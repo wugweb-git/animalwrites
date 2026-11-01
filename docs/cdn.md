@@ -7,7 +7,7 @@
 | Pages | Lifetime at the edge | Option |
 |---|---|---|
 | Home, News, hubs, Directory places, campaigns, other pages | `aw_cdn_ttl` (900 s since 1 Nov 2026, was 300; 60–3600) | `aw_cdn_ttl` |
-| Directory listings, Library items, Resources | `aw_cdn_ttl_long` (default 3600 s), plus `stale-while-revalidate=600` | `aw_cdn_ttl_long` (0 = same as `aw_cdn_ttl`) |
+| Directory listings, Library items, Resources | `aw_cdn_ttl_long` (default 3600 s), plus `stale-while-revalidate=600` | `aw_cdn_ttl_long` (0 = same as `aw_cdn_ttl`). Not set on live (2 Nov 2026): no such option is stored, so the default 3600 s applies |
 
 Browsers get no lifetime (no `max-age`), so they always ask again. A URL with any query string (utm_, fbclid, gclid, filters) gets no header at all and is never stored at the edge.
 

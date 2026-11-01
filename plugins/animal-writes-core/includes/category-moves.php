@@ -54,3 +54,25 @@ add_action(
 	},
 	1
 );
+
+/**
+ * A link shared with its # written as %23 (/campaigns/lab-animals-rules-2026/%23how-to-help, 2 Nov 2026) is a 404:
+ * the browser sends %23 as part of the path. Rank Math cannot redirect it (it decodes %23 first and sees a loop to the
+ * page itself), so this does: 301 to the path before %23 with the rest as the fragment, the query string kept. Only a
+ * plain anchor (letters, digits, - and _) after the %23.
+ */
+add_action(
+	'parse_request',
+	function () {
+		if ( is_admin() || ! in_array( $_SERVER['REQUEST_METHOD'] ?? 'GET', array( 'GET', 'HEAD' ), true ) ) {
+			return;
+		}
+		list( $path, $query ) = aw_moves_request();
+		if ( ! preg_match( '#^(/[^%]*)%23([A-Za-z0-9_-]+)/?$#i', $path, $m ) ) {
+			return;
+		}
+		wp_safe_redirect( home_url( $m[1] ) . ( '' !== $query ? '?' . $query : '' ) . '#' . $m[2], 301, 'Animal Writes' );
+		exit;
+	},
+	0
+);
