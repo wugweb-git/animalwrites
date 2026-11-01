@@ -89,7 +89,7 @@ Owner, 25 Oct — not to be raised until their dates: the Lab rules Post phase (
 - **AVIF delivery:** LiteSpeed's WebP/AVIF setting is off (`img_optm-webp=0`); 796 large PNG/JPEG originals have no AVIF copy (340 MB); 37 images over 1 MB (65 MB, five are GIFs). Plan: optimisation-plan.md. Turning the setting on needs the owner's OK; each GIF is the owner's call.
 - **Image context (`kits_image_context`):** not in the REST API, so it cannot be bulk-filled from the browser; needs a small admin tool if wanted. New News imports arrive without caption and description (9 so far); a fill at import would stop that.
 - **Copy review leftovers:** duplicate titles (Jeev Aashraya x17, Shri Gau Seva Samiti x12, others) and 126 title endings in live-copy-review.md; news slugs stay long (not changed).
-- **The four archived Library PDFs (items 142 to 145):** archived on purpose by the plugin (folder missing on the server); AWBI source links work. Owner decides whether to re-fetch.
+- **The four AWBI Library PDFs (items 142 to 145): hosted (owner, 2 Nov 2026, live).** The owner chose to host them. New per-item field aw_doc_host_ok (1 = hosted by the owner's decision) makes an item hostable and fetches its gov.in PDF on the server; the four files went back under their original attachments (192 to 195), so no new media items. Checked live: each page shows the PDF viewer and Download PDF (490.8, 395.7, 441.8 and 164.0 KB), and the no-permission line is gone.
 
 ### Only the owner (sign-ins, keys, files)
 - **Press coverage keyphrases (1 Nov):** items 14205 and 14206 have the focus keyphrase "https www facebook com"; Press coverage refuses edits from the REST helper, so set them in the editor.
