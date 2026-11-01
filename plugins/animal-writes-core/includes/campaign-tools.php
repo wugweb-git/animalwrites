@@ -586,6 +586,23 @@ add_action(
 	}
 );
 
+/*
+ * A campaign page's largest element on a phone is its hero heading, set in Inter at 800 (Lighthouse mobile, 1 Nov 2026),
+ * so phones and tablets fetch Inter alongside the stylesheets instead of after them (the theme preloads it from 1200px).
+ * The heading paints sooner, and the poster below it no longer moves when Inter replaces the fallback.
+ */
+add_action(
+	'wp_head',
+	function () {
+		if ( ! is_singular( 'aw_campaign' ) ) {
+			return;
+		}
+		$font = get_theme_file_uri( 'assets/fonts/inter/inter-latin.woff2' );
+		echo '<link rel="preload" href="' . esc_url( $font ) . '" as="font" type="font/woff2" crossorigin media="(max-width: 1199px)">' . "\n";
+	},
+	2
+);
+
 /* ---------- WP Admin: the campaign boxes and list columns ---------- */
 /*
  * Five SCF field groups (acf-json/group_aw_campaign_*.json) are the campaign's boxes in the main column, after Event

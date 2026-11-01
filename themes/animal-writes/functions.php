@@ -74,11 +74,11 @@ add_action(
 );
 
 /*
- * Inter is served once. The theme's own variable file (assets/fonts/inter/inter-latin.woff2, weights 400 to 700,
+ * Inter is served once. The theme's own variable file (assets/fonts/inter/inter-latin.woff2, weights 100 to 900,
  * font-display: swap) covers every weight the site uses. The Font Library copy of Inter (wp-content/uploads/fonts) also
- * declares 400 to 700 as separate static files without swap, and as the later rules they won: three extra 118 KB files
- * per page, with text hidden while they load. Those overlapping faces are left out; the library's other weights and its
- * italics stay. Phones do not preload the file: on a slow phone a preload would compete with the page's main picture (wide screens do, above).
+ * declares each weight as a separate static file without swap, and as the later rules they won: extra 118 KB files
+ * per page, with text hidden while they load (the campaign headings at 800 waited for one). Those overlapping upright
+ * faces are left out (the variable file draws 800 at the same width as the static file); the library's italics stay. Phones do not preload the file: on a slow phone a preload would compete with the page's main picture (wide screens do, above).
  */
 add_action(
 	'init',
@@ -98,7 +98,7 @@ add_action(
 							function ( $f ) {
 								$src    = implode( ' ', (array) ( $f['src'] ?? array() ) );
 								$weight = (int) ( $f['font-weight'] ?? 0 );
-								return ! ( 'inter' === strtolower( trim( (string) ( $f['font-family'] ?? '' ), '"\' ' ) ) && false !== strpos( $src, '/uploads/fonts/' ) && 'normal' === ( $f['font-style'] ?? 'normal' ) && $weight >= 400 && $weight <= 700 );
+								return ! ( 'inter' === strtolower( trim( (string) ( $f['font-family'] ?? '' ), '"\' ' ) ) && false !== strpos( $src, '/uploads/fonts/' ) && 'normal' === ( $f['font-style'] ?? 'normal' ) && $weight >= 100 && $weight <= 900 );
 							}
 						)
 					);

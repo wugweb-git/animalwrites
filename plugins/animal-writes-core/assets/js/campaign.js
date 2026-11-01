@@ -217,7 +217,6 @@
 		pickedEl.textContent = n + ' of ' + grounds.length + ' chosen';
 	}
 	picked();
-	grounds.forEach(function (g) { g.box.addEventListener('change', picked); });
 
 	function val(name) { return (form.elements[name].value || '').replace(/\s+/g, ' ').trim(); }
 
@@ -234,13 +233,20 @@
 		return parts.join('\n');
 	}
 
-	function render() { preview.textContent = letter(); }
+	/* The preview is rebuilt once per frame, not on every key press or tick (Interaction to Next Paint). */
+	var renderQueued = false;
+	function renderNow() { renderQueued = false; preview.textContent = letter(); picked(); }
+	function render() {
+		if (renderQueued) return;
+		renderQueued = true;
+		(window.requestAnimationFrame || setTimeout)(renderNow);
+	}
 
 	var opened = false, openedAt = 0;
 	form.addEventListener('focusin', function () { if (!opened) { opened = true; openedAt = Date.now(); trackLater('letter_open'); } });
 	form.addEventListener('input', render);
 	form.addEventListener('submit', function (e) { e.preventDefault(); });
-	render();
+	renderNow();
 
 	function copy(text) {
 		function fallback() {
