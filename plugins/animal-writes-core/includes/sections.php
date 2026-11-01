@@ -20,6 +20,23 @@ const AW_SECTION_DESC = array(
 );
 
 /**
+ * Tag pages whose topic has its own page: tag slug => that page's slug (a Resource). The tag page's head band gets a
+ * button to it, labelled with the page's own title (1 Nov 2026: /tag/faq/ ranked above the FAQ page).
+ */
+const AW_TAG_MAIN_PAGES = array(
+	'faq' => 'animal-welfare-faqs',
+);
+
+/** The button from a tag page to its topic's own page, or ''. */
+function aw_tag_main_page_button( $slug ) {
+	$page = isset( AW_TAG_MAIN_PAGES[ $slug ] ) ? get_page_by_path( AW_TAG_MAIN_PAGES[ $slug ], OBJECT, 'post' ) : null;
+	if ( ! $page instanceof WP_Post || 'publish' !== $page->post_status ) {
+		return '';
+	}
+	return '<p class="aw-tag-main-page"><a class="kit-btn kit-btn--secondary" href="' . esc_url( get_permalink( $page ) ) . '">' . esc_html( get_the_title( $page ) ) . '</a></p>';
+}
+
+/**
  * One visual tile for a post: remote image, featured image, or a placard.
  *
  * @param WP_Post $p Post.
@@ -142,7 +159,7 @@ function aw_section_head_archive() {
 				'title'   => $title,
 				'icon'    => is_tag() && function_exists( 'aw_tag_icon' ) ? aw_tag_icon( (string) get_queried_object()->slug ) : '', // every tag has an icon (tags.php)
 				'desc'    => $desc ? $desc : '',
-				'note'    => is_tag() && function_exists( 'aw_service_type_note' ) ? aw_service_type_note( get_queried_object() ) : '',
+				'note'    => is_tag() ? ( function_exists( 'aw_service_type_note' ) ? aw_service_type_note( get_queried_object() ) : '' ) . aw_tag_main_page_button( (string) get_queried_object()->slug ) : '',
 				'count'   => $count ? $count_label : '',
 				'visual'  => $visual,
 				'filters' => $filters ? $filters : '',

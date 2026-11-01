@@ -890,7 +890,8 @@
     "aw-bp",
     "aw-tile-logo",
     "aw-guide-disclaimer",
-    "aw-category-image"
+    "aw-category-image",
+    "aw-tag-main-page"
    ],
    "states": [
     "n/a"

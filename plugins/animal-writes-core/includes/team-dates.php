@@ -62,6 +62,35 @@ function aw_team_dates_add_links_read() {
 add_action( 'admin_init', 'aw_team_dates_add_links_read' );
 
 /**
+ * Dates from the 1 Nov 2026 search analysis, added once (flag aw_team_dates_1101). A date already on the calendar under
+ * the same title is not added again; each can be removed like any other date.
+ */
+function aw_team_dates_add_1101() {
+	if ( get_option( 'aw_team_dates_1101' ) ) {
+		return;
+	}
+	$add  = array(
+		array( 'date' => '2026-11-05', 'title' => 'Lab rules objections close', 'note' => 'Campaign 13848. The countdown on the home page and the campaign page ends today.' ),
+		array( 'date' => '2026-11-08', 'title' => 'Diwali', 'note' => 'Firecrackers and animals: the Diwali guide is planned for before this date.' ),
+		array( 'date' => '2026-11-17', 'title' => 'Supreme Court stray-dog compliance hearing (press-reported)', 'note' => 'High Courts\' compliance reports are due before the Supreme Court. Date from press reports, not checked against the cause list. The stray dogs case explainer is planned for before this date.' ),
+		array( 'date' => '2026-11-17', 'title' => 'Rankings recheck: 19 core queries', 'note' => 'Recheck the Google India positions of the 19 core queries from the 1 Nov 2026 search analysis (2 were in the top 30 on 1 Nov).' ),
+	);
+	$all  = aw_team_dates();
+	$have = array();
+	foreach ( $all as $d ) {
+		$have[ $d['date'] . '|' . $d['title'] ] = true;
+	}
+	foreach ( $add as $d ) {
+		if ( ! isset( $have[ $d['date'] . '|' . $d['title'] ] ) ) {
+			$all[] = $d;
+		}
+	}
+	update_option( 'aw_team_dates', $all, false );
+	update_option( 'aw_team_dates_1101', time(), false );
+}
+add_action( 'admin_init', 'aw_team_dates_add_1101' );
+
+/**
  * The FAQ holdout ended early (owner, 31 Oct 2026: no holdout): its 1 Dec date leaves the calendar, once (flag
  * aw_team_dates_faq_holdout_off).
  */

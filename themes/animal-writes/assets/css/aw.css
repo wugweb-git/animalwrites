@@ -653,6 +653,7 @@ body { background: var(--kit-color-canvas); }
 .kit-section-band :where(.kit-section-inner, .kit-section-head, .kit-section-head > .wp-block-group) > * { margin-block-start: 0; }
 .kit-section-band .kit-section-desc { margin-top: var(--kit-space-head); }
 .kit-section-band .kit-section-count { margin-top: var(--kit-space-2); }
+.kit-section-band .aw-tag-main-page { margin-top: var(--kit-space-head); } /* a tag page's button to its topic's own page (sections.php) */
 .kit-section-band .kit-section-filters { margin-top: var(--kit-space-head); }
 .kit-section-band .kit-crumbs li > a:not([class]) { color: inherit; } /* not the content-link blue */
 .aw-hub-list .wp-block-post-template > li { max-width: none; } /* not a prose list */
