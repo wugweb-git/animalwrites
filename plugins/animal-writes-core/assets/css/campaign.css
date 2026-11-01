@@ -119,6 +119,18 @@
 .aw-camp--sc-stray-dogs .aw-camp-poster .aw-cd-when .aw-date .kit-ico { display: none; }
 .aw-camp--sc-stray-dogs .aw-camp-poster .aw-camp-poster-note { padding-top: var(--kit-space-3); border-top: 1px solid var(--camp-line); font-size: var(--kit-type-sm); }
 /* Page sections (owner, 1 Nov 2026: fix every section). A campaign is a landing page: text runs the full band width. */
+.aw-camp--sc-stray-dogs .aw-camp-section:not(.aw-camp-hero) .aw-camp-lede { max-width: none; }
+/* Section headings in the campaign plum */
+.aw-camp--sc-stray-dogs .aw-camp-section:not(.aw-camp-hero) :is(h2, h3) { color: var(--camp-primary); }
+/* Date strip: plum rules, the reports date on a yellow rule */
+.aw-camp--sc-stray-dogs .aw-camp-dates li { border-top-color: var(--camp-primary); }
+.aw-camp--sc-stray-dogs .aw-camp-dates .is-key { border-top-color: var(--kit-color-accent); }
+/* Tables (from 768): a plum-tint head and light bands on the rows */
+@media (min-width: 768px) {
+	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) thead th { background: #f4e8ee; color: var(--camp-primary); }
+	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) tbody tr:nth-child(even) td { background: rgb(58 23 48 / 0.03); }
+	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) tbody td:first-child { font-weight: var(--kit-weight-bold); color: var(--camp-primary); }
+}
 /* The date strip: three to a row, no calendar marks inside the big dates */
 @media (min-width: 768px) { .aw-camp--sc-stray-dogs .aw-camp-dates { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .aw-camp--sc-stray-dogs .aw-camp-dates-when .kit-ico { display: none; }
