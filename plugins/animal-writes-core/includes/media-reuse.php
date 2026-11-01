@@ -69,6 +69,43 @@ function aw_media_reuse_save_log( array $log ) {
 }
 
 /**
+ * Set or remove one picture's log entry, re-reading the option just before saving so entries saved meanwhile are kept.
+ *
+ * @param int        $picture Attachment ID.
+ * @param array|null $entry   New entry, or null to remove it.
+ * @return bool
+ */
+function aw_media_reuse_set_entry( $picture, $entry ) {
+	$log = aw_media_reuse_log();
+	if ( null === $entry ) {
+		unset( $log[ $picture ] );
+	} else {
+		$log[ $picture ] = $entry;
+	}
+	return aw_media_reuse_save_log( $log );
+}
+
+/**
+ * Entries left 'pending' for over a minute (the request stopped after the log was saved) are put back to the old
+ * values, as long as the page still has the old cover or the new one; otherwise the entry is just closed.
+ */
+function aw_media_reuse_recover() {
+	foreach ( aw_media_reuse_log() as $picture => $e ) {
+		if ( 'pending' !== ( $e['status'] ?? '' ) || time() - (int) ( $e['time'] ?? 0 ) < MINUTE_IN_SECONDS ) {
+			continue;
+		}
+		$cover = (int) get_post_meta( (int) $e['target'], '_thumbnail_id', true );
+		if ( get_post( (int) $e['target'] ) && in_array( $cover, array( (int) $picture, (int) $e['old_cover'] ), true ) ) {
+			aw_media_reuse_restore( $e, (int) $picture, true );
+			aw_media_reuse_refresh( (int) $e['target'] );
+		}
+		$e['status'] = 'undone';
+		$e['time']   = time();
+		aw_media_reuse_set_entry( (int) $picture, $e );
+	}
+}
+
+/**
  * Whether a page shows its own document (hosted PDF or its first page) instead of a cover.
  *
  * @param int $id Page ID.
@@ -204,8 +241,7 @@ function aw_media_reuse_apply( $picture ) {
 	$target   = $row['target'];
 	$old_off  = metadata_exists( 'post', $target, 'aw_source_image_off' ) ? (string) get_post_meta( $target, 'aw_source_image_off', true ) : null;
 	$set_off  = 'aw_news' === get_post_type( $target ) || 'publisher' === aw_media_reuse_current( $target )['kind']; // a news item always gets the flag, so no later fetch can bring back a publisher image over the cover
-	$log      = aw_media_reuse_log();
-	$log[ $picture ] = array(
+	$entry    = array(
 		'status'    => 'pending',
 		'time'      => time(),
 		'target'    => $target,
@@ -213,7 +249,7 @@ function aw_media_reuse_apply( $picture ) {
 		'old_off'   => $old_off,
 		'set_off'   => $set_off,
 	);
-	if ( ! aw_media_reuse_save_log( $log ) ) {
+	if ( ! aw_media_reuse_set_entry( $picture, $entry ) ) {
 		return 'The old values could not be saved, so nothing was changed.';
 	}
 	update_post_meta( $target, '_thumbnail_id', $picture );
@@ -223,13 +259,12 @@ function aw_media_reuse_apply( $picture ) {
 	}
 	$ok = (int) get_post_meta( $target, '_thumbnail_id', true ) === $picture && ( ! $set_off || '1' === (string) get_post_meta( $target, 'aw_source_image_off', true ) );
 	if ( ! $ok ) {
-		aw_media_reuse_restore( $log[ $picture ], $picture, true );
-		unset( $log[ $picture ] );
-		aw_media_reuse_save_log( $log );
+		aw_media_reuse_restore( $entry, $picture, true );
+		aw_media_reuse_set_entry( $picture, null );
 		return 'The change did not stick, so the old values were put back.';
 	}
-	$log[ $picture ]['status'] = 'applied';
-	aw_media_reuse_save_log( $log );
+	$entry['status'] = 'applied';
+	aw_media_reuse_set_entry( $picture, $entry );
 	aw_media_reuse_refresh( $target );
 	return '';
 }
@@ -292,10 +327,11 @@ function aw_media_reuse_undo( $picture ) {
 	if ( '' !== $why ) {
 		return ucfirst( $why ) . '.';
 	}
-	$log[ $picture ]['status'] = 'undone';
-	$log[ $picture ]['time']   = time();
-	aw_media_reuse_save_log( $log );
-	aw_media_reuse_refresh( (int) $log[ $picture ]['target'] );
+	$entry           = $log[ $picture ];
+	$entry['status'] = 'undone';
+	$entry['time']   = time();
+	aw_media_reuse_set_entry( $picture, $entry );
+	aw_media_reuse_refresh( (int) $entry['target'] );
 	return '';
 }
 
@@ -351,6 +387,7 @@ function aw_media_reuse_screen() {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		return;
 	}
+	aw_media_reuse_recover();
 	$plan = aw_media_reuse_plan();
 	$log  = aw_media_reuse_log();
 	echo '<div class="wrap"><h1>Reuse pictures</h1>';
