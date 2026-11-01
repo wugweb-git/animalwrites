@@ -333,14 +333,30 @@ add_action(
 			return;
 		}
 		$g = wp_unslash( $_GET ); // phpcs:ignore WordPress.Security.NonceVerification
-		// A 6-digit PIN code in the search box opens that PIN's district (or state) list.
+		// A 6-digit PIN code in the search box opens that PIN's district (or state) list; when India Post does not know
+		// the PIN, the district of the listings that store it (or the nearest PIN prefix) is used.
 		$pin = preg_replace( '/\s/', '', (string) ( $g['q'] ?? '' ) );
 		if ( preg_match( '/^[1-9]\d{5}$/', $pin ) ) {
 			$r = aw_pin_lookup( $pin );
+			if ( ! is_array( $r ) || empty( $r['district_slug'] ) ) {
+				$near = aw_pin_nearest_district( $pin );
+				if ( $near ) {
+					$r = array( 'state_slug' => aw_place_parent_state( $near )->slug, 'district_slug' => $near->slug );
+				}
+			}
 			if ( is_array( $r ) ) {
 				$g['state']    = $r['state_slug'];
 				$g['district'] = $r['district_slug'];
 				$g['q']        = '';
+				$g['aw_filter'] = 1;
+			}
+		} elseif ( '' === sanitize_title( $g['state'] ?? '' ) && '' === sanitize_title( $g['district'] ?? '' ) ) {
+			// A district, state or known city name in the search box ("Jhansi", "Kerala", "Kochi") opens that place's list.
+			$place = aw_search_place( (string) ( $g['q'] ?? '' ) );
+			if ( $place ) {
+				$g['state']     = 'district' === $place->kind ? aw_place_parent_state( $place )->slug : $place->slug;
+				$g['district']  = 'district' === $place->kind ? $place->slug : '';
+				$g['q']         = '';
 				$g['aw_filter'] = 1;
 			}
 		}
@@ -368,6 +384,58 @@ add_action(
 		exit;
 	}
 );
+
+/**
+ * The place a search term names: a district or state by its LGD or common name (places.php), or a city or
+ * neighbourhood the place detector maps to a district (AW_PLACE_DETECT_CITIES, find-help.php). Null when the term is
+ * not a place name, names more than one district, or is a word the detector skips ("south", "mon").
+ *
+ * @param string $text The search box text.
+ * @return object|null
+ */
+function aw_search_place( $text ) {
+	$text = trim( (string) $text );
+	if ( '' === $text || mb_strlen( $text ) < 3 || preg_match( '/\d/', $text ) ) {
+		return null;
+	}
+	$key = aw_place_key( $text );
+	if ( defined( 'AW_PLACE_DETECT_SKIP' ) && in_array( $key, AW_PLACE_DETECT_SKIP, true ) ) {
+		return null;
+	}
+	$d = aw_place_district_by_name( $text );
+	if ( ! $d && defined( 'AW_PLACE_DETECT_CITIES' ) && isset( AW_PLACE_DETECT_CITIES[ $key ] ) ) {
+		$d = aw_place_district_by_name( AW_PLACE_DETECT_CITIES[ $key ] );
+	}
+	return $d ? $d : aw_place_state_by_name( $text );
+}
+
+/**
+ * The district most of the published listings with a PIN code store: the exact PIN first, then the PINs that share
+ * its first three digits (India Post's sorting district). Null when no listing stores such a PIN.
+ *
+ * @param string $pin 6-digit PIN code.
+ * @return object|null
+ */
+function aw_pin_nearest_district( $pin ) {
+	global $wpdb;
+	$pin = preg_replace( '/\D/', '', (string) $pin );
+	if ( 6 !== strlen( $pin ) ) {
+		return null;
+	}
+	foreach ( array( $pin, substr( $pin, 0, 3 ) . '___' ) as $like ) {
+		$code = $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			$wpdb->prepare(
+				"SELECT d.meta_value FROM {$wpdb->postmeta} pc JOIN {$wpdb->posts} p ON p.ID = pc.post_id AND p.post_type = 'aw_listing' AND p.post_status = 'publish' JOIN {$wpdb->postmeta} d ON d.post_id = p.ID AND d.meta_key = 'aw_district_code' WHERE pc.meta_key = 'aw_pincode' AND pc.meta_value LIKE %s GROUP BY d.meta_value ORDER BY COUNT(*) DESC LIMIT 1",
+				$like
+			)
+		);
+		$d = $code ? aw_place_district( (int) $code ) : null;
+		if ( $d ) {
+			return $d;
+		}
+	}
+	return null;
+}
 
 /** Published listings shown to visitors (preview-only ones, such as the sample listing, left out). */
 function aw_listing_public_count() {

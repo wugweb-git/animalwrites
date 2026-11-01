@@ -29,6 +29,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * A phone number as schema.org wants it, in E.164 ("+919962998886"): the digits with the country code and no spaces,
+ * dashes or trunk 0 (aw_normalise_phone in animal-writes-core). A short helpline code such as 1962 is left as it is.
+ *
+ * @param string $raw The number as stored ("+91 99629 98886", "0471-2467700", "1962").
+ * @return string '' when the number has no digits.
+ */
+function aw_seo_e164( $raw ) {
+	$d = function_exists( 'aw_normalise_phone' ) ? aw_normalise_phone( $raw ) : preg_replace( '/\D+/', '', (string) $raw );
+	if ( '' === $d ) {
+		return '';
+	}
+	return strlen( $d ) <= 5 ? $d : '+' . $d;
+}
+
+/**
  * Organization data for a listing.
  *
  * @param int $id Post ID.
@@ -95,7 +110,7 @@ function aw_listing_schema( $id ) {
 	// Phone numbers from the list: every number as telephone (one, or a list), and each number marked WhatsApp as a
 	// WhatsApp contact point.
 	$phones = function_exists( 'aw_listing_phones' ) ? aw_listing_phones( $id ) : array();
-	$tels   = array_values( array_unique( wp_list_pluck( $phones, 'number' ) ) );
+	$tels   = array_values( array_unique( array_filter( array_map( 'aw_seo_e164', wp_list_pluck( $phones, 'number' ) ) ) ) );
 	if ( $tels ) {
 		$org['telephone'] = 1 === count( $tels ) ? $tels[0] : $tels;
 	}
@@ -105,7 +120,7 @@ function aw_listing_schema( $id ) {
 	$wa = array();
 	foreach ( $phones as $p ) {
 		if ( $p['whatsapp'] ) {
-			$wa[] = array( '@type' => 'ContactPoint', 'contactType' => 'WhatsApp', 'telephone' => $p['number'], 'availableLanguage' => array( 'en', 'hi' ) );
+			$wa[] = array( '@type' => 'ContactPoint', 'contactType' => 'WhatsApp', 'telephone' => aw_seo_e164( $p['number'] ), 'availableLanguage' => array( 'en', 'hi' ) );
 		}
 	}
 	if ( $wa ) {
