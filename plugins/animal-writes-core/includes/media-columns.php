@@ -135,8 +135,8 @@ add_filter(
 			'aw_parent'  => 'Uploaded to',
 			'aw_opt'     => 'Optimisation',
 		);
-		$order  = array( 'cb', 'aw_file', 'taxonomy-aw_media_group', 'aw_slug', 'aw_caption', 'aw_desc', 'rank_math_image_alt', 'aw_context', 'aw_parent', 'aw_opt', 'date' );
-		$remove = array( 'title', 'author', 'rank_math_image_title', 'imgoptm', 'parent' );
+		$order  = array( 'cb', 'aw_file', 'rank_math_image_title', 'taxonomy-aw_media_group', 'aw_slug', 'aw_caption', 'aw_desc', 'rank_math_image_alt', 'aw_context', 'aw_parent', 'aw_opt', 'date' );
+		$remove = array( 'title', 'author', 'imgoptm', 'parent' );
 		$out    = array();
 		foreach ( $order as $key ) {
 			if ( isset( $columns[ $key ] ) ) {
