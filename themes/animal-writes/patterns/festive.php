@@ -3,7 +3,7 @@
  * Title: AW_Festive
  * Slug: animal-writes/festive
  * Categories: animal-writes
- * Description: Festivals and animals banner: dark band with an eyebrow, H2, one line, four tips with Kits icons and one Brand button, beside a three-picture collage (pictures on top below 1200). Not tied to any post, campaign or query.
+ * Description: Festivals and animals banner: dark band with an eyebrow, H2, one line, four tips with Kits icons and one Brand button, beside a three-picture collage (pictures on top below 1200). The button opens "Who to call" on the Diwali 2026 campaign; no query.
  * Inserter: yes
  *
  * @package animal-writes
@@ -44,7 +44,7 @@
 
 <!-- wp:buttons -->
 <div class="wp-block-buttons"><!-- wp:button {"className":"is-style-kits-brand"} -->
-<div class="wp-block-button is-style-kits-brand"><a class="wp-block-button__link wp-element-button" href="#">Report an injured animal</a></div>
+<div class="wp-block-button is-style-kits-brand"><a class="wp-block-button__link wp-element-button" href="/campaigns/diwali-firecrackers-animals-2026/#help">Report an injured animal</a></div>
 <!-- /wp:button --></div>
 <!-- /wp:buttons --></div>
 <!-- /wp:group -->
