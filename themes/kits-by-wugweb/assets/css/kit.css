@@ -746,13 +746,13 @@ html.has-modal-open .kit-sticky-help { display: none !important; }
 .kit-link-ext::after { content: ""; display: inline-block; width: .875em; height: .875em; margin-left: .25em; vertical-align: -.1em; background-color: currentColor; -webkit-mask: var(--kit-ext-ico) center / contain no-repeat; mask: var(--kit-ext-ico) center / contain no-repeat; --kit-ext-ico: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M7%207h10v10%22/%3E%3Cpath%20d%3D%22M7%2017%2017%207%22/%3E%3C/svg%3E"); }
 
 /* ---------- Footer (1 Nov 2026) ----------
-   Row 1: Brand · Explore · Animal Writes · Legal & Trust — four columns from 1200, 2×2 from 768, stacked on phones
-   (Brand, then the three link lists as folds). Row 2: Helplines in a lighter, bordered strip. Row 3: © · policies ·
-   Powered by, smaller and dimmer. Column labels are white, links light grey. Phones put Helplines first. Height =
-   content (no screen-height cap; tools/ci/footer_check.py). Own surface and a top rule so the sticky header reads as
-   separate; the same grid line as the header logo (nav container and padding). The newsletter sign-up is its own
-   band above the footer (.aw-nl-band, aw.css). */
-.kit-footer { --kit-footer-bg: color-mix(in srgb, var(--neutral-8) 45%, var(--neutral-9)); --kit-footer-muted: color-mix(in srgb, var(--kit-color-on-ink) 72%, transparent); --kit-footer-dim: color-mix(in srgb, var(--kit-color-on-ink) 56%, transparent); --kit-footer-rule: color-mix(in srgb, var(--kit-color-on-ink) 14%, transparent); --kit-footer-raised: color-mix(in srgb, var(--kit-color-on-ink) 5%, transparent); font-size: var(--kit-type-sm); }
+   The newsletter is its own band just above (.aw-nl-band, aw.css). The dark block: Brand · Explore · Animal Writes ·
+   Legal & Trust (brand wider, the three link columns one width; 2×2 from 768; stacked on phones with the lists as
+   folds); one plain helplines line (tap-to-call numbers in the accent colour); then © · policies · Powered by, smaller
+   and dimmer. Column labels white, links light grey. Height = content (no screen-height cap;
+   tools/ci/footer_check.py). Own surface and a top rule so the sticky header reads as separate; the same grid line as
+   the header logo. */
+.kit-footer { --kit-footer-bg: color-mix(in srgb, var(--neutral-8) 45%, var(--neutral-9)); --kit-footer-muted: color-mix(in srgb, var(--kit-color-on-ink) 72%, transparent); --kit-footer-dim: color-mix(in srgb, var(--kit-color-on-ink) 56%, transparent); --kit-footer-rule: color-mix(in srgb, var(--kit-color-on-ink) 14%, transparent); font-size: var(--kit-type-sm); }
 .kit-site-footer.kit-footer { display: flex; flex-direction: column; background: var(--kit-footer-bg) !important; border-top: var(--kit-border-width) solid color-mix(in srgb, var(--kit-color-on-ink) 22%, transparent); padding: var(--kit-space-7) var(--kit-space-4) var(--kit-space-4) !important; }
 @media (min-width: 768px) { .kit-site-footer.kit-footer { padding-inline: var(--kit-space-6) !important; } }
 @media (min-width: 1200px) { .kit-site-footer.kit-footer { padding-inline: var(--kit-space-gutter) !important; } } /* same edge as the header and the page sections */
@@ -761,7 +761,7 @@ html.has-modal-open .kit-sticky-help { display: none !important; }
 /* Row 1 */
 .kit-footer-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-6); padding: 0 0 var(--kit-space-7); }
 @media (min-width: 768px) { .kit-footer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--kit-space-7) var(--kit-space-6); } }
-@media (min-width: 1200px) { .kit-footer-grid { grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 1fr)); column-gap: var(--kit-space-7); } }
+@media (min-width: 1200px) { .kit-footer-grid { grid-template-columns: minmax(0, 1.3fr) repeat(3, minmax(0, 1fr)); column-gap: var(--kit-space-7); } } /* the three link columns share one width */
 .kit-footer-brand { display: flex; flex-direction: column; align-items: flex-start; gap: var(--kit-space-3); min-width: 0; }
 .kit-footer-brand p { margin: 0; color: var(--kit-footer-muted); line-height: 1.55; max-width: 30ch; }
 .kit-footer-brand .kit-visits { font-size: var(--kit-type-xs); }
@@ -773,42 +773,26 @@ html.has-modal-open .kit-sticky-help { display: none !important; }
 .kit-social > .kit-ico { position: relative; }
 .kit-social:hover { color: var(--kit-color-on-ink); }
 .kit-social:hover::before { background: color-mix(in srgb, var(--kit-color-on-ink) 10%, transparent); border-color: color-mix(in srgb, var(--kit-color-on-ink) 32%, transparent); }
-.kit-footer-head { display: flex; align-items: center; gap: var(--kit-space-2); margin: 0 0 var(--kit-space-3); font-size: var(--kit-type-xs) !important; font-weight: var(--kit-weight-strong); letter-spacing: 0; line-height: 1.4 !important; color: var(--kit-color-on-ink) !important; }
+.kit-footer-head { display: flex; align-items: center; gap: var(--kit-space-2); margin: 0 0 var(--kit-space-3); font-size: var(--kit-type-sm) !important; font-weight: var(--kit-weight-strong); letter-spacing: 0; line-height: 1.4 !important; color: var(--kit-color-on-ink) !important; }
 .kit-footer-list, .kit-legal-links, .kit-footer-inline, .kit-footer-helplines { list-style: none; padding: 0; margin: 0; }
 .kit-footer-list li { margin: 0; }
-.kit-footer-list a { display: flex; align-items: center; min-height: 2.25rem; color: var(--kit-footer-muted); text-decoration: none; }
+.kit-footer-list a { display: flex; align-items: center; min-height: 2.5rem; font-size: var(--kit-type-base); color: var(--kit-footer-muted); text-decoration: none; }
 .kit-footer :is(.kit-footer-list, .kit-footer-inline, .kit-legal-links) a:hover, .kit-footer-mail:hover { color: var(--kit-color-on-ink); text-decoration: underline; text-underline-offset: var(--kit-underline-offset-sm); }
 .kit-footer .kit-footer-helplines a:hover { color: var(--kit-color-on-ink); }
 
-/* Row 2: Helplines, a slightly lighter strip with a border */
-.kit-footer-helprow { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2) var(--kit-space-6); padding: var(--kit-space-3) var(--kit-space-5); border: var(--kit-border-width) solid var(--kit-footer-rule); border-radius: var(--kit-radius-card); background: var(--kit-footer-raised); box-sizing: border-box; }
-.kit-site-footer.kit-footer > .kit-footer-helprow { margin-bottom: var(--kit-space-5) !important; }
-.kit-footer-helprow .kit-footer-head { margin: 0; }
-.kit-footer-helplines { display: flex; flex-wrap: wrap; gap: var(--kit-space-1) var(--kit-space-6); }
-.kit-footer-helplines a { display: inline-flex; align-items: center; gap: var(--kit-space-2); min-height: var(--kit-size-target); color: var(--kit-footer-muted); text-decoration: none; }
-.kit-footer-helplines strong { color: var(--kit-color-accent); font-weight: var(--kit-weight-strong); white-space: nowrap; }
-.kit-footer-helplines .kit-ico { color: var(--kit-color-accent); }
-.kit-footer-help-what::before { content: "– "; }
-.kit-footer-help-more { display: inline-flex; align-items: center; gap: var(--kit-space-1); min-height: var(--kit-size-target); margin-left: auto; color: var(--kit-color-on-ink); font-weight: var(--kit-weight-strong); text-decoration: none; white-space: nowrap; }
+/* Helplines: one plain line above the bottom bar: label, 112 · 1962 · 0129-2555700 as tap-to-call links (each number's
+   purpose is in its aria-label), "Find helplines near you" at the end. Wraps on phones. */
+.kit-footer-helprow { display: flex; flex-wrap: wrap; align-items: center; gap: 0 var(--kit-space-4); padding: var(--kit-space-2) 0; border-top: var(--kit-border-width) solid var(--kit-footer-rule); }
+.kit-footer-helprow > .kit-footer-head { margin: 0; }
+.kit-footer-helplines { display: flex; flex-wrap: wrap; align-items: center; }
+.kit-footer-helplines li + li::before { content: "·"; padding: 0 var(--kit-space-2); color: var(--kit-footer-dim); }
+.kit-footer-helplines li { display: inline-flex; align-items: center; }
+.kit-footer-helplines a { display: inline-flex; align-items: center; min-height: var(--kit-size-target); color: var(--kit-color-accent); text-decoration: none; }
+.kit-footer-helplines a:hover { text-decoration: underline; text-underline-offset: 0.2em; }
+.kit-footer-helplines strong { font-weight: var(--kit-weight-strong); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.kit-footer-help-more { display: inline-flex; align-items: center; gap: var(--kit-space-1); min-height: var(--kit-size-target); margin-left: auto; color: var(--kit-color-on-ink); text-decoration: none; white-space: nowrap; }
 .kit-footer-help-more:hover { color: var(--kit-color-accent); text-decoration: underline; text-underline-offset: 0.2em; }
 .kit-footer-help-more:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
-/* 1200 and up: one row, label · the three numbers (number over its purpose, which may wrap) · the link at the end */
-@media (min-width: 1200px) {
-	.kit-footer-helprow { display: grid; grid-template-columns: auto repeat(3, minmax(0, 1fr)) auto; align-items: center; column-gap: var(--kit-space-6); }
-	.kit-footer-helplines { display: contents; }
-	.kit-footer-helplines a { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: var(--kit-space-2); row-gap: 0; align-items: center; padding: var(--kit-space-1) 0; }
-	.kit-footer-helplines a > .kit-ico { grid-row: 1 / 3; }
-	.kit-footer-help-what::before { content: none; }
-}
-/* 768–1199: label above, the numbers in three equal columns, number on line 1, purpose on line 2 */
-@media (min-width: 768px) and (max-width: 1199px) {
-	.kit-footer-helprow { display: block; padding-block: var(--kit-space-4); }
-	.kit-footer-helplines { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--kit-space-2) var(--kit-space-6); margin-top: var(--kit-space-2); }
-	.kit-footer-helplines a { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: var(--kit-space-2); row-gap: 0; align-items: center; padding: var(--kit-space-1) 0; }
-	.kit-footer-helplines a > .kit-ico { grid-row: 1 / 3; }
-	.kit-footer-help-what::before { content: none; }
-	.kit-footer-help-more { display: flex; justify-content: flex-end; width: fit-content; margin: var(--kit-space-2) 0 0 auto; }
-}
 .kit-footer-inline { display: flex; flex-wrap: wrap; gap: var(--kit-space-1) var(--kit-space-5); }
 .kit-footer-inline a { display: inline-flex; align-items: center; min-height: 2rem; color: var(--kit-footer-muted); text-decoration: none; font-size: var(--kit-type-xs); }
 
@@ -827,7 +811,7 @@ html.has-modal-open .kit-sticky-help { display: none !important; }
    open from 768 and without JavaScript, with the summary hidden and the column label shown; under 768 the summary is
    the label (a 44px row with a chevron), the folds are stacked under the Brand block and start closed, and an open fold
    shows its links in two columns. Brand compact: logo with the visits line beside it, the line, then address and social
-   icons on their own rows; helplines come first, one 44px row each; legal links and "Powered by" share a row. Height still
+   icons on their own rows; the helplines line wraps; legal links and "Powered by" share a row. Height still
    follows the content (footer_check.py). */
 .kit-footer-fold > summary { display: none; }
 @media (max-width: 767px) {
@@ -849,18 +833,7 @@ html.has-modal-open .kit-sticky-help { display: none !important; }
 	.kit-footer-fold[open] > summary > .kit-ico { transform: rotate(180deg); }
 	.kit-footer-fold .kit-footer-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--kit-space-4); }
 	.kit-footer-fold .kit-footer-list a { min-height: var(--kit-size-target); }
-	.kit-footer-helprow, .kit-footer-helplines { flex-direction: column; align-items: stretch; }
-	.kit-footer-helprow { order: -1; gap: 0; padding: var(--kit-space-1) var(--kit-space-4); }
-	.kit-site-footer.kit-footer > .kit-footer-helprow { margin-bottom: var(--kit-space-4) !important; }
-	.kit-footer-helprow > .kit-footer-head { min-height: var(--kit-size-target); }
-	.kit-footer-helplines { gap: 0; width: 100%; }
-	.kit-footer-helplines li { border-top: var(--kit-border-width) solid var(--kit-footer-rule); }
-	.kit-footer-helplines a { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: var(--kit-space-3); align-items: center; width: 100%; min-height: var(--kit-size-target); padding: var(--kit-space-2) 0; box-sizing: border-box; }
-	.kit-footer-helplines a > .kit-ico { grid-row: 1 / 3; }
-	.kit-footer-helplines strong { font-size: var(--kit-type-base); line-height: 1.2; }
-	.kit-footer-help-what { font-size: var(--kit-type-xs); line-height: 1.4; }
-	.kit-footer-help-what::before { content: none; }
-	.kit-footer-help-more { width: 100%; min-height: var(--kit-size-target); margin: 0; border-top: var(--kit-border-width) solid var(--kit-footer-rule); box-sizing: border-box; }
+	.kit-footer-help-more { margin-left: 0; }
 	.kit-footer-bar { padding-top: var(--kit-space-2); }
 }
 @media (max-width: 767px) and (prefers-reduced-motion: reduce) { .kit-footer-fold > summary > .kit-ico { transition: none; } }
