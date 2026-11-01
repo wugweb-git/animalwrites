@@ -1883,7 +1883,7 @@
     "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
     "target": "44px",
     "motion": "plus sign turns; none with prefers-reduced-motion",
-    "sr": "H2 'Questions about …'; each question a button that says whether it is expanded"
+    "sr": "H2 '… FAQs'; each question a button that says whether it is expanded"
    },
    "seo": {
     "heading": "H2 (h4 size), H3 per question",

@@ -511,7 +511,7 @@ ins.adsbygoogle:not([data-ad-status="filled"]) { height: 0 !important; min-heigh
 .rank-math-answer[hidden] { display: none; }
 @media (prefers-reduced-motion: reduce) { .rank-math-question > button::after { transition: none; } }
 
-/* FAQ accordion (kit-faq): the section head (kit-sec-head: H2 "Questions about <subject>", one line, a ghost "see all"),
+/* FAQ accordion (kit-faq): the section head (kit-sec-head: H2 "<Subject> FAQs", a ghost "see all"),
    then each question an H3 holding a button (aria-expanded) that opens its answer. Answers are in the HTML; kit.js
    closes them after load, so without JavaScript every answer shows. Rows like Details. .kit-faq-head: the older head. */
 .kit-faq-head { font-size: var(--kit-type-h4); font-weight: var(--kit-weight-strong); line-height: var(--kit-leading-heading); margin: 0 0 var(--kit-space-3); }

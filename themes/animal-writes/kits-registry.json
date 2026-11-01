@@ -2653,7 +2653,7 @@
     "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
     "target": "44px",
     "motion": "none",
-    "sr": "H2 'Questions about <term>'; each question a button (aria-expanded) that opens its answer"
+    "sr": "H2 '<Term> FAQs'; each question a button (aria-expanded) that opens its answer"
    },
    "seo": {
     "heading": "H2",
@@ -2737,11 +2737,11 @@
     "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
     "target": "44px",
     "motion": "none",
-    "sr": "Section head: H2 'Questions about <subject>', the line 'Quick answers. More in the full FAQ.' and a ghost 'All questions' link (both left out on the full FAQ page); each question a button that opens its answer"
+    "sr": "Section head: H2 '<Subject> FAQs' (plain 'FAQs' when the subject is long) and a ghost 'All FAQs' link (left out on the full FAQ page); each question a button that opens its answer"
    },
    "seo": {
-    "heading": "H2 'Questions about <subject>' in the standard section head (kit-sec-head: H2, supporting line, ghost 'All questions' link)",
-    "link": "All questions (full FAQ); one per answer",
+    "heading": "H2 '<Subject> FAQs' from aw_faq_heading() (style AW_FAQ_HEAD_STYLE) in the standard section head (kit-sec-head: H2, ghost 'All FAQs' link)",
+    "link": "All FAQs (full FAQ); one per answer",
     "alt": "n/a",
     "schema": "FAQPage parsed from the same accordion (faq.php)"
    },

@@ -113,7 +113,8 @@ add_filter(
 			$ctx['entity'] = aw_faq_doc_short( $obj->ID );
 			$ctx['full']   = aw_faq_is_topic_name( $ctx['entity'] ) ? '' : aw_faq_doc_name( $obj->ID ); // the full official title, once, in the first answer; a release or circular named by its topic keeps the topic (its title is a headline)
 			$ctx['about']  = $ctx['url'] . ( in_array( $kind, array( 'act', 'rule', 'notification' ), true ) ? '#legislation' : ( 'template' === $kind ? '#document' : '#article' ) );
-			$ctx['head']   = 'Questions about the ' . $ctx['entity'];
+			$ctx['subject'] = $ctx['entity'];
+			$ctx['head']    = function_exists( 'aw_faq_heading' ) ? aw_faq_heading( $ctx['entity'] ) : 'FAQs'; // the site's FAQ head style (aw-seo-extras)
 		} elseif ( $obj instanceof WP_Post && 'page' === $obj->post_type && in_array( $obj->post_name, array( 'directory', 'opportunities' ), true ) ) {
 			$ctx['page_id'] = $ctx['url'] . '#page'; // the list pages' CollectionPage (aw_hub_schema_nodes)
 			$ctx['about']   = $ctx['page_id'];

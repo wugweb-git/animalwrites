@@ -152,7 +152,7 @@ function aw_faq_hub_pages() {
 const AW_FAQ_SUBJECT_TYPES = array( 'page', 'post' );
 
 /**
- * The subject a post's FAQ heading names ("Questions about <subject>") and where it came from: the FAQ box's Subject
+ * The subject a post's FAQ heading names (aw_faq_heading(): "<Subject> FAQs") and where it came from: the FAQ box's Subject
  * field (meta aw_faq_subject; pages and posts), the pages map (Settings → FAQ), the site's name on the front page, else
  * the title.
  *
@@ -175,13 +175,66 @@ function aw_faq_subject( $post ) {
 }
 
 /**
- * The FAQ head's supporting line and its "see all" link (filter aw_faq_head_parts): [ line, url, label ]. Both are
- * left out on the page the link points to.
+ * The FAQ section head, site-wide: which style the H2, the supporting line and the "see all" link use. Switching
+ * style is this one line; the styles are in aw_faq_head_styles().
+ */
+const AW_FAQ_HEAD_STYLE = 'subject';
+
+/** Longest subject (characters) the 'subject' style names; a longer one, or one that is itself a question or an FAQ title, gets plain "FAQs". */
+const AW_FAQ_HEAD_MAX = 40;
+
+/**
+ * The FAQ head styles: style => [ H2 pattern (%s = the subject; '' = no subject), plain H2 (a long or missing
+ * subject), supporting line ('' = none), link label ].
+ *
+ * @return array
+ */
+function aw_faq_head_styles() {
+	return array(
+		'subject' => array( '%s FAQs', 'FAQs', '', 'All FAQs' ), // "Animal Writes FAQs", "Directory FAQs"
+		'plain'   => array( '', 'FAQs', '', 'All FAQs' ), // "FAQs" everywhere
+		'common'  => array( '', 'Common questions', '', 'More questions' ),
+		'about'   => array( 'Questions about %s', 'Questions', 'Quick answers. More in the full FAQ.', 'All questions' ), // the old head
+	);
+}
+
+/** The current head style's row (aw_faq_head_styles()). */
+function aw_faq_head_style() {
+	$styles = aw_faq_head_styles();
+	return $styles[ AW_FAQ_HEAD_STYLE ] ?? $styles['subject'];
+}
+
+/**
+ * The FAQ H2 for a subject, in the site's head style (filter aw_faq_heading). The visible H2 and the FAQPage name
+ * both come from here. Except in the old 'about' style: a leading "the" is dropped and the first letter capitalised
+ * ("the Directory" -> "Directory FAQs"); a subject over AW_FAQ_HEAD_MAX characters, one that starts with a question
+ * word ("How to report ...") or one that already says FAQ gets the plain H2.
+ *
+ * @param string $subject The subject (aw_faq_subject(), a term name, a document's short name).
+ * @return string
+ */
+function aw_faq_heading( $subject ) {
+	list( $pattern, $plain ) = aw_faq_head_style();
+	$subject                 = trim( (string) $subject );
+	if ( 'about' !== AW_FAQ_HEAD_STYLE ) {
+		$subject = ucfirst( (string) preg_replace( '/^the\s+/i', '', $subject ) );
+		if ( mb_strlen( $subject ) > AW_FAQ_HEAD_MAX || preg_match( '/^(how|what|why|when|where|who|which|can|do|does|is|are|should)\b/i', $subject ) || preg_match( '/\bFAQs?\b|frequently asked/i', $subject ) ) {
+			$subject = '';
+		}
+	}
+	$head = '' !== $pattern && '' !== $subject ? sprintf( $pattern, $subject ) : $plain;
+	return (string) apply_filters( 'aw_faq_heading', $head, $subject );
+}
+
+/**
+ * The FAQ head's supporting line and its "see all" link (filter aw_faq_head_parts): [ line, url, label ], from the head
+ * style. Both are left out on the page the link points to.
  *
  * @return array
  */
 function aw_faq_head_parts() {
-	return array_values( (array) apply_filters( 'aw_faq_head_parts', array( 'Quick answers. More in the full FAQ.', home_url( '/resources/animal-welfare-faqs/' ), 'All questions' ) ) );
+	$style = aw_faq_head_style();
+	return array_values( (array) apply_filters( 'aw_faq_head_parts', array( $style[2], home_url( '/resources/animal-welfare-faqs/' ), $style[3] ) ) );
 }
 
 // The FAQ subject (FAQ box → Subject): a plain line, editable by whoever may edit the page or post.
@@ -229,7 +282,7 @@ function aw_faq_show_here() {
 /**
  * The FAQ context of a post or term: kind (the post type or 'term'; the site's filter names its own kinds), store
  * ('post' | 'term'), object ID, type (post type or taxonomy), entity name, URL, the page node's and the main entity's
- * @id, the H2. Null for a type without the box.
+ * @id, the subject, the H2 (aw_faq_heading()). Null for a type without the box.
  *
  * @param WP_Post|WP_Term|null $obj Default: the queried object.
  * @return array|null
@@ -252,7 +305,8 @@ function aw_faq_context( $obj = null ) {
 			'url'             => $url,
 			'page_id'         => $url . '#webpage',
 			'about'           => $url . '#webpage',
-			'head'            => 'Questions about ' . $subject[0],
+			'subject'         => $subject[0],
+			'head'            => aw_faq_heading( $subject[0] ),
 			'subject_missing' => 'title' === $subject[1] && in_array( $obj->post_type, AW_FAQ_SUBJECT_TYPES, true ),
 		);
 		if ( isset( $hubs[ (int) $obj->ID ] ) ) { // a hub page by the map, whatever its Subject field says
@@ -262,7 +316,7 @@ function aw_faq_context( $obj = null ) {
 	} elseif ( $obj instanceof WP_Term && in_array( $obj->taxonomy, aw_faq_taxonomies(), true ) ) {
 		$url  = (string) kits_term_url( $obj );
 		$name = aw_faq_plain( $obj->name );
-		$ctx  = array( 'kind' => 'term', 'store' => 'term', 'id' => (int) $obj->term_id, 'type' => $obj->taxonomy, 'entity' => $name, 'full' => '', 'url' => $url, 'page_id' => $url . '#webpage', 'about' => $url . '#webpage', 'head' => 'Questions about ' . $name, 'subject_missing' => false );
+		$ctx  = array( 'kind' => 'term', 'store' => 'term', 'id' => (int) $obj->term_id, 'type' => $obj->taxonomy, 'entity' => $name, 'full' => '', 'url' => $url, 'page_id' => $url . '#webpage', 'about' => $url . '#webpage', 'subject' => $name, 'head' => aw_faq_heading( $name ), 'subject_missing' => false );
 	}
 	return null === $ctx ? null : apply_filters( 'aw_faq_context', $ctx, $obj );
 }
@@ -513,7 +567,7 @@ function aw_faq_build( $ctx = null ) {
 }
 
 /**
- * The accordion: the section head (H2 "Questions about <subject>", one line, the ghost "All questions" link); each
+ * The accordion: the section head (H2 from aw_faq_heading(), the style's line if any, its ghost "see all" link); each
  * question a button (aria-expanded) inside an H3; each answer in the HTML (kit.js closes them after load; without
  * JavaScript every answer shows).
  *
@@ -717,8 +771,8 @@ function aw_faq_editor( $ctx ) {
 	wp_nonce_field( 'aw_faq_items', 'aw_faq_items_nonce' );
 	if ( 'post' === $ctx['store'] && in_array( $ctx['type'], AW_FAQ_SUBJECT_TYPES, true ) ) { // the field only where the heading uses it
 		$own  = (string) get_post_meta( $ctx['id'], 'aw_faq_subject', true );
-		$fall = '' === $own ? (string) preg_replace( '/^Questions about /', '', (string) $ctx['head'] ) : ''; // the heading as shown (after the aw_faq_context filters)
-		echo '<p><label for="aw-faq-subject"><strong>Subject</strong> (the heading reads “Questions about …”)</label><br><input type="text" class="large-text" id="aw-faq-subject" name="aw_faq_subject" value="' . esc_attr( $own ) . '" placeholder="' . esc_attr( $fall ) . '"></p>';
+		$fall = '' === $own ? (string) ( $ctx['subject'] ?? '' ) : ''; // the subject the heading uses now (after the aw_faq_context filters)
+		echo '<p><label for="aw-faq-subject"><strong>Subject</strong> (the heading reads “' . esc_html( aw_faq_heading( 'Subject' ) ) . '”; a long subject gets a plain heading)</label><br><input type="text" class="large-text" id="aw-faq-subject" name="aw_faq_subject" value="' . esc_attr( $own ) . '" placeholder="' . esc_attr( $fall ) . '"></p>';
 		if ( '' === $own && ! empty( $ctx['subject_missing'] ) ) {
 			echo '<div class="notice notice-warning inline"><p>' . esc_html( 'No subject: the heading uses the page title, “' . $ctx['head'] . '”.' ) . '</p></div>';
 		}
