@@ -1,0 +1,5013 @@
+{
+	"about": "Every edit-screen box, the keys it stores and where each key is used. Read by aw_edit_screen_map() in includes/edit-screens.php. Short paths: core/ = plugins/animal-writes-core/includes/, seo/ = plugins/aw-seo-extras/includes/, src/ = plugins/aw-sourcing/includes/, kits/ = plugins/kits-core/includes/, acf-json/ = plugins/animal-writes-core/acf-json/. Line numbers are as of 1 Nov 2026. See docs/edit-screens.md.",
+	"kinds": [
+		"display",
+		"schema",
+		"faq",
+		"filter",
+		"sourcing",
+		"analytics",
+		"admin"
+	],
+	"boxes": {
+		"submitdiv": {
+			"title": "Publish",
+			"source": "WordPress",
+			"file": "wp-admin/includes/meta-boxes.php (post_submit_meta_box)",
+			"screen": "post",
+			"types": [],
+			"runtime": "live",
+			"notes": "Sidebar panel in the block editor."
+		},
+		"categorydiv": {
+			"title": "Categories",
+			"source": "WordPress",
+			"file": "wp-admin/includes/meta-boxes.php (post_categories_meta_box)",
+			"screen": "post",
+			"types": [],
+			"runtime": "live"
+		},
+		"tagsdiv-post_tag": {
+			"title": "Tags",
+			"source": "WordPress",
+			"file": "wp-admin/includes/meta-boxes.php (post_tags_meta_box)",
+			"screen": "post",
+			"types": [],
+			"runtime": "live"
+		},
+		"tagsdiv-aw_campaign_link": {
+			"title": "Linked campaigns",
+			"source": "WordPress",
+			"file": "wp-admin/includes/meta-boxes.php (post_tags_meta_box); taxonomy from core/campaign-links.php",
+			"screen": "post",
+			"types": [],
+			"runtime": "live"
+		},
+		"tagsdiv-aw_media_group": {
+			"title": "Media groups",
+			"source": "WordPress",
+			"file": "wp-admin/includes/meta-boxes.php (post_tags_meta_box); taxonomy from core/media-groups.php",
+			"screen": "post",
+			"types": [
+				"attachment"
+			],
+			"runtime": "live"
+		},
+		"pageparentdiv": {
+			"title": "Attributes (template, parent, order)",
+			"source": "WordPress",
+			"file": "wp-admin/includes/meta-boxes.php (page_attributes_meta_box)",
+			"screen": "post",
+			"types": [],
+			"runtime": "live"
+		},
+		"postimagediv": {
+			"title": "Featured image",
+			"source": "WordPress",
+			"file": "wp-admin/includes/meta-boxes.php (post_thumbnail_meta_box)",
+			"screen": "post",
+			"types": [],
+			"runtime": "live",
+			"notes": "On Directory listings this is the logo."
+		},
+		"postexcerpt": {
+			"title": "Excerpt",
+			"source": "WordPress",
+			"file": "wp-admin/includes/meta-boxes.php (post_excerpt_meta_box)",
+			"screen": "post",
+			"types": [],
+			"runtime": "live",
+			"notes": "On Directory listings this is the short bio."
+		},
+		"postcustom": {
+			"title": "Custom Fields",
+			"source": "WordPress",
+			"file": "wp-admin/includes/meta-boxes.php (post_custom_meta_box)",
+			"screen": "post",
+			"types": [],
+			"runtime": "live",
+			"notes": "Block editor: only when switched on in Preferences → Panels. The only editor for aw_campaign_metrics, aw_legal_dated and aw_file_hi_url."
+		},
+		"slugdiv": {
+			"title": "Slug",
+			"source": "WordPress",
+			"file": "wp-admin/includes/meta-boxes.php (post_slug_meta_box)",
+			"screen": "post",
+			"types": [],
+			"runtime": "live",
+			"notes": "Adds nothing on types without a public address (aw_press, aw_claim, aw_report, aw_message)."
+		},
+		"authordiv": {
+			"title": "Author",
+			"source": "WordPress",
+			"file": "wp-admin/includes/meta-boxes.php (post_author_meta_box)",
+			"screen": "post",
+			"types": [],
+			"runtime": "live"
+		},
+		"revisionsdiv": {
+			"title": "Revisions",
+			"source": "WordPress",
+			"file": "wp-admin/includes/meta-boxes.php (post_revisions_meta_box)",
+			"screen": "post",
+			"types": [],
+			"runtime": "live",
+			"notes": "Shown only when the item has two or more revisions; stores nothing."
+		},
+		"commentsdiv": {
+			"title": "Comments",
+			"source": "WordPress",
+			"file": "wp-admin/includes/meta-boxes.php",
+			"screen": "post",
+			"types": [],
+			"runtime": "live"
+		},
+		"commentstatusdiv": {
+			"title": "Discussion",
+			"source": "WordPress",
+			"file": "wp-admin/includes/meta-boxes.php",
+			"screen": "post",
+			"types": [],
+			"runtime": "live"
+		},
+		"aw-issuer": {
+			"title": "Issued by",
+			"source": "Animal Writes core",
+			"file": "core/issuers.php (aw_issuer_box)",
+			"screen": "post",
+			"types": [
+				"post",
+				"aw_legal"
+			],
+			"runtime": "live"
+		},
+		"aw-place": {
+			"title": "Place",
+			"source": "Animal Writes core",
+			"file": "core/places-admin.php (aw_place_box)",
+			"screen": "post",
+			"types": [
+				"aw_news",
+				"aw_legal",
+				"aw_campaign",
+				"aw_opportunity",
+				"aw_listing"
+			],
+			"runtime": "live"
+		},
+		"aw_related": {
+			"title": "Related",
+			"source": "Animal Writes core",
+			"file": "core/model.php (aw_related_box)",
+			"screen": "post",
+			"types": [
+				"post",
+				"aw_news",
+				"aw_legal",
+				"aw_campaign",
+				"aw_opportunity",
+				"aw_press"
+			],
+			"runtime": "live",
+			"notes": "Rows depend on the type: aw_relations() in core/model.php."
+		},
+		"aw_linked_from": {
+			"title": "Linked from",
+			"source": "Animal Writes core",
+			"file": "core/model.php (aw_linked_from_box)",
+			"screen": "post",
+			"types": [
+				"post",
+				"aw_legal",
+				"aw_listing"
+			],
+			"runtime": "live",
+			"notes": "Read-only list of items that point here; stores nothing."
+		},
+		"aw-faq": {
+			"title": "FAQ",
+			"source": "AW SEO Plus",
+			"file": "seo/faq.php (add_meta_boxes, aw_faq_editor)",
+			"screen": "post",
+			"types": [
+				"post",
+				"page",
+				"aw_news",
+				"aw_legal",
+				"aw_campaign",
+				"aw_opportunity",
+				"aw_listing"
+			],
+			"runtime": "live"
+		},
+		"aw-legal-item": {
+			"title": "Library item",
+			"source": "Animal Writes core",
+			"file": "core/faq-data.php (add_meta_boxes_aw_legal)",
+			"screen": "post",
+			"types": [
+				"aw_legal"
+			],
+			"runtime": "live"
+		},
+		"aw-campaign-details": {
+			"title": "Campaign details",
+			"source": "Animal Writes core",
+			"file": "core/campaign-tools.php (aw_camp_details_box)",
+			"screen": "post",
+			"types": [
+				"aw_campaign"
+			],
+			"runtime": "live",
+			"notes": "Same title as the SCF group \"Campaign details\"; both edit aw_campaign_close and aw_campaign_doc, and the SCF value is saved last."
+		},
+		"aw-campaign-record": {
+			"title": "Real-world impact",
+			"source": "Animal Writes core",
+			"file": "core/campaign-record.php (aw_camp_record_box)",
+			"screen": "post",
+			"types": [
+				"aw_campaign"
+			],
+			"runtime": "live"
+		},
+		"aw-enrich-prov": {
+			"title": "Where these details come from",
+			"source": "AW Sourcing",
+			"file": "src/enrichment-admin.php (aw_enrich_prov_box)",
+			"screen": "post",
+			"types": [
+				"aw_listing"
+			],
+			"runtime": "live",
+			"notes": "Mostly read-only: the per-field sources also shown under each SCF field."
+		},
+		"aw_org_people": {
+			"title": "Volunteers",
+			"source": "Animal Writes core",
+			"file": "core/org-people.php (aw_org_people_box)",
+			"screen": "post",
+			"types": [
+				"aw_listing"
+			],
+			"runtime": "live",
+			"notes": "Read-only list of FluentCRM contacts for this listing; needs edit_aw_volunteers."
+		},
+		"aw_press_box": {
+			"title": "Coverage",
+			"source": "Animal Writes core",
+			"file": "core/press.php (add_meta_boxes_aw_press)",
+			"screen": "post",
+			"types": [
+				"aw_press"
+			],
+			"runtime": "live"
+		},
+		"aw_claim_review": {
+			"title": "Review",
+			"source": "Animal Writes core",
+			"file": "core/claims.php (aw_claim_review_box)",
+			"screen": "post",
+			"types": [
+				"aw_claim"
+			],
+			"runtime": "live",
+			"notes": "Read-only claim details with Approve / Reject links."
+		},
+		"aw-report-sent": {
+			"title": "Report",
+			"source": "Animal Writes core",
+			"file": "core/reports.php (add_meta_boxes_aw_report)",
+			"screen": "post",
+			"types": [
+				"aw_report"
+			],
+			"runtime": "live",
+			"notes": "Read-only."
+		},
+		"aw-listing-details": {
+			"title": "Organisation details (fallback)",
+			"source": "Animal Writes core",
+			"file": "core/listing-profile.php (aw_listing_details_box)",
+			"screen": "post",
+			"types": [
+				"aw_listing"
+			],
+			"runtime": "fallback",
+			"notes": "Only when SCF is off."
+		},
+		"aw-sponsored": {
+			"title": "Sponsored (fallback)",
+			"source": "Animal Writes core",
+			"file": "core/pages.php (aw_sponsored_box)",
+			"screen": "post",
+			"types": [
+				"post"
+			],
+			"runtime": "fallback",
+			"notes": "Only when SCF is off."
+		},
+		"attachment-fields": {
+			"title": "Image context, Focus keyphrase (attachment fields)",
+			"source": "Kits Core",
+			"file": "kits/image-context.php (attachment_fields_to_edit)",
+			"screen": "post",
+			"types": [
+				"attachment"
+			],
+			"runtime": "edit-screen-only",
+			"notes": "Fields, not a box."
+		},
+		"acf-group_aw_resource": {
+			"title": "Resource details",
+			"source": "Secure Custom Fields",
+			"file": "acf-json/group_aw_resource.json",
+			"screen": "post",
+			"types": [
+				"post"
+			],
+			"runtime": "scf"
+		},
+		"acf-group_aw_news": {
+			"title": "Source",
+			"source": "Secure Custom Fields",
+			"file": "acf-json/group_aw_news.json",
+			"screen": "post",
+			"types": [
+				"aw_news"
+			],
+			"runtime": "scf"
+		},
+		"acf-group_aw_legal": {
+			"title": "Library details",
+			"source": "Secure Custom Fields",
+			"file": "acf-json/group_aw_legal.json",
+			"screen": "post",
+			"types": [
+				"aw_legal"
+			],
+			"runtime": "scf"
+		},
+		"acf-group_aw_campaign": {
+			"title": "Campaign details",
+			"source": "Secure Custom Fields",
+			"file": "acf-json/group_aw_campaign.json",
+			"screen": "post",
+			"types": [
+				"aw_campaign"
+			],
+			"runtime": "scf",
+			"notes": "Duplicate edit with the side box \"Campaign details\" (aw_campaign_close, aw_campaign_doc); this value wins on save."
+		},
+		"acf-group_aw_opportunity": {
+			"title": "Opportunity details",
+			"source": "Secure Custom Fields",
+			"file": "acf-json/group_aw_opportunity.json",
+			"screen": "post",
+			"types": [
+				"aw_opportunity"
+			],
+			"runtime": "scf"
+		},
+		"acf-group_aw_listing": {
+			"title": "Organisation details",
+			"source": "Secure Custom Fields",
+			"file": "acf-json/group_aw_listing.json",
+			"screen": "post",
+			"types": [
+				"aw_listing"
+			],
+			"runtime": "scf"
+		},
+		"rank_math_metabox": {
+			"title": "Rank Math SEO",
+			"source": "Rank Math SEO",
+			"file": "seo-by-rank-math/includes/admin/metabox/class-metabox.php",
+			"screen": "post",
+			"types": [
+				"post",
+				"page",
+				"aw_news",
+				"aw_legal",
+				"aw_campaign",
+				"aw_opportunity",
+				"aw_listing"
+			],
+			"runtime": "edit-screen-only",
+			"notes": "Sidebar in the block editor, a box on News (classic editor)."
+		},
+		"rank_math_metabox_link_suggestions": {
+			"title": "Link Suggestions",
+			"source": "Rank Math SEO",
+			"file": "seo-by-rank-math/includes/admin/metabox/class-metabox.php",
+			"screen": "post",
+			"types": [
+				"aw_news"
+			],
+			"runtime": "edit-screen-only",
+			"notes": "Classic editor only."
+		},
+		"litespeed_meta_boxes": {
+			"title": "LiteSpeed",
+			"source": "LiteSpeed Cache",
+			"file": "litespeed-cache/src/metabox.cls.php",
+			"screen": "post",
+			"types": [],
+			"runtime": "live",
+			"notes": "No litespeed_* rows on live: adds nothing so far."
+		},
+		"wpil_link-articles": {
+			"title": "Link Whisper Suggested Links",
+			"source": "Link Whisper",
+			"file": "link-whisper/core/Wpil/Base.php (showSuggestionsBox)",
+			"screen": "post",
+			"types": [
+				"post",
+				"page"
+			],
+			"runtime": "live",
+			"notes": "Rendering this box deletes wpil_links on that post (Link Whisper)."
+		},
+		"term-core": {
+			"title": "Name, Slug, Parent, Description",
+			"source": "WordPress",
+			"file": "wp-admin/edit-tag-form.php",
+			"screen": "term",
+			"types": [],
+			"runtime": "always"
+		},
+		"term-photo": {
+			"title": "Photo",
+			"source": "Animal Writes core",
+			"file": "core/category-images.php",
+			"screen": "term",
+			"types": [
+				"category",
+				"post_tag"
+			],
+			"runtime": "live",
+			"match": {
+				"file": "includes/category-images.php",
+				"hooks": [
+					"add_form_fields",
+					"edit_form_fields"
+				],
+				"priority": 10
+			}
+		},
+		"term-banner": {
+			"title": "Banner image",
+			"source": "Animal Writes core",
+			"file": "core/category-images.php",
+			"screen": "term",
+			"types": [
+				"category"
+			],
+			"runtime": "live",
+			"match": {
+				"file": "includes/category-images.php",
+				"hooks": [
+					"edit_form_fields"
+				],
+				"priority": 20
+			}
+		},
+		"term-help-types": {
+			"title": "Find help: listing types",
+			"source": "Animal Writes core",
+			"file": "core/model.php",
+			"screen": "term",
+			"types": [
+				"category"
+			],
+			"runtime": "live",
+			"match": {
+				"file": "includes/model.php",
+				"hooks": [
+					"add_form_fields",
+					"edit_form_fields"
+				],
+				"priority": 10,
+				"taxonomies": [
+					"category"
+				]
+			}
+		},
+		"term-guides-here": {
+			"title": "Guides linking here",
+			"source": "Animal Writes core",
+			"file": "core/model.php",
+			"screen": "term",
+			"types": [
+				"post_tag"
+			],
+			"runtime": "live",
+			"notes": "Read-only; listing-type tags only.",
+			"match": {
+				"file": "includes/model.php",
+				"hooks": [
+					"edit_form_fields"
+				],
+				"priority": 20,
+				"taxonomies": [
+					"post_tag"
+				]
+			}
+		},
+		"term-faq": {
+			"title": "FAQ",
+			"source": "AW SEO Plus",
+			"file": "seo/faq.php (aw_faq_term_box)",
+			"screen": "term",
+			"types": [
+				"category",
+				"post_tag"
+			],
+			"runtime": "live",
+			"match": {
+				"callback": "aw_faq_term_box",
+				"hooks": [
+					"edit_form_fields"
+				]
+			}
+		},
+		"term-rank-math": {
+			"title": "Rank Math SEO",
+			"source": "Rank Math SEO",
+			"file": "seo-by-rank-math/includes/admin/metabox/class-metabox.php",
+			"screen": "term",
+			"types": [
+				"category",
+				"post_tag"
+			],
+			"runtime": "edit-screen-only"
+		}
+	},
+	"keys": {
+		"post_status": {
+			"store": "post_field",
+			"label": "Status, visibility, publish date",
+			"type": "post field",
+			"boxes": [
+				"submitdiv"
+			],
+			"types": [],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "WordPress publishing",
+					"file": ""
+				}
+			]
+		},
+		"category": {
+			"store": "taxonomy",
+			"label": "Categories",
+			"type": "taxonomy",
+			"boxes": [
+				"categorydiv"
+			],
+			"types": [],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "category pages, breadcrumbs, cards",
+					"file": "core/term-page.php"
+				},
+				{
+					"kind": "filter",
+					"where": "News / Library lists by category",
+					"file": "core/hubs.php"
+				}
+			]
+		},
+		"post_tag": {
+			"store": "taxonomy",
+			"label": "Tags (labels, listing types, services)",
+			"type": "taxonomy",
+			"boxes": [
+				"tagsdiv-post_tag"
+			],
+			"types": [],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "tag pages and chips",
+					"file": "core/term-page.php"
+				},
+				{
+					"kind": "filter",
+					"where": "Directory listing types",
+					"file": "core/directory.php"
+				},
+				{
+					"kind": "schema",
+					"where": "listing knowsAbout / services",
+					"file": "seo/schema.php"
+				}
+			]
+		},
+		"aw_campaign_link": {
+			"store": "taxonomy",
+			"label": "Linked campaigns",
+			"type": "taxonomy",
+			"boxes": [
+				"tagsdiv-aw_campaign_link"
+			],
+			"types": [],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "campaign pages list their linked items",
+					"file": "core/campaign-links.php"
+				}
+			],
+			"notes": [
+				"Campaign items use this taxonomy, not tags."
+			]
+		},
+		"aw_media_group": {
+			"store": "taxonomy",
+			"label": "Media group",
+			"type": "taxonomy",
+			"boxes": [
+				"tagsdiv-aw_media_group"
+			],
+			"types": [
+				"attachment"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "Media Library column and filter",
+					"file": "core/media-groups.php"
+				}
+			]
+		},
+		"post_parent_template": {
+			"store": "post_field",
+			"label": "Template, parent, order",
+			"type": "post field",
+			"boxes": [
+				"pageparentdiv"
+			],
+			"types": [],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "block theme template for the item",
+					"file": "themes/"
+				}
+			]
+		},
+		"_thumbnail_id": {
+			"store": "post_meta",
+			"label": "Featured image",
+			"type": "attachment ID",
+			"boxes": [
+				"postimagediv"
+			],
+			"types": [],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "card and page image; listing logo",
+					"file": "core/media.php"
+				},
+				{
+					"kind": "schema",
+					"where": "image / logo",
+					"file": "seo/schema.php"
+				}
+			]
+		},
+		"post_excerpt": {
+			"store": "post_field",
+			"label": "Excerpt",
+			"type": "text",
+			"boxes": [
+				"postexcerpt"
+			],
+			"types": [],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "card summary; listing short bio",
+					"file": "core/hub-blocks.php"
+				},
+				{
+					"kind": "schema",
+					"where": "description",
+					"file": "seo/schema.php"
+				}
+			]
+		},
+		"post_name": {
+			"store": "post_field",
+			"label": "Slug",
+			"type": "text",
+			"boxes": [
+				"slugdiv"
+			],
+			"types": [],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "the item address",
+					"file": ""
+				}
+			]
+		},
+		"post_author": {
+			"store": "post_field",
+			"label": "Author",
+			"type": "user ID",
+			"boxes": [
+				"authordiv"
+			],
+			"types": [],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "WordPress author",
+					"file": ""
+				}
+			]
+		},
+		"aw_issuer": {
+			"store": "post_meta",
+			"label": "Issuer",
+			"type": "slug (aw_issuers())",
+			"boxes": [
+				"aw-issuer"
+			],
+			"types": [
+				"post",
+				"aw_legal"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "issuer line in the Library meta row",
+					"file": "core/item-head.php:329"
+				},
+				{
+					"kind": "display",
+					"where": "card source",
+					"file": "core/hub-blocks.php:604"
+				},
+				{
+					"kind": "schema",
+					"where": "GovernmentOrganization / court (aw_schema_issuer)",
+					"file": "seo/schema.php:373"
+				},
+				{
+					"kind": "faq",
+					"where": "issuer and \"where to read\" questions",
+					"file": "core/faq-data.php:342"
+				},
+				{
+					"kind": "analytics",
+					"where": "dataLayer issuer",
+					"file": "core/kits-config.php:67"
+				},
+				{
+					"kind": "sourcing",
+					"where": "relevance and auto-review",
+					"file": "src/"
+				}
+			]
+		},
+		"aw_issuers_added": {
+			"store": "option",
+			"label": "Issuers added from the box",
+			"type": "option (slug ⇒ name)",
+			"boxes": [
+				"aw-issuer"
+			],
+			"types": [
+				"post",
+				"aw_legal"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "extends the issuer list",
+					"file": "core/issuers.php"
+				}
+			]
+		},
+		"aw_state_code": {
+			"store": "post_meta",
+			"label": "State (LGD code)",
+			"type": "int, multiple rows",
+			"boxes": [
+				"aw-place"
+			],
+			"types": [
+				"aw_news",
+				"aw_legal",
+				"aw_campaign",
+				"aw_opportunity",
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "place chips, related by place",
+					"file": "core/related.php:93"
+				},
+				{
+					"kind": "schema",
+					"where": "jobLocation / Place (aw_schema_place)",
+					"file": "seo/schema.php:344"
+				},
+				{
+					"kind": "filter",
+					"where": "place pages and counts",
+					"file": "core/places.php:296"
+				},
+				{
+					"kind": "filter",
+					"where": "programmatic place pages",
+					"file": "seo/programmatic.php:48"
+				},
+				{
+					"kind": "filter",
+					"where": "near opportunities, district helplines",
+					"file": "core/near-opps.php:27"
+				},
+				{
+					"kind": "analytics",
+					"where": "dataLayer state",
+					"file": "core/kits-config.php:62"
+				},
+				{
+					"kind": "sourcing",
+					"where": "place detection and merges",
+					"file": "core/find-help.php:444"
+				}
+			]
+		},
+		"aw_district_code": {
+			"store": "post_meta",
+			"label": "District (LGD code)",
+			"type": "int, multiple rows",
+			"boxes": [
+				"aw-place"
+			],
+			"types": [
+				"aw_news",
+				"aw_legal",
+				"aw_campaign",
+				"aw_opportunity",
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "place chips, related by place",
+					"file": "core/related.php:171"
+				},
+				{
+					"kind": "schema",
+					"where": "jobLocation / Place",
+					"file": "seo/schema.php:820"
+				},
+				{
+					"kind": "filter",
+					"where": "Directory district pages, filtered views",
+					"file": "seo/filtered-views.php:347"
+				},
+				{
+					"kind": "filter",
+					"where": "district helplines",
+					"file": "core/district-helplines.php:50"
+				},
+				{
+					"kind": "analytics",
+					"where": "dataLayer district",
+					"file": "core/kits-config.php:63"
+				},
+				{
+					"kind": "sourcing",
+					"where": "place detection and merges",
+					"file": "src/enrichment-cleanup.php:72"
+				}
+			]
+		},
+		"aw_pincode": {
+			"store": "post_meta",
+			"label": "PIN code",
+			"type": "6 digits",
+			"boxes": [
+				"aw-place"
+			],
+			"types": [
+				"aw_news",
+				"aw_legal",
+				"aw_campaign",
+				"aw_opportunity",
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "listing location text",
+					"file": "core/listing-template.php:217"
+				},
+				{
+					"kind": "schema",
+					"where": "PostalAddress.postalCode",
+					"file": "seo/schema.php:87"
+				},
+				{
+					"kind": "faq",
+					"where": "location answer",
+					"file": "core/faq-data.php:235"
+				},
+				{
+					"kind": "admin",
+					"where": "geocoder input",
+					"file": "core/geocode.php:79"
+				}
+			]
+		},
+		"aw_place_city": {
+			"store": "post_meta",
+			"label": "Town or area",
+			"type": "text",
+			"boxes": [
+				"aw-place"
+			],
+			"types": [
+				"aw_news",
+				"aw_legal",
+				"aw_campaign",
+				"aw_opportunity",
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "place text binding",
+					"file": "core/bindings.php:111"
+				},
+				{
+					"kind": "schema",
+					"where": "job addressLocality",
+					"file": "seo/schema.php:768"
+				},
+				{
+					"kind": "admin",
+					"where": "\"Featured in\" matching",
+					"file": "core/featured.php:92"
+				}
+			]
+		},
+		"aw_place_source": {
+			"store": "post_meta",
+			"label": "Who set the place",
+			"type": "editor / auto",
+			"boxes": [
+				"aw-place"
+			],
+			"types": [
+				"aw_news",
+				"aw_legal",
+				"aw_campaign",
+				"aw_opportunity",
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "place detector bookkeeping",
+					"file": "core/find-help.php:257"
+				}
+			],
+			"notes": [
+				"Written by the box on a real change; not typed."
+			]
+		},
+		"aw_place_auto": {
+			"store": "post_meta",
+			"label": "Place found automatically",
+			"type": "flag",
+			"boxes": [
+				"aw-place"
+			],
+			"types": [
+				"aw_news",
+				"aw_legal",
+				"aw_campaign",
+				"aw_opportunity",
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "place detector bookkeeping",
+					"file": "core/find-help.php:422"
+				}
+			],
+			"notes": [
+				"Deleted by the box on a real change."
+			]
+		},
+		"aw_rel_legal": {
+			"store": "post_meta",
+			"label": "Legal Watch items in this story",
+			"type": "aw_legal IDs, multiple rows",
+			"boxes": [
+				"aw_related"
+			],
+			"types": [
+				"aw_news"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "\"From the Library\" / \"News about this\"",
+					"file": "core/related.php:240"
+				},
+				{
+					"kind": "display",
+					"where": "item head links",
+					"file": "core/item-head.php:431"
+				}
+			]
+		},
+		"aw_rel_org": {
+			"store": "post_meta",
+			"label": "Organisations featured",
+			"type": "aw_listing IDs, multiple rows",
+			"boxes": [
+				"aw_related"
+			],
+			"types": [
+				"aw_news",
+				"aw_legal",
+				"post",
+				"aw_press",
+				"aw_campaign"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "\"Featured in\" on the listing",
+					"file": "core/featured.php:372"
+				},
+				{
+					"kind": "display",
+					"where": "\"News from\"",
+					"file": "core/related.php:264"
+				},
+				{
+					"kind": "schema",
+					"where": "listing subjectOf",
+					"file": "core/featured.php:461"
+				}
+			],
+			"notes": [
+				"0 rows on live."
+			]
+		},
+		"aw_organiser": {
+			"store": "post_meta",
+			"label": "Organiser",
+			"type": "aw_listing ID (max 1)",
+			"boxes": [
+				"aw_related"
+			],
+			"types": [
+				"aw_campaign"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "listing \"Campaigns\" (Organiser)",
+					"file": "core/listing-template.php:519"
+				},
+				{
+					"kind": "schema",
+					"where": "Event organizer",
+					"file": "seo/schema.php:582"
+				}
+			],
+			"notes": [
+				"Overlaps with the side box \"Partners\" (aw_campaign_partners)."
+			]
+		},
+		"aw_participant": {
+			"store": "post_meta",
+			"label": "Participating organisations",
+			"type": "aw_listing IDs",
+			"boxes": [
+				"aw_related"
+			],
+			"types": [
+				"aw_campaign"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "listing \"Campaigns\" (Partner)",
+					"file": "core/listing-template.php:522"
+				}
+			],
+			"notes": [
+				"Same role as aw_campaign_partners in the side box \"Campaign details\"."
+			]
+		},
+		"aw_organisation": {
+			"store": "post_meta",
+			"label": "Organisation",
+			"type": "aw_listing ID (max 1)",
+			"boxes": [
+				"aw_related"
+			],
+			"types": [
+				"aw_opportunity"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "posted-by link",
+					"file": "core/hub-blocks.php:307"
+				},
+				{
+					"kind": "display",
+					"where": "listing \"Opportunities\"",
+					"file": "core/listing-template.php:500"
+				},
+				{
+					"kind": "schema",
+					"where": "hiring organisation url / address",
+					"file": "seo/schema.php:770"
+				},
+				{
+					"kind": "sourcing",
+					"where": "set by ingest",
+					"file": "src/ingest.php:565"
+				}
+			],
+			"notes": [
+				"Overlaps with the SCF field \"Organisation\" (aw_org_name)."
+			]
+		},
+		"aw_rel_resource": {
+			"store": "post_meta",
+			"label": "Library items (templates, documents)",
+			"type": "aw_legal IDs",
+			"boxes": [
+				"aw_related"
+			],
+			"types": [
+				"post"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "\"Guides on this\" / \"From the Library\"",
+					"file": "core/related.php:245"
+				},
+				{
+					"kind": "display",
+					"where": "item head links",
+					"file": "core/item-head.php:436"
+				}
+			]
+		},
+		"aw_rel_guide": {
+			"store": "post_meta",
+			"label": "Guides on this",
+			"type": "post IDs",
+			"boxes": [
+				"aw_related"
+			],
+			"types": [
+				"post"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "\"Guides on this\" at the end of a research post",
+					"file": "core/item-head.php:443"
+				}
+			]
+		},
+		"aw_rel_org_auto": {
+			"store": "post_meta",
+			"label": "Found in the text (ticks)",
+			"type": "aw_listing IDs",
+			"boxes": [
+				"aw_related"
+			],
+			"types": [
+				"aw_news",
+				"aw_legal",
+				"post",
+				"aw_press",
+				"aw_campaign"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "\"Featured in\"",
+					"file": "core/featured.php:270"
+				},
+				{
+					"kind": "schema",
+					"where": "listing subjectOf",
+					"file": "core/featured.php:461"
+				}
+			],
+			"notes": [
+				"Written by aw_featured_scan on save."
+			]
+		},
+		"aw_rel_org_not": {
+			"store": "post_meta",
+			"label": "Found in the text, unticked",
+			"type": "aw_listing IDs",
+			"boxes": [
+				"aw_related"
+			],
+			"types": [
+				"aw_news",
+				"aw_legal",
+				"post",
+				"aw_press",
+				"aw_campaign"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "keeps an unticked match out of \"Featured in\"",
+					"file": "core/featured.php:353"
+				}
+			]
+		},
+		"aw_rel_listing_type": {
+			"store": "post_meta",
+			"label": "Listing types (Resources)",
+			"type": "post_tag IDs",
+			"boxes": [
+				"aw_related"
+			],
+			"types": [
+				"post"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "tag screen \"Guides linking here\"",
+					"file": "core/model.php:291"
+				}
+			],
+			"notes": [
+				"Saved but never read on the site (admin only); 0 rows on live."
+			]
+		},
+		"aw_faq": {
+			"store": "post_meta",
+			"label": "FAQ rows",
+			"type": "JSON list",
+			"boxes": [
+				"aw-faq",
+				"term-faq"
+			],
+			"types": [
+				"post",
+				"page",
+				"aw_news",
+				"aw_legal",
+				"aw_campaign",
+				"aw_opportunity",
+				"aw_listing",
+				"category",
+				"post_tag"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "FAQ block animal-writes/item-faq",
+					"file": "seo/faq.php"
+				},
+				{
+					"kind": "schema",
+					"where": "FAQPage",
+					"file": "seo/schema.php:1344"
+				},
+				{
+					"kind": "faq",
+					"where": "own and edited rows; automatic rows come from each type's fields",
+					"file": "core/faq-data.php"
+				},
+				{
+					"kind": "admin",
+					"where": "FAQ overview counts",
+					"file": "seo/faq-overview.php:60"
+				}
+			]
+		},
+		"aw_short_name": {
+			"store": "post_meta",
+			"label": "Short name",
+			"type": "text",
+			"boxes": [
+				"aw-legal-item"
+			],
+			"types": [
+				"aw_legal"
+			],
+			"uses": [
+				{
+					"kind": "faq",
+					"where": "the name questions use",
+					"file": "core/faq-data.php:154"
+				}
+			]
+		},
+		"aw_legal_act": {
+			"store": "post_meta",
+			"label": "Issued under (Act)",
+			"type": "text",
+			"boxes": [
+				"aw-legal-item"
+			],
+			"types": [
+				"aw_legal"
+			],
+			"uses": [
+				{
+					"kind": "faq",
+					"where": "\"Issued under\" answers",
+					"file": "core/faq-data.php:396"
+				}
+			]
+		},
+		"aw_key_sections": {
+			"store": "post_meta",
+			"label": "Key sections",
+			"type": "lines \"no | summary | link\"",
+			"boxes": [
+				"aw-legal-item"
+			],
+			"types": [
+				"aw_legal"
+			],
+			"uses": [
+				{
+					"kind": "faq",
+					"where": "\"What does section N say?\"",
+					"file": "core/faq-data.php:419"
+				}
+			]
+		},
+		"aw_legal_dated": {
+			"store": "post_meta",
+			"label": "Dated",
+			"type": "date",
+			"boxes": [
+				"postcustom"
+			],
+			"types": [
+				"aw_legal"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "\"Dated {date}\" in the meta row",
+					"file": "core/item-head.php:152"
+				}
+			],
+			"notes": [
+				"No box: Custom Fields or REST only."
+			]
+		},
+		"aw_file_hi_url": {
+			"store": "post_meta",
+			"label": "Hindi file link",
+			"type": "url",
+			"boxes": [
+				"postcustom"
+			],
+			"types": [
+				"aw_legal"
+			],
+			"uses": [],
+			"notes": [
+				"Saved but never read (registered only, \"no longer edited\"); 15 rows."
+			]
+		},
+		"aw_source_url": {
+			"store": "post_meta",
+			"label": "Source URL",
+			"type": "url",
+			"boxes": [
+				"acf-group_aw_resource",
+				"acf-group_aw_news",
+				"acf-group_aw_legal",
+				"acf-group_aw_opportunity",
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"post",
+				"aw_news",
+				"aw_legal",
+				"aw_opportunity",
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "\"Read at {source}\" binding",
+					"file": "core/bindings.php:81"
+				},
+				{
+					"kind": "display",
+					"where": "item sources",
+					"file": "core/item-head.php:318"
+				},
+				{
+					"kind": "display",
+					"where": "listing Sources block",
+					"file": "core/data-sources.php:61"
+				},
+				{
+					"kind": "schema",
+					"where": "Article isBasedOn / citation",
+					"file": "seo/schema.php:426"
+				},
+				{
+					"kind": "schema",
+					"where": "PDF / court document url",
+					"file": "seo/schema.php:366"
+				},
+				{
+					"kind": "faq",
+					"where": "download / read / study answers",
+					"file": "core/faq-data.php:333"
+				},
+				{
+					"kind": "sourcing",
+					"where": "same-story dedupe; written by ingest",
+					"file": "src/same-story.php:42"
+				},
+				{
+					"kind": "admin",
+					"where": "review table, source images",
+					"file": "src/class-aw-sourcing-review-table.php:126"
+				}
+			]
+		},
+		"aw_source_name": {
+			"store": "post_meta",
+			"label": "Source name / Publisher name",
+			"type": "text",
+			"boxes": [
+				"acf-group_aw_resource",
+				"acf-group_aw_news",
+				"acf-group_aw_legal",
+				"acf-group_aw_opportunity",
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"post",
+				"aw_news",
+				"aw_legal",
+				"aw_opportunity",
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "source label binding",
+					"file": "core/bindings.php:83"
+				},
+				{
+					"kind": "display",
+					"where": "item head by-line",
+					"file": "core/item-head.php:341"
+				},
+				{
+					"kind": "display",
+					"where": "card source",
+					"file": "core/hub-blocks.php:603"
+				},
+				{
+					"kind": "schema",
+					"where": "Article publisher / Periodical name",
+					"file": "seo/schema.php:427"
+				},
+				{
+					"kind": "faq",
+					"where": "study journal",
+					"file": "core/faq-data.php:574"
+				},
+				{
+					"kind": "sourcing",
+					"where": "written by ingest",
+					"file": "src/ingest.php:241"
+				}
+			]
+		},
+		"aw_source_date": {
+			"store": "post_meta",
+			"label": "Source date",
+			"type": "Y-m-d",
+			"boxes": [
+				"acf-group_aw_resource",
+				"acf-group_aw_news",
+				"acf-group_aw_legal",
+				"acf-group_aw_opportunity",
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"post",
+				"aw_news",
+				"aw_legal",
+				"aw_opportunity",
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "shown date (Post Date block), meta row",
+					"file": "core/display.php:38"
+				},
+				{
+					"kind": "display",
+					"where": "card date",
+					"file": "core/hub-blocks.php:253"
+				},
+				{
+					"kind": "schema",
+					"where": "datePublished; Legislation legislationDate",
+					"file": "seo/schema.php:428"
+				},
+				{
+					"kind": "faq",
+					"where": "date answers",
+					"file": "core/faq-data.php:370"
+				},
+				{
+					"kind": "filter",
+					"where": "News list sort key",
+					"file": "core/display.php:60"
+				},
+				{
+					"kind": "sourcing",
+					"where": "written by ingest; gov-verified watch list",
+					"file": "core/gov-verified.php:48"
+				}
+			]
+		},
+		"aw_publisher": {
+			"store": "post_meta",
+			"label": "Publisher (worked out from the source URL)",
+			"type": "text, read-only",
+			"boxes": [
+				"acf-group_aw_news"
+			],
+			"types": [
+				"aw_news"
+			],
+			"uses": [
+				{
+					"kind": "sourcing",
+					"where": "written by aw_publisher_sync",
+					"file": "core/systems.php:410"
+				}
+			],
+			"notes": [
+				"Read-only in SCF: shown, never saved from the box."
+			]
+		},
+		"kits_last_reviewed": {
+			"store": "post_meta",
+			"label": "Last reviewed",
+			"type": "date",
+			"boxes": [
+				"acf-group_aw_resource"
+			],
+			"types": [
+				"post"
+			],
+			"uses": [
+				{
+					"kind": "schema",
+					"where": "Article lastReviewed",
+					"file": "seo/schema.php:429"
+				}
+			]
+		},
+		"aw_sponsored": {
+			"store": "post_meta",
+			"label": "Sponsored",
+			"type": "true/false",
+			"boxes": [
+				"acf-group_aw_resource",
+				"aw-sponsored"
+			],
+			"types": [
+				"post"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "\"Sponsored\" tag in the meta row",
+					"file": "core/item-head.php:159"
+				},
+				{
+					"kind": "display",
+					"where": "sponsored label binding",
+					"file": "core/bindings.php:89"
+				},
+				{
+					"kind": "filter",
+					"where": "sponsored filter",
+					"file": "core/systems.php:169"
+				},
+				{
+					"kind": "analytics",
+					"where": "dataLayer sponsor",
+					"file": "core/kits-config.php:109"
+				}
+			]
+		},
+		"aw_sponsor_name": {
+			"store": "post_meta",
+			"label": "Sponsor name",
+			"type": "text",
+			"boxes": [
+				"acf-group_aw_resource",
+				"aw-sponsored"
+			],
+			"types": [
+				"post"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "\"Sponsored by X\"",
+					"file": "core/bindings.php:92"
+				},
+				{
+					"kind": "display",
+					"where": "sponsored item block",
+					"file": "core/sponsored-blocks.php:30"
+				},
+				{
+					"kind": "analytics",
+					"where": "dataLayer sponsor",
+					"file": "core/kits-config.php:109"
+				}
+			]
+		},
+		"aw_file_id": {
+			"store": "post_meta",
+			"label": "Document file",
+			"type": "attachment ID",
+			"boxes": [
+				"acf-group_aw_legal"
+			],
+			"types": [
+				"aw_legal"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "PDF cover / featured image",
+					"file": "core/media.php:24"
+				},
+				{
+					"kind": "schema",
+					"where": "DigitalDocument (aw_schema_pdf)",
+					"file": "seo/schema.php:363"
+				},
+				{
+					"kind": "faq",
+					"where": "PDF question",
+					"file": "core/faq-data.php:331"
+				},
+				{
+					"kind": "sourcing",
+					"where": "written by aw_mirror_gov_pdf",
+					"file": "core/media.php:418"
+				}
+			]
+		},
+		"aw_file_url": {
+			"store": "post_meta",
+			"label": "Document link",
+			"type": "url",
+			"boxes": [
+				"acf-group_aw_legal"
+			],
+			"types": [
+				"aw_legal"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "file_url binding",
+					"file": "core/bindings.php:158"
+				},
+				{
+					"kind": "schema",
+					"where": "court document url",
+					"file": "seo/schema.php:564"
+				}
+			]
+		},
+		"aw_legal_number": {
+			"store": "post_meta",
+			"label": "Official number",
+			"type": "text",
+			"boxes": [
+				"acf-group_aw_legal"
+			],
+			"types": [
+				"aw_legal"
+			],
+			"uses": [
+				{
+					"kind": "schema",
+					"where": "legislationIdentifier",
+					"file": "seo/schema.php:483"
+				},
+				{
+					"kind": "faq",
+					"where": "date question",
+					"file": "core/faq-data.php:371"
+				},
+				{
+					"kind": "sourcing",
+					"where": "ingest match",
+					"file": "src/ingest.php:97"
+				}
+			]
+		},
+		"aw_legal_force": {
+			"store": "post_meta",
+			"label": "In force",
+			"type": "InForce / PartiallyInForce / NotInForce",
+			"boxes": [
+				"acf-group_aw_legal"
+			],
+			"types": [
+				"aw_legal"
+			],
+			"uses": [
+				{
+					"kind": "schema",
+					"where": "legislationLegalForce",
+					"file": "seo/schema.php:484"
+				},
+				{
+					"kind": "faq",
+					"where": "in-force questions",
+					"file": "core/faq-data.php:348"
+				},
+				{
+					"kind": "sourcing",
+					"where": "ingest",
+					"file": "src/ingest.php:390"
+				}
+			]
+		},
+		"aw_requires_email": {
+			"store": "post_meta",
+			"label": "Ask for an email before download",
+			"type": "true/false",
+			"boxes": [
+				"acf-group_aw_legal"
+			],
+			"types": [
+				"aw_legal"
+			],
+			"uses": [],
+			"notes": [
+				"Saved but never read; 0 rows."
+			]
+		},
+		"aw_org_name": {
+			"store": "post_meta",
+			"label": "Organisation",
+			"type": "text",
+			"boxes": [
+				"acf-group_aw_opportunity"
+			],
+			"types": [
+				"aw_opportunity"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "org_name binding, posted-by, card source",
+					"file": "core/bindings.php:141"
+				},
+				{
+					"kind": "schema",
+					"where": "JobPosting hiringOrganization",
+					"file": "seo/schema.php:773"
+				},
+				{
+					"kind": "sourcing",
+					"where": "ingest and auto-link",
+					"file": "src/ingest.php:298"
+				}
+			],
+			"notes": [
+				"Overlaps with Related → Organisation (aw_organisation)."
+			]
+		},
+		"aw_deadline": {
+			"store": "post_meta",
+			"label": "Deadline",
+			"type": "date",
+			"boxes": [
+				"acf-group_aw_opportunity"
+			],
+			"types": [
+				"aw_opportunity"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "\"Apply by\" / Closed bindings",
+					"file": "core/bindings.php:145"
+				},
+				{
+					"kind": "schema",
+					"where": "validThrough",
+					"file": "seo/schema.php:779"
+				},
+				{
+					"kind": "filter",
+					"where": "open / closed",
+					"file": "core/retention.php:41"
+				},
+				{
+					"kind": "sourcing",
+					"where": "ingest",
+					"file": "src/ingest.php:303"
+				}
+			]
+		},
+		"aw_review_until": {
+			"store": "post_meta",
+			"label": "Review date",
+			"type": "date",
+			"boxes": [
+				"acf-group_aw_opportunity"
+			],
+			"types": [
+				"aw_opportunity"
+			],
+			"uses": [
+				{
+					"kind": "filter",
+					"where": "closes the item when there is no deadline",
+					"file": "core/retention.php:42"
+				}
+			]
+		},
+		"aw_event_date": {
+			"store": "post_meta",
+			"label": "Event date",
+			"type": "date",
+			"boxes": [
+				"acf-group_aw_opportunity",
+				"acf-group_aw_campaign"
+			],
+			"types": [
+				"aw_opportunity",
+				"aw_campaign"
+			],
+			"uses": [
+				{
+					"kind": "schema",
+					"where": "Event startDate",
+					"file": "seo/schema.php:585"
+				}
+			],
+			"notes": [
+				"No front-end display found."
+			]
+		},
+		"aw_event_schedule": {
+			"store": "post_meta",
+			"label": "Repeats",
+			"type": "text",
+			"boxes": [
+				"acf-group_aw_opportunity"
+			],
+			"types": [
+				"aw_opportunity"
+			],
+			"uses": [
+				{
+					"kind": "schema",
+					"where": "repeat schedule (aw_opportunity_repeat)",
+					"file": "seo/schema.php:884"
+				}
+			]
+		},
+		"aw_apply_url": {
+			"store": "post_meta",
+			"label": "Apply URL",
+			"type": "url",
+			"boxes": [
+				"acf-group_aw_opportunity"
+			],
+			"types": [
+				"aw_opportunity"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "Apply button binding",
+					"file": "core/bindings.php:143"
+				},
+				{
+					"kind": "display",
+					"where": "item sources",
+					"file": "core/item-head.php:372"
+				},
+				{
+					"kind": "sourcing",
+					"where": "ingest",
+					"file": "src/ingest.php:300"
+				}
+			]
+		},
+		"aw_website": {
+			"store": "post_meta",
+			"label": "Website",
+			"type": "url",
+			"boxes": [
+				"acf-group_aw_opportunity",
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_opportunity",
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "listing Contact",
+					"file": "core/listing-template.php:179"
+				},
+				{
+					"kind": "schema",
+					"where": "url / sameAs; opportunity org url fallback",
+					"file": "seo/schema.php:67"
+				},
+				{
+					"kind": "admin",
+					"where": "contact score",
+					"file": "core/directory.php:482"
+				}
+			]
+		},
+		"aw_employment_type": {
+			"store": "post_meta",
+			"label": "Employment type",
+			"type": "select",
+			"boxes": [
+				"acf-group_aw_opportunity"
+			],
+			"types": [
+				"aw_opportunity"
+			],
+			"uses": [
+				{
+					"kind": "schema",
+					"where": "employmentType",
+					"file": "seo/schema.php:795"
+				},
+				{
+					"kind": "sourcing",
+					"where": "ingest",
+					"file": "src/ingest.php:308"
+				}
+			]
+		},
+		"aw_paid_listing": {
+			"store": "post_meta",
+			"label": "Paid listing",
+			"type": "true/false",
+			"boxes": [
+				"acf-group_aw_opportunity"
+			],
+			"types": [
+				"aw_opportunity"
+			],
+			"uses": [],
+			"notes": [
+				"Saved but never read; 0 rows."
+			]
+		},
+		"aw_campaign_open": {
+			"store": "post_meta",
+			"label": "Opens on",
+			"type": "Y-m-d",
+			"boxes": [
+				"aw-campaign-details"
+			],
+			"types": [
+				"aw_campaign"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "upcoming window",
+					"file": "core/campaign-tools.php:54"
+				},
+				{
+					"kind": "display",
+					"where": "mail strip window",
+					"file": "core/mail-campaign-strip.php:36"
+				}
+			]
+		},
+		"aw_campaign_close": {
+			"store": "post_meta",
+			"label": "Closes on",
+			"type": "Y-m-d",
+			"boxes": [
+				"aw-campaign-details",
+				"acf-group_aw_campaign"
+			],
+			"types": [
+				"aw_campaign"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "open / closed state, days left, sidebar card",
+					"file": "core/campaign-tools.php:48"
+				},
+				{
+					"kind": "admin",
+					"where": "close job and list column",
+					"file": "core/campaign-tools.php:144"
+				},
+				{
+					"kind": "analytics",
+					"where": "dataLayer campaign_status",
+					"file": "core/kits-config.php:103"
+				}
+			],
+			"notes": [
+				"Edited in two boxes on one screen; the SCF value is saved last."
+			]
+		},
+		"aw_campaign_doc": {
+			"store": "post_meta",
+			"label": "Campaign document",
+			"type": "aw_legal ID",
+			"boxes": [
+				"aw-campaign-details",
+				"acf-group_aw_campaign"
+			],
+			"types": [
+				"aw_campaign"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "rule chips quote this Library item",
+					"file": "core/campaign-tools.php:247"
+				},
+				{
+					"kind": "schema",
+					"where": "campaign about the Legislation",
+					"file": "seo/schema.php:595"
+				}
+			],
+			"notes": [
+				"Edited in two boxes on one screen; the SCF value is saved last."
+			]
+		},
+		"aw_campaign_partners": {
+			"store": "post_meta",
+			"label": "Partners",
+			"type": "CSV listing IDs",
+			"boxes": [
+				"aw-campaign-details"
+			],
+			"types": [
+				"aw_campaign"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "[aw_campaign_partners] cards",
+					"file": "core/campaign-tools.php:418"
+				},
+				{
+					"kind": "display",
+					"where": "listing \"Campaigns\" (Partner)",
+					"file": "core/listing-template.php:522"
+				}
+			],
+			"notes": [
+				"Same role as Related → Participating organisations (aw_participant)."
+			]
+		},
+		"aw_campaign_supporters": {
+			"store": "post_meta",
+			"label": "Supporters",
+			"type": "CSV listing IDs",
+			"boxes": [
+				"aw-campaign-details"
+			],
+			"types": [
+				"aw_campaign"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "\"Supported by\"; listing \"Campaigns\" (Supporter)",
+					"file": "core/listing-template.php:529"
+				}
+			]
+		},
+		"aw_campaign_outcome": {
+			"store": "post_meta",
+			"label": "Outcome",
+			"type": "pending / achieved / partial / not / inconclusive",
+			"boxes": [
+				"aw-campaign-details"
+			],
+			"types": [
+				"aw_campaign"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "[aw_campaign_outcome]",
+					"file": "core/campaign-tools.php:98"
+				},
+				{
+					"kind": "display",
+					"where": "campaign record",
+					"file": "core/campaign-record.php:127"
+				}
+			]
+		},
+		"aw_campaign_outcome_asof": {
+			"store": "post_meta",
+			"label": "As of",
+			"type": "Y-m-d",
+			"boxes": [
+				"aw-campaign-details"
+			],
+			"types": [
+				"aw_campaign"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "outcome date",
+					"file": "core/campaign-tools.php:100"
+				}
+			]
+		},
+		"aw_campaign_state_override": {
+			"store": "post_meta",
+			"label": "Override the state",
+			"type": "pre / active / post",
+			"boxes": [
+				"aw-campaign-details"
+			],
+			"types": [
+				"aw_campaign"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "state override",
+					"file": "core/campaign-tools.php:60"
+				}
+			]
+		},
+		"aw_campaign_override_note": {
+			"store": "post_meta",
+			"label": "Reason",
+			"type": "text",
+			"boxes": [
+				"aw-campaign-details"
+			],
+			"types": [
+				"aw_campaign"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "reason kept with the override",
+					"file": "core/campaign-tools.php:61"
+				}
+			]
+		},
+		"aw_campaign_metric_min": {
+			"store": "post_meta",
+			"label": "Show the count from",
+			"type": "int",
+			"boxes": [
+				"aw-campaign-details"
+			],
+			"types": [
+				"aw_campaign"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "when the letter count shows",
+					"file": "core/campaign-tools.php:170"
+				}
+			]
+		},
+		"aw_campaign_metric_stale": {
+			"store": "post_meta",
+			"label": "\"As of\" date after N days",
+			"type": "int",
+			"boxes": [
+				"aw-campaign-details"
+			],
+			"types": [
+				"aw_campaign"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "when the count gets an as-of date",
+					"file": "core/campaign-tools.php:403"
+				}
+			]
+		},
+		"aw_campaign_share_text": {
+			"store": "post_meta",
+			"label": "Share line",
+			"type": "text",
+			"boxes": [
+				"aw-campaign-details"
+			],
+			"types": [
+				"aw_campaign"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "Share button data",
+					"file": "core/campaign-tools.php:565"
+				}
+			]
+		},
+		"aw_campaign_share_story": {
+			"store": "post_meta",
+			"label": "Story image",
+			"type": "attachment ID",
+			"boxes": [
+				"aw-campaign-details"
+			],
+			"types": [
+				"aw_campaign"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "Share button data",
+					"file": "core/campaign-tools.php:579"
+				},
+				{
+					"kind": "admin",
+					"where": "kept by media merge",
+					"file": "core/media-merge.php:27"
+				}
+			]
+		},
+		"aw_campaign_share_post": {
+			"store": "post_meta",
+			"label": "Post image",
+			"type": "attachment ID",
+			"boxes": [
+				"aw-campaign-details"
+			],
+			"types": [
+				"aw_campaign"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "Share button data",
+					"file": "core/campaign-tools.php:579"
+				},
+				{
+					"kind": "admin",
+					"where": "kept by media merge",
+					"file": "core/media-merge.php:27"
+				}
+			]
+		},
+		"aw_campaign_sent": {
+			"store": "post_meta",
+			"label": "Letters sent",
+			"type": "int, read-only",
+			"boxes": [
+				"aw-campaign-details"
+			],
+			"types": [
+				"aw_campaign"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "[aw_campaign_count]",
+					"file": "core/campaign-tools.php:171"
+				}
+			],
+			"notes": [
+				"Shown in the box, written by the \"Yes, I sent it\" endpoint."
+			]
+		},
+		"aw_event_place": {
+			"store": "post_meta",
+			"label": "Event place",
+			"type": "text",
+			"boxes": [
+				"acf-group_aw_campaign"
+			],
+			"types": [
+				"aw_campaign"
+			],
+			"uses": [
+				{
+					"kind": "schema",
+					"where": "Event location",
+					"file": "seo/schema.php:586"
+				}
+			]
+		},
+		"aw_campaign_impact_state": {
+			"store": "post_meta",
+			"label": "Real-world impact: state",
+			"type": "verified / no-change / pending / inconclusive / na",
+			"boxes": [
+				"aw-campaign-record"
+			],
+			"types": [
+				"aw_campaign"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "Real-world impact module",
+					"file": "core/campaign-record.php:116"
+				},
+				{
+					"kind": "schema",
+					"where": "campaign record",
+					"file": "seo/schema.php:671"
+				}
+			]
+		},
+		"aw_campaign_impact_evidence": {
+			"store": "post_meta",
+			"label": "Real-world impact: evidence",
+			"type": "post ID",
+			"boxes": [
+				"aw-campaign-record"
+			],
+			"types": [
+				"aw_campaign"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "Real-world impact module",
+					"file": "core/campaign-record.php:120"
+				},
+				{
+					"kind": "schema",
+					"where": "campaign record",
+					"file": "seo/schema.php:671"
+				}
+			]
+		},
+		"aw_campaign_metrics": {
+			"store": "post_meta",
+			"label": "Metric records",
+			"type": "JSON list",
+			"boxes": [
+				"postcustom"
+			],
+			"types": [
+				"aw_campaign"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "metric records",
+					"file": "core/campaign-record.php:73"
+				},
+				{
+					"kind": "schema",
+					"where": "campaign record",
+					"file": "seo/schema.php:671"
+				}
+			],
+			"notes": [
+				"No box: Custom Fields or REST only."
+			]
+		},
+		"aw_email": {
+			"store": "post_meta",
+			"label": "Email",
+			"type": "email",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "Contact",
+					"file": "core/listing-template.php:176"
+				},
+				{
+					"kind": "schema",
+					"where": "email",
+					"file": "seo/schema.php:102"
+				},
+				{
+					"kind": "admin",
+					"where": "contact score",
+					"file": "core/directory.php:482"
+				}
+			]
+		},
+		"aw_phones": {
+			"store": "post_meta",
+			"label": "Phone numbers",
+			"type": "repeater (number, label, whatsapp)",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "Contact (aw_listing_phones)",
+					"file": "core/meta.php:237"
+				},
+				{
+					"kind": "schema",
+					"where": "telephone, WhatsApp contactPoint",
+					"file": "seo/schema.php:96"
+				},
+				{
+					"kind": "faq",
+					"where": "phone answers",
+					"file": "core/faq-data.php:29"
+				},
+				{
+					"kind": "filter",
+					"where": "district helplines, programmatic counts",
+					"file": "core/district-helplines.php"
+				}
+			]
+		},
+		"aw_area": {
+			"store": "post_meta",
+			"label": "Area or landmark",
+			"type": "text",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "Location",
+					"file": "core/listing-template.php:217"
+				},
+				{
+					"kind": "schema",
+					"where": "streetAddress fallback",
+					"file": "seo/schema.php:82"
+				},
+				{
+					"kind": "faq",
+					"where": "location answer",
+					"file": "core/faq-data.php:234"
+				}
+			]
+		},
+		"aw_address": {
+			"store": "post_meta",
+			"label": "Full address",
+			"type": "text",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "Location",
+					"file": "core/listing-template.php:216"
+				},
+				{
+					"kind": "schema",
+					"where": "streetAddress",
+					"file": "seo/schema.php:82"
+				},
+				{
+					"kind": "faq",
+					"where": "address answer",
+					"file": "core/faq-data.php:229"
+				},
+				{
+					"kind": "admin",
+					"where": "geocoder",
+					"file": "core/geocode.php:76"
+				}
+			]
+		},
+		"aw_maps_url": {
+			"store": "post_meta",
+			"label": "Google Maps link",
+			"type": "url",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "Contact (directions)",
+					"file": "core/listing-template.php:182"
+				},
+				{
+					"kind": "schema",
+					"where": "hasMap",
+					"file": "seo/schema.php:118"
+				},
+				{
+					"kind": "faq",
+					"where": "directions answer",
+					"file": "core/faq-data.php:242"
+				}
+			]
+		},
+		"aw_lat": {
+			"store": "post_meta",
+			"label": "Latitude",
+			"type": "number",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "Directory map points",
+					"file": "core/geocode.php:126"
+				},
+				{
+					"kind": "schema",
+					"where": "geo",
+					"file": "seo/schema.php:121"
+				}
+			]
+		},
+		"aw_lng": {
+			"store": "post_meta",
+			"label": "Longitude",
+			"type": "number",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "Directory map points",
+					"file": "core/geocode.php:126"
+				},
+				{
+					"kind": "schema",
+					"where": "geo",
+					"file": "seo/schema.php:122"
+				}
+			]
+		},
+		"aw_place_id": {
+			"store": "post_meta",
+			"label": "Google place ID",
+			"type": "text",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "Google block",
+					"file": "src/enrichment-front.php:65"
+				},
+				{
+					"kind": "sourcing",
+					"where": "duplicates check",
+					"file": "src/enrichment.php:1351"
+				}
+			]
+		},
+		"aw_opening_hours": {
+			"store": "post_meta",
+			"label": "Opening hours by day",
+			"type": "repeater (day, open, close, closed)",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "Contact hours (aw_listing_hours)",
+					"file": "core/meta.php:260"
+				},
+				{
+					"kind": "schema",
+					"where": "openingHoursSpecification",
+					"file": "seo/schema.php:137"
+				},
+				{
+					"kind": "faq",
+					"where": "hours answer",
+					"file": "core/faq-data.php:34"
+				}
+			]
+		},
+		"aw_registration": {
+			"store": "post_meta",
+			"label": "Registration",
+			"type": "text",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "Registrations",
+					"file": "core/listing-template.php:145"
+				},
+				{
+					"kind": "schema",
+					"where": "identifier PropertyValue",
+					"file": "seo/schema.php:186"
+				},
+				{
+					"kind": "faq",
+					"where": "registration answers",
+					"file": "core/faq-data.php:305"
+				},
+				{
+					"kind": "filter",
+					"where": "Verified (gov-verified)",
+					"file": "core/gov-verified.php:28"
+				}
+			]
+		},
+		"aw_reg_12a": {
+			"store": "post_meta",
+			"label": "12A",
+			"type": "text",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "Registrations",
+					"file": "core/listing-template.php:145"
+				},
+				{
+					"kind": "schema",
+					"where": "identifier PropertyValue",
+					"file": "seo/schema.php:186"
+				},
+				{
+					"kind": "faq",
+					"where": "registration answers",
+					"file": "core/faq-data.php:305"
+				},
+				{
+					"kind": "filter",
+					"where": "Verified (gov-verified)",
+					"file": "core/gov-verified.php:28"
+				}
+			]
+		},
+		"aw_reg_80g": {
+			"store": "post_meta",
+			"label": "80G",
+			"type": "text",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "Registrations",
+					"file": "core/listing-template.php:145"
+				},
+				{
+					"kind": "schema",
+					"where": "identifier PropertyValue",
+					"file": "seo/schema.php:186"
+				},
+				{
+					"kind": "faq",
+					"where": "registration answers",
+					"file": "core/faq-data.php:305"
+				},
+				{
+					"kind": "filter",
+					"where": "Verified (gov-verified)",
+					"file": "core/gov-verified.php:28"
+				}
+			]
+		},
+		"aw_fcra": {
+			"store": "post_meta",
+			"label": "FCRA",
+			"type": "text",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "Registrations",
+					"file": "core/listing-template.php:145"
+				},
+				{
+					"kind": "schema",
+					"where": "identifier PropertyValue",
+					"file": "seo/schema.php:186"
+				},
+				{
+					"kind": "faq",
+					"where": "registration answers",
+					"file": "core/faq-data.php:305"
+				},
+				{
+					"kind": "filter",
+					"where": "Verified (gov-verified)",
+					"file": "core/gov-verified.php:28"
+				}
+			]
+		},
+		"aw_darpan_id": {
+			"store": "post_meta",
+			"label": "NGO Darpan ID",
+			"type": "text",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "Registrations",
+					"file": "core/listing-template.php:145"
+				},
+				{
+					"kind": "schema",
+					"where": "identifier PropertyValue",
+					"file": "seo/schema.php:186"
+				},
+				{
+					"kind": "faq",
+					"where": "registration answers",
+					"file": "core/faq-data.php:305"
+				},
+				{
+					"kind": "filter",
+					"where": "Verified (gov-verified)",
+					"file": "core/gov-verified.php:28"
+				}
+			]
+		},
+		"aw_reg_type": {
+			"store": "post_meta",
+			"label": "Registered as",
+			"type": "text",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "Registrations label",
+					"file": "core/listing-template.php:145"
+				},
+				{
+					"kind": "faq",
+					"where": "registration answer",
+					"file": "core/faq-data.php:310"
+				}
+			]
+		},
+		"aw_reg_date": {
+			"store": "post_meta",
+			"label": "Registration date",
+			"type": "date",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "Organisation block",
+					"file": "core/listing-template.php:303"
+				}
+			]
+		},
+		"aw_reg_authority": {
+			"store": "post_meta",
+			"label": "Registration authority",
+			"type": "text",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "claim and enrichment field lists",
+					"file": "core/claims-review.php"
+				}
+			],
+			"notes": [
+				"Saved but never read on the site (\"admin only\")."
+			]
+		},
+		"aw_reg_act": {
+			"store": "post_meta",
+			"label": "Registered under (Act)",
+			"type": "text",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "claim and enrichment field lists",
+					"file": "core/claims-review.php"
+				}
+			],
+			"notes": [
+				"Saved but never read on the site (\"admin only\")."
+			]
+		},
+		"aw_sectors": {
+			"store": "post_meta",
+			"label": "Sectors (NGO Darpan)",
+			"type": "text",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "claim and enrichment field lists",
+					"file": "core/claims-review.php"
+				}
+			],
+			"notes": [
+				"Saved but never read on the site (\"admin only\")."
+			]
+		},
+		"aw_awbi_code": {
+			"store": "post_meta",
+			"label": "AWBI recognition code",
+			"type": "text, read-only",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "Registrations",
+					"file": "core/listing-template.php:143"
+				},
+				{
+					"kind": "schema",
+					"where": "identifier AWBI recognition code",
+					"file": "seo/schema.php:180"
+				},
+				{
+					"kind": "faq",
+					"where": "AWBI answers",
+					"file": "core/faq-data.php:268"
+				},
+				{
+					"kind": "display",
+					"where": "meta description",
+					"file": "seo/helpers.php:465"
+				}
+			],
+			"notes": [
+				"Read-only in SCF: shown, never saved from the box."
+			]
+		},
+		"aw_awbi_valid": {
+			"store": "post_meta",
+			"label": "AWBI valid until",
+			"type": "date",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "\"valid until / Expired\"",
+					"file": "core/listing-template.php:147"
+				},
+				{
+					"kind": "faq",
+					"where": "AWBI answer",
+					"file": "core/faq-data.php:272"
+				},
+				{
+					"kind": "admin",
+					"where": "re-verify job",
+					"file": "core/cron.php:76"
+				}
+			]
+		},
+		"aw_awbi_recognised": {
+			"store": "post_meta",
+			"label": "AWBI recognised on",
+			"type": "date",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "claim and enrichment field lists",
+					"file": "src/enrichment.php:274"
+				}
+			],
+			"notes": [
+				"Saved but never read on the site."
+			]
+		},
+		"aw_awbi_renewed": {
+			"store": "post_meta",
+			"label": "AWBI renewed on",
+			"type": "date",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "claim and enrichment field lists",
+					"file": "src/enrichment.php:274"
+				}
+			],
+			"notes": [
+				"Saved but never read on the site."
+			]
+		},
+		"aw_aliases": {
+			"store": "post_meta",
+			"label": "Also known as",
+			"type": "text",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "name matching for \"Featured in\"",
+					"file": "core/featured.php:138"
+				}
+			]
+		},
+		"aw_founded": {
+			"store": "post_meta",
+			"label": "Year established",
+			"type": "4-digit year",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "Organisation block",
+					"file": "core/listing-template.php:302"
+				},
+				{
+					"kind": "schema",
+					"where": "foundingDate",
+					"file": "seo/schema.php:130"
+				}
+			]
+		},
+		"aw_head": {
+			"store": "post_meta",
+			"label": "Head of the organisation",
+			"type": "text",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "Organisation block",
+					"file": "core/listing-template.php:304"
+				},
+				{
+					"kind": "schema",
+					"where": "founder / employee Person",
+					"file": "seo/schema.php:157"
+				}
+			]
+		},
+		"aw_animals": {
+			"store": "post_meta",
+			"label": "Animals",
+			"type": "text",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "Services",
+					"file": "core/listing-template.php:251"
+				},
+				{
+					"kind": "faq",
+					"where": "animals answers",
+					"file": "core/faq-data.php:318"
+				}
+			]
+		},
+		"aw_areas_served": {
+			"store": "post_meta",
+			"label": "Areas served",
+			"type": "text",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "Services",
+					"file": "core/listing-template.php:252"
+				},
+				{
+					"kind": "schema",
+					"where": "areaServed",
+					"file": "seo/schema.php:89"
+				}
+			]
+		},
+		"aw_services": {
+			"store": "post_meta",
+			"label": "Services",
+			"type": "text",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "Services, services binding",
+					"file": "core/listing-template.php:239"
+				},
+				{
+					"kind": "schema",
+					"where": "knowsAbout / hasOfferCatalog",
+					"file": "seo/schema.php:143"
+				},
+				{
+					"kind": "faq",
+					"where": "services answer",
+					"file": "core/faq-data.php:250"
+				},
+				{
+					"kind": "sourcing",
+					"where": "claims and enrichment write it",
+					"file": "src/enrichment.php:427"
+				}
+			]
+		},
+		"aw_services_source": {
+			"store": "post_meta",
+			"label": "Services: stated by",
+			"type": "text",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "stated-by note under Services",
+					"file": "core/listing-template.php:239"
+				}
+			]
+		},
+		"aw_services_on": {
+			"store": "post_meta",
+			"label": "Services: stated on",
+			"type": "date",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "stated-by note under Services",
+					"file": "core/listing-template.php:239"
+				}
+			]
+		},
+		"aw_languages": {
+			"store": "post_meta",
+			"label": "Languages",
+			"type": "text",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "Services",
+					"file": "core/listing-template.php:253"
+				},
+				{
+					"kind": "schema",
+					"where": "knowsLanguage",
+					"file": "seo/schema.php:133"
+				}
+			]
+		},
+		"aw_instagram": {
+			"store": "post_meta",
+			"label": "Instagram",
+			"type": "url",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "Profiles",
+					"file": "core/listing-template.php:317"
+				},
+				{
+					"kind": "schema",
+					"where": "sameAs",
+					"file": "seo/schema.php:114"
+				},
+				{
+					"kind": "admin",
+					"where": "robots / sitemap reachability",
+					"file": "seo/robots.php:80"
+				}
+			]
+		},
+		"aw_facebook": {
+			"store": "post_meta",
+			"label": "Facebook",
+			"type": "url",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "Profiles",
+					"file": "core/listing-template.php:317"
+				},
+				{
+					"kind": "schema",
+					"where": "sameAs",
+					"file": "seo/schema.php:114"
+				},
+				{
+					"kind": "admin",
+					"where": "robots / sitemap reachability",
+					"file": "seo/robots.php:80"
+				}
+			]
+		},
+		"aw_x": {
+			"store": "post_meta",
+			"label": "X",
+			"type": "url",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "Profiles",
+					"file": "core/listing-template.php:317"
+				},
+				{
+					"kind": "schema",
+					"where": "sameAs",
+					"file": "seo/schema.php:114"
+				},
+				{
+					"kind": "admin",
+					"where": "robots / sitemap reachability",
+					"file": "seo/robots.php:80"
+				}
+			]
+		},
+		"aw_youtube": {
+			"store": "post_meta",
+			"label": "YouTube",
+			"type": "url",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "Profiles",
+					"file": "core/listing-template.php:317"
+				},
+				{
+					"kind": "schema",
+					"where": "sameAs",
+					"file": "seo/schema.php:114"
+				},
+				{
+					"kind": "admin",
+					"where": "robots / sitemap reachability",
+					"file": "seo/robots.php:80"
+				}
+			]
+		},
+		"aw_linkedin": {
+			"store": "post_meta",
+			"label": "LinkedIn",
+			"type": "url",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "Profiles",
+					"file": "core/listing-template.php:317"
+				},
+				{
+					"kind": "schema",
+					"where": "sameAs",
+					"file": "seo/schema.php:114"
+				},
+				{
+					"kind": "admin",
+					"where": "robots / sitemap reachability",
+					"file": "seo/robots.php:80"
+				}
+			]
+		},
+		"aw_wikidata": {
+			"store": "post_meta",
+			"label": "Wikidata",
+			"type": "text",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "schema",
+					"where": "sameAs Wikidata URL",
+					"file": "seo/schema.php:114"
+				}
+			]
+		},
+		"aw_ngobase_url": {
+			"store": "post_meta",
+			"label": "NGO base link",
+			"type": "url",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "Sources",
+					"file": "core/data-sources.php:99"
+				},
+				{
+					"kind": "schema",
+					"where": "sameAs",
+					"file": "seo/schema.php:114"
+				}
+			]
+		},
+		"aw_g_profile": {
+			"store": "post_meta",
+			"label": "Google profile",
+			"type": "url",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "Profiles, activity",
+					"file": "core/listing-template.php:317"
+				},
+				{
+					"kind": "schema",
+					"where": "sameAs",
+					"file": "seo/schema.php:114"
+				}
+			]
+		},
+		"aw_g_category": {
+			"store": "post_meta",
+			"label": "Google category",
+			"type": "text",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "schema",
+					"where": "keywords",
+					"file": "seo/schema.php:178"
+				}
+			]
+		},
+		"aw_g_rating": {
+			"store": "post_meta",
+			"label": "Google rating",
+			"type": "number",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "Activity \"On Google\"",
+					"file": "core/listing-template.php:444"
+				}
+			],
+			"notes": [
+				"Not in schema on purpose (third-party rating)."
+			]
+		},
+		"aw_g_reviews": {
+			"store": "post_meta",
+			"label": "Google reviews",
+			"type": "digits",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "Activity \"On Google\"",
+					"file": "core/listing-template.php:444"
+				}
+			]
+		},
+		"aw_ig_followers": {
+			"store": "post_meta",
+			"label": "Instagram followers",
+			"type": "text",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "Activity",
+					"file": "core/listing-template.php:451"
+				},
+				{
+					"kind": "sourcing",
+					"where": "enrichment extras",
+					"file": "src/enrichment-front.php:71"
+				}
+			]
+		},
+		"aw_ig_posts": {
+			"store": "post_meta",
+			"label": "Instagram posts",
+			"type": "text",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "Activity",
+					"file": "core/listing-template.php:451"
+				},
+				{
+					"kind": "sourcing",
+					"where": "enrichment extras",
+					"file": "src/enrichment-front.php:71"
+				}
+			]
+		},
+		"aw_last_post": {
+			"store": "post_meta",
+			"label": "Last post",
+			"type": "text",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "Activity",
+					"file": "core/listing-template.php:451"
+				},
+				{
+					"kind": "sourcing",
+					"where": "enrichment extras",
+					"file": "src/enrichment-front.php:71"
+				}
+			]
+		},
+		"aw_gallery": {
+			"store": "post_meta",
+			"label": "Photos",
+			"type": "attachment IDs (CSV, max 4 from SCF)",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "Photos (aw_listing_photo_ids)",
+					"file": "core/listing-template.php:356"
+				},
+				{
+					"kind": "schema",
+					"where": "image",
+					"file": "seo/schema.php:124"
+				},
+				{
+					"kind": "sourcing",
+					"where": "enrichment and claims write it",
+					"file": "src/enrichment.php:347"
+				}
+			],
+			"notes": [
+				"SCF save keeps 4 photos; aw_sanitize_meta allows 6."
+			]
+		},
+		"aw_volunteer_url": {
+			"store": "post_meta",
+			"label": "Volunteer link",
+			"type": "url",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "Support buttons",
+					"file": "core/listing-template.php:337"
+				},
+				{
+					"kind": "schema",
+					"where": "JoinAction",
+					"file": "seo/schema.php:168"
+				},
+				{
+					"kind": "faq",
+					"where": "volunteer answer",
+					"file": "core/faq-data.php:287"
+				}
+			]
+		},
+		"aw_adopt_url": {
+			"store": "post_meta",
+			"label": "Adoption link",
+			"type": "url",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "Support buttons",
+					"file": "core/listing-template.php:337"
+				},
+				{
+					"kind": "faq",
+					"where": "adoption answer",
+					"file": "core/faq-data.php:297"
+				}
+			]
+		},
+		"aw_donate_url": {
+			"store": "post_meta",
+			"label": "Donation link",
+			"type": "text",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "claim cleaning only",
+					"file": "core/claims-review.php:438"
+				}
+			],
+			"notes": [
+				"Saved but never read: removed from the listing page on 31 Oct 2026; stored values kept."
+			]
+		},
+		"aw_upi": {
+			"store": "post_meta",
+			"label": "UPI ID",
+			"type": "text",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "claim cleaning only",
+					"file": "core/claims-review.php:438"
+				}
+			],
+			"notes": [
+				"Saved but never read: removed from the listing page on 31 Oct 2026; stored values kept."
+			]
+		},
+		"aw_rel_nofollow": {
+			"store": "post_meta",
+			"label": "Links: nofollow",
+			"type": "true/false",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "rel nofollow sponsored on the listing's links",
+					"file": "core/listing-template.php:34"
+				}
+			]
+		},
+		"aw_verified": {
+			"store": "post_meta",
+			"label": "Verified (shown as Claimed)",
+			"type": "true/false",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "\"Claimed on {date}\" badge",
+					"file": "core/bindings.php:96"
+				},
+				{
+					"kind": "filter",
+					"where": "Directory filter and map",
+					"file": "core/directory.php:173"
+				},
+				{
+					"kind": "sourcing",
+					"where": "written by claim approval",
+					"file": "core/claims.php:223"
+				}
+			],
+			"notes": [
+				"Label says Verified; the site shows Claimed. Government verification is aw_gov_verified_on (no box)."
+			]
+		},
+		"aw_verified_on": {
+			"store": "post_meta",
+			"label": "Verified on",
+			"type": "date",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "Claimed date, meta row",
+					"file": "core/item-head.php:184"
+				}
+			]
+		},
+		"aw_needs_reverify": {
+			"store": "post_meta",
+			"label": "Needs re-check",
+			"type": "true/false",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "\"Needs re-check\"",
+					"file": "core/bindings.php:99"
+				},
+				{
+					"kind": "admin",
+					"where": "set by the re-verify job",
+					"file": "core/cron.php:65"
+				}
+			]
+		},
+		"aw_detail_sources": {
+			"store": "post_meta",
+			"label": "Sources per detail",
+			"type": "repeater (detail, url, checked)",
+			"boxes": [
+				"acf-group_aw_listing"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "\"Last updated\" / figures-on dates",
+					"file": "core/listing-template.php:383"
+				}
+			]
+		},
+		"aw_enrich_flags": {
+			"store": "post_meta",
+			"label": "Identity unresolved",
+			"type": "array",
+			"boxes": [
+				"aw-enrich-prov"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "sourcing",
+					"where": "enrichment queue / REST",
+					"file": "src/enrichment.php:1074"
+				}
+			]
+		},
+		"aw_enrich_checked": {
+			"store": "post_meta",
+			"label": "Last checked",
+			"type": "date, read-only",
+			"boxes": [
+				"aw-enrich-prov"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "figures-on date",
+					"file": "core/listing-template.php:434"
+				},
+				{
+					"kind": "sourcing",
+					"where": "enrichment queue",
+					"file": "src/enrichment.php:1074"
+				}
+			]
+		},
+		"aw_press_url": {
+			"store": "post_meta",
+			"label": "Link to the coverage",
+			"type": "url",
+			"boxes": [
+				"aw_press_box"
+			],
+			"types": [
+				"aw_press"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "press card link",
+					"file": "core/hub-blocks.php:432"
+				},
+				{
+					"kind": "schema",
+					"where": "url",
+					"file": "seo/schema.php:1278"
+				},
+				{
+					"kind": "admin",
+					"where": "duplicates check, campaign links",
+					"file": "core/campaign-tools.php:814"
+				}
+			]
+		},
+		"aw_press_publisher": {
+			"store": "post_meta",
+			"label": "Publisher",
+			"type": "text",
+			"boxes": [
+				"aw_press_box"
+			],
+			"types": [
+				"aw_press"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "card source",
+					"file": "core/hub-blocks.php:595"
+				},
+				{
+					"kind": "schema",
+					"where": "publisher",
+					"file": "seo/schema.php:1280"
+				}
+			]
+		},
+		"aw_press_logo": {
+			"store": "post_meta",
+			"label": "Publisher logo",
+			"type": "attachment ID",
+			"boxes": [
+				"aw_press_box"
+			],
+			"types": [
+				"aw_press"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "card image fallback",
+					"file": "core/hub-blocks.php:724"
+				},
+				{
+					"kind": "schema",
+					"where": "image",
+					"file": "seo/schema.php:1256"
+				}
+			]
+		},
+		"aw_press_date": {
+			"store": "post_meta",
+			"label": "Date",
+			"type": "Y-m-d",
+			"boxes": [
+				"aw_press_box"
+			],
+			"types": [
+				"aw_press"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "card date",
+					"file": "core/hub-blocks.php:516"
+				},
+				{
+					"kind": "filter",
+					"where": "list sort, hub query",
+					"file": "core/press.php:342"
+				},
+				{
+					"kind": "schema",
+					"where": "datePublished",
+					"file": "seo/schema.php:1279"
+				}
+			]
+		},
+		"aw_press_format": {
+			"store": "post_meta",
+			"label": "Format",
+			"type": "select",
+			"boxes": [
+				"aw_press_box"
+			],
+			"types": [
+				"aw_press"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "card chip",
+					"file": "core/hub-blocks.php:657"
+				}
+			]
+		},
+		"aw_press_platform": {
+			"store": "post_meta",
+			"label": "Platform",
+			"type": "select",
+			"boxes": [
+				"aw_press_box"
+			],
+			"types": [
+				"aw_press"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "admin column",
+					"file": "core/press.php:439"
+				}
+			],
+			"notes": [
+				"Admin only by design."
+			]
+		},
+		"aw_press_account": {
+			"store": "post_meta",
+			"label": "Account handle",
+			"type": "text",
+			"boxes": [
+				"aw_press_box"
+			],
+			"types": [
+				"aw_press"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "admin column",
+					"file": "core/press.php:439"
+				}
+			],
+			"notes": [
+				"Admin only by design."
+			]
+		},
+		"aw_press_thumb_src": {
+			"store": "post_meta",
+			"label": "Thumbnail source URL",
+			"type": "url",
+			"boxes": [
+				"aw_press_box"
+			],
+			"types": [
+				"aw_press"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "fetch bookkeeping",
+					"file": "core/press.php"
+				}
+			]
+		},
+		"aw_press_video": {
+			"store": "post_meta",
+			"label": "Video embed URL",
+			"type": "url",
+			"boxes": [
+				"aw_press_box"
+			],
+			"types": [
+				"aw_press"
+			],
+			"uses": [],
+			"notes": [
+				"Saved but never read; written by the preview fetch."
+			]
+		},
+		"aw_press_notes": {
+			"store": "post_meta",
+			"label": "Notes",
+			"type": "text",
+			"boxes": [
+				"aw_press_box"
+			],
+			"types": [
+				"aw_press"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "notes, not shown by design",
+					"file": ""
+				}
+			]
+		},
+		"aw_press_fetch": {
+			"store": "post_meta",
+			"label": "Preview fetch status",
+			"type": "text",
+			"boxes": [
+				"aw_press_box"
+			],
+			"types": [
+				"aw_press"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "box status line",
+					"file": "core/press.php"
+				}
+			],
+			"notes": [
+				"Written by \"Refresh preview\", not typed."
+			]
+		},
+		"aw_c_listing": {
+			"store": "post_meta",
+			"label": "Claimed listing",
+			"type": "read-only",
+			"boxes": [
+				"aw_claim_review"
+			],
+			"types": [
+				"aw_claim"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "claim review; Approve writes the listing",
+					"file": "core/claims.php:183"
+				}
+			]
+		},
+		"aw_c_status": {
+			"store": "post_meta",
+			"label": "Claim status",
+			"type": "read-only",
+			"boxes": [
+				"aw_claim_review"
+			],
+			"types": [
+				"aw_claim"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "claim review; Approve writes the listing",
+					"file": "core/claims.php:183"
+				}
+			]
+		},
+		"aw_c_proposed": {
+			"store": "post_meta",
+			"label": "Proposed changes",
+			"type": "read-only",
+			"boxes": [
+				"aw_claim_review"
+			],
+			"types": [
+				"aw_claim"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "claim review; Approve writes the listing",
+					"file": "core/claims.php:183"
+				}
+			]
+		},
+		"aw_c_name": {
+			"store": "post_meta",
+			"label": "Name",
+			"type": "read-only",
+			"boxes": [
+				"aw_claim_review"
+			],
+			"types": [
+				"aw_claim"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "claim review; Approve writes the listing",
+					"file": "core/claims.php:183"
+				}
+			]
+		},
+		"aw_c_role": {
+			"store": "post_meta",
+			"label": "Role",
+			"type": "read-only",
+			"boxes": [
+				"aw_claim_review"
+			],
+			"types": [
+				"aw_claim"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "claim review; Approve writes the listing",
+					"file": "core/claims.php:183"
+				}
+			]
+		},
+		"aw_c_email": {
+			"store": "post_meta",
+			"label": "Email",
+			"type": "read-only",
+			"boxes": [
+				"aw_claim_review"
+			],
+			"types": [
+				"aw_claim"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "claim review; Approve writes the listing",
+					"file": "core/claims.php:183"
+				}
+			]
+		},
+		"aw_c_phone": {
+			"store": "post_meta",
+			"label": "Phone",
+			"type": "read-only",
+			"boxes": [
+				"aw_claim_review"
+			],
+			"types": [
+				"aw_claim"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "claim review; Approve writes the listing",
+					"file": "core/claims.php:183"
+				}
+			]
+		},
+		"aw_c_logo": {
+			"store": "post_meta",
+			"label": "Logo",
+			"type": "read-only",
+			"boxes": [
+				"aw_claim_review"
+			],
+			"types": [
+				"aw_claim"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "claim review; Approve writes the listing",
+					"file": "core/claims.php:183"
+				}
+			]
+		},
+		"aw_c_feature": {
+			"store": "post_meta",
+			"label": "Feature",
+			"type": "read-only",
+			"boxes": [
+				"aw_claim_review"
+			],
+			"types": [
+				"aw_claim"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "claim review; Approve writes the listing",
+					"file": "core/claims.php:183"
+				}
+			]
+		},
+		"aw_c_notes": {
+			"store": "post_meta",
+			"label": "Notes",
+			"type": "read-only",
+			"boxes": [
+				"aw_claim_review"
+			],
+			"types": [
+				"aw_claim"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "claim review; Approve writes the listing",
+					"file": "core/claims.php:183"
+				}
+			]
+		},
+		"aw_r_type": {
+			"store": "post_meta",
+			"label": "Type",
+			"type": "read-only",
+			"boxes": [
+				"aw-report-sent"
+			],
+			"types": [
+				"aw_report"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "report review list",
+					"file": "core/reports.php:150"
+				}
+			]
+		},
+		"aw_r_page": {
+			"store": "post_meta",
+			"label": "Page",
+			"type": "read-only",
+			"boxes": [
+				"aw-report-sent"
+			],
+			"types": [
+				"aw_report"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "report review list",
+					"file": "core/reports.php:150"
+				}
+			]
+		},
+		"aw_r_reason": {
+			"store": "post_meta",
+			"label": "Reason",
+			"type": "read-only",
+			"boxes": [
+				"aw-report-sent"
+			],
+			"types": [
+				"aw_report"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "report review list",
+					"file": "core/reports.php:150"
+				}
+			]
+		},
+		"aw_r_details": {
+			"store": "post_meta",
+			"label": "Details",
+			"type": "read-only",
+			"boxes": [
+				"aw-report-sent"
+			],
+			"types": [
+				"aw_report"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "report review list",
+					"file": "core/reports.php:150"
+				}
+			]
+		},
+		"aw_r_email": {
+			"store": "post_meta",
+			"label": "Email",
+			"type": "read-only",
+			"boxes": [
+				"aw-report-sent"
+			],
+			"types": [
+				"aw_report"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "report review list",
+					"file": "core/reports.php:150"
+				}
+			]
+		},
+		"aw_r_status": {
+			"store": "post_meta",
+			"label": "Status",
+			"type": "read-only",
+			"boxes": [
+				"aw-report-sent"
+			],
+			"types": [
+				"aw_report"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "report review list",
+					"file": "core/reports.php:150"
+				}
+			]
+		},
+		"aw_r_ref": {
+			"store": "post_meta",
+			"label": "Reference",
+			"type": "read-only",
+			"boxes": [
+				"aw-report-sent"
+			],
+			"types": [
+				"aw_report"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "report review list",
+					"file": "core/reports.php:150"
+				}
+			]
+		},
+		"kits_image_context": {
+			"store": "post_meta",
+			"label": "Image context",
+			"type": "text",
+			"boxes": [
+				"attachment-fields"
+			],
+			"types": [
+				"attachment"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "Media list column",
+					"file": "core/media-columns.php:214"
+				},
+				{
+					"kind": "admin",
+					"where": "filled on upload",
+					"file": "core/media-autofill.php:174"
+				}
+			],
+			"notes": [
+				"No front-end display."
+			]
+		},
+		"kits_image_keyphrase": {
+			"store": "post_meta",
+			"label": "Focus keyphrase",
+			"type": "text",
+			"boxes": [
+				"attachment-fields"
+			],
+			"types": [
+				"attachment"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "Media list column",
+					"file": "core/media-columns.php"
+				},
+				{
+					"kind": "admin",
+					"where": "filled on upload",
+					"file": "core/media-autofill.php"
+				}
+			]
+		},
+		"aw_category_image": {
+			"store": "term_meta",
+			"label": "Photo",
+			"type": "attachment ID",
+			"boxes": [
+				"term-photo"
+			],
+			"types": [
+				"category",
+				"post_tag"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "category page head; item fallback image",
+					"file": "core/category-images.php:20"
+				},
+				{
+					"kind": "display",
+					"where": "card fallback",
+					"file": "core/hub-blocks.php:682"
+				}
+			]
+		},
+		"aw_banner_image": {
+			"store": "term_meta",
+			"label": "Banner image",
+			"type": "attachment ID",
+			"boxes": [
+				"term-banner"
+			],
+			"types": [
+				"category"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "category banner",
+					"file": "core/category-images.php:144"
+				}
+			],
+			"notes": [
+				"0 rows on live."
+			]
+		},
+		"aw_help_types": {
+			"store": "term_meta",
+			"label": "Find help: listing types",
+			"type": "post_tag IDs",
+			"boxes": [
+				"term-help-types"
+			],
+			"types": [
+				"category"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "\"Find help\" on the category page",
+					"file": "core/model.php:289"
+				}
+			]
+		},
+		"rank_math_title": {
+			"store": "post_meta",
+			"label": "rank_math_title",
+			"type": "see Rank Math SEO",
+			"boxes": [
+				"rank_math_metabox"
+			],
+			"types": [
+				"post",
+				"page",
+				"aw_news",
+				"aw_legal",
+				"aw_campaign",
+				"aw_opportunity",
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "read by Rank Math SEO",
+					"file": ""
+				},
+				{
+					"kind": "admin",
+					"where": "filled by our code when not typed (_aw_seo_auto)",
+					"file": "seo/titles.php:141"
+				}
+			]
+		},
+		"rank_math_description": {
+			"store": "post_meta",
+			"label": "rank_math_description",
+			"type": "see Rank Math SEO",
+			"boxes": [
+				"rank_math_metabox"
+			],
+			"types": [
+				"post",
+				"page",
+				"aw_news",
+				"aw_legal",
+				"aw_campaign",
+				"aw_opportunity",
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "read by Rank Math SEO",
+					"file": ""
+				},
+				{
+					"kind": "admin",
+					"where": "filled by our code when not typed (_aw_seo_auto)",
+					"file": "seo/programmatic.php:661"
+				}
+			]
+		},
+		"rank_math_focus_keyword": {
+			"store": "post_meta",
+			"label": "rank_math_focus_keyword",
+			"type": "see Rank Math SEO",
+			"boxes": [
+				"rank_math_metabox"
+			],
+			"types": [
+				"post",
+				"page",
+				"aw_news",
+				"aw_legal",
+				"aw_campaign",
+				"aw_opportunity",
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "read by Rank Math SEO",
+					"file": ""
+				}
+			]
+		},
+		"rank_math_robots": {
+			"store": "post_meta",
+			"label": "rank_math_robots",
+			"type": "see Rank Math SEO",
+			"boxes": [
+				"rank_math_metabox"
+			],
+			"types": [
+				"post",
+				"page",
+				"aw_news",
+				"aw_legal",
+				"aw_campaign",
+				"aw_opportunity",
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "read by Rank Math SEO",
+					"file": ""
+				}
+			]
+		},
+		"rank_math_seo_score": {
+			"store": "post_meta",
+			"label": "rank_math_seo_score",
+			"type": "see Rank Math SEO",
+			"boxes": [
+				"rank_math_metabox"
+			],
+			"types": [
+				"post",
+				"page",
+				"aw_news",
+				"aw_legal",
+				"aw_campaign",
+				"aw_opportunity",
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "read by Rank Math SEO",
+					"file": ""
+				}
+			]
+		},
+		"rank_math_primary_category": {
+			"store": "post_meta",
+			"label": "rank_math_primary_category",
+			"type": "see Rank Math SEO",
+			"boxes": [
+				"rank_math_metabox"
+			],
+			"types": [
+				"post",
+				"page",
+				"aw_news",
+				"aw_legal",
+				"aw_campaign",
+				"aw_opportunity",
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "read by Rank Math SEO",
+					"file": ""
+				}
+			]
+		},
+		"rank_math_facebook_image": {
+			"store": "post_meta",
+			"label": "rank_math_facebook_image",
+			"type": "see Rank Math SEO",
+			"boxes": [
+				"rank_math_metabox"
+			],
+			"types": [
+				"post",
+				"page",
+				"aw_news",
+				"aw_legal",
+				"aw_campaign",
+				"aw_opportunity",
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "read by Rank Math SEO",
+					"file": ""
+				}
+			]
+		},
+		"rank_math_facebook_image_id": {
+			"store": "post_meta",
+			"label": "rank_math_facebook_image_id",
+			"type": "see Rank Math SEO",
+			"boxes": [
+				"rank_math_metabox"
+			],
+			"types": [
+				"post",
+				"page",
+				"aw_news",
+				"aw_legal",
+				"aw_campaign",
+				"aw_opportunity",
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "read by Rank Math SEO",
+					"file": ""
+				}
+			]
+		},
+		"rank_math_facebook_title": {
+			"store": "post_meta",
+			"label": "rank_math_facebook_title",
+			"type": "see Rank Math SEO",
+			"boxes": [
+				"rank_math_metabox"
+			],
+			"types": [
+				"post",
+				"page",
+				"aw_news",
+				"aw_legal",
+				"aw_campaign",
+				"aw_opportunity",
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "read by Rank Math SEO",
+					"file": ""
+				}
+			]
+		},
+		"rank_math_facebook_description": {
+			"store": "post_meta",
+			"label": "rank_math_facebook_description",
+			"type": "see Rank Math SEO",
+			"boxes": [
+				"rank_math_metabox"
+			],
+			"types": [
+				"post",
+				"page",
+				"aw_news",
+				"aw_legal",
+				"aw_campaign",
+				"aw_opportunity",
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "read by Rank Math SEO",
+					"file": ""
+				}
+			]
+		},
+		"rank_math_twitter_use_facebook": {
+			"store": "post_meta",
+			"label": "rank_math_twitter_use_facebook",
+			"type": "see Rank Math SEO",
+			"boxes": [
+				"rank_math_metabox"
+			],
+			"types": [
+				"post",
+				"page",
+				"aw_news",
+				"aw_legal",
+				"aw_campaign",
+				"aw_opportunity",
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "read by Rank Math SEO",
+					"file": ""
+				}
+			]
+		},
+		"rank_math_rich_snippet": {
+			"store": "post_meta",
+			"label": "rank_math_rich_snippet",
+			"type": "see Rank Math SEO",
+			"boxes": [
+				"rank_math_metabox"
+			],
+			"types": [
+				"post",
+				"page",
+				"aw_news",
+				"aw_legal",
+				"aw_campaign",
+				"aw_opportunity",
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "read by Rank Math SEO",
+					"file": ""
+				}
+			]
+		},
+		"rank_math_schema_*": {
+			"store": "post_meta",
+			"label": "rank_math_schema_*",
+			"type": "see Rank Math SEO",
+			"boxes": [
+				"rank_math_metabox"
+			],
+			"types": [
+				"post",
+				"page",
+				"aw_news",
+				"aw_legal",
+				"aw_campaign",
+				"aw_opportunity",
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "read by Rank Math SEO",
+					"file": ""
+				},
+				{
+					"kind": "schema",
+					"where": "schema rows written by our code",
+					"file": "seo/rank-math-schema.php"
+				}
+			]
+		},
+		"rank_math_breadcrumb_title": {
+			"store": "term_meta",
+			"label": "rank_math_breadcrumb_title",
+			"type": "see Rank Math SEO",
+			"boxes": [
+				"term-rank-math"
+			],
+			"types": [
+				"category",
+				"post_tag"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "read by Rank Math SEO",
+					"file": ""
+				},
+				{
+					"kind": "display",
+					"where": "breadcrumb label",
+					"file": "seo/breadcrumbs.php:30"
+				}
+			]
+		},
+		"rank_math_canonical_url": {
+			"store": "term_meta",
+			"label": "rank_math_canonical_url",
+			"type": "see Rank Math SEO",
+			"boxes": [
+				"term-rank-math"
+			],
+			"types": [
+				"category",
+				"post_tag"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "read by Rank Math SEO",
+					"file": ""
+				}
+			]
+		},
+		"litespeed_no_cache": {
+			"store": "post_meta",
+			"label": "litespeed_no_cache",
+			"type": "see LiteSpeed Cache",
+			"boxes": [
+				"litespeed_meta_boxes"
+			],
+			"types": [],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "read by LiteSpeed Cache",
+					"file": ""
+				}
+			],
+			"notes": [
+				"0 rows on live."
+			]
+		},
+		"litespeed_no_image_lazy": {
+			"store": "post_meta",
+			"label": "litespeed_no_image_lazy",
+			"type": "see LiteSpeed Cache",
+			"boxes": [
+				"litespeed_meta_boxes"
+			],
+			"types": [],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "read by LiteSpeed Cache",
+					"file": ""
+				}
+			],
+			"notes": [
+				"0 rows on live."
+			]
+		},
+		"litespeed_no_vpi": {
+			"store": "post_meta",
+			"label": "litespeed_no_vpi",
+			"type": "see LiteSpeed Cache",
+			"boxes": [
+				"litespeed_meta_boxes"
+			],
+			"types": [],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "read by LiteSpeed Cache",
+					"file": ""
+				}
+			],
+			"notes": [
+				"0 rows on live."
+			]
+		},
+		"litespeed_vpi_list": {
+			"store": "post_meta",
+			"label": "litespeed_vpi_list",
+			"type": "see LiteSpeed Cache",
+			"boxes": [
+				"litespeed_meta_boxes"
+			],
+			"types": [],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "read by LiteSpeed Cache",
+					"file": ""
+				}
+			],
+			"notes": [
+				"0 rows on live."
+			]
+		},
+		"litespeed_vpi_list_mobile": {
+			"store": "post_meta",
+			"label": "litespeed_vpi_list_mobile",
+			"type": "see LiteSpeed Cache",
+			"boxes": [
+				"litespeed_meta_boxes"
+			],
+			"types": [],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "read by LiteSpeed Cache",
+					"file": ""
+				}
+			],
+			"notes": [
+				"0 rows on live."
+			]
+		},
+		"wpil_sync_report3": {
+			"store": "post_meta",
+			"label": "wpil_sync_report3",
+			"type": "see Link Whisper",
+			"boxes": [
+				"wpil_link-articles"
+			],
+			"types": [
+				"post",
+				"page"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "read by Link Whisper",
+					"file": ""
+				}
+			]
+		},
+		"wpil_links": {
+			"store": "post_meta",
+			"label": "wpil_links",
+			"type": "see Link Whisper",
+			"boxes": [
+				"wpil_link-articles"
+			],
+			"types": [
+				"post",
+				"page"
+			],
+			"uses": [
+				{
+					"kind": "admin",
+					"where": "read by Link Whisper",
+					"file": ""
+				}
+			]
+		}
+	}
+}
