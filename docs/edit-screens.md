@@ -14,6 +14,8 @@ Code: `plugins/animal-writes-core/includes/edit-screens.php`. Map: `plugins/anim
 
 **Collapsed by default:** LiteSpeed, Link Whisper Suggested Links, Rank Math Link Suggestions, Custom Fields, Slug and Linked from start collapsed on every post edit screen (`aw_edit_screen_collapsed_boxes()`, through core's `postbox_classes_{screen}_{box}` filter, which only adds the `closed` class). They are still there: click the title to open one, drag or hide it in Screen Options as before. A box opened this way starts collapsed again on the next load. Nothing is written to the user's saved box settings.
 
+**Side boxes on fewer types (1 Nov 2026):** Place shows on Directory listings only (`AW_PLACE_EDIT_TYPES` in `core/places-admin.php`) and Issued by on Library items only (`core/issuers.php`). Places and issuers already stored on other types are kept and still read on the site; their saves are unchanged.
+
 Notes on each row: the box's own note, a key edited in two boxes on the same screen, keys saved but never read, boxes hidden by an SCF group, not mapped yet.
 
 ## When you add or change a field

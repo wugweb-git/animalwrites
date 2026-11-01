@@ -30,7 +30,7 @@ Legend: **src** = where the box comes from. **cond** = when it shows. SCF box id
 | 4 | Linked campaigns | tagsdiv-aw_campaign_link | core box for our taxonomy `aw_campaign_link` | side/core | panel |
 | 5 | Resource attributes (template) | pageparentdiv | core | side/core | panel; shows because the theme has templates for posts |
 | 6 | LiteSpeed | litespeed_meta_boxes | LiteSpeed `litespeed-cache/src/metabox.cls.php:76` | side/core | public types only |
-| 7 | Issued by | aw-issuer | ours, `core/issuers.php:76` (cb `aw_issuer_box` :81) | side/default | always on post + aw_legal |
+| 7 | Issued by | aw-issuer | ours, `core/issuers.php:75` (cb `aw_issuer_box` :79) | side/default | **removed from post 1 Nov 2026** (aw_legal only); stored `aw_issuer` on posts kept and read |
 | 8 | Featured image | postimagediv | core | side/low | panel |
 | 9 | Excerpt | postexcerpt | core | normal/core | panel |
 | 10 | Custom Fields | postcustom | core | normal/core | only if enabled in Preferences |
@@ -72,7 +72,7 @@ No SCF group, no Related box. The admin account's saved order still lists a `kit
 | 4 | Linked campaigns | tagsdiv-aw_campaign_link | core | side/core | |
 | 5 | Post Attributes (template) | pageparentdiv | core | side/core | |
 | 6 | LiteSpeed | litespeed_meta_boxes | LiteSpeed | side/core | |
-| 7 | Place | aw-place | ours `core/places-admin.php:19` (cb :25) | side/default | `AW_PLACE_TYPES` (`core/places.php:28`) |
+| 7 | Place | aw-place | ours `core/places-admin.php:23` (cb :29) | side/default | **removed 1 Nov 2026**: box on `AW_PLACE_EDIT_TYPES` (aw_listing) only; stored places here kept and read (`AW_PLACE_TYPES`, `core/places.php:28`) |
 | 8 | Link Suggestions | rank_math_metabox_link_suggestions | Rank Math `class-metabox.php:232` | side/default | classic editor only; `pt_aw_news_link_suggestions` = on; `link_builder` cap. Not captured (see above) |
 | 9 | Featured image | postimagediv | core | side/low | |
 | 10 | Rank Math SEO | rank_math_metabox | Rank Math | normal (Rank Math priority setting) | pt_aw_news_add_meta_box on; a real metabox here (classic) |
@@ -91,8 +91,8 @@ No SCF group, no Related box. The admin account's saved order still lists a `kit
 | 2 | Categories / Tags / Linked campaigns | categorydiv, tagsdiv-post_tag, tagsdiv-aw_campaign_link | core | side/core | panels |
 | 3 | Post Attributes | pageparentdiv | core | side/core | panel |
 | 4 | LiteSpeed | litespeed_meta_boxes | LiteSpeed | side/core | |
-| 5 | Issued by | aw-issuer | ours `core/issuers.php:76` | side/default | |
-| 6 | Place | aw-place | ours `core/places-admin.php:19` | side/default | |
+| 5 | Issued by | aw-issuer | ours `core/issuers.php:75` | side/default | |
+| 6 | Place | aw-place | ours `core/places-admin.php:23` | side/default | **removed 1 Nov 2026** (aw_listing only) |
 | 7 | Revisions | revisionsdiv | core | normal/core | panel; 2+ revisions |
 | 8 | Excerpt / Custom Fields / Slug | postexcerpt, postcustom, slugdiv | core | normal/core | panels / pref |
 | 9 | Related | aw_related | ours | normal/default | relation aw_rel_org |
@@ -111,7 +111,7 @@ The admin account's saved order (normal): acf-group_aw_legal, aw_linked_from, aw
 | 1 | **Campaign details** | aw-campaign-details | ours `core/campaign-tools.php:587` (cb :591) | side/high | `add_meta_boxes_aw_campaign` |
 | 2 | Publish / Categories / Tags / Linked campaigns / Post Attributes | core | core | side/core | panels |
 | 3 | LiteSpeed | litespeed_meta_boxes | LiteSpeed | side/core | |
-| 4 | Place | aw-place | ours | side/default | |
+| 4 | Place | aw-place | ours | side/default | **removed 1 Nov 2026** (aw_listing only) |
 | 5 | Real-world impact | aw-campaign-record | ours `core/campaign-record.php:217` (cb :220) | side/default | |
 | 6 | Featured image | postimagediv | core | side/low | panel |
 | 7 | Revisions / Excerpt / Custom Fields / Slug | core | core | normal/core | panels / pref |
@@ -128,7 +128,7 @@ Two boxes share the title "Campaign details" (side box and SCF group). Since 1 N
 |---|---|---|---|---|
 | 1 | Publish / Categories / Tags / Linked campaigns / Post Attributes | core | core | side/core (panels) |
 | 2 | LiteSpeed | litespeed_meta_boxes | LiteSpeed | side/core |
-| 3 | Place | aw-place | ours | side/default |
+| 3 | Place | aw-place | ours | side/default (**removed 1 Nov 2026**, aw_listing only) |
 | 4 | Excerpt / Custom Fields / Slug | core | core | normal/core |
 | 5 | Related | aw_related | ours (relation aw_organisation, max 1) | normal/default |
 | 6 | Opportunity details | acf-group_aw_opportunity | SCF `acf-json/group_aw_opportunity.json` | normal |
@@ -196,7 +196,7 @@ Columns: **stored as**, type, sanitising on save, REST (`show_in_rest` via `regi
 
 ### 2.1 Our boxes
 
-**Issued by** (`core/issuers.php:81–109`)
+**Issued by** (`core/issuers.php:79–107`; aw_legal only since 1 Nov 2026)
 
 | field | stored as | type | sanitising | REST |
 |---|---|---|---|---|
@@ -205,7 +205,7 @@ Columns: **stored as**, type, sanitising on save, REST (`show_in_rest` via `regi
 
 Nonce `aw_issuer_save`; save_post prio 10.
 
-**Place** (`core/places-admin.php:25–110`; storage `aw_set_item_places()` `core/places.php:207–240`)
+**Place** (`core/places-admin.php:29–114`; aw_listing only since 1 Nov 2026 (`AW_PLACE_EDIT_TYPES`), places stored on the other `AW_PLACE_TYPES` are kept and read; storage `aw_set_item_places()` `core/places.php:207–240`)
 
 | field | stored as | type | sanitising | REST |
 |---|---|---|---|---|
@@ -214,9 +214,9 @@ Nonce `aw_issuer_save`; save_post prio 10.
 | District | `aw_district_code` (multiple rows) | int LGD code | `absint`; district inside its state | no |
 | "Also" ticks | more `aw_state_code`/`aw_district_code` rows | | | |
 | Town or area | `aw_place_city` | text | `sanitize_text_field` | no |
-| (on a real change) | `aw_place_source` = `editor`, deletes `aw_place_auto` (:97–100) | | | no |
+| (on a real change) | `aw_place_source` = `editor`, deletes `aw_place_auto` (:101–104) | | | no |
 
-Invalid input → transient `aw_place_error_{user}` notice, place kept. PIN lookup AJAX `wp_ajax_aw_pin_lookup` (:115).
+Invalid input → transient `aw_place_error_{user}` notice, place kept. PIN lookup AJAX `wp_ajax_aw_pin_lookup` (:126).
 
 **Related** (`core/model.php:144–220`; relations `aw_relations()` `core/model.php:31–41`)
 

@@ -72,9 +72,7 @@ function aw_set_issuer( $id, $value ) {
 add_action(
 	'add_meta_boxes',
 	function () {
-		foreach ( array( 'aw_legal', 'post' ) as $type ) {
-			add_meta_box( 'aw-issuer', 'Issued by', 'aw_issuer_box', $type, 'side', 'default' );
-		}
+		add_meta_box( 'aw-issuer', 'Issued by', 'aw_issuer_box', 'aw_legal', 'side', 'default' ); // Library only (owner, 1 Nov 2026); issuers stored on Resources are kept and still read
 	}
 );
 

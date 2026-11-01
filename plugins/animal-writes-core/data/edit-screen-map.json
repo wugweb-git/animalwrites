@@ -136,10 +136,10 @@
 			"file": "core/issuers.php (aw_issuer_box)",
 			"screen": "post",
 			"types": [
-				"post",
 				"aw_legal"
 			],
-			"runtime": "live"
+			"runtime": "live",
+			"notes": "Library items only since 1 Nov 2026. aw_issuer values stored on Resources (post) are kept and still read; no box edits them there."
 		},
 		"aw-place": {
 			"title": "Place",
@@ -147,13 +147,10 @@
 			"file": "core/places-admin.php (aw_place_box)",
 			"screen": "post",
 			"types": [
-				"aw_news",
-				"aw_legal",
-				"aw_campaign",
-				"aw_opportunity",
 				"aw_listing"
 			],
-			"runtime": "live"
+			"runtime": "live",
+			"notes": "Directory listings only (AW_PLACE_EDIT_TYPES) since 1 Nov 2026. On News, Library, Campaigns and Opportunities (AW_PLACE_TYPES) the stored place is kept and still read; no box edits it there."
 		},
 		"aw_related": {
 			"title": "Related",
@@ -776,6 +773,9 @@
 					"where": "relevance and auto-review",
 					"file": "src/"
 				}
+			],
+			"notes": [
+				"Edited in the Issued by box on Library items only; values stored on Resources are kept and read."
 			]
 		},
 		"aw_issuers_added": {
@@ -786,7 +786,6 @@
 				"aw-issuer"
 			],
 			"types": [
-				"post",
 				"aw_legal"
 			],
 			"uses": [
@@ -847,6 +846,9 @@
 					"where": "place detection and merges",
 					"file": "core/find-help.php:444"
 				}
+			],
+			"notes": [
+				"Edited in the Place box on Directory listings only; on the other types the stored value is kept and read."
 			]
 		},
 		"aw_district_code": {
@@ -894,6 +896,9 @@
 					"where": "place detection and merges",
 					"file": "src/enrichment-cleanup.php:72"
 				}
+			],
+			"notes": [
+				"Edited in the Place box on Directory listings only; on the other types the stored value is kept and read."
 			]
 		},
 		"aw_pincode": {
@@ -931,6 +936,9 @@
 					"where": "geocoder input",
 					"file": "core/geocode.php:79"
 				}
+			],
+			"notes": [
+				"Edited in the Place box on Directory listings only; on the other types the stored value is kept and read."
 			]
 		},
 		"aw_place_city": {
@@ -963,6 +971,9 @@
 					"where": "\"Featured in\" matching",
 					"file": "core/featured.php:92"
 				}
+			],
+			"notes": [
+				"Edited in the Place box on Directory listings only; on the other types the stored value is kept and read."
 			]
 		},
 		"aw_place_source": {
@@ -987,7 +998,8 @@
 				}
 			],
 			"notes": [
-				"Written by the box on a real change; not typed."
+				"Written by the box on a real change; not typed.",
+				"Edited in the Place box on Directory listings only; on the other types the stored value is kept and read."
 			]
 		},
 		"aw_place_auto": {
@@ -1012,7 +1024,8 @@
 				}
 			],
 			"notes": [
-				"Deleted by the box on a real change."
+				"Deleted by the box on a real change.",
+				"Edited in the Place box on Directory listings only; on the other types the stored value is kept and read."
 			]
 		},
 		"aw_rel_legal": {

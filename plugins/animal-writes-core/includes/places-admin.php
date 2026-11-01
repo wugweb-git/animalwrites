@@ -1,7 +1,8 @@
 <?php
 /**
- * Place box on each item that can have a place (places.php): PIN code → State and District filled from India Post,
- * matched to the LGD file; State → District dropdowns built from the file when there is no PIN or India Post is down.
+ * Place box on Directory listings (AW_PLACE_EDIT_TYPES; owner, 1 Nov 2026). Other place types (AW_PLACE_TYPES in
+ * places.php) keep their stored place, found by auto-detect or set before; it is still read and counted.
+ * PIN code → State and District filled from India Post, matched to the LGD file; State → District dropdowns built from the file when there is no PIN or India Post is down.
  * There is no place list in WP Admin and no way to type a place that is not in LGD. Codes that are not in the file
  * are not saved (a notice says so) and the item keeps its previous place.
  *
@@ -12,10 +13,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/** Post types whose edit screen shows the Place box. */
+const AW_PLACE_EDIT_TYPES = array( 'aw_listing' );
+
 add_action(
 	'add_meta_boxes',
 	function () {
-		foreach ( AW_PLACE_TYPES as $type ) {
+		foreach ( AW_PLACE_EDIT_TYPES as $type ) {
 			add_meta_box( 'aw-place', 'Place', 'aw_place_box', $type, 'side', 'default' );
 		}
 	}
@@ -141,7 +145,7 @@ add_action(
 
 /** District follows State; "Fill in" asks India Post. */
 function aw_place_box_js() {
-	if ( ! in_array( get_post_type(), AW_PLACE_TYPES, true ) ) {
+	if ( ! in_array( get_post_type(), AW_PLACE_EDIT_TYPES, true ) ) {
 		return;
 	}
 	?>
