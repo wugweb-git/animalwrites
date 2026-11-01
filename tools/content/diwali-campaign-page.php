@@ -41,6 +41,13 @@ function dwh( $t, $level = 2, $anchor = '' ) {
 function dwsc( $sc ) {
 	return "<!-- wp:shortcode -->\n$sc\n<!-- /wp:shortcode -->\n\n";
 }
+function dwlist( $items ) {
+	$li = '';
+	foreach ( $items as $i ) {
+		$li .= "<!-- wp:list-item -->\n<li>$i</li>\n<!-- /wp:list-item -->\n";
+	}
+	return "<!-- wp:list -->\n<ul class=\"wp-block-list\">$li</ul>\n<!-- /wp:list -->\n\n";
+}
 function dwhtml( $h ) {
 	return "<!-- wp:html -->\n$h\n<!-- /wp:html -->\n\n";
 }
@@ -153,8 +160,8 @@ $hero = dwsec(
 	'<!-- wp:columns {"verticalAlignment":"center","className":"aw-camp-hero-cols"} -->' . "\n" . '<div class="wp-block-columns are-vertically-aligned-center aw-camp-hero-cols">'
 	. '<!-- wp:column {"verticalAlignment":"center","width":"58%"} -->' . "\n" . '<div class="wp-block-column is-vertically-aligned-center" style="flex-basis:58%">'
 	. dwsc( '[aw_camp_status]' )
-	. dwh( 'Diwali is loud. Keep the animals around you safe.', 1 )
-	. dwp( 'Firecrackers frighten and hurt pets, street animals and birds. A safe room and an ID tag for your pet, a quiet corner and water for the dogs outside, and the right number to call if an animal is hurt.', 'aw-camp-hero-summary' )
+	. dwh( 'Diwali is loud. Keep pets and street dogs safe.', 1 )
+	. dwp( 'Firecrackers frighten and hurt pets, street animals and birds. Keeping dogs during Diwali safe takes a safe room and an ID tag for your pet, a quiet corner and water for the dogs outside, and the right number to call if an animal is hurt.', 'aw-camp-hero-summary' )
 	. dwp( 'Our aim: no animal near you hurt, lost or left without help this Diwali.' )
 	. dwbuttons( array( array( 'What to do tonight', '#tonight' ), array( 'Who to call', '#help', 'ghost' ) ) )
 	. '</div>' . "\n" . '<!-- /wp:column -->' . "\n\n"
@@ -218,10 +225,10 @@ $card = function ( $icon, $title, $text, $more = '' ) {
 	return dwp( dwi( $icon ), 'aw-camp-card-ico' ) . dwh( $title, 3 ) . $text . $more;
 };
 $cards = array(
-	array( 'before', $card( 'home', 'Before Diwali: pets at home', dwp( 'Make a safe room: an inner room with the windows and curtains shut, bedding, water, familiar toys and the TV or music on. Let the animal hide; don\'t pull it out.' ) . dwp( 'Put an up-to-date phone number on the collar and check that the microchip is registered with your number. Keep recent photos on your phone. Walk and feed dogs earlier in the evening, before the bursting starts, and on a leash only.' ) . dwp( 'Keep cats indoors. Move bird cages and small pets away from windows and cover the cage partly. If your animal is old, unwell or very anxious, ask your vet before the festival. Never give human medicines.' ) ) ),
+	array( 'before', $card( 'home', 'Before Diwali: pets at home', dwp( 'Make a safe room: an inner room with the windows and curtains shut, bedding, water, familiar toys and the TV or music on. Let the animal hide; don\'t pull it out.' ) . dwp( 'Put an up-to-date phone number on the collar and check that the microchip is registered with your number. Keep recent photos on your phone. Walk and feed dogs earlier in the evening, before the bursting starts, and on a leash only.' ) . dwp( 'Keep cats indoors. Move bird cages and small pets away from windows and cover the cage partly. If your animal is old, unwell or very anxious, ask your vet before the festival (advice from ' . dwa( 'GADVASU', 'https://www.gadvasu.in/news/3170' ) . ', the Punjab vet university). Save your vet\'s number and Diwali hours now. Never give human medicines.' ) ) ),
 	array( 'street', $card( 'paw', 'Community dogs, cats and cows', dwp( 'With your RWA or building\'s permission, leave a gate, parking or stairwell corner open for the dogs that live around you, with water bowls away from where crackers are burst. Ask neighbours not to burst crackers near feeding spots, under parked cars, or near gaushalas, cattle sheds and shelters. Cattle panic in traffic; keep crackers away from them.' ) . dwp( 'The next morning, check under cars and in drains: frightened animals hide and get stuck.' ) . dwp( '<strong>Message for your RWA group:</strong> "Diwali is this Sunday. Please don\'t burst crackers near the dogs\' corner, under parked cars or near animals. If you see an animal that\'s hurt, call a vet or a rescue group (numbers on animalwrites.in)."' ), dwmore( 'Caring for community dogs in your area', '/resources/caring-for-community-dogs-in-your-area/' ) ) ),
 	array( 'birds', $card( 'heart', 'Birds and owls', dwp( 'Noise and smoke disturb roosting birds, and stunned or injured birds turn up the next morning. Put a bird in a dark, quiet box with air holes, do not feed it, and call a bird helpline number near you.' ) . dwp( 'Owls are trapped and sold around Diwali for superstitious rituals. Report a caged or offered owl to the state forest department or the Wildlife Crime Control Bureau. Don\'t release sky lanterns near trees, wetlands or sheds.' ), dwmore( 'Injured bird helpline numbers by city', '/resources/injured-bird-helpline-numbers-by-city/' ) . dwmore( 'PTR on high alert against owl poaching ahead of Diwali', '/news/ptr-on-high-alert-against-owl-poaching-ahead-of-diwali/' ) ) ),
-	array( 'night', $card( 'moon', 'On Diwali night', dwp( 'Pets inside before dusk, and all doors and gates shut: pets bolt when guests come and go. Stay with an anxious pet and don\'t scold it. Keep crackers, sparklers and hot ash away from animals.' ) . dwp( 'No festive sweets: chocolate, grapes and raisins are poisonous to dogs; ask a vet if an animal has eaten something. If you burst crackers, use certified green crackers only, in the hours your district allows, and away from animals.' ) ) ),
+	array( 'night', $card( 'moon', 'On Diwali night', dwp( 'Pets inside before dusk, and all doors and gates shut: pets bolt when guests come and go. Stay with an anxious pet and don\'t scold it. Keep crackers, sparklers and hot ash away from animals.' ) . dwp( 'No festive sweets: chocolate, grapes and raisins are poisonous to dogs (' . dwa( 'ASPCA Animal Poison Control', 'https://www.aspca.org/pet-care/aspca-poison-control/people-foods-avoid-feeding-your-pets' ) . '); ask a vet if an animal has eaten something. If you burst crackers, use certified green crackers only, in the hours your district allows, and away from animals.' ) ) ),
 	array( 'after', $card( 'injured', 'After Diwali: burnt, lost or injured animals', dwp( 'Burnt fur, limping, pawing at the eyes or mouth, shaking or hiding are signs an animal needs a vet. No ointments or home remedies: get it to a vet or a rescue group. A frightened animal may bite, so approach slowly and keep your hands away from its mouth. Move it only if it is in danger where it lies.' ) . dwp( 'If your pet is missing, search nearby hiding places at dawn, tell the guards and your RWA group, post photos on local groups, call the vets and shelters near you, and update your microchip registry. Clear unburnt crackers and wrappers from streets and feeding spots: animals chew them.' ), dwmore( 'Helping an injured animal: moving it safely', '/resources/found-an-injured-animal-what-to-do/' ) ) ),
 );
 $grid = '';
@@ -285,7 +292,7 @@ $faq = dwsec(
 	. dwfaq(
 		array(
 			array( 'How do I calm dogs during Diwali firecrackers?', 'Keep your dog in an inner room with the curtains drawn and the TV or music on, and stay with it. Let it hide, and don\'t scold it or force it outside. Walk and feed it before dark. If it is very anxious, ask your vet before the festival.' ),
-			array( 'Can I give my dog medicine for Diwali firecracker fear?', 'Only medicine a vet prescribes for your dog. Human sleeping pills and painkillers can kill a dog. Ask your vet well before Diwali, and tell them about any heart or breathing problems.' ),
+			array( 'Can I give my dog medicine for Diwali firecracker fear?', 'Only medicine a vet prescribes for your dog. Human painkillers such as ibuprofen and paracetamol can poison dogs (' . dwa( 'ASPCA Animal Poison Control', 'https://www.aspca.org/about-us/press-releases/human-otc-medications-lead-aspcas-annual-list-top-toxins-pets' ) . '). Ask your vet first, and tell them about any heart or breathing problems.' ),
 			array( 'How can I help street dogs during Diwali?', 'Put out water and leave a quiet corner away from the bursting, with your RWA\'s permission. Ask neighbours not to burst crackers near the dogs or under parked cars. Check under cars and in drains the next morning, and call a ' . dwa( 'rescue group', '/directory/?tag=rescue-group' ) . ' if a dog is hurt.' ),
 			array( 'What should I do if a bird is hurt by Diwali firecrackers?', 'Put the bird in a dark, quiet box with air holes, don\'t feed it, and call a ' . dwa( 'bird helpline', '/resources/injured-bird-helpline-numbers-by-city/' ) . ' or your state forest department. Keep cats and crows away from it while you wait.' ),
 			array( 'Is bursting firecrackers on animals a crime in India?', 'Yes. Causing an animal unnecessary pain is an offence under section 11 of the Prevention of Cruelty to Animals Act, 1960, and maiming or killing one is an offence under section 325 of the Bharatiya Nyaya Sanhita, 2023 (up to five years in jail). ' . dwa( 'Report it to the police', '/resources/how-to-report-animal-cruelty/' ) . '.' ),
@@ -324,7 +331,10 @@ $library = dwsec(
 <!-- /wp:post-template --></div>
 <!-- /wp:query -->',
 		$term_id
-	) . "\n\n",
+	) . "\n\n"
+	. dwh( 'Sources', 3 )
+	. dwlist( array_map( fn( $x ) => dwa( $x[0], $x[1] ) . ' (' . $x[2] . ')', array( array( 'Prevention of Cruelty to Animals Act, 1960', '/library/the-prevention-of-cruelty-to-animals-act-1960-as-amended-in-1982/', 'our Library' ), array( 'Bharatiya Nyaya Sanhita, 2023, section 325', 'https://egazette.gov.in/WriteReadData/2023/250883.pdf', 'Gazette of India' ), array( 'Wild Life (Protection) Amendment Act, 2022', 'https://prsindia.org/files/bills_acts/bills_parliament/2021/The%20Wild%20Life%20(Protection)%20Amendment%20Act,%202022.pdf', 'PRS India' ), array( 'Supreme Court, Arjun Gopal v Union of India, 23 Oct 2018', 'https://www.theweek.in/news/india/2018/10/23/supreme-court-refuses-complete-ban-on-sale-of-firecrackers-.amp.html', 'The Week' ), array( 'States may fix two-hour slots, 31 Oct 2018', 'https://www.livelaw.in/amp/sc-modifies-time-slot-for-bursting-crackers-states-can-fix-timings-but-cannot-exceed-two-hours-a-day', 'LiveLaw' ), array( 'In re Noise Pollution, 2005', 'https://leap.unep.org/en/countries/in/national-case-law/re-noise-pollution-restricting-use-loudspeakers', 'UNEP LEAP' ), array( 'Supreme Court hearing, 29 Oct 2026', 'https://www.etvbharat.com/en/bharat/virat-kohli-like-voices-needed-to-deter-firecracker-use-compliance-failures-make-court-orders-a-mockery-sc-enn26102905740', 'ETV Bharat' ), array( 'Odisha Diwali guidelines, 31 Oct 2026', 'https://odishabytes.com/dos-and-donts-issued-for-diwali-celebration-in-odisha-check-guidelines-violations-to-invite-penal-action/', 'Odisha Bytes' ), array( 'People foods to avoid feeding your pets', 'https://www.aspca.org/pet-care/aspca-poison-control/people-foods-avoid-feeding-your-pets', 'ASPCA' ), array( 'Human medicines and pets', 'https://www.aspca.org/about-us/press-releases/human-otc-medications-lead-aspcas-annual-list-top-toxins-pets', 'ASPCA' ), array( 'Diwali advice for pets', 'https://www.gadvasu.in/news/3170', 'GADVASU' ) ) ) )
+	. dwp( 'Read on 1 Nov 2026.', 'aw-camp-note' ),
 	'aw-camp-white'
 );
 
