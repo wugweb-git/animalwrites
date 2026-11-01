@@ -1000,7 +1000,7 @@ function aw_edit_screens_render( array $all ): void {
 }
 
 /**
- * Mapping tab: our own boxes as a grid, one column per module, then our admin-page widgets.
+ * Mapping tab: our own boxes as a core form-table, each with read-only ticks for the modules it shows on, then our admin-page widgets.
  *
  * @param array    $display Display rows.
  * @param array    $screens Post type or taxonomy => post|term, in order.
@@ -1022,35 +1022,18 @@ function aw_edit_screens_mapping_tab( array $display, array $screens, callable $
 		$boxes,
 		fn( $a, $b ) => strcasecmp( $a['plugin'], $b['plugin'] ) ?: ( strcasecmp( $a['purpose'], $b['purpose'] ) ?: strcasecmp( $a['title'], $b['title'] ) )
 	);
-	$used = array();
+	echo '<table class="form-table" role="presentation"><tbody>';
 	foreach ( $boxes as $r ) {
-		foreach ( $r['types'] as $t ) {
-			$used[ $t ] = true;
+		echo '<tr><th scope="row">' . esc_html( $r['title'] ) . '<br><code>' . esc_html( $r['id'] ) . '</code><p class="description">' . esc_html( $r['plugin'] . ' · ' . $r['purpose'] ) . '</p></th><td>';
+		echo '<fieldset><legend class="screen-reader-text"><span>' . esc_html( $r['title'] ) . '</span></legend>';
+		foreach ( array_keys( $screens ) as $t ) {
+			if ( in_array( $t, $r['types'], true ) ) {
+				echo '<label><input type="checkbox" disabled checked> ' . esc_html( $label( (string) $t ) ) . ' <code>' . esc_html( (string) $t ) . '</code></label><br>';
+			}
 		}
+		echo '</fieldset>' . aw_edit_screen_fields_details( $r, true ) . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from escaped parts.
 	}
-	$cols = array(
-		'box'     => 'Box',
-		'plugin'  => 'Plugin',
-		'purpose' => 'Purpose',
-	);
-	foreach ( array_keys( $screens ) as $t ) {
-		if ( isset( $used[ $t ] ) ) {
-			$cols[ 'm:' . $t ] = $label( (string) $t );
-		}
-	}
-	$cells = array();
-	foreach ( $boxes as $r ) {
-		$row = array(
-			'box'     => aw_edit_screen_box_cell( $r, true ),
-			'plugin'  => esc_html( $r['plugin'] ),
-			'purpose' => esc_html( $r['purpose'] ),
-		);
-		foreach ( $r['types'] as $t ) {
-			$row[ 'm:' . $t ] = '<span class="dashicons dashicons-yes" aria-hidden="true"></span><span class="screen-reader-text">Yes</span>';
-		}
-		$cells[] = $row;
-	}
-	aw_edit_screens_grid( $cols, $cells );
+	echo '</tbody></table>';
 
 	$widgets = array();
 	foreach ( $display as $r ) {
