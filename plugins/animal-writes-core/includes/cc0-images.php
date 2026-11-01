@@ -64,6 +64,9 @@ function aw_publisher_image( $post_id ) {
 	if ( '' === $url || ! preg_match( '#^https://[^/]+/#i', $url ) ) {
 		return '';
 	}
+	if ( '1' === (string) get_post_meta( $post_id, 'aw_source_image_off', true ) ) {
+		return ''; // switched off for this item (Media -> Reuse pictures): its cover leads; the weekly re-check does not undo it
+	}
 	return '0' === (string) get_post_meta( $post_id, 'aw_source_image_ok', true ) ? '' : $url;
 }
 
@@ -104,6 +107,7 @@ function aw_cc0_run() {
 	// 1. Publisher images: unchecked first, then failures older than a week.
 	$week = gmdate( 'Y-m-d H:i:s', time() - WEEK_IN_SECONDS );
 	$ids  = $wpdb->get_col( $wpdb->prepare( "SELECT p.ID " . aw_cc0_items_sql() . " AND EXISTS (SELECT 1 FROM {$wpdb->postmeta} si WHERE si.post_id = p.ID AND si.meta_key = 'aw_source_image' AND si.meta_value <> '')
+		AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} sf WHERE sf.post_id = p.ID AND sf.meta_key = 'aw_source_image_off' AND sf.meta_value = '1')
 		AND ( NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} c WHERE c.post_id = p.ID AND c.meta_key = 'aw_source_image_checked')
 		   OR EXISTS (SELECT 1 FROM {$wpdb->postmeta} o JOIN {$wpdb->postmeta} c2 ON c2.post_id = o.post_id AND c2.meta_key = 'aw_source_image_checked'
 		              WHERE o.post_id = p.ID AND o.meta_key = 'aw_source_image_ok' AND o.meta_value = '0' AND c2.meta_value < %s) )
@@ -307,6 +311,7 @@ function aw_source_og_run( $limit = 40 ) {
 			WHERE p.post_status = 'publish' AND p.post_type IN ('aw_news','aw_legal','post','aw_opportunity')
 			AND ( si.meta_value IS NULL OR si.meta_value = '' OR ok.meta_value = '0' )
 			AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} t WHERE t.post_id = p.ID AND t.meta_key = 'aw_source_og_tried')
+			AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} sf WHERE sf.post_id = p.ID AND sf.meta_key = 'aw_source_image_off' AND sf.meta_value = '1')
 			ORDER BY p.post_date DESC LIMIT %d",
 			$limit
 		)
