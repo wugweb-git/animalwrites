@@ -6,7 +6,7 @@
  * - awbi       AWBI list of recognised organisations, as on 31 May 2026: name, recognition code, address, valid until.
  * - awbi-abc   AWBI list of ABC projects: name, district, recognition and validity of the ABC project.
  * - gov        State animal husbandry departments and DAHD: name, place, type (veterinary institutions).
- * - awol       AWO List compiled by Saumya Garg (Dec 2023 – Jan 2025), schema 1.2: name, address, phone, whether the
+ * - awol       AWO List (Dec 2023 – Jan 2025), schema 1.2: name, address, phone, whether the
  *              organisation said it has a shelter, rescue and treatment, notes from the call.
  * - organisation  What the organisation itself told us (claim approved).
  * - darpan     NGO Darpan (NITI Aayog), read from its own search (owner types the CAPTCHA): Darpan ID, registration, sectors.
@@ -33,7 +33,7 @@ function aw_data_sources() {
 		'awbi'         => array( 'AWBI', 'AWBI list of recognised organisations', '2026-05-31', 'https://awbi.gov.in/' ),
 		'awbi-abc'     => array( 'AWBI', 'AWBI list of ABC projects', '', 'https://awbi.gov.in/' ),
 		'gov'          => array( 'GOV', '', '', '' ), // label and link come from the listing's own source name and URL
-		'awol'         => array( 'AWOL', 'AWO List compiled by Saumya Garg', '2025-01-03', '' ),
+		'awol'         => array( 'AWOL', 'AWO List', '2025-01-03', '' ),
 		'gmaps'        => array( 'MAPS', 'Google Maps', '', '' ), // link: the listing's own Google Maps link
 		'ngobase'      => array( 'NGOB', 'ngobase.org', '2026-10-09', '' ), // link: the organisation's ngobase.org profile
 		'organisation' => array( 'ORG', 'The organisation', '', '' ),

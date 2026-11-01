@@ -133,7 +133,7 @@ def main(awo_dir, held_csv, listings_file):
         told = f" It told the AWO List compilers that it {joined}." if said else ""
         rep.new({"key": "awol|" + h["awo_id"], "name": name, "types": types, "state": st["code"], "district": dcode, "area": where,
                  "phone": phone, "address_private": o.get("address", ""),
-                 "content": f"{name} is an animal welfare organisation in {where}. It is listed in the AWO List compiled by Saumya Garg (December 2023 to January 2025).{told}",
+                 "content": f"{name} is an animal welfare organisation in {where}. It is listed in the AWO List (December 2023 to January 2025).{told}",
                  "source_name": SOURCE_NAME, "source_url": "", "source_date": SOURCE_DATE, "data_source": "awol"},
                 dict(sample, name=name, district=dname, why="phones differ"))
         decisions.append({"awo_id": h["awo_id"], "awo_name": o["name"], "district": o["district"], "awo_phone": phone, "decision": "add as new", "listing": "", "listing_title": "", "reason": "phones differ, names share nothing (held against " + l.get("title", "") + ")"})

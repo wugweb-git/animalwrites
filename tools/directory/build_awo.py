@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""AWO List (compiled by Saumya Garg, Dec 2023 to Jan 2025) -> new listings / fills, for import_listings.php.
+"""AWO List (Dec 2023 to Jan 2025) -> new listings / fills, for import_listings.php.
 
-Source: awo-list-1.2.json and awol-match.json (data/awo-list-sgarg/, captured 8 Oct 2026; the Drive folder is not public).
+Source: awo-list-1.2.json and awol-match.json (local data folder, captured 8 Oct 2026; the Drive folder is not public).
 Owner approved publishing it on 21 Oct 2026. Rules: an exact match (score 95 and over) to an existing listing fills its
 phone only when the listing has none, and adds the types the organisation stated (rescue, shelter); verified or claimed
 listings are left alone. A likely match (80 to 94), or a same-name organisation in the same district, is held back for a
@@ -18,7 +18,7 @@ import sys
 from places import Places, norm
 from report import Report
 
-SOURCE_NAME = "AWO List (S. Garg)"
+SOURCE_NAME = "AWO List"
 SOURCE_DATE = "2025-01-03"
 
 
@@ -34,7 +34,7 @@ def phone_of(raw):
 
 
 def main(awo_dir, listings_file):
-    rep = Report("awol", "AWO List (compiled by Saumya Garg)", "")
+    rep = Report("awol", "AWO List", "")
     places = Places()
     orgs = {o["id"]: o for o in json.load(open(os.path.join(awo_dir, "awo-list-1.2.json"), encoding="utf-8"))["organisations"]}
     match = {m["id"]: m for m in json.load(open(os.path.join(awo_dir, "awol-match.json"), encoding="utf-8"))}
@@ -99,7 +99,7 @@ def main(awo_dir, listings_file):
         joined = said[0] if len(said) == 1 else ", ".join(said[:-1]) + " and " + said[-1] if said else ""
         told = f" It told the AWO List compilers that it {joined}." if said else ""
         content = (f"{name} is an animal welfare organisation in {where}. It is listed in the AWO List "
-                   f"compiled by Saumya Garg (December 2023 to January 2025).{told}")
+                   f"(December 2023 to January 2025).{told}")
         rep.new({"key": key, "name": name, "types": types, "state": st["code"], "district": dcode,
                  "area": where, "phone": phone, "address_private": o.get("address", ""),
                  "content": content, "source_name": SOURCE_NAME, "source_url": "", "source_date": SOURCE_DATE,
