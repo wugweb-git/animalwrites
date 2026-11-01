@@ -191,8 +191,8 @@ const AW_FAQ_HEAD_MAX = 40;
  */
 function aw_faq_head_styles() {
 	return array(
-		'subject' => array( '%s FAQs', 'FAQs', '', 'All FAQs' ), // "Animal Writes FAQs", "Directory FAQs"
-		'plain'   => array( '', 'FAQs', '', 'All FAQs' ), // "FAQs" everywhere
+		'subject' => array( '%s FAQs', 'FAQs', '', 'Animal welfare FAQ' ), // "Animal Writes FAQs", "Directory FAQs"
+		'plain'   => array( '', 'FAQs', '', 'Animal welfare FAQ' ), // "FAQs" everywhere
 		'common'  => array( '', 'Common questions', '', 'More questions' ),
 		'about'   => array( 'Questions about %s', 'Questions', 'Quick answers. More in the full FAQ.', 'All questions' ), // the old head
 	);
@@ -227,8 +227,9 @@ function aw_faq_heading( $subject ) {
 }
 
 /**
- * The FAQ head's supporting line and its "see all" link (filter aw_faq_head_parts): [ line, url, label ], from the head
- * style. Both are left out on the page the link points to.
+ * The FAQ head's default supporting line and its "see all" link (filter aw_faq_head_parts): [ line, url, label ], from
+ * the head style. Both are left out on the page the link points to. A page's own line (aw_faq_context() 'line': the FAQ
+ * box's Subtitle field, or the site's default for its kind) replaces the default line and shows on every page.
  *
  * @return array
  */
@@ -245,6 +246,17 @@ add_action(
 			register_post_meta(
 				$pt,
 				'aw_faq_subject',
+				array(
+					'type'              => 'string',
+					'single'            => true,
+					'show_in_rest'      => true,
+					'sanitize_callback' => 'sanitize_text_field',
+					'auth_callback'     => fn( $allowed, $key, $post_id ) => current_user_can( 'edit_post', (int) $post_id ),
+				)
+			);
+			register_post_meta( // the FAQ subtitle (FAQ box → Subtitle): one line under the heading
+				$pt,
+				'aw_faq_line',
 				array(
 					'type'              => 'string',
 					'single'            => true,
@@ -282,7 +294,8 @@ function aw_faq_show_here() {
 /**
  * The FAQ context of a post or term: kind (the post type or 'term'; the site's filter names its own kinds), store
  * ('post' | 'term'), object ID, type (post type or taxonomy), entity name, URL, the page node's and the main entity's
- * @id, the subject, the H2 (aw_faq_heading()). Null for a type without the box.
+ * @id, the subject, the H2 (aw_faq_heading()), the line under it ('' = none; pages and posts: the FAQ box's Subtitle
+ * field). Null for a type without the box.
  *
  * @param WP_Post|WP_Term|null $obj Default: the queried object.
  * @return array|null
@@ -307,6 +320,7 @@ function aw_faq_context( $obj = null ) {
 			'about'           => $url . '#webpage',
 			'subject'         => $subject[0],
 			'head'            => aw_faq_heading( $subject[0] ),
+			'line'            => in_array( $obj->post_type, AW_FAQ_SUBJECT_TYPES, true ) ? aw_faq_plain( (string) get_post_meta( $obj->ID, 'aw_faq_line', true ) ) : '',
 			'subject_missing' => 'title' === $subject[1] && in_array( $obj->post_type, AW_FAQ_SUBJECT_TYPES, true ),
 		);
 		if ( isset( $hubs[ (int) $obj->ID ] ) ) { // a hub page by the map, whatever its Subject field says
@@ -316,7 +330,7 @@ function aw_faq_context( $obj = null ) {
 	} elseif ( $obj instanceof WP_Term && in_array( $obj->taxonomy, aw_faq_taxonomies(), true ) ) {
 		$url  = (string) kits_term_url( $obj );
 		$name = aw_faq_plain( $obj->name );
-		$ctx  = array( 'kind' => 'term', 'store' => 'term', 'id' => (int) $obj->term_id, 'type' => $obj->taxonomy, 'entity' => $name, 'full' => '', 'url' => $url, 'page_id' => $url . '#webpage', 'about' => $url . '#webpage', 'subject' => $name, 'head' => aw_faq_heading( $name ), 'subject_missing' => false );
+		$ctx  = array( 'kind' => 'term', 'store' => 'term', 'id' => (int) $obj->term_id, 'type' => $obj->taxonomy, 'entity' => $name, 'full' => '', 'url' => $url, 'page_id' => $url . '#webpage', 'about' => $url . '#webpage', 'subject' => $name, 'head' => aw_faq_heading( $name ), 'line' => '', 'subject_missing' => false );
 	}
 	return null === $ctx ? null : apply_filters( 'aw_faq_context', $ctx, $obj );
 }
@@ -567,7 +581,7 @@ function aw_faq_build( $ctx = null ) {
 }
 
 /**
- * The accordion: the section head (H2 from aw_faq_heading(), the style's line if any, its ghost "see all" link); each
+ * The accordion: the section head (H2 from aw_faq_heading(), the page's line if any, its ghost "see all" link); each
  * question a button (aria-expanded) inside an H3; each answer in the HTML (kit.js closes them after load; without
  * JavaScript every answer shows).
  *
@@ -594,7 +608,9 @@ function aw_faq_html( $faq = null ) {
 	// parsed from is the text the page shows; texturizing it again later changes nothing.
 	list( $line, $all, $label ) = array_pad( aw_faq_head_parts(), 3, '' );
 	$here = untrailingslashit( (string) strtok( (string) $faq['ctx']['url'], '?#' ) ) === untrailingslashit( (string) strtok( (string) $all, '?#' ) );
-	$line = $here ? '' : $line; // on the full FAQ page itself: neither the line that points to it nor the link
+	$line = $here ? '' : $line; // on the full FAQ page itself: neither the default line that points to it nor the link
+	$own  = trim( (string) ( $faq['ctx']['line'] ?? '' ) );
+	$line = '' !== $own ? $own : $line; // the page's own line, wherever it is
 	$head = '<div class="kit-sec-head"><div><h2 id="kit-faq-h">' . esc_html( $faq['ctx']['head'] ) . '</h2>' . ( '' !== $line ? '<p>' . esc_html( $line ) . '</p>' : '' ) . '</div>'
 		. ( '' !== $all && '' !== $label && ! $here ? '<a class="kit-btn kit-btn--ghost kit-btn--sm" href="' . esc_url( $all ) . '">' . esc_html( $label ) . '</a>' : '' ) . '</div>';
 	return $html[ $key ] = wptexturize( '<section class="kit-faq" id="faq" aria-labelledby="kit-faq-h" data-faq="' . esc_attr( $faq['ctx']['kind'] ) . '">' . $head . $body . '</section>' );
@@ -776,6 +792,8 @@ function aw_faq_editor( $ctx ) {
 		if ( '' === $own && ! empty( $ctx['subject_missing'] ) ) {
 			echo '<div class="notice notice-warning inline"><p>' . esc_html( 'No subject: the heading uses the page title, “' . $ctx['head'] . '”.' ) . '</p></div>';
 		}
+		$line = (string) get_post_meta( $ctx['id'], 'aw_faq_line', true );
+		echo '<p><label for="aw-faq-line"><strong>Subtitle</strong> (one line under the heading; leave empty for none)</label><br><input type="text" class="large-text" id="aw-faq-line" name="aw_faq_line" value="' . esc_attr( $line ) . '"></p>';
 	}
 	// The default order as rendered (no automatic rows stored): saving it unchanged stores none, even when the item's
 	// own fields changed in the same save (they are saved first, so the questions now may differ from these).
@@ -959,6 +977,14 @@ add_action(
 				delete_post_meta( $post_id, 'aw_faq_subject' );
 			} else {
 				update_post_meta( $post_id, 'aw_faq_subject', $subject );
+			}
+		}
+		if ( isset( $_POST['aw_faq_line'] ) && in_array( $post->post_type, AW_FAQ_SUBJECT_TYPES, true ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- checked in aw_faq_editor_posted()
+			$line = sanitize_text_field( wp_unslash( $_POST['aw_faq_line'] ) ); // phpcs:ignore WordPress.Security.NonceVerification -- checked in aw_faq_editor_posted()
+			if ( '' === $line ) {
+				delete_post_meta( $post_id, 'aw_faq_line' );
+			} else {
+				update_post_meta( $post_id, 'aw_faq_line', $line );
 			}
 		}
 		$ctx = aw_faq_context( $post );

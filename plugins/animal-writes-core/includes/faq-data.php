@@ -107,6 +107,7 @@ add_filter(
 		if ( $obj instanceof WP_Post && 'aw_listing' === $obj->post_type ) {
 			$ctx['kind']  = 'listing';
 			$ctx['about'] = $ctx['url'] . '#organization';
+			$ctx['line']  = 'Where it is, what it offers and how to reach it.'; // the FAQ head's line on every listing
 		} elseif ( $obj instanceof WP_Post && 'aw_legal' === $obj->post_type ) {
 			$kind          = aw_faq_legal_kind( $obj->ID );
 			$ctx['kind']   = 'legal';
