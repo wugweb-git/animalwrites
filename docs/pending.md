@@ -42,6 +42,11 @@ Owner, 25 Oct — not to be raised until their dates: the Lab rules Post phase (
 - **"Who regulates animal welfare in India" hub:** outline drafted; the owner decides whether to build it.
 - **AWBI facts (awbi.gov.in, read 1 Nov 2026):** 0129-2555700 is the Board's office line at Ballabhgarh (Monday to Friday, 9:00 AM to 5:30 PM). It is not an emergency line. Complaints go through the online Grievance form (sign-in needed). The site lists no separate grievance number and no recruitment page: its notice says vacancies are advertised publicly and offers come only from its official email or registered post.
 
+### Supreme Court stray dogs (1 Nov 2026)
+- **Supreme Court stray-dog tracker:** a new campaign (not the frozen community-dogs campaign), draft copy waiting for the owner's yes. Proposed address /campaigns/supreme-court-stray-dogs/; live by 10 Nov; the 17 Nov 2026 date is "compliance reports due" (19 May 2026 judgment, para 114), not a confirmed hearing. Then the guide /resources/supreme-court-stray-dog-orders-explained/ gets its "reports due" line, a link and a button to the campaign, and 49 News items get a campaign link.
+- **Supreme Court guide feeding link:** done 1 Nov 2026. "Feeding community dogs: what the law says" now opens the feeding good-practice guide, not the RWA guide.
+- **Cause-list check:** 12–14 Nov 2026, sci.gov.in, diary 41706/2025, for a 17 Nov listing.
+
 ### Media (owner to decide, 1 Nov 2026)
 - **Duplicates:** 185 groups (262 extra files, about 24 MB): 160 safe to merge, 3 need review, 22 are favicon/logo copies to leave. The merge tool (Media → Duplicate files) is live and merging the 160 in batches, Undo available; nothing deleted, extras only get the Trash status.
 - **Media, still open (1 Nov 2026):**
