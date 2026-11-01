@@ -503,6 +503,37 @@ add_action(
 	}
 );
 
+/* ---------- Dashboard panels (owner, 1 Nov 2026) ---------- */
+
+// Getting Started: FluentCRM shows the checklist only while its dashboard data carries onboarding steps.
+add_filter(
+	'fluent_crm/dashboard_data',
+	function ( $data ) {
+		if ( is_array( $data ) ) {
+			$data['onboarding'] = null;
+		}
+		return $data;
+	}
+);
+
+// The greeting header, Quick Links and the "Do more with FluentCRM Pro" card have no filter, so they are hidden with
+// a few lines of CSS on FluentCRM's own stylesheet, on FluentCRM's admin page only. The Pro card is the one linking to
+// FluentCRM's Pro page; the integration "Recommendation" card links there too, so it goes as well.
+add_action(
+	'admin_enqueue_scripts',
+	function ( $hook ) {
+		if ( 'toplevel_page_fluentcrm-admin' !== $hook || ! aw_crm_on() || ! wp_style_is( 'fluentcrm_app_global', 'enqueued' ) ) {
+			return;
+		}
+		wp_add_inline_style(
+			'fluentcrm_app_global',
+			'.fluentcrm_admin_dashboard .fcrm_dashboard_user,.fluentcrm_admin_dashboard .fcrm_quick_links_wrap,'
+			. '.fluentcrm_admin_dashboard .fcrm_base_card:has(a[href*="utm_campaign=pro"]){display:none}'
+		);
+	},
+	20
+);
+
 /* ---------- Setup commands (send nothing) ---------- */
 
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
