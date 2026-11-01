@@ -1625,6 +1625,32 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 	.aw-ed-law > .kit-stack > .kit-tile::before { justify-self: start; margin-bottom: var(--kit-space-3); }
 	.aw-ed-law > .kit-stack > .kit-tile::after { align-self: start; margin-top: 0.625rem; } /* centred on the icon square */
 }
+/* From the Library items (1 Nov 2026): three, the lead and two more. Meta row is the date and the publisher (no place, no
+   type chip); the two rows have a bigger title and a 4:3 picture. 768 to 1199: the lead runs full width (picture left,
+   4:3, text right) with the two rows side by side under it. From 1200: lead 5fr on the left, the two rows 7fr on the
+   right, each row half the lead's height with a 45% wide 4:3 picture, so both columns end level. */
+.aw-ed-law .aw-news-mosaic :is(.kit-meta-row .kit-meta-item:not(.aw-date), .kit-tag:not(.kit-tag--source)) { display: none; }
+.aw-ed-law .aw-news-mosaic .kit-card--stacked-md .kit-card-title { font-size: var(--kit-type-h4) !important; }
+.aw-ed-law .aw-news-mosaic .kit-card--stacked-md > .kit-card-media { aspect-ratio: 4 / 3; }
+.aw-ed-law .aw-news-mosaic .kit-card--stacked-md > .kit-card-media img { height: 100%; object-fit: cover; }
+@media (min-width: 768px) {
+	.aw-ed-law .aw-news-mosaic > li:nth-child(n+2) { align-self: stretch; display: flex; }
+	.aw-ed-law .aw-news-mosaic > li:nth-child(n+2) > .kit-card { flex: 1 1 auto; align-items: center; }
+}
+@media (min-width: 768px) and (max-width: 1199px) {
+	.aw-ed-law .aw-news-list.aw-news-mosaic { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+	.aw-ed-law .aw-news-mosaic > li:first-child { grid-column: 1 / -1 !important; grid-row: 1 !important; } /* over the shared three-item rule (:has, higher specificity) */
+	.aw-ed-law .aw-news-mosaic > li:nth-child(2) { grid-column: 1; grid-row: 2; }
+	.aw-ed-law .aw-news-mosaic > li:nth-child(3) { grid-column: 2; grid-row: 2; }
+	.aw-ed-law .aw-news-mosaic > li:first-child > .kit-card { flex-direction: row; }
+	.aw-ed-law .aw-news-mosaic > li:first-child .kit-card-media { position: static; flex: 0 0 45%; aspect-ratio: 4 / 3; min-height: 0; }
+	.aw-ed-law .aw-news-mosaic > li:first-child .kit-card-media img { position: static; height: 100%; object-fit: cover; }
+	.aw-ed-law .aw-news-mosaic > li:first-child > .kit-card > .kit-card-body { flex: 1 1 0; align-self: center; }
+}
+@media (min-width: 1200px) {
+	.aw-ed-law .aw-news-list.aw-news-mosaic { grid-template-rows: 1fr 1fr; }
+	.aw-ed-law .aw-news-mosaic .kit-card--stacked-md > .kit-card-media { width: 45% !important; max-width: 45%; }
+}
 
 /* Take action on Home: two Kits cards (icon, title, one line, button), side by side from 768; the button at the bottom.
    The card is not a link (its button is), so it does not lift on hover. */

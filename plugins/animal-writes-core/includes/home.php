@@ -198,8 +198,8 @@ function aw_home_guide_ids( $q ) {
 }
 
 /**
- * From the Library on Home: the newest Act, rule, order or judgment leads, then the three newest other items, an
- * official release after the rest (newest first otherwise).
+ * From the Library on Home: the newest Act, rule, order or judgment leads, then the newest other items (the list's
+ * size less one), an official release after the rest (newest first otherwise).
  *
  * @param array $q The Query Loop's query vars.
  * @return int[]
@@ -219,7 +219,7 @@ function aw_home_library_ids( $q ) {
 		}
 	}
 	$lead = $lead ? $lead : $ids[0];
-	$rest = array_slice( array_values( array_diff( $ids, array( $lead ) ) ), 0, 3 );
+	$rest = array_slice( array_values( array_diff( $ids, array( $lead ) ) ), 0, max( 0, (int) ( $q['posts_per_page'] ?? 4 ) - 1 ) );
 	// Official releases last; stable on every PHP version (usort is stable only from PHP 8): the list index breaks ties.
 	$keyed = array();
 	foreach ( $rest as $i => $id ) {

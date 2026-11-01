@@ -3,7 +3,7 @@
  * Title: From the Library
  * Slug: animal-writes/animal-law
  * Categories: animal-writes
- * Description: Four Library items as a mosaic of News cards (the newest Act, rule, order or judgment large on the left with its summary, three more beside it, an official release last; home.php), then four Kits tiles into the Library by type (four across from 1200, two by two below, a sideways row on phones).
+ * Description: Three Library items as a mosaic of News cards (the newest Act, rule, order or judgment large on the left with its summary, two more beside it, an official release last; home.php; from 768 to 1199 the lead runs full width above the two), then four Kits tiles into the Library by type (four across from 1200, two by two below, a sideways row on phones).
  * Inserter: yes
  *
  * @package animal-writes
@@ -28,7 +28,7 @@
 <!-- /wp:buttons --></div>
 <!-- /wp:group -->
 
-<!-- wp:query {"queryId":43,"query":{"perPage":4,"pages":0,"offset":0,"postType":"aw_legal","order":"desc","orderBy":"date","inherit":false},"className":"aw-hub-list","layout":{"type":"default"}} -->
+<!-- wp:query {"queryId":43,"query":{"perPage":3,"pages":0,"offset":0,"postType":"aw_legal","order":"desc","orderBy":"date","inherit":false},"className":"aw-hub-list","layout":{"type":"default"}} -->
 <div class="wp-block-query aw-hub-list"><!-- wp:post-template {"className":"aw-news-list aw-news-mosaic","layout":{"type":"default"}} -->
 <?php echo function_exists( 'aw_hub_item' ) ? str_replace( '"level":2', '"level":3', aw_hub_item( 'aw_news' ) ) : ''; // the News card for Library items too: picture (document page or publisher image), publisher, date, title ?>
 <!-- /wp:post-template --></div>
