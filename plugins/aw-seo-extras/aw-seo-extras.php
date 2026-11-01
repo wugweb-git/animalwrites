@@ -3,7 +3,7 @@
  * Plugin Name:       AW SEO Plus
  * Plugin URI:        https://animalwrites.in/
  * Description:       What Rank Math (free) cannot do for animalwrites.in: titles, descriptions and canonicals of list pages (hubs, Directory places, filtered lists), the site's own JSON-LD nodes in Rank Math's graph, the Directory sitemap, dynamic noindex rules, share images, URL clean-up redirects, the focus-keyword API, llms.txt ordering and Directory section, the FAQ system (an FAQ box on every public post type and taxonomy, automatic questions filled in where the site provides them) and Search Insights (keywords, Search Console by day through Site Kit, priorities; read-only), under its own AW SEO Plus menu (Overview, FAQ, Search Insights, Settings: every module's rules, and an on/off switch for each feature module). Rank Math holds everything else. Does nothing unless Rank Math is active.
- * Version:           1.9.0
+ * Version:           1.9.1
  * Requires at least: 6.4
  * Requires PHP:      8.0
  * Author:            Wugweb

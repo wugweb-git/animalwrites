@@ -41,7 +41,11 @@ Library official releases and circulars (owner, 25 Oct 2026): "When was the … 
 
 Library: "Who issued …" is not asked for Acts and Rules (the stored issuer is whose copy it is, not the law-maker). Four fields were added for Library documents (box "FAQ fields"): Short name (`aw_short_name`), Hindi version link (`aw_file_hi_url`), Issued under (`aw_legal_act`), Key sections (`aw_key_sections`, Acts and Rules only, one per line `number | one-line summary | link`). Section questions come only from that list.
 
-Resources guides: AW SEO Plus → FAQ counts them in a row of their own (guides with and without an FAQ; research summaries are not counted, as Research gets no FAQ). Since 25 Oct 2026 every guide has one.
+Resources guides: since 25 Oct 2026 every guide has an FAQ (their Rank Math FAQ blocks were converted). Guides get no automatic questions.
+
+Resources research summaries (owner, 1 Nov 2026; until then Research had no FAQ): automatic questions from the study's own fields, naming it "the <focus keyphrase> study in <place>" (the place the title names, else the first district, else the first state): who carried it out (`aw_authors`, with `aw_study_title` when the answer stays short), where it was published (`aw_journal`, else `aw_source_name`, and `aw_source_date`), what it is about (the excerpt's first sentences, up to 35 words), and which law it discusses (`aw_entities` laws that are Library documents). Each links to the study (`aw_source_url`), except the law answer, which links to the law's Library page. None without a focus keyphrase or a source link.
+
+Tags (owner, 1 Nov 2026): automatic questions from the items tagged (news, Library, Resources, Directory listings; Opportunities left out while paused): the latest news item, the latest Library document, the newest Resource, which organisations offer it (counts by state, link to the Directory filtered by the tag), who issues the Library documents (not Acts, Rules or templates), which topics (categories) come up most, which districts have the most listings, and which journals published the studies. None for a Directory listing type, for a tag with written questions of its own (it keeps only those), or for a tag with fewer than 4 items. Categories get none (theirs are written). A tag's item IDs are kept for an hour (transient `aw_faq_tag_<id>`), so a newly tagged item reaches its answers within the hour. A term's FAQ shows on page 1 of its list only.
 
 ## AW SEO Plus → FAQ
 
