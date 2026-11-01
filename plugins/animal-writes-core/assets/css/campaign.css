@@ -61,6 +61,8 @@
 .aw-camp--diwali .aw-camp-dark .aw-camp-steps span { color: color-mix(in srgb, var(--kit-color-on-ink) 80%, transparent); }
 /* Who to call has two columns: it fits a phone without sideways scrolling */
 .aw-camp--diwali #help { --kit-table-min: 0; }
+/* Supreme Court stray dogs (2026): the default ink hero; its main button in the site's own yellow so it shows on ink. */
+.aw-camp--sc-stray-dogs .aw-camp-hero .wp-block-button:not(.aw-camp-ghost) .wp-block-button__link { background: var(--kit-color-accent); color: var(--kit-color-on-accent); }
 /* The hero is the primary colour behind its ink, on every campaign; marks inside it use the same pair. */
 .aw-camp .aw-camp-hero { --camp-mark: var(--camp-primary); --camp-on-mark: var(--camp-primary-ink); }
 

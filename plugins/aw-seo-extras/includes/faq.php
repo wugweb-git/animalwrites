@@ -148,8 +148,8 @@ function aw_faq_hub_pages() {
 	return $out;
 }
 
-/** Post types whose FAQ heading can name a subject of its own (the FAQ box's Subject field): pages and posts. */
-const AW_FAQ_SUBJECT_TYPES = array( 'page', 'post' );
+/** Post types whose FAQ heading can name a subject of its own (the FAQ box's Subject field): pages, posts and campaigns. */
+const AW_FAQ_SUBJECT_TYPES = array( 'page', 'post', 'aw_campaign' );
 
 /**
  * The subject a post's FAQ heading names (aw_faq_heading(): "Questions about <subject>") and where it came from: the FAQ box's Subject
