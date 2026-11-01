@@ -308,27 +308,30 @@ add_shortcode(
 		ob_start();
 		?>
 <form class="aw-letter" data-letter="<?php echo esc_attr( wp_json_encode( $data ) ); ?>" novalidate>
-	<div class="aw-letter-inputs">
-		<fieldset class="aw-letter-grounds-pick">
-			<legend><span class="aw-letter-step">1</span>Choose your grounds <span class="aw-letter-picked" aria-live="polite"></span></legend>
-			<div class="aw-letter-ground-list"></div>
-		</fieldset>
-		<div class="aw-letter-sign">
-		<p class="aw-letter-head"><span class="aw-letter-step">2</span>Sign it</p>
-		<p class="aw-letter-field"><label for="aw-letter-name">Your name <span aria-hidden="true">*</span></label>
-			<input id="aw-letter-name" name="name" type="text" autocomplete="name" required maxlength="80"></p>
-		<p class="aw-letter-field"><label for="aw-letter-city">Your city <span aria-hidden="true">*</span></label>
-			<input id="aw-letter-city" name="city" type="text" autocomplete="address-level2" required maxlength="60"></p>
-		<p class="aw-letter-field aw-letter-email"><label for="aw-letter-email">Your email <span aria-hidden="true">*</span></label>
-			<input id="aw-letter-email" name="email" type="email" autocomplete="email" required maxlength="190"></p>
-		<p class="aw-letter-field"><label for="aw-letter-own">Add a line in your own words <span class="aw-letter-hint">(optional, up to 300 characters)</span></label>
-			<textarea id="aw-letter-own" name="own" maxlength="300" rows="3"></textarea></p>
+<div class="kit-steps aw-letter-steps" data-steps="3">
+	<fieldset class="kit-step aw-letter-grounds-pick" data-step="1">
+		<legend><span class="kit-step-count">Step 1 of 3</span><span class="aw-letter-step" aria-hidden="true">1</span><span class="kit-step-title">Choose your grounds</span> <span class="aw-letter-picked" aria-live="polite"></span></legend>
+		<div class="aw-letter-ground-list"></div>
+		<div class="kit-step-nav"><button type="button" class="kit-btn" data-step-next>Next</button></div>
+	</fieldset>
+	<fieldset class="kit-step aw-letter-sign" data-step="2">
+		<legend class="aw-letter-head"><span class="kit-step-count">Step 2 of 3</span><span class="aw-letter-step" aria-hidden="true">2</span><span class="kit-step-title">Sign it</span></legend>
+		<div class="aw-letter-sign-fields">
+			<p class="aw-letter-field"><label for="aw-letter-name">Your name <span aria-hidden="true">*</span></label>
+				<input id="aw-letter-name" aria-describedby="aw-letter-name-error" name="name" type="text" autocomplete="name" required maxlength="80"><span class="kit-field-message kit-field-error" id="aw-letter-name-error" aria-live="polite"></span></p>
+			<p class="aw-letter-field"><label for="aw-letter-city">Your city <span aria-hidden="true">*</span></label>
+				<input id="aw-letter-city" aria-describedby="aw-letter-city-error" name="city" type="text" autocomplete="address-level2" required maxlength="60"><span class="kit-field-message kit-field-error" id="aw-letter-city-error" aria-live="polite"></span></p>
+			<p class="aw-letter-field aw-letter-email"><label for="aw-letter-email">Your email <span aria-hidden="true">*</span></label>
+				<input id="aw-letter-email" aria-describedby="aw-letter-email-error" name="email" type="email" autocomplete="email" required maxlength="190"><span class="kit-field-message kit-field-error" id="aw-letter-email-error" aria-live="polite"></span></p>
+			<p class="aw-letter-field"><label for="aw-letter-own">Add a line in your own words <span class="aw-letter-hint">(optional, up to 300 characters)</span></label>
+				<textarea id="aw-letter-own" name="own" maxlength="300" rows="3"></textarea></p>
 		</div>
-	</div>
-	<div class="aw-letter-out">
-		<p class="aw-letter-head"><span class="aw-letter-step">3</span>Check and send</p>
+		<div class="aw-letter-preview" tabindex="0" aria-label="Your letter"></div>
+		<div class="kit-step-nav"><button type="button" class="kit-btn" data-step-next>Next</button><button type="button" class="kit-btn kit-btn--secondary" data-step-back>Back</button></div>
+	</fieldset>
+	<fieldset class="kit-step aw-letter-out" data-step="3">
+		<legend class="aw-letter-head"><span class="kit-step-count">Step 3 of 3</span><span class="aw-letter-step" aria-hidden="true">3</span><span class="kit-step-title">Check and send</span></legend>
 		<p class="aw-letter-meta"><span class="aw-letter-to"><?php echo aw_i( 'mail' ); ?><?php echo esc_html( $to ); ?></span><span><strong>Subject:</strong> <?php echo esc_html( $a['subject'] ); ?></span></p>
-		<div class="aw-letter-preview" aria-live="polite" tabindex="0" aria-label="Your letter"></div>
 		<p class="aw-letter-optin"><input type="checkbox" id="aw-letter-optin" name="optin" value="1" checked> <label for="aw-letter-optin"><?php echo esc_html( defined( 'AW_CL_OPTIN' ) ? AW_CL_OPTIN : '' ); ?></label></p>
 		<p class="aw-letter-field"><label for="aw-letter-wa">WhatsApp number <span class="aw-letter-hint">(optional)</span></label>
 			<input id="aw-letter-wa" name="whatsapp" type="tel" inputmode="tel" autocomplete="tel" maxlength="16"></p>
@@ -351,7 +354,9 @@ add_shortcode(
 			<p>Keep the sent email: it is your record. CCSEA may reply to the address you sent from.</p>
 			<p class="aw-letter-ref" hidden>Your reference: <strong></strong></p>
 		</div>
-	</div>
+		<div class="kit-step-nav"><button type="button" class="kit-btn kit-btn--secondary" data-step-back>Back</button></div>
+	</fieldset>
+</div>
 </form>
 		<?php
 		return (string) ob_get_clean();

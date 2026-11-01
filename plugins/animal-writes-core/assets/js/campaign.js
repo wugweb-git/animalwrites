@@ -316,12 +316,22 @@
 		var ok = !miss.length;
 		errorEl.textContent = ok ? '' : 'Add ' + miss.map(function (f) { return f[1]; }).join(miss.length > 2 ? ', ' : ' and ').replace(/, ([^,]*)$/, ' and $1') + ' to send your objection.';
 		errorEl.hidden = ok;
-		if (!ok) form.elements[miss[0][0]].focus();
+		if (!ok) { // the field is in step 2: go back to it first (the theme's steps, kit.js)
+			var first = form.elements[miss[0][0]], step = first.closest('.kit-step');
+			var back = step && step.hidden && form.querySelector('.kit-step:not([hidden]) [data-step-back]');
+			if (back) back.click();
+			first.focus();
+		}
 		return ok;
 	}
 	['name', 'city', 'email'].forEach(function (n) { // the mark clears as soon as the field is filled
 		var el = form.elements[n];
-		if (el) el.addEventListener('input', function () { if (el.getAttribute('aria-invalid') === 'true' && (n === 'email' ? emailOk() : val(n))) el.setAttribute('aria-invalid', 'false'); });
+		if (el) el.addEventListener('input', function () {
+			if (el.getAttribute('aria-invalid') !== 'true' || !(n === 'email' ? emailOk() : val(n))) return;
+			el.setAttribute('aria-invalid', 'false');
+			var msg = document.getElementById(el.id + '-error'); // the step's error line (kit.js) clears with the mark
+			if (msg) msg.textContent = '';
+		});
 	});
 
 	/* keepalive: the browser finishes the call after the page leaves (Gmail or the mail app opening). One retry after

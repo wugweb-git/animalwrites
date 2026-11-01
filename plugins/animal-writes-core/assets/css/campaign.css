@@ -364,10 +364,6 @@
 	.aw-camp--lab-rules :is(.aw-camp-hero-cols, .aw-camp-split) { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 	.aw-camp--lab-rules .aw-camp-art { max-height: var(--kit-thumb-max); } /* 15rem (docs/card-sizes.md): the picture is cropped, never the text */
 	.aw-camp--lab-rules .aw-camp-ladder { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-	/* Step 3: the sign-up box and the WhatsApp field side by side */
-	.aw-camp--lab-rules .aw-letter-out { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--kit-space-5); align-content: start; }
-	.aw-camp--lab-rules .aw-letter-out > * { grid-column: 1 / -1; }
-	.aw-camp--lab-rules .aw-letter-out > :is(.aw-letter-optin, .aw-letter-field) { grid-column: auto; }
 	/* Share: the buttons across, then the two pictures beside the link preview */
 	.aw-camp--lab-rules .aw-letter-share-box.is-in-section { row-gap: var(--kit-space-4); }
 	.aw-camp--lab-rules .aw-letter-share-box.is-in-section .aw-letter-share-copy { grid-column: 1 / -1; }
@@ -375,7 +371,6 @@
 	.aw-camp--lab-rules .aw-letter-share-box.is-in-section .aw-letter-share-preview { grid-column: 2; grid-row: 2; }
 }
 @media (min-width: 1200px) {
-	.aw-camp--lab-rules .aw-letter { grid-template-columns: 1fr 2fr; } /* step 3 a third wider than 5fr 7fr, so it stays under 600px */
 	/* Share: buttons, pictures and preview in three columns */
 	.aw-camp--lab-rules .aw-letter-share-box.is-in-section { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 	.aw-camp--lab-rules .aw-letter-share-box.is-in-section :is(.aw-letter-share-copy, .aw-letter-share-pics, .aw-letter-share-preview) { grid-row: 1; grid-column: auto; }
@@ -389,6 +384,14 @@
 	.aw-camp--lab-rules:has(> .aw-sticky-cta) { --aw-bar-h: calc(var(--kit-btn-height) + 2 * var(--kit-space-2) + env(safe-area-inset-bottom)); padding-bottom: var(--aw-bar-h); }
 	html:has(.aw-camp--lab-rules > .aw-sticky-cta) { scroll-padding-bottom: calc(var(--kit-btn-height) + 2 * var(--kit-space-2) + env(safe-area-inset-bottom)); }
 }
+/* Send your objection from 768: the heading, lede and note beside the letter tool, so the section stays under 720px
+   (the 1120px text column of .aw-camp-section > *, as the Diwali help band) */
+@media (min-width: 768px) {
+	.aw-camp--lab-rules .aw-camp-section:has(> .aw-letter) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); column-gap: var(--kit-space-6); align-content: start; align-items: start; padding-inline: max(var(--kit-space-gutter), (100% - 1120px) / 2); }
+	.aw-camp--lab-rules .aw-camp-section:has(> .aw-letter) > * { grid-column: 1; max-width: none; margin-inline: 0 !important; } /* core's constrained layout centres children with !important */
+	.aw-camp--lab-rules .aw-camp-section:has(> .aw-letter) > .aw-letter { grid-column: 2; grid-row: 1 / span 4; box-sizing: border-box; width: 100%; min-width: 0; margin: 0; padding: var(--kit-space-5); }
+}
+@media (min-width: 768px) and (max-width: 1199px) { .aw-camp--lab-rules .aw-camp-section:has(> .aw-letter) { grid-template-columns: minmax(0, 1fr) minmax(0, 3fr); } }
 /* The fixed hero (--kit-hero-h) holds its content at every width (owner, 2 Nov 2026): one call to action, and on short
    phones (under 760px tall) the poster without the Gazette strip, its G.S.R. stamp beside the countdown */
 .aw-camp--lab-rules .aw-camp-hero .aw-camp-ghost { display: none; }
@@ -625,15 +628,43 @@
 .aw-rule-chip-src { color: var(--kit-color-muted); font-size: var(--kit-type-small, 0.875rem); }
 .aw-rule-chip-close { margin-top: var(--kit-space-3); min-height: 2.75rem; padding: var(--kit-space-2) var(--kit-space-4); border: 1px solid var(--kit-color-line); border-radius: var(--kit-radius-control); background: transparent; font: inherit; cursor: pointer; }
 
-/* Letter tool: 1 grounds (full width), 2 sign and 3 send side by side */
-.aw-letter { display: grid; gap: var(--kit-space-6); }
-.aw-letter-inputs { display: contents; }
-@media (min-width: 1200px) {
-	.aw-letter { grid-template-columns: 5fr 7fr; align-items: start; }
-	.aw-letter-grounds-pick { grid-column: 1 / -1; }
-	.aw-letter-out { position: sticky; top: calc(var(--kit-header-height, 4rem) + var(--kit-space-4)); }
-}
+/* Letter tool in three steps (the theme's steps, kit.js): 1 grounds, 2 sign it beside the letter it fills, 3 check and
+   send. Without JavaScript all three show one after the other. Each step is under 600px at every width. */
 .aw-letter fieldset { margin: 0; padding: 0; border: 0; min-width: 0; }
+.aw-letter .kit-step[hidden] { display: none; } /* a step's own display rule must not show a hidden step */
+.aw-letter-steps:not(.is-stepped) > .kit-step + .kit-step { margin-top: var(--kit-space-6); }
+.aw-letter .kit-steps-progress { margin-bottom: var(--kit-space-4); }
+.aw-letter .kit-step-nav { margin-top: var(--kit-space-3); }
+.aw-letter .aw-letter-sign-fields > .aw-letter-field { margin-bottom: var(--kit-space-2); }
+.aw-letter .kit-field-message:empty { display: none; } /* the error line takes room only when it has a message; the field names it (aria-describedby) and gets focus when it does */
+/* Step 2: name and city side by side, email and your own line full width (phones, and from 1200 beside the letter) */
+@media (max-width: 767px), (min-width: 1200px) {
+	.aw-letter .aw-letter-sign-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--kit-space-3); }
+	.aw-letter .aw-letter-sign-fields > :is(.aw-letter-email, :has(textarea)) { grid-column: 1 / -1; }
+}
+@media (max-width: 767px) {
+	.aw-letter .aw-letter-preview { max-height: calc(2 * var(--kit-space-9)); } /* the letter scrolls inside its box */
+	/* Step 3: Gmail across, the email app and copy side by side */
+	.aw-letter .aw-letter-routes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--kit-space-3); }
+	.aw-letter .aw-letter-routes > [data-route="gmail"] { grid-column: 1 / -1; }
+}
+@media (min-width: 768px) {
+	.aw-letter .aw-letter-sign { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--kit-space-5); align-items: start; }
+	.aw-letter .aw-letter-sign > .kit-step-nav { grid-column: 1 / -1; }
+	/* Step 3: the address and subject beside the sign-up boxes */
+	.aw-letter .aw-letter-out { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--kit-space-5); align-content: start; }
+	.aw-letter .aw-letter-out > * { grid-column: 1 / -1; }
+	.aw-letter .aw-letter-out > .aw-letter-meta { grid-column: 1; grid-row: 1 / span 3; margin: 0; }
+	.aw-letter .aw-letter-out > :is(.aw-letter-optin, .aw-letter-field) { grid-column: 2; }
+	.aw-letter .aw-letter-out > .aw-letter-meta + .aw-letter-optin { margin-top: 0; }
+}
+@media (min-width: 768px) and (max-width: 1199px) {
+	/* Step 2: name, city and email beside the letter, your own line under both */
+	.aw-letter .aw-letter-sign-fields { display: contents; }
+	.aw-letter .aw-letter-sign .aw-letter-field { grid-column: 1; }
+	.aw-letter .aw-letter-sign .aw-letter-preview { grid-column: 2; grid-row: 1 / span 3; }
+	.aw-letter .aw-letter-sign .aw-letter-field:has(textarea) { grid-column: 1 / -1; }
+}
 .aw-letter legend, .aw-letter-head { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); margin: 0 0 var(--kit-space-4); font-size: var(--kit-type-h3); font-weight: 800; letter-spacing: -0.01em; }
 .aw-letter-step { display: inline-grid; place-items: center; width: 2rem; height: 2rem; border-radius: 50%; background: var(--camp-mark, var(--kit-color-ink)); color: var(--camp-on-mark, var(--kit-color-on-ink)); font-size: 1rem; }
 .aw-letter-picked { font-size: var(--kit-type-sm); font-weight: var(--kit-weight-regular); color: var(--kit-color-muted); }
