@@ -214,7 +214,9 @@ function aw_faq_context( $obj = null ) {
  * (question template, %s = the entity), needs (fields; documentation), pattern (the search it answers), answer
  * (callable: ($id, $entity) → [answer HTML, fact key, counts?], a list of [q, a, fact] for several questions, or null
  * when the fields are empty; $id is the term ID for a taxonomy), question (optional callable: ($q, $id, $entity, $key)
- * → the question). Empty here: the site adds its own.
+ * → the question), hidden (optional: true, or a callable ($id, $entity) → bool; with hidden_why, the reason shown in the
+ * box): a hidden question stays in the FAQ box, marked Hidden, but is never shown on the page or in the schema and does
+ * not count toward the minimum. Empty here: the site adds its own.
  *
  * @return array
  */
@@ -226,7 +228,7 @@ function aw_faq_registry() {
  * The automatic questions an item has from its data now, by id (the registry key; one per section for lists).
  *
  * @param array $ctx aw_faq_context().
- * @return array[] id => [ id, q, a, fact, priority, key, counts, answer ]
+ * @return array[] id => [ id, q, a, fact, priority, key, counts, answer, hidden (the reason, or '') ]
  */
 function aw_faq_auto( $ctx ) {
 	$out = array();
@@ -235,14 +237,16 @@ function aw_faq_auto( $ctx ) {
 		if ( ! $r ) {
 			continue;
 		}
+		$h      = $e['hidden'] ?? false;
+		$hidden = ( is_callable( $h ) ? call_user_func( $h, $ctx['id'], $ctx['entity'] ) : (bool) $h ) ? (string) ( $e['hidden_why'] ?? 'not shown on the page' ) : '';
 		if ( isset( $r[0] ) && is_string( $r[0] ) ) { // one answer: [ html, fact, counts ]
 			$q                = ! empty( $e['question'] ) ? call_user_func( $e['question'], $e['q'], $ctx['id'], $ctx['entity'], $e['key'] ) : sprintf( $e['q'], $ctx['entity'] );
-			$out[ sanitize_key( $e['key'] ) ] = array( 'id' => sanitize_key( $e['key'] ), 'q' => $q, 'a' => $r[0], 'fact' => $r[1], 'priority' => $e['priority'], 'key' => $e['key'], 'counts' => $r[2] ?? true, 'answer' => $e['answer'] );
+			$out[ sanitize_key( $e['key'] ) ] = array( 'id' => sanitize_key( $e['key'] ), 'q' => $q, 'a' => $r[0], 'fact' => $r[1], 'priority' => $e['priority'], 'key' => $e['key'], 'counts' => $r[2] ?? true, 'answer' => $e['answer'], 'hidden' => $hidden );
 			continue;
 		}
 		foreach ( array_values( $r ) as $i => $x ) { // several (key sections)
 			$id         = sanitize_key( $e['key'] . '-' . substr( md5( (string) $x['fact'] ), 0, 8 ) ); // stable per section, safe as a key
-			$out[ $id ] = array( 'id' => $id, 'q' => $x['q'], 'a' => $x['a'], 'fact' => $x['fact'], 'priority' => $e['priority'] + $i / 100, 'key' => $e['key'], 'counts' => true, 'answer' => $e['answer'] );
+			$out[ $id ] = array( 'id' => $id, 'q' => $x['q'], 'a' => $x['a'], 'fact' => $x['fact'], 'priority' => $e['priority'] + $i / 100, 'key' => $e['key'], 'counts' => true, 'answer' => $e['answer'], 'hidden' => $hidden );
 		}
 	}
 	return $out;
@@ -324,7 +328,7 @@ function aw_faq_items_save( $store, $id, array $rows ) {
  * @param array $ctx   aw_faq_context().
  * @param bool  $cache Keep for the request (false for the counts, which walk every item).
  * @return array [ rows[ [ origin auto|edited|own|removed, id, q, a, gen (the automatic text), sources, keyword, status,
- *               reviewed, fact, counts, answer, shown, why ] ], ok, note ]
+ *               reviewed, fact, counts, answer, hidden, shown, why ] ], ok, note ]
  */
 function aw_faq_rows( $ctx, $cache = true ) {
 	static $memo = array();
@@ -335,8 +339,8 @@ function aw_faq_rows( $ctx, $cache = true ) {
 	$auto   = aw_faq_auto( $ctx );
 	$stored = aw_faq_items( $ctx['store'], $ctx['id'] );
 	uasort( $auto, fn( $a, $b ) => $a['priority'] <=> $b['priority'] );
-	$base   = array( 'id' => '', 'key' => 'own', 'gen' => null, 'sources' => array(), 'keyword' => '', 'status' => 'approved', 'reviewed' => '', 'counts' => true, 'answer' => null );
-	$gen    = fn( $origin, $g ) => array( 'origin' => $origin, 'id' => $g['id'], 'q' => $g['q'], 'a' => $g['a'], 'gen' => $g, 'key' => $g['key'], 'fact' => $g['fact'], 'counts' => $g['counts'], 'answer' => $g['answer'] ) + $base;
+	$base   = array( 'id' => '', 'key' => 'own', 'gen' => null, 'sources' => array(), 'keyword' => '', 'status' => 'approved', 'reviewed' => '', 'counts' => true, 'answer' => null, 'hidden' => '' );
+	$gen    = fn( $origin, $g ) => array( 'origin' => $origin, 'id' => $g['id'], 'q' => $g['q'], 'a' => $g['a'], 'gen' => $g, 'key' => $g['key'], 'fact' => $g['fact'], 'counts' => $g['counts'], 'answer' => $g['answer'], 'hidden' => $g['hidden'] ?? '' ) + $base;
 	$placed = array(); // in the stored order: own rows and the automatic rows the box placed
 	$custom = false;
 	foreach ( $stored as $s ) {
@@ -350,7 +354,7 @@ function aw_faq_rows( $ctx, $cache = true ) {
 			$auto[ $s['auto'] ]['placed'] = true;
 		}
 		if ( 'edited' === $s['state'] ) {
-			$placed[] = array( 'origin' => 'edited', 'id' => $s['auto'], 'q' => $s['q'], 'a' => $s['a'], 'gen' => $g, 'key' => 'edited', 'fact' => $g ? $g['fact'] : 'edited:' . $s['auto'] ) + $base; // the fact it states, so a repeat of it is still dropped
+			$placed[] = array( 'origin' => 'edited', 'id' => $s['auto'], 'q' => $s['q'], 'a' => $s['a'], 'gen' => $g, 'key' => 'edited', 'fact' => $g ? $g['fact'] : 'edited:' . $s['auto'], 'hidden' => $g['hidden'] ?? '' ) + $base; // the fact it states, so a repeat of it is still dropped; hidden stays hidden when edited
 		} elseif ( $g ) { // automatic or removed: only while the data still gives the question
 			$placed[] = $gen( 'removed' === $s['state'] ? 'removed' : 'auto', $g );
 		}
@@ -370,7 +374,7 @@ function aw_faq_rows( $ctx, $cache = true ) {
 }
 
 /**
- * Mark which rows the page shows, in the box's order: removed and draft rows are not shown; a row stating a fact (or
+ * Mark which rows the page shows, in the box's order: removed, hidden and draft rows are not shown; a row stating a fact (or
  * asking a question) already shown is dropped; at most AW_FAQ_MAX; fewer than the minimum counted = no FAQ at all.
  *
  * @param array $ctx  aw_faq_context().
@@ -387,6 +391,8 @@ function aw_faq_rows_mark( $ctx, array $rows ) {
 		$qk  = 'q:' . strtolower( trim( preg_replace( '/\W+/u', ' ', $r['q'] ) ) );
 		if ( 'removed' === $r['origin'] ) {
 			$why = 'Removed';
+		} elseif ( '' !== ( $r['hidden'] ?? '' ) ) {
+			$why = 'Hidden: ' . $r['hidden'];
 		} elseif ( 'own' === $r['origin'] && 'approved' !== $r['status'] ) {
 			$why = 'Draft: not shown until approved';
 		} elseif ( isset( $seen[ 'f:' . $r['fact'] ] ) || isset( $seen[ $qk ] ) ) {
