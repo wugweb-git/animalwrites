@@ -13,7 +13,9 @@
 
 const DW_SLUG  = 'diwali-firecrackers-animals-2026';
 const DW_TERM  = 'campaign-diwali-firecrackers-2026';
-const DW_HERO  = 14272; // a person feeding two street dogs by the roadside
+const DW_HERO  = 14272; // a person feeding two street dogs by the roadside (the featured image)
+const DW_PHOTO = 0;     // hero photo, wide: a woman sets down water for a street dog on Diwali night
+const DW_PHOTO_PHONE = 0; // the same scene, framed for phones
 const DW_ART   = 8771;  // a woman feeding cows on a street in India
 const DW_DIWALI = '2026-11-08';
 
@@ -145,30 +147,29 @@ if ( ! $term_id ) {
 	exit( 1 );
 }
 
-/* hero: open (until 8 Nov) and closed (from 9 Nov); one shows. */
-$poster = '<div class="aw-camp-poster">'
-	. '<figure class="aw-camp-poster-doc">' . wp_get_attachment_image( DW_HERO, 'large', false, array( 'loading' => 'eager', 'decoding' => 'async' ) ) . '</figure>'
-	. '<p class="aw-camp-stamp">8 Nov 2026</p>'
-	. '[aw_countdown label="Diwali"]'
-	. '<p class="aw-camp-poster-chips"><span class="aw-camp-poster-label">If an animal is hurt</span> '
-	. '<a class="kit-chip kit-chip--on-ink" href="#help">Who to call</a> '
-	. '<a class="kit-chip kit-chip--on-ink" href="/resources/found-an-injured-animal-what-to-do/">Injured animal</a> '
-	. '<a class="kit-chip kit-chip--on-ink" href="/resources/injured-bird-helpline-numbers-by-city/">Bird helplines</a></p>'
-	. '</div>';
+/* hero: open (until 8 Nov) and closed (from 9 Nov); one shows. The open hero is a night photo with the text over its
+   dark side (from 1200) or above it (below 1200); no countdown. */
+$photo = '<picture class="aw-camp-hero-photo alignfull">'
+	. '<source media="(max-width: 767px)" srcset="' . esc_url( wp_get_attachment_image_url( DW_PHOTO_PHONE, 'full' ) ) . '">'
+	. '<img src="' . esc_url( wp_get_attachment_image_url( DW_PHOTO, 'full' ) ) . '" alt="' . esc_attr( get_post_meta( DW_PHOTO, '_wp_attachment_image_alt', true ) ) . '" width="1672" height="941" fetchpriority="high" decoding="async">'
+	. '</picture>';
 $hero = dwsec(
 	'top',
-	'<!-- wp:columns {"verticalAlignment":"center","className":"aw-camp-hero-cols"} -->' . "\n" . '<div class="wp-block-columns are-vertically-aligned-center aw-camp-hero-cols">'
-	. '<!-- wp:column {"verticalAlignment":"center","width":"58%"} -->' . "\n" . '<div class="wp-block-column is-vertically-aligned-center" style="flex-basis:58%">'
+	dwhtml( $photo )
+	. '<!-- wp:group {"className":"aw-camp-hero-copy","layout":{"type":"default"}} -->' . "\n" . '<div class="wp-block-group aw-camp-hero-copy">'
 	. dwsc( '[aw_camp_status]' )
 	. dwh( 'Diwali is loud. Keep pets and street dogs safe.', 1 )
 	. dwp( 'Firecrackers frighten and hurt pets, street animals and birds. Keeping dogs during Diwali safe takes a safe room and an ID tag for your pet, a quiet corner and water for the dogs outside, and the right number to call if an animal is hurt.', 'aw-camp-hero-summary' )
 	. dwp( 'Our aim: no animal near you hurt, lost or left without help this Diwali.' )
 	. dwbuttons( array( array( 'What to do tonight', '#tonight' ), array( 'Who to call', '#help', 'ghost' ) ) )
-	. '</div>' . "\n" . '<!-- /wp:column -->' . "\n\n"
-	. '<!-- wp:column {"verticalAlignment":"center","width":"42%"} -->' . "\n" . '<div class="wp-block-column is-vertically-aligned-center" style="flex-basis:42%">'
-	. dwhtml( $poster )
-	. '</div>' . "\n" . '<!-- /wp:column --></div>' . "\n" . '<!-- /wp:columns -->' . "\n\n",
-	'aw-camp-hero aw-camp-open'
+	. dwhtml(
+		'<p class="aw-camp-poster-chips"><span class="aw-camp-poster-label">If an animal is hurt</span> '
+		. '<a class="kit-chip kit-chip--on-ink" href="#help">Who to call</a> '
+		. '<a class="kit-chip kit-chip--on-ink" href="/resources/found-an-injured-animal-what-to-do/">Injured animal</a> '
+		. '<a class="kit-chip kit-chip--on-ink" href="/resources/injured-bird-helpline-numbers-by-city/">Bird helplines</a></p>'
+	)
+	. '</div>' . "\n" . '<!-- /wp:group -->' . "\n\n",
+	'aw-camp-hero aw-camp-hero--photo aw-camp-open'
 );
 $hero_closed = dwsec(
 	'',
@@ -398,7 +399,7 @@ $content = '<!-- wp:group {"align":"full","className":"aw-camp aw-camp--diwali",
 	. dwslot( 'partners', dwsec( '', dwsc( '[aw_campaign_partners title="Partners"]' ), 'aw-camp-white' ), 'aw-camp-if-filled' )
 	. dwslot( 'next-steps', $next_open, 'aw-camp-open' )
 	. dwslot( 'updates', $share, 'aw-camp-open' )
-	. dwsc( '[aw_sticky_cta href="#tonight" label="What to do tonight"]' )
+	. dwsc( '[aw_sticky_cta href="#tonight" label="What to do tonight" days="0"]' )
 	. "</div>\n<!-- /wp:group -->";
 
 $title   = 'Keep animals safe this Diwali';

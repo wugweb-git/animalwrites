@@ -22,7 +22,7 @@
  *                                                                class aw-letter-grounds just before it
  *   [aw_campaign_count min="100"]                                "N letters sent" once N reaches min
  *   [aw_camp_status]                                             the hero's status: action window, and the outcome
- *   [aw_sticky_cta href="#send" label="..."]                     phone-only bar with the days left
+ *   [aw_sticky_cta href="#send" label="..."]                     phone-only bar with the days left; days="0" leaves them out
  *   [aw_campaign_band campaign="slug" theme="lab-rules"]       home band; shown only while the campaign is
  *                                                                published and open; label="…" a pill above the
  *                                                                title, art="ID" art_phone="ID" the artwork behind it
@@ -470,13 +470,14 @@ add_shortcode(
 add_shortcode(
 	'aw_sticky_cta',
 	function ( $atts ) {
-		$a  = shortcode_atts( array( 'href' => '#send', 'label' => 'Send your objection' ), $atts );
+		$a  = shortcode_atts( array( 'href' => '#send', 'label' => 'Send your objection', 'days' => '1' ), $atts );
 		$id = aw_camp_id();
 		if ( ! $id || ! aw_camp_is_open( $id ) ) {
 			return '';
 		}
-		$d = aw_camp_days_left( $id );
-		return '<div class="aw-sticky-cta" data-target="' . esc_attr( $a['href'] ) . '"><a class="wp-element-button" href="' . esc_attr( $a['href'] ) . '">' . esc_html( $a['label'] ) . '</a><span class="aw-sticky-cta-days">' . esc_html( $d ? sprintf( _n( '%d day to go', '%d days to go', $d, 'animal-writes-core' ), $d ) : 'Last day today' ) . '</span></div>';
+		$d    = aw_camp_days_left( $id );
+		$days = '0' === (string) $a['days'] ? '' : '<span class="aw-sticky-cta-days">' . esc_html( $d ? sprintf( _n( '%d day to go', '%d days to go', $d, 'animal-writes-core' ), $d ) : 'Last day today' ) . '</span>';
+		return '<div class="aw-sticky-cta" data-target="' . esc_attr( $a['href'] ) . '"><a class="wp-element-button" href="' . esc_attr( $a['href'] ) . '">' . esc_html( $a['label'] ) . '</a>' . $days . '</div>';
 	}
 );
 
