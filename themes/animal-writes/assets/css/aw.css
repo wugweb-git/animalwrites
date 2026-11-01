@@ -1588,7 +1588,7 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 .aw-ed-find .kit-sec-head { margin-bottom: var(--kit-space-5); }
 .aw-ed-find .kit-sec-head p strong { color: var(--kit-color-ink); font-weight: var(--kit-weight-bold); }
 .aw-findhelp-bar { container-type: inline-size; margin-bottom: var(--kit-space-6); }
-.aw-findhelp-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "q q" "state go" "near near"; align-items: center; gap: var(--kit-space-2); margin: 0; }
+.aw-findhelp-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "q q" "state go" "near near"; align-items: center; gap: var(--kit-space-2); margin: 0; padding: 0; background: none; border-radius: 0; box-shadow: none; } /* the form also carries .aw-ed-search (the Directory search event): none of its raised box on phones */
 .aw-findhelp-form .kit-field { margin: 0; --kit-field-height: var(--kit-size-control); }
 .aw-findhelp-q { grid-area: q; }
 .aw-findhelp-state { grid-area: state; }
