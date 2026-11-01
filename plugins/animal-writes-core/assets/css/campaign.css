@@ -205,6 +205,7 @@
 @media (min-width: 768px) {
 	.aw-camp--sc-stray-dogs #share .aw-camp-share-kit:has(.aw-letter-share-pics) { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--kit-space-grid); align-items: start; }
 	.aw-camp--sc-stray-dogs #share .aw-camp-share-kit .aw-letter-share-pics { grid-column: auto; padding-top: 0; border-top: 0; }
+	.aw-camp--sc-stray-dogs #share .aw-camp-share-kit + .aw-camp-note { margin-top: var(--kit-space-4); } /* the note sits as close to the share row as the row to the text above */
 }
 /* The court orders and the state tracker: one sideways row of cards at every width (Layout rules 5, 6 and 10), each
    row a card with its parts under their column headings, snapping. Phones show one card and the edge of the next
