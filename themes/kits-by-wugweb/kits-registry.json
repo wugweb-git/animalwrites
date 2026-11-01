@@ -988,12 +988,12 @@
    ],
    "states": [
     "default",
-    "Categories folded (below 1200px)"
+    "link lists folded (below 768px)"
    ],
    "tokens": [],
    "a11y": {
-    "element": "<footer> with one <nav> per list, each with its own aria-label (Helplines, Explore, Animal Writes, Categories, Policies)",
-    "aria": "Categories fold is a <details>",
+    "element": "<footer> with one <nav> per list, each with its own aria-label (Explore, Animal Writes, Legal and trust, Helplines, Policies)",
+    "aria": "each phone fold is a <details>",
     "keyboard": "Tab; Enter",
     "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
     "target": "44px rows on phones",
@@ -1005,7 +1005,7 @@
     ]
    },
    "seo": {
-    "heading": "H2 per column (small)",
+    "heading": "none: column labels are paragraphs, each list a named nav",
     "link": "page names; phone numbers as tel: links",
     "alt": "logo alt",
     "schema": "Organization (site-wide)"
