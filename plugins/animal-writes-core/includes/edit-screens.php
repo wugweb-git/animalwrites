@@ -1,0 +1,662 @@
+<?php
+/**
+ * Animal Writes → Edit screens (owner, 1 Nov 2026): every box on every edit screen, the keys it stores and where each
+ * key is used on the site. Read-only: nothing here writes an option, meta or post.
+ *
+ * The map lives in data/edit-screen-map.json (boxes by id, keys by stored name) and is read by aw_edit_screen_map();
+ * other plugins add entries with the aw_edit_screen_boxes and aw_edit_screen_map filters. The boxes themselves are
+ * read live: for each post type the screen is set up on an in-memory post (ID 0, never saved), add_meta_boxes runs,
+ * $wp_meta_boxes is read and put back. No box callback is rendered. SCF field groups come from acf_get_field_groups().
+ * Term screens: the callbacks on each taxonomy's form hooks. A box or field the map does not know shows "Not mapped yet".
+ *
+ * Screen: Animal Writes → Edit screens (manage_options). WP-CLI: wp aw-edit-screens [--type=<type>] [--format=table|json].
+ * How to add an entry: docs/edit-screens.md.
+ *
+ * @package animal-writes-core
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/** The map file as decoded JSON: about, kinds, boxes, keys. */
+function aw_edit_screen_map_data(): array {
+	static $data = null;
+	if ( null === $data ) {
+		$file = AW_CORE_DIR . 'data/edit-screen-map.json';
+		$raw  = is_readable( $file ) ? (string) file_get_contents( $file ) : '';
+		$data = json_decode( $raw, true );
+		$data = is_array( $data ) ? $data : array();
+	}
+	return $data;
+}
+
+/**
+ * Every known box: id => title, source (WordPress / plugin name / Animal Writes core), file, screen (post|term),
+ * types (empty: any type), runtime (live, scf, fallback, edit-screen-only, always), notes, match (term screens).
+ */
+function aw_edit_screen_boxes(): array {
+	$data = aw_edit_screen_map_data();
+	return (array) apply_filters( 'aw_edit_screen_boxes', (array) ( $data['boxes'] ?? array() ) );
+}
+
+/**
+ * Every stored key: name => store (post_meta, term_meta, taxonomy, post_field, option), label, type, types (empty:
+ * any type), boxes (list of id, title, source), uses (list of kind, where, file), notes (list).
+ */
+function aw_edit_screen_map(): array {
+	$data  = aw_edit_screen_map_data();
+	$boxes = aw_edit_screen_boxes();
+	$keys  = array();
+	foreach ( (array) ( $data['keys'] ?? array() ) as $name => $k ) {
+		$list = array();
+		foreach ( (array) ( $k['boxes'] ?? array() ) as $id ) {
+			$list[] = array(
+				'id'     => (string) $id,
+				'title'  => (string) ( $boxes[ $id ]['title'] ?? $id ),
+				'source' => (string) ( $boxes[ $id ]['source'] ?? '' ),
+			);
+		}
+		$k['boxes']    = $list;
+		$k['types']    = (array) ( $k['types'] ?? array() );
+		$k['uses']     = (array) ( $k['uses'] ?? array() );
+		$k['notes']    = (array) ( $k['notes'] ?? array() );
+		$keys[ $name ] = $k;
+	}
+	return (array) apply_filters( 'aw_edit_screen_map', $keys );
+}
+
+/** Post types that have an edit screen (block-editor internals and SCF's own types left out). */
+function aw_edit_screen_post_types(): array {
+	$skip = array( 'wp_block', 'wp_navigation', 'wp_template', 'wp_template_part', 'wp_global_styles', 'wp_font_family', 'wp_font_face', 'acf-field-group', 'acf-taxonomy', 'acf-post-type', 'acf-ui-options-page' );
+	return array_values( array_diff( array_keys( get_post_types( array( 'show_ui' => true ) ) ), $skip ) );
+}
+
+/** Taxonomies that have a term screen. */
+function aw_edit_screen_taxonomies(): array {
+	return array_values( array_keys( get_taxonomies( array( 'show_ui' => true ) ) ) );
+}
+
+/**
+ * Where a callback is defined, as "function @ path:line" (path from the site root), or '' when unknown.
+ *
+ * @param mixed $cb Callback.
+ */
+function aw_edit_screen_callback( $cb ): string {
+	try {
+		if ( is_string( $cb ) && function_exists( $cb ) ) {
+			$r    = new ReflectionFunction( $cb );
+			$name = $cb;
+		} elseif ( is_array( $cb ) && isset( $cb[0], $cb[1] ) && is_string( $cb[1] ) ) {
+			$cls  = is_object( $cb[0] ) ? get_class( $cb[0] ) : (string) $cb[0];
+			$r    = new ReflectionMethod( $cls, $cb[1] );
+			$name = $cls . '::' . $cb[1];
+		} elseif ( $cb instanceof Closure ) {
+			$r    = new ReflectionFunction( $cb );
+			$name = 'closure';
+		} else {
+			return '';
+		}
+		return $name . ' @ ' . str_replace( wp_normalize_path( ABSPATH ), '', wp_normalize_path( (string) $r->getFileName() ) ) . ':' . (int) $r->getStartLine();
+	} catch ( Throwable $e ) {
+		return '';
+	}
+}
+
+/**
+ * Source label from a callback location: WordPress, Animal Writes (plugin folder) or the plugin's folder name.
+ *
+ * @param string $where aw_edit_screen_callback() result.
+ */
+function aw_edit_screen_source_from( string $where ): string {
+	if ( '' === $where ) {
+		return 'Unknown';
+	}
+	if ( false !== strpos( $where, ' @ wp-admin/' ) || false !== strpos( $where, ' @ wp-includes/' ) ) {
+		return 'WordPress';
+	}
+	if ( preg_match( '~/(?:plugins|mu-plugins)/([^/]+)/~', $where, $m ) ) {
+		$ours = array( 'animal-writes-core', 'aw-seo-extras', 'aw-sourcing', 'kits-core', 'mailweb' );
+		return in_array( $m[1], $ours, true ) ? 'Animal Writes (' . $m[1] . ')' : $m[1];
+	}
+	return 'Theme or other';
+}
+
+/**
+ * The boxes each post type registers, read live: type => [ id => title, context, priority, callback, compat ].
+ * In-memory post (ID 0), nothing saved, no callback rendered; $wp_meta_boxes, $post and the screen are put back.
+ */
+function aw_edit_screen_live_boxes(): array {
+	static $out = null;
+	if ( null !== $out ) {
+		return $out;
+	}
+	$out = array();
+	require_once ABSPATH . 'wp-admin/includes/admin.php';
+	require_once ABSPATH . 'wp-admin/includes/meta-boxes.php';
+	global $wp_meta_boxes, $post;
+	$keep_boxes  = $wp_meta_boxes;
+	$keep_post   = $post;
+	$keep_screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+	foreach ( aw_edit_screen_post_types() as $type ) {
+		$wp_meta_boxes = array(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- put back below.
+		$dummy         = new WP_Post(
+			(object) array(
+				'ID'             => 0,
+				'post_type'      => $type,
+				'post_status'    => 'auto-draft',
+				'post_author'    => get_current_user_id(),
+				'post_title'     => '',
+				'post_content'   => '',
+				'post_excerpt'   => '',
+				'comment_status' => 'closed',
+				'ping_status'    => 'closed',
+				'filter'         => 'raw',
+			)
+		);
+		$post = $dummy; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- put back below.
+		set_current_screen( $type );
+		if ( function_exists( 'register_and_do_post_meta_boxes' ) ) {
+			register_and_do_post_meta_boxes( $dummy ); // core boxes + add_meta_boxes + add_meta_boxes_{type} + do_meta_boxes
+		} else {
+			do_action( 'add_meta_boxes', $type, $dummy );
+			do_action( "add_meta_boxes_{$type}", $dummy );
+		}
+		$out[ $type ] = array();
+		foreach ( (array) ( $wp_meta_boxes[ $type ] ?? array() ) as $ctx => $prios ) {
+			foreach ( (array) $prios as $prio => $list ) {
+				foreach ( (array) $list as $id => $b ) {
+					if ( ! is_array( $b ) ) {
+						continue; // removed
+					}
+					$out[ $type ][ (string) $id ] = array(
+						'title'    => wp_strip_all_tags( (string) $b['title'] ),
+						'context'  => (string) $ctx,
+						'priority' => (string) $prio,
+						'callback' => aw_edit_screen_callback( $b['callback'] ),
+						'compat'   => ! empty( $b['args']['__back_compat_meta_box'] ),
+					);
+				}
+			}
+		}
+	}
+	$wp_meta_boxes = $keep_boxes; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- restored.
+	$post          = $keep_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- restored.
+	if ( $keep_screen instanceof WP_Screen ) {
+		$keep_screen->set_current_screen();
+	} else {
+		$GLOBALS['current_screen'] = null; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- no screen before (WP-CLI).
+	}
+	return $out;
+}
+
+/** SCF field groups when SCF is active: acf-{key} => title, types, hide (box ids), fields (name => type). */
+function aw_edit_screen_scf_groups(): array {
+	if ( ! function_exists( 'acf_get_field_groups' ) || ! function_exists( 'acf_get_fields' ) ) {
+		return array();
+	}
+	$hide_map = array(
+		'excerpt'         => 'postexcerpt',
+		'slug'            => 'slugdiv',
+		'author'          => 'authordiv',
+		'page_attributes' => 'pageparentdiv',
+		'featured_image'  => 'postimagediv',
+		'categories'      => 'categorydiv',
+		'tags'            => 'tagsdiv-post_tag',
+		'revisions'       => 'revisionsdiv',
+		'comments'        => 'commentsdiv',
+		'discussion'      => 'commentstatusdiv',
+		'format'          => 'formatdiv',
+	);
+	$out = array();
+	foreach ( (array) acf_get_field_groups() as $g ) {
+		if ( empty( $g['key'] ) || empty( $g['active'] ) ) {
+			continue;
+		}
+		$types = array();
+		foreach ( (array) ( $g['location'] ?? array() ) as $and ) {
+			foreach ( (array) $and as $rule ) {
+				if ( 'post_type' === ( $rule['param'] ?? '' ) && '==' === ( $rule['operator'] ?? '' ) ) {
+					$types[] = (string) $rule['value'];
+				}
+			}
+		}
+		$fields = array();
+		foreach ( (array) acf_get_fields( $g ) as $f ) {
+			if ( ! empty( $f['name'] ) ) {
+				$fields[ (string) $f['name'] ] = (string) $f['type'];
+			}
+		}
+		$hide = array();
+		foreach ( (array) ( $g['hide_on_screen'] ?? array() ) as $h ) {
+			if ( isset( $hide_map[ $h ] ) ) {
+				$hide[] = $hide_map[ $h ];
+			}
+		}
+		$out[ 'acf-' . $g['key'] ] = array(
+			'title'  => wp_strip_all_tags( (string) $g['title'] ),
+			'types'  => array_values( array_unique( $types ) ),
+			'hide'   => $hide,
+			'fields' => $fields,
+		);
+	}
+	return $out;
+}
+
+/** The callbacks on each taxonomy's form hooks: tax => list of hook, priority, callback. */
+function aw_edit_screen_live_terms(): array {
+	global $wp_filter;
+	$out = array();
+	foreach ( aw_edit_screen_taxonomies() as $tax ) {
+		$out[ $tax ] = array();
+		foreach ( array( 'add_form_fields', 'edit_form_fields', 'edit_form', 'term_edit_form_top', 'add_form' ) as $suffix ) {
+			$hook = $tax . '_' . $suffix;
+			if ( empty( $wp_filter[ $hook ] ) ) {
+				continue;
+			}
+			foreach ( $wp_filter[ $hook ]->callbacks as $prio => $cbs ) {
+				foreach ( $cbs as $c ) {
+					$out[ $tax ][] = array(
+						'hook'     => $suffix,
+						'priority' => (int) $prio,
+						'callback' => aw_edit_screen_callback( $c['function'] ),
+					);
+				}
+			}
+		}
+	}
+	return $out;
+}
+
+/**
+ * Does a term-screen map box match a live hook callback?
+ *
+ * @param array  $match Box 'match'.
+ * @param array  $h     Live hook (hook, priority, callback).
+ * @param string $tax   Taxonomy.
+ */
+function aw_edit_screen_term_match( array $match, array $h, string $tax ): bool {
+	if ( ! empty( $match['taxonomies'] ) && ! in_array( $tax, (array) $match['taxonomies'], true ) ) {
+		return false;
+	}
+	if ( ! in_array( $h['hook'], (array) ( $match['hooks'] ?? array() ), true ) ) {
+		return false;
+	}
+	if ( isset( $match['priority'] ) && (int) $match['priority'] !== (int) $h['priority'] ) {
+		return false;
+	}
+	if ( ! empty( $match['callback'] ) && 0 !== strpos( $h['callback'], $match['callback'] . ' @' ) ) {
+		return false;
+	}
+	if ( ! empty( $match['file'] ) && false === strpos( $h['callback'], (string) $match['file'] . ':' ) ) {
+		return false;
+	}
+	return true;
+}
+
+/**
+ * The keys a box stores on a type: name => map entry.
+ *
+ * @param string $box_id Box id.
+ * @param string $type   Post type or taxonomy.
+ * @param array  $map    aw_edit_screen_map().
+ */
+function aw_edit_screen_box_keys( string $box_id, string $type, array $map ): array {
+	$out = array();
+	foreach ( $map as $name => $k ) {
+		if ( ! in_array( $box_id, wp_list_pluck( $k['boxes'], 'id' ), true ) ) {
+			continue;
+		}
+		if ( $k['types'] && ! in_array( $type, $k['types'], true ) ) {
+			continue;
+		}
+		$out[ $name ] = $k;
+	}
+	return $out;
+}
+
+/**
+ * Every row: one per box per post type or taxonomy. Each row: screen (post|term), type, id, title, source, file,
+ * shows_on, mapped (bool), fields (key => type), uses (key => list of kind, where, file), notes (list).
+ */
+function aw_edit_screen_rows(): array {
+	static $rows = null;
+	if ( null !== $rows ) {
+		return $rows;
+	}
+	$rows  = array();
+	$boxes = aw_edit_screen_boxes();
+	$map   = aw_edit_screen_map();
+	$live  = aw_edit_screen_live_boxes();
+	$scf   = aw_edit_screen_scf_groups();
+	$add   = function ( string $screen, string $type, string $id, array $info, array $extra_fields, array $notes ) use ( &$rows, $boxes, $map ) {
+		$known  = isset( $boxes[ $id ] );
+		$b      = $known ? $boxes[ $id ] : array();
+		$keys   = $known ? aw_edit_screen_box_keys( $id, $type, $map ) : array();
+		$fields = array();
+		$uses   = array();
+		foreach ( $keys as $name => $k ) {
+			$fields[ $name ] = (string) $k['type'];
+			$uses[ $name ]   = $k['uses'];
+			foreach ( $k['notes'] as $n ) {
+				$notes[] = $name . ': ' . $n;
+			}
+		}
+		foreach ( $extra_fields as $name => $t ) {
+			if ( ! isset( $fields[ $name ] ) ) {
+				$fields[ $name ] = $t;
+				if ( ! isset( $map[ $name ] ) ) {
+					$notes[] = $name . ': Not mapped yet.';
+				}
+			}
+		}
+		if ( ! empty( $b['notes'] ) ) {
+			array_unshift( $notes, (string) $b['notes'] );
+		}
+		if ( ! $known ) {
+			array_unshift( $notes, 'Not mapped yet.' );
+		}
+		$rows[] = array(
+			'screen'   => $screen,
+			'type'     => $type,
+			'id'       => $id,
+			'title'    => $known ? (string) $b['title'] : (string) ( $info['title'] ?? $id ),
+			'source'   => $known ? (string) $b['source'] : aw_edit_screen_source_from( (string) ( $info['callback'] ?? '' ) ),
+			'file'     => $known ? (string) $b['file'] : (string) ( $info['callback'] ?? '' ),
+			'shows_on' => (string) ( $info['shows_on'] ?? '' ),
+			'mapped'   => $known,
+			'fields'   => $fields,
+			'uses'     => $uses,
+			'notes'    => $notes,
+		);
+	};
+
+	foreach ( $live as $type => $list ) {
+		$block = function_exists( 'use_block_editor_for_post_type' ) && use_block_editor_for_post_type( $type );
+		$seen  = array();
+		$hide  = array();
+		foreach ( $scf as $gid => $g ) {
+			if ( in_array( $type, $g['types'], true ) ) {
+				foreach ( $g['hide'] as $h ) {
+					$hide[ $h ] = $g['title'];
+				}
+			}
+		}
+		foreach ( $list as $id => $b ) {
+			$seen[ $id ] = true;
+			$where       = $b['context'] . ' / ' . $b['priority'];
+			if ( $block && $b['compat'] ) {
+				$where .= ' (sidebar panel in the block editor)';
+			}
+			$notes = isset( $hide[ $id ] ) ? array( 'Hidden by the SCF group "' . $hide[ $id ] . '".' ) : array();
+			$extra = isset( $scf[ $id ] ) ? $scf[ $id ]['fields'] : array();
+			$add( 'post', $type, $id, $b + array( 'shows_on' => $where ), $extra, $notes );
+		}
+		foreach ( $scf as $gid => $g ) {
+			if ( isset( $seen[ $gid ] ) || ! in_array( $type, $g['types'], true ) ) {
+				continue;
+			}
+			$seen[ $gid ] = true;
+			$add( 'post', $type, $gid, array( 'title' => $g['title'], 'callback' => 'SCF field group', 'shows_on' => 'normal (SCF field group)' ), $g['fields'], array() );
+		}
+		foreach ( $boxes as $id => $b ) {
+			if ( isset( $seen[ $id ] ) || 'post' !== ( $b['screen'] ?? 'post' ) || empty( $b['types'] ) || ! in_array( $type, (array) $b['types'], true ) ) {
+				continue;
+			}
+			$rt = (string) ( $b['runtime'] ?? 'live' );
+			if ( 'fallback' === $rt || ( 'scf' === $rt && $scf ) ) {
+				continue; // a fallback shows only when registered; an SCF group comes from SCF itself
+			}
+			$note = 'edit-screen-only' === $rt ? 'Registered only on the edit screen itself; listed from the map.' : ( 'scf' === $rt ? 'SCF is not active: this group does not show.' : 'Not registered on this page load; listed from the map.' );
+			$add( 'post', $type, $id, array( 'shows_on' => '—' ), array(), array( $note ) );
+		}
+	}
+
+	foreach ( aw_edit_screen_live_terms() as $tax => $hooks ) {
+		$seen = array();
+		$add( 'term', $tax, 'term-core', array( 'shows_on' => 'add and edit forms' ), array(), array() );
+		foreach ( $hooks as $h ) {
+			$hit = '';
+			foreach ( $boxes as $id => $b ) {
+				if ( 'term' === ( $b['screen'] ?? '' ) && ! empty( $b['match'] ) && aw_edit_screen_term_match( (array) $b['match'], $h, $tax ) ) {
+					$hit = $id;
+					break;
+				}
+			}
+			$id = '' !== $hit ? $hit : $tax . '_' . $h['hook'] . '@' . $h['priority'];
+			if ( isset( $seen[ $id ] ) ) {
+				$seen[ $id ][] = $h['hook'];
+				continue;
+			}
+			$seen[ $id ] = array( $h['hook'] );
+			$add( 'term', $tax, $id, array( 'title' => $h['hook'], 'callback' => $h['callback'], 'shows_on' => $h['hook'] . ' / ' . $h['priority'] ), array(), array() );
+		}
+		foreach ( $boxes as $id => $b ) {
+			if ( isset( $seen[ $id ] ) || 'term' !== ( $b['screen'] ?? '' ) || empty( $b['types'] ) || ! in_array( $tax, (array) $b['types'], true ) ) {
+				continue;
+			}
+			$note = 'edit-screen-only' === ( $b['runtime'] ?? '' ) ? 'Registered only on the term screen itself; listed from the map.' : 'Not registered on this page load; listed from the map.';
+			$add( 'term', $tax, $id, array( 'shows_on' => '—' ), array(), array( $note ) );
+		}
+	}
+
+	// Same key edited by two boxes on one screen.
+	$by = array();
+	foreach ( $rows as $i => $r ) {
+		if ( 'postcustom' === $r['id'] ) {
+			continue; // Custom Fields can edit any key
+		}
+		foreach ( array_keys( $r['fields'] ) as $k ) {
+			$by[ $r['type'] ][ $k ][] = $i;
+		}
+	}
+	foreach ( $by as $list ) {
+		foreach ( $list as $k => $idx ) {
+			if ( count( $idx ) < 2 ) {
+				continue;
+			}
+			foreach ( $idx as $i ) {
+				$others = array();
+				foreach ( $idx as $j ) {
+					if ( $j !== $i ) {
+						$others[] = '"' . $rows[ $j ]['title'] . '"';
+					}
+				}
+				$rows[ $i ]['notes'][] = $k . ': also edited in ' . implode( ', ', $others ) . ' on this screen.';
+			}
+		}
+	}
+	foreach ( $rows as $i => $r ) {
+		$rows[ $i ]['notes'] = array_values( array_unique( $r['notes'] ) );
+	}
+	return $rows;
+}
+
+/**
+ * Rows for one post type or taxonomy ('' for all).
+ *
+ * @param string $type Post type or taxonomy.
+ */
+function aw_edit_screen_rows_for( string $type = '' ): array {
+	return array_values( array_filter( aw_edit_screen_rows(), fn( $r ) => '' === $type || $r['type'] === $type ) );
+}
+
+/**
+ * How many rows (boxes or term hooks) and fields are not mapped yet.
+ *
+ * @param array $rows Rows.
+ */
+function aw_edit_screen_unmapped( array $rows ): int {
+	$n = 0;
+	foreach ( $rows as $r ) {
+		$n += $r['mapped'] ? 0 : 1;
+		foreach ( $r['notes'] as $note ) {
+			$n += ( ': Not mapped yet.' === substr( $note, -17 ) ) ? 1 : 0;
+		}
+	}
+	return $n;
+}
+
+/**
+ * A key's uses as one plain line: "display: where (file); schema: …".
+ *
+ * @param array $uses List of kind, where, file.
+ */
+function aw_edit_screen_uses_text( array $uses ): string {
+	$parts = array();
+	foreach ( $uses as $u ) {
+		$parts[] = ( $u['kind'] ?? '' ) . ': ' . ( $u['where'] ?? '' ) . ( empty( $u['file'] ) ? '' : ' (' . $u['file'] . ')' );
+	}
+	return $parts ? implode( '; ', $parts ) : 'not used';
+}
+
+add_action(
+	'admin_menu',
+	function () {
+		$hook = add_submenu_page( AW_CORE_MENU, 'Edit screens', 'Edit screens', 'manage_options', 'aw-edit-screens', 'aw_edit_screens_page' ); // Animal Writes → Edit screens
+		if ( $hook ) {
+			add_action(
+				'load-' . $hook,
+				function () {
+					if ( current_user_can( 'manage_options' ) ) {
+						aw_edit_screen_rows(); // read the boxes before the page prints anything
+					}
+				}
+			);
+		}
+	},
+	14 // after Keys (13)
+);
+
+/** Animal Writes → Edit screens. */
+function aw_edit_screens_page(): void {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		return;
+	}
+	$all   = aw_edit_screen_rows();
+	$types = array();
+	foreach ( $all as $r ) {
+		$types[ $r['type'] ] = $r['screen'];
+	}
+	$type = isset( $_GET['type'] ) ? sanitize_key( wp_unslash( $_GET['type'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only filter.
+	if ( ! isset( $types[ $type ] ) ) {
+		$type = '';
+	}
+	$rows = aw_edit_screen_rows_for( $type );
+	$base = admin_url( 'admin.php?page=aw-edit-screens' );
+
+	echo '<div class="wrap"><h1>Edit screens</h1>';
+	echo '<p>Every box on each edit screen, the keys it stores and where each key is used. Boxes are read from the plugins as they run now; what each key does comes from the map in <code>animal-writes-core/data/edit-screen-map.json</code> (see <code>docs/edit-screens.md</code>). Read-only.</p>';
+	$unmapped = aw_edit_screen_unmapped( $rows );
+	if ( $unmapped ) {
+		echo '<div class="notice notice-warning inline"><p>' . esc_html( sprintf( '%d boxes or fields here are not mapped yet.', $unmapped ) ) . '</p></div>';
+	} else {
+		echo '<div class="notice notice-success inline"><p>Every box and field here is in the map.</p></div>';
+	}
+
+	$counts = array_count_values( wp_list_pluck( $all, 'type' ) );
+	$links  = array( '<a href="' . esc_url( $base ) . '"' . ( '' === $type ? ' class="current" aria-current="page"' : '' ) . '>All <span class="count">(' . count( $all ) . ')</span></a>' );
+	foreach ( $types as $t => $screen ) {
+		$obj     = 'term' === $screen ? get_taxonomy( $t ) : get_post_type_object( $t );
+		$label   = $obj ? $obj->labels->name : $t;
+		$label  .= 'term' === $screen ? ' (terms)' : '';
+		$links[] = '<a href="' . esc_url( add_query_arg( 'type', $t, $base ) ) . '"' . ( $type === $t ? ' class="current" aria-current="page"' : '' ) . '>' . esc_html( $label ) . ' <span class="count">(' . (int) ( $counts[ $t ] ?? 0 ) . ')</span></a>';
+	}
+	echo '<ul class="subsubsub"><li>' . implode( ' |</li><li>', $links ) . '</li></ul><br class="clear">'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- each link is escaped above.
+
+	$cells = array();
+	foreach ( $rows as $r ) {
+		$fields = array();
+		$used   = array();
+		foreach ( $r['fields'] as $k => $t ) {
+			$fields[] = '<code>' . esc_html( $k ) . '</code> → ' . esc_html( $t );
+			$parts    = array();
+			foreach ( (array) ( $r['uses'][ $k ] ?? array() ) as $u ) {
+				$parts[] = '<strong>' . esc_html( (string) ( $u['kind'] ?? '' ) ) . '</strong> ' . esc_html( (string) ( $u['where'] ?? '' ) ) . ( empty( $u['file'] ) ? '' : ' <code>' . esc_html( (string) $u['file'] ) . '</code>' );
+			}
+			$used[] = '<code>' . esc_html( $k ) . '</code>: ' . ( $parts ? implode( '; ', $parts ) : 'not used' );
+		}
+		$cells[] = array(
+			'type'   => esc_html( $r['type'] ),
+			'box'    => '<strong>' . esc_html( $r['title'] ) . '</strong><br><code>' . esc_html( $r['id'] ) . '</code>',
+			'source' => esc_html( $r['source'] ) . ( '' === $r['file'] ? '' : '<br><code>' . esc_html( $r['file'] ) . '</code>' ),
+			'shows'  => esc_html( $r['shows_on'] ),
+			'fields' => $fields ? implode( '<br>', $fields ) : '—',
+			'used'   => $used ? implode( '<br>', $used ) : '—',
+			'notes'  => $r['notes'] ? implode( '<br>', array_map( 'esc_html', $r['notes'] ) ) : '—',
+		);
+	}
+	$cols = array(
+		'type'   => 'Type',
+		'box'    => 'Box',
+		'source' => 'Source',
+		'shows'  => 'Shows on',
+		'fields' => 'Fields',
+		'used'   => 'Used where',
+		'notes'  => 'Notes',
+	);
+	if ( '' !== $type ) {
+		unset( $cols['type'] );
+	}
+	aw_core_simple_table( 'aw-edit-screens', $cols, $cells, array( 'primary' => 'box', 'empty' => 'No boxes.' ) );
+	echo '</div>';
+}
+
+if ( defined( 'WP_CLI' ) && WP_CLI ) {
+	/**
+	 * Lists every edit-screen box, its fields and where they are used (read-only).
+	 *
+	 * ## OPTIONS
+	 *
+	 * [--type=<type>]
+	 * : One post type or taxonomy.
+	 *
+	 * [--format=<format>]
+	 * : table or json.
+	 * ---
+	 * default: table
+	 * ---
+	 */
+	WP_CLI::add_command(
+		'aw-edit-screens',
+		function ( $args, $assoc ) {
+			$admins = get_users( array( 'role' => 'administrator', 'fields' => 'ID', 'number' => 1 ) );
+			if ( $admins && ! get_current_user_id() ) {
+				wp_set_current_user( (int) $admins[0] ); // boxes that check a capability; in memory only
+			}
+			$type = sanitize_key( (string) ( $assoc['type'] ?? '' ) );
+			$rows = aw_edit_screen_rows_for( $type );
+			if ( 'json' === ( $assoc['format'] ?? 'table' ) ) {
+				WP_CLI::line( (string) wp_json_encode( $rows, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) );
+				return;
+			}
+			$out = array();
+			foreach ( $rows as $r ) {
+				$kinds = array();
+				foreach ( $r['uses'] as $list ) {
+					foreach ( $list as $u ) {
+						$kinds[ (string) $u['kind'] ] = true;
+					}
+				}
+				$f = array();
+				foreach ( $r['fields'] as $k => $t ) {
+					$f[] = $k . '=' . $t;
+				}
+				$out[] = array(
+					'type'     => $r['type'],
+					'box'      => $r['title'] . ' [' . $r['id'] . ']',
+					'source'   => $r['source'],
+					'shows_on' => $r['shows_on'],
+					'fields'   => implode( ', ', $f ),
+					'used'     => implode( ',', array_keys( $kinds ) ),
+					'notes'    => implode( ' | ', $r['notes'] ),
+				);
+			}
+			WP_CLI\Utils\format_items( 'table', $out, array( 'type', 'box', 'source', 'shows_on', 'fields', 'used', 'notes' ) );
+			if ( ! is_admin() ) {
+				WP_CLI::log( 'Some plugins add their boxes only in WP admin (for example LiteSpeed); they show on Animal Writes → Edit screens.' );
+			}
+			WP_CLI::log( sprintf( '%d rows, %d not mapped yet.', count( $rows ), aw_edit_screen_unmapped( $rows ) ) );
+		}
+	);
+}

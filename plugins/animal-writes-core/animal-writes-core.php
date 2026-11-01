@@ -42,6 +42,7 @@ require_once AW_CORE_DIR . 'includes/kits-config.php';
 require_once AW_CORE_DIR . 'includes/admin-table.php';
 require_once AW_CORE_DIR . 'includes/admin-home.php';
 require_once AW_CORE_DIR . 'includes/keys.php'; // Animal Writes → Keys: service keys in WP admin (owner, 31 Oct 2026)
+require_once AW_CORE_DIR . 'includes/edit-screens.php'; // Animal Writes → Edit screens: every edit-screen box, its fields and where they are used (owner, 1 Nov 2026)
 require_once AW_CORE_DIR . 'includes/admin-tidy.php';
 require_once AW_CORE_DIR . 'includes/cdn-cache.php';
 require_once AW_CORE_DIR . 'includes/deploy-purge.php';
