@@ -146,7 +146,7 @@ add_filter(
 		foreach ( aw_campaign_links( $id ) as $t ) {
 			$line = AW_CAMPAIGN_NEWS_LINES[ $t->slug ] ?? null;
 			if ( $line && 'publish' === get_post_status( $line[0] ) ) {
-				return $html . '<p class="aw-campaign-line">' . esc_html( $line[1] ) . '<a href="' . esc_url( get_permalink( $line[0] ) ) . '">' . esc_html( $line[2] ) . '</a>.</p>';
+				return $html . '<p>' . esc_html( $line[1] ) . '<a href="' . esc_url( get_permalink( $line[0] ) ) . '">' . esc_html( $line[2] ) . '</a>.</p>';
 			}
 		}
 		return $html;
