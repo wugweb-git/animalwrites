@@ -126,12 +126,12 @@
 	.aw-camp--sc-stray-dogs .aw-camp-hero-cols > .wp-block-column:first-child { flex-basis: 58% !important; }
 	.aw-camp--sc-stray-dogs .aw-camp-hero-cols > .wp-block-column:last-child { flex-basis: 42% !important; }
 }
-/* The theme hero (owner, 2 Nov 2026: the same size as the other heroes): at least --kit-hero-min (560px, 660px from
-   1200) with the theme section padding, no override. The photo is the hero's background at every width; below 1200 the
-   tall photo with its top faded into the cream behind the text, from 1200 the wide photo on the right. The hero is
-   taller than --kit-hero-min only while its text and poster need more room. */
+/* The theme hero, fixed at --kit-hero-h (720px or one screen, whichever is less; owner, 2 Nov 2026) at every width, with
+   the theme section padding. The photo is the hero's background at every width; below 1200 the tall photo with its top
+   faded into the cream behind the text, from 1200 the wide photo on the right. */
 .aw-camp.aw-camp--sc-stray-dogs .aw-camp-hero.aw-camp-section.alignfull {
-	min-height: var(--kit-hero-min);
+	box-sizing: border-box;
+	height: var(--kit-hero-h);
 	background:
 		linear-gradient(to bottom, var(--camp-cream) 0%, rgb(251 238 231 / .92) 40%, rgb(251 238 231 / 0) 70%),
 		url("/wp-content/themes/animal-writes/assets/img/campaigns/supreme-court-stray-dog-phone.webp") center bottom / cover no-repeat,
@@ -243,8 +243,8 @@
 .aw-camp-hero { background: var(--camp-mark); color: var(--camp-on-mark); }
 .aw-camp--community-dogs .aw-camp-hero, .aw-camp--community-dogs.aw-camp-hero { min-height: 1020px; } /* the Community dogs hero only: 1020 below 1200, 800 from 1200 (owner, 19 Oct 2026) */
 @media (min-width: 1200px) { .aw-camp--community-dogs .aw-camp-hero, .aw-camp--community-dogs.aw-camp-hero { min-height: 800px; } }
-/* Lab Rules hero: the theme hero, --kit-hero-min (560 below 1200, 660 from 1200; docs/design-system.md "Section heights"), the poster strip at its own shape */
-.aw-camp--lab-rules .aw-camp-hero { min-height: var(--kit-hero-min); }
+/* Lab Rules hero: fixed at --kit-hero-h (720px or one screen, whichever is less; owner, 2 Nov 2026), the poster strip at its own shape */
+.aw-camp--lab-rules .aw-camp-hero { box-sizing: border-box; height: var(--kit-hero-h); }
 @media (max-width: 1199px) { .aw-camp--lab-rules .aw-camp-hero-cols { gap: var(--kit-space-4); } }
 .aw-camp-hero :is(h1, h2, p, .aw-cd-num, .aw-cd-unit, .aw-cd-when) { color: var(--camp-on-mark); }
 .aw-camp-hero a:not(.wp-element-button) { color: var(--camp-on-mark); text-decoration: underline; text-underline-offset: 0.2em; }

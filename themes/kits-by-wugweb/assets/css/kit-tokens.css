@@ -75,6 +75,7 @@
   --kit-space-section: 48px;
   --kit-space-band-gap: var(--s-6); /* head band › a list toolbar under it: 24 / 32 / 40 */
   --kit-hero-min: 560px;
+  --kit-hero-h: min(720px, 100svh); /* every hero's height at every width, phones too: 720px or one screen, whichever is less (owner, 2 Nov 2026: "fixed or within viewport sizes") */
   --kit-photo-card-h: 250px; /* photo card in a stack (Take action): 250 on phones, 350 from 768 (owner, 2 Nov 2026) */
   --kit-space-gutter: 16px;
   --kit-space-grid: 16px;

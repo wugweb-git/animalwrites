@@ -1283,7 +1283,7 @@ header.wp-block-template-part.kit-header-hidden { transform: translateY(calc(-10
 /* A full-width Cover with placed content (bottom left and the like) keeps that content on the page column, where every page head starts */
 .wp-block-cover.alignfull.has-custom-content-position > .wp-block-cover__inner-container.is-layout-constrained { width: 100%; }
 .wp-block-cover.alignfull { padding-block: var(--kit-space-section); }
-.wp-block-cover.kit-hero { min-height: var(--kit-hero-min) !important; } /* the page hero: 560 below 1200, 660 from 1200 (owner, 19 Oct 2026); !important over the block's own min-height style */ /* the section padding, top and bottom, like every section */
+.wp-block-cover.kit-hero { box-sizing: border-box; height: var(--kit-hero-h); min-height: 0 !important; } /* the page hero: fixed at --kit-hero-h, 720px or one screen (owner, 2 Nov 2026); !important over the block's own min-height style */ /* the section padding, top and bottom, like every section */
 .wp-block-post-content > .alignfull { margin-block: 0; } /* full-width sections carry the section padding, so no block gap (white strip) between them */
 /* Everywhere, not only at the top level: full-width section groups nested in a wrapper (campaign pages) get no block gap
    either, and every full-width section with its own padding uses the one section padding (owner, 19 Oct 2026) */

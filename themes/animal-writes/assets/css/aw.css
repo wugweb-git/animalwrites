@@ -1527,13 +1527,14 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 
 /* Home hero: campaign 13848 while it is published, open or closed (home.php). The campaign band's
    design (campaign-home.css), as the page head. From 768 it is the theme hero (owner, 2 Nov 2026: no section taller
-   than 720px or one screen): at least --kit-hero-min (560, 660 from 1200; design-system.md "Section heights"), the
-   section padding top and bottom, the text centred in it; the H1 at the theme H1 size at every width (the display
+   than 720px or one screen): fixed at --kit-hero-h (720px or one screen, whichever is less, at every width; design-system.md
+   "Layout rules" 4), the section padding top and bottom, the text centred in it; the H1 at the theme H1 size at every width (the display
    size wrapped to four lines and pushed the hero to 877px) and the phone spacing between the parts. The H1 has the
    lab-rules heading weight.
    On phones the label, H1, line, countdown and main button come first, the artwork under the text. */
 .aw-camp-band:not(.aw-camp-band--closed) { --kit-color-focus: var(--camp-on-mark); } /* the focus ring in the band's text colour: the Kits blue is 1.3:1 on the campaign colour (the closed band is light) */
 .aw-camp-band.aw-ed-hero--campaign { padding-block: var(--kit-space-6) var(--kit-space-section); }
+section.aw-camp-band.aw-ed-hero--campaign { box-sizing: border-box; height: var(--kit-hero-h); } /* every hero is fixed at --kit-hero-h, 720px or one screen, at every width (owner, 2 Nov 2026) */
 .aw-camp-band.aw-ed-hero--campaign h1.aw-camp-band-title { margin: 0 0 var(--kit-space-4); max-width: 18ch; font-size: var(--kit-type-h1); color: var(--camp-on-mark); }
 .aw-camp--lab-rules.aw-ed-hero--campaign h1.aw-camp-band-title { font-weight: var(--kit-weight-bold); letter-spacing: normal; line-height: var(--kit-leading-heading); } /* as .aw-camp--lab-rules h2 (campaign.css) */
 .aw-ed-hero--campaign .aw-camp-band-pill { margin-bottom: var(--kit-space-4); }
@@ -1553,7 +1554,7 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 /* From 768: the artwork right of the text, as in the band. A 10:9 box, centred on the hero's height, shows the
    picture's right half (the papers, stamp and mouse) whatever the hero's height; the text keeps clear of it. */
 @media (min-width: 768px) {
-	section.aw-camp-band.aw-ed-hero--campaign { box-sizing: border-box; display: grid; align-content: center; min-height: var(--kit-hero-min); padding-block: var(--kit-space-section); } /* the theme hero height; padding outranks the band's art padding under 1200 */
+	section.aw-camp-band.aw-ed-hero--campaign { display: grid; align-content: center; padding-block: var(--kit-space-section); } /* padding outranks the band's art padding under 1200 */
 	.aw-ed-hero--campaign > .aw-camp-band-inner { width: 100%; } /* a grid item with auto margins would shrink to its text */
 	.aw-camp-band.aw-ed-hero--campaign.has-art .aw-camp-band-text { max-width: calc(55% - var(--kit-space-grid)); }
 	.aw-ed-hero--campaign .aw-camp-band-art { inset: 50% 0 auto auto; width: 45%; height: auto; aspect-ratio: 10 / 9; translate: 0 -50%; }
