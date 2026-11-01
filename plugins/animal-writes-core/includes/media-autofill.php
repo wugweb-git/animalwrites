@@ -4,7 +4,7 @@
  *
  * - Name: a file or camera name (IMG_2034, DSC00012) becomes plain words, at most 60 characters, never ending in a stop word.
  * - Alternative Text: the name, up to 160 characters.
- * - Caption = SEO title (up to 70 characters): the name, or "host favicon | Animal Writes" / "host logo | Animal Writes".
+ * - Caption = SEO title (up to 60 characters): the name, or "host favicon | Animal Writes" / "host logo | Animal Writes".
  * - Description = SEO description: at least 100 and up to 160 characters, written for favicons, logos, source images and any other image.
  * - Image context (kits_image_context): the page the file is attached to or later used on (featured or source image), and its Rank Math focus keyword, up to 160 characters.
  * No admin screen, no options, no CSS.
@@ -85,7 +85,7 @@ function aw_media_autofill_caption( $name ) {
 	if ( $brand ) {
 		return $brand['host'] . ' ' . $brand['kind'] . ' | Animal Writes';
 	}
-	return aw_media_autofill_cut( $name, 70 );
+	return aw_media_autofill_cut( $name, 60 );
 }
 
 /**
