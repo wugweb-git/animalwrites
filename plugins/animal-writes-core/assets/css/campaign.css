@@ -176,8 +176,13 @@
 	.aw-camp--sc-stray-dogs .aw-camp-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 	.aw-camp.aw-camp--sc-stray-dogs .aw-camp-grid > .aw-camp-card { grid-column: auto; }
 }
-/* Read the law and the record: three Library rows to a line from 1200 (two rows of three) */
-@media (min-width: 1200px) { .aw-camp--sc-stray-dogs .aw-camp-docs-q .wp-block-post-template { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+/* Read the law and the record: three Library rows to a line from 768 (two rows of three) */
+@media (min-width: 768px) { .aw-camp--sc-stray-dogs .aw-camp-docs-q .wp-block-post-template { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+/* Share: from 768 the share buttons and the two share pictures side by side, not one under the other */
+@media (min-width: 768px) {
+	.aw-camp--sc-stray-dogs #share .aw-camp-share-kit:has(.aw-letter-share-pics) { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--kit-space-grid); align-items: start; }
+	.aw-camp--sc-stray-dogs #share .aw-camp-share-kit .aw-letter-share-pics { grid-column: auto; padding-top: 0; border-top: 0; }
+}
 /* In the news: each card the theme card width (card-sizes.md, --kit-card-min) */
 .aw-camp.aw-camp--sc-stray-dogs .aw-camp-row .wp-block-post-template > li { flex-basis: var(--kit-card-min); }
 /* Phones: the "Check your state" bar never covers a focused link or the end of the page (WCAG 2.2, 2.4.11): the page
