@@ -64,6 +64,9 @@ function aw_publisher_image( $post_id ) {
 	if ( '' === $url || ! preg_match( '#^https://[^/]+/#i', $url ) ) {
 		return '';
 	}
+	if ( '1' === (string) get_post_meta( $post_id, 'aw_source_image_off', true ) ) {
+		return ''; // switched off for this item (Media -> Reuse pictures): its cover leads; the weekly re-check does not undo it
+	}
 	return '0' === (string) get_post_meta( $post_id, 'aw_source_image_ok', true ) ? '' : $url;
 }
 
@@ -96,7 +99,7 @@ function aw_cc0_run() {
 	// 0b. Linked publisher images stored in the Media Library (no hotlinking).
 	$local = aw_source_localise_run( 25, 60 );
 	// 0c. Documents whose source is a PDF: the first page as their picture.
-	foreach ( $wpdb->get_col( "SELECT p.ID FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} su ON su.post_id = p.ID AND su.meta_key = 'aw_source_url' AND su.meta_value LIKE '%.pdf%' WHERE p.post_status = 'publish' AND p.post_type IN ('aw_legal','post','aw_news') AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} d WHERE d.post_id = p.ID AND d.meta_key IN ('aw_doc_preview','aw_file_id','aw_pdf_cover_tried')) ORDER BY p.post_date DESC LIMIT 5" ) as $pid ) { // phpcs:ignore WordPress.DB
+	foreach ( $wpdb->get_col( "SELECT p.ID FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} su ON su.post_id = p.ID AND su.meta_key = 'aw_source_url' AND su.meta_value LIKE '%.pdf%' WHERE p.post_status = 'publish' AND p.post_type IN ('aw_legal','post','aw_news') AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} d WHERE d.post_id = p.ID AND d.meta_key IN ('aw_doc_preview','aw_file_id','aw_pdf_cover_tried','aw_cover_reused')) ORDER BY p.post_date DESC LIMIT 5" ) as $pid ) { // phpcs:ignore WordPress.DB
 		update_post_meta( $pid, 'aw_pdf_cover_tried', current_time( 'mysql', true ) );
 		aw_source_pdf_cover( (int) $pid );
 	}
@@ -104,6 +107,7 @@ function aw_cc0_run() {
 	// 1. Publisher images: unchecked first, then failures older than a week.
 	$week = gmdate( 'Y-m-d H:i:s', time() - WEEK_IN_SECONDS );
 	$ids  = $wpdb->get_col( $wpdb->prepare( "SELECT p.ID " . aw_cc0_items_sql() . " AND EXISTS (SELECT 1 FROM {$wpdb->postmeta} si WHERE si.post_id = p.ID AND si.meta_key = 'aw_source_image' AND si.meta_value <> '')
+		AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} sf WHERE sf.post_id = p.ID AND sf.meta_key = 'aw_source_image_off' AND sf.meta_value = '1')
 		AND ( NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} c WHERE c.post_id = p.ID AND c.meta_key = 'aw_source_image_checked')
 		   OR EXISTS (SELECT 1 FROM {$wpdb->postmeta} o JOIN {$wpdb->postmeta} c2 ON c2.post_id = o.post_id AND c2.meta_key = 'aw_source_image_checked'
 		              WHERE o.post_id = p.ID AND o.meta_key = 'aw_source_image_ok' AND o.meta_value = '0' AND c2.meta_value < %s) )
@@ -307,6 +311,7 @@ function aw_source_og_run( $limit = 40 ) {
 			WHERE p.post_status = 'publish' AND p.post_type IN ('aw_news','aw_legal','post','aw_opportunity')
 			AND ( si.meta_value IS NULL OR si.meta_value = '' OR ok.meta_value = '0' )
 			AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} t WHERE t.post_id = p.ID AND t.meta_key = 'aw_source_og_tried')
+			AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} sf WHERE sf.post_id = p.ID AND sf.meta_key = 'aw_source_image_off' AND sf.meta_value = '1')
 			ORDER BY p.post_date DESC LIMIT %d",
 			$limit
 		)
@@ -364,7 +369,7 @@ function aw_source_pdf_cover( $post_id ) {
 	if ( ! in_array( get_post_type( $post_id ), array( 'aw_legal', 'post', 'aw_news' ), true ) ) {
 		return 0; // documents only: a Directory listing's source PDF (the AWBI list) is not its picture
 	}
-	if ( ! preg_match( '~^https?://[^?#]+\.pdf(\?|$)~i', $src ) || get_post_meta( $post_id, 'aw_file_id', true ) || get_post_meta( $post_id, 'aw_doc_preview', true ) || ! class_exists( 'Imagick' ) ) {
+	if ( ! preg_match( '~^https?://[^?#]+\.pdf(\?|$)~i', $src ) || get_post_meta( $post_id, 'aw_file_id', true ) || get_post_meta( $post_id, 'aw_doc_preview', true ) || get_post_meta( $post_id, 'aw_cover_reused', true ) || ! class_exists( 'Imagick' ) ) {
 		return 0;
 	}
 	$pdf = aw_source_download( $src );
@@ -504,6 +509,7 @@ function aw_source_localise_run( $limit = 25, $budget = 60 ) {
 			LEFT JOIN {$wpdb->postmeta} ok ON ok.post_id = p.ID AND ok.meta_key = 'aw_source_image_ok'
 			LEFT JOIN {$wpdb->postmeta} lt ON lt.post_id = p.ID AND lt.meta_key = 'aw_source_localise_tried'
 			WHERE p.post_status = 'publish' AND ( ok.meta_value IS NULL OR ok.meta_value <> '0' ) AND ( lt.meta_value IS NULL OR lt.meta_value < %s )
+			AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} sf WHERE sf.post_id = p.ID AND sf.meta_key = 'aw_source_image_off' AND sf.meta_value = '1')
 			ORDER BY p.post_date DESC LIMIT %d",
 			'%' . $wpdb->esc_like( $host ) . '%',
 			gmdate( 'Y-m-d H:i:s', time() - DAY_IN_SECONDS ),
