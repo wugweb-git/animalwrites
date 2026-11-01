@@ -300,7 +300,7 @@ Icon in a kraft square (turns marigold on hover) + H4 title + one-line descripti
 Lucide line icons (ISC licence) as CSS masks, so each is one `<span>` that takes the text colour: arrow-right, arrow-up-right, directory, legal, news, knowledge, research, opportunities, campaign, resources, helpline, mail, phone, search, instagram, facebook, x. Always `aria-hidden="true"` next to visible text or an `aria-label`.
 
 ### Footer
-Brand column (wordmark, one line, email with icon, social icon buttons), Explore (two columns), Animal Writes links; bottom bar with copyright, visit count, Terms, Privacy, Disclaimer and **Powered by Wugweb** (pill, links to wugweb.com).
+Newsletter band above it on every page (`.aw-nl-band`, `#newsletter`: heading, one line, the sign-up form). Then the dark footer: four columns from 1200 (Brand: wordmark, one line, email, small round social icons; Explore; Animal Writes; Legal & Trust), 2×2 from 768, stacked on phones with the three link lists as folds. Column labels are paragraphs, not headings; each list is a `<nav>` with its own aria-label. Helplines strip (tap-to-call, slightly lighter and bordered; first on phones). Bottom bar, smaller and dimmer (6:1 on the footer surface): copyright, Privacy, Terms, Disclaimer and **Powered by Wugweb**.
 
 ### Other components
 PDF viewer (inline document + download + official source), helplines grid, data table, countdown and live counts, steps, ad placements (Advanced Ads block), details/FAQ (+ rotates to ×), pagination, search, print button. All use the same tokens and states.
