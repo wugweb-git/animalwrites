@@ -143,7 +143,7 @@ function aw_media_merge_check( $keep, array $extras ) {
 	$allowed = aw_media_merge_meta_keys();
 	$known   = function_exists( 'aw_media_post_meta_uses' ) ? array_keys( aw_media_post_meta_uses() ) : array();
 	$kin     = $known ? implode( ',', array_fill( 0, count( $known ), '%s' ) ) : "''";
-	// phpcs:disable WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- the IN lists are only %s placeholders built with array_fill
+	// phpcs:disable WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- the lists are only %s placeholders joined with implode or array_fill; every value is bound through prepare()
 	$rows = $wpdb->get_results( $wpdb->prepare( "SELECT meta_id, post_id, meta_key, meta_value FROM {$wpdb->postmeta} WHERE meta_value IN ($in) AND ( meta_key REGEXP 'image|img|logo|thumb|icon|photo|file|preview|_att|banner|picture|attachment|hero|cover|poster|avatar|_id$|_og' OR meta_key IN ($kin) )", array_merge( $ids, $known ) ) );
 	$meta = array();
 	foreach ( (array) $rows as $r ) {
