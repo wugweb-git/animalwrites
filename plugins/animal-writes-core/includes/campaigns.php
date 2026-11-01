@@ -4,7 +4,7 @@
  * (The proof-of-posting receipts and live counts were removed on 8 Oct 2026; they had no entries.)
  *
  * Shortcode:
- *   [aw_countdown date="2026-11-29" label="Posting day"]
+ *   [aw_countdown date="2026-11-29" label="Posting day"]   on a campaign page, date may be left out: the close date is used
  *
  * @package animal-writes-core
  */
@@ -29,7 +29,10 @@ function aw_private_dir() {
 add_shortcode(
 	'aw_countdown',
 	function ( $atts ) {
-		$a    = shortcode_atts( array( 'date' => '', 'label' => '' ), $atts );
+		$a = shortcode_atts( array( 'date' => '', 'label' => '' ), $atts );
+		if ( '' === $a['date'] && function_exists( 'aw_camp_id' ) && aw_camp_id() ) { // no date: the campaign's own close date, the one source the sticky bar and home band also read
+			$a['date'] = (string) get_post_meta( aw_camp_id(), 'aw_campaign_close', true );
+		}
 		$date = preg_match( '/^\d{4}-\d{2}-\d{2}$/', $a['date'] ) ? $a['date'] : '';
 		if ( ! $date ) {
 			return '';
