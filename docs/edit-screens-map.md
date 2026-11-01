@@ -40,7 +40,7 @@ The SCF groups ship in Animal Writes core (`acf-json/`); SCF only renders them.
 | Animal Writes core | Opportunity details (SCF) | Details |
 | Animal Writes core | Contact, Opening hours, Registrations, About and services, Online, Photos and support (SCF, listing) | Details |
 | Animal Writes core | Address and place (SCF, listing; includes Place) | Place |
-| Animal Writes core | Claimed and sources (SCF, listing; includes Where these details come from) | Sources |
+| Animal Writes core | Claimed and sources (SCF, listing; includes Where these details come from and From government records) | Sources |
 | Animal Writes core | Photo (category, tag), Banner image (category) | Image |
 | Animal Writes core | Find help: listing types (category) | Find help |
 | Animal Writes core | Guides linking here (tag) | Links |
@@ -200,7 +200,7 @@ The five campaign groups (7–11) hold one message field each; the fields inside
 | 9 | About and services | acf-group_aw_listing_about | SCF | normal | |
 | 10 | Online | acf-group_aw_listing_online | SCF | normal | |
 | 11 | Photos and support | acf-group_aw_listing_photos | SCF | normal | |
-| 12 | Claimed and sources | acf-group_aw_listing_claimed | SCF; ends with "Where these details come from", drawn by `aw_enrich_prov_box` (`src/enrichment-admin.php:138`) | normal | |
+| 12 | Claimed and sources | acf-group_aw_listing_claimed | SCF; ends with "Where these details come from", drawn by `aw_enrich_prov_box` (`src/enrichment-admin.php:138`), then "From government records", drawn by `aw_gov_state_lines` (`core/gov-verified.php:192`) | normal | |
 | 13 | Linked from | aw_linked_from | ours | normal/low | target of aw_rel_org, aw_organiser, aw_participant, aw_organisation |
 | 14 | FAQ | aw-faq | ours | normal/low | |
 | 15 | Volunteers | aw_org_people | ours `core/org-people.php:109` (cb :119) | normal/low | `current_user_can( 'edit_aw_volunteers' )` |
@@ -345,6 +345,18 @@ Every field is written on every save (empty strings are stored, not deleted). `a
 
 Also prints a "Source: …" line under each matching SCF field (`acf/render_field`, `src/enrichment-admin.php`).
 
+**From government records** (last in the SCF "Claimed and sources" box on aw_listing, message field `field_aw_listing_msg_gov_state`; `aw_gov_state_lines` `core/gov-verified.php:192`, rendered by `acf/render_field/key=field_aw_listing_msg_gov_state` :223). Read-only text, no inputs, nothing saved; empty when the listing has no government record. One line each, in the front end's own wording:
+
+| line | from | front-end source of the wording |
+|---|---|---|
+| "Verified on {date}" | `aw_gov_verified_on` | `aw_gov_verified_line()` (meta row) |
+| "{source}, as on {date}", one per source | `aw_gov_verified_by` (source slugs) | `aw_listing_sources()` ("Details from" on the profile) |
+| "Not on the current AWBI list {date}" | `aw_awbi_dropped` | Registrations section (`core/listing-template.php:144`) |
+| "AWBI list of recognised organisations, as on {date}" (when not already listed) | `aw_awbi_list_on` | `aw_listing_sources()` |
+| "Blacklisted on NGO Darpan by {by}, from {date}" | `aw_darpan_blacklisted_on`, `aw_darpan_blacklisted_by` | `aw_binding_value( 'blacklisted_label' )` (meta row tag) |
+
+The six keys are mapped to this box as `readonly` in `data/edit-screen-map.json` (not counted as edited).
+
 **Volunteers** (`core/org-people.php:119–136`): read-only list of FluentCRM contacts tagged org-approved / org-pending for this listing. Stores nothing.
 
 **Coverage** (aw_press, `core/press.php:117–196`)
@@ -427,9 +439,9 @@ Saving goes through `aw_value_guard()` (`core/scf.php:62–113`, filter `acf/pre
 | group_aw_listing_about "About and services" | `aw_aliases`, `aw_founded` (4-digit year), `aw_head`, `aw_animals`, `aw_areas_served`, `aw_services`, `aw_services_source` + `aw_services_on` (only when Services filled), `aw_languages` |
 | group_aw_listing_online "Online" | `aw_website`, `aw_instagram`, `aw_facebook`, `aw_x`, `aw_youtube`, `aw_linkedin` (urls), `aw_wikidata`, `aw_ig_followers`, `aw_ig_posts`, `aw_last_post`, `aw_ngobase_url`, `aw_g_profile`, `aw_g_category`, `aw_g_rating` (numeric), `aw_g_reviews` (digits) |
 | group_aw_listing_photos "Photos and support" | message "logo is the Featured image"; `aw_gallery` gallery (IDs, stored CSV); `aw_volunteer_url`, `aw_adopt_url` urls; `aw_rel_nofollow` true_false; under "Not used on the site": `aw_donate_url` url, `aw_upi` |
-| group_aw_listing_claimed "Claimed and sources" | `aw_verified` true_false (label "Claimed"; unticked stores '' not delete); `aw_verified_on` date (label "Claimed on", only when ticked); `aw_needs_reverify` true_false; `aw_source_url`, `aw_source_name`, `aw_source_date`; `aw_detail_sources` repeater (detail select of 13 values, url, checked date); message: "Where these details come from" (§2.1) |
+| group_aw_listing_claimed "Claimed and sources" | `aw_verified` true_false (label "Claimed"; unticked stores '' not delete); `aw_verified_on` date (label "Claimed on", only when ticked); `aw_needs_reverify` true_false; `aw_source_url`, `aw_source_name`, `aw_source_date`; `aw_detail_sources` repeater (detail select of 13 values, url, checked date); message: "Where these details come from" (§2.1); message: "From government records" (§2.1, read-only: `aw_awbi_dropped`, `aw_awbi_list_on`, `aw_gov_verified_on`, `aw_gov_verified_by`, `aw_darpan_blacklisted_by`, `aw_darpan_blacklisted_on`) |
 
-Registered on aw_listing but in **no** box/field: `aw_awbi_dropped`, `aw_awbi_list_on`, `aw_gov_verified_on`, `aw_gov_verified_by`, `aw_darpan_blacklisted_by`, `aw_darpan_blacklisted_on`, `aw_sponsored`, `aw_sponsor_name` (all set by code/imports).
+Registered on aw_listing but in **no** box/field: `aw_sponsored`, `aw_sponsor_name` (set by code/imports). The government-record keys (`aw_awbi_dropped`, `aw_awbi_list_on`, `aw_gov_verified_on`, `aw_gov_verified_by`, `aw_darpan_blacklisted_by`, `aw_darpan_blacklisted_on`) are set by code and imports and shown read-only under "From government records".
 
 ### 2.3 Third-party boxes
 
@@ -603,7 +615,7 @@ None. Every key has one box per type: the Place, Issued by, Library item, proven
 - **aw_campaign partners:** "Partners" `aw_campaign_partners` (Organisations box, CSV) vs Related → "Participating organisations" `aw_participant` (meta rows). Both are read as role "Partner" on the listing's Campaigns block (`core/listing-template.php:515–525`). Also Related → "Organiser" `aw_organiser`. Live: partners stored on 1 campaign (empty value); `aw_participant`, `aw_organiser` 0 rows.
 - **aw_opportunity organisation:** SCF "Organisation" `aw_org_name` (+ "Website" `aw_website`) vs Related → "Organisation" `aw_organisation` (listing link). Schema and display use both (`seo/schema.php:770–777, 941–945`).
 - **aw_listing provenance:** "Where these details come from" (end of Claimed and sources) lists the same per-field sources the SCF fields show as a "Source:" line. Display only.
-- **aw_listing "Claimed":** `aw_verified` / `aw_verified_on` are labelled Claimed / Claimed on and shown as "Claimed on {date}" (`core/bindings.php`); government verification is `aw_gov_verified_on/_by` (no box).
+- **aw_listing "Claimed":** `aw_verified` / `aw_verified_on` are labelled Claimed / Claimed on and shown as "Claimed on {date}" (`core/bindings.php`); government verification is `aw_gov_verified_on/_by`, shown read-only under "From government records" in the same box.
 - **aw_listing gallery limit:** SCF save keeps 4 photos (`core/scf.php:92`); `aw_sanitize_meta` and the meta description say up to 6 (`core/meta.php:62, 136–138`).
 - **Rank Math title/description** are typed in Rank Math and also filled by our code when not typed (`_aw_seo_auto`).
 
@@ -615,7 +627,7 @@ None. Every key has one box per type: the Place, Issued by, Library item, proven
 - **Linked from** on aw_legal/aw_listing/post: read-only; mostly "Nothing links here yet." (live: aw_rel_legal 2, aw_rel_resource 1, aw_rel_guide 9, aw_rel_org 0, aw_organisation 15 rows).
 - **Related on aw_campaign:** its three hand rows (aw_rel_org, aw_organiser, aw_participant) have 0 rows on live; only the "Found in the text" ticks hold data (8).
 - **Related → Listing types (post):** saved to `aw_rel_listing_type`, read only on the tag screen; 0 rows.
-- **SCF read-only fields:** `aw_awbi_code` (listing), `aw_publisher` (news) — shown, never saved.
+- **SCF read-only fields:** `aw_awbi_code` (listing), `aw_publisher` (news) — shown, never saved. The government-record keys of a listing are shown as text under "From government records" (no fields).
 - **SCF fields never read on the front end or in schema:** `aw_requires_email` (Library), `aw_paid_listing` (Opportunity), `aw_donate_url`, `aw_upi`, `aw_sectors`, `aw_reg_authority`, `aw_reg_act`, `aw_awbi_recognised`, `aw_awbi_renewed` (Listing). Details in §6.
 - **Coverage → Video embed URL** (`aw_press_video`): never read.
 - Fallback boxes `aw-listing-details` and `aw-sponsored` are not registered while SCF is active (correct; listed for completeness).
@@ -674,7 +686,6 @@ Keys edited in (or registered for) an edit screen with no reader outside the box
 | `aw_sectors` | aw_listing | SCF | 20 | "admin only" |
 | `aw_reg_authority`, `aw_reg_act` | aw_listing | SCF | 2 / 2 | "admin only" |
 | `aw_awbi_recognised`, `aw_awbi_renewed` | aw_listing | SCF | 2732 / 124 | only claim/enrichment lists |
-| `aw_darpan_blacklisted_by` | aw_listing | none | 1 | registered only; `_on` is read |
 | `aw_press_video` | aw_press | Coverage box | 2 | written by fetch |
 | `aw_rel_listing_type` | post | Related box | 0 | read only on the tag screen (admin) |
 | `aw_press_notes`, `aw_press_platform`, `aw_press_account` | aw_press | Coverage box | 34 / 57 / 2 | admin only by design |

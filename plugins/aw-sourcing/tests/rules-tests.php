@@ -145,7 +145,7 @@ aw_t( '' === $by2['aw_campaign']['inherit'] && 80 === $by2['aw_campaign']['max_w
 $orders = array_map( fn( $g ) => (int) $g['menu_order'], $acf_gs );
 sort( $orders );
 aw_t( 8 === count( $acf_gs ) && range( 0, 7 ) === $orders && $acf['fields'] === aw_enrich_listing_groups_fields( array_reverse( $acf_gs ), 'group_aw_listing' ), 'listing fields: 8 groups, read in menu_order whatever the file order' );
-aw_t( 'aw_email' === $acf['fields'][0]['name'] && 'field_aw_listing_msg_provenance' === end( $acf['fields'] )['key'] && 65 === count( $acf['fields'] ), 'listing fields: Contact first, the provenance message last, 61 fields and 4 messages' );
+aw_t( 'aw_email' === $acf['fields'][0]['name'] && 'field_aw_listing_msg_gov_state' === end( $acf['fields'] )['key'] && 66 === count( $acf['fields'] ), 'listing fields: Contact first, the government records message last, 61 fields and 5 messages' );
 aw_t( array( 'x' ) === array_column( aw_enrich_listing_groups_fields( array( array( 'key' => 'group_aw_news', 'fields' => array( array( 'name' => 'n' ) ) ), array( 'key' => 'group_aw_listing_b', 'menu_order' => 1, 'fields' => array( array( 'name' => 'x' ) ) ) ), 'group_aw_listing' ), 'name' ), 'listing fields: other groups left out' );
 $schema = aw_enrich_schema_build( $acf['fields'], $p3['enrich_fields'], 'group_aw_listing', $p3['sections']['aw_listing']['tags'], array( 'rescue' => 'Rescue' ) );
 $mapped = array_filter( $schema['fields'], fn( $f ) => (bool) $f['enrich'] );

@@ -26,7 +26,7 @@
             "name": "aw_org_name",
             "aria-label": "",
             "type": "text",
-            "instructions": "The name shown as \"Posted by\". Link the Directory profile in the Related box. Place: the Place box. Type: Tags.",
+            "instructions": "The name shown as \"Posted by\". Link the Directory profile in the Related box. Type: Tags.",
             "required": 0,
             "conditional_logic": 0,
             "wrapper": {
@@ -335,5 +335,5 @@
     "active": true,
     "description": "Opportunity details on the existing meta keys.",
     "show_in_rest": 0,
-    "modified": 1792224000
+    "modified": 1793512615
 }

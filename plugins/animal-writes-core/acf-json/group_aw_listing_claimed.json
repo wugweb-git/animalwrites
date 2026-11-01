@@ -239,6 +239,24 @@
             "message": "",
             "new_lines": "wpautop",
             "esc_html": 0
+        },
+        {
+            "key": "field_aw_listing_msg_gov_state",
+            "label": "From government records",
+            "name": "",
+            "aria-label": "",
+            "type": "message",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "message": "",
+            "new_lines": "wpautop",
+            "esc_html": 0
         }
     ],
     "location": [
@@ -259,5 +277,5 @@
     "active": true,
     "description": "Directory listing details. Each field reads and writes the listing meta key of the same name (animal-writes-core meta.php).",
     "show_in_rest": 0,
-    "modified": 1793506771
+    "modified": 1793512615
 }

@@ -182,6 +182,54 @@ add_filter(
 	3
 );
 
+/**
+ * The listing's state from government records, as visitors see it, with the stored dates and sources: one line each.
+ * Empty when there is none. Shown read-only on the edit screen.
+ *
+ * @param int $id Listing ID.
+ * @return string[]
+ */
+function aw_gov_state_lines( $id ) {
+	$m     = fn( $k ) => trim( (string) get_post_meta( $id, $k, true ) );
+	$day   = fn( $d ) => strtotime( $d . ' 12:00:00' ) ? wp_date( 'j M Y', strtotime( $d . ' 12:00:00' ) ) : $d;
+	$srcs  = array();
+	$lines = array();
+	foreach ( aw_listing_sources( $id ) as list( $slug, , $label, $on ) ) {
+		$srcs[ $slug ] = $label . ( $on ? ', as on ' . $day( $on ) : '' ); // as "Details from" on the profile
+	}
+	$verified = wp_strip_all_tags( aw_gov_verified_line( $id ) ); // Verified on {date}
+	if ( '' !== $verified ) {
+		$lines[] = $verified;
+		foreach ( array_filter( explode( ',', $m( 'aw_gov_verified_by' ) ) ) as $slug ) {
+			$lines[] = $srcs[ $slug ] ?? ( aw_data_sources()[ $slug ][1] ?? $slug );
+		}
+	}
+	if ( '' !== $m( 'aw_awbi_dropped' ) ) {
+		$lines[] = __( 'Not on the current AWBI list', 'animal-writes-core' ) . ' ' . $day( $m( 'aw_awbi_dropped' ) ); // as the Registrations section
+	}
+	if ( '' !== $m( 'aw_awbi_list_on' ) && isset( $srcs['awbi'] ) && ! in_array( $srcs['awbi'], $lines, true ) ) {
+		$lines[] = $srcs['awbi']; // the older AWBI list the code comes from
+	}
+	$black = function_exists( 'aw_binding_value' ) ? (string) aw_binding_value( 'blacklisted_label', $id ) : ''; // Blacklisted on NGO Darpan
+	if ( '' !== $black ) {
+		$lines[] = $black . ( '' !== $m( 'aw_darpan_blacklisted_by' ) ? ' by ' . $m( 'aw_darpan_blacklisted_by' ) : '' ) . ', from ' . $day( $m( 'aw_darpan_blacklisted_on' ) );
+	}
+	return $lines;
+}
+
+// "From government records" at the end of SCF's "Claimed and sources" group: the Verified state and the AWBI and NGO
+// Darpan records it is worked out from. Text only; nothing is saved.
+add_action(
+	'acf/render_field/key=field_aw_listing_msg_gov_state',
+	function () {
+		$post  = get_post();
+		$lines = $post && 'aw_listing' === $post->post_type ? aw_gov_state_lines( $post->ID ) : array();
+		if ( $lines ) {
+			echo '<ul><li>' . implode( '</li><li>', array_map( 'esc_html', $lines ) ) . '</li></ul>';
+		}
+	}
+);
+
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	// wp aw gov-verify [--dry-run] [--off]: check every published listing (and switch Verified on); how many are
 	// Verified, by source. --off removes it from every listing and switches it off.
