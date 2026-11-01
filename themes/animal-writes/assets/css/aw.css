@@ -1601,6 +1601,20 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 	.aw-pair-grid { grid-template-columns: 1fr 1fr; }
 }
 
+/* Home: the whole card is a link. The campaign cards (Supreme Court, AW_Festive) and the photo cards (Volunteer, Run an
+   organisation?) follow their first button; any other link in the card stays on top and keeps its own target. The
+   photo card's picture and fade go under the text (isolated, negative z-index) so the button's cover reaches the
+   card's edges. ::before is free on these buttons (::after is the arrow). */
+.home .aw-pair-grid > :is(.aw-content, .aw-festive) :is(.kit-btn, .wp-block-button__link):first-of-type::before,
+.home .kit-photo-card .wp-block-button:first-child > .wp-block-button__link::before { content: ""; position: absolute; inset: 0; z-index: 1; }
+.home .aw-pair-grid > .aw-content .aw-content-actions > a:not(:first-of-type),
+.home .kit-photo-card .wp-block-cover__inner-container a:not(.wp-block-button:first-child > a) { position: relative; z-index: 2; }
+.home .kit-photo-card { isolation: isolate; }
+.home .kit-photo-card > .wp-block-cover__image-background { z-index: -2; }
+.home .kit-photo-card > .wp-block-cover__background { z-index: -1; }
+.home .kit-photo-card > .wp-block-cover__inner-container { position: static; }
+.home :is(.aw-pair-grid > .aw-content, .aw-pair-grid > .aw-festive, .kit-photo-card):has(a:focus-visible) { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset-lg); }
+
 /* Section heads on Home: H2, one supporting line, a small ghost "see all"; 16px between them and to the content */
 .home .kit-sec-head { row-gap: var(--kit-space-4); margin-bottom: var(--kit-space-head); }
 .home .kit-sec-head p { margin-top: var(--kit-space-4); }
