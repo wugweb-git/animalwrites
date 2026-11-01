@@ -105,3 +105,53 @@ add_filter(
 		return $blocks;
 	}
 );
+
+/* ---------- Guides ---------- */
+
+/** Query Loop ID of the home Guides section (pattern learn.php). */
+const AW_HOME_GUIDES_QUERY = 44;
+
+/**
+ * Guides on Home: the three newest guides, with at most one state "report cruelty" guide
+ * (/resources/animal-cruelty-complaint-{state}/), so one kind does not fill the row.
+ *
+ * @param array $q The Query Loop's query vars.
+ * @return int[]
+ */
+function aw_home_guide_ids( $q ) {
+	$ids   = get_posts( array_merge( $q, array( 'posts_per_page' => 12, 'paged' => 1, 'offset' => 0, 'fields' => 'ids', 'no_found_rows' => true ) ) );
+	$out   = array();
+	$state = false;
+	foreach ( $ids as $id ) {
+		$is_state = 0 === strpos( (string) get_post_field( 'post_name', $id ), 'animal-cruelty-complaint-' );
+		if ( $is_state && $state ) {
+			continue;
+		}
+		$state = $state || $is_state;
+		$out[] = (int) $id;
+		if ( 3 === count( $out ) ) {
+			break;
+		}
+	}
+	return $out;
+}
+
+add_filter(
+	'query_loop_block_query_vars',
+	function ( $q, $block ) {
+		$qid = (int) ( $block->context['queryId'] ?? 0 );
+		if ( ! is_front_page() || AW_HOME_GUIDES_QUERY !== $qid ) {
+			return $q;
+		}
+		$ids = aw_home_guide_ids( $q );
+		if ( $ids ) {
+			$q['post__in']       = $ids;
+			$q['orderby']        = 'post__in';
+			$q['posts_per_page'] = count( $ids );
+			$q['offset']         = 0;
+		}
+		return $q;
+	},
+	20,
+	2
+);

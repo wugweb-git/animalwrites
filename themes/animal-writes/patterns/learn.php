@@ -3,7 +3,7 @@
  * Title: Guides
  * Slug: animal-writes/learn
  * Categories: animal-writes
- * Description: The three newest guides from Resources as the same cards the Resources list uses, with a link to all guides.
+ * Description: The three newest guides from Resources (at most one state cruelty-complaint guide; home.php) as three equal Resources cards, with a link to all guides.
  * Inserter: yes
  *
  * @package animal-writes
