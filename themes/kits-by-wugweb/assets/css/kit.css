@@ -1075,7 +1075,7 @@ body { background: var(--kit-surface-page); }
 .kit-list-count { text-align: center; margin: var(--kit-space-6) 0 var(--kit-space-3); font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
 /* Error and empty pages (404, no results) */
 .kit-error-page > * { max-width: 40rem; }
-.kit-error-code { margin: 0; font-size: var(--kit-type-display) !important; font-weight: var(--kit-weight-bold); line-height: 1; color: var(--kit-color-muted); }
+.kit-error-code { margin: 0; font-size: var(--kit-type-display) !important; font-weight: var(--kit-weight-bold); line-height: 1; color: var(--kit-color-ink); }
 .kit-error-lead { font-size: var(--kit-type-lead); color: var(--kit-color-text); }
 .kit-error-search { display: flex; gap: var(--kit-space-2); margin: var(--kit-space-5) 0; max-width: 100%; }
 .kit-error-search .kit-btn { flex: 0 0 auto; }
@@ -1083,6 +1083,30 @@ body { background: var(--kit-surface-page); }
 .kit-error-links ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--kit-space-2); }
 .kit-error-links a { display: inline-flex; align-items: center; min-height: var(--kit-size-target); padding: 0 var(--kit-space-4); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-pill); text-decoration: none; color: var(--kit-color-ink); }
 .kit-error-links a:hover { background: var(--kit-color-ink); color: var(--kit-color-on-ink); }
+/* Search field with its icon inside; section chips with their icons */
+.kit-error-field { position: relative; display: flex; flex: 1 1 auto; min-width: 0; }
+.kit-error-field > .kit-ico { position: absolute; left: var(--kit-space-4); top: 50%; transform: translateY(-50%); --kit-ico-size: var(--kit-icon-md); color: var(--kit-color-muted); pointer-events: none; }
+.kit-error-search .kit-error-field input { width: 100%; padding-left: calc(var(--kit-space-4) + var(--kit-icon-md) + var(--kit-space-2)); border-color: var(--kit-color-muted); } /* the field's edge at 3:1 or more (WCAG 1.4.11) */
+.kit-error-links a { gap: var(--kit-space-2); }
+.kit-error-links a .kit-ico { --kit-ico-size: var(--kit-icon-md); }
+/* The photo (aw_error_picture): on phones after the lead, the column's width, no frame. From 768px it fills the section
+   behind the text at the page hero's height (--kit-hero-min, so the section stays within 720px): the page colour fades
+   in from the left over the photo, so the text keeps its contrast whatever the picture (stops: docs/design-system.md,
+   Error pages) */
+.kit-error-media { margin: var(--kit-space-5) 0; }
+.kit-error-media img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; }
+@media (min-width: 768px) {
+	.kit-error-page:has(> .kit-error-media) { position: relative; isolation: isolate; min-height: var(--kit-hero-min); }
+	.kit-error-page > .kit-error-media { position: absolute; inset: 0; z-index: -1; max-width: none; margin: 0 !important; } /* !important: WordPress's constrained layout sets its child margins with !important */
+	.kit-error-page > .kit-error-media :is(picture, img) { width: 100%; height: 100%; }
+	.kit-error-page > .kit-error-media img { aspect-ratio: auto; object-position: right bottom; }
+	/* solid to the text column's right edge (it grows with the text size, so 200% text never reaches the photo), then clear over 20% */
+	.kit-error-page > .kit-error-media { --kit-error-col: calc(var(--kit-space-gutter) + max(0px, (100% - 2 * var(--kit-space-gutter) - var(--kit-width-wide)) / 2) + 40rem); }
+	.kit-error-page > .kit-error-media::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, var(--kit-color-canvas) 0%, var(--kit-color-canvas) var(--kit-error-col), transparent calc(var(--kit-error-col) + 20%)); }
+	/* the text column starts where the header's logo does, on the left of the wide width, not centred over the photo */
+	.kit-error-page:has(> .kit-error-media) > :not(.kit-error-media) { max-width: 40rem; margin-left: max(0px, (100% - var(--kit-width-wide)) / 2) !important; margin-right: auto !important; }
+	.kit-error-page:has(> .kit-error-media) .kit-error-links a, .kit-error-page:has(> .kit-error-media) .kit-error-field input { background: var(--kit-color-raised); }
+}
 
 /* The menu button only below 1200px (from 1200px the full menu shows on one row). */
 @media (max-width: 1199px) { .kit-site-header .wp-block-navigation__responsive-container-open { display: inline-flex !important; } }
