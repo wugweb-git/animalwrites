@@ -196,7 +196,7 @@ add_filter(
 			'aw_seo'     => 'SEO',
 			'aw_opt'     => 'Optimisation',
 		);
-		$order  = array( 'cb', 'title', 'aw_slug', 'aw_caption', 'aw_desc', 'rank_math_image_alt', 'aw_context', 'aw_parent', 'aw_seo', 'aw_opt', 'date' );
+		$order  = array( 'cb', 'title', 'taxonomy-aw_media_group', 'aw_slug', 'aw_caption', 'aw_desc', 'rank_math_image_alt', 'aw_context', 'aw_parent', 'aw_seo', 'aw_opt', 'date' );
 		$remove = array( 'author', 'rank_math_image_title', 'imgoptm', 'parent' );
 		$out    = array();
 		foreach ( $order as $key ) {
