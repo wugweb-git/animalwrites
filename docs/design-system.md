@@ -296,6 +296,7 @@ A section's height is its content plus the theme's section padding: `.kit-sectio
 - No fixed heights on sections or cards (no `height`/`min-height` in px, rem or vh); a picture's height comes from its shape (`aspect-ratio`).
 - No percentage padding-top or padding-bottom (it ties a height to the width); keep room for a picture with the picture itself, as a block with its own `aspect-ratio`.
 - No `!important` over `.kit-section` padding, and no `.kit-section` inside a `.kit-section`: a card in a section is a card, with card padding.
+- Desktop and tablet (owner, 2 Nov 2026): from 768 every section, hero included, is at most 720px tall (800 the absolute ceiling) and no card or block is over 600px at any width. On Home the hero is the theme hero (`--kit-hero-min`, theme H1 size); Need help now is four columns from a 56.5rem section and one sideways row below; Guides pictures are 16:9 (`--kit-placard-ratio`) in the row of three; the community dogs story is two columns from 768.
 - Home on phones: every Home section fits one 375×812 screen, heading and padding included. Card lists scroll sideways in one row instead of stacking (Library tiles, story figures and dates, Take action photo cards); the page itself never scrolls sideways (`scrollWidth` = viewport width). Exception (owner, 2 Nov 2026): the campaign cards row stacks below 800px, so on phones that one section is two cards tall.
 - Tablet and desktop: see Layout rules 5 (at most 720px, ceiling 800px, from 768 wide).
 - Home campaign row (`aw-pair`, Supreme Court and AW_Festive cards, owner 2 Nov 2026): two photo cards (text over the campaign photograph). Stacked while the row is narrower than 800px, side by side from 800 (a container query on `.aw-pair`, no new media query), each card one round height at every width, `--aw-pair-card-h` on `.aw-pair` (owner, 2 Nov 2026: "500 for all"; one button per card); it is a min-height, so text is never cut off, and it is the one fixed card height allowed.
@@ -308,9 +309,9 @@ The home page's sections and their order live in the theme template `themes/anim
 1. Hero: block `animal-writes/home-hero`. While campaign 13848 is published it shows the campaign hero, open or closed: no automatic switch when it closes, and nothing is added after it closes. The standard hero (pattern `hero`) is not shown on Home; the block falls back to it only if the campaign is not published.
 2. Need help now? (`help-now`).
 3. Find help near you (`find-help`: `[aw_find_help compact="1"]`).
-4. What's happening (`whats-happening`: Query Loop 41, four items as a mosaic: the lead with a 4:3 picture and summary, three rows beside it spread to end level; the same cards on phones).
+4. What's happening (`whats-happening`: Query Loop 41, three items as a mosaic: the lead with a 4:3 picture and summary, two rows beside it spread to end level; on phones the lead is a row like the other two).
 5. Guides (`learn`: Query Loop 44, at most one state cruelty guide).
-6. From the Library (`animal-law`: Query Loop 43, four items in the same mosaic: an Act, rule, order or judgment leads, official releases last).
+6. From the Library (`animal-law`: Query Loop 43, three items as row cards (picture left, date, publisher, title), three across from 66rem, else one sideways row; then the four type tiles, four across from 1200, a sideways row below: an Act, rule, order or judgment leads, official releases last).
 7. Take action (`take-action`).
 8. India Writes for Its Community Dogs (`aw1-story`).
 9. FAQ (block `animal-writes/item-faq`).
