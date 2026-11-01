@@ -3,7 +3,7 @@
  * Title: Take action
  * Slug: animal-writes/take-action
  * Categories: animal-writes
- * Description: Two photo blocks (core Cover, dark overlay) side by side above the footer, each with one Brand button: volunteer, and claim your Directory listing (owner, 18 Oct 2026).
+ * Description: Section head, then two Kits cards side by side (one under the other on phones), each with an icon, title, one line and a button: volunteer, and claim your Directory listing.
  * Inserter: yes
  *
  * @package animal-writes
@@ -22,37 +22,49 @@
 <!-- /wp:group --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"className":"kit-stack","layout":{"type":"grid","columnCount":2,"minimumColumnWidth":"18rem"}} -->
-<div class="wp-block-group kit-stack"><!-- wp:cover {"url":"/wp-content/uploads/2026/10/aw1-im2-873x1024.jpeg","id":18,"alt":"Women holding placards for community dogs in a park.","dimRatio":60,"overlayColor":"foreground","isUserOverlayColor":true,"focalPoint":{"x":0.5,"y":0.35},"minHeight":420,"contentPosition":"bottom left","isDark":true,"className":"kit-photo-card","layout":{"type":"default"}} -->
-<div class="wp-block-cover is-dark has-custom-content-position is-position-bottom-left kit-photo-card" style="min-height:420px"><span aria-hidden="true" class="wp-block-cover__background has-foreground-background-color has-background-dim-60 has-background-dim"></span><img class="wp-block-cover__image-background wp-image-18" alt="Women holding placards for community dogs in a park." src="/wp-content/uploads/2026/10/aw1-im2-873x1024.jpeg" style="object-position:50% 35%" data-object-fit="cover" data-object-position="50% 35%"/><div class="wp-block-cover__inner-container"><!-- wp:heading {"level":3,"fontSize":"2x-large"} -->
-<h3 class="wp-block-heading has-2-x-large-font-size">Volunteer</h3>
+<!-- wp:group {"className":"kit-stack aw-ed-acts","layout":{"type":"grid","columnCount":2,"minimumColumnWidth":"16rem"}} -->
+<div class="wp-block-group kit-stack aw-ed-acts"><!-- wp:group {"tagName":"article","className":"kit-card kit-card--block-md aw-ed-act","layout":{"type":"default"}} -->
+<article class="wp-block-group kit-card kit-card--block-md aw-ed-act"><!-- wp:group {"className":"kit-card-body","layout":{"type":"default"}} -->
+<div class="wp-block-group kit-card-body"><!-- wp:html -->
+<span class="kit-ico kit-ico--user aw-ed-act-ico" aria-hidden="true"></span>
+<!-- /wp:html -->
+
+<!-- wp:heading {"level":3,"className":"kit-card-title"} -->
+<h3 class="wp-block-heading kit-card-title">Volunteer</h3>
 <!-- /wp:heading -->
 
-<!-- wp:paragraph -->
-<p>Coordinate in your city, write, design, or help with legal work.</p>
+<!-- wp:paragraph {"className":"kit-card-sum"} -->
+<p class="kit-card-sum">Coordinate in your city, write letters, rescue, design or help with legal work.</p>
 <!-- /wp:paragraph -->
 
 <!-- wp:buttons -->
-<div class="wp-block-buttons"><!-- wp:button {"className":"is-style-kits-brand"} -->
-<div class="wp-block-button is-style-kits-brand"><a class="wp-block-button__link wp-element-button" href="/volunteer/">Register as a volunteer</a></div>
+<div class="wp-block-buttons"><!-- wp:button -->
+<div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="/volunteer/">Register as a volunteer</a></div>
 <!-- /wp:button --></div>
-<!-- /wp:buttons --></div></div>
-<!-- /wp:cover -->
+<!-- /wp:buttons --></div>
+<!-- /wp:group --></article>
+<!-- /wp:group -->
 
-<!-- wp:cover {"url":"/wp-content/uploads/2026/10/aw-category-dog-vaccination.jpg","id":8752,"alt":"A vet vaccinating a dog.","dimRatio":60,"overlayColor":"foreground","isUserOverlayColor":true,"focalPoint":{"x":0.5,"y":0.5},"minHeight":420,"contentPosition":"bottom left","isDark":true,"className":"kit-photo-card","layout":{"type":"default"}} -->
-<div class="wp-block-cover is-dark has-custom-content-position is-position-bottom-left kit-photo-card" style="min-height:420px"><span aria-hidden="true" class="wp-block-cover__background has-foreground-background-color has-background-dim-60 has-background-dim"></span><img class="wp-block-cover__image-background wp-image-8752" alt="A vet vaccinating a dog." src="/wp-content/uploads/2026/10/aw-category-dog-vaccination.jpg" style="object-position:50% 50%" data-object-fit="cover" data-object-position="50% 50%"/><div class="wp-block-cover__inner-container"><!-- wp:heading {"level":3,"fontSize":"2x-large"} -->
-<h3 class="wp-block-heading has-2-x-large-font-size">Claim your listing</h3>
+<!-- wp:group {"tagName":"article","className":"kit-card kit-card--block-md aw-ed-act","layout":{"type":"default"}} -->
+<article class="wp-block-group kit-card kit-card--block-md aw-ed-act"><!-- wp:group {"className":"kit-card-body","layout":{"type":"default"}} -->
+<div class="wp-block-group kit-card-body"><!-- wp:html -->
+<span class="kit-ico kit-ico--building aw-ed-act-ico" aria-hidden="true"></span>
+<!-- /wp:html -->
+
+<!-- wp:heading {"level":3,"className":"kit-card-title"} -->
+<h3 class="wp-block-heading kit-card-title">Run an organisation?</h3>
 <!-- /wp:heading -->
 
-<!-- wp:paragraph -->
-<p>Run an organisation or service listed in the Directory? Claim its listing to keep its details up to date.</p>
+<!-- wp:paragraph {"className":"kit-card-sum"} -->
+<p class="kit-card-sum">Claim your listing to keep your phone, hours and services right. Free.</p>
 <!-- /wp:paragraph -->
 
 <!-- wp:buttons -->
-<div class="wp-block-buttons"><!-- wp:button {"className":"is-style-kits-brand"} -->
-<div class="wp-block-button is-style-kits-brand"><a class="wp-block-button__link wp-element-button" href="/claim/">Claim your listing</a></div>
+<div class="wp-block-buttons"><!-- wp:button -->
+<div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="/claim/">Claim your listing</a></div>
 <!-- /wp:button --></div>
-<!-- /wp:buttons --></div></div>
-<!-- /wp:cover --></div>
+<!-- /wp:buttons --></div>
+<!-- /wp:group --></article>
+<!-- /wp:group --></div>
 <!-- /wp:group --></section>
 <!-- /wp:group -->
