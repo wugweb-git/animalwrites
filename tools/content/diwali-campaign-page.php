@@ -218,24 +218,23 @@ $what = dwsec(
 	'aw-camp-white'
 );
 
-/* why-it-matters: the law, and the firecracker rules (the rules expire, so they show only while open). */
+/* why-it-matters: the law as three campaign cards (the firecracker rules card expires, so it shows only while open). */
+$lcard = function ( $anchor, $cls, $icon, $title, $body ) {
+	$id = $anchor ? ' id="' . $anchor . '"' : '';
+	$an = $anchor ? '"anchor":"' . $anchor . '",' : '';
+	return "<!-- wp:group {{$an}\"className\":\"$cls\",\"layout\":{\"type\":\"default\"}} -->\n<div$id class=\"wp-block-group $cls\">" . dwp( dwi( $icon ), 'aw-camp-card-ico' ) . dwh( $title, 3 ) . $body . "</div>\n<!-- /wp:group -->\n\n";
+};
 $law = dwsec(
 	'law',
 	dwh( 'What the law says' )
 	. dwp( 'Hurting an animal with firecrackers is a crime. This is general information, not legal advice.', 'aw-camp-lede' )
-	. dwh( 'Cruelty', 3 )
-	. dwp( 'Treating an animal so as to cause it unnecessary pain or suffering is an offence under section 11(1)(a) of the Prevention of Cruelty to Animals Act, 1960: a fine of ₹10 to ₹50 for a first offence, and for a repeat within three years ₹25 to ₹100, up to three months in jail, or both.' )
-	. dwp( 'Killing, poisoning or maiming an animal is also an offence under section 325 of the Bharatiya Nyaya Sanhita, 2023: up to five years in jail, a fine, or both.' )
-	. dwh( 'Owls and wildlife', 3 )
-	. dwp( 'Owls are protected under the Wild Life (Protection) Act, 1972. The barn owl, the Indian eagle owl and nine more owls are in Schedule I, its highest protection. Catching or selling an owl is an offence.' )
+	. "<!-- wp:group {\"className\":\"aw-camp-grid\",\"layout\":{\"type\":\"default\"}} -->\n<div class=\"wp-block-group aw-camp-grid\">"
+	. $lcard( '', 'aw-camp-card', 'legal', 'Cruelty', dwp( 'Treating an animal so as to cause it unnecessary pain or suffering is an offence under section 11(1)(a) of the Prevention of Cruelty to Animals Act, 1960: a fine of ₹10 to ₹50 for a first offence, and for a repeat within three years ₹25 to ₹100, up to three months in jail, or both.' ) . dwp( 'Killing, poisoning or maiming an animal is also an offence under section 325 of the Bharatiya Nyaya Sanhita, 2023: up to five years in jail, a fine, or both.' ) )
+	. $lcard( '', 'aw-camp-card', 'paw', 'Owls and wildlife', dwp( 'Owls are protected under the Wild Life (Protection) Act, 1972. The barn owl, the Indian eagle owl and nine more owls are in Schedule I, its highest protection. Catching or selling an owl is an offence.' ) )
+	. $lcard( 'rules', 'aw-camp-card aw-camp-open', 'alert', 'Firecracker rules', dwp( 'Supreme Court orders since 2018 allow only less-polluting "green" crackers, sold through licensed traders, and limit bursting on Diwali to two hours, which the states fix. Noise crackers are banned between 10 pm and 6 am, and no cracker may be louder than 125 dB at four metres.' ) . dwp( 'Delhi-NCR has its own orders. The Supreme Court heard the 2026 matter on 30 Sep 2026 and 29 Oct 2026 and said it would pass a balanced order; when we checked on 1 Nov 2026, it had not been published. In Odisha, the State Pollution Control Board\'s guidelines restrict bursting to 7 pm to 9 pm.' ) . dwp( 'States and district magistrates issue their own timings and bans, so check your state\'s or district\'s order before you buy or burst.' ) )
+	. "</div>\n<!-- /wp:group -->\n\n"
 	. dwp( 'Film it, note the time and place, and report it to the police or on 112.' )
-	. dwmore( 'How to report animal cruelty', '/resources/how-to-report-animal-cruelty/' )
-	. "<!-- wp:group {\"anchor\":\"rules\",\"className\":\"aw-camp-open\",\"layout\":{\"type\":\"default\"}} -->\n<div id=\"rules\" class=\"wp-block-group aw-camp-open\">"
-	. dwh( 'Firecracker rules' )
-	. dwp( 'Supreme Court orders since 2018 allow only less-polluting "green" crackers, sold through licensed traders, and limit bursting on Diwali to two hours, which the states fix. Noise crackers are banned between 10 pm and 6 am, and no cracker may be louder than 125 dB at four metres.' )
-	. dwp( 'Delhi-NCR has its own orders. The Supreme Court heard the 2026 matter on 30 Sep 2026 and 29 Oct 2026 and said it would pass a balanced order; when we checked on 1 Nov 2026, it had not been published. In Odisha, the State Pollution Control Board\'s guidelines restrict bursting to 7 pm to 9 pm.' )
-	. dwp( 'States and district magistrates issue their own timings and bans, so check your state\'s or district\'s order before you buy or burst.' )
-	. "</div>\n<!-- /wp:group -->\n\n",
+	. dwmore( 'How to report animal cruelty', '/resources/how-to-report-animal-cruelty/' ),
 	'aw-camp-grey'
 );
 
@@ -294,8 +293,10 @@ $help = dwsec(
 		)
 	)
 	. dwp( dwi( 'helpline' ) . '1962 is a state service for animals, not a national number, and in several states it answers only in the day. Call a vet or rescue group in the Directory if it does not answer.', 'aw-camp-note' )
+	. '<!-- wp:group {"layout":{"type":"flex","flexWrap":"wrap"}} -->' . "\n" . '<div class="wp-block-group">'
 	. dwmore( 'What 1962 is and where it runs', '/resources/1962-helpline-mobile-veterinary-units/' )
-	. dwmore( 'Who to call for an animal emergency in India', '/resources/who-to-call-for-an-animal-emergency-in-india-112-1962-local-groups/' ),
+	. dwmore( 'Who to call for an animal emergency in India', '/resources/who-to-call-for-an-animal-emergency-in-india-112-1962-local-groups/' )
+	. '</div>' . "\n" . '<!-- /wp:group -->' . "\n\n",
 	'aw-camp-grey'
 );
 
