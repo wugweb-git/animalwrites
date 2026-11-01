@@ -1506,3 +1506,22 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 .home .kit-sec-head p { margin-top: var(--kit-space-4); }
 .home .kit-sec-head > .wp-block-buttons { margin: 0; }
 .aw-ed-help .kit-sec-head p { color: inherit; } /* on the dark band */
+
+/* Need help now: the three national helplines as large tap-to-call rows (one under the other on phones, three across from
+   768; 112 filled), then the four tiles two by two at every width. Phones: no icon square or arrow in the tiles, so the
+   section stays one screen tall. */
+.aw-ed-helplines { list-style: none; margin: 0 0 var(--kit-space-4); padding: 0; display: grid; gap: var(--kit-space-2); grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 768px) { .aw-ed-helplines { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--kit-space-grid); margin-bottom: var(--kit-space-grid); } }
+.aw-ed-helpline { display: flex; align-items: center; gap: var(--kit-space-2) var(--kit-space-3); flex-wrap: wrap; box-sizing: border-box; height: 100%; min-height: var(--kit-size-control-lg); padding: var(--kit-space-2) var(--kit-space-4); border: var(--kit-border-width) solid color-mix(in srgb, var(--kit-color-on-ink) 30%, transparent); border-radius: var(--kit-radius-card); color: var(--kit-color-on-ink) !important; text-decoration: none; }
+.aw-ed-helpline strong { font-size: var(--kit-type-h3); font-weight: var(--kit-weight-bold); line-height: 1.1; font-variant-numeric: tabular-nums; }
+.aw-ed-helpline > span:last-child { flex: 1 1 10rem; font-size: var(--kit-type-sm); line-height: 1.35; }
+.aw-ed-helpline .kit-ico { --kit-ico-size: var(--kit-icon-md); flex: none; }
+.aw-ed-helplines > li:first-child .aw-ed-helpline { background: var(--kit-color-accent); border-color: var(--kit-color-accent); color: var(--kit-color-on-accent) !important; }
+.aw-ed-helpline:hover { border-color: var(--kit-color-on-ink); }
+.aw-ed-helpline:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
+.aw-ed-help .aw-ed-help-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: var(--kit-space-2); }
+@media (min-width: 768px) { .aw-ed-help .aw-ed-help-tiles { gap: var(--kit-space-grid); } }
+@media (max-width: 767px) {
+	.aw-ed-help .aw-ed-help-tiles > .kit-tile { grid-template-columns: minmax(0, 1fr); grid-template-areas: "title" "desc"; padding: var(--kit-space-3); }
+	.aw-ed-help .aw-ed-help-tiles > .kit-tile::before, .aw-ed-help .aw-ed-help-tiles > .kit-tile::after { content: none; }
+}

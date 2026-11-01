@@ -3,7 +3,7 @@
  * Title: Need help now
  * Slug: animal-writes/help-now
  * Categories: animal-writes, system
- * Description: Dark band with four Kits tiles, two by two, (icon, title, one line): injured animal, report cruelty, veterinary care, find an organisation; then the national helplines line.
+ * Description: Dark band: section head, the three national helplines as large tap-to-call rows, then four Kits tiles two by two (title, one line): injured animal, report cruelty, veterinary care, find an organisation.
  * Inserter: yes
  *
  * @package animal-writes
@@ -22,8 +22,12 @@
 <!-- /wp:group --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"className":"kit-stack","layout":{"type":"grid","columnCount":2,"minimumColumnWidth":"16rem"}} -->
-<div class="wp-block-group kit-stack"><!-- wp:group {"className":"kit-tile kit-ico--injured","layout":{"type":"default"}} -->
+<!-- wp:html {"metadata":{"name":"Helplines (tap to call)"}} -->
+<ul class="aw-ed-helplines" aria-label="National helplines"><li><a class="aw-ed-helpline" href="tel:112" aria-label="Call 112, danger to people or animals right now"><span class="kit-ico kit-ico--phone" aria-hidden="true"></span><strong>112</strong><span>danger to people or animals right now</span></a></li><li><a class="aw-ed-helpline" href="tel:1962" aria-label="Call 1962, vet at your door for livestock and animals (most states)"><span class="kit-ico kit-ico--phone" aria-hidden="true"></span><strong>1962</strong><span>vet at your door for livestock and animals (most states)</span></a></li><li><a class="aw-ed-helpline" href="tel:01292555700" aria-label="Call 0129-2555700, AWBI, cruelty complaints (office hours)"><span class="kit-ico kit-ico--phone" aria-hidden="true"></span><strong>0129-2555700</strong><span>AWBI, cruelty complaints (office hours)</span></a></li></ul>
+<!-- /wp:html -->
+
+<!-- wp:group {"className":"kit-stack aw-ed-help-tiles","layout":{"type":"grid","columnCount":2,"minimumColumnWidth":"16rem"}} -->
+<div class="wp-block-group kit-stack aw-ed-help-tiles"><!-- wp:group {"className":"kit-tile kit-ico--injured","layout":{"type":"default"}} -->
 <div class="wp-block-group kit-tile kit-ico--injured"><!-- wp:heading {"level":3} -->
 <h3 class="wp-block-heading"><a href="/resources/found-an-injured-animal-what-to-do/">Injured animal</a></h3>
 <!-- /wp:heading -->
@@ -62,9 +66,5 @@
 <p>Animal welfare groups, Gaushalas and ABC centres, by state and district.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
-<!-- /wp:group -->
-
-<!-- wp:paragraph {"fontSize":"small"} -->
-<p class="has-small-font-size"><a href="#helplines">National helplines</a>: 112, 1962 and AWBI.</p>
-<!-- /wp:paragraph --></section>
+<!-- /wp:group --></section>
 <!-- /wp:group -->
