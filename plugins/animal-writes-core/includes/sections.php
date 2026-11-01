@@ -252,6 +252,43 @@ function aw_list_page( $type, $term_page ) {
 }
 
 /**
+ * The organisation types with the most published listings, most first: [ [ slug, name ], … ]. One query, counted on
+ * published Directory listings only (a tag's own count includes other post types), cached until a listing is saved.
+ *
+ * @param int $n How many.
+ * @return array
+ */
+function aw_find_help_top_types( $n = 6 ) {
+	$slugs = function_exists( 'aw_listing_type_slugs' ) ? array_values( array_filter( (array) aw_listing_type_slugs() ) ) : array();
+	if ( ! $slugs ) {
+		return array();
+	}
+	$out = get_transient( 'aw_find_help_types' );
+	if ( is_array( $out ) ) {
+		return array_slice( $out, 0, $n );
+	}
+	global $wpdb;
+	$in   = implode( ',', array_fill( 0, count( $slugs ), '%s' ) );
+	$rows = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- one grouped count, cached below
+		$wpdb->prepare(
+			"SELECT t.slug, t.name, COUNT(DISTINCT p.ID) AS n FROM {$wpdb->terms} t
+			INNER JOIN {$wpdb->term_taxonomy} tt ON tt.term_id = t.term_id AND tt.taxonomy = 'post_tag'
+			INNER JOIN {$wpdb->term_relationships} tr ON tr.term_taxonomy_id = tt.term_taxonomy_id
+			INNER JOIN {$wpdb->posts} p ON p.ID = tr.object_id AND p.post_type = 'aw_listing' AND p.post_status = 'publish'
+			WHERE t.slug IN ($in) GROUP BY t.term_id, t.slug, t.name ORDER BY n DESC, t.name ASC LIMIT 12", // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $in is the placeholders
+			$slugs
+		)
+	);
+	$out = array();
+	foreach ( (array) $rows as $r ) {
+		$out[] = array( (string) $r->slug, html_entity_decode( (string) $r->name, ENT_QUOTES, 'UTF-8' ) );
+	}
+	set_transient( 'aw_find_help_types', $out, DAY_IN_SECONDS ); // a day at most, so a change to the type list shows too
+	return array_slice( $out, 0, $n );
+}
+add_action( 'save_post_aw_listing', fn() => delete_transient( 'aw_find_help_types' ) );
+
+/**
  * [aw_find_help] Directory discovery for the home page (the section heading is a core Heading in the pattern): the total,
  * a search box whose state picker lists every state and union territory, and the twelve states with the most
  * organisations in the Directory's own state index style, with a link to all of them (owner, 18 Oct 2026).
@@ -262,7 +299,7 @@ function aw_list_page( $type, $term_page ) {
 add_shortcode(
 	'aw_find_help',
 	function ( $atts ) {
-		$atts   = shortcode_atts( array( 'compact' => '' ), $atts );
+		$atts   = shortcode_atts( array( 'compact' => false ), $atts );
 		$total  = aw_listing_public_count();
 		$opts   = '<option value="">All states and UTs</option>';
 		$counts = array();
@@ -281,11 +318,10 @@ add_shortcode(
 			. '<label class="screen-reader-text" for="aw-ed-q">Organisation name</label><span class="kit-ico kit-ico--search" aria-hidden="true"></span><input id="aw-ed-q" type="search" name="q" placeholder="Search by name, for example Blue Cross">'
 			. '<label class="screen-reader-text" for="aw-ed-state">State or union territory</label><select id="aw-ed-state" name="state">' . $opts . '</select>'
 			. '<button type="submit" class="kit-btn">Search</button>';
-		if ( '' !== $atts['compact'] ) {
+		if ( wp_validate_boolean( $atts['compact'] ) ) {
 			$chips = '';
-			$types = get_terms( array( 'taxonomy' => 'post_tag', 'slug' => aw_listing_type_slugs(), 'hide_empty' => true, 'orderby' => 'count', 'order' => 'DESC', 'number' => 6 ) );
-			foreach ( is_wp_error( $types ) ? array() : $types as $t ) {
-				$chips .= '<li><a class="kit-chip" href="' . esc_url( add_query_arg( 'tag', $t->slug, $dir ) ) . '">' . esc_html( html_entity_decode( $t->name, ENT_QUOTES, 'UTF-8' ) ) . '</a></li>';
+			foreach ( aw_find_help_top_types( 6 ) as $t ) {
+				$chips .= '<li><a class="kit-chip" href="' . esc_url( add_query_arg( 'tag', $t[0], $dir ) ) . '">' . esc_html( $t[1] ) . '</a></li>';
 			}
 			return '<div class="kit-sec-head"><div><h2 class="wp-block-heading" id="aw-find-h">Find help near you</h2>'
 				. '<p>' . esc_html( number_format_i18n( $total ) ) . ' animal welfare organisations, vets and gaushalas in ' . (int) $with . ' states and union territories.</p></div>'

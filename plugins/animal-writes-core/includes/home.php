@@ -23,6 +23,26 @@ add_filter(
 	2
 );
 
+// Home sections named by their own H2 (aria-labelledby on the <section>): the core Group block has no such attribute.
+// The class alone decides: a shortcode's H2 may only be printed after the blocks are rendered.
+const AW_HOME_SECTION_HEADS = array(
+	'aw-ed-find' => 'aw-find-h', // Find help near you: the H2 is printed by [aw_find_help compact="1"] (sections.php)
+);
+add_filter(
+	'render_block_core/group',
+	function ( $html, $block ) {
+		$cls = preg_split( '/\s+/', (string) ( $block['attrs']['className'] ?? '' ) );
+		foreach ( AW_HOME_SECTION_HEADS as $class => $h ) {
+			if ( in_array( $class, $cls, true ) && ! preg_match( '/^\s*<section\b[^>]*aria-labelledby=/', $html ) ) {
+				return (string) preg_replace( '/^(\s*<section\b)/', '$1 aria-labelledby="' . $h . '"', $html, 1 );
+			}
+		}
+		return $html;
+	},
+	20,
+	2
+);
+
 /* ---------- Hero ---------- */
 
 /** The campaign the home hero shows (the draft lab animal rules, 2026), until the owner changes it (owner, 1 Nov 2026). */
