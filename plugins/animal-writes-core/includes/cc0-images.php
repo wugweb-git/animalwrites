@@ -99,7 +99,7 @@ function aw_cc0_run() {
 	// 0b. Linked publisher images stored in the Media Library (no hotlinking).
 	$local = aw_source_localise_run( 25, 60 );
 	// 0c. Documents whose source is a PDF: the first page as their picture.
-	foreach ( $wpdb->get_col( "SELECT p.ID FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} su ON su.post_id = p.ID AND su.meta_key = 'aw_source_url' AND su.meta_value LIKE '%.pdf%' WHERE p.post_status = 'publish' AND p.post_type IN ('aw_legal','post','aw_news') AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} d WHERE d.post_id = p.ID AND d.meta_key IN ('aw_doc_preview','aw_file_id','aw_pdf_cover_tried')) ORDER BY p.post_date DESC LIMIT 5" ) as $pid ) { // phpcs:ignore WordPress.DB
+	foreach ( $wpdb->get_col( "SELECT p.ID FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} su ON su.post_id = p.ID AND su.meta_key = 'aw_source_url' AND su.meta_value LIKE '%.pdf%' WHERE p.post_status = 'publish' AND p.post_type IN ('aw_legal','post','aw_news') AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} d WHERE d.post_id = p.ID AND d.meta_key IN ('aw_doc_preview','aw_file_id','aw_pdf_cover_tried','aw_cover_reused')) ORDER BY p.post_date DESC LIMIT 5" ) as $pid ) { // phpcs:ignore WordPress.DB
 		update_post_meta( $pid, 'aw_pdf_cover_tried', current_time( 'mysql', true ) );
 		aw_source_pdf_cover( (int) $pid );
 	}
@@ -369,7 +369,7 @@ function aw_source_pdf_cover( $post_id ) {
 	if ( ! in_array( get_post_type( $post_id ), array( 'aw_legal', 'post', 'aw_news' ), true ) ) {
 		return 0; // documents only: a Directory listing's source PDF (the AWBI list) is not its picture
 	}
-	if ( ! preg_match( '~^https?://[^?#]+\.pdf(\?|$)~i', $src ) || get_post_meta( $post_id, 'aw_file_id', true ) || get_post_meta( $post_id, 'aw_doc_preview', true ) || ! class_exists( 'Imagick' ) ) {
+	if ( ! preg_match( '~^https?://[^?#]+\.pdf(\?|$)~i', $src ) || get_post_meta( $post_id, 'aw_file_id', true ) || get_post_meta( $post_id, 'aw_doc_preview', true ) || get_post_meta( $post_id, 'aw_cover_reused', true ) || ! class_exists( 'Imagick' ) ) {
 		return 0;
 	}
 	$pdf = aw_source_download( $src );

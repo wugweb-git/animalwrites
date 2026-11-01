@@ -198,6 +198,7 @@ function aw_media_reuse_apply( $picture ) {
 		return 'The old values could not be saved, so nothing was changed.';
 	}
 	update_post_meta( $target, '_thumbnail_id', $picture );
+	update_post_meta( $target, 'aw_cover_reused', $picture ); // keeps the PDF cover job (cc0-images.php) from replacing the chosen cover
 	if ( $set_off ) {
 		update_post_meta( $target, 'aw_source_image_off', '1' );
 	}
@@ -240,6 +241,7 @@ function aw_media_reuse_restore( array $e, $picture, $force = false ) {
 	} else {
 		delete_post_meta( $target, '_thumbnail_id' );
 	}
+	delete_post_meta( $target, 'aw_cover_reused' );
 	if ( ! empty( $e['set_off'] ) ) {
 		if ( null === $e['old_off'] ) {
 			delete_post_meta( $target, 'aw_source_image_off' );
