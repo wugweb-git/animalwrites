@@ -7,7 +7,15 @@ Check this list against git and the live site before acting on it. Refer to item
 Owner, 25 Oct — not to be raised until their dates: the Lab rules Post phase (7 Nov); the High Court judgments source stays off (revisit 6 Nov); Opportunities workers stay paused; the Community dogs campaign stays exactly as it is (new community-dog developments become new campaigns or content).
 
 ### Media (owner to decide, 1 Nov 2026)
-- **Duplicates:** 185 groups (262 extra files, about 24 MB). Plan in Claude outputs/media-audit-2026-10-31/duplicates-plan.md: 160 safe to merge (repoint, verify, trash only), 3 need review, 22 are favicon/logo copies to leave. Nothing deleted; wait for the owner's yes.
+- **Duplicates:** 185 groups (262 extra files, about 24 MB): 160 safe to merge, 3 need review, 22 are favicon/logo copies to leave. The merge tool (Media → Duplicate files) is live and merging the 160 in batches, Undo available; nothing deleted, extras only get the Trash status.
+- **Media, still open (1 Nov 2026):**
+  - **Make WebP:** first batch after the duplicate merges finish.
+  - **Number-tailed slugs:** the remaining duplicate listing copies still carry them.
+  - **Reuse pictures screen:** per-item screen, in review as a PR; applies unmapped pictures as covers and switches off the stored publisher image per item.
+  - **Real photos needed:** weak listing pictures and two job drafts; four generated pictures (prompts written).
+  - **Possible duplicate listings sharing a website:** 9 pairs, for the owner to review.
+  - **Unmapped pictures without a home:** stay unmapped, never deleted.
+  - **Campaign share assets:** placement after 7 Nov.
 - **Unreferenced images:** of 110 with no reference found, 78 are really unused (24 are only in the undo option `aw_banners_removed_2026_10_08`), 32 are used after all (8 directly on About 58 and Adoption 15573); unreferenced-recheck.csv. No deletes without the owner.
 - **AVIF delivery:** LiteSpeed's WebP/AVIF setting is off (`img_optm-webp=0`); 796 large PNG/JPEG originals have no AVIF copy (340 MB); 37 images over 1 MB (65 MB, five are GIFs). Plan: optimisation-plan.md. Turning the setting on needs the owner's OK; each GIF is the owner's call.
 - **Image context (`kits_image_context`):** not in the REST API, so it cannot be bulk-filled from the browser; needs a small admin tool if wanted. New News imports arrive without caption and description (9 so far); a fill at import would stop that.
@@ -99,6 +107,9 @@ These live in WordPress: **Animal Writes → Dates** (month calendar, add and re
 - **Search Console (22 to 24 Oct).** Validation started for the 2 sitemap redirects, the 1 sitemap canonical, Events and the 26 district × type pages that were noindex on 9–10 Oct. Intended, do not re-validate: redirect 15, canonical 14, 404 2, duplicate 1. Job Postings warnings stay (Decided: never).
 - **404 and error tracking (31 Oct):** the 404 page answers with status 404 and sends `404_view` with the path; form errors are tracked as `form_error`; 500 and 503 cannot be tracked in GA4, so they are covered by the branded error pages and the daily count of PHP fatal errors.
 - **Rollback:** a rollback to a release older than 24 Oct must be purged by hand (rollback.yml warns); newer releases are purged by `deploy-purge.php`.
+
+## Done (1 Nov 2026)
+- **Media Library work (1 Nov 2026):** list columns (file, group, slug, caption, description, keyphrase, alt, image context, used-in, optimisation); autofill of the empty fields on upload; media groups (12) on all images; WebP conversion for new uploads and the Make WebP screen (heaviest files first); duplicate-files merge tool (Media → Duplicate files, 160 groups, merged in batches, Undo available); name, slug, caption, description, alt, image context and focus keyphrase rewritten for the whole library, limits name, slug and caption 100, alt, description and image context 160.
 
 ## Done (31 Oct 2026)
 - **Media Library audit and clean-up (31 Oct and 1 Nov 2026, live).** All 4,090 images: name 60 characters or fewer (cut at a word, entities decoded), alt text on every image (1 new upload without), caption (= SEO title) and description (= SEO description) filled where empty (never overwritten); favicons and logos `host favicon` / `host logo`; news and listing images from their title; guides, library and press images with the page's focus keyword; stock photos' placeholder descriptions replaced; 33 junk keywords replaced. Written through wp-admin REST (SSH writes are blocked). PR #102 (Media Library columns: Slug, Also used in, SEO, Optimisation; no Author) merged and live; "Uploaded to" keeps Attach / Detach. Reports in Claude outputs/media-audit-2026-10-31 (plan-before-after.csv has every old value for Undo).

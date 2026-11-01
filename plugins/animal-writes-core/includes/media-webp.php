@@ -247,7 +247,8 @@ function aw_media_webp_pending( $limit = 0 ) {
 	global $wpdb;
 	$log = aw_media_webp_log();
 	$ids = $wpdb->get_col( "SELECT ID FROM {$wpdb->posts} WHERE post_type = 'attachment' AND post_mime_type IN ('image/jpeg','image/png') ORDER BY ID ASC" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-	$out = array();
+	$out    = array();
+	$weight = array();
 	foreach ( array_chunk( array_map( 'intval', (array) $ids ), 200 ) as $chunk ) {
 		update_meta_cache( 'post', $chunk );
 		foreach ( $chunk as $id ) {
@@ -261,12 +262,20 @@ function aw_media_webp_pending( $limit = 0 ) {
 			$meta = wp_get_attachment_metadata( $id );
 			foreach ( (array) ( is_array( $meta ) ? ( $meta['sizes'] ?? array() ) : array() ) as $size ) {
 				if ( aw_media_webp_old_size( $size ) ) {
-					$out[] = $id;
+					$out[]         = $id;
+					$weight[ $id ] = (int) ( $meta['filesize'] ?? 0 );
 					break;
 				}
 			}
 		}
 	}
+	// Heaviest files first (the largest saving per batch); equal sizes keep ID order.
+	usort(
+		$out,
+		static function ( $a, $b ) use ( $weight ) {
+			return ( $weight[ $b ] <=> $weight[ $a ] ) ?: ( $a <=> $b );
+		}
+	);
 	return aw_media_webp_pick( $out, $log, $limit );
 }
 
