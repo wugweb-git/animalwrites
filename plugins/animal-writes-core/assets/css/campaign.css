@@ -59,14 +59,9 @@
 @media (min-width: 768px) { .aw-camp--diwali .aw-camp-steps--six { grid-template-columns: repeat(3, 1fr); } }
 /* Step lines on the night band: meta colour is for light bands */
 .aw-camp--diwali .aw-camp-dark .aw-camp-steps span { color: color-mix(in srgb, var(--kit-color-on-ink) 80%, transparent); }
-/* Reading width: text in the bands stays in the 720px column, on the left of the 1120px band (tables, cards and rows keep the band) */
-.aw-camp--diwali .aw-camp-section:not(.aw-camp-hero) > :is(p, h2, h3, ul.wp-block-list, ol.wp-block-list) { max-width: var(--kit-width-content, 720px); margin-left: max(0px, calc((100% - 1120px) / 2)) !important; margin-right: auto !important; }
 /* Date strip: sized to fit three across beside the photo */
 .aw-camp--diwali .aw-camp-dates { grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr)); }
 .aw-camp--diwali .aw-camp-dates-when { font-size: var(--kit-type-h3); white-space: nowrap; }
-/* "More" links: the same space above and below; two in a row sit together */
-.aw-camp--diwali p:has(> .aw-camp-more) { margin-top: var(--kit-space-4); margin-bottom: var(--kit-space-5); }
-.aw-camp--diwali p:has(> .aw-camp-more) + p:has(> .aw-camp-more) { margin-top: var(--kit-space-2); }
 /* Who to call has two columns: it fits a phone without sideways scrolling */
 .aw-camp--diwali #help { --kit-table-min: 0; }
 /* Supreme Court stray dogs (2026): deep plum and the site yellow, no black (owner, 1 Nov 2026). Plum on cream 14:1, white on plum 15.6:1. */
