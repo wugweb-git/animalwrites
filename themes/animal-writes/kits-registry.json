@@ -1614,6 +1614,30 @@
    "block": "animal-writes/take-action"
   },
   {
+   "name": "AW_Festive",
+   "type": "pattern",
+   "status": "live",
+   "classes": ["aw-festive"],
+   "states": ["default: dark band (--kit-color-ink), eyebrow, H2, one line, four tips with Kits icons, one Brand button; three-picture collage beside the copy from 1200, on top below 1200"],
+   "tokens": ["--kit-color-accent", "--kit-color-on-ink", "--kit-radius-media", "--kit-type-h1"],
+   "a11y": {
+    "element": "pattern (Editor → Patterns, \"Animal Writes\"); section with H2, list and one button",
+    "aria": "icons aria-hidden",
+    "keyboard": "Tab to the button",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px button",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "H2",
+    "link": "one button, no target yet",
+    "alt": "each picture described",
+    "schema": "none"
+   },
+   "block": "animal-writes/festive"
+  },
+  {
    "name": "Volunteer banner",
    "type": "pattern",
    "status": "live",

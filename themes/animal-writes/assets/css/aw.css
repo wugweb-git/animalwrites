@@ -1677,3 +1677,28 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 /* Take action on Home: two Kits cards (icon, title, one line, button), side by side from 768; the button at the bottom.
    The card is not a link (its button is), so it does not lift on hover. */
 
+
+/* AW_Festive on Home (festivals and animals): a dark band (--kit-color-ink). Eyebrow, H2, one line, four tips with Kits icons
+   and one Brand button, beside a three-picture collage (one tall, two stacked). From 1200 the copy is 5fr on the left and
+   the pictures 6fr on the right; below 1200 the pictures sit on top (2:1 from 768, 3:2 on phones). */
+.aw-festive { background: var(--kit-color-ink); color: var(--kit-color-on-ink); }
+.aw-festive .aw-festive-in { display: grid; gap: var(--kit-space-6); align-items: center; }
+.aw-festive .aw-festive-eyebrow { display: inline-flex; align-items: center; gap: var(--kit-space-2); margin: 0 0 var(--kit-space-3); padding: 4px 12px; border-radius: var(--kit-radius-pill); background: var(--kit-color-accent); color: var(--kit-color-on-accent); font-size: .8125rem; font-weight: 600; line-height: 1.4; }
+.aw-festive h2 { margin: 0 0 var(--kit-space-3); color: var(--kit-color-on-ink); font-size: var(--kit-type-h1); line-height: 1.1; letter-spacing: -.02em; }
+.aw-festive h2 em { font-style: normal; color: var(--kit-color-accent); }
+.aw-festive .aw-festive-line { margin: 0 0 var(--kit-space-5); max-width: 34rem; color: color-mix(in srgb, var(--kit-color-on-ink) 82%, transparent); font-size: 1.0625rem; line-height: 1.55; }
+.aw-festive .aw-festive-tips { list-style: none; margin: 0 0 var(--kit-space-6); padding: 0; display: grid; gap: var(--kit-space-3); }
+.aw-festive .aw-festive-tips li { display: flex; align-items: center; gap: var(--kit-space-3); max-width: none; margin: 0; color: var(--kit-color-on-ink); font-weight: 500; }
+.aw-festive .aw-festive-ico { flex: 0 0 36px; height: 36px; display: grid; place-items: center; border-radius: var(--kit-radius-control); background: color-mix(in srgb, var(--kit-color-on-ink) 10%, transparent); color: var(--kit-color-accent); }
+.aw-festive .aw-festive-ico .kit-ico { --kit-ico-size: 20px; }
+.aw-festive .aw-festive-art { order: -1; display: grid; grid-template-columns: 1.2fr 1fr; grid-template-rows: 1fr 1fr; gap: 12px; aspect-ratio: 3 / 2; }
+.aw-festive .aw-festive-art > figure { margin: 0; min-height: 0; overflow: hidden; border-radius: var(--kit-radius-media); }
+.aw-festive .aw-festive-art > figure:first-child { grid-row: 1 / 3; }
+.aw-festive .aw-festive-art img { display: block; width: 100%; height: 100%; object-fit: cover; }
+@media (min-width: 768px) {
+	.aw-festive .aw-festive-art { aspect-ratio: 2 / 1; }
+}
+@media (min-width: 1200px) {
+	.aw-festive .aw-festive-in { grid-template-columns: 5fr 6fr; gap: var(--kit-space-7); }
+	.aw-festive .aw-festive-art { order: 0; aspect-ratio: 4 / 3; }
+}
