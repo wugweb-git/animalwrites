@@ -147,30 +147,48 @@ if ( ! $term_id ) {
 	exit( 1 );
 }
 
-/* hero: open (until 8 Nov) and closed (from 9 Nov); one shows. The open hero is the night photo with the text over its
-   dark side (from 1200) or above it (below 1200), four tip tiles and no countdown. */
-$photo = '<picture class="aw-camp-hero-photo alignfull">'
-	. '<source media="(max-width: 767px)" srcset="' . esc_url( wp_get_attachment_image_url( DW_PHOTO_TALL, 'large' ) ) . '" width="768" height="1024">'
-	. '<img src="' . esc_url( wp_get_attachment_image_url( DW_PHOTO, 'full' ) ) . '" alt="' . esc_attr( get_post_meta( DW_PHOTO, '_wp_attachment_image_alt', true ) ) . '" width="1672" height="941" fetchpriority="high" decoding="async">'
-	. '</picture>';
-$tips  = '<ul class="aw-camp-hero-tips">';
-foreach ( array( array( 'home', 'Keep pets indoors', '#before' ), array( 'paw', 'Keep water outside', '#street' ), array( 'name', 'Use an ID tag', '#before' ), array( 'phone', 'Know who to call', '#help' ) ) as $t ) {
-	$tips .= '<li><a href="' . $t[2] . '">' . dwi( $t[0] ) . $t[1] . '</a></li>';
-}
-$tips .= '</ul>';
-$hero = dwsec(
-	'top',
-	dwhtml( $photo )
-	. '<!-- wp:group {"className":"aw-camp-hero-copy","layout":{"type":"default"}} -->' . "\n" . '<div class="wp-block-group aw-camp-hero-copy">'
-	. dwsc( '[aw_camp_status]' )
-	. dwh( 'Diwali is loud. Keep pets and street dogs <span class="aw-camp-hl">safe.</span>', 1 )
-	. dwp( 'Firecrackers frighten and hurt pets, street animals and birds. Keeping dogs during Diwali safe takes a safe room and an ID tag for your pet, a quiet corner and water for the dogs outside, and the right number to call if an animal is hurt.', 'aw-camp-hero-summary' )
-	. dwp( 'Our aim: no animal near you hurt, lost or left without help this Diwali.' )
-	. dwhtml( $tips )
-	. dwbuttons( array( array( 'What to do tonight', '#tonight' ), array( 'Who to call', '#help', 'ghost' ) ) )
-	. '</div>' . "\n" . '<!-- /wp:group -->' . "\n\n",
-	'aw-camp-hero aw-camp-hero--photo aw-camp-open'
+/* hero: open (until 8 Nov) and closed (from 9 Nov); one shows. The open hero is the theme's page hero: a core Cover
+   (kit-hero: its height and padding come from the theme) with the night photo, the text in a 560px column on the left,
+   the four tips as the theme's icon tip list and two Kits buttons. No countdown. */
+$cover = array(
+	'url'             => wp_get_attachment_image_url( DW_PHOTO, 'full' ),
+	'id'              => DW_PHOTO,
+	'alt'             => get_post_meta( DW_PHOTO, '_wp_attachment_image_alt', true ),
+	'dimRatio'        => 30,
+	'overlayColor'    => 'foreground',
+	'isUserOverlayColor' => true,
+	'focalPoint'      => array( 'x' => 0.7, 'y' => 0.6 ),
+	'minHeight'       => 660,
+	'contentPosition' => 'center left',
+	'isDark'          => true,
+	'anchor'          => 'top',
+	'className'       => 'kit-hero aw-camp-hero aw-camp-open',
+	'align'           => 'full',
+	'style'           => array( 'spacing' => array( 'padding' => array( 'right' => 'var(--wp--style--root--padding-right)', 'left' => 'var(--wp--style--root--padding-left)' ) ) ),
+	'layout'          => array( 'type' => 'constrained', 'contentSize' => '1120px' ),
 );
+$tips = '<!-- wp:list {"className":"aw-festive-tips"} -->' . "\n" . '<ul class="wp-block-list aw-festive-tips">';
+foreach ( array( array( 'home', 'Keep pets indoors' ), array( 'paw', 'Keep water out for the dogs outside' ), array( 'name', 'Use an ID tag' ), array( 'phone', 'Know who to call' ) ) as $t ) {
+	$tips .= '<!-- wp:list-item -->' . "\n" . '<li><span class="aw-festive-ico">' . dwi( $t[0] ) . '</span>' . $t[1] . '</li>' . "\n" . '<!-- /wp:list-item -->' . "\n";
+}
+$tips .= '</ul>' . "\n" . '<!-- /wp:list -->' . "\n\n";
+$hero = '<!-- wp:cover ' . wp_json_encode( $cover, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) . ' -->' . "\n"
+	. '<div id="top" class="wp-block-cover alignfull is-dark has-custom-content-position is-position-center-left kit-hero aw-camp-hero aw-camp-open" style="padding-right:var(--wp--style--root--padding-right);padding-left:var(--wp--style--root--padding-left);min-height:660px">'
+	. '<span aria-hidden="true" class="wp-block-cover__background has-foreground-background-color has-background-dim-30 has-background-dim"></span>'
+	. '<img class="wp-block-cover__image-background wp-image-' . DW_PHOTO . '" alt="' . esc_attr( $cover['alt'] ) . '" src="' . esc_url( $cover['url'] ) . '" style="object-position:70% 60%" data-object-fit="cover" data-object-position="70% 60%"/>'
+	. '<div class="wp-block-cover__inner-container">'
+	. '<!-- wp:group {"layout":{"type":"constrained","contentSize":"560px","justifyContent":"left"}} -->' . "\n" . '<div class="wp-block-group">'
+	. dwsc( '[aw_camp_status]' )
+	. dwh( 'Diwali is loud. Keep pets and street dogs safe.', 1 )
+	. dwp( 'Firecrackers frighten and hurt pets, street animals and birds. Keeping dogs during Diwali safe takes a safe room and an ID tag for your pet, a quiet corner and water for the dogs outside, and the right number to call if an animal is hurt.' )
+	. dwp( 'Our aim: no animal near you hurt, lost or left without help this Diwali.' )
+	. $tips
+	. '<!-- wp:buttons -->' . "\n" . '<div class="wp-block-buttons">'
+	. '<!-- wp:button {"className":"is-style-kits-brand"} -->' . "\n" . '<div class="wp-block-button is-style-kits-brand"><a class="wp-block-button__link wp-element-button" href="#tonight">What to do tonight</a></div>' . "\n" . '<!-- /wp:button -->' . "\n\n"
+	. '<!-- wp:button {"className":"is-style-kits-secondary"} -->' . "\n" . '<div class="wp-block-button is-style-kits-secondary"><a class="wp-block-button__link wp-element-button" href="#help">Who to call</a></div>' . "\n" . '<!-- /wp:button -->'
+	. '</div>' . "\n" . '<!-- /wp:buttons -->'
+	. '</div>' . "\n" . '<!-- /wp:group -->'
+	. '</div></div>' . "\n" . '<!-- /wp:cover -->' . "\n\n";
 $hero_closed = dwsec(
 	'',
 	dwsc( '[aw_camp_status]' )

@@ -59,38 +59,11 @@
 @media (min-width: 768px) { .aw-camp--diwali .aw-camp-steps--six { grid-template-columns: repeat(3, 1fr); } }
 /* Step lines on the night band: meta colour is for light bands */
 .aw-camp--diwali .aw-camp-dark .aw-camp-steps span { color: color-mix(in srgb, var(--kit-color-on-ink) 80%, transparent); }
-/* Photo hero: the night photo full width behind the text from 1200 (its dark left side holds the text); below 1200 the
-   text on the night band, then the photo full width (tall crop on phones, wide on tablets). The picture is alignfull so
-   the constrained layout leaves its margins alone. Four tip tiles under the summary. */
-.aw-camp--diwali .aw-camp-hero--photo { position: relative; display: flex; flex-direction: column; overflow: hidden; background: var(--camp-dark); padding-bottom: 0 !important; }
-.aw-camp--diwali .aw-camp-hero--photo .aw-camp-hero-copy > * { max-width: 38rem; }
-.aw-camp--diwali .aw-camp-hero--photo .aw-camp-hero-summary { max-width: 38rem; }
-.aw-camp--diwali .aw-camp-hero--photo > .aw-camp-hero-photo { order: 2; display: block; max-width: none; width: 100vw; margin: var(--kit-space-6) calc(50% - 50vw) 0; }
-.aw-camp--diwali .aw-camp-hero-photo img { display: block; width: 100%; height: auto; }
-.aw-camp--diwali .aw-camp-hero--photo .wp-block-button:not(.aw-camp-ghost) .wp-block-button__link { background: var(--kit-color-accent); color: var(--kit-color-on-accent); }
-.aw-camp--diwali .aw-camp-hl { position: relative; color: var(--kit-color-accent); white-space: nowrap; }
-.aw-camp--diwali .aw-camp-hl::after { content: ""; position: absolute; left: 0.05em; right: 0.05em; bottom: -0.08em; height: 0.12em; border-radius: 1em; background: var(--kit-color-accent); transform: rotate(-1.5deg); }
-.aw-camp-hero-tips { list-style: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--kit-space-2); margin: 0 0 var(--kit-space-5); padding: 0; }
-.aw-camp-hero-tips a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--kit-space-2); min-height: 6.5rem; padding: var(--kit-space-3) var(--kit-space-2); border: 1px solid color-mix(in srgb, var(--kit-color-on-ink) 45%, transparent); border-radius: var(--kit-radius-card); background: color-mix(in srgb, var(--camp-dark) 55%, transparent); color: var(--kit-color-on-ink); text-align: center; text-decoration: none; font-size: var(--kit-type-sm); line-height: 1.25; }
-.aw-camp--diwali .aw-camp-hero--photo .aw-camp-hero-tips a { color: var(--kit-color-on-ink); text-decoration: none; }
-.aw-camp-hero-tips a:hover { border-color: var(--kit-color-accent); }
-.aw-camp-hero-tips .kit-ico { font-size: 1.75rem; color: var(--kit-color-accent); }
-@media (min-width: 768px) { .aw-camp-hero-tips { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-@media (min-width: 1200px) {
-	.aw-camp--diwali .aw-camp-hero--photo { justify-content: center; min-height: min(56.25vw, 900px); padding-bottom: var(--wp--preset--spacing--60) !important; }
-	.aw-camp--diwali .aw-camp-hero--photo > .aw-camp-hero-photo { position: absolute; inset: 0; z-index: 0; width: auto; margin: 0 !important; }
-	.aw-camp--diwali .aw-camp-hero-photo img { position: absolute; right: 0; bottom: 0; width: 100%; height: auto; -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 18%); mask-image: linear-gradient(180deg, transparent 0, #000 18%); } /* full width at its own shape, from the bottom: the people stay where the photo has them; the top fades into the night band */
-	.aw-camp--diwali .aw-camp-hero-photo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, color-mix(in srgb, var(--camp-dark) 85%, transparent) 0, color-mix(in srgb, var(--camp-dark) 50%, transparent) 34%, transparent 48%); } /* keeps the text readable whatever the crop */
-	.aw-camp--diwali .aw-camp-hero--photo > .aw-camp-hero-copy { position: relative; z-index: 1; max-width: none; width: 100%; margin-left: 0 !important; margin-right: 0 !important; padding-left: clamp(0px, 2vw, 2rem); box-sizing: border-box; } /* the text sits on the photo's dark left side, clear of the woman (about 38% across) */
-	.aw-camp--diwali .aw-camp-hero--photo .aw-camp-hero-copy > *, .aw-camp--diwali .aw-camp-hero--photo .aw-camp-hero-summary { max-width: min(31rem, 35vw); }
-	.aw-camp--diwali .aw-camp-hero--photo h1 { font-size: clamp(2.75rem, 3.9vw, 4.5rem); }
-	.aw-camp-hero-tips a { min-height: 5.25rem; }
-}
 /* Reading width: text in the bands stays in the 720px column, on the left of the 1120px band (tables, cards and rows keep the band) */
 .aw-camp--diwali .aw-camp-section:not(.aw-camp-hero) > :is(p, h2, h3, ul.wp-block-list, ol.wp-block-list) { max-width: var(--kit-width-content, 720px); margin-left: max(0px, calc((100% - 1120px) / 2)) !important; margin-right: auto !important; }
 /* Date strip: sized to fit three across beside the photo */
 .aw-camp--diwali .aw-camp-dates { grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr)); }
-.aw-camp--diwali .aw-camp-dates-when { font-size: clamp(1.25rem, 1rem + 0.8vw, 1.6rem); white-space: nowrap; }
+.aw-camp--diwali .aw-camp-dates-when { font-size: var(--kit-type-h3); white-space: nowrap; }
 /* "More" links: the same space above and below; two in a row sit together */
 .aw-camp--diwali p:has(> .aw-camp-more) { margin-top: var(--kit-space-4); margin-bottom: var(--kit-space-5); }
 .aw-camp--diwali p:has(> .aw-camp-more) + p:has(> .aw-camp-more) { margin-top: var(--kit-space-2); }

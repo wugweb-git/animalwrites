@@ -1738,10 +1738,10 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 .aw-festive h2 { margin: 0 0 var(--kit-space-3); color: var(--kit-color-on-ink); font-size: var(--kit-type-h1); line-height: 1.1; letter-spacing: -.02em; }
 .aw-festive h2 em { font-style: normal; color: var(--kit-color-accent); }
 .aw-festive .aw-festive-line { margin: 0 0 var(--kit-space-5); max-width: 34rem; color: color-mix(in srgb, var(--kit-color-on-ink) 82%, transparent); font-size: 1.0625rem; line-height: 1.55; }
-.aw-festive .aw-festive-tips { list-style: none; margin: 0 0 var(--kit-space-6); padding: 0; display: grid; gap: var(--kit-space-3); }
-.aw-festive .aw-festive-tips li { display: flex; align-items: center; gap: var(--kit-space-3); max-width: none; margin: 0; color: var(--kit-color-on-ink); font-weight: 500; }
-.aw-festive .aw-festive-ico { flex: 0 0 36px; height: 36px; display: grid; place-items: center; border-radius: var(--kit-radius-control); background: color-mix(in srgb, var(--kit-color-on-ink) 10%, transparent); color: var(--kit-color-accent); }
-.aw-festive .aw-festive-ico .kit-ico { --kit-ico-size: 20px; }
+:is(.aw-festive, .kit-hero) .aw-festive-tips { list-style: none; margin: 0 0 var(--kit-space-6); padding: 0; display: grid; gap: var(--kit-space-3); }
+:is(.aw-festive, .kit-hero) .aw-festive-tips li { display: flex; align-items: center; gap: var(--kit-space-3); max-width: none; margin: 0; color: var(--kit-color-on-ink); font-weight: 500; }
+:is(.aw-festive, .kit-hero) .aw-festive-ico { flex: 0 0 36px; height: 36px; display: grid; place-items: center; border-radius: var(--kit-radius-control); background: color-mix(in srgb, var(--kit-color-on-ink) 10%, transparent); color: var(--kit-color-accent); }
+:is(.aw-festive, .kit-hero) .aw-festive-ico .kit-ico { --kit-ico-size: 20px; }
 .aw-festive .aw-festive-art { order: -1; display: grid; grid-template-columns: 1.2fr 1fr; grid-template-rows: 1fr 1fr; gap: 12px; aspect-ratio: 3 / 2; }
 .aw-festive .aw-festive-art > figure { margin: 0; min-height: 0; overflow: hidden; border-radius: var(--kit-radius-media); }
 .aw-festive .aw-festive-art > figure:first-child { grid-row: 1 / 3; }
