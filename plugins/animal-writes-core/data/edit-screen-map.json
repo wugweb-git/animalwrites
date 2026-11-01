@@ -528,13 +528,13 @@
 			"source": "Secure Custom Fields",
 			"plugin": "Animal Writes core",
 			"purpose": "Sources",
-			"file": "acf-json/group_aw_listing_claimed.json; src/enrichment-admin.php (aw_enrich_prov_box)",
+			"file": "acf-json/group_aw_listing_claimed.json; src/enrichment-admin.php (aw_enrich_prov_box); core/gov-verified.php (aw_gov_state_lines)",
 			"screen": "post",
 			"types": [
 				"aw_listing"
 			],
 			"runtime": "scf",
-			"notes": "Ends with \"Where these details come from\" (a message field, acf/render_field): the per-field sources, mostly read-only, and the Identity unresolved tick."
+			"notes": "Ends with two message fields (acf/render_field): \"Where these details come from\", the per-field sources, mostly read-only, and the Identity unresolved tick; then \"From government records\", the Verified state and the AWBI and NGO Darpan records it is worked out from, as text (nothing saved)."
 		},
 		"rank_math_metabox": {
 			"title": "Rank Math SEO",
@@ -6187,7 +6187,7 @@
 				}
 			],
 			"notes": [
-				"Government verification is aw_gov_verified_on (no box)."
+				"Government verification is aw_gov_verified_on, shown read-only under \"From government records\" in this box."
 			]
 		},
 		"aw_verified_on": {
@@ -6288,6 +6288,223 @@
 					"where": "enrichment queue",
 					"file": "src/enrichment.php:1074"
 				}
+			],
+			"readonly": true
+		},
+		"aw_awbi_dropped": {
+			"store": "post_meta",
+			"label": "Not on the current AWBI list (date)",
+			"type": "Y-m-d",
+			"boxes": [
+				"acf-group_aw_listing_claimed"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "Registrations: \"Not on the current AWBI list {date}\"",
+					"file": "core/listing-template.php:144"
+				},
+				{
+					"kind": "faq",
+					"where": "AWBI answer",
+					"file": "core/faq-data.php:316"
+				},
+				{
+					"kind": "schema",
+					"where": "identifier description",
+					"file": "seo/schema.php:183"
+				},
+				{
+					"kind": "display",
+					"where": "AWBI description",
+					"file": "seo/helpers.php:466"
+				},
+				{
+					"kind": "filter",
+					"where": "Verified: a listing off the AWBI list is not Verified by AWBI",
+					"file": "core/gov-verified.php:61"
+				},
+				{
+					"kind": "admin",
+					"where": "\"From government records\" (read-only)",
+					"file": "core/gov-verified.php:192"
+				}
+			],
+			"notes": [
+				"Set by AWBI list imports."
+			],
+			"readonly": true
+		},
+		"aw_awbi_list_on": {
+			"store": "post_meta",
+			"label": "Date of the AWBI list the code comes from",
+			"type": "Y-m-d",
+			"boxes": [
+				"acf-group_aw_listing_claimed"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "AWBI source date (\"Details from\")",
+					"file": "core/data-sources.php:92"
+				},
+				{
+					"kind": "filter",
+					"where": "Verified on: the AWBI list's date",
+					"file": "core/gov-verified.php:62"
+				},
+				{
+					"kind": "admin",
+					"where": "\"From government records\" (read-only)",
+					"file": "core/gov-verified.php:192"
+				}
+			],
+			"notes": [
+				"Set by AWBI list imports; empty = the 31 May 2026 list."
+			],
+			"readonly": true
+		},
+		"aw_darpan_blacklisted_by": {
+			"store": "post_meta",
+			"label": "Blacklisted on NGO Darpan by",
+			"type": "text",
+			"boxes": [
+				"acf-group_aw_listing_claimed"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "faq",
+					"where": "phone answers only for Darpan listings not blacklisted",
+					"file": "core/faq-data.php:210"
+				},
+				{
+					"kind": "admin",
+					"where": "\"From government records\" (read-only)",
+					"file": "core/gov-verified.php:192"
+				}
+			],
+			"notes": [
+				"Set by NGO Darpan imports."
+			],
+			"readonly": true
+		},
+		"aw_darpan_blacklisted_on": {
+			"store": "post_meta",
+			"label": "Blacklisted on NGO Darpan from",
+			"type": "Y-m-d",
+			"boxes": [
+				"acf-group_aw_listing_claimed"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "\"Blacklisted on NGO Darpan\" tag, meta row",
+					"file": "core/bindings.php:106"
+				},
+				{
+					"kind": "display",
+					"where": "\"Blacklisted on NGO Darpan\" tag on cards",
+					"file": "core/hub-blocks.php:454"
+				},
+				{
+					"kind": "faq",
+					"where": "phone answers only for Darpan listings not blacklisted",
+					"file": "core/faq-data.php:210"
+				},
+				{
+					"kind": "admin",
+					"where": "\"From government records\" (read-only)",
+					"file": "core/gov-verified.php:192"
+				}
+			],
+			"notes": [
+				"Set by NGO Darpan imports."
+			],
+			"readonly": true
+		},
+		"aw_gov_verified_by": {
+			"store": "post_meta",
+			"label": "Verified: the government sources",
+			"type": "text (source slugs, comma-separated)",
+			"boxes": [
+				"acf-group_aw_listing_claimed"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "sourcing",
+					"where": "written by aw_gov_verified_sync",
+					"file": "core/gov-verified.php:94"
+				},
+				{
+					"kind": "admin",
+					"where": "\"From government records\" (read-only)",
+					"file": "core/gov-verified.php:192"
+				}
+			],
+			"notes": [
+				"Set by code (wp aw gov-verify, and when the watched fields change)."
+			],
+			"readonly": true
+		},
+		"aw_gov_verified_on": {
+			"store": "post_meta",
+			"label": "Verified: date of the government document",
+			"type": "Y-m-d",
+			"boxes": [
+				"acf-group_aw_listing_claimed"
+			],
+			"types": [
+				"aw_listing"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "\"Verified on {date}\" in the meta row",
+					"file": "core/gov-verified.php:157"
+				},
+				{
+					"kind": "display",
+					"where": "Verified tick beside the name on cards",
+					"file": "core/gov-verified.php:171"
+				},
+				{
+					"kind": "filter",
+					"where": "Directory \"Verified only\" (?gov=1)",
+					"file": "core/directory.php:190"
+				},
+				{
+					"kind": "filter",
+					"where": "Directory map points",
+					"file": "core/directory-map.php:64"
+				},
+				{
+					"kind": "sourcing",
+					"where": "written by aw_gov_verified_sync",
+					"file": "core/gov-verified.php:93"
+				},
+				{
+					"kind": "admin",
+					"where": "\"From government records\" (read-only)",
+					"file": "core/gov-verified.php:192"
+				}
+			],
+			"notes": [
+				"Set by code (wp aw gov-verify, and when the watched fields change)."
 			],
 			"readonly": true
 		},
