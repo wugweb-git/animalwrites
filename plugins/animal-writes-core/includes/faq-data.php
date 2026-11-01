@@ -66,7 +66,6 @@ add_filter(
 			array( 'key' => 'tag-animals', 'priority' => 6, 'q' => 'Which animals do the %s organisations help?', 'needs' => array( '3 Directory listings with aw_animals' ), 'pattern' => '<tag> for <animal>', 'answer' => 'aw_faq_tag_animals', 'question' => 'aw_faq_tag_question' ),
 			array( 'key' => 'tag-laws', 'priority' => 6.1, 'q' => 'Which laws do the %s explain?', 'needs' => array( '3 Resources or news items linking to a Library document' ), 'pattern' => '<law> <tag>', 'answer' => 'aw_faq_tag_laws', 'question' => 'aw_faq_tag_question' ),
 			array( 'key' => 'tag-in-force', 'priority' => 6.2, 'q' => 'Which %s are in force?', 'needs' => array( '2 Library documents with aw_legal_force' ), 'pattern' => '<tag> in force', 'answer' => 'aw_faq_tag_in_force', 'question' => 'aw_faq_tag_question' ),
-			array( 'key' => 'tag-campaign', 'priority' => 6.3, 'q' => 'Which campaign are the %s for?', 'needs' => array( '2 Library documents linked to one campaign (aw_campaign_link)' ), 'pattern' => '<campaign> <tag>', 'answer' => 'aw_faq_tag_campaign', 'question' => 'aw_faq_tag_question' ),
 		);
 		return $r;
 	}
@@ -918,6 +917,7 @@ function aw_faq_tag_in_force( $term_id ) {
 	return array( $a, 'tag-in-force' );
 }
 
+// Not in the registry until the campaigns it names are open again (owner, 1 Nov 2026).
 /** The campaign most of the tag's Library documents are linked to (aw_campaign_link; its term meta aw_campaign_page). */
 function aw_faq_tag_campaign( $term_id, $name ) {
 	$ids    = aw_faq_tag_items( $term_id )['aw_legal'] ?? array();
