@@ -13,6 +13,7 @@ add_filter(
 	'attachment_fields_to_edit',
 	function ( $fields, $post ) {
 		$fields['kits_image_context'] = array( 'label' => 'Image context', 'input' => 'textarea', 'value' => (string) get_post_meta( $post->ID, 'kits_image_context', true ), 'helps' => 'Note for editors: the copy this image supports. Not shown on the site.' );
+		$fields['kits_image_keyphrase'] = array( 'label' => 'Focus keyphrase', 'input' => 'text', 'value' => (string) get_post_meta( $post->ID, 'kits_image_keyphrase', true ), 'helps' => 'The one phrase this image supports in search. Editor note; not shown on the site.' );
 		return $fields;
 	},
 	10,
@@ -23,6 +24,9 @@ add_filter(
 	function ( $post, $att ) {
 		if ( isset( $att['kits_image_context'] ) ) {
 			update_post_meta( $post['ID'], 'kits_image_context', sanitize_textarea_field( $att['kits_image_context'] ) );
+		}
+		if ( isset( $att['kits_image_keyphrase'] ) ) {
+			update_post_meta( $post['ID'], 'kits_image_keyphrase', sanitize_text_field( $att['kits_image_keyphrase'] ) );
 		}
 		return $post;
 	},
@@ -46,18 +50,39 @@ add_action(
 				},
 			)
 		);
+		register_post_meta(
+			'attachment',
+			'kits_image_keyphrase',
+			array(
+				'type'              => 'string',
+				'single'            => true,
+				'show_in_rest'      => true,
+				'sanitize_callback' => 'sanitize_text_field',
+				'auth_callback'     => function ( $allowed, $meta_key, $post_id ) {
+					return current_user_can( 'edit_post', $post_id );
+				},
+			)
+		);
 	}
 );
 
-// The note is for editors only. REST returns registered meta to anyone who can read the attachment, so it is removed from
-// every response (including embeds) unless the viewer can edit that attachment.
+// The note and the keyphrase are for editors only. REST returns registered meta to anyone who can read the attachment, so both are
+// removed from every response (including embeds) unless the viewer can edit that attachment.
 add_filter(
 	'rest_prepare_attachment',
 	function ( $response, $post ) {
 		$data = $response->get_data();
-		if ( isset( $data['meta'] ) && is_array( $data['meta'] ) && array_key_exists( 'kits_image_context', $data['meta'] ) && ! current_user_can( 'edit_post', $post->ID ) ) {
-			unset( $data['meta']['kits_image_context'] );
-			$response->set_data( $data );
+		if ( isset( $data['meta'] ) && is_array( $data['meta'] ) && ! current_user_can( 'edit_post', $post->ID ) ) {
+			$changed = false;
+			foreach ( array( 'kits_image_context', 'kits_image_keyphrase' ) as $key ) {
+				if ( array_key_exists( $key, $data['meta'] ) ) {
+					unset( $data['meta'][ $key ] );
+					$changed = true;
+				}
+			}
+			if ( $changed ) {
+				$response->set_data( $data );
+			}
 		}
 		return $response;
 	},

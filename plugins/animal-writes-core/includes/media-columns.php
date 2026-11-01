@@ -2,7 +2,7 @@
 /**
  * Media Library list columns: name, slug, where each file is used and what to optimise.
  *
- * - Every SEO field of a file is visible: Caption = SEO title, Description = SEO description, Image context, and
+ * - Every SEO field of a file is visible: Caption = SEO title, Description = SEO description, Focus keyphrase, Image context, and
  *   Alternative Text (Rank Math's own column), each as its own column.
  * - No Author column (the site has one author).
  * - "Uploaded to" keeps what WordPress prints (parent post, Attach / Detach) and lists every other place the file is used
@@ -127,15 +127,16 @@ add_filter(
 	'manage_media_columns',
 	function ( $columns ) {
 		$ours   = array(
-			'aw_file'    => isset( $columns['title'] ) ? $columns['title'] : 'File',
-			'aw_slug'    => 'Slug',
-			'aw_caption' => 'SEO title',
-			'aw_desc'    => 'SEO description',
-			'aw_context' => 'Image context',
-			'aw_parent'  => 'Uploaded to',
-			'aw_opt'     => 'Optimisation',
+			'aw_file'      => isset( $columns['title'] ) ? $columns['title'] : 'File',
+			'aw_slug'      => 'Slug',
+			'aw_caption'   => 'SEO title',
+			'aw_desc'      => 'SEO description',
+			'aw_keyphrase' => 'Focus keyphrase',
+			'aw_context'   => 'Image context',
+			'aw_parent'    => 'Uploaded to',
+			'aw_opt'       => 'Optimisation',
 		);
-		$order  = array( 'cb', 'aw_file', 'rank_math_image_title', 'taxonomy-aw_media_group', 'aw_slug', 'aw_caption', 'aw_desc', 'rank_math_image_alt', 'aw_context', 'aw_parent', 'aw_opt', 'date' );
+		$order  = array( 'cb', 'aw_file', 'rank_math_image_title', 'taxonomy-aw_media_group', 'aw_slug', 'aw_caption', 'aw_desc', 'aw_keyphrase', 'rank_math_image_alt', 'aw_context', 'aw_parent', 'aw_opt', 'date' );
 		$remove = array( 'title', 'author', 'imgoptm', 'parent' );
 		$out    = array();
 		foreach ( $order as $key ) {
@@ -177,7 +178,7 @@ add_filter(
 add_action(
 	'manage_media_custom_column',
 	function ( $column, $post_id ) {
-		if ( ! in_array( $column, array( 'aw_file', 'aw_slug', 'aw_caption', 'aw_desc', 'aw_context', 'aw_parent', 'aw_opt' ), true ) ) {
+		if ( ! in_array( $column, array( 'aw_file', 'aw_slug', 'aw_caption', 'aw_desc', 'aw_keyphrase', 'aw_context', 'aw_parent', 'aw_opt' ), true ) ) {
 			return;
 		}
 		$post = get_post( $post_id );
@@ -208,6 +209,11 @@ add_action(
 		if ( 'aw_desc' === $column ) {
 			$desc = trim( wp_strip_all_tags( (string) $post->post_content ) );
 			echo '' !== $desc ? esc_html( $desc ) : '—';
+			return;
+		}
+		if ( 'aw_keyphrase' === $column ) {
+			$phrase = trim( (string) get_post_meta( $post_id, 'kits_image_keyphrase', true ) );
+			echo '' !== $phrase ? esc_html( $phrase ) : '—';
 			return;
 		}
 		if ( 'aw_context' === $column ) {

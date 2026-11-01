@@ -6,7 +6,8 @@
  * - Alternative Text: the name, up to 160 characters.
  * - Caption = SEO title (up to 100 characters): the name, or "host favicon | Animal Writes" / "host logo | Animal Writes".
  * - Description = SEO description: at least 100 and up to 160 characters, written for favicons, logos, source images and any other image.
- * - Image context (kits_image_context): the page the file is attached to or later used on (featured or source image), and its Rank Math focus keyword, up to 160 characters.
+ * - Image context (kits_image_context): the page the file is attached to or later used on (featured or source image), up to 160 characters.
+ * - Focus keyphrase (kits_image_keyphrase): that page's Rank Math focus keyword (the first one).
  * No admin screen, no options, no CSS.
  *
  * @package animal-writes-core
@@ -129,13 +130,23 @@ function aw_media_autofill_context( $parent_id ) {
 	$type  = get_post_type_object( $parent->post_type );
 	$label = $type ? $type->labels->singular_name : $parent->post_type;
 	$text  = sprintf( 'Used on: %1$s: %2$s (ID %3$d).', $label, aw_media_autofill_cut( html_entity_decode( $parent->post_title, ENT_QUOTES, 'UTF-8' ), 50 ), $parent->ID );
-	$kw    = trim( (string) strtok( (string) get_post_meta( $parent->ID, 'rank_math_focus_keyword', true ), ',' ) );
-	if ( '' === $kw ) {
-		return $text;
+	return aw_media_autofill_cut( $text, 160 );
+}
+
+/**
+ * Fill the focus keyphrase of an image from a page's Rank Math focus keyword (the first one), only when it is empty.
+ *
+ * @param int $att_id  Attachment ID.
+ * @param int $page_id Page the image is attached to or used on.
+ */
+function aw_media_autofill_keyphrase( $att_id, $page_id ) {
+	if ( $page_id < 1 || '' !== trim( (string) get_post_meta( $att_id, 'kits_image_keyphrase', true ) ) ) {
+		return;
 	}
-	$room = 160 - mb_strlen( $text ) - mb_strlen( ' Focus keyword: .' );
-	$kw   = $room > 0 ? aw_media_autofill_cut( $kw, $room ) : '';
-	return '' !== $kw ? $text . ' Focus keyword: ' . $kw . '.' : $text; // The keyword part is cut or dropped first so the 160-character cap holds.
+	$kw = trim( (string) strtok( (string) get_post_meta( $page_id, 'rank_math_focus_keyword', true ), ',' ) );
+	if ( '' !== $kw ) {
+		update_post_meta( $att_id, 'kits_image_keyphrase', sanitize_text_field( $kw ) );
+	}
 }
 
 /**
@@ -177,11 +188,12 @@ function aw_media_autofill_run( $post_id ) {
 			update_post_meta( $post_id, 'kits_image_context', $context );
 		}
 	}
+	aw_media_autofill_keyphrase( $post_id, (int) $post->post_parent );
 }
 add_action( 'add_attachment', 'aw_media_autofill_run' );
 
 /**
- * Fill the image context when a picture is used on a page after it was uploaded (featured image or news source image).
+ * Fill the image context and focus keyphrase when a picture is used on a page after it was uploaded (featured image or news source image).
  *
  * @param int    $meta_id  Meta ID (unused).
  * @param int    $post_id  Post the meta belongs to.
@@ -196,13 +208,13 @@ function aw_media_autofill_used( $meta_id, $post_id, $meta_key, $value ) {
 	if ( $att < 1 || 'attachment' === get_post_type( $post_id ) || ! wp_attachment_is_image( $att ) ) {
 		return;
 	}
-	if ( '' !== trim( (string) get_post_meta( $att, 'kits_image_context', true ) ) ) {
-		return;
+	if ( '' === trim( (string) get_post_meta( $att, 'kits_image_context', true ) ) ) {
+		$context = aw_media_autofill_context( (int) $post_id );
+		if ( '' !== $context ) {
+			update_post_meta( $att, 'kits_image_context', $context );
+		}
 	}
-	$context = aw_media_autofill_context( (int) $post_id );
-	if ( '' !== $context ) {
-		update_post_meta( $att, 'kits_image_context', $context );
-	}
+	aw_media_autofill_keyphrase( $att, (int) $post_id );
 }
 add_action( 'added_post_meta', 'aw_media_autofill_used', 10, 4 );
 add_action( 'updated_post_meta', 'aw_media_autofill_used', 10, 4 );
