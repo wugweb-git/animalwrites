@@ -33,8 +33,8 @@ function aw_edit_screen_map_data(): array {
 }
 
 /**
- * Every known box: id => title, source (WordPress / plugin name / Animal Writes core), file, screen (post|term),
- * types (empty: any type), runtime (live, scf, fallback, edit-screen-only, always), notes, match (term screens).
+ * Every known box: id => title, source (WordPress / plugin name / Animal Writes core), file, screen (post|term|admin),
+ * types (empty: any type), runtime (live, scf, fallback, edit-screen-only, always, map-only), notes, match (term screens), page (admin pages).
  */
 function aw_edit_screen_boxes(): array {
 	$data = aw_edit_screen_map_data();
@@ -357,7 +357,7 @@ function aw_edit_screen_box_keys( string $box_id, string $type, array $map ): ar
 }
 
 /**
- * Every row: one per box per post type or taxonomy. Each row: screen (post|term), type, id, title, source, file,
+ * Every row: one per box per post type, taxonomy or admin page. Each row: screen (post|term|admin), type, id, title, source, file,
  * shows_on, mapped (bool), fields (key => type), uses (key => list of kind, where, file), notes (list).
  */
 function aw_edit_screen_rows(): array {
@@ -481,6 +481,15 @@ function aw_edit_screen_rows(): array {
 		}
 	}
 
+	// Admin pages that are not edit screens (Dashboard widgets, report pages): listed from the map, one row per page in "types".
+	foreach ( $boxes as $id => $b ) {
+		if ( 'admin' === ( $b['screen'] ?? '' ) ) {
+			foreach ( (array) $b['types'] as $page ) {
+				$add( 'admin', (string) $page, $id, array( 'shows_on' => (string) ( $b['page'] ?? $page ) ), array(), array( 'Listed from the map, not read live.' ) );
+			}
+		}
+	}
+
 	// Same key edited by two boxes on one screen.
 	$by = array();
 	foreach ( $rows as $i => $r ) {
@@ -511,6 +520,24 @@ function aw_edit_screen_rows(): array {
 		$rows[ $i ]['notes'] = array_values( array_unique( $r['notes'] ) );
 	}
 	return $rows;
+}
+
+/**
+ * Label for a row's type: the post type or taxonomy, or for an admin page the map's "page" (e.g. "Dashboard (widgets)").
+ *
+ * @param string $type   Post type, taxonomy or admin page id.
+ * @param string $screen post, term or admin.
+ */
+function aw_edit_screen_type_label( string $type, string $screen ): string {
+	if ( 'admin' !== $screen ) {
+		return $type;
+	}
+	foreach ( aw_edit_screen_boxes() as $b ) {
+		if ( 'admin' === ( $b['screen'] ?? '' ) && in_array( $type, (array) $b['types'], true ) && ! empty( $b['page'] ) ) {
+			return (string) $b['page'];
+		}
+	}
+	return $type;
 }
 
 /**
@@ -638,7 +665,7 @@ function aw_edit_screen_display_rows( array $rows ): array {
 		}
 		$group = $r['mapped'] && isset( $merge[ $r['id'] ] ) ? $merge[ $r['id'] ] : '';
 		if ( '' === $group ) {
-			$out[] = $r + array( 'label' => $r['type'], 'types' => array( $r['type'] ) );
+			$out[] = $r + array( 'label' => aw_edit_screen_type_label( $r['type'], $r['screen'] ), 'types' => array( $r['type'] ) );
 			continue;
 		}
 		if ( ! isset( $at[ $group ] ) ) {
@@ -672,7 +699,7 @@ function aw_edit_screen_display_rows( array $rows ): array {
 		);
 		foreach ( $general as $r ) {
 			if ( ! in_array( $r['id'], $row['ids'], true ) ) {
-				$row['titles'][] = $r['title'] . ( 'term' === $r['screen'] ? ' (term screens)' : '' );
+				$row['titles'][] = $r['title'] . ( 'term' === $r['screen'] ? ' (term screens)' : ( 'admin' === $r['screen'] ? ' — ' . aw_edit_screen_type_label( $r['type'], 'admin' ) : '' ) );
 				foreach ( $r['notes'] as $n ) {
 					$row['notes'][] = $r['title'] . ': ' . $n;
 				}
@@ -763,6 +790,11 @@ add_action(
 	14 // after Keys (13)
 );
 
+/** The note on rows that are listed from the map, not read live (page and command). */
+function aw_edit_screen_map_only_note(): string {
+	return 'Sidebar panels that plugins add with JavaScript in the block editor, and Dashboard widgets and report-page boxes, are listed from the map, not read live.';
+}
+
 /** Animal Writes → Edit screens. */
 function aw_edit_screens_page(): void {
 	if ( ! current_user_can( 'manage_options' ) ) {
@@ -782,6 +814,7 @@ function aw_edit_screens_page(): void {
 
 	echo '<div class="wrap"><h1>Edit screens</h1>';
 	echo '<p>Every box on each edit screen, the keys it stores and where each key is used. Boxes are read from the plugins as they run now; what each key does comes from the map in <code>animal-writes-core/data/edit-screen-map.json</code> (see <code>docs/edit-screens.md</code>). Read-only.</p>';
+	echo '<p class="description">' . esc_html( aw_edit_screen_map_only_note() ) . '</p>';
 	$unmapped = aw_edit_screen_unmapped( $rows );
 	if ( $unmapped ) {
 		echo '<div class="notice notice-warning inline"><p>' . esc_html( sprintf( '%d boxes or fields here are not mapped yet.', $unmapped ) ) . '</p></div>';
@@ -792,8 +825,8 @@ function aw_edit_screens_page(): void {
 	$counts = array_count_values( wp_list_pluck( $all, 'type' ) );
 	$links  = array( '<a href="' . esc_url( $base ) . '"' . ( '' === $type ? ' class="current" aria-current="page"' : '' ) . '>All <span class="count">(' . count( $all ) . ')</span></a>' );
 	foreach ( $types as $t => $screen ) {
-		$obj     = 'term' === $screen ? get_taxonomy( $t ) : get_post_type_object( $t );
-		$label   = $obj ? $obj->labels->name : $t;
+		$obj     = 'term' === $screen ? get_taxonomy( $t ) : ( 'admin' === $screen ? null : get_post_type_object( $t ) );
+		$label   = $obj ? $obj->labels->name : aw_edit_screen_type_label( $t, $screen );
 		$label  .= 'term' === $screen ? ' (terms)' : '';
 		$links[] = '<a href="' . esc_url( add_query_arg( 'type', $t, $base ) ) . '"' . ( $type === $t ? ' class="current" aria-current="page"' : '' ) . '>' . esc_html( $label ) . ' <span class="count">(' . (int) ( $counts[ $t ] ?? 0 ) . ')</span></a>';
 	}
@@ -915,6 +948,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			if ( ! is_admin() ) {
 				WP_CLI::log( 'Some plugins add their boxes only in WP admin (for example LiteSpeed); they show on Animal Writes → Edit screens.' );
 			}
+			WP_CLI::log( aw_edit_screen_map_only_note() );
 			$twice = aw_edit_screen_twice( $rows );
 			WP_CLI::log( 'Edited in two places:' );
 			if ( $twice ) {

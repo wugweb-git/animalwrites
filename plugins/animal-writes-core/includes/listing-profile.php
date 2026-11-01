@@ -57,7 +57,7 @@ function aw_listing_fields() {
 	);
 }
 
-// With SCF active the "Organisation details" field group (acf-json/group_aw_listing.json) edits these same keys; this box
+// With SCF active the listing field groups (acf-json/group_aw_listing*.json: Contact and seven more) edit these same keys; this box
 // is the fallback when SCF is off.
 add_action(
 	'add_meta_boxes_aw_listing',

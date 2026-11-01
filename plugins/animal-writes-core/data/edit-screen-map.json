@@ -158,32 +158,6 @@
 			"types": [],
 			"runtime": "live"
 		},
-		"aw-issuer": {
-			"title": "Issued by",
-			"source": "Animal Writes core",
-			"plugin": "Animal Writes core",
-			"purpose": "Issuer",
-			"file": "core/issuers.php (aw_issuer_box)",
-			"screen": "post",
-			"types": [
-				"aw_legal"
-			],
-			"runtime": "live",
-			"notes": "Library items only since 1 Nov 2026. aw_issuer values stored on Resources (post) are kept and still read; no box edits them there."
-		},
-		"aw-place": {
-			"title": "Place",
-			"source": "Animal Writes core",
-			"plugin": "Animal Writes core",
-			"purpose": "Place",
-			"file": "core/places-admin.php (aw_place_box)",
-			"screen": "post",
-			"types": [
-				"aw_listing"
-			],
-			"runtime": "live",
-			"notes": "Directory listings only (AW_PLACE_EDIT_TYPES) since 1 Nov 2026. On News, Library, Campaigns and Opportunities (AW_PLACE_TYPES) the stored place is kept and still read; no box edits it there."
-		},
 		"aw_related": {
 			"title": "Related",
 			"source": "Animal Writes core",
@@ -234,56 +208,6 @@
 				"aw_listing"
 			],
 			"runtime": "live"
-		},
-		"aw-legal-item": {
-			"title": "Library item",
-			"source": "Animal Writes core",
-			"plugin": "Animal Writes core",
-			"purpose": "Details",
-			"file": "core/faq-data.php (add_meta_boxes_aw_legal)",
-			"screen": "post",
-			"types": [
-				"aw_legal"
-			],
-			"runtime": "live"
-		},
-		"aw-campaign-details": {
-			"title": "Campaign details",
-			"source": "Animal Writes core",
-			"plugin": "Animal Writes core",
-			"purpose": "Details",
-			"file": "core/campaign-tools.php (aw_camp_details_box)",
-			"screen": "post",
-			"types": [
-				"aw_campaign"
-			],
-			"runtime": "live",
-			"notes": "The only box that edits aw_campaign_close and aw_campaign_doc (the SCF group \"Campaign details\" no longer has these two fields since 1 Nov 2026)."
-		},
-		"aw-campaign-record": {
-			"title": "Real-world impact",
-			"source": "Animal Writes core",
-			"plugin": "Animal Writes core",
-			"purpose": "Campaign outcome",
-			"file": "core/campaign-record.php (aw_camp_record_box)",
-			"screen": "post",
-			"types": [
-				"aw_campaign"
-			],
-			"runtime": "live"
-		},
-		"aw-enrich-prov": {
-			"title": "Where these details come from",
-			"source": "AW Sourcing",
-			"plugin": "AW Sourcing",
-			"purpose": "Sources",
-			"file": "src/enrichment-admin.php (aw_enrich_prov_box)",
-			"screen": "post",
-			"types": [
-				"aw_listing"
-			],
-			"runtime": "live",
-			"notes": "Mostly read-only: the per-field sources also shown under each SCF field."
 		},
 		"aw_org_people": {
 			"title": "Volunteers",
@@ -400,10 +324,10 @@
 			"runtime": "scf"
 		},
 		"acf-group_aw_legal": {
-			"title": "Library details",
+			"title": "Source",
 			"source": "Secure Custom Fields",
 			"plugin": "Animal Writes core",
-			"purpose": "Details",
+			"purpose": "Sources",
 			"file": "acf-json/group_aw_legal.json",
 			"screen": "post",
 			"types": [
@@ -411,8 +335,21 @@
 			],
 			"runtime": "scf"
 		},
+		"acf-group_aw_legal_document": {
+			"title": "Document",
+			"source": "Secure Custom Fields",
+			"plugin": "Animal Writes core",
+			"purpose": "Details",
+			"file": "acf-json/group_aw_legal_document.json; core/faq-data.php (aw_legal_item_fields), core/issuers.php (aw_issuer_box)",
+			"screen": "post",
+			"types": [
+				"aw_legal"
+			],
+			"runtime": "scf",
+			"notes": "Short name, Issued under, Key sections and Issued by are drawn inside this box by message fields (acf/render_field); their own nonces and saves."
+		},
 		"acf-group_aw_campaign": {
-			"title": "Campaign details",
+			"title": "Event",
 			"source": "Secure Custom Fields",
 			"plugin": "Animal Writes core",
 			"purpose": "Details",
@@ -421,8 +358,72 @@
 			"types": [
 				"aw_campaign"
 			],
+			"runtime": "scf"
+		},
+		"acf-group_aw_campaign_dates": {
+			"title": "Dates and state",
+			"source": "Secure Custom Fields",
+			"plugin": "Animal Writes core",
+			"purpose": "Details",
+			"file": "acf-json/group_aw_campaign_dates.json; core/campaign-tools.php (aw_camp_dates_box)",
+			"screen": "post",
+			"types": [
+				"aw_campaign"
+			],
 			"runtime": "scf",
-			"notes": "Event date and Event place only; Closes on and Campaign document are edited in the side box \"Campaign details\"."
+			"notes": "Fields drawn by a message field (acf/render_field); saved on save_post_aw_campaign (core/campaign-tools.php)."
+		},
+		"acf-group_aw_campaign_document": {
+			"title": "Document",
+			"source": "Secure Custom Fields",
+			"plugin": "Animal Writes core",
+			"purpose": "Details",
+			"file": "acf-json/group_aw_campaign_document.json; core/campaign-tools.php (aw_camp_document_box)",
+			"screen": "post",
+			"types": [
+				"aw_campaign"
+			],
+			"runtime": "scf",
+			"notes": "Field drawn by a message field (acf/render_field); saved on save_post_aw_campaign (core/campaign-tools.php)."
+		},
+		"acf-group_aw_campaign_orgs": {
+			"title": "Organisations",
+			"source": "Secure Custom Fields",
+			"plugin": "Animal Writes core",
+			"purpose": "Details",
+			"file": "acf-json/group_aw_campaign_orgs.json; core/campaign-tools.php (aw_camp_orgs_box)",
+			"screen": "post",
+			"types": [
+				"aw_campaign"
+			],
+			"runtime": "scf",
+			"notes": "Fields drawn by a message field (acf/render_field); saved on save_post_aw_campaign (core/campaign-tools.php)."
+		},
+		"acf-group_aw_campaign_outcome": {
+			"title": "Outcome",
+			"source": "Secure Custom Fields",
+			"plugin": "Animal Writes core",
+			"purpose": "Campaign outcome",
+			"file": "acf-json/group_aw_campaign_outcome.json; core/campaign-tools.php (aw_camp_outcome_box), core/campaign-record.php (aw_camp_record_box)",
+			"screen": "post",
+			"types": [
+				"aw_campaign"
+			],
+			"runtime": "scf",
+			"notes": "Fields drawn by a message field (acf/render_field); outcome saved in core/campaign-tools.php, real-world impact in core/campaign-record.php."
+		},
+		"acf-group_aw_campaign_share": {
+			"title": "Letters and share",
+			"source": "Secure Custom Fields",
+			"plugin": "Animal Writes core",
+			"purpose": "Details",
+			"file": "acf-json/group_aw_campaign_share.json; core/campaign-tools.php (aw_camp_share_box)",
+			"screen": "post",
+			"types": [
+				"aw_campaign"
+			],
+			"runtime": "scf",
+			"notes": "Fields drawn by a message field (acf/render_field); saved on save_post_aw_campaign (core/campaign-tools.php). Letters sent is shown, not edited."
 		},
 		"acf-group_aw_opportunity": {
 			"title": "Opportunity details",
@@ -437,7 +438,7 @@
 			"runtime": "scf"
 		},
 		"acf-group_aw_listing": {
-			"title": "Organisation details",
+			"title": "Contact",
 			"source": "Secure Custom Fields",
 			"plugin": "Animal Writes core",
 			"purpose": "Details",
@@ -447,6 +448,93 @@
 				"aw_listing"
 			],
 			"runtime": "scf"
+		},
+		"acf-group_aw_listing_address": {
+			"title": "Address and place",
+			"source": "Secure Custom Fields",
+			"plugin": "Animal Writes core",
+			"purpose": "Place",
+			"file": "acf-json/group_aw_listing_address.json; core/places-admin.php (aw_place_box)",
+			"screen": "post",
+			"types": [
+				"aw_listing"
+			],
+			"runtime": "scf",
+			"notes": "PIN code, State, District and Town are drawn at the top by a message field (acf/render_field); their own nonce and save (core/places-admin.php)."
+		},
+		"acf-group_aw_listing_hours": {
+			"title": "Opening hours",
+			"source": "Secure Custom Fields",
+			"plugin": "Animal Writes core",
+			"purpose": "Details",
+			"file": "acf-json/group_aw_listing_hours.json",
+			"screen": "post",
+			"types": [
+				"aw_listing"
+			],
+			"runtime": "scf"
+		},
+		"acf-group_aw_listing_registrations": {
+			"title": "Registrations",
+			"source": "Secure Custom Fields",
+			"plugin": "Animal Writes core",
+			"purpose": "Details",
+			"file": "acf-json/group_aw_listing_registrations.json",
+			"screen": "post",
+			"types": [
+				"aw_listing"
+			],
+			"runtime": "scf"
+		},
+		"acf-group_aw_listing_about": {
+			"title": "About and services",
+			"source": "Secure Custom Fields",
+			"plugin": "Animal Writes core",
+			"purpose": "Details",
+			"file": "acf-json/group_aw_listing_about.json",
+			"screen": "post",
+			"types": [
+				"aw_listing"
+			],
+			"runtime": "scf"
+		},
+		"acf-group_aw_listing_online": {
+			"title": "Online",
+			"source": "Secure Custom Fields",
+			"plugin": "Animal Writes core",
+			"purpose": "Details",
+			"file": "acf-json/group_aw_listing_online.json",
+			"screen": "post",
+			"types": [
+				"aw_listing"
+			],
+			"runtime": "scf"
+		},
+		"acf-group_aw_listing_photos": {
+			"title": "Photos and support",
+			"source": "Secure Custom Fields",
+			"plugin": "Animal Writes core",
+			"purpose": "Details",
+			"file": "acf-json/group_aw_listing_photos.json",
+			"screen": "post",
+			"types": [
+				"aw_listing"
+			],
+			"runtime": "scf",
+			"notes": "The logo is the Featured image (a message field says so)."
+		},
+		"acf-group_aw_listing_claimed": {
+			"title": "Claimed and sources",
+			"source": "Secure Custom Fields",
+			"plugin": "Animal Writes core",
+			"purpose": "Sources",
+			"file": "acf-json/group_aw_listing_claimed.json; src/enrichment-admin.php (aw_enrich_prov_box)",
+			"screen": "post",
+			"types": [
+				"aw_listing"
+			],
+			"runtime": "scf",
+			"notes": "Ends with \"Where these details come from\" (a message field, acf/render_field): the per-field sources, mostly read-only, and the Identity unresolved tick."
 		},
 		"rank_math_metabox": {
 			"title": "Rank Math SEO",
@@ -480,6 +568,19 @@
 			"runtime": "edit-screen-only",
 			"notes": "Classic editor only. Collapsed by default (core/edit-screens.php, aw_edit_screen_collapsed_boxes)."
 		},
+		"rank_math_metabox_content_ai": {
+			"title": "Content AI",
+			"source": "Rank Math SEO",
+			"plugin": "Rank Math SEO",
+			"purpose": "SEO",
+			"file": "seo-by-rank-math/includes/modules/content-ai/class-admin.php (add_content_ai_metabox)",
+			"screen": "post",
+			"types": [
+				"aw_news"
+			],
+			"runtime": "edit-screen-only",
+			"notes": "Classic editor only (side, high). Writing suggestions; no key the site reads."
+		},
 		"litespeed_meta_boxes": {
 			"title": "LiteSpeed",
 			"source": "LiteSpeed Cache",
@@ -504,6 +605,390 @@
 			],
 			"runtime": "live",
 			"notes": "Rendering this box deletes wpil_links on that post (Link Whisper). Collapsed by default (core/edit-screens.php, aw_edit_screen_collapsed_boxes)."
+		},
+		"panel-rank-math": {
+			"title": "Rank Math (sidebar panel: SEO, Schema, Content AI)",
+			"source": "Rank Math SEO",
+			"plugin": "Rank Math SEO",
+			"purpose": "SEO",
+			"file": "seo-by-rank-math (block editor script)",
+			"screen": "post",
+			"types": [
+				"post",
+				"page",
+				"aw_legal",
+				"aw_opportunity",
+				"aw_listing"
+			],
+			"runtime": "edit-screen-only",
+			"notes": "JavaScript sidebar panel in the block editor, not a box; listed from the map. It edits the rank_math_* keys listed under the box \"Rank Math SEO\" (rank_math_metabox)."
+		},
+		"panel-link-whisper": {
+			"title": "Link Whisper target keyword (sidebar panel)",
+			"source": "Link Whisper",
+			"plugin": "Link Whisper",
+			"purpose": "Links",
+			"file": "link-whisper (block editor script)",
+			"screen": "post",
+			"types": [
+				"post",
+				"page"
+			],
+			"runtime": "edit-screen-only",
+			"notes": "JavaScript sidebar panel in the block editor, not a box; listed from the map. No key the site reads."
+		},
+		"panel-scf-bindings": {
+			"title": "SCF block bindings (sidebar panel)",
+			"source": "Secure Custom Fields",
+			"plugin": "Secure Custom Fields",
+			"purpose": "Block bindings",
+			"file": "secure-custom-fields (block bindings script)",
+			"screen": "post",
+			"types": [
+				"post",
+				"page",
+				"aw_legal",
+				"aw_opportunity",
+				"aw_listing"
+			],
+			"runtime": "edit-screen-only",
+			"notes": "JavaScript sidebar panel in the block editor, not a box; listed from the map. A binding is saved in the block itself (post content), not as a meta key."
+		},
+		"dashboard_right_now": {
+			"title": "At a Glance",
+			"source": "WordPress",
+			"plugin": "WordPress",
+			"purpose": "General",
+			"file": "wp-admin/includes/dashboard.php (wp_dashboard_setup)",
+			"screen": "admin",
+			"page": "Dashboard (widgets)",
+			"types": [
+				"dashboard"
+			],
+			"runtime": "map-only",
+			"notes": "Stores nothing; read-only."
+		},
+		"dashboard_activity": {
+			"title": "Activity",
+			"source": "WordPress",
+			"plugin": "WordPress",
+			"purpose": "General",
+			"file": "wp-admin/includes/dashboard.php (wp_dashboard_setup)",
+			"screen": "admin",
+			"page": "Dashboard (widgets)",
+			"types": [
+				"dashboard"
+			],
+			"runtime": "map-only",
+			"notes": "Stores nothing; read-only."
+		},
+		"dashboard_quick_press": {
+			"title": "Quick Draft",
+			"source": "WordPress",
+			"plugin": "WordPress",
+			"purpose": "General",
+			"file": "wp-admin/includes/dashboard.php (wp_dashboard_setup)",
+			"screen": "admin",
+			"page": "Dashboard (widgets)",
+			"types": [
+				"dashboard"
+			],
+			"runtime": "map-only",
+			"notes": "Saves a new draft post; no meta key."
+		},
+		"dashboard_site_health": {
+			"title": "Site Health Status",
+			"source": "WordPress",
+			"plugin": "WordPress",
+			"purpose": "General",
+			"file": "wp-admin/includes/dashboard.php (wp_dashboard_setup)",
+			"screen": "admin",
+			"page": "Dashboard (widgets)",
+			"types": [
+				"dashboard"
+			],
+			"runtime": "map-only",
+			"notes": "Stores nothing; read-only."
+		},
+		"dashboard_primary": {
+			"title": "WordPress Events and News",
+			"source": "WordPress",
+			"plugin": "WordPress",
+			"purpose": "General",
+			"file": "wp-admin/includes/dashboard.php (wp_dashboard_setup)",
+			"screen": "admin",
+			"page": "Dashboard (widgets)",
+			"types": [
+				"dashboard"
+			],
+			"runtime": "map-only",
+			"notes": "Stores nothing; read-only."
+		},
+		"mailweb_widget": {
+			"title": "Mail",
+			"source": "Mailweb",
+			"plugin": "Mailweb",
+			"purpose": "Mail",
+			"file": "plugins/mailweb/includes/overview.php:158",
+			"screen": "admin",
+			"page": "Dashboard (widgets)",
+			"types": [
+				"dashboard"
+			],
+			"runtime": "map-only",
+			"notes": "Counts and the last 5 messages per mailbox; stores nothing. Users with the Mailweb capability only."
+		},
+		"aw_visits": {
+			"title": "Animal Writes visits",
+			"source": "Kits Core",
+			"plugin": "Kits Core",
+			"purpose": "Visits",
+			"file": "kits/visits.php:200",
+			"screen": "admin",
+			"page": "Dashboard (widgets)",
+			"types": [
+				"dashboard"
+			],
+			"runtime": "map-only",
+			"notes": "Reads the visit counters (options aw_visits_total, aw_visits_since); stores nothing."
+		},
+		"aw_team_dates": {
+			"title": "Dates",
+			"source": "Animal Writes core",
+			"plugin": "Animal Writes core",
+			"purpose": "Team dates",
+			"file": "core/team-dates.php:210",
+			"screen": "admin",
+			"page": "Dashboard (widgets)",
+			"types": [
+				"dashboard"
+			],
+			"runtime": "map-only",
+			"notes": "Stores nothing; read-only. Users with AW_DATES_CAP only."
+		},
+		"aw_cl_widget": {
+			"title": "Campaign letters",
+			"source": "Animal Writes core",
+			"plugin": "Animal Writes core",
+			"purpose": "Campaign letters",
+			"file": "core/campaign-letters.php:366",
+			"screen": "admin",
+			"page": "Dashboard (widgets)",
+			"types": [
+				"dashboard"
+			],
+			"runtime": "map-only",
+			"notes": "Letters sent in the last 7 days; stores nothing. Editors, when aw_cl_campaigns() lists a campaign."
+		},
+		"aw_cron_health": {
+			"title": "Scheduled tasks",
+			"source": "Animal Writes core",
+			"plugin": "Animal Writes core",
+			"purpose": "Scheduled tasks",
+			"file": "core/cron-health.php:105",
+			"screen": "admin",
+			"page": "Dashboard (widgets)",
+			"types": [
+				"dashboard"
+			],
+			"runtime": "map-only",
+			"notes": "Stores nothing; read-only. Administrators only."
+		},
+		"rank_math_dashboard_widget": {
+			"title": "Rank Math Overview",
+			"source": "Rank Math SEO",
+			"plugin": "Rank Math SEO",
+			"purpose": "SEO",
+			"file": "seo-by-rank-math/includes/admin/class-dashboard-widget.php:52",
+			"screen": "admin",
+			"page": "Dashboard (widgets)",
+			"types": [
+				"dashboard"
+			],
+			"runtime": "map-only",
+			"notes": "Only with the Analytics module on. Not read live; confirm on the Dashboard."
+		},
+		"google_dashboard_widget": {
+			"title": "Site Kit Summary",
+			"source": "Site Kit by Google",
+			"plugin": "Site Kit by Google",
+			"purpose": "Analytics",
+			"file": "google-site-kit",
+			"screen": "admin",
+			"page": "Dashboard (widgets)",
+			"types": [
+				"dashboard"
+			],
+			"runtime": "map-only",
+			"notes": "Id not checked in the code. Not read live; confirm on the Dashboard."
+		},
+		"litespeed_dashboard_widget": {
+			"title": "LiteSpeed",
+			"source": "LiteSpeed Cache",
+			"plugin": "LiteSpeed Cache",
+			"purpose": "Image / cache",
+			"file": "litespeed-cache",
+			"screen": "admin",
+			"page": "Dashboard (widgets)",
+			"types": [
+				"dashboard"
+			],
+			"runtime": "map-only",
+			"notes": "Id not checked in the code. Not read live; confirm on the Dashboard."
+		},
+		"advads_dashboard_widget": {
+			"title": "Advanced Ads",
+			"source": "Advanced Ads",
+			"plugin": "Advanced Ads",
+			"purpose": "Ads",
+			"file": "advanced-ads",
+			"screen": "admin",
+			"page": "Dashboard (widgets)",
+			"types": [
+				"dashboard"
+			],
+			"runtime": "map-only",
+			"notes": "Advanced Ads is off on live; shows only when it is turned on. Id not checked in the code. Not read live; confirm on the Dashboard."
+		},
+		"aw-si-sources": {
+			"title": "Sources",
+			"source": "AW SEO Plus",
+			"plugin": "AW SEO Plus",
+			"purpose": "SEO report",
+			"file": "seo/search-insights/admin.php:119",
+			"screen": "admin",
+			"page": "Search Insights (report page)",
+			"types": [
+				"aw-search-insights"
+			],
+			"runtime": "map-only",
+			"notes": "Overview tab only. Reads Search Insights data; stores no post meta."
+		},
+		"aw-si-priorities": {
+			"title": "Priorities",
+			"source": "AW SEO Plus",
+			"plugin": "AW SEO Plus",
+			"purpose": "SEO report",
+			"file": "seo/search-insights/admin.php:120",
+			"screen": "admin",
+			"page": "Search Insights (report page)",
+			"types": [
+				"aw-search-insights"
+			],
+			"runtime": "map-only",
+			"notes": "Overview tab only. Reads Search Insights data; stores no post meta."
+		},
+		"aw-si-quick": {
+			"title": "Quick wins (position 8–20, at least 10 impressions)",
+			"source": "AW SEO Plus",
+			"plugin": "AW SEO Plus",
+			"purpose": "SEO report",
+			"file": "seo/search-insights/admin.php:121",
+			"screen": "admin",
+			"page": "Search Insights (report page)",
+			"types": [
+				"aw-search-insights"
+			],
+			"runtime": "map-only",
+			"notes": "Overview tab only. Reads Search Insights data; stores no post meta."
+		},
+		"aw-si-movers": {
+			"title": "Movers (28 days against the 28 before)",
+			"source": "AW SEO Plus",
+			"plugin": "AW SEO Plus",
+			"purpose": "SEO report",
+			"file": "seo/search-insights/admin.php:122",
+			"screen": "admin",
+			"page": "Search Insights (report page)",
+			"types": [
+				"aw-search-insights"
+			],
+			"runtime": "map-only",
+			"notes": "Overview tab only. Reads Search Insights data; stores no post meta."
+		},
+		"aw-si-brand": {
+			"title": "Brand",
+			"source": "AW SEO Plus",
+			"plugin": "AW SEO Plus",
+			"purpose": "SEO report",
+			"file": "seo/search-insights/admin.php:123",
+			"screen": "admin",
+			"page": "Search Insights (report page)",
+			"types": [
+				"aw-search-insights"
+			],
+			"runtime": "map-only",
+			"notes": "Overview tab only. Reads Search Insights data; stores no post meta."
+		},
+		"aw-si-ai": {
+			"title": "AI referrals (GA4, 28 days)",
+			"source": "AW SEO Plus",
+			"plugin": "AW SEO Plus",
+			"purpose": "SEO report",
+			"file": "seo/search-insights/admin.php:124",
+			"screen": "admin",
+			"page": "Search Insights (report page)",
+			"types": [
+				"aw-search-insights"
+			],
+			"runtime": "map-only",
+			"notes": "Overview tab only. Reads Search Insights data; stores no post meta."
+		},
+		"aw-si-referrers": {
+			"title": "Top referrers (GA4)",
+			"source": "AW SEO Plus",
+			"plugin": "AW SEO Plus",
+			"purpose": "SEO report",
+			"file": "seo/search-insights/admin.php:125",
+			"screen": "admin",
+			"page": "Search Insights (report page)",
+			"types": [
+				"aw-search-insights"
+			],
+			"runtime": "map-only",
+			"notes": "Overview tab only. Reads Search Insights data; stores no post meta."
+		},
+		"aw-si-site-search": {
+			"title": "Searches on our site (28 days, minimum)",
+			"source": "AW SEO Plus",
+			"plugin": "AW SEO Plus",
+			"purpose": "SEO report",
+			"file": "seo/search-insights/admin.php:126",
+			"screen": "admin",
+			"page": "Search Insights (report page)",
+			"types": [
+				"aw-search-insights"
+			],
+			"runtime": "map-only",
+			"notes": "Overview tab only. Reads Search Insights data; stores no post meta."
+		},
+		"aw-si-gaps": {
+			"title": "Content gaps (keyword map gaps and P2)",
+			"source": "AW SEO Plus",
+			"plugin": "AW SEO Plus",
+			"purpose": "SEO report",
+			"file": "seo/search-insights/admin.php:127",
+			"screen": "admin",
+			"page": "Search Insights (report page)",
+			"types": [
+				"aw-search-insights"
+			],
+			"runtime": "map-only",
+			"notes": "Overview tab only. Reads Search Insights data; stores no post meta."
+		},
+		"aw-si-crawl": {
+			"title": "Crawler access (weekly)",
+			"source": "AW SEO Plus",
+			"plugin": "AW SEO Plus",
+			"purpose": "SEO report",
+			"file": "seo/search-insights/admin.php:128",
+			"screen": "admin",
+			"page": "Search Insights (report page)",
+			"types": [
+				"aw-search-insights"
+			],
+			"runtime": "map-only",
+			"notes": "Overview tab only. Reads Search Insights data; stores no post meta."
 		},
 		"term-core": {
 			"title": "Name, Slug, Parent, Description",
@@ -631,7 +1116,36 @@
 				"category",
 				"post_tag"
 			],
-			"runtime": "edit-screen-only"
+			"runtime": "edit-screen-only",
+			"notes": "Edit form only, below the table.",
+			"match": {
+				"file": "metabox/class-metabox.php",
+				"hooks": [
+					"edit_form"
+				],
+				"priority": 11
+			}
+		},
+		"term-rank-math-description": {
+			"title": "Description (Rank Math editor)",
+			"source": "Rank Math SEO",
+			"plugin": "Rank Math SEO",
+			"purpose": "SEO",
+			"file": "seo-by-rank-math/includes/admin/metabox/class-taxonomy-screen.php (category_description_editor)",
+			"screen": "term",
+			"types": [
+				"category",
+				"post_tag"
+			],
+			"runtime": "edit-screen-only",
+			"notes": "Edit form only: replaces the core Description field with a rich editor (rank_math_description_editor). It saves the core term description; no meta key.",
+			"match": {
+				"file": "metabox/class-taxonomy-screen.php",
+				"hooks": [
+					"edit_form_fields"
+				],
+				"priority": 1
+			}
 		}
 	},
 	"keys": {
@@ -830,7 +1344,7 @@
 			"label": "Issuer",
 			"type": "slug (aw_issuers())",
 			"boxes": [
-				"aw-issuer"
+				"acf-group_aw_legal_document"
 			],
 			"types": [
 				"post",
@@ -869,7 +1383,7 @@
 				}
 			],
 			"notes": [
-				"Edited in the Issued by box on Library items only; values stored on Resources are kept and read."
+				"Edited in the Document box on Library items only; values stored on Resources are kept and read."
 			]
 		},
 		"aw_issuers_added": {
@@ -877,7 +1391,7 @@
 			"label": "Issuers added from the box",
 			"type": "option (slug ⇒ name)",
 			"boxes": [
-				"aw-issuer"
+				"acf-group_aw_legal_document"
 			],
 			"types": [
 				"aw_legal"
@@ -895,7 +1409,7 @@
 			"label": "State (LGD code)",
 			"type": "int, multiple rows",
 			"boxes": [
-				"aw-place"
+				"acf-group_aw_listing_address"
 			],
 			"types": [
 				"aw_news",
@@ -942,7 +1456,7 @@
 				}
 			],
 			"notes": [
-				"Edited in the Place box on Directory listings only; on the other types the stored value is kept and read."
+				"Edited in the Address and place box on Directory listings only; on the other types the stored value is kept and read."
 			]
 		},
 		"aw_district_code": {
@@ -950,7 +1464,7 @@
 			"label": "District (LGD code)",
 			"type": "int, multiple rows",
 			"boxes": [
-				"aw-place"
+				"acf-group_aw_listing_address"
 			],
 			"types": [
 				"aw_news",
@@ -992,7 +1506,7 @@
 				}
 			],
 			"notes": [
-				"Edited in the Place box on Directory listings only; on the other types the stored value is kept and read."
+				"Edited in the Address and place box on Directory listings only; on the other types the stored value is kept and read."
 			]
 		},
 		"aw_pincode": {
@@ -1000,7 +1514,7 @@
 			"label": "PIN code",
 			"type": "6 digits",
 			"boxes": [
-				"aw-place"
+				"acf-group_aw_listing_address"
 			],
 			"types": [
 				"aw_news",
@@ -1032,7 +1546,7 @@
 				}
 			],
 			"notes": [
-				"Edited in the Place box on Directory listings only; on the other types the stored value is kept and read."
+				"Edited in the Address and place box on Directory listings only; on the other types the stored value is kept and read."
 			]
 		},
 		"aw_place_city": {
@@ -1040,7 +1554,7 @@
 			"label": "Town or area",
 			"type": "text",
 			"boxes": [
-				"aw-place"
+				"acf-group_aw_listing_address"
 			],
 			"types": [
 				"aw_news",
@@ -1067,7 +1581,7 @@
 				}
 			],
 			"notes": [
-				"Edited in the Place box on Directory listings only; on the other types the stored value is kept and read."
+				"Edited in the Address and place box on Directory listings only; on the other types the stored value is kept and read."
 			]
 		},
 		"aw_place_source": {
@@ -1075,7 +1589,7 @@
 			"label": "Who set the place",
 			"type": "editor / auto",
 			"boxes": [
-				"aw-place"
+				"acf-group_aw_listing_address"
 			],
 			"types": [
 				"aw_news",
@@ -1092,8 +1606,8 @@
 				}
 			],
 			"notes": [
-				"Written by the box on a real change; not typed.",
-				"Edited in the Place box on Directory listings only; on the other types the stored value is kept and read."
+				"Written by the Place fields on a real change; not typed.",
+				"Edited in the Address and place box on Directory listings only; on the other types the stored value is kept and read."
 			]
 		},
 		"aw_place_auto": {
@@ -1101,7 +1615,7 @@
 			"label": "Place found automatically",
 			"type": "flag",
 			"boxes": [
-				"aw-place"
+				"acf-group_aw_listing_address"
 			],
 			"types": [
 				"aw_news",
@@ -1118,8 +1632,8 @@
 				}
 			],
 			"notes": [
-				"Deleted by the box on a real change.",
-				"Edited in the Place box on Directory listings only; on the other types the stored value is kept and read."
+				"Deleted by the Place fields on a real change.",
+				"Edited in the Address and place box on Directory listings only; on the other types the stored value is kept and read."
 			]
 		},
 		"aw_rel_legal": {
@@ -1203,7 +1717,7 @@
 				}
 			],
 			"notes": [
-				"Overlaps with the side box \"Partners\" (aw_campaign_partners)."
+				"Overlaps with Partners (aw_campaign_partners) in the Organisations box."
 			]
 		},
 		"aw_participant": {
@@ -1224,7 +1738,7 @@
 				}
 			],
 			"notes": [
-				"Same role as aw_campaign_partners in the side box \"Campaign details\"."
+				"Same role as aw_campaign_partners in the Organisations box."
 			]
 		},
 		"aw_organisation": {
@@ -1424,7 +1938,7 @@
 			"label": "Short name",
 			"type": "text",
 			"boxes": [
-				"aw-legal-item"
+				"acf-group_aw_legal_document"
 			],
 			"types": [
 				"aw_legal"
@@ -1442,7 +1956,7 @@
 			"label": "Issued under (Act)",
 			"type": "text",
 			"boxes": [
-				"aw-legal-item"
+				"acf-group_aw_legal_document"
 			],
 			"types": [
 				"aw_legal"
@@ -1460,7 +1974,7 @@
 			"label": "Key sections",
 			"type": "lines \"no | summary | link\"",
 			"boxes": [
-				"aw-legal-item"
+				"acf-group_aw_legal_document"
 			],
 			"types": [
 				"aw_legal"
@@ -1518,7 +2032,7 @@
 				"acf-group_aw_news",
 				"acf-group_aw_legal",
 				"acf-group_aw_opportunity",
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_claimed"
 			],
 			"types": [
 				"post",
@@ -1579,7 +2093,7 @@
 				"acf-group_aw_news",
 				"acf-group_aw_legal",
 				"acf-group_aw_opportunity",
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_claimed"
 			],
 			"types": [
 				"post",
@@ -1630,7 +2144,7 @@
 				"acf-group_aw_news",
 				"acf-group_aw_legal",
 				"acf-group_aw_opportunity",
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_claimed"
 			],
 			"types": [
 				"post",
@@ -1779,7 +2293,7 @@
 			"label": "Document file",
 			"type": "attachment ID",
 			"boxes": [
-				"acf-group_aw_legal"
+				"acf-group_aw_legal_document"
 			],
 			"types": [
 				"aw_legal"
@@ -1812,7 +2326,7 @@
 			"label": "Document link",
 			"type": "url",
 			"boxes": [
-				"acf-group_aw_legal"
+				"acf-group_aw_legal_document"
 			],
 			"types": [
 				"aw_legal"
@@ -1835,7 +2349,7 @@
 			"label": "Official number",
 			"type": "text",
 			"boxes": [
-				"acf-group_aw_legal"
+				"acf-group_aw_legal_document"
 			],
 			"types": [
 				"aw_legal"
@@ -1863,7 +2377,7 @@
 			"label": "In force",
 			"type": "InForce / PartiallyInForce / NotInForce",
 			"boxes": [
-				"acf-group_aw_legal"
+				"acf-group_aw_legal_document"
 			],
 			"types": [
 				"aw_legal"
@@ -1891,14 +2405,14 @@
 			"label": "Ask for an email before download",
 			"type": "true/false",
 			"boxes": [
-				"acf-group_aw_legal"
+				"acf-group_aw_legal_document"
 			],
 			"types": [
 				"aw_legal"
 			],
 			"uses": [],
 			"notes": [
-				"Saved but never read; 0 rows."
+				"Saved but never read; 0 rows. Under \"Not used on the site\" in the box."
 			]
 		},
 		"aw_org_name": {
@@ -2058,7 +2572,7 @@
 			"type": "url",
 			"boxes": [
 				"acf-group_aw_opportunity",
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_online"
 			],
 			"types": [
 				"aw_opportunity",
@@ -2125,7 +2639,7 @@
 			"label": "Opens on",
 			"type": "Y-m-d",
 			"boxes": [
-				"aw-campaign-details"
+				"acf-group_aw_campaign_dates"
 			],
 			"types": [
 				"aw_campaign"
@@ -2148,7 +2662,7 @@
 			"label": "Closes on",
 			"type": "Y-m-d",
 			"boxes": [
-				"aw-campaign-details"
+				"acf-group_aw_campaign_dates"
 			],
 			"types": [
 				"aw_campaign"
@@ -2176,7 +2690,7 @@
 			"label": "Campaign document",
 			"type": "aw_legal ID",
 			"boxes": [
-				"aw-campaign-details"
+				"acf-group_aw_campaign_document"
 			],
 			"types": [
 				"aw_campaign"
@@ -2199,7 +2713,7 @@
 			"label": "Partners",
 			"type": "CSV listing IDs",
 			"boxes": [
-				"aw-campaign-details"
+				"acf-group_aw_campaign_orgs"
 			],
 			"types": [
 				"aw_campaign"
@@ -2225,7 +2739,7 @@
 			"label": "Supporters",
 			"type": "CSV listing IDs",
 			"boxes": [
-				"aw-campaign-details"
+				"acf-group_aw_campaign_orgs"
 			],
 			"types": [
 				"aw_campaign"
@@ -2243,7 +2757,7 @@
 			"label": "Outcome",
 			"type": "pending / achieved / partial / not / inconclusive",
 			"boxes": [
-				"aw-campaign-details"
+				"acf-group_aw_campaign_outcome"
 			],
 			"types": [
 				"aw_campaign"
@@ -2266,7 +2780,7 @@
 			"label": "As of",
 			"type": "Y-m-d",
 			"boxes": [
-				"aw-campaign-details"
+				"acf-group_aw_campaign_outcome"
 			],
 			"types": [
 				"aw_campaign"
@@ -2284,7 +2798,7 @@
 			"label": "Override the state",
 			"type": "pre / active / post",
 			"boxes": [
-				"aw-campaign-details"
+				"acf-group_aw_campaign_dates"
 			],
 			"types": [
 				"aw_campaign"
@@ -2302,7 +2816,7 @@
 			"label": "Reason",
 			"type": "text",
 			"boxes": [
-				"aw-campaign-details"
+				"acf-group_aw_campaign_dates"
 			],
 			"types": [
 				"aw_campaign"
@@ -2320,7 +2834,7 @@
 			"label": "Show the count from",
 			"type": "int",
 			"boxes": [
-				"aw-campaign-details"
+				"acf-group_aw_campaign_share"
 			],
 			"types": [
 				"aw_campaign"
@@ -2338,7 +2852,7 @@
 			"label": "\"As of\" date after N days",
 			"type": "int",
 			"boxes": [
-				"aw-campaign-details"
+				"acf-group_aw_campaign_share"
 			],
 			"types": [
 				"aw_campaign"
@@ -2356,7 +2870,7 @@
 			"label": "Share line",
 			"type": "text",
 			"boxes": [
-				"aw-campaign-details"
+				"acf-group_aw_campaign_share"
 			],
 			"types": [
 				"aw_campaign"
@@ -2374,7 +2888,7 @@
 			"label": "Story image",
 			"type": "attachment ID",
 			"boxes": [
-				"aw-campaign-details"
+				"acf-group_aw_campaign_share"
 			],
 			"types": [
 				"aw_campaign"
@@ -2397,7 +2911,7 @@
 			"label": "Post image",
 			"type": "attachment ID",
 			"boxes": [
-				"aw-campaign-details"
+				"acf-group_aw_campaign_share"
 			],
 			"types": [
 				"aw_campaign"
@@ -2420,7 +2934,7 @@
 			"label": "Letters sent",
 			"type": "int, read-only",
 			"boxes": [
-				"aw-campaign-details"
+				"acf-group_aw_campaign_share"
 			],
 			"types": [
 				"aw_campaign"
@@ -2434,7 +2948,8 @@
 			],
 			"notes": [
 				"Shown in the box, written by the \"Yes, I sent it\" endpoint."
-			]
+			],
+			"readonly": true
 		},
 		"aw_event_place": {
 			"store": "post_meta",
@@ -2459,7 +2974,7 @@
 			"label": "Real-world impact: state",
 			"type": "verified / no-change / pending / inconclusive / na",
 			"boxes": [
-				"aw-campaign-record"
+				"acf-group_aw_campaign_outcome"
 			],
 			"types": [
 				"aw_campaign"
@@ -2482,7 +2997,7 @@
 			"label": "Real-world impact: evidence",
 			"type": "post ID",
 			"boxes": [
-				"aw-campaign-record"
+				"acf-group_aw_campaign_outcome"
 			],
 			"types": [
 				"aw_campaign"
@@ -2592,7 +3107,7 @@
 			"label": "Area or landmark",
 			"type": "text",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_address"
 			],
 			"types": [
 				"aw_listing"
@@ -2620,7 +3135,7 @@
 			"label": "Full address",
 			"type": "text",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_address"
 			],
 			"types": [
 				"aw_listing"
@@ -2653,7 +3168,7 @@
 			"label": "Google Maps link",
 			"type": "url",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_address"
 			],
 			"types": [
 				"aw_listing"
@@ -2681,7 +3196,7 @@
 			"label": "Latitude",
 			"type": "number",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_address"
 			],
 			"types": [
 				"aw_listing"
@@ -2704,7 +3219,7 @@
 			"label": "Longitude",
 			"type": "number",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_address"
 			],
 			"types": [
 				"aw_listing"
@@ -2727,7 +3242,7 @@
 			"label": "Google place ID",
 			"type": "text",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_address"
 			],
 			"types": [
 				"aw_listing"
@@ -2750,7 +3265,7 @@
 			"label": "Opening hours by day",
 			"type": "repeater (day, open, close, closed)",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_hours"
 			],
 			"types": [
 				"aw_listing"
@@ -2778,7 +3293,7 @@
 			"label": "Registration",
 			"type": "text",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_registrations"
 			],
 			"types": [
 				"aw_listing"
@@ -2811,7 +3326,7 @@
 			"label": "12A",
 			"type": "text",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_registrations"
 			],
 			"types": [
 				"aw_listing"
@@ -2844,7 +3359,7 @@
 			"label": "80G",
 			"type": "text",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_registrations"
 			],
 			"types": [
 				"aw_listing"
@@ -2877,7 +3392,7 @@
 			"label": "FCRA",
 			"type": "text",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_registrations"
 			],
 			"types": [
 				"aw_listing"
@@ -2910,7 +3425,7 @@
 			"label": "NGO Darpan ID",
 			"type": "text",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_registrations"
 			],
 			"types": [
 				"aw_listing"
@@ -2943,7 +3458,7 @@
 			"label": "Registered as",
 			"type": "text",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_registrations"
 			],
 			"types": [
 				"aw_listing"
@@ -2966,7 +3481,7 @@
 			"label": "Registration date",
 			"type": "date",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_registrations"
 			],
 			"types": [
 				"aw_listing"
@@ -2984,7 +3499,7 @@
 			"label": "Registration authority",
 			"type": "text",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_registrations"
 			],
 			"types": [
 				"aw_listing"
@@ -3005,7 +3520,7 @@
 			"label": "Registered under (Act)",
 			"type": "text",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_registrations"
 			],
 			"types": [
 				"aw_listing"
@@ -3026,7 +3541,7 @@
 			"label": "Sectors (NGO Darpan)",
 			"type": "text",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_registrations"
 			],
 			"types": [
 				"aw_listing"
@@ -3047,7 +3562,7 @@
 			"label": "AWBI recognition code",
 			"type": "text, read-only",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_registrations"
 			],
 			"types": [
 				"aw_listing"
@@ -3083,7 +3598,7 @@
 			"label": "AWBI valid until",
 			"type": "date",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_registrations"
 			],
 			"types": [
 				"aw_listing"
@@ -3111,7 +3626,7 @@
 			"label": "AWBI recognised on",
 			"type": "date",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_registrations"
 			],
 			"types": [
 				"aw_listing"
@@ -3132,7 +3647,7 @@
 			"label": "AWBI renewed on",
 			"type": "date",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_registrations"
 			],
 			"types": [
 				"aw_listing"
@@ -3153,7 +3668,7 @@
 			"label": "Also known as",
 			"type": "text",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_about"
 			],
 			"types": [
 				"aw_listing"
@@ -3171,7 +3686,7 @@
 			"label": "Year established",
 			"type": "4-digit year",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_about"
 			],
 			"types": [
 				"aw_listing"
@@ -3194,7 +3709,7 @@
 			"label": "Head of the organisation",
 			"type": "text",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_about"
 			],
 			"types": [
 				"aw_listing"
@@ -3217,7 +3732,7 @@
 			"label": "Animals",
 			"type": "text",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_about"
 			],
 			"types": [
 				"aw_listing"
@@ -3240,7 +3755,7 @@
 			"label": "Areas served",
 			"type": "text",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_about"
 			],
 			"types": [
 				"aw_listing"
@@ -3263,7 +3778,7 @@
 			"label": "Services",
 			"type": "text",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_about"
 			],
 			"types": [
 				"aw_listing"
@@ -3296,7 +3811,7 @@
 			"label": "Services: stated by",
 			"type": "text",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_about"
 			],
 			"types": [
 				"aw_listing"
@@ -3314,7 +3829,7 @@
 			"label": "Services: stated on",
 			"type": "date",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_about"
 			],
 			"types": [
 				"aw_listing"
@@ -3332,7 +3847,7 @@
 			"label": "Languages",
 			"type": "text",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_about"
 			],
 			"types": [
 				"aw_listing"
@@ -3355,7 +3870,7 @@
 			"label": "Instagram",
 			"type": "url",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_online"
 			],
 			"types": [
 				"aw_listing"
@@ -3383,7 +3898,7 @@
 			"label": "Facebook",
 			"type": "url",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_online"
 			],
 			"types": [
 				"aw_listing"
@@ -3411,7 +3926,7 @@
 			"label": "X",
 			"type": "url",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_online"
 			],
 			"types": [
 				"aw_listing"
@@ -3439,7 +3954,7 @@
 			"label": "YouTube",
 			"type": "url",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_online"
 			],
 			"types": [
 				"aw_listing"
@@ -3467,7 +3982,7 @@
 			"label": "LinkedIn",
 			"type": "url",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_online"
 			],
 			"types": [
 				"aw_listing"
@@ -3495,7 +4010,7 @@
 			"label": "Wikidata",
 			"type": "text",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_online"
 			],
 			"types": [
 				"aw_listing"
@@ -3513,7 +4028,7 @@
 			"label": "NGO base link",
 			"type": "url",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_online"
 			],
 			"types": [
 				"aw_listing"
@@ -3536,7 +4051,7 @@
 			"label": "Google profile",
 			"type": "url",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_online"
 			],
 			"types": [
 				"aw_listing"
@@ -3559,7 +4074,7 @@
 			"label": "Google category",
 			"type": "text",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_online"
 			],
 			"types": [
 				"aw_listing"
@@ -3577,7 +4092,7 @@
 			"label": "Google rating",
 			"type": "number",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_online"
 			],
 			"types": [
 				"aw_listing"
@@ -3598,7 +4113,7 @@
 			"label": "Google reviews",
 			"type": "digits",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_online"
 			],
 			"types": [
 				"aw_listing"
@@ -3616,7 +4131,7 @@
 			"label": "Instagram followers",
 			"type": "text",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_online"
 			],
 			"types": [
 				"aw_listing"
@@ -3639,7 +4154,7 @@
 			"label": "Instagram posts",
 			"type": "text",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_online"
 			],
 			"types": [
 				"aw_listing"
@@ -3662,7 +4177,7 @@
 			"label": "Last post",
 			"type": "text",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_online"
 			],
 			"types": [
 				"aw_listing"
@@ -3685,7 +4200,7 @@
 			"label": "Photos",
 			"type": "attachment IDs (CSV, max 4 from SCF)",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_photos"
 			],
 			"types": [
 				"aw_listing"
@@ -3716,7 +4231,7 @@
 			"label": "Volunteer link",
 			"type": "url",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_photos"
 			],
 			"types": [
 				"aw_listing"
@@ -3744,7 +4259,7 @@
 			"label": "Adoption link",
 			"type": "url",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_photos"
 			],
 			"types": [
 				"aw_listing"
@@ -3767,7 +4282,7 @@
 			"label": "Donation link",
 			"type": "text",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_photos"
 			],
 			"types": [
 				"aw_listing"
@@ -3788,7 +4303,7 @@
 			"label": "UPI ID",
 			"type": "text",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_photos"
 			],
 			"types": [
 				"aw_listing"
@@ -3809,7 +4324,7 @@
 			"label": "Links: nofollow",
 			"type": "true/false",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_photos"
 			],
 			"types": [
 				"aw_listing"
@@ -3824,10 +4339,10 @@
 		},
 		"aw_verified": {
 			"store": "post_meta",
-			"label": "Verified (shown as Claimed)",
+			"label": "Claimed",
 			"type": "true/false",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_claimed"
 			],
 			"types": [
 				"aw_listing"
@@ -3850,15 +4365,15 @@
 				}
 			],
 			"notes": [
-				"Label says Verified; the site shows Claimed. Government verification is aw_gov_verified_on (no box)."
+				"Government verification is aw_gov_verified_on (no box)."
 			]
 		},
 		"aw_verified_on": {
 			"store": "post_meta",
-			"label": "Verified on",
+			"label": "Claimed on",
 			"type": "date",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_claimed"
 			],
 			"types": [
 				"aw_listing"
@@ -3876,7 +4391,7 @@
 			"label": "Needs re-check",
 			"type": "true/false",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_claimed"
 			],
 			"types": [
 				"aw_listing"
@@ -3899,7 +4414,7 @@
 			"label": "Sources per detail",
 			"type": "repeater (detail, url, checked)",
 			"boxes": [
-				"acf-group_aw_listing"
+				"acf-group_aw_listing_claimed"
 			],
 			"types": [
 				"aw_listing"
@@ -3917,7 +4432,7 @@
 			"label": "Identity unresolved",
 			"type": "array",
 			"boxes": [
-				"aw-enrich-prov"
+				"acf-group_aw_listing_claimed"
 			],
 			"types": [
 				"aw_listing"
@@ -3935,7 +4450,7 @@
 			"label": "Last checked",
 			"type": "date, read-only",
 			"boxes": [
-				"aw-enrich-prov"
+				"acf-group_aw_listing_claimed"
 			],
 			"types": [
 				"aw_listing"
@@ -3951,7 +4466,8 @@
 					"where": "enrichment queue",
 					"file": "src/enrichment.php:1074"
 				}
-			]
+			],
+			"readonly": true
 		},
 		"aw_press_url": {
 			"store": "post_meta",
