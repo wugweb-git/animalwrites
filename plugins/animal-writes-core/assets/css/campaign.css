@@ -35,7 +35,6 @@
 .aw-camp--lab-rules .aw-camp-dark .aw-camp-gap { box-shadow: inset 0 0 0 2px var(--camp-line); }
 .aw-camp--lab-rules .aw-camp-dark .aw-camp-gap > .kit-ico { color: var(--camp-line); }
 .aw-camp--lab-rules .aw-camp-dark .aw-camp-tier-bar { background: linear-gradient(to right, var(--camp-line) var(--fill), rgb(255 255 255 / 0.12) var(--fill)); }
-@media (min-width: 1200px) { .aw-camp--lab-rules .aw-camp-dark .aw-camp-tier-bar { background: linear-gradient(to top, var(--camp-line) var(--fill), rgb(255 255 255 / 0.12) var(--fill)); } }
 /* Diwali 2026 (firecrackers and animals): marigold on paper, a night-sky dark band. */
 .aw-camp--diwali {
 	--camp-primary: #a14a05; /* marigold, deepened so white text on it passes 4.5:1 */
@@ -242,14 +241,11 @@
 
 /* Bands */
 .aw-camp-hero { background: var(--camp-mark); color: var(--camp-on-mark); }
-:is(.aw-camp--lab-rules, .aw-camp--community-dogs) .aw-camp-hero, .aw-camp--community-dogs.aw-camp-hero { min-height: 1020px; } /* these two campaign heroes only: 1020 below 1200, 800 from 1200 (owner, 19 Oct 2026) */
-@media (min-width: 1200px) { :is(.aw-camp--lab-rules, .aw-camp--community-dogs) .aw-camp-hero, .aw-camp--community-dogs.aw-camp-hero { min-height: 800px; } }
-/* Lab Rules hero fits 1020 / 1020 / 800: a tighter gap between the stacked columns and a shorter Gazette strip */
-@media (max-width: 1199px) {
-	.aw-camp--lab-rules .aw-camp-hero-cols { gap: var(--kit-space-4); }
-	.aw-camp--lab-rules .aw-camp-hero .aw-camp-poster-doc { aspect-ratio: 4 / 1; }
-}
-@media (min-width: 1200px) { .aw-camp--lab-rules .aw-camp-hero .aw-camp-poster-doc { aspect-ratio: 2 / 1; } }
+.aw-camp--community-dogs .aw-camp-hero, .aw-camp--community-dogs.aw-camp-hero { min-height: 1020px; } /* the Community dogs hero only: 1020 below 1200, 800 from 1200 (owner, 19 Oct 2026) */
+@media (min-width: 1200px) { .aw-camp--community-dogs .aw-camp-hero, .aw-camp--community-dogs.aw-camp-hero { min-height: 800px; } }
+/* Lab Rules hero: the theme hero, --kit-hero-min (560 below 1200, 660 from 1200; docs/design-system.md "Section heights"), the poster strip at its own shape */
+.aw-camp--lab-rules .aw-camp-hero { min-height: var(--kit-hero-min); }
+@media (max-width: 1199px) { .aw-camp--lab-rules .aw-camp-hero-cols { gap: var(--kit-space-4); } }
 .aw-camp-hero :is(h1, h2, p, .aw-cd-num, .aw-cd-unit, .aw-cd-when) { color: var(--camp-on-mark); }
 .aw-camp-hero a:not(.wp-element-button) { color: var(--camp-on-mark); text-decoration: underline; text-underline-offset: 0.2em; }
 .aw-camp-paper { background: var(--camp-surface); }
@@ -279,6 +275,52 @@
 .aw-camp--lab-rules .aw-letter-ground:not(:hover, :has(input:checked)) { box-shadow: inset 0 0 0 1px var(--kit-color-muted); }
 .aw-camp--lab-rules .aw-camp-compare table { background: var(--kit-color-raised); box-shadow: inset 0 0 0 1px var(--kit-color-line); }
 .aw-camp--lab-rules .aw-camp-compare tbody td:nth-child(n) { background: var(--kit-color-raised); border-color: var(--kit-color-line); } /* also the draft column: no tint */
+/* Lab Rules sizes (owner, 2 Nov 2026): from 768 a band is at most 720px tall, and no card or block is over 600px at any width.
+   Card lists scroll sideways in one snapping row (as .aw-camp-row); boxes have the card padding, --kit-space-5 (docs/card-sizes.md). */
+.aw-camp--lab-rules :is(.aw-camp-gap, .aw-camp-doc-strip, .aw-letter-ground, .aw-letter-meta, .aw-letter-preview) { padding: var(--kit-space-5); }
+.aw-camp--lab-rules :is(.aw-camp-grid, .aw-camp-docs-q .wp-block-post-template, .aw-letter-ground-list) {
+	display: flex; gap: var(--kit-space-grid); overflow-x: auto; overscroll-behavior-x: contain;
+	scroll-snap-type: x mandatory; padding-bottom: var(--kit-space-3); scrollbar-width: thin;
+}
+.aw-camp--lab-rules :is(.aw-camp-grid, .aw-camp-docs-q .wp-block-post-template, .aw-letter-ground-list) > * { flex: 0 0 var(--kit-card-min); scroll-snap-align: start; }
+.aw-camp--lab-rules .aw-camp-grid > :first-child { flex-basis: min(calc(2 * var(--kit-card-min)), 100%); } /* the main change: two cards wide, one screen wide on phones */
+.aw-camp--lab-rules .aw-camp-docs-q li > .kit-card { height: 100%; }
+/* Grounds: each is a checkbox card, so Tab reaches every one and scrolls it into view; the fieldset legend names the row */
+.aw-camp--lab-rules .aw-letter-to { font-size: var(--kit-type-h3); } /* the recipient at the theme H3 size, not a literal clamp */
+.aw-camp--lab-rules .aw-letter-preview { box-sizing: border-box; max-height: 14rem; } /* the letter scrolls inside its box (focusable, labelled): the phone value at every width */
+.aw-camp--lab-rules .aw-letter-share-pic img { height: var(--kit-thumb-max); } /* 15rem (docs/card-sizes.md); widths from the image ratios */
+/* The pain bar: one 12px bar (--kit-space-3) at every width, filled left to right */
+.aw-camp--lab-rules .aw-camp-tier-bar { height: var(--kit-space-3); border-radius: var(--kit-radius-pill); }
+@media (min-width: 768px) {
+	/* Two columns from 768 (core columns stack below 782): the hero text beside its poster, a section's opening beside its art */
+	.aw-camp--lab-rules :is(.aw-camp-hero-cols, .aw-camp-split) { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+	.aw-camp--lab-rules .aw-camp-art { max-height: var(--kit-thumb-max); } /* 15rem (docs/card-sizes.md): the picture is cropped, never the text */
+	.aw-camp--lab-rules .aw-camp-ladder { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+	/* Step 3: the sign-up box and the WhatsApp field side by side */
+	.aw-camp--lab-rules .aw-letter-out { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--kit-space-5); align-content: start; }
+	.aw-camp--lab-rules .aw-letter-out > * { grid-column: 1 / -1; }
+	.aw-camp--lab-rules .aw-letter-out > :is(.aw-letter-optin, .aw-letter-field) { grid-column: auto; }
+	/* Share: the buttons across, then the two pictures beside the link preview */
+	.aw-camp--lab-rules .aw-letter-share-box.is-in-section { row-gap: var(--kit-space-4); }
+	.aw-camp--lab-rules .aw-letter-share-box.is-in-section .aw-letter-share-copy { grid-column: 1 / -1; }
+	.aw-camp--lab-rules .aw-letter-share-box.is-in-section .aw-letter-share-pics { grid-column: 1; grid-row: 2; padding-top: 0; border-top: 0; }
+	.aw-camp--lab-rules .aw-letter-share-box.is-in-section .aw-letter-share-preview { grid-column: 2; grid-row: 2; }
+}
+@media (min-width: 1200px) {
+	.aw-camp--lab-rules .aw-letter { grid-template-columns: 1fr 2fr; } /* step 3 a third wider than 5fr 7fr, so it stays under 600px */
+	/* Share: buttons, pictures and preview in three columns */
+	.aw-camp--lab-rules .aw-letter-share-box.is-in-section { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+	.aw-camp--lab-rules .aw-letter-share-box.is-in-section :is(.aw-letter-share-copy, .aw-letter-share-pics, .aw-letter-share-preview) { grid-row: 1; grid-column: auto; }
+	/* Hero poster: the Gazette strip keeps the 3:1 masthead shape it has below 1200, so the hero stays under 720px */
+	.aw-camp--lab-rules .aw-camp-hero .aw-camp-poster-doc { aspect-ratio: 3 / 1; }
+}
+.aw-camp.aw-camp--lab-rules .aw-camp-row .wp-block-post-template > li { flex-basis: var(--kit-card-min); }
+/* The phone bar never covers text or focus (WCAG 2.4.11): the page keeps the bar's height free at the bottom.
+   Bar height = its button (--kit-btn-height) + the bar's own padding (--kit-space-2 above and below) + the safe area. */
+@media (max-width: 767px) {
+	.aw-camp--lab-rules:has(> .aw-sticky-cta) { --aw-bar-h: calc(var(--kit-btn-height) + 2 * var(--kit-space-2) + env(safe-area-inset-bottom)); padding-bottom: var(--aw-bar-h); }
+	html:has(.aw-camp--lab-rules > .aw-sticky-cta) { scroll-padding-bottom: calc(var(--kit-btn-height) + 2 * var(--kit-space-2) + env(safe-area-inset-bottom)); }
+}
 
 /* Campaign artwork beside a section's opening (c2split): a 4:3 crop of the artwork's busy side */
 .aw-camp-split { margin-bottom: var(--kit-space-5); }
