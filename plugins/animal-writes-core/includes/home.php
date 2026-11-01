@@ -173,7 +173,7 @@ add_filter(
 const AW_HOME_SC_CAMPAIGN = 23225;
 
 /**
- * Home: the Supreme Court campaign card (in the campaign's brand: cream card, the campaign's photograph on top). The text is
+ * Home: the Supreme Court campaign card (the campaign hero in small: cream, plum, the campaign's portrait photograph behind the text). The text is
  * the campaign hero's own: case number, title, summary, the countdown to its close date and its two buttons. Empty when
  * the campaign is not published.
  *
@@ -190,13 +190,17 @@ function aw_block_home_sc() {
 	if ( function_exists( 'aw_camp_cache_until' ) ) {
 		aw_camp_cache_until( $id ); // the day count moves at midnight in India
 	}
-	$pic  = (int) get_post_thumbnail_id( $id );
-	$img  = $pic && wp_attachment_is_image( $pic ) ? wp_get_attachment_image( $pic, 'full', false, array( 'class' => 'aw-content-bg', 'alt' => '', 'sizes' => '(max-width: 767px) 100vw, 600px', 'loading' => 'lazy', 'decoding' => 'async' ) ) : '';
+	// The campaign's portrait photograph (the one its hero shows on phones): the card's background at every width.
+	$img  = '<img class="aw-content-bg" src="' . esc_url( get_theme_file_uri( 'assets/img/campaigns/supreme-court-stray-dog-phone.webp' ) ) . '" width="1122" height="1402" alt="" loading="lazy" decoding="async">';
+	$win  = function_exists( 'aw_camp_window' ) ? aw_camp_window( $id ) : '';
+	$name = array( 'upcoming' => 'Upcoming', 'open' => 'Open', 'last-day' => 'Last day', 'closed' => 'Closed' );
+	$cd   = $day ? do_shortcode( '[aw_countdown date="' . $day . '" label="Compliance reports due"]' ) : ''; // $day is Y-m-d (checked above)
+	$cd   = preg_replace( '#(Compliance reports due: )([^<]+)(</span>)#', '$1<span class="aw-date">$2</span>$3', $cd ); // the date in a pill, as on the campaign
 	$out  = '<section class="aw-content aw-sc" aria-labelledby="aw-sc-t">' . $img . '<div class="aw-content-body">';
-	$out .= '<p class="aw-sc-eyebrow"><span class="kit-ico kit-ico--legal" aria-hidden="true"></span>SMWP (C) 5/2025</p>';
+	$out .= isset( $name[ $win ] ) ? '<p class="aw-sc-status">' . esc_html( $name[ $win ] ) . '</p>' : '';
 	$out .= '<h2 id="aw-sc-t">' . str_replace( 'first compliance', '<mark>first compliance</mark>', esc_html( get_the_title( $id ) ) ) . '</h2>';
 	$out .= '<p class="aw-sc-line">Every High Court must tell the Supreme Court what its state has done about stray dogs, also called community dogs. See what the court ordered, and where your state stands.</p>';
-	$out .= $day ? do_shortcode( '[aw_countdown date="' . $day . '" label="Compliance reports due"]' ) : ''; // $day is Y-m-d (checked above)
+	$out .= '<div class="aw-sc-poster"><p class="aw-sc-eyebrow">SMWP (C) 5/2025</p>' . $cd . '</div>';
 	$out .= '<p class="aw-content-actions"><a class="kit-btn kit-btn--brand" href="' . esc_url( $url . '#tracker' ) . '">Check your state</a><a class="kit-btn kit-btn--secondary" href="' . esc_url( $url . '#orders' ) . '">What the court ordered</a></p>';
 	return $out . '</div></section>';
 }
