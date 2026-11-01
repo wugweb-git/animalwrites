@@ -434,7 +434,7 @@ function aw_featured_html( $lid ) {
 /* ---------- Schema: the item's mentions, the organisation's subjectOf ---------- */
 
 /**
- * schema.org mentions for an item.
+ * schema.org mentions for an item: at most 5 organisations (owner, 1 Nov 2026), the ones picked by hand first.
  *
  * @param int $id Item.
  * @return array
@@ -442,7 +442,7 @@ function aw_featured_html( $lid ) {
 function aw_featured_mentions_schema( $id ) {
 	return array_map(
 		fn( $l ) => array( '@type' => 'Organization', '@id' => get_permalink( $l ) . '#organization', 'name' => html_entity_decode( get_the_title( $l ), ENT_QUOTES ), 'url' => get_permalink( $l ) ),
-		aw_featured_orgs( $id )
+		array_slice( aw_featured_orgs( $id ), 0, 5 )
 	);
 }
 
