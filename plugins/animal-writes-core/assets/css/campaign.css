@@ -114,6 +114,7 @@
 .aw-camp--diwali #help > :is(.aw-camp-note, .aw-camp-note + *) { margin-top: var(--kit-space-3); }
 @media (min-width: 768px) and (max-width: 1199px) {
 	.aw-camp--diwali #help > .wp-block-buttons { flex-wrap: nowrap; gap: var(--kit-space-2); }
+	.aw-camp--diwali #help .wp-block-table table { min-width: calc(3 * var(--kit-card-min)); } /* rows on one line; the table scrolls sideways in its frame where it is wider (a named, focusable row: campaign.js) */
 	.aw-camp--diwali #help > .wp-block-buttons .wp-block-button__link { padding-inline: var(--kit-space-4); }
 }
 /* Share band: with the story and post pictures (1a24a0e1) the band's artwork is the same picture twice, so it goes;
