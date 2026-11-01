@@ -1515,13 +1515,13 @@
     "aw-sc"
    ],
    "states": [
-    "default (block animal-writes/home-sc): the campaign hero in small, in the campaign's brand: cream card, the campaign's portrait photograph (theme asset) as the background from 1200 and under the text below 1200, the status pill (Open, Last day, ...) from the campaign's dates, campaign title as H2 with the marker on \"first compliance\", its summary, a white poster with the scales mark, case number, countdown and the date in a yellow pill, Check your state and What the court ordered buttons; empty when the campaign is not published"
+    "default (block animal-writes/home-sc): the campaign hero in small, in the campaign's brand: cream card, the campaign's portrait photograph (theme asset) as the background at every width, a cream fade under the text, the status pill (Open, Last day, ...) from the campaign's dates, campaign title as H2 with the marker on \"first compliance\", its summary, a white poster with the scales mark, case number and day count, one button (Check your state); 500px tall at every width (--aw-pair-card-h); empty when the campaign is not published"
    ],
    "tokens": [],
    "a11y": {
     "element": "pattern (Editor \u2192 Patterns, \"Animal Writes\")",
     "aria": "section aria-labelledby its H2; photograph alt=\"\"; icon aria-hidden",
-    "keyboard": "Tab through the two buttons",
+    "keyboard": "Tab to the button",
     "focus": "3px ring in plum, 2px offset (:focus-visible)",
     "target": "44px buttons",
     "motion": "none",
@@ -1703,12 +1703,12 @@
    "type": "pattern",
    "status": "live",
    "classes": ["aw-festive", "kit-photo-card"],
-   "states": ["default: the Diwali 2026 campaign card on Home: photo card (core Cover, dim 50) on the portrait campaign photo, H2, one line, Brand and secondary buttons at the top; its height is its text and the card padding (no fixed height)"],
+   "states": ["default: the Diwali 2026 campaign card on Home: photo card (core Cover, dim 50) on the portrait campaign photo, H2, one line, one Brand button (What to do tonight) at the top; 500px tall at every width (--aw-pair-card-h)"],
    "tokens": ["--kit-btn-brand-bg", "--kit-color-on-ink", "--kit-radius-card"],
    "a11y": {
-    "element": "pattern (Editor → Patterns, \"Animal Writes\"); card with H2, one line and two buttons",
+    "element": "pattern (Editor → Patterns, \"Animal Writes\"); card with H2, one line and one button",
     "aria": "icons aria-hidden",
-    "keyboard": "Tab to the two buttons",
+    "keyboard": "Tab to the button",
     "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
     "target": "44px button",
     "motion": "none",
@@ -1716,7 +1716,7 @@
    },
    "seo": {
     "heading": "H2",
-    "link": "two buttons to the Diwali campaign (#tonight, #help)",
+    "link": "one button to the Diwali campaign (#tonight)",
     "alt": "the photo described",
     "schema": "none"
    },

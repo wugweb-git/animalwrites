@@ -195,13 +195,13 @@ function aw_block_home_sc() {
 	$win  = function_exists( 'aw_camp_window' ) ? aw_camp_window( $id ) : '';
 	$name = array( 'upcoming' => 'Upcoming', 'open' => 'Open', 'last-day' => 'Last day', 'closed' => 'Closed' );
 	$cd   = $day ? do_shortcode( '[aw_countdown date="' . $day . '" label="Compliance reports due"]' ) : ''; // $day is Y-m-d (checked above)
-	$cd   = preg_replace( '#(Compliance reports due: )([^<]+)(</span>)#', '$1<span class="aw-date">$2</span>$3', $cd ); // the date in a pill, as on the campaign
+	$cd   = preg_replace( '#\s*<span class="aw-cd-when">[^<]*</span>#', '', $cd ); // the day count only: the title already gives the date (owner, 2 Nov 2026: the card is 500px)
 	$out  = '<section class="aw-content aw-sc" aria-labelledby="aw-sc-t">' . $img . '<div class="aw-content-body">';
 	$out .= isset( $name[ $win ] ) ? '<p class="aw-sc-status">' . esc_html( $name[ $win ] ) . '</p>' : '';
 	$out .= '<h2 id="aw-sc-t">' . str_replace( 'first compliance', '<mark>first compliance</mark>', esc_html( get_the_title( $id ) ) ) . '</h2>';
 	$out .= '<p class="aw-sc-line">Every High Court must tell the Supreme Court what its state has done about stray dogs, also called community dogs. See what the court ordered, and where your state stands.</p>';
 	$out .= '<div class="aw-sc-poster"><p class="aw-sc-eyebrow">SMWP (C) 5/2025</p>' . $cd . '</div>';
-	$out .= '<p class="aw-content-actions"><a class="kit-btn kit-btn--brand" href="' . esc_url( $url . '#tracker' ) . '">Check your state</a><a class="kit-btn kit-btn--secondary" href="' . esc_url( $url . '#orders' ) . '">What the court ordered</a></p>';
+	$out .= '<p class="aw-content-actions"><a class="kit-btn kit-btn--brand" href="' . esc_url( $url . '#tracker' ) . '">Check your state</a></p>'; // one button (owner, 2 Nov 2026)
 	return $out . '</div></section>';
 }
 

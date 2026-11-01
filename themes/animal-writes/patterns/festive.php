@@ -3,7 +3,7 @@
  * Title: AW_Festive
  * Slug: animal-writes/festive
  * Categories: animal-writes
- * Description: The Diwali 2026 campaign card on Home: the theme photo card (core Cover, kit-photo-card) on the campaign's portrait photo (Media 23398, as on the campaign hero), the campaign hero's H2, line and two Kits buttons in the night sky at the top, in the campaign colours (aw-camp--diwali). A card in the Home campaign row (aw-pair), not a section.
+ * Description: The Diwali 2026 campaign card on Home: the theme photo card (core Cover, kit-photo-card) on the campaign's portrait photo (Media 23398, as on the campaign hero), the campaign hero's H2, line and one Kits button (owner, 2 Nov 2026: one button per card) in the night sky at the top, in the campaign colours (aw-camp--diwali). A card in the Home campaign row (aw-pair), not a section.
  * Inserter: yes
  *
  * @package animal-writes
@@ -21,10 +21,6 @@
 <!-- wp:buttons -->
 <div class="wp-block-buttons"><!-- wp:button {"className":"is-style-kits-brand"} -->
 <div class="wp-block-button is-style-kits-brand"><a class="wp-block-button__link wp-element-button" href="/campaigns/diwali-firecrackers-animals-2026/#tonight">What to do tonight</a></div>
-<!-- /wp:button -->
-
-<!-- wp:button {"className":"is-style-kits-secondary"} -->
-<div class="wp-block-button is-style-kits-secondary"><a class="wp-block-button__link wp-element-button" href="/campaigns/diwali-firecrackers-animals-2026/#help">Who to call</a></div>
 <!-- /wp:button --></div>
 <!-- /wp:buttons --></div></div>
 <!-- /wp:cover -->
