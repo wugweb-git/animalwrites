@@ -327,7 +327,7 @@ add_shortcode(
 				. '<p>' . esc_html( number_format_i18n( $total ) ) . ' animal welfare organisations, vets and gaushalas in ' . (int) $with . ' states and union territories.</p></div>'
 				. '<div class="aw-findhelp-all"><a class="kit-btn kit-btn--ghost kit-btn--sm" href="' . esc_url( $dir ) . '#aw-browse-states-h">Browse all states</a></div></div>'
 				. $form . '<a class="aw-findhelp-near" href="' . esc_url( $dir ) . '#near-me"><span class="kit-ico kit-ico--map-pin" aria-hidden="true"></span>Use my location</a></form>'
-				. ( $chips ? '<nav class="aw-findhelp-types" aria-label="Organisation types"><ul class="kit-tags">' . $chips . '</ul></nav>' : '' );
+				. ( $chips ? '<ul class="kit-tags aw-findhelp-types" aria-label="Organisation types">' . $chips . '</ul>' : '' );
 		}
 		usort( $counts, fn( $a, $b ) => $b[1] <=> $a[1] );
 		$top = '';

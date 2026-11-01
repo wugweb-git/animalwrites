@@ -1479,9 +1479,10 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 /* Home hero: campaign 13848 while it is published, open or closed (home.php; owner, 1 Nov 2026). The campaign band's
    design (campaign-home.css), as the page head. Less padding than a section, so it stays under 70% of the screen at
    1200; on phones the label, H1, line, countdown and main button come first. The H1 has the lab-rules heading weight. */
+.aw-camp-band:not(.aw-camp-band--closed) { --kit-color-focus: var(--camp-on-mark); } /* the focus ring in the band's text colour: the Kits blue is 1.3:1 on the campaign colour (the closed band is light) */
 .aw-camp-band.aw-ed-hero--campaign { padding-top: var(--kit-space-7); }
 @media (min-width: 1200px) { .aw-camp-band.aw-ed-hero--campaign { padding-bottom: var(--kit-space-7); } }
-.aw-camp-band.aw-ed-hero--campaign h1.aw-camp-band-title { margin: 0 0 var(--kit-space-3); max-width: 18ch; font-size: var(--kit-type-display); color: var(--camp-on-mark); }
+.aw-camp-band.aw-ed-hero--campaign h1.aw-camp-band-title { margin: 0 0 var(--kit-space-3); max-width: 18ch; font-size: var(--kit-type-h1); color: var(--camp-on-mark); }
 .aw-camp--lab-rules.aw-ed-hero--campaign h1.aw-camp-band-title { font-weight: var(--kit-weight-bold); letter-spacing: normal; line-height: var(--kit-leading-heading); } /* as .aw-camp--lab-rules h2 (campaign.css) */
 .aw-ed-hero--campaign .aw-camp-band-pill { margin-bottom: var(--kit-space-4); }
 .aw-camp-band.aw-ed-hero--campaign .aw-countdown { margin: var(--kit-space-5) 0 var(--kit-space-2); }
@@ -1489,8 +1490,19 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 .aw-ed-hero--campaign .aw-cd-when { display: none; } /* the dates are in the row under it */
 .aw-ed-hero--campaign .aw-camp-band-range { justify-content: flex-start; gap: var(--kit-space-4); margin-top: 0; }
 .aw-camp-band.aw-ed-hero--campaign .aw-camp-band-actions { margin-top: var(--kit-space-5); }
-.aw-camp-band.aw-ed-hero--campaign .aw-ed-hero-help { margin: var(--kit-space-4) 0 0; font-size: var(--kit-type-sm); }
-.aw-ed-hero-help a { color: inherit; font-weight: var(--kit-weight-strong); text-decoration: underline; text-underline-offset: var(--kit-underline-offset); }
+.aw-camp-band.aw-ed-hero--campaign .aw-ed-hero-help { margin: var(--kit-space-3) 0 0; font-size: var(--kit-type-sm); }
+.aw-ed-hero-help a { display: inline-flex; align-items: center; min-height: var(--kit-size-target); color: inherit; font-weight: var(--kit-weight-strong); text-decoration: underline; text-underline-offset: var(--kit-underline-offset); }
+/* Phones: less space above and around the countdown, so label, H1, line, countdown and Send your objection are above the
+   fold; the artwork under the text is half the screen's width tall (cover, centred). */
+@media (max-width: 767px) {
+	.aw-camp-band.aw-ed-hero--campaign { padding-top: var(--kit-space-5); }
+	.aw-camp-band.aw-ed-hero--campaign .aw-camp-band-pill { margin-bottom: var(--kit-space-3); }
+	.aw-camp-band.aw-ed-hero--campaign .aw-countdown { margin: var(--kit-space-4) 0 var(--kit-space-2); }
+	.aw-camp-band.aw-ed-hero--campaign .aw-camp-band-actions { margin-top: var(--kit-space-4); }
+	.aw-camp-band.aw-ed-hero--campaign.has-art { padding-bottom: calc(50vw + var(--kit-space-4)); }
+	.aw-ed-hero--campaign .aw-camp-band-art { height: 50vw; }
+	.aw-ed-hero--campaign .aw-camp-band-art img { height: 100%; object-fit: cover; object-position: center; }
+}
 
 /* Section heads on Home: H2, one supporting line, a small ghost "see all"; 16px between them and to the content */
 .home .kit-sec-head { row-gap: var(--kit-space-4); margin-bottom: var(--kit-space-head); }
@@ -1504,8 +1516,8 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 .aw-ed-helplines { list-style: none; margin: 0 0 var(--kit-space-4); padding: 0; display: grid; gap: var(--kit-space-2); grid-template-columns: minmax(0, 1fr); }
 @media (min-width: 768px) { .aw-ed-helplines { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--kit-space-grid); margin-bottom: var(--kit-space-grid); } }
 .aw-ed-helpline { display: flex; align-items: center; gap: var(--kit-space-2) var(--kit-space-3); flex-wrap: wrap; box-sizing: border-box; height: 100%; min-height: var(--kit-size-control-lg); padding: var(--kit-space-2) var(--kit-space-4); border: var(--kit-border-width) solid color-mix(in srgb, var(--kit-color-on-ink) 30%, transparent); border-radius: var(--kit-radius-card); color: var(--kit-color-on-ink) !important; text-decoration: none; }
-.aw-ed-helpline strong { font-size: var(--kit-type-h3); font-weight: var(--kit-weight-bold); line-height: 1.1; font-variant-numeric: tabular-nums; }
-.aw-ed-helpline > span:last-child { flex: 1 1 10rem; font-size: var(--kit-type-sm); line-height: 1.35; }
+.aw-ed-helpline strong { font-size: var(--kit-type-h3); font-weight: var(--kit-weight-bold); line-height: var(--kit-leading-display); font-variant-numeric: tabular-nums; }
+.aw-ed-helpline > span:last-child { flex: 1 1 10rem; font-size: var(--kit-type-sm); line-height: var(--kit-leading-heading); }
 .aw-ed-helpline .kit-ico { --kit-ico-size: var(--kit-icon-md); flex: none; }
 .aw-ed-helplines > li:first-child .aw-ed-helpline { background: var(--kit-color-accent); border-color: var(--kit-color-accent); color: var(--kit-color-on-accent) !important; }
 .aw-ed-helpline:hover { border-color: var(--kit-color-on-ink); }
@@ -1522,7 +1534,7 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 .aw-ed-find .aw-ed-search { margin-bottom: var(--kit-space-4); }
 .aw-findhelp-near { display: inline-flex; align-items: center; gap: var(--kit-space-1); min-height: var(--kit-size-target); padding: 0 var(--kit-space-2); color: var(--kit-color-link); font-weight: var(--kit-weight-medium); text-decoration: underline; text-underline-offset: var(--kit-underline-offset); }
 .aw-findhelp-near:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); border-radius: var(--kit-radius-control); }
-.aw-findhelp-types .kit-tags { list-style: none; margin: 0; padding: 0; gap: var(--kit-space-2); }
+.aw-findhelp-types.kit-tags { list-style: none; margin: 0; padding: 0; gap: var(--kit-space-2); }
 .aw-findhelp-types .kit-chip { min-height: var(--kit-size-target); padding-inline: var(--kit-space-3); font-size: var(--kit-type-sm); }
 
 /* From the Library on Home: the mosaic above (What's happening's), then the four type tiles four across from 1200 */
@@ -1537,9 +1549,14 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 .kit-card.aw-ed-act .kit-card-title { font-size: var(--kit-type-h3) !important; }
 .aw-ed-act .kit-card-body > .wp-block-buttons { margin-top: auto !important; padding-top: var(--kit-space-2); }
 
-/* India Writes for Its Community Dogs on Home (pattern aw1-story-home): one band about half the full story's height.
-   Phones: title, line and button, then the figure. From 768: the 2.5 lakh figure on the left, the text on the right. */
-@media (min-width: 768px) { .wp-block-cover.kit-section.aw-ed-story--home { padding-block: var(--kit-space-7) !important; } }
+/* India Writes for Its Community Dogs on Home (pattern aw1-story-home): one band, the section's own padding.
+   Phones: title, line and button, then the figure. From 768: the 2.5 lakh figure on the left, the text on the right.
+   The overlay is the Ink colour (secondary) over the photograph: 80% under the figure, at least 92% under the text, so
+   white text passes 4.5:1 on any part of the photograph (phones: the text is over the whole width, at least 80%). */
+.wp-block-cover.aw-ed-story--home > .wp-block-cover__background.has-background-dim {
+	background: linear-gradient(90deg, color-mix(in srgb, var(--wp--preset--color--secondary) 80%, transparent) 0%, color-mix(in srgb, var(--wp--preset--color--secondary) 92%, transparent) 40%, color-mix(in srgb, var(--wp--preset--color--secondary) 94%, transparent) 100%);
+	opacity: 1;
+}
 .aw-ed-story.aw-camp--community-dogs.aw-ed-story--home .aw-ed-story-cols { gap: var(--kit-space-5); align-items: center; }
 @media (min-width: 768px) {
 	.aw-ed-story.aw-camp--community-dogs.aw-ed-story--home .aw-ed-story-cols { grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: var(--kit-space-7); }

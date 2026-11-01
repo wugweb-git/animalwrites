@@ -26,6 +26,7 @@ add_filter(
 // Home sections named by their own H2 (aria-labelledby on the <section>): the core Group block has no such attribute.
 // The class alone decides: a shortcode's H2 may only be printed after the blocks are rendered.
 const AW_HOME_SECTION_HEADS = array(
+	'aw-ed-help' => 'aw-help-h', // Need help now? (pattern help-now, the H2's anchor)
 	'aw-ed-find' => 'aw-find-h', // Find help near you: the H2 is printed by [aw_find_help compact="1"] (sections.php)
 );
 add_filter(

@@ -1358,9 +1358,15 @@
    "name": "Animal law",
    "type": "pattern",
    "status": "live",
-   "classes": [],
+   "classes": [
+    "aw-hub-list",
+    "aw-news-list",
+    "aw-news-mosaic",
+    "aw-ed-law"
+   ],
    "states": [
-    "default"
+    "default: four items as a mosaic: the lead (kit-card--block-lg: 4:3 picture, title, summary) and three kit-card--stacked-md rows (thumbnail, same title clamp at every width); from 768 the lead on the left, the rows spread over its height so both columns end level (7fr/5fr from 768, 5fr/7fr from 1200)",
+    "the Library lead is an Act, rule, order or judgment, official releases last (home.php); then the four type tiles"
    ],
    "tokens": [],
    "a11y": {
@@ -1436,17 +1442,23 @@
    "name": "Find help",
    "type": "pattern",
    "status": "live",
-   "classes": [],
+   "classes": [
+    "aw-ed-find",
+    "aw-ed-search",
+    "aw-findhelp-all",
+    "aw-findhelp-near",
+    "aw-findhelp-types"
+   ],
    "states": [
-    "default"
+    "default ([aw_find_help compact=\"1\"]): section head (H2, live counts, Browse all states), search row (name, state, Search, Use my location), six type chips counted on published listings"
    ],
    "tokens": [],
    "a11y": {
     "element": "pattern (Editor → Patterns, \"Animal Writes\")",
-    "aria": "none",
+    "aria": "section aria-labelledby its H2 (home.php); chips a plain list with aria-label \"Organisation types\"; search role=\"search\", labelled fields",
     "keyboard": "not interactive",
-    "focus": "n/a",
-    "target": "n/a",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px controls, link and chips",
     "motion": "none",
     "sr": "visible text"
    },
@@ -1462,17 +1474,22 @@
    "name": "Need help now",
    "type": "pattern",
    "status": "live",
-   "classes": [],
+   "classes": [
+    "aw-ed-help",
+    "aw-ed-helplines",
+    "aw-ed-helpline",
+    "aw-ed-help-tiles"
+   ],
    "states": [
-    "default"
+    "default: section head (H2, one line), three tap-to-call helplines (112 filled; one under the other on phones, three across from 768), then four tiles two by two at every width"
    ],
    "tokens": [],
    "a11y": {
     "element": "pattern (Editor → Patterns, \"Animal Writes\")",
-    "aria": "none",
+    "aria": "section aria-labelledby its H2 (home.php); helplines list aria-label \"National helplines\"; each call link has an aria-label",
     "keyboard": "not interactive",
-    "focus": "n/a",
-    "target": "n/a",
+    "focus": "3px ring in --kit-color-focus (light on the dark band), 2px offset (:focus-visible)",
+    "target": "44px rows and tile links",
     "motion": "none",
     "sr": "visible text"
    },
@@ -1601,9 +1618,14 @@
    "name": "What's happening",
    "type": "pattern",
    "status": "live",
-   "classes": [],
+   "classes": [
+    "aw-hub-list",
+    "aw-news-list",
+    "aw-news-mosaic",
+    "aw-ed-news"
+   ],
    "states": [
-    "default"
+    "default: four items as a mosaic: the lead (kit-card--block-lg: 4:3 picture, title, summary) and three kit-card--stacked-md rows (thumbnail, same title clamp at every width); from 768 the lead on the left, the rows spread over its height so both columns end level (7fr/5fr from 768, 5fr/7fr from 1200)"
    ],
    "tokens": [],
    "a11y": {
@@ -2772,7 +2794,11 @@
    "name": "Home: hero",
    "type": "block",
    "status": "live",
-   "classes": [],
+   "classes": [
+    "aw-ed-hero",
+    "aw-ed-hero--campaign",
+    "aw-ed-hero-help"
+   ],
    "states": [
     "campaign 13848 published (open or closed; owner, 1 Nov 2026): the campaign band's design (aw-camp-band, campaign palette), label, H1, line, countdown and dates, two buttons, link to Need help now",
     "campaign not published: the Hero pattern (animal-writes/hero)"
@@ -2782,8 +2808,8 @@
     "element": "<section> labelled by its H1 (campaign) or the Cover",
     "aria": "aria-labelledby the H1; artwork alt=\"\"",
     "keyboard": "Tab to the buttons and the link",
-    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
-    "target": "44px buttons",
+    "focus": "3px ring in --camp-on-mark (the band's text colour, white on the campaign colour), 2px offset (:focus-visible)",
+    "target": "44px buttons and the Find help near you link",
     "motion": "none",
     "sr": "visible text"
    },
@@ -2799,9 +2825,17 @@
    "name": "India Writes for Its Community Dogs (Home)",
    "type": "pattern",
    "status": "live",
-   "classes": [],
+   "classes": [
+    "aw-ed-story",
+    "aw-ed-story--home",
+    "aw-ed-story-cols",
+    "aw-ed-story-text",
+    "aw-ed-story-fig",
+    "aw-ed-story-num",
+    "aw-ed-story-actions"
+   ],
    "states": [
-    "default: figure left, title, line and button right (from 768); text then figure on phones"
+    "default: figure left, title, line and button right (from 768); text then figure on phones; section padding; Ink overlay at least 92% under the text (80% under the figure)"
    ],
    "tokens": [],
    "a11y": {
