@@ -1,0 +1,22 @@
+# Section-height rules that existed on 2 Nov 2026 (tools/ci/theme_rules_check.py). They still pass; new ones fail.
+# Remove a line when its rule is fixed. A new exception needs the owner's word; add the reason after "  #".
+# Format: file | kind | selector | declaration
+plugins/animal-writes-core/assets/css/campaign-record.css | imp | .aw-camp.aw-camp--community-dogs > .aw-camp-section | padding: var(--dg-pad) var(--dg-inline) !important
+plugins/animal-writes-core/assets/css/campaign.css | height | :is(.aw-camp--lab-rules, .aw-camp--community-dogs) .aw-camp-hero, .aw-camp--community-dogs.aw-camp-hero | min-height: 1020px
+plugins/animal-writes-core/assets/css/campaign.css | height | :is(.aw-camp--lab-rules, .aw-camp--community-dogs) .aw-camp-hero, .aw-camp--community-dogs.aw-camp-hero | min-height: 800px
+plugins/animal-writes-core/assets/css/campaign.css | height | .aw-letter-share-pic img | height: clamp(11rem, 34vw, 15rem)
+plugins/animal-writes-core/assets/css/dir-map.css | height | .aw-dir-map-canvas | height: clamp(360px, 70vh, 640px)
+themes/animal-writes/assets/css/aw.css | height | .aw-pdf .wp-block-file__embed | height: min(80vh, 900px)
+themes/animal-writes/assets/css/aw.css | height | .aw-pdf .wp-block-file__embed | height: 60vh
+themes/animal-writes/assets/css/aw.css | imp | .kit-section-band--compact | padding-bottom: var(--kit-space-6) !important
+themes/animal-writes/assets/css/aw.css | imp | .kit-section-band--compact:not(:has(.kit-section-filters)) | padding-bottom: var(--kit-space-head) !important
+themes/animal-writes/assets/css/aw.css | height | .aw-vol-banner-photo img | min-height: 320px
+themes/animal-writes/assets/css/aw.css | height | .aw-vol-page .aw-vol-banner-photo img | height: 240px
+themes/animal-writes/assets/css/aw.css | height | .aw-vol-page .aw-vol-banner-photo img | height: 360px
+themes/animal-writes/assets/css/aw.css | height | .aw-sponsored-banner-media img | min-height: 220px
+themes/animal-writes/assets/css/aw.css | imp | .home :is(.aw-ed-law > .kit-stack, .aw-ed-story-figures, .aw-ed-story-dates, .kit-section > .kit-stack:has(> .kit-photo-card)) | padding: 0 var(--kit-space-gutter) var(--kit-space-3) !important
+themes/animal-writes/assets/css/aw.css | pct | .aw-content-body | padding-top: 40%
+themes/kits-by-wugweb/assets/css/kit.css | height | .wp-block-navigation__responsive-container.is-menu-open | height: 100svh
+themes/kits-by-wugweb/assets/css/kit.css | height | .wp-block-navigation__responsive-container.is-menu-open | height: 100dvh
+themes/kits-by-wugweb/assets/css/kit.css | height | .wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation__responsive-dialog, .wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation__responsive-container-content | min-height: calc(100dvh - var(--kit-header-height) - var(--kit-space-5) - env(safe-area-inset-top) - env(safe-area-inset-bottom))
+themes/kits-by-wugweb/assets/css/kit.css | height | .wp-block-navigation__responsive-container.is-menu-open | height: calc(100dvh - var(--wp-admin--admin-bar--height, 0px))

@@ -267,6 +267,17 @@ WhatsApp, X, Copy link (pills). Inside `<main>` after the content. Copy link con
 Theme patterns in `themes/animal-writes/patterns/`, listed under **Animal Writes sections** in the block inserter. The homepage references them, so one edit to a file updates every page using it:
 `hero` (standard home hero; not shown on Home while campaign 13848 is published), `help-now` (Need help now: tap-to-call helplines and four tiles), `whats-happening` (newest news), `animal-law` (From the Library), `learn` (Guides), `find-help` (Directory search, Use my location and type chips), `aw1-story` (India Writes for Its Community Dogs, full story), `take-action` (volunteer and claim your listing: two photo blocks, an H2 each, no section heading), `volunteer-banner`, `guide-cta` (end of a campaign guide), `campaign` (campaign kit layout). Slugs are `animal-writes/<name>`; the Kits theme's own patterns are in `themes/kits-by-wugweb/patterns/`.
 
+### Section heights
+A section's height is its content plus the theme's section padding: `.kit-section` sets `padding-block: var(--kit-space-section)` (48px under 768, 70px to 1199, 96px from 1200). Inside a section, cards and gaps use `--kit-space-*` tokens. A page hero (`.kit-hero`) is the one fixed shape: `--kit-hero-min`.
+
+- No fixed heights on sections or cards (no `height`/`min-height` in px, rem or vh); a picture's height comes from its shape (`aspect-ratio`).
+- No percentage padding-top or padding-bottom (it ties a height to the width); keep room for a picture with the picture itself, as a block with its own `aspect-ratio`.
+- No `!important` over `.kit-section` padding, and no `.kit-section` inside a `.kit-section`: a card in a section is a card, with card padding.
+- Home on phones: every Home section fits one 375×812 screen, heading and padding included. Card lists scroll sideways in one row instead of stacking (Library tiles, story figures and dates, Take action photo cards); the page itself never scrolls sideways (`scrollWidth` = viewport width). Exception (owner, 2 Nov 2026): the campaign cards row stacks below 800px, so on phones that one section is two cards tall.
+- Home campaign row (`aw-pair`, Supreme Court and AW_Festive cards, owner 2 Nov 2026): two photo cards (text over the campaign photograph). Stacked while the row is narrower than 800px, side by side from 800 (a container query on `.aw-pair`, no new media query), both the same height side by side; each card at most 500px tall (600px only when its text cannot fit).
+
+`tools/ci/theme_rules_check.py` (Deploy check) fails on a new fixed height (200px / 12.5rem / 20vh or more), a vertical percentage padding or an `!important` padding on a section-level selector; rules that existed on 2 Nov 2026 are in `tools/ci/theme_rules_baseline.txt`. The phone-screen and 500px rules are measured on the page at 375, 412, 768, 1024 and 1280 (section and card heights, `document.documentElement.scrollWidth`).
+
 ### Home layout
 The home page's sections and their order live in the theme template `themes/animal-writes/templates/front-page.html`, not in the front page's content:
 
