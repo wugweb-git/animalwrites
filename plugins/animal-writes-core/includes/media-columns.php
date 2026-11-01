@@ -2,10 +2,12 @@
 /**
  * Media Library list columns: name, slug, where each file is used, Rank Math page score, what is missing and what to optimise.
  *
+ * - Every SEO field of a file is visible: Caption = SEO title, Description = SEO description, Image context, and
+ *   Alternative Text (Rank Math's own column), each as its own column.
  * - No Author column (the site has one author).
- * - "Uploaded to" stays as WordPress has it (with Attach / Detach); "Also used in" sits beside it and lists every other
- *   place the file is used: featured image, source image, document preview, logos, social image, a category or tag photo,
- *   the site icon, and the source a favicon or logo belongs to. A file used more than once shows all of them.
+ * - "Uploaded to" keeps what WordPress prints (parent post, Attach / Detach) and lists every other place the file is used
+ *   as extra rows below it: featured image, source image, document preview, logos, social image, a category or tag
+ *   photo, the site icon, and the source a favicon or logo belongs to. Sorting still goes through the core parent order.
  * - SEO: the Rank Math score of the pages that use the file (Rank Math does not score attachments, so no score of our
  *   own is made up), and what is missing on the file itself, from the fields already on the attachment: Alternative Text,
  *   Caption = SEO title, Description = SEO description, Image context, the focus keyword of the pages that use it.
@@ -185,27 +187,47 @@ function aw_media_seo( $post, $use ) {
 add_filter(
 	'manage_media_columns',
 	function ( $columns ) {
-		unset( $columns['author'] );
-		$out = array();
-		foreach ( $columns as $key => $label ) {
-			$out[ $key ] = $label;
-			if ( 'title' === $key ) {
-				$out['aw_slug'] = 'Slug';
-			}
-			if ( 'parent' === $key ) {
-				$out['aw_used'] = 'Also used in';
+		$ours   = array(
+			'aw_slug'    => 'Slug',
+			'aw_caption' => 'SEO title',
+			'aw_desc'    => 'SEO description',
+			'aw_context' => 'Image context',
+			'aw_parent'  => 'Uploaded to',
+			'aw_seo'     => 'SEO',
+			'aw_opt'     => 'Optimisation',
+		);
+		$order  = array( 'cb', 'title', 'aw_slug', 'aw_caption', 'aw_desc', 'rank_math_image_alt', 'aw_context', 'aw_parent', 'aw_seo', 'aw_opt', 'date' );
+		$remove = array( 'author', 'rank_math_image_title', 'imgoptm', 'parent' );
+		$out    = array();
+		foreach ( $order as $key ) {
+			if ( isset( $columns[ $key ] ) ) {
+				$out[ $key ] = $columns[ $key ];
+			} elseif ( isset( $ours[ $key ] ) ) {
+				$out[ $key ] = $ours[ $key ];
 			}
 		}
-		$out['aw_seo'] = 'SEO';
-		$out['aw_opt'] = 'Optimisation';
+		foreach ( $columns as $key => $label ) {
+			if ( ! isset( $out[ $key ] ) && ! in_array( $key, $remove, true ) ) {
+				$out[ $key ] = $label;
+			}
+		}
 		return $out;
+	},
+	99
+);
+
+add_filter(
+	'manage_upload_sortable_columns',
+	function ( $columns ) {
+		$columns['aw_parent'] = 'parent';
+		return $columns;
 	}
 );
 
 add_action(
 	'manage_media_custom_column',
 	function ( $column, $post_id ) {
-		if ( ! in_array( $column, array( 'aw_slug', 'aw_used', 'aw_seo', 'aw_opt' ), true ) ) {
+		if ( ! in_array( $column, array( 'aw_slug', 'aw_caption', 'aw_desc', 'aw_context', 'aw_parent', 'aw_seo', 'aw_opt' ), true ) ) {
 			return;
 		}
 		$post = get_post( $post_id );
@@ -216,21 +238,46 @@ add_action(
 			echo esc_html( $post->post_name );
 			return;
 		}
+		if ( 'aw_caption' === $column ) {
+			$caption = trim( wp_strip_all_tags( (string) $post->post_excerpt ) );
+			echo '' !== $caption ? esc_html( $caption ) : '—';
+			return;
+		}
+		if ( 'aw_desc' === $column ) {
+			$desc = trim( wp_strip_all_tags( (string) $post->post_content ) );
+			echo '' !== $desc ? esc_html( $desc ) : '—';
+			return;
+		}
+		if ( 'aw_context' === $column ) {
+			$ctx = trim( wp_strip_all_tags( (string) get_post_meta( $post_id, 'kits_image_context', true ) ) );
+			echo '' !== $ctx ? esc_html( $ctx ) : '—';
+			return;
+		}
 		$page_ids = ! empty( $GLOBALS['wp_query']->posts ) ? wp_list_pluck( $GLOBALS['wp_query']->posts, 'ID' ) : array( $post_id );
 		$use      = aw_media_usage( $page_ids )[ (int) $post_id ] ?? array(
 			'uses'  => array(),
 			'pages' => array(),
 			'kw'    => '',
 		);
-		if ( 'aw_used' === $column ) {
-			if ( ! $use['uses'] ) {
-				echo '—';
-				return;
+		if ( 'aw_parent' === $column ) {
+			if ( isset( $GLOBALS['wp_list_table'] ) && is_object( $GLOBALS['wp_list_table'] ) && method_exists( $GLOBALS['wp_list_table'], 'column_parent' ) ) {
+				$GLOBALS['wp_list_table']->column_parent( $post );
+			} elseif ( (int) $post->post_parent > 0 ) {
+				echo '<a href="' . esc_url( get_edit_post_link( (int) $post->post_parent ) ) . '">' . esc_html( get_the_title( (int) $post->post_parent ) ) . '</a>';
+			} else {
+				echo '(Unattached)';
 			}
-			$shown = array_slice( array_values( $use['uses'] ), 0, 5 );
-			echo wp_kses( implode( '<br>', $shown ), array( 'a' => array( 'href' => array() ), 'br' => array() ) );
-			if ( count( $use['uses'] ) > 5 ) {
-				echo '<br>+' . (int) ( count( $use['uses'] ) - 5 ) . ' more';
+			// Every other use, one row each; the parent post is already shown above.
+			$uses = $use['uses'];
+			if ( (int) $post->post_parent > 0 ) {
+				$uses = array_diff_key( $uses, array_flip( preg_grep( '/^p' . (int) $post->post_parent . '(?!\d)/', array_map( 'strval', array_keys( $uses ) ) ) ) );
+			}
+			if ( $uses ) {
+				$shown = array_slice( array_values( $uses ), 0, 5 );
+				echo '<br>' . wp_kses( implode( '<br>', $shown ), array( 'a' => array( 'href' => array() ), 'br' => array() ) );
+				if ( count( $uses ) > 5 ) {
+					echo '<br>+' . (int) ( count( $uses ) - 5 ) . ' more';
+				}
 			}
 			return;
 		}
@@ -264,7 +311,14 @@ add_action(
 		if ( ! empty( $meta['filesize'] ) ) {
 			$bits[] = size_format( (int) $meta['filesize'] );
 		}
-		$bits[] = strtoupper( (string) preg_replace( '#^image/#', '', (string) $post->post_mime_type ) );
+		$format = strtoupper( pathinfo( (string) get_attached_file( $post_id ), PATHINFO_EXTENSION ) );
+		if ( 'JPG' === $format ) {
+			$format = 'JPEG';
+		}
+		if ( '' === $format ) {
+			$format = strtoupper( (string) preg_replace( '#^image/#', '', (string) $post->post_mime_type ) );
+		}
+		$bits[] = $format;
 		echo esc_html( implode( ' · ', $bits ) );
 		$flags = array();
 		if ( ! empty( $meta['filesize'] ) && (int) $meta['filesize'] > 1000000 ) {
@@ -280,6 +334,13 @@ add_action(
 		}
 		if ( $flags ) {
 			echo '<br>' . esc_html( implode( '; ', $flags ) );
+		}
+		$attached = get_attached_file( $post_id );
+		if ( $attached && 'webp' !== strtolower( pathinfo( $attached, PATHINFO_EXTENSION ) ) ) {
+			$parts = pathinfo( $attached );
+			if ( is_file( $attached . '.webp' ) || is_file( $parts['dirname'] . '/' . $parts['filename'] . '.webp' ) ) {
+				echo '<br>WebP copy: yes';
+			}
 		}
 	},
 	10,
