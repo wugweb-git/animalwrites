@@ -102,11 +102,14 @@ function aw_si_run_problem( string $src ): string {
  */
 function aw_si_run_ok( string $src, array $info = array() ): void {
 	$r         = aw_si_runs();
+	$had       = (int) ( $r[ $src ]['rows_at'] ?? 0 );
 	$r[ $src ] = array(
 		'ok'      => time(),
 		'error'   => null,
 		'info'    => $info,
 		'started' => (int) ( $r[ $src ]['started'] ?? 0 ),
+		// When this source last stored rows (1 Nov 2026): a run that keeps "succeeding" with 0 rows is a failing source.
+		'rows_at' => ! array_key_exists( 'rows', $info ) || (int) $info['rows'] > 0 ? time() : ( $had ? $had : time() ),
 	);
 	update_option( AW_SI_RUNS, $r, false );
 }
@@ -138,4 +141,19 @@ function aw_si_stale( string $src ): bool {
 	$ok    = (int) ( aw_si_runs()[ $src ]['ok'] ?? 0 );
 	$since = $ok ? $ok : (int) get_option( 'aw_si_installed', time() );
 	return ( time() - $since ) > 2 * $every;
+}
+
+/**
+ * Days since a source last stored rows, when its runs have stored none for 7 days or more; 0 otherwise. Sources whose
+ * runs report no row count are never counted.
+ *
+ * @param string $src Source key.
+ */
+function aw_si_rows_dry_days( string $src ): int {
+	$r = aw_si_runs()[ $src ] ?? array();
+	if ( empty( $r['ok'] ) || ! array_key_exists( 'rows', (array) ( $r['info'] ?? array() ) ) || (int) $r['info']['rows'] > 0 || empty( $r['rows_at'] ) ) {
+		return 0;
+	}
+	$days = (int) floor( ( time() - (int) $r['rows_at'] ) / DAY_IN_SECONDS );
+	return $days >= 7 ? $days : 0;
 }

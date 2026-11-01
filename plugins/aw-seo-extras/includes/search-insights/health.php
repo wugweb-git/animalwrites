@@ -16,8 +16,12 @@ function aw_si_health_test(): array {
 	$fails = array();
 	foreach ( aw_si_sources() as $src => $s ) {
 		$err = aw_si_run_problem( $src );
+		$dry = aw_si_rows_dry_days( $src );
 		if ( $err ) {
 			$fails[] = $s['label'] . ': ' . $err;
+		} elseif ( $dry ) {
+			/* translators: %d: days. */
+			$fails[] = $s['label'] . ': ' . sprintf( __( 'source failed: its runs have stored no rows for %d days.', 'aw-seo-extras' ), $dry );
 		} elseif ( aw_si_stale( $src ) ) {
 			$late[] = $s['label'];
 		}
