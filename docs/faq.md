@@ -29,7 +29,7 @@ Owner-approved spec, 20 Oct 2026; FAQ on every page, 31 Oct 2026. Code: `plugins
 | Directory, Volunteer, Claim, Opportunities (Settings: pages with a subject in the heading) | after the list (the end of the page's content), wide, page 1 only, no filters, never on a Directory place or type view |
 | Every other page or campaign | after the page's content at the content width, page 1 only, no filters |
 
-Section head (`kit-sec-head`): the H2 from `aw_faq_heading()` ("<Subject> FAQs"), a subtitle only where the page has one, and a ghost "Animal welfare FAQ" link to /resources/animal-welfare-faqs/ (left out on that page). Pages and posts: the FAQ box's Subtitle field (meta `aw_faq_line`, one line; empty = no subtitle). Directory listings: "Where it is, what it offers and how to reach it." (`faq-data.php`). Library documents, category and tag pages: no subtitle. There is no default line (filter `aw_faq_head_parts`: [ default line, link URL, link label ]).
+Section head (`kit-sec-head`): the H2 from `aw_faq_heading()` ("Questions about <subject>"), a subtitle only where the page has one, and a ghost "Animal welfare FAQ" link to /resources/animal-welfare-faqs/ (left out on that page). Pages and posts: the FAQ box's Subtitle field (meta `aw_faq_line`, one line; empty = no subtitle). Directory listings: "Where it is, what it offers and how to reach it." (`faq-data.php`). Library documents, category and tag pages: no subtitle. There is no default line (filter `aw_faq_head_parts`: [ default line, link URL, link label ]).
 
 ## Registry (automatic questions)
 

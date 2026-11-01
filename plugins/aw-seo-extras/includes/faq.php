@@ -152,7 +152,7 @@ function aw_faq_hub_pages() {
 const AW_FAQ_SUBJECT_TYPES = array( 'page', 'post' );
 
 /**
- * The subject a post's FAQ heading names (aw_faq_heading(): "<Subject> FAQs") and where it came from: the FAQ box's Subject
+ * The subject a post's FAQ heading names (aw_faq_heading(): "Questions about <subject>") and where it came from: the FAQ box's Subject
  * field (meta aw_faq_subject; pages and posts), the pages map (Settings → FAQ), the site's name on the front page, else
  * the title.
  *
@@ -178,7 +178,7 @@ function aw_faq_subject( $post ) {
  * The FAQ section head, site-wide: which style the H2, the supporting line and the "see all" link use. Switching
  * style is this one line; the styles are in aw_faq_head_styles().
  */
-const AW_FAQ_HEAD_STYLE = 'subject';
+const AW_FAQ_HEAD_STYLE = 'about';
 
 /** Longest subject (characters) the 'subject' style names; a longer one, or one that is itself a question or an FAQ title, gets plain "FAQs". */
 const AW_FAQ_HEAD_MAX = 40;
@@ -194,7 +194,7 @@ function aw_faq_head_styles() {
 		'subject' => array( '%s FAQs', 'FAQs', '', 'Animal welfare FAQ' ), // "Animal Writes FAQs", "Directory FAQs"
 		'plain'   => array( '', 'FAQs', '', 'Animal welfare FAQ' ), // "FAQs" everywhere
 		'common'  => array( '', 'Common questions', '', 'More questions' ),
-		'about'   => array( 'Questions about %s', 'Questions', 'Quick answers. More in the full FAQ.', 'All questions' ), // the old head
+		'about'   => array( 'Questions about %s', 'Questions', '', 'Animal welfare FAQ' ), // "Questions about the Directory"
 	);
 }
 
@@ -206,7 +206,7 @@ function aw_faq_head_style() {
 
 /**
  * The FAQ H2 for a subject, in the site's head style (filter aw_faq_heading). The visible H2 and the FAQPage name
- * both come from here. Except in the old 'about' style: a leading "the" is dropped and the first letter capitalised
+ * both come from here. In the 'about' style (the current one) the subject is used as it is. In the others: a leading "the" is dropped and the first letter capitalised
  * ("the Directory" -> "Directory FAQs"); a subject over AW_FAQ_HEAD_MAX characters, one that starts with a question
  * word ("How to report ...") or one that already says FAQ gets the plain H2.
  *

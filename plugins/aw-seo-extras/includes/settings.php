@@ -209,7 +209,7 @@ function aw_seo_modules(): array {
 				'AW_FAQ_MIN_GUIDE' => array( 'type' => 'int', 'label' => 'Fewest questions on a post (Resources guides)', 'help' => '', 'default' => 2 ),
 				'AW_FAQ_MAX' => array( 'type' => 'int', 'label' => 'Most questions shown', 'help' => '', 'default' => 6 ),
 				'AW_FAQ_WORDS' => array( 'type' => 'int', 'label' => 'Longest answer (words)', 'help' => 'Longer answers are flagged by the checks.', 'default' => 50 ),
-				'AW_FAQ_HUBS' => array( 'type' => 'map', 'label' => 'Pages with a subject in the FAQ heading', 'help' => 'One per line: page slug | subject (the heading: "<Subject> FAQs"). Their FAQ sits under the list, wide. Other pages: the page title, or plain "FAQs" when it is long.', 'default' => array(
+				'AW_FAQ_HUBS' => array( 'type' => 'map', 'label' => 'Pages with a subject in the FAQ heading', 'help' => 'One per line: page slug | subject (the heading: "Questions about <subject>"). Their FAQ sits under the list, wide. Other pages: the page title.', 'default' => array(
 						'directory'     => 'the Directory',
 						'volunteer'     => 'volunteering',
 						'claim'         => 'claiming a listing',
