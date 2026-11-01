@@ -152,7 +152,12 @@ const AW_HOME_LIBRARY_LEAD = array( 'act', 'rule', 'order', 'judgment' );
 function aw_home_is_state_guide( $id ) {
 	static $re = null;
 	if ( null === $re ) {
-		$slugs = function_exists( 'aw_place_states' ) ? array_filter( wp_list_pluck( aw_place_states(), 'slug' ) ) : array();
+		$slugs = array();
+		foreach ( function_exists( 'aw_place_states' ) ? aw_place_states() : array() as $st ) { // a state's slug ("chandigarh-ut" too, as "chandigarh") and its name
+			$slugs[] = preg_replace( '/-ut$/', '', (string) $st->slug );
+			$slugs[] = sanitize_title( (string) $st->name );
+		}
+		$slugs = array_unique( array_filter( $slugs ) );
 		$re    = $slugs ? '/^animal-cruelty-complaint-(' . implode( '|', array_map( fn( $s ) => preg_quote( (string) $s, '/' ), $slugs ) ) . ')$/' : '';
 	}
 	return $re && preg_match( $re, (string) get_post_field( 'post_name', $id ) );
