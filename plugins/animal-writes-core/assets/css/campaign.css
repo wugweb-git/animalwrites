@@ -208,10 +208,10 @@
 	.aw-camp--sc-stray-dogs #share .aw-camp-share-kit + .aw-camp-note { margin-top: var(--kit-space-4); } /* the note sits as close to the share row as the row to the text above */
 }
 /* The court orders and the state tracker: one sideways row of cards at every width (Layout rules 5, 6 and 10), each
-   row a card with its parts under their column headings, snapping. Phones show one card and the edge of the next
-   (--aw-carousel-item, 82%); from 768 two cards to the view (--aw-card-columns md). The server names each row and
+   row a card with its parts under their column headings, snapping. Phones show one card to the screen (narrower
+   cards would pass 600px); from 768 two cards to the view (--aw-card-columns md). The server names each row and
    makes it focusable, and gives the table its roles back (campaign-tools.php, aw_sc_rows_a11y). */
-.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) { --aw-sc-card: 82%; margin: 0; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; padding-bottom: var(--kit-space-3); }
+.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) { --aw-sc-card: 100%; margin: 0; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; padding-bottom: var(--kit-space-3); }
 .aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) table { display: block; width: auto; min-width: 0; border: 0; }
 .aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) tbody { display: flex; gap: var(--kit-space-4); }
