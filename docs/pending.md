@@ -87,6 +87,9 @@ Owner, 25 Oct — not to be raised until their dates: the Lab rules Post phase (
 - **The four archived Library PDFs (items 142 to 145):** archived on purpose by the plugin (folder missing on the server); AWBI source links work. Owner decides whether to re-fetch.
 
 ### Only the owner (sign-ins, keys, files)
+- **Press coverage keyphrases (1 Nov):** items 14205 and 14206 have the focus keyphrase "https www facebook com"; Press coverage refuses edits from the REST helper, so set them in the editor.
+- **GA4 "Not found path" (1 Nov):** Admin → Custom definitions → Create custom dimension: name "Not found path", scope Event, parameter `path` (sent with `404_view`). Saving it needs the owner's click.
+- **Rank Math 404 log (1 Nov):** 1.7K rows include fixed and bot URLs; "Clear log" starts it fresh (it deletes the rows, so it is the owner's click).
 - **Social, owner's steps (31 Oct):** Reddit community r/AnimalWrites; WhatsApp Channel (followers never see the admin's number); Threads waits for a new Instagram account. Once the Reddit and WhatsApp links exist, they are added to the footer and the Contact page.
 - **Vercel key:** only if that AI provider is wanted.
 - **Workers on time: hPanel cron (31 Oct):** #89 is live. In hPanel → Advanced → Cron Jobs, replace the sourcing job (`aw-dispatch-sourcing.sh`, 17 */4) with, every 15 minutes: `cd /home/u544169507/domains/animalwrites.in/public_html && /usr/local/bin/wp aw workers-tick >> /home/u544169507/aw-cron.log 2>&1`. Only after that: workers repo → Settings → Variables → `AW_SCHEDULER` = `site` (set it earlier and nothing starts the workers). The server has no crontab command, so this can only be done in hPanel.
@@ -202,6 +205,9 @@ These live in WordPress: **Animal Writes → Dates** (month calendar, add and re
 - **Rollback:** a rollback to a release older than 24 Oct must be purged by hand (rollback.yml warns); newer releases are purged by `deploy-purge.php`.
 
 ## Done (1 Nov 2026, technical)
+- **Search Insights gaps and conflicts:** a position between 3 and 4 no longer counts as a content gap, and keyword-map gap notes clear once one of our pages ranks in the top 20 (Gaps 4 → 0). News items and archives no longer count as two owners of a keyphrase, and Rank Math regex redirects are followed (Conflicts 125 → 30). Rising: 11 covered terms marked Noted.
+- **404s:** about 85 Rank Math redirects added (lab-rules link typos, news slugs with a source name, old /directory/listing/ paths, state cruelty-complaint guides as 302 to the how-to-report guide, missing October PDFs to their Library items, /faq, /privacy, /guides, /tag/dogs); #234 and #247 repointed to live articles. One link stays 404: `campaigns/lab-animals-rules-2026/%23how-to-help` (Rank Math sees a loop); fix it where it was shared.
+- **Focus keyphrases:** 29 fixed (wrong or off-topic keyphrases, place names on the dog-bite, rabies and elephant studies, ABC Rules 2023 Library item, extra secondaries on the guides Google prefers).
 - **Form entries in Mail:** Mail → Website forms also lists Volunteer, Claim and Report, with the badge and a wp-admin notice while any is unread (no email; form emails stay off). Entry dates show in site time.
 - **Tag FAQ subject:** tags have a Subject field in their FAQ box (term meta `aw_faq_subject`, also over REST as `meta.aw_faq_subject` on /wp/v2/tags); empty keeps the tag's name. A change purges that tag page.
 - **GA4 test events, 1 Nov:** about 17 admin test events (rule_card_open, ground_toggle, campaign_action) reached live GA4 from the lab campaign check; they can be told apart by the date and the admin's client.
