@@ -13,6 +13,8 @@
 		"submitdiv": {
 			"title": "Publish",
 			"source": "WordPress",
+			"plugin": "WordPress",
+			"purpose": "General",
 			"file": "wp-admin/includes/meta-boxes.php (post_submit_meta_box)",
 			"screen": "post",
 			"types": [],
@@ -22,6 +24,8 @@
 		"categorydiv": {
 			"title": "Categories",
 			"source": "WordPress",
+			"plugin": "WordPress",
+			"purpose": "General",
 			"file": "wp-admin/includes/meta-boxes.php (post_categories_meta_box)",
 			"screen": "post",
 			"types": [],
@@ -30,6 +34,8 @@
 		"tagsdiv-post_tag": {
 			"title": "Tags",
 			"source": "WordPress",
+			"plugin": "WordPress",
+			"purpose": "General",
 			"file": "wp-admin/includes/meta-boxes.php (post_tags_meta_box)",
 			"screen": "post",
 			"types": [],
@@ -38,6 +44,8 @@
 		"tagsdiv-aw_campaign_link": {
 			"title": "Linked campaigns",
 			"source": "WordPress",
+			"plugin": "WordPress",
+			"purpose": "General",
 			"file": "wp-admin/includes/meta-boxes.php (post_tags_meta_box); taxonomy from core/campaign-links.php",
 			"screen": "post",
 			"types": [],
@@ -46,6 +54,8 @@
 		"tagsdiv-aw_media_group": {
 			"title": "Media groups",
 			"source": "WordPress",
+			"plugin": "WordPress",
+			"purpose": "General",
 			"file": "wp-admin/includes/meta-boxes.php (post_tags_meta_box); taxonomy from core/media-groups.php",
 			"screen": "post",
 			"types": [
@@ -56,6 +66,8 @@
 		"pageparentdiv": {
 			"title": "Attributes (template, parent, order)",
 			"source": "WordPress",
+			"plugin": "WordPress",
+			"purpose": "General",
 			"file": "wp-admin/includes/meta-boxes.php (page_attributes_meta_box)",
 			"screen": "post",
 			"types": [],
@@ -64,6 +76,8 @@
 		"postimagediv": {
 			"title": "Featured image",
 			"source": "WordPress",
+			"plugin": "WordPress",
+			"purpose": "General",
 			"file": "wp-admin/includes/meta-boxes.php (post_thumbnail_meta_box)",
 			"screen": "post",
 			"types": [],
@@ -73,6 +87,8 @@
 		"postexcerpt": {
 			"title": "Excerpt",
 			"source": "WordPress",
+			"plugin": "WordPress",
+			"purpose": "General",
 			"file": "wp-admin/includes/meta-boxes.php (post_excerpt_meta_box)",
 			"screen": "post",
 			"types": [],
@@ -82,6 +98,8 @@
 		"postcustom": {
 			"title": "Custom Fields",
 			"source": "WordPress",
+			"plugin": "WordPress",
+			"purpose": "General",
 			"file": "wp-admin/includes/meta-boxes.php (post_custom_meta_box)",
 			"screen": "post",
 			"types": [],
@@ -91,6 +109,8 @@
 		"slugdiv": {
 			"title": "Slug",
 			"source": "WordPress",
+			"plugin": "WordPress",
+			"purpose": "General",
 			"file": "wp-admin/includes/meta-boxes.php (post_slug_meta_box)",
 			"screen": "post",
 			"types": [],
@@ -100,6 +120,8 @@
 		"authordiv": {
 			"title": "Author",
 			"source": "WordPress",
+			"plugin": "WordPress",
+			"purpose": "General",
 			"file": "wp-admin/includes/meta-boxes.php (post_author_meta_box)",
 			"screen": "post",
 			"types": [],
@@ -108,6 +130,8 @@
 		"revisionsdiv": {
 			"title": "Revisions",
 			"source": "WordPress",
+			"plugin": "WordPress",
+			"purpose": "General",
 			"file": "wp-admin/includes/meta-boxes.php (post_revisions_meta_box)",
 			"screen": "post",
 			"types": [],
@@ -117,6 +141,8 @@
 		"commentsdiv": {
 			"title": "Comments",
 			"source": "WordPress",
+			"plugin": "WordPress",
+			"purpose": "General",
 			"file": "wp-admin/includes/meta-boxes.php",
 			"screen": "post",
 			"types": [],
@@ -125,6 +151,8 @@
 		"commentstatusdiv": {
 			"title": "Discussion",
 			"source": "WordPress",
+			"plugin": "WordPress",
+			"purpose": "General",
 			"file": "wp-admin/includes/meta-boxes.php",
 			"screen": "post",
 			"types": [],
@@ -133,6 +161,8 @@
 		"aw-issuer": {
 			"title": "Issued by",
 			"source": "Animal Writes core",
+			"plugin": "Animal Writes core",
+			"purpose": "Issuer",
 			"file": "core/issuers.php (aw_issuer_box)",
 			"screen": "post",
 			"types": [
@@ -144,6 +174,8 @@
 		"aw-place": {
 			"title": "Place",
 			"source": "Animal Writes core",
+			"plugin": "Animal Writes core",
+			"purpose": "Place",
 			"file": "core/places-admin.php (aw_place_box)",
 			"screen": "post",
 			"types": [
@@ -155,6 +187,8 @@
 		"aw_related": {
 			"title": "Related",
 			"source": "Animal Writes core",
+			"plugin": "Animal Writes core",
+			"purpose": "Links",
 			"file": "core/model.php (aw_related_box)",
 			"screen": "post",
 			"types": [
@@ -171,6 +205,8 @@
 		"aw_linked_from": {
 			"title": "Linked from",
 			"source": "Animal Writes core",
+			"plugin": "Animal Writes core",
+			"purpose": "Links",
 			"file": "core/model.php (aw_linked_from_box)",
 			"screen": "post",
 			"types": [
@@ -184,6 +220,8 @@
 		"aw-faq": {
 			"title": "FAQ",
 			"source": "AW SEO Plus",
+			"plugin": "AW SEO Plus",
+			"purpose": "FAQ",
 			"file": "seo/faq.php (add_meta_boxes, aw_faq_editor)",
 			"screen": "post",
 			"types": [
@@ -200,6 +238,8 @@
 		"aw-legal-item": {
 			"title": "Library item",
 			"source": "Animal Writes core",
+			"plugin": "Animal Writes core",
+			"purpose": "Details",
 			"file": "core/faq-data.php (add_meta_boxes_aw_legal)",
 			"screen": "post",
 			"types": [
@@ -210,6 +250,8 @@
 		"aw-campaign-details": {
 			"title": "Campaign details",
 			"source": "Animal Writes core",
+			"plugin": "Animal Writes core",
+			"purpose": "Details",
 			"file": "core/campaign-tools.php (aw_camp_details_box)",
 			"screen": "post",
 			"types": [
@@ -221,6 +263,8 @@
 		"aw-campaign-record": {
 			"title": "Real-world impact",
 			"source": "Animal Writes core",
+			"plugin": "Animal Writes core",
+			"purpose": "Campaign outcome",
 			"file": "core/campaign-record.php (aw_camp_record_box)",
 			"screen": "post",
 			"types": [
@@ -231,6 +275,8 @@
 		"aw-enrich-prov": {
 			"title": "Where these details come from",
 			"source": "AW Sourcing",
+			"plugin": "AW Sourcing",
+			"purpose": "Sources",
 			"file": "src/enrichment-admin.php (aw_enrich_prov_box)",
 			"screen": "post",
 			"types": [
@@ -242,6 +288,8 @@
 		"aw_org_people": {
 			"title": "Volunteers",
 			"source": "Animal Writes core",
+			"plugin": "Animal Writes core",
+			"purpose": "People",
 			"file": "core/org-people.php (aw_org_people_box)",
 			"screen": "post",
 			"types": [
@@ -253,6 +301,8 @@
 		"aw_press_box": {
 			"title": "Coverage",
 			"source": "Animal Writes core",
+			"plugin": "Animal Writes core",
+			"purpose": "Details",
 			"file": "core/press.php (add_meta_boxes_aw_press)",
 			"screen": "post",
 			"types": [
@@ -263,6 +313,8 @@
 		"aw_claim_review": {
 			"title": "Review",
 			"source": "Animal Writes core",
+			"plugin": "Animal Writes core",
+			"purpose": "Review",
 			"file": "core/claims.php (aw_claim_review_box)",
 			"screen": "post",
 			"types": [
@@ -274,6 +326,8 @@
 		"aw-report-sent": {
 			"title": "Report",
 			"source": "Animal Writes core",
+			"plugin": "Animal Writes core",
+			"purpose": "Report",
 			"file": "core/reports.php (add_meta_boxes_aw_report)",
 			"screen": "post",
 			"types": [
@@ -285,6 +339,8 @@
 		"aw-listing-details": {
 			"title": "Organisation details (fallback)",
 			"source": "Animal Writes core",
+			"plugin": "Animal Writes core",
+			"purpose": "Details",
 			"file": "core/listing-profile.php (aw_listing_details_box)",
 			"screen": "post",
 			"types": [
@@ -296,6 +352,8 @@
 		"aw-sponsored": {
 			"title": "Sponsored (fallback)",
 			"source": "Animal Writes core",
+			"plugin": "Animal Writes core",
+			"purpose": "Details",
 			"file": "core/pages.php (aw_sponsored_box)",
 			"screen": "post",
 			"types": [
@@ -307,6 +365,8 @@
 		"attachment-fields": {
 			"title": "Image context, Focus keyphrase (attachment fields)",
 			"source": "Kits Core",
+			"plugin": "Kits Core",
+			"purpose": "Image",
 			"file": "kits/image-context.php (attachment_fields_to_edit)",
 			"screen": "post",
 			"types": [
@@ -318,6 +378,8 @@
 		"acf-group_aw_resource": {
 			"title": "Resource details",
 			"source": "Secure Custom Fields",
+			"plugin": "Animal Writes core",
+			"purpose": "Details",
 			"file": "acf-json/group_aw_resource.json",
 			"screen": "post",
 			"types": [
@@ -328,6 +390,8 @@
 		"acf-group_aw_news": {
 			"title": "Source",
 			"source": "Secure Custom Fields",
+			"plugin": "Animal Writes core",
+			"purpose": "Sources",
 			"file": "acf-json/group_aw_news.json",
 			"screen": "post",
 			"types": [
@@ -338,6 +402,8 @@
 		"acf-group_aw_legal": {
 			"title": "Library details",
 			"source": "Secure Custom Fields",
+			"plugin": "Animal Writes core",
+			"purpose": "Details",
 			"file": "acf-json/group_aw_legal.json",
 			"screen": "post",
 			"types": [
@@ -348,6 +414,8 @@
 		"acf-group_aw_campaign": {
 			"title": "Campaign details",
 			"source": "Secure Custom Fields",
+			"plugin": "Animal Writes core",
+			"purpose": "Details",
 			"file": "acf-json/group_aw_campaign.json",
 			"screen": "post",
 			"types": [
@@ -359,6 +427,8 @@
 		"acf-group_aw_opportunity": {
 			"title": "Opportunity details",
 			"source": "Secure Custom Fields",
+			"plugin": "Animal Writes core",
+			"purpose": "Details",
 			"file": "acf-json/group_aw_opportunity.json",
 			"screen": "post",
 			"types": [
@@ -369,6 +439,8 @@
 		"acf-group_aw_listing": {
 			"title": "Organisation details",
 			"source": "Secure Custom Fields",
+			"plugin": "Animal Writes core",
+			"purpose": "Details",
 			"file": "acf-json/group_aw_listing.json",
 			"screen": "post",
 			"types": [
@@ -379,6 +451,8 @@
 		"rank_math_metabox": {
 			"title": "Rank Math SEO",
 			"source": "Rank Math SEO",
+			"plugin": "Rank Math SEO",
+			"purpose": "SEO",
 			"file": "seo-by-rank-math/includes/admin/metabox/class-metabox.php",
 			"screen": "post",
 			"types": [
@@ -396,6 +470,8 @@
 		"rank_math_metabox_link_suggestions": {
 			"title": "Link Suggestions",
 			"source": "Rank Math SEO",
+			"plugin": "Rank Math SEO",
+			"purpose": "Links",
 			"file": "seo-by-rank-math/includes/admin/metabox/class-metabox.php",
 			"screen": "post",
 			"types": [
@@ -407,6 +483,8 @@
 		"litespeed_meta_boxes": {
 			"title": "LiteSpeed",
 			"source": "LiteSpeed Cache",
+			"plugin": "LiteSpeed Cache",
+			"purpose": "Image / cache",
 			"file": "litespeed-cache/src/metabox.cls.php",
 			"screen": "post",
 			"types": [],
@@ -416,6 +494,8 @@
 		"wpil_link-articles": {
 			"title": "Link Whisper Suggested Links",
 			"source": "Link Whisper",
+			"plugin": "Link Whisper",
+			"purpose": "Links",
 			"file": "link-whisper/core/Wpil/Base.php (showSuggestionsBox)",
 			"screen": "post",
 			"types": [
@@ -428,6 +508,8 @@
 		"term-core": {
 			"title": "Name, Slug, Parent, Description",
 			"source": "WordPress",
+			"plugin": "WordPress",
+			"purpose": "General",
 			"file": "wp-admin/edit-tag-form.php",
 			"screen": "term",
 			"types": [],
@@ -436,6 +518,8 @@
 		"term-photo": {
 			"title": "Photo",
 			"source": "Animal Writes core",
+			"plugin": "Animal Writes core",
+			"purpose": "Image",
 			"file": "core/category-images.php",
 			"screen": "term",
 			"types": [
@@ -455,6 +539,8 @@
 		"term-banner": {
 			"title": "Banner image",
 			"source": "Animal Writes core",
+			"plugin": "Animal Writes core",
+			"purpose": "Image",
 			"file": "core/category-images.php",
 			"screen": "term",
 			"types": [
@@ -472,6 +558,8 @@
 		"term-help-types": {
 			"title": "Find help: listing types",
 			"source": "Animal Writes core",
+			"plugin": "Animal Writes core",
+			"purpose": "Find help",
 			"file": "core/model.php",
 			"screen": "term",
 			"types": [
@@ -493,6 +581,8 @@
 		"term-guides-here": {
 			"title": "Guides linking here",
 			"source": "Animal Writes core",
+			"plugin": "Animal Writes core",
+			"purpose": "Links",
 			"file": "core/model.php",
 			"screen": "term",
 			"types": [
@@ -514,6 +604,8 @@
 		"term-faq": {
 			"title": "FAQ",
 			"source": "AW SEO Plus",
+			"plugin": "AW SEO Plus",
+			"purpose": "FAQ",
 			"file": "seo/faq.php (aw_faq_term_box)",
 			"screen": "term",
 			"types": [
@@ -531,6 +623,8 @@
 		"term-rank-math": {
 			"title": "Rank Math SEO",
 			"source": "Rank Math SEO",
+			"plugin": "Rank Math SEO",
+			"purpose": "SEO",
 			"file": "seo-by-rank-math/includes/admin/metabox/class-metabox.php",
 			"screen": "term",
 			"types": [
