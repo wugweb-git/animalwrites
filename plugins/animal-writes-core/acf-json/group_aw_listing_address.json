@@ -26,7 +26,7 @@
             "name": "aw_area",
             "aria-label": "",
             "type": "text",
-            "instructions": "No full street address. State, district and PIN code are in the Place box.",
+            "instructions": "No full street address.",
             "required": 0,
             "conditional_logic": 0,
             "wrapper": {
