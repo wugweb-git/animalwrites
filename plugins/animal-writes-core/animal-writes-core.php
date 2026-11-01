@@ -72,6 +72,7 @@ require_once AW_CORE_DIR . 'includes/media-columns.php'; // Media Library column
 require_once AW_CORE_DIR . 'includes/media-groups.php'; // Media group label for every attachment: core taxonomy, column, REST
 require_once AW_CORE_DIR . 'includes/media-webp.php'; // Resized copies of JPEG and PNG uploads as WebP; Media → Make WebP converts existing images in batches with Undo
 require_once AW_CORE_DIR . 'includes/media-merge.php'; // Media → Duplicate files: merge duplicate copies with Undo
+require_once AW_CORE_DIR . 'includes/media-reuse.php'; // Media → Reuse pictures: recycle Media Library pictures as page covers, one at a time, with Undo
 require_once AW_CORE_DIR . 'includes/volunteers-db.php';
 require_once AW_CORE_DIR . 'includes/volunteers.php';
 require_once AW_CORE_DIR . 'includes/campaigns.php';
