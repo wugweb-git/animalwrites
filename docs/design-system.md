@@ -273,9 +273,9 @@ The home page's sections and their order live in the theme template `themes/anim
 1. Hero: block `animal-writes/home-hero`. While campaign 13848 is published it shows the campaign hero, open or closed: no automatic switch when it closes, and nothing is added after it closes (owner, 1 Nov 2026). The standard hero (pattern `hero`) is not shown on Home; the block falls back to it only if the campaign is not published.
 2. Need help now? (`help-now`).
 3. Find help near you (`find-help`: `[aw_find_help compact="1"]`).
-4. What's happening (`whats-happening`: Query Loop 41, four items as a mosaic).
+4. What's happening (`whats-happening`: Query Loop 41, four items as a mosaic: the lead with a 4:3 picture and summary, three rows beside it spread to end level; the same cards on phones).
 5. Guides (`learn`: Query Loop 44, at most one state cruelty guide).
-6. From the Library (`animal-law`: Query Loop 43, the law first).
+6. From the Library (`animal-law`: Query Loop 43, four items in the same mosaic: an Act, rule, order or judgment leads, official releases last).
 7. Take action (`take-action`).
 8. India Writes for Its Community Dogs (`aw1-story-home`).
 9. FAQ (block `animal-writes/item-faq`).

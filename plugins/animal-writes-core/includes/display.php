@@ -69,9 +69,10 @@ add_action(
 		if ( ! $types || array_diff( $types, array( 'aw_news', 'aw_legal' ) ) ) {
 			return;
 		}
-		// The visitor's sort: A–Z stays A–Z; "Oldest first" keeps the source date but ascending.
+		// The visitor's sort: A–Z stays A–Z; "Oldest first" keeps the source date but ascending. A list of picked items
+		// (orderby post__in, e.g. From the Library on Home, home.php) keeps the order it was given.
 		$asked = $q->get( 'orderby' );
-		if ( is_array( $asked ) && isset( $asked['title'] ) || 'title' === $asked ) {
+		if ( is_array( $asked ) && isset( $asked['title'] ) || 'title' === $asked || 'post__in' === $asked ) {
 			return;
 		}
 		$dir          = is_array( $asked ) && 'ASC' === strtoupper( (string) ( $asked['date'] ?? '' ) ) || 'ASC' === strtoupper( (string) $q->get( 'order' ) ) && 'date' === $asked ? 'ASC' : 'DESC';

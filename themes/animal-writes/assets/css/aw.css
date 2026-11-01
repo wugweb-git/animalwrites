@@ -1317,37 +1317,29 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 
 /* News card lists, two layouts for section previews (owner, 18 Oct 2026). Same News card (aw_hub_item), its card and
    row states only:
-   .is-brief      no summary under the title
    .is-three      three cards across from 768; on phones the first card, then rows
-   .aw-news-mosaic five stories: a lead story and four compact rows (see below). */
+   .aw-news-mosaic four items: a lead card and three rows beside it (see below). */
 
 .aw-tasks.is-three { margin-bottom: 0; } /* a section preview: the section padding ends it */
 @media (min-width: 768px) { :is(.aw-news-list, .aw-tasks).is-three { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); } } /* News or Resources cards, three across (no orphan in a row of three) */
-/* Mosaic (What's happening, From the Library): the lead card (block-lg, hubs.php picks the state by place) and the next
-   two or three as stacked-md rows. Phones: the lead (2:1 picture), then the rows (no thumbnail, two-line titles). From 768:
-   the lead on the left spans the rows on the right, which keep their natural height; the lead's picture fills what its
-   text leaves (at least 10rem), so both columns end level. No summary (is-brief). */
-.aw-news-list.aw-news-mosaic { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-2); align-items: start; }
+/* Mosaic (What's happening, From the Library on Home; owner, 1 Nov 2026): the lead card (block-lg: 4:3 picture, title,
+   summary; hubs.php picks the state by place) and the next three as stacked-md rows (thumbnail and the title clamp of
+   every card, phones included). Phones: the lead, then the rows. From 768: the lead on the left spans the rows on the
+   right; each row keeps its natural height and the rows are spread over the lead's height (the first at the top, the
+   last at the bottom), so both columns end level with nothing cropped or stretched. 7fr / 5fr from 768, 5fr / 7fr from 1200. */
+.aw-news-list.aw-news-mosaic { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-3); }
 .aw-news-mosaic > li { margin: 0 !important; min-width: 0; }
-.aw-news-mosaic.is-brief .kit-card-sum { display: none; }
-.aw-news-mosaic .kit-card--block-lg > .kit-card-media { --kit-card-media-ratio: 2 / 1; }
-.aw-news-mosaic .kit-card--block-lg > .kit-card-body { padding: var(--kit-space-4); }
 .aw-news-mosaic .kit-card--stacked-md { height: auto; }
-@media (max-width: 767px) {
-	.aw-news-mosaic .kit-card--stacked-md { padding: var(--kit-space-3); }
-	.aw-news-mosaic .kit-card--stacked-md > .kit-card-media { display: none; }
-	.aw-news-mosaic .kit-card .kit-card-title a { -webkit-line-clamp: 2; }
-}
 @media (min-width: 768px) {
 	.aw-news-list.aw-news-mosaic { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); column-gap: var(--kit-space-grid); row-gap: var(--kit-space-3); }
-	.aw-news-mosaic > li:first-child { grid-column: 1; grid-row: 1 / span 3; align-self: stretch; }
+	.aw-news-mosaic > li:first-child { grid-column: 1; grid-row: 1 / span 3; align-self: start; }
 	.aw-news-mosaic:has(> li:nth-child(3):last-child) > li:first-child { grid-row: 1 / span 2; }
-	.aw-news-mosaic > li:nth-child(n+2) { grid-column: 2; }
-	.aw-news-mosaic > li:first-child > .kit-card { height: 100%; }
-	.aw-news-mosaic > li:first-child .kit-card-media { flex: 1 1 0; aspect-ratio: auto; min-height: 10rem; max-height: none; }
-	.aw-news-mosaic > li:first-child .kit-card-media img { position: absolute; inset: 0; }
-	.aw-news-mosaic > li:first-child .kit-card-title a { -webkit-line-clamp: 4; }
+	.aw-news-mosaic:has(> li:nth-child(2):last-child) > li:first-child { grid-row: 1; }
+	.aw-news-mosaic > li:nth-child(n+2) { grid-column: 2; align-self: center; }
+	.aw-news-mosaic > li:nth-child(2) { align-self: start; }
+	.aw-news-mosaic > li:nth-child(n+3):last-child { align-self: end; }
 }
+@media (min-width: 1200px) { .aw-news-list.aw-news-mosaic { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); } }
 
 /* Card lists (kit-card states, kit.css): the list item is only a wrapper; a one-column list (Library) keeps a gap. */
 .aw-cases:has(> li > .kit-card[class*="kit-card--"]) { display: grid !important; gap: var(--kit-space-4); border-top: 0; }

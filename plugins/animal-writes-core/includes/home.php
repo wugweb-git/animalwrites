@@ -122,24 +122,49 @@ const AW_HOME_LIBRARY_QUERY = 43;
 const AW_HOME_LIBRARY_LEAD = array( 'act', 'rule', 'order', 'judgment' );
 
 /**
- * Guides on Home: the three newest guides, with at most one state "report cruelty" guide
- * (/resources/animal-cruelty-complaint-{state}/), so one kind does not fill the row.
+ * Whether a guide is a state "report cruelty" guide: /resources/animal-cruelty-complaint-{state}/, {state} one of the
+ * site's state slugs (places.php).
+ *
+ * @param int $id Post ID.
+ * @return bool
+ */
+function aw_home_is_state_guide( $id ) {
+	static $re = null;
+	if ( null === $re ) {
+		$slugs = function_exists( 'aw_place_states' ) ? array_filter( wp_list_pluck( aw_place_states(), 'slug' ) ) : array();
+		$re    = $slugs ? '/^animal-cruelty-complaint-(' . implode( '|', array_map( fn( $s ) => preg_quote( (string) $s, '/' ), $slugs ) ) . ')$/' : '';
+	}
+	return $re && preg_match( $re, (string) get_post_field( 'post_name', $id ) );
+}
+
+/**
+ * Guides on Home: the three newest guides, with at most one state "report cruelty" guide, so one kind does not fill
+ * the row. When the first candidates do not give three, more are read (up to 48 in all).
  *
  * @param array $q The Query Loop's query vars.
  * @return int[]
  */
 function aw_home_guide_ids( $q ) {
-	$ids   = get_posts( array_merge( $q, array( 'posts_per_page' => 12, 'paged' => 1, 'offset' => 0, 'fields' => 'ids', 'no_found_rows' => true ) ) );
 	$out   = array();
 	$state = false;
-	foreach ( $ids as $id ) {
-		$is_state = 0 === strpos( (string) get_post_field( 'post_name', $id ), 'animal-cruelty-complaint-' );
-		if ( $is_state && $state ) {
-			continue;
+	for ( $page = 1; $page <= 4 && count( $out ) < 3; $page++ ) {
+		$ids = array_map( 'intval', get_posts( array_merge( $q, array( 'posts_per_page' => 12, 'paged' => 1, 'offset' => ( $page - 1 ) * 12, 'fields' => 'ids', 'no_found_rows' => true ) ) ) );
+		if ( ! $ids ) {
+			break;
 		}
-		$state = $state || $is_state;
-		$out[] = (int) $id;
-		if ( 3 === count( $out ) ) {
+		_prime_post_caches( $ids, true, false );
+		foreach ( $ids as $id ) {
+			$is_state = aw_home_is_state_guide( $id );
+			if ( $is_state && $state ) {
+				continue;
+			}
+			$state = $state || $is_state;
+			$out[] = $id;
+			if ( 3 === count( $out ) ) {
+				break;
+			}
+		}
+		if ( count( $ids ) < 12 ) {
 			break;
 		}
 	}
@@ -147,14 +172,18 @@ function aw_home_guide_ids( $q ) {
 }
 
 /**
- * From the Library on Home: the newest Act, rule, order or judgment leads, then the two newest other items, an official
- * release after the rest.
+ * From the Library on Home: the newest Act, rule, order or judgment leads, then the three newest other items, an
+ * official release after the rest (newest first otherwise).
  *
  * @param array $q The Query Loop's query vars.
  * @return int[]
  */
 function aw_home_library_ids( $q ) {
-	$ids  = array_map( 'intval', get_posts( array_merge( $q, array( 'posts_per_page' => 20, 'paged' => 1, 'offset' => 0, 'fields' => 'ids', 'no_found_rows' => true ) ) ) );
+	$ids = array_map( 'intval', get_posts( array_merge( $q, array( 'posts_per_page' => 20, 'paged' => 1, 'offset' => 0, 'fields' => 'ids', 'no_found_rows' => true ) ) ) );
+	if ( ! $ids ) {
+		return array();
+	}
+	_prime_post_caches( $ids, true, false );
 	$kind = fn( $id ) => function_exists( 'aw_legal_kinds' ) ? wp_list_pluck( aw_legal_kinds( $id ), 'slug' ) : array();
 	$lead = 0;
 	foreach ( $ids as $id ) {
@@ -163,10 +192,15 @@ function aw_home_library_ids( $q ) {
 			break;
 		}
 	}
-	$lead = $lead ? $lead : (int) ( $ids[0] ?? 0 );
-	$rest = array_slice( array_values( array_diff( $ids, array( $lead ) ) ), 0, 2 );
-	usort( $rest, fn( $a, $b ) => (int) in_array( 'official-release', $kind( $a ), true ) <=> (int) in_array( 'official-release', $kind( $b ), true ) ); // stable (PHP 8): newest first otherwise
-	return $lead ? array_merge( array( $lead ), $rest ) : array();
+	$lead = $lead ? $lead : $ids[0];
+	$rest = array_slice( array_values( array_diff( $ids, array( $lead ) ) ), 0, 3 );
+	// Official releases last; stable on every PHP version (usort is stable only from PHP 8): the list index breaks ties.
+	$keyed = array();
+	foreach ( $rest as $i => $id ) {
+		$keyed[] = array( (int) in_array( 'official-release', $kind( $id ), true ), $i, $id );
+	}
+	sort( $keyed );
+	return array_merge( array( $lead ), array_column( $keyed, 2 ) );
 }
 
 add_filter(
