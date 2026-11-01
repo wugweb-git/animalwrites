@@ -1525,3 +1525,11 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 	.aw-ed-help .aw-ed-help-tiles > .kit-tile { grid-template-columns: minmax(0, 1fr); grid-template-areas: "title" "desc"; padding: var(--kit-space-3); }
 	.aw-ed-help .aw-ed-help-tiles > .kit-tile::before, .aw-ed-help .aw-ed-help-tiles > .kit-tile::after { content: none; }
 }
+
+/* Find help near you (compact, [aw_find_help compact="1"]): the search row with Use my location, then the six most-used
+   organisation types as chips. Nothing else. */
+.aw-ed-find .aw-ed-search { margin-bottom: var(--kit-space-4); }
+.aw-findhelp-near { display: inline-flex; align-items: center; gap: var(--kit-space-1); min-height: var(--kit-size-target); padding: 0 var(--kit-space-2); color: var(--kit-color-link); font-weight: var(--kit-weight-medium); text-decoration: underline; text-underline-offset: var(--kit-underline-offset); }
+.aw-findhelp-near:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); border-radius: var(--kit-radius-control); }
+.aw-findhelp-types .kit-tags { list-style: none; margin: 0; padding: 0; gap: var(--kit-space-2); }
+.aw-findhelp-types .kit-chip { min-height: var(--kit-size-target); padding-inline: var(--kit-space-3); font-size: var(--kit-type-sm); }

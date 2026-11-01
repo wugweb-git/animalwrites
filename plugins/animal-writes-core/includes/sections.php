@@ -255,10 +255,14 @@ function aw_list_page( $type, $term_page ) {
  * [aw_find_help] Directory discovery for the home page (the section heading is a core Heading in the pattern): the total,
  * a search box whose state picker lists every state and union territory, and the twelve states with the most
  * organisations in the Directory's own state index style, with a link to all of them (owner, 18 Oct 2026).
+ *
+ * [aw_find_help compact="1"] the home section as one block: its section head (H2, the live counts, Browse all states),
+ * the search row with Use my location, and the six organisation types with the most listings as chips.
  */
 add_shortcode(
 	'aw_find_help',
-	function () {
+	function ( $atts ) {
+		$atts   = shortcode_atts( array( 'compact' => '' ), $atts );
 		$total  = aw_listing_public_count();
 		$opts   = '<option value="">All states and UTs</option>';
 		$counts = array();
@@ -271,18 +275,31 @@ add_shortcode(
 			$opts    .= '<option value="' . esc_attr( $st->slug ) . '">' . esc_html( $st->name ) . '</option>';
 		}
 		$with = count( $counts );
+		$dir  = aw_hub_url( 'aw_listing' );
+		$form = '<form class="aw-ed-search" role="search" method="get" action="' . esc_url( $dir ) . '">'
+			. '<input type="hidden" name="aw_filter" value="1">'
+			. '<label class="screen-reader-text" for="aw-ed-q">Organisation name</label><span class="kit-ico kit-ico--search" aria-hidden="true"></span><input id="aw-ed-q" type="search" name="q" placeholder="Search by name, for example Blue Cross">'
+			. '<label class="screen-reader-text" for="aw-ed-state">State or union territory</label><select id="aw-ed-state" name="state">' . $opts . '</select>'
+			. '<button type="submit" class="kit-btn">Search</button>';
+		if ( '' !== $atts['compact'] ) {
+			$chips = '';
+			$types = get_terms( array( 'taxonomy' => 'post_tag', 'slug' => aw_listing_type_slugs(), 'hide_empty' => true, 'orderby' => 'count', 'order' => 'DESC', 'number' => 6 ) );
+			foreach ( is_wp_error( $types ) ? array() : $types as $t ) {
+				$chips .= '<li><a class="kit-chip" href="' . esc_url( add_query_arg( 'tag', $t->slug, $dir ) ) . '">' . esc_html( html_entity_decode( $t->name, ENT_QUOTES, 'UTF-8' ) ) . '</a></li>';
+			}
+			return '<div class="kit-sec-head"><div><h2 class="wp-block-heading" id="aw-find-h">Find help near you</h2>'
+				. '<p>' . esc_html( number_format_i18n( $total ) ) . ' animal welfare organisations, vets and gaushalas in ' . (int) $with . ' states and union territories.</p></div>'
+				. '<div class="aw-findhelp-all"><a class="kit-btn kit-btn--ghost kit-btn--sm" href="' . esc_url( $dir ) . '#aw-browse-states-h">Browse all states</a></div></div>'
+				. $form . '<a class="aw-findhelp-near" href="' . esc_url( $dir ) . '#near-me"><span class="kit-ico kit-ico--map-pin" aria-hidden="true"></span>Use my location</a></form>'
+				. ( $chips ? '<nav class="aw-findhelp-types" aria-label="Organisation types"><ul class="kit-tags">' . $chips . '</ul></nav>' : '' );
+		}
 		usort( $counts, fn( $a, $b ) => $b[1] <=> $a[1] );
 		$top = '';
 		foreach ( array_slice( $counts, 0, 12 ) as $c ) {
 			$top .= '<li><a href="' . esc_url( aw_directory_url( $c[0]->slug ) ) . '"><span>' . esc_html( $c[0]->name ) . '</span>' . kits_count( $c[1] ) . '</a></li>';
 		}
-		$dir = aw_hub_url( 'aw_listing' );
 		return '<p class="has-large-font-size"><strong>' . esc_html( number_format_i18n( $total ) ) . '</strong> organisations in <strong>' . (int) $with . '</strong> states and union territories</p>'
-			. '<form class="aw-ed-search" role="search" method="get" action="' . esc_url( $dir ) . '">'
-			. '<input type="hidden" name="aw_filter" value="1">'
-			. '<label class="screen-reader-text" for="aw-ed-q">Organisation name</label><span class="kit-ico kit-ico--search" aria-hidden="true"></span><input id="aw-ed-q" type="search" name="q" placeholder="Search by name, for example Blue Cross">'
-			. '<label class="screen-reader-text" for="aw-ed-state">State or union territory</label><select id="aw-ed-state" name="state">' . $opts . '</select>'
-			. '<button type="submit" class="kit-btn">Search</button></form>'
+			. $form . '</form>'
 			. ( $top ? '<nav class="aw-browse-states" aria-labelledby="aw-top-states-h"><h3 id="aw-top-states-h">States with the most organisations</h3><ul>' . $top . '</ul></nav>'
 				. '<p class="kit-more"><a href="' . esc_url( $dir ) . '#aw-browse-states-h">All ' . (int) $with . ' states and union territories</a></p>' : '' );
 	}
