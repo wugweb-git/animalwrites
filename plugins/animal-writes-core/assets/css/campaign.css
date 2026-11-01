@@ -157,7 +157,7 @@
    faded into the cream behind the text, from 1200 the wide photo on the right. */
 .aw-camp.aw-camp--sc-stray-dogs .aw-camp-hero.aw-camp-section.alignfull {
 	box-sizing: border-box;
-	height: var(--kit-hero-h);
+	min-height: var(--kit-hero-h); /* only text zoomed to 200% makes it taller (WCAG 1.4.4) */
 	background:
 		linear-gradient(to bottom, var(--camp-cream) 0%, rgb(251 238 231 / .92) 40%, rgb(251 238 231 / 0) 70%),
 		url("/wp-content/themes/animal-writes/assets/img/campaigns/supreme-court-stray-dog-phone.webp") center bottom / cover no-repeat,
@@ -277,7 +277,7 @@
 .aw-camp--community-dogs .aw-camp-hero, .aw-camp--community-dogs.aw-camp-hero { min-height: 1020px; } /* the Community dogs hero only: 1020 below 1200, 800 from 1200 (owner, 19 Oct 2026) */
 @media (min-width: 1200px) { .aw-camp--community-dogs .aw-camp-hero, .aw-camp--community-dogs.aw-camp-hero { min-height: 800px; } }
 /* Lab Rules hero: fixed at --kit-hero-h (720px or one screen, whichever is less; owner, 2 Nov 2026), the poster strip at its own shape */
-.aw-camp--lab-rules .aw-camp-hero { box-sizing: border-box; height: var(--kit-hero-h); }
+.aw-camp--lab-rules .aw-camp-hero { box-sizing: border-box; min-height: var(--kit-hero-h); } /* only text zoomed to 200% makes it taller (WCAG 1.4.4) */
 /* Phones: the Supreme Court and Lab rules heroes fit --kit-hero-h (owner, 2 Nov 2026: one CTA where possible, the
    poster scaled to fit). The hero keeps its first button (the second leads to a section further down the page); the poster
    is a ticket: the day count beside the stamp and "days to go", the due date and the rest under them; the Gazette strip
@@ -370,10 +370,10 @@
 	.aw-camp--lab-rules:has(> .aw-sticky-cta) { --aw-bar-h: calc(var(--kit-btn-height) + 2 * var(--kit-space-2) + env(safe-area-inset-bottom)); padding-bottom: var(--aw-bar-h); }
 	html:has(.aw-camp--lab-rules > .aw-sticky-cta) { scroll-padding-bottom: calc(var(--kit-btn-height) + 2 * var(--kit-space-2) + env(safe-area-inset-bottom)); }
 }
-/* The fixed hero (--kit-hero-h) holds its content at every width (owner, 2 Nov 2026): one call to action, and on phones
-   the poster without the Gazette strip, its G.S.R. stamp beside the countdown */
+/* The fixed hero (--kit-hero-h) holds its content at every width (owner, 2 Nov 2026): one call to action, and on short
+   phones (under 760px tall) the poster without the Gazette strip, its G.S.R. stamp beside the countdown */
 .aw-camp--lab-rules .aw-camp-hero .aw-camp-ghost { display: none; }
-@media (max-width: 767px) {
+@media (max-width: 767px) and (max-height: 760px) {
 	.aw-camp--lab-rules .aw-camp-hero .aw-camp-poster { position: relative; }
 	.aw-camp--lab-rules .aw-camp-hero .aw-camp-poster-doc { display: none; }
 	.aw-camp--lab-rules .aw-camp-hero .aw-camp-stamp { position: absolute; top: var(--kit-space-5); right: var(--kit-space-5); margin: 0; }

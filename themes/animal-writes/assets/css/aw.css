@@ -1534,7 +1534,7 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
    On phones the label, H1, line, countdown and main button come first, the artwork under the text. */
 .aw-camp-band:not(.aw-camp-band--closed) { --kit-color-focus: var(--camp-on-mark); } /* the focus ring in the band's text colour: the Kits blue is 1.3:1 on the campaign colour (the closed band is light) */
 .aw-camp-band.aw-ed-hero--campaign { padding-block: var(--kit-space-6) var(--kit-space-section); }
-section.aw-camp-band.aw-ed-hero--campaign { box-sizing: border-box; height: var(--kit-hero-h); } /* every hero is fixed at --kit-hero-h, 720px or one screen, at every width (owner, 2 Nov 2026) */
+section.aw-camp-band.aw-ed-hero--campaign { box-sizing: border-box; min-height: var(--kit-hero-h); } /* every hero is --kit-hero-h, 720px or one screen, at every width (owner, 2 Nov 2026); only text zoomed to 200% can make it taller (WCAG 1.4.4) */
 .aw-camp-band.aw-ed-hero--campaign h1.aw-camp-band-title { margin: 0 0 var(--kit-space-4); max-width: 18ch; font-size: var(--kit-type-h1); color: var(--camp-on-mark); }
 .aw-camp--lab-rules.aw-ed-hero--campaign h1.aw-camp-band-title { font-weight: var(--kit-weight-bold); letter-spacing: normal; line-height: var(--kit-leading-heading); } /* as .aw-camp--lab-rules h2 (campaign.css) */
 .aw-ed-hero--campaign .aw-camp-band-pill { margin-bottom: var(--kit-space-4); }

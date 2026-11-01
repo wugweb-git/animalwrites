@@ -634,3 +634,27 @@
 		row.setAttribute('aria-labelledby', h.id);
 	});
 })();
+
+/* Supreme Court hero on phones: the poster's note moves to the top of the first section below the hero (under its
+   heading), the same words, so the hero fits --kit-hero-h (owner, 2 Nov 2026); from 768 it goes back to the poster. */
+(function () {
+	var note = document.querySelector('.aw-camp--sc-stray-dogs .aw-camp-hero .aw-camp-poster-note');
+	if (!note || !window.matchMedia) return;
+	var hero = note.closest('.aw-camp-hero');
+	var slot = hero.closest('.aw-camp-slot') || hero;
+	var next = slot.nextElementSibling;
+	var sec = next && (next.matches('.aw-camp-section') ? next : next.querySelector('.aw-camp-section'));
+	if (!sec) return;
+	var home = note.parentNode, after = note.nextSibling;
+	var mq = window.matchMedia('(max-width: 767px)');
+	function place() {
+		if (mq.matches) {
+			var h = sec.querySelector(':scope > h2');
+			sec.insertBefore(note, h ? h.nextSibling : sec.firstChild);
+		} else if (note.parentNode !== home) {
+			home.insertBefore(note, after);
+		}
+	}
+	place();
+	if (mq.addEventListener) mq.addEventListener('change', place);
+})();
