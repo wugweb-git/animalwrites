@@ -46,7 +46,7 @@ $aw_pic     = $aw_wide || $aw_phone;
 --kit-type-sm:clamp(.75rem,.7273rem + .0909vw,.8125rem);--kit-type-base:clamp(.9375rem,.9091rem + .1212vw,1rem);--kit-type-lead:clamp(1rem,.9432rem + .2424vw,1.125rem);--kit-type-h1:clamp(2rem,1.5455rem + 1.9394vw,3rem);--kit-type-display:clamp(2.5rem,1.3636rem + 4.8485vw,5rem);
 --kit-leading-body:1.6;--kit-leading-display:1.06;--kit-tracking-display:-.035em;--kit-tracking-body:-.006em;--kit-weight-medium:500;--kit-weight-bold:700;
 --kit-space-3:12px;--kit-space-4:16px;--kit-space-5:24px;--kit-space-6:32px;--kit-space-8:4rem;--kit-space-section:48px;--kit-space-gutter:16px;--kit-hero-min:560px;--kit-width-wide:1200px;
---kit-size-target:44px;--kit-radius-hero:12px;--kit-radius-pill:9999px;--kit-elevation-3:0 20px 48px rgba(20,20,20,.18);--kit-border-width:1px;--kit-focus-width:3px;--kit-focus-offset:2px;--kit-motion-fast:120ms;
+--kit-size-target:44px;--kit-radius-hero:12px;--kit-radius-pill:9999px;--kit-elevation-3:0 20px 48px rgba(20,20,20,.18);--kit-border-width:1px;--kit-focus-width:3px;--kit-underline-offset-sm:3px;--kit-focus-offset:2px;--kit-motion-fast:120ms;
 --kit-btn-height:var(--kit-size-target);--kit-btn-pad:16px;--kit-btn-gap:8px;--kit-icon-md:20px;--kit-btn-hover-mix:85%;
 --kit-color-accent:#FFBE1A;--kit-color-on-accent:#141414;--kit-btn-brand-bg:var(--kit-color-accent);--kit-btn-brand-fg:var(--kit-color-on-accent)}
 @media (min-width:768px){:root{--kit-space-section:70px;--kit-space-gutter:32px;--kit-btn-height:48px;--kit-btn-pad:24px}}
@@ -55,7 +55,7 @@ $aw_pic     = $aw_wide || $aw_phone;
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 body{margin:0;background:var(--kit-color-canvas);color:var(--kit-color-text);font:400 var(--kit-type-base)/var(--kit-leading-body) "Inter",system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:var(--kit-tracking-body)}
-/* As the 404 page: one text column; the photo after the lead below 1200px, behind the text from 1200px (reference 7) */
+/* As the 404 page: one text column; the photo after the lead on phones, behind the text from 768px (reference 7) */
 main{position:relative;isolation:isolate;display:grid;align-content:center;min-height:var(--kit-hero-min);padding:var(--kit-space-section) var(--kit-space-gutter)}
 .text{width:100%;max-width:var(--kit-width-wide);margin:0 auto}
 .text>*{max-width:40rem}
@@ -70,11 +70,12 @@ p{margin:0}
 .btn .ico{flex:none;width:var(--kit-icon-md);height:var(--kit-icon-md);background-color:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M15%2021v-8a1%201%200%200%200-1-1h-4a1%201%200%200%200-1%201v8%22/%3E%3Cpath%20d%3D%22M3%2010a2%202%200%200%201%20.709-1.528l7-5.999a2%202%200%200%201%202.582%200l7%205.999A2%202%200%200%201%2021%2010v9a2%202%200%200%201-2%202H5a2%202%200%200%201-2-2z%22/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M15%2021v-8a1%201%200%200%200-1-1h-4a1%201%200%200%200-1%201v8%22/%3E%3Cpath%20d%3D%22M3%2010a2%202%200%200%201%20.709-1.528l7-5.999a2%202%200%200%201%202.582%200l7%205.999A2%202%200%200%201%2021%2010v9a2%202%200%200%201-2%202H5a2%202%200%200%201-2-2z%22/%3E%3C/svg%3E") center/contain no-repeat}
 @media (hover:hover){.btn:hover{background:color-mix(in srgb,var(--kit-btn-brand-bg) var(--kit-btn-hover-mix),var(--kit-color-ink));border-color:color-mix(in srgb,var(--kit-btn-brand-bg) var(--kit-btn-hover-mix),var(--kit-color-ink))}}
 .note{margin-top:var(--kit-space-5);color:var(--kit-color-muted);font-size:var(--kit-type-sm)}
-.note a{color:var(--kit-color-link);text-underline-offset:3px;overflow-wrap:anywhere}
+.note a{color:var(--kit-color-link);text-underline-offset:var(--kit-underline-offset-sm);overflow-wrap:anywhere}
 a:focus-visible{outline:var(--kit-focus-width) solid var(--kit-color-focus);outline-offset:var(--kit-focus-offset)}
 figure{margin:var(--kit-space-5) 0}
 figure img{display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover}
-@media (min-width:1200px){figure{position:absolute;inset:0;z-index:-1;max-width:none!important;margin:0}figure picture,figure img{width:100%;height:100%}figure img{aspect-ratio:auto;object-position:right bottom}figure::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,var(--kit-color-canvas) 0%,var(--kit-color-canvas) 35%,transparent 65%)}}
+@media (min-width:768px){.text>figure{position:absolute;inset:0;z-index:-1;max-width:none;margin:0}figure picture,figure img{width:100%;height:100%}figure img{aspect-ratio:auto;object-position:right bottom}figure::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,var(--kit-color-canvas) 0%,var(--kit-color-canvas) 60%,transparent 90%)}}
+@media (min-width:1200px){figure::after{background:linear-gradient(90deg,var(--kit-color-canvas) 0%,var(--kit-color-canvas) 35%,transparent 65%)}}
 @media (prefers-reduced-motion:reduce){.btn{transition:none}}
 </style>
 </head>
@@ -86,7 +87,7 @@ figure img{display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:cove
 <h1>We are updating the website</h1>
 <p class="lead">Animal Writes is being updated and will be back in a few minutes. Please reload this page shortly.</p>
 <?php if ( $aw_pic ) : ?>
-<figure><picture><?php if ( $aw_wide && $aw_phone ) : ?><source media="(min-width: 1200px)" srcset="/wp-content/plugins/animal-writes-core/assets/error/503-wide.webp" width="2400" height="1350"><?php endif; ?><img src="/wp-content/plugins/animal-writes-core/assets/error/503-<?php echo $aw_phone ? 'phone' : 'wide'; ?>.webp" width="1200" height="900" alt="" decoding="async"></picture></figure>
+<figure><picture><?php if ( $aw_wide && $aw_phone ) : ?><source media="(min-width: 768px)" srcset="/wp-content/plugins/animal-writes-core/assets/error/503-wide.webp" width="2400" height="1350"><?php endif; ?><img src="/wp-content/plugins/animal-writes-core/assets/error/503-<?php echo $aw_phone ? 'phone' : 'wide'; ?>.webp" width="1200" height="900" alt="" decoding="async"></picture></figure>
 <?php endif; ?>
 <ul class="actions">
 <li><a class="btn" href="/"><span class="ico" aria-hidden="true"></span>Go to the home page</a></li>

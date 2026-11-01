@@ -141,8 +141,8 @@ add_shortcode(
 
 /**
  * An error page's photo (owner, 2 Nov 2026: the animals blended into the page, reference 7). Files in assets/error/:
- * {name}-wide.webp (16:9, 2400 × 1350: from 1200px it fills the section behind the text, so its left half is a plain
- * wall and the animals sit bottom right) and {name}-phone.webp (4:3, 1200 × 900: below 1200px, after the lead, animals
+ * {name}-wide.webp (16:9, 2400 × 1350: from 768px it fills the section behind the text, so its left half is a plain
+ * wall and the animals sit bottom right) and {name}-phone.webp (4:3, 1200 × 900: on phones, after the lead, animals
  * in the middle). Either file alone is used at every width. '' with neither: the page keeps its one text column.
  * Decorative (empty alt): the words say everything.
  *
@@ -158,6 +158,6 @@ function aw_error_picture( $name ) {
 		return '';
 	}
 	$src    = $phone ? $phone : $wide;
-	$source = $wide && $phone ? '<source media="(min-width: 1200px)" srcset="' . esc_url( $wide ) . '" width="2400" height="1350">' : '';
+	$source = $wide && $phone ? '<source media="(min-width: 768px)" srcset="' . esc_url( $wide ) . '" width="2400" height="1350">' : '';
 	return '<figure class="kit-error-media"><picture>' . $source . '<img src="' . esc_url( $src ) . '" width="1200" height="900" alt="" decoding="async" fetchpriority="high"></picture></figure>';
 }

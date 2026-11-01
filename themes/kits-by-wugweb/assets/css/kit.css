@@ -1089,20 +1089,24 @@ body { background: var(--kit-surface-page); }
 .kit-error-search .kit-error-field input { width: 100%; padding-left: calc(var(--kit-space-4) + var(--kit-icon-md) + var(--kit-space-2)); }
 .kit-error-links a { gap: var(--kit-space-2); }
 .kit-error-links a .kit-ico { --kit-ico-size: var(--kit-icon-md); }
-/* The photo (aw_error_picture): below 1200px after the lead, the column's width, no frame; from 1200px it fills the
-   section behind the text at the page hero's height (its left half is a plain wall, so the text stays readable) */
+/* The photo (aw_error_picture): on phones after the lead, the column's width, no frame. From 768px it fills the section
+   behind the text at the page hero's height (--kit-hero-min, so the section stays within 720px): the page colour fades
+   in from the left over the photo, so the text keeps its contrast whatever the picture (stops: docs/design-system.md,
+   Error pages) */
 .kit-error-media { margin: var(--kit-space-5) 0; }
 .kit-error-media img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; }
-@media (min-width: 1200px) {
+@media (min-width: 768px) {
 	.kit-error-page:has(> .kit-error-media) { position: relative; isolation: isolate; min-height: var(--kit-hero-min); }
-	.kit-error-page > .kit-error-media { position: absolute; inset: 0; z-index: -1; max-width: none !important; margin: 0 !important; }
+	.kit-error-page > .kit-error-media { position: absolute; inset: 0; z-index: -1; max-width: none; margin: 0 !important; } /* !important: WordPress's constrained layout sets its child margins with !important */
 	.kit-error-page > .kit-error-media :is(picture, img) { width: 100%; height: 100%; }
 	.kit-error-page > .kit-error-media img { aspect-ratio: auto; object-position: right bottom; }
-	/* the page colour fades in from the left over any photo, so the text keeps its contrast whatever the picture */
-	.kit-error-page > .kit-error-media::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, var(--kit-color-canvas) 0%, var(--kit-color-canvas) 35%, transparent 65%); }
+	.kit-error-page > .kit-error-media::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, var(--kit-color-canvas) 0%, var(--kit-color-canvas) 60%, transparent 90%); }
 	/* the text column starts where the header's logo does, on the left of the wide width, not centred over the photo */
 	.kit-error-page:has(> .kit-error-media) > :not(.kit-error-media) { max-width: 40rem; margin-left: max(0px, (100% - var(--kit-width-wide)) / 2) !important; margin-right: auto !important; }
 	.kit-error-page:has(> .kit-error-media) .kit-error-links a, .kit-error-page:has(> .kit-error-media) .kit-error-field input { background: var(--kit-color-raised); }
+}
+@media (min-width: 1200px) {
+	.kit-error-page > .kit-error-media::after { background: linear-gradient(90deg, var(--kit-color-canvas) 0%, var(--kit-color-canvas) 35%, transparent 65%); }
 }
 
 /* The menu button only below 1200px (from 1200px the full menu shows on one row). */
