@@ -803,7 +803,7 @@ add_action(
 
 /** The note on rows that are listed from the map, not read live (page and command). */
 function aw_edit_screen_map_only_note(): string {
-	return 'Sidebar panels that plugins add with JavaScript in the block editor, Dashboard widgets and the panels, boxes and tables on admin pages (AW Sourcing, AW SEO Plus and Search Insights, Animal Writes, Mailweb) are listed from the map, not read live.';
+	return 'Sidebar panels that plugins add with JavaScript in the block editor, Dashboard widgets and the panels, boxes and tables on admin pages (AW Sourcing, AW SEO Plus and Search Insights, Animal Writes, Mailweb, Kits Core) are listed from the map, not read live.';
 }
 
 /** Animal Writes → Edit screens. */

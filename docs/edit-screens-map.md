@@ -741,7 +741,7 @@ Purpose "SEO report". They read Search Insights data and store no post meta.
 
 ## 9. Admin page widgets
 
-The panels, boxes and tables on the admin pages of AW Sourcing, AW SEO Plus (with Search Insights), Animal Writes and Mailweb. Listed on Animal Writes → Edit screens with one heading per page (`"screen": "admin"`, `types` = the page id below), from the map, never read live and never counted as not mapped or as edited in two places. What each one reads, sets and its limits are in the row's notes (map fields `reads`, `sets`, `limits`); `option:`, `table:` and `transient:` mark options, custom tables and transients, other names are post meta. The ten Search Insights Overview boxes are in §8. Kits Core pages are not included.
+The panels, boxes and tables on the admin pages of AW Sourcing, AW SEO Plus (with Search Insights), Animal Writes, Mailweb and Kits Core. Listed on Animal Writes → Edit screens with one heading per page (`"screen": "admin"`, `types` = the page id below), from the map, never read live and never counted as not mapped or as edited in two places. What each one reads, sets and its limits are in the row's notes (map fields `reads`, `sets`, `limits`); `option:`, `table:` and `transient:` mark options, custom tables and transients, other names are post meta. The ten Search Insights Overview boxes are in §8.
 
 ### AW Sourcing
 
@@ -1013,6 +1013,26 @@ The panels, boxes and tables on the admin pages of AW Sourcing, AW SEO Plus (wit
 |---|---|---|---|---|---|
 | ap-mail-smtp | Site sending (SMTP) | form | `option:mailweb_smtp` | Test email goes to the admin address. | `plugins/mailweb/includes/smtp.php:66 (mailweb_smtp_screen)` |
 | ap-mail-cap | Daily sending limit | form | `table:wp_mailweb_queue`, `option:mailweb_cap`, `option:mailweb_stats`, `option:mailweb_last_error`, `option:mailweb_pause` | Default 90 a day with 10 held back; 4 tries before an email is held. | `plugins/mailweb/includes/mail-cap.php:384` |
+
+### Kits Core
+
+**Kits: Overview** (`kits`)
+
+| id | widget | kind | reads | limits | file |
+|---|---|---|---|---|---|
+| ap-kits-overview | Design and branding / Site features | table | `option:aw_visits_total`, `option:aw_visits_since`, `option:kits_preview_ips`, `option:kits_altcha_key` | — | `kits/admin-home.php:86, :119 (kits_overview_page)` |
+
+**Kits: Design system** (`kits-system`)
+
+| id | widget | kind | reads | limits | file |
+|---|---|---|---|---|---|
+| ap-kits-system | Design system (Components, States sheet, Menu types, Colour contrast, Tokens) | table | `themes/*/kits-registry.json`, `token CSS files`, `option:kits_spot_map` | Notice at the top for classes in use with no registry entry. | `kits/system-screen.php:135 (kits_system_page)` |
+
+**Kits: Preview** (`kits-preview`)
+
+| id | widget | kind | reads | limits | file |
+|---|---|---|---|---|---|
+| ap-kits-preview | Preview addresses | form | `option:kits_preview_ips` | One address per line. | `kits/preview.php:236` |
 
 **Keys set from an admin page, not from an edit-screen box**
 

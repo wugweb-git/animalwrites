@@ -2903,6 +2903,71 @@
 			"limits": "One row per offered picture (the plan file); Apply, Undo and Check again one picture at a time; news, Library items, listings and posts only.",
 			"decision": "",
 			"notes": "Apply sets the page's cover (_thumbnail_id), aw_cover_reused (keeps the PDF cover job from replacing it) and, on news, Library items and posts, aw_source_image_off; Undo puts them back. These keys are set from Reuse pictures, not from an edit-screen box."
+		},
+		"ap-kits-overview": {
+			"title": "Design and branding / Site features",
+			"source": "Kits Core",
+			"plugin": "Kits Core",
+			"purpose": "Kits overview",
+			"file": "kits/admin-home.php:86, :119 (kits_overview_page)",
+			"screen": "admin",
+			"page": "Kits: Overview",
+			"types": [
+				"kits"
+			],
+			"runtime": "map-only",
+			"kind": "table",
+			"reads": [
+				"option:aw_visits_total",
+				"option:aw_visits_since",
+				"option:kits_preview_ips",
+				"option:kits_altcha_key"
+			],
+			"limits": "",
+			"decision": "",
+			"notes": "Stores nothing."
+		},
+		"ap-kits-system": {
+			"title": "Design system (Components, States sheet, Menu types, Colour contrast, Tokens)",
+			"source": "Kits Core",
+			"plugin": "Kits Core",
+			"purpose": "Design system",
+			"file": "kits/system-screen.php:135 (kits_system_page)",
+			"screen": "admin",
+			"page": "Kits: Design system",
+			"types": [
+				"kits-system"
+			],
+			"runtime": "map-only",
+			"kind": "table",
+			"reads": [
+				"themes/*/kits-registry.json",
+				"token CSS files",
+				"option:kits_spot_map"
+			],
+			"limits": "Notice at the top for classes in use with no registry entry.",
+			"decision": "",
+			"notes": "Stores nothing (caches option kits_spot_map)."
+		},
+		"ap-kits-preview": {
+			"title": "Preview addresses",
+			"source": "Kits Core",
+			"plugin": "Kits Core",
+			"purpose": "Preview",
+			"file": "kits/preview.php:236",
+			"screen": "admin",
+			"page": "Kits: Preview",
+			"types": [
+				"kits-preview"
+			],
+			"runtime": "map-only",
+			"kind": "form",
+			"reads": [
+				"option:kits_preview_ips"
+			],
+			"limits": "One address per line.",
+			"decision": "",
+			"notes": "Saves option kits_preview_ips."
 		}
 	},
 	"keys": {
