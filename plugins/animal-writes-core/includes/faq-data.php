@@ -265,7 +265,7 @@ function aw_faq_listing_services( $id, $name ) {
 		$names = array_map( 'trim', explode( ',', aw_lf( $id, 'aw_services' ) ) );
 	}
 	if ( ! $names ) {
-		if ( aw_faq_listing_type( $id, $name ) ) {
+		if ( aw_faq_listing_type( $id, $name ) && aw_faq_listing_type_fits( $id, $name ) ) {
 			return null; // the type answer says what kind of organisation it is; services read off the type would repeat it
 		}
 		$names = aw_listing_type_services( $id );
@@ -279,6 +279,31 @@ function aw_faq_listing_services( $id, $name ) {
 	$list  = aw_faq_and( array_map( 'aw_faq_lc', array_slice( $names, 0, 8 ) ) ) . ( $extra ? ' and ' . $extra . ' more' : '' );
 	$a     = esc_html( $name ) . ' offers ' . esc_html( $list ) . ( $typed ? ' (based on type)' : '' ) . '. ' . aw_faq_a( aw_faq_section_url( $id, 'services' ), 'See its services' ) . '.';
 	return array( $a, 'services', ! $typed ); // "based on type" is shown but does not count toward the 3 (owner, 20 Oct 2026)
+}
+
+/**
+ * Whether the type question makes the FAQ when "services based on type" gives way to it: fewer than AW_FAQ_MAX
+ * questions shown before it, counting the listing's other answers of a higher priority in the default order (hidden
+ * and repeated facts left out, as the FAQ box does). Otherwise the services answer stays, so one of the two shows.
+ */
+function aw_faq_listing_type_fits( $id, $name ) {
+	$reg  = (array) ( apply_filters( 'aw_faq_registry', array() )['aw_listing'] ?? array() );
+	$prio = (float) ( array_column( $reg, 'priority', 'key' )['type'] ?? 0 );
+	$seen = array();
+	foreach ( $reg as $e ) {
+		if ( in_array( $e['key'], array( 'services', 'type' ), true ) || $e['priority'] >= $prio ) {
+			continue;
+		}
+		$h = $e['hidden'] ?? false;
+		if ( is_callable( $h ) ? call_user_func( $h, $id, $name ) : (bool) $h ) {
+			continue;
+		}
+		$r = call_user_func( $e['answer'], $id, $name );
+		if ( $r && isset( $r[0] ) && is_string( $r[0] ) ) {
+			$seen[ (string) $r[1] ] = true;
+		}
+	}
+	return count( $seen ) < ( defined( 'AW_FAQ_MAX' ) ? AW_FAQ_MAX : 6 );
 }
 
 function aw_faq_listing_awbi( $id, $name ) {
@@ -371,7 +396,8 @@ function aw_faq_type_words( $t ) {
 }
 
 /**
- * Published listings of each type by district code and by state code (from aw_place_counts() pairs).
+ * Published listings of each type by district code (aw_place_counts() pairs) and by state code (counted on the state
+ * code, so listings with a state and no district are in it, as on the state pages).
  *
  * @return array{district: array, state: array}
  */
@@ -384,13 +410,25 @@ function aw_faq_type_counts() {
 	foreach ( function_exists( 'aw_place_counts' ) ? (array) ( aw_place_counts()['pairs'] ?? array() ) : array() as $p ) {
 		list( $code, $type, , $n ) = $p;
 		$idx['district'][ $code ][ $type ] = $n;
-		$d                                 = aw_place_district( $code );
-		if ( $d ) {
-			$idx['state'][ $d->state ][ $type ] = ( $idx['state'][ $d->state ][ $type ] ?? 0 ) + $n;
-		}
 	}
+	$state = get_transient( 'aw_faq_state_type_counts' );
+	if ( ! is_array( $state ) ) {
+		global $wpdb;
+		$state = array();
+		$slugs = function_exists( 'aw_listing_type_slugs' ) ? (array) aw_listing_type_slugs() : array();
+		$skip  = function_exists( 'kits_preview_only_ids' ) && kits_preview_only_ids() ? ' AND p.ID NOT IN (' . implode( ',', array_map( 'intval', kits_preview_only_ids() ) ) . ')' : ''; // preview-only items
+		$types = "'" . implode( "','", array_map( 'esc_sql', $slugs ) ) . "'";
+		$rows  = $slugs ? $wpdb->get_results( "SELECT sm.meta_value code, t.slug type, COUNT(DISTINCT p.ID) n FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} sm ON sm.post_id = p.ID AND sm.meta_key = 'aw_state_code' JOIN {$wpdb->term_relationships} rt ON rt.object_id = p.ID JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = rt.term_taxonomy_id AND tt.taxonomy = 'post_tag' JOIN {$wpdb->terms} t ON t.term_id = tt.term_id AND t.slug IN ({$types}) WHERE p.post_type = 'aw_listing' AND p.post_status = 'publish'{$skip} GROUP BY sm.meta_value, t.slug", ARRAY_A ) : array(); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		foreach ( (array) $rows as $r ) {
+			$state[ (int) $r['code'] ][ $r['type'] ] = (int) $r['n'];
+		}
+		set_transient( 'aw_faq_state_type_counts', $state, HOUR_IN_SECONDS );
+	}
+	$idx['state'] = $state;
 	return $idx;
 }
+
+add_action( 'save_post_aw_listing', fn() => delete_transient( 'aw_faq_state_type_counts' ) ); // fresh state counts after a listing is saved
 
 /** Whether a listing value is shown marked unverified (kept next to another value). */
 function aw_faq_unverified( $id, $value ) {
@@ -410,9 +448,10 @@ function aw_faq_listing_type( $id, $name ) {
 	$slug  = $types[0]->slug;
 	$plur  = $words[0][1];
 	$cnt   = aw_faq_type_counts();
-	if ( $place && 'district' === $place->kind && ( $cnt['district'][ $place->code ][ $slug ] ?? 0 ) > 1 ) { // others of its type in its district
+	$self  = 'publish' === get_post_status( $id ) ? 1 : 0; // the counts include the listing itself once published
+	if ( $place && 'district' === $place->kind && ( $cnt['district'][ $place->code ][ $slug ] ?? 0 ) > $self ) { // others of its type in its district
 		$link = aw_faq_a( aw_directory_url( $place->slug, $slug ), 'See other ' . $plur . ' in ' . $place->name );
-	} elseif ( $place && ( $cnt['state'][ 'district' === $place->kind ? $place->state : $place->code ][ $slug ] ?? 0 ) > ( 'district' === $place->kind ? 1 : 0 ) ) { // else in its state
+	} elseif ( $place && ( $cnt['state'][ 'district' === $place->kind ? $place->state : $place->code ][ $slug ] ?? 0 ) > $self ) { // else in its state
 		$st   = 'district' === $place->kind ? aw_place_state( $place->state ) : $place;
 		$link = aw_faq_a( aw_directory_url( $st->slug, $slug ), 'See other ' . $plur . ' in ' . $st->name );
 	} else {
@@ -444,8 +483,14 @@ function aw_faq_listing_nearby_place( $id ) {
 	if ( ! $place ) {
 		return null;
 	}
-	$others = (int) aw_place_count( $place ) - ( 'publish' === get_post_status( $id ) ? 1 : 0 );
-	return $others > 0 ? array( $place, $others ) : null;
+	$self = 'publish' === get_post_status( $id ) ? 1 : 0;
+	foreach ( array( $place, 'district' === $place->kind ? aw_place_state( $place->state ) : null ) as $p ) { // the district, else its state
+		$others = $p ? (int) aw_place_count( $p ) - $self : 0;
+		if ( $others > 0 ) {
+			return array( $p, $others );
+		}
+	}
+	return null;
 }
 
 function aw_faq_listing_nearby_question( $tpl, $id ) {
