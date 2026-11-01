@@ -1543,19 +1543,3 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 /* Take action on Home: two Kits cards (icon, title, one line, button), side by side from 768; the button at the bottom.
    The card is not a link (its button is), so it does not lift on hover. */
 
-/* India Writes for Its Community Dogs on Home (pattern aw1-story-home): one band, the section's own padding.
-   Phones: title, line and button, then the figure. From 768: the 2.5 lakh figure on the left, the text on the right.
-   The overlay is the Ink colour (secondary) over the photograph: 80% under the figure, at least 92% under the text, so
-   white text passes 4.5:1 on any part of the photograph (phones: the text is over the whole width, at least 80%). */
-.wp-block-cover.aw-ed-story--home > .wp-block-cover__background.has-background-dim {
-	background: linear-gradient(90deg, color-mix(in srgb, var(--wp--preset--color--secondary) 80%, transparent) 0%, color-mix(in srgb, var(--wp--preset--color--secondary) 92%, transparent) 40%, color-mix(in srgb, var(--wp--preset--color--secondary) 94%, transparent) 100%);
-	opacity: 1;
-}
-.aw-ed-story.aw-camp--community-dogs.aw-ed-story--home .aw-ed-story-cols { gap: var(--kit-space-5); align-items: center; }
-@media (min-width: 768px) {
-	.aw-ed-story.aw-camp--community-dogs.aw-ed-story--home .aw-ed-story-cols { grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: var(--kit-space-7); }
-	.aw-ed-story--home .aw-ed-story-fig { order: -1; }
-}
-.aw-ed-story--home .aw-ed-story-fig > * { margin: 0 !important; }
-.aw-ed-story.aw-camp--community-dogs.aw-ed-story--home .aw-ed-story-num { font-size: var(--kit-type-display) !important; color: var(--camp-primary); }
-.aw-ed-story--home .aw-ed-story-fig .has-small-font-size { margin-top: var(--kit-space-1) !important; color: color-mix(in srgb, var(--kit-color-on-ink) 80%, transparent); }

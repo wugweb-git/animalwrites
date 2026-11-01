@@ -2809,40 +2809,6 @@
     "schema": "none"
    },
    "block": "animal-writes/home-hero"
-  },
-  {
-   "name": "India Writes for Its Community Dogs (Home)",
-   "type": "pattern",
-   "status": "live",
-   "classes": [
-    "aw-ed-story",
-    "aw-ed-story--home",
-    "aw-ed-story-cols",
-    "aw-ed-story-text",
-    "aw-ed-story-fig",
-    "aw-ed-story-num",
-    "aw-ed-story-actions"
-   ],
-   "states": [
-    "default: figure left, title, line and button right (from 768); text then figure on phones; section padding; Ink overlay at least 92% under the text (80% under the figure)"
-   ],
-   "tokens": [],
-   "a11y": {
-    "element": "pattern (Editor → Patterns, \"Animal Writes\")",
-    "aria": "none",
-    "keyboard": "Tab to the button",
-    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
-    "target": "44px button",
-    "motion": "none",
-    "sr": "visible text; title before the figure in reading order"
-   },
-   "seo": {
-    "heading": "H2",
-    "link": "Read the full story (campaign page)",
-    "alt": "empty (background photograph)",
-    "schema": "none"
-   },
-   "block": "animal-writes/aw1-story-home"
   }
  ],
  "nav_status": {
