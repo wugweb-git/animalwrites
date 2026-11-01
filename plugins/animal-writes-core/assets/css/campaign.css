@@ -66,6 +66,8 @@
 .aw-camp--diwali .aw-camp-hero--photo .aw-camp-hero-summary { max-width: 36rem; }
 .aw-camp--diwali .aw-camp-hero--photo > .aw-camp-hero-photo { order: 2; display: block; max-width: none; width: 100vw; margin: var(--kit-space-6) calc(50% - 50vw) 0; }
 .aw-camp--diwali .aw-camp-hero-photo img { display: block; width: 100%; height: auto; }
+/* the main button in the site's own yellow so it shows on the night band */
+.aw-camp--diwali .aw-camp-hero--photo .wp-block-button:not(.aw-camp-ghost) .wp-block-button__link { background: var(--kit-color-accent); color: var(--kit-color-on-accent); }
 @media (min-width: 1200px) {
 	.aw-camp--diwali .aw-camp-hero--photo { flex-direction: row; align-items: center; justify-content: center; gap: var(--kit-space-7); padding-bottom: var(--wp--preset--spacing--60) !important; }
 	.aw-camp--diwali .aw-camp-hero--photo > .aw-camp-hero-copy { flex: 0 1 40rem; margin-left: 0 !important; margin-right: 0 !important; }
