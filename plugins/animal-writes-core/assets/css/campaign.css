@@ -261,7 +261,6 @@
 .aw-camp--sc-stray-dogs .aw-camp-tracker { padding-bottom: 0; scrollbar-width: thin; }
 .aw-camp--sc-stray-dogs .aw-camp-tracker td { padding-bottom: var(--kit-space-2); }
 .aw-camp--sc-stray-dogs .aw-camp-tracker td:last-child { padding-bottom: 0; }
-@media (min-width: 768px) { .aw-camp--sc-stray-dogs .aw-camp-tracker { --aw-sc-card: min(100%, var(--kit-width-content)); } }
 .aw-camp--sc-stray-dogs .aw-camp-tracker td:has(> .aw-sc-fold)::before { content: none; }
 .aw-camp--sc-stray-dogs .aw-camp-tracker td:first-child > .aw-sc-fold { font-size: var(--kit-type-base); font-weight: var(--kit-weight-regular, 400); color: var(--kit-color-text); } /* the folded list of states reads as text; its summary keeps the fold style */
 .aw-camp--sc-stray-dogs .aw-sc-fold > summary { display: flex; align-items: center; justify-content: space-between; gap: var(--kit-space-2); min-height: var(--kit-size-target); color: var(--camp-primary); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-bold); list-style: none; cursor: pointer; }
@@ -274,6 +273,7 @@
 @media (min-width: 768px) {
 	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) { --aw-sc-card: calc((100% - var(--kit-space-4)) / 2); }
 }
+@media (min-width: 768px) { .aw-camp--sc-stray-dogs .aw-camp-tracker { --aw-sc-card: min(100%, var(--kit-width-content)); } } /* after the two-across rule above, which it overrides for the tracker */
 /* The Library: one sideways row at every width (82% of the view on phones, two to the view from 768, three from 1200).
    What you can do: the same row below 1200; from 1200 the three cards side by side, none spanning the row. */
 .aw-camp--sc-stray-dogs #read .wp-block-post-template { display: flex; gap: var(--kit-space-4); overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; padding-bottom: var(--kit-space-3); }
