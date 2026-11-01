@@ -184,7 +184,7 @@ function aw_media_reuse_apply( $picture ) {
 	}
 	$target   = $row['target'];
 	$old_off  = metadata_exists( 'post', $target, 'aw_source_image_off' ) ? (string) get_post_meta( $target, 'aw_source_image_off', true ) : null;
-	$set_off  = 'publisher' === aw_media_reuse_current( $target )['kind'];
+	$set_off  = 'aw_news' === get_post_type( $target ) || 'publisher' === aw_media_reuse_current( $target )['kind']; // a news item always gets the flag, so no later fetch can bring back a publisher image over the cover
 	$log      = aw_media_reuse_log();
 	$log[ $picture ] = array(
 		'status'    => 'pending',
@@ -336,7 +336,7 @@ function aw_media_reuse_screen() {
 	foreach ( $log as $e ) {
 		$applied += 'applied' === $e['status'] ? 1 : 0;
 	}
-	echo '<p>Pictures already in the Media Library, offered as the cover of a page. Apply sets the cover and, on a news item, Library item or post that shows the publisher image, switches that image off so the cover shows; the weekly check does not switch it back on. Undo puts the old cover back, as long as the page still has what Apply set. Nothing is applied by itself, and no picture is deleted or edited. A picture used by another page, or a page that no longer exists, is refused.</p>';
+	echo '<p>Pictures already in the Media Library, offered as the cover of a page. Apply sets the cover and, on a news item (or a Library item or post that shows the publisher image), switches the publisher image off so the cover shows; the weekly check does not switch it back on. Undo puts the old cover back, as long as the page still has what Apply set. Nothing is applied by itself, and no picture is deleted or edited. A picture used by another page, or a page that no longer exists, is refused.</p>';
 	echo '<p>' . count( $plan ) . ' pictures offered: ' . (int) $applied . ' applied.</p>';
 	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
 	wp_nonce_field( 'aw_media_reuse' );
