@@ -1322,22 +1322,24 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 
 .aw-tasks.is-three { margin-bottom: 0; } /* a section preview: the section padding ends it */
 @media (min-width: 768px) { :is(.aw-news-list, .aw-tasks).is-three { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); } } /* News or Resources cards, three across (no orphan in a row of three) */
-/* Mosaic (What's happening, From the Library on Home): the lead card (block-lg: 4:3 picture, title,
-   summary; hubs.php picks the state by place) and the next three as stacked-md rows (thumbnail and the title clamp of
-   every card, phones included). Phones: the lead, then the rows. From 768: the lead on the left spans the rows on the
-   right; each row keeps its natural height and the rows are spread over the lead's height (the first at the top, the
-   last at the bottom), so both columns end level with nothing cropped or stretched. 7fr / 5fr from 768, 5fr / 7fr from 1200. */
+/* Mosaic (What's happening, From the Library on Home): the lead card (block-lg: picture, title, summary; hubs.php picks
+   the state by place) and the next three as stacked-md rows (thumbnail and the title clamp of every card, phones
+   included). Phones: the lead, then the rows, each at its natural height. From 768: the rows sit one under the other on
+   the right, at their natural height, with the normal gap; the lead on the left takes the same height, and its picture
+   is the part that gives (it fills what the title and summary leave, cropped like every card picture, at least 8rem), so
+   both columns end level with no empty gap and nothing stretched. 7fr / 5fr from 768, 5fr / 7fr from 1200. */
 .aw-news-list.aw-news-mosaic { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-3); }
 .aw-news-mosaic > li { margin: 0 !important; min-width: 0; }
 .aw-news-mosaic .kit-card--stacked-md { height: auto; }
 @media (min-width: 768px) {
-	.aw-news-list.aw-news-mosaic { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); column-gap: var(--kit-space-grid); row-gap: var(--kit-space-3); }
-	.aw-news-mosaic > li:first-child { grid-column: 1; grid-row: 1 / span 3; align-self: start; }
+	.aw-news-list.aw-news-mosaic { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); grid-auto-rows: auto; align-content: start; column-gap: var(--kit-space-grid); row-gap: var(--kit-space-3); }
+	.aw-news-mosaic > li:first-child { grid-column: 1; grid-row: 1 / span 3; display: flex; }
 	.aw-news-mosaic:has(> li:nth-child(3):last-child) > li:first-child { grid-row: 1 / span 2; }
 	.aw-news-mosaic:has(> li:nth-child(2):last-child) > li:first-child { grid-row: 1; }
-	.aw-news-mosaic > li:nth-child(n+2) { grid-column: 2; align-self: center; }
-	.aw-news-mosaic > li:nth-child(2) { align-self: start; }
-	.aw-news-mosaic > li:nth-child(n+3):last-child { align-self: end; }
+	.aw-news-mosaic > li:nth-child(n+2) { grid-column: 2; align-self: start; }
+	.aw-news-mosaic > li:first-child > .kit-card { flex: 1 1 auto; height: auto; }
+	.aw-news-mosaic > li:first-child .kit-card-media { position: relative; flex: 1 1 0; min-height: 8rem; aspect-ratio: auto; margin: 0; }
+	.aw-news-mosaic > li:first-child .kit-card-media img { position: absolute; inset: 0; }
 }
 @media (min-width: 1200px) { .aw-news-list.aw-news-mosaic { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); } }
 
