@@ -1,0 +1,43 @@
+{
+    "key": "group_aw_campaign_dates",
+    "title": "Dates and state",
+    "fields": [
+        {
+            "key": "field_aw_campaign_dates_box",
+            "label": "",
+            "name": "",
+            "aria-label": "",
+            "type": "message",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "message": "",
+            "new_lines": "",
+            "esc_html": 0
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "post_type",
+                "operator": "==",
+                "value": "aw_campaign"
+            }
+        ]
+    ],
+    "menu_order": 1,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "left",
+    "instruction_placement": "field",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Opens on, closes on and the state override.",
+    "show_in_rest": 0,
+    "modified": 1793476800
+}
