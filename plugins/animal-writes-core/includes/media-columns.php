@@ -1,6 +1,6 @@
 <?php
 /**
- * Media Library list columns: name, slug, where each file is used, Rank Math page score, what is missing and what to optimise.
+ * Media Library list columns: name, slug, where each file is used and what to optimise.
  *
  * - Every SEO field of a file is visible: Caption = SEO title, Description = SEO description, Image context, and
  *   Alternative Text (Rank Math's own column), each as its own column.
@@ -8,9 +8,6 @@
  * - "Uploaded to" keeps what WordPress prints (parent post, Attach / Detach) and lists every other place the file is used
  *   as extra rows below it: featured image, source image, document preview, logos, social image, a category or tag
  *   photo, the site icon, and the source a favicon or logo belongs to. Sorting still goes through the core parent order.
- * - SEO: the Rank Math score of the pages that use the file (Rank Math does not score attachments, so no score of our
- *   own is made up), and what is missing on the file itself, from the fields already on the attachment: Alternative Text,
- *   Caption = SEO title, Description = SEO description, Image context, the focus keyword of the pages that use it.
  * - Optimisation: size, format and what is missing (no resized copies, over 300 KB, under 64 px).
  * Core list-table columns only: no custom CSS, no scripts. Read only; nothing is saved by this file.
  *
@@ -126,64 +123,6 @@ function aw_media_usage( $ids ) {
 	return array_intersect_key( $cache, array_flip( $ids ) );
 }
 
-/**
- * What to fix on one file (no score: Rank Math gives none for attachments).
- *
- * @param WP_Post $post Attachment.
- * @param array   $use  Row from aw_media_usage().
- * @return string[] Issues; empty when the file is complete.
- */
-function aw_media_seo( $post, $use ) {
-	$is_img = wp_attachment_is_image( $post );
-	$meta   = $is_img ? wp_get_attachment_metadata( $post->ID ) : array();
-	$bytes  = ! empty( $meta['filesize'] ) ? (int) $meta['filesize'] : 0;
-	$alt    = trim( (string) get_post_meta( $post->ID, '_wp_attachment_image_alt', true ) );
-	$cap    = trim( (string) $post->post_excerpt );
-	$desc   = trim( wp_strip_all_tags( (string) $post->post_content ) );
-	$ctx    = trim( (string) get_post_meta( $post->ID, 'kits_image_context', true ) );
-	$kw     = strtolower( (string) $use['kw'] );
-	$issues = array();
-	$title  = html_entity_decode( (string) $post->post_title, ENT_QUOTES, 'UTF-8' );
-	if ( '' === $title || mb_strlen( $title ) > 60 ) {
-		$issues[] = 'name over 60 characters';
-	}
-	if ( $is_img ) {
-		if ( '' === $alt ) {
-			$issues[] = 'no alt text';
-		} elseif ( mb_strlen( $alt ) > 160 ) {
-			$issues[] = 'alt over 160 characters';
-		}
-	}
-	if ( '' === $cap ) {
-		$issues[] = 'no caption (SEO title)';
-	} elseif ( mb_strlen( $cap ) > 60 ) {
-		$issues[] = 'caption over 60 characters';
-	}
-	$dl = mb_strlen( $desc );
-	if ( 0 === $dl ) {
-		$issues[] = 'no description (SEO description)';
-	} elseif ( $dl < 100 || $dl > 160 ) {
-		$issues[] = 'description not 100-160 characters';
-	}
-	if ( '' === $ctx ) {
-		$issues[] = 'no image context';
-	}
-	if ( '' !== $kw && false === stripos( $cap . ' ' . $desc . ' ' . $alt, $kw ) ) {
-		$issues[] = 'focus keyword "' . $kw . '" not used';
-	}
-	if ( $is_img ) {
-		if ( $bytes > 300000 ) {
-			$issues[] = 'over 300 KB';
-		} elseif ( empty( $meta['sizes'] ) ) {
-			$issues[] = 'no resized copies';
-		}
-	}
-	if ( ! $use['uses'] && ! (int) $post->post_parent ) {
-		$issues[] = 'not used anywhere';
-	}
-	return $issues;
-}
-
 add_filter(
 	'manage_media_columns',
 	function ( $columns ) {
@@ -194,10 +133,9 @@ add_filter(
 			'aw_desc'    => 'SEO description',
 			'aw_context' => 'Image context',
 			'aw_parent'  => 'Uploaded to',
-			'aw_seo'     => 'SEO',
 			'aw_opt'     => 'Optimisation',
 		);
-		$order  = array( 'cb', 'aw_file', 'taxonomy-aw_media_group', 'aw_slug', 'aw_caption', 'aw_desc', 'rank_math_image_alt', 'aw_context', 'aw_parent', 'aw_seo', 'aw_opt', 'date' );
+		$order  = array( 'cb', 'aw_file', 'taxonomy-aw_media_group', 'aw_slug', 'aw_caption', 'aw_desc', 'rank_math_image_alt', 'aw_context', 'aw_parent', 'aw_opt', 'date' );
 		$remove = array( 'title', 'author', 'rank_math_image_title', 'imgoptm', 'parent' );
 		$out    = array();
 		foreach ( $order as $key ) {
@@ -239,7 +177,7 @@ add_filter(
 add_action(
 	'manage_media_custom_column',
 	function ( $column, $post_id ) {
-		if ( ! in_array( $column, array( 'aw_file', 'aw_slug', 'aw_caption', 'aw_desc', 'aw_context', 'aw_parent', 'aw_seo', 'aw_opt' ), true ) ) {
+		if ( ! in_array( $column, array( 'aw_file', 'aw_slug', 'aw_caption', 'aw_desc', 'aw_context', 'aw_parent', 'aw_opt' ), true ) ) {
 			return;
 		}
 		$post = get_post( $post_id );
@@ -303,23 +241,6 @@ add_action(
 					echo '<br>+' . (int) ( count( $uses ) - 5 ) . ' more';
 				}
 			}
-			return;
-		}
-		if ( 'aw_seo' === $column ) {
-			$issues = aw_media_seo( $post, $use );
-			$best = null;
-			foreach ( $use['pages'] as $pid ) {
-				$s = (int) get_post_meta( $pid, 'rank_math_seo_score', true );
-				if ( $s > 0 && ( null === $best || $s < $best ) ) {
-					$best = $s;
-				}
-			}
-			$lines = array();
-			if ( null !== $best ) {
-				$lines[] = 'Page score: ' . (int) $best;
-			}
-			$lines[] = $issues ? esc_html( implode( '; ', array_slice( $issues, 0, 3 ) ) ) : 'Complete';
-			echo wp_kses_post( implode( '<br>', $lines ) );
 			return;
 		}
 		// Optimisation.
