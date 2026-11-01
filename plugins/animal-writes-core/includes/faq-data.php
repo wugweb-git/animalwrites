@@ -26,7 +26,6 @@ add_filter(
 	'aw_faq_registry',
 	function ( $r ) {
 		$r['aw_listing'] = array(
-			array( 'key' => 'phone', 'priority' => 1, 'q' => 'What is the contact number of %s?', 'needs' => array( 'aw_phones' ), 'pattern' => '<org> contact number / helpline number', 'answer' => 'aw_faq_listing_phone' ),
 			array( 'key' => 'location', 'priority' => 2, 'q' => 'Where is %s located?', 'needs' => array( 'aw_address', 'district' ), 'pattern' => '<org> <city> / address', 'answer' => 'aw_faq_listing_location' ),
 			array( 'key' => 'services', 'priority' => 3, 'q' => 'What services does %s offer?', 'needs' => array( 'aw_services', 'type' ), 'pattern' => '<org> services / adoption / rescue', 'answer' => 'aw_faq_listing_services' ),
 			array( 'key' => 'awbi', 'priority' => 4, 'q' => 'Is %s recognised by the Animal Welfare Board of India?', 'needs' => array( 'aw_awbi_code' ), 'pattern' => '<org> awbi', 'answer' => 'aw_faq_listing_awbi' ),
@@ -195,6 +194,7 @@ function aw_faq_hours_summary( array $rows ) {
 function aw_faq_section_url( $id, $slug ) {
 	return get_permalink( $id ) . '#aw-' . $slug . '-h';
 }
+/** Not in the registry: no phone or WhatsApp in FAQs (owner, 1 Nov 2026). */
 function aw_faq_listing_phone( $id, $name ) {
 	$phones = array_values( array_filter( aw_listing_phones( $id ), fn( $p ) => '' !== aw_tel_url( $p['number'] ) ) );
 	if ( ! $phones ) {
