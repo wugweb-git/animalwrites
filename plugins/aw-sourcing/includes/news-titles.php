@@ -94,7 +94,8 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 				}
 				if ( ! $dry ) {
 					global $wpdb;
-					wp_update_post( array( 'ID' => $id, 'post_title' => $after, 'post_name' => $post->post_name ) );
+					$save = fn() => wp_update_post( array( 'ID' => $id, 'post_title' => $after, 'post_name' => $post->post_name ) );
+					function_exists( 'aw_keep_modified' ) ? aw_keep_modified( $save ) : $save(); // letter case only: the modified date stays
 					if ( get_post_field( 'post_name', $id ) !== $post->post_name ) { // a save hook trimmed it (a publisher suffix, 20 Oct 2026): the URL stays
 						$wpdb->update( $wpdb->posts, array( 'post_name' => $post->post_name ), array( 'ID' => $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 						delete_post_meta( $id, '_wp_old_slug', $post->post_name );

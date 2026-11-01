@@ -1138,6 +1138,7 @@ function aw_faq_convert_rank_math( $post_id, $dry = false ) {
 	);
 	update_post_meta( $post_id, '_aw_faq_rm_block', wp_slash( wp_json_encode( $log ) ) );
 	$GLOBALS['aw_faq_converting'] = true;
+	$GLOBALS['aw_keep_modified']  = true; // the same questions in another field: the modified date stays (keep-modified.php)
 	wp_update_post(
 		array(
 			'ID'           => $post_id,
@@ -1145,6 +1146,7 @@ function aw_faq_convert_rank_math( $post_id, $dry = false ) {
 		)
 	);
 	$GLOBALS['aw_faq_converting'] = false;
+	$GLOBALS['aw_keep_modified']  = false;
 	clean_post_cache( $post_id );
 	return array( count( $moved ), $long, $links );
 }
@@ -1187,6 +1189,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 					WP_CLI::error( "Nothing to undo for $id." );
 				}
 				$GLOBALS['aw_faq_converting'] = true;
+				$GLOBALS['aw_keep_modified']  = true; // the same questions in another field: the modified date stays (keep-modified.php)
 				wp_update_post(
 					array(
 						'ID'           => $id,
@@ -1194,6 +1197,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 					)
 				);
 				$GLOBALS['aw_faq_converting'] = false;
+				$GLOBALS['aw_keep_modified']  = false;
 				if ( '' === (string) $last['faq'] ) {
 					delete_post_meta( $id, 'aw_faq' );
 				} else {
@@ -1251,6 +1255,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 				$fail   = 0;
 				$seen   = 0;
 				$kwmiss = 0;
+				$warn   = 0; // a heading that falls back to the page title ("Questions about About"): a warning, never a failure
 				foreach ( aw_faq_index( true )['rows'] as $row ) {
 					if ( ! $row['shown'] ) {
 						continue;
@@ -1263,6 +1268,10 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 						continue;
 					}
 					++$seen;
+					if ( ! empty( $ctx['subject_missing'] ) ) {
+						++$warn;
+						WP_CLI::line( $id . ': warning: no FAQ subject, the heading uses the title ("' . $ctx['head'] . '")' );
+					}
 					$qa   = aw_faq_parse( aw_faq_html( $faq ) );
 					$errs = array();
 					if ( count( $qa ) < aw_faq_min( $faq['ctx'] ) || count( $qa ) > AW_FAQ_MAX ) {
@@ -1296,6 +1305,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 					}
 				}
 				WP_CLI::line( "$kwmiss pages have their focus keyphrase in fewer than 2 questions (--verbose lists them)." );
+				WP_CLI::line( $warn ? "$warn pages and guides use their title as the FAQ subject (warnings above; FAQ box → Subject)." : 'No page or guide uses its title as the FAQ subject.' );
 				$fail ? WP_CLI::error( "$fail of $seen pages with an FAQ fail." ) : WP_CLI::success( "$seen pages with an FAQ pass." );
 				return;
 			}

@@ -46,6 +46,7 @@ require_once AW_CORE_DIR . 'includes/edit-screens.php'; // Animal Writes → Edi
 require_once AW_CORE_DIR . 'includes/admin-tidy.php';
 require_once AW_CORE_DIR . 'includes/cdn-cache.php';
 require_once AW_CORE_DIR . 'includes/deploy-purge.php';
+require_once AW_CORE_DIR . 'includes/keep-modified.php'; // technical saves keep the modified date (1 Nov 2026)
 require_once AW_CORE_DIR . 'includes/content-types.php';
 require_once AW_CORE_DIR . 'includes/category-moves.php';
 require_once AW_CORE_DIR . 'includes/tags.php';
