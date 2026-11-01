@@ -118,6 +118,17 @@ function aw_media_reuse_taken( $picture, $target ) {
 	if ( $other ) {
 		return 'the picture is already used by page ' . (int) $other;
 	}
+	foreach ( (array) get_option( 'aw_thumb_map', array() ) as $post_id => $att ) { // category photos held by items (thumbs.php)
+		if ( (int) $att === $picture && (int) $post_id !== $target ) {
+			return 'the picture is the category photo shown on page ' . (int) $post_id;
+		}
+	}
+	$cat     = array();
+	$cat_map = (array) get_option( 'aw_category_images', array() );
+	array_walk_recursive( $cat_map, function ( $v ) use ( &$cat ) { $cat[] = (int) $v; } );
+	if ( in_array( $picture, $cat, true ) || $wpdb->get_var( $wpdb->prepare( "SELECT term_id FROM {$wpdb->termmeta} WHERE meta_key = 'aw_category_image' AND meta_value = %s LIMIT 1", (string) $picture ) ) ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		return 'the picture is a category photo';
+	}
 	if ( function_exists( 'aw_thumb_hash' ) ) { // the site rule: the same file is not a cover twice (thumbs.php)
 		$hash = aw_thumb_hash( $picture );
 		$rows = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
@@ -126,6 +137,11 @@ function aw_media_reuse_taken( $picture, $target ) {
 				$target
 			)
 		);
+		foreach ( (array) get_option( 'aw_thumb_map', array() ) as $post_id => $att ) {
+			if ( (int) $post_id !== $target && (int) $att !== $picture && (int) $att > 0 && aw_thumb_hash( (int) $att ) === $hash ) {
+				return 'the same file is the category photo shown on page ' . (int) $post_id;
+			}
+		}
 		foreach ( (array) $rows as $r ) {
 			if ( (int) $r->meta_value !== $picture && (int) $r->meta_value > 0 && aw_thumb_hash( (int) $r->meta_value ) === $hash ) {
 				return 'the same file is already the cover of page ' . (int) $r->post_id;
@@ -239,6 +255,12 @@ function aw_media_reuse_restore( array $e, $picture, $force = false ) {
 			return 'page ' . $target . ' changed its publisher image setting since, so it was left as it is';
 		}
 	}
+	if ( ! $force && (int) $e['old_cover'] > 0 ) {
+		$taken = aw_media_reuse_taken( (int) $e['old_cover'], $target );
+		if ( '' !== $taken ) {
+			return 'the old cover ' . (int) $e['old_cover'] . ' cannot go back: ' . $taken;
+		}
+	}
 	if ( (int) $e['old_cover'] > 0 ) {
 		update_post_meta( $target, '_thumbnail_id', (int) $e['old_cover'] );
 	} else {
@@ -279,10 +301,10 @@ function aw_media_reuse_undo( $picture ) {
 
 /** The public duplicate count is kept for 5 minutes and the category photos are assigned by a rebuild: refresh both. */
 function aw_media_reuse_refresh() {
-	delete_transient( 'aw_thumb_dupes_n' );
-	if ( function_exists( 'aw_thumb_schedule' ) ) {
-		aw_thumb_schedule();
+	if ( function_exists( 'aw_thumb_rebuild' ) ) {
+		aw_thumb_rebuild(); // now, so thumb-dupes never counts a stale map
 	}
+	delete_transient( 'aw_thumb_dupes_n' );
 }
 
 add_action(
