@@ -37,7 +37,13 @@ function aw_edit_screen_map_data(): array {
  */
 function aw_edit_screen_boxes(): array {
 	$data = aw_edit_screen_map_data();
-	return (array) apply_filters( 'aw_edit_screen_boxes', (array) ( $data['boxes'] ?? array() ) );
+	$out  = array();
+	foreach ( (array) apply_filters( 'aw_edit_screen_boxes', (array) ( $data['boxes'] ?? array() ) ) as $id => $b ) {
+		if ( is_array( $b ) ) {
+			$out[ (string) $id ] = $b + array( 'title' => (string) $id, 'source' => '', 'file' => '', 'screen' => 'post', 'types' => array(), 'runtime' => 'live' );
+		}
+	}
+	return $out;
 }
 
 /**
@@ -63,7 +69,26 @@ function aw_edit_screen_map(): array {
 		$k['notes']    = (array) ( $k['notes'] ?? array() );
 		$keys[ $name ] = $k;
 	}
-	return (array) apply_filters( 'aw_edit_screen_map', $keys );
+	$out = array();
+	foreach ( (array) apply_filters( 'aw_edit_screen_map', $keys ) as $name => $k ) {
+		if ( ! is_array( $k ) ) {
+			continue;
+		}
+		$list = array();
+		foreach ( (array) ( $k['boxes'] ?? array() ) as $b ) {
+			$id = is_array( $b ) ? (string) ( $b['id'] ?? '' ) : (string) $b;
+			if ( '' !== $id ) {
+				$list[] = is_array( $b ) ? $b + array( 'title' => $id, 'source' => '' ) : array( 'id' => $id, 'title' => (string) ( $boxes[ $id ]['title'] ?? $id ), 'source' => (string) ( $boxes[ $id ]['source'] ?? '' ) );
+			}
+		}
+		$k['boxes']           = $list;
+		$k['type']            = (string) ( $k['type'] ?? '' );
+		$k['types']           = (array) ( $k['types'] ?? array() );
+		$k['uses']            = array_values( array_filter( (array) ( $k['uses'] ?? array() ), 'is_array' ) );
+		$k['notes']           = array_map( 'strval', (array) ( $k['notes'] ?? array() ) );
+		$out[ (string) $name ] = $k;
+	}
+	return $out;
 }
 
 /** Post types that have an edit screen (block-editor internals and SCF's own types left out). */
@@ -138,6 +163,29 @@ function aw_edit_screen_live_boxes(): array {
 	$keep_boxes  = $wp_meta_boxes;
 	$keep_post   = $post;
 	$keep_screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+	try {
+		aw_edit_screen_read_boxes( $out );
+	} finally {
+		$wp_meta_boxes = $keep_boxes; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- restored.
+		$post          = $keep_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- restored.
+		if ( $keep_screen instanceof WP_Screen ) {
+			$keep_screen->set_current_screen();
+		} else {
+			$GLOBALS['current_screen'] = null; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- no screen before (WP-CLI).
+			$GLOBALS['typenow']        = ''; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- set by set_current_screen().
+			$GLOBALS['taxnow']         = ''; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- set by set_current_screen().
+		}
+	}
+	return $out;
+}
+
+/**
+ * Fills $out with each post type's boxes. Changes $wp_meta_boxes, $post and the screen; the caller puts them back.
+ *
+ * @param array $out Filled: type => boxes.
+ */
+function aw_edit_screen_read_boxes( array &$out ): void {
+	global $wp_meta_boxes, $post;
 	foreach ( aw_edit_screen_post_types() as $type ) {
 		$wp_meta_boxes = array(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- put back below.
 		$dummy         = new WP_Post(
@@ -180,14 +228,6 @@ function aw_edit_screen_live_boxes(): array {
 			}
 		}
 	}
-	$wp_meta_boxes = $keep_boxes; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- restored.
-	$post          = $keep_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- restored.
-	if ( $keep_screen instanceof WP_Screen ) {
-		$keep_screen->set_current_screen();
-	} else {
-		$GLOBALS['current_screen'] = null; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- no screen before (WP-CLI).
-	}
-	return $out;
 }
 
 /** SCF field groups when SCF is active: acf-{key} => title, types, hide (box ids), fields (name => type). */
@@ -351,7 +391,7 @@ function aw_edit_screen_rows(): array {
 			}
 		}
 		if ( ! empty( $b['notes'] ) ) {
-			array_unshift( $notes, (string) $b['notes'] );
+			$notes = array_merge( array_map( 'strval', (array) $b['notes'] ), $notes );
 		}
 		if ( ! $known ) {
 			array_unshift( $notes, 'Not mapped yet.' );
@@ -495,19 +535,6 @@ function aw_edit_screen_unmapped( array $rows ): int {
 		}
 	}
 	return $n;
-}
-
-/**
- * A key's uses as one plain line: "display: where (file); schema: …".
- *
- * @param array $uses List of kind, where, file.
- */
-function aw_edit_screen_uses_text( array $uses ): string {
-	$parts = array();
-	foreach ( $uses as $u ) {
-		$parts[] = ( $u['kind'] ?? '' ) . ': ' . ( $u['where'] ?? '' ) . ( empty( $u['file'] ) ? '' : ' (' . $u['file'] . ')' );
-	}
-	return $parts ? implode( '; ', $parts ) : 'not used';
 }
 
 add_action(
