@@ -219,7 +219,7 @@
 				"aw_campaign"
 			],
 			"runtime": "live",
-			"notes": "Same title as the SCF group \"Campaign details\"; both edit aw_campaign_close and aw_campaign_doc, and the SCF value is saved last."
+			"notes": "The only box that edits aw_campaign_close and aw_campaign_doc (the SCF group \"Campaign details\" no longer has these two fields since 1 Nov 2026)."
 		},
 		"aw-campaign-record": {
 			"title": "Real-world impact",
@@ -357,7 +357,7 @@
 				"aw_campaign"
 			],
 			"runtime": "scf",
-			"notes": "Duplicate edit with the side box \"Campaign details\" (aw_campaign_close, aw_campaign_doc); this value wins on save."
+			"notes": "Event date and Event place only; Closes on and Campaign document are edited in the side box \"Campaign details\"."
 		},
 		"acf-group_aw_opportunity": {
 			"title": "Opportunity details",
@@ -2041,8 +2041,7 @@
 			"label": "Closes on",
 			"type": "Y-m-d",
 			"boxes": [
-				"aw-campaign-details",
-				"acf-group_aw_campaign"
+				"aw-campaign-details"
 			],
 			"types": [
 				"aw_campaign"
@@ -2063,9 +2062,6 @@
 					"where": "dataLayer campaign_status",
 					"file": "core/kits-config.php:103"
 				}
-			],
-			"notes": [
-				"Edited in two boxes on one screen; the SCF value is saved last."
 			]
 		},
 		"aw_campaign_doc": {
@@ -2073,8 +2069,7 @@
 			"label": "Campaign document",
 			"type": "aw_legal ID",
 			"boxes": [
-				"aw-campaign-details",
-				"acf-group_aw_campaign"
+				"aw-campaign-details"
 			],
 			"types": [
 				"aw_campaign"
@@ -2090,9 +2085,6 @@
 					"where": "campaign about the Legislation",
 					"file": "seo/schema.php:595"
 				}
-			],
-			"notes": [
-				"Edited in two boxes on one screen; the SCF value is saved last."
 			]
 		},
 		"aw_campaign_partners": {

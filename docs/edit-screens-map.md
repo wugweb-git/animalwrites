@@ -120,7 +120,7 @@ The admin account's saved order (normal): acf-group_aw_legal, aw_linked_from, aw
 | 10 | FAQ | aw-faq | ours | normal/low | |
 | — | Rank Math SEO | rank_math_metabox | Rank Math | sidebar | |
 
-Two boxes share the title "Campaign details" (side box and SCF group).
+Two boxes share the title "Campaign details" (side box and SCF group). Since 1 Nov 2026 the SCF group holds only Event date and Event place; Closes on and Campaign document are edited in the side box only (§4.1).
 
 ### aw_opportunity — block editor
 
@@ -361,7 +361,7 @@ Saving goes through `aw_value_guard()` (`core/scf.php:62–113`, filter `acf/pre
 | Apply | Paid listing | `aw_paid_listing` | true_false | | yes |
 | Source | Source URL / name / date | `aw_source_*` | | | yes |
 
-**group_aw_campaign "Campaign details"** (aw_campaign): `aw_event_date` date, `aw_event_place` text, `aw_campaign_close` date ("Closes on"), `aw_campaign_doc` post_object → aw_legal, return id. All REST yes.
+**group_aw_campaign "Campaign details"** (aw_campaign): `aw_event_date` date, `aw_event_place` text. All REST yes. (Until 1 Nov 2026 it also had `aw_campaign_close` date "Closes on" and `aw_campaign_doc` post_object → aw_legal; both are now edited in the side box only, §4.1.)
 
 **group_aw_listing "Organisation details"** (aw_listing). REST: yes for every key in `aw_meta_schema` or the aw-sourcing list (`src/enrichment.php:163–190`, sanitiser `aw_enrich_sanitize` :193ff); **no** for `aw_phones`, `aw_opening_hours`, `aw_detail_sources`, `aw_aliases`.
 
@@ -543,6 +543,8 @@ Live listing page = theme template `single-aw_listing.html` (blocks listing-abou
 ### 4.1 Same key edited in two boxes on one screen
 
 1. **aw_campaign: `aw_campaign_close` and `aw_campaign_doc`** — side box "Campaign details" (`core/campaign-tools.php:603–604`, saved :636–638 on `save_post_aw_campaign` prio 10) **and** SCF group "Campaign details" (`acf-json/group_aw_campaign.json`, fields `field_aw_campaign_campaign_close`, `field_aw_campaign_campaign_doc`, saved by SCF's `acf_form_post::save_post` on `save_post` prio 10 → `aw_value_guard`). WordPress fires `save_post_{type}` before `save_post`, so on every save both values are posted and **SCF's value is written last and wins**: a date or document changed only in the side box is overwritten by the unchanged SCF field (aw_value_guard writes when the posted value differs from the stored one). The two boxes also share the title "Campaign details". Live: 2 campaigns have aw_campaign_close, 1 has aw_campaign_doc.
+
+   **Fixed 1 Nov 2026:** the two fields were removed from the SCF group, so the side box is the only place they are edited and its value is the one saved. Stored values, the meta keys and the side box's nonce and save are unchanged.
 
 No other key is edited by two boxes on the same screen (checked every box/field list above: source keys are SCF-only per type; issuer is box-only with an SCF message pointing to it; listing logo is the Featured image with an SCF message pointing to it; Place keys are box-only).
 
