@@ -107,6 +107,7 @@ add_shortcode(
 		$gone    = aw_removed_item();
 		$section = aw_not_found_section();
 		$q       = aw_not_found_query();
+		$media   = aw_error_picture( '404' );
 
 		$html = '<p class="kit-error-code">' . ( $gone ? '410' : '404' ) . '</p>';
 		if ( $gone ) {
@@ -115,7 +116,8 @@ add_shortcode(
 		} else {
 			$html .= '<h1 class="wp-block-heading">Page not found</h1><p class="kit-error-lead">This page doesn’t exist or has moved. Search the site, or go to a section.</p>';
 		}
-		$html .= '<form class="kit-error-search" action="' . esc_url( home_url( '/search/' ) ) . '" method="get" role="search"><label class="screen-reader-text" for="kit-404-q">Search</label><input id="kit-404-q" type="search" name="q" value="' . esc_attr( $q ) . '" placeholder="Search" autocomplete="off"><button type="submit" class="kit-btn"><span class="kit-ico kit-ico--search" aria-hidden="true"></span>Search</button></form>';
+		$html .= $media; // after the lead on phones and tablets; from 1200px the photo fills the section behind the text
+		$html .= '<form class="kit-error-search" action="' . esc_url( home_url( '/search/' ) ) . '" method="get" role="search"><label class="screen-reader-text" for="kit-404-q">Search</label><span class="kit-error-field"><span class="kit-ico kit-ico--search" aria-hidden="true"></span><input id="kit-404-q" type="search" name="q" value="' . esc_attr( $q ) . '" placeholder="Search" autocomplete="off"></span><button type="submit" class="kit-btn kit-btn--brand kit-btn--label">Search</button></form>';
 
 		if ( $section ) {
 			$posts = get_posts( array( 'post_type' => $section[0], 'post_status' => 'publish', 'numberposts' => 3, 'orderby' => 'date', 'order' => 'DESC' ) );
@@ -128,27 +130,34 @@ add_shortcode(
 			}
 		}
 
-		$html .= '<nav class="kit-error-links" aria-label="Sections"><ul><li><a href="/directory/">Directory</a></li><li><a href="/news/">News</a></li><li><a href="/resources/">Resources</a></li><li><a href="/library/">Library</a></li><li><a href="/opportunities/">Opportunities</a></li><li><a href="/contact/">Contact</a></li><li><a href="/">Home</a></li></ul></nav>';
-		$media = aw_error_picture( '404' );
-		return '' === $media ? $html : '<div class="aw-hero-grid kit-error-hero"><div class="kit-error-text">' . $html . '</div>' . $media . '</div>';
+		$links = array( '/directory/' => array( 'Directory', 'directory' ), '/news/' => array( 'News', 'news' ), '/resources/' => array( 'Resources', 'resources' ), '/library/' => array( 'Library', 'legal' ), '/opportunities/' => array( 'Opportunities', 'opportunities' ), '/contact/' => array( 'Contact', 'mail' ), '/' => array( 'Home', 'home' ) );
+		$html .= '<nav class="kit-error-links" aria-label="Sections"><ul>';
+		foreach ( $links as $href => $l ) {
+			$html .= '<li><a href="' . esc_url( $href ) . '"><span class="kit-ico kit-ico--' . esc_attr( $l[1] ) . '" aria-hidden="true"></span>' . esc_html( $l[0] ) . '</a></li>';
+		}
+		return $html . '</ul></nav>';
 	}
 );
 
 /**
- * The picture beside an error page's text, as the home hero's (aw-hero-media: 4:3 below 1200px, 4:5 from 1200px).
- * Two files per page in assets/error/: {name}-wide.webp (4:3, 1600 × 1200) and {name}-tall.webp (4:5, 1080 × 1350).
- * '' while the wide file is missing: the page then keeps its one text column. Decorative (empty alt): the words beside
- * it say everything.
+ * An error page's photo (owner, 2 Nov 2026: the animals blended into the page, reference 7). Files in assets/error/:
+ * {name}-wide.webp (16:9, 2400 × 1350: from 1200px it fills the section behind the text, so its left half is a plain
+ * wall and the animals sit bottom right) and {name}-phone.webp (4:3, 1200 × 900: below 1200px, after the lead, animals
+ * in the middle). Either file alone is used at every width. '' with neither: the page keeps its one text column.
+ * Decorative (empty alt): the words say everything.
  *
  * @param string $name 404, 500 or 503.
  * @return string
  */
 function aw_error_picture( $name ) {
-	$dir = AW_CORE_DIR . 'assets/error/';
-	if ( ! is_readable( $dir . $name . '-wide.webp' ) ) {
+	$dir   = AW_CORE_DIR . 'assets/error/';
+	$url   = plugins_url( 'assets/error/', AW_CORE_DIR . 'animal-writes-core.php' );
+	$wide  = is_readable( $dir . $name . '-wide.webp' ) ? $url . $name . '-wide.webp' : '';
+	$phone = is_readable( $dir . $name . '-phone.webp' ) ? $url . $name . '-phone.webp' : '';
+	if ( '' === $wide && '' === $phone ) {
 		return '';
 	}
-	$url  = plugins_url( 'assets/error/', AW_CORE_DIR . 'animal-writes-core.php' );
-	$tall = is_readable( $dir . $name . '-tall.webp' ) ? '<source media="(min-width: 1200px)" srcset="' . esc_url( $url . $name . '-tall.webp' ) . '" width="1080" height="1350">' : '';
-	return '<figure class="aw-hero-media kit-error-media"><picture>' . $tall . '<img src="' . esc_url( $url . $name . '-wide.webp' ) . '" width="1600" height="1200" alt="" decoding="async" fetchpriority="high"></picture></figure>';
+	$src    = $phone ? $phone : $wide;
+	$source = $wide && $phone ? '<source media="(min-width: 1200px)" srcset="' . esc_url( $wide ) . '" width="2400" height="1350">' : '';
+	return '<figure class="kit-error-media"><picture>' . $source . '<img src="' . esc_url( $src ) . '" width="1200" height="900" alt="" decoding="async" fetchpriority="high"></picture></figure>';
 }
