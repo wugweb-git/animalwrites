@@ -275,7 +275,7 @@ function aw_find_help_top_types( $n = 6 ) {
 			INNER JOIN {$wpdb->term_taxonomy} tt ON tt.term_id = t.term_id AND tt.taxonomy = 'post_tag'
 			INNER JOIN {$wpdb->term_relationships} tr ON tr.term_taxonomy_id = tt.term_taxonomy_id
 			INNER JOIN {$wpdb->posts} p ON p.ID = tr.object_id AND p.post_type = 'aw_listing' AND p.post_status = 'publish'
-			WHERE t.slug IN ($in) GROUP BY t.term_id, t.slug, t.name ORDER BY n DESC, t.name ASC LIMIT 12", // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $in is the placeholders
+			WHERE t.slug IN ($in) GROUP BY t.term_id, t.slug, t.name ORDER BY n DESC, t.name ASC LIMIT 12", // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $in is only %s placeholders
 			$slugs
 		)
 	);
