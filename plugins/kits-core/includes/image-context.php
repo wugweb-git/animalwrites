@@ -30,3 +30,37 @@ add_filter(
 	2
 );
 
+add_action(
+	'init',
+	function () {
+		register_post_meta(
+			'attachment',
+			'kits_image_context',
+			array(
+				'type'              => 'string',
+				'single'            => true,
+				'show_in_rest'      => true,
+				'sanitize_callback' => 'sanitize_textarea_field',
+				'auth_callback'     => function ( $allowed, $meta_key, $post_id ) {
+					return current_user_can( 'edit_post', $post_id );
+				},
+			)
+		);
+	}
+);
+
+// The note is for editors only. REST returns registered meta to anyone who can read the attachment, so it is removed from
+// every response (including embeds) unless the viewer can edit that attachment.
+add_filter(
+	'rest_prepare_attachment',
+	function ( $response, $post ) {
+		$data = $response->get_data();
+		if ( isset( $data['meta'] ) && is_array( $data['meta'] ) && array_key_exists( 'kits_image_context', $data['meta'] ) && ! current_user_can( 'edit_post', $post->ID ) ) {
+			unset( $data['meta']['kits_image_context'] );
+			$response->set_data( $data );
+		}
+		return $response;
+	},
+	10,
+	2
+);
