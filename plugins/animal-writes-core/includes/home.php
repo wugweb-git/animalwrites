@@ -243,3 +243,12 @@ add_filter(
 	20,
 	2
 );
+
+// Block templates run shortcodes before patterns are expanded, so a Shortcode block inside a home pattern (Find help near
+// you) would print as text. Run it when the block renders.
+add_filter(
+	'render_block_core/shortcode',
+	function ( $html ) {
+		return is_front_page() ? do_shortcode( shortcode_unautop( $html ) ) : $html;
+	}
+);
