@@ -5,11 +5,12 @@
  *
  * Campaign settings (post meta on the aw_campaign item), per the Campaign Content Standard v1.0 (Notion, 17 Oct 2026):
  *   aw_campaign_open           Y-m-d  the first day for action (IST); before it the campaign is Pre (Upcoming)
- *   aw_campaign_close          Y-m-d  the last day for action (IST); from 00:00 IST the day after, it is Post (Closed)
+ *   aw_campaign_close          Y-m-d  the last day for action (IST), shown in the countdown; it does not close the campaign
  *   aw_campaign_doc            int    the Library item whose clauses the rule chips quote
  *   aw_campaign_outcome        Post only: pending|achieved|partial|not|inconclusive (pending until reviewed)
  *   aw_campaign_outcome_asof   Y-m-d  when the outcome was last reviewed (set to the closing day if empty)
- *   aw_campaign_state_override pre|active|post, with aw_campaign_override_note (the reason; required)
+ *   aw_campaign_state_override pre|active|post, with aw_campaign_override_note (the reason; required). A campaign
+ *                              closes only when the owner sets Post here; nothing closes it by date (owner, 2 Nov 2026)
  *   aw_campaign_metric_min     the count is shown from this number (default 100)
  *   aw_campaign_metric_stale   days after the last letter before the count shows an "as of" date (default 1)
  *   aw_campaign_share_text     the line shared with the link (Share button, WhatsApp, X); default: the title
@@ -55,18 +56,14 @@ function aw_camp_open_ts( $id ) {
 	return preg_match( '/^\d{4}-\d{2}-\d{2}$/', $day ) ? strtotime( $day . ' 00:00:00 Asia/Kolkata' ) : 0;
 }
 
-/** Lifecycle state from the dates (pre, active or post); a manual override with a reason wins. Not filtered. */
+/** Lifecycle state: pre before the open date, then active until the owner sets the override to post. Not filtered. */
 function aw_camp_state( $id ) {
 	$over = (string) get_post_meta( $id, 'aw_campaign_state_override', true );
 	if ( in_array( $over, array( 'pre', 'active', 'post' ), true ) && '' !== trim( (string) get_post_meta( $id, 'aw_campaign_override_note', true ) ) ) {
 		return $over;
 	}
-	$open  = aw_camp_open_ts( $id );
-	$close = aw_camp_close_ts( $id );
-	if ( $open && time() < $open ) {
-		return 'pre';
-	}
-	return $close && time() >= $close ? 'post' : 'active';
+	$open = aw_camp_open_ts( $id );
+	return $open && time() < $open ? 'pre' : 'active'; // the close date never closes it (owner, 2 Nov 2026)
 }
 
 /** Whether the campaign is open (Active; no dates counts as open). Filterable for checking the closed state. */
@@ -125,7 +122,7 @@ add_filter(
 
 /*
  * The switch at closing time, cache-safe: while a campaign is open, its page (and the home page with its hero) is cached
- * only until the moment it closes (LiteSpeed TTL), and a one-off cron event purges the whole cache at that moment. The
+ * only until its close date (LiteSpeed TTL). The
  * TTL is also capped at the next midnight in India, so the countdown's day count never stays a day behind in the cache.
  */
 function aw_camp_cache_until( $id ) {
@@ -135,25 +132,17 @@ function aw_camp_cache_until( $id ) {
 		do_action( 'litespeed_control_set_ttl', max( 60, min( $ts, $midnight ) - time() ) );
 	}
 }
-function aw_camp_schedule_close( $id ) {
-	$ts = aw_camp_close_ts( $id );
-	wp_clear_scheduled_hook( 'aw_camp_closed', array( (int) $id ) );
-	if ( $ts && time() < $ts && 'publish' === get_post_status( $id ) ) {
-		wp_schedule_single_event( $ts + 5, 'aw_camp_closed', array( (int) $id ) );
-	}
-}
-add_action( 'save_post_aw_campaign', fn( $id ) => aw_camp_schedule_close( $id ), 20 );
-add_action( 'updated_post_meta', fn( $mid, $id, $key ) => 'aw_campaign_close' === $key && aw_camp_schedule_close( $id ), 10, 3 );
+// No closing job: a campaign closes only when the owner sets it to Post (owner, 2 Nov 2026). Jobs scheduled before
+// that are removed once, so none fires at a close date.
 add_action(
-	'aw_camp_closed',
-	function ( $id = 0 ) {
-		if ( $id && ! get_post_meta( $id, 'aw_campaign_outcome_asof', true ) ) { // outcome Pending, as of the closing day
-			update_post_meta( $id, 'aw_campaign_outcome_asof', wp_date( 'Y-m-d', aw_camp_close_ts( $id ), new DateTimeZone( 'Asia/Kolkata' ) ) );
+	'init',
+	function () {
+		if ( ! get_option( 'aw_camp_close_jobs_removed' ) ) {
+			wp_unschedule_hook( 'aw_camp_closed' );
+			update_option( 'aw_camp_close_jobs_removed', 1, false );
 		}
-		do_action( 'litespeed_purge_all' );
 	}
 );
-// Campaigns published before the closing job existed were scheduled once; that step ran and was removed (audit item 16, flag confirmed on live 25 Oct 2026; see git history).
 
 /* ---------- Open / closed blocks ---------- */
 add_filter(

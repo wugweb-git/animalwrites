@@ -100,10 +100,9 @@ add_filter(
 		// campaign_view / campaign_action events (aw-analytics.js, campaign.js).
 		if ( is_singular( 'aw_campaign' ) ) {
 			$id                   = get_queried_object_id();
-			$close                = function_exists( 'aw_camp_close_ts' ) ? (int) aw_camp_close_ts( $id ) : 0;
 			$c['campaign_slug']   = (string) get_post_field( 'post_name', $id );
 			$c['campaign_title']  = html_entity_decode( get_the_title( $id ), ENT_QUOTES, 'UTF-8' );
-			$c['campaign_status'] = $close ? ( $close > time() ? 'open' : 'closed' ) : ''; // by the close date; no date: ''
+			$c['campaign_status'] = get_post_meta( $id, 'aw_campaign_close', true ) && function_exists( 'aw_camp_is_open' ) ? ( aw_camp_is_open( $id ) ? 'open' : 'closed' ) : ''; // its own state; no date: ''
 		}
 		// A sponsored Resource or listing: the sponsor's name (sponsored_view).
 		if ( is_singular() && get_post_meta( get_queried_object_id(), 'aw_sponsored', true ) ) {

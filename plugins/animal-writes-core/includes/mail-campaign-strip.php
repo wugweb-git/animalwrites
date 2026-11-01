@@ -28,16 +28,17 @@ function aw_mail_open_campaign() {
 		array(
 			'post_type'   => 'aw_campaign',
 			'post_status' => 'publish',
-			'numberposts' => 1,
+			'numberposts' => 10,
 			'meta_key'    => 'aw_campaign_close', // phpcs:ignore WordPress.DB.SlowDBQuery
 			'orderby'     => 'meta_value',
 			'order'       => 'ASC',
 			'meta_query'  => array( // phpcs:ignore WordPress.DB.SlowDBQuery
 				array( 'key' => 'aw_campaign_open', 'value' => $today, 'compare' => '<=', 'type' => 'DATE' ),
-				array( 'key' => 'aw_campaign_close', 'value' => $today, 'compare' => '>=', 'type' => 'DATE' ),
 			),
 		)
 	);
+	// Open until the owner closes it, not by the close date (owner, 2 Nov 2026).
+	$q = function_exists( 'aw_camp_is_open' ) ? array_values( array_filter( $q, fn( $p ) => aw_camp_is_open( $p->ID ) ) ) : $q;
 	if ( ! $q ) {
 		return null;
 	}
