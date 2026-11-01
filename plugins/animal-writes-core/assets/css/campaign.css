@@ -127,8 +127,8 @@
 /* The share band in the hero's cream; from 1200 a photo from the Library on the right (Media 15534, unused elsewhere), faded into the cream, the text clear of it */
 .aw-camp--sc-stray-dogs #share.aw-camp-section { background: var(--camp-cream); }
 @media (min-width: 1200px) {
-	.aw-camp--sc-stray-dogs #share.aw-camp-section { min-height: 26rem; background: linear-gradient(to right, var(--camp-cream) 56%, transparent 70%), url("/wp-content/uploads/2026/10/photo-1626648701445-1f67aeb6e49c.avif") right center / auto 100% no-repeat, var(--camp-cream); }
-	.aw-camp--sc-stray-dogs #share.aw-camp-section > * { box-sizing: border-box; padding-right: 40%; }
+	.aw-camp--sc-stray-dogs #share.aw-camp-section { background: linear-gradient(to right, var(--camp-cream) 56%, transparent 70%), url("/wp-content/uploads/2026/10/photo-1626648701445-1f67aeb6e49c.avif") right center / auto 100% no-repeat, var(--camp-cream); }
+	.aw-camp--sc-stray-dogs #share.aw-camp-section > * { box-sizing: border-box; padding-right: calc(var(--kit-card-media-max) + var(--kit-space-gutter)); } /* the text clear of the photo: the card media width and the gutter */
 }
 /* Section headings in the campaign plum */
 .aw-camp--sc-stray-dogs .aw-camp-section:not(.aw-camp-hero) :is(h2, h3) { color: var(--camp-primary); }
@@ -150,23 +150,41 @@
 .aw-camp--sc-stray-dogs .aw-camp-grid > :first-child a:not(.wp-element-button) { color: var(--camp-on-mark); }
 /* The share bar under the share message */
 .aw-camp--sc-stray-dogs .aw-camp-share-kit { margin: var(--kit-space-4) 0; }
-/* Phones: the court orders and the state tracker as one card per row, each part under its column heading */
-@media (max-width: 767px) {
-	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) { overflow: visible; }
-	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) table { display: block; min-width: 0; border: 0; }
-	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) :is(tbody, tr, td) { display: block; }
-	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) tr { margin: 0 0 var(--kit-space-3); padding: var(--kit-space-5); border-radius: var(--kit-radius-card); background: var(--camp-tile, var(--kit-color-raised)); box-shadow: inset 0 0 0 1px var(--kit-color-line); }
-	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) td { padding: 0 0 var(--kit-space-3); border: 0; }
-	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) td:last-child { padding-bottom: 0; }
-	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) td:first-child { font-size: var(--kit-type-lead); font-weight: 800; color: var(--camp-primary); }
-	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) td:not(:first-child)::before { display: block; margin-bottom: var(--kit-space-1); color: var(--camp-meta); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-bold); }
-	.aw-camp--sc-stray-dogs .aw-camp-timeline td:nth-child(2)::before { content: "Bench"; }
-	.aw-camp--sc-stray-dogs .aw-camp-timeline td:nth-child(3)::before { content: "What was ordered"; }
-	.aw-camp--sc-stray-dogs .aw-camp-timeline td:nth-child(4)::before { content: "Document"; }
-	.aw-camp--sc-stray-dogs .aw-camp-tracker td:nth-child(2)::before { content: "High Court and case"; }
-	.aw-camp--sc-stray-dogs .aw-camp-tracker td:nth-child(3)::before { content: "Latest public order, and what is due"; }
-	.aw-camp--sc-stray-dogs .aw-camp-tracker td:nth-child(4)::before { content: "Source"; }
+/* The court orders and the state tracker: one sideways row of cards at every width (Layout rules 5, 6 and 10), each
+   row a card with its parts under their column headings, snapping. Phones show one card and the edge of the next
+   (--aw-carousel-item, 82%); from 768 two cards to the view (--aw-card-columns md). The server names each row and
+   makes it focusable, and gives the table its roles back (campaign-tools.php, aw_sc_rows_a11y). */
+.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) { --aw-sc-card: 82%; margin: 0; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; padding-bottom: var(--kit-space-3); }
+.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) table { display: block; width: auto; min-width: 0; border: 0; }
+.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) tbody { display: flex; gap: var(--kit-space-4); }
+.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) tr { display: block; flex: 0 0 var(--aw-sc-card); margin: 0; padding: var(--kit-space-5); border-radius: var(--kit-radius-card); background: var(--camp-tile, var(--kit-color-raised)); box-shadow: inset 0 0 0 1px var(--kit-color-line); scroll-snap-align: start; }
+.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) td { display: block; padding: 0 0 var(--kit-space-3); border: 0; background: none; }
+.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) td:last-child { padding-bottom: 0; }
+.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) td:first-child { font-size: var(--kit-type-lead); font-weight: var(--kit-weight-bold); color: var(--camp-primary); }
+.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) td:not(:first-child)::before { display: block; margin-bottom: var(--kit-space-1); color: var(--camp-meta); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-bold); }
+.aw-camp--sc-stray-dogs .aw-camp-timeline td:nth-child(2)::before { content: "Bench"; }
+.aw-camp--sc-stray-dogs .aw-camp-timeline td:nth-child(3)::before { content: "What was ordered"; }
+.aw-camp--sc-stray-dogs .aw-camp-timeline td:nth-child(4)::before { content: "Document"; }
+.aw-camp--sc-stray-dogs .aw-camp-tracker td:nth-child(2)::before { content: "High Court and case"; }
+.aw-camp--sc-stray-dogs .aw-camp-tracker td:nth-child(3)::before { content: "Latest public order, and what is due"; }
+.aw-camp--sc-stray-dogs .aw-camp-tracker td:nth-child(4)::before { content: "Source"; }
+.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker, #act .aw-camp-grid, #read .wp-block-post-template):focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
+@media (min-width: 768px) {
+	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) { --aw-sc-card: calc((100% - var(--kit-space-4)) / 2); }
+}
+/* What you can do and the Library: one sideways row below 1200 (two cards to the view from 768); from 1200 the three
+   action cards side by side and the Library three to a row */
+@media (max-width: 1199px) {
+	.aw-camp--sc-stray-dogs :is(#act .aw-camp-grid, #read .wp-block-post-template) { display: flex; gap: var(--kit-space-4); overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; padding-bottom: var(--kit-space-3); }
+	.aw-camp--sc-stray-dogs :is(#act .aw-camp-grid > *, #read .wp-block-post-template > li) { flex: 0 0 82%; margin: 0; scroll-snap-align: start; }
+}
+@media (min-width: 768px) and (max-width: 1199px) {
+	.aw-camp--sc-stray-dogs :is(#act .aw-camp-grid > *, #read .wp-block-post-template > li) { flex-basis: calc((100% - var(--kit-space-4)) / 2); }
+}
+@media (min-width: 1200px) {
+	.aw-camp--sc-stray-dogs #act .aw-camp-grid > .aw-camp-card { grid-column: auto; margin: 0; }
+	.aw-camp--sc-stray-dogs #read .wp-block-post-template { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 /* The hero is the primary colour behind its ink, on every campaign; marks inside it use the same pair. */
 .aw-camp .aw-camp-hero { --camp-mark: var(--camp-primary); --camp-on-mark: var(--camp-primary-ink); }
@@ -565,8 +583,8 @@
 .aw-camp-band.aw-camp-band--closed .aw-camp-band-kicker { margin: 0 0 var(--kit-space-1); color: var(--camp-mark); font-weight: var(--kit-weight-strong); }
 /* One row that scrolls sideways (News and guides, What's happening; owner, 21 Oct 2026): each card a fixed width, snapping */
 .aw-camp .aw-camp-row { display: flex; gap: var(--kit-space-4); overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scroll-padding-inline: 0; padding-bottom: var(--kit-space-3); scrollbar-width: thin; }
-.aw-camp .aw-camp-row :is(.aw-camp-row-q, .wp-block-post-template) { display: contents !important; }
-.aw-camp .aw-camp-row .wp-block-post-template > li { flex: 0 0 var(--kit-card-min); margin: 0 !important; scroll-snap-align: start; list-style: none; }
+.aw-camp .aw-camp-row :is(.aw-camp-row-q, .wp-block-post-template) { display: contents; }
+.aw-camp .aw-camp-row .wp-block-post-template > li { flex: 0 0 var(--kit-card-min); margin: 0; scroll-snap-align: start; list-style: none; }
 .aw-camp .aw-camp-row .kit-card { height: 100%; }
 /* Very light campaign tone (owner, 19 Oct 2026: brand, very light brand, white, grey or black): the Share section */
 .aw-camp-tint { background: color-mix(in srgb, var(--camp-primary) 7%, #fff); --camp-tile: var(--kit-color-raised); }
