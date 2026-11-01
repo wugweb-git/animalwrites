@@ -148,8 +148,8 @@ function aw_media_seo( $post, $use ) {
 	if ( $is_img ) {
 		if ( '' === $alt ) {
 			$issues[] = 'no alt text';
-		} elseif ( mb_strlen( $alt ) > 125 ) {
-			$issues[] = 'alt over 125 characters';
+		} elseif ( mb_strlen( $alt ) > 160 ) {
+			$issues[] = 'alt over 160 characters';
 		}
 	}
 	if ( '' === $cap ) {
@@ -158,8 +158,8 @@ function aw_media_seo( $post, $use ) {
 	$dl = mb_strlen( $desc );
 	if ( 0 === $dl ) {
 		$issues[] = 'no description (SEO description)';
-	} elseif ( $dl < 100 || $dl > 155 ) {
-		$issues[] = 'description not 100-155 characters';
+	} elseif ( $dl < 100 || $dl > 160 ) {
+		$issues[] = 'description not 100-160 characters';
 	}
 	if ( '' === $ctx ) {
 		$issues[] = 'no image context';

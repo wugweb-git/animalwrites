@@ -3,10 +3,10 @@
  * Media Library autofill for new image uploads: fills the fields that are empty, never overwrites a value.
  *
  * - Name: a file or camera name (IMG_2034, DSC00012) becomes plain words, at most 60 characters, never ending in a stop word.
- * - Alternative Text: the name, up to 125 characters.
+ * - Alternative Text: the name, up to 160 characters.
  * - Caption = SEO title: the name, or "host favicon | Animal Writes" / "host logo | Animal Writes".
- * - Description = SEO description: up to 155 characters, written for favicons, logos, source images and any other image.
- * - Image context (kits_image_context): the page the file is attached to or later used on (featured or source image), and its Rank Math focus keyword.
+ * - Description = SEO description: at least 100 and up to 160 characters, written for favicons, logos, source images and any other image.
+ * - Image context (kits_image_context): the page the file is attached to or later used on (featured or source image), and its Rank Math focus keyword, up to 160 characters.
  * No admin screen, no options, no CSS.
  *
  * @package animal-writes-core
@@ -89,7 +89,7 @@ function aw_media_autofill_caption( $name ) {
 }
 
 /**
- * SEO description, at most 155 characters.
+ * SEO description, at most 160 characters.
  *
  * @param string $name      Name.
  * @param bool   $is_source True when the file name ends in -source.
@@ -100,7 +100,7 @@ function aw_media_autofill_description( $name, $is_source ) {
 	if ( $brand ) {
 		$base = sprintf( '%1$s %2$s, shown beside news from %1$s on Animal Writes', $brand['host'], $brand['kind'] );
 		$text = $base . ", India's tracker of animal welfare news, law and help.";
-		if ( mb_strlen( $text ) > 155 ) {
+		if ( mb_strlen( $text ) > 160 ) {
 			$text = $base . '.';
 		}
 	} else {
@@ -112,11 +112,11 @@ function aw_media_autofill_description( $name, $is_source ) {
 	if ( mb_strlen( $text ) < 100 ) {
 		$text .= ' Animal welfare news, law and help in India.'; // Reaches the 100-character minimum the Media Library SEO check expects.
 	}
-	return mb_substr( $text, 0, 155 );
+	return mb_substr( $text, 0, 160 );
 }
 
 /**
- * Image context line from the page the file is attached to.
+ * Image context line from the page the file is attached to, at most 160 characters.
  *
  * @param int $parent_id Parent post ID.
  * @return string Empty when there is no usable parent.
@@ -130,7 +130,12 @@ function aw_media_autofill_context( $parent_id ) {
 	$label = $type ? $type->labels->singular_name : $parent->post_type;
 	$text  = sprintf( 'Used on: %1$s: %2$s (ID %3$d).', $label, aw_media_autofill_cut( html_entity_decode( $parent->post_title, ENT_QUOTES, 'UTF-8' ), 50 ), $parent->ID );
 	$kw    = trim( (string) strtok( (string) get_post_meta( $parent->ID, 'rank_math_focus_keyword', true ), ',' ) );
-	return '' !== $kw ? $text . ' Focus keyword: ' . $kw . '.' : $text;
+	if ( '' === $kw ) {
+		return $text;
+	}
+	$room = 160 - mb_strlen( $text ) - mb_strlen( ' Focus keyword: .' );
+	$kw   = $room > 0 ? aw_media_autofill_cut( $kw, $room ) : '';
+	return '' !== $kw ? $text . ' Focus keyword: ' . $kw . '.' : $text; // The keyword part is cut or dropped first so the 160-character cap holds.
 }
 
 /**
@@ -164,7 +169,7 @@ function aw_media_autofill_run( $post_id ) {
 		clean_post_cache( $post_id );
 	}
 	if ( '' === trim( (string) get_post_meta( $post_id, '_wp_attachment_image_alt', true ) ) ) {
-		update_post_meta( $post_id, '_wp_attachment_image_alt', aw_media_autofill_cut( $name, 125 ) );
+		update_post_meta( $post_id, '_wp_attachment_image_alt', aw_media_autofill_cut( $name, 160 ) );
 	}
 	if ( '' === trim( (string) get_post_meta( $post_id, 'kits_image_context', true ) ) ) {
 		$context = aw_media_autofill_context( (int) $post->post_parent );
