@@ -2,7 +2,8 @@
 /**
  * Media → Duplicate files: merges the duplicate copies of a file that the Media Library audit found.
  *
- * Trash is off on this site (MEDIA_TRASH), so deleting an attachment would be permanent. This tool never deletes: for each
+ * Trash is off on this site (MEDIA_TRASH), so deleting an attachment would be permanent. The retired copies get no trash
+ * time on purpose: WordPress's daily clean-up removes trash older than 30 days by that time, and this tool never deletes. This tool never deletes: for each
  * group it repoints every reference from the extra copies to one kept copy, checks that nothing still points at them, and
  * retires the extras by giving them the Trash status (files stay on disk). Every change is saved with its old value before
  * it is made, so Undo (or a half-finished group) puts each reference and the copies back. Permanent deletion is a separate,
@@ -59,7 +60,8 @@ function aw_media_merge_data( $keep ) {
 
 /** Save the old values of one group. */
 function aw_media_merge_save_data( $keep, array $data ) {
-	update_option( 'aw_media_merge_data_' . (int) $keep, $data, false );
+	$key = 'aw_media_merge_data_' . (int) $keep;
+	return update_option( $key, $data, false ) || get_option( $key ) === $data;
 }
 
 /**
@@ -171,20 +173,37 @@ function aw_media_merge_check( $keep, array $extras ) {
 	if ( (int) $trows ) {
 		return $fail( 'used as a category or tag photo' );
 	}
+	$terms = array();
+	$args  = array();
 	foreach ( $extras as $id ) {
-		$hit = $wpdb->get_var( $wpdb->prepare( "SELECT option_name FROM {$wpdb->options} WHERE option_name NOT LIKE %s AND option_name NOT LIKE %s AND option_name NOT LIKE %s AND ( option_value = %s OR option_value LIKE %s OR option_value LIKE %s OR option_value LIKE %s OR option_value LIKE %s ) LIMIT 1", $wpdb->esc_like( 'aw_media_merge_' ) . '%', $wpdb->esc_like( '_transient_' ) . '%', $wpdb->esc_like( '_site_transient_' ) . '%', (string) $id, '%i:' . $id . ';%', '%"' . $id . '"%', '%:' . $id . ',%', '%:' . $id . '}%' ) );
-		if ( $hit ) {
-			return $fail( 'named in the option ' . $hit );
+		$terms[] = 'option_value = %s OR option_value LIKE %s OR option_value LIKE %s OR option_value LIKE %s OR option_value LIKE %s OR option_value LIKE %s OR option_value LIKE %s';
+		array_push( $args, (string) $id, '%i:' . $id . ';%', '%"' . $id . '"%', '%:' . $id . ',%', '%:' . $id . '}%', '%[' . $id . ',%', '%,' . $id . ']%' );
+	}
+	$hit = $wpdb->get_var( $wpdb->prepare( 'SELECT option_name FROM ' . $wpdb->options . " WHERE option_name NOT LIKE %s AND option_name NOT LIKE %s AND option_name NOT LIKE %s AND ( " . implode( ' OR ', $terms ) . ' ) LIMIT 1', array_merge( array( $wpdb->esc_like( 'aw_media_merge_' ) . '%', $wpdb->esc_like( '_transient_' ) . '%', $wpdb->esc_like( '_site_transient_' ) . '%' ), $args ) ) );
+	if ( $hit ) {
+		return $fail( 'named in the option ' . $hit );
+	}
+	// Posts that write one of the old addresses or block image IDs (exact addresses only).
+	$likes  = array();
+	$largs  = array();
+	foreach ( $extras as $id ) {
+		foreach ( array_unique( aw_media_merge_urls( $id ) ) as $url ) {
+			$likes[] = 'post_content LIKE %s';
+			$largs[] = '%' . $wpdb->esc_like( $url ) . '%';
 		}
 	}
-	$posts = array();
-	foreach ( $extras as $id ) {
-		$full  = (string) wp_get_attachment_url( $id );
-		$stem  = '' === $full ? '' : pathinfo( $full, PATHINFO_FILENAME );
-		$like  = '' === $stem ? '%wp-image-' . (int) $id . '%' : '%' . $wpdb->esc_like( $stem ) . '%';
-		$rx    = '"(id|mediaId)":' . (int) $id . '([^0-9]|$)|data-id="' . (int) $id . '"|wp-image-' . (int) $id . '([^0-9]|$)';
-		$found = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_type NOT IN ( 'attachment', 'revision' ) AND ( post_content LIKE %s OR post_content REGEXP %s ) LIMIT 300", $like, $rx ) );
-		$posts = array_merge( $posts, array_map( 'intval', $found ) );
+	$rx      = '"(id|mediaId)":(' . implode( '|', $ids ) . ')([^0-9]|$)|data-id="(' . implode( '|', $ids ) . ')"|wp-image-(' . implode( '|', $ids ) . ')([^0-9]|$)';
+	$likes[] = 'post_content REGEXP %s';
+	$largs[] = $rx;
+	$found   = $wpdb->get_col( $wpdb->prepare( 'SELECT ID FROM ' . $wpdb->posts . " WHERE post_type NOT IN ( 'attachment', 'revision' ) AND ( " . implode( ' OR ', $likes ) . ' ) LIMIT 300', $largs ) );
+	if ( count( $found ) >= 300 ) {
+		return $fail( 'too many pages (300 or more) write one of the addresses' );
+	}
+	$posts = array_map( 'intval', $found );
+	// A gallery lists image IDs in one place; a group used there is blocked rather than rewritten.
+	$gal = $wpdb->get_var( $wpdb->prepare( 'SELECT ID FROM ' . $wpdb->posts . " WHERE post_type NOT IN ( 'attachment', 'revision' ) AND post_content LIKE %s AND post_content REGEXP %s LIMIT 1", '%ids%', '[^0-9](' . implode( '|', $ids ) . ')[^0-9]' ) );
+	if ( $gal ) {
+		return $fail( 'listed in a gallery on post ' . (int) $gal );
 	}
 	// phpcs:enable
 	return array( 'ok' => true, 'why' => '', 'meta' => $meta, 'posts' => array_values( array_unique( $posts ) ) );
@@ -196,7 +215,6 @@ function aw_media_merge_retire( array $extras, $keep, $retire ) {
 	foreach ( $extras as $id ) {
 		if ( $retire ) {
 			update_post_meta( $id, '_wp_trash_meta_status', 'inherit' );
-			update_post_meta( $id, '_wp_trash_meta_time', time() );
 			update_post_meta( $id, 'aw_merged_into', (int) $keep );
 		} else {
 			delete_post_meta( $id, '_wp_trash_meta_status' );
@@ -268,7 +286,10 @@ function aw_media_merge_group( $keep ) {
 	aw_media_merge_set_status( $keep, 'pending' );
 	// 1. Repoint the picture references (the old values are saved first).
 	$data['meta'] = $c['meta'];
-	aw_media_merge_save_data( $keep, $data );
+	if ( ! aw_media_merge_save_data( $keep, $data ) ) {
+		aw_media_merge_set_status( $keep, 'failed', 'the old values could not be saved; nothing was changed' );
+		return array( 'status' => 'failed', 'why' => 'the old values could not be saved' );
+	}
 	foreach ( $c['meta'] as $m ) {
 		$wpdb->update( $wpdb->postmeta, array( 'meta_value' => $m['new'] ), array( 'meta_id' => $m['meta_id'] ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		wp_cache_delete( $m['post_id'], 'post_meta' );
@@ -296,7 +317,12 @@ function aw_media_merge_group( $keep ) {
 		}
 		if ( $new !== $post->post_content ) {
 			$data['content'][ $pid ] = array( 'old' => $post->post_content, 'hash' => md5( $new ) );
-			aw_media_merge_save_data( $keep, $data );
+			if ( ! aw_media_merge_save_data( $keep, $data ) ) {
+				unset( $data['content'][ $pid ] );
+				$left = aw_media_merge_restore( $data );
+				aw_media_merge_set_status( $keep, $left ? 'pending' : 'failed', 'the old values could not be saved; the group was put back' );
+				return array( 'status' => 'failed', 'why' => 'the old values could not be saved' );
+			}
 			$wpdb->update( $wpdb->posts, array( 'post_content' => $new ), array( 'ID' => $pid ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 			clean_post_cache( $pid );
 		}
@@ -304,8 +330,8 @@ function aw_media_merge_group( $keep ) {
 	// 3. Check that nothing still points at the extras.
 	$left = aw_media_merge_check( $keep, $extras );
 	if ( ! $left['ok'] || $left['meta'] || $left['posts'] ) {
-		aw_media_merge_restore( $data );
-		aw_media_merge_set_status( $keep, 'failed', 'a reference was still left after repointing; everything was put back' );
+		$kept = aw_media_merge_restore( $data );
+		aw_media_merge_set_status( $keep, $kept ? 'pending' : 'failed', 'a reference was still left after repointing' . ( $kept ? '; ' . $kept . ' item(s) were edited meanwhile and still need Put back' : '; everything was put back' ) );
 		return array( 'status' => 'failed', 'why' => 'a reference was still left after repointing' );
 	}
 	// 4. Retire the extras (Trash status; files stay).
@@ -344,17 +370,22 @@ add_action(
 		$do   = sanitize_text_field( wp_unslash( $_POST['do'] ?? '' ) );
 		$args = array( 'page' => 'aw-media-duplicates' );
 		if ( 'batch' === $do ) {
-			$done = 0;
-			$stop = microtime( true ) + 25;
+			$done  = 0;
+			$stop  = microtime( true ) + 40;
+			$heavy = 0;
+			if ( function_exists( 'set_time_limit' ) ) {
+				set_time_limit( 120 ); // phpcs:ignore Squiz.PHP.DiscouragedFunctions.Discouraged
+			}
 			$log  = aw_media_merge_log();
 			foreach ( array_keys( aw_media_merge_groups() ) as $keep ) {
 				if ( isset( $log[ $keep ] ) && in_array( $log[ $keep ]['status'], array( 'merged', 'blocked', 'failed', 'undone' ), true ) ) {
 					continue;
 				}
-				if ( $done >= 10 || microtime( true ) > $stop ) {
+				if ( $done >= 10 || $heavy > 40 || microtime( true ) > $stop ) {
 					break;
 				}
 				aw_media_merge_group( (int) $keep );
+				$heavy += count( aw_media_merge_extras( (int) $keep ) );
 				++$done;
 			}
 			$args['aw_mm'] = $done;
@@ -371,7 +402,7 @@ add_action(
 				$args['aw_mm_skip'] = (int) ( $after[ $keep ]['skipped'] ?? 0 );
 			} else {
 				$log = aw_media_merge_log();
-				if ( 'retry' === $m[1] && 'merged' !== ( $log[ $keep ]['status'] ?? '' ) ) {
+				if ( 'retry' === $m[1] && ! in_array( $log[ $keep ]['status'] ?? '', array( 'merged', 'pending' ), true ) ) {
 					unset( $log[ $keep ] );
 					update_option( 'aw_media_merge_log', $log, false );
 				}
@@ -431,7 +462,7 @@ function aw_media_merge_screen() {
 			$state  = 'Merged ' . esc_html( wp_date( 'j M Y', (int) $e['time'] ) );
 			$action = '<button type="submit" name="do" value="undo:' . (int) $keep . '" class="button">Undo</button>';
 		} elseif ( 'pending' === $status ) {
-			$state  = 'Stopped half way';
+			$state  = 'Stopped half way' . ( ! empty( $e['why'] ) ? ': ' . esc_html( $e['why'] ) : '' );
 			$action = '<button type="submit" name="do" value="undo:' . (int) $keep . '" class="button">Put back</button>';
 		} elseif ( in_array( $status, array( 'blocked', 'failed' ), true ) ) {
 			$state  = 'Blocked: ' . esc_html( $e['why'] );
