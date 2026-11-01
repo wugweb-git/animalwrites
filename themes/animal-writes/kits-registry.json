@@ -1486,14 +1486,14 @@
     "aw-content"
    ],
    "states": [
-    "default (block animal-writes/home-content): light card, photograph on top, H2, one line, two buttons (no destination yet), trust line (live organisation count to the nearest hundred)"
+    "default (block animal-writes/home-content): dark card over a photograph fading to ink behind the text, H2, the four parts of the site with icon squares, two buttons (no destination yet), trust line (live organisation count to the nearest hundred)"
    ],
    "tokens": [],
    "a11y": {
     "element": "pattern (Editor → Patterns, \"Animal Writes\")",
-    "aria": "section aria-labelledby its H2; photograph alt=\"\"",
+    "aria": "section aria-labelledby its H2; photograph alt=\"\"; icons aria-hidden",
     "keyboard": "Tab to the two buttons",
-    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "focus": "3px ring in --kit-color-on-ink (white on the ink overlay), 2px offset (:focus-visible)",
     "target": "44px buttons",
     "motion": "none",
     "sr": "visible text"
@@ -1514,7 +1514,7 @@
     "aw-pair"
    ],
    "states": [
-    "default: canvas band with the AW Content (light) and AW_Festive (dark) cards, each its own design; stacked on phones, two equal columns of equal height from 768; same padding and radius; buttons level at the bottom"
+    "default: canvas band with the AW Content (photograph overlay) and AW_Festive (pictures on top) cards, each its own design; stacked on phones, two equal columns of equal height from 768; same padding and radius"
    ],
    "tokens": [],
    "a11y": {

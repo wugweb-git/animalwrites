@@ -3,7 +3,7 @@
  * Title: AW Content and AW_Festive row
  * Slug: animal-writes/aw-pair
  * Categories: animal-writes
- * Description: One Home row with two cards, each its own design: AW Content (light, pattern aw-content) and AW_Festive (dark, pattern festive). Stacked on phones, two equal columns of equal height from 768, buttons level at the bottom.
+ * Description: One Home row with two cards, each its own design: AW Content (photograph overlay, pattern aw-content) and AW_Festive (pictures on top, pattern festive). Stacked on phones, two equal columns of equal height from 768.
  * Inserter: yes
  *
  * @package animal-writes

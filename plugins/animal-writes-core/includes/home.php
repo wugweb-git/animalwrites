@@ -135,23 +135,25 @@ add_filter(
 
 /* ---------- AW Content ---------- */
 
-/** Photograph for the AW Content card: the community dogs letter drive (aw1-im4), not used elsewhere on Home. */
-const AW_CONTENT_PHOTO = 20;
+/** Photograph for the AW Content card: the community dogs letter drive (aw1-im3), not used elsewhere on Home. */
+const AW_CONTENT_PHOTO = 19;
 
 /**
- * Home: AW Content block (pattern animal-writes/aw-content). A light card: the photograph on top, H2, one line, two
- * buttons (no destination yet, #) and the trust line, whose count is the live organisation count to the nearest hundred.
+ * Home: AW Content block (pattern animal-writes/aw-content). A dark card over a photograph that fades to ink behind the
+ * text: H2, the four parts of the site (the one line, split at its dots), two buttons (no destination yet, #) and the
+ * trust line, whose count is the live organisation count to the nearest hundred.
  *
  * @return string
  */
 function aw_block_home_content() {
-	$n   = function_exists( 'aw_listing_public_count' ) ? aw_listing_public_count() : 0;
-	$n   = $n >= 100 ? number_format_i18n( round( $n / 100 ) * 100 ) . '+' : ( $n ? number_format_i18n( $n ) : '' ); // 6,796 shows 6,800+
-	$img = wp_attachment_is_image( AW_CONTENT_PHOTO ) ? wp_get_attachment_image( AW_CONTENT_PHOTO, 'large', false, array( 'class' => 'aw-content-img', 'alt' => '', 'sizes' => '(min-width: 768px) 50vw, 100vw', 'loading' => 'lazy', 'decoding' => 'async' ) ) : '';
+	$n    = function_exists( 'aw_listing_public_count' ) ? aw_listing_public_count() : 0;
+	$n    = $n >= 100 ? number_format_i18n( round( $n / 100 ) * 100 ) . '+' : ( $n ? number_format_i18n( $n ) : '' ); // 6,796 shows 6,800+
+	$img  = wp_attachment_is_image( AW_CONTENT_PHOTO ) ? wp_get_attachment_image( AW_CONTENT_PHOTO, 'full', false, array( 'class' => 'aw-content-bg', 'alt' => '', 'sizes' => '1280px', 'loading' => 'lazy', 'decoding' => 'async' ) ) : ''; // a wide strip covering a tall card: always the full file
+	$item = fn( $ico, $label ) => '<li><span class="aw-content-ico" aria-hidden="true"><span class="kit-ico kit-ico--' . $ico . '"></span></span>' . $label . '</li>';
 
-	$out  = '<section class="aw-content" aria-labelledby="aw-content-t">' . $img . '<div class="aw-content-body">';
+	$out  = '<section class="aw-content kit-dark" aria-labelledby="aw-content-t">' . $img . '<div class="aw-content-body">';
 	$out .= '<h2 id="aw-content-t">Animal welfare information and help across India</h2>';
-	$out .= '<p class="aw-content-lead">Directory of organisations &amp; vets · Practical guides · Laws &amp; news · Ways to act</p>';
+	$out .= '<ul class="aw-content-list">' . $item( 'directory', 'Directory of organisations &amp; vets' ) . $item( 'knowledge', 'Practical guides' ) . $item( 'legal', 'Laws &amp; news' ) . $item( 'megaphone', 'Ways to act' ) . '</ul>';
 	$out .= '<p class="aw-content-actions"><a class="kit-btn kit-btn--brand kit-btn--ico-map-pin" href="#">Find help near you</a><a class="kit-btn kit-btn--secondary" href="#">Claim or update your organisation</a></p>';
 	$out .= '<p class="aw-content-trust">' . ( $n ? esc_html( $n ) . ' organisations · ' : '' ) . 'Free to search and claim · Source-linked</p>';
 	return $out . '</div></section>';
