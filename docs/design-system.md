@@ -280,7 +280,14 @@ These hold on every page. Section heights below gives the detail.
 8. **One button per card.**
 9. **Headings.** Only the theme H1, H2 and H3 sizes (`--kit-type-h1`, `--kit-type-h2`, `--kit-type-h3`). No page-level heading font-size overrides.
 
-Checks: `tools/ci/theme_rules_check.py` in the Deploy check catches rules 3 and 9 and padding under 24px (2) in CSS. `tools/ci/section_heights_audit.js`, pasted into the browser console, measures rules 4 to 7 on the page: OVER above 720, FAIL above 800.
+10. **Content block at most 600px.** Owner: "a content block must not exceed 600 - you cannot have cards or blocks which break the standard accessibility and WCAG". At every width, phones included, no card or content block is taller than 600px. That covers cards, tiles, photo cards, columns, fold bodies, table cards and form steps. A long block is split into cards in a swipe row, or into a fold with a short visible part.
+11. **WCAG 2.2 AA for every pattern.**
+    - Swipe rows: the row can be scrolled by keyboard (`tabindex="0"` on the scroller, or focusable cards), focus is visible, the row is named (`aria-labelledby` its heading, or `aria-label`), and nothing can be reached only by swiping.
+    - Folds: a real `<details>`/`<summary>` (or a button with `aria-expanded`), with the content kept in the page.
+    - Sticky bar: it never covers the focused element (`scroll-padding-bottom` at the bar's height), and it is small or can be dismissed.
+    - Everywhere: targets at least 44×44px, text contrast at least 4.5:1, reflow at 320px with no sideways page scroll, text that resizes to 200%, and `prefers-reduced-motion` respected (no smooth scroll or animation when it is set).
+
+Checks: `tools/ci/theme_rules_check.py` in the Deploy check catches rules 3 and 9 and padding under 24px (2) in CSS. `tools/ci/section_heights_audit.js`, pasted into the browser console, measures rules 4 to 7, 10 and the measurable points of 11 on the page: sections OVER above 720 and FAIL above 800, blocks over 600, swipe rows with no keyboard focus or name, targets under 44px and sideways page scroll.
 
 ### Section heights
 A section's height is its content plus the theme's section padding: `.kit-section` sets `padding-block: var(--kit-space-section)` (48px under 768, 70px to 1199, 96px from 1200). Inside a section, cards and gaps use `--kit-space-*` tokens. A page hero (`.kit-hero`) is the one fixed shape: `--kit-hero-min`.

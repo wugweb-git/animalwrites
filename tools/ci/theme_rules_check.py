@@ -15,6 +15,8 @@ This check fails on a NEW rule in our CSS (themes/, plugins/*/assets/, not vendo
           (owner, 2 Nov 2026; docs/card-sizes.md). var(--kit-space-1..4), var(--s-1..4), the gutter/head/grid tokens,
           numbers under 24px (1rem = 16px) and 0 are under; var(--kit-space-5..9) and --kit-space-section are fine.
           A child reset to 0 inside a padded box (.kit-card-body in a padded stacked card) is listed in the baseline.
+  motion  sets scroll-behavior: smooth outside @media (prefers-reduced-motion: no-preference), unless the same file sets
+          that selector back to auto under (prefers-reduced-motion: reduce) (WCAG 2.2, owner 2 Nov 2026).
   type    sets font-size on an h1, h2 or h3 to anything but the theme's own sizes (var(--kit-type-*), inherit), so
           headings keep the theme H1/H2/H3 sizes (owner, 2 Nov 2026).
 
@@ -78,7 +80,7 @@ def rules(text):
             head = text[start:i].strip()
             line = text.count("\n", 0, start) + 1 + (len(text[start:i]) - len(text[start:i].lstrip("\n")) and 0)
             if head.startswith("@"):
-                stack.append(None)
+                stack.append(" ".join(head.split()))
                 start = i + 1
             else:
                 j = text.find("}", i)
@@ -86,7 +88,7 @@ def rules(text):
                     break
                 body = text[i + 1:j]
                 line = text.count("\n", 0, i) + 1 - head.count("\n")
-                out.append((" ".join(head.split()), body, line))
+                out.append((" ".join(head.split()), body, line, " ".join(stack)))
                 i = j
                 start = j + 1
         elif c == "}":
@@ -213,7 +215,10 @@ def findings():
     out = []
     for f in sorted(css_files()):
         rel = str(f.relative_to(ROOT))
-        for sel, body, line in rules(f.read_text(errors="ignore")):
+        parsed = rules(f.read_text(errors="ignore"))
+        calm = {sel for sel, body, line, ctx in parsed if "reduced-motion: reduce" in ctx.replace("(", " ").replace("  ", " ")
+                and any(k == "scroll-behavior" and v.startswith("auto") for k, v in decls(body))}
+        for sel, body, line, ctx in parsed:
             for k, v in decls(body):
                 kinds = []
                 if k in ("padding-top", "padding-bottom", "padding-block", "padding-block-start", "padding-block-end"):
@@ -231,6 +236,8 @@ def findings():
                     kinds.append("pad")
                 if k == "font-size" and any(HEADING.search(last) for _, last in subjects(sel)) and not TYPE_OK.match(v):
                     kinds.append("type")
+                if k == "scroll-behavior" and v.startswith("smooth") and sel not in calm and "prefers-reduced-motion: no-preference" not in ctx.replace("(", " ").replace(")", " ").replace("  ", " "):
+                    kinds.append("motion")
                 for kind in kinds:
                     out.append((rel, line, kind, sel, f"{k}: {v}"))
     return out
