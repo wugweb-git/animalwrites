@@ -262,3 +262,24 @@
 	d.addEventListener('toggle', sync);
 	sync();
 })();
+
+/* Need help now: the bento tiles fade up one after another (112 first) when the grid scrolls into view. Tiles already
+   on screen when the page loads are left as they are; nothing moves under prefers-reduced-motion or without GSAP. */
+(function () {
+	var grid = document.querySelector('.aw-bento');
+	if (!grid || !window.gsap || !('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+	if (grid.getBoundingClientRect().top < window.innerHeight) return;
+	var tiles = grid.querySelectorAll('.aw-bento-tile');
+	window.gsap.set(tiles, { opacity: 0, y: 16 });
+	var io = new IntersectionObserver(function (entries) {
+		var e = entries[0];
+		if (!e.isIntersecting) {
+			if (e.boundingClientRect.bottom < 0) { io.disconnect(); window.gsap.set(tiles, { clearProps: 'opacity,transform' }); } // jumped past: show it, no animation
+			return;
+		}
+		io.disconnect();
+		window.gsap.to(tiles, { opacity: 1, y: 0, duration: 0.45, ease: 'power2.out', stagger: 0.06, clearProps: 'opacity,transform' });
+	}, { rootMargin: '0px 0px -10% 0px' });
+	io.observe(grid);
+	window.addEventListener('beforeprint', function () { io.disconnect(); window.gsap.set(tiles, { clearProps: 'opacity,transform' }); });
+})();
