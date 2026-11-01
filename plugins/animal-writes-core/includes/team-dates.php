@@ -93,7 +93,7 @@ add_action( 'admin_init', 'aw_team_dates_add_1101' );
 /**
  * Dates follow-up of 1 Nov 2026, once (flag aw_team_dates_1101b): the 17 Nov entry names what the 19 May 2026 judgment
  * set (compliance reports due, not a hearing); a cause-list check on 12 Nov; the Search Insights thresholds review on
- * 25 Nov. A date already on the calendar under the same title is not added again.
+ * 25 Nov; the stray-dog pages' 28-day checkpoint on 15 Dec. A date already on the calendar under the same title is not added again.
  */
 function aw_team_dates_add_1101b() {
 	if ( get_option( 'aw_team_dates_1101b' ) ) {
@@ -106,7 +106,8 @@ function aw_team_dates_add_1101b() {
 		}
 	}
 	$add  = array(
-		array( 'date' => '2026-11-12', 'title' => 'Cause-list check for 17 Nov', 'note' => 'Check the Supreme Court cause list for the stray-dog case before the 17 Nov entry is relied on.' ),
+		array( 'date' => '2026-11-12', 'title' => 'Cause-list check, SMWP (C) 5/2025, for 17 Nov', 'note' => 'Supreme Court cause list (advance and daily lists for 17 Nov 2026) and case status, diary no. 41706/2025. Repeat on 13 and 14 Nov.' ),
+		array( 'date' => '2026-12-15', 'title' => 'Supreme Court stray dogs: 28-day checkpoint', 'note' => 'Search Insights → Pages: the campaign, the explainer and the Library judgment of 19 May 2026, impressions, clicks and position for 17 Nov–14 Dec against the 1 Nov baseline.' ),
 		array( 'date' => '2026-11-25', 'title' => 'Search Insights thresholds review (Wikipedia 2×, GDELT 3×)', 'note' => 'Review the Rising thresholds: Wikipedia pageviews at 2× the usual level, GDELT at 3× (GDELT is off while it refuses our requests).' ),
 	);
 	$have = array();

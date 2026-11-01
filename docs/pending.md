@@ -164,10 +164,11 @@ These live in WordPress: **Animal Writes → Dates** (month calendar, add and re
 
 - **5 Nov 2026**: lab rules objections close (campaign 13848).
 - **7 Nov 2026**: owner decides the lab rules Post phase. Until then no closed-state or Post content, and no FAQ visibility changes, on 13848.
-- **12 Nov 2026**: cause-list check for 17 Nov (Supreme Court stray-dog case).
+- **12 Nov 2026**: cause-list check, SMWP (C) 5/2025, for 17 Nov (repeat 13 and 14 Nov).
 - **17 Nov 2026**: Directory thin-page indexing re-check (10:00) and the 8 tracked keyword positions (11:00); both are scheduled tasks.
 - **17 Nov 2026**: Supreme Court stray-dog case: High Court compliance reports due (19 May 2026 judgment). Was titled "compliance hearing".
 - **25 Nov 2026**: Search Insights thresholds review (Wikipedia 2×, GDELT 3×).
+- **15 Dec 2026**: Supreme Court stray dogs, 28-day checkpoint (campaign, explainer, 19 May judgment in Search Insights → Pages).
 
 ## Notes to keep
 - **FluentCRM: everyone on the Newsletter list (owner, 31 Oct 2026):** Contact, Volunteer sign-up and Claim senders are all on the Newsletter list; "Email me updates" is only recorded as 1/0; no form changes a contact's status (owner, 1 Nov 2026). Remove my data never reaches FluentCRM; the Campaign form is unchanged. No automations on live; any future FluentCRM automation or campaign must target subscribed contacts only.
@@ -182,7 +183,7 @@ These live in WordPress: **Animal Writes → Dates** (month calendar, add and re
 - **Keyphrase ownership guard (T11):** /aw/v1/seo-focus refuses a keyphrase another published page or term has, or whose keyword record another page owns; News never takes an evergreen page's phrase; `dry: true` counts only. Replay over today's 129 conflicts (read-only): 124 would have been prevented, 314 writes refused (about 221 of them News items); 5 are conflicts only because Google shows a page that does not own the phrase. `wp aw-si keyphrase-guard --list`. Hand edits in the editor are not guarded.
 - **Modified dates (T37):** the 281 posts saved on 1 Nov 14:00–15:00 IST were real edits made in wp-admin: titles and excerpts rewritten (each has a revision; e.g. "Application Fess" → "Fees", study titles reworded) and 280 Rank Math titles and descriptions written. Their "modified 1 Nov" is true; nothing re-stamped. From now on technical saves keep the date: `aw_keep_modified()` in PHP, `?aw_keep_modified=1` or header `X-AW-Keep-Modified: 1` on REST updates (FAQ block conversions and the News letter-case fix use it).
 - **Search Insights sources (T16):** GDELT off by default; a run's info says baseline, no rows or source failed; the Keywords list shows "source failed" for Trends while Trends refuses; the 22 Oct seed counts as the Live Google check's run (133 results); Settings → Bing searches counts and adds keyword records for Bing searches without one; stored quick_win flag (keyword table version 3) behind the Quick wins view and box.
-- **Dates (T18):** 17 Nov retitled, 12 Nov cause-list check, 25 Nov thresholds review (once, flag aw_team_dates_1101b).
+- **Dates (T18):** 17 Nov retitled, 12 Nov cause-list check, 25 Nov thresholds review, 15 Dec stray-dog checkpoint (once, flag aw_team_dates_1101b).
 - **Schema (T29/T44):** a News item's WebPage carries the NewsArticle's dates (story date, not the hour it was published here). Already right: Library acts, rules and notifications are Legislation with legislationIdentifier (14 of 14); district ItemList numberOfItems is the real total (Mumbai 94); listing phones E.164 (other session, 69d32683). IndexNow (T50): Rank Math Instant Indexing on, key set, key file answers 200; nothing to change.
 - **FAQ subjects:** the "North" place and "large indian civet" capitals were already right on live (the 1 Nov titles); `wp aw-faq check` now warns for every page and guide whose heading falls back to its title.
 - **Reading cadence (T52):** `docs/seo/monitoring-cadence.md`.
