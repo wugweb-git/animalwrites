@@ -1550,6 +1550,7 @@ section.aw-camp-band.aw-ed-hero--campaign { box-sizing: border-box; height: var(
 	.aw-camp-band.aw-ed-hero--campaign.has-art { padding-bottom: calc(50vw + var(--kit-space-section)); }
 	.aw-ed-hero--campaign .aw-camp-band-art { height: 50vw; }
 	.aw-ed-hero--campaign .aw-camp-band-art img { height: 100%; object-fit: cover; object-position: center; }
+	.aw-camp-band.aw-ed-hero--campaign .aw-camp-band-ghost { display: none; } /* one CTA in the hero on phones, so it fits --kit-hero-h (owner, 2 Nov 2026); the rules are on the campaign page */
 }
 /* From 768: the artwork right of the text, as in the band. A 10:9 box, centred on the hero's height, shows the
    picture's right half (the papers, stamp and mouse) whatever the hero's height; the text keeps clear of it. */

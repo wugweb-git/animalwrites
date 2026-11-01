@@ -245,6 +245,22 @@
 @media (min-width: 1200px) { .aw-camp--community-dogs .aw-camp-hero, .aw-camp--community-dogs.aw-camp-hero { min-height: 800px; } }
 /* Lab Rules hero: fixed at --kit-hero-h (720px or one screen, whichever is less; owner, 2 Nov 2026), the poster strip at its own shape */
 .aw-camp--lab-rules .aw-camp-hero { box-sizing: border-box; height: var(--kit-hero-h); }
+/* Phones: the Supreme Court and Lab rules heroes fit --kit-hero-h (owner, 2 Nov 2026: one CTA where possible, the
+   poster scaled to fit). The hero keeps its first button (the second leads to a section further down the page); the poster
+   is a ticket: the day count beside the stamp and "days to go", the due date and the rest under them; the Gazette strip
+   is a slimmer crop of the same page (6:1). */
+@media (max-width: 767px) {
+	:is(.aw-camp--sc-stray-dogs, .aw-camp--lab-rules) .aw-camp-hero .wp-block-buttons > .wp-block-button ~ .wp-block-button { display: none; }
+	:is(.aw-camp--sc-stray-dogs, .aw-camp--lab-rules) .aw-camp-hero-cols { gap: var(--kit-space-4); }
+	:is(.aw-camp--sc-stray-dogs, .aw-camp--lab-rules) .aw-camp-hero .aw-camp-poster { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-areas: "doc doc" "num stamp" "num unit" "when when" "rest rest"; column-gap: var(--kit-space-4); align-items: end; }
+	:is(.aw-camp--sc-stray-dogs, .aw-camp--lab-rules) .aw-camp-hero .aw-camp-poster > * { grid-area: rest; }
+	:is(.aw-camp--sc-stray-dogs, .aw-camp--lab-rules) .aw-camp-hero .aw-camp-poster > .aw-camp-poster-doc { grid-area: doc; aspect-ratio: 6 / 1; }
+	:is(.aw-camp--sc-stray-dogs, .aw-camp--lab-rules) .aw-camp-hero .aw-camp-poster > .aw-camp-stamp { grid-area: stamp; margin: 0; justify-self: start; }
+	:is(.aw-camp--sc-stray-dogs, .aw-camp--lab-rules) .aw-camp-hero .aw-camp-poster > .aw-countdown { display: contents; }
+	:is(.aw-camp--sc-stray-dogs, .aw-camp--lab-rules) .aw-camp-hero .aw-camp-poster .aw-cd-num { grid-area: num; align-self: center; }
+	:is(.aw-camp--sc-stray-dogs, .aw-camp--lab-rules) .aw-camp-hero .aw-camp-poster .aw-cd-unit { grid-area: unit; align-self: start; }
+	:is(.aw-camp--sc-stray-dogs, .aw-camp--lab-rules) .aw-camp-hero .aw-camp-poster .aw-cd-when { grid-area: when; }
+}
 @media (max-width: 1199px) { .aw-camp--lab-rules .aw-camp-hero-cols { gap: var(--kit-space-4); } }
 .aw-camp-hero :is(h1, h2, p, .aw-cd-num, .aw-cd-unit, .aw-cd-when) { color: var(--camp-on-mark); }
 .aw-camp-hero a:not(.wp-element-button) { color: var(--camp-on-mark); text-decoration: underline; text-underline-offset: 0.2em; }
