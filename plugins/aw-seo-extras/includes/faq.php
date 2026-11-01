@@ -149,6 +149,38 @@ function aw_faq_hub_pages() {
 }
 
 /**
+ * The subject a post's FAQ heading names ("Questions about <subject>") and where it came from: the FAQ box's Subject
+ * field (meta aw_faq_subject), the pages map (Settings → FAQ), the site's name on the front page, else the title.
+ *
+ * @param WP_Post $post Post.
+ * @return array [ subject, 'meta' | 'map' | 'front' | 'title' ]
+ */
+function aw_faq_subject( $post ) {
+	$meta = aw_faq_plain( (string) get_post_meta( $post->ID, 'aw_faq_subject', true ) );
+	if ( '' !== $meta ) {
+		return array( $meta, 'meta' );
+	}
+	$hubs = 'page' === $post->post_type ? aw_faq_hub_pages() : array();
+	if ( isset( $hubs[ (int) $post->ID ] ) ) {
+		return array( $hubs[ (int) $post->ID ], 'map' );
+	}
+	if ( (int) get_option( 'page_on_front' ) === (int) $post->ID && '' !== aw_faq_plain( get_bloginfo( 'name' ) ) ) {
+		return array( aw_faq_plain( get_bloginfo( 'name' ) ), 'front' );
+	}
+	return array( aw_faq_plain( get_the_title( $post ) ), 'title' );
+}
+
+/**
+ * The FAQ head's supporting line and its "see all" link (filter aw_faq_head_parts): [ line, url, label ]. The link is
+ * left out on the page it points to.
+ *
+ * @return array
+ */
+function aw_faq_head_parts() {
+	return (array) apply_filters( 'aw_faq_head_parts', array( 'Quick answers. More in the full FAQ.', home_url( '/resources/animal-welfare-faqs/' ), 'All questions' ) );
+}
+
+/**
  * Whether a page shows its FAQ after its content here: page 1, and no search or filter in the address (tracking
  * parameters and page 1 of a core Query Loop aside). Filter aw_faq_show_here for the site's own list views.
  *
@@ -182,29 +214,30 @@ function aw_faq_context( $obj = null ) {
 	$obj = null === $obj ? get_queried_object() : $obj;
 	$ctx = null;
 	if ( $obj instanceof WP_Post && in_array( $obj->post_type, aw_faq_post_types(), true ) ) {
-		$url   = (string) get_permalink( $obj );
-		$title = aw_faq_plain( get_the_title( $obj ) );
-		$hubs  = 'page' === $obj->post_type ? aw_faq_hub_pages() : array();
-		$ctx   = array(
-			'kind'    => 'post' === $obj->post_type ? 'guide' : $obj->post_type,
-			'store'   => 'post',
-			'id'      => (int) $obj->ID,
-			'type'    => $obj->post_type,
-			'entity'  => $title,
-			'full'    => '',
-			'url'     => $url,
-			'page_id' => $url . '#webpage',
-			'about'   => $url . '#webpage',
-			'head'    => 'post' === $obj->post_type ? 'Questions and answers' : 'Questions about ' . ( $hubs[ (int) $obj->ID ] ?? $title ),
+		$url     = (string) get_permalink( $obj );
+		$title   = aw_faq_plain( get_the_title( $obj ) );
+		$subject = aw_faq_subject( $obj );
+		$ctx     = array(
+			'kind'            => 'post' === $obj->post_type ? 'guide' : $obj->post_type,
+			'store'           => 'post',
+			'id'              => (int) $obj->ID,
+			'type'            => $obj->post_type,
+			'entity'          => $title,
+			'full'            => '',
+			'url'             => $url,
+			'page_id'         => $url . '#webpage',
+			'about'           => $url . '#webpage',
+			'head'            => 'Questions about ' . $subject[0],
+			'subject_missing' => 'title' === $subject[1] && in_array( $obj->post_type, array( 'page', 'post' ), true ),
 		);
-		if ( isset( $hubs[ (int) $obj->ID ] ) ) {
+		if ( 'map' === $subject[1] ) {
 			$ctx['kind']   = 'hub';
-			$ctx['entity'] = $hubs[ (int) $obj->ID ];
+			$ctx['entity'] = $subject[0];
 		}
 	} elseif ( $obj instanceof WP_Term && in_array( $obj->taxonomy, aw_faq_taxonomies(), true ) ) {
 		$url  = (string) kits_term_url( $obj );
 		$name = aw_faq_plain( $obj->name );
-		$ctx  = array( 'kind' => 'term', 'store' => 'term', 'id' => (int) $obj->term_id, 'type' => $obj->taxonomy, 'entity' => $name, 'full' => '', 'url' => $url, 'page_id' => $url . '#webpage', 'about' => $url . '#webpage', 'head' => 'Questions about ' . $name );
+		$ctx  = array( 'kind' => 'term', 'store' => 'term', 'id' => (int) $obj->term_id, 'type' => $obj->taxonomy, 'entity' => $name, 'full' => '', 'url' => $url, 'page_id' => $url . '#webpage', 'about' => $url . '#webpage', 'head' => 'Questions about ' . $name, 'subject_missing' => false );
 	}
 	return null === $ctx ? null : apply_filters( 'aw_faq_context', $ctx, $obj );
 }
@@ -455,8 +488,9 @@ function aw_faq_build( $ctx = null ) {
 }
 
 /**
- * The accordion: H2 "Questions about …" at h4 size; each question a button (aria-expanded) inside an H3; each answer
- * in the HTML (kit.js closes them after load; without JavaScript every answer shows).
+ * The accordion: the section head (H2 "Questions about <subject>", one line, the ghost "All questions" link); each
+ * question a button (aria-expanded) inside an H3; each answer in the HTML (kit.js closes them after load; without
+ * JavaScript every answer shows).
  *
  * @param array|null $faq aw_faq_build().
  * @return string
@@ -479,7 +513,11 @@ function aw_faq_html( $faq = null ) {
 	}
 	// wptexturize as the block template does to the whole page (" - " → " – ", "24x7" → "24×7"), so the text the schema is
 	// parsed from is the text the page shows; texturizing it again later changes nothing.
-	return $html[ $key ] = wptexturize( '<section class="kit-faq" id="faq" aria-labelledby="kit-faq-h" data-faq="' . esc_attr( $faq['ctx']['kind'] ) . '"><h2 class="kit-faq-head" id="kit-faq-h">' . esc_html( $faq['ctx']['head'] ) . '</h2>' . $body . '</section>' );
+	list( $line, $all, $label ) = array_pad( aw_faq_head_parts(), 3, '' );
+	$here = untrailingslashit( (string) strtok( (string) $faq['ctx']['url'], '?#' ) ) === untrailingslashit( (string) strtok( (string) $all, '?#' ) );
+	$head = '<div class="kit-sec-head"><div><h2 id="kit-faq-h">' . esc_html( $faq['ctx']['head'] ) . '</h2>' . ( '' !== $line ? '<p>' . esc_html( $line ) . '</p>' : '' ) . '</div>'
+		. ( '' !== $all && '' !== $label && ! $here ? '<a class="kit-btn kit-btn--ghost kit-btn--sm" href="' . esc_url( $all ) . '">' . esc_html( $label ) . '</a>' : '' ) . '</div>';
+	return $html[ $key ] = wptexturize( '<section class="kit-faq" id="faq" aria-labelledby="kit-faq-h" data-faq="' . esc_attr( $faq['ctx']['kind'] ) . '">' . $head . $body . '</section>' );
 }
 
 /**
@@ -651,6 +689,15 @@ function aw_faq_editor( $ctx ) {
 	$r    = aw_faq_rows( $ctx, false );
 	$rows = $r['rows'];
 	wp_nonce_field( 'aw_faq_items', 'aw_faq_items_nonce' );
+	if ( 'post' === $ctx['store'] ) {
+		$post = get_post( $ctx['id'] );
+		$fall = $post ? aw_faq_subject( $post ) : array( '', 'title' );
+		$own  = (string) get_post_meta( $ctx['id'], 'aw_faq_subject', true );
+		echo '<p><label for="aw-faq-subject"><strong>Subject</strong> (the heading reads “Questions about …”)</label><br><input type="text" class="large-text" id="aw-faq-subject" name="aw_faq_subject" value="' . esc_attr( $own ) . '" placeholder="' . esc_attr( 'meta' === $fall[1] ? '' : $fall[0] ) . '"></p>';
+		if ( '' === $own && ! empty( $ctx['subject_missing'] ) ) {
+			echo '<div class="notice notice-warning inline"><p>' . esc_html( 'No subject: the heading uses the page title, “' . $ctx['head'] . '”.' ) . '</p></div>';
+		}
+	}
 	// The default order as rendered (no automatic rows stored): saving it unchanged stores none, even when the item's
 	// own fields changed in the same save (they are saved first, so the questions now may differ from these).
 	$stored_auto = array_filter( aw_faq_items( $ctx['store'], $ctx['id'] ), fn( $x ) => '' !== ( $x['auto'] ?? '' ) );
@@ -827,6 +874,14 @@ add_action(
 		if ( absint( wp_unslash( $_POST['post_ID'] ?? 0 ) ) !== (int) $post_id || ! current_user_can( 'edit_post', $post_id ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- checked in aw_faq_editor_posted()
 			return; // only the post whose edit screen sent the box (not another post saved in the same request)
 		}
+		if ( isset( $_POST['aw_faq_subject'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- checked in aw_faq_editor_posted()
+			$subject = sanitize_text_field( wp_unslash( $_POST['aw_faq_subject'] ) ); // phpcs:ignore WordPress.Security.NonceVerification -- checked in aw_faq_editor_posted()
+			if ( '' === $subject ) {
+				delete_post_meta( $post_id, 'aw_faq_subject' );
+			} else {
+				update_post_meta( $post_id, 'aw_faq_subject', $subject );
+			}
+		}
 		$ctx = aw_faq_context( $post );
 		if ( $ctx ) {
 			aw_faq_editor_save( $ctx );
@@ -834,6 +889,38 @@ add_action(
 	},
 	10,
 	2
+);
+
+/* ---------- Pages and posts lists: the FAQ subject column ---------- */
+
+/**
+ * The FAQ subject column on the Pages and Posts lists: the subject the heading names, "Missing: uses the title" when a
+ * page or post shows an FAQ without one, a dash when it shows no FAQ.
+ */
+add_action(
+	'admin_init',
+	function () {
+		foreach ( array_intersect( array( 'page', 'post' ), aw_faq_post_types() ) as $pt ) {
+			add_filter( "manage_{$pt}_posts_columns", fn( $cols ) => array_merge( $cols, array( 'aw_faq_subject' => 'FAQ subject' ) ) );
+			add_action(
+				"manage_{$pt}_posts_custom_column",
+				function ( $col, $post_id ) {
+					if ( 'aw_faq_subject' !== $col ) {
+						return;
+					}
+					$post = get_post( $post_id );
+					$ctx  = $post ? aw_faq_context( $post ) : null;
+					if ( ! $ctx || ! aw_faq_build( $ctx ) ) {
+						echo '—';
+						return;
+					}
+					echo esc_html( ! empty( $ctx['subject_missing'] ) ? 'Missing: uses the title' : aw_faq_subject( $post )[0] );
+				},
+				10,
+				2
+			);
+		}
+	}
 );
 
 /** The FAQ box on a term's edit screen. */
@@ -1099,7 +1186,18 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 				return;
 			}
 			// report
-			WP_CLI::line( wp_json_encode( aw_faq_index( true )['counts'], JSON_PRETTY_PRINT ) );
+			$ix = aw_faq_index( true );
+			WP_CLI::line( wp_json_encode( $ix['counts'], JSON_PRETTY_PRINT ) );
+			$missing = 0;
+			foreach ( $ix['rows'] as $row ) { // pages and posts that show an FAQ with no subject: the heading falls back to the title
+				$p   = 'post' === $row['store'] && $row['shown'] ? get_post( $row['id'] ) : null;
+				$ctx = $p ? aw_faq_context( $p ) : null;
+				if ( $ctx && ! empty( $ctx['subject_missing'] ) ) {
+					++$missing;
+					WP_CLI::line( sprintf( 'No FAQ subject: %s %d %s (heading: "%s")', $row['type'], $row['id'], get_post_field( 'post_name', $p ), $ctx['head'] ) );
+				}
+			}
+			WP_CLI::line( $missing ? "$missing pages and posts show an FAQ without a subject (FAQ box → Subject)." : 'Every page and post with an FAQ has a subject.' );
 		}
 	);
 }

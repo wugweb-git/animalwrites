@@ -511,9 +511,12 @@ ins.adsbygoogle:not([data-ad-status="filled"]) { height: 0 !important; min-heigh
 .rank-math-answer[hidden] { display: none; }
 @media (prefers-reduced-motion: reduce) { .rank-math-question > button::after { transition: none; } }
 
-/* FAQ accordion (kit-faq): an H2 at h4 size; each question an H3 holding a button (aria-expanded) that opens its answer.
-   Answers are in the HTML; kit.js closes them after load, so without JavaScript every answer shows. Rows like Details. */
+/* FAQ accordion (kit-faq): the section head (kit-sec-head: H2 "Questions about <subject>", one line, a ghost "see all"),
+   then each question an H3 holding a button (aria-expanded) that opens its answer. Answers are in the HTML; kit.js
+   closes them after load, so without JavaScript every answer shows. Rows like Details. .kit-faq-head: the older head. */
 .kit-faq-head { font-size: var(--kit-type-h4); font-weight: var(--kit-weight-strong); line-height: var(--kit-leading-heading); margin: 0 0 var(--kit-space-3); }
+.kit-faq > .kit-sec-head { row-gap: var(--kit-space-4); margin-bottom: var(--kit-space-head); }
+.kit-faq > .kit-sec-head p { margin-top: var(--kit-space-4); }
 .kit-faq-item { border-bottom: var(--kit-border-width) solid var(--kit-color-line); }
 .kit-faq-q { margin: 0; font-size: var(--kit-type-body); line-height: var(--kit-leading-heading); }
 .kit-faq-btn { all: unset; box-sizing: border-box; width: 100%; display: flex; justify-content: space-between; align-items: center; gap: var(--kit-space-4); min-height: var(--kit-size-target); padding-block: var(--kit-space-3); cursor: pointer; font-weight: var(--kit-weight-strong); }
