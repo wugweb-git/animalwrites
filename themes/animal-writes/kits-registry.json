@@ -1448,12 +1448,16 @@
     "aw-findhelp-actions",
     "aw-findhelp-bar",
     "aw-findhelp-filters",
+    "aw-findhelp-form",
+    "aw-findhelp-go",
     "aw-findhelp-label",
     "aw-findhelp-near",
+    "aw-findhelp-q",
+    "aw-findhelp-state",
     "aw-findhelp-types"
    ],
    "states": [
-    "default ([aw_find_help compact=\"1\"]): section head (H2, live counts), search bar (name, state, Search, Use my location), Quick filters (six types counted on published listings), Browse all states and Claim buttons"
+    "default ([aw_find_help compact=\"1\"]): section head (H2, live counts), search bar of kit-field fields and kit-btn (name, state, Search, Use my location), Quick filters as kit-filter-pill (six types counted on published listings; one sideways row on phones), Browse all states and Claim buttons"
    ],
    "tokens": [],
    "a11y": {

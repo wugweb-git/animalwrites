@@ -319,14 +319,21 @@ add_shortcode(
 			. '<label class="screen-reader-text" for="aw-ed-state">State or union territory</label><select id="aw-ed-state" name="state">' . $opts . '</select>'
 			. '<button type="submit" class="kit-btn">Search</button>';
 		if ( wp_validate_boolean( $atts['compact'] ) ) {
-			$chips = '';
+			$pills = '';
 			foreach ( aw_find_help_top_types( 6 ) as $t ) {
-				$chips .= '<li><a class="kit-chip" href="' . esc_url( add_query_arg( 'tag', $t[0], $dir ) ) . '">' . esc_html( $t[1] ) . '</a></li>';
+				$pills .= '<li><a class="kit-filter-pill" href="' . esc_url( add_query_arg( 'tag', $t[0], $dir ) ) . '">' . esc_html( $t[1] ) . '</a></li>';
 			}
+			$field = fn( $cls, $id, $label, $control ) => '<div class="kit-field aw-findhelp-' . $cls . '"><label class="screen-reader-text" for="' . $id . '">' . $label . '</label><div class="kit-field-control">' . $control . '</div></div>';
 			return '<div class="kit-sec-head"><div><h2 class="wp-block-heading" id="aw-find-h">Find help near you</h2>'
 				. '<p><strong>' . esc_html( number_format_i18n( $total ) ) . '</strong> vets, shelters and rescue groups in <strong>' . (int) $with . '</strong> states.</p></div></div>'
-				. '<div class="aw-findhelp-bar">' . $form . '<a class="aw-findhelp-near" href="' . esc_url( $dir ) . '#near-me"><span class="kit-ico kit-ico--map-pin" aria-hidden="true"></span>Use my location</a></form></div>'
-				. ( $chips ? '<div class="aw-findhelp-filters"><p class="aw-findhelp-label" id="aw-findhelp-filters-h">Quick filters</p><ul class="kit-tags aw-findhelp-types" aria-labelledby="aw-findhelp-filters-h">' . $chips . '</ul></div>' : '' )
+				. '<div class="aw-findhelp-bar"><form class="aw-ed-search aw-findhelp-form" role="search" method="get" action="' . esc_url( $dir ) . '">'
+				. '<input type="hidden" name="aw_filter" value="1">'
+				. $field( 'q', 'aw-ed-q', 'Organisation name', '<span class="kit-ico kit-ico--search kit-field-icon" aria-hidden="true"></span><input id="aw-ed-q" type="search" name="q" placeholder="Search by name, for example Blue Cross">' )
+				. $field( 'state', 'aw-ed-state', 'State or union territory', '<select id="aw-ed-state" name="state">' . $opts . '</select>' )
+				. '<button type="submit" class="kit-btn aw-findhelp-go">Search</button>'
+				. '<a class="kit-btn kit-btn--ghost aw-findhelp-near" href="' . esc_url( $dir ) . '#near-me"><span class="kit-ico kit-ico--map-pin" aria-hidden="true"></span>Use my location</a>'
+				. '</form></div>'
+				. ( $pills ? '<div class="aw-findhelp-filters"><p class="aw-findhelp-label" id="aw-findhelp-filters-h">Quick filters</p><ul class="aw-findhelp-types" aria-labelledby="aw-findhelp-filters-h">' . $pills . '</ul></div>' : '' )
 				. '<div class="aw-findhelp-actions"><a class="kit-btn kit-btn--secondary" href="' . esc_url( $dir ) . '#aw-browse-states-h">Browse all states</a>'
 				. '<a class="kit-btn" href="' . esc_url( home_url( '/claim/' ) ) . '">Claim or update your listing</a></div>';
 		}

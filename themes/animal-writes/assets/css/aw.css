@@ -1561,39 +1561,37 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 .aw-bento-cta .kit-ico { --kit-ico-size: var(--kit-icon-sm); }
 @media (prefers-reduced-motion: reduce) { .aw-bento-tile { transition: none; } .aw-bento-tile:hover, .aw-bento-tile.aw-bento--sos:hover { transform: none; } }
 
-/* Find help near you (compact, [aw_find_help compact="1"]): a larger title over the live counts; one search bar (name,
-   state, Search, Use my location) that is one row when it fits, the name above the rest when it does not and a stack on
-   phones (container queries on .aw-findhelp-bar); the six most-used organisation types as Quick filters; then Browse all
-   states and Claim as two buttons. Every field, button and pill is at least 44px tall (the bar's are 48px). */
+/* Find help near you (compact, [aw_find_help compact="1"]). Kits components carry their own states: kit-field (the
+   name and state fields), kit-btn (Search, Use my location, the two buttons), kit-filter-pill (Quick filters). This block
+   only lays them out. The bar is a size container: one raised row when it fits; the name above the rest when it does
+   not; on phones the plain fields on the section, name, then state + Search, then Use my location. Quick filters scroll sideways in one row under 768. */
 .aw-ed-find #aw-find-h { font-size: var(--kit-type-h1) !important; line-height: 1.1 !important; }
 .aw-ed-find .kit-sec-head { margin-bottom: var(--kit-space-5); }
 .aw-ed-find .kit-sec-head p strong { color: var(--kit-color-ink); font-weight: var(--kit-weight-bold); }
 .aw-findhelp-bar { container-type: inline-size; margin-bottom: var(--kit-space-6); }
-.aw-ed-find .aw-ed-search { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "q q" "state btn" "near near"; align-items: center; gap: var(--kit-space-2); margin: 0; padding: var(--kit-space-2); }
-.aw-ed-find .aw-ed-search > .kit-ico--search { grid-area: q; justify-self: start; margin-inline-start: var(--kit-space-3); pointer-events: none; }
-.aw-ed-find .aw-ed-search :is(input[type=search], select) { box-sizing: border-box; width: 100%; height: var(--kit-size-control); min-height: var(--kit-size-control); border: var(--kit-border-width) solid var(--kit-chip-border); border-radius: var(--kit-radius-control); background-color: var(--kit-color-raised); font-size: var(--kit-type-base); }
-.aw-ed-find .aw-ed-search input[type=search] { grid-area: q; padding-inline: calc(var(--kit-space-3) + var(--kit-space-2) + 1rem) var(--kit-space-3); }
-.aw-ed-find .aw-ed-search input[type=search]::placeholder { color: var(--kit-color-muted); opacity: 1; }
-.aw-ed-find .aw-ed-search select { grid-area: state; }
-.aw-ed-find .aw-ed-search .kit-btn { grid-area: btn; min-height: var(--kit-size-control); padding-inline: var(--kit-space-5); }
-.aw-ed-find .aw-ed-search .aw-findhelp-near { grid-area: near; justify-self: start; }
+.aw-findhelp-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "q q" "state go" "near near"; align-items: center; gap: var(--kit-space-2); margin: 0; }
+.aw-findhelp-form .kit-field { margin: 0; --kit-field-height: var(--kit-size-control); }
+.aw-findhelp-q { grid-area: q; }
+.aw-findhelp-state { grid-area: state; }
+.aw-findhelp-go { grid-area: go; }
+.aw-findhelp-near { grid-area: near; justify-self: start; }
+.aw-findhelp-form .kit-btn { min-height: var(--kit-size-control); }
 @container (min-width: 36rem) {
-	.aw-ed-find .aw-ed-search { grid-template-columns: minmax(0, 1fr) auto auto; grid-template-areas: "q q q" "state btn near"; }
+	.aw-findhelp-form { grid-template-columns: minmax(0, 1fr) auto auto; grid-template-areas: "q q q" "state go near"; padding: var(--kit-space-2); background: var(--kit-color-raised); border-radius: var(--kit-radius-card); box-shadow: var(--kit-elevation-2); }
 }
 @container (min-width: 56rem) {
-	.aw-ed-find .aw-ed-search { grid-template-columns: minmax(0, 1fr) minmax(12rem, 16rem) auto auto; grid-template-areas: "q state btn near"; }
+	.aw-findhelp-form { grid-template-columns: minmax(0, 1fr) minmax(12rem, 16rem) auto auto; grid-template-areas: "q state go near"; }
 }
-.aw-findhelp-near { display: inline-flex; align-items: center; gap: var(--kit-space-1); min-height: var(--kit-size-control); padding: 0 var(--kit-space-2); color: var(--kit-color-link); font-weight: var(--kit-weight-medium); white-space: nowrap; text-decoration: underline; text-underline-offset: var(--kit-underline-offset); }
-.aw-findhelp-near:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); border-radius: var(--kit-radius-control); }
 .aw-findhelp-filters { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2) var(--kit-space-3); margin-bottom: var(--kit-space-6); }
 .aw-findhelp-label { margin: 0; font-size: var(--kit-type-sm); font-weight: var(--kit-weight-strong); color: var(--kit-color-muted); }
-.aw-findhelp-types.kit-tags { list-style: none; margin: 0; padding: 0; gap: var(--kit-space-2); }
-.aw-findhelp-types .kit-chip { min-height: var(--kit-size-target); padding-inline: var(--kit-space-4); border-radius: var(--kit-radius-pill); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-medium); }
-.aw-findhelp-types .kit-chip::after { inset: 0; }
+.aw-findhelp-types { display: flex; flex-wrap: wrap; gap: var(--kit-space-2); list-style: none; margin: 0; padding: 0; }
 .aw-findhelp-actions { display: flex; flex-wrap: wrap; gap: var(--kit-space-3); }
-.aw-findhelp-actions .kit-btn { min-height: var(--kit-size-control); }
 @media (max-width: 767px) {
-	.aw-findhelp-label { flex-basis: 100%; }
+	.aw-findhelp-filters { display: block; }
+	.aw-findhelp-label { margin-bottom: var(--kit-space-2); }
+	.aw-findhelp-types { flex-wrap: nowrap; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-inline: var(--kit-space-gutter); scrollbar-width: none; overscroll-behavior-x: contain; margin-inline: calc(-1 * var(--kit-space-gutter)); padding-inline: var(--kit-space-gutter); }
+	.aw-findhelp-types::-webkit-scrollbar { display: none; }
+	.aw-findhelp-types li { flex: none; scroll-snap-align: start; }
 	.aw-findhelp-actions .kit-btn { flex: 1 1 100%; justify-content: center; }
 }
 
