@@ -49,8 +49,8 @@ function aw_si_priority( ?int $trends, int $impr, ?float $pos, bool $has_page ):
 	if ( ! $high ) {
 		return 'P3';
 	}
-	// High demand: P1 when we rank 4–20 or a page fits, else P2 (a content gap).
-	return $has_page || ( null !== $pos && $pos >= 4 && $pos <= 20 ) ? 'P1' : 'P2';
+	// High demand: P1 when we rank below the top 3 but within 20 (e.g. 3.4) or a page fits, else P2 (a content gap).
+	return $has_page || ( null !== $pos && $pos > 3 && $pos <= 20 ) ? 'P1' : 'P2';
 }
 
 /**

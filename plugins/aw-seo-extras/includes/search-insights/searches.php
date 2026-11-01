@@ -21,8 +21,10 @@ function aw_si_searches_gaps(): array {
 		return array();
 	}
 	$k = aw_si_table( 'keywords' );
+	// A keyword-map gap note stays on the record; the gap is shown only while no page carries the search and none of
+	// our pages ranks in the top 20 for it.
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
-	$rows   = $wpdb->get_results( "SELECT label, note, status, action, impr28, pos28 FROM {$k} WHERE note LIKE 'Gap%' OR status = 'gap' ORDER BY impr28 DESC, label" );
+	$rows   = $wpdb->get_results( "SELECT label, note, status, action, impr28, pos28 FROM {$k} WHERE status = 'gap' OR ( note LIKE 'Gap%' AND COALESCE(status, '') NOT IN ('has-page', 'conflict') AND NOT ( COALESCE(page, '') <> '' AND pos28 IS NOT NULL AND pos28 <= 20 ) ) ORDER BY impr28 DESC, label" );
 	$groups = array();
 	foreach ( (array) $rows as $r ) {
 		$title = 0 === strpos( (string) $r->note, 'Gap' ) ? trim( (string) preg_replace( '/^Gap \([^)]*\):\s*/', '', (string) $r->note ) ) : __( 'High demand, no page yet (P2)', 'aw-seo-extras' );

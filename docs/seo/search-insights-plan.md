@@ -275,7 +275,7 @@ The schedule avoids the existing jobs:
 ## 7. Priority and suggested actions
 
 **Priority.** The rule from `keyword-map.md`, unchanged:
-- **P1:** high demand (Trends T ≥ 20, or GSC ≥ 50 impressions in 28 days), and we rank 4–20 or have a page that fits.
+- **P1:** high demand (Trends T ≥ 20, or GSC ≥ 50 impressions in 28 days), and we rank below the top 3 but within 20 (above 3, up to 20, so 3.4 counts) or have a page that fits.
 - **P2:** high demand, but no page yet (a content gap).
 - **P3:** low demand, or already in the top 3.
 
