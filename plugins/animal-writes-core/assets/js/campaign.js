@@ -584,3 +584,15 @@
 		update();
 	}
 })();
+
+/* Lab Rules rows that scroll sideways (campaign.css "Lab Rules sizes"): each row is a region named by its section's
+   own heading (no new words). Every card in them holds a link, chip or checkbox, so Tab reaches each card. */
+(function () {
+	document.querySelectorAll('.aw-camp--lab-rules :is(.aw-camp-grid, .aw-camp-docs-q .wp-block-post-template)').forEach(function (row) {
+		var sec = row.closest('.aw-camp-section');
+		var h = sec && sec.querySelector('h2[id]');
+		if (!h || row.hasAttribute('aria-labelledby')) return;
+		row.setAttribute('role', 'region');
+		row.setAttribute('aria-labelledby', h.id);
+	});
+})();

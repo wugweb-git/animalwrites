@@ -2,8 +2,8 @@
 # Remove a line when its rule is fixed. A new exception needs the owner's word; add the reason after "  #".
 # Format: file | kind | selector | declaration
 plugins/animal-writes-core/assets/css/campaign-record.css | imp | .aw-camp.aw-camp--community-dogs > .aw-camp-section | padding: var(--dg-pad) var(--dg-inline) !important
-plugins/animal-writes-core/assets/css/campaign.css | height | :is(.aw-camp--lab-rules, .aw-camp--community-dogs) .aw-camp-hero, .aw-camp--community-dogs.aw-camp-hero | min-height: 1020px
-plugins/animal-writes-core/assets/css/campaign.css | height | :is(.aw-camp--lab-rules, .aw-camp--community-dogs) .aw-camp-hero, .aw-camp--community-dogs.aw-camp-hero | min-height: 800px
+plugins/animal-writes-core/assets/css/campaign.css | height | .aw-camp--community-dogs .aw-camp-hero, .aw-camp--community-dogs.aw-camp-hero | min-height: 1020px
+plugins/animal-writes-core/assets/css/campaign.css | height | .aw-camp--community-dogs .aw-camp-hero, .aw-camp--community-dogs.aw-camp-hero | min-height: 800px
 plugins/animal-writes-core/assets/css/campaign.css | height | .aw-letter-share-pic img | height: clamp(11rem, 34vw, 15rem)
 plugins/animal-writes-core/assets/css/dir-map.css | height | .aw-dir-map-canvas | height: clamp(360px, 70vh, 640px)
 themes/animal-writes/assets/css/aw.css | height | .aw-pdf .wp-block-file__embed | height: min(80vh, 900px)
