@@ -443,7 +443,10 @@ add_shortcode(
 		if ( ! $id ) {
 			return '';
 		}
-		$win   = aw_camp_window( $id );
+		$win = aw_camp_window( $id );
+		if ( 'open' === $win ) {
+			return ''; // no "Open" label on campaigns (owner, 2 Nov 2026)
+		}
 		$names = array( 'upcoming' => 'Upcoming', 'open' => 'Open', 'last-day' => 'Last day', 'closed' => 'Closed' );
 		$out   = '<p class="aw-camp-status"><span class="aw-camp-status-window is-' . esc_attr( $win ) . '">' . esc_html( $names[ $win ] ) . '</span>';
 		if ( 'closed' === $win ) {
