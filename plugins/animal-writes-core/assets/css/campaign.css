@@ -97,27 +97,42 @@
 	--camp-cream: #fbeee7; /* the photo's own sky, so its edge meets the band with no line */
 	--kit-btn-brand-bg: var(--camp-primary); --kit-btn-brand-fg: var(--camp-primary-ink);
 }
-/* Hero: cream with plum ink; a community dog before the Supreme Court on the right (phones: under the card) */
-.aw-camp.aw-camp--sc-stray-dogs .aw-camp-hero { --camp-mark: var(--camp-cream); --camp-on-mark: var(--camp-primary); }
-/* Above the theme's full-width group padding rule; the photo sits under the card, the dog clear of it */
+/* Hero: cream with plum ink and a community dog before the Supreme Court (owner's reference design, 1 Nov 2026) */
+.aw-camp.aw-camp--sc-stray-dogs .aw-camp-hero { --camp-mark: var(--camp-cream); --camp-on-mark: var(--camp-primary); --camp-line: rgb(58 23 48 / 0.18); }
+/* Above the theme's full-width group padding rule. Phones: the 4:5 photo under the card, its sky faded into the cream */
 .aw-camp.aw-camp--sc-stray-dogs .aw-camp-hero.aw-camp-section.alignfull {
-	/* phones: the 4:5 photo, its sky faded into the cream so no edge shows */
 	background:
 		linear-gradient(to bottom, var(--camp-cream) calc(100% - 125vw), rgb(251 238 231 / 0) calc(100% - 100vw)),
 		url("/wp-content/themes/animal-writes/assets/img/campaigns/supreme-court-stray-dog-phone.webp") center bottom / 100% auto no-repeat,
 		var(--camp-cream);
 	padding-bottom: 105vw !important;
 }
+/* Tablets: the wide photo along the bottom, under the card */
 @media (min-width: 768px) { .aw-camp.aw-camp--sc-stray-dogs .aw-camp-hero.aw-camp-section.alignfull { background: var(--camp-cream) url("/wp-content/themes/animal-writes/assets/img/campaigns/supreme-court-stray-dog-hero.webp") no-repeat right bottom / auto 72%; padding-bottom: clamp(180px, 16vw, 260px) !important; } }
-.aw-camp--sc-stray-dogs .aw-camp-hero h1::after { content: ""; display: block; width: min(60%, 18rem); height: 0.35rem; margin-top: var(--kit-space-3); border-radius: 999px; background: var(--kit-color-accent); transform: rotate(-1deg); }
+/* Desktops: the photo at full height on the right; text and card at the top, so the dog lies clear below the card */
+@media (min-width: 1200px) {
+	.aw-camp.aw-camp--sc-stray-dogs .aw-camp-hero.aw-camp-section.alignfull { background-size: auto 100%; min-height: clamp(760px, 60vw, 920px); padding-bottom: var(--kit-space-6) !important; }
+	.aw-camp--sc-stray-dogs .aw-camp-hero-cols > .wp-block-column { align-self: flex-start; }
+	.aw-camp--sc-stray-dogs .aw-camp-hero .aw-camp-poster { max-width: 26rem; }
+}
+/* The marker behind the key words of the headline */
+.aw-camp--sc-stray-dogs .aw-camp-hero h1 mark { background: linear-gradient(100deg, rgb(255 190 26 / 0) 0.2em, rgb(255 190 26 / 0.9) 0.5em, rgb(255 190 26 / 0.75) calc(100% - 0.4em), rgb(255 190 26 / 0) 100%) 0 60% / 100% 62% no-repeat; color: inherit; padding: 0 0.2em; margin: 0 -0.2em; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+/* "Open": a pale yellow pill with a dot */
+.aw-camp--sc-stray-dogs .aw-camp-hero .aw-camp-status-window { background: #fde9b0; color: var(--camp-primary); }
+.aw-camp--sc-stray-dogs .aw-camp-hero .aw-camp-status-window::before { content: ""; display: inline-block; width: 0.5em; height: 0.5em; margin-right: 0.45em; border-radius: 50%; background: #b06a10; vertical-align: 0.1em; }
 .aw-camp--sc-stray-dogs .aw-camp-hero .wp-block-button:not(.aw-camp-ghost) .wp-block-button__link { background: var(--camp-primary); color: var(--camp-primary-ink); }
 .aw-camp--sc-stray-dogs .aw-camp-hero .aw-camp-ghost .wp-block-button__link { background: rgb(251 238 231 / 0.85); }
 .aw-camp--sc-stray-dogs .aw-camp-hero .aw-camp-ghost .wp-block-button__link:hover { background: var(--camp-primary); color: var(--camp-primary-ink); }
-/* The fact card: white paper, plum ink, a yellow rule above the date */
+/* The fact card: white paper, plum ink, thin rules; the case number with a scales mark, the date in a yellow pill */
 .aw-camp--sc-stray-dogs .aw-camp-poster { background: rgb(255 252 249 / 0.96); box-shadow: 0 1.5rem 3rem -1.5rem rgb(58 23 48 / 0.45); }
 .aw-camp--sc-stray-dogs .aw-camp-poster :is(p, .aw-cd-num, .aw-cd-unit, .aw-cd-when) { color: var(--camp-primary); }
-.aw-camp--sc-stray-dogs .aw-camp-poster .aw-camp-stamp { border-color: var(--camp-primary); }
-.aw-camp--sc-stray-dogs .aw-camp-poster .aw-cd-when { border-top-color: var(--kit-color-accent); }
+.aw-camp--sc-stray-dogs .aw-camp-poster .aw-camp-stamp { display: flex; align-items: center; gap: var(--kit-space-2); width: 100%; margin: 0 0 var(--kit-space-4); padding: 0 0 var(--kit-space-3); border: 0; border-bottom: 1px solid var(--camp-line); border-radius: 0; transform: none; color: var(--camp-primary); font-size: var(--kit-type-lead); }
+.aw-camp--sc-stray-dogs .aw-camp-poster .aw-camp-stamp::before { content: ""; flex: none; width: 1.6em; height: 1.6em; background: #b06a10; -webkit-mask: var(--aw-sc-scales) center / contain no-repeat; mask: var(--aw-sc-scales) center / contain no-repeat; }
+.aw-camp--sc-stray-dogs .aw-camp-poster { --aw-sc-scales: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m16%2016%203-8%203%208c-.87.65-1.92%201-3%201s-2.13-.35-3-1Z%22/%3E%3Cpath%20d%3D%22m2%2016%203-8%203%208c-.87.65-1.92%201-3%201s-2.13-.35-3-1Z%22/%3E%3Cpath%20d%3D%22M7%2021h10%22/%3E%3Cpath%20d%3D%22M12%203v18%22/%3E%3Cpath%20d%3D%22M3%207h2c2%200%205-1%207-2%202%201%205%202%207%202h2%22/%3E%3C/svg%3E"); }
+.aw-camp--sc-stray-dogs .aw-camp-poster .aw-cd-when { display: block; padding-top: var(--kit-space-3); margin-top: var(--kit-space-3); border-top: 1px solid var(--camp-line); font-weight: var(--kit-weight-bold); }
+.aw-camp--sc-stray-dogs .aw-camp-poster .aw-cd-when .aw-date { display: inline-block; margin-top: var(--kit-space-1); padding: 0.1em 0.6em; border-radius: 999px; background: var(--kit-color-accent); color: var(--camp-primary); }
+.aw-camp--sc-stray-dogs .aw-camp-poster .aw-cd-when .aw-date .kit-ico { display: none; }
+.aw-camp--sc-stray-dogs .aw-camp-poster .aw-camp-poster-note { padding-top: var(--kit-space-3); border-top: 1px solid var(--camp-line); font-size: var(--kit-type-sm); }
 /* The hero is the primary colour behind its ink, on every campaign; marks inside it use the same pair. */
 .aw-camp .aw-camp-hero { --camp-mark: var(--camp-primary); --camp-on-mark: var(--camp-primary-ink); }
 
