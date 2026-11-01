@@ -102,6 +102,9 @@
 	html:has(.aw-camp--diwali .aw-sticky-cta) { scroll-padding-bottom: calc(var(--kit-btn-height) + 2 * var(--kit-space-2) + env(safe-area-inset-bottom)); }
 	.aw-camp--diwali:has(> .aw-sticky-cta) { padding-bottom: calc(var(--kit-btn-height) + 2 * var(--kit-space-2) + env(safe-area-inset-bottom)); }
 }
+/* The hero is fixed at --kit-hero-h (720px, or one screen when shorter) at every width, phones too (owner, 2 Nov 2026);
+   the text fits inside, and the hero grows only if a screen is too short for it (never cut off) */
+.aw-camp--diwali .wp-block-cover.kit-hero { min-height: var(--kit-hero-h) !important; }
 /* Sections at most 720px from 768 (owner, 2 Nov 2026), from content, tokens and the theme breakpoints only */
 /* What the law says: 16px (--kit-space-4) from the opening line to the cards */
 .aw-camp--diwali #law.aw-camp-section > .aw-camp-lede + * { margin-top: var(--kit-space-4); }
