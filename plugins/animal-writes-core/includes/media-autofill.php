@@ -6,7 +6,7 @@
  * - Alternative Text: the name, up to 125 characters.
  * - Caption = SEO title: the name, or "host favicon | Animal Writes" / "host logo | Animal Writes".
  * - Description = SEO description: up to 155 characters, written for favicons, logos, source images and any other image.
- * - Image context (kits_image_context): the page the file is attached to, and its Rank Math focus keyword.
+ * - Image context (kits_image_context): the page the file is attached to or later used on (featured or source image), and its Rank Math focus keyword.
  * No admin screen, no options, no CSS.
  *
  * @package animal-writes-core
@@ -109,6 +109,9 @@ function aw_media_autofill_description( $name, $is_source ) {
 			? sprintf( 'Source image for the news item “%s”. Animal Writes, India.', $short )
 			: sprintf( "Image for “%s” on Animal Writes, India's tracker of animal welfare news, law and help.", $short );
 	}
+	if ( mb_strlen( $text ) < 100 ) {
+		$text .= ' Animal welfare news, law and help in India.'; // Reaches the 100-character minimum the Media Library SEO check expects.
+	}
 	return mb_substr( $text, 0, 155 );
 }
 
@@ -171,3 +174,30 @@ function aw_media_autofill_run( $post_id ) {
 	}
 }
 add_action( 'add_attachment', 'aw_media_autofill_run' );
+
+/**
+ * Fill the image context when a picture is used on a page after it was uploaded (featured image or news source image).
+ *
+ * @param int    $meta_id  Meta ID (unused).
+ * @param int    $post_id  Post the meta belongs to.
+ * @param string $meta_key Meta key.
+ * @param mixed  $value    Meta value (the attachment ID).
+ */
+function aw_media_autofill_used( $meta_id, $post_id, $meta_key, $value ) {
+	if ( ! in_array( $meta_key, array( '_thumbnail_id', 'aw_source_image_att' ), true ) || ! is_numeric( $value ) ) {
+		return;
+	}
+	$att = (int) $value;
+	if ( $att < 1 || 'attachment' === get_post_type( $post_id ) || ! wp_attachment_is_image( $att ) ) {
+		return;
+	}
+	if ( '' !== trim( (string) get_post_meta( $att, 'kits_image_context', true ) ) ) {
+		return;
+	}
+	$context = aw_media_autofill_context( (int) $post_id );
+	if ( '' !== $context ) {
+		update_post_meta( $att, 'kits_image_context', $context );
+	}
+}
+add_action( 'added_post_meta', 'aw_media_autofill_used', 10, 4 );
+add_action( 'updated_post_meta', 'aw_media_autofill_used', 10, 4 );
