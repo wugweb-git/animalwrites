@@ -67,6 +67,7 @@ require_once AW_CORE_DIR . 'includes/cron.php';
 require_once AW_CORE_DIR . 'includes/display.php';
 require_once AW_CORE_DIR . 'includes/media.php';
 require_once AW_CORE_DIR . 'includes/media-columns.php'; // Media Library columns: slug, also used in, SEO score, optimisation; no Author (owner, 31 Oct 2026)
+require_once AW_CORE_DIR . 'includes/media-merge.php'; // Media → Duplicate files: merge duplicate copies with Undo (owner, 1 Nov 2026)
 require_once AW_CORE_DIR . 'includes/volunteers-db.php';
 require_once AW_CORE_DIR . 'includes/volunteers.php';
 require_once AW_CORE_DIR . 'includes/campaigns.php';
