@@ -67,10 +67,11 @@ function aw_media_merge_save_data( $keep, array $data ) {
 /**
  * Every address of an attachment (full size and each resized copy), by size name.
  *
- * @param int $id Attachment ID.
+ * @param int  $id      Attachment ID.
+ * @param bool $on_disk Only the sizes whose file exists (for the kept copy, so a rewritten address never points at a missing file).
  * @return string[]
  */
-function aw_media_merge_urls( $id ) {
+function aw_media_merge_urls( $id, $on_disk = false ) {
 	$full = (string) wp_get_attachment_url( $id );
 	if ( '' === $full ) {
 		return array();
@@ -78,8 +79,9 @@ function aw_media_merge_urls( $id ) {
 	$urls = array( 'full' => $full );
 	$meta = wp_get_attachment_metadata( $id );
 	$dir  = trailingslashit( dirname( $full ) );
+	$path = $on_disk ? trailingslashit( dirname( (string) get_attached_file( $id ) ) ) : '';
 	foreach ( (array) ( $meta['sizes'] ?? array() ) as $size => $info ) {
-		if ( ! empty( $info['file'] ) ) {
+		if ( ! empty( $info['file'] ) && ( ! $on_disk || is_file( $path . $info['file'] ) ) ) {
 			$urls[ $size ] = $dir . $info['file'];
 		}
 	}
@@ -295,7 +297,7 @@ function aw_media_merge_group( $keep ) {
 		wp_cache_delete( $m['post_id'], 'post_meta' );
 	}
 	// 2. Replace the image addresses and block image IDs written in post content (each post's old text is saved first).
-	$kurls = aw_media_merge_urls( $keep );
+	$kurls = aw_media_merge_urls( $keep, true );
 	foreach ( $c['posts'] as $pid ) {
 		$post = get_post( $pid );
 		if ( ! $post ) {
