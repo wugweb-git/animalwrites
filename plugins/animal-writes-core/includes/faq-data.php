@@ -2,7 +2,7 @@
 /**
  * Animal Writes' FAQ data for AW SEO Plus (owner, 31 Oct 2026: the plugin's FAQ is a generic feature; the site's own
  * rules live here, through its filters). Nothing here runs unless AW SEO Plus calls its filters, except the Library
- * "FAQ fields" box and its meta, which are Library fields.
+ * "Library item" box and its meta, which are Library fields.
  *
  * - aw_faq_registry: the questions built from a Directory listing's and a Library document's own fields (each entry a
  *   question template, the fields it needs, an answer builder, a priority in Search Insights demand order).
@@ -41,7 +41,6 @@ add_filter(
 			array( 'key' => 'force', 'priority' => 2, 'q' => 'Is the %s in force?', 'needs' => array( 'aw_legal_force' ), 'pattern' => '<doc> latest / today', 'answer' => 'aw_faq_legal_force', 'question' => 'aw_faq_legal_question' ),
 			array( 'key' => 'date', 'priority' => 3, 'q' => 'When was the %s %s?', 'needs' => array( 'aw_source_date', 'aw_legal_number (not needed for official releases and circulars)' ), 'pattern' => '<doc> gazette / notification', 'answer' => 'aw_faq_legal_date', 'question' => 'aw_faq_legal_question' ),
 			array( 'key' => 'issuer', 'priority' => 4, 'q' => 'Who issued the %s?', 'needs' => array( 'aw_issuer (not for Acts and Rules: the stored issuer is whose copy it is)' ), 'pattern' => '—', 'answer' => 'aw_faq_legal_issuer', 'question' => 'aw_faq_legal_question' ),
-			array( 'key' => 'hindi', 'priority' => 5, 'q' => 'Is the %s available in Hindi?', 'needs' => array( 'aw_file_hi_url' ), 'pattern' => '<doc> in hindi', 'answer' => 'aw_faq_legal_hindi', 'question' => 'aw_faq_legal_question' ),
 			array( 'key' => 'read', 'priority' => 7, 'q' => 'Where can I read the %s?', 'needs' => array( 'aw_source_url (not a PDF)', 'aw_issuer', 'official release' ), 'pattern' => '<doc> press release', 'answer' => 'aw_faq_legal_read', 'question' => 'aw_faq_legal_question' ),
 			array( 'key' => 'sections', 'priority' => 6, 'q' => 'What does section %2$s of the %1$s say?', 'needs' => array( 'aw_key_sections (Acts and Rules)' ), 'pattern' => 'pca act section 11 / punishment', 'answer' => 'aw_faq_legal_sections' ),
 		);
@@ -417,11 +416,6 @@ function aw_faq_legal_read( $id, $doc ) {
 	return array( 'On the website of ' . esc_html( $iss->name ) . ': ' . aw_faq_a( $src, 'read the ' . esc_html( $doc ) ) . '.', 'read' );
 }
 
-function aw_faq_legal_hindi( $id, $doc ) {
-	$url = trim( (string) get_post_meta( $id, 'aw_file_hi_url', true ) );
-	return $url ? array( 'Yes. The Hindi version of the ' . esc_html( $doc ) . ' is ' . aw_faq_a( $url, 'here' ) . '.', 'hindi' ) : null;
-}
-
 /**
  * Key sections of an Act or Rules, as listed by an editor (never picked automatically): meta aw_key_sections, one per
  * line "number | one-line plain summary | link (optional)".
@@ -456,13 +450,14 @@ function aw_faq_legal_sections( $id, $doc ) {
 	}
 	return $out ? $out : null;
 }
-/* ---------- Library documents: the fields the FAQ reads that had no home ---------- */
+/* ---------- Library documents: the "Library item" box (document fields the FAQ also reads) ---------- */
 
 add_action(
 	'init',
 	function () {
 		$auth = fn() => current_user_can( 'edit_posts' );
-		register_post_meta( 'aw_legal', 'aw_short_name', array( 'type' => 'string', 'single' => true, 'show_in_rest' => true, 'description' => 'Short name, as people search it (PCA Act 1960); used in FAQ questions', 'sanitize_callback' => 'sanitize_text_field', 'auth_callback' => $auth ) );
+		register_post_meta( 'aw_legal', 'aw_short_name', array( 'type' => 'string', 'single' => true, 'show_in_rest' => true, 'description' => 'Short name, as people search it (PCA Act 1960)', 'sanitize_callback' => 'sanitize_text_field', 'auth_callback' => $auth ) );
+		// The Hindi version link is no longer edited or asked about (owner, 1 Nov 2026); stored values are kept.
 		register_post_meta( 'aw_legal', 'aw_file_hi_url', array( 'type' => 'string', 'single' => true, 'show_in_rest' => true, 'description' => 'Hindi version (link to the official Hindi text)', 'sanitize_callback' => 'esc_url_raw', 'auth_callback' => $auth ) );
 		register_post_meta( 'aw_legal', 'aw_legal_act', array( 'type' => 'string', 'single' => true, 'show_in_rest' => true, 'description' => 'Issued under (the parent Act, as the document states it)', 'sanitize_callback' => 'sanitize_text_field', 'auth_callback' => $auth ) );
 		register_post_meta( 'aw_legal', 'aw_key_sections', array( 'type' => 'string', 'single' => true, 'show_in_rest' => true, 'description' => 'Key sections (Acts and Rules): one per line, "number | one-line plain summary | link"', 'sanitize_callback' => 'sanitize_textarea_field', 'auth_callback' => $auth ) );
@@ -473,13 +468,12 @@ add_action(
 	'add_meta_boxes_aw_legal',
 	function () {
 		add_meta_box(
-			'aw-faq-legal',
-			'FAQ fields',
+			'aw-legal-item',
+			'Library item',
 			function ( $post ) {
 				wp_nonce_field( 'aw_faq_legal', 'aw_faq_legal_nonce' );
-				echo '<p class="description">Questions on this page come from its own fields (PDF, in force, date and number, issuer). These add more when filled.</p>';
-				echo '<p><label for="aw-short-name">Short name, as people search it (e.g. PCA Act 1960, ABC Rules 2023). Questions use it; empty = the focus keyphrase</label><br><input type="text" class="large-text" id="aw-short-name" name="aw_short_name" value="' . esc_attr( get_post_meta( $post->ID, 'aw_short_name', true ) ) . '"></p>';
-				echo '<p><label for="aw-file-hi">Hindi version (link to the official Hindi text)</label><br><input type="url" class="large-text" id="aw-file-hi" name="aw_file_hi_url" value="' . esc_attr( get_post_meta( $post->ID, 'aw_file_hi_url', true ) ) . '"></p>';
+				echo '<h3>Details</h3>';
+				echo '<p><label for="aw-short-name">Short name, as people search it (e.g. PCA Act 1960, ABC Rules 2023). Empty = the focus keyphrase</label><br><input type="text" class="large-text" id="aw-short-name" name="aw_short_name" value="' . esc_attr( get_post_meta( $post->ID, 'aw_short_name', true ) ) . '"></p>';
 				echo '<p><label for="aw-legal-act">Issued under (the parent Act, as the document states it)</label><br><input type="text" class="large-text" id="aw-legal-act" name="aw_legal_act" value="' . esc_attr( get_post_meta( $post->ID, 'aw_legal_act', true ) ) . '"></p>';
 				echo '<p><label for="aw-key-sections">Key sections (Acts and Rules only): one per line, "number | one-line plain summary | link"</label><br><textarea class="large-text" rows="4" id="aw-key-sections" name="aw_key_sections" placeholder="11 | punishment for treating animals cruelly | https://…">' . esc_textarea( get_post_meta( $post->ID, 'aw_key_sections', true ) ) . '</textarea></p>';
 			},
@@ -495,7 +489,7 @@ add_action(
 		if ( wp_is_post_revision( $post_id ) || ! isset( $_POST['aw_faq_legal_nonce'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['aw_faq_legal_nonce'] ) ), 'aw_faq_legal' ) || ! current_user_can( 'edit_post', $post_id ) ) {
 			return;
 		}
-		foreach ( array( 'aw_short_name' => 'sanitize_text_field', 'aw_file_hi_url' => 'esc_url_raw', 'aw_legal_act' => 'sanitize_text_field', 'aw_key_sections' => 'sanitize_textarea_field' ) as $k => $clean ) {
+		foreach ( array( 'aw_short_name' => 'sanitize_text_field', 'aw_legal_act' => 'sanitize_text_field', 'aw_key_sections' => 'sanitize_textarea_field' ) as $k => $clean ) {
 			$v = call_user_func( $clean, wp_unslash( (string) ( $_POST[ $k ] ?? '' ) ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 			'' !== trim( $v ) ? update_post_meta( $post_id, $k, $v ) : delete_post_meta( $post_id, $k );
 		}
