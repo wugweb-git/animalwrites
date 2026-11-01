@@ -806,9 +806,12 @@ function aw_edit_screen_map_only_note(): string {
 	return 'Sidebar panels that plugins add with JavaScript in the block editor, Dashboard widgets and the panels, boxes and tables on admin pages (AW Sourcing, AW SEO Plus and Search Insights, Animal Writes, Mailweb, Kits Core) are listed from the map, not read live.';
 }
 
-/** Plugins that are ours: their boxes are on the Mapping tab, every other plugin's on "Third-party boxes". */
+/**
+ * Plugins mapped as ours on the Mapping tab; every other plugin's boxes are on "Third-party boxes". AW Sourcing,
+ * AW SEO Plus and Mailweb are treated like third-party plugins there (owner, 1 Nov 2026).
+ */
 function aw_edit_screen_own_plugins(): array {
-	return array( 'Animal Writes core', 'AW SEO Plus', 'AW Sourcing', 'Kits Core', 'Mailweb' );
+	return array( 'Animal Writes core', 'Kits Core' );
 }
 
 /**
