@@ -1003,3 +1003,7 @@
    3:1 on the Diwali hero, the dark sections and every campaign's lead tile, so there the ring is white
    (--kit-color-on-ink), as on the Share band. Community dogs stays as it is. */
 .aw-camp--diwali .aw-camp-hero, .aw-camp:not(.aw-camp--community-dogs) :is(.aw-camp-dark, .aw-camp-grid > .aw-camp-card:first-child) { --kit-color-focus: var(--kit-color-on-ink); }
+/* The Supreme Court phone bar never covers text or focus either (WCAG 2.4.11), as on Diwali and Lab rules */
+@media (max-width: 767px) {
+	html:has(.aw-camp--sc-stray-dogs .aw-sticky-cta) { scroll-padding-bottom: calc(var(--kit-btn-height) + 2 * var(--kit-space-2) + env(safe-area-inset-bottom)); }
+}
