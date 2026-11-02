@@ -11,13 +11,18 @@
  * - nf: 404_view events by path for the last 28 days, one report per run (1 Nov 2026). The path is the event's own
  *   parameter (custom dimension customEvent:path); while that dimension is not registered in GA4, or any event in the
  *   window has no path ("(not set)", sent before it was registered), the report uses pagePath, the same address on a
- *   404 page.
+ *   404 page;
+ * - camp: campaign_view, objection_sent and objection_confirmed on campaign pages (pagePath begins /campaigns/) by
+ *   session source, for the last 28 days, one report per run (2 Nov 2026: what X and other sources bring to each
+ *   campaign; keyEvents alone mixes every key event). campaign_view counts sessions, the other two count events.
  *
  * Rows in obs: src ga4, period day; search (txt = term, page_key = md5 of the term), ai (page = landing path,
  * txt = source), organic (page = landing path), ref / ref_eng / ref_key (page = landing path, txt = source). value =
  * events or sessions. Referral counts leave out AW_SI_GA4_SKIP_DAYS (22 Oct 2026: test events). nf rows: period 28d,
  * d = the last day of the window, page = txt = path, value = events; each run replaces the earlier window, and a failed
  * report keeps it.
+ * camp rows: period 28d, d = the last day of the window, metric camp_view (sessions), camp_sent or camp_conf (events),
+ * page = page path, txt = source; replaced and kept the same way as nf.
  *
  * @package aw-seo-extras
  */
@@ -37,6 +42,18 @@ const AW_SI_GA4_SKIP_DAYS = array( '2026-10-22' );
 function aw_si_social_sources(): array {
 	return (array) apply_filters( 'aw_si_social_sources', array( 'ig', 'instagram.com', 'l.instagram.com', 'instagram', 'facebook.com', 'm.facebook.com', 'l.facebook.com', 'lm.facebook.com', 'facebook', 't.co', 'x.com', 'twitter.com', 'linkedin.com', 'lnkd.in', 'linkedin', 'reddit.com', 'out.reddit.com', 'reddit', 'whatsapp', 'wa.me', 'web.whatsapp.com', 'telegram', 't.me', 'web.telegram.org', 'linktr.ee' ) );
 }
+
+/** Sources counted as X (Twitter). Filter aw_si_x_sources. */
+function aw_si_x_sources(): array {
+	return (array) apply_filters( 'aw_si_x_sources', array( 't.co', 'x.com', 'twitter.com' ) );
+}
+
+/** Campaign events in the camp report => obs metric. */
+const AW_SI_GA4_CAMP_EVENTS = array(
+	'campaign_view'       => 'camp_view',
+	'objection_sent'      => 'camp_sent',
+	'objection_confirmed' => 'camp_conf',
+);
 
 /** SQL condition that leaves out AW_SI_GA4_SKIP_DAYS (column d). */
 function aw_si_ga4_skip_sql(): string {
@@ -252,10 +269,84 @@ function aw_si_ga4_store_nf( string $end, array $rows ) {
 	foreach ( $rows as $path => $n ) {
 		$obs[] = array( 0, (string) $path, md5( 'nf|' . $path ), 'nf', (float) $n, (string) $path );
 	}
-	$n = aw_si_obs_replace_day( 'ga4', $end, $obs, '28d' );
+	$n = aw_si_obs_replace_day( 'ga4', $end, $obs, '28d', array( 'nf' ) );
 	if ( ! is_wp_error( $n ) ) {
 		$o = aw_si_table( 'obs' );
 		$wpdb->query( $wpdb->prepare( "DELETE FROM {$o} WHERE src = 'ga4' AND metric = 'nf' AND period = '28d' AND d <> %s", $end ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+	}
+	return $n;
+}
+
+/**
+ * Campaign events by session source and page for the 28 days up to $end, without AW_SI_GA4_SKIP_DAYS: sessions with a
+ * campaign_view, and objection_sent and objection_confirmed events.
+ *
+ * @param object $module Site Kit's analytics-4 module.
+ * @param string $end    Last day (Y-m-d).
+ * @return array|WP_Error array{rows: array<string, array{0: string, 1: string, 2: string, 3: float}>, truncated: bool}
+ *                        Rows as [metric, path, source, value].
+ */
+function aw_si_ga4_fetch_camp( $module, string $end ) {
+	$res = aw_si_ga4_report(
+		$module,
+		array(
+			'startDate'        => ( new DateTimeImmutable( $end, wp_timezone() ) )->modify( '-27 days' )->format( 'Y-m-d' ),
+			'endDate'          => $end,
+			'dimensions'       => array( 'sessionSource', 'eventName', 'pagePath', 'date' ),
+			'metrics'          => array( 'eventCount', 'sessions' ),
+			'dimensionFilters' => array(
+				'eventName' => array_keys( AW_SI_GA4_CAMP_EVENTS ),
+				'pagePath'  => array(
+					'filterType' => 'stringFilter',
+					'matchType'  => 'BEGINS_WITH',
+					'value'      => '/campaigns/',
+				),
+			),
+		)
+	);
+	if ( is_wp_error( $res ) ) {
+		return $res;
+	}
+	$skip = array_map( fn( $d ) => str_replace( '-', '', $d ), AW_SI_GA4_SKIP_DAYS );
+	$out  = array();
+	foreach ( $res as $r ) {
+		$metric = AW_SI_GA4_CAMP_EVENTS[ (string) ( $r[0][1] ?? '' ) ] ?? '';
+		$path   = mb_substr( aw_si_landing_path( (string) ( $r[0][2] ?? '' ) ), 0, 255 );
+		$src    = mb_substr( strtolower( (string) ( $r[0][0] ?? '' ) ), 0, 100 );
+		if ( '' === $metric || '' === $path || '' === $src || in_array( (string) ( $r[0][3] ?? '' ), $skip, true ) ) {
+			continue;
+		}
+		$key = $metric . '|' . $path . '|' . $src;
+		if ( ! isset( $out[ $key ] ) ) {
+			$out[ $key ] = array( $metric, $path, $src, 0.0 );
+		}
+		$out[ $key ][3] += (float) ( $r[1][ 'camp_view' === $metric ? 1 : 0 ] ?? 0 ); // Views as sessions, the rest as events.
+	}
+	return array(
+		'rows'      => array_values( $out ),
+		'truncated' => count( $res ) >= AW_SI_GA4_ROWS,
+	);
+}
+
+/**
+ * Store a 28-day campaign window, replacing the earlier one (the nf rows are left alone).
+ *
+ * @param string $end  Last day of the window (Y-m-d).
+ * @param array  $rows As aw_si_ga4_fetch_camp()['rows'].
+ * @return int|WP_Error Rows written.
+ */
+function aw_si_ga4_store_camp( string $end, array $rows ) {
+	global $wpdb;
+	$metrics = array_values( AW_SI_GA4_CAMP_EVENTS );
+	$obs     = array();
+	foreach ( $rows as $r ) {
+		$obs[] = array( 0, $r[1], md5( $r[0] . '|' . $r[1] . '|' . $r[2] ), $r[0], (float) $r[3], $r[2] );
+	}
+	$n = aw_si_obs_replace_day( 'ga4', $end, $obs, '28d', $metrics );
+	if ( ! is_wp_error( $n ) ) {
+		$o = aw_si_table( 'obs' );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name and the fixed metric keys only.
+		$wpdb->query( $wpdb->prepare( "DELETE FROM {$o} WHERE src = 'ga4' AND metric IN ('" . implode( "', '", $metrics ) . "') AND period = '28d' AND d <> %s", $end ) );
 	}
 	return $n;
 }
@@ -293,18 +384,20 @@ function aw_si_landing_path( string $lp ): string {
 /**
  * Replace one day's rows of a source with new ones, in one transaction (a failed write keeps the old rows).
  *
- * @param string $src    Source key in obs.
- * @param string $day    Date (Y-m-d).
- * @param array  $rows   Each [kw_id, page, page_key, metric, value, txt].
- * @param string $period Period of the rows: day, or 28d for a 28-day window ending on $day.
+ * @param string   $src     Source key in obs.
+ * @param string   $day     Date (Y-m-d).
+ * @param array    $rows    Each [kw_id, page, page_key, metric, value, txt].
+ * @param string   $period  Period of the rows: day, or 28d for a 28-day window ending on $day.
+ * @param string[] $metrics Only these metrics are replaced (empty: every metric of the source, period and day).
  * @return int|WP_Error Rows written.
  */
-function aw_si_obs_replace_day( string $src, string $day, array $rows, string $period = 'day' ) {
+function aw_si_obs_replace_day( string $src, string $day, array $rows, string $period = 'day', array $metrics = array() ) {
 	global $wpdb;
-	$o   = aw_si_table( 'obs' );
-	$now = aw_si_now();
+	$o    = aw_si_table( 'obs' );
+	$now  = aw_si_now();
+	$only = $metrics ? " AND metric IN ('" . implode( "', '", array_map( 'esc_sql', $metrics ) ) . "')" : '';
 	$wpdb->query( 'START TRANSACTION' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-	$ok = false !== $wpdb->query( $wpdb->prepare( "DELETE FROM {$o} WHERE src = %s AND period = %s AND d = %s", $src, $period, $day ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	$ok = false !== $wpdb->query( $wpdb->prepare( "DELETE FROM {$o} WHERE src = %s AND period = %s AND d = %s{$only}", $src, $period, $day ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name and escaped metric keys.
 	foreach ( array_chunk( $rows, 300 ) as $chunk ) {
 		$place = array();
 		$args  = array();
@@ -403,6 +496,23 @@ function aw_si_ga4_run( array $args = array() ): array {
 						$rep['sample']['nf'] = array_slice( $nf['rows'], 0, 5, true );
 					}
 				}
+				// Campaign events, the same 28 days. A failure is a warning: the earlier window stays.
+				$camp = aw_si_ga4_fetch_camp( $module, $end );
+				if ( ! is_wp_error( $camp ) && ! $dry ) {
+					$w    = aw_si_ga4_store_camp( $end, $camp['rows'] );
+					$camp = is_wp_error( $w ) ? $w : $camp;
+				}
+				if ( is_wp_error( $camp ) ) {
+					$rep['camp_error'] = $camp->get_error_message();
+				} else {
+					$rep['camp'] = array(
+						'rows'      => count( $camp['rows'] ),
+						'truncated' => $camp['truncated'],
+					);
+					if ( $dry ) {
+						$rep['sample']['camp'] = array_slice( $camp['rows'], 0, 5 );
+					}
+				}
 			}
 			return $rep;
 		}
@@ -422,6 +532,7 @@ function aw_si_ga4_run( array $args = array() ): array {
 					'warnings'  => $rep['warnings'] ?? array(),
 					'up_to'     => $rep['days'] ? max( array_keys( $rep['days'] ) ) : '',
 					'nf'        => $rep['nf'] ?? array(),
+					'camp'      => $rep['camp'] ?? array(),
 				)
 			);
 			if ( ! empty( $rep['warnings'] ) ) {
@@ -431,6 +542,10 @@ function aw_si_ga4_run( array $args = array() ): array {
 			if ( ! empty( $rep['nf_error'] ) ) {
 				/* translators: %s: GA4's error. */
 				aw_si_run_fail( 'ga4', sprintf( __( 'GA4 404 figures could not be read (the earlier figures were kept): %s', 'aw-seo-extras' ), $rep['nf_error'] ) );
+			}
+			if ( ! empty( $rep['camp_error'] ) ) {
+				/* translators: %s: GA4's error. */
+				aw_si_run_fail( 'ga4', sprintf( __( 'GA4 campaign figures could not be read (the earlier figures were kept): %s', 'aw-seo-extras' ), $rep['camp_error'] ) );
 			}
 		}
 	}

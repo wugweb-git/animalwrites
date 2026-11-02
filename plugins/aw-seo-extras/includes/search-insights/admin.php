@@ -123,6 +123,7 @@ function aw_si_load(): void {
 		add_meta_box( 'aw-si-brand', __( 'Brand', 'aw-seo-extras' ), 'aw_si_box_brand', $screen, 'normal' );
 		add_meta_box( 'aw-si-ai', __( 'AI referrals (GA4, 28 days)', 'aw-seo-extras' ), 'aw_si_box_ai', $screen, 'normal' );
 		add_meta_box( 'aw-si-referrers', __( 'Top referrers (GA4)', 'aw-seo-extras' ), 'aw_si_box_referrers', $screen, 'normal' );
+		add_meta_box( 'aw-si-campaigns', __( 'Campaigns by source (GA4, 28 days)', 'aw-seo-extras' ), 'aw_si_box_campaigns', $screen, 'normal' );
 		add_meta_box( 'aw-si-nf', __( 'Not found (404s, GA4, 28 days)', 'aw-seo-extras' ), 'aw_si_box_nf', $screen, 'normal' );
 		add_meta_box( 'aw-si-clarity', __( 'Clarity (28 days)', 'aw-seo-extras' ), 'aw_si_box_clarity', $screen, 'normal' );
 		add_meta_box( 'aw-si-site-search', __( 'Searches on our site (28 days, minimum)', 'aw-seo-extras' ), 'aw_si_box_site_search', $screen, 'normal' );
@@ -503,6 +504,128 @@ function aw_si_box_referrers(): void {
 	echo '<p class="description">' . esc_html__( 'Referral and social sessions by source (GA4 channels Referral, Organic Social and Paid Social, plus Instagram, Facebook, X, LinkedIn, Reddit, WhatsApp, Telegram and Linktree). 22 Oct 2026 is left out (GA4 test events). GA4 page views changed on 25 Oct 2026, when the site moved to one GA4 tag (#80).', 'aw-seo-extras' ) . '</p>';
 }
 
+/**
+ * Slug of the published campaign a site path leads to (the campaign page, an address under it, or a short link or old
+ * address that redirects there), or ''.
+ *
+ * @param string $path  Site path.
+ * @param array  $slugs Published campaign slug => title.
+ */
+function aw_si_campaign_of( string $path, array $slugs ): string {
+	static $seen = array();
+	if ( ! isset( $seen[ $path ] ) ) {
+		$seen[ $path ] = '';
+		foreach ( array( $path, aw_si_final_path( $path ) ) as $p ) {
+			if ( preg_match( '#^/campaigns/([^/]+)#', $p, $m ) && isset( $slugs[ $m[1] ] ) ) {
+				$seen[ $path ] = $m[1];
+				break;
+			}
+		}
+	}
+	return $seen[ $path ];
+}
+
+/**
+ * Overview box: what X, all social sources and all sources bring to each campaign (owner, 2 Nov 2026). Landed sessions
+ * and key events come from the daily referral rows (ref, ref_key); viewed sessions, objections sent and confirmed from
+ * the 28-day campaign rows (camp_view, camp_sent, camp_conf).
+ */
+function aw_si_box_campaigns(): void {
+	global $wpdb;
+	if ( ! aw_si_ready() ) {
+		echo '<p>' . esc_html__( 'Nothing yet.', 'aw-seo-extras' ) . '</p>';
+		return;
+	}
+	$slugs = array();
+	foreach ( get_posts(
+		array(
+			'post_type'      => 'aw_campaign',
+			'post_status'    => 'publish',
+			'posts_per_page' => 100,
+			'orderby'        => 'date',
+			'order'          => 'DESC',
+		)
+	) as $post ) {
+		$slugs[ $post->post_name ] = get_the_title( $post );
+	}
+	if ( ! $slugs ) {
+		echo '<p>' . esc_html__( 'No published campaigns.', 'aw-seo-extras' ) . '</p>';
+		return;
+	}
+	$o    = aw_si_table( 'obs' );
+	$skip = aw_si_ga4_skip_sql();
+	// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name and fixed conditions only.
+	$camp = (array) $wpdb->get_results( "SELECT page, txt, metric, value, d FROM {$o} WHERE src = 'ga4' AND period = '28d' AND metric IN ('camp_view', 'camp_sent', 'camp_conf')" );
+	// The same 28 days as the campaign rows (to yesterday until they arrive).
+	$end   = $camp ? (string) $camp[0]->d : ( new DateTimeImmutable( 'yesterday', wp_timezone() ) )->format( 'Y-m-d' );
+	$start = ( new DateTimeImmutable( $end, wp_timezone() ) )->modify( '-27 days' )->format( 'Y-m-d' );
+	$ref   = (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, txt, metric, SUM(value) value, MIN(d) since FROM {$o} WHERE src = 'ga4' AND period = 'day' AND metric IN ('ref', 'ref_key') AND d >= %s AND d <= %s{$skip} GROUP BY page, txt, metric", $start, $end ) );
+	// phpcs:enable
+	$x      = array_map( 'strtolower', aw_si_x_sources() );
+	$social = array_map( 'strtolower', aw_si_social_sources() );
+	$cols   = array(
+		'ref'       => 'landed',
+		'ref_key'   => 'key',
+		'camp_view' => 'viewed',
+		'camp_sent' => 'sent',
+		'camp_conf' => 'conf',
+	);
+	$t      = array();
+	$since  = '';
+	foreach ( array_merge( $ref, $camp ) as $r ) {
+		$slug = aw_si_campaign_of( (string) $r->page, $slugs );
+		if ( '' === $slug ) {
+			continue;
+		}
+		$col     = $cols[ $r->metric ];
+		$buckets = array( 'all' );
+		if ( in_array( $r->txt, $social, true ) ) {
+			$buckets[] = 'social';
+		}
+		if ( in_array( $r->txt, $x, true ) ) {
+			$buckets[] = 'x';
+		}
+		foreach ( $buckets as $b ) {
+			$t[ $slug ][ $b ][ $col ] = ( $t[ $slug ][ $b ][ $col ] ?? 0 ) + (float) $r->value;
+		}
+		if ( isset( $r->since ) && ( '' === $since || $r->since < $since ) ) {
+			$since = (string) $r->since;
+		}
+	}
+	if ( ! $t ) {
+		echo '<p>' . esc_html__( 'No campaign visits recorded yet (GA4 runs daily at 07:20 IST).', 'aw-seo-extras' ) . '</p>';
+		return;
+	}
+	uasort( $t, fn( $a, $b ) => ( ( $b['all']['viewed'] ?? 0 ) <=> ( $a['all']['viewed'] ?? 0 ) ) ?: ( ( $b['all']['landed'] ?? 0 ) <=> ( $a['all']['landed'] ?? 0 ) ) );
+	$rows = array(
+		'x'      => __( 'X', 'aw-seo-extras' ),
+		'social' => __( 'All social', 'aw-seo-extras' ),
+		'all'    => __( 'All sources', 'aw-seo-extras' ),
+	);
+	$num  = fn( $v ) => null === $v ? '–' : number_format_i18n( (int) round( (float) $v ) );
+	echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Campaign', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'From', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Sessions (landed)', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Key events', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Sessions (viewed)', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Objections sent', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Confirmed', 'aw-seo-extras' ) . '</th></tr></thead><tbody>';
+	foreach ( $t as $slug => $b ) {
+		$first = true;
+		foreach ( $rows as $key => $label ) {
+			$v    = $b[ $key ] ?? array();
+			$cell = $first ? '<a href="' . esc_url( home_url( '/campaigns/' . $slug . '/' ) ) . '" target="_blank" rel="noopener">' . esc_html( $slugs[ $slug ] ) . '</a>' : '';
+			$all  = 'all' === $key; // Landed sessions and key events are stored for referral and social sources only.
+			echo '<tr><td>' . $cell . '</td><td>' . esc_html( $label ) . '</td><td>' . esc_html( $all ? '–' : $num( $v['landed'] ?? 0 ) ) . '</td><td>' . esc_html( $all ? '–' : $num( $v['key'] ?? 0 ) ) . '</td><td>' . esc_html( $camp ? $num( $v['viewed'] ?? 0 ) : '–' ) . '</td><td>' . esc_html( $camp ? $num( $v['sent'] ?? 0 ) : '–' ) . '</td><td>' . esc_html( $camp ? $num( $v['conf'] ?? 0 ) : '–' ) . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $cell is escaped above.
+			$first = false;
+		}
+	}
+	echo '</tbody></table>';
+	$from = $since && $since > $start ? $since : $start;
+	/* translators: 1: first day, 2: last day. */
+	echo '<p class="description">' . esc_html( sprintf( __( '%1$s to %2$s. X: t.co, x.com and twitter.com. All social includes X.', 'aw-seo-extras' ), wp_date( get_option( 'date_format' ), strtotime( $from ) ), wp_date( get_option( 'date_format' ), strtotime( $end ) ) ) ) . '</p>';
+	echo '<p class="description">' . esc_html__( 'Sessions (landed) and key events: sessions that started on the campaign page or a short link to it, from referral and social sources (direct, search and email visits are not in these rows). Key events count every GA4 key event in those sessions, not only objections.', 'aw-seo-extras' ) . '</p>';
+	if ( $camp ) {
+		echo '<p class="description">' . esc_html__( 'Sessions (viewed), objections sent and confirmed: sessions with a campaign_view, and objection_sent and objection_confirmed events, on the campaign page, by the session\'s source, from every source. 22 Oct 2026 is left out (GA4 test events).', 'aw-seo-extras' ) . '</p>';
+	} else {
+		echo '<p class="description">' . esc_html__( 'Sessions (viewed), objections sent and confirmed arrive with the next GA4 run (daily at 07:20 IST).', 'aw-seo-extras' ) . '</p>';
+	}
+}
+
 /** Overview box: the 20 paths with the most 404_view events in the stored 28-day window, and where each goes now. */
 function aw_si_box_nf(): void {
 	global $wpdb;
@@ -727,7 +850,7 @@ function aw_si_settings_tab(): void {
 	$seeded = (int) get_option( 'aw_si_seeded' );
 	do_action( 'aw_si_settings_notices' );
 	echo '<table class="form-table" role="presentation"><tbody>';
-	echo '<tr><th scope="row">' . esc_html__( 'Schedule', 'aw-seo-extras' ) . '</th><td><p>' . esc_html__( 'Daily at 06:30 IST: Clarity (once the token is set). Daily at 07:10 IST: Search Console (the last 4 days again, plus up to 15 older days until 90 days are stored), keyword roles from Rank Math and Sourcing, then priorities. Daily at 07:20 IST: GA4 (site search, AI referrals, all referral and social sources, organic landing pages; the last 3 days; 404s for the last 28 days). Sundays at 06:00 IST: PageSpeed for the key pages and every campaign page, a few at a time. Mondays at 08:45 IST: crawler access from the server; at 09:15 IST from outside (workers). Daily at 23:30 IST: rows older than 90 days become monthly totals. The 2nd of each month at 07:40 IST: Bing Webmaster (links to us, and clicks and impressions by search and by page; once the key is set). Searches on the site are counted as they happen.', 'aw-seo-extras' ) . '</p></td></tr>';
+	echo '<tr><th scope="row">' . esc_html__( 'Schedule', 'aw-seo-extras' ) . '</th><td><p>' . esc_html__( 'Daily at 06:30 IST: Clarity (once the token is set). Daily at 07:10 IST: Search Console (the last 4 days again, plus up to 15 older days until 90 days are stored), keyword roles from Rank Math and Sourcing, then priorities. Daily at 07:20 IST: GA4 (site search, AI referrals, all referral and social sources, organic landing pages; the last 3 days; 404s and campaign events for the last 28 days). Sundays at 06:00 IST: PageSpeed for the key pages and every campaign page, a few at a time. Mondays at 08:45 IST: crawler access from the server; at 09:15 IST from outside (workers). Daily at 23:30 IST: rows older than 90 days become monthly totals. The 2nd of each month at 07:40 IST: Bing Webmaster (links to us, and clicks and impressions by search and by page; once the key is set). Searches on the site are counted as they happen.', 'aw-seo-extras' ) . '</p></td></tr>';
 	echo '<tr><th scope="row">' . esc_html__( 'Keys', 'aw-seo-extras' ) . '</th><td><ul>';
 	foreach ( array( 'AW_CLARITY_TOKEN' => __( 'Clarity', 'aw-seo-extras' ), 'AW_BING_WEBMASTER_KEY' => __( 'Bing Webmaster', 'aw-seo-extras' ), 'AW_PSI_KEY' => __( 'PageSpeed (optional)', 'aw-seo-extras' ) ) as $const => $label ) {
 		$set = '' !== aw_si_key( $const );
