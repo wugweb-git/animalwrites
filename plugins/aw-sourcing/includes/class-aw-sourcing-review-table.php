@@ -124,7 +124,8 @@ class AW_Sourcing_Review_Table extends WP_List_Table {
 
 	private function source_url( $p ) {
 		$url = (string) get_post_meta( $p->ID, 'aw_source_url', true );
-		return $url ? $url : (string) get_post_meta( $p->ID, 'aw_press_url', true );
+		$url = $url ? $url : (string) get_post_meta( $p->ID, 'aw_press_url', true );
+		return $url ? $url : (string) get_post_meta( $p->ID, 'aw_social_url', true ); // a social post's own link
 	}
 
 	protected function column_title( $p ) {

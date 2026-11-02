@@ -2414,6 +2414,36 @@
    "block": "animal-writes/item-more"
   },
   {
+   "name": "What people are saying (social posts)",
+   "type": "block",
+   "status": "built, off (owner's OK of design and label first)",
+   "classes": [],
+   "states": [
+    "off (Animal Writes → Modules → Show on pages; prints nothing)",
+    "no approved posts (prints nothing)",
+    "cards: date, platform, handle; person; summary",
+    "X or YouTube post: Show the post button, embed after the click",
+    "editor preview (one-line note)"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "server-rendered block: section with H2, list of Kits cards (kit-card--block-md) in the More list (aw-more-list)",
+    "aria": "section aria-labelledby its H2; button aria-expanded and aria-controls its embed box",
+    "keyboard": "Tab to each person link and Show the post button; Enter or Space loads or hides the post",
+    "focus": "3px ring in --kit-color-focus (:focus-visible)",
+    "target": "44px (kit-btn--sm)",
+    "motion": "none",
+    "sr": "H2, cards with H3 links, button state"
+   },
+   "seo": {
+    "heading": "H2, H3 per card",
+    "link": "the post on its platform, rel nofollow ugc",
+    "alt": "none (no pictures)",
+    "schema": "none"
+   },
+   "block": "animal-writes/social-posts"
+  },
+  {
    "name": "Listing: logo and description",
    "type": "block",
    "status": "live",

@@ -1,0 +1,45 @@
+{
+    "key": "group_aw_campaign_social",
+    "title": "Social posts",
+    "fields": [
+        {
+            "key": "field_aw_campaign_social_terms",
+            "label": "Hashtags and search strings",
+            "name": "aw_social_terms",
+            "aria-label": "",
+            "type": "textarea",
+            "instructions": "One per line: a hashtag (#name) or a phrase in quotes (\"two words\"). Used by the weekly collection and the workers to find posts about this campaign.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": "",
+            "rows": 4,
+            "placeholder": "",
+            "new_lines": ""
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "post_type",
+                "operator": "==",
+                "value": "aw_campaign"
+            }
+        ]
+    ],
+    "menu_order": 6,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "field",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Hashtags and search strings for the campaign's social posts.",
+    "show_in_rest": 0,
+    "modified": 1793577600
+}

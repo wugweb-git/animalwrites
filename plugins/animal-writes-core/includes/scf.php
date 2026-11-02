@@ -61,7 +61,7 @@ add_action(
 );
 
 /** Our field groups (keys of the files in acf-json/). */
-const AW_SCF_GROUPS = array( 'group_aw_listing', 'group_aw_listing_address', 'group_aw_listing_hours', 'group_aw_listing_registrations', 'group_aw_listing_about', 'group_aw_listing_online', 'group_aw_listing_photos', 'group_aw_listing_claimed', 'group_aw_opportunity', 'group_aw_news', 'group_aw_legal', 'group_aw_legal_document', 'group_aw_campaign', 'group_aw_campaign_dates', 'group_aw_campaign_document', 'group_aw_campaign_orgs', 'group_aw_campaign_outcome', 'group_aw_campaign_share', 'group_aw_resource' );
+const AW_SCF_GROUPS = array( 'group_aw_listing', 'group_aw_listing_address', 'group_aw_listing_hours', 'group_aw_listing_registrations', 'group_aw_listing_about', 'group_aw_listing_online', 'group_aw_listing_photos', 'group_aw_listing_claimed', 'group_aw_opportunity', 'group_aw_news', 'group_aw_legal', 'group_aw_legal_document', 'group_aw_campaign', 'group_aw_campaign_dates', 'group_aw_campaign_document', 'group_aw_campaign_orgs', 'group_aw_campaign_outcome', 'group_aw_campaign_share', 'group_aw_resource', 'group_aw_social', 'group_aw_campaign_social' );
 
 add_filter(
 	'acf/settings/load_json',
@@ -130,9 +130,13 @@ function aw_value_guard( $check, $value, $post_id, $field ) {
 			$value = implode( ',', array_slice( array_filter( array_map( 'absint', (array) $value ) ), 0, 4 ) );
 			break;
 		case 'file':
+		case 'image':
 		case 'post_object':
 			$value = is_array( $value ) ? ( $value['ID'] ?? reset( $value ) ) : $value;
 			$value = absint( $value ) ? (string) absint( $value ) : '';
+			break;
+		case 'relationship': // stored "1,2,3" like the photos (social posts' related items)
+			$value = implode( ',', array_slice( array_values( array_unique( array_filter( array_map( 'absint', (array) $value ) ) ) ), 0, 20 ) );
 			break;
 	}
 	$value = is_scalar( $value ) ? trim( (string) $value ) : '';
@@ -152,6 +156,14 @@ add_filter( 'acf/pre_update_value', 'aw_value_guard', 5, 4 );
 // Photos are stored "1,2,3"; SCF's gallery reads a list.
 add_filter(
 	'acf/load_value/type=gallery',
+	fn( $value, $post_id, $field ) => aw_scf_ours( $field ) && is_string( $value ) ? array_values( array_filter( array_map( 'absint', explode( ',', $value ) ) ) ) : $value,
+	10,
+	3
+);
+
+// Related items are stored "1,2,3" too; SCF's relationship field reads a list.
+add_filter(
+	'acf/load_value/type=relationship',
 	fn( $value, $post_id, $field ) => aw_scf_ours( $field ) && is_string( $value ) ? array_values( array_filter( array_map( 'absint', explode( ',', $value ) ) ) ) : $value,
 	10,
 	3

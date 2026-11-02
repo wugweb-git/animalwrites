@@ -20,12 +20,14 @@ const AW_REVIEW_TYPES = array(
 	'aw_legal'       => 'Library',
 	'aw_opportunity' => 'Opportunity',
 	'aw_press'       => 'Press',
+	'aw_social'      => 'Social post', // Social posts (core social-posts.php), only while that module is on
 	'post'           => 'Research', // research papers only (Resources tagged research): a held one shows why (24 Oct 2026)
 );
 
 /** A review item: any of the types above, but of Resources only research papers (guides are never reviewed here). */
 function aw_review_is_item( $p ) {
-	return $p && isset( AW_REVIEW_TYPES[ $p->post_type ] ) && ( 'post' !== $p->post_type || has_term( 'research', 'post_tag', $p ) );
+	// A type switched off (Social posts) is left out; its records are kept.
+	return $p && isset( AW_REVIEW_TYPES[ $p->post_type ] ) && post_type_exists( $p->post_type ) && ( 'post' !== $p->post_type || has_term( 'research', 'post_tag', $p ) );
 }
 
 /**
@@ -75,7 +77,7 @@ function aw_review_count_flush() {
 add_action(
 	'transition_post_status',
 	function ( $new, $old, $post ) {
-		if ( in_array( $post->post_type, array( 'aw_news', 'aw_legal', 'aw_opportunity', 'aw_press' ), true ) ) {
+		if ( in_array( $post->post_type, array( 'aw_news', 'aw_legal', 'aw_opportunity', 'aw_press', 'aw_social' ), true ) ) {
 			aw_review_count_flush();
 		}
 	},
@@ -187,6 +189,7 @@ function aw_review_page() {
 			echo '<div class="notice notice-warning is-dismissible"><p>Nothing changed: choose Publish or Reject and tick at least one item.</p></div>';
 		}
 	}
+	do_action( 'aw_review_intake' ); // other plugins' intake forms (core social-posts.php: add a social post from its link)
 	$table->views();
 	echo '<form method="get"><input type="hidden" name="page" value="aw-review">' . ( $type ? '<input type="hidden" name="type" value="' . esc_attr( $type ) . '">' : '' );
 	$table->search_box( 'Search items', 'aw-review' );
