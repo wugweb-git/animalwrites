@@ -345,8 +345,9 @@ function aw_si_ga4_store_camp( string $end, array $rows ) {
 	$n = aw_si_obs_replace_day( 'ga4', $end, $obs, '28d', $metrics );
 	if ( ! is_wp_error( $n ) ) {
 		$o = aw_si_table( 'obs' );
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name and the fixed metric keys only.
-		$wpdb->query( $wpdb->prepare( "DELETE FROM {$o} WHERE src = 'ga4' AND metric IN ('" . implode( "', '", $metrics ) . "') AND period = '28d' AND d <> %s", $end ) );
+		$in = implode( ', ', array_fill( 0, count( $metrics ), '%s' ) );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- table name and one %s per metric, built above.
+		$wpdb->query( $wpdb->prepare( "DELETE FROM {$o} WHERE src = 'ga4' AND metric IN ({$in}) AND period = '28d' AND d <> %s", array_merge( array_values( $metrics ), array( $end ) ) ) );
 	}
 	return $n;
 }
@@ -397,7 +398,7 @@ function aw_si_obs_replace_day( string $src, string $day, array $rows, string $p
 	$now  = aw_si_now();
 	$only = $metrics ? ' AND metric IN (' . implode( ', ', array_fill( 0, count( $metrics ), '%s' ) ) . ')' : '';
 	$wpdb->query( 'START TRANSACTION' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- table name and one %s per metric, built above.
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- table name and one %s per metric, built above.
 	$ok = false !== $wpdb->query( $wpdb->prepare( "DELETE FROM {$o} WHERE src = %s AND period = %s AND d = %s{$only}", array_merge( array( $src, $period, $day ), array_values( $metrics ) ) ) );
 	foreach ( array_chunk( $rows, 300 ) as $chunk ) {
 		$place = array();
