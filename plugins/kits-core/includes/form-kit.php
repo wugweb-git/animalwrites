@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 function kits_field_dict() {
 	$phone = array( 'autocomplete' => 'tel', 'inputmode' => 'tel', 'maxlength' => 16, 'data-rule' => 'phone', 'data-msg-phone' => 'Enter a 10-digit phone number, like 98765 43210' );
 	$d     = array(
-		'name'         => array( 'label' => 'Your name', 'icon' => 'name', 'placeholder' => 'Asha', 'attrs' => array( 'autocomplete' => 'name', 'maxlength' => 80 ), 'rules' => array( 'max:80' ), 'messages' => array( 'required' => 'Enter your name' ) ),
+		'name'         => array( 'label' => 'Your name', 'icon' => 'name', 'placeholder' => 'Your name', 'attrs' => array( 'autocomplete' => 'name', 'maxlength' => 80 ), 'rules' => array( 'max:80' ), 'messages' => array( 'required' => 'Enter your name' ) ),
 		'email'        => array( 'label' => 'Email', 'type' => 'email', 'icon' => 'mail', 'placeholder' => 'you@example.com', 'required' => true, 'attrs' => array( 'autocomplete' => 'email', 'inputmode' => 'email', 'maxlength' => 254 ), 'rules' => array( 'email' ), 'messages' => array( 'required' => 'Enter your email address', 'email' => 'Enter a full email address, like you@example.com' ) ),
 		'phone'        => array( 'label' => 'Phone', 'type' => 'tel', 'icon' => 'phone', 'placeholder' => '98765 43210', 'attrs' => $phone, 'rules' => array( 'phone' ), 'messages' => array( 'required' => 'Enter your phone number', 'phone' => 'Enter a 10-digit phone number, like 98765 43210' ) ),
 		'whatsapp'     => array( 'label' => 'WhatsApp', 'type' => 'tel', 'icon' => 'brand-whatsapp', 'placeholder' => '98765 43210', 'attrs' => $phone, 'rules' => array( 'phone' ), 'messages' => array( 'phone' => 'Enter a 10-digit phone number, like 98765 43210' ) ),

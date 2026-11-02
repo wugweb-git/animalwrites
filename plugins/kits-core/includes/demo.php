@@ -45,7 +45,7 @@ function kits_demo_panel( $suffix = '' ) {
 	};
 	$o .= $h( '11 Form field' ) . '<div class="kit-demo-fields">'
 		. $f( 'Default', '', '<span class="kit-ico kit-ico--mail kit-field-icon" aria-hidden="true"></span><input type="email" placeholder="you@example.com">' )
-		. $f( 'Optional', 'Optional', '<span class="kit-ico kit-ico--name kit-field-icon" aria-hidden="true"></span><input type="text" placeholder="Asha">' )
+		. $f( 'Optional', 'Optional', '<span class="kit-ico kit-ico--name kit-field-icon" aria-hidden="true"></span><input type="text" placeholder="Your name">' )
 		. $f( 'Focus', '', '<input type="text" class="is-demo-focus" value="Focused">' )
 		. $f( 'Filled', '', '<input type="text" value="Blue Cross of India">' )
 		. $f( 'Invalid', '', '<input type="email" aria-invalid="true" value="asha@">', 'Enter a full email address, like you@example.com' )
