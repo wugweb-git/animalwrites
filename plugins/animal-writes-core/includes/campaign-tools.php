@@ -1073,3 +1073,13 @@ add_filter(
 	},
 	100
 );
+
+// The Supreme Court stray dogs campaign: its hero has no <img> (the photograph is the band's background), so no picture
+// on the page is in the first screen; every one loads lazily (owner, 2 Nov 2026, mobile audit: the News card and the
+// Take action photos loaded before anyone scrolled to them).
+add_filter(
+	'wp_omit_loading_attr_threshold',
+	function ( $threshold ) {
+		return defined( 'AW_HOME_SC_CAMPAIGN' ) && is_singular( 'aw_campaign' ) && AW_HOME_SC_CAMPAIGN === get_queried_object_id() ? 0 : $threshold;
+	}
+);

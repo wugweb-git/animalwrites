@@ -283,6 +283,21 @@
 	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) { --aw-sc-card: calc((100% - var(--kit-space-4)) / 2); }
 }
 @media (min-width: 768px) { .aw-camp--sc-stray-dogs .aw-camp-tracker { --aw-sc-card: min(100%, var(--kit-width-content)); } } /* after the two-across rule above, which it overrides for the tracker */
+/* Phone UX (owner, 2 Nov 2026, mobile audit):
+   - the state cards show the edge of the next one (--aw-carousel-item, 82%) so the row reads as swipeable; the court
+     order cards stay one to the screen (at 82% the longest passes 600px);
+   - the share buttons --kit-space-2 apart (WCAG 2.2 target spacing), wrapping to a second line on narrow phones;
+   - on short screens (phones turned sideways, under 500px tall) the hero cannot hold the theme H1, text and poster in one
+     screen, so the "Check your state" bar shows there too, as on phones. */
+@media (max-width: 767px) { .aw-camp--sc-stray-dogs .aw-camp-tracker { --aw-sc-card: 82%; } }
+.aw-camp--sc-stray-dogs .kit-share { flex-wrap: wrap; gap: var(--kit-space-2); }
+@media (min-width: 768px) and (max-height: 500px) {
+	.aw-camp--sc-stray-dogs .aw-sticky-cta { display: flex; align-items: center; justify-content: space-between; gap: var(--kit-space-3); position: fixed; left: 0; right: 0; bottom: 0; z-index: var(--kit-layer-nav, 50); padding: var(--kit-space-2) var(--kit-space-4) calc(var(--kit-space-2) + env(safe-area-inset-bottom)); background: var(--camp-dark, var(--kit-color-ink)); color: var(--kit-color-on-ink); transition: transform var(--kit-motion-base, 200ms) var(--kit-motion-ease, ease); }
+	.aw-camp--sc-stray-dogs .aw-sticky-cta.is-hidden { transform: translateY(110%); }
+	html:has(.aw-camp--sc-stray-dogs .aw-sticky-cta) { scroll-padding-bottom: calc(var(--kit-btn-height) + 2 * var(--kit-space-2) + env(safe-area-inset-bottom)); }
+	.aw-camp--sc-stray-dogs:has(> .aw-sticky-cta) { padding-bottom: calc(var(--kit-btn-height) + 2 * var(--kit-space-2) + env(safe-area-inset-bottom)); }
+}
+@media (min-width: 768px) and (max-height: 500px) and (prefers-reduced-motion: reduce) { .aw-camp--sc-stray-dogs .aw-sticky-cta { transition: none; } }
 /* The Library: one sideways row at every width (82% of the view on phones, two to the view from 768, three from 1200).
    What you can do: the same row below 1200; from 1200 the three cards side by side, none spanning the row. */
 .aw-camp--sc-stray-dogs #read .wp-block-post-template { display: flex; gap: var(--kit-space-4); overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; padding-bottom: var(--kit-space-3); }
