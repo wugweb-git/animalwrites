@@ -395,9 +395,10 @@ function aw_si_obs_replace_day( string $src, string $day, array $rows, string $p
 	global $wpdb;
 	$o    = aw_si_table( 'obs' );
 	$now  = aw_si_now();
-	$only = $metrics ? " AND metric IN ('" . implode( "', '", array_map( 'esc_sql', $metrics ) ) . "')" : '';
+	$only = $metrics ? ' AND metric IN (' . implode( ', ', array_fill( 0, count( $metrics ), '%s' ) ) . ')' : '';
 	$wpdb->query( 'START TRANSACTION' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-	$ok = false !== $wpdb->query( $wpdb->prepare( "DELETE FROM {$o} WHERE src = %s AND period = %s AND d = %s{$only}", $src, $period, $day ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name and escaped metric keys.
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- table name and one %s per metric, built above.
+	$ok = false !== $wpdb->query( $wpdb->prepare( "DELETE FROM {$o} WHERE src = %s AND period = %s AND d = %s{$only}", array_merge( array( $src, $period, $day ), array_values( $metrics ) ) ) );
 	foreach ( array_chunk( $rows, 300 ) as $chunk ) {
 		$place = array();
 		$args  = array();
