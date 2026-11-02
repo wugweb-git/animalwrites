@@ -523,12 +523,12 @@
 	});
 })();
 
-/* What the draft does (campaign-lab.css, bento): the five smaller tiles fold. Each tile's own H3 moves into a summary and
+/* What the draft does (campaign-lab.css, bento): the four supporting tiles fold (the lead and the full-width last tile stay open). Each tile's own H3 moves into a summary and
    its text into the same details, so the tile shows icon, heading and rule chips and the text opens on tap. No words are
    added; the rule chips stay outside the fold. Without JavaScript nothing changes and every text stays open. */
 (function () {
 	if (!('open' in document.createElement('details'))) return;
-	document.querySelectorAll('.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card:not(:first-child)').forEach(function (card) {
+	document.querySelectorAll('.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card:not(:first-child):not(:last-child)').forEach(function (card) {
 		var h = card.querySelector(':scope > h3');
 		var text = card.querySelectorAll(':scope > p:not(.aw-camp-card-ico):not(.aw-camp-card-chips)');
 		if (!h || !text.length) return;
@@ -540,6 +540,20 @@
 		fold.appendChild(sum);
 		text.forEach(function (p) { fold.appendChild(p); });
 	});
+})();
+
+/* What the draft does: the tiles fade in once, when the grid first comes on screen (campaign-lab.css is-reveal / is-in).
+   Skipped with reduced motion or without IntersectionObserver; a timer shows them anyway if the observer never fires. */
+(function () {
+	var grid = document.querySelector('.aw-camp--lab-rules .aw-camp-grid');
+	if (!grid || !('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+	if (grid.getBoundingClientRect().top < window.innerHeight) return;
+	Array.prototype.forEach.call(grid.children, function (c, i) { c.style.setProperty('--i', i); });
+	grid.classList.add('is-reveal');
+	var show = function () { grid.classList.add('is-in'); io.disconnect(); setTimeout(function () { grid.classList.remove('is-reveal', 'is-in'); }, 1000); };
+	var io = new IntersectionObserver(function (e) { if (e[0].isIntersecting) show(); }, { rootMargin: '0px 0px -10% 0px' });
+	io.observe(grid);
+	setTimeout(show, 4000);
 })();
 
 /* Phone bar: shows once the hero has scrolled away; hidden while the letter tool or the footer is on screen, and for the

@@ -633,3 +633,41 @@
 .aw-camp--lab-rules #read .aw-camp-docs-q li::before { content: none; }
 .aw-camp--lab-rules #read .aw-camp-docs-q li:hover { box-shadow: none; }
 .aw-camp.aw-camp--lab-rules #read .aw-camp-docs-q li > .kit-card { height: 100%; box-sizing: border-box; padding: var(--kit-space-5); }
+
+/* What the draft does, the owner's bento brief (2 Nov 2026): one dominant tile, four supporting tiles, one full-width
+   tile at the bottom. Phones: one column in markup order (the lead first). From 768: the lead the full row, then two
+   pairs, then the last tile the full row. From 1200: the lead two columns wide and two rows tall, the four supporting
+   tiles in a 2 x 2 beside it, the last tile the full row. Gap --kit-space-4 from 1200 (as Home). */
+@media (min-width: 768px) {
+	.aw-camp.aw-camp--lab-rules .aw-camp-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-areas: "c1 c1" "c2 c3" "c4 c5" "c6 c6"; }
+}
+@media (min-width: 1200px) {
+	.aw-camp.aw-camp--lab-rules .aw-camp-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-areas: "c1 c1 c2 c3" "c1 c1 c4 c5" "c6 c6 c6 c6"; }
+}
+/* Supporting tiles: the page background, a soft line and --kit-elevation-1. The lead: the campaign crimson deepening
+   to 25% darker (white text stays above 4.5:1 across it), --kit-elevation-2, a larger icon (--kit-icon-xl in a box of
+   a target plus --kit-space-2). */
+.aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card { background: var(--kit-color-bg); box-shadow: inset 0 0 0 1px var(--kit-color-line), var(--kit-elevation-1); transition: transform var(--kit-motion-base) var(--kit-motion-ease), box-shadow var(--kit-motion-base) var(--kit-motion-ease); }
+.aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card:first-child { background: linear-gradient(160deg, var(--camp-mark), color-mix(in srgb, var(--camp-mark) 75%, #000)); box-shadow: var(--kit-elevation-2); }
+.aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card:first-child .aw-camp-card-ico { width: calc(var(--kit-size-target) + var(--kit-space-2)); height: calc(var(--kit-size-target) + var(--kit-space-2)); }
+/* Headings: the page-level H3 rule in aw.css sets every H3 with !important, so these carry it too: the lead at
+   --kit-type-h2, the other tiles at Home's tile heading --kit-type-h4 */
+.aw-camp.aw-camp--lab-rules #why-it-matters .aw-camp-grid > .aw-camp-card:first-child h3 { font-size: var(--kit-type-h2) !important; }
+.aw-camp.aw-camp--lab-rules #why-it-matters .aw-camp-grid > .aw-camp-card:not(:first-child) h3 { font-size: var(--kit-type-h4) !important; }
+/* Hover on a pointer: the tile lifts by --kit-motion-lift with a deeper shadow; the lead deeper still. Pressed: the
+   tile settles back. */
+@media (hover: hover) {
+	.aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card:hover { transform: translateY(var(--kit-motion-lift)); box-shadow: inset 0 0 0 1px var(--kit-color-line), var(--kit-elevation-2); }
+	.aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card:first-child:hover { box-shadow: var(--kit-elevation-3); }
+}
+.aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card:active { transform: none; }
+.aw-camp--lab-rules .aw-camp-card-fold > summary:active { background: color-mix(in srgb, currentColor 8%, transparent); }
+/* On first view the tiles fade in and rise --kit-space-2, 40ms apart (campaign-lab.js sets is-reveal, then is-in once
+   the grid is on screen). Without JavaScript, or with reduced motion, they are simply there. */
+.aw-camp--lab-rules .aw-camp-grid.is-reveal > .aw-camp-card { opacity: 0; transform: translateY(var(--kit-space-2)); }
+.aw-camp--lab-rules .aw-camp-grid.is-reveal.is-in > .aw-camp-card { opacity: 1; transform: none; transition: opacity var(--kit-motion-slow) var(--kit-motion-ease), transform var(--kit-motion-slow) var(--kit-motion-ease), box-shadow var(--kit-motion-base) var(--kit-motion-ease); transition-delay: calc(var(--i, 0) * 40ms); }
+@media (prefers-reduced-motion: reduce) {
+	.aw-camp--lab-rules .aw-camp-grid.is-reveal > .aw-camp-card { opacity: 1; transform: none; }
+	.aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card { transition: none; }
+	.aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card:hover { transform: none; }
+}
