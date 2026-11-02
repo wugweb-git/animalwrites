@@ -289,9 +289,10 @@
    story's figures and dates (Home phones, aw.css) and a table in an article (kit.css .wp-block-table), takes keyboard
    focus, so arrow keys scroll it, and is a region named by words already on the page: the story's heading; the table's
    caption, else the nearest heading above it; any other row, the nearest h2-h3 above it in its section, else the nearest
-   h2-h6 above it. A row that fits is left alone. A row that already has a name of its own (Home's help tiles, the
-   Lab rows) keeps it and only takes keyboard focus. Skipped: rows that already have a tabindex, the Diwali page's rows
-   (campaign.js), the header and footer, and form fields. */
+   h2-h6 above it. A row that fits is left alone. A row that already has a name of its own (Home's help tiles and
+   quick filters) keeps it and only takes keyboard focus. Skipped: rows that already have a tabindex, the campaign
+   pages' rows (.aw-camp: campaign.js and the Supreme Court rows in campaign-tools.php), the header and footer, and
+   form fields. */
 (function () {
 	var main = document.querySelector('main') || document.querySelector('.wp-block-post-content');
 	var fixed = [], n = 0;
@@ -320,7 +321,7 @@
 		fixed.push({ el: r, name: r.closest('.aw-ed-story').querySelector('h2') });
 	});
 	document.querySelectorAll('.wp-block-post-content figure.wp-block-table').forEach(function (r) {
-		if (r.closest('.aw-camp--diwali')) return;
+		if (r.closest('.aw-camp--diwali, .aw-camp--lab-rules')) return; // their tables: campaign.js
 		fixed.push({ el: r, name: r.querySelector('figcaption, caption') || above(r, r.closest('.wp-block-post-content'), 'h2, h3, h4, h5, h6') });
 	});
 	if (!main && !fixed.length) return;
@@ -361,7 +362,7 @@
 		Array.prototype.forEach.call(main.querySelectorAll('*'), function (r) {
 			if (done.indexOf(r) > -1) return;
 			var on = r.clientWidth > 0 && wide(r) && /^(auto|scroll)$/.test(getComputedStyle(r).overflowX) &&
-				!r.matches('input, textarea, select, [contenteditable]') && !r.closest('.aw-camp--diwali, header, footer');
+				!r.matches('input, textarea, select, [contenteditable]') && !r.closest('.aw-camp, header, footer');
 			if (r.hasAttribute('data-aw-tab') || own(r)) {
 				focus(r, on);
 				return;
