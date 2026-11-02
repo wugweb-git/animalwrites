@@ -297,6 +297,12 @@
 	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) { --aw-sc-card: calc((100% - var(--kit-space-4)) / 2); }
 }
 @media (min-width: 768px) { .aw-camp--sc-stray-dogs .aw-camp-tracker { --aw-sc-card: min(100%, var(--kit-width-content)); } } /* after the two-across rule above, which it overrides for the tracker */
+/* The hero at --kit-hero-h on every phone (Layout rules 4; at 360x640 it was 696): its section padding one step down
+   (--kit-section-y at --kit-space-5) and the summary straight under the H1's own margin */
+@media (max-width: 767px) {
+	.aw-camp--sc-stray-dogs .aw-camp-hero { --kit-section-y: var(--kit-space-5); }
+	.aw-camp--sc-stray-dogs .aw-camp-hero .aw-camp-hero-summary { margin-top: 0; }
+}
 /* Phone UX (owner, 2 Nov 2026, mobile audit):
    - the state cards show the edge of the next one (--aw-carousel-item, 82%) so the row reads as swipeable;
    - the share buttons --kit-space-2 apart (WCAG 2.2 target spacing), wrapping to a second line on narrow phones. */
