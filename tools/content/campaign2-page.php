@@ -438,7 +438,7 @@ HTML
 $share = c2sec(
 	'share',
 	c2h( 'Get three more letters in' )
-	. c2p( 'One letter is one voice. Send this page to three people who care about animals, so each of them can send their own objection before 5 Nov 2026.', 'aw-camp-lede' )
+	. c2p( 'CCSEA considers every objection before the rules are made final. Send this page to three people who care about animals, so each of them can send their own objection before 5 Nov 2026.', 'aw-camp-lede' )
 	. c2html( '<div class="aw-camp-share-kit" data-aw-share></div>' )
 	. c2p( c2i( 'mail' ) . 'We\'ll email you when CCSEA responds and when the final rules are published. Sign up with the newsletter form at the end of this page.', 'aw-camp-note' ),
 	'aw-camp-tint aw-camp-open'
@@ -499,8 +499,8 @@ foreach ( array(
 	'aw_campaign_metric_min'     => '100', // objections sent: shown from 100 (Campaign Content Standard D3)
 	'aw_campaign_metric_stale'   => '1', // days before the count shows an "as of" date
 	'aw_campaign_doc'            => (int) $doc->ID,
-	'rank_math_title'            => 'Object to the Draft Lab Animal Rules 2026 – Animal Writes',
-	'rank_math_description'      => 'India\'s draft lab animal rules would let labs approve most animal experiments themselves. Read what they say and send your objection by 5 November.',
+	'rank_math_title'            => 'Draft Lab Animal Rules 2026: Object at cpcsea-mef@gov.in', // owner's yes, 3 Nov 2026
+	'rank_math_description'      => 'Send your objection to India\'s draft lab animal rules, G.S.R. 864(E), to cpcsea-mef@gov.in by 5 Nov 2026. Our letter tool builds it from the grounds you pick.',
 	'rank_math_focus_keyword'    => 'draft lab animal rules 2026,ccsea draft rules,objection to draft rules,gsr 864e,cpcsea-mef@gov.in,g.s.r. 864(e)', // as on live (2 Nov 2026)
 	'rank_math_primary_category' => (string) get_term_by( 'slug', 'campaigns-civic-action', 'category' )->term_id,
 ) as $k => $v ) {

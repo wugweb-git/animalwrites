@@ -914,3 +914,5 @@
 @media (max-width: 767px) {
 	html:has(.aw-camp--lab-rules .aw-sticky-cta) { scroll-padding-bottom: calc(var(--kit-btn-height) + 2 * var(--kit-space-2) + env(safe-area-inset-bottom)); }
 }
+/* The line beside the main share button, in the band's text colour at --kit-type-sm */
+.aw-camp.aw-camp #share .aw-share-cta-note { font-size: var(--kit-type-sm); color: var(--camp-on-mark); }

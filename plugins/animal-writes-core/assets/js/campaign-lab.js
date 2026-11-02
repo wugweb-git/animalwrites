@@ -467,6 +467,10 @@
 		done.setAttribute('role', 'status');
 		done.setAttribute('aria-live', 'polite');
 		wrap.appendChild(b);
+		var note = document.createElement('span');
+		note.className = 'aw-share-cta-note';
+		note.textContent = 'It takes under a minute.'; // owner's line, 3 Nov 2026
+		wrap.appendChild(note);
 		wrap.appendChild(done);
 		holder.insertBefore(wrap, holder.firstChild);
 		b.addEventListener('click', function () {
