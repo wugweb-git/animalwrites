@@ -810,34 +810,49 @@ body { background: var(--kit-color-canvas); }
 .aw-newsletter-form .ff-message-success { margin: 0; padding: var(--kit-space-5); border: 0; border-left: var(--kit-border-accent) solid var(--kit-color-accent); border-radius: var(--kit-radius-card); background: transparent; color: inherit; box-shadow: none; }
 .aw-newsletter-form .ff-message-success p { margin: 0; }
 .aw-newsletter-form .ff-errors-in-stack { color: var(--kit-color-accent); }
-/* Newsletter band (1 Nov 2026): its own light block just above the footer on every page (parts/footer.html),
-   #newsletter. Accent envelope badge, title and line (paragraphs, not headings), then the form. Phones: email, name,
-   Subscribe and the consent line stacked, one per row. From 768: email, name and Subscribe side by side in one row,
-   the consent line under them. From 1200 the text on the left and the form on the right. Same fields and order as the
-   form itself. */
+/* Newsletter band (1 Nov 2026; card, owner, 2 Nov 2026): its own block just above the footer on every page
+   (parts/footer.html), #newsletter. A card on the soft tint (--kit-color-surface, line border, --kit-radius-card),
+   at most the content width (--kit-width-content), padding --kit-space-5 on phones and --kit-space-6 from 768. Accent
+   envelope badge, title (H3 size on phones, H2 from 768, bold) and line (paragraphs, not headings), then the form.
+   Phones: email, name, Subscribe and the consent line stacked, full width. From 768: email, name and Subscribe in one
+   row, the consent line under them. Fields white on the tint with the theme focus ring; Subscribe is the ink button
+   with a lift on hover and a press, --kit-motion-base transitions, no motion under prefers-reduced-motion. Same
+   fields, order and text as the form itself. */
 .aw-nl-band { background: var(--kit-color-raised); border-top: var(--kit-border-width) solid var(--kit-color-line); padding: var(--kit-space-6) var(--kit-space-4); }
 @media (min-width: 768px) { .aw-nl-band { padding-inline: var(--kit-space-6); } }
 @media (min-width: 1200px) { .aw-nl-band { padding: var(--kit-space-7) var(--kit-space-gutter); } }
-.aw-nl-band-inner { display: grid; gap: var(--kit-space-5) var(--kit-space-8); max-width: var(--kit-width-nav); margin: 0 auto; }
-@media (min-width: 1200px) { .aw-nl-band-inner { grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr); align-items: center; } }
+.aw-nl-band-inner { box-sizing: border-box; display: grid; gap: var(--kit-space-5); max-width: var(--kit-width-content); margin: 0 auto; padding: var(--kit-space-5); background: var(--kit-color-surface); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); }
+@media (min-width: 768px) { .aw-nl-band-inner { padding: var(--kit-space-6); } }
 .aw-nl-band-text { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: var(--kit-space-4); align-items: center; }
 .aw-nl-band-ico { grid-row: 1 / 3; display: inline-flex; align-items: center; justify-content: center; width: var(--kit-size-control-lg); height: var(--kit-size-control-lg); border-radius: var(--kit-radius-pill); background: var(--kit-color-accent); color: var(--kit-color-on-accent); --kit-ico-size: 1.5rem; }
-.aw-nl-band p.aw-nl-band-head { margin: 0; max-width: none; font-size: var(--kit-type-h3); font-weight: var(--kit-weight-strong); line-height: 1.2; color: var(--kit-color-ink); }
+.aw-nl-band p.aw-nl-band-head { margin: 0; max-width: none; font-size: var(--kit-type-h2); font-weight: var(--kit-weight-bold); line-height: var(--kit-leading-heading); color: var(--kit-color-ink); }
 .aw-nl-band p.aw-nl-band-line { margin: var(--kit-space-1) 0 0; max-width: 46ch; font-size: var(--kit-type-base); color: var(--kit-color-muted); }
 .aw-nl-band .aw-newsletter-form .ff-el-input--label { margin-bottom: var(--kit-space-1); }
 .aw-nl-band .aw-newsletter-form .ff-el-input--label label { font-size: var(--kit-type-sm); color: var(--kit-color-text); }
 .aw-nl-band .aw-newsletter-form .ff-custom_html p { color: var(--kit-color-muted); }
 .aw-nl-band .aw-newsletter-form :is(.ff-el-is-error .text-danger, .ff-errors-in-stack) { color: var(--kit-color-danger); }
 .aw-nl-band .aw-newsletter-form .ff-message-success { border-left-color: var(--kit-color-success); }
-.aw-nl-band .aw-newsletter-form .ff-el-form-control { height: var(--kit-btn-height); min-height: var(--kit-btn-height); }
-.aw-nl-band .aw-newsletter-form .ff-btn-submit.kit-btn { min-height: var(--kit-btn-height); }
+.aw-nl-band .aw-newsletter-form .ff-el-form-control { height: var(--kit-btn-height); min-height: var(--kit-btn-height); background-color: var(--kit-color-raised); transition-duration: var(--kit-motion-base); }
+.aw-nl-band .aw-newsletter-form .ff-el-form-control:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); } /* the theme focus ring, outside the blue border */
+.aw-nl-band .aw-newsletter-form .ff-btn-submit.kit-btn {
+	min-height: var(--kit-btn-height); font-weight: var(--kit-weight-strong);
+	transition: background-color var(--kit-motion-base) var(--kit-motion-ease), transform var(--kit-motion-base) var(--kit-motion-ease), box-shadow var(--kit-motion-base) var(--kit-motion-ease);
+}
+@media (hover: hover) { .aw-nl-band .aw-newsletter-form .ff-btn-submit.kit-btn:hover:not([disabled], .is-loading, [aria-busy=true]) { box-shadow: var(--kit-elevation-2); } } /* hover: the fill turns --kit-btn-primary-bg-hover, with a shadow */
+.aw-nl-band .aw-newsletter-form .ff-btn-submit.kit-btn:active:not([disabled]) { background: var(--kit-color-ink); box-shadow: none; } /* pressed: back to ink, no shadow */
+@media (hover: hover) and (prefers-reduced-motion: no-preference) { .aw-nl-band .aw-newsletter-form .ff-btn-submit.kit-btn:hover:not([disabled], .is-loading, [aria-busy=true]) { transform: translateY(var(--kit-motion-lift)); } } /* and lifts */
+@media (prefers-reduced-motion: no-preference) { .aw-nl-band .aw-newsletter-form .ff-btn-submit.kit-btn:active:not([disabled]) { transform: translateY(var(--kit-btn-press)); } } /* and goes down 1px */
+@media (prefers-reduced-motion: reduce) {
+	.aw-nl-band .aw-newsletter-form :is(.ff-btn-submit.kit-btn, .ff-el-form-control) { transition: none; }
+	.aw-nl-band .aw-newsletter-form .ff-btn-submit.kit-btn:active:not([disabled]) { transform: none; } /* outranks the theme's 1px press */
+}
 @media (min-width: 768px) {
 	.aw-nl-band .aw-newsletter-form .frm-fluent-form fieldset { display: grid !important; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) auto; align-items: end; gap: var(--kit-space-2) var(--kit-space-3); }
 	.aw-nl-band .aw-newsletter-form .ff-custom_html { grid-column: 1 / -1; }
 	.aw-nl-band .aw-newsletter-form .ff-btn-submit.kit-btn { width: auto; }
 }
 @media (max-width: 767px) {
-	.aw-nl-band p.aw-nl-band-head { font-size: var(--kit-type-h4); }
+	.aw-nl-band p.aw-nl-band-head { font-size: var(--kit-type-h3); }
 	.aw-nl-band p.aw-nl-band-line { font-size: var(--kit-type-sm); }
 	.aw-nl-band-ico { width: var(--kit-size-target); height: var(--kit-size-target); --kit-ico-size: 1.25rem; }
 }
