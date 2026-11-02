@@ -619,3 +619,10 @@
 .aw-camp--lab-rules .aw-camp-card-fold > summary:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
 .aw-camp--lab-rules .aw-camp-card-fold > :not(summary) { margin: var(--kit-space-2) 0 0; }
 @media (prefers-reduced-motion: reduce) { .aw-camp--lab-rules .aw-camp-card-fold > summary::after { transition: none; } }
+
+/* The bento's tiles at Home's tile sizes (owner, 2 Nov 2026: "same as Home"), so the section stays under 720px from
+   1200: the small tiles' headings at Home's tile-heading size (--kit-type-h4, 18px; aw.css lets these headings off its
+   page-level H3 rule, as it does Home's bento), their icon box at the 44px target, the lead's text at --kit-type-sm */
+.aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card:not(:first-child) h3 { font-size: var(--kit-type-h4); line-height: var(--kit-leading-heading); }
+.aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card:not(:first-child) .aw-camp-card-ico { width: var(--kit-size-target); height: var(--kit-size-target); }
+.aw-camp.aw-camp--lab-rules #why-it-matters .aw-camp-grid > .aw-camp-card:first-child p:not(.aw-camp-card-ico):not(.aw-camp-card-chips) { font-size: var(--kit-type-sm); }
