@@ -9,8 +9,8 @@
  * @package animal-writes
  */
 ?>
-<!-- wp:group {"tagName":"section","metadata":{"name":"From the Library"},"align":"full","className":"kit-section kit-surface-section aw-ed-law","layout":{"type":"constrained","contentSize":"1200px"}} -->
-<section class="wp-block-group alignfull kit-section kit-surface-section aw-ed-law"><!-- wp:group {"className":"kit-sec-head","layout":{"type":"default"}} -->
+<!-- wp:group {"tagName":"section","metadata":{"name":"From the Library"},"align":"full","className":"is-style-kits-section kit-section kit-surface-section aw-ed-law","layout":{"type":"constrained","contentSize":"1200px"}} -->
+<section class="wp-block-group alignfull is-style-kits-section kit-section kit-surface-section aw-ed-law"><!-- wp:group {"className":"kit-sec-head","layout":{"type":"default"}} -->
 <div class="wp-block-group kit-sec-head"><!-- wp:group {"layout":{"type":"default"}} -->
 <div class="wp-block-group"><!-- wp:heading -->
 <h2 class="wp-block-heading">The law, in plain words</h2>

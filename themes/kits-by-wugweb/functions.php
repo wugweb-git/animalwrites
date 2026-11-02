@@ -119,9 +119,13 @@ function kits_block_styles() {
 			'kits-ghost'     => __( 'Ghost', 'kits-by-wugweb' ),
 			'kits-brand'     => __( 'Brand', 'kits-by-wugweb' ),
 		),
+		// Section and Head band: their padding, background and gap are settings (theme.json styles.blocks.core/group.variations;
+		// Appearance > Editor > Styles > Blocks > Group), not CSS. docs/kits-control-map.md.
 		'core/group'     => array(
-			'kits-card'    => __( 'Card', 'kits-by-wugweb' ),
-			'kits-surface' => __( 'Surface', 'kits-by-wugweb' ),
+			'kits-card'      => __( 'Card', 'kits-by-wugweb' ),
+			'kits-surface'   => __( 'Surface', 'kits-by-wugweb' ),
+			'kits-section'   => __( 'Section', 'kits-by-wugweb' ),
+			'kits-head-band' => __( 'Head band', 'kits-by-wugweb' ),
 		),
 		'core/separator' => array(
 			'kits-hairline' => __( 'Hairline', 'kits-by-wugweb' ),
@@ -151,6 +155,33 @@ function kits_block_styles() {
 	}
 }
 add_action( 'init', 'kits_block_styles' );
+
+/**
+ * Groups saved before the Section and Head band styles existed carry the old classes (kit-section, kit-section-band).
+ * They get the matching style class when they render, so they follow the Styles settings without a content change.
+ * Re-saving such a block with the style picked makes this a no-op for it.
+ */
+add_filter(
+	'render_block_core/group',
+	function ( $html, $block ) {
+		$classes = preg_split( '/\s+/', (string) ( $block['attrs']['className'] ?? '' ) );
+		if ( false !== strpos( implode( ' ', $classes ), 'is-style-' ) ) {
+			return $html;
+		}
+		$style = in_array( 'kit-section-band', $classes, true ) ? 'is-style-kits-head-band' : ( in_array( 'kit-section', $classes, true ) ? 'is-style-kits-section' : '' );
+		if ( '' === $style ) {
+			return $html;
+		}
+		$tags = new WP_HTML_Tag_Processor( $html );
+		if ( $tags->next_tag() ) {
+			$tags->add_class( $style );
+			return $tags->get_updated_html();
+		}
+		return $html;
+	},
+	10,
+	2
+);
 
 /**
  * Badge after a menu label: "Beta" (block style kits-beta). The badge sits inside the link, so the link's name reads

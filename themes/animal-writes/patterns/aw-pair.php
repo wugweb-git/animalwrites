@@ -9,8 +9,8 @@
  * @package animal-writes
  */
 ?>
-<!-- wp:group {"tagName":"section","metadata":{"name":"Campaign cards"},"align":"full","className":"kit-section kit-bg-canvas aw-pair","layout":{"type":"constrained","contentSize":"1200px"}} -->
-<section class="wp-block-group alignfull kit-section kit-bg-canvas aw-pair"><!-- wp:group {"className":"aw-pair-grid","layout":{"type":"default"}} -->
+<!-- wp:group {"tagName":"section","metadata":{"name":"Campaign cards"},"align":"full","className":"is-style-kits-section kit-section aw-pair","layout":{"type":"constrained","contentSize":"1200px"}} -->
+<section class="wp-block-group alignfull is-style-kits-section kit-section aw-pair"><!-- wp:group {"className":"aw-pair-grid","layout":{"type":"default"}} -->
 <div class="wp-block-group aw-pair-grid"><!-- wp:pattern {"slug":"animal-writes/aw-sc"} /-->
 
 <!-- wp:pattern {"slug":"animal-writes/festive"} /--></div>

@@ -9,8 +9,8 @@
  * @package animal-writes
  */
 ?>
-<!-- wp:group {"tagName":"section","metadata":{"name":"What's happening"},"align":"full","className":"kit-section kit-bg-canvas aw-ed-news","layout":{"type":"constrained","contentSize":"1200px"}} -->
-<section class="wp-block-group alignfull kit-section kit-bg-canvas aw-ed-news"><!-- wp:group {"className":"kit-sec-head","layout":{"type":"default"}} -->
+<!-- wp:group {"tagName":"section","metadata":{"name":"What's happening"},"align":"full","className":"is-style-kits-section kit-section aw-ed-news","layout":{"type":"constrained","contentSize":"1200px"}} -->
+<section class="wp-block-group alignfull is-style-kits-section kit-section aw-ed-news"><!-- wp:group {"className":"kit-sec-head","layout":{"type":"default"}} -->
 <div class="wp-block-group kit-sec-head"><!-- wp:group {"layout":{"type":"default"}} -->
 <div class="wp-block-group"><!-- wp:heading -->
 <h2 class="wp-block-heading">Latest news</h2>

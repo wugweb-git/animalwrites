@@ -206,9 +206,10 @@ body.single-aw_research .kit-lead-media { display: none; }
 /* 4.6 Section header (archives): full-width kraft band with title, description, count and a three-tile visual */
 /* The band runs edge to edge at every width, flush under the header (no gap above or at the sides). It holds the
    breadcrumb, the heading and the page's search or filters, all on the same left edge as the content below. */
-.kit-section-band { background: var(--kit-color-surface); width: auto; max-width: none !important; margin: 0 calc(50% - 50vw) var(--kit-space-6) !important; padding: var(--kit-space-head) var(--kit-space-gutter) var(--kit-space-6); }
+/* Its background and padding are settings: Group style Head band (theme.json styles.blocks.core/group.variations.kits-head-band). */
+.kit-section-band { width: auto; max-width: none !important; margin: 0 calc(50% - 50vw) var(--kit-space-6) !important; }
 main > .kit-section-band:first-child, main > p:first-child + .kit-section-band { margin-top: 0 !important; }
-.kit-section-band:not(:has(.kit-section-filters)) { margin-bottom: 0 !important; padding-bottom: var(--kit-space-head); } /* head band (breadcrumb, H1, description): its last row › what follows 16 */
+.kit-section-band:not(:has(.kit-section-filters)) { margin-bottom: 0 !important; } /* head band (breadcrumb, H1, description): its last row › what follows 16 */
 .kit-section-band:not(:has(.kit-section-filters)) + * { margin-block-start: 0; } /* no flow-layout gap under it */
 .kit-section-band:not(:has(.kit-section-filters)) + .kit-section-filters--below { margin-block-start: var(--kit-space-band-gap); } /* a list toolbar under the head band: 24 / 32 / 40, never touching it */
 .kit-section-band:not(:has(.kit-section-filters)) + :is(.wp-block-post-content, .wp-block-post-featured-image, .kit-with-sidebar) { margin-block-start: var(--kit-space-section); } /* a page's content starts a section below the head (48 / 70 / 96; owner, 31 Oct 2026: it touched the band) */
@@ -218,6 +219,7 @@ main > .kit-section-band:first-child, main > p:first-child + .kit-section-band {
 /* Page head: nav › breadcrumb › H1 › description › lead, 16 apart (--kit-space-head) */
 .kit-section-inner > .kit-crumbs { margin: 0 0 var(--kit-space-head); }
 .kit-section-filters { margin-top: var(--kit-space-head); }
+.kit-section-band .kit-section-filters { margin-bottom: calc(var(--kit-space-6) - var(--kit-space-head)); } /* filters inside the band: its bottom padding (a setting) plus this keeps the old --kit-space-6 under them */
 .kit-section-filters .kit-filter-active { margin-top: var(--kit-space-3); }
 .kit-section-filters .kit-filters, .kit-section-filters .kit-filter-active { margin-bottom: 0; }
 /* List pages: the filters and count sit under the head band, then the list and its pagination, 16 apart (--kit-space-collection) */
@@ -329,8 +331,8 @@ html { overflow-x: clip; }
 .kit-ico--map-pin-house { --i: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M15%2022a1%201%200%200%201-1-1v-4a1%201%200%200%201%20.445-.832l3-2a1%201%200%200%201%201.11%200l3%202A1%201%200%200%201%2022%2017v4a1%201%200%200%201-1%201z%22/%3E%3Cpath%20d%3D%22M18%2010a8%208%200%200%200-16%200c0%204.993%205.539%2010.193%207.399%2011.799a1%201%200%200%200%20.601.2%22/%3E%3Cpath%20d%3D%22M18%2022v-3%22/%3E%3Ccircle%20cx%3D%2210%22%20cy%3D%2210%22%20r%3D%223%22/%3E%3C/svg%3E"); }
 
 /* 4.8 Section — background variants separate blocks; cards sit on them with elevation.
-   .kit-section (vertical rhythm) + .kit-bg-canvas | .kit-bg-kraft | .kit-bg-ink */
-.kit-section { padding-block: var(--kit-space-section) !important; }
+   Group style Section (is-style-kits-section): its padding (48 / 70 / 96), background and gap are settings in theme.json
+   (styles.blocks.core/group.variations.kits-section). .kit-bg-kraft and .kit-surface-section are the other backgrounds. */
 @media (max-width: 767px) { .kit-stack.is-layout-grid { grid-template-columns: minmax(0, 1fr) !important; } } /* a grid of cards stacks one per row on phones */
 .kit-bg-canvas { background: var(--kit-color-canvas); }
 .kit-bg-kraft { background: var(--kit-color-surface); }

@@ -3,14 +3,15 @@
  * Title: Section
  * Slug: kits-by-wugweb/section
  * Categories: kits-components
+ * Description: A full-width section (Group style Section): its padding, background and gap are set in Styles > Blocks > Group > Section.
  */
 ?>
-<!-- wp:group {"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|70","bottom":"var:preset|spacing|70"}}},"layout":{"type":"constrained"}} -->
-<div class="wp-block-group alignfull" style="padding-top:var(--wp--preset--spacing--70);padding-bottom:var(--wp--preset--spacing--70)"><!-- wp:heading -->
+<!-- wp:group {"tagName":"section","align":"full","className":"is-style-kits-section","layout":{"type":"constrained"}} -->
+<section class="wp-block-group alignfull is-style-kits-section"><!-- wp:heading -->
 <h2 class="wp-block-heading">Section heading</h2>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
 <p>Section text.</p>
-<!-- /wp:paragraph --></div>
+<!-- /wp:paragraph --></section>
 <!-- /wp:group -->

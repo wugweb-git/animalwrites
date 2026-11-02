@@ -8,8 +8,6 @@ plugins/animal-writes-core/assets/css/campaign.css | height | .aw-letter-share-p
 plugins/animal-writes-core/assets/css/dir-map.css | height | .aw-dir-map-canvas | height: clamp(360px, 70vh, 640px)
 themes/animal-writes/assets/css/aw.css | height | .aw-pdf .wp-block-file__embed | height: min(80vh, 900px)
 themes/animal-writes/assets/css/aw.css | height | .aw-pdf .wp-block-file__embed | height: 60vh
-themes/animal-writes/assets/css/aw.css | imp | .kit-section-band--compact | padding-bottom: var(--kit-space-6) !important
-themes/animal-writes/assets/css/aw.css | imp | .kit-section-band--compact:not(:has(.kit-section-filters)) | padding-bottom: var(--kit-space-head) !important
 themes/animal-writes/assets/css/aw.css | height | .aw-vol-banner-photo img | min-height: 320px
 themes/animal-writes/assets/css/aw.css | height | .aw-vol-page .aw-vol-banner-photo img | height: 240px
 themes/animal-writes/assets/css/aw.css | height | .aw-vol-page .aw-vol-banner-photo img | height: 360px
