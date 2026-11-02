@@ -746,3 +746,6 @@
 	.aw-camp--lab-rules .aw-camp-dates li:nth-child(3n)::before { right: calc(-1 * var(--kit-space-4)); }
 	.aw-camp--lab-rules .aw-camp-dates li:last-child::before { right: 0; }
 }
+/* the one link under the timeline sits --kit-space-5 below it (the list's own margin), not --kit-space-8, so the section
+   stays within 720px from 1200 */
+.aw-camp--lab-rules #what a.aw-camp-more { margin-top: 0; }
