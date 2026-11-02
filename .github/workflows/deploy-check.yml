@@ -84,6 +84,10 @@ jobs:
         run: python3 tools/ci/breakpoint_check.py
       - name: Section heights from the theme (no new fixed heights, vertical % padding or !important over section padding)
         run: python3 tools/ci/theme_rules_check.py
+      # Report mode (owner, 3 Nov 2026): the step goes red on a new finding but does not stop the deploy yet.
+      - name: Settings parts (report) - no CSS for parts moved to Styles settings, no new admin page, menu or admin stylesheet
+        continue-on-error: true
+        run: python3 tools/ci/settings_parts_check.py
       - name: Colour contrast (text 4.5:1, non-text 3:1; every campaign palette)
         run: python3 tools/ci/contrast_check.py
       - name: No picture used twice on the live site

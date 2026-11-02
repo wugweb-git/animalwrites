@@ -12,7 +12,7 @@
   const w = innerWidth;
   const wide = w >= 768;
 
-  const secSel = '.kit-section, .alignfull, .aw-camp-section, .kit-hero, main section';
+  const secSel = '.kit-section, .is-style-kits-section, .alignfull, .aw-camp-section, .kit-hero, .wp-block-kits-hero, main section';
   const limit = wide ? Math.min(720, innerHeight) : (document.body.classList.contains('home') ? innerHeight : Infinity);
   const sections = [...root.querySelectorAll(secSel)]
     .filter((e) => !e.closest('header, footer') && !e.parentElement.closest(secSel) && shown(e))
