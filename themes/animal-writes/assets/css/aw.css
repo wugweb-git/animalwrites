@@ -1625,6 +1625,16 @@ section.aw-camp-band.aw-ed-hero--campaign { box-sizing: border-box; min-height: 
 	.wp-block-cover.aw-take-part-card, .wp-block-cover.aw-take-part-card > .wp-block-cover__image-background, .aw-take-part-card .wp-block-button__link { transition: none; }
 	.aw-take-part-card .wp-block-button__link:active { transform: none; }
 }
+/* The whole card is its button's link (the button's ::before covers the card; the link name stays the button's text).
+   The inner container is not positioned, so the link's box is the card; photo and overlay sit below the text in the
+   card's own stacking context. The card shows the focus ring (ink, on the light page round it) when its link has keyboard focus. */
+.wp-block-cover.aw-take-part-card { isolation: isolate; cursor: pointer; }
+.wp-block-cover.aw-take-part-card > :is(.wp-block-cover__image-background, .wp-block-cover__background) { z-index: -1; }
+.wp-block-cover.aw-take-part-card.has-custom-content-position.has-custom-content-position.is-position-bottom-left > .wp-block-cover__inner-container { position: static; }
+.aw-take-part-card .wp-block-button__link::before { content: ""; position: absolute; inset: 0; border-radius: var(--kit-radius-card); } /* ::after is the button's arrow icon */
+.aw-take-part-card .wp-block-button__link:focus-visible { outline: 0; }
+.aw-take-part-card .wp-block-button__link:is(:hover, :active) { transform: none; } /* a moved button would hold the link's box: the card lifts instead */
+.wp-block-cover.aw-take-part-card:has(.wp-block-button__link:focus-visible) { outline: var(--kit-focus-width) solid var(--kit-color-ink); outline-offset: var(--kit-focus-offset); }
 /* Sidebar (from 1200): the compact stack, card height from its text, H3 size titles */
 .kit-sidebar .aw-take-part { grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-4); }
 .kit-sidebar .wp-block-cover.aw-take-part-card { min-height: 0; }
