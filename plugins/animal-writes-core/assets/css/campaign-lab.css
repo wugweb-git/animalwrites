@@ -583,3 +583,12 @@
 .aw-camp--lab-rules .rank-math-question { font-size: inherit; }
 .aw-camp--lab-rules a.aw-camp-more { margin-top: var(--kit-space-8); }
 .aw-camp--lab-rules .kit-chip::after { inset: calc((var(--s-8) - var(--kit-size-target)) / 2) 0; }
+
+/* Lab rules page: no sideways rows (owner, 2 Nov 2026: "revert the page as it was - not side ways"). The two card rows
+   (On social media, In the news) stack in the card grid: one column on phones, two from 768, three from 1200; the
+   Today vs the draft table wraps to fit (three columns). Nothing else on the page changes. */
+.aw-camp--lab-rules .aw-camp-row { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-4); overflow-x: visible; scroll-snap-type: none; padding-bottom: 0; }
+@media (min-width: 768px) { .aw-camp--lab-rules .aw-camp-row { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1200px) { .aw-camp--lab-rules .aw-camp-row { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.aw-camp--lab-rules .aw-camp-row .wp-block-post-template > li { min-width: 0; scroll-snap-align: none; }
+.aw-camp--lab-rules #compare { --kit-table-min: 0; }

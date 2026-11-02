@@ -789,6 +789,13 @@
 .aw-camp .aw-camp-row :is(.aw-camp-row-q, .wp-block-post-template) { display: contents; }
 .aw-camp .aw-camp-row .wp-block-post-template > li { flex: 0 0 var(--kit-card-min); margin: 0; scroll-snap-align: start; list-style: none; }
 .aw-camp .aw-camp-row .kit-card { height: 100%; }
+/* Supreme Court In the news: no sideways row from 768 either (owner, 2 Nov 2026: no sideways scrolling on campaign pages);
+   the cards stand in the card grid, two across from 768, three from 1200 (phones: the stacked rule below). */
+@media (min-width: 768px) {
+	.aw-camp--sc-stray-dogs #latest .aw-camp-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); overflow-x: visible; scroll-snap-type: none; padding-bottom: 0; }
+	.aw-camp--sc-stray-dogs #latest .aw-camp-row .wp-block-post-template > li { min-width: 0; scroll-snap-align: none; }
+}
+@media (min-width: 1200px) { .aw-camp--sc-stray-dogs #latest .aw-camp-row { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 /* Very light campaign tone (owner, 19 Oct 2026: brand, very light brand, white, grey or black): the Share section */
 .aw-camp-tint { background: color-mix(in srgb, var(--camp-primary) 7%, #fff); --camp-tile: var(--kit-color-raised); }
 .aw-letter-share-box.is-in-section { margin-top: var(--kit-space-5); padding: 0; background: none; align-items: start; }
