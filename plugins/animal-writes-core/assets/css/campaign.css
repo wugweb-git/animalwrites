@@ -860,6 +860,8 @@
 	/* The rows show a slice of the next card, so they read as scrollable; no card is wider than the row (padding included) */
 	.aw-camp.aw-camp--lab-rules :is(.aw-camp-grid, .aw-letter-ground-list) > * { box-sizing: border-box; flex-basis: min(var(--kit-card-min), calc(100% - var(--kit-space-7))); }
 	.aw-camp.aw-camp--lab-rules .aw-camp-grid > :first-child { flex-basis: calc(100% - var(--kit-space-7)); }
-	.aw-camp.aw-camp--lab-rules .aw-letter-ground-list > * { flex-basis: calc(100% - var(--kit-space-5)); } /* a narrower peek, so a ground stays short and step 1 under 600px */
+	/* Grounds: at least the theme's row card width (--kit-row-item), so 20px of the next ground shows, and wide enough that the longest ground keeps step 1 under 600px */
+	.aw-camp.aw-camp--lab-rules .aw-letter-ground-list { gap: var(--kit-space-3); }
+	.aw-camp.aw-camp--lab-rules .aw-letter-ground-list > * { flex-basis: max(var(--kit-row-item), calc(100% - var(--kit-space-6))); }
 }
 .aw-camp--lab-rules .aw-camp-more { min-height: var(--kit-size-target); } /* "Read the full draft" and the like: a 44px target */
