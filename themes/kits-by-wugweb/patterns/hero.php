@@ -3,10 +3,11 @@
  * Title: Hero
  * Slug: kits-by-wugweb/hero
  * Categories: kits-components
+ * Description: Page hero (Kits Hero block): label, H1, one line and two actions. Its height, colours and padding are set in Styles > Blocks > Hero.
  */
 ?>
-<!-- wp:group {"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|80","bottom":"var:preset|spacing|80"}}},"layout":{"type":"constrained"}} -->
-<div class="wp-block-group alignfull" style="padding-top:var(--wp--preset--spacing--80);padding-bottom:var(--wp--preset--spacing--80)"><!-- wp:paragraph {"className":"is-style-kits-label"} -->
+<!-- wp:kits/hero {"align":"full","layout":{"type":"constrained"}} -->
+<section class="wp-block-kits-hero alignfull"><!-- wp:paragraph {"className":"is-style-kits-label"} -->
 <p class="is-style-kits-label">Label</p>
 <!-- /wp:paragraph -->
 
@@ -26,5 +27,5 @@
 <!-- wp:button {"className":"is-style-kits-secondary"} -->
 <div class="wp-block-button is-style-kits-secondary"><a class="wp-block-button__link wp-element-button">Secondary action</a></div>
 <!-- /wp:button --></div>
-<!-- /wp:buttons --></div>
-<!-- /wp:group -->
+<!-- /wp:buttons --></section>
+<!-- /wp:kits/hero -->

@@ -1015,6 +1015,20 @@
    "name": "Section band and hub head",
    "type": "component",
    "status": "live",
+   "controls": {
+    "type": "block style variation",
+    "block": "core/group",
+    "styles": [
+     "kits-section",
+     "kits-head-band"
+    ],
+    "settings": [
+     "padding",
+     "background",
+     "gap"
+    ],
+    "where": "Appearance > Editor > Styles > Blocks > Group"
+   },
    "classes": [
     "kit-section",
     "kit-sec"
@@ -1890,6 +1904,51 @@
     "link": "one per answer, descriptive",
     "alt": "n/a",
     "schema": "FAQPage parsed from this markup (site plugin)"
+   }
+  },
+  {
+   "name": "Hero (Kits block)",
+   "type": "block",
+   "status": "live",
+   "block": "kits/hero",
+   "classes": [],
+   "states": [
+    "default (ink band, content at the bottom)",
+    "background image (block support)"
+   ],
+   "tokens": [
+    "kit-hero-h",
+    "kit-space-section"
+   ],
+   "controls": {
+    "type": "Kits block with block supports",
+    "settings": [
+     "min-height",
+     "colour",
+     "background image",
+     "padding",
+     "border",
+     "radius",
+     "shadow",
+     "type"
+    ],
+    "where": "Appearance > Editor > Styles > Blocks > Hero",
+    "token": "Minimum height sets --kit-hero-h for every hero (kits-core/includes/blocks.php)"
+   },
+   "a11y": {
+    "element": "<section> holding the page H1",
+    "aria": "none",
+    "keyboard": "its links and buttons, in order",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "its buttons, 44px",
+    "motion": "none",
+    "sr": "visible text; a background image is decorative"
+   },
+   "seo": {
+    "heading": "H1",
+    "link": "the actions",
+    "alt": "none (background image is decorative)",
+    "schema": "none"
    }
   }
  ],

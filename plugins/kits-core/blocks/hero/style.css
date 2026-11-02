@@ -1,0 +1,5 @@
+/* Kits Hero: the content sits at the bottom of the hero's height. Height, colours, padding, border and shadow are
+   block supports (Styles > Blocks > Hero), not CSS. Only the default (constrained) layout is stacked here, so a
+   Flex or Grid layout picked in the editor is left alone. */
+.wp-block-kits-hero { box-sizing: border-box; }
+.wp-block-kits-hero.is-layout-constrained { display: flex; flex-direction: column; justify-content: flex-end; }
