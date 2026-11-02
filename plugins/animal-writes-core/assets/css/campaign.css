@@ -839,4 +839,4 @@
 	.aw-camp.aw-camp--lab-rules .aw-camp-grid > :first-child { flex-basis: calc(100% - var(--kit-space-7)); }
 	.aw-camp.aw-camp--lab-rules .aw-letter-ground-list > * { flex-basis: calc(100% - var(--kit-space-5)); } /* a narrower peek, so a ground stays short and step 1 under 600px */
 }
-.aw-camp-more { min-height: var(--kit-size-target); } /* "Read the full draft" and the like: a 44px target */
+.aw-camp--lab-rules .aw-camp-more { min-height: var(--kit-size-target); } /* "Read the full draft" and the like: a 44px target */
