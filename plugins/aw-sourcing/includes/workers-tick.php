@@ -21,8 +21,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/** Not started here: wp-cron.yml (hPanel runs wp-cron), keepalive.yml (GitHub's own), backup-offsite.yml (UpdraftPlus). */
-const AW_TICK_SKIP = array( 'wp-cron.yml', 'keepalive.yml', 'backup-offsite.yml' );
+/** Not started here: wp-cron.yml (hPanel runs wp-cron), keepalive.yml (GitHub's own). */
+const AW_TICK_SKIP = array( 'wp-cron.yml', 'keepalive.yml' );
 
 /** Longest look back for a missed slot (the server cron was down): one day. */
 const AW_TICK_LOOKBACK_MIN = 1440;

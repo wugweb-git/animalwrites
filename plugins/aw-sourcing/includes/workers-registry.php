@@ -59,14 +59,6 @@ const AW_WORKERS = array(
 		'timeout_min'  => 90,
 		'late_after_h' => 36,
 	),
-	'backup-offsite.yml'       => array(
-		'name'         => 'Site backup copy',
-		'what'         => 'Copies the site\'s daily database and code backup to a private GitHub release (kept 14 days)',
-		'crons'        => array( '30 23 * * *' ),
-		'interval_min' => 1440,
-		'timeout_min'  => 360,
-		'late_after_h' => 36,
-	),
 	'seo-scores.yml'           => array(
 		'name'         => 'SEO scores (Rank Math)',
 		'what'         => 'Works out Rank Math SEO scores with Rank Math\'s own analyser for items that have a keyword but no score',

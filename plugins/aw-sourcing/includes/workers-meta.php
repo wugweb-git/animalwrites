@@ -39,7 +39,6 @@ const AW_WORKER_DEFAULT_GROUP = array(
 	'directory-enrichment' => 'directory',
 	'darpan-import'        => 'directory',
 	'tests'                => 'maintenance',
-	'backup-offsite'       => 'maintenance',
 	'wp-cron'              => 'maintenance',
 	'keepalive'            => 'maintenance',
 	'backfill'             => 'one-off',
