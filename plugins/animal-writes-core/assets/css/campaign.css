@@ -738,20 +738,6 @@
 	.aw-sticky-cta.is-hidden { transform: translateY(110%); }
 }
 @media (max-width: 767px) and (prefers-reduced-motion: reduce) { .aw-sticky-cta { transition: none; } }
-/* Lab Rules on a phone on its side (short screens from 768 wide): the same bar, since the hero fills the screen there */
-@media (min-width: 768px) and (max-height: 500px) {
-	.aw-camp--lab-rules .aw-sticky-cta {
-		display: flex; align-items: center; justify-content: space-between; gap: var(--kit-space-3);
-		position: fixed; left: 0; right: 0; bottom: 0; z-index: var(--kit-layer-nav, 50);
-		padding: var(--kit-space-2) var(--kit-space-4) calc(var(--kit-space-2) + env(safe-area-inset-bottom));
-		background: var(--camp-dark, var(--kit-color-ink)); color: var(--kit-color-on-ink);
-		transition: transform var(--kit-motion-base, 200ms) var(--kit-motion-ease, ease);
-	}
-	.aw-camp--lab-rules .aw-sticky-cta.is-hidden { transform: translateY(110%); }
-	.aw-camp--lab-rules:has(> .aw-sticky-cta) { padding-bottom: calc(var(--kit-btn-height) + 2 * var(--kit-space-2) + env(safe-area-inset-bottom)); }
-	html:has(.aw-camp--lab-rules > .aw-sticky-cta) { scroll-padding-bottom: calc(var(--kit-btn-height) + 2 * var(--kit-space-2) + env(safe-area-inset-bottom)); }
-}
-@media (min-width: 768px) and (max-height: 500px) and (prefers-reduced-motion: reduce) { .aw-camp--lab-rules .aw-sticky-cta { transition: none; } }
 
 /* Home band */
 .aw-camp-band {
@@ -839,4 +825,4 @@
 	.aw-camp.aw-camp--lab-rules .aw-camp-grid > :first-child { flex-basis: calc(100% - var(--kit-space-7)); }
 	.aw-camp.aw-camp--lab-rules .aw-letter-ground-list > * { flex-basis: calc(100% - var(--kit-space-5)); } /* a narrower peek, so a ground stays short and step 1 under 600px */
 }
-.aw-camp-more { min-height: var(--kit-size-target); } /* "Read the full draft" and the like: a 44px target */
+.aw-camp--lab-rules .aw-camp-more { min-height: var(--kit-size-target); } /* "Read the full draft" and the like: a 44px target */
