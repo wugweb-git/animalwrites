@@ -60,14 +60,9 @@
 .aw-camp--diwali .aw-camp-dark .aw-camp-steps span { color: color-mix(in srgb, var(--kit-color-on-ink) 80%, transparent); }
 /* Who to call has two columns: it fits a phone without sideways scrolling */
 .aw-camp--diwali #help { --kit-table-min: 0; }
-/* Section and card heights (docs/design-system.md, Layout rules 5 and 6; a card at most 600px): phones first.
-   The law cards and the five action cards are one sideways row that snaps (the theme's scroll row, kit.css
-   .kit-scroll-row): on phones one card per screen with the next card's edge showing, from 768 one card of the content width
-   (--kit-width-content) with the next one showing. Each card shows its first paragraph; the rest is in the card's fold (core Details, its heading as the
-   summary). campaign.js makes a row that scrolls a named, focusable region. */
-.aw-camp--diwali .aw-camp-grid { display: flex; gap: var(--kit-space-4); overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scrollbar-width: thin; padding-bottom: var(--kit-space-3); }
-.aw-camp--diwali .aw-camp-grid > .aw-camp-card { flex: 0 0 calc(100% - var(--kit-space-5)); margin: 0; scroll-snap-align: start; }
-@media (min-width: 768px) { .aw-camp--diwali .aw-camp-grid > .aw-camp-card { flex-basis: min(calc(100% - var(--kit-space-5)), var(--kit-width-content)); } }
+/* The law cards and the five action cards stand in the campaign card grid (.aw-camp-grid: stacked on phones, two
+   across from 768, three from 1200; no sideways row, owner 2 Nov 2026). Each card shows its first paragraph; the rest
+   is in the card's fold (core Details, its heading as the summary). */
 /* Who to call from 1200: the table on the left, the Directory buttons, the 1962 note and the two guides beside it */
 @media (min-width: 1200px) {
 	.aw-camp--diwali #help.aw-camp-section { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); column-gap: var(--kit-space-6); align-content: start; padding-inline: max(var(--kit-space-gutter), (100% - 1120px) / 2); } /* the 1120px text column of .aw-camp-section > * */
@@ -89,13 +84,8 @@
 .aw-camp--diwali .aw-camp-grid > :first-child .aw-camp-card-fold summary { color: var(--camp-on-mark); }
 /* The three dates sit side by side at every width, so What's happening stays one block (one column beside the photo from 768) */
 .aw-camp--diwali .aw-camp-dates { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--kit-space-3); }
-/* Tonight, in order: on phones the six steps are one sideways row (the Home story row, aw.css .aw-ed-story-figures) */
+/* Tonight, in order: on phones the six steps stack one under another (.aw-camp-steps) */
 @media (max-width: 767px) {
-	.aw-camp--diwali .aw-camp-steps--six { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: min(70%, 16rem); overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scrollbar-width: thin; padding-bottom: var(--kit-space-3); }
-	.aw-camp--diwali .aw-camp-steps--six > li { scroll-snap-align: start; }
-	/* Who to call: the table scrolls sideways inside its frame (kit.css .wp-block-table) at two card widths, so its
-	   rows stay short; data tables may scroll on their own (WCAG 1.4.10) */
-	.aw-camp--diwali #help { --kit-table-min: calc(2 * var(--kit-card-min)); }
 	/* The phone bar never covers text or focus (WCAG 2.4.11): the page keeps the bar's height free at the bottom.
 	   Bar height = its padding (--kit-space-2, twice) + the button (--kit-btn-height) + the safe area */
 	html:has(.aw-camp--diwali .aw-sticky-cta) { scroll-padding-bottom: calc(var(--kit-btn-height) + 2 * var(--kit-space-2) + env(safe-area-inset-bottom)); }
@@ -109,13 +99,6 @@
 @media (max-width: 767px) {
 	.aw-camp--diwali .kit-hero .wp-block-buttons > .wp-block-button ~ .wp-block-button { display: none; }
 	.aw-camp--diwali #help .wp-block-table :is(th, td) { font-size: var(--kit-type-base); }
-	/* Law and action cards: the icon beside the heading, not on a line of its own, so each card stays within 600px
-	   (Layout rules 10) while the cards narrow enough for more of the next card to show (rule 12) */
-	.aw-camp--diwali .aw-camp-grid > .aw-camp-card { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: var(--kit-space-3); align-content: start; flex-basis: calc(100% - var(--kit-space-6)); }
-	.aw-camp--diwali .aw-camp-grid > .aw-camp-card > * { grid-column: 1 / -1; }
-	.aw-camp--diwali .aw-camp-grid > .aw-camp-card > .aw-camp-card-ico { grid-column: 1; align-self: center; margin-bottom: 0; }
-	.aw-camp--diwali .aw-camp-grid > .aw-camp-card > .aw-camp-card-ico + h3 { grid-column: 2; align-self: center; margin-block: 0; }
-	.aw-camp--diwali .aw-camp-grid > .aw-camp-card > .aw-camp-card-ico + h3 + * { margin-top: var(--kit-space-3); }
 }
 /* Sections at most 720px from 768 (owner, 2 Nov 2026), from content, tokens and the theme breakpoints only */
 /* What the law says: 16px (--kit-space-4) from the opening line to the cards */
@@ -146,12 +129,9 @@
 	.aw-camp--diwali #library .aw-camp-section > .wp-block-list > li, .aw-camp--diwali #library .aw-camp-section > .aw-camp-fold > .wp-block-list > li { break-inside: avoid; }
 }
 /* Diwali on phones (mobile audit, 2 Nov 2026; Layout rules 4, 10 and 12). The hero's text starts under the hero's own
-   padding instead of the middle, so its one button is on the first screen at 360x640. The news row shows part of the next card (cards at most
-   --kit-card-min, else --kit-carousel-item); the law and action rows keep full-width cards, which a narrower card
-   would push past 600px (rule 10). */
+   padding instead of the middle, so its one button is on the first screen at 360x640. */
 @media (max-width: 767px) {
 	.aw-camp--diwali .wp-block-cover.kit-hero { align-items: flex-start; }
-	.aw-camp.aw-camp--diwali .aw-camp-row .wp-block-post-template > li { flex-basis: min(var(--kit-card-min), var(--kit-carousel-item)); }
 }
 /* FAQ: the question rows --kit-space-2 apart (8px between targets) */
 .aw-camp--diwali .rank-math-list-item + .rank-math-list-item { margin-top: var(--kit-space-2); }
@@ -256,35 +236,29 @@
 	.aw-camp--sc-stray-dogs #share .aw-camp-share-kit .aw-letter-share-pics { grid-column: auto; padding-top: 0; border-top: 0; }
 	.aw-camp--sc-stray-dogs #share .aw-camp-share-kit + .aw-camp-note { margin-top: var(--kit-space-4); } /* the note sits as close to the share row as the row to the text above */
 }
-/* The court orders and the state tracker: one sideways row of cards at every width (Layout rules 5, 6 and 10), each
-   row a card with its parts under their column headings, snapping. Phones show one card to the screen (narrower
-   cards would pass 600px); from 768 two cards to the view (--aw-card-columns md). The server names each row and
-   makes it focusable, and gives the table its roles back (campaign-tools.php, aw_sc_rows_a11y). */
-.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) { --aw-sc-card: 100%; margin: 0; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; padding-bottom: var(--kit-space-3); }
-.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) table { display: block; width: auto; min-width: 0; border: 0; }
-.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) tbody { display: flex; gap: var(--kit-space-4); }
-.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) tr { display: block; box-sizing: border-box; flex: 0 0 var(--aw-sc-card); min-width: 0; margin: 0; padding: var(--kit-space-5); border-radius: var(--kit-radius-card); background: var(--camp-tile, var(--kit-color-raised)); box-shadow: inset 0 0 0 1px var(--kit-color-line); scroll-snap-align: start; }
-.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) td { display: block; padding: 0 0 var(--kit-space-3); border: 0; background: none; overflow-wrap: anywhere; }
-.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) td:last-child { padding-bottom: 0; }
-.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) td:first-child { font-size: var(--kit-type-lead); font-weight: var(--kit-weight-bold); color: var(--camp-primary); }
-.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) td:not(:first-child)::before { display: block; margin-bottom: var(--kit-space-1); color: var(--camp-meta); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-bold); }
-.aw-camp--sc-stray-dogs .aw-camp-timeline td:nth-child(2)::before { content: "Bench"; }
-.aw-camp--sc-stray-dogs .aw-camp-timeline td:nth-child(3)::before { content: "What was ordered"; }
-.aw-camp--sc-stray-dogs .aw-camp-timeline td:nth-child(4)::before { content: "Document"; }
-.aw-camp--sc-stray-dogs .aw-camp-tracker td:nth-child(2)::before { content: "High Court and case"; }
-.aw-camp--sc-stray-dogs .aw-camp-tracker td:nth-child(3)::before { content: "Latest public order, and what is due"; }
-.aw-camp--sc-stray-dogs .aw-camp-tracker td:nth-child(4)::before { content: "Source"; }
+/* The court orders and the state tracker: tables from 768; on phones one card per row, stacked one under another
+   (no sideways row, owner 2 Nov 2026), each part under its column heading. The server gives the tables their roles
+   back, which some browsers drop once the rows are shown as cards (campaign-tools.php, aw_sc_rows_a11y). */
+@media (max-width: 767px) {
+	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) { overflow: visible; }
+	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) table { display: block; width: auto; min-width: 0; border: 0; }
+	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) :is(tbody, tr, td) { display: block; }
+	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) tr { box-sizing: border-box; margin: 0 0 var(--kit-space-3); padding: var(--kit-space-5); border-radius: var(--kit-radius-card); background: var(--camp-tile, var(--kit-color-raised)); box-shadow: inset 0 0 0 1px var(--kit-color-line); }
+	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) td { padding: 0 0 var(--kit-space-2); border: 0; background: none; overflow-wrap: anywhere; }
+	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) td:last-child { padding-bottom: 0; }
+	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) td:first-child { font-size: var(--kit-type-lead); font-weight: var(--kit-weight-bold); color: var(--camp-primary); }
+	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) td:not(:first-child)::before { display: block; margin-bottom: var(--kit-space-1); color: var(--camp-meta); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-bold); }
+	.aw-camp--sc-stray-dogs .aw-camp-timeline td:nth-child(2)::before { content: "Bench"; }
+	.aw-camp--sc-stray-dogs .aw-camp-timeline td:nth-child(3)::before { content: "What was ordered"; }
+	.aw-camp--sc-stray-dogs .aw-camp-timeline td:nth-child(4)::before { content: "Document"; }
+	.aw-camp--sc-stray-dogs .aw-camp-tracker td:nth-child(2)::before { content: "High Court and case"; }
+	.aw-camp--sc-stray-dogs .aw-camp-tracker td:nth-child(3)::before { content: "Latest public order, and what is due"; }
+	.aw-camp--sc-stray-dogs .aw-camp-tracker td:nth-child(4)::before { content: "Source"; }
+	.aw-camp--sc-stray-dogs .aw-camp-tracker td:has(> .aw-sc-fold)::before { content: none; }
+}
 /* Each state's latest order folded (Layout rules 5 and 11): a real details element the server wraps around the cell
-   (aw_sc_rows_a11y), its summary the column's own heading, a 44px target with the Kits chevron; the cards keep their
-   own heights so opening one does not stretch the row */
-.aw-camp--sc-stray-dogs .aw-camp-tracker tbody { align-items: flex-start; }
-/* The state cards one text column wide from 768 (--kit-width-content, so the long High Court lines wrap less), their
-   parts --kit-space-2 apart and the row's thin scrollbar under them without extra room: the tracker under 720 */
-.aw-camp--sc-stray-dogs .aw-camp-tracker { padding-bottom: 0; scrollbar-width: thin; }
-.aw-camp--sc-stray-dogs .aw-camp-tracker td { padding-bottom: var(--kit-space-2); }
-.aw-camp--sc-stray-dogs .aw-camp-tracker td:last-child { padding-bottom: 0; }
-.aw-camp--sc-stray-dogs .aw-camp-tracker td:has(> .aw-sc-fold)::before { content: none; }
+   (aw_sc_tracker_folds), its summary the column's own heading, a 44px target with the Kits chevron */
 .aw-camp--sc-stray-dogs .aw-camp-tracker td:first-child > .aw-sc-fold { font-size: var(--kit-type-base); font-weight: var(--kit-weight-regular, 400); color: var(--kit-color-text); } /* the folded list of states reads as text; its summary keeps the fold style */
 .aw-camp--sc-stray-dogs .aw-sc-fold > summary { display: flex; align-items: center; justify-content: space-between; gap: var(--kit-space-2); min-height: var(--kit-size-target); color: var(--camp-primary); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-bold); list-style: none; cursor: pointer; }
 .aw-camp--sc-stray-dogs .aw-sc-fold > summary::-webkit-details-marker { display: none; }
@@ -292,45 +266,17 @@
 .aw-camp--sc-stray-dogs .aw-sc-fold[open] > summary::after { transform: rotate(180deg); }
 .aw-camp--sc-stray-dogs .aw-sc-fold > summary:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
 @media (prefers-reduced-motion: reduce) { .aw-camp--sc-stray-dogs .aw-sc-fold > summary::after { transition: none; } }
-.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker, #act .aw-camp-grid, #read .wp-block-post-template):focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
-@media (min-width: 768px) {
-	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) { --aw-sc-card: calc((100% - var(--kit-space-4)) / 2); }
-}
-@media (min-width: 768px) { .aw-camp--sc-stray-dogs .aw-camp-tracker { --aw-sc-card: min(100%, var(--kit-width-content)); } } /* after the two-across rule above, which it overrides for the tracker */
 /* The hero at --kit-hero-h on every phone (Layout rules 4; at 360x640 it was 696): its section padding one step down
    (--kit-section-y at --kit-space-5) and the summary straight under the H1's own margin */
 @media (max-width: 767px) {
 	.aw-camp--sc-stray-dogs .aw-camp-hero { --kit-section-y: var(--kit-space-5); }
 	.aw-camp--sc-stray-dogs .aw-camp-hero .aw-camp-hero-summary { margin-top: 0; }
 }
-/* Phone UX (owner, 2 Nov 2026, mobile audit):
-   - the state cards show the edge of the next one (--aw-carousel-item, 82%) so the row reads as swipeable;
-   - the share buttons --kit-space-2 apart (WCAG 2.2 target spacing), wrapping to a second line on narrow phones. */
-@media (max-width: 767px) { .aw-camp--sc-stray-dogs .aw-camp-tracker { --aw-sc-card: 82%; } }
-/* The court order cards: the scroller's own width (a container), less --kit-space-6, so the next card shows at the edge
-   and the longest card stays under 600px; their parts --kit-space-2 apart, as on the state cards */
-@media (max-width: 767px) {
-	.aw-camp--sc-stray-dogs .aw-camp-timeline { container-type: inline-size; --aw-sc-card: calc(100cqi - var(--kit-space-6)); }
-	.aw-camp--sc-stray-dogs .aw-camp-timeline td { padding-bottom: var(--kit-space-2); }
-	.aw-camp--sc-stray-dogs .aw-camp-timeline td:last-child { padding-bottom: 0; }
-}
+/* Phone UX (owner, 2 Nov 2026, mobile audit): the share buttons --kit-space-2 apart (WCAG 2.2 target spacing),
+   wrapping to a second line on narrow phones. */
 /* Find help: the state links --kit-space-2 apart in both directions (WCAG 2.2 target spacing) */
 .aw-camp--sc-stray-dogs #find-help .aw-browse-states { row-gap: var(--kit-space-2); }
 .aw-camp--sc-stray-dogs .kit-share { flex-wrap: wrap; gap: var(--kit-space-2); }
-/* The Library: one sideways row at every width (82% of the view on phones, two to the view from 768, three from 1200).
-   What you can do: the same row below 1200; from 1200 the three cards side by side, none spanning the row. */
-.aw-camp--sc-stray-dogs #read .wp-block-post-template { display: flex; gap: var(--kit-space-4); overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; padding-bottom: var(--kit-space-3); }
-@media (max-width: 1199px) {
-	.aw-camp--sc-stray-dogs #act .aw-camp-grid { display: flex; gap: var(--kit-space-4); overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; padding-bottom: var(--kit-space-3); }
-}
-.aw-camp--sc-stray-dogs :is(#act .aw-camp-grid > *, #read .wp-block-post-template > li) { box-sizing: border-box; flex: 0 0 82%; min-width: 0; margin: 0; scroll-snap-align: start; }
-@media (min-width: 768px) {
-	.aw-camp--sc-stray-dogs :is(#act .aw-camp-grid > *, #read .wp-block-post-template > li) { flex-basis: calc((100% - var(--kit-space-4)) / 2); }
-}
-@media (min-width: 1200px) {
-	.aw-camp--sc-stray-dogs #read .wp-block-post-template > li { flex-basis: calc((100% - 2 * var(--kit-space-4)) / 3); }
-	.aw-camp--sc-stray-dogs #act .aw-camp-grid > .aw-camp-card { grid-column: auto; }
-}
 /* The hero is the primary colour behind its ink, on every campaign; marks inside it use the same pair. */
 .aw-camp .aw-camp-hero { --camp-mark: var(--camp-primary); --camp-on-mark: var(--camp-primary-ink); }
 
@@ -867,19 +813,16 @@
 .aw-camp--lab-rules .aw-camp-more { min-height: var(--kit-size-target); } /* "Read the full draft" and the like: a 44px target */
 
 /* Campaign pages on phones: no sideways rows (owner, 2 Nov 2026: "no side scroll in campaign page on mobile"). Below 768
-   every card row, the six steps, the court orders and state tracker cards, the grounds, the share pictures, the news and
-   Library lists stack one card under another at the full width, and the two data tables fit the screen (their text
-   wraps). From 768 the rows above apply as before. campaign.js (Diwali, Lab, Supreme Court) names and focuses a row only
-   while it scrolls, so these stacked lists take no tabindex or region role. */
+   the card rows, the grounds, the news and Library lists stack one card under another at the full width, and the two
+   data tables fit the screen (their text wraps). The Diwali and Supreme Court card lists, steps, court orders and state
+   tracker have no sideways row at any width (their own rules above). campaign.js names and focuses a row only while it
+   scrolls, so these stacked lists take no tabindex or region role. */
 @media (max-width: 767px) {
-	.aw-camp :is(.aw-camp-grid, .aw-camp-row, .aw-letter-ground-list, .aw-camp-docs-q .wp-block-post-template, #read .wp-block-post-template, .aw-camp-steps--six) {
+	.aw-camp :is(.aw-camp-grid, .aw-camp-row, .aw-letter-ground-list, .aw-camp-docs-q .wp-block-post-template) {
 		display: grid; grid-template-columns: minmax(0, 1fr); grid-auto-flow: row; grid-auto-columns: auto; gap: var(--kit-space-4);
 		overflow-x: visible; scroll-snap-type: none; padding-bottom: 0;
 	}
-	.aw-camp :is(.aw-camp-grid, .aw-camp-row .wp-block-post-template, .aw-letter-ground-list, .aw-camp-docs-q .wp-block-post-template, #read .wp-block-post-template, .aw-camp-steps--six) > * { min-width: 0; width: auto; max-width: none; margin: 0; }
-	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) { overflow-x: visible; scroll-snap-type: none; padding-bottom: 0; }
-	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) tbody { flex-direction: column; }
-	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) tr { flex: none; }
+	.aw-camp :is(.aw-camp-grid, .aw-camp-row .wp-block-post-template, .aw-letter-ground-list, .aw-camp-docs-q .wp-block-post-template) > * { min-width: 0; width: auto; max-width: none; margin: 0; }
 	.aw-camp--diwali #help, .aw-camp--lab-rules #compare { --kit-table-min: 0; }
 	.aw-camp :is(#help, #compare) .wp-block-table { overflow-x: visible; }
 	.aw-camp--diwali .aw-camp-dates :is(.aw-date, .aw-date time) { white-space: normal; } /* the three dates wrap inside their third of the row instead of running past the screen */

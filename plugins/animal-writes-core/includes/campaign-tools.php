@@ -962,11 +962,10 @@ add_filter(
 );
 
 /**
- * The Supreme Court stray dogs campaign's sideways rows (campaign.css: the court orders and state tracker tables, the
- * action cards and the Library list) made usable without a pointer (Layout rules 11, WCAG 2.2 AA): each row can take
- * keyboard focus and is named by the heading just before it (which gets an id when it has none). On phones the rows
- * stack (campaign.css) and campaign.js takes the focus and region role off a row that does not scroll. The two tables keep
- * their table roles, which some browsers drop once the rows are shown as cards.
+ * The Supreme Court stray dogs campaign page: the state tracker's folds (aw_sc_tracker_folds); the court orders and state
+ * tracker tables keep their table roles, which some browsers drop once the rows are shown as cards on phones
+ * (campaign.css). The news row, which scrolls sideways, can take keyboard focus and is named by the heading just before
+ * it (which gets an id when it has none); campaign.js takes the focus off it while it fits (phones: stacked).
  *
  * @param string $html The rendered content.
  * @return string
@@ -980,7 +979,6 @@ function aw_sc_rows_a11y( $html ) {
 	$head  = '';
 	$n     = 0;
 	$table = false; // inside one of the two tables
-	$list  = false; // the next post list is the Library row
 	$roles = array( 'TABLE' => 'table', 'THEAD' => 'rowgroup', 'TBODY' => 'rowgroup', 'TR' => 'row', 'TH' => 'columnheader', 'TD' => 'cell' );
 	while ( $p->next_tag( array( 'tag_closers' => 'visit' ) ) ) {
 		$tag = $p->get_tag();
@@ -996,17 +994,9 @@ function aw_sc_rows_a11y( $html ) {
 			}
 			$head = $id;
 		} elseif ( 'FIGURE' === $tag && ( $p->has_class( 'aw-camp-timeline' ) || $p->has_class( 'aw-camp-tracker' ) ) ) {
-			aw_sc_row_attrs( $p, $head );
 			$table = true;
 		} elseif ( $table && isset( $roles[ $tag ] ) ) {
 			$p->set_attribute( 'role', $roles[ $tag ] );
-		} elseif ( 'DIV' === $tag && $p->has_class( 'aw-camp-grid' ) ) {
-			aw_sc_row_attrs( $p, $head );
-		} elseif ( 'DIV' === $tag && $p->has_class( 'aw-camp-docs-q' ) ) {
-			$list = true;
-		} elseif ( $list && 'UL' === $tag && $p->has_class( 'wp-block-post-template' ) ) {
-			aw_sc_row_attrs( $p, $head );
-			$list = false;
 		} elseif ( 'DIV' === $tag && $p->has_class( 'aw-camp-row' ) && '' !== $head ) {
 			$p->set_attribute( 'data-aw-sc-row', '' );
 			$p->set_attribute( 'tabindex', '0' ); // the news row: focusable, so the arrow keys scroll it (Layout rules 11)
@@ -1053,21 +1043,6 @@ function aw_sc_tracker_folds( $html ) {
 		},
 		$html
 	);
-}
-
-/**
- * A sideways row: a named region that takes keyboard focus.
- *
- * @param WP_HTML_Tag_Processor $p    At the row's opening tag.
- * @param string                $head Id of the heading that names it ('' = none).
- */
-function aw_sc_row_attrs( $p, $head ) {
-	$p->set_attribute( 'data-aw-sc-row', '' ); // campaign.js drops the focus and role while the row fits (phones: stacked)
-	$p->set_attribute( 'tabindex', '0' );
-	$p->set_attribute( 'role', 'region' );
-	if ( '' !== $head ) {
-		$p->set_attribute( 'aria-labelledby', $head );
-	}
 }
 
 add_filter(

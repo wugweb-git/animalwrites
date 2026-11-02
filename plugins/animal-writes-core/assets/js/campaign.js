@@ -611,10 +611,11 @@
 	}
 })();
 
-/* Diwali rows (campaign.css): a card row, the step row, the News row or the table that scrolls sideways is a region
-   named by its section heading and takes keyboard focus, so arrow keys scroll it (WCAG 2.1.1); a row that fits is left alone. */
+/* Diwali (campaign.css): the News row or the Who to call table, when it scrolls sideways, is a region named by its
+   section heading and takes keyboard focus, so arrow keys scroll it (WCAG 2.1.1); one that fits is left alone. The card
+   lists and the steps have no sideways row (owner, 2 Nov 2026). */
 (function () {
-	var rows = document.querySelectorAll('.aw-camp--diwali :is(.aw-camp-grid, .aw-camp-steps--six, .wp-block-table, .aw-camp-row)');
+	var rows = document.querySelectorAll('.aw-camp--diwali :is(.wp-block-table, .aw-camp-row)');
 	if (!rows.length) return;
 	function mark() {
 		Array.prototype.forEach.call(rows, function (r) {
@@ -697,9 +698,9 @@
 	if (mq.addEventListener) mq.addEventListener('change', place);
 })();
 
-/* Supreme Court rows (campaign-tools.php, aw_sc_rows_a11y): the server makes each row a named, focusable region. On
-   phones the rows stack (campaign.css, owner 2 Nov 2026), so a row that does not scroll loses its tabindex and region
-   role, and gets them back when it scrolls again (a wider window). Its name stays. */
+/* Supreme Court News row (campaign-tools.php, aw_sc_rows_a11y): the server makes it named and focusable. On phones it
+   stacks (campaign.css, owner 2 Nov 2026), so while it does not scroll it loses its tabindex, and gets it back when it
+   scrolls again (a wider window). Its name stays. */
 (function () {
 	var rows = document.querySelectorAll('[data-aw-sc-row]');
 	if (!rows.length) return;
