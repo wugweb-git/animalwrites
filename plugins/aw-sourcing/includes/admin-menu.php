@@ -343,7 +343,7 @@ function aw_sourcing_overview_page() {
 				'status'  => $r[3],
 			);
 		}
-		aw_sourcing_simple_table( 'aw-sourcing-overview', array( 'feature' => 'Feature', 'what' => 'What it does', 'where' => 'Where', 'status' => 'Status' ), $cells, array( 'primary' => 'feature' ) );
+		aw_sourcing_simple_table( 'aw-sourcing-overview', array( 'feature' => 'Feature', 'what' => 'What it does', 'where' => 'Where', 'status' => 'Status' ), $cells, array( 'primary' => 'feature', 'foot' => false ) );
 	}
 
 	if ( $admin && function_exists( 'aw_workers_runs' ) && defined( 'AW_WORKERS' ) ) {
@@ -363,7 +363,7 @@ function aw_sourcing_overview_page() {
 				'next'   => esc_html( $next ? wp_date( 'j M, g:i a', $next ) : ( ! empty( $w['after'] ) ? 'After "' . $w['after'] . '"' : 'By hand' ) ),
 			);
 		}
-		aw_sourcing_simple_table( 'aw-sourcing-runs', array( 'worker' => 'Worker', 'last' => 'Last report', 'result' => 'Result', 'next' => 'Next due' ), $cells, array( 'primary' => 'worker', 'empty' => 'No worker has reported yet.' ) );
+		aw_sourcing_simple_table( 'aw-sourcing-runs', array( 'worker' => 'Worker', 'last' => 'Last report', 'result' => 'Result', 'next' => 'Next due' ), $cells, array( 'primary' => 'worker', 'empty' => 'No worker has reported yet.', 'foot' => false ) );
 		echo '<p>' . aw_sourcing_overview_link( 'Sourcing → Workers', aw_sourcing_url( 'workers' ) ) . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in the helper
 	}
 
@@ -376,7 +376,7 @@ function aw_sourcing_overview_page() {
 			array( 'cmd' => '<code>wp aw-sourcing import-dr</code>', 'what' => esc_html( 'Domain Rating values for the Sources list.' ) ),
 			array( 'cmd' => '<code>wp aw news-titles</code>', 'what' => esc_html( 'Apply corrected News or Press titles from a CSV file (apply <file.csv>, --dry-run).' ) ),
 		),
-		array( 'primary' => 'cmd' )
+		array( 'primary' => 'cmd', 'foot' => false )
 	);
 	echo '<p>' . esc_html( 'Each command lists its options with --help.' ) . '</p></div>';
 }

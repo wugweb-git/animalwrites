@@ -21,7 +21,7 @@ class AW_Sourcing_Simple_Table extends WP_List_Table {
 	/** @var array rows: column => escaped HTML, plus _sort => [column => raw value] and _find => searchable text */
 	private $rows;
 
-	/** @var array per_page (0: all on one page), sortable (columns), primary, empty, search (bool), fixed (bool) */
+	/** @var array per_page (0: all on one page), sortable (columns), primary, empty, search (bool), fixed (bool), foot (bool: the footer header row) */
 	private $opts;
 
 	/**
@@ -34,7 +34,7 @@ class AW_Sourcing_Simple_Table extends WP_List_Table {
 		parent::__construct( array( 'singular' => $plural, 'plural' => $plural, 'ajax' => false, 'screen' => get_current_screen() ) );
 		$this->cols = $cols;
 		$this->rows = $rows;
-		$this->opts = $opts + array( 'per_page' => 0, 'sortable' => array(), 'primary' => (string) array_key_first( $cols ), 'empty' => 'Nothing yet.', 'search' => false, 'fixed' => false );
+		$this->opts = $opts + array( 'per_page' => 0, 'sortable' => array(), 'primary' => (string) array_key_first( $cols ), 'empty' => 'Nothing yet.', 'search' => false, 'fixed' => false, 'foot' => true );
 	}
 
 	public function get_columns() {
@@ -56,6 +56,25 @@ class AW_Sourcing_Simple_Table extends WP_List_Table {
 	protected function get_table_classes() {
 		$c = parent::get_table_classes();
 		return $this->opts['fixed'] ? $c : array_values( array_diff( $c, array( 'fixed' ) ) ); // content-wide columns unless asked
+	}
+
+	/**
+	 * The core table; with opts foot false, without the footer row that repeats the column headers (the Sourcing
+	 * overview, where several tables follow each other and the repeated row sat above the next section's heading).
+	 */
+	public function display() {
+		if ( $this->opts['foot'] ) {
+			parent::display();
+			return;
+		}
+		$this->display_tablenav( 'top' );
+		$this->screen->render_screen_reader_content( 'heading_list' );
+		echo '<table class="wp-list-table ' . esc_attr( implode( ' ', $this->get_table_classes() ) ) . '"><thead><tr>';
+		$this->print_column_headers();
+		echo '</tr></thead><tbody>';
+		$this->display_rows_or_placeholder();
+		echo '</tbody></table>';
+		$this->display_tablenav( 'bottom' );
 	}
 
 	/** No bulk actions and no nonce: nothing here posts. */
