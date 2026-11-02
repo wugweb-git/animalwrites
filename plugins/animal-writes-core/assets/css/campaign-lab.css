@@ -850,3 +850,45 @@
 /* the button above already says Share, so the bar's own small "Share" label is left out here and the six 44px icons fit
    one row inside the card on a 375px phone (the bar keeps its aria-label) */
 .aw-camp--lab-rules #share .aw-camp-share-kit .kit-share-label { display: none; }
+
+/* Share block template (owner, 2 Nov 2026: "heavily branded", one action, ready-made pictures, icons only; the same on
+   every campaign). The Share section is a band in the campaign colour, deepening to 25% darker, its heading and text
+   in the colour on it. In the band, a white card (--kit-color-surface-soft, --kit-radius-card, --kit-elevation-2,
+   --kit-space-5 padding): the main "Share this page" button (the theme's brand button, --kit-size-control tall, full
+   width on phones, pressed scale), the site's share bar as 44px icons only (names and the small label hidden; each keeps
+   its aria-label and title), and the story and post pictures as tappable cards: phones two columns at full card width,
+   from 768 beside the button at --kit-thumb-max tall (docs/card-sizes.md). Nothing scrolls sideways. */
+.aw-camp.aw-camp #share { background: linear-gradient(160deg, var(--camp-mark), color-mix(in srgb, var(--camp-mark) 75%, #000)); color: var(--camp-on-mark); }
+.aw-camp.aw-camp #share :is(h2, h3, p:not(.aw-share-cta):not(.aw-share-pics-head), a:not(.kit-share-btn):not(.wp-element-button), .aw-date) { color: var(--camp-on-mark); }
+.aw-camp.aw-camp #share .aw-share-block { display: grid; gap: var(--kit-space-5); margin-top: var(--kit-space-5); padding: var(--kit-space-5); border-radius: var(--kit-radius-card); background: var(--kit-color-surface-soft); color: var(--kit-color-text); box-shadow: var(--kit-elevation-2); }
+.aw-camp.aw-camp #share .aw-share-cta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-3); margin: 0; }
+.aw-camp.aw-camp #share .aw-share-cta-btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--kit-space-2); width: 100%; min-height: var(--kit-size-control); padding-inline: var(--kit-space-6); font-size: var(--kit-type-base); font-weight: var(--kit-weight-bold); transition: transform var(--kit-motion-fast) var(--kit-motion-ease); }
+.aw-camp.aw-camp #share .aw-share-cta-btn:active { transform: scale(0.98); }
+.aw-camp.aw-camp #share .aw-share-cta-btn .kit-ico { --kit-ico-size: var(--kit-size-check); }
+.aw-camp.aw-camp #share .aw-share-cta-done { font-size: var(--kit-type-sm); font-weight: var(--kit-weight-strong); color: var(--camp-mark); }
+.aw-camp.aw-camp #share .aw-share-cta-done:empty { display: none; }
+.aw-camp.aw-camp #share .aw-share-block .kit-share :is(.kit-share-label, .kit-share-name) { display: none !important; }
+.aw-camp.aw-camp #share .aw-share-pics { display: grid; gap: var(--kit-space-3); }
+.aw-camp.aw-camp #share .aw-share-pics-head { margin: 0; font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
+.aw-camp.aw-camp #share .aw-share-pics-head strong { display: block; font-size: var(--kit-type-base); color: var(--kit-color-text); }
+.aw-camp.aw-camp #share .aw-share-pics-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--kit-space-3); align-items: end; }
+.aw-camp.aw-camp #share .aw-share-pic { display: grid; gap: var(--kit-space-2); min-width: 0; margin: 0; padding: 0; border: 0; background: none; color: var(--kit-color-text); font: inherit; text-align: left; cursor: pointer; border-radius: var(--kit-radius-card); }
+.aw-camp.aw-camp #share .aw-share-pic img { display: block; width: 100%; height: auto; border-radius: var(--kit-radius-card); box-shadow: var(--kit-elevation-1); transition: transform var(--kit-motion-base) var(--kit-motion-ease), box-shadow var(--kit-motion-base) var(--kit-motion-ease); }
+.aw-camp.aw-camp #share .aw-share-pic > span { display: inline-flex; align-items: center; gap: var(--kit-space-1); min-height: var(--kit-size-target); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-strong); }
+.aw-camp.aw-camp #share .aw-share-pic:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
+@media (hover: hover) {
+	.aw-camp.aw-camp #share .aw-share-pic:hover img { transform: translateY(var(--kit-motion-lift)); box-shadow: var(--kit-elevation-2); }
+}
+@media (min-width: 768px) {
+	.aw-camp.aw-camp #share .aw-share-cta-btn { width: auto; }
+	.aw-camp.aw-camp #share .aw-share-block:has(> .aw-share-pics) { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "cta pics" "bar pics"; align-items: start; }
+	.aw-camp.aw-camp #share .aw-share-block > .aw-share-cta { grid-area: cta; }
+	.aw-camp.aw-camp #share .aw-share-block > .kit-share { grid-area: bar; }
+	.aw-camp.aw-camp #share .aw-share-block > .aw-share-pics { grid-area: pics; }
+	.aw-camp.aw-camp #share .aw-share-pics-list { display: flex; }
+	.aw-camp.aw-camp #share .aw-share-pic img { width: auto; height: var(--kit-thumb-max); }
+}
+@media (prefers-reduced-motion: reduce) {
+	.aw-camp.aw-camp #share :is(.aw-share-cta-btn, .aw-share-pic img) { transition: none; }
+	.aw-camp.aw-camp #share .aw-share-cta-btn:active, .aw-camp.aw-camp #share .aw-share-pic:hover img { transform: none; }
+}

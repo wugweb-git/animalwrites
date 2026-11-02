@@ -217,30 +217,90 @@
 		var pageKit = document.querySelector('.aw-camp-share-kit');
 		if (pageKit) sharePics(pageKit, pageKit);
 	}
-	/* Share redesign, 2 Nov 2026 (Diwali, Supreme Court and any campaign without a letter tool, not Community dogs): no
-	   pictures on the page. Where the browser has a share sheet, a Share button first in the server's share bar
-	   (campaign-tools.php) sends the campaign's picture with the message and link (shareAll). */
-	if (!document.querySelector('.aw-letter') && !cdFrozen && canShare && sh.url) {
-		var pageBar = document.querySelector('.aw-camp-share-kit .kit-share');
-		if (pageBar) {
-			var nb = document.createElement('button');
-			nb.type = 'button';
-			nb.className = 'kit-share-btn kit-share-native';
-			nb.dataset.kitShare = 'native';
-			nb.setAttribute('aria-label', 'Share');
-			nb.title = 'Share';
-			nb.innerHTML = '<span class="kit-ico kit-ico--share" aria-hidden="true"></span><span class="kit-share-name" aria-hidden="true">Share</span>';
-			nb.addEventListener('click', function () { shareAll(pageBar); });
-			pageBar.insertBefore(nb, pageBar.querySelector('.kit-share-btn'));
-			if ('IntersectionObserver' in window) { // fetch the picture once the bar is near, so the tap opens the sheet at once
-				var pio = new IntersectionObserver(function (en) {
-					if (!en[0].isIntersecting) return;
-					pio.disconnect();
-					getFile(picKind());
-				}, { rootMargin: '400px' });
-				pio.observe(pageBar);
-			}
+	/* Share block template (owner, 2 Nov 2026; the same on every campaign): in the Share section's card, one main
+	   "Share this page" button (the phone's share sheet with the picture, the message and the short link; where a browser
+	   has no share sheet it copies the link and says so), the site's share bar as icons, and the campaign's ready-made
+	   story and post pictures: a tap shares that picture with the message and link, or saves it and copies the link. */
+	function sharePicture(kind, done) {
+		if (navigator.clipboard) navigator.clipboard.writeText(sh.url).catch(function () {});
+		done.textContent = canShare ? 'Link copied. Paste it in a Link sticker.' : 'Image saved. The link is copied too: paste it with your post.';
+		getFile(kind).then(function (file) {
+			if (!file) return;
+			if (canShareFile(file)) return navigator.share({ files: [file], title: sh.title, text: sh.text + ' ' + sh.url }).catch(function () {});
+			var a = document.createElement('a');
+			a.href = URL.createObjectURL(file);
+			a.download = file.name;
+			document.body.appendChild(a);
+			a.click();
+			a.remove();
+		});
+	}
+	function shareBlock(holder) {
+		if (!holder || holder.dataset.awShareBlock) return;
+		holder.dataset.awShareBlock = '1';
+		holder.classList.add('aw-share-block');
+		var wrap = document.createElement('p');
+		wrap.className = 'aw-share-cta';
+		var b = document.createElement('button');
+		b.type = 'button';
+		b.className = 'wp-element-button kit-btn kit-btn--brand aw-share-cta-btn';
+		b.dataset.kitShare = canShare ? 'native' : 'copy_link';
+		b.innerHTML = '<span class="kit-ico kit-ico--' + (canShare ? 'share' : 'link') + '" aria-hidden="true"></span>';
+		b.appendChild(document.createTextNode('Share this page'));
+		var done = document.createElement('span');
+		done.className = 'aw-share-cta-done';
+		done.setAttribute('role', 'status');
+		done.setAttribute('aria-live', 'polite');
+		wrap.appendChild(b);
+		wrap.appendChild(done);
+		holder.insertBefore(wrap, holder.firstChild);
+		var timer;
+		b.addEventListener('click', function () {
+			if (canShare) { shareAll(holder); return; }
+			if (navigator.clipboard) navigator.clipboard.writeText(sh.url).catch(function () {});
+			done.textContent = 'Link copied';
+			clearTimeout(timer);
+			timer = setTimeout(function () { done.textContent = ''; }, 4000);
+		});
+		var pics = [['story', 'Instagram or Facebook story', 'Story, 9:16'], ['post', 'Instagram or Facebook post', 'Post, 4:5']].filter(function (k) { return sh[k[0]]; });
+		if (pics.length) {
+			var box = document.createElement('div');
+			box.className = 'aw-share-pics';
+			box.innerHTML = '<p class="aw-share-pics-head"><strong>Or share a picture</strong> ' + (canShare ? 'Tap one to share it. The link is copied for the Link sticker.' : 'Click one to save it. The link is copied too.') + '</p>';
+			var list = document.createElement('div');
+			list.className = 'aw-share-pics-list';
+			pics.forEach(function (k) {
+				var p = document.createElement('button');
+				p.type = 'button';
+				p.className = 'aw-share-pic aw-share-pic--' + k[0];
+				p.dataset.kitShare = k[0] + '_image';
+				var img = document.createElement('img');
+				img.src = sh[k[0]];
+				img.alt = '';
+				img.loading = 'lazy';
+				img.decoding = 'async';
+				p.appendChild(img);
+				p.insertAdjacentHTML('beforeend', '<span><span class="kit-ico kit-ico--' + (canShare ? 'share' : 'download') + '" aria-hidden="true"></span>' + k[2] + '</span>');
+				p.setAttribute('aria-label', k[2] + ': ' + (canShare ? 'share the ' : 'save the ') + k[1] + ' picture'); // the name starts with the visible text (WCAG 2.5.3)
+				p.addEventListener('click', function () { sharePicture(k[0], done); });
+				list.appendChild(p);
+			});
+			box.appendChild(list);
+			holder.appendChild(box);
 		}
+		if (canShare && 'IntersectionObserver' in window) { // fetch the pictures once the block is near, so a tap opens the sheet at once
+			var io = new IntersectionObserver(function (en) {
+				if (!en[0].isIntersecting) return;
+				io.disconnect();
+				getFile(picKind());
+				pics.forEach(function (k) { getFile(k[0]); });
+			}, { rootMargin: '400px' });
+			io.observe(holder);
+		}
+	}
+	if (!document.querySelector('.aw-letter') && !cdFrozen && sh.url) {
+		var pageKit = document.querySelector('.aw-camp-share-kit');
+		if (pageKit && pageKit.querySelector('.kit-share')) shareBlock(pageKit);
 	}
 
 	/* Letter tool. */
