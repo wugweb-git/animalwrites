@@ -635,16 +635,42 @@
 	var t;
 	window.addEventListener('resize', function () { clearTimeout(t); t = setTimeout(mark, 150); }, { passive: true });
 })();
-/* Lab Rules rows that scroll sideways (campaign.css "Lab Rules sizes"): each row is a region named by its section's
-   own heading (no new words). Every card in them holds a link, chip or checkbox, so Tab reaches each card. */
+/* Lab Rules rows that scroll sideways (campaign.css "Lab Rules sizes"): a row that scrolls is named by its section's own
+   heading, or the step's legend for the grounds (no new words), and takes keyboard focus so arrow keys scroll it
+   (WCAG 2.1.1); a list stays a list. Checked after load and on resize, as a row only scrolls when it overflows. */
 (function () {
-	document.querySelectorAll('.aw-camp--lab-rules :is(.aw-camp-grid, .aw-camp-docs-q .wp-block-post-template)').forEach(function (row) {
-		var sec = row.closest('.aw-camp-section');
-		var h = sec && sec.querySelector('h2[id]');
-		if (!h || row.hasAttribute('aria-labelledby')) return;
-		if (!/^(UL|OL)$/.test(row.tagName)) row.setAttribute('role', 'region'); // a list stays a list (its items need a list parent)
-		row.setAttribute('aria-labelledby', h.id);
-	});
+	var rows = document.querySelectorAll('.aw-camp--lab-rules :is(.aw-camp-grid, .aw-camp-row, .aw-camp-docs-q .wp-block-post-template, .aw-letter-ground-list, .wp-block-table)');
+	if (!rows.length) return;
+	var n = 0;
+	function label(row) {
+		var h = row.closest('fieldset');
+		h = h ? h.querySelector('legend') : null;
+		if (!h) {
+			var sec = row.closest('.aw-camp-section');
+			h = sec && sec.querySelector('h2');
+		}
+		if (h && !h.id) h.id = 'aw-row-name-' + (++n);
+		return h ? h.id : '';
+	}
+	function mark() {
+		Array.prototype.forEach.call(rows, function (row) {
+			var id = label(row);
+			if (row.scrollWidth > row.clientWidth + 1 && id) {
+				row.setAttribute('tabindex', '0');
+				if (!/^(UL|OL)$/.test(row.tagName)) row.setAttribute('role', 'region');
+				row.setAttribute('aria-labelledby', id);
+			} else {
+				row.removeAttribute('tabindex');
+				if (row.getAttribute('role') === 'region') row.removeAttribute('role');
+				row.removeAttribute('aria-labelledby');
+			}
+		});
+	}
+	if (document.readyState === 'complete') mark(); else window.addEventListener('load', mark);
+	mark();
+	document.addEventListener('kit:step', function () { setTimeout(mark, 0); }); // a letter step that opens shows its row
+	var t;
+	window.addEventListener('resize', function () { clearTimeout(t); t = setTimeout(mark, 150); }, { passive: true });
 })();
 
 /* Supreme Court hero on phones: the poster's note moves to the top of the first section below the hero (under its
