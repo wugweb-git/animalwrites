@@ -1,6 +1,6 @@
 <?php
 /**
- * PageSpeed (plan §5.1): mobile and desktop for the 16 key pages, weekly on Sunday 06:00 IST, through Site Kit's
+ * PageSpeed (plan §5.1): mobile and desktop for the key pages and every campaign page, weekly on Sunday 06:00 IST, through Site Kit's
  * pagespeed-insights module as its owner; when the module can't be used (no owner, not connected), the public PageSpeed
  * API directly, with the free AW_PSI_KEY (Animal Writes → Keys or wp-config.php) when set (keyless calls have a small shared quota). One PageSpeed call can take 10–40 seconds, so the 32 calls run as a queue: a few per cron run, the next run
  * five minutes later, until the queue is empty.
@@ -22,8 +22,8 @@ const AW_SI_PSI_BUDGET = 25; // Seconds: no new call starts after this, so a run
 // AW_SI_PSI_FLAG: AW SEO Plus → Settings (settings.php).
 
 /**
- * The 16 key pages of the 20 Oct PageSpeed audit: the hubs, a state and a district page, and the newest item of each
- * type. Filter aw_si_psi_pages changes the list.
+ * The key pages of the 20 Oct PageSpeed audit: the hubs, a state and a district page, the newest item of each type,
+ * and every published campaign page (2 Nov 2026). Filter aw_si_psi_pages changes the list.
  *
  * @return string[] Site paths.
  */
@@ -34,7 +34,21 @@ function aw_si_psi_pages(): array {
 			$paths[] = aw_si_path( (string) aw_directory_url( $slug ) );
 		}
 	}
-	foreach ( array( 'aw_news', 'aw_legal', 'post', 'aw_opportunity', 'aw_campaign', 'aw_listing' ) as $type ) {
+	// Every published campaign (a handful), so each campaign page gets LCP and TBT figures.
+	$camps = get_posts(
+		array(
+			'post_type'      => 'aw_campaign',
+			'post_status'    => 'publish',
+			'posts_per_page' => 20,
+			'fields'         => 'ids',
+			'orderby'        => 'date',
+			'order'          => 'DESC',
+		)
+	);
+	foreach ( $camps as $id ) {
+		$paths[] = aw_si_object_path( 'post', (int) $id );
+	}
+	foreach ( array( 'aw_news', 'aw_legal', 'post', 'aw_opportunity', 'aw_listing' ) as $type ) {
 		$ids = get_posts(
 			array(
 				'post_type'      => $type,
