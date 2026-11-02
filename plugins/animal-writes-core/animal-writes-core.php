@@ -78,6 +78,7 @@ require_once AW_CORE_DIR . 'includes/volunteers-db.php';
 require_once AW_CORE_DIR . 'includes/volunteers.php';
 require_once AW_CORE_DIR . 'includes/campaigns.php';
 require_once AW_CORE_DIR . 'includes/campaign-tools.php';
+require_once AW_CORE_DIR . 'includes/campaign-short.php'; // /lab, /diwali...: a campaign's short link, 301 to its page
 require_once AW_CORE_DIR . 'includes/campaign-letters.php';
 require_once AW_CORE_DIR . 'includes/campaign-record.php';
 require_once AW_CORE_DIR . 'includes/sections.php';

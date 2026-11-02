@@ -64,6 +64,7 @@
 	/* Share: the phone's own share sheet (Instagram, WhatsApp, Telegram, Snapchat...) plus the story and post images,
 	   which go straight to Instagram or Facebook stories through the same sheet; on a computer the images download. */
 	var sh = window.awCampShare || {};
+	if (sh.short) sh.url = sh.short; /* the campaign's short link (/lab): what Share and Copy link hand out; the page's canonical stays the full address */
 	var canShare = !!navigator.share;
 	/* The pictures are fetched once, ahead of the tap where possible: a phone only opens its share sheet straight from a tap. */
 	var files = {};

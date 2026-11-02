@@ -104,6 +104,7 @@ function aw_meta_schema() {
 		'aw_campaign_share_story' => array( 'string', array( 'aw_campaign' ), 'Story image (attachment ID, 1080x1920)' ),
 		'aw_campaign_share_post' => array( 'string', array( 'aw_campaign' ), 'Post image (attachment ID, 1080x1080)' ),
 		'aw_campaign_metric_stale' => array( 'string', array( 'aw_campaign' ), 'Days without a new letter before the count shows an as-of date' ),
+		'aw_campaign_short'  => array( 'string', array( 'aw_campaign' ), 'Short link slug: /{slug} redirects to the campaign while published (letters, digits, hyphens)' ),
 
 		// Resources: the date a guide was last checked (schema lastReviewed).
 		'kits_last_reviewed' => array( 'string', array( 'post' ), 'Last reviewed (Y-m-d)' ),
@@ -135,6 +136,9 @@ function aw_sanitize_meta( $value, $key ) {
 	if ( in_array( $key, $date_keys, true ) ) {
 		$value = (string) $value;
 		return preg_match( '/^\d{4}-\d{2}-\d{2}$/', $value ) ? $value : '';
+	}
+	if ( 'aw_campaign_short' === $key ) { // one path segment (campaign-short.php)
+		return function_exists( 'aw_camp_short_clean' ) ? aw_camp_short_clean( $value ) : sanitize_title( (string) $value );
 	}
 	if ( 'aw_gallery' === $key ) { // up to six media IDs
 		return implode( ',', array_slice( array_filter( array_map( 'absint', explode( ',', (string) $value ) ) ), 0, 6 ) );
