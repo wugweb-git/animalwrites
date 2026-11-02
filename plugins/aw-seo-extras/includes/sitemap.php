@@ -140,3 +140,25 @@ add_filter(
 	10,
 	3
 );
+
+/*
+ * Rank Math keeps each sitemap as a stored file and only clears it from wp-admin screens and cron (its Cache_Watcher is
+ * started only there). A post saved through the REST API (the block editor, admin REST writes) or WP-CLI left its
+ * type's sitemap as it was, so a new item stayed out until the next admin save (2 Nov 2026: Library item 23678). The
+ * same clearing Rank Math does is queued here for those requests and runs at the end of the request.
+ */
+add_action(
+	'save_post',
+	function ( $post_id, $post ) {
+		if ( is_admin() || wp_doing_cron() || ! class_exists( '\RankMath\Sitemap\Cache_Watcher' ) ) {
+			return; // Rank Math's own watcher runs there.
+		}
+		if ( wp_is_post_revision( $post_id ) || 'auto-draft' === $post->post_status || '' !== (string) $post->post_password ) {
+			return; // As Rank Math: no clearing for revisions, auto-drafts or password-protected posts.
+		}
+		\RankMath\Sitemap\Cache_Watcher::invalidate_post( $post_id );
+		add_action( 'shutdown', array( 'RankMath\Sitemap\Cache_Watcher', 'clear_queued' ) ); // the same callback Rank Math adds; added once
+	},
+	10,
+	2
+);
