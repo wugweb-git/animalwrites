@@ -15,6 +15,9 @@ function aw_si_health_test(): array {
 	$late  = array();
 	$fails = array();
 	foreach ( aw_si_sources() as $src => $s ) {
+		if ( aw_si_rising_blocked( $src ) ) {
+			continue; // refused by the service (HTTP 429/403): a known limit, said on the panel, not a failure
+		}
 		$err = aw_si_run_problem( $src );
 		$dry = aw_si_rows_dry_days( $src );
 		if ( $err ) {
