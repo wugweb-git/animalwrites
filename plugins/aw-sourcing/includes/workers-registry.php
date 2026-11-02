@@ -163,7 +163,7 @@ const AW_WORKERS = array(
 	),
 	'search-insights.yml'      => array(
 		'name'         => 'Search Insights: rising terms',
-		'what'         => 'Rising terms for Tools → Search Insights → Rising: Trends trending now, Wikipedia and GDELT daily; autocomplete and Trends related weekly; Trends interest monthly',
+		'what'         => 'Rising terms for Tools → Search Insights → Rising: Trends trending now and Wikipedia daily; autocomplete and Trends related weekly; Trends interest monthly',
 		'crons'        => array( '40 2 * * *', '0 3 * * 1', '30 3 1 * *' ),
 		'interval_min' => 1440,
 		'timeout_min'  => 30,
