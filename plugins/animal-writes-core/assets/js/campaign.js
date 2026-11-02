@@ -593,15 +593,13 @@
 	var hero = document.querySelector('.aw-camp-hero');
 	var foot = document.querySelector('.wp-site-blocks > footer, footer.wp-block-template-part');
 	var sent = false, onSend = false, onHero = !!hero, onFoot = false;
-	var short = window.matchMedia && window.matchMedia('(max-height: 500px)'); // a phone on its side: the hero fills the screen, so the bar shows on it too
 	try { sent = sessionStorage.getItem('aw-letter-sent') === '1'; } catch (e) { /* private mode */ }
 	function update() {
-		var h = sent || onSend || (onHero && !(short && short.matches)) || onFoot;
+		var h = sent || onSend || onHero || onFoot;
 		bar.classList.toggle('is-hidden', h);
 		bar.inert = h; // off screen: not reachable by keyboard either
 	}
 	update();
-	if (short && short.addEventListener) short.addEventListener('change', update);
 	document.addEventListener('aw:letter-sent', function () { sent = true; update(); });
 	if ('IntersectionObserver' in window) {
 		if (target) new IntersectionObserver(function (en) { onSend = en[0].isIntersecting; update(); }).observe(target);
