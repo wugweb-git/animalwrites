@@ -194,6 +194,27 @@ function aw_ff_styled( $form ) {
 	return '' !== aw_ff_key( $form ) || ( $id && (int) get_option( 'aw_nl_ff_form_full' ) === $id );
 }
 
+/**
+ * Whether a Fluent Forms form is being rendered inside one of the site's kit wrappers ([data-kit-form]); set by the
+ * wrapper around its do_shortcode() call (aw_ff_kit_wrap()). Such a form gets the kit field icons (owner, 2 Nov 2026).
+ */
+function aw_ff_in_kit_wrap() {
+	return ! empty( $GLOBALS['aw_ff_kit_wrap'] );
+}
+
+/**
+ * A Fluent Forms shortcode rendered as a kit-wrapped form (the field icons above).
+ *
+ * @param string $shortcode The [fluentform …] shortcode.
+ * @return string
+ */
+function aw_ff_kit_wrap( $shortcode ) {
+	$GLOBALS['aw_ff_kit_wrap'] = true;
+	$html                      = do_shortcode( $shortcode );
+	$GLOBALS['aw_ff_kit_wrap'] = false;
+	return $html;
+}
+
 /** What a form is shown for (listing, item, source, the update link's contact), while it renders. */
 function aw_ff_ctx( $k = null ) {
 	$c = (array) ( $GLOBALS['aw_ff_ctx'] ?? array() );
@@ -438,8 +459,12 @@ foreach ( array( 'input_text', 'input_email', 'input_url', 'textarea', 'select',
 	add_filter(
 		'fluentform/rendering_field_html_' . $aw_ff_el,
 		function ( $html, $data, $form ) {
-			if ( ! aw_ff_styled( $form ) ) {
-				return $html;
+			if ( ! aw_ff_styled( $form ) ) { // a form in a kit wrapper ([data-kit-form]) gets the field icons only
+				$name = is_array( $data ) ? (string) ( $data['attributes']['name'] ?? '' ) : '';
+				$icon = AW_FF_ICONS[ $name ] ?? '';
+				return aw_ff_in_kit_wrap() && $icon && is_array( $data ) && in_array( $data['element'] ?? '', array( 'input_text', 'input_email', 'input_url' ), true ) && empty( $data['settings']['prefix_label'] )
+					? (string) preg_replace( '/(<input\b[^>]*>)/', '<div class="kit-field-control"><span class="kit-ico kit-ico--' . $icon . ' kit-field-icon" aria-hidden="true"></span>$1</div>', $html, 1 )
+					: $html;
 			}
 			if ( ! is_array( $data ) ) { // Fluent Forms passes the markup in place of the field for tick boxes
 				$data = array( 'element' => false !== strpos( $html, 'ff-el-form-check' ) ? 'input_checkbox' : '', 'attributes' => array( 'name' => preg_match( '/name=[\'"]([a-z_]+)/', $html, $m ) ? $m[1] : '' ) );

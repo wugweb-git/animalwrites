@@ -37,7 +37,7 @@ function aw_newsletter_ff_form() {
 	if ( ! $id ) {
 		return aw_nl_link_note() . aw_ff_missing( 'Newsletter', 'wp option update ' . AW_NL_FF_OPTION . ' <form ID>' );
 	}
-	return aw_nl_link_note() . '<div class="aw-newsletter-form" data-kit-form="newsletter">' . do_shortcode( '[fluentform id="' . $id . '"]' ) . '</div>';
+	return aw_nl_link_note() . '<div class="aw-newsletter-form" data-kit-form="newsletter">' . ( function_exists( 'aw_ff_kit_wrap' ) ? aw_ff_kit_wrap( '[fluentform id="' . $id . '"]' ) : do_shortcode( '[fluentform id="' . $id . '"]' ) ) . '</div>';
 }
 add_shortcode( 'aw_newsletter', 'aw_newsletter_ff_form' );
 
