@@ -495,7 +495,7 @@ function aw_inline_dates( $html ) {
 			} elseif ( preg_match( '#^</(time|script|style|h[1-6])>#i', $part ) ) {
 				$skip = max( 0, $skip - 1 );
 			} elseif ( preg_match( '#^<[a-z][^>]*\sclass="[^"]*\bkit-card-sum\b#i', $part ) ) {
-				$sum = 1;
+				$sum = preg_match( '#^<p\b#i', $part ) ? 2 : 1; // the summary can be the paragraph itself
 			} elseif ( 1 === $sum && preg_match( '#^<p\b#i', $part ) ) {
 				$sum = 2;
 			} elseif ( 2 === $sum && preg_match( '#^</p>#i', $part ) ) {
