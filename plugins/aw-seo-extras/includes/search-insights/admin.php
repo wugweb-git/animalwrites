@@ -188,7 +188,15 @@ function aw_si_source_notices(): void {
 		$err = aw_si_run_problem( $src );
 		/* translators: 1: source, 2: date and time. */
 		$parts[] = $ok ? sprintf( __( '%1$s: %2$s', 'aw-seo-extras' ), $s['label'], wp_date( 'j M, H:i', $ok ) ) : sprintf( __( '%s: not run yet', 'aw-seo-extras' ), $s['label'] );
-		if ( $err ) {
+		if ( $err && aw_si_rising_blocked( $src ) ) {
+			$paste = in_array( $src, array( 'rising_trends_interest', 'rising_trends_related' ), true ) ? ' ' . __( 'Paste the figures on the Rising tab.', 'aw-seo-extras' ) : '';
+			$msg   = $ok
+				/* translators: 1: source, 2: date and time. */
+				? sprintf( __( '%1$s: the service refuses automated requests from our servers (HTTP 429), so it is not fetched; figures from %2$s.', 'aw-seo-extras' ), $s['label'], wp_date( 'j M, H:i', $ok ) )
+				/* translators: %s: source. */
+				: sprintf( __( '%s: the service refuses automated requests from our servers (HTTP 429), so it is not fetched; no figures yet.', 'aw-seo-extras' ), $s['label'] );
+			echo '<div class="notice notice-info inline"><p>' . esc_html( $msg . $paste ) . '</p></div>';
+		} elseif ( $err ) {
 			/* translators: 1: source, 2: the problem, 3: date of the data still shown. */
 			$msg = sprintf( __( '%1$s: %2$s The figures shown are from %3$s.', 'aw-seo-extras' ), $s['label'], $err, $ok ? wp_date( 'j M, H:i', $ok ) : __( 'no earlier run', 'aw-seo-extras' ) );
 			echo '<div class="notice notice-error inline"><p><span class="dashicons dashicons-warning" aria-hidden="true"></span> ' . esc_html( $msg ) . '</p></div>';
