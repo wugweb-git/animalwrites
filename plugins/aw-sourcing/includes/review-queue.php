@@ -125,6 +125,9 @@ function aw_review_apply( $ids, $action ) {
 		if ( ! aw_review_is_item( $p ) || ! in_array( $p->post_status, array( 'pending', 'draft' ), true ) || ! current_user_can( 'edit_post', $id ) ) {
 			continue;
 		}
+		if ( 'publish' === $action && 'aw_social' === $p->post_type && '' === trim( (string) get_post_meta( $id, 'aw_social_summary', true ) ) ) {
+			continue; // A social post needs its staff summary before it goes live.
+		}
 		if ( 'publish' === $action ) {
 			$src = (string) get_post_meta( $id, 'aw_source_date', true );
 			if ( get_post_meta( $id, 'aw_backfill', true ) && preg_match( '/^\d{4}-\d{2}-\d{2}$/', $src ) && $src <= current_time( 'Y-m-d' ) ) {
