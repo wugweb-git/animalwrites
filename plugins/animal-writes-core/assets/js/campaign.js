@@ -74,6 +74,7 @@
 		if (!files[kind]) files[kind] = fetch(url).then(function (r) { return r.blob(); }).then(function (blob) {
 			var ext = url.slice(url.lastIndexOf('.') + 1).toLowerCase();
 			var type = /^image\//.test(blob.type) ? blob.type : ({ png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', webp: 'image/webp' })[ext] || 'image/jpeg';
+			ext = ({ 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp', 'image/avif': 'avif' })[type] || ext; // the image service may send WebP for a .jpg: the name follows the real type, or apps refuse the file
 			return new File([blob], (sh.slug || 'campaign') + '-' + kind + '.' + ext, { type: type }); // apps only take an image they can recognise
 		}).catch(function () { return null; });
 		return files[kind];
@@ -221,9 +222,15 @@
 	   "Share this page" button (the phone's share sheet with the picture, the message and the short link; where a browser
 	   has no share sheet it copies the link and says so), the site's share bar as icons, and the campaign's ready-made
 	   story and post pictures: a tap shares that picture with the message and link, or saves it and copies the link. */
+	var sayTimer;
+	function say(done, msg) { // one status line under the button, cleared after a while
+		done.textContent = msg;
+		clearTimeout(sayTimer);
+		sayTimer = setTimeout(function () { done.textContent = ''; }, 6000);
+	}
 	function sharePicture(kind, done) {
 		if (navigator.clipboard) navigator.clipboard.writeText(sh.url).catch(function () {});
-		done.textContent = canShare ? 'Link copied. Paste it in a Link sticker.' : 'Image saved. The link is copied too: paste it with your post.';
+		say(done, canShare ? 'Link copied. Paste it in a Link sticker.' : 'Image saved. The link is copied too: paste it with your post.');
 		getFile(kind).then(function (file) {
 			if (!file) return;
 			if (canShareFile(file)) return navigator.share({ files: [file], title: sh.title, text: sh.text + ' ' + sh.url }).catch(function () {});
@@ -254,14 +261,15 @@
 		wrap.appendChild(b);
 		wrap.appendChild(done);
 		holder.insertBefore(wrap, holder.firstChild);
-		var timer;
 		b.addEventListener('click', function () {
 			if (canShare) { shareAll(holder); return; }
 			if (navigator.clipboard) navigator.clipboard.writeText(sh.url).catch(function () {});
-			done.textContent = 'Link copied';
-			clearTimeout(timer);
-			timer = setTimeout(function () { done.textContent = ''; }, 4000);
+			say(done, 'Link copied');
 		});
+		/* The share bar's links carry the campaign's share message with the short link (the server's bar has the title). */
+		var u = encodeURIComponent(sh.url), t = encodeURIComponent(sh.text || sh.title || '');
+		var nets = { x: 'https://x.com/intent/post?text=' + t + '&url=' + u, whatsapp: 'https://wa.me/?text=' + t + '%20' + u, email: 'mailto:?subject=' + encodeURIComponent(sh.title || '') + '&body=' + t + '%20' + u };
+		holder.querySelectorAll('.kit-share a[data-kit-share]').forEach(function (a) { if (nets[a.dataset.kitShare] && sh.text) a.href = nets[a.dataset.kitShare]; });
 		var pics = [['story', 'Instagram or Facebook story', 'Story, 9:16'], ['post', 'Instagram or Facebook post', 'Post, 4:5']].filter(function (k) { return sh[k[0]]; });
 		if (pics.length) {
 			var box = document.createElement('div');

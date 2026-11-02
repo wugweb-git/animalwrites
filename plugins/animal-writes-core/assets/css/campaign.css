@@ -949,19 +949,19 @@
 /* Share block template (owner, 2 Nov 2026: "heavily branded", one action, ready-made pictures, icons only; the same on
    every campaign). The Share section is a band in the campaign colour, deepening to 25% darker; everything sits on the
    band, no inner card. The campaign's ready-made post and story pictures are the visual: the post large in front, the
-   story beside it, both tappable (a tap shares that picture). Beside them (in a band at least 44rem wide; above them in
-   a narrower one) the one main button, white with the campaign colour, --kit-size-control tall, full width on phones,
+   story beside it, both tappable (a tap shares that picture), after the button and the bar in reading and Tab order:
+   to their right in a band at least 44rem wide, under them in a narrower one. The one main button, white with the campaign colour, --kit-size-control tall, full width on phones,
    and the share bar as white 44px icons only (each keeps its aria-label and title). Nothing scrolls sideways. */
 .aw-camp.aw-camp #share { background: linear-gradient(160deg, var(--camp-mark), color-mix(in srgb, var(--camp-mark) 75%, #000)); color: var(--camp-on-mark); }
 .aw-camp.aw-camp #share :is(h2, h3, p, a:not(.kit-share-btn):not(.wp-element-button), .aw-date, .aw-date .kit-ico) { color: var(--camp-on-mark); }
 .aw-camp.aw-camp #share.aw-camp-section h2 { font-size: var(--kit-type-h1) !important; line-height: var(--kit-leading-heading); }
 .aw-camp.aw-camp #share:has(> .aw-share-block), .aw-camp.aw-camp #share :has(> .aw-share-block) { container: aw-share / inline-size; }
-.aw-camp.aw-camp #share .aw-camp-share-kit.aw-share-block { display: grid; gap: var(--kit-space-5); margin-top: var(--kit-space-6); padding: 0; border-radius: 0; background: none; box-shadow: none; grid-template-areas: "pics" "cta" "bar"; }
+.aw-camp.aw-camp #share .aw-camp-share-kit.aw-share-block { display: grid; gap: var(--kit-space-5); margin-top: var(--kit-space-6); padding: 0; border-radius: 0; background: none; box-shadow: none; grid-template-areas: "cta" "bar" "pics"; }
 .aw-camp.aw-camp #share .aw-share-block > .aw-share-cta { grid-area: cta; }
 .aw-camp.aw-camp #share .aw-share-block > .kit-share { grid-area: bar; }
 .aw-camp.aw-camp #share .aw-share-block > .aw-share-pics { grid-area: pics; }
 @container aw-share (min-width: 44rem) {
-	.aw-camp.aw-camp #share .aw-share-block:has(> .aw-share-pics) { grid-template-columns: auto minmax(0, 1fr); grid-template-areas: "pics cta" "pics bar"; column-gap: var(--kit-space-7); align-content: center; align-items: center; }
+	.aw-camp.aw-camp #share .aw-share-block:has(> .aw-share-pics) { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "cta pics" "bar pics"; column-gap: var(--kit-space-7); align-content: center; align-items: center; }
 	.aw-camp.aw-camp #share .aw-share-block > .aw-share-cta { align-self: end; }
 	.aw-camp.aw-camp #share .aw-share-block > .kit-share { align-self: start; }
 }
