@@ -696,3 +696,27 @@
 	place();
 	if (mq.addEventListener) mq.addEventListener('change', place);
 })();
+
+/* Supreme Court rows (campaign-tools.php, aw_sc_rows_a11y): the server makes each row a named, focusable region. On
+   phones the rows stack (campaign.css, owner 2 Nov 2026), so a row that does not scroll loses its tabindex and region
+   role, and gets them back when it scrolls again (a wider window). Its name stays. */
+(function () {
+	var rows = document.querySelectorAll('[data-aw-sc-row]');
+	if (!rows.length) return;
+	var role = [];
+	Array.prototype.forEach.call(rows, function (r, i) { role[i] = r.getAttribute('role'); });
+	function mark() {
+		Array.prototype.forEach.call(rows, function (r, i) {
+			if (r.scrollWidth > r.clientWidth + 1) {
+				r.setAttribute('tabindex', '0');
+				if (role[i]) r.setAttribute('role', role[i]);
+			} else {
+				r.removeAttribute('tabindex');
+				r.removeAttribute('role');
+			}
+		});
+	}
+	if (document.readyState === 'complete') mark(); else window.addEventListener('load', mark);
+	var t;
+	window.addEventListener('resize', function () { clearTimeout(t); t = setTimeout(mark, 150); }, { passive: true });
+})();

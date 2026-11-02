@@ -293,6 +293,7 @@ These hold on every page. Section heights below gives the detail.
     - named and focusable as in rule 11: `tabindex="0"` on the scroller, `aria-labelledby` its heading; the arrow keys scroll it;
     - the row bleeds to the gutter inside its section; the page itself never scrolls sideways.
     Not a swipe row: a hub page's main paginated results grid (`/news/`, `/resources/`, `/library/`, Directory results), which stays a grid so people can browse; and an article's body.
+    Campaign pages on phones: no swipe rows, cards stack (owner, 2 Nov 2026). Below 768 every row on a campaign page (cards, steps, court orders and state tracker, grounds, share pictures, news, Library) is one card under another at the full width, and data tables fit the screen; from 768 the rows above apply (campaign.css, end of file).
 
 Checks: `tools/ci/theme_rules_check.py` in the Deploy check catches rules 3 and 9 and padding under 24px (2) in CSS. `tools/ci/section_heights_audit.js`, pasted into the browser console, measures rules 4 to 7, 10 and the measurable points of 11 on the page: sections OVER above 720 and FAIL above 800, blocks over 600, swipe rows with no keyboard focus or name, targets under 44px and sideways page scroll.
 

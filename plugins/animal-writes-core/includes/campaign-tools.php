@@ -964,7 +964,8 @@ add_filter(
 /**
  * The Supreme Court stray dogs campaign's sideways rows (campaign.css: the court orders and state tracker tables, the
  * action cards and the Library list) made usable without a pointer (Layout rules 11, WCAG 2.2 AA): each row can take
- * keyboard focus and is named by the heading just before it (which gets an id when it has none). The two tables keep
+ * keyboard focus and is named by the heading just before it (which gets an id when it has none). On phones the rows
+ * stack (campaign.css) and campaign.js takes the focus and region role off a row that does not scroll. The two tables keep
  * their table roles, which some browsers drop once the rows are shown as cards.
  *
  * @param string $html The rendered content.
@@ -1007,6 +1008,7 @@ function aw_sc_rows_a11y( $html ) {
 			aw_sc_row_attrs( $p, $head );
 			$list = false;
 		} elseif ( 'DIV' === $tag && $p->has_class( 'aw-camp-row' ) && '' !== $head ) {
+			$p->set_attribute( 'data-aw-sc-row', '' );
 			$p->set_attribute( 'tabindex', '0' ); // the news row: focusable, so the arrow keys scroll it (Layout rules 11)
 			$p->set_attribute( 'aria-labelledby', $head );
 		}
@@ -1060,6 +1062,7 @@ function aw_sc_tracker_folds( $html ) {
  * @param string                $head Id of the heading that names it ('' = none).
  */
 function aw_sc_row_attrs( $p, $head ) {
+	$p->set_attribute( 'data-aw-sc-row', '' ); // campaign.js drops the focus and role while the row fits (phones: stacked)
 	$p->set_attribute( 'tabindex', '0' );
 	$p->set_attribute( 'role', 'region' );
 	if ( '' !== $head ) {
