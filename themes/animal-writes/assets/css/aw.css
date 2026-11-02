@@ -145,6 +145,8 @@
 	.aw-toolbar-count { flex: 1 1 12rem; }
 	.aw-toolbar :is(.kit-dd-btn, .kit-btn, .kit-filter-sheet > summary) { min-height: var(--aw-toolbar-h); }
 	.aw-toolbar .kit-segment :is(a, button) { min-height: calc(var(--aw-toolbar-h) - 2 * var(--kit-space-1)); }
+	.aw-toolbar :is(.kit-dd-btn, .kit-segment a, .kit-segment button) { position: relative; } /* the 36px controls (owner, 21 Oct 2026) keep the theme's 44px hit area (as .kit-chip) */
+	.aw-toolbar :is(.kit-dd-btn, .kit-segment a, .kit-segment button)::after { content: ""; position: absolute; inset: calc((100% - var(--kit-size-target)) / 2) 0; }
 }
 .aw-org-contact { display: inline-flex; gap: var(--kit-space-2); color: var(--kit-color-muted); }
 
@@ -469,6 +471,7 @@ body { background: var(--kit-color-canvas); }
 .kit-ed-lead .aw-src { margin-top: var(--kit-space-2); }
 :is(.kit-ed-list, .kit-ed-lead) .aw-card-time { padding-right: 0; min-height: 0; }
 .is-layout-constrained > .aw-src { max-width: var(--wp--style--global--content-size, 720px); margin-left: auto !important; margin-right: auto !important; }
+.wp-block-post-content.alignwide.is-layout-constrained > :not(.alignwide):not(.alignfull) { max-width: var(--kit-width-content); margin-left: max(0px, calc((100% - var(--kit-width-wide)) / 2)) !important; margin-right: auto !important; } /* a page's own text in page.html (Privacy, Terms, Disclaimer and the like; hubs and campaign pages use other templates): headings, lists and forms in the one 720px main column, on the paragraphs' left edge (kit.css, post-content text; the theme content size is 1200) */
 
 /* Report an error (listing pages): same disclosure treatment as the claim panel, quieter */
 .aw-report { margin-block: var(--kit-space-4) var(--kit-space-7); }
@@ -571,6 +574,8 @@ body { background: var(--kit-color-canvas); }
 .aw-contact-row:last-child { border-bottom: var(--kit-border-width) solid var(--neutral-2); }
 .aw-contact-row h3 { margin: 0 0 var(--kit-space-1); font-size: var(--fluid-h5); }
 .aw-contact-pick { color: var(--kit-color-link); text-decoration: underline; text-underline-offset: 0.18em; } /* opens the form with this reason */
+.aw-contact-pick { position: relative; }
+.aw-contact-pick::after { content: ""; position: absolute; inset: calc((100% - var(--kit-size-target)) / 2) 0; } /* the theme's 44px hit area (as .kit-chip), from the link's own height */
 .aw-contact-row p { margin: 0; }
 .aw-elsewhere ul { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: var(--kit-space-2) var(--kit-space-5); }
 .aw-elsewhere a { display: inline-flex; align-items: center; gap: var(--kit-space-1); min-height: var(--kit-size-target); }
