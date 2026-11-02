@@ -968,7 +968,7 @@
 .aw-camp.aw-camp #share .aw-share-pics { display: grid; gap: var(--kit-space-3); }
 /* the pictures beside the button and the bar only where the card is at least 44rem wide (Lab, Supreme Court); in a
    narrower column (Diwali, beside its photo) they stay under the bar */
-.aw-camp.aw-camp #share :has(> .aw-share-block) { container: aw-share / inline-size; }
+.aw-camp.aw-camp #share:has(> .aw-share-block), .aw-camp.aw-camp #share :has(> .aw-share-block) { container: aw-share / inline-size; }
 @container aw-share (min-width: 44rem) {
 	.aw-camp.aw-camp #share .aw-share-block:has(> .aw-share-pics) { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "cta pics" "bar pics"; align-items: start; }
 	.aw-camp.aw-camp #share .aw-share-block > .aw-share-cta { grid-area: cta; }
