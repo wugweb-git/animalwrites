@@ -1675,11 +1675,59 @@
    "block": "animal-writes/learn"
   },
   {
-   "name": "Take action",
+   "name": "Take part",
    "type": "pattern",
    "status": "live",
+   "classes": ["aw-take-part", "kit-photo-card"],
+   "states": ["band (take-part): the cards in a full-width section, Home and the end of every campaign page; three equal cards in one row from 768, one under the other on phones", "compact (take-part-cards on its own, sidebar from 1200): one under the other, height from the text, H3-size titles", "a card left out: Volunteer on /volunteer/, Run an organisation? on an unclaimed listing", "hover (pointer): card lifts, photo 1.03, shadow elevation-2; button lifts and brightens; pressed: darker, .98", "load: the cards rise one after another (aw.js); none under prefers-reduced-motion"],
+   "tokens": ["--kit-photo-card-h", "--kit-space-grid", "--kit-space-5", "--kit-space-7", "--kit-elevation-1", "--kit-elevation-2", "--kit-motion-base", "--kit-motion-lift", "--kit-size-control", "--kit-color-accent", "--kit-color-ink"],
+   "a11y": {
+    "element": "patterns take-part (band) and take-part-cards (Editor → Patterns, \"Animal Writes\"); three core Cover blocks",
+    "aria": "none; the arrow in each button is the theme's button icon (Brand button default: icon + label)",
+    "keyboard": "Tab to the three buttons",
+    "focus": "3px ring in --kit-color-on-ink on the cards, 2px offset (:focus-visible)",
+    "target": "48px buttons",
+    "motion": "transform and opacity only; none under prefers-reduced-motion",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "an H2 per card (no section heading)",
+    "link": "Register as a volunteer (/volunteer/); Claim your listing (/claim/); Subscribe (#newsletter, the footer sign-up)",
+    "alt": "photos described (alt on each Cover image)",
+    "schema": "none"
+   },
+   "block": "animal-writes/take-part"
+  },
+  {
+   "name": "Take part cards",
+   "type": "pattern",
+   "status": "live",
+   "classes": ["aw-take-part", "kit-photo-card"],
+   "states": ["the three Take part cards on their own (not in the inserter): inside the take-part band, and in the sidebar as the compact stack; see Take part"],
+   "tokens": ["--kit-photo-card-h"],
+   "a11y": {
+    "element": "pattern; three core Cover blocks in a group",
+    "aria": "none",
+    "keyboard": "Tab to the three buttons",
+    "focus": "see Take part",
+    "target": "48px buttons",
+    "motion": "see Take part",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "an H2 per card",
+    "link": "see Take part",
+    "alt": "photos described",
+    "schema": "none"
+   },
+   "block": "animal-writes/take-part-cards"
+  },
+  {
+   "name": "Take action",
+   "type": "pattern",
+   "status": "replaced",
    "classes": ["kit-photo-card"],
-   "states": ["default: two photo blocks (core Cover, dark overlay) side by side from 768, one under the other on phones, each with its own H2, one line and a Brand button; no section heading"],
+   "states": ["replaced by Take part (owner, 2 Nov 2026); default: two photo blocks (core Cover, dark overlay) side by side from 768, one under the other on phones, each with its own H2, one line and a Brand button; no section heading"],
    "tokens": ["--kit-space-grid"],
    "a11y": {
     "element": "pattern (Editor → Patterns, \"Animal Writes\"); two core Cover blocks",

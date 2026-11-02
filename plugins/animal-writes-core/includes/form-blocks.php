@@ -250,8 +250,8 @@ add_action(
 
 // The one-time step that made /volunteer/, its redirect and the volunteer banners ran and was removed (audit item 16, flag confirmed on live 25 Oct 2026; see git history).
 
-// Every campaign page ends with the Home page's last section, Take action (Volunteer, Claim your listing), in the
-// campaign's own colours (owner, 19 Oct 2026); a page without a campaign class keeps the volunteer banner.
+// Every campaign page ends with the Home page's Take part band (Volunteer, Run an organisation?, Get updates; owner,
+// 2 Nov 2026; was Take action, 19 Oct 2026); a page without a campaign class keeps the volunteer banner.
 add_filter(
 	'the_content',
 	function ( $content ) {
@@ -259,11 +259,32 @@ add_filter(
 			return $content;
 		}
 		if ( preg_match( '/\baw-camp--([a-z0-9-]+)/', $content, $m ) ) {
-			return $content . '<div class="alignfull aw-camp-end aw-camp--' . esc_attr( $m[1] ) . '">' . do_blocks( '<!-- wp:pattern {"slug":"animal-writes/take-action"} /-->' ) . '</div>';
+			return $content . '<div class="alignfull aw-camp-end aw-camp--' . esc_attr( $m[1] ) . '">' . do_blocks( '<!-- wp:pattern {"slug":"animal-writes/take-part"} /-->' ) . '</div>';
 		}
 		return $content . do_blocks( '<!-- wp:pattern {"slug":"animal-writes/volunteer-banner"} /-->' );
 	},
 	20
+);
+
+// Take part cards (pattern take-part-cards): a page that is already one card's job leaves that card out. /volunteer/
+// drops Volunteer (the page is that card) and an unclaimed listing drops Run an organisation? (it has its own claim box).
+add_filter(
+	'render_block_core/cover',
+	function ( $html, $block ) {
+		$c = (string) ( $block['attrs']['className'] ?? '' );
+		if ( false === strpos( $c, 'aw-take-part-card--' ) ) {
+			return $html;
+		}
+		if ( false !== strpos( $c, 'aw-take-part-card--vol' ) && is_page( 'volunteer' ) ) {
+			return '';
+		}
+		if ( false !== strpos( $c, 'aw-take-part-card--claim' ) && is_singular( 'aw_listing' ) && ! get_post_meta( get_queried_object_id(), 'aw_verified', true ) ) {
+			return '';
+		}
+		return $html;
+	},
+	10,
+	2
 );
 
 // /volunteer/ in the breadcrumb is "Volunteer".

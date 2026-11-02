@@ -30,8 +30,9 @@ add_filter( 'kits_preview_only_ids', fn( $ids ) => array_merge( (array) $ids, ar
 add_filter(
 	'kits_section_labels',
 	fn( $l ) => $l + array(
-		'aw-system'    => array( 'list', 'List' ),
-		'aw-vol-banner' => array( 'volunteer-banner', 'Volunteer' ),
+		'aw-system'         => array( 'list', 'List' ),
+		'aw-vol-banner'     => array( 'volunteer-banner', 'Volunteer' ),
+		'aw-take-part-band' => array( 'take-part', 'Take part' ),
 	)
 );
 

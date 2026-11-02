@@ -1003,7 +1003,7 @@ body { background: var(--kit-color-canvas); }
    H1 page title · H2 section heading · H3 card / sub-section title · H4 compact list title · H5 small heading ·
    Lead · Body · Secondary body (muted) · Meta (small, muted). Sizes come from the fluid type tokens (scale from 375 to 1200).
    ====================================================================================================== */
-:is(main h2, .aw-hub-group > h2, .aw-also h2, .kit-ed-head h2, .aw-vol-banner-title):not(.aw-story-title, .aw-case-title, .kit-eyebrow, .screen-reader-text, .wp-block-post-title, .aw-local-card-head, .aw-camp-band-title) {
+:is(main h2, .aw-hub-group > h2, .aw-also h2, .kit-ed-head h2, .aw-vol-banner-title):not(.aw-story-title, .aw-case-title, .kit-eyebrow, .screen-reader-text, .wp-block-post-title, .aw-local-card-head, .aw-camp-band-title, .aw-take-part-card h2) {
 	font-size: var(--kit-type-h2) !important; font-weight: var(--kit-weight-bold) !important; line-height: 1.2 !important; letter-spacing: var(--kit-tracking-heading, -0.01em);
 }
 :is(.aw-story-title, .aw-org-name, .kit-ed-lead .wp-block-post-title, main .entry-content h3:not(:where(.aw-system .aw-hub-list:not(.aw-hub-library) .kit-card-title)), main h3.wp-block-heading, .aw-local-card-head, .aw-contact-row h3) { /* section page card titles keep the size they had as H2 (H3 since 20 Oct 2026) */
@@ -1590,6 +1590,46 @@ section.aw-camp-band.aw-ed-hero--campaign { box-sizing: border-box; min-height: 
 @media (min-width: 768px) {
 	.aw-pair-grid { grid-template-columns: 1fr 1fr; }
 }
+
+/* Take part (owner, 2 Nov 2026; pattern take-part-cards, in the take-part band on Home and at the end of every campaign
+   page, and on its own in the sidebar): Volunteer, Run an organisation? and Get updates as three theme photo cards (core
+   Cover, kit-photo-card). Three equal cards in one row from 768, one under the other on phones and in the sidebar. The
+   photo stays clear: no overlay (dim 0), the text sits on ink 78% that starts --kit-space-7 above it (white text 7:1 or
+   more over any photo). Get updates has no fitting photo, so it is the brand ink. Same height (--kit-photo-card-h, a
+   minimum, so text is never cut off), radius, padding (kit.css) and shadow on all three; the same Brand button in the
+   site yellow everywhere, one step up (--kit-size-control). Motion only on pointer devices and never under
+   prefers-reduced-motion. The load rise is aw.js (Need help now's stagger). */
+.aw-take-part { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-grid); --kit-btn-brand-bg: var(--kit-color-accent); --kit-btn-brand-fg: var(--kit-color-on-accent); }
+@media (min-width: 768px) { .aw-take-part { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.wp-block-cover.aw-take-part-card { margin: 0; min-height: var(--kit-photo-card-h); box-shadow: var(--kit-elevation-1); --kit-color-focus: var(--kit-color-on-ink); --kit-btn-height: var(--kit-size-control); transition: transform var(--kit-motion-base) var(--kit-motion-ease), box-shadow var(--kit-motion-base) var(--kit-motion-ease); }
+.wp-block-cover.aw-take-part-card > .wp-block-cover__image-background { transition: transform var(--kit-motion-base) var(--kit-motion-ease); }
+/* outranks core's content-position rule (.wp-block-cover.has-custom-content-position x2 .is-position-bottom-left: width auto, margin 0) */
+.wp-block-cover.aw-take-part-card.has-custom-content-position.has-custom-content-position.is-position-bottom-left > .wp-block-cover__inner-container {
+	box-sizing: border-box; width: calc(100% + 2 * var(--kit-space-5)); max-width: none; margin: 0 calc(-1 * var(--kit-space-5)) calc(-1 * var(--kit-space-5));
+	padding: var(--kit-space-7) var(--kit-space-5) var(--kit-space-5);
+	background: linear-gradient(0deg, color-mix(in srgb, var(--kit-color-ink) 78%, transparent) calc(100% - var(--kit-space-7)), transparent);
+}
+.wp-block-cover.aw-take-part-card .wp-block-cover__inner-container > :last-child { margin-bottom: 0; }
+.aw-take-part-card h2 { font-size: var(--kit-type-h2); font-weight: var(--kit-weight-bold); line-height: var(--kit-leading-heading); }
+.aw-take-part-card .wp-block-button__link { font-size: var(--fluid-body-lg); --_bg-h: color-mix(in srgb, var(--kit-btn-brand-bg) var(--kit-btn-hover-mix), var(--kit-color-on-ink)); --_line-h: var(--_bg-h); transition: background-color var(--kit-motion-base) var(--kit-motion-ease), transform var(--kit-motion-base) var(--kit-motion-ease); }
+@media (min-width: 768px) and (max-width: 1199px) {
+	.aw-take-part-card .wp-block-button__link { padding-inline: var(--kit-space-4); font-size: var(--fluid-body-md); } /* three across in a tablet column */
+}
+.aw-take-part-card .wp-block-button__link:active { background: color-mix(in srgb, var(--kit-btn-brand-bg) var(--kit-btn-hover-mix), var(--kit-color-ink)); transform: scale(.98); } /* pressed: a little darker and smaller */
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+	.wp-block-cover.aw-take-part-card:hover { transform: translateY(var(--kit-motion-lift)); box-shadow: var(--kit-elevation-2); }
+	.wp-block-cover.aw-take-part-card:hover > .wp-block-cover__image-background { transform: scale(1.03); }
+	.aw-take-part-card .wp-block-button__link:hover { transform: translateY(var(--kit-motion-lift)); } /* hover: lift and a brighter yellow */
+}
+@media (prefers-reduced-motion: reduce) {
+	.wp-block-cover.aw-take-part-card, .wp-block-cover.aw-take-part-card > .wp-block-cover__image-background, .aw-take-part-card .wp-block-button__link { transition: none; }
+	.aw-take-part-card .wp-block-button__link:active { transform: none; }
+}
+/* Sidebar (from 1200): the compact stack, card height from its text, H3 size titles */
+.kit-sidebar .aw-take-part { grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-4); }
+.kit-sidebar .wp-block-cover.aw-take-part-card { min-height: 0; }
+.kit-sidebar .aw-take-part-card h2 { font-size: var(--kit-type-h3); }
+.kit-sidebar .aw-take-part-card .wp-block-button__link { font-size: var(--fluid-body-md); }
 
 /* Section heads on Home: H2, one supporting line, a small ghost "see all"; 16px between them and to the content */
 .home .kit-sec-head { row-gap: var(--kit-space-4); margin-bottom: var(--kit-space-head); }

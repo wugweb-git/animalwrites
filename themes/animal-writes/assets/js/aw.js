@@ -263,23 +263,28 @@
 	sync();
 })();
 
-/* Need help now: the bento tiles fade up one after another (112 first) when the grid scrolls into view. Tiles already
-   on screen when the page loads are left as they are; nothing moves under prefers-reduced-motion or without GSAP. */
+/* Need help now and Take part: the bento tiles and the Take part cards fade up one after another (112 first) when their
+   grid scrolls into view. A grid already on screen when the page loads is left as it is; nothing moves under
+   prefers-reduced-motion or without GSAP. */
 (function () {
-	var grid = document.querySelector('.aw-bento');
-	if (!grid || !window.gsap || !('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-	if (grid.getBoundingClientRect().top < window.innerHeight) return;
-	var tiles = grid.querySelectorAll('.aw-bento-tile');
-	window.gsap.set(tiles, { opacity: 0, y: 16 });
-	var io = new IntersectionObserver(function (entries) {
-		var e = entries[0];
-		if (!e.isIntersecting) {
-			if (e.boundingClientRect.bottom < 0) { io.disconnect(); window.gsap.set(tiles, { clearProps: 'opacity,transform' }); } // jumped past: show it, no animation
-			return;
-		}
-		io.disconnect();
-		window.gsap.to(tiles, { opacity: 1, y: 0, duration: 0.45, ease: 'power2.out', stagger: 0.06, clearProps: 'opacity,transform' });
-	}, { rootMargin: '0px 0px -10% 0px' });
-	io.observe(grid);
-	window.addEventListener('beforeprint', function () { io.disconnect(); window.gsap.set(tiles, { clearProps: 'opacity,transform' }); });
+	if (!window.gsap || !('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+	[['.aw-bento', '.aw-bento-tile'], ['.aw-take-part', '.aw-take-part-card']].forEach(function (pair) {
+		Array.prototype.forEach.call(document.querySelectorAll(pair[0]), function (grid) {
+			if (grid.getBoundingClientRect().top < window.innerHeight) return;
+			var tiles = grid.querySelectorAll(pair[1]);
+			if (!tiles.length) return;
+			window.gsap.set(tiles, { opacity: 0, y: 16 });
+			var io = new IntersectionObserver(function (entries) {
+				var e = entries[0];
+				if (!e.isIntersecting) {
+					if (e.boundingClientRect.bottom < 0) { io.disconnect(); window.gsap.set(tiles, { clearProps: 'opacity,transform' }); } // jumped past: show it, no animation
+					return;
+				}
+				io.disconnect();
+				window.gsap.to(tiles, { opacity: 1, y: 0, duration: 0.45, ease: 'power2.out', stagger: 0.06, clearProps: 'opacity,transform' });
+			}, { rootMargin: '0px 0px -10% 0px' });
+			io.observe(grid);
+			window.addEventListener('beforeprint', function () { io.disconnect(); window.gsap.set(tiles, { clearProps: 'opacity,transform' }); });
+		});
+	});
 })();
