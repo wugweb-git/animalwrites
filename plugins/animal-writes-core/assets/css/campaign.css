@@ -112,15 +112,8 @@
 	.aw-camp--diwali #help .wp-block-table table { min-width: calc(3 * var(--kit-card-min)); } /* rows on one line; the table scrolls sideways in its frame where it is wider (a named, focusable row: campaign.js) */
 	.aw-camp--diwali #help > .wp-block-buttons .wp-block-button__link { padding-inline: var(--kit-space-4); }
 }
-/* Share band: with the story and post pictures (1a24a0e1) the band's artwork is the same picture twice, so it goes;
-   from 768 the pictures stand beside the heading, line, share row and note */
-.aw-camp--diwali #share .wp-block-columns:has(.aw-letter-share-pics) > .wp-block-column:has(> .aw-camp-art) { display: none; }
-@media (min-width: 768px) {
-	.aw-camp--diwali #share .wp-block-column:has(.aw-letter-share-pics) { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: repeat(4, auto) 1fr; column-gap: var(--kit-space-6); align-content: start; }
-	.aw-camp--diwali #share .wp-block-column:has(.aw-letter-share-pics) > * { grid-column: 1; }
-	.aw-camp--diwali #share .aw-camp-share-kit:has(.aw-letter-share-pics) { display: contents; }
-	.aw-camp--diwali #share .aw-letter-share-pics { grid-column: 2; grid-row: 1 / -1; margin-top: 0; }
-}
+/* Share band (share redesign, 2 Nov 2026): the story and post pictures are no longer shown (campaign.js), so the
+   band keeps its artwork beside the heading, line, share row and note */
 /* Read the law: the sources list is a fold under the word "Sources" (build script, class aw-camp-fold) */
 .aw-camp--diwali .aw-camp-fold > :not(summary) { margin: 0 0 var(--kit-space-3); }
 /* Read the law: the sources list in two columns from 768 */
@@ -230,11 +223,10 @@
 .aw-camp--sc-stray-dogs .aw-camp-grid > :first-child a:not(.wp-element-button) { color: var(--camp-on-mark); }
 /* The share bar under the share message */
 .aw-camp--sc-stray-dogs .aw-camp-share-kit { margin: var(--kit-space-4) 0; }
-/* Share (from the Technical session's 27e4d5e3): from 768 the share buttons and the two share pictures side by side, not one under the other */
+/* Share (share redesign, 2 Nov 2026): no share pictures on the page (campaign.js); from 768 the note sits as close to
+   the share row as the row to the text above */
 @media (min-width: 768px) {
-	.aw-camp--sc-stray-dogs #share .aw-camp-share-kit:has(.aw-letter-share-pics) { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--kit-space-grid); align-items: start; }
-	.aw-camp--sc-stray-dogs #share .aw-camp-share-kit .aw-letter-share-pics { grid-column: auto; padding-top: 0; border-top: 0; }
-	.aw-camp--sc-stray-dogs #share .aw-camp-share-kit + .aw-camp-note { margin-top: var(--kit-space-4); } /* the note sits as close to the share row as the row to the text above */
+	.aw-camp--sc-stray-dogs #share .aw-camp-share-kit + .aw-camp-note { margin-top: var(--kit-space-4); }
 }
 /* The court orders and the state tracker: tables from 768; on phones one card per row, stacked one under another
    (no sideways row, owner 2 Nov 2026), each part under its column heading. The server gives the tables their roles

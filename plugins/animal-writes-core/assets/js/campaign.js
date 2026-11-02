@@ -78,11 +78,20 @@
 		return files[kind];
 	}
 	function canShareFile(file) { return !!(file && navigator.canShare && navigator.canShare({ files: [file] })); }
+	/* Share pictures as templates, not shown (owner, 2 Nov 2026; every campaign on this file but Community dogs, which
+	   stays as it was): the Share button sends the story on a phone, the post elsewhere (the other one, then the link
+	   preview image, if unset), with the message and link; the link alone where files can't go. */
+	var cdFrozen = !!document.querySelector('.aw-camp--community-dogs');
+	function picKind() {
+		if (cdFrozen) return 'og';
+		var phone = window.matchMedia && window.matchMedia('(max-width: 767px)').matches;
+		return [phone ? 'story' : 'post', phone ? 'post' : 'story', 'og'].filter(function (k) { return k === 'og' ? sh.og && sh.og.image : sh[k]; })[0] || '';
+	}
 	/* Phone: one share with the picture, the message and the link (WhatsApp, Telegram and Facebook keep all three; Instagram
 	   keeps the picture, so the link is on the clipboard for its Link sticker). */
 	function shareAll(where) {
 		if (navigator.clipboard) navigator.clipboard.writeText(sh.url).catch(function () {});
-		getFile('og').then(function (file) {
+		getFile(picKind()).then(function (file) {
 			var data = canShareFile(file) ? { files: [file], title: sh.title, text: sh.text + ' ' + sh.url } : { title: sh.title, text: sh.text, url: sh.url };
 			return navigator.share(data);
 		}).catch(function () {});
@@ -154,7 +163,7 @@
 			var io = new IntersectionObserver(function (en) {
 				if (!en[0].isIntersecting) return;
 				io.disconnect();
-				['og', 'story', 'post'].forEach(getFile);
+				if (cdFrozen) ['og', 'story', 'post'].forEach(getFile); else getFile(picKind());
 			}, { rootMargin: '400px' });
 			io.observe(where);
 		}
@@ -203,9 +212,34 @@
 		wrap.appendChild(list);
 		box.appendChild(wrap);
 	}
-	if (!document.querySelector('.aw-letter')) {
+	if (!document.querySelector('.aw-letter') && cdFrozen) {
 		var pageKit = document.querySelector('.aw-camp-share-kit');
 		if (pageKit) sharePics(pageKit, pageKit);
+	}
+	/* Share redesign, 2 Nov 2026 (Diwali, Supreme Court and any campaign without a letter tool, not Community dogs): no
+	   pictures on the page. Where the browser has a share sheet, a Share button first in the server's share bar
+	   (campaign-tools.php) sends the campaign's picture with the message and link (shareAll). */
+	if (!document.querySelector('.aw-letter') && !cdFrozen && canShare && sh.url) {
+		var pageBar = document.querySelector('.aw-camp-share-kit .kit-share');
+		if (pageBar) {
+			var nb = document.createElement('button');
+			nb.type = 'button';
+			nb.className = 'kit-share-btn kit-share-native';
+			nb.dataset.kitShare = 'native';
+			nb.setAttribute('aria-label', 'Share');
+			nb.title = 'Share';
+			nb.innerHTML = '<span class="kit-ico kit-ico--share" aria-hidden="true"></span><span class="kit-share-name" aria-hidden="true">Share</span>';
+			nb.addEventListener('click', function () { shareAll(pageBar); });
+			pageBar.insertBefore(nb, pageBar.querySelector('.kit-share-btn'));
+			if ('IntersectionObserver' in window) { // fetch the picture once the bar is near, so the tap opens the sheet at once
+				var pio = new IntersectionObserver(function (en) {
+					if (!en[0].isIntersecting) return;
+					pio.disconnect();
+					getFile(picKind());
+				}, { rootMargin: '400px' });
+				pio.observe(pageBar);
+			}
+		}
 	}
 
 	/* Letter tool. */
@@ -493,7 +527,7 @@
 				+ (holder ? '' : '<h3 class="aw-letter-share-head" id="aw-letter-share-title"></h3>'
 				+ '<p class="aw-letter-share-lede">One letter is one voice. Send this page to three people who care about animals, so each of them can send their own objection' + (sh.close ? ' before ' + sh.close : '') + '.</p>')
 				+ '<p class="aw-letter-share"></p></div>'
-				+ (og.image ? '<figure class="aw-letter-share-preview" aria-label="What people will see">'
+				+ (cdFrozen && og.image ? '<figure class="aw-letter-share-preview" aria-label="What people will see">'
 					+ '<img src="' + esc(og.image) + '" alt="" width="1200" height="630" loading="lazy" decoding="async">'
 					+ '<figcaption><span class="aw-letter-share-host">' + esc(og.host) + '</span>'
 					+ '<strong>' + esc(og.title) + '</strong>'
@@ -503,7 +537,7 @@
 			else confirmBox.parentNode.insertBefore(sendShare, confirmBox);
 			var row = sendShare.querySelector('.aw-letter-share');
 			shareKit(row);
-			sharePics(sendShare, row);
+			if (cdFrozen) sharePics(sendShare, row); // the pictures are templates for a share elsewhere (2 Nov 2026)
 		}
 		if (shareHead) shareHead.textContent = sent ? 'Sent? Now get three more letters in.' : 'Get three more letters in.';
 		if (sent && sendShare.classList.contains('is-in-section') && !form.querySelector('.aw-letter-next')) { // a pointer from the letter tool to the Share section
