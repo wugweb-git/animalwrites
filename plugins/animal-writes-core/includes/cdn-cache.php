@@ -110,3 +110,83 @@ add_action(
 	10,
 	3
 );
+
+/**
+ * Animal Writes → Check site: a "Shared cache (CDN)" section for both lifetimes (owner, 2 Nov 2026). Core Settings API
+ * and core markup only. Whole seconds: 0 (off; for the long one, the same as the short one) or 60 to 3600; anything
+ * else is clamped into that range. The header a public page gets now is shown under the fields.
+ *
+ * @param mixed $v Submitted value.
+ */
+function aw_cdn_ttl_sanitize( $v ) {
+	$v = (int) round( (float) $v );
+	return $v <= 0 ? 0 : max( 60, min( 3600, $v ) );
+}
+
+add_action(
+	'admin_init',
+	function () {
+		register_setting( 'aw_cdn', 'aw_cdn_ttl', array( 'type' => 'integer', 'default' => 0, 'sanitize_callback' => 'aw_cdn_ttl_sanitize', 'show_in_rest' => false ) );
+		register_setting( 'aw_cdn', 'aw_cdn_ttl_long', array( 'type' => 'integer', 'default' => 3600, 'sanitize_callback' => 'aw_cdn_ttl_sanitize', 'show_in_rest' => false ) );
+		add_settings_section( 'aw_cdn', 'Shared cache (CDN)', 'aw_cdn_settings_intro', 'aw-cdn' );
+		add_settings_field( 'aw_cdn_ttl', 'Public pages', 'aw_cdn_settings_field', 'aw-cdn', 'aw_cdn', array( 'label_for' => 'aw_cdn_ttl', 'default' => 0, 'note' => 'Home, News, hubs, Directory places and campaigns. 0 = off.' ) );
+		add_settings_field( 'aw_cdn_ttl_long', 'Listings, Library items and Resources', 'aw_cdn_settings_field', 'aw-cdn', 'aw_cdn', array( 'label_for' => 'aw_cdn_ttl_long', 'default' => 3600, 'note' => '0 = the same as public pages.' ) );
+	}
+);
+
+/** Section text. */
+function aw_cdn_settings_intro() {
+	echo '<p>' . esc_html( 'Seconds the CDN keeps a copy of a page for visitors who are not logged in: 0, or 60 to 3600. A published change shows when the copy runs out.' ) . '</p>';
+}
+
+/**
+ * One lifetime field.
+ *
+ * @param array $args label_for (the option), default, note.
+ */
+function aw_cdn_settings_field( $args ) {
+	$id = (string) $args['label_for'];
+	printf(
+		'<input type="number" class="small-text" id="%1$s" name="%1$s" value="%2$d" min="0" max="3600" step="1"> %3$s<p class="description">%4$s</p>',
+		esc_attr( $id ),
+		(int) get_option( $id, (int) $args['default'] ),
+		esc_html( 'seconds' ),
+		esc_html( (string) $args['note'] )
+	);
+}
+
+/** The Cache-Control header public pages get with the saved options ('' when off). */
+function aw_cdn_header_now( bool $long ): string {
+	$ttl = aw_cdn_ttl_sanitize( get_option( 'aw_cdn_ttl', 0 ) );
+	if ( ! $ttl ) {
+		return '';
+	}
+	if ( $long ) {
+		$l   = aw_cdn_ttl_sanitize( get_option( 'aw_cdn_ttl_long', 3600 ) );
+		$ttl = $l > 0 ? max( $ttl, $l ) : $ttl;
+		return 'public, s-maxage=' . $ttl . ', stale-while-revalidate=600';
+	}
+	return 'public, s-maxage=' . $ttl;
+}
+
+add_action(
+	'aw_site_check_after',
+	function () {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+		settings_errors( 'general' ); // options.php's "Settings saved." (core prints it only under the Settings menu)
+		echo '<form method="post" action="' . esc_url( admin_url( 'options.php' ) ) . '">';
+		settings_fields( 'aw_cdn' );
+		do_settings_sections( 'aw-cdn' );
+		$short = aw_cdn_header_now( false );
+		$long  = aw_cdn_header_now( true );
+		echo '<p>' . esc_html( 'Header now:' ) . '</p><ul>';
+		echo '<li>' . esc_html( 'Public pages: ' ) . ( $short ? '<code>Cache-Control: ' . esc_html( $short ) . '</code>' : esc_html( 'none (CDN caching off)' ) ) . '</li>';
+		echo '<li>' . esc_html( 'Listings, Library items and Resources: ' ) . ( $long ? '<code>Cache-Control: ' . esc_html( $long ) . '</code>' : esc_html( 'none (CDN caching off)' ) ) . '</li>';
+		echo '</ul>';
+		submit_button();
+		echo '</form>';
+	},
+	20
+);

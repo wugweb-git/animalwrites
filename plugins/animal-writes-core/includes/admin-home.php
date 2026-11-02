@@ -121,7 +121,7 @@ function aw_core_overview_page() {
 			array( 'To review', 'Items waiting for a person (from AW Sourcing).', aw_core_link( 'Sourcing → To review', 'admin.php?page=aw-review' ), $st['review'] ),
 			array( 'Scheduled tasks', 'Who triggers WP-Cron (Hostinger, GitHub, UptimeRobot) and the longest gap; dashboard widget.', aw_core_link( 'Dashboard', 'index.php' ), $st['cron'] ),
 			array( 'Daily backup', 'Database and deployed code into ~/backups on the server, kept 14 days.', $admin ? aw_core_link( 'Check site', 'admin.php?page=aw-site-check' ) : '—', $st['backup'] ),
-			array( 'Deploys and cache', 'LiteSpeed purged once after each deploy; CDN lifetime for anonymous public pages.', '—', $st['deploy'] . ' ' . $st['cdn'] ),
+			array( 'Deploys and cache', 'LiteSpeed purged once after each deploy; CDN lifetime for anonymous public pages.', $admin ? aw_core_link( 'Check site → Shared cache (CDN)', 'admin.php?page=aw-site-check' ) : '—', $st['deploy'] . ' ' . $st['cdn'] ),
 			array( 'Staging', 'staging.animalwrites.in: same code, database without personal data, marked in the admin bar.', '—', $st['stage'] ),
 		),
 	);

@@ -564,9 +564,6 @@ function aw_enrich_sideload( $url, $lid, $alt, $referer = '' ) {
 /** After a listing changes: its page cache. */
 function aw_enrich_after_change( $lid ) {
 	clean_post_cache( $lid );
-	if ( function_exists( 'aw_cdn_purge_post' ) ) {
-		aw_cdn_purge_post( $lid );
-	}
 	do_action( 'litespeed_purge_post', $lid );
 }
 

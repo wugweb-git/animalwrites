@@ -54,4 +54,5 @@ hPanel → **Websites** → animalwrites.in → **Manage** → **Performance** �
 
 ## Changed
 
+- 2 Nov 2026: both lifetimes get fields: Animal Writes → Check site → Shared cache (CDN) (whole seconds, 0 or 60–3600, with the header pages get now).
 - 1 Nov 2026: `aw_cdn_ttl` 300 → 900 s (Home, News, hubs, campaigns). The CDN settings in B were proposed the same day.
