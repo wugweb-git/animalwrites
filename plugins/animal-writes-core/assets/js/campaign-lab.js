@@ -474,7 +474,6 @@
 		if (pics.length) {
 			var box = document.createElement('div');
 			box.className = 'aw-share-pics';
-			box.innerHTML = '<p class="aw-share-pics-head"><strong>Or share a picture</strong> ' + (canShare ? 'Tap one to share it. The link is copied for the Link sticker.' : 'Click one to save it. The link is copied too.') + '</p>';
 			var list = document.createElement('div');
 			list.className = 'aw-share-pics-list';
 			pics.forEach(function (k) {
@@ -488,8 +487,8 @@
 				img.loading = 'lazy';
 				img.decoding = 'async';
 				p.appendChild(img);
-				p.insertAdjacentHTML('beforeend', '<span><span class="kit-ico kit-ico--' + (canShare ? 'share' : 'download') + '" aria-hidden="true"></span>' + k[2] + '</span>');
-				p.setAttribute('aria-label', k[2] + ': ' + (canShare ? 'share the ' : 'save the ') + k[1] + ' picture'); // the name starts with the visible text (WCAG 2.5.3)
+				p.setAttribute('aria-label', (canShare ? 'Share the ' : 'Save the ') + k[1] + ' picture');
+				p.title = p.getAttribute('aria-label');
 				p.addEventListener('click', function () { sharePicture(k[0], done); });
 				list.appendChild(p);
 			});
