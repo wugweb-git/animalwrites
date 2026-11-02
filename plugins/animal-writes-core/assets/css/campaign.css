@@ -834,3 +834,7 @@
 	.aw-camp :is(#help, #compare) .wp-block-table { overflow-x: visible; }
 	.aw-camp--diwali .aw-camp-dates :is(.aw-date, .aw-date time) { white-space: normal; } /* the three dates wrap inside their third of the row instead of running past the screen */
 }
+
+/* Diwali Who to call: the table wraps to fit, no sideways scrolling (owner, 2 Nov 2026) */
+.aw-camp--diwali #help .wp-block-table { overflow-x: visible; }
+.aw-camp--diwali #help .wp-block-table :is(th, td) { white-space: normal; overflow-wrap: anywhere; }
