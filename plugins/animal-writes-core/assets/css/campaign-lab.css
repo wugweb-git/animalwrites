@@ -717,3 +717,32 @@
 	.aw-camp :is(#next, #next-closed) .aw-camp-steps > li { transition: none; }
 	.aw-camp :is(#next, #next-closed) .aw-camp-steps > li:hover { transform: none; }
 }
+
+/* What's happening timeline on the Lab rules page (owner, 2 Nov 2026: "Yes, Lab too"): the Diwali and Supreme Court
+   block from campaign.css, scoped to this page. It restyles the section's own date list, so no page text changes. */
+.aw-camp--lab-rules :has(> .aw-camp-dates) { container: aw-happening / inline-size; }
+.aw-camp--lab-rules .aw-camp-dates { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; margin: var(--kit-space-5) 0; }
+.aw-camp--lab-rules .aw-camp-dates li { position: relative; margin: 0; padding: 0 0 var(--kit-space-5) var(--kit-space-6); border: 0; }
+.aw-camp--lab-rules .aw-camp-dates li:last-child { padding-bottom: 0; }
+.aw-camp--lab-rules .aw-camp-dates li::before { content: ""; position: absolute; left: calc(var(--kit-space-3) / 2 - var(--kit-border-width) / 2); top: var(--kit-space-4); bottom: 0; border-left: var(--kit-border-width) solid var(--kit-color-line); } /* the connecting line */
+.aw-camp--lab-rules .aw-camp-dates li:last-child::before { display: none; }
+.aw-camp--lab-rules .aw-camp-dates li::after { content: ""; position: absolute; left: 0; top: var(--kit-space-2); width: var(--kit-space-3); height: var(--kit-space-3); border-radius: 50%; background: var(--kit-color-bg); border: var(--kit-border-width) solid var(--camp-meta); box-sizing: border-box; } /* the dot */
+.aw-camp--lab-rules .aw-camp-dates .is-key::after { background: var(--camp-mark); border-color: var(--camp-mark); width: var(--kit-space-4); height: var(--kit-space-4); left: calc(var(--kit-space-3) / 2 - var(--kit-space-4) / 2); top: calc(var(--kit-space-2) - (var(--kit-space-4) - var(--kit-space-3)) / 2); }
+.aw-camp--lab-rules .aw-camp-dates-when { display: block; font-size: var(--kit-type-h3); font-weight: var(--kit-weight-bold); letter-spacing: normal; line-height: var(--kit-leading-heading); color: var(--kit-color-ink); }
+.aw-camp--lab-rules .aw-camp-dates-when .kit-ico { display: none; }
+.aw-camp--lab-rules .aw-camp-dates-when :is(.aw-date, time) { white-space: normal; } /* a date wraps inside a narrow column (Diwali beside its photo at 768) instead of running past it */
+.aw-camp--lab-rules .aw-camp-dates .is-key .aw-camp-dates-when { color: var(--kit-color-ink); text-decoration: underline; text-decoration-color: var(--camp-mark); text-decoration-thickness: var(--kit-space-1); text-underline-offset: var(--kit-space-1); }
+.aw-camp--lab-rules .aw-camp-dates-what { display: block; margin-top: var(--kit-space-1); font-size: var(--kit-type-base); line-height: var(--kit-leading-body); color: var(--camp-meta); }
+@container aw-happening (min-width: 24rem) {
+	.aw-camp--lab-rules .aw-camp-dates { grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: var(--kit-space-4); row-gap: var(--kit-space-5); }
+	.aw-camp--lab-rules .aw-camp-dates li { padding: var(--kit-space-5) 0 0; }
+	.aw-camp--lab-rules .aw-camp-dates li::before { display: block; left: 0; right: calc(-1 * var(--kit-space-4)); top: calc(var(--kit-space-3) / 2 - var(--kit-border-width) / 2); bottom: auto; border-left: 0; border-top: var(--kit-border-width) solid var(--kit-color-line); } /* the line runs across the row, through the gap */
+	.aw-camp--lab-rules .aw-camp-dates li:nth-child(3n)::before, .aw-camp--lab-rules .aw-camp-dates li:last-child::before { right: 0; }
+	.aw-camp--lab-rules .aw-camp-dates li::after { top: 0; }
+	.aw-camp--lab-rules .aw-camp-dates .is-key::after { left: calc((var(--kit-space-3) - var(--kit-space-4)) / 2); top: calc((var(--kit-space-3) - var(--kit-space-4)) / 2); }
+}
+@container aw-happening (min-width: 60rem) {
+	.aw-camp--lab-rules .aw-camp-dates { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); }
+	.aw-camp--lab-rules .aw-camp-dates li:nth-child(3n)::before { right: calc(-1 * var(--kit-space-4)); }
+	.aw-camp--lab-rules .aw-camp-dates li:last-child::before { right: 0; }
+}
