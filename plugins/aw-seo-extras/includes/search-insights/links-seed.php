@@ -5,8 +5,9 @@
  *   Telegram, Reddit, X, LinkedIn; the Instagram tables are mentions and tags, not links, so they are left out). Where
  *   the read names no linked page, the home page is used and the note says so.
  * - The OpenRush backlink index, read 25 Oct 2026.
- * Run on the schema upgrade, on opening the Links tab, or with `wp aw-si links seed`. Marked done (option
- * aw_si_links_seeded) only when every row was written; a repeat only moves dates, never types or hidden flags.
+ * - Second batch: Search Console → Links, read 2 Nov 2026 (data/links-2026-11-02.php, option aw_si_links_seeded_20261102).
+ * Run on the schema upgrade, on opening the Links tab, or with `wp aw-si links seed`. Each batch is marked done (its own
+ * option) only when every row was written; a repeat only moves dates, never types or hidden flags.
  *
  * @package aw-seo-extras
  */
@@ -106,33 +107,53 @@ function aw_si_links_seed_data(): array {
 }
 
 /**
- * Add the seed rows once.
+ * The seed batches: option that marks a batch done => its rows.
+ * A new batch gets its own option, so batches already done never run again.
+ */
+function aw_si_links_seed_batches(): array {
+	return array(
+		'aw_si_links_seeded'          => 'aw_si_links_seed_data',
+		'aw_si_links_seeded_20261102' => fn() => (array) require __DIR__ . '/data/links-2026-11-02.php',
+	);
+}
+
+/**
+ * Add each seed batch once.
  *
  * @param bool $force Run again even when marked done or after Delete data (a repeat only moves dates).
- * @return array Counts, or an empty array when already seeded.
+ * @return array Counts, or an empty array when every batch is already seeded.
  */
 function aw_si_links_seed( bool $force = false ): array {
 	// After "Delete Search Insights data" (aw_si_off is set) the built-in links stay deleted; only --force brings them back.
-	if ( ! $force && ( get_option( 'aw_si_links_seeded' ) || get_option( 'aw_si_off' ) ) ) {
+	if ( ! $force && get_option( 'aw_si_off' ) ) {
 		return array();
 	}
-	$count = array(
-		'added'   => 0,
-		'updated' => 0,
-		'failed'  => 0,
-	);
-	foreach ( aw_si_links_seed_data() as $row ) {
-		$n = aw_si_link_put( $row );
-		if ( 1 === $n ) {
-			++$count['added'];
-		} elseif ( $n >= 0 ) {
-			++$count['updated'];
-		} else {
-			++$count['failed'];
+	$count = array();
+	foreach ( aw_si_links_seed_batches() as $option => $rows ) {
+		if ( ! $force && get_option( $option ) ) {
+			continue;
 		}
-	}
-	if ( ! $count['failed'] ) {
-		update_option( 'aw_si_links_seeded', time(), false );
+		$c = array(
+			'added'   => 0,
+			'updated' => 0,
+			'failed'  => 0,
+		);
+		foreach ( $rows() as $row ) {
+			$n = aw_si_link_put( (array) $row );
+			if ( 1 === $n ) {
+				++$c['added'];
+			} elseif ( $n >= 0 ) {
+				++$c['updated'];
+			} else {
+				++$c['failed'];
+			}
+		}
+		if ( ! $c['failed'] ) {
+			update_option( $option, time(), false );
+		}
+		foreach ( $c as $k => $v ) {
+			$count[ $k ] = ( $count[ $k ] ?? 0 ) + $v;
+		}
 	}
 	return $count;
 }
