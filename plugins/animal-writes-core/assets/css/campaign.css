@@ -954,7 +954,7 @@
    and the share bar as white 44px icons only (each keeps its aria-label and title). Nothing scrolls sideways. */
 .aw-camp.aw-camp #share { background: linear-gradient(160deg, var(--camp-mark), color-mix(in srgb, var(--camp-mark) 75%, #000)); color: var(--camp-on-mark); }
 .aw-camp.aw-camp #share :is(h2, h3, p, a:not(.kit-share-btn):not(.wp-element-button), .aw-date, .aw-date .kit-ico) { color: var(--camp-on-mark); }
-.aw-camp.aw-camp #share h2 { font-size: var(--kit-type-h1); line-height: var(--kit-leading-heading); }
+.aw-camp.aw-camp #share.aw-camp-section h2 { font-size: var(--kit-type-h1) !important; line-height: var(--kit-leading-heading); }
 .aw-camp.aw-camp #share:has(> .aw-share-block), .aw-camp.aw-camp #share :has(> .aw-share-block) { container: aw-share / inline-size; }
 .aw-camp.aw-camp #share .aw-camp-share-kit.aw-share-block { display: grid; gap: var(--kit-space-5); margin-top: var(--kit-space-6); padding: 0; border-radius: 0; background: none; box-shadow: none; grid-template-areas: "pics" "cta" "bar"; }
 .aw-camp.aw-camp #share .aw-share-block > .aw-share-cta { grid-area: cta; }
