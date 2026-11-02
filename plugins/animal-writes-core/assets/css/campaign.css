@@ -109,6 +109,13 @@
 @media (max-width: 767px) {
 	.aw-camp--diwali .kit-hero .wp-block-buttons > .wp-block-button ~ .wp-block-button { display: none; }
 	.aw-camp--diwali #help .wp-block-table :is(th, td) { font-size: var(--kit-type-base); }
+	/* Law and action cards: the icon beside the heading, not on a line of its own, so each card stays within 600px
+	   (Layout rules 10) while the cards narrow enough for more of the next card to show (rule 12) */
+	.aw-camp--diwali .aw-camp-grid > .aw-camp-card { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: var(--kit-space-3); align-content: start; flex-basis: calc(100% - var(--kit-space-6)); }
+	.aw-camp--diwali .aw-camp-grid > .aw-camp-card > * { grid-column: 1 / -1; }
+	.aw-camp--diwali .aw-camp-grid > .aw-camp-card > .aw-camp-card-ico { grid-column: 1; align-self: center; margin-bottom: 0; }
+	.aw-camp--diwali .aw-camp-grid > .aw-camp-card > .aw-camp-card-ico + h3 { grid-column: 2; align-self: center; margin-block: 0; }
+	.aw-camp--diwali .aw-camp-grid > .aw-camp-card > .aw-camp-card-ico + h3 + * { margin-top: var(--kit-space-3); }
 }
 /* Sections at most 720px from 768 (owner, 2 Nov 2026), from content, tokens and the theme breakpoints only */
 /* What the law says: 16px (--kit-space-4) from the opening line to the cards */
