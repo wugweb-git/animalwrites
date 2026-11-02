@@ -473,8 +473,9 @@ add_filter(
 /*
  * Every date carries the calendar icon (owner, 15–16 Oct 2026), also inside sentences: a date written in a page's,
  * guide's or campaign's text ("29 November 2025", "8 Oct 2026", "November 29, 2025", "October 2026") gets the site's
- * date component (icon + <time datetime>) when shown, written in the one site format (AW_DATE_FORMAT: "29 Nov 2025"; a month alone "Oct 2026"). Only visible text in text blocks, classic content and card excerpts is touched (not headings), never
- * a date already inside <time>; the stored text is not changed.
+ * date component (icon + <time datetime>) when shown, written in the one site format (AW_DATE_FORMAT: "29 Nov 2025"; a month alone "Oct 2026"). Only visible text in text blocks, classic content and an item's own excerpt is touched (not headings), never
+ * a date already inside <time>; the stored text is not changed. A card's summary (.kit-card-sum) stays plain text (hub-blocks.php):
+ * it is skipped here too, since a page whose content holds a query loop (Library) runs this over its cards through the_content.
  */
 function aw_inline_dates( $html ) {
 	static $re = '/(?<![\w-])(?:(?<from>\d{1,2})(?:st|nd|rd|th)?\s*[–—-]\s*(?=\d))?(?:(?<d1>\d{1,2})(?:st|nd|rd|th)?\s+)?(?<mon>January|February|March|April|May|June|July|August|September|October|November|December|Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sept?|Oct|Nov|Dec)\.?(?:\s+(?<d2>\d{1,2})(?:st|nd|rd|th)?,)?\s+(?<yr>(?:19|20)\d{2})(?![\w-])/u'; // a range "20–27 Jan 2025" is one date
@@ -483,6 +484,7 @@ function aw_inline_dates( $html ) {
 	}
 	$parts = preg_split( '/(<[^>]+>)/', $html, -1, PREG_SPLIT_DELIM_CAPTURE );
 	$skip  = 0; // inside <time>, <script>, <style> or a heading
+	$sum   = 0; // 1: a card summary box opened, 2: inside its paragraph
 	foreach ( $parts as $k => $part ) {
 		if ( '' === $part ) {
 			continue;
@@ -492,10 +494,16 @@ function aw_inline_dates( $html ) {
 				++$skip;
 			} elseif ( preg_match( '#^</(time|script|style|h[1-6])>#i', $part ) ) {
 				$skip = max( 0, $skip - 1 );
+			} elseif ( preg_match( '#^<[a-z][^>]*\sclass="[^"]*\bkit-card-sum\b#i', $part ) ) {
+				$sum = 1;
+			} elseif ( 1 === $sum && preg_match( '#^<p\b#i', $part ) ) {
+				$sum = 2;
+			} elseif ( 2 === $sum && preg_match( '#^</p>#i', $part ) ) {
+				$sum = 0;
 			}
 			continue;
 		}
-		if ( $skip ) {
+		if ( $skip || 2 === $sum ) {
 			continue;
 		}
 		$parts[ $k ] = preg_replace_callback(
