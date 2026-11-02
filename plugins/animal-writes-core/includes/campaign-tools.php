@@ -1007,7 +1007,8 @@ function aw_sc_rows_a11y( $html ) {
 			aw_sc_row_attrs( $p, $head );
 			$list = false;
 		} elseif ( 'DIV' === $tag && $p->has_class( 'aw-camp-row' ) && '' !== $head ) {
-			$p->set_attribute( 'aria-labelledby', $head ); // the news row: its cards are links, so only the name is added
+			$p->set_attribute( 'tabindex', '0' ); // the news row: focusable, so the arrow keys scroll it (Layout rules 11)
+			$p->set_attribute( 'aria-labelledby', $head );
 		}
 	}
 	return $p->get_updated_html();
