@@ -316,11 +316,7 @@ add_shortcode(
 <?php if ( aw_camp_is_lab_page( $id ) ) : // the Lab rules page keeps its letter tool on one page, as on the morning of 2 Nov 2026 (owner) ?>
 	<?php
 	// Fields in the theme's form markup (kits-core forms.php aw_field()): kit-field, label, kit-field-control with the
-	// field icon, the error line {id}-error; placeholders are the form kit's own (kits_field_dict()).
-	$ph = function ( $k ) {
-		$d = function_exists( 'kits_field_dict' ) ? kits_field_dict() : array();
-		return isset( $d[ $k ]['placeholder'] ) ? ' placeholder="' . esc_attr( $d[ $k ]['placeholder'] ) . '"' : '';
-	};
+	// field icon and the error line {id}-error. Each placeholder repeats its label in plain words (owner, 2 Nov 2026).
 	?>
 	<div class="aw-letter-inputs">
 		<fieldset class="aw-letter-grounds-pick">
@@ -330,16 +326,16 @@ add_shortcode(
 		<div class="aw-letter-sign">
 		<p class="aw-letter-head"><span class="aw-letter-step">2</span>Sign it</p>
 		<div class="kit-field kit-field--text aw-letter-field"><label for="aw-letter-name">Your name <span aria-hidden="true">*</span></label>
-			<div class="kit-field-control"><span class="kit-ico kit-ico--name kit-field-icon" aria-hidden="true"></span><input id="aw-letter-name" aria-describedby="aw-letter-name-error" name="name" type="text" autocomplete="name" enterkeyhint="next" required maxlength="80"<?php echo $ph( 'name' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in $ph ?>></div>
+			<div class="kit-field-control"><span class="kit-ico kit-ico--name kit-field-icon" aria-hidden="true"></span><input id="aw-letter-name" aria-describedby="aw-letter-name-error" name="name" type="text" autocomplete="name" enterkeyhint="next" required maxlength="80" placeholder="Your name"></div>
 			<span class="kit-field-message kit-field-error" id="aw-letter-name-error" aria-live="polite"></span></div>
 		<div class="kit-field kit-field--text aw-letter-field"><label for="aw-letter-city">Your city <span aria-hidden="true">*</span></label>
-			<div class="kit-field-control"><span class="kit-ico kit-ico--map-pin kit-field-icon" aria-hidden="true"></span><input id="aw-letter-city" aria-describedby="aw-letter-city-error" name="city" type="text" autocomplete="address-level2" enterkeyhint="next" required maxlength="60"></div>
+			<div class="kit-field-control"><span class="kit-ico kit-ico--map-pin kit-field-icon" aria-hidden="true"></span><input id="aw-letter-city" aria-describedby="aw-letter-city-error" name="city" type="text" autocomplete="address-level2" enterkeyhint="next" required maxlength="60" placeholder="Your city"></div>
 			<span class="kit-field-message kit-field-error" id="aw-letter-city-error" aria-live="polite"></span></div>
 		<div class="kit-field kit-field--email aw-letter-field aw-letter-email"><label for="aw-letter-email">Your email <span aria-hidden="true">*</span></label>
-			<div class="kit-field-control"><span class="kit-ico kit-ico--mail kit-field-icon" aria-hidden="true"></span><input id="aw-letter-email" aria-describedby="aw-letter-email-error" name="email" type="email" inputmode="email" autocomplete="email" enterkeyhint="next" required maxlength="190"<?php echo $ph( 'email' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in $ph ?>></div>
+			<div class="kit-field-control"><span class="kit-ico kit-ico--mail kit-field-icon" aria-hidden="true"></span><input id="aw-letter-email" aria-describedby="aw-letter-email-error" name="email" type="email" inputmode="email" autocomplete="email" enterkeyhint="next" required maxlength="190" placeholder="Your email"></div>
 			<span class="kit-field-message kit-field-error" id="aw-letter-email-error" aria-live="polite"></span></div>
 		<div class="kit-field kit-field--textarea aw-letter-field"><label for="aw-letter-own">Add a line in your own words <span class="kit-optional aw-letter-hint">(optional, up to 300 characters)</span></label>
-			<div class="kit-field-control"><textarea id="aw-letter-own" name="own" maxlength="300" rows="3"></textarea></div></div>
+			<div class="kit-field-control"><span class="kit-ico kit-ico--file kit-field-icon" aria-hidden="true"></span><textarea id="aw-letter-own" name="own" maxlength="300" rows="3" placeholder="Add a line in your own words"></textarea></div></div>
 		</div>
 	</div>
 	<div class="aw-letter-out">
@@ -349,7 +345,7 @@ add_shortcode(
 		<div class="aw-letter-preview" aria-live="polite" tabindex="0" aria-label="Your letter"></div>
 		<div class="kit-field kit-field--checkbox aw-letter-optin"><label class="kit-checkbox kit-check" for="aw-letter-optin"><input type="checkbox" id="aw-letter-optin" name="optin" value="1" checked> <span><?php echo esc_html( defined( 'AW_CL_OPTIN' ) ? AW_CL_OPTIN : '' ); ?></span></label></div>
 		<div class="kit-field kit-field--tel aw-letter-field"><label for="aw-letter-wa">WhatsApp number <span class="kit-optional aw-letter-hint">(optional)</span></label>
-			<div class="kit-field-control"><span class="kit-ico kit-ico--brand-whatsapp kit-field-icon" aria-hidden="true"></span><input id="aw-letter-wa" name="whatsapp" type="tel" inputmode="tel" autocomplete="tel" enterkeyhint="done" maxlength="16"<?php echo $ph( 'whatsapp' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in $ph ?>></div></div>
+			<div class="kit-field-control"><span class="kit-ico kit-ico--brand-whatsapp kit-field-icon" aria-hidden="true"></span><input id="aw-letter-wa" name="whatsapp" type="tel" inputmode="tel" autocomplete="tel" enterkeyhint="done" maxlength="16" placeholder="WhatsApp number"></div></div>
 		<div class="kit-field kit-field--checkbox aw-letter-optin"><label class="kit-checkbox kit-check" for="aw-letter-wa-optin"><input type="checkbox" id="aw-letter-wa-optin" name="wa_optin" value="1" checked> <span>OK to contact me on WhatsApp.</span></label></div>
 		<p class="kit-form-status aw-letter-error" role="alert" hidden>Add your name, city and email first.</p>
 		<?php echo function_exists( 'kits_altcha_widget' ) ? str_replace( '<div class="kit-captcha', '<div data-placed class="kit-captcha', kits_altcha_widget( 'invisible' ) ) : ''; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in kits_altcha_widget; the sign-up's bot check (campaign.js) ?>

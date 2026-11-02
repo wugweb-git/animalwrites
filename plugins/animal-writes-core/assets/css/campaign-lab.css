@@ -567,3 +567,7 @@
 @media (min-width: 1200px) { .aw-camp--lab-rules .aw-camp-row { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .aw-camp--lab-rules .aw-camp-row .wp-block-post-template > li { min-width: 0; scroll-snap-align: none; }
 .aw-camp--lab-rules #compare { --kit-table-min: 0; }
+
+/* Letter tool: the own-words box carries the field icon too, at its first line (the kit sets the icon and its room for one-line fields only) */
+.aw-camp--lab-rules .aw-letter .kit-field--textarea .kit-field-control > .kit-field-icon { top: var(--s-3); transform: none; }
+.aw-camp--lab-rules .aw-letter .kit-field-control:has(> .kit-field-icon) textarea { padding-left: calc(var(--s-3) + 1.25rem + var(--s-2)); }
