@@ -314,6 +314,14 @@ add_shortcode(
 		?>
 <form class="aw-letter" data-letter="<?php echo esc_attr( wp_json_encode( $data ) ); ?>" novalidate>
 <?php if ( aw_camp_is_lab_page( $id ) ) : // the Lab rules page keeps its letter tool on one page, as on the morning of 2 Nov 2026 (owner) ?>
+	<?php
+	// Fields in the theme's form markup (kits-core forms.php aw_field()): kit-field, label, kit-field-control with the
+	// field icon, the error line {id}-error; placeholders are the form kit's own (kits_field_dict()).
+	$ph = function ( $k ) {
+		$d = function_exists( 'kits_field_dict' ) ? kits_field_dict() : array();
+		return isset( $d[ $k ]['placeholder'] ) ? ' placeholder="' . esc_attr( $d[ $k ]['placeholder'] ) . '"' : '';
+	};
+	?>
 	<div class="aw-letter-inputs">
 		<fieldset class="aw-letter-grounds-pick">
 			<legend><span class="aw-letter-step">1</span>Choose your grounds <span class="aw-letter-picked" aria-live="polite"></span></legend>
@@ -321,14 +329,17 @@ add_shortcode(
 		</fieldset>
 		<div class="aw-letter-sign">
 		<p class="aw-letter-head"><span class="aw-letter-step">2</span>Sign it</p>
-		<p class="aw-letter-field"><label for="aw-letter-name">Your name <span aria-hidden="true">*</span></label>
-			<input id="aw-letter-name" name="name" type="text" autocomplete="name" required maxlength="80"></p>
-		<p class="aw-letter-field"><label for="aw-letter-city">Your city <span aria-hidden="true">*</span></label>
-			<input id="aw-letter-city" name="city" type="text" autocomplete="address-level2" required maxlength="60"></p>
-		<p class="aw-letter-field aw-letter-email"><label for="aw-letter-email">Your email <span aria-hidden="true">*</span></label>
-			<input id="aw-letter-email" name="email" type="email" autocomplete="email" required maxlength="190"></p>
-		<p class="aw-letter-field"><label for="aw-letter-own">Add a line in your own words <span class="aw-letter-hint">(optional, up to 300 characters)</span></label>
-			<textarea id="aw-letter-own" name="own" maxlength="300" rows="3"></textarea></p>
+		<div class="kit-field kit-field--text aw-letter-field"><label for="aw-letter-name">Your name <span aria-hidden="true">*</span></label>
+			<div class="kit-field-control"><span class="kit-ico kit-ico--name kit-field-icon" aria-hidden="true"></span><input id="aw-letter-name" aria-describedby="aw-letter-name-error" name="name" type="text" autocomplete="name" enterkeyhint="next" required maxlength="80"<?php echo $ph( 'name' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in $ph ?>></div>
+			<span class="kit-field-message kit-field-error" id="aw-letter-name-error" aria-live="polite"></span></div>
+		<div class="kit-field kit-field--text aw-letter-field"><label for="aw-letter-city">Your city <span aria-hidden="true">*</span></label>
+			<div class="kit-field-control"><span class="kit-ico kit-ico--map-pin kit-field-icon" aria-hidden="true"></span><input id="aw-letter-city" aria-describedby="aw-letter-city-error" name="city" type="text" autocomplete="address-level2" enterkeyhint="next" required maxlength="60"></div>
+			<span class="kit-field-message kit-field-error" id="aw-letter-city-error" aria-live="polite"></span></div>
+		<div class="kit-field kit-field--email aw-letter-field aw-letter-email"><label for="aw-letter-email">Your email <span aria-hidden="true">*</span></label>
+			<div class="kit-field-control"><span class="kit-ico kit-ico--mail kit-field-icon" aria-hidden="true"></span><input id="aw-letter-email" aria-describedby="aw-letter-email-error" name="email" type="email" inputmode="email" autocomplete="email" enterkeyhint="next" required maxlength="190"<?php echo $ph( 'email' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in $ph ?>></div>
+			<span class="kit-field-message kit-field-error" id="aw-letter-email-error" aria-live="polite"></span></div>
+		<div class="kit-field kit-field--textarea aw-letter-field"><label for="aw-letter-own">Add a line in your own words <span class="kit-optional aw-letter-hint">(optional, up to 300 characters)</span></label>
+			<div class="kit-field-control"><textarea id="aw-letter-own" name="own" maxlength="300" rows="3"></textarea></div></div>
 		</div>
 	</div>
 	<div class="aw-letter-out">
@@ -336,27 +347,27 @@ add_shortcode(
 		<p class="aw-letter-meta"><span class="aw-letter-to"><?php echo aw_i( 'mail' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_i() returns a trusted inline SVG icon.
 ?><?php echo esc_html( $to ); ?></span><span><strong>Subject:</strong> <?php echo esc_html( $a['subject'] ); ?></span></p>
 		<div class="aw-letter-preview" aria-live="polite" tabindex="0" aria-label="Your letter"></div>
-		<p class="aw-letter-optin"><input type="checkbox" id="aw-letter-optin" name="optin" value="1" checked> <label for="aw-letter-optin"><?php echo esc_html( defined( 'AW_CL_OPTIN' ) ? AW_CL_OPTIN : '' ); ?></label></p>
-		<p class="aw-letter-field"><label for="aw-letter-wa">WhatsApp number <span class="aw-letter-hint">(optional)</span></label>
-			<input id="aw-letter-wa" name="whatsapp" type="tel" inputmode="tel" autocomplete="tel" maxlength="16"></p>
-		<p class="aw-letter-optin"><input type="checkbox" id="aw-letter-wa-optin" name="wa_optin" value="1" checked> <label for="aw-letter-wa-optin">OK to contact me on WhatsApp.</label></p>
-		<p class="aw-letter-error" role="alert" hidden>Add your name, city and email first.</p>
+		<div class="kit-field kit-field--checkbox aw-letter-optin"><label class="kit-checkbox kit-check" for="aw-letter-optin"><input type="checkbox" id="aw-letter-optin" name="optin" value="1" checked> <span><?php echo esc_html( defined( 'AW_CL_OPTIN' ) ? AW_CL_OPTIN : '' ); ?></span></label></div>
+		<div class="kit-field kit-field--tel aw-letter-field"><label for="aw-letter-wa">WhatsApp number <span class="kit-optional aw-letter-hint">(optional)</span></label>
+			<div class="kit-field-control"><span class="kit-ico kit-ico--brand-whatsapp kit-field-icon" aria-hidden="true"></span><input id="aw-letter-wa" name="whatsapp" type="tel" inputmode="tel" autocomplete="tel" enterkeyhint="done" maxlength="16"<?php echo $ph( 'whatsapp' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in $ph ?>></div></div>
+		<div class="kit-field kit-field--checkbox aw-letter-optin"><label class="kit-checkbox kit-check" for="aw-letter-wa-optin"><input type="checkbox" id="aw-letter-wa-optin" name="wa_optin" value="1" checked> <span>OK to contact me on WhatsApp.</span></label></div>
+		<p class="kit-form-status aw-letter-error" role="alert" hidden>Add your name, city and email first.</p>
 		<?php echo function_exists( 'kits_altcha_widget' ) ? str_replace( '<div class="kit-captcha', '<div data-placed class="kit-captcha', kits_altcha_widget( 'invisible' ) ) : ''; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in kits_altcha_widget; the sign-up's bot check (campaign.js) ?>
 		<div class="aw-letter-routes">
-			<button type="button" class="wp-element-button" data-route="gmail"><?php echo aw_i( 'brand-gmail' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_i() returns a trusted inline SVG icon.
+			<button type="button" class="wp-element-button kit-btn" data-route="gmail"><?php echo aw_i( 'brand-gmail' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_i() returns a trusted inline SVG icon.
 ?>Send with Gmail</button>
-			<button type="button" class="wp-element-button aw-letter-alt" data-route="mailto"><?php echo aw_i( 'mail' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_i() returns a trusted inline SVG icon.
+			<button type="button" class="wp-element-button kit-btn kit-btn--secondary aw-letter-alt" data-route="mailto"><?php echo aw_i( 'mail' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_i() returns a trusted inline SVG icon.
 ?>Email app</button>
-			<button type="button" class="wp-element-button aw-letter-alt" data-route="copy"><?php echo aw_i( 'copy' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_i() returns a trusted inline SVG icon.
+			<button type="button" class="wp-element-button kit-btn kit-btn--secondary aw-letter-alt" data-route="copy"><?php echo aw_i( 'copy' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_i() returns a trusted inline SVG icon.
 ?>Copy letter</button>
 		</div>
 		<p class="aw-letter-copied" role="status"></p>
 		<div class="aw-letter-confirm" hidden>
 			<p><strong>Did you send it?</strong> Check your sent folder. We count your objection once you say it went.</p>
-			<button type="button" class="wp-element-button" data-confirm="yes">Yes, I sent it</button>
-			<button type="button" class="wp-element-button aw-letter-alt" data-confirm="no">Not yet</button>
+			<button type="button" class="wp-element-button kit-btn" data-confirm="yes">Yes, I sent it</button>
+			<button type="button" class="wp-element-button kit-btn kit-btn--secondary aw-letter-alt" data-confirm="no">Not yet</button>
 		</div>
-		<div class="aw-letter-thanks" hidden tabindex="-1">
+		<div class="kit-form-done aw-letter-thanks" hidden tabindex="-1">
 			<p class="aw-letter-thanks-head"><?php echo aw_i( 'check' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_i() returns a trusted inline SVG icon.
 ?><strong>Thank you. Your objection is on its way to CCSEA.</strong></p>
 			<p>Keep the sent email: it is your record. CCSEA may reply to the address you sent from.</p>

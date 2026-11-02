@@ -209,9 +209,7 @@
 .aw-camp--lab-rules :is(.aw-camp-white, .aw-camp-grey) .aw-camp-card:not(:first-child) { background: var(--camp-tile); }
 .aw-camp--lab-rules .aw-letter { --camp-tile: var(--kit-color-bg); padding: var(--kit-space-5); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); box-shadow: 0 0 0 1px var(--kit-color-line), 0 8px 24px rgb(29 20 24 / 0.08); }
 @media (min-width: 768px) { .aw-camp--lab-rules .aw-letter { padding: var(--kit-space-6); } }
-.aw-camp--lab-rules .aw-letter :is(.aw-letter-ground, .aw-letter-field input, .aw-letter-field textarea, .aw-letter-preview) { background: var(--kit-color-raised); }
-.aw-camp--lab-rules .aw-letter :is(.aw-letter-field input, .aw-letter-field textarea) { border: 1px solid var(--kit-color-muted); }
-.aw-camp--lab-rules .aw-letter-ground:not(:hover, :has(input:checked)) { box-shadow: inset 0 0 0 1px var(--kit-color-muted); }
+.aw-camp--lab-rules .aw-letter .aw-letter-preview { background: var(--kit-color-raised); }
 .aw-camp--lab-rules .aw-camp-compare table { background: var(--kit-color-raised); box-shadow: inset 0 0 0 1px var(--kit-color-line); }
 .aw-camp--lab-rules .aw-camp-compare tbody td:nth-child(n) { background: var(--kit-color-raised); border-color: var(--kit-color-line); } /* also the draft column: no tint */
 
@@ -421,21 +419,7 @@
 .aw-letter-picked { font-size: var(--kit-type-sm); font-weight: var(--kit-weight-regular); color: var(--kit-color-muted); }
 .aw-letter-ground-list { display: grid; gap: var(--kit-space-3); grid-template-columns: 1fr; }
 @media (min-width: 768px) { .aw-letter-ground-list { grid-template-columns: repeat(2, 1fr); } }
-.aw-letter-ground {
-	position: relative; display: grid; grid-template-columns: auto 1fr; gap: var(--kit-space-3); align-items: start; margin: 0;
-	padding: var(--kit-space-4); border-radius: var(--kit-radius-card); background: var(--kit-color-bg); box-shadow: inset 0 0 0 1px var(--kit-color-line);
-	font-size: var(--kit-type-sm); cursor: pointer; transition: box-shadow var(--kit-motion-fast) var(--kit-motion-ease);
-}
-.aw-letter-ground label { cursor: pointer; }
-.aw-letter-ground label::after { content: ""; position: absolute; inset: 0; } /* the whole card toggles */
-.aw-letter-ground:hover { box-shadow: inset 0 0 0 1px var(--camp-mark, var(--kit-color-ink)); }
-.aw-letter-ground:has(input:checked) { box-shadow: inset 0 0 0 2px var(--camp-mark, var(--kit-color-ink)); }
-.aw-letter-ground:has(input:focus-visible) { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
-.aw-letter-ground input { width: 1.25rem; height: 1.25rem; margin: 0.1em 0 0; accent-color: var(--camp-mark, var(--kit-color-ink)); }
 .aw-letter-ground strong { display: block; font-size: var(--kit-type-base); }
-.aw-letter-field { display: grid; gap: var(--kit-space-1); margin: 0 0 var(--kit-space-3); }
-.aw-letter-field input, .aw-letter-field textarea { box-sizing: border-box; width: 100%; padding: var(--kit-space-2) var(--kit-space-3); border: var(--kit-border-control, 1px solid var(--kit-color-line)); border-radius: var(--kit-radius-control); font: inherit; background: var(--kit-color-bg); }
-.aw-letter-hint { color: var(--kit-color-muted); }
 .aw-letter-meta { display: grid; gap: var(--kit-space-1); margin: 0 0 var(--kit-space-3); padding: var(--kit-space-4); border-radius: var(--kit-radius-card); background: var(--camp-mark, var(--kit-color-ink)); color: var(--camp-on-mark, var(--kit-color-on-ink)); }
 .aw-letter-meta strong { color: inherit; }
 .aw-letter-to { display: flex; align-items: center; gap: var(--kit-space-2); font-size: clamp(1.25rem, 1rem + 1vw, 1.75rem); font-weight: 800; letter-spacing: -0.02em; overflow-wrap: anywhere; }
@@ -444,24 +428,34 @@
 	background: var(--kit-color-bg); border: 1px solid var(--kit-color-line); border-radius: var(--kit-radius-card); font-size: var(--kit-type-sm, 0.9375rem);
 }
 @media (max-width: 767px) { .aw-letter-preview { max-height: 14rem; } }
-.aw-letter-error { margin: var(--kit-space-3) 0 0; padding: var(--kit-space-3) var(--kit-space-4); border-radius: var(--kit-radius-card); background: var(--kit-color-danger-soft); color: var(--kit-color-danger); font-weight: 600; }
-.aw-letter :is(input, textarea)[aria-invalid=true] { border-color: var(--kit-color-danger); box-shadow: 0 0 0 1px var(--kit-color-danger); }
 .aw-letter-confirm { align-items: center; padding: var(--kit-space-4); border-radius: var(--kit-radius-card); background: var(--kit-color-bg); }
-.aw-letter-thanks { margin-top: var(--kit-space-3); padding: var(--kit-space-4); border-radius: var(--kit-radius-card); background: color-mix(in srgb, var(--kit-color-success) 10%, #fff); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--kit-color-success) 35%, transparent); }
 .aw-letter-thanks p { margin: 0; }
 .aw-letter-thanks p + p { margin-top: var(--kit-space-2); }
 .aw-letter-thanks-head { display: flex; align-items: center; gap: var(--kit-space-2); }
 .aw-letter-thanks-head .kit-ico { color: var(--kit-color-success); }
-.aw-letter-optin { display: flex; align-items: flex-start; gap: var(--kit-space-2); margin: var(--kit-space-3) 0; font-size: var(--kit-type-sm); }
-.aw-letter-optin input { flex: none; width: 1.25rem; height: 1.25rem; margin: 0.1em 0 0; accent-color: var(--camp-mark, var(--kit-color-ink)); }
-.aw-letter-optin label { cursor: pointer; }
 .aw-letter-routes, .aw-letter-confirm { display: flex; flex-wrap: wrap; gap: var(--kit-space-2); margin-top: var(--kit-space-3); }
-.aw-letter-routes .wp-element-button { display: inline-flex; align-items: center; gap: var(--kit-space-2); }
 .aw-letter-confirm p { flex-basis: 100%; margin: 0; }
 .aw-letter [hidden] { display: none; }
-.aw-letter .aw-letter-alt { background: transparent; color: var(--kit-color-text); box-shadow: inset 0 0 0 1px var(--kit-color-line); }
 .aw-letter-copied:empty { display: none; }
 .aw-letter-copy-addr { padding: 0; border: 0; background: none; color: inherit; font: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 0.2em; cursor: pointer; }
+/* Letter tool on the theme's form kit (owner, 2 Nov 2026: "map it as per form ui"). Fields are kit-field (label, icon,
+   placeholder, hover, focus ring, aria-invalid with the alert icon, is-valid, the 16px phone size: kit-primitives.css
+   16, kit.css), the opt-ins kit-checkbox, the message by the send buttons kit-form-status, the thank-you kit-form-done,
+   the buttons kit-btn and kit-btn--secondary. Here only what the Lab letter tool adds: the grounds as choice cards in
+   the field border (the Volunteer tiles' look, aw.css), and the form type scale (aw.css .aw-form-ff). */
+.aw-camp--lab-rules .aw-letter .kit-field-message:empty { min-height: 0; margin: 0; } /* stays for live announcements; no empty line under a box */
+.aw-camp--lab-rules .aw-letter :is(.aw-letter-optin .kit-checkbox, .aw-letter-ground.kit-checkbox) { font-size: var(--kit-type-sm); font-weight: var(--kit-weight-regular); line-height: 1.4; }
+.aw-camp--lab-rules .aw-letter-optin.kit-field { margin: 0 0 var(--kit-space-2); }
+.aw-camp--lab-rules .aw-letter-ground.kit-checkbox {
+	position: relative; margin: 0; padding: var(--kit-space-4); gap: var(--kit-space-3);
+	border: var(--kit-border-control) solid var(--kit-field-border); border-radius: var(--kit-radius-control); background: var(--kit-color-raised);
+	transition: border-color var(--kit-motion-fast) var(--kit-motion-ease), box-shadow var(--kit-motion-fast) var(--kit-motion-ease);
+}
+@media (hover: hover) { .aw-camp--lab-rules .aw-letter-ground.kit-checkbox:hover { border-color: var(--kit-color-ink); } }
+.aw-camp--lab-rules .aw-letter-ground.kit-checkbox:has(input:checked) { border-color: var(--kit-color-ink); box-shadow: inset 0 0 0 1px var(--kit-color-ink); } /* chosen: a 2px dark border and the tick, not colour alone; no shift */
+.aw-camp--lab-rules .aw-letter-ground.kit-checkbox:has(input:focus-visible) { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
+.aw-camp--lab-rules .aw-letter .aw-letter-error { margin: var(--kit-space-3) 0 0; }
+@media (prefers-reduced-motion: reduce) { .aw-camp--lab-rules .aw-letter-ground.kit-checkbox { transition: none; } }
 
 .aw-camp-count { font-size: var(--kit-type-lead); }
 

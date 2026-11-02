@@ -173,15 +173,15 @@
 		source.querySelectorAll('li').forEach(function (li, i) {
 			var n = i + 1;
 			var id = 'aw-ground-' + n;
-			var row = document.createElement('p');
-			row.className = 'aw-letter-ground';
+			var row = document.createElement('label'); // a choice card: the theme's checkbox (kit-checkbox), the whole card toggles
+			row.className = 'kit-checkbox aw-letter-ground';
+			row.htmlFor = id;
 			var box = document.createElement('input');
 			box.type = 'checkbox';
 			box.id = id;
 			box.value = String(n);
 			box.checked = (cfg.ticked || []).indexOf(n) !== -1;
-			var label = document.createElement('label');
-			label.htmlFor = id;
+			var label = document.createElement('span');
 			label.innerHTML = li.innerHTML;
 			row.appendChild(box);
 			row.appendChild(label);
@@ -251,13 +251,22 @@
 	function wantsUpdates() { return !!(optin && optin.checked); }
 	function emailOk() { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val('email')); }
 
+	/* A field's state, as the theme's forms show it (kit.js): aria-invalid and the message on the field's own error line,
+	   is-valid once it holds a good value. */
+	function mark(el, text) {
+		el.setAttribute('aria-invalid', text ? 'true' : 'false');
+		el.classList.toggle('is-valid', !text && el.value.trim() !== '');
+		var line = document.getElementById(el.id + '-error');
+		if (line) line.textContent = text;
+	}
+
 	/* Error state: names what is missing, marks each field, and focuses the first one. */
 	function ready() {
 		var miss = [];
 		[['name', 'your name'], ['city', 'your city'], ['email', 'a working email']].forEach(function (f) {
 			var bad = f[0] === 'email' ? !emailOk() : !val(f[0]);
 			var el = form.elements[f[0]];
-			if (el) el.setAttribute('aria-invalid', bad ? 'true' : 'false');
+			if (el) mark(el, bad ? 'Add ' + f[1] + ' to send your objection.' : ''); // the same words as the message by the send buttons
 			if (bad) miss.push(f);
 		});
 		var ok = !miss.length;
@@ -268,7 +277,10 @@
 	}
 	['name', 'city', 'email'].forEach(function (n) { // the mark clears as soon as the field is filled
 		var el = form.elements[n];
-		if (el) el.addEventListener('input', function () { if (el.getAttribute('aria-invalid') === 'true' && (n === 'email' ? emailOk() : val(n))) el.setAttribute('aria-invalid', 'false'); });
+		if (!el) return;
+		var good = function () { return n === 'email' ? emailOk() : !!val(n); };
+		el.addEventListener('input', function () { if (el.getAttribute('aria-invalid') === 'true' && good()) mark(el, ''); });
+		el.addEventListener('blur', function () { if (el.getAttribute('aria-invalid') !== 'true') el.classList.toggle('is-valid', good()); }); // success state once filled; errors only after a send
 	});
 
 	/* keepalive: the browser finishes the call after the page leaves (Gmail or the mail app opening). One retry after
