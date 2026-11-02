@@ -584,13 +584,13 @@
 	});
 })();
 
-/* Phone bar: shows once the hero's button has scrolled away (or is not yet on screen); hidden while the letter tool or the footer is on screen, and for the
+/* Phone bar: shows once the hero has scrolled away; hidden while the letter tool or the footer is on screen, and for the
    rest of the session after a letter is confirmed. */
 (function () {
 	var bar = document.querySelector('.aw-sticky-cta');
 	if (!bar) return;
 	var target = document.querySelector(bar.dataset.target);
-	var hero = document.querySelector('.aw-camp-hero .wp-block-button__link') || document.querySelector('.aw-camp-hero'); // the hero's own button: while it is on screen the bar is not needed (on a short screen the hero is, but its button is not)
+	var hero = document.querySelector('.aw-camp-hero');
 	var foot = document.querySelector('.wp-site-blocks > footer, footer.wp-block-template-part');
 	var sent = false, onSend = false, onHero = !!hero, onFoot = false;
 	try { sent = sessionStorage.getItem('aw-letter-sent') === '1'; } catch (e) { /* private mode */ }
