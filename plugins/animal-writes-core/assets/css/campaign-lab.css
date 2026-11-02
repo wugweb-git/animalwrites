@@ -778,8 +778,8 @@
 
 /* Bento (the section's card grid, .aw-camp-grid): the first card leads in the campaign colour, deepening to 25% darker,
    --kit-elevation-2, its heading at --kit-type-h2; the others white with headings at --kit-type-h4. aw.css sets every
-   H3 with !important, so these carry it too. From 768: three cards = the lead two thirds and two rows tall beside two;
-   five cards = the lead two thirds beside one, then three thirds. Phones: one column in markup order. */
+   H3 with !important, so these carry it too. From 768: three cards = the lead two thirds beside one, then the third the full row;
+   five cards = the lead two thirds beside one, then two halves, then the last the full row. Phones: one column in markup order. */
 .aw-camp.aw-camp .aw-camp-grid > .aw-camp-card { min-width: 0; margin: 0; padding: var(--kit-space-5); border-radius: var(--kit-radius-card); background: var(--kit-color-surface-soft); box-shadow: inset 0 0 0 1px var(--kit-color-line), var(--kit-elevation-1); transition: transform var(--kit-motion-base) var(--kit-motion-ease), box-shadow var(--kit-motion-base) var(--kit-motion-ease); }
 .aw-camp.aw-camp .aw-camp-grid > .aw-camp-card:first-child { background: linear-gradient(160deg, var(--camp-mark), color-mix(in srgb, var(--camp-mark) 75%, #000)); color: var(--camp-on-mark); box-shadow: var(--kit-elevation-2); }
 .aw-camp.aw-camp .aw-camp-section .aw-camp-grid > .aw-camp-card:first-child h3 { font-size: var(--kit-type-h2) !important; line-height: var(--kit-leading-heading); }
@@ -792,8 +792,8 @@
 .aw-camp.aw-camp .aw-camp-grid:has(> :nth-child(3):last-child) { grid-template-columns: minmax(0, 1fr); grid-template-areas: "c1" "c2" "c3"; }
 .aw-camp.aw-camp .aw-camp-grid:has(> :nth-child(5):last-child) { grid-template-columns: minmax(0, 1fr); grid-template-areas: "c1" "c2" "c3" "c4" "c5"; }
 @media (min-width: 768px) {
-	.aw-camp.aw-camp .aw-camp-grid:has(> :nth-child(3):last-child) { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-areas: "c1 c1 c2" "c1 c1 c3"; }
-	.aw-camp.aw-camp .aw-camp-grid:has(> :nth-child(5):last-child) { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-areas: "c1 c1 c2" "c3 c4 c5"; }
+	.aw-camp.aw-camp .aw-camp-grid:has(> :nth-child(3):last-child) { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-areas: "c1 c1 c2" "c3 c3 c3"; }
+	.aw-camp.aw-camp .aw-camp-grid:has(> :nth-child(5):last-child) { grid-template-columns: repeat(6, minmax(0, 1fr)); grid-template-areas: "c1 c1 c1 c1 c2 c2" "c3 c3 c3 c4 c4 c4" "c5 c5 c5 c5 c5 c5"; }
 }
 @media (hover: hover) {
 	.aw-camp.aw-camp .aw-camp-grid > .aw-camp-card:hover { transform: translateY(var(--kit-motion-lift)); box-shadow: inset 0 0 0 1px var(--kit-color-line), var(--kit-elevation-2); }
