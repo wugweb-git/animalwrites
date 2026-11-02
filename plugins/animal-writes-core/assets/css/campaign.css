@@ -984,7 +984,8 @@
 	.aw-camp.aw-camp #share .aw-share-block .kit-share .kit-share-btn:hover { background: var(--camp-on-mark); color: var(--camp-mark); }
 }
 /* the pictures: the post in front at --kit-thumb-max tall, the story beside it; phones two columns at full width */
-.aw-camp.aw-camp #share .aw-share-pics { margin: 0; }
+.aw-camp.aw-camp #share .aw-share-pics { display: grid; gap: var(--kit-space-3); margin: 0; }
+.aw-camp.aw-camp #share .aw-share-pics-head { margin: 0; font-size: var(--kit-type-base); font-weight: var(--kit-weight-bold); color: var(--camp-on-mark); }
 .aw-camp.aw-camp #share .aw-share-pics-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--kit-space-3); align-items: end; }
 .aw-camp.aw-camp #share .aw-share-pic { display: block; min-width: 0; margin: 0; padding: 0; border: 0; background: none; cursor: pointer; border-radius: var(--kit-radius-card); }
 .aw-camp.aw-camp #share .aw-share-pic img { display: block; width: auto; max-width: 100%; height: auto; max-height: var(--kit-thumb-max); border-radius: var(--kit-radius-card); box-shadow: var(--kit-elevation-3); transition: transform var(--kit-motion-base) var(--kit-motion-ease); }

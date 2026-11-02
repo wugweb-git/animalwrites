@@ -482,6 +482,7 @@
 		if (pics.length) {
 			var box = document.createElement('div');
 			box.className = 'aw-share-pics';
+			box.innerHTML = '<p class="aw-share-pics-head">Or share a ready-made picture</p>'; // owner's yes, 2 Nov 2026
 			var list = document.createElement('div');
 			list.className = 'aw-share-pics-list';
 			pics.forEach(function (k) {
