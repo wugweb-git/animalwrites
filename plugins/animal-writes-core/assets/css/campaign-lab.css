@@ -847,3 +847,6 @@
 .aw-camp--lab-rules #share .aw-share-cta-done:empty { display: none; }
 @media (min-width: 768px) { .aw-camp--lab-rules #share .aw-share-cta-btn { width: auto; } }
 @media (prefers-reduced-motion: reduce) { .aw-camp--lab-rules #share .aw-share-cta-btn { transition: none; } .aw-camp--lab-rules #share .aw-share-cta-btn:active { transform: none; } }
+/* the button above already says Share, so the bar's own small "Share" label is left out here and the six 44px icons fit
+   one row inside the card on a 375px phone (the bar keeps its aria-label) */
+.aw-camp--lab-rules #share .aw-camp-share-kit .kit-share-label { display: none; }
