@@ -91,8 +91,10 @@ function aw_si_pages_data(): array {
 		$set( $r->page, 'ref', (int) ( $out[ $r->page ]['ref'] ?? 0 ) + (int) $r->v );
 		$out[ $r->page ]['ref_by'][ (string) $r->txt ] = (int) $r->v;
 	}
-	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, metric, SUM(value) s, AVG(value) a, MAX(value) m FROM {$o} WHERE src = 'clarity' AND page <> '' AND period = 'day' AND d BETWEEN %s AND %s GROUP BY page, metric", $from, $to ) ) as $r ) {
-		$set( $r->page, 'c_' . $r->metric, 'sessions' === $r->metric ? (int) $r->s : ( 'flag' === $r->metric ? (int) $r->m : round( (float) $r->a, 1 ) ) );
+	// A Clarity flag counts only on enough flagged days (filter aw_si_quality_min_days, as in aw_si_quality_pages()).
+	$c_min = max( 1, (int) apply_filters( 'aw_si_quality_min_days', 3 ) );
+	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, metric, SUM(value) s, AVG(value) a, SUM(value > 0) n FROM {$o} WHERE src = 'clarity' AND page <> '' AND period = 'day' AND d BETWEEN %s AND %s GROUP BY page, metric", $from, $to ) ) as $r ) {
+		$set( $r->page, 'c_' . $r->metric, 'sessions' === $r->metric ? (int) $r->s : ( 'flag' === $r->metric ? (int) ( (int) $r->n >= $c_min ) : round( (float) $r->a, 1 ) ) );
 	}
 	// Latest PageSpeed run, latest Clarity note.
 	foreach ( (array) $wpdb->get_results( "SELECT o.page, o.metric, o.value, o.d FROM {$o} o JOIN (SELECT page_key, metric, MAX(d) d FROM {$o} WHERE src = 'psi' AND metric IN ('score-mobile', 'score-desktop', 'flag') GROUP BY page_key, metric) l ON l.page_key = o.page_key AND l.metric = o.metric AND l.d = o.d WHERE o.src = 'psi'" ) as $r ) {
