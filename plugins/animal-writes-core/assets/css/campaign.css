@@ -746,6 +746,7 @@
 	background: var(--camp-mark); color: var(--camp-on-mark);
 }
 .wp-block-post-content > :is(.aw-camp-band, .aw-camp-end) { margin-block: 0; } /* sections: no block gap between them */
+.wp-block-post-content > .aw-camp:has(> .aw-sticky-cta):has(+ .aw-camp-end) { padding-bottom: 0; } /* the Take part band follows: the page goes on below, and the phone bar hides at the footer, so no space is kept for it here */
 /* The artwork is the background, nothing laid over it; the text sits on its plain left side (owner, 19 Oct 2026).
    1200+: the artwork covers the band. Below: the whole scene under the text (phones get their own crop). */
 .aw-camp-band.has-art { position: relative; overflow: hidden; background-color: var(--camp-art-bg, var(--camp-mark)); }

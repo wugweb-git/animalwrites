@@ -1610,7 +1610,7 @@ section.aw-camp-band.aw-ed-hero--campaign { box-sizing: border-box; min-height: 
    page, and on its own in the sidebar): Volunteer, Run an organisation? and Get updates as three theme photo cards (core
    Cover, kit-photo-card). Three equal cards in one row from 768, one under the other on phones and in the sidebar. The
    photo stays clear: no overlay (dim 0), the text sits on ink 78% that starts --kit-space-7 above it (white text 7:1 or
-   more over any photo). Get updates has no fitting photo, so it is the brand ink. Same height (--kit-photo-card-h, a
+   more over any photo). Get updates has no fitting photo, so it is a colour card of the same weight (below). Same height (--kit-photo-card-h, a
    minimum, so text is never cut off), radius, padding (kit.css) and shadow on all three; the same Brand button in the
    site yellow everywhere, one step up (--kit-size-control). Motion only on pointer devices and never under
    prefers-reduced-motion. The load rise is aw.js (Need help now's stagger). */
@@ -1650,6 +1650,38 @@ section.aw-camp-band.aw-ed-hero--campaign { box-sizing: border-box; min-height: 
 .aw-take-part-card .wp-block-button__link:focus-visible { outline: 0; }
 .aw-take-part-card .wp-block-button__link:is(:hover, :active) { transform: none; } /* a moved button would hold the link's box: the card lifts instead */
 .wp-block-cover.aw-take-part-card:has(.wp-block-button__link:focus-visible) { outline: var(--kit-focus-width) solid var(--kit-color-ink); outline-offset: var(--kit-focus-offset); }
+/* Get updates (owner, 2 Nov 2026: as strong as the two photo cards): a colour card in the photo's place, the whole card
+   tinted from the top (--aw-tp-top) to a deep shade (--aw-tp-base). Home and pages: the site yellow mixed into ink; on a
+   campaign page the campaign's own --camp-mark (white text on it is 4.5:1 or more on every campaign) into a deeper mix.
+   A soft glow of the tint behind the icon, a fine dot texture (on-ink 8%, every --kit-space-4) and the theme's mail icon
+   large at the top right, where no text sits: --kit-space-8 square on phones, --kit-space-9 from 768. The card is dark
+   enough for white text everywhere, so it has no ink band; the text, its place and the button match the photo cards. */
+.aw-take-part { --aw-tp-top: color-mix(in srgb, var(--kit-color-accent) 28%, var(--kit-color-ink)); --aw-tp-base: var(--kit-color-ink); --aw-tp-glow: var(--kit-color-accent); --aw-tp-ico: var(--kit-color-accent); }
+.wp-block-cover.aw-take-part-card--news > .wp-block-cover__background {
+	background-image:
+		radial-gradient(circle at calc(100% - var(--kit-space-5) - var(--kit-space-8) / 2) calc(var(--kit-space-5) + var(--kit-space-8) / 2), color-mix(in srgb, var(--aw-tp-glow) 35%, transparent), transparent var(--kit-space-9)),
+		radial-gradient(color-mix(in srgb, var(--kit-color-on-ink) 8%, transparent) 1px, transparent 1.5px),
+		linear-gradient(180deg, var(--aw-tp-top), var(--aw-tp-base));
+	background-size: auto, var(--kit-space-4) var(--kit-space-4), auto;
+}
+.wp-block-cover.aw-take-part-card--news.has-custom-content-position.has-custom-content-position.is-position-bottom-left > .wp-block-cover__inner-container { background: none; }
+.wp-block-cover.aw-take-part-card--news::after {
+	content: ""; position: absolute; z-index: -1; top: var(--kit-space-5); right: var(--kit-space-5);
+	width: var(--kit-space-8); height: var(--kit-space-8); background-color: var(--aw-tp-ico);
+	-webkit-mask: var(--kit-ico-mail) center / contain no-repeat; mask: var(--kit-ico-mail) center / contain no-repeat;
+}
+@media (min-width: 768px) {
+	.wp-block-cover.aw-take-part-card--news::after { width: var(--kit-space-9); height: var(--kit-space-9); }
+	.wp-block-cover.aw-take-part-card--news > .wp-block-cover__background { background-image:
+		radial-gradient(circle at calc(100% - var(--kit-space-5) - var(--kit-space-9) / 2) calc(var(--kit-space-5) + var(--kit-space-9) / 2), color-mix(in srgb, var(--aw-tp-glow) 35%, transparent), transparent calc(1.5 * var(--kit-space-9))),
+		radial-gradient(color-mix(in srgb, var(--kit-color-on-ink) 8%, transparent) 1px, transparent 1.5px),
+		linear-gradient(180deg, var(--aw-tp-top), var(--aw-tp-base)); }
+}
+/* Campaign pages (the band at the end, .aw-camp-end .aw-camp--*): the campaign colour tints the Get updates card and a
+   --kit-border-accent edge along the top of each card. The buttons stay the site yellow with ink text (readable on every
+   photo and tint). */
+.aw-camp-end .aw-take-part { --aw-tp-top: var(--camp-mark, var(--kit-color-ink)); --aw-tp-base: color-mix(in srgb, var(--camp-mark, var(--kit-color-ink)) 45%, var(--kit-color-ink)); --aw-tp-glow: var(--kit-color-on-ink); --aw-tp-ico: var(--kit-color-on-ink); }
+.aw-camp-end .wp-block-cover.aw-take-part-card::before { content: ""; position: absolute; z-index: 1; inset: 0 0 auto; height: var(--kit-border-accent); background: var(--camp-mark, var(--kit-color-accent)); pointer-events: none; }
 /* Sidebar (from 1200): the compact stack, card height from its text, H3 size titles */
 .kit-sidebar .aw-take-part { grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-4); }
 .kit-sidebar .wp-block-cover.aw-take-part-card { min-height: 0; }
