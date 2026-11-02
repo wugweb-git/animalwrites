@@ -283,3 +283,84 @@
 	io.observe(grid);
 	window.addEventListener('beforeprint', function () { io.disconnect(); window.gsap.set(tiles, { clearProps: 'opacity,transform' }); });
 })();
+
+/* Rows that scroll sideways (WCAG 2.1.1, 4.1.2): any element in the page's main area that scrolls sideways (overflow-x
+   auto or scroll, and wider than its box), such as the card swipe rows (design-system.md rule 12), the Community dogs
+   story's figures and dates (Home phones, aw.css) and a table in an article (kit.css .wp-block-table), takes keyboard
+   focus, so arrow keys scroll it, and is a region named by words already on the page: the story's heading; the table's
+   caption, else the nearest heading above it; any other row, the nearest h2-h3 above it in its section, else the nearest
+   h2-h6 above it. A row that fits is left alone. Skipped: rows that already have a tabindex or a name, the campaign
+   pages' rows (.aw-camp, campaign.js), the header and footer, and form fields. */
+(function () {
+	var main = document.querySelector('main') || document.querySelector('.wp-block-post-content');
+	var fixed = [], n = 0;
+	function idOf(el) {
+		if (!el.id) {
+			do { n++; } while (document.getElementById('aw-row-name-' + n));
+			el.id = 'aw-row-name-' + n;
+		}
+		return el.id;
+	}
+	function above(el, root, sel) { // the nearest heading (sel) before el, inside root
+		for (var node = el; node && node !== root; node = node.parentElement) {
+			for (var p = node.previousElementSibling; p; p = p.previousElementSibling) {
+				if (p.matches(sel)) return p;
+				var hs = p.querySelectorAll(sel);
+				if (hs.length) return hs[hs.length - 1];
+			}
+		}
+		return null;
+	}
+	function nameOf(el) {
+		var sec = el.parentElement && el.parentElement.closest('section, .kit-section, .wp-block-group');
+		return (sec && above(el, sec, 'h2, h3')) || above(el, main, 'h2, h3, h4, h5, h6');
+	}
+	document.querySelectorAll('.aw-ed-story :is(.aw-ed-story-figures, .aw-ed-story-dates)').forEach(function (r) {
+		fixed.push({ el: r, name: r.closest('.aw-ed-story').querySelector('h2') });
+	});
+	document.querySelectorAll('.wp-block-post-content figure.wp-block-table').forEach(function (r) {
+		if (r.closest('.aw-camp--diwali')) return;
+		fixed.push({ el: r, name: r.querySelector('figcaption, caption') || above(r, r.closest('.wp-block-post-content'), 'h2, h3, h4, h5, h6') });
+	});
+	if (!main && !fixed.length) return;
+	function own(r) { // a tabindex or name that this script did not set
+		return !r.hasAttribute('data-aw-row') && (r.hasAttribute('tabindex') || r.hasAttribute('aria-label') || r.hasAttribute('aria-labelledby'));
+	}
+	function set(r, name, on) {
+		if (on) {
+			r.setAttribute('data-aw-row', '');
+			r.setAttribute('tabindex', '0');
+			r.setAttribute('role', 'region');
+			if (name) r.setAttribute('aria-labelledby', idOf(name));
+		} else if (r.hasAttribute('data-aw-row')) {
+			r.removeAttribute('data-aw-row');
+			r.removeAttribute('tabindex');
+			r.removeAttribute('role');
+			r.removeAttribute('aria-labelledby');
+		}
+	}
+	function wide(r) { return r.scrollWidth > r.clientWidth + 1; }
+	function mark() {
+		var done = [];
+		fixed.forEach(function (row) {
+			done.push(row.el);
+			if (!own(row.el)) set(row.el, row.name, wide(row.el));
+		});
+		if (!main) return;
+		Array.prototype.forEach.call(main.querySelectorAll('*'), function (r) {
+			if (done.indexOf(r) > -1) return;
+			var on = r.clientWidth > 0 && wide(r) && /^(auto|scroll)$/.test(getComputedStyle(r).overflowX) &&
+				!r.matches('input, textarea, select, [contenteditable]') && !r.closest('.aw-camp, header, footer');
+			if (on && own(r)) return;
+			set(r, on ? nameOf(r) : null, on);
+		});
+	}
+	// After load (images change widths), so the width reads don't add to the page's start-up work.
+	if (document.readyState === 'complete') {
+		mark();
+	} else {
+		window.addEventListener('load', mark);
+	}
+	var t;
+	window.addEventListener('resize', function () { clearTimeout(t); t = setTimeout(mark, 150); }, { passive: true });
+})();

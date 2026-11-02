@@ -124,7 +124,7 @@
 @media (min-width: 1200px) { .aw-dir-search { grid-template-columns: minmax(9rem, 2fr) repeat(3, minmax(11.5rem, 1fr)) auto; } .aw-dir-q { grid-column: auto; } .aw-dir-submit .kit-btn { width: auto; } } /* "Choose a state first" fits whole */
 
 /* Collection toolbar (hub-blocks.php aw_toolbar): one row above every list, count left, controls (filters, Sort, and on the Directory
-   View and Near me) right; under 768 the controls wrap under the count at 44px. From 768 the controls are 36px (owner, 21 Oct 2026). */
+   View and Near me) right; the controls are 44px (--kit-size-target) at every width (WCAG 2.5.8; 36px from 768 until 2 Nov 2026). */
 .aw-toolbar { --aw-toolbar-h: var(--kit-size-target); display: flex; flex-wrap: wrap; align-items: center; column-gap: var(--kit-space-3); row-gap: var(--kit-space-2); margin: 0 0 var(--kit-space-collection); }
 .aw-toolbar-count { margin: 0; flex: 1 0 100%; font-weight: var(--kit-weight-strong); color: var(--kit-color-ink); }
 .aw-toolbar > .kit-filterbar { flex: 0 1 auto; }
@@ -141,13 +141,11 @@
 }
 @media (min-width: 768px) {
 	.aw-dd-sort { display: none; }
-	.aw-toolbar { --aw-toolbar-h: 2.25rem; }
 	.aw-toolbar-count { flex: 1 1 12rem; }
 	.aw-toolbar :is(.kit-dd-btn, .kit-btn, .kit-filter-sheet > summary) { min-height: var(--aw-toolbar-h); }
-	.aw-toolbar .kit-segment :is(a, button) { min-height: calc(var(--aw-toolbar-h) - 2 * var(--kit-space-1)); }
-	.aw-toolbar :is(.kit-dd-btn, .kit-segment a, .kit-segment button) { position: relative; } /* the 36px controls (owner, 21 Oct 2026) keep the theme's 44px hit area (as .kit-chip) */
-	.aw-toolbar :is(.kit-dd-btn, .kit-segment a, .kit-segment button)::after { content: ""; position: absolute; inset: calc((100% - var(--kit-size-target)) / 2) 0; }
+	.aw-toolbar .kit-segment :is(a, button) { min-height: var(--aw-toolbar-h); } /* each sort / view link 44px (--kit-size-target), not 28 */
 }
+.kit-segment :is(a, button) { min-height: var(--kit-size-target); } /* every segmented control (Directory A–Z / Most details first, List / Map, Library and list sorts): 44px targets; the primitive is 36 inside its 4px frame */
 .aw-org-contact { display: inline-flex; gap: var(--kit-space-2); color: var(--kit-color-muted); }
 
 /* Browse by state (Directory hub and home): every state/UT with listings, A–Z, with counts */
@@ -350,15 +348,11 @@ body { background: var(--kit-color-canvas); }
 /* 10 More: at most two groups of three cards (4:3 picture, type and date, title, one line) */
 .aw-more { display: grid; gap: var(--kit-space-7); margin: var(--kit-space-8) 0 0; }
 .aw-more-head { margin: 0 0 var(--kit-space-4); font-weight: var(--kit-weight-strong); } /* size: has-x-large-font-size (the Kits h4) */
-.aw-more-list { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-4); margin: 0; padding: 0; list-style: none; }
-@media (min-width: 768px) { .aw-more-list { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--kit-space-grid); } }
-.aw-more-list > li { margin: 0; }
-/* More below an item (owner, 2 Nov 2026: a section at most 720px on tablet and desktop, no card list taller than one row): each group is one row
-   that scrolls sideways (the Kits scroll row, kit.css "Sideways scroll row"); three cards across from 768 as before, so a group of six
-   organisations shows three and scrolls to the rest. The list is focusable (tabindex, named by its heading) so keys scroll it too. */
-.aw-more > .aw-more-group > .aw-more-list { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; padding-bottom: var(--kit-space-3); }
-.aw-more > .aw-more-group > .aw-more-list > li { flex: 0 0 var(--kit-carousel-item); scroll-snap-align: start; }
-@media (min-width: 768px) { .aw-more > .aw-more-group > .aw-more-list > li { flex-basis: calc((100% - 2 * var(--kit-space-grid)) / 3); } }
+.aw-more-list { list-style: none; }
+/* More / Latest / In the press / Opportunities / Campaigns below an item, a listing or a term page (item-head.php,
+   listing-template.php, term-page.php): each group is one sideways swipe row at every width (design-system.md Layout
+   rules 12): the theme row, kit.css .kit-scroll-row, applied here because the plugin prints these lists. Cards
+   --kit-row-item wide (phones min(82%, 22rem), from 768 --kit-card-min), so part of the next card shows. */
 .aw-more-card { height: 100%; box-sizing: border-box; display: flex; flex-direction: column; overflow: hidden; border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); }
 .aw-more-card .aw-more-media { margin: 0; aspect-ratio: 4 / 3; border-radius: 0; }
 .aw-more-card .aw-more-media img { width: 100%; height: 100%; object-fit: cover; }
@@ -366,7 +360,7 @@ body { background: var(--kit-color-canvas); }
 .aw-more-card .aw-more-media--logo img { object-fit: contain; padding: var(--kit-space-4); box-sizing: border-box; } /* an opportunity's picture is the organisation's logo: whole, never cropped */
 .aw-more-body { padding: var(--kit-space-5); }
 .aw-more-meta { margin: 0 0 var(--kit-space-2); }
-.aw-more-title { margin: 0; font-size: var(--kit-type-base, 1rem); line-height: 1.35; }
+.aw-more-title { margin: 0; font-size: var(--kit-type-h3); line-height: 1.25; } /* the theme H3 (Layout rules 9), not body size */
 .aw-more-title a::after { content: ""; position: absolute; inset: 0; } /* the whole card is the link */
 .aw-more-line { margin: var(--kit-space-1) 0 0; font-size: var(--kit-type-sm); color: var(--kit-color-muted); display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
 /* Directory profile, row 4: the organisation's logo only */
@@ -419,13 +413,13 @@ body { background: var(--kit-color-canvas); }
 .aw-sources-list { margin: 0 0 var(--kit-space-2); }
 .aw-sources-updated { margin: 0 0 var(--kit-space-2); }
 /* More organisations: the logo whole in the 4:3 box, or the initials */
-.aw-more-logo { display: flex; align-items: center; justify-content: center; aspect-ratio: 4 / 3; background: var(--kit-color-raised); border-bottom: var(--kit-border-width) solid var(--kit-color-line); }
+.aw-more-logo { display: flex; align-items: center; justify-content: center; aspect-ratio: var(--kit-placard-ratio); background: var(--kit-color-raised); border-bottom: var(--kit-border-width) solid var(--kit-color-line); } /* an organisation's logo box (listing More cards): the placard shape, 16:7 on phones and 16:9 from 768, keeps the card under 600px (4:3 made it 601 at 375) */
 .aw-more-logo img { max-width: 60%; max-height: 70%; width: auto; height: auto; object-fit: contain; }
 .aw-more-initials { font-size: var(--kit-type-h3); font-weight: var(--kit-weight-bold); color: var(--kit-color-muted); }
 /* ---------- Sidebar (1200+): the current campaign, Register as a volunteer, the sidebar ad (parts/sidebar.html) ---------- */
 .kit-sidebar { display: grid; gap: var(--kit-space-6); align-content: start; }
 .aw-side-camp { overflow: hidden; border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); }
-.aw-side-camp-media { aspect-ratio: var(--kit-card-media-ratio); background: var(--kit-color-raised); border-bottom: var(--kit-border-width) solid var(--kit-color-line); } /* the 4:3 card picture box (like .aw-more-logo), so the card stays under 600px with a tall poster */
+.aw-side-camp-media { aspect-ratio: var(--kit-placard-ratio); background: var(--kit-color-raised); border-bottom: var(--kit-border-width) solid var(--kit-color-line); } /* the placard picture box (16:9 from 768; the sidebar shows from 1200): 4:3 made the card 604px at 1440 (block limit 600) */
 .aw-side-camp-media img { display: block; width: 100%; height: 100%; object-fit: contain; } /* whole, never cropped: campaign pictures carry text */
 .aw-side-camp-body { padding: var(--kit-space-5); }
 .aw-side-camp-meta { margin: 0 0 var(--kit-space-2); }
@@ -455,8 +449,6 @@ body { background: var(--kit-color-canvas); }
 .kit-item .kit-faq, .aw-hub-faq { margin-top: var(--kit-space-7); } /* FAQ: last in a Library item's content, before a listing's Sources, after a hub's list (faq.php) */
 .aw-hub-faq { margin-bottom: var(--kit-space-7); }
 .aw-term-chips { list-style: none; margin: 0; padding: 0; }
-.kit-main .aw-more-list { grid-template-columns: minmax(0, 1fr); }
-@media (min-width: 768px) { .kit-main .aw-more-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .aw-more-all { margin: var(--kit-space-3) 0 0; }
 /* Sidebar: Claim your listing */
 .aw-side-claim { padding: var(--kit-space-5); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); }
@@ -515,6 +507,12 @@ body { background: var(--kit-color-canvas); }
 .aw-hub-group h2 { font-size: var(--kit-type-h, 1.25rem); margin: 0 0 var(--kit-space-2, .5rem); }
 .aw-hub-group ul { margin: 0 0 var(--kit-space-2, .5rem); padding-inline-start: 1.1em; }
 .aw-hub-group li { margin-block: var(--kit-space-1, .25rem); }
+/* Each group full width, one under the other (owner, 2 Nov 2026: no block over 720px; side by side, two groups of six
+   rows were 730 to 871px tall). The Resources / News / Library / Campaigns groups are one swipe row each at every
+   width (Layout rules 12; "Card swipe rows" at the end of this file). Find help (directory type links, not a card
+   list) stays a list, in two columns from 768. */
+.aw-hub { grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 768px) { .aw-hub-help > ul { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--kit-space-grid); align-items: start; } }
 /* Search page: the Kits search field (kit-error-search) and result rows like the hub lists. */
 .aw-search-count { color: var(--kit-color-muted); }
 .aw-search-form.kit-error-search { margin-block: 0 var(--kit-space-collection); } /* search: field › count › results 16 apart, like the list pages */
@@ -550,9 +548,10 @@ body { background: var(--kit-color-canvas); }
 
 /* Search: grouped by section, matches highlighted */
 .aw-search-group { margin-block: var(--kit-space-6, 1.5rem); }
-.aw-search-group .aw-search-head { display: flex; align-items: baseline; gap: var(--kit-space-2); }
+.aw-search-group .aw-search-head { display: flex; align-items: baseline; gap: var(--kit-space-2); font-size: var(--kit-type-h2); font-weight: var(--kit-weight-bold); line-height: 1.2; color: var(--kit-color-ink); } /* the group heading is an H2 at the theme H2 size, not the eyebrow's label size */
 .aw-search-results mark { background: color-mix(in srgb, var(--kit-color-accent) 45%, transparent); color: inherit; padding: 0 .1em; border-radius: var(--kit-radius-hair); }
 .aw-search-more { font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
+.wp-block-search .wp-block-search__button { min-height: var(--kit-size-target); } /* the core Search block's button (empty list pages, e.g. a tag with no posts): 44px, not 36 */
 
 /* Data-source labels on organisations (kit-tag): mark on cards; mark + list name and date on the profile. */
 .aw-datasrcs { display: inline-flex; flex-wrap: wrap; gap: var(--kit-space-1); vertical-align: middle; }
@@ -565,7 +564,7 @@ body { background: var(--kit-color-canvas); }
 .aw-datasrc-mark { font-weight: var(--kit-weight-medium); letter-spacing: 0.02em; }
 .aw-datasrc-row { display: inline-flex; align-items: center; gap: var(--kit-space-2); }
 
-/* Contact (Phase 11 H2): wide screens = text left (about 55%), form right and sticky; phones = intro, form, rows.
+/* Contact (Phase 11 H2): from 768 = text left (about 55%), form right and sticky; phones = intro, form, rows.
    Rows are information only: hairline dividers, no cards. */
 .aw-contact { display: grid; gap: var(--kit-space-6); }
 .aw-contact > * { margin: 0 !important; min-width: 0; }
@@ -579,12 +578,13 @@ body { background: var(--kit-color-canvas); }
 .aw-contact-row p { margin: 0; }
 .aw-elsewhere ul { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: var(--kit-space-2) var(--kit-space-5); }
 .aw-elsewhere a { display: inline-flex; align-items: center; gap: var(--kit-space-1); min-height: var(--kit-size-target); }
-@media (min-width: 1200px) {
+@media (min-width: 768px) { /* from 768, not 1200 (owner, 2 Nov 2026: no section over 720px; stacked it was 1338px at 768) */
 	.aw-contact { grid-template-columns: minmax(0, 55fr) minmax(0, 45fr); column-gap: var(--kit-space-7); align-items: start; }
 	.aw-contact-org { grid-column: 1; grid-row: 1; }
 	.aw-contact-report { grid-column: 1; grid-row: 2; }
 	.aw-contact-form-col { grid-column: 2; grid-row: 1 / span 2; position: sticky; top: var(--kit-space-5); }
 }
+
 
 /* Card title links are at least 24px tall to tap (WCAG 2.5.8), also when the title is one line (Phase 11 D). */
 :is(.aw-org-name, .aw-story-title) a { display: inline-block; min-height: var(--kit-space-5); }
@@ -621,7 +621,7 @@ body { background: var(--kit-color-canvas); }
 .aw-hub-list .aw-story-title { margin: 0 0 var(--kit-space-2); }
 .is-first-page .aw-news-list > li:first-child { grid-column: 1 / -1; padding-bottom: var(--kit-space-7) !important; border-bottom: var(--kit-border-width) solid var(--kit-color-line) !important; }
 
-.is-first-page .aw-news-list > li:first-child .wp-block-post-excerpt__excerpt { display: block; -webkit-line-clamp: unset; font-size: inherit; line-height: inherit; }
+.is-first-page .aw-news-list > li:first-child .wp-block-post-excerpt__excerpt { -webkit-line-clamp: 3; font-size: inherit; line-height: inherit; } /* three lines, as the block-lg card (kit.css), so the lead stays within 600px (Layout rules 10) */
 
 .is-first-page .aw-news-list > li:nth-child(n+2):nth-child(-n+4) { grid-column: 1 / -1; }
 
@@ -1026,23 +1026,19 @@ body { background: var(--kit-color-canvas); }
 :is(.aw-story-title, .aw-org-name, .wp-block-post-template .wp-block-post-title) { text-wrap: pretty; }
 
 /* ======================================================================================================
-   Kits lead lists (kit-ed-news-grid, kit-ed-list) in page content: a sideways row on phones and tablets.
+   Kits lead lists (kit-ed-news-grid, kit-ed-list) in page content: one sideways swipe row of the five stories at
+   every width (Layout rules 12; was lead + three from 1200), the theme row's settings (kit.css .kit-scroll-row):
+   scroll snap, --kit-row-item per story, the gutter bleed, room for the focus ring above.
    ====================================================================================================== */
-
-/* What's happening: phones and tablets = one sideways row of five stories; desktop = lead + three */
-@media (max-width: 1199px) {
-	.kit-ed-news-grid { display: flex !important; overflow-x: auto; scroll-snap-type: x mandatory; gap: var(--kit-space-4); margin-inline: calc(-1 * var(--kit-space-gutter)); padding: 0 var(--kit-space-gutter) var(--kit-space-3); scrollbar-width: none; }
-	.kit-ed-news-grid::-webkit-scrollbar { display: none; }
-	.kit-ed-news-grid > .wp-block-query, .kit-ed-news-grid .wp-block-post-template { display: contents !important; }
-	.kit-ed-news-grid .wp-block-post-template > li { display: block !important; flex: 0 0 min(78%, 20rem); scroll-snap-align: start; margin: 0 !important; padding: 0 !important; border: 0 !important; }
-	.kit-ed-news-grid .wp-block-post-featured-image { margin: 0 0 var(--kit-space-3) !important; width: 100%; }
-	.kit-ed-news-grid .wp-block-post-featured-image img { height: 100%; }
-	.kit-ed-news-grid .wp-block-post-excerpt { display: none; }
-	.kit-ed-news-grid .wp-block-post-title { font-size: var(--kit-type-h4) !important; margin: var(--kit-space-2) 0 0 !important; }
-}
-@media (min-width: 1200px) {
-	.kit-ed-list .wp-block-post-template > li:nth-child(n+4) { display: none !important; }
-}
+.kit-ed-news-grid { display: flex !important; overflow-x: auto; scroll-snap-type: x mandatory; gap: var(--kit-space-4); margin-inline: calc(-1 * var(--kit-space-gutter)); padding: var(--kit-space-2) var(--kit-space-gutter) var(--kit-space-3); scroll-padding-inline: var(--kit-space-gutter); scrollbar-width: none; overscroll-behavior-x: contain; }
+.kit-ed-news-grid::-webkit-scrollbar { display: none; }
+.kit-ed-news-grid > .wp-block-query, .kit-ed-news-grid .wp-block-post-template { display: contents !important; }
+.kit-ed-news-grid .wp-block-post-template > li { display: block !important; flex: 0 0 var(--kit-row-item); scroll-snap-align: start; margin: 0 !important; padding: 0 !important; border: 0 !important; }
+.kit-ed-news-grid .wp-block-post-featured-image { margin: 0 0 var(--kit-space-3) !important; width: 100%; }
+.kit-ed-news-grid .wp-block-post-featured-image img { height: 100%; }
+.kit-ed-news-grid .wp-block-post-excerpt { display: none; }
+.kit-ed-news-grid .wp-block-post-title { font-size: var(--kit-type-h3) !important; margin: var(--kit-space-2) 0 0 !important; }
+@media (prefers-reduced-motion: reduce) { .kit-ed-news-grid { scroll-snap-type: none; } }
 
 /* Animal Writes 1.0: photos in one row (sideways on phones and tablets), numbers and timeline compact */
 @media (max-width: 1199px) {
@@ -1248,7 +1244,7 @@ body { background: var(--kit-color-canvas); }
 .aw-about-inner { max-width: var(--kit-width-wide); margin-inline: auto; }
 .aw-about-inner > * + * { margin-block-start: var(--kit-space-4); }
 .aw-about-inner > .is-style-kits-label { margin-bottom: 0; }
-.aw-about-inner > :is(h2, p) { max-width: 62ch; }
+.aw-about-inner > :is(h2, p) { max-width: min(62ch, var(--kit-width-content)); } /* 62ch ran to 736px at 1440; the 720 column at most */
 .aw-about-inner > h2 { max-width: 24ch; margin-block-start: var(--kit-space-2); }
 .aw-about-inner > :is(.wp-block-group, .aw-about-how) { margin-block-start: var(--kit-space-6); }
 .aw-about-inner > p.has-large-font-size { margin-block-start: var(--kit-space-6); font-weight: var(--kit-weight-strong); }
@@ -1261,12 +1257,14 @@ body { background: var(--kit-color-canvas); }
 .aw-about-who .wp-block-columns { margin: 0; }
 .aw-about-who .wp-block-column > * + * { margin-block-start: var(--kit-space-4); }
 .aw-about-who .wp-block-column > h2 { max-width: 20ch; margin-block-start: var(--kit-space-2); }
-.aw-about-who .wp-block-column > p { max-width: 62ch; }
+.aw-about-who .wp-block-column > p { max-width: min(62ch, var(--kit-width-content)); }
 .aw-about-who .wp-block-column > p.has-large-font-size { margin-block-start: var(--kit-space-6); font-weight: var(--kit-weight-strong); }
 .aw-about-who .wp-block-image { margin: 0; }
 .aw-about-who .wp-block-image img { width: 100%; height: auto; border-radius: var(--kit-radius-media); }
+/* From 768 the story and the photograph side by side (core Columns stack them up to 781px: 1015px at 768) */
+@media (min-width: 768px) and (max-width: 1199px) { .aw-about-who .wp-block-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--kit-space-grid); align-items: center; } }
 /* How we work: plain heading and text under the tiles */
-.aw-about-how { max-width: 62ch; }
+.aw-about-how { max-width: min(62ch, var(--kit-width-content)); }
 .aw-about-how > * { margin-block: 0; }
 .aw-about-how > * + * { margin-block-start: var(--kit-space-2); }
 /* Why we do it: the turn in the copy, set large; three principles, each with its picture */
@@ -1289,6 +1287,14 @@ body { background: var(--kit-color-canvas); }
 @media (min-width: 768px) { .aw-about-why .aw-about-inner > .wp-block-group { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; } }
 @media (min-width: 768px) { .aw-about-help .aw-about-inner > .wp-block-group { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: var(--kit-space-4); } }
 @media (min-width: 768px) and (max-width: 1199px) { .aw-about-act .wp-block-button__link { padding-inline: var(--kit-space-3); font-size: var(--kit-type-sm); } }
+/* From 768 the tile's icon sits beside its title instead of above it (the band ran 810 to 872px; limit 720) */
+@media (min-width: 768px) {
+	.aw-about-help .aw-about-act { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto auto 1fr; column-gap: var(--kit-space-3); align-items: center; }
+	.aw-about-help .aw-about-act > .aw-about-act-ico { margin-bottom: 0; }
+	.aw-about-help .aw-about-act > h3 { margin-block-start: 0; }
+	.aw-about-help .aw-about-act > :not(.aw-about-act-ico, h3) { grid-column: 1 / -1; align-self: start; }
+	.aw-about-help .aw-about-act > .wp-block-buttons { align-self: end; }
+}
 :is(.aw-about-what, .aw-about-help) .wp-block-button__link { white-space: nowrap; }
 /* About page pictures: 4:3 cover at the top of each card and principle (owner uploads, 18 Oct 2026) */
 .aw-about-band .aw-about-pic { margin: 0 0 var(--kit-space-3) !important; }
@@ -1301,6 +1307,15 @@ body { background: var(--kit-color-canvas); }
    768, stacked on phones; the picture stays left of the text at every width. The whole tile is the link; hover deepens the grey. */
 .aw-about-what .aw-about-inner > .wp-block-group:not(.aw-about-how) { grid-template-columns: minmax(0, 1fr) !important; gap: var(--kit-space-4); }
 @media (min-width: 1200px) { .aw-about-what .aw-about-inner > .wp-block-group:not(.aw-about-how) { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } }
+/* From 768 (owner, 2 Nov 2026: no section over 720px; six tiles in a column ran 1737 to 2644px): the six tiles are one
+   sideways row with scroll snap, the pattern of the More rows (.aw-more-list) and Need help now (.aw-bento). Each tile
+   keeps its picture-left layout at 82% of the row (the phone --kit-carousel-item), at most the 720 column
+   (--kit-width-content); every tile's button is focusable, so the row scrolls by keyboard; the band's heading names it. */
+@media (min-width: 768px) {
+	.aw-about-what .aw-about-inner > .wp-block-group:not(.aw-about-how) { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; gap: var(--kit-space-grid); padding: var(--kit-space-1) var(--kit-space-1) var(--kit-space-3); }
+	.aw-about-what .aw-about-inner > .wp-block-group:not(.aw-about-how) > .is-style-kits-card { flex: 0 0 min(82%, var(--kit-width-content)); scroll-snap-align: start; }
+}
+@media (min-width: 768px) and (prefers-reduced-motion: reduce) { .aw-about-what .aw-about-inner > .wp-block-group:not(.aw-about-how) { scroll-snap-type: none; } }
 .aw-about-what .is-style-kits-card { position: relative; display: flex; flex-direction: column; gap: var(--kit-space-2); height: 100%; margin: 0 !important; padding: var(--kit-space-5) !important; background: var(--kit-color-canvas) !important; border: 0 !important; border-radius: var(--kit-radius-card) !important; transition: background-color var(--kit-motion-base) var(--kit-motion-ease); }
 .aw-about-what .is-style-kits-card > * { margin: 0 !important; }
 .aw-about-what .is-style-kits-card > .aw-about-pic { margin-bottom: var(--kit-space-2) !important; }
@@ -1351,88 +1366,33 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 
 /* News card lists, two layouts for section previews (owner, 18 Oct 2026). Same News card (aw_hub_item), its card and
    row states only:
-   .is-three      three cards across from 768; on phones the first card, then rows
-   .aw-news-mosaic four items: a lead card and three rows beside it (see below). */
+   .is-three      three cards across from 768 (no orphan in a row of three)
+   .aw-news-mosaic the Home Latest news and From the Library items: one swipe row of row cards (below, "From the Library"). */
 
 .aw-tasks.is-three { margin-bottom: 0; } /* a section preview: the section padding ends it */
 @media (min-width: 768px) { :is(.aw-news-list, .aw-tasks).is-three { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); } } /* News or Resources cards, three across (no orphan in a row of three) */
-/* Guides on Home (owner, 1 Nov 2026): no sideways row, no 2 + 1 orphan. The list is a size container, so the layout
-   follows the room it has, not the screen: three equal block-md cards in one row once three cards of 18rem
-   (--kit-card-min) and the two 24px gaps fit (57rem = 912px: 1000 up, so 1200 and 1440 too); the cards in the row are
-   one height (the grid stretches the card, its content keeps its natural height: title 3 lines, summary 2). Narrower
-   (phones and 768 to about 960) the three cards are one column of compact rows, the stacked-md look: thumbnail left,
-   meta and title right, no summary, as in the What's happening rows. */
-.aw-ed-learn .aw-hub-list { container: aw-guides / inline-size; }
-.aw-ed-learn .aw-tasks.is-three { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-3); }
-@container aw-guides (max-width: 911px) {
-	.aw-ed-learn .aw-tasks.is-three .kit-card { flex-direction: row; align-items: flex-start; gap: var(--kit-space-4); padding: var(--kit-space-5); }
-	.aw-ed-learn .aw-tasks.is-three .kit-card > .kit-card-media { width: var(--kit-thumb-lg); max-width: 40%; border-radius: var(--kit-radius-media); }
-	.aw-ed-learn .aw-tasks.is-three .kit-card > .kit-card-body { flex: 1 1 0; padding: 0; }
-	.aw-ed-learn .aw-tasks.is-three .kit-card-sum { display: none; }
-}
-@container aw-guides (min-width: 912px) { .aw-ed-learn .aw-tasks.is-three { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--kit-space-grid); } }
-/* Guides on Home: meta row is the date, read time and the Guide badge (no topic chip); bigger title, a one-line
-   summary, 4:3 pictures in both layouts. */
+/* Guides on Home (owner, 2 Nov 2026, Layout rules 12: card lists are one swipe row at every width; was three across from
+   a 912px container and compact rows below it): the three block-md cards in the theme row (kit-scroll-row on the
+   pattern's Query, kit.css), --kit-row-item wide (phones min(82%, 22rem), from 768 --kit-card-min). Meta row: the date,
+   read time and the Guide badge (no topic chip); title at the theme H3 (Layout rules 9); a one-line summary. Pictures
+   4:3 on phones, the placard shape from 768 (--kit-placard-ratio, 16:9): a card about 360px tall at 288px wide, so
+   the section stays under 720 (Layout rules 5); on a 375 phone about 430px (4:3, 307px wide). */
 .aw-ed-learn .kit-tag--category { display: none; }
-.aw-ed-learn .aw-tasks.is-three .kit-card .kit-card-title { font-size: var(--kit-type-h4) !important; }
+.aw-ed-learn .aw-tasks.is-three .kit-card .kit-card-title { font-size: var(--kit-type-h3) !important; }
 .aw-ed-learn .aw-tasks.is-three .kit-card[class*="kit-card--"] .kit-card-sum .wp-block-post-excerpt__excerpt { -webkit-line-clamp: 1; }
 .aw-ed-learn .aw-tasks.is-three .kit-card > .kit-card-media { aspect-ratio: 4 / 3; }
 .aw-ed-learn .aw-tasks.is-three .kit-card > .kit-card-media img { height: 100%; object-fit: cover; }
-@container aw-guides (min-width: 912px) { .aw-ed-learn .aw-tasks.is-three .kit-card > .kit-card-media { aspect-ratio: var(--kit-placard-ratio); } } /* 16:9 (--kit-placard-ratio from 768) in the row of three: the 4:3 picture made the section 758px at 1280 (limit 720) */
-/* Mosaic (What's happening, From the Library on Home): the lead card (block-lg: picture, title, summary; hubs.php picks
-   the state by place) and the next three as stacked-md rows (thumbnail and the title clamp of every card, phones
-   included). Phones: the lead, then the rows, each at its natural height. From 768: the rows sit one under the other on
-   the right, at their natural height, with the normal gap; the lead on the left takes the same height, and its picture
-   is the part that gives (it fills what the title and summary leave, cropped like every card picture, at least 8rem), so
-   both columns end level with no empty gap and nothing stretched. The lead's text keeps its natural height (only the
-   picture grows), and from 1200, where the lead is the narrow column, its summary is cut at 2 lines so the picture stays
-   about 2:1 rather than a strip. 7fr / 5fr from 768, 5fr / 7fr from 1200. */
-.aw-news-list.aw-news-mosaic { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-3); }
+@media (min-width: 768px) { .aw-ed-learn .aw-tasks.is-three .kit-card > .kit-card-media { aspect-ratio: var(--kit-placard-ratio); } }
 .aw-news-mosaic > li { margin: 0 !important; min-width: 0; }
 .aw-news-mosaic .kit-card--stacked-md { height: auto; }
-@media (min-width: 768px) {
-	.aw-news-list.aw-news-mosaic { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); grid-auto-rows: auto; align-content: start; column-gap: var(--kit-space-grid); row-gap: var(--kit-space-3); }
-	.aw-news-mosaic > li:first-child { grid-column: 1; grid-row: 1 / span 3; display: flex; }
-	.aw-news-mosaic:has(> li:nth-child(3):last-child) > li:first-child { grid-row: 1 / span 2; }
-	.aw-news-mosaic:has(> li:nth-child(2):last-child) > li:first-child { grid-row: 1; }
-	.aw-news-mosaic > li:nth-child(n+2) { grid-column: 2; align-self: start; }
-	.aw-news-mosaic > li:first-child > .kit-card { flex: 1 1 auto; height: auto; }
-	.aw-news-mosaic > li:first-child > .kit-card > .kit-card-body { flex: none; }
-	.aw-news-mosaic > li:first-child .kit-card-media { position: relative; flex: 1 1 0; min-height: 8rem; aspect-ratio: auto; margin: 0; }
-	.aw-news-mosaic > li:first-child .kit-card-media img { position: absolute; inset: 0; }
-}
-@media (min-width: 1200px) {
-	.aw-news-list.aw-news-mosaic { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); }
-	.aw-news-mosaic > li:first-child .kit-card.kit-card--block-lg .kit-card-sum .wp-block-post-excerpt__excerpt { -webkit-line-clamp: 2; }
-}
-/* Latest news on Home only (1 Nov 2026): the meta row is the date and the source (no place, no topic chip); the rows have
-   a bigger title and a 4:3 thumbnail. 768 to 1199: two equal columns and the small thumbnail, so date and source stay
-   on one line. From 1200: a 10rem thumbnail, so the three rows are about as tall as a lead card with a 4:3 picture. */
+/* Latest news on Home (1 Nov 2026; 2 Nov 2026 one swipe row at every width, Layout rules 12): the meta row is the date
+   and the source (no place, no topic chip). Every item, the lead too, is the same picture-left row card as From the
+   Library (below: ":is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic"), in the theme row (kit-scroll-row on the pattern's Query). */
 .aw-ed-news .kit-meta-row .kit-meta-item:not(.aw-date), .aw-ed-news .kit-tag--category { display: none; }
-.aw-ed-news .aw-news-mosaic .kit-card--stacked-md .kit-card-title { font-size: var(--kit-type-h4) !important; }
-.aw-ed-news .aw-news-mosaic .kit-card--stacked-md > .kit-card-media { aspect-ratio: 4 / 3; }
-.aw-ed-news .aw-news-mosaic .kit-card--stacked-md > .kit-card-media img { height: 100%; object-fit: cover; }
-@media (min-width: 768px) and (max-width: 1199px) {
-	.aw-ed-news .aw-news-list.aw-news-mosaic { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
-	.aw-ed-news .aw-news-mosaic .kit-card--stacked-md > .kit-card-media { width: var(--kit-thumb-md) !important; }
-}
-@media (min-width: 1200px) { .aw-ed-news .aw-news-mosaic .kit-card--stacked-md > .kit-card-media { width: 10rem !important; } }
-/* Phones (owner, 2 Nov 2026: each Home section one screen): the lead is a row like the other two (112px 4:3 picture,
-   date and source, h4 title, no summary); the section went from 1329px (four items, block lead) to 829px. */
-@media (max-width: 767px) {
-	.aw-ed-news .aw-news-mosaic > li > .kit-card { gap: var(--kit-space-5); }
-	.aw-ed-news .aw-news-mosaic > li:first-child > .kit-card { flex-direction: row; align-items: flex-start; }
-	.aw-ed-news .aw-news-mosaic > li:first-child > .kit-card[class*="kit-card--block"] { gap: 0; } /* a block card: no card padding, its body padded 24px; the picture gets the same room */
-	.aw-ed-news .aw-news-mosaic > li:first-child > .kit-card > .kit-card-media { flex: none; width: var(--kit-thumb-lg) !important; max-width: 40%; aspect-ratio: 4 / 3; border-radius: var(--kit-radius-media); }
-	.aw-ed-news .aw-news-mosaic > li:first-child > .kit-card[class*="kit-card--block"] > .kit-card-media { margin: var(--kit-space-5) 0 var(--kit-space-5) var(--kit-space-5); }
-	.aw-ed-news .aw-news-mosaic > li:first-child > .kit-card > .kit-card-media img { height: 100%; object-fit: cover; }
-	.aw-ed-news .aw-news-mosaic > li:first-child > .kit-card > .kit-card-body { flex: 1 1 0; }
-	.aw-ed-news .aw-news-mosaic > li:first-child .kit-card-sum { display: none; }
-	.aw-ed-news .aw-news-mosaic > li:first-child .kit-card-title { font-size: var(--kit-type-h4) !important; }
-}
 
 /* Card lists (kit-card states, kit.css): the list item is only a wrapper; a one-column list (Library) keeps a gap. */
-.aw-cases:has(> li > .kit-card[class*="kit-card--"]) { display: grid !important; gap: var(--kit-space-4); border-top: 0; }
+.aw-cases:not(.aw-related-list > *):has(> li > .kit-card[class*="kit-card--"]) { display: grid !important; gap: var(--kit-space-4); border-top: 0; } /* not the Related row (a swipe row, "Card swipe rows" at the end) */
+.aw-related-list > .aw-cases { border-top: 0; }
 .aw-camp-docs-q li:has(> .kit-card) { display: block; padding: 0; border: 0; background: none; box-shadow: none; }
 .aw-camp-docs-q li:has(> .kit-card)::before { content: none; }
 .aw-camp .kit-card--stacked-sm { --kit-card-icon-color: var(--camp-mark, var(--kit-color-ink)); }
@@ -1670,7 +1630,7 @@ section.aw-camp-band.aw-ed-hero--campaign { box-sizing: border-box; min-height: 
 .aw-bento-tile:active { transform: scale(.98); transition-duration: 90ms; }
 /* Focus: the ring goes round the whole tile (yellow on the dark band, from Kits' dark-surface focus colour) */
 .aw-bento-tile:has(a:focus-visible) { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
-.aw-bento-tile h3 { margin: 0; font-size: var(--kit-type-h4); font-weight: var(--kit-weight-bold); line-height: var(--kit-leading-heading); }
+.aw-bento-tile h3 { margin: 0; font-size: var(--kit-type-h3); font-weight: var(--kit-weight-bold); line-height: var(--kit-leading-heading); }
 .aw-bento-tile h3 a, .aw-bento-tile h3 a:hover { color: inherit !important; text-decoration: none; } /* beats the site rule that makes heading links ink */
 .aw-bento-tile h3 a::after { content: ""; position: absolute; inset: 0; border-radius: inherit; } /* the whole tile is the link */
 .aw-bento-tile h3 a:focus-visible { outline: none; }
@@ -1708,7 +1668,6 @@ section.aw-camp-band.aw-ed-hero--campaign { box-sizing: border-box; min-height: 
    name and state fields), kit-btn (Search, Use my location, the two buttons), kit-filter-pill (Quick filters). This block
    only lays them out. The bar is a size container: one raised row when it fits; the name above the rest when it does
    not; on phones the plain fields on the section, name, then state + Search, then Use my location. Quick filters scroll sideways in one row under 768. */
-.aw-ed-find #aw-find-h { font-size: var(--kit-type-h1) !important; line-height: 1.1 !important; }
 .aw-ed-find .kit-sec-head { margin-bottom: var(--kit-space-5); }
 .aw-ed-find .kit-sec-head p strong { color: var(--kit-color-ink); font-weight: var(--kit-weight-bold); }
 .aw-findhelp-bar { container-type: inline-size; margin-bottom: var(--kit-space-6); }
@@ -1738,16 +1697,17 @@ section.aw-camp-band.aw-ed-hero--campaign { box-sizing: border-box; min-height: 
 	.aw-findhelp-actions .kit-btn { flex: 1 1 100%; justify-content: center; }
 }
 
-/* From the Library on Home (owner, 2 Nov 2026: no section taller than 720px or one screen; it was 1049px at 1280):
-   the three items, then the four type tiles, each one row.
-   - Items: the What's happening mosaic markup, every item (the lead too) as a stacked-md row card: the 112px
-     (--kit-thumb-lg) 4:3 picture left, date and publisher, title (h4); no summary. The list is a size container: three
-     across from 68.5rem (three cards whose text column keeps --kit-body-min: 3 x (7rem picture + 1.5rem gap + 10rem
-     text + 3rem padding) + two 2rem gaps), else one sideways row (the Kits sideways row: min(82%, 22rem) per card, as
-     .kit-scroll-row in kit.css). Every card is a link, so Tab reaches each one and scrolls it into view.
-   - Tiles: phones and 768 to 1199 the sideways row (Home on phones, above, and below); from 1200 four across, the icon
-     square on top with the arrow beside it and the title and line under them full width (a 4-across tile is too
-     narrow for the icon, text and arrow side by side). The section head's "See all" button is the way to the rest. */
+/* From the Library and Latest news on Home (owner, 2 Nov 2026: no section taller than 720px or one screen; Layout rules 12:
+   card lists are one swipe row at every width): the items, then (Library) the four type tiles.
+   - Items: the mosaic markup, every item (the lead too) as a stacked-md row card: the 112px (--kit-thumb-lg) 4:3 picture
+     left, date and source or publisher, title (theme H3, Layout rules 9); no summary. One sideways swipe row at every
+     width: the theme row (kit-scroll-row on the pattern's Query, kit.css), each card min(82%, 22rem) wide
+     (--kit-row-item for picture-left cards: the picture, a 24px gap and the 10rem text column, --kit-body-min, need
+     more than --kit-card-min). About 160px tall (24 + the title's three lines + 24); three cards (1088px) fit from 1200,
+     so the row scrolls only where it is narrower. Every card is a link, so Tab reaches each one and scrolls it into view.
+   - Tiles (Library types, navigation, not a card list): phones and 768 to 1199 the sideways row (Home on phones, above,
+     and below); from 1200 the four in one row, the icon square on top with the arrow beside it and the title and line
+     under them full width (a 4-across tile is too narrow for the icon, text and arrow side by side). */
 @media (min-width: 768px) { .aw-ed-law > .kit-stack { gap: var(--kit-space-grid); grid-auto-rows: 1fr; } }
 @media (min-width: 768px) and (max-width: 1199px) {
 	.home .aw-ed-law > .kit-stack {
@@ -1764,42 +1724,35 @@ section.aw-camp-band.aw-ed-hero--campaign { box-sizing: border-box; min-height: 
 	.aw-ed-law > .kit-stack > .kit-tile::before { justify-self: start; margin-bottom: var(--kit-space-3); }
 	.aw-ed-law > .kit-stack > .kit-tile::after { align-self: start; margin-top: 0.625rem; } /* centred on the icon square */
 }
-.aw-ed-law .aw-hub-list { container: aw-library / inline-size; }
+:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic { --kit-row-item: min(82%, 22rem); }
 .aw-ed-law .aw-news-mosaic :is(.kit-meta-row .kit-meta-item:not(.aw-date), .kit-tag:not(.kit-tag--source)) { display: none; }
-.aw-ed-law .aw-news-mosaic > li { grid-column: auto !important; grid-row: auto !important; display: flex; } /* over the shared mosaic placement (:has, higher specificity) */
-.aw-ed-law .aw-news-mosaic > li > .kit-card { flex: 1 1 auto; flex-direction: row; align-items: flex-start; gap: var(--kit-space-5); }
-.aw-ed-law .aw-news-mosaic > li > .kit-card > .kit-card-media { position: static; flex: none; width: var(--kit-thumb-lg) !important; max-width: 40%; aspect-ratio: 4 / 3; min-height: 0; margin: 0; border-radius: var(--kit-radius-media); }
-.aw-ed-law .aw-news-mosaic > li > .kit-card > .kit-card-media img { position: static; height: 100%; object-fit: cover; }
-.aw-ed-law .aw-news-mosaic > li > .kit-card > .kit-card-body { flex: 1 1 0; align-self: auto; }
+:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li { display: flex; }
+:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li > .kit-card { flex: 1 1 auto; flex-direction: row; align-items: flex-start; gap: var(--kit-space-5); }
+:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li > .kit-card > .kit-card-media { position: static; flex: none; width: var(--kit-thumb-lg) !important; max-width: 40%; aspect-ratio: 4 / 3; min-height: 0; margin: 0; border-radius: var(--kit-radius-media); }
+:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li > .kit-card > .kit-card-media img { position: static; height: 100%; object-fit: cover; }
+:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li > .kit-card > .kit-card-body { flex: 1 1 0; align-self: auto; }
 /* The lead is a block card (no card padding, its body padded 24px): its picture gets the same 24px room, so it lines up with the stacked rows */
-.aw-ed-law .aw-news-mosaic > li > .kit-card[class*="kit-card--block"] { gap: 0; }
-.aw-ed-law .aw-news-mosaic > li > .kit-card[class*="kit-card--block"] > .kit-card-media { margin: var(--kit-space-5) 0 var(--kit-space-5) var(--kit-space-5); }
-.aw-ed-law .aw-news-mosaic .kit-card-sum { display: none; }
-.aw-ed-law .aw-news-mosaic .kit-card-title { font-size: var(--kit-type-h4) !important; }
-@container aw-library (min-width: 68.5rem) {
-	.aw-ed-law .aw-news-list.aw-news-mosaic { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: none; gap: var(--kit-space-grid); }
-}
-@container aw-library (max-width: 68.49rem) {
-	.aw-ed-law .aw-news-list.aw-news-mosaic { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: var(--kit-space-4); margin-inline: calc(-1 * var(--kit-space-gutter)); padding: var(--kit-space-2) var(--kit-space-gutter) var(--kit-space-3); scroll-padding-inline: var(--kit-space-gutter); scrollbar-width: none; overscroll-behavior-x: contain; }
-	.aw-ed-law .aw-news-list.aw-news-mosaic::-webkit-scrollbar { display: none; }
-	.aw-ed-law .aw-news-mosaic > li { flex: 0 0 min(82%, 22rem); scroll-snap-align: start; }
-}
+:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li > .kit-card[class*="kit-card--block"] { gap: 0; }
+:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li > .kit-card[class*="kit-card--block"] > .kit-card-media { margin: var(--kit-space-5) 0 var(--kit-space-5) var(--kit-space-5); }
+:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic .kit-card-sum { display: none; }
+:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic .kit-card-title { font-size: var(--kit-type-h3) !important; }
 
 /* India Writes for Its Community Dogs on Home (pattern aw1-story; the band's own rules are in campaign-record.css).
    768 to 1199 (owner, 2 Nov 2026: no section taller than 720px; stacked it was 873px at 1024 and 819 at 768): the
    heading and line with the figures (two by two) under them on the left, the four photographs two by two on the right
    beside both, then the dates and the button full width. The story text group is display: contents so its parts sit in
-   the band's grid; the reading and Tab order stays the markup order. Phones and from 1200: campaign-record.css. */
+   the band's grid; the reading and Tab order stays the markup order. Phones and from 1200: campaign-record.css.
+   The same layout on /campaigns/ (a page-hub page), where the stacked band was 843px at 768 and 877 at 1024. */
 @media (min-width: 768px) and (max-width: 1199px) {
-	.home .aw-ed-story.aw-camp--community-dogs .aw-ed-story-cols { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); grid-template-areas: "head media" "figures media" "dates dates" "actions actions"; column-gap: var(--kit-space-grid); row-gap: var(--kit-space-5); align-items: center; }
-	.home .aw-ed-story.aw-camp--community-dogs .aw-ed-story-text { display: contents; }
-	.home .aw-ed-story.aw-camp--community-dogs .aw-ed-story-text > * { margin: 0 !important; min-width: 0; }
-	.home .aw-ed-story.aw-camp--community-dogs .aw-ed-story-text > :first-child { grid-area: head; }
-	.home .aw-ed-story.aw-camp--community-dogs .aw-ed-story-figures { grid-area: figures; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-	.home .aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates { grid-area: dates; }
-	.home .aw-ed-story.aw-camp--community-dogs .aw-ed-story-actions { grid-area: actions; }
-	.home .aw-ed-story.aw-camp--community-dogs .aw-ed-story-media { grid-area: media; }
-	.home .aw-ed-story.aw-camp--community-dogs .aw-ed-story-photos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+	:is(.home, .page-template-page-hub) .aw-ed-story.aw-camp--community-dogs .aw-ed-story-cols { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); grid-template-areas: "head media" "figures media" "dates dates" "actions actions"; column-gap: var(--kit-space-grid); row-gap: var(--kit-space-5); align-items: center; }
+	:is(.home, .page-template-page-hub) .aw-ed-story.aw-camp--community-dogs .aw-ed-story-text { display: contents; }
+	:is(.home, .page-template-page-hub) .aw-ed-story.aw-camp--community-dogs .aw-ed-story-text > * { margin: 0 !important; min-width: 0; }
+	:is(.home, .page-template-page-hub) .aw-ed-story.aw-camp--community-dogs .aw-ed-story-text > :first-child { grid-area: head; }
+	:is(.home, .page-template-page-hub) .aw-ed-story.aw-camp--community-dogs .aw-ed-story-figures { grid-area: figures; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+	:is(.home, .page-template-page-hub) .aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates { grid-area: dates; }
+	:is(.home, .page-template-page-hub) .aw-ed-story.aw-camp--community-dogs .aw-ed-story-actions { grid-area: actions; }
+	:is(.home, .page-template-page-hub) .aw-ed-story.aw-camp--community-dogs .aw-ed-story-media { grid-area: media; }
+	:is(.home, .page-template-page-hub) .aw-ed-story.aw-camp--community-dogs .aw-ed-story-photos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 /* Take action on Home: two Kits cards (icon, title, one line, button), side by side from 768; the button at the bottom.
@@ -1816,3 +1769,37 @@ section.aw-camp-band.aw-ed-hero--campaign { box-sizing: border-box; min-height: 
 .kit-hero .aw-festive-ico { flex: 0 0 auto; display: grid; place-items: center; color: var(--kit-color-on-ink); } /* the icon alone, white on the dark (yellow is for fills only), so the hero keeps --kit-hero-min */
 .kit-hero .aw-festive-ico .kit-ico { --kit-ico-size: var(--kit-size-check); }
 @media (min-width: 768px) { .kit-hero .aw-festive-tips { grid-template-columns: repeat(2, max-content); column-gap: var(--kit-space-6); } } /* in a page hero the tips sit two across, so the hero keeps its height */
+
+/* ======================================================================================================
+   Card swipe rows (docs/design-system.md, Layout rules 12; owner, 2 Nov 2026: "sideways scroller for news, library etc
+   media content and stuff"): the theme row (kit.css .kit-scroll-row) on the card lists the plugin prints, where there
+   is no Query block to give the class: the More / Latest / In the press / Opportunities / Campaigns groups under items,
+   listings and term pages (.aw-more-list), the Related groups at the end of an item (not Directory rows, .aw-orgs: a
+   separate component), a category hub's Resources / News / Library / Campaigns groups and the Campaigns hub's "More
+   campaigns". The same settings as the theme row: one row at every width, scroll snap (x mandatory, each card snapping
+   to its start; off under prefers-reduced-motion), cards --kit-row-item wide (phones min(82%, 22rem), from 768
+   --kit-card-min, so part of the next card shows; rows of picture-left cards min(82%, 22rem)), a --kit-space-4 gap,
+   the gutter bleed (--kit-space-gutter) inside the section, --kit-space-2 above for the hover lift and focus ring.
+   aw.js makes a row that overflows focusable and names it by its heading.
+   Not swipe rows: a hub's main paginated results (/news/, /resources/, /library/, Directory, and the press hub's list
+   of every clipping), an article's body and the Home campaign row (Layout rules 7).
+   ====================================================================================================== */
+:is(.aw-more-group > .aw-more-list, .aw-related-list > .wp-block-post-template:not(.aw-orgs), .aw-hub-group:not(.aw-hub-help) > ul, .aw-camp-more > .wp-block-post-template) {
+	display: flex; flex-direction: row; flex-wrap: nowrap; align-items: stretch; overflow-x: auto; scroll-snap-type: x mandatory; gap: var(--kit-space-4);
+	margin: 0 calc(-1 * var(--kit-space-gutter)); padding: var(--kit-space-2) var(--kit-space-gutter) var(--kit-space-3); scroll-padding-inline: var(--kit-space-gutter);
+	max-width: none; list-style: none; scrollbar-width: none; overscroll-behavior-x: contain;
+}
+:is(.aw-more-group > .aw-more-list, .aw-related-list > .wp-block-post-template:not(.aw-orgs), .aw-hub-group:not(.aw-hub-help) > ul, .aw-camp-more > .wp-block-post-template)::-webkit-scrollbar { display: none; }
+:is(.aw-more-group > .aw-more-list, .aw-related-list > .wp-block-post-template:not(.aw-orgs), .aw-hub-group:not(.aw-hub-help) > ul, .aw-camp-more > .wp-block-post-template) > li { flex: 0 0 var(--kit-row-item); min-width: 0; max-width: none; margin: 0; scroll-snap-align: start; }
+.aw-related-list > .aw-cases { --kit-row-item: min(82%, 22rem); } /* Library cards are picture-left (stacked-lg): the picture, the gap and the 10rem text column (--kit-body-min) */
+@media (prefers-reduced-motion: reduce) {
+	:is(.aw-more-group > .aw-more-list, .aw-related-list > .wp-block-post-template:not(.aw-orgs), .aw-hub-group:not(.aw-hub-help) > ul, .aw-camp-more > .wp-block-post-template) { scroll-snap-type: none; }
+}
+/* Beside the sidebar (item pages from 1200) the row ends at the text column, so it never runs under the sidebar */
+@media (min-width: 1200px) {
+	.kit-with-sidebar:has(> .kit-sidebar > *) > .kit-main :is(.aw-more-group > .aw-more-list, .aw-related-list > .wp-block-post-template:not(.aw-orgs)) { margin-inline-end: 0; padding-inline-end: 0; }
+}
+/* A category hub's items are links with a meta row, not cards: in the row each one is a card box (the card tokens:
+   line border, card radius, raised surface, 24px padding, --kit-space-5), the meta row above its title. */
+.aw-hub-group:not(.aw-hub-help) > ul > li { display: flex; flex-direction: column; gap: var(--kit-space-2); padding: var(--kit-space-5); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); }
+.aw-hub-group:not(.aw-hub-help) > ul > li > * { margin: 0; }

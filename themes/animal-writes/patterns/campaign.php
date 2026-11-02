@@ -45,8 +45,8 @@
 <h2 class="wp-block-heading" id="letters">Letter templates</h2>
 <!-- /wp:heading -->
 
-<!-- wp:query {"queryId":61,"query":{"perPage":6,"pages":0,"offset":0,"postType":"aw_legal","order":"asc","orderBy":"date","inherit":false,"taxQuery":{"post_tag":[1045]}},"className":"kit-cards aw-cards-3"} -->
-<div class="wp-block-query kit-cards aw-cards-3"><!-- wp:post-template -->
+<!-- wp:query {"queryId":61,"query":{"perPage":6,"pages":0,"offset":0,"postType":"aw_legal","order":"asc","orderBy":"date","inherit":false,"taxQuery":{"post_tag":[1045]}},"className":"kit-cards aw-cards-3 kit-scroll-row"} -->
+<div class="wp-block-query kit-cards aw-cards-3 kit-scroll-row"><!-- wp:post-template -->
 <!-- wp:post-title {"level":3,"isLink":true} /-->
 
 <!-- wp:post-excerpt {"excerptLength":20} /-->

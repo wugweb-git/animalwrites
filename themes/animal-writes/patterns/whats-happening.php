@@ -28,8 +28,8 @@
 <!-- /wp:buttons --></div>
 <!-- /wp:group -->
 
-<!-- wp:query {"queryId":41,"query":{"perPage":3,"pages":0,"offset":0,"postType":"aw_news","order":"desc","orderBy":"date","inherit":false},"className":"aw-hub-list","layout":{"type":"default"}} -->
-<div class="wp-block-query aw-hub-list"><!-- wp:post-template {"className":"aw-news-list aw-news-mosaic","layout":{"type":"default"}} -->
+<!-- wp:query {"queryId":41,"query":{"perPage":3,"pages":0,"offset":0,"postType":"aw_news","order":"desc","orderBy":"date","inherit":false},"className":"aw-hub-list kit-scroll-row","layout":{"type":"default"}} -->
+<div class="wp-block-query aw-hub-list kit-scroll-row"><!-- wp:post-template {"className":"aw-news-list aw-news-mosaic","layout":{"type":"default"}} -->
 <?php echo function_exists( 'aw_hub_item' ) ? str_replace( '"level":2', '"level":3', aw_hub_item( 'aw_news' ) ) : ''; // the News list's card, one level below this section's H2 ?>
 <!-- /wp:post-template --></div>
 <!-- /wp:query --></section>

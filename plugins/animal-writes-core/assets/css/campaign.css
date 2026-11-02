@@ -138,6 +138,16 @@
 	.aw-camp--diwali #library .aw-camp-section > .wp-block-list, .aw-camp--diwali #library .aw-camp-section > .aw-camp-fold > .wp-block-list { columns: 2; column-gap: var(--kit-space-6); }
 	.aw-camp--diwali #library .aw-camp-section > .wp-block-list > li, .aw-camp--diwali #library .aw-camp-section > .aw-camp-fold > .wp-block-list > li { break-inside: avoid; }
 }
+/* Diwali on phones (mobile audit, 2 Nov 2026; Layout rules 4, 10 and 12). The hero's text starts under the hero's own
+   padding instead of the middle, so its one button is on the first screen at 360x640. The news row shows part of the next card (cards at most
+   --kit-card-min, else --kit-carousel-item); the law and action rows keep full-width cards, which a narrower card
+   would push past 600px (rule 10). */
+@media (max-width: 767px) {
+	.aw-camp--diwali .wp-block-cover.kit-hero { align-items: flex-start; }
+	.aw-camp.aw-camp--diwali .aw-camp-row .wp-block-post-template > li { flex-basis: min(var(--kit-card-min), var(--kit-carousel-item)); }
+}
+/* FAQ: the question rows --kit-space-2 apart (8px between targets) */
+.aw-camp--diwali .rank-math-list-item + .rank-math-list-item { margin-top: var(--kit-space-2); }
 /* Supreme Court stray dogs (2026): deep plum and the site yellow, no black (owner, 1 Nov 2026). Plum on cream 14:1, white on plum 15.6:1. */
 .aw-camp--sc-stray-dogs {
 	--camp-primary: #3a1730;

@@ -508,7 +508,7 @@ ins.adsbygoogle:not([data-ad-status="filled"]) { height: 0 !important; min-heigh
 /* Rank Math FAQ (keeps its FAQ schema): drawn like the Details FAQ below; kit.js makes each answer open and close. */
 .rank-math-block { margin-block: var(--kit-space-6); }
 .rank-math-list-item { border-bottom: var(--kit-border-width) solid var(--kit-color-line); }
-.rank-math-question { margin: 0 !important; font-size: var(--kit-type-body); line-height: var(--kit-leading-heading); }
+.rank-math-question { margin: 0 !important; font-size: var(--kit-type-h3); line-height: var(--kit-leading-heading); } /* the theme H3 (Layout rules 9); --kit-type-body was never a token, so it fell back to the body size */
 .rank-math-question > button { all: unset; box-sizing: border-box; width: 100%; display: flex; justify-content: space-between; align-items: center; gap: var(--kit-space-4); min-height: var(--kit-size-target); padding-block: var(--kit-space-3); cursor: pointer; font-weight: var(--kit-weight-strong); }
 .rank-math-question > button::after { content: "+"; font-size: 1.4em; line-height: 1; transition: transform var(--kit-motion-base) var(--kit-motion-ease); }
 .rank-math-question > button[aria-expanded="true"]::after { transform: rotate(45deg); }
@@ -525,7 +525,7 @@ ins.adsbygoogle:not([data-ad-status="filled"]) { height: 0 !important; min-heigh
 .kit-faq > .kit-sec-head { row-gap: var(--kit-space-4); margin-bottom: var(--kit-space-head); }
 .kit-faq > .kit-sec-head p { margin-top: var(--kit-space-4); }
 .kit-faq-item { border-bottom: var(--kit-border-width) solid var(--kit-color-line); }
-.kit-faq-q { margin: 0; font-size: var(--kit-type-body); line-height: var(--kit-leading-heading); }
+.kit-faq-q { margin: 0; font-size: var(--kit-type-h3); line-height: var(--kit-leading-heading); } /* the theme H3 (Layout rules 9) */
 .kit-faq-btn { all: unset; box-sizing: border-box; width: 100%; display: flex; justify-content: space-between; align-items: center; gap: var(--kit-space-4); min-height: var(--kit-size-target); padding-block: var(--kit-space-3); cursor: pointer; font-weight: var(--kit-weight-strong); }
 .kit-faq-btn::after { content: "+"; flex: none; font-size: 1.4em; line-height: 1; transition: transform var(--kit-motion-base) var(--kit-motion-ease); }
 .kit-faq-btn[aria-expanded="true"]::after { transform: rotate(45deg); }
@@ -1124,13 +1124,20 @@ body { background: var(--kit-surface-page); }
 
 /* CTA buttons (owner, 9 Oct 2026): every link button carries an icon, which nudges on hover and focus: kit-primitives.css section 10. */
 
-/* Sideways scroll row (phones): a list of cards scrolls across instead of stacking down the screen. Add kit-scroll-row
-   to a Query Loop; from 768px the list lays out as the section decides. */
-@media (max-width: 767px) {
-	.kit-scroll-row .wp-block-post-template { display: flex !important; flex-direction: row !important; overflow-x: auto; scroll-snap-type: x mandatory; gap: var(--kit-space-4); margin: 0 calc(-1 * var(--kit-space-gutter)) !important; padding: 0 var(--kit-space-gutter) var(--kit-space-3) !important; scroll-padding-inline: var(--kit-space-gutter); max-width: none !important; width: auto !important; scrollbar-width: none; overscroll-behavior-x: contain; }
-	.kit-scroll-row .wp-block-post-template::-webkit-scrollbar { display: none; }
-	.kit-scroll-row .wp-block-post-template > li { flex: 0 0 min(82%, 22rem); scroll-snap-align: start; margin: 0 !important; }
-}
+/* Sideways swipe row, at every width (docs/design-system.md, Layout rules 12; owner, 2 Nov 2026): a list of cards is
+   one row that scrolls across instead of stacking down the page. Add kit-scroll-row to a Query Loop. Scroll snap, each
+   card snapping to its start; the row bleeds to the gutter (--kit-space-gutter) inside its section, so the page never
+   scrolls sideways. Card width --kit-row-item: phones min(82%, 22rem) (the peek width, so part of the next card shows),
+   from 768 --kit-card-min. A row of picture-left (stacked) cards sets --kit-row-item: min(82%, 22rem) at every width,
+   since a stacked card needs its picture plus a 10rem text column (--kit-body-min, docs/card-sizes.md). Top padding
+   (--kit-space-2): room for the card's hover lift and focus ring inside the scroller. aw.js makes any row that overflows
+   focusable (tabindex 0) and names it by its heading, so no tabindex in the markup. */
+:root { --kit-row-item: min(82%, 22rem); }
+@media (min-width: 768px) { :root { --kit-row-item: var(--kit-card-min); } }
+.kit-scroll-row .wp-block-post-template { display: flex !important; flex-direction: row !important; flex-wrap: nowrap; align-items: stretch; overflow-x: auto; scroll-snap-type: x mandatory; gap: var(--kit-space-4); margin: 0 calc(-1 * var(--kit-space-gutter)) !important; padding: var(--kit-space-2) var(--kit-space-gutter) var(--kit-space-3) !important; scroll-padding-inline: var(--kit-space-gutter); max-width: none !important; width: auto !important; scrollbar-width: none; overscroll-behavior-x: contain; }
+.kit-scroll-row .wp-block-post-template::-webkit-scrollbar { display: none; }
+.kit-scroll-row .wp-block-post-template > li { flex: 0 0 var(--kit-row-item); min-width: 0; scroll-snap-align: start; margin: 0 !important; }
+@media (prefers-reduced-motion: reduce) { .kit-scroll-row .wp-block-post-template { scroll-snap-type: none; } }
 
 /* Header hides on scroll down, returns on scroll up (kit.js adds .kit-header-hidden). */
 header.wp-block-template-part:has(.kit-site-header) { transition: transform var(--kit-duration-spring) var(--kit-ease-spring); }
@@ -1197,7 +1204,7 @@ header.wp-block-template-part.kit-header-hidden { transform: translateY(calc(-10
 .kit-card-chips-lead { display: inline-flex; flex-wrap: nowrap; gap: var(--s-1, 4px); min-width: 0; max-width: 100%; }
 .kit-card-chips-lead > * { min-width: 0; }
 .kit-card-chips-lead > :is(.kit-card-label, .aw-sponsored-label) { flex: none; }
-.kit-card .kit-card-title { font-size: var(--kit-type-base) !important; font-weight: var(--kit-weight-strong); line-height: 1.3 !important; letter-spacing: -0.01em; }
+.kit-card .kit-card-title { font-size: var(--kit-type-h3) !important; font-weight: var(--kit-weight-strong); line-height: var(--kit-leading-heading) !important; letter-spacing: -0.01em; } /* the theme H3 (Layout rules 9; was the body size); 3 lines at most stay under 80px */
 .kit-card[class*="kit-card--"] .kit-card-title a { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; color: var(--kit-color-ink); }
 .kit-card .kit-card-title a::after { content: ""; position: absolute; inset: 0; }
 .kit-card .kit-card-title .kit-ico--arrow-up-right { --kit-ico-size: .9em; }
@@ -1224,6 +1231,16 @@ header.wp-block-template-part.kit-header-hidden { transform: translateY(calc(-10
 .kit-card--stacked-sm > .kit-card-body { gap: var(--kit-space-1); }
 .kit-card--stacked-sm::before { content: ""; flex: none; width: 1.5rem; height: 1.5rem; background: var(--kit-card-icon-color, var(--kit-color-ink)); -webkit-mask: var(--kit-card-icon, var(--kit-ico-file, none)) center / contain no-repeat; mask: var(--kit-card-icon, var(--kit-ico-file, none)) center / contain no-repeat; }
 .kit-card--stacked-sm:has(> .kit-card-media)::before { content: none; }
+/* News hub lead (first page; not the Home mosaic): from 1200 the picture sits left of the text with the wide stacked
+   card's split (docs/card-sizes.md: picture 30%, 4.5 to 15rem; text column at least 10rem). It keeps the block card's
+   look: the picture flush to the card edge, at least its 4:3 shape, cropped to the text's height when that is taller
+   (at most --kit-card-media-max); the text keeps its 24px padding. The card is as tall as its text, not the three rows
+   beside it. So it stays under 600px (Layout rules 10; with the picture on top it was 618px at 1280 and 1440). */
+@media (min-width: 1200px) {
+	.is-first-page .aw-news-list:not(.aw-news-mosaic) > li:first-child > .kit-card--block-lg { flex-direction: row; height: auto; }
+	.is-first-page .aw-news-list:not(.aw-news-mosaic) > li:first-child > .kit-card--block-lg > .kit-card-media { flex: none; align-self: stretch; width: clamp(var(--kit-thumb-min), 30%, var(--kit-thumb-max)); }
+	.is-first-page .aw-news-list:not(.aw-news-mosaic) > li:first-child > .kit-card--block-lg > .kit-card-body { flex: 1 1 0; min-width: var(--kit-body-min); }
+}
 
 /* Step progress header for multi-step forms (kit.js adds it to .kit-steps; 12 Oct 2026). */
 .kit-steps-progress { list-style: none; margin: 0 0 var(--kit-space-5); padding: 0; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: var(--kit-space-2); counter-reset: none; }

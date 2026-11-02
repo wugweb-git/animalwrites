@@ -49,7 +49,9 @@ a.kit-tag { cursor: pointer; }
 .kit-tag--featured { --kit-status: var(--kit-color-ink) !important; }
 .kit-tag:is(.kit-tag--success, .kit-tag--warning, .kit-tag--danger, .kit-tag--closed, .kit-tag--featured) .aw-date { color: inherit; }
 .kit-tags { display: flex; flex-wrap: wrap; gap: var(--s-1); align-items: center; }
-.kit-chip::after, .wp-block-post-terms a::after { content: ""; position: absolute; inset: calc((var(--s-8) - var(--kit-size-target)) / 2) 0; } /* 44px hit area */
+.kit-chip::after, .wp-block-post-terms a::after { content: ""; position: absolute; inset: calc((var(--s-8) - var(--kit-size-target)) / 2) 0; }
+.kit-chip::after { inset: calc((100% - var(--kit-size-target)) / 2) 0; } /* a 44px hit area (--kit-size-target) from the chip's own height, the chip's look unchanged; it reaches 8px above and below, so chips in a row with an 8px gap (.aw-item-meta) meet in the gap and never cover each other */
+.kit-tags:has(> .kit-chip, > li > .kit-chip) { row-gap: var(--kit-space-4); } /* wrapped chip rows 16px apart (44 - 28), so the hit areas of one row never reach the chips of the next */
 :is(.kit-chip, .wp-block-post-terms a, a.kit-tag):visited { color: var(--kit-chip-fg); }
 :is(.kit-chip, .wp-block-post-terms a, a.kit-tag):focus-visible { background: var(--kit-chip-hover); border-color: var(--kit-chip-border-strong); outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
 :is(.kit-chip, .wp-block-post-terms a, a.kit-tag):active, :is(.kit-chip, .wp-block-post-terms a, a.kit-tag)[aria-current], .kit-chip.is-selected { background: var(--kit-chip-selected); border-color: var(--kit-chip-border-strong); }
