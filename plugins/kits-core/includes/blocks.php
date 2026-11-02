@@ -25,6 +25,26 @@ add_action(
 );
 
 /**
+ * Markup printed by PHP as a core Group block, so a Group style on it (Section, Head band) gets its CSS: WordPress prints
+ * a block style's settings only for blocks that render with it. $html is the group's full markup, as the block saves it.
+ *
+ * @param string $html  The group's markup (outer tag included).
+ * @param array  $attrs Group attributes: className with the style (is-style-kits-section), tagName, align, layout.
+ * @return string
+ */
+function kits_group_html( $html, $attrs ) {
+	return render_block(
+		array(
+			'blockName'    => 'core/group',
+			'attrs'        => $attrs,
+			'innerBlocks'  => array(),
+			'innerHTML'    => $html,
+			'innerContent' => array( $html ),
+		)
+	);
+}
+
+/**
  * A Styles value as CSS: preset references (var:preset|spacing|section) become CSS variables. Only plain CSS length
  * values pass (numbers, units, var(), min(), max(), clamp(), calc()); anything else returns ''.
  *

@@ -380,7 +380,22 @@ add_filter(
 		}
 		$done   = true;
 		$states = aw_findhelp_states_window( $id );
-		return $states ? '<section class="wp-block-group alignfull is-style-kits-section aw-camp-section aw-camp-tint aw-findhelp-band kit-section has-global-padding is-layout-constrained" id="find-help">' . aw_findhelp_html( $id, $states, 'aw-findhelp-head', false ) . '</section>' . $html : $html;
+		if ( ! $states ) {
+			return $html;
+		}
+		$band = '<section class="wp-block-group alignfull is-style-kits-section aw-camp-section aw-camp-tint aw-findhelp-band kit-section has-global-padding is-layout-constrained" id="find-help">' . aw_findhelp_html( $id, $states, 'aw-findhelp-head', false ) . '</section>';
+		if ( function_exists( 'kits_group_html' ) ) { // a core Group with the Section style, so its padding comes from Styles
+			$band = kits_group_html(
+				$band,
+				array(
+					'tagName'   => 'section',
+					'align'     => 'full',
+					'className' => 'is-style-kits-section aw-camp-section aw-camp-tint aw-findhelp-band kit-section',
+					'layout'    => array( 'type' => 'constrained' ),
+				)
+			);
+		}
+		return $band . $html;
 	},
 	10,
 	2

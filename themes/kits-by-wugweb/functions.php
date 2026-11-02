@@ -158,29 +158,27 @@ add_action( 'init', 'kits_block_styles' );
 
 /**
  * Groups saved before the Section and Head band styles existed carry the old classes (kit-section, kit-section-band).
- * They get the matching style class when they render, so they follow the Styles settings without a content change.
- * Re-saving such a block with the style picked makes this a no-op for it.
+ * They get the matching style before they render (WordPress prints a style's CSS for the blocks that have it), so they
+ * follow the Styles settings without a content change. Re-saving such a block with the style picked makes this a no-op.
  */
 add_filter(
-	'render_block_core/group',
-	function ( $html, $block ) {
-		$classes = preg_split( '/\s+/', (string) ( $block['attrs']['className'] ?? '' ) );
-		if ( false !== strpos( implode( ' ', $classes ), 'is-style-' ) ) {
-			return $html;
+	'render_block_data',
+	function ( $block ) {
+		if ( 'core/group' !== ( $block['blockName'] ?? '' ) ) {
+			return $block;
+		}
+		$class   = (string) ( $block['attrs']['className'] ?? '' );
+		$classes = preg_split( '/\s+/', $class );
+		if ( false !== strpos( $class, 'is-style-' ) ) {
+			return $block;
 		}
 		$style = in_array( 'kit-section-band', $classes, true ) ? 'is-style-kits-head-band' : ( in_array( 'kit-section', $classes, true ) ? 'is-style-kits-section' : '' );
-		if ( '' === $style ) {
-			return $html;
+		if ( '' !== $style ) {
+			$block['attrs']['className'] = trim( $style . ' ' . $class );
 		}
-		$tags = new WP_HTML_Tag_Processor( $html );
-		if ( $tags->next_tag() ) {
-			$tags->add_class( $style );
-			return $tags->get_updated_html();
-		}
-		return $html;
+		return $block;
 	},
-	10,
-	2
+	5 // before core's block style variation support (10), which prints the style's CSS
 );
 
 /**

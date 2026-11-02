@@ -72,12 +72,28 @@ function aw_head_band( $a ) {
 		$under = aw_head_below( $a['filters'], $a['count'], $a['type'] );
 		return aw_head_band( array_merge( $a, array( 'count' => '', 'filters' => '', 'compact' => false, 'below' => false ) ) ) . $under;
 	}
-	// wp-block-group is-style-kits-head-band: the band's background and padding come from the Head band style in Styles.
-	return '<header class="wp-block-group is-style-kits-head-band kit-section-band alignfull' . ( $a['compact'] ? ' kit-section-band--compact' : '' ) . '"><div class="kit-section-inner">' . $a['crumbs'] . '<div class="kit-section-head"><div>'
+	// The band is a core Group with the Head band style, so its background and padding come from Styles.
+	$html = '<header class="wp-block-group is-style-kits-head-band kit-section-band alignfull' . ( $a['compact'] ? ' kit-section-band--compact' : '' ) . '"><div class="kit-section-inner">' . $a['crumbs'] . '<div class="kit-section-head"><div>'
 		. '<h1 class="' . esc_attr( $a['title_class'] ) . '">' . $a['icon'] . esc_html( $a['title'] ) . '</h1>'
 		. ( '' !== $a['desc'] ? '<p class="kit-section-desc">' . wp_kses( $a['desc'], array( 'a' => array( 'href' => true ) ) ) . '</p>' : '' ) . $a['note'] // plain links kept (a tag description pointing to its page, owner 25 Oct 2026); everything else escaped
 		. $count
 		. '</div>' . $a['visual'] . '</div>' . ( '' !== $a['filters'] ? '<div class="kit-section-filters">' . $a['filters'] . '</div>' : '' ) . '</div></header>';
+	if ( ! function_exists( 'kits_group_html' ) ) {
+		return $html;
+	}
+	$below = $GLOBALS['aw_head_below'] ?? ''; // the saved-band filter below must not attach a list toolbar to this band
+	$GLOBALS['aw_head_below'] = '';
+	$html  = kits_group_html(
+		$html,
+		array(
+			'tagName'   => 'header',
+			'align'     => 'full',
+			'className' => 'is-style-kits-head-band kit-section-band' . ( $a['compact'] ? ' kit-section-band--compact' : '' ),
+			'layout'    => array( 'type' => 'default' ),
+		)
+	);
+	$GLOBALS['aw_head_below'] = $below;
+	return $html;
 }
 
 /** Head band of an archive, category, tag or Directory place page (was the [aw_section_head] shortcode's own markup). */
