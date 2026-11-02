@@ -763,3 +763,6 @@
 }
 /* Supporting cards: a soft top highlight (the line colour, 1px) over the existing 1px line and --kit-elevation-1 */
 .aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card:not(:first-child) { box-shadow: inset 0 1px 0 var(--kit-color-surface), inset 0 0 0 1px var(--kit-color-line), var(--kit-elevation-1); }
+@media (hover: hover) {
+	.aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card:not(:first-child):hover { box-shadow: inset 0 1px 0 var(--kit-color-surface), inset 0 0 0 1px var(--kit-color-line), var(--kit-elevation-2); }
+}
