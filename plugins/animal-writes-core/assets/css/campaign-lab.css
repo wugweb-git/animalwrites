@@ -648,3 +648,10 @@
 .aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card:not(:first-child) h3 { font-size: var(--kit-type-h4); line-height: var(--kit-leading-heading); }
 .aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card:not(:first-child) .aw-camp-card-ico { width: var(--kit-size-target); height: var(--kit-size-target); }
 .aw-camp.aw-camp--lab-rules #why-it-matters .aw-camp-grid > .aw-camp-card:first-child p:not(.aw-camp-card-ico):not(.aw-camp-card-chips) { font-size: var(--kit-type-sm); }
+
+/* Read the law and the record: the theme's stacked card (picture beside the title, card background, 24px padding),
+   so the list row styles above are reset for this section */
+.aw-camp--lab-rules #read .aw-camp-docs-q li { display: block; padding: 0; background: none; box-shadow: none; border-radius: 0; }
+.aw-camp--lab-rules #read .aw-camp-docs-q li::before { content: none; }
+.aw-camp--lab-rules #read .aw-camp-docs-q li:hover { box-shadow: none; }
+.aw-camp.aw-camp--lab-rules #read .aw-camp-docs-q li > .kit-card { height: 100%; box-sizing: border-box; padding: var(--kit-space-5); }

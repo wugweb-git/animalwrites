@@ -335,7 +335,9 @@ $read = c2sec(
 <!-- wp:query {"queryId":84,"query":{"perPage":12,"pages":0,"offset":0,"postType":"aw_legal","order":"desc","orderBy":"date","inherit":false,%TQ%},"className":"aw-camp-docs-q kit-ico--file"} -->
 <div class="wp-block-query aw-camp-docs-q kit-ico--file"><!-- wp:post-template -->
 <!-- wp:group {"tagName":"article","className":"kit-card kit-card--stacked-sm","layout":{"type":"default"}} -->
-<article class="wp-block-group kit-card kit-card--stacked-sm"><!-- wp:group {"className":"kit-card-body","layout":{"type":"default"}} -->
+<article class="wp-block-group kit-card kit-card--stacked-sm"><!-- wp:post-featured-image {"isLink":false,"className":"kit-card-media"} /-->
+
+<!-- wp:group {"className":"kit-card-body","layout":{"type":"default"}} -->
 <div class="wp-block-group kit-card-body"><!-- wp:animal-writes/badges {"state":"stacked-sm"} /-->
 
 <!-- wp:post-title {"level":3,"isLink":true,"className":"kit-card-title"} /--></div>
