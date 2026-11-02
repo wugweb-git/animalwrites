@@ -868,13 +868,15 @@
 .aw-camp.aw-camp #share .aw-share-cta-done { font-size: var(--kit-type-sm); font-weight: var(--kit-weight-strong); color: var(--camp-mark); }
 .aw-camp.aw-camp #share .aw-share-cta-done:empty { display: none; }
 .aw-camp.aw-camp #share .aw-share-block .kit-share :is(.kit-share-label, .kit-share-name) { display: none !important; }
+.aw-camp.aw-camp #share .aw-share-block .kit-share { flex-wrap: nowrap; gap: var(--kit-space-1); }
+@media (min-width: 768px) { .aw-camp.aw-camp #share .aw-share-block .kit-share { gap: var(--kit-space-2); } }
 .aw-camp.aw-camp #share .aw-share-pics { display: grid; gap: var(--kit-space-3); }
 .aw-camp.aw-camp #share .aw-share-pics-head { margin: 0; font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
 .aw-camp.aw-camp #share .aw-share-pics-head strong { display: block; font-size: var(--kit-type-base); color: var(--kit-color-text); }
 .aw-camp.aw-camp #share .aw-share-pics-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--kit-space-3); align-items: end; }
 .aw-camp.aw-camp #share .aw-share-pic { display: grid; gap: var(--kit-space-2); min-width: 0; margin: 0; padding: 0; border: 0; background: none; color: var(--kit-color-text); font: inherit; text-align: left; cursor: pointer; border-radius: var(--kit-radius-card); }
-.aw-camp.aw-camp #share .aw-share-pic img { display: block; width: 100%; height: auto; border-radius: var(--kit-radius-card); box-shadow: var(--kit-elevation-1); transition: transform var(--kit-motion-base) var(--kit-motion-ease), box-shadow var(--kit-motion-base) var(--kit-motion-ease); }
-.aw-camp.aw-camp #share .aw-share-pic > span { display: inline-flex; align-items: center; gap: var(--kit-space-1); min-height: var(--kit-size-target); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-strong); }
+.aw-camp.aw-camp #share .aw-share-pic img { display: block; width: auto; max-width: 100%; height: auto; max-height: var(--kit-thumb-max); border-radius: var(--kit-radius-card); box-shadow: var(--kit-elevation-1); transition: transform var(--kit-motion-base) var(--kit-motion-ease), box-shadow var(--kit-motion-base) var(--kit-motion-ease); }
+.aw-camp.aw-camp #share .aw-share-pic > span { display: inline-flex; align-items: center; gap: var(--kit-space-1); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-strong); }
 .aw-camp.aw-camp #share .aw-share-pic:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
 @media (hover: hover) {
 	.aw-camp.aw-camp #share .aw-share-pic:hover img { transform: translateY(var(--kit-motion-lift)); box-shadow: var(--kit-elevation-2); }
