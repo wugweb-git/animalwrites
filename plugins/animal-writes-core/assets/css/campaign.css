@@ -105,13 +105,10 @@
    the text fits inside, and the hero grows only if a screen is too short for it (never cut off) */
 .aw-camp--diwali .wp-block-cover.kit-hero { min-height: var(--kit-hero-h) !important; }
 /* Phones: one call to action in the hero (Layout rules 4; "Who to call" is its own section further down), and the Who
-   to call table at body size. Short landscape phones: the tips two across, so the hero content fits one screen. */
+   to call table at body size. */
 @media (max-width: 767px) {
 	.aw-camp--diwali .kit-hero .wp-block-buttons > .wp-block-button ~ .wp-block-button { display: none; }
 	.aw-camp--diwali #help .wp-block-table :is(th, td) { font-size: var(--kit-type-base); }
-}
-@media (max-width: 767px) and (max-height: 500px) {
-	.aw-camp--diwali .kit-hero .aw-festive-tips { grid-template-columns: repeat(2, max-content); column-gap: var(--kit-space-6); margin-bottom: var(--kit-space-4); }
 }
 /* Sections at most 720px from 768 (owner, 2 Nov 2026), from content, tokens and the theme breakpoints only */
 /* What the law says: 16px (--kit-space-4) from the opening line to the cards */
