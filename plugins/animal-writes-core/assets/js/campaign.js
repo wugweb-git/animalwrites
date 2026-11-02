@@ -196,7 +196,7 @@
 			img.decoding = 'async';
 			b.appendChild(img);
 			b.insertAdjacentHTML('beforeend', '<span><span class="kit-ico kit-ico--' + (canShare ? 'share' : 'download') + '" aria-hidden="true"></span>' + k[2] + '</span>');
-			b.setAttribute('aria-label', (canShare ? 'Share the ' : 'Save the ') + k[1] + ' picture');
+			b.setAttribute('aria-label', k[2] + ': ' + (canShare ? 'share the ' : 'save the ') + k[1] + ' picture'); // the name starts with the visible text (WCAG 2.5.3)
 			b.addEventListener('click', function () { shareImage(k[0], row); });
 			list.appendChild(b);
 		});
@@ -593,13 +593,15 @@
 	var hero = document.querySelector('.aw-camp-hero');
 	var foot = document.querySelector('.wp-site-blocks > footer, footer.wp-block-template-part');
 	var sent = false, onSend = false, onHero = !!hero, onFoot = false;
+	var short = window.matchMedia && window.matchMedia('(max-height: 500px)'); // a phone on its side: the hero fills the screen, so the bar shows on it too
 	try { sent = sessionStorage.getItem('aw-letter-sent') === '1'; } catch (e) { /* private mode */ }
 	function update() {
-		var h = sent || onSend || onHero || onFoot;
+		var h = sent || onSend || (onHero && !(short && short.matches)) || onFoot;
 		bar.classList.toggle('is-hidden', h);
 		bar.inert = h; // off screen: not reachable by keyboard either
 	}
 	update();
+	if (short && short.addEventListener) short.addEventListener('change', update);
 	document.addEventListener('aw:letter-sent', function () { sent = true; update(); });
 	if ('IntersectionObserver' in window) {
 		if (target) new IntersectionObserver(function (en) { onSend = en[0].isIntersecting; update(); }).observe(target);
@@ -642,7 +644,7 @@
 		var sec = row.closest('.aw-camp-section');
 		var h = sec && sec.querySelector('h2[id]');
 		if (!h || row.hasAttribute('aria-labelledby')) return;
-		row.setAttribute('role', 'region');
+		if (!/^(UL|OL)$/.test(row.tagName)) row.setAttribute('role', 'region'); // a list stays a list (its items need a list parent)
 		row.setAttribute('aria-labelledby', h.id);
 	});
 })();

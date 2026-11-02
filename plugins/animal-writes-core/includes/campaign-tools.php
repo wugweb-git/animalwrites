@@ -318,11 +318,11 @@ add_shortcode(
 		<legend class="aw-letter-head"><span class="kit-step-count">Step 2 of 3</span><span class="aw-letter-step" aria-hidden="true">2</span><span class="kit-step-title">Sign it</span></legend>
 		<div class="aw-letter-sign-fields">
 			<p class="aw-letter-field"><label for="aw-letter-name">Your name <span aria-hidden="true">*</span></label>
-				<input id="aw-letter-name" aria-describedby="aw-letter-name-error" name="name" type="text" autocomplete="name" required maxlength="80"><span class="kit-field-message kit-field-error" id="aw-letter-name-error" aria-live="polite"></span></p>
+				<input id="aw-letter-name" aria-describedby="aw-letter-name-error" name="name" type="text" autocomplete="name" enterkeyhint="next" required maxlength="80"><span class="kit-field-message kit-field-error" id="aw-letter-name-error" aria-live="polite"></span></p>
 			<p class="aw-letter-field"><label for="aw-letter-city">Your city <span aria-hidden="true">*</span></label>
-				<input id="aw-letter-city" aria-describedby="aw-letter-city-error" name="city" type="text" autocomplete="address-level2" required maxlength="60"><span class="kit-field-message kit-field-error" id="aw-letter-city-error" aria-live="polite"></span></p>
+				<input id="aw-letter-city" aria-describedby="aw-letter-city-error" name="city" type="text" autocomplete="address-level2" enterkeyhint="next" required maxlength="60"><span class="kit-field-message kit-field-error" id="aw-letter-city-error" aria-live="polite"></span></p>
 			<p class="aw-letter-field aw-letter-email"><label for="aw-letter-email">Your email <span aria-hidden="true">*</span></label>
-				<input id="aw-letter-email" aria-describedby="aw-letter-email-error" name="email" type="email" autocomplete="email" required maxlength="190"><span class="kit-field-message kit-field-error" id="aw-letter-email-error" aria-live="polite"></span></p>
+				<input id="aw-letter-email" aria-describedby="aw-letter-email-error" name="email" type="email" autocomplete="email" enterkeyhint="next" required maxlength="190"><span class="kit-field-message kit-field-error" id="aw-letter-email-error" aria-live="polite"></span></p>
 			<p class="aw-letter-field"><label for="aw-letter-own">Add a line in your own words <span class="aw-letter-hint">(optional, up to 300 characters)</span></label>
 				<textarea id="aw-letter-own" name="own" maxlength="300" rows="3"></textarea></p>
 		</div>
