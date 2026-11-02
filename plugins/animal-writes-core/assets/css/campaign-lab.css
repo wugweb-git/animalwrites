@@ -671,3 +671,13 @@
 	.aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card { transition: none; }
 	.aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card:hover { transform: none; }
 }
+/* The tiles take no block margin from the page flow (the grid gap spaces them). From 768 the full-width last tile
+   reads in one band: icon, then heading over text, then its rule chips. */
+.aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card { margin: 0; }
+@media (min-width: 768px) {
+	.aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card:last-child { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "ico h chips" "ico t chips"; column-gap: var(--kit-space-5); row-gap: var(--kit-space-2); align-items: center; }
+	.aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card:last-child > .aw-camp-card-ico { grid-area: ico; align-self: start; margin: 0; }
+	.aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card:last-child > h3 { grid-area: h; align-self: end; }
+	.aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card:last-child > p:not(.aw-camp-card-ico, .aw-camp-card-chips) { grid-area: t; align-self: start; }
+	.aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card:last-child > .aw-camp-card-chips { grid-area: chips; max-width: 18rem; }
+}
