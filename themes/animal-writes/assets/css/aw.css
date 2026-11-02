@@ -1620,7 +1620,7 @@ section.aw-camp-band.aw-ed-hero--campaign { box-sizing: border-box; min-height: 
 	.aw-bento > .aw-bento-tile { flex: 0 0 min(82%, 22rem); scroll-snap-align: start; }
 }
 @container aw-help (min-width: 56.5rem) {
-	.aw-bento { grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-areas: "sos injured vet1962 awbi" "sos cruelty vets orgs"; }
+	.aw-bento { gap: var(--kit-space-4); grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-areas: "sos injured vet1962 awbi" "sos cruelty vets orgs"; } /* 16px between tiles, so the Home help section stays within 720 (Layout rules 5) */
 }
 /* Each tile is a size container, so the phone numbers scale to the tile and never wrap or overflow. Depth: a faint
    border, a light line along the top edge, a soft top-to-bottom shade and a small shadow. Hover: the tile lifts
