@@ -368,9 +368,9 @@ html { overflow-x: clip; }
 /* 5. Site chrome ------------------------------------------------------------- */
 .kit-announce { display: flex; align-items: center; justify-content: center; box-sizing: border-box; min-height: var(--kit-announce-height); padding: 0 var(--kit-space-4); } /* 25px bar (token), 16px sides */
 .kit-announce > p { margin-block: 0; line-height: var(--kit-leading-heading); }
-.kit-announce a { color: inherit; font-weight: var(--kit-weight-strong); }
+.kit-announce a { display: inline-flex; align-items: center; min-height: var(--kit-space-5); color: inherit; font-weight: var(--kit-weight-strong); } /* 24px tap height inside the 25px bar (WCAG 2.5.8) */
 .kit-site-header { position: relative; z-index: var(--kit-z-header); }
-.kit-wordmark { display: inline-flex; line-height: 0; border-radius: var(--kit-radius-xs); }
+.kit-wordmark { display: inline-flex; align-items: center; min-height: var(--kit-size-target); line-height: 0; border-radius: var(--kit-radius-xs); } /* the logo link is a 44px target at every width, also when the phone logo is 112px wide */
 .kit-wordmark img { height: var(--kit-size-target); width: auto; }
 .kit-site-footer .kit-wordmark img { height: 52px; }
 .kit-dark a { color: inherit; }
@@ -776,7 +776,7 @@ html.has-modal-open .kit-sticky-help { display: none !important; }
 .kit-footer-head { display: flex; align-items: center; gap: var(--kit-space-2); margin: 0 0 var(--kit-space-3); font-size: var(--kit-type-sm) !important; font-weight: var(--kit-weight-strong); letter-spacing: 0; line-height: 1.4 !important; color: var(--kit-color-on-ink) !important; }
 .kit-footer-list, .kit-legal-links, .kit-footer-inline, .kit-footer-helplines { list-style: none; padding: 0; margin: 0; }
 .kit-footer-list li { margin: 0; }
-.kit-footer-list a { display: flex; align-items: center; min-height: 2.5rem; font-size: var(--kit-type-base); color: var(--kit-footer-muted); text-decoration: none; }
+.kit-footer-list a { display: flex; align-items: center; min-height: var(--kit-size-target); font-size: var(--kit-type-base); color: var(--kit-footer-muted); text-decoration: none; }
 .kit-footer :is(.kit-footer-list, .kit-footer-inline, .kit-legal-links) a:hover, .kit-footer-mail:hover { color: var(--kit-color-on-ink); text-decoration: underline; text-underline-offset: var(--kit-underline-offset-sm); }
 .kit-footer .kit-footer-helplines a:hover { color: var(--kit-color-on-ink); }
 
