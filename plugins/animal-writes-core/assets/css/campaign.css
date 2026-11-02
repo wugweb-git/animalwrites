@@ -283,6 +283,20 @@
 	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) { --aw-sc-card: calc((100% - var(--kit-space-4)) / 2); }
 }
 @media (min-width: 768px) { .aw-camp--sc-stray-dogs .aw-camp-tracker { --aw-sc-card: min(100%, var(--kit-width-content)); } } /* after the two-across rule above, which it overrides for the tracker */
+/* Phone UX (owner, 2 Nov 2026, mobile audit):
+   - the state cards show the edge of the next one (--aw-carousel-item, 82%) so the row reads as swipeable;
+   - the share buttons --kit-space-2 apart (WCAG 2.2 target spacing), wrapping to a second line on narrow phones. */
+@media (max-width: 767px) { .aw-camp--sc-stray-dogs .aw-camp-tracker { --aw-sc-card: 82%; } }
+/* The court order cards: the scroller's own width (a container), less --kit-space-6, so the next card shows at the edge
+   and the longest card stays under 600px; their parts --kit-space-2 apart, as on the state cards */
+@media (max-width: 767px) {
+	.aw-camp--sc-stray-dogs .aw-camp-timeline { container-type: inline-size; --aw-sc-card: calc(100cqi - var(--kit-space-6)); }
+	.aw-camp--sc-stray-dogs .aw-camp-timeline td { padding-bottom: var(--kit-space-2); }
+	.aw-camp--sc-stray-dogs .aw-camp-timeline td:last-child { padding-bottom: 0; }
+}
+/* Find help: the state links --kit-space-2 apart in both directions (WCAG 2.2 target spacing) */
+.aw-camp--sc-stray-dogs #find-help .aw-browse-states { row-gap: var(--kit-space-2); }
+.aw-camp--sc-stray-dogs .kit-share { flex-wrap: wrap; gap: var(--kit-space-2); }
 /* The Library: one sideways row at every width (82% of the view on phones, two to the view from 768, three from 1200).
    What you can do: the same row below 1200; from 1200 the three cards side by side, none spanning the row. */
 .aw-camp--sc-stray-dogs #read .wp-block-post-template { display: flex; gap: var(--kit-space-4); overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; padding-bottom: var(--kit-space-3); }
