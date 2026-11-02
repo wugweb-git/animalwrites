@@ -38,6 +38,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/** Whether a campaign is the Lab rules one (lab-animals-rules-2026), whose page is kept as it was on the morning of 2 Nov 2026 (owner). */
+function aw_camp_is_lab_page( $id ) {
+	return $id && 'lab-animals-rules-2026' === get_post_field( 'post_name', $id );
+}
+
 /** The campaign whose page is being shown (or the one given), or 0. */
 function aw_camp_id( $id = 0 ) {
 	$id = $id ? (int) $id : (int) get_the_ID();
@@ -308,6 +313,52 @@ add_shortcode(
 		ob_start();
 		?>
 <form class="aw-letter" data-letter="<?php echo esc_attr( wp_json_encode( $data ) ); ?>" novalidate>
+<?php if ( aw_camp_is_lab_page( $id ) ) : // the Lab rules page keeps its letter tool on one page, as on the morning of 2 Nov 2026 (owner) ?>
+	<div class="aw-letter-inputs">
+		<fieldset class="aw-letter-grounds-pick">
+			<legend><span class="aw-letter-step">1</span>Choose your grounds <span class="aw-letter-picked" aria-live="polite"></span></legend>
+			<div class="aw-letter-ground-list"></div>
+		</fieldset>
+		<div class="aw-letter-sign">
+		<p class="aw-letter-head"><span class="aw-letter-step">2</span>Sign it</p>
+		<p class="aw-letter-field"><label for="aw-letter-name">Your name <span aria-hidden="true">*</span></label>
+			<input id="aw-letter-name" name="name" type="text" autocomplete="name" required maxlength="80"></p>
+		<p class="aw-letter-field"><label for="aw-letter-city">Your city <span aria-hidden="true">*</span></label>
+			<input id="aw-letter-city" name="city" type="text" autocomplete="address-level2" required maxlength="60"></p>
+		<p class="aw-letter-field aw-letter-email"><label for="aw-letter-email">Your email <span aria-hidden="true">*</span></label>
+			<input id="aw-letter-email" name="email" type="email" autocomplete="email" required maxlength="190"></p>
+		<p class="aw-letter-field"><label for="aw-letter-own">Add a line in your own words <span class="aw-letter-hint">(optional, up to 300 characters)</span></label>
+			<textarea id="aw-letter-own" name="own" maxlength="300" rows="3"></textarea></p>
+		</div>
+	</div>
+	<div class="aw-letter-out">
+		<p class="aw-letter-head"><span class="aw-letter-step">3</span>Check and send</p>
+		<p class="aw-letter-meta"><span class="aw-letter-to"><?php echo aw_i( 'mail' ); ?><?php echo esc_html( $to ); ?></span><span><strong>Subject:</strong> <?php echo esc_html( $a['subject'] ); ?></span></p>
+		<div class="aw-letter-preview" aria-live="polite" tabindex="0" aria-label="Your letter"></div>
+		<p class="aw-letter-optin"><input type="checkbox" id="aw-letter-optin" name="optin" value="1" checked> <label for="aw-letter-optin"><?php echo esc_html( defined( 'AW_CL_OPTIN' ) ? AW_CL_OPTIN : '' ); ?></label></p>
+		<p class="aw-letter-field"><label for="aw-letter-wa">WhatsApp number <span class="aw-letter-hint">(optional)</span></label>
+			<input id="aw-letter-wa" name="whatsapp" type="tel" inputmode="tel" autocomplete="tel" maxlength="16"></p>
+		<p class="aw-letter-optin"><input type="checkbox" id="aw-letter-wa-optin" name="wa_optin" value="1" checked> <label for="aw-letter-wa-optin">OK to contact me on WhatsApp.</label></p>
+		<p class="aw-letter-error" role="alert" hidden>Add your name, city and email first.</p>
+		<?php echo function_exists( 'kits_altcha_widget' ) ? str_replace( '<div class="kit-captcha', '<div data-placed class="kit-captcha', kits_altcha_widget( 'invisible' ) ) : ''; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in kits_altcha_widget; the sign-up's bot check (campaign.js) ?>
+		<div class="aw-letter-routes">
+			<button type="button" class="wp-element-button" data-route="gmail"><?php echo aw_i( 'brand-gmail' ); ?>Send with Gmail</button>
+			<button type="button" class="wp-element-button aw-letter-alt" data-route="mailto"><?php echo aw_i( 'mail' ); ?>Email app</button>
+			<button type="button" class="wp-element-button aw-letter-alt" data-route="copy"><?php echo aw_i( 'copy' ); ?>Copy letter</button>
+		</div>
+		<p class="aw-letter-copied" role="status"></p>
+		<div class="aw-letter-confirm" hidden>
+			<p><strong>Did you send it?</strong> Check your sent folder. We count your objection once you say it went.</p>
+			<button type="button" class="wp-element-button" data-confirm="yes">Yes, I sent it</button>
+			<button type="button" class="wp-element-button aw-letter-alt" data-confirm="no">Not yet</button>
+		</div>
+		<div class="aw-letter-thanks" hidden tabindex="-1">
+			<p class="aw-letter-thanks-head"><?php echo aw_i( 'check' ); ?><strong>Thank you. Your objection is on its way to CCSEA.</strong></p>
+			<p>Keep the sent email: it is your record. CCSEA may reply to the address you sent from.</p>
+			<p class="aw-letter-ref" hidden>Your reference: <strong></strong></p>
+		</div>
+	</div>
+<?php else : ?>
 <div class="kit-steps aw-letter-steps" data-steps="3">
 	<fieldset class="kit-step aw-letter-grounds-pick" data-step="1">
 		<legend><span class="kit-step-count">Step 1 of 3</span><span class="aw-letter-step" aria-hidden="true">1</span><span class="kit-step-title">Choose your grounds</span> <span class="aw-letter-picked" aria-live="polite"></span></legend>
@@ -357,6 +408,7 @@ add_shortcode(
 		<div class="kit-step-nav"><button type="button" class="kit-btn kit-btn--secondary" data-step-back>Back</button></div>
 	</fieldset>
 </div>
+<?php endif; ?>
 </form>
 		<?php
 		return (string) ob_get_clean();
@@ -551,6 +603,9 @@ add_action(
 		}
 		$v    = fn( $f ) => (string) filemtime( AW_CORE_DIR . $f );
 		$slug = $band ? (string) get_post_field( 'post_name', AW_HOME_CAMPAIGN ) : '';
+		$lab  = is_singular( 'aw_campaign' ) && aw_camp_is_lab_page( $id ); // the Lab rules page: its own copy of both files, as on the morning of 2 Nov 2026 (owner)
+		$css  = $lab ? 'campaign-lab.css' : 'campaign.css';
+		$js   = $lab ? 'campaign-lab.js' : 'campaign.js';
 		if ( $band && ! is_singular( 'aw_campaign' ) && AW_CAMP_HOME_CSS_FOR === $slug && is_readable( AW_CORE_DIR . 'assets/css/campaign-home.css' ) ) {
 			// Home: only the band's rules (campaign-home.css; the campaign hero uses them), inline in campaign.css's place, so nothing blocks the first paint
 			// and the cascade order stays the same (owner, 22 Oct 2026). Any other campaign in the band: the full file.
@@ -558,9 +613,9 @@ add_action(
 			wp_enqueue_style( 'aw-campaign' );
 			wp_add_inline_style( 'aw-campaign', (string) file_get_contents( AW_CORE_DIR . 'assets/css/campaign-home.css' ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions
 		} else {
-			wp_enqueue_style( 'aw-campaign', plugins_url( 'assets/css/campaign.css', AW_CORE_DIR . 'animal-writes-core.php' ), array(), $v( 'assets/css/campaign.css' ) );
+			wp_enqueue_style( 'aw-campaign', plugins_url( 'assets/css/' . $css, AW_CORE_DIR . 'animal-writes-core.php' ), array(), $v( 'assets/css/' . $css ) );
 		}
-		wp_enqueue_script( 'aw-campaign', plugins_url( 'assets/js/campaign.js', AW_CORE_DIR . 'animal-writes-core.php' ), array(), $v( 'assets/js/campaign.js' ), array( 'in_footer' => true, 'strategy' => 'defer' ) );
+		wp_enqueue_script( 'aw-campaign', plugins_url( 'assets/js/' . $js, AW_CORE_DIR . 'animal-writes-core.php' ), array(), $v( 'assets/js/' . $js ), array( 'in_footer' => true, 'strategy' => 'defer' ) );
 		if ( is_singular( 'aw_campaign' ) ) { // the Share button and the story/post images (campaign.js)
 			$img = fn( $k ) => ( $a = (int) get_post_meta( $id, $k, true ) ) ? (string) wp_get_attachment_url( $a ) : '';
 			$txt = (string) get_post_meta( $id, 'aw_campaign_share_text', true );

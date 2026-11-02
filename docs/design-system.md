@@ -288,6 +288,7 @@ These hold on every page. Section heights below gives the detail.
     - Sticky bar: it never covers the focused element (`scroll-padding-bottom` at the bar's height), and it is small or can be dismissed.
     - Everywhere: targets at least 44×44px, text contrast at least 4.5:1, reflow at 320px with no sideways page scroll, text that resizes to 200%, and `prefers-reduced-motion` respected (no smooth scroll or animation when it is set).
 12. **No sideways swipe rows** (owner, 2 Nov 2026); card lists use the stacked or grid card states (card-sizes.md).
+    Lab rules campaign page: kept as it was on 2 Nov morning (owner); not covered by rules 4, 12 or the 24px rule.
 
 Checks: `tools/ci/theme_rules_check.py` in the Deploy check catches rules 3 and 9 and padding under 24px (2) in CSS. `tools/ci/section_heights_audit.js`, pasted into the browser console, measures rules 4 to 7, 10 and the measurable points of 11 on the page: sections OVER above 720 and FAIL above 800, blocks over 600, swipe rows with no keyboard focus or name, targets under 44px and sideways page scroll.
 

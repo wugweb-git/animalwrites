@@ -1,0 +1,585 @@
+/* Lab rules campaign page only (lab-animals-rules-2026): campaign.css kept as it was on the morning of 2 Nov 2026 (owner); campaign-tools.php loads it in campaign.css's place. */
+/* Campaign tools (campaign-tools.php). Campaign colours are tokens on the page wrapper (.aw-camp), set per campaign;
+   spacing, type and radii come from Kits. Breakpoints: 768, 1200. Buttons stay the Kits primary. */
+
+.aw-camp {
+	/* Campaign tokens (Campaign Content Standard F1). The four identity tokens, then the five roles the rules use:
+	   mark = brand colour for fills, icons, borders and key text on light surfaces; on-mark = text on a mark fill;
+	   deep = shadow tint; dark = the dark band; meta = secondary text. Each campaign sets all nine. */
+	--camp-primary: var(--kit-color-ink);
+	--camp-primary-ink: var(--kit-color-on-ink);
+	--camp-surface: var(--kit-color-surface-soft);
+	--camp-accent: var(--kit-color-ink);
+	--camp-mark: var(--kit-color-ink);
+	--camp-on-mark: var(--kit-color-on-ink);
+	--camp-deep: var(--kit-color-ink);
+	--camp-dark: var(--kit-color-ink);
+	--camp-meta: var(--kit-color-muted);
+}
+/* Campaign 2.0 (draft lab animal rules 2026). */
+.aw-camp--lab-rules {
+	--camp-primary: #a3122f; /* "Gazette crimson", palette A (owner, 17 Oct 2026) */
+	--camp-primary-ink: #ffffff;
+	--camp-surface: var(--kit-color-bg); /* no tinted surfaces: brand, white, grey or black only (owner, 19 Oct 2026) */
+	--camp-accent: #6b0f22;
+	--camp-mark: var(--camp-primary);
+	--camp-on-mark: #ffffff;
+	--camp-deep: var(--camp-accent);
+	--camp-dark: #1d1418;
+	--camp-meta: #5e4c51;
+	--camp-art-bg: #a10825; /* the artwork's own crimson (home band), so its edges meet the band with no line */
+	--kit-btn-brand-bg: var(--camp-primary); --kit-btn-brand-fg: var(--camp-primary-ink); /* Brand buttons in the campaign colour */
+}
+/* Crimson on the dark bands is under 3:1, so rules, outlines, bars and icons there are white */
+.aw-camp--lab-rules :is(.aw-camp-poster, .aw-camp-dark) { --camp-line: var(--kit-color-on-ink); }
+.aw-camp--lab-rules .aw-camp-poster :is(.aw-camp-stamp, .aw-cd-when) { border-color: var(--camp-line); }
+.aw-camp--lab-rules .aw-camp-dark .aw-camp-gap { box-shadow: inset 0 0 0 2px var(--camp-line); }
+.aw-camp--lab-rules .aw-camp-dark .aw-camp-gap > .kit-ico { color: var(--camp-line); }
+.aw-camp--lab-rules .aw-camp-dark .aw-camp-tier-bar { background: linear-gradient(to right, var(--camp-line) var(--fill), rgb(255 255 255 / 0.12) var(--fill)); }
+@media (min-width: 1200px) { .aw-camp--lab-rules .aw-camp-dark .aw-camp-tier-bar { background: linear-gradient(to top, var(--camp-line) var(--fill), rgb(255 255 255 / 0.12) var(--fill)); } }
+/* Diwali 2026 (firecrackers and animals): marigold on paper, a night-sky dark band. */
+.aw-camp--diwali {
+	--camp-primary: #a14a05; /* marigold, deepened so white text on it passes 4.5:1 */
+	--camp-primary-ink: #ffffff;
+	--camp-surface: var(--kit-color-bg);
+	--camp-accent: #6e3203;
+	--camp-mark: var(--camp-primary);
+	--camp-on-mark: #ffffff;
+	--camp-deep: var(--camp-accent);
+	--camp-dark: #1b1636; /* night sky */
+	--camp-meta: #5a4a3e;
+	--kit-btn-brand-bg: var(--camp-primary); --kit-btn-brand-fg: var(--camp-primary-ink);
+}
+/* Marigold on the night band is under 3:1, so rules, outlines and icons there are white */
+.aw-camp--diwali :is(.aw-camp-poster, .aw-camp-dark) { --camp-line: var(--kit-color-on-ink); }
+.aw-camp--diwali .aw-camp-poster :is(.aw-camp-stamp, .aw-cd-when) { border-color: var(--camp-line); }
+.aw-camp--diwali .aw-camp-dark .kit-ico { color: var(--camp-line); }
+/* The poster carries a photo, not a document: full colour, centred */
+.aw-camp--diwali .aw-camp-poster-doc img { filter: none; opacity: 1; object-position: center; }
+/* Six night-time steps sit three to a row */
+@media (min-width: 768px) { .aw-camp--diwali .aw-camp-steps--six { grid-template-columns: repeat(3, 1fr); } }
+/* Step lines on the night band: meta colour is for light bands */
+.aw-camp--diwali .aw-camp-dark .aw-camp-steps span { color: color-mix(in srgb, var(--kit-color-on-ink) 80%, transparent); }
+/* Date strip: sized to fit three across beside the photo */
+.aw-camp--diwali .aw-camp-dates { grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr)); }
+.aw-camp--diwali .aw-camp-dates-when { font-size: var(--kit-type-h3); white-space: nowrap; }
+/* Who to call has two columns: it fits a phone without sideways scrolling */
+.aw-camp--diwali #help { --kit-table-min: 0; }
+/* Supreme Court stray dogs (2026): deep plum and the site yellow, no black (owner, 1 Nov 2026). Plum on cream 14:1, white on plum 15.6:1. */
+.aw-camp--sc-stray-dogs {
+	--camp-primary: #3a1730;
+	--camp-primary-ink: #ffffff;
+	--camp-accent: #3a1730;
+	--camp-mark: #3a1730;
+	--camp-on-mark: #ffffff;
+	--camp-deep: #3a1730;
+	--camp-dark: #3a1730;
+	--camp-meta: #5c4654;
+	--camp-cream: #fbeee7; /* the photo's own sky, so its edge meets the band with no line */
+	--kit-btn-brand-bg: var(--camp-primary); --kit-btn-brand-fg: var(--camp-primary-ink);
+}
+/* Hero: cream with plum ink and a community dog before the Supreme Court (owner's reference design, 1 Nov 2026) */
+.aw-camp.aw-camp--sc-stray-dogs .aw-camp-hero { --camp-mark: var(--camp-cream); --camp-on-mark: var(--camp-primary); --camp-line: rgb(58 23 48 / 0.18); }
+/* Above the theme's full-width group padding rule. Phones: the 4:5 photo under the card, its sky faded into the cream */
+.aw-camp.aw-camp--sc-stray-dogs .aw-camp-hero.aw-camp-section.alignfull {
+	background:
+		linear-gradient(to bottom, var(--camp-cream) calc(100% - 125vw), rgb(251 238 231 / 0) calc(100% - 100vw)),
+		url("/wp-content/themes/animal-writes/assets/img/campaigns/supreme-court-stray-dog-phone.webp") center bottom / 100% auto no-repeat,
+		var(--camp-cream);
+	padding-bottom: 80vw !important;
+}
+/* Tablets: the wide photo along the bottom, under the card */
+@media (min-width: 768px) { .aw-camp.aw-camp--sc-stray-dogs .aw-camp-hero.aw-camp-section.alignfull { background: var(--camp-cream) url("/wp-content/themes/animal-writes/assets/img/campaigns/supreme-court-stray-dog-hero.webp") no-repeat right bottom / auto 72%; padding-bottom: clamp(180px, 16vw, 260px) !important; } }
+/* Desktops: the photo at full height on the right; text and card at the top, so the dog lies clear below the card */
+@media (min-width: 1200px) {
+	.aw-camp.aw-camp--sc-stray-dogs .aw-camp-hero.aw-camp-section.alignfull { background-size: auto 100%; min-height: var(--kit-hero-min); padding-bottom: var(--kit-space-6) !important; }
+	.aw-camp--sc-stray-dogs .aw-camp-hero-cols > .wp-block-column { align-self: flex-start; }
+	.aw-camp--sc-stray-dogs .aw-camp-hero .aw-camp-poster { max-width: 26rem; }
+}
+/* The marker behind the key words of the headline */
+.aw-camp--sc-stray-dogs .aw-camp-hero h1 mark { background: linear-gradient(100deg, rgb(255 190 26 / 0) 0.2em, rgb(255 190 26 / 0.9) 0.5em, rgb(255 190 26 / 0.75) calc(100% - 0.4em), rgb(255 190 26 / 0) 100%) 0 60% / 100% 62% no-repeat; color: inherit; padding: 0 0.2em; margin: 0 -0.2em; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+/* "Open": a pale yellow pill with a dot */
+.aw-camp--sc-stray-dogs .aw-camp-hero .aw-camp-status-window { background: #fde9b0; color: var(--camp-primary); }
+.aw-camp--sc-stray-dogs .aw-camp-hero .aw-camp-status-window::before { content: ""; display: inline-block; width: 0.5em; height: 0.5em; margin-right: 0.45em; border-radius: 50%; background: #b06a10; vertical-align: 0.1em; }
+.aw-camp--sc-stray-dogs .aw-camp-hero .wp-block-button:not(.aw-camp-ghost) .wp-block-button__link { background: var(--camp-primary); color: var(--camp-primary-ink); }
+.aw-camp--sc-stray-dogs .aw-camp-hero .aw-camp-ghost .wp-block-button__link { background: rgb(251 238 231 / 0.85); }
+.aw-camp--sc-stray-dogs .aw-camp-hero .aw-camp-ghost .wp-block-button__link:hover { background: var(--camp-primary); color: var(--camp-primary-ink); }
+/* The fact card: white paper, plum ink, thin rules; the case number with a scales mark, the date in a yellow pill */
+.aw-camp--sc-stray-dogs .aw-camp-poster { background: rgb(255 252 249 / 0.96); box-shadow: 0 1.5rem 3rem -1.5rem rgb(58 23 48 / 0.45); }
+.aw-camp--sc-stray-dogs .aw-camp-poster :is(p, .aw-cd-num, .aw-cd-unit, .aw-cd-when) { color: var(--camp-primary); }
+.aw-camp--sc-stray-dogs .aw-camp-poster .aw-camp-stamp { display: flex; align-items: center; gap: var(--kit-space-2); width: 100%; margin: 0 0 var(--kit-space-4); padding: 0 0 var(--kit-space-3); border: 0; border-bottom: 1px solid var(--camp-line); border-radius: 0; transform: none; color: var(--camp-primary); font-size: var(--kit-type-lead); }
+.aw-camp--sc-stray-dogs .aw-camp-poster .aw-camp-stamp::before { content: ""; flex: none; width: 1.6em; height: 1.6em; background: #b06a10; -webkit-mask: var(--aw-sc-scales) center / contain no-repeat; mask: var(--aw-sc-scales) center / contain no-repeat; }
+.aw-camp--sc-stray-dogs .aw-camp-poster { --aw-sc-scales: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m16%2016%203-8%203%208c-.87.65-1.92%201-3%201s-2.13-.35-3-1Z%22/%3E%3Cpath%20d%3D%22m2%2016%203-8%203%208c-.87.65-1.92%201-3%201s-2.13-.35-3-1Z%22/%3E%3Cpath%20d%3D%22M7%2021h10%22/%3E%3Cpath%20d%3D%22M12%203v18%22/%3E%3Cpath%20d%3D%22M3%207h2c2%200%205-1%207-2%202%201%205%202%207%202h2%22/%3E%3C/svg%3E"); }
+.aw-camp--sc-stray-dogs .aw-camp-poster .aw-cd-when { display: block; padding-top: var(--kit-space-3); margin-top: var(--kit-space-3); border-top: 1px solid var(--camp-line); font-weight: var(--kit-weight-bold); }
+.aw-camp--sc-stray-dogs .aw-camp-poster .aw-cd-when .aw-date { display: inline-block; margin-top: var(--kit-space-1); padding: 0.1em 0.6em; border-radius: 999px; background: var(--kit-color-accent); color: var(--camp-primary); }
+.aw-camp--sc-stray-dogs .aw-camp-poster .aw-cd-when .aw-date .kit-ico { display: none; }
+.aw-camp--sc-stray-dogs .aw-camp-poster .aw-camp-poster-note { padding-top: var(--kit-space-3); border-top: 1px solid var(--camp-line); font-size: var(--kit-type-sm); }
+/* Page sections (owner, 1 Nov 2026: fix every section). A campaign is a landing page: text runs the full band width. */
+.aw-camp--sc-stray-dogs .aw-camp-section:not(.aw-camp-hero) .aw-camp-lede { max-width: none; }
+/* Section headings: a plum icon in a pale yellow circle (the Kits icons, drawn in plum) */
+.aw-camp--sc-stray-dogs :is(#what, #tracker-sec, #act, #latest, #find-help, #read, #next, #share, #sources) h2 { display: flex; align-items: center; gap: var(--kit-space-3); }
+.aw-camp--sc-stray-dogs :is(#what, #tracker-sec, #act, #latest, #find-help, #read, #next, #share, #sources) h2::before { content: ""; flex: none; width: 2.75rem; height: 2.75rem; border-radius: 50%; background: #fde9b0 var(--aw-sc-ico) center / 55% no-repeat; }
+.aw-camp--sc-stray-dogs #what h2 { --aw-sc-ico: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%233a1730%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M4%2022h16a2%202%200%200%200%202-2V4a2%202%200%200%200-2-2H8a2%202%200%200%200-2%202v16a2%202%200%200%201-2%202Zm0%200a2%202%200%200%201-2-2v-9c0-1.1.9-2%202-2h2%22/%3E%3Cpath%20d%3D%22M18%2014h-8%22/%3E%3Cpath%20d%3D%22M15%2018h-5%22/%3E%3Cpath%20d%3D%22M10%206h8v4h-8V6Z%22/%3E%3C/svg%3E"); }
+.aw-camp--sc-stray-dogs #tracker-sec h2 { --aw-sc-ico: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%233a1730%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M14.106%205.553a2%202%200%200%200%201.788%200l3.659-1.83A1%201%200%200%201%2021%204.619v12.764a1%201%200%200%201-.553.894l-4.553%202.277a2%202%200%200%201-1.788%200l-4.212-2.106a2%202%200%200%200-1.788%200l-3.659%201.83A1%201%200%200%201%203%2019.381V6.618a1%201%200%200%201%20.553-.894l4.553-2.277a2%202%200%200%201%201.788%200z%22%2F%3E%20%3Cpath%20d%3D%22M15%205.764v15%22%2F%3E%20%3Cpath%20d%3D%22M9%203.236v15%22%2F%3E%3C%2Fsvg%3E"); }
+.aw-camp--sc-stray-dogs #act h2 { --aw-sc-ico: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%233a1730%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m3%2011%2018-5v12L3%2014v-3z%22/%3E%3Cpath%20d%3D%22M11.6%2016.8a3%203%200%201%201-5.8-1.6%22/%3E%3C/svg%3E"); }
+.aw-camp--sc-stray-dogs #latest h2 { --aw-sc-ico: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%233a1730%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M4%2022h16a2%202%200%200%200%202-2V4a2%202%200%200%200-2-2H8a2%202%200%200%200-2%202v16a2%202%200%200%201-2%202Zm0%200a2%202%200%200%201-2-2v-9c0-1.1.9-2%202-2h2%22/%3E%3Cpath%20d%3D%22M18%2014h-8%22/%3E%3Cpath%20d%3D%22M15%2018h-5%22/%3E%3Cpath%20d%3D%22M10%206h8v4h-8V6Z%22/%3E%3C/svg%3E"); }
+.aw-camp--sc-stray-dogs #find-help h2 { --aw-sc-ico: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%233a1730%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M9%2011a3%203%200%201%200%206%200a3%203%200%200%200%20-6%200%22%2F%3E%3Cpath%20d%3D%22M17.657%2016.657l-4.243%204.243a2%202%200%200%201%20-2.827%200l-4.244%20-4.243a8%208%200%201%201%2011.314%200z%22%2F%3E%3C%2Fsvg%3E"); }
+.aw-camp--sc-stray-dogs #read h2 { --aw-sc-ico: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%233a1730%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m16%2016%203-8%203%208c-.87.65-1.92%201-3%201s-2.13-.35-3-1Z%22/%3E%3Cpath%20d%3D%22m2%2016%203-8%203%208c-.87.65-1.92%201-3%201s-2.13-.35-3-1Z%22/%3E%3Cpath%20d%3D%22M7%2021h10%22/%3E%3Cpath%20d%3D%22M12%203v18%22/%3E%3Cpath%20d%3D%22M3%207h2c2%200%205-1%207-2%202%201%205%202%207%202h2%22/%3E%3C/svg%3E"); }
+.aw-camp--sc-stray-dogs #next h2 { --aw-sc-ico: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%233a1730%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20width%3D%2218%22%20height%3D%2218%22%20x%3D%223%22%20y%3D%224%22%20rx%3D%222%22/%3E%3Cpath%20d%3D%22M16%202v4%22/%3E%3Cpath%20d%3D%22M8%202v4%22/%3E%3Cpath%20d%3D%22M3%2010h18%22/%3E%3C/svg%3E"); }
+.aw-camp--sc-stray-dogs #share h2 { --aw-sc-ico: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%233a1730%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2218%22%20cy%3D%225%22%20r%3D%223%22%2F%3E%3Ccircle%20cx%3D%226%22%20cy%3D%2212%22%20r%3D%223%22%2F%3E%3Ccircle%20cx%3D%2218%22%20cy%3D%2219%22%20r%3D%223%22%2F%3E%3Cline%20x1%3D%228.59%22%20x2%3D%2215.42%22%20y1%3D%2213.51%22%20y2%3D%2217.49%22%2F%3E%3Cline%20x1%3D%2215.41%22%20x2%3D%228.59%22%20y1%3D%226.51%22%20y2%3D%2210.49%22%2F%3E%3C%2Fsvg%3E"); }
+.aw-camp--sc-stray-dogs #sources h2 { --aw-sc-ico: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%233a1730%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M10%2013a5%205%200%200%200%207.54.54l3-3a5%205%200%200%200-7.07-7.07l-1.72%201.71%22/%3E%3Cpath%20d%3D%22M14%2011a5%205%200%200%200-7.54-.54l-3%203a5%205%200%200%200%207.07%207.07l1.71-1.71%22/%3E%3C/svg%3E"); }
+/* The share band in the hero's cream; from 1200 a photo from the Library on the right (Media 15534, unused elsewhere), faded into the cream, the text clear of it */
+.aw-camp--sc-stray-dogs #share.aw-camp-section { background: var(--camp-cream); }
+@media (min-width: 1200px) {
+	.aw-camp--sc-stray-dogs #share.aw-camp-section { min-height: 26rem; background: linear-gradient(to right, var(--camp-cream) 56%, transparent 70%), url("/wp-content/uploads/2026/10/photo-1626648701445-1f67aeb6e49c.avif") right center / auto 100% no-repeat, var(--camp-cream); }
+	.aw-camp--sc-stray-dogs #share.aw-camp-section > * { box-sizing: border-box; padding-right: 40%; }
+}
+/* Section headings in the campaign plum */
+.aw-camp--sc-stray-dogs .aw-camp-section:not(.aw-camp-hero) :is(h2, h3) { color: var(--camp-primary); }
+/* Date strip: plum rules, the reports date on a yellow rule */
+.aw-camp--sc-stray-dogs .aw-camp-dates li { border-top-color: var(--camp-primary); }
+.aw-camp--sc-stray-dogs .aw-camp-dates .is-key { border-top-color: var(--kit-color-accent); }
+/* Tables (from 768): a plum-tint head and light bands on the rows */
+@media (min-width: 768px) {
+	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) thead th { background: #f4e8ee; color: var(--camp-primary); }
+	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) tbody tr:nth-child(even) td { background: rgb(58 23 48 / 0.03); }
+	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) tbody td:first-child { font-weight: var(--kit-weight-bold); color: var(--camp-primary); }
+}
+/* The date strip: three to a row, no calendar marks inside the big dates */
+@media (min-width: 768px) { .aw-camp--sc-stray-dogs .aw-camp-dates { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.aw-camp--sc-stray-dogs .aw-camp-dates-when .kit-ico { display: none; }
+/* Notes with links and dates inside run as one paragraph (only the icon notes are a row) */
+.aw-camp--sc-stray-dogs .aw-camp-note:not(:has(> .kit-ico)) { display: block; }
+/* Links on the plum card read in white */
+.aw-camp--sc-stray-dogs .aw-camp-grid > :first-child a:not(.wp-element-button) { color: var(--camp-on-mark); }
+/* The share bar under the share message */
+.aw-camp--sc-stray-dogs .aw-camp-share-kit { margin: var(--kit-space-4) 0; }
+/* Phones: the court orders and the state tracker as one card per row, each part under its column heading */
+@media (max-width: 767px) {
+	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) { overflow: visible; }
+	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) table { display: block; min-width: 0; border: 0; }
+	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) :is(tbody, tr, td) { display: block; }
+	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) tr { margin: 0 0 var(--kit-space-3); padding: var(--kit-space-4); border-radius: var(--kit-radius-card); background: var(--camp-tile, var(--kit-color-raised)); box-shadow: inset 0 0 0 1px var(--kit-color-line); }
+	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) td { padding: 0 0 var(--kit-space-3); border: 0; }
+	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) td:last-child { padding-bottom: 0; }
+	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) td:first-child { font-size: var(--kit-type-lead); font-weight: 800; color: var(--camp-primary); }
+	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) td:not(:first-child)::before { display: block; margin-bottom: var(--kit-space-1); color: var(--camp-meta); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-bold); }
+	.aw-camp--sc-stray-dogs .aw-camp-timeline td:nth-child(2)::before { content: "Bench"; }
+	.aw-camp--sc-stray-dogs .aw-camp-timeline td:nth-child(3)::before { content: "What was ordered"; }
+	.aw-camp--sc-stray-dogs .aw-camp-timeline td:nth-child(4)::before { content: "Document"; }
+	.aw-camp--sc-stray-dogs .aw-camp-tracker td:nth-child(2)::before { content: "High Court and case"; }
+	.aw-camp--sc-stray-dogs .aw-camp-tracker td:nth-child(3)::before { content: "Latest public order, and what is due"; }
+	.aw-camp--sc-stray-dogs .aw-camp-tracker td:nth-child(4)::before { content: "Source"; }
+}
+/* The hero is the primary colour behind its ink, on every campaign; marks inside it use the same pair. */
+.aw-camp .aw-camp-hero { --camp-mark: var(--camp-primary); --camp-on-mark: var(--camp-primary-ink); }
+
+/* Bands */
+.aw-camp-hero { background: var(--camp-mark); color: var(--camp-on-mark); }
+:is(.aw-camp--lab-rules, .aw-camp--community-dogs) .aw-camp-hero, .aw-camp--community-dogs.aw-camp-hero { min-height: 1020px; } /* these two campaign heroes only: 1020 below 1200, 800 from 1200 (owner, 19 Oct 2026) */
+@media (min-width: 1200px) { :is(.aw-camp--lab-rules, .aw-camp--community-dogs) .aw-camp-hero, .aw-camp--community-dogs.aw-camp-hero { min-height: 800px; } }
+/* Lab Rules hero fits 1020 / 1020 / 800: a tighter gap between the stacked columns and a shorter Gazette strip */
+@media (max-width: 1199px) {
+	.aw-camp--lab-rules .aw-camp-hero-cols { gap: var(--kit-space-4); }
+	.aw-camp--lab-rules .aw-camp-hero .aw-camp-poster-doc { aspect-ratio: 4 / 1; }
+}
+@media (min-width: 1200px) { .aw-camp--lab-rules .aw-camp-hero .aw-camp-poster-doc { aspect-ratio: 2 / 1; } }
+.aw-camp-hero :is(h1, h2, p, .aw-cd-num, .aw-cd-unit, .aw-cd-when) { color: var(--camp-on-mark); }
+.aw-camp-hero a:not(.wp-element-button) { color: var(--camp-on-mark); text-decoration: underline; text-underline-offset: 0.2em; }
+.aw-camp-paper { background: var(--camp-surface); }
+/* White and grey bands alternate; whatever sits on a band (cards, grounds, fields) takes the other one (--camp-tile) */
+.aw-camp-white { background: var(--kit-color-raised); --camp-tile: var(--kit-color-bg); }
+.aw-camp-grey { background: var(--kit-color-bg); --camp-tile: var(--kit-color-raised); }
+.aw-camp-dark { background: var(--camp-dark); color: var(--kit-color-on-ink); }
+.aw-camp-dark :is(h2, h3, h4, p, li, strong) { color: var(--kit-color-on-ink); }
+
+/* Type: the artwork's heavy, tight headlines, in the site face (Inter) */
+.aw-camp :is(h1, h2, h3.aw-camp-mod-h) { font-weight: 800; letter-spacing: -0.03em; line-height: 1.05; text-wrap: balance; }
+.aw-camp h1 { font-size: clamp(2.25rem, 1.4rem + 3.6vw, 4rem); margin: 0 0 var(--kit-space-4); }
+.aw-camp :is(h2, h3.aw-camp-mod-h) { font-size: clamp(1.75rem, 1.3rem + 1.8vw, 2.5rem); margin: 0 0 var(--kit-space-4); }
+/* A module (H3) with its own band reads like a section: the site's H2 level (aw.css text levels are !important) */
+.aw-camp h3.aw-camp-mod-h { font-size: var(--kit-type-h2) !important; font-weight: var(--kit-weight-bold) !important; line-height: 1.2 !important; }
+.aw-camp h3 { letter-spacing: -0.01em; text-wrap: balance; }
+.aw-camp-lede { max-width: 62ch; font-size: var(--kit-type-lead); }
+.aw-camp-section > * { max-width: 1120px; }
+
+/* Lab rules (owner, 19 Oct 2026): section titles are plain theme H2s, cards and the letter tool stand off their band */
+.aw-camp--lab-rules h2 { font-weight: var(--kit-weight-bold); letter-spacing: normal; line-height: 1.2; }
+.aw-camp--lab-rules :is(.aw-camp-white, .aw-camp-grey) .aw-camp-card:not(:first-child) { background: var(--camp-tile); }
+.aw-camp--lab-rules .aw-letter { --camp-tile: var(--kit-color-bg); padding: var(--kit-space-5); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); box-shadow: 0 0 0 1px var(--kit-color-line), 0 8px 24px rgb(29 20 24 / 0.08); }
+@media (min-width: 768px) { .aw-camp--lab-rules .aw-letter { padding: var(--kit-space-6); } }
+.aw-camp--lab-rules .aw-letter :is(.aw-letter-ground, .aw-letter-field input, .aw-letter-field textarea, .aw-letter-preview) { background: var(--kit-color-raised); }
+.aw-camp--lab-rules .aw-letter :is(.aw-letter-field input, .aw-letter-field textarea) { border: 1px solid var(--kit-color-muted); }
+.aw-camp--lab-rules .aw-letter-ground:not(:hover, :has(input:checked)) { box-shadow: inset 0 0 0 1px var(--kit-color-muted); }
+.aw-camp--lab-rules .aw-camp-compare table { background: var(--kit-color-raised); box-shadow: inset 0 0 0 1px var(--kit-color-line); }
+.aw-camp--lab-rules .aw-camp-compare tbody td:nth-child(n) { background: var(--kit-color-raised); border-color: var(--kit-color-line); } /* also the draft column: no tint */
+
+/* Campaign artwork beside a section's opening (c2split): a 4:3 crop of the artwork's busy side */
+.aw-camp-split { margin-bottom: var(--kit-space-5); }
+.aw-camp-art { margin: 0; aspect-ratio: 4 / 3; overflow: hidden; border-radius: var(--kit-radius-card); background: var(--camp-mark); }
+.aw-camp-art img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+/* Status (hero): the action window, and after closing the outcome beside it as its own label */
+.aw-camp-status { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); margin: 0 0 var(--kit-space-4); }
+.aw-camp-status > span { display: inline-flex; align-items: center; gap: var(--kit-space-1); padding: var(--kit-space-1) var(--kit-space-3); border-radius: var(--kit-radius-pill); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-strong); }
+.aw-camp-status-window { background: var(--camp-on-mark); color: var(--camp-mark); }
+.aw-camp-status-outcome, .aw-camp-status-asof { box-shadow: inset 0 0 0 1px var(--camp-on-mark); }
+.aw-camp-hero .aw-camp-status .aw-date { color: inherit; }
+.aw-camp-hero .aw-camp-count { margin: var(--kit-space-4) 0 0; }
+.aw-camp-count-asof { color: var(--camp-meta); font-size: var(--kit-type-sm); }
+.aw-camp-hero .aw-camp-count-asof { color: inherit; opacity: 0.85; }
+
+/* Hero: text left, poster panel right */
+.aw-camp-hero-cols { gap: var(--kit-space-6); }
+.aw-camp-hero-summary { max-width: 36ch; font-size: var(--kit-type-lead); margin-bottom: var(--kit-space-5); }
+.aw-camp-closed .aw-camp-hero-summary { max-width: 1120px; padding-right: max(0px, calc(min(100%, 1120px) - 40rem)); box-sizing: border-box; } /* constrained layout centres a narrow paragraph: keep it full width, text on the left */
+.aw-camp-hero .wp-block-buttons { gap: var(--kit-space-3); }
+.aw-camp-ghost .wp-block-button__link { background: transparent; color: var(--camp-on-mark); box-shadow: inset 0 0 0 2px var(--camp-on-mark); border: 0; }
+.aw-camp-ghost .wp-block-button__link:hover { background: var(--camp-on-mark); color: var(--camp-mark); }
+.aw-camp-poster {
+	position: relative; padding: var(--kit-space-5); border-radius: var(--kit-radius-card);
+	background: var(--camp-dark); color: var(--kit-color-on-ink);
+	box-shadow: 0 1.5rem 3rem -1.5rem var(--camp-deep);
+}
+.aw-camp-poster :is(p, .aw-cd-num, .aw-cd-unit, .aw-cd-when) { color: var(--kit-color-on-ink); }
+.aw-camp-poster .aw-cd-num { font-size: clamp(5rem, 3rem + 7vw, 8.5rem); font-weight: 800; letter-spacing: -0.05em; line-height: 0.85; }
+.aw-camp-poster .aw-cd-when { padding-top: var(--kit-space-3); margin-top: var(--kit-space-3); border-top: 3px solid var(--camp-mark); }
+.aw-camp-stamp {
+	display: inline-block; margin: 0 0 var(--kit-space-4); padding: var(--kit-space-1) var(--kit-space-2);
+	border: 2px solid var(--camp-mark); border-radius: var(--kit-radius-control);
+	color: var(--kit-color-on-ink); font-weight: var(--kit-weight-bold); font-variant-numeric: tabular-nums; transform: rotate(-2deg);
+}
+.aw-camp-poster-chips { margin: var(--kit-space-4) 0 0; }
+.aw-camp-poster-label { display: block; margin-bottom: var(--kit-space-1); font-size: var(--kit-type-sm); opacity: 0.8; }
+.aw-camp-poster .aw-rule-chip { --kit-chip-border: rgb(255 255 255 / 0.45); }
+.aw-camp-poster .aw-rule-chip { --kit-chip-border-strong: var(--kit-color-on-ink); --kit-chip-hover: var(--camp-mark); }
+
+/* Legal-document motif: pages of the Gazette (owner, 17 Oct 2026). Muted, never behind text. */
+.aw-camp-poster-doc { margin: calc(-1 * var(--kit-space-5)) calc(-1 * var(--kit-space-5)) var(--kit-space-4); aspect-ratio: 3 / 1; overflow: hidden; border-radius: var(--kit-radius-card) var(--kit-radius-card) 0 0; background: var(--kit-color-bg); } /* phones: the masthead strip */
+@media (min-width: 1200px) { .aw-camp-poster-doc { aspect-ratio: 16 / 9; } }
+.aw-camp-poster-doc img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; filter: grayscale(1); opacity: 0.8; }
+.aw-camp-card-doc { margin: 0 0 var(--kit-space-3); aspect-ratio: 4 / 3; overflow: hidden; border-radius: var(--kit-radius-control); background: var(--kit-color-bg); box-shadow: inset 0 0 0 1px var(--kit-color-line); }
+.aw-camp-card-doc img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; filter: grayscale(1); }
+.aw-camp-gap-doc { max-width: 32rem; margin-bottom: var(--kit-space-4); }
+.aw-camp-doc-strip { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--kit-space-3); margin: 0 0 var(--kit-space-5); padding: var(--kit-space-4); border-radius: var(--kit-radius-card); background: var(--camp-dark); }
+@media (min-width: 768px) { .aw-camp-doc-strip { grid-template-columns: repeat(4, 1fr); } }
+.aw-camp-doc-page { margin: 0; aspect-ratio: 3 / 2; overflow: hidden; border-radius: var(--kit-radius-control); background: var(--kit-color-bg); }
+.aw-camp-doc-page img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; filter: grayscale(1); opacity: 0.85; }
+
+/* Date strip (artwork slide 2): big dates on red top rules */
+.aw-camp-dates { list-style: none; margin: var(--kit-space-5) 0 var(--kit-space-3); padding: 0; display: grid; gap: var(--kit-space-4); grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); }
+.aw-camp-dates li { padding-top: var(--kit-space-3); border-top: 3px solid var(--camp-mark); }
+.aw-camp-dates-when { display: block; font-size: clamp(1.5rem, 1.1rem + 1.4vw, 2.25rem); font-weight: 800; letter-spacing: -0.03em; }
+.aw-camp-dates-when .kit-ico { --kit-ico-size: 0.7em; color: var(--camp-mark); }
+.aw-camp-dates-what { color: var(--camp-meta); }
+.aw-camp-dates .is-key { border-top-width: 6px; }
+.aw-camp-dates .is-key .aw-camp-dates-when { color: var(--camp-mark); }
+.aw-camp-more { display: inline-flex; align-items: center; gap: var(--kit-space-1); font-weight: var(--kit-weight-strong); }
+
+/* What the draft does: icon grid; the main change leads in red */
+.aw-camp-grid { display: grid; gap: var(--kit-space-4); grid-template-columns: 1fr; }
+@media (min-width: 768px) { .aw-camp-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1200px) { .aw-camp-grid { grid-template-columns: repeat(3, 1fr); } .aw-camp-grid > :first-child { grid-column: span 2; } .aw-camp-grid > :last-child:nth-child(3n) { grid-column: 1 / -1; } }
+.aw-camp-card { display: flex; flex-direction: column; padding: var(--kit-space-5); border-radius: var(--kit-radius-card); background: var(--kit-color-bg); box-shadow: inset 0 0 0 1px var(--kit-color-line); }
+.aw-camp-card > * { margin: 0 0 var(--kit-space-3); }
+.aw-camp-card h3 { font-size: var(--kit-type-h3); }
+.aw-camp-card-chips { margin: auto 0 0; padding-top: var(--kit-space-2); }
+.aw-camp-card-ico { display: inline-grid; place-items: center; width: 3rem; height: 3rem; border-radius: 50%; background: var(--camp-surface); color: var(--camp-mark); }
+.aw-camp-card-ico .kit-ico { --kit-ico-size: 1.5rem; }
+.aw-camp-grid > :first-child { background: var(--camp-mark); color: var(--camp-on-mark); box-shadow: none; }
+.aw-camp-grid > :first-child :is(h3, p) { color: var(--camp-on-mark); }
+.aw-camp .aw-camp-grid > .aw-camp-card:first-child h3 { font-size: clamp(1.5rem, 1.1rem + 1.4vw, 2.25rem); font-weight: 800; letter-spacing: -0.02em; }
+.aw-camp .aw-camp-grid > .aw-camp-card:first-child p:not(.aw-camp-card-chips) { font-size: var(--kit-type-lead); max-width: 52ch; }
+.aw-camp-grid > :first-child .aw-camp-card-ico { background: rgb(255 255 255 / 0.15); color: var(--camp-on-mark); }
+.aw-camp-grid > :first-child .aw-rule-chip { --kit-chip-border: var(--camp-on-mark); }
+
+/* Pain scale: four steps, the bar grows with the pain */
+.aw-camp-ladder { list-style: none; margin: var(--kit-space-5) 0; padding: 0; display: grid; gap: var(--kit-space-5); grid-template-columns: 1fr; }
+@media (min-width: 768px) { .aw-camp-ladder { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1200px) { .aw-camp-ladder { grid-template-columns: repeat(4, 1fr); } }
+/* Tiers are H3 under the section H2 (owner, 25 Oct) with the look they had as H4: aw.css gives content H3s line-height 1.25 !important */
+.aw-camp .aw-camp-ladder .aw-camp-tier h3 { font-size: var(--kit-type-h3) !important; line-height: 1.3 !important; }
+.aw-camp-tier h3 { margin: 0 0 var(--kit-space-2); font-size: var(--kit-type-h3); font-weight: 800; }
+.aw-camp-tier p { margin: 0 0 var(--kit-space-2); }
+.aw-camp-tier { --fill: 100%; }
+.aw-camp-tier--1 { --fill: 25%; }
+.aw-camp-tier--2 { --fill: 50%; }
+.aw-camp-tier--3 { --fill: 75%; }
+.aw-camp-tier-bar { display: block; height: 0.75rem; margin-bottom: var(--kit-space-3); border-radius: var(--kit-radius-pill); background: linear-gradient(to right, var(--camp-mark) var(--fill), rgb(255 255 255 / 0.12) var(--fill)); }
+@media (min-width: 1200px) {
+	.aw-camp-ladder { align-items: start; }
+	.aw-camp-tier-bar { height: 6rem; border-radius: var(--kit-radius-control); background: linear-gradient(to top, var(--camp-mark) var(--fill), rgb(255 255 255 / 0.08) var(--fill)); }
+}
+.aw-camp-tier-who { display: inline-flex; align-items: center; gap: var(--kit-space-1); padding: var(--kit-space-1) var(--kit-space-2); border-radius: var(--kit-radius-control); background: rgb(255 255 255 / 0.1); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-strong); }
+.aw-camp-tier-who.is-ext { background: var(--camp-mark); }
+.aw-camp-gap { display: flex; gap: var(--kit-space-3); align-items: flex-start; padding: var(--kit-space-4); border-radius: var(--kit-radius-card); box-shadow: inset 0 0 0 2px var(--camp-mark); }
+.aw-camp-gap > .kit-ico { --kit-ico-size: 1.5rem; flex: none; color: var(--camp-mark); margin-top: 0.15em; }
+.aw-camp-dark .aw-rule-chip { --kit-chip-border: rgb(255 255 255 / 0.45); }
+
+/* Today vs the draft: the draft column carries the campaign colour */
+.aw-camp-compare table { background: var(--kit-color-bg); border-radius: var(--kit-radius-card); overflow: hidden; }
+.aw-camp-compare :is(th, td) { padding: var(--kit-space-3); vertical-align: top; }
+.aw-camp .aw-camp-compare .wp-block-table thead :is(tr, th) { background: var(--camp-dark); color: var(--kit-color-on-ink); border-color: var(--camp-dark); }
+.aw-camp .aw-camp-compare .wp-block-table thead th:last-child { background: var(--camp-mark); color: var(--camp-on-mark); }
+.aw-camp-compare tbody td:first-child { font-weight: var(--kit-weight-strong); }
+.aw-camp-compare tbody td:last-child { background: color-mix(in srgb, var(--camp-mark) 7%, transparent); }
+
+/* Other ways to send: icon list */
+.aw-camp-ways { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--kit-space-4); grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); }
+.aw-camp-way { display: flex; flex-direction: column; gap: var(--kit-space-3); padding: var(--kit-space-5); border-radius: var(--kit-radius-card); background: var(--camp-tile, var(--kit-color-bg)); }
+.aw-camp-way-badge { display: grid; place-items: center; width: 3rem; height: 3rem; border-radius: 50%; background: var(--camp-primary); color: var(--camp-primary-ink); }
+.aw-camp-way-badge .kit-ico { --kit-ico-size: 1.375rem; }
+.aw-camp-way h3 { margin: var(--kit-space-2) 0 0; font-size: var(--kit-type-h4, 1.25rem); }
+.aw-camp-way p, .aw-camp-way address { margin: 0; }
+.aw-camp-way address { font-style: normal; line-height: 1.6; }
+.aw-camp-way-date { margin-top: auto !important; color: var(--camp-mark); font-weight: 600; }
+/* Brand band: the objection tally, the number set large */
+.aw-camp-brand { background: var(--camp-primary); color: var(--camp-primary-ink); }
+.aw-camp-brand :is(h2, p, strong, span) { color: var(--camp-primary-ink); }
+.aw-camp-brand .wp-block-button__link { background: var(--camp-primary-ink); color: var(--camp-primary); }
+.aw-camp-brand .wp-block-button__link:hover { background: var(--camp-dark); color: var(--kit-color-on-ink); }
+.aw-camp-tally-cols { gap: var(--kit-space-5) var(--kit-space-6, 3rem); }
+.aw-camp-tally p:not(.aw-camp-count) { max-width: 34rem; }
+.aw-camp-tally .aw-camp-count { margin: 0; padding: var(--kit-space-5) var(--kit-space-6, 2.5rem); border-radius: var(--kit-radius-card); background: var(--camp-primary-ink); box-shadow: 0 18px 40px rgb(40 4 14 / 0.28); font-size: var(--kit-type-lead); font-weight: 600; }
+.aw-camp-tally .aw-camp-count, .aw-camp-tally .aw-camp-count :is(strong, span) { color: var(--camp-dark); }
+.aw-camp-tally .aw-camp-count strong { display: block; color: var(--camp-primary); font-size: clamp(4.5rem, 14vw, 8.5rem); font-weight: 800; line-height: 0.95; letter-spacing: -0.04em; }
+
+/* Questions: heading column sticks beside the answers */
+@media (min-width: 768px) { .aw-camp-faq-cols > :first-child { position: sticky; top: calc(var(--kit-header-height, 4rem) + var(--kit-space-4)); align-self: flex-start; } }
+
+
+/* Library documents with the campaign tag (query loop): file icon from the theme's --i on the wrapper */
+.aw-camp-docs-q .wp-block-post-template { list-style: none; margin: var(--kit-space-4) 0 0; padding: 0; display: grid; gap: var(--kit-space-3); grid-template-columns: 1fr; }
+@media (min-width: 768px) { .aw-camp-docs-q .wp-block-post-template { grid-template-columns: repeat(2, 1fr); } }
+.aw-camp-docs-q li { position: relative; display: grid; grid-template-columns: auto 1fr; gap: var(--kit-space-3); align-items: start; margin: 0; padding: var(--kit-space-4); border-radius: var(--kit-radius-card); background: var(--kit-color-bg); box-shadow: inset 0 0 0 1px var(--kit-color-line); transition: box-shadow var(--kit-motion-fast) var(--kit-motion-ease); }
+.aw-camp-docs-q li::before { content: ""; width: 1.5rem; height: 1.5rem; background: var(--camp-mark); -webkit-mask: var(--i) center / contain no-repeat; mask: var(--i) center / contain no-repeat; }
+.aw-camp-docs-q li:hover { box-shadow: inset 0 0 0 2px var(--camp-mark); }
+/* aw.css sets card titles to h3 size with !important, and Kits gives card children inline margins; these are list rows */
+.aw-camp .aw-camp-docs-q .wp-block-post-title { margin: 0 !important; font-size: var(--kit-type-base) !important; font-weight: var(--kit-weight-strong); letter-spacing: 0; line-height: 1.4; }
+.aw-camp .aw-camp-docs-q .wp-block-post-title a { color: var(--kit-color-text); text-decoration: none; }
+.aw-camp .aw-camp-docs-q .wp-block-post-title a::after { content: ""; position: absolute; inset: 0; } /* the whole card is the link */
+.aw-camp .aw-camp-docs-q .wp-block-post-title a:focus-visible { outline: none; }
+.aw-camp-docs-q li:has(a:focus-visible) { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
+
+/* What happens next: a step line */
+.aw-camp-steps { list-style: none; margin: var(--kit-space-4) 0 0; padding: 0; counter-reset: aw-step; display: grid; gap: var(--kit-space-4); grid-template-columns: 1fr; }
+@media (min-width: 768px) { .aw-camp-steps { grid-template-columns: repeat(4, 1fr); } }
+.aw-camp-steps li { counter-increment: aw-step; position: relative; padding-top: 3.25rem; }
+.aw-camp-steps li::before { content: counter(aw-step); position: absolute; top: 0; left: 0; display: grid; place-items: center; width: 2.5rem; height: 2.5rem; border-radius: 50%; background: var(--camp-mark); color: var(--camp-on-mark); font-weight: 800; }
+@media (min-width: 768px) { .aw-camp-steps li:not(:last-child)::after { content: ""; position: absolute; top: 1.2rem; left: 3rem; right: calc(-1 * var(--kit-space-4) + 0.5rem); height: 2px; background: var(--camp-mark); opacity: 0.35; } }
+.aw-camp-steps strong { display: block; font-size: var(--kit-type-h4, 1.125rem); }
+.aw-camp-steps span { color: var(--camp-meta); }
+
+/* Share row */
+.aw-camp-share { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); margin-top: var(--kit-space-4); }
+.aw-camp-share-label { flex-basis: 100%; font-weight: var(--kit-weight-strong); }
+.aw-letter-share-box { display: grid; gap: var(--kit-space-5); margin-top: var(--kit-space-5); padding: var(--kit-space-5); border-radius: var(--kit-radius-card); background: color-mix(in srgb, var(--camp-primary) 7%, #fff); }
+@media (min-width: 768px) { .aw-letter-share-box { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); align-items: center; } }
+.aw-letter-share-head { margin: 0; color: var(--camp-primary); font-size: clamp(1.375rem, 2.6vw, 1.75rem); font-weight: 800; line-height: 1.15; letter-spacing: -0.01em; }
+.aw-letter-share-lede { margin: var(--kit-space-2) 0 0; }
+.aw-letter-share { display: flex; flex-wrap: wrap; gap: var(--kit-space-2); margin: var(--kit-space-4) 0 0; }
+.aw-letter-share .aw-camp-share-btn { text-decoration: none; border: 0; background: var(--kit-color-raised); font: inherit; cursor: pointer; display: inline-flex; align-items: center; gap: var(--kit-space-2); min-height: 2.75rem; padding: 0 var(--kit-space-4); border-radius: var(--kit-radius-pill); box-shadow: inset 0 0 0 1px var(--kit-color-line); color: var(--kit-color-text); }
+.aw-letter-share .aw-camp-share-btn:hover { box-shadow: inset 0 0 0 1px currentColor; }
+.aw-letter-share .aw-camp-share-btn.is-primary { background: var(--camp-primary); color: var(--camp-primary-ink); box-shadow: none; font-weight: 600; }
+.aw-letter-share-preview { margin: 0; overflow: hidden; border-radius: var(--kit-radius-card); background: var(--kit-color-raised); box-shadow: 0 0 0 1px var(--kit-color-line), 0 10px 28px rgb(29 20 24 / 0.10); }
+.aw-letter-share-preview img { display: block; width: 100%; height: auto; aspect-ratio: 1200 / 630; object-fit: cover; }
+.aw-letter-share-preview figcaption { display: grid; gap: var(--kit-space-1); padding: var(--kit-space-3) var(--kit-space-4) var(--kit-space-4); font-size: var(--kit-type-sm); }
+.aw-letter-share-host { color: var(--camp-meta, var(--kit-color-muted)); }
+.aw-letter-share-preview strong { font-size: var(--kit-type-base, 1rem); line-height: 1.3; }
+.aw-letter-share-desc { color: var(--camp-meta, var(--kit-color-muted)); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.aw-letter-share-pics { grid-column: 1 / -1; padding-top: var(--kit-space-4); border-top: 1px solid color-mix(in srgb, var(--camp-primary) 18%, transparent); }
+.aw-letter-share-pics-head { margin: 0 0 var(--kit-space-3); font-size: var(--kit-type-sm); }
+.aw-letter-share-pics-head strong { display: block; font-size: var(--kit-type-base, 1rem); }
+.aw-letter-share-pics-list { display: flex; gap: var(--kit-space-3); align-items: flex-end; }
+.aw-letter-share-pic { display: grid; gap: var(--kit-space-2); padding: 0; border: 0; background: none; font: inherit; color: var(--kit-color-text); cursor: pointer; text-align: start; }
+.aw-letter-share-pic img { display: block; height: clamp(11rem, 34vw, 15rem); width: auto; border-radius: var(--kit-radius-sm, 8px); box-shadow: 0 0 0 1px var(--kit-color-line), 0 8px 20px rgb(29 20 24 / 0.12); transition: transform 0.15s ease; }
+.aw-letter-share-pic--story img { aspect-ratio: 9 / 16; }
+.aw-letter-share-pic--post img { aspect-ratio: 4 / 5; }
+.aw-letter-share-pic:hover img, .aw-letter-share-pic:focus-visible img { transform: translateY(-2px); }
+.aw-letter-share-pic > span { display: inline-flex; align-items: center; gap: var(--kit-space-1); font-size: var(--kit-type-sm); font-weight: 600; }
+@media (prefers-reduced-motion: reduce) { .aw-letter-share-pic img { transition: none; } }
+.aw-camp-share-note { margin-top: var(--kit-space-2); font-size: var(--kit-type-sm); }
+.aw-camp .aw-camp-share :is(a, button) { border: 0; background: transparent; font: inherit; cursor: pointer; display: inline-flex; align-items: center; gap: var(--kit-space-2); min-height: 2.75rem; padding: 0 var(--kit-space-4); border-radius: var(--kit-radius-pill); box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.4); color: var(--kit-color-on-ink); text-decoration: none; }
+.aw-camp .aw-camp-share :is(a, button):hover { background: var(--camp-mark); box-shadow: none; }
+.aw-camp-share :is(a, button):focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
+.aw-camp-note { display: flex; align-items: center; gap: var(--kit-space-2); color: var(--camp-meta); font-size: var(--kit-type-sm); }
+
+/* Countdown: one settle on load */
+.aw-camp-hero .aw-cd-num { display: inline-block; animation: aw-camp-settle var(--kit-motion-slow, 400ms) var(--kit-motion-ease, ease-out) both; }
+@keyframes aw-camp-settle { from { transform: translateY(0.25em); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .aw-camp-hero .aw-cd-num { animation: none; } }
+
+/* Rule chips: the one Kits chip (kit-primitives.css), tinted with the campaign's own colours (owner, 20 Oct 2026) */
+.aw-rule-chip { --kit-chip-bg: transparent; --kit-chip-fg: currentColor; --kit-chip-border: var(--camp-meta, var(--kit-color-line)); --kit-chip-border-strong: currentColor; --kit-chip-hover: color-mix(in srgb, currentColor 10%, transparent); margin: var(--kit-space-1) var(--kit-space-1) 0 0; font-variant-numeric: tabular-nums; cursor: pointer; }
+.aw-camp-hero .aw-rule-chip { --kit-chip-border: var(--camp-on-mark); }
+.aw-rule-chip--plain { cursor: default; }
+.aw-rule-chip-dialog {
+	width: min(40rem, calc(100vw - 2 * var(--kit-space-4))); max-height: 80vh; overflow: auto;
+	padding: var(--kit-space-5); border: 0; border-radius: var(--kit-radius-card); background: var(--kit-color-bg); color: var(--kit-color-text);
+	box-shadow: var(--kit-elevation-2);
+}
+.aw-rule-chip-dialog::backdrop { background: var(--kit-overlay, rgba(0, 0, 0, 0.5)); }
+.aw-rule-chip-text { padding-left: var(--kit-space-3); border-left: var(--kit-space-1) solid var(--camp-mark, var(--kit-color-accent)); }
+.aw-rule-chip-text .aw-clause { margin-left: var(--kit-space-3); }
+.aw-rule-chip-src { color: var(--kit-color-muted); font-size: var(--kit-type-small, 0.875rem); }
+.aw-rule-chip-close { margin-top: var(--kit-space-3); min-height: 2.75rem; padding: var(--kit-space-2) var(--kit-space-4); border: 1px solid var(--kit-color-line); border-radius: var(--kit-radius-control); background: transparent; font: inherit; cursor: pointer; }
+
+/* Letter tool: 1 grounds (full width), 2 sign and 3 send side by side */
+.aw-letter { display: grid; gap: var(--kit-space-6); }
+.aw-letter-inputs { display: contents; }
+@media (min-width: 1200px) {
+	.aw-letter { grid-template-columns: 5fr 7fr; align-items: start; }
+	.aw-letter-grounds-pick { grid-column: 1 / -1; }
+	.aw-letter-out { position: sticky; top: calc(var(--kit-header-height, 4rem) + var(--kit-space-4)); }
+}
+.aw-letter fieldset { margin: 0; padding: 0; border: 0; min-width: 0; }
+.aw-letter legend, .aw-letter-head { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); margin: 0 0 var(--kit-space-4); font-size: var(--kit-type-h3); font-weight: 800; letter-spacing: -0.01em; }
+.aw-letter-step { display: inline-grid; place-items: center; width: 2rem; height: 2rem; border-radius: 50%; background: var(--camp-mark, var(--kit-color-ink)); color: var(--camp-on-mark, var(--kit-color-on-ink)); font-size: 1rem; }
+.aw-letter-picked { font-size: var(--kit-type-sm); font-weight: var(--kit-weight-regular); color: var(--kit-color-muted); }
+.aw-letter-ground-list { display: grid; gap: var(--kit-space-3); grid-template-columns: 1fr; }
+@media (min-width: 768px) { .aw-letter-ground-list { grid-template-columns: repeat(2, 1fr); } }
+.aw-letter-ground {
+	position: relative; display: grid; grid-template-columns: auto 1fr; gap: var(--kit-space-3); align-items: start; margin: 0;
+	padding: var(--kit-space-4); border-radius: var(--kit-radius-card); background: var(--kit-color-bg); box-shadow: inset 0 0 0 1px var(--kit-color-line);
+	font-size: var(--kit-type-sm); cursor: pointer; transition: box-shadow var(--kit-motion-fast) var(--kit-motion-ease);
+}
+.aw-letter-ground label { cursor: pointer; }
+.aw-letter-ground label::after { content: ""; position: absolute; inset: 0; } /* the whole card toggles */
+.aw-letter-ground:hover { box-shadow: inset 0 0 0 1px var(--camp-mark, var(--kit-color-ink)); }
+.aw-letter-ground:has(input:checked) { box-shadow: inset 0 0 0 2px var(--camp-mark, var(--kit-color-ink)); }
+.aw-letter-ground:has(input:focus-visible) { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
+.aw-letter-ground input { width: 1.25rem; height: 1.25rem; margin: 0.1em 0 0; accent-color: var(--camp-mark, var(--kit-color-ink)); }
+.aw-letter-ground strong { display: block; font-size: var(--kit-type-base); }
+.aw-letter-field { display: grid; gap: var(--kit-space-1); margin: 0 0 var(--kit-space-3); }
+.aw-letter-field input, .aw-letter-field textarea { box-sizing: border-box; width: 100%; padding: var(--kit-space-2) var(--kit-space-3); border: var(--kit-border-control, 1px solid var(--kit-color-line)); border-radius: var(--kit-radius-control); font: inherit; background: var(--kit-color-bg); }
+.aw-letter-hint { color: var(--kit-color-muted); }
+.aw-letter-meta { display: grid; gap: var(--kit-space-1); margin: 0 0 var(--kit-space-3); padding: var(--kit-space-4); border-radius: var(--kit-radius-card); background: var(--camp-mark, var(--kit-color-ink)); color: var(--camp-on-mark, var(--kit-color-on-ink)); }
+.aw-letter-meta strong { color: inherit; }
+.aw-letter-to { display: flex; align-items: center; gap: var(--kit-space-2); font-size: clamp(1.25rem, 1rem + 1vw, 1.75rem); font-weight: 800; letter-spacing: -0.02em; overflow-wrap: anywhere; }
+.aw-letter-preview {
+	white-space: pre-wrap; max-height: 24rem; overflow: auto; padding: var(--kit-space-4);
+	background: var(--kit-color-bg); border: 1px solid var(--kit-color-line); border-radius: var(--kit-radius-card); font-size: var(--kit-type-sm, 0.9375rem);
+}
+@media (max-width: 767px) { .aw-letter-preview { max-height: 14rem; } }
+.aw-letter-error { margin: var(--kit-space-3) 0 0; padding: var(--kit-space-3) var(--kit-space-4); border-radius: var(--kit-radius-card); background: var(--kit-color-danger-soft); color: var(--kit-color-danger); font-weight: 600; }
+.aw-letter :is(input, textarea)[aria-invalid=true] { border-color: var(--kit-color-danger); box-shadow: 0 0 0 1px var(--kit-color-danger); }
+.aw-letter-confirm { align-items: center; padding: var(--kit-space-4); border-radius: var(--kit-radius-card); background: var(--kit-color-bg); }
+.aw-letter-thanks { margin-top: var(--kit-space-3); padding: var(--kit-space-4); border-radius: var(--kit-radius-card); background: color-mix(in srgb, var(--kit-color-success) 10%, #fff); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--kit-color-success) 35%, transparent); }
+.aw-letter-thanks p { margin: 0; }
+.aw-letter-thanks p + p { margin-top: var(--kit-space-2); }
+.aw-letter-thanks-head { display: flex; align-items: center; gap: var(--kit-space-2); }
+.aw-letter-thanks-head .kit-ico { color: var(--kit-color-success); }
+.aw-letter-optin { display: flex; align-items: flex-start; gap: var(--kit-space-2); margin: var(--kit-space-3) 0; font-size: var(--kit-type-sm); }
+.aw-letter-optin input { flex: none; width: 1.25rem; height: 1.25rem; margin: 0.1em 0 0; accent-color: var(--camp-mark, var(--kit-color-ink)); }
+.aw-letter-optin label { cursor: pointer; }
+.aw-letter-routes, .aw-letter-confirm { display: flex; flex-wrap: wrap; gap: var(--kit-space-2); margin-top: var(--kit-space-3); }
+.aw-letter-routes .wp-element-button { display: inline-flex; align-items: center; gap: var(--kit-space-2); }
+.aw-letter-confirm p { flex-basis: 100%; margin: 0; }
+.aw-letter [hidden] { display: none; }
+.aw-letter .aw-letter-alt { background: transparent; color: var(--kit-color-text); box-shadow: inset 0 0 0 1px var(--kit-color-line); }
+.aw-letter-copied:empty { display: none; }
+.aw-letter-copy-addr { padding: 0; border: 0; background: none; color: inherit; font: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 0.2em; cursor: pointer; }
+
+.aw-camp-count { font-size: var(--kit-type-lead); }
+
+/* Phone bar */
+.aw-sticky-cta { display: none; }
+@media (max-width: 767px) {
+	.aw-sticky-cta {
+		display: flex; align-items: center; justify-content: space-between; gap: var(--kit-space-3);
+		position: fixed; left: 0; right: 0; bottom: 0; z-index: var(--kit-layer-nav, 50);
+		padding: var(--kit-space-2) var(--kit-space-4) calc(var(--kit-space-2) + env(safe-area-inset-bottom));
+		background: var(--camp-dark, var(--kit-color-ink)); color: var(--kit-color-on-ink);
+		transition: transform var(--kit-motion-base, 200ms) var(--kit-motion-ease, ease);
+	}
+	.aw-sticky-cta.is-hidden { transform: translateY(110%); }
+}
+@media (max-width: 767px) and (prefers-reduced-motion: reduce) { .aw-sticky-cta { transition: none; } }
+
+/* Home band */
+.aw-camp-band {
+	padding: var(--kit-space-section) var(--kit-space-gutter); /* the section padding: 48/70/96 top and bottom, the gutter at the sides */
+	max-width: none; margin-inline: calc(50% - 50vw) !important; /* full width, like every section (out of the page padding; core sets auto !important); the content keeps the page column */
+	background: var(--camp-mark); color: var(--camp-on-mark);
+}
+.wp-block-post-content > :is(.aw-camp-band, .aw-camp-end) { margin-block: 0; } /* sections: no block gap between them */
+/* The artwork is the background, nothing laid over it; the text sits on its plain left side (owner, 19 Oct 2026).
+   1200+: the artwork covers the band. Below: the whole scene under the text (phones get their own crop). */
+.aw-camp-band.has-art { position: relative; overflow: hidden; background-color: var(--camp-art-bg, var(--camp-mark)); }
+.aw-camp-band-art { position: absolute; inset: 0 0 0 auto; width: max(calc(50% + var(--kit-width-wide) / 2 - 34rem), 60rem); z-index: 0; } /* from the end of the text column to the right edge, so the scene never grows under the text on wide screens; its plain left side meets the band colour */
+.aw-camp-band-art img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: right center; }
+.aw-camp-band-inner { position: relative; z-index: 1; max-width: var(--kit-width-wide); margin-inline: auto; }
+.aw-camp-band-text { max-width: 36rem; }
+.aw-camp-band-pill { display: inline-block; margin: 0 0 var(--kit-space-5); padding: var(--kit-space-1) var(--kit-space-4); border: 2px solid var(--camp-on-mark); border-radius: var(--kit-radius-pill); font-weight: var(--kit-weight-bold); font-size: var(--kit-type-sm); }
+.aw-camp-band h2.aw-camp-band-title { margin: 0 0 var(--kit-space-4); font-size: clamp(2.25rem, 1.4rem + 3.4vw, 4rem); font-weight: 800; letter-spacing: -0.035em; line-height: 1.02; max-width: 14ch; } /* the band's headline, as on the campaign's link card (exempt from the site H2 size, aw.css) */
+.aw-camp-band-text > p:not(.aw-camp-band-pill, .aw-camp-band-actions, .aw-camp-band-range, .aw-countdown) { font-size: var(--kit-type-lead); max-width: 30rem; margin: 0; }
+.aw-camp-band .aw-countdown { margin: var(--kit-space-6) 0 var(--kit-space-3); align-items: baseline; }
+.aw-camp-band .aw-cd-num { font-size: clamp(3rem, 2rem + 3vw, 4.5rem); font-weight: 800; letter-spacing: -0.05em; line-height: 0.85; font-variant-numeric: tabular-nums; }
+.aw-camp-band .aw-countdown:has(+ .aw-camp-band-days) .aw-cd-when { display: none; } /* the dates are under the day marks */
+.aw-camp-band-days { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(var(--days), minmax(0, 1fr)); gap: 3px; align-items: end; height: 2rem; }
+.aw-camp-band-days li { height: 70%; border-radius: 2px; background: var(--camp-on-mark); }
+.aw-camp-band-days li.is-past { background: rgb(255 255 255 / 0.28); }
+.aw-camp-band-days li.is-today { height: 100%; }
+.aw-camp-band-range { justify-content: space-between; max-width: none; margin: var(--kit-space-3) 0 0; } /* the dates sit under the two ends of the day marks */
+.aw-camp-band-range .kit-meta-item { color: var(--camp-on-mark); }
+.aw-camp-band .aw-camp-band-actions { margin-top: var(--kit-space-6); }
+@media (max-width: 1199px) {
+	.aw-camp-band.has-art { padding-bottom: calc(52.5vw - 1rem); } /* the scene's height (1730 x 909) */
+	.aw-camp-band-art { inset: auto 0 0 0; width: auto; }
+	.aw-camp-band-art img { height: auto; object-fit: initial; }
+	.aw-camp-band-text { max-width: none; }
+}
+@media (max-width: 767px) {
+	.aw-camp-band.has-art { padding-bottom: calc(75vw + var(--kit-space-4)); } /* the phone crop is 4:3 */
+}
+.aw-camp-band :is(h2, p, .aw-cd-num, .aw-cd-unit, .aw-cd-when) { color: var(--camp-on-mark); }
+.aw-camp-band h2 { margin: 0 0 var(--kit-space-2); }
+.aw-camp .aw-camp-band-ghost { background: transparent; color: var(--camp-on-mark); box-shadow: inset 0 0 0 2px var(--camp-on-mark); }
+.aw-camp .aw-camp-band-ghost:hover { background: var(--camp-on-mark); color: var(--camp-mark); }
+.aw-camp-band-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-3); margin: var(--kit-space-3) 0 0; }
+
+/* Press cards on a campaign page: an item without a photo shows the publisher's logo on the campaign surface */
+.aw-camp .aw-camp-press .aw-story-fallback { background: var(--camp-surface); }
+.aw-camp .aw-camp-press .aw-story-fallback img.aw-story-logo { width: auto !important; height: auto !important; max-width: 45%; max-height: 45%; } /* a logo tile, whole, not a photo-sized logo */
+
+/* In the press: the Media & PR cards; partners (only when the campaign has some) */
+.aw-camp-press { margin-top: var(--kit-space-4); }
+.aw-camp-partners { margin-top: var(--kit-space-7); }
+.aw-camp-partners ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--kit-space-3); grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr)); }
+.aw-camp-partners a { display: flex; align-items: center; gap: var(--kit-space-3); padding: var(--kit-space-3); border-radius: var(--kit-radius-card); background: var(--kit-color-bg); box-shadow: inset 0 0 0 1px var(--kit-color-line); color: var(--kit-color-text); font-weight: var(--kit-weight-strong); text-decoration: none; }
+.aw-camp-partners a:hover { box-shadow: inset 0 0 0 2px var(--camp-mark); }
+.aw-camp-partners img { width: 3rem; height: 3rem; object-fit: contain; border-radius: var(--kit-radius-control); }
+
+/* Closed (the wrapper gets is-closed after the close date): "What happens after 5 November?" leads the questions */
+.aw-camp.is-closed .rank-math-block .rank-math-list { display: flex; flex-direction: column; } /* Rank Math's FAQ markup */
+.aw-camp.is-closed #faq-078f9b7a10 { order: -1; } /* id from the question text (campaign2-page.php c2faq) */
+
+/* Home band after closing: "Latest campaign", on paper */
+.aw-camp-band--closed { background: var(--camp-surface); color: var(--camp-dark); }
+.aw-camp-band.aw-camp-band--closed :is(h2, p, .aw-camp-band-kicker) { color: var(--camp-dark); }
+.aw-camp-band.aw-camp-band--closed .aw-camp-band-kicker { margin: 0 0 var(--kit-space-1); color: var(--camp-mark); font-weight: var(--kit-weight-strong); }
+/* One row that scrolls sideways (News and guides, What's happening; owner, 21 Oct 2026): each card a fixed width, snapping */
+.aw-camp .aw-camp-row { display: flex; gap: var(--kit-space-4); overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scroll-padding-inline: 0; padding-bottom: var(--kit-space-3); scrollbar-width: thin; }
+.aw-camp .aw-camp-row :is(.aw-camp-row-q, .wp-block-post-template) { display: contents !important; }
+.aw-camp .aw-camp-row .wp-block-post-template > li { flex: 0 0 clamp(15rem, 78vw, 18.5rem); margin: 0 !important; scroll-snap-align: start; list-style: none; }
+.aw-camp .aw-camp-row .kit-card { height: 100%; }
+/* Very light campaign tone (owner, 19 Oct 2026: brand, very light brand, white, grey or black): the Share section */
+.aw-camp-tint { background: color-mix(in srgb, var(--camp-primary) 7%, #fff); --camp-tile: var(--kit-color-raised); }
+.aw-letter-share-box.is-in-section { margin-top: var(--kit-space-5); padding: 0; background: none; align-items: start; }
+.aw-letter-share-box.is-in-section .aw-letter-share { margin-top: 0; }
+.aw-letter-share-box.is-in-section .aw-letter-share-pics { padding-top: var(--kit-space-5); }
+.aw-letter-next { margin: var(--kit-space-3) 0 0; padding: var(--kit-space-3) var(--kit-space-4); border-radius: var(--kit-radius-card); background: color-mix(in srgb, var(--camp-primary) 7%, #fff); }
+.aw-letter .aw-letter-next a { display: inline-flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); color: var(--camp-primary); text-decoration: none; }
+.aw-letter .aw-letter-next a:hover strong { text-decoration: underline; }
+
+/* The theme as it was on the morning of 2 Nov 2026, on the Lab rules page only (owner: "undo to previous version - lab
+   page"). The theme sheets changed after that; these put back their old values inside .aw-camp--lab-rules. */
+.aw-camp--lab-rules .kit-card[class*="kit-card--block"] > .kit-card-body { padding: var(--kit-space-4); }
+.aw-camp--lab-rules .kit-card[class*="kit-card--stacked"] { padding: var(--kit-space-4); }
+.aw-camp--lab-rules .kit-card .kit-card-title { --kit-type-h3: var(--kit-type-base); --kit-leading-heading: 1.3; } /* the card title at the body size again (kit.css sets it from these tokens) */
+.aw-camp--lab-rules .wp-block-cover.kit-photo-card { padding: 1em; } /* core Cover's own padding */
+.aw-camp--lab-rules .kit-stack > .wp-block-cover.kit-photo-card { min-height: 420px; } /* the Take action pattern's photo cards */
+.aw-camp--lab-rules .rank-math-question { font-size: inherit; }
+.aw-camp--lab-rules a.aw-camp-more { margin-top: var(--kit-space-8); }
+.aw-camp--lab-rules .kit-chip::after { inset: calc((var(--s-8) - var(--kit-size-target)) / 2) 0; }
