@@ -966,6 +966,15 @@
 .aw-camp.aw-camp #share .aw-share-block .kit-share { flex-wrap: nowrap; gap: var(--kit-space-1); }
 @media (min-width: 768px) { .aw-camp.aw-camp #share .aw-share-block .kit-share { gap: var(--kit-space-2); } }
 .aw-camp.aw-camp #share .aw-share-pics { display: grid; gap: var(--kit-space-3); }
+/* the pictures beside the button and the bar only where the card is at least 44rem wide (Lab, Supreme Court); in a
+   narrower column (Diwali, beside its photo) they stay under the bar */
+.aw-camp.aw-camp #share :has(> .aw-share-block) { container: aw-share / inline-size; }
+@container aw-share (min-width: 44rem) {
+	.aw-camp.aw-camp #share .aw-share-block:has(> .aw-share-pics) { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "cta pics" "bar pics"; align-items: start; }
+	.aw-camp.aw-camp #share .aw-share-block > .aw-share-cta { grid-area: cta; }
+	.aw-camp.aw-camp #share .aw-share-block > .kit-share { grid-area: bar; }
+	.aw-camp.aw-camp #share .aw-share-block > .aw-share-pics { grid-area: pics; }
+}
 .aw-camp.aw-camp #share .aw-share-pics-head { margin: 0; font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
 .aw-camp.aw-camp #share .aw-share-pics-head strong { display: block; font-size: var(--kit-type-base); color: var(--kit-color-text); }
 .aw-camp.aw-camp #share .aw-share-pics-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--kit-space-3); align-items: end; }
@@ -978,10 +987,6 @@
 }
 @media (min-width: 768px) {
 	.aw-camp.aw-camp #share .aw-share-cta-btn { width: auto; }
-	.aw-camp.aw-camp #share .aw-share-block:has(> .aw-share-pics) { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "cta pics" "bar pics"; align-items: start; }
-	.aw-camp.aw-camp #share .aw-share-block > .aw-share-cta { grid-area: cta; }
-	.aw-camp.aw-camp #share .aw-share-block > .kit-share { grid-area: bar; }
-	.aw-camp.aw-camp #share .aw-share-block > .aw-share-pics { grid-area: pics; }
 	.aw-camp.aw-camp #share .aw-share-pics-list { display: flex; }
 	.aw-camp.aw-camp #share .aw-share-pic img { width: auto; height: var(--kit-thumb-max); }
 }
