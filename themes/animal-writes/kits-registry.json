@@ -1941,6 +1941,7 @@
    "classes": [
     "aw-rule-chip",
     "aw-letter",
+    "aw-share-cta",
     "aw-sticky-cta",
     "aw-camp-band",
     "aw-camp-count",

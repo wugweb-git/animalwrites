@@ -834,3 +834,16 @@
 	.aw-camp.aw-camp--lab-rules .aw-camp-grid { grid-template-columns: repeat(12, minmax(0, 1fr)); grid-template-areas: "c1 c1 c1 c1 c1 c1 c1 c1 c2 c2 c2 c2" "c3 c3 c3 c3 c4 c4 c4 c4 c5 c5 c5 c5" "c6 c6 c6 c6 c6 c6 c6 c6 c6 c6 c6 c6"; }
 }
 .aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card:not(:first-child) { background: var(--kit-color-surface-soft); }
+
+/* Share section (owner's brief, 2 Nov 2026): the share block as a white card on the section tint (--kit-color-surface-soft,
+   1px line, --kit-elevation-1, --kit-space-5 padding); one main "Share this page" button (the theme's brand button at
+   --kit-size-control tall, full width on phones), the "Link copied" line beside it, the site's share bar under it. */
+.aw-camp--lab-rules #share .aw-camp-share-kit { display: grid; gap: var(--kit-space-5); margin-top: var(--kit-space-5); padding: var(--kit-space-5); border-radius: var(--kit-radius-card); background: var(--kit-color-surface-soft); box-shadow: inset 0 0 0 1px var(--kit-color-line), var(--kit-elevation-1); }
+.aw-camp--lab-rules #share .aw-share-cta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-3); margin: 0; }
+.aw-camp--lab-rules #share .aw-share-cta-btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--kit-space-2); width: 100%; min-height: var(--kit-size-control); padding-inline: var(--kit-space-6); font-size: var(--kit-type-base); font-weight: var(--kit-weight-bold); transition: transform var(--kit-motion-fast) var(--kit-motion-ease); }
+.aw-camp--lab-rules #share .aw-share-cta-btn:active { transform: scale(0.98); }
+.aw-camp--lab-rules #share .aw-share-cta-btn .kit-ico { --kit-ico-size: var(--kit-size-check); }
+.aw-camp--lab-rules #share .aw-share-cta-done { font-size: var(--kit-type-sm); font-weight: var(--kit-weight-strong); color: var(--camp-mark); }
+.aw-camp--lab-rules #share .aw-share-cta-done:empty { display: none; }
+@media (min-width: 768px) { .aw-camp--lab-rules #share .aw-share-cta-btn { width: auto; } }
+@media (prefers-reduced-motion: reduce) { .aw-camp--lab-rules #share .aw-share-cta-btn { transition: none; } .aw-camp--lab-rules #share .aw-share-cta-btn:active { transform: none; } }

@@ -425,6 +425,42 @@
 
 	/* The share box sits under the send buttons all the time (owner, 21 Oct 2026: sharing matters): a message, the share
 	   buttons (no link preview or pictures shown: 2 Nov 2026). After a send its heading turns to asking for three more letters. */
+	/* The Share section's main button (owner, 2 Nov 2026): "Share this page" opens the phone's share sheet with the
+	   picture, the message and the short link (shareAll); where a browser has no share sheet it copies the link and says
+	   so. The site's share bar stays under it for the networks. */
+	function shareCta(holder) {
+		var wrap = document.createElement('p');
+		wrap.className = 'aw-share-cta';
+		var b = document.createElement('button');
+		b.type = 'button';
+		b.className = 'wp-element-button kit-btn kit-btn--brand aw-share-cta-btn';
+		b.dataset.kitShare = canShare ? 'native' : 'copy_link';
+		b.innerHTML = '<span class="kit-ico kit-ico--' + (canShare ? 'share' : 'link') + '" aria-hidden="true"></span>';
+		b.appendChild(document.createTextNode('Share this page'));
+		var done = document.createElement('span');
+		done.className = 'aw-share-cta-done';
+		done.setAttribute('role', 'status');
+		done.setAttribute('aria-live', 'polite');
+		wrap.appendChild(b);
+		wrap.appendChild(done);
+		holder.insertBefore(wrap, holder.firstChild);
+		var timer;
+		b.addEventListener('click', function () {
+			if (canShare) { shareAll(); return; }
+			if (navigator.clipboard) navigator.clipboard.writeText(sh.url).catch(function () {});
+			done.textContent = 'Link copied';
+			clearTimeout(timer);
+			timer = setTimeout(function () { done.textContent = ''; }, 4000);
+		});
+		if (canShare && 'IntersectionObserver' in window) { // fetch the picture once the button is near, so the tap opens the sheet at once
+			var io = new IntersectionObserver(function (en) {
+				if (!en[0].isIntersecting) return;
+				io.disconnect();
+				getFile(picKind());
+			}, { rootMargin: '400px' });
+			io.observe(b);
+		}
+	}
 	var sendShare = null, shareHead = null;
 	function showSendShare(sent) {
 		if (!sh.url) return;
@@ -434,6 +470,7 @@
 			if (holder && holder.querySelector('.kit-share')) { // the site's one share bar, from the server (owner, 2 Nov 2026: the listing share widget)
 				sendShare = holder;
 				holder.classList.add('is-in-section');
+				shareCta(holder);
 			}
 		}
 		if (!sendShare) {
