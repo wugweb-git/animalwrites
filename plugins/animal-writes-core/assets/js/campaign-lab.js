@@ -431,6 +431,12 @@
 		if (!sendShare) {
 			/* The page's own Share section (owner, 21 Oct 2026) holds the heading and message; else the box carries them. */
 			var holder = document.querySelector('[data-aw-share]');
+			if (holder && holder.querySelector('.kit-share')) { // the site's one share bar, from the server (owner, 2 Nov 2026: the listing share widget)
+				sendShare = holder;
+				holder.classList.add('is-in-section');
+			}
+		}
+		if (!sendShare) {
 			sendShare = document.createElement(holder ? 'div' : 'section');
 			sendShare.className = 'aw-letter-share-box' + (holder ? ' is-in-section' : '');
 			if (!holder) sendShare.setAttribute('aria-labelledby', 'aw-letter-share-title');

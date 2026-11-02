@@ -1015,12 +1015,12 @@ add_filter(
 	2
 );
 
-// A Share section on a campaign without a letter tool: the share bar from the server (the letter tool's script fills the
-// holder on campaigns that have one), so the section is never empty.
+// A campaign's Share section: the site's one share bar from the server, the one on listings and posts (owner, 2 Nov
+// 2026), on every campaign, with or without a letter tool.
 add_filter(
 	'the_content',
 	function ( $html ) {
-		if ( ! is_singular( 'aw_campaign' ) || ! function_exists( 'aw_share_html' ) || false === strpos( $html, 'data-aw-share' ) || false !== strpos( $html, 'class="aw-letter"' ) ) {
+		if ( ! is_singular( 'aw_campaign' ) || ! function_exists( 'aw_share_html' ) || false === strpos( $html, 'data-aw-share' ) ) {
 			return $html;
 		}
 		$short = aw_camp_short_url( get_the_ID() ); // the short link, when the campaign has one (campaign-short.php)
