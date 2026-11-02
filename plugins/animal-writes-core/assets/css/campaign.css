@@ -82,8 +82,6 @@
 .aw-camp--diwali .aw-camp-card-fold > summary { padding-block: 0; } /* the row is the 44px target (--kit-size-target), no extra band */
 .aw-camp--diwali .aw-camp-card-fold > :not(summary) { margin: 0 0 var(--kit-space-3); }
 .aw-camp--diwali .aw-camp-grid > :first-child .aw-camp-card-fold summary { color: var(--camp-on-mark); }
-/* The three dates sit side by side at every width, so What's happening stays one block (one column beside the photo from 768) */
-.aw-camp--diwali .aw-camp-dates { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--kit-space-3); }
 /* Tonight, in order: on phones the six steps stack one under another (.aw-camp-steps) */
 @media (max-width: 767px) {
 	/* The phone bar never covers text or focus (WCAG 2.4.11): the page keeps the bar's height free at the bottom.
@@ -204,18 +202,12 @@
 }
 /* Section headings in the campaign plum */
 .aw-camp--sc-stray-dogs .aw-camp-section:not(.aw-camp-hero) :is(h2, h3) { color: var(--camp-primary); }
-/* Date strip: plum rules, the reports date on a yellow rule */
-.aw-camp--sc-stray-dogs .aw-camp-dates li { border-top-color: var(--camp-primary); }
-.aw-camp--sc-stray-dogs .aw-camp-dates .is-key { border-top-color: var(--kit-color-accent); }
 /* Tables (from 768): a plum-tint head and light bands on the rows */
 @media (min-width: 768px) {
 	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) thead th { background: #f4e8ee; color: var(--camp-primary); }
 	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) tbody tr:nth-child(even) td { background: rgb(58 23 48 / 0.03); }
 	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) tbody td:first-child { font-weight: var(--kit-weight-bold); color: var(--camp-primary); }
 }
-/* The date strip: three to a row, no calendar marks inside the big dates */
-@media (min-width: 768px) { .aw-camp--sc-stray-dogs .aw-camp-dates { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-.aw-camp--sc-stray-dogs .aw-camp-dates-when .kit-ico { display: none; }
 /* Notes with links and dates inside run as one paragraph (only the icon notes are a row) */
 .aw-camp--sc-stray-dogs .aw-camp-note:not(:has(> .kit-ico)) { display: block; }
 /* Links on the plum card read in white */
@@ -459,6 +451,40 @@
 .aw-camp-dates-what { color: var(--camp-meta); }
 .aw-camp-dates .is-key { border-top-width: 6px; }
 .aw-camp-dates .is-key .aw-camp-dates-when { color: var(--camp-mark); }
+/* "What's happening" timeline (owner, 2 Nov 2026), section 2 of the Diwali and Supreme Court pages. It restyles the
+   section's own date list (ol.aw-camp-dates: li > .aw-camp-dates-when + .aw-camp-dates-what, li.is-key the one date that
+   matters most), so no page text changes. To reuse it, copy this block and change the scope class.
+   - Narrow (the list under 24rem, so phones): a vertical timeline, dot + date + description, a thin line between dots.
+   - From 24rem: a row of 3 (6 dates make two rows of 3); from 60rem every date in one row. No sideways scrolling.
+   - Only the key date carries the campaign mark (--camp-mark): a filled, larger dot and an underline. The other dots and the
+     line are the soft --kit-color-line; every date stays --kit-color-ink at --kit-type-h3, descriptions --kit-type-base in
+     --camp-meta. The calendar marks inside the dates are hidden (the dates are the content). */
+:is(.aw-camp--diwali, .aw-camp--sc-stray-dogs) :has(> .aw-camp-dates) { container: aw-happening / inline-size; }
+:is(.aw-camp--diwali, .aw-camp--sc-stray-dogs) .aw-camp-dates { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; margin: var(--kit-space-5) 0; }
+:is(.aw-camp--diwali, .aw-camp--sc-stray-dogs) .aw-camp-dates li { position: relative; margin: 0; padding: 0 0 var(--kit-space-5) var(--kit-space-6); border: 0; }
+:is(.aw-camp--diwali, .aw-camp--sc-stray-dogs) .aw-camp-dates li:last-child { padding-bottom: 0; }
+:is(.aw-camp--diwali, .aw-camp--sc-stray-dogs) .aw-camp-dates li::before { content: ""; position: absolute; left: calc(var(--kit-space-3) / 2 - var(--kit-border-width) / 2); top: var(--kit-space-4); bottom: 0; border-left: var(--kit-border-width) solid var(--kit-color-line); } /* the connecting line */
+:is(.aw-camp--diwali, .aw-camp--sc-stray-dogs) .aw-camp-dates li:last-child::before { display: none; }
+:is(.aw-camp--diwali, .aw-camp--sc-stray-dogs) .aw-camp-dates li::after { content: ""; position: absolute; left: 0; top: var(--kit-space-2); width: var(--kit-space-3); height: var(--kit-space-3); border-radius: 50%; background: var(--kit-color-bg); border: var(--kit-border-width) solid var(--camp-meta); box-sizing: border-box; } /* the dot */
+:is(.aw-camp--diwali, .aw-camp--sc-stray-dogs) .aw-camp-dates .is-key::after { background: var(--camp-mark); border-color: var(--camp-mark); width: var(--kit-space-4); height: var(--kit-space-4); left: calc(var(--kit-space-3) / 2 - var(--kit-space-4) / 2); top: calc(var(--kit-space-2) - (var(--kit-space-4) - var(--kit-space-3)) / 2); }
+:is(.aw-camp--diwali, .aw-camp--sc-stray-dogs) .aw-camp-dates-when { display: block; font-size: var(--kit-type-h3); font-weight: var(--kit-weight-bold); letter-spacing: normal; line-height: var(--kit-leading-heading); color: var(--kit-color-ink); }
+:is(.aw-camp--diwali, .aw-camp--sc-stray-dogs) .aw-camp-dates-when .kit-ico { display: none; }
+:is(.aw-camp--diwali, .aw-camp--sc-stray-dogs) .aw-camp-dates-when :is(.aw-date, time) { white-space: normal; } /* a date wraps inside a narrow column (Diwali beside its photo at 768) instead of running past it */
+:is(.aw-camp--diwali, .aw-camp--sc-stray-dogs) .aw-camp-dates .is-key .aw-camp-dates-when { color: var(--kit-color-ink); text-decoration: underline; text-decoration-color: var(--camp-mark); text-decoration-thickness: var(--kit-space-1); text-underline-offset: var(--kit-space-1); }
+:is(.aw-camp--diwali, .aw-camp--sc-stray-dogs) .aw-camp-dates-what { display: block; margin-top: var(--kit-space-1); font-size: var(--kit-type-base); line-height: var(--kit-leading-body); color: var(--camp-meta); }
+@container aw-happening (min-width: 24rem) {
+	:is(.aw-camp--diwali, .aw-camp--sc-stray-dogs) .aw-camp-dates { grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: var(--kit-space-4); row-gap: var(--kit-space-5); }
+	:is(.aw-camp--diwali, .aw-camp--sc-stray-dogs) .aw-camp-dates li { padding: var(--kit-space-5) 0 0; }
+	:is(.aw-camp--diwali, .aw-camp--sc-stray-dogs) .aw-camp-dates li::before { display: block; left: 0; right: calc(-1 * var(--kit-space-4)); top: calc(var(--kit-space-3) / 2 - var(--kit-border-width) / 2); bottom: auto; border-left: 0; border-top: var(--kit-border-width) solid var(--kit-color-line); } /* the line runs across the row, through the gap */
+	:is(.aw-camp--diwali, .aw-camp--sc-stray-dogs) .aw-camp-dates li:nth-child(3n)::before, :is(.aw-camp--diwali, .aw-camp--sc-stray-dogs) .aw-camp-dates li:last-child::before { right: 0; }
+	:is(.aw-camp--diwali, .aw-camp--sc-stray-dogs) .aw-camp-dates li::after { top: 0; }
+	:is(.aw-camp--diwali, .aw-camp--sc-stray-dogs) .aw-camp-dates .is-key::after { left: calc((var(--kit-space-3) - var(--kit-space-4)) / 2); top: calc((var(--kit-space-3) - var(--kit-space-4)) / 2); }
+}
+@container aw-happening (min-width: 60rem) {
+	:is(.aw-camp--diwali, .aw-camp--sc-stray-dogs) .aw-camp-dates { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); }
+	:is(.aw-camp--diwali, .aw-camp--sc-stray-dogs) .aw-camp-dates li:nth-child(3n)::before { right: calc(-1 * var(--kit-space-4)); }
+	:is(.aw-camp--diwali, .aw-camp--sc-stray-dogs) .aw-camp-dates li:last-child::before { right: 0; }
+}
 .aw-camp-more { display: inline-flex; align-items: center; gap: var(--kit-space-1); font-weight: var(--kit-weight-strong); }
 
 /* What the draft does: icon grid; the main change leads in red */
