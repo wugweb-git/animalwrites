@@ -755,12 +755,13 @@
 		if (e.target.matches && e.target.matches('.aw-dir-search, .aw-ed-search')) filters(new URLSearchParams(new FormData(e.target)), 'directory'); // the Directory search, also the homepage's
 	}, true);
 
-	// Every button (and link styled as a button): button_click with its label (GTM, owner 9 Oct 2026)
+	// Every button (and link styled as a button): button_click with its label (GTM, owner 9 Oct 2026). A block that sits
+	// just above the footer and belongs to it (data-area="footer", the newsletter band) counts as the footer.
 	document.addEventListener('click', function (e) {
 		var b = e.target.closest && e.target.closest('button, [role=button], .kit-btn, .wp-block-button__link, .wp-element-button, summary.kit-btn, input[type=submit]');
 		if (!b || b.closest('.wp-block-post-template li a:not(.kit-btn)')) return;
 		var label = (b.getAttribute('aria-label') || b.textContent || b.value || '').replace(/\s+/g, ' ').trim().slice(0, 80);
-		track('button_click', { label: label, href: (b.getAttribute('href') || '').slice(0, 200), area: b.closest('header') ? 'header' : b.closest('footer') ? 'footer' : b.closest('form') ? 'form' : 'page' });
+		track('button_click', { label: label, href: (b.getAttribute('href') || '').slice(0, 200), area: b.closest('header') ? 'header' : b.closest('footer, [data-area=footer]') ? 'footer' : b.closest('form') ? 'form' : 'page' });
 	}, true);
 
 	// The network of a share intent URL (WhatsApp/Telegram text share, X, Facebook, LinkedIn, Pinterest, Reddit), or ''.
