@@ -333,7 +333,8 @@ add_shortcode(
 	</div>
 	<div class="aw-letter-out">
 		<p class="aw-letter-head"><span class="aw-letter-step">3</span>Check and send</p>
-		<p class="aw-letter-meta"><span class="aw-letter-to"><?php echo aw_i( 'mail' ); ?><?php echo esc_html( $to ); ?></span><span><strong>Subject:</strong> <?php echo esc_html( $a['subject'] ); ?></span></p>
+		<p class="aw-letter-meta"><span class="aw-letter-to"><?php echo aw_i( 'mail' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_i() returns a trusted inline SVG icon.
+?><?php echo esc_html( $to ); ?></span><span><strong>Subject:</strong> <?php echo esc_html( $a['subject'] ); ?></span></p>
 		<div class="aw-letter-preview" aria-live="polite" tabindex="0" aria-label="Your letter"></div>
 		<p class="aw-letter-optin"><input type="checkbox" id="aw-letter-optin" name="optin" value="1" checked> <label for="aw-letter-optin"><?php echo esc_html( defined( 'AW_CL_OPTIN' ) ? AW_CL_OPTIN : '' ); ?></label></p>
 		<p class="aw-letter-field"><label for="aw-letter-wa">WhatsApp number <span class="aw-letter-hint">(optional)</span></label>
@@ -342,9 +343,12 @@ add_shortcode(
 		<p class="aw-letter-error" role="alert" hidden>Add your name, city and email first.</p>
 		<?php echo function_exists( 'kits_altcha_widget' ) ? str_replace( '<div class="kit-captcha', '<div data-placed class="kit-captcha', kits_altcha_widget( 'invisible' ) ) : ''; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in kits_altcha_widget; the sign-up's bot check (campaign.js) ?>
 		<div class="aw-letter-routes">
-			<button type="button" class="wp-element-button" data-route="gmail"><?php echo aw_i( 'brand-gmail' ); ?>Send with Gmail</button>
-			<button type="button" class="wp-element-button aw-letter-alt" data-route="mailto"><?php echo aw_i( 'mail' ); ?>Email app</button>
-			<button type="button" class="wp-element-button aw-letter-alt" data-route="copy"><?php echo aw_i( 'copy' ); ?>Copy letter</button>
+			<button type="button" class="wp-element-button" data-route="gmail"><?php echo aw_i( 'brand-gmail' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_i() returns a trusted inline SVG icon.
+?>Send with Gmail</button>
+			<button type="button" class="wp-element-button aw-letter-alt" data-route="mailto"><?php echo aw_i( 'mail' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_i() returns a trusted inline SVG icon.
+?>Email app</button>
+			<button type="button" class="wp-element-button aw-letter-alt" data-route="copy"><?php echo aw_i( 'copy' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_i() returns a trusted inline SVG icon.
+?>Copy letter</button>
 		</div>
 		<p class="aw-letter-copied" role="status"></p>
 		<div class="aw-letter-confirm" hidden>
@@ -353,7 +357,8 @@ add_shortcode(
 			<button type="button" class="wp-element-button aw-letter-alt" data-confirm="no">Not yet</button>
 		</div>
 		<div class="aw-letter-thanks" hidden tabindex="-1">
-			<p class="aw-letter-thanks-head"><?php echo aw_i( 'check' ); ?><strong>Thank you. Your objection is on its way to CCSEA.</strong></p>
+			<p class="aw-letter-thanks-head"><?php echo aw_i( 'check' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_i() returns a trusted inline SVG icon.
+?><strong>Thank you. Your objection is on its way to CCSEA.</strong></p>
 			<p>Keep the sent email: it is your record. CCSEA may reply to the address you sent from.</p>
 			<p class="aw-letter-ref" hidden>Your reference: <strong></strong></p>
 		</div>
@@ -382,7 +387,8 @@ add_shortcode(
 	</fieldset>
 	<fieldset class="kit-step aw-letter-out" data-step="3">
 		<legend class="aw-letter-head"><span class="kit-step-count">Step 3 of 3</span><span class="aw-letter-step" aria-hidden="true">3</span><span class="kit-step-title">Check and send</span></legend>
-		<p class="aw-letter-meta"><span class="aw-letter-to"><?php echo aw_i( 'mail' ); ?><?php echo esc_html( $to ); ?></span><span><strong>Subject:</strong> <?php echo esc_html( $a['subject'] ); ?></span></p>
+		<p class="aw-letter-meta"><span class="aw-letter-to"><?php echo aw_i( 'mail' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_i() returns a trusted inline SVG icon.
+?><?php echo esc_html( $to ); ?></span><span><strong>Subject:</strong> <?php echo esc_html( $a['subject'] ); ?></span></p>
 		<p class="aw-letter-optin"><input type="checkbox" id="aw-letter-optin" name="optin" value="1" checked> <label for="aw-letter-optin"><?php echo esc_html( defined( 'AW_CL_OPTIN' ) ? AW_CL_OPTIN : '' ); ?></label></p>
 		<p class="aw-letter-field"><label for="aw-letter-wa">WhatsApp number <span class="aw-letter-hint">(optional)</span></label>
 			<input id="aw-letter-wa" name="whatsapp" type="tel" inputmode="tel" autocomplete="tel" maxlength="16"></p>
@@ -390,9 +396,12 @@ add_shortcode(
 		<p class="aw-letter-error" role="alert" hidden>Add your name, city and email first.</p>
 		<?php echo function_exists( 'kits_altcha_widget' ) ? str_replace( '<div class="kit-captcha', '<div data-placed class="kit-captcha', kits_altcha_widget( 'invisible' ) ) : ''; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in kits_altcha_widget; the sign-up's bot check (campaign.js) ?>
 		<div class="aw-letter-routes">
-			<button type="button" class="wp-element-button" data-route="gmail"><?php echo aw_i( 'brand-gmail' ); ?>Send with Gmail</button>
-			<button type="button" class="wp-element-button aw-letter-alt" data-route="mailto"><?php echo aw_i( 'mail' ); ?>Email app</button>
-			<button type="button" class="wp-element-button aw-letter-alt" data-route="copy"><?php echo aw_i( 'copy' ); ?>Copy letter</button>
+			<button type="button" class="wp-element-button" data-route="gmail"><?php echo aw_i( 'brand-gmail' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_i() returns a trusted inline SVG icon.
+?>Send with Gmail</button>
+			<button type="button" class="wp-element-button aw-letter-alt" data-route="mailto"><?php echo aw_i( 'mail' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_i() returns a trusted inline SVG icon.
+?>Email app</button>
+			<button type="button" class="wp-element-button aw-letter-alt" data-route="copy"><?php echo aw_i( 'copy' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_i() returns a trusted inline SVG icon.
+?>Copy letter</button>
 		</div>
 		<p class="aw-letter-copied" role="status"></p>
 		<div class="aw-letter-confirm" hidden>
@@ -401,7 +410,8 @@ add_shortcode(
 			<button type="button" class="wp-element-button aw-letter-alt" data-confirm="no">Not yet</button>
 		</div>
 		<div class="aw-letter-thanks" hidden tabindex="-1">
-			<p class="aw-letter-thanks-head"><?php echo aw_i( 'check' ); ?><strong>Thank you. Your objection is on its way to CCSEA.</strong></p>
+			<p class="aw-letter-thanks-head"><?php echo aw_i( 'check' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_i() returns a trusted inline SVG icon.
+?><strong>Thank you. Your objection is on its way to CCSEA.</strong></p>
 			<p>Keep the sent email: it is your record. CCSEA may reply to the address you sent from.</p>
 			<p class="aw-letter-ref" hidden>Your reference: <strong></strong></p>
 		</div>
