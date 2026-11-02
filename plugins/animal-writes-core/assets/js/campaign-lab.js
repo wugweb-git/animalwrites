@@ -652,14 +652,14 @@
 	setTimeout(show, 4000);
 })();
 
-/* Phone bar: shows once the hero has scrolled away; hidden while the letter tool or the footer is on screen, and for the
-   rest of the session after a letter is confirmed. */
+/* Phone bar: shows once the hero has scrolled away; hidden while the letter tool, the newsletter band or the footer is
+   on screen, and for the rest of the session after a letter is confirmed. */
 (function () {
 	var bar = document.querySelector('.aw-sticky-cta');
 	if (!bar) return;
 	var target = document.querySelector(bar.dataset.target);
 	var hero = document.querySelector('.aw-camp-hero');
-	var foot = document.querySelector('.wp-site-blocks > footer, footer.wp-block-template-part');
+	var feet = document.querySelectorAll('.aw-nl-band, .wp-site-blocks > footer, footer.wp-block-template-part'); // the band is its own part just above the footer
 	var sent = false, onSend = false, onHero = !!hero, onFoot = false;
 	try { sent = sessionStorage.getItem('aw-letter-sent') === '1'; } catch (e) { /* private mode */ }
 	function update() {
@@ -672,7 +672,15 @@
 	if ('IntersectionObserver' in window) {
 		if (target) new IntersectionObserver(function (en) { onSend = en[0].isIntersecting; update(); }).observe(target);
 		if (hero) new IntersectionObserver(function (en) { onHero = en[0].isIntersecting; update(); }).observe(hero);
-		if (foot) new IntersectionObserver(function (en) { onFoot = en[0].isIntersecting; update(); }).observe(foot);
+		if (feet.length) {
+			var inView = [];
+			var fo = new IntersectionObserver(function (en) {
+				en.forEach(function (e) { var i = inView.indexOf(e.target); if (e.isIntersecting && i < 0) inView.push(e.target); else if (!e.isIntersecting && i > -1) inView.splice(i, 1); });
+				onFoot = inView.length > 0;
+				update();
+			});
+			Array.prototype.forEach.call(feet, function (f) { fo.observe(f); });
+		}
 	} else {
 		onHero = false;
 		update();

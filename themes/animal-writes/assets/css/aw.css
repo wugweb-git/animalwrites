@@ -811,13 +811,15 @@ body { background: var(--kit-color-canvas); }
 .aw-newsletter-form .ff-message-success p { margin: 0; }
 .aw-newsletter-form .ff-errors-in-stack { color: var(--kit-color-accent); }
 /* Newsletter band (1 Nov 2026; card, owner, 2 Nov 2026): its own block just above the footer on every page
-   (parts/footer.html), #newsletter. A card on the soft tint (--kit-color-surface, line border, --kit-radius-card),
+   (parts/newsletter.html, its own template part before the footer part in every template; owner, 2 Nov 2026:
+   "newsletter block above footer on all"), #newsletter. A card on the soft tint (--kit-color-surface, line border, --kit-radius-card),
    at most the content width (--kit-width-content), padding --kit-space-5 on phones and --kit-space-6 from 768. Accent
    envelope badge, title (H3 size on phones, H2 from 768, bold) and line (paragraphs, not headings), then the form.
    Phones: email, name, Subscribe and the consent line stacked, full width. From 768: email, name and Subscribe in one
    row, the consent line under them. Fields white on the tint with the theme focus ring; Subscribe is the ink button
    with a lift on hover and a press, --kit-motion-base transitions, no motion under prefers-reduced-motion. Same
    fields, order and text as the form itself. */
+.wp-site-blocks > :has(> .aw-nl-band) + * { margin-block-start: 0; } /* the band meets the footer with no strip (it was inside the footer part) */
 .aw-nl-band { background: var(--kit-color-raised); border-top: var(--kit-border-width) solid var(--kit-color-line); padding: var(--kit-space-6) var(--kit-space-4); }
 @media (min-width: 768px) { .aw-nl-band { padding-inline: var(--kit-space-6); } }
 @media (min-width: 1200px) { .aw-nl-band { padding: var(--kit-space-7) var(--kit-space-gutter); } }

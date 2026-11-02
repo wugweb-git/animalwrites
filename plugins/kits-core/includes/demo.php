@@ -252,7 +252,7 @@ add_action(
 	'wp_head',
 	function () {
 		if ( is_page( 'kits-demo' ) && isset( $_GET['kits_embed'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-			echo '<style>html{margin-top:0!important}#wpadminbar,.wp-site-blocks>header,.wp-site-blocks>footer,header.wp-block-template-part,footer.wp-block-template-part{display:none!important}</style>';
+			echo '<style>html{margin-top:0!important}#wpadminbar,.wp-site-blocks>header,.wp-site-blocks>footer,.wp-site-blocks>.wp-block-template-part,header.wp-block-template-part,footer.wp-block-template-part{display:none!important}</style>';
 		}
 	}
 );
