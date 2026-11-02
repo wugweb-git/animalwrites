@@ -681,3 +681,40 @@
 	.aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card:last-child > p:not(.aw-camp-card-ico, .aw-camp-card-chips) { grid-area: t; align-self: start; }
 	.aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card:last-child > .aw-camp-card-chips { grid-area: chips; max-width: 18rem; }
 }
+
+/* What happens next as a roadmap (owner's brief, 2 Nov 2026), on every campaign's next-steps section. Phone first: a
+   vertical timeline of full-width step cards (--kit-space-5 padding, --kit-radius-card, a soft line and
+   --kit-elevation-1), the number in a 44px (--kit-size-target) circle beside the title and text, a 2px line in the
+   campaign colour joining one number to the next. From 768 two columns of two; from 1200 one row of four with the line
+   running across. The first step, the one coming up next, carries the accent: a campaign-colour tint, a 2px
+   campaign-colour edge and a filled number; the other numbers are outlined. Words unchanged; titles at --kit-type-h4,
+   the line under them muted. Hover on a pointer: the card lifts by --kit-motion-lift. */
+.aw-camp :is(#next, #next-closed) .aw-camp-steps { gap: var(--kit-space-4); margin-top: var(--kit-space-5); }
+.aw-camp :is(#next, #next-closed) .aw-camp-steps > li { display: grid; grid-template-columns: var(--kit-size-target) minmax(0, 1fr); column-gap: var(--kit-space-4); row-gap: var(--kit-space-1); align-content: start; margin: 0; padding: var(--kit-space-5); border-radius: var(--kit-radius-card); background: var(--kit-color-bg); box-shadow: inset 0 0 0 1px var(--kit-color-line), var(--kit-elevation-1); transition: transform var(--kit-motion-base) var(--kit-motion-ease), box-shadow var(--kit-motion-base) var(--kit-motion-ease); }
+.aw-camp :is(#next, #next-closed) .aw-camp-steps > li::before { position: static; grid-column: 1; grid-row: 1 / span 2; align-self: start; width: var(--kit-size-target); height: var(--kit-size-target); background: var(--kit-color-bg); color: var(--camp-mark); box-shadow: inset 0 0 0 2px var(--camp-mark); font-size: var(--kit-type-h4); }
+.aw-camp :is(#next, #next-closed) .aw-camp-steps > li > strong { grid-column: 2; align-self: center; min-height: var(--kit-size-target); display: flex; align-items: center; font-size: var(--kit-type-h4); line-height: var(--kit-leading-heading); }
+.aw-camp :is(#next, #next-closed) .aw-camp-steps > li > span { grid-column: 2; color: var(--camp-meta); font-size: var(--kit-type-sm); line-height: var(--kit-leading-body); }
+/* the joining line: phones, down from one number to the next card's number */
+.aw-camp :is(#next, #next-closed) .aw-camp-steps > li:not(:last-child)::after { content: ""; position: absolute; top: calc(var(--kit-space-5) + var(--kit-size-target)); bottom: calc(-1 * var(--kit-space-4) - var(--kit-space-5)); left: calc(var(--kit-space-5) + var(--kit-size-target) / 2 - 1px); right: auto; width: 2px; height: auto; background: var(--camp-mark); opacity: 0.35; }
+.aw-camp :is(#next, #next-closed) .aw-camp-steps > li:first-child { background: color-mix(in srgb, var(--camp-mark) 7%, var(--kit-color-bg)); box-shadow: inset 0 0 0 2px var(--camp-mark), var(--kit-elevation-2); }
+.aw-camp :is(#next, #next-closed) .aw-camp-steps > li:first-child::before { background: var(--camp-mark); color: var(--camp-on-mark); box-shadow: none; }
+@media (min-width: 768px) {
+	.aw-camp :is(#next, #next-closed) .aw-camp-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+	.aw-camp :is(#next, #next-closed) .aw-camp-steps > li:not(:last-child)::after { content: none; }
+}
+@media (min-width: 1200px) {
+	.aw-camp :is(#next, #next-closed) .aw-camp-steps { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+	.aw-camp :is(#next, #next-closed) .aw-camp-steps > li { grid-template-columns: minmax(0, 1fr); row-gap: var(--kit-space-2); }
+	.aw-camp :is(#next, #next-closed) .aw-camp-steps > li::before { grid-row: auto; margin-bottom: var(--kit-space-2); }
+	.aw-camp :is(#next, #next-closed) .aw-camp-steps > li > :is(strong, span) { grid-column: 1; }
+	.aw-camp :is(#next, #next-closed) .aw-camp-steps > li > strong { min-height: 0; }
+	.aw-camp :is(#next, #next-closed) .aw-camp-steps > li:not(:last-child)::after { content: ""; top: calc(var(--kit-space-5) + var(--kit-size-target) / 2 - 1px); bottom: auto; left: calc(var(--kit-space-5) + var(--kit-size-target) + var(--kit-space-2)); right: calc(-1 * var(--kit-space-4)); width: auto; height: 2px; }
+}
+@media (hover: hover) {
+	.aw-camp :is(#next, #next-closed) .aw-camp-steps > li:hover { transform: translateY(var(--kit-motion-lift)); box-shadow: inset 0 0 0 1px var(--kit-color-line), var(--kit-elevation-2); }
+	.aw-camp :is(#next, #next-closed) .aw-camp-steps > li:first-child:hover { box-shadow: inset 0 0 0 2px var(--camp-mark), var(--kit-elevation-3); }
+}
+@media (prefers-reduced-motion: reduce) {
+	.aw-camp :is(#next, #next-closed) .aw-camp-steps > li { transition: none; }
+	.aw-camp :is(#next, #next-closed) .aw-camp-steps > li:hover { transform: none; }
+}
