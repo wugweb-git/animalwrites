@@ -903,3 +903,14 @@
 	.aw-camp.aw-camp #share :is(.aw-share-cta-btn, .aw-share-pic img) { transition: none; }
 	.aw-camp.aw-camp #share .aw-share-cta-btn:active, .aw-camp.aw-camp #share .aw-share-cta-btn:hover, .aw-camp.aw-camp #share .aw-share-pic:hover img { transform: none; }
 }
+
+/* Focus on the dark surfaces (WCAG 1.4.11, 3:1 for the focus ring): the site's blue ring (--kit-color-focus) is about
+   1.3:1 on the crimson hero and the lead tile, and under 3:1 on the dark poster and dark sections, so there the ring is
+   white (--kit-color-on-ink), as on the Share band. */
+.aw-camp--lab-rules :is(.aw-camp-hero, .aw-camp-poster, .aw-camp-dark, .aw-camp-grid > .aw-camp-card:first-child) { --kit-color-focus: var(--kit-color-on-ink); }
+/* The phone bar never covers text or focus (WCAG 2.4.11): the page keeps the bar's height free at the bottom (as in
+   campaign.css). Bar height = its button (--kit-btn-height) + the bar's own padding (--kit-space-2 above and below) +
+   the safe area. */
+@media (max-width: 767px) {
+	html:has(.aw-camp--lab-rules .aw-sticky-cta) { scroll-padding-bottom: calc(var(--kit-btn-height) + 2 * var(--kit-space-2) + env(safe-area-inset-bottom)); }
+}

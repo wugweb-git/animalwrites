@@ -998,3 +998,8 @@
 	.aw-camp.aw-camp #share :is(.aw-share-cta-btn, .aw-share-pic img) { transition: none; }
 	.aw-camp.aw-camp #share .aw-share-cta-btn:active, .aw-camp.aw-camp #share .aw-share-cta-btn:hover, .aw-camp.aw-camp #share .aw-share-pic:hover img { transform: none; }
 }
+
+/* Focus on the dark surfaces (WCAG 1.4.11, 3:1 for the focus ring): the site's blue ring (--kit-color-focus) is under
+   3:1 on the Diwali hero, the dark sections and every campaign's lead tile, so there the ring is white
+   (--kit-color-on-ink), as on the Share band. Community dogs stays as it is. */
+.aw-camp--diwali .aw-camp-hero, .aw-camp:not(.aw-camp--community-dogs) :is(.aw-camp-dark, .aw-camp-grid > .aw-camp-card:first-child) { --kit-color-focus: var(--kit-color-on-ink); }
