@@ -101,6 +101,21 @@ function aw_si_trends_failed(): bool {
 	return $f;
 }
 
+/**
+ * Whether a rising source's last problem is the service refusing our servers (HTTP 429 or 403) with nothing stored
+ * since (2 Nov 2026). Google Trends and GDELT do this to the workers' and the site's addresses alike, so it is a known
+ * limit of the free source, not a fault: the panel says so in one line and Site Health does not count it as failing.
+ *
+ * @param string $src Source key in the run log (rising_*).
+ */
+function aw_si_rising_blocked( string $src ): bool {
+	if ( 0 !== strpos( $src, 'rising_' ) ) {
+		return false;
+	}
+	$r = aw_si_runs()[ $src ] ?? array();
+	return ! empty( $r['error'] ) && (int) ( $r['error']['time'] ?? 0 ) >= (int) ( $r['ok'] ?? 0 ) && (bool) preg_match( '/HTTP (429|403)\b/', (string) ( $r['error']['message'] ?? '' ) );
+}
+
 // Each rising source has its own entry in the run log, the notices and Site Health ("rising_" keeps them apart). A source
 // that has not reported yet joins once twice its schedule has passed since this code first loaded, so a deploy does not
 // show seven sources "late" against the date phase 1 was installed.
