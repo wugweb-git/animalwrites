@@ -16,6 +16,7 @@
  *   aw_campaign_share_text     the line shared with the link (Share button, WhatsApp, X); default: the title
  *   aw_campaign_share_story    attachment ID: 1080x1920 image for Instagram/Facebook/WhatsApp stories (owner-approved)
  *   aw_campaign_share_post     attachment ID: 1080x1080 image for feed posts (owner-approved)
+ *   aw_campaign_share_hashtags hashtags for the X link only: comma-separated, without # (owner, 2 Nov 2026)
  *   aw_campaign_short          the short link's slug: /lab redirects to the campaign (campaign-short.php)
  *
  * Shortcodes:
@@ -650,7 +651,7 @@ add_action(
 			$og_d = $rm( 'rank_math_facebook_description' );
 			$og_d = $og_d ? $og_d : ( $rm( 'rank_math_description' ) ? $rm( 'rank_math_description' ) : wp_strip_all_tags( get_the_excerpt( $id ) ) );
 			$og_i = $img( 'rank_math_facebook_image_id' );
-			wp_add_inline_script( 'aw-campaign', 'window.awCampShare=' . wp_json_encode( array( 'url' => get_permalink( $id ), 'short' => aw_camp_short_url( $id ), 'title' => get_the_title( $id ), 'text' => $txt ? $txt : get_the_title( $id ), 'story' => $img( 'aw_campaign_share_story' ), 'post' => $img( 'aw_campaign_share_post' ), 'slug' => get_post_field( 'post_name', $id ), 'og' => array( 'title' => $og_t, 'desc' => $og_d, 'image' => $og_i ? $og_i : $img( 'aw_campaign_share_post' ), 'host' => wp_parse_url( home_url(), PHP_URL_HOST ) ), 'close' => aw_date( get_post_meta( $id, 'aw_campaign_close', true ) ) ) ) . ';', 'before' );
+			wp_add_inline_script( 'aw-campaign', 'window.awCampShare=' . wp_json_encode( array( 'url' => get_permalink( $id ), 'short' => aw_camp_short_url( $id ), 'title' => get_the_title( $id ), 'text' => $txt ? $txt : get_the_title( $id ), 'hashtags' => aw_camp_x_hashtags( get_post_meta( $id, 'aw_campaign_share_hashtags', true ) ), 'story' => $img( 'aw_campaign_share_story' ), 'post' => $img( 'aw_campaign_share_post' ), 'slug' => get_post_field( 'post_name', $id ), 'og' => array( 'title' => $og_t, 'desc' => $og_d, 'image' => $og_i ? $og_i : $img( 'aw_campaign_share_post' ), 'host' => wp_parse_url( home_url(), PHP_URL_HOST ) ), 'close' => aw_date( get_post_meta( $id, 'aw_campaign_close', true ) ) ) ) . ';', 'before' );
 		}
 	}
 );
@@ -808,7 +809,7 @@ function aw_camp_share_box( $post ) {
 	$m    = fn( $k ) => (string) get_post_meta( $post->ID, $k, true );
 	$sent = (int) get_post_meta( $post->ID, 'aw_campaign_sent', true );
 	echo '<p><label for="aw-camp-min"><strong>Show the count from</strong></label> <input type="number" min="0" id="aw-camp-min" name="aw_campaign_metric_min" value="' . esc_attr( $m( 'aw_campaign_metric_min' ) ? $m( 'aw_campaign_metric_min' ) : '100' ) . '" class="small-text"><br><label for="aw-camp-stale">"As of" date after</label> <input type="number" min="1" id="aw-camp-stale" name="aw_campaign_metric_stale" value="' . esc_attr( $m( 'aw_campaign_metric_stale' ) ? $m( 'aw_campaign_metric_stale' ) : '1' ) . '" class="small-text"> days without a new letter</p>';
-	echo '<p><label for="aw-camp-share-text"><strong>Share line</strong> (sent with the link)</label><input type="text" id="aw-camp-share-text" name="aw_campaign_share_text" value="' . esc_attr( $m( 'aw_campaign_share_text' ) ) . '" class="widefat"><br><label for="aw-camp-share-story">Story image ID (1080×1920)</label> <input type="number" id="aw-camp-share-story" name="aw_campaign_share_story" value="' . esc_attr( $m( 'aw_campaign_share_story' ) ) . '" class="small-text"><br><label for="aw-camp-share-post">Post image ID (1080×1080)</label> <input type="number" id="aw-camp-share-post" name="aw_campaign_share_post" value="' . esc_attr( $m( 'aw_campaign_share_post' ) ) . '" class="small-text"></p>';
+	echo '<p><label for="aw-camp-share-text"><strong>Share line</strong> (sent with the link)</label><input type="text" id="aw-camp-share-text" name="aw_campaign_share_text" value="' . esc_attr( $m( 'aw_campaign_share_text' ) ) . '" class="widefat"><br><label for="aw-camp-share-hashtags">Hashtags for X</label><input type="text" id="aw-camp-share-hashtags" name="aw_campaign_share_hashtags" value="' . esc_attr( $m( 'aw_campaign_share_hashtags' ) ) . '" class="widefat"><br><label for="aw-camp-share-story">Story image ID (1080×1920)</label> <input type="number" id="aw-camp-share-story" name="aw_campaign_share_story" value="' . esc_attr( $m( 'aw_campaign_share_story' ) ) . '" class="small-text"><br><label for="aw-camp-share-post">Post image ID (1080×1080)</label> <input type="number" id="aw-camp-share-post" name="aw_campaign_share_post" value="' . esc_attr( $m( 'aw_campaign_share_post' ) ) . '" class="small-text"></p>';
 	$short = aw_camp_short_url( $post->ID );
 	echo '<p><label for="aw-camp-short"><strong>Short link</strong></label><br><code>' . esc_html( trailingslashit( home_url() ) ) . '</code><input type="text" id="aw-camp-short" name="aw_campaign_short" value="' . esc_attr( $m( 'aw_campaign_short' ) ) . '" class="regular-text" maxlength="40"><br><span class="description">Letters, digits and hyphens. Redirects to this campaign while it is published; Share and Copy link use it.' . ( $short ? ' <a href="' . esc_url( $short ) . '">' . esc_html( $short ) . '</a>' : '' ) . '</span></p>';
 	echo '<p><strong>Letters sent:</strong> ' . esc_html( number_format_i18n( $sent ) ) . '<br><span class="description">"Yes, I sent it" clicks, at most one a minute per visitor. Shown on the page from 100.</span></p>';
@@ -844,6 +845,7 @@ add_action(
 		update_post_meta( $id, 'aw_campaign_metric_min', (string) absint( $_POST['aw_campaign_metric_min'] ?? 100 ) );
 		update_post_meta( $id, 'aw_campaign_metric_stale', (string) max( 1, absint( $_POST['aw_campaign_metric_stale'] ?? 1 ) ) );
 		update_post_meta( $id, 'aw_campaign_share_text', sanitize_text_field( wp_unslash( $_POST['aw_campaign_share_text'] ?? '' ) ) );
+		update_post_meta( $id, 'aw_campaign_share_hashtags', aw_camp_x_hashtags( wp_unslash( $_POST['aw_campaign_share_hashtags'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- aw_camp_x_hashtags() keeps letters, digits and _ only
 		update_post_meta( $id, 'aw_campaign_share_story', (string) absint( $_POST['aw_campaign_share_story'] ?? 0 ) );
 		update_post_meta( $id, 'aw_campaign_share_post', (string) absint( $_POST['aw_campaign_share_post'] ?? 0 ) );
 		update_post_meta( $id, 'aw_campaign_partners', implode( ',', array_filter( array_map( 'absint', explode( ',', sanitize_text_field( wp_unslash( $_POST['aw_campaign_partners'] ?? '' ) ) ) ) ) ) );
@@ -1020,6 +1022,17 @@ add_filter(
 	2
 );
 
+/**
+ * A campaign's hashtags for the X link: comma-separated, each without # and only letters, digits and _ (what X takes).
+ *
+ * @param mixed $raw Stored or posted value.
+ * @return string
+ */
+function aw_camp_x_hashtags( $raw ) {
+	$tags = array_filter( array_map( fn( $t ) => preg_replace( '/[^A-Za-z0-9_]/', '', (string) $t ), explode( ',', (string) $raw ) ), 'strlen' );
+	return implode( ',', array_values( array_unique( $tags ) ) );
+}
+
 // A campaign's Share section: the site's one share bar from the server, the one on listings and posts (owner, 2 Nov
 // 2026), on every campaign, with or without a letter tool.
 add_filter(
@@ -1030,6 +1043,10 @@ add_filter(
 		}
 		$short = aw_camp_short_url( get_the_ID() ); // the short link, when the campaign has one (campaign-short.php)
 		$bar   = $short && function_exists( 'kits_share_html' ) ? kits_share_html( $short, html_entity_decode( get_the_title(), ENT_QUOTES ) ) : aw_share_html( get_the_ID() );
+		$tags  = aw_camp_x_hashtags( get_post_meta( get_the_ID(), 'aw_campaign_share_hashtags', true ) );
+		if ( '' !== $tags ) { // the campaign's hashtags on the X link only (owner, 2 Nov 2026)
+			$bar = (string) preg_replace( '#(class="kit-share-btn kit-share-x" href="[^"]+)"#', '$1&#038;hashtags=' . rawurlencode( $tags ) . '"', $bar, 1 );
+		}
 		return preg_replace_callback(
 			'#(<div class="aw-camp-share-kit"[^>]*\sdata-aw-share[^>]*>)\s*(</div>)#',
 			function ( $m ) use ( $bar ) {

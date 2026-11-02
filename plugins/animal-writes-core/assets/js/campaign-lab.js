@@ -125,7 +125,7 @@
 		if (canShare) btn('Share', 'share', 'native', shareAll).classList.add('is-primary');
 		else {
 			link('WhatsApp', 'brand-whatsapp', 'whatsapp', 'https://wa.me/?text=' + t + '%20' + u);
-			link('X', 'x-brand', 'x', 'https://twitter.com/intent/tweet?text=' + t + '&url=' + u);
+			link('X', 'x-brand', 'x', 'https://twitter.com/intent/tweet?text=' + t + '&url=' + u + (sh.hashtags ? '&hashtags=' + encodeURIComponent(sh.hashtags) : ''));
 			link('Facebook', 'facebook', 'facebook', 'https://www.facebook.com/sharer/sharer.php?u=' + u);
 			link('LinkedIn', 'linkedin', 'linkedin', 'https://www.linkedin.com/sharing/share-offsite/?url=' + u);
 			var c = btn('Copy link', 'link', 'copy_link', function () {
@@ -476,7 +476,7 @@
 		});
 		/* The share bar's links carry the campaign's share message with the short link (the server's bar has the title). */
 		var u = encodeURIComponent(sh.url), t = encodeURIComponent(sh.text || sh.title || '');
-		var nets = { x: 'https://x.com/intent/post?text=' + t + '&url=' + u, whatsapp: 'https://wa.me/?text=' + t + '%20' + u, email: 'mailto:?subject=' + encodeURIComponent(sh.title || '') + '&body=' + t + '%20' + u };
+		var nets = { x: 'https://x.com/intent/post?text=' + t + '&url=' + u + (sh.hashtags ? '&hashtags=' + encodeURIComponent(sh.hashtags) : ''), whatsapp: 'https://wa.me/?text=' + t + '%20' + u, email: 'mailto:?subject=' + encodeURIComponent(sh.title || '') + '&body=' + t + '%20' + u };
 		holder.querySelectorAll('.kit-share a[data-kit-share]').forEach(function (a) { if (nets[a.dataset.kitShare] && sh.text) a.href = nets[a.dataset.kitShare]; });
 		var pics = [['story', 'Instagram or Facebook story', 'Story, 9:16'], ['post', 'Instagram or Facebook post', 'Post, 4:5']].filter(function (k) { return sh[k[0]]; });
 		if (pics.length) {
