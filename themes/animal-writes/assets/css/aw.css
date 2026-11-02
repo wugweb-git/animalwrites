@@ -1467,9 +1467,11 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 	.aw-dir-search .aw-dir-more-body .aw-dir-check { grid-column: auto; align-self: end; display: flex; align-items: center; min-height: var(--kit-field-height); font-size: .8125rem; }
 }
 
-/* Type scale (owner, 21 Oct 2026). Every width: buttons, inputs and selects 14px, and the line under every page title 14px (on phones too,
-   owner's call: iPhones zoom the page when a field under 16px is tapped). From 768: labels and small text 11 to 13px (small 12 to 13,
-   extra small 11 to 12, meta 13). The Directory page is the reference. */
+/* Type scale (owner, 21 Oct 2026). Every width: buttons and the line under every page title 14px. Inputs, selects and textareas
+   (and the "+91" prefix, which follows --kit-field-text-size) 14px from 768 and 16px on phones (owner, 2 Nov 2026: iPhones zoom the
+   page when a field under 16px is tapped). From 768: labels and small text 11 to 13px (small 12 to 13, extra small 11 to 12, meta 13).
+   The Directory page is the reference. */
+@media (max-width: 767px) { :root { --kit-field-text-size: 1rem; } }
 .kit-btn, .wp-block-button__link, .fluentform .ff-btn.kit-btn { font-size: .875rem; } /* the Fluent Forms submit button carried its own 16px (ff-btn-md) */
 :is(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="submit"]), select, textarea) { font-size: var(--kit-field-text-size) !important; }
 .kit-section-desc { font-size: .875rem; }
