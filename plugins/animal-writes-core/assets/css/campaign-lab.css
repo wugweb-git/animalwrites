@@ -289,7 +289,7 @@
 .aw-camp-card-ico .kit-ico { --kit-ico-size: 1.5rem; }
 .aw-camp-grid > :first-child { background: var(--camp-mark); color: var(--camp-on-mark); box-shadow: none; }
 .aw-camp-grid > :first-child :is(h3, p) { color: var(--camp-on-mark); }
-.aw-camp .aw-camp-grid > .aw-camp-card:first-child h3 { font-size: clamp(1.5rem, 1.1rem + 1.4vw, 2.25rem); font-weight: 800; letter-spacing: -0.02em; }
+.aw-camp .aw-camp-grid > .aw-camp-card:first-child h3 { font-size: var(--kit-type-h2); font-weight: 800; letter-spacing: -0.02em; }
 .aw-camp .aw-camp-grid > .aw-camp-card:first-child p:not(.aw-camp-card-chips) { font-size: var(--kit-type-lead); max-width: 52ch; }
 .aw-camp-grid > :first-child .aw-camp-card-ico { background: rgb(255 255 255 / 0.15); color: var(--camp-on-mark); }
 .aw-camp-grid > :first-child .aw-rule-chip { --kit-chip-border: var(--camp-on-mark); }
@@ -593,14 +593,15 @@
 .aw-camp--lab-rules .aw-camp-row .wp-block-post-template > li { min-width: 0; scroll-snap-align: none; }
 .aw-camp--lab-rules #compare { --kit-table-min: 0; }
 
-/* What the draft does (owner, 2 Nov 2026: "like section 2 of home page"): the Home "Need help now" bento (aw.css
-   .aw-bento) for the six change cards, in the Lab colours; the main change (the mark-colour card) is the lead tile.
-   No sideways row at any width; the reading and Tab order is the markup order. Phones: one column. From 768: two
-   columns, the main change the full row, then pairs, the last card the full row. From 1200: four columns in two rows,
-   the main change two columns wide beside two cards, then three cards with the last two columns wide. The lead is
-   wide, not two rows tall as on Home, because these cards hold more text: a two-row lead would pass 600px (Layout
-   rules 10). Gaps as Home: --kit-space-5, --kit-space-4 in four columns. As on Home, rows stretch, the icon stays at
-   the top and the title, text and rule chips go to the bottom, so the cards in one row end level. */
+/* What the draft does (owner, 2 Nov 2026: "a bento layout, not a grid", like Home section 2): the Home "Need help now"
+   bento (aw.css .aw-bento) for the six change cards, in the Lab colours. The main change (card 1) is the lead tile: a
+   solid --camp-mark tile like Home's emergency tile, two rows tall as on Home, fully open. The other five are solid
+   surface tiles with the Home icon tile; their text folds (campaign-lab.js puts it in a details whose summary is the
+   card's own H3), so a tile shows icon, heading and rule chips. Without JavaScript every text stays open.
+   Areas as Home: phones one column. From 768 two columns: the lead two rows tall beside two tiles, then a pair, the
+   last tile the full row. From 1200 four columns in two rows: the lead two rows tall, three tiles beside it in the first
+   row, two in the second with the last two columns wide. Gaps as Home: --kit-space-5, --kit-space-4 in four columns.
+   No sideways row at any width; the reading and Tab order is the markup order. */
 .aw-camp.aw-camp--lab-rules .aw-camp-grid { display: grid; gap: var(--kit-space-5); grid-template-columns: minmax(0, 1fr); grid-template-areas: "c1" "c2" "c3" "c4" "c5" "c6"; }
 .aw-camp.aw-camp--lab-rules .aw-camp-grid > :nth-child(1) { grid-area: c1; }
 .aw-camp.aw-camp--lab-rules .aw-camp-grid > :nth-child(2) { grid-area: c2; }
@@ -609,15 +610,34 @@
 .aw-camp.aw-camp--lab-rules .aw-camp-grid > :nth-child(5) { grid-area: c5; }
 .aw-camp.aw-camp--lab-rules .aw-camp-grid > :nth-child(6) { grid-area: c6; }
 @media (min-width: 768px) {
-	.aw-camp.aw-camp--lab-rules .aw-camp-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-areas: "c1 c1" "c2 c3" "c4 c5" "c6 c6"; }
+	.aw-camp.aw-camp--lab-rules .aw-camp-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-areas: "c1 c2" "c1 c3" "c4 c5" "c6 c6"; }
 }
 @media (min-width: 1200px) {
-	.aw-camp.aw-camp--lab-rules .aw-camp-grid { gap: var(--kit-space-4); grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-areas: "c1 c1 c2 c3" "c4 c5 c6 c6"; }
+	.aw-camp.aw-camp--lab-rules .aw-camp-grid { gap: var(--kit-space-4); grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-areas: "c1 c2 c3 c4" "c1 c5 c6 c6"; }
 }
-.aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card { min-width: 0; gap: var(--kit-space-3); }
+/* The Home tile (.aw-bento-tile): padding --kit-space-5, --kit-radius-card, --kit-space-3 between parts; the icon at the
+   top and the rest at the bottom, so the tiles in one row end level. */
+.aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card { min-width: 0; gap: var(--kit-space-3); padding: var(--kit-space-5); border-radius: var(--kit-radius-card); }
 .aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card > * { margin: 0; }
 .aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card > :first-child { margin-bottom: auto; }
-/* The Home tile's icon square (.aw-bento-ico: 48px, --kit-radius-control) and its small text (--kit-type-sm) on the five
-   smaller cards; the main change keeps the lead size. */
-.aw-camp.aw-camp--lab-rules .aw-camp-grid .aw-camp-card-ico { width: var(--kit-size-control); height: var(--kit-size-control); border-radius: var(--kit-radius-control); }
-.aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card:not(:first-child) > p:not(.aw-camp-card-ico, .aw-camp-card-chips) { font-size: var(--kit-type-sm); line-height: var(--kit-leading-body); }
+.aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card > .aw-camp-card-chips { padding-top: 0; }
+/* The Home icon tile (.aw-bento-ico): a rounded square of a target plus --kit-space-1, the icon --kit-icon-xl, the
+   tile's own colour at 14% behind it (the lead: its text colour at 15%, as before) */
+.aw-camp.aw-camp--lab-rules .aw-camp-grid .aw-camp-card-ico { width: calc(var(--kit-size-target) + var(--kit-space-1)); height: calc(var(--kit-size-target) + var(--kit-space-1)); border-radius: var(--kit-radius-control); background: color-mix(in srgb, currentColor 14%, transparent); }
+.aw-camp.aw-camp--lab-rules .aw-camp-grid .aw-camp-card-ico .kit-ico { --kit-ico-size: var(--kit-icon-xl); }
+.aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card:first-child .aw-camp-card-ico { background: color-mix(in srgb, var(--camp-on-mark) 15%, transparent); }
+/* Headings at the Home tile's level (--kit-type-h3, bold); the lead's at --kit-type-h2 and its text at --kit-type-base,
+   so the two-row lead stays within 600px (Layout rules); the small tiles' text at Home's --kit-type-sm */
+.aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card h3 { margin: 0; font-size: var(--kit-type-h3); font-weight: var(--kit-weight-bold); line-height: var(--kit-leading-heading); letter-spacing: normal; }
+.aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card:first-child h3 { font-size: var(--kit-type-h2); }
+.aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card:first-child p:not(.aw-camp-card-ico, .aw-camp-card-chips) { font-size: var(--kit-type-base); line-height: var(--kit-leading-body); max-width: none; }
+.aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card:not(:first-child) p:not(.aw-camp-card-ico, .aw-camp-card-chips) { font-size: var(--kit-type-sm); line-height: var(--kit-leading-body); }
+/* The fold on the five smaller tiles (campaign-lab.js): the summary holds the H3, a 44px target with the theme's details
+   marker (kit.css .wp-block-details: a "+" that turns to a cross when open) and the theme focus ring. */
+.aw-camp--lab-rules .aw-camp-card-fold > summary { display: flex; align-items: center; justify-content: space-between; gap: var(--kit-space-3); min-height: var(--kit-size-target); cursor: pointer; list-style: none; border-radius: var(--kit-radius-control); }
+.aw-camp--lab-rules .aw-camp-card-fold > summary::-webkit-details-marker { display: none; }
+.aw-camp--lab-rules .aw-camp-card-fold > summary::after { content: "+"; flex: none; font-size: 1.4em; line-height: 1; transition: transform var(--kit-motion-base) var(--kit-motion-ease); }
+.aw-camp--lab-rules .aw-camp-card-fold[open] > summary::after { transform: rotate(45deg); }
+.aw-camp--lab-rules .aw-camp-card-fold > summary:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
+.aw-camp--lab-rules .aw-camp-card-fold > :not(summary) { margin: var(--kit-space-2) 0 0; }
+@media (prefers-reduced-motion: reduce) { .aw-camp--lab-rules .aw-camp-card-fold > summary::after { transition: none; } }
