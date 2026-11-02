@@ -26,41 +26,6 @@
 		bar.addEventListener('focusin', function () { bar.classList.remove('is-hidden'); });
 	}
 
-	/* 3. Carousels: position dots that also work as controls. */
-	document.querySelectorAll('.kit-cards .wp-block-post-template, .kit-cards .wp-block-post-template').forEach(function (track) {
-		var items = track.children;
-		if (items.length < 2) return;
-		var dots = document.createElement('div');
-		dots.className = 'kit-carousel-dots';
-		dots.setAttribute('role', 'group');
-		dots.setAttribute('aria-label', 'Choose a card');
-		Array.prototype.forEach.call(items, function (item, i) {
-			var b = document.createElement('button');
-			b.type = 'button';
-			b.setAttribute('aria-label', 'Card ' + (i + 1) + ' of ' + items.length);
-			b.addEventListener('click', function () {
-				setCurrent(i);
-				track.scrollTo({ left: item.offsetLeft - track.offsetLeft - parseFloat(getComputedStyle(track).paddingLeft), behavior: reduce ? 'auto' : 'smooth' });
-			});
-			dots.appendChild(b);
-		});
-		track.parentNode.insertBefore(dots, track.nextSibling);
-		function mark() {
-			var best = 0, bestDist = Infinity, left = track.scrollLeft;
-			Array.prototype.forEach.call(items, function (item, i) {
-				var d = Math.abs(item.offsetLeft - track.offsetLeft - left);
-				if (d < bestDist) { bestDist = d; best = i; }
-			});
-			setCurrent(best);
-		}
-		function setCurrent(n) {
-			Array.prototype.forEach.call(dots.children, function (b, i) { b.setAttribute('aria-current', i === n ? 'true' : 'false'); });
-		}
-		var settle;
-		track.addEventListener('scroll', function () { clearTimeout(settle); settle = setTimeout(mark, 90); }, { passive: true });
-		mark();
-	});
-
 	/* Copy link (share bar): the icon turns to a check and the label to "Link copied" for 2 s; screen readers hear it. */
 	document.addEventListener('click', function (e) {
 		var b = e.target.closest('.kit-share-copy, .aw-share-copy');

@@ -204,7 +204,7 @@ Every interactive component implements the states that apply to it, with the sam
 | Active / pressed | Buttons move down 1px and scale 0.99, shadow removed |
 | Disabled | 55% opacity, `not-allowed` cursor, no hover |
 | Loading | `.is-loading`: label hidden, spinner (`aw-spin`), `aria-busy="true"`, second click ignored |
-| Selected / current | Nav: `aria-current="page"` with permanent underline; carousel dot: `aria-current="true"` filled |
+| Selected / current | Nav: `aria-current="page"` with permanent underline |
 | Empty | Query blocks: h2 "Nothing here yet", one sentence, and search |
 | Error | Field: danger border + soft danger fill + message below (`.aw-field-error`, linked by `aria-describedby`); form: `.aw-form-summary` (`role="alert"`, focused, links to each field) |
 | Success | Field: success border (`.is-valid`); form: `.aw-form-done` (`role="status"`) |
@@ -223,7 +223,7 @@ Each entry: anatomy, variants, tokens, behaviour, where it is used.
 
 ### Card (recycled for news, legal, research, guides, opportunities, resources, listings)
 - **Anatomy:** media (16:9 image, document cover, logo or placard) → topic chips → h2/h3 title link → excerpt → date (source date for ingested items).
-- **Variants:** `aw-cards-3` grid; `aw-cards-lead` (first item spans two columns on `lg`); `.aw-listing-card` (round logo, area, verified badge); carousel on `sm` (`carousel-item` width, scroll-snap, dots).
+- **Variants:** `aw-cards-3` grid; `aw-cards-lead` (first item spans two columns on `lg`); `.aw-listing-card` (round logo, area, verified badge); one column on `sm`, two from `md`, three from `lg`; no carousel (owner, 2 Nov 2026: no sideways scrolling rows anywhere).
 - **Tokens:** `radius-card`, `radius-media`, `elevation-1/2`, `motion-base`, `motion-lift`, `card-columns`, `card-media-ratio`, `space-grid`.
 - **Behaviour:** the title is the only link announced; the image link duplicates it, so it is `tabindex="-1"` and `aria-hidden`. Government PDFs show their first page as the image (`object-position: top`).
 - **Used:** every archive (`templates/archive.html`, `archive-aw_listing.html`), homepage queries, search.
@@ -283,14 +283,14 @@ These hold on every page. Section heights below gives the detail.
 
 10. **Content block at most 600px.** Owner: "a content block must not exceed 600 - you cannot have cards or blocks which break the standard accessibility and WCAG". At every width, phones included, no card or content block is taller than 600px. That covers cards, tiles, photo cards, columns, fold bodies, table cards and form steps. A long block is split into cards, or into a fold with a short visible part.
 11. **WCAG 2.2 AA for every pattern.**
-    - Swipe rows: the row can be scrolled by keyboard (`tabindex="0"` on the scroller, or focusable cards), focus is visible, the row is named (`aria-labelledby` its heading, or `aria-label`), and nothing can be reached only by swiping.
+    - A data table that keeps its own scroll (rule 12): the scroller can be scrolled by keyboard (`tabindex="0"`), focus is visible, it is named (`aria-labelledby` its heading, or `aria-label`), and nothing can be reached only by swiping.
     - Folds: a real `<details>`/`<summary>` (or a button with `aria-expanded`), with the content kept in the page.
     - Sticky bar: it never covers the focused element (`scroll-padding-bottom` at the bar's height), and it is small or can be dismissed.
     - Everywhere: targets at least 44×44px, text contrast at least 4.5:1, reflow at 320px with no sideways page scroll, text that resizes to 200%, and `prefers-reduced-motion` respected (no smooth scroll or animation when it is set).
-12. **No sideways swipe rows** (owner, 2 Nov 2026); card lists use the stacked or grid card states (card-sizes.md).
-    Lab rules campaign page: kept as it was on 2 Nov morning (owner); not covered by rules 4, 12 or the 24px rule.
+12. **No sideways scrolling rows anywhere (owner, 2 Nov 2026).** Card lists, tiles, photo cards, figures, filters and chips stack, sit in a grid (the card-sizes.md states) or wrap; no carousel, no swipe row, no `overflow-x` row. Data tables wrap to fit the column; only a table that cannot fit with whole words keeps its own scroll inside its frame (`.wp-block-table`, which scrolls only when the table is wider), with the rule 11 table points. On phones a table of four or more columns keeps `--kit-table-min` (kit.css). Tables that keep a phone scroll (survey of all 40 live tables, 2 Nov 2026): the CCSEA amendment rules (fees), Animal days in India, Wildlife week (both), Dog bite and rabies vaccine (third table), Who regulates animal welfare (four columns), the 1962 helpline table (three columns, a long place name) and the Lab rules today vs draft guide (three columns, 3px over). All of them scroll at 360 only; none at 768 or 1280 (scan of 31 pages at 360, 768 and 1280, 2 Nov 2026). The campaign pages' tables wrap (the Lab compare table too). The Supreme Court orders and tracker tables are cards on phones.
+    Lab rules campaign page: kept as it was on 2 Nov morning (owner); not covered by rule 4 or the 24px rule. Rule 12 applies there too (owner, 2 Nov 2026: "revert the page as it was - not side ways").
 
-Checks: `tools/ci/theme_rules_check.py` in the Deploy check catches rules 3 and 9 and padding under 24px (2) in CSS. `tools/ci/section_heights_audit.js`, pasted into the browser console, measures rules 4 to 7, 10 and the measurable points of 11 on the page: sections OVER above 720 and FAIL above 800, blocks over 600, swipe rows with no keyboard focus or name, targets under 44px and sideways page scroll.
+Checks: `tools/ci/theme_rules_check.py` in the Deploy check catches rules 3 and 9 and padding under 24px (2) in CSS. `tools/ci/section_heights_audit.js`, pasted into the browser console, measures rules 4 to 7, 10 and the measurable points of 11 on the page: sections OVER above 720 and FAIL above 800, blocks over 600, scrollers with no keyboard focus or name, targets under 44px and sideways page scroll.
 
 ### Error pages (404, 500, 503)
 The 404 (theme template, `[aw_not_found]`) and the 500/503 drop-ins (`animal-writes-core/dropins/`) share one layout. Text column 40rem (`.kit-error-page > *`, as before 2 Nov 2026). Phones: code, H1, lead, then the photo (4:3, no frame), then search and section links. From 768px the photo fills the section behind the text at `--kit-hero-min`, and the page colour (`--kit-color-canvas`) fades in from the left over it: solid to the text column's right edge (it grows with the text size, so 200% text stays on the page colour) and clear 20% further, so the text never sits on the picture. The error-page search field has a `--kit-color-muted` edge (3:1 or more). The photo files (`assets/error/{404,500,503}-wide.webp` 16:9, `-phone.webp` 4:3) are optional: without them the pages keep their one text column. The 500/503 pages load before WordPress, so they copy the token values in.
@@ -302,7 +302,7 @@ A section's height is its content plus the theme's section padding: `.kit-sectio
 - No percentage padding-top or padding-bottom (it ties a height to the width); keep room for a picture with the picture itself, as a block with its own `aspect-ratio`.
 - No `!important` over `.kit-section` padding, and no `.kit-section` inside a `.kit-section`: a card in a section is a card, with card padding.
 - Desktop and tablet (owner, 2 Nov 2026): from 768 every section, hero included, is at most 720px tall (800 the absolute ceiling) and no card or block is over 600px at any width. On Home the hero is the theme hero (`--kit-hero-h`, theme H1 size); Need help now is four columns from a 56.5rem section (two columns from 768, one column on phones); Guides pictures are 16:9 (`--kit-placard-ratio`) in the row of three; the community dogs story is two columns from 768.
-- Home on phones: every Home section fits one 375×812 screen, heading and padding included. Card lists scroll sideways in one row instead of stacking (Library tiles, story figures and dates, Take action photo cards); the page itself never scrolls sideways (`scrollWidth` = viewport width). The campaign cards row stacks on phones, so there that one section is two cards tall (owner, 2 Nov 2026).
+- Home on phones: no sideways rows (Layout rules 12): Library tiles, story figures and dates and Take action photo cards stack, and Need help now shows all seven tiles; the page never scrolls sideways (`scrollWidth` = viewport width). No rows wins over the one-screen rule (owner, 2 Nov 2026), so some sections run over one 375×812 screen (2 Nov 2026: Need help now 1611px, The law, in plain words 1705px, the community story 1008px). The campaign cards row stacks on phones, so there that one section is two cards tall (owner, 2 Nov 2026).
 - Tablet and desktop: see Layout rules 5 (at most 720px, ceiling 800px, from 768 wide).
 - Home campaign row (`aw-pair`, Supreme Court and AW_Festive cards, owner 2 Nov 2026): two photo cards, the text over the campaign photograph. Stacked on phones, side by side from 768 (the theme breakpoint). Each card is one height at every width, `--aw-pair-card-h` on `.aw-pair` (owner, 2 Nov 2026: "500 for all"; one button per card). It is a min-height, so text is never cut off, and it is the one fixed card height allowed.
 
@@ -316,7 +316,7 @@ The home page's sections and their order live in the theme template `themes/anim
 3. Find help near you (`find-help`: `[aw_find_help compact="1"]`).
 4. What's happening (`whats-happening`: Query Loop 41, three items as a mosaic: the lead with a 4:3 picture and summary, two rows beside it spread to end level; on phones the lead is a row like the other two).
 5. Guides (`learn`: Query Loop 44, at most one state cruelty guide).
-6. From the Library (`animal-law`: Query Loop 43, three items in the mosaic: the lead full width with the two rows side by side under it from 768 to 1199, the lead beside the two rows from 1200; then the four type tiles, two by two from 768, four across from 1200, a sideways row on phones (25 Oct 2026): an Act, rule, order or judgment leads, official releases last).
+6. From the Library (`animal-law`: Query Loop 43, three items in the mosaic: the lead full width with the two rows side by side under it from 768 to 1199, the lead beside the two rows from 1200; then the four type tiles, two by two from 768, four across from 1200, stacked on phones (no sideways row, 2 Nov 2026; was a sideways row from 25 Oct 2026): an Act, rule, order or judgment leads, official releases last).
 7. Take action (`take-action`).
 8. India Writes for Its Community Dogs (`aw1-story`).
 9. FAQ (block `animal-writes/item-faq`).

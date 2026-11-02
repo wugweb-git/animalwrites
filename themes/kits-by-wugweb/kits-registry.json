@@ -1204,7 +1204,7 @@
   {
    "name": "Carousel dots",
    "type": "primitive",
-   "status": "live",
+   "status": "replaced",
    "classes": [
     "kit-carousel"
    ],

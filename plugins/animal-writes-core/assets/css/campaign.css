@@ -103,13 +103,12 @@
 /* Sections at most 720px from 768 (owner, 2 Nov 2026), from content, tokens and the theme breakpoints only */
 /* What the law says: 16px (--kit-space-4) from the opening line to the cards */
 .aw-camp--diwali #law.aw-camp-section > .aw-camp-lede + * { margin-top: var(--kit-space-4); }
-/* Who to call: the table's own space --kit-space-4; the 1962 note and the two guide links stay with the buttons
+/* Who to call: the table fits the column at every width (two columns, text wraps; no sideways scroll, owner 2 Nov 2026); its own space --kit-space-4; the 1962 note and the two guide links stay with the buttons
    (--kit-space-3); 768 to 1199 the four buttons sit in one row (button side padding --kit-space-4, gap --kit-space-2) */
 .aw-camp--diwali #help > .wp-block-table { margin-block: var(--kit-space-4); }
 .aw-camp--diwali #help > :is(.aw-camp-note, .aw-camp-note + *) { margin-top: var(--kit-space-3); }
 @media (min-width: 768px) and (max-width: 1199px) {
 	.aw-camp--diwali #help > .wp-block-buttons { flex-wrap: nowrap; gap: var(--kit-space-2); }
-	.aw-camp--diwali #help .wp-block-table table { min-width: calc(3 * var(--kit-card-min)); } /* rows on one line; the table scrolls sideways in its frame where it is wider (a named, focusable row: campaign.js) */
 	.aw-camp--diwali #help > .wp-block-buttons .wp-block-button__link { padding-inline: var(--kit-space-4); }
 }
 /* Share band: with the story and post pictures (1a24a0e1) the band's artwork is the same picture twice, so it goes;
@@ -784,18 +783,14 @@
 .aw-camp-band--closed { background: var(--camp-surface); color: var(--camp-dark); }
 .aw-camp-band.aw-camp-band--closed :is(h2, p, .aw-camp-band-kicker) { color: var(--camp-dark); }
 .aw-camp-band.aw-camp-band--closed .aw-camp-band-kicker { margin: 0 0 var(--kit-space-1); color: var(--camp-mark); font-weight: var(--kit-weight-strong); }
-/* One row that scrolls sideways (News and guides, What's happening; owner, 21 Oct 2026): each card a fixed width, snapping */
-.aw-camp .aw-camp-row { display: flex; gap: var(--kit-space-4); overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scroll-padding-inline: 0; padding-bottom: var(--kit-space-3); scrollbar-width: thin; }
+/* News and guides, What's happening (was a sideways row, 21 Oct 2026): a card grid, no sideways row (owner, 2 Nov 2026:
+   no sideways scrolling rows anywhere). One column on phones, two from 768, three from 1200 (the kit-cards states). */
+.aw-camp .aw-camp-row { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-4); }
+@media (min-width: 768px) { .aw-camp .aw-camp-row { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1200px) { .aw-camp .aw-camp-row { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .aw-camp .aw-camp-row :is(.aw-camp-row-q, .wp-block-post-template) { display: contents; }
-.aw-camp .aw-camp-row .wp-block-post-template > li { flex: 0 0 var(--kit-card-min); margin: 0; scroll-snap-align: start; list-style: none; }
+.aw-camp .aw-camp-row .wp-block-post-template > li { min-width: 0; margin: 0; list-style: none; }
 .aw-camp .aw-camp-row .kit-card { height: 100%; }
-/* Supreme Court In the news: no sideways row from 768 either (owner, 2 Nov 2026: no sideways scrolling on campaign pages);
-   the cards stand in the card grid, two across from 768, three from 1200 (phones: the stacked rule below). */
-@media (min-width: 768px) {
-	:is(.aw-camp--sc-stray-dogs, .aw-camp--diwali) #latest .aw-camp-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); overflow-x: visible; scroll-snap-type: none; padding-bottom: 0; }
-	:is(.aw-camp--sc-stray-dogs, .aw-camp--diwali) #latest .aw-camp-row .wp-block-post-template > li { min-width: 0; scroll-snap-align: none; }
-}
-@media (min-width: 1200px) { :is(.aw-camp--sc-stray-dogs, .aw-camp--diwali) #latest .aw-camp-row { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 /* Very light campaign tone (owner, 19 Oct 2026: brand, very light brand, white, grey or black): the Share section */
 .aw-camp-tint { background: color-mix(in srgb, var(--camp-primary) 7%, #fff); --camp-tile: var(--kit-color-raised); }
 .aw-letter-share-box.is-in-section { margin-top: var(--kit-space-5); padding: 0; background: none; align-items: start; }

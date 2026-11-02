@@ -425,28 +425,8 @@ html { overflow-x: clip; }
 @media (min-width: 768px) { .kit-menu-secondary { margin-inline-start: var(--kit-space-3); padding-inline-start: var(--kit-space-4); border-inline-start: var(--kit-border-width) solid color-mix(in srgb, var(--neutral-0) 25%, transparent); } }
 /* Footer categories: two compact columns */
 
-/* Carousel (card rows on small screens) — controls added by aw.js */
-@media (max-width: 767px) {
-	.kit-cards .wp-block-post-template {
-		display: flex !important; overflow-x: auto; scroll-snap-type: x mandatory; gap: var(--kit-space-4) !important;
-		margin-inline: calc(-1 * var(--kit-space-gutter)); padding: 0 var(--kit-space-gutter) var(--kit-space-3);
-		scrollbar-width: none; overscroll-behavior-x: contain;
-	}
-	.kit-cards .wp-block-post-template::-webkit-scrollbar { display: none; }
-	.kit-cards .wp-block-post-template > li { flex: 0 0 var(--kit-carousel-item); scroll-snap-align: start; grid-column: auto !important; grid-row: auto !important; }
-	.kit-cards .kit-card-media { aspect-ratio: var(--kit-card-media-ratio); }
-}
-.kit-carousel-dots { display: flex; justify-content: center; gap: var(--kit-space-2); margin-top: var(--kit-space-2); }
-.kit-carousel-dots button {
-	width: var(--kit-size-target); height: var(--kit-size-target); padding: 0; border: 0; background: transparent; cursor: pointer;
-	display: inline-flex; align-items: center; justify-content: center;
-}
-.kit-carousel-dots button::before {
-	content: ""; width: 8px; height: 8px; border-radius: var(--kit-radius-pill); background: var(--kit-color-line);
-	transition: width var(--kit-motion-base) var(--kit-motion-ease), background-color var(--kit-motion-base) var(--kit-motion-ease);
-}
-.kit-carousel-dots button[aria-current=true]::before { width: 22px; background: var(--kit-color-ink); }
-@media (min-width: 768px) { .kit-carousel-dots { display: none; } }
+/* Card lists (kit-cards) stack on phones (kit-cards grid above: one column, two from 768, three from 1200): no sideways
+   carousel (owner, 2 Nov 2026: no sideways scrolling rows anywhere). */
 
 .kit-more { font-weight: var(--kit-weight-medium); margin-top: var(--kit-space-6); color: var(--kit-color-muted); }
 .kit-more a { color: var(--kit-color-ink); font-weight: var(--kit-weight-strong); }
@@ -492,11 +472,15 @@ ins.adsbygoogle[data-ad-status="unfilled"] { display: none !important; }
 ins.adsbygoogle:not([data-ad-status="filled"]) { height: 0 !important; min-height: 0 !important; overflow: hidden; }
 [class*="-entity-placement"]:has(ins.adsbygoogle):not(:has(ins.adsbygoogle[data-ad-status="filled"])) > [class$="-adlabel"] { display: none; }
 
-/* Tables (core/table): header row, cell padding, line borders; scroll sideways on small screens instead of squeezing.
+/* Tables (core/table): header row, cell padding, line borders; they wrap to fit (see below).
    "Stripes" (core block style) shades every other row. Tokens only. */
 .wp-block-table { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-block: var(--kit-space-5); }
 .wp-block-table table { width: 100%; border-collapse: collapse; font-size: var(--kit-type-sm); line-height: var(--kit-leading-body); }
-@media (max-width: 767px) { .wp-block-table table { min-width: var(--kit-table-min); } }
+/* Tables wrap to fit the column with whole words (owner, 2 Nov 2026: no sideways scrolling rows anywhere): the frame
+   scrolls only when a table cannot fit. On phones a table of four or more columns keeps its readable width
+   (--kit-table-min) and its own scroll; two and three columns wrap. :where() keeps the old specificity, so page
+   rules (the Supreme Court cards) still win. */
+@media (max-width: 767px) { .wp-block-table:where(:has(tr > :nth-child(4))) table { min-width: var(--kit-table-min); } }
 .wp-block-table table :is(th, td) { padding: var(--kit-space-3) var(--kit-space-4); border: 0; border-bottom: var(--kit-border-width) solid var(--kit-color-line); text-align: start; vertical-align: top; }
 .wp-block-table table thead { border-bottom: 0; }
 .wp-block-table table thead th { background: var(--kit-color-surface); color: var(--kit-color-ink); font-weight: var(--kit-weight-strong); border-bottom-color: var(--kit-color-ink); }
@@ -1124,13 +1108,8 @@ body { background: var(--kit-surface-page); }
 
 /* CTA buttons (owner, 9 Oct 2026): every link button carries an icon, which nudges on hover and focus: kit-primitives.css section 10. */
 
-/* Sideways scroll row (phones): a list of cards scrolls across instead of stacking down the screen. Add kit-scroll-row
-   to a Query Loop; from 768px the list lays out as the section decides. */
-@media (max-width: 767px) {
-	.kit-scroll-row .wp-block-post-template { display: flex !important; flex-direction: row !important; overflow-x: auto; scroll-snap-type: x mandatory; gap: var(--kit-space-4); margin: 0 calc(-1 * var(--kit-space-gutter)) !important; padding: 0 var(--kit-space-gutter) var(--kit-space-3) !important; scroll-padding-inline: var(--kit-space-gutter); max-width: none !important; width: auto !important; scrollbar-width: none; overscroll-behavior-x: contain; }
-	.kit-scroll-row .wp-block-post-template::-webkit-scrollbar { display: none; }
-	.kit-scroll-row .wp-block-post-template > li { flex: 0 0 min(82%, 22rem); scroll-snap-align: start; margin: 0 !important; }
-}
+/* kit-scroll-row no longer makes a sideways row (owner, 2 Nov 2026: no sideways scrolling rows anywhere); a list with the
+   class keeps its own stacked or grid layout. */
 /* --kit-row-item: a card width, phones min(82%, 22rem), from 768 --kit-card-min; still read by campaign.css (Lab rules grounds). */
 :root { --kit-row-item: min(82%, 22rem); }
 @media (min-width: 768px) { :root { --kit-row-item: var(--kit-card-min); } }

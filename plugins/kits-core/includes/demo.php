@@ -169,7 +169,7 @@ add_filter(
 
 /**
  * Kits components drawn nowhere else on the sheet (owner, 18 Oct 2026), each under its registry name in its states.
- * Fixed or phone-only pieces (sticky bar, carousel dots) are shown in place here (.kit-demo-static).
+ * Fixed or phone-only pieces (sticky bar) are shown in place here (.kit-demo-static).
  */
 function kits_demo_more() {
 	$h   = fn( $t ) => '<h3 class="kit-demo-h">' . esc_html( $t ) . '</h3>';
@@ -180,7 +180,7 @@ function kits_demo_more() {
 	if ( $pic ) {
 		$img = (string) get_the_post_thumbnail_url( $pic[0], 'large' );
 	}
-	$o  = '<style>.kit-demo-static .kit-sticky-help{position:static!important;display:flex!important;transform:none!important}.kit-demo-static .kit-carousel-dots{display:flex!important}.kit-demo-state{margin:var(--s-3) 0 var(--s-1);font-size:var(--kit-meta-size);color:var(--kit-color-muted)}.kit-demo-grid>span{display:grid;place-items:center;min-height:2.5rem;background:var(--kit-color-surface);border-radius:var(--kit-radius-control);font-size:var(--kit-meta-size)}.kit-demo-surfaces{display:grid;gap:var(--s-3);grid-template-columns:repeat(auto-fill,minmax(10rem,1fr))}.kit-demo-surfaces>div{padding:var(--s-4);border-radius:var(--kit-radius-card);border:1px solid var(--kit-color-line);min-height:5rem}</style>';
+	$o  = '<style>.kit-demo-static .kit-sticky-help{position:static!important;display:flex!important;transform:none!important}.kit-demo-state{margin:var(--s-3) 0 var(--s-1);font-size:var(--kit-meta-size);color:var(--kit-color-muted)}.kit-demo-grid>span{display:grid;place-items:center;min-height:2.5rem;background:var(--kit-color-surface);border-radius:var(--kit-radius-control);font-size:var(--kit-meta-size)}.kit-demo-surfaces{display:grid;gap:var(--s-3);grid-template-columns:repeat(auto-fill,minmax(10rem,1fr))}.kit-demo-surfaces>div{padding:var(--s-4);border-radius:var(--kit-radius-card);border:1px solid var(--kit-color-line);min-height:5rem}</style>';
 	$o .= $h( 'Sticky action bar' ) . $st( 'Default (phones only; fixed to the bottom of the screen, hidden while scrolling down)' )
 		. '<div class="kit-demo-static"><div class="kit-sticky-help"><a class="kit-sh-primary" href="#">' . $ico( 'helpline' ) . 'Call 1962</a><a class="kit-sh-secondary" href="#">Find help near you</a></div></div>';
 	$o .= $h( 'Banner' ) . $st( 'Default (a section page banner; nothing is printed until it has a picture)' )
@@ -195,10 +195,8 @@ function kits_demo_more() {
 		$share = fn( $copied ) => $copied ? (string) preg_replace( '#(<button[^>]*kit-share-copy[^>]*>)(.*?)(</button>)#s', '$1' . $ico( 'check' ) . 'Link copied$3', $real ) : $real;
 	}
 	$o .= $h( 'Share' ) . $st( 'Default' ) . $share( false ) . $st( 'Copied (after Copy link)' ) . $share( true );
-	$o .= $h( 'Table' ) . $st( 'Default (zebra rows; hover darkens a row; on phones the table scrolls sideways inside its box)' )
+	$o .= $h( 'Table' ) . $st( 'Default (zebra rows; hover darkens a row; tables wrap to fit; on phones a table of four or more columns scrolls inside its box)' )
 		. '<div class="kit-table" style="overflow-x:auto"><table><thead><tr><th>Who approves</th><th>Today</th><th>Draft 2026</th></tr></thead><tbody><tr><td>Small animals</td><td>Lab committee</td><td>Lab committee</td></tr><tr><td>Large animals</td><td>National committee</td><td>Lab committee</td></tr><tr><td>Penalty</td><td>Up to ₹200</td><td>Up to ₹200</td></tr></tbody></table></div>';
-	$o .= $h( 'Carousel dots' ) . $st( 'Default and current (phones only, under a card row that scrolls sideways)' )
-		. '<div class="kit-demo-static"><div class="kit-carousel-dots" role="group" aria-label="Choose a card"><button type="button" aria-label="Card 1 of 4" aria-current="true"></button><button type="button" aria-label="Card 2 of 4"></button><button type="button" aria-label="Card 3 of 4"></button><button type="button" aria-label="Card 4 of 4"></button></div></div>';
 	$o .= $h( 'Claim panel' ) . $st( 'Closed' ) . '<div class="kit-claim"><details><summary>Is this your organisation?</summary><p>Claim this listing to update its details.</p></details></div>'
 		. $st( 'Open' ) . '<div class="kit-claim"><details open><summary>Is this your organisation?</summary><p>Claim this listing to update its details.</p><p><a class="kit-btn kit-btn--sm" href="#">Claim this listing</a></p></details></div>';
 	$o .= $h( 'More link' ) . $st( 'Default' ) . '<p class="kit-more">More in the Library: <a href="#">all court orders</a></p>';
