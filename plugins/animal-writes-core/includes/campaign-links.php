@@ -156,6 +156,21 @@ add_action(
 				)
 			);
 		}
+		// The campaign page a link points to (post ID); editable through wp-admin REST like the two fields above.
+		register_term_meta(
+			AW_CAMPAIGN_LINK,
+			'aw_campaign_page',
+			array(
+				'type'              => 'integer',
+				'single'            => true,
+				'default'           => 0,
+				'sanitize_callback' => 'absint',
+				'show_in_rest'      => true,
+				'auth_callback'     => function () {
+					return current_user_can( 'manage_categories' );
+				},
+			)
+		);
 	},
 	6
 );
