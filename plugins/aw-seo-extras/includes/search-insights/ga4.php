@@ -9,8 +9,9 @@
  * - ref, social: every referral (channel Referral, Organic Social, Paid Social) and the social sources below, by source
  *   and landing page, with sessions, engaged sessions and key events (owner, 31 Oct 2026);
  * - nf: 404_view events by path for the last 28 days, one report per run (1 Nov 2026). The path is the event's own
- *   parameter (custom dimension customEvent:path); while that dimension is not registered in GA4 the report falls back
- *   to pagePath, which is the same address on a 404 page.
+ *   parameter (custom dimension customEvent:path); while that dimension is not registered in GA4, or any event in the
+ *   window has no path ("(not set)", sent before it was registered), the report uses pagePath, the same address on a
+ *   404 page.
  *
  * Rows in obs: src ga4, period day; search (txt = term, page_key = md5 of the term), ai (page = landing path,
  * txt = source), organic (page = landing path), ref / ref_eng / ref_key (page = landing path, txt = source). value =
@@ -207,10 +208,16 @@ function aw_si_ga4_fetch_nf( $module, string $end ) {
 	$err  = null;
 	foreach ( array( 'customEvent:path', 'pagePath' ) as $dim ) {
 		$res = aw_si_ga4_report( $module, $args + array( 'dimensions' => array( $dim, 'date' ) ) );
-		if ( ! is_wp_error( $res ) ) {
+		if ( is_wp_error( $res ) ) {
+			$err = $res; // Most often: the custom dimension is not registered yet. Try pagePath.
+			continue;
+		}
+		// Events sent before the custom dimension was registered have no path ("(not set)"). While any row lacks it,
+		// pagePath is used for the whole window: on a 404 page it is the same address.
+		$unset = array_filter( $res, fn( $r ) => '(not set)' === (string) ( $r[0][0] ?? '' ) );
+		if ( 'pagePath' === $dim || ! $unset ) {
 			break;
 		}
-		$err = $res; // Most often: the custom dimension is not registered yet. Try pagePath.
 	}
 	if ( is_wp_error( $res ) ) {
 		return $err;
