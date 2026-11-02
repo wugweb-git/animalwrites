@@ -862,7 +862,7 @@
 .aw-camp :is(#next, #next-closed) .aw-camp-steps { gap: var(--kit-space-4); margin-top: var(--kit-space-5); }
 .aw-camp :is(#next, #next-closed) .aw-camp-steps > li { display: grid; grid-template-columns: var(--kit-size-target) minmax(0, 1fr); column-gap: var(--kit-space-4); row-gap: var(--kit-space-1); align-content: start; margin: 0; padding: var(--kit-space-5); border-radius: var(--kit-radius-card); background: var(--kit-color-bg); box-shadow: inset 0 0 0 1px var(--kit-color-line), var(--kit-elevation-1); transition: transform var(--kit-motion-base) var(--kit-motion-ease), box-shadow var(--kit-motion-base) var(--kit-motion-ease); }
 .aw-camp :is(#next, #next-closed) .aw-camp-steps > li::before { position: static; grid-column: 1; grid-row: 1 / span 2; align-self: start; width: var(--kit-size-target); height: var(--kit-size-target); background: var(--kit-color-bg); color: var(--camp-mark); box-shadow: inset 0 0 0 2px var(--camp-mark); font-size: var(--kit-type-h4); }
-.aw-camp :is(#next, #next-closed) .aw-camp-steps > li > strong { grid-column: 2; align-self: center; min-height: var(--kit-size-target); display: flex; align-items: center; font-size: var(--kit-type-h4); line-height: var(--kit-leading-heading); }
+.aw-camp :is(#next, #next-closed) .aw-camp-steps > li > strong { grid-column: 2; align-self: center; display: block; font-size: var(--kit-type-h4); line-height: var(--kit-leading-heading); }
 .aw-camp :is(#next, #next-closed) .aw-camp-steps > li > span { grid-column: 2; color: var(--camp-meta); font-size: var(--kit-type-sm); line-height: var(--kit-leading-body); }
 /* the joining line: phones, down from one number to the next card's number */
 .aw-camp :is(#next, #next-closed) .aw-camp-steps > li:not(:last-child)::after { content: ""; position: absolute; top: calc(var(--kit-space-5) + var(--kit-size-target)); bottom: calc(-1 * var(--kit-space-4) - var(--kit-space-5)); left: calc(var(--kit-space-5) + var(--kit-size-target) / 2 - 1px); right: auto; width: 2px; height: auto; background: var(--camp-mark); opacity: 0.35; }
@@ -877,7 +877,6 @@
 	.aw-camp :is(#next, #next-closed) .aw-camp-steps > li { grid-template-columns: minmax(0, 1fr); row-gap: var(--kit-space-2); }
 	.aw-camp :is(#next, #next-closed) .aw-camp-steps > li::before { grid-row: auto; margin-bottom: var(--kit-space-2); }
 	.aw-camp :is(#next, #next-closed) .aw-camp-steps > li > :is(strong, span) { grid-column: 1; }
-	.aw-camp :is(#next, #next-closed) .aw-camp-steps > li > strong { min-height: 0; }
 	.aw-camp :is(#next, #next-closed) .aw-camp-steps > li:not(:last-child)::after { content: ""; top: calc(var(--kit-space-5) + var(--kit-size-target) / 2 - 1px); bottom: auto; left: calc(var(--kit-space-5) + var(--kit-size-target) + var(--kit-space-2)); right: calc(-1 * var(--kit-space-4)); width: auto; height: 2px; }
 }
 @media (hover: hover) {
