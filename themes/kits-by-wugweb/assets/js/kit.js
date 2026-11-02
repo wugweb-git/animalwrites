@@ -615,26 +615,27 @@
 	});
 })();
 
-/* Motion: scroll-in (transform and opacity only; nothing under prefers-reduced-motion).
+/* Motion: scroll-in (transform and opacity only; nothing under prefers-reduced-motion). The browser's own animations
+   (element.animate), no library (owner, 2 Nov 2026: GSAP removed).
    The first two groups (page header or hero, first content section) are shown at once, never faded in: they hold the
    page's largest text or picture, and hiding them until this script ran delayed LCP by 1-2 s on phones (owner, 20 Oct
    2026). Later sections rise in as they scroll into view. Elements can opt in with data-reveal. */
 (function () {
-	if (!window.gsap || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+	if (!('IntersectionObserver' in window) || !Element.prototype.animate || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 	var main = document.getElementById('main');
 	if (!main || main.classList.contains('kit-static')) return; // a template can opt out: its sections are always visible
 	var root = main.querySelector(':scope > .wp-block-post-content') || main;
 	var sections = Array.prototype.slice.call(root.querySelectorAll(':scope > section, :scope > header, :scope > .alignfull, [data-reveal]'));
-	var ease = 'back.out(1.2)'; // a light spring
+	var ease = 'cubic-bezier(.2, .9, .3, 1.2)'; // a light spring (was GSAP back.out(1.2))
 	sections.forEach(function (s, i) {
 		if (i < 2) return; // above the fold: shown as rendered
-		if (!('IntersectionObserver' in window)) return;
 		s.style.opacity = '0';
 		var io = new IntersectionObserver(function (entries) {
 			entries.forEach(function (e) {
 				if (e.isIntersecting) {
 					io.disconnect();
-					window.gsap.fromTo(s, { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: ease, clearProps: 'transform,opacity' });
+					s.style.opacity = '';
+					s.animate([{ opacity: 0, transform: 'translateY(24px)' }, { opacity: 1, transform: 'none' }], { duration: 600, easing: ease });
 				} else if (e.boundingClientRect.bottom < 0) { // jumped past (anchor link, fast scroll): show it, no animation
 					io.disconnect();
 					s.style.opacity = '';
@@ -645,7 +646,7 @@
 	});
 	// Print shows every section, whether or not it has scrolled into view.
 	window.addEventListener('beforeprint', function () {
-		sections.forEach(function (s) { window.gsap.killTweensOf(s); s.style.opacity = ''; s.style.transform = ''; });
+		sections.forEach(function (s) { s.getAnimations().forEach(function (a) { a.cancel(); }); s.style.opacity = ''; });
 	});
 })();
 

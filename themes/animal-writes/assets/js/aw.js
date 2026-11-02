@@ -264,27 +264,31 @@
 })();
 
 /* Need help now and Take part: the bento tiles and the Take part cards fade up one after another (112 first) when their
-   grid scrolls into view. A grid already on screen when the page loads is left as it is; nothing moves under
-   prefers-reduced-motion or without GSAP. */
+   grid scrolls into view (the browser's own animations, element.animate; GSAP removed, owner, 2 Nov 2026). A grid already
+   on screen when the page loads is left as it is; nothing moves under prefers-reduced-motion. */
 (function () {
-	if (!window.gsap || !('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+	if (!('IntersectionObserver' in window) || !Element.prototype.animate || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 	[['.aw-bento', '.aw-bento-tile'], ['.aw-take-part', '.aw-take-part-card']].forEach(function (pair) {
 		Array.prototype.forEach.call(document.querySelectorAll(pair[0]), function (grid) {
 			if (grid.getBoundingClientRect().top < window.innerHeight) return;
-			var tiles = grid.querySelectorAll(pair[1]);
+			var tiles = Array.prototype.slice.call(grid.querySelectorAll(pair[1]));
 			if (!tiles.length) return;
-			window.gsap.set(tiles, { opacity: 0, y: 16 });
+			function show() { tiles.forEach(function (t) { t.style.opacity = ''; }); }
+			tiles.forEach(function (t) { t.style.opacity = '0'; });
 			var io = new IntersectionObserver(function (entries) {
 				var e = entries[0];
 				if (!e.isIntersecting) {
-					if (e.boundingClientRect.bottom < 0) { io.disconnect(); window.gsap.set(tiles, { clearProps: 'opacity,transform' }); } // jumped past: show it, no animation
+					if (e.boundingClientRect.bottom < 0) { io.disconnect(); show(); } // jumped past: show it, no animation
 					return;
 				}
 				io.disconnect();
-				window.gsap.to(tiles, { opacity: 1, y: 0, duration: 0.45, ease: 'power2.out', stagger: 0.06, clearProps: 'opacity,transform' });
+				show();
+				tiles.forEach(function (t, i) { // was GSAP: 0.45 s, power2.out, 0.06 s stagger
+					t.animate([{ opacity: 0, transform: 'translateY(16px)' }, { opacity: 1, transform: 'none' }], { duration: 450, delay: i * 60, easing: 'cubic-bezier(.25, .46, .45, .94)', fill: 'backwards' });
+				});
 			}, { rootMargin: '0px 0px -10% 0px' });
 			io.observe(grid);
-			window.addEventListener('beforeprint', function () { io.disconnect(); window.gsap.set(tiles, { clearProps: 'opacity,transform' }); });
+			window.addEventListener('beforeprint', function () { io.disconnect(); tiles.forEach(function (t) { t.getAnimations().forEach(function (a) { a.cancel(); }); }); show(); });
 		});
 	});
 })();
