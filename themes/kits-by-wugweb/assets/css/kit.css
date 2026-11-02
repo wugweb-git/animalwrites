@@ -1124,20 +1124,16 @@ body { background: var(--kit-surface-page); }
 
 /* CTA buttons (owner, 9 Oct 2026): every link button carries an icon, which nudges on hover and focus: kit-primitives.css section 10. */
 
-/* Sideways swipe row, at every width (docs/design-system.md, Layout rules 12; owner, 2 Nov 2026): a list of cards is
-   one row that scrolls across instead of stacking down the page. Add kit-scroll-row to a Query Loop. Scroll snap, each
-   card snapping to its start; the row bleeds to the gutter (--kit-space-gutter) inside its section, so the page never
-   scrolls sideways. Card width --kit-row-item: phones min(82%, 22rem) (the peek width, so part of the next card shows),
-   from 768 --kit-card-min. A row of picture-left (stacked) cards sets --kit-row-item: min(82%, 22rem) at every width,
-   since a stacked card needs its picture plus a 10rem text column (--kit-body-min, docs/card-sizes.md). Top padding
-   (--kit-space-2): room for the card's hover lift and focus ring inside the scroller. aw.js makes any row that overflows
-   focusable (tabindex 0) and names it by its heading, so no tabindex in the markup. */
+/* Sideways scroll row (phones): a list of cards scrolls across instead of stacking down the screen. Add kit-scroll-row
+   to a Query Loop; from 768px the list lays out as the section decides. */
+@media (max-width: 767px) {
+	.kit-scroll-row .wp-block-post-template { display: flex !important; flex-direction: row !important; overflow-x: auto; scroll-snap-type: x mandatory; gap: var(--kit-space-4); margin: 0 calc(-1 * var(--kit-space-gutter)) !important; padding: 0 var(--kit-space-gutter) var(--kit-space-3) !important; scroll-padding-inline: var(--kit-space-gutter); max-width: none !important; width: auto !important; scrollbar-width: none; overscroll-behavior-x: contain; }
+	.kit-scroll-row .wp-block-post-template::-webkit-scrollbar { display: none; }
+	.kit-scroll-row .wp-block-post-template > li { flex: 0 0 min(82%, 22rem); scroll-snap-align: start; margin: 0 !important; }
+}
+/* --kit-row-item: a card width, phones min(82%, 22rem), from 768 --kit-card-min; still read by campaign.css (Lab rules grounds). */
 :root { --kit-row-item: min(82%, 22rem); }
 @media (min-width: 768px) { :root { --kit-row-item: var(--kit-card-min); } }
-.kit-scroll-row .wp-block-post-template { display: flex !important; flex-direction: row !important; flex-wrap: nowrap; align-items: stretch; overflow-x: auto; scroll-snap-type: x mandatory; gap: var(--kit-space-4); margin: 0 calc(-1 * var(--kit-space-gutter)) !important; padding: var(--kit-space-2) var(--kit-space-gutter) var(--kit-space-3) !important; scroll-padding-inline: var(--kit-space-gutter); max-width: none !important; width: auto !important; scrollbar-width: none; overscroll-behavior-x: contain; }
-.kit-scroll-row .wp-block-post-template::-webkit-scrollbar { display: none; }
-.kit-scroll-row .wp-block-post-template > li { flex: 0 0 var(--kit-row-item); min-width: 0; scroll-snap-align: start; margin: 0 !important; }
-@media (prefers-reduced-motion: reduce) { .kit-scroll-row .wp-block-post-template { scroll-snap-type: none; } }
 
 /* Header hides on scroll down, returns on scroll up (kit.js adds .kit-header-hidden). */
 header.wp-block-template-part:has(.kit-site-header) { transition: transform var(--kit-duration-spring) var(--kit-ease-spring); }

@@ -346,13 +346,11 @@ body { background: var(--kit-color-canvas); }
 .aw-item-share { margin: var(--kit-space-6) 0 0; }
 .aw-item-share .kit-share { border-top: 0; padding-top: 0; }
 /* 10 More: at most two groups of three cards (4:3 picture, type and date, title, one line) */
-.aw-more { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-7); margin: var(--kit-space-8) 0 0; } /* one column that never grows past the page: the swipe rows inside scroll instead of widening it (Layout rules 12) */
+.aw-more { display: grid; gap: var(--kit-space-7); margin: var(--kit-space-8) 0 0; }
 .aw-more-head { margin: 0 0 var(--kit-space-4); font-weight: var(--kit-weight-strong); } /* size: has-x-large-font-size (the Kits h4) */
-.aw-more-list { list-style: none; }
-/* More / Latest / In the press / Opportunities / Campaigns below an item, a listing or a term page (item-head.php,
-   listing-template.php, term-page.php): each group is one sideways swipe row at every width (design-system.md Layout
-   rules 12): the theme row, kit.css .kit-scroll-row, applied here because the plugin prints these lists. Cards
-   --kit-row-item wide (phones min(82%, 22rem), from 768 --kit-card-min), so part of the next card shows. */
+.aw-more-list { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-4); margin: 0; padding: 0; list-style: none; }
+@media (min-width: 768px) { .aw-more-list { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--kit-space-grid); } }
+.aw-more-list > li { margin: 0; }
 .aw-more-card { height: 100%; box-sizing: border-box; display: flex; flex-direction: column; overflow: hidden; border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); }
 .aw-more-card .aw-more-media { margin: 0; aspect-ratio: 4 / 3; border-radius: 0; }
 .aw-more-card .aw-more-media img { width: 100%; height: 100%; object-fit: cover; }
@@ -449,6 +447,8 @@ body { background: var(--kit-color-canvas); }
 .kit-item .kit-faq, .aw-hub-faq { margin-top: var(--kit-space-7); } /* FAQ: last in a Library item's content, before a listing's Sources, after a hub's list (faq.php) */
 .aw-hub-faq { margin-bottom: var(--kit-space-7); }
 .aw-term-chips { list-style: none; margin: 0; padding: 0; }
+.kit-main .aw-more-list { grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 768px) { .kit-main .aw-more-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .aw-more-all { margin: var(--kit-space-3) 0 0; }
 /* Sidebar: Claim your listing */
 .aw-side-claim { padding: var(--kit-space-5); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); }
@@ -507,12 +507,6 @@ body { background: var(--kit-color-canvas); }
 .aw-hub-group h2 { font-size: var(--kit-type-h, 1.25rem); margin: 0 0 var(--kit-space-2, .5rem); }
 .aw-hub-group ul { margin: 0 0 var(--kit-space-2, .5rem); padding-inline-start: 1.1em; }
 .aw-hub-group li { margin-block: var(--kit-space-1, .25rem); }
-/* Each group full width, one under the other (owner, 2 Nov 2026: no block over 720px; side by side, two groups of six
-   rows were 730 to 871px tall). The Resources / News / Library / Campaigns groups are one swipe row each at every
-   width (Layout rules 12; "Card swipe rows" at the end of this file). Find help (directory type links, not a card
-   list) stays a list, in two columns from 768. */
-.aw-hub { grid-template-columns: minmax(0, 1fr); }
-@media (min-width: 768px) { .aw-hub-help > ul { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--kit-space-grid); align-items: start; } }
 /* Search page: the Kits search field (kit-error-search) and result rows like the hub lists. */
 .aw-search-count { color: var(--kit-color-muted); }
 .aw-search-form.kit-error-search { margin-block: 0 var(--kit-space-collection); } /* search: field › count › results 16 apart, like the list pages */
@@ -1026,19 +1020,23 @@ body { background: var(--kit-color-canvas); }
 :is(.aw-story-title, .aw-org-name, .wp-block-post-template .wp-block-post-title) { text-wrap: pretty; }
 
 /* ======================================================================================================
-   Kits lead lists (kit-ed-news-grid, kit-ed-list) in page content: one sideways swipe row of the five stories at
-   every width (Layout rules 12; was lead + three from 1200), the theme row's settings (kit.css .kit-scroll-row):
-   scroll snap, --kit-row-item per story, the gutter bleed, room for the focus ring above.
+   Kits lead lists (kit-ed-news-grid, kit-ed-list) in page content: a sideways row on phones and tablets.
    ====================================================================================================== */
-.kit-ed-news-grid { display: flex !important; overflow-x: auto; scroll-snap-type: x mandatory; gap: var(--kit-space-4); margin-inline: calc(-1 * var(--kit-space-gutter)); padding: var(--kit-space-2) var(--kit-space-gutter) var(--kit-space-3); scroll-padding-inline: var(--kit-space-gutter); scrollbar-width: none; overscroll-behavior-x: contain; }
-.kit-ed-news-grid::-webkit-scrollbar { display: none; }
-.kit-ed-news-grid > .wp-block-query, .kit-ed-news-grid .wp-block-post-template { display: contents !important; }
-.kit-ed-news-grid .wp-block-post-template > li { display: block !important; flex: 0 0 var(--kit-row-item); scroll-snap-align: start; margin: 0 !important; padding: 0 !important; border: 0 !important; }
-.kit-ed-news-grid .wp-block-post-featured-image { margin: 0 0 var(--kit-space-3) !important; width: 100%; }
-.kit-ed-news-grid .wp-block-post-featured-image img { height: 100%; }
-.kit-ed-news-grid .wp-block-post-excerpt { display: none; }
-.kit-ed-news-grid .wp-block-post-title { font-size: var(--kit-type-h3) !important; margin: var(--kit-space-2) 0 0 !important; }
-@media (prefers-reduced-motion: reduce) { .kit-ed-news-grid { scroll-snap-type: none; } }
+
+/* What's happening: phones and tablets = one sideways row of five stories; desktop = lead + three */
+@media (max-width: 1199px) {
+	.kit-ed-news-grid { display: flex !important; overflow-x: auto; scroll-snap-type: x mandatory; gap: var(--kit-space-4); margin-inline: calc(-1 * var(--kit-space-gutter)); padding: 0 var(--kit-space-gutter) var(--kit-space-3); scrollbar-width: none; }
+	.kit-ed-news-grid::-webkit-scrollbar { display: none; }
+	.kit-ed-news-grid > .wp-block-query, .kit-ed-news-grid .wp-block-post-template { display: contents !important; }
+	.kit-ed-news-grid .wp-block-post-template > li { display: block !important; flex: 0 0 min(78%, 20rem); scroll-snap-align: start; margin: 0 !important; padding: 0 !important; border: 0 !important; }
+	.kit-ed-news-grid .wp-block-post-featured-image { margin: 0 0 var(--kit-space-3) !important; width: 100%; }
+	.kit-ed-news-grid .wp-block-post-featured-image img { height: 100%; }
+	.kit-ed-news-grid .wp-block-post-excerpt { display: none; }
+	.kit-ed-news-grid .wp-block-post-title { font-size: var(--kit-type-h3) !important; margin: var(--kit-space-2) 0 0 !important; }
+}
+@media (min-width: 1200px) {
+	.kit-ed-list .wp-block-post-template > li:nth-child(n+4) { display: none !important; }
+}
 
 /* Animal Writes 1.0: photos in one row (sideways on phones and tablets), numbers and timeline compact */
 @media (max-width: 1199px) {
@@ -1307,15 +1305,6 @@ body { background: var(--kit-color-canvas); }
    768, stacked on phones; the picture stays left of the text at every width. The whole tile is the link; hover deepens the grey. */
 .aw-about-what .aw-about-inner > .wp-block-group:not(.aw-about-how) { grid-template-columns: minmax(0, 1fr) !important; gap: var(--kit-space-4); }
 @media (min-width: 1200px) { .aw-about-what .aw-about-inner > .wp-block-group:not(.aw-about-how) { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } }
-/* From 768 (owner, 2 Nov 2026: no section over 720px; six tiles in a column ran 1737 to 2644px): the six tiles are one
-   sideways row with scroll snap, the pattern of the More rows (.aw-more-list) and Need help now (.aw-bento). Each tile
-   keeps its picture-left layout at 82% of the row (the phone --kit-carousel-item), at most the 720 column
-   (--kit-width-content); every tile's button is focusable, so the row scrolls by keyboard; the band's heading names it. */
-@media (min-width: 768px) {
-	.aw-about-what .aw-about-inner > .wp-block-group:not(.aw-about-how) { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; gap: var(--kit-space-grid); padding: var(--kit-space-1) var(--kit-space-1) var(--kit-space-3); }
-	.aw-about-what .aw-about-inner > .wp-block-group:not(.aw-about-how) > .is-style-kits-card { flex: 0 0 min(82%, var(--kit-width-content)); scroll-snap-align: start; }
-}
-@media (min-width: 768px) and (prefers-reduced-motion: reduce) { .aw-about-what .aw-about-inner > .wp-block-group:not(.aw-about-how) { scroll-snap-type: none; } }
 .aw-about-what .is-style-kits-card { position: relative; display: flex; flex-direction: column; gap: var(--kit-space-2); height: 100%; margin: 0 !important; padding: var(--kit-space-5) !important; background: var(--kit-color-canvas) !important; border: 0 !important; border-radius: var(--kit-radius-card) !important; transition: background-color var(--kit-motion-base) var(--kit-motion-ease); }
 .aw-about-what .is-style-kits-card > * { margin: 0 !important; }
 .aw-about-what .is-style-kits-card > .aw-about-pic { margin-bottom: var(--kit-space-2) !important; }
@@ -1366,33 +1355,88 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 
 /* News card lists, two layouts for section previews (owner, 18 Oct 2026). Same News card (aw_hub_item), its card and
    row states only:
-   .is-three      three cards across from 768 (no orphan in a row of three)
-   .aw-news-mosaic the Home Latest news and From the Library items: one swipe row of row cards (below, "From the Library"). */
+   .is-three      three cards across from 768; on phones the first card, then rows
+   .aw-news-mosaic four items: a lead card and three rows beside it (see below). */
 
 .aw-tasks.is-three { margin-bottom: 0; } /* a section preview: the section padding ends it */
 @media (min-width: 768px) { :is(.aw-news-list, .aw-tasks).is-three { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); } } /* News or Resources cards, three across (no orphan in a row of three) */
-/* Guides on Home (owner, 2 Nov 2026, Layout rules 12: card lists are one swipe row at every width; was three across from
-   a 912px container and compact rows below it): the three block-md cards in the theme row (kit-scroll-row on the
-   pattern's Query, kit.css), --kit-row-item wide (phones min(82%, 22rem), from 768 --kit-card-min). Meta row: the date,
-   read time and the Guide badge (no topic chip); title at the theme H3 (Layout rules 9); a one-line summary. Pictures
-   4:3 on phones, the placard shape from 768 (--kit-placard-ratio, 16:9): a card about 360px tall at 288px wide, so
-   the section stays under 720 (Layout rules 5); on a 375 phone about 430px (4:3, 307px wide). */
+/* Guides on Home (owner, 1 Nov 2026): no sideways row, no 2 + 1 orphan. The list is a size container, so the layout
+   follows the room it has, not the screen: three equal block-md cards in one row once three cards of 18rem
+   (--kit-card-min) and the two 24px gaps fit (57rem = 912px: 1000 up, so 1200 and 1440 too); the cards in the row are
+   one height (the grid stretches the card, its content keeps its natural height: title 3 lines, summary 2). Narrower
+   (phones and 768 to about 960) the three cards are one column of compact rows, the stacked-md look: thumbnail left,
+   meta and title right, no summary, as in the What's happening rows. */
+.aw-ed-learn .aw-hub-list { container: aw-guides / inline-size; }
+.aw-ed-learn .aw-tasks.is-three { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-3); }
+@container aw-guides (max-width: 911px) {
+	.aw-ed-learn .aw-tasks.is-three .kit-card { flex-direction: row; align-items: flex-start; gap: var(--kit-space-4); padding: var(--kit-space-5); }
+	.aw-ed-learn .aw-tasks.is-three .kit-card > .kit-card-media { width: var(--kit-thumb-lg); max-width: 40%; border-radius: var(--kit-radius-media); }
+	.aw-ed-learn .aw-tasks.is-three .kit-card > .kit-card-body { flex: 1 1 0; padding: 0; }
+	.aw-ed-learn .aw-tasks.is-three .kit-card-sum { display: none; }
+}
+@container aw-guides (min-width: 912px) { .aw-ed-learn .aw-tasks.is-three { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--kit-space-grid); } }
+/* Guides on Home: meta row is the date, read time and the Guide badge (no topic chip); bigger title, a one-line
+   summary, 4:3 pictures in both layouts. */
 .aw-ed-learn .kit-tag--category { display: none; }
 .aw-ed-learn .aw-tasks.is-three .kit-card .kit-card-title { font-size: var(--kit-type-h3) !important; }
 .aw-ed-learn .aw-tasks.is-three .kit-card[class*="kit-card--"] .kit-card-sum .wp-block-post-excerpt__excerpt { -webkit-line-clamp: 1; }
 .aw-ed-learn .aw-tasks.is-three .kit-card > .kit-card-media { aspect-ratio: 4 / 3; }
 .aw-ed-learn .aw-tasks.is-three .kit-card > .kit-card-media img { height: 100%; object-fit: cover; }
-@media (min-width: 768px) { .aw-ed-learn .aw-tasks.is-three .kit-card > .kit-card-media { aspect-ratio: var(--kit-placard-ratio); } }
+@container aw-guides (min-width: 912px) { .aw-ed-learn .aw-tasks.is-three .kit-card > .kit-card-media { aspect-ratio: var(--kit-placard-ratio); } } /* 16:9 (--kit-placard-ratio from 768) in the row of three: the 4:3 picture made the section 758px at 1280 (limit 720) */
+/* Mosaic (What's happening, From the Library on Home): the lead card (block-lg: picture, title, summary; hubs.php picks
+   the state by place) and the next three as stacked-md rows (thumbnail and the title clamp of every card, phones
+   included). Phones: the lead, then the rows, each at its natural height. From 768: the rows sit one under the other on
+   the right, at their natural height, with the normal gap; the lead on the left takes the same height, and its picture
+   is the part that gives (it fills what the title and summary leave, cropped like every card picture, at least 8rem), so
+   both columns end level with no empty gap and nothing stretched. The lead's text keeps its natural height (only the
+   picture grows), and from 1200, where the lead is the narrow column, its summary is cut at 2 lines so the picture stays
+   about 2:1 rather than a strip. 7fr / 5fr from 768, 5fr / 7fr from 1200. */
+.aw-news-list.aw-news-mosaic { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-3); }
 .aw-news-mosaic > li { margin: 0 !important; min-width: 0; }
 .aw-news-mosaic .kit-card--stacked-md { height: auto; }
-/* Latest news on Home (1 Nov 2026; 2 Nov 2026 one swipe row at every width, Layout rules 12): the meta row is the date
-   and the source (no place, no topic chip). Every item, the lead too, is the same picture-left row card as From the
-   Library (below: ":is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic"), in the theme row (kit-scroll-row on the pattern's Query). */
+@media (min-width: 768px) {
+	.aw-news-list.aw-news-mosaic { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); grid-auto-rows: auto; align-content: start; column-gap: var(--kit-space-grid); row-gap: var(--kit-space-3); }
+	.aw-news-mosaic > li:first-child { grid-column: 1; grid-row: 1 / span 3; display: flex; }
+	.aw-news-mosaic:has(> li:nth-child(3):last-child) > li:first-child { grid-row: 1 / span 2; }
+	.aw-news-mosaic:has(> li:nth-child(2):last-child) > li:first-child { grid-row: 1; }
+	.aw-news-mosaic > li:nth-child(n+2) { grid-column: 2; align-self: start; }
+	.aw-news-mosaic > li:first-child > .kit-card { flex: 1 1 auto; height: auto; }
+	.aw-news-mosaic > li:first-child > .kit-card > .kit-card-body { flex: none; }
+	.aw-news-mosaic > li:first-child .kit-card-media { position: relative; flex: 1 1 0; min-height: 8rem; aspect-ratio: auto; margin: 0; }
+	.aw-news-mosaic > li:first-child .kit-card-media img { position: absolute; inset: 0; }
+}
+@media (min-width: 1200px) {
+	.aw-news-list.aw-news-mosaic { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); }
+	.aw-news-mosaic > li:first-child .kit-card.kit-card--block-lg .kit-card-sum .wp-block-post-excerpt__excerpt { -webkit-line-clamp: 2; }
+}
+/* Latest news on Home only (1 Nov 2026): the meta row is the date and the source (no place, no topic chip); the rows have
+   a bigger title and a 4:3 thumbnail. 768 to 1199: two equal columns and the small thumbnail, so date and source stay
+   on one line. From 1200: a 10rem thumbnail, so the three rows are about as tall as a lead card with a 4:3 picture. */
 .aw-ed-news .kit-meta-row .kit-meta-item:not(.aw-date), .aw-ed-news .kit-tag--category { display: none; }
+.aw-ed-news .aw-news-mosaic .kit-card--stacked-md .kit-card-title { font-size: var(--kit-type-h3) !important; }
+.aw-ed-news .aw-news-mosaic .kit-card--stacked-md > .kit-card-media { aspect-ratio: 4 / 3; }
+.aw-ed-news .aw-news-mosaic .kit-card--stacked-md > .kit-card-media img { height: 100%; object-fit: cover; }
+@media (min-width: 768px) and (max-width: 1199px) {
+	.aw-ed-news .aw-news-list.aw-news-mosaic { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+	.aw-ed-news .aw-news-mosaic .kit-card--stacked-md > .kit-card-media { width: var(--kit-thumb-md) !important; }
+}
+@media (min-width: 1200px) { .aw-ed-news .aw-news-mosaic .kit-card--stacked-md > .kit-card-media { width: 10rem !important; } }
+/* Phones (owner, 2 Nov 2026: each Home section one screen): the lead is a row like the other two (112px 4:3 picture,
+   date and source, H3 title, no summary); the section went from 1329px (four items, block lead) to 829px. */
+@media (max-width: 767px) {
+	.aw-ed-news .aw-news-mosaic > li > .kit-card { gap: var(--kit-space-5); }
+	.aw-ed-news .aw-news-mosaic > li:first-child > .kit-card { flex-direction: row; align-items: flex-start; }
+	.aw-ed-news .aw-news-mosaic > li:first-child > .kit-card[class*="kit-card--block"] { gap: 0; } /* a block card: no card padding, its body padded 24px; the picture gets the same room */
+	.aw-ed-news .aw-news-mosaic > li:first-child > .kit-card > .kit-card-media { flex: none; width: var(--kit-thumb-lg) !important; max-width: 40%; aspect-ratio: 4 / 3; border-radius: var(--kit-radius-media); }
+	.aw-ed-news .aw-news-mosaic > li:first-child > .kit-card[class*="kit-card--block"] > .kit-card-media { margin: var(--kit-space-5) 0 var(--kit-space-5) var(--kit-space-5); }
+	.aw-ed-news .aw-news-mosaic > li:first-child > .kit-card > .kit-card-media img { height: 100%; object-fit: cover; }
+	.aw-ed-news .aw-news-mosaic > li:first-child > .kit-card > .kit-card-body { flex: 1 1 0; }
+	.aw-ed-news .aw-news-mosaic > li:first-child .kit-card-sum { display: none; }
+	.aw-ed-news .aw-news-mosaic > li:first-child .kit-card-title { font-size: var(--kit-type-h3) !important; }
+}
 
 /* Card lists (kit-card states, kit.css): the list item is only a wrapper; a one-column list (Library) keeps a gap. */
-.aw-cases:not(.aw-related-list > *):has(> li > .kit-card[class*="kit-card--"]) { display: grid !important; gap: var(--kit-space-4); border-top: 0; } /* not the Related row (a swipe row, "Card swipe rows" at the end) */
-.aw-related-list > .aw-cases { border-top: 0; }
+.aw-cases:has(> li > .kit-card[class*="kit-card--"]) { display: grid !important; gap: var(--kit-space-4); border-top: 0; }
 .aw-camp-docs-q li:has(> .kit-card) { display: block; padding: 0; border: 0; background: none; box-shadow: none; }
 .aw-camp-docs-q li:has(> .kit-card)::before { content: none; }
 .aw-camp .kit-card--stacked-sm { --kit-card-icon-color: var(--camp-mark, var(--kit-color-ink)); }
@@ -1604,20 +1648,16 @@ section.aw-camp-band.aw-ed-hero--campaign { box-sizing: border-box; min-height: 
 /* Need help now: a bento grid on the dark band. Each tile is one link (its H3's link covers the tile); phone numbers
    are tap to call. The reading order (and Tab order) is the markup order at every width: 112, injured animal, 1962,
    AWBI, report cruelty, find a vet, find an organisation. Grid rows stretch, so tiles in one row end level.
-   The section is a size container (owner, 2 Nov 2026: no section taller than 720px or one screen):
-   - narrower than 56.5rem (phones, tablets): one sideways row (the Kits sideways row, as .kit-scroll-row in kit.css:
-     min(82%, 22rem) per tile), 112 first, the next tile showing at the edge; every tile is a link, so Tab reaches
-     each one and scrolls it into view (it was one column, 1597px tall on a 375 phone, 974px at 768);
-   - from 56.5rem (four tiles of --kit-body-min text plus their --kit-space-5 padding and three --kit-space-5 gaps:
-     4 x (10rem + 3rem) + 4.5rem; 1024 and up): four columns, two rows, 112 two rows tall in the first column. */
+   Phones: one column. From 768: two columns, 112 two rows tall beside the injured-animal and 1962 tiles.
+   The section is a size container (owner, 2 Nov 2026: no section taller than 720px): from 56.5rem (four tiles of
+   --kit-body-min text plus their --kit-space-5 padding and three --kit-space-5 gaps: 4 x (10rem + 3rem) + 4.5rem;
+   1024 and up) four columns, two rows, 112 two rows tall in the first column. */
 .aw-ed-help { container: aw-help / inline-size; }
 .aw-bento { display: grid; gap: var(--kit-space-5); grid-template-columns: minmax(0, 1fr); grid-template-areas: "sos" "injured" "vet1962" "awbi" "cruelty" "vets" "orgs"; }
 .aw-bento--sos { grid-area: sos; } .aw-bento--injured { grid-area: injured; } .aw-bento--vet1962 { grid-area: vet1962; } .aw-bento--awbi { grid-area: awbi; }
 .aw-bento--cruelty { grid-area: cruelty; } .aw-bento--vets { grid-area: vets; } .aw-bento--orgs { grid-area: orgs; }
-@container aw-help (max-width: 56.49rem) {
-	.aw-bento { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: var(--kit-space-4); margin-inline: calc(-1 * var(--kit-space-gutter)); padding: var(--kit-space-2) var(--kit-space-gutter) var(--kit-space-3); scroll-padding-inline: var(--kit-space-gutter); scrollbar-width: none; overscroll-behavior-x: contain; } /* top padding: room for the focus ring and the hover lift */
-	.aw-bento::-webkit-scrollbar { display: none; }
-	.aw-bento > .aw-bento-tile { flex: 0 0 min(82%, 22rem); scroll-snap-align: start; }
+@media (min-width: 768px) {
+	.aw-bento { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-areas: "sos injured" "sos vet1962" "awbi cruelty" "vets orgs"; }
 }
 @container aw-help (min-width: 56.5rem) {
 	.aw-bento { gap: var(--kit-space-4); grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-areas: "sos injured vet1962 awbi" "sos cruelty vets orgs"; } /* 16px between tiles, so the Home help section stays within 720 (Layout rules 5) */
@@ -1697,45 +1737,43 @@ section.aw-camp-band.aw-ed-hero--campaign { box-sizing: border-box; min-height: 
 	.aw-findhelp-actions .kit-btn { flex: 1 1 100%; justify-content: center; }
 }
 
-/* From the Library and Latest news on Home (owner, 2 Nov 2026: no section taller than 720px or one screen; Layout rules 12:
-   card lists are one swipe row at every width): the items, then (Library) the four type tiles.
-   - Items: the mosaic markup, every item (the lead too) as a stacked-md row card: the 112px (--kit-thumb-lg) 4:3 picture
-     left, date and source or publisher, title (theme H3, Layout rules 9); no summary. One sideways swipe row at every
-     width: the theme row (kit-scroll-row on the pattern's Query, kit.css), each card min(82%, 22rem) wide
-     (--kit-row-item for picture-left cards: the picture, a 24px gap and the 10rem text column, --kit-body-min, need
-     more than --kit-card-min). About 160px tall (24 + the title's three lines + 24); three cards (1088px) fit from 1200,
-     so the row scrolls only where it is narrower. Every card is a link, so Tab reaches each one and scrolls it into view.
-   - Tiles (Library types, navigation, not a card list): phones and 768 to 1199 the sideways row (Home on phones, above,
-     and below); from 1200 the four in one row, the icon square on top with the arrow beside it and the title and line
-     under them full width (a 4-across tile is too narrow for the icon, text and arrow side by side). */
+/* From the Library on Home: the mosaic above (What's happening's), then the four type tiles. Phones: the sideways row
+   (Home on phones, above). From 768: two by two, every tile one height, the mosaic's column gap. From 1200: four across,
+   the icon square on top with the arrow beside it and the title and line under them full width (a 4-across tile is
+   too narrow for the icon, text and arrow side by side). */
 @media (min-width: 768px) { .aw-ed-law > .kit-stack { gap: var(--kit-space-grid); grid-auto-rows: 1fr; } }
-@media (min-width: 768px) and (max-width: 1199px) {
-	.home .aw-ed-law > .kit-stack {
-		display: flex !important; flex-direction: row !important; align-items: stretch; overflow-x: auto; scroll-snap-type: x mandatory; gap: var(--kit-space-4) !important;
-		margin-inline: calc(-1 * var(--kit-space-gutter)) !important; padding: var(--kit-space-2) var(--kit-space-gutter) var(--kit-space-3) !important; scroll-padding-inline: var(--kit-space-gutter);
-		max-width: none !important; width: auto !important; scrollbar-width: none; overscroll-behavior-x: contain;
-	}
-	.home .aw-ed-law > .kit-stack::-webkit-scrollbar { display: none; }
-	.home .aw-ed-law > .kit-stack > .kit-tile { flex: 0 0 min(88%, 24rem); scroll-snap-align: start; margin: 0 !important; }
-}
 @media (min-width: 1200px) {
 	.aw-ed-law > .kit-stack { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
 	.aw-ed-law > .kit-stack > .kit-tile { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "ico arrow" "title title" "desc desc"; grid-template-rows: auto auto 1fr; }
 	.aw-ed-law > .kit-stack > .kit-tile::before { justify-self: start; margin-bottom: var(--kit-space-3); }
 	.aw-ed-law > .kit-stack > .kit-tile::after { align-self: start; margin-top: 0.625rem; } /* centred on the icon square */
 }
-:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic { --kit-row-item: min(82%, 22rem); }
+/* From the Library items (1 Nov 2026): three, the lead and two more. Meta row is the date and the publisher (no place, no
+   type chip); the two rows have a bigger title and a 4:3 picture. 768 to 1199: the lead runs full width (picture left,
+   4:3, text right) with the two rows side by side under it. From 1200: lead 5fr on the left, the two rows 7fr on the
+   right, each row half the lead's height with a 45% wide 4:3 picture, so both columns end level. */
 .aw-ed-law .aw-news-mosaic :is(.kit-meta-row .kit-meta-item:not(.aw-date), .kit-tag:not(.kit-tag--source)) { display: none; }
-:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li { display: flex; }
-:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li > .kit-card { flex: 1 1 auto; flex-direction: row; align-items: flex-start; gap: var(--kit-space-5); }
-:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li > .kit-card > .kit-card-media { position: static; flex: none; width: var(--kit-thumb-lg) !important; max-width: 40%; aspect-ratio: 4 / 3; min-height: 0; margin: 0; border-radius: var(--kit-radius-media); }
-:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li > .kit-card > .kit-card-media img { position: static; height: 100%; object-fit: cover; }
-:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li > .kit-card > .kit-card-body { flex: 1 1 0; align-self: auto; }
-/* The lead is a block card (no card padding, its body padded 24px): its picture gets the same 24px room, so it lines up with the stacked rows */
-:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li > .kit-card[class*="kit-card--block"] { gap: 0; }
-:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li > .kit-card[class*="kit-card--block"] > .kit-card-media { margin: var(--kit-space-5) 0 var(--kit-space-5) var(--kit-space-5); }
-:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic .kit-card-sum { display: none; }
-:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic .kit-card-title { font-size: var(--kit-type-h3) !important; }
+.aw-ed-law .aw-news-mosaic .kit-card--stacked-md .kit-card-title { font-size: var(--kit-type-h3) !important; }
+.aw-ed-law .aw-news-mosaic .kit-card--stacked-md > .kit-card-media { aspect-ratio: 4 / 3; }
+.aw-ed-law .aw-news-mosaic .kit-card--stacked-md > .kit-card-media img { height: 100%; object-fit: cover; }
+@media (min-width: 768px) {
+	.aw-ed-law .aw-news-mosaic > li:nth-child(n+2) { align-self: stretch; display: flex; }
+	.aw-ed-law .aw-news-mosaic > li:nth-child(n+2) > .kit-card { flex: 1 1 auto; align-items: center; }
+}
+@media (min-width: 768px) and (max-width: 1199px) {
+	.aw-ed-law .aw-news-list.aw-news-mosaic { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+	.aw-ed-law .aw-news-mosaic > li:first-child { grid-column: 1 / -1 !important; grid-row: 1 !important; } /* over the shared three-item rule (:has, higher specificity) */
+	.aw-ed-law .aw-news-mosaic > li:nth-child(2) { grid-column: 1; grid-row: 2; }
+	.aw-ed-law .aw-news-mosaic > li:nth-child(3) { grid-column: 2; grid-row: 2; }
+	.aw-ed-law .aw-news-mosaic > li:first-child > .kit-card { flex-direction: row; }
+	.aw-ed-law .aw-news-mosaic > li:first-child .kit-card-media { position: static; flex: 0 0 45%; aspect-ratio: 4 / 3; min-height: 0; }
+	.aw-ed-law .aw-news-mosaic > li:first-child .kit-card-media img { position: static; height: 100%; object-fit: cover; }
+	.aw-ed-law .aw-news-mosaic > li:first-child > .kit-card > .kit-card-body { flex: 1 1 0; align-self: center; }
+}
+@media (min-width: 1200px) {
+	.aw-ed-law .aw-news-list.aw-news-mosaic { grid-template-rows: 1fr 1fr; }
+	.aw-ed-law .aw-news-mosaic .kit-card--stacked-md > .kit-card-media { width: 45% !important; max-width: 45%; }
+}
 
 /* India Writes for Its Community Dogs on Home (pattern aw1-story; the band's own rules are in campaign-record.css).
    768 to 1199 (owner, 2 Nov 2026: no section taller than 720px; stacked it was 873px at 1024 and 819 at 768): the
@@ -1770,36 +1808,3 @@ section.aw-camp-band.aw-ed-hero--campaign { box-sizing: border-box; min-height: 
 .kit-hero .aw-festive-ico .kit-ico { --kit-ico-size: var(--kit-size-check); }
 @media (min-width: 768px) { .kit-hero .aw-festive-tips { grid-template-columns: repeat(2, max-content); column-gap: var(--kit-space-6); } } /* in a page hero the tips sit two across, so the hero keeps its height */
 
-/* ======================================================================================================
-   Card swipe rows (docs/design-system.md, Layout rules 12; owner, 2 Nov 2026: "sideways scroller for news, library etc
-   media content and stuff"): the theme row (kit.css .kit-scroll-row) on the card lists the plugin prints, where there
-   is no Query block to give the class: the More / Latest / In the press / Opportunities / Campaigns groups under items,
-   listings and term pages (.aw-more-list), the Related groups at the end of an item (not Directory rows, .aw-orgs: a
-   separate component), a category hub's Resources / News / Library / Campaigns groups and the Campaigns hub's "More
-   campaigns". The same settings as the theme row: one row at every width, scroll snap (x mandatory, each card snapping
-   to its start; off under prefers-reduced-motion), cards --kit-row-item wide (phones min(82%, 22rem), from 768
-   --kit-card-min, so part of the next card shows; rows of picture-left cards min(82%, 22rem)), a --kit-space-4 gap,
-   the gutter bleed (--kit-space-gutter) inside the section, --kit-space-2 above for the hover lift and focus ring.
-   aw.js makes a row that overflows focusable and names it by its heading.
-   Not swipe rows: a hub's main paginated results (/news/, /resources/, /library/, Directory, and the press hub's list
-   of every clipping), an article's body and the Home campaign row (Layout rules 7).
-   ====================================================================================================== */
-:is(.aw-more-group > .aw-more-list, .aw-related-list > .wp-block-post-template:not(.aw-orgs), .aw-hub-group:not(.aw-hub-help) > ul, .aw-camp-more > .wp-block-post-template) {
-	display: flex; flex-direction: row; flex-wrap: nowrap; align-items: stretch; overflow-x: auto; scroll-snap-type: x mandatory; gap: var(--kit-space-4);
-	margin: 0 calc(-1 * var(--kit-space-gutter)); padding: var(--kit-space-2) var(--kit-space-gutter) var(--kit-space-3); scroll-padding-inline: var(--kit-space-gutter);
-	max-width: none; list-style: none; scrollbar-width: none; overscroll-behavior-x: contain;
-}
-:is(.aw-more-group > .aw-more-list, .aw-related-list > .wp-block-post-template:not(.aw-orgs), .aw-hub-group:not(.aw-hub-help) > ul, .aw-camp-more > .wp-block-post-template)::-webkit-scrollbar { display: none; }
-:is(.aw-more-group > .aw-more-list, .aw-related-list > .wp-block-post-template:not(.aw-orgs), .aw-hub-group:not(.aw-hub-help) > ul, .aw-camp-more > .wp-block-post-template) > li { flex: 0 0 var(--kit-row-item); min-width: 0; max-width: none; margin: 0; scroll-snap-align: start; }
-.aw-related-list > .aw-cases { --kit-row-item: min(82%, 22rem); } /* Library cards are picture-left (stacked-lg): the picture, the gap and the 10rem text column (--kit-body-min) */
-@media (prefers-reduced-motion: reduce) {
-	:is(.aw-more-group > .aw-more-list, .aw-related-list > .wp-block-post-template:not(.aw-orgs), .aw-hub-group:not(.aw-hub-help) > ul, .aw-camp-more > .wp-block-post-template) { scroll-snap-type: none; }
-}
-/* Beside the sidebar (item pages from 1200) the row ends at the text column, so it never runs under the sidebar */
-@media (min-width: 1200px) {
-	.kit-with-sidebar:has(> .kit-sidebar > *) > .kit-main :is(.aw-more-group > .aw-more-list, .aw-related-list > .wp-block-post-template:not(.aw-orgs)) { margin-inline-end: 0; padding-inline-end: 0; }
-}
-/* A category hub's items are links with a meta row, not cards: in the row each one is a card box (the card tokens:
-   line border, card radius, raised surface, 24px padding, --kit-space-5), the meta row above its title. */
-.aw-hub-group:not(.aw-hub-help) > ul > li { display: flex; flex-direction: column; gap: var(--kit-space-2); padding: var(--kit-space-5); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); }
-.aw-hub-group:not(.aw-hub-help) > ul > li > * { margin: 0; }
