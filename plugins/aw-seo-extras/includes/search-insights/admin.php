@@ -124,6 +124,7 @@ function aw_si_load(): void {
 		add_meta_box( 'aw-si-ai', __( 'AI referrals (GA4, 28 days)', 'aw-seo-extras' ), 'aw_si_box_ai', $screen, 'normal' );
 		add_meta_box( 'aw-si-referrers', __( 'Top referrers (GA4)', 'aw-seo-extras' ), 'aw_si_box_referrers', $screen, 'normal' );
 		add_meta_box( 'aw-si-nf', __( 'Not found (404s, GA4, 28 days)', 'aw-seo-extras' ), 'aw_si_box_nf', $screen, 'normal' );
+		add_meta_box( 'aw-si-clarity', __( 'Clarity (28 days)', 'aw-seo-extras' ), 'aw_si_box_clarity', $screen, 'normal' );
 		add_meta_box( 'aw-si-site-search', __( 'Searches on our site (28 days, minimum)', 'aw-seo-extras' ), 'aw_si_box_site_search', $screen, 'normal' );
 		add_meta_box( 'aw-si-gaps', __( 'Content gaps (keyword map gaps and P2)', 'aw-seo-extras' ), 'aw_si_box_gaps', $screen, 'normal' );
 		add_meta_box( 'aw-si-crawl', __( 'Crawler access (weekly)', 'aw-seo-extras' ), 'aw_si_box_crawl', $screen, 'normal' );
@@ -561,6 +562,157 @@ function aw_si_box_site_search(): void {
 	echo '</tbody></table>';
 	echo '<p class="description">' . esc_html__( 'Minimum counts: a search answered from the page cache never reaches WordPress, so it is not counted (mostly Directory searches; WordPress search results are normally not cached). Daily counts per term only: no IP address, user or session is stored, and terms that look like emails or phone numbers are dropped.', 'aw-seo-extras' ) . '</p>';
 }
+
+/**
+ * A Clarity share as "12.5%", or a dash when missing.
+ *
+ * @param mixed $v Per cent.
+ */
+function aw_si_clarity_pct( $v ): string {
+	return is_numeric( $v ) ? number_format_i18n( (float) $v, 1 ) . '%' : '–';
+}
+
+/**
+ * A Clarity time as "34 s", or a dash when missing.
+ *
+ * @param mixed $v Seconds.
+ */
+function aw_si_clarity_secs( $v ): string {
+	/* translators: %s: seconds. */
+	return is_numeric( $v ) ? sprintf( __( '%s s', 'aw-seo-extras' ), number_format_i18n( round( (float) $v ) ) ) : '–';
+}
+
+/**
+ * Pages per session with one decimal, or a dash when missing.
+ *
+ * @param mixed $v Pages per session.
+ */
+function aw_si_clarity_num( $v ): string {
+	return is_numeric( $v ) ? number_format_i18n( (float) $v, 1 ) : '–';
+}
+
+/**
+ * Sessions by device as "Mobile / PC / Tablet" figures, e.g. "120 / 80 / 3".
+ *
+ * @param mixed $devices device => sessions.
+ */
+function aw_si_clarity_devices_txt( $devices ): string {
+	$by = array_change_key_case( (array) $devices, CASE_LOWER );
+	$n  = array();
+	foreach ( array( 'mobile', 'pc', 'tablet' ) as $d ) {
+		$n[] = number_format_i18n( (int) ( $by[ $d ] ?? 0 ) );
+	}
+	return implode( ' / ', $n );
+}
+
+/** The line shown when Clarity has nothing to show: no token, or no data yet. */
+function aw_si_clarity_empty_line(): string {
+	if ( ! function_exists( 'aw_si_clarity_on' ) || ! aw_si_clarity_on() ) {
+		return __( 'No Clarity token: add it under Animal Writes → Keys.', 'aw-seo-extras' );
+	}
+	return __( 'No Clarity data yet; it imports daily at 06:30.', 'aw-seo-extras' );
+}
+
+/** Overview box: Clarity totals for 28 days (clarity.php), linked to the Clarity tab. */
+function aw_si_box_clarity(): void {
+	$s = function_exists( 'aw_si_clarity_summary' ) && function_exists( 'aw_si_clarity_on' ) && aw_si_clarity_on() ? (array) aw_si_clarity_summary( 28 ) : array();
+	if ( empty( $s['days'] ) ) {
+		echo '<p>' . esc_html( aw_si_clarity_empty_line() ) . '</p>';
+		return;
+	}
+	$flagged = '<a href="' . esc_url( add_query_arg( 'view', 'flagged', aw_si_url( 'clarity' ) ) ) . '">' . esc_html( number_format_i18n( (int) ( $s['flagged'] ?? 0 ) ) ) . '</a>';
+	$rows    = array(
+		__( 'Sessions', 'aw-seo-extras' )                      => esc_html( number_format_i18n( (int) ( $s['sessions'] ?? 0 ) ) ),
+		__( 'Pages per session', 'aw-seo-extras' )             => esc_html( aw_si_clarity_num( $s['pps'] ?? null ) ),
+		__( 'Scroll depth', 'aw-seo-extras' )                  => esc_html( aw_si_clarity_pct( $s['scroll'] ?? null ) ),
+		__( 'Active time', 'aw-seo-extras' )                   => esc_html( aw_si_clarity_secs( $s['active'] ?? null ) ),
+		__( 'Dead clicks', 'aw-seo-extras' )                   => esc_html( aw_si_clarity_pct( $s['dead'] ?? null ) ),
+		__( 'Rage clicks', 'aw-seo-extras' )                   => esc_html( aw_si_clarity_pct( $s['rage'] ?? null ) ),
+		__( 'Quick backs', 'aw-seo-extras' )                   => esc_html( aw_si_clarity_pct( $s['quickback'] ?? null ) ),
+		__( 'Excessive scrolling', 'aw-seo-extras' )           => esc_html( aw_si_clarity_pct( $s['xscroll'] ?? null ) ),
+		__( 'Script errors', 'aw-seo-extras' )                 => esc_html( aw_si_clarity_pct( $s['jserror'] ?? null ) ),
+		__( 'Pages flagged (3+ days)', 'aw-seo-extras' )       => $flagged,
+		__( 'Mobile / PC / Tablet sessions', 'aw-seo-extras' ) => esc_html( aw_si_clarity_devices_txt( $s['devices'] ?? array() ) ),
+	);
+	echo '<table class="widefat striped"><tbody>';
+	foreach ( $rows as $label => $value ) {
+		echo '<tr><th scope="row">' . esc_html( $label ) . '</th><td>' . $value . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above.
+	}
+	echo '</tbody></table>';
+	$days = (int) $s['days'];
+	/* translators: %s: number of days. */
+	$line = sprintf( _n( '%s day of data', '%s days of data', $days, 'aw-seo-extras' ), number_format_i18n( $days ) );
+	if ( ! empty( $s['last'] ) ) {
+		/* translators: %s: date. */
+		$line .= ' · ' . sprintf( __( 'last day %s', 'aw-seo-extras' ), mysql2date( 'j M Y', (string) $s['last'] ) );
+	}
+	echo '<p class="description">' . esc_html( $line ) . '</p>';
+	echo '<p><a class="button" href="' . esc_url( aw_si_url( 'clarity' ) ) . '">' . esc_html__( 'Clarity', 'aw-seo-extras' ) . '</a></p>';
+}
+
+// Clarity tab: after Pages when Pages is there, else at the end.
+add_filter(
+	'aw_si_tabs',
+	function ( $tabs ) {
+		$tabs = (array) $tabs;
+		$out  = array();
+		foreach ( $tabs as $key => $label ) {
+			$out[ $key ] = $label;
+			if ( 'pages' === $key ) {
+				$out['clarity'] = __( 'Clarity', 'aw-seo-extras' );
+			}
+		}
+		if ( ! isset( $out['clarity'] ) ) {
+			$out['clarity'] = __( 'Clarity', 'aw-seo-extras' );
+		}
+		return $out;
+	},
+	20
+);
+
+add_filter(
+	'set_screen_option_aw_si_clarity_per_page',
+	function ( $keep, $option, $value ) {
+		return max( 10, min( 500, (int) $value ) );
+	},
+	10,
+	3
+);
+
+add_action(
+	'aw_si_load_tab_clarity',
+	function () {
+		add_screen_option(
+			'per_page',
+			array(
+				'label'   => __( 'Pages per page', 'aw-seo-extras' ),
+				'default' => 50,
+				'option'  => 'aw_si_clarity_per_page',
+			)
+		);
+		require_once __DIR__ . '/class-aw-si-clarity-table.php';
+	}
+);
+
+add_action(
+	'aw_si_tab_clarity',
+	function () {
+		if ( ! current_user_can( aw_si_cap() ) || ! class_exists( 'AW_SI_Clarity_Table' ) ) {
+			return;
+		}
+		$table = new AW_SI_Clarity_Table();
+		$table->prepare_items();
+		$table->views();
+		echo '<form method="get"><input type="hidden" name="page" value="' . esc_attr( AW_SI_SLUG ) . '"><input type="hidden" name="tab" value="clarity">';
+		$view = isset( $_GET['view'] ) ? sanitize_key( wp_unslash( $_GET['view'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- navigation only.
+		if ( $view ) {
+			echo '<input type="hidden" name="view" value="' . esc_attr( $view ) . '">';
+		}
+		$table->search_box( __( 'Search pages', 'aw-seo-extras' ), 'aw-si-clarity' );
+		$table->display();
+		echo '</form>';
+	}
+);
 
 /** Settings tab: schedule, seed, run now, delete data. */
 function aw_si_settings_tab(): void {
