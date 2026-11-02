@@ -209,6 +209,7 @@ These live in WordPress: **Animal Writes → Dates** (month calendar, add and re
 
 - **17 Nov 2026**: Directory thin-page indexing re-check (10:00) and the 8 tracked keyword positions (11:00); both are scheduled tasks.
 - **25 Nov 2026**: Search Insights thresholds review (Wikipedia 2×, GDELT 3×).
+- **29 Nov 2026**: help-now guides 28-day checkpoint: 1962 (13798), who-to-call (9031), injured-animal (126) and dog-bite (17307) against the 28 days to 31 Oct (figures in Done, 1 Nov).
 
 ## Notes to keep
 - **FluentCRM: everyone on the Newsletter list (owner, 31 Oct 2026):** Contact, Volunteer sign-up and Claim senders are all on the Newsletter list; "Email me updates" is only recorded as 1/0; no form changes a contact's status (owner, 1 Nov 2026). Remove my data never reaches FluentCRM; the Campaign form is unchanged. No automations on live; any future FluentCRM automation or campaign must target subscribed contacts only.
