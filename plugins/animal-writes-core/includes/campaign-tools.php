@@ -914,15 +914,20 @@ function aw_block_current_campaign( $a = array(), $id = 0 ) {
  */
 add_filter(
 	'query_loop_block_query_vars',
-	function ( $q ) {
+	function ( $q, $block = null ) {
+		// The post type the block asks for: WordPress drops a type with no public pages (aw_press) from the query vars,
+		// and systems.php (priority 10) only puts it back, so the block's own setting is read here (after it, at 15).
+		$type = $block instanceof WP_Block ? (string) ( $block->context['query']['postType'] ?? '' ) : (string) ( $q['post_type'] ?? '' );
 		// The lab rules page only: the community dogs page keeps its own Media coverage list of articles (31 Oct 2026).
-		if ( ! is_singular( 'aw_campaign' ) || 'aw_press' !== ( $q['post_type'] ?? '' ) || 'lab-animals-rules-2026' !== get_post_field( 'post_name', get_queried_object_id() ) ) {
+		if ( ! is_singular( 'aw_campaign' ) || 'aw_press' !== $type || 'lab-animals-rules-2026' !== get_post_field( 'post_name', get_queried_object_id() ) ) {
 			return $q;
 		}
 		$q['meta_query']   = isset( $q['meta_query'] ) && is_array( $q['meta_query'] ) ? $q['meta_query'] : array(); // phpcs:ignore WordPress.DB.SlowDBQuery
 		$q['meta_query'][] = array( 'key' => 'aw_press_group', 'value' => array( 'social', 'videos' ), 'compare' => 'IN' );
 		return $q;
-	}
+	},
+	15,
+	2
 );
 
 /*

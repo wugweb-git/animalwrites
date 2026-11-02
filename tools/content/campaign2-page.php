@@ -477,7 +477,7 @@ $post     = array(
 	'post_type'    => 'aw_campaign',
 	'post_name'    => 'lab-animals-rules-2026',
 	'post_title'   => 'Object to the draft lab animal rules 2026',
-	'post_excerpt' => 'India\'s draft rules on animal experiments would let labs approve most experiments themselves. Read what the rules say and send your objection to CCSEA by 5 November 2026.',
+	'post_excerpt' => 'India\'s draft rules on animal experiments would let labs approve most experiments themselves. Read what the rules say and send your objection to CCSEA by 5 Nov 2026.',
 	'post_content' => $content,
 	'post_status'  => $existing ? $existing->post_status : 'draft',
 );
@@ -501,7 +501,7 @@ foreach ( array(
 	'aw_campaign_doc'            => (int) $doc->ID,
 	'rank_math_title'            => 'Object to the Draft Lab Animal Rules 2026 – Animal Writes',
 	'rank_math_description'      => 'India\'s draft lab animal rules would let labs approve most animal experiments themselves. Read what they say and send your objection by 5 November.',
-	'rank_math_focus_keyword'    => 'draft lab animal rules 2026,ccsea draft rules,objection to draft rules',
+	'rank_math_focus_keyword'    => 'draft lab animal rules 2026,ccsea draft rules,objection to draft rules,gsr 864e,cpcsea-mef@gov.in,g.s.r. 864(e)', // as on live (2 Nov 2026)
 	'rank_math_primary_category' => (string) get_term_by( 'slug', 'campaigns-civic-action', 'category' )->term_id,
 ) as $k => $v ) {
 	update_post_meta( $id, $k, $v );
