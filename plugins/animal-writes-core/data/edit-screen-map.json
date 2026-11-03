@@ -738,6 +738,20 @@
 			"runtime": "map-only",
 			"notes": "Counts and the last 5 messages per mailbox; stores nothing. Users with the Mailweb capability only."
 		},
+		"aw_core_dashboard": {
+			"title": "Animal Writes",
+			"source": "Animal Writes core",
+			"plugin": "Animal Writes core",
+			"purpose": "Core Dashboard box",
+			"file": "core/dashboard-core.php:59",
+			"screen": "admin",
+			"page": "Dashboard (widgets)",
+			"types": [
+				"dashboard"
+			],
+			"runtime": "map-only",
+			"notes": "One box for the core plugin: Campaign letters, Form entries, Dates, Activity and Scheduled tasks are its sections (each keeps its own permission check); stores nothing."
+		},
 		"aw_activity": {
 			"title": "Activity",
 			"source": "Animal Writes core",
@@ -751,6 +765,20 @@
 			],
 			"runtime": "map-only",
 			"notes": "Reads post counts and the newest items; stores nothing. Replaces WordPress's Activity box."
+		},
+		"aw_sourcing_dashboard": {
+			"title": "Sourcing",
+			"source": "AW Sourcing",
+			"plugin": "AW Sourcing",
+			"purpose": "Sourcing Dashboard box",
+			"file": "src/dashboard.php:84",
+			"screen": "admin",
+			"page": "Dashboard (widgets)",
+			"types": [
+				"dashboard"
+			],
+			"runtime": "map-only",
+			"notes": "Reads worker reports, the To review count and AI key status; stores nothing."
 		},
 		"aw_form_entries": {
 			"title": "Form entries",
