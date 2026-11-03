@@ -35,9 +35,16 @@ function mailweb_overview_box( $key ) {
 		return null;
 	}
 	$unread = 0;
+	$total  = null;
 	foreach ( $folders as $f ) {
 		if ( 'INBOX' === ( $f['path'] ?? '' ) ) {
 			$unread = (int) ( $f['unreadCount'] ?? 0 );
+			foreach ( array( 'messageCount', 'messages', 'total' ) as $k ) { // the Inbox size, when the API gives it
+				if ( isset( $f[ $k ] ) && is_numeric( $f[ $k ] ) ) {
+					$total = (int) $f[ $k ];
+					break;
+				}
+			}
 		}
 	}
 	$list = mailweb_api( '/api/v1/mailboxes/' . rawurlencode( $box ) . '/folders/INBOX/messages?perPage=10&sort=-date&page=1' );
@@ -57,7 +64,7 @@ function mailweb_overview_box( $key ) {
 			'unseen'  => ! empty( $m['unseen'] ),
 		);
 	}
-	$out = array( 'unread' => $unread, 'messages' => $msgs );
+	$out = array( 'unread' => $unread, 'total' => $total, 'messages' => $msgs );
 	set_transient( 'mailweb_overview_' . $key, $out, MAILWEB_CACHE );
 	return $out;
 }
@@ -98,6 +105,19 @@ function mailweb_overview_render( $max, $compact = false ) {
 		return;
 	}
 	$link = '<a href="' . esc_url( admin_url( 'admin.php?page=mailweb' ) ) . '">' . esc_html__( 'Open Mail', 'mailweb' ) . '</a>';
+	if ( $compact && function_exists( 'kits_dash_cards' ) ) { // Dashboard cards (owner, 3 Nov 2026): unread per mailbox
+		$cards = array();
+		foreach ( mailweb_all_boxes() as $key => $addr ) {
+			$box     = mailweb_overview_box( $key ); // cached: the same call the list below makes
+			$has_all = $box && isset( $box['total'] ) && null !== $box['total'];
+			$cards[] = array(
+				/* translators: %s: mailbox address. */
+				'label' => sprintf( $has_all ? __( '%s: unread / in Inbox', 'mailweb' ) : __( '%s unread', 'mailweb' ), $addr ),
+				'value' => $box ? number_format_i18n( (int) ( $box['unread'] ?? 0 ) ) . ( $has_all ? ' / ' . number_format_i18n( (int) $box['total'] ) : '' ) : __( 'not available', 'mailweb' ),
+			);
+		}
+		echo kits_dash_cards( $cards ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside.
+	}
 	foreach ( mailweb_all_boxes() as $key => $addr ) {
 		$box   = mailweb_overview_box( $key );
 		$alias = mailweb_aliases_of( $addr );

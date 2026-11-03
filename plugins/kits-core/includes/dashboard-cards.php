@@ -78,7 +78,7 @@ add_action(
 <style id="aw-dash-cards">
 .aw-dash-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,9em),1fr));gap:8px;margin:0 0 12px;padding:0;list-style:none}
 .aw-dash-card{min-width:0;margin:0;padding:12px;border:1px solid #c3c4c7;border-radius:4px;background:#fff;display:flex;flex-direction:column;gap:2px}
-.aw-dash-label{color:#50575e;font-size:13px}
+.aw-dash-label{color:#50575e;font-size:13px;overflow-wrap:anywhere}
 .aw-dash-value{color:#1d2327;font-size:24px;font-weight:600;line-height:1.3;overflow-wrap:anywhere}
 .aw-dash-delta{font-size:13px}
 .aw-dash-delta--up{color:#007017}
