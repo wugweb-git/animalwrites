@@ -21,7 +21,7 @@
 
 /* Metrics: value, label, then the source and "as of" */
 .aw-camp-metric { display: flex; flex-direction: column; gap: var(--kit-space-1); }
-.aw-camp-metric-value { font-size: var(--kit-type-h1); font-weight: 800; letter-spacing: var(--kit-tracking-display); line-height: var(--kit-leading-display); }
+.aw-camp-metric-value { font-size: var(--kit-type-h1); font-weight: var(--kit-weight-bold); letter-spacing: var(--kit-tracking-display); line-height: var(--kit-leading-display); }
 .aw-camp-metric-label { font-weight: var(--kit-weight-strong); }
 .aw-camp-metric-note { color: var(--camp-meta, var(--kit-color-muted)); font-size: var(--kit-type-sm); }
 .aw-camp-hero .aw-camp-metric-note { color: var(--camp-on-mark); }
@@ -164,7 +164,7 @@
 .aw-camp.aw-camp--community-dogs #why-it-matters .aw-card:nth-child(4) :is(h3, p, li, strong) { color: var(--kit-color-on-ink); }
 .aw-camp.aw-camp--community-dogs #why-it-matters .aw-card:nth-child(4)::before { background: var(--camp-primary); }
 .aw-camp.aw-camp--community-dogs #why-it-matters .aw-card:nth-child(4) > p:first-child { margin-bottom: var(--kit-space-1) !important; color: var(--camp-primary); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-bold); }
-.aw-camp.aw-camp--community-dogs #why-it-matters .aw-card:nth-child(4) h3 { font-size: var(--kit-type-h2) !important; font-weight: 800 !important; letter-spacing: var(--kit-tracking-display); } /* the shared bento lead card size (campaign.css) */
+.aw-camp.aw-camp--community-dogs #why-it-matters .aw-card:nth-child(4) h3 { font-size: var(--kit-type-h2) !important; font-weight: var(--kit-weight-bold) !important; letter-spacing: var(--kit-tracking-display); } /* the shared bento lead card size (campaign.css) */
 .aw-camp.aw-camp--community-dogs #why-it-matters .aw-card:nth-child(4) ul { padding-left: var(--kit-space-5); }
 .aw-camp.aw-camp--community-dogs #why-it-matters .aw-card:nth-child(4) li::marker { color: var(--camp-primary); }
 .aw-camp.aw-camp--community-dogs #why-it-matters .aw-card:nth-child(4) > p:last-child { padding: var(--kit-space-4); border-radius: var(--kit-radius-control); background: color-mix(in srgb, var(--kit-color-on-ink) 8%, transparent); }
@@ -322,8 +322,8 @@
 /* Timeline: a rail with a small orange stop per date; the day of posting is the filled stop. A 2 x 2 on phones, a row of
    four from 768 (one screen on a phone, layout only: the words are fixed). */
 .aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: var(--kit-space-4); }
-.aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates > * { position: relative; margin: 0 !important; padding: var(--kit-space-3) var(--kit-space-3) 0 0; border-top: 1px solid var(--dg-line); }
-.aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates > *::before { content: ""; position: absolute; left: 0; top: -0.3125rem; width: 0.625rem; height: 0.625rem; box-sizing: border-box; border-radius: 50%; border: 2px solid var(--camp-primary); background: #141414; }
+.aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates > * { position: relative; margin: 0 !important; padding: var(--kit-space-3) var(--kit-space-3) 0 0; border-top: var(--kit-border-width) solid var(--dg-line); }
+.aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates > *::before { content: ""; position: absolute; left: 0; top: calc(var(--kit-space-3) / -2); width: var(--kit-space-3); height: var(--kit-space-3); box-sizing: border-box; border-radius: 50%; border: var(--kit-border-mark) solid var(--camp-primary); background: var(--kit-color-ink); }
 .aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates > .is-key::before { background: var(--camp-primary); }
 .aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates p { margin: 0 !important; }
 .aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates p:first-child { white-space: nowrap; }
