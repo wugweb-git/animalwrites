@@ -868,7 +868,7 @@ The panels, boxes and tables on the admin pages of AW Sourcing, AW SEO Plus (wit
 
 | id | widget | kind | reads | limits | file |
 |---|---|---|---|---|---|
-| ap-seo-settings | Module settings (one tab per module) | form | `option:aw_seo_settings` | Tabs: General, Titles and descriptions, Canonicals, Robots rules, Filtered lists, Schema, FAQ, Search Insights, Rank Math schema, Open Graph. Administrators only. | `seo/settings.php:421 (aw_seo_settings_page)` |
+| ap-seo-settings | Settings (seven tabs) | form | `option:aw_seo_settings` | Tabs: Modules, Titles and descriptions, Indexing, Schema and FAQ, Share images and Open Graph, Focus keywords and content analysis, AI agents. Search Insights numbers are on Search Insights → Settings. Administrators only. | `seo/settings.php:512 (aw_seo_settings_page)` |
 
 **AW SEO Plus: FAQ** (`aw-faq`)
 

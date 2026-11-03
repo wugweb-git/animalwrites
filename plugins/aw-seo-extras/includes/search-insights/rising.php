@@ -7,9 +7,7 @@
  *   GET gives the job its lists (English keywords, topics, species, watchlists, seeds); POST takes one source's rising
  *   terms and figures and records that source's run (Trends trending now, Wikipedia, GDELT daily; autocomplete and
  *   Trends related queries weekly; Trends interest monthly).
- * - In the news, on the site: daily counts of states, species and laws across the News items AW Sourcing fetched, flagged
- *   at 3× the 14-day average (daily at 23:40 IST, after the rollup). Publishers are not counted (owner, 26 Oct 2026: a
- *   publisher's count is our own feed volume, not a topic); the label says "In the news" so it is not read as search demand.
+ * - News spikes (counts across our own News items) were removed on 3 Nov 2026; their Noted rows stay as history.
  * - The Rising tab (filter aw_si_tabs): the rising terms with their sources, growth, first seen, matching page and
  *   suggested action; the owner marks them Noted or Dismissed. A paste form takes Trends figures when the worker is
  *   refused.
@@ -29,13 +27,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_SI_RISING_CRON      = 'aw_si_rising_spikes';
-// AW_SI_SPIKE_RATIO: AW SEO Plus → Settings (settings.php).
-// AW_SI_SPIKE_MIN: AW SEO Plus → Settings (settings.php).
-// AW_SI_SPIKE_WINDOW: AW SEO Plus → Settings (settings.php).
+const AW_SI_RISING_CRON      = 'aw_si_rising_spikes'; // The removed News spikes' event, kept only to clear it.
 const AW_SI_RISING_MAX_ROWS  = 500; // Per POST: rising terms.
 const AW_SI_RISING_MAX_OBS   = 3000; // Per POST: figures.
-const AW_SI_RISING_NEWS_SRCS = array( 'trends_rss', 'gdelt', 'sourcing' ); // Sources that mean "in the news".
+const AW_SI_RISING_NEWS_SRCS = array( 'trends_rss', 'gdelt' ); // Sources that mean "in the news".
 
 /**
  * The rising sources: key => label, schedule and whether the workers send it.
@@ -74,10 +69,30 @@ function aw_si_rising_sources(): array {
 			'every'  => 31 * DAY_IN_SECONDS,
 			'worker' => true,
 		),
-		'sourcing'        => array(
-			'label'  => __( 'In the news (our News: species, states, laws)', 'aw-seo-extras' ),
+		// Keyword tools (tool-imports.php): pasted on Settings → Imports by hand or by the scheduled task.
+		'ubersuggest'     => array(
+			'label'  => __( 'Ubersuggest (import)', 'aw-seo-extras' ),
 			'every'  => DAY_IN_SECONDS,
 			'worker' => false,
+			'import' => true,
+		),
+		'vidiq'           => array(
+			'label'  => __( 'vidIQ (import)', 'aw-seo-extras' ),
+			'every'  => WEEK_IN_SECONDS,
+			'worker' => false,
+			'import' => true,
+		),
+		'openseo'         => array(
+			'label'  => __( 'OpenSEO (import)', 'aw-seo-extras' ),
+			'every'  => 31 * DAY_IN_SECONDS,
+			'worker' => false,
+			'import' => true,
+		),
+		'sourcing'        => array( // Removed 3 Nov 2026: only its old rows show, as history.
+			'label'   => __( 'Our News counts (stopped 3 Nov 2026)', 'aw-seo-extras' ),
+			'every'   => DAY_IN_SECONDS,
+			'worker'  => false,
+			'history' => true,
 		),
 	);
 }
@@ -132,6 +147,12 @@ add_filter(
 			if ( empty( $runs[ 'rising_' . $key ] ) && time() - $since <= 2 * $s['every'] ) {
 				continue;
 			}
+			if ( ! empty( $s['history'] ) ) {
+				continue; // A removed source: never late or failing.
+			}
+			if ( ! empty( $s['import'] ) && empty( $runs[ 'rising_' . $key ] ) ) {
+				continue; // An import is listed once it has sent something, so it is never late before.
+			}
 			if ( 'gdelt' === $key && ! aw_si_gdelt_on() ) {
 				continue; // switched off: not late, not failing (Settings → News (GDELT))
 			}
@@ -164,7 +185,7 @@ function aw_si_rising_lists(): array {
 	if ( aw_si_ready() ) {
 		$k     = aw_si_table( 'keywords' );
 		$roles = (int) ( AW_SI_ROLE_TRACKED | AW_SI_ROLE_SOURCING | AW_SI_ROLE_FOCUS );
-		$eff   = "IF(priority_override <> '', priority_override, priority)";
+		$eff   = aw_si_eff_sql();
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name and integers only.
 		$keywords = $wpdb->get_col( $wpdb->prepare( "SELECT label FROM {$k} WHERE lang = 'en' AND entity = 0 AND roles & %d AND label NOT LIKE %s ORDER BY impr28 DESC, id LIMIT 3000", $roles, '%{%' ) );
 		$topics   = $wpdb->get_col( "SELECT DISTINCT topic FROM {$k} WHERE topic <> '' AND lang = 'en' ORDER BY topic" );
@@ -195,7 +216,8 @@ function aw_si_rising_lists(): array {
  * @param string $norm          Normalised term.
  * @param string $term          Term as written.
  * @param bool   $look_up_posts Also search published titles when no keyword has a page (new terms only).
- * @return array{0: int, 1: string} Keyword ID (0: none) and site path or page label ('' when none).
+ * @return array{0: int, 1: string, 2: string} Keyword ID (0: none), site path or page label ('' when none), and the
+ *                                             keyword's suggested action from the daily calculation (aw_si_decide).
  */
 function aw_si_rising_match( string $norm, string $term, bool $look_up_posts = true ): array {
 	global $wpdb;
@@ -204,8 +226,8 @@ function aw_si_rising_match( string $norm, string $term, bool $look_up_posts = t
 	if ( null === $kw ) {
 		$kw = array();
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
-		foreach ( (array) $wpdb->get_results( "SELECT id, norm, page FROM {$k} WHERE entity = 0 AND lang = 'en'" ) as $r ) {
-			$kw[ (string) $r->norm ] = array( (int) $r->id, (string) $r->page );
+		foreach ( (array) $wpdb->get_results( "SELECT id, norm, page, action FROM {$k} WHERE entity = 0 AND lang = 'en'" ) as $r ) {
+			$kw[ (string) $r->norm ] = array( (int) $r->id, (string) $r->page, (string) $r->action );
 		}
 		uksort( $kw, fn( $a, $b ) => strlen( $b ) <=> strlen( $a ) ); // Longest first: the most specific match wins.
 	}
@@ -221,6 +243,7 @@ function aw_si_rising_match( string $norm, string $term, bool $look_up_posts = t
 	}
 	$id   = $hit ? $hit[0] : 0;
 	$page = $hit ? $hit[1] : '';
+	$act  = $hit ? $hit[2] : '';
 	if ( '' === $page && $look_up_posts && mb_strlen( $term ) >= 4 ) {
 		// A title search (a scan of published posts' titles): only for a term seen for the first time.
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
@@ -229,7 +252,8 @@ function aw_si_rising_match( string $norm, string $term, bool $look_up_posts = t
 			$page = aw_si_path( (string) get_permalink( (int) $post ) );
 		}
 	}
-	return array( $id, $page );
+	// The page as it is reached now: an old address that redirects counts as its target (the same rule as Keywords).
+	return array( $id, '' !== $page ? aw_si_final_path( $page ) : '', $act );
 }
 
 /**
@@ -292,7 +316,7 @@ function aw_si_rising_put( string $term, string $source, ?float $growth, string 
 		$first = $d;
 		$last  = $d;
 	}
-	list( $kw_id, $page ) = aw_si_rising_match( $norm, $term, ! $old );
+	list( $kw_id, $page, $kw_action ) = aw_si_rising_match( $norm, $term, ! $old );
 	if ( $old && '' === $page ) {
 		$page = (string) $old->page; // The title search ran when the term was new.
 	}
@@ -305,7 +329,9 @@ function aw_si_rising_put( string $term, string $source, ?float $growth, string 
 		'last_seen'  => $last,
 		'kw_id'      => $kw_id,
 		'page'       => mb_substr( $page, 0, 255 ),
-		'action'     => aw_si_rising_action( $term, $srcs, $page ),
+		// A term that is one of our keywords takes that keyword's action from the daily calculation (aw_si_decide), so
+		// Rising and Keywords never suggest two different things for one search; other terms use the rising rule.
+		'action'     => '' !== $kw_action ? $kw_action : aw_si_rising_action( $term, $srcs, $page ),
 		'note'       => mb_substr( $note, 0, 255 ),
 	);
 	if ( $old ) {
@@ -501,191 +527,14 @@ add_action(
 	}
 );
 
-/**
- * Counts per day across the News items AW Sourcing fetched (any status but auto-draft): states, species and laws
- * (publishers are not counted: owner, 26 Oct 2026). Days are IST calendar days of aw_ingested_at.
- *
- * @param string $from First day (Y-m-d).
- * @param string $to   Last day (Y-m-d).
- * @return array<string, array<string, array<string, int>>> day => kind => name => items.
- */
-function aw_si_sourcing_counts( string $from, string $to ): array {
-	global $wpdb;
-	$tz    = wp_timezone();
-	$start = ( new DateTimeImmutable( $from . ' 00:00', $tz ) )->getTimestamp();
-	$end   = ( new DateTimeImmutable( $to . ' 00:00', $tz ) )->modify( '+1 day' )->getTimestamp();
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- a bounded range of one meta key.
-	$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT p.ID, p.post_title, p.post_excerpt, CAST(m.meta_value AS UNSIGNED) AS t FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'aw_ingested_at' WHERE p.post_type = 'aw_news' AND p.post_status <> 'auto-draft' AND CAST(m.meta_value AS UNSIGNED) >= %d AND CAST(m.meta_value AS UNSIGNED) < %d", $start, $end ) );
-	$out  = array();
-	if ( ! $rows ) {
-		return $out;
-	}
-	update_meta_cache( 'post', array_map( 'intval', wp_list_pluck( $rows, 'ID' ) ) );
-	$species = array();
-	foreach ( aw_si_species() as $s ) {
-		$species[ aw_si_norm( $s ) ] = $s;
-	}
-	$states = array();
-	if ( function_exists( 'aw_lgd' ) ) {
-		foreach ( (array) ( aw_lgd()['states'] ?? array() ) as $s ) {
-			$states[ (string) $s->code ] = (string) $s->name;
-		}
-	}
-	foreach ( $rows as $r ) {
-		$day   = wp_date( 'Y-m-d', (int) $r->t, $tz );
-		$found = array(
-			'state'   => array(),
-			'species' => array(),
-			'law'     => array(),
-		);
-		$ent = json_decode( (string) get_post_meta( (int) $r->ID, 'aw_entities', true ), true );
-		foreach ( (array) ( $ent['places'] ?? array() ) as $p ) {
-			$code = (string) ( $p['state'] ?? '' );
-			$name = $states[ $code ] ?? ( empty( $p['district'] ) ? (string) ( $p['name'] ?? '' ) : '' );
-			if ( '' !== $name ) {
-				$found['state'][ $name ] = true; // A district counts for its state.
-			}
-		}
-		foreach ( (array) ( $ent['laws'] ?? array() ) as $l ) {
-			if ( ! empty( $l['name'] ) ) {
-				$found['law'][ (string) $l['name'] ] = true;
-			}
-		}
-		$words = ' ' . aw_si_norm( $r->post_title . ' ' . $r->post_excerpt ) . ' ';
-		foreach ( $species as $n => $label ) {
-			if ( false !== strpos( $words, ' ' . $n . ' ' ) || false !== strpos( $words, ' ' . $n . 's ' ) ) {
-				$found['species'][ $label ] = true;
-			}
-		}
-		foreach ( $found as $kind => $names ) {
-			foreach ( array_keys( $names ) as $name ) {
-				$out[ $day ][ $kind ][ (string) $name ] = ( $out[ $day ][ $kind ][ (string) $name ] ?? 0 ) + 1;
-			}
-		}
-	}
-	return $out;
-}
-
-/**
- * The spikes of one day: names counted at least AW_SI_SPIKE_MIN times and at least 3× their 14-day average.
- *
- * @param array  $counts aw_si_sourcing_counts() for the day and the 14 days before it.
- * @param string $day    Day (Y-m-d).
- * @return array<int, array{kind: string, name: string, count: int, avg: float, growth: float|null}>
- */
-function aw_si_sourcing_spikes( array $counts, string $day ): array {
-	$out = array();
-	foreach ( (array) ( $counts[ $day ] ?? array() ) as $kind => $names ) {
-		foreach ( $names as $name => $n ) {
-			if ( $n < AW_SI_SPIKE_MIN ) {
-				continue;
-			}
-			$sum = 0;
-			for ( $i = 1; $i <= AW_SI_SPIKE_WINDOW; $i++ ) {
-				$sum += (int) ( $counts[ gmdate( 'Y-m-d', strtotime( $day . " -{$i} days" ) ) ][ $kind ][ $name ] ?? 0 );
-			}
-			$avg = $sum / AW_SI_SPIKE_WINDOW;
-			if ( $n >= AW_SI_SPIKE_RATIO * $avg ) {
-				$out[] = array(
-					'kind'   => (string) $kind,
-					'name'   => (string) $name,
-					'count'  => (int) $n,
-					'avg'    => round( $avg, 1 ),
-					'growth' => $avg > 0 ? round( $n / $avg, 2 ) : null,
-				);
-			}
-		}
-	}
-	return $out;
-}
-
-/**
- * Count and flag Sourcing spikes for the last $days days (today included, so today's count is provisional until the
- * next run). Writes the daily counts to obs and the spikes to rising, unless $dry.
- *
- * @param int  $days Days to work out.
- * @param bool $dry  Work out only.
- * @return array{days: int, counts: int, spikes: array}
- */
-function aw_si_sourcing_spikes_run( int $days = 2, bool $dry = false ): array {
-	$tz     = wp_timezone();
-	$today  = new DateTimeImmutable( 'today', $tz );
-	$first  = $today->modify( '-' . ( $days - 1 ) . ' days' )->format( 'Y-m-d' );
-	$counts = aw_si_sourcing_counts( $today->modify( '-' . ( $days - 1 + AW_SI_SPIKE_WINDOW ) . ' days' )->format( 'Y-m-d' ), $today->format( 'Y-m-d' ) );
-	$kinds  = array(
-		'state'   => __( 'State', 'aw-seo-extras' ),
-		'species' => __( 'Species', 'aw-seo-extras' ),
-		'law'     => __( 'Law', 'aw-seo-extras' ),
-	);
-	$out    = array(
-		'days'   => $days,
-		'counts' => 0,
-		'spikes' => array(),
-	);
-	for ( $i = 0; $i < $days; $i++ ) {
-		$day = ( new DateTimeImmutable( $first, $tz ) )->modify( "+{$i} days" )->format( 'Y-m-d' );
-		foreach ( (array) ( $counts[ $day ] ?? array() ) as $kind => $names ) {
-			foreach ( $names as $name => $n ) {
-				++$out['counts'];
-				if ( ! $dry ) {
-					aw_si_obs_put(
-						0,
-						'#sourcing:' . $kind . ':' . aw_si_norm( (string) $name ),
-						'sourcing',
-						(string) $kind,
-						'day',
-						$day,
-						array(
-							'value' => (int) $n,
-							'txt'   => (string) $name,
-						)
-					);
-				}
-			}
-		}
-		foreach ( aw_si_sourcing_spikes( $counts, $day ) as $s ) {
-			$s['day']        = $day;
-			$out['spikes'][] = $s;
-			if ( ! $dry ) {
-				/* translators: 1: Publisher, State, Species or Law, 2: items, 3: date, 4: average. */
-				$note = sprintf( __( 'In the news: %1$s in %2$d News items on %3$s, 14-day average %4$s', 'aw-seo-extras' ), $kinds[ $s['kind'] ] ?? $s['kind'], $s['count'], wp_date( 'j M', strtotime( $day . ' 12:00' ), $tz ), number_format_i18n( $s['avg'], 1 ) );
-				aw_si_rising_put( $s['name'], 'sourcing', $s['growth'], $day, $note );
-			}
-		}
-	}
-	return $out;
-}
-
-/** The daily Sourcing spikes run, with its result in the run log. */
-function aw_si_sourcing_spikes_cron(): void {
-	if ( get_option( 'aw_si_off' ) || ! aw_si_ready() ) {
-		return;
-	}
-	aw_si_run_start( 'rising_sourcing' );
-	try {
-		$r = aw_si_sourcing_spikes_run();
-		aw_si_run_ok(
-			'rising_sourcing',
-			array(
-				'rows'   => $r['counts'],
-				'spikes' => count( $r['spikes'] ),
-			)
-		);
-	} catch ( Throwable $e ) {
-		aw_si_run_fail( 'rising_sourcing', $e->getMessage() );
-	}
-}
-add_action( AW_SI_RISING_CRON, 'aw_si_sourcing_spikes_cron' );
-
+// News spikes ("In the news": species, states and laws frequent in our own News) were removed on 3 Nov 2026 (owner):
+// they measured our feed, not search demand. Their rows stay as history (Noted rows included); the old daily event is
+// cleared.
 add_action(
 	'init',
 	function () {
-		if ( get_option( 'aw_si_off' ) ) {
-			wp_clear_scheduled_hook( AW_SI_RISING_CRON ); // Switched off by Delete data.
-			return;
-		}
-		if ( ! wp_next_scheduled( AW_SI_RISING_CRON ) ) {
-			wp_schedule_event( ( new DateTimeImmutable( 'today 23:40', wp_timezone() ) )->getTimestamp(), 'daily', AW_SI_RISING_CRON );
+		if ( wp_next_scheduled( AW_SI_RISING_CRON ) ) {
+			wp_clear_scheduled_hook( AW_SI_RISING_CRON );
 		}
 	}
 );
@@ -708,7 +557,7 @@ add_filter(
 );
 
 // Deactivating the plugin removes the spikes event, as it does Search Insights' own (aw-seo-extras.php).
-register_deactivation_hook( AW_SEO_EXTRAS_DIR . 'aw-seo-extras.php', fn() => wp_clear_scheduled_hook( AW_SI_RISING_CRON ) );
+add_filter( 'aw_si_cron_hooks', fn( $h ) => array_merge( (array) $h, array( AW_SI_RISING_CRON ) ) );
 
 // The tab's message flags are dropped from the address after showing, so sort and page links do not repeat them.
 add_filter( 'removable_query_args', fn( $args ) => array_merge( (array) $args, array( 'marked', 'pasted', 'skipped' ) ) );
@@ -773,7 +622,7 @@ function aw_si_rising_tab(): void {
 		echo '<div class="notice notice-success inline"><p>' . esc_html( sprintf( __( 'Pasted: %1$d lines stored, %2$d skipped.', 'aw-seo-extras' ), absint( wp_unslash( $_GET['pasted'] ) ), absint( wp_unslash( $_GET['skipped'] ?? 0 ) ) ) ) . '</p></div>';
 	}
 	// phpcs:enable
-	echo '<p>' . esc_html__( 'Terms rising in India from free sources: Trends trending now, Wikipedia pageviews and Indian news (GDELT) daily; Google autocomplete and Trends rising related searches weekly; and "In the news": species, states and laws suddenly frequent in the News we publish (not search demand). Growth is how many times the usual level (– when the source gives no ratio). Nothing here changes Rank Math or the Sourcing lists: mark each term Noted or Dismissed.', 'aw-seo-extras' ) . '</p>';
+	echo '<p>' . esc_html__( 'Terms rising in India from free sources: Trends trending now, Wikipedia pageviews and Indian news (GDELT) daily; Google autocomplete and Trends rising related searches weekly. Growth is how many times the usual level (– when the source gives no ratio). Nothing here changes Rank Math or the Sourcing lists: mark each term Noted or Dismissed.', 'aw-seo-extras' ) . '</p>';
 	$table = new AW_SI_Rising_Table();
 	$table->prepare_items();
 	$table->views();
@@ -921,25 +770,40 @@ function aw_si_rising_top( int $limit = 10, string $since = '' ): array {
 	return (array) $wpdb->get_results( $wpdb->prepare( "SELECT term, sources, growth, first_seen, last_seen, page, action, status FROM {$t} WHERE last_seen >= %s AND status <> 'dismissed' ORDER BY growth IS NULL, growth DESC, last_seen DESC LIMIT %d", $since, $limit ), ARRAY_A );
 }
 
+/** Overview box: the ten fastest-rising terms seen in the last 7 days (not dismissed), with what to do. */
+function aw_si_box_rising_week(): void {
+	$rows = aw_si_rising_top( 10 );
+	if ( ! $rows ) {
+		echo '<p>' . esc_html__( 'No rising terms in the last 7 days.', 'aw-seo-extras' ) . '</p>';
+		return;
+	}
+	$all = aw_si_rising_sources();
+	echo '<table class="widefat fixed striped"><thead><tr><th scope="col">' . esc_html__( 'Term', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Growth', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Sources', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Our page', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Suggested action', 'aw-seo-extras' ) . '</th></tr></thead><tbody>';
+	foreach ( $rows as $r ) {
+		$src = array();
+		foreach ( array_filter( explode( ',', (string) $r['sources'] ) ) as $s ) {
+			$src[] = (string) ( $all[ $s ]['label'] ?? $s );
+		}
+		/* translators: %s: times the usual level, such as 2.6. */
+		$growth = null === $r['growth'] ? '–' : sprintf( __( '×%s', 'aw-seo-extras' ), number_format_i18n( (float) $r['growth'], 1 ) );
+		$page   = (string) $r['page'];
+		echo '<tr><td>' . esc_html( (string) $r['term'] ) . '</td><td>' . esc_html( $growth ) . '</td><td>' . esc_html( implode( ', ', $src ) ) . '</td><td>' . ( '' !== $page && '/' === $page[0] ? '<a href="' . esc_url( home_url( $page ) ) . '">' . esc_html( $page ) . '</a>' : '–' ) . '</td><td>' . esc_html( aw_si_actions()[ (string) $r['action'] ] ?? '–' ) . '</td></tr>';
+	}
+	echo '</tbody></table>';
+	echo '<p><a href="' . esc_url( aw_si_url( 'rising' ) ) . '">' . esc_html__( 'All rising terms', 'aw-seo-extras' ) . '</a></p>';
+}
+
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	/**
-	 * Search Insights rising terms.
+	 * Search Insights rising terms (old name of `wp aw-si rising`, kept as an alias).
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     wp aw-si-rising spikes --days=7 --dry-run
-	 *     wp aw-si-rising top --limit=10
+	 *     wp aw-si rising --limit=10
 	 */
 	WP_CLI::add_command(
 		'aw-si-rising',
 		function ( $args, $assoc ) {
-			$what = $args[0] ?? 'top';
-			if ( 'spikes' === $what ) {
-				$r = aw_si_sourcing_spikes_run( max( 1, min( 60, (int) ( $assoc['days'] ?? 7 ) ) ), isset( $assoc['dry-run'] ) );
-				WP_CLI::log( sprintf( '%d daily counts over %d days, %d spikes%s', $r['counts'], $r['days'], count( $r['spikes'] ), isset( $assoc['dry-run'] ) ? ' (dry run: nothing stored)' : '' ) );
-				WP_CLI\Utils\format_items( 'table', $r['spikes'], array( 'day', 'kind', 'name', 'count', 'avg', 'growth' ) );
-				return;
-			}
 			WP_CLI\Utils\format_items( 'table', aw_si_rising_top( (int) ( $assoc['limit'] ?? 10 ) ), array( 'term', 'sources', 'growth', 'first_seen', 'page', 'action', 'status' ) );
 		}
 	);

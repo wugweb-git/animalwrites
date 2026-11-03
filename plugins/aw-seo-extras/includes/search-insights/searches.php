@@ -27,6 +27,9 @@ function aw_si_searches_gaps(): array {
 	$rows   = $wpdb->get_results( "SELECT label, note, status, action, impr28, pos28 FROM {$k} WHERE status = 'gap' OR ( note LIKE 'Gap%' AND COALESCE(status, '') NOT IN ('has-page', 'conflict') AND NOT ( COALESCE(page, '') <> '' AND pos28 IS NOT NULL AND pos28 <= 20 ) ) ORDER BY impr28 DESC, label" );
 	$groups = array();
 	foreach ( (array) $rows as $r ) {
+		if ( aw_si_gap_variant_covered( (string) $r->label ) ) {
+			continue; // "order/judgement": one of the phrases has a page already.
+		}
 		$title = 0 === strpos( (string) $r->note, 'Gap' ) ? trim( (string) preg_replace( '/^Gap \([^)]*\):\s*/', '', (string) $r->note ) ) : __( 'High demand, no page yet (P2)', 'aw-seo-extras' );
 		/* translators: 1: search phrase, 2: impressions in 28 days, 3: average position. */
 		$line = null === $r->pos28 ? sprintf( __( '"%1$s": %2$s impressions (28 days)', 'aw-seo-extras' ), $r->label, number_format_i18n( (int) $r->impr28 ) ) : sprintf( __( '"%1$s": %2$s impressions (28 days), position %3$s', 'aw-seo-extras' ), $r->label, number_format_i18n( (int) $r->impr28 ), number_format_i18n( (float) $r->pos28, 1 ) );
@@ -41,4 +44,29 @@ function aw_si_searches_gaps(): array {
 		$out[] = array( (string) $title, implode( '; ', $lines ) . '.' );
 	}
 	return $out;
+}
+
+/**
+ * Whether a keyword-map label written with alternatives ("supreme court stray dogs order/judgement") is covered: one
+ * of its phrases ("… order", "… judgement") is a keyword with a page of ours.
+ *
+ * @param string $label Keyword label.
+ */
+function aw_si_gap_variant_covered( string $label ): bool {
+	global $wpdb;
+	if ( ! preg_match( '#(\p{L}+)/(\p{L}+)#u', $label, $m ) ) {
+		return false;
+	}
+	static $has = null; // Every has-page phrase, read once for all the gap rows.
+	if ( null === $has ) {
+		$k = aw_si_table( 'keywords' );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+		$has = array_flip( (array) $wpdb->get_col( "SELECT norm FROM {$k} WHERE status = 'has-page'" ) );
+	}
+	foreach ( array( $m[1], $m[2] ) as $alt ) {
+		if ( isset( $has[ aw_si_norm( str_replace( $m[0], $alt, $label ) ) ] ) ) {
+			return true;
+		}
+	}
+	return false;
 }

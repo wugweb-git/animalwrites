@@ -14,9 +14,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/** Link types and their labels; '' is unsorted. */
+/** Link types and their labels; '' is unsorted. Filter aw_si_link_types adds more. */
 function aw_si_link_types(): array {
-	return array(
+	$types = array(
 		'press'        => __( 'Press', 'aw-seo-extras' ),
 		'organisation' => __( 'Organisation', 'aw-seo-extras' ),
 		'social'       => __( 'Social', 'aw-seo-extras' ),
@@ -24,6 +24,7 @@ function aw_si_link_types(): array {
 		'copy'         => __( 'Copy', 'aw-seo-extras' ),
 		'spam'         => __( 'Spam', 'aw-seo-extras' ),
 	);
+	return (array) apply_filters( 'aw_si_link_types', $types ); // alerts.php adds Mention.
 }
 
 /**

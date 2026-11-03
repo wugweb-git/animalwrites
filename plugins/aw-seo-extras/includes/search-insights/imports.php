@@ -20,11 +20,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /** The import kinds and their labels. */
 function aw_si_import_kinds(): array {
-	return array(
+	$kinds = array(
 		'kp'     => __( 'Keyword Planner (CSV export: Keyword, Avg. monthly searches)', 'aw-seo-extras' ),
 		'trends' => __( 'Google Trends averages (paste: keyword, value; "animal welfare" = 100)', 'aw-seo-extras' ),
 		'gov'    => __( 'data.gov.in / IDSP figures (paste: state, measure, value, as of, source URL)', 'aw-seo-extras' ),
 	);
+	return (array) apply_filters( 'aw_si_import_kinds', $kinds ); // tool-imports.php adds Ubersuggest, vidIQ, OpenSEO.
 }
 
 /**
@@ -107,6 +108,12 @@ function aw_si_import_number( string $v ): ?float {
  * @return array{rows: int, skipped: int, error: string}
  */
 function aw_si_import( string $kind, string $raw ): array {
+	global $wpdb;
+	$o     = aw_si_table( 'obs' );
+	$other = apply_filters( 'aw_si_import_run', null, $kind, $raw ); // An import kind added by another file.
+	if ( is_array( $other ) ) {
+		return $other;
+	}
 	$month = wp_date( 'Y-m-01' );
 	$out   = array(
 		'rows'    => 0,
@@ -127,6 +134,9 @@ function aw_si_import( string $kind, string $raw ): array {
 					continue;
 				}
 				$id = (int) current( aw_si_kw_ids( array( sanitize_text_field( $cells[0] ) ), 0 ) );
+				if ( $id ) { // A new paste replaces the keyword's earlier pasted figure (the workers' rows stay).
+					$wpdb->query( $wpdb->prepare( "DELETE FROM {$o} WHERE src = 'trends' AND metric = 'index' AND period = '12m' AND kw_id = %d AND txt = 'import'", $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+				}
 				$put(
 					$id && aw_si_obs_put(
 						$id,
@@ -237,10 +247,18 @@ function aw_si_import_rows(): void {
 }
 add_action( 'aw_si_settings_rows', 'aw_si_import_rows' );
 
+/**
+ * Who may send an import: the Search Insights managers, or a separate sender account that has only the capability
+ * aw_si_import (the owner creates that user; it can import and nothing else in Search Insights).
+ */
+function aw_si_can_import(): bool {
+	return current_user_can( aw_si_cap() ) || current_user_can( 'aw_si_import' );
+}
+
 add_action(
 	'admin_post_aw_si_import',
 	function () {
-		if ( ! current_user_can( aw_si_cap() ) || ! check_admin_referer( 'aw_si_import' ) ) {
+		if ( ! aw_si_can_import() || ! check_admin_referer( 'aw_si_import' ) ) {
 			wp_die( esc_html__( 'Not allowed.', 'aw-seo-extras' ), 403 );
 		}
 		$kind = isset( $_POST['kind'] ) ? sanitize_key( wp_unslash( $_POST['kind'] ) ) : '';
@@ -295,7 +313,12 @@ add_action(
 			return;
 		}
 		/* translators: 1: import kind, 2: rows stored, 3: rows skipped. */
-		echo '<div class="notice notice-success inline"><p>' . esc_html( sprintf( __( '%1$s: %2$s rows stored, %3$s skipped.', 'aw-seo-extras' ), aw_si_import_kinds()[ $r['kind'] ] ?? $r['kind'], number_format_i18n( (int) $r['rows'] ), number_format_i18n( (int) $r['skipped'] ) ) ) . '</p></div>';
+		$msg = sprintf( __( '%1$s: %2$s rows stored, %3$s skipped.', 'aw-seo-extras' ), aw_si_import_kinds()[ $r['kind'] ] ?? $r['kind'], number_format_i18n( (int) $r['rows'] ), number_format_i18n( (int) $r['skipped'] ) );
+		if ( ! empty( $r['rising'] ) ) {
+			/* translators: %s: terms. */
+			$msg .= ' ' . sprintf( __( '%s terms that are not keywords yet went to Rising.', 'aw-seo-extras' ), number_format_i18n( (int) $r['rising'] ) );
+		}
+		echo '<div class="notice notice-success inline"><p>' . esc_html( $msg ) . '</p></div>';
 	}
 );
 

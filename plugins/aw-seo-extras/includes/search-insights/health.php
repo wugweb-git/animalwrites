@@ -1,7 +1,7 @@
 <?php
 /**
  * Site Health test "Search Insights sources fresh" (owner addendum, 24 Oct): warns when a source never ran, last failed,
- * or is more than twice its schedule late.
+ * or is more than twice its schedule late. Crawler access has its own test (crawlcheck.php) and is not repeated here.
  *
  * @package aw-seo-extras
  */
@@ -17,6 +17,9 @@ function aw_si_health_test(): array {
 	foreach ( aw_si_sources() as $src => $s ) {
 		if ( aw_si_rising_blocked( $src ) ) {
 			continue; // refused by the service (HTTP 429/403): a known limit, said on the panel, not a failure
+		}
+		if ( in_array( $src, array( 'crawl-in', 'crawl-out' ), true ) ) {
+			continue; // judged once, by the crawler-access test (crawlcheck.php), which also says when a run is missing
 		}
 		$err = aw_si_run_problem( $src );
 		$dry = aw_si_rows_dry_days( $src );

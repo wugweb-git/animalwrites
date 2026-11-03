@@ -60,14 +60,15 @@
    it (44px, --kit-size-target) rather than above it, between soft lines, so the six steps read as one checklist and the
    band fits one phone screen (375px wide: 840px tall before, 648px after). */
 .aw-camp--diwali #tonight .aw-camp-steps { gap: 0; margin-top: var(--kit-space-5); }
-.aw-camp--diwali #tonight .aw-camp-steps > li { display: grid; grid-template-columns: var(--kit-size-target) minmax(0, 1fr); column-gap: var(--kit-space-4); row-gap: var(--kit-space-1); align-content: center; margin: 0; padding: var(--kit-space-3) 0; border-top: var(--kit-border-width) solid color-mix(in srgb, var(--kit-color-on-ink) 16%, transparent); }
+.aw-camp--diwali #tonight .aw-camp-steps > li { display: grid; grid-template-columns: var(--kit-size-target) minmax(0, 1fr); column-gap: var(--kit-space-4); row-gap: var(--kit-space-1); align-content: center; margin: 0; padding: var(--kit-space-3) 0; border-top: var(--kit-border-width) solid color-mix(in srgb, var(--camp-line) 16%, transparent); }
 .aw-camp--diwali #tonight .aw-camp-steps > li::before { position: static; grid-column: 1; grid-row: 1 / span 2; align-self: center; }
 .aw-camp--diwali #tonight .aw-camp-steps > li > :is(strong, span) { grid-column: 2; }
 .aw-camp--diwali #tonight .aw-camp-steps > li > strong { align-self: end; line-height: var(--kit-leading-heading); }
 .aw-camp--diwali #tonight .aw-camp-steps > li > span { align-self: start; line-height: var(--kit-leading-body); }
 /* The step numbers: the marigold disc is 2.88:1 on the night band (under 3:1, WCAG 1.4.11), so a white ring
-   (--camp-line) and a white number, as the band's other rules and icons */
-.aw-camp--diwali #tonight .aw-camp-steps > li::before { background: transparent; color: var(--kit-color-on-ink); box-shadow: inset 0 0 0 2px var(--camp-line); }
+   (--camp-line) and a white number, as the band's other rules and icons; the ring is the step-marker width
+   (--kit-border-mark, as .kit-steps-progress and .aw-steps) */
+.aw-camp--diwali #tonight .aw-camp-steps > li::before { background: transparent; color: var(--kit-color-on-ink); box-shadow: inset 0 0 0 var(--kit-border-mark) var(--camp-line); }
 /* Two across from 768 and three from 1200, as the campaign card grid (.aw-camp-grid); no connector lines between the
    steps (the line after the third ran past the row's end to the band's edge) */
 @media (min-width: 768px) {
@@ -77,18 +78,27 @@
 @media (min-width: 1200px) { .aw-camp--diwali #tonight .aw-camp-steps { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 /* Step 6 is the one action: a marigold card, the whole card a link to Who to call (#help); white on marigold is 6:1.
    Only when the step has its link, so the card never looks tappable without one. The card lifts on hover only, and
-   not with reduced motion. */
-.aw-camp--diwali #tonight .aw-camp-steps > li:last-child:has(a) { position: relative; margin-top: var(--kit-space-3); padding: var(--kit-space-5); border: 0; border-radius: var(--kit-radius-card); background: var(--camp-primary); box-shadow: var(--kit-elevation-2); transition: transform var(--kit-motion-base) var(--kit-motion-ease), box-shadow var(--kit-motion-base) var(--kit-motion-ease); }
+   not with reduced motion. The whole-card link uses the campaign's card-link rules (.aw-camp-docs-q li, further down;
+   the focus ring is --kit-color-focus, white on the dark band). Kits has the same pattern on .wp-block-group.kit-tile
+   and .aw-take-part-card, but both are tied to block markup (a Group tile with an h3, a Cover with a button), and
+   neither Kits nor docs/component-map.md has an action-card class, so the marigold card itself is set here. */
+.aw-camp--diwali #tonight .aw-camp-steps > li:last-child:has(a) { position: relative; margin-top: var(--kit-space-3); padding: var(--kit-space-5); border: 0; border-radius: var(--kit-radius-card); background: var(--camp-primary); box-shadow: var(--kit-elevation-2); transition: transform var(--kit-motion-base) var(--kit-motion-ease); }
 .aw-camp--diwali #tonight .aw-camp-steps > li:last-child:has(a)::before { background: var(--kit-color-on-ink); color: var(--camp-primary); box-shadow: none; }
-.aw-camp--diwali #tonight .aw-camp-steps > li:last-child a { color: var(--kit-color-on-ink); font-weight: 600; text-decoration: underline; text-underline-offset: 0.2em; }
-.aw-camp--diwali #tonight .aw-camp-steps > li:last-child a::after { content: ""; position: absolute; inset: 0; border-radius: inherit; } /* the whole card is the target */
-.aw-camp--diwali #tonight .aw-camp-steps > li:last-child a:focus-visible { outline: none; }
-.aw-camp--diwali #tonight .aw-camp-steps > li:last-child:has(a:focus-visible) { outline: var(--kit-focus-width) solid var(--kit-color-on-ink); outline-offset: var(--kit-focus-offset); }
+.aw-camp--diwali #tonight .aw-camp-steps > li:last-child a { color: var(--kit-color-on-ink); font-weight: 600; text-decoration: underline; text-underline-offset: 0.2em; -webkit-tap-highlight-color: transparent; touch-action: manipulation; } /* the card's own press state below, not the browser's grey box */
 @media (min-width: 768px) { .aw-camp--diwali #tonight .aw-camp-steps > li:last-child:has(a) { margin-top: 0; } } /* in line with its row */
 @media (hover: hover) { .aw-camp--diwali #tonight .aw-camp-steps > li:last-child:has(a):hover { transform: translateY(var(--kit-motion-lift)); box-shadow: var(--kit-elevation-3); } }
+/* Pressed, as a button (docs/design-system.md, Active / pressed): down 1px (--kit-btn-press), shadow removed; phones get this
+   feedback on tap */
+.aw-camp--diwali #tonight .aw-camp-steps > li:last-child:has(a:active) { transform: translateY(var(--kit-btn-press)); box-shadow: none; }
 @media (prefers-reduced-motion: reduce) {
 	.aw-camp--diwali #tonight .aw-camp-steps > li:last-child:has(a) { transition: none; }
-	.aw-camp--diwali #tonight .aw-camp-steps > li:last-child:has(a):hover { transform: none; }
+	.aw-camp--diwali #tonight .aw-camp-steps > li:last-child:has(a):is(:hover, :active) { transform: none; }
+}
+/* High-contrast mode (forced colours) drops box-shadow, so the number rings and the step 6 card get real borders in the
+   system text colour; the ring keeps its 44px (border-box) */
+@media (forced-colors: active) {
+	.aw-camp--diwali #tonight .aw-camp-steps > li::before { box-sizing: border-box; border: var(--kit-border-mark) solid CanvasText; }
+	.aw-camp--diwali #tonight .aw-camp-steps > li:last-child:has(a) { border: var(--kit-border-width) solid CanvasText; }
 }
 /* Who to call has two columns: it fits a phone without sideways scrolling */
 .aw-camp--diwali #help { --kit-table-min: 0; }
@@ -211,8 +221,17 @@
 .aw-camp--sc-stray-dogs .aw-camp-poster .aw-cd-when .aw-date { display: inline-block; margin-top: var(--kit-space-1); padding: 0.1em 0.6em; border-radius: 999px; background: var(--kit-color-accent); color: var(--camp-primary); }
 .aw-camp--sc-stray-dogs .aw-camp-poster .aw-cd-when .aw-date .kit-ico { display: none; }
 .aw-camp--sc-stray-dogs .aw-camp-poster .aw-camp-poster-note { padding-top: var(--kit-space-3); border-top: 1px solid var(--camp-line); font-size: var(--kit-type-sm); }
-/* Page sections (owner, 1 Nov 2026: fix every section). A campaign is a landing page: text runs the full band width. */
-.aw-camp--sc-stray-dogs .aw-camp-section:not(.aw-camp-hero) .aw-camp-lede { max-width: none; }
+/* Page sections (owner, 1 Nov 2026: fix every section). A campaign is a landing page: text runs the full band width,
+   the band's 1120px text column (.aw-camp-section > *), so an intro lines up with its heading (3 Nov 2026: at none it ran
+   32px past the column on each side at 1280). */
+.aw-camp--sc-stray-dogs .aw-camp-section:not(.aw-camp-hero) .aw-camp-lede { max-width: 1120px; }
+/* Dates inside a sentence read as text: no calendar icon mid-line (owner, 3 Nov 2026: audit). A date that stands alone
+   keeps it (the orders' date column, What happens next, the hero poster). */
+.aw-camp--sc-stray-dogs :is(p, #sources li, .aw-camp-timeline td:not(:first-child)) .aw-date .kit-ico { display: none; }
+/* The orders' document links: a 44px tap area (--kit-size-target) around the one link in the cell, without making the
+   row taller */
+.aw-camp--sc-stray-dogs .aw-camp-timeline td:nth-child(4) a { position: relative; }
+.aw-camp--sc-stray-dogs .aw-camp-timeline td:nth-child(4) a::before { content: ""; position: absolute; inset-inline: 0; top: 50%; height: var(--kit-size-target); transform: translateY(-50%); }
 /* Section headings: a plum icon in a pale yellow circle (the Kits icons, drawn in plum) */
 .aw-camp--sc-stray-dogs :is(#what, #orders, #tracker-sec, #act, #latest, #find-help, #read, #next, #share, #sources) h2 { display: flex; align-items: center; gap: var(--kit-space-3); }
 .aw-camp--sc-stray-dogs :is(#what, #orders, #tracker-sec, #act, #latest, #find-help, #read, #next, #share, #sources) h2::before { content: ""; flex: none; width: 2.75rem; height: 2.75rem; border-radius: 50%; background: #fde9b0 var(--aw-sc-ico) center / 55% no-repeat; }
@@ -273,19 +292,23 @@
    order is shown, not folded: its date leads in the yellow date pill (the hero poster's), and its closing "Due:" or
    "Next:" line stands on its own under a plum rule (campaign-tools.php aw_sc_tracker_marks adds aw-sc-lead and
    aw-sc-due). The calendar icons inside the running text are dropped: the dates read as text, the pill marks the one
-   that leads. */
+   that leads. The pill is the Kits badge colouring (--kit-color-accent, --kit-radius-pill) with the tag's side padding
+   (--s-2), not the .kit-tag class: that sets the label size and a 1.75rem min-height, which would shrink the date and
+   open up the line it sits in. The due line's rule is --kit-border-mark, the Kits step mark. */
 .aw-camp--sc-stray-dogs .aw-camp-tracker td .kit-ico { display: none; }
-.aw-camp--sc-stray-dogs .aw-camp-tracker .aw-sc-lead { display: inline-block; padding: 0 0.6em; border-radius: var(--kit-radius-pill); background: var(--kit-color-accent); color: var(--camp-primary); font-weight: var(--kit-weight-bold); white-space: nowrap; }
-.aw-camp--sc-stray-dogs .aw-camp-tracker .aw-sc-due { display: block; margin-top: var(--kit-space-2); padding-left: var(--kit-space-3); border-left: 3px solid var(--camp-primary); color: var(--camp-primary); }
+.aw-camp--sc-stray-dogs .aw-camp-tracker .aw-sc-lead { display: inline-block; padding: 0 var(--s-2); border-radius: var(--kit-radius-pill); background: var(--kit-color-accent); color: var(--camp-primary); font-weight: var(--kit-weight-bold); white-space: nowrap; }
+.aw-camp--sc-stray-dogs .aw-camp-tracker .aw-sc-due { display: block; margin-top: var(--kit-space-2); padding-left: var(--kit-space-3); border-left: var(--kit-border-mark) solid var(--camp-primary); color: var(--camp-primary); }
 .aw-camp--sc-stray-dogs .aw-camp-tracker .aw-sc-due .aw-date { white-space: nowrap; }
-/* Tablet and desktop: the table, the order its widest column; the card for several states lists them as text */
+/* Tablet and desktop: the table, the order its widest column; the card for several states lists them as text. The column
+   shares are percentages because Kits has no table-column token (kit.css sizes tables by content); they apply only to
+   the full table (no JavaScript), as the picked view sizes its columns to the one row. */
 @media (min-width: 768px) {
 	.aw-camp--sc-stray-dogs .aw-camp-tracker table { table-layout: fixed; }
 	.aw-camp--sc-stray-dogs .aw-camp-tracker th:nth-child(1) { width: 18%; }
 	.aw-camp--sc-stray-dogs .aw-camp-tracker th:nth-child(2) { width: 22%; }
 	.aw-camp--sc-stray-dogs .aw-camp-tracker th:nth-child(3) { width: 38%; }
 	.aw-camp--sc-stray-dogs .aw-camp-tracker th:nth-child(4) { width: 22%; }
-	.aw-camp--sc-stray-dogs .aw-camp-tracker tbody td.aw-sc-states { font-weight: var(--kit-weight-regular, 400); color: var(--kit-color-text); }
+	.aw-camp--sc-stray-dogs .aw-camp-tracker tbody td.aw-sc-states { font-weight: var(--kit-weight-regular); color: var(--kit-color-text); }
 }
 /* Phones: one card per state. The state, the court and case under it in the meta colour, the order across a thin rule,
    then "Source" and the sources, each link a 44px target (--kit-size-target, one 44px line per row). Only the sources
@@ -295,30 +318,47 @@
 	.aw-camp--sc-stray-dogs .aw-camp-tracker td:first-child { padding-bottom: 0; }
 	.aw-camp--sc-stray-dogs .aw-camp-tracker td.aw-sc-states { font-size: var(--kit-type-base); }
 	.aw-camp--sc-stray-dogs .aw-camp-tracker td:nth-child(2) { padding-bottom: var(--kit-space-3); color: var(--camp-meta); }
-	.aw-camp--sc-stray-dogs .aw-camp-tracker td:nth-child(3) { padding-top: var(--kit-space-3); padding-bottom: var(--kit-space-1); border-top: 1px solid var(--kit-color-line); }
+	.aw-camp--sc-stray-dogs .aw-camp-tracker td:nth-child(3) { padding-top: var(--kit-space-3); padding-bottom: var(--kit-space-1); border-top: var(--kit-border-width) solid var(--kit-color-line); }
 	.aw-camp--sc-stray-dogs .aw-camp-tracker td:nth-child(4) { line-height: var(--kit-size-target); }
 	.aw-camp--sc-stray-dogs .aw-camp-tracker td:nth-child(4)::before { display: inline; margin: 0 var(--kit-space-2) 0 0; }
 	.aw-camp--sc-stray-dogs .aw-camp-tracker td:nth-child(4) a { display: inline-block; }
 }
-/* The state picker (campaign.js; owner, 3 Nov 2026: "audit and sort this"): one state at a time, so the section fits
-   Layout rules 5 and 6. The Kits form field, its label beside the select in one 44px row; only the chosen row shows.
-   From 768 the picker sits in the heading's row, at the right; on phones it is under the intro, full width. The intro's
+/* The pickers (campaign.js awScPicker; owner, 3 Nov 2026: "audit and sort this", "fix all four"): one state, or one
+   court order, at a time, so the section fits Layout rules 5 and 6. The Kits form field, its label beside the select in
+   one 44px row; only the chosen row shows.
+   Where your state stands: from 768 the picker sits in the heading's row, at the right; on phones under the intro, full
+   width. What the court ordered: under the heading, full width on phones, as wide as its date from 768. The intro's
    dates read as text, like the table's (no calendar icons in running text). */
 .aw-camp--sc-stray-dogs #tracker .aw-camp-lede .aw-date .kit-ico { display: none; }
-.aw-camp--sc-stray-dogs .aw-camp-tracker.is-picked tbody tr[hidden] { display: none; }
-.aw-camp--sc-stray-dogs #tracker > .aw-sc-pick { display: flex; align-items: center; gap: var(--kit-space-3); margin: var(--kit-space-5) 0 0; }
-.aw-camp--sc-stray-dogs #tracker > .aw-sc-pick > label { margin: 0; color: var(--camp-primary); font-weight: var(--kit-weight-bold); white-space: nowrap; }
-.aw-camp--sc-stray-dogs #tracker > .aw-sc-pick > .kit-field-control { flex: 1 1 auto; min-width: 0; }
+.aw-camp--sc-stray-dogs :is(.aw-camp-tracker, .aw-camp-timeline).is-picked tbody tr[hidden] { display: none; }
+.aw-camp--sc-stray-dogs :is(#tracker, #orders) > .aw-sc-pick { display: flex; align-items: center; gap: var(--kit-space-3); margin: var(--kit-space-5) 0 0; }
+.aw-camp--sc-stray-dogs :is(#tracker, #orders) > .aw-sc-pick > label { margin: 0; color: var(--camp-primary); font-weight: var(--kit-weight-bold); white-space: nowrap; }
+.aw-camp--sc-stray-dogs :is(#tracker, #orders) > .aw-sc-pick > .kit-field-control { flex: 1 1 auto; min-width: 0; }
 @media (min-width: 768px) {
 	.aw-camp--sc-stray-dogs #tracker:has(> .aw-sc-pick) { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--kit-space-5); align-items: center; }
 	.aw-camp--sc-stray-dogs #tracker:has(> .aw-sc-pick) > * { grid-column: 1 / -1; }
 	.aw-camp--sc-stray-dogs #tracker:has(> .aw-sc-pick) > h2 { grid-column: 1; grid-row: 1; }
 	.aw-camp--sc-stray-dogs #tracker > .aw-sc-pick { grid-column: 2; grid-row: 1; margin: 0; }
+	.aw-camp--sc-stray-dogs #orders > .aw-sc-pick > .kit-field-control { flex: 0 1 auto; }
 	/* one row at a time: the columns size to that row, so the several-states row (15 names) stays under 800 at 768 */
 	.aw-camp--sc-stray-dogs .aw-camp-tracker.is-picked table { table-layout: auto; }
 	.aw-camp--sc-stray-dogs .aw-camp-tracker.is-picked th:nth-child(n) { width: auto; }
 	.aw-camp--sc-stray-dogs .aw-camp-tracker.is-picked th:first-child { white-space: nowrap; }
 }
+/* What you can do: the card fold (campaign.js) is the theme's details block (kit.css .wp-block-details, its 44px summary,
+   "+" marker and focus ring) inside the card, so the card's own padding stands in for the block's rule and summary
+   padding. */
+.aw-camp--sc-stray-dogs #act .aw-camp-card-fold { border-bottom: 0; }
+.aw-camp--sc-stray-dogs #act .aw-camp-card-fold > summary { padding-block: 0; }
+.aw-camp--sc-stray-dogs #act .aw-camp-card-fold > summary > h3 { margin: 0; }
+.aw-camp--sc-stray-dogs #act .aw-camp-card-fold > :not(summary) { margin: var(--kit-space-2) 0 0; }
+/* In the news and Read the law: the rest of the cards in one fold under the first row (campaign.js awScMore), the theme's
+   details block. In the news lays its cards straight into the row's grid, so its fold spans the row and lays its own
+   cards out the same way (one column on phones, two from 768); Read the law's list keeps its own grid rules. */
+.aw-camp--sc-stray-dogs .aw-sc-more { margin-top: var(--kit-space-4); }
+.aw-camp.aw-camp--sc-stray-dogs #latest .aw-sc-more { grid-column: 1 / -1; margin: 0; }
+.aw-camp.aw-camp--sc-stray-dogs #latest .aw-sc-more > ul { display: grid; gap: var(--kit-space-4); grid-template-columns: minmax(0, 1fr); margin: 0 0 var(--kit-space-4); padding: 0; list-style: none; }
+@media (min-width: 768px) { .aw-camp.aw-camp--sc-stray-dogs #latest .aw-sc-more > ul { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 /* The hero at --kit-hero-h on every phone (Layout rules 4; at 360x640 it was 696): its section padding one step down
    (--kit-section-y at --kit-space-5) and the summary straight under the H1's own margin */
 @media (max-width: 767px) {
@@ -637,9 +677,12 @@
 /* aw.css sets card titles to h3 size with !important, and Kits gives card children inline margins; these are list rows */
 .aw-camp .aw-camp-docs-q .wp-block-post-title { margin: 0 !important; font-size: var(--kit-type-h3) !important; font-weight: var(--kit-weight-strong); letter-spacing: 0; line-height: 1.4; }
 .aw-camp .aw-camp-docs-q .wp-block-post-title a { color: var(--kit-color-text); text-decoration: none; }
-.aw-camp .aw-camp-docs-q .wp-block-post-title a::after { content: ""; position: absolute; inset: 0; } /* the whole card is the link */
-.aw-camp .aw-camp-docs-q .wp-block-post-title a:focus-visible { outline: none; }
-.aw-camp-docs-q li:has(a:focus-visible) { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
+.aw-camp .aw-camp-docs-q .wp-block-post-title a::after,
+.aw-camp--diwali #tonight .aw-camp-steps > li:last-child a::after { content: ""; position: absolute; inset: 0; } /* the whole card is the link */
+.aw-camp .aw-camp-docs-q .wp-block-post-title a:focus-visible,
+.aw-camp--diwali #tonight .aw-camp-steps > li:last-child a:focus-visible { outline: none; }
+.aw-camp-docs-q li:has(a:focus-visible),
+.aw-camp--diwali #tonight .aw-camp-steps > li:last-child:has(a:focus-visible) { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
 
 /* What happens next: a step line */
 .aw-camp-steps { list-style: none; margin: var(--kit-space-4) 0 0; padding: 0; counter-reset: aw-step; display: grid; gap: var(--kit-space-4); grid-template-columns: 1fr; }

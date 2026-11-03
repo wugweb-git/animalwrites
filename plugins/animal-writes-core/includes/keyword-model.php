@@ -74,7 +74,11 @@ const AW_SI_RESET_COLUMNS = array(
  */
 function aw_si_reset_sql( $keep ) {
 	$out = array( 'roles = roles & ' . (int) $keep, 'group_id = id' );
-	foreach ( AW_SI_RESET_COLUMNS as $col => $v ) {
+	$cols = AW_SI_RESET_COLUMNS;
+	if ( function_exists( 'aw_kw_ready' ) && aw_kw_ready() ) {
+		$cols['quick_win'] = 0; // Keyword table version 3: the stored quick-win flag goes too.
+	}
+	foreach ( $cols as $col => $v ) {
 		$out[] = $col . ' = ' . ( null === $v ? 'NULL' : ( is_int( $v ) ? (string) $v : "''" ) );
 	}
 	return implode( ', ', $out );

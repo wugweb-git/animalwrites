@@ -847,13 +847,22 @@
 .aw-camp.aw-camp #latest .kit-card > .kit-card-body { flex: 1; min-width: 0; padding: 0; }
 /* Below 1200 the picture beside the whole body left the text 165px wide: the meta row broke in two and Kits cut titles
    to three lines with "…". Here the meta row runs the card's width on top, a square picture (--kit-thumb-sm on phones,
-   --kit-thumb-md on tablets) sits beside the title, and the title shows in full. */
+   --kit-thumb-md on tablets) sits beside the title, and the title shows in full.
+   Not a Kits variant: kit-card--stacked-sm/-md (kit.css) put the picture beside the whole body, meta row included. Tested
+   on live at 375 (3 Nov 2026): stacked-sm gives a 209px text column, all 14 meta rows on two lines and 5 titles cut;
+   stacked-md 165px, 14 on two lines, 7 titles and 9 meta rows cut. No variant puts the meta row above the picture. */
 @media (max-width: 1199px) {
 	.aw-camp.aw-camp #latest .kit-card { display: grid; grid-template-columns: var(--kit-thumb-md) minmax(0, 1fr); grid-template-areas: "meta meta" "media title"; align-items: start; gap: var(--kit-space-3) var(--kit-space-4); }
 	.aw-camp.aw-camp #latest .kit-card > .kit-card-body { display: contents; }
-	.aw-camp.aw-camp #latest .kit-card-metarow { grid-area: meta; flex-wrap: nowrap; }
+	/* One row when the date, place and first chip fit; on a narrower card the chip goes under the date whole, never cut.
+	   Only the first chip sets the chips' minimum width (later chips wrap their words, and Kits hides them off the row).
+	   Kits' own metarow rule (chips flex 1 1 8rem, meta may shrink) cuts the last meta item here: at 375 "2 min read" on
+	   the 8 guides and "New Delhi", so the meta keeps its width (as Home's guide rows, aw.css .aw-ed-learn). */
+	.aw-camp.aw-camp #latest .kit-card-metarow { grid-area: meta; }
 	.aw-camp.aw-camp #latest .kit-card-metarow > .kit-card-meta { flex: none; }
-	.aw-camp.aw-camp #latest .kit-card-metarow > .kit-card-chips { flex: 1 1 0; }
+	.aw-camp.aw-camp #latest .kit-card-metarow > .kit-card-chips { flex: 1 1 0; min-width: min-content; }
+	.aw-camp.aw-camp #latest .kit-card-metarow > .kit-card-chips > :first-child { flex: none; }
+	.aw-camp.aw-camp #latest .kit-card-metarow > .kit-card-chips > :not(:first-child) .kit-tag-text { white-space: normal; }
 	.aw-camp.aw-camp #latest .kit-card > .kit-card-media { grid-area: media; width: 100%; max-width: none; aspect-ratio: 1; }
 	.aw-camp.aw-camp #latest .kit-card > .kit-card-media img { width: 100%; height: 100%; object-fit: cover; }
 	.aw-camp.aw-camp #latest .kit-card-title { grid-area: title; margin: 0; }

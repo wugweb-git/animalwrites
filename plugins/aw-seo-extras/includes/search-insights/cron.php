@@ -31,18 +31,39 @@ function aw_si_daily( bool $by_hand = false ): array {
 	$out        = array( 'seed' => aw_si_seed() );
 	$gsc        = aw_si_gsc_run();
 	$out['gsc'] = $gsc;
+	// Roles, the calculation and topics are one entry in the run log ("Keyword roles"): its Detail shows the seed's
+	// problem, the role counts, the priorities worked out and any write that failed.
 	aw_si_run_start( 'roles' );
+	$errors = array();
+	if ( ! empty( $out['seed']['error'] ) ) {
+		$errors[] = __( 'The keyword map seed file is missing, so the map was not loaded.', 'aw-seo-extras' );
+	}
+	$failed = '';
 	try {
 		$out['roles'] = aw_si_sync_roles();
-		aw_si_run_ok( 'roles', $out['roles'] );
 	} catch ( Throwable $e ) {
-		aw_si_run_fail( 'roles', $e->getMessage() );
+		$failed       = $e->getMessage();
+		$out['roles'] = array();
 	}
-	$out['compute'] = aw_si_compute();
+	try {
+		$out['compute'] = aw_si_compute();
+	} catch ( Throwable $e ) {
+		$errors[] = __( 'Priorities could not be worked out: ', 'aw-seo-extras' ) . $e->getMessage();
+	}
 	try {
 		$out['topics'] = aw_si_sync_topics(); // After the calculation: it reads the page Google shows most.
 	} catch ( Throwable $e ) {
-		aw_si_run_fail( 'roles', $e->getMessage() );
+		$errors[] = __( 'Topics could not be updated: ', 'aw-seo-extras' ) . $e->getMessage();
+	}
+	$info           = $out['roles'];
+	$info['errors'] = array_merge( $errors, (array) ( $info['errors'] ?? array() ), (array) ( $out['compute']['errors'] ?? array() ) );
+	foreach ( array( 'P1', 'P2', 'P3', 'P4' ) as $p ) {
+		$info['prio'][ $p ] = (int) ( $out['compute'][ $p ] ?? 0 );
+	}
+	if ( '' !== $failed ) {
+		aw_si_run_fail( 'roles', $failed ); // the priorities above still ran, on yesterday's roles
+	} else {
+		aw_si_run_ok( 'roles', $info );
 	}
 	return $out;
 }

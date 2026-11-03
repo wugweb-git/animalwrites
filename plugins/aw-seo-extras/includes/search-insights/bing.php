@@ -92,8 +92,7 @@ function aw_si_bing_date( string $d ): string {
 
 /** Days of figures stored: fewer than the rollup keeps as days, so a day already rolled up is never stored again. */
 function aw_si_bing_days(): int {
-	$keep = defined( 'AW_SI_KEEP_DAYS' ) ? (int) AW_SI_KEEP_DAYS : 90;
-	return max( 1, min( AW_SI_BING_DAYS, $keep - 5 ) );
+	return max( 1, min( AW_SI_BING_DAYS, aw_si_keep_days() - 5 ) );
 }
 
 /**
