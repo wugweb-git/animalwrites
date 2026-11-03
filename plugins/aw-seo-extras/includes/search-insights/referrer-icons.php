@@ -1,6 +1,6 @@
 <?php
 /**
- * Site icons beside the referring sources on the Overview (Top referrers, AI referrals, Campaigns by source).
+ * Names and site icons of the referring sources (Top referrers, AI referrals, the Pages columns).
  *
  * The icon comes from the publishers' icons (aw_favicon_url() in Kits Core) when the host is a known publisher, else
  * from option aw_si_ref_icons (host => attachment ID, 0 = tried and none found). That option fills on Kits Core's hourly
@@ -72,12 +72,97 @@ function aw_si_ref_icon( string $src ): string {
 }
 
 /**
- * A source with its icon, as HTML.
+ * The name a source is shown under: one name per site, so "ig" and l.instagram.com are both Instagram. A site without a
+ * name of its own shows its host; a source that is not a site (direct, a campaign name) shows as GA4 gives it.
+ *
+ * @param string $src GA4 session source.
+ */
+function aw_si_referrer_label( string $src ): string {
+	$host  = aw_si_ref_host( $src );
+	$names = array(
+		'instagram.com'         => 'Instagram',
+		'facebook.com'          => 'Facebook',
+		'x.com'                 => 'X',
+		'linkedin.com'          => 'LinkedIn',
+		'reddit.com'            => 'Reddit',
+		'whatsapp.com'          => 'WhatsApp',
+		'telegram.org'          => 'Telegram',
+		'threads.com'           => 'Threads',
+		'youtube.com'           => 'YouTube',
+		'linktr.ee'             => 'Linktree',
+		'chatgpt.com'           => 'ChatGPT',
+		'chat.openai.com'       => 'ChatGPT',
+		'perplexity.ai'         => 'Perplexity',
+		'gemini.google.com'     => 'Gemini',
+		'copilot.microsoft.com' => 'Copilot',
+		'claude.ai'             => 'Claude',
+		'google.com'            => 'Google',
+		'bing.com'              => 'Bing',
+		'duckduckgo.com'        => 'DuckDuckGo',
+	);
+	$names = (array) apply_filters( 'aw_si_referrer_names', $names );
+	if ( '' === $host ) {
+		return trim( $src );
+	}
+	return (string) ( $names[ $host ] ?? $host );
+}
+
+/**
+ * Rows of one source each, merged into one row per name (aw_si_referrer_label()): the number fields are added up, the
+ * earliest "since" is kept. Order: as the first row of each name came.
+ *
+ * @param object[] $rows   Rows with a txt field.
+ * @param string[] $fields Number fields to add up.
+ * @return object[] Rows with txt = the source of the biggest row and label = the name.
+ */
+function aw_si_ref_merge( array $rows, array $fields ): array {
+	$out = array();
+	foreach ( $rows as $r ) {
+		$label = aw_si_referrer_label( (string) $r->txt );
+		$key   = strtolower( $label );
+		if ( ! isset( $out[ $key ] ) ) {
+			$out[ $key ]        = clone $r;
+			$out[ $key ]->label = $label;
+			continue;
+		}
+		foreach ( $fields as $f ) {
+			$out[ $key ]->$f = (float) $out[ $key ]->$f + (float) $r->$f;
+		}
+		if ( isset( $r->since ) && (string) $r->since < (string) $out[ $key ]->since ) {
+			$out[ $key ]->since = $r->since;
+		}
+	}
+	return array_values( $out );
+}
+
+/**
+ * The two names that sent most, each with its icon, as HTML (the Pages columns).
+ *
+ * @param array $by Source => sessions.
+ */
+function aw_si_ref_top( array $by ): string {
+	$n   = array();
+	$src = array();
+	foreach ( $by as $s => $v ) {
+		$label         = aw_si_referrer_label( (string) $s );
+		$n[ $label ]   = ( $n[ $label ] ?? 0 ) + (int) $v;
+		$src[ $label ] = $src[ $label ] ?? (string) $s;
+	}
+	arsort( $n );
+	$out = array();
+	foreach ( array_slice( array_keys( $n ), 0, 2 ) as $label ) {
+		$out[] = aw_si_ref_icon( $src[ $label ] ) . ' ' . esc_html( (string) $label );
+	}
+	return implode( ', ', $out );
+}
+
+/**
+ * A source with its icon and its name, as HTML.
  *
  * @param string $src GA4 session source.
  */
 function aw_si_ref_html( string $src ): string {
-	return aw_si_ref_icon( $src ) . ' ' . esc_html( $src );
+	return aw_si_ref_icon( $src ) . ' ' . esc_html( aw_si_referrer_label( $src ) );
 }
 
 /** The hosts the Overview shows (the 90 days of referral and AI rows) that have no icon yet and were not tried. */

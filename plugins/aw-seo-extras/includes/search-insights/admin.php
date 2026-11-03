@@ -551,6 +551,8 @@ function aw_si_box_ai(): void {
 		echo '<p>' . esc_html__( 'No AI referrals recorded yet (GA4 runs daily at 07:20 IST).', 'aw-seo-extras' ) . '</p>';
 		return;
 	}
+	$by_src = aw_si_ref_merge( $by_src, array( 'n' ) ); // One row per site: "ig" and l.instagram.com are both Instagram.
+	usort( $by_src, fn( $a, $b ) => (float) $b->n <=> (float) $a->n );
 	$parts = array();
 	foreach ( $by_src as $r ) {
 		$parts[] = aw_si_ref_html( (string) $r->txt ) . ': ' . esc_html( number_format_i18n( (int) $r->n ) );
@@ -577,7 +579,11 @@ function aw_si_box_referrers(): void {
 	$d90   = $today->modify( "-{$keep} days" )->format( 'Y-m-d' ); // Daily rows are kept this long.
 	$skip  = aw_si_ga4_skip_sql();
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name and fixed dates only.
-	$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT txt, SUM(IF(metric = 'ref' AND d >= %s, value, 0)) s28, SUM(IF(metric = 'ref_eng' AND d >= %s, value, 0)) e28, SUM(IF(metric = 'ref_key' AND d >= %s, value, 0)) k28, SUM(IF(metric = 'ref', value, 0)) s90, MIN(d) since FROM {$o} WHERE src = 'ga4' AND metric IN ('ref', 'ref_eng', 'ref_key') AND period = 'day' AND d >= %s{$skip} GROUP BY txt ORDER BY s28 DESC, s90 DESC LIMIT 20", $d28, $d28, $d28, $d90 ) );
+	$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT txt, SUM(IF(metric = 'ref' AND d >= %s, value, 0)) s28, SUM(IF(metric = 'ref_eng' AND d >= %s, value, 0)) e28, SUM(IF(metric = 'ref_key' AND d >= %s, value, 0)) k28, SUM(IF(metric = 'ref', value, 0)) s90, MIN(d) since FROM {$o} WHERE src = 'ga4' AND metric IN ('ref', 'ref_eng', 'ref_key') AND period = 'day' AND d >= %s{$skip} GROUP BY txt ORDER BY s28 DESC, s90 DESC LIMIT 80", $d28, $d28, $d28, $d90 ) );
+	// One row per site ("ig" and l.instagram.com are both Instagram), then the top 20.
+	$rows = aw_si_ref_merge( $rows, array( 's28', 'e28', 'k28', 's90' ) );
+	usort( $rows, fn( $a, $b ) => array( (float) $b->s28, (float) $b->s90 ) <=> array( (float) $a->s28, (float) $a->s90 ) );
+	$rows = array_slice( $rows, 0, 20 );
 	if ( ! $rows ) {
 		echo '<p>' . esc_html__( 'No referrals recorded yet (GA4 runs daily at 07:20 IST).', 'aw-seo-extras' ) . '</p>';
 	} else {
@@ -970,6 +976,14 @@ function aw_si_settings_tab(): void {
 		? esc_html( sprintf( __( 'Seeded once on %s from docs/seo/keyword-map.md and the 21 Oct rankings. The table here is the source of truth now.', 'aw-seo-extras' ), wp_date( 'j M Y, H:i', $seeded ) ) )
 		: esc_html__( 'Not seeded yet: the first run seeds it.', 'aw-seo-extras' );
 	echo '</p></td></tr>';
+	if ( function_exists( 'aw_seo_settings_embed' ) && current_user_can( 'manage_options' ) ) {
+		echo '<tr><th scope="row">' . esc_html__( 'Numbers', 'aw-seo-extras' ) . '</th><td>';
+		if ( isset( $_GET['saved'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- a notice only.
+			echo '<div class="notice notice-success inline"><p>' . esc_html( 'reset' === $_GET['saved'] ? __( 'Defaults restored.', 'aw-seo-extras' ) : __( 'Settings saved.', 'aw-seo-extras' ) ) . '</p></div>'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		}
+		aw_seo_settings_embed( 'search-insights' );
+		echo '</td></tr>';
+	}
 	echo '<tr><th scope="row">' . esc_html__( 'Run now', 'aw-seo-extras' ) . '</th><td>';
 	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_si_run">';
 	wp_nonce_field( 'aw_si_run' );
