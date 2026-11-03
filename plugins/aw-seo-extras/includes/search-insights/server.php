@@ -28,9 +28,10 @@ const AW_SI_SRV_DAYS = 90;
 const AW_SI_SRV_URLS = 100; // distinct addresses kept per day and kind; more are counted as "(other)".
 
 /**
- * Crawlers counted, as name => user-agent token (matched case-insensitively, first match wins, so the more specific
- * tokens come first). Google-Extended and Applebot-Extended are robots.txt names only (Google and Apple crawl with
- * Googlebot and Applebot), so they cannot be seen in requests.
+ * The crawler watch list (owner, 3 Nov 2026), as name => user-agent token, matched case-insensitively; the first match
+ * wins, so the more specific tokens come first. Every name always has a row on the tab, with 0 when it made no
+ * requests. An empty token is a robots.txt name only (Google-Extended, Applebot-Extended: Google and Apple crawl with
+ * Googlebot and Applebot), which never visits and so is never counted.
  *
  * @return array<string,string>
  */
@@ -38,23 +39,34 @@ function aw_si_srv_bots(): array {
 	return (array) apply_filters(
 		'aw_si_srv_bots',
 		array(
-			'OAI-SearchBot'      => 'OAI-SearchBot',
-			'ChatGPT-User'       => 'ChatGPT-User',
-			'GPTBot'             => 'GPTBot',
-			'Claude-User'        => 'Claude-User',
-			'Claude-SearchBot'   => 'Claude-SearchBot',
-			'ClaudeBot'          => 'ClaudeBot',
-			'Perplexity-User'    => 'Perplexity-User',
-			'PerplexityBot'      => 'PerplexityBot',
-			'Bytespider'         => 'Bytespider',
-			'meta-webindexer'    => 'meta-webindexer',
-			'meta-externalagent' => 'meta-externalagent',
-			'Amazonbot'          => 'Amazonbot',
-			'Applebot'           => 'Applebot',
-			'CCBot'              => 'CCBot',
-			'PetalBot'           => 'PetalBot',
-			'Googlebot'          => 'Googlebot',
-			'bingbot'            => 'bingbot',
+			'OAI-SearchBot'         => 'OAI-SearchBot',
+			'ChatGPT-User'          => 'ChatGPT-User',
+			'GPTBot'                => 'GPTBot',
+			'Claude-User'           => 'Claude-User',
+			'Claude-SearchBot'      => 'Claude-SearchBot',
+			'ClaudeBot'             => 'ClaudeBot',
+			'Perplexity-User'       => 'Perplexity-User',
+			'PerplexityBot'         => 'PerplexityBot',
+			'MistralAI-User'        => 'MistralAI-User',
+			'cohere-ai'             => 'cohere-ai',
+			'YouBot'                => 'YouBot',
+			'Google-InspectionTool' => 'Google-InspectionTool',
+			'GoogleOther'           => 'GoogleOther',
+			'Googlebot'             => 'Googlebot',
+			'Google-Extended'       => '',
+			'Bingbot'               => 'bingbot',
+			'Applebot'              => 'Applebot',
+			'Applebot-Extended'     => '',
+			'Amazonbot'             => 'Amazonbot',
+			'DuckDuckBot'           => 'DuckDuckBot',
+			'YandexBot'             => 'YandexBot',
+			'Baiduspider'           => 'Baiduspider',
+			'meta-externalagent'    => 'meta-externalagent',
+			'meta-webindexer'       => 'meta-webindexer',
+			'Bytespider'            => 'Bytespider',
+			'CCBot'                 => 'CCBot',
+			'PetalBot'              => 'PetalBot',
+			'Diffbot'               => 'Diffbot',
 		)
 	);
 }
@@ -69,7 +81,7 @@ function aw_si_srv_bot( string $ua ): string {
 		return '';
 	}
 	foreach ( aw_si_srv_bots() as $name => $token ) {
-		if ( false !== stripos( $ua, (string) $token ) ) {
+		if ( '' !== (string) $token && false !== stripos( $ua, (string) $token ) ) {
 			return (string) $name;
 		}
 	}
@@ -276,24 +288,46 @@ add_action(
 		$days = aw_si_srv_days();
 		echo '<p>' . esc_html__( 'What the server sees, per day, for 90 days. The host gives no access log, so total requests, bandwidth and visitor countries are only in hPanel. Crawler requests and 4xx/5xx answers are counted when a request reaches WordPress; pages the CDN serves from its cache are not counted. No IP address or full user agent is stored.', 'aw-seo-extras' ) . '</p>';
 
-		// Totals per crawler over the stored days.
-		$bots = array();
-		foreach ( $days as $d ) {
+		// Every crawler on the watch list, with 0 when it made no requests.
+		$today   = wp_date( 'Ymd' );
+		$periods = array(
+			'today' => array( __( 'Today', 'aw-seo-extras' ), 1 ),
+			'd7'    => array( __( 'Last 7 days', 'aw-seo-extras' ), 7 ),
+			'd30'   => array( __( 'Last 30 days', 'aw-seo-extras' ), 30 ),
+			'all'   => array( __( 'All stored days', 'aw-seo-extras' ), AW_SI_SRV_DAYS ),
+		);
+		$sums    = array();
+		foreach ( $days as $ymd => $d ) {
+			$age = (int) round( ( strtotime( $today ) - strtotime( (string) $ymd ) ) / DAY_IN_SECONDS );
 			foreach ( (array) ( $d['bots'] ?? array() ) as $b => $n ) {
-				$bots[ $b ] = (int) ( $bots[ $b ] ?? 0 ) + (int) $n;
+				foreach ( $periods as $pk => $per ) {
+					if ( $age < $per[1] ) {
+						$sums[ $b ][ $pk ] = (int) ( $sums[ $b ][ $pk ] ?? 0 ) + (int) $n;
+					}
+				}
 			}
 		}
-		arsort( $bots );
-		echo '<h2>' . esc_html__( 'Crawler requests, all stored days', 'aw-seo-extras' ) . '</h2>';
-		if ( $bots ) {
-			echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Crawler', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Requests', 'aw-seo-extras' ) . '</th></tr></thead><tbody>';
-			foreach ( $bots as $b => $n ) {
-				echo '<tr><td>' . esc_html( $b ) . '</td><td>' . esc_html( number_format_i18n( $n ) ) . '</td></tr>';
-			}
-			echo '</tbody></table>';
-		} else {
-			echo '<p>' . esc_html__( 'None counted yet.', 'aw-seo-extras' ) . '</p>';
+		echo '<h2>' . esc_html__( 'Crawler requests', 'aw-seo-extras' ) . '</h2>';
+		echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Crawler', 'aw-seo-extras' ) . '</th>';
+		foreach ( $periods as $per ) {
+			echo '<th scope="col">' . esc_html( $per[0] ) . '</th>';
 		}
+		echo '<th scope="col">' . esc_html__( 'Note', 'aw-seo-extras' ) . '</th></tr></thead><tbody>';
+		$names = array_keys( aw_si_srv_bots() );
+		foreach ( array_keys( $sums ) as $b ) {
+			if ( ! in_array( $b, $names, true ) ) {
+				$names[] = $b; // a crawler counted under a name since taken off the list.
+			}
+		}
+		foreach ( $names as $b ) {
+			$only = '' === (string) ( aw_si_srv_bots()[ $b ] ?? 'x' );
+			echo '<tr><td>' . esc_html( $b ) . '</td>';
+			foreach ( array_keys( $periods ) as $pk ) {
+				echo '<td>' . esc_html( number_format_i18n( (int) ( $sums[ $b ][ $pk ] ?? 0 ) ) ) . '</td>';
+			}
+			echo '<td>' . ( $only ? esc_html__( 'robots.txt name only, never visits', 'aw-seo-extras' ) : '' ) . '</td></tr>';
+		}
+		echo '</tbody></table>';
 
 		echo '<h2>' . esc_html__( 'Per day', 'aw-seo-extras' ) . '</h2>';
 		$table = new AW_SI_Server_Table( $days );
