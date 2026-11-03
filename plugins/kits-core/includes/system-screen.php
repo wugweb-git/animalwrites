@@ -1,9 +1,10 @@
 <?php
 /**
  * Kits → Design system: a read-only index of the design system, generated from kits-registry.json in the Kits
- * master theme and in the site's child theme. Every component, block, pattern and menu type with its states, its
- * accessibility record and its SEO output; where each is used (from the theme and plugin files); the colour pairs
- * with their contrast worked out from the live tokens; and the tokens themselves. Classes in use with no registry
+ * master theme, in a child theme when there is one, and in active plugins that ship one. Every component, block,
+ * pattern and menu type with its states, its accessibility record and its SEO output; where each is used (from the
+ * theme and plugin files); the colour pairs with their contrast worked out from the live values (colours, fonts and
+ * sizes from Styles, other tokens from the theme's CSS); and the tokens themselves. Classes in use with no registry
  * entry are listed at the top (the deploy check fails on them too). Nothing here changes the site.
  *
  * Every state of every component is drawn on the states sheet (/kits-demo/, private).
@@ -15,14 +16,49 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/** The registry: master first, then the child theme's own entries. */
+/**
+ * Folders that carry the site's design system files: the Kits master theme, a child theme when there is one, then
+ * every active plugin that ships a kits-registry.json in its own folder. With no child theme the theme folder is
+ * listed once.
+ *
+ * @return array Folder paths, master first.
+ */
+function kits_system_dirs() {
+	static $dirs = null;
+	if ( null !== $dirs ) {
+		return $dirs;
+	}
+	$dirs = array_values( array_unique( array( get_template_directory(), get_stylesheet_directory() ) ) );
+
+	$files = function_exists( 'wp_get_active_and_valid_plugins' ) ? (array) wp_get_active_and_valid_plugins() : array(); // Full paths.
+	if ( is_multisite() && function_exists( 'wp_get_active_network_plugins' ) ) {
+		$files = array_merge( $files, (array) wp_get_active_network_plugins() );
+	}
+	$root = realpath( WP_PLUGIN_DIR );
+	if ( false === $root ) {
+		return $dirs;
+	}
+	foreach ( array_unique( $files ) as $file ) {
+		$dir  = dirname( (string) $file );
+		$real = realpath( $dir );
+		if ( false === $real || $real === $root || 0 !== strpos( $real, $root . DIRECTORY_SEPARATOR ) ) { // A single-file plugin has no folder of its own; nothing outside the plugins folder.
+			continue;
+		}
+		if ( is_readable( $dir . '/kits-registry.json' ) && ! in_array( $dir, $dirs, true ) ) {
+			$dirs[] = $dir;
+		}
+	}
+	return $dirs;
+}
+
+/** The registry: master first, then the child theme's entries (if any), then those of active plugins. */
 function kits_registry() {
 	static $reg = null;
 	if ( null !== $reg ) {
 		return $reg;
 	}
 	$reg = array( 'items' => array(), 'nav' => array(), 'nav_status' => array() );
-	foreach ( array_unique( array( get_template_directory(), get_stylesheet_directory() ) ) as $dir ) {
+	foreach ( kits_system_dirs() as $dir ) {
 		$f = $dir . '/kits-registry.json';
 		$j = is_readable( $f ) ? json_decode( (string) file_get_contents( $f ), true ) : null; // phpcs:ignore WordPress.WP.AlternativeFunctions
 		if ( ! is_array( $j ) ) {
@@ -38,10 +74,78 @@ function kits_registry() {
 	return $reg;
 }
 
-/** Custom properties declared in :root of the token stylesheets (base values), name => value. */
+/**
+ * The values Appearance → Editor → Styles owns (colour palette, font families, font sizes, spacing sizes, radius
+ * sizes and the rest), read from the preset custom properties WordPress itself prints in :root / body for the merged
+ * theme.json, style variation and the site's own Styles. Name (without the leading --) => value; later rules win.
+ */
+function kits_styles_values() {
+	static $vals = null;
+	if ( null !== $vals ) {
+		return $vals;
+	}
+	$vals = array();
+	if ( ! function_exists( 'wp_get_global_stylesheet' ) ) {
+		return $vals;
+	}
+	$css = (string) wp_get_global_stylesheet( array( 'variables' ) );
+	if ( ! preg_match_all( '/([^{}]+)\{([^{}]*)\}/', $css, $rules, PREG_SET_ORDER ) ) {
+		return $vals;
+	}
+	foreach ( $rules as $rule ) {
+		$selectors = array_map( 'trim', explode( ',', $rule[1] ) );
+		if ( ! array_intersect( $selectors, array( ':root', 'body' ) ) ) { // Presets scoped to one block are not site-wide.
+			continue;
+		}
+		if ( preg_match_all( '/--(wp--preset--[a-z0-9-]+)\s*:\s*([^;]+);?/i', $rule[2], $decls, PREG_SET_ORDER ) ) {
+			foreach ( $decls as $d ) {
+				$vals[ strtolower( $d[1] ) ] = trim( $d[2] );
+			}
+		}
+	}
+	return $vals;
+}
+
+/**
+ * Site-wide choices in Styles (text, background and link colour, body font and size): label => value, with
+ * var:preset|… references written as the custom property they stand for.
+ */
+function kits_styles_root() {
+	$out = array();
+	if ( ! function_exists( 'wp_get_global_styles' ) ) {
+		return $out;
+	}
+	$rows = array(
+		'Text colour'       => array( 'color', 'text' ),
+		'Background colour' => array( 'color', 'background' ),
+		'Link colour'       => array( 'elements', 'link', 'color', 'text' ),
+		'Body font'         => array( 'typography', 'fontFamily' ),
+		'Body font size'    => array( 'typography', 'fontSize' ),
+	);
+	foreach ( $rows as $label => $path ) {
+		$v = wp_get_global_styles( $path );
+		if ( ! is_string( $v ) || '' === $v ) {
+			continue;
+		}
+		if ( preg_match( '/^var:preset\|([a-z0-9-]+)\|([a-z0-9-]+)$/i', $v, $m ) ) {
+			$v = 'var(--wp--preset--' . $m[1] . '--' . $m[2] . ')';
+		}
+		$out[ $label ] = $v;
+	}
+	return $out;
+}
+
+/**
+ * Custom properties declared in :root of the token stylesheets (base values), then the values from Styles on top,
+ * name => value. Kits tokens that point at a Styles preset (var(--wp--preset--…, fallback)) so resolve to the colour
+ * or size the site uses now, not the fallback written in the CSS.
+ */
 function kits_token_values() {
 	$vals = array();
-	$css  = array( get_template_directory() . '/assets/css/kits-v42.css', get_template_directory() . '/assets/css/kit-tokens.css', get_stylesheet_directory() . '/assets/css/tokens.css' );
+	$css  = array( get_template_directory() . '/assets/css/kits-v42.css', get_template_directory() . '/assets/css/kit-tokens.css' );
+	foreach ( kits_system_dirs() as $dir ) { // The child theme's or the site plugin's own tokens.
+		$css[] = $dir . '/assets/css/tokens.css';
+	}
 	foreach ( array_unique( $css ) as $f ) {
 		$s = is_readable( $f ) ? (string) file_get_contents( $f ) : ''; // phpcs:ignore WordPress.WP.AlternativeFunctions
 		if ( preg_match( '/:root\s*\{(.*?)\n\}/s', $s, $m ) && preg_match_all( '/--([a-z0-9-]+):\s*([^;]+);/', $m[1], $mm, PREG_SET_ORDER ) ) {
@@ -50,14 +154,88 @@ function kits_token_values() {
 			}
 		}
 	}
-	return $vals;
+	return array_merge( $vals, kits_styles_values() );
 }
 
-/** A token's value with var() references followed. */
+/**
+ * Where a token's value comes from: the Styles preset it reaches through var(), or the theme's CSS.
+ *
+ * @param string $name Token name without the leading dashes.
+ * @param array  $vals Every token's value, keyed the same way.
+ */
+function kits_token_source( $name, $vals ) {
+	$styles = kits_styles_values();
+	$seen   = array();
+	for ( $i = 0; $i < 10 && isset( $vals[ $name ] ) && ! isset( $seen[ $name ] ); $i++ ) {
+		if ( isset( $styles[ $name ] ) ) {
+			return 'Styles (<code>--' . esc_html( $name ) . '</code>)';
+		}
+		$seen[ $name ] = true;
+		$ref           = kits_css_var_find( $vals[ $name ] );
+		while ( null !== $ref && ! isset( $vals[ $ref['name'] ] ) && null !== $ref['fallback'] && null !== kits_css_var_find( $ref['fallback'] ) ) {
+			$ref = kits_css_var_find( $ref['fallback'] ); // An unset property: the value comes from its fallback.
+		}
+		if ( null === $ref ) {
+			break;
+		}
+		$name = $ref['name'];
+	}
+	return isset( $styles[ $name ] ) ? 'Styles (<code>--' . esc_html( $name ) . '</code>)' : 'the theme\'s CSS (not in Styles)';
+}
+
+/**
+ * The first var(--name[, fallback]) in a CSS value, with brackets counted so a fallback such as
+ * clamp(1rem, 2vw, 2rem) or var(--other) is kept whole.
+ *
+ * @param string $v CSS value.
+ * @return array|null 'whole' (the var() text), 'name' (without the dashes), 'fallback' (string or null); null if none.
+ */
+function kits_css_var_find( $v ) {
+	$v = (string) $v;
+	if ( ! preg_match( '/var\(\s*--([a-z0-9-]+)\s*/i', $v, $m, PREG_OFFSET_CAPTURE ) ) {
+		return null;
+	}
+	$start = $m[0][1];
+	$depth = 0;
+	$comma = null;
+	$len   = strlen( $v );
+	for ( $j = $start + 3; $j < $len; $j++ ) { // From the "(" of var(.
+		$c = $v[ $j ];
+		if ( '(' === $c ) {
+			++$depth;
+		} elseif ( ')' === $c ) {
+			--$depth;
+			if ( 0 === $depth ) {
+				break;
+			}
+		} elseif ( ',' === $c && 1 === $depth && null === $comma ) {
+			$comma = $j;
+		}
+	}
+	if ( $j >= $len ) { // No closing bracket.
+		return null;
+	}
+	return array(
+		'whole'    => substr( $v, $start, $j - $start + 1 ),
+		'name'     => $m[1][0],
+		'fallback' => null === $comma ? null : trim( substr( $v, $comma + 1, $j - $comma - 1 ) ),
+	);
+}
+
+/**
+ * A token's value with var() references followed.
+ *
+ * @param string $name Token name without the leading dashes.
+ * @param array  $vals Every token's value, keyed the same way.
+ */
 function kits_token_resolve( $name, $vals ) {
 	$v = $vals[ $name ] ?? '';
-	for ( $i = 0; $i < 10 && preg_match( '/var\(--([a-z0-9-]+)(?:,\s*([^)]+))?\)/', $v, $m ); $i++ ) {
-		$v = str_replace( $m[0], $vals[ $m[1] ] ?? ( $m[2] ?? '' ), $v );
+	for ( $i = 0; $i < 10; $i++ ) {
+		$ref = kits_css_var_find( $v );
+		if ( null === $ref ) {
+			break;
+		}
+		$v = str_replace( $ref['whole'], $vals[ $ref['name'] ] ?? ( $ref['fallback'] ?? '' ), $v );
 	}
 	return strtolower( trim( $v ) );
 }
@@ -83,13 +261,19 @@ function kits_contrast( $a, $b ) {
 
 /** Where each class is used: class => list of files (theme and plugin files; kept 12 hours). */
 function kits_class_usage() {
-	$key    = 'kits_class_usage_' . md5( implode( '|', array_map( fn( $f ) => is_readable( $f ) ? filemtime( $f ) : 0, array( get_template_directory() . '/kits-registry.json', get_stylesheet_directory() . '/kits-registry.json', get_template_directory() . '/assets/css/kit.css', get_stylesheet_directory() . '/assets/css/aw.css' ) ) ) ); // new files, new list
+	$watch = array( get_template_directory() . '/assets/css/kit.css' );
+	foreach ( kits_system_dirs() as $dir ) {
+		$watch[] = $dir . '/kits-registry.json';
+		$watch[] = $dir . '/assets/css/aw.css';
+	}
+	$watch  = array_unique( $watch );
+	$key    = 'kits_class_usage_' . md5( implode( '|', array_merge( $watch, array_map( fn( $f ) => is_readable( $f ) ? filemtime( $f ) : 0, $watch ) ) ) ); // New files or folders, new list.
 	$cached = get_transient( $key );
 	if ( is_array( $cached ) ) {
 		return $cached;
 	}
 	$used  = array();
-	$roots = array_unique( array( get_template_directory(), get_stylesheet_directory(), WP_PLUGIN_DIR . '/kits-core', WP_PLUGIN_DIR . '/animal-writes-core' ) );
+	$roots = array_unique( array_merge( kits_system_dirs(), array( WP_PLUGIN_DIR . '/kits-core', WP_PLUGIN_DIR . '/animal-writes-core' ) ) );
 	foreach ( $roots as $root ) {
 		if ( ! is_dir( $root ) ) {
 			continue;
@@ -178,17 +362,40 @@ function kits_system_page() {
 		return;
 	}
 	if ( 'tokens' === $tab ) {
-		$cells = array();
+		$cells  = array();
+		$swatch = fn( $r ) => preg_match( '/^#[0-9a-f]{3,8}$/', $r ) ? '<span style="display:inline-block;width:14px;height:14px;border:1px solid #ccc;vertical-align:middle;margin-right:6px;background:' . esc_attr( $r ) . '"></span>' : '';
+		foreach ( kits_styles_root() as $label => $v ) { // Site-wide choices in Styles.
+			$r       = kits_token_resolve( '_', array_merge( $vals, array( '_' => $v ) ) );
+			$cells[] = array(
+				'token'    => esc_html( $label ),
+				'value'    => '<code>' . esc_html( $v ) . '</code>',
+				'resolves' => $swatch( $r ) . '<code>' . esc_html( $r ) . '</code>',
+				'from'     => 'Styles',
+			);
+		}
 		foreach ( $vals as $k => $v ) {
-			if ( 0 !== strpos( $k, 'kit-' ) ) {
+			if ( 0 !== strpos( $k, 'kit-' ) && 0 !== strpos( $k, 'wp--preset--' ) ) {
 				continue;
 			}
-			$r  = kits_token_resolve( $k, $vals );
-			$sw = preg_match( '/^#[0-9a-f]{3,8}$/', $r ) ? '<span style="display:inline-block;width:14px;height:14px;border:1px solid #ccc;vertical-align:middle;margin-right:6px;background:' . esc_attr( $r ) . '"></span>' : '';
-			$cells[] = array( 'token' => '<code>--' . esc_html( $k ) . '</code>', 'value' => '<code>' . esc_html( $v ) . '</code>', 'resolves' => $sw . '<code>' . esc_html( $r ) . '</code>' );
+			$r       = kits_token_resolve( $k, $vals );
+			$cells[] = array(
+				'token'    => '<code>--' . esc_html( $k ) . '</code>',
+				'value'    => '<code>' . esc_html( $v ) . '</code>',
+				'resolves' => $swatch( $r ) . '<code>' . esc_html( $r ) . '</code>',
+				'from'     => kits_token_source( $k, $vals ),
+			);
 		}
-		kits_simple_table( 'tokens', array( 'token' => 'Token', 'value' => 'Value', 'resolves' => 'Resolves to' ), $cells );
-		echo '<p>Base values (phones). Sizes that change at 768px and 1200px are fluid (clamp) or set in the token file.</p></div>';
+		kits_simple_table(
+			'tokens',
+			array(
+				'token'    => 'Token',
+				'value'    => 'Value',
+				'resolves' => 'Resolves to',
+				'from'     => 'From',
+			),
+			$cells
+		);
+		echo '<p>Base values (phones). Sizes that change at 768px and 1200px are fluid (clamp) or set in the token file. Values from Styles are the ones the site uses now (theme.json, the style variation and any change made in Appearance → Editor → Styles); change them there.</p></div>';
 		return;
 	}
 	if ( 'contrast' === $tab ) {
