@@ -187,22 +187,34 @@ Checked against the Campaign Content Standard v1.0 (17 Oct).
 | Sitemap | Pass | In aw_campaign-sitemap.xml |
 | hreflang | None | English only; none needed |
 
-### Post state: what is ready and what is missing (code read, 3 Nov)
-The page stays Active until the owner sets Post (override plus a note); the close date alone changes nothing.
+### Post state: readiness only (3 Nov)
+The owner decides the Post phase on 7 Nov. Nothing for Post is built before then.
 
-| Item (standard) | State | Note |
-|---|---|---|
-| Outcome with an as-of date (A3, D4) | Ready | "Outcome: Pending. As of 5 Nov 2026" by default; the owner sets the outcome and date in Outcome |
-| Letter tool, Share, hero buttons off (D4) | Ready | All `aw-camp-open`; the sent counter refuses once closed |
-| Phone bar off (E) | Ready | Prints only while open |
-| Closed hero | Ready | Owner's copy (17 Oct) |
-| Closed hero button "Get updates on these rules" | Fixed in the build script | Linked to `#updates`, which the page does not have; now `#newsletter`. Live changes when the script runs |
-| Home band in Post (E: outcome only, no action button) | Missing | Not tied to the state: keeps "Send your objection", the countdown and "objections close 5 Nov 2026". Needs the owner's Post band text, or the owner's word to show the standard Home hero instead |
-| Impact: Results and Real-world impact (D4) | Missing | No section. Needs the owner's numbers and words |
-| how-to-help in Post: what the campaign did | Missing | Hidden in Post; nothing replaces it. Owner's words |
-| Count in the closed hero (D3) | Owner's call | Shows from 100 "Yes, I sent it" clicks: self-reported, labelled "objections sent", no "by the campaign's count". The owner said on 21 Oct the stored number is not real |
-| Expired text (D4) | Owner's call | Context says "The public has 30 days to send objections"; FAQ "Who can send an objection?" and "Does one email matter?" describe the open window; share text, meta and og description say "by 5 Nov 2026" |
-| Post order (C) | Differs | Built: hero, next-steps, context, why-it-matters, people, news, library, faq. Standard: hero, why-it-matters, how-to-help, context, impact, next-steps, faq, partners, press, library, news, updates |
+**What happens at 00:00 IST on 6 Nov (code read).** Nothing closes the page. There is no closing job, and only the owner's Post setting (override plus a note) ends Active. Until then:
+- The hero, the letter tool, Share and "Send your objection" all stay. The sent counter keeps counting.
+- Hero countdown: "Today" on 5 Nov. From 6 Nov it reads "Took place on Objections close: 5 Nov 2026", next to the live letter tool.
+- Phone bar: says "Last day today" from 5 Nov until Post.
+- Home band: keeps "objections close 5 Nov 2026", "Your objection counts until 5 November" and "Send your objection". Its countdown turns to "Took place on".
+- The page cache stops at 00:00 IST on 6 Nov, so these show at once.
+
+So from 6 Nov until the owner sets Post, the page and Home still ask people to send objections after the window has closed (standard D4 and E).
+
+| Item | Exists | Missing | Owner decides |
+|---|---|---|---|
+| Outcome with an as-of date | Outcome field; shows "Outcome: Pending. As of 5 Nov 2026" in Post by default | | The outcome and date |
+| Letter tool, Share, hero buttons, phone bar off | All hide in Post; the counter refuses | | When Post starts |
+| Closed hero | Owner's copy (17 Oct) in the build script | | The copy, on 7 Nov |
+| "Get updates on these rules" button | In the closed hero | Links to `#updates`, which the page does not have | Target (for example `#newsletter`), on 7 Nov |
+| Count in the closed hero | `[aw_campaign_count]`, from 100 | Label has no "by the campaign's count"; the count is self-reported "Yes, I sent it" clicks (1,012 on 3 Nov), so it will show | Show it or not (owner, 21 Oct: no count on the page) |
+| Home band in Post | | Not tied to the state | Outcome-only band text, or the standard Home hero |
+| Impact (Results, Real-world impact) | | No section | Numbers and words |
+| how-to-help in Post (what the campaign did) | | Nothing replaces it | Words |
+| FAQ | 7 questions | "Who can send an objection?" and "Does one email matter?" describe the open window | Which stay |
+| What happens next | 4 steps, under the hero in Post | | Wording |
+| Context, share text, meta, og | | "The public has 30 days…"; "by 5 Nov 2026" | New wording |
+| Post order | Built: hero, next-steps, context, why-it-matters, people, news, library, faq | Standard: hero, why-it-matters, how-to-help, context, impact, next-steps, faq, partners, press, library, news, updates | Order |
+| Share images, hero alt text | | | After 7 Nov |
+| Dates entry "Lab Post phase" (7 Nov) | In Animal Writes → Dates | | Delete it (owner) |
 
 ## Speed and cache
 - Inter from one file, preloaded on phones and tablets; the letter preview rebuilt once per frame; rule dialogs join the page on the chip's first tap. 33e61d9a, aee48e9c, 1 Nov
