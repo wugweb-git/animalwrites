@@ -345,25 +345,89 @@ function aw_si_box_sources(): void {
 		$err  = aw_si_run_problem( $src );
 		$icon = $err ? 'dismiss' : ( ! $ok ? 'minus' : ( aw_si_stale( $src ) ? 'clock' : 'yes-alt' ) );
 		$word = $err ? __( 'Failed', 'aw-seo-extras' ) : ( ! $ok ? __( 'Not run yet', 'aw-seo-extras' ) : ( aw_si_stale( $src ) ? __( 'Late', 'aw-seo-extras' ) : __( 'OK', 'aw-seo-extras' ) ) );
-		$info = (array) ( $r['info'] ?? array() );
-		$det  = array();
-		if ( ! empty( $info['up_to'] ) ) {
-			/* translators: %s: date. */
-			$det[] = sprintf( __( 'figures up to %s', 'aw-seo-extras' ), mysql2date( 'j M Y', $info['up_to'] ) );
-		}
-		if ( isset( $info['rows'] ) ) {
-			/* translators: %s: number of rows. */
-			$det[] = sprintf( __( '%s rows', 'aw-seo-extras' ), number_format_i18n( (int) $info['rows'] ) );
-		}
-		if ( ! empty( $info['via'] ) ) {
-			$det[] = (string) $info['via']; // The source used instead, e.g. Rank Math Analytics when Site Kit failed.
-		}
+		$det  = aw_si_run_detail( $src, (array) ( $r['info'] ?? array() ) );
 		if ( $err ) {
 			$det[] = $err;
 		}
 		echo '<tr><td>' . esc_html( $s['label'] ) . '</td><td>' . esc_html( $ok ? wp_date( 'j M Y, H:i', $ok ) : __( 'Never', 'aw-seo-extras' ) ) . '</td><td><span class="dashicons dashicons-' . esc_attr( $icon ) . '" aria-hidden="true"></span> ' . esc_html( $word ) . '</td><td>' . esc_html( implode( '; ', $det ) ) . '</td></tr>';
 	}
 	echo '</tbody></table>';
+}
+
+/**
+ * What a source's last run recorded, as short phrases for the Sources box: the date of the figures and the rows, plus
+ * each source's own counts (keyword roles, the rollup, crawler checks, PageSpeed pages not measured, GA4 warnings).
+ *
+ * @param string $src  Source key.
+ * @param array  $info The run's info.
+ * @return string[]
+ */
+function aw_si_run_detail( string $src, array $info ): array {
+	$n   = fn( $k ) => number_format_i18n( (int) ( $info[ $k ] ?? 0 ) );
+	$det = array();
+	if ( ! empty( $info['up_to'] ) ) {
+		/* translators: %s: date. */
+		$det[] = sprintf( __( 'figures up to %s', 'aw-seo-extras' ), mysql2date( 'j M Y', $info['up_to'] ) );
+	}
+	if ( isset( $info['rows'] ) ) {
+		/* translators: %s: number of rows. */
+		$det[] = sprintf( __( '%s rows', 'aw-seo-extras' ), $n( 'rows' ) );
+	}
+	if ( ! empty( $info['via'] ) ) {
+		$det[] = (string) $info['via']; // The source used instead, e.g. Rank Math Analytics when Site Kit failed.
+	}
+	if ( 'roles' === $src && isset( $info['focus_kw'] ) ) {
+		/* translators: 1: focus keyphrases, 2: posts, 3: terms, 4: listing names, 5: Sourcing keywords, 6: brand searches. */
+		$det[] = sprintf( __( '%1$s focus keyphrases on %2$s posts and %3$s terms; %4$s listing names; %5$s Sourcing keywords; %6$s brand searches', 'aw-seo-extras' ), $n( 'focus_kw' ), $n( 'focus_posts' ), $n( 'focus_terms' ), $n( 'entities' ), $n( 'sourcing' ), $n( 'brand' ) );
+	}
+	if ( 'rollup' === $src && isset( $info['daily'] ) ) {
+		/* translators: 1: daily rows, 2: monthly rows. */
+		$det[] = sprintf( __( '%1$s daily rows older than 90 days rolled into %2$s monthly rows', 'aw-seo-extras' ), $n( 'daily' ), $n( 'monthly' ) );
+		if ( ! empty( $info['cutoff'] ) ) {
+			/* translators: %s: date. */
+			$det[] = sprintf( __( 'daily rows kept from %s', 'aw-seo-extras' ), mysql2date( 'j M Y', (string) $info['cutoff'] ) );
+		}
+	}
+	if ( isset( $info['checks'] ) && is_numeric( $info['checks'] ) ) {
+		/* translators: 1: checks, 2: problems. */
+		$det[] = sprintf( __( '%1$s checks, %2$s problems (Crawler access box)', 'aw-seo-extras' ), $n( 'checks' ), $n( 'problems' ) );
+	}
+	if ( 'bing' === $src && isset( $info['queries'] ) ) {
+		/* translators: 1: searches, 2: pages. */
+		$det[] = sprintf( __( '%1$s searches, %2$s pages', 'aw-seo-extras' ), $n( 'queries' ), $n( 'pages' ) );
+	}
+	if ( 'clarity' === $src && isset( $info['pages'] ) ) {
+		/* translators: 1: pages, 2: pages flagged that day. */
+		$det[] = sprintf( __( '%1$s pages, %2$s flagged that day', 'aw-seo-extras' ), $n( 'pages' ), $n( 'flagged' ) );
+	}
+	if ( 'ga4' === $src ) {
+		if ( isset( $info['nf']['paths'] ) ) {
+			/* translators: %s: number of paths. */
+			$det[] = sprintf( __( '%s 404 paths', 'aw-seo-extras' ), number_format_i18n( (int) $info['nf']['paths'] ) );
+		}
+		if ( isset( $info['camp']['rows'] ) ) {
+			/* translators: %s: number of rows. */
+			$det[] = sprintf( __( '%s campaign rows', 'aw-seo-extras' ), number_format_i18n( (int) $info['camp']['rows'] ) );
+		}
+	}
+	if ( isset( $info['rising'] ) && 0 === strpos( $src, 'rising_' ) ) {
+		/* translators: %s: number of rising terms. */
+		$det[] = sprintf( __( '%s rising', 'aw-seo-extras' ), $n( 'rising' ) );
+	}
+	if ( ! empty( $info['pasted'] ) ) {
+		$det[] = __( 'pasted on the Rising tab', 'aw-seo-extras' );
+	}
+	if ( 'live' === $src ) {
+		$det[] = __( 'monthly, by hand (Check list tab)', 'aw-seo-extras' );
+	}
+	foreach ( array( 'errors', 'warnings' ) as $key ) {
+		$list = array_filter( array_map( 'strval', (array) ( $info[ $key ] ?? array() ) ) );
+		if ( $list ) {
+			/* translators: 1: number of problems, 2: the first one. */
+			$det[] = sprintf( _n( '%1$s problem: %2$s', '%1$s problems, the first: %2$s', count( $list ), 'aw-seo-extras' ), number_format_i18n( count( $list ) ), wp_html_excerpt( (string) reset( $list ), 140, '…' ) );
+		}
+	}
+	return $det;
 }
 
 /** Overview box: counts per priority and view, linked to the Keywords tab. */
@@ -465,9 +529,9 @@ function aw_si_box_ai(): void {
 	}
 	$parts = array();
 	foreach ( $by_src as $r ) {
-		$parts[] = $r->txt . ': ' . number_format_i18n( (int) $r->n );
+		$parts[] = aw_si_ref_html( (string) $r->txt ) . ': ' . esc_html( number_format_i18n( (int) $r->n ) );
 	}
-	echo '<p>' . esc_html( implode( ' · ', $parts ) ) . '</p>';
+	echo '<p>' . implode( ' · ', $parts ) . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above.
 	echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Landing page', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Sessions', 'aw-seo-extras' ) . '</th></tr></thead><tbody>';
 	foreach ( $by_page as $r ) {
 		echo '<tr><td><a href="' . esc_url( home_url( $r->page ) ) . '" target="_blank" rel="noopener">' . esc_html( $r->page ) . '</a></td><td>' . esc_html( number_format_i18n( (int) $r->n ) ) . '</td></tr>';
@@ -495,7 +559,7 @@ function aw_si_box_referrers(): void {
 		$since = min( wp_list_pluck( $rows, 'since' ) );
 		echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Source', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Sessions (28 days)', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Engaged', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Key events', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Sessions (90 days)', 'aw-seo-extras' ) . '</th></tr></thead><tbody>';
 		foreach ( $rows as $r ) {
-			echo '<tr><td>' . esc_html( $r->txt ) . '</td><td>' . esc_html( number_format_i18n( (int) $r->s28 ) ) . '</td><td>' . esc_html( number_format_i18n( (int) $r->e28 ) ) . '</td><td>' . esc_html( number_format_i18n( (int) $r->k28 ) ) . '</td><td>' . esc_html( number_format_i18n( (int) $r->s90 ) ) . '</td></tr>';
+			echo '<tr><td>' . aw_si_ref_html( (string) $r->txt ) . '</td><td>' . esc_html( number_format_i18n( (int) $r->s28 ) ) . '</td><td>' . esc_html( number_format_i18n( (int) $r->e28 ) ) . '</td><td>' . esc_html( number_format_i18n( (int) $r->k28 ) ) . '</td><td>' . esc_html( number_format_i18n( (int) $r->s90 ) ) . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_si_ref_html() escapes.
 		}
 		echo '</tbody></table>';
 		/* translators: %s: first date with referral figures. */
@@ -603,7 +667,7 @@ function aw_si_box_campaigns(): void {
 		'all'    => __( 'All sources', 'aw-seo-extras' ),
 	);
 	$num  = fn( $v ) => null === $v ? '–' : number_format_i18n( (int) round( (float) $v ) );
-	echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Campaign', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'From', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Sessions (landed)', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Key events', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Sessions (viewed)', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Objections sent', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Confirmed', 'aw-seo-extras' ) . '</th></tr></thead><tbody>';
+	echo '<table class="widefat fixed striped"><thead><tr><th scope="col">' . esc_html__( 'Campaign', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'From', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Sessions (landed)', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Key events', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Sessions (viewed)', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Objections sent', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Confirmed', 'aw-seo-extras' ) . '</th></tr></thead><tbody>';
 	foreach ( $t as $slug => $b ) {
 		$first = true;
 		foreach ( $rows as $key => $label ) {
@@ -626,6 +690,19 @@ function aw_si_box_campaigns(): void {
 	}
 }
 
+/**
+ * Whether a site path opens a published post, page or listing now (no request is made: WordPress's own URL lookup).
+ *
+ * @param string $path Site path.
+ */
+function aw_si_path_loads( string $path ): bool {
+	if ( '' === $path || '/' !== $path[0] || preg_match( '/[^\x21-\x7e]|%[0-9a-f]{2}/i', $path ) ) {
+		return false; // Spaces, invisible characters and encoded fragments (%23) never match a page.
+	}
+	$id = url_to_postid( home_url( $path ) );
+	return $id > 0 && 'publish' === get_post_status( $id );
+}
+
 /** Overview box: the 20 paths with the most 404_view events in the stored 28-day window, and where each goes now. */
 function aw_si_box_nf(): void {
 	global $wpdb;
@@ -646,6 +723,8 @@ function aw_si_box_nf(): void {
 		if ( untrailingslashit( $to ) !== untrailingslashit( (string) $r->txt ) ) {
 			/* translators: %s: path the redirect ends at. */
 			$status = sprintf( esc_html__( 'Redirects to %s', 'aw-seo-extras' ), '<a href="' . esc_url( home_url( $to ) ) . '" target="_blank" rel="noopener">' . esc_html( $to ) . '</a>' );
+		} elseif ( aw_si_path_loads( (string) $r->txt ) ) {
+			$status = esc_html__( 'Loads now (the 404s were earlier)', 'aw-seo-extras' );
 		} else {
 			$status = esc_html__( 'Still 404', 'aw-seo-extras' );
 		}
@@ -655,7 +734,7 @@ function aw_si_box_nf(): void {
 	$info = aw_si_runs()['ga4']['info']['nf'] ?? array();
 	$dim  = 'pagePath' === ( $info['dim'] ?? '' ) ? __( 'page path (the custom dimension "path" is not registered in GA4 yet)', 'aw-seo-extras' ) : __( 'the event\'s path parameter', 'aw-seo-extras' );
 	/* translators: 1: last day of the window, 2: what the path comes from. */
-	echo '<p class="description">' . esc_html( sprintf( __( '404_view events in the 28 days to %1$s, by %2$s. 22 Oct 2026 is left out (GA4 test events). Status follows Rank Math redirects (exact and regex) and old slugs; "Still 404" means no redirect, not that the address was checked again.', 'aw-seo-extras' ), wp_date( get_option( 'date_format' ), strtotime( (string) $rows[0]->d ) ), $dim ) ) . '</p>';
+	echo '<p class="description">' . esc_html( sprintf( __( '404_view events in the 28 days to %1$s, by %2$s. 22 Oct 2026 is left out (GA4 test events). Status follows Rank Math redirects (exact and regex) and old slugs; "Loads now" means the address opens a published page today (the 404s came before it existed or during an update); "Still 404" means neither, not that the address was checked again.', 'aw-seo-extras' ), wp_date( get_option( 'date_format' ), strtotime( (string) $rows[0]->d ) ), $dim ) ) . '</p>';
 }
 
 /** Overview box: content gaps (the keyword map's demand gaps and every P2 keyword), with the suggested page type. */
