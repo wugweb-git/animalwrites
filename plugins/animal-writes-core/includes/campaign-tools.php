@@ -156,9 +156,10 @@ add_filter(
 	'render_block',
 	function ( $html, $block ) {
 		$cls = (string) ( $block['attrs']['className'] ?? '' );
-		if ( preg_match( '/(^|\s)aw-camp(\s|$)/', $cls ) && aw_camp_id() ) { // the page wrapper: is-closed lets CSS reorder sections
+		if ( preg_match( '/(^|\s)aw-camp(\s|$)/', $cls ) && aw_camp_id() ) { // the page wrapper: is-closed (Post) or is-pre lets CSS reorder sections
 			aw_camp_cache_until( aw_camp_id() );
-			return aw_camp_is_open( aw_camp_id() ) ? $html : preg_replace( '/^(\s*<[^>]*?class=")([^"]*)"/', '$1$2 is-closed"', $html, 1 ); // appended to the wrapper's own class list
+			$cls = array( 'pre' => 'is-pre', 'post' => 'is-closed' )[ aw_camp_shown_state( aw_camp_id() ) ] ?? ''; // is-closed only after closing; a campaign not open yet is is-pre
+			return '' === $cls ? $html : preg_replace( '/^(\s*<[^>]*?class=")([^"]*)"/', '$1$2 ' . $cls . '"', $html, 1 ); // appended to the wrapper's own class list
 		}
 		$id = aw_camp_id();
 		if ( ! $id ) {
