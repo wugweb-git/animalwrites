@@ -35,7 +35,7 @@
 .aw-camp--lab-rules .aw-camp-poster :is(.aw-camp-stamp, .aw-cd-when) { border-color: var(--camp-line); }
 .aw-camp--lab-rules .aw-camp-dark .aw-camp-gap { box-shadow: inset 0 0 0 2px var(--camp-line); }
 .aw-camp--lab-rules .aw-camp-dark .aw-camp-gap > .kit-ico { color: var(--camp-line); }
-.aw-camp--lab-rules .aw-camp-dark .aw-camp-tier-bar { background: linear-gradient(to right, var(--camp-line) var(--fill), rgb(255 255 255 / 0.12) var(--fill)); }
+.aw-camp--lab-rules .aw-camp-dark .aw-camp-tier-bar { background: linear-gradient(to right, var(--camp-line) var(--aw-tier-fill), rgb(255 255 255 / 0.16) var(--aw-tier-fill)); }
 /* Diwali 2026 (firecrackers and animals): marigold on paper, a night-sky dark band. */
 .aw-camp--diwali {
 	--camp-primary: #a14a05; /* marigold, deepened so white text on it passes 4.5:1 */
@@ -291,20 +291,51 @@
 .aw-camp-grid > :first-child .aw-camp-card-ico { background: rgb(255 255 255 / 0.15); color: var(--camp-on-mark); }
 .aw-camp-grid > :first-child .aw-rule-chip { --kit-chip-border: var(--camp-on-mark); }
 
-/* Pain scale: four steps, the bar grows with the pain */
+/* Pain scale: a pain meter (owner, 3 Nov 2026: thin, animated, mobile first). Each step's bar is four segments, as many
+   lit as the step's level; the segments charge once, step after step, when the ladder first comes on screen. On phones a
+   rail down the left joins the steps and fills as the reader scrolls past each one; the two steps CCSEA reviews carry a
+   crimson node. campaign-lab.js adds is-reveal / is-in (the fill) and is-live / is-on / --aw-seg (the rail); without it,
+   or with reduced motion, every bar and the rail show full and still. */
+@property --aw-tier-fill { syntax: "<percentage>"; inherits: true; initial-value: 100%; }
 .aw-camp-ladder { list-style: none; margin: var(--kit-space-5) 0; padding: 0; display: grid; gap: var(--kit-space-5); grid-template-columns: 1fr; }
 @media (min-width: 768px) { .aw-camp-ladder { grid-template-columns: repeat(2, 1fr); } }
-@media (min-width: 1200px) { .aw-camp-ladder { grid-template-columns: repeat(4, 1fr); } }
+@media (min-width: 1200px) { .aw-camp-ladder { grid-template-columns: repeat(4, 1fr); align-items: start; } } /* side by side, the four bars read as one gauge; the bar stays thin on desktop (owner, 3 Nov 2026: the 6rem block read as a missing picture) */
 /* Tiers are H3 under the section H2 (owner, 25 Oct) with the look they had as H4: aw.css gives content H3s line-height 1.25 !important */
 .aw-camp .aw-camp-ladder .aw-camp-tier h3 { font-size: var(--kit-type-h3) !important; line-height: 1.3 !important; }
 .aw-camp-tier h3 { margin: 0 0 var(--kit-space-2); font-size: var(--kit-type-h3); font-weight: 800; }
 .aw-camp-tier p { margin: 0 0 var(--kit-space-2); }
-.aw-camp-tier { --fill: 100%; }
+.aw-camp-tier { --fill: 100%; position: relative; }
 .aw-camp-tier--1 { --fill: 25%; }
 .aw-camp-tier--2 { --fill: 50%; }
 .aw-camp-tier--3 { --fill: 75%; }
-.aw-camp-tier-bar { display: block; height: 0.75rem; margin-bottom: var(--kit-space-3); border-radius: var(--kit-radius-pill); background: linear-gradient(to right, var(--camp-mark) var(--fill), rgb(255 255 255 / 0.12) var(--fill)); }
-@media (min-width: 1200px) { .aw-camp-ladder { align-items: start; } } /* the bar stays the thin bar on desktop too (owner, 3 Nov 2026: the 6rem block read as a missing picture) */
+/* The meter: the 0.75rem bar cut into four segments a --kit-space-1 apart (the mask is one gap wider than the bar, so the
+   last segment ends flush) */
+.aw-camp-tier-bar {
+	--aw-tier-fill: var(--fill);
+	display: block; height: 0.75rem; margin-bottom: var(--kit-space-3); border-radius: var(--kit-radius-control);
+	background: linear-gradient(to right, var(--camp-mark) var(--aw-tier-fill), rgb(255 255 255 / 0.16) var(--aw-tier-fill));
+	-webkit-mask: repeating-linear-gradient(to right, #000 0 calc(25% - var(--kit-space-1)), transparent 0 25%) 0 0 / calc(100% + var(--kit-space-1)) 100% no-repeat;
+	mask: repeating-linear-gradient(to right, #000 0 calc(25% - var(--kit-space-1)), transparent 0 25%) 0 0 / calc(100% + var(--kit-space-1)) 100% no-repeat;
+	transition: filter var(--kit-motion-base) var(--kit-motion-ease);
+}
+.aw-camp-ladder.is-reveal .aw-camp-tier-bar { --aw-tier-fill: 0%; }
+.aw-camp-ladder.is-reveal.is-in .aw-camp-tier-bar { --aw-tier-fill: var(--fill); transition: --aw-tier-fill calc(var(--kit-motion-slow) * 2) var(--kit-motion-ease) calc(var(--i, 0) * 160ms); }
+@media (hover: hover) and (pointer: fine) { .aw-camp-dark .aw-camp-tier:hover .aw-camp-tier-bar { filter: drop-shadow(0 0 var(--kit-space-2) rgb(255 255 255 / 0.55)); } }
+/* Phones: the rail. A node beside each bar, and a line from each node down to the next. */
+@media (max-width: 767px) {
+	.aw-camp-ladder { padding-inline-start: var(--kit-space-5); }
+	.aw-camp-tier::before { content: ""; position: absolute; z-index: 1; inset-block-start: 0; inset-inline-start: calc(-1 * var(--kit-space-5)); width: 0.75rem; height: 0.75rem; border-radius: 50%; background: var(--camp-line, var(--kit-color-on-ink)); box-shadow: 0 0 0 var(--kit-space-1) rgb(255 255 255 / 0.16); transition: background-color var(--kit-motion-base) var(--kit-motion-ease), box-shadow var(--kit-motion-base) var(--kit-motion-ease); }
+	.aw-camp-tier:is(.aw-camp-tier--3, .aw-camp-tier--4)::before { background: var(--camp-mark); box-shadow: inset 0 0 0 2px var(--camp-line, var(--kit-color-on-ink)), 0 0 0 var(--kit-space-1) rgb(255 255 255 / 0.16); }
+	.aw-camp-tier:not(:last-child)::after { content: ""; position: absolute; inset-block-start: 0.75rem; inset-inline-start: calc(0.375rem - 1px - var(--kit-space-5)); width: 2px; height: calc(100% - 0.75rem + var(--kit-space-5)); background: linear-gradient(to bottom, var(--camp-line, var(--kit-color-on-ink)) var(--aw-seg, 100%), rgb(255 255 255 / 0.16) var(--aw-seg, 100%)); }
+	.aw-camp-ladder.is-live .aw-camp-tier:not(.is-on)::before { background: var(--camp-dark); box-shadow: inset 0 0 0 2px rgb(255 255 255 / 0.45); }
+	.aw-camp-ladder.is-live .aw-camp-tier.is-on::before { animation: aw-tier-node var(--kit-motion-slow) var(--kit-motion-ease) 1; }
+}
+@keyframes aw-tier-node { 50% { transform: scale(1.35); } }
+@media (prefers-reduced-motion: reduce) {
+	.aw-camp-tier-bar, .aw-camp-tier::before { transition: none; }
+	.aw-camp-ladder.is-reveal .aw-camp-tier-bar { --aw-tier-fill: var(--fill); }
+	.aw-camp-ladder.is-live .aw-camp-tier.is-on::before { animation: none; }
+}
 .aw-camp-tier-who { display: inline-flex; align-items: center; gap: var(--kit-space-1); padding: var(--kit-space-1) var(--kit-space-2); border-radius: var(--kit-radius-control); background: rgb(255 255 255 / 0.1); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-strong); }
 .aw-camp-tier-who.is-ext { background: var(--camp-mark); }
 .aw-camp-gap { display: flex; gap: var(--kit-space-3); align-items: flex-start; padding: var(--kit-space-4); border-radius: var(--kit-radius-card); box-shadow: inset 0 0 0 2px var(--camp-mark); }

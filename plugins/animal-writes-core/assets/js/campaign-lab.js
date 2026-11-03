@@ -671,6 +671,69 @@
 	setTimeout(show, 4000);
 })();
 
+/* Pain scale (campaign-lab.css): the meters charge once, step after step, when the ladder first comes on screen (skipped
+   with reduced motion, without IntersectionObserver, or when the page opens on the ladder). On phones the rail fills as
+   the reader scrolls: a step lights once its bar passes 60% of the screen height, and the line to the next step fills
+   with it. Scroll reads are batched to one per frame and run only while the ladder is near the screen. */
+(function () {
+	var ladder = document.querySelector('.aw-camp--lab-rules .aw-camp-ladder');
+	if (!ladder) return;
+	var tiers = ladder.querySelectorAll('.aw-camp-tier');
+	var hasIO = 'IntersectionObserver' in window;
+	var still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+	if (hasIO && !still && ladder.getBoundingClientRect().top > window.innerHeight) {
+		Array.prototype.forEach.call(tiers, function (t, i) { t.style.setProperty('--i', i); });
+		ladder.classList.add('is-reveal');
+		var done = false;
+		var show = function () {
+			if (done) return;
+			done = true;
+			ladder.classList.add('is-in');
+			io.disconnect();
+			setTimeout(function () { ladder.classList.remove('is-reveal', 'is-in'); }, 1600);
+		};
+		var io = new IntersectionObserver(function (e) { if (e[0].isIntersecting) show(); }, { rootMargin: '0px 0px -20% 0px' });
+		io.observe(ladder);
+		setTimeout(show, 8000);
+	}
+
+	if (!hasIO || tiers.length < 2) return;
+	var phone = window.matchMedia('(max-width: 767px)');
+	var near = false, live = false, frame = 0;
+	function paint() {
+		frame = 0;
+		var line = window.innerHeight * 0.6;
+		var tops = Array.prototype.map.call(tiers, function (t) { return t.getBoundingClientRect().top; });
+		Array.prototype.forEach.call(tiers, function (t, i) {
+			t.classList.toggle('is-on', tops[i] < line);
+			if (i < tiers.length - 1) {
+				var seg = Math.min(1, Math.max(0, (line - tops[i]) / (tops[i + 1] - tops[i])));
+				t.style.setProperty('--aw-seg', (seg * 100).toFixed(1) + '%');
+			}
+		});
+	}
+	function onScroll() { if (near && !frame) frame = requestAnimationFrame(paint); }
+	new IntersectionObserver(function (e) { near = e[0].isIntersecting; onScroll(); }, { rootMargin: '50% 0px' }).observe(ladder);
+	function setup() {
+		if (phone.matches === live) return;
+		live = phone.matches;
+		ladder.classList.toggle('is-live', live);
+		if (live) {
+			window.addEventListener('scroll', onScroll, { passive: true });
+			window.addEventListener('resize', onScroll, { passive: true });
+			paint();
+		} else {
+			window.removeEventListener('scroll', onScroll);
+			window.removeEventListener('resize', onScroll);
+			Array.prototype.forEach.call(tiers, function (t) { t.classList.remove('is-on'); t.style.removeProperty('--aw-seg'); });
+		}
+	}
+	setup();
+	if (phone.addEventListener) phone.addEventListener('change', setup);
+	else if (phone.addListener) phone.addListener(setup);
+})();
+
 /* Phone bar: shows once the hero has scrolled away; hidden while the letter tool, the newsletter band or the footer is
    on screen, and for the rest of the session after a letter is confirmed. */
 (function () {
