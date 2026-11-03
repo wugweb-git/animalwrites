@@ -1421,17 +1421,19 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 }
 @media (min-width: 1200px) { .aw-ed-news .aw-news-mosaic .kit-card--stacked-md > .kit-card-media { width: 10rem !important; } }
 /* Phones (owner, 2 Nov 2026: each Home section one screen): the lead is a row like the other two (112px 4:3 picture,
-   date and source, H3 title, no summary); the section went from 1329px (four items, block lead) to 829px. */
+   date and source, H3 title, no summary); the section went from 1329px (four items, block lead) to 829px. The Library
+   lead takes the same rule (3 Nov 2026; 1705 to 1405px at 375). It is the Kits kit-card--stacked-md row restated for a
+   kit-card--block-lg card: the markup is one server render for every width and the lead stays a block card from 768,
+   so the class cannot change at 767. The title is already H3 (kit.css .kit-card-title, !important). */
 @media (max-width: 767px) {
-	.aw-ed-news .aw-news-mosaic > li > .kit-card { gap: var(--kit-space-5); }
-	.aw-ed-news .aw-news-mosaic > li:first-child > .kit-card { flex-direction: row; align-items: flex-start; }
-	.aw-ed-news .aw-news-mosaic > li:first-child > .kit-card[class*="kit-card--block"] { gap: 0; } /* a block card: no card padding, its body padded 24px; the picture gets the same room */
-	.aw-ed-news .aw-news-mosaic > li:first-child > .kit-card > .kit-card-media { flex: none; width: var(--kit-thumb-lg) !important; max-width: 40%; aspect-ratio: 4 / 3; border-radius: var(--kit-radius-media); }
-	.aw-ed-news .aw-news-mosaic > li:first-child > .kit-card[class*="kit-card--block"] > .kit-card-media { margin: var(--kit-space-5) 0 var(--kit-space-5) var(--kit-space-5) !important; } /* !important: Kits sets a card picture's margin to 0 !important (kit.css, card states), which left the lead's picture flush with the card edge */
-	.aw-ed-news .aw-news-mosaic > li:first-child > .kit-card > .kit-card-media img { height: 100%; object-fit: cover; }
-	.aw-ed-news .aw-news-mosaic > li:first-child > .kit-card > .kit-card-body { flex: 1 1 0; }
-	.aw-ed-news .aw-news-mosaic > li:first-child .kit-card-sum { display: none; }
-	.aw-ed-news .aw-news-mosaic > li:first-child .kit-card-title { font-size: var(--kit-type-h3) !important; }
+	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li > .kit-card { gap: var(--kit-space-5); }
+	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li:first-child > .kit-card { flex-direction: row; align-items: flex-start; }
+	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li:first-child > .kit-card[class*="kit-card--block"] { gap: 0; } /* a block card: no card padding, its body padded 24px; the picture gets the same room */
+	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li:first-child > .kit-card > .kit-card-media { flex: none; width: var(--kit-thumb-lg); max-width: 40%; aspect-ratio: 4 / 3; border-radius: var(--kit-radius-media); } /* the kit-card--stacked-md picture (kit.css) */
+	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li:first-child > .kit-card[class*="kit-card--block"] > .kit-card-media { margin: var(--kit-space-5) 0 var(--kit-space-5) var(--kit-space-5) !important; } /* !important over kit.css .kit-card[class*="kit-card--"] > .kit-card-media { margin: 0 !important }, which left the picture flush with the card edge */
+	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li:first-child > .kit-card > .kit-card-media img { height: 100%; object-fit: cover; }
+	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li:first-child > .kit-card > .kit-card-body { flex: 1 1 0; }
+	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li:first-child .kit-card-sum { display: none; } /* as kit.css hides it on kit-card--stacked-md */
 }
 
 /* Card lists (kit-card states, kit.css): the list item is only a wrapper; a one-column list (Library) keeps a gap. */
@@ -1831,20 +1833,6 @@ section.aw-camp-band.aw-ed-hero--campaign { box-sizing: border-box; min-height: 
 .aw-ed-law .aw-news-mosaic .kit-card--stacked-md .kit-card-title { font-size: var(--kit-type-h3) !important; }
 .aw-ed-law .aw-news-mosaic .kit-card--stacked-md > .kit-card-media { aspect-ratio: 4 / 3; }
 .aw-ed-law .aw-news-mosaic .kit-card--stacked-md > .kit-card-media img { height: 100%; object-fit: cover; }
-/* Phones (3 Nov 2026; Home sections fit one phone screen, block-padding-and-sizes): the lead is a row like the two
-   under it, as in Latest news: a --kit-thumb-lg 4:3 picture in the card padding, the date and publisher, the H3 title,
-   no summary. The section went from 1705 to 1405px at 375. */
-@media (max-width: 767px) {
-	.aw-ed-law .aw-news-mosaic > li > .kit-card { gap: var(--kit-space-5); }
-	.aw-ed-law .aw-news-mosaic > li:first-child > .kit-card { flex-direction: row; align-items: flex-start; }
-	.aw-ed-law .aw-news-mosaic > li:first-child > .kit-card[class*="kit-card--block"] { gap: 0; }
-	.aw-ed-law .aw-news-mosaic > li:first-child > .kit-card > .kit-card-media { flex: none; width: var(--kit-thumb-lg) !important; max-width: 40%; aspect-ratio: 4 / 3; border-radius: var(--kit-radius-media); }
-	.aw-ed-law .aw-news-mosaic > li:first-child > .kit-card[class*="kit-card--block"] > .kit-card-media { margin: var(--kit-space-5) 0 var(--kit-space-5) var(--kit-space-5) !important; }
-	.aw-ed-law .aw-news-mosaic > li:first-child > .kit-card > .kit-card-media img { height: 100%; object-fit: cover; }
-	.aw-ed-law .aw-news-mosaic > li:first-child > .kit-card > .kit-card-body { flex: 1 1 0; }
-	.aw-ed-law .aw-news-mosaic > li:first-child .kit-card-sum { display: none; }
-	.aw-ed-law .aw-news-mosaic > li:first-child .kit-card-title { font-size: var(--kit-type-h3) !important; }
-}
 @media (min-width: 768px) {
 	.aw-ed-law .aw-news-mosaic > li:nth-child(n+2) { align-self: stretch; display: flex; }
 	.aw-ed-law .aw-news-mosaic > li:nth-child(n+2) > .kit-card { flex: 1 1 auto; align-items: center; }
@@ -1861,7 +1849,7 @@ section.aw-camp-band.aw-ed-hero--campaign { box-sizing: border-box; min-height: 
 }
 @media (min-width: 1200px) {
 	.aw-ed-law .aw-news-list.aw-news-mosaic { grid-template-rows: 1fr 1fr; }
-	.aw-ed-law .aw-news-mosaic .kit-card--stacked-md > .kit-card-media { width: 10rem !important; max-width: 40%; } /* the Latest news row picture from 1200 (3 Nov 2026; was 45%, which made each row 260px and the lead 532px, over the 500px card cap; the section is 870px at 1280, was 1049) */
+	.aw-ed-law .aw-news-mosaic .kit-card--stacked-md > .kit-card-media { width: 10rem !important; max-width: 40%; } /* !important over kit.css .kit-card--stacked-md > .kit-card-media { width: var(--kit-thumb-lg) !important }; the Latest news row picture from 1200 (3 Nov 2026; was 45%, which made each row 260px and the lead 532px, over the 500px card cap; the section is 870px at 1280, was 1049) */
 }
 
 /* India Writes for Its Community Dogs on Home (pattern aw1-story; the band's own rules are in campaign-record.css).
