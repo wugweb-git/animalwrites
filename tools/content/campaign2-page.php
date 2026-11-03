@@ -121,7 +121,7 @@ function c2guides( array $slugs ) {
 	foreach ( $slugs as $slug ) {
 		$g = get_page_by_path( $slug, OBJECT, 'post' );
 		if ( $g ) {
-			$out .= c2p( c2i( 'resources' ) . '<a href="' . esc_url( get_permalink( $g ) ) . '">' . esc_html( get_the_title( $g ) ) . '</a>', 'aw-camp-note' );
+			$out .= c2p( c2i( 'knowledge' ) . '<a href="' . esc_url( get_permalink( $g ) ) . '">' . esc_html( get_the_title( $g ) ) . '</a>', 'aw-camp-note' );
 		}
 	}
 	return $out;
