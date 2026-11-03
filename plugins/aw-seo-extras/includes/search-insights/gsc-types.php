@@ -3,7 +3,8 @@
  * Search Console beyond web search (3 Nov 2026), through Site Kit's own Google client (no new key):
  *
  * - Discover and Google News, daily at 07:15 IST: clicks and impressions per page for the last 3 days Search Console
- *   has (each day replaced). Rows in obs: src gsc, metric discover or gnews, period day, page = path.
+ *   has (each day replaced). Rows in obs: src gsc-types (not gsc: the daily Search Console run
+ *   replaces every gsc row of the days it reads), metric discover or gnews, period day, page = path.
  * - URL Inspection, daily from 07:40 IST: up to AW_SI_INSPECT_CAP pages a day (Google allows 2,000 a day per site),
  *   never-checked pages first, then pages not indexed, then the oldest checks. A few calls per cron step, the next
  *   step five minutes later. A refused call (HTTP 403 or 429) stops it for the day. Rows in obs: src inspect, metric
@@ -179,12 +180,12 @@ add_action( AW_SI_GSC_TYPES_CRON, fn() => aw_si_gsc_types_run() );
 function aw_si_gsc_types_store( string $metric, string $day, array $rows ): void {
 	global $wpdb;
 	$o = aw_si_table( 'obs' );
-	$wpdb->query( $wpdb->prepare( "DELETE FROM {$o} WHERE src = 'gsc' AND metric = %s AND period = 'day' AND d = %s", $metric, $day ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+	$wpdb->query( $wpdb->prepare( "DELETE FROM {$o} WHERE src = 'gsc-types' AND metric = %s AND period = 'day' AND d = %s", $metric, $day ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
 	foreach ( $rows as $path => $r ) {
 		aw_si_obs_put(
 			0,
 			(string) $path,
-			'gsc',
+			'gsc-types',
 			$metric,
 			'day',
 			$day,
@@ -211,7 +212,7 @@ function aw_si_gsc_types_pages( int $days = 28, int $limit = 10 ): array {
 	$o     = aw_si_table( 'obs' );
 	$since = ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( "-{$days} days" )->format( 'Y-m-d' );
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
-	return (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, SUM(IF(metric = 'discover', clicks, 0)) dc, SUM(IF(metric = 'discover', impr, 0)) di, SUM(IF(metric = 'gnews', clicks, 0)) nc, SUM(IF(metric = 'gnews', impr, 0)) ni FROM {$o} WHERE src = 'gsc' AND metric IN ('discover', 'gnews') AND period = 'day' AND d >= %s GROUP BY page ORDER BY (di + ni) DESC LIMIT %d", $since, $limit ) );
+	return (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, SUM(IF(metric = 'discover', clicks, 0)) dc, SUM(IF(metric = 'discover', impr, 0)) di, SUM(IF(metric = 'gnews', clicks, 0)) nc, SUM(IF(metric = 'gnews', impr, 0)) ni FROM {$o} WHERE src = 'gsc-types' AND metric IN ('discover', 'gnews') AND period = 'day' AND d >= %s GROUP BY page ORDER BY (di + ni) DESC LIMIT %d", $since, $limit ) );
 }
 
 /** Overview box: Discover and Google News. */

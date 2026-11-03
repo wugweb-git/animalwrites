@@ -97,9 +97,15 @@ function aw_si_pages_data(): array {
 		$set( $r->page, 'c_' . $r->metric, 'sessions' === $r->metric ? (int) $r->s : ( 'flag' === $r->metric ? (int) ( (int) $r->n >= $c_min ) : round( (float) $r->a, 1 ) ) );
 	}
 	// Latest PageSpeed run, latest Clarity note.
-	foreach ( (array) $wpdb->get_results( "SELECT o.page, o.metric, o.value, o.d FROM {$o} o JOIN (SELECT page_key, metric, MAX(d) d FROM {$o} WHERE src = 'psi' AND metric IN ('score-mobile', 'score-desktop', 'flag') GROUP BY page_key, metric) l ON l.page_key = o.page_key AND l.metric = o.metric AND l.d = o.d WHERE o.src = 'psi'" ) as $r ) {
+	foreach ( (array) $wpdb->get_results( "SELECT o.page, o.metric, o.value, o.d FROM {$o} o JOIN (SELECT page_key, metric, MAX(d) d FROM {$o} WHERE src = 'psi' AND metric IN ('score-mobile', 'score-desktop', 'flag', 'lcp-mobile', 'cls-mobile', 'field-lcp-mobile', 'field-inp-mobile', 'field-cls-mobile') GROUP BY page_key, metric) l ON l.page_key = o.page_key AND l.metric = o.metric AND l.d = o.d WHERE o.src = 'psi'" ) as $r ) {
 		$set( $r->page, 'psi_' . $r->metric, (float) $r->value );
 		$set( $r->page, 'psi_d', $r->d );
+	}
+	// Bing Webmaster per page (bing.php stores Bing's weekly rows): the last 90 days.
+	$b_from = ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( '-90 days' )->format( 'Y-m-d' );
+	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, SUM(impr) i, SUM(clicks) c FROM {$o} WHERE src = 'bing' AND metric = 'p' AND page <> '' AND d >= %s GROUP BY page", $b_from ) ) as $r ) {
+		$set( $r->page, 'bing_impr', (int) $r->i );
+		$set( $r->page, 'bing_clicks', (int) $r->c );
 	}
 	foreach ( (array) $wpdb->get_results( "SELECT o.page, o.txt, o.d FROM {$o} o JOIN (SELECT page_key, MAX(d) d FROM {$o} WHERE src = 'clarity-note' GROUP BY page_key) l ON l.page_key = o.page_key AND l.d = o.d WHERE o.src = 'clarity-note'" ) as $r ) {
 		$set( $r->page, 'note', (string) $r->txt );
@@ -110,6 +116,16 @@ function aw_si_pages_data(): array {
 	foreach ( aw_si_rankmath_scores() as $path => $score ) {
 		if ( isset( $out[ $path ] ) ) {
 			$out[ $path ]['rm_score'] = $score;
+		}
+	}
+	// Google's index state from URL Inspection (gsc-types.php), for pages already in the list.
+	if ( function_exists( 'aw_si_index_states' ) ) {
+		foreach ( aw_si_index_states() as $path => $st ) {
+			if ( isset( $out[ $path ] ) ) {
+				$out[ $path ]['index']   = $st[0] ? 1 : 0;
+				$out[ $path ]['index_t'] = $st[1];
+				$out[ $path ]['index_d'] = $st[2];
+			}
 		}
 	}
 	foreach ( $out as $path => $f ) {

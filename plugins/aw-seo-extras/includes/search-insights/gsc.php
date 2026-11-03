@@ -220,7 +220,7 @@ function aw_si_gsc_store_day( string $day, array $data ) {
 		$merged[ $key ] = array( $m[0], $m[1], $m[2], $m[3] + $v[3], $impr, $impr ? ( $m[5] * $m[4] + $v[5] * $v[4] ) / $impr : 0 );
 	}
 	$wpdb->query( 'START TRANSACTION' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-	$ok = false !== $wpdb->query( $wpdb->prepare( "DELETE FROM {$o} WHERE src = 'gsc' AND period = 'day' AND d = %s", $day ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	$ok = false !== $wpdb->query( $wpdb->prepare( "DELETE FROM {$o} WHERE src = 'gsc' AND metric IN ('total', 'q', 'qp', 'p') AND period = 'day' AND d = %s", $day ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- only the rows this run writes.
 	foreach ( array_chunk( array_values( $merged ), 300 ) as $chunk ) {
 		$place = array();
 		$args  = array();
