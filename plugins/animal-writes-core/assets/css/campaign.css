@@ -203,12 +203,6 @@
 .aw-camp--sc-stray-dogs #next h2 { --aw-sc-ico: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%233a1730%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20width%3D%2218%22%20height%3D%2218%22%20x%3D%223%22%20y%3D%224%22%20rx%3D%222%22/%3E%3Cpath%20d%3D%22M16%202v4%22/%3E%3Cpath%20d%3D%22M8%202v4%22/%3E%3Cpath%20d%3D%22M3%2010h18%22/%3E%3C/svg%3E"); }
 .aw-camp--sc-stray-dogs #share h2 { --aw-sc-ico: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%233a1730%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2218%22%20cy%3D%225%22%20r%3D%223%22%2F%3E%3Ccircle%20cx%3D%226%22%20cy%3D%2212%22%20r%3D%223%22%2F%3E%3Ccircle%20cx%3D%2218%22%20cy%3D%2219%22%20r%3D%223%22%2F%3E%3Cline%20x1%3D%228.59%22%20x2%3D%2215.42%22%20y1%3D%2213.51%22%20y2%3D%2217.49%22%2F%3E%3Cline%20x1%3D%2215.41%22%20x2%3D%228.59%22%20y1%3D%226.51%22%20y2%3D%2210.49%22%2F%3E%3C%2Fsvg%3E"); }
 .aw-camp--sc-stray-dogs #sources h2 { --aw-sc-ico: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%233a1730%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M10%2013a5%205%200%200%200%207.54.54l3-3a5%205%200%200%200-7.07-7.07l-1.72%201.71%22/%3E%3Cpath%20d%3D%22M14%2011a5%205%200%200%200-7.54-.54l-3%203a5%205%200%200%200%207.07%207.07l1.71-1.71%22/%3E%3C/svg%3E"); }
-/* The share band in the hero's cream; from 1200 a photo from the Library on the right (Media 15534, unused elsewhere), faded into the cream, the text clear of it */
-.aw-camp--sc-stray-dogs #share.aw-camp-section { background: var(--camp-cream); }
-@media (min-width: 1200px) {
-	.aw-camp--sc-stray-dogs #share.aw-camp-section { background: linear-gradient(to right, var(--camp-cream) 56%, transparent 70%), url("/wp-content/uploads/2026/10/photo-1626648701445-1f67aeb6e49c.avif") right center / auto 100% no-repeat, var(--camp-cream); }
-	.aw-camp--sc-stray-dogs #share.aw-camp-section > * { box-sizing: border-box; padding-right: calc(var(--kit-card-media-max) + var(--kit-space-gutter)); } /* the text clear of the photo: the card media width and the gutter */
-}
 /* Section headings in the campaign plum */
 .aw-camp--sc-stray-dogs .aw-camp-section:not(.aw-camp-hero) :is(h2, h3) { color: var(--camp-primary); }
 /* Tables (from 768): a plum-tint head and light bands on the rows */
@@ -223,8 +217,7 @@
 .aw-camp--sc-stray-dogs .aw-camp-grid > :first-child a:not(.wp-element-button) { color: var(--camp-on-mark); }
 /* The share bar under the share message */
 .aw-camp--sc-stray-dogs .aw-camp-share-kit { margin: var(--kit-space-4) 0; }
-/* Share (share redesign, 2 Nov 2026): no share pictures on the page (campaign.js); from 768 the note sits as close to
-   the share row as the row to the text above */
+/* Share: from 768 the note sits as close to the share block as the block to the text above */
 @media (min-width: 768px) {
 	.aw-camp--sc-stray-dogs #share .aw-camp-share-kit + .aw-camp-note { margin-top: var(--kit-space-4); }
 }
@@ -1051,7 +1044,16 @@
    band, no inner card. The campaign's ready-made post and story pictures are the visual: the post large in front, the
    story beside it, both tappable (a tap shares that picture), after the button and the bar in reading and Tab order:
    to their right in a band at least 44rem wide, under them in a narrower one. The one main button, white with the campaign colour, --kit-size-control tall, full width on phones,
-   and the share bar as white 44px icons only (each keeps its aria-label and title). Nothing scrolls sideways. */
+   and the share bar as white 44px icons only (each keeps its aria-label and title). Nothing scrolls sideways.
+   The band is one component wherever it sits: as the section itself (Supreme Court) or in a text column beside the
+   campaign's art (Diwali). Its layout follows the width it has (container aw-share); the button is full width on phones
+   only. States (3 Nov 2026):
+   - default: heading, intro, the main button, the bar, the pictures when the campaign has them, the note;
+   - without pictures: the button and the bar only, no empty column;
+   - phone or computer: the phone's share sheet (share icon) or copy link (link icon); a picture tap shares or saves it;
+   - done: the status line beside the button (6 s, role=status); the bar's copy icon turns to a check, filled white (2 s, kit.js);
+   - hover (hover devices only), focus (a white ring), pressed (the button at 98%), reduced motion (no movement);
+   - before the script runs: the server's Kits bar, in white on the band. */
 .aw-camp.aw-camp #share { background: linear-gradient(160deg, var(--camp-mark), color-mix(in srgb, var(--camp-mark) 75%, #000)); color: var(--camp-on-mark); }
 .aw-camp.aw-camp #share :is(h2, h3, p, a:not(.kit-share-btn):not(.wp-element-button), .aw-date, .aw-date .kit-ico) { color: var(--camp-on-mark); }
 .aw-camp.aw-camp #share.aw-camp-section h2 { font-size: var(--kit-type-h1) !important; line-height: var(--kit-leading-heading); }
@@ -1073,28 +1075,38 @@
 .aw-camp.aw-camp #share .aw-share-cta-btn:active { transform: scale(0.98); }
 .aw-camp.aw-camp #share .aw-share-cta-done { font-size: var(--kit-type-sm); font-weight: var(--kit-weight-strong); color: var(--camp-on-mark); }
 .aw-camp.aw-camp #share .aw-share-cta-done:empty { display: none; }
-@container aw-share (min-width: 44rem) { .aw-camp.aw-camp #share .aw-share-cta-btn { width: auto; } }
-/* the share bar: white 44px icons, no names, no small label, one row */
-.aw-camp.aw-camp #share .aw-share-block .kit-share { flex-wrap: nowrap; gap: var(--kit-space-2); border-top: 0; }
+@media (min-width: 768px) { .aw-camp.aw-camp #share .aw-share-cta-btn { width: auto; } } /* full width on phones only, also in a narrow column */
+/* the share bar: white 44px icons, no names, no small label, one row; no Kits rule above it on the band (its 24px stays) */
+.aw-camp.aw-camp #share .kit-share { border-top: 0; }
+.aw-camp.aw-camp #share .kit-share :is(.kit-share-label, .kit-share-name) { color: var(--camp-on-mark); }
+.aw-camp.aw-camp #share .aw-share-block .kit-share { flex-wrap: nowrap; gap: var(--kit-space-2); }
 .aw-camp.aw-camp #share .aw-share-block .kit-share :is(.kit-share-label, .kit-share-name) { display: none !important; }
-.aw-camp.aw-camp #share .aw-share-block .kit-share .kit-share-btn { border-color: var(--camp-on-mark); background: transparent; color: var(--camp-on-mark); }
-.aw-camp.aw-camp #share .aw-share-block .kit-share .kit-share-btn:focus-visible { background: var(--camp-on-mark); color: var(--camp-mark); outline: var(--kit-focus-width) solid var(--camp-on-mark); outline-offset: var(--kit-focus-offset); } /* the focus ring white on the band */
+.aw-camp.aw-camp #share .kit-share .kit-share-btn { border-color: var(--camp-on-mark); background: transparent; color: var(--camp-on-mark); }
+.aw-camp.aw-camp #share .aw-share-block .kit-share .kit-share-btn { width: var(--kit-size-target); padding: 0; } /* round at every width (kit.js labels the bar at lg, the names stay hidden here) */
+.aw-camp.aw-camp #share .kit-share .kit-share-btn:focus-visible { background: var(--camp-on-mark); color: var(--camp-mark); outline: var(--kit-focus-width) solid var(--camp-on-mark); outline-offset: var(--kit-focus-offset); } /* the focus ring white on the band */
+.aw-camp.aw-camp #share .kit-share .kit-share-copy:has(.kit-ico--check) { background: var(--camp-on-mark); color: var(--camp-mark); } /* done: the link is copied */
 @media (hover: hover) {
 	.aw-camp.aw-camp #share .aw-share-cta-btn:hover { box-shadow: var(--kit-elevation-3); transform: translateY(var(--kit-motion-lift)); }
-	.aw-camp.aw-camp #share .aw-share-block .kit-share .kit-share-btn:hover { background: var(--camp-on-mark); color: var(--camp-mark); }
+	.aw-camp.aw-camp #share .kit-share .kit-share-btn:hover { background: var(--camp-on-mark); color: var(--camp-mark); }
 }
-/* the pictures: the post in front at --kit-thumb-max tall, the story beside it; phones two columns at full width */
-.aw-camp.aw-camp #share .aw-share-pics { display: grid; gap: var(--kit-space-3); margin: 0; }
-.aw-camp.aw-camp #share .aw-share-pics-head { margin: 0; font-size: var(--kit-type-base); font-weight: var(--kit-weight-bold); color: var(--camp-on-mark); }
-.aw-camp.aw-camp #share .aw-share-pics-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--kit-space-3); align-items: end; }
+/* the pictures: the post in front at --kit-thumb-max tall, the story beside it; phones two columns at full width.
+   Under the bar they are the theme's fold, closed (its 44px summary and "+"); beside the button it stays open and the
+   summary is only the label (campaign.js .is-beside) */
+.aw-camp.aw-camp #share .aw-share-pics { margin: 0; border-bottom: 0; }
+.aw-camp.aw-camp #share .aw-share-pics-head { justify-content: flex-start; margin: 0; padding-block: 0; font-size: var(--kit-type-base); font-weight: var(--kit-weight-bold); color: var(--camp-on-mark); }
+.aw-camp.aw-camp #share .aw-share-pics-head:focus-visible { outline: var(--kit-focus-width) solid var(--camp-on-mark); outline-offset: var(--kit-focus-offset); }
+.aw-camp.aw-camp #share .aw-share-pics.is-beside > .aw-share-pics-head { min-height: 0; cursor: default; pointer-events: none; }
+.aw-camp.aw-camp #share .aw-share-pics.is-beside > .aw-share-pics-head::after { content: none; }
+.aw-camp.aw-camp #share .aw-share-pics-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--kit-space-3); align-items: end; margin-top: var(--kit-space-3); }
 .aw-camp.aw-camp #share .aw-share-pic { display: block; min-width: 0; margin: 0; padding: 0; border: 0; background: none; cursor: pointer; border-radius: var(--kit-radius-card); }
 .aw-camp.aw-camp #share .aw-share-pic img { display: block; width: auto; max-width: 100%; height: auto; max-height: var(--kit-thumb-max); border-radius: var(--kit-radius-card); box-shadow: var(--kit-elevation-3); transition: transform var(--kit-motion-base) var(--kit-motion-ease); }
 .aw-camp.aw-camp #share .aw-share-pic--post { order: -1; }
 .aw-camp.aw-camp #share .aw-share-pic:focus-visible { outline: var(--kit-focus-width) solid var(--camp-on-mark); outline-offset: var(--kit-focus-offset); }
 @media (hover: hover) { .aw-camp.aw-camp #share .aw-share-pic:hover img { transform: translateY(var(--kit-motion-lift)); } }
-@container aw-share (min-width: 44rem) { .aw-camp.aw-camp #share .aw-share-pics-list { display: flex; } }
+@media (min-width: 768px) { .aw-camp.aw-camp #share .aw-share-pics-list { display: flex; } } /* side by side at their own width, also in a narrow column */
 @media (prefers-reduced-motion: reduce) {
 	.aw-camp.aw-camp #share :is(.aw-share-cta-btn, .aw-share-pic img) { transition: none; }
+	.aw-camp.aw-camp #share .aw-share-pics-head::after { transition: none; }
 	.aw-camp.aw-camp #share .aw-share-cta-btn:active, .aw-camp.aw-camp #share .aw-share-cta-btn:hover, .aw-camp.aw-camp #share .aw-share-pic:hover img { transform: none; }
 }
 
