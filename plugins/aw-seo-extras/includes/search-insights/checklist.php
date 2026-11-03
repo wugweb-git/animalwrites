@@ -67,12 +67,11 @@ function aw_si_checklist_defaults(): array {
 	}
 	$k   = aw_si_table( 'keywords' );
 	$o   = aw_si_table( 'obs' );
-	$eff = "IF(priority_override <> '', priority_override, priority)";
-	// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table names and constants only.
+	// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared -- table names, constants and aw_si_view_sql() (fixed SQL from a map).
 	$ids = array_merge(
-		(array) $wpdb->get_col( $wpdb->prepare( "SELECT id FROM {$k} WHERE roles & %d AND {$eff} IN ('P1', 'P2') AND entity = 0", AW_SI_ROLE_TRACKED ) ),
+		(array) $wpdb->get_col( $wpdb->prepare( "SELECT id FROM {$k} WHERE roles & %d AND ( " . aw_si_view_sql( 'p1' ) . ' OR ' . aw_si_view_sql( 'p2' ) . ' ) AND entity = 0', AW_SI_ROLE_TRACKED ) ),
 		(array) $wpdb->get_col( $wpdb->prepare( "SELECT id FROM {$k} WHERE roles & %d", AW_SI_ROLE_BRAND ) ),
-		(array) $wpdb->get_col( $wpdb->prepare( "SELECT id FROM {$k} WHERE pos28 BETWEEN 8 AND 20 AND impr28 >= %d AND entity = 0 ORDER BY impr28 DESC LIMIT 100", AW_SI_QUICK_MIN ) ),
+		(array) $wpdb->get_col( "SELECT id FROM {$k} WHERE " . aw_si_view_sql( 'quick' ) . ' AND entity = 0 ORDER BY impr28 DESC LIMIT 100' ),
 		(array) $wpdb->get_col( "SELECT DISTINCT kw_id FROM {$o} WHERE src = 'live' AND metric = 'position' AND kw_id > 0" )
 	);
 	// phpcs:enable

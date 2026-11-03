@@ -116,18 +116,7 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 
 	/** SQL condition of each view. */
 	private function view_sql(): array {
-		$eff = "IF(priority_override <> '', priority_override, priority)";
-		return array(
-			'all'       => '1=1',
-			'p1'        => "{$eff} = 'P1'",
-			'p2'        => "{$eff} = 'P2'",
-			'p3'        => "{$eff} = 'P3'",
-			'gap'       => "status = 'gap'",
-			'conflict'  => "status = 'conflict'",
-			'quick'     => aw_si_quick_sql(),
-			'notranked' => 'roles & ' . (int) AW_SI_ROLE_TRACKED . ' AND impr28 = 0',
-			'entity'    => 'entity = 1',
-		);
+		return aw_si_view_sql(); // One rule for every view (compute.php).
 	}
 
 	/** Labels of the views. */
@@ -307,7 +296,7 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 		$orderby = $this->arg( 'orderby' );
 		$cols    = array(
 			'label'    => 'label',
-			'priority' => "IF(priority_override <> '', priority_override, priority)",
+			'priority' => aw_si_eff_sql(),
 			'topic'    => "topic = '', topic",
 			'impr28'   => 'impr28',
 			'clicks28' => 'clicks28',

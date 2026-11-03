@@ -131,11 +131,12 @@ function aw_si_bing_kw_run( bool $dry = false ): array {
 	if ( ! $dry ) {
 		aw_si_run_start( 'bing_kw' );
 	}
-	$k    = aw_si_table( 'keywords' );
-	$o    = aw_si_table( 'obs' );
-	$quick = aw_si_quick_sql();
+	$k     = aw_si_table( 'keywords' );
+	$o     = aw_si_table( 'obs' );
+	$quick = aw_si_view_sql( 'quick' );
+	$p1    = aw_si_view_sql( 'p1' );
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared -- table name and fixed conditions.
-	$kws  = (array) $wpdb->get_results( $wpdb->prepare( "SELECT id, label FROM {$k} WHERE ( IF(priority_override <> '', priority_override, priority) = 'P1' OR {$quick} ) AND COALESCE(lang, 'en') = 'en' AND label NOT LIKE '%%{%%' ORDER BY impr28 DESC LIMIT %d", AW_SI_BING_KW ) );
+	$kws  = (array) $wpdb->get_results( $wpdb->prepare( "SELECT id, label FROM {$k} WHERE ( {$p1} OR {$quick} ) AND COALESCE(lang, 'en') = 'en' AND label NOT LIKE %s ORDER BY impr28 DESC LIMIT %d", '%' . $wpdb->esc_like( '{' ) . '%', AW_SI_BING_KW ) );
 	$rows = 0;
 	$fail = array();
 	$cut  = ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( '-84 days' )->format( 'Y-m-d' );

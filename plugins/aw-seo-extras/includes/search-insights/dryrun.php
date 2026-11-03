@@ -204,11 +204,18 @@ function aw_si_dry_report( string $day ): array {
 		$rec[ $n ]['clicks'] += $r[1];
 		$rec[ $n ]['pos']     = $rec[ $n ]['impr'] ? round( ( (float) $rec[ $n ]['pos'] * $old + $r[3] * $r[2] ) / $rec[ $n ]['impr'], 1 ) : null;
 	}
+	// The page Google shows most, as the daily calculation finds it: old addresses counted as the page they redirect to.
+	$shown = array();
 	foreach ( $qp28 as $r ) {
 		$n = aw_si_norm( (string) ( $r[0][0] ?? '' ) );
-		if ( isset( $rec[ $n ] ) && $r[2] > $rec[ $n ]['top'][1] ) {
-			$rec[ $n ]['top'] = array( aw_si_path( (string) ( $r[0][1] ?? '' ) ), $r[2] );
+		if ( isset( $rec[ $n ] ) ) {
+			$path                  = aw_si_final_path( aw_si_path( (string) ( $r[0][1] ?? '' ) ) );
+			$shown[ $n ][ $path ] = ( $shown[ $n ][ $path ] ?? 0 ) + (int) $r[2];
 		}
+	}
+	foreach ( $shown as $n => $by ) {
+		arsort( $by );
+		$rec[ $n ]['top'] = array( (string) key( $by ), (int) reset( $by ) );
 	}
 	$per_day    = count( $one['total'] ) + count( $one['q'] ) + count( $one['qp'] ) + count( $one['p'] );
 	$day_impr   = (int) array_sum( array_column( $one['total'], 2 ) );
@@ -253,11 +260,14 @@ function aw_si_dry_report( string $day ): array {
 			'shown_minor' => aw_si_is_minor_path( (string) $r['top'][0], $arch ),
 		);
 		$d    = aw_si_decide( $r['trends'], $r['impr'], $r['pos'], $r['live'], array_keys( $r['owners'] ), $r['has_page'], $r['top'], $ctx );
-		++$views['all'];
-		++$views[ $d['priority'] ];
-		$views['gap']       += 'gap' === $d['status'] ? 1 : 0;
-		$views['conflict']  += $d['conflict'] ? 1 : 0;
-		$views['notranked'] += ( $r['roles'] & AW_SI_ROLE_TRACKED ) && 0 === $r['impr'] ? 1 : 0;
+		// Listing names count only in their own view, as the Keywords views and the Priorities box leave them out
+		// (aw_si_entity_sql; the dry run has no movers yet).
+		$in                  = $r['entity'] ? 0 : 1;
+		$views['all']       += $in;
+		$views[ $d['priority'] ] += $in;
+		$views['gap']       += $in && 'gap' === $d['status'] ? 1 : 0;
+		$views['conflict']  += $in && $d['conflict'] ? 1 : 0;
+		$views['notranked'] += $in && ( $r['roles'] & AW_SI_ROLE_TRACKED ) && 0 === $r['impr'] ? 1 : 0;
 		$views['entity']    += $r['entity'];
 		foreach ( array_keys( $roles ) as $bit ) {
 			$roles[ $bit ] += ( $r['roles'] & $bit ) ? 1 : 0;
@@ -266,8 +276,8 @@ function aw_si_dry_report( string $day ): array {
 		if ( $d['action'] ) {
 			$acts[ $d['action'] ] = ( $acts[ $d['action'] ] ?? 0 ) + 1;
 		}
-		if ( aw_si_quick_win( $r['pos'], $r['impr'] ) ) {
-			++$views['quick'];
+		if ( aw_si_quick_win( $d['pos'], $r['impr'] ) ) { // The position the daily calculation stores the flag from.
+			$views['quick'] += $in;
 			$quick[] = array( $r['label'], $r['pos'], $r['impr'], $d['owners'] ? $d['owners'][0] : $d['shown'], $d['action'] );
 		}
 		if ( $r['roles'] & AW_SI_ROLE_BRAND && $r['impr'] ) {
@@ -286,7 +296,7 @@ function aw_si_dry_report( string $day ): array {
 		'wp_aw_si_kw_pages' => $pages,
 		'wp_aw_si_obs'      => array(
 			'gsc per day'       => $per_day,
-			'gsc after 90 days' => $per_day * 90,
+			'gsc after the daily-figures window' => $per_day * ( defined( 'AW_SI_KEEP_DAYS' ) ? (int) AW_SI_KEEP_DAYS : 90 ),
 			'trends (seed)'     => $obs['trends'],
 			'live check (seed)' => $obs['live'],
 		),
@@ -314,11 +324,11 @@ function aw_si_dry_report( string $day ): array {
 			'languages' => $langs,
 			'actions'   => $acts,
 		),
-		'Searches' => array(
-			'targets' => $seed_targets . ' keyword-map rows ("Our target?")',
-			'gaps'    => count( array_unique( array_column( (array) ( $seed['gaps'] ?? array() ), 'gap' ) ) ) . ' demand-gap groups from the map, plus every P2 keyword',
+		'Content gaps' => array(
+			'targets' => $seed_targets . ' keyword-map rows',
+			'gaps'    => count( array_unique( array_column( (array) ( $seed['gaps'] ?? array() ), 'gap' ) ) ) . ' demand-gap groups from the map, plus every P2 keyword (Overview box)',
 		),
-		'Settings' => 'schedule, seed date, Run now, Delete data',
+		'Settings' => 'schedule, Run now, imports, snapshot, Delete data',
 	);
 	return $out;
 }

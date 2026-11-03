@@ -230,9 +230,6 @@ function aw_seo_modules(): array {
 				'AW_SI_PSI_FLAG' => array( 'type' => 'int', 'label' => 'PageSpeed mobile score that flags a page (under)', 'help' => '', 'default' => 50 ),
 				'AW_SI_RM_LOW' => array( 'type' => 'int', 'label' => 'Rank Math SEO score that is "low" (under)', 'help' => '', 'default' => 50 ),
 				'AW_SI_KEEP_DAYS' => array( 'type' => 'int', 'label' => 'Daily figures kept (days)', 'help' => 'Older days become monthly totals.', 'default' => 90 ),
-				'AW_SI_SPIKE_RATIO' => array( 'type' => 'int', 'label' => 'Sourcing spike: times the usual', 'help' => '', 'default' => 3 ),
-				'AW_SI_SPIKE_MIN' => array( 'type' => 'int', 'label' => 'Sourcing spike: items that day at least', 'help' => '', 'default' => 3 ),
-				'AW_SI_SPIKE_WINDOW' => array( 'type' => 'int', 'label' => 'Sourcing spike: usual = average of days', 'help' => '', 'default' => 14 ),
 			),
 		),
 		'rank-math-schema' => array(

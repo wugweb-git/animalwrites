@@ -118,7 +118,8 @@ function aw_si_load(): void {
 		$screen = get_current_screen();
 		add_meta_box( 'aw-si-sources', __( 'Sources', 'aw-seo-extras' ), 'aw_si_box_sources', $screen, 'normal' );
 		add_meta_box( 'aw-si-priorities', __( 'Priorities', 'aw-seo-extras' ), 'aw_si_box_priorities', $screen, 'normal' );
-		add_meta_box( 'aw-si-quick', __( 'Quick wins (position 8–20, at least 10 impressions)', 'aw-seo-extras' ), 'aw_si_box_quick', $screen, 'normal' );
+		/* translators: %d: minimum impressions. */
+		add_meta_box( 'aw-si-quick', sprintf( __( 'Quick wins (position 8–20, at least %d impressions)', 'aw-seo-extras' ), AW_SI_QUICK_MIN ), 'aw_si_box_quick', $screen, 'normal' );
 		add_meta_box( 'aw-si-movers', __( 'Movers (28 days against the 28 before)', 'aw-seo-extras' ), 'aw_si_box_movers', $screen, 'normal' );
 		add_meta_box( 'aw-si-brand', __( 'Brand', 'aw-seo-extras' ), 'aw_si_box_brand', $screen, 'normal' );
 		add_meta_box( 'aw-si-ai', __( 'AI referrals (GA4, 28 days)', 'aw-seo-extras' ), 'aw_si_box_ai', $screen, 'normal' );
@@ -445,14 +446,13 @@ function aw_si_box_priorities(): void {
 		return;
 	}
 	$t   = aw_si_table( 'keywords' );
-	$eff = "IF(priority_override <> '', priority_override, priority)";
 	$sql = array(
-		'p1'        => array( 'P1', "{$eff} = 'P1'" ),
-		'p2'        => array( __( 'P2 (gaps)', 'aw-seo-extras' ), "{$eff} = 'P2'" ),
-		'conflict'  => array( __( 'Conflicts', 'aw-seo-extras' ), "status = 'conflict'" ),
-		'quick'     => array( __( 'Quick wins', 'aw-seo-extras' ), aw_si_quick_sql() ),
-		'notranked' => array( __( 'Tracked, not ranking', 'aw-seo-extras' ), 'roles & ' . (int) AW_SI_ROLE_TRACKED . ' AND impr28 = 0' ),
-		'all'       => array( __( 'All keywords', 'aw-seo-extras' ), '1=1' ),
+		'p1'        => array( 'P1', aw_si_view_sql( 'p1' ) ),
+		'p2'        => array( __( 'P2 (gaps)', 'aw-seo-extras' ), aw_si_view_sql( 'p2' ) ),
+		'conflict'  => array( __( 'Conflicts', 'aw-seo-extras' ), aw_si_view_sql( 'conflict' ) ),
+		'quick'     => array( __( 'Quick wins', 'aw-seo-extras' ), aw_si_view_sql( 'quick' ) ),
+		'notranked' => array( __( 'Tracked, not ranking', 'aw-seo-extras' ), aw_si_view_sql( 'notranked' ) ),
+		'all'       => array( __( 'All keywords', 'aw-seo-extras' ), aw_si_view_sql( 'all' ) ),
 	);
 	$ent = aw_si_entity_sql(); // Listing names count as in the Keywords views: the 20 that moved most, not all.
 	echo '<ul>';
@@ -466,7 +466,7 @@ function aw_si_box_priorities(): void {
 /** Overview box: quick wins. */
 function aw_si_box_quick(): void {
 	aw_si_mini_table(
-		aw_si_rows( 'pos28 BETWEEN 8 AND 20 AND impr28 >= ' . (int) AW_SI_QUICK_MIN, 'impr28 DESC' ),
+		aw_si_rows( aw_si_view_sql( 'quick' ) . ' AND ' . aw_si_entity_sql(), 'impr28 DESC' ), // The same rows as the Quick wins view.
 		array(
 			'pos28'  => __( 'Position', 'aw-seo-extras' ),
 			'impr28' => __( 'Impressions', 'aw-seo-extras' ),

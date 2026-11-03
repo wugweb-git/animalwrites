@@ -24,7 +24,7 @@ function aw_si_snapshot_keywords(): array {
 	$k   = aw_si_table( 'keywords' );
 	$ids = function_exists( 'aw_si_checklist' ) ? aw_si_checklist() : array();
 	$in  = $ids ? ' OR id IN (' . implode( ',', array_map( 'intval', $ids ) ) . ')' : '';
-	$eff = "IF(priority_override <> '', priority_override, priority)";
+	$eff = aw_si_eff_sql();
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared -- table name, constants and integers.
 	return (array) $wpdb->get_results( $wpdb->prepare( "SELECT *, {$eff} eff FROM {$k} WHERE entity = 0 AND label NOT LIKE %s AND ((roles & %d AND {$eff} IN ('P1', 'P2')){$in}) ORDER BY {$eff} = '', {$eff}, label", '%' . $wpdb->esc_like( '{' ) . '%', AW_SI_ROLE_TRACKED ) );
 }
@@ -136,7 +136,7 @@ function aw_si_keyword_map_md(): string {
 	}
 	$k   = aw_si_table( 'keywords' );
 	$p   = aw_si_table( 'kw_pages' );
-	$eff = "IF(k.priority_override <> '', k.priority_override, k.priority)";
+	$eff = aw_si_eff_sql( 'k.' );
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared -- table names and constants.
 	$links = (array) $wpdb->get_results( $wpdb->prepare( "SELECT k.id, k.label, k.page_type, k.intent, k.trends, k.impr28, k.pos28, k.live_txt, k.status, k.action, {$eff} eff, l.path, l.obj_type, l.obj_id, l.role FROM {$p} l JOIN {$k} k ON k.id = l.kw_id WHERE l.src = 'seed' AND l.role IN ('owner', 'secondary') AND k.roles & %d ORDER BY l.role = 'secondary', k.label", AW_SI_ROLE_TRACKED ) );
 	$pages = array(); // section => page => [primary rows, secondary labels].

@@ -14,7 +14,7 @@ Search Insights, Sourcing and Classification are separate areas. A change belong
 | **Sourcing** (what the workers fetch and how it arrives) | `aw-sourcing`, Sourcing menu (Overview, To review, Enrichment review, Sources, Keywords, Rules, AI models, Workers, reports, Settings) | Feeds and publishers, relevance keywords, rules and summaries, AI models, auto-review, Directory enrichment, the workers' endpoints and the Workers tab | Search Insights' searches (only as suggestions in Keywords → Suggestions; never added automatically) |
 | **Classification** (how content is organised on the site) | `animal-writes-core`, Classification menu (Categories, Tags) and the content types | Categories, tags, sections, the content model | Nothing from the other two |
 
-Where they meet, the line stays: the keyword table is Core's (`keyword-table.php`), and each area writes only its own roles. Search Insights → Sourcing keywords (`aw-sourcing/includes/search-insights-tab.php`) is Sourcing's code shown inside Search Insights. Sourcing → Keywords → Suggestions only reads Search Insights. Rising's "In the news" spikes are Search Insights' logic over Sourcing's items.
+Where they meet, the line stays: the keyword table is Core's (`keyword-table.php`), and each area writes only its own roles. Search Insights → Sourcing keywords (`aw-sourcing/includes/search-insights-tab.php`) is Sourcing's code shown inside Search Insights. Sourcing → Keywords → Suggestions only reads Search Insights.
 
 ## animal-writes-core
 
