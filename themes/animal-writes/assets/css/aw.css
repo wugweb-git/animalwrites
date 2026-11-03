@@ -1842,21 +1842,26 @@ section.aw-camp-band.aw-ed-hero--campaign { box-sizing: border-box; min-height: 
 	.aw-findhelp-actions .kit-btn { flex: 1 1 100%; justify-content: center; }
 }
 
-/* From the Library on Home: the mosaic above (What's happening's), then the four type tiles. Phones: the sideways row
-   (Home on phones, above). From 768: two by two, every tile one height, the mosaic's column gap. From 1200: four across,
-   the icon square on top with the arrow beside it and the title and line under them full width (a 4-across tile is
-   too narrow for the icon, text and arrow side by side). */
-@media (min-width: 768px) { .aw-ed-law > .kit-stack { gap: var(--kit-space-grid); grid-auto-rows: 1fr; } }
+/* From the Library on Home: the mosaic above (What's happening's), then the four type tiles in a Show more fold
+   (.aw-more; a plain <details>, folded at every width and without JavaScript: 3 Nov 2026, the section was 870px from
+   1200 and 1056px at 768, over Layout rules 5). Phones: one column. From 768: two by two, every tile one height, the
+   mosaic's column gap. From 1200: four across, the icon square on top with the arrow beside it and the title and line
+   under them full width (a 4-across tile is too narrow for the icon, text and arrow side by side). */
+.aw-ed-law > .aw-more { margin-top: var(--kit-space-4); }
+.aw-ed-law > .aw-more[open] > summary { margin-bottom: var(--kit-space-4); }
+@media (min-width: 768px) { .aw-ed-law .kit-stack { gap: var(--kit-space-grid); grid-auto-rows: 1fr; } }
 @media (min-width: 1200px) {
-	.aw-ed-law > .kit-stack { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
-	.aw-ed-law > .kit-stack > .kit-tile { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "ico arrow" "title title" "desc desc"; grid-template-rows: auto auto 1fr; }
-	.aw-ed-law > .kit-stack > .kit-tile::before { justify-self: start; margin-bottom: var(--kit-space-3); }
-	.aw-ed-law > .kit-stack > .kit-tile::after { align-self: start; margin-top: 0.625rem; } /* centred on the icon square */
+	.aw-ed-law .kit-stack { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+	.aw-ed-law .kit-stack > .kit-tile { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "ico arrow" "title title" "desc desc"; grid-template-rows: auto auto 1fr; }
+	.aw-ed-law .kit-stack > .kit-tile::before { justify-self: start; margin-bottom: var(--kit-space-3); }
+	.aw-ed-law .kit-stack > .kit-tile::after { align-self: start; margin-top: 0.625rem; } /* centred on the icon square */
 }
 /* From the Library items (1 Nov 2026): three, the lead and two more. Meta row is the date and the publisher (no place, no
-   type chip); the two rows have a bigger title and a 4:3 picture. 768 to 1199: the lead runs full width (picture left,
-   4:3, text right) with the two rows side by side under it. From 1200: lead 5fr on the left, the two rows 7fr on the
-   right, each row half the lead's height with a 10rem 4:3 picture (as in Latest news), so both columns end level. */
+   type chip); the two rows have a bigger title and a 4:3 picture. 768 to 1199: the lead runs full width as a row like
+   the two side by side under it (the phone lead rule above, which ends at 767 for Latest news: --kit-thumb-lg 4:3
+   picture in the card padding, no summary; 3 Nov 2026, 768 1056 -> 718px). From 1200: lead 5fr on the left, the two
+   rows 7fr on the right, each row half the lead's height with the Kits kit-card--stacked-md picture
+   (--kit-thumb-lg), so both columns end level (3 Nov 2026: 10rem made the section 743px with the fold; now 695). */
 .aw-ed-law .aw-news-mosaic :is(.kit-meta-row .kit-meta-item:not(.aw-date), .kit-tag:not(.kit-tag--source)) { display: none; }
 .aw-ed-law .aw-news-mosaic .kit-card--stacked-md .kit-card-title { font-size: var(--kit-type-h3) !important; }
 .aw-ed-law .aw-news-mosaic .kit-card--stacked-md > .kit-card-media { aspect-ratio: 4 / 3; }
@@ -1870,14 +1875,14 @@ section.aw-camp-band.aw-ed-hero--campaign { box-sizing: border-box; min-height: 
 	.aw-ed-law .aw-news-mosaic > li:first-child { grid-column: 1 / -1 !important; grid-row: 1 !important; } /* over the shared three-item rule (:has, higher specificity) */
 	.aw-ed-law .aw-news-mosaic > li:nth-child(2) { grid-column: 1; grid-row: 2; }
 	.aw-ed-law .aw-news-mosaic > li:nth-child(3) { grid-column: 2; grid-row: 2; }
-	.aw-ed-law .aw-news-mosaic > li:first-child > .kit-card { flex-direction: row; }
-	.aw-ed-law .aw-news-mosaic > li:first-child .kit-card-media { position: static; flex: 0 0 45%; aspect-ratio: 4 / 3; min-height: 0; }
+	.aw-ed-law .aw-news-mosaic > li:first-child > .kit-card { flex-direction: row; align-items: flex-start; gap: 0; }
+	.aw-ed-law .aw-news-mosaic > li:first-child .kit-card-media { position: static; flex: none; width: var(--kit-thumb-lg); max-width: 40%; aspect-ratio: 4 / 3; min-height: 0; border-radius: var(--kit-radius-media); margin: var(--kit-space-5) 0 var(--kit-space-5) var(--kit-space-5) !important; } /* !important over kit.css .kit-card[class*="kit-card--"] > .kit-card-media { margin: 0 !important } */
 	.aw-ed-law .aw-news-mosaic > li:first-child .kit-card-media img { position: static; height: 100%; object-fit: cover; }
-	.aw-ed-law .aw-news-mosaic > li:first-child > .kit-card > .kit-card-body { flex: 1 1 0; align-self: center; }
+	.aw-ed-law .aw-news-mosaic > li:first-child > .kit-card > .kit-card-body { flex: 1 1 0; }
+	.aw-ed-law .aw-news-mosaic > li:first-child .kit-card-sum { display: none; }
 }
 @media (min-width: 1200px) {
 	.aw-ed-law .aw-news-list.aw-news-mosaic { grid-template-rows: 1fr 1fr; }
-	.aw-ed-law .aw-news-mosaic .kit-card--stacked-md > .kit-card-media { width: 10rem !important; max-width: 40%; } /* !important over kit.css .kit-card--stacked-md > .kit-card-media { width: var(--kit-thumb-lg) !important }; the Latest news row picture from 1200 (3 Nov 2026; was 45%, which made each row 260px and the lead 532px, over the 500px card cap; the section is 870px at 1280, was 1049) */
 }
 
 /* India Writes for Its Community Dogs on Home (pattern aw1-story; the band's own rules are in campaign-record.css).
