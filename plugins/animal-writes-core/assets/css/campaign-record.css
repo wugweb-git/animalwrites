@@ -137,7 +137,7 @@
 	.aw-camp.aw-camp--community-dogs .aw-camp-hero > .wp-block-image { grid-column: 2; grid-row: 1 / span 8; width: 20rem; margin: var(--kit-space-3) 0 0 !important; justify-self: end; }
 	.aw-camp.aw-camp--community-dogs .aw-camp-hero > .aw-camp-postmark { grid-column: 2; grid-row: 1 / span 8; justify-self: start; margin: 0 !important; transform: translate(-3.5rem, -1rem) rotate(-12deg); }
 }
-@media (prefers-reduced-motion: reduce) { .aw-camp.aw-camp--community-dogs .aw-camp-hero > .wp-block-image { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .aw-camp.aw-camp--community-dogs .aw-camp-hero > .wp-block-image { animation: none; } .aw-camp.aw-camp--community-dogs :is(#next-steps .aw-camp-doclist li, .aw-camp-partner-logos > figure img, .aw-camp-follow a) { transition: none; } .aw-camp.aw-camp--community-dogs .aw-camp-follow a:active { transform: none; } }
 
 /* ---------- Campaign goal: the heading beside two statements, the outcome under them ---------- */
 .aw-camp.aw-camp--community-dogs #campaign-goal > p:not(.aw-camp-status) { max-width: 40ch; margin: 0 !important; font-size: var(--kit-type-h3); font-weight: var(--kit-weight-medium); line-height: var(--kit-leading-heading); letter-spacing: var(--kit-tracking-heading); }
@@ -199,11 +199,12 @@
 }
 /* Moments: the five extra photos as an even 4:3 grid under the mosaic, one set of pictures */
 .aw-camp.aw-camp--community-dogs #how-to-help .aw-ed-mosaic { margin-top: var(--kit-space-4) !important; margin-bottom: var(--kit-space-2) !important; }
-.aw-camp.aw-camp--community-dogs #how-to-help .wp-block-gallery { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--kit-space-2); margin-top: 0 !important; }
+/* Phones: as many columns as fit at --kit-thumb-lg, at most four, so large phones keep one short block (767: 1113 -> 275px) */
+.aw-camp.aw-camp--community-dogs #how-to-help .wp-block-gallery { display: grid !important; grid-template-columns: repeat(auto-fit, minmax(max(var(--kit-thumb-lg), calc((100% - 3 * var(--kit-space-2)) / 4)), 1fr)); gap: var(--kit-space-2); margin-top: 0 !important; }
 .aw-camp.aw-camp--community-dogs #how-to-help .wp-block-gallery > figure { width: auto !important; margin: 0 !important; aspect-ratio: 4 / 3; }
-.aw-camp.aw-camp--community-dogs #how-to-help .wp-block-gallery > figure:first-child { grid-column: 1 / -1; }
+.aw-camp.aw-camp--community-dogs #how-to-help .wp-block-gallery > figure:first-child { grid-column: span 2; grid-row: span 2; }
 .aw-camp.aw-camp--community-dogs #how-to-help .wp-block-gallery > figure img { width: 100%; height: 100% !important; object-fit: cover; border-radius: var(--kit-radius-media); }
-@media (min-width: 768px) { .aw-camp.aw-camp--community-dogs #how-to-help .wp-block-gallery { grid-template-columns: repeat(4, minmax(0, 1fr)); } .aw-camp.aw-camp--community-dogs #how-to-help .wp-block-gallery > figure:first-child { grid-column: span 2; grid-row: span 2; } }
+@media (min-width: 768px) { .aw-camp.aw-camp--community-dogs #how-to-help .wp-block-gallery { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 @media (min-width: 1200px) { .aw-camp.aw-camp--community-dogs #how-to-help .wp-block-gallery { grid-template-columns: repeat(5, minmax(0, 1fr)); } .aw-camp.aw-camp--community-dogs #how-to-help .wp-block-gallery > figure:first-child { grid-column: auto; grid-row: auto; } }
 
 /* ---------- Timeline: a rail with a stop per date; the day of posting is the filled stop ---------- */
@@ -259,8 +260,8 @@
 }
 
 /* ---------- Supported by: logo tiles, whole logos, names under them ---------- */
-.aw-camp.aw-camp--community-dogs .aw-camp-partner-logos { display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--kit-space-5) var(--kit-space-3); }
-@media (min-width: 768px) { .aw-camp.aw-camp--community-dogs .aw-camp-partner-logos { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+.aw-camp.aw-camp--community-dogs .aw-camp-partner-logos { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(var(--kit-thumb-md), 1fr)); gap: var(--kit-space-5) var(--kit-space-3); } /* phones: as many --kit-thumb-md logos as fit (375: four; 767: eight) */
+@media (min-width: 768px) { .aw-camp.aw-camp--community-dogs .aw-camp-partner-logos { grid-template-columns: repeat(auto-fill, minmax(var(--kit-thumb-lg), 1fr)); } } /* 768: five; 1199: eight */
 @media (min-width: 1200px) { .aw-camp.aw-camp--community-dogs .aw-camp-partner-logos { grid-template-columns: repeat(7, minmax(0, 1fr)); } }
 .aw-camp.aw-camp--community-dogs .aw-camp-partner-logos > figure { display: flex !important; flex-direction: column; width: auto !important; margin: 0 !important; }
 .aw-camp.aw-camp--community-dogs .aw-camp-partner-logos > figure a { display: block; border-radius: var(--kit-radius-card); }
