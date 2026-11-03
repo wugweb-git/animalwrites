@@ -57,6 +57,9 @@ p, li { max-width: var(--kit-measure); text-wrap: pretty; }
 	padding: 0;
 	margin-block: var(--kit-space-5);
 }
+/* A Post Template set to two columns in the editor keeps two (at most), and one when two cards would be under the card
+   width (--kit-card-min); without this the theme's auto-fill grid above would put three in a row */
+.wp-block-post-template.is-layout-grid.columns-2 { grid-template-columns: repeat(auto-fill, minmax(max(min(var(--kit-card-min), 100%), calc((100% - var(--kit-space-grid)) / 2)), 1fr)); }
 .wp-block-post-template > li { margin: 0; }
 
 /* 4. Shared components ------------------------------------------------------- */
