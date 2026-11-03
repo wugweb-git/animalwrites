@@ -124,7 +124,7 @@ Every hash below is on `wordpress` (live) as of 3 Nov 2026. Sections are in page
 - Keyphrases: the campaign owns "g.s.r. 864(e)", "gsr 864e" and "cpcsea-mef@gov.in"; the rule-by-rule guide and Library draft keep "draft lab animal rules 2026, ccsea draft rules". 1 Nov (pending.md)
 - Library draft H1 is the full official name plus "(GSR 864E)". 1 Nov (pending.md)
 - SEO titles keep the hyphen in cpcsea-mef@gov.in. 7b1a5425, 3 Nov
-- Links shared with `#` written as `%23` redirect. 5765dc0d, 2 Nov
+- Links shared with `#` written as `%23` redirect (`…/%23how-to-help` 301s to `#how-to-help`, checked 3 Nov). 5765dc0d, 2 Nov
 - Search (28 days to 31 Oct): campaign page 16,102 impressions, 1,653 clicks, position 3.8; Library draft 5,861 / 505 / 3.5.
 
 ## Decided by the owner
@@ -151,7 +151,6 @@ Every hash below is on `wordpress` (live) as of 3 Nov 2026. Sections are in page
 - The closed-state copy exists in the build script and shows on Post; the post-deadline news piece ("Objections closed: what happens now") is not written.
 - Close day: 6 Nov in the campaign plan, 7 Nov in the theme rebuild plan; the Dates list has no Post entry.
 - PCA Act 1960 Chapter IV is not in the Library.
-- The shared link `campaigns/lab-animals-rules-2026/%23how-to-help` returns 404 (redirect loop); fix it where it was shared.
 
 ## Rules for this page
 - Lab page: dates and wording only on the owner's word; new visible words need the owner's yes on the exact text.
