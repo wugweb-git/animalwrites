@@ -405,23 +405,24 @@ function aw_cl_widget() {
 	} else {
 		echo '<p style="font-size:14px">' . esc_html( sprintf( '%s sent · %s in the last 7 days', number_format_i18n( $total ), number_format_i18n( $week ) ) ) . '</p>';
 	}
-	$list = function ( $title, $rows, $col ) {
-		echo '<p style="margin:12px 0 4px"><strong>' . esc_html( $title ) . '</strong></p>';
+	// Two sub-sections (owner, 3 Nov 2026), each opening to its table: Top grounds open, Top cities closed.
+	$list = function ( $title, $rows, $col, $open ) {
+		echo '<details style="margin:12px 0 0"' . ( $open ? ' open' : '' ) . '><summary><strong>' . esc_html( $title ) . '</strong></summary>';
 		if ( ! $rows ) {
-			echo '<p class="description">None yet.</p>';
+			echo '<p class="description">None yet.</p></details>';
 			return;
 		}
-		$cells = array();
+		echo '<table class="widefat striped" style="margin-top:6px"><thead><tr><th scope="col">' . esc_html( $col ) . '</th><th scope="col">Letters</th></tr></thead><tbody>';
 		foreach ( $rows as $label => $n ) {
-			$cells[] = array( 'label' => esc_html( $label ), 'n' => esc_html( number_format_i18n( $n ) ) );
+			echo '<tr><td>' . esc_html( $label ) . '</td><td>' . esc_html( number_format_i18n( $n ) ) . '</td></tr>';
 		}
-		aw_core_simple_table( 'letters-top', array( 'label' => esc_html( $col ), 'n' => 'Letters' ), $cells, array( 'foot' => false ) );
+		echo '</tbody></table></details>';
 	};
 	$top = array();
 	foreach ( array_slice( $ground, 0, 3, true ) as $n => $c ) {
 		$top[ $n . '. ' . ( $labels[ $n ] ?? '' ) ] = $c;
 	}
-	$list( 'Top grounds', $top, 'Ground' );
-	$list( 'Top cities', $cities, 'City' );
+	$list( 'Top grounds', $top, 'Ground', true );
+	$list( 'Top cities', $cities, 'City', false );
 	echo '<p style="margin-top:12px"><a href="' . esc_url( admin_url( 'edit.php?post_type=aw_campaign&page=aw-letter-report&campaign=' . $cid ) ) . '">Full letter report →</a></p>';
 }
