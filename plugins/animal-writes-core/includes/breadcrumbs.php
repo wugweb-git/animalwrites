@@ -66,10 +66,18 @@ function aw_breadcrumbs_html() {
 	return $html . '</ol></nav>';
 }
 
+/**
+ * True when Page Options hide the trail on this item (the item, or its post type's default). Search engines still get
+ * the BreadcrumbList.
+ */
+function aw_breadcrumbs_hidden() {
+	return is_singular() && function_exists( 'kits_option' ) && 'hide' === kits_option( 'crumbs' );
+}
+
 /** The trail, once per page ('' after the first call): the section band places it itself, inside the band. */
 function aw_breadcrumbs_claim() {
 	static $done = false;
-	if ( $done || is_admin() || ! aw_breadcrumbs() ) {
+	if ( $done || is_admin() || aw_breadcrumbs_hidden() || ! aw_breadcrumbs() ) {
 		return '';
 	}
 	$done = true;

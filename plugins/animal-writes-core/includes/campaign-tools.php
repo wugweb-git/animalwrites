@@ -664,11 +664,15 @@ add_action(
 add_action(
 	'wp_head',
 	function () {
-		if ( ! is_singular( 'aw_campaign' ) ) {
+		$mode = function_exists( 'kits_option' ) ? kits_option( 'font_preload' ) : 'wide'; // Theme Options → Font preload.
+		if ( ! is_singular( 'aw_campaign' ) || 'off' === $mode ) {
 			return;
 		}
-		$font = get_theme_file_uri( 'assets/fonts/inter/inter-latin.woff2' );
-		echo '<link rel="preload" href="' . esc_url( $font ) . '" as="font" type="font/woff2" crossorigin media="(max-width: 1199px)">' . "\n";
+		$font = function_exists( 'kits_body_font_file' ) ? kits_body_font_file() : '';
+		$font = '' !== $font ? $font : get_theme_file_uri( 'assets/fonts/inter/inter-latin.woff2' );
+		if ( 'all' !== $mode ) { // "all": the theme already preloads it for every width.
+			echo '<link rel="preload" href="' . esc_url( $font ) . '" as="font" type="font/woff2" crossorigin media="(max-width: 1199px)">' . "\n";
+		}
 		$heavy = aw_camp_inter_file( 800 ); // the heading's own file when the theme's Inter does not cover 800 (Global Styles keep it at 400 to 700)
 		if ( $heavy && $heavy !== $font ) {
 			echo '<link rel="preload" href="' . esc_url( $heavy ) . '" as="font" type="font/woff2" crossorigin media="(max-width: 1199px)">' . "\n";

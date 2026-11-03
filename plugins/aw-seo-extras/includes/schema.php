@@ -238,7 +238,7 @@ function aw_seo_rm_setting( $key ) {
 function aw_publisher_profiles() {
 	$list = array_merge( array( (string) aw_seo_rm_setting( 'social_url_facebook' ) ), preg_split( '/\s+/', (string) aw_seo_rm_setting( 'social_additional_profiles' ) ) );
 	$list = array_values( array_unique( array_filter( array_map( 'trim', $list ), fn( $u ) => (bool) wp_http_validate_url( $u ) ) ) );
-	return $list ? $list : array( 'https://www.facebook.com/AnimalWritesIndia/', 'https://www.instagram.com/animalwrites_india/', 'https://x.com/AnimalWrites' );
+	return $list ? $list : array( 'https://www.facebook.com/AnimalWritesIndia/', 'https://www.instagram.com/animalwrites_india/', 'https://x.com/animals_writes' );
 }
 
 /**

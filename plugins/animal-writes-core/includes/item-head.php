@@ -403,7 +403,8 @@ function aw_block_item_share( $a, $id ) {
 	if ( ! aw_item_here( $id ) ) {
 		return aw_item_editor_preview( 'Share: X, Facebook, LinkedIn, WhatsApp, Email, Copy link' );
 	}
-	return function_exists( 'aw_share_html' ) ? '<div class="aw-item-share">' . aw_share_html( $id ) . '</div>' : '';
+	$bar = function_exists( 'aw_share_html' ) ? aw_share_html( $id ) : '';
+	return '' !== $bar ? '<div class="aw-item-share">' . $bar . '</div>' : '';
 }
 
 /* ---------- 10. More ---------- */
