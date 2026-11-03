@@ -254,8 +254,8 @@ $cards = array(
 	array( 'after', $card( 'injured', 'After Diwali: burnt, lost or injured animals', dwp( 'Burnt fur, limping, pawing at the eyes or mouth, shaking or hiding are signs an animal needs a vet. No ointments or home remedies: get it to a vet or a rescue group. A frightened animal may bite, so approach slowly and keep your hands away from its mouth. Move it only if it is in danger where it lies.' ), dwmore( 'Helping an injured animal: moving it safely', '/resources/found-an-injured-animal-what-to-do/' ), dwp( 'If your pet is missing, search nearby hiding places at dawn, tell the guards and your RWA group, post photos on local groups, call the vets and shelters near you, and update your microchip registry. Clear unburnt crackers and wrappers from streets and feeding spots: animals chew them.' ) ) ),
 );
 $grid = '';
-foreach ( $cards as $c ) { // each card has its own anchor, so the hero and FAQ can link to it; before and night cards hide after Diwali
-	$cls   = 'aw-camp-card' . ( in_array( $c[0], array( 'before', 'night' ), true ) ? ' aw-camp-open' : '' );
+foreach ( $cards as $c ) { // each card has its own anchor, so the hero and FAQ can link to it; before, street and night cards hide after Diwali (their set-up and the RWA message for "this Sunday" expire; the morning checks are in What to do now)
+	$cls   = 'aw-camp-card' . ( in_array( $c[0], array( 'before', 'street', 'night' ), true ) ? ' aw-camp-open' : '' );
 	$grid .= "<!-- wp:group {\"anchor\":\"{$c[0]}\",\"className\":\"$cls\",\"layout\":{\"type\":\"default\"}} -->\n<div id=\"{$c[0]}\" class=\"wp-block-group $cls\">{$c[1]}</div>\n<!-- /wp:group -->\n\n";
 }
 $todo    = dwsec( 'what-to-do', dwh( 'What to do, and when' ) . "<!-- wp:group {\"className\":\"aw-camp-grid\",\"layout\":{\"type\":\"default\"}} -->\n<div class=\"wp-block-group aw-camp-grid\">$grid</div>\n<!-- /wp:group -->\n\n", 'aw-camp-white' );
@@ -409,22 +409,39 @@ $share = dwsec(
 	'aw-camp-tint aw-camp-open'
 );
 
-$content = '<!-- wp:group {"align":"full","className":"aw-camp aw-camp--diwali","layout":{"type":"default"}} -->' . "\n"
+/*
+ * Sections in the Campaign Content Standard v1.0 order for each state (C2 Active, C3 Post). The page has one URL, so a
+ * section whose place differs between the two states is printed twice, aw-camp-open and aw-camp-closed, and the server
+ * drops the copy for the other state (campaign-tools.php), so readers and screen readers get the order the page shows.
+ * Kept single, at a place right for both states: the hero (its open and closed parts are marked inside), why-it-matters,
+ * how-to-help (expired night actions are aw-camp-open inside), faq (one Rank Math FAQ block, so one FAQPage), press and
+ * people (the social-posts block prints once per page).
+ * Active: hero, context, why-it-matters, how-to-help, faq, news, library, press, people, partners, next-steps, updates.
+ * Post: hero, why-it-matters, how-to-help, context, next-steps, faq, partners, press, people, library, news. The goal is
+ * in the closed hero; impact is not applicable (hidden); support has no content; updates in Post has no copy yet, so
+ * the site's newsletter band after the page is the only sign-up.
+ */
+$partners = dwsec( '', dwsc( '[aw_campaign_partners title="Partners"]' ), 'aw-camp-white' );
+$content  = '<!-- wp:group {"align":"full","className":"aw-camp aw-camp--diwali","layout":{"type":"default"}} -->' . "\n"
 	. '<div class="wp-block-group alignfull aw-camp aw-camp--diwali">'
 	. dwslot( 'hero', $hero . $hero_closed )
-	. dwslot( 'next-steps', $next_closed, 'aw-camp-closed' )
-	. dwslot( 'context', $what )
+	. dwslot( 'context', $what, 'aw-camp-open' )
 	. dwslot( 'why-it-matters', $law )
 	. dwslot( 'how-to-help', $todo . $tonight . $help )
+	. dwslot( 'context', $what, 'aw-camp-closed' )
+	. dwslot( 'next-steps', $next_closed, 'aw-camp-closed' )
 	. dwslot( 'faq', $faq )
-	. dwslot( 'news', $news )
-	. dwslot( 'library', $library )
+	. dwslot( 'news', $news, 'aw-camp-open' )
+	. dwslot( 'library', $library, 'aw-camp-open' )
+	. dwslot( 'partners', $partners, 'aw-camp-if-filled aw-camp-closed' )
 	. dwslot( 'press', $press, 'aw-camp-if-items' )
 	. dwslot( 'people', dwsec( '', '<!-- wp:animal-writes/social-posts /-->', 'aw-camp-white' ) ) // What people are saying, as on the lab rules page (owner, 3 Nov 2026): approved social posts linked to the campaign; the block prints nothing while there are none
-	. dwslot( 'partners', dwsec( '', dwsc( '[aw_campaign_partners title="Partners"]' ), 'aw-camp-white' ), 'aw-camp-if-filled' )
+	. dwslot( 'partners', $partners, 'aw-camp-if-filled aw-camp-open' )
 	. dwslot( 'next-steps', $next_open, 'aw-camp-open' )
 	. dwslot( 'updates', $share, 'aw-camp-open' )
-	. dwsc( '[aw_sticky_cta href="#tonight" label="What to do tonight" days="0"]' )
+	. dwslot( 'library', $library, 'aw-camp-closed' )
+	. dwslot( 'news', $news, 'aw-camp-closed' )
+	. dwsc( '[aw_sticky_cta href="#tonight" label="What to do tonight" days="0"]' ) // phone bar: Active only (it prints nothing once closed); no days (owner, 1 Nov 2026)
 	. "</div>\n<!-- /wp:group -->";
 
 $title   = 'Keep animals safe this Diwali';
