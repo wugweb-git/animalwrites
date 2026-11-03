@@ -191,9 +191,9 @@ add_action(
 	2
 );
 
-// Daily: items published another way (direct status changes) get their fields too.
+// Daily: items published another way (direct status changes) get their fields too. Scheduled from admin.
 add_action(
-	'init',
+	'admin_init',
 	function () {
 		if ( ! wp_next_scheduled( 'aw_seo_fill_daily' ) ) {
 			wp_schedule_event( time() + HOUR_IN_SECONDS, 'daily', 'aw_seo_fill_daily' );
@@ -619,16 +619,13 @@ add_filter( 'rank_math/opengraph/twitter/twitter_title', fn( $t ) => aw_seo_prin
 /*
  * Yearly SEO titles (owner, 21 Oct 2026: "World Animal Day 2026 Date, Theme, History – Animal Writes", the year
  * updated each year; the slug has no year). A post with meta aw_seo_title_yearly = 1 gets the year in its Rank Math
- * title moved to the current one, checked once a day. A plain number in the stored field, never a %variable%.
+ * title moved to the current one, checked once a day by the daily event (never on a page view). A plain number in the
+ * stored field, never a %variable%.
  */
 add_action(
-	'init',
+	'aw_seo_fill_daily',
 	function () {
 		$year = wp_date( 'Y' );
-		if ( get_transient( 'aw_seo_title_year_checked' ) ) {
-			return;
-		}
-		set_transient( 'aw_seo_title_year_checked', 1, DAY_IN_SECONDS );
 		foreach ( get_posts( array( 'post_type' => 'any', 'post_status' => 'publish', 'numberposts' => 50, 'fields' => 'ids', 'meta_key' => 'aw_seo_title_yearly', 'meta_value' => '1' ) ) as $id ) { // phpcs:ignore WordPress.DB.SlowDBQuery
 			$t = (string) get_post_meta( $id, 'rank_math_title', true );
 			$n = preg_replace( '/\b20\d\d\b/', $year, $t, 1 );

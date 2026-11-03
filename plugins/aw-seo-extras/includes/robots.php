@@ -79,7 +79,9 @@ function aw_listing_unreachable( $id ) {
 	$score = get_post_meta( $id, 'aw_contact_score', true );
 	if ( '' === $score && function_exists( 'aw_contact_score' ) ) {
 		$score = aw_contact_score( $id ); // listings imported without a contact never got the stored score
-		update_post_meta( $id, 'aw_contact_score', $score );
+		if ( aw_seo_may_store() ) {
+			update_post_meta( $id, 'aw_contact_score', $score ); // stored by the daily job or admin, never by a page view
+		}
 	}
 	if ( (int) $score > 0 ) {
 		return false;
@@ -91,6 +93,24 @@ function aw_listing_unreachable( $id ) {
 	}
 	return true;
 }
+
+/** Whether this request may write to the database: admin, cron and WP-CLI (never a front-end page view). */
+function aw_seo_may_store() {
+	return is_admin() || wp_doing_cron() || ( defined( 'WP_CLI' ) && WP_CLI );
+}
+
+/** Daily: listings without a stored contact score get it, so the noindex rule and the sitemap read stored values. */
+function aw_seo_fill_contact_scores() {
+	if ( ! function_exists( 'aw_contact_score' ) ) {
+		return;
+	}
+	global $wpdb;
+	$ids = $wpdb->get_col( "SELECT p.ID FROM {$wpdb->posts} p LEFT JOIN {$wpdb->postmeta} s ON s.post_id = p.ID AND s.meta_key = 'aw_contact_score' WHERE p.post_type = 'aw_listing' AND p.post_status = 'publish' AND s.meta_id IS NULL LIMIT 1000" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	foreach ( $ids as $id ) {
+		update_post_meta( (int) $id, 'aw_contact_score', aw_contact_score( (int) $id ) );
+	}
+}
+add_action( 'aw_seo_fill_daily', 'aw_seo_fill_contact_scores', 40 ); // the daily event of titles.php
 
 /** Whether the current view is an item or list kept out of search engines by a rule of its state. */
 function aw_seo_noindex_rule() {
@@ -172,7 +192,7 @@ add_filter( 'robots_txt', 'aw_seo_robots_content_signal', 50 );
 /**
  * Published profiles with no contact (aw_listing_unreachable() above), as an ID-keyed set: one query per
  * sitemap request instead of a meta lookup per listing. Listings with no stored score count as candidates and are
- * checked one by one (that also stores their score).
+ * checked one by one (their score is stored by the daily job, aw_seo_fill_contact_scores()).
  */
 function aw_sitemap_unreachable_listings() {
 	static $set = null;

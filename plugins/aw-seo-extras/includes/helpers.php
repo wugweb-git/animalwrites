@@ -294,6 +294,43 @@ function aw_seo_upload_path( $url ) {
 	return 0 === strpos( $abs, $base ) ? $up['basedir'] . substr( $abs, strlen( $base ) ) : '';
 }
 
+/**
+ * A value built once and kept for 12 hours or until the next change to any post, its terms or its trash state
+ * (aw_seo_cache_gen moves on then, so every key built before is left to expire).
+ *
+ * @param string   $name  What is kept (any string; it is hashed).
+ * @param callable $build Builds the value.
+ * @return mixed
+ */
+function aw_seo_cached( $name, callable $build ) {
+	$key = 'aw_seo_c_' . md5( $name . '|' . (string) get_option( 'aw_seo_cache_gen', '0' ) );
+	$hit = get_transient( $key );
+	if ( is_array( $hit ) && array_key_exists( 'v', $hit ) ) {
+		return $hit['v'];
+	}
+	$value = $build();
+	set_transient( $key, array( 'v' => $value ), 12 * HOUR_IN_SECONDS );
+	return $value;
+}
+/** A post, its terms or its trash state changed: aw_seo_cached() values are rebuilt (written once, at the end of the request). */
+function aw_seo_cache_flush() {
+	$GLOBALS['aw_seo_cache_stale'] = true;
+	if ( ! has_action( 'shutdown', 'aw_seo_cache_flush_write' ) ) {
+		add_action( 'shutdown', 'aw_seo_cache_flush_write', 0 );
+	}
+}
+/** Moves aw_seo_cache_gen on, so every key built before is no longer read. */
+function aw_seo_cache_flush_write() {
+	if ( ! empty( $GLOBALS['aw_seo_cache_stale'] ) ) {
+		update_option( 'aw_seo_cache_gen', (string) microtime( true ), true );
+		$GLOBALS['aw_seo_cache_stale'] = false;
+	}
+}
+foreach ( array( 'save_post', 'deleted_post', 'set_object_terms' ) as $aw_seo_hook ) {
+	add_action( $aw_seo_hook, 'aw_seo_cache_flush' );
+}
+unset( $aw_seo_hook );
+
 /** "{Text} – Animal Writes". */
 function aw_seo_branded( $text ) {
 	return $text . ' – ' . get_bloginfo( 'name' );
