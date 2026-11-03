@@ -63,12 +63,18 @@ function aw_sitemap_directory_urls() {
  * @return array List of ['loc' => URL].
  */
 function aw_sitemap_filtered_urls() {
+	if ( ! function_exists( 'aw_sitemap_filtered_build' ) ) {
+		return array(); // the Filtered views module is off: no filtered lists
+	}
 	$urls = get_option( 'aw_sitemap_filtered' );
 	return is_array( $urls ) ? $urls : aw_sitemap_filtered_build();
 }
 
 /** Daily: filtered-sitemap.xml is rebuilt (never on a request), and Rank Math's stored copy of it is cleared. */
 function aw_sitemap_filtered_rebuild() {
+	if ( ! function_exists( 'aw_sitemap_filtered_build' ) ) {
+		return; // the Filtered views module is off
+	}
 	update_option( 'aw_sitemap_filtered', aw_sitemap_filtered_build(), false );
 	if ( class_exists( '\RankMath\Sitemap\Cache_Watcher' ) ) {
 		\RankMath\Sitemap\Cache_Watcher::invalidate( 'filtered' );
