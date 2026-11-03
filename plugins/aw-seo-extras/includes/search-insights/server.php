@@ -4,8 +4,9 @@
  *
  * - The host gives this account no access log (only PHP error logs), so bandwidth and requests the CDN answers are
  *   not available here; hPanel shows them. What is counted:
- *   - AI and search crawler requests per bot, by user agent, for requests that reach WordPress. Pages the CDN serves
- *     from its cache never reach WordPress, so these are lower bounds.
+ *   - AI and search crawler requests per bot, by user agent, for requests that reach WordPress. Pages the CDN or the
+ *     server's LiteSpeed page cache answer from a stored copy never reach WordPress, so these are lower bounds until
+ *     those caches let crawlers through (docs/cdn.md, step C).
  *   - 4xx and 5xx answers WordPress gave to front-end requests (not wp-admin, cron or the REST API), with the top
  *     addresses (path only, no query string).
  *   - PHP errors per day by kind from this domain's PHP error logs (the same files as the daily error count,
@@ -287,7 +288,7 @@ add_action(
 			return;
 		}
 		$days = aw_si_srv_days();
-		echo '<p>' . esc_html__( 'What the server sees, per day. The host gives no access log, so bandwidth and the pages the CDN serves from its cache are only in hPanel. Everything here is counted when a request reaches WordPress. No full IP address or user agent is stored.', 'aw-seo-extras' ) . '</p>';
+		echo '<p>' . esc_html__( 'What the server sees, per day, kept for good. Everything here is counted when a request reaches WordPress: a page the CDN or the server\'s page cache (LiteSpeed) answers from a stored copy is not counted, unless that cache lets the request through (docs/cdn.md, step C). Bandwidth is only in hPanel. No full IP address or user agent is stored.', 'aw-seo-extras' ) . '</p>';
 
 		// Every crawler on the watch list, with 0 when it made no requests.
 		$today   = wp_date( 'Ymd' );

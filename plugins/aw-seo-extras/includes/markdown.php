@@ -8,8 +8,10 @@
  *   page's summary (its meta description) as a quote, then headings, paragraphs, lists, quotes, tables, links and
  *   pictures (alt text), with full addresses. Navigation, the footer, forms, buttons, scripts, styles and hidden parts are left out.
  * - Headers: Content-Type text/markdown; charset=utf-8, Vary: Accept, Cache-Control no-store, private (and LiteSpeed
- *   no-cache) and a canonical Link to the HTML page, so no shared cache keeps the Markdown or hands it to a browser. The HTML keeps its own cache headers
- *   (cdn-cache.php); while the CDN holds a page's HTML, an agent asking for Markdown gets that HTML.
+ *   no-cache) and a canonical Link to the HTML page, so no shared cache keeps the Markdown or hands it to a browser. The HTML of
+ *   these pages keeps its own cache headers (cdn-cache.php) and also gets Vary: Accept (owner, 3 Nov 2026), so a cache that
+ *   honours Vary stores it per Accept header (AW_MD_VARY_HTML, AW SEO Plus → Settings; 0 turns it off). The server's page cache (LiteSpeed) and the Hostinger CDN answer from their
+ *   copy before WordPress runs; how agents get past them: docs/cdn.md, step C.
  * - Password-protected pages, previews and logged-in requests are never converted.
  * - Off with the "Markdown for agents" switch in AW SEO Plus → Settings.
  *
@@ -50,12 +52,17 @@ function aw_md_accept_prefers( string $accept ): bool {
 	return $md > $html || ( $md === $html && ! isset( $q['text/html'] ) );
 }
 
-/** Whether this request gets Markdown. */
-function aw_md_wanted(): bool {
+/** Whether this request is for a page that has a Markdown version (Home and single pages, for anonymous GETs). */
+function aw_md_has_version(): bool {
 	if ( 'get' !== ( isset( $_SERVER['REQUEST_METHOD'] ) ? sanitize_key( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) : '' ) || is_admin() || is_feed() || is_preview() || is_embed() || is_404() || is_user_logged_in() ) {
 		return false;
 	}
-	if ( ! ( is_front_page() || is_singular() ) || ( is_singular() && post_password_required() ) ) {
+	return ( is_front_page() || is_singular() ) && ! ( is_singular() && post_password_required() );
+}
+
+/** Whether this request gets Markdown. */
+function aw_md_wanted(): bool {
+	if ( ! aw_md_has_version() ) {
 		return false;
 	}
 	$accept = isset( $_SERVER['HTTP_ACCEPT'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_ACCEPT'] ) ) : '';
@@ -310,6 +317,9 @@ add_action(
 	'template_redirect',
 	function () {
 		if ( ! aw_md_wanted() ) {
+			if ( ( ! defined( 'AW_MD_VARY_HTML' ) || AW_MD_VARY_HTML ) && aw_md_has_version() && ! headers_sent() ) {
+				header( 'Vary: Accept', false ); // the HTML too, so a shared cache that honours Vary keeps it apart from the Markdown.
+			}
 			return;
 		}
 		ob_start(

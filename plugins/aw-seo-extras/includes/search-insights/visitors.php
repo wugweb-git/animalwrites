@@ -3,8 +3,8 @@
  * Server tab, visitors (owner, 3 Nov 2026): the country and a shortened IP address of each front-end request that
  * reaches WordPress, as daily counts, for the admin only (to spot scrapers).
  *
- * - Counted: front-end requests (not logged in; not wp-admin, the REST API, cron, AJAX or WP-CLI). Pages the CDN serves
- *   from its cache never reach WordPress, so these are the requests the server itself answered.
+ * - Counted: front-end requests (not logged in; not wp-admin, the REST API, cron, AJAX or WP-CLI). Pages the CDN or the
+ *   server's LiteSpeed page cache answer from a stored copy never reach WordPress, so these are the requests the server itself answered.
  * - Shortened IP: IPv4 with the last number zeroed (203.0.113.0), IPv6 cut to its first 48 bits (2001:db8:1::).
  *   No full address is stored. Shortened addresses are kept 30 days (the daily run deletes older ones); country
  *   counts are kept for good.
@@ -244,7 +244,7 @@ function aw_si_vis_section(): void {
 		return;
 	}
 	$geo = (string) get_option( 'aw_si_geo_updated' );
-	echo '<p class="description">' . esc_html__( 'Front-end requests the server answered (not logged-in users, wp-admin, the REST API or cron; not pages the CDN served from its cache), by country and by shortened address (IPv4 with the last number zeroed, IPv6 to 48 bits). Shortened addresses are kept 30 days, countries for good.', 'aw-seo-extras' ) . ' ';
+	echo '<p class="description">' . esc_html__( 'Front-end requests the server answered (not logged-in users, wp-admin, the REST API or cron; not pages the CDN or the server\'s page cache answered from a stored copy), by country and by shortened address (IPv4 with the last number zeroed, IPv6 to 48 bits). Shortened addresses are kept 30 days, countries for good.', 'aw-seo-extras' ) . ' ';
 	/* translators: %s: date the country file was downloaded, or "not yet". */
 	echo esc_html( sprintf( __( 'Countries: the CDN\'s country header when sent, else IP Geolocation by DB-IP (db-ip.com, CC BY 4.0), file of %s.', 'aw-seo-extras' ), '' !== $geo ? $geo : __( 'not yet', 'aw-seo-extras' ) ) ) . '</p>';
 

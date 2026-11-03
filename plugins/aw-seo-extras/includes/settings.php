@@ -310,6 +310,7 @@ function aw_seo_modules(): array {
 			'files'  => array( 'markdown' ),
 			'desc'   => 'Home and single pages as Markdown when a request asks for text/markdown; browsers get the HTML.',
 			'fields' => array(
+				'AW_MD_VARY_HTML' => array( 'type' => 'int', 'label' => 'Vary: Accept on the HTML (1 on, 0 off)', 'help' => 'Set 0 if the CDN stops storing Home and single pages (x-hcdn-cache-status never HIT).', 'default' => 1 ),
 			),
 		),
 		'analysis' => array(
