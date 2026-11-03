@@ -130,6 +130,7 @@ Every hash below is on `wordpress` (live) as of 3 Nov 2026. Sections are in page
 - Guides: rule by rule, who approves, today vs the draft, how to object, pain scale, IAEC, CPCSEA, Palamur timeline, alternatives, testing laws. b06d2ced, 14f61b61, 16 Oct
 - Guide call to action box on the six lab guides and the Library draft. 1bf1b476, 16 Oct
 - The NAMs paper added to the Library and linked to the campaign (owner's yes, 2 Nov; the two tinyurl emails skipped).
+- NAMs card picture: media 24027, `nams-organ-on-a-chip-device-lab-bench.avif` (1200x800), title "Organ-on-a-chip device on a lab bench", alt "A small clear organ-on-a-chip device on a lab bench beside a pipette and a petri dish." Image and alt approved by the owner, 3 Nov. Set as the picture of Library item 23913; checked on the live page.
 
 ## What happens next
 - A roadmap: step cards, a vertical timeline on phones, the next step highlighted. 228bf825, af2ec664, 2 Nov
@@ -302,7 +303,7 @@ So from 6 Nov until the owner sets Post, the page and Home still ask people to s
 - Accessibility leftovers to re-check: share and Library link names, a list item outside its list, table header scope, one date at 2.55:1, 12px chip text, enterkeyhint.
 - Step-2 wording "Enter this" (copy).
 - Wrong pictures on media 13904 (a cat) and 12972 (a dog).
-- The NAMs card shows the grey fallback; Share and Volunteer photos are shared by three campaigns.
+- Share and Volunteer photos are shared by three campaigns. (The NAMs card picture was set on 3 Nov.)
 - Internal-link and small search fixes (proposals).
 - Press search run for the campaign after the next Sources sync.
 
