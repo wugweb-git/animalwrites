@@ -6,8 +6,8 @@
  * - Counted: front-end requests (not logged in; not wp-admin, the REST API, cron, AJAX or WP-CLI). Pages the CDN serves
  *   from its cache never reach WordPress, so these are the requests the server itself answered.
  * - Shortened IP: IPv4 with the last number zeroed (203.0.113.0), IPv6 cut to its first 48 bits (2001:db8:1::).
- *   No full address is stored. Shortened addresses are kept 30 days, country counts 90 days; the daily run deletes
- *   older rows.
+ *   No full address is stored. Shortened addresses are kept 30 days (the daily run deletes older ones); country
+ *   counts are kept for good.
  * - Country: a country header from the CDN when one is sent (filter aw_si_vis_country_headers), else the free DB-IP
  *   Lite country file (CC BY 4.0, db-ip.com), downloaded once a month into uploads/aw-geo/ as two small lookup files.
  *   No paid service and no lookup per request leaves the server.
@@ -22,7 +22,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 const AW_SI_VIS_DB      = '1'; // Table version.
 const AW_SI_VIS_IP_DAYS = 30;
-const AW_SI_VIS_C_DAYS  = 90;
 const AW_SI_GEO_CRON    = 'aw_si_geo_refresh';
 
 /** The table name. */
@@ -143,13 +142,12 @@ function aw_si_vis_count(): void {
 }
 add_action( 'shutdown', 'aw_si_vis_count', 0 );
 
-/** The daily step: the table in place, old rows deleted, the lookup files refreshed when a month old. */
+/** The daily step: the table in place, shortened addresses older than 30 days deleted, the lookup files refreshed when a month old. */
 function aw_si_vis_daily(): void {
 	aw_si_vis_install();
 	global $wpdb;
 	$t = aw_si_vis_table();
 	$wpdb->query( $wpdb->prepare( "DELETE FROM {$t} WHERE kind = 'i' AND day < %s", wp_date( 'Y-m-d', time() - AW_SI_VIS_IP_DAYS * DAY_IN_SECONDS ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- shortened addresses older than 30 days
-	$wpdb->query( $wpdb->prepare( "DELETE FROM {$t} WHERE kind = 'c' AND day < %s", wp_date( 'Y-m-d', time() - AW_SI_VIS_C_DAYS * DAY_IN_SECONDS ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- country counts older than 90 days
 	$v4 = aw_si_geo_dir() . 'v4.bin';
 	if ( ( ! is_readable( $v4 ) || filemtime( $v4 ) < time() - 30 * DAY_IN_SECONDS ) && ! wp_next_scheduled( AW_SI_GEO_CRON ) ) {
 		wp_schedule_single_event( time() + 120, AW_SI_GEO_CRON ); // its own run: the download and conversion take a while.
@@ -223,14 +221,14 @@ add_filter( 'aw_si_cron_hooks', fn( $h ) => array_merge( (array) $h, array( AW_S
  * Rows for the tab.
  *
  * @param string $kind c or i.
- * @param int    $days Days back.
+ * @param int    $days Days back (0: all days).
  * @param int    $limit Rows.
  * @return array<string,int> Key => count over the days.
  */
 function aw_si_vis_top( string $kind, int $days, int $limit ): array {
 	global $wpdb;
 	$t    = aw_si_vis_table();
-	$rows = $wpdb->get_results( $wpdb->prepare( "SELECT k, SUM(n) AS n FROM {$t} WHERE kind = %s AND day >= %s GROUP BY k ORDER BY n DESC LIMIT %d", $kind, wp_date( 'Y-m-d', time() - ( $days - 1 ) * DAY_IN_SECONDS ), $limit ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- our own counter table
+	$rows = $wpdb->get_results( $wpdb->prepare( "SELECT k, SUM(n) AS n FROM {$t} WHERE kind = %s AND day >= %s GROUP BY k ORDER BY n DESC LIMIT %d", $kind, $days > 0 ? wp_date( 'Y-m-d', time() - ( $days - 1 ) * DAY_IN_SECONDS ) : '1970-01-01', $limit ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- our own counter table
 	$out  = array();
 	foreach ( (array) $rows as $r ) {
 		$out[ (string) $r->k ] = (int) $r->n;
@@ -246,7 +244,7 @@ function aw_si_vis_section(): void {
 		return;
 	}
 	$geo = (string) get_option( 'aw_si_geo_updated' );
-	echo '<p class="description">' . esc_html__( 'Front-end requests the server answered (not logged-in users, wp-admin, the REST API or cron; not pages the CDN served from its cache), by country and by shortened address (IPv4 with the last number zeroed, IPv6 to 48 bits). Shortened addresses are kept 30 days, countries 90 days.', 'aw-seo-extras' ) . ' ';
+	echo '<p class="description">' . esc_html__( 'Front-end requests the server answered (not logged-in users, wp-admin, the REST API or cron; not pages the CDN served from its cache), by country and by shortened address (IPv4 with the last number zeroed, IPv6 to 48 bits). Shortened addresses are kept 30 days, countries for good.', 'aw-seo-extras' ) . ' ';
 	/* translators: %s: date the country file was downloaded, or "not yet". */
 	echo esc_html( sprintf( __( 'Countries: the CDN\'s country header when sent, else IP Geolocation by DB-IP (db-ip.com, CC BY 4.0), file of %s.', 'aw-seo-extras' ), '' !== $geo ? $geo : __( 'not yet', 'aw-seo-extras' ) ) ) . '</p>';
 
@@ -271,7 +269,7 @@ function aw_si_vis_section(): void {
 
 	foreach (
 		array(
-			array( __( 'Top countries, 90 days', 'aw-seo-extras' ), __( 'Country', 'aw-seo-extras' ), aw_si_vis_top( 'c', AW_SI_VIS_C_DAYS, 10 ) ),
+			array( __( 'Top countries, all days', 'aw-seo-extras' ), __( 'Country', 'aw-seo-extras' ), aw_si_vis_top( 'c', 0, 10 ) ),
 			array( __( 'Top shortened addresses, 30 days', 'aw-seo-extras' ), __( 'Shortened address', 'aw-seo-extras' ), aw_si_vis_top( 'i', AW_SI_VIS_IP_DAYS, 10 ) ),
 		) as $sec
 	) {

@@ -1,6 +1,6 @@
 <?php
 /**
- * Server tab (owner, 3 Nov 2026): what the server itself sees, kept 90 days, aggregate counts only.
+ * Server tab (owner, 3 Nov 2026): what the server itself sees, aggregate counts only, kept for good (nothing is deleted).
  *
  * - The host gives this account no access log (only PHP error logs), so bandwidth and requests the CDN answers are
  *   not available here; hPanel shows them. What is counted:
@@ -13,8 +13,8 @@
  * - Visitors by country and shortened IP address: visitors.php.
  * - No full IP address, full user agent or query string is stored; a crawler is kept only as its name.
  * - Counts are kept in one option per day (aw_si_srv_YYYYMMDD, site time zone, not autoloaded); a request is written
- *   only when it is a listed crawler or a 4xx/5xx answer. The daily run (aw_si_daily) adds yesterday's PHP errors and
- *   deletes days older than 90.
+ *   only when it is a listed crawler or a 4xx/5xx answer. The daily run (aw_si_daily) adds yesterday's PHP errors.
+ *   Every day is kept (owner, 3 Nov 2026: nothing is dropped).
  * - Speed and AI visibility are checked automatically every morning: selfcheck.php.
  *
  * @package aw-seo-extras
@@ -24,7 +24,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_SI_SRV_DAYS = 90;
 const AW_SI_SRV_URLS = 100; // distinct addresses kept per day and kind; more are counted as "(other)".
 
 /**
@@ -218,7 +217,7 @@ function aw_si_srv_msg_html( string $msg ): string {
 	return esc_html( $msg ) . ' (' . ( '' !== $link ? '<a href="' . esc_url( $link ) . '" target="_blank" rel="noopener">' . esc_html( $file ) . '</a>' : esc_html( $file ) ) . ')';
 }
 
-/** The daily step: yesterday's PHP errors into its day, then days older than 90 deleted. */
+/** The daily step: yesterday's PHP errors into its day. Every day is kept. */
 function aw_si_srv_daily(): void {
 	$ymd        = wp_date( 'Ymd', time() - DAY_IN_SECONDS );
 	$key        = aw_si_srv_key( $ymd );
@@ -226,12 +225,6 @@ function aw_si_srv_daily(): void {
 	$day        = is_array( $day ) ? $day : array();
 	$day['php'] = aw_si_srv_php_errors( $ymd );
 	update_option( $key, $day, false );
-	global $wpdb;
-	$cut = aw_si_srv_key( wp_date( 'Ymd', time() - AW_SI_SRV_DAYS * DAY_IN_SECONDS ) );
-	$old = $wpdb->get_col( $wpdb->prepare( "SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s AND option_name < %s", $wpdb->esc_like( 'aw_si_srv_' ) . '%', $cut ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- a prefix scan of our own options
-	foreach ( $old as $name ) {
-		delete_option( $name );
-	}
 }
 add_action( AW_SI_CRON_DAILY, 'aw_si_srv_daily', 20 );
 
@@ -242,7 +235,7 @@ add_action( AW_SI_CRON_DAILY, 'aw_si_srv_daily', 20 );
  */
 function aw_si_srv_days(): array {
 	global $wpdb;
-	$rows = $wpdb->get_results( $wpdb->prepare( "SELECT option_name, option_value FROM {$wpdb->options} WHERE option_name LIKE %s ORDER BY option_name DESC LIMIT %d", $wpdb->esc_like( 'aw_si_srv_' ) . '%', AW_SI_SRV_DAYS + 1 ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- a prefix scan of our own options
+	$rows = $wpdb->get_results( $wpdb->prepare( "SELECT option_name, option_value FROM {$wpdb->options} WHERE option_name LIKE %s ORDER BY option_name DESC", $wpdb->esc_like( 'aw_si_srv_' ) . '%' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- a prefix scan of our own options
 	$out  = array();
 	foreach ( (array) $rows as $r ) {
 		$v = maybe_unserialize( $r->option_value );
@@ -302,7 +295,7 @@ add_action(
 			'today' => array( __( 'Today', 'aw-seo-extras' ), 1 ),
 			'd7'    => array( __( 'Last 7 days', 'aw-seo-extras' ), 7 ),
 			'd30'   => array( __( 'Last 30 days', 'aw-seo-extras' ), 30 ),
-			'all'   => array( __( 'All stored days', 'aw-seo-extras' ), AW_SI_SRV_DAYS ),
+			'all'   => array( __( 'All days', 'aw-seo-extras' ), PHP_INT_MAX ),
 		);
 		$sums    = array();
 		foreach ( $days as $ymd => $d ) {

@@ -13,7 +13,7 @@
  *   5. The home page's JSON-LD decodes and has one Organization node with the site's @id, name and URL.
  *   6. llms.txt answers with text.
  *   The home page is asked with a query string, so the CDN's cached copy is not the one checked.
- * - Stored in option aw_si_srv_checks (Ymd => speed, ai), the last 90 days.
+ * - Stored in option aw_si_srv_checks (Ymd => speed, ai), every day kept.
  *
  * @package aw-seo-extras
  */
@@ -39,7 +39,7 @@ function aw_si_chk_put( string $part, array $value ): void {
 	$all[ $ymd ]          = (array) ( $all[ $ymd ] ?? array() );
 	$all[ $ymd ][ $part ] = 'speed' === $part ? array_merge( (array) ( $all[ $ymd ]['speed'] ?? array() ), $value ) : $value;
 	krsort( $all );
-	update_option( 'aw_si_srv_checks', array_slice( $all, 0, AW_SI_SRV_DAYS, true ), false );
+	update_option( 'aw_si_srv_checks', $all, false );
 }
 
 /** The daily step: the checks, each in its own run a few minutes apart. */
