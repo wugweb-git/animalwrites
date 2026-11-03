@@ -72,7 +72,9 @@
   --kit-space-head: var(--s-4);
   --kit-space-head-meta: var(--s-3);
   --kit-space-collection: var(--s-4);
-  --kit-space-section: 48px;
+  --kit-space-section-base: 48px; /* the section steps: 48 / 70 / 96 */
+  --kit-space-section: var(--kit-space-section-base); /* section top (and both sides where a part has one value); Styles > Group > Section > Padding top */
+  --kit-space-section-end: var(--kit-space-section-base); /* section bottom; Styles > Group > Section > Padding bottom */
   --kit-space-band-gap: var(--s-6); /* head band › a list toolbar under it: 24 / 32 / 40 */
   --kit-hero-min: 560px;
   --kit-hero-h: min(720px, 100svh); /* every hero's height at every width, phones too: 720px or one screen, whichever is less (owner, 2 Nov 2026: "fixed or within viewport sizes") */
@@ -203,7 +205,7 @@
 @media (min-width: 768px) {
   :root {
     --kit-photo-card-h: 350px;
-    --kit-space-section: 70px;
+    --kit-space-section-base: 70px;
     --kit-space-band-gap: var(--s-8);
     --kit-space-gutter: 32px;
     --kit-space-grid: 24px;
@@ -220,7 +222,7 @@
 }
 @media (min-width: 1200px) {
   :root {
-    --kit-space-section: 96px;
+    --kit-space-section-base: 96px;
     --kit-space-band-gap: var(--s-10);
     --kit-hero-min: 660px;
     --kit-space-gutter: 48px;

@@ -6,9 +6,10 @@
  *   (Dimensions > Minimum height), colours, padding, border and shadow.
  * - Two Styles values are also the theme's tokens, so heroes and sections that are not (yet) these blocks follow them too:
  *     Styles > Blocks > Hero > Minimum height             -> --kit-hero-h        (every hero: Home, campaigns, covers)
- *     Styles > Blocks > Group > Section > Padding (top)    -> --kit-space-section (every section, band and campaign section)
- *   While a value is the theme default (the token itself), nothing is printed and the token keeps its 48 / 70 / 96 steps
- *   at 768 and 1200 (kit-tokens.css). A value set in Styles is one value at every width.
+ *     Styles > Blocks > Group > Section > Padding top      -> --kit-space-section     (every section, band and campaign section)
+ *     Styles > Blocks > Group > Section > Padding bottom   -> --kit-space-section-end (their bottom side)
+ *   While a value is the theme default (the Section preset), nothing is printed and the tokens keep their 48 / 70 / 96
+ *   steps at 768 and 1200 (--kit-space-section-base, kit-tokens.css). A value set in Styles is one value at every width.
  *
  * @package kits-core
  */
@@ -72,22 +73,25 @@ function kits_style_value_css( $value ) {
  */
 function kits_style_tokens_css() {
 	$map = array(
-		'--kit-hero-h'        => array(
+		'--kit-hero-h'            => array(
 			'value'   => wp_get_global_styles( array( 'dimensions', 'minHeight' ), array( 'block_name' => 'kits/hero' ) ),
 			'default' => array( 'var(--kit-hero-h)' ),
 		),
-		'--kit-space-section' => array(
-			// The top padding: one token holds both sides, so set top and bottom together in Styles.
+		'--kit-space-section'     => array(
 			'value'   => wp_get_global_styles( array( 'variations', 'kits-section', 'spacing', 'padding', 'top' ), array( 'block_name' => 'core/group' ) ),
-			'default' => array( 'var(--wp--preset--spacing--section)', 'var(--kit-space-section)' ),
+			'default' => array( 'var(--wp--preset--spacing--section)', 'var(--kit-space-section-base)' ),
+		),
+		'--kit-space-section-end' => array(
+			'value'   => wp_get_global_styles( array( 'variations', 'kits-section', 'spacing', 'padding', 'bottom' ), array( 'block_name' => 'core/group' ) ),
+			'default' => array( 'var(--wp--preset--spacing--section)', 'var(--kit-space-section-base)' ),
 		),
 	);
 	$out = '';
 	foreach ( $map as $token => $row ) {
 		$css = kits_style_value_css( $row['value'] );
-		// A value that refers to the token itself (or to the preset that is the token) would make the token cyclic and
-		// invalid everywhere, so it is left to the block that holds it.
-		$self = false !== strpos( $css, $token ) || array_filter( $row['default'], fn( $d ) => false !== strpos( $css, trim( $d, 'var()' ) ) );
+		// A value that names one of these tokens could make them cyclic and invalid everywhere, so it is left to the block
+		// that holds it. The Section preset points at --kit-space-section-base, so it is safe to use.
+		$self = (bool) preg_match( '/(' . implode( '|', array_map( 'preg_quote', array_keys( $map ) ) ) . ')(?![\w-])/', $css );
 		if ( '' !== $css && ! in_array( $css, $row['default'], true ) && ! $self ) {
 			$out .= $token . ':' . $css . ';';
 		}

@@ -182,6 +182,16 @@ add_filter(
 );
 
 /**
+ * The same in the editor (assets/js/legacy-styles.js): older groups get the style when they open, so the editor
+ * shows the Styles values on them and the next save keeps the style in the content.
+ */
+function kits_legacy_styles_editor() {
+	$f = get_template_directory() . '/assets/js/legacy-styles.js';
+	wp_enqueue_script( 'kits-legacy-styles', get_template_directory_uri() . '/assets/js/legacy-styles.js', array( 'wp-hooks', 'wp-compose', 'wp-element', 'wp-data', 'wp-block-editor' ), (string) filemtime( $f ), true );
+}
+add_action( 'enqueue_block_editor_assets', 'kits_legacy_styles_editor' );
+
+/**
  * Badge after a menu label: "Beta" (block style kits-beta). The badge sits inside the link, so the link's name reads
  * "{label}, Beta" (the comma is for screen readers only) and its target size is unchanged.
  *

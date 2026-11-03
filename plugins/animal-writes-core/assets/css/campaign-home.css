@@ -9,7 +9,7 @@
 .aw-camp :is(h2, h3.aw-camp-mod-h) { font-size: clamp(1.75rem, 1.3rem + 1.8vw, 2.5rem); margin: 0 0 var(--kit-space-4); }
 .aw-camp--lab-rules h2 { font-weight: var(--kit-weight-bold); letter-spacing: normal; line-height: 1.2; }
 .aw-camp--lab-rules .aw-letter-ground:not(:hover, :has(input:checked)) { box-shadow: inset 0 0 0 1px var(--kit-color-muted); }
-.aw-camp-band { padding: var(--kit-space-section) var(--kit-space-gutter); max-width: none; background: var(--camp-mark); color: var(--camp-on-mark); margin-inline: calc(50% - 50vw) !important; }
+.aw-camp-band { padding: var(--kit-space-section) var(--kit-space-gutter) var(--kit-space-section-end); max-width: none; background: var(--camp-mark); color: var(--camp-on-mark); margin-inline: calc(50% - 50vw) !important; }
 .wp-block-post-content > :is(.aw-camp-band, .aw-camp-end) { margin-block: 0px; }
 .aw-camp-band.has-art { position: relative; overflow: hidden; background-color: var(--camp-art-bg, var(--camp-mark)); }
 .aw-camp-band-art { position: absolute; inset: 0px 0px 0px auto; width: max(calc(50% + var(--kit-width-wide) / 2 - 34rem), 60rem); z-index: 0; }

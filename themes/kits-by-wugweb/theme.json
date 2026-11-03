@@ -220,7 +220,7 @@
 				{
 					"slug": "section",
 					"name": "Section (48 / 70 / 96)",
-					"size": "var(--kit-space-section)"
+					"size": "var(--kit-space-section-base)"
 				}
 			]
 		},

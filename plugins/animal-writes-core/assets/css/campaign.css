@@ -739,7 +739,7 @@
 
 /* Home band */
 .aw-camp-band {
-	padding: var(--kit-space-section) var(--kit-space-gutter); /* the section padding: 48/70/96 top and bottom, the gutter at the sides */
+	padding: var(--kit-space-section) var(--kit-space-gutter) var(--kit-space-section-end); /* the section padding: 48/70/96 top and bottom (Styles > Group > Section), the gutter at the sides */
 	max-width: none; margin-inline: calc(50% - 50vw) !important; /* full width, like every section (out of the page padding; core sets auto !important); the content keeps the page column */
 	background: var(--camp-mark); color: var(--camp-on-mark);
 }

@@ -219,7 +219,7 @@ main > .kit-section-band:first-child, main > p:first-child + .kit-section-band {
 /* Page head: nav › breadcrumb › H1 › description › lead, 16 apart (--kit-space-head) */
 .kit-section-inner > .kit-crumbs { margin: 0 0 var(--kit-space-head); }
 .kit-section-filters { margin-top: var(--kit-space-head); }
-.kit-section-band .kit-section-filters { margin-bottom: calc(var(--kit-space-6) - var(--kit-space-head)); } /* filters inside the band: its bottom padding (a setting) plus this keeps the old --kit-space-6 under them */
+.kit-section-band .kit-section-filters { margin-top: var(--kit-space-head); margin-bottom: calc(var(--kit-space-6) - var(--kit-space-head)); } /* filters inside the band: 16 above (beats the band's no-gap rule); its bottom padding (a setting) plus this keeps the old --kit-space-6 under them */
 .kit-section-filters .kit-filter-active { margin-top: var(--kit-space-3); }
 .kit-section-filters .kit-filters, .kit-section-filters .kit-filter-active { margin-bottom: 0; }
 /* List pages: the filters and count sit under the head band, then the list and its pagination, 16 apart (--kit-space-collection) */
@@ -1300,7 +1300,7 @@ header.wp-block-template-part.kit-header-hidden { transform: translateY(calc(-10
 /* Photo blocks (core Cover with the card radius) in a grid: the text sits at the bottom, the button last */
 /* A full-width Cover with placed content (bottom left and the like) keeps that content on the page column, where every page head starts */
 .wp-block-cover.alignfull.has-custom-content-position > .wp-block-cover__inner-container.is-layout-constrained { width: 100%; }
-.wp-block-cover.alignfull { padding-block: var(--kit-space-section); }
+.wp-block-cover.alignfull { padding-block: var(--kit-space-section) var(--kit-space-section-end); }
 .wp-block-cover.kit-hero { box-sizing: border-box; min-height: var(--kit-hero-h) !important; } /* the page hero: --kit-hero-h, 720px or one screen (owner, 2 Nov 2026); content is fitted to it, and only text zoomed to 200% can make it taller (WCAG 1.4.4); !important over the block's own min-height style */ /* the section padding, top and bottom, like every section */
 .wp-block-post-content > .alignfull { margin-block: 0; } /* full-width sections carry the section padding, so no block gap (white strip) between them */
 /* Everywhere, not only at the top level: full-width section groups nested in a wrapper (campaign pages) get no block gap
