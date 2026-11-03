@@ -118,8 +118,9 @@ add_shortcode(
 			return ''; // Not applicable: hidden
 		}
 		$ev   = (int) get_post_meta( $id, 'aw_campaign_impact_evidence', true );
-		$link = $ev && 'publish' === get_post_status( $ev ) ? '<span class="aw-camp-impact-evidence">Evidence: <a href="' . esc_url( get_permalink( $ev ) ) . '">' . esc_html( get_the_title( $ev ) ) . '</a></span>' : '';
-		return '<p class="aw-camp-status aw-camp-impact is-' . esc_attr( $state ) . '"><span class="aw-camp-status-window">' . esc_html( AW_CAMP_IMPACT[ $state ] ) . '</span>' . $link . '</p>';
+		$link = $ev && 'publish' === get_post_status( $ev ) ? ' Evidence: <a href="' . esc_url( get_permalink( $ev ) ) . '">' . esc_html( get_the_title( $ev ) ) . '</a>' : '';
+		// Plain text, like the hero's outcome line: no status pills on campaigns (owner, 2 Nov 2026)
+		return '<p class="aw-camp-status aw-camp-impact is-' . esc_attr( $state ) . '"><strong>' . esc_html( AW_CAMP_IMPACT[ $state ] ) . '.</strong>' . $link . '</p>';
 	}
 );
 
@@ -131,9 +132,85 @@ add_shortcode(
 			return '';
 		}
 		list( $key, $label, $asof ) = aw_camp_outcome( $id );
-		return '<p class="aw-camp-status"><span class="aw-camp-status-outcome is-' . esc_attr( $key ) . '">Outcome: ' . esc_html( $label ) . '</span>'
-			. ( $asof ? '<span class="aw-camp-status-asof">As of ' . aw_camp_record_date( $asof ) . '</span>' : '' ) . '</p>';
+		// The same plain line as [aw_camp_status] in the hero: no status pills on campaigns (owner, 2 Nov 2026)
+		return '<p class="aw-camp-status is-' . esc_attr( $key ) . '">Outcome: ' . esc_html( $label ) . ( $asof ? '. As of ' . aw_camp_record_date( $asof ) : '' ) . '</p>';
 	}
+);
+
+/* ---------- The record lists of a closed campaign ---------- */
+
+/*
+ * A closed campaign's record lists (sections press, library and news, Campaign Content Standard C3) show their first four
+ * items; the rest wait in a closed Show more fold, the theme's .aw-more (a core Details, the words Home uses), at every
+ * width, so each section stays one screen on phones and within 720px from 768 (docs/design-system.md, Layout rules 5).
+ * Nothing is removed: the folded items stay in the page, and a list across two queries (News, then guides) folds as one.
+ */
+const AW_CAMP_RECORD_SHOWN = 4;
+
+/** The section's HTML with every list item after the first AW_CAMP_RECORD_SHOWN in one closed fold, or unchanged. */
+function aw_camp_record_fold( $html ) {
+	$at = 0;
+	for ( $i = 0; $i <= AW_CAMP_RECORD_SHOWN; $i++ ) {
+		$at = strpos( $html, '<li class="wp-block-post ', $i ? $at + 1 : 0 );
+		if ( false === $at ) {
+			return $html; // four items or fewer: nothing to fold
+		}
+	}
+	// The list and the query block the fifth item sits in: closed before the fold, opened again inside it, so every
+	// original closing tag still has its opening tag.
+	$ul = strrpos( substr( $html, 0, $at ), '<ul class="' );
+	$q  = strrpos( substr( $html, 0, $at ), '<div class="wp-block-query' );
+	$end = strrpos( $html, '</' ); // the section's own closing tag
+	if ( false === $ul || false === $q || $q > $ul || false === $end || $end < $at ) {
+		return $html;
+	}
+	$ul_tag = substr( $html, $ul, strpos( $html, '>', $ul ) - $ul + 1 );
+	$q_tag  = substr( $html, $q, strpos( $html, '>', $q ) - $q + 1 );
+	$open   = '</ul></div><details class="wp-block-details aw-more aw-camp-record-more"><summary><span class="aw-more-show">Show more</span><span class="aw-more-less">Show less</span></summary>' . $q_tag . $ul_tag;
+	return substr( $html, 0, $at ) . $open . substr( $html, $at, $end - $at ) . '</details>' . substr( $html, $end );
+}
+
+add_filter(
+	'render_block_core/group',
+	function ( $html, $block ) {
+		$id = aw_camp_id();
+		if ( ! $id || ! in_array( (string) ( $block['attrs']['anchor'] ?? '' ), array( 'press', 'library', 'news' ), true ) || 'closed' !== aw_camp_window( $id ) || false !== strpos( $html, 'aw-camp-record-more' ) ) {
+			return $html;
+		}
+		return aw_camp_record_fold( $html );
+	},
+	20,
+	2
+);
+
+/*
+ * The Community dogs hero photo (the stamp) is stored with no width, height or srcset, so phones downloaded the 683px
+ * JPEG (70 KB) for a stamp about 150px wide and its box could shift on load. Give the img the attachment's width,
+ * height and srcset, sized to the stamp (campaign-record.css: 152px below 768, 200px to 1199, 320px from 1200). Front end
+ * only; the stored block is not changed.
+ */
+add_filter(
+	'render_block_core/image',
+	function ( $html, $block ) {
+		$att = (int) ( $block['attrs']['id'] ?? 0 );
+		if ( ! $att || is_admin() || ! is_singular( 'aw_campaign' ) || 'india-writes-for-its-community-dogs' !== get_post_field( 'post_name', get_queried_object_id() ) || false !== strpos( $html, ' srcset=' ) || ! preg_match( '/<img\b[^>]*\bwp-image-' . $att . '\b[^>]*>/', $html, $m ) ) {
+			return $html;
+		}
+		if ( (int) get_post_thumbnail_id( get_queried_object_id() ) !== $att ) {
+			return $html; // the hero photo only (the campaign's featured image)
+		}
+		$meta   = wp_get_attachment_metadata( $att );
+		$srcset = (string) wp_get_attachment_image_srcset( $att, 'large' );
+		$src    = wp_get_attachment_image_src( $att, 'large' );
+		if ( '' === $srcset || ! $src || empty( $meta['width'] ) ) {
+			return $html;
+		}
+		$img = preg_replace( '/\s(sizes|width|height)="[^"]*"/', '', $m[0] );
+		$img = str_replace( '<img ', '<img width="' . (int) $src[1] . '" height="' . (int) $src[2] . '" srcset="' . esc_attr( $srcset ) . '" sizes="(min-width: 1200px) 320px, (min-width: 768px) 200px, 152px" ', $img );
+		return str_replace( $m[0], $img, $html );
+	},
+	10,
+	2
 );
 
 /* ---------- Editor-only blocks ---------- */

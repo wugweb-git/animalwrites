@@ -21,9 +21,9 @@
 
 /* Metrics: value, label, then the source and "as of" */
 .aw-camp-metric { display: flex; flex-direction: column; gap: var(--kit-space-1); }
-.aw-camp-metric-value { font-size: clamp(2rem, 1.4rem + 2vw, 3rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1.05; }
+.aw-camp-metric-value { font-size: var(--kit-type-h1); font-weight: 800; letter-spacing: var(--kit-tracking-display); line-height: var(--kit-leading-display); }
 .aw-camp-metric-label { font-weight: var(--kit-weight-strong); }
-.aw-camp-metric-note { color: var(--camp-meta, var(--kit-color-muted)); font-size: var(--kit-type-small); }
+.aw-camp-metric-note { color: var(--camp-meta, var(--kit-color-muted)); font-size: var(--kit-type-sm); }
 .aw-camp-hero .aw-camp-metric-note { color: var(--camp-on-mark); }
 .aw-camp-metric.is-stale .aw-camp-metric-value { opacity: 0.8; }
 .aw-camp-results { display: grid; gap: var(--kit-space-5); grid-template-columns: 1fr; }
@@ -34,7 +34,7 @@
 .aw-camp-impact { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2) var(--kit-space-3); }
 
 /* Partner logos: whole logos, names below (gallery reused from the campaign page) */
-.aw-camp--community-dogs .aw-camp-partner-logos .wp-block-image img { object-fit: contain; background: #fff; }
+.aw-camp--community-dogs .aw-camp-partner-logos .wp-block-image img { object-fit: contain; background: var(--kit-color-raised); }
 
 /* The campaign's story block on Home and the Campaigns page (pattern animal-writes/aw1-story) in its own colours */
 .kit-ed-story.aw-camp--community-dogs { --kit-color-accent: var(--camp-accent); }
@@ -50,12 +50,10 @@
    Breakpoints: 768, 1200.
    ====================================================================================================== */
 .aw-camp.aw-camp--community-dogs {
-	--dg-pad: clamp(3.5rem, 2.25rem + 5vw, 6.5rem);              /* section top and bottom */
 	--dg-gutter: var(--wp--style--root--padding-left, var(--kit-space-gutter));
-	--dg-inline: max(var(--dg-gutter), calc((100% - 1120px) / 2)); /* the 1120px text column, edge to edge bands */
-	--dg-h2: clamp(2rem, 1.3rem + 2.6vw, 3.25rem);
+	--dg-inline: max(var(--dg-gutter), calc((100% - var(--kit-width-wide)) / 2 + var(--s-10))); /* the 1120px text column (1200 less 2 x 40), edge to edge bands */
 	--dg-line: color-mix(in srgb, var(--camp-dark) 14%, transparent);
-	--dg-raised: var(--kit-color-raised, #fff);
+	--dg-raised: var(--kit-color-raised);
 }
 
 /* Brand colour (owner, 18 Oct 2026: "use correct brand color"): on this page the marks (rail stops, icons, rules,
@@ -69,39 +67,38 @@
    edge; two plain bands in a row get a rule between them */
 .aw-camp.aw-camp--community-dogs > .aw-camp-section {
 	display: grid; grid-template-columns: minmax(0, 1fr); align-content: start;
-	margin-block: 0; padding: var(--dg-pad) var(--dg-inline) !important;
+	margin-block: 0; padding-block: var(--kit-space-section) !important; padding-inline: var(--dg-inline) !important; /* the theme section padding (3 Nov 2026; was 56 to 104px) */
 }
 .aw-camp.aw-camp--community-dogs > .aw-camp-section > :not(.aw-ed-mosaic) { max-width: none; min-width: 0; margin-inline: 0 !important; }
 .aw-camp.aw-camp--community-dogs > .aw-camp-section:not(.aw-camp-paper, .aw-camp-dark, .aw-camp-hero) + .aw-camp-section:not(.aw-camp-paper, .aw-camp-dark) { border-top: 1px solid var(--kit-color-line); }
 .aw-camp.aw-camp--community-dogs > .aw-camp-section > p:not(.aw-camp-status) { max-width: 68ch; }
 
-/* Type: section headings at a real display size (aw.css text levels are !important) */
+/* Type: section headings in the shared campaign size and weight (campaign.css), modules at the theme H3 (3 Nov 2026) */
 .aw-camp.aw-camp--community-dogs .aw-camp-section > h2,
-.aw-camp.aw-camp--community-dogs .kit-ed-head h2 { font-size: var(--dg-h2) !important; font-weight: 800 !important; letter-spacing: -0.035em; line-height: 1.02 !important; margin: 0 0 var(--kit-space-6) !important; max-width: 20ch; text-wrap: balance; }
-.aw-camp.aw-camp--community-dogs .aw-camp-section h3:not(.wp-block-post-title) { font-size: clamp(1.1875rem, 1.1rem + 0.35vw, 1.375rem) !important; font-weight: 700 !important; letter-spacing: -0.015em; line-height: 1.25 !important; margin: var(--kit-space-6) 0 var(--kit-space-3) !important; }
+.aw-camp.aw-camp--community-dogs .kit-ed-head h2 { margin: 0 0 var(--kit-space-5) !important; max-width: 20ch; text-wrap: balance; }
+.aw-camp.aw-camp--community-dogs .aw-camp-section h3:not(.wp-block-post-title) { font-weight: var(--kit-weight-bold) !important; letter-spacing: var(--kit-tracking-heading); line-height: var(--kit-leading-heading) !important; margin: var(--kit-space-5) 0 var(--kit-space-3) !important; }
 .aw-camp.aw-camp--community-dogs .aw-date { white-space: nowrap; }
 
 /* ---------- Hero: words left, the stamp and its postmark right (below on phones and tablets) ---------- */
 /* Owner, 18 Oct 2026: white text on the #ffa500 hero (asked after being told it is 2:1, under the 4.5:1 minimum).
    Only the hero's ink token changes, so the palette (and the deploy contrast check, which reads the palette block)
    keeps ink for brand buttons and the follow button. "Closed" becomes an ink pill so its orange text is not on white. */
-.aw-camp.aw-camp--community-dogs .aw-camp-hero { --camp-primary-ink: #ffffff; }
-.aw-camp.aw-camp--community-dogs .aw-camp-hero .aw-camp-status-window { background: var(--camp-dark); color: #ffffff; }
+.aw-camp.aw-camp--community-dogs .aw-camp-hero { --camp-primary-ink: var(--kit-color-on-ink); }
 .aw-camp.aw-camp--community-dogs .aw-camp-hero .aw-camp-metric-note { opacity: 1 !important; }
-.aw-camp.aw-camp--community-dogs .aw-camp-hero { column-gap: clamp(2rem, 1rem + 4vw, 5rem); padding-top: clamp(2.5rem, 1.5rem + 3vw, 4.5rem) !important; overflow: hidden; }
-.aw-camp.aw-camp--community-dogs .aw-camp-hero h1 { font-size: clamp(2.75rem, 1.5rem + 4.6vw, 4.75rem) !important; letter-spacing: -0.045em; line-height: 0.95 !important; margin: 0 0 var(--kit-space-5) !important; text-wrap: balance; }
-.aw-camp.aw-camp--community-dogs .aw-camp-hero .aw-camp-lede { max-width: 46ch; margin: 0 !important; font-size: clamp(1.0625rem, 1rem + 0.3vw, 1.1875rem); font-weight: var(--kit-weight-strong); }
+.aw-camp.aw-camp--community-dogs .aw-camp-hero { column-gap: var(--kit-space-7); overflow: hidden; }
+.aw-camp.aw-camp--community-dogs .aw-camp-hero h1 { font-size: var(--kit-type-h1) !important; letter-spacing: var(--kit-tracking-display); line-height: var(--kit-leading-display) !important; margin: 0 0 var(--kit-space-4) !important; text-wrap: balance; }
+.aw-camp.aw-camp--community-dogs .aw-camp-hero .aw-camp-lede { max-width: 46ch; margin: 0 !important; font-size: var(--kit-type-lead); font-weight: var(--kit-weight-strong); }
 .aw-camp.aw-camp--community-dogs .aw-camp-hero .aw-camp-status { margin: var(--kit-space-4) 0 0 !important; }
 .aw-camp.aw-camp--community-dogs .aw-camp-hero-summary { max-width: 52ch !important; padding: 0 !important; margin: var(--kit-space-6) 0 0 !important; }
 .aw-camp.aw-camp--community-dogs .aw-camp-hero > .aw-camp-metric { margin-top: var(--kit-space-6) !important; padding-top: var(--kit-space-4); border-top: 2px solid var(--camp-primary-ink); max-width: 36rem; }
-.aw-camp.aw-camp--community-dogs .aw-camp-hero .aw-camp-metric-value { font-size: clamp(2.75rem, 2rem + 2.6vw, 4rem); letter-spacing: -0.04em; }
+.aw-camp.aw-camp--community-dogs .aw-camp-hero .aw-camp-metric-value { font-size: var(--kit-type-h1); }
 .aw-camp.aw-camp--community-dogs .aw-camp-hero .aw-camp-metric-note { color: var(--camp-primary-ink); opacity: 0.8; }
 
 /* The stamp: the portrait photo whole, on white stamp paper with perforated edges (a mask of holes outside the
    picture). Slightly turned, as if stuck on by hand; it settles once on load. */
 .aw-camp.aw-camp--community-dogs .aw-camp-hero > .wp-block-image {
 	grid-column: 1; grid-row: 20; justify-self: end; width: min(72%, 19rem); margin: var(--kit-space-6) 0.5rem 0 0 !important; padding: 0.875rem;
-	background: #fff; transform: rotate(2.5deg);
+	background: var(--kit-color-raised); transform: rotate(2.5deg);
 	-webkit-mask: radial-gradient(circle at center, #0000 0.34rem, #000 0.38rem) -0.5rem -0.5rem / 1rem 1rem round, linear-gradient(#000 0 0) content-box;
 	mask: radial-gradient(circle at center, #0000 0.34rem, #000 0.38rem) -0.5rem -0.5rem / 1rem 1rem round, linear-gradient(#000 0 0) content-box;
 	animation: dg-stamp 700ms cubic-bezier(0.16, 1, 0.3, 1) 150ms both;
@@ -143,7 +140,7 @@
 @media (prefers-reduced-motion: reduce) { .aw-camp.aw-camp--community-dogs .aw-camp-hero > .wp-block-image { animation: none; } }
 
 /* ---------- Campaign goal: the heading beside two statements, the outcome under them ---------- */
-.aw-camp.aw-camp--community-dogs #campaign-goal > p:not(.aw-camp-status) { max-width: 40ch; margin: 0 !important; font-size: clamp(1.25rem, 1.1rem + 0.7vw, 1.625rem); font-weight: 500; line-height: 1.3; letter-spacing: -0.015em; }
+.aw-camp.aw-camp--community-dogs #campaign-goal > p:not(.aw-camp-status) { max-width: 40ch; margin: 0 !important; font-size: var(--kit-type-h3); font-weight: var(--kit-weight-medium); line-height: var(--kit-leading-heading); letter-spacing: var(--kit-tracking-heading); }
 .aw-camp.aw-camp--community-dogs #campaign-goal > p strong { display: block; margin-bottom: var(--kit-space-1); color: var(--camp-dark); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-bold); letter-spacing: 0; }
 .aw-camp.aw-camp--community-dogs #campaign-goal > p:not(.aw-camp-status) + p:not(.aw-camp-status) { margin-top: var(--kit-space-5) !important; padding-top: var(--kit-space-5); border-top: 1px solid var(--dg-line); }
 .aw-camp.aw-camp--community-dogs #campaign-goal > .aw-camp-status { margin-top: var(--kit-space-5) !important; }
@@ -153,25 +150,24 @@
 	.aw-camp.aw-camp--community-dogs #campaign-goal > h2 { grid-column: 1; grid-row: 1 / span 3; margin: 0 !important; }
 }
 
-/* Status labels off the hero: rings and fills in the mark colour (the hero's white ring disappears on paper) */
-.aw-camp.aw-camp--community-dogs .aw-camp-section:not(.aw-camp-hero) :is(.aw-camp-status-outcome, .aw-camp-status-asof) { box-shadow: inset 0 0 0 1px var(--camp-mark); color: var(--camp-dark); }
-.aw-camp.aw-camp--community-dogs .aw-camp-section:not(.aw-camp-hero) .aw-camp-status-window { background: var(--camp-primary); color: #ffffff; }
-.aw-camp.aw-camp--community-dogs .aw-camp-status > .aw-camp-impact-evidence { display: inline; padding: 0; border-radius: 0; font-weight: var(--kit-weight-regular); }
+/* Outcome and Real-world impact lines: plain text, no status pills (owner, 2 Nov 2026; campaign-record.php) */
+.aw-camp.aw-camp--community-dogs .aw-camp-status { display: block; font-weight: var(--kit-weight-strong); }
+.aw-camp.aw-camp--community-dogs .aw-camp-impact strong { font-weight: var(--kit-weight-bold); }
 
 /* ---------- Why it mattered: three short points and the long one as a dark card across the row ---------- */
 .aw-camp.aw-camp--community-dogs #why-it-matters .is-layout-grid { gap: var(--kit-space-4); }
-.aw-camp.aw-camp--community-dogs #why-it-matters .aw-card { display: flex; flex-direction: column; padding: clamp(1.5rem, 1.2rem + 1vw, 2rem); border-radius: var(--kit-radius-card); background: var(--camp-surface); box-shadow: inset 0 0 0 1px var(--kit-color-line); }
+.aw-camp.aw-camp--community-dogs #why-it-matters .aw-card { display: flex; flex-direction: column; padding: var(--kit-space-5); border-radius: var(--kit-radius-card); background: var(--camp-surface); box-shadow: inset 0 0 0 1px var(--kit-color-line); }
 .aw-camp.aw-camp--community-dogs #why-it-matters .aw-card > * { margin: 0 0 var(--kit-space-3) !important; }
 .aw-camp.aw-camp--community-dogs #why-it-matters .aw-card > :last-child { margin-bottom: 0 !important; }
-.aw-camp.aw-camp--community-dogs #why-it-matters .aw-card::before { content: ""; display: block; flex: none; width: 2rem; height: 2rem; margin-bottom: var(--kit-space-5); background: var(--camp-mark); -webkit-mask: var(--i) center / contain no-repeat; mask: var(--i) center / contain no-repeat; }
+.aw-camp.aw-camp--community-dogs #why-it-matters .aw-card::before { content: ""; display: block; flex: none; width: var(--kit-space-6); height: var(--kit-space-6); margin-bottom: var(--kit-space-4); background: var(--camp-mark); -webkit-mask: var(--i) center / contain no-repeat; mask: var(--i) center / contain no-repeat; }
 .aw-camp.aw-camp--community-dogs #why-it-matters .aw-card:nth-child(4) { grid-column: 1 / -1; background: var(--camp-dark); box-shadow: none; color: var(--kit-color-on-ink); }
 .aw-camp.aw-camp--community-dogs #why-it-matters .aw-card:nth-child(4) :is(h3, p, li, strong) { color: var(--kit-color-on-ink); }
 .aw-camp.aw-camp--community-dogs #why-it-matters .aw-card:nth-child(4)::before { background: var(--camp-primary); }
 .aw-camp.aw-camp--community-dogs #why-it-matters .aw-card:nth-child(4) > p:first-child { margin-bottom: var(--kit-space-1) !important; color: var(--camp-primary); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-bold); }
-.aw-camp.aw-camp--community-dogs #why-it-matters .aw-card:nth-child(4) h3 { font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2.125rem) !important; font-weight: 800 !important; letter-spacing: -0.03em; }
-.aw-camp.aw-camp--community-dogs #why-it-matters .aw-card:nth-child(4) ul { padding-left: 1.25rem; }
+.aw-camp.aw-camp--community-dogs #why-it-matters .aw-card:nth-child(4) h3 { font-size: var(--kit-type-h2) !important; font-weight: 800 !important; letter-spacing: var(--kit-tracking-display); } /* the shared bento lead card size (campaign.css) */
+.aw-camp.aw-camp--community-dogs #why-it-matters .aw-card:nth-child(4) ul { padding-left: var(--kit-space-5); }
 .aw-camp.aw-camp--community-dogs #why-it-matters .aw-card:nth-child(4) li::marker { color: var(--camp-primary); }
-.aw-camp.aw-camp--community-dogs #why-it-matters .aw-card:nth-child(4) > p:last-child { padding: var(--kit-space-4); border-radius: var(--kit-radius-control); background: rgb(255 255 255 / 0.08); }
+.aw-camp.aw-camp--community-dogs #why-it-matters .aw-card:nth-child(4) > p:last-child { padding: var(--kit-space-4); border-radius: var(--kit-radius-control); background: color-mix(in srgb, var(--kit-color-on-ink) 8%, transparent); }
 @media (min-width: 1200px) {
 	.aw-camp.aw-camp--community-dogs #why-it-matters .is-layout-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 	.aw-camp.aw-camp--community-dogs #why-it-matters .aw-card:nth-child(4) { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); column-gap: var(--kit-space-7); align-content: start; padding: var(--kit-space-7); }
@@ -185,12 +181,12 @@
 .aw-camp.aw-camp--community-dogs #how-to-help > p { margin: 0 0 var(--kit-space-4) !important; }
 @media (min-width: 1200px) { .aw-camp.aw-camp--community-dogs #how-to-help .aw-ed-mosaic { margin-inline: 0 !important; } } /* the grid column, not centred */
 .aw-camp.aw-camp--community-dogs .aw-camp-doclist { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--kit-space-1); }
-.aw-camp.aw-camp--community-dogs .aw-camp-doclist li { position: relative; display: grid; grid-template-columns: 1.25rem 1fr; gap: var(--kit-space-3); align-items: start; margin: 0; padding: var(--kit-space-3) 0; }
-.aw-camp.aw-camp--community-dogs .aw-camp-doclist li::before { content: ""; width: 1.25rem; height: 1.25rem; margin-top: 0.15em; background: var(--camp-mark); -webkit-mask: var(--i) center / contain no-repeat; mask: var(--i) center / contain no-repeat; }
+.aw-camp.aw-camp--community-dogs .aw-camp-doclist li { position: relative; display: grid; grid-template-columns: var(--kit-icon-md) 1fr; gap: var(--kit-space-3); align-items: center; box-sizing: border-box; min-height: var(--kit-size-target); margin: 0; padding: var(--kit-space-3) 0; } /* the whole row is the link, at least a 44px target */
+.aw-camp.aw-camp--community-dogs .aw-camp-doclist li::before { content: ""; width: var(--kit-icon-md); height: var(--kit-icon-md); background: var(--camp-mark); -webkit-mask: var(--i) center / contain no-repeat; mask: var(--i) center / contain no-repeat; }
 .aw-camp.aw-camp--community-dogs .aw-camp-doclist a { color: var(--kit-color-text); font-weight: var(--kit-weight-strong); text-decoration: none; }
 .aw-camp.aw-camp--community-dogs .aw-camp-doclist a::after { content: ""; position: absolute; inset: 0; } /* the whole row is the link */
 .aw-camp.aw-camp--community-dogs .aw-camp-doclist a:hover { text-decoration: underline; text-underline-offset: 0.2em; }
-.aw-camp.aw-camp--community-dogs .aw-camp-doclist li:has(a:focus-visible) { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: 2px; border-radius: var(--kit-radius-control); }
+.aw-camp.aw-camp--community-dogs .aw-camp-doclist li:has(a:focus-visible) { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); border-radius: var(--kit-radius-control); }
 .aw-camp.aw-camp--community-dogs #how-to-help .aw-camp-doclist { padding: var(--kit-space-3) var(--kit-space-5); border-radius: var(--kit-radius-card); background: var(--dg-raised); box-shadow: inset 0 0 0 1px var(--kit-color-line); }
 .aw-camp.aw-camp--community-dogs #how-to-help .aw-camp-doclist li + li { border-top: 1px solid var(--dg-line); }
 @media (min-width: 1200px) {
@@ -217,7 +213,7 @@
 .aw-camp.aw-camp--community-dogs .aw-camp-timeline li:last-child { padding-bottom: 0; border-left-color: transparent; }
 .aw-camp.aw-camp--community-dogs .aw-camp-timeline li::before { content: ""; position: absolute; left: -0.5625rem; top: 0.3rem; width: 1rem; height: 1rem; box-sizing: border-box; border-radius: 50%; background: var(--dg-raised); box-shadow: inset 0 0 0 3px var(--camp-mark); }
 .aw-camp.aw-camp--community-dogs .aw-camp-timeline li.is-key::before { left: -0.8125rem; top: 0.1rem; width: 1.5rem; height: 1.5rem; background: var(--camp-mark); box-shadow: 0 0 0 4px var(--dg-raised); }
-.aw-camp.aw-camp--community-dogs .aw-camp-timeline .aw-camp-dates-when { font-size: clamp(1.25rem, 1.1rem + 0.5vw, 1.5rem); line-height: 1.2; white-space: nowrap; }
+.aw-camp.aw-camp--community-dogs .aw-camp-timeline .aw-camp-dates-when { font-size: var(--kit-type-h3); line-height: var(--kit-leading-heading); white-space: nowrap; }
 .aw-camp.aw-camp--community-dogs .aw-camp-timeline .aw-camp-dates-when .kit-ico { --kit-ico-size: 0.75em; }
 .aw-camp.aw-camp--community-dogs .aw-camp-timeline .aw-camp-dates-what { display: block; margin-top: var(--kit-space-1); max-width: 34ch; }
 .aw-camp.aw-camp--community-dogs .aw-camp-timeline .aw-camp-dates-what strong { color: var(--kit-color-text); }
@@ -234,13 +230,13 @@
 .aw-camp.aw-camp--community-dogs .aw-camp-results { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--kit-space-6) var(--kit-space-5); margin: 0 0 var(--kit-space-7) !important; }
 .aw-camp.aw-camp--community-dogs .aw-camp-results > * { margin-block: 0 !important; }
 .aw-camp.aw-camp--community-dogs .aw-camp-results .aw-camp-metric { padding-top: var(--kit-space-4); border-top: 2px solid var(--camp-dark); }
-.aw-camp.aw-camp--community-dogs .aw-camp-results .aw-camp-metric-value { font-size: clamp(2.25rem, 1.6rem + 2.4vw, 3.75rem); letter-spacing: -0.045em; }
-.aw-camp.aw-camp--community-dogs .aw-camp-results .aw-camp-metric-note { font-size: 0.8125rem; }
+.aw-camp.aw-camp--community-dogs .aw-camp-results .aw-camp-metric-value { font-size: var(--kit-type-h1); }
+.aw-camp.aw-camp--community-dogs .aw-camp-results .aw-camp-metric-note { font-size: var(--kit-type-sm); }
 @media (min-width: 1200px) { .aw-camp.aw-camp--community-dogs .aw-camp-results { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 .aw-camp.aw-camp--community-dogs #impact > ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--kit-space-4); }
 .aw-camp.aw-camp--community-dogs #impact > p:not(.aw-camp-status) { margin: 0 0 var(--kit-space-4) !important; font-weight: var(--kit-weight-strong); }
 .aw-camp.aw-camp--community-dogs #impact > ul li { color: var(--camp-meta); font-size: var(--kit-type-sm); }
-.aw-camp.aw-camp--community-dogs #impact > ul li a { display: block; margin-bottom: var(--kit-space-1); color: var(--kit-color-text); font-size: var(--kit-type-base); font-weight: var(--kit-weight-strong); line-height: 1.35; }
+.aw-camp.aw-camp--community-dogs #impact > ul li a { display: flex; align-items: center; min-height: var(--kit-size-target); margin-bottom: var(--kit-space-1); color: var(--kit-color-text); font-size: var(--kit-type-base); font-weight: var(--kit-weight-strong); line-height: var(--kit-leading-heading); }
 .aw-camp.aw-camp--community-dogs #impact > .aw-camp-impact { margin: 0 !important; padding: var(--kit-space-5); border-radius: var(--kit-radius-card); background: var(--dg-raised); box-shadow: inset 0 0 0 1px var(--kit-color-line); gap: var(--kit-space-3); }
 @media (min-width: 1200px) {
 	.aw-camp.aw-camp--community-dogs #impact { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: var(--kit-space-7); }
@@ -252,9 +248,9 @@
 }
 
 /* ---------- What happened next: the account at reading size, the three documents beside it ---------- */
-.aw-camp.aw-camp--community-dogs #next-steps > p { margin: 0 0 var(--kit-space-6) !important; max-width: 62ch; font-size: clamp(1.0625rem, 1rem + 0.35vw, 1.25rem); line-height: 1.6; }
+.aw-camp.aw-camp--community-dogs #next-steps > p { margin: 0 0 var(--kit-space-5) !important; max-width: 62ch; font-size: var(--kit-type-lead); line-height: var(--kit-leading-body); }
 .aw-camp.aw-camp--community-dogs #next-steps .aw-camp-doclist { gap: var(--kit-space-3); }
-.aw-camp.aw-camp--community-dogs #next-steps .aw-camp-doclist li { padding: var(--kit-space-4) var(--kit-space-5); border-radius: var(--kit-radius-card); background: var(--dg-raised); box-shadow: inset 0 0 0 1px var(--kit-color-line); transition: box-shadow var(--kit-motion-fast, 150ms) var(--kit-motion-ease, ease); }
+.aw-camp.aw-camp--community-dogs #next-steps .aw-camp-doclist li { padding: var(--kit-space-4) var(--kit-space-5); border-radius: var(--kit-radius-card); background: var(--dg-raised); box-shadow: inset 0 0 0 1px var(--kit-color-line); transition: box-shadow var(--kit-motion-fast) var(--kit-motion-ease); }
 .aw-camp.aw-camp--community-dogs #next-steps .aw-camp-doclist li:hover { box-shadow: inset 0 0 0 2px var(--camp-mark); }
 @media (min-width: 1200px) {
 	.aw-camp.aw-camp--community-dogs #next-steps { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); column-gap: var(--kit-space-7); align-items: start; }
@@ -268,9 +264,9 @@
 @media (min-width: 1200px) { .aw-camp.aw-camp--community-dogs .aw-camp-partner-logos { grid-template-columns: repeat(7, minmax(0, 1fr)); } }
 .aw-camp.aw-camp--community-dogs .aw-camp-partner-logos > figure { display: flex !important; flex-direction: column; width: auto !important; margin: 0 !important; }
 .aw-camp.aw-camp--community-dogs .aw-camp-partner-logos > figure a { display: block; border-radius: var(--kit-radius-card); }
-.aw-camp.aw-camp--community-dogs .aw-camp-partner-logos > figure img { display: block; width: 100%; height: auto !important; aspect-ratio: 1; padding: var(--kit-space-2); box-sizing: border-box; border-radius: var(--kit-radius-card); box-shadow: inset 0 0 0 1px var(--kit-color-line); transition: box-shadow var(--kit-motion-fast, 150ms) var(--kit-motion-ease, ease); }
+.aw-camp.aw-camp--community-dogs .aw-camp-partner-logos > figure img { display: block; width: 100%; height: auto !important; aspect-ratio: 1; padding: var(--kit-space-2); box-sizing: border-box; border-radius: var(--kit-radius-card); box-shadow: inset 0 0 0 1px var(--kit-color-line); transition: box-shadow var(--kit-motion-fast) var(--kit-motion-ease); }
 .aw-camp.aw-camp--community-dogs .aw-camp-partner-logos > figure a:hover img { box-shadow: inset 0 0 0 2px var(--camp-mark); }
-.aw-camp.aw-camp--community-dogs .aw-camp-partner-logos > figure figcaption { position: static !important; max-height: none !important; margin: 0 !important; padding: var(--kit-space-2) 0 0 !important; background: none !important; color: var(--kit-color-text) !important; font-size: var(--kit-type-sm); line-height: 1.3; text-align: center; text-shadow: none !important; overflow: visible !important; }
+.aw-camp.aw-camp--community-dogs .aw-camp-partner-logos > figure figcaption { position: static !important; max-height: none !important; margin: 0 !important; padding: var(--kit-space-2) 0 0 !important; background: none !important; color: var(--kit-color-text) !important; font-size: var(--kit-type-sm); line-height: var(--kit-leading-heading); text-align: center; text-shadow: none !important; overflow: visible !important; }
 
 /* ---------- Media coverage and News and guides: the Media & PR, News and Resources sections' own cards ---------- */
 .aw-camp.aw-camp--community-dogs .aw-camp-cards { margin: 0 0 var(--kit-space-7) !important; }
@@ -279,9 +275,7 @@
 .aw-camp.aw-camp--community-dogs .aw-camp-section .kit-ed-head h3 { margin: 0 !important; }
 .aw-camp.aw-camp--community-dogs .aw-camp-section .kit-ed-head h2 { margin: 0 !important; }
 
-/* ---------- Read the law and the record: the Kits card arrow gets its own space ---------- */
-.aw-camp.aw-camp--community-dogs .aw-camp-docs-q li { align-items: center; background: var(--dg-raised); padding-right: calc(36px + 2 * var(--kit-space-4)); }
-.aw-camp.aw-camp--community-dogs .aw-camp-docs-q li::after { top: 50%; bottom: auto; right: var(--kit-space-4); transform: translateY(-50%); }
+/* ---------- Read the law and the record: the shared Read the law cards (campaign.css, #library) ---------- */
 
 /* ---------- Stay connected: the closing band; the two channels as buttons with their icons ---------- */
 .aw-camp.aw-camp--community-dogs #updates > h2 { color: var(--kit-color-on-ink); }
@@ -289,10 +283,10 @@
 .aw-camp.aw-camp--community-dogs #updates > .aw-camp-follow { max-width: none; }
 .aw-camp.aw-camp--community-dogs .aw-camp-follow { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-3); }
 .aw-camp.aw-camp--community-dogs .aw-camp-follow .aw-camp-sep { display: none; }
-.aw-camp.aw-camp--community-dogs .aw-camp-follow a { display: inline-flex; align-items: center; gap: var(--kit-space-2); min-height: 3rem; padding: 0 var(--kit-space-5); border-radius: var(--kit-radius-pill); background: var(--camp-primary); color: var(--camp-primary-ink) !important; font-weight: var(--kit-weight-bold); text-decoration: none; white-space: nowrap; transition: transform var(--kit-motion-fast, 150ms) var(--kit-motion-ease, ease); }
-.aw-camp.aw-camp--community-dogs .aw-camp-follow a + .aw-camp-sep + a, .aw-camp.aw-camp--community-dogs .aw-camp-follow a:last-child { background: transparent; color: var(--kit-color-on-ink) !important; box-shadow: inset 0 0 0 2px rgb(255 255 255 / 0.5); }
+.aw-camp.aw-camp--community-dogs .aw-camp-follow a { display: inline-flex; align-items: center; gap: var(--kit-space-2); min-height: var(--kit-size-control); padding: 0 var(--kit-space-5); border-radius: var(--kit-radius-pill); background: var(--camp-primary); color: var(--camp-primary-ink) !important; font-weight: var(--kit-weight-bold); text-decoration: none; white-space: nowrap; transition: transform var(--kit-motion-fast) var(--kit-motion-ease); }
+.aw-camp.aw-camp--community-dogs .aw-camp-follow a + .aw-camp-sep + a, .aw-camp.aw-camp--community-dogs .aw-camp-follow a:last-child { background: transparent; color: var(--kit-color-on-ink) !important; box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--kit-color-on-ink) 50%, transparent); }
 .aw-camp.aw-camp--community-dogs .aw-camp-follow a:active { transform: translateY(1px); }
-.aw-camp.aw-camp--community-dogs .aw-camp-follow a .kit-ico { --kit-ico-size: 1.25rem; }
+.aw-camp.aw-camp--community-dogs .aw-camp-follow a .kit-ico { --kit-ico-size: var(--kit-icon-md); }
 @media (min-width: 1200px) {
 	.aw-camp.aw-camp--community-dogs #updates { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); column-gap: var(--kit-space-7); align-items: center; }
 	.aw-camp.aw-camp--community-dogs #updates > h2 { grid-row: 1 / span 2; margin: 0 !important; }

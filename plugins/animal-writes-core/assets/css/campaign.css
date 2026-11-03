@@ -375,8 +375,7 @@
 
 /* Bands */
 .aw-camp-hero { background: var(--camp-mark); color: var(--camp-on-mark); }
-.aw-camp--community-dogs .aw-camp-hero, .aw-camp--community-dogs.aw-camp-hero { min-height: 1020px; } /* the Community dogs hero only: 1020 below 1200, 800 from 1200 (owner, 19 Oct 2026) */
-@media (min-width: 1200px) { .aw-camp--community-dogs .aw-camp-hero, .aw-camp--community-dogs.aw-camp-hero { min-height: 800px; } }
+.aw-camp--community-dogs .aw-camp-hero, .aw-camp--community-dogs.aw-camp-hero { box-sizing: border-box; min-height: var(--kit-hero-h); } /* --kit-hero-h like every campaign hero (was 1020 below 1200 and 800 from 1200, 19 Oct 2026; Layout rules 5) */
 /* Lab Rules hero: fixed at --kit-hero-h (720px or one screen, whichever is less; owner, 2 Nov 2026), the poster strip at its own shape */
 .aw-camp--lab-rules .aw-camp-hero { box-sizing: border-box; min-height: var(--kit-hero-h); } /* only text zoomed to 200% makes it taller (WCAG 1.4.4) */
 /* Phones: the Supreme Court and Lab rules heroes fit --kit-hero-h (owner, 2 Nov 2026: one CTA where possible, the
@@ -1061,21 +1060,29 @@
 	.aw-camp.aw-camp .aw-camp-grid > .aw-camp-card:first-child:hover { box-shadow: var(--kit-elevation-3); }
 }
 
-/* Read the law and the record (#read): the theme's stacked card (picture beside the title) on a white card; the list
+/* Read the law and the record (#read; #library on Community dogs): the theme's stacked card (picture beside the title) on a white card; the list
    row styles reset so the card carries the padding. Phones one column, from 768 two. */
-.aw-camp.aw-camp #read .aw-camp-docs-q li { display: block; padding: 0; background: none; box-shadow: none; border-radius: 0; }
-.aw-camp.aw-camp #read .aw-camp-docs-q li::before { content: none; }
-.aw-camp.aw-camp #read .aw-camp-docs-q li:hover { box-shadow: none; }
-.aw-camp.aw-camp #read .aw-camp-docs-q li > .kit-card { height: 100%; box-sizing: border-box; padding: var(--kit-space-5); background: var(--kit-color-surface-soft); }
+.aw-camp.aw-camp :is(#read, #library) .aw-camp-docs-q li { display: block; padding: 0; background: none; box-shadow: none; border-radius: 0; }
+.aw-camp.aw-camp :is(#read, #library) .aw-camp-docs-q li::before { content: none; }
+.aw-camp.aw-camp :is(#read, #library) .aw-camp-docs-q li:hover { box-shadow: none; }
+.aw-camp.aw-camp :is(#read, #library) .aw-camp-docs-q li > .kit-card { height: 100%; box-sizing: border-box; padding: var(--kit-space-5); background: var(--kit-color-surface-soft); }
 
 /* In the news (#latest): stacked cards like the theme's kit-card--stacked-md (the picture --kit-thumb-lg wide, at most
-   40%, beside the title), white. Phones one column, from 768 two. */
-.aw-camp.aw-camp #latest .aw-camp-row { display: grid; gap: var(--kit-space-4); grid-template-columns: minmax(0, 1fr); }
-@media (min-width: 768px) { .aw-camp.aw-camp #latest .aw-camp-row { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-.aw-camp.aw-camp #latest .aw-camp-row .wp-block-post-template > li { flex: none; width: auto; min-width: 0; margin: 0; }
-.aw-camp.aw-camp #latest .kit-card { flex-direction: row; align-items: center; gap: var(--kit-space-4); height: 100%; box-sizing: border-box; padding: var(--kit-space-5); background: var(--kit-color-surface-soft); }
-.aw-camp.aw-camp #latest .kit-card > .kit-card-media { flex: none; width: var(--kit-thumb-lg); max-width: 40%; margin: 0; border-radius: var(--kit-radius-media); overflow: hidden; }
-.aw-camp.aw-camp #latest .kit-card > .kit-card-body { flex: 1; min-width: 0; padding: 0; }
+   40%, beside the title), white. Phones one column, from 768 two. Community dogs' Media coverage and News and guides
+   lists (.aw-camp-cards, a post template list) use the same cards. */
+.aw-camp.aw-camp :is(#latest .aw-camp-row, .aw-camp-cards .wp-block-post-template) { display: grid; gap: var(--kit-space-4); grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 768px) { .aw-camp.aw-camp :is(#latest .aw-camp-row, .aw-camp-cards .wp-block-post-template) { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.aw-camp.aw-camp :is(#latest .aw-camp-row, .aw-camp-cards) .wp-block-post-template > li { flex: none; width: auto; min-width: 0; margin: 0; }
+.aw-camp.aw-camp :is(#latest, .aw-camp-cards) .kit-card { flex-direction: row; align-items: center; gap: var(--kit-space-4); height: 100%; box-sizing: border-box; padding: var(--kit-space-5); background: var(--kit-color-surface-soft); }
+.aw-camp.aw-camp :is(#latest, .aw-camp-cards) .kit-card > .kit-card-media { flex: none; width: var(--kit-thumb-lg); max-width: 40%; margin: 0; border-radius: var(--kit-radius-media); overflow: hidden; }
+.aw-camp.aw-camp :is(#latest, .aw-camp-cards) .kit-card > .kit-card-body { flex: 1; min-width: 0; padding: 0; }
+
+/* A closed campaign's record lists (campaign-record.php, aw_camp_record_fold): the first four items, then the rest in
+   a closed Show more fold (the theme's .aw-more summary, a --kit-size-target row) on a soft line, at every width. */
+.aw-camp .aw-camp-record-more { display: block; margin: var(--kit-space-4) 0 0; border-top: var(--kit-border-width) solid var(--kit-color-line); }
+.aw-camp .aw-camp-record-more > summary { display: flex; align-items: center; box-sizing: border-box; min-height: var(--kit-size-target); font-weight: var(--kit-weight-bold); cursor: pointer; }
+.aw-camp .aw-camp-record-more > summary:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
+.aw-camp .aw-camp-record-more[open] > summary { margin-bottom: var(--kit-space-4); }
 
 /* What happens next: the row of four from 768 (not only from 1200), the cards white */
 .aw-camp.aw-camp :is(#next, #next-closed) .aw-camp-steps > li:not(:first-child) { background: var(--kit-color-surface-soft); }
@@ -1164,8 +1171,9 @@
 
 /* Focus on the dark surfaces (WCAG 1.4.11, 3:1 for the focus ring): the site's blue ring (--kit-color-focus) is under
    3:1 on the Diwali hero, the dark sections and every campaign's lead tile, so there the ring is white
-   (--kit-color-on-ink), as on the Share band. Community dogs stays as it is. */
-.aw-camp--diwali .aw-camp-hero, .aw-camp:not(.aw-camp--community-dogs) :is(.aw-camp-dark, .aw-camp-grid > .aw-camp-card:first-child) { --kit-color-focus: var(--kit-color-on-ink); }
+   (--kit-color-on-ink), as on the Share band. Community dogs too: its Stay connected band and the dark card in Why it
+   mattered. */
+.aw-camp--diwali .aw-camp-hero, .aw-camp :is(.aw-camp-dark, .aw-camp-grid > .aw-camp-card:first-child), .aw-camp--community-dogs #why-it-matters .aw-card:nth-child(4) { --kit-color-focus: var(--kit-color-on-ink); }
 /* The Supreme Court phone bar never covers text or focus either (WCAG 2.4.11), as on Diwali and Lab rules */
 @media (max-width: 767px) {
 	html:has(.aw-camp--sc-stray-dogs .aw-sticky-cta) { scroll-padding-bottom: calc(var(--kit-btn-height) + 2 * var(--kit-space-2) + env(safe-area-inset-bottom)); }
