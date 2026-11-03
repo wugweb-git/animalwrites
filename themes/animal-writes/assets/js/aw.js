@@ -291,3 +291,45 @@
 		});
 	});
 })();
+
+/* WebMCP (owner, 3 Nov 2026): where the browser offers navigator.modelContext, an AI agent in the visitor's browser
+   gets two read-only tools: the site search and the Directory search. Both call the site's own public REST answers
+   (WordPress search; Directory listings), send nothing anywhere else and change nothing. No visible change. */
+(function () {
+	var mc = navigator.modelContext;
+	if (!mc || typeof mc.registerTool !== 'function') return;
+	var text = function (html) { return (new DOMParser().parseFromString(html || '', 'text/html').body.textContent || '').trim(); };
+	var get = function (path) {
+		return fetch(path, { credentials: 'omit', headers: { Accept: 'application/json' } }).then(function (r) {
+			if (!r.ok) throw new Error('HTTP ' + r.status);
+			return r.json();
+		});
+	};
+	var answer = function (rows) { return { content: [{ type: 'text', text: JSON.stringify(rows) }] }; };
+	var query = { type: 'object', properties: { query: { type: 'string', description: 'Words to search for.' } }, required: ['query'] };
+	var tools = [
+		{
+			name: 'search_animal_writes',
+			description: 'Search Animal Writes (animal welfare in India): news, court orders, laws, guides, campaigns and pages. Returns up to 10 results with title, address and kind.',
+			inputSchema: query,
+			annotations: { readOnlyHint: true },
+			execute: function (input) {
+				return get('/wp-json/wp/v2/search?per_page=10&search=' + encodeURIComponent(String(input && input.query || ''))).then(function (rows) {
+					return answer(rows.map(function (r) { return { title: text(r.title), url: r.url, kind: r.subtype }; }));
+				});
+			}
+		},
+		{
+			name: 'search_animal_writes_directory',
+			description: 'Search the Animal Writes Directory of animal welfare organisations, shelters, vets, gaushalas and rescue groups in India. Use a name, a service or a place (for example "vet Pune"). Returns up to 10 listings with name, address and summary.',
+			inputSchema: query,
+			annotations: { readOnlyHint: true },
+			execute: function (input) {
+				return get('/wp-json/wp/v2/aw_listing?per_page=10&_fields=title,link,excerpt&search=' + encodeURIComponent(String(input && input.query || ''))).then(function (rows) {
+					return answer(rows.map(function (r) { return { name: text(r.title && r.title.rendered), url: r.link, summary: text(r.excerpt && r.excerpt.rendered) }; }));
+				});
+			}
+		}
+	];
+	tools.forEach(function (t) { try { mc.registerTool(t); } catch (e) { /* already registered, or the browser refused: the page works as before */ } });
+})();
