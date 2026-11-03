@@ -48,7 +48,8 @@ add_filter(
 add_filter(
 	'render_block_core/template-part',
 	function ( $html, $block ) {
-		if ( 'footer' !== ( $block['attrs']['slug'] ?? '' ) ) {
+		// The site footer: the footer part, or the part Page Options put in its place (same area).
+		if ( 'footer' !== ( $block['attrs']['slug'] ?? '' ) && 'footer' !== ( $block['attrs']['area'] ?? '' ) ) {
 			return $html;
 		}
 		$p = new WP_HTML_Tag_Processor( $html );

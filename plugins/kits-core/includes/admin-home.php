@@ -132,5 +132,6 @@ function kits_overview_page() {
 			array( 'Slugs and image notes', esc_html( 'Every published item gets a slug; an editor-only note per image on the copy it supports.' ), kits_link( 'Media', 'upload.php' ), $auto ),
 		)
 	);
+	do_action( 'kits_overview_after' );
 	echo '</div>';
 }
