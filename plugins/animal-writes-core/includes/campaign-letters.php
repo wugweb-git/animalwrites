@@ -405,7 +405,7 @@ function aw_cl_widget() {
 	} else {
 		echo '<p style="font-size:14px">' . esc_html( sprintf( '%s sent · %s in the last 7 days', number_format_i18n( $total ), number_format_i18n( $week ) ) ) . '</p>';
 	}
-	$list = function ( $title, $rows ) {
+	$list = function ( $title, $rows, $col ) {
 		echo '<p style="margin:12px 0 4px"><strong>' . esc_html( $title ) . '</strong></p>';
 		if ( ! $rows ) {
 			echo '<p class="description">None yet.</p>';
@@ -415,13 +415,13 @@ function aw_cl_widget() {
 		foreach ( $rows as $label => $n ) {
 			$cells[] = array( 'label' => esc_html( $label ), 'n' => esc_html( number_format_i18n( $n ) ) );
 		}
-		aw_core_simple_table( 'letters-top', array( 'label' => '<span class="screen-reader-text">' . esc_html( $title ) . '</span>', 'n' => 'Letters' ), $cells );
+		aw_core_simple_table( 'letters-top', array( 'label' => esc_html( $col ), 'n' => 'Letters' ), $cells, array( 'foot' => false ) );
 	};
 	$top = array();
 	foreach ( array_slice( $ground, 0, 3, true ) as $n => $c ) {
 		$top[ $n . '. ' . ( $labels[ $n ] ?? '' ) ] = $c;
 	}
-	$list( 'Top grounds', $top );
-	$list( 'Top cities', $cities );
+	$list( 'Top grounds', $top, 'Ground' );
+	$list( 'Top cities', $cities, 'City' );
 	echo '<p style="margin-top:12px"><a href="' . esc_url( admin_url( 'edit.php?post_type=aw_campaign&page=aw-letter-report&campaign=' . $cid ) ) . '">Full letter report →</a></p>';
 }

@@ -18,7 +18,6 @@ const AW_DATES_CAP = 'edit_others_posts'; // editors and administrators
 function aw_team_dates_seed() {
 	return array(
 		array( 'date' => '2026-11-05', 'title' => 'Lab rules objections close', 'note' => 'Campaign 13848. The countdown on the home page and the campaign page ends today.' ),
-		array( 'date' => '2026-11-07', 'title' => 'Decide the lab rules Post phase', 'note' => 'Owner decides what 13848 shows after closing. Until then no closed-state or Post content and no FAQ visibility changes on it.' ),
 		array( 'date' => '2026-11-17', 'title' => 'Directory thin-page re-check and keyword positions', 'note' => 'Scheduled tasks at 10:00 (Directory indexing against the 20 Oct baseline) and 11:00 (8 tracked keywords).' ),
 	);
 }
