@@ -78,17 +78,20 @@
 /* Step 6 is the one action: a marigold card, the whole card a link to Who to call (#help); white on marigold is 6:1.
    Only when the step has its link, so the card never looks tappable without one. The card lifts on hover only, and
    not with reduced motion. */
-.aw-camp--diwali #tonight .aw-camp-steps > li:last-child:has(a) { position: relative; margin-top: var(--kit-space-3); padding: var(--kit-space-5); border: 0; border-radius: var(--kit-radius-card); background: var(--camp-primary); box-shadow: var(--kit-elevation-2); transition: transform var(--kit-motion-base) var(--kit-motion-ease), box-shadow var(--kit-motion-base) var(--kit-motion-ease); }
+.aw-camp--diwali #tonight .aw-camp-steps > li:last-child:has(a) { position: relative; margin-top: var(--kit-space-3); padding: var(--kit-space-5); border: 0; border-radius: var(--kit-radius-card); background: var(--camp-primary); box-shadow: var(--kit-elevation-2); transition: transform var(--kit-motion-base) var(--kit-motion-ease); }
 .aw-camp--diwali #tonight .aw-camp-steps > li:last-child:has(a)::before { background: var(--kit-color-on-ink); color: var(--camp-primary); box-shadow: none; }
-.aw-camp--diwali #tonight .aw-camp-steps > li:last-child a { color: var(--kit-color-on-ink); font-weight: 600; text-decoration: underline; text-underline-offset: 0.2em; }
+.aw-camp--diwali #tonight .aw-camp-steps > li:last-child a { color: var(--kit-color-on-ink); font-weight: 600; text-decoration: underline; text-underline-offset: 0.2em; -webkit-tap-highlight-color: transparent; touch-action: manipulation; } /* the card's own press state below, not the browser's grey box */
 .aw-camp--diwali #tonight .aw-camp-steps > li:last-child a::after { content: ""; position: absolute; inset: 0; border-radius: inherit; } /* the whole card is the target */
 .aw-camp--diwali #tonight .aw-camp-steps > li:last-child a:focus-visible { outline: none; }
 .aw-camp--diwali #tonight .aw-camp-steps > li:last-child:has(a:focus-visible) { outline: var(--kit-focus-width) solid var(--kit-color-on-ink); outline-offset: var(--kit-focus-offset); }
 @media (min-width: 768px) { .aw-camp--diwali #tonight .aw-camp-steps > li:last-child:has(a) { margin-top: 0; } } /* in line with its row */
 @media (hover: hover) { .aw-camp--diwali #tonight .aw-camp-steps > li:last-child:has(a):hover { transform: translateY(var(--kit-motion-lift)); box-shadow: var(--kit-elevation-3); } }
+/* Pressed, as a button (docs/design-system.md, Active / pressed): down 1px (--kit-btn-press), shadow removed; phones get this
+   feedback on tap */
+.aw-camp--diwali #tonight .aw-camp-steps > li:last-child:has(a:active) { transform: translateY(var(--kit-btn-press)); box-shadow: none; }
 @media (prefers-reduced-motion: reduce) {
 	.aw-camp--diwali #tonight .aw-camp-steps > li:last-child:has(a) { transition: none; }
-	.aw-camp--diwali #tonight .aw-camp-steps > li:last-child:has(a):hover { transform: none; }
+	.aw-camp--diwali #tonight .aw-camp-steps > li:last-child:has(a):is(:hover, :active) { transform: none; }
 }
 /* Who to call has two columns: it fits a phone without sideways scrolling */
 .aw-camp--diwali #help { --kit-table-min: 0; }
