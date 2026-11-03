@@ -46,6 +46,24 @@ add_action(
 				require_once AW_SEO_EXTRAS_DIR . 'includes/' . $file . '.php';
 			}
 		}
+		// A switched-off module's scheduled job is taken off (its file, which runs and reschedules it, is not loaded).
+		// Checked in admin and cron requests only, so a page view never writes.
+		$idle = array_intersect_key( array( 'health' => 'aw_seo_endpoints_watchdog', 'sitemap' => 'aw_seo_sitemap_daily' ), array_flip( $off ) );
+		if ( $idle ) {
+			add_action(
+				'init',
+				function () use ( $idle ) {
+					if ( ! is_admin() && ! wp_doing_cron() ) {
+						return;
+					}
+					foreach ( $idle as $hook ) {
+						if ( wp_next_scheduled( $hook ) ) {
+							wp_clear_scheduled_hook( $hook );
+						}
+					}
+				}
+			);
+		}
 	},
 	5
 );
