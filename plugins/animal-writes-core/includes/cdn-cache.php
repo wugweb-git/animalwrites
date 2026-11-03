@@ -56,8 +56,9 @@ function aw_cdn_ttl() {
 	if ( $qs || ! empty( $_SERVER['HTTP_AUTHORIZATION'] ) ) {
 		return 0;
 	}
+	// aw_fv (aw-analytics.js: first visit date and visit count) is on every returning visitor and never changes the page.
 	foreach ( array_keys( $_COOKIE ) as $name ) {
-		if ( preg_match( '/^(wordpress_logged_in|wordpress_sec_|wp-postpass_|comment_author_|wp-settings-|aw_|kits_)/', (string) $name ) ) {
+		if ( 'aw_fv' !== $name && preg_match( '/^(wordpress_logged_in|wordpress_sec_|wp-postpass_|comment_author_|wp-settings-|aw_|kits_)/', (string) $name ) ) {
 			return 0;
 		}
 	}
