@@ -3036,7 +3036,8 @@
     "schema": "none"
    },
    "block": "animal-writes/home-hero"
-  }
+  },
+  {"name": "Dates Dashboard box: calendar tiles (admin)", "type": "component", "status": "live", "classes": ["aw-dates-list", "aw-dates-item", "aw-dates-tile", "aw-dates-mon", "aw-dates-day", "aw-dates-text", "aw-dates-when"], "states": ["coming (blue month band)", "today (outlined tile)", "past (grey month band)"], "tokens": [], "a11y": {"element": "<ul> of dates; the month/day tile is aria-hidden, the full date is read before the event", "aria": "tile aria-hidden; screen-reader-text full date", "keyboard": "not interactive", "focus": "n/a", "target": "n/a", "motion": "none", "sr": "\"3 Nov 2026: event, tomorrow\""}, "seo": {"heading": "none", "link": "n/a", "alt": "n/a", "schema": "none"}, "note": "animal-writes-core/includes/team-dates.php, wp-admin Dashboard only (owner, 3 Nov 2026: Dashboard widgets may use cards and charts). White on #2271b1 5.2:1, on #646970 5.5:1."}
  ],
  "nav_status": {
   "announcement-bar": "live",
