@@ -985,7 +985,7 @@ function aw_social_card( WP_Post $p ): string {
 	$embed    = '';
 	if ( in_array( $link['platform'], array( 'x', 'youtube' ), true ) ) {
 		$box   = 'aw-social-embed-' . (int) $p->ID;
-		$embed = '<div class="aw-opp-actions"><button type="button" class="kit-btn kit-btn--secondary kit-btn--sm kit-btn--label" data-aw-social-embed="' . esc_attr( $link['platform'] ) . '" data-url="' . esc_url( $link['url'] ) . '" data-id="' . esc_attr( $link['video'] ) . '" data-title="' . esc_attr( $name ) . '" aria-expanded="false" aria-controls="' . esc_attr( $box ) . '">' . esc_html( 'Show the post' ) . '</button>'
+		$embed = '<div class="aw-opp-actions"><button type="button" class="kit-btn kit-btn--secondary kit-btn--sm kit-btn--label" data-aw-social-embed="' . esc_attr( $link['platform'] ) . '" data-url="' . esc_url( $link['url'] ) . '" data-id="' . esc_attr( $link['video'] ) . '" data-title="' . esc_attr( $name ) . '" aria-expanded="false" aria-controls="' . esc_attr( $box ) . '"' . ( '' !== $name ? ' aria-label="' . esc_attr( 'Show the post by ' . $name ) . '"' : '' ) . '>' . esc_html( 'Show the post' ) . '</button>'
 			. '<div id="' . esc_attr( $box ) . '" style="flex-basis:100%" hidden></div></div>'; // the embed takes the row under the button
 		aw_social_embed_script();
 	}

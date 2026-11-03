@@ -295,10 +295,11 @@ So from 6 Nov until the owner sets Post, the page and Home still ask people to s
 - The owner removes the 7 Nov "Decide the lab rules Post phase" entry in Animal Writes → Dates (owner: "I'll remove it").
 
 ### Technical, open
-- The phone bar wraps at 320.
+- The phone bar wraps at 320: fixed on a branch, not live (days kept on one line).
 - One source chip reads "Hindu"; the paper is "The Hindu" (copy).
 - A leftover Diwali rule `.aw-camp-steps--six` in campaign-lab.css.
-- campaign.js still treats the compare table as a scroll row (it is cards now).
+- campaign.js still treats the compare table as a scroll row (it is cards now): fixed on a branch, not live.
+- Fixed on a branch, not live (3 Nov): each "Show the post" button names the person; each "Read the full text" link names its rule (15 links); JSON-LD `position` and `numberOfItems` print as numbers on every page.
 - Off-scale heading overrides and one hard-coded disc colour in campaign-lab.css.
 - Accessibility leftovers to re-check: share and Library link names, a list item outside its list, table header scope, one date at 2.55:1, 12px chip text, enterkeyhint.
 - Step-2 wording "Enter this" (copy).
