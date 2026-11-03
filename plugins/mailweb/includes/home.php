@@ -102,24 +102,30 @@ function mailweb_home_page() {
 			'<a href="' . esc_url( admin_url( 'index.php' ) ) . '">' . esc_html__( 'Dashboard', 'mailweb' ) . '</a>',
 			esc_html__( 'Automatic', 'mailweb' ),
 		),
-		array(
-			__( 'Command', 'mailweb' ),
-			__( 'Run the FluentCRM feed for every mailbox.', 'mailweb' ),
-			'<code>wp mailweb crm-sync --all</code>',
-			'',
-		),
 	);
 	$cells = array();
+	$attn  = array();
 	foreach ( $rows as $r ) {
 		$cells[] = array(
-			'feature' => '<strong>' . esc_html( $r[0] ) . '</strong>',
+			'feature' => '<strong>' . esc_html( $r[0] ) . '</strong><div class="row-actions visible">' . $r[2] . '</div>',
 			'what'    => esc_html( $r[1] ),
-			'where'   => $r[2],
 			'status'  => $r[3],
 		);
+		if ( false !== strpos( (string) $r[3], 'dashicons-warning' ) ) {
+			$attn[] = '<li><strong>' . esc_html( $r[0] ) . '</strong>: ' . esc_html( trim( wp_strip_all_tags( (string) $r[3] ) ) ) . ' (' . $r[2] . ')</li>';
+		}
 	}
 	echo '<div class="wrap"><h1>' . esc_html__( 'Mail', 'mailweb' ) . '</h1>';
 	echo '<p>' . esc_html__( 'Hostinger Mail inside WordPress, and the site\'s own sending. Secrets are encrypted; nothing is deleted on uninstall.', 'mailweb' ) . '</p>';
-	mailweb_simple_table( 'mailweb-overview', array( 'feature' => __( 'Feature', 'mailweb' ), 'what' => __( 'What it does', 'mailweb' ), 'where' => __( 'Where', 'mailweb' ), 'status' => __( 'On this site', 'mailweb' ) ), $cells, array( 'primary' => 'feature' ) );
+	if ( $attn ) { // Rows whose status is a warning, first and together.
+		echo '<div class="notice notice-warning inline"><p><strong>' . esc_html__( 'Needs attention', 'mailweb' ) . '</strong></p><ul class="ul-disc">' . implode( '', $attn ) . '</ul></div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from escaped parts.
+	}
+	$opts = array(
+		'primary' => 'feature',
+		'foot'    => false,
+	);
+	mailweb_simple_table( 'mailweb-overview', array( 'feature' => __( 'Feature', 'mailweb' ), 'what' => __( 'What it does', 'mailweb' ), 'status' => __( 'On this site', 'mailweb' ) ), $cells, $opts );
+	echo '<details><summary><strong>' . esc_html__( 'Command (WP-CLI on the server)', 'mailweb' ) . '</strong></summary>';
+	echo '<p><code>wp mailweb crm-sync --all</code> ' . esc_html__( 'Run the FluentCRM feed for every mailbox.', 'mailweb' ) . '</p></details>';
 	echo '</div>';
 }

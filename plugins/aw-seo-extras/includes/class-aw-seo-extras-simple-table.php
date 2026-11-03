@@ -22,7 +22,7 @@ class AW_SEO_Extras_Simple_Table extends WP_List_Table {
 	/** @var array rows: column => escaped HTML */
 	private $rows;
 
-	/** @var array per_page (0: all on one page), total (rows are already that page), primary, fixed (bool), empty */
+	/** @var array per_page (0: all on one page), total (rows are already that page), primary, fixed (bool), empty, foot (bool: the footer header row) */
 	private $opts;
 
 	/**
@@ -35,7 +35,23 @@ class AW_SEO_Extras_Simple_Table extends WP_List_Table {
 		parent::__construct( array( 'singular' => $plural, 'plural' => $plural, 'ajax' => false, 'screen' => get_current_screen() ) );
 		$this->cols = $cols;
 		$this->rows = $rows;
-		$this->opts = $opts + array( 'per_page' => 0, 'total' => null, 'primary' => (string) array_key_first( $cols ), 'fixed' => false, 'empty' => 'Nothing yet.' );
+		$this->opts = $opts + array( 'per_page' => 0, 'total' => null, 'primary' => (string) array_key_first( $cols ), 'fixed' => false, 'empty' => 'Nothing yet.', 'foot' => true );
+	}
+
+	/** Core's table; with opts foot false, without the footer row that repeats the column headers (the Overview, where tables follow each other). */
+	public function display() {
+		if ( $this->opts['foot'] ) {
+			parent::display();
+			return;
+		}
+		$this->display_tablenav( 'top' );
+		$this->screen->render_screen_reader_content( 'heading_list' );
+		echo '<table class="wp-list-table ' . esc_attr( implode( ' ', $this->get_table_classes() ) ) . '"><thead><tr>';
+		$this->print_column_headers();
+		echo '</tr></thead><tbody>';
+		$this->display_rows_or_placeholder();
+		echo '</tbody></table>';
+		$this->display_tablenav( 'bottom' );
 	}
 
 	public function get_columns() {

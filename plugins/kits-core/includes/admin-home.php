@@ -52,18 +52,24 @@ function kits_link( string $label, string $path ): string {
 	return '<a href="' . esc_url( admin_url( $path ) ) . '">' . esc_html( $label ) . '</a>';
 }
 
-/** Rows: a list of [feature, what, where (HTML), status (HTML)] as a core list table. */
+/**
+ * Rows: a list of [feature, what, where (HTML), status (HTML)] as a core list table of three columns: the feature with
+ * where it lives under it (as a list table's row links), what it is, and its state on this site. No footer row.
+ */
 function kits_overview_table( string $name, array $rows ): void {
 	$cells = array();
 	foreach ( $rows as $r ) {
 		$cells[] = array(
-			'feature' => '<strong>' . esc_html( $r[0] ) . '</strong>',
+			'feature' => '<strong>' . esc_html( $r[0] ) . '</strong>' . ( '' !== $r[2] ? '<div class="row-actions visible">' . $r[2] . '</div>' : '' ),
 			'what'    => $r[1],
-			'where'   => $r[2],
 			'status'  => $r[3],
 		);
 	}
-	kits_simple_table( $name, array( 'feature' => 'Feature', 'what' => 'What it is', 'where' => 'Where', 'status' => 'On this site' ), $cells, array( 'primary' => 'feature' ) );
+	$opts = array(
+		'primary' => 'feature',
+		'foot'    => false,
+	);
+	kits_simple_table( $name, array( 'feature' => 'Feature', 'what' => 'What it is', 'status' => 'On this site' ), $cells, $opts );
 }
 
 /** Kits → Overview. */
