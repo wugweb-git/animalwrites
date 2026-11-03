@@ -25,14 +25,21 @@ function mailweb_overview_box( $key ) {
 	if ( is_array( $cached ) ) {
 		return $cached;
 	}
+	// The last good answer (3 Nov 2026: support@ showed "Not reachable" after one failed call, then answered at once):
+	// a failed call is tried once more, and while the API is down the box shows the last good figures, marked stale.
+	$last = get_option( 'mailweb_overview_last_' . $key );
+	$last = is_array( $last ) ? $last : null;
 	if ( get_transient( 'mailweb_overview_down_' . $key ) ) {
-		return null; // the API failed a moment ago: no new try on every admin page for 5 minutes
+		return $last ? $last + array( 'stale' => true ) : null; // the API failed a moment ago: no new try for 5 minutes
 	}
 	$box     = function_exists( 'mailweb_box_id' ) ? mailweb_box_id( $key ) : '';
 	$folders = '' !== $box ? mailweb_api( '/api/v1/mailboxes/' . rawurlencode( $box ) . '/folders' ) : null;
+	if ( '' !== $box && ! is_array( $folders ) ) {
+		$folders = mailweb_api( '/api/v1/mailboxes/' . rawurlencode( $box ) . '/folders' ); // once more: one-off failures happen
+	}
 	if ( ! is_array( $folders ) ) {
 		set_transient( 'mailweb_overview_down_' . $key, 1, MAILWEB_CACHE );
-		return null;
+		return $last ? $last + array( 'stale' => true ) : null;
 	}
 	$unread = 0;
 	foreach ( $folders as $f ) {
@@ -59,6 +66,7 @@ function mailweb_overview_box( $key ) {
 	}
 	$out = array( 'unread' => $unread, 'messages' => $msgs );
 	set_transient( 'mailweb_overview_' . $key, $out, MAILWEB_CACHE );
+	update_option( 'mailweb_overview_last_' . $key, $out + array( 'at' => time() ), false );
 	return $out;
 }
 
@@ -106,6 +114,10 @@ function mailweb_overview_render( $max, $compact = false ) {
 		$unread = sprintf( _n( '%d unread', '%d unread', $n, 'mailweb' ), $n );
 		/* translators: %s: comma-separated list of the mailbox's alias addresses. */
 		$also = $alias ? ' ' . sprintf( __( '(also %s)', 'mailweb' ), implode( ', ', $alias ) ) : '';
+		if ( $box && ! empty( $box['stale'] ) ) {
+			/* translators: %s: time of the last good answer. */
+			$unread .= ' ' . sprintf( __( '(the Mail API is not answering; shown from %s)', 'mailweb' ), wp_date( 'g:i a', (int) ( $box['at'] ?? 0 ) ) );
+		}
 		echo '<h3>' . ( function_exists( 'mailweb_profile_picture' ) ? wp_kses_post( mailweb_profile_picture( $addr, 24 ) ) : '' ) . esc_html( $addr . $also ) . ' — ' . ( $box ? esc_html( $unread ) : esc_html__( 'not available', 'mailweb' ) ) . '</h3>';
 		if ( ! $box ) {
 			echo '<p>' . esc_html__( 'The Mail API could not be reached for this mailbox (token missing or not scoped to it).', 'mailweb' ) . ' ' . $link . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput -- built from escaped parts
@@ -155,6 +167,9 @@ function mailweb_overview_widget( $max ) {
 		$msgs = $box ? array_slice( (array) $box['messages'], 0, $max ) : array();
 		if ( ! $box ) {
 			$status = array( 'warning', '#b32d2e', __( 'Not reachable', 'mailweb' ) );
+		} elseif ( ! empty( $box['stale'] ) ) {
+			/* translators: %s: time of the last good answer. */
+			$status = array( 'clock', '#50575e', sprintf( __( 'Shown from %s', 'mailweb' ), wp_date( 'g:i a', (int) ( $box['at'] ?? 0 ) ) ) );
 		} elseif ( ! $msgs ) {
 			$status = array( 'minus', '#50575e', __( 'Empty', 'mailweb' ) );
 		} else {
