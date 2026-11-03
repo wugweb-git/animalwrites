@@ -768,7 +768,7 @@
    heading, or the step's legend for the grounds (no new words), and takes keyboard focus so arrow keys scroll it
    (WCAG 2.1.1); a list stays a list. Checked after load and on resize, as a row only scrolls when it overflows. */
 (function () {
-	var rows = document.querySelectorAll('.aw-camp--lab-rules :is(.aw-camp-grid, .aw-camp-row, .aw-camp-docs-q .wp-block-post-template, .aw-letter-ground-list, .wp-block-table)');
+	var rows = document.querySelectorAll('.aw-camp--lab-rules :is(.aw-camp-grid, .aw-camp-row, .aw-camp-docs-q .wp-block-post-template, .aw-letter-ground-list)');
 	if (!rows.length) return;
 	var n = 0;
 	function label(row) {

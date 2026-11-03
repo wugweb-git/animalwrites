@@ -328,13 +328,13 @@ add_shortcode(
 		<div class="aw-letter-sign">
 		<p class="aw-letter-head"><span class="aw-letter-step">2</span>Sign it</p>
 		<div class="kit-field kit-field--text aw-letter-field"><label for="aw-letter-name">Your name <span aria-hidden="true">*</span></label>
-			<div class="kit-field-control"><span class="kit-ico kit-ico--name kit-field-icon" aria-hidden="true"></span><input id="aw-letter-name" aria-describedby="aw-letter-name-error" name="name" type="text" autocomplete="name" enterkeyhint="next" required maxlength="80" placeholder="Your name"></div>
+			<div class="kit-field-control"><span class="kit-ico kit-ico--name kit-field-icon" aria-hidden="true"></span><input id="aw-letter-name" aria-describedby="aw-letter-name-error" data-msg-required="Add your name to send your objection." name="name" type="text" autocomplete="name" enterkeyhint="next" required maxlength="80" placeholder="Your name"></div>
 			<span class="kit-field-message kit-field-error" id="aw-letter-name-error" aria-live="polite"></span></div>
 		<div class="kit-field kit-field--text aw-letter-field"><label for="aw-letter-city">Your city <span aria-hidden="true">*</span></label>
-			<div class="kit-field-control"><span class="kit-ico kit-ico--map-pin kit-field-icon" aria-hidden="true"></span><input id="aw-letter-city" aria-describedby="aw-letter-city-error" name="city" type="text" autocomplete="address-level2" enterkeyhint="next" required maxlength="60" placeholder="Your city"></div>
+			<div class="kit-field-control"><span class="kit-ico kit-ico--map-pin kit-field-icon" aria-hidden="true"></span><input id="aw-letter-city" aria-describedby="aw-letter-city-error" data-msg-required="Add your city to send your objection." name="city" type="text" autocomplete="address-level2" enterkeyhint="next" required maxlength="60" placeholder="Your city"></div>
 			<span class="kit-field-message kit-field-error" id="aw-letter-city-error" aria-live="polite"></span></div>
 		<div class="kit-field kit-field--email aw-letter-field aw-letter-email"><label for="aw-letter-email">Your email <span aria-hidden="true">*</span></label>
-			<div class="kit-field-control"><span class="kit-ico kit-ico--mail kit-field-icon" aria-hidden="true"></span><input id="aw-letter-email" aria-describedby="aw-letter-email-error" name="email" type="email" inputmode="email" autocomplete="email" enterkeyhint="next" required maxlength="190" placeholder="Your email"></div>
+			<div class="kit-field-control"><span class="kit-ico kit-ico--mail kit-field-icon" aria-hidden="true"></span><input id="aw-letter-email" aria-describedby="aw-letter-email-error" data-msg-required="Add a working email to send your objection." name="email" type="email" inputmode="email" autocomplete="email" enterkeyhint="next" required maxlength="190" placeholder="Your email" data-msg-email="Add a working email to send your objection."></div>
 			<span class="kit-field-message kit-field-error" id="aw-letter-email-error" aria-live="polite"></span></div>
 		<div class="kit-field kit-field--textarea aw-letter-field"><label for="aw-letter-own">Add a line in your own words <span class="kit-optional aw-letter-hint">(optional, up to 300 characters)</span></label>
 			<div class="kit-field-control"><span class="kit-ico kit-ico--file kit-field-icon" aria-hidden="true"></span><textarea id="aw-letter-own" name="own" maxlength="300" rows="3" placeholder="Add a line in your own words"></textarea></div></div>
@@ -383,11 +383,11 @@ add_shortcode(
 		<legend class="aw-letter-head"><span class="kit-step-count">Step 2 of 3</span><span class="aw-letter-step" aria-hidden="true">2</span><span class="kit-step-title">Sign it</span></legend>
 		<div class="aw-letter-sign-fields">
 			<p class="aw-letter-field"><label for="aw-letter-name">Your name <span aria-hidden="true">*</span></label>
-				<input id="aw-letter-name" aria-describedby="aw-letter-name-error" name="name" type="text" autocomplete="name" enterkeyhint="next" required maxlength="80"><span class="kit-field-message kit-field-error" id="aw-letter-name-error" aria-live="polite"></span></p>
+				<input id="aw-letter-name" aria-describedby="aw-letter-name-error" data-msg-required="Add your name to send your objection." name="name" type="text" autocomplete="name" enterkeyhint="next" required maxlength="80"><span class="kit-field-message kit-field-error" id="aw-letter-name-error" aria-live="polite"></span></p>
 			<p class="aw-letter-field"><label for="aw-letter-city">Your city <span aria-hidden="true">*</span></label>
-				<input id="aw-letter-city" aria-describedby="aw-letter-city-error" name="city" type="text" autocomplete="address-level2" enterkeyhint="next" required maxlength="60"><span class="kit-field-message kit-field-error" id="aw-letter-city-error" aria-live="polite"></span></p>
+				<input id="aw-letter-city" aria-describedby="aw-letter-city-error" data-msg-required="Add your city to send your objection." name="city" type="text" autocomplete="address-level2" enterkeyhint="next" required maxlength="60"><span class="kit-field-message kit-field-error" id="aw-letter-city-error" aria-live="polite"></span></p>
 			<p class="aw-letter-field aw-letter-email"><label for="aw-letter-email">Your email <span aria-hidden="true">*</span></label>
-				<input id="aw-letter-email" aria-describedby="aw-letter-email-error" name="email" type="email" autocomplete="email" enterkeyhint="next" required maxlength="190"><span class="kit-field-message kit-field-error" id="aw-letter-email-error" aria-live="polite"></span></p>
+				<input id="aw-letter-email" aria-describedby="aw-letter-email-error" data-msg-required="Add a working email to send your objection." name="email" type="email" autocomplete="email" enterkeyhint="next" required maxlength="190"><span class="kit-field-message kit-field-error" id="aw-letter-email-error" aria-live="polite"></span></p>
 			<p class="aw-letter-field"><label for="aw-letter-own">Add a line in your own words <span class="aw-letter-hint">(optional, up to 300 characters)</span></label>
 				<textarea id="aw-letter-own" name="own" maxlength="300" rows="3"></textarea></p>
 		</div>

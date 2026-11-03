@@ -231,7 +231,7 @@ So from 6 Nov until the owner sets Post, the page and Home still ask people to s
 - Inter from one file, preloaded on phones and tablets; the letter preview rebuilt once per frame; rule dialogs join the page on the chip's first tap. 33e61d9a, aee48e9c, 1 Nov
 - Font fix: only the library weights the theme's Inter file covers are left out, so 800 headings have their own file again. 8edf5ee6, 1 Nov
 - Lighthouse mobile on live: LCP 3.8 / 3.5 / 3.4 s, CLS 0 (was 0.108), time to first byte 1.1–1.4 s. LCP is still above 2.5 s; the phone LCP element is the hero H1 (Inter 800). bd51c4f9, 1 Nov
-- CDN: `s-maxage=300`, 5 of 5 HIT; the cache is purged after every deploy.
+- CDN: `s-maxage=900`, 5 of 5 HIT; the cache is purged after every deploy.
 
 ## Results (to 3 Nov)
 - Search Console, 28 days to 31 Oct: campaign page 16,102 impressions, 1,653 clicks, position 3.8; Library draft 5,861 / 505 / 3.5; rule by rule 3,355 / 185 / 5.0; testing-laws guide 4,556 / 166 / 4.1. The Lab pages drew most of the site's search clicks in that period.
