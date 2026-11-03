@@ -411,7 +411,7 @@ function aw_cl_widget() {
 			$d                                    = wp_date( 'Y-m-d', strtotime( "-{$i} days" ) );
 			$bars[ wp_date( 'j M', strtotime( $d ) ) ] = (int) ( $per[ $d ] ?? 0 );
 		}
-		echo kits_dash_bars( $bars, 'Letters per day, last 14 days' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside.
+		echo kits_dash_bars( $bars, 'Letters per day, last 14 days', true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside.
 	} else {
 		echo '<p style="font-size:14px">' . esc_html( sprintf( '%s sent · %s in the last 7 days', number_format_i18n( $total ), number_format_i18n( $week ) ) ) . '</p>';
 	}

@@ -47,27 +47,52 @@ function kits_dash_cards( array $cards ): string {
  * @param string $label  What the bars are, e.g. "Visits per day, last 14 days".
  * @return string HTML.
  */
-function kits_dash_bars( array $values, string $label ): string {
+function kits_dash_bars( array $values, string $label, bool $table = false ): string {
 	if ( ! $values ) {
 		return '';
 	}
+	// Mark spec (dataviz, 3 Nov 2026): bars at most 24px wide with a 2px surface gap, a 4px rounded data-end and a
+	// square baseline, one recessive baseline, and only the peak labelled (never a number on every bar).
 	$n    = count( $values );
 	$max  = max( 1, max( array_map( 'floatval', $values ) ) );
 	$w    = 280;
-	$h    = 64;
+	$h    = 72;
+	$top  = 14; // room for the peak label
 	$gap  = 2;
-	$bw   = max( 2, ( $w - $gap * ( $n - 1 ) ) / $n );
+	$slot = ( $w - $gap * ( $n - 1 ) ) / $n;
+	$bw   = min( 24, max( 2, $slot ) );
 	$keys = array_keys( $values );
 	$sum  = sprintf( '%1$s: from %2$s (%3$s) to %4$s (%5$s), highest %6$s.', $label, $keys[0], number_format_i18n( (float) reset( $values ) ), end( $keys ), number_format_i18n( (float) end( $values ) ), number_format_i18n( $max ) );
 	$bars = '';
+	$peak = '';
 	$i    = 0;
 	foreach ( $values as $k => $v ) {
-		$bh    = max( 1, round( ( (float) $v / $max ) * ( $h - 4 ), 1 ) );
-		$x     = round( $i * ( $bw + $gap ), 1 );
-		$bars .= '<rect x="' . $x . '" y="' . ( $h - $bh ) . '" width="' . round( $bw, 1 ) . '" height="' . $bh . '"><title>' . esc_html( $k . ': ' . number_format_i18n( (float) $v ) ) . '</title></rect>';
+		$v   = (float) $v;
+		$bh  = $v > 0 ? max( 1, round( ( $v / $max ) * ( $h - $top ), 1 ) ) : 0;
+		$x   = round( $i * ( $slot + $gap ) + ( $slot - $bw ) / 2, 1 );
+		$y   = $h - $bh;
+		$r   = min( 4, $bw / 2, $bh );
+		$tip = '<title>' . esc_html( $k . ': ' . number_format_i18n( $v ) ) . '</title>';
+		if ( $bh > 0 ) {
+			// Rounded top corners, square at the baseline.
+			$d     = sprintf( 'M%1$s %2$sV%3$sQ%1$s %4$s %5$s %4$sH%6$sQ%7$s %4$s %7$s %3$sV%2$sZ', $x, $h, $y + $r, $y, $x + $r, $x + $bw - $r, $x + $bw );
+			$bars .= '<path d="' . esc_attr( $d ) . '">' . $tip . '</path>';
+		}
+		if ( '' === $peak && $v >= $max ) {
+			$peak = '<text x="' . round( $x + $bw / 2, 1 ) . '" y="' . max( 10, $y - 3 ) . '" text-anchor="middle">' . esc_html( number_format_i18n( $v ) ) . '</text>';
+		}
 		++$i;
 	}
-	return '<figure class="aw-dash-chart"><svg viewBox="0 0 ' . $w . ' ' . $h . '" width="100%" height="' . $h . '" role="img" aria-label="' . esc_attr( $sum ) . '" preserveAspectRatio="none">' . $bars . '</svg><figcaption class="description">' . esc_html( $label ) . '</figcaption></figure>';
+	$base = '<line x1="0" y1="' . $h . '" x2="' . $w . '" y2="' . $h . '"></line>';
+	$out  = '<figure class="aw-dash-chart"><svg viewBox="0 0 ' . $w . ' ' . ( $h + 1 ) . '" role="img" aria-label="' . esc_attr( $sum ) . '">' . $bars . $base . $peak . '</svg><figcaption class="description">' . esc_html( $label ) . '</figcaption></figure>';
+	if ( $table ) { // the exact figures (a table view for every chart)
+		$rows = '';
+		foreach ( array_reverse( $values, true ) as $k => $v ) {
+			$rows .= '<tr><td>' . esc_html( (string) $k ) . '</td><td>' . esc_html( number_format_i18n( (float) $v ) ) . '</td></tr>';
+		}
+		$out .= '<details><summary>' . esc_html( 'Figures' ) . '</summary><table class="widefat striped"><thead><tr><th scope="col">Day</th><th scope="col">' . esc_html( $label ) . '</th></tr></thead><tbody>' . $rows . '</tbody></table></details>';
+	}
+	return $out;
 }
 
 // The styles, once, on the Dashboard only.
@@ -85,7 +110,9 @@ add_action(
 .aw-dash-delta--down{color:#b32d2e}
 .aw-dash-delta--flat{color:#50575e}
 .aw-dash-chart{margin:0 0 12px}
-.aw-dash-chart svg{display:block;fill:#2271b1}
+.aw-dash-chart svg{display:block;width:100%;height:auto;max-height:120px;fill:#2271b1;overflow:visible}
+.aw-dash-chart line{stroke:#c3c4c7;stroke-width:1}
+.aw-dash-chart text{fill:#50575e;font-size:10px}
 .aw-dash-chart figcaption{margin-top:4px}
 </style>
 		<?php
