@@ -420,6 +420,7 @@ $content = '<!-- wp:group {"align":"full","className":"aw-camp aw-camp--diwali",
 	. dwslot( 'news', $news )
 	. dwslot( 'library', $library )
 	. dwslot( 'press', $press, 'aw-camp-if-items' )
+	. dwslot( 'people', dwsec( '', '<!-- wp:animal-writes/social-posts /-->', 'aw-camp-white' ) ) // What people are saying, as on the lab rules page (owner, 3 Nov 2026): approved social posts linked to the campaign; the block prints nothing while there are none
 	. dwslot( 'partners', dwsec( '', dwsc( '[aw_campaign_partners title="Partners"]' ), 'aw-camp-white' ), 'aw-camp-if-filled' )
 	. dwslot( 'next-steps', $next_open, 'aw-camp-open' )
 	. dwslot( 'updates', $share, 'aw-camp-open' )
