@@ -738,6 +738,20 @@
 			"runtime": "map-only",
 			"notes": "Counts and the last 5 messages per mailbox; stores nothing. Users with the Mailweb capability only."
 		},
+		"aw_activity": {
+			"title": "Activity",
+			"source": "Animal Writes core",
+			"plugin": "Animal Writes core",
+			"purpose": "Activity",
+			"file": "core/dashboard-activity.php:63",
+			"screen": "admin",
+			"page": "Dashboard (widgets)",
+			"types": [
+				"dashboard"
+			],
+			"runtime": "map-only",
+			"notes": "Reads post counts and the newest items; stores nothing. Replaces WordPress's Activity box."
+		},
 		"aw_form_entries": {
 			"title": "Form entries",
 			"source": "Animal Writes core",
