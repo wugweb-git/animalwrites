@@ -204,13 +204,38 @@ add_action(
 			'aw_visits',
 			get_bloginfo( 'name' ) . ' visits',
 			function () {
-				echo '<p><strong>' . esc_html( number_format_i18n( (int) get_option( 'aw_visits_total', 0 ) ) ) . '</strong> visits since ' . esc_html( (string) get_option( 'aw_visits_since' ) ) . '</p>';
+				$day = function ( $i ) {
+					return (int) get_option( 'aw_visits_' . gmdate( 'Ymd', time() - $i * DAY_IN_SECONDS ), 0 );
+				};
+				$week = 0;
+				$prev = 0;
+				for ( $i = 1; $i <= 7; $i++ ) { // whole days only: today is still counting
+					$week += $day( $i );
+					$prev += $day( $i + 7 );
+				}
+				$pub = kits_visits_public();
+				if ( function_exists( 'kits_dash_cards' ) ) { // Dashboard cards (owner, 3 Nov 2026)
+					echo kits_dash_cards( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside.
+						array(
+							array( 'label' => 'Today so far', 'value' => number_format_i18n( $day( 0 ) ) ),
+							array( 'label' => 'Last 7 days', 'value' => number_format_i18n( $week ), 'delta' => $week - $prev, 'delta_text' => 'on the 7 days before' ),
+							array( 'label' => 'All time' . ( $pub['since_label'] ? ' (since ' . $pub['since_label'] . ')' : '' ), 'value' => number_format_i18n( $pub['total'] ) ),
+						)
+					);
+					$bars = array();
+					for ( $i = 13; $i >= 0; $i-- ) {
+						$bars[ wp_date( 'j M', strtotime( gmdate( 'Ymd', time() - $i * DAY_IN_SECONDS ) ) ) ] = $day( $i ); // the counter's days are UTC days
+					}
+					echo kits_dash_bars( $bars, 'Visits per day, last 14 days' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside.
+				}
+				echo '<details><summary>' . esc_html( 'Daily figures (' . number_format_i18n( (int) get_option( 'aw_visits_total', 0 ) ) . ' counted since ' . (string) get_option( 'aw_visits_since' ) . ')' ) . '</summary>';
 				$cells = array();
 				for ( $i = 0; $i < 14; $i++ ) {
 					$d       = gmdate( 'Ymd', time() - $i * DAY_IN_SECONDS );
 					$cells[] = array( 'day' => esc_html( wp_date( 'j M', strtotime( $d ) ) ), 'n' => esc_html( number_format_i18n( (int) get_option( 'aw_visits_' . $d, 0 ) ) ) );
 				}
 				kits_simple_table( 'visits', array( 'day' => 'Day', 'n' => 'Visits' ), $cells );
+				echo '</details>';
 				echo '<p class="description">One count per browser session; bots and logged-in editors excluded. Google Analytics remains the detailed source.</p>';
 				if ( current_user_can( 'manage_options' ) ) { // the count from day 0: add the visits before this counter started
 					echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_visits_baseline">' . wp_nonce_field( 'aw_visits_baseline', '_wpnonce', true, false )

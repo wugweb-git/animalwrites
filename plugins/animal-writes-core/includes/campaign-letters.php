@@ -385,7 +385,26 @@ function aw_cl_widget() {
 	arsort( $ground );
 	$cities = wp_list_pluck( (array) $wpdb->get_results( $wpdb->prepare( "SELECT city AS k, COUNT(*) AS n FROM {$t} WHERE campaign_id = %d AND city <> '' GROUP BY city ORDER BY n DESC LIMIT 3", $cid ) ), 'n', 'k' ); // phpcs:ignore
 	echo '<p><strong>' . esc_html( $all[ $cid ] ) . '</strong></p>';
-	echo '<p style="font-size:14px">' . esc_html( sprintf( '%s sent · %s in the last 7 days', number_format_i18n( $total ), number_format_i18n( $week ) ) ) . '</p>';
+	if ( function_exists( 'kits_dash_cards' ) ) { // Dashboard cards and chart (owner, 3 Nov 2026)
+		$prev  = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$t} WHERE campaign_id = %d AND sent_on >= %s AND sent_on < %s", $cid, wp_date( 'Y-m-d', strtotime( '-13 days' ) ), wp_date( 'Y-m-d', strtotime( '-6 days' ) ) ) ); // phpcs:ignore
+		$today = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$t} WHERE campaign_id = %d AND sent_on >= %s", $cid, wp_date( 'Y-m-d' ) ) ); // phpcs:ignore
+		echo kits_dash_cards( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside.
+			array(
+				array( 'label' => 'Sent', 'value' => number_format_i18n( $total ) ),
+				array( 'label' => 'Last 7 days', 'value' => number_format_i18n( $week ), 'delta' => $week - $prev, 'delta_text' => 'on the 7 days before' ),
+				array( 'label' => 'Today so far', 'value' => number_format_i18n( $today ) ),
+			)
+		);
+		$per  = wp_list_pluck( (array) $wpdb->get_results( $wpdb->prepare( "SELECT DATE(sent_on) AS k, COUNT(*) AS n FROM {$t} WHERE campaign_id = %d AND sent_on >= %s GROUP BY DATE(sent_on)", $cid, wp_date( 'Y-m-d', strtotime( '-13 days' ) ) ) ), 'n', 'k' ); // phpcs:ignore
+		$bars = array();
+		for ( $i = 13; $i >= 0; $i-- ) {
+			$d                                    = wp_date( 'Y-m-d', strtotime( "-{$i} days" ) );
+			$bars[ wp_date( 'j M', strtotime( $d ) ) ] = (int) ( $per[ $d ] ?? 0 );
+		}
+		echo kits_dash_bars( $bars, 'Letters per day, last 14 days' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside.
+	} else {
+		echo '<p style="font-size:14px">' . esc_html( sprintf( '%s sent · %s in the last 7 days', number_format_i18n( $total ), number_format_i18n( $week ) ) ) . '</p>';
+	}
 	$list = function ( $title, $rows ) {
 		echo '<p style="margin:12px 0 4px"><strong>' . esc_html( $title ) . '</strong></p>';
 		if ( ! $rows ) {

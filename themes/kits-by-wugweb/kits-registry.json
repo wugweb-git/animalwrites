@@ -1891,6 +1891,42 @@
     "alt": "n/a",
     "schema": "FAQPage parsed from this markup (site plugin)"
    }
+  },
+  {
+   "name": "Dashboard stat cards and bar chart (admin)",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "aw-dash-cards",
+    "aw-dash-card",
+    "aw-dash-label",
+    "aw-dash-value",
+    "aw-dash-delta",
+    "aw-dash-chart"
+   ],
+   "states": [
+    "delta up (▲, green)",
+    "delta down (▼, red)",
+    "same (=)",
+    "no delta"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<ul> of cards; <figure> with an inline <svg role=img> and a figcaption (wp-admin Dashboard only)",
+    "aria": "svg aria-label is a one-sentence summary; each bar has a <title>; the exact figures stay in a table under it",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text; up/down said in words, not colour alone"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   },
+   "note": "kits-core/includes/dashboard-cards.php (owner, 3 Nov 2026: Dashboard widgets only; other admin screens stay core-only). WP admin colours: text #1d2327/#50575e, up #007017, down #b32d2e, bars #2271b1."
   }
  ],
  "nav": [
