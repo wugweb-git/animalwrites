@@ -376,13 +376,31 @@ $next_inner = c2h( 'What happens next' )
 	);
 $next = c2sec( 'next', $next_inner, 'aw-camp-white' ); // in the next-steps section: near the end while open, under the hero once closed
 
-/* In the news: the six newest campaign News items (the guides moved under the sections they explain, owner 3 Nov 2026). */
+/* News and guides: the newest campaign News item leads, the newest campaign guides (Resources) beside it; the home page's news grid. */
 $updates = c2sec( // one row that scrolls sideways: the newest News, then the newest guides; no summaries on campaign cards (owner, 21 Oct 2026)
 	'latest',
 	c2html( '<header class="kit-ed-head"><div><h2>In the news</h2></div><a class="kit-ed-more" href="/news/">All news ' . c2i( 'arrow-right' ) . '</a></header>' )
 	. '<!-- wp:group {"className":"aw-camp-row","layout":{"type":"default"}} -->' . "\n" . '<div class="wp-block-group aw-camp-row">'
 	. c2q( <<<'HTML'
 <!-- wp:query {"queryId":82,"query":{"perPage":6,"pages":0,"offset":0,"postType":"aw_news","order":"desc","orderBy":"date","inherit":false,%TQ%},"className":"aw-camp-row-q"} -->
+<div class="wp-block-query aw-camp-row-q"><!-- wp:post-template -->
+<!-- wp:group {"tagName":"article","className":"kit-card kit-card--block-md","layout":{"type":"default"}} -->
+<article class="wp-block-group kit-card kit-card--block-md"><!-- wp:post-featured-image {"isLink":true,"className":"kit-card-media"} /-->
+
+<!-- wp:group {"className":"kit-card-body","layout":{"type":"default"}} -->
+<div class="wp-block-group kit-card-body"><!-- wp:animal-writes/read-meta /-->
+
+<!-- wp:animal-writes/badges {"state":"block-md"} /-->
+
+<!-- wp:post-title {"level":3,"isLink":true,"className":"kit-card-title"} /--></div>
+<!-- /wp:group --></article>
+<!-- /wp:group -->
+<!-- /wp:post-template --></div>
+<!-- /wp:query -->
+HTML
+, $tq ) . "\n"
+	. c2q( <<<'HTML'
+<!-- wp:query {"queryId":83,"query":{"perPage":8,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","inherit":false,%TQ%},"className":"aw-camp-row-q"} -->
 <div class="wp-block-query aw-camp-row-q"><!-- wp:post-template -->
 <!-- wp:group {"tagName":"article","className":"kit-card kit-card--block-md","layout":{"type":"default"}} -->
 <article class="wp-block-group kit-card kit-card--block-md"><!-- wp:post-featured-image {"isLink":true,"className":"kit-card-media"} /-->
