@@ -2,9 +2,9 @@
 /**
  * Lightweight visit counter endpoint (17 Oct 2026, server load): POST here counts one visit with WordPress loaded in
  * SHORTINIT mode (database and options only; no plugins, theme or REST), several times cheaper than the REST route.
- * The counting itself is Kits Core's kits_visit_count() (bots, prefetch/prerender and floods are not counted).
+ * The counting itself is kits_visit_count() in AW SEO Plus (includes/visits.php, its Visit counter module) (bots, prefetch/prerender and floods are not counted).
  *
- * Kits Core is bundled next to this plugin without a public address, so this file is the public door to it
+ * AW SEO Plus sits next to this plugin; this file is the public door to its counter
  * (animal-writes-core.php points the footer script here through the kits_visit_endpoint filter).
  *
  * @package animal-writes-core
@@ -22,12 +22,17 @@ $aw_root = __DIR__; // the real path (the plugin folder may be a link): climb to
 while ( ! file_exists( $aw_root . '/wp-load.php' ) && dirname( $aw_root ) !== $aw_root ) {
 	$aw_root = dirname( $aw_root );
 }
-if ( ! file_exists( $aw_root . '/wp-load.php' ) || ! file_exists( dirname( __DIR__ ) . '/kits-core/includes/visits.php' ) ) {
+if ( ! file_exists( $aw_root . '/wp-load.php' ) || ! file_exists( dirname( __DIR__ ) . '/aw-seo-extras/includes/visits.php' ) ) {
 	http_response_code( 503 );
 	exit;
 }
 require $aw_root . '/wp-load.php';
-require dirname( __DIR__ ) . '/kits-core/includes/visits.php';
+$aw_seo = (array) get_option( 'aw_seo_settings', array() );
+if ( isset( $aw_seo['visits']['on'] ) && empty( $aw_seo['visits']['on'] ) ) { // AW SEO Plus → Settings: Visit counter off
+	http_response_code( 404 );
+	exit;
+}
+require dirname( __DIR__ ) . '/aw-seo-extras/includes/visits.php';
 
 $aw_counted = kits_visit_count(
 	(string) ( $_SERVER['HTTP_USER_AGENT'] ?? '' ), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput

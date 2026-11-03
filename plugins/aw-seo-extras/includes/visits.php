@@ -5,7 +5,10 @@
  * prerenders it). The footer reads the total from a static file (uploads/kits-visits.json), so a page view starts no
  * PHP; only the one count per session does, through the lightest endpoint the site offers (kits_visit_endpoint).
  *
- * @package kits-core
+ * Moved from Kits Core to AW SEO Plus on 3 Nov 2026 (owner): its own module, AW SEO Plus → Settings → Visit counter.
+ * Function names and option keys are unchanged, so the count carries on and nothing else needs to know.
+ *
+ * @package aw-seo-extras
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

@@ -740,10 +740,10 @@
 		},
 		"aw_visits": {
 			"title": "Animal Writes visits",
-			"source": "Kits Core",
-			"plugin": "Kits Core",
+			"source": "AW SEO Plus",
+			"plugin": "AW SEO Plus",
 			"purpose": "Visits",
-			"file": "kits/visits.php:200",
+			"file": "seo/visits.php:203",
 			"screen": "admin",
 			"page": "Dashboard (widgets)",
 			"types": [
