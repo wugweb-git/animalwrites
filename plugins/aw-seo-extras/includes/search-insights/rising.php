@@ -69,6 +69,25 @@ function aw_si_rising_sources(): array {
 			'every'  => 31 * DAY_IN_SECONDS,
 			'worker' => true,
 		),
+		// Keyword tools (tool-imports.php): pasted on Settings → Imports by hand or by the scheduled task.
+		'ubersuggest'     => array(
+			'label'  => __( 'Ubersuggest (import)', 'aw-seo-extras' ),
+			'every'  => DAY_IN_SECONDS,
+			'worker' => false,
+			'import' => true,
+		),
+		'vidiq'           => array(
+			'label'  => __( 'vidIQ (import)', 'aw-seo-extras' ),
+			'every'  => WEEK_IN_SECONDS,
+			'worker' => false,
+			'import' => true,
+		),
+		'openseo'         => array(
+			'label'  => __( 'OpenSEO (import)', 'aw-seo-extras' ),
+			'every'  => 31 * DAY_IN_SECONDS,
+			'worker' => false,
+			'import' => true,
+		),
 		'sourcing'        => array( // Removed 3 Nov 2026: only its old rows show, as history.
 			'label'   => __( 'Our News counts (stopped 3 Nov 2026)', 'aw-seo-extras' ),
 			'every'   => DAY_IN_SECONDS,
@@ -130,6 +149,9 @@ add_filter(
 			}
 			if ( ! empty( $s['history'] ) ) {
 				continue; // A removed source: never late or failing.
+			}
+			if ( ! empty( $s['import'] ) && empty( $runs[ 'rising_' . $key ] ) ) {
+				continue; // An import is listed once it has sent something, so it is never late before.
 			}
 			if ( 'gdelt' === $key && ! aw_si_gdelt_on() ) {
 				continue; // switched off: not late, not failing (Settings → News (GDELT))

@@ -20,11 +20,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /** The import kinds and their labels. */
 function aw_si_import_kinds(): array {
-	return array(
+	$kinds = array(
 		'kp'     => __( 'Keyword Planner (CSV export: Keyword, Avg. monthly searches)', 'aw-seo-extras' ),
 		'trends' => __( 'Google Trends averages (paste: keyword, value; "animal welfare" = 100)', 'aw-seo-extras' ),
 		'gov'    => __( 'data.gov.in / IDSP figures (paste: state, measure, value, as of, source URL)', 'aw-seo-extras' ),
 	);
+	return (array) apply_filters( 'aw_si_import_kinds', $kinds ); // tool-imports.php adds Ubersuggest, vidIQ, OpenSEO.
 }
 
 /**
@@ -107,6 +108,10 @@ function aw_si_import_number( string $v ): ?float {
  * @return array{rows: int, skipped: int, error: string}
  */
 function aw_si_import( string $kind, string $raw ): array {
+	$other = apply_filters( 'aw_si_import_run', null, $kind, $raw ); // An import kind added by another file.
+	if ( is_array( $other ) ) {
+		return $other;
+	}
 	$month = wp_date( 'Y-m-01' );
 	$out   = array(
 		'rows'    => 0,
@@ -308,7 +313,12 @@ add_action(
 			return;
 		}
 		/* translators: 1: import kind, 2: rows stored, 3: rows skipped. */
-		echo '<div class="notice notice-success inline"><p>' . esc_html( sprintf( __( '%1$s: %2$s rows stored, %3$s skipped.', 'aw-seo-extras' ), aw_si_import_kinds()[ $r['kind'] ] ?? $r['kind'], number_format_i18n( (int) $r['rows'] ), number_format_i18n( (int) $r['skipped'] ) ) ) . '</p></div>';
+		$msg = sprintf( __( '%1$s: %2$s rows stored, %3$s skipped.', 'aw-seo-extras' ), aw_si_import_kinds()[ $r['kind'] ] ?? $r['kind'], number_format_i18n( (int) $r['rows'] ), number_format_i18n( (int) $r['skipped'] ) );
+		if ( ! empty( $r['rising'] ) ) {
+			/* translators: %s: terms. */
+			$msg .= ' ' . sprintf( __( '%s terms that are not keywords yet went to Rising.', 'aw-seo-extras' ), number_format_i18n( (int) $r['rising'] ) );
+		}
+		echo '<div class="notice notice-success inline"><p>' . esc_html( $msg ) . '</p></div>';
 	}
 );
 

@@ -82,6 +82,9 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 			'live'     => __( 'Live check', 'aw-seo-extras' ),
 			'trends'   => __( 'Trends', 'aw-seo-extras' ),
 			'volume'   => __( 'Volume (imports)', 'aw-seo-extras' ),
+			'ubersuggest' => __( 'Ubersuggest', 'aw-seo-extras' ),
+			'vidiq'       => __( 'vidIQ (YouTube)', 'aw-seo-extras' ),
+			'openseo'     => __( 'OpenSEO', 'aw-seo-extras' ),
 			'action'   => __( 'Suggested action', 'aw-seo-extras' ),
 		);
 	}
@@ -341,7 +344,9 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 			$since = ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( '-90 days' )->format( 'Y-m-d' );
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers and a table name.
 			$bing = (array) $wpdb->get_results( $wpdb->prepare( "SELECT kw_id, SUM(IF(metric = 'q', impr, 0)) i, AVG(IF(metric = 'kw-volume', value, NULL)) v FROM {$o} WHERE src = 'bing' AND metric IN ('q', 'kw-volume') AND kw_id IN ({$in}) AND d >= %s GROUP BY kw_id", $since ), OBJECT_K );
+			$tools = function_exists( 'aw_si_tool_figures' ) ? aw_si_tool_figures( $page_ids ) : array();
 			foreach ( $this->items as $item ) {
+				$item->tools    = $tools[ (int) $item->id ] ?? array();
 				$item->volume   = $by[ (int) $item->id ] ?? null;
 				$item->bing     = isset( $bing[ $item->id ] ) ? (int) $bing[ $item->id ]->i : null;
 				$item->bing_vol = isset( $bing[ $item->id ]->v ) ? (float) $bing[ $item->id ]->v : null;
@@ -530,6 +535,16 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 					return '<span title="' . esc_attr__( 'Google Trends refused the last request, so there is no figure: this says nothing about demand.', 'aw-seo-extras' ) . '">' . esc_html__( 'source failed', 'aw-seo-extras' ) . '</span>';
 				}
 				return null === $item->trends ? '–' : esc_html( number_format_i18n( (int) $item->trends ) );
+			case 'ubersuggest':
+			case 'vidiq':
+			case 'openseo':
+				$f = $item->tools[ $col ] ?? null;
+				if ( ! $f ) {
+					return '–';
+				}
+				/* translators: %s: searches a month. */
+				$line = esc_html( sprintf( __( '%s a month', 'aw-seo-extras' ), number_format_i18n( (float) $f->value ) ) );
+				return $line . ( '' !== (string) $f->txt ? '<br><span class="description">' . esc_html( (string) $f->txt ) . '</span>' : '' );
 			case 'bing':
 				return isset( $item->bing ) ? esc_html( number_format_i18n( (int) $item->bing ) ) : '–';
 			case 'volume':
