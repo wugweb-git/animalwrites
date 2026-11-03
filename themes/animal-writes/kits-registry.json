@@ -2416,12 +2416,14 @@
   {
    "name": "What people are saying (social posts)",
    "type": "block",
-   "status": "built, off (owner's OK of design and label first)",
-   "classes": [],
+   "status": "live on the Lab campaign page",
+   "classes": [
+    "aw-social-card"
+   ],
    "states": [
     "off (Animal Writes → Modules → Show on pages; prints nothing)",
     "no approved posts (prints nothing)",
-    "cards: date, platform, handle; person; summary",
+    "cards: date, on platform, handle; person; summary",
     "X or YouTube post: Show the post button, embed after the click",
     "editor preview (one-line note)"
    ],
