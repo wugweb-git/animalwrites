@@ -1749,9 +1749,19 @@ section.aw-camp-band.aw-ed-hero--campaign { box-sizing: border-box; min-height: 
 }
 @container aw-help (min-width: 56.5rem) {
 	.aw-bento { gap: var(--kit-space-4); grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-areas: "sos injured vet1962 awbi" "sos cruelty vets orgs"; } /* 16px between tiles, so the Home help section stays within 720 (Layout rules 5) */
-	.aw-bento > .aw-more[open], .aw-bento > .aw-more[open]::details-content, .aw-bento > .aw-more[open] > .aw-bento-more { display: contents; } /* open (from 1200, or tapped): its tiles take their own areas */
 	.aw-bento > .aw-more[open] > summary { display: none; }
-	.aw-bento > .aw-more:not([open]) { grid-area: 2 / 2 / 3 / 5; } /* 1024 to 1199, folded: under the injured-animal and 1962 tiles */
+	@supports selector(::details-content) {
+		.aw-bento > .aw-more[open], .aw-bento > .aw-more[open]::details-content, .aw-bento > .aw-more[open] > .aw-bento-more { display: contents; } /* open (from 1200, or tapped): its tiles take their own areas */
+		.aw-bento > .aw-more:not([open]) { grid-area: 2 / 2 / 3 / 5; } /* 1024 to 1199, folded: under the injured-animal and 1962 tiles */
+	}
+	/* Browsers without ::details-content (before Safari 18.4, Chrome 131, Firefox 143) cannot lay the fold's tiles into
+	   the bento's areas: there the 112, injured-animal and 1962 tiles share the first row and the fold's four tiles
+	   the second, four across. */
+	@supports not selector(::details-content) {
+		.aw-bento { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-areas: "sos injured vet1962" "more more more"; }
+		.aw-bento-more { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+		.aw-bento-more > .aw-bento-tile { grid-area: auto; }
+	}
 }
 /* Below the four-column layout (phones and 768 to about 900px; 3 Nov 2026, Home sections fit one phone screen and
    are at most 720px from 768): the four link tiles (injured animal, report cruelty, find a vet, find an organisation)
