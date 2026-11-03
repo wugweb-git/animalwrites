@@ -464,6 +464,7 @@ $content = '<!-- wp:group {"align":"full","className":"aw-camp aw-camp--lab-rule
 	. c2slot( 'why-it-matters', $rules . $pain . $compare )
 	. c2slot( 'how-to-help', $send . $share, 'aw-camp-open' ) // Other ways to send removed (owner, 21 Oct 2026)
 	. c2slot( 'press', $press, 'aw-camp-if-items' ) // On social media: posts linked to this campaign by its keywords (31 Oct 2026); hidden while there are none. (owner, 31 Oct 2026; was a second What's happening): people's social posts, after the share ask
+	. c2slot( 'people', c2sec( '', "<!-- wp:animal-writes/social-posts /-->", 'aw-camp-white' ) ) // What people are saying: approved social posts linked to the campaign (owner, 3 Nov 2026)
 	. c2slot( 'news', $updates )
 	. c2slot( 'library', $read )
 	. c2slot( 'faq', $faq )
