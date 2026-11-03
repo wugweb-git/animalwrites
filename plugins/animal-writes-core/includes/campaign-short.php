@@ -94,7 +94,7 @@ function aw_camp_short_clash( $short, $id ) {
 	return '';
 }
 
-// /{short} or /{short}/ to the campaign, keeping any query string (utm tags). GET and HEAD only; before WordPress's own
+// /{short} or /{short}/ to the campaign, keeping utm tags but not click ids; never cached (302, no-cache). GET and HEAD only; before WordPress's own
 // canonical redirect (10) and the 410 for removed items (not-found.php, 99).
 add_action(
 	'template_redirect',
@@ -112,10 +112,17 @@ add_action(
 		}
 		$to    = (string) get_permalink( $id );
 		$query = (string) wp_parse_url( (string) wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ), PHP_URL_QUERY ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-		if ( '' !== $query ) {
-			$to .= ( false === strpos( $to, '?' ) ? '?' : '&' ) . $query;
+		parse_str( $query, $args );
+		// Click ids (fbclid, gclid...) are per person: never pass them on. utm tags stay.
+		$args = array_diff_key( array_filter( $args, 'is_string' ), array_flip( array( 'fbclid', 'gclid', 'gbraid', 'wbraid', 'msclkid', 'igshid', 'ttclid', 'twclid', 'li_fat_id', 'mc_eid', 'yclid', 'dclid' ) ) );
+		if ( $args ) {
+			$to = add_query_arg( array_map( 'rawurlencode', $args ), $to );
 		}
-		wp_safe_redirect( $to, 301, 'Animal Writes' );
+		// The redirect depends on the query string, which the page cache may leave out of its key (LiteSpeed
+		// ignores fbclid), so it must never be cached: a cached copy sent everyone one visitor's click id.
+		do_action( 'litespeed_control_set_nocache', 'campaign short link redirect' );
+		nocache_headers();
+		wp_safe_redirect( $to, 302, 'Animal Writes' );
 		exit;
 	},
 	1
