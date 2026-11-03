@@ -263,7 +263,7 @@ $tonight = dwsec(
 	'tonight',
 	dwh( 'Tonight, in order' )
 	. dwhtml(
-		'<ol class="aw-camp-steps aw-camp-steps--six">'
+		'<ol class="aw-camp-steps aw-camp-steps--six" role="list">'
 		. '<li><strong>Pets inside before dusk</strong><span>Doors, gates and windows shut</span></li>'
 		. '<li><strong>Safe room on</strong><span>Curtains drawn, water down, TV or music on</span></li>'
 		. '<li><strong>Collar and tag on</strong><span>Your number, readable</span></li>'
