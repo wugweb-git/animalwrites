@@ -311,6 +311,14 @@ function aw_seo_modules(): array {
 				'AW_LLMS_GUIDE_TYPES' => array( 'type' => 'list', 'label' => 'Guide tags', 'help' => 'Tags whose Resources items are listed as guides. One per line.', 'default' => array( 'guide', 'faq' ) ),
 			),
 		),
+		'markdown' => array(
+			'label'  => 'Markdown for agents',
+			'switch' => true,
+			'files'  => array( 'markdown' ),
+			'desc'   => 'Home and single pages as Markdown when a request asks for text/markdown; browsers get the HTML.',
+			'fields' => array(
+			),
+		),
 		'analysis' => array(
 			'label'  => 'Content analysis',
 			'switch' => true,
