@@ -179,8 +179,17 @@
 .aw-camp--sc-stray-dogs .aw-camp-poster .aw-cd-when .aw-date { display: inline-block; margin-top: var(--kit-space-1); padding: 0.1em 0.6em; border-radius: 999px; background: var(--kit-color-accent); color: var(--camp-primary); }
 .aw-camp--sc-stray-dogs .aw-camp-poster .aw-cd-when .aw-date .kit-ico { display: none; }
 .aw-camp--sc-stray-dogs .aw-camp-poster .aw-camp-poster-note { padding-top: var(--kit-space-3); border-top: 1px solid var(--camp-line); font-size: var(--kit-type-sm); }
-/* Page sections (owner, 1 Nov 2026: fix every section). A campaign is a landing page: text runs the full band width. */
-.aw-camp--sc-stray-dogs .aw-camp-section:not(.aw-camp-hero) .aw-camp-lede { max-width: none; }
+/* Page sections (owner, 1 Nov 2026: fix every section). A campaign is a landing page: text runs the full band width,
+   the band's 1120px text column (.aw-camp-section > *), so an intro lines up with its heading (3 Nov 2026: at none it ran
+   32px past the column on each side at 1280). */
+.aw-camp--sc-stray-dogs .aw-camp-section:not(.aw-camp-hero) .aw-camp-lede { max-width: 1120px; }
+/* Dates inside a sentence read as text: no calendar icon mid-line (owner, 3 Nov 2026: audit). A date that stands alone
+   keeps it (the orders' date column, What happens next, the hero poster). */
+.aw-camp--sc-stray-dogs :is(p, #sources li, .aw-camp-timeline td:not(:first-child)) .aw-date .kit-ico { display: none; }
+/* The orders' document links: a 44px tap area (--kit-size-target) around the one link in the cell, without making the
+   row taller */
+.aw-camp--sc-stray-dogs .aw-camp-timeline td:nth-child(4) a { position: relative; }
+.aw-camp--sc-stray-dogs .aw-camp-timeline td:nth-child(4) a::before { content: ""; position: absolute; inset-inline: 0; top: 50%; height: var(--kit-size-target); transform: translateY(-50%); }
 /* Section headings: a plum icon in a pale yellow circle (the Kits icons, drawn in plum) */
 .aw-camp--sc-stray-dogs :is(#what, #orders, #tracker-sec, #act, #latest, #find-help, #read, #next, #share, #sources) h2 { display: flex; align-items: center; gap: var(--kit-space-3); }
 .aw-camp--sc-stray-dogs :is(#what, #orders, #tracker-sec, #act, #latest, #find-help, #read, #next, #share, #sources) h2::before { content: ""; flex: none; width: 2.75rem; height: 2.75rem; border-radius: 50%; background: #fde9b0 var(--aw-sc-ico) center / 55% no-repeat; }
