@@ -973,3 +973,8 @@
 	.aw-camp--lab-rules #read .kit-card .kit-tag-text { white-space: normal; overflow: visible; text-overflow: clip; }
 	.aw-camp--lab-rules #read .kit-card .kit-card-title a { display: inline; -webkit-line-clamp: unset; overflow: visible; }
 }
+/* Rule chips on phones: the chip opens the rule's own words, so it is a 44px target (--kit-size-target) like the page's
+   other buttons; the Kits chip is 28px. The pain-scale's chips are left to that section. */
+@media (max-width: 767px) {
+	.aw-camp--lab-rules .aw-rule-chip:not(#pain-scale .aw-rule-chip) { min-height: var(--kit-size-target); }
+}
