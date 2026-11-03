@@ -1371,6 +1371,7 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 	.aw-ed-learn .aw-tasks.is-three .kit-card > .kit-card-media { width: var(--kit-thumb-lg); max-width: 40%; border-radius: var(--kit-radius-media); }
 	.aw-ed-learn .aw-tasks.is-three .kit-card > .kit-card-body { flex: 1 1 0; padding: 0; }
 	.aw-ed-learn .aw-tasks.is-three .kit-card-sum { display: none; }
+	.aw-ed-learn .aw-tasks.is-three .kit-card-meta { flex-wrap: wrap !important; } /* the read time goes under the date instead of ending in "3 min r…" (Kits keeps a card's meta row on one line) */
 }
 @container aw-guides (min-width: 912px) { .aw-ed-learn .aw-tasks.is-three { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--kit-space-grid); } }
 /* Guides on Home: meta row is the date, read time and the Guide badge (no topic chip); bigger title, a one-line
@@ -1426,7 +1427,7 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 	.aw-ed-news .aw-news-mosaic > li:first-child > .kit-card { flex-direction: row; align-items: flex-start; }
 	.aw-ed-news .aw-news-mosaic > li:first-child > .kit-card[class*="kit-card--block"] { gap: 0; } /* a block card: no card padding, its body padded 24px; the picture gets the same room */
 	.aw-ed-news .aw-news-mosaic > li:first-child > .kit-card > .kit-card-media { flex: none; width: var(--kit-thumb-lg) !important; max-width: 40%; aspect-ratio: 4 / 3; border-radius: var(--kit-radius-media); }
-	.aw-ed-news .aw-news-mosaic > li:first-child > .kit-card[class*="kit-card--block"] > .kit-card-media { margin: var(--kit-space-5) 0 var(--kit-space-5) var(--kit-space-5); }
+	.aw-ed-news .aw-news-mosaic > li:first-child > .kit-card[class*="kit-card--block"] > .kit-card-media { margin: var(--kit-space-5) 0 var(--kit-space-5) var(--kit-space-5) !important; } /* !important: Kits sets a card picture's margin to 0 !important (kit.css, card states), which left the lead's picture flush with the card edge */
 	.aw-ed-news .aw-news-mosaic > li:first-child > .kit-card > .kit-card-media img { height: 100%; object-fit: cover; }
 	.aw-ed-news .aw-news-mosaic > li:first-child > .kit-card > .kit-card-body { flex: 1 1 0; }
 	.aw-ed-news .aw-news-mosaic > li:first-child .kit-card-sum { display: none; }
@@ -1724,6 +1725,17 @@ section.aw-camp-band.aw-ed-hero--campaign { box-sizing: border-box; min-height: 
 @container aw-help (min-width: 56.5rem) {
 	.aw-bento { gap: var(--kit-space-4); grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-areas: "sos injured vet1962 awbi" "sos cruelty vets orgs"; } /* 16px between tiles, so the Home help section stays within 720 (Layout rules 5) */
 }
+/* Below the four-column layout (phones and 768 to about 900px; 3 Nov 2026, Home sections fit one phone screen and
+   are at most 720px from 768): the four link tiles (injured animal, report cruelty, find a vet, find an organisation)
+   put their icon square beside the title and line, as a Kits tile does, and tiles sit --kit-space-4 apart as in the
+   four-column layout. The 112, 1962 and AWBI tiles keep their number layout. Section at 375: 1611 -> 1378px;
+   at 768: 982 -> 887px. */
+@container aw-help not (min-width: 56.5rem) {
+	.aw-bento { gap: var(--kit-space-4); }
+	.aw-bento-tile:is(.aw-bento--injured, .aw-bento--cruelty, .aw-bento--vets, .aw-bento--orgs) { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto 1fr; align-content: start; column-gap: var(--kit-space-4); row-gap: var(--kit-space-1); }
+	.aw-bento-tile:is(.aw-bento--injured, .aw-bento--cruelty, .aw-bento--vets, .aw-bento--orgs) > .aw-bento-ico { grid-row: 1 / span 2; margin-bottom: 0; }
+	.aw-bento-tile:is(.aw-bento--injured, .aw-bento--cruelty, .aw-bento--vets, .aw-bento--orgs) > :is(h3, p) { grid-column: 2; }
+}
 /* Each tile is a size container, so the phone numbers scale to the tile and never wrap or overflow. Depth: a faint
    border, a light line along the top edge, a soft top-to-bottom shade and a small shadow. Hover: the tile lifts
    (Kits' lift) with a stronger border and shadow. Pressed: it shrinks slightly, so a tap on a phone shows. */
@@ -1810,11 +1822,25 @@ section.aw-camp-band.aw-ed-hero--campaign { box-sizing: border-box; min-height: 
 /* From the Library items (1 Nov 2026): three, the lead and two more. Meta row is the date and the publisher (no place, no
    type chip); the two rows have a bigger title and a 4:3 picture. 768 to 1199: the lead runs full width (picture left,
    4:3, text right) with the two rows side by side under it. From 1200: lead 5fr on the left, the two rows 7fr on the
-   right, each row half the lead's height with a 45% wide 4:3 picture, so both columns end level. */
+   right, each row half the lead's height with a 10rem 4:3 picture (as in Latest news), so both columns end level. */
 .aw-ed-law .aw-news-mosaic :is(.kit-meta-row .kit-meta-item:not(.aw-date), .kit-tag:not(.kit-tag--source)) { display: none; }
 .aw-ed-law .aw-news-mosaic .kit-card--stacked-md .kit-card-title { font-size: var(--kit-type-h3) !important; }
 .aw-ed-law .aw-news-mosaic .kit-card--stacked-md > .kit-card-media { aspect-ratio: 4 / 3; }
 .aw-ed-law .aw-news-mosaic .kit-card--stacked-md > .kit-card-media img { height: 100%; object-fit: cover; }
+/* Phones (3 Nov 2026; Home sections fit one phone screen, block-padding-and-sizes): the lead is a row like the two
+   under it, as in Latest news: a --kit-thumb-lg 4:3 picture in the card padding, the date and publisher, the H3 title,
+   no summary. The section went from 1705 to 1405px at 375. */
+@media (max-width: 767px) {
+	.aw-ed-law .aw-news-mosaic > li > .kit-card { gap: var(--kit-space-5); }
+	.aw-ed-law .aw-news-mosaic > li:first-child > .kit-card { flex-direction: row; align-items: flex-start; }
+	.aw-ed-law .aw-news-mosaic > li:first-child > .kit-card[class*="kit-card--block"] { gap: 0; }
+	.aw-ed-law .aw-news-mosaic > li:first-child > .kit-card > .kit-card-media { flex: none; width: var(--kit-thumb-lg) !important; max-width: 40%; aspect-ratio: 4 / 3; border-radius: var(--kit-radius-media); }
+	.aw-ed-law .aw-news-mosaic > li:first-child > .kit-card[class*="kit-card--block"] > .kit-card-media { margin: var(--kit-space-5) 0 var(--kit-space-5) var(--kit-space-5) !important; }
+	.aw-ed-law .aw-news-mosaic > li:first-child > .kit-card > .kit-card-media img { height: 100%; object-fit: cover; }
+	.aw-ed-law .aw-news-mosaic > li:first-child > .kit-card > .kit-card-body { flex: 1 1 0; }
+	.aw-ed-law .aw-news-mosaic > li:first-child .kit-card-sum { display: none; }
+	.aw-ed-law .aw-news-mosaic > li:first-child .kit-card-title { font-size: var(--kit-type-h3) !important; }
+}
 @media (min-width: 768px) {
 	.aw-ed-law .aw-news-mosaic > li:nth-child(n+2) { align-self: stretch; display: flex; }
 	.aw-ed-law .aw-news-mosaic > li:nth-child(n+2) > .kit-card { flex: 1 1 auto; align-items: center; }
@@ -1831,7 +1857,7 @@ section.aw-camp-band.aw-ed-hero--campaign { box-sizing: border-box; min-height: 
 }
 @media (min-width: 1200px) {
 	.aw-ed-law .aw-news-list.aw-news-mosaic { grid-template-rows: 1fr 1fr; }
-	.aw-ed-law .aw-news-mosaic .kit-card--stacked-md > .kit-card-media { width: 45% !important; max-width: 45%; }
+	.aw-ed-law .aw-news-mosaic .kit-card--stacked-md > .kit-card-media { width: 10rem !important; max-width: 40%; } /* the Latest news row picture from 1200 (3 Nov 2026; was 45%, which made each row 260px and the lead 532px, over the 500px card cap; the section is 870px at 1280, was 1049) */
 }
 
 /* India Writes for Its Community Dogs on Home (pattern aw1-story; the band's own rules are in campaign-record.css).

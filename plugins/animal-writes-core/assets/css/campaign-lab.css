@@ -845,6 +845,21 @@
 .aw-camp.aw-camp #latest .kit-card { flex-direction: row; align-items: center; gap: var(--kit-space-4); height: 100%; box-sizing: border-box; padding: var(--kit-space-5); background: var(--kit-color-surface-soft); }
 .aw-camp.aw-camp #latest .kit-card > .kit-card-media { flex: none; width: var(--kit-thumb-lg); max-width: 40%; margin: 0; border-radius: var(--kit-radius-media); overflow: hidden; }
 .aw-camp.aw-camp #latest .kit-card > .kit-card-body { flex: 1; min-width: 0; padding: 0; }
+/* Below 1200 the picture beside the whole body left the text 165px wide: the meta row broke in two and Kits cut titles
+   to three lines with "…". Here the meta row runs the card's width on top, a square picture (--kit-thumb-sm on phones,
+   --kit-thumb-md on tablets) sits beside the title, and the title shows in full. */
+@media (max-width: 1199px) {
+	.aw-camp.aw-camp #latest .kit-card { display: grid; grid-template-columns: var(--kit-thumb-md) minmax(0, 1fr); grid-template-areas: "meta meta" "media title"; align-items: start; gap: var(--kit-space-3) var(--kit-space-4); }
+	.aw-camp.aw-camp #latest .kit-card > .kit-card-body { display: contents; }
+	.aw-camp.aw-camp #latest .kit-card-metarow { grid-area: meta; flex-wrap: nowrap; }
+	.aw-camp.aw-camp #latest .kit-card-metarow > .kit-card-meta { flex: none; }
+	.aw-camp.aw-camp #latest .kit-card-metarow > .kit-card-chips { flex: 1 1 0; }
+	.aw-camp.aw-camp #latest .kit-card > .kit-card-media { grid-area: media; width: 100%; max-width: none; aspect-ratio: 1; }
+	.aw-camp.aw-camp #latest .kit-card > .kit-card-media img { width: 100%; height: 100%; object-fit: cover; }
+	.aw-camp.aw-camp #latest .kit-card-title { grid-area: title; margin: 0; }
+	.aw-camp.aw-camp #latest .kit-card-title a { display: block; -webkit-line-clamp: none; overflow: visible; }
+}
+@media (max-width: 767px) { .aw-camp.aw-camp #latest .kit-card { grid-template-columns: var(--kit-thumb-sm) minmax(0, 1fr); } }
 
 /* What happens next: the row of four from 768 (not only from 1200), the cards white */
 .aw-camp.aw-camp :is(#next, #next-closed) .aw-camp-steps > li:not(:first-child) { background: var(--kit-color-surface-soft); }
@@ -964,19 +979,21 @@
 /* Read the law and the record on phones: at 320 the cards ran 19px past the screen's edge, sized to the longest source
    tag. Below 768 the list's one column may shrink, so may the card's text column (aw.css gives it --kit-body-min), the
    source tag wraps instead of being cut (kit.css keeps tags to one 28px line with an ellipsis), and the title shows in
-   full (kit.css cuts card titles to three lines; the titles are already shortened where they are printed). */
+   full (the rule after this block). */
 @media (max-width: 767px) {
 	.aw-camp--lab-rules #read .wp-block-post-template { grid-template-columns: minmax(0, 1fr); }
 	.aw-camp--lab-rules #read .kit-card[class*="kit-card--stacked"] > .kit-card-body { min-width: 0; }
 	.aw-camp--lab-rules #read .kit-card .kit-card-chips { height: auto; overflow: visible; }
 	.aw-camp--lab-rules #read .kit-card .kit-tag { height: auto; padding-block: var(--kit-space-1); border-radius: var(--kit-radius-control); white-space: normal; }
 	.aw-camp--lab-rules #read .kit-card .kit-tag-text { white-space: normal; overflow: visible; text-overflow: clip; }
-	.aw-camp--lab-rules #read .kit-card .kit-card-title a { display: inline; -webkit-line-clamp: unset; overflow: visible; }
 }
+/* Library titles show in full at every width: from 768 Kits' three-line cut ended 9 of the 12 titles in "…" */
+.aw-camp--lab-rules #read .kit-card .kit-card-title a { display: inline; -webkit-line-clamp: unset; overflow: visible; }
 /* Rule chips on phones: the chip opens the rule's own words, so it is a 44px target (--kit-size-target) like the page's
-   other buttons; the Kits chip is 28px. The pain-scale's chips are left to that section. */
+   other buttons; the Kits chip is 28px. The pain scale's two chips too (they were 28px), and the
+   "Read the full draft" link (24px). */
 @media (max-width: 767px) {
-	.aw-camp--lab-rules .aw-rule-chip:not(#pain-scale .aw-rule-chip) { min-height: var(--kit-size-target); }
+	.aw-camp--lab-rules :is(.aw-rule-chip, .aw-camp-more) { min-height: var(--kit-size-target); }
 }
 /* The letter on phones (campaign-lab.js): folded, its first 14rem (the box's phone height before) fading out over
    --kit-space-8, with the button under it; open, the whole letter in the page, no scroll box inside the page. From 768

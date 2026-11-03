@@ -832,3 +832,56 @@
 	var t;
 	window.addEventListener('resize', function () { clearTimeout(t); t = setTimeout(mark, 150); }, { passive: true });
 })();
+
+/* Supreme Court, Where your state stands (owner, 3 Nov 2026: "audit and sort this"): a state picker, so the section is
+   one state at a time (Layout rules 5 and 6) instead of 13 cards or rows. The picker is a Kits form field (kit-field)
+   whose label is the table's own first heading ("State / UT"); its options are the states named in the first column,
+   in A to Z order, each state of the several-states row on its own and pointing at that row. The table stays a table:
+   the other rows are hidden, the chosen one shows (the first row to start, as the server sent it). Choosing a state
+   changes only the row below; focus stays on the picker. Without JavaScript every state shows, as before. */
+(function () {
+	var fig = document.querySelector('.aw-camp--sc-stray-dogs .aw-camp-tracker');
+	var th = fig && fig.querySelector('thead th');
+	var rows = fig ? fig.querySelectorAll('tbody tr') : [];
+	if (!th || rows.length < 2) return;
+	var table = fig.querySelector('table');
+	var opts = [];
+	Array.prototype.forEach.call(rows, function (tr, i) {
+		var cell = tr.cells[0];
+		if (!cell) return;
+		var text = cell.textContent.replace(/\s+/g, ' ').trim();
+		var names = cell.classList.contains('aw-sc-states') ? text.split(/\s*,\s*/) : [text];
+		names.forEach(function (n) {
+			if (n) opts.push({ name: n.charAt(0).toUpperCase() + n.slice(1), row: i, last: /^the\s/i.test(n) });
+		});
+	});
+	opts.sort(function (a, b) { return a.last - b.last || a.name.localeCompare(b.name, 'en'); });
+	if (!table.id) table.id = 'aw-sc-tracker-table';
+	var field = document.createElement('div');
+	field.className = 'kit-field aw-sc-pick';
+	var label = document.createElement('label');
+	label.htmlFor = 'aw-sc-pick';
+	label.textContent = th.textContent.trim();
+	var wrap = document.createElement('div');
+	wrap.className = 'kit-field-control';
+	var sel = document.createElement('select');
+	sel.id = 'aw-sc-pick';
+	sel.setAttribute('aria-controls', table.id);
+	opts.forEach(function (o) {
+		var op = document.createElement('option');
+		op.value = String(o.row);
+		op.textContent = o.name;
+		sel.appendChild(op);
+	});
+	wrap.appendChild(sel);
+	field.appendChild(label);
+	field.appendChild(wrap);
+	fig.parentNode.insertBefore(field, fig);
+	function show(i) {
+		Array.prototype.forEach.call(rows, function (tr, j) { tr.hidden = j !== i; });
+	}
+	sel.selectedIndex = Math.max(0, opts.findIndex(function (o) { return o.row === 0; })); // the first row, as on the page
+	show(Number(sel.value));
+	fig.classList.add('is-picked');
+	sel.addEventListener('change', function () { show(Number(sel.value)); });
+})();
