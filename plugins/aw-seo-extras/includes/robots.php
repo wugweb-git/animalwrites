@@ -79,7 +79,7 @@ function aw_listing_unreachable( $id ) {
 	if ( (int) $score > 0 ) {
 		return false;
 	}
-	foreach ( array( 'aw_facebook', 'aw_instagram', 'aw_x', 'aw_youtube', 'aw_linkedin' ) as $k ) {
+	foreach ( aw_seo_social_keys() as $k ) {
 		if ( '' !== trim( (string) get_post_meta( $id, $k, true ) ) ) {
 			return false;
 		}

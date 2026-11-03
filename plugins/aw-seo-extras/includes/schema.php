@@ -1109,7 +1109,7 @@ function aw_category_schema_nodes() {
 	$start = ( max( 1, (int) get_query_var( 'paged' ) ) - 1 ) * $per;
 	$items = array();
 	foreach ( (array) $wp_query->posts as $i => $p ) {
-		if ( ! $p instanceof WP_Post || aw_is_noindex_item( $p->ID ) || ( function_exists( 'kits_preview_only_ids' ) && in_array( (int) $p->ID, kits_preview_only_ids(), true ) ) ) {
+		if ( ! $p instanceof WP_Post || aw_is_noindex_item( $p->ID ) || in_array( (int) $p->ID, aw_seo_preview_ids(), true ) ) {
 			continue;
 		}
 		$items[] = array(
@@ -1167,7 +1167,7 @@ function aw_page_lists_schema_nodes( $page_id ) {
 	$walk( parse_blocks( (string) get_post_field( 'post_content', $page_id ) ) );
 	$items = array();
 	$seen  = array();
-	$skip  = function_exists( 'kits_preview_only_ids' ) ? kits_preview_only_ids() : array();
+	$skip  = aw_seo_preview_ids();
 	foreach ( $loops as $query ) {
 		$loop = (object) array( 'context' => array( 'query' => $query ) );
 		$vars = apply_filters( 'query_loop_block_query_vars', build_query_vars_from_query_block( $loop, 1 ), $loop, 1 ); // the same rules the list follows (open Opportunities only)
@@ -1236,7 +1236,7 @@ function aw_hub_schema_nodes() {
 		}
 	}
 	foreach ( $posts as $i => $p ) {
-		if ( aw_is_noindex_item( $p->ID ) || ( function_exists( 'kits_preview_only_ids' ) && in_array( (int) $p->ID, kits_preview_only_ids(), true ) ) ) {
+		if ( aw_is_noindex_item( $p->ID ) || in_array( (int) $p->ID, aw_seo_preview_ids(), true ) ) {
 			continue; // not indexed (or preview only), so not listed
 		}
 		$items[] = array( '@type' => 'ListItem', 'position' => $start + $i + 1, 'url' => get_permalink( $p ), 'name' => aw_seo_plain( get_the_title( $p ) ) );

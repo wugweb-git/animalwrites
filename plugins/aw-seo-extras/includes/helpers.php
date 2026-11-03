@@ -243,6 +243,57 @@ function aw_is_noindex_item( $id ) {
 
 /* ---------- Naming rules (SEO audits, 10 Oct 2026) ---------- */
 
+/**
+ * Preview-only items (kits_preview_only_ids(), e.g. the sample listing): never listed, counted or in a sitemap.
+ *
+ * @return int[]
+ */
+function aw_seo_preview_ids() {
+	return function_exists( 'kits_preview_only_ids' ) ? array_map( 'intval', (array) kits_preview_only_ids() ) : array();
+}
+
+/**
+ * Query arguments with a hub list's own rules added: open opportunities only, preview-only items left out. The same
+ * rules for every count of a list (filtered views, their sitemap, breadcrumbs).
+ *
+ * @param string $type Post type of the hub.
+ * @param array  $v    WP_Query arguments.
+ * @return array
+ */
+function aw_seo_hub_rules( $type, array $v ) {
+	if ( 'aw_opportunity' === $type && function_exists( 'aw_open_opportunities_meta_query' ) ) {
+		$v['meta_query']   = (array) ( $v['meta_query'] ?? array() ); // phpcs:ignore WordPress.DB.SlowDBQuery
+		$v['meta_query'][] = aw_open_opportunities_meta_query();
+	}
+	if ( aw_seo_preview_ids() ) {
+		$v['post__not_in'] = aw_seo_preview_ids();
+	}
+	return $v;
+}
+
+/**
+ * Meta keys of a listing's social profiles: any one of them is a way to reach the organisation.
+ *
+ * @return string[]
+ */
+function aw_seo_social_keys() {
+	return array( 'aw_facebook', 'aw_instagram', 'aw_x', 'aw_youtube', 'aw_linkedin' );
+}
+
+/**
+ * The file in the uploads folder an address points to (http or https, query string ignored), or '' when the address
+ * is not in the uploads folder.
+ *
+ * @param string $url Picture address.
+ * @return string
+ */
+function aw_seo_upload_path( $url ) {
+	$up   = wp_get_upload_dir();
+	$base = set_url_scheme( $up['baseurl'], 'https' );
+	$abs  = set_url_scheme( (string) strtok( (string) $url, '?' ), 'https' );
+	return 0 === strpos( $abs, $base ) ? $up['basedir'] . substr( $abs, strlen( $base ) ) : '';
+}
+
 /** "{Text} – Animal Writes". */
 function aw_seo_branded( $text ) {
 	return $text . ' – ' . get_bloginfo( 'name' );
@@ -540,13 +591,12 @@ function aw_seo_share_safe_url( $url ) {
 	if ( ! preg_match( '/\.(avif|webp)$/i', (string) $plain ) ) {
 		return array( $url, 0, 0, '' );
 	}
-	$up   = wp_get_upload_dir();
-	$base = set_url_scheme( $up['baseurl'], 'https' );
-	$abs  = set_url_scheme( $plain, 'https' );
-	if ( 0 !== strpos( $abs, $base ) ) {
+	$path = aw_seo_upload_path( $plain );
+	if ( '' === $path ) {
 		return array( $url, 0, 0, '' );
 	}
-	$path = $up['basedir'] . substr( $abs, strlen( $base ) );
+	$up   = wp_get_upload_dir();
+	$base = set_url_scheme( $up['baseurl'], 'https' );
 	$stem = preg_replace( '/(-\d+x\d+)?\.(avif|webp)$/i', '', $path ); // the upload's own name, without a size or format
 	$mime = array( 'jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'png' => 'image/png' ); // never WebP: it is not a share format either
 	foreach ( $mime as $ext => $type ) {

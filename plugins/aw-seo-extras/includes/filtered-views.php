@@ -75,13 +75,7 @@ function aw_seo_filtered_place( $type, $key, $slug ) {
 	}
 	list( $tq, $mq ) = aw_filter_clauses( $type, array( $key => array( $slug ) ) );
 	$v = array( 'post_type' => $type, 'post_status' => 'publish', 'posts_per_page' => 1, 'fields' => 'ids', 'no_found_rows' => false, 'tax_query' => $tq, 'meta_query' => $mq ); // phpcs:ignore WordPress.DB.SlowDBQuery
-	if ( 'aw_opportunity' === $type && function_exists( 'aw_open_opportunities_meta_query' ) ) {
-		$v['meta_query'][] = aw_open_opportunities_meta_query();
-	}
-	if ( function_exists( 'kits_preview_only_ids' ) && kits_preview_only_ids() ) {
-		$v['post__not_in'] = kits_preview_only_ids();
-	}
-	return array( $name, (int) ( new WP_Query( $v ) )->found_posts );
+	return array( $name, (int) ( new WP_Query( aw_seo_hub_rules( $type, $v ) ) )->found_posts );
 }
 
 /** Filter parameters present on this request (sort is an order, not a filter): param => raw string. */
@@ -113,13 +107,7 @@ function aw_seo_filtered_count( $type, $key, $slug ) {
 		'no_found_rows'  => false,
 		'tax_query'      => array( array( 'taxonomy' => 'tag' === $key ? 'post_tag' : 'category', 'field' => 'slug', 'terms' => 'aw_listing' === $type && function_exists( 'aw_listing_type_query' ) ? explode( ',', aw_listing_type_query( $slug ) ) : array( $slug ), 'include_children' => true ) ),
 	);
-	if ( 'aw_opportunity' === $type && function_exists( 'aw_open_opportunities_meta_query' ) ) {
-		$v['meta_query'] = array( aw_open_opportunities_meta_query() ); // phpcs:ignore WordPress.DB.SlowDBQuery
-	}
-	if ( function_exists( 'kits_preview_only_ids' ) && kits_preview_only_ids() ) {
-		$v['post__not_in'] = kits_preview_only_ids();
-	}
-	return (int) ( new WP_Query( $v ) )->found_posts;
+	return (int) ( new WP_Query( aw_seo_hub_rules( $type, $v ) ) )->found_posts;
 }
 
 /**

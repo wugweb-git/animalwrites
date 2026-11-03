@@ -106,11 +106,12 @@ function aw_sitemap_unreachable_listings() {
 		return $set;
 	}
 	global $wpdb;
-	$ids = $wpdb->get_col( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$social = "'" . implode( "','", array_map( 'esc_sql', aw_seo_social_keys() ) ) . "'";
+	$ids    = $wpdb->get_col( // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL
 		"SELECT p.ID FROM {$wpdb->posts} p
 		LEFT JOIN {$wpdb->postmeta} s ON s.post_id = p.ID AND s.meta_key = 'aw_contact_score'
 		WHERE p.post_type = 'aw_listing' AND p.post_status = 'publish' AND ( s.meta_value IS NULL OR s.meta_value = '' OR s.meta_value = '0' )
-		AND NOT EXISTS ( SELECT 1 FROM {$wpdb->postmeta} m WHERE m.post_id = p.ID AND m.meta_key IN ( 'aw_facebook', 'aw_instagram', 'aw_x', 'aw_youtube', 'aw_linkedin' ) AND TRIM( m.meta_value ) <> '' )"
+		AND NOT EXISTS ( SELECT 1 FROM {$wpdb->postmeta} m WHERE m.post_id = p.ID AND m.meta_key IN ( {$social} ) AND TRIM( m.meta_value ) <> '' )"
 	);
 	$set = array();
 	_prime_post_caches( array_map( 'intval', $ids ), false, true );
@@ -132,7 +133,7 @@ add_filter(
 		$closed = 'aw_opportunity' === $obj->post_type && function_exists( 'aw_retention_state' ) && aw_retention_state( $obj );
 		$merged = (int) get_post_meta( $obj->ID, 'aw_merged_into', true ) > 0; // a same-story duplicate (normally private already)
 		$unreachable = 'aw_listing' === $obj->post_type && isset( aw_sitemap_unreachable_listings()[ (int) $obj->ID ] ); // noindex (robots.php)
-		if ( '' === (string) $obj->post_name || $closed || $merged || $unreachable || ( function_exists( 'kits_preview_only_ids' ) && in_array( (int) $obj->ID, kits_preview_only_ids(), true ) ) ) {
+		if ( '' === (string) $obj->post_name || $closed || $merged || $unreachable || in_array( (int) $obj->ID, aw_seo_preview_ids(), true ) ) {
 			return false;
 		}
 		return $url;
