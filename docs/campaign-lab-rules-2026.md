@@ -73,11 +73,14 @@ Every hash below is on `wordpress` (live) as of 3 Nov 2026. Sections are in page
 - One Share block on every campaign: a band in the campaign colour, white main button, icon share bar, the ready-made pictures. 597d300d, 74df45af, 9026fd5d, 880d66f0, 816ada37, 5afec03e, 246151ad, 474a9356, 3088b8cb, 4e55a9f9, 2 Nov
 - Hashtags for X: the X share link carries #StopAnimalTesting #WithdrawAnimalTestingRules #AnimalFreeScience; WhatsApp and email unchanged. 2fffe9c5, 2 Nov
 - "It takes under a minute." beside the main button. 08f608f6, 2 Nov
+- Share works the same on all three campaigns: the shared picture file is named by its real type, one status message at a time, the bar's X link carries the share text and the hashtags, "Or share a ready-made picture" over the pictures, a white focus ring on the band. 246151ad series, 2 Nov; checked on Lab, Diwali and Supreme Court (native share with pictures, copy fallback, keyboard order, no console errors).
+- A "Hashtags for X" field on the campaign editor (`aw_campaign_share_hashtags`). 2fffe9c5, 2 Nov
 
 ## What people are saying
 - Shows people's own social posts about the campaign; hidden while there are none. 9fc74211, 21 Oct; a26863de, f6e6b41c, 31 Oct
 - "On social media" lists only social posts linked to Lab; hidden while empty (it is hidden). c9b93a3b, 2 Nov
 - "What people are saying": approved social posts linked to the campaign, one card per person (6 people, once each). 2e978ca7, 0bb120a1, 3 Nov
+- The 15 approved social posts are shown on the page (owner, 3 Nov: "Show them live").
 
 ## In the news
 - Press items carry the campaign; a Campaign filter in Media & PR. 3b5dda7a, 17 Oct
@@ -100,6 +103,7 @@ Every hash below is on `wordpress` (live) as of 3 Nov 2026. Sections are in page
 - Library drafts imported: the draft rules, the 1998 Rules and the related documents. ed835c9a, 16 Oct
 - Guides: rule by rule, who approves, today vs the draft, how to object, pain scale, IAEC, CPCSEA, Palamur timeline, alternatives, testing laws. b06d2ced, 14f61b61, 16 Oct
 - Guide call to action box on the six lab guides and the Library draft. 1bf1b476, 16 Oct
+- The NAMs paper added to the Library and linked to the campaign (owner's yes, 2 Nov; the two tinyurl emails skipped).
 
 ## What happens next
 - A roadmap: step cards, a vertical timeline on phones, the next step highlighted. 228bf825, af2ec664, 2 Nov
@@ -127,6 +131,12 @@ Every hash below is on `wordpress` (live) as of 3 Nov 2026. Sections are in page
 - Library draft H1 is the full official name plus "(GSR 864E)"; SEO title ends "PDF"; a "G.S.R. 864(E) PDF" heading above the PDF view; main date 6 Oct 2026 with "Dated 30 Sep 2026" as a second line. 1 Nov (pending.md); owner, 24 Oct
 - The campaign's publish date stays fixed; only dateModified moves when the build script runs.
 - SEO titles keep the hyphen in cpcsea-mef@gov.in. 7b1a5425, 3 Nov
+- New lede, summary and search title and description, on the owner's yes ("Yes, all of them", 2 Nov). 08f608f6
+
+## Sourcing and admin
+- Sourcing topic rules for `campaign-lab-animals-2026` and the campaign's press keywords (`aw_sourcing_kw`) set, 2 Nov.
+- The Dashboard letters box: the top-grounds and top-cities tables are named Ground and City and print no repeated header row; the Dates seed has no 7 Nov Post-phase entry. 4fd6ebf8, 3 Nov
+- Shared section templates (What's happening, the bento, Read the law, What happens next, stacked news, the Share band) are the same on Lab, Diwali and Supreme Court, phones first and then 1080 and up (owner, 2 Nov).
 - Links shared with `#` written as `%23` redirect (`…/%23how-to-help` 301s to `#how-to-help`, checked 3 Nov). 5765dc0d, 2 Nov
 - Search (28 days to 31 Oct): campaign page 16,102 impressions, 1,653 clicks, position 3.8; Library draft 5,861 / 505 / 3.5.
 
@@ -155,6 +165,8 @@ Every hash below is on `wordpress` (live) as of 3 Nov 2026. Sections are in page
 - Post phase (closed-state content, FAQ visibility, What happens next): on hold for the owner's decision.
 - Waiting on the owner: which X posts go on the page; the label for copy-the-hashtags chips; the owner's own X steps (repin with /lab, the hashtags and a picture); whether to move the guide box up on the Library draft (a template change).
 - PCA Act 1960 Chapter IV is not in the Library.
+- The owner removes the 7 Nov "Decide the lab rules Post phase" entry in Animal Writes → Dates (owner: "I'll remove it").
+- Press search run for the campaign after the next Sources sync.
 
 ## Rules for this page
 - Lab page: dates and wording only on the owner's word; new visible words need the owner's yes on the exact text.
