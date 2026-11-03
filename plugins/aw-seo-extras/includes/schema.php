@@ -1517,13 +1517,17 @@ add_filter(
  * value as "&amp;"; JSON-LD is not HTML, so a title such as "Photo & Video Content" reached search engines as
  * "Photo &amp; Video Content" (and query strings in URLs as "&amp;"). The script Rank Math prints is read back and
  * every text value decoded to plain characters; values that are HTML (a JobPosting description) keep their markup.
+ * The same pass writes every value to a string, so a list's "position" and "numberOfItems" are numbers again.
  *
  * @param mixed $node Graph or value.
  * @return mixed
  */
 function aw_schema_plain_values( $node ) {
 	if ( is_array( $node ) ) {
-		return array_map( 'aw_schema_plain_values', $node );
+		foreach ( $node as $k => $v ) {
+			$node[ $k ] = in_array( $k, array( 'position', 'numberOfItems' ), true ) && is_string( $v ) && ctype_digit( $v ) ? (int) $v : aw_schema_plain_values( $v );
+		}
+		return $node;
 	}
 	if ( is_string( $node ) && false !== strpos( $node, '&' ) && false === strpos( $node, '<' ) ) {
 		return html_entity_decode( $node, ENT_QUOTES | ENT_HTML5, 'UTF-8' );

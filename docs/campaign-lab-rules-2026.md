@@ -231,7 +231,7 @@ So from 6 Nov until the owner sets Post, the page and Home still ask people to s
 - Inter from one file, preloaded on phones and tablets; the letter preview rebuilt once per frame; rule dialogs join the page on the chip's first tap. 33e61d9a, aee48e9c, 1 Nov
 - Font fix: only the library weights the theme's Inter file covers are left out, so 800 headings have their own file again. 8edf5ee6, 1 Nov
 - Lighthouse mobile on live: LCP 3.8 / 3.5 / 3.4 s, CLS 0 (was 0.108), time to first byte 1.1–1.4 s. LCP is still above 2.5 s; the phone LCP element is the hero H1 (Inter 800). bd51c4f9, 1 Nov
-- CDN: `s-maxage=300`, 5 of 5 HIT; the cache is purged after every deploy.
+- CDN: `s-maxage=900`, 5 of 5 HIT; the cache is purged after every deploy.
 
 ## Results (to 3 Nov)
 - Search Console, 28 days to 31 Oct: campaign page 16,102 impressions, 1,653 clicks, position 3.8; Library draft 5,861 / 505 / 3.5; rule by rule 3,355 / 185 / 5.0; testing-laws guide 4,556 / 166 / 4.1. The Lab pages drew most of the site's search clicks in that period.
@@ -295,10 +295,11 @@ So from 6 Nov until the owner sets Post, the page and Home still ask people to s
 - The owner removes the 7 Nov "Decide the lab rules Post phase" entry in Animal Writes → Dates (owner: "I'll remove it").
 
 ### Technical, open
-- The phone bar wraps at 320.
+- The phone bar wraps at 320: fixed on a branch, not live (days kept on one line).
 - One source chip reads "Hindu"; the paper is "The Hindu" (copy).
 - A leftover Diwali rule `.aw-camp-steps--six` in campaign-lab.css.
-- campaign.js still treats the compare table as a scroll row (it is cards now).
+- campaign.js still treats the compare table as a scroll row (it is cards now): fixed on a branch, not live.
+- Fixed on a branch, not live (3 Nov): each "Show the post" button names the person; each "Read the full text" link names its rule (15 links); JSON-LD `position` and `numberOfItems` print as numbers on every page.
 - Off-scale heading overrides and one hard-coded disc colour in campaign-lab.css.
 - Accessibility leftovers to re-check: share and Library link names, a list item outside its list, table header scope, one date at 2.55:1, 12px chip text, enterkeyhint.
 - Step-2 wording "Enter this" (copy).

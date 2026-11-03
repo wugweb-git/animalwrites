@@ -848,6 +848,7 @@
 		transition: transform var(--kit-motion-base, 200ms) var(--kit-motion-ease, ease);
 	}
 	.aw-sticky-cta.is-hidden { transform: translateY(110%); }
+	.aw-sticky-cta-days { white-space: nowrap; flex-shrink: 0; } /* "1 day to go" stays on one line at 320px */
 }
 @media (max-width: 767px) and (prefers-reduced-motion: reduce) { .aw-sticky-cta { transition: none; } }
 
