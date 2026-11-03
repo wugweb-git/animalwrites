@@ -7,7 +7,9 @@
  * table, share bar, ads, details, pagination, search, empty state), motion, print, shared system pieces.
  */
 /* 1. Base ------------------------------------------------------------------ */
-html { scroll-behavior: smooth; }
+/* Smooth in-page scrolling starts with the visitor's first pointer or key press (kit.js adds .kit-smooth), so the
+   browser's jump to a #fragment on load is instant and lands on the target even while the page is still settling. */
+@media (prefers-reduced-motion: no-preference) { html.kit-smooth { scroll-behavior: smooth; } }
 html, body { overflow-x: clip; }
 /* Page colours, body type, links, headings, buttons and captions come from theme.json (Appearance > Editor > Styles);
    the rules here add only what theme.json cannot express, so a change made in Styles is never overridden. */
