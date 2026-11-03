@@ -179,6 +179,13 @@
 .aw-camp--sc-stray-dogs .aw-camp-poster .aw-cd-when .aw-date { display: inline-block; margin-top: var(--kit-space-1); padding: 0.1em 0.6em; border-radius: 999px; background: var(--kit-color-accent); color: var(--camp-primary); }
 .aw-camp--sc-stray-dogs .aw-camp-poster .aw-cd-when .aw-date .kit-ico { display: none; }
 .aw-camp--sc-stray-dogs .aw-camp-poster .aw-camp-poster-note { padding-top: var(--kit-space-3); border-top: 1px solid var(--camp-line); font-size: var(--kit-type-sm); }
+/* Short phones (under 760px tall, as the Lab hero): the ticket at its smallest so the hero fits --kit-hero-h; the day
+   count at the theme H1 size beside the stamp and "days to go", the stamp as one small line (no rule under it) */
+@media (max-width: 767px) and (max-height: 760px) {
+	.aw-camp--sc-stray-dogs .aw-camp-hero .aw-camp-poster { align-items: center; }
+	.aw-camp--sc-stray-dogs .aw-camp-hero .aw-cd-num { font-size: var(--kit-type-h1); line-height: 1; }
+	.aw-camp--sc-stray-dogs .aw-camp-hero .aw-camp-poster > .aw-camp-stamp { padding: 0; border: 0; font-size: var(--kit-type-sm); }
+}
 /* Page sections (owner, 1 Nov 2026: fix every section). A campaign is a landing page: text runs the full band width,
    the band's 1120px text column (.aw-camp-section > *), so an intro lines up with its heading (3 Nov 2026: at none it ran
    32px past the column on each side at 1280). */
