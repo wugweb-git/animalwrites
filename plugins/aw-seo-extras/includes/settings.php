@@ -152,7 +152,7 @@ function aw_seo_modules(): array {
 			'files'  => array( 'robots' ),
 			'desc'   => 'Noindex rules that depend on an item\'s state or a list\'s size.',
 			'fields' => array(
-				'AW_THIN_DISTRICT_TYPE' => array( 'type' => 'int', 'label' => 'Thin Directory page (listings or fewer)', 'help' => 'A district × type page with this many listings or fewer is noindex (an empty page always is).', 'default' => 1 ),
+				'AW_THIN_DISTRICT_TYPE' => array( 'type' => 'int', 'label' => 'Fewest listings for an indexed Directory page', 'help' => 'A district × type page with fewer listings than this is noindex and left out of the Directory sitemap, unless it is on the "Thin pages kept indexed" list. At 1, the default, only a page with no listings is noindex.', 'default' => 1 ),
 				'AW_DIRECTORY_KEEP_INDEXED' => array( 'type' => 'list', 'label' => 'Thin pages kept indexed', 'help' => 'Paths under /directory/ that stay indexed anyway. One per line.', 'default' => array(
 						'haryana/jhajjar/animal-welfare-organisation',
 						'madhya-pradesh/sheopur/animal-welfare-organisation',
