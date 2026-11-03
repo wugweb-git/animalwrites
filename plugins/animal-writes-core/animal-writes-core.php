@@ -130,6 +130,7 @@ require_once AW_CORE_DIR . 'includes/campaign-form.php'; // "Sign it" as the Flu
 require_once AW_CORE_DIR . 'includes/fluentcrm.php';
 require_once AW_CORE_DIR . 'includes/admin-ia.php';
 require_once AW_CORE_DIR . 'includes/team-dates.php';
+require_once AW_CORE_DIR . 'includes/dashboard-forms.php';
 require_once AW_CORE_DIR . 'includes/cron-health.php';
 require_once AW_CORE_DIR . 'includes/error-count.php';
 require_once AW_CORE_DIR . 'includes/error-pages.php';

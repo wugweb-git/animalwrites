@@ -738,6 +738,20 @@
 			"runtime": "map-only",
 			"notes": "Counts and the last 5 messages per mailbox; stores nothing. Users with the Mailweb capability only."
 		},
+		"aw_form_entries": {
+			"title": "Form entries",
+			"source": "Animal Writes core",
+			"plugin": "Animal Writes core",
+			"purpose": "Form entries",
+			"file": "core/dashboard-forms.php:42",
+			"screen": "admin",
+			"page": "Dashboard (widgets)",
+			"types": [
+				"dashboard"
+			],
+			"runtime": "map-only",
+			"notes": "Reads Fluent Forms submissions (counts only); stores nothing. Replaces fluentform_stat_widget. Fluent Forms entry viewers only."
+		},
 		"aw_team_dates": {
 			"title": "Dates",
 			"source": "Animal Writes core",
