@@ -216,6 +216,27 @@
 	}
 	picked();
 
+	/* Phones: the letter shows its opening lines with a fade, and opens in full with one button under it, in place of a
+	   small box that scrolls inside the page (campaign-lab.css .aw-letter-whole). From 768 the button is hidden and the
+	   box is as before. Screen readers get the whole letter either way. */
+	if (preview) {
+		preview.id = preview.id || 'aw-letter-preview';
+		var whole = document.createElement('button');
+		whole.type = 'button';
+		whole.className = 'kit-btn kit-btn--secondary kit-btn--sm aw-letter-whole';
+		whole.setAttribute('aria-controls', preview.id);
+		whole.setAttribute('aria-expanded', 'false');
+		whole.textContent = 'Show the whole letter';
+		preview.classList.add('is-folded');
+		preview.parentNode.insertBefore(whole, preview.nextSibling);
+		whole.addEventListener('click', function () {
+			var open = preview.classList.toggle('is-folded') === false;
+			whole.setAttribute('aria-expanded', String(open));
+			whole.textContent = open ? 'Show less' : 'Show the whole letter';
+			if (!open && preview.getBoundingClientRect().top < 0) preview.scrollIntoView({ block: 'start' }); // back to the letter's top when it folds from below
+		});
+	}
+
 	function val(name) { return (form.elements[name].value || '').replace(/\s+/g, ' ').trim(); }
 
 	function letter() {

@@ -945,3 +945,52 @@
 }
 /* The line beside the main share button, in the band's text colour at --kit-type-sm */
 .aw-camp.aw-camp #share .aw-share-cta-note { font-size: var(--kit-type-sm); color: var(--camp-on-mark); }
+/* Today vs the draft on phones: one card per row, as the Supreme Court page's tables (above), so the Draft 2026 column
+   is never off the side of the screen (it was at 320). The row's name heads the card, then Today and Draft 2026 under
+   the table's own column headings; the column headings stay in the page for screen readers. From 768 the table as before. */
+@media (max-width: 767px) {
+	.aw-camp--lab-rules .aw-camp-compare .wp-block-table { overflow: visible; }
+	.aw-camp--lab-rules .aw-camp-compare .wp-block-table table { display: block; min-width: 0; border: 0; border-radius: 0; background: none; box-shadow: none; overflow: visible; }
+	.aw-camp--lab-rules .aw-camp-compare .wp-block-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+	.aw-camp--lab-rules .aw-camp-compare .wp-block-table :is(tbody, tr, td) { display: block; }
+	.aw-camp--lab-rules .aw-camp-compare .wp-block-table tr { margin: 0 0 var(--kit-space-3); padding: var(--kit-space-5); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); box-shadow: inset 0 0 0 1px var(--kit-color-line); }
+	.aw-camp--lab-rules .aw-camp-compare .wp-block-table tbody td:nth-child(n) { padding: 0 0 var(--kit-space-3); border: 0; background: none; }
+	.aw-camp--lab-rules .aw-camp-compare .wp-block-table tbody td:last-child { padding-bottom: 0; }
+	.aw-camp--lab-rules .aw-camp-compare .wp-block-table tbody td:first-child { font-size: var(--kit-type-h4); font-weight: var(--kit-weight-bold); line-height: var(--kit-leading-heading); }
+	.aw-camp--lab-rules .aw-camp-compare .wp-block-table td:not(:first-child)::before { display: block; margin-bottom: var(--kit-space-1); color: var(--camp-meta); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-bold); }
+	.aw-camp--lab-rules .aw-camp-compare .wp-block-table td:nth-child(2)::before { content: "Today"; }
+	.aw-camp--lab-rules .aw-camp-compare .wp-block-table td:nth-child(3)::before { content: "Draft 2026"; color: var(--camp-mark); }
+}
+/* Read the law and the record on phones: at 320 the cards ran 19px past the screen's edge, sized to the longest source
+   tag. Below 768 the list's one column may shrink, so may the card's text column (aw.css gives it --kit-body-min), the
+   source tag wraps instead of being cut (kit.css keeps tags to one 28px line with an ellipsis), and the title shows in
+   full (kit.css cuts card titles to three lines; the titles are already shortened where they are printed). */
+@media (max-width: 767px) {
+	.aw-camp--lab-rules #read .wp-block-post-template { grid-template-columns: minmax(0, 1fr); }
+	.aw-camp--lab-rules #read .kit-card[class*="kit-card--stacked"] > .kit-card-body { min-width: 0; }
+	.aw-camp--lab-rules #read .kit-card .kit-card-chips { height: auto; overflow: visible; }
+	.aw-camp--lab-rules #read .kit-card .kit-tag { height: auto; padding-block: var(--kit-space-1); border-radius: var(--kit-radius-control); white-space: normal; }
+	.aw-camp--lab-rules #read .kit-card .kit-tag-text { white-space: normal; overflow: visible; text-overflow: clip; }
+	.aw-camp--lab-rules #read .kit-card .kit-card-title a { display: inline; -webkit-line-clamp: unset; overflow: visible; }
+}
+/* Rule chips on phones: the chip opens the rule's own words, so it is a 44px target (--kit-size-target) like the page's
+   other buttons; the Kits chip is 28px. The pain-scale's chips are left to that section. */
+@media (max-width: 767px) {
+	.aw-camp--lab-rules .aw-rule-chip:not(#pain-scale .aw-rule-chip) { min-height: var(--kit-size-target); }
+}
+/* The letter on phones (campaign-lab.js): folded, its first 14rem (the box's phone height before) fading out over
+   --kit-space-8, with the button under it; open, the whole letter in the page, no scroll box inside the page. From 768
+   the button is hidden and the box scrolls as before. */
+.aw-letter-whole { margin-top: var(--kit-space-3); }
+@media (min-width: 768px) { .aw-letter-whole { display: none; } }
+@media (max-width: 767px) {
+	.aw-letter .aw-letter-preview { max-height: none; overflow: visible; }
+	.aw-letter .aw-letter-preview.is-folded { max-height: 14rem; overflow: hidden; -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - var(--kit-space-8)), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - var(--kit-space-8)), transparent); }
+}
+/* Guides under the sections they explain (owner, 3 Nov 2026): each link a 44px target (--kit-size-target) in body type,
+   the lines of one section kept together; on the dark pain-scale section the link and its icon take the on-ink colour
+   (the site blue is about 2.9:1 there, WCAG 1.4.3 needs 4.5:1). */
+.aw-camp--lab-rules .aw-camp-note:has(> a[href*="/resources/"]) { font-size: var(--kit-type-base); }
+.aw-camp--lab-rules .aw-camp-note:has(> a[href*="/resources/"]) + .aw-camp-note:has(> a[href*="/resources/"]) { margin-block-start: 0; }
+.aw-camp--lab-rules .aw-camp-note > a[href*="/resources/"] { display: flex; align-items: center; min-height: var(--kit-size-target); }
+.aw-camp--lab-rules .aw-camp-dark .aw-camp-note:has(> a[href*="/resources/"]) > :is(a, .kit-ico) { color: var(--kit-color-on-ink); }
