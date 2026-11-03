@@ -945,3 +945,19 @@
 }
 /* The line beside the main share button, in the band's text colour at --kit-type-sm */
 .aw-camp.aw-camp #share .aw-share-cta-note { font-size: var(--kit-type-sm); color: var(--camp-on-mark); }
+/* Today vs the draft on phones: one card per row, as the Supreme Court page's tables (above), so the Draft 2026 column
+   is never off the side of the screen (it was at 320). The row's name heads the card, then Today and Draft 2026 under
+   the table's own column headings; the column headings stay in the page for screen readers. From 768 the table as before. */
+@media (max-width: 767px) {
+	.aw-camp--lab-rules .aw-camp-compare .wp-block-table { overflow: visible; }
+	.aw-camp--lab-rules .aw-camp-compare .wp-block-table table { display: block; min-width: 0; border: 0; border-radius: 0; background: none; box-shadow: none; overflow: visible; }
+	.aw-camp--lab-rules .aw-camp-compare .wp-block-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+	.aw-camp--lab-rules .aw-camp-compare .wp-block-table :is(tbody, tr, td) { display: block; }
+	.aw-camp--lab-rules .aw-camp-compare .wp-block-table tr { margin: 0 0 var(--kit-space-3); padding: var(--kit-space-5); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); box-shadow: inset 0 0 0 1px var(--kit-color-line); }
+	.aw-camp--lab-rules .aw-camp-compare .wp-block-table tbody td:nth-child(n) { padding: 0 0 var(--kit-space-3); border: 0; background: none; }
+	.aw-camp--lab-rules .aw-camp-compare .wp-block-table tbody td:last-child { padding-bottom: 0; }
+	.aw-camp--lab-rules .aw-camp-compare .wp-block-table tbody td:first-child { font-size: var(--kit-type-h4); font-weight: var(--kit-weight-bold); line-height: var(--kit-leading-heading); }
+	.aw-camp--lab-rules .aw-camp-compare .wp-block-table td:not(:first-child)::before { display: block; margin-bottom: var(--kit-space-1); color: var(--camp-meta); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-bold); }
+	.aw-camp--lab-rules .aw-camp-compare .wp-block-table td:nth-child(2)::before { content: "Today"; }
+	.aw-camp--lab-rules .aw-camp-compare .wp-block-table td:nth-child(3)::before { content: "Draft 2026"; color: var(--camp-mark); }
+}
