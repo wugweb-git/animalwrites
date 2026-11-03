@@ -187,6 +187,23 @@ Checked against the Campaign Content Standard v1.0 (17 Oct).
 | Sitemap | Pass | In aw_campaign-sitemap.xml |
 | hreflang | None | English only; none needed |
 
+### Post state: what is ready and what is missing (code read, 3 Nov)
+The page stays Active until the owner sets Post (override plus a note); the close date alone changes nothing.
+
+| Item (standard) | State | Note |
+|---|---|---|
+| Outcome with an as-of date (A3, D4) | Ready | "Outcome: Pending. As of 5 Nov 2026" by default; the owner sets the outcome and date in Outcome |
+| Letter tool, Share, hero buttons off (D4) | Ready | All `aw-camp-open`; the sent counter refuses once closed |
+| Phone bar off (E) | Ready | Prints only while open |
+| Closed hero | Ready | Owner's copy (17 Oct) |
+| Closed hero button "Get updates on these rules" | Fixed in the build script | Linked to `#updates`, which the page does not have; now `#newsletter`. Live changes when the script runs |
+| Home band in Post (E: outcome only, no action button) | Missing | Not tied to the state: keeps "Send your objection", the countdown and "objections close 5 Nov 2026". Needs the owner's Post band text, or the owner's word to show the standard Home hero instead |
+| Impact: Results and Real-world impact (D4) | Missing | No section. Needs the owner's numbers and words |
+| how-to-help in Post: what the campaign did | Missing | Hidden in Post; nothing replaces it. Owner's words |
+| Count in the closed hero (D3) | Owner's call | Shows from 100 "Yes, I sent it" clicks: self-reported, labelled "objections sent", no "by the campaign's count". The owner said on 21 Oct the stored number is not real |
+| Expired text (D4) | Owner's call | Context says "The public has 30 days to send objections"; FAQ "Who can send an objection?" and "Does one email matter?" describe the open window; share text, meta and og description say "by 5 Nov 2026" |
+| Post order (C) | Differs | Built: hero, next-steps, context, why-it-matters, people, news, library, faq. Standard: hero, why-it-matters, how-to-help, context, impact, next-steps, faq, partners, press, library, news, updates |
+
 ## Speed and cache
 - Inter from one file, preloaded on phones and tablets; the letter preview rebuilt once per frame; rule dialogs join the page on the chip's first tap. 33e61d9a, aee48e9c, 1 Nov
 - Font fix: only the library weights the theme's Inter file covers are left out, so 800 headings have their own file again. 8edf5ee6, 1 Nov

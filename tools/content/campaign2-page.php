@@ -187,7 +187,7 @@ $hero_closed = c2sec( // owner's copy, 17 Oct 2026
 	. c2p( 'The public comment window on the Draft Laboratory Animals Rules, 2026 (G.S.R. 864(E)) ended on 5 November 2026. CCSEA now has to consider the objections before the rules are finalised. We\'ll update this page when the final rules are notified.', 'aw-camp-hero-summary' )
 	. c2sc( '[aw_campaign_count min="100"]' )
 	. '<!-- wp:buttons -->' . "\n" . '<div class="wp-block-buttons"><!-- wp:button -->' . "\n" . '<div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="#next-steps">Read what happens next</a></div>' . "\n" . '<!-- /wp:button -->' . "\n"
-	. '<!-- wp:button {"className":"is-style-outline aw-camp-ghost"} -->' . "\n" . '<div class="wp-block-button is-style-outline aw-camp-ghost"><a class="wp-block-button__link wp-element-button" href="#updates">Get updates on these rules</a></div>' . "\n" . '<!-- /wp:button --></div>' . "\n" . '<!-- /wp:buttons -->' . "\n\n",
+	. '<!-- wp:button {"className":"is-style-outline aw-camp-ghost"} -->' . "\n" . '<div class="wp-block-button is-style-outline aw-camp-ghost"><a class="wp-block-button__link wp-element-button" href="#newsletter">Get updates on these rules</a></div>' . "\n" . '<!-- /wp:button --></div>' . "\n" . '<!-- /wp:buttons -->' . "\n\n",
 	'aw-camp-hero aw-camp-closed'
 );
 
