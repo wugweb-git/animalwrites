@@ -1373,6 +1373,9 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 	.aw-ed-learn .aw-tasks.is-three .kit-card-sum { display: none; }
 	.aw-ed-learn .aw-tasks.is-three .kit-card-meta { flex-wrap: wrap !important; } /* the read time goes under the date instead of ending in "3 min r…" (Kits keeps a card's meta row on one line) */
 }
+/* Phones (3 Nov 2026, Home sections fit one 375x812 screen): the --kit-thumb-md picture (as Latest news rows from 768
+   to 1199), so the date and read time share one line again. Guides at 375: 861 -> 753px. */
+@media (max-width: 767px) { .aw-ed-learn .aw-tasks.is-three .kit-card > .kit-card-media { width: var(--kit-thumb-md); } }
 @container aw-guides (min-width: 912px) { .aw-ed-learn .aw-tasks.is-three { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--kit-space-grid); } }
 /* Guides on Home: meta row is the date, read time and the Guide badge (no topic chip); bigger title, a one-line
    summary, 4:3 pictures in both layouts. */
