@@ -250,19 +250,23 @@
    order is shown, not folded: its date leads in the yellow date pill (the hero poster's), and its closing "Due:" or
    "Next:" line stands on its own under a plum rule (campaign-tools.php aw_sc_tracker_marks adds aw-sc-lead and
    aw-sc-due). The calendar icons inside the running text are dropped: the dates read as text, the pill marks the one
-   that leads. */
+   that leads. The pill is the Kits badge colouring (--kit-color-accent, --kit-radius-pill) with the tag's side padding
+   (--s-2), not the .kit-tag class: that sets the label size and a 1.75rem min-height, which would shrink the date and
+   open up the line it sits in. The due line's rule is --kit-border-mark, the Kits step mark. */
 .aw-camp--sc-stray-dogs .aw-camp-tracker td .kit-ico { display: none; }
-.aw-camp--sc-stray-dogs .aw-camp-tracker .aw-sc-lead { display: inline-block; padding: 0 0.6em; border-radius: var(--kit-radius-pill); background: var(--kit-color-accent); color: var(--camp-primary); font-weight: var(--kit-weight-bold); white-space: nowrap; }
-.aw-camp--sc-stray-dogs .aw-camp-tracker .aw-sc-due { display: block; margin-top: var(--kit-space-2); padding-left: var(--kit-space-3); border-left: 3px solid var(--camp-primary); color: var(--camp-primary); }
+.aw-camp--sc-stray-dogs .aw-camp-tracker .aw-sc-lead { display: inline-block; padding: 0 var(--s-2); border-radius: var(--kit-radius-pill); background: var(--kit-color-accent); color: var(--camp-primary); font-weight: var(--kit-weight-bold); white-space: nowrap; }
+.aw-camp--sc-stray-dogs .aw-camp-tracker .aw-sc-due { display: block; margin-top: var(--kit-space-2); padding-left: var(--kit-space-3); border-left: var(--kit-border-mark) solid var(--camp-primary); color: var(--camp-primary); }
 .aw-camp--sc-stray-dogs .aw-camp-tracker .aw-sc-due .aw-date { white-space: nowrap; }
-/* Tablet and desktop: the table, the order its widest column; the card for several states lists them as text */
+/* Tablet and desktop: the table, the order its widest column; the card for several states lists them as text. The column
+   shares are percentages because Kits has no table-column token (kit.css sizes tables by content); they apply only to
+   the full table (no JavaScript), as the picked view sizes its columns to the one row. */
 @media (min-width: 768px) {
 	.aw-camp--sc-stray-dogs .aw-camp-tracker table { table-layout: fixed; }
 	.aw-camp--sc-stray-dogs .aw-camp-tracker th:nth-child(1) { width: 18%; }
 	.aw-camp--sc-stray-dogs .aw-camp-tracker th:nth-child(2) { width: 22%; }
 	.aw-camp--sc-stray-dogs .aw-camp-tracker th:nth-child(3) { width: 38%; }
 	.aw-camp--sc-stray-dogs .aw-camp-tracker th:nth-child(4) { width: 22%; }
-	.aw-camp--sc-stray-dogs .aw-camp-tracker tbody td.aw-sc-states { font-weight: var(--kit-weight-regular, 400); color: var(--kit-color-text); }
+	.aw-camp--sc-stray-dogs .aw-camp-tracker tbody td.aw-sc-states { font-weight: var(--kit-weight-regular); color: var(--kit-color-text); }
 }
 /* Phones: one card per state. The state, the court and case under it in the meta colour, the order across a thin rule,
    then "Source" and the sources, each link a 44px target (--kit-size-target, one 44px line per row). Only the sources
@@ -272,7 +276,7 @@
 	.aw-camp--sc-stray-dogs .aw-camp-tracker td:first-child { padding-bottom: 0; }
 	.aw-camp--sc-stray-dogs .aw-camp-tracker td.aw-sc-states { font-size: var(--kit-type-base); }
 	.aw-camp--sc-stray-dogs .aw-camp-tracker td:nth-child(2) { padding-bottom: var(--kit-space-3); color: var(--camp-meta); }
-	.aw-camp--sc-stray-dogs .aw-camp-tracker td:nth-child(3) { padding-top: var(--kit-space-3); padding-bottom: var(--kit-space-1); border-top: 1px solid var(--kit-color-line); }
+	.aw-camp--sc-stray-dogs .aw-camp-tracker td:nth-child(3) { padding-top: var(--kit-space-3); padding-bottom: var(--kit-space-1); border-top: var(--kit-border-width) solid var(--kit-color-line); }
 	.aw-camp--sc-stray-dogs .aw-camp-tracker td:nth-child(4) { line-height: var(--kit-size-target); }
 	.aw-camp--sc-stray-dogs .aw-camp-tracker td:nth-child(4)::before { display: inline; margin: 0 var(--kit-space-2) 0 0; }
 	.aw-camp--sc-stray-dogs .aw-camp-tracker td:nth-child(4) a { display: inline-block; }
