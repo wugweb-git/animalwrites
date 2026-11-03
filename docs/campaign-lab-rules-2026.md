@@ -159,6 +159,34 @@ Every hash below is on `wordpress` (live) as of 3 Nov 2026. Sections are in page
 - Links shared with `#` written as `%23` redirect (`…/%23how-to-help` 301s to `#how-to-help`, checked 3 Nov). 5765dc0d, 2 Nov
 - Search (28 days to 31 Oct): campaign page 16,102 impressions, 1,653 clicks, position 3.8; Library draft 5,861 / 505 / 3.5.
 
+## Standard and schema check (3 Nov, live)
+Checked against the Campaign Content Standard v1.0 (17 Oct).
+
+| Item | Result | Note |
+|---|---|---|
+| Section anchors equal slugs | Pass | hero, context, why-it-matters, how-to-help, news, library, faq, next-steps |
+| Section order | Owner's order | Questions after the news and the Library (owner, 21 Oct); the standard puts faq before news |
+| impact, support, partners | Hidden by rule | Count under 100; no partners listed |
+| press | Merged | Into In the news (owner) |
+| What people are saying, Find help near you | Owner's sections | Not slugs in the standard; "What people are saying" is a slot, "Find help near you" is not |
+| One H1, H2 sections, H3 modules | Pass | Rule cards and pain tiers are H3 |
+| Dates never joined into one string (A3) | Pass | Hero: "2 days to go" and "Objections close: 5 Nov 2026" are separate elements, the date in `<time>`; phone bar shows days only |
+| Meta rows, date first | Pass | All 20 card meta rows start with the date |
+| Newsletter above the footer | Pass | After the volunteer band |
+| Settings: open, close, count threshold, doc | Pass | Set by the build script |
+| Settings: hashtags, story image, post image, short link | Pass | All render on the page (X share, downloads, /lab) |
+| Post image size label in settings | Fixed | Said 1080×1080; the image is 1080×1350 |
+| JSON-LD parses, one block | Pass | |
+| CreativeWork | Pass | Dates, description, image, about (Library law, two topics), creator |
+| FAQPage | Pass | 7 questions, all in the visible text |
+| BreadcrumbList | Pass | Home › Campaigns › page |
+| ItemList (6 rule changes), DefinedTermSet (pain scale) | Pass | Names visible; anchors #change-1 to 6 exist |
+| Title, description | Pass | Description and og/twitter text say "by 5 Nov 2026" (wording after the 5th is the owner's) |
+| Canonical, robots | Pass | Self canonical; index, follow |
+| og:image, og:image:alt, twitter card | Pass | summary_large_image |
+| Sitemap | Pass | In aw_campaign-sitemap.xml |
+| hreflang | None | English only; none needed |
+
 ## Speed and cache
 - Inter from one file, preloaded on phones and tablets; the letter preview rebuilt once per frame; rule dialogs join the page on the chip's first tap. 33e61d9a, aee48e9c, 1 Nov
 - Font fix: only the library weights the theme's Inter file covers are left out, so 800 headings have their own file again. 8edf5ee6, 1 Nov
