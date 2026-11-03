@@ -67,6 +67,9 @@
 .aw-camp--diwali #tonight .aw-camp-steps > li > :is(strong, span) { grid-column: 2; }
 .aw-camp--diwali #tonight .aw-camp-steps > li > strong { align-self: end; line-height: var(--kit-leading-heading); }
 .aw-camp--diwali #tonight .aw-camp-steps > li > span { align-self: start; line-height: var(--kit-leading-body); }
+/* The step numbers: the marigold disc is 2.88:1 on the night band (under 3:1, WCAG 1.4.11), so a white ring
+   (--camp-line) and a white number, as the band's other rules and icons */
+.aw-camp--diwali #tonight .aw-camp-steps > li::before { background: transparent; color: var(--kit-color-on-ink); box-shadow: inset 0 0 0 2px var(--camp-line); }
 /* Who to call has two columns: it fits a phone without sideways scrolling */
 .aw-camp--diwali #help { --kit-table-min: 0; }
 /* The law cards and the five action cards stand in the campaign card grid (.aw-camp-grid: stacked on phones, two
