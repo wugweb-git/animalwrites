@@ -94,7 +94,7 @@ function aw_camp_short_clash( $short, $id ) {
 	return '';
 }
 
-// /{short} or /{short}/ to the campaign, keeping the query string (utm tags) without ad click IDs; never cached. GET and HEAD only; before WordPress's own
+// /{short} or /{short}/ to the campaign, keeping any query string (utm tags). GET and HEAD only; before WordPress's own
 // canonical redirect (10) and the 410 for removed items (not-found.php, 99).
 add_action(
 	'template_redirect',
@@ -112,20 +112,9 @@ add_action(
 		}
 		$to    = (string) get_permalink( $id );
 		$query = (string) wp_parse_url( (string) wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ), PHP_URL_QUERY ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-		// One visitor's ad click IDs never travel on: LiteSpeed leaves them out of its cache key, so a cached
-		// redirect carried one Facebook click ID to everyone (3 Nov 2026). utm tags stay.
-		$args = array();
-		parse_str( $query, $args );
-		foreach ( array( 'fbclid', 'gclid', 'gbraid', 'wbraid', 'dclid', 'msclkid', 'ttclid', 'twclid', 'igshid', 'li_fat_id', 'mc_eid', '_ga', '_gl' ) as $click_id ) {
-			unset( $args[ $click_id ] );
+		if ( '' !== $query ) {
+			$to .= ( false === strpos( $to, '?' ) ? '?' : '&' ) . $query;
 		}
-		if ( $args ) {
-			$to = add_query_arg( urlencode_deep( $args ), $to );
-		}
-		// The redirect depends on the query string, so no cache keeps it.
-		do_action( 'litespeed_control_set_nocache', 'campaign short link redirect' );
-		header( 'X-LiteSpeed-Cache-Control: no-cache' );
-		nocache_headers();
 		wp_safe_redirect( $to, 301, 'Animal Writes' );
 		exit;
 	},
