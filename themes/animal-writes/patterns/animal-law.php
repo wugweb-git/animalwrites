@@ -3,7 +3,7 @@
  * Title: From the Library
  * Slug: animal-writes/animal-law
  * Categories: animal-writes
- * Description: Three Library items as a mosaic of News cards (the newest Act, rule, order or judgment large on the left with its summary, two more beside it, an official release last; home.php; from 768 to 1199 the lead runs full width above the two), then four Kits tiles into the Library by type (four across from 1200, two by two below, a sideways row on phones).
+ * Description: Three Library items as a mosaic of News cards (the newest Act, rule, order or judgment large on the left with its summary, two more beside it, an official release last; home.php; from 768 to 1199 the lead runs full width above the two), then four Kits tiles into the Library by type in a Show more fold (a plain details, folded at every width; four across from 1200, two by two from 768, one column on phones).
  * Inserter: yes
  *
  * @package animal-writes
@@ -34,8 +34,12 @@
 <!-- /wp:post-template --></div>
 <!-- /wp:query -->
 
-<!-- wp:group {"className":"kit-stack","style":{"spacing":{"margin":{"top":"var:preset|spacing|50"}}},"layout":{"type":"grid","columnCount":2,"minimumColumnWidth":"16rem"}} -->
-<div class="wp-block-group kit-stack" style="margin-top:var(--wp--preset--spacing--50)"><!-- wp:group {"className":"kit-tile kit-ico--legal","layout":{"type":"default"}} -->
+<!-- wp:html {"metadata":{"name":"Show more (opens the fold)"}} -->
+<details class="wp-block-details aw-more"><summary><span class="aw-more-show">Show more</span><span class="aw-more-less">Show less</span></summary>
+<!-- /wp:html -->
+
+<!-- wp:group {"className":"kit-stack","layout":{"type":"grid","columnCount":2,"minimumColumnWidth":"16rem"}} -->
+<div class="wp-block-group kit-stack"><!-- wp:group {"className":"kit-tile kit-ico--legal","layout":{"type":"default"}} -->
 <div class="wp-block-group kit-tile kit-ico--legal"><!-- wp:heading {"level":3} -->
 <h3 class="wp-block-heading"><a href="/library/?tag=act">Acts and Rules</a></h3>
 <!-- /wp:heading -->
@@ -74,5 +78,9 @@
 <p>Letters you can send today.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
-<!-- /wp:group --></section>
+<!-- /wp:group -->
+
+<!-- wp:html {"metadata":{"name":"Show more (closes the fold)"}} -->
+</details>
+<!-- /wp:html --></section>
 <!-- /wp:group -->

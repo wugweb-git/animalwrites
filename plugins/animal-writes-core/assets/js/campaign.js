@@ -272,9 +272,14 @@
 		holder.querySelectorAll('.kit-share a[data-kit-share]').forEach(function (a) { if (nets[a.dataset.kitShare] && sh.text) a.href = nets[a.dataset.kitShare]; });
 		var pics = [['story', 'Instagram or Facebook story', 'Story, 9:16'], ['post', 'Instagram or Facebook post', 'Post, 4:5']].filter(function (k) { return sh[k[0]]; });
 		if (pics.length) {
-			var box = document.createElement('div');
-			box.className = 'aw-share-pics';
-			box.innerHTML = '<p class="aw-share-pics-head">Or share a ready-made picture</p>'; // owner's yes, 2 Nov 2026
+			/* The theme's fold (kit.css .wp-block-details): closed when the pictures sit under the bar (phones, a narrow
+			   column), open and fixed when they sit beside the button (the band at least 44rem wide). */
+			var box = document.createElement('details');
+			box.className = 'wp-block-details aw-share-pics';
+			var head = document.createElement('summary');
+			head.className = 'aw-share-pics-head';
+			head.textContent = 'Or share a ready-made picture'; // owner's yes, 2 Nov 2026
+			box.appendChild(head);
 			var list = document.createElement('div');
 			list.className = 'aw-share-pics-list';
 			pics.forEach(function (k) {
@@ -295,6 +300,18 @@
 			});
 			box.appendChild(list);
 			holder.appendChild(box);
+			var beside = null;
+			var place = function () {
+				var now = box.getBoundingClientRect().left >= wrap.getBoundingClientRect().right;
+				if (now === beside) return;
+				beside = now;
+				box.classList.toggle('is-beside', now);
+				box.open = now;
+				if (now) head.setAttribute('tabindex', '-1'); else head.removeAttribute('tabindex');
+			};
+			box.addEventListener('toggle', function () { if (beside && !box.open) box.open = true; });
+			place();
+			if ('ResizeObserver' in window) new ResizeObserver(place).observe(holder);
 		}
 		if (canShare && 'IntersectionObserver' in window) { // fetch the pictures once the block is near, so a tap opens the sheet at once
 			var io = new IntersectionObserver(function (en) {
