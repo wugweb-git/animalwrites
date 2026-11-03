@@ -150,6 +150,24 @@ add_action(
 		}
 	}
 );
+// India Writes for Its Community Dogs closed on 29 Nov 2025 and was moved to Post on 17 Oct 2026 (Campaign Content
+// Standard v1.0, appendix), by its close date only. Since the close date stopped closing campaigns (2 Nov 2026) it read
+// as open: no outcome in its hero, and the sidebar's Current campaign card offered "Take part". Its Post state is set
+// once, as the override the owner's rule asks for; a later change in WordPress Admin is kept.
+add_action(
+	'init',
+	function () {
+		if ( get_option( 'aw_camp_dogs_post_set' ) ) {
+			return;
+		}
+		$p = get_page_by_path( 'india-writes-for-its-community-dogs', OBJECT, 'aw_campaign' );
+		if ( $p && '' === (string) get_post_meta( $p->ID, 'aw_campaign_state_override', true ) ) {
+			update_post_meta( $p->ID, 'aw_campaign_state_override', 'post' );
+			update_post_meta( $p->ID, 'aw_campaign_override_note', 'Closed 29 Nov 2025; in Post since 17 Oct 2026 (Campaign Content Standard v1.0, appendix).' );
+		}
+		update_option( 'aw_camp_dogs_post_set', 1, false );
+	}
+);
 
 /* ---------- Open / closed blocks ---------- */
 add_filter(
