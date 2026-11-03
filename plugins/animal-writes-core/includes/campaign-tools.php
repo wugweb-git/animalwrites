@@ -25,7 +25,8 @@
  *                                                                class aw-letter-grounds just before it
  *   [aw_campaign_count min="100"]                                "N letters sent" once N reaches min
  *   [aw_camp_status]                                             the hero's status: action window, and the outcome
- *   [aw_sticky_cta href="#send" label="..."]                     phone-only bar with the days left; days="0" leaves them out
+ *   [aw_sticky_cta href="#send" label="..."]                     phone-only bar with the days left; days="0" leaves them out;
+ *                                                                pre_label="..." (pre_href, default #updates) shows it in Pre too
  *   [aw_campaign_band campaign="slug" theme="lab-rules"]       home band; shown only while the campaign is
  *                                                                published and open; label="…" a pill above the
  *                                                                title, art="ID" art_phone="ID" the artwork behind it
@@ -537,8 +538,11 @@ add_shortcode(
 add_shortcode(
 	'aw_sticky_cta',
 	function ( $atts ) {
-		$a  = shortcode_atts( array( 'href' => '#send', 'label' => 'Send your objection', 'days' => '1' ), $atts );
+		$a  = shortcode_atts( array( 'href' => '#send', 'label' => 'Send your objection', 'days' => '1', 'pre_href' => '#updates', 'pre_label' => '' ), $atts );
 		$id = aw_camp_id();
+		if ( $id && '' !== $a['pre_label'] && 'pre' === aw_camp_shown_state( $id ) ) { // Pre: optional "get notified" bar, no day count (Content Standard E)
+			return '<div class="aw-sticky-cta" data-target="' . esc_attr( $a['pre_href'] ) . '"><a class="wp-element-button" href="' . esc_attr( $a['pre_href'] ) . '">' . esc_html( $a['pre_label'] ) . '</a></div>';
+		}
 		if ( ! $id || ! aw_camp_is_open( $id ) ) {
 			return '';
 		}
