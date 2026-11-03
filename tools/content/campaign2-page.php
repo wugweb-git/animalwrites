@@ -115,6 +115,17 @@ function c2q( $markup, $tq ) {
 function c2i( $n ) {
 	return '<span class="kit-ico kit-ico--' . $n . '" aria-hidden="true"></span>';
 }
+/** Campaign guides (Resources) as one link line each, under the section they explain (owner, 3 Nov 2026; were in In the news). */
+function c2guides( array $slugs ) {
+	$out = '';
+	foreach ( $slugs as $slug ) {
+		$g = get_page_by_path( $slug, OBJECT, 'post' );
+		if ( $g ) {
+			$out .= c2p( c2i( 'knowledge' ) . '<a href="' . esc_url( get_permalink( $g ) ) . '">' . esc_html( get_the_title( $g ) ) . '</a>', 'aw-camp-note' );
+		}
+	}
+	return $out;
+}
 /** A section opening in two columns: the heading and lede beside a piece of the campaign artwork (owner, 19 Oct 2026). */
 function c2split( $text, $img_id, $pos = 'right center' ) {
 	$img = wp_get_attachment_image( $img_id, 'large', false, array( 'loading' => 'lazy', 'decoding' => 'async', 'style' => 'object-position:' . $pos ) );
@@ -213,7 +224,7 @@ foreach ( $cards as $i => $c ) { // each card has its own anchor (change-1 ...),
 	$n     = $i + 1;
 	$grid .= "<!-- wp:group {\"anchor\":\"change-$n\",\"className\":\"aw-camp-card\",\"layout\":{\"type\":\"default\"}} -->\n<div id=\"change-$n\" class=\"wp-block-group aw-camp-card\">$c</div>\n<!-- /wp:group -->\n\n";
 }
-$rules = c2sec( 'rules', c2h( 'What the draft does' ) . "<!-- wp:group {\"className\":\"aw-camp-grid\",\"layout\":{\"type\":\"default\"}} -->\n<div class=\"wp-block-group aw-camp-grid\">$grid</div>\n<!-- /wp:group -->\n\n", 'aw-camp-grey' );
+$rules = c2sec( 'rules', c2h( 'What the draft does' ) . "<!-- wp:group {\"className\":\"aw-camp-grid\",\"layout\":{\"type\":\"default\"}} -->\n<div class=\"wp-block-group aw-camp-grid\">$grid</div>\n<!-- /wp:group -->\n\n" . c2guides( array( 'who-approves-animal-experiments-draft-rules', 'iaec-full-form-members-approvals', 'alternatives-to-animal-testing-india' ) ), 'aw-camp-grey' );
 
 /* 4. Pain scale: a four-step ladder; who approves sits on each step. */
 $tier = function ( $lvl, $name, $who, $ext, $text ) {
@@ -232,7 +243,8 @@ $pain = c2sec(
 		. $tier( 4, 'Non-recovery', 'CCSEA, for animals larger than rodents and rabbits', true, 'Done fully under anaesthesia; the animal does not wake up.' )
 		. '</ol>'
 		. '<p class="aw-camp-gap">' . c2i( 'alert' ) . '<span>The draft does not say who approves severe experiments on rats, mice or rabbits. ' . chip( '11-2', 'Rule 11(2)' ) . ' ' . chip( 'annexure-1', 'Annexure I' ) . '</span></p>'
-	),
+	)
+	. c2guides( array( 'animal-experiment-severity-mild-moderate-severe' ) ),
 	'aw-camp-dark'
 );
 
@@ -250,7 +262,8 @@ $compare = c2sec(
 			array( 'How it\'s judged', 'Size of the animal', 'Expected pain' ),
 			array( 'Penalty in the Act', 'Up to ₹200', 'Up to ₹200 (Act unchanged); the draft adds suspension or revocation of registration' ),
 		)
-	),
+	)
+	. c2guides( array( 'lab-animal-rules-today-vs-draft-2026', 'draft-lab-animal-rules-2026-rule-by-rule', 'animal-testing-laws-india' ) ),
 	'aw-camp-white aw-camp-compare'
 );
 
@@ -281,7 +294,8 @@ $send = c2sec(
 	. c2p( 'Choose your grounds, sign it, and send it from your own email. Letters with a name, a city and a line in your own words count as individual responses.', 'aw-camp-lede' )
 	. c2list( $grounds, true, 'aw-letter-grounds' )
 	. c2sc( $letter_sc )
-	. c2p( c2i( 'check' ) . 'Your letter goes from your own email account.', 'aw-camp-note' ),
+	. c2p( c2i( 'check' ) . 'Your letter goes from your own email account.', 'aw-camp-note' )
+	. c2guides( array( 'how-to-object-to-a-draft-rule-india' ) ),
 	'aw-camp-grey aw-camp-open'
 );
 
@@ -438,7 +452,7 @@ HTML
 $share = c2sec(
 	'share',
 	c2h( 'Get three more letters in' )
-	. c2p( 'One letter is one voice. Send this page to three people who care about animals, so each of them can send their own objection before 5 Nov 2026.', 'aw-camp-lede' )
+	. c2p( 'CCSEA considers every objection before the rules are made final. Send this page to three people who care about animals, so each of them can send their own objection before 5 Nov 2026.', 'aw-camp-lede' )
 	. c2html( '<div class="aw-camp-share-kit" data-aw-share></div>' )
 	. c2p( c2i( 'mail' ) . 'We\'ll email you when CCSEA responds and when the final rules are published. Sign up with the newsletter form at the end of this page.', 'aw-camp-note' ),
 	'aw-camp-tint aw-camp-open'
@@ -464,6 +478,7 @@ $content = '<!-- wp:group {"align":"full","className":"aw-camp aw-camp--lab-rule
 	. c2slot( 'why-it-matters', $rules . $pain . $compare )
 	. c2slot( 'how-to-help', $send . $share, 'aw-camp-open' ) // Other ways to send removed (owner, 21 Oct 2026)
 	. c2slot( 'press', $press, 'aw-camp-if-items' ) // On social media: posts linked to this campaign by its keywords (31 Oct 2026); hidden while there are none. (owner, 31 Oct 2026; was a second What's happening): people's social posts, after the share ask
+	. c2slot( 'people', c2sec( '', "<!-- wp:animal-writes/social-posts /-->", 'aw-camp-white' ) ) // What people are saying: approved social posts linked to the campaign (owner, 3 Nov 2026)
 	. c2slot( 'news', $updates )
 	. c2slot( 'library', $read )
 	. c2slot( 'faq', $faq )
@@ -499,8 +514,8 @@ foreach ( array(
 	'aw_campaign_metric_min'     => '100', // objections sent: shown from 100 (Campaign Content Standard D3)
 	'aw_campaign_metric_stale'   => '1', // days before the count shows an "as of" date
 	'aw_campaign_doc'            => (int) $doc->ID,
-	'rank_math_title'            => 'Object to the Draft Lab Animal Rules 2026 – Animal Writes',
-	'rank_math_description'      => 'India\'s draft lab animal rules would let labs approve most animal experiments themselves. Read what they say and send your objection by 5 November.',
+	'rank_math_title'            => 'Draft Lab Animal Rules 2026: Object at cpcsea-mef@gov.in', // owner's yes, 3 Nov 2026
+	'rank_math_description'      => 'Send your objection to India\'s draft lab animal rules, G.S.R. 864(E), to cpcsea-mef@gov.in by 5 Nov 2026. Our letter tool builds it from the grounds you pick.',
 	'rank_math_focus_keyword'    => 'draft lab animal rules 2026,ccsea draft rules,objection to draft rules,gsr 864e,cpcsea-mef@gov.in,g.s.r. 864(e)', // as on live (2 Nov 2026)
 	'rank_math_primary_category' => (string) get_term_by( 'slug', 'campaigns-civic-action', 'category' )->term_id,
 ) as $k => $v ) {

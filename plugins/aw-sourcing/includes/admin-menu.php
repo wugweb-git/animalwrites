@@ -332,23 +332,34 @@ function aw_sourcing_overview_page() {
 
 	echo '<div class="wrap"><h1>' . esc_html( 'Sourcing' ) . '</h1>';
 	echo '<p>' . esc_html( sprintf( 'What the workers fetch, how it arrives and what waits for a person. Each row says where the feature lives in this menu. Sourcing restructure phase %d is in place.', function_exists( 'aw_sourcing_phase' ) ? aw_sourcing_phase() : 0 ) ) . '</p>';
+	// Rows whose status is a warning, first and together (core notice); nothing when every check is fine.
+	$attn = array();
+	foreach ( $groups as $rows ) {
+		foreach ( $rows as $r ) {
+			if ( false !== strpos( (string) $r[3], 'dashicons-warning' ) ) {
+				$attn[] = '<li><strong>' . esc_html( $r[0] ) . '</strong>: ' . esc_html( trim( wp_strip_all_tags( (string) $r[3] ) ) ) . ( '' !== $r[2] && '—' !== $r[2] ? ' (' . $r[2] . ')' : '' ) . '</li>';
+			}
+		}
+	}
+	if ( $attn ) {
+		echo '<div class="notice notice-warning inline"><p><strong>' . esc_html( 'Needs attention' ) . '</strong></p><ul class="ul-disc">' . implode( '', $attn ) . '</ul></div>'; // phpcs:ignore WordPress.Security.EscapeOutput -- built from escaped parts
+	}
 	foreach ( $groups as $title => $rows ) {
 		echo '<h2>' . esc_html( $title ) . '</h2>';
 		$cells = array();
 		foreach ( $rows as $r ) {
 			$cells[] = array(
-				'feature' => '<strong>' . esc_html( $r[0] ) . '</strong>',
+				'feature' => '<strong>' . esc_html( $r[0] ) . '</strong>' . ( '' !== $r[2] && '—' !== $r[2] ? '<div class="row-actions visible">' . $r[2] . '</div>' : '' ),
 				'what'    => esc_html( $r[1] ),
-				'where'   => $r[2],
 				'status'  => $r[3],
 			);
 		}
-		aw_sourcing_simple_table( 'aw-sourcing-overview', array( 'feature' => 'Feature', 'what' => 'What it does', 'where' => 'Where', 'status' => 'Status' ), $cells, array( 'primary' => 'feature', 'foot' => false ) );
+		aw_sourcing_simple_table( 'aw-sourcing-overview', array( 'feature' => 'Feature', 'what' => 'What it does', 'status' => 'Status' ), $cells, array( 'primary' => 'feature', 'foot' => false ) );
 	}
 
 	if ( $admin && function_exists( 'aw_workers_runs' ) && defined( 'AW_WORKERS' ) ) {
-		echo '<h2>' . esc_html( 'Last runs' ) . '</h2>';
 		$cells = array();
+		$good  = 0;
 		$now   = time();
 		foreach ( aw_workers_runs() as $file => $runs ) {
 			$w = function_exists( 'aw_worker_def' ) ? aw_worker_def( $file, AW_WORKERS[ $file ] ) : AW_WORKERS[ $file ];
@@ -356,6 +367,7 @@ function aw_sourcing_overview_page() {
 			$last    = $runs ? reset( $runs ) : null;
 			$seen    = $last ? max( (int) ( $last['ended'] ?? 0 ), (int) ( $last['started'] ?? 0 ) ) : 0;
 			$next    = ! empty( $w['crons'] ) ? aw_workers_next( (array) $w['crons'], $now ) : 0;
+			$good   += $last && 'success' === ( $last['result'] ?? '' ) ? 1 : 0;
 			$cells[] = array(
 				'worker' => '<strong>' . esc_html( (string) $w['name'] ) . '</strong>',
 				'last'   => esc_html( $seen ? wp_date( 'j M Y, g:i a', $seen ) : '—' ),
@@ -363,11 +375,12 @@ function aw_sourcing_overview_page() {
 				'next'   => esc_html( $next ? wp_date( 'j M, g:i a', $next ) : ( ! empty( $w['after'] ) ? 'After "' . $w['after'] . '"' : 'By hand' ) ),
 			);
 		}
+		echo '<details><summary><strong>' . esc_html( 'Last runs' ) . '</strong> ' . esc_html( sprintf( '(%1$d of %2$d successful)', $good, count( $cells ) ) ) . '</summary>';
 		aw_sourcing_simple_table( 'aw-sourcing-runs', array( 'worker' => 'Worker', 'last' => 'Last report', 'result' => 'Result', 'next' => 'Next due' ), $cells, array( 'primary' => 'worker', 'empty' => 'No worker has reported yet.', 'foot' => false ) );
-		echo '<p>' . aw_sourcing_overview_link( 'Sourcing → Workers', aw_sourcing_url( 'workers' ) ) . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in the helper
+		echo '<p>' . aw_sourcing_overview_link( 'Sourcing → Workers', aw_sourcing_url( 'workers' ) ) . '</p></details>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in the helper
 	}
 
-	echo '<h2>' . esc_html( 'Commands (WP-CLI on the server)' ) . '</h2>';
+	echo '<details><summary><strong>' . esc_html( 'Commands (WP-CLI on the server)' ) . '</strong> (3)</summary>';
 	aw_sourcing_simple_table(
 		'aw-sourcing-commands',
 		array( 'cmd' => 'Command', 'what' => 'What it does' ),
@@ -378,5 +391,5 @@ function aw_sourcing_overview_page() {
 		),
 		array( 'primary' => 'cmd', 'foot' => false )
 	);
-	echo '<p>' . esc_html( 'Each command lists its options with --help.' ) . '</p></div>';
+	echo '<p>' . esc_html( 'Each command lists its options with --help.' ) . '</p></details></div>';
 }

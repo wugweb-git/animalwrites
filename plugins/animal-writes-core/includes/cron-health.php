@@ -102,29 +102,73 @@ add_action(
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
-		wp_add_dashboard_widget(
+		aw_dash_summary(
+			'aw_cron_health',
+			function () {
+				$last = aw_cron_last();
+				return $last && time() - $last < AW_CRON_STALE ? 'Running' : 'Stopped';
+			}
+		);
+		aw_dash_section(
 			'aw_cron_health',
 			'Scheduled tasks',
 			function () {
-				$now   = time();
-				$runs  = aw_cron_runs();
-				$names = array( 'hostinger' => 'Hostinger server cron', 'github' => 'GitHub Actions', 'uptimerobot' => 'UptimeRobot', 'cron-job.org' => 'cron-job.org', 'other' => 'Other' );
-				$cells = array();
+				$now     = time();
+				$runs    = aw_cron_runs();
+				$last    = aw_cron_last();
+				$running = $last && $now - $last < AW_CRON_STALE;
+				$names   = array( 'hostinger' => 'Hostinger server cron', 'github' => 'GitHub Actions', 'uptimerobot' => 'UptimeRobot', 'cron-job.org' => 'cron-job.org', 'other' => 'Other' );
+				$marks   = array(
+					'ok'   => array( 'dashicons-yes-alt', '#007017', 'OK' ),
+					'late' => array( 'dashicons-warning', '#b32d2e', 'Late' ),
+					'none' => array( 'dashicons-minus', '#50575e', 'Not used' ),
+				);
+				$rows    = array();
+				$total   = 0;
 				foreach ( array_unique( array_merge( array( 'hostinger', 'github', 'uptimerobot' ), array_keys( $runs ) ) ) as $k ) {
-					$t       = (array) ( $runs[ $k ] ?? array() );
-					$last    = $t ? (int) max( $t ) : 0;
-					$st      = aw_cron_stats( $t, $now - DAY_IN_SECONDS, $now );
-					$cells[] = array(
-						'trigger' => esc_html( $names[ $k ] ?? $k ),
-						'last'    => $last ? esc_html( wp_date( 'j M Y, g:i a', $last ) ) : 'never',
-						'runs'    => (int) $st['runs'],
-						'gap'     => $st['runs'] ? esc_html( aw_cron_span( $st['gap'] ) ) : '—',
+					$t      = (array) ( $runs[ $k ] ?? array() );
+					$t_last = $t ? (int) max( $t ) : 0;
+					$st     = aw_cron_stats( $t, $now - DAY_IN_SECONDS, $now );
+					$total += (int) $st['runs'];
+					if ( ! $t_last ) {
+						$state = 'none';
+					} elseif ( $now - $t_last >= AW_CRON_STALE || $st['gap'] > AW_CRON_STALE ) {
+						$state = 'late';
+					} else {
+						$state = 'ok';
+					}
+					$rows[] = array(
+						'name'  => $names[ $k ] ?? $k,
+						'last'  => $t_last ? wp_date( 'j M Y, g:i a', $t_last ) : 'Never',
+						'runs'  => (int) $st['runs'],
+						'gap'   => $st['runs'] ? aw_cron_span( $st['gap'] ) : '',
+						'state' => $state,
 					);
 				}
-				aw_core_simple_table( 'cron-triggers', array( 'trigger' => 'Trigger', 'last' => 'Last run', 'runs' => 'Runs, 24 h', 'gap' => 'Longest gap, 24 h' ), $cells );
-				$last = aw_cron_last();
+				if ( function_exists( 'kits_dash_cards' ) ) {
+					echo kits_dash_cards( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside kits_dash_cards().
+						array(
+							array( 'label' => 'Status', 'value' => $running ? 'Running' : 'Stopped' ),
+							array( 'label' => 'Last run', 'value' => $last ? aw_cron_span( $now - $last ) . ' ago' : 'Never' ),
+							array( 'label' => 'Runs, 24 h', 'value' => number_format_i18n( $total ) ),
+						)
+					);
+				}
+				echo '<table class="widefat striped"><thead><tr><th scope="col">Trigger</th><th scope="col">Last run</th><th scope="col">Runs, 24 h</th><th scope="col">Status</th></tr></thead><tbody>';
+				foreach ( $rows as $r ) {
+					$m = $marks[ $r['state'] ];
+					echo '<tr><td>' . esc_html( $r['name'] );
+					if ( '' !== $r['gap'] ) {
+						echo '<br><span class="description">' . esc_html( 'Longest gap, 24 h: ' . $r['gap'] ) . '</span>';
+					}
+					echo '</td><td>' . esc_html( $r['last'] ) . '</td><td>' . esc_html( number_format_i18n( $r['runs'] ) ) . '</td>';
+					echo '<td><span class="dashicons ' . esc_attr( $m[0] ) . '" aria-hidden="true" style="color:' . esc_attr( $m[1] ) . '"></span> ' . esc_html( $m[2] ) . '</td></tr>';
+				}
+				echo '</tbody></table>';
 				do_action( 'aw_cron_health_after' );
-				echo '<p>' . ( $last && $now - $last < AW_CRON_STALE ? 'Running: last run ' . esc_html( aw_cron_span( $now - $last ) ) . ' ago.' : '<strong>No run for 30 minutes or more.</strong> The owner is emailed.' ) . '</p>';
+				if ( ! $running ) {
+					echo '<p><strong>No run for 30 minutes or more.</strong> The owner is emailed.</p>';
+				}
 			}
 		);
 	}

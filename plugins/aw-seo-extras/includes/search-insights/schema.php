@@ -153,11 +153,14 @@ function aw_si_drop_all(): void {
 	if ( aw_kw_ready() ) {
 		$wpdb->query( "DELETE FROM {$m} WHERE kw_id NOT IN (SELECT id FROM {$k})" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table names only.
 	}
-	foreach ( array( AW_SI_DB_OPTION, 'aw_si_runs', 'aw_si_seeded', 'aw_si_backfill', 'aw_si_installed', 'aw_si_psi_queue', 'aw_si_clarity_calls', 'aw_si_crawl_inside', 'aw_si_crawl_outside', 'aw_si_crawl_mailed', 'aw_si_clarity_retried', 'aw_si_bing_cursor', 'aw_si_links_seeded', 'aw_si_links_seeded_20261102' ) as $opt ) {
+	foreach ( array( AW_SI_DB_OPTION, 'aw_si_runs', 'aw_si_seeded', 'aw_si_backfill', 'aw_si_installed', 'aw_si_psi_queue', 'aw_si_clarity_calls', 'aw_si_crawl_inside', 'aw_si_crawl_outside', 'aw_si_crawl_mailed', 'aw_si_clarity_retried', 'aw_si_bing_cursor', 'aw_si_links_seeded', 'aw_si_links_seeded_20261102', 'aw_si_checklist', 'aw_si_live_token', 'aw_si_live_seed_run', 'aw_si_gdelt_on', 'aw_si_rising_since', 'aw_si_ref_icons', 'aw_si_inspect_queue' ) as $opt ) {
 		delete_option( $opt );
 	}
-	delete_transient( 'aw_si_redirects' );
-	delete_transient( 'aw_si_redirects_rx' );
+	foreach ( array( 'aw_si_redirects', 'aw_si_redirects_rx', 'aw_si_rm_scores' ) as $tr ) {
+		delete_transient( $tr );
+	}
+	// Per-key caches (Bing keyword volumes, live-check and import results): every transient named aw_si_….
+	$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s", $wpdb->esc_like( '_transient_aw_si_' ) . '%', $wpdb->esc_like( '_transient_timeout_aw_si_' ) . '%' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- no API deletes transients by prefix.
 	update_option( 'aw_si_off', time(), false );
 	foreach ( aw_si_cron_hooks() as $hook ) {
 		wp_clear_scheduled_hook( $hook );

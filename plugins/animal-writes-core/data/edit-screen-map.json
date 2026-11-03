@@ -738,19 +738,75 @@
 			"runtime": "map-only",
 			"notes": "Counts and the last 5 messages per mailbox; stores nothing. Users with the Mailweb capability only."
 		},
-		"aw_visits": {
-			"title": "Animal Writes visits",
-			"source": "Kits Core",
-			"plugin": "Kits Core",
-			"purpose": "Visits",
-			"file": "kits/visits.php:200",
+		"aw_core_dashboard": {
+			"title": "Animal Writes",
+			"source": "Animal Writes core",
+			"plugin": "Animal Writes core",
+			"purpose": "Core Dashboard box",
+			"file": "core/dashboard-core.php:59",
 			"screen": "admin",
 			"page": "Dashboard (widgets)",
 			"types": [
 				"dashboard"
 			],
 			"runtime": "map-only",
-			"notes": "Reads the visit counters (options aw_visits_total, aw_visits_since); stores nothing."
+			"notes": "One box for the core plugin: Campaign letters, Form entries, Dates, Activity and Scheduled tasks are its sections (each keeps its own permission check); stores nothing."
+		},
+		"aw_activity": {
+			"title": "Activity",
+			"source": "Animal Writes core",
+			"plugin": "Animal Writes core",
+			"purpose": "Activity",
+			"file": "core/dashboard-activity.php:63",
+			"screen": "admin",
+			"page": "Dashboard (widgets)",
+			"types": [
+				"dashboard"
+			],
+			"runtime": "map-only",
+			"notes": "Reads post counts and the newest items; stores nothing. Replaces WordPress's Activity box."
+		},
+		"aw_seo_dashboard": {
+			"title": "SEO",
+			"source": "AW SEO Plus",
+			"plugin": "AW SEO Plus",
+			"purpose": "SEO Dashboard box",
+			"file": "seo/search-insights/dashboard.php:131",
+			"screen": "admin",
+			"page": "Dashboard (widgets)",
+			"types": [
+				"dashboard"
+			],
+			"runtime": "map-only",
+			"notes": "Reads stored Search Console, GA4 404 and source-run rows; stores nothing."
+		},
+		"aw_sourcing_dashboard": {
+			"title": "Sourcing",
+			"source": "AW Sourcing",
+			"plugin": "AW Sourcing",
+			"purpose": "Sourcing Dashboard box",
+			"file": "src/dashboard.php:84",
+			"screen": "admin",
+			"page": "Dashboard (widgets)",
+			"types": [
+				"dashboard"
+			],
+			"runtime": "map-only",
+			"notes": "Reads worker reports, the To review count and AI key status; stores nothing."
+		},
+		"aw_form_entries": {
+			"title": "Form entries",
+			"source": "Animal Writes core",
+			"plugin": "Animal Writes core",
+			"purpose": "Form entries",
+			"file": "core/dashboard-forms.php:42",
+			"screen": "admin",
+			"page": "Dashboard (widgets)",
+			"types": [
+				"dashboard"
+			],
+			"runtime": "map-only",
+			"notes": "Reads Fluent Forms submissions (counts only); stores nothing. Replaces fluentform_stat_widget. Fluent Forms entry viewers only."
 		},
 		"aw_team_dates": {
 			"title": "Dates",
@@ -2918,8 +2974,6 @@
 			"runtime": "map-only",
 			"kind": "table",
 			"reads": [
-				"option:aw_visits_total",
-				"option:aw_visits_since",
 				"option:kits_preview_ips",
 				"option:kits_altcha_key"
 			],

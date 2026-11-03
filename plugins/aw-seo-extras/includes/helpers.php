@@ -107,9 +107,19 @@ function aw_seo_unseparate( $text, $publisher = '' ) {
  * @return string
  */
 function aw_seo_no_hyphens( $text, $case = true ) {
-	$t = (string) $text;
+	$t    = (string) $text;
+	$keep = array(); // email addresses are kept as written (cpcsea-mef@gov.in stays one address)
+	$t    = (string) preg_replace_callback(
+		'/[\p{L}\p{N}._%+-]+@[\p{L}\p{N}-]+(?:\.[\p{L}\p{N}-]+)+/u',
+		function ( $m ) use ( &$keep ) {
+			$keep[] = $m[0];
+			return "\u{E000}" . str_repeat( "\u{E002}", count( $keep ) ) . "\u{E001}";
+		},
+		$t
+	);
+	$back = fn( $s ) => (string) preg_replace_callback( '/\x{E000}(\x{E002}+)\x{E001}/u', fn( $m ) => $keep[ mb_strlen( $m[1] ) - 1 ], $s );
 	if ( ! preg_match( '/[\p{L}\p{N}]\p{Pd}|\p{Pd}\s*[\p{L}\p{N}]/u', $t ) ) {
-		return $t;
+		return $back( $t );
 	}
 	$d = '[-\x{2010}-\x{2015}\x{2212}]';
 	$t = preg_replace_callback( '/(?<![\p{L}\p{N}.])(\d{4})\s*' . $d . '\s*(\d{4})(?![\p{L}\p{N}])/u', fn( $m ) => $m[1] . ' to ' . $m[2], $t );
@@ -128,7 +138,7 @@ function aw_seo_no_hyphens( $text, $case = true ) {
 			$t
 		) : $t
 	);
-	return trim( (string) preg_replace( '/\s+/u', ' ', $t ) );
+	return $back( trim( (string) preg_replace( '/\s+/u', ' ', $t ) ) );
 }
 
 /** A title (with or without " – Animal Writes" at the end) without hyphens; the separator before the site name stays. */

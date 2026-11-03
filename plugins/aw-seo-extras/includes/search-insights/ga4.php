@@ -383,47 +383,6 @@ function aw_si_landing_path( string $lp ): string {
 }
 
 /**
- * Replace one day's rows of a source with new ones, in one transaction (a failed write keeps the old rows).
- *
- * @param string   $src     Source key in obs.
- * @param string   $day     Date (Y-m-d).
- * @param array    $rows    Each [kw_id, page, page_key, metric, value, txt].
- * @param string   $period  Period of the rows: day, or 28d for a 28-day window ending on $day.
- * @param string[] $metrics Only these metrics are replaced (empty: every metric of the source, period and day).
- * @return int|WP_Error Rows written.
- */
-function aw_si_obs_replace_day( string $src, string $day, array $rows, string $period = 'day', array $metrics = array() ) {
-	global $wpdb;
-	$o    = aw_si_table( 'obs' );
-	$now  = aw_si_now();
-	$only = $metrics ? ' AND metric IN (' . implode( ', ', array_fill( 0, count( $metrics ), '%s' ) ) . ')' : '';
-	$wpdb->query( 'START TRANSACTION' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- table name and one %s per metric, built above.
-	$ok = false !== $wpdb->query( $wpdb->prepare( "DELETE FROM {$o} WHERE src = %s AND period = %s AND d = %s{$only}", array_merge( array( $src, $period, $day ), array_values( $metrics ) ) ) );
-	foreach ( array_chunk( $rows, 300 ) as $chunk ) {
-		$place = array();
-		$args  = array();
-		foreach ( $chunk as $v ) {
-			$place[] = '(%d, %s, %s, %s, %s, %s, %s, %f, %s, %s)';
-			array_push( $args, (int) $v[0], mb_substr( (string) $v[1], 0, 255 ), (string) $v[2], $src, (string) $v[3], $period, $day, (float) $v[4], mb_substr( (string) $v[5], 0, 255 ), $now );
-		}
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- one placeholder group per row, built above.
-		$ok = $ok && false !== $wpdb->query( $wpdb->prepare( "INSERT INTO {$o} (kw_id, page, page_key, src, metric, period, d, value, txt, fetched) VALUES " . implode( ', ', $place ), $args ) );
-		if ( ! $ok ) {
-			break;
-		}
-	}
-	if ( ! $ok ) {
-		$error = $wpdb->last_error;
-		$wpdb->query( 'ROLLBACK' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-		/* translators: 1: source, 2: date, 3: database error. */
-		return new WP_Error( 'aw_si_store', sprintf( __( '%1$s rows for %2$s could not be saved, so the earlier rows were kept: %3$s', 'aw-seo-extras' ), $src, $day, $error ) );
-	}
-	$wpdb->query( 'COMMIT' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-	return count( $rows );
-}
-
-/**
  * The daily GA4 run. Never throws; failures go to the run log and the stored data stays.
  *
  * @param array $args days (override), dry (fetch only).

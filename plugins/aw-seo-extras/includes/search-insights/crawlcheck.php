@@ -515,7 +515,7 @@ function aw_si_box_crawl(): void {
 
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	/**
-	 * Crawler access from this server: every agent on every sample page.
+	 * Crawler access from this server: every agent on every sample page (old name of `wp aw-si crawl`, kept as an alias).
 	 *
 	 * ## OPTIONS
 	 *

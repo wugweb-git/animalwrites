@@ -67,6 +67,8 @@ class AW_SI_Pages_Table extends WP_List_Table {
 			'ref'      => __( 'Referrals (GA4)', 'aw-seo-extras' ),
 			'clarity'  => __( 'Clarity (28 days)', 'aw-seo-extras' ),
 			'psi'      => __( 'PageSpeed (mobile / desktop)', 'aw-seo-extras' ),
+			'bing'     => __( 'Bing (90 days)', 'aw-seo-extras' ),
+			'index'    => __( 'Google index', 'aw-seo-extras' ),
 			'rm_score' => __( 'SEO score (Rank Math)', 'aw-seo-extras' ),
 			'note'     => __( 'Clarity note', 'aw-seo-extras' ),
 		);
@@ -85,6 +87,8 @@ class AW_SI_Pages_Table extends WP_List_Table {
 			'ref'      => array( 'ref', true ),
 			'clarity'  => array( 'c_sessions', true ),
 			'psi'      => array( 'psi_score-mobile', false ),
+			'bing'     => array( 'bing_impr', true ),
+			'index'    => array( 'index', false ),
 			'rm_score' => array( 'rm_score', false ),
 		);
 	}
@@ -104,6 +108,7 @@ class AW_SI_Pages_Table extends WP_List_Table {
 			'conflicts' => fn( $r ) => ! empty( $r['conflicts'] ),
 			'noted'     => fn( $r ) => ! empty( $r['note'] ),
 			'lowseo'    => fn( $r ) => isset( $r['rm_score'] ) && $r['rm_score'] < AW_SI_RM_LOW,
+			'unindexed' => fn( $r ) => isset( $r['index'] ) && 0 === $r['index'],
 		);
 	}
 
@@ -118,6 +123,7 @@ class AW_SI_Pages_Table extends WP_List_Table {
 			'noted'     => __( 'With Clarity notes', 'aw-seo-extras' ),
 			/* translators: %d: score limit, e.g. 50. */
 			'lowseo'    => sprintf( __( 'Rank Math score under %d', 'aw-seo-extras' ), AW_SI_RM_LOW ),
+			'unindexed' => __( 'Not indexed (Google)', 'aw-seo-extras' ),
 		);
 		$current = $this->arg( 'view' ) ? $this->arg( 'view' ) : 'all';
 		$out     = array();
@@ -275,7 +281,71 @@ class AW_SI_Pages_Table extends WP_List_Table {
 		}
 		$m = isset( $item['psi_score-mobile'] ) ? number_format_i18n( (float) $item['psi_score-mobile'] ) : '–';
 		$d = isset( $item['psi_score-desktop'] ) ? number_format_i18n( (float) $item['psi_score-desktop'] ) : '–';
-		return esc_html( $m . ' / ' . $d ) . ( ! empty( $item['psi_d'] ) ? '<br><span class="description">' . esc_html( mysql2date( 'j M', $item['psi_d'] ) ) . '</span>' : '' );
+		$lab = array();
+		if ( isset( $item['psi_lcp-mobile'] ) ) {
+			/* translators: %s: seconds. */
+			$lab[] = sprintf( __( 'LCP %s s', 'aw-seo-extras' ), number_format_i18n( (float) $item['psi_lcp-mobile'] / 1000, 1 ) );
+		}
+		if ( isset( $item['psi_cls-mobile'] ) ) {
+			/* translators: %s: layout shift score. */
+			$lab[] = sprintf( __( 'CLS %s', 'aw-seo-extras' ), number_format_i18n( (float) $item['psi_cls-mobile'], 2 ) );
+		}
+		$field = array();
+		if ( isset( $item['psi_field-lcp-mobile'] ) ) {
+			/* translators: %s: seconds. */
+			$field[] = sprintf( __( 'LCP %s s', 'aw-seo-extras' ), number_format_i18n( (float) $item['psi_field-lcp-mobile'] / 1000, 1 ) );
+		}
+		if ( isset( $item['psi_field-inp-mobile'] ) ) {
+			/* translators: %s: milliseconds. */
+			$field[] = sprintf( __( 'INP %s ms', 'aw-seo-extras' ), number_format_i18n( (float) $item['psi_field-inp-mobile'] ) );
+		}
+		if ( isset( $item['psi_field-cls-mobile'] ) ) {
+			/* translators: %s: layout shift score. */
+			$field[] = sprintf( __( 'CLS %s', 'aw-seo-extras' ), number_format_i18n( (float) $item['psi_field-cls-mobile'], 2 ) );
+		}
+		$out = esc_html( $m . ' / ' . $d );
+		if ( $lab ) {
+			/* translators: %s: lab figures. */
+			$out .= '<br><span class="description">' . esc_html( sprintf( __( 'Mobile test: %s', 'aw-seo-extras' ), implode( ', ', $lab ) ) ) . '</span>';
+		}
+		if ( $field ) {
+			/* translators: %s: real-user figures. */
+			$out .= '<br><span class="description">' . esc_html( sprintf( __( 'Chrome users, mobile: %s', 'aw-seo-extras' ), implode( ', ', $field ) ) ) . '</span>';
+		}
+		return $out . ( ! empty( $item['psi_d'] ) ? '<br><span class="description">' . esc_html( mysql2date( 'j M', $item['psi_d'] ) ) . '</span>' : '' );
+	}
+
+	/**
+	 * Bing impressions and clicks, 90 days.
+	 *
+	 * @param array $item Row.
+	 */
+	protected function column_bing( $item ) {
+		if ( ! isset( $item['bing_impr'] ) ) {
+			return '–';
+		}
+		/* translators: 1: impressions, 2: clicks. */
+		return esc_html( sprintf( __( '%1$s impressions, %2$s clicks', 'aw-seo-extras' ), number_format_i18n( (int) $item['bing_impr'] ), number_format_i18n( (int) ( $item['bing_clicks'] ?? 0 ) ) ) );
+	}
+
+	/**
+	 * Google's index state (URL Inspection) and when it was checked.
+	 *
+	 * @param array $item Row.
+	 */
+	protected function column_index( $item ) {
+		if ( ! isset( $item['index'] ) ) {
+			return esc_html__( 'Not checked yet', 'aw-seo-extras' );
+		}
+		$word = $item['index'] ? __( 'Indexed', 'aw-seo-extras' ) : __( 'Not indexed', 'aw-seo-extras' );
+		$out  = '<span class="dashicons dashicons-' . ( $item['index'] ? 'yes-alt' : 'warning' ) . '" aria-hidden="true"></span> ' . esc_html( $word );
+		if ( ! $item['index'] && '' !== (string) ( $item['index_t'] ?? '' ) ) {
+			$out .= '<br><span class="description">' . esc_html( (string) $item['index_t'] ) . '</span>';
+		}
+		if ( ! empty( $item['index_d'] ) ) {
+			$out .= '<br><span class="description">' . esc_html( mysql2date( 'j M', (string) $item['index_d'] ) ) . '</span>';
+		}
+		return $out;
 	}
 
 	/**

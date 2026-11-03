@@ -1064,7 +1064,7 @@ add_filter(
 );
 
 /**
- * The Supreme Court stray dogs campaign page: the state tracker's folds (aw_sc_tracker_folds); the court orders and state
+ * The Supreme Court stray dogs campaign page: the state tracker's cells marked (aw_sc_tracker_marks); the court orders and state
  * tracker tables keep their table roles, which some browsers drop once the rows are shown as cards on phones
  * (campaign.css). The news row, which scrolls sideways, can take keyboard focus and is named by the heading just before
  * it (which gets an id when it has none); campaign.js takes the focus off it while it fits (phones: stacked).
@@ -1076,7 +1076,7 @@ function aw_sc_rows_a11y( $html ) {
 	if ( false === strpos( $html, 'aw-camp--sc-stray-dogs' ) || ! class_exists( 'WP_HTML_Tag_Processor' ) ) {
 		return $html;
 	}
-	$html  = aw_sc_tracker_folds( $html );
+	$html  = aw_sc_tracker_marks( $html );
 	$p     = new WP_HTML_Tag_Processor( $html );
 	$head  = '';
 	$n     = 0;
@@ -1109,38 +1109,42 @@ function aw_sc_rows_a11y( $html ) {
 }
 
 /**
- * The state tracker's long cells folded: in every state card the third cell (the latest public order, and what is due),
- * and in a card for several states its list of states, go inside a details element whose summary is that column's own
- * heading, closed, so each card stays short (Layout rules 5 and 10). The words are the table's own; without the
- * headings the cells are left as they are.
+ * The state tracker's cells marked for the card and table styles (campaign.css, "Where your state stands"); nothing is
+ * folded or reworded. In each order cell (the third) the date it opens with gets aw-sc-lead (the date pill) and a
+ * closing <strong> ("Due: ..." or "Next: ...") gets aw-sc-due (its own line); a state cell that lists several states
+ * gets aw-sc-states (set as text, not as a name).
  *
  * @param string $html The rendered content.
  * @return string
  */
-function aw_sc_tracker_folds( $html ) {
+function aw_sc_tracker_marks( $html ) {
+	// One class added to an opening tag, with or without a class attribute.
+	$add  = function ( $tag, $name ) {
+		return preg_match( '#\sclass="#', $tag ) ? (string) preg_replace( '#\sclass="#', ' class="' . $name . ' ', $tag, 1 ) : (string) preg_replace( '#^<(\w+)#', '<$1 class="' . $name . '"', $tag, 1 );
+	};
+	$cell = function ( $tr ) use ( $add ) {
+		$n = 0;
+		return preg_replace_callback(
+			'#(<td\b[^>]*>)(.*?)(</td>)#s',
+			function ( $td ) use ( &$n, $add ) {
+				++$n;
+				$open = $td[1];
+				$body = $td[2];
+				if ( 1 === $n && false !== strpos( wp_strip_all_tags( $body ), ',' ) ) {
+					$open = $add( $open, 'aw-sc-states' );
+				} elseif ( 3 === $n ) {
+					$body = (string) preg_replace( '#^(\s*)<span class="aw-date"#', '$1<span class="aw-date aw-sc-lead"', $body, 1 );
+					$body = (string) preg_replace( '#<strong>((?:(?!<strong\b).)*)</strong>(\s*)$#s', '<strong class="aw-sc-due">$1</strong>$2', $body, 1 );
+				}
+				return $open . $body . $td[3];
+			},
+			$tr[0]
+		);
+	};
 	return (string) preg_replace_callback(
 		'#(<figure\b[^>]*\baw-camp-tracker\b[^>]*>)(.*?)(</figure>)#s',
-		function ( $f ) {
-			if ( ! preg_match( '#<thead\b.*?</thead>#s', $f[2], $head ) || ! preg_match_all( '#<th\b[^>]*>(.*?)</th>#s', $head[0], $th ) || empty( $th[1][2] ) ) {
-				return $f[0];
-			}
-			$label = trim( wp_strip_all_tags( $th[1][2] ) );
-			$first = trim( wp_strip_all_tags( $th[1][0] ) );
-			$cell  = function ( $tr ) use ( $label, $first ) {
-				$n = 0;
-				return preg_replace_callback(
-					'#(<td\b[^>]*>)(.*?)(</td>)#s',
-					function ( $td ) use ( &$n, $label, $first ) {
-						++$n;
-						if ( 1 === $n && '' !== $first && false !== strpos( wp_strip_all_tags( $td[2] ), ',' ) ) { // a card for several states: its list folded under the column's own heading
-							return $td[1] . '<details class="aw-sc-fold aw-sc-fold--states"><summary>' . esc_html( $first ) . '</summary>' . $td[2] . '</details>' . $td[3];
-						}
-						return 3 === $n && '' !== trim( $td[2] ) ? $td[1] . '<details class="aw-sc-fold"><summary>' . esc_html( $label ) . '</summary>' . $td[2] . '</details>' . $td[3] : $td[0];
-					},
-					$tr[0]
-				);
-			};
-			$rows  = fn( $tb ) => preg_replace_callback( '#<tr\b[^>]*>.*?</tr>#s', $cell, $tb[0] );
+		function ( $f ) use ( $cell ) {
+			$rows = fn( $tb ) => preg_replace_callback( '#<tr\b[^>]*>.*?</tr>#s', $cell, $tb[0] );
 			return $f[1] . (string) preg_replace_callback( '#<tbody\b.*?</tbody>#s', $rows, $f[2] ) . $f[3];
 		},
 		$html

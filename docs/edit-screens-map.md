@@ -721,7 +721,6 @@ Not edit screens; listed on Animal Writes → Edit screens under "Dashboard (wid
 |---|---|---|---|---|---|
 | dashboard_right_now, dashboard_activity, dashboard_quick_press, dashboard_site_health, dashboard_primary | At a Glance, Activity, Quick Draft, Site Health Status, WordPress Events and News | WordPress (General row) | General | `wp-admin/includes/dashboard.php` | Quick Draft saves a draft post; the others nothing |
 | mailweb_widget | Mail | Mailweb | Mail | `plugins/mailweb/includes/overview.php:158` | nothing |
-| aw_visits | {site name} visits | Kits Core | Visits | `kits/visits.php:200` | nothing (reads options `aw_visits_total`, `aw_visits_since`) |
 | aw_team_dates | Dates | Animal Writes core | Team dates | `core/team-dates.php:210` | nothing |
 | aw_cl_widget | Campaign letters | Animal Writes core | Campaign letters | `core/campaign-letters.php:366` | nothing |
 | aw_cron_health | Scheduled tasks | Animal Writes core | Scheduled tasks | `core/cron-health.php:105` | nothing |
@@ -1032,7 +1031,7 @@ The panels, boxes and tables on the admin pages of AW Sourcing, AW SEO Plus (wit
 
 | id | widget | kind | reads | limits | file |
 |---|---|---|---|---|---|
-| ap-kits-overview | Design and branding / Site features | table | `option:aw_visits_total`, `option:aw_visits_since`, `option:kits_preview_ips`, `option:kits_altcha_key` | — | `kits/admin-home.php:86, :119 (kits_overview_page)` |
+| ap-kits-overview | Design and branding / Site features | table | `option:kits_preview_ips`, `option:kits_altcha_key` | — | `kits/admin-home.php:86, :119 (kits_overview_page)` |
 
 **Kits: Design system** (`kits-system`)
 

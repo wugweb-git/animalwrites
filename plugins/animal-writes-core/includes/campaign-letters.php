@@ -363,7 +363,17 @@ add_action(
 	'wp_dashboard_setup',
 	function () {
 		if ( current_user_can( 'edit_posts' ) && aw_cl_campaigns() ) {
-			wp_add_dashboard_widget( 'aw_cl_widget', 'Campaign letters', 'aw_cl_widget' );
+			aw_dash_section( 'aw_cl_widget', 'Campaign letters', 'aw_cl_widget' ); // a section of the Animal Writes box
+			aw_dash_summary(
+				'aw_cl_widget',
+				function () {
+					global $wpdb;
+					$cid = (int) array_key_first( aw_cl_campaigns() );
+					$t   = aw_cl_table();
+					$n   = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$t} WHERE campaign_id = %d AND sent_on >= %s", $cid, wp_date( 'Y-m-d', strtotime( '-6 days' ) ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+					return number_format_i18n( $n ) . ' in the last 7 days';
+				}
+			);
 		}
 	}
 );
@@ -385,24 +395,44 @@ function aw_cl_widget() {
 	arsort( $ground );
 	$cities = wp_list_pluck( (array) $wpdb->get_results( $wpdb->prepare( "SELECT city AS k, COUNT(*) AS n FROM {$t} WHERE campaign_id = %d AND city <> '' GROUP BY city ORDER BY n DESC LIMIT 3", $cid ) ), 'n', 'k' ); // phpcs:ignore
 	echo '<p><strong>' . esc_html( $all[ $cid ] ) . '</strong></p>';
-	echo '<p style="font-size:14px">' . esc_html( sprintf( '%s sent · %s in the last 7 days', number_format_i18n( $total ), number_format_i18n( $week ) ) ) . '</p>';
-	$list = function ( $title, $rows ) {
-		echo '<p style="margin:12px 0 4px"><strong>' . esc_html( $title ) . '</strong></p>';
+	if ( function_exists( 'kits_dash_cards' ) ) { // Dashboard cards and chart (owner, 3 Nov 2026)
+		$prev  = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$t} WHERE campaign_id = %d AND sent_on >= %s AND sent_on < %s", $cid, wp_date( 'Y-m-d', strtotime( '-13 days' ) ), wp_date( 'Y-m-d', strtotime( '-6 days' ) ) ) ); // phpcs:ignore
+		$today = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$t} WHERE campaign_id = %d AND sent_on >= %s", $cid, wp_date( 'Y-m-d' ) ) ); // phpcs:ignore
+		echo kits_dash_cards( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside.
+			array(
+				array( 'label' => 'Sent', 'value' => number_format_i18n( $total ) ),
+				array( 'label' => 'Last 7 days', 'value' => number_format_i18n( $week ), 'delta' => $week - $prev, 'delta_text' => 'on the 7 days before' ),
+				array( 'label' => 'Today so far', 'value' => number_format_i18n( $today ) ),
+			)
+		);
+		$per  = wp_list_pluck( (array) $wpdb->get_results( $wpdb->prepare( "SELECT DATE(sent_on) AS k, COUNT(*) AS n FROM {$t} WHERE campaign_id = %d AND sent_on >= %s GROUP BY DATE(sent_on)", $cid, wp_date( 'Y-m-d', strtotime( '-13 days' ) ) ) ), 'n', 'k' ); // phpcs:ignore
+		$bars = array();
+		for ( $i = 13; $i >= 0; $i-- ) {
+			$d                                    = wp_date( 'Y-m-d', strtotime( "-{$i} days" ) );
+			$bars[ wp_date( 'j M', strtotime( $d ) ) ] = (int) ( $per[ $d ] ?? 0 );
+		}
+		echo kits_dash_bars( $bars, 'Letters per day, last 14 days', true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside.
+	} else {
+		echo '<p style="font-size:14px">' . esc_html( sprintf( '%s sent · %s in the last 7 days', number_format_i18n( $total ), number_format_i18n( $week ) ) ) . '</p>';
+	}
+	// Two sub-sections (owner, 3 Nov 2026), each opening to its table: Top grounds open, Top cities closed.
+	$list = function ( $title, $rows, $col, $open ) {
+		echo '<details style="margin:12px 0 0"' . ( $open ? ' open' : '' ) . '><summary><strong>' . esc_html( $title ) . '</strong></summary>';
 		if ( ! $rows ) {
-			echo '<p class="description">None yet.</p>';
+			echo '<p class="description">None yet.</p></details>';
 			return;
 		}
-		$cells = array();
+		echo '<table class="widefat striped" style="margin-top:6px"><thead><tr><th scope="col">' . esc_html( $col ) . '</th><th scope="col">Letters</th></tr></thead><tbody>';
 		foreach ( $rows as $label => $n ) {
-			$cells[] = array( 'label' => esc_html( $label ), 'n' => esc_html( number_format_i18n( $n ) ) );
+			echo '<tr><td>' . esc_html( $label ) . '</td><td>' . esc_html( number_format_i18n( $n ) ) . '</td></tr>';
 		}
-		aw_core_simple_table( 'letters-top', array( 'label' => '<span class="screen-reader-text">' . esc_html( $title ) . '</span>', 'n' => 'Letters' ), $cells );
+		echo '</tbody></table></details>';
 	};
 	$top = array();
 	foreach ( array_slice( $ground, 0, 3, true ) as $n => $c ) {
 		$top[ $n . '. ' . ( $labels[ $n ] ?? '' ) ] = $c;
 	}
-	$list( 'Top grounds', $top );
-	$list( 'Top cities', $cities );
+	$list( 'Top grounds', $top, 'Ground', true );
+	$list( 'Top cities', $cities, 'City', false );
 	echo '<p style="margin-top:12px"><a href="' . esc_url( admin_url( 'edit.php?post_type=aw_campaign&page=aw-letter-report&campaign=' . $cid ) ) . '">Full letter report →</a></p>';
 }

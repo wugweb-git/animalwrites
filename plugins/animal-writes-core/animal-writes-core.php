@@ -79,6 +79,7 @@ require_once AW_CORE_DIR . 'includes/volunteers.php';
 require_once AW_CORE_DIR . 'includes/campaigns.php';
 require_once AW_CORE_DIR . 'includes/campaign-tools.php';
 require_once AW_CORE_DIR . 'includes/campaign-short.php'; // /lab, /diwali...: a campaign's short link, 301 to its page
+require_once AW_CORE_DIR . 'includes/dashboard-core.php';
 require_once AW_CORE_DIR . 'includes/campaign-letters.php';
 require_once AW_CORE_DIR . 'includes/campaign-record.php';
 require_once AW_CORE_DIR . 'includes/sections.php';
@@ -130,6 +131,8 @@ require_once AW_CORE_DIR . 'includes/campaign-form.php'; // "Sign it" as the Flu
 require_once AW_CORE_DIR . 'includes/fluentcrm.php';
 require_once AW_CORE_DIR . 'includes/admin-ia.php';
 require_once AW_CORE_DIR . 'includes/team-dates.php';
+require_once AW_CORE_DIR . 'includes/dashboard-forms.php';
+require_once AW_CORE_DIR . 'includes/dashboard-activity.php';
 require_once AW_CORE_DIR . 'includes/cron-health.php';
 require_once AW_CORE_DIR . 'includes/error-count.php';
 require_once AW_CORE_DIR . 'includes/error-pages.php';

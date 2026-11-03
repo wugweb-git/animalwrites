@@ -926,7 +926,7 @@ add_filter(
 
 /**
  * Approved social posts linked to an item: on a campaign, the ones with its campaign links; on News, Library and
- * Directory items, the ones that name it as related. Newest post first, at most six.
+ * Directory items, the ones that name it as related. Newest post first, one per person, at most six.
  *
  * @param int $id Item.
  * @return WP_Post[]
@@ -947,7 +947,20 @@ function aw_social_for_item( int $id ): array {
 	}
 	$posts = get_posts( $args );
 	usort( $posts, fn( $a, $b ) => strcmp( (string) get_post_meta( $b->ID, 'aw_social_date', true ), (string) get_post_meta( $a->ID, 'aw_social_date', true ) ) );
-	return array_slice( $posts, 0, 6 );
+	$seen = array(); // one card per person: their newest post (owner, 3 Nov 2026)
+	$out  = array();
+	foreach ( $posts as $p ) {
+		$who = strtolower( trim( (string) get_post_meta( $p->ID, 'aw_social_platform', true ) . ':' . ltrim( (string) get_post_meta( $p->ID, 'aw_social_handle', true ), '@' ) ) );
+		if ( ':' === $who ) {
+			$who = 'id:' . $p->ID;
+		}
+		if ( isset( $seen[ $who ] ) ) {
+			continue;
+		}
+		$seen[ $who ] = true;
+		$out[]        = $p;
+	}
+	return array_slice( $out, 0, 6 );
 }
 
 /**
@@ -967,7 +980,7 @@ function aw_social_card( WP_Post $p ): string {
 	$date     = (string) get_post_meta( $p->ID, 'aw_social_date', true );
 	$name     = '' !== $person ? $person : ( '' !== $handle ? $handle : ( AW_SOCIAL_PLATFORMS[ $platform ] ?? '' ) );
 	$meta     = ( $date && function_exists( 'aw_date' ) ? aw_date( $date . ' 12:00:00' ) : '' ) // the date always first in a meta row (owner)
-		. '<span class="kit-meta-item">' . esc_html( AW_SOCIAL_PLATFORMS[ $platform ] ?? 'Other' ) . '</span>'
+		. '<span class="kit-meta-item">' . esc_html( 'on ' . ( AW_SOCIAL_PLATFORMS[ $platform ] ?? 'Other' ) ) . '</span>'
 		. ( '' !== $handle && $handle !== $name ? '<span class="kit-meta-item">' . esc_html( $handle ) . '</span>' : '' );
 	$embed    = '';
 	if ( in_array( $link['platform'], array( 'x', 'youtube' ), true ) ) {
@@ -976,7 +989,7 @@ function aw_social_card( WP_Post $p ): string {
 			. '<div id="' . esc_attr( $box ) . '" style="flex-basis:100%" hidden></div></div>'; // the embed takes the row under the button
 		aw_social_embed_script();
 	}
-	return '<li><article class="kit-card kit-card--block-md"><div class="kit-card-body">'
+	return '<li><article class="kit-card kit-card--block-md aw-social-card"><div class="kit-card-body">'
 		. '<p class="kit-card-meta kit-meta-row">' . $meta . '</p>'
 		. '<h3 class="kit-card-title"><a href="' . esc_url( $url ) . '" rel="nofollow ugc noopener">' . esc_html( $name ) . '</a></h3>'
 		. ( '' !== $summary ? '<p class="kit-card-sum">' . esc_html( $summary ) . '</p>' : '' )

@@ -6,7 +6,9 @@
  * five minutes later, until the queue is empty.
  *
  * Rows in obs: src psi, period day (the week's run date), page = path; metrics score-mobile, lcp-mobile, tbt-mobile,
- * cls-mobile and the same for desktop; flag = 1 when the mobile score is under 50.
+ * cls-mobile and the same for desktop; flag = 1 when the mobile score is under 50. Chrome's real-user figures (CrUX)
+ * come in the same answer: field-lcp/inp/cls-{strategy} per page when Chrome has them for it, and the whole site's
+ * site-lcp/inp/cls-{strategy} on the home page row.
  *
  * @package aw-seo-extras
  */
@@ -81,12 +83,45 @@ function aw_si_psi_figures( $resp ): array {
 	$lh    = (array) ( $resp['lighthouseResult'] ?? array() );
 	$audit = fn( $k ) => isset( $lh['audits'][ $k ]['numericValue'] ) ? (float) $lh['audits'][ $k ]['numericValue'] : null;
 	$score = $lh['categories']['performance']['score'] ?? null;
-	return array(
-		'score' => null === $score ? null : round( (float) $score * 100 ),
-		'lcp'   => $audit( 'largest-contentful-paint' ),
-		'tbt'   => $audit( 'total-blocking-time' ),
-		'cls'   => $audit( 'cumulative-layout-shift' ),
+	return array_merge(
+		array(
+			'score' => null === $score ? null : round( (float) $score * 100 ),
+			'lcp'   => $audit( 'largest-contentful-paint' ),
+			'tbt'   => $audit( 'total-blocking-time' ),
+			'cls'   => $audit( 'cumulative-layout-shift' ),
+		),
+		aw_si_psi_field( (array) ( $resp['loadingExperience'] ?? array() ), 'field' ),
+		aw_si_psi_field( (array) ( $resp['originLoadingExperience'] ?? array() ), 'site' )
 	);
+}
+
+/**
+ * Chrome's real-user figures (CrUX, 28 days, 75th percentile) from a PageSpeed response: LCP and INP in ms, CLS. The
+ * same free PageSpeed call carries them, so no CrUX key is needed. Page figures only when Chrome has them for that page
+ * (not the site's figures given in their place); the site's figures as site-*.
+ *
+ * @param array  $exp    loadingExperience or originLoadingExperience.
+ * @param string $prefix field (this page) or site (the whole site).
+ * @return array<string, float> e.g. field-lcp => 2100.
+ */
+function aw_si_psi_field( array $exp, string $prefix ): array {
+	if ( ! $exp || ( 'field' === $prefix && ! empty( $exp['origin_fallback'] ) ) ) {
+		return array();
+	}
+	$m   = (array) ( $exp['metrics'] ?? array() );
+	$out = array();
+	foreach (
+		array(
+			'lcp' => array( 'LARGEST_CONTENTFUL_PAINT_MS', 1 ),
+			'inp' => array( 'INTERACTION_TO_NEXT_PAINT', 1 ),
+			'cls' => array( 'CUMULATIVE_LAYOUT_SHIFT_SCORE', 100 ), // CrUX gives CLS × 100.
+		) as $key => $def
+	) {
+		if ( isset( $m[ $def[0] ]['percentile'] ) && is_numeric( $m[ $def[0] ]['percentile'] ) ) {
+			$out[ $prefix . '-' . $key ] = (float) $m[ $def[0] ]['percentile'] / $def[1];
+		}
+	}
+	return $out;
 }
 
 /**
@@ -199,7 +234,7 @@ function aw_si_psi_step(): array {
 			$q['errors'][] = $path . ' (' . $strategy . '): ' . $fig->get_error_message();
 		} else {
 			foreach ( $fig as $metric => $value ) {
-				if ( null !== $value ) {
+				if ( null !== $value && ( '/' === $path || 0 !== strpos( $metric, 'site-' ) ) ) { // The site's figures once, on the home page row.
 					aw_si_obs_put( 0, $path, 'psi', $metric . '-' . $strategy, 'day', $q['d'], array( 'value' => (float) $value ) );
 				}
 			}

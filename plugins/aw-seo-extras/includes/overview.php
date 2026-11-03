@@ -207,22 +207,42 @@ function aw_seo_overview_page() {
 	}
 	unset( $row );
 
+	// Three cells per module: the module with where to set it up under it (as a list table's row links), what it
+	// does, and its status. Rows whose status is a warning are also listed first, together, in a core notice.
+	$cells = array();
+	$attn  = array();
+	foreach ( $rows as $row ) {
+		$cells[] = array(
+			'module' => $row['module'] . ( '' !== $row['where'] ? '<div class="row-actions visible">' . $row['where'] . '</div>' : '' ),
+			'what'   => esc_html( $row['what'] ),
+			'status' => $row['status'],
+		);
+		if ( false !== strpos( (string) $row['status'], 'dashicons-warning' ) ) {
+			$attn[] = '<li>' . $row['module'] . ': ' . esc_html( trim( wp_strip_all_tags( (string) $row['status'] ) ) ) . '</li>';
+		}
+	}
+
 	echo '<div class="wrap"><h1>AW SEO Plus</h1>';
 	echo '<p>' . esc_html__( 'What the plugin adds to Rank Math (free) for animalwrites.in. Rank Math holds everything else; where a module’s settings live in Rank Math, the link goes there.', 'aw-seo-extras' ) . '</p>';
+	if ( $attn ) {
+		echo '<div class="notice notice-warning inline"><p><strong>' . esc_html__( 'Needs attention', 'aw-seo-extras' ) . '</strong></p><ul class="ul-disc">' . implode( '', $attn ) . '</ul></div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from escaped parts.
+	}
 	echo '<h2>' . esc_html__( 'Modules', 'aw-seo-extras' ) . '</h2>';
 	aw_seo_extras_simple_table(
 		'aw-seo-modules',
 		array(
 			'module' => 'Module',
 			'what'   => 'What it does',
-			'where'  => 'Where to set it up',
 			'status' => 'Status',
 		),
-		$rows,
-		array( 'primary' => 'module' )
+		$cells,
+		array(
+			'primary' => 'module',
+			'foot'    => false,
+		)
 	);
 
-	echo '<h2>' . esc_html__( 'On edit screens', 'aw-seo-extras' ) . '</h2>';
+	echo '<details><summary><strong>' . esc_html__( 'On edit screens', 'aw-seo-extras' ) . '</strong> (3)</summary>';
 	aw_seo_extras_simple_table(
 		'aw-seo-boxes',
 		array(
@@ -243,10 +263,14 @@ function aw_seo_overview_page() {
 				'box'    => 'FAQ box on the term screen: automatic questions (tags) and the term’s own questions.',
 			),
 		),
-		array( 'primary' => 'screen' )
+		array(
+			'primary' => 'screen',
+			'foot'    => false,
+		)
 	);
+	echo '</details>';
 
-	echo '<h2>' . esc_html__( 'Commands (WP-CLI on the server)', 'aw-seo-extras' ) . '</h2>';
+	echo '<details><summary><strong>' . esc_html__( 'Commands (WP-CLI on the server)', 'aw-seo-extras' ) . '</strong> (5)</summary>';
 	aw_seo_extras_simple_table(
 		'aw-seo-commands',
 		array(
@@ -275,7 +299,10 @@ function aw_seo_overview_page() {
 				'what' => 'List the active redirects in Rank Math’s Redirections',
 			),
 		),
-		array( 'primary' => 'cmd' )
+		array(
+			'primary' => 'cmd',
+			'foot'    => false,
+		)
 	);
-	echo '<p>' . esc_html__( 'Each command lists its options with --help.', 'aw-seo-extras' ) . '</p></div>';
+	echo '<p>' . esc_html__( 'Each command lists its options with --help.', 'aw-seo-extras' ) . '</p></details></div>';
 }

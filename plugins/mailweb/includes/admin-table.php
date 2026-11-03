@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @param string $plural Table name (CSS class).
  * @param array  $cols   Column => label ('cb' => '<input type="checkbox">' for a checkbox column).
  * @param array  $rows   Rows of escaped HTML cells, column => HTML.
- * @param array  $opts   per_page, total (rows are already that page), primary, fixed, empty.
+ * @param array  $opts   per_page, total (rows are already that page), primary, fixed, empty, foot.
  */
 function mailweb_simple_table( $plural, array $cols, array $rows, array $opts = array() ) {
 	if ( ! class_exists( 'WP_List_Table' ) ) {

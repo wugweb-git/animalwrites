@@ -113,13 +113,13 @@ function aw_core_overview_page() {
 			array( 'Press coverage and sponsored blocks', 'Coverage of Animal Writes on /media/; the Sponsored block group.', aw_core_link( 'Press coverage', 'edit.php?post_type=aw_press' ), $auto ),
 		),
 		'Running the site' => array(
-			array( 'Dates', 'The team\'s calendar (observance days, deadlines) and the Dates dashboard widget.', aw_core_link( 'Animal Writes → Dates', 'admin.php?page=aw-dates' ), $st['dates'] ),
+			array( 'Dates', 'The team\'s calendar (observance days, deadlines) and its section in the Animal Writes dashboard box.', aw_core_link( 'Animal Writes → Dates', 'admin.php?page=aw-dates' ), $st['dates'] ),
 			array( 'Check site', 'Loads one page of every kind and reports any that do not open cleanly; also in the admin bar.', $admin ? aw_core_link( 'Animal Writes → Check site', 'admin.php?page=aw-site-check' ) : 'Administrators', $st['check'] ),
 			array( 'Contact links', 'The "Elsewhere" links on the Contact page.', aw_core_link( 'Animal Writes → Contact links', 'admin.php?page=aw-elsewhere' ), $auto ),
 			array( 'Keys', 'Service keys the plugins use (Clarity, Bing Webmaster, PageSpeed): paste once, never shown again; a wp-config.php constant wins.', $admin ? aw_core_link( 'Animal Writes → Keys', 'admin.php?page=aw-keys' ) : 'Administrators', $auto ),
 			array( 'Edit screens', 'Every box on each edit screen (WordPress, plugins and ours), the keys it stores and where each key is used.', $admin ? aw_core_link( 'Animal Writes → Edit screens', 'admin.php?page=aw-edit-screens' ) : 'Administrators', $auto ),
 			array( 'To review', 'Items waiting for a person (from AW Sourcing).', aw_core_link( 'Sourcing → To review', 'admin.php?page=aw-review' ), $st['review'] ),
-			array( 'Scheduled tasks', 'Who triggers WP-Cron (Hostinger, GitHub, UptimeRobot) and the longest gap; dashboard widget.', aw_core_link( 'Dashboard', 'index.php' ), $st['cron'] ),
+			array( 'Scheduled tasks', 'Who triggers WP-Cron (Hostinger, GitHub, UptimeRobot) and the longest gap; a section in the Animal Writes dashboard box.', aw_core_link( 'Dashboard', 'index.php' ), $st['cron'] ),
 			array( 'Daily backup', 'Database and deployed code into ~/backups on the server, kept 14 days.', $admin ? aw_core_link( 'Check site', 'admin.php?page=aw-site-check' ) : '—', $st['backup'] ),
 			array( 'Deploys and cache', 'LiteSpeed purged once after each deploy; CDN lifetime for anonymous public pages.', $admin ? aw_core_link( 'Check site → Shared cache (CDN)', 'admin.php?page=aw-site-check' ) : '—', $st['deploy'] . ' ' . $st['cdn'] ),
 			array( 'Staging', 'staging.animalwrites.in: same code, database without personal data, marked in the admin bar.', '—', $st['stage'] ),
@@ -128,48 +128,87 @@ function aw_core_overview_page() {
 
 	echo '<div class="wrap"><h1>Animal Writes</h1>';
 	echo '<p>The site\'s own plugin: its content model, Directory, campaigns, forms and the jobs that keep it running. Each row says where to find the feature.</p>';
+	aw_core_overview_attention( $groups );
+	$opts = array(
+		'primary' => 'feature',
+		'foot'    => false,
+	);
 	foreach ( $groups as $title => $rows ) {
 		echo '<h2>' . esc_html( $title ) . '</h2>';
-		$cells = array();
-		foreach ( $rows as $r ) {
-			$cells[] = array(
-				'feature' => '<strong>' . esc_html( $r[0] ) . '</strong>',
-				'what'    => esc_html( $r[1] ),
-				'where'   => $r[2],
-				'status'  => $r[3],
-			);
-		}
-		aw_core_simple_table( 'aw-overview', array( 'feature' => 'Feature', 'what' => 'What it does', 'where' => 'Where', 'status' => 'Status' ), $cells, array( 'primary' => 'feature' ) );
+		aw_core_simple_table( 'aw-overview', array( 'feature' => 'Feature', 'what' => 'What it does', 'status' => 'Status' ), aw_core_overview_cells( $rows ), $opts );
 	}
 
-	echo '<h2>On the dashboard</h2>';
+	echo '<details><summary><strong>On the dashboard</strong>: the Animal Writes box (5 sections)</summary>';
 	aw_core_simple_table(
 		'aw-widgets',
-		array( 'widget' => 'Widget', 'what' => 'What it shows' ),
+		array( 'widget' => 'Section', 'what' => 'What it shows' ),
 		array(
+			array( 'widget' => 'Campaign letters', 'what' => 'Letters sent per campaign (open first).' ),
+			array( 'widget' => 'Form entries', 'what' => 'Unread website form entries.' ),
 			array( 'widget' => 'Dates', 'what' => 'The next dates in the team calendar.' ),
-			array( 'widget' => 'Scheduled tasks', 'what' => 'WP-Cron triggers in the last 24 hours (administrators).' ),
-			array( 'widget' => 'Campaign letters', 'what' => 'Letters sent per campaign.' ),
+			array( 'widget' => 'Activity', 'what' => 'Items awaiting review.' ),
+			array( 'widget' => 'Scheduled tasks', 'what' => 'WP-Cron triggers in the last 24 hours, running or stopped (administrators).' ),
 		),
-		array( 'primary' => 'widget' )
-	);
-
-	echo '<h2>Commands (WP-CLI on the server)</h2>';
-	aw_core_simple_table(
-		'aw-commands',
-		array( 'cmd' => 'Command', 'what' => 'What it does' ),
 		array(
-			array( 'cmd' => '<code>wp aw crm-setup</code>', 'what' => 'FluentCRM sender, list, tags and custom fields' ),
-			array( 'cmd' => '<code>wp aw ff-form</code>', 'what' => 'Which Fluent Forms form shows as each site form' ),
-			array( 'cmd' => '<code>wp aw geocode</code>', 'what' => 'Listing coordinates for the map' ),
-			array( 'cmd' => '<code>wp aw sort-dates</code>', 'what' => 'News and Library sort dates' ),
-			array( 'cmd' => '<code>wp aw redirects-import</code>', 'what' => 'Old addresses into Rank Math Redirections' ),
-			array( 'cmd' => '<code>wp aw raw-export</code>', 'what' => 'Campaign form sign-ups as CSV' ),
-			array( 'cmd' => '<code>wp aw-edit-screens</code>', 'what' => 'Edit-screen boxes, their fields and where they are used (read-only)' ),
-			array( 'cmd' => '<code>wp aw-featured scan</code>', 'what' => '"Featured in" links between organisations and items' ),
-			array( 'cmd' => '<code>wp aw-places detect</code>, <code>mark-auto</code>', 'what' => 'Places found in items' ),
-		),
-		array( 'primary' => 'cmd' )
+			'primary' => 'widget',
+			'foot'    => false,
+		)
 	);
-	echo '<p>Each command lists its options with --help.</p></div>';
+	echo '</details>';
+
+	$cmds = array(
+		array( 'cmd' => '<code>wp aw crm-setup</code>', 'what' => 'FluentCRM sender, list, tags and custom fields' ),
+		array( 'cmd' => '<code>wp aw ff-form</code>', 'what' => 'Which Fluent Forms form shows as each site form' ),
+		array( 'cmd' => '<code>wp aw geocode</code>', 'what' => 'Listing coordinates for the map' ),
+		array( 'cmd' => '<code>wp aw sort-dates</code>', 'what' => 'News and Library sort dates' ),
+		array( 'cmd' => '<code>wp aw redirects-import</code>', 'what' => 'Old addresses into Rank Math Redirections' ),
+		array( 'cmd' => '<code>wp aw raw-export</code>', 'what' => 'Campaign form sign-ups as CSV' ),
+		array( 'cmd' => '<code>wp aw-edit-screens</code>', 'what' => 'Edit-screen boxes, their fields and where they are used (read-only)' ),
+		array( 'cmd' => '<code>wp aw-featured scan</code>', 'what' => '"Featured in" links between organisations and items' ),
+		array( 'cmd' => '<code>wp aw-places detect</code>, <code>mark-auto</code>', 'what' => 'Places found in items' ),
+	);
+	echo '<details><summary><strong>Commands (WP-CLI on the server)</strong> (' . count( $cmds ) . ')</summary>';
+	$opts = array(
+		'primary' => 'cmd',
+		'foot'    => false,
+	);
+	aw_core_simple_table( 'aw-commands', array( 'cmd' => 'Command', 'what' => 'What it does' ), $cmds, $opts );
+	echo '<p>Each command lists its options with --help.</p></details></div>';
+}
+
+/**
+ * Overview rows [feature, what, where, status] as three cells: the feature with its place under it (as a list
+ * table's row links), what it does, and its status.
+ *
+ * @param array $rows Rows.
+ */
+function aw_core_overview_cells( array $rows ): array {
+	$cells = array();
+	foreach ( $rows as $r ) {
+		$cells[] = array(
+			'feature' => '<strong>' . esc_html( $r[0] ) . '</strong>' . ( '' !== $r[2] && '—' !== $r[2] ? '<div class="row-actions visible">' . $r[2] . '</div>' : '' ),
+			'what'    => esc_html( $r[1] ),
+			'status'  => $r[3],
+		);
+	}
+	return $cells;
+}
+
+/**
+ * Rows whose status is a warning, first and together, in a core notice; nothing when every check is fine.
+ *
+ * @param array $groups Group title => rows [feature, what, where, status].
+ */
+function aw_core_overview_attention( array $groups ): void {
+	$items = array();
+	foreach ( $groups as $rows ) {
+		foreach ( $rows as $r ) {
+			if ( false !== strpos( (string) $r[3], 'dashicons-warning' ) ) {
+				$items[] = '<li><strong>' . esc_html( $r[0] ) . '</strong>: ' . esc_html( trim( wp_strip_all_tags( (string) $r[3] ) ) ) . ( '' !== $r[2] && '—' !== $r[2] ? ' (' . $r[2] . ')' : '' ) . '</li>';
+			}
+		}
+	}
+	if ( $items ) {
+		echo '<div class="notice notice-warning inline"><p><strong>Needs attention</strong></p><ul class="ul-disc">' . implode( '', $items ) . '</ul></div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from escaped parts.
+	}
 }

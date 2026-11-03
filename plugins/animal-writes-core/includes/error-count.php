@@ -54,6 +54,10 @@ function aw_error_count_php_candidates() {
 	$out[] = WP_CONTENT_DIR . '/debug.log';
 	$out[] = $d['root'] . '/error_log';
 	$out[] = $d['root'] . '/wp-admin/error_log';
+	$host  = (string) wp_parse_url( home_url(), PHP_URL_HOST );
+	if ( '' !== $host ) {
+		$out[] = $d['home'] . '/.logs/error_log_' . str_replace( array( '.', '-' ), '_', $host ); // Hostinger's log for this domain only (the folder holds every domain's)
+	}
 	return array_values( array_unique( (array) apply_filters( 'aw_error_count_php_paths', $out ) ) );
 }
 

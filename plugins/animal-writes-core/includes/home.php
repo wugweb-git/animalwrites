@@ -336,3 +336,23 @@ add_filter(
 		return is_front_page() ? do_shortcode( shortcode_unautop( $html ) ) : $html;
 	}
 );
+
+// The story band's photograph (pattern aw1-story, a core Cover) is printed with one 1536px file and no srcset, so phones
+// downloaded 376 KB where the 768px copy is 116 KB. Give its img the attachment's srcset (the browser picks the size; the
+// band is full width, so the default 100vw applies). Front end only; the stored pattern is not changed.
+add_filter(
+	'render_block_core/cover',
+	function ( $html, $block ) {
+		$id = (int) ( $block['attrs']['id'] ?? 0 );
+		if ( ! $id || ! in_array( 'aw-ed-story', preg_split( '/\s+/', (string) ( $block['attrs']['className'] ?? '' ) ), true ) || false !== strpos( $html, ' srcset=' ) ) {
+			return $html;
+		}
+		$srcset = (string) wp_get_attachment_image_srcset( $id, 'full' );
+		if ( '' === $srcset ) {
+			return $html;
+		}
+		return (string) preg_replace( '/<img\b(?=[^>]*\bwp-image-' . $id . '\b)/', '<img srcset="' . esc_attr( $srcset ) . '"', $html, 1 );
+	},
+	10,
+	2
+);

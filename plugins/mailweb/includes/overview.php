@@ -25,14 +25,21 @@ function mailweb_overview_box( $key ) {
 	if ( is_array( $cached ) ) {
 		return $cached;
 	}
+	// The last good answer (3 Nov 2026: support@ showed "Not reachable" after one failed call, then answered at once):
+	// a failed call is tried once more, and while the API is down the box shows the last good figures, marked stale.
+	$last = get_option( 'mailweb_overview_last_' . $key );
+	$last = is_array( $last ) ? $last : null;
 	if ( get_transient( 'mailweb_overview_down_' . $key ) ) {
-		return null; // the API failed a moment ago: no new try on every admin page for 5 minutes
+		return $last ? $last + array( 'stale' => true ) : null; // the API failed a moment ago: no new try for 5 minutes
 	}
 	$box     = function_exists( 'mailweb_box_id' ) ? mailweb_box_id( $key ) : '';
 	$folders = '' !== $box ? mailweb_api( '/api/v1/mailboxes/' . rawurlencode( $box ) . '/folders' ) : null;
+	if ( '' !== $box && ! is_array( $folders ) ) {
+		$folders = mailweb_api( '/api/v1/mailboxes/' . rawurlencode( $box ) . '/folders' ); // once more: one-off failures happen
+	}
 	if ( ! is_array( $folders ) ) {
 		set_transient( 'mailweb_overview_down_' . $key, 1, MAILWEB_CACHE );
-		return null;
+		return $last ? $last + array( 'stale' => true ) : null;
 	}
 	$unread = 0;
 	foreach ( $folders as $f ) {
@@ -59,6 +66,7 @@ function mailweb_overview_box( $key ) {
 	}
 	$out = array( 'unread' => $unread, 'messages' => $msgs );
 	set_transient( 'mailweb_overview_' . $key, $out, MAILWEB_CACHE );
+	update_option( 'mailweb_overview_last_' . $key, $out + array( 'at' => time() ), false );
 	return $out;
 }
 
@@ -93,6 +101,10 @@ function mailweb_overview_date( $date ) {
  * @param bool $compact Dashboard widget layout.
  */
 function mailweb_overview_render( $max, $compact = false ) {
+	if ( $compact ) {
+		mailweb_overview_widget( $max );
+		return;
+	}
 	$link = '<a href="' . esc_url( admin_url( 'admin.php?page=mailweb' ) ) . '">' . esc_html__( 'Open Mail', 'mailweb' ) . '</a>';
 	foreach ( mailweb_all_boxes() as $key => $addr ) {
 		$box   = mailweb_overview_box( $key );
@@ -102,6 +114,10 @@ function mailweb_overview_render( $max, $compact = false ) {
 		$unread = sprintf( _n( '%d unread', '%d unread', $n, 'mailweb' ), $n );
 		/* translators: %s: comma-separated list of the mailbox's alias addresses. */
 		$also = $alias ? ' ' . sprintf( __( '(also %s)', 'mailweb' ), implode( ', ', $alias ) ) : '';
+		if ( $box && ! empty( $box['stale'] ) ) {
+			/* translators: %s: time of the last good answer. */
+			$unread .= ' ' . sprintf( __( '(the Mail API is not answering; shown from %s)', 'mailweb' ), wp_date( 'g:i a', (int) ( $box['at'] ?? 0 ) ) );
+		}
 		echo '<h3>' . ( function_exists( 'mailweb_profile_picture' ) ? wp_kses_post( mailweb_profile_picture( $addr, 24 ) ) : '' ) . esc_html( $addr . $also ) . ' — ' . ( $box ? esc_html( $unread ) : esc_html__( 'not available', 'mailweb' ) ) . '</h3>';
 		if ( ! $box ) {
 			echo '<p>' . esc_html__( 'The Mail API could not be reached for this mailbox (token missing or not scoped to it).', 'mailweb' ) . ' ' . $link . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput -- built from escaped parts
@@ -134,6 +150,46 @@ function mailweb_overview_render( $max, $compact = false ) {
 	}
 }
 
+/**
+ * The dashboard widget (owner, 3 Nov 2026: shorter): per mailbox one line with its unread count and a short list of
+ * the newest emails (sender, bold when unread; date; subject on one line), then one link to the inbox. Core list
+ * markup only.
+ *
+ * @param int $max Emails per mailbox.
+ */
+function mailweb_overview_widget( $max ) {
+	// One table (owner, 3 Nov 2026: "some columns, some rows, status and dropdown"): a row per mailbox with its unread
+	// count and status; the mailbox opens to its latest messages.
+	$inbox = admin_url( 'admin.php?page=mailweb' );
+	echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Mailbox', 'mailweb' ) . '</th><th scope="col">' . esc_html__( 'Unread', 'mailweb' ) . '</th><th scope="col">' . esc_html__( 'Status', 'mailweb' ) . '</th></tr></thead><tbody>';
+	foreach ( mailweb_all_boxes() as $key => $addr ) {
+		$box  = mailweb_overview_box( $key );
+		$msgs = $box ? array_slice( (array) $box['messages'], 0, $max ) : array();
+		if ( ! $box ) {
+			$status = array( 'warning', '#b32d2e', __( 'Not reachable', 'mailweb' ) );
+		} elseif ( ! empty( $box['stale'] ) ) {
+			/* translators: %s: time of the last good answer. */
+			$status = array( 'clock', '#50575e', sprintf( __( 'Shown from %s', 'mailweb' ), wp_date( 'g:i a', (int) ( $box['at'] ?? 0 ) ) ) );
+		} elseif ( ! $msgs ) {
+			$status = array( 'minus', '#50575e', __( 'Empty', 'mailweb' ) );
+		} else {
+			$status = array( 'yes-alt', '#007017', __( 'OK', 'mailweb' ) );
+		}
+		$list = '';
+		foreach ( $msgs as $m ) {
+			$t     = $m['date'] ? strtotime( $m['date'] ) : false;
+			$subj  = '' !== $m['subject'] ? $m['subject'] : __( '(no subject)', 'mailweb' );
+			$name  = esc_html( (string) ( $m['name'] ?? $m['from'] ) );
+			$list .= '<li>' . ( $m['unseen'] ? '<strong>' . $name . '</strong> <span class="screen-reader-text">' . esc_html__( '(unread)', 'mailweb' ) . '</span>' : $name ) . ( $t ? ' <span class="description">' . esc_html( wp_date( 'j M', $t ) ) . '</span>' : '' ) . '<br><a href="' . esc_url( $inbox ) . '" title="' . esc_attr( $subj ) . '">' . esc_html( mb_strimwidth( $subj, 0, 60, '…' ) ) . '</a></li>';
+		}
+		$who  = ( function_exists( 'mailweb_profile_picture' ) ? wp_kses_post( mailweb_profile_picture( $addr, 20 ) ) : '' ) . esc_html( $addr );
+		$cell = $list ? '<details><summary>' . $who . '</summary><ul>' . $list . '</ul></details>' : $who;
+		echo '<tr><td style="overflow-wrap:anywhere">' . $cell . '</td><td>' . ( $box ? esc_html( number_format_i18n( (int) ( $box['unread'] ?? 0 ) ) ) : '–' ) . '</td><td><span class="dashicons dashicons-' . esc_attr( $status[0] ) . '" style="color:' . esc_attr( $status[1] ) . '" aria-hidden="true"></span> ' . esc_html( $status[2] ) . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput -- built from escaped parts
+	}
+	echo '</tbody></table>';
+	echo '<p><a href="' . esc_url( $inbox ) . '">' . esc_html__( 'Open Mail', 'mailweb' ) . '</a></p>';
+}
+
 // Top-level "Mail" menu with the unread badge (hidden at 0).
 add_action(
 	'admin_menu',
@@ -150,12 +206,12 @@ add_action(
 	}
 );
 
-// Dashboard widget "Mail": the same counts and the last 5 per mailbox.
+// Dashboard widget "Mail": the same counts and the last 3 per mailbox.
 add_action(
 	'wp_dashboard_setup',
 	function () {
 		if ( current_user_can( MAILWEB_CAP ) ) {
-			wp_add_dashboard_widget( 'mailweb_widget', __( 'Mail', 'mailweb' ), fn() => mailweb_overview_render( 5, true ) );
+			wp_add_dashboard_widget( 'mailweb_widget', __( 'Mail', 'mailweb' ), fn() => mailweb_overview_render( 3, true ) );
 		}
 	}
 );

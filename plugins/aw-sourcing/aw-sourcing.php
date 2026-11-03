@@ -79,3 +79,4 @@ require_once AW_SOURCING_DIR . 'includes/workers-admin.php';
 require_once AW_SOURCING_DIR . 'includes/ai-provider-icons.php';
 // The Sourcing menu, its Overview and the Plugins screen links (owner, 25 Oct 2026).
 require_once AW_SOURCING_DIR . 'includes/admin-menu.php';
+require_once AW_SOURCING_DIR . 'includes/dashboard.php'; // the Dashboard box "Sourcing" (owner, 3 Nov 2026)

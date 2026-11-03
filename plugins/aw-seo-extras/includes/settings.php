@@ -230,9 +230,6 @@ function aw_seo_modules(): array {
 				'AW_SI_PSI_FLAG' => array( 'type' => 'int', 'label' => 'PageSpeed mobile score that flags a page (under)', 'help' => '', 'default' => 50 ),
 				'AW_SI_RM_LOW' => array( 'type' => 'int', 'label' => 'Rank Math SEO score that is "low" (under)', 'help' => '', 'default' => 50 ),
 				'AW_SI_KEEP_DAYS' => array( 'type' => 'int', 'label' => 'Daily figures kept (days)', 'help' => 'Older days become monthly totals.', 'default' => 90 ),
-				'AW_SI_SPIKE_RATIO' => array( 'type' => 'int', 'label' => 'Sourcing spike: times the usual', 'help' => '', 'default' => 3 ),
-				'AW_SI_SPIKE_MIN' => array( 'type' => 'int', 'label' => 'Sourcing spike: items that day at least', 'help' => '', 'default' => 3 ),
-				'AW_SI_SPIKE_WINDOW' => array( 'type' => 'int', 'label' => 'Sourcing spike: usual = average of days', 'help' => '', 'default' => 14 ),
 			),
 		),
 		'rank-math-schema' => array(
@@ -302,6 +299,15 @@ function aw_seo_modules(): array {
 			'fields' => array(
 				'AW_LLMS_PAGE_ORDER' => array( 'type' => 'list', 'label' => 'Page order', 'help' => 'Page slugs in order, one per line; "/" is the home page.', 'default' => array( '', 'news', 'library', 'resources', 'directory', 'opportunities', 'campaigns', 'press-coverage', 'categories', 'about', 'editorial-policy', 'corrections', 'contact', 'privacy-policy', 'terms', 'disclaimer', 'volunteer', 'claim' ) ),
 				'AW_LLMS_GUIDE_TYPES' => array( 'type' => 'list', 'label' => 'Guide tags', 'help' => 'Tags whose Resources items are listed as guides. One per line.', 'default' => array( 'guide', 'faq' ) ),
+			),
+		),
+		'markdown' => array(
+			'label'  => 'Markdown for agents',
+			'switch' => true,
+			'files'  => array( 'markdown' ),
+			'desc'   => 'Home and single pages as Markdown when a request asks for text/markdown; browsers get the HTML.',
+			'fields' => array(
+				'AW_MD_VARY_HTML' => array( 'type' => 'int', 'label' => 'Vary: Accept on the HTML (1 on, 0 off)', 'help' => 'Set 0 if the CDN stops storing Home and single pages (x-hcdn-cache-status never HIT).', 'default' => 1 ),
 			),
 		),
 		'analysis' => array(

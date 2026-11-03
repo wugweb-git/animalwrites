@@ -1,0 +1,157 @@
+<?php
+/**
+ * Site icons beside the referring sources on the Overview (Top referrers, AI referrals, Campaigns by source).
+ *
+ * The icon comes from the publishers' icons (aw_favicon_url() in Kits Core) when the host is a known publisher, else
+ * from option aw_si_ref_icons (host => attachment ID, 0 = tried and none found). That option fills on Kits Core's hourly
+ * aw_fetch_favicons event, five hosts a run: Google's favicon service, then the host's /favicon.ico, saved once into
+ * the Media Library as "Favicon: host". Nothing is fetched while a page is drawn; until then a core dashicon shows.
+ *
+ * @package aw-seo-extras
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+const AW_SI_REF_ICONS = 'aw_si_ref_icons';
+
+/**
+ * The site a GA4 source stands for: "ig" and l.instagram.com are Instagram, t.co is X, and so on. '' when the source is
+ * not a site (direct, a campaign name).
+ *
+ * @param string $src GA4 session source.
+ */
+function aw_si_ref_host( string $src ): string {
+	$src   = strtolower( trim( $src ) );
+	$alias = array(
+		'ig'               => 'instagram.com',
+		'instagram'        => 'instagram.com',
+		'l.instagram.com'  => 'instagram.com',
+		'facebook'         => 'facebook.com',
+		'm.facebook.com'   => 'facebook.com',
+		'l.facebook.com'   => 'facebook.com',
+		'lm.facebook.com'  => 'facebook.com',
+		't.co'             => 'x.com',
+		'twitter.com'      => 'x.com',
+		'linkedin'         => 'linkedin.com',
+		'lnkd.in'          => 'linkedin.com',
+		'reddit'           => 'reddit.com',
+		'out.reddit.com'   => 'reddit.com',
+		'whatsapp'         => 'whatsapp.com',
+		'wa.me'            => 'whatsapp.com',
+		'web.whatsapp.com' => 'whatsapp.com',
+		'telegram'         => 'telegram.org',
+		't.me'             => 'telegram.org',
+		'l.threads.com'    => 'threads.com',
+		'l.threads.net'    => 'threads.com',
+	);
+	if ( isset( $alias[ $src ] ) ) {
+		return $alias[ $src ];
+	}
+	$host = preg_replace( '/^www\./', '', $src );
+	return preg_match( '/^[a-z0-9-]+(\.[a-z0-9-]+)+$/', (string) $host ) ? (string) $host : '';
+}
+
+/**
+ * The icon of a source as HTML (16 px, decorative: the name is printed beside it).
+ *
+ * @param string $src GA4 session source.
+ */
+function aw_si_ref_icon( string $src ): string {
+	$host = aw_si_ref_host( $src );
+	$url  = '' !== $host && function_exists( 'aw_favicon_url' ) ? aw_favicon_url( $host ) : '';
+	if ( '' === $url && '' !== $host ) {
+		$id  = (int) ( ( (array) get_option( AW_SI_REF_ICONS, array() ) )[ $host ] ?? 0 );
+		$url = $id ? (string) wp_get_attachment_image_url( $id, 'thumbnail' ) : '';
+	}
+	if ( '' === $url ) {
+		return '<span class="dashicons dashicons-admin-site-alt3" aria-hidden="true"></span>';
+	}
+	return '<img src="' . esc_url( $url ) . '" alt="" width="16" height="16" loading="lazy" decoding="async">';
+}
+
+/**
+ * A source with its icon, as HTML.
+ *
+ * @param string $src GA4 session source.
+ */
+function aw_si_ref_html( string $src ): string {
+	return aw_si_ref_icon( $src ) . ' ' . esc_html( $src );
+}
+
+/** The hosts the Overview shows (the 90 days of referral and AI rows) that have no icon yet and were not tried. */
+function aw_si_ref_icons_wanted(): array {
+	global $wpdb;
+	if ( ! function_exists( 'aw_si_ready' ) || ! aw_si_ready() ) {
+		return array();
+	}
+	$o     = aw_si_table( 'obs' );
+	$since = ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( '-90 days' )->format( 'Y-m-d' );
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+	$srcs = (array) $wpdb->get_col( $wpdb->prepare( "SELECT txt FROM {$o} WHERE src = 'ga4' AND metric IN ('ref', 'ai') AND period = 'day' AND d >= %s GROUP BY txt ORDER BY SUM(value) DESC LIMIT 60", $since ) );
+	$have = (array) get_option( AW_SI_REF_ICONS, array() );
+	$want = array();
+	foreach ( $srcs as $src ) {
+		$host = aw_si_ref_host( (string) $src );
+		if ( '' !== $host && ! array_key_exists( $host, $have ) && ( ! function_exists( 'aw_favicon_url' ) || '' === aw_favicon_url( $host ) ) ) {
+			$want[ $host ] = true;
+		}
+	}
+	return array_keys( $want );
+}
+
+// Kits Core's hourly favicon run: also fetch the icons of the referring sites (five a run at most).
+add_action(
+	'aw_fetch_favicons',
+	function () {
+		$want = array_slice( aw_si_ref_icons_wanted(), 0, 5 );
+		if ( ! $want ) {
+			return;
+		}
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+		require_once ABSPATH . 'wp-admin/includes/image.php';
+		require_once ABSPATH . 'wp-admin/includes/media.php';
+		$have  = (array) get_option( AW_SI_REF_ICONS, array() );
+		$types = array(
+			'image/png'                => 'png',
+			'image/x-icon'             => 'ico',
+			'image/vnd.microsoft.icon' => 'ico',
+			'image/jpeg'               => 'jpg',
+			'image/gif'                => 'gif',
+			'image/webp'               => 'webp',
+		);
+		foreach ( $want as $host ) {
+			$att = 0;
+			foreach ( array( 'https://www.google.com/s2/favicons?sz=64&domain=' . rawurlencode( $host ), 'https://' . $host . '/favicon.ico' ) as $from ) {
+				$tmp = download_url( $from, 15 );
+				if ( is_wp_error( $tmp ) ) {
+					continue;
+				}
+				$type = wp_get_image_mime( $tmp );
+				if ( ! $type || filesize( $tmp ) < 100 ) {
+					wp_delete_file( $tmp );
+					continue;
+				}
+				$id = media_handle_sideload(
+					array(
+						'name'     => 'favicon-' . sanitize_title( $host ) . '.' . ( $types[ $type ] ?? 'png' ),
+						'tmp_name' => $tmp,
+					),
+					0,
+					'Favicon: ' . $host
+				);
+				if ( is_wp_error( $id ) ) {
+					wp_delete_file( $tmp );
+					continue;
+				}
+				update_post_meta( $id, '_aw_favicon_host', $host );
+				$att = (int) $id;
+				break;
+			}
+			$have[ $host ] = $att;
+		}
+		update_option( AW_SI_REF_ICONS, $have, false );
+	},
+	30
+);

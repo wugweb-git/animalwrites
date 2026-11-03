@@ -35,8 +35,7 @@
 .aw-camp--lab-rules .aw-camp-poster :is(.aw-camp-stamp, .aw-cd-when) { border-color: var(--camp-line); }
 .aw-camp--lab-rules .aw-camp-dark .aw-camp-gap { box-shadow: inset 0 0 0 2px var(--camp-line); }
 .aw-camp--lab-rules .aw-camp-dark .aw-camp-gap > .kit-ico { color: var(--camp-line); }
-.aw-camp--lab-rules .aw-camp-dark .aw-camp-tier-bar { background: linear-gradient(to right, var(--camp-line) var(--fill), rgb(255 255 255 / 0.12) var(--fill)); }
-@media (min-width: 1200px) { .aw-camp--lab-rules .aw-camp-dark .aw-camp-tier-bar { background: linear-gradient(to top, var(--camp-line) var(--fill), rgb(255 255 255 / 0.12) var(--fill)); } }
+.aw-camp--lab-rules .aw-camp-dark .aw-camp-tier-bar { background: linear-gradient(to right, var(--camp-line) var(--aw-tier-fill), rgb(255 255 255 / 0.16) var(--aw-tier-fill)); }
 /* Diwali 2026 (firecrackers and animals): marigold on paper, a night-sky dark band. */
 .aw-camp--diwali {
 	--camp-primary: #a14a05; /* marigold, deepened so white text on it passes 4.5:1 */
@@ -292,22 +291,50 @@
 .aw-camp-grid > :first-child .aw-camp-card-ico { background: rgb(255 255 255 / 0.15); color: var(--camp-on-mark); }
 .aw-camp-grid > :first-child .aw-rule-chip { --kit-chip-border: var(--camp-on-mark); }
 
-/* Pain scale: four steps, the bar grows with the pain */
+/* Pain scale: a pain meter (owner, 3 Nov 2026: thin, animated, mobile first). Each step's bar is four segments, as many
+   lit as the step's level; the segments charge once, step after step, when the ladder first comes on screen. On phones a
+   rail down the left joins the steps and fills as the reader scrolls past each one; the two steps CCSEA reviews carry a
+   crimson node. campaign-lab.js adds is-reveal / is-in (the fill) and is-live / is-on / --aw-seg (the rail); without it,
+   or with reduced motion, every bar and the rail show full and still. */
+@property --aw-tier-fill { syntax: "<percentage>"; inherits: true; initial-value: 100%; }
 .aw-camp-ladder { list-style: none; margin: var(--kit-space-5) 0; padding: 0; display: grid; gap: var(--kit-space-5); grid-template-columns: 1fr; }
 @media (min-width: 768px) { .aw-camp-ladder { grid-template-columns: repeat(2, 1fr); } }
-@media (min-width: 1200px) { .aw-camp-ladder { grid-template-columns: repeat(4, 1fr); } }
+@media (min-width: 1200px) { .aw-camp-ladder { grid-template-columns: repeat(4, 1fr); align-items: start; } } /* side by side, the four bars read as one gauge; the bar stays thin on desktop (owner, 3 Nov 2026: the 6rem block read as a missing picture) */
 /* Tiers are H3 under the section H2 (owner, 25 Oct) with the look they had as H4: aw.css gives content H3s line-height 1.25 !important */
 .aw-camp .aw-camp-ladder .aw-camp-tier h3 { font-size: var(--kit-type-h3) !important; line-height: 1.3 !important; }
 .aw-camp-tier h3 { margin: 0 0 var(--kit-space-2); font-size: var(--kit-type-h3); font-weight: 800; }
 .aw-camp-tier p { margin: 0 0 var(--kit-space-2); }
-.aw-camp-tier { --fill: 100%; }
+.aw-camp-tier { --fill: 100%; position: relative; }
 .aw-camp-tier--1 { --fill: 25%; }
 .aw-camp-tier--2 { --fill: 50%; }
 .aw-camp-tier--3 { --fill: 75%; }
-.aw-camp-tier-bar { display: block; height: 0.75rem; margin-bottom: var(--kit-space-3); border-radius: var(--kit-radius-pill); background: linear-gradient(to right, var(--camp-mark) var(--fill), rgb(255 255 255 / 0.12) var(--fill)); }
-@media (min-width: 1200px) {
-	.aw-camp-ladder { align-items: start; }
-	.aw-camp-tier-bar { height: 6rem; border-radius: var(--kit-radius-control); background: linear-gradient(to top, var(--camp-mark) var(--fill), rgb(255 255 255 / 0.08) var(--fill)); }
+/* The meter: the 0.75rem bar cut into four segments a --kit-space-1 apart (the mask is one gap wider than the bar, so the
+   last segment ends flush) */
+.aw-camp-tier-bar {
+	--aw-tier-fill: var(--fill);
+	display: block; height: 0.75rem; margin-bottom: var(--kit-space-3); border-radius: var(--kit-radius-control);
+	background: linear-gradient(to right, var(--camp-mark) var(--aw-tier-fill), rgb(255 255 255 / 0.16) var(--aw-tier-fill));
+	-webkit-mask: repeating-linear-gradient(to right, #000 0 calc(25% - var(--kit-space-1)), transparent 0 25%) 0 0 / calc(100% + var(--kit-space-1)) 100% no-repeat;
+	mask: repeating-linear-gradient(to right, #000 0 calc(25% - var(--kit-space-1)), transparent 0 25%) 0 0 / calc(100% + var(--kit-space-1)) 100% no-repeat;
+	transition: filter var(--kit-motion-base) var(--kit-motion-ease);
+}
+.aw-camp-ladder.is-reveal .aw-camp-tier-bar { --aw-tier-fill: 0%; }
+.aw-camp-ladder.is-reveal.is-in .aw-camp-tier-bar { --aw-tier-fill: var(--fill); transition: --aw-tier-fill calc(var(--kit-motion-slow) * 2) var(--kit-motion-ease) calc(var(--i, 0) * 160ms); }
+@media (hover: hover) and (pointer: fine) { .aw-camp-dark .aw-camp-tier:hover .aw-camp-tier-bar { filter: drop-shadow(0 0 var(--kit-space-2) rgb(255 255 255 / 0.55)); } }
+/* Phones: the rail. A node beside each bar, and a line from each node down to the next. */
+@media (max-width: 767px) {
+	.aw-camp-ladder { padding-inline-start: var(--kit-space-5); }
+	.aw-camp-tier::before { content: ""; position: absolute; z-index: 1; inset-block-start: 0; inset-inline-start: calc(-1 * var(--kit-space-5)); width: 0.75rem; height: 0.75rem; border-radius: 50%; background: var(--camp-line, var(--kit-color-on-ink)); box-shadow: 0 0 0 var(--kit-space-1) rgb(255 255 255 / 0.16); transition: background-color var(--kit-motion-base) var(--kit-motion-ease), box-shadow var(--kit-motion-base) var(--kit-motion-ease); }
+	.aw-camp-tier:is(.aw-camp-tier--3, .aw-camp-tier--4)::before { background: var(--camp-mark); box-shadow: inset 0 0 0 2px var(--camp-line, var(--kit-color-on-ink)), 0 0 0 var(--kit-space-1) rgb(255 255 255 / 0.16); }
+	.aw-camp-tier:not(:last-child)::after { content: ""; position: absolute; inset-block-start: 0.75rem; inset-inline-start: calc(0.375rem - 1px - var(--kit-space-5)); width: 2px; height: calc(100% - 0.75rem + var(--kit-space-5)); background: linear-gradient(to bottom, var(--camp-line, var(--kit-color-on-ink)) var(--aw-seg, 100%), rgb(255 255 255 / 0.16) var(--aw-seg, 100%)); }
+	.aw-camp-ladder.is-live .aw-camp-tier:not(.is-on)::before { background: var(--camp-dark); box-shadow: inset 0 0 0 2px rgb(255 255 255 / 0.45); }
+	.aw-camp-ladder.is-live .aw-camp-tier.is-on::before { animation: aw-tier-node var(--kit-motion-slow) var(--kit-motion-ease) 1; }
+}
+@keyframes aw-tier-node { 50% { transform: scale(1.35); } }
+@media (prefers-reduced-motion: reduce) {
+	.aw-camp-tier-bar, .aw-camp-tier::before { transition: none; }
+	.aw-camp-ladder.is-reveal .aw-camp-tier-bar { --aw-tier-fill: var(--fill); }
+	.aw-camp-ladder.is-live .aw-camp-tier.is-on::before { animation: none; }
 }
 .aw-camp-tier-who { display: inline-flex; align-items: center; gap: var(--kit-space-1); padding: var(--kit-space-1) var(--kit-space-2); border-radius: var(--kit-radius-control); background: rgb(255 255 255 / 0.1); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-strong); }
 .aw-camp-tier-who.is-ext { background: var(--camp-mark); }
@@ -420,6 +447,8 @@
 .aw-letter-ground-list { display: grid; gap: var(--kit-space-3); grid-template-columns: 1fr; }
 @media (min-width: 768px) { .aw-letter-ground-list { grid-template-columns: repeat(2, 1fr); } }
 .aw-letter-ground strong { display: block; font-size: var(--kit-type-base); }
+.aw-letter-ground[hidden] { display: none !important; }
+.aw-letter-more { margin-top: var(--kit-space-4); }
 .aw-letter-meta { display: grid; gap: var(--kit-space-1); margin: 0 0 var(--kit-space-3); padding: var(--kit-space-4); border-radius: var(--kit-radius-card); background: var(--camp-mark, var(--kit-color-ink)); color: var(--camp-on-mark, var(--kit-color-on-ink)); }
 .aw-letter-meta strong { color: inherit; }
 .aw-letter-to { display: flex; align-items: center; gap: var(--kit-space-2); font-size: clamp(1.25rem, 1rem + 1vw, 1.75rem); font-weight: 800; letter-spacing: -0.02em; overflow-wrap: anywhere; }
@@ -816,6 +845,25 @@
 .aw-camp.aw-camp #latest .kit-card { flex-direction: row; align-items: center; gap: var(--kit-space-4); height: 100%; box-sizing: border-box; padding: var(--kit-space-5); background: var(--kit-color-surface-soft); }
 .aw-camp.aw-camp #latest .kit-card > .kit-card-media { flex: none; width: var(--kit-thumb-lg); max-width: 40%; margin: 0; border-radius: var(--kit-radius-media); overflow: hidden; }
 .aw-camp.aw-camp #latest .kit-card > .kit-card-body { flex: 1; min-width: 0; padding: 0; }
+/* Below 1200 the picture beside the whole body left the text 165px wide: the meta row broke in two and Kits cut titles
+   to three lines with "…". Here the meta row runs the card's width on top, a square picture (--kit-thumb-sm on phones,
+   --kit-thumb-md on tablets) sits beside the title, and the title shows in full. */
+@media (max-width: 1199px) {
+	.aw-camp.aw-camp #latest .kit-card { display: grid; grid-template-columns: var(--kit-thumb-md) minmax(0, 1fr); grid-template-areas: "meta meta" "media title"; align-items: start; gap: var(--kit-space-3) var(--kit-space-4); }
+	.aw-camp.aw-camp #latest .kit-card > .kit-card-body { display: contents; }
+	/* One row when the date, place and first chip fit; on a narrower card the chip goes under the date whole, never cut.
+	   Only the first chip sets the chips' minimum width (later chips wrap their words, and Kits hides them off the row). */
+	.aw-camp.aw-camp #latest .kit-card-metarow { grid-area: meta; }
+	.aw-camp.aw-camp #latest .kit-card-metarow > .kit-card-meta { flex: none; }
+	.aw-camp.aw-camp #latest .kit-card-metarow > .kit-card-chips { flex: 1 1 0; min-width: min-content; }
+	.aw-camp.aw-camp #latest .kit-card-metarow > .kit-card-chips > :first-child { flex: none; }
+	.aw-camp.aw-camp #latest .kit-card-metarow > .kit-card-chips > :not(:first-child) .kit-tag-text { white-space: normal; }
+	.aw-camp.aw-camp #latest .kit-card > .kit-card-media { grid-area: media; width: 100%; max-width: none; aspect-ratio: 1; }
+	.aw-camp.aw-camp #latest .kit-card > .kit-card-media img { width: 100%; height: 100%; object-fit: cover; }
+	.aw-camp.aw-camp #latest .kit-card-title { grid-area: title; margin: 0; }
+	.aw-camp.aw-camp #latest .kit-card-title a { display: block; -webkit-line-clamp: none; overflow: visible; }
+}
+@media (max-width: 767px) { .aw-camp.aw-camp #latest .kit-card { grid-template-columns: var(--kit-thumb-sm) minmax(0, 1fr); } }
 
 /* What happens next: the row of four from 768 (not only from 1200), the cards white */
 .aw-camp.aw-camp :is(#next, #next-closed) .aw-camp-steps > li:not(:first-child) { background: var(--kit-color-surface-soft); }
@@ -903,3 +951,67 @@
 	.aw-camp.aw-camp #share :is(.aw-share-cta-btn, .aw-share-pic img) { transition: none; }
 	.aw-camp.aw-camp #share .aw-share-cta-btn:active, .aw-camp.aw-camp #share .aw-share-cta-btn:hover, .aw-camp.aw-camp #share .aw-share-pic:hover img { transform: none; }
 }
+
+/* Focus on the dark surfaces (WCAG 1.4.11, 3:1 for the focus ring): the site's blue ring (--kit-color-focus) is about
+   1.3:1 on the crimson hero and the lead tile, and under 3:1 on the dark poster and dark sections, so there the ring is
+   white (--kit-color-on-ink), as on the Share band. */
+.aw-camp--lab-rules :is(.aw-camp-hero, .aw-camp-poster, .aw-camp-dark, .aw-camp-grid > .aw-camp-card:first-child) { --kit-color-focus: var(--kit-color-on-ink); }
+/* The phone bar never covers text or focus (WCAG 2.4.11): the page keeps the bar's height free at the bottom (as in
+   campaign.css). Bar height = its button (--kit-btn-height) + the bar's own padding (--kit-space-2 above and below) +
+   the safe area. */
+@media (max-width: 767px) {
+	html:has(.aw-camp--lab-rules .aw-sticky-cta) { scroll-padding-bottom: calc(var(--kit-btn-height) + 2 * var(--kit-space-2) + env(safe-area-inset-bottom)); }
+}
+/* The line beside the main share button, in the band's text colour at --kit-type-sm */
+.aw-camp.aw-camp #share .aw-share-cta-note { font-size: var(--kit-type-sm); color: var(--camp-on-mark); }
+/* Today vs the draft on phones: one card per row, as the Supreme Court page's tables (above), so the Draft 2026 column
+   is never off the side of the screen (it was at 320). The row's name heads the card, then Today and Draft 2026 under
+   the table's own column headings; the column headings stay in the page for screen readers. From 768 the table as before. */
+@media (max-width: 767px) {
+	.aw-camp--lab-rules .aw-camp-compare .wp-block-table { overflow: visible; }
+	.aw-camp--lab-rules .aw-camp-compare .wp-block-table table { display: block; min-width: 0; border: 0; border-radius: 0; background: none; box-shadow: none; overflow: visible; }
+	.aw-camp--lab-rules .aw-camp-compare .wp-block-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+	.aw-camp--lab-rules .aw-camp-compare .wp-block-table :is(tbody, tr, td) { display: block; }
+	.aw-camp--lab-rules .aw-camp-compare .wp-block-table tr { margin: 0 0 var(--kit-space-3); padding: var(--kit-space-5); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); box-shadow: inset 0 0 0 1px var(--kit-color-line); }
+	.aw-camp--lab-rules .aw-camp-compare .wp-block-table tbody td:nth-child(n) { padding: 0 0 var(--kit-space-3); border: 0; background: none; }
+	.aw-camp--lab-rules .aw-camp-compare .wp-block-table tbody td:last-child { padding-bottom: 0; }
+	.aw-camp--lab-rules .aw-camp-compare .wp-block-table tbody td:first-child { font-size: var(--kit-type-h4); font-weight: var(--kit-weight-bold); line-height: var(--kit-leading-heading); }
+	.aw-camp--lab-rules .aw-camp-compare .wp-block-table td:not(:first-child)::before { display: block; margin-bottom: var(--kit-space-1); color: var(--camp-meta); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-bold); }
+	.aw-camp--lab-rules .aw-camp-compare .wp-block-table td:nth-child(2)::before { content: "Today"; }
+	.aw-camp--lab-rules .aw-camp-compare .wp-block-table td:nth-child(3)::before { content: "Draft 2026"; color: var(--camp-mark); }
+}
+/* Read the law and the record on phones: at 320 the cards ran 19px past the screen's edge, sized to the longest source
+   tag. Below 768 the list's one column may shrink, so may the card's text column (aw.css gives it --kit-body-min), the
+   source tag wraps instead of being cut (kit.css keeps tags to one 28px line with an ellipsis), and the title shows in
+   full (the rule after this block). */
+@media (max-width: 767px) {
+	.aw-camp--lab-rules #read .wp-block-post-template { grid-template-columns: minmax(0, 1fr); }
+	.aw-camp--lab-rules #read .kit-card[class*="kit-card--stacked"] > .kit-card-body { min-width: 0; }
+	.aw-camp--lab-rules #read .kit-card .kit-card-chips { height: auto; overflow: visible; }
+	.aw-camp--lab-rules #read .kit-card .kit-tag { height: auto; padding-block: var(--kit-space-1); border-radius: var(--kit-radius-control); white-space: normal; }
+	.aw-camp--lab-rules #read .kit-card .kit-tag-text { white-space: normal; overflow: visible; text-overflow: clip; }
+}
+/* Library titles show in full at every width: from 768 Kits' three-line cut ended 9 of the 12 titles in "…" */
+.aw-camp--lab-rules #read .kit-card .kit-card-title a { display: inline; -webkit-line-clamp: unset; overflow: visible; }
+/* Rule chips on phones: the chip opens the rule's own words, so it is a 44px target (--kit-size-target) like the page's
+   other buttons; the Kits chip is 28px. The pain scale's two chips too (they were 28px), and the
+   "Read the full draft" link (24px). */
+@media (max-width: 767px) {
+	.aw-camp--lab-rules :is(.aw-rule-chip, .aw-camp-more) { min-height: var(--kit-size-target); }
+}
+/* The letter on phones (campaign-lab.js): folded, its first 14rem (the box's phone height before) fading out over
+   --kit-space-8, with the button under it; open, the whole letter in the page, no scroll box inside the page. From 768
+   the button is hidden and the box scrolls as before. */
+.aw-letter-whole { margin-top: var(--kit-space-3); }
+@media (min-width: 768px) { .aw-letter-whole { display: none; } }
+@media (max-width: 767px) {
+	.aw-letter .aw-letter-preview { max-height: none; overflow: visible; }
+	.aw-letter .aw-letter-preview.is-folded { max-height: 14rem; overflow: hidden; -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - var(--kit-space-8)), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - var(--kit-space-8)), transparent); }
+}
+/* Guides under the sections they explain (owner, 3 Nov 2026): each link a 44px target (--kit-size-target) in body type,
+   the lines of one section kept together; on the dark pain-scale section the link and its icon take the on-ink colour
+   (the site blue is about 2.9:1 there, WCAG 1.4.3 needs 4.5:1). */
+.aw-camp--lab-rules .aw-camp-note:has(> a[href*="/resources/"]) { font-size: var(--kit-type-base); }
+.aw-camp--lab-rules .aw-camp-note:has(> a[href*="/resources/"]) + .aw-camp-note:has(> a[href*="/resources/"]) { margin-block-start: 0; }
+.aw-camp--lab-rules .aw-camp-note > a[href*="/resources/"] { display: flex; align-items: center; min-height: var(--kit-size-target); }
+.aw-camp--lab-rules .aw-camp-dark .aw-camp-note:has(> a[href*="/resources/"]) > :is(a, .kit-ico) { color: var(--kit-color-on-ink); }

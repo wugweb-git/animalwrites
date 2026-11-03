@@ -282,3 +282,21 @@ add_action(
 		);
 	}
 );
+
+// One-time: press items 14205 and 14206 were imported with a web address as their focus keyword ("https www facebook
+// com"). Press coverage has no Rank Math box and Rank Math's REST refuses the type, so it is cleared here once, only
+// while it still holds that exact value. Remove this block once aw_seo_press_kw_1103 is set on live.
+add_action(
+	'admin_init',
+	function () {
+		if ( get_option( 'aw_seo_press_kw_1103' ) || ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+		foreach ( array( 14205, 14206 ) as $id ) {
+			if ( 'https www facebook com' === trim( (string) get_post_meta( $id, 'rank_math_focus_keyword', true ) ) ) {
+				delete_post_meta( $id, 'rank_math_focus_keyword' );
+			}
+		}
+		update_option( 'aw_seo_press_kw_1103', 1, false );
+	}
+);

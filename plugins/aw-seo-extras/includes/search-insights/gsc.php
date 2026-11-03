@@ -177,8 +177,6 @@ function aw_si_gsc_fetch_day( $module, string $day, float $until = 0 ) {
  * @return int|WP_Error Rows written, or why the day was not replaced.
  */
 function aw_si_gsc_store_day( string $day, array $data ) {
-	global $wpdb;
-	$o      = aw_si_table( 'obs' );
 	$labels = array();
 	foreach ( array( 'q', 'qp' ) as $key ) {
 		foreach ( $data[ $key ] as $r ) {
@@ -186,7 +184,6 @@ function aw_si_gsc_store_day( string $day, array $data ) {
 		}
 	}
 	$ids  = aw_si_kw_ids( array_unique( $labels ), AW_SI_ROLE_SEARCHED );
-	$now  = aw_si_now();
 	$vals = array();
 	foreach ( $data['total'] as $r ) {
 		$vals[] = array( 0, '', 'total', $r[1], $r[2], $r[3] );
@@ -219,33 +216,17 @@ function aw_si_gsc_store_day( string $day, array $data ) {
 		$impr           = $m[4] + $v[4];
 		$merged[ $key ] = array( $m[0], $m[1], $m[2], $m[3] + $v[3], $impr, $impr ? ( $m[5] * $m[4] + $v[5] * $v[4] ) / $impr : 0 );
 	}
-	$wpdb->query( 'START TRANSACTION' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-	$ok = false !== $wpdb->query( $wpdb->prepare( "DELETE FROM {$o} WHERE src = 'gsc' AND period = 'day' AND d = %s", $day ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-	foreach ( array_chunk( array_values( $merged ), 300 ) as $chunk ) {
-		$place = array();
-		$args  = array();
-		foreach ( $chunk as $v ) {
-			$place[] = "(%d, %s, %s, 'gsc', %s, 'day', %s, %d, %d, %f, %s)";
-			array_push( $args, $v[0], mb_substr( $v[1], 0, 255 ), '' === $v[1] ? '' : md5( $v[1] ), $v[2], $day, $v[3], $v[4], round( $v[5], 2 ), $now );
-		}
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- one placeholder group per row, built above.
-		$ok = $ok && false !== $wpdb->query( $wpdb->prepare( "INSERT INTO {$o} (kw_id, page, page_key, src, metric, period, d, clicks, impr, pos, fetched) VALUES " . implode( ', ', $place ), $args ) );
-		if ( ! $ok ) {
-			break;
-		}
-	}
-	if ( ! $ok ) {
-		$error = $wpdb->last_error;
-		$wpdb->query( 'ROLLBACK' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$rows = array_map( fn( $v ) => array( $v[0], $v[1], '' === $v[1] ? '' : md5( $v[1] ), $v[2], $v[3], $v[4], $v[5] ), array_values( $merged ) );
+	$n    = aw_si_obs_replace_day( 'gsc', $day, $rows, 'day', array( 'total', 'q', 'qp', 'p' ), 'gsc' ); // only the rows this run writes
+	if ( is_wp_error( $n ) ) {
 		/* translators: 1: date, 2: database error. */
-		return new WP_Error( 'aw_si_store', sprintf( __( 'Search Console rows for %1$s could not be saved, so the earlier rows were kept: %2$s', 'aw-seo-extras' ), $day, $error ) );
+		return new WP_Error( 'aw_si_store', sprintf( __( 'Search Console rows for %1$s could not be saved, so the earlier rows were kept: %2$s', 'aw-seo-extras' ), $day, $n->get_error_message() ) );
 	}
-	$wpdb->query( 'COMMIT' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-	return count( $merged );
+	return $n;
 }
 
 /**
- * Days to fetch this run: the last 4 days, then up to 15 older days still missing within 90 days.
+ * Days to fetch this run: the last 4 days, then up to 15 older days still missing within 90 days (or the daily-figures setting, if shorter).
  *
  * @param DateTimeImmutable|null $today   Today (site time zone); for tests.
  * @param int                    $per_run Older days per run.
@@ -257,7 +238,7 @@ function aw_si_gsc_days( ?DateTimeImmutable $today = null, int $per_run = AW_SI_
 		$days[] = $today->modify( "-{$i} days" )->format( 'Y-m-d' );
 	}
 	$next  = (string) get_option( 'aw_si_backfill', '' ); // The next older day to backfill.
-	$floor = $today->modify( '-' . AW_SI_GSC_BACKFILL . ' days' )->format( 'Y-m-d' );
+	$floor = $today->modify( '-' . min( AW_SI_GSC_BACKFILL, aw_si_keep_days() ) . ' days' )->format( 'Y-m-d' ); // never a day already rolled up
 	$from  = $next && $next < end( $days ) ? $next : $today->modify( '-' . ( AW_SI_GSC_REFETCH + 1 ) . ' days' )->format( 'Y-m-d' );
 	$d     = new DateTimeImmutable( $from, wp_timezone() );
 	for ( $i = 0; $i < $per_run; $i++ ) {

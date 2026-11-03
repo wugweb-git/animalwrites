@@ -103,7 +103,9 @@ add_filter(
 );
 
 /**
- * Site search terms over the last $days days, all kinds together, most searched first.
+ * Site search terms over the last $days days, all kinds together, most searched first. WordPress search and GA4 site
+ * search count the same searches, so they are one row ("wp") with the higher of the two counts; GA4's test-event days
+ * are left out.
  *
  * @param int $days  Window.
  * @param int $limit Terms.
@@ -116,6 +118,7 @@ function aw_si_site_searches( int $days = 28, int $limit = 15 ): array {
 	}
 	$o     = aw_si_table( 'obs' );
 	$since = ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( '-' . max( 1, $days ) . ' days' )->format( 'Y-m-d' );
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
-	return (array) $wpdb->get_results( $wpdb->prepare( "SELECT txt, metric, SUM(value) n FROM {$o} WHERE ((src = 'site-search') OR (src = 'ga4' AND metric = 'search')) AND period = 'day' AND d >= %s GROUP BY txt, metric ORDER BY n DESC LIMIT %d", $since, $limit ) );
+	$skip  = aw_si_ga4_skip_sql();
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name and fixed dates only.
+	return (array) $wpdb->get_results( $wpdb->prepare( "SELECT txt, IF(metric = 'search', 'wp', metric) metric, GREATEST(SUM(IF(src = 'ga4', 0, value)), SUM(IF(src = 'ga4', value, 0))) n FROM {$o} WHERE ((src = 'site-search') OR (src = 'ga4' AND metric = 'search'{$skip})) AND period = 'day' AND d >= %s GROUP BY txt, IF(metric = 'search', 'wp', metric) ORDER BY n DESC LIMIT %d", $since, $limit ) );
 }

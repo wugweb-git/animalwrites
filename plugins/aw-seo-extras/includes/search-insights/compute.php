@@ -184,6 +184,37 @@ function aw_si_quick_sql(): string {
 }
 
 /**
+ * The effective priority: the owner's override, else the calculated one.
+ *
+ * @param string $alias Table alias with its dot (e.g. "k."), or ''.
+ */
+function aw_si_eff_sql( string $alias = '' ): string {
+	return "IF({$alias}priority_override <> '', {$alias}priority_override, {$alias}priority)";
+}
+
+/**
+ * SQL condition of each keyword view (Keywords tab, Priorities box, check list, exports), so every count uses one rule.
+ *
+ * @param string $view all, p1, p2, p3, gap, conflict, quick, notranked or entity; '' for the whole map.
+ * @return string|array<string, string> The condition of $view (1=0 when unknown), or view => condition.
+ */
+function aw_si_view_sql( string $view = '' ) {
+	$eff = aw_si_eff_sql();
+	$map = array(
+		'all'       => '1=1',
+		'p1'        => "{$eff} = 'P1'",
+		'p2'        => "{$eff} = 'P2'",
+		'p3'        => "{$eff} = 'P3'",
+		'gap'       => "status = 'gap'",
+		'conflict'  => "status = 'conflict'",
+		'quick'     => aw_si_quick_sql(),
+		'notranked' => 'roles & ' . (int) AW_SI_ROLE_TRACKED . ' AND impr28 = 0',
+		'entity'    => 'entity = 1',
+	);
+	return '' === $view ? $map : ( $map[ $view ] ?? '1=0' );
+}
+
+/**
  * Priority, status and suggested action of one keyword (used by the daily calculation and by the dry run).
  *
  * @param int|null   $trends   Trends index.
@@ -373,7 +404,12 @@ function aw_si_compute(): array {
 		}
 		if ( $changed ) {
 			$set['updated'] = aw_si_now();
-			$wpdb->update( $k, $set, array( 'id' => $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			if ( false === $wpdb->update( $k, $set, array( 'id' => $id ) ) ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+				$count['failed'] = ( $count['failed'] ?? 0 ) + 1;
+				if ( empty( $count['errors'] ) ) {
+					$count['errors'] = array( __( 'Some keyword records could not be updated: ', 'aw-seo-extras' ) . $wpdb->last_error );
+				}
+			}
 		}
 		$eff                                 = $r->priority_override ? $r->priority_override : $priority;
 		$count[ $eff ]                       = ( $count[ $eff ] ?? 0 ) + 1;

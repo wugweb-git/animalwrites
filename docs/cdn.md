@@ -13,6 +13,8 @@ Browsers get no lifetime (no `max-age`), so they always ask again. A URL with an
 
 ## What purges the cache (2 Nov 2026)
 
+> 3 Nov 2026: LiteSpeed Cache is active on live again (`wp plugin list`; pages answer `x-litespeed-cache: hit`). There are two caches in front of WordPress: the server's LiteSpeed page cache and the Hostinger CDN. The paragraph below describes 2 Nov.
+
 Nothing. LiteSpeed Cache is inactive on live, so its hooks do nothing: `deploy-purge.php` still runs after each deploy but has no page cache to purge, and publishing or editing a post purges nothing either (the `litespeed_purge_*` calls in the plugins are no-ops). The only cache left is the Hostinger CDN (`server: hcdn`), and WordPress cannot purge it. A change (a deploy, a new post, an edit) shows at the edge when the stored copy runs out: within 15 minutes for Home, News, hubs and campaigns (`aw_cdn_ttl` 900), within an hour for listings, Library items and Resources (`aw_cdn_ttl_long` 3600, plus up to 10 minutes stale). Each edge keeps its own copy. To show a change at once: hPanel → CDN → Purge cache (step 4 below).
 
 Checked 2 Nov 2026: `/` answers `cache-control: public, s-maxage=900`, `x-hcdn-cache-status: HIT`, edge `fra` (Frankfurt).
@@ -52,7 +54,37 @@ hPanel → **Websites** → animalwrites.in → **Manage** → **Performance** �
 3. **Respect origin cache headers.** Keep "Cache everything" off: the site decides what is stored (forms and nonce pages never are).
 4. **Purge.** **Purge cache** (or **Flush cache**) clears every edge at once: use it after a deploy that must show at once. If hPanel offers "Purge on Git deploy" or a purge API key, turn it on and tell the developers; then the lifetimes above can rise.
 
+### C. Let AI agents and crawlers past the caches (3 Nov 2026)
+
+Why: Markdown for agents and the Server tab's crawler, visitor and error counts work only when a request reaches WordPress. Today two caches answer first: the server's LiteSpeed page cache (`x-litespeed-cache: hit`, checked 3 Nov on `/about/`: an `Accept: text/markdown` request got the cached HTML) and the Hostinger CDN (`x-hcdn-cache-status: HIT`). People keep both caches; only the requests below skip them.
+
+What the site already does (code): the HTML of Home and single pages sends `Vary: Accept`, and the Markdown answer is `no-store`. If the CDN honours Vary it keeps the Markdown and HTML apart by itself (test 3 below).
+
+**C1. Server page cache (LiteSpeed): one block in `.htaccess`.** hPanel → **Websites** → animalwrites.in → **Manage** → **Files** → **File Manager** → `public_html/.htaccess` → **Edit**. Paste this as the very first lines of the file, above `# BEGIN LSCACHE`, and save:
+
+```
+# BEGIN AW agents
+<IfModule LiteSpeed>
+RewriteEngine on
+RewriteCond %{HTTP:Accept} text/markdown [NC,OR]
+RewriteCond %{HTTP_USER_AGENT} (GPTBot|OAI-SearchBot|ChatGPT-User|ClaudeBot|Claude-User|Claude-SearchBot|PerplexityBot|Perplexity-User|MistralAI-User|cohere-ai|YouBot|Googlebot|Google-InspectionTool|GoogleOther|bingbot|Applebot|Amazonbot|DuckDuckBot|YandexBot|Baiduspider|meta-externalagent|meta-webindexer|Bytespider|CCBot|PetalBot|Diffbot) [NC]
+RewriteRule .* - [E=Cache-Control:no-cache]
+</IfModule>
+# END AW agents
+```
+
+It marks only those requests "no cache" for LiteSpeed (the same switch the LiteSpeed block uses for REST requests), so they reach WordPress; nobody else's page is affected. To undo: delete the block. Download a copy of `.htaccess` before editing; if the site shows an error after saving, put the copy back.
+
+**C2. Hostinger CDN.** hPanel offers no rule by user agent or Accept header (Hostinger's CDN help lists only Cache-Control, the WordPress login and cart cookies, and Development mode). Ask Hostinger support (chat): "Please make the CDN for animalwrites.in bypass its cache for requests whose User-Agent contains any of: GPTBot, OAI-SearchBot, ChatGPT-User, ClaudeBot, Claude-User, Claude-SearchBot, PerplexityBot, Perplexity-User, MistralAI-User, cohere-ai, YouBot, Googlebot, Google-InspectionTool, GoogleOther, bingbot, Applebot, Amazonbot, DuckDuckBot, YandexBot, Baiduspider, meta-externalagent, meta-webindexer, Bytespider, CCBot, PetalBot, Diffbot; and for requests whose Accept header contains text/markdown. Or tell us whether the CDN honours the `Vary: Accept` response header." Note their answer here. Without it, crawler requests for pages the CDN holds are not counted (the Server tab says so).
+
+**Tests after C1 (and after the code with `Vary: Accept` is live):**
+
+1. `curl -s -o /dev/null -D - -H 'Accept: text/markdown' https://animalwrites.in/about/ | grep -i 'content-type\|x-litespeed-cache\|x-hcdn'` → `content-type: text/markdown`, no `x-litespeed-cache: hit`.
+2. `curl -s -o /dev/null -D - -A 'Mozilla/5.0 (compatible; GPTBot/1.2)' https://animalwrites.in/about/ | grep -i 'x-litespeed-cache\|x-hcdn'` → no `x-litespeed-cache: hit` (an `x-hcdn-cache-status: HIT` means C2 is still needed).
+3. Run `curl -s -o /dev/null -D - https://animalwrites.in/about/ | grep -i 'vary\|x-hcdn'` twice: `vary` lists `Accept`, and the second answer is `HIT`. If it never turns `HIT`, the CDN does not store pages with that Vary: set **AW SEO Plus → Settings → Markdown for agents → Vary: Accept on the HTML** to 0 and tell the developers.
+
 ## Changed
 
+- 3 Nov 2026: step C (agents and crawlers past LiteSpeed and the CDN); `Vary: Accept` on the HTML of Home and single pages; LiteSpeed Cache noted active again.
 - 2 Nov 2026: both lifetimes get fields: Animal Writes → Check site → Shared cache (CDN) (whole seconds, 0 or 60–3600, with the header pages get now).
 - 1 Nov 2026: `aw_cdn_ttl` 300 → 900 s (Home, News, hubs, campaigns). The CDN settings in B were proposed the same day.

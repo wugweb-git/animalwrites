@@ -300,7 +300,8 @@ function aw_publisher_schema() {
 				'description'   => aw_seo_plain( $desc ),
 				'logo'          => $logo ? array_filter( array( '@type' => 'ImageObject', 'url' => $logo, 'width' => (int) ( $lmeta['width'] ?? 0 ), 'height' => (int) ( $lmeta['height'] ?? 0 ) ) ) : null,
 				'email'         => $email,
-				'contactPoint'  => array( '@type' => 'ContactPoint', 'contactType' => 'customer support', 'email' => $email, 'url' => home_url( '/contact/' ) ),
+				'contactPoint'  => array( '@type' => 'ContactPoint', 'contactType' => 'customer support', 'email' => $email, 'url' => home_url( '/contact/' ), 'areaServed' => 'IN', 'availableLanguage' => array( 'en', 'hi' ) ),
+				'address'       => array( '@type' => 'PostalAddress', 'addressCountry' => 'IN' ), // the country only: no public street address or phone (owner, 3 Nov 2026)
 				'foundingDate'  => '2025-11', // the first campaign, India Writes for Its Community Dogs (November 2025)
 				'areaServed'    => array( '@type' => 'Country', 'name' => 'India', 'identifier' => 'IN' ),
 				'knowsAbout'    => is_array( $about ) ? array_values( array_map( 'aw_seo_plain', $about ) ) : null,

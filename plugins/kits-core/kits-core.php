@@ -20,6 +20,7 @@ define( 'KITS_CORE_LOADED', '1.0.0' );
 define( 'KITS_CORE_DIR', __DIR__ . '/' );
 
 require_once KITS_CORE_DIR . 'includes/admin-table.php';
+require_once KITS_CORE_DIR . 'includes/dashboard-cards.php';
 require_once KITS_CORE_DIR . 'includes/admin-home.php';
 require_once KITS_CORE_DIR . 'includes/altcha.php';
 require_once KITS_CORE_DIR . 'includes/forms.php';
@@ -36,7 +37,6 @@ require_once KITS_CORE_DIR . 'includes/slugs.php';
 require_once KITS_CORE_DIR . 'includes/analytics.php';
 require_once KITS_CORE_DIR . 'includes/performance.php';
 require_once KITS_CORE_DIR . 'includes/preview.php';
-require_once KITS_CORE_DIR . 'includes/visits.php';
 require_once KITS_CORE_DIR . 'includes/sourcing.php';
 require_once KITS_CORE_DIR . 'includes/attribution.php';
 require_once KITS_CORE_DIR . 'includes/theme-updates.php';

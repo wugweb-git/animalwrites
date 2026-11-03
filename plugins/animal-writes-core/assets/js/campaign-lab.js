@@ -192,6 +192,21 @@
 			box.addEventListener('change', function () { render(); trackLater('ground_toggle', { ground: n, on: box.checked }); });
 		});
 		source.hidden = true; // the list stays in the page for readers without JavaScript
+		// Only the ticked grounds show at first; the rest open with one button (owner, 3 Nov 2026: the form was 4,400px on phones).
+		var rest = grounds.filter(function (g) { return !g.box.checked; });
+		if (rest.length) {
+			rest.forEach(function (g) { g.box.parentNode.hidden = true; });
+			var more = document.createElement('button');
+			more.type = 'button';
+			more.className = 'kit-btn kit-btn--secondary kit-btn--sm aw-letter-more';
+			more.textContent = 'Show all ' + grounds.length + ' grounds';
+			holder.parentNode.insertBefore(more, holder.nextSibling);
+			more.addEventListener('click', function () {
+				rest.forEach(function (g) { g.box.parentNode.hidden = false; });
+				more.remove();
+				rest[0].box.focus();
+			});
+		}
 	}
 	var pickedEl = form.querySelector('.aw-letter-picked');
 	function picked() {
@@ -200,6 +215,27 @@
 		pickedEl.textContent = n + ' of ' + grounds.length + ' chosen';
 	}
 	picked();
+
+	/* Phones: the letter shows its opening lines with a fade, and opens in full with one button under it, in place of a
+	   small box that scrolls inside the page (campaign-lab.css .aw-letter-whole). From 768 the button is hidden and the
+	   box is as before. Screen readers get the whole letter either way. */
+	if (preview) {
+		preview.id = preview.id || 'aw-letter-preview';
+		var whole = document.createElement('button');
+		whole.type = 'button';
+		whole.className = 'kit-btn kit-btn--secondary kit-btn--sm aw-letter-whole';
+		whole.setAttribute('aria-controls', preview.id);
+		whole.setAttribute('aria-expanded', 'false');
+		whole.textContent = 'Show the whole letter';
+		preview.classList.add('is-folded');
+		preview.parentNode.insertBefore(whole, preview.nextSibling);
+		whole.addEventListener('click', function () {
+			var open = preview.classList.toggle('is-folded') === false;
+			whole.setAttribute('aria-expanded', String(open));
+			whole.textContent = open ? 'Show less' : 'Show the whole letter';
+			if (!open && preview.getBoundingClientRect().top < 0) preview.scrollIntoView({ block: 'start' }); // back to the letter's top when it folds from below
+		});
+	}
 
 	function val(name) { return (form.elements[name].value || '').replace(/\s+/g, ' ').trim(); }
 
@@ -467,6 +503,10 @@
 		done.setAttribute('role', 'status');
 		done.setAttribute('aria-live', 'polite');
 		wrap.appendChild(b);
+		var note = document.createElement('span');
+		note.className = 'aw-share-cta-note';
+		note.textContent = 'It takes under a minute.'; // owner's line, 3 Nov 2026
+		wrap.appendChild(note);
 		wrap.appendChild(done);
 		holder.insertBefore(wrap, holder.firstChild);
 		b.addEventListener('click', function () {
@@ -650,6 +690,69 @@
 	var io = new IntersectionObserver(function (e) { if (e[0].isIntersecting) show(); }, { rootMargin: '0px 0px -10% 0px' });
 	io.observe(grid);
 	setTimeout(show, 4000);
+})();
+
+/* Pain scale (campaign-lab.css): the meters charge once, step after step, when the ladder first comes on screen (skipped
+   with reduced motion, without IntersectionObserver, or when the page opens on the ladder). On phones the rail fills as
+   the reader scrolls: a step lights once its bar passes 60% of the screen height, and the line to the next step fills
+   with it. Scroll reads are batched to one per frame and run only while the ladder is near the screen. */
+(function () {
+	var ladder = document.querySelector('.aw-camp--lab-rules .aw-camp-ladder');
+	if (!ladder) return;
+	var tiers = ladder.querySelectorAll('.aw-camp-tier');
+	var hasIO = 'IntersectionObserver' in window;
+	var still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+	if (hasIO && !still && ladder.getBoundingClientRect().top > window.innerHeight) {
+		Array.prototype.forEach.call(tiers, function (t, i) { t.style.setProperty('--i', i); });
+		ladder.classList.add('is-reveal');
+		var done = false;
+		var show = function () {
+			if (done) return;
+			done = true;
+			ladder.classList.add('is-in');
+			io.disconnect();
+			setTimeout(function () { ladder.classList.remove('is-reveal', 'is-in'); }, 1600);
+		};
+		var io = new IntersectionObserver(function (e) { if (e[0].isIntersecting) show(); }, { rootMargin: '0px 0px -20% 0px' });
+		io.observe(ladder);
+		setTimeout(show, 8000);
+	}
+
+	if (!hasIO || tiers.length < 2) return;
+	var phone = window.matchMedia('(max-width: 767px)');
+	var near = false, live = false, frame = 0;
+	function paint() {
+		frame = 0;
+		var line = window.innerHeight * 0.6;
+		var tops = Array.prototype.map.call(tiers, function (t) { return t.getBoundingClientRect().top; });
+		Array.prototype.forEach.call(tiers, function (t, i) {
+			t.classList.toggle('is-on', tops[i] < line);
+			if (i < tiers.length - 1) {
+				var seg = Math.min(1, Math.max(0, (line - tops[i]) / (tops[i + 1] - tops[i])));
+				t.style.setProperty('--aw-seg', (seg * 100).toFixed(1) + '%');
+			}
+		});
+	}
+	function onScroll() { if (near && !frame) frame = requestAnimationFrame(paint); }
+	new IntersectionObserver(function (e) { near = e[0].isIntersecting; onScroll(); }, { rootMargin: '50% 0px' }).observe(ladder);
+	function setup() {
+		if (phone.matches === live) return;
+		live = phone.matches;
+		ladder.classList.toggle('is-live', live);
+		if (live) {
+			window.addEventListener('scroll', onScroll, { passive: true });
+			window.addEventListener('resize', onScroll, { passive: true });
+			paint();
+		} else {
+			window.removeEventListener('scroll', onScroll);
+			window.removeEventListener('resize', onScroll);
+			Array.prototype.forEach.call(tiers, function (t) { t.classList.remove('is-on'); t.style.removeProperty('--aw-seg'); });
+		}
+	}
+	setup();
+	if (phone.addEventListener) phone.addEventListener('change', setup);
+	else if (phone.addListener) phone.addListener(setup);
 })();
 
 /* Phone bar: shows once the hero has scrolled away; hidden while the letter tool, the newsletter band or the footer is

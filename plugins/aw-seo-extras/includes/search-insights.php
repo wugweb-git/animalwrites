@@ -38,7 +38,13 @@ foreach ( array( 'schema', 'runs', 'sitekit', 'keywords', 'gsc', 'compute', 'rol
 // Phase 5: the monthly snapshot CSV and the rebuilt keyword map. Rank Math: SEO scores, and its Search Console rows as a backup.
 // Links (31 Oct 2026): who links to us, the Bing Webmaster monthly run and the links seed.
 // Crawler access (31 Oct 2026): weekly checks from the server and from outside (workers), in Site Health.
-foreach ( array( 'sitesearch', 'ga4', 'psi', 'clarity', 'bing', 'sources', 'pages', 'checklist', 'imports', 'snapshot', 'rankmath', 'links', 'links-seed', 'crawlcheck' ) as $aw_si_file ) {
+// Server (3 Nov 2026): crawler requests, 4xx/5xx answers and PHP errors per day, and the hPanel numbers typed by hand.
+// Dashboard (3 Nov 2026): the SEO box on the WordPress Dashboard, from the stored rows.
+// Referrer icons (3 Nov 2026): site icons beside the referring sources on the Overview.
+// Search Console types (3 Nov 2026): Discover and Google News per page, and URL Inspection index status.
+// Bing crawl (3 Nov 2026): Bing's crawl statistics weekly and keyword volumes monthly.
+// Google Alerts (3 Nov 2026): up to two alert feeds from Animal Writes → Keys, as Mention rows on the Links tab.
+foreach ( array( 'sitesearch', 'ga4', 'psi', 'clarity', 'bing', 'sources', 'pages', 'checklist', 'imports', 'snapshot', 'rankmath', 'links', 'links-seed', 'crawlcheck', 'server', 'visitors', 'selfcheck', 'dashboard', 'referrer-icons', 'gsc-types', 'bing-crawl', 'alerts', 'tool-imports' ) as $aw_si_file ) {
 	require_once __DIR__ . '/search-insights/' . $aw_si_file . '.php';
 }
 unset( $aw_si_file );
