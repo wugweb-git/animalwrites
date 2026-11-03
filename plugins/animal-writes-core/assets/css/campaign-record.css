@@ -318,21 +318,18 @@
 @media (min-width: 768px) { .aw-ed-story.aw-camp--community-dogs .aw-ed-story-figures { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 
 
-/* Timeline: a rail with a small orange stop per date; the day of posting is the filled stop */
-.aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates { display: grid; grid-template-columns: 1fr; }
-.aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates > * { position: relative; margin: 0 !important; padding: 0 0 var(--kit-space-4) var(--kit-space-5); border-left: 1px solid var(--dg-line); }
-.aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates > :last-child { padding-bottom: 0; border-left-color: transparent; }
-.aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates > *::before { content: ""; position: absolute; left: -0.3125rem; top: 0.4rem; width: 0.625rem; height: 0.625rem; box-sizing: border-box; border-radius: 50%; border: 2px solid var(--camp-primary); background: #141414; }
+/* Timeline: a rail with a small orange stop per date; the day of posting is the filled stop. A 2 x 2 on phones, a row of
+   four from 768 (one screen on a phone, layout only: the words are fixed). */
+.aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: var(--kit-space-4); }
+.aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates > * { position: relative; margin: 0 !important; padding: var(--kit-space-3) var(--kit-space-3) 0 0; border-top: 1px solid var(--dg-line); }
+.aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates > *::before { content: ""; position: absolute; left: 0; top: -0.3125rem; width: 0.625rem; height: 0.625rem; box-sizing: border-box; border-radius: 50%; border: 2px solid var(--camp-primary); background: #141414; }
 .aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates > .is-key::before { background: var(--camp-primary); }
 .aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates p { margin: 0 !important; }
 .aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates p:first-child { white-space: nowrap; }
 .aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates .has-small-font-size { margin-top: var(--kit-space-1) !important; color: rgb(255 255 255 / 0.8); }
 .aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates .is-key p:first-child { color: var(--camp-primary); }
-@media (min-width: 768px) {
-	.aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-	.aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates > *, .aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates > :last-child { padding: var(--kit-space-3) var(--kit-space-3) 0 0; border-left: 0; border-top: 1px solid var(--dg-line); }
-	.aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates > *::before { left: 0; top: -0.3125rem; }
-}
+@media (max-width: 767px) { .aw-ed-story.aw-camp--community-dogs .aw-ed-story-cols { gap: var(--kit-space-5); } }
+@media (min-width: 768px) { .aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 
 /* Photographs: four of the campaign's own pictures as even squares, a 2 x 2 beside the words (a row of four below 1200) */
 .aw-ed-story.aw-camp--community-dogs .aw-ed-story-photos { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--kit-space-2); }
