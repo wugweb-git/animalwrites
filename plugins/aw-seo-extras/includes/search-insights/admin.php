@@ -131,6 +131,7 @@ function aw_si_load(): void {
 		add_meta_box( 'aw-si-site-search', __( 'Searches on our site (28 days, minimum)', 'aw-seo-extras' ), 'aw_si_box_site_search', $screen, 'normal' );
 		add_meta_box( 'aw-si-gaps', __( 'Content gaps (keyword map gaps and P2)', 'aw-seo-extras' ), 'aw_si_box_gaps', $screen, 'normal' );
 		add_meta_box( 'aw-si-crawl', __( 'Crawler access (weekly)', 'aw-seo-extras' ), 'aw_si_box_crawl', $screen, 'normal' );
+		add_meta_box( 'aw-si-bing-crawl', __( 'Bing crawl (12 weeks)', 'aw-seo-extras' ), 'aw_si_box_bing_crawl', $screen, 'normal' );
 		wp_enqueue_script( 'postbox' );
 		wp_add_inline_script( 'postbox', 'jQuery( function () { postboxes.add_postbox_toggles( pagenow ); } );' );
 	}
