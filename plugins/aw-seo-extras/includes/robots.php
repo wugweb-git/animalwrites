@@ -10,6 +10,8 @@
  * - Directory profiles with no contact at all, unless they have Search Console impressions: noindex.
  * - The Web Stories archive (/web-stories/) while no story is published: noindex.
  * - Every RSS/Atom feed (posts, News, Opportunities, Library, comments): X-Robots-Tag noindex, links followed (owner, 25 Oct 2026).
+ * - robots.txt: a Content-Signal line (search=yes, ai-input=yes, ai-train=no; owner, 3 Nov 2026) under User-agent: *,
+ *   added to the text Rank Math writes; every saved rule and the Sitemap line stay as they are.
  * - Any wp_robots rule another plugin adds (e.g. a staging copy's noindex): Rank Math removes every wp_robots filter,
  *   so a copy of them is kept before it starts and asked here.
  *
@@ -138,3 +140,24 @@ add_filter( 'rank_math/frontend/robots', fn( $r ) => is_singular( 'aw_listing' )
 
 // Feeds stay out of the index (owner, 25 Oct 2026): a header, as a feed has no <head>.
 add_action( 'template_redirect', fn() => is_feed() && ! headers_sent() ? header( 'X-Robots-Tag: noindex, follow' ) : null, 0 );
+
+/**
+ * The robots.txt Content-Signal (owner, 3 Nov 2026): one line under the first User-agent: * group. The rest of the file is
+ * Rank Math's saved text, unchanged. Runs after Rank Math (10) and before the staging copy's block-all (99).
+ *
+ * @param string $txt robots.txt text.
+ */
+function aw_seo_robots_content_signal( $txt ) {
+	$txt    = (string) $txt;
+	$signal = (string) apply_filters( 'aw_seo_content_signal', 'search=yes, ai-input=yes, ai-train=no' );
+	if ( '' === $signal || preg_match( '/^\s*Content-Signal\s*:/mi', $txt ) ) {
+		return $txt;
+	}
+	$line = 'Content-Signal: ' . $signal;
+	if ( preg_match( '/^User-agent:\s*\*\s*$/mi', $txt, $m, PREG_OFFSET_CAPTURE ) ) {
+		$at = $m[0][1] + strlen( $m[0][0] );
+		return substr( $txt, 0, $at ) . "\n" . $line . substr( $txt, $at );
+	}
+	return "User-agent: *\n" . $line . "\n\n" . $txt;
+}
+add_filter( 'robots_txt', 'aw_seo_robots_content_signal', 50 );
