@@ -254,7 +254,7 @@ function aw_seo_modules(): array {
 			'label'  => 'Directory sitemap',
 			'switch' => true,
 			'files'  => array( 'sitemap' ),
-			'desc'   => 'The Directory\'s place pages in Rank Math\'s sitemap.',
+			'desc'   => 'The Directory\'s place pages and the filtered lists in Rank Math\'s sitemap.',
 			'fields' => array(
 			),
 		),
