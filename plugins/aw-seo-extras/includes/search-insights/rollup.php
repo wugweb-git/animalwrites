@@ -45,6 +45,9 @@ function aw_si_rollup( bool $dry = false, int $limit = 50000 ): array {
 	$c_cut  = $today->modify( '-' . $c_keep . ' days' )->format( 'Y-m-d' );
 	// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
 	$rows = $wpdb->get_results( $wpdb->prepare( "SELECT id, kw_id, page, page_key, src, metric, d, clicks, impr, pos, value, txt FROM {$o} WHERE ( period = 'day' OR ( period = 'week' AND src = 'bing' AND metric <> 'kw-volume' ) ) AND d < %s AND ( src NOT IN ('clarity', 'clarity-dev') OR d < %s ) ORDER BY d LIMIT %d", $cutoff, $c_cut, $limit ) );
+	if ( ! $dry ) {
+		aw_si_trends_prune(); // every run, also when no daily rows are due
+	}
 	if ( $dry || ! $rows ) {
 		return array(
 			'daily'   => count( (array) $rows ),
@@ -145,7 +148,6 @@ function aw_si_rollup( bool $dry = false, int $limit = 50000 ): array {
 		return array( 'error' => sprintf( __( 'The rollup could not save the monthly rows, so the daily rows were kept: %s', 'aw-seo-extras' ), $error ) );
 	}
 	$wpdb->query( 'COMMIT' );
-	aw_si_trends_prune();
 	// phpcs:enable
 	return array(
 		'daily'   => count( $rows ),

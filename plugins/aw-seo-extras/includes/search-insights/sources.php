@@ -50,7 +50,7 @@ add_filter(
 
 /** Days the daily figures are kept before they become monthly totals (AW SEO Plus → Settings, AW_SI_KEEP_DAYS). */
 function aw_si_keep_days(): int {
-	return max( 30, defined( 'AW_SI_KEEP_DAYS' ) ? (int) AW_SI_KEEP_DAYS : 90 );
+	return max( 1, defined( 'AW_SI_KEEP_DAYS' ) ? (int) AW_SI_KEEP_DAYS : 90 );
 }
 
 /** Cron hooks of every Search Insights job, for scheduling, Delete data and deactivation. */

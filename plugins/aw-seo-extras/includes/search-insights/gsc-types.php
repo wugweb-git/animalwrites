@@ -182,7 +182,7 @@ add_action( AW_SI_GSC_TYPES_CRON, fn() => aw_si_gsc_types_run() );
 function aw_si_gsc_types_store( string $metric, string $day, array $rows ) {
 	$list = array();
 	foreach ( $rows as $path => $r ) {
-		$list[] = array( 0, (string) $path, '' === (string) $path ? '' : md5( (string) $path ), $metric, (int) $r[0], (int) $r[1], 0 );
+		$list[] = array( 0, (string) $path, '' === (string) $path ? '' : md5( (string) $path ), $metric, (int) $r[0], (int) $r[1], null );
 	}
 	return aw_si_obs_replace_day( 'gsc-types', $day, $list, 'day', array( $metric ), 'gsc' );
 }

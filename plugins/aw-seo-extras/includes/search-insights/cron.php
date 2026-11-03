@@ -38,11 +38,12 @@ function aw_si_daily( bool $by_hand = false ): array {
 	if ( ! empty( $out['seed']['error'] ) ) {
 		$errors[] = __( 'The keyword map seed file is missing, so the map was not loaded.', 'aw-seo-extras' );
 	}
+	$failed = '';
 	try {
 		$out['roles'] = aw_si_sync_roles();
 	} catch ( Throwable $e ) {
-		aw_si_run_fail( 'roles', $e->getMessage() );
-		return $out;
+		$failed       = $e->getMessage();
+		$out['roles'] = array();
 	}
 	try {
 		$out['compute'] = aw_si_compute();
@@ -59,7 +60,11 @@ function aw_si_daily( bool $by_hand = false ): array {
 	foreach ( array( 'P1', 'P2', 'P3', 'P4' ) as $p ) {
 		$info['prio'][ $p ] = (int) ( $out['compute'][ $p ] ?? 0 );
 	}
-	aw_si_run_ok( 'roles', $info );
+	if ( '' !== $failed ) {
+		aw_si_run_fail( 'roles', $failed ); // the priorities above still ran, on yesterday's roles
+	} else {
+		aw_si_run_ok( 'roles', $info );
+	}
 	return $out;
 }
 add_action( AW_SI_CRON_DAILY, fn() => aw_si_daily() );

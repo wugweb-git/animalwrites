@@ -114,7 +114,8 @@ function aw_si_link_pages( array $links, bool $keep = false ): bool {
 	$t   = aw_si_table( 'kw_pages' );
 	$now = aw_si_now();
 	$ok  = true;
-	$verb = $keep ? 'INSERT IGNORE' : 'REPLACE';
+	$verb = $keep ? 'INSERT' : 'REPLACE';
+	$tail = $keep ? ' ON DUPLICATE KEY UPDATE id = id' : ''; // keep the existing link; other errors still fail
 	foreach ( array_chunk( $links, 300 ) as $chunk ) {
 		$place = array();
 		$args  = array();
@@ -123,7 +124,7 @@ function aw_si_link_pages( array $links, bool $keep = false ): bool {
 			array_push( $args, (int) $l[0], (string) $l[1], (int) $l[2], mb_substr( (string) $l[3], 0, 255 ), md5( $l[1] . ':' . $l[2] . ':' . $l[3] ), (string) $l[4], (string) $l[5], $now );
 		}
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- one placeholder group per row, built above.
-		$ok = $ok && false !== $wpdb->query( $wpdb->prepare( "{$verb} INTO {$t} (kw_id, obj_type, obj_id, path, path_key, role, src, updated) VALUES " . implode( ', ', $place ), $args ) );
+		$ok = $ok && false !== $wpdb->query( $wpdb->prepare( "{$verb} INTO {$t} (kw_id, obj_type, obj_id, path, path_key, role, src, updated) VALUES " . implode( ', ', $place ) . $tail, $args ) );
 	}
 	return $ok;
 }
@@ -378,7 +379,7 @@ function aw_si_obs_put( int $kw_id, string $page, string $src, string $metric, s
  * @param string   $src     Source key in obs.
  * @param string   $day     Date (Y-m-d).
  * @param array    $rows    Each [kw_id, page, page_key, metric, value, txt]; with $shape 'gsc' each
- *                          [kw_id, page, page_key, metric, clicks, impressions, position].
+ *                          [kw_id, page, page_key, metric, clicks, impressions, position or null].
  * @param string   $period  Period of the rows: day, or 28d for a 28-day window ending on $day.
  * @param string[] $metrics Only these metrics are replaced (empty: every metric of the source, period and day).
  * @param string   $shape   value (value / txt columns) or gsc (clicks / impr / pos columns).
@@ -400,8 +401,13 @@ function aw_si_obs_replace_day( string $src, string $day, array $rows, string $p
 		foreach ( $chunk as $v ) {
 			array_push( $args, (int) $v[0], mb_substr( (string) $v[1], 0, 255 ), (string) $v[2], $src, (string) $v[3], $period, $day );
 			if ( $gsc ) {
-				$place[] = '(%d, %s, %s, %s, %s, %s, %s, %d, %d, %f, %s)';
-				array_push( $args, (int) $v[4], (int) $v[5], round( (float) $v[6], 2 ), $now );
+				if ( null === $v[6] ) { // no position (Discover, Google News)
+					$place[] = '(%d, %s, %s, %s, %s, %s, %s, %d, %d, NULL, %s)';
+					array_push( $args, (int) $v[4], (int) $v[5], $now );
+				} else {
+					$place[] = '(%d, %s, %s, %s, %s, %s, %s, %d, %d, %f, %s)';
+					array_push( $args, (int) $v[4], (int) $v[5], round( (float) $v[6], 2 ), $now );
+				}
 			} else {
 				$place[] = '(%d, %s, %s, %s, %s, %s, %s, %f, %s, %s)';
 				array_push( $args, (float) $v[4], mb_substr( (string) $v[5], 0, 255 ), $now );

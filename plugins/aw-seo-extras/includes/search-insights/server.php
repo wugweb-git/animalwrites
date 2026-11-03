@@ -239,9 +239,10 @@ function aw_si_srv_days(): array {
 	$rows = $wpdb->get_results( $wpdb->prepare( "SELECT option_name, option_value FROM {$wpdb->options} WHERE option_name LIKE %s ORDER BY option_name DESC", $wpdb->esc_like( 'aw_si_srv_' ) . '%' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- a prefix scan of our own options
 	$out  = array();
 	foreach ( (array) $rows as $r ) {
-		$v = maybe_unserialize( $r->option_value );
-		if ( is_array( $v ) ) {
-			$out[ substr( (string) $r->option_name, strlen( 'aw_si_srv_' ) ) ] = $v;
+		$v   = maybe_unserialize( $r->option_value );
+		$ymd = substr( (string) $r->option_name, strlen( 'aw_si_srv_' ) );
+		if ( is_array( $v ) && preg_match( '/^\d{8}$/', $ymd ) ) { // day options only, not aw_si_srv_checks
+			$out[ $ymd ] = $v;
 		}
 	}
 	return $out;

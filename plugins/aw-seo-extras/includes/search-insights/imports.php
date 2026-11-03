@@ -108,6 +108,8 @@ function aw_si_import_number( string $v ): ?float {
  * @return array{rows: int, skipped: int, error: string}
  */
 function aw_si_import( string $kind, string $raw ): array {
+	global $wpdb;
+	$o     = aw_si_table( 'obs' );
 	$other = apply_filters( 'aw_si_import_run', null, $kind, $raw ); // An import kind added by another file.
 	if ( is_array( $other ) ) {
 		return $other;
@@ -133,8 +135,6 @@ function aw_si_import( string $kind, string $raw ): array {
 				}
 				$id = (int) current( aw_si_kw_ids( array( sanitize_text_field( $cells[0] ) ), 0 ) );
 				if ( $id ) { // A new paste replaces the keyword's earlier pasted figure (the workers' rows stay).
-					global $wpdb;
-					$o = aw_si_table( 'obs' );
 					$wpdb->query( $wpdb->prepare( "DELETE FROM {$o} WHERE src = 'trends' AND metric = 'index' AND period = '12m' AND kw_id = %d AND txt = 'import'", $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
 				}
 				$put(

@@ -111,7 +111,7 @@ function aw_si_tool_import( string $tool, string $raw ): array {
 	$mcol  = (string) current( array_intersect( $head, array( 'month', 'date' ) ) ); // exact: "monthly searches" is the volume
 	$extra = array_filter(
 		array(
-			'SD'          => aw_si_import_col( $head, array( 'seo difficulty', 'sd' ) ),
+			'SD'          => aw_si_import_col( $head, array( 'seo difficulty' ) ) ? aw_si_import_col( $head, array( 'seo difficulty' ) ) : (string) current( array_intersect( $head, array( 'sd' ) ) ), // "sd" exactly: "cpc (usd)" contains it
 			'CPC'         => aw_si_import_col( $head, array( 'cpc' ) ),
 			'competition' => aw_si_import_col( $head, array( 'competition' ) ),
 			'score'       => aw_si_import_col( $head, array( 'overall', 'score' ) ),
