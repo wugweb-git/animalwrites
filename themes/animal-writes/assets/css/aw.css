@@ -1371,6 +1371,7 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 	.aw-ed-learn .aw-tasks.is-three .kit-card > .kit-card-media { width: var(--kit-thumb-lg); max-width: 40%; border-radius: var(--kit-radius-media); }
 	.aw-ed-learn .aw-tasks.is-three .kit-card > .kit-card-body { flex: 1 1 0; padding: 0; }
 	.aw-ed-learn .aw-tasks.is-three .kit-card-sum { display: none; }
+	.aw-ed-learn .aw-tasks.is-three .kit-card-meta { flex-wrap: wrap !important; } /* the read time goes under the date instead of ending in "3 min r…" (Kits keeps a card's meta row on one line) */
 }
 @container aw-guides (min-width: 912px) { .aw-ed-learn .aw-tasks.is-three { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--kit-space-grid); } }
 /* Guides on Home: meta row is the date, read time and the Guide badge (no topic chip); bigger title, a one-line
