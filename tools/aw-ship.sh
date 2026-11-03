@@ -9,12 +9,9 @@ sha=$(git rev-parse HEAD)
 server=(ssh -i ~/.ssh/hostinger_aw -p 65002 -o LogLevel=ERROR -o BatchMode=yes -o ConnectTimeout=15 u544169507@46.28.45.135)
 # No deploy while a FluentCRM campaign is sending (3 Nov 2026): Hostinger replaces aw_deploy on each pull, so for a few
 # seconds the plugins are missing, and a campaign batch that starts then sends without mailweb's mailbox (33 emails failed).
+# Same check as the Deploy check job (the site's /aw/v1/deploy-status); it refuses when the site can't say.
 # Pause the campaign in FluentCRM (Campaigns, the campaign, Pause Sending), ship, then Resume.
-sending=$("${server[@]}" 'cd ~/domains/animalwrites.in/public_html && wp db query "SELECT GROUP_CONCAT(DISTINCT c.id) FROM $(wp db prefix)fc_campaigns c JOIN $(wp db prefix)fc_campaign_emails e ON e.campaign_id = c.id WHERE c.status IN (\"working\",\"scheduled\") AND e.status IN (\"pending\",\"scheduled\",\"processing\")" --skip-column-names' 2>/dev/null | grep -v '^\s*$' | tail -1)
-if [ -n "$sending" ] && [ "$sending" != "NULL" ]; then
-  echo "REFUSING to deploy: FluentCRM campaign(s) $sending are sending. Pause them in FluentCRM, ship, then Resume."
-  exit 1
-fi
+python3 tools/ci/mail_sending_check.py || exit 1
 git push -q origin "HEAD:refs/heads/wordpress-dev"
 # GitHub can take a while to create the run, and it may sit queued behind another run: look it up by this commit and
 # wait for it (up to 10 minutes) instead of giving up. A newer push to wordpress-dev still stops the ship.

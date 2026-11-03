@@ -13,6 +13,11 @@ on:
   pull_request:
     branches: [wordpress-dev]
   workflow_dispatch:
+    inputs:
+      skip_mail_check:
+        description: "Deploy even if a FluentCRM campaign is sending, or the site can't say (emergencies only)"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -97,6 +102,12 @@ jobs:
         run: python3 tools/ci/thumb_check.py
       - name: Boot WordPress and load every page type
         run: bash tools/ci/smoke.sh
+      # Each deploy replaces the deployed folder, so mailweb is missing for a few seconds and a campaign batch that
+      # starts then fails (3 Nov 2026). A push to wordpress-dev deploys through this job, so the check lives here too,
+      # not only in tools/aw-ship.sh. It fails closed; the manual run's "skip_mail_check" overrides it.
+      - name: No deploy while a FluentCRM campaign is sending
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/wordpress-dev' && inputs.skip_mail_check != true
+        run: python3 tools/ci/mail_sending_check.py
       - name: Move the deploy branch to this commit, and mark it as a release
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/wordpress-dev'
         run: |
