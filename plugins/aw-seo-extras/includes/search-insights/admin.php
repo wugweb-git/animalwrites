@@ -125,6 +125,8 @@ function aw_si_load(): void {
 		add_meta_box( 'aw-si-referrers', __( 'Top referrers (GA4)', 'aw-seo-extras' ), 'aw_si_box_referrers', $screen, 'normal' );
 		add_meta_box( 'aw-si-campaigns', __( 'Campaigns by source (GA4, 28 days)', 'aw-seo-extras' ), 'aw_si_box_campaigns', $screen, 'normal' );
 		add_meta_box( 'aw-si-nf', __( 'Not found (404s, GA4, 28 days)', 'aw-seo-extras' ), 'aw_si_box_nf', $screen, 'normal' );
+		add_meta_box( 'aw-si-index', __( 'Index status (URL Inspection)', 'aw-seo-extras' ), 'aw_si_box_index', $screen, 'normal' );
+		add_meta_box( 'aw-si-gsc-types', __( 'Discover and Google News (Search Console, 28 days)', 'aw-seo-extras' ), 'aw_si_box_gsc_types', $screen, 'normal' );
 		add_meta_box( 'aw-si-clarity', __( 'Clarity (28 days)', 'aw-seo-extras' ), 'aw_si_box_clarity', $screen, 'normal' );
 		add_meta_box( 'aw-si-site-search', __( 'Searches on our site (28 days, minimum)', 'aw-seo-extras' ), 'aw_si_box_site_search', $screen, 'normal' );
 		add_meta_box( 'aw-si-gaps', __( 'Content gaps (keyword map gaps and P2)', 'aw-seo-extras' ), 'aw_si_box_gaps', $screen, 'normal' );
@@ -414,6 +416,10 @@ function aw_si_run_detail( string $src, array $info ): array {
 		/* translators: %s: number of rising terms. */
 		$det[] = sprintf( __( '%s rising', 'aw-seo-extras' ), $n( 'rising' ) );
 	}
+	if ( 'inspect' === $src && isset( $info['indexed'] ) ) {
+		/* translators: %s: pages indexed. */
+		$det[] = sprintf( __( '%s indexed', 'aw-seo-extras' ), $n( 'indexed' ) );
+	}
 	if ( ! empty( $info['pasted'] ) ) {
 		$det[] = __( 'pasted on the Rising tab', 'aw-seo-extras' );
 	}
@@ -519,9 +525,10 @@ function aw_si_box_ai(): void {
 	}
 	$o     = aw_si_table( 'obs' );
 	$since = ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( '-28 days' )->format( 'Y-m-d' );
-	// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
-	$by_src  = (array) $wpdb->get_results( $wpdb->prepare( "SELECT txt, SUM(value) n FROM {$o} WHERE src = 'ga4' AND metric = 'ai' AND period = 'day' AND d >= %s GROUP BY txt ORDER BY n DESC", $since ) );
-	$by_page = (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, SUM(value) n FROM {$o} WHERE src = 'ga4' AND metric = 'ai' AND period = 'day' AND d >= %s GROUP BY page ORDER BY n DESC LIMIT 10", $since ) );
+	$skip  = aw_si_ga4_skip_sql(); // The GA4 test day is left out here too, as in the other GA4 boxes.
+	// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name and fixed dates only.
+	$by_src  = (array) $wpdb->get_results( $wpdb->prepare( "SELECT txt, SUM(value) n FROM {$o} WHERE src = 'ga4' AND metric = 'ai' AND period = 'day' AND d >= %s{$skip} GROUP BY txt ORDER BY n DESC", $since ) );
+	$by_page = (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, SUM(value) n FROM {$o} WHERE src = 'ga4' AND metric = 'ai' AND period = 'day' AND d >= %s{$skip} GROUP BY page ORDER BY n DESC LIMIT 10", $since ) );
 	// phpcs:enable
 	if ( ! $by_src ) {
 		echo '<p>' . esc_html__( 'No AI referrals recorded yet (GA4 runs daily at 07:20 IST).', 'aw-seo-extras' ) . '</p>';

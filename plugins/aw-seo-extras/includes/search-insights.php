@@ -41,7 +41,8 @@ foreach ( array( 'schema', 'runs', 'sitekit', 'keywords', 'gsc', 'compute', 'rol
 // Server (3 Nov 2026): crawler requests, 4xx/5xx answers and PHP errors per day, and the hPanel numbers typed by hand.
 // Dashboard (3 Nov 2026): the SEO box on the WordPress Dashboard, from the stored rows.
 // Referrer icons (3 Nov 2026): site icons beside the referring sources on the Overview.
-foreach ( array( 'sitesearch', 'ga4', 'psi', 'clarity', 'bing', 'sources', 'pages', 'checklist', 'imports', 'snapshot', 'rankmath', 'links', 'links-seed', 'crawlcheck', 'server', 'visitors', 'selfcheck', 'dashboard', 'referrer-icons' ) as $aw_si_file ) {
+// Search Console types (3 Nov 2026): Discover and Google News per page, and URL Inspection index status.
+foreach ( array( 'sitesearch', 'ga4', 'psi', 'clarity', 'bing', 'sources', 'pages', 'checklist', 'imports', 'snapshot', 'rankmath', 'links', 'links-seed', 'crawlcheck', 'server', 'visitors', 'selfcheck', 'dashboard', 'referrer-icons', 'gsc-types' ) as $aw_si_file ) {
 	require_once __DIR__ . '/search-insights/' . $aw_si_file . '.php';
 }
 unset( $aw_si_file );
