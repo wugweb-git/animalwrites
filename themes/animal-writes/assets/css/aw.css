@@ -1630,6 +1630,16 @@ section.aw-camp-band.aw-ed-hero--campaign { box-sizing: border-box; min-height: 
    prefers-reduced-motion. The load rise is aw.js (Need help now's stagger). */
 .aw-take-part { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-grid); --kit-btn-brand-bg: var(--kit-color-accent); --kit-btn-brand-fg: var(--kit-color-on-accent); }
 @media (min-width: 768px) { .aw-take-part { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+/* Home only (aw-take-part-band--home, home.php; 3 Nov 2026, Home sections fit one 375x812 screen: 878 -> 414px at 375):
+   on phones the second and third cards are in a Show more fold (.aw-more). From 768 the fold is open with its summary
+   hidden and spans the second and third columns, its two cards in the same columns and gap as the first. */
+.aw-take-part-more-cards { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-grid); }
+.aw-take-part-more[open] > summary { margin-bottom: var(--kit-space-grid); }
+@media (min-width: 768px) {
+	.aw-take-part > .aw-take-part-more { grid-column: 2 / -1; }
+	.aw-take-part-more > summary { display: none; }
+	.aw-take-part-more-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
 .wp-block-cover.aw-take-part-card { margin: 0; min-height: var(--kit-photo-card-h); box-shadow: var(--kit-elevation-1); --kit-color-focus: var(--kit-color-on-ink); --kit-btn-height: var(--kit-size-control); transition: transform var(--kit-motion-base) var(--kit-motion-ease), box-shadow var(--kit-motion-base) var(--kit-motion-ease); }
 .wp-block-cover.aw-take-part-card > .wp-block-cover__image-background { transition: transform var(--kit-motion-base) var(--kit-motion-ease); }
 /* outranks core's content-position rule (.wp-block-cover.has-custom-content-position x2 .is-position-bottom-left: width auto, margin 0) */
