@@ -1429,7 +1429,7 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
    kit-card--block-lg card: the markup is one server render for every width and the lead stays a block card from 768,
    so the class cannot change at 767. The title is already H3 (kit.css .kit-card-title, !important). */
 @media (max-width: 767px) {
-	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li > .kit-card { gap: var(--kit-space-5); }
+	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li > :is(.kit-card, .aw-law-more > .kit-card) { gap: var(--kit-space-5); }
 	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li:first-child > .kit-card { flex-direction: row; align-items: flex-start; }
 	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li:first-child > .kit-card[class*="kit-card--block"] { gap: 0; } /* a block card: no card padding, its body padded 24px; the picture gets the same room */
 	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li:first-child > .kit-card > .kit-card-media { flex: none; width: var(--kit-thumb-lg); max-width: 40%; aspect-ratio: 4 / 3; border-radius: var(--kit-radius-media); } /* the kit-card--stacked-md picture (kit.css) */
@@ -1888,8 +1888,14 @@ section.aw-camp-band.aw-ed-hero--campaign { box-sizing: border-box; min-height: 
 .aw-ed-law .aw-news-mosaic .kit-card--stacked-md > .kit-card-media img { height: 100%; object-fit: cover; }
 @media (min-width: 768px) {
 	.aw-ed-law .aw-news-mosaic > li:nth-child(n+2) { align-self: stretch; display: flex; }
-	.aw-ed-law .aw-news-mosaic > li:nth-child(n+2) > .kit-card { flex: 1 1 auto; align-items: center; }
+	.aw-ed-law .aw-news-mosaic > li:nth-child(n+2) > :is(.kit-card, .aw-law-more > .kit-card) { flex: 1 1 auto; align-items: center; }
+	.aw-law-more > summary { display: none; }
+	.aw-law-more[open], .aw-law-more[open]::details-content { display: contents; } /* the card stands in the list item as before */
 }
+/* Home Library on phones (3 Nov 2026, Home sections fit one 375x812 screen): the third item's card sits in a Show more
+   fold (an .aw-more added by animal-writes-core home.php); 907 -> about 770. */
+.aw-law-more[open] > summary { margin-bottom: var(--kit-space-3); }
+@media (max-width: 767px) { .aw-ed-law:has(.aw-law-more:not([open])) > .aw-more { display: none; } } /* one Show more at a time: the type tiles' fold shows once the third item is open */
 @media (min-width: 768px) and (max-width: 1199px) {
 	.aw-ed-law .aw-news-list.aw-news-mosaic { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 	.aw-ed-law .aw-news-mosaic > li:first-child { grid-column: 1 / -1 !important; grid-row: 1 !important; } /* over the shared three-item rule (:has, higher specificity) */
