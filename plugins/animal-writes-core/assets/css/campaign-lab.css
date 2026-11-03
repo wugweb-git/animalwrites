@@ -990,9 +990,9 @@
 /* Library titles show in full at every width: from 768 Kits' three-line cut ended 9 of the 12 titles in "…" */
 .aw-camp--lab-rules #read .kit-card .kit-card-title a { display: inline; -webkit-line-clamp: unset; overflow: visible; }
 /* Rule chips on phones: the chip opens the rule's own words, so it is a 44px target (--kit-size-target) like the page's
-   other buttons; the Kits chip is 28px. The pain-scale's chips are left to that section. */
+   other buttons; the Kits chip is 28px. The pain scale's two chips too (they were 28px). */
 @media (max-width: 767px) {
-	.aw-camp--lab-rules .aw-rule-chip:not(#pain-scale .aw-rule-chip) { min-height: var(--kit-size-target); }
+	.aw-camp--lab-rules .aw-rule-chip { min-height: var(--kit-size-target); }
 }
 /* The letter on phones (campaign-lab.js): folded, its first 14rem (the box's phone height before) fading out over
    --kit-space-8, with the button under it; open, the whole letter in the page, no scroll box inside the page. From 768
