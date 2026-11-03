@@ -1,0 +1,117 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/theme.json",
+	"version": 3,
+	"title": "Animal Writes",
+	"settings": {
+		"color": {
+			"palette": [
+				{
+					"slug": "primary",
+					"name": "Accent",
+					"color": "#FFBE1A"
+				},
+				{
+					"slug": "primary-dark",
+					"name": "Accent ink",
+					"color": "#0062b8"
+				},
+				{
+					"slug": "secondary",
+					"name": "Ink",
+					"color": "#141414"
+				},
+				{
+					"slug": "foreground",
+					"name": "Text",
+					"color": "#1e1e1e"
+				},
+				{
+					"slug": "text-muted",
+					"name": "Muted",
+					"color": "#5f5f5f"
+				},
+				{
+					"slug": "border",
+					"name": "Line",
+					"color": "#e4ddd0"
+				},
+				{
+					"slug": "canvas",
+					"name": "Page",
+					"color": "#F4F4F4"
+				},
+				{
+					"slug": "surface",
+					"name": "Surface",
+					"color": "#efe4cf"
+				},
+				{
+					"slug": "background",
+					"name": "Raised",
+					"color": "#FFFFFF"
+				},
+				{
+					"slug": "on-ink",
+					"name": "On ink",
+					"color": "#FFFFFF"
+				},
+				{
+					"slug": "focus",
+					"name": "Focus",
+					"color": "#0062b8"
+				},
+				{
+					"slug": "error",
+					"name": "Danger",
+					"color": "#c8102e"
+				},
+				{
+					"slug": "success",
+					"name": "Success",
+					"color": "#137a3b"
+				},
+				{
+					"slug": "warning",
+					"name": "Warning",
+					"color": "#8a5a00"
+				}
+			]
+		},
+		"typography": {
+			"fontFamilies": [
+				{
+					"slug": "base",
+					"name": "Inter",
+					"fontFamily": "\"Inter\", \"Inter Fallback\", system-ui, -apple-system, \"Segoe UI\", sans-serif",
+					"fontFace": [
+						{
+							"fontFamily": "Inter",
+							"fontStyle": "normal",
+							"fontWeight": "100 900",
+							"fontDisplay": "swap",
+							"src": [
+								"file:./assets/fonts/inter/inter-latin.woff2"
+							]
+						}
+					]
+				},
+				{
+					"slug": "display",
+					"name": "Inter (headings)",
+					"fontFamily": "\"Inter\", \"Inter Fallback\", system-ui, -apple-system, \"Segoe UI\", sans-serif",
+					"fontFace": [
+						{
+							"fontFamily": "Inter",
+							"fontStyle": "normal",
+							"fontWeight": "100 900",
+							"fontDisplay": "swap",
+							"src": [
+								"file:./assets/fonts/inter/inter-latin.woff2"
+							]
+						}
+					]
+				}
+			]
+		}
+	}
+}
