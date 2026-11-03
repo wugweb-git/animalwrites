@@ -230,7 +230,8 @@ function aw_si_rising_match( string $norm, string $term, bool $look_up_posts = t
 			$page = aw_si_path( (string) get_permalink( (int) $post ) );
 		}
 	}
-	return array( $id, $page, $act );
+	// The page as it is reached now: an old address that redirects counts as its target (the same rule as Keywords).
+	return array( $id, '' !== $page ? aw_si_final_path( $page ) : '', $act );
 }
 
 /**
@@ -534,7 +535,7 @@ add_filter(
 );
 
 // Deactivating the plugin removes the spikes event, as it does Search Insights' own (aw-seo-extras.php).
-register_deactivation_hook( AW_SEO_EXTRAS_DIR . 'aw-seo-extras.php', fn() => wp_clear_scheduled_hook( AW_SI_RISING_CRON ) );
+add_filter( 'aw_si_cron_hooks', fn( $h ) => array_merge( (array) $h, array( AW_SI_RISING_CRON ) ) );
 
 // The tab's message flags are dropped from the address after showing, so sort and page links do not repeat them.
 add_filter( 'removable_query_args', fn( $args ) => array_merge( (array) $args, array( 'marked', 'pasted', 'skipped' ) ) );
@@ -747,18 +748,40 @@ function aw_si_rising_top( int $limit = 10, string $since = '' ): array {
 	return (array) $wpdb->get_results( $wpdb->prepare( "SELECT term, sources, growth, first_seen, last_seen, page, action, status FROM {$t} WHERE last_seen >= %s AND status <> 'dismissed' ORDER BY growth IS NULL, growth DESC, last_seen DESC LIMIT %d", $since, $limit ), ARRAY_A );
 }
 
+/** Overview box: the ten fastest-rising terms seen in the last 7 days (not dismissed), with what to do. */
+function aw_si_box_rising_week(): void {
+	$rows = aw_si_rising_top( 10 );
+	if ( ! $rows ) {
+		echo '<p>' . esc_html__( 'No rising terms in the last 7 days.', 'aw-seo-extras' ) . '</p>';
+		return;
+	}
+	$all = aw_si_rising_sources();
+	echo '<table class="widefat fixed striped"><thead><tr><th scope="col">' . esc_html__( 'Term', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Growth', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Sources', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Our page', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Suggested action', 'aw-seo-extras' ) . '</th></tr></thead><tbody>';
+	foreach ( $rows as $r ) {
+		$src = array();
+		foreach ( array_filter( explode( ',', (string) $r['sources'] ) ) as $s ) {
+			$src[] = (string) ( $all[ $s ]['label'] ?? $s );
+		}
+		/* translators: %s: times the usual level, such as 2.6. */
+		$growth = null === $r['growth'] ? '–' : sprintf( __( '×%s', 'aw-seo-extras' ), number_format_i18n( (float) $r['growth'], 1 ) );
+		$page   = (string) $r['page'];
+		echo '<tr><td>' . esc_html( (string) $r['term'] ) . '</td><td>' . esc_html( $growth ) . '</td><td>' . esc_html( implode( ', ', $src ) ) . '</td><td>' . ( '' !== $page && '/' === $page[0] ? '<a href="' . esc_url( home_url( $page ) ) . '">' . esc_html( $page ) . '</a>' : '–' ) . '</td><td>' . esc_html( aw_si_actions()[ (string) $r['action'] ] ?? '–' ) . '</td></tr>';
+	}
+	echo '</tbody></table>';
+	echo '<p><a href="' . esc_url( aw_si_url( 'rising' ) ) . '">' . esc_html__( 'All rising terms', 'aw-seo-extras' ) . '</a></p>';
+}
+
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	/**
-	 * Search Insights rising terms.
+	 * Search Insights rising terms (old name of `wp aw-si rising`, kept as an alias).
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     wp aw-si-rising top --limit=10
+	 *     wp aw-si rising --limit=10
 	 */
 	WP_CLI::add_command(
 		'aw-si-rising',
 		function ( $args, $assoc ) {
-			$what = $args[0] ?? 'top';
 			WP_CLI\Utils\format_items( 'table', aw_si_rising_top( (int) ( $assoc['limit'] ?? 10 ) ), array( 'term', 'sources', 'growth', 'first_seen', 'page', 'action', 'status' ) );
 		}
 	);

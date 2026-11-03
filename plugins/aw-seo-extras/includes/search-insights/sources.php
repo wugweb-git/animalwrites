@@ -48,6 +48,11 @@ add_filter(
 	}
 );
 
+/** Days the daily figures are kept before they become monthly totals (AW SEO Plus → Settings, AW_SI_KEEP_DAYS). */
+function aw_si_keep_days(): int {
+	return max( 30, defined( 'AW_SI_KEEP_DAYS' ) ? (int) AW_SI_KEEP_DAYS : 90 );
+}
+
 /** Cron hooks of every Search Insights job, for scheduling, Delete data and deactivation. */
 function aw_si_cron_hooks(): array {
 	return (array) apply_filters( 'aw_si_cron_hooks', array( 'aw_si_daily', 'aw_si_rollup', AW_SI_GA4_CRON, AW_SI_PSI_CRON, AW_SI_PSI_MORE, AW_SI_CLARITY_CRON, AW_SI_CLARITY_RETRY, AW_SI_BING_CRON ) );

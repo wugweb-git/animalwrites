@@ -24,12 +24,12 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @param string $metric Metric.
  */
 function aw_si_metric_kind( string $src, string $metric ): string {
-	$last = (array) apply_filters( 'aw_si_last_value_metrics', array( 'trends:index', 'live:position', 'psi:score', 'clarity:scroll' ) );
+	$last = (array) apply_filters( 'aw_si_last_value_metrics', array( 'trends:index', 'live:position', 'psi:score', 'clarity:scroll', 'bing:in-index' ) );
 	return in_array( $src . ':' . $metric, $last, true ) ? 'last' : 'sum';
 }
 
 /**
- * Roll up one batch of old daily rows. Runs daily; a large backlog is worked through over several days.
+ * Roll up one batch of old daily rows (and Bing's weekly rows, which are daily-like figures by Bing's week). Runs daily; a large backlog is worked through over several days.
  *
  * @param bool $dry   Count only.
  * @param int  $limit Daily rows per run.
@@ -39,12 +39,12 @@ function aw_si_rollup( bool $dry = false, int $limit = 50000 ): array {
 	global $wpdb;
 	$o      = aw_si_table( 'obs' );
 	$today  = new DateTimeImmutable( 'today', wp_timezone() );
-	$cutoff = $today->modify( '-' . AW_SI_KEEP_DAYS . ' days' )->format( 'Y-m-d' );
+	$cutoff = $today->modify( '-' . aw_si_keep_days() . ' days' )->format( 'Y-m-d' );
 	// Clarity's daily rows stay at least AW_SI_CLARITY_KEEP days (its 28-day views), whatever the setting says.
-	$c_keep = max( (int) AW_SI_KEEP_DAYS, defined( 'AW_SI_CLARITY_KEEP' ) ? (int) AW_SI_CLARITY_KEEP : 35 );
+	$c_keep = max( aw_si_keep_days(), defined( 'AW_SI_CLARITY_KEEP' ) ? (int) AW_SI_CLARITY_KEEP : 35 );
 	$c_cut  = $today->modify( '-' . $c_keep . ' days' )->format( 'Y-m-d' );
 	// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
-	$rows = $wpdb->get_results( $wpdb->prepare( "SELECT id, kw_id, page, page_key, src, metric, d, clicks, impr, pos, value, txt FROM {$o} WHERE period = 'day' AND d < %s AND ( src NOT IN ('clarity', 'clarity-dev') OR d < %s ) ORDER BY d LIMIT %d", $cutoff, $c_cut, $limit ) );
+	$rows = $wpdb->get_results( $wpdb->prepare( "SELECT id, kw_id, page, page_key, src, metric, d, clicks, impr, pos, value, txt FROM {$o} WHERE ( period = 'day' OR ( period = 'week' AND src = 'bing' AND metric <> 'kw-volume' ) ) AND d < %s AND ( src NOT IN ('clarity', 'clarity-dev') OR d < %s ) ORDER BY d LIMIT %d", $cutoff, $c_cut, $limit ) );
 	if ( $dry || ! $rows ) {
 		return array(
 			'daily'   => count( (array) $rows ),
@@ -145,10 +145,23 @@ function aw_si_rollup( bool $dry = false, int $limit = 50000 ): array {
 		return array( 'error' => sprintf( __( 'The rollup could not save the monthly rows, so the daily rows were kept: %s', 'aw-seo-extras' ), $error ) );
 	}
 	$wpdb->query( 'COMMIT' );
+	aw_si_trends_prune();
 	// phpcs:enable
 	return array(
 		'daily'   => count( $rows ),
 		'monthly' => $written,
 		'cutoff'  => $cutoff,
 	);
+}
+
+/**
+ * Trends 12-month indexes older than 13 months go, except each keyword's latest (the one priority reads): one row a
+ * worker run or paste would otherwise stay for ever.
+ */
+function aw_si_trends_prune(): int {
+	global $wpdb;
+	$o   = aw_si_table( 'obs' );
+	$cut = ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( '-13 months' )->format( 'Y-m-d' );
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+	return (int) $wpdb->query( $wpdb->prepare( "DELETE o FROM {$o} o JOIN (SELECT kw_id, MAX(d) d FROM {$o} WHERE src = 'trends' AND metric = 'index' AND period = '12m' GROUP BY kw_id) l ON l.kw_id = o.kw_id WHERE o.src = 'trends' AND o.metric = 'index' AND o.period = '12m' AND o.d < l.d AND o.d < %s", $cut ) );
 }

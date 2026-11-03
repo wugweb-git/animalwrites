@@ -120,6 +120,7 @@ function aw_si_load(): void {
 		add_meta_box( 'aw-si-priorities', __( 'Priorities', 'aw-seo-extras' ), 'aw_si_box_priorities', $screen, 'normal' );
 		/* translators: %d: minimum impressions. */
 		add_meta_box( 'aw-si-quick', sprintf( __( 'Quick wins (position 8–20, at least %d impressions)', 'aw-seo-extras' ), AW_SI_QUICK_MIN ), 'aw_si_box_quick', $screen, 'normal' );
+		add_meta_box( 'aw-si-rising-week', __( 'Rising this week', 'aw-seo-extras' ), 'aw_si_box_rising_week', $screen, 'normal' );
 		add_meta_box( 'aw-si-movers', __( 'Movers (28 days against the 28 before)', 'aw-seo-extras' ), 'aw_si_box_movers', $screen, 'normal' );
 		add_meta_box( 'aw-si-brand', __( 'Brand', 'aw-seo-extras' ), 'aw_si_box_brand', $screen, 'normal' );
 		add_meta_box( 'aw-si-ai', __( 'AI referrals (GA4, 28 days)', 'aw-seo-extras' ), 'aw_si_box_ai', $screen, 'normal' );
@@ -224,6 +225,17 @@ function aw_si_source_notices(): void {
 				/* translators: %s: dates. */
 				: __( 'GA4 returned its row maximum on %s, so the smallest pages or terms of those days may be missing.', 'aw-seo-extras' );
 			echo '<div class="notice notice-warning inline"><p>' . esc_html( sprintf( $msg, $days ) ) . '</p></div>';
+		}
+		// The 28-day 404 and campaign-event reports are one window each, not days: they have their own flag.
+		$cut = array_filter(
+			array(
+				__( '404s', 'aw-seo-extras' )            => ! empty( $r['info']['nf']['truncated'] ),
+				__( 'campaign events', 'aw-seo-extras' ) => ! empty( $r['info']['camp']['truncated'] ),
+			)
+		);
+		if ( 'ga4' === $src && $cut ) {
+			/* translators: %s: 404s and/or campaign events. */
+			echo '<div class="notice notice-warning inline"><p>' . esc_html( sprintf( __( 'GA4 returned its row maximum for the 28-day %s report, so the rarest rows of that window may be missing.', 'aw-seo-extras' ), implode( ', ', array_keys( $cut ) ) ) ) . '</p></div>';
 		}
 	}
 	if ( function_exists( 'aw_si_gdelt_on' ) && ! aw_si_gdelt_on() ) {
@@ -383,10 +395,14 @@ function aw_si_run_detail( string $src, array $info ): array {
 	if ( 'roles' === $src && isset( $info['focus_kw'] ) ) {
 		/* translators: 1: focus keyphrases, 2: posts, 3: terms, 4: listing names, 5: Sourcing keywords, 6: brand searches. */
 		$det[] = sprintf( __( '%1$s focus keyphrases on %2$s posts and %3$s terms; %4$s listing names; %5$s Sourcing keywords; %6$s brand searches', 'aw-seo-extras' ), $n( 'focus_kw' ), $n( 'focus_posts' ), $n( 'focus_terms' ), $n( 'entities' ), $n( 'sourcing' ), $n( 'brand' ) );
+		if ( ! empty( $info['prio'] ) ) {
+			/* translators: 1–4: keywords at P1, P2, P3, P4. */
+			$det[] = sprintf( __( 'priorities worked out: P1 %1$s, P2 %2$s, P3 %3$s, P4 %4$s', 'aw-seo-extras' ), number_format_i18n( (int) ( $info['prio']['P1'] ?? 0 ) ), number_format_i18n( (int) ( $info['prio']['P2'] ?? 0 ) ), number_format_i18n( (int) ( $info['prio']['P3'] ?? 0 ) ), number_format_i18n( (int) ( $info['prio']['P4'] ?? 0 ) ) );
+		}
 	}
 	if ( 'rollup' === $src && isset( $info['daily'] ) ) {
-		/* translators: 1: daily rows, 2: monthly rows. */
-		$det[] = sprintf( __( '%1$s daily rows older than 90 days rolled into %2$s monthly rows', 'aw-seo-extras' ), $n( 'daily' ), $n( 'monthly' ) );
+		/* translators: 1: daily rows, 2: days, 3: monthly rows. */
+		$det[] = sprintf( __( '%1$s daily rows older than %2$d days rolled into %3$s monthly rows', 'aw-seo-extras' ), $n( 'daily' ), aw_si_keep_days(), $n( 'monthly' ) );
 		if ( ! empty( $info['cutoff'] ) ) {
 			/* translators: %s: date. */
 			$det[] = sprintf( __( 'daily rows kept from %s', 'aw-seo-extras' ), mysql2date( 'j M Y', (string) $info['cutoff'] ) );
@@ -557,7 +573,8 @@ function aw_si_box_referrers(): void {
 	$o     = aw_si_table( 'obs' );
 	$today = new DateTimeImmutable( 'today', wp_timezone() );
 	$d28   = $today->modify( '-28 days' )->format( 'Y-m-d' );
-	$d90   = $today->modify( '-90 days' )->format( 'Y-m-d' ); // Daily rows are kept 90 days.
+	$keep  = aw_si_keep_days();
+	$d90   = $today->modify( "-{$keep} days" )->format( 'Y-m-d' ); // Daily rows are kept this long.
 	$skip  = aw_si_ga4_skip_sql();
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name and fixed dates only.
 	$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT txt, SUM(IF(metric = 'ref' AND d >= %s, value, 0)) s28, SUM(IF(metric = 'ref_eng' AND d >= %s, value, 0)) e28, SUM(IF(metric = 'ref_key' AND d >= %s, value, 0)) k28, SUM(IF(metric = 'ref', value, 0)) s90, MIN(d) since FROM {$o} WHERE src = 'ga4' AND metric IN ('ref', 'ref_eng', 'ref_key') AND period = 'day' AND d >= %s{$skip} GROUP BY txt ORDER BY s28 DESC, s90 DESC LIMIT 20", $d28, $d28, $d28, $d90 ) );
@@ -565,7 +582,7 @@ function aw_si_box_referrers(): void {
 		echo '<p>' . esc_html__( 'No referrals recorded yet (GA4 runs daily at 07:20 IST).', 'aw-seo-extras' ) . '</p>';
 	} else {
 		$since = min( wp_list_pluck( $rows, 'since' ) );
-		echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Source', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Sessions (28 days)', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Engaged', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Key events', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Sessions (90 days)', 'aw-seo-extras' ) . '</th></tr></thead><tbody>';
+		echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Source', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Sessions (28 days)', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Engaged', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Key events', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html( sprintf( /* translators: %d: days. */ __( 'Sessions (%d days)', 'aw-seo-extras' ), $keep ) ) . '</th></tr></thead><tbody>';
 		foreach ( $rows as $r ) {
 			echo '<tr><td>' . aw_si_ref_html( (string) $r->txt ) . '</td><td>' . esc_html( number_format_i18n( (int) $r->s28 ) ) . '</td><td>' . esc_html( number_format_i18n( (int) $r->e28 ) ) . '</td><td>' . esc_html( number_format_i18n( (int) $r->k28 ) ) . '</td><td>' . esc_html( number_format_i18n( (int) $r->s90 ) ) . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_si_ref_html() escapes.
 		}
@@ -767,11 +784,10 @@ function aw_si_box_site_search(): void {
 		return;
 	}
 	$where = array(
-		'wp'       => __( 'Site search', 'aw-seo-extras' ),
+		'wp'       => __( 'Site search (WordPress or GA4, the higher count)', 'aw-seo-extras' ),
 		'dir-q'    => __( 'Directory search', 'aw-seo-extras' ),
 		'dir-pin'  => __( 'Directory PIN code', 'aw-seo-extras' ),
 		'dir-near' => __( 'Near me (district found)', 'aw-seo-extras' ),
-		'search'   => __( 'GA4 site search', 'aw-seo-extras' ),
 	);
 	echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Term', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Where', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Searches', 'aw-seo-extras' ) . '</th></tr></thead><tbody>';
 	foreach ( $rows as $r ) {
@@ -937,7 +953,7 @@ function aw_si_settings_tab(): void {
 	$seeded = (int) get_option( 'aw_si_seeded' );
 	do_action( 'aw_si_settings_notices' );
 	echo '<table class="form-table" role="presentation"><tbody>';
-	echo '<tr><th scope="row">' . esc_html__( 'Schedule', 'aw-seo-extras' ) . '</th><td><p>' . esc_html__( 'Daily at 06:30 IST: Clarity (once the token is set). Daily at 07:10 IST: Search Console (the last 4 days again, plus up to 15 older days until 90 days are stored), keyword roles from Rank Math and Sourcing, then priorities. Daily at 07:20 IST: GA4 (site search, AI referrals, all referral and social sources, organic landing pages; the last 3 days; 404s and campaign events for the last 28 days). Sundays at 06:00 IST: PageSpeed for the key pages and every campaign page, a few at a time. Mondays at 08:45 IST: crawler access from the server; at 09:15 IST from outside (workers). Daily at 23:30 IST: rows older than 90 days become monthly totals. The 2nd of each month at 07:40 IST: Bing Webmaster (links to us, and clicks and impressions by search and by page; once the key is set). Searches on the site are counted as they happen.', 'aw-seo-extras' ) . '</p></td></tr>';
+	echo '<tr><th scope="row">' . esc_html__( 'Schedule', 'aw-seo-extras' ) . '</th><td><p>' . esc_html( sprintf( /* translators: 1: days of daily figures stored, 2: the same. */ __( 'Daily at 06:30 IST: Clarity (once the token is set). Daily at 07:10 IST: Search Console (the last 4 days again, plus up to 15 older days until %1$d days are stored), keyword roles from Rank Math and Sourcing, then priorities; at 07:15 IST Discover and Google News; from 07:40 IST URL Inspection (up to 2,000 pages a day, not indexed and never checked first). Daily at 07:20 IST: GA4 (site search, AI referrals, all referral and social sources, organic landing pages; the last 3 days; 404s and campaign events for the last 28 days). Daily at 08:10 IST: Google Alerts feeds (once set on Keys). Sundays at 06:00 IST: PageSpeed (lab scores and Chrome users\' figures) for the key pages and every campaign page, a few at a time. Mondays at 06:45 IST: Bing crawl figures; at 08:45 IST crawler access from the server; at 09:15 IST from outside (workers). Daily at 23:30 IST: rows older than %2$d days become monthly totals. The 2nd of each month at 07:40 IST: Bing Webmaster (links to us, and clicks and impressions by search and by page; once the key is set); once a month Bing search volumes for the top keywords. Searches on the site are counted as they happen.', 'aw-seo-extras' ), aw_si_keep_days(), aw_si_keep_days() ) ) . '</p></td></tr>';
 	echo '<tr><th scope="row">' . esc_html__( 'Keys', 'aw-seo-extras' ) . '</th><td><ul>';
 	foreach ( array( 'AW_CLARITY_TOKEN' => __( 'Clarity', 'aw-seo-extras' ), 'AW_BING_WEBMASTER_KEY' => __( 'Bing Webmaster', 'aw-seo-extras' ), 'AW_PSI_KEY' => __( 'PageSpeed (optional)', 'aw-seo-extras' ) ) as $const => $label ) {
 		$set = '' !== aw_si_key( $const );
@@ -958,7 +974,7 @@ function aw_si_settings_tab(): void {
 	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_si_run">';
 	wp_nonce_field( 'aw_si_run' );
 	echo '<p><button type="submit" name="what" value="daily" class="button">' . esc_html__( 'Run the daily update', 'aw-seo-extras' ) . '</button> ';
-	echo '<button type="submit" name="what" value="rollup" class="button">' . esc_html__( 'Run the 90-day rollup', 'aw-seo-extras' ) . '</button> ';
+	echo '<button type="submit" name="what" value="rollup" class="button">' . esc_html( sprintf( /* translators: %d: days. */ __( 'Run the %d-day rollup', 'aw-seo-extras' ), aw_si_keep_days() ) ) . '</button> ';
 	echo '<button type="submit" name="what" value="ga4" class="button">' . esc_html__( 'Run GA4', 'aw-seo-extras' ) . '</button> ';
 	echo '<button type="submit" name="what" value="psi" class="button">' . esc_html__( 'Start PageSpeed', 'aw-seo-extras' ) . '</button>';
 	if ( aw_si_bing_on() ) {

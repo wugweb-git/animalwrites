@@ -127,6 +127,11 @@ function aw_si_import( string $kind, string $raw ): array {
 					continue;
 				}
 				$id = (int) current( aw_si_kw_ids( array( sanitize_text_field( $cells[0] ) ), 0 ) );
+				if ( $id ) { // A new paste replaces the keyword's earlier pasted figure (the workers' rows stay).
+					global $wpdb;
+					$o = aw_si_table( 'obs' );
+					$wpdb->query( $wpdb->prepare( "DELETE FROM {$o} WHERE src = 'trends' AND metric = 'index' AND period = '12m' AND kw_id = %d AND txt = 'import'", $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+				}
 				$put(
 					$id && aw_si_obs_put(
 						$id,
@@ -237,10 +242,18 @@ function aw_si_import_rows(): void {
 }
 add_action( 'aw_si_settings_rows', 'aw_si_import_rows' );
 
+/**
+ * Who may send an import: the Search Insights managers, or a separate sender account that has only the capability
+ * aw_si_import (the owner creates that user; it can import and nothing else in Search Insights).
+ */
+function aw_si_can_import(): bool {
+	return current_user_can( aw_si_cap() ) || current_user_can( 'aw_si_import' );
+}
+
 add_action(
 	'admin_post_aw_si_import',
 	function () {
-		if ( ! current_user_can( aw_si_cap() ) || ! check_admin_referer( 'aw_si_import' ) ) {
+		if ( ! aw_si_can_import() || ! check_admin_referer( 'aw_si_import' ) ) {
 			wp_die( esc_html__( 'Not allowed.', 'aw-seo-extras' ), 403 );
 		}
 		$kind = isset( $_POST['kind'] ) ? sanitize_key( wp_unslash( $_POST['kind'] ) ) : '';

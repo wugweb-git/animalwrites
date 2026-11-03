@@ -296,7 +296,7 @@ function aw_si_dry_report( string $day ): array {
 		'wp_aw_si_kw_pages' => $pages,
 		'wp_aw_si_obs'      => array(
 			'gsc per day'       => $per_day,
-			'gsc after the daily-figures window' => $per_day * ( defined( 'AW_SI_KEEP_DAYS' ) ? (int) AW_SI_KEEP_DAYS : 90 ),
+			'gsc after the daily-figures window' => $per_day * aw_si_keep_days(),
 			'trends (seed)'     => $obs['trends'],
 			'live check (seed)' => $obs['live'],
 		),

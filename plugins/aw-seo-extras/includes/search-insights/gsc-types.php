@@ -139,7 +139,7 @@ function aw_si_gsc_types_run( bool $dry = false ): array {
 					foreach ( (array) $resp->getRows() as $row ) {
 						$path = aw_si_path( (string) ( $row->getKeys()[0] ?? '' ) );
 						if ( '' !== $path ) {
-							$rows[ $path ] = array( (int) $row->getClicks(), (int) $row->getImpressions() );
+							$rows[ $path ] = array( (int) ( $rows[ $path ][0] ?? 0 ) + (int) $row->getClicks(), (int) ( $rows[ $path ][1] ?? 0 ) + (int) $row->getImpressions() ); // two addresses of one page add up
 						}
 					}
 					$rep[ $metric ][ $day ] = count( $rows );
@@ -147,8 +147,9 @@ function aw_si_gsc_types_run( bool $dry = false ): array {
 					if ( $rows ) {
 						$rep['up_to'] = max( $rep['up_to'], $day );
 					}
-					if ( ! $dry ) {
-						aw_si_gsc_types_store( $metric, $day, $rows );
+					$n = $dry ? 0 : aw_si_gsc_types_store( $metric, $day, $rows );
+					if ( is_wp_error( $n ) ) {
+						return $n;
 					}
 				}
 			}
@@ -176,25 +177,14 @@ add_action( AW_SI_GSC_TYPES_CRON, fn() => aw_si_gsc_types_run() );
  * @param string $metric discover or gnews.
  * @param string $day    Y-m-d.
  * @param array  $rows   path => [clicks, impressions].
+ * @return int|WP_Error Rows written.
  */
-function aw_si_gsc_types_store( string $metric, string $day, array $rows ): void {
-	global $wpdb;
-	$o = aw_si_table( 'obs' );
-	$wpdb->query( $wpdb->prepare( "DELETE FROM {$o} WHERE src = 'gsc-types' AND metric = %s AND period = 'day' AND d = %s", $metric, $day ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+function aw_si_gsc_types_store( string $metric, string $day, array $rows ) {
+	$list = array();
 	foreach ( $rows as $path => $r ) {
-		aw_si_obs_put(
-			0,
-			(string) $path,
-			'gsc-types',
-			$metric,
-			'day',
-			$day,
-			array(
-				'clicks' => $r[0],
-				'impr'   => $r[1],
-			)
-		);
+		$list[] = array( 0, (string) $path, '' === (string) $path ? '' : md5( (string) $path ), $metric, (int) $r[0], (int) $r[1], 0 );
 	}
+	return aw_si_obs_replace_day( 'gsc-types', $day, $list, 'day', array( $metric ), 'gsc' );
 }
 
 /**
@@ -336,7 +326,7 @@ function aw_si_inspect_step(): array {
 				$req->setInspectionUrl( home_url( $path ) );
 				$req->setSiteUrl( $property );
 				try {
-					$resp = $service->urlInspection_index->inspect( $req );
+					$resp = $service->urlInspection_index->inspect( $req ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- Google's client property.
 				} catch ( Throwable $e ) {
 					$code = aw_si_gsc_http_code( $e );
 					if ( in_array( $code, array( 403, 429 ), true ) ) {

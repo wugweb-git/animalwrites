@@ -108,6 +108,9 @@ function aw_si_snapshot_rows(): array {
 function aw_si_snapshot_csv(): string {
 	$rows = aw_si_snapshot_rows();
 	$cols = array( 'date', 'query', 'group', 'source', 'position', 'url', 'top3', 'ai_overview', 'ai_overview_names_aw', 'paa', 'related', 'gsc_impr_28d', 'gsc_clicks_28d', 'gsc_pos_28d', 'demand', 'priority', 'status', 'action' );
+	// A column that is empty in every row (e.g. the live-check columns in a month without a live check) is left out.
+	$keep = array( 'date', 'query', 'priority', 'status', 'action' );
+	$cols = array_values( array_filter( $cols, fn( $c ) => in_array( $c, $keep, true ) || array_filter( $rows, fn( $r ) => '' !== (string) ( $r[ $c ] ?? '' ) ) ) );
 	$fh   = fopen( 'php://temp', 'w+' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- in-memory stream.
 	fputcsv( $fh, $cols, ',', '"', '\\' );
 	foreach ( $rows as $r ) {

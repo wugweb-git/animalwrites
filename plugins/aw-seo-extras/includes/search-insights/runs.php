@@ -28,7 +28,8 @@ function aw_si_sources(): array {
 			'every' => DAY_IN_SECONDS,
 		),
 		'rollup' => array(
-			'label' => __( 'Retention (90-day rollup)', 'aw-seo-extras' ),
+			/* translators: %d: days. */
+			'label' => sprintf( __( 'Retention (%d-day rollup)', 'aw-seo-extras' ), aw_si_keep_days() ),
 			'every' => DAY_IN_SECONDS,
 		),
 	);

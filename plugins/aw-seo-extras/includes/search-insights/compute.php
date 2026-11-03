@@ -404,7 +404,12 @@ function aw_si_compute(): array {
 		}
 		if ( $changed ) {
 			$set['updated'] = aw_si_now();
-			$wpdb->update( $k, $set, array( 'id' => $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			if ( false === $wpdb->update( $k, $set, array( 'id' => $id ) ) ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+				$count['failed'] = ( $count['failed'] ?? 0 ) + 1;
+				if ( empty( $count['errors'] ) ) {
+					$count['errors'] = array( __( 'Some keyword records could not be updated: ', 'aw-seo-extras' ) . $wpdb->last_error );
+				}
+			}
 		}
 		$eff                                 = $r->priority_override ? $r->priority_override : $priority;
 		$count[ $eff ]                       = ( $count[ $eff ] ?? 0 ) + 1;

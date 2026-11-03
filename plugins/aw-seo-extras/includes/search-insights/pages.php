@@ -66,10 +66,10 @@ function aw_si_pages_data(): array {
 		$out[ $path ][ $field ] = $value;
 	};
 	// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table names only.
-	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, SUM(clicks) c, SUM(impr) i, SUM(pos * impr) / NULLIF(SUM(impr), 0) p FROM {$o} WHERE src = 'gsc' AND metric = 'p' AND period = 'day' AND d BETWEEN %s AND %s GROUP BY page", $from, $to ) ) as $r ) {
-		$set( $r->page, 'clicks', (int) $r->c );
-		$set( $r->page, 'impr', (int) $r->i );
-		$set( $r->page, 'pos', null === $r->p ? null : round( (float) $r->p, 1 ) );
+	foreach ( aw_si_page_metrics( array(), 28 ) as $page => $m ) { // the same figures as the Overview's pages
+		foreach ( $m as $field => $v ) {
+			$set( (string) $page, $field, $v );
+		}
 	}
 	// Keywords the page owns (keyword map or Rank Math focus), and how many of them are in conflict.
 	$p = aw_si_table( 'kw_pages' );
@@ -77,7 +77,8 @@ function aw_si_pages_data(): array {
 		$set( $r->page, 'keywords', (int) $r->n );
 		$set( $r->page, 'conflicts', (int) $r->c );
 	}
-	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, metric, txt, SUM(value) v FROM {$o} WHERE src = 'ga4' AND metric IN ('organic', 'ai') AND period = 'day' AND d BETWEEN %s AND %s GROUP BY page, metric, txt", $from, $to ) ) as $r ) {
+	$skip = aw_si_ga4_skip_sql(); // Without the GA4 test-event days.
+	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, metric, txt, SUM(value) v FROM {$o} WHERE src = 'ga4' AND metric IN ('organic', 'ai') AND period = 'day' AND d BETWEEN %s AND %s{$skip} GROUP BY page, metric, txt", $from, $to ) ) as $r ) {
 		if ( 'organic' === $r->metric ) {
 			$set( $r->page, 'organic', (int) $r->v );
 			continue;
@@ -85,8 +86,7 @@ function aw_si_pages_data(): array {
 		$set( $r->page, 'ai', (int) ( $out[ $r->page ]['ai'] ?? 0 ) + (int) $r->v );
 		$out[ $r->page ]['ai_by'][ (string) $r->txt ] = (int) $r->v;
 	}
-	// Referral and social sessions (owner, 31 Oct 2026), without the GA4 test-event day.
-	$skip = aw_si_ga4_skip_sql();
+	// Referral and social sessions (owner, 31 Oct 2026).
 	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, txt, SUM(value) v FROM {$o} WHERE src = 'ga4' AND metric = 'ref' AND period = 'day' AND d BETWEEN %s AND %s{$skip} GROUP BY page, txt", $from, $to ) ) as $r ) {
 		$set( $r->page, 'ref', (int) ( $out[ $r->page ]['ref'] ?? 0 ) + (int) $r->v );
 		$out[ $r->page ]['ref_by'][ (string) $r->txt ] = (int) $r->v;

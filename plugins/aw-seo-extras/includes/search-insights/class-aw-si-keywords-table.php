@@ -78,6 +78,7 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 			'clicks28' => __( 'Clicks', 'aw-seo-extras' ),
 			'pos28'    => __( 'Position', 'aw-seo-extras' ),
 			'change'   => __( 'Change', 'aw-seo-extras' ),
+			'bing'     => __( 'Bing impressions (90 days)', 'aw-seo-extras' ),
 			'live'     => __( 'Live check', 'aw-seo-extras' ),
 			'trends'   => __( 'Trends', 'aw-seo-extras' ),
 			'volume'   => __( 'Volume (imports)', 'aw-seo-extras' ),
@@ -335,8 +336,15 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 			foreach ( $vols as $v ) {
 				$by[ (int) $v->kw_id ] = $v; // Ordered by date: the latest wins.
 			}
+			// Bing: our impressions by search (bing.php, Bing's weeks and older months) and Bing's own weekly search
+			// volume for the top keywords (bing-crawl.php, the last 12 weeks), kept apart from Search Console's figures.
+			$since = ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( '-90 days' )->format( 'Y-m-d' );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers and a table name.
+			$bing = (array) $wpdb->get_results( $wpdb->prepare( "SELECT kw_id, SUM(IF(metric = 'q', impr, 0)) i, AVG(IF(metric = 'kw-volume', value, NULL)) v FROM {$o} WHERE src = 'bing' AND metric IN ('q', 'kw-volume') AND kw_id IN ({$in}) AND d >= %s GROUP BY kw_id", $since ), OBJECT_K );
 			foreach ( $this->items as $item ) {
-				$item->volume = $by[ (int) $item->id ] ?? null;
+				$item->volume   = $by[ (int) $item->id ] ?? null;
+				$item->bing     = isset( $bing[ $item->id ] ) ? (int) $bing[ $item->id ]->i : null;
+				$item->bing_vol = isset( $bing[ $item->id ]->v ) ? (float) $bing[ $item->id ]->v : null;
 			}
 		}
 		if ( $agg && 1 === $paged ) {
@@ -522,9 +530,19 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 					return '<span title="' . esc_attr__( 'Google Trends refused the last request, so there is no figure: this says nothing about demand.', 'aw-seo-extras' ) . '">' . esc_html__( 'source failed', 'aw-seo-extras' ) . '</span>';
 				}
 				return null === $item->trends ? '–' : esc_html( number_format_i18n( (int) $item->trends ) );
+			case 'bing':
+				return isset( $item->bing ) ? esc_html( number_format_i18n( (int) $item->bing ) ) : '–';
 			case 'volume':
-				$v = $item->volume ?? null;
-				return $v ? esc_html( ( '' !== $v->txt ? $v->txt : number_format_i18n( (float) $v->value ) ) . ' (KP)' ) : '–';
+				$v     = $item->volume ?? null;
+				$lines = array();
+				if ( $v ) {
+					$lines[] = esc_html( ( '' !== $v->txt ? $v->txt : number_format_i18n( (float) $v->value ) ) . ' (KP)' );
+				}
+				if ( isset( $item->bing_vol ) ) {
+					/* translators: %s: searches a week. */
+					$lines[] = esc_html( sprintf( __( '%s a week (Bing)', 'aw-seo-extras' ), number_format_i18n( (int) round( $item->bing_vol ) ) ) );
+				}
+				return $lines ? implode( '<br>', $lines ) : '–';
 			case 'topic':
 				return '' === $item->topic ? '–' : esc_html( $item->topic );
 		}

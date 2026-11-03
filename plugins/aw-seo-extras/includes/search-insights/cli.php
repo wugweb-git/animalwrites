@@ -1,6 +1,7 @@
 <?php
 /**
- * WP-CLI: wp aw-si status | dry-run | run | fetch <source> [--dry] | links <seed|add> | rollup | keyphrase-guard | delete-data --yes
+ * WP-CLI, one root: wp aw-si status | dry-run | run | fetch <source> [--dry] | links <seed|add> | rising [top] | crawl [--dry-run]
+ * | rollup | keyphrase-guard | delete-data --yes. The older `wp aw-si-rising` and `wp aw-si-crawl` still work (aliases).
  *
  * `dry-run` writes nothing: it reads the seed, Rank Math, Sourcing and one day of Search Console (through Site Kit, as
  * the module's owner) and reports what phase 1 would store.
@@ -72,10 +73,12 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 
 			/**
 			 * One source now: ga4 (last 3 days, or --day), psi (one key page, mobile and desktop, with --dry; the
-			 * full weekly queue without it), clarity (2 of its 10 daily calls) or bing (Bing Webmaster links and figures).
+			 * full weekly queue without it), clarity (2 of its 10 daily calls), bing (Bing Webmaster links and figures),
+			 * gsc-types (Discover and Google News, the last 3 days), inspect (today's URL Inspection queue; --dry lists
+			 * the next 20 pages), bing-crawl (crawl figures), bing-kw (search volumes) or alerts (Google Alerts feeds).
 			 *
 			 * <source>
-			 * : ga4, psi, clarity or bing.
+			 * : ga4, psi, clarity, bing, gsc-types, inspect, bing-crawl, bing-kw or alerts.
 			 *
 			 * [--day=<Y-m-d>]
 			 * : GA4 only: one day.
@@ -117,8 +120,24 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 						WP_CLI::error( 'Bing Webmaster is not set up: add its API key under Animal Writes → Keys.' );
 					}
 					$out = aw_si_bing_run( array( 'dry' => $dry ) );
+				} elseif ( 'gsc-types' === $src ) {
+					$out = aw_si_gsc_types_run( $dry );
+				} elseif ( 'inspect' === $src ) {
+					if ( $dry ) {
+						$out = array( 'next' => aw_si_inspect_todo( 20 ) );
+					} else {
+						aw_si_inspect_start(); // The first pages now; WP-cron runs the rest every five minutes.
+						$out = get_option( AW_SI_INSPECT_QUEUE );
+						unset( $out['todo'] );
+					}
+				} elseif ( 'bing-crawl' === $src ) {
+					$out = aw_si_bing_crawl_run( $dry );
+				} elseif ( 'bing-kw' === $src ) {
+					$out = aw_si_bing_kw_run( $dry );
+				} elseif ( 'alerts' === $src ) {
+					$out = aw_si_alerts_run( $dry );
 				} else {
-					WP_CLI::error( 'Source must be ga4, psi, clarity or bing.' );
+					WP_CLI::error( 'Source must be ga4, psi, clarity, bing, gsc-types, inspect, bing-crawl, bing-kw or alerts.' );
 				}
 				foreach ( (array) $out as $k => $v ) {
 					if ( is_wp_error( $v ) ) {
@@ -222,6 +241,35 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 					WP_CLI::error( 'Not saved (check --from, --domain and --to).' );
 				}
 				WP_CLI::success( 1 === $n ? 'Link added.' : 'Link was there already: dates updated.' );
+			}
+
+			/**
+			 * Rising terms of the last 7 days, fastest growing first.
+			 *
+			 * [--limit=<n>]
+			 * : Terms. Default: 10.
+			 *
+			 * @param array $args  Positional arguments.
+			 * @param array $assoc Named arguments.
+			 */
+			public function rising( $args, $assoc ) {
+				WP_CLI\Utils\format_items( 'table', aw_si_rising_top( (int) ( $assoc['limit'] ?? 10 ) ), array( 'term', 'sources', 'growth', 'first_seen', 'page', 'action', 'status' ) );
+			}
+
+			/**
+			 * Crawler access from this server: every agent on every sample page.
+			 *
+			 * [--dry-run]
+			 * : Check and print only; store nothing, send no email.
+			 *
+			 * @param array $args  Positional arguments.
+			 * @param array $assoc Named arguments.
+			 */
+			public function crawl( $args, $assoc ) {
+				$run = aw_si_crawl_run( isset( $assoc['dry-run'] ) );
+				WP_CLI\Utils\format_items( 'table', $run['checks'], array( 'agent', 'kind', 'code', 'ms', 'result' ) );
+				$problems = aw_si_crawl_problems( $run );
+				WP_CLI::log( $problems ? 'Problems: ' . implode( '; ', $problems ) : 'Every agent got every page.' );
 			}
 
 			/**

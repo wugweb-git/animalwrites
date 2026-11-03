@@ -105,11 +105,16 @@ function aw_si_link_page( int $kw_id, string $obj_type, int $obj_id, string $pat
  * Store many page links at once (insert or refresh).
  *
  * @param array $links Each [kw_id, obj_type, obj_id, path, role, src].
+ * @param bool  $keep  Keep a link that already exists (from the keyword map) instead of replacing it: the daily focus
+ *                     rebuild must not take over a map link, or the next day's "delete the focus links" would drop it.
+ * @return bool Whether every write worked.
  */
-function aw_si_link_pages( array $links ): void {
+function aw_si_link_pages( array $links, bool $keep = false ): bool {
 	global $wpdb;
 	$t   = aw_si_table( 'kw_pages' );
 	$now = aw_si_now();
+	$ok  = true;
+	$verb = $keep ? 'INSERT IGNORE' : 'REPLACE';
 	foreach ( array_chunk( $links, 300 ) as $chunk ) {
 		$place = array();
 		$args  = array();
@@ -118,8 +123,9 @@ function aw_si_link_pages( array $links ): void {
 			array_push( $args, (int) $l[0], (string) $l[1], (int) $l[2], mb_substr( (string) $l[3], 0, 255 ), md5( $l[1] . ':' . $l[2] . ':' . $l[3] ), (string) $l[4], (string) $l[5], $now );
 		}
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- one placeholder group per row, built above.
-		$wpdb->query( $wpdb->prepare( "REPLACE INTO {$t} (kw_id, obj_type, obj_id, path, path_key, role, src, updated) VALUES " . implode( ', ', $place ), $args ) );
+		$ok = $ok && false !== $wpdb->query( $wpdb->prepare( "{$verb} INTO {$t} (kw_id, obj_type, obj_id, path, path_key, role, src, updated) VALUES " . implode( ', ', $place ), $args ) );
 	}
+	return $ok;
 }
 
 /**
@@ -366,6 +372,58 @@ function aw_si_obs_put( int $kw_id, string $page, string $src, string $metric, s
 }
 
 /**
+ * Replace one day's rows of a source with new ones, in one transaction (a failed write keeps the old rows). The one
+ * writer for every day-replace (Search Console, Discover and News, GA4, Clarity).
+ *
+ * @param string   $src     Source key in obs.
+ * @param string   $day     Date (Y-m-d).
+ * @param array    $rows    Each [kw_id, page, page_key, metric, value, txt]; with $shape 'gsc' each
+ *                          [kw_id, page, page_key, metric, clicks, impressions, position].
+ * @param string   $period  Period of the rows: day, or 28d for a 28-day window ending on $day.
+ * @param string[] $metrics Only these metrics are replaced (empty: every metric of the source, period and day).
+ * @param string   $shape   value (value / txt columns) or gsc (clicks / impr / pos columns).
+ * @return int|WP_Error Rows written.
+ */
+function aw_si_obs_replace_day( string $src, string $day, array $rows, string $period = 'day', array $metrics = array(), string $shape = 'value' ) {
+	global $wpdb;
+	$o    = aw_si_table( 'obs' );
+	$now  = aw_si_now();
+	$gsc  = 'gsc' === $shape;
+	$cols = $gsc ? 'clicks, impr, pos' : 'value, txt';
+	$only = $metrics ? ' AND metric IN (' . implode( ', ', array_fill( 0, count( $metrics ), '%s' ) ) . ')' : '';
+	$wpdb->query( 'START TRANSACTION' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- table name and one %s per metric, built above.
+	$ok = false !== $wpdb->query( $wpdb->prepare( "DELETE FROM {$o} WHERE src = %s AND period = %s AND d = %s{$only}", array_merge( array( $src, $period, $day ), array_values( $metrics ) ) ) );
+	foreach ( array_chunk( array_values( $rows ), 300 ) as $chunk ) {
+		$place = array();
+		$args  = array();
+		foreach ( $chunk as $v ) {
+			array_push( $args, (int) $v[0], mb_substr( (string) $v[1], 0, 255 ), (string) $v[2], $src, (string) $v[3], $period, $day );
+			if ( $gsc ) {
+				$place[] = '(%d, %s, %s, %s, %s, %s, %s, %d, %d, %f, %s)';
+				array_push( $args, (int) $v[4], (int) $v[5], round( (float) $v[6], 2 ), $now );
+			} else {
+				$place[] = '(%d, %s, %s, %s, %s, %s, %s, %f, %s, %s)';
+				array_push( $args, (float) $v[4], mb_substr( (string) $v[5], 0, 255 ), $now );
+			}
+		}
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- one placeholder group per row, built above.
+		$ok = $ok && false !== $wpdb->query( $wpdb->prepare( "INSERT INTO {$o} (kw_id, page, page_key, src, metric, period, d, {$cols}, fetched) VALUES " . implode( ', ', $place ), $args ) );
+		if ( ! $ok ) {
+			break;
+		}
+	}
+	if ( ! $ok ) {
+		$error = $wpdb->last_error;
+		$wpdb->query( 'ROLLBACK' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		/* translators: 1: source, 2: date, 3: database error. */
+		return new WP_Error( 'aw_si_store', sprintf( __( '%1$s rows for %2$s could not be saved, so the earlier rows were kept: %3$s', 'aw-seo-extras' ), $src, $day, $error ) );
+	}
+	$wpdb->query( 'COMMIT' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	return count( $rows );
+}
+
+/**
  * Primary and secondary phrases of a Rank Math focus keyword field ("primary, secondary, …").
  *
  * @param string $field The rank_math_focus_keyword value.
@@ -414,7 +472,6 @@ function aw_si_sync_roles(): array {
 	}
 	// The focus role is rebuilt from scratch each day so a keyphrase the owner removed loses it.
 	$wpdb->query( $wpdb->prepare( "UPDATE {$k} SET roles = roles & ~%d", AW_SI_ROLE_FOCUS ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-	$wpdb->query( "DELETE FROM {$p} WHERE src = 'focus'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	$ids = aw_si_kw_ids( $labels, AW_SI_ROLE_FOCUS );
 	// Load every linked post and term in a few queries before building their links.
 	_prime_post_caches( array_map( 'intval', wp_list_pluck( (array) $rows, 'ID' ) ), false, false );
@@ -426,10 +483,21 @@ function aw_si_sync_roles(): array {
 			$rows_out[] = array( $id, $l[1], $l[2], aw_si_object_path( $l[1], $l[2] ), $l[3], 'focus' );
 		}
 	}
-	aw_si_link_pages( $rows_out );
+	// The focus links are swapped in one transaction: a failed write keeps yesterday's links (and is logged).
+	$errors = array();
+	$wpdb->query( 'START TRANSACTION' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$ok = false !== $wpdb->query( "DELETE FROM {$p} WHERE src = 'focus'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	$ok = $ok && aw_si_link_pages( $rows_out, true );
+	if ( $ok ) {
+		$wpdb->query( 'COMMIT' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	} else {
+		$errors[] = __( 'Focus keyphrase links could not be saved, so yesterday\'s were kept: ', 'aw-seo-extras' ) . $wpdb->last_error;
+		$wpdb->query( 'ROLLBACK' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	}
 
 	// Listings: mark existing records (from Search Console or the map) whose phrase is a listing's name.
 	$names = $wpdb->get_col( "SELECT m.meta_value FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'rank_math_focus_keyword' WHERE p.post_type = 'aw_listing' AND p.post_status = 'publish' AND m.meta_value <> ''" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$read  = '' === $wpdb->last_error; // the flags are rebuilt only from a list that was read
 	$map   = aw_si_kw_map();
 	$ent   = array();
 	foreach ( (array) $names as $n ) {
@@ -438,9 +506,21 @@ function aw_si_sync_roles(): array {
 			$ent[] = (int) $map[ $norm ];
 		}
 	}
-	foreach ( array_chunk( $ent, 500 ) as $chunk ) {
-		$in = implode( ',', array_map( 'intval', $chunk ) );
-		$wpdb->query( "UPDATE {$k} SET entity = 1 WHERE id IN ({$in})" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers.
+	// Rebuilt each day, so a listing that was unpublished (or renamed) stops marking its name. The seed's
+	// "{organisation name}" placeholder records keep their flag.
+	if ( $read ) {
+		$wpdb->query( 'START TRANSACTION' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$ok = false !== $wpdb->query( $wpdb->prepare( "UPDATE {$k} SET entity = 0 WHERE entity = 1 AND label NOT LIKE %s", '%' . $wpdb->esc_like( '{' ) . '%' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+		foreach ( array_chunk( array_unique( $ent ), 500 ) as $chunk ) {
+			$in = implode( ',', array_map( 'intval', $chunk ) );
+			$ok = $ok && false !== $wpdb->query( "UPDATE {$k} SET entity = 1 WHERE id IN ({$in})" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers.
+		}
+		if ( $ok ) {
+			$wpdb->query( 'COMMIT' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		} else {
+			$errors[] = __( 'Listing-name flags could not be saved, so the earlier flags were kept: ', 'aw-seo-extras' ) . $wpdb->last_error;
+			$wpdb->query( 'ROLLBACK' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		}
 	}
 
 	// Sourcing: read only, and only when AW Sourcing is active (the section hides otherwise). From sourcing phase 2 the
@@ -478,6 +558,7 @@ function aw_si_sync_roles(): array {
 		'entities'    => count( $ent ),
 		'sourcing'    => count( $sourcing ),
 		'brand'       => count( $brand ),
+		'errors'      => $errors,
 	);
 }
 

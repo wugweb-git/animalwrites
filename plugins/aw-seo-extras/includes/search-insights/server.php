@@ -262,6 +262,54 @@ function aw_si_srv_list( array $map, int $limit = 5 ): string {
 	return implode( ', ', $parts );
 }
 
+/**
+ * Crawler requests by week (Monday to Sunday), the last 12 weeks: all crawlers, the five busiest by name, the rest.
+ *
+ * @param array $days What aw_si_srv_days() returned.
+ */
+function aw_si_srv_weeks_table( array $days ): void {
+	$monday = new DateTimeImmutable( 'monday this week', wp_timezone() );
+	$weeks  = array();
+	for ( $i = 0; $i < 12; $i++ ) {
+		$weeks[ $monday->modify( '-' . ( 7 * $i ) . ' days' )->format( 'Ymd' ) ] = array();
+	}
+	$first = (string) array_key_last( $weeks );
+	$tot   = array();
+	foreach ( $days as $ymd => $d ) {
+		if ( (string) $ymd < $first ) {
+			continue;
+		}
+		$wk = ( new DateTimeImmutable( (string) $ymd, wp_timezone() ) )->modify( 'monday this week' )->format( 'Ymd' );
+		foreach ( (array) ( $d['bots'] ?? array() ) as $b => $n ) {
+			$weeks[ $wk ][ $b ] = (int) ( $weeks[ $wk ][ $b ] ?? 0 ) + (int) $n;
+			$tot[ $b ]          = (int) ( $tot[ $b ] ?? 0 ) + (int) $n;
+		}
+	}
+	if ( ! $tot ) {
+		return;
+	}
+	arsort( $tot );
+	$top = array_slice( array_keys( $tot ), 0, 5 );
+	echo '<h2>' . esc_html__( 'Crawler requests by week (12 weeks)', 'aw-seo-extras' ) . '</h2>';
+	echo '<table class="widefat fixed striped"><thead><tr><th scope="col">' . esc_html__( 'Week from', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'All crawlers', 'aw-seo-extras' ) . '</th>';
+	foreach ( $top as $b ) {
+		echo '<th scope="col">' . esc_html( $b ) . '</th>';
+	}
+	echo '<th scope="col">' . esc_html__( 'Others', 'aw-seo-extras' ) . '</th></tr></thead><tbody>';
+	foreach ( $weeks as $wk => $by ) {
+		$all  = array_sum( $by );
+		$rest = $all;
+		echo '<tr><td>' . esc_html( wp_date( 'j M', ( new DateTimeImmutable( (string) $wk, wp_timezone() ) )->getTimestamp() ) ) . '</td><td>' . esc_html( number_format_i18n( $all ) ) . '</td>';
+		foreach ( $top as $b ) {
+			$rest -= (int) ( $by[ $b ] ?? 0 );
+			echo '<td>' . esc_html( number_format_i18n( (int) ( $by[ $b ] ?? 0 ) ) ) . '</td>';
+		}
+		echo '<td>' . esc_html( number_format_i18n( $rest ) ) . '</td></tr>';
+	}
+	echo '</tbody></table>';
+	echo '<p class="description">' . esc_html__( 'Weeks before counting started (3 Nov 2026) show 0.', 'aw-seo-extras' ) . '</p>';
+}
+
 /* ---------- The tab ---------- */
 
 add_filter(
@@ -330,6 +378,7 @@ add_action(
 			echo '<td>' . ( $only ? esc_html__( 'robots.txt name only, never visits', 'aw-seo-extras' ) : '' ) . '</td></tr>';
 		}
 		echo '</tbody></table>';
+		aw_si_srv_weeks_table( $days );
 
 		if ( function_exists( 'aw_si_vis_section' ) ) {
 			aw_si_vis_section();
