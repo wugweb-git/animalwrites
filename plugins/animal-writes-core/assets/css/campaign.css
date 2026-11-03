@@ -853,6 +853,37 @@
 .aw-camp--diwali #help .wp-block-table { overflow-x: visible; }
 .aw-camp--diwali #help .wp-block-table :is(th, td) { white-space: normal; overflow-wrap: anywhere; }
 
+/* Diwali sections within 720px with no sideways scrolling (Layout rules 5 and 10; owner, 3 Nov 2026: "manage it").
+   - What the law says and What to do, and when: each card is a fold (core Details, .aw-camp-acc), the first open, so the
+     list is one 44px row per card (--kit-size-target) between soft lines (--kit-color-line). Text is unchanged.
+   - In the news and guides: the four newest News items show; the rest and the Guides sit in a closed fold under them
+     (.aw-camp-more-fold, "More news and guides").
+   - Who to call and Read the law, from 768: table rows and the gaps above the buttons and the sources one step tighter
+     (--kit-space-2, --kit-space-4). */
+.aw-camp--diwali :is(#law, #what-to-do) .aw-camp-grid { display: block; margin-block: var(--kit-space-5); border-top: var(--kit-border-width) solid var(--kit-color-line); }
+.aw-camp--diwali .aw-camp-acc { margin: 0; padding: 0; border-bottom: var(--kit-border-width) solid var(--kit-color-line); background: none; box-shadow: none; color: var(--kit-color-text); }
+.aw-camp--diwali .aw-camp-acc > summary { display: flex; align-items: center; gap: var(--kit-space-3); box-sizing: border-box; min-height: var(--kit-size-target); padding-block: var(--kit-space-2); font-size: var(--kit-type-h3); font-weight: var(--kit-weight-bold); line-height: var(--kit-leading-heading); color: var(--kit-color-ink); cursor: pointer; list-style: none; }
+.aw-camp--diwali .aw-camp-acc > summary::-webkit-details-marker { display: none; }
+.aw-camp--diwali .aw-camp-acc > summary::after { content: ""; flex: 0 0 auto; margin-left: auto; width: var(--kit-space-2); height: var(--kit-space-2); border-right: calc(2 * var(--kit-border-width)) solid currentColor; border-bottom: calc(2 * var(--kit-border-width)) solid currentColor; transform: rotate(45deg); } /* the open/closed chevron */
+.aw-camp--diwali .aw-camp-acc[open] > summary::after { transform: rotate(-135deg); }
+.aw-camp--diwali .aw-camp-acc > summary:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
+.aw-camp--diwali .aw-camp-acc > :not(summary) { margin: 0 0 var(--kit-space-3); max-width: var(--kit-width-content); }
+.aw-camp--diwali .aw-camp-acc > :last-child { margin-bottom: var(--kit-space-4); }
+.aw-camp--diwali .aw-camp-acc > .aw-camp-card-ico { display: none; } /* the card icon: decorative, the row is the heading */
+.aw-camp--diwali .aw-camp-grid > .aw-camp-acc :is(h3, p) { color: var(--kit-color-text); }
+.aw-camp--diwali .aw-camp-grid > .aw-camp-acc a:not(.wp-element-button) { color: var(--kit-color-link); }
+.aw-camp--diwali #latest .aw-camp-more-fold { grid-column: 1 / -1; margin: 0; border-top: var(--kit-border-width) solid var(--kit-color-line); }
+.aw-camp--diwali #latest .aw-camp-more-fold > summary { display: flex; align-items: center; box-sizing: border-box; min-height: var(--kit-size-target); padding-block: var(--kit-space-2); font-weight: var(--kit-weight-bold); cursor: pointer; }
+.aw-camp--diwali #latest .aw-camp-more-fold > summary:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
+.aw-camp--diwali #latest .aw-camp-more-fold .wp-block-post-template { display: grid; gap: var(--kit-space-4); margin: 0 0 var(--kit-space-4); padding: 0; list-style: none; }
+@media (min-width: 768px) {
+	.aw-camp--diwali #latest .aw-camp-more-fold .wp-block-post-template { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+	.aw-camp--diwali #help .wp-block-table :is(th, td) { padding-block: var(--kit-space-2); }
+	.aw-camp--diwali #help > .wp-block-buttons { margin-top: var(--kit-space-4); }
+	.aw-camp--diwali #read > h3 { margin-top: var(--kit-space-4); }
+	.aw-camp--diwali #read > .aw-camp-note { margin-top: var(--kit-space-4); }
+}
+
 /* What happens next as a roadmap (owner's brief, 2 Nov 2026), on every campaign's next-steps section. Phone first: a
    vertical timeline of full-width step cards (--kit-space-5 padding, --kit-radius-card, a soft line and
    --kit-elevation-1), the number in a 44px (--kit-size-target) circle beside the title and text, a 2px line in the
