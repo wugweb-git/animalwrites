@@ -945,3 +945,10 @@
 }
 /* The line beside the main share button, in the band's text colour at --kit-type-sm */
 .aw-camp.aw-camp #share .aw-share-cta-note { font-size: var(--kit-type-sm); color: var(--camp-on-mark); }
+/* Guides under the sections they explain (owner, 3 Nov 2026): each link a 44px target (--kit-size-target) in body type,
+   the lines of one section kept together; on the dark pain-scale section the link and its icon take the on-ink colour
+   (the site blue is about 2.9:1 there, WCAG 1.4.3 needs 4.5:1). */
+.aw-camp--lab-rules .aw-camp-note:has(> a[href*="/resources/"]) { font-size: var(--kit-type-base); }
+.aw-camp--lab-rules .aw-camp-note:has(> a[href*="/resources/"]) + .aw-camp-note:has(> a[href*="/resources/"]) { margin-block-start: 0; }
+.aw-camp--lab-rules .aw-camp-note > a[href*="/resources/"] { display: flex; align-items: center; min-height: var(--kit-size-target); }
+.aw-camp--lab-rules .aw-camp-dark .aw-camp-note:has(> a[href*="/resources/"]) > :is(a, .kit-ico) { color: var(--kit-color-on-ink); }
