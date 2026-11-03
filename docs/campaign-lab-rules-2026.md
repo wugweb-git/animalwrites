@@ -166,7 +166,7 @@ Checked against the Campaign Content Standard v1.0 (17 Oct).
 |---|---|---|
 | Section anchors equal slugs | Pass | hero, context, why-it-matters, how-to-help, news, library, faq, next-steps |
 | Section order | Owner's order | Questions after the news and the Library (owner, 21 Oct); the standard puts faq before news |
-| impact, support, partners | Hidden by rule | Count under 100; no partners listed |
+| impact, support, partners | Hidden | No count on the page (owner, 21 Oct; 1,012 confirmed on 3 Nov); no support content; no partners listed |
 | press | Merged | Into In the news (owner) |
 | What people are saying, Find help near you | Owner's sections | Not slugs in the standard; "What people are saying" is a slot, "Find help near you" is not |
 | One H1, H2 sections, H3 modules | Pass | Rule cards and pain tiers are H3 |
@@ -228,6 +228,27 @@ So from 6 Nov until the owner sets Post, the page and Home still ask people to s
 - X, 27 Oct – 2 Nov: 264 Lab posts; #StopAnimalTesting 226, #WithdrawAnimalTestingRules 157, #AnimalFreeScience 133; posts with a picture averaged 171 views vs 25 for text only; 1 post linked animalwrites.in.
 - Links: Hindustan Times, Free Press Journal and DT Next link to the site.
 - Newsletter: 115 volunteers on 3 Nov; 80 delivered that day, the rest on 4 Nov.
+## Letters and data (letter log `wp_aw_camp_letters`, read 3 Nov 2026)
+- 3,981 send taps from 3,593 sends since 17 Oct: Gmail 3,559, copy 375, email app 46.
+- 3,169 taps came with the updates box ticked.
+- Confirmed "Yes, I sent it": 671 (31 Oct), 730 (2 Nov), 1,012 (3 Nov).
+- Daily taps: highest 744 on 24 Oct; about 120 a day 30 Oct–2 Nov (111, 122, 118, 154); 652 on 3 Nov, the day of the campaign email.
+- Devices to 31 Oct: phone 2,770, desktop 254, tablet 27.
+
+## Media & PR and sourcing
+- Press items published: the Hindustan Times explainer (13949) and four Supreme Court items (19497, 19500, 19503, 19506), with written titles for the last three. Pharmabiz (13959) is back in draft.
+- Repeats folded into the first story ("also reported by"): CNBC TV18 into 12972; Arogya Legal, Urban Acres and DrugsControl into 13639. Telangana Today's copy (14236) is private, merged into 13639, with a 301.
+- Media & PR items get the campaign link by keyword on save (Sourcing campaign rules). f6e6b41c, 31 Oct
+- The campaign's rule phrases (2 Nov): the 10 earlier ones plus the committee's full name, animal experimentation, animal research, experiments on animals, laboratory animals rules, lab animal rules, animal testing rules, gsr 864 / gsr 864e / gsr864 / gsr 864 e / 864(e), institutional animal ethics committee, animal ethics committee, breeding and trading of laboratory animals, new approach methodologies, cpcsea-mef, animal testing bill, draft prevention of cruelty to animals 2026, #ccsea, #gsr864e, #labanimalrules.
+- Press search run on 31 Oct: 0 new, 11 own page, 11 not relevant, 18 not classified (the free AI check was unavailable).
+
+## X (read of 27 Oct–2 Nov, 264 posts, a sample)
+- Main tag set: #StopAnimalTesting #WithdrawAnimalTestingRules #AnimalFreeScience (88 posts together). #WithdrawAnimalTestingRules is the campaign's own tag; #SayNoToAnimalExperimentationBill had 12 posts.
+- Posts with a picture or video averaged 171 views and 9 reposts; text-only posts 25 and 1.
+- Links people shared: a tinyurl objection form (35), In Defense of Animals (26), PETA India (29), a lung-on-a-chip study on nature.com (10), change.org (6). One post linked to this page.
+- Most-tagged accounts: @Dept_of_AHD (26), @ICMRDELHI (8), @IndianExpress (6).
+- Used on the page: the three tags on the X share link (2fffe9c5) and "What people are saying" (2e978ca7).
+- Search: the tag phrases have almost no Google searches ("stop animal testing" 1 impression in 28 days); people search the rule words.
 
 ## Decided by the owner
 - Palette A, Gazette crimson (17 Oct).
@@ -242,11 +263,14 @@ So from 6 Nov until the owner sets Post, the page and Home still ask people to s
 - 6 people once each; 6 news items then 8 guides; "Find help near you" kept (3 Nov).
 - The pain meter (3 Nov).
 - Nothing closes the campaign by date; it closes only when its state is set to Post (2 Nov).
+- No reminder email to the senders who ticked the updates box (3 Nov).
 
 ## Still open
-- Letters: the target was 5,000. Confirmed letters are under 100 (the public count is not showing); the admin letters widget and GA4 hold the full numbers.
+- Letters: the target was 5,000. On 3 Nov, 1,012 people had answered "Yes, I sent it" (`aw_campaign_sent`); the letter log holds 3,981 send taps from 3,593 sends (see Letters and data below).
 - Outreach planned but not done: newsletters of 19 and 26 Oct, the X thread, LinkedIn document post, WhatsApp card, partner kit, countdown stories.
 - PCA Act 1960 Chapter IV is not in the Library.
+- Opening the page from a link ending in `#rules` or `#faq` stayed at the hero in the built-in browser (desktop and 375px), while the "What the rules say" button and a later `#rules` worked. Not yet checked on a real phone or another browser.
+- "cpcsea-mef@gov.in" searches: 93 impressions, 3 clicks, position 6.8 (to 31 Oct); a search title or description that answers the address needs the owner's text.
 
 ### Owner's call (recorded only)
 - Library draft: a campaign link on its first screen (the guide box sits about three phone screens down; moving it is a template change).
