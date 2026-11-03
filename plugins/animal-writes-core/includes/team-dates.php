@@ -279,9 +279,16 @@ add_action(
 				if ( ! $next ) {
 					echo '<p>Nothing in the next 60 days.</p>';
 				} else {
-					echo '<ul style="margin:0">';
+					// Calendar tiles (owner, 3 Nov 2026: "simple calendar block layout"): month and day on a tile, the
+					// event and how far off it is beside it. Past dates are greyed; today's tile is filled.
+					$today = wp_date( 'Y-m-d' );
+					echo '<style>.aw-dates-list{margin:0;padding:0;list-style:none}.aw-dates-item{display:flex;gap:12px;align-items:center;margin:0 0 10px}.aw-dates-tile{flex:0 0 auto;width:48px;border:1px solid #c3c4c7;border-radius:4px;text-align:center;background:#fff;overflow:hidden}.aw-dates-mon{display:block;background:#2271b1;color:#fff;font-size:11px;font-weight:600;line-height:18px;text-transform:uppercase}.aw-dates-day{display:block;color:#1d2327;font-size:20px;font-weight:600;line-height:30px}.aw-dates-item--past .aw-dates-mon{background:#646970}.aw-dates-item--today .aw-dates-tile{border-color:#2271b1;box-shadow:0 0 0 1px #2271b1}.aw-dates-text{min-width:0;overflow-wrap:anywhere}.aw-dates-when{display:block;color:#50575e}</style>';
+					echo '<ul class="aw-dates-list">';
 					foreach ( $next as $d ) {
-						echo '<li style="margin:0 0 8px"><strong>' . esc_html( aw_team_date_label( $d['date'] ) ) . '</strong> · ' . esc_html( aw_team_date_when( $d['date'] ) ) . '<br>' . esc_html( $d['title'] ) . '</li>';
+						$t    = strtotime( $d['date'] . ' 12:00:00' );
+						$mod  = $d['date'] < $today ? ' aw-dates-item--past' : ( $d['date'] === $today ? ' aw-dates-item--today' : '' );
+						echo '<li class="aw-dates-item' . esc_attr( $mod ) . '"><span class="aw-dates-tile" aria-hidden="true"><span class="aw-dates-mon">' . esc_html( wp_date( 'M', $t ) ) . '</span><span class="aw-dates-day">' . esc_html( wp_date( 'j', $t ) ) . '</span></span>'
+							. '<span class="aw-dates-text"><span class="screen-reader-text">' . esc_html( aw_team_date_label( $d['date'] ) ) . ': </span><strong>' . esc_html( $d['title'] ) . '</strong><span class="aw-dates-when">' . esc_html( aw_team_date_when( $d['date'] ) ) . '</span></span></li>';
 					}
 					echo '</ul>';
 				}
