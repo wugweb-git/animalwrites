@@ -16,6 +16,7 @@ Live at https://animalwrites.in. How changes are made, reviewed and shipped: [CL
 - [docs/plugin-map.md](docs/plugin-map.md) — every plugin file and what it does.
 - [docs/design-system.md](docs/design-system.md) — breakpoints (768 / 1200), tokens, components.
 - [docs/rollback.md](docs/rollback.md) — release tags and rollback.
+- [docs/campaign-lab-rules-2026.md](docs/campaign-lab-rules-2026.md) — Lab rules campaign page: every change by section, decisions, open items.
 
 ## URLs
 | Section | URL |
