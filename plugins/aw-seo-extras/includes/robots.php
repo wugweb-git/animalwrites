@@ -14,6 +14,11 @@
  *   added to the text Rank Math writes; every saved rule and the Sitemap line stay as they are.
  * - Any wp_robots rule another plugin adds (e.g. a staging copy's noindex): Rank Math removes every wp_robots filter,
  *   so a copy of them is kept before it starts and asked here.
+ * - Rank Math's sitemaps leave out what these rules keep out of the index: closed opportunities, profiles with no
+ *   contact, items merged into another story, items without a slug, and preview-only items (kits_preview_only_ids(),
+ *   e.g. the sample listing). Always on, as the rules themselves. Private, draft and noindex items and the empty Web
+ *   Stories type are left out by Rank Math itself; fixed exclusions are Rank Math settings (Sitemap → Exclude posts:
+ *   the search page). Claim forms (/claim/, page 12587) are noindex, follow and out of every sitemap.
  *
  * @package aw-seo-extras
  */
@@ -161,3 +166,52 @@ function aw_seo_robots_content_signal( $txt ) {
 	return "User-agent: *\n" . $line . "\n\n" . $txt;
 }
 add_filter( 'robots_txt', 'aw_seo_robots_content_signal', 50 );
+
+/* ---------- Sitemaps: what a rule above keeps out of the index stays out of Rank Math's sitemaps ---------- */
+
+/**
+ * Published profiles with no contact (aw_listing_unreachable() above), as an ID-keyed set: one query per
+ * sitemap request instead of a meta lookup per listing. Listings with no stored score count as candidates and are
+ * checked one by one (that also stores their score).
+ */
+function aw_sitemap_unreachable_listings() {
+	static $set = null;
+	if ( null !== $set ) {
+		return $set;
+	}
+	global $wpdb;
+	$social = "'" . implode( "','", array_map( 'esc_sql', aw_seo_social_keys() ) ) . "'";
+	$ids    = $wpdb->get_col( // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL
+		"SELECT p.ID FROM {$wpdb->posts} p
+		LEFT JOIN {$wpdb->postmeta} s ON s.post_id = p.ID AND s.meta_key = 'aw_contact_score'
+		WHERE p.post_type = 'aw_listing' AND p.post_status = 'publish' AND ( s.meta_value IS NULL OR s.meta_value = '' OR s.meta_value = '0' )
+		AND NOT EXISTS ( SELECT 1 FROM {$wpdb->postmeta} m WHERE m.post_id = p.ID AND m.meta_key IN ( {$social} ) AND TRIM( m.meta_value ) <> '' )"
+	);
+	$set = array();
+	_prime_post_caches( array_map( 'intval', $ids ), false, true );
+	foreach ( $ids as $id ) {
+		if ( aw_listing_unreachable( (int) $id ) ) {
+			$set[ (int) $id ] = true;
+		}
+	}
+	return $set;
+}
+
+add_filter(
+	'rank_math/sitemap/entry',
+	function ( $url, $type, $obj ) {
+		$obj = ( 'post' === $type && is_object( $obj ) && ! empty( $obj->ID ) ) ? get_post( (int) $obj->ID ) : null; // Rank Math passes a database row
+		if ( ! $obj instanceof WP_Post ) {
+			return $url;
+		}
+		$closed = 'aw_opportunity' === $obj->post_type && function_exists( 'aw_retention_state' ) && aw_retention_state( $obj );
+		$merged = (int) get_post_meta( $obj->ID, 'aw_merged_into', true ) > 0; // a same-story duplicate (normally private already)
+		$unreachable = 'aw_listing' === $obj->post_type && isset( aw_sitemap_unreachable_listings()[ (int) $obj->ID ] ); // noindex (above)
+		if ( '' === (string) $obj->post_name || $closed || $merged || $unreachable || in_array( (int) $obj->ID, aw_seo_preview_ids(), true ) ) {
+			return false;
+		}
+		return $url;
+	},
+	10,
+	3
+);

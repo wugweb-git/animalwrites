@@ -285,19 +285,15 @@ add_filter(
 	25
 );
 
-/* ---------- Sitemap: filtered-sitemap.xml ---------- */
+/* ---------- The URLs of filtered-sitemap.xml (the sitemap itself: sitemap.php, rebuilt daily) ---------- */
 
 /**
- * The indexable ?category_name=, ?state= and ?publisher= views of every hub (3 or more items each), cached for 12
- * hours. ?tag= views are not listed: their tag pages are (Rank Math's tag sitemap).
+ * The indexable ?category_name=, ?state= and ?publisher= views of every hub (3 or more items each). ?tag= views are
+ * not listed: their tag pages are (Rank Math's tag sitemap).
  *
  * @return array List of ['loc' => URL].
  */
-function aw_sitemap_filtered_urls() {
-	$urls = get_transient( 'aw_sitemap_filtered' );
-	if ( false !== $urls ) {
-		return $urls;
-	}
+function aw_sitemap_filtered_build() {
 	$urls = array();
 	foreach ( AW_FILTERED_CATEGORY_HUBS as $type ) {
 		$cats = function_exists( 'aw_section_categories' ) ? aw_section_categories( $type ) : array();
@@ -319,10 +315,8 @@ function aw_sitemap_filtered_urls() {
 			}
 		}
 	}
-	set_transient( 'aw_sitemap_filtered', $urls, 12 * HOUR_IN_SECONDS );
 	return $urls;
 }
-add_action( 'transition_post_status', fn( $new, $old ) => $new !== $old && delete_transient( 'aw_sitemap_filtered' ), 10, 2 );
 
 /**
  * Candidate ?state= or ?publisher= values of a hub: the states and publishers its published items carry at least
@@ -346,28 +340,3 @@ function aw_sitemap_filtered_values( $type, $key ) {
 	}
 	return array_values( array_unique( $out ) );
 }
-
-add_filter(
-	'rank_math/sitemap/providers',
-	function ( $providers ) {
-		if ( ! interface_exists( '\RankMath\Sitemap\Providers\Provider' ) || ! class_exists( '\RankMath\Sitemap\Router' ) ) {
-			return $providers;
-		}
-		if ( ! class_exists( 'AW_Rank_Math_Sitemap_Filtered' ) ) {
-			/** Filtered hub lists with a category of their own. */
-			class AW_Rank_Math_Sitemap_Filtered implements \RankMath\Sitemap\Providers\Provider {
-				public function handles_type( $type ) {
-					return 'filtered' === $type;
-				}
-				public function get_index_links( $max_entries ) {
-					return aw_sitemap_filtered_urls() ? array( array( 'loc' => \RankMath\Sitemap\Router::get_base_url( 'filtered-sitemap.xml' ) ) ) : array();
-				}
-				public function get_sitemap_links( $type, $max_entries, $current_page ) {
-					return array_slice( aw_sitemap_filtered_urls(), ( max( 1, (int) $current_page ) - 1 ) * $max_entries, $max_entries );
-				}
-			}
-		}
-		$providers[] = new AW_Rank_Math_Sitemap_Filtered();
-		return $providers;
-	}
-);
