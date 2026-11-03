@@ -979,15 +979,16 @@
 /* Read the law and the record on phones: at 320 the cards ran 19px past the screen's edge, sized to the longest source
    tag. Below 768 the list's one column may shrink, so may the card's text column (aw.css gives it --kit-body-min), the
    source tag wraps instead of being cut (kit.css keeps tags to one 28px line with an ellipsis), and the title shows in
-   full (kit.css cuts card titles to three lines; the titles are already shortened where they are printed). */
+   full (the rule after this block). */
 @media (max-width: 767px) {
 	.aw-camp--lab-rules #read .wp-block-post-template { grid-template-columns: minmax(0, 1fr); }
 	.aw-camp--lab-rules #read .kit-card[class*="kit-card--stacked"] > .kit-card-body { min-width: 0; }
 	.aw-camp--lab-rules #read .kit-card .kit-card-chips { height: auto; overflow: visible; }
 	.aw-camp--lab-rules #read .kit-card .kit-tag { height: auto; padding-block: var(--kit-space-1); border-radius: var(--kit-radius-control); white-space: normal; }
 	.aw-camp--lab-rules #read .kit-card .kit-tag-text { white-space: normal; overflow: visible; text-overflow: clip; }
-	.aw-camp--lab-rules #read .kit-card .kit-card-title a { display: inline; -webkit-line-clamp: unset; overflow: visible; }
 }
+/* Library titles show in full at every width: from 768 Kits' three-line cut ended 9 of the 12 titles in "…" */
+.aw-camp--lab-rules #read .kit-card .kit-card-title a { display: inline; -webkit-line-clamp: unset; overflow: visible; }
 /* Rule chips on phones: the chip opens the rule's own words, so it is a 44px target (--kit-size-target) like the page's
    other buttons; the Kits chip is 28px. The pain-scale's chips are left to that section. */
 @media (max-width: 767px) {
