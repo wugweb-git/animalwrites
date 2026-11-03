@@ -851,9 +851,13 @@
 @media (max-width: 1199px) {
 	.aw-camp.aw-camp #latest .kit-card { display: grid; grid-template-columns: var(--kit-thumb-md) minmax(0, 1fr); grid-template-areas: "meta meta" "media title"; align-items: start; gap: var(--kit-space-3) var(--kit-space-4); }
 	.aw-camp.aw-camp #latest .kit-card > .kit-card-body { display: contents; }
-	.aw-camp.aw-camp #latest .kit-card-metarow { grid-area: meta; flex-wrap: nowrap; }
+	/* One row when the date, place and first chip fit; on a narrower card the chip goes under the date whole, never cut.
+	   Only the first chip sets the chips' minimum width (later chips wrap their words, and Kits hides them off the row). */
+	.aw-camp.aw-camp #latest .kit-card-metarow { grid-area: meta; }
 	.aw-camp.aw-camp #latest .kit-card-metarow > .kit-card-meta { flex: none; }
-	.aw-camp.aw-camp #latest .kit-card-metarow > .kit-card-chips { flex: 1 1 0; }
+	.aw-camp.aw-camp #latest .kit-card-metarow > .kit-card-chips { flex: 1 1 0; min-width: min-content; }
+	.aw-camp.aw-camp #latest .kit-card-metarow > .kit-card-chips > :first-child { flex: none; }
+	.aw-camp.aw-camp #latest .kit-card-metarow > .kit-card-chips > :not(:first-child) .kit-tag-text { white-space: normal; }
 	.aw-camp.aw-camp #latest .kit-card > .kit-card-media { grid-area: media; width: 100%; max-width: none; aspect-ratio: 1; }
 	.aw-camp.aw-camp #latest .kit-card > .kit-card-media img { width: 100%; height: 100%; object-fit: cover; }
 	.aw-camp.aw-camp #latest .kit-card-title { grid-area: title; margin: 0; }
