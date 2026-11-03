@@ -1717,22 +1717,41 @@ section.aw-camp-band.aw-ed-hero--campaign { box-sizing: border-box; min-height: 
 }
 .aw-ed-help .kit-sec-head p { color: inherit; } /* on the dark band */
 
+/* Show more folds on Home (3 Nov 2026; Layout rules 5 and 6: a fold when a section does not fit): a core Details (the
+   kit.css look) folded by the Kits fold primitive, details[data-kit-fold] (kit.js, kits_fold_now in kits-core), at or
+   below its width; open without JavaScript, and a link into it opens it. The summary reads "Show more" when folded
+   and "Show less" when open. */
+.aw-more { display: block; margin-block: 0; }
+.aw-more > summary { padding-block: 0; } /* a --kit-size-target (44px) row: Kits adds 12px padding to its min-height */
+.aw-more > summary .aw-more-less, .aw-more[open] > summary .aw-more-show { display: none; }
+.aw-more[open] > summary .aw-more-less { display: inline; }
+
 /* Need help now: a bento grid on the dark band. Each tile is one link (its H3's link covers the tile); phone numbers
    are tap to call. The reading order (and Tab order) is the markup order at every width: 112, injured animal, 1962,
    AWBI, report cruelty, find a vet, find an organisation. Grid rows stretch, so tiles in one row end level.
    Phones: one column. From 768: two columns, 112 two rows tall beside the injured-animal and 1962 tiles.
    The section is a size container (owner, 2 Nov 2026: no section taller than 720px): from 56.5rem (four tiles of
    --kit-body-min text plus their --kit-space-5 padding and three --kit-space-5 gaps: 4 x (10rem + 3rem) + 4.5rem;
-   1024 and up) four columns, two rows, 112 two rows tall in the first column. */
+   1024 and up) four columns, two rows, 112 two rows tall in the first column.
+   At or below 1199px (3 Nov 2026, Home sections fit one 375x812 screen and are at most 720px from 768) the AWBI,
+   report cruelty, find a vet and find an organisation tiles are in a Show more fold (.aw-more, below), in the "more"
+   area; open, they keep the order and layout above. Section at 375: 1378 -> 802px; 768: 887 -> 581px. */
 .aw-ed-help { container: aw-help / inline-size; }
-.aw-bento { display: grid; gap: var(--kit-space-5); grid-template-columns: minmax(0, 1fr); grid-template-areas: "sos" "injured" "vet1962" "awbi" "cruelty" "vets" "orgs"; }
+.aw-bento { display: grid; gap: var(--kit-space-5); grid-template-columns: minmax(0, 1fr); grid-template-areas: "sos" "injured" "vet1962" "more"; }
+.aw-bento > .aw-more { grid-area: more; align-self: start; }
+.aw-bento-more { display: grid; gap: var(--kit-space-4); grid-template-columns: minmax(0, 1fr); }
+.aw-bento > .aw-more[open] > summary { margin-bottom: var(--kit-space-4); }
 .aw-bento--sos { grid-area: sos; } .aw-bento--injured { grid-area: injured; } .aw-bento--vet1962 { grid-area: vet1962; } .aw-bento--awbi { grid-area: awbi; }
 .aw-bento--cruelty { grid-area: cruelty; } .aw-bento--vets { grid-area: vets; } .aw-bento--orgs { grid-area: orgs; }
 @media (min-width: 768px) {
-	.aw-bento { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-areas: "sos injured" "sos vet1962" "awbi cruelty" "vets orgs"; }
+	.aw-bento { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-areas: "sos injured" "sos vet1962" "more more"; }
+	.aw-bento-more { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @container aw-help (min-width: 56.5rem) {
 	.aw-bento { gap: var(--kit-space-4); grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-areas: "sos injured vet1962 awbi" "sos cruelty vets orgs"; } /* 16px between tiles, so the Home help section stays within 720 (Layout rules 5) */
+	.aw-bento > .aw-more[open], .aw-bento > .aw-more[open]::details-content, .aw-bento > .aw-more[open] > .aw-bento-more { display: contents; } /* open (from 1200, or tapped): its tiles take their own areas */
+	.aw-bento > .aw-more[open] > summary { display: none; }
+	.aw-bento > .aw-more:not([open]) { grid-area: 2 / 2 / 3 / 5; } /* 1024 to 1199, folded: under the injured-animal and 1962 tiles */
 }
 /* Below the four-column layout (phones and 768 to about 900px; 3 Nov 2026, Home sections fit one phone screen and
    are at most 720px from 768): the four link tiles (injured animal, report cruelty, find a vet, find an organisation)
@@ -1744,6 +1763,12 @@ section.aw-camp-band.aw-ed-hero--campaign { box-sizing: border-box; min-height: 
 	.aw-bento-tile:is(.aw-bento--injured, .aw-bento--cruelty, .aw-bento--vets, .aw-bento--orgs) { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto 1fr; align-content: start; column-gap: var(--kit-space-4); row-gap: var(--kit-space-1); }
 	.aw-bento-tile:is(.aw-bento--injured, .aw-bento--cruelty, .aw-bento--vets, .aw-bento--orgs) > .aw-bento-ico { grid-row: 1 / span 2; margin-bottom: 0; }
 	.aw-bento-tile:is(.aw-bento--injured, .aw-bento--cruelty, .aw-bento--vets, .aw-bento--orgs) > :is(h3, p) { grid-column: 2; }
+	.aw-bento-more > .aw-bento-tile { grid-area: auto; } /* in the fold's own grid, not the bento's named areas */
+	/* the 1962 and AWBI tiles the same way: icon square beside the label, number and line (3 Nov 2026) */
+	.aw-bento-tile:is(.aw-bento--vet1962, .aw-bento--awbi) { display: grid; grid-template-columns: auto minmax(0, 1fr); align-content: start; column-gap: var(--kit-space-4); row-gap: var(--kit-space-1); }
+	.aw-bento-tile:is(.aw-bento--vet1962, .aw-bento--awbi) > .aw-bento-head { display: contents; }
+	.aw-bento-tile:is(.aw-bento--vet1962, .aw-bento--awbi) .aw-bento-ico { grid-row: 1 / span 3; grid-column: 1; margin: 0; }
+	.aw-bento-tile:is(.aw-bento--vet1962, .aw-bento--awbi) :is(.aw-bento-eyebrow, h3, p) { grid-column: 2; margin: 0; }
 }
 /* Each tile is a size container, so the phone numbers scale to the tile and never wrap or overflow. Depth: a faint
    border, a light line along the top edge, a soft top-to-bottom shade and a small shadow. Hover: the tile lifts
