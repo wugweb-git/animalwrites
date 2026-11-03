@@ -7,19 +7,20 @@
  *   name, URL, logo, locality/region, contact details when present, the official website as sameAs, identifiers
  *   (AWBI code, registration, 12A, 80G, Darpan), services, opening hours, donate and volunteer actions.
  * - News, Library and Resources: one purpose-made node per type and sub-type (aw_article_nodes: NewsArticle,
- *   Legislation, Article on a court ruling / press release / government document, DigitalDocument, Article + HowTo,
+ *   Legislation, Article on a court ruling / press release / government document, DigitalDocument, Article,
  *   Article on a ScholarlyArticle). A guide's FAQPage is Rank Math's own (its FAQ block). Opportunities: JobPosting for
  *   open jobs, internships, fellowships and volunteering (none once closed, none for events or fostering). Campaigns:
- *   Event when the day is stored, else CreativeWork. Rank Math's Titles & Meta hold each type's schema type; these
+ *   Event when the day and the place are stored, else CreativeWork. Rank Math's Titles & Meta hold each type's schema type; these
  *   nodes replace its default, which cannot carry these properties.
  * - Section hubs, Directory places and category pages: CollectionPage + ItemList of the page's items. Categories
  *   page: CollectionPage + ItemList of the categories. Media & PR: CollectionPage of press items. Contact: ContactPage. About: AboutPage.
  * - FAQPage (listings, Library documents, type/service/category pages, four hubs): parsed from the page's own FAQ
  *   accordion (faq.php, in this plugin), so its text is the visible text; isPartOf the page, about its main entity.
- * - Every page: the publisher (Organization, with publishing and corrections policies) and the site (WebSite with the
- *   site's own search address), replacing Rank Math's defaults (same @id). The BreadcrumbList is Rank Math's own
- *   (breadcrumbs.php gives it the trail people see).
+ * - Every page: the publisher (Organization, with publishing and corrections policies) and the site (WebSite),
+ *   replacing Rank Math's defaults (same @id); the WebSite has no SearchAction. The BreadcrumbList is Rank Math's
+ *   own (breadcrumbs.php gives it the trail people see).
  *   Every node's inLanguage is en-IN (Rank Math writes the WordPress locale, en-US, on its WebPage).
+ * - Every picture in these nodes is a share-safe address (aw_seo_share_safe_url(): never AVIF or WebP), as og:image.
  *
  * @package aw-seo-extras
  */
@@ -88,7 +89,7 @@ function aw_listing_schema( $id ) {
 		'mainEntityOfPage' => get_permalink( $id ),                           // this profile
 		'description' => aw_seo_plain( get_the_excerpt( $id ) ),
 	);
-	$logo = get_the_post_thumbnail_url( $id, 'medium' );
+	$logo = aw_schema_safe_url( (string) get_the_post_thumbnail_url( $id, 'medium' ) );
 	if ( $logo ) {
 		$org['logo']  = $logo;
 		$org['image'] = $logo;
@@ -138,7 +139,7 @@ function aw_listing_schema( $id ) {
 	}
 	// The Google rating is shown on the page only: Google does not accept third-party ratings in an organisation's schema.
 	$own    = function_exists( 'aw_listing_photo_ids' ) ? aw_listing_photo_ids( $id ) : array_filter( explode( ',', $m( 'aw_gallery' ) ) ); // never stock or CC images
-	$photos = array_values( array_filter( array_map( fn( $p ) => (string) wp_get_attachment_image_url( (int) $p, 'large' ), $own ) ) );
+	$photos = array_values( array_filter( array_map( fn( $p ) => aw_schema_safe_url( (string) wp_get_attachment_image_url( (int) $p, 'large' ) ), $own ) ) );
 	if ( $photos ) {
 		$org['image'] = array_values( array_unique( array_merge( (array) ( $org['image'] ?? array() ), $photos ) ) );
 	}
@@ -328,6 +329,35 @@ function aw_schema_date( $date ) {
 }
 
 /**
+ * A picture address as og:image gives it: an AVIF or WebP upload as its original JPEG or PNG, or its share JPEG
+ * (aw_seo_share_safe_url(), helpers.php). '' stays ''.
+ *
+ * @param string $url Picture address.
+ * @return string
+ */
+function aw_schema_safe_url( $url ) {
+	return '' === (string) $url ? '' : (string) aw_seo_share_safe_url( (string) $url )[0];
+}
+
+/**
+ * A picture (as aw_seo_attachment(): url, width, height) with a share-safe address, and that file's own size when the
+ * address changed. Null stays null.
+ *
+ * @param array|null $img Picture.
+ * @return array|null
+ */
+function aw_schema_safe_image( $img ) {
+	if ( ! is_array( $img ) || empty( $img['url'] ) ) {
+		return $img;
+	}
+	list( $url, $w, $h ) = aw_seo_share_safe_url( (string) $img['url'] );
+	if ( $url === $img['url'] ) {
+		return $img;
+	}
+	return array_merge( $img, array( 'url' => $url ), $w ? array( 'width' => $w, 'height' => $h ) : array( 'width' => 0, 'height' => 0 ) );
+}
+
+/**
  * ImageObject for an item: the same image its og:image uses (helpers.php: for ingested items the publisher's own
  * image, linked), with its size when known. Null when the site has no image to give.
  *
@@ -336,6 +366,7 @@ function aw_schema_date( $date ) {
  */
 function aw_schema_image( $id ) {
 	$img = ( is_singular() && get_queried_object_id() === (int) $id ) ? aw_seo_image() : ( aw_seo_item_image( $id ) ? aw_seo_item_image( $id ) : aw_seo_default_image() );
+	$img = aw_schema_safe_image( $img );
 	if ( $img && false !== strpos( html_entity_decode( $img['url'] ), '&' ) ) { // printed through wp_kses (& as &amp;): the plain address, as og:image
 		$img = array( 'url' => strtok( html_entity_decode( $img['url'] ), '?' ), 'width' => 0, 'height' => 0 );
 	}
@@ -392,33 +423,6 @@ function aw_schema_issuer( $id ) {
 }
 
 /**
- * HowTo of a guide whose text is a numbered list of steps (its first numbered list with three or more steps), or null.
- * The steps are the guide's own words.
- *
- * @param int $id Post ID.
- * @return array|null
- */
-function aw_schema_howto( $id ) {
-	if ( ! preg_match( '#<ol[^>]*>(.*?)</ol>#is', (string) get_post_field( 'post_content', $id ), $ol ) ) {
-		return null;
-	}
-	preg_match_all( '#<li[^>]*>(.*?)</li>#is', $ol[1], $li );
-	$steps = array_values( array_filter( array_map( 'aw_seo_plain', $li[1] ) ) );
-	if ( count( $steps ) < 3 || count( $steps ) !== count( $li[1] ) ) {
-		return null;
-	}
-	$url = get_permalink( $id );
-	return array(
-		'@type'    => 'HowTo',
-		'@id'      => $url . '#howto',
-		'name'     => aw_seo_plain( get_the_title( $id ) ),
-		'url'      => $url,
-		'isPartOf' => array( '@id' => $url . '#article' ),
-		'step'     => array_map( fn( $t, $i ) => array( '@type' => 'HowToStep', 'position' => $i + 1, 'text' => $t ), $steps, array_keys( $steps ) ),
-	);
-}
-
-/**
  * The item's own schema node, purpose-made by type and sub-type (see the file header). Only stored values are used.
  *
  * - News: NewsArticle; the source article (isBasedOn), its publisher (sourceOrganization), the other reports of the
@@ -427,8 +431,8 @@ function aw_schema_howto( $id ) {
  *   body as sourceOrganization); judgments and orders as our Article on the court's ruling (a CreativeWork by the
  *   court); official releases as our Article on the issuer's press release; circulars, advisories and other documents
  *   as our Article on the issuer's DigitalDocument; templates as a DigitalDocument.
- * - Resources: guides as Article (plus HowTo when the guide is numbered steps; FAQPage comes from Rank Math's FAQ
- *   block); research summaries as Article based on the ScholarlyArticle (DOI, journal).
+ * - Resources: guides as Article (FAQPage comes from Rank Math's FAQ block); research summaries as Article based on
+ *   the ScholarlyArticle (DOI, journal).
  *
  * @param int $id Post ID.
  * @return array List of nodes (the main one first).
@@ -566,11 +570,6 @@ function aw_article_nodes( $id ) {
 			);
 		}
 		$nodes[] = $article;
-		$howto   = $research ? null : aw_schema_howto( $id );
-		if ( $howto ) {
-			$nodes[0]['hasPart'] = array( '@id' => $howto['@id'] );
-			$nodes[]             = $howto;
-		}
 	}
 	return array_map( fn( $n ) => array_filter( $n, fn( $v ) => null !== $v && '' !== $v && array() !== $v ), $nodes );
 }
@@ -587,8 +586,8 @@ function aw_court_document_url( $id ) {
 }
 
 /**
- * A campaign: an Event when its day is stored (aw_event_date, Y-m-d; place in aw_event_place), organised by its
- * organiser or Animal Writes; otherwise a CreativeWork by the organiser. The stored day is the whole event (one day:
+ * A campaign: an Event when its day and its place are stored (aw_event_date, Y-m-d; aw_event_place), organised by
+ * its organiser or Animal Writes; otherwise (no day, or no place) a CreativeWork by the organiser. The stored day is the whole event (one day:
  * endDate the same). No offers (only when the campaign states free participation; none does), no performer.
  *
  * @param int $id Post ID.
@@ -597,7 +596,7 @@ function aw_court_document_url( $id ) {
 function aw_campaign_schema( $id ) {
 	$org     = function_exists( 'aw_campaign_organiser' ) ? aw_campaign_organiser( $id ) : (int) get_post_meta( $id, 'aw_organisation', true );
 	$org     = $org ? $org : (int) get_post_meta( $id, 'aw_organiser', true ); // the older key, read when aw_organisation is empty
-	$image   = (string) get_the_post_thumbnail_url( $id, 'large' );
+	$image   = aw_schema_safe_url( (string) get_the_post_thumbnail_url( $id, 'large' ) );
 	$by      = $org && 'publish' === get_post_status( $org ) ? array( '@type' => 'NGO', 'name' => aw_seo_plain( get_the_title( $org ) ), 'url' => get_permalink( $org ) ) : array( '@id' => home_url( '/#organization' ) );
 	$day     = (string) get_post_meta( $id, 'aw_event_date', true );
 	$place   = aw_seo_plain( (string) get_post_meta( $id, 'aw_event_place', true ) );
@@ -614,13 +613,13 @@ function aw_campaign_schema( $id ) {
 	if ( $doc && 'publish' === get_post_status( $doc ) ) {
 		$common['about'] = array_merge( array( array( '@id' => get_permalink( $doc ) . '#legislation' ) ), (array) $common['about'] );
 	}
-	if ( preg_match( '/^\d{4}-\d{2}-\d{2}$/', $day ) ) {
+	if ( preg_match( '/^\d{4}-\d{2}-\d{2}$/', $day ) && '' !== $place ) { // an Event needs a place: without one, a CreativeWork
 		return array_filter(
 			array_merge(
 				array( '@type' => 'Event', '@id' => get_permalink( $id ) . '#event', 'startDate' => $day, 'endDate' => $day, 'eventAttendanceMode' => 'https://schema.org/OfflineEventAttendanceMode', 'eventStatus' => 'https://schema.org/EventScheduled' ),
 				$common,
 				array(
-					'location'  => $place ? array( '@type' => 'Place', 'name' => $place, 'address' => array( '@type' => 'PostalAddress', 'addressCountry' => 'IN' ) ) : null,
+					'location'  => array( '@type' => 'Place', 'name' => $place, 'address' => array( '@type' => 'PostalAddress', 'addressCountry' => 'IN' ) ),
 					'organizer' => $by,
 					'performer' => $by, // the organiser runs the day (Search Console asks for a performer)
 					'offers'    => array( '@type' => 'Offer', 'price' => '0', 'priceCurrency' => 'INR', 'availability' => 'https://schema.org/InStock', 'url' => get_permalink( $id ) ), // free to take part
@@ -702,7 +701,7 @@ function aw_campaign_record_schema( $id ) {
 			}
 		}
 	}
-	$image = (string) get_the_post_thumbnail_url( $id, 'large' );
+	$image = aw_schema_safe_url( (string) get_the_post_thumbnail_url( $id, 'large' ) );
 	return array_filter(
 		array(
 			'@type'            => 'Article',
@@ -749,21 +748,16 @@ function aw_schema_language( $node ) {
 /** Other names of the site and organisation (owner, 20 Oct 2026); Google reads the WebSite's for the site name in results. */
 // AW_SITE_ALT_NAMES: AW SEO Plus → Settings (settings.php).
 
-/** The site itself, with site search (shown on every page). */
+/** The site itself (shown on every page). */
 function aw_website_schema() {
 	return array(
-		'@type'           => 'WebSite',
-		'@id'             => home_url( '/#website' ),
-		'name'            => get_bloginfo( 'name' ),
-		'alternateName'   => AW_SITE_ALT_NAMES,
-		'url'             => home_url( '/' ),
-		'inLanguage'      => 'en-IN',
-		'publisher'       => array( '@id' => home_url( '/#organization' ) ),
-		'potentialAction' => array(
-			'@type'       => 'SearchAction',
-			'target'      => home_url( '/search/?q={search_term_string}' ),
-			'query-input' => 'required name=search_term_string',
-		),
+		'@type'         => 'WebSite',
+		'@id'           => home_url( '/#website' ),
+		'name'          => get_bloginfo( 'name' ),
+		'alternateName' => AW_SITE_ALT_NAMES,
+		'url'           => home_url( '/' ),
+		'inLanguage'    => 'en-IN',
+		'publisher'     => array( '@id' => home_url( '/#organization' ) ),
 	);
 }
 
@@ -936,11 +930,12 @@ function aw_opportunity_org_address( $id, $org_id ) {
  * The schema.org node of an Opportunity, by what it is (owner, 17 Oct 2026: the correct type per item):
  * - a role (job, internship, volunteer role): JobPosting (aw_job_schema);
  * - an event with a stated day, or a stated monthly repeat: Event at the organisation's place, organised by it
- *   (a repeat also as an eventSchedule; startDate is its next day). Without a day: no node;
+ *   (a repeat also as an eventSchedule; startDate is its next day). Without a day: no node; with a day but no place
+ *   stored (no district or state): CreativeWork;
  * - a fellowship: EducationalOccupationalProgram offered by the organisation (applicationDeadline from aw_deadline);
  * - a grant or scholarship: MonetaryGrant funded by the organisation (no amount: none is stored);
  * - a course, training or workshop: Course by the organisation (with a CourseInstance when it has a day);
- * - an award, competition or call: Event when it has a day, else CreativeWork;
+ * - an award, competition or call: Event when it has a day and a place, else CreativeWork;
  * - anything else (fostering alone): no node; the page is Rank Math's WebPage.
  * A closed opportunity (past its deadline or review date) has none.
  */
@@ -973,14 +968,18 @@ function aw_opportunity_schema( $id ) {
 	$repeat   = $day ? null : aw_opportunity_repeat( $id );
 	$deadline = (string) get_post_meta( $id, 'aw_deadline', true );
 	$deadline = preg_match( '/^\d{4}-\d{2}-\d{2}$/', $deadline ) ? $deadline : '';
-	$event    = function () use ( $id, $common, $org, $org_id, $day, $repeat ) {
+	$creative = fn() => array_filter( array_merge( array( '@type' => 'CreativeWork' ), $common, array( 'creator' => $org, 'datePublished' => get_the_date( 'c', $id ) ) ) );
+	$event    = function () use ( $id, $common, $org, $org_id, $day, $repeat, $creative ) {
 		if ( ! $day && ! $repeat ) {
 			return array();
+		}
+		$addr = aw_opportunity_org_address( $id, $org_id );
+		if ( ! array_diff_key( $addr, array( '@type' => 1, 'addressCountry' => 1 ) ) ) {
+			return $creative(); // no place stated (country only): an Event needs one, so a CreativeWork
 		}
 		$t     = wp_timezone();
 		$start = $repeat ? new DateTimeImmutable( $repeat[0] . ' ' . $repeat[1], $t ) : null;
 		$end   = $repeat ? new DateTimeImmutable( $repeat[0] . ' ' . $repeat[2], $t ) : null;
-		$addr  = aw_opportunity_org_address( $id, $org_id );
 		$image = aw_schema_image( $id );
 		return array_filter(
 			array_merge(
@@ -1014,7 +1013,7 @@ function aw_opportunity_schema( $id ) {
 		return array_filter( array_merge( array( '@type' => 'Course' ), $common, array( 'provider' => $org, 'hasCourseInstance' => $instance ) ) );
 	}
 	$ev = $event(); // an award, competition or call
-	return $ev ? $ev : array_filter( array_merge( array( '@type' => 'CreativeWork' ), $common, array( 'creator' => $org, 'datePublished' => get_the_date( 'c', $id ) ) ) );
+	return $ev ? $ev : $creative();
 }
 
 /** The Categories page: CollectionPage + ItemList of every category. */
@@ -1271,7 +1270,7 @@ function aw_hub_schema_nodes() {
 /** ImageObject of a press item: its stored thumbnail, else the stored publisher logo (null when neither exists). */
 function aw_press_image_schema( $id ) {
 	foreach ( array( (int) get_post_thumbnail_id( $id ), (int) get_post_meta( $id, 'aw_press_logo', true ) ) as $att ) {
-		$img = $att ? aw_seo_attachment( $att ) : null;
+		$img = $att ? aw_schema_safe_image( aw_seo_attachment( $att ) ) : null;
 		if ( $img ) {
 			return array_filter( array( '@type' => 'ImageObject', 'url' => $img['url'], 'width' => $img['width'], 'height' => $img['height'] ) );
 		}
@@ -1403,9 +1402,9 @@ function aw_schema_page_image() {
 	$typed = (int) aw_seo_typed( 'facebook_image_id' );
 	$img   = $typed ? aw_seo_attachment( $typed, 'full' ) : null;
 	if ( ! $img && '' !== aw_seo_typed( 'facebook_image' ) ) {
-		return array( 'url' => aw_seo_typed( 'facebook_image' ), 'width' => 0, 'height' => 0 );
+		return aw_schema_safe_image( array( 'url' => aw_seo_typed( 'facebook_image' ), 'width' => 0, 'height' => 0 ) );
 	}
-	return $img ? $img : aw_seo_image();
+	return $img ? aw_schema_safe_image( $img ) : aw_seo_image();
 }
 
 /** Replace every reference {"@id": $from} in a graph with {"@id": $to}. */

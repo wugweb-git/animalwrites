@@ -1,16 +1,21 @@
 <?php
 /**
- * Open Graph / Twitter details Rank Math's settings cannot express. Rank Math prints the tags; a share image or text
- * chosen in Rank Math always wins.
+ * Share cards (Open Graph and Twitter tags): what Rank Math prints, adjusted where its settings cannot say it. Rank
+ * Math prints every tag; a share image chosen in Rank Math always wins.
  *
- * - One share image (helpers.php): the item's own image when landscape: for News, Library, research and Opportunities
- *   the publisher's image, linked; else the featured image (a listing's logo), a Library item's hosted PDF cover, a
- *   Page's own band photo. Category pages: the category photo, stored in Rank Math's own share-image fields
- *   (programmatic.php), which Rank Math prints. Tags and everything else: the site share image.
- * - og:type "article" only for news, Library, Resources and campaigns; "website" elsewhere.
- * - og:locale en_IN.
- * - og:image:alt: the picture's own alt text, else the page's title (never the focus keyword, which Rank Math would use).
- * - A missing page shares no image.
+ * - The share image when none is chosen: aw_seo_image() (helpers.php) picks it: the item's own landscape image (for
+ *   News, Library, research and Opportunities the publisher's image, linked), else the featured image (a listing's
+ *   logo), a Library item's hosted PDF cover, a Page's own band photo; else the site share image. It is added with its
+ *   size, type and alt text: the picture's own alt text, else the page's title (never the focus keyword).
+ * - Category pages: the category photo, stored in Rank Math's own share-image fields (programmatic.php), which Rank
+ *   Math prints. A Directory type's tag page: the share card typed as a URL in Rank Math (which Rank Math does not
+ *   print for a term), with its size and the alt text "<focus keyphrase> in India – Animal Writes".
+ * - og:image, og:image:secure_url and twitter:image are never AVIF or WebP: such an upload goes out as its original
+ *   JPEG or PNG, or a 1200x630 JPEG (aw_seo_share_safe_url), and og:image:type, :width and :height follow that file.
+ *   The swap is worked out for each image on its own, so one image's file never changes the next image's tags.
+ * - og:type "article" only for the types in AW_SEO_ARTICLE_TYPES (News, Library, Resources, campaigns); "website"
+ *   elsewhere. og:locale en_IN.
+ * - A missing page (404) shares no image, not even the site default.
  *
  * @package aw-seo-extras
  */
@@ -64,9 +69,8 @@ foreach ( array( 'facebook/og_image', 'facebook/og_image_secure_url', 'twitter/t
 		"rank_math/opengraph/{$aw_seo_tag}",
 		function ( $url ) {
 			$safe = aw_seo_share_safe_url( (string) $url );
-			if ( $safe[0] !== $url ) {
-				$GLOBALS['aw_seo_og_swap'] = $safe;
-			}
+			// Set for every image (og:image comes first of each image's tags), so a swap never carries over to the next one.
+			$GLOBALS['aw_seo_og_swap'] = $safe[0] !== $url ? $safe : null;
 			return $safe[0];
 		}
 	);
