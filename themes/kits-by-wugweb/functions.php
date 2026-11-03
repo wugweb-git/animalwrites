@@ -167,9 +167,13 @@ add_filter(
 		if ( 'core/group' !== ( $block['blockName'] ?? '' ) ) {
 			return $block;
 		}
+		static $on = null;
+		if ( null === $on ) {
+			$on = 'off' !== ( function_exists( 'kits_option' ) ? kits_option( 'legacy_group_styles' ) : 'on' ); // Theme Options: Old section classes.
+		}
 		$class   = (string) ( $block['attrs']['className'] ?? '' );
 		$classes = preg_split( '/\s+/', $class );
-		if ( false !== strpos( $class, 'is-style-' ) ) {
+		if ( ! $on || false !== strpos( $class, 'is-style-' ) ) {
 			return $block;
 		}
 		$style = in_array( 'kit-section-band', $classes, true ) ? 'is-style-kits-head-band' : ( in_array( 'kit-section', $classes, true ) ? 'is-style-kits-section' : '' );
@@ -186,6 +190,9 @@ add_filter(
  * shows the Styles values on them and the next save keeps the style in the content.
  */
 function kits_legacy_styles_editor() {
+	if ( 'off' === ( function_exists( 'kits_option' ) ? kits_option( 'legacy_group_styles' ) : 'on' ) ) {
+		return;
+	}
 	$f = get_template_directory() . '/assets/js/legacy-styles.js';
 	wp_enqueue_script( 'kits-legacy-styles', get_template_directory_uri() . '/assets/js/legacy-styles.js', array( 'wp-hooks', 'wp-compose', 'wp-element', 'wp-data', 'wp-block-editor' ), (string) filemtime( $f ), true );
 }
@@ -308,14 +315,15 @@ add_filter(
  * One stylesheet instead of five: the Kits files (kits-v42, kit-tokens, kits, kit, kit-primitives) are joined, in the
  * same order, into uploads/kits-cache/kits-{hash}.css; the hash changes with any file, so a changed file makes a new
  * bundle. The five handles stay registered (child themes depend on them) but print nothing. If the bundle cannot be
- * written, the five files load as before. Turn off with add_filter( 'kits_bundle_css', '__return_false' ).
+ * written, the five files load as before. Turned off in Theme Options (Joined stylesheet) or with
+ * add_filter( 'kits_bundle_css', '__return_false' ).
  */
 add_action(
 	'wp_enqueue_scripts',
 	function () {
 		$styles  = wp_styles();
 		$handles = array( 'kits-v42', 'kit-tokens', 'kits', 'kit-components', 'kit-primitives' );
-		if ( is_admin() || ! apply_filters( 'kits_bundle_css', true ) ) {
+		if ( is_admin() || ! apply_filters( 'kits_bundle_css', 'off' !== ( function_exists( 'kits_option' ) ? kits_option( 'css_bundle' ) : 'on' ) ) ) {
 			return;
 		}
 		$dir   = get_template_directory();

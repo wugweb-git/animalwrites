@@ -7,8 +7,8 @@
  * - Site: the theme's own templates, so Inherit everywhere changes nothing.
  *
  * Options: header part, footer part, sidebar (hide), page title (hide on screen; the H1 stays for screen readers; a site's
- * own title block can ask kits_page_option( 'title' ) too) and colour set (a block style of the main
- * content, from the active theme's styles). They are applied while the page is drawn, on the front end only. The panel is
+ * own title block can ask kits_page_option( 'title' ) too), breadcrumbs (hide; the site's trail reads it) and colour set
+ * (a block style of the main content, from the active theme's styles). They are applied while the page is drawn, on the front end only. The panel is
  * in the post editor (not in the Site Editor's Pages view).
  *
  * @package kits-core
@@ -25,6 +25,7 @@ function kits_page_option_fields(): array {
 		'footer'  => array( 'Footer', 'part' ),
 		'sidebar' => array( 'Sidebar', 'hide' ),
 		'title'   => array( 'Page title', 'hide' ),
+		'crumbs'  => array( 'Breadcrumbs', 'hide' ),
 		'colours' => array( 'Colour set', 'style' ),
 	);
 }

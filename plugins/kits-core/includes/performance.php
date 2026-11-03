@@ -21,6 +21,8 @@
  *   - Accessibility Checker's sr-only stylesheet loads only on a page whose content uses its sr-only text format;
  *   - no emoji script or styles (the site shows emoji as text).
  *   Ads scripts (Advanced Ads, AdSense) are left as they are.
+ * jQuery at the end, the main picture fix, the deferred scripts, the later form styles and no emoji each have an on/off
+ * switch in Theme Options (Kits → Overview); all are on by default.
  *
  * @package kits-core
  */
@@ -29,9 +31,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * Whether a Theme Options switch is on (each part below has one; all are on by default).
+ *
+ * @param string $key Field key.
+ * @return bool
+ */
+function kits_perf_on( $key ) {
+	return 'off' !== ( function_exists( 'kits_option' ) ? kits_option( $key ) : 'on' );
+}
+
 add_action(
 	'wp_enqueue_scripts',
 	function () {
+		if ( ! kits_perf_on( 'jquery_footer' ) ) {
+			return;
+		}
 		$scripts = wp_scripts();
 		foreach ( array( 'jquery', 'jquery-core', 'jquery-migrate' ) as $handle ) {
 			if ( isset( $scripts->registered[ $handle ] ) ) {
@@ -45,7 +60,7 @@ add_action(
 add_filter(
 	'od_template_output_buffer',
 	function ( $html ) {
-		if ( false === strpos( $html, 'data-od-removed-fetchpriority' ) ) {
+		if ( false === strpos( $html, 'data-od-removed-fetchpriority' ) || ! kits_perf_on( 'lcp_fix' ) ) {
 			return $html;
 		}
 		// Preloads Optimization Detective added: media "screen and (600px < width <= 782px)" covers one group; one with no
@@ -94,14 +109,46 @@ add_filter(
 	20
 );
 
+/**
+ * The body font's file for a preload: the first file of the first face of the "base" font family in Styles (saved
+ * Global Styles first, then theme.json). '' when there is none or it is not a woff2 file.
+ *
+ * @return string URL.
+ */
+function kits_body_font_file() {
+	$all = function_exists( 'wp_get_global_settings' ) ? (array) wp_get_global_settings( array( 'typography', 'fontFamilies' ) ) : array();
+	foreach ( array( 'custom', 'theme' ) as $origin ) {
+		foreach ( (array) ( $all[ $origin ] ?? array() ) as $family ) {
+			if ( 'base' !== ( $family['slug'] ?? '' ) ) {
+				continue;
+			}
+			$src = (array) ( $family['fontFace'][0]['src'] ?? array() );
+			$src = (string) reset( $src );
+			if ( 0 === strpos( $src, 'file:./' ) ) {
+				$src = get_theme_file_uri( substr( $src, 7 ) );
+			}
+			return '.woff2' === strtolower( substr( (string) strtok( $src, '?#' ), -6 ) ) ? $src : '';
+		}
+	}
+	return '';
+}
+
 /** Whether the main content of the current singular page contains $needle (a form, a format class). */
 function kits_content_has( $needle ) {
 	return is_singular() && false !== strpos( (string) get_post_field( 'post_content', get_queried_object_id() ), $needle );
 }
 
-remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
-remove_action( 'wp_print_styles', 'print_emoji_styles' );
-add_filter( 'emoji_svg_url', '__return_false' );
+add_action(
+	'init',
+	function () {
+		if ( ! kits_perf_on( 'no_emoji' ) ) {
+			return;
+		}
+		remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
+		remove_action( 'wp_print_styles', 'print_emoji_styles' );
+		add_filter( 'emoji_svg_url', '__return_false' );
+	}
+);
 
 add_action(
 	'wp_enqueue_scripts',
@@ -110,7 +157,7 @@ add_action(
 			return;
 		}
 		$scripts = wp_scripts();
-		foreach ( array( 'jquery-core', 'jquery-migrate', 'fluent-form-submission', 'wp-hooks', 'wp-i18n', 'edac-frontend-fixes' ) as $handle ) {
+		foreach ( kits_perf_on( 'defer_scripts' ) ? array( 'jquery-core', 'jquery-migrate', 'fluent-form-submission', 'wp-hooks', 'wp-i18n', 'edac-frontend-fixes' ) : array() as $handle ) {
 			if ( isset( $scripts->registered[ $handle ] ) && ! $scripts->get_data( $handle, 'strategy' ) ) {
 				$scripts->add_data( $handle, 'strategy', 'defer' );
 			}
@@ -125,7 +172,7 @@ add_action(
 add_filter(
 	'style_loader_tag',
 	function ( $tag, $handle ) {
-		if ( is_admin() || ! in_array( $handle, array( 'fluent-form-styles', 'fluentform-public-default' ), true ) || apply_filters( 'kits_page_has_form', kits_content_has( 'fluentform' ) ) ) {
+		if ( is_admin() || ! in_array( $handle, array( 'fluent-form-styles', 'fluentform-public-default' ), true ) || ! kits_perf_on( 'form_css_lazy' ) || apply_filters( 'kits_page_has_form', kits_content_has( 'fluentform' ) ) ) {
 			return $tag;
 		}
 		// Added when the page has loaded or on the first scroll, whichever comes first (at once if load has already fired),

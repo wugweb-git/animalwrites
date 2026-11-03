@@ -18,17 +18,55 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return string
  */
 function aw_share_html( $post_id ) {
-	return kits_share_html( (string) get_permalink( $post_id ), html_entity_decode( get_the_title( $post_id ), ENT_QUOTES ) );
+	$saved = kits_share_saved();
+	$type  = (string) get_post_type( $post_id );
+	$nets  = isset( $saved[ $type ] ) ? kits_share_list( $saved[ $type ] ) : null; // Networks chosen in Theme Options; else every network.
+	if ( array() === $nets ) {
+		return ''; // No networks for this kind of item: no bar.
+	}
+	return kits_share_html( (string) get_permalink( $post_id ), html_entity_decode( get_the_title( $post_id ), ENT_QUOTES ), $nets );
+}
+
+/**
+ * The share networks chosen in Theme Options, type => comma list or 'none'. Only types set there.
+ *
+ * @return array<string,string>
+ */
+function kits_share_saved() {
+	$saved = function_exists( 'kits_option' ) ? kits_option( 'share_networks' ) : array();
+	return is_array( $saved ) ? array_map( 'strval', $saved ) : array();
+}
+
+/**
+ * A comma list of networks ('x,whatsapp', or 'none') as an array of keys.
+ *
+ * @param string $csv Comma list.
+ * @return string[]
+ */
+function kits_share_list( $csv ) {
+	return 'none' === $csv ? array() : array_values( array_filter( array_map( 'trim', explode( ',', $csv ) ) ) );
+}
+
+/**
+ * Post types that get the share bar at the end of the item: the kits_share_post_types filter, less any type whose
+ * networks are all turned off in Theme Options.
+ *
+ * @return string[]
+ */
+function kits_share_types() {
+	$saved = kits_share_saved();
+	return array_values( array_filter( (array) apply_filters( 'kits_share_post_types', array( 'post' ) ), fn( $t ) => ! isset( $saved[ $t ] ) || kits_share_list( $saved[ $t ] ) ) );
 }
 
 /**
  * The share bar for any address and title (a post, a category or tag page).
  *
- * @param string $url   Page address.
- * @param string $title Plain-text title.
+ * @param string        $url   Page address.
+ * @param string        $title Plain-text title.
+ * @param string[]|null $only  Network keys to show, in the usual order; null for every network. Copy link always shows.
  * @return string
  */
-function kits_share_html( $url, $title ) {
+function kits_share_html( $url, $title, $only = null ) {
 	$site  = html_entity_decode( get_bloginfo( 'name' ), ENT_QUOTES );
 	$nets  = array( // key => [name, icon, link]
 		'x'        => array( 'X', 'x-brand', 'https://x.com/intent/post?text=' . rawurlencode( $title ) . '&url=' . rawurlencode( $url ) ),
@@ -37,6 +75,9 @@ function kits_share_html( $url, $title ) {
 		'whatsapp' => array( 'WhatsApp', 'brand-whatsapp', 'https://wa.me/?text=' . rawurlencode( $title . ' ' . $url ) ),
 		'email'    => array( 'Email', 'mail', 'mailto:?subject=' . rawurlencode( sprintf( 'From %s: %s', $site, $title ) ) . '&body=' . rawurlencode( $url ) ),
 	);
+	if ( null !== $only ) {
+		$nets = array_intersect_key( $nets, array_flip( (array) $only ) );
+	}
 	$out = '<div class="kit-share" role="group" aria-label="' . esc_attr__( 'Share', 'kits-core' ) . '"><span class="kit-share-label" aria-hidden="true">' . esc_html__( 'Share', 'kits-core' ) . '</span>';
 	foreach ( $nets as $key => list( $name, $icon, $href ) ) {
 		/* translators: %s: network name. */
@@ -53,8 +94,8 @@ add_filter(
 	'render_block_core/group',
 	function ( $content, $block ) {
 		static $done = false;
-		$types = (array) apply_filters( 'kits_share_post_types', array( 'post' ) );
-		if ( $done || ! $types || 'main' !== ( $block['attrs']['tagName'] ?? '' ) || ! is_singular( $types ) ) { // no types: off (is_singular( [] ) would match every page)
+		$types = kits_share_types();
+		if ( $done || ! $types || 'main' !== ( $block['attrs']['tagName'] ?? '' ) || ! is_singular( $types ) ) { // No types: off (is_singular( [] ) would match every page).
 			return $content;
 		}
 		$pos = strrpos( $content, '</main>' );
