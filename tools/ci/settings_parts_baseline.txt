@@ -9,6 +9,7 @@ plugins/animal-writes-core/assets/css/campaign.css | css Hero | .aw-camp--commun
 plugins/animal-writes-core/assets/css/campaign.css | css Hero | .aw-camp--community-dogs .aw-camp-hero | min-height: 800px
 plugins/animal-writes-core/assets/css/campaign.css | css Hero | .aw-camp--community-dogs.aw-camp-hero | min-height: 1020px
 plugins/animal-writes-core/assets/css/campaign.css | css Hero | .aw-camp--community-dogs.aw-camp-hero | min-height: 800px
+plugins/animal-writes-core/assets/css/campaign.css | css Hero | .aw-camp--diwali .wp-block-cover.kit-hero | min-height: var(--kit-hero-h) !important
 plugins/animal-writes-core/assets/css/campaign.css | css Hero | .aw-camp--lab-rules .aw-camp-hero | min-height: var(--kit-hero-h)
 plugins/animal-writes-core/assets/css/campaign.css | css Hero | .aw-camp.aw-camp--sc-stray-dogs .aw-camp-hero.aw-camp-section.alignfull | min-height: var(--kit-hero-h)
 plugins/animal-writes-core/includes/admin-home.php | admin page | add_menu_page( 'Animal Writes', 'Animal Writes', 'edit_posts', AW_CORE_MENU, 'aw_core_overview_page', 'dashicons-pets', 28 );
