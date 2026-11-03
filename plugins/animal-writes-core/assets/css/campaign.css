@@ -93,6 +93,12 @@
 	.aw-camp--diwali #tonight .aw-camp-steps > li:last-child:has(a) { transition: none; }
 	.aw-camp--diwali #tonight .aw-camp-steps > li:last-child:has(a):is(:hover, :active) { transform: none; }
 }
+/* High-contrast mode (forced colours) drops box-shadow, so the number rings and the step 6 card get real borders in the
+   system text colour; the ring keeps its 44px (border-box) */
+@media (forced-colors: active) {
+	.aw-camp--diwali #tonight .aw-camp-steps > li::before { box-sizing: border-box; border: 2px solid CanvasText; }
+	.aw-camp--diwali #tonight .aw-camp-steps > li:last-child:has(a) { border: var(--kit-border-width) solid CanvasText; }
+}
 /* Who to call has two columns: it fits a phone without sideways scrolling */
 .aw-camp--diwali #help { --kit-table-min: 0; }
 /* The law cards and the five action cards stand in the campaign card grid (.aw-camp-grid: stacked on phones, two
