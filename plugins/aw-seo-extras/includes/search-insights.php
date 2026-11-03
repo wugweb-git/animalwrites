@@ -39,7 +39,7 @@ foreach ( array( 'schema', 'runs', 'sitekit', 'keywords', 'gsc', 'compute', 'rol
 // Links (31 Oct 2026): who links to us, the Bing Webmaster monthly run and the links seed.
 // Crawler access (31 Oct 2026): weekly checks from the server and from outside (workers), in Site Health.
 // Server (3 Nov 2026): crawler requests, 4xx/5xx answers and PHP errors per day, and the hPanel numbers typed by hand.
-foreach ( array( 'sitesearch', 'ga4', 'psi', 'clarity', 'bing', 'sources', 'pages', 'checklist', 'imports', 'snapshot', 'rankmath', 'links', 'links-seed', 'crawlcheck', 'server', 'visitors' ) as $aw_si_file ) {
+foreach ( array( 'sitesearch', 'ga4', 'psi', 'clarity', 'bing', 'sources', 'pages', 'checklist', 'imports', 'snapshot', 'rankmath', 'links', 'links-seed', 'crawlcheck', 'server', 'visitors', 'selfcheck' ) as $aw_si_file ) {
 	require_once __DIR__ . '/search-insights/' . $aw_si_file . '.php';
 }
 unset( $aw_si_file );

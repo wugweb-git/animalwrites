@@ -15,8 +15,7 @@
  * - Counts are kept in one option per day (aw_si_srv_YYYYMMDD, site time zone, not autoloaded); a request is written
  *   only when it is a listed crawler or a 4xx/5xx answer. The daily run (aw_si_daily) adds yesterday's PHP errors and
  *   deletes days older than 90.
- * - The hPanel numbers (speed on mobile and desktop, AI visibility) are typed by hand on the tab, with their date
- *   (option aw_si_hpanel, the last 90 entries).
+ * - Speed and AI visibility are checked automatically every morning: selfcheck.php.
  *
  * @package aw-seo-extras
  */
@@ -272,14 +271,6 @@ add_action(
 	}
 );
 
-/** The hPanel entries, newest first. */
-function aw_si_srv_hpanel(): array {
-	$rows = get_option( 'aw_si_hpanel', array() );
-	$rows = is_array( $rows ) ? $rows : array();
-	usort( $rows, fn( $a, $b ) => strcmp( (string) ( $b['date'] ?? '' ), (string) ( $a['date'] ?? '' ) ) );
-	return $rows;
-}
-
 add_action(
 	'aw_si_tab_server',
 	function () {
@@ -339,65 +330,8 @@ add_action(
 		$table->prepare_items();
 		$table->display();
 
-		// hPanel numbers, typed by hand.
-		echo '<h2>' . esc_html__( 'hPanel numbers', 'aw-seo-extras' ) . '</h2>';
-		echo '<p class="description">' . esc_html__( 'Copied by hand from hPanel (Performance → Page speed, and AI visibility), with the date they were read.', 'aw-seo-extras' ) . '</p>';
-		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_si_hpanel">';
-		wp_nonce_field( 'aw_si_hpanel' );
-		echo '<table class="form-table" role="presentation"><tbody>';
-		$fields = array(
-			'date'    => array( __( 'Date read', 'aw-seo-extras' ), 'date', wp_date( 'Y-m-d' ) ),
-			'speed_m' => array( __( 'Speed, mobile (0–100)', 'aw-seo-extras' ), 'number', '' ),
-			'speed_d' => array( __( 'Speed, desktop (0–100)', 'aw-seo-extras' ), 'number', '' ),
-			'ai'      => array( __( 'AI visibility (0–100)', 'aw-seo-extras' ), 'number', '' ),
-		);
-		foreach ( $fields as $name => $f ) {
-			echo '<tr><th scope="row"><label for="aw-si-hp-' . esc_attr( $name ) . '">' . esc_html( $f[0] ) . '</label></th><td><input type="' . esc_attr( $f[1] ) . '" id="aw-si-hp-' . esc_attr( $name ) . '" name="' . esc_attr( $name ) . '" value="' . esc_attr( $f[2] ) . '"' . ( 'number' === $f[1] ? ' min="0" max="100" step="1" class="small-text"' : ' required' ) . '></td></tr>';
+		if ( function_exists( 'aw_si_chk_section' ) ) {
+			aw_si_chk_section();
 		}
-		echo '</tbody></table>';
-		submit_button( __( 'Save hPanel numbers', 'aw-seo-extras' ), 'secondary' );
-		echo '</form>';
-		$rows = aw_si_srv_hpanel();
-		if ( $rows ) {
-			echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Date', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Speed, mobile', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Speed, desktop', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'AI visibility', 'aw-seo-extras' ) . '</th></tr></thead><tbody>';
-			foreach ( $rows as $r ) {
-				echo '<tr><td>' . esc_html( (string) ( $r['date'] ?? '' ) ) . '</td>';
-				foreach ( array( 'speed_m', 'speed_d', 'ai' ) as $k ) {
-					echo '<td>' . esc_html( isset( $r[ $k ] ) && '' !== $r[ $k ] ? (string) (int) $r[ $k ] : '—' ) . '</td>';
-				}
-				echo '</tr>';
-			}
-			echo '</tbody></table>';
-		}
-	}
-);
-
-add_action(
-	'admin_post_aw_si_hpanel',
-	function () {
-		if ( ! current_user_can( aw_si_cap() ) || ! check_admin_referer( 'aw_si_hpanel' ) ) {
-			wp_die( esc_html__( 'Not allowed.', 'aw-seo-extras' ), 403 );
-		}
-		$date = isset( $_POST['date'] ) ? sanitize_text_field( wp_unslash( $_POST['date'] ) ) : '';
-		if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $date ) ) {
-			wp_die(
-				esc_html__( 'Not saved: the date is missing.', 'aw-seo-extras' ),
-				'',
-				array(
-					'back_link' => true,
-					'response'  => 400,
-				)
-			);
-		}
-		$row = array( 'date' => $date );
-		foreach ( array( 'speed_m', 'speed_d', 'ai' ) as $k ) {
-			$v         = isset( $_POST[ $k ] ) ? sanitize_text_field( wp_unslash( $_POST[ $k ] ) ) : '';
-			$row[ $k ] = '' === $v ? '' : max( 0, min( 100, (int) $v ) );
-		}
-		$rows = array_values( array_filter( aw_si_srv_hpanel(), fn( $r ) => ( $r['date'] ?? '' ) !== $date ) ); // one entry per date.
-		array_unshift( $rows, $row );
-		update_option( 'aw_si_hpanel', array_slice( $rows, 0, AW_SI_SRV_DAYS ), false );
-		wp_safe_redirect( aw_si_url( 'server' ) );
-		exit;
 	}
 );
