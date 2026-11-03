@@ -36,7 +36,6 @@
 .aw-camp--lab-rules .aw-camp-dark .aw-camp-gap { box-shadow: inset 0 0 0 2px var(--camp-line); }
 .aw-camp--lab-rules .aw-camp-dark .aw-camp-gap > .kit-ico { color: var(--camp-line); }
 .aw-camp--lab-rules .aw-camp-dark .aw-camp-tier-bar { background: linear-gradient(to right, var(--camp-line) var(--fill), rgb(255 255 255 / 0.12) var(--fill)); }
-@media (min-width: 1200px) { .aw-camp--lab-rules .aw-camp-dark .aw-camp-tier-bar { background: linear-gradient(to top, var(--camp-line) var(--fill), rgb(255 255 255 / 0.12) var(--fill)); } }
 /* Diwali 2026 (firecrackers and animals): marigold on paper, a night-sky dark band. */
 .aw-camp--diwali {
 	--camp-primary: #a14a05; /* marigold, deepened so white text on it passes 4.5:1 */
@@ -305,10 +304,7 @@
 .aw-camp-tier--2 { --fill: 50%; }
 .aw-camp-tier--3 { --fill: 75%; }
 .aw-camp-tier-bar { display: block; height: 0.75rem; margin-bottom: var(--kit-space-3); border-radius: var(--kit-radius-pill); background: linear-gradient(to right, var(--camp-mark) var(--fill), rgb(255 255 255 / 0.12) var(--fill)); }
-@media (min-width: 1200px) {
-	.aw-camp-ladder { align-items: start; }
-	.aw-camp-tier-bar { height: 6rem; border-radius: var(--kit-radius-control); background: linear-gradient(to top, var(--camp-mark) var(--fill), rgb(255 255 255 / 0.08) var(--fill)); }
-}
+@media (min-width: 1200px) { .aw-camp-ladder { align-items: start; } } /* the bar stays the thin bar on desktop too (owner, 3 Nov 2026: the 6rem block read as a missing picture) */
 .aw-camp-tier-who { display: inline-flex; align-items: center; gap: var(--kit-space-1); padding: var(--kit-space-1) var(--kit-space-2); border-radius: var(--kit-radius-control); background: rgb(255 255 255 / 0.1); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-strong); }
 .aw-camp-tier-who.is-ext { background: var(--camp-mark); }
 .aw-camp-gap { display: flex; gap: var(--kit-space-3); align-items: flex-start; padding: var(--kit-space-4); border-radius: var(--kit-radius-card); box-shadow: inset 0 0 0 2px var(--camp-mark); }
@@ -420,6 +416,8 @@
 .aw-letter-ground-list { display: grid; gap: var(--kit-space-3); grid-template-columns: 1fr; }
 @media (min-width: 768px) { .aw-letter-ground-list { grid-template-columns: repeat(2, 1fr); } }
 .aw-letter-ground strong { display: block; font-size: var(--kit-type-base); }
+.aw-letter-ground[hidden] { display: none !important; }
+.aw-letter-more { margin-top: var(--kit-space-4); }
 .aw-letter-meta { display: grid; gap: var(--kit-space-1); margin: 0 0 var(--kit-space-3); padding: var(--kit-space-4); border-radius: var(--kit-radius-card); background: var(--camp-mark, var(--kit-color-ink)); color: var(--camp-on-mark, var(--kit-color-on-ink)); }
 .aw-letter-meta strong { color: inherit; }
 .aw-letter-to { display: flex; align-items: center; gap: var(--kit-space-2); font-size: clamp(1.25rem, 1rem + 1vw, 1.75rem); font-weight: 800; letter-spacing: -0.02em; overflow-wrap: anywhere; }

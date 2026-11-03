@@ -926,7 +926,7 @@ add_filter(
 
 /**
  * Approved social posts linked to an item: on a campaign, the ones with its campaign links; on News, Library and
- * Directory items, the ones that name it as related. Newest post first, at most six.
+ * Directory items, the ones that name it as related. Newest post first, one per person, at most six.
  *
  * @param int $id Item.
  * @return WP_Post[]
@@ -947,7 +947,20 @@ function aw_social_for_item( int $id ): array {
 	}
 	$posts = get_posts( $args );
 	usort( $posts, fn( $a, $b ) => strcmp( (string) get_post_meta( $b->ID, 'aw_social_date', true ), (string) get_post_meta( $a->ID, 'aw_social_date', true ) ) );
-	return array_slice( $posts, 0, 6 );
+	$seen = array(); // one card per person: their newest post (owner, 3 Nov 2026)
+	$out  = array();
+	foreach ( $posts as $p ) {
+		$who = strtolower( trim( (string) get_post_meta( $p->ID, 'aw_social_platform', true ) . ':' . ltrim( (string) get_post_meta( $p->ID, 'aw_social_handle', true ), '@' ) ) );
+		if ( ':' === $who ) {
+			$who = 'id:' . $p->ID;
+		}
+		if ( isset( $seen[ $who ] ) ) {
+			continue;
+		}
+		$seen[ $who ] = true;
+		$out[]        = $p;
+	}
+	return array_slice( $out, 0, 6 );
 }
 
 /**

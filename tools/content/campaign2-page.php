@@ -115,6 +115,17 @@ function c2q( $markup, $tq ) {
 function c2i( $n ) {
 	return '<span class="kit-ico kit-ico--' . $n . '" aria-hidden="true"></span>';
 }
+/** Campaign guides (Resources) as one link line each, under the section they explain (owner, 3 Nov 2026; were in In the news). */
+function c2guides( array $slugs ) {
+	$out = '';
+	foreach ( $slugs as $slug ) {
+		$g = get_page_by_path( $slug, OBJECT, 'post' );
+		if ( $g ) {
+			$out .= c2p( c2i( 'resources' ) . '<a href="' . esc_url( get_permalink( $g ) ) . '">' . esc_html( get_the_title( $g ) ) . '</a>', 'aw-camp-note' );
+		}
+	}
+	return $out;
+}
 /** A section opening in two columns: the heading and lede beside a piece of the campaign artwork (owner, 19 Oct 2026). */
 function c2split( $text, $img_id, $pos = 'right center' ) {
 	$img = wp_get_attachment_image( $img_id, 'large', false, array( 'loading' => 'lazy', 'decoding' => 'async', 'style' => 'object-position:' . $pos ) );
@@ -213,7 +224,7 @@ foreach ( $cards as $i => $c ) { // each card has its own anchor (change-1 ...),
 	$n     = $i + 1;
 	$grid .= "<!-- wp:group {\"anchor\":\"change-$n\",\"className\":\"aw-camp-card\",\"layout\":{\"type\":\"default\"}} -->\n<div id=\"change-$n\" class=\"wp-block-group aw-camp-card\">$c</div>\n<!-- /wp:group -->\n\n";
 }
-$rules = c2sec( 'rules', c2h( 'What the draft does' ) . "<!-- wp:group {\"className\":\"aw-camp-grid\",\"layout\":{\"type\":\"default\"}} -->\n<div class=\"wp-block-group aw-camp-grid\">$grid</div>\n<!-- /wp:group -->\n\n", 'aw-camp-grey' );
+$rules = c2sec( 'rules', c2h( 'What the draft does' ) . "<!-- wp:group {\"className\":\"aw-camp-grid\",\"layout\":{\"type\":\"default\"}} -->\n<div class=\"wp-block-group aw-camp-grid\">$grid</div>\n<!-- /wp:group -->\n\n" . c2guides( array( 'who-approves-animal-experiments-draft-rules', 'iaec-full-form-members-approvals', 'alternatives-to-animal-testing-india' ) ), 'aw-camp-grey' );
 
 /* 4. Pain scale: a four-step ladder; who approves sits on each step. */
 $tier = function ( $lvl, $name, $who, $ext, $text ) {
@@ -232,7 +243,8 @@ $pain = c2sec(
 		. $tier( 4, 'Non-recovery', 'CCSEA, for animals larger than rodents and rabbits', true, 'Done fully under anaesthesia; the animal does not wake up.' )
 		. '</ol>'
 		. '<p class="aw-camp-gap">' . c2i( 'alert' ) . '<span>The draft does not say who approves severe experiments on rats, mice or rabbits. ' . chip( '11-2', 'Rule 11(2)' ) . ' ' . chip( 'annexure-1', 'Annexure I' ) . '</span></p>'
-	),
+	)
+	. c2guides( array( 'animal-experiment-severity-mild-moderate-severe' ) ),
 	'aw-camp-dark'
 );
 
@@ -250,7 +262,8 @@ $compare = c2sec(
 			array( 'How it\'s judged', 'Size of the animal', 'Expected pain' ),
 			array( 'Penalty in the Act', 'Up to ₹200', 'Up to ₹200 (Act unchanged); the draft adds suspension or revocation of registration' ),
 		)
-	),
+	)
+	. c2guides( array( 'lab-animal-rules-today-vs-draft-2026', 'draft-lab-animal-rules-2026-rule-by-rule', 'animal-testing-laws-india' ) ),
 	'aw-camp-white aw-camp-compare'
 );
 
@@ -281,7 +294,8 @@ $send = c2sec(
 	. c2p( 'Choose your grounds, sign it, and send it from your own email. Letters with a name, a city and a line in your own words count as individual responses.', 'aw-camp-lede' )
 	. c2list( $grounds, true, 'aw-letter-grounds' )
 	. c2sc( $letter_sc )
-	. c2p( c2i( 'check' ) . 'Your letter goes from your own email account.', 'aw-camp-note' ),
+	. c2p( c2i( 'check' ) . 'Your letter goes from your own email account.', 'aw-camp-note' )
+	. c2guides( array( 'how-to-object-to-a-draft-rule-india' ) ),
 	'aw-camp-grey aw-camp-open'
 );
 
@@ -362,31 +376,13 @@ $next_inner = c2h( 'What happens next' )
 	);
 $next = c2sec( 'next', $next_inner, 'aw-camp-white' ); // in the next-steps section: near the end while open, under the hero once closed
 
-/* News and guides: the newest campaign News item leads, the newest campaign guides (Resources) beside it; the home page's news grid. */
+/* In the news: the six newest campaign News items (the guides moved under the sections they explain, owner 3 Nov 2026). */
 $updates = c2sec( // one row that scrolls sideways: the newest News, then the newest guides; no summaries on campaign cards (owner, 21 Oct 2026)
 	'latest',
 	c2html( '<header class="kit-ed-head"><div><h2>In the news</h2></div><a class="kit-ed-more" href="/news/">All news ' . c2i( 'arrow-right' ) . '</a></header>' )
 	. '<!-- wp:group {"className":"aw-camp-row","layout":{"type":"default"}} -->' . "\n" . '<div class="wp-block-group aw-camp-row">'
 	. c2q( <<<'HTML'
 <!-- wp:query {"queryId":82,"query":{"perPage":6,"pages":0,"offset":0,"postType":"aw_news","order":"desc","orderBy":"date","inherit":false,%TQ%},"className":"aw-camp-row-q"} -->
-<div class="wp-block-query aw-camp-row-q"><!-- wp:post-template -->
-<!-- wp:group {"tagName":"article","className":"kit-card kit-card--block-md","layout":{"type":"default"}} -->
-<article class="wp-block-group kit-card kit-card--block-md"><!-- wp:post-featured-image {"isLink":true,"className":"kit-card-media"} /-->
-
-<!-- wp:group {"className":"kit-card-body","layout":{"type":"default"}} -->
-<div class="wp-block-group kit-card-body"><!-- wp:animal-writes/read-meta /-->
-
-<!-- wp:animal-writes/badges {"state":"block-md"} /-->
-
-<!-- wp:post-title {"level":3,"isLink":true,"className":"kit-card-title"} /--></div>
-<!-- /wp:group --></article>
-<!-- /wp:group -->
-<!-- /wp:post-template --></div>
-<!-- /wp:query -->
-HTML
-, $tq ) . "\n"
-	. c2q( <<<'HTML'
-<!-- wp:query {"queryId":83,"query":{"perPage":8,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","inherit":false,%TQ%},"className":"aw-camp-row-q"} -->
 <div class="wp-block-query aw-camp-row-q"><!-- wp:post-template -->
 <!-- wp:group {"tagName":"article","className":"kit-card kit-card--block-md","layout":{"type":"default"}} -->
 <article class="wp-block-group kit-card kit-card--block-md"><!-- wp:post-featured-image {"isLink":true,"className":"kit-card-media"} /-->
