@@ -202,6 +202,22 @@ function aw_si_srv_php_errors( string $ymd ): array {
 	return $out;
 }
 
+/**
+ * A PHP error message as HTML, with its file:line. A file of this site's own plugins or themes links to that line in
+ * the public repository (the live branch); any other file is shown as text.
+ *
+ * @param string $msg Message (paths relative to the site root).
+ */
+function aw_si_srv_msg_html( string $msg ): string {
+	if ( ! preg_match( '#(wp-content/(plugins|themes)/([^/\s]+)/\S+?\.php)(?: on line |:)(\d+)#', $msg, $m ) ) {
+		return esc_html( $msg );
+	}
+	$own  = (array) apply_filters( 'aw_si_srv_repo_dirs', array( 'animal-writes-core', 'aw-seo-extras', 'aw-sourcing', 'kits-core', 'mailweb', 'animal-writes', 'kits-by-wugweb' ) );
+	$file = $m[1] . ':' . $m[4];
+	$link = in_array( $m[3], $own, true ) ? 'https://github.com/wugweb-git/animalwrites/blob/wordpress/' . substr( $m[1], strlen( 'wp-content/' ) ) . '#L' . $m[4] : '';
+	return esc_html( $msg ) . ' (' . ( '' !== $link ? '<a href="' . esc_url( $link ) . '" target="_blank" rel="noopener">' . esc_html( $file ) . '</a>' : esc_html( $file ) ) . ')';
+}
+
 /** The daily step: yesterday's PHP errors into its day, then days older than 90 deleted. */
 function aw_si_srv_daily(): void {
 	$ymd        = wp_date( 'Ymd', time() - DAY_IN_SECONDS );

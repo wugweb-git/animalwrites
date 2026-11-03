@@ -108,7 +108,7 @@ class AW_SI_Server_Table extends WP_List_Table {
 				$kinds = (array) ( $php['kinds'] ?? array() );
 				$out   = esc_html( $kinds ? number_format_i18n( array_sum( $kinds ) ) . ': ' . aw_si_srv_list( $kinds, 6 ) : '0' );
 				foreach ( array_slice( (array) ( $php['top'] ?? array() ), 0, 3, true ) as $msg => $n ) {
-					$out .= '<br><span class="description">' . esc_html( $n . ' × ' . $msg ) . '</span>';
+					$out .= '<br><span class="description">' . esc_html( number_format_i18n( (int) $n ) . ' × ' ) . aw_si_srv_msg_html( (string) $msg ) . '</span>'; // escaped inside.
 				}
 				return $out;
 		}
