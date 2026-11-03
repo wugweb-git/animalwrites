@@ -978,3 +978,12 @@
 @media (max-width: 767px) {
 	.aw-camp--lab-rules .aw-rule-chip:not(#pain-scale .aw-rule-chip) { min-height: var(--kit-size-target); }
 }
+/* The letter on phones (campaign-lab.js): folded, its first 14rem (the box's phone height before) fading out over
+   --kit-space-8, with the button under it; open, the whole letter in the page, no scroll box inside the page. From 768
+   the button is hidden and the box scrolls as before. */
+.aw-letter-whole { margin-top: var(--kit-space-3); }
+@media (min-width: 768px) { .aw-letter-whole { display: none; } }
+@media (max-width: 767px) {
+	.aw-letter .aw-letter-preview { max-height: none; overflow: visible; }
+	.aw-letter .aw-letter-preview.is-folded { max-height: 14rem; overflow: hidden; -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - var(--kit-space-8)), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - var(--kit-space-8)), transparent); }
+}
