@@ -97,6 +97,31 @@ add_filter(
 );
 
 /** Before output: screen options, meta boxes, and priority overrides (then redirect). */
+/** One line per term of the Keywords screen (its Help tab). The numbers are the current settings. */
+function aw_si_terms_html(): string {
+	$terms = array(
+		'P1'                   => __( 'high demand, and we have a page or rank 4–20. Improve that page first.', 'aw-seo-extras' ),
+		'P2'                   => __( 'high demand and no page of ours. Write one.', 'aw-seo-extras' ),
+		'P3'                   => __( 'low demand, or already in the top 3.', 'aw-seo-extras' ),
+		/* translators: 1: Trends index, 2: impressions. */
+		__( 'High demand', 'aw-seo-extras' ) => sprintf( __( 'Google Trends %1$d or more, or %2$d or more Search Console impressions in 28 days.', 'aw-seo-extras' ), AW_SI_HIGH_TRENDS, AW_SI_HIGH_IMPR ),
+		/* translators: %d: impressions. */
+		__( 'Quick win', 'aw-seo-extras' ) => sprintf( __( 'we rank 8 to 20 with at least %d impressions in 28 days. A small update can reach page one.', 'aw-seo-extras' ), AW_SI_QUICK_MIN ),
+		__( 'Gap', 'aw-seo-extras' ) => __( 'high demand, and no page of ours.', 'aw-seo-extras' ),
+		__( 'Conflict', 'aw-seo-extras' ) => __( 'two of our pages compete for one search, or Google shows a different page from the one meant for it.', 'aw-seo-extras' ),
+		__( 'Has page', 'aw-seo-extras' ) => __( 'one of our pages owns the keyword.', 'aw-seo-extras' ),
+		__( 'Tracked, not ranking', 'aw-seo-extras' ) => __( 'on our list, with no impressions in 28 days.', 'aw-seo-extras' ),
+		__( 'Entity', 'aw-seo-extras' ) => __( 'a listing\'s name, shown as one combined row.', 'aw-seo-extras' ),
+		__( 'Position', 'aw-seo-extras' ) => __( 'average place in Google over 28 days (1 is the top).', 'aw-seo-extras' ),
+		__( 'Impressions', 'aw-seo-extras' ) => __( 'how often we showed in Google for this search in 28 days.', 'aw-seo-extras' ),
+	);
+	$out = '<ul>';
+	foreach ( $terms as $term => $line ) {
+		$out .= '<li><strong>' . esc_html( $term ) . ':</strong> ' . esc_html( $line ) . '</li>';
+	}
+	return $out . '</ul>';
+}
+
 function aw_si_load(): void {
 	aw_si_install();
 	$tab = aw_si_tab();
@@ -113,6 +138,13 @@ function aw_si_load(): void {
 			)
 		);
 		aw_si_handle_overrides();
+		get_current_screen()->add_help_tab(
+			array(
+				'id'      => 'aw-si-terms',
+				'title'   => __( 'Terms', 'aw-seo-extras' ),
+				'content' => aw_si_terms_html(),
+			)
+		);
 	}
 	if ( 'overview' === $tab ) {
 		$screen = get_current_screen();
