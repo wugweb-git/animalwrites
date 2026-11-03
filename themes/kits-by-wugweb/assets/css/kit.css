@@ -1183,6 +1183,7 @@ header.wp-block-template-part.kit-header-hidden { transform: translateY(calc(-10
 .kit-card .kit-card-title { font-size: var(--kit-type-h3) !important; font-weight: var(--kit-weight-strong); line-height: var(--kit-leading-heading) !important; letter-spacing: -0.01em; } /* the theme H3 (Layout rules 9; was the body size); 3 lines at most stay under 80px */
 .kit-card[class*="kit-card--"] .kit-card-title a { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; color: var(--kit-color-ink); }
 .kit-card .kit-card-title a::after { content: ""; position: absolute; inset: 0; }
+.kit-card .kit-card-title a.kit-link-ext::after { width: auto; height: auto; margin: 0; background: none; -webkit-mask: none; mask: none; } /* an off-site title link keeps the whole-card layer, not the 14px arrow (it sat in the top-left corner) */
 .kit-card .kit-card-title .kit-ico--arrow-up-right { --kit-ico-size: .9em; }
 .kit-card .kit-card-sum { color: var(--kit-color-muted); font-size: var(--kit-type-sm); line-height: 1.55; }
 .kit-card[class*="kit-card--"] .kit-card-sum .wp-block-post-excerpt__excerpt { margin: 0; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }

@@ -1867,7 +1867,5 @@ section.aw-camp-band.aw-ed-hero--campaign { box-sizing: border-box; min-height: 
 .kit-hero .aw-festive-ico .kit-ico { --kit-ico-size: var(--kit-size-check); }
 @media (min-width: 768px) { .kit-hero .aw-festive-tips { grid-template-columns: repeat(2, max-content); column-gap: var(--kit-space-6); } } /* in a page hero the tips sit two across, so the hero keeps its height */
 
-/* What people are saying cards (3 Nov 2026): the calendar icon keeps the meta icon gap from the date; no external-link
-   arrow on the person's name (the "Show the post" button already says where the link goes). */
+/* What people are saying cards (3 Nov 2026): the calendar icon keeps the meta icon gap from the date. */
 .aw-social-card .aw-date { display: inline-flex; align-items: center; gap: var(--kit-meta-icon-gap); }
-.aw-social-card .kit-card-title .kit-ico--arrow-up-right { display: none; }
