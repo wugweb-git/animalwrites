@@ -268,6 +268,25 @@
 	.aw-camp--sc-stray-dogs .aw-camp-tracker td:nth-child(4)::before { display: inline; margin: 0 var(--kit-space-2) 0 0; }
 	.aw-camp--sc-stray-dogs .aw-camp-tracker td:nth-child(4) a { display: inline-block; }
 }
+/* The state picker (campaign.js; owner, 3 Nov 2026: "audit and sort this"): one state at a time, so the section fits
+   Layout rules 5 and 6. The Kits form field, its label beside the select in one 44px row; only the chosen row shows.
+   From 768 the picker sits in the heading's row, at the right; on phones it is under the intro, full width. The intro's
+   dates read as text, like the table's (no calendar icons in running text). */
+.aw-camp--sc-stray-dogs #tracker .aw-camp-lede .aw-date .kit-ico { display: none; }
+.aw-camp--sc-stray-dogs .aw-camp-tracker.is-picked tbody tr[hidden] { display: none; }
+.aw-camp--sc-stray-dogs #tracker > .aw-sc-pick { display: flex; align-items: center; gap: var(--kit-space-3); margin: var(--kit-space-5) 0 0; }
+.aw-camp--sc-stray-dogs #tracker > .aw-sc-pick > label { margin: 0; color: var(--camp-primary); font-weight: var(--kit-weight-bold); white-space: nowrap; }
+.aw-camp--sc-stray-dogs #tracker > .aw-sc-pick > .kit-field-control { flex: 1 1 auto; min-width: 0; }
+@media (min-width: 768px) {
+	.aw-camp--sc-stray-dogs #tracker:has(> .aw-sc-pick) { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--kit-space-5); align-items: center; }
+	.aw-camp--sc-stray-dogs #tracker:has(> .aw-sc-pick) > * { grid-column: 1 / -1; }
+	.aw-camp--sc-stray-dogs #tracker:has(> .aw-sc-pick) > h2 { grid-column: 1; grid-row: 1; }
+	.aw-camp--sc-stray-dogs #tracker > .aw-sc-pick { grid-column: 2; grid-row: 1; margin: 0; }
+	/* one row at a time: the columns size to that row, so the several-states row (15 names) stays under 800 at 768 */
+	.aw-camp--sc-stray-dogs .aw-camp-tracker.is-picked table { table-layout: auto; }
+	.aw-camp--sc-stray-dogs .aw-camp-tracker.is-picked th:nth-child(n) { width: auto; }
+	.aw-camp--sc-stray-dogs .aw-camp-tracker.is-picked th:first-child { white-space: nowrap; }
+}
 /* The hero at --kit-hero-h on every phone (Layout rules 4; at 360x640 it was 696): its section padding one step down
    (--kit-section-y at --kit-space-5) and the summary straight under the H1's own margin */
 @media (max-width: 767px) {
