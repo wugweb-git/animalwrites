@@ -323,25 +323,42 @@
 	.aw-camp--sc-stray-dogs .aw-camp-tracker td:nth-child(4)::before { display: inline; margin: 0 var(--kit-space-2) 0 0; }
 	.aw-camp--sc-stray-dogs .aw-camp-tracker td:nth-child(4) a { display: inline-block; }
 }
-/* The state picker (campaign.js; owner, 3 Nov 2026: "audit and sort this"): one state at a time, so the section fits
-   Layout rules 5 and 6. The Kits form field, its label beside the select in one 44px row; only the chosen row shows.
-   From 768 the picker sits in the heading's row, at the right; on phones it is under the intro, full width. The intro's
+/* The pickers (campaign.js awScPicker; owner, 3 Nov 2026: "audit and sort this", "fix all four"): one state, or one
+   court order, at a time, so the section fits Layout rules 5 and 6. The Kits form field, its label beside the select in
+   one 44px row; only the chosen row shows.
+   Where your state stands: from 768 the picker sits in the heading's row, at the right; on phones under the intro, full
+   width. What the court ordered: under the heading, full width on phones, as wide as its date from 768. The intro's
    dates read as text, like the table's (no calendar icons in running text). */
 .aw-camp--sc-stray-dogs #tracker .aw-camp-lede .aw-date .kit-ico { display: none; }
-.aw-camp--sc-stray-dogs .aw-camp-tracker.is-picked tbody tr[hidden] { display: none; }
-.aw-camp--sc-stray-dogs #tracker > .aw-sc-pick { display: flex; align-items: center; gap: var(--kit-space-3); margin: var(--kit-space-5) 0 0; }
-.aw-camp--sc-stray-dogs #tracker > .aw-sc-pick > label { margin: 0; color: var(--camp-primary); font-weight: var(--kit-weight-bold); white-space: nowrap; }
-.aw-camp--sc-stray-dogs #tracker > .aw-sc-pick > .kit-field-control { flex: 1 1 auto; min-width: 0; }
+.aw-camp--sc-stray-dogs :is(.aw-camp-tracker, .aw-camp-timeline).is-picked tbody tr[hidden] { display: none; }
+.aw-camp--sc-stray-dogs :is(#tracker, #orders) > .aw-sc-pick { display: flex; align-items: center; gap: var(--kit-space-3); margin: var(--kit-space-5) 0 0; }
+.aw-camp--sc-stray-dogs :is(#tracker, #orders) > .aw-sc-pick > label { margin: 0; color: var(--camp-primary); font-weight: var(--kit-weight-bold); white-space: nowrap; }
+.aw-camp--sc-stray-dogs :is(#tracker, #orders) > .aw-sc-pick > .kit-field-control { flex: 1 1 auto; min-width: 0; }
 @media (min-width: 768px) {
 	.aw-camp--sc-stray-dogs #tracker:has(> .aw-sc-pick) { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--kit-space-5); align-items: center; }
 	.aw-camp--sc-stray-dogs #tracker:has(> .aw-sc-pick) > * { grid-column: 1 / -1; }
 	.aw-camp--sc-stray-dogs #tracker:has(> .aw-sc-pick) > h2 { grid-column: 1; grid-row: 1; }
 	.aw-camp--sc-stray-dogs #tracker > .aw-sc-pick { grid-column: 2; grid-row: 1; margin: 0; }
+	.aw-camp--sc-stray-dogs #orders > .aw-sc-pick > .kit-field-control { flex: 0 1 auto; }
 	/* one row at a time: the columns size to that row, so the several-states row (15 names) stays under 800 at 768 */
 	.aw-camp--sc-stray-dogs .aw-camp-tracker.is-picked table { table-layout: auto; }
 	.aw-camp--sc-stray-dogs .aw-camp-tracker.is-picked th:nth-child(n) { width: auto; }
 	.aw-camp--sc-stray-dogs .aw-camp-tracker.is-picked th:first-child { white-space: nowrap; }
 }
+/* What you can do: the card fold (campaign.js) is the theme's details block (kit.css .wp-block-details, its 44px summary,
+   "+" marker and focus ring) inside the card, so the card's own padding stands in for the block's rule and summary
+   padding. */
+.aw-camp--sc-stray-dogs #act .aw-camp-card-fold { border-bottom: 0; }
+.aw-camp--sc-stray-dogs #act .aw-camp-card-fold > summary { padding-block: 0; }
+.aw-camp--sc-stray-dogs #act .aw-camp-card-fold > summary > h3 { margin: 0; }
+.aw-camp--sc-stray-dogs #act .aw-camp-card-fold > :not(summary) { margin: var(--kit-space-2) 0 0; }
+/* In the news and Read the law: the rest of the cards in one fold under the first row (campaign.js awScMore), the theme's
+   details block. In the news lays its cards straight into the row's grid, so its fold spans the row and lays its own
+   cards out the same way (one column on phones, two from 768); Read the law's list keeps its own grid rules. */
+.aw-camp--sc-stray-dogs .aw-sc-more { margin-top: var(--kit-space-4); }
+.aw-camp.aw-camp--sc-stray-dogs #latest .aw-sc-more { grid-column: 1 / -1; margin: 0; }
+.aw-camp.aw-camp--sc-stray-dogs #latest .aw-sc-more > ul { display: grid; gap: var(--kit-space-4); grid-template-columns: minmax(0, 1fr); margin: 0 0 var(--kit-space-4); padding: 0; list-style: none; }
+@media (min-width: 768px) { .aw-camp.aw-camp--sc-stray-dogs #latest .aw-sc-more > ul { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 /* The hero at --kit-hero-h on every phone (Layout rules 4; at 360x640 it was 696): its section padding one step down
    (--kit-section-y at --kit-space-5) and the summary straight under the H1's own margin */
 @media (max-width: 767px) {
