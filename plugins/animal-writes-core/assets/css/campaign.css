@@ -58,6 +58,15 @@
 @media (min-width: 768px) { .aw-camp--diwali .aw-camp-steps--six { grid-template-columns: repeat(3, 1fr); } }
 /* Step lines on the night band: meta colour is for light bands */
 .aw-camp--diwali .aw-camp-dark .aw-camp-steps span { color: color-mix(in srgb, var(--kit-color-on-ink) 80%, transparent); }
+/* Tonight, in order (owner, 3 Nov 2026: "audit and sort this"). Phone first: each step is one row with its number beside
+   it (44px, --kit-size-target) rather than above it, between soft lines, so the six steps read as one checklist and the
+   band fits one phone screen (375px wide: 840px tall before, 648px after). */
+.aw-camp--diwali #tonight .aw-camp-steps { gap: 0; margin-top: var(--kit-space-5); }
+.aw-camp--diwali #tonight .aw-camp-steps > li { display: grid; grid-template-columns: var(--kit-size-target) minmax(0, 1fr); column-gap: var(--kit-space-4); row-gap: var(--kit-space-1); align-content: center; margin: 0; padding: var(--kit-space-3) 0; border-top: var(--kit-border-width) solid color-mix(in srgb, var(--kit-color-on-ink) 16%, transparent); }
+.aw-camp--diwali #tonight .aw-camp-steps > li::before { position: static; grid-column: 1; grid-row: 1 / span 2; align-self: center; }
+.aw-camp--diwali #tonight .aw-camp-steps > li > :is(strong, span) { grid-column: 2; }
+.aw-camp--diwali #tonight .aw-camp-steps > li > strong { align-self: end; line-height: var(--kit-leading-heading); }
+.aw-camp--diwali #tonight .aw-camp-steps > li > span { align-self: start; line-height: var(--kit-leading-body); }
 /* Who to call has two columns: it fits a phone without sideways scrolling */
 .aw-camp--diwali #help { --kit-table-min: 0; }
 /* The law cards and the five action cards stand in the campaign card grid (.aw-camp-grid: stacked on phones, two
