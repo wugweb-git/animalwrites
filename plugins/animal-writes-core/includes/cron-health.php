@@ -102,7 +102,14 @@ add_action(
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
-		wp_add_dashboard_widget(
+		aw_dash_summary(
+			'aw_cron_health',
+			function () {
+				$last = aw_cron_last();
+				return $last && time() - $last < AW_CRON_STALE ? 'Running' : 'Stopped';
+			}
+		);
+		aw_dash_section(
 			'aw_cron_health',
 			'Scheduled tasks',
 			function () {
