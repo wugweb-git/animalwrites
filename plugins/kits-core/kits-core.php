@@ -41,3 +41,4 @@ require_once KITS_CORE_DIR . 'includes/sourcing.php';
 require_once KITS_CORE_DIR . 'includes/attribution.php';
 require_once KITS_CORE_DIR . 'includes/theme-updates.php';
 require_once KITS_CORE_DIR . 'includes/page-options.php';
+require_once KITS_CORE_DIR . 'includes/settings-transfer.php';

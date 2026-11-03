@@ -92,7 +92,10 @@ function kits_overview_page() {
 			array_slice( $palette, 0, 20 )
 		)
 	);
-	$fonts     = (array) ( wp_get_global_settings( array( 'typography', 'fontFamilies', 'theme' ) ) ?? array() );
+	// Every font the site can use: the theme's and its style variation's (theme), and those installed on Appearance → Fonts (custom).
+	$font_sets = (array) ( wp_get_global_settings( array( 'typography', 'fontFamilies' ) ) ?? array() );
+	$fonts     = array_merge( (array) ( $font_sets['theme'] ?? array() ), (array) ( $font_sets['custom'] ?? array() ) );
+	$colours   = WP_Block_Styles_Registry::get_instance()->get_registered_styles_for_block( 'core/post-content' );
 	$templates = get_block_templates( array(), 'wp_template' );
 	$parts     = get_block_templates( array(), 'wp_template_part' );
 	$patterns  = array_filter( WP_Block_Patterns_Registry::get_instance()->get_all_registered(), fn( $p ) => array_intersect( (array) ( $p['categories'] ?? array() ), array( 'animal-writes', 'kits-components', 'kits-lists' ) ) );
@@ -104,7 +107,8 @@ function kits_overview_page() {
 		array(
 			array( 'Themes', esc_html( 'Active: ' . $theme->get( 'Name' ) . ' ' . $theme->get( 'Version' ) . ( $parent ? ', a child of ' . $parent->get( 'Name' ) . ' ' . $parent->get( 'Version' ) : '' ) . '.' ), kits_link( 'Appearance → Themes', 'themes.php' ) . ( function_exists( 'kits_changelog_url' ) && kits_changelog_url() ? ', <a href="' . esc_url( kits_changelog_url() ) . '">' . esc_html( 'Change log (read before updating)' ) . '</a>' : '' ), $auto ),
 			array( 'Colours', esc_html( count( $palette ) . ' brand colours from the theme.' ) . '<br>' . $swatch, kits_link( 'Editor → Styles', 'site-editor.php?path=/wp_global_styles' ) . ', ' . kits_link( 'Design system → Tokens', 'admin.php?page=kits-system&tab=tokens' ), esc_html( 'Contrast worked out in Design system → Contrast.' ) ),
-			array( 'Fonts', esc_html( implode( ', ', array_filter( array_map( fn( $f ) => (string) ( $f['name'] ?? '' ), $fonts ) ) ) ), kits_link( 'Editor → Styles → Typography', 'site-editor.php?path=/wp_global_styles' ), $auto ),
+			array( 'Fonts', esc_html( implode( ', ', array_unique( array_filter( array_map( fn( $f ) => (string) ( $f['name'] ?? '' ), $fonts ) ) ) ) ), kits_link( 'Editor → Styles → Typography', 'site-editor.php?path=/wp_global_styles' ) . ', ' . kits_link( 'Appearance → Fonts', 'font-library.php' ), $auto ),
+			array( 'Colour sets', esc_html( $colours ? implode( ', ', array_map( fn( $c ) => (string) ( $c['label'] ?? $c['name'] ), $colours ) ) . '. A page picks one in Page Options; a section picks one as its Group style.' : 'None yet.' ), kits_link( 'Editor → Styles → Blocks → Group', 'site-editor.php?path=/wp_global_styles' ), $auto ),
 			array( 'Templates', esc_html( count( $templates ) . ' page templates (home, item, Directory profile, hubs, category and tag pages, 404 …).' ), kits_link( 'Editor → Templates', 'site-editor.php?postType=wp_template' ), $auto ),
 			array( 'Header, footer and sidebar', esc_html( count( $parts ) . ' template parts.' ), kits_link( 'Editor → Patterns → Template parts', 'site-editor.php?postType=wp_template_part' ), $auto ),
 			array( 'Patterns', esc_html( count( $patterns ) . ' patterns (heroes, card grids, calls to action, FAQ, newsletter, campaign blocks …).' ), kits_link( 'Editor → Patterns', 'site-editor.php?path=/patterns' ), $auto ),
@@ -112,6 +116,7 @@ function kits_overview_page() {
 			array( 'Style variations', esc_html( count( $variants ) . ' saved look(s) of the site.' ), kits_link( 'Editor → Styles', 'site-editor.php?path=/wp_global_styles' ), $auto ),
 			array( 'Logo and site icon', esc_html( 'The site\'s logo in the header part; the site icon in the browser tab.' ), kits_link( 'Editor → Header', 'site-editor.php?postType=wp_template_part' ) . ', ' . kits_link( 'Settings → General', 'options-general.php' ), $auto ),
 			array( 'Design registry', esc_html( $reg_items . ' components, blocks and patterns of the child theme (plus the master\'s) with their states, accessibility and SEO; classes without an entry fail the deploy check.' ), kits_link( 'Kits → Design system', 'admin.php?page=kits-system' ), $auto ),
+			array( 'Export and import', esc_html( 'One JSON file with the site\'s Styles, Page Options defaults and synced patterns. Import it on another site with WP-CLI (wp kits import <file>) or the kits/v1/settings REST route.' ), function_exists( 'kits_settings_transfer_url' ) ? '<a href="' . esc_url( kits_settings_transfer_url() ) . '">' . esc_html( 'Download the settings file' ) . '</a>' : '', esc_html( 'Nothing is deleted on import.' ) ),
 			array( 'States sheet', esc_html( 'Every component and block in every state, drawn by the site\'s own styles (private page /kits-demo/).' ), kits_link( 'Design system → States sheet', 'admin.php?page=kits-system&tab=states' ), $auto ),
 		)
 	);
