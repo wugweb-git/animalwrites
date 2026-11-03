@@ -845,6 +845,21 @@
 .aw-camp.aw-camp #latest .kit-card { flex-direction: row; align-items: center; gap: var(--kit-space-4); height: 100%; box-sizing: border-box; padding: var(--kit-space-5); background: var(--kit-color-surface-soft); }
 .aw-camp.aw-camp #latest .kit-card > .kit-card-media { flex: none; width: var(--kit-thumb-lg); max-width: 40%; margin: 0; border-radius: var(--kit-radius-media); overflow: hidden; }
 .aw-camp.aw-camp #latest .kit-card > .kit-card-body { flex: 1; min-width: 0; padding: 0; }
+/* Below 1200 the picture beside the whole body left the text 165px wide: the meta row broke in two and Kits cut titles
+   to three lines with "…". Here the meta row runs the card's width on top, a square picture (--kit-thumb-sm on phones,
+   --kit-thumb-md on tablets) sits beside the title, and the title shows in full. */
+@media (max-width: 1199px) {
+	.aw-camp.aw-camp #latest .kit-card { display: grid; grid-template-columns: var(--kit-thumb-md) minmax(0, 1fr); grid-template-areas: "meta meta" "media title"; align-items: start; gap: var(--kit-space-3) var(--kit-space-4); }
+	.aw-camp.aw-camp #latest .kit-card > .kit-card-body { display: contents; }
+	.aw-camp.aw-camp #latest .kit-card-metarow { grid-area: meta; flex-wrap: nowrap; }
+	.aw-camp.aw-camp #latest .kit-card-metarow > .kit-card-meta { flex: none; }
+	.aw-camp.aw-camp #latest .kit-card-metarow > .kit-card-chips { flex: 1 1 0; }
+	.aw-camp.aw-camp #latest .kit-card > .kit-card-media { grid-area: media; width: 100%; max-width: none; aspect-ratio: 1; }
+	.aw-camp.aw-camp #latest .kit-card > .kit-card-media img { width: 100%; height: 100%; object-fit: cover; }
+	.aw-camp.aw-camp #latest .kit-card-title { grid-area: title; margin: 0; }
+	.aw-camp.aw-camp #latest .kit-card-title a { display: block; -webkit-line-clamp: none; overflow: visible; }
+}
+@media (max-width: 767px) { .aw-camp.aw-camp #latest .kit-card { grid-template-columns: var(--kit-thumb-sm) minmax(0, 1fr); } }
 
 /* What happens next: the row of four from 768 (not only from 1200), the cards white */
 .aw-camp.aw-camp :is(#next, #next-closed) .aw-camp-steps > li:not(:first-child) { background: var(--kit-color-surface-soft); }
