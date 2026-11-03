@@ -1816,6 +1816,20 @@ section.aw-camp-band.aw-ed-hero--campaign { box-sizing: border-box; min-height: 
 .aw-ed-law .aw-news-mosaic .kit-card--stacked-md .kit-card-title { font-size: var(--kit-type-h3) !important; }
 .aw-ed-law .aw-news-mosaic .kit-card--stacked-md > .kit-card-media { aspect-ratio: 4 / 3; }
 .aw-ed-law .aw-news-mosaic .kit-card--stacked-md > .kit-card-media img { height: 100%; object-fit: cover; }
+/* Phones (3 Nov 2026; Home sections fit one phone screen, block-padding-and-sizes): the lead is a row like the two
+   under it, as in Latest news: a --kit-thumb-lg 4:3 picture in the card padding, the date and publisher, the H3 title,
+   no summary. The section went from 1705 to 1405px at 375. */
+@media (max-width: 767px) {
+	.aw-ed-law .aw-news-mosaic > li > .kit-card { gap: var(--kit-space-5); }
+	.aw-ed-law .aw-news-mosaic > li:first-child > .kit-card { flex-direction: row; align-items: flex-start; }
+	.aw-ed-law .aw-news-mosaic > li:first-child > .kit-card[class*="kit-card--block"] { gap: 0; }
+	.aw-ed-law .aw-news-mosaic > li:first-child > .kit-card > .kit-card-media { flex: none; width: var(--kit-thumb-lg) !important; max-width: 40%; aspect-ratio: 4 / 3; border-radius: var(--kit-radius-media); }
+	.aw-ed-law .aw-news-mosaic > li:first-child > .kit-card[class*="kit-card--block"] > .kit-card-media { margin: var(--kit-space-5) 0 var(--kit-space-5) var(--kit-space-5) !important; }
+	.aw-ed-law .aw-news-mosaic > li:first-child > .kit-card > .kit-card-media img { height: 100%; object-fit: cover; }
+	.aw-ed-law .aw-news-mosaic > li:first-child > .kit-card > .kit-card-body { flex: 1 1 0; }
+	.aw-ed-law .aw-news-mosaic > li:first-child .kit-card-sum { display: none; }
+	.aw-ed-law .aw-news-mosaic > li:first-child .kit-card-title { font-size: var(--kit-type-h3) !important; }
+}
 @media (min-width: 768px) {
 	.aw-ed-law .aw-news-mosaic > li:nth-child(n+2) { align-self: stretch; display: flex; }
 	.aw-ed-law .aw-news-mosaic > li:nth-child(n+2) > .kit-card { flex: 1 1 auto; align-items: center; }
