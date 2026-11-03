@@ -354,7 +354,10 @@ function aw_schema_safe_image( $img ) {
 	if ( $url === $img['url'] ) {
 		return $img;
 	}
-	return array_merge( $img, array( 'url' => $url ), $w ? array( 'width' => $w, 'height' => $h ) : array( 'width' => 0, 'height' => 0 ) );
+	$img['url']    = $url;
+	$img['width']  = (int) $w; // the new file's own size (0 when unknown)
+	$img['height'] = (int) $h;
+	return $img;
 }
 
 /**
@@ -1227,11 +1230,13 @@ function aw_hub_schema_nodes() {
 	// other filtered request is built each time, so query strings cannot fill the cache.
 	$plain = ! function_exists( 'aw_seo_filter_params' ) || ! aw_seo_filter_params();
 	if ( $plain || $view ) {
-		$path = (string) wp_parse_url( add_query_arg( array() ), PHP_URL_PATH ); // the request's own path (Directory places and types)
-		$sort = sanitize_key( wp_unslash( $_GET['sort'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification -- an order, read only
-		return $nodes = aw_seo_cached( 'hub_schema|' . $type . '|' . $url . '|' . $path . '|' . $sort . '|' . aw_hub_page() . '|' . get_queried_object_id(), fn() => aw_hub_schema_build( $type, $url, $view ) );
+		$path  = (string) wp_parse_url( add_query_arg( array() ), PHP_URL_PATH ); // the request's own path (Directory places and types)
+		$sort  = sanitize_key( wp_unslash( $_GET['sort'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification -- an order, read only
+		$nodes = aw_seo_cached( 'hub_schema|' . $type . '|' . $url . '|' . $path . '|' . $sort . '|' . aw_hub_page() . '|' . get_queried_object_id(), fn() => aw_hub_schema_build( $type, $url, $view ) );
+		return $nodes;
 	}
-	return $nodes = aw_hub_schema_build( $type, $url, $view );
+	$nodes = aw_hub_schema_build( $type, $url, $view );
+	return $nodes;
 }
 
 /**

@@ -48,7 +48,11 @@ add_action(
 		}
 		// A switched-off module's scheduled job is taken off (its file, which runs and reschedules it, is not loaded).
 		// Checked in admin and cron requests only, so a page view never writes.
-		$idle = array_intersect_key( array( 'health' => 'aw_seo_endpoints_watchdog', 'sitemap' => 'aw_seo_sitemap_daily' ), array_flip( $off ) );
+		$jobs = array(
+			'health'  => 'aw_seo_endpoints_watchdog',
+			'sitemap' => 'aw_seo_sitemap_daily',
+		);
+		$idle = array_intersect_key( $jobs, array_flip( $off ) );
 		if ( $idle ) {
 			add_action(
 				'init',

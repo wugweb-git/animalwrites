@@ -210,7 +210,7 @@ function aw_sitemap_unreachable_listings() {
 			$keys
 		)
 	);
-	$set = array();
+	$set  = array();
 	_prime_post_caches( array_map( 'intval', $ids ), false, true );
 	foreach ( $ids as $id ) {
 		if ( aw_listing_unreachable( (int) $id ) ) {
@@ -227,8 +227,8 @@ add_filter(
 		if ( ! $obj instanceof WP_Post ) {
 			return $url;
 		}
-		$closed = 'aw_opportunity' === $obj->post_type && function_exists( 'aw_retention_state' ) && aw_retention_state( $obj );
-		$merged = (int) get_post_meta( $obj->ID, 'aw_merged_into', true ) > 0; // a same-story duplicate (normally private already)
+		$closed      = 'aw_opportunity' === $obj->post_type && function_exists( 'aw_retention_state' ) && aw_retention_state( $obj );
+		$merged      = (int) get_post_meta( $obj->ID, 'aw_merged_into', true ) > 0; // a same-story duplicate (normally private already)
 		$unreachable = 'aw_listing' === $obj->post_type && isset( aw_sitemap_unreachable_listings()[ (int) $obj->ID ] ); // noindex (above)
 		if ( '' === (string) $obj->post_name || $closed || $merged || $unreachable || in_array( (int) $obj->ID, aw_seo_preview_ids(), true ) ) {
 			return false;
