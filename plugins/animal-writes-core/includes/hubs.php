@@ -200,9 +200,12 @@ function aw_hub_query_vars( $type, $page = 1 ) {
 			$v['orderby']              = array( 'closes' => 'ASC', 'date' => 'DESC' );
 		}
 	} elseif ( 'aw_campaign' === $type ) {
-		$aw1 = get_page_by_path( 'india-writes-for-its-community-dogs', OBJECT, 'aw_campaign' );
-		if ( $aw1 ) {
-			$v['post__not_in'] = array( $aw1->ID ); // shown above the list as its own story
+		// The first campaign is left out of the list only while the hub page still shows it above the list as its own
+		// story (pattern aw1-story); without the story every campaign is one card of the same size (owner, 3 Nov 2026).
+		$aw1  = get_page_by_path( 'india-writes-for-its-community-dogs', OBJECT, 'aw_campaign' );
+		$page = get_queried_object_id() ? get_post( get_queried_object_id() ) : null;
+		if ( $aw1 && $page instanceof WP_Post && false !== strpos( (string) $page->post_content, 'animal-writes/aw1-story' ) ) {
+			$v['post__not_in'] = array( $aw1->ID );
 		}
 	} elseif ( 'aw_listing' === $type ) {
 		$v = aw_directory_query_vars( $v );
@@ -509,9 +512,7 @@ function aw_hub_after( $type ) {
 
 /** A hub Page's content. */
 function aw_hub_page_content( $type, $pattern_id ) {
-	$before = 'aw_campaign' === $type ? '<!-- wp:pattern {"slug":"animal-writes/aw1-story"} /-->
-
-' : '';
+	$before = ''; // the Campaigns hub has no story band above its list: every campaign is a card of the same size (owner, 3 Nov 2026)
 	return aw_hub_band( $type ) . '
 
 <!-- wp:group {"align":"wide","className":"aw-system","layout":{"type":"default"}} -->
