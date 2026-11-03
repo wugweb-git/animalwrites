@@ -47,10 +47,12 @@ Every hash below is on `wordpress` (live) as of 3 Nov 2026. Sections are in page
 - On phones, one card per row, so the Draft 2026 column is never off the screen. 74cc0801, 3 Nov
 
 ## Send your objection (letter tool)
-- Letter tool: pick grounds, then Gmail, Outlook, the email app or copy; confirmed-letter count. 482990d1, 16 Oct
+- Letter tool: pick grounds, then send; confirmed-letter count. 482990d1, 16 Oct
+- Routes now: Gmail (the app on phones), the email app, or Copy letter; no Outlook; Copy address in the note after copying (owner, 19 Oct).
 - Stepped letter tool. 8a4e8888, 17 Oct
-- Anonymous statistics per letter (city, grounds, route, device, date; no name, email or IP); an unticked "Email me updates" box. 1464c105, 17 Oct
-- Every send records the sender: name, city and email required; a contact tagged with the campaign. fba35301, 18 Oct
+- Anonymous statistics per letter (city, grounds, route, device, date; no name, email or IP). 1464c105, 17 Oct
+- Every send records the sender: name, city and email required; a contact tagged with the campaign; "Email me updates" and the WhatsApp box start ticked. fba35301, 18 Oct
+- "Sign it" is Campaign form #10 (campaign, reasons, route, own line, both boxes, WhatsApp, an AW-L-n reference, visit fields); contacts tagged campaign-<slug> (owner, 21 Oct).
 - The record-keeping sentence and the "Is my data stored?" question removed. 299dc952, 18 Oct
 - Letter tool on a white card. d0586909, 19 Oct
 - Other ways to send removed (by post first, then the section). b380d669, 6a5c3290, 21 Oct
@@ -65,7 +67,7 @@ Every hash below is on `wordpress` (live) as of 3 Nov 2026. Sections are in page
 
 ## Share ("Get three more letters in")
 - Share box with a message and a link preview from the page's social data; on phones Share sends picture, message and link together. 0f677cce, 21 Oct
-- Story (9:16) and post (4:5) pictures to share or save. 44bfb673, 21 Oct
+- Story (9:16) and post (4:5) pictures to share or save; share pictures are JPG, never AVIF (owner, 19 Oct). 44bfb673, 21 Oct
 - Short link `/lab`; Share and Copy link use it. 8f3b2067, 2 Nov
 - One main "Share this page" button over the share bar. 188e57a4, 4db1e969, 2 Nov
 - One Share block on every campaign: a band in the campaign colour, white main button, icon share bar, the ready-made pictures. 597d300d, 74df45af, 9026fd5d, 880d66f0, 816ada37, 5afec03e, 246151ad, 474a9356, 3088b8cb, 4e55a9f9, 2 Nov
@@ -106,7 +108,7 @@ Every hash below is on `wordpress` (live) as of 3 Nov 2026. Sections are in page
 - No second newsletter form on the page (the site footer has one). 5e6b1fcb, 16 Oct
 - The newsletter band above the footer on every page. ac1a32f1, 2 Nov
 - Get updates as a tinted card in the campaign colour. 4b6046b3, 2 Nov
-- The email footer strip names the campaign: "Labs could approve most animal tests themselves · closes 5 Nov". f8ed17ba, 18 Oct
+- The email footer strip names the campaign: "Labs could approve most animal tests themselves · closes 5 Nov"; the strip is the owner's HTML as written, only the days-left block changes. f8ed17ba, 18 Oct
 - 3 Nov: one email to the 115 subscribed contacts tagged with the campaign; part of the send is resent on 4 Nov.
 
 ## Phone bar
@@ -122,7 +124,8 @@ Every hash below is on `wordpress` (live) as of 3 Nov 2026. Sections are in page
 ## SEO and schema
 - Campaign schema about its Library law; rule cards as an ItemList with their own anchors. 482990d1, 16 Oct; 71eb987f, 17 Oct
 - Keyphrases: the campaign owns "g.s.r. 864(e)", "gsr 864e" and "cpcsea-mef@gov.in"; the rule-by-rule guide and Library draft keep "draft lab animal rules 2026, ccsea draft rules". 1 Nov (pending.md)
-- Library draft H1 is the full official name plus "(GSR 864E)". 1 Nov (pending.md)
+- Library draft H1 is the full official name plus "(GSR 864E)"; SEO title ends "PDF"; a "G.S.R. 864(E) PDF" heading above the PDF view; main date 6 Oct 2026 with "Dated 30 Sep 2026" as a second line. 1 Nov (pending.md); owner, 24 Oct
+- The campaign's publish date stays fixed; only dateModified moves when the build script runs.
 - SEO titles keep the hyphen in cpcsea-mef@gov.in. 7b1a5425, 3 Nov
 - Links shared with `#` written as `%23` redirect (`…/%23how-to-help` 301s to `#how-to-help`, checked 3 Nov). 5765dc0d, 2 Nov
 - Search (28 days to 31 Oct): campaign page 16,102 impressions, 1,653 clicks, position 3.8; Library draft 5,861 / 505 / 3.5.
@@ -149,7 +152,8 @@ Every hash below is on `wordpress` (live) as of 3 Nov 2026. Sections are in page
   - the meta, social description and share text say "by 5 Nov" / "before 5 November";
   - the social images and their alt text say "Objections close 5 November 2026".
 - The closed-state copy exists in the build script and shows on Post; the post-deadline news piece ("Objections closed: what happens now") is not written.
-- Close day: 6 Nov in the campaign plan, 7 Nov in the theme rebuild plan; the Dates list has no Post entry.
+- Post phase (closed-state content, FAQ visibility, What happens next): on hold for the owner's decision.
+- Waiting on the owner: which X posts go on the page; the label for copy-the-hashtags chips; the owner's own X steps (repin with /lab, the hashtags and a picture); whether to move the guide box up on the Library draft (a template change).
 - PCA Act 1960 Chapter IV is not in the Library.
 
 ## Rules for this page
