@@ -766,6 +766,20 @@
 			"runtime": "map-only",
 			"notes": "Reads post counts and the newest items; stores nothing. Replaces WordPress's Activity box."
 		},
+		"aw_seo_dashboard": {
+			"title": "SEO",
+			"source": "AW SEO Plus",
+			"plugin": "AW SEO Plus",
+			"purpose": "SEO Dashboard box",
+			"file": "seo/search-insights/dashboard.php:131",
+			"screen": "admin",
+			"page": "Dashboard (widgets)",
+			"types": [
+				"dashboard"
+			],
+			"runtime": "map-only",
+			"notes": "Reads stored Search Console, GA4 404 and source-run rows; stores nothing."
+		},
 		"aw_sourcing_dashboard": {
 			"title": "Sourcing",
 			"source": "AW Sourcing",
