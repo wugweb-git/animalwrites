@@ -2,7 +2,7 @@
 /**
  * Server tab (owner, 3 Nov 2026): what the server itself sees, kept 90 days, aggregate counts only.
  *
- * - The host gives this account no access log (only PHP error logs), so total requests, bandwidth and countries are
+ * - The host gives this account no access log (only PHP error logs), so bandwidth and requests the CDN answers are
  *   not available here; hPanel shows them. What is counted:
  *   - AI and search crawler requests per bot, by user agent, for requests that reach WordPress. Pages the CDN serves
  *     from its cache never reach WordPress, so these are lower bounds.
@@ -10,7 +10,8 @@
  *     addresses (path only, no query string).
  *   - PHP errors per day by kind from this domain's PHP error logs (the same files as the daily error count,
  *     error-count.php), with the most frequent messages.
- * - Nothing personal is stored: no IP address, no full user agent, no query string; a crawler is kept only as its name.
+ * - Visitors by country and shortened IP address: visitors.php.
+ * - No full IP address, full user agent or query string is stored; a crawler is kept only as its name.
  * - Counts are kept in one option per day (aw_si_srv_YYYYMMDD, site time zone, not autoloaded); a request is written
  *   only when it is a listed crawler or a 4xx/5xx answer. The daily run (aw_si_daily) adds yesterday's PHP errors and
  *   deletes days older than 90.
@@ -286,7 +287,7 @@ add_action(
 			return;
 		}
 		$days = aw_si_srv_days();
-		echo '<p>' . esc_html__( 'What the server sees, per day, for 90 days. The host gives no access log, so total requests, bandwidth and visitor countries are only in hPanel. Crawler requests and 4xx/5xx answers are counted when a request reaches WordPress; pages the CDN serves from its cache are not counted. No IP address or full user agent is stored.', 'aw-seo-extras' ) . '</p>';
+		echo '<p>' . esc_html__( 'What the server sees, per day. The host gives no access log, so bandwidth and the pages the CDN serves from its cache are only in hPanel. Everything here is counted when a request reaches WordPress. No full IP address or user agent is stored.', 'aw-seo-extras' ) . '</p>';
 
 		// Every crawler on the watch list, with 0 when it made no requests.
 		$today   = wp_date( 'Ymd' );
@@ -328,6 +329,10 @@ add_action(
 			echo '<td>' . ( $only ? esc_html__( 'robots.txt name only, never visits', 'aw-seo-extras' ) : '' ) . '</td></tr>';
 		}
 		echo '</tbody></table>';
+
+		if ( function_exists( 'aw_si_vis_section' ) ) {
+			aw_si_vis_section();
+		}
 
 		echo '<h2>' . esc_html__( 'Per day', 'aw-seo-extras' ) . '</h2>';
 		$table = new AW_SI_Server_Table( $days );
