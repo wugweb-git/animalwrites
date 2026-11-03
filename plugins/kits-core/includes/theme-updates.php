@@ -9,7 +9,10 @@
  *       "requires": "6.6", "requires_php": "7.4", "tested": "7.1" }
  *
  * With it, Appearance → Themes shows "New version available", "View version details" (the change log) and
- * "Update now", and the auto-updates toggle works. The JSON address can be changed with the kits_update_url filter.
+ * "Update now", and the auto-updates toggle works.
+ *
+ * The check is off until the JSON is published: the address comes from the kits_update_url filter (or the
+ * KITS_UPDATE_URL constant) and is empty by default, so nothing is asked and no update is offered.
  *
  * @package kits-core
  */
@@ -18,9 +21,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/** Where the Kits update JSON lives. */
+/** Where the Kits update JSON lives; empty means the check is off. */
 function kits_update_url() {
-	return (string) apply_filters( 'kits_update_url', 'https://wugweb.com/kits/update.json' );
+	$url = defined( 'KITS_UPDATE_URL' ) ? (string) KITS_UPDATE_URL : '';
+	return esc_url_raw( (string) apply_filters( 'kits_update_url', $url ) );
 }
 
 /** The change log that ships with the installed theme (readme.txt), for "read before updating". */
@@ -35,6 +39,9 @@ function kits_changelog_url() {
  * @return array|false
  */
 function kits_update_release() {
+	if ( '' === kits_update_url() ) {
+		return false;
+	}
 	$cached = get_site_transient( 'kits_update_release' );
 	if ( is_array( $cached ) ) {
 		return $cached['version'] ? $cached : false;
