@@ -17,8 +17,7 @@
  *   when written that way.
  * - In More (cross-navigation), for an item with a place: its state and that state's districts with listings, at
  *   most 12, nearest first. Without a place: one line, "Find help near you → All states and districts" and Near me.
- * - Campaign pages: a band of 12 states before the Library band, a window that moves with the campaign's ID (not on the
- *   lab rules campaign, owner 3 Nov 2026).
+ * - Campaign pages: a band of 12 states before the Library band, a window that moves with the campaign's ID.
  * - Only places with at least one listing (stored counts, places.php): those pages are indexed. Same HTML for every
  *   visitor; no query of its own beyond the stored counts.
  *
@@ -376,7 +375,7 @@ add_filter(
 			return $html;
 		}
 		$id = get_queried_object_id();
-		if ( ! aw_findhelp_applies( $id ) || 'lab-animals-rules-2026' === get_post_field( 'post_name', $id ) ) { // not on the lab rules campaign (owner, 3 Nov 2026)
+		if ( ! aw_findhelp_applies( $id ) ) {
 			return $html;
 		}
 		$done   = true;
