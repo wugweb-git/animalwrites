@@ -39,3 +39,4 @@ require_once KITS_CORE_DIR . 'includes/preview.php';
 require_once KITS_CORE_DIR . 'includes/visits.php';
 require_once KITS_CORE_DIR . 'includes/sourcing.php';
 require_once KITS_CORE_DIR . 'includes/attribution.php';
+require_once KITS_CORE_DIR . 'includes/theme-updates.php';

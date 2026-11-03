@@ -25,6 +25,7 @@ tokens/tokens.json is the source. tools/build-tokens.py (and, for a child theme,
 * Styles values for the hero height and section padding also reach parts that are not blocks yet.
 * Animal Writes style variation (styles/animal-writes.json), with the Inter font.
 * Needs WordPress 6.6 or later (Group styles in theme.json).
+* Updates come from wugweb.com (Update URI, checked by Kits Core): Appearance > Themes shows new versions with their details, and auto-updates can be turned on.
 
 = 2.0.0 =
 * Rebuilt: valid theme.json from Kits tokens, real header/footer, full template set, cleaned patterns, Inter Tight bundled.

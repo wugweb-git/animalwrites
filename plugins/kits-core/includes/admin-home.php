@@ -102,7 +102,7 @@ function kits_overview_page() {
 	kits_overview_table(
 		'kits-design',
 		array(
-			array( 'Themes', esc_html( 'Active: ' . $theme->get( 'Name' ) . ' ' . $theme->get( 'Version' ) . ( $parent ? ', a child of ' . $parent->get( 'Name' ) . ' ' . $parent->get( 'Version' ) : '' ) . '.' ), kits_link( 'Appearance → Themes', 'themes.php' ), $auto ),
+			array( 'Themes', esc_html( 'Active: ' . $theme->get( 'Name' ) . ' ' . $theme->get( 'Version' ) . ( $parent ? ', a child of ' . $parent->get( 'Name' ) . ' ' . $parent->get( 'Version' ) : '' ) . '.' ), kits_link( 'Appearance → Themes', 'themes.php' ) . ( function_exists( 'kits_changelog_url' ) && kits_changelog_url() ? ', <a href="' . esc_url( kits_changelog_url() ) . '">' . esc_html( 'Change log (read before updating)' ) . '</a>' : '' ), $auto ),
 			array( 'Colours', esc_html( count( $palette ) . ' brand colours from the theme.' ) . '<br>' . $swatch, kits_link( 'Editor → Styles', 'site-editor.php?path=/wp_global_styles' ) . ', ' . kits_link( 'Design system → Tokens', 'admin.php?page=kits-system&tab=tokens' ), esc_html( 'Contrast worked out in Design system → Contrast.' ) ),
 			array( 'Fonts', esc_html( implode( ', ', array_filter( array_map( fn( $f ) => (string) ( $f['name'] ?? '' ), $fonts ) ) ) ), kits_link( 'Editor → Styles → Typography', 'site-editor.php?path=/wp_global_styles' ), $auto ),
 			array( 'Templates', esc_html( count( $templates ) . ' page templates (home, item, Directory profile, hubs, category and tag pages, 404 …).' ), kits_link( 'Editor → Templates', 'site-editor.php?postType=wp_template' ), $auto ),
