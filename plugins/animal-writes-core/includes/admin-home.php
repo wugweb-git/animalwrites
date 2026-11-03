@@ -113,13 +113,13 @@ function aw_core_overview_page() {
 			array( 'Press coverage and sponsored blocks', 'Coverage of Animal Writes on /media/; the Sponsored block group.', aw_core_link( 'Press coverage', 'edit.php?post_type=aw_press' ), $auto ),
 		),
 		'Running the site' => array(
-			array( 'Dates', 'The team\'s calendar (observance days, deadlines) and the Dates dashboard widget.', aw_core_link( 'Animal Writes → Dates', 'admin.php?page=aw-dates' ), $st['dates'] ),
+			array( 'Dates', 'The team\'s calendar (observance days, deadlines) and its section in the Animal Writes dashboard box.', aw_core_link( 'Animal Writes → Dates', 'admin.php?page=aw-dates' ), $st['dates'] ),
 			array( 'Check site', 'Loads one page of every kind and reports any that do not open cleanly; also in the admin bar.', $admin ? aw_core_link( 'Animal Writes → Check site', 'admin.php?page=aw-site-check' ) : 'Administrators', $st['check'] ),
 			array( 'Contact links', 'The "Elsewhere" links on the Contact page.', aw_core_link( 'Animal Writes → Contact links', 'admin.php?page=aw-elsewhere' ), $auto ),
 			array( 'Keys', 'Service keys the plugins use (Clarity, Bing Webmaster, PageSpeed): paste once, never shown again; a wp-config.php constant wins.', $admin ? aw_core_link( 'Animal Writes → Keys', 'admin.php?page=aw-keys' ) : 'Administrators', $auto ),
 			array( 'Edit screens', 'Every box on each edit screen (WordPress, plugins and ours), the keys it stores and where each key is used.', $admin ? aw_core_link( 'Animal Writes → Edit screens', 'admin.php?page=aw-edit-screens' ) : 'Administrators', $auto ),
 			array( 'To review', 'Items waiting for a person (from AW Sourcing).', aw_core_link( 'Sourcing → To review', 'admin.php?page=aw-review' ), $st['review'] ),
-			array( 'Scheduled tasks', 'Who triggers WP-Cron (Hostinger, GitHub, UptimeRobot) and the longest gap; dashboard widget.', aw_core_link( 'Dashboard', 'index.php' ), $st['cron'] ),
+			array( 'Scheduled tasks', 'Who triggers WP-Cron (Hostinger, GitHub, UptimeRobot) and the longest gap; a section in the Animal Writes dashboard box.', aw_core_link( 'Dashboard', 'index.php' ), $st['cron'] ),
 			array( 'Daily backup', 'Database and deployed code into ~/backups on the server, kept 14 days.', $admin ? aw_core_link( 'Check site', 'admin.php?page=aw-site-check' ) : '—', $st['backup'] ),
 			array( 'Deploys and cache', 'LiteSpeed purged once after each deploy; CDN lifetime for anonymous public pages.', $admin ? aw_core_link( 'Check site → Shared cache (CDN)', 'admin.php?page=aw-site-check' ) : '—', $st['deploy'] . ' ' . $st['cdn'] ),
 			array( 'Staging', 'staging.animalwrites.in: same code, database without personal data, marked in the admin bar.', '—', $st['stage'] ),
@@ -138,14 +138,16 @@ function aw_core_overview_page() {
 		aw_core_simple_table( 'aw-overview', array( 'feature' => 'Feature', 'what' => 'What it does', 'status' => 'Status' ), aw_core_overview_cells( $rows ), $opts );
 	}
 
-	echo '<details><summary><strong>On the dashboard</strong> (3)</summary>';
+	echo '<details><summary><strong>On the dashboard</strong>: the Animal Writes box (5 sections)</summary>';
 	aw_core_simple_table(
 		'aw-widgets',
-		array( 'widget' => 'Widget', 'what' => 'What it shows' ),
+		array( 'widget' => 'Section', 'what' => 'What it shows' ),
 		array(
+			array( 'widget' => 'Campaign letters', 'what' => 'Letters sent per campaign (open first).' ),
+			array( 'widget' => 'Form entries', 'what' => 'Unread website form entries.' ),
 			array( 'widget' => 'Dates', 'what' => 'The next dates in the team calendar.' ),
-			array( 'widget' => 'Scheduled tasks', 'what' => 'WP-Cron triggers in the last 24 hours (administrators).' ),
-			array( 'widget' => 'Campaign letters', 'what' => 'Letters sent per campaign.' ),
+			array( 'widget' => 'Activity', 'what' => 'Items awaiting review.' ),
+			array( 'widget' => 'Scheduled tasks', 'what' => 'WP-Cron triggers in the last 24 hours, running or stopped (administrators).' ),
 		),
 		array(
 			'primary' => 'widget',
