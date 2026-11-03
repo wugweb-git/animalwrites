@@ -131,5 +131,3 @@ add_action(
 add_filter( 'mailweb_smtp_defaults', fn( $d ) => array_merge( $d, array( 'user' => 'noreply@animalwrites.in', 'name' => 'Animal Writes' ) ) );
 add_filter( 'mailweb_smtp_reply_to', fn() => 'support@animalwrites.in' );
 
-// Visits are posted to the plugin's lightweight endpoint (visit.php: WordPress in SHORTINIT mode), not the REST route.
-add_filter( 'kits_visit_endpoint', fn() => plugins_url( 'visit.php', AW_CORE_DIR . 'animal-writes-core.php' ) );

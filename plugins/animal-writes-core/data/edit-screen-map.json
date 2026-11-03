@@ -738,20 +738,6 @@
 			"runtime": "map-only",
 			"notes": "Counts and the last 5 messages per mailbox; stores nothing. Users with the Mailweb capability only."
 		},
-		"aw_visits": {
-			"title": "Animal Writes visits",
-			"source": "AW SEO Plus",
-			"plugin": "AW SEO Plus",
-			"purpose": "Visits",
-			"file": "seo/visits.php:203",
-			"screen": "admin",
-			"page": "Dashboard (widgets)",
-			"types": [
-				"dashboard"
-			],
-			"runtime": "map-only",
-			"notes": "Reads the visit counters (options aw_visits_total, aw_visits_since); stores nothing."
-		},
 		"aw_team_dates": {
 			"title": "Dates",
 			"source": "Animal Writes core",
@@ -2918,8 +2904,6 @@
 			"runtime": "map-only",
 			"kind": "table",
 			"reads": [
-				"option:aw_visits_total",
-				"option:aw_visits_since",
 				"option:kits_preview_ips",
 				"option:kits_altcha_key"
 			],

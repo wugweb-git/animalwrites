@@ -113,7 +113,6 @@ Where they meet, the line stays: the keyword table is Core's (`keyword-table.php
 | `team-dates.php` | Animal Writes → Dates (owner, 21 Oct 2026): the team's own calendar inside WordPress. One-off dates only; the monthly "Search Console Links read" reminder on the 1st is added once for the next 12 months (flag `aw_team_dates_links_read`). |
 | `term-page.php` | Category and tag pages (owner, 20 Oct 2026): one archive layout for every term. |
 | `faq-data.php` | The site's FAQ data for AW SEO Plus (31 Oct 2026): automatic questions from Directory listing and Library fields (`aw_faq_registry`), names and schema nodes (`aw_faq_context`), no page FAQ on Directory place views (`aw_faq_show_here`); the Library "Library item" box (Short name, Issued under, Key sections). |
-| `visit.php` (plugin root, not in includes/) | The visit counter's public endpoint (17 Oct 2026, server load): a POST loads WordPress in SHORTINIT mode (database and options only) and counts one visit with kits_visit_count() (AW SEO Plus, includes/visits.php); the footer script posts here (filter kits_visit_endpoint). Anything but POST gets 405. |
 | `thumbs.php` | Thumbnails never repeat (owner, 9 Oct 2026) — for content WE create. Routes: `aw/v1/thumb-dupes`. |
 | `admin-table.php`, `class-aw-core-simple-table.php` | `aw_core_simple_table()`: the plugin's plain admin tables as a read-only core list table (WP_List_Table; no nonce or bulk actions, so it can sit inside a screen's own form). The class loads only when a screen draws one. |
 
@@ -315,7 +314,6 @@ Plan: `docs/seo/search-insights-plan.md`. AW SEO Plus → Search Insights (`admi
 | `schema.php` | The site's own JSON-LD nodes, put into Rank Math's one graph (Rank Math's schema templates cannot build these from the site's fields): - Listings: NGO / VeterinaryCare / AnimalShelter / GovernmentOffice (by listing type, |
 | `sitemap.php` | Rank Math sitemap (/sitemap_index.xml) additions: - a "directory" sitemap (directory-sitemap.xml) of the Directory place pages (/directory/{state}/, /directory/{state}/{district}/) that have listings, and district × list |
 | `titles.php` | Search titles and meta descriptions. |
-| `includes/visits.php` (module Visit counter, from Kits Core 3 Nov 2026) | Honest visitor counter: one count per browser session, bots excluded, nothing personal stored. Counting runs in the browser (so cached pages still count). Shown in the footer. Routes: `aw/v1/visit` (the cheaper door is core's `visit.php`). |
 
 ## Every plugin on live (`wp plugin list`, 24 Oct 2026)
 

@@ -235,13 +235,6 @@ function aw_seo_modules(): array {
 				'AW_SI_SPIKE_WINDOW' => array( 'type' => 'int', 'label' => 'Sourcing spike: usual = average of days', 'help' => '', 'default' => 14 ),
 			),
 		),
-		'visits' => array(
-			'label'  => 'Visit counter',
-			'switch' => true,
-			'files'  => array( 'visits' ),
-			'desc'   => 'One count per browser session, bots and logged-in editors left out, nothing personal stored: the total in the site footer and the visits box on the Dashboard.',
-			'fields' => array(),
-		),
 		'rank-math-schema' => array(
 			'label'  => 'Rank Math schema entries',
 			'switch' => true,

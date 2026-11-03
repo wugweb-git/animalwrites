@@ -390,7 +390,7 @@ html { overflow-x: clip; }
 	min-width: var(--kit-size-target); min-height: var(--kit-size-target); display: inline-flex; align-items: center; justify-content: center;
 }
 .wp-block-navigation__responsive-container.is-menu-open { animation: kit-fade var(--kit-motion-base) var(--kit-motion-ease); }
-.kit-visits:empty { display: none; }
+.kit-visits:empty { display: none; } /* the visit counter was removed (3 Nov 2026); hides the line on a footer saved before that */
 
 /* Sticky help bar (phones): hides on scroll down, returns on scroll up */
 .kit-sticky-help {
@@ -751,7 +751,6 @@ html.has-modal-open .kit-sticky-help { display: none !important; }
 @media (min-width: 1200px) { .kit-footer-grid { grid-template-columns: minmax(0, 1.3fr) repeat(3, minmax(0, 1fr)); column-gap: var(--kit-space-7); } } /* the three link columns share one width */
 .kit-footer-brand { display: flex; flex-direction: column; align-items: flex-start; gap: var(--kit-space-3); min-width: 0; }
 .kit-footer-brand p { margin: 0; color: var(--kit-footer-muted); line-height: 1.55; max-width: 30ch; }
-.kit-footer-brand .kit-visits { font-size: var(--kit-type-xs); }
 .kit-footer-mail { display: inline-flex; align-items: center; gap: var(--kit-space-2); min-height: var(--kit-size-target); color: var(--kit-footer-muted); text-decoration: none; overflow-wrap: anywhere; }
 .kit-socials { display: flex; gap: var(--kit-space-1); }
 /* Small rounded icons; the 44px box is the tap area, the visible circle is 36px (box-shadow ring inside the box) */
@@ -797,7 +796,7 @@ html.has-modal-open .kit-sticky-help { display: none !important; }
 /* Footer on phones. Explore, Animal Writes and Legal & Trust are folds (details.kit-footer-fold, data-kit-fold="767"):
    open from 768 and without JavaScript, with the summary hidden and the column label shown; under 768 the summary is
    the label (a 44px row with a chevron), the folds are stacked under the Brand block and start closed, and an open fold
-   shows its links in two columns. Brand compact: logo with the visits line beside it, the line, then address and social
+   shows its links in two columns. Brand compact: logo, the line, then address and social
    icons on their own rows, then the helplines; legal links and "Powered by" share a row. Height still
    follows the content (footer_check.py). */
 .kit-footer-fold > summary { display: none; }
@@ -807,8 +806,7 @@ html.has-modal-open .kit-sticky-help { display: none !important; }
 	.kit-footer-brand { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: var(--kit-space-1) var(--kit-space-3); padding-bottom: var(--kit-space-3); }
 	.kit-footer-brand > .kit-wordmark { grid-column: 1; grid-row: 1; }
 	.kit-footer-brand > .kit-wordmark img { width: auto; height: 36px; }
-	.kit-footer-brand > .kit-visits { grid-column: 2; grid-row: 1; justify-self: end; max-width: none; text-align: end; line-height: 1.4; }
-	.kit-footer-brand > p:not(.kit-visits) { grid-column: 1 / -1; grid-row: 2; max-width: none; font-size: var(--kit-type-sm); }
+	.kit-footer-brand > p { grid-column: 1 / -1; grid-row: 2; max-width: none; font-size: var(--kit-type-sm); }
 	.kit-footer-brand > .kit-footer-mail { grid-column: 1 / -1; grid-row: 3; }
 	.kit-footer-brand > .kit-socials { grid-column: 1 / -1; grid-row: 4; margin-inline-start: calc(-1 * var(--kit-space-1)); } /* the circles line up with the text edge */
 	.kit-footer-grid > .kit-footer-col > .kit-footer-head { display: none; }

@@ -258,7 +258,7 @@ Each entry: anatomy, variants, tokens, behaviour, where it is used.
 Topic and type terms as pills (`radius-pill`, `type-xs`, surface fill); links with hover and focus states.
 
 ### Navigation and chrome
-Header (one banner landmark), announce bar, primary nav (underline grows on hover; current page stays underlined), footer (one contentinfo landmark) with honest visit counter, sticky help bar on `sm` (hides when scrolling down past 240px, returns on scroll up or focus).
+Header (one banner landmark), announce bar, primary nav (underline grows on hover; current page stays underlined), footer (one contentinfo landmark), sticky help bar on `sm` (hides when scrolling down past 240px, returns on scroll up or focus).
 
 ### Share bar
 WhatsApp, X, Copy link (pills). Inside `<main>` after the content. Copy link confirms with "Link copied" for 2 seconds.
