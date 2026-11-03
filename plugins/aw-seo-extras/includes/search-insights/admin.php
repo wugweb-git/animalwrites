@@ -579,7 +579,7 @@ function aw_si_box_referrers(): void {
 	$d90   = $today->modify( "-{$keep} days" )->format( 'Y-m-d' ); // Daily rows are kept this long.
 	$skip  = aw_si_ga4_skip_sql();
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name and fixed dates only.
-	$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT txt, SUM(IF(metric = 'ref' AND d >= %s, value, 0)) s28, SUM(IF(metric = 'ref_eng' AND d >= %s, value, 0)) e28, SUM(IF(metric = 'ref_key' AND d >= %s, value, 0)) k28, SUM(IF(metric = 'ref', value, 0)) s90, MIN(d) since FROM {$o} WHERE src = 'ga4' AND metric IN ('ref', 'ref_eng', 'ref_key') AND period = 'day' AND d >= %s{$skip} GROUP BY txt ORDER BY s28 DESC, s90 DESC LIMIT 80", $d28, $d28, $d28, $d90 ) );
+	$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT txt, SUM(IF(metric = 'ref' AND d >= %s, value, 0)) s28, SUM(IF(metric = 'ref_eng' AND d >= %s, value, 0)) e28, SUM(IF(metric = 'ref_key' AND d >= %s, value, 0)) k28, SUM(IF(metric = 'ref', value, 0)) s90, MIN(d) since FROM {$o} WHERE src = 'ga4' AND metric IN ('ref', 'ref_eng', 'ref_key') AND period = 'day' AND d >= %s{$skip} GROUP BY txt", $d28, $d28, $d28, $d90 ) );
 	// One row per site ("ig" and l.instagram.com are both Instagram), then the top 20.
 	$rows = aw_si_ref_merge( $rows, array( 's28', 'e28', 'k28', 's90' ) );
 	usort( $rows, fn( $a, $b ) => array( (float) $b->s28, (float) $b->s90 ) <=> array( (float) $a->s28, (float) $a->s90 ) );

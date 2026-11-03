@@ -476,6 +476,21 @@ function aw_seo_tab_fields( string $tab ): array {
 }
 
 add_action(
+	'admin_init',
+	function () {
+		// The settings are read on every request: autoload them (a save sets it too; this covers the option as it is).
+		if ( function_exists( 'wp_set_option_autoload' ) && false !== get_option( AW_SEO_SETTINGS ) && ! array_key_exists( AW_SEO_SETTINGS, wp_load_alloptions() ) ) {
+			wp_set_option_autoload( AW_SEO_SETTINGS, true );
+		}
+		// An old link to Search Insights' module tab: its numbers are on Search Insights → Settings.
+		if ( 'aw-seo-settings' === sanitize_key( wp_unslash( $_GET['page'] ?? '' ) ) && 'search-insights' === sanitize_key( wp_unslash( $_GET['tab'] ?? '' ) ) && function_exists( 'aw_si_url' ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- navigation only
+			wp_safe_redirect( aw_si_url( 'settings' ) );
+			exit;
+		}
+	}
+);
+
+add_action(
 	'admin_menu',
 	function () {
 		add_submenu_page( AW_SEO_MENU, 'AW SEO Plus settings', 'Settings', 'manage_options', 'aw-seo-settings', 'aw_seo_settings_page' );

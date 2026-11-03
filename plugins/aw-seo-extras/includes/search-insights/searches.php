@@ -54,7 +54,7 @@ function aw_si_searches_gaps(): array {
  */
 function aw_si_gap_variant_covered( string $label ): bool {
 	global $wpdb;
-	if ( ! preg_match( '#(\S+)/(\S+)#', $label, $m ) ) {
+	if ( ! preg_match( '#(\p{L}+)/(\p{L}+)#u', $label, $m ) ) {
 		return false;
 	}
 	$norms = array();
