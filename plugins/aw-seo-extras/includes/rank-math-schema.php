@@ -26,11 +26,11 @@
  * the editor's entry stays the one Rank Math shows and prints.
  *
  * Library and Resources items carry the type of their own node (aw_article_nodes in schema.php): Legislation for
- * Acts, Rules and Notifications, DigitalDocument for templates, Article for the rest (a guide's HowTo stays a part of
- * it). A campaign carries Event (CreativeWork when no day is stored), as aw_campaign_schema() builds it.
+ * Acts, Rules and Notifications, DigitalDocument for templates, Article for the rest. A campaign carries Event
+ * (CreativeWork when no day or no place is stored), as aw_campaign_schema() builds it.
  *
  * News carries NewsArticle (aw_article_nodes). An open Opportunity carries the type of what it is (aw_opportunity_schema):
- * JobPosting for a role, Event for an event with a day, EducationalOccupationalProgram for a fellowship, MonetaryGrant
+ * JobPosting for a role, Event for an event with a day and a place (else CreativeWork), EducationalOccupationalProgram for a fellowship, MonetaryGrant
  * for a grant, Course for a course. A closed one, or one with no node (fostering alone, an event without a day): no
  * entry, and Rank Math's own "no schema" flag (rank_math_rich_snippet "off", as its Schema tab writes when every entry is deleted) so its list does not show the type's default JobPosting.
  * When an open Opportunity closes, the entry written here is taken back (an editor's edited entry stays). A Directory

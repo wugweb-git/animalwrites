@@ -226,9 +226,7 @@ class AW_SI_Pages_Table extends WP_List_Table {
 		if ( empty( $item['ai'] ) ) {
 			return '–';
 		}
-		$by = (array) ( $item['ai_by'] ?? array() );
-		arsort( $by );
-		return esc_html( number_format_i18n( (int) $item['ai'] ) ) . '<br><span class="description">' . esc_html( implode( ', ', array_slice( array_keys( $by ), 0, 2 ) ) ) . '</span>';
+		return esc_html( number_format_i18n( (int) $item['ai'] ) ) . '<br><span class="description">' . aw_si_ref_top( (array) ( $item['ai_by'] ?? array() ) ) . '</span>';
 	}
 
 	/**
@@ -240,9 +238,7 @@ class AW_SI_Pages_Table extends WP_List_Table {
 		if ( empty( $item['ref'] ) ) {
 			return '–';
 		}
-		$by = (array) ( $item['ref_by'] ?? array() );
-		arsort( $by );
-		return esc_html( number_format_i18n( (int) $item['ref'] ) ) . '<br><span class="description">' . esc_html( implode( ', ', array_slice( array_keys( $by ), 0, 2 ) ) ) . '</span>';
+		return esc_html( number_format_i18n( (int) $item['ref'] ) ) . '<br><span class="description">' . aw_si_ref_top( (array) ( $item['ref_by'] ?? array() ) ) . '</span>';
 	}
 
 	/**

@@ -198,7 +198,7 @@ function aw_seo_overview_page() {
 			continue;
 		}
 		$on           = array_filter( $mods, 'aw_seo_module_on' );
-		$row['where'] = ( $on && '' !== $row['where'] ? $row['where'] . '<br>' : '' ) . aw_seo_overview_link( 'Settings', aw_seo_settings_url( $mods[0] ) ); // an Off module's own screens are gone
+		$row['where'] = ( $on && '' !== $row['where'] ? $row['where'] . '<br>' : '' ) . aw_seo_overview_link( 'Settings', aw_seo_settings_url( $on ? $mods[0] : 'modules' ) ); // Off: the switch is on Modules // an Off module's own screens are gone
 		if ( ! $on ) {
 			$row['status'] = '<span class="dashicons dashicons-marker" aria-hidden="true"></span> ' . esc_html__( 'Off (switch it on in Settings).', 'aw-seo-extras' );
 		} elseif ( count( $on ) < count( $mods ) ) {

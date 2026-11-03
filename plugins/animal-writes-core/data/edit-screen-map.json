@@ -2068,11 +2068,11 @@
 			"notes": "Stores nothing."
 		},
 		"ap-seo-settings": {
-			"title": "Module settings (one tab per module)",
+			"title": "Settings (seven tabs)",
 			"source": "AW SEO Plus",
 			"plugin": "AW SEO Plus",
 			"purpose": "SEO settings",
-			"file": "seo/settings.php:421 (aw_seo_settings_page)",
+			"file": "seo/settings.php:512 (aw_seo_settings_page)",
 			"screen": "admin",
 			"page": "AW SEO Plus: Settings",
 			"types": [
@@ -2083,9 +2083,9 @@
 			"reads": [
 				"option:aw_seo_settings"
 			],
-			"limits": "Tabs: General, Titles and descriptions, Canonicals, Robots rules, Filtered lists, Schema, FAQ, Search Insights, Rank Math schema, Open Graph. Administrators only.",
+			"limits": "Tabs: Modules, Titles and descriptions, Indexing, Schema and FAQ, Share images and Open Graph, Focus keywords and content analysis, AI agents. Search Insights numbers are on Search Insights → Settings. Administrators only.",
 			"decision": "",
-			"notes": "Saves the tab's fields and module switch in option aw_seo_settings (only values changed from the defaults)."
+			"notes": "Modules saves every on/off switch; each other tab saves its fields, stored per module in option aw_seo_settings (only values changed from the defaults)."
 		},
 		"ap-seo-faq-types": {
 			"title": "FAQ box on",

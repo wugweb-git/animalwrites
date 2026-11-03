@@ -1370,6 +1370,9 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 	.aw-ed-learn .aw-tasks.is-three .kit-card-sum { display: none; }
 	.aw-ed-learn .aw-tasks.is-three .kit-card-meta { flex-wrap: wrap !important; } /* the read time goes under the date instead of ending in "3 min r…" (Kits keeps a card's meta row on one line) */
 }
+/* Phones (3 Nov 2026, Home sections fit one 375x812 screen): the --kit-thumb-md picture (as Latest news rows from 768
+   to 1199), so the date and read time share one line again. Guides at 375: 861 -> 753px. */
+@media (max-width: 767px) { .aw-ed-learn .aw-tasks.is-three .kit-card > .kit-card-media { width: var(--kit-thumb-md); } }
 @container aw-guides (min-width: 912px) { .aw-ed-learn .aw-tasks.is-three { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--kit-space-grid); } }
 /* Guides on Home: meta row is the date, read time and the Guide badge (no topic chip); bigger title, a one-line
    summary, 4:3 pictures in both layouts. */
@@ -1418,17 +1421,19 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 }
 @media (min-width: 1200px) { .aw-ed-news .aw-news-mosaic .kit-card--stacked-md > .kit-card-media { width: 10rem !important; } }
 /* Phones (owner, 2 Nov 2026: each Home section one screen): the lead is a row like the other two (112px 4:3 picture,
-   date and source, H3 title, no summary); the section went from 1329px (four items, block lead) to 829px. */
+   date and source, H3 title, no summary); the section went from 1329px (four items, block lead) to 829px. The Library
+   lead takes the same rule (3 Nov 2026; 1705 to 1405px at 375). It is the Kits kit-card--stacked-md row restated for a
+   kit-card--block-lg card: the markup is one server render for every width and the lead stays a block card from 768,
+   so the class cannot change at 767. The title is already H3 (kit.css .kit-card-title, !important). */
 @media (max-width: 767px) {
-	.aw-ed-news .aw-news-mosaic > li > .kit-card { gap: var(--kit-space-5); }
-	.aw-ed-news .aw-news-mosaic > li:first-child > .kit-card { flex-direction: row; align-items: flex-start; }
-	.aw-ed-news .aw-news-mosaic > li:first-child > .kit-card[class*="kit-card--block"] { gap: 0; } /* a block card: no card padding, its body padded 24px; the picture gets the same room */
-	.aw-ed-news .aw-news-mosaic > li:first-child > .kit-card > .kit-card-media { flex: none; width: var(--kit-thumb-lg) !important; max-width: 40%; aspect-ratio: 4 / 3; border-radius: var(--kit-radius-media); }
-	.aw-ed-news .aw-news-mosaic > li:first-child > .kit-card[class*="kit-card--block"] > .kit-card-media { margin: var(--kit-space-5) 0 var(--kit-space-5) var(--kit-space-5) !important; } /* !important: Kits sets a card picture's margin to 0 !important (kit.css, card states), which left the lead's picture flush with the card edge */
-	.aw-ed-news .aw-news-mosaic > li:first-child > .kit-card > .kit-card-media img { height: 100%; object-fit: cover; }
-	.aw-ed-news .aw-news-mosaic > li:first-child > .kit-card > .kit-card-body { flex: 1 1 0; }
-	.aw-ed-news .aw-news-mosaic > li:first-child .kit-card-sum { display: none; }
-	.aw-ed-news .aw-news-mosaic > li:first-child .kit-card-title { font-size: var(--kit-type-h3) !important; }
+	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li > :is(.kit-card, .aw-law-more > .kit-card) { gap: var(--kit-space-5); }
+	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li:first-child > .kit-card { flex-direction: row; align-items: flex-start; }
+	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li:first-child > .kit-card[class*="kit-card--block"] { gap: 0; } /* a block card: no card padding, its body padded 24px; the picture gets the same room */
+	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li:first-child > .kit-card > .kit-card-media { flex: none; width: var(--kit-thumb-lg); max-width: 40%; aspect-ratio: 4 / 3; border-radius: var(--kit-radius-media); } /* the kit-card--stacked-md picture (kit.css) */
+	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li:first-child > .kit-card[class*="kit-card--block"] > .kit-card-media { margin: var(--kit-space-5) 0 var(--kit-space-5) var(--kit-space-5) !important; } /* !important over kit.css .kit-card[class*="kit-card--"] > .kit-card-media { margin: 0 !important }, which left the picture flush with the card edge */
+	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li:first-child > .kit-card > .kit-card-media img { height: 100%; object-fit: cover; }
+	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li:first-child > .kit-card > .kit-card-body { flex: 1 1 0; }
+	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li:first-child .kit-card-sum { display: none; } /* as kit.css hides it on kit-card--stacked-md */
 }
 
 /* Card lists (kit-card states, kit.css): the list item is only a wrapper; a one-column list (Library) keeps a gap. */
@@ -1585,7 +1590,11 @@ section.aw-camp-band.aw-ed-hero--campaign { box-sizing: border-box; min-height: 
 .aw-sc-status { align-self: flex-start; margin: 0 0 var(--kit-space-2); padding: var(--kit-space-1) var(--kit-space-3); border-radius: var(--kit-radius-pill); background: #fde9b0; color: #3a1730; font-size: var(--kit-type-xs); font-weight: 600; }
 .aw-sc-status::before { content: ""; display: inline-block; width: .5em; height: .5em; margin-right: .45em; border-radius: 50%; background: #b06a10; vertical-align: .1em; }
 .aw-sc h2 mark { background: linear-gradient(100deg, rgb(255 190 26 / 0) .2em, rgb(255 190 26 / .9) .5em, rgb(255 190 26 / .75) calc(100% - .4em), rgb(255 190 26 / 0) 100%) 0 60% / 100% 62% no-repeat; color: inherit; padding: 0 .2em; margin: 0 -.2em; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
-.aw-sc-line { margin: 0; color: #5c4654; }
+.aw-sc-line { position: relative; max-width: 40ch; margin: 0; color: #5c4654; } /* 40ch, the photo card's line length (kit.css kit-photo-card), as on the Diwali card beside it */
+/* The line sits over the photograph where the cream fade has gone (it measured 1.1 to 2.5:1 over the dark parts of the
+   photo, 3 Nov 2026): a cream scrim (the card's own .92 cream) behind the line only, soft at its top, right and foot,
+   so the line is 6.6:1 or more at every width and the dog stays clear beside it. */
+.aw-sc-line::before { content: ""; position: absolute; z-index: -1; inset: calc(-1 * var(--kit-space-3)) calc(-1 * var(--kit-space-5)); background: rgb(251 238 231 / .92); -webkit-mask: linear-gradient(180deg, transparent 0, #000 var(--kit-space-3), #000 calc(100% - var(--kit-space-3)), transparent 100%), linear-gradient(90deg, #000 calc(100% - var(--kit-space-5)), transparent 100%); -webkit-mask-composite: source-in; mask: linear-gradient(180deg, transparent 0, #000 var(--kit-space-3), #000 calc(100% - var(--kit-space-3)), transparent 100%), linear-gradient(90deg, #000 calc(100% - var(--kit-space-5)), transparent 100%); mask-composite: intersect; }
 .aw-sc-poster { max-width: var(--kit-card-min); margin-top: var(--kit-space-4); padding: var(--kit-space-5); border-radius: var(--kit-radius-card); background: rgb(255 252 249 / .96); box-shadow: 0 1.5rem 3rem -1.5rem rgb(58 23 48 / .45); color: #3a1730; }
 .aw-sc-eyebrow { display: flex; align-items: center; gap: var(--kit-space-2); margin: 0 0 var(--kit-space-2); padding: 0 0 var(--kit-space-2); border-bottom: 1px solid var(--aw-sc-line); font-weight: 700; }
 .aw-sc-eyebrow::before { content: ""; flex: none; width: 1.6em; height: 1.6em; background: #b06a10; -webkit-mask: var(--aw-sc-scales) center / contain no-repeat; mask: var(--aw-sc-scales) center / contain no-repeat; }
@@ -1593,8 +1602,8 @@ section.aw-camp-band.aw-ed-hero--campaign { box-sizing: border-box; min-height: 
 .aw-sc .aw-countdown { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--kit-space-3); margin: 0; padding: 0; background: none; color: #3a1730; }
 .aw-sc .aw-cd-num { font-size: var(--kit-type-h2); font-weight: 800; line-height: 1; letter-spacing: -.03em; color: #3a1730; }
 .aw-sc .aw-cd-unit { font-weight: 600; }
-.aw-sc .aw-content-actions { margin-top: auto; padding-top: var(--kit-space-4); } /* one button, at the foot of the card */
-.aw-sc .aw-content-actions .kit-btn { flex: 1 1 auto; width: auto; }
+.aw-sc .aw-content-actions { align-items: flex-start; margin-top: var(--kit-space-4); padding-top: 0; } /* one button, right under the text and at its own width, as on the Diwali card (3 Nov 2026; it was full width at the foot) */
+.aw-sc .aw-content-actions .kit-btn { flex: none; width: auto; }
 
 /* Home: the campaign row (pattern aw-pair; owner, 2 Nov 2026): two photo cards, the text over the campaign photograph:
    the Supreme Court card (aw-sc) and AW_Festive (a kit-photo-card Cover). Stacked on phones, side by side from the theme
@@ -1618,6 +1627,16 @@ section.aw-camp-band.aw-ed-hero--campaign { box-sizing: border-box; min-height: 
    prefers-reduced-motion. The load rise is aw.js (Need help now's stagger). */
 .aw-take-part { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-grid); --kit-btn-brand-bg: var(--kit-color-accent); --kit-btn-brand-fg: var(--kit-color-on-accent); }
 @media (min-width: 768px) { .aw-take-part { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+/* Home only (aw-take-part-band--home, home.php; 3 Nov 2026, Home sections fit one 375x812 screen: 878 -> 414px at 375):
+   on phones the second and third cards are in a Show more fold (.aw-more). From 768 the fold is open with its summary
+   hidden and spans the second and third columns, its two cards in the same columns and gap as the first. */
+.aw-take-part-more-cards { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-grid); }
+.aw-take-part-more[open] > summary { margin-bottom: var(--kit-space-grid); }
+@media (min-width: 768px) {
+	.aw-take-part > .aw-take-part-more { grid-column: 2 / -1; }
+	.aw-take-part-more > summary { display: none; }
+	.aw-take-part-more-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
 .wp-block-cover.aw-take-part-card { margin: 0; min-height: var(--kit-photo-card-h); box-shadow: var(--kit-elevation-1); --kit-color-focus: var(--kit-color-on-ink); --kit-btn-height: var(--kit-size-control); transition: transform var(--kit-motion-base) var(--kit-motion-ease), box-shadow var(--kit-motion-base) var(--kit-motion-ease); }
 .wp-block-cover.aw-take-part-card > .wp-block-cover__image-background { transition: transform var(--kit-motion-base) var(--kit-motion-ease); }
 /* outranks core's content-position rule (.wp-block-cover.has-custom-content-position x2 .is-position-bottom-left: width auto, margin 0) */
@@ -1705,22 +1724,51 @@ section.aw-camp-band.aw-ed-hero--campaign { box-sizing: border-box; min-height: 
 }
 .aw-ed-help .kit-sec-head p { color: inherit; } /* on the dark band */
 
+/* Show more folds on Home (3 Nov 2026; Layout rules 5 and 6: a fold when a section does not fit): a core Details (the
+   kit.css look) folded by the Kits fold primitive, details[data-kit-fold] (kit.js, kits_fold_now in kits-core), at or
+   below its width; open without JavaScript, and a link into it opens it. The summary reads "Show more" when folded
+   and "Show less" when open. */
+.aw-more { display: block; margin-block: 0; }
+.aw-more > summary { padding-block: 0; } /* a --kit-size-target (44px) row: Kits adds 12px padding to its min-height */
+.aw-more > summary .aw-more-less, .aw-more[open] > summary .aw-more-show { display: none; }
+.aw-more[open] > summary .aw-more-less { display: inline; }
+
 /* Need help now: a bento grid on the dark band. Each tile is one link (its H3's link covers the tile); phone numbers
    are tap to call. The reading order (and Tab order) is the markup order at every width: 112, injured animal, 1962,
    AWBI, report cruelty, find a vet, find an organisation. Grid rows stretch, so tiles in one row end level.
    Phones: one column. From 768: two columns, 112 two rows tall beside the injured-animal and 1962 tiles.
    The section is a size container (owner, 2 Nov 2026: no section taller than 720px): from 56.5rem (four tiles of
    --kit-body-min text plus their --kit-space-5 padding and three --kit-space-5 gaps: 4 x (10rem + 3rem) + 4.5rem;
-   1024 and up) four columns, two rows, 112 two rows tall in the first column. */
+   1024 and up) four columns, two rows, 112 two rows tall in the first column.
+   At or below 1199px (3 Nov 2026, Home sections fit one 375x812 screen and are at most 720px from 768) the AWBI,
+   report cruelty, find a vet and find an organisation tiles are in a Show more fold (.aw-more, below), in the "more"
+   area; open, they keep the order and layout above. Section at 375: 1378 -> 802px; 768: 887 -> 581px. */
 .aw-ed-help { container: aw-help / inline-size; }
-.aw-bento { display: grid; gap: var(--kit-space-5); grid-template-columns: minmax(0, 1fr); grid-template-areas: "sos" "injured" "vet1962" "awbi" "cruelty" "vets" "orgs"; }
+.aw-bento { display: grid; gap: var(--kit-space-5); grid-template-columns: minmax(0, 1fr); grid-template-areas: "sos" "injured" "vet1962" "more"; }
+.aw-bento > .aw-more { grid-area: more; align-self: start; }
+.aw-bento-more { display: grid; gap: var(--kit-space-4); grid-template-columns: minmax(0, 1fr); }
+.aw-bento > .aw-more[open] > summary { margin-bottom: var(--kit-space-4); }
 .aw-bento--sos { grid-area: sos; } .aw-bento--injured { grid-area: injured; } .aw-bento--vet1962 { grid-area: vet1962; } .aw-bento--awbi { grid-area: awbi; }
 .aw-bento--cruelty { grid-area: cruelty; } .aw-bento--vets { grid-area: vets; } .aw-bento--orgs { grid-area: orgs; }
 @media (min-width: 768px) {
-	.aw-bento { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-areas: "sos injured" "sos vet1962" "awbi cruelty" "vets orgs"; }
+	.aw-bento { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-areas: "sos injured" "sos vet1962" "more more"; }
+	.aw-bento-more { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @container aw-help (min-width: 56.5rem) {
 	.aw-bento { gap: var(--kit-space-4); grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-areas: "sos injured vet1962 awbi" "sos cruelty vets orgs"; } /* 16px between tiles, so the Home help section stays within 720 (Layout rules 5) */
+	.aw-bento > .aw-more[open] > summary { display: none; }
+	@supports selector(::details-content) {
+		.aw-bento > .aw-more[open], .aw-bento > .aw-more[open]::details-content, .aw-bento > .aw-more[open] > .aw-bento-more { display: contents; } /* open (from 1200, or tapped): its tiles take their own areas */
+		.aw-bento > .aw-more:not([open]) { grid-area: 2 / 2 / 3 / 5; } /* 1024 to 1199, folded: under the injured-animal and 1962 tiles */
+	}
+	/* Browsers without ::details-content (before Safari 18.4, Chrome 131, Firefox 143) cannot lay the fold's tiles into
+	   the bento's areas: there the 112, injured-animal and 1962 tiles share the first row and the fold's four tiles
+	   the second, four across. */
+	@supports not selector(::details-content) {
+		.aw-bento { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-areas: "sos injured vet1962" "more more more"; }
+		.aw-bento-more { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+		.aw-bento-more > .aw-bento-tile { grid-area: auto; }
+	}
 }
 /* Below the four-column layout (phones and 768 to about 900px; 3 Nov 2026, Home sections fit one phone screen and
    are at most 720px from 768): the four link tiles (injured animal, report cruelty, find a vet, find an organisation)
@@ -1732,6 +1780,12 @@ section.aw-camp-band.aw-ed-hero--campaign { box-sizing: border-box; min-height: 
 	.aw-bento-tile:is(.aw-bento--injured, .aw-bento--cruelty, .aw-bento--vets, .aw-bento--orgs) { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto 1fr; align-content: start; column-gap: var(--kit-space-4); row-gap: var(--kit-space-1); }
 	.aw-bento-tile:is(.aw-bento--injured, .aw-bento--cruelty, .aw-bento--vets, .aw-bento--orgs) > .aw-bento-ico { grid-row: 1 / span 2; margin-bottom: 0; }
 	.aw-bento-tile:is(.aw-bento--injured, .aw-bento--cruelty, .aw-bento--vets, .aw-bento--orgs) > :is(h3, p) { grid-column: 2; }
+	.aw-bento-more > .aw-bento-tile { grid-area: auto; } /* in the fold's own grid, not the bento's named areas */
+	/* the 1962 and AWBI tiles the same way: icon square beside the label, number and line (3 Nov 2026) */
+	.aw-bento-tile:is(.aw-bento--vet1962, .aw-bento--awbi) { display: grid; grid-template-columns: auto minmax(0, 1fr); align-content: start; column-gap: var(--kit-space-4); row-gap: var(--kit-space-1); }
+	.aw-bento-tile:is(.aw-bento--vet1962, .aw-bento--awbi) > .aw-bento-head { display: contents; }
+	.aw-bento-tile:is(.aw-bento--vet1962, .aw-bento--awbi) .aw-bento-ico { grid-row: 1 / span 3; grid-column: 1; margin: 0; }
+	.aw-bento-tile:is(.aw-bento--vet1962, .aw-bento--awbi) :is(.aw-bento-eyebrow, h3, p) { grid-column: 2; margin: 0; }
 }
 /* Each tile is a size container, so the phone numbers scale to the tile and never wrap or overflow. Depth: a faint
    border, a light line along the top edge, a soft top-to-bottom shade and a small shadow. Hover: the tile lifts
@@ -1805,56 +1859,53 @@ section.aw-camp-band.aw-ed-hero--campaign { box-sizing: border-box; min-height: 
 	.aw-findhelp-actions .kit-btn { flex: 1 1 100%; justify-content: center; }
 }
 
-/* From the Library on Home: the mosaic above (What's happening's), then the four type tiles. Phones: the sideways row
-   (Home on phones, above). From 768: two by two, every tile one height, the mosaic's column gap. From 1200: four across,
-   the icon square on top with the arrow beside it and the title and line under them full width (a 4-across tile is
-   too narrow for the icon, text and arrow side by side). */
-@media (min-width: 768px) { .aw-ed-law > .kit-stack { gap: var(--kit-space-grid); grid-auto-rows: 1fr; } }
+/* From the Library on Home: the mosaic above (What's happening's), then the four type tiles in a Show more fold
+   (.aw-more; a plain <details>, folded at every width and without JavaScript: 3 Nov 2026, the section was 870px from
+   1200 and 1056px at 768, over Layout rules 5). Phones: one column. From 768: two by two, every tile one height, the
+   mosaic's column gap. From 1200: four across, the icon square on top with the arrow beside it and the title and line
+   under them full width (a 4-across tile is too narrow for the icon, text and arrow side by side). */
+.aw-ed-law > .aw-more { margin-top: var(--kit-space-4); }
+.aw-ed-law > .aw-more[open] > summary { margin-bottom: var(--kit-space-4); }
+@media (min-width: 768px) { .aw-ed-law .kit-stack { gap: var(--kit-space-grid); grid-auto-rows: 1fr; } }
 @media (min-width: 1200px) {
-	.aw-ed-law > .kit-stack { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
-	.aw-ed-law > .kit-stack > .kit-tile { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "ico arrow" "title title" "desc desc"; grid-template-rows: auto auto 1fr; }
-	.aw-ed-law > .kit-stack > .kit-tile::before { justify-self: start; margin-bottom: var(--kit-space-3); }
-	.aw-ed-law > .kit-stack > .kit-tile::after { align-self: start; margin-top: 0.625rem; } /* centred on the icon square */
+	.aw-ed-law .kit-stack { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+	.aw-ed-law .kit-stack > .kit-tile { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "ico arrow" "title title" "desc desc"; grid-template-rows: auto auto 1fr; }
+	.aw-ed-law .kit-stack > .kit-tile::before { justify-self: start; margin-bottom: var(--kit-space-3); }
+	.aw-ed-law .kit-stack > .kit-tile::after { align-self: start; margin-top: 0.625rem; } /* centred on the icon square */
 }
 /* From the Library items (1 Nov 2026): three, the lead and two more. Meta row is the date and the publisher (no place, no
-   type chip); the two rows have a bigger title and a 4:3 picture. 768 to 1199: the lead runs full width (picture left,
-   4:3, text right) with the two rows side by side under it. From 1200: lead 5fr on the left, the two rows 7fr on the
-   right, each row half the lead's height with a 10rem 4:3 picture (as in Latest news), so both columns end level. */
+   type chip); the two rows have a bigger title and a 4:3 picture. 768 to 1199: the lead runs full width as a row like
+   the two side by side under it (the phone lead rule above, which ends at 767 for Latest news: --kit-thumb-lg 4:3
+   picture in the card padding, no summary; 3 Nov 2026, 768 1056 -> 718px). From 1200: lead 5fr on the left, the two
+   rows 7fr on the right, each row half the lead's height with the Kits kit-card--stacked-md picture
+   (--kit-thumb-lg), so both columns end level (3 Nov 2026: 10rem made the section 743px with the fold; now 695). */
 .aw-ed-law .aw-news-mosaic :is(.kit-meta-row .kit-meta-item:not(.aw-date), .kit-tag:not(.kit-tag--source)) { display: none; }
 .aw-ed-law .aw-news-mosaic .kit-card--stacked-md .kit-card-title { font-size: var(--kit-type-h3) !important; }
 .aw-ed-law .aw-news-mosaic .kit-card--stacked-md > .kit-card-media { aspect-ratio: 4 / 3; }
 .aw-ed-law .aw-news-mosaic .kit-card--stacked-md > .kit-card-media img { height: 100%; object-fit: cover; }
-/* Phones (3 Nov 2026; Home sections fit one phone screen, block-padding-and-sizes): the lead is a row like the two
-   under it, as in Latest news: a --kit-thumb-lg 4:3 picture in the card padding, the date and publisher, the H3 title,
-   no summary. The section went from 1705 to 1405px at 375. */
-@media (max-width: 767px) {
-	.aw-ed-law .aw-news-mosaic > li > .kit-card { gap: var(--kit-space-5); }
-	.aw-ed-law .aw-news-mosaic > li:first-child > .kit-card { flex-direction: row; align-items: flex-start; }
-	.aw-ed-law .aw-news-mosaic > li:first-child > .kit-card[class*="kit-card--block"] { gap: 0; }
-	.aw-ed-law .aw-news-mosaic > li:first-child > .kit-card > .kit-card-media { flex: none; width: var(--kit-thumb-lg) !important; max-width: 40%; aspect-ratio: 4 / 3; border-radius: var(--kit-radius-media); }
-	.aw-ed-law .aw-news-mosaic > li:first-child > .kit-card[class*="kit-card--block"] > .kit-card-media { margin: var(--kit-space-5) 0 var(--kit-space-5) var(--kit-space-5) !important; }
-	.aw-ed-law .aw-news-mosaic > li:first-child > .kit-card > .kit-card-media img { height: 100%; object-fit: cover; }
-	.aw-ed-law .aw-news-mosaic > li:first-child > .kit-card > .kit-card-body { flex: 1 1 0; }
-	.aw-ed-law .aw-news-mosaic > li:first-child .kit-card-sum { display: none; }
-	.aw-ed-law .aw-news-mosaic > li:first-child .kit-card-title { font-size: var(--kit-type-h3) !important; }
-}
 @media (min-width: 768px) {
 	.aw-ed-law .aw-news-mosaic > li:nth-child(n+2) { align-self: stretch; display: flex; }
-	.aw-ed-law .aw-news-mosaic > li:nth-child(n+2) > .kit-card { flex: 1 1 auto; align-items: center; }
+	.aw-ed-law .aw-news-mosaic > li:nth-child(n+2) > :is(.kit-card, .aw-law-more > .kit-card) { flex: 1 1 auto; align-items: center; }
+	.aw-law-more > summary { display: none; }
+	.aw-law-more[open], .aw-law-more[open]::details-content { display: contents; } /* the card stands in the list item as before */
 }
+/* Home Library on phones (3 Nov 2026, Home sections fit one 375x812 screen): the third item's card sits in a Show more
+   fold (an .aw-more added by animal-writes-core home.php); 907 -> about 770. */
+.aw-law-more[open] > summary { margin-bottom: var(--kit-space-3); }
+@media (max-width: 767px) { .aw-ed-law:has(.aw-law-more:not([open])) > .aw-more { display: none; } } /* one Show more at a time: the type tiles' fold shows once the third item is open */
 @media (min-width: 768px) and (max-width: 1199px) {
 	.aw-ed-law .aw-news-list.aw-news-mosaic { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 	.aw-ed-law .aw-news-mosaic > li:first-child { grid-column: 1 / -1 !important; grid-row: 1 !important; } /* over the shared three-item rule (:has, higher specificity) */
 	.aw-ed-law .aw-news-mosaic > li:nth-child(2) { grid-column: 1; grid-row: 2; }
 	.aw-ed-law .aw-news-mosaic > li:nth-child(3) { grid-column: 2; grid-row: 2; }
-	.aw-ed-law .aw-news-mosaic > li:first-child > .kit-card { flex-direction: row; }
-	.aw-ed-law .aw-news-mosaic > li:first-child .kit-card-media { position: static; flex: 0 0 45%; aspect-ratio: 4 / 3; min-height: 0; }
+	.aw-ed-law .aw-news-mosaic > li:first-child > .kit-card { flex-direction: row; align-items: flex-start; gap: 0; }
+	.aw-ed-law .aw-news-mosaic > li:first-child .kit-card-media { position: static; flex: none; width: var(--kit-thumb-lg); max-width: 40%; aspect-ratio: 4 / 3; min-height: 0; border-radius: var(--kit-radius-media); margin: var(--kit-space-5) 0 var(--kit-space-5) var(--kit-space-5) !important; } /* !important over kit.css .kit-card[class*="kit-card--"] > .kit-card-media { margin: 0 !important } */
 	.aw-ed-law .aw-news-mosaic > li:first-child .kit-card-media img { position: static; height: 100%; object-fit: cover; }
-	.aw-ed-law .aw-news-mosaic > li:first-child > .kit-card > .kit-card-body { flex: 1 1 0; align-self: center; }
+	.aw-ed-law .aw-news-mosaic > li:first-child > .kit-card > .kit-card-body { flex: 1 1 0; }
+	.aw-ed-law .aw-news-mosaic > li:first-child .kit-card-sum { display: none; }
 }
 @media (min-width: 1200px) {
 	.aw-ed-law .aw-news-list.aw-news-mosaic { grid-template-rows: 1fr 1fr; }
-	.aw-ed-law .aw-news-mosaic .kit-card--stacked-md > .kit-card-media { width: 10rem !important; max-width: 40%; } /* the Latest news row picture from 1200 (3 Nov 2026; was 45%, which made each row 260px and the lead 532px, over the 500px card cap; the section is 870px at 1280, was 1049) */
 }
 
 /* India Writes for Its Community Dogs on Home (pattern aw1-story; the band's own rules are in campaign-record.css).

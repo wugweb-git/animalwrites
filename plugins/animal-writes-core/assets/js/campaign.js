@@ -272,9 +272,14 @@
 		holder.querySelectorAll('.kit-share a[data-kit-share]').forEach(function (a) { if (nets[a.dataset.kitShare] && sh.text) a.href = nets[a.dataset.kitShare]; });
 		var pics = [['story', 'Instagram or Facebook story', 'Story, 9:16'], ['post', 'Instagram or Facebook post', 'Post, 4:5']].filter(function (k) { return sh[k[0]]; });
 		if (pics.length) {
-			var box = document.createElement('div');
-			box.className = 'aw-share-pics';
-			box.innerHTML = '<p class="aw-share-pics-head">Or share a ready-made picture</p>'; // owner's yes, 2 Nov 2026
+			/* The theme's fold (kit.css .wp-block-details): closed when the pictures sit under the bar (phones, a narrow
+			   column), open and fixed when they sit beside the button (the band at least 44rem wide). */
+			var box = document.createElement('details');
+			box.className = 'wp-block-details aw-share-pics';
+			var head = document.createElement('summary');
+			head.className = 'aw-share-pics-head';
+			head.textContent = 'Or share a ready-made picture'; // owner's yes, 2 Nov 2026
+			box.appendChild(head);
 			var list = document.createElement('div');
 			list.className = 'aw-share-pics-list';
 			pics.forEach(function (k) {
@@ -295,6 +300,18 @@
 			});
 			box.appendChild(list);
 			holder.appendChild(box);
+			var beside = null;
+			var place = function () {
+				var now = box.getBoundingClientRect().left >= wrap.getBoundingClientRect().right;
+				if (now === beside) return;
+				beside = now;
+				box.classList.toggle('is-beside', now);
+				box.open = now;
+				if (now) head.setAttribute('tabindex', '-1'); else head.removeAttribute('tabindex');
+			};
+			box.addEventListener('toggle', function () { if (beside && !box.open) box.open = true; });
+			place();
+			if ('ResizeObserver' in window) new ResizeObserver(place).observe(holder);
 		}
 		if (canShare && 'IntersectionObserver' in window) { // fetch the pictures once the block is near, so a tap opens the sheet at once
 			var io = new IntersectionObserver(function (en) {
@@ -833,39 +850,30 @@
 	window.addEventListener('resize', function () { clearTimeout(t); t = setTimeout(mark, 150); }, { passive: true });
 })();
 
-/* Supreme Court, Where your state stands (owner, 3 Nov 2026: "audit and sort this"): a state picker, so the section is
-   one state at a time (Layout rules 5 and 6) instead of 13 cards or rows. The picker is a Kits form field (kit-field)
-   whose label is the table's own first heading ("State / UT"); its options are the states named in the first column,
-   in A to Z order, each state of the several-states row on its own and pointing at that row. The table stays a table:
-   the other rows are hidden, the chosen one shows (the first row to start, as the server sent it). Choosing a state
-   changes only the row below; focus stays on the picker. Without JavaScript every state shows, as before. */
-(function () {
-	var fig = document.querySelector('.aw-camp--sc-stray-dogs .aw-camp-tracker');
-	var th = fig && fig.querySelector('thead th');
-	var rows = fig ? fig.querySelectorAll('tbody tr') : [];
-	if (!th || rows.length < 2) return;
+/* Supreme Court pickers (owner, 3 Nov 2026: "audit and sort this", then "fix all four"): a table shows one row at a time,
+   so its section fits Layout rules 5 and 6, instead of every row at once. The picker is a Kits form field (kit-field)
+   whose label is the table's own first heading; its options are the first column's text. The table stays a table: the
+   other rows are hidden, the chosen one shows. Choosing changes only the row below; focus stays on the picker. Without
+   JavaScript every row shows, as before.
+   - Where your state stands: label "State / UT", the states A to Z, each state of the several-states row on its own and
+     pointing at that row; the first row to start, as the server sent it.
+   - What the court ordered: label "Date", the dates in the table's own order (oldest first); the last row to start (the
+     17 Nov 2026 hearing, the date the page is about). The dates line in What's happening shows them all together. */
+function awScPicker(fig, id, opts, start) {
+	var th = fig.querySelector('thead th');
+	var rows = fig.querySelectorAll('tbody tr');
 	var table = fig.querySelector('table');
-	var opts = [];
-	Array.prototype.forEach.call(rows, function (tr, i) {
-		var cell = tr.cells[0];
-		if (!cell) return;
-		var text = cell.textContent.replace(/\s+/g, ' ').trim();
-		var names = cell.classList.contains('aw-sc-states') ? text.split(/\s*,\s*/) : [text];
-		names.forEach(function (n) {
-			if (n) opts.push({ name: n.charAt(0).toUpperCase() + n.slice(1), row: i, last: /^the\s/i.test(n) });
-		});
-	});
-	opts.sort(function (a, b) { return a.last - b.last || a.name.localeCompare(b.name, 'en'); });
-	if (!table.id) table.id = 'aw-sc-tracker-table';
+	if (!th || !table || rows.length < 2 || !opts.length) return;
+	if (!table.id) table.id = id + '-table';
 	var field = document.createElement('div');
 	field.className = 'kit-field aw-sc-pick';
 	var label = document.createElement('label');
-	label.htmlFor = 'aw-sc-pick';
+	label.htmlFor = id;
 	label.textContent = th.textContent.trim();
 	var wrap = document.createElement('div');
 	wrap.className = 'kit-field-control';
 	var sel = document.createElement('select');
-	sel.id = 'aw-sc-pick';
+	sel.id = id;
 	sel.setAttribute('aria-controls', table.id);
 	opts.forEach(function (o) {
 		var op = document.createElement('option');
@@ -880,8 +888,86 @@
 	function show(i) {
 		Array.prototype.forEach.call(rows, function (tr, j) { tr.hidden = j !== i; });
 	}
-	sel.selectedIndex = Math.max(0, opts.findIndex(function (o) { return o.row === 0; })); // the first row, as on the page
+	sel.selectedIndex = Math.max(0, opts.findIndex(function (o) { return o.row === start; }));
 	show(Number(sel.value));
 	fig.classList.add('is-picked');
 	sel.addEventListener('change', function () { show(Number(sel.value)); });
+}
+(function () {
+	var fig = document.querySelector('.aw-camp--sc-stray-dogs .aw-camp-tracker');
+	if (!fig) return;
+	var opts = [];
+	Array.prototype.forEach.call(fig.querySelectorAll('tbody tr'), function (tr, i) {
+		var cell = tr.cells[0];
+		if (!cell) return;
+		var text = cell.textContent.replace(/\s+/g, ' ').trim();
+		var names = cell.classList.contains('aw-sc-states') ? text.split(/\s*,\s*/) : [text];
+		names.forEach(function (n) {
+			if (n) opts.push({ name: n.charAt(0).toUpperCase() + n.slice(1), row: i, last: /^the\s/i.test(n) });
+		});
+	});
+	opts.sort(function (a, b) { return a.last - b.last || a.name.localeCompare(b.name, 'en'); });
+	awScPicker(fig, 'aw-sc-pick', opts, 0);
+})();
+(function () {
+	var fig = document.querySelector('.aw-camp--sc-stray-dogs #orders .aw-camp-timeline');
+	if (!fig) return;
+	var opts = [];
+	Array.prototype.forEach.call(fig.querySelectorAll('tbody tr'), function (tr, i) {
+		var text = tr.cells[0] ? tr.cells[0].textContent.replace(/\s+/g, ' ').trim() : '';
+		if (text) opts.push({ name: text, row: i });
+	});
+	awScPicker(fig, 'aw-sc-pick-order', opts, opts.length ? opts[opts.length - 1].row : 0);
+})();
+
+/* Supreme Court, What you can do before 17 Nov (owner, 3 Nov 2026: "fix all four"): the Lab page's card fold
+   (campaign-lab.js), drawn as the theme's details block (kit.css .wp-block-details: a 44px summary and the "+" marker).
+   The lead card stays open; in the others the card's own H3 moves into a summary and its text into
+   the same details, so the card shows icon and heading and the text opens on tap. No words are added. The section fits
+   Layout rules 5 (824 to 659 at 768). Without JavaScript nothing changes and every text stays open. */
+(function () {
+	if (!('open' in document.createElement('details'))) return;
+	document.querySelectorAll('.aw-camp--sc-stray-dogs #act .aw-camp-grid > .aw-camp-card:not(:first-child)').forEach(function (card) {
+		var h = card.querySelector(':scope > h3');
+		var text = card.querySelectorAll(':scope > p:not(.aw-camp-card-ico):not(.aw-camp-card-chips)');
+		if (!h || !text.length) return;
+		var fold = document.createElement('details');
+		fold.className = 'wp-block-details aw-camp-card-fold';
+		var sum = document.createElement('summary');
+		card.insertBefore(fold, h);
+		sum.appendChild(h);
+		fold.appendChild(sum);
+		text.forEach(function (p) { fold.appendChild(p); });
+	});
+})();
+
+/* Supreme Court, In the news and Read the law and the record (owner, 3 Nov 2026: "fix all four"): the first row of
+   cards shows, the rest open in one fold under it (Layout rules 5: folds, or the first row plus See all). The fold is the
+   theme's details block (kit.css .wp-block-details) and its summary is the site's own label for that list ("More news",
+   "More from the Library", as in item-head.php's related lists), so no words are added. The cards move into a list
+   with the same classes, so they keep their look. Without JavaScript every card shows, as before. */
+function awScMore(sec, keep, label) {
+	var lists = sec ? sec.querySelectorAll('.wp-block-query .wp-block-post-template') : [];
+	if (!lists.length) return;
+	var items = [];
+	Array.prototype.forEach.call(lists, function (ul) { Array.prototype.push.apply(items, ul.children); });
+	var rest = items.slice(keep);
+	if (!rest.length) return;
+	var fold = document.createElement('details');
+	fold.className = 'wp-block-details aw-sc-more';
+	var sum = document.createElement('summary');
+	sum.textContent = label;
+	var ul = document.createElement('ul');
+	ul.className = lists[0].className;
+	rest.forEach(function (li) { ul.appendChild(li); });
+	fold.appendChild(sum);
+	fold.appendChild(ul);
+	var last = lists[lists.length - 1];
+	last.parentNode.insertBefore(fold, last.nextSibling); // inside the query, so the list keeps its own card rules
+}
+(function () {
+	var camp = document.querySelector('.aw-camp--sc-stray-dogs');
+	if (!camp || !('open' in document.createElement('details'))) return;
+	awScMore(camp.querySelector('#latest'), 2, 'More news');
+	awScMore(camp.querySelector('#read'), 2, 'More from the Library');
 })();

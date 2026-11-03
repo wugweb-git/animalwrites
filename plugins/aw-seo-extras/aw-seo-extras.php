@@ -46,6 +46,28 @@ add_action(
 				require_once AW_SEO_EXTRAS_DIR . 'includes/' . $file . '.php';
 			}
 		}
+		// A switched-off module's scheduled job is taken off (its file, which runs and reschedules it, is not loaded).
+		// Checked in admin and cron requests only, so a page view never writes.
+		$jobs = array(
+			'health'  => 'aw_seo_endpoints_watchdog',
+			'sitemap' => 'aw_seo_sitemap_daily',
+		);
+		$idle = array_intersect_key( $jobs, array_flip( $off ) );
+		if ( $idle ) {
+			add_action(
+				'init',
+				function () use ( $idle ) {
+					if ( ! is_admin() && ! wp_doing_cron() ) {
+						return;
+					}
+					foreach ( $idle as $hook ) {
+						if ( wp_next_scheduled( $hook ) ) {
+							wp_clear_scheduled_hook( $hook );
+						}
+					}
+				}
+			);
+		}
 	},
 	5
 );
@@ -57,8 +79,8 @@ register_deactivation_hook(
 		foreach ( function_exists( 'aw_si_cron_hooks' ) ? aw_si_cron_hooks() : array( 'aw_si_daily', 'aw_si_rollup' ) as $hook ) {
 			wp_clear_scheduled_hook( $hook );
 		}
-		// The SEO jobs too (plugin audit 23): titles.php, health.php.
-		foreach ( array( 'aw_seo_fill_daily', 'aw_seo_endpoints_watchdog' ) as $hook ) {
+		// The SEO jobs too: titles.php, health.php, sitemap.php.
+		foreach ( array( 'aw_seo_fill_daily', 'aw_seo_endpoints_watchdog', 'aw_seo_sitemap_daily' ) as $hook ) {
 			wp_clear_scheduled_hook( $hook ); // repeating (no-argument) events only, as Core
 		}
 	}

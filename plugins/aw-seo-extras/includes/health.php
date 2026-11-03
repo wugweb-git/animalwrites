@@ -2,10 +2,12 @@
 /**
  * Sitemap and llms.txt watchdog (14 Oct 2026: both answered 404 until rewrite rules were flushed).
  *
- * Hourly (event aw_seo_endpoints_watchdog): Rank Math's rewrite rules for /sitemap_index.xml and /llms.txt must be in
- * the stored rules, and a request from the site to each must answer 200. If either fails, rewrite rules are flushed once
+ * Hourly (event aw_seo_endpoints_watchdog): Rank Math's rewrite rules for /sitemap_index.xml, /llms.txt and, while the
+ * Directory sitemap module is on, /directory-sitemap.xml must be in the stored rules, and a request from the site to
+ * each must answer 200. If either fails, rewrite rules are flushed once
  * and both are checked again. If they still fail, the admin email gets a message and the dashboard shows a notice.
  * One email per 12 hours for the same failing addresses; a newly failing address is emailed at once.
+ * The event is scheduled from admin; while this module is switched off it is unscheduled (aw-seo-extras.php).
  *
  * @package aw-seo-extras
  */
@@ -16,10 +18,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /** Address => rewrite-rule key Rank Math adds for it. */
 function aw_seo_watched_endpoints() {
-	return array(
+	$out = array(
 		'/sitemap_index.xml' => 'sitemap_index\.xml$',
 		'/llms.txt'          => '^llms\.txt$',
 	);
+	if ( aw_seo_module_on( 'sitemap' ) ) {
+		$out['/directory-sitemap.xml'] = '([^/]+?)-sitemap([0-9]+)?\.xml$'; // Rank Math's rule for every {type}-sitemap.xml
+	}
+	return $out;
 }
 
 /**
@@ -75,7 +81,7 @@ function aw_seo_endpoints_watchdog() {
 }
 add_action( 'aw_seo_endpoints_watchdog', 'aw_seo_endpoints_watchdog' );
 add_action(
-	'init',
+	'admin_init',
 	function () {
 		if ( ! wp_next_scheduled( 'aw_seo_endpoints_watchdog' ) ) {
 			wp_schedule_event( time() + 300, 'hourly', 'aw_seo_endpoints_watchdog' );

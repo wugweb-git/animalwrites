@@ -243,6 +243,94 @@ function aw_is_noindex_item( $id ) {
 
 /* ---------- Naming rules (SEO audits, 10 Oct 2026) ---------- */
 
+/**
+ * Preview-only items (kits_preview_only_ids(), e.g. the sample listing): never listed, counted or in a sitemap.
+ *
+ * @return int[]
+ */
+function aw_seo_preview_ids() {
+	return function_exists( 'kits_preview_only_ids' ) ? array_map( 'intval', (array) kits_preview_only_ids() ) : array();
+}
+
+/**
+ * Query arguments with a hub list's own rules added: open opportunities only, preview-only items left out. The same
+ * rules for every count of a list (filtered views, their sitemap, breadcrumbs).
+ *
+ * @param string $type Post type of the hub.
+ * @param array  $v    WP_Query arguments.
+ * @return array
+ */
+function aw_seo_hub_rules( $type, array $v ) {
+	if ( 'aw_opportunity' === $type && function_exists( 'aw_open_opportunities_meta_query' ) ) {
+		$v['meta_query']   = (array) ( $v['meta_query'] ?? array() ); // phpcs:ignore WordPress.DB.SlowDBQuery
+		$v['meta_query'][] = aw_open_opportunities_meta_query();
+	}
+	if ( aw_seo_preview_ids() ) {
+		$v['post__not_in'] = aw_seo_preview_ids();
+	}
+	return $v;
+}
+
+/**
+ * Meta keys of a listing's social profiles: any one of them is a way to reach the organisation.
+ *
+ * @return string[]
+ */
+function aw_seo_social_keys() {
+	return array( 'aw_facebook', 'aw_instagram', 'aw_x', 'aw_youtube', 'aw_linkedin' );
+}
+
+/**
+ * The file in the uploads folder an address points to (http or https, query string ignored), or '' when the address
+ * is not in the uploads folder.
+ *
+ * @param string $url Picture address.
+ * @return string
+ */
+function aw_seo_upload_path( $url ) {
+	$up   = wp_get_upload_dir();
+	$base = set_url_scheme( $up['baseurl'], 'https' );
+	$abs  = set_url_scheme( (string) strtok( (string) $url, '?' ), 'https' );
+	return 0 === strpos( $abs, $base ) ? $up['basedir'] . substr( $abs, strlen( $base ) ) : '';
+}
+
+/**
+ * A value built once and kept for 12 hours or until the next change to any post, its terms or its trash state
+ * (aw_seo_cache_gen moves on then, so every key built before is left to expire).
+ *
+ * @param string   $name  What is kept (any string; it is hashed).
+ * @param callable $build Builds the value.
+ * @return mixed
+ */
+function aw_seo_cached( $name, callable $build ) {
+	$key = 'aw_seo_c_' . md5( $name . '|' . (string) get_option( 'aw_seo_cache_gen', '0' ) );
+	$hit = get_transient( $key );
+	if ( is_array( $hit ) && array_key_exists( 'v', $hit ) ) {
+		return $hit['v'];
+	}
+	$value = $build();
+	set_transient( $key, array( 'v' => $value ), 12 * HOUR_IN_SECONDS );
+	return $value;
+}
+/** A post, its terms or its trash state changed: aw_seo_cached() values are rebuilt (written once, at the end of the request). */
+function aw_seo_cache_flush() {
+	$GLOBALS['aw_seo_cache_stale'] = true;
+	if ( ! has_action( 'shutdown', 'aw_seo_cache_flush_write' ) ) {
+		add_action( 'shutdown', 'aw_seo_cache_flush_write', 0 );
+	}
+}
+/** Moves aw_seo_cache_gen on, so every key built before is no longer read. */
+function aw_seo_cache_flush_write() {
+	if ( ! empty( $GLOBALS['aw_seo_cache_stale'] ) ) {
+		update_option( 'aw_seo_cache_gen', (string) microtime( true ), true );
+		$GLOBALS['aw_seo_cache_stale'] = false;
+	}
+}
+foreach ( array( 'save_post', 'deleted_post', 'set_object_terms' ) as $aw_seo_hook ) {
+	add_action( $aw_seo_hook, 'aw_seo_cache_flush' );
+}
+unset( $aw_seo_hook );
+
 /** "{Text} – Animal Writes". */
 function aw_seo_branded( $text ) {
 	return $text . ' – ' . get_bloginfo( 'name' );
@@ -540,13 +628,12 @@ function aw_seo_share_safe_url( $url ) {
 	if ( ! preg_match( '/\.(avif|webp)$/i', (string) $plain ) ) {
 		return array( $url, 0, 0, '' );
 	}
-	$up   = wp_get_upload_dir();
-	$base = set_url_scheme( $up['baseurl'], 'https' );
-	$abs  = set_url_scheme( $plain, 'https' );
-	if ( 0 !== strpos( $abs, $base ) ) {
+	$path = aw_seo_upload_path( $plain );
+	if ( '' === $path ) {
 		return array( $url, 0, 0, '' );
 	}
-	$path = $up['basedir'] . substr( $abs, strlen( $base ) );
+	$up   = wp_get_upload_dir();
+	$base = set_url_scheme( $up['baseurl'], 'https' );
 	$stem = preg_replace( '/(-\d+x\d+)?\.(avif|webp)$/i', '', $path ); // the upload's own name, without a size or format
 	$mime = array( 'jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'png' => 'image/png' ); // never WebP: it is not a share format either
 	foreach ( $mime as $ext => $type ) {

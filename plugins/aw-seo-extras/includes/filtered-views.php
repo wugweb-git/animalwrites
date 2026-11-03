@@ -73,15 +73,15 @@ function aw_seo_filtered_place( $type, $key, $slug ) {
 	if ( '' === $name || ! function_exists( 'aw_filter_clauses' ) ) {
 		return array( '', 0 );
 	}
-	list( $tq, $mq ) = aw_filter_clauses( $type, array( $key => array( $slug ) ) );
-	$v = array( 'post_type' => $type, 'post_status' => 'publish', 'posts_per_page' => 1, 'fields' => 'ids', 'no_found_rows' => false, 'tax_query' => $tq, 'meta_query' => $mq ); // phpcs:ignore WordPress.DB.SlowDBQuery
-	if ( 'aw_opportunity' === $type && function_exists( 'aw_open_opportunities_meta_query' ) ) {
-		$v['meta_query'][] = aw_open_opportunities_meta_query();
-	}
-	if ( function_exists( 'kits_preview_only_ids' ) && kits_preview_only_ids() ) {
-		$v['post__not_in'] = kits_preview_only_ids();
-	}
-	return array( $name, (int) ( new WP_Query( $v ) )->found_posts );
+	$n = aw_seo_cached(
+		"filtered_place|{$type}|{$key}|{$slug}", // kept until the next post change (aw_seo_cached)
+		function () use ( $type, $key, $slug ) {
+			list( $tq, $mq ) = aw_filter_clauses( $type, array( $key => array( $slug ) ) );
+			$v = array( 'post_type' => $type, 'post_status' => 'publish', 'posts_per_page' => 1, 'fields' => 'ids', 'no_found_rows' => false, 'tax_query' => $tq, 'meta_query' => $mq ); // phpcs:ignore WordPress.DB.SlowDBQuery
+			return (int) ( new WP_Query( aw_seo_hub_rules( $type, $v ) ) )->found_posts;
+		}
+	);
+	return array( $name, (int) $n );
 }
 
 /** Filter parameters present on this request (sort is an order, not a filter): param => raw string. */
@@ -97,7 +97,7 @@ function aw_seo_filter_params() {
 
 /**
  * Items a hub list holds for one category or tag, with the hub's own rules (open opportunities only; preview-only
- * items left out). The same count on the page and in the sitemap.
+ * items left out). The same count on the page and in the sitemap. Kept until the next post change (aw_seo_cached).
  *
  * @param string $type Post type of the hub.
  * @param string $key  category_name|tag.
@@ -105,21 +105,20 @@ function aw_seo_filter_params() {
  * @return int
  */
 function aw_seo_filtered_count( $type, $key, $slug ) {
-	$v = array(
-		'post_type'      => $type,
-		'post_status'    => 'publish',
-		'posts_per_page' => 1,
-		'fields'         => 'ids',
-		'no_found_rows'  => false,
-		'tax_query'      => array( array( 'taxonomy' => 'tag' === $key ? 'post_tag' : 'category', 'field' => 'slug', 'terms' => 'aw_listing' === $type && function_exists( 'aw_listing_type_query' ) ? explode( ',', aw_listing_type_query( $slug ) ) : array( $slug ), 'include_children' => true ) ),
+	return (int) aw_seo_cached(
+		"filtered_count|{$type}|{$key}|{$slug}", // kept until the next post change (aw_seo_cached)
+		function () use ( $type, $key, $slug ) {
+			$v = array(
+				'post_type'      => $type,
+				'post_status'    => 'publish',
+				'posts_per_page' => 1,
+				'fields'         => 'ids',
+				'no_found_rows'  => false,
+				'tax_query'      => array( array( 'taxonomy' => 'tag' === $key ? 'post_tag' : 'category', 'field' => 'slug', 'terms' => 'aw_listing' === $type && function_exists( 'aw_listing_type_query' ) ? explode( ',', aw_listing_type_query( $slug ) ) : array( $slug ), 'include_children' => true ) ), // phpcs:ignore WordPress.DB.SlowDBQuery
+			);
+			return (int) ( new WP_Query( aw_seo_hub_rules( $type, $v ) ) )->found_posts;
+		}
 	);
-	if ( 'aw_opportunity' === $type && function_exists( 'aw_open_opportunities_meta_query' ) ) {
-		$v['meta_query'] = array( aw_open_opportunities_meta_query() ); // phpcs:ignore WordPress.DB.SlowDBQuery
-	}
-	if ( function_exists( 'kits_preview_only_ids' ) && kits_preview_only_ids() ) {
-		$v['post__not_in'] = kits_preview_only_ids();
-	}
-	return (int) ( new WP_Query( $v ) )->found_posts;
 }
 
 /**
@@ -297,19 +296,15 @@ add_filter(
 	25
 );
 
-/* ---------- Sitemap: filtered-sitemap.xml ---------- */
+/* ---------- The URLs of filtered-sitemap.xml (the sitemap itself: sitemap.php, rebuilt daily) ---------- */
 
 /**
- * The indexable ?category_name=, ?state= and ?publisher= views of every hub (3 or more items each), cached for 12
- * hours. ?tag= views are not listed: their tag pages are (Rank Math's tag sitemap).
+ * The indexable ?category_name=, ?state= and ?publisher= views of every hub (3 or more items each). ?tag= views are
+ * not listed: their tag pages are (Rank Math's tag sitemap).
  *
  * @return array List of ['loc' => URL].
  */
-function aw_sitemap_filtered_urls() {
-	$urls = get_transient( 'aw_sitemap_filtered' );
-	if ( false !== $urls ) {
-		return $urls;
-	}
+function aw_sitemap_filtered_build() {
 	$urls = array();
 	foreach ( AW_FILTERED_CATEGORY_HUBS as $type ) {
 		$cats = function_exists( 'aw_section_categories' ) ? aw_section_categories( $type ) : array();
@@ -331,10 +326,8 @@ function aw_sitemap_filtered_urls() {
 			}
 		}
 	}
-	set_transient( 'aw_sitemap_filtered', $urls, 12 * HOUR_IN_SECONDS );
 	return $urls;
 }
-add_action( 'transition_post_status', fn( $new, $old ) => $new !== $old && delete_transient( 'aw_sitemap_filtered' ), 10, 2 );
 
 /**
  * Candidate ?state= or ?publisher= values of a hub: the states and publishers its published items carry at least
@@ -358,28 +351,3 @@ function aw_sitemap_filtered_values( $type, $key ) {
 	}
 	return array_values( array_unique( $out ) );
 }
-
-add_filter(
-	'rank_math/sitemap/providers',
-	function ( $providers ) {
-		if ( ! interface_exists( '\RankMath\Sitemap\Providers\Provider' ) || ! class_exists( '\RankMath\Sitemap\Router' ) ) {
-			return $providers;
-		}
-		if ( ! class_exists( 'AW_Rank_Math_Sitemap_Filtered' ) ) {
-			/** Filtered hub lists with a category of their own. */
-			class AW_Rank_Math_Sitemap_Filtered implements \RankMath\Sitemap\Providers\Provider {
-				public function handles_type( $type ) {
-					return 'filtered' === $type;
-				}
-				public function get_index_links( $max_entries ) {
-					return aw_sitemap_filtered_urls() ? array( array( 'loc' => \RankMath\Sitemap\Router::get_base_url( 'filtered-sitemap.xml' ) ) ) : array();
-				}
-				public function get_sitemap_links( $type, $max_entries, $current_page ) {
-					return array_slice( aw_sitemap_filtered_urls(), ( max( 1, (int) $current_page ) - 1 ) * $max_entries, $max_entries );
-				}
-			}
-		}
-		$providers[] = new AW_Rank_Math_Sitemap_Filtered();
-		return $providers;
-	}
-);

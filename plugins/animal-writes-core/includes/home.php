@@ -337,6 +337,56 @@ add_filter(
 	}
 );
 
+// Home's Take part band (aw-take-part-band--home in templates/front-page.html; 3 Nov 2026, Home sections fit one 375x812
+// screen): the second and third cards (Run an organisation?, Get updates) go in a Show more fold on phones, the theme's
+// .aw-more (a core Details folded by details[data-kit-fold], open without JavaScript and from 768). The shared cards
+// pattern (campaign pages, sidebar) is not changed.
+add_filter(
+	'render_block_core/group',
+	function ( $html, $block ) {
+		if ( ! in_array( 'aw-take-part-band--home', preg_split( '/\s+/', (string) ( $block['attrs']['className'] ?? '' ) ), true ) || false !== strpos( $html, 'aw-take-part-more' ) ) {
+			return $html;
+		}
+		$card  = strpos( $html, 'aw-take-part-card--claim' );
+		$open  = false === $card ? false : strrpos( substr( $html, 0, $card ), '<div' );
+		$close = strrpos( $html, '</div>' ); // the end of the cards' group (.aw-take-part), just before the band's </section>
+		if ( false === $open || false === $close || $close < $open || 3 !== substr_count( $html, 'aw-take-part-card--' ) ) {
+			return $html;
+		}
+		$fold = '<details class="wp-block-details aw-more aw-take-part-more" data-kit-fold="767" open><summary><span class="aw-more-show">Show more</span><span class="aw-more-less">Show less</span></summary><div class="aw-take-part-more-cards">';
+		$end  = '</div></details>' . ( function_exists( 'kits_fold_now' ) ? kits_fold_now( 'fold' ) : '' );
+		return substr( $html, 0, $open ) . $fold . substr( $html, $open, $close - $open ) . $end . substr( $html, $close );
+	},
+	10,
+	2
+);
+
+// Home's Library list (pattern animal-law, query 43; 3 Nov 2026, Home sections fit one 375x812 screen): the third item's
+// card goes in a Show more fold inside its own list item, the theme's .aw-more (folded by details[data-kit-fold] on
+// phones, open without JavaScript and from 768, where the summary is hidden and the grid is unchanged).
+add_filter(
+	'render_block_core/query',
+	function ( $html, $block ) {
+		if ( 43 !== (int) ( $block['attrs']['queryId'] ?? 0 ) || ! is_front_page() || false !== strpos( $html, 'aw-law-more' ) ) {
+			return $html;
+		}
+		if ( 3 !== substr_count( $html, '<li class="wp-block-post' ) ) {
+			return $html;
+		}
+		$li    = strrpos( $html, '<li class="wp-block-post' );
+		$open  = strpos( $html, '>', $li );
+		$close = strrpos( $html, '</li>' );
+		if ( false === $open || false === $close || $close < $open ) {
+			return $html;
+		}
+		$fold = '<details class="wp-block-details aw-more aw-law-more" data-kit-fold="767" open><summary><span class="aw-more-show">Show more</span><span class="aw-more-less">Show less</span></summary>';
+		$end  = '</details>' . ( function_exists( 'kits_fold_now' ) ? kits_fold_now( 'fold' ) : '' );
+		return substr( $html, 0, $open + 1 ) . $fold . substr( $html, $open + 1, $close - $open - 1 ) . $end . substr( $html, $close );
+	},
+	10,
+	2
+);
+
 // The story band's photograph (pattern aw1-story, a core Cover) is printed with one 1536px file and no srcset, so phones
 // downloaded 376 KB where the 768px copy is 116 KB. Give its img the attachment's srcset (the browser picks the size; the
 // band is full width, so the default 100vw applies). Front end only; the stored pattern is not changed.

@@ -4,11 +4,13 @@
  * - a "directory" sitemap (directory-sitemap.xml) of the Directory place pages (/directory/{state}/,
  *   /directory/{state}/{district}/) that have listings, and district × listing-type pages with listings. Places come
  *   from the LGD file (places.php); Rank Math knows nothing of these virtual pages.
+ * - a "filtered" sitemap (filtered-sitemap.xml) of the indexable filtered hub lists (filtered-views.php), rebuilt
+ *   once a day (event aw_seo_sitemap_daily), never on a request.
+ * - both from one provider class (AW_Rank_Math_Sitemap); this module's switch turns both off.
  * - no post-type archive links (the sections are Pages, listed in the page sitemap).
- * - items that are not indexed by a rule of their state stay out: closed opportunities, items merged into another
- *   story, items without a slug, and preview-only items (kits_preview_only_ids(), e.g. the sample listing). Private, draft and noindex items
- *   and the empty Web Stories type are left out by Rank Math itself. Fixed exclusions are Rank Math settings (noindex items, Sitemap →
- *   Exclude posts: the search page). Claim forms (/claim/, page 12587) are noindex, follow and out of every sitemap (owner, 24 Oct 2026).
+ * - Rank Math's stored sitemaps are cleared after saves through the REST API and WP-CLI too.
+ * Items kept out of the index by a rule of their state are left out of every sitemap by robots.php, whether this
+ * module is on or not.
  *
  * @package aw-seo-extras
  */
@@ -54,92 +56,104 @@ function aw_sitemap_directory_urls() {
 	return $urls;
 }
 
+/**
+ * The indexable filtered hub lists (filtered-views.php) as the daily job below last stored them. Before its first run
+ * they are built on the spot (and not stored).
+ *
+ * @return array List of ['loc' => URL].
+ */
+function aw_sitemap_filtered_urls() {
+	if ( ! function_exists( 'aw_sitemap_filtered_build' ) ) {
+		return array(); // the Filtered views module is off: no filtered lists
+	}
+	$urls = get_option( 'aw_sitemap_filtered' );
+	return is_array( $urls ) ? $urls : aw_sitemap_filtered_build();
+}
+
+/** Daily: filtered-sitemap.xml is rebuilt (never on a request), and Rank Math's stored copy of it is cleared. */
+function aw_sitemap_filtered_rebuild() {
+	if ( ! function_exists( 'aw_sitemap_filtered_build' ) ) {
+		return; // the Filtered views module is off
+	}
+	update_option( 'aw_sitemap_filtered', aw_sitemap_filtered_build(), false );
+	if ( class_exists( '\RankMath\Sitemap\Cache_Watcher' ) ) {
+		\RankMath\Sitemap\Cache_Watcher::invalidate( 'filtered' );
+		add_action( 'shutdown', array( 'RankMath\Sitemap\Cache_Watcher', 'clear_queued' ) );
+	}
+}
+add_action( 'aw_seo_sitemap_daily', 'aw_sitemap_filtered_rebuild' );
+add_action(
+	'admin_init',
+	function () {
+		if ( ! wp_next_scheduled( 'aw_seo_sitemap_daily' ) ) {
+			wp_schedule_event( time() + 600, 'daily', 'aw_seo_sitemap_daily' );
+		}
+	}
+);
+
+/**
+ * One page of a list of URLs as Rank Math's sitemap links.
+ *
+ * @param array $urls         List of ['loc' => URL, 'lastmod' => date (optional)].
+ * @param int   $max_entries  Links per sitemap page.
+ * @param int   $current_page Page, from 1.
+ * @return array
+ */
+function aw_sitemap_page_links( array $urls, $max_entries, $current_page ) {
+	$max_entries = max( 1, (int) $max_entries );
+	$chunk       = array_slice( $urls, ( max( 1, (int) $current_page ) - 1 ) * $max_entries, $max_entries );
+	return array_map( fn( $u ) => array_filter( array( 'loc' => $u['loc'], 'mod' => $u['lastmod'] ?? '' ) ), $chunk );
+}
+
 add_filter(
 	'rank_math/sitemap/providers',
 	function ( $providers ) {
 		if ( ! interface_exists( '\RankMath\Sitemap\Providers\Provider' ) || ! class_exists( '\RankMath\Sitemap\Router' ) ) {
 			return $providers;
 		}
-		if ( ! class_exists( 'AW_Rank_Math_Sitemap_Directory' ) ) {
-			/** Directory place pages and district × type pages. */
-			class AW_Rank_Math_Sitemap_Directory implements \RankMath\Sitemap\Providers\Provider {
+		if ( ! class_exists( 'AW_Rank_Math_Sitemap' ) ) {
+			/** The site's own sitemaps: directory-sitemap.xml and filtered-sitemap.xml (each paged by Rank Math's entries per sitemap). */
+			class AW_Rank_Math_Sitemap implements \RankMath\Sitemap\Providers\Provider {
+				/** Sitemap type => function that lists its URLs. */
+				const TYPES = array(
+					'directory' => 'aw_sitemap_directory_urls',
+					'filtered'  => 'aw_sitemap_filtered_urls',
+				);
+
 				public function handles_type( $type ) {
-					return 'directory' === $type;
+					return isset( self::TYPES[ $type ] );
 				}
+
 				public function get_index_links( $max_entries ) {
-					$urls  = aw_sitemap_directory_urls();
-					$pages = (int) ceil( count( $urls ) / max( 1, $max_entries ) );
-					$links = array();
-					for ( $i = 1; $i <= $pages; $i++ ) {
-						$chunk   = array_slice( $urls, ( $i - 1 ) * $max_entries, $max_entries );
-						$mods    = array_filter( wp_list_pluck( $chunk, 'lastmod' ) );
-						$links[] = array_filter(
-							array(
-								'loc'     => \RankMath\Sitemap\Router::get_base_url( 'directory-sitemap' . ( $pages > 1 ? $i : '' ) . '.xml' ),
-								'lastmod' => $mods ? max( $mods ) : '',
-							)
-						);
+					$max_entries = max( 1, (int) $max_entries );
+					$links       = array();
+					foreach ( self::TYPES as $type => $source ) {
+						$urls  = (array) call_user_func( $source );
+						$pages = (int) ceil( count( $urls ) / $max_entries );
+						for ( $i = 1; $i <= $pages; $i++ ) {
+							$mods    = array_filter( wp_list_pluck( array_slice( $urls, ( $i - 1 ) * $max_entries, $max_entries ), 'lastmod' ) );
+							$links[] = array_filter(
+								array(
+									'loc'     => \RankMath\Sitemap\Router::get_base_url( $type . '-sitemap' . ( $pages > 1 ? $i : '' ) . '.xml' ),
+									'lastmod' => $mods ? max( $mods ) : '',
+								)
+							);
+						}
 					}
 					return $links;
 				}
+
 				public function get_sitemap_links( $type, $max_entries, $current_page ) {
-					$chunk = array_slice( aw_sitemap_directory_urls(), ( max( 1, (int) $current_page ) - 1 ) * $max_entries, $max_entries );
-					return array_map( fn( $u ) => array_filter( array( 'loc' => $u['loc'], 'mod' => $u['lastmod'] ?? '' ) ), $chunk );
+					return isset( self::TYPES[ $type ] ) ? aw_sitemap_page_links( (array) call_user_func( self::TYPES[ $type ] ), $max_entries, $current_page ) : array();
 				}
 			}
 		}
-		$providers[] = new AW_Rank_Math_Sitemap_Directory();
+		$providers[] = new AW_Rank_Math_Sitemap();
 		return $providers;
 	}
 );
 
 add_filter( 'rank_math/sitemap/post_type_archive_link', '__return_false' );
-
-/**
- * Published profiles with no contact (aw_listing_unreachable() in robots.php), as an ID-keyed set: one query per
- * sitemap request instead of a meta lookup per listing. Listings with no stored score count as candidates and are
- * checked one by one (that also stores their score).
- */
-function aw_sitemap_unreachable_listings() {
-	static $set = null;
-	if ( null !== $set ) {
-		return $set;
-	}
-	global $wpdb;
-	$ids = $wpdb->get_col( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-		"SELECT p.ID FROM {$wpdb->posts} p
-		LEFT JOIN {$wpdb->postmeta} s ON s.post_id = p.ID AND s.meta_key = 'aw_contact_score'
-		WHERE p.post_type = 'aw_listing' AND p.post_status = 'publish' AND ( s.meta_value IS NULL OR s.meta_value = '' OR s.meta_value = '0' )
-		AND NOT EXISTS ( SELECT 1 FROM {$wpdb->postmeta} m WHERE m.post_id = p.ID AND m.meta_key IN ( 'aw_facebook', 'aw_instagram', 'aw_x', 'aw_youtube', 'aw_linkedin' ) AND TRIM( m.meta_value ) <> '' )"
-	);
-	$set = array();
-	_prime_post_caches( array_map( 'intval', $ids ), false, true );
-	foreach ( $ids as $id ) {
-		if ( aw_listing_unreachable( (int) $id ) ) {
-			$set[ (int) $id ] = true;
-		}
-	}
-	return $set;
-}
-
-add_filter(
-	'rank_math/sitemap/entry',
-	function ( $url, $type, $obj ) {
-		$obj = ( 'post' === $type && is_object( $obj ) && ! empty( $obj->ID ) ) ? get_post( (int) $obj->ID ) : null; // Rank Math passes a database row
-		if ( ! $obj instanceof WP_Post ) {
-			return $url;
-		}
-		$closed = 'aw_opportunity' === $obj->post_type && function_exists( 'aw_retention_state' ) && aw_retention_state( $obj );
-		$merged = (int) get_post_meta( $obj->ID, 'aw_merged_into', true ) > 0; // a same-story duplicate (normally private already)
-		$unreachable = 'aw_listing' === $obj->post_type && isset( aw_sitemap_unreachable_listings()[ (int) $obj->ID ] ); // noindex (robots.php)
-		if ( '' === (string) $obj->post_name || $closed || $merged || $unreachable || ( function_exists( 'kits_preview_only_ids' ) && in_array( (int) $obj->ID, kits_preview_only_ids(), true ) ) ) {
-			return false;
-		}
-		return $url;
-	},
-	10,
-	3
-);
 
 /*
  * Rank Math keeps each sitemap as a stored file and only clears it from wp-admin screens and cron (its Cache_Watcher is

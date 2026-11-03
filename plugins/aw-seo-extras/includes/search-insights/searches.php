@@ -54,15 +54,19 @@ function aw_si_searches_gaps(): array {
  */
 function aw_si_gap_variant_covered( string $label ): bool {
 	global $wpdb;
-	if ( ! preg_match( '#(\S+)/(\S+)#', $label, $m ) ) {
+	if ( ! preg_match( '#(\p{L}+)/(\p{L}+)#u', $label, $m ) ) {
 		return false;
 	}
-	$norms = array();
-	foreach ( array( $m[1], $m[2] ) as $alt ) {
-		$norms[] = aw_si_norm( str_replace( $m[0], $alt, $label ) );
+	static $has = null; // Every has-page phrase, read once for all the gap rows.
+	if ( null === $has ) {
+		$k = aw_si_table( 'keywords' );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+		$has = array_flip( (array) $wpdb->get_col( "SELECT norm FROM {$k} WHERE status = 'has-page'" ) );
 	}
-	$k  = aw_si_table( 'keywords' );
-	$in = implode( ', ', array_fill( 0, count( $norms ), '%s' ) );
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- one %s per phrase.
-	return (bool) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$k} WHERE norm IN ({$in}) AND status = 'has-page'", $norms ) );
+	foreach ( array( $m[1], $m[2] ) as $alt ) {
+		if ( isset( $has[ aw_si_norm( str_replace( $m[0], $alt, $label ) ) ] ) ) {
+			return true;
+		}
+	}
+	return false;
 }

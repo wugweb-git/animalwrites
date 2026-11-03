@@ -53,8 +53,8 @@ function aw_seo_modules(): array {
 						'aw_opportunity' => 'Volunteer, foster, internship and job opportunities in animal welfare in India.',
 						'aw_listing'     => 'Animal welfare organisations, Gaushalas and government vets across India.',
 					) ),
-				'AW_SEO_LISTING_SHARE_IMAGE' => array( 'type' => 'int', 'label' => 'Listing share image (attachment ID)', 'help' => 'Used when a listing has no logo of its own.', 'default' => 8814 ),
-				'AW_SEO_SOURCE_IMAGE_TYPES' => array( 'type' => 'list', 'label' => 'Types that share the publisher\'s image', 'help' => 'One post type per line.', 'default' => array( 'aw_news', 'aw_legal', 'post', 'aw_opportunity' ) ),
+				'AW_SEO_LISTING_SHARE_IMAGE' => array( 'tab' => 'share', 'type' => 'int', 'label' => 'Listing share image (attachment ID)', 'help' => 'Used when a listing has no logo of its own.', 'default' => 8814 ),
+				'AW_SEO_SOURCE_IMAGE_TYPES' => array( 'tab' => 'share', 'type' => 'list', 'label' => 'Types that share the publisher\'s image', 'help' => 'One post type per line.', 'default' => array( 'aw_news', 'aw_legal', 'post', 'aw_opportunity' ) ),
 			),
 		),
 		'titles' => array(
@@ -152,7 +152,7 @@ function aw_seo_modules(): array {
 			'files'  => array( 'robots' ),
 			'desc'   => 'Noindex rules that depend on an item\'s state or a list\'s size.',
 			'fields' => array(
-				'AW_THIN_DISTRICT_TYPE' => array( 'type' => 'int', 'label' => 'Thin Directory page (listings or fewer)', 'help' => 'A district × type page with this many listings or fewer is noindex (an empty page always is).', 'default' => 1 ),
+				'AW_THIN_DISTRICT_TYPE' => array( 'type' => 'int', 'label' => 'Fewest listings for an indexed Directory page', 'help' => 'A district × type page with fewer listings than this is noindex and left out of the Directory sitemap, unless it is on the "Thin pages kept indexed" list. At 1, the default, only a page with no listings is noindex.', 'default' => 1 ),
 				'AW_DIRECTORY_KEEP_INDEXED' => array( 'type' => 'list', 'label' => 'Thin pages kept indexed', 'help' => 'Paths under /directory/ that stay indexed anyway. One per line.', 'default' => array(
 						'haryana/jhajjar/animal-welfare-organisation',
 						'madhya-pradesh/sheopur/animal-welfare-organisation',
@@ -405,6 +405,91 @@ function aw_seo_field_value( string $type, string $text ) {
 
 /* ---------- AW SEO Plus → Settings ---------- */
 
+/**
+ * The Settings tabs and the modules whose settings each shows. The settings stay stored per module; a field with its
+ * own 'tab' shows on that tab. Modules holds every on/off switch. Search Insights' numbers show on Search Insights →
+ * Settings, not here.
+ */
+function aw_seo_setting_tabs(): array {
+	return array(
+		'modules'         => array(
+			'label'   => 'Modules',
+			'modules' => array(),
+		),
+		'titles'          => array(
+			'label'   => 'Titles and descriptions',
+			'modules' => array( 'general', 'titles', 'breadcrumbs' ),
+		),
+		'indexing'        => array(
+			'label'   => 'Indexing',
+			'modules' => array( 'canonical', 'robots', 'filtered', 'sitemap', 'redirects', 'health' ),
+		),
+		'schema'          => array(
+			'label'   => 'Schema and FAQ',
+			'modules' => array( 'schema', 'faq', 'rank-math-schema' ),
+		),
+		'share'           => array(
+			'label'   => 'Share images and Open Graph',
+			'modules' => array( 'opengraph' ),
+		),
+		'analysis'        => array(
+			'label'   => 'Focus keywords and content analysis',
+			'modules' => array( 'focus-keywords', 'analysis' ),
+		),
+		'ai'              => array(
+			'label'   => 'AI agents',
+			'modules' => array( 'llms', 'markdown' ),
+		),
+		'search-insights' => array(
+			'label'   => 'Search Insights',
+			'modules' => array( 'search-insights' ),
+			'hidden'  => true,
+		),
+	);
+}
+
+/** The tab a module's settings are on. */
+function aw_seo_module_tab( string $module ): string {
+	foreach ( aw_seo_setting_tabs() as $tab => $t ) {
+		if ( in_array( $module, $t['modules'], true ) ) {
+			return $tab;
+		}
+	}
+	return 'modules';
+}
+
+/**
+ * The fields a tab shows, by module: {module: {CONST: field}}.
+ *
+ * @param string $tab Tab key.
+ */
+function aw_seo_tab_fields( string $tab ): array {
+	$out = array();
+	foreach ( aw_seo_modules() as $key => $mod ) {
+		foreach ( $mod['fields'] as $const => $f ) {
+			if ( ( $f['tab'] ?? aw_seo_module_tab( $key ) ) === $tab ) {
+				$out[ $key ][ $const ] = $f;
+			}
+		}
+	}
+	return $out;
+}
+
+add_action(
+	'admin_init',
+	function () {
+		// The settings are read on every request: autoload them (a save sets it too; this covers the option as it is).
+		if ( function_exists( 'wp_set_option_autoload' ) && false !== get_option( AW_SEO_SETTINGS ) && ! array_key_exists( AW_SEO_SETTINGS, wp_load_alloptions() ) ) {
+			wp_set_option_autoload( AW_SEO_SETTINGS, true );
+		}
+		// An old link to Search Insights' module tab: its numbers are on Search Insights → Settings.
+		if ( 'aw-seo-settings' === sanitize_key( wp_unslash( $_GET['page'] ?? '' ) ) && 'search-insights' === sanitize_key( wp_unslash( $_GET['tab'] ?? '' ) ) && function_exists( 'aw_si_url' ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- navigation only
+			wp_safe_redirect( aw_si_url( 'settings' ) );
+			exit;
+		}
+	}
+);
+
 add_action(
 	'admin_menu',
 	function () {
@@ -413,100 +498,202 @@ add_action(
 	200 // last under AW SEO Plus
 );
 
-/** Settings tab address. */
-function aw_seo_settings_url( string $module = 'general' ): string {
-	return add_query_arg( array( 'page' => 'aw-seo-settings', 'tab' => $module ), admin_url( 'admin.php' ) );
+/**
+ * Settings address: a tab, or the tab a module's settings are on (old links named the module).
+ *
+ * @param string $key Tab or module key.
+ */
+function aw_seo_settings_url( string $key = 'modules' ): string {
+	$tabs = aw_seo_setting_tabs();
+	if ( ! isset( $tabs[ $key ] ) && isset( aw_seo_modules()[ $key ] ) ) {
+		$key = aw_seo_module_tab( $key );
+	}
+	if ( ! empty( $tabs[ $key ]['hidden'] ) && function_exists( 'aw_si_url' ) ) {
+		return aw_si_url( 'settings' );
+	}
+	return add_query_arg( array( 'page' => 'aw-seo-settings', 'tab' => isset( $tabs[ $key ] ) ? $key : 'modules' ), admin_url( 'admin.php' ) );
 }
 
 /** The current tab. */
 function aw_seo_settings_tab(): string {
-	$tab = sanitize_key( wp_unslash( $_GET['tab'] ?? 'general' ) ); // phpcs:ignore WordPress.Security.NonceVerification -- navigation only
-	return isset( aw_seo_modules()[ $tab ] ) ? $tab : 'general';
+	$tab  = sanitize_key( wp_unslash( $_GET['tab'] ?? 'modules' ) ); // phpcs:ignore WordPress.Security.NonceVerification -- navigation only
+	$tabs = aw_seo_setting_tabs();
+	if ( ! isset( $tabs[ $tab ] ) && isset( aw_seo_modules()[ $tab ] ) ) {
+		$tab = aw_seo_module_tab( $tab ); // An old link to a module's tab.
+	}
+	return isset( $tabs[ $tab ] ) && empty( $tabs[ $tab ]['hidden'] ) ? $tab : 'modules';
 }
 
 function aw_seo_settings_page() {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		wp_die( 'Not allowed.', 403 );
 	}
-	$mods  = aw_seo_modules();
-	$tab   = aw_seo_settings_tab();
-	$mod   = $mods[ $tab ];
-	$saved = aw_seo_saved()[ $tab ] ?? array();
+	$tab = aw_seo_settings_tab();
 	echo '<div class="wrap"><h1>AW SEO Plus settings</h1>';
 	if ( isset( $_GET['saved'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		echo '<div class="notice notice-success is-dismissible"><p>' . ( 'reset' === $_GET['saved'] ? 'Defaults restored.' : 'Settings saved.' ) . ' A module switched on or off takes effect on the next page load.</p></div>'; // phpcs:ignore WordPress.Security.NonceVerification
 	}
-	echo '<nav class="nav-tab-wrapper" aria-label="Modules">';
-	foreach ( $mods as $k => $m ) {
-		$off = ! aw_seo_module_on( $k ) ? ' (off)' : '';
-		echo '<a class="nav-tab' . ( $k === $tab ? ' nav-tab-active' : '' ) . '" href="' . esc_url( aw_seo_settings_url( $k ) ) . '"' . ( $k === $tab ? ' aria-current="page"' : '' ) . '>' . esc_html( $m['label'] . $off ) . '</a>';
+	echo '<nav class="nav-tab-wrapper" aria-label="Settings">';
+	foreach ( aw_seo_setting_tabs() as $k => $t ) {
+		if ( empty( $t['hidden'] ) ) {
+			echo '<a class="nav-tab' . ( $k === $tab ? ' nav-tab-active' : '' ) . '" href="' . esc_url( aw_seo_settings_url( $k ) ) . '"' . ( $k === $tab ? ' aria-current="page"' : '' ) . '>' . esc_html( $t['label'] ) . '</a>';
+		}
 	}
 	echo '</nav>';
-	echo '<p>' . esc_html( $mod['desc'] ) . '</p>';
-	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
-	echo '<input type="hidden" name="action" value="aw_seo_settings"><input type="hidden" name="module" value="' . esc_attr( $tab ) . '">';
-	wp_nonce_field( 'aw_seo_settings_' . $tab );
-	echo '<table class="form-table" role="presentation"><tbody>';
-	if ( ! empty( $mod['switch'] ) ) {
-		echo '<tr><th scope="row">Module</th><td><label><input type="checkbox" name="on" value="1"' . checked( aw_seo_module_on( $tab ), true, false ) . '> ' . esc_html( $mod['label'] ) . ' is on</label></td></tr>';
+	if ( 'modules' === $tab ) {
+		aw_seo_settings_modules_form();
 	} else {
-		echo '<tr><th scope="row">Module</th><td>Always on: other modules use it.</td></tr>';
+		aw_seo_settings_fields_form( $tab );
 	}
-	foreach ( $mod['fields'] as $const => $f ) {
-		$value = array_key_exists( $const, $saved ) ? $saved[ $const ] : $f['default'];
-		$id    = 'aw-seo-' . strtolower( str_replace( '_', '-', $const ) );
-		echo '<tr><th scope="row"><label for="' . esc_attr( $id ) . '">' . esc_html( $f['label'] ) . '</label></th><td>';
-		if ( 'int' === $f['type'] ) {
-			echo '<input type="number" min="0" class="small-text" id="' . esc_attr( $id ) . '" name="f[' . esc_attr( $const ) . ']" value="' . esc_attr( aw_seo_field_text( 'int', $value ) ) . '">';
+	echo '</div>';
+}
+
+/** Modules tab: every module, its on/off box (foundation modules are always on). */
+function aw_seo_settings_modules_form(): void {
+	echo '<p>A module switched off is not loaded: its screens, checks and output are gone until it is switched on again.</p>';
+	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
+	echo '<input type="hidden" name="action" value="aw_seo_settings"><input type="hidden" name="tab" value="modules">';
+	wp_nonce_field( 'aw_seo_settings_modules' );
+	echo '<table class="form-table" role="presentation"><tbody>';
+	foreach ( aw_seo_modules() as $key => $mod ) {
+		echo '<tr><th scope="row">' . esc_html( $mod['label'] ) . '</th><td>';
+		if ( ! empty( $mod['switch'] ) ) {
+			echo '<label><input type="checkbox" name="on[' . esc_attr( $key ) . ']" value="1"' . checked( aw_seo_module_on( $key ), true, false ) . '> On</label>';
 		} else {
-			$rows = min( 16, max( 3, count( (array) $value ) + 1 ) );
-			echo '<textarea class="large-text code" rows="' . (int) $rows . '" id="' . esc_attr( $id ) . '" name="f[' . esc_attr( $const ) . ']">' . esc_textarea( aw_seo_field_text( $f['type'], $value ) ) . '</textarea>';
+			echo 'Always on: other modules use it.';
 		}
-		$changed = array_key_exists( $const, $saved ) && $saved[ $const ] !== $f['default'];
-		echo '<p class="description">' . esc_html( trim( $f['help'] . ( $changed ? ' Changed from the default.' : '' ) ) ) . '</p></td></tr>';
+		echo '<p class="description">' . esc_html( $mod['desc'] ) . '</p></td></tr>';
 	}
 	echo '</tbody></table>';
-	submit_button( 'Save changes', 'primary', 'submit', false );
-	if ( $saved ) {
-		echo ' ';
-		submit_button( 'Restore defaults', 'secondary', 'reset', false );
+	submit_button( 'Save changes' );
+	echo '</form>';
+}
+
+/**
+ * A tab's settings as one form, a section per module.
+ *
+ * @param string $tab Tab key.
+ */
+function aw_seo_settings_fields_form( string $tab ): void {
+	$mods   = aw_seo_modules();
+	$saved  = aw_seo_saved();
+	$fields = aw_seo_tab_fields( $tab );
+	$any    = false;
+	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
+	echo '<input type="hidden" name="action" value="aw_seo_settings"><input type="hidden" name="tab" value="' . esc_attr( $tab ) . '">';
+	wp_nonce_field( 'aw_seo_settings_' . $tab );
+	foreach ( aw_seo_setting_tabs()[ $tab ]['modules'] as $key ) {
+		$mod = $mods[ $key ];
+		if ( empty( aw_seo_setting_tabs()[ $tab ]['hidden'] ) ) { // A screen of its own has its own heading.
+			echo '<h2>' . esc_html( $mod['label'] ) . '</h2>';
+			echo '<p>' . esc_html( $mod['desc'] ) . ( aw_seo_module_on( $key ) ? '' : ' Off: switch it on under Modules.' ) . '</p>';
+		}
+		if ( empty( $fields[ $key ] ) ) {
+			continue;
+		}
+		echo '<table class="form-table" role="presentation"><tbody>';
+		foreach ( $fields[ $key ] as $const => $f ) {
+			$has   = array_key_exists( $const, $saved[ $key ] ?? array() );
+			$value = $has ? $saved[ $key ][ $const ] : $f['default'];
+			$any   = $any || $has;
+			aw_seo_settings_field_row( $key, $const, $f, $value, $has && $value !== $f['default'] );
+		}
+		echo '</tbody></table>';
 	}
-	echo '</form></div>';
+	// Fields of another module shown on this tab (the share images under General).
+	foreach ( $fields as $key => $list ) {
+		if ( in_array( $key, aw_seo_setting_tabs()[ $tab ]['modules'], true ) ) {
+			continue;
+		}
+		echo '<h2>' . esc_html( $mods[ $key ]['label'] ) . '</h2><table class="form-table" role="presentation"><tbody>';
+		foreach ( $list as $const => $f ) {
+			$has   = array_key_exists( $const, $saved[ $key ] ?? array() );
+			$value = $has ? $saved[ $key ][ $const ] : $f['default'];
+			$any   = $any || $has;
+			aw_seo_settings_field_row( $key, $const, $f, $value, $has && $value !== $f['default'] );
+		}
+		echo '</tbody></table>';
+	}
+	if ( $fields ) {
+		submit_button( 'Save changes', 'primary', 'submit', false );
+		if ( $any ) {
+			echo ' ';
+			submit_button( 'Restore defaults', 'secondary', 'reset', false );
+		}
+	}
+	echo '</form>';
+}
+
+/**
+ * One setting as a form-table row.
+ *
+ * @param string $module  Module key.
+ * @param string $const   Constant.
+ * @param array  $f       Field.
+ * @param mixed  $value   Current value.
+ * @param bool   $changed Saved and not the default.
+ */
+function aw_seo_settings_field_row( string $module, string $const, array $f, $value, bool $changed ): void {
+	$id = 'aw-seo-' . strtolower( str_replace( '_', '-', $const ) );
+	echo '<tr><th scope="row"><label for="' . esc_attr( $id ) . '">' . esc_html( $f['label'] ) . '</label></th><td>';
+	if ( 'int' === $f['type'] ) {
+		echo '<input type="number" min="0" class="small-text" id="' . esc_attr( $id ) . '" name="f[' . esc_attr( $const ) . ']" value="' . esc_attr( aw_seo_field_text( 'int', $value ) ) . '">';
+	} else {
+		$rows = min( 16, max( 3, count( (array) $value ) + 1 ) );
+		echo '<textarea class="large-text code" rows="' . (int) $rows . '" id="' . esc_attr( $id ) . '" name="f[' . esc_attr( $const ) . ']">' . esc_textarea( aw_seo_field_text( $f['type'], $value ) ) . '</textarea>';
+	}
+	echo '<p class="description">' . esc_html( trim( $f['help'] . ( $changed ? ' Changed from the default.' : '' ) ) ) . '</p></td></tr>';
 }
 
 add_action(
 	'admin_post_aw_seo_settings',
 	function () {
-		$tab  = sanitize_key( wp_unslash( $_POST['module'] ?? '' ) );
-		$mods = aw_seo_modules();
-		if ( ! isset( $mods[ $tab ] ) || ! current_user_can( 'manage_options' ) ) {
+		$tab  = sanitize_key( wp_unslash( $_POST['tab'] ?? '' ) );
+		$tabs = aw_seo_setting_tabs();
+		if ( ! isset( $tabs[ $tab ] ) || ! current_user_can( 'manage_options' ) ) {
 			wp_die( 'Not allowed.', 403 );
 		}
 		check_admin_referer( 'aw_seo_settings_' . $tab );
-		$all = aw_seo_saved();
-		if ( isset( $_POST['reset'] ) ) {
-			unset( $all[ $tab ] );
-			$done = 'reset';
+		$all  = aw_seo_saved();
+		$done = 'saved';
+		if ( 'modules' === $tab ) {
+			$on = (array) wp_unslash( $_POST['on'] ?? array() ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- only the keys of known modules are read
+			foreach ( aw_seo_modules() as $key => $mod ) {
+				if ( ! empty( $mod['switch'] ) ) {
+					$all[ $key ]['on'] = ! empty( $on[ $key ] );
+				}
+			}
 		} else {
-			$new = array();
-			if ( ! empty( $mods[ $tab ]['switch'] ) ) {
-				$new['on'] = ! empty( $_POST['on'] );
-			}
+			$reset  = isset( $_POST['reset'] );
 			$posted = (array) wp_unslash( $_POST['f'] ?? array() ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- each field is sanitised by its type below
-			foreach ( $mods[ $tab ]['fields'] as $const => $f ) {
-				if ( ! isset( $posted[ $const ] ) ) {
-					continue;
-				}
-				$value = aw_seo_field_value( $f['type'], (string) $posted[ $const ] );
-				if ( $value !== $f['default'] ) { // store only what differs, so a later default change reaches unchanged fields
-					$new[ $const ] = $value;
+			foreach ( aw_seo_tab_fields( $tab ) as $key => $list ) {
+				foreach ( $list as $const => $f ) {
+					unset( $all[ $key ][ $const ] );
+					if ( $reset || ! isset( $posted[ $const ] ) ) {
+						continue;
+					}
+					$value = aw_seo_field_value( $f['type'], (string) $posted[ $const ] );
+					if ( $value !== $f['default'] ) { // store only what differs, so a later default change reaches unchanged fields
+						$all[ $key ][ $const ] = $value;
+					}
 				}
 			}
-			$all[ $tab ] = $new;
-			$done        = 'saved';
+			$done = $reset ? 'reset' : 'saved';
 		}
-		update_option( AW_SEO_SETTINGS, array_filter( $all ), false );
+		// Read on every request (the constants), so autoloaded.
+		update_option( AW_SEO_SETTINGS, array_filter( $all ), true );
 		wp_safe_redirect( add_query_arg( 'saved', $done, aw_seo_settings_url( $tab ) ) );
 		exit;
 	}
 );
+
+/**
+ * The settings of a module's tab as a form, for a screen of its own (Search Insights → Settings shows its numbers).
+ *
+ * @param string $tab Tab key.
+ */
+function aw_seo_settings_embed( string $tab ): void {
+	if ( current_user_can( 'manage_options' ) && isset( aw_seo_setting_tabs()[ $tab ] ) ) {
+		aw_seo_settings_fields_form( $tab );
+	}
+}
