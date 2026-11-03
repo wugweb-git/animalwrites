@@ -1426,7 +1426,7 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 	.aw-ed-news .aw-news-mosaic > li:first-child > .kit-card { flex-direction: row; align-items: flex-start; }
 	.aw-ed-news .aw-news-mosaic > li:first-child > .kit-card[class*="kit-card--block"] { gap: 0; } /* a block card: no card padding, its body padded 24px; the picture gets the same room */
 	.aw-ed-news .aw-news-mosaic > li:first-child > .kit-card > .kit-card-media { flex: none; width: var(--kit-thumb-lg) !important; max-width: 40%; aspect-ratio: 4 / 3; border-radius: var(--kit-radius-media); }
-	.aw-ed-news .aw-news-mosaic > li:first-child > .kit-card[class*="kit-card--block"] > .kit-card-media { margin: var(--kit-space-5) 0 var(--kit-space-5) var(--kit-space-5); }
+	.aw-ed-news .aw-news-mosaic > li:first-child > .kit-card[class*="kit-card--block"] > .kit-card-media { margin: var(--kit-space-5) 0 var(--kit-space-5) var(--kit-space-5) !important; } /* !important: Kits sets a card picture's margin to 0 !important (kit.css, card states), which left the lead's picture flush with the card edge */
 	.aw-ed-news .aw-news-mosaic > li:first-child > .kit-card > .kit-card-media img { height: 100%; object-fit: cover; }
 	.aw-ed-news .aw-news-mosaic > li:first-child > .kit-card > .kit-card-body { flex: 1 1 0; }
 	.aw-ed-news .aw-news-mosaic > li:first-child .kit-card-sum { display: none; }
