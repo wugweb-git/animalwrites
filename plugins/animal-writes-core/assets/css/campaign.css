@@ -54,8 +54,6 @@
 .aw-camp--diwali .aw-camp-dark .kit-ico { color: var(--camp-line); }
 /* The poster carries a photo, not a document: full colour, centred */
 .aw-camp--diwali .aw-camp-poster-doc img { filter: none; opacity: 1; object-position: center; }
-/* Six night-time steps sit three to a row */
-@media (min-width: 768px) { .aw-camp--diwali .aw-camp-steps--six { grid-template-columns: repeat(3, 1fr); } }
 /* Step lines on the night band: meta colour is for light bands */
 .aw-camp--diwali .aw-camp-dark .aw-camp-steps span { color: color-mix(in srgb, var(--kit-color-on-ink) 80%, transparent); }
 /* Tonight, in order (owner, 3 Nov 2026: "audit and sort this"). Phone first: each step is one row with its number beside
@@ -70,6 +68,13 @@
 /* The step numbers: the marigold disc is 2.88:1 on the night band (under 3:1, WCAG 1.4.11), so a white ring
    (--camp-line) and a white number, as the band's other rules and icons */
 .aw-camp--diwali #tonight .aw-camp-steps > li::before { background: transparent; color: var(--kit-color-on-ink); box-shadow: inset 0 0 0 2px var(--camp-line); }
+/* Two across from 768 and three from 1200, as the campaign card grid (.aw-camp-grid); no connector lines between the
+   steps (the line after the third ran past the row's end to the band's edge) */
+@media (min-width: 768px) {
+	.aw-camp--diwali #tonight .aw-camp-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--kit-space-6); }
+	.aw-camp--diwali #tonight .aw-camp-steps > li::after { content: none; }
+}
+@media (min-width: 1200px) { .aw-camp--diwali #tonight .aw-camp-steps { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 /* Who to call has two columns: it fits a phone without sideways scrolling */
 .aw-camp--diwali #help { --kit-table-min: 0; }
 /* The law cards and the five action cards stand in the campaign card grid (.aw-camp-grid: stacked on phones, two
