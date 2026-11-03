@@ -312,7 +312,7 @@ A section's height is its content plus the theme's section padding: `.kit-sectio
 The home page's sections and their order live in the theme template `themes/animal-writes/templates/front-page.html`, not in the front page's content:
 
 1. Hero: block `animal-writes/home-hero`. While campaign 13848 is published it shows the campaign hero, open or closed: no automatic switch when it closes, and nothing is added after it closes. The standard hero (pattern `hero`) is not shown on Home; the block falls back to it only if the campaign is not published.
-2. Need help now? (`help-now`).
+2. Need help now? (`help-now`). Below the four-column layout the four link tiles have their icon square beside the title and line, 16px between tiles (3 Nov 2026).
 3. Find help near you (`find-help`: `[aw_find_help compact="1"]`).
 4. What's happening (`whats-happening`: Query Loop 41, three items as a mosaic: the lead with a 4:3 picture and summary, two rows beside it spread to end level; on phones the lead is a row like the other two).
 5. Guides (`learn`: Query Loop 44, at most one state cruelty guide).

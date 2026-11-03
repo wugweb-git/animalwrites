@@ -1725,6 +1725,17 @@ section.aw-camp-band.aw-ed-hero--campaign { box-sizing: border-box; min-height: 
 @container aw-help (min-width: 56.5rem) {
 	.aw-bento { gap: var(--kit-space-4); grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-areas: "sos injured vet1962 awbi" "sos cruelty vets orgs"; } /* 16px between tiles, so the Home help section stays within 720 (Layout rules 5) */
 }
+/* Below the four-column layout (phones and 768 to about 900px; 3 Nov 2026, Home sections fit one phone screen and
+   are at most 720px from 768): the four link tiles (injured animal, report cruelty, find a vet, find an organisation)
+   put their icon square beside the title and line, as a Kits tile does, and tiles sit --kit-space-4 apart as in the
+   four-column layout. The 112, 1962 and AWBI tiles keep their number layout. Section at 375: 1611 -> 1378px;
+   at 768: 982 -> 887px. */
+@container aw-help not (min-width: 56.5rem) {
+	.aw-bento { gap: var(--kit-space-4); }
+	.aw-bento-tile:is(.aw-bento--injured, .aw-bento--cruelty, .aw-bento--vets, .aw-bento--orgs) { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto 1fr; align-content: start; column-gap: var(--kit-space-4); row-gap: var(--kit-space-1); }
+	.aw-bento-tile:is(.aw-bento--injured, .aw-bento--cruelty, .aw-bento--vets, .aw-bento--orgs) > .aw-bento-ico { grid-row: 1 / span 2; margin-bottom: 0; }
+	.aw-bento-tile:is(.aw-bento--injured, .aw-bento--cruelty, .aw-bento--vets, .aw-bento--orgs) > :is(h3, p) { grid-column: 2; }
+}
 /* Each tile is a size container, so the phone numbers scale to the tile and never wrap or overflow. Depth: a faint
    border, a light line along the top edge, a soft top-to-bottom shade and a small shadow. Hover: the tile lifts
    (Kits' lift) with a stronger border and shadow. Pressed: it shrinks slightly, so a tap on a phone shows. */
