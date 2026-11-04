@@ -823,21 +823,23 @@ body { background: var(--kit-color-canvas); }
 .aw-nl-band { background: var(--kit-color-raised); border-top: var(--kit-border-width) solid var(--kit-color-line); padding: var(--kit-space-6) var(--kit-space-4); }
 @media (min-width: 768px) { .aw-nl-band { padding-inline: var(--kit-space-6); } }
 @media (min-width: 1200px) { .aw-nl-band { padding: var(--kit-space-7) var(--kit-space-gutter); } }
-.aw-nl-band-inner { box-sizing: border-box; position: relative; overflow: hidden; display: grid; gap: var(--kit-space-5); max-width: var(--kit-width-content); margin: 0 auto; padding: var(--kit-space-5); background: var(--kit-color-surface); border: var(--kit-border-width) solid var(--kit-color-line); border-top: var(--kit-border-mark) solid var(--kit-color-accent); border-radius: var(--kit-radius-card); } /* the top rule in the site accent (owner's mock, 4 Nov 2026; the site has no crimson token, crimson is the Lab campaign's) */
+.aw-nl-band-inner { box-sizing: border-box; position: relative; overflow: hidden; display: grid; gap: var(--kit-space-5); max-width: var(--kit-width-content); margin: 0 auto; padding: var(--kit-space-5); --nl-mark: color-mix(in srgb, var(--kit-color-danger) 82%, var(--kit-color-ink)); --nl-mark-deep: color-mix(in srgb, var(--kit-color-danger) 62%, var(--kit-color-ink)); background: color-mix(in srgb, var(--nl-mark) 6%, var(--kit-color-raised)); border: var(--kit-border-width) solid color-mix(in srgb, var(--nl-mark) 14%, var(--kit-color-line)); border-top: var(--kit-border-mark) solid var(--nl-mark); border-radius: var(--kit-radius-card); box-shadow: var(--kit-elevation-1); } /* owner's mock, 4 Nov 2026: crimson from the site red (--kit-color-danger) taken toward ink, on a pinkish cream card */
 @media (min-width: 768px) { .aw-nl-band-inner { padding: var(--kit-space-6); } }
 .aw-nl-band-text { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: var(--kit-space-4); align-items: center; }
-.aw-nl-band-text > p { padding-inline-start: var(--kit-space-4); border-inline-start: var(--kit-border-width) solid var(--kit-color-line); } /* the divider between the icon and the words */
+.aw-nl-band-text > p { padding-inline-start: var(--kit-space-4); border-inline-start: var(--kit-border-width) solid color-mix(in srgb, var(--kit-color-ink) 35%, transparent); } /* the divider between the icon and the words */
 /* Envelope and letters, drawn in tokens (decorative, no words): top right from 768, the text keeps clear of it */
 .aw-nl-band-art { display: none; }
 @media (min-width: 768px) {
-	.aw-nl-band-art { display: block; position: absolute; inset-block-start: var(--kit-space-4); inset-inline-end: var(--kit-space-5); width: var(--kit-space-9); height: auto; pointer-events: none; }
-	.aw-nl-band-text { padding-inline-end: calc(var(--kit-space-9) + var(--kit-space-5)); }
+	.aw-nl-band-art { display: block; position: absolute; inset-block-start: var(--kit-space-3); inset-inline-end: var(--kit-space-5); width: calc(var(--kit-space-9) * 1.5); height: auto; overflow: visible; pointer-events: none; }
+	.aw-nl-band-text { padding-inline-end: calc(var(--kit-space-9) * 1.5 + var(--kit-space-4)); }
 }
-.aw-nl-art-sheet { fill: var(--kit-color-raised); stroke: var(--kit-color-line); stroke-width: 1.5; }
-.aw-nl-art-back { fill: var(--kit-color-line); }
-.aw-nl-art-flap { fill: var(--kit-color-raised); stroke: var(--kit-color-line); stroke-width: 1.5; stroke-linejoin: round; }
-.aw-nl-art-seal { fill: var(--kit-color-accent); }
-.aw-nl-band-ico { grid-row: 1 / 3; display: inline-flex; align-items: center; justify-content: center; width: var(--kit-size-control-lg); height: var(--kit-size-control-lg); border-radius: var(--kit-radius-pill); background: var(--kit-color-accent); color: var(--kit-color-on-accent); --kit-ico-size: 1.5rem; }
+.aw-nl-art-halo { fill: color-mix(in srgb, var(--nl-mark) 12%, transparent); }
+.aw-nl-art-sheet { fill: var(--kit-color-surface); stroke: color-mix(in srgb, var(--nl-mark) 20%, var(--kit-color-line)); stroke-width: 1; }
+.aw-nl-art-rule { stroke: color-mix(in srgb, var(--kit-color-ink) 22%, transparent); stroke-width: 1.5; stroke-linecap: round; }
+.aw-nl-art-back { fill: var(--nl-mark-deep); }
+.aw-nl-art-flap { fill: var(--nl-mark); stroke: var(--nl-mark-deep); stroke-width: 1; stroke-linejoin: round; }
+.aw-nl-art-seal { fill: var(--nl-mark-deep); stroke: var(--kit-color-surface); stroke-width: 1; }
+.aw-nl-band-ico { grid-row: 1 / 3; display: inline-flex; align-items: center; justify-content: center; width: var(--kit-size-control-lg); height: var(--kit-size-control-lg); border-radius: var(--kit-radius-pill); background: var(--nl-mark); color: var(--kit-color-on-ink); --kit-ico-size: 1.5rem; }
 .aw-nl-band p.aw-nl-band-head { margin: 0; max-width: none; font-size: var(--kit-type-h2); font-weight: var(--kit-weight-bold); line-height: var(--kit-leading-heading); color: var(--kit-color-ink); }
 .aw-nl-band p.aw-nl-band-line { margin: 0; padding-top: var(--kit-space-1); max-width: 46ch; font-size: var(--kit-type-base); color: var(--kit-color-muted); }
 .aw-nl-band .aw-newsletter-form .ff-el-input--label { margin-bottom: var(--kit-space-1); }
@@ -848,11 +850,12 @@ body { background: var(--kit-color-canvas); }
 .aw-nl-band .aw-newsletter-form .ff-el-form-control { height: var(--kit-btn-height); min-height: var(--kit-btn-height); background-color: var(--kit-color-raised); transition-duration: var(--kit-motion-base); }
 .aw-nl-band .aw-newsletter-form .ff-el-form-control:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); } /* the theme focus ring, outside the blue border */
 .aw-nl-band .aw-newsletter-form .ff-btn-submit.kit-btn {
+	--kit-btn-primary-bg: var(--nl-mark); --kit-btn-primary-bg-hover: var(--nl-mark-deep); --kit-btn-primary-fg: var(--kit-color-on-ink); --kit-btn-primary-fg-hover: var(--kit-color-on-ink);
 	min-height: var(--kit-btn-height); font-weight: var(--kit-weight-strong);
 	transition: background-color var(--kit-motion-base) var(--kit-motion-ease), transform var(--kit-motion-base) var(--kit-motion-ease), box-shadow var(--kit-motion-base) var(--kit-motion-ease);
 }
 @media (hover: hover) { .aw-nl-band .aw-newsletter-form .ff-btn-submit.kit-btn:hover:not([disabled], .is-loading, [aria-busy=true]) { box-shadow: var(--kit-elevation-2); } } /* hover: the fill turns --kit-btn-primary-bg-hover, with a shadow */
-.aw-nl-band .aw-newsletter-form .ff-btn-submit.kit-btn:active:not([disabled]) { background: var(--kit-color-ink); box-shadow: none; } /* pressed: back to ink, no shadow */
+.aw-nl-band .aw-newsletter-form .ff-btn-submit.kit-btn:active:not([disabled]) { background: var(--nl-mark-deep); box-shadow: none; } /* pressed: deep crimson, no shadow */
 @media (hover: hover) and (prefers-reduced-motion: no-preference) { .aw-nl-band .aw-newsletter-form .ff-btn-submit.kit-btn:hover:not([disabled], .is-loading, [aria-busy=true]) { transform: translateY(var(--kit-motion-lift)); } } /* and lifts */
 @media (prefers-reduced-motion: no-preference) { .aw-nl-band .aw-newsletter-form .ff-btn-submit.kit-btn:active:not([disabled]) { transform: translateY(var(--kit-btn-press)); } } /* and goes down 1px */
 @media (prefers-reduced-motion: reduce) {
