@@ -57,9 +57,18 @@ add_action(
 			'wp_enqueue_scripts',
 			function () {
 				$v = fn( $f ) => (string) filemtime( aw_theme_parts_path( $f ) );
-				wp_enqueue_style( 'aw-tokens', aw_theme_file_uri( 'assets/css/tokens.css' ), array( 'kit-tokens' ), $v( 'assets/css/tokens.css' ) ); // brand values over the Kits defaults
+				wp_enqueue_style( 'aw-tokens', aw_theme_file_uri( 'assets/css/tokens.css' ), array( 'kit-tokens' ), $v( 'assets/css/tokens.css' ) ); // Brand values over the Kits defaults.
 				wp_enqueue_style( 'aw-components', aw_theme_file_uri( 'assets/css/aw.css' ), array( 'aw-tokens', 'kit-components' ), $v( 'assets/css/aw.css' ) );
-				wp_enqueue_script( 'aw-interactions', aw_theme_file_uri( 'assets/js/aw.js' ), array( 'kit-interactions' ), $v( 'assets/js/aw.js' ), array( 'in_footer' => true, 'strategy' => 'defer' ) );
+				wp_enqueue_script(
+					'aw-interactions',
+					aw_theme_file_uri( 'assets/js/aw.js' ),
+					array( 'kit-interactions' ),
+					$v( 'assets/js/aw.js' ),
+					array(
+						'in_footer' => true,
+						'strategy'  => 'defer',
+					)
+				);
 			},
 			20
 		);
@@ -76,7 +85,7 @@ add_action(
 		add_action(
 			'wp_head',
 			function () {
-				if ( ! is_front_page() || ( function_exists( 'aw_home_hero_is_campaign' ) && aw_home_hero_is_campaign() ) ) { // the campaign hero has its own artwork
+				if ( ! is_front_page() || ( function_exists( 'aw_home_hero_is_campaign' ) && aw_home_hero_is_campaign() ) ) { // The campaign hero has its own artwork.
 					return;
 				}
 				$base = '/wp-content/uploads/2026/10/aw1-im5-';
@@ -94,8 +103,11 @@ add_action(
 		add_filter(
 			'style_loader_tag',
 			function ( $tag, $handle ) {
-				$files = array( 'wp-block-navigation' => 'home-navigation.css', 'wp-block-cover' => 'home-cover.css' );
-				if ( ! is_front_page() || is_admin() || ! isset( $files[ $handle ] ) || get_bloginfo( 'version' ) !== '7.1.3' ) { // the child theme's AW_HOME_CORE_CSS_WP
+				$files = array(
+					'wp-block-navigation' => 'home-navigation.css',
+					'wp-block-cover'      => 'home-cover.css',
+				);
+				if ( ! is_front_page() || is_admin() || ! isset( $files[ $handle ] ) || get_bloginfo( 'version' ) !== '7.1.3' ) { // The child theme's AW_HOME_CORE_CSS_WP.
 					return $tag;
 				}
 				$file = aw_theme_parts_path( 'assets/vendor/wp-core/' . $files[ $handle ] );

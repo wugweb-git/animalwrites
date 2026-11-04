@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 add_action(
 	'setup_theme',
 	function () {
-		if ( 'kits-by-wugweb' !== get_template() || 'animal-writes' === get_stylesheet() ) { // the child theme adds both itself
+		if ( 'kits-by-wugweb' !== get_template() || 'animal-writes' === get_stylesheet() ) { // The child theme adds both itself.
 			return;
 		}
 
@@ -38,7 +38,7 @@ add_action(
 			function () {
 				$mode = function_exists( 'kits_option' ) ? kits_option( 'font_preload' ) : 'wide';
 				$font = function_exists( 'kits_body_font_file' ) ? kits_body_font_file() : '';
-				$font = '' !== $font ? $font : get_theme_file_uri( 'assets/fonts/inter/inter-latin.woff2' ); // Kits ships this file
+				$font = '' !== $font ? $font : get_theme_file_uri( 'assets/fonts/inter/inter-latin.woff2' ); // Kits ships this file.
 				if ( 'off' !== $mode ) {
 					echo '<link rel="preload" href="' . esc_url( $font ) . '" as="font" type="font/woff2" crossorigin' . ( 'all' === $mode ? '' : ' media="(min-width: 1200px)"' ) . '>' . "\n";
 				}
