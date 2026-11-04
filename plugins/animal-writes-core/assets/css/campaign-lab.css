@@ -299,7 +299,7 @@
 @property --aw-tier-fill { syntax: "<percentage>"; inherits: true; initial-value: 100%; }
 .aw-camp-ladder { list-style: none; margin: var(--kit-space-5) 0; padding: 0; display: grid; gap: var(--kit-space-5); grid-template-columns: 1fr; }
 @media (min-width: 768px) { .aw-camp-ladder { grid-template-columns: repeat(2, 1fr); } }
-@media (min-width: 1200px) { .aw-camp-ladder { grid-template-columns: repeat(4, 1fr); align-items: start; } } /* side by side, the four bars read as one gauge; the bar stays thin on desktop (owner, 3 Nov 2026: the 6rem block read as a missing picture) */
+@media (min-width: 1200px) { .aw-camp-ladder { grid-template-columns: repeat(4, 1fr); } } /* side by side, the four bars read as one gauge; the bar stays thin on desktop (owner, 3 Nov 2026: the 6rem block read as a missing picture) */
 /* Tiers are H3 under the section H2 (owner, 25 Oct) with the look they had as H4: aw.css gives content H3s line-height 1.25 !important */
 .aw-camp .aw-camp-ladder .aw-camp-tier h3 { font-size: var(--kit-type-h3) !important; line-height: 1.3 !important; }
 .aw-camp-tier h3 { margin: 0 0 var(--kit-space-2); font-size: var(--kit-type-h3); font-weight: 800; }
@@ -352,8 +352,11 @@
 .aw-camp-tier .aw-camp-tier-who { align-self: flex-start; margin-bottom: var(--kit-space-3); }
 .aw-camp-tier-who.is-ext { box-shadow: inset 0 0 0 var(--kit-border-width) color-mix(in srgb, var(--kit-color-on-ink) 28%, transparent); } /* the crimson chip stays clear of the crimson card */
 .aw-camp-tier-art { display: block; width: calc(100% + 2 * var(--kit-space-5)); max-width: none; height: auto; aspect-ratio: 4 / 3; object-fit: cover; margin: auto calc(-1 * var(--kit-space-5)) calc(-1 * var(--kit-space-5)); padding-top: var(--kit-space-3); border-radius: 0 0 var(--kit-radius-card) var(--kit-radius-card); -webkit-mask: linear-gradient(to bottom, transparent, #000 40%); mask: linear-gradient(to bottom, transparent, #000 40%); }
-@media (min-width: 768px) { .aw-camp-ladder { align-items: stretch; } }
-@media (min-width: 1200px) { .aw-camp-ladder { align-items: stretch; } }
+/* Phones: the cards are padded, so the rail's node and line start level with the bar */
+@media (max-width: 767px) {
+	.aw-camp-tier::before { inset-block-start: var(--kit-space-5); }
+	.aw-camp-tier:not(:last-child)::after { inset-block-start: calc(0.75rem + var(--kit-space-5)); }
+}
 
 /* Today vs the draft: the draft column carries the campaign colour */
 .aw-camp-compare table { background: var(--kit-color-bg); border-radius: var(--kit-radius-card); overflow: hidden; }

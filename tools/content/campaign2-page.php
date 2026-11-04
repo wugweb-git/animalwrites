@@ -231,7 +231,7 @@ $rules = c2sec( 'rules', c2h( 'What the draft does' ) . "<!-- wp:group {\"classN
 $tier = function ( $lvl, $name, $who, $ext, $text, $art = '' ) {
 	return '<li class="aw-camp-tier aw-camp-tier--' . $lvl . '"><span class="aw-camp-tier-bar" aria-hidden="true"></span>'
 		. '<h3>' . $name . '</h3><p class="aw-camp-tier-who' . ( $ext ? ' is-ext' : '' ) . '">' . c2i( $ext ? 'legal' : 'building' ) . $who . '</p><p class="aw-camp-tier-ex">' . $text . '</p>'
-		. ( $art ? '<img class="aw-camp-tier-art" src="' . $art . '" alt="" width="800" height="600" loading="lazy" decoding="async">' : '' ) . '</li>';
+		. ( $art ? '<img class="aw-camp-tier-art" src="' . esc_url( $art ) . '" alt="" width="800" height="600" loading="lazy" decoding="async">' : '' ) . '</li>';
 };
 $pain = c2sec(
 	'pain-scale',
