@@ -191,7 +191,7 @@ function aw_block_home_sc() {
 		aw_camp_cache_until( $id ); // the day count moves at midnight in India
 	}
 	// The campaign's portrait photograph (the one its hero shows on phones): the card's background at every width.
-	$img  = '<img class="aw-content-bg" src="' . esc_url( get_theme_file_uri( 'assets/img/campaigns/supreme-court-stray-dog-phone.webp' ) ) . '" width="1122" height="1402" alt="" loading="lazy" decoding="async">';
+	$img  = '<img class="aw-content-bg" src="' . esc_url( aw_theme_file_uri( 'assets/img/campaigns/supreme-court-stray-dog-phone.webp' ) ) . '" width="1122" height="1402" alt="" loading="lazy" decoding="async">';
 	$pre  = function_exists( 'aw_camp_shown_state' ) && 'pre' === aw_camp_shown_state( $id ); // Pre: no countdown to close, no action button (Content Standard E)
 	$cd   = $day && ! $pre ? do_shortcode( '[aw_countdown date="' . $day . '" label="Compliance reports due"]' ) : ''; // $day is Y-m-d (checked above)
 	$cd   = preg_replace( '#\s*<span class="aw-cd-when">[^<]*</span>#', '', $cd ); // the day count only: the heading gives the date

@@ -318,7 +318,7 @@ function aw_block_listing_profiles( $a, $id ) {
 		if ( aw_lf( $id, $k ) ) {
 			/* translators: 1: organisation, 2: network. */
 			$label  = sprintf( __( '%1$s on %2$s', 'animal-writes-core' ), get_the_title( $id ), $l[1] );
-			$mark   = 'aw_g_profile' === $k ? '<img class="aw-listing-profile-img" src="' . esc_url( get_theme_file_uri( 'assets/img/google-maps.png' ) ) . '" alt="" width="20" height="20">' : '<span class="kit-ico kit-ico--' . esc_attr( $l[0] ) . '" aria-hidden="true"></span>'; // Google: its own Maps mark
+			$mark   = 'aw_g_profile' === $k ? '<img class="aw-listing-profile-img" src="' . esc_url( aw_theme_file_uri( 'assets/img/google-maps.png' ) ) . '" alt="" width="20" height="20">' : '<span class="kit-ico kit-ico--' . esc_attr( $l[0] ) . '" aria-hidden="true"></span>'; // Google: its own Maps mark
 			$links .= '<a class="aw-listing-profile" href="' . esc_url( aw_lf( $id, $k ) ) . '" rel="' . esc_attr( $rel ) . '" target="_blank" data-act="' . esc_attr( substr( $k, 3 ) ) . '" aria-label="' . esc_attr( $label ) . '" title="' . esc_attr( $l[1] ) . '">' . $mark . '</a>';
 		}
 	}

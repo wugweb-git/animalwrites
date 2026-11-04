@@ -77,7 +77,7 @@ $aw_photo   = '/wp-content/uploads/2026/11/supreme-court-steps-sleeping-street-d
 --kit-color-accent:#FFBE1A;--kit-color-on-accent:#141414;--kit-btn-brand-bg:var(--kit-color-accent);--kit-btn-brand-fg:var(--kit-color-on-accent)}
 @media (min-width:768px){:root{--kit-space-section:70px;--kit-space-gutter:32px;--kit-btn-height:48px;--kit-btn-pad:24px}}
 @media (min-width:1200px){:root{--kit-space-section:96px;--kit-space-gutter:48px;--kit-hero-min:660px;--kit-btn-height:52px}}
-@font-face{font-family:"Inter";font-style:normal;font-weight:400 700;font-display:swap;src:url("/wp-content/themes/animal-writes/assets/fonts/inter/inter-latin.woff2") format("woff2")}
+@font-face{font-family:"Inter";font-style:normal;font-weight:400 700;font-display:swap;src:url("/wp-content/themes/kits-by-wugweb/assets/fonts/inter/inter-latin.woff2") format("woff2")}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 body{margin:0;background:var(--kit-color-canvas);color:var(--kit-color-text);font:400 var(--kit-type-base)/var(--kit-leading-body) "Inter",system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:var(--kit-tracking-body)}
