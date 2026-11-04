@@ -60,11 +60,7 @@ add_action(
 		if ( ! current_user_can( 'edit_posts' ) ) {
 			return;
 		}
-		aw_dash_summary(
-			'aw_activity',
-			fn() => number_format_i18n( aw_activity_counts( aw_activity_types() )['pending'] ) . ' awaiting review'
-		);
-		aw_dash_section(
+		wp_add_dashboard_widget(
 			'aw_activity',
 			'Activity',
 			function () {

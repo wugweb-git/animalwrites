@@ -38,11 +38,7 @@ add_action(
 		if ( ! aw_forms_widget_allowed() ) {
 			return;
 		}
-		aw_dash_summary(
-			'aw_form_entries',
-			fn() => number_format_i18n( array_sum( array_map( fn( $r ) => (int) $r->unread, aw_forms_widget_rows() ) ) ) . ' unread'
-		);
-		aw_dash_section(
+		wp_add_dashboard_widget(
 			'aw_form_entries',
 			'Form entries',
 			function () {

@@ -363,17 +363,7 @@ add_action(
 	'wp_dashboard_setup',
 	function () {
 		if ( current_user_can( 'edit_posts' ) && aw_cl_campaigns() ) {
-			aw_dash_section( 'aw_cl_widget', 'Campaign letters', 'aw_cl_widget' ); // a section of the Animal Writes box
-			aw_dash_summary(
-				'aw_cl_widget',
-				function () {
-					global $wpdb;
-					$cid = (int) array_key_first( aw_cl_campaigns() );
-					$t   = aw_cl_table();
-					$n   = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$t} WHERE campaign_id = %d AND sent_on >= %s", $cid, wp_date( 'Y-m-d', strtotime( '-6 days' ) ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
-					return number_format_i18n( $n ) . ' in the last 7 days';
-				}
-			);
+			wp_add_dashboard_widget( 'aw_cl_widget', 'Campaign letters', 'aw_cl_widget' );
 		}
 	}
 );

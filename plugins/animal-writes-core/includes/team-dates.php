@@ -269,19 +269,7 @@ add_action(
 		if ( ! current_user_can( AW_DATES_CAP ) ) {
 			return;
 		}
-		aw_dash_summary(
-			'aw_team_dates',
-			function () {
-				$today = wp_date( 'Y-m-d' );
-				foreach ( aw_team_dates() as $d ) {
-					if ( $d['date'] >= $today ) {
-						return 'Next: ' . $d['title'] . ', ' . aw_team_date_when( $d['date'] );
-					}
-				}
-				return 'Nothing coming up';
-			}
-		);
-		aw_dash_section(
+		wp_add_dashboard_widget(
 			'aw_team_dates',
 			'Dates',
 			function () {

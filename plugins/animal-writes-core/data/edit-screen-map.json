@@ -738,20 +738,6 @@
 			"runtime": "map-only",
 			"notes": "Counts and the last 5 messages per mailbox; stores nothing. Users with the Mailweb capability only."
 		},
-		"aw_core_dashboard": {
-			"title": "Animal Writes",
-			"source": "Animal Writes core",
-			"plugin": "Animal Writes core",
-			"purpose": "Core Dashboard box",
-			"file": "core/dashboard-core.php:59",
-			"screen": "admin",
-			"page": "Dashboard (widgets)",
-			"types": [
-				"dashboard"
-			],
-			"runtime": "map-only",
-			"notes": "One box for the core plugin: Campaign letters, Form entries, Dates, Activity and Scheduled tasks are its sections (each keeps its own permission check); stores nothing."
-		},
 		"aw_activity": {
 			"title": "Activity",
 			"source": "Animal Writes core",
