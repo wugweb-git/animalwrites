@@ -21,6 +21,8 @@ import subprocess
 import sys
 import tempfile
 
+from theme_copies import is_copy
+
 REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 RULESET = os.path.join(REPO, 'tools', 'ci', 'phpcs-security.xml')
 
@@ -93,6 +95,8 @@ def main():
         status = parts[0]
         new_path = parts[-1]
         if not new_path.endswith('.php'):
+            continue
+        if is_copy(os.path.join(REPO, new_path)):  # a copy of a child theme file (tools/ci/theme_copies.py)
             continue
         old_path = parts[1] if status.startswith('R') else (None if status == 'A' else new_path)
         if old_path is not None and not old_path.endswith('.php'):
