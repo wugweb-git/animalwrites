@@ -3,10 +3,13 @@
  * Switching from the Animal Writes child theme to Kits by Wugweb alone (4 Nov 2026).
  *
  * The child's saved Styles (its wp_global_styles post: fonts, colours, any Site Editor changes) and its theme mods are
- * kept per theme, so Kits would start without them. On core's switch_theme action, in the same request as the switch
- * (no page is built without them), they are copied to Kits:
- * - Styles: only when Kits has no saved Styles of its own, or only core's empty default post;
- * - theme mods: only the keys Kits does not already have.
+ * kept per theme, so Kits would start without them. They are copied to Kits just before core writes the new
+ * `stylesheet` option (pre_update_option_stylesheet, inside switch_theme()), so no request ever sees Kits active
+ * without them:
+ * - Styles: only when Kits has no saved Styles of its own, or only core's empty default post. Revisions stay on the
+ *   child's post;
+ * - theme mods: only the keys Kits does not already have; a positive custom_css_post_id is not copied (that
+ *   Additional CSS post belongs to the child).
  * The child's records are never changed, so switching back to it finds them as they were. Each run is recorded in
  * option aw_theme_switch_log (last 10) and shown on Animal Writes → Check site.
  *
@@ -21,32 +24,17 @@ const AW_THEME_SWITCH_FROM = 'animal-writes';
 const AW_THEME_SWITCH_TO   = 'kits-by-wugweb';
 
 /**
- * A theme's saved Styles post, as core finds it (post name and wp_theme term), or null.
+ * A theme's saved Styles post, found the way core finds it, or null.
  *
  * @param string $stylesheet Theme folder name.
  */
 function aw_theme_switch_styles_post( string $stylesheet ): ?WP_Post {
-	$posts = get_posts(
-		array(
-			'post_type'              => 'wp_global_styles',
-			'post_status'            => array( 'publish' ),
-			'name'                   => sprintf( 'wp-global-styles-%s', urlencode( $stylesheet ) ), // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.urlencode_urlencode -- core's own name for the post
-			'posts_per_page'         => 1,
-			'orderby'                => 'date',
-			'order'                  => 'DESC',
-			'no_found_rows'          => true,
-			'update_post_term_cache' => false,
-			'suppress_filters'       => true,
-			'tax_query'              => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
-				array(
-					'taxonomy' => 'wp_theme',
-					'field'    => 'name',
-					'terms'    => $stylesheet,
-				),
-			),
-		)
-	);
-	return $posts ? $posts[0] : null;
+	$theme = wp_get_theme( $stylesheet );
+	if ( ! $theme->exists() || ! class_exists( 'WP_Theme_JSON_Resolver' ) ) {
+		return null;
+	}
+	$row = WP_Theme_JSON_Resolver::get_user_data_from_wp_global_styles( $theme, false );
+	return ! empty( $row['ID'] ) ? get_post( (int) $row['ID'] ) : null;
 }
 
 /**
@@ -64,20 +52,21 @@ function aw_theme_switch_styles_empty( WP_Post $post ): bool {
 }
 
 /**
- * Copies the child's saved Styles and theme mods to Kits when the site switches from the child to Kits.
+ * Copies the child's saved Styles and theme mods to Kits when the site is about to switch from the child to Kits.
+ * Filter callback: always returns the new value unchanged.
  *
- * @param string   $new_name  New theme name.
- * @param WP_Theme $new_theme New theme.
- * @param WP_Theme $old_theme Old theme.
+ * @param mixed $value     New `stylesheet` value.
+ * @param mixed $old_value Current `stylesheet` value.
+ * @return mixed
  */
-function aw_theme_switch_copy( $new_name, $new_theme, $old_theme ) {
-	if ( ! $old_theme instanceof WP_Theme || ! $new_theme instanceof WP_Theme
-		|| AW_THEME_SWITCH_FROM !== $old_theme->get_stylesheet() || AW_THEME_SWITCH_TO !== $new_theme->get_stylesheet() ) {
-		return;
+function aw_theme_switch_copy( $value, $old_value ) {
+	if ( AW_THEME_SWITCH_FROM !== $old_value || AW_THEME_SWITCH_TO !== $value || ! wp_get_theme( AW_THEME_SWITCH_TO )->exists() ) {
+		return $value;
 	}
+	$user  = wp_get_current_user();
 	$entry = array(
 		'time'   => time(),
-		'user'   => get_current_user_id(),
+		'user'   => $user->exists() ? $user->user_login : '',
 		'from'   => AW_THEME_SWITCH_FROM,
 		'to'     => AW_THEME_SWITCH_TO,
 		'styles' => '',
@@ -120,13 +109,16 @@ function aw_theme_switch_copy( $new_name, $new_theme, $old_theme ) {
 		$entry['styles'] = is_wp_error( $id ) ? 'Copy failed: ' . $id->get_error_message() : sprintf( 'Copied the child\'s saved Styles (#%d) to a new Kits Styles post (#%d).', $src->ID, $id );
 	}
 
-	// Theme mods: keys Kits does not have yet.
+	// Theme mods: keys Kits does not have yet. The child's own Additional CSS post stays the child's.
 	$from_mods = get_option( 'theme_mods_' . AW_THEME_SWITCH_FROM );
 	$to_mods   = get_option( 'theme_mods_' . AW_THEME_SWITCH_TO );
 	$to_mods   = is_array( $to_mods ) ? $to_mods : array();
 	if ( ! is_array( $from_mods ) || ! $from_mods ) {
 		$entry['mods'] = 'The child theme has no theme mods; nothing copied.';
 	} else {
+		if ( isset( $from_mods['custom_css_post_id'] ) && (int) $from_mods['custom_css_post_id'] > 0 ) {
+			unset( $from_mods['custom_css_post_id'] );
+		}
 		$add = array_diff_key( $from_mods, $to_mods );
 		if ( $add ) {
 			update_option( 'theme_mods_' . AW_THEME_SWITCH_TO, array_merge( $to_mods, $add ) );
@@ -147,8 +139,9 @@ function aw_theme_switch_copy( $new_name, $new_theme, $old_theme ) {
 	$log   = is_array( $log ) ? $log : array();
 	$log[] = $entry;
 	update_option( 'aw_theme_switch_log', array_slice( $log, -10 ), false );
+	return $value;
 }
-add_action( 'switch_theme', 'aw_theme_switch_copy', 10, 3 );
+add_filter( 'pre_update_option_stylesheet', 'aw_theme_switch_copy', 10, 2 );
 
 /** Animal Writes → Check site: the last theme switch from the child to Kits, if there was one. */
 function aw_theme_switch_site_check() {
@@ -163,7 +156,8 @@ function aw_theme_switch_site_check() {
 	}
 	$last = end( $log );
 	$time = isset( $last['time'] ) ? wp_date( 'j M Y, H:i', (int) $last['time'] ) : '';
-	echo '<p>' . esc_html( sprintf( 'Last switch from %1$s to %2$s: %3$s.', (string) ( $last['from'] ?? '' ), (string) ( $last['to'] ?? '' ), $time ) ) . '</p><ul>';
+	$who  = '' !== (string) ( $last['user'] ?? '' ) ? ' by ' . (string) $last['user'] : '';
+	echo '<p>' . esc_html( sprintf( 'Last switch from %1$s to %2$s: %3$s%4$s.', (string) ( $last['from'] ?? '' ), (string) ( $last['to'] ?? '' ), $time, $who ) ) . '</p><ul>';
 	echo '<li>' . esc_html( 'Styles: ' . (string) ( $last['styles'] ?? '' ) ) . '</li>';
 	echo '<li>' . esc_html( 'Theme mods: ' . (string) ( $last['mods'] ?? '' ) ) . '</li>';
 	echo '</ul>';
