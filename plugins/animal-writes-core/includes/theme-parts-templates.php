@@ -12,8 +12,8 @@
  *   theme's file does; a template saved in the Site Editor (database) still wins over both, and "Clear
  *   customizations" goes back to the file here. register_block_template() is not used: core ranks a theme file above
  *   a plugin template of the same slug, so page, single, 404 and archive would stay Kits', and it has no parts.
- * - theme.json: the custom templates (page-hub, campaign-page) and any template part areas are merged into the theme
- *   data (wp_theme_json_data_theme), as the child theme's theme.json is merged over Kits'.
+ * - theme.json (custom templates such as page-hub and campaign-page, template part areas): merged with the rest of
+ *   the copied theme.json in theme-parts-assets.php.
  * - Patterns: registered on init from the file headers, as core does for a theme's patterns folder.
  * - A template part block saved with "theme":"animal-writes" renders the active theme's part.
  *
@@ -34,6 +34,29 @@ function aw_core_theme_template_dir( string $template_type ): string {
 }
 
 /**
+ * The .html files in a folder and its subfolders, found as core's _get_block_templates_paths() finds a theme's
+ * (sorted, so the result does not depend on the file system's order).
+ *
+ * @param string $base_directory Folder.
+ * @return string[] Full paths.
+ */
+function aw_core_theme_template_paths( string $base_directory ): array {
+	$paths = array();
+	if ( is_dir( $base_directory ) ) {
+		$nested = new RegexIterator(
+			new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $base_directory ) ),
+			'/^.+\.html$/i',
+			RecursiveRegexIterator::GET_MATCH
+		);
+		foreach ( $nested as $path => $match ) {
+			$paths[] = (string) $path;
+		}
+	}
+	sort( $paths );
+	return $paths;
+}
+
+/**
  * This plugin's template or part files that match a query, in the form core's _get_block_templates_files() returns
  * (slug, path, theme, type, and title, postTypes or area from theme.json).
  *
@@ -47,15 +70,16 @@ function aw_core_theme_template_files( string $template_type, array $query = arr
 	}
 	static $paths = array();
 	if ( ! isset( $paths[ $template_type ] ) ) {
-		$paths[ $template_type ] = (array) glob( aw_core_theme_template_dir( $template_type ) . '/*.html' );
-		sort( $paths[ $template_type ] );
+		$paths[ $template_type ] = aw_core_theme_template_paths( aw_core_theme_template_dir( $template_type ) );
 	}
+	$base    = aw_core_theme_template_dir( $template_type ) . DIRECTORY_SEPARATOR;
 	$include = (array) ( $query['slug__in'] ?? array() );
 	$skip    = (array) ( $query['slug__not_in'] ?? array() );
 	$area    = $query['area'] ?? null;
 	$out     = array();
 	foreach ( $paths[ $template_type ] as $path ) {
-		$slug = basename( (string) $path, '.html' );
+		// As core: the path below the folder, without ".html" (a file in a subfolder keeps the subfolder in its slug).
+		$slug = substr( $path, strlen( $base ), -5 );
 		if ( ( $include && ! in_array( $slug, $include, true ) ) || ( $skip && in_array( $slug, $skip, true ) ) ) {
 			continue;
 		}
@@ -170,30 +194,6 @@ function aw_core_theme_mark_saved( $template ) {
 add_filter( 'get_block_template', 'aw_core_theme_mark_saved', 1 );
 
 /**
- * The custom templates and template parts declared in the Animal Writes theme.json, merged over Kits' theme data the
- * way a child theme's theme.json is (same keys, same order).
- *
- * @param WP_Theme_JSON_Data $theme_json Kits' theme.json data.
- */
-function aw_core_theme_json_templates( $theme_json ) {
-	if ( ! aw_core_theme_parts_on() || ! is_object( $theme_json ) || ! method_exists( $theme_json, 'update_with' ) ) {
-		return $theme_json;
-	}
-	$file = AW_THEME_PARTS_DIR . 'theme.json';
-	$data = is_readable( $file ) ? wp_json_file_decode( $file, array( 'associative' => true ) ) : null;
-	if ( ! is_array( $data ) ) {
-		return $theme_json;
-	}
-	$add = array_intersect_key( $data, array_flip( array( 'customTemplates', 'templateParts' ) ) );
-	if ( ! $add ) {
-		return $theme_json;
-	}
-	$add['version'] = (int) ( $data['version'] ?? WP_Theme_JSON::LATEST_SCHEMA );
-	return $theme_json->update_with( $add );
-}
-add_filter( 'wp_theme_json_data_theme', 'aw_core_theme_json_templates' );
-
-/**
  * A template part block saved while the child theme was active can carry "theme":"animal-writes"; core renders a part
  * only for the active theme, so it is read as the active theme's part.
  *
@@ -208,20 +208,80 @@ function aw_core_theme_part_block_theme( $block ) {
 add_filter( 'render_block_data', 'aw_core_theme_part_block_theme', 1 );
 
 /**
- * Pattern headers of this plugin's patterns folder, parsed as WP_Theme::get_block_patterns() parses a theme's
- * (kept until a file changes).
+ * The .php files in a folder and its subfolders, in the order WP_Theme::scandir() lists a theme's patterns folder
+ * (scandir() order, dot files and the excluded folders skipped).
  *
- * @return array[] File name => pattern data.
+ * @param string $path          Folder, no trailing slash.
+ * @param string $relative_path Path below the patterns folder (used when recursing).
+ * @return string[] Path below the patterns folder => full path.
+ */
+function aw_core_theme_pattern_scandir( string $path, string $relative_path = '' ): array {
+	if ( ! is_dir( $path ) ) {
+		return array();
+	}
+	$relative_path = '' === $relative_path ? '' : trailingslashit( $relative_path );
+	$results       = scandir( $path );
+	$files         = array();
+	/** This filter is documented in wp-includes/class-wp-theme.php */
+	$exclusions = (array) apply_filters( 'theme_scandir_exclusions', array( 'CVS', 'node_modules', 'vendor', 'bower_components' ) );
+	foreach ( $results ? $results : array() as $result ) {
+		if ( '.' === $result[0] || in_array( $result, $exclusions, true ) ) {
+			continue;
+		}
+		if ( is_dir( $path . '/' . $result ) ) {
+			$files = array_merge( $files, aw_core_theme_pattern_scandir( $path . '/' . $result, $relative_path . $result ) );
+		} elseif ( preg_match( '~\.(php)$~', $result ) ) {
+			$files[ $relative_path . $result ] = $path . '/' . $result;
+		}
+	}
+	return $files;
+}
+
+/**
+ * Pattern headers of this plugin's patterns folder, parsed as WP_Theme::get_block_patterns() parses a theme's: the
+ * same file list filter (theme_block_pattern_files), the same checks and notices, a pattern with an invalid slug
+ * still kept (core flags it and goes on). Cached in a site transient with core's expiry for theme pattern data
+ * (wp_theme_files_cache_ttl) and only while the file list and dates match; no cache in theme development mode.
+ *
+ * @return array[] Path below the patterns folder => pattern data.
  */
 function aw_core_theme_pattern_data(): array {
-	$dir   = AW_THEME_PARTS_DIR . 'patterns/';
-	$files = (array) glob( $dir . '*.php' );
-	sort( $files );
-	$sig    = md5( implode( ',', array_map( fn( $f ) => basename( (string) $f ) . ':' . (int) filemtime( (string) $f ), $files ) ) );
-	$cached = get_site_transient( 'aw_core_theme_patterns' );
-	if ( is_array( $cached ) && ( $cached['sig'] ?? '' ) === $sig && is_array( $cached['patterns'] ?? null ) ) {
-		return $cached['patterns'];
+	$dirpath = AW_THEME_PARTS_DIR . 'patterns';
+	$files   = aw_core_theme_pattern_scandir( $dirpath );
+	/** This filter is documented in wp-includes/class-wp-theme.php */
+	$files   = (array) apply_filters( 'theme_block_pattern_files', $files, $dirpath );
+	$dirpath = trailingslashit( $dirpath );
+
+	// Current files, by path below the patterns folder; only these may come back from the cache.
+	$current = array();
+	foreach ( $files as $file ) {
+		$file = (string) $file;
+		$key  = str_replace( $dirpath, '', $file );
+		if ( 0 === strpos( $file, $dirpath ) && 0 === validate_file( $key ) && is_file( $file ) ) {
+			$current[ $key ] = (int) filemtime( $file );
+		}
 	}
+
+	$transient = 'aw_core_theme_patterns';
+	$can_cache = ! wp_is_development_mode( 'theme' );
+	$sig       = md5( (string) wp_json_encode( $current ) );
+	$cached    = get_site_transient( $transient );
+	if ( is_array( $cached ) ) {
+		if ( ! $can_cache ) {
+			delete_site_transient( $transient );
+		} elseif ( ( $cached['sig'] ?? '' ) === $sig && is_array( $cached['patterns'] ?? null ) ) {
+			$patterns = array();
+			foreach ( $cached['patterns'] as $key => $pattern ) {
+				if ( is_string( $key ) && isset( $current[ $key ] ) && is_array( $pattern ) && isset( $pattern['slug'], $pattern['title'] ) ) {
+					$patterns[ $key ] = $pattern;
+				}
+			}
+			if ( count( $patterns ) === count( $cached['patterns'] ) ) {
+				return $patterns;
+			}
+		}
+	}
+
 	$headers = array(
 		'title'         => 'Title',
 		'slug'          => 'Slug',
@@ -236,8 +296,24 @@ function aw_core_theme_pattern_data(): array {
 	);
 	$out     = array();
 	foreach ( $files as $file ) {
-		$pattern = get_file_data( (string) $file, $headers );
-		if ( empty( $pattern['slug'] ) || ! preg_match( '/^[A-z0-9\/_-]+$/', $pattern['slug'] ) || ! $pattern['title'] ) {
+		$file = (string) $file;
+		$key  = str_replace( $dirpath, '', $file );
+		if ( ! isset( $current[ $key ] ) ) {
+			continue;
+		}
+		$pattern = get_file_data( $file, $headers );
+		if ( empty( $pattern['slug'] ) ) {
+			/* translators: %s: file name. */
+			_doing_it_wrong( __FUNCTION__, esc_html( sprintf( __( 'Could not register file "%s" as a block pattern ("Slug" field missing)', 'animal-writes-core' ), $file ) ), '6.0.0' );
+			continue;
+		}
+		if ( ! preg_match( '/^[A-z0-9\/_-]+$/', $pattern['slug'] ) ) {
+			/* translators: 1: file name; 2: slug value found. */
+			_doing_it_wrong( __FUNCTION__, esc_html( sprintf( __( 'Could not register file "%1$s" as a block pattern (invalid slug "%2$s")', 'animal-writes-core' ), $file, $pattern['slug'] ) ), '6.0.0' );
+		}
+		if ( ! $pattern['title'] ) {
+			/* translators: %s: file name. */
+			_doing_it_wrong( __FUNCTION__, esc_html( sprintf( __( 'Could not register file "%s" as a block pattern ("Title" field missing)', 'animal-writes-core' ), $file ) ), '6.0.0' );
 			continue;
 		}
 		foreach ( array( 'categories', 'keywords', 'blockTypes', 'postTypes', 'templateTypes' ) as $list ) {
@@ -257,31 +333,44 @@ function aw_core_theme_pattern_data(): array {
 		} else {
 			unset( $pattern['inserter'] );
 		}
-		$out[ basename( (string) $file ) ] = $pattern;
+		$out[ $key ] = $pattern;
 	}
-	set_site_transient(
-		'aw_core_theme_patterns',
-		array(
-			'sig'      => $sig,
-			'patterns' => $out,
-		)
-	);
+	if ( $can_cache ) {
+		/** This filter is documented in wp-includes/class-wp-theme.php */
+		$ttl = (int) apply_filters( 'wp_theme_files_cache_ttl', 1800, 'theme_block_patterns' );
+		set_site_transient(
+			$transient,
+			array(
+				'sig'      => $sig,
+				'patterns' => $out,
+			),
+			$ttl > 0 ? $ttl : 1800
+		);
+	}
 	return $out;
 }
 
 /**
  * Registers this plugin's patterns as core registers a theme's (_register_theme_block_patterns): same slugs and
- * headers, the file rendered when the pattern is used, a slug already registered left alone. Before core's own run
- * (init 10), as a child theme's patterns come before its parent's.
+ * headers, the file rendered when the pattern is used, a slug already registered left alone. Core hooks its run on
+ * init at 10 and, in that run, registers a child theme's patterns before its parent's; core's callback is added
+ * before any plugin loads, so this runs at 9, just ahead of it, to keep the child's patterns first.
  */
 function aw_core_theme_register_patterns() {
-	if ( ! aw_core_theme_parts_on() ) {
+	if ( ! aw_core_theme_parts_on() || empty( wp_get_active_and_valid_themes() ) ) {
 		return;
 	}
 	$registry = WP_Block_Patterns_Registry::get_instance();
+	$dirpath  = AW_THEME_PARTS_DIR . 'patterns/';
 	foreach ( aw_core_theme_pattern_data() as $file => $pattern ) {
-		$path = AW_THEME_PARTS_DIR . 'patterns/' . $file;
-		if ( $registry->is_registered( $pattern['slug'] ) || ! is_readable( $path ) ) {
+		if ( $registry->is_registered( $pattern['slug'] ) ) {
+			continue;
+		}
+		$path = $dirpath . $file;
+		if ( 0 !== validate_file( (string) $file ) || ! file_exists( $path ) ) {
+			/* translators: %s: file name. */
+			_doing_it_wrong( __FUNCTION__, esc_html( sprintf( __( 'Could not register file "%s" as a block pattern as the file does not exist.', 'animal-writes-core' ), $file ) ), '6.4.0' );
+			delete_site_transient( 'aw_core_theme_patterns' );
 			continue;
 		}
 		$pattern['filePath'] = $path;
