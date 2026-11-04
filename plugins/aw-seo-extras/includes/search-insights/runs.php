@@ -154,7 +154,11 @@ function aw_si_run_fail( string $src, string $message ): void {
  */
 function aw_si_stale( string $src ): bool {
 	$every = (int) ( aw_si_sources()[ $src ]['every'] ?? DAY_IN_SECONDS );
-	$ok    = (int) ( aw_si_runs()[ $src ]['ok'] ?? 0 );
+	$r     = aw_si_runs()[ $src ] ?? array();
+	$ok    = (int) ( $r['ok'] ?? 0 );
+	if ( (int) ( $r['started'] ?? 0 ) > $ok && time() - (int) ( $r['beat'] ?? 0 ) <= HOUR_IN_SECONDS ) {
+		return false; // A run in steps is working now (a step in the last hour): not late.
+	}
 	$since = $ok ? $ok : (int) get_option( 'aw_si_installed', time() );
 	return ( time() - $since ) > 2 * $every;
 }
