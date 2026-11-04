@@ -44,3 +44,4 @@ require_once KITS_CORE_DIR . 'includes/page-options.php';
 require_once KITS_CORE_DIR . 'includes/settings-transfer.php';
 require_once KITS_CORE_DIR . 'includes/theme-options.php';
 require_once KITS_CORE_DIR . 'includes/site-parts.php';
+require_once KITS_CORE_DIR . 'includes/fonts.php';
