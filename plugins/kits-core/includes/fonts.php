@@ -1,7 +1,7 @@
 <?php
 /**
- * Inter on a Kits site (Kits by Wugweb as the active theme, no animal-writes child, which carries its own copy of
- * these two hooks):
+ * Inter on a Kits site whose body font is Inter (Kits by Wugweb as the active theme, no animal-writes child, which
+ * carries its own copy of these two hooks; a Kits site on Inter Tight or another font gets neither):
  *
  * - Inter without the jump (Core Web Vitals, layout shift). Until Inter arrives, text shows in "Inter Fallback": the
  *   device's Arial resized to Inter's width and line height (measured from inter-latin.woff2: 107.48% wide, ascent
@@ -22,24 +22,47 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * Whether these hooks apply: Kits by Wugweb is the theme, not under the animal-writes child (which adds both itself),
+ * and the body ("base") font family is Inter (saved Global Styles first, then theme.json), so a Kits site on its own
+ * Inter Tight or any other font is left alone. Asked when each hook runs, so a theme previewed in the Customizer counts.
+ */
+function kits_inter_hooks_on(): bool {
+	if ( 'kits-by-wugweb' !== get_template() || 'animal-writes' === get_stylesheet() || ! function_exists( 'wp_get_global_settings' ) ) {
+		return false;
+	}
+	$all = (array) wp_get_global_settings( array( 'typography', 'fontFamilies' ) );
+	foreach ( array( 'custom', 'theme' ) as $origin ) {
+		foreach ( (array) ( $all[ $origin ] ?? array() ) as $family ) {
+			if ( 'base' === ( $family['slug'] ?? '' ) ) {
+				$first = (string) strtok( (string) ( $family['fontFamily'] ?? '' ), ',' );
+				return 'inter' === strtolower( trim( $first, "\"' " ) );
+			}
+		}
+	}
+	return false;
+}
+
 /*
  * Added at setup_theme (after every plugin, before the theme's functions.php), the place a child theme's hooks have, so
- * they keep the order the child theme gave them among other hooks of the same priority.
+ * they keep the order the child theme gave them among other hooks of the same priority. Priority 11 is after the
+ * Customizer's own setup_theme (10).
  */
 add_action(
 	'setup_theme',
 	function () {
-		if ( 'kits-by-wugweb' !== get_template() || 'animal-writes' === get_stylesheet() ) { // The child theme adds both itself.
-			return;
-		}
-
 		add_action(
 			'wp_head',
 			function () {
+				if ( ! kits_inter_hooks_on() ) {
+					return;
+				}
 				$mode = function_exists( 'kits_option' ) ? kits_option( 'font_preload' ) : 'wide';
 				$font = function_exists( 'kits_body_font_file' ) ? kits_body_font_file() : '';
-				$font = '' !== $font ? $font : get_theme_file_uri( 'assets/fonts/inter/inter-latin.woff2' ); // Kits ships this file.
-				if ( 'off' !== $mode ) {
+				if ( '' === $font && is_readable( get_theme_file_path( 'assets/fonts/inter/inter-latin.woff2' ) ) ) { // Kits ships this file.
+					$font = get_theme_file_uri( 'assets/fonts/inter/inter-latin.woff2' );
+				}
+				if ( 'off' !== $mode && '' !== $font ) { // No file, no preload.
 					echo '<link rel="preload" href="' . esc_url( $font ) . '" as="font" type="font/woff2" crossorigin' . ( 'all' === $mode ? '' : ' media="(min-width: 1200px)"' ) . '>' . "\n";
 				}
 				// The id is the one the animal-writes child theme prints, so the page is the same with or without it.
@@ -54,44 +77,53 @@ add_action(
 				if ( 'off' === ( function_exists( 'kits_option' ) ? kits_option( 'inter_dedupe' ) : 'on' ) ) { // Theme Options: One copy of Inter.
 					return;
 				}
-				if ( ! class_exists( 'WP_Font_Face_Resolver' ) || false === has_action( 'wp_head', 'wp_print_font_faces' ) ) {
+				if ( 'kits-by-wugweb' !== get_template() || 'animal-writes' === get_stylesheet() || ! class_exists( 'WP_Font_Face_Resolver' ) ) {
 					return;
 				}
-				remove_action( 'wp_head', 'wp_print_font_faces', 50 );
-				add_action(
-					'wp_head',
-					function () {
-						$fonts  = WP_Font_Face_Resolver::get_fonts_from_theme_json();
-						$is_lib = fn( $f ) => false !== strpos( implode( ' ', (array) ( $f['src'] ?? array() ) ), '/uploads/fonts/' );
-						$inter  = fn( $f ) => 'inter' === strtolower( trim( (string) ( $f['font-family'] ?? '' ), '"\' ' ) ) && 'normal' === ( $f['font-style'] ?? 'normal' );
-						// The weights the theme's own file is declared for, as resolved: only those library faces are left out.
-						$lo = 1000;
-						$hi = 0;
-						foreach ( $fonts as $faces ) {
-							foreach ( $faces as $f ) {
-								if ( $inter( $f ) && ! $is_lib( $f ) ) {
-									$w  = array_map( 'intval', preg_split( '/\s+/', trim( (string) ( $f['font-weight'] ?? '400' ) ) ) );
-									$lo = min( $lo, min( $w ) );
-									$hi = max( $hi, max( $w ) );
-								}
+				$print = function () {
+					$fonts  = WP_Font_Face_Resolver::get_fonts_from_theme_json();
+					$is_lib = fn( $f ) => false !== strpos( implode( ' ', (array) ( $f['src'] ?? array() ) ), '/uploads/fonts/' );
+					$inter  = fn( $f ) => 'inter' === strtolower( trim( (string) ( $f['font-family'] ?? '' ), '"\' ' ) ) && 'normal' === ( $f['font-style'] ?? 'normal' );
+					// The weights the theme's own file is declared for, as resolved: only those library faces are left out.
+					$lo = 1000;
+					$hi = 0;
+					foreach ( $fonts as $faces ) {
+						foreach ( $faces as $f ) {
+							if ( $inter( $f ) && ! $is_lib( $f ) ) {
+								$w  = array_map( 'intval', preg_split( '/\s+/', trim( (string) ( $f['font-weight'] ?? '400' ) ) ) );
+								$lo = min( $lo, min( $w ) );
+								$hi = max( $hi, max( $w ) );
 							}
 						}
-						foreach ( $fonts as $family => $faces ) {
-							$fonts[ $family ] = array_values(
-								array_filter(
-									$faces,
-									function ( $f ) use ( $is_lib, $inter, $lo, $hi ) {
-										$weight = (int) ( $f['font-weight'] ?? 0 );
-										return ! ( $inter( $f ) && $is_lib( $f ) && $weight >= $lo && $weight <= $hi );
-									}
-								)
-							);
+					}
+					foreach ( $fonts as $family => $faces ) {
+						$fonts[ $family ] = array_values(
+							array_filter(
+								$faces,
+								function ( $f ) use ( $is_lib, $inter, $lo, $hi ) {
+									$weight = (int) ( $f['font-weight'] ?? 0 );
+									return ! ( $inter( $f ) && $is_lib( $f ) && $weight >= $lo && $weight <= $hi );
+								}
+							)
+						);
+					}
+					wp_print_font_faces( array_filter( $fonts ) );
+				};
+				// The font check reads Global Styles, which is only settled once init is over: WordPress's own printer
+				// is swapped for this one just before it runs (wp_head 50), and only on an Inter site.
+				add_action(
+					'wp_head',
+					function () use ( $print ) {
+						if ( false === has_action( 'wp_head', 'wp_print_font_faces' ) || ! kits_inter_hooks_on() ) {
+							return;
 						}
-						wp_print_font_faces( array_filter( $fonts ) );
+						add_action( 'wp_head', $print, 50 );
+						remove_action( 'wp_head', 'wp_print_font_faces', 50 );
 					},
-					50
+					49
 				);
 			}
 		);
-	}
+	},
+	11
 );
