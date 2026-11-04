@@ -247,7 +247,7 @@ These live in WordPress: **Animal Writes → Dates** (month calendar, add and re
 - **X data (2 Nov):** 264 Lab posts read on x.com in the browser: Claude outputs/x-lab-campaign-posts-2026-11-02.csv and x-lab-campaign-summary-2026-11-02.md. The X posts for the Lab page wait for the owner's pick.
 - **No sideways rows anywhere (owner, 2 Nov; live 8f3b2067):** the 25 Oct Home phone rows, the find-help filter row and the Campaigns list scroll row are removed; card lists use the stacked or grid states; the Diwali help table wraps. Checked on 9 pages at 375, 768 and 1280: no sideways scrolling.
 - **Campaign share and Lab letter form (live 8f3b2067):** share redesign on all campaigns; the Lab letter tool on the theme form kit, each placeholder repeating its label.
-- **Campaign short links (live 8f3b2067):** /lab, /diwali and /sc-dogs answer 301 to their campaigns (set in each campaign's Short link field). Community dogs has none (campaign frozen).
+- **Campaign short links (live 8f3b2067):** /lab, /diwali and /sc-dogs answer 302 to their campaigns (checked live 4 Nov 2026) (set in each campaign's Short link field). Community dogs has none (campaign frozen).
 - **X handle (2 Nov):** Rank Math Twitter username is animals_writes; pages print twitter:site @animals_writes.
 - **Lab rules (live 1afd535a):** What the draft does as the owner's three-row bento (option B, 838px at 1280, owner's choice); Read the law and the record as stacked cards with picture and card background (featured image block added to the page's query 84 card).
 - **What's happening (live af2ec664, cf019c96):** one dated timeline on Diwali, Supreme Court and Lab; only the key date in the campaign colour; text unchanged.
