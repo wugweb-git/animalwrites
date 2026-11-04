@@ -246,6 +246,7 @@ function aw_si_psi_step(): array {
 		update_option( AW_SI_PSI_QUEUE, $q, false ); // Saved after each call, so a run cut short loses nothing.
 	}
 	if ( $q['todo'] ) {
+		aw_si_run_beat( 'psi' );
 		return $q; // The next step is already booked (above).
 	}
 	wp_clear_scheduled_hook( AW_SI_PSI_MORE ); // Done: no further step.

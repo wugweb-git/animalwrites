@@ -280,6 +280,20 @@ function aw_si_inspect_start(): void {
 		aw_si_inspect_step(); // Today's queue already started.
 		return;
 	}
+	if ( is_array( $q ) && ! empty( $q['todo'] ) && ! empty( $q['done'] ) && '' === ( $q['refused'] ?? '' ) ) {
+		// Yesterday's queue did not get through every page: log what it did, so the run is not left open for good.
+		// The pages left are still first in line (never checked, then not indexed).
+		aw_si_run_ok(
+			'inspect',
+			array(
+				'rows'     => (int) $q['done'],
+				'up_to'    => (string) $q['d'],
+				'indexed'  => (int) $q['indexed'],
+				/* translators: %d: pages. */
+				'warnings' => array( sprintf( __( '%d pages were not reached that day.', 'aw-seo-extras' ), count( $q['todo'] ) ) ),
+			)
+		);
+	}
 	update_option(
 		AW_SI_INSPECT_QUEUE,
 		array(
@@ -367,6 +381,7 @@ function aw_si_inspect_step(): array {
 	$q['errors'] = array_slice( (array) $q['errors'], -20 );
 	update_option( AW_SI_INSPECT_QUEUE, $q, false );
 	if ( $q['todo'] && '' === $q['refused'] ) {
+		aw_si_run_beat( 'inspect' );
 		return $q;
 	}
 	wp_clear_scheduled_hook( AW_SI_INSPECT_MORE );
