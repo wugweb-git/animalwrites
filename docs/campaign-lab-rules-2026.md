@@ -18,6 +18,9 @@ Every hash below is on `wordpress` (live) as of 3 Nov 2026. Sections are in page
 - 1 Nov: speed and font fixes; keyphrases; companion links on the guides; Library draft title and H1.
 - 2 Nov: theme hero, three-step letter tool on the form kit, bento, share block, short link /lab, hashtags for X; the page kept as on 2 Nov morning.
 - 3 Nov: pain meter, What people are saying, phone and tablet fixes; one newsletter to 115 volunteers.
+- 4 Nov: pain scale as four cards and the newsletter band in crimson (live with 1d787b75); 45 campaign pictures added to the media library (24146–24190), none placed on the page.
+- 5 Nov: the objection window closes (30 days from the Gazette).
+- Close (correction): the page does not close on 5 or 6 Nov. Nothing closes it by date; it stays Active until its state is set to Post (owner, 2 Nov). See Post state below.
 
 ## Hero
 - Page set to the Campaign Content Standard v1.0 (Active order). 6d4feee1, 17 Oct
@@ -238,7 +241,7 @@ So from 6 Nov until the owner sets Post, the page and Home still ask people to s
 - AI referrals: 96 landings on the Library draft, 72 on the campaign page.
 - X, 27 Oct – 2 Nov: 264 Lab posts; #StopAnimalTesting 226, #WithdrawAnimalTestingRules 157, #AnimalFreeScience 133; posts with a picture averaged 171 views vs 25 for text only; 1 post linked animalwrites.in.
 - Links: Hindustan Times, Free Press Journal and DT Next link to the site.
-- Newsletter: 115 volunteers on 3 Nov; 80 delivered that day, the rest on 4 Nov.
+- Newsletter: 115 volunteers on 3 Nov; 80 delivered through the mailbox that day (the daily cap is 80). The other 35 go out as the cap frees up: resend campaigns 3 and 4 and mailweb retries (see Off the page).
 ## Letters and data (letter log `wp_aw_camp_letters`, read 3 Nov 2026)
 - 3,981 send taps from 3,593 sends since 17 Oct: Gmail 3,559, copy 375, email app 46.
 - 3,169 taps came with the updates box ticked.
@@ -260,6 +263,18 @@ So from 6 Nov until the owner sets Post, the page and Home still ask people to s
 - Most-tagged accounts: @Dept_of_AHD (26), @ICMRDELHI (8), @IndianExpress (6).
 - Used on the page: the three tags on the X share link (2fffe9c5) and "What people are saying" (2e978ca7).
 - Search: the tag phrases have almost no Google searches ("stop animal testing" 1 impression in 28 days); people search the rule words.
+
+## Off the page
+- Newsletter (3 Nov): FluentCRM campaign 2, "Object to the draft lab animal rules 2026", to the 115 subscribed contacts tagged with the campaign, from noreply@ with Reply-To contact@, started 18:51 IST.
+- 33 failed at 18:53 ("Could not instantiate mail function") and 11 (contacts 22–31, 68) were marked sent but never left. Cause: a deploy re-clones the plugin folder, so mailweb was missing for about 10 seconds and FluentCRM fell back to PHP mail(), which the host refuses.
+- Resends: campaign 3 to the 33 (tag 22, "Lab rules newsletter resend 4 Nov"); campaign 4 to the 11 (tag 23, "Lab rules newsletter resend 2, 4 Nov"). Campaigns 3 and 4 are paused on 4 Nov and resume on the owner's word.
+- Fixes: the ship script refuses to deploy while a campaign is sending; AW Mail Guard (`tools/server/aw-mail-guard/`) holds FluentCRM batches while mailweb is missing, installed once outside the deploy folder. e855e321
+- Own accounts: X @animals_writes and LinkedIn /company/animalwrites, each with a pinned Lab post (31 Oct).
+- Short link `/lab` (was `/lab-rules`); `/lab-rul/` and about 85 Rank Math redirects, including lab-rules link typos (1 Nov). 8f3b2067
+- Observance guides World Rabies Day (20209), Animal Welfare Fortnight (20305) and World Wildlife Day (20306) hold Related rows to the Library (1 Nov).
+- Dates calendar (Animal Writes → Dates) seeded with 5 Nov (lab rules close) and 7 Nov (decide the Post phase). c8c51fcd, 21 Oct
+- Media library (4 Nov): 45 campaign pictures, 24146–24190, descriptive names, not placed; 24146 and 24162 carry text. Placement is the owner's call.
+- Social posts by page section (card, story, X, Instagram, LinkedIn, WhatsApp), each with #AnimalWrites first: drafts, not posted.
 
 ## Decided by the owner
 - Palette A, Gazette crimson (17 Oct).
