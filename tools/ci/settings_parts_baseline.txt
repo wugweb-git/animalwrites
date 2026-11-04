@@ -5,10 +5,6 @@ plugins/animal-writes-core/assets/css/campaign-lab.css | css Hero | .aw-camp--co
 plugins/animal-writes-core/assets/css/campaign-lab.css | css Hero | .aw-camp.aw-camp--sc-stray-dogs .aw-camp-hero.aw-camp-section.alignfull | min-height: var(--kit-hero-min)
 plugins/animal-writes-core/assets/css/campaign-lab.css | css Hero | :is(.aw-camp--lab-rules, .aw-camp--community-dogs) .aw-camp-hero | min-height: 1020px
 plugins/animal-writes-core/assets/css/campaign-lab.css | css Hero | :is(.aw-camp--lab-rules, .aw-camp--community-dogs) .aw-camp-hero | min-height: 800px
-plugins/animal-writes-core/assets/css/campaign.css | css Hero | .aw-camp--community-dogs .aw-camp-hero | min-height: 1020px
-plugins/animal-writes-core/assets/css/campaign.css | css Hero | .aw-camp--community-dogs .aw-camp-hero | min-height: 800px
-plugins/animal-writes-core/assets/css/campaign.css | css Hero | .aw-camp--community-dogs.aw-camp-hero | min-height: 1020px
-plugins/animal-writes-core/assets/css/campaign.css | css Hero | .aw-camp--community-dogs.aw-camp-hero | min-height: 800px
 plugins/animal-writes-core/assets/css/campaign.css | css Hero | .aw-camp--diwali .wp-block-cover.kit-hero | min-height: var(--kit-hero-h) !important
 plugins/animal-writes-core/assets/css/campaign.css | css Hero | .aw-camp--lab-rules .aw-camp-hero | min-height: var(--kit-hero-h)
 plugins/animal-writes-core/assets/css/campaign.css | css Hero | .aw-camp.aw-camp--sc-stray-dogs .aw-camp-hero.aw-camp-section.alignfull | min-height: var(--kit-hero-h)
@@ -52,3 +48,6 @@ plugins/mailweb/includes/overview.php | admin page | add_submenu_page( 'mailweb'
 plugins/mailweb/includes/overview.php | admin page | add_submenu_page( 'mailweb', __( 'Mail', 'mailweb' ), __( 'Inbox', 'mailweb' ), MAILWEB_CAP, 'mailweb', 'mailweb_inbox_page' );
 themes/animal-writes/assets/css/aw.css | css Hero | section.aw-camp-band.aw-ed-hero--campaign | min-height: var(--kit-hero-h)
 themes/kits-by-wugweb/assets/css/kit.css | css Hero | .wp-block-cover.kit-hero | min-height: var(--kit-hero-h) !important
+plugins/animal-writes-core/assets/css/campaign.css | css Hero | .aw-camp--community-dogs .aw-camp-hero | min-height: var(--kit-hero-h)
+plugins/animal-writes-core/assets/css/campaign.css | css Hero | .aw-camp--community-dogs.aw-camp-hero | min-height: var(--kit-hero-h)
+plugins/animal-writes-core/includes/team-dates.php | admin style | <style> block
