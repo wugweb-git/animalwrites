@@ -11,26 +11,28 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/*
- * The Animal Writes presets (colour palette, Inter) from Kits' style variation styles/animal-writes.json, which
- * tools/aw-style-variation.py copies from the child's theme.json. Merged into the theme's own data the way a child
- * theme.json is, so they are the theme's presets without the variation being picked in the Site Editor.
+/**
+ * The Animal Writes theme.json (this plugin's copy of the child's), merged over Kits' theme data the way core merges
+ * a child theme's theme.json over its parent's (WP_Theme_JSON_Resolver::get_theme_data(): the parent's data, merged
+ * with the child's): settings, styles, custom templates and template parts. Font files given as file:./ are resolved
+ * by core against the active theme, Kits, whose assets/fonts/inter/inter-latin.woff2 is the same file as the child's
+ * (tools/ci/theme_copies.py checks it).
+ *
+ * @param WP_Theme_JSON_Data $theme_json Kits' theme.json data.
  */
-add_filter(
-	'wp_theme_json_data_theme',
-	function ( $theme_json ) {
-		if ( ! aw_core_theme_parts_on() ) {
-			return $theme_json;
-		}
-		$file = get_template_directory() . '/styles/animal-writes.json';
-		$data = is_readable( $file ) ? json_decode( (string) file_get_contents( $file ), true ) : null; // phpcs:ignore WordPress.WP.AlternativeFunctions
-		if ( ! is_array( $data ) || empty( $data['settings'] ) ) {
-			return $theme_json;
-		}
-		unset( $data['$schema'], $data['title'] );
-		return $theme_json->update_with( $data );
+function aw_core_theme_json_data( $theme_json ) {
+	if ( ! aw_core_theme_parts_on() || ! is_object( $theme_json ) || ! method_exists( $theme_json, 'update_with' ) ) {
+		return $theme_json;
 	}
-);
+	$file = AW_THEME_PARTS_DIR . 'theme.json';
+	$data = is_readable( $file ) ? wp_json_file_decode( $file, array( 'associative' => true ) ) : null;
+	if ( ! is_array( $data ) ) {
+		return $theme_json;
+	}
+	unset( $data['$schema'] );
+	return $theme_json->update_with( $data );
+}
+add_filter( 'wp_theme_json_data_theme', 'aw_core_theme_json_data' );
 
 /**
  * Path or address of a file this plugin carries for the theme (theme/assets/...).
@@ -43,19 +45,20 @@ function aw_theme_parts_path( string $file ): string {
 
 /*
  * The child theme's hooks, added at setup_theme: after every plugin and before the parent theme's functions.php, the
- * place the child's functions.php has, so each one keeps its order among other hooks of the same priority.
+ * place the child's functions.php has, so each one keeps its order among other hooks of the same priority. Priority 11
+ * is after the Customizer's own setup_theme (10), which is when a theme being previewed takes effect; each hook still
+ * asks aw_core_theme_parts_on() when it runs, so it does nothing while the child theme is active.
  */
 add_action(
 	'setup_theme',
 	function () {
-		if ( ! aw_core_theme_parts_on() ) {
-			return;
-		}
-
 		// Design tokens, component styles and interactions, over the Kits ones.
 		add_action(
 			'wp_enqueue_scripts',
 			function () {
+				if ( ! aw_core_theme_parts_on() ) {
+					return;
+				}
 				$v = fn( $f ) => (string) filemtime( aw_theme_parts_path( $f ) );
 				wp_enqueue_style( 'aw-tokens', aw_theme_file_uri( 'assets/css/tokens.css' ), array( 'kit-tokens' ), $v( 'assets/css/tokens.css' ) ); // Brand values over the Kits defaults.
 				wp_enqueue_style( 'aw-components', aw_theme_file_uri( 'assets/css/aw.css' ), array( 'aw-tokens', 'kit-components' ), $v( 'assets/css/aw.css' ) );
@@ -77,6 +80,9 @@ add_action(
 		add_action(
 			'init',
 			function () {
+				if ( ! aw_core_theme_parts_on() ) {
+					return;
+				}
 				register_block_pattern_category( 'animal-writes', array( 'label' => __( 'Animal Writes', 'animal-writes-core' ) ) );
 			}
 		);
@@ -85,7 +91,7 @@ add_action(
 		add_action(
 			'wp_head',
 			function () {
-				if ( ! is_front_page() || ( function_exists( 'aw_home_hero_is_campaign' ) && aw_home_hero_is_campaign() ) ) { // The campaign hero has its own artwork.
+				if ( ! aw_core_theme_parts_on() || ! is_front_page() || ( function_exists( 'aw_home_hero_is_campaign' ) && aw_home_hero_is_campaign() ) ) { // The campaign hero has its own artwork.
 					return;
 				}
 				$base = '/wp-content/uploads/2026/10/aw1-im5-';
@@ -107,7 +113,7 @@ add_action(
 					'wp-block-navigation' => 'home-navigation.css',
 					'wp-block-cover'      => 'home-cover.css',
 				);
-				if ( ! is_front_page() || is_admin() || ! isset( $files[ $handle ] ) || get_bloginfo( 'version' ) !== '7.1.3' ) { // The child theme's AW_HOME_CORE_CSS_WP.
+				if ( ! aw_core_theme_parts_on() || ! is_front_page() || is_admin() || ! isset( $files[ $handle ] ) || get_bloginfo( 'version' ) !== '7.1.3' ) { // The child theme's AW_HOME_CORE_CSS_WP.
 					return $tag;
 				}
 				$file = aw_theme_parts_path( 'assets/vendor/wp-core/' . $files[ $handle ] );
@@ -121,13 +127,17 @@ add_action(
 		add_filter(
 			'style_loader_tag',
 			function ( $tag, $handle ) {
+				if ( 'aw-tokens' !== $handle || ! aw_core_theme_parts_on() ) {
+					return $tag;
+				}
 				$file = aw_theme_parts_path( 'assets/css/tokens.css' );
-				return 'aw-tokens' === $handle && ! is_admin() && is_readable( $file ) ? '<style id="aw-tokens-css">' . file_get_contents( $file ) . "</style>\n" : $tag; // phpcs:ignore WordPress.WP.AlternativeFunctions
+				return ! is_admin() && is_readable( $file ) ? '<style id="aw-tokens-css">' . file_get_contents( $file ) . "</style>\n" : $tag; // phpcs:ignore WordPress.WP.AlternativeFunctions
 			},
 			10,
 			2
 		);
-	}
+	},
+	11
 );
 
 /*
@@ -153,5 +163,24 @@ add_filter(
 			}
 		}
 		return $settings;
+	}
+);
+
+/*
+ * The classic editor (TinyMCE) gets the same two files, as it does for a theme's add_editor_style() files: appended
+ * to its list of stylesheets in the admin, as core adds get_editor_stylesheets().
+ */
+add_filter(
+	'mce_css',
+	function ( $mce_css ) {
+		if ( ! is_admin() || ! aw_core_theme_parts_on() ) {
+			return $mce_css;
+		}
+		foreach ( array( 'assets/css/tokens.css', 'assets/css/aw.css' ) as $f ) {
+			if ( is_readable( aw_theme_parts_path( $f ) ) ) {
+				$mce_css .= ',' . str_replace( ',', '%2C', aw_theme_file_uri( $f ) );
+			}
+		}
+		return trim( (string) $mce_css, ' ,' );
 	}
 );
