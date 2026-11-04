@@ -80,6 +80,20 @@ function aw_si_run_start( string $src ): void {
 }
 
 /**
+ * Mark a run that works in steps as still going, so a queue that takes hours is not taken for a run cut short.
+ *
+ * @param string $src Source key.
+ */
+function aw_si_run_beat( string $src ): void {
+	$r = aw_si_runs();
+	if ( empty( $r[ $src ]['started'] ) ) {
+		return;
+	}
+	$r[ $src ]['beat'] = time();
+	update_option( AW_SI_RUNS, $r, false );
+}
+
+/**
  * The problem with a source's last run in plain words, or ''.
  *
  * @param string $src Source key.
@@ -88,7 +102,8 @@ function aw_si_run_problem( string $src ): string {
 	$r   = aw_si_runs()[ $src ] ?? array();
 	$err = $r['error'] ?? null;
 	$end = max( (int) ( $r['ok'] ?? 0 ), (int) ( $err['time'] ?? 0 ) );
-	if ( ! empty( $r['started'] ) && (int) $r['started'] > $end && time() - (int) $r['started'] > HOUR_IN_SECONDS ) {
+	$last = max( (int) ( $r['started'] ?? 0 ), (int) ( $r['beat'] ?? 0 ) ); // A run in steps (URL Inspection, PageSpeed) beats at each step.
+	if ( ! empty( $r['started'] ) && (int) $r['started'] > $end && time() - $last > HOUR_IN_SECONDS ) {
 		/* translators: %s: date and time. */
 		return sprintf( __( 'The run started on %s did not finish (probably a time limit).', 'aw-seo-extras' ), wp_date( 'j M, H:i', (int) $r['started'] ) );
 	}
