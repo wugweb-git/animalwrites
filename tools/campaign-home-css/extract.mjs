@@ -4,8 +4,24 @@
 //  plus (c) state variants of the band and countdown (selectors naming aw-camp-band or countdown) that JS may switch on.
 // Writes used.css (rules in source order, @media / @supports kept around them, @keyframes and @font-face that
 // used rules reference) and report.json.
+// When OUT is a path under themes/animal-writes/ and plugins/animal-writes-core/theme/ exists, each file is also written,
+// byte for byte, to the same path under the plugin's theme/ folder (its copy of the child theme files).
 import puppeteer from 'puppeteer-core';
 import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+const CHILD = path.join(REPO, 'themes/animal-writes');
+const COPY = path.join(REPO, 'plugins/animal-writes-core/theme');
+const write = (file, data) => {
+  fs.writeFileSync(file, data);
+  const rel = path.relative(CHILD, path.resolve(file));
+  if (!rel.startsWith('..') && !path.isAbsolute(rel) && fs.existsSync(COPY)) {
+    fs.mkdirSync(path.dirname(path.join(COPY, rel)), { recursive: true });
+    fs.writeFileSync(path.join(COPY, rel), data);
+  }
+};
 
 const URL = process.argv[2] || 'https://animalwrites.in/';
 const SHEET_ARG = process.argv[3] || '/campaign.css';
@@ -80,7 +96,7 @@ for (const r of ruleTexts) {
   css += r.wrap.reduce((acc, w) => acc + w + ' { ', '') + r.text + ' }'.repeat(r.wrap.length) + '\n';
 }
 const total = ruleTexts.filter(r => r.text).length;
-fs.writeFileSync(OUT + '.css', css);
-fs.writeFileSync(OUT + '.json', JSON.stringify({ total_rules: total, used_rules: used.size, used_bytes: css.length, coverage: cov, state_rules: ruleTexts.filter(r => r.hit === 'state').map(r => r.sel) }, null, 1));
+write(OUT + '.css', css);
+write(OUT + '.json', JSON.stringify({ total_rules: total, used_rules: used.size, used_bytes: css.length, coverage: cov, state_rules: ruleTexts.filter(r => r.hit === 'state').map(r => r.sel) }, null, 1));
 console.log(JSON.stringify({ total_rules: total, used_rules: used.size, used_bytes: css.length, coverage: cov }));
 await browser.close();
