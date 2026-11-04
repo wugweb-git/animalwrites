@@ -64,4 +64,41 @@ done
 code=$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:8080/?rest_route=/aw/v1/sourcing-policy")
 if [ "$code" != "401" ]; then echo "FAIL $code /aw/v1/sourcing-policy (want 401)"; FAIL=1; else echo "ok   $code /aw/v1/sourcing-policy"; fi
 if [ -f /tmp/wp-debug.log ] && grep -E 'PHP (Fatal|Parse) error' /tmp/wp-debug.log; then FAIL=1; fi
+
+# Second pass: Kits by Wugweb with no child. animal-writes-core then serves the child's styles, scripts, templates,
+# parts and patterns (includes/theme-parts*.php); the same URLs must answer 200 and the page must be the child's.
+echo "-- kits-by-wugweb, no child theme"
+LOG_START=$( [ -f /tmp/wp-debug.log ] && wc -l </tmp/wp-debug.log || echo 0 )
+wp theme activate kits-by-wugweb --quiet
+wp cache flush --quiet
+wp transient delete --all --quiet || true
+wp rewrite flush --quiet
+curl -s -o /dev/null http://127.0.0.1:8080/ || true
+for u in "${URLS[@]}"; do
+  code=$(curl -s -o /tmp/page.html -w '%{http_code}' "http://127.0.0.1:8080$u")
+  if [ "$code" != "200" ] || grep -qiE 'critical error|Fatal error|Parse error' /tmp/page.html; then
+    echo "FAIL $code $u (no child)"; FAIL=1
+  else
+    echo "ok   $code $u (no child)"
+  fi
+done
+# has NAME FILE PATTERN: an ok/FAIL line for a fixed-string match in a fetched page.
+has() { if grep -qF -- "$3" "$2"; then echo "ok   $1"; else echo "FAIL $1"; FAIL=1; fi; }
+curl -s -o /tmp/home.html http://127.0.0.1:8080/
+# The component stylesheet comes from the plugin's copy, not a theme folder.
+if grep -oE "<link[^>]*id=['\"]aw-components-css['\"][^>]*>" /tmp/home.html | grep -qF '/wp-content/plugins/animal-writes-core/theme/assets/css/aw.css'; then
+  echo "ok   aw-components-css from the plugin (no child)"
+else
+  echo "FAIL aw-components-css from the plugin (no child)"; FAIL=1
+fi
+# Markers from the child's front-page template and header part, in no Kits template or part; written as the class
+# attribute so a stylesheet rule cannot match them.
+has "front-page template is the Animal Writes one (no child)" /tmp/home.html 'aw-take-part-band aw-take-part-band--home'
+has "header part is the Animal Writes one (no child)" /tmp/home.html 'class="aw-announce-lead"'
+want=$(ls "$REPO"/themes/animal-writes/patterns/*.php | wc -l | tr -d ' ')
+got=$(wp eval 'echo count(array_filter(array_keys(WP_Block_Patterns_Registry::get_instance()->get_all_registered()), fn($n)=>str_starts_with($n,"animal-writes/")));' 2>/dev/null || echo error)
+if [ "$got" = "$want" ]; then echo "ok   $got animal-writes/ patterns registered (no child)"; else echo "FAIL $got animal-writes/ patterns registered, want $want (no child)"; FAIL=1; fi
+if [ -f /tmp/wp-debug.log ] && tail -n +"$((LOG_START + 1))" /tmp/wp-debug.log | grep -E 'PHP (Fatal|Parse) error|PHP Warning'; then FAIL=1; fi
+wp theme activate animal-writes --quiet
+wp cache flush --quiet
 exit $FAIL
