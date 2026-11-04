@@ -39,3 +39,4 @@ function aw_theme_file_uri( string $file ): string {
 
 require_once AW_CORE_DIR . 'includes/theme-parts-assets.php';
 require_once AW_CORE_DIR . 'includes/theme-parts-templates.php';
+require_once AW_CORE_DIR . 'includes/theme-switch.php';
