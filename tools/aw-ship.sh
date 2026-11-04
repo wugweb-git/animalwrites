@@ -27,7 +27,8 @@ done
 [ -n "$run" ] || { echo "REFUSING to deploy: no Deploy check run found for $sha after 10 minutes"; exit 1; }
 gh run watch "$run" --exit-status >/dev/null || { echo "REFUSING to deploy: the Deploy check failed for $sha"; exit 1; }
 # Admins bypass branch protection on direct pushes, so the status is checked here too: the commit's "check" must be success.
-status=$(gh api "repos/wugweb-git/animalwrites/commits/$sha/check-runs" -q '[.check_runs[] | select(.name=="check")] | map(.conclusion) | unique | join(",")')
+# A re-run adds a second "check" run to the same commit (an old failure beside the new result), so only the newest counts (4 Nov 2026).
+status=$(gh api "repos/wugweb-git/animalwrites/commits/$sha/check-runs" -q '[.check_runs[] | select(.name=="check")] | sort_by(.started_at) | last | .conclusion // ""')
 [ "$status" = "success" ] || { echo "REFUSING to deploy: check status for $sha is '${status:-none}', not success"; exit 1; }
 git fetch -q origin
 # Compare full shas: "--short" is 8 characters here and 7 on the server, so short shas never matched (1 Nov 2026).
