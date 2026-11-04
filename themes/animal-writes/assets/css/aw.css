@@ -1806,6 +1806,7 @@ section.aw-camp-band.aw-ed-hero--campaign { box-sizing: border-box; min-height: 
 .aw-bento-ico--accent { color: var(--kit-color-accent); }
 .aw-bento-head { display: flex; align-items: center; gap: var(--kit-space-3); }
 .aw-bento-tile .aw-bento-num { font-size: min(var(--kit-type-h2), 12cqi); font-weight: 800; letter-spacing: -0.03em; line-height: var(--kit-leading-display); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.aw-bento-tile .aw-bento-num a { display: inline-flex; align-items: center; min-height: var(--kit-size-target); margin-block: calc((1lh - var(--kit-size-target)) / 2); } /* a tel number link gets the 44px tap height without making the tile taller (4 Nov 2026: 1962 was 59x30) */
 /* In a row stretched by a taller tile, the icon or label stays at the top and the title and line go to the bottom, so
    the text in one row ends level and no tile has a gap under its text */
 .aw-bento-tile > :first-child { margin-bottom: auto; }
