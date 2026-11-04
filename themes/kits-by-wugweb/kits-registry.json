@@ -1753,6 +1753,34 @@
    }
   },
   {
+   "name": "Smooth scrolling",
+   "type": "utility",
+   "status": "live",
+   "classes": [
+    "kit-smooth"
+   ],
+   "states": [
+    "off on load (a #section link jumps at once)",
+    "on (html.kit-smooth, added by kit.js at the first pointer or key press)"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "class on the html element",
+    "aria": "none",
+    "keyboard": "n/a",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "smooth in-page scrolling only under prefers-reduced-motion: no-preference",
+    "sr": "no effect"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
    "name": "Core block styles (Site Editor > Styles > Blocks)",
    "type": "primitive",
    "status": "live",
