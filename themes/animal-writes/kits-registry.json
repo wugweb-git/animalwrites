@@ -771,33 +771,6 @@
    }
   },
   {
-   "name": "Announcement text",
-   "type": "component",
-   "status": "live",
-   "classes": [
-    "aw-announce"
-   ],
-   "states": [
-    "default"
-   ],
-   "tokens": [],
-   "a11y": {
-    "element": "text in the announcement bar",
-    "aria": "none",
-    "keyboard": "not interactive",
-    "focus": "n/a",
-    "target": "n/a",
-    "motion": "none",
-    "sr": "visible text"
-   },
-   "seo": {
-    "heading": "none",
-    "link": "n/a",
-    "alt": "n/a",
-    "schema": "none"
-   }
-  },
-  {
    "name": "Footer extras",
    "type": "component",
    "status": "live",
