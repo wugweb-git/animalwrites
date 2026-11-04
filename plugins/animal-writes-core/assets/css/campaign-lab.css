@@ -342,6 +342,19 @@
 .aw-camp-gap > .kit-ico { --kit-ico-size: 1.5rem; flex: none; color: var(--camp-mark); margin-top: 0.15em; }
 .aw-camp-dark .aw-rule-chip { --kit-chip-border: rgb(255 255 255 / 0.45); }
 
+/* Pain scale cards (owner's mock, 4 Nov 2026): each tier is a card that turns more crimson as the pain rises (meaning
+   also in the meter's segment count and the chip's words and icon); four equal cards in one row from 1200, 2 x 2 from
+   768, stacked on the phone rail below. An optional picture fills the foot of the card and fades into it. */
+.aw-camp-tier { --tint: 0%; display: flex; flex-direction: column; padding: var(--kit-space-5); border-radius: var(--kit-radius-card); background: color-mix(in srgb, var(--camp-mark) var(--tint), color-mix(in srgb, var(--kit-color-on-ink) 7%, var(--camp-dark))); }
+.aw-camp-tier--2 { --tint: 16%; }
+.aw-camp-tier--3 { --tint: 36%; }
+.aw-camp-tier--4 { --tint: 56%; }
+.aw-camp-tier .aw-camp-tier-who { align-self: flex-start; margin-bottom: var(--kit-space-3); }
+.aw-camp-tier-who.is-ext { box-shadow: inset 0 0 0 var(--kit-border-width) color-mix(in srgb, var(--kit-color-on-ink) 28%, transparent); } /* the crimson chip stays clear of the crimson card */
+.aw-camp-tier-art { display: block; width: calc(100% + 2 * var(--kit-space-5)); max-width: none; height: auto; aspect-ratio: 4 / 3; object-fit: cover; margin: auto calc(-1 * var(--kit-space-5)) calc(-1 * var(--kit-space-5)); padding-top: var(--kit-space-3); border-radius: 0 0 var(--kit-radius-card) var(--kit-radius-card); -webkit-mask: linear-gradient(to bottom, transparent, #000 40%); mask: linear-gradient(to bottom, transparent, #000 40%); }
+@media (min-width: 768px) { .aw-camp-ladder { align-items: stretch; } }
+@media (min-width: 1200px) { .aw-camp-ladder { align-items: stretch; } }
+
 /* Today vs the draft: the draft column carries the campaign colour */
 .aw-camp-compare table { background: var(--kit-color-bg); border-radius: var(--kit-radius-card); overflow: hidden; }
 .aw-camp-compare :is(th, td) { padding: var(--kit-space-3); vertical-align: top; }

@@ -227,9 +227,11 @@ foreach ( $cards as $i => $c ) { // each card has its own anchor (change-1 ...),
 $rules = c2sec( 'rules', c2h( 'What the draft does' ) . "<!-- wp:group {\"className\":\"aw-camp-grid\",\"layout\":{\"type\":\"default\"}} -->\n<div class=\"wp-block-group aw-camp-grid\">$grid</div>\n<!-- /wp:group -->\n\n" . c2guides( array( 'who-approves-animal-experiments-draft-rules', 'iaec-full-form-members-approvals', 'alternatives-to-animal-testing-india' ) ), 'aw-camp-grey' );
 
 /* 4. Pain scale: a four-step ladder; who approves sits on each step. */
-$tier = function ( $lvl, $name, $who, $ext, $text ) {
+/* $art: an optional picture URL for the foot of the card (decorative, so alt=""; no words, labels, logos or faces). */
+$tier = function ( $lvl, $name, $who, $ext, $text, $art = '' ) {
 	return '<li class="aw-camp-tier aw-camp-tier--' . $lvl . '"><span class="aw-camp-tier-bar" aria-hidden="true"></span>'
-		. '<h3>' . $name . '</h3><p class="aw-camp-tier-who' . ( $ext ? ' is-ext' : '' ) . '">' . c2i( $ext ? 'legal' : 'building' ) . $who . '</p><p>' . $text . '</p></li>';
+		. '<h3>' . $name . '</h3><p class="aw-camp-tier-who' . ( $ext ? ' is-ext' : '' ) . '">' . c2i( $ext ? 'legal' : 'building' ) . $who . '</p><p class="aw-camp-tier-ex">' . $text . '</p>'
+		. ( $art ? '<img class="aw-camp-tier-art" src="' . $art . '" alt="" width="800" height="600" loading="lazy" decoding="async">' : '' ) . '</li>';
 };
 $pain = c2sec(
 	'pain-scale',
