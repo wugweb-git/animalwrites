@@ -13,6 +13,11 @@
 		}
 	} catch (e) {}
 
+	/* Smooth in-page scrolling (kit.css html.kit-smooth) from the first pointer or key press on, never for the jump to
+	   a #fragment while the page loads: an animated load-time jump lands short when content above it settles. */
+	var smooth = function () { doc.classList.add('kit-smooth'); };
+	['pointerdown', 'keydown'].forEach(function (t) { window.addEventListener(t, smooth, { once: true, passive: true, capture: true }); });
+
 	/* 2. Sticky help bar: hide while scrolling down, show on scroll up or near the top. */
 	var bar = document.querySelector('.kit-sticky-help, .kit-sticky-help');
 	if (bar) {
