@@ -94,9 +94,9 @@ fi
 # Markers from the child's front-page template and header part, in no Kits template or part; written as the class
 # attribute so a stylesheet rule cannot match them.
 has "front-page template is the Animal Writes one (no child)" /tmp/home.html 'aw-take-part-band aw-take-part-band--home'
-has "header part is the Animal Writes one (no child)" /tmp/home.html 'class="aw-announce-lead"'
+has "header part is the Animal Writes one (no child)" /tmp/home.html 'class="kit-header-utility" data-menu="secondary"'
 want=$(ls "$REPO"/themes/animal-writes/patterns/*.php | wc -l | tr -d ' ')
-got=$(wp eval 'echo count(array_filter(array_keys(WP_Block_Patterns_Registry::get_instance()->get_all_registered()), fn($n)=>str_starts_with($n,"animal-writes/")));' 2>/dev/null || echo error)
+got=$(wp eval 'echo count(array_filter(WP_Block_Patterns_Registry::get_instance()->get_all_registered(), fn($p)=>str_starts_with($p["name"],"animal-writes/")));' 2>/dev/null || echo error)
 if [ "$got" = "$want" ]; then echo "ok   $got animal-writes/ patterns registered (no child)"; else echo "FAIL $got animal-writes/ patterns registered, want $want (no child)"; FAIL=1; fi
 if [ -f /tmp/wp-debug.log ] && tail -n +"$((LOG_START + 1))" /tmp/wp-debug.log | grep -E 'PHP (Fatal|Parse) error|PHP Warning'; then FAIL=1; fi
 wp theme activate animal-writes --quiet
