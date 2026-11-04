@@ -25,6 +25,7 @@ import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import theme_rules_check as t  # noqa: E402  (the shared CSS rule parser)
+from theme_copies import is_copy  # noqa: E402
 
 ROOT = t.ROOT
 BASELINE = ROOT / "tools/ci/settings_parts_baseline.txt"
@@ -62,7 +63,7 @@ def css_findings():
 def php_files():
     for base in (ROOT / "themes", ROOT / "plugins"):
         for f in base.rglob("*.php"):
-            if not t.SKIP.search("/" + str(f.relative_to(ROOT))) and "/tests/" not in str(f):
+            if not t.SKIP.search("/" + str(f.relative_to(ROOT))) and "/tests/" not in str(f) and not is_copy(f):
                 yield f
 
 
@@ -87,7 +88,7 @@ def admin_findings():
     for base in (ROOT / "themes", ROOT / "plugins"):
         for f in base.rglob("*.css"):
             rel = str(f.relative_to(ROOT))
-            if "admin" in rel.lower() and not t.SKIP.search("/" + rel):
+            if "admin" in rel.lower() and not t.SKIP.search("/" + rel) and not is_copy(f):
                 out.append(f"{rel} | admin style | stylesheet file")
     return out
 

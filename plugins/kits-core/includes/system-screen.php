@@ -36,6 +36,7 @@ function kits_system_dirs() {
 	}
 	$root = realpath( WP_PLUGIN_DIR );
 	if ( false === $root ) {
+		$dirs = array_values( (array) apply_filters( 'kits_system_dirs', $dirs ) );
 		return $dirs;
 	}
 	foreach ( array_unique( $files ) as $file ) {
@@ -48,6 +49,13 @@ function kits_system_dirs() {
 			$dirs[] = $dir;
 		}
 	}
+	/**
+	 * Filters the folders with design system files, e.g. a site plugin that carries the theme's files in a
+	 * folder of its own.
+	 *
+	 * @param string[] $dirs Folder paths, master first.
+	 */
+	$dirs = array_values( (array) apply_filters( 'kits_system_dirs', $dirs ) );
 	return $dirs;
 }
 

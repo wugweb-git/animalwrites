@@ -10,14 +10,16 @@ import pathlib
 import re
 import sys
 
+from theme_copies import theme_file
+
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 # Same order as the site loads them: Kits primitives, Kits tokens, then the child theme's brand values.
 TOKEN_FILES = [
     ROOT / "themes/kits-by-wugweb/assets/css/kits-v42.css",
     ROOT / "themes/kits-by-wugweb/assets/css/kit-tokens.css",
-    ROOT / "themes/animal-writes/assets/css/tokens.css",
+    theme_file("assets/css/tokens.css"),  # the child theme's, or the plugin's copy once it is gone
 ]
-REGISTRIES = sorted((ROOT / "themes").glob("*/kits-registry.json"))
+REGISTRIES = sorted(set((ROOT / "themes").glob("*/kits-registry.json")) | {theme_file("kits-registry.json")})
 CAMPAIGN_CSS = ROOT / "plugins/animal-writes-core/assets/css/campaign.css"
 # Campaign palettes kept outside campaign.css (campaign-record.php's styles): read as if they were in it.
 CAMPAIGN_CSS_MORE = [ROOT / "plugins/animal-writes-core/assets/css/campaign-record.css"]

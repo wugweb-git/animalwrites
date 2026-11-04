@@ -9,6 +9,8 @@ import pathlib
 import re
 import sys
 
+from theme_copies import is_copy
+
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 ALLOWED = {("min", "768"), ("max", "767"), ("min", "1200"), ("max", "1199")}
 WIDTH = re.compile(r"\b(min|max)-width\s*:\s*([0-9.]+)(px|em|rem)")
@@ -20,7 +22,7 @@ def main():
     bad = []
     for base in ("themes", "plugins"):
         for f in (ROOT / base).rglob("*"):
-            if f.suffix not in (".css", ".php", ".html", ".js") or SKIP.search(str(f)):
+            if f.suffix not in (".css", ".php", ".html", ".js") or SKIP.search(str(f)) or is_copy(f):
                 continue
             for n, line in enumerate(f.read_text(errors="ignore").splitlines(), 1):
                 for q in QUERY.findall(line):

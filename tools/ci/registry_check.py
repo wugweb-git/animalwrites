@@ -9,8 +9,10 @@ import os
 import re
 import sys
 
+from theme_copies import is_copy, theme_file
+
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-REGS = ["themes/kits-by-wugweb/kits-registry.json", "themes/animal-writes/kits-registry.json"]
+REGS = ["themes/kits-by-wugweb/kits-registry.json", theme_file("kits-registry.json")]  # the child's, or the plugin's copy
 
 prefixes, blocks = [], set()
 for r in REGS:
@@ -27,6 +29,8 @@ for top in ("themes", "plugins"):
             if ext not in ("php", "html", "css", "js"):
                 continue
             p = os.path.join(dp, f)
+            if is_copy(p):
+                continue
             s = open(p, encoding="utf-8", errors="ignore").read()
             found = set()
             if ext == "css":
@@ -49,7 +53,7 @@ missing = sorted(c for c in used if not covered(c))
 hb = open(os.path.join(ROOT, "plugins/animal-writes-core/includes/hub-blocks.php")).read()
 fn = hb[hb.index("function aw_hub_blocks"):hb.index("add_action", hb.index("function aw_hub_blocks"))]
 site_blocks = {"animal-writes/" + n for n in re.findall(r"^\s*'([a-z-]+)'\s*=>\s*array\(", fn, re.M)}
-site_blocks |= {"animal-writes/" + f[:-4] for f in os.listdir(os.path.join(ROOT, "themes/animal-writes/patterns")) if f.endswith(".php")}
+site_blocks |= {"animal-writes/" + f[:-4] for f in os.listdir(theme_file("patterns")) if f.endswith(".php")}
 missing_blocks = sorted(site_blocks - blocks)
 unused = sorted(p for p in prefixes if not any(c == p or c.startswith(p + "-") for c in used))
 

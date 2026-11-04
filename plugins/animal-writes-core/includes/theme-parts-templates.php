@@ -45,15 +45,15 @@ function aw_core_theme_template_files( string $template_type, array $query = arr
 	if ( 'wp_template' !== $template_type && 'wp_template_part' !== $template_type ) {
 		return array();
 	}
-	$include = (array) ( $query['slug__in'] ?? array() );
-	$skip    = (array) ( $query['slug__not_in'] ?? array() );
-	$area    = $query['area'] ?? null;
-	$out     = array();
 	static $paths = array();
 	if ( ! isset( $paths[ $template_type ] ) ) {
 		$paths[ $template_type ] = (array) glob( aw_core_theme_template_dir( $template_type ) . '/*.html' );
 		sort( $paths[ $template_type ] );
 	}
+	$include = (array) ( $query['slug__in'] ?? array() );
+	$skip    = (array) ( $query['slug__not_in'] ?? array() );
+	$area    = $query['area'] ?? null;
+	$out     = array();
 	foreach ( $paths[ $template_type ] as $path ) {
 		$slug = basename( (string) $path, '.html' );
 		if ( ( $include && ! in_array( $slug, $include, true ) ) || ( $skip && in_array( $slug, $skip, true ) ) ) {
@@ -294,3 +294,17 @@ function aw_core_theme_register_patterns() {
 	}
 }
 add_action( 'init', 'aw_core_theme_register_patterns', 9 );
+
+/**
+ * Kits → Design system reads the Animal Writes registry and tokens (kits-registry.json, assets/css/tokens.css) from
+ * this plugin's theme folder when there is no child theme.
+ *
+ * @param string[] $dirs Folders with design system files.
+ */
+function aw_core_theme_system_dirs( $dirs ) {
+	if ( aw_core_theme_parts_on() && is_readable( AW_THEME_PARTS_DIR . 'kits-registry.json' ) ) {
+		$dirs[] = untrailingslashit( AW_THEME_PARTS_DIR );
+	}
+	return array_values( array_unique( (array) $dirs ) );
+}
+add_filter( 'kits_system_dirs', 'aw_core_theme_system_dirs' );

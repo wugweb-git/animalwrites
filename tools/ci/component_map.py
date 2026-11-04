@@ -1,9 +1,10 @@
 """Write docs/component-map.md from the Kits registries and the code: each component with its classes, states, the
 tokens it uses, and the files that use it. Run after changing a component: python3 tools/ci/component_map.py"""
 import json, os, re, collections
+from theme_copies import is_copy, theme_file
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 items = []
-for r in ("themes/kits-by-wugweb/kits-registry.json", "themes/animal-writes/kits-registry.json"):
+for r in ("themes/kits-by-wugweb/kits-registry.json", theme_file("kits-registry.json")):  # the child's, or the plugin's copy
     j = json.load(open(os.path.join(ROOT, r)))
     for it in j["items"]:
         it["owner"] = j["owner"]
@@ -15,6 +16,8 @@ for top in ("themes", "plugins"):
             if not f.endswith((".php", ".html", ".css", ".js")):
                 continue
             p = os.path.join(dp, f)
+            if is_copy(p):
+                continue
             s = open(p, encoding="utf-8", errors="ignore").read()
             for c in set(re.findall(r"(?<![a-zA-Z0-9_-])((?:aw|kit)-[a-z0-9]+(?:-[a-z0-9]+)*)", s)):
                 used[c].add(os.path.relpath(p, ROOT))
