@@ -69,6 +69,8 @@ if [ -f /tmp/wp-debug.log ] && grep -E 'PHP (Fatal|Parse) error' /tmp/wp-debug.l
 # parts and patterns (includes/theme-parts*.php); the same URLs must answer 200 and the page must be the child's.
 echo "-- kits-by-wugweb, no child theme"
 LOG_START=$( [ -f /tmp/wp-debug.log ] && wc -l </tmp/wp-debug.log || echo 0 )
+# A saved Styles post for the child (one custom colour), so the switch must copy it to Kits (includes/theme-switch.php).
+wp eval '$old = get_posts( array( "post_type" => "wp_global_styles", "name" => "wp-global-styles-animal-writes", "posts_per_page" => 1, "fields" => "ids" ) ); $id = wp_insert_post( array( "ID" => $old ? $old[0] : 0, "post_type" => "wp_global_styles", "post_status" => "publish", "post_title" => "Custom Styles", "post_name" => "wp-global-styles-animal-writes", "post_content" => wp_slash( "{\"settings\":{\"color\":{\"palette\":{\"custom\":[{\"slug\":\"ci-switch\",\"color\":\"#123456\",\"name\":\"CI\"}]}}},\"isGlobalStylesUserThemeJSON\":true,\"version\":3}" ) ) ); wp_set_object_terms( $id, "animal-writes", "wp_theme" );'
 wp theme activate kits-by-wugweb --quiet
 wp cache flush --quiet
 wp transient delete --all --quiet || true
@@ -98,6 +100,9 @@ has "header part is the Animal Writes one (no child)" /tmp/home.html 'class="kit
 want=$(ls "$REPO"/themes/animal-writes/patterns/*.php | wc -l | tr -d ' ')
 got=$(wp eval 'echo count(array_filter(WP_Block_Patterns_Registry::get_instance()->get_all_registered(), fn($p)=>str_starts_with($p["name"],"animal-writes/")));' 2>/dev/null || echo error)
 if [ "$got" = "$want" ]; then echo "ok   $got animal-writes/ patterns registered (no child)"; else echo "FAIL $got animal-writes/ patterns registered, want $want (no child)"; FAIL=1; fi
+# The child's saved Styles were copied to Kits on the switch, and Kits uses them.
+got=$(wp eval '$p = get_posts( array( "post_type" => "wp_global_styles", "name" => "wp-global-styles-kits-by-wugweb", "posts_per_page" => 1, "tax_query" => array( array( "taxonomy" => "wp_theme", "field" => "name", "terms" => "kits-by-wugweb" ) ) ) ); $c = wp_list_pluck( (array) ( wp_get_global_settings( array( "color", "palette" ) )["custom"] ?? array() ), "color" ); echo ( $p && false !== strpos( $p[0]->post_content, "#123456" ) ? "post" : "nopost" ) . "," . ( in_array( "#123456", $c, true ) ? "used" : "unused" );' 2>/dev/null || echo error)
+if [ "$got" = "post,used" ]; then echo "ok   child's saved Styles copied to Kits and used (no child)"; else echo "FAIL child's saved Styles copied to Kits and used: $got (no child)"; FAIL=1; fi
 if [ -f /tmp/wp-debug.log ] && tail -n +"$((LOG_START + 1))" /tmp/wp-debug.log | grep -E 'PHP (Fatal|Parse) error|PHP Warning'; then FAIL=1; fi
 wp theme activate animal-writes --quiet
 wp cache flush --quiet
