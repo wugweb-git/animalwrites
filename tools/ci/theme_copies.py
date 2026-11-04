@@ -3,7 +3,9 @@
 when Kits by Wugweb runs with no child theme) are the same as the child theme's (themes/animal-writes/).
 
 While both exist, the child theme is the source: change a file there, then copy it to the plugin's theme/ folder. This
-check fails when a copy differs from the child's file, or when a child template, part, pattern or registry has no copy.
+check fails when a copy differs from the child's file, or when a child asset, template, part, pattern, theme.json or
+registry has no copy. The child's fonts are not copied: Kits by Wugweb serves its own Inter file, which must be the
+same file as the child's (checked here too).
 The other checks read the child's file and skip its copy (is_copy), so a rule is not counted twice. Once the child
 theme is gone, the plugin's files are read in its place (theme_file).
 
@@ -17,7 +19,10 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 CHILD = ROOT / "themes/animal-writes"
 COPY = ROOT / "plugins/animal-writes-core/theme"
 # Each of these child files must have a copy (the plugin serves them; a missing one would be missing on the site).
-REQUIRED = ("templates", "parts", "patterns", "kits-registry.json")
+REQUIRED = ("assets", "templates", "parts", "patterns", "theme.json", "kits-registry.json")
+# Not copied: theme.json's file:./ fonts resolve against Kits, which ships the same file (FONTS).
+NOT_COPIED = ("assets/fonts",)
+FONTS = (("themes/kits-by-wugweb/assets/fonts/inter/inter-latin.woff2", "themes/animal-writes/assets/fonts/inter/inter-latin.woff2"),)
 
 
 def is_copy(path):
@@ -53,8 +58,14 @@ def main():
     for top in REQUIRED:
         src = CHILD / top
         for f in sorted([src] if src.is_file() else src.rglob("*") if src.is_dir() else []):
-            if f.is_file() and f.name != ".DS_Store" and not (COPY / f.relative_to(CHILD)).is_file():
-                bad.append(f"MISSING {f.relative_to(CHILD)} (copy it to plugins/animal-writes-core/theme/)")
+            rel = f.relative_to(CHILD)
+            if any(rel.as_posix() == x or rel.as_posix().startswith(x + "/") for x in NOT_COPIED):
+                continue
+            if f.is_file() and f.name != ".DS_Store" and not (COPY / rel).is_file():
+                bad.append(f"MISSING {rel} (copy it to plugins/animal-writes-core/theme/)")
+    for kits, child in FONTS:
+        if (ROOT / child).is_file() and not ((ROOT / kits).is_file() and filecmp.cmp(ROOT / kits, ROOT / child, shallow=False)):
+            bad.append(f"FONT {kits} is not the same file as {child}")
     if bad:
         print("Animal Writes theme copies out of step with the child theme:")
         print("\n".join("  " + b for b in bad))
