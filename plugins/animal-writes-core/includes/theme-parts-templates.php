@@ -14,6 +14,7 @@
  *   a plugin template of the same slug, so page, single, 404 and archive would stay Kits', and it has no parts.
  * - theme.json: the custom templates (page-hub, campaign-page) and any template part areas are merged into the theme
  *   data (wp_theme_json_data_theme), as the child theme's theme.json is merged over Kits'.
+ * - Patterns: registered on init from the file headers, as core does for a theme's patterns folder.
  * - A template part block saved with "theme":"animal-writes" renders the active theme's part.
  *
  * @package animal-writes-core
@@ -205,3 +206,91 @@ function aw_core_theme_part_block_theme( $block ) {
 	return $block;
 }
 add_filter( 'render_block_data', 'aw_core_theme_part_block_theme', 1 );
+
+/**
+ * Pattern headers of this plugin's patterns folder, parsed as WP_Theme::get_block_patterns() parses a theme's
+ * (kept until a file changes).
+ *
+ * @return array[] File name => pattern data.
+ */
+function aw_core_theme_pattern_data(): array {
+	$dir   = AW_THEME_PARTS_DIR . 'patterns/';
+	$files = (array) glob( $dir . '*.php' );
+	sort( $files );
+	$sig    = md5( implode( ',', array_map( fn( $f ) => basename( (string) $f ) . ':' . (int) filemtime( (string) $f ), $files ) ) );
+	$cached = get_site_transient( 'aw_core_theme_patterns' );
+	if ( is_array( $cached ) && ( $cached['sig'] ?? '' ) === $sig && is_array( $cached['patterns'] ?? null ) ) {
+		return $cached['patterns'];
+	}
+	$headers = array(
+		'title'         => 'Title',
+		'slug'          => 'Slug',
+		'description'   => 'Description',
+		'viewportWidth' => 'Viewport Width',
+		'inserter'      => 'Inserter',
+		'categories'    => 'Categories',
+		'keywords'      => 'Keywords',
+		'blockTypes'    => 'Block Types',
+		'postTypes'     => 'Post Types',
+		'templateTypes' => 'Template Types',
+	);
+	$out     = array();
+	foreach ( $files as $file ) {
+		$pattern = get_file_data( (string) $file, $headers );
+		if ( empty( $pattern['slug'] ) || ! preg_match( '/^[A-z0-9\/_-]+$/', $pattern['slug'] ) || ! $pattern['title'] ) {
+			continue;
+		}
+		foreach ( array( 'categories', 'keywords', 'blockTypes', 'postTypes', 'templateTypes' ) as $list ) {
+			if ( ! empty( $pattern[ $list ] ) ) {
+				$pattern[ $list ] = array_filter( wp_parse_list( (string) $pattern[ $list ] ) );
+			} else {
+				unset( $pattern[ $list ] );
+			}
+		}
+		if ( ! empty( $pattern['viewportWidth'] ) ) {
+			$pattern['viewportWidth'] = (int) $pattern['viewportWidth'];
+		} else {
+			unset( $pattern['viewportWidth'] );
+		}
+		if ( ! empty( $pattern['inserter'] ) ) {
+			$pattern['inserter'] = in_array( strtolower( $pattern['inserter'] ), array( 'yes', 'true' ), true );
+		} else {
+			unset( $pattern['inserter'] );
+		}
+		$out[ basename( (string) $file ) ] = $pattern;
+	}
+	set_site_transient(
+		'aw_core_theme_patterns',
+		array(
+			'sig'      => $sig,
+			'patterns' => $out,
+		)
+	);
+	return $out;
+}
+
+/**
+ * Registers this plugin's patterns as core registers a theme's (_register_theme_block_patterns): same slugs and
+ * headers, the file rendered when the pattern is used, a slug already registered left alone. Before core's own run
+ * (init 10), as a child theme's patterns come before its parent's.
+ */
+function aw_core_theme_register_patterns() {
+	if ( ! aw_core_theme_parts_on() ) {
+		return;
+	}
+	$registry = WP_Block_Patterns_Registry::get_instance();
+	foreach ( aw_core_theme_pattern_data() as $file => $pattern ) {
+		$path = AW_THEME_PARTS_DIR . 'patterns/' . $file;
+		if ( $registry->is_registered( $pattern['slug'] ) || ! is_readable( $path ) ) {
+			continue;
+		}
+		$pattern['filePath'] = $path;
+		// The child theme's text domain, as core translates a theme's pattern headers.
+		$pattern['title'] = translate_with_gettext_context( $pattern['title'], 'Pattern title', 'animal-writes' ); // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText,WordPress.WP.I18n.LowLevelTranslationFunction
+		if ( ! empty( $pattern['description'] ) ) {
+			$pattern['description'] = translate_with_gettext_context( $pattern['description'], 'Pattern description', 'animal-writes' ); // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText,WordPress.WP.I18n.LowLevelTranslationFunction
+		}
+		register_block_pattern( $pattern['slug'], $pattern );
+	}
+}
+add_action( 'init', 'aw_core_theme_register_patterns', 9 );
