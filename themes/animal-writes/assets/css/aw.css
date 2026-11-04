@@ -535,8 +535,6 @@ body { background: var(--kit-color-canvas); }
 .kit-card-media.is-logo { position: relative; } .kit-card-media.is-logo .aw-story-fallback { display: flex; } .kit-card-media.is-logo .aw-story-logo { width: 40%; height: 40%; } /* an organisation's logo standing in for an Opportunity's picture, whole */
 
 /* Announcement bar: one line on phones (just the link) */
-@media (max-width: 767px) { .aw-announce-lead { display: none; } .kit-announce p { white-space: nowrap; } }
-.kit-announce .kit-ico--megaphone { margin-right: .35em; }
 
 /* Search: grouped by section, matches highlighted */
 .aw-search-group { margin-block: var(--kit-space-6, 1.5rem); }
