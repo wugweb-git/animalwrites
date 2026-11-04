@@ -755,6 +755,93 @@
 	else if (phone.addListener) phone.addListener(setup);
 })();
 
+/* Pain scale from 1200 (campaign-lab.css .aw-camp-scale.is-tabs): each tier's H3 holds a toggle button and one panel
+   beside the ladder shows the chosen tier's examples under a large meter; Mild first. Up/Down and Home/End move between
+   the buttons. Below 1200 the buttons and the panel go and every tier is open again. */
+(function () {
+	var scale = document.querySelector('.aw-camp--lab-rules .aw-camp-scale');
+	if (!scale) return;
+	var tiers = Array.prototype.slice.call(scale.querySelectorAll('.aw-camp-tier'));
+	if (tiers.length < 2 || !window.matchMedia) return;
+	var wide = window.matchMedia('(min-width: 1200px)');
+	var panel = null, name = null, who = null, text = null, on = false;
+	function btn(t) { return t.querySelector('.aw-camp-tier-btn'); }
+	function pick(i) {
+		tiers.forEach(function (t, k) {
+			t.classList.toggle('is-current', k === i);
+			btn(t).setAttribute('aria-pressed', k === i ? 'true' : 'false');
+		});
+		panel.style.setProperty('--fill', getComputedStyle(tiers[i]).getPropertyValue('--fill').trim());
+		panel.setAttribute('aria-labelledby', btn(tiers[i]).id);
+		panel.classList.toggle('is-ext', !!tiers[i].querySelector('.aw-camp-tier-who.is-ext'));
+		name.textContent = btn(tiers[i]).textContent;
+		who.replaceChildren.apply(who, Array.prototype.map.call(tiers[i].querySelector('.aw-camp-tier-who').childNodes, function (c) { return c.cloneNode(true); }));
+		who.className = tiers[i].querySelector('.aw-camp-tier-who').className;
+		text.textContent = tiers[i].querySelector('.aw-camp-tier-ex').textContent;
+	}
+	function key(e) {
+		var i = tiers.indexOf(e.currentTarget.closest('.aw-camp-tier')), n = tiers.length, to = -1;
+		if (e.key === 'ArrowDown') to = (i + 1) % n;
+		else if (e.key === 'ArrowUp') to = (i + n - 1) % n;
+		else if (e.key === 'Home') to = 0;
+		else if (e.key === 'End') to = n - 1;
+		if (to < 0) return;
+		e.preventDefault();
+		btn(tiers[to]).focus();
+	}
+	function setup() {
+		if (wide.matches === on) return;
+		on = wide.matches;
+		if (on) {
+			tiers.forEach(function (t, i) {
+				var h = t.querySelector('.aw-camp-tier-name'), b = document.createElement('button');
+				b.type = 'button';
+				b.className = 'aw-camp-tier-btn';
+				b.id = 'aw-tier-btn-' + (i + 1);
+				b.setAttribute('aria-controls', 'aw-tier-panel');
+				b.textContent = h.textContent;
+				h.textContent = '';
+				h.appendChild(b);
+				b.addEventListener('click', function () { pick(i); });
+				b.addEventListener('keydown', key);
+			});
+			panel = document.createElement('div');
+			panel.id = 'aw-tier-panel';
+			panel.className = 'aw-camp-tier-panel';
+			panel.setAttribute('role', 'region');
+			panel.setAttribute('aria-live', 'polite');
+			var bar = document.createElement('span');
+			bar.className = 'aw-camp-tier-bar';
+			bar.setAttribute('aria-hidden', 'true');
+			name = document.createElement('p');
+			name.className = 'aw-camp-tier-panel-name';
+			name.setAttribute('aria-hidden', 'true'); /* the panel is already named by the pressed button */
+			who = document.createElement('p');
+			text = document.createElement('p');
+			text.className = 'aw-camp-tier-panel-ex';
+			panel.appendChild(name);
+			panel.appendChild(bar);
+			panel.appendChild(who);
+			panel.appendChild(text);
+			scale.appendChild(panel);
+			scale.classList.add('is-tabs');
+			pick(0);
+		} else {
+			tiers.forEach(function (t) {
+				var h = t.querySelector('.aw-camp-tier-name'), b = btn(t);
+				if (b) h.textContent = b.textContent;
+				t.classList.remove('is-current');
+			});
+			if (panel) panel.remove();
+			panel = name = who = text = null;
+			scale.classList.remove('is-tabs');
+		}
+	}
+	setup();
+	if (wide.addEventListener) wide.addEventListener('change', setup);
+	else if (wide.addListener) wide.addListener(setup);
+})();
+
 /* Phone bar: shows once the hero has scrolled away; hidden while the letter tool, the newsletter band or the footer is
    on screen, and for the rest of the session after a letter is confirmed. */
 (function () {

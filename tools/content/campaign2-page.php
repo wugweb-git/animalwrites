@@ -229,20 +229,20 @@ $rules = c2sec( 'rules', c2h( 'What the draft does' ) . "<!-- wp:group {\"classN
 /* 4. Pain scale: a four-step ladder; who approves sits on each step. */
 $tier = function ( $lvl, $name, $who, $ext, $text ) {
 	return '<li class="aw-camp-tier aw-camp-tier--' . $lvl . '"><span class="aw-camp-tier-bar" aria-hidden="true"></span>'
-		. '<h3>' . $name . '</h3><p class="aw-camp-tier-who' . ( $ext ? ' is-ext' : '' ) . '">' . c2i( $ext ? 'legal' : 'building' ) . $who . '</p><p>' . $text . '</p></li>';
+		. '<h3 class="aw-camp-tier-name">' . $name . '</h3><p class="aw-camp-tier-who' . ( $ext ? ' is-ext' : '' ) . '">' . c2i( $ext ? 'legal' : 'building' ) . $who . '</p><p class="aw-camp-tier-ex">' . $text . '</p></li>';
 };
 $pain = c2sec(
 	'pain-scale',
 	c2h( 'The pain scale decides who says yes' )
 	. c2p( 'Every experiment would be labelled by how much pain it is expected to cause. The label decides whether anyone outside the lab reviews it.', 'aw-camp-lede' )
 	. c2html(
-		'<ol class="aw-camp-ladder">'
+		'<div class="aw-camp-scale"><ol class="aw-camp-ladder">'
 		. $tier( 1, 'Mild', 'Lab\'s own committee', false, 'Keeping sociable rats or mice alone for a short time; withholding food from adult rats for under 24 hours.' )
 		. $tier( 2, 'Moderate', 'Lab\'s own committee', false, 'Withholding food from adult rats for 48 hours; stimuli the animal cannot escape or avoid; inducing tumours.' )
 		. $tier( 3, 'Severe', 'CCSEA, for animals larger than rodents and rabbits', true, 'Toxicity tests where death is the endpoint; inescapable electric shock; long isolation of dogs and monkeys.' )
 		. $tier( 4, 'Non-recovery', 'CCSEA, for animals larger than rodents and rabbits', true, 'Done fully under anaesthesia; the animal does not wake up.' )
-		. '</ol>'
-		. '<p class="aw-camp-gap">' . c2i( 'alert' ) . '<span>The draft does not say who approves severe experiments on rats, mice or rabbits. ' . chip( '11-2', 'Rule 11(2)' ) . ' ' . chip( 'annexure-1', 'Annexure I' ) . '</span></p>'
+		. '</ol></div>'
+		. '<p class="aw-camp-gap aw-camp-gap--lead">' . c2i( 'alert' ) . '<span>The draft does not say who approves severe experiments on rats, mice or rabbits. ' . chip( '11-2', 'Rule 11(2)' ) . ' ' . chip( 'annexure-1', 'Annexure I' ) . '</span></p>'
 	)
 	. c2guides( array( 'animal-experiment-severity-mild-moderate-severe' ) ),
 	'aw-camp-dark'
