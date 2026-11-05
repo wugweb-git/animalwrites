@@ -204,9 +204,9 @@
 }
 @media (min-width: 768px) {
   :root {
-    --kit-photo-card-h: 350px;
     --kit-space-section-base: 70px;
     --kit-space-band-gap: var(--s-8);
+    --kit-photo-card-h: 350px;
     --kit-space-gutter: 32px;
     --kit-space-grid: 24px;
     --kit-offset: 14px;

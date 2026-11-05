@@ -260,15 +260,40 @@
       "md": "var(--s-4)",
       "lg": "var(--s-4)"
     },
-    "space-section": {
+    "space-section-base": {
       "sm": "48px",
       "md": "70px",
       "lg": "96px"
+    },
+    "space-section": {
+      "sm": "var(--kit-space-section-base)",
+      "md": "var(--kit-space-section-base)",
+      "lg": "var(--kit-space-section-base)"
+    },
+    "space-section-end": {
+      "sm": "var(--kit-space-section-base)",
+      "md": "var(--kit-space-section-base)",
+      "lg": "var(--kit-space-section-base)"
+    },
+    "space-band-gap": {
+      "sm": "var(--s-6)",
+      "md": "var(--s-8)",
+      "lg": "var(--s-10)"
     },
     "hero-min": {
       "sm": "560px",
       "md": "560px",
       "lg": "660px"
+    },
+    "hero-h": {
+      "sm": "min(720px, 100svh)",
+      "md": "min(720px, 100svh)",
+      "lg": "min(720px, 100svh)"
+    },
+    "photo-card-h": {
+      "sm": "250px",
+      "md": "350px",
+      "lg": "350px"
     },
     "space-gutter": {
       "sm": "16px",
@@ -739,6 +764,26 @@
       "sm": "var(--kit-size-control)",
       "md": "var(--kit-size-control)",
       "lg": "var(--kit-size-control)"
+    },
+    "field-border": {
+      "sm": "var(--neutral-5)",
+      "md": "var(--neutral-5)",
+      "lg": "var(--neutral-5)"
+    },
+    "field-hint": {
+      "sm": "var(--neutral-7)",
+      "md": "var(--neutral-7)",
+      "lg": "var(--neutral-7)"
+    },
+    "field-text-size": {
+      "sm": ".875rem",
+      "md": ".875rem",
+      "lg": ".875rem"
+    },
+    "field-hint-size": {
+      "sm": "var(--fluid-body-sm)",
+      "md": "var(--fluid-body-sm)",
+      "lg": "var(--fluid-body-sm)"
     },
     "btn-pad": {
       "sm": "var(--s-4)",

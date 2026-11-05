@@ -2,6 +2,7 @@
 """Kits responsive token engine: expand sparse sm/md/lg tokens, validate, emit CSS custom properties.
 
 Contract: every token is {sm, md, lg}; sm is the base (min-width 0); md and lg inherit upward.
+An optional "$comment" on a token is written after its base line as a CSS comment.
 Primitives live under $primitives and are referenced as {group.key}. No device words in token names.
 
   python3 build-tokens.py --src tokens.json --css out.css [--json compiled.json] [--prefix kit] [--alias aw]
@@ -26,7 +27,7 @@ BPS = ("sm", "md", "lg")
 def expand(tok, name):
     if not isinstance(tok, dict) or "sm" not in tok:
         sys.exit(f"{name}: must be an object with an 'sm' value")
-    bad = set(tok) - set(BPS)
+    bad = set(tok) - set(BPS) - {"$comment"}
     if bad:
         sys.exit(f"{name}: illegal breakpoint keys {bad} (only sm/md/lg)")
     out = {"sm": tok["sm"]}
@@ -139,6 +140,7 @@ def build(src_path, css_path, json_path=None, prefix="kit", alias=None, alias_na
     for name in src["tokens"]:
         if re.search(r"(mobile|tablet|desktop|phone)", name):
             sys.exit(f"{name}: device words are not allowed in token names")
+    notes = {n: t["$comment"] for n, t in src["tokens"].items() if isinstance(t, dict) and t.get("$comment")}
     compiled = {n: expand(t, n) for n, t in src["tokens"].items()}
     compiled = {n: {b: resolve_refs(v, src.get("$primitives", {})) for b, v in t.items()} for n, t in compiled.items()}
     assert {n: expand(t, n) for n, t in compiled.items()} == compiled, "expansion must be idempotent"
@@ -155,7 +157,7 @@ def build(src_path, css_path, json_path=None, prefix="kit", alias=None, alias_na
     if prim_bound:
         lines.append("  /* Kits v4.2 primitives bound to theme.json presets (Styles > Typography / Layout) */")
         lines += [f"  --{n}: {v};" for n, v in prim_bound.items()]
-    lines += [f"  --{p}{n}: {tok_bound[n] if n in tok_bound and parent is None else t['sm']};" for n, t in compiled.items()]
+    lines += [f"  --{p}{n}: {tok_bound[n] if n in tok_bound and parent is None else t['sm']};" + (f" /* {notes[n]} */" if n in notes else "") for n, t in compiled.items()]
     if alias:  # aliases cover this file's tokens plus alias_names (e.g. the parent's), so a partial override file keeps every --alias-* name
         lines += [f"  --{alias}-{n}: var(--{p}{n});" for n in dict.fromkeys([*compiled, *alias_names])]
     lines.append("}")
