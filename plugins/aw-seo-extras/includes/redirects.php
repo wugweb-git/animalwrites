@@ -145,6 +145,18 @@ add_action(
 	1
 );
 
+// The Home page has no page 2: /page/2/ (any number) is a copy of Home, so it goes to Home in one hop (5 Nov 2026).
+add_action(
+	'template_redirect',
+	function () {
+		if ( is_front_page() && 'page' === get_option( 'show_on_front' ) && max( (int) get_query_var( 'paged' ), (int) get_query_var( 'page' ) ) > 1 ) {
+			wp_safe_redirect( home_url( '/' ), 301, 'Animal Writes' );
+			exit;
+		}
+	},
+	1
+);
+
 add_filter( 'do_redirect_guess_404_permalink', '__return_false' );
 
 // A redirect never leads to the trash (owner, 15 Oct 2026): trashing an item switches off the redirects that point to
