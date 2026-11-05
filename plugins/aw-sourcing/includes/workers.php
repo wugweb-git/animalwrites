@@ -7,7 +7,8 @@
  * Data: each workflow reports its start and end (POST aw/v1/worker-run, the workers' application password) from
  * .github/actions/report in wugweb-git/animal-writes-workers. Nothing polls GitHub.
  * Alerts: a workflow with no report for its late limit (late_after_h), a run that failed, was cancelled or skipped its
- * main step, or a run with no end after its timeout. Shown on the Workers screen, in the dashboard box "Scheduled tasks", in
+ * main step, or a run with no end after its timeout; and UpdraftPlus's newest remote backup older than 36 hours or a
+ * failed backup run (aw_backup_problem, animal-writes-core backups.php). Shown on the Workers screen, in the dashboard box "Scheduled tasks", in
  * Tools → Site Health, and emailed to the owner once per new set of problems (the ingestion watchdog's pattern).
  *
  * @package aw-sourcing
@@ -185,6 +186,11 @@ function aw_workers_problems( $now = null ) {
 			}
 			$out[ $file . ':' . $result ] = $msg . ' ' . wp_date( 'j M, g:i a', max( (int) ( $last['ended'] ?? 0 ), (int) $last['started'] ) );
 		}
+	}
+	// Backups (animal-writes-core backups.php): UpdraftPlus's newest remote backup older than 36 hours, or a failed run.
+	$backup = function_exists( 'aw_backup_problem' ) ? aw_backup_problem( $now ) : '';
+	if ( '' !== $backup ) {
+		$out['updraftplus:backup'] = $backup;
 	}
 	if ( $cache ) {
 		$memo = $out;

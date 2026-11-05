@@ -149,3 +149,52 @@ add_action(
 		);
 	}
 );
+
+/*
+ * Remote backup alert (owner, 25 Oct 2026): backups are UpdraftPlus's job (database daily, files weekly, to Google
+ * Drive). Its newest backup sent to a remote store older than 36 hours, or its last run ending with errors, is a
+ * Workers problem (aw_workers_problems, aw-sourcing workers.php): shown on Sourcing → Workers, in the dashboard box and
+ * Site Health, and emailed once per new set of problems. Read from UpdraftPlus's own options; nothing is written.
+ */
+const AW_BACKUP_REMOTE_STALE = 36 * HOUR_IN_SECONDS;
+
+/**
+ * Unix time of UpdraftPlus's newest backup that went to a remote store (not 'none'), or 0.
+ *
+ * @return int
+ */
+function aw_backup_remote_last() {
+	$last = 0;
+	foreach ( (array) get_option( 'updraft_backup_history', array() ) as $at => $b ) {
+		$services = array_diff( (array) ( $b['service'] ?? array() ), array( '', 'none' ) );
+		if ( $services && ( isset( $b['db'] ) || isset( $b['plugins'] ) ) ) {
+			$last = max( $last, (int) $at );
+		}
+	}
+	return $last;
+}
+
+/**
+ * The backup problem as a sentence, or '' (also '' when UpdraftPlus is not active).
+ *
+ * @param int|null $now Unix time (tests).
+ * @return string
+ */
+function aw_backup_problem( $now = null ) {
+	if ( ! class_exists( 'UpdraftPlus' ) ) {
+		return '';
+	}
+	$now  = $now ? $now : time();
+	$last = aw_backup_remote_last();
+	if ( ! $last ) {
+		return 'UpdraftPlus has no backup in a remote store (Google Drive) yet.';
+	}
+	if ( $now - $last > AW_BACKUP_REMOTE_STALE ) {
+		return sprintf( 'The newest UpdraftPlus backup in Google Drive is %d hours old (%s); one is expected daily.', floor( ( $now - $last ) / HOUR_IN_SECONDS ), wp_date( 'j M, g:i a', $last ) );
+	}
+	$run = (array) get_option( 'updraft_last_backup', array() );
+	if ( $run && ( empty( $run['success'] ) || ! empty( $run['errors'] ) ) ) {
+		return sprintf( 'The last UpdraftPlus backup run (%s) ended with errors%s', wp_date( 'j M, g:i a', (int) ( $run['backup_time'] ?? 0 ) ), ! empty( $run['errors'] ) && is_array( $run['errors'] ) ? ': ' . mb_substr( wp_strip_all_tags( (string) reset( $run['errors'] ) ), 0, 160 ) : '.' );
+	}
+	return '';
+}
