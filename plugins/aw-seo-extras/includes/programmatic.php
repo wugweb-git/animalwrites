@@ -303,6 +303,7 @@ function aw_seo_dir_title() {
 	$what = aw_seo_title_case( aw_seo_view_type_words( $v, max( 1, $v['n'] ) ) );
 	$ph   = aw_seo_dir_view_phones( $v );
 	$num  = $ph ? ( 1 === $ph ? ' Contact Number' : ' Contact Numbers' ) : ''; // no separator but the " – " before the site name (owner, 15 Oct 2026)
+	$one  = aw_seo_title_case( aw_seo_view_type_words( $v, 1 ) ); // "Animal Shelter Contact Numbers", not "Animal Shelters Contact Numbers" (owner, 5 Nov 2026)
 	if ( 'district' === $v['kind'] ) {
 		$full  = $v['place']->name . ', ' . $v['state']->name; // "in Gandhinagar, Gujarat" (owner, 5 Nov 2026)
 		$short = $v['place']->name;
@@ -313,7 +314,7 @@ function aw_seo_dir_title() {
 	return aw_seo_fit(
 		array_unique(
 			array(
-				$num ? $what . $num . ' in ' . $full : aw_seo_branded( $what . ' in ' . $full ),
+				$num ? $one . $num . ' in ' . $full : aw_seo_branded( $what . ' in ' . $full ),
 				aw_seo_branded( $what . ' in ' . $full ),
 				$what . ' in ' . $full,
 				aw_seo_branded( $what . ' in ' . $short ),
@@ -337,7 +338,7 @@ function aw_seo_dir_h1() {
 	if ( ! $ph ) {
 		return '';
 	}
-	return aw_seo_title_case( aw_seo_view_type_words( $v, max( 1, $v['n'] ) ) ) . ( 1 === $ph ? ' Contact Number' : ' Contact Numbers' ) . ' in ' . $v['place']->name;
+	return aw_seo_title_case( aw_seo_view_type_words( $v, 1 ) ) . ( 1 === $ph ? ' Contact Number' : ' Contact Numbers' ) . ' in ' . $v['place']->name;
 }
 
 /**
