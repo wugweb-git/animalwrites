@@ -241,7 +241,7 @@ So from 6 Nov until the owner sets Post, the page and Home still ask people to s
 - AI referrals: 96 landings on the Library draft, 72 on the campaign page.
 - X, 27 Oct – 2 Nov: 264 Lab posts; #StopAnimalTesting 226, #WithdrawAnimalTestingRules 157, #AnimalFreeScience 133; posts with a picture averaged 171 views vs 25 for text only; 1 post linked animalwrites.in.
 - Links: Hindustan Times, Free Press Journal and DT Next link to the site.
-- Newsletter: 115 volunteers on 3 Nov; 80 delivered through the mailbox that day (the daily cap is 80). The resend campaigns 3 and 4 stay paused (owner, 5 Nov), so the contacts still waiting in them are not sent (see Off the page).
+- Newsletter: 115 volunteers on 3 Nov; 80 delivered through the mailbox that day (the daily cap is 80). With the resend campaigns 3 and 4, all 115 have a sent email (FluentCRM, checked 5 Nov; see Off the page).
 ## Letters and data (letter log `wp_aw_camp_letters`, read 3 Nov 2026)
 - 3,981 send taps from 3,593 sends since 17 Oct: Gmail 3,559, copy 375, email app 46.
 - 3,169 taps came with the updates box ticked.
@@ -267,7 +267,7 @@ So from 6 Nov until the owner sets Post, the page and Home still ask people to s
 ## Off the page
 - Newsletter (3 Nov): FluentCRM campaign 2, "Object to the draft lab animal rules 2026", to the 115 subscribed contacts tagged with the campaign, from noreply@ with Reply-To contact@, started 18:51 IST.
 - 33 failed at 18:53 ("Could not instantiate mail function") and 11 (contacts 22–31, 68) were marked sent but never left. Cause: a deploy re-clones the plugin folder, so mailweb was missing for about 10 seconds and FluentCRM fell back to PHP mail(), which the host refuses.
-- Resends: campaign 3 to the 33 (tag 22, "Lab rules newsletter resend 4 Nov"); campaign 4 to the 11 (tag 23, "Lab rules newsletter resend 2, 4 Nov"). Campaigns 3 and 4 are paused on 4 Nov and stay paused (owner, 5 Nov: "no").
+- Resends: campaign 3 to the 33 (tag 22, "Lab rules newsletter resend 4 Nov"); campaign 4 to the 11 (tag 23, "Lab rules newsletter resend 2, 4 Nov"). Both finished on 4 Nov (campaign 3: 33 of 33 sent; campaign 4: 11 of 11 sent, by 19:00) and were archived at 19:11. Checked in FluentCRM on 5 Nov: none of the 115 is left without a sent email, so nothing is waiting and nothing needs resuming.
 - Fixes: the ship script refuses to deploy while a campaign is sending; AW Mail Guard (`tools/server/aw-mail-guard/`) holds FluentCRM batches while mailweb is missing, installed once outside the deploy folder. e855e321
 - Own accounts: X @animals_writes and LinkedIn /company/animalwrites, each with a pinned Lab post (31 Oct).
 - Short link `/lab` (was `/lab-rules`); `/lab-rul/` and about 85 Rank Math redirects, including lab-rules link typos (1 Nov). 8f3b2067
