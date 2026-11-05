@@ -241,7 +241,7 @@ So from 6 Nov until the owner sets Post, the page and Home still ask people to s
 - AI referrals: 96 landings on the Library draft, 72 on the campaign page.
 - X, 27 Oct – 2 Nov: 264 Lab posts; #StopAnimalTesting 226, #WithdrawAnimalTestingRules 157, #AnimalFreeScience 133; posts with a picture averaged 171 views vs 25 for text only; 1 post linked animalwrites.in.
 - Links: Hindustan Times, Free Press Journal and DT Next link to the site.
-- Newsletter: 115 volunteers on 3 Nov; 80 delivered through the mailbox that day (the daily cap is 80). The resend campaigns 3 and 4 stay paused (owner, 5 Nov), so the 44 they hold are not sent (see Off the page).
+- Newsletter: 115 volunteers on 3 Nov; 80 delivered through the mailbox that day (the daily cap is 80). The resend campaigns 3 and 4 stay paused (owner, 5 Nov), so the contacts still waiting in them are not sent (see Off the page).
 ## Letters and data (letter log `wp_aw_camp_letters`, read 3 Nov 2026)
 - 3,981 send taps from 3,593 sends since 17 Oct: Gmail 3,559, copy 375, email app 46.
 - 3,169 taps came with the updates box ticked.
