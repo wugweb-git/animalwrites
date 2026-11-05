@@ -208,7 +208,7 @@ function aw_si_view_sql( string $view = '' ) {
 		'gap'       => "status = 'gap'",
 		'conflict'  => "status = 'conflict'",
 		'quick'     => aw_si_quick_sql(),
-		'notranked' => 'roles & ' . (int) AW_SI_ROLE_TRACKED . ' AND impr28 = 0',
+		'notranked' => 'roles & ' . (int) AW_SI_ROLE_TRACKED . " AND impr28 = 0 AND LOCATE('{', label) = 0", // Directory patterns are not searched; no % here, as views pass through prepare().
 		'entity'    => 'entity = 1',
 	);
 	return '' === $view ? $map : ( $map[ $view ] ?? '1=0' );

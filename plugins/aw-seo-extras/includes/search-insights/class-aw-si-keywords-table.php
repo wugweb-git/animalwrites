@@ -445,7 +445,8 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 	}
 
 	/**
-	 * Status, and "not ranking" for a tracked keyword with no impressions.
+	 * Status, and "not ranking" for a tracked keyword with no impressions. A Directory pattern such as
+	 * "gaushala in {district}" is never searched as typed, so it says so instead of "not ranking".
 	 *
 	 * @param object $item Keyword record.
 	 */
@@ -456,7 +457,9 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 			'conflict' => __( 'Conflict', 'aw-seo-extras' ),
 		);
 		$s      = $labels[ $item->status ] ?? '–';
-		if ( ( (int) $item->roles & AW_SI_ROLE_TRACKED ) && 0 === (int) $item->impr28 ) {
+		if ( false !== strpos( $item->label, '{' ) ) {
+			$s .= ' · ' . __( 'Directory pattern, not searched', 'aw-seo-extras' );
+		} elseif ( ( (int) $item->roles & AW_SI_ROLE_TRACKED ) && 0 === (int) $item->impr28 ) {
 			$s .= ' · ' . __( 'not ranking', 'aw-seo-extras' );
 		}
 		return esc_html( $s );
