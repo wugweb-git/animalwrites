@@ -37,7 +37,7 @@
 <!-- wp:group {"className":"kit-stack","style":{"spacing":{"margin":{"top":"var:preset|spacing|50"}}},"layout":{"type":"grid","columnCount":2,"minimumColumnWidth":"16rem"}} -->
 <div class="wp-block-group kit-stack" style="margin-top:var(--wp--preset--spacing--50)"><!-- wp:group {"className":"kit-tile kit-ico--legal","layout":{"type":"default"}} -->
 <div class="wp-block-group kit-tile kit-ico--legal"><!-- wp:heading {"level":3} -->
-<h3 class="wp-block-heading"><a href="/library/?tag=act">Acts and Rules</a></h3>
+<h3 class="wp-block-heading"><a href="/library/?tag=act,rule">Acts and Rules</a></h3>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
