@@ -304,7 +304,7 @@ function aw_seo_dir_title() {
 	$ph   = aw_seo_dir_view_phones( $v );
 	$num  = $ph ? ( 1 === $ph ? ' Contact Number' : ' Contact Numbers' ) : ''; // no separator but the " – " before the site name (owner, 15 Oct 2026)
 	if ( 'district' === $v['kind'] ) {
-		$full  = $v['place']->name . ' ' . $v['state']->name;
+		$full  = $v['place']->name . ', ' . $v['state']->name; // "in Gandhinagar, Gujarat" (owner, 5 Nov 2026)
 		$short = $v['place']->name;
 	} else {
 		$full  = 'state' === $v['kind'] ? $v['place']->name : 'India';
@@ -322,6 +322,22 @@ function aw_seo_dir_title() {
 		),
 		60 - mb_strlen( aw_seo_page_suffix() )
 	);
+}
+
+/**
+ * H1 of a district or state × type page where its listings have a number: "Animal Shelter Contact Numbers in
+ * Gandhinagar", the same words as its title (owner, 5 Nov 2026); '' otherwise.
+ */
+function aw_seo_dir_h1() {
+	$v = aw_seo_dir_view();
+	if ( ! $v || '' === $v['type'] || $v['other'] || ! in_array( $v['kind'], array( 'district', 'state' ), true ) ) {
+		return '';
+	}
+	$ph = aw_seo_dir_view_phones( $v );
+	if ( ! $ph ) {
+		return '';
+	}
+	return aw_seo_title_case( aw_seo_view_type_words( $v, max( 1, $v['n'] ) ) ) . ( 1 === $ph ? ' Contact Number' : ' Contact Numbers' ) . ' in ' . $v['place']->name;
 }
 
 /**

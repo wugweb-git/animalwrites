@@ -226,7 +226,8 @@ function aw_is_directory_view() {
 /**
  * H1 of the Directory view: "Directory", "Animal Helpline Numbers in Kerala" where the place's title says so (a listing
  * with a phone or an official number: aw_seo_place_has_helpline(); owner, 5 Nov 2026), else "Help in Kerala";
- * "Gaushala in Ernakulam" or the type.
+ * "Animal Shelter Contact Numbers in Gandhinagar" where its listings have a number (aw_seo_dir_h1(), owner, 5 Nov 2026),
+ * else "Gaushala in Ernakulam" or the type.
  */
 function aw_directory_h1() {
 	$city  = aw_current_place();
@@ -235,6 +236,10 @@ function aw_directory_h1() {
 		return get_the_title( get_queried_object_id() );
 	}
 	if ( $tname ) {
+		$numbers = $city && function_exists( 'aw_seo_dir_h1' ) ? aw_seo_dir_h1() : '';
+		if ( '' !== $numbers ) {
+			return $numbers;
+		}
 		return $city ? $tname . ' in ' . $city->name : $tname;
 	}
 	if ( function_exists( 'aw_seo_place_has_helpline' ) && aw_seo_place_has_helpline( $city ) ) {
