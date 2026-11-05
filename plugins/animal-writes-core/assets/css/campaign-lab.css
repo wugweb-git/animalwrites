@@ -352,8 +352,6 @@
 .aw-camp-tier .aw-camp-tier-who { align-self: flex-start; margin-bottom: var(--kit-space-3); }
 .aw-camp-tier-who.is-ext { box-shadow: inset 0 0 0 var(--kit-border-width) color-mix(in srgb, var(--kit-color-on-ink) 28%, transparent); } /* the crimson chip stays clear of the crimson card */
 .aw-camp-tier-art { display: block; width: calc(100% + 2 * var(--kit-space-5)); max-width: none; height: auto; aspect-ratio: 4 / 3; object-fit: cover; margin: auto calc(-1 * var(--kit-space-5)) calc(-1 * var(--kit-space-5)); padding-top: var(--kit-space-3); border-radius: 0 0 var(--kit-radius-card) var(--kit-radius-card); -webkit-mask: linear-gradient(to bottom, transparent, #000 40%); mask: linear-gradient(to bottom, transparent, #000 40%); }
-/* Phones only: from 768 the pictures would take the section past the 720px height rule (docs/design-system.md rule 5); hidden lazy images are not loaded */
-@media (min-width: 768px) { .aw-camp-tier-art { display: none; } }
 /* Phones: the cards are padded, so the rail's node and line start level with the bar */
 @media (max-width: 767px) {
 	.aw-camp-tier::before { inset-block-start: var(--kit-space-5); }
