@@ -88,7 +88,7 @@ function c2buttons( $btns ) {
 	return "<!-- wp:buttons -->\n<div class=\"wp-block-buttons\">$b</div>\n<!-- /wp:buttons -->\n\n";
 }
 function c2table( $head, $rows ) {
-	$h = '<tr><th>' . implode( '</th><th>', $head ) . '</th></tr>';
+	$h = '<tr><th scope="col">' . implode( '</th><th scope="col">', $head ) . '</th></tr>';
 	$b = '';
 	foreach ( $rows as $r ) {
 		$b .= '<tr><td>' . implode( '</td><td>', $r ) . '</td></tr>';
@@ -239,10 +239,10 @@ $pain = c2sec(
 	. c2p( 'Every experiment would be labelled by how much pain it is expected to cause. The label decides whether anyone outside the lab reviews it.', 'aw-camp-lede' )
 	. c2html(
 		'<ol class="aw-camp-ladder">'
-		. $tier( 1, 'Mild', 'Lab\'s own committee', false, 'Keeping sociable rats or mice alone for a short time; withholding food from adult rats for under 24 hours.' )
-		. $tier( 2, 'Moderate', 'Lab\'s own committee', false, 'Withholding food from adult rats for 48 hours; stimuli the animal cannot escape or avoid; inducing tumours.' )
-		. $tier( 3, 'Severe', 'CCSEA, for animals larger than rodents and rabbits', true, 'Toxicity tests where death is the endpoint; inescapable electric shock; long isolation of dogs and monkeys.' )
-		. $tier( 4, 'Non-recovery', 'CCSEA, for animals larger than rodents and rabbits', true, 'Done fully under anaesthesia; the animal does not wake up.' )
+		. $tier( 1, 'Mild', 'Lab\'s own committee', false, 'Keeping sociable rats or mice alone for a short time; withholding food from adult rats for under 24 hours.', 'https://animalwrites.in/wp-content/uploads/2026/11/calm-white-mouse-beside-crimson-book.png' )
+		. $tier( 2, 'Moderate', 'Lab\'s own committee', false, 'Withholding food from adult rats for 48 hours; stimuli the animal cannot escape or avoid; inducing tumours.', 'https://animalwrites.in/wp-content/uploads/2026/11/white-mouse-front-crimson-box-file.jpg' )
+		. $tier( 3, 'Severe', 'CCSEA, for animals larger than rodents and rabbits', true, 'Toxicity tests where death is the endpoint; inescapable electric shock; long isolation of dogs and monkeys.', 'https://animalwrites.in/wp-content/uploads/2026/11/white-rat-steel-bench-grid-form.jpg' )
+		. $tier( 4, 'Non-recovery', 'CCSEA, for animals larger than rodents and rabbits', true, 'Done fully under anaesthesia; the animal does not wake up.', 'https://animalwrites.in/wp-content/uploads/2026/11/pale-lab-glassware-cream-bench.png' )
 		. '</ol>'
 		. '<p class="aw-camp-gap">' . c2i( 'alert' ) . '<span>The draft does not say who approves severe experiments on rats, mice or rabbits. ' . chip( '11-2', 'Rule 11(2)' ) . ' ' . chip( 'annexure-1', 'Annexure I' ) . '</span></p>'
 	)
