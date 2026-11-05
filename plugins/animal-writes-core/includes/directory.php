@@ -223,14 +223,24 @@ function aw_is_directory_view() {
 	return function_exists( 'aw_hub_type' ) && 'aw_listing' === aw_hub_type();
 }
 
-/** H1 of the Directory view: "Directory", "Help in Kerala", "Gaushala in Ernakulam" or the type. */
+/**
+ * H1 of the Directory view: "Directory", "Animal Helpline Numbers in Kerala" where the place's title says so (a listing
+ * with a phone or an official number: aw_seo_place_has_helpline(); owner, 5 Nov 2026), else "Help in Kerala";
+ * "Gaushala in Ernakulam" or the type.
+ */
 function aw_directory_h1() {
 	$city  = aw_current_place();
 	$tname = aw_current_type_name();
 	if ( ! $city && ! $tname ) {
 		return get_the_title( get_queried_object_id() );
 	}
-	return $tname ? ( $city ? $tname . ' in ' . $city->name : $tname ) : 'Help in ' . $city->name;
+	if ( $tname ) {
+		return $city ? $tname . ' in ' . $city->name : $tname;
+	}
+	if ( function_exists( 'aw_seo_place_has_helpline' ) && aw_seo_place_has_helpline( $city ) ) {
+		return 'Animal Helpline Numbers in ' . $city->name;
+	}
+	return 'Help in ' . $city->name;
 }
 
 // The Directory Page's H1 and intro follow the place and type.
