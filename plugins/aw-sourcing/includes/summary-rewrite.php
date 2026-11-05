@@ -23,8 +23,10 @@
  *   Writes and settles may carry src_chars (the length of the source text read); a 'short' state also keeps the
  *   section's minimum it was judged by (min_words).
  *
- * State lives in the meta aw_summary_rw = {state: ok|done|short|failed, md5, at, tries, model, reason}. A state counts
- * only while the summary still has the md5 it was settled with. Nothing is deleted.
+ * State lives in the meta aw_summary_rw = {state: ok|done|short|failed, md5, at, tries, model, reason, min_words}. A
+ * state counts only while the summary still has the md5 it was settled with, and an ok or done one only while it is
+ * not below a section minimum raised since it was judged (min_words, from 5 Nov 2026). Nothing is deleted; a rewrite
+ * keeps the old text in aw_summary_history. ?progress=1 counts those waiting as 'below_min' per section.
  *
  * @package aw-sourcing
  */
@@ -37,10 +39,40 @@ function aw_summary_rw_clean( $id ) {
 	return trim( str_replace( '[Needs legal review]', '', wp_strip_all_tags( (string) get_post_field( 'post_excerpt', $id, 'raw' ) ) ) );
 }
 
-/** Is this item's summary settled (a state recorded for exactly this text)? */
+/** The current word minimum of an item's section (0 when it has none). */
+function aw_summary_rw_min( $id ) {
+	$sec = aw_summary_section( $id );
+	return '' === $sec ? 0 : (int) ( aw_summary_rules()['sections'][ $sec ]['min_words'] ?? 0 );
+}
+
+/**
+ * An ok or done summary below its section's current minimum that was not judged by that minimum (owner, 25 Oct
+ * 2026: summaries settled before the minimums were raised open again and are rewritten at the normal pace; never
+ * padded: a thin source ends as 'short' and is listed).
+ *
+ * @param int    $id      Post ID.
+ * @param string $excerpt The summary as stored.
+ * @param array  $m       Its aw_summary_rw meta.
+ * @return bool
+ */
+function aw_summary_rw_below_min( $id, $excerpt, array $m ) {
+	if ( ! in_array( $m['state'] ?? '', array( 'ok', 'done' ), true ) ) {
+		return false;
+	}
+	$min = aw_summary_rw_min( $id );
+	if ( ! $min || (int) ( $m['min_words'] ?? 0 ) === $min ) {
+		return false;
+	}
+	return aw_summary_words( trim( str_replace( '[Needs legal review]', '', wp_strip_all_tags( (string) $excerpt ) ) ) ) < $min;
+}
+
+/** Is this item's summary settled (a state recorded for exactly this text, and not below a raised minimum)? */
 function aw_summary_rw_settled( $id, $excerpt ) {
 	$m = get_post_meta( $id, 'aw_summary_rw', true );
 	if ( ! is_array( $m ) || md5( (string) $excerpt ) !== ( $m['md5'] ?? '' ) ) {
+		return false;
+	}
+	if ( aw_summary_rw_below_min( $id, $excerpt, $m ) ) {
 		return false;
 	}
 	return in_array( $m['state'] ?? '', array( 'ok', 'done', 'short' ), true ) || ( 'failed' === ( $m['state'] ?? '' ) && (int) ( $m['tries'] ?? 0 ) >= 2 );
@@ -133,6 +165,7 @@ function aw_summary_rw_set( $id, $excerpt, $state, $extra = array() ) {
 				'md5'   => md5( (string) $excerpt ),
 				'at'    => current_time( 'mysql' ),
 				'tries' => 'failed' === $state ? $tries + 1 : $tries,
+				'min_words' => aw_summary_rw_min( $id ), // the minimum it was judged by: a raised one opens it again
 			),
 			$extra
 		)
@@ -209,6 +242,9 @@ function aw_summary_rw_progress() {
 		$st = ( is_array( $m ) && md5( (string) $r->post_excerpt ) === ( $m['md5'] ?? '' ) ) ? ( $m['state'] ?? 'open' ) : 'open';
 		if ( 'failed' === $st && (int) ( $m['tries'] ?? 0 ) < 2 ) {
 			$st = 'open';
+		}
+		if ( 'open' !== $st && aw_summary_rw_below_min( $id, $r->post_excerpt, $m ) ) {
+			$st = 'below_min'; // settled before the minimum was raised: waiting for its rewrite
 		}
 		$count[ $sec ][ $st ] = ( $count[ $sec ][ $st ] ?? 0 ) + 1;
 		if ( in_array( $st, array( 'short', 'failed' ), true ) ) {
