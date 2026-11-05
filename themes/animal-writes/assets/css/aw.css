@@ -1956,7 +1956,7 @@ section.aw-camp-band.aw-ed-hero--campaign { box-sizing: border-box; min-height: 
    in marigold with white text (4.5:1). */
 .aw-festive.wp-block-cover { flex-direction: column; }
 .aw-festive .wp-block-cover__inner-container { display: flex; flex: 1 1 auto; flex-direction: column; }
-.aw-festive .wp-block-cover__inner-container > .wp-block-buttons { margin-top: auto; padding-top: var(--kit-space-4); } /* the button at the foot, level with the Supreme Court card's (5 Nov 2026) */
+.aw-festive .wp-block-cover__inner-container > :has(+ .wp-block-buttons) { margin-bottom: auto; } /* the button at the foot, level with the Supreme Court card's (5 Nov 2026); kits.css fixes the buttons' top margin, so the space goes under the line above them */
 .aw-festive.aw-camp--diwali { --camp-primary: #a14a05; --camp-primary-ink: #ffffff; --kit-btn-brand-bg: var(--camp-primary); --kit-btn-brand-fg: var(--camp-primary-ink); }
 /* The icon tip list (campaign hero) */
 .kit-hero .aw-festive-tips { list-style: none; margin: 0 0 var(--kit-space-6); padding: 0; display: grid; gap: var(--kit-space-3); }
