@@ -95,7 +95,7 @@ else
 fi
 # Markers from the child's front-page template and header part, in no Kits template or part; written as the class
 # attribute so a stylesheet rule cannot match them.
-has "front-page template is the Animal Writes one (no child)" /tmp/home.html 'alignfull is-style-kits-section kit-section aw-ed-faq' # the FAQ section; the Take part band went back to its pattern (5 Nov 2026)
+has "front-page template is the Animal Writes one (no child)" /tmp/home.html 'class="wp-block-group kit-static' # the front page's main group (only our front-page template uses kit-static); the Take part band went back to its pattern and the FAQ section is empty without FAQ items (5 Nov 2026)
 has "header part is the Animal Writes one (no child)" /tmp/home.html 'class="kit-header-utility" data-menu="secondary"'
 want=$(ls "$REPO"/themes/animal-writes/patterns/*.php | wc -l | tr -d ' ')
 got=$(wp eval 'echo count(array_filter(WP_Block_Patterns_Registry::get_instance()->get_all_registered(), fn($p)=>str_starts_with($p["name"],"animal-writes/")));' 2>/dev/null || echo error)
