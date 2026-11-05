@@ -16,6 +16,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+// The AW SEO Plus Overview's FAQ status asks for this when the hourly count has run out (5 Nov 2026).
+add_action( 'aw_faq_index_build', fn() => aw_faq_index( true ) );
+
 /**
  * Every item that shows an FAQ or has draft questions, and the counts by type. Cached for an hour.
  *

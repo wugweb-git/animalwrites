@@ -325,7 +325,7 @@ function aw_si_screen(): void {
 	} else {
 		wp_nonce_field( 'closedpostboxes', 'closedpostboxesnonce', false );
 		wp_nonce_field( 'meta-box-order', 'meta-box-order-nonce', false );
-		echo '<div id="dashboard-widgets-wrap"><div id="dashboard-widgets" class="metabox-holder"><div class="postbox-container">';
+		echo '<div id="dashboard-widgets-wrap"><div id="dashboard-widgets" class="metabox-holder columns-1"><div class="postbox-container">';
 		do_meta_boxes( get_current_screen(), 'normal', null );
 		echo '</div></div></div>';
 	}

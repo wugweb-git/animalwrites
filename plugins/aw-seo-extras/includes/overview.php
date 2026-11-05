@@ -78,6 +78,10 @@ function aw_seo_overview_si_status(): string {
 function aw_seo_overview_faq_status(): string {
 	$ix = get_transient( 'aw_faq_index' );
 	if ( ! is_array( $ix ) || ! isset( $ix['counts'] ) ) {
+		// The count is kept for an hour after AW SEO Plus → FAQ builds it; rebuild it in the background, not on this view.
+		if ( function_exists( 'aw_faq_index' ) && ! wp_next_scheduled( 'aw_faq_index_build' ) ) {
+			wp_schedule_single_event( time(), 'aw_faq_index_build' );
+		}
 		return '';
 	}
 	$faq    = array_sum( wp_list_pluck( $ix['counts'], 'faq' ) );
