@@ -301,7 +301,6 @@ So from 6 Nov until the owner sets Post, the page and Home still ask people to s
 ### Owner's call (recorded only)
 - Library draft: a campaign link on its first screen (the guide box sits about three phone screens down; moving it is a template change).
 - UTM links for the X and LinkedIn bios; a per-minute cap on the public sent counter.
-- Newsletter campaigns 2–4: finish with 0 failed on 4 Nov.
 - AW Mail Guard: install the plugin zip once.
 - FluentCRM: one list per source (later).
 - X: which posts go on the page; repin the own post with /lab, the hashtags and a picture.
@@ -310,11 +309,9 @@ So from 6 Nov until the owner sets Post, the page and Home still ask people to s
 - The owner removes the 7 Nov "Decide the lab rules Post phase" entry in Animal Writes → Dates (owner: "I'll remove it").
 
 ### Technical, open
-- The phone bar wraps at 320: fixed on a branch, not live (days kept on one line).
+- Live (checked 5 Nov, 519bc1f9, 59d846cb): the phone bar's days on one line at 320, the compare table no longer a scroll row, "Show the post" and "Read the full text" names, JSON-LD numbers.
 - One source chip reads "Hindu"; the paper is "The Hindu" (copy).
 - A leftover Diwali rule `.aw-camp-steps--six` in campaign-lab.css.
-- campaign.js still treats the compare table as a scroll row (it is cards now): fixed on a branch, not live.
-- Fixed on a branch, not live (3 Nov): each "Show the post" button names the person; each "Read the full text" link names its rule (15 links); JSON-LD `position` and `numberOfItems` print as numbers on every page.
 - Off-scale heading overrides and one hard-coded disc colour in campaign-lab.css.
 - Accessibility leftovers to re-check: share and Library link names, a list item outside its list, table header scope, one date at 2.55:1, 12px chip text, enterkeyhint.
 - Step-2 wording "Enter this" (copy).
