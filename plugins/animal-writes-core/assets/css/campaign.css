@@ -195,11 +195,11 @@
 	min-height: var(--kit-hero-h); /* only text zoomed to 200% makes it taller (WCAG 1.4.4) */
 	background:
 		linear-gradient(to bottom, var(--camp-cream) 0%, rgb(251 238 231 / .92) 40%, rgb(251 238 231 / 0) 70%),
-		url("/wp-content/themes/animal-writes/assets/img/campaigns/supreme-court-stray-dog-phone.webp") center bottom / cover no-repeat,
+		url("/wp-content/plugins/animal-writes-core/theme/assets/img/campaigns/supreme-court-stray-dog-phone.webp") center bottom / cover no-repeat,
 		var(--camp-cream);
 }
 @media (min-width: 1200px) {
-	.aw-camp.aw-camp--sc-stray-dogs .aw-camp-hero.aw-camp-section.alignfull { background: var(--camp-cream) url("/wp-content/themes/animal-writes/assets/img/campaigns/supreme-court-stray-dog-hero.webp") no-repeat right bottom / auto 100%; }
+	.aw-camp.aw-camp--sc-stray-dogs .aw-camp-hero.aw-camp-section.alignfull { background: var(--camp-cream) url("/wp-content/plugins/animal-writes-core/theme/assets/img/campaigns/supreme-court-stray-dog-hero.webp") no-repeat right bottom / auto 100%; }
 	.aw-camp--sc-stray-dogs .aw-camp-hero-cols > .wp-block-column { align-self: flex-start; }
 	.aw-camp--sc-stray-dogs .aw-camp-hero .aw-camp-poster { max-width: 26rem; }
 }
