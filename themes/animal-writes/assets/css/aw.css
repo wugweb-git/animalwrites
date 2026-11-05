@@ -1914,6 +1914,7 @@ section.aw-camp-band.aw-ed-hero--campaign { box-sizing: border-box; min-height: 
    fold (an .aw-more added by animal-writes-core home.php); 907 -> about 770. */
 .aw-law-more[open] > summary { margin-bottom: var(--kit-space-3); }
 @media (max-width: 767px) { .aw-ed-law:has(.aw-law-more:not([open])) > .aw-more { display: none; } } /* one Show more at a time: the type tiles' fold shows once the third item is open */
+@supports selector(::details-content) { @media (max-width: 767px) { .aw-ed-law:has(.aw-law-more[open]) > .aw-more:not([open]) > summary { display: none; } .aw-ed-law:has(.aw-law-more[open]) > .aw-more:not([open])::details-content { display: block; content-visibility: visible; } } } /* phones: one tap opens the third item and the type tiles together (5 Nov 2026); browsers without ::details-content keep the second Show more */
 @media (min-width: 768px) and (max-width: 1199px) {
 	.aw-ed-law .aw-news-list.aw-news-mosaic { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 	.aw-ed-law .aw-news-mosaic > li:first-child { grid-column: 1 / -1 !important; grid-row: 1 !important; } /* over the shared three-item rule (:has, higher specificity) */
