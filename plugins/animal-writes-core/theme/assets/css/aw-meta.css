@@ -1,0 +1,10 @@
+/* Animal Writes: the meta rows: an item's head row, the claim head, places and News card rows. Loads after aw.css (dependency aw-components). Rules copied unchanged
+   from aw.css, in their original order. */
+.aw-item-meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); margin: var(--kit-space-head-meta) 0 var(--kit-space-head); font-size: var(--fluid-label); font-weight: var(--kit-weight-regular); color: var(--kit-color-text); }
+.aw-item-meta > :is(.aw-item-date, .aw-item-dated, .aw-item-deadline, .aw-item-verified-on) { display: inline-flex; align-items: center; gap: var(--kit-space-1); }
+.aw-item-meta .aw-date { color: inherit; font: inherit; }
+.aw-item-meta .kit-tag--closed { margin-right: var(--kit-space-1); }
+.kit-item .aw-item-meta + *, body.single-aw_research .kit-item .aw-item-meta + .kit-lead-media + * { margin-top: var(--kit-space-head); }
+.aw-place { display: inline-flex; align-items: center; gap: var(--kit-meta-icon-gap); }
+.aw-card-meta { display: flex; align-items: center; flex-wrap: wrap; gap: var(--kit-meta-row-gap) var(--kit-meta-gap); margin: var(--kit-space-3) 0 var(--kit-space-1); min-width: 0; }
+.kit-ed-list .aw-card-meta { grid-area: terms; margin: 0; }

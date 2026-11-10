@@ -242,6 +242,7 @@ function aw_block_list_filters( $a ) {
 function aw_news_meta_row( $id ) {
 	$src  = function_exists( 'aw_source_row_html' ) ? aw_source_row_html( $id ) : '';
 	$time = function_exists( 'aw_rel_time_html' ) ? '<span class="wp-block-post-date kit-meta-item kit-meta-item--time aw-card-time">' . aw_rel_time_html( $id ) . '</span>' : '';
+	aw_use_component_style( 'aw-meta' ); // aw-card-meta
 	return '' === $src . $time ? '' : '<div class="aw-card-meta kit-meta-row">' . $src . $time . '</div>';
 }
 
@@ -279,6 +280,9 @@ function aw_block_read_meta( $a, $id ) {
 
 function aw_block_place( $a, $id ) {
 	$p = function_exists( 'aw_item_place' ) ? aw_item_place( $id ) : null;
+	if ( $p ) {
+		aw_use_component_style( 'aw-meta' ); // aw-place
+	}
 	return $p ? '<span class="aw-place kit-meta-item">' . aw_i( 'directory' ) . esc_html( $p->name ) . '</span>' : '';
 }
 
@@ -292,6 +296,9 @@ function aw_opp_line_place( $id ) {
 			$p = $q;
 			break;
 		}
+	}
+	if ( $p ) {
+		aw_use_component_style( 'aw-meta' ); // aw-place
 	}
 	return $p ? '<span class="aw-place kit-meta-item">' . aw_i( 'directory' ) . esc_html( $p->name ) . '</span>' : '';
 }

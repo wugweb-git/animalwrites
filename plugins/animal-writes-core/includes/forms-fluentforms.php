@@ -237,6 +237,9 @@ function aw_ff_form( $key, $ctx = array() ) {
 		return aw_ff_missing( AW_FF_FORMS[ $key ]['title'] ?? $key, 'wp aw ff-form ' . $key . ' <form ID>' );
 	}
 	aw_use_component_style( 'aw-forms' ); // the kit-form aw-form-ff wrapper
+	if ( 'volunteer' === $key ) {
+		aw_use_component_style( 'aw-volunteer' ); // aw-volunteer-form, aw-vol-roles, aw-vol-role
+	}
 	$GLOBALS['aw_ff_ctx'] = (array) $ctx + array( 'key' => $key );
 	$form                 = do_shortcode( '[fluentform id="' . $id . '"]' );
 	$GLOBALS['aw_ff_ctx'] = array();

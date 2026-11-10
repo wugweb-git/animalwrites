@@ -50,6 +50,7 @@ function aw_block_volunteer( $a ) {
 	if ( '' === $form ) { // no form (Fluent Forms off): no empty "Register as a volunteer" button either
 		return '';
 	}
+	aw_use_component_style( 'aw-volunteer' ); // #volunteer and its disclosure
 	if ( ! empty( $a['open'] ) ) {
 		return '<div class="aw-volunteer" id="volunteer">' . $form . '</div>';
 	}
