@@ -3693,7 +3693,8 @@
 				"aw_related"
 			],
 			"types": [
-				"post"
+				"post",
+				"aw_news"
 			],
 			"uses": [
 				{
