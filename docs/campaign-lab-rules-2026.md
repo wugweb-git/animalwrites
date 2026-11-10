@@ -273,7 +273,12 @@ So from 6 Nov until the owner sets Post, the page and Home still ask people to s
 - Short link `/lab` (was `/lab-rules`); `/lab-rul/` and about 85 Rank Math redirects, including lab-rules link typos (1 Nov). 8f3b2067
 - Observance guides World Rabies Day (20209), Animal Welfare Fortnight (20305) and World Wildlife Day (20306) hold Related rows to the Library (1 Nov).
 - Dates calendar (Animal Writes → Dates) seeded with 5 Nov (lab rules close) and 7 Nov (decide the Post phase). c8c51fcd, 21 Oct
-- Media library (4 Nov): 45 campaign pictures, 24146–24190, descriptive names, not placed; 24146 and 24162 carry text. Placement is the owner's call.
+- Media library (4 Nov): 45 campaign pictures, 24146–24190, descriptive names, 24146 and 24162 carry text. Placed (owner, 10 Nov: "yes"; checked on live):
+  - Pain-scale cards, in the page content (no build-script rerun): Mild 24183, Moderate 24189, Severe 24164, Non-recovery 24169; shown at every width.
+  - Guide pictures: rule-by-rule (13854) 24152, was 16337; who approves (13855) 24147, was 16338.
+  - News 12972 ("Explained", Hindustan Times): 24157, was 12984; the publisher's photo is turned off (aw_source_image_off).
+  - Library 13904 (Delhi High Court, PETA India v. CCSEA): 24163 in place of the cat photo.
+  - Not placed: the other five guide pictures (24184, 24181, 24176, 24171, 24158 are 319–762px wide, below the 1200×900 covers); the section pictures (the sections have no picture slot); the Post pictures (the page is still Active); the share bases 24153 (1200×630), 24154 (1080×1350) and 24155 (1080×1920), big enough, for the share images; the spares.
 - Social posts by page section (card, story, X, Instagram, LinkedIn, WhatsApp), each with #AnimalWrites first: drafts, not posted.
 
 ## Decided by the owner
