@@ -655,7 +655,12 @@ add_action(
 			wp_enqueue_style( 'aw-campaign' );
 			wp_add_inline_style( 'aw-campaign', (string) file_get_contents( AW_CORE_DIR . 'assets/css/campaign-home.css' ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions
 		} else {
-			wp_enqueue_style( 'aw-campaign', plugins_url( 'assets/css/' . $css, AW_CORE_DIR . 'animal-writes-core.php' ), array(), $v( 'assets/css/' . $css ) );
+			$deps = array();
+			if ( ! $lab ) { // the campaign tokens, just before campaign.css (the Lab page's frozen copy carries its own)
+				wp_register_style( 'aw-camp-tokens', plugins_url( 'assets/css/aw-camp-tokens.css', AW_CORE_DIR . 'animal-writes-core.php' ), array(), $v( 'assets/css/aw-camp-tokens.css' ) );
+				$deps = array( 'aw-camp-tokens' );
+			}
+			wp_enqueue_style( 'aw-campaign', plugins_url( 'assets/css/' . $css, AW_CORE_DIR . 'animal-writes-core.php' ), $deps, $v( 'assets/css/' . $css ) );
 		}
 		wp_enqueue_script( 'aw-campaign', plugins_url( 'assets/js/' . $js, AW_CORE_DIR . 'animal-writes-core.php' ), array(), $v( 'assets/js/' . $js ), array( 'in_footer' => true, 'strategy' => 'defer' ) );
 		if ( is_singular( 'aw_campaign' ) ) { // the Share button and the story/post images (campaign.js)

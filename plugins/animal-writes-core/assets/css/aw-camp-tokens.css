@@ -1,0 +1,59 @@
+/* aw-camp-tokens.css: the campaign tokens, one source per campaign (Campaign Content Standard F1). Loaded before
+   campaign.css on campaign pages and before aw-camp-band.css wherever the campaign band is printed (campaign-tools.php).
+   The Lab rules page keeps its own frozen copy in campaign-lab.css (owner). Community dogs' tokens are in
+   campaign-record.css. */
+
+.aw-camp {
+	/* Campaign tokens (Campaign Content Standard F1). The four identity tokens, then the five roles the rules use:
+	   mark = brand colour for fills, icons, borders and key text on light surfaces; on-mark = text on a mark fill;
+	   deep = shadow tint; dark = the dark band; meta = secondary text. Each campaign sets all nine. */
+	--camp-primary: var(--kit-color-ink);
+	--camp-primary-ink: var(--kit-color-on-ink);
+	--camp-surface: var(--kit-color-surface-soft);
+	--camp-accent: var(--kit-color-ink);
+	--camp-mark: var(--kit-color-ink);
+	--camp-on-mark: var(--kit-color-on-ink);
+	--camp-deep: var(--kit-color-ink);
+	--camp-dark: var(--kit-color-ink);
+	--camp-meta: var(--kit-color-muted);
+}
+/* Campaign 2.0 (draft lab animal rules 2026). */
+.aw-camp--lab-rules {
+	--camp-primary: #a3122f; /* "Gazette crimson", palette A (owner, 17 Oct 2026) */
+	--camp-primary-ink: #ffffff;
+	--camp-surface: var(--kit-color-bg); /* no tinted surfaces: brand, white, grey or black only (owner, 19 Oct 2026) */
+	--camp-accent: #6b0f22;
+	--camp-mark: var(--camp-primary);
+	--camp-on-mark: #ffffff;
+	--camp-deep: var(--camp-accent);
+	--camp-dark: #1d1418;
+	--camp-meta: #5e4c51;
+	--camp-art-bg: #a10825; /* the artwork's own crimson (home band), so its edges meet the band with no line */
+	--kit-btn-brand-bg: var(--camp-primary); --kit-btn-brand-fg: var(--camp-primary-ink); /* Brand buttons in the campaign colour */
+}
+/* Diwali 2026 (firecrackers and animals): marigold on paper, a night-sky dark band. */
+.aw-camp--diwali {
+	--camp-primary: #a14a05; /* marigold, deepened so white text on it passes 4.5:1 */
+	--camp-primary-ink: #ffffff;
+	--camp-surface: var(--kit-color-bg);
+	--camp-accent: #6e3203;
+	--camp-mark: var(--camp-primary);
+	--camp-on-mark: #ffffff;
+	--camp-deep: var(--camp-accent);
+	--camp-dark: #1b1636; /* night sky */
+	--camp-meta: #5a4a3e;
+	--kit-btn-brand-bg: var(--camp-primary); --kit-btn-brand-fg: var(--camp-primary-ink);
+}
+/* Supreme Court stray dogs (2026): deep plum and the site yellow, no black (owner, 1 Nov 2026). Plum on cream 14:1, white on plum 15.6:1. */
+.aw-camp--sc-stray-dogs {
+	--camp-primary: #3a1730;
+	--camp-primary-ink: #ffffff;
+	--camp-accent: #3a1730;
+	--camp-mark: #3a1730;
+	--camp-on-mark: #ffffff;
+	--camp-deep: #3a1730;
+	--camp-dark: #3a1730;
+	--camp-meta: #5c4654;
+	--camp-cream: #fbeee7; /* the photo's own sky, so its edge meets the band with no line */
+	--kit-btn-brand-bg: var(--camp-primary); --kit-btn-brand-fg: var(--camp-primary-ink);
+}

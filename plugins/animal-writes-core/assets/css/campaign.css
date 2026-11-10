@@ -1,53 +1,13 @@
 /* Campaign tools (campaign-tools.php). Campaign colours are tokens on the page wrapper (.aw-camp), set per campaign;
-   spacing, type and radii come from Kits. Breakpoints: 768, 1200. Buttons stay the Kits primary. */
+   spacing, type and radii come from Kits. Breakpoints: 768, 1200. Buttons stay the Kits primary. The tokens themselves
+   are in aw-camp-tokens.css, which loads just before this file. */
 
-.aw-camp {
-	/* Campaign tokens (Campaign Content Standard F1). The four identity tokens, then the five roles the rules use:
-	   mark = brand colour for fills, icons, borders and key text on light surfaces; on-mark = text on a mark fill;
-	   deep = shadow tint; dark = the dark band; meta = secondary text. Each campaign sets all nine. */
-	--camp-primary: var(--kit-color-ink);
-	--camp-primary-ink: var(--kit-color-on-ink);
-	--camp-surface: var(--kit-color-surface-soft);
-	--camp-accent: var(--kit-color-ink);
-	--camp-mark: var(--kit-color-ink);
-	--camp-on-mark: var(--kit-color-on-ink);
-	--camp-deep: var(--kit-color-ink);
-	--camp-dark: var(--kit-color-ink);
-	--camp-meta: var(--kit-color-muted);
-}
-/* Campaign 2.0 (draft lab animal rules 2026). */
-.aw-camp--lab-rules {
-	--camp-primary: #a3122f; /* "Gazette crimson", palette A (owner, 17 Oct 2026) */
-	--camp-primary-ink: #ffffff;
-	--camp-surface: var(--kit-color-bg); /* no tinted surfaces: brand, white, grey or black only (owner, 19 Oct 2026) */
-	--camp-accent: #6b0f22;
-	--camp-mark: var(--camp-primary);
-	--camp-on-mark: #ffffff;
-	--camp-deep: var(--camp-accent);
-	--camp-dark: #1d1418;
-	--camp-meta: #5e4c51;
-	--camp-art-bg: #a10825; /* the artwork's own crimson (home band), so its edges meet the band with no line */
-	--kit-btn-brand-bg: var(--camp-primary); --kit-btn-brand-fg: var(--camp-primary-ink); /* Brand buttons in the campaign colour */
-}
 /* Crimson on the dark bands is under 3:1, so rules, outlines, bars and icons there are white */
 .aw-camp--lab-rules :is(.aw-camp-poster, .aw-camp-dark) { --camp-line: var(--kit-color-on-ink); }
 .aw-camp--lab-rules .aw-camp-poster :is(.aw-camp-stamp, .aw-cd-when) { border-color: var(--camp-line); }
 .aw-camp--lab-rules .aw-camp-dark .aw-camp-gap { box-shadow: inset 0 0 0 2px var(--camp-line); }
 .aw-camp--lab-rules .aw-camp-dark .aw-camp-gap > .kit-ico { color: var(--camp-line); }
 .aw-camp--lab-rules .aw-camp-dark .aw-camp-tier-bar { background: linear-gradient(to right, var(--camp-line) var(--fill), rgb(255 255 255 / 0.12) var(--fill)); }
-/* Diwali 2026 (firecrackers and animals): marigold on paper, a night-sky dark band. */
-.aw-camp--diwali {
-	--camp-primary: #a14a05; /* marigold, deepened so white text on it passes 4.5:1 */
-	--camp-primary-ink: #ffffff;
-	--camp-surface: var(--kit-color-bg);
-	--camp-accent: #6e3203;
-	--camp-mark: var(--camp-primary);
-	--camp-on-mark: #ffffff;
-	--camp-deep: var(--camp-accent);
-	--camp-dark: #1b1636; /* night sky */
-	--camp-meta: #5a4a3e;
-	--kit-btn-brand-bg: var(--camp-primary); --kit-btn-brand-fg: var(--camp-primary-ink);
-}
 /* Marigold on the night band is under 3:1, so rules, outlines and icons there are white */
 .aw-camp--diwali :is(.aw-camp-poster, .aw-camp-dark) { --camp-line: var(--kit-color-on-ink); }
 .aw-camp--diwali .aw-camp-poster :is(.aw-camp-stamp, .aw-cd-when) { border-color: var(--camp-line); }
@@ -167,19 +127,6 @@
 }
 /* FAQ: the question rows --kit-space-2 apart (8px between targets) */
 .aw-camp--diwali .rank-math-list-item + .rank-math-list-item { margin-top: var(--kit-space-2); }
-/* Supreme Court stray dogs (2026): deep plum and the site yellow, no black (owner, 1 Nov 2026). Plum on cream 14:1, white on plum 15.6:1. */
-.aw-camp--sc-stray-dogs {
-	--camp-primary: #3a1730;
-	--camp-primary-ink: #ffffff;
-	--camp-accent: #3a1730;
-	--camp-mark: #3a1730;
-	--camp-on-mark: #ffffff;
-	--camp-deep: #3a1730;
-	--camp-dark: #3a1730;
-	--camp-meta: #5c4654;
-	--camp-cream: #fbeee7; /* the photo's own sky, so its edge meets the band with no line */
-	--kit-btn-brand-bg: var(--camp-primary); --kit-btn-brand-fg: var(--camp-primary-ink);
-}
 /* Hero: cream with plum ink and a community dog before the Supreme Court (owner's reference design, 1 Nov 2026) */
 .aw-camp.aw-camp--sc-stray-dogs .aw-camp-hero { --camp-mark: var(--camp-cream); --camp-on-mark: var(--camp-primary); --camp-line: rgb(58 23 48 / 0.18); }
 @media (min-width: 768px) { /* hero text and poster side by side from 768 (core Columns stack them until 781): the hero is 613 at 768, within 720 (Layout rules 5); the columns' own 58/42 widths */

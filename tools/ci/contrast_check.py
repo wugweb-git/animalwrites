@@ -21,8 +21,8 @@ TOKEN_FILES = [
 ]
 REGISTRIES = sorted(set((ROOT / "themes").glob("*/kits-registry.json")) | {theme_file("kits-registry.json")})
 CAMPAIGN_CSS = ROOT / "plugins/animal-writes-core/assets/css/campaign.css"
-# Campaign palettes kept outside campaign.css (campaign-record.php's styles): read as if they were in it.
-CAMPAIGN_CSS_MORE = [ROOT / "plugins/animal-writes-core/assets/css/campaign-record.css"]
+# Campaign palettes kept outside campaign.css (the tokens file, and campaign-record.php's styles): read as if they were in it.
+CAMPAIGN_CSS_MORE = [ROOT / "plugins/animal-writes-core/assets/css/aw-camp-tokens.css", ROOT / "plugins/animal-writes-core/assets/css/campaign-record.css"]
 
 TEXT, NON_TEXT = 4.5, 3.0
 # Campaign pairs, from how campaign.css uses the palette: (foreground, background, minimum, where).
@@ -115,11 +115,11 @@ def main():
 
     css = strip(CAMPAIGN_CSS.read_text() + "\n" + "\n".join(f.read_text() for f in CAMPAIGN_CSS_MORE if f.exists()))
     base = {}
-    for m in re.finditer(r"(^|\})\s*\.aw-camp\s*\{([^}]*)\}", css):
-        base.update(decls(m.group(2)))
+    for m in re.finditer(r"(?:^|(?<=\}))\s*\.aw-camp\s*\{([^}]*)\}", css, re.M):  # (?<=}): rules side by side (aw-camp-tokens.css)
+        base.update(decls(m.group(1)))
     palettes = {"default (.aw-camp)": {}}
-    for m in re.finditer(r"(^|\})\s*\.aw-camp--([a-z0-9-]+)\s*\{([^}]*)\}", css):
-        palettes[f".aw-camp--{m.group(2)}"] = decls(m.group(3))
+    for m in re.finditer(r"(?:^|(?<=\}))\s*\.aw-camp--([a-z0-9-]+)\s*\{([^}]*)\}", css):
+        palettes[f".aw-camp--{m.group(1)}"] = decls(m.group(2))
     for name, own in palettes.items():
         scope = {**vals, **base, **own}
         for fg, bg, need, where in CAMPAIGN_PAIRS:
