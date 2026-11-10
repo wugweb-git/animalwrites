@@ -570,6 +570,7 @@ function aw_directory_filter( $type = '' ) {
 		$t_opts .= '<option value="' . esc_attr( $slug ) . '"' . selected( $cur_type, $slug, false ) . '>' . esc_html( $o[0] . ' (' . number_format_i18n( $o[1] ) . ')' ) . '</option>';
 	}
 	$field = fn( $id, $label, $control, $cls = '' ) => '<div class="kit-field aw-dir-' . $cls . '"><label for="' . $id . '">' . $label . '</label><div class="kit-field-control">' . $control . '</div></div>';
+	aw_use_component_style( 'aw-directory' ); // the search form (tag pages, the List filters block, the shortcode)
 	return '<form class="aw-dir-search kit-section-search" role="search" method="get" action="' . esc_url( aw_hub_url( 'aw_listing' ) ) . '">'
 		. $field( 'aw-dir-q', 'Name or PIN code', '<span class="kit-ico kit-ico--search kit-field-icon" aria-hidden="true"></span><input type="search" id="aw-dir-q" name="q" value="' . esc_attr( $text ) . '" placeholder="Blue Cross" autocomplete="off"><button type="button" class="aw-dir-filter-toggle' . ( $state || $cur_type || $verified || $gov ? ' has-filters' : '' ) . '" aria-label="Filters" aria-controls="aw-dir-more" aria-expanded="' . ( $state || $cur_type || $verified || $gov ? 'true' : 'false' ) . '"><span class="kit-ico kit-ico--sliders" aria-hidden="true"></span></button>', 'q' )
 		. '<details class="aw-dir-more" id="aw-dir-more" data-kit-fold="767"' . ( $state || $cur_type || $verified || $gov ? ' data-kit-keep-open' : '' ) . ' open><summary class="screen-reader-text">Filters</summary><div class="aw-dir-more-body">' // phones: one field and "Filters"

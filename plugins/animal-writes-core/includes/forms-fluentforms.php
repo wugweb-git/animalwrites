@@ -447,6 +447,7 @@ foreach ( array( 'input_text', 'input_email', 'input_url', 'textarea', 'select',
 			$data = function_exists( 'aw_ff_update_values' ) ? aw_ff_update_values( $data, $form ) : $data; // the update link (volunteers.php)
 			$name = (string) ( $data['attributes']['name'] ?? '' );
 			if ( 'org_name' === $name && 'volunteer' === aw_ff_key( $form ) ) { // the Directory picker (aw.js, org-people.php)
+				aw_use_component_style( 'aw-directory' ); // aw.js adds aw-org-host and aw-org-list
 				$data['attributes']['data-aw-org-search'] = admin_url( 'admin-ajax.php?action=aw_org_search' );
 			}
 			if ( in_array( $name, AW_FF_PHONES, true ) && is_string( $data['attributes']['value'] ?? null ) && '' !== aw_ff_phone10( $data['attributes']['value'] ) ) {

@@ -16,6 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /** One card. */
 function aw_local_card( $head, $line, $actions ) {
+	aw_use_component_style( 'aw-directory' ); // aw-local-card
 	$id = 'aw-local-' . wp_unique_id();
 	return '<aside class="aw-local-card" aria-labelledby="' . esc_attr( $id ) . '"><h2 class="aw-local-card-head" id="' . esc_attr( $id ) . '">' . esc_html( $head ) . '</h2><p>' . esc_html( $line ) . '</p><div class="aw-local-card-actions">' . $actions . '</div></aside>';
 }

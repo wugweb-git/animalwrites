@@ -320,6 +320,7 @@ function aw_block_org_mark( $a, $id ) {
 	if ( ! $logo && function_exists( 'aw_item_here' ) && aw_item_here( $id ) ) {
 		return ''; // the profile's own row 4: the logo, or nothing (no initials placeholder; owner, 20 Oct 2026)
 	}
+	aw_use_component_style( 'aw-directory' ); // aw-org-mark
 	$words    = array_values( array_filter( preg_split( '/\s+/', preg_replace( '/[^\p{L}\s]/u', '', get_the_title( $id ) ) ) ) ); // "1962 Mobile Veterinary Unit" → MV
 	$initials = mb_strtoupper( mb_substr( $words[0] ?? '', 0, 1 ) . mb_substr( $words[1] ?? '', 0, 1 ) );
 	return '<div class="aw-org-mark">' . ( $logo ? '<img src="' . esc_url( $logo ) . '" alt="" loading="lazy">' : '<span aria-hidden="true">' . esc_html( $initials ) . '</span>' ) . '</div>';
@@ -366,6 +367,7 @@ function aw_block_contact( $a, $id ) {
 
 function aw_block_org_actions( $a, $id ) {
 	$phone = function_exists( 'aw_listing_first_phone' ) ? aw_listing_first_phone( $id ) : '';
+	aw_use_component_style( 'aw-directory' ); // aw-org-actions, aw-org-go, and the aw-org row around them
 	return '<div class="aw-org-actions">' // no Call button on cards (owner, 12 Oct 2026)
 		. '<a class="aw-org-go" href="' . esc_url( get_permalink( $id ) ) . '" aria-label="' . esc_attr( 'View ' . get_the_title( $id ) ) . '">' . aw_i( 'arrow-right' ) . '</a></div>';
 }

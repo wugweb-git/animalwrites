@@ -106,6 +106,7 @@ function aw_district_helplines_html( $d ) {
 	if ( $mvu && 'publish' === $mvu->post_status ) {
 		$cards .= aw_helpline_card( __( 'Mobile Veterinary Units', 'animal-writes-core' ), '1962', __( 'A vet comes to the animal.', 'animal-writes-core' ), esc_html( sprintf( '%s animal husbandry department', $state->name ) ), get_permalink( $mvu ) );
 	}
+	aw_use_component_style( 'aw-directory' ); // aw-district-helplines, aw-helpline
 	$id = 'aw-dh-' . wp_unique_id();
 	/* translators: %s: district. */
 	return '<section class="aw-district-helplines" aria-labelledby="' . esc_attr( $id ) . '"><h2 id="' . esc_attr( $id ) . '">' . esc_html( sprintf( __( 'Animal helpline numbers in %s', 'animal-writes-core' ), $d->name ) ) . '</h2>'

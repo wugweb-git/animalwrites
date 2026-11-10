@@ -75,6 +75,7 @@ function aw_org_people_html( $lid ) {
 	if ( ! $people ) {
 		return '';
 	}
+	aw_use_component_style( 'aw-directory' ); // aw-org-links-group, aw-org-links
 	// A claimant shows with their role (owner, 31 Oct 2026: claim form #6), a volunteer with their name alone.
 	return '<section class="aw-org-links-group aw-org-people"><h2>Volunteers</h2><ul>' . implode( '', array_map( fn( $p ) => '<li>' . esc_html( $p['name'] ) . ( '' !== $p['role'] ? '<span class="aw-org-people-role">, ' . esc_html( $p['role'] ) . '</span>' : '' ) . '</li>', $people ) ) . '</ul></section>';
 }

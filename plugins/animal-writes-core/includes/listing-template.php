@@ -366,6 +366,9 @@ function aw_block_listing_photos( $a, $id ) {
 		$cap  = $cap ? $cap : trim( (string) get_post_meta( $pid, '_wp_attachment_image_alt', true ) );
 		$out .= '<figure><div class="aw-org-photo">' . wp_get_attachment_image( $pid, 'medium_large', false, array( 'loading' => 'lazy' ) ) . '</div>' . ( $cap ? '<figcaption>' . esc_html( $cap ) . '</figcaption>' : '' ) . '</figure>';
 	}
+	if ( '' !== $out ) {
+		aw_use_component_style( 'aw-directory' ); // aw-org-gallery, aw-org-photo
+	}
 	return aw_listing_group( 'photos', __( 'Photos', 'animal-writes-core' ), '' !== $out ? '<div class="aw-org-gallery">' . $out . '</div>' : '' );
 }
 

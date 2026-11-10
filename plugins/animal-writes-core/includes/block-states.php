@@ -213,6 +213,7 @@ add_filter(
 		$h  = fn( $t ) => '<h3 class="kit-demo-h">' . esc_html( $t ) . '</h3>';
 		$st = fn( $t ) => '<p class="aw-state-name">' . esc_html( $t ) . '</p>';
 		$o  = '<h2>More Animal Writes components</h2>';
+		aw_use_component_style( 'aw-directory' ); // the helpline samples
 		$o .= '<div>' . $h( 'Helplines' ) . $st( 'Default: the first card is the emergency one (red bar)' )
 			. '<div class="aw-helplines"><div class="aw-helpline"><h3>Emergency</h3><a class="aw-helpline-num" href="tel:112">112</a><p>Police, fire and ambulance, anywhere in India.</p><p class="aw-helpline-src">Ministry of Home Affairs</p></div>'
 			. '<div class="aw-helpline"><h3>Mobile Veterinary Units</h3><a class="aw-helpline-num" href="tel:1962">1962</a><p>A vet comes to the animal, in most states.</p><p class="aw-helpline-src">State animal husbandry departments</p></div></div>'

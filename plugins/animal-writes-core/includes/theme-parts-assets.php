@@ -84,6 +84,13 @@ function aw_component_style_files(): array {
 				'core/post-template' => array( 'aw-news-list', 'aw-tasks', 'aw-news-grid' ),
 			),
 		),
+		'aw-directory' => array( // The Directory: search, filters, organisation rows, helplines, local cards; flags print it elsewhere.
+			'file'   => 'assets/css/aw-directory.css',
+			'when'   => fn() => function_exists( 'aw_is_directory_view' ) && aw_is_directory_view(), // /directory/ and its place and type URLs
+			'blocks' => array(
+				'core/post-template' => 'aw-orgs', // the Directory list pattern, placed elsewhere
+			),
+		),
 	);
 }
 
