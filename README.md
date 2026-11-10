@@ -5,10 +5,10 @@ Live at https://animalwrites.in. How changes are made, reviewed and shipped: [CL
 - `themes/kits-by-wugweb/` — the Kits by Wugweb parent theme (in this repo).
 - `themes/animal-writes/` — the Animal Writes child theme (brand palette, templates).
 - `plugins/animal-writes-core/` — content types, templates, directory, campaigns, forms glue, deploy purge, branded error pages.
-- `plugins/aw-sourcing/` — feeds, keywords, publishers, relay, AI keys, To review, enrichment, the Workers tab, the ingest API.
-- `plugins/aw-seo-extras/` — all SEO code (with Rank Math), the FAQ system, Search Insights.
+- `plugins/aw-sourcing/` — SourceWeb: feeds, keywords, publishers, relay, AI keys, To review, enrichment, the Workers tab, the ingest API.
+- `plugins/aw-seo-extras/` — SearchWeb: all SEO code (with Rank Math), the FAQ system, Search Insights.
 - `plugins/kits-core/` — reusable design-system parts (no site-specific code).
-- `plugins/mailweb/` — Mailweb 3.2: the WordPress inbox for the Hostinger mailboxes; replies go from support@.
+- `plugins/mailweb/` — MailWeb 3.2: the WordPress inbox for the Hostinger mailboxes; replies go from support@.
 
 ## Docs
 - [CLAUDE.md](CLAUDE.md) — working rules (pull requests for bigger work, small changes straight onto `wordpress-dev`, shipping).

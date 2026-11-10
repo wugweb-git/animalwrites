@@ -26,7 +26,7 @@ class AW_Sourcing_SI_Keywords_Table extends WP_List_Table {
 	 * @param array $stats aw_sourcing_keyword_stats() result.
 	 */
 	public function __construct( array $stats ) {
-		parent::__construct( array( 'singular' => 'keyword', 'plural' => 'keywords', 'ajax' => false ) ); // the current screen (Search Insights moved to AW SEO Plus, 25 Oct 2026)
+		parent::__construct( array( 'singular' => 'keyword', 'plural' => 'keywords', 'ajax' => false ) ); // the current screen (Search Insights moved to SearchWeb, 25 Oct 2026)
 		$this->stats = $stats;
 	}
 
