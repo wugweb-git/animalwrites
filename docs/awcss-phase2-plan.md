@@ -1,5 +1,7 @@
 # aw.css phase 2: plan (approved by the owner 10 Nov; built after phase 1 ships)
 
+**Status, 11 Nov 2026: built and live, all 13 steps** (last: steps 11–13, c8f238ab; review follow-ups e6be935e and cb721d37). Checked after shipping: a code review found every rule moved out of aw.css back exactly once, same selector, values, media query and order; a render compare on 16 live pages at 375, 768 and 1280 px found no change. The original plan follows unchanged.
+
 10 Nov 2026. Plan only. Nothing here is built.
 
 ## What changed from the first draft
