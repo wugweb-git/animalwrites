@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""aw.css → aw.min.css, and the Kits kit.css, kit-primitives.css, kit-tokens.css → .min.css: comments and whitespace
-out, nothing else.
+"""aw*.css → aw*.min.css (aw.css and the component files aw-*.css in plugins/animal-writes-core/theme/assets/css), and
+the Kits kit.css, kit-primitives.css, kit-tokens.css → .min.css: comments and whitespace out, nothing else.
 
-The site serves the .min.css files; the sources stay the readable files in git (the block editor loads the sources).
+The site serves the .min.css files; the sources stay the readable files in git (the editors load the sources).
 Edit a source (aw.css also in its child theme copy; kit-tokens.css comes from tools/build-tokens.py), then run this and
 commit both files. The Deploy check runs it with --check and fails when a .min.css is not what this writes from its
 source.
@@ -21,10 +21,16 @@ import pathlib
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
+AW_CSS = ROOT / "plugins/animal-writes-core/theme/assets/css"
 KITS_CSS = ROOT / "themes/kits-by-wugweb/assets/css"
-PAIRS = ((ROOT / "plugins/animal-writes-core/theme/assets/css/aw.css", ROOT / "plugins/animal-writes-core/theme/assets/css/aw.min.css"),) + tuple(
-    (KITS_CSS / (n + ".css"), KITS_CSS / (n + ".min.css")) for n in ("kit-tokens", "kit", "kit-primitives")
-)
+
+
+def pairs():
+    """Each source with its .min.css: every aw*.css (not *.min.css) in AW_CSS, and the three Kits files."""
+    aw = [f for f in sorted(AW_CSS.glob("aw*.css")) if not f.name.endswith(".min.css")]
+    kits = [KITS_CSS / (n + ".css") for n in ("kit-tokens", "kit", "kit-primitives")]
+    return [(f, f.with_name(f.name[: -len(".css")] + ".min.css")) for f in aw + kits]
+
 
 NO_SPACE_AROUND = set("{};,>~")
 NO_SPACE_AFTER = NO_SPACE_AROUND | set(":(")
@@ -104,9 +110,9 @@ def minify(src):
 def main(argv):
     check = "--check" in argv
     args = [a for a in argv if a != "--check"]
-    pairs = [(pathlib.Path(args[0]), pathlib.Path(args[1]))] if len(args) == 2 else PAIRS
+    todo = [(pathlib.Path(args[0]), pathlib.Path(args[1]))] if len(args) == 2 else pairs()
     bad = 0
-    for src, dst in pairs:
+    for src, dst in todo:
         want = minify(src.read_text(encoding="utf-8"))
         if check:
             if not dst.is_file() or dst.read_text(encoding="utf-8") != want:

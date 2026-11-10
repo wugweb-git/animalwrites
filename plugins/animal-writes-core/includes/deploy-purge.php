@@ -15,12 +15,23 @@
  * request whose headers are already sent. Storing the commit there would mark it done without purging anything.
  * tools/aw-ship.sh purges the same way: its last step requests ?aw_deploy_nudge=ship-<sha>-<time> (WP-CLI's
  * `wp litespeed-purge all` cannot notify the web server on this host, 24 Oct 2026). A second nudge is harmless.
+ * The same request empties uploads/kits-cache/parts/ (the joined component stylesheets of Kits by Wugweb), so sets no
+ * page uses any more do not count against the cap. Pages make their files again as they are visited, under the same
+ * names while the CSS is unchanged (owner, 10 Nov 2026).
  *
  * @package animal-writes-core
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
+}
+
+/** Empty the folder of joined component stylesheets (Kits kits_parts_bundle_dir()). */
+function aw_deploy_empty_parts_css() {
+	$dir = function_exists( 'kits_parts_bundle_dir' ) ? kits_parts_bundle_dir()['path'] : trailingslashit( wp_upload_dir( null, false )['basedir'] ) . 'kits-cache/parts';
+	foreach ( array_merge( (array) glob( $dir . '/*.css' ), (array) glob( $dir . '/*.tmp' ) ) as $f ) {
+		wp_delete_file( $f );
+	}
 }
 
 /** The commit checked out in the deploy repository (the one this plugin is served from), '' if unknown. */
@@ -52,6 +63,7 @@ add_action(
 			return;
 		}
 		update_option( 'aw_deployed_head', $head, true );
+		aw_deploy_empty_parts_css();
 		do_action( 'litespeed_purge_all' ); // LiteSpeed Cache's own hook; nothing happens if it is not active
 	},
 	99

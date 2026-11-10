@@ -607,7 +607,7 @@ function kits_theme_option_row( string $key, array $f, array $types = array() ):
 	} elseif ( 'choice' === $f['kind'] ) {
 		echo '<select id="' . esc_attr( $id ) . '" name="' . esc_attr( $name ) . '">';
 		foreach ( $f['choices'] as $c => $label ) {
-			echo '<option value="' . esc_attr( $c ) . '"' . selected( (string) $val, (string) $c, false ) . '>' . esc_html( $label . ( $c === $f['default'] ? ' (default)' : '' ) ) . '</option>';
+			echo '<option value="' . esc_attr( $c ) . '"' . selected( (string) $val, (string) $c, false ) . '>' . esc_html( $label . ( (string) $c === (string) $f['default'] ? ' (default)' : '' ) ) . '</option>';
 		}
 		echo '</select>';
 	} elseif ( 'share' === $f['kind'] ) {

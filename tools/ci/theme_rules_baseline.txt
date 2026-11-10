@@ -10,7 +10,7 @@ themes/animal-writes/assets/css/aw.css | height | .aw-vol-page .aw-vol-banner-ph
 themes/animal-writes/assets/css/aw.css | height | .aw-vol-page .aw-vol-banner-photo img | height: 360px
 themes/animal-writes/assets/css/aw.css | height | .aw-sponsored-banner-media img | min-height: 220px
 themes/animal-writes/assets/css/aw.css | imp | .home :is(.aw-ed-law > .kit-stack, .aw-ed-story-figures, .aw-ed-story-dates, .kit-section > .kit-stack:has(> .kit-photo-card)) | padding: 0 var(--kit-space-gutter) var(--kit-space-3) !important
-themes/animal-writes/assets/css/aw.css | pct | .aw-content-body | padding-top: 40%
+plugins/animal-writes-core/theme/assets/css/aw-home.css | pct | .aw-content-body | padding-top: 40%
 themes/kits-by-wugweb/assets/css/kit.css | height | .wp-block-navigation__responsive-container.is-menu-open | height: 100svh
 themes/kits-by-wugweb/assets/css/kit.css | height | .wp-block-navigation__responsive-container.is-menu-open | height: 100dvh
 themes/kits-by-wugweb/assets/css/kit.css | height | .wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation__responsive-dialog, .wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation__responsive-container-content | min-height: calc(100dvh - var(--kit-header-height) - var(--kit-space-5) - env(safe-area-inset-top) - env(safe-area-inset-bottom))
@@ -19,7 +19,7 @@ themes/kits-by-wugweb/assets/css/kit.css | height | .wp-block-navigation__respon
 themes/animal-writes/assets/css/aw.css | pad | .aw-org | padding: var(--kit-space-5) 0  # Directory row: a bottom rule only, no box at the sides (owner to confirm)
 themes/animal-writes/assets/css/aw.css | pad | .aw-item-share .kit-share | padding-top: 0  # share row on item pages has no rule or box (border-top: 0)
 themes/animal-writes/assets/css/aw.css | pad | .aw-vol-page .aw-vol-banner-body | padding: 0  # /volunteer/ banner has no box (background: none)
-themes/animal-writes/assets/css/aw.css | pad | .aw-ed-learn .aw-tasks.is-three .kit-card > .kit-card-body | padding: 0  # body inside a card padded 24px
+plugins/animal-writes-core/theme/assets/css/aw-home.css | pad | .aw-ed-learn .aw-tasks.is-three .kit-card > .kit-card-body | padding: 0  # body inside a card padded 24px
 themes/animal-writes/assets/css/aw.css | pad | .aw-camp-docs-q li:has(> .kit-card) | padding: 0  # list item wrapper, no box; the kit-card inside is padded
 themes/kits-by-wugweb/assets/css/kit.css | pad | .kit-card[class*="kit-card--stacked"] > .kit-card-body | padding: 0  # body inside a stacked card padded 24px
 themes/kits-by-wugweb/assets/css/kit.css | pad | .kit-toc ol | padding: 0 var(--kit-space-5) var(--kit-space-5) var(--kit-space-7)  # list under the summary, which has 24px below it

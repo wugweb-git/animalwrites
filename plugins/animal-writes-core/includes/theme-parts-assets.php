@@ -43,6 +43,89 @@ function aw_theme_parts_path( string $file ): string {
 	return AW_THEME_PARTS_DIR . ltrim( $file, '/' );
 }
 
+/**
+ * Component stylesheets (theme/assets/css/aw-*.css): each loads only on the pages that print its component, joined
+ * with aw.css into one file per page by Kits (kits_component_styles, Kits functions.php). handle => [
+ *   'file'   => path relative to the theme root; the .min.css next to it is served when it exists,
+ *   'when'   => optional callable, no arguments: a template condition, e.g. 'is_front_page',
+ *   'blocks' => optional [ block name => class prefix ]: stored content no PHP prints, e.g. [ 'core/group' => 'aw-about-' ],
+ * ]. With no 'when', the file loads on pages whose PHP called aw_use_component_style( $handle ) while printing.
+ * The order here is the order in the joined file, after aw.css. Editors load every file (below). For example:
+ *
+ *     'aw-home'     => array( 'file' => 'assets/css/aw-home.css', 'when' => 'is_front_page' ),
+ *     'aw-type-ico' => array( 'file' => 'assets/css/aw-type-ico.css' ),
+ *
+ * tools/ci/css_min.py writes and checks the .min.css of every theme/assets/css/aw*.css.
+ *
+ * @return array<string,array>
+ */
+function aw_component_style_files(): array {
+	return array(
+		'aw-home' => array( // Home sections: front page only (no campaign CSS rides on this condition).
+			'file' => 'assets/css/aw-home.css',
+			'when' => 'is_front_page',
+		),
+	);
+}
+
+/**
+ * Called by the PHP that prints a component: this page loads that component's stylesheet.
+ *
+ * @param string $handle Handle from aw_component_style_files().
+ */
+function aw_use_component_style( string $handle ): void {
+	if ( function_exists( 'kits_use_component_style' ) ) {
+		kits_use_component_style( $handle );
+	}
+}
+
+/**
+ * The served copy of a theme CSS file: its .min.css (tools/ci/css_min.py) when that exists.
+ *
+ * @param string $file Path relative to the theme root.
+ */
+function aw_theme_css_served( string $file ): string {
+	$min = (string) preg_replace( '/\.css$/', '.min.css', $file );
+	return is_readable( aw_theme_parts_path( $min ) ) ? $min : $file;
+}
+
+/** Stylesheets the editors show: tokens, aw.css, then every component file (sources, not minified). */
+function aw_editor_style_files(): array {
+	return array_merge( array( 'assets/css/tokens.css', 'assets/css/aw.css' ), array_column( aw_component_style_files(), 'file' ) );
+}
+
+/*
+ * aw.css first (every page), then the component files, through the Kits registry. Only while this plugin serves the
+ * theme parts; under the child theme the child's aw.css loads as before.
+ */
+add_filter(
+	'kits_component_styles',
+	function ( $styles ) {
+		if ( ! aw_core_theme_parts_on() || ! is_array( $styles ) ) {
+			return $styles;
+		}
+		// Registered and enqueued below (wp_enqueue_scripts 20). 'file' lets Kits join it when its address cannot be mapped.
+		$styles['aw-components'] = array(
+			'file' => aw_theme_parts_path( aw_theme_css_served( 'assets/css/aw.css' ) ),
+			'when' => '__return_true',
+		);
+		foreach ( aw_component_style_files() as $handle => $c ) {
+			if ( empty( $c['file'] ) ) {
+				continue;
+			}
+			$file              = aw_theme_css_served( (string) $c['file'] );
+			$styles[ $handle ] = array(
+				'src'    => aw_theme_file_uri( $file ),
+				'file'   => aw_theme_parts_path( $file ),
+				'deps'   => array( 'aw-components' ),
+				'when'   => $c['when'] ?? null,
+				'blocks' => $c['blocks'] ?? array(),
+			);
+		}
+		return $styles;
+	}
+);
+
 /*
  * The child theme's hooks, added at setup_theme: after every plugin and before the parent theme's functions.php, the
  * place the child's functions.php has, so each one keeps its order among other hooks of the same priority. Priority 11
@@ -123,7 +206,8 @@ add_action(
 );
 
 /*
- * The editors (post editor, Site Editor) show content with the site's tokens and components, after the Kits styles:
+ * The editors (post editor, Site Editor) show content with the site's tokens and components, after the Kits styles
+ * (every component file, whatever the page prints):
  * what add_editor_style() gives a theme, which a plugin cannot call with its own paths. Same entries WordPress builds
  * for a theme's editor styles (get_block_editor_theme_styles()), added at the end of the list.
  */
@@ -133,7 +217,7 @@ add_filter(
 		if ( ! aw_core_theme_parts_on() || ! current_theme_supports( 'editor-styles' ) ) {
 			return $settings;
 		}
-		foreach ( array( 'assets/css/tokens.css', 'assets/css/aw.css' ) as $f ) {
+		foreach ( aw_editor_style_files() as $f ) {
 			$path = aw_theme_parts_path( $f );
 			if ( is_readable( $path ) ) {
 				$settings['styles'][] = array(
@@ -149,7 +233,7 @@ add_filter(
 );
 
 /*
- * The classic editor (TinyMCE) gets the same two files, as it does for a theme's add_editor_style() files: appended
+ * The classic editor (TinyMCE) gets the same files, as it does for a theme's add_editor_style() files: appended
  * to its list of stylesheets in the admin, as core adds get_editor_stylesheets().
  */
 add_filter(
@@ -158,7 +242,7 @@ add_filter(
 		if ( ! is_admin() || ! aw_core_theme_parts_on() ) {
 			return $mce_css;
 		}
-		foreach ( array( 'assets/css/tokens.css', 'assets/css/aw.css' ) as $f ) {
+		foreach ( aw_editor_style_files() as $f ) {
 			if ( is_readable( aw_theme_parts_path( $f ) ) ) {
 				$mce_css .= ',' . str_replace( ',', '%2C', aw_theme_file_uri( $f ) );
 			}

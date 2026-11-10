@@ -110,3 +110,18 @@ function aw_site_check_page() {
 	do_action( 'aw_site_check_after' ); // e.g. the daily backup line
 	echo '</div>';
 }
+
+/*
+ * Joined component stylesheets against their cap (Kits functions.php): a warning near the cap, so pages do not fall
+ * back to separate files unnoticed. The same count is on Kits → Welcome.
+ */
+add_action(
+	'aw_site_check_after',
+	function () {
+		if ( ! function_exists( 'kits_parts_bundle_status' ) || ! aw_core_theme_parts_on() ) {
+			return;
+		}
+		$s = kits_parts_bundle_status();
+		echo '<div class="notice ' . esc_attr( $s['warn'] ? 'notice-warning' : 'notice-info' ) . ' inline"><p><strong>' . esc_html( 'Joined component files:' ) . '</strong> ' . esc_html( trim( $s['text'] . '. ' . $s['fix'] ) ) . '</p></div>';
+	}
+);

@@ -328,61 +328,570 @@ add_filter(
 	2
 );
 
+/* ---------- Component styles: one file per component, loaded on the pages that print it ---------- */
+
+/**
+ * Component stylesheets a plugin or child theme adds with the kits_component_styles filter, in the order they join
+ * the page's stylesheet (registry order). Each entry is handle => args:
+ *
+ * - 'src'    URL of the file. Leave it out for a handle the plugin registers itself.
+ * - 'file'   Path of the file on disk: its version (filemtime) and, when the URL cannot be mapped, the joined copy.
+ * - 'deps'   Handles it prints after.
+ * - 'when'   Callable, no arguments: true on pages that need the file whatever they print (a template condition,
+ *            checked at wp_enqueue_scripts 20), for example 'is_front_page'.
+ * - 'blocks' block name => class prefix: a block of that name with a class that starts so flags the file. Only for
+ *            stored content that no PHP prints, shown on the page (not excerpts or feeds).
+ *
+ * A handle with no 'when' loads only on pages whose PHP called kits_use_component_style( $handle ) while it rendered.
+ *
+ * @return array<string,array> handle => args, normalised.
+ */
+function kits_component_styles(): array {
+	static $list = null;
+	if ( null !== $list ) {
+		return $list;
+	}
+	if ( ! kits_component_styles_ready() ) {
+		return array(); // Too early for the filter; asked again later.
+	}
+	$list = array();
+	foreach ( (array) apply_filters( 'kits_component_styles', array() ) as $handle => $args ) {
+		if ( ! is_string( $handle ) || '' === $handle || ! is_array( $args ) ) {
+			continue;
+		}
+		$args            = wp_parse_args(
+			$args,
+			array(
+				'src'    => '',
+				'file'   => '',
+				'deps'   => array(),
+				'when'   => null,
+				'blocks' => array(),
+			)
+		);
+		$args['deps']    = array_values( array_filter( (array) $args['deps'], 'is_string' ) );
+		$args['blocks']  = array_filter( (array) $args['blocks'], 'is_string' );
+		$list[ $handle ] = $args;
+	}
+	return $list;
+}
+
+/** Whether init has finished, so every kits_component_styles filter is in place. */
+function kits_component_styles_ready(): bool {
+	return did_action( 'init' ) && ! doing_action( 'init' );
+}
+
+/**
+ * The component flags of this request: handles whose component was printed.
+ *
+ * @param string $add Handle to add; '' only reads.
+ * @return array<string,bool>
+ */
+function kits_component_style_flags( string $add = '' ): array {
+	static $set = array();
+	if ( '' !== $add ) {
+		$set[ $add ] = true;
+	}
+	return $set;
+}
+
+/**
+ * Called by the PHP that prints a component: the page loads that component's stylesheet. In a block theme the whole
+ * template renders before wp_head, so the file prints in the head with the others. A component first printed after
+ * the styles were queued (for example in wp_footer) gets its file at once, which prints in the footer.
+ *
+ * @param string $handle Handle given in kits_component_styles.
+ */
+function kits_use_component_style( string $handle ): void {
+	if ( '' === $handle || isset( kits_component_style_flags()[ $handle ] ) ) {
+		return;
+	}
+	kits_component_style_flags( $handle );
+	if ( did_action( 'kits_component_styles_enqueued' ) && kits_component_style_register( $handle ) ) {
+		wp_enqueue_style( $handle );
+	}
+}
+
+/**
+ * Register a component stylesheet from its registry entry, unless that handle is registered already.
+ *
+ * @param string $handle Handle.
+ * @return bool Whether the handle is registered now.
+ */
+function kits_component_style_register( string $handle ): bool {
+	if ( wp_style_is( $handle, 'registered' ) ) {
+		return true;
+	}
+	$s = kits_component_styles()[ $handle ] ?? null;
+	if ( ! $s || ! is_string( $s['src'] ) || '' === $s['src'] ) {
+		return false;
+	}
+	$file = (string) $s['file'];
+	$ver  = '' !== $file && is_readable( $file ) ? (string) filemtime( $file ) : false;
+	return wp_register_style( $handle, $s['src'], $s['deps'], $ver );
+}
+
+// Template conditions and flags turn into enqueues once the template has rendered (block themes) and before the joiner (1000).
+add_action(
+	'wp_enqueue_scripts',
+	function () {
+		$flags = kits_component_style_flags();
+		foreach ( kits_component_styles() as $handle => $s ) {
+			$on = isset( $flags[ $handle ] ) || ( is_callable( $s['when'] ) && call_user_func( $s['when'] ) );
+			if ( $on && kits_component_style_register( $handle ) ) {
+				wp_enqueue_style( $handle );
+			}
+		}
+		do_action( 'kits_component_styles_enqueued' );
+	},
+	20
+);
+
+// Fallback for stored content no PHP prints: a block whose class starts with an entry's prefix flags that entry.
+// For the content of the page itself (singular views): excerpts and feeds do not flag.
+add_filter(
+	'render_block',
+	function ( $html, $block ) {
+		static $map = null;
+		if ( null === $map ) {
+			if ( ! kits_component_styles_ready() ) {
+				return $html; // Too early: the map is built on a later block.
+			}
+			$map = array();
+			foreach ( kits_component_styles() as $handle => $s ) {
+				foreach ( $s['blocks'] as $name => $prefix ) {
+					if ( '' !== $prefix ) {
+						$map[ $name ][ $handle ] = $prefix;
+					}
+				}
+			}
+		}
+		$name = (string) ( $block['blockName'] ?? '' );
+		if ( isset( $map[ $name ] ) && ! doing_filter( 'get_the_excerpt' ) && ! is_feed() ) { // Excerpts and feeds do not flag.
+			$class = ' ' . (string) ( $block['attrs']['className'] ?? '' );
+			foreach ( $map[ $name ] as $handle => $prefix ) {
+				if ( preg_match( '/\s' . preg_quote( $prefix, '/' ) . '/', $class ) ) {
+					kits_use_component_style( $handle );
+				}
+			}
+		}
+		return $html;
+	},
+	10,
+	2
+);
+
+/* ---------- Joined stylesheets ---------- */
+
+/** The Joined stylesheet switch: Theme Options (css_bundle), then the kits_bundle_css filter. */
+function kits_bundle_css_switch(): bool {
+	return (bool) apply_filters( 'kits_bundle_css', 'off' !== ( function_exists( 'kits_option' ) ? kits_option( 'css_bundle' ) : 'on' ) );
+}
+
+/**
+ * Stored content hash of a joined file, if its parts are unchanged.
+ *
+ * The hash names the file, so its address changes only when the CSS does. It is kept with the parts' signature
+ * (path, mtime, size), so the parts are read again only when one of them changes (after a deploy, for example).
+ *
+ * @param string $key Option name.
+ * @param string $sig Signature of the parts.
+ * @return string Hash, or '' when the parts changed or nothing is stored.
+ */
+function kits_joined_hash( string $key, string $sig ): string {
+	$memo = get_option( $key );
+	return is_array( $memo ) && isset( $memo['sig'], $memo['hash'] ) && $memo['sig'] === $sig ? (string) $memo['hash'] : '';
+}
+
+/**
+ * Store the content hash of a joined file with its parts' signature.
+ *
+ * @param string $key  Option name.
+ * @param string $sig  Signature of the parts.
+ * @param string $hash Content hash.
+ */
+function kits_joined_hash_save( string $key, string $sig, string $hash ): void {
+	if ( kits_joined_hash( $key, $sig ) !== $hash ) {
+		update_option( $key, compact( 'sig', 'hash' ), true );
+	}
+}
+
+/**
+ * Write a joined file: a temp file in the same folder, then a rename, so a reader never sees half a file.
+ * A failed write is remembered for an hour (transient kits_joined_write_fail), so pages do not retry on every view.
+ *
+ * @param string $path Target path.
+ * @param string $css  Contents.
+ * @return bool Whether the file is in place.
+ */
+function kits_joined_write( string $path, string $css ): bool {
+	$dir = dirname( $path );
+	$tmp = $path . '.' . wp_generate_password( 6, false ) . '.tmp';
+	if ( wp_mkdir_p( $dir ) && wp_is_writable( $dir ) && false !== @file_put_contents( $tmp, $css ) && @rename( $tmp, $path ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions, WordPress.PHP.NoSilencedErrors -- a failure is handled below.
+		return true;
+	}
+	wp_delete_file( $tmp );
+	set_transient( 'kits_joined_write_fail', time(), HOUR_IN_SECONDS );
+	return false;
+}
+
+/**
+ * Older versions of one joined file: deleted once the newest has been in place for a day, so cached pages that still
+ * link to an older one keep it that long.
+ *
+ * @param array<string,int> $files Path => mtime, newest first.
+ */
+function kits_joined_prune( array $files ): void {
+	if ( count( $files ) > 1 && reset( $files ) < time() - DAY_IN_SECONDS ) {
+		foreach ( array_slice( array_keys( $files ), 1 ) as $old ) {
+			wp_delete_file( $old );
+		}
+	}
+}
+
 /**
  * One stylesheet instead of five: the Kits files (kits-v42, kit-tokens, kits, kit, kit-primitives) are joined, in the
- * same order, into uploads/kits-cache/kits-{hash}.css; the hash changes with any file, so a changed file makes a new
- * bundle. The five handles stay registered (child themes depend on them) but print nothing. If the bundle cannot be
- * written, the five files load as before. Turned off in Theme Options (Joined stylesheet) or with
- * add_filter( 'kits_bundle_css', '__return_false' ).
+ * same order, into uploads/kits-cache/kits-{hash}.css. The hash is of the joined CSS, so the address changes only when
+ * a file's contents change. The five handles stay registered (child themes depend on them) but print nothing. If the
+ * bundle cannot be written, the five files load as before.
+ */
+function kits_bundle_core_css() {
+	$styles  = wp_styles();
+	$handles = array( 'kits-v42', 'kit-tokens', 'kits', 'kit-components', 'kit-primitives' );
+	$dir     = get_template_directory();
+	$uri     = get_template_directory_uri();
+	$files   = array();
+	foreach ( $handles as $h ) {
+		$src = isset( $styles->registered[ $h ] ) ? (string) $styles->registered[ $h ]->src : '';
+		if ( ( ! wp_style_is( $h, 'enqueued' ) && ! wp_style_is( $h, 'registered' ) ) || 0 !== strpos( $src, $uri ) || ! empty( $styles->registered[ $h ]->extra['after'] ) || ! empty( $styles->registered[ $h ]->extra['before'] ) ) {
+			return; // Not ours, or carries inline CSS: leave the files as they are.
+		}
+		$files[ $h ] = $dir . substr( strtok( $src, '?' ), strlen( $uri ) );
+	}
+	$sig   = md5( implode( ',', array_map( fn( $f ) => $f . ':' . ( file_exists( $f ) ? filemtime( $f ) . ':' . filesize( $f ) : 0 ), $files ) ) );
+	$up    = wp_upload_dir();
+	$cache = trailingslashit( $up['basedir'] ) . 'kits-cache';
+	$hash  = kits_joined_hash( 'kits_bundle_ver', $sig );
+	if ( '' === $hash || ! file_exists( $cache . '/kits-' . $hash . '.css' ) ) {
+		if ( get_transient( 'kits_joined_write_fail' ) ) {
+			return;
+		}
+		$css = '';
+		foreach ( $files as $h => $f ) {
+			$part = file_exists( $f ) ? (string) file_get_contents( $f ) : ''; // phpcs:ignore WordPress.WP.AlternativeFunctions
+			if ( '' === $part ) {
+				return;
+			}
+			$css .= "/* {$h} */\n" . $part . "\n";
+		}
+		$hash = substr( md5( $css ), 0, 12 );
+		$path = $cache . '/kits-' . $hash . '.css';
+		if ( ! file_exists( $path ) && ! kits_joined_write( $path, $css ) ) {
+			return;
+		}
+		kits_joined_hash_save( 'kits_bundle_ver', $sig, $hash );
+		$list = array();
+		foreach ( (array) glob( $cache . '/kits-*.css' ) as $f ) {
+			$list[ $f ] = (int) filemtime( $f );
+		}
+		arsort( $list );
+		kits_joined_prune( $list );
+	}
+	$first = $styles->registered[ $handles[0] ];
+	wp_register_style( 'kits-bundle', trailingslashit( $up['baseurl'] ) . 'kits-cache/kits-' . $hash . '.css', $first->deps, null ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion -- the file name carries the hash.
+	foreach ( $handles as $h ) {
+		$styles->registered[ $h ]->src  = false; // An alias: prints nothing, keeps its place for dependants.
+		$styles->registered[ $h ]->deps = array( 'kits-bundle' );
+	}
+}
+
+/**
+ * Folder of the joined component stylesheets: {set}-{hash}.css. Its own folder, so the Kits clean-up never sees it.
+ *
+ * @param bool $create Passed to wp_upload_dir(): create the month folder.
+ * @return array{path:string,url:string}
+ */
+function kits_parts_bundle_dir( bool $create = false ): array {
+	$up = wp_upload_dir( null, $create );
+	return array(
+		'path' => trailingslashit( $up['basedir'] ) . 'kits-cache/parts',
+		'url'  => trailingslashit( $up['baseurl'] ) . 'kits-cache/parts',
+	);
+}
+
+/**
+ * The joined component files on disk, by set.
+ *
+ * @param string $dir Folder.
+ * @return array<string,array<string,int>> set => [ path => mtime ], newest first.
+ */
+function kits_parts_bundle_sets( string $dir ): array {
+	$sets = array();
+	foreach ( (array) glob( $dir . '/*.css' ) as $f ) {
+		if ( preg_match( '/^([0-9a-f]{10})-[0-9a-f]{10}\.css$/', basename( (string) $f ), $m ) ) {
+			$sets[ $m[1] ][ $f ] = (int) filemtime( $f );
+		}
+	}
+	foreach ( $sets as &$files ) {
+		arsort( $files );
+	}
+	return $sets;
+}
+
+/**
+ * Clean-up of the joined component files, on each rebuild.
+ *
+ * - In each set, older versions go once the newest has been in place a day.
+ * - A set whose newest file is older than 30 days goes whole: no page uses it (files in use are touched weekly).
+ * - Temp files left by a failed write go after an hour.
+ *
+ * @param string $dir Folder.
+ */
+function kits_parts_bundle_clean( string $dir ): void {
+	clearstatcache();
+	foreach ( kits_parts_bundle_sets( $dir ) as $set => $list ) {
+		if ( reset( $list ) < time() - 30 * DAY_IN_SECONDS ) {
+			array_map( 'wp_delete_file', array_keys( $list ) );
+			delete_option( 'kits_parts_ver_' . $set );
+		} else {
+			kits_joined_prune( $list );
+		}
+	}
+	foreach ( (array) glob( $dir . '/*.tmp' ) as $t ) {
+		if ( filemtime( $t ) < time() - HOUR_IN_SECONDS ) {
+			wp_delete_file( $t );
+		}
+	}
+}
+
+/** Most joined component files kept (Kits → Core Settings → Joined files cap; kits_parts_bundle_cap filter). */
+function kits_parts_bundle_cap(): int {
+	$cap = function_exists( 'kits_option' ) ? (int) kits_option( 'css_parts_cap' ) : 0;
+	return max( 1, (int) apply_filters( 'kits_parts_bundle_cap', $cap > 0 ? $cap : 50 ) );
+}
+
+/**
+ * Path on disk of a registered stylesheet address, if it is a .css file of this site's plugins, themes or wp-content.
+ *
+ * @param string $src Registered src.
+ */
+function kits_style_src_file( string $src ): string {
+	$bare = fn( $u ) => (string) preg_replace( '#^(?:https?:)?//#i', '//', (string) $u );
+	$src  = $bare( (string) preg_replace( '/[?#].*$/', '', $src ) );
+	foreach ( array(
+		WP_PLUGIN_DIR    => plugins_url(),
+		get_theme_root() => get_theme_root_uri(),
+		WP_CONTENT_DIR   => content_url(),
+	) as $dir => $url ) {
+		$url = trailingslashit( $bare( untrailingslashit( $url ) ) );
+		if ( 0 !== strpos( $src, $url ) ) {
+			continue;
+		}
+		$rel = rawurldecode( substr( $src, strlen( $url ) ) );
+		if ( '.css' !== substr( $rel, -4 ) || preg_match( '#(^|/)\.\.(/|$)#', $rel ) ) {
+			return '';
+		}
+		return trailingslashit( $dir ) . $rel;
+	}
+	return '';
+}
+
+/**
+ * Relative url() addresses in a moved stylesheet, made root-relative against the folder it came from (no scheme or
+ * host, so the joined file is the same whichever address the site answers on).
+ *
+ * @param string $css  CSS.
+ * @param string $base URL of the file's folder.
+ */
+function kits_css_absolute_urls( string $css, string $base ): string {
+	$base = trailingslashit( wp_make_link_relative( $base ) );
+	return (string) preg_replace_callback(
+		'/url\(\s*([\'"]?)([^\'")]+)\1\s*\)/i',
+		function ( $m ) use ( $base ) {
+			$u = trim( $m[2] );
+			if ( preg_match( '#^(?:[a-z][a-z0-9+.-]*:|/|\#)#i', $u ) ) {
+				return $m[0]; // Data:, http(s):, root-relative and fragment addresses stay.
+			}
+			return 'url(' . $m[1] . $base . $u . $m[1] . ')';
+		},
+		$css
+	);
+}
+
+/**
+ * Handles that will print: the queue (or the given handles) and everything they depend on.
+ *
+ * @param WP_Styles  $styles Styles.
+ * @param array|null $from   Handles to start from; null for the queue.
+ * @return array<string,bool>
+ */
+function kits_styles_needed( WP_Styles $styles, ?array $from = null ): array {
+	$seen = array();
+	$todo = array_map( fn( $h ) => explode( '?', (string) $h )[0], null === $from ? (array) $styles->queue : $from );
+	while ( $todo ) {
+		$h = array_shift( $todo );
+		if ( isset( $seen[ $h ] ) || ! isset( $styles->registered[ $h ] ) ) {
+			continue;
+		}
+		$seen[ $h ] = true;
+		$todo       = array_merge( $todo, (array) $styles->registered[ $h ]->deps );
+	}
+	return $seen;
+}
+
+/**
+ * One component stylesheet per page: the component stylesheets this page loads (kits_component_styles, in
+ * registry order) are joined into uploads/kits-cache/parts/{set}-{hash}.css. {set} hashes the list of handles, {hash}
+ * the joined CSS, so the address changes only when the CSS does. The handles stay registered as aliases that print
+ * nothing, with deps = [ kits-parts ], so the joined file prints where the first of them would.
+ *
+ * The separate files load instead when one of them carries inline CSS, another media, an RTL copy or an @import, when
+ * one of their outside deps is missing or needs one of them, when the file cannot be written, or when the cap on
+ * joined files is reached for a set that has none yet.
+ */
+function kits_bundle_component_css() {
+	$registry = kits_component_styles();
+	if ( ! $registry ) {
+		return;
+	}
+	$styles  = wp_styles();
+	$needed  = kits_styles_needed( $styles );
+	$members = array_values( array_filter( array_keys( $registry ), fn( $h ) => isset( $needed[ $h ] ) ) );
+	if ( ! $members ) {
+		return;
+	}
+	$deps = array();
+	foreach ( $members as $h ) {
+		foreach ( (array) $styles->registered[ $h ]->deps as $d ) {
+			if ( ! in_array( $d, $members, true ) && ! in_array( $d, $deps, true ) ) {
+				if ( ! isset( $styles->registered[ $d ] ) ) {
+					return; // A missing dep would stop the joined file printing at all: separate files.
+				}
+				$deps[] = $d;
+			}
+		}
+	}
+	if ( array_intersect( $members, array_keys( kits_styles_needed( $styles, $deps ) ) ) ) {
+		return; // An outside dep that needs a member would make a loop through kits-parts.
+	}
+	$files = array();
+	$bases = array();
+	foreach ( $members as $h ) {
+		$o = $styles->registered[ $h ];
+		if ( ! is_string( $o->src ) || '' === $o->src || ! empty( $o->extra['after'] ) || ! empty( $o->extra['before'] ) || ! empty( $o->extra['conditional'] ) || ! empty( $o->extra['alt'] ) || ( is_rtl() && ! empty( $o->extra['rtl'] ) ) || ! in_array( (string) $o->args, array( '', 'all' ), true ) ) {
+			return; // Inline CSS, a condition, another media or an RTL copy: leave the files as they are.
+		}
+		$f = kits_style_src_file( $o->src );
+		if ( '' === $f || ! is_readable( $f ) ) {
+			$f = (string) $registry[ $h ]['file'];
+		}
+		if ( '' === $f || ! is_readable( $f ) ) {
+			return;
+		}
+		$files[ $h ] = $f;
+		$bases[ $h ] = dirname( (string) preg_replace( '/[?#].*$/', '', $o->src ) );
+	}
+	$set   = substr( md5( implode( ',', $members ) ), 0, 10 );
+	$sig   = md5( implode( ',', array_map( fn( $f ) => $f . ':' . filemtime( $f ) . ':' . filesize( $f ), $files ) ) );
+	$dir   = kits_parts_bundle_dir();
+	$key   = 'kits_parts_ver_' . $set;
+	$hash  = kits_joined_hash( $key, $sig );
+	$path  = $dir['path'] . '/' . $set . '-' . $hash . '.css';
+	$clean = false;
+	if ( '' === $hash || ! file_exists( $path ) ) {
+		if ( get_transient( 'kits_joined_write_fail' ) ) {
+			return; // Uploads could not be written lately: separate files, no retry on every view.
+		}
+		$sets = kits_parts_bundle_sets( $dir['path'] );
+		if ( ! isset( $sets[ $set ] ) && count( $sets ) >= kits_parts_bundle_cap() ) {
+			if ( false === get_transient( 'kits_parts_cap_hit' ) ) {
+				set_transient( 'kits_parts_cap_hit', time(), WEEK_IN_SECONDS ); // Shown on Welcome and Site check.
+			}
+			return; // Cap reached: this set loads its separate files, nothing new is written.
+		}
+		$css = '';
+		foreach ( $files as $h => $f ) {
+			$part = file_get_contents( $f ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+			if ( false === $part || preg_match( '/@import\b/i', $part ) ) {
+				return; // An @import must open a stylesheet; joined, it would be dropped.
+			}
+			$part = (string) preg_replace( '/@charset\s+[^;]+;/i', '', $part );
+			$css .= '/* ' . str_replace( '*/', '', $h ) . " */\n" . kits_css_absolute_urls( $part, $bases[ $h ] ) . "\n";
+		}
+		$hash = substr( md5( $css ), 0, 10 );
+		$path = $dir['path'] . '/' . $set . '-' . $hash . '.css';
+		if ( ! file_exists( $path ) && ! kits_joined_write( $path, $css ) ) {
+			return;
+		}
+		kits_joined_hash_save( $key, $sig, $hash );
+		$clean = true;
+	}
+	if ( filemtime( $path ) < time() - WEEK_IN_SECONDS && wp_is_writable( $path ) ) {
+		touch( $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- in use: the 30-day clean-up keeps it.
+	}
+	if ( $clean ) {
+		kits_parts_bundle_clean( $dir['path'] );
+	}
+	wp_register_style( 'kits-parts', $dir['url'] . '/' . $set . '-' . $hash . '.css', $deps, null ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion -- the file name carries the hash.
+	foreach ( $members as $h ) {
+		$styles->registered[ $h ]->src  = false; // An alias: prints nothing, keeps its place for dependants.
+		$styles->registered[ $h ]->deps = array( 'kits-parts' );
+	}
+}
+
+/**
+ * The joined component files against the cap, for Kits → Welcome and a site's own checks.
+ *
+ * @return array{on:bool,count:int,cap:int,warn:bool,hit:int,fail:int,text:string,fix:string}
+ */
+function kits_parts_bundle_status(): array {
+	$on    = kits_bundle_css_switch();
+	$cap   = kits_parts_bundle_cap();
+	$count = count( kits_parts_bundle_sets( kits_parts_bundle_dir()['path'] ) );
+	$hit   = (int) get_transient( 'kits_parts_cap_hit' );
+	$fail  = (int) get_transient( 'kits_joined_write_fail' );
+	if ( $hit && $count < $cap ) {
+		delete_transient( 'kits_parts_cap_hit' ); // Room again (cap raised or files removed).
+		$hit = 0;
+	}
+	$warn = $on && ( $fail > 0 || $hit > 0 || $count >= (int) ceil( $cap * 0.8 ) );
+	$text = $on ? sprintf( '%1$d of %2$d joined files', $count, $cap ) : 'Joined stylesheet is off: every component file loads on its own';
+	$fix  = '';
+	if ( $warn && $fail ) {
+		$fix = 'uploads/kits-cache/ could not be written on ' . wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $fail ) . ': pages load separate files. Make the folder writable; the next try is an hour after the failure. ';
+	}
+	if ( $warn && ( $hit || $count >= (int) ceil( $cap * 0.8 ) ) ) {
+		$fix .= $hit ? 'The cap was reached on ' . wp_date( get_option( 'date_format' ), $hit ) . ': pages with a new set of components load separate files. ' : 'Near the cap: once it is reached, pages with a new set of components load separate files. ';
+		$fix .= 'Raise the cap in Kits → Core Settings (Joined files cap), or empty uploads/kits-cache/parts/ (the files are made again as pages are visited).';
+	}
+	return compact( 'on', 'count', 'cap', 'warn', 'hit', 'fail', 'text', 'fix' );
+}
+
+// Kits → Welcome: one status row, shown once a plugin registers component styles.
+add_filter(
+	'kits_status_rows',
+	function ( $rows ) {
+		if ( ! kits_component_styles() ) {
+			return $rows;
+		}
+		$s      = kits_parts_bundle_status();
+		$rows[] = array( 'Joined component files', function_exists( 'kits_status_cell' ) ? kits_status_cell( $s['text'], $s['fix'] ) : esc_html( trim( $s['text'] . ' ' . $s['fix'] ) ) );
+		return $rows;
+	}
+);
+
+/*
+ * Both joiners run late (1000), after every plugin queued its files and the component flags became enqueues (20).
+ * Turned off together in Theme Options (Joined stylesheet) or with add_filter( 'kits_bundle_css', '__return_false' ).
  */
 add_action(
 	'wp_enqueue_scripts',
 	function () {
-		$styles  = wp_styles();
-		$handles = array( 'kits-v42', 'kit-tokens', 'kits', 'kit-components', 'kit-primitives' );
-		if ( is_admin() || ! apply_filters( 'kits_bundle_css', 'off' !== ( function_exists( 'kits_option' ) ? kits_option( 'css_bundle' ) : 'on' ) ) ) {
+		if ( is_admin() || ! kits_bundle_css_switch() ) {
 			return;
 		}
-		$dir   = get_template_directory();
-		$uri   = get_template_directory_uri();
-		$files = array();
-		foreach ( $handles as $h ) {
-			$src = isset( $styles->registered[ $h ] ) ? (string) $styles->registered[ $h ]->src : '';
-			if ( ! wp_style_is( $h, 'enqueued' ) && ! wp_style_is( $h, 'registered' ) || 0 !== strpos( $src, $uri ) || ! empty( $styles->registered[ $h ]->extra['after'] ) || ! empty( $styles->registered[ $h ]->extra['before'] ) ) {
-				return; // not ours, or carries inline CSS: leave the files as they are
-			}
-			$files[ $h ] = $dir . substr( strtok( $src, '?' ), strlen( $uri ) );
-		}
-		$sig  = substr( md5( implode( ',', array_map( fn( $f ) => $f . ':' . ( file_exists( $f ) ? filemtime( $f ) . ':' . filesize( $f ) : 0 ), $files ) ) ), 0, 12 );
-		$up   = wp_upload_dir();
-		$path = trailingslashit( $up['basedir'] ) . 'kits-cache/kits-' . $sig . '.css';
-		if ( ! file_exists( $path ) ) {
-			$css = '';
-			foreach ( $files as $h => $f ) {
-				$part = file_exists( $f ) ? (string) file_get_contents( $f ) : ''; // phpcs:ignore WordPress.WP.AlternativeFunctions
-				if ( '' === $part ) {
-					return;
-				}
-				$css .= "/* {$h} */\n" . $part . "\n";
-			}
-			wp_mkdir_p( dirname( $path ) );
-			$tmp = $path . '.' . wp_generate_password( 6, false ) . '.tmp';
-			if ( false === file_put_contents( $tmp, $css ) || ! rename( $tmp, $path ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions
-				@unlink( $tmp ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
-				return;
-			}
-			foreach ( (array) glob( dirname( $path ) . '/kits-*.css' ) as $old ) {
-				if ( $old !== $path && filemtime( $old ) < time() - DAY_IN_SECONDS ) {
-					@unlink( $old ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
-				}
-			}
-		}
-		$first = $styles->registered[ $handles[0] ];
-		wp_register_style( 'kits-bundle', trailingslashit( $up['baseurl'] ) . 'kits-cache/kits-' . $sig . '.css', $first->deps, null );
-		foreach ( $handles as $h ) {
-			$styles->registered[ $h ]->src  = false; // an alias: prints nothing, keeps its place for dependants
-			$styles->registered[ $h ]->deps = array( 'kits-bundle' );
-		}
+		kits_bundle_core_css();
+		kits_bundle_component_css();
 	},
 	1000
 );

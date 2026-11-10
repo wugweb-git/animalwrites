@@ -76,6 +76,9 @@ wp cache flush --quiet
 wp transient delete --all --quiet || true
 wp rewrite flush --quiet
 curl -s -o /dev/null http://127.0.0.1:8080/ || true
+# Animal Writes component stylesheets: aw.css and theme/assets/css/aw-*.css as separate links, or the joined file
+# uploads/kits-cache/parts/*.css (Kits kits_component_styles). aw_links FILE prints how many links a page has.
+aw_links() { grep -oE "<link[^>]*rel=['\"]stylesheet['\"][^>]*>" "$1" | grep -cE "/animal-writes-core/theme/assets/css/|/kits-cache/parts/" || true; }
 for u in "${URLS[@]}"; do
   code=$(curl -s -o /tmp/page.html -w '%{http_code}' "http://127.0.0.1:8080$u")
   if [ "$code" != "200" ] || grep -qiE 'critical error|Fatal error|Parse error' /tmp/page.html; then
@@ -83,16 +86,52 @@ for u in "${URLS[@]}"; do
   else
     echo "ok   $code $u (no child)"
   fi
+  # With the Joined stylesheet on (the default): exactly one Animal Writes stylesheet link on every page.
+  case "$u" in *rest_route=*) continue ;; esac
+  n=$(aw_links /tmp/page.html)
+  if [ "$n" = "1" ]; then echo "ok   1 Animal Writes stylesheet $u (no child)"; else echo "FAIL $n Animal Writes stylesheets $u, want 1 (no child)"; FAIL=1; fi
 done
 # has NAME FILE PATTERN: an ok/FAIL line for a fixed-string match in a fetched page.
 has() { if grep -qF -- "$3" "$2"; then echo "ok   $1"; else echo "FAIL $1"; FAIL=1; fi; }
 curl -s -o /tmp/home.html http://127.0.0.1:8080/
+curl -s -o /tmp/state.html http://127.0.0.1:8080/directory/kerala/
+curl -s -o /tmp/listing.html "http://127.0.0.1:8080$(single aw_listing)"
+# joined FILE: the joined component file a page links to (kits-parts-css), fetched to /tmp/joined-NAME.css.
+joined() { href=$(grep -oE "<link[^>]*id=['\"]kits-parts-css['\"][^>]*>" "$1" | grep -oE "href=['\"][^'\"]+" | head -1 | cut -c7-); [ -n "$href" ] && curl -s -o "/tmp/joined-$2.css" "$href"; }
+if joined /tmp/home.html home; then
+  has "joined file on / starts with aw.css (no child)" /tmp/joined-home.css '/* aw-components */'
+  # aw.css's wordmark url() is rewritten to the folder it came from: the plugin's copy, not a theme folder.
+  has "joined aw.css is the plugin copy (no child)" /tmp/joined-home.css '/wp-content/plugins/animal-writes-core/theme/assets/'
+else
+  echo "FAIL no joined component file on / (no child)"; FAIL=1
+fi
+# Markers of the component files, once they exist: aw-home on the front page only.
+if [ -f "$REPO/plugins/animal-writes-core/theme/assets/css/aw-home.css" ]; then
+  has "joined file on / has aw-home (no child)" /tmp/joined-home.css '/* aw-home */'
+  if joined /tmp/state.html state && grep -qF '/* aw-home */' /tmp/joined-state.css; then echo "FAIL joined file on a state page has aw-home (no child)"; FAIL=1; else echo "ok   joined file on a state page has no aw-home (no child)"; fi
+fi
+# Joined stylesheet off: the separate files load, each where its component is.
+wp eval '$o = (array) get_option( "kits_theme_options", array() ); $o["css_bundle"] = "off"; update_option( "kits_theme_options", $o );'
+curl -s -o /tmp/home.html http://127.0.0.1:8080/
+curl -s -o /tmp/state.html http://127.0.0.1:8080/directory/kerala/
+curl -s -o /tmp/listing.html "http://127.0.0.1:8080$(single aw_listing)"
 # The component stylesheet comes from the plugin's copy (aw.min.css, or aw.css when the min file is missing), not a theme folder.
 if grep -oE "<link[^>]*id=['\"]aw-components-css['\"][^>]*>" /tmp/home.html | grep -qE '/wp-content/plugins/animal-writes-core/theme/assets/css/aw(\.min)?\.css'; then
-  echo "ok   aw-components-css from the plugin (no child)"
+  echo "ok   aw-components-css from the plugin (no child, joined off)"
 else
-  echo "FAIL aw-components-css from the plugin (no child)"; FAIL=1
+  echo "FAIL aw-components-css from the plugin (no child, joined off)"; FAIL=1
 fi
+if grep -qF 'kits-cache/parts/' /tmp/home.html; then echo "FAIL joined component file on / with the switch off (no child)"; FAIL=1; else echo "ok   no joined component file with the switch off (no child)"; fi
+if [ -f "$REPO/plugins/animal-writes-core/theme/assets/css/aw-home.css" ]; then
+  has "aw-home-css on / (no child, joined off)" /tmp/home.html "id='aw-home-css'"
+  if grep -qF "id='aw-home-css'" /tmp/state.html; then echo "FAIL aw-home-css on a state page (no child, joined off)"; FAIL=1; else echo "ok   no aw-home-css on a state page (no child, joined off)"; fi
+fi
+if [ -f "$REPO/plugins/animal-writes-core/theme/assets/css/aw-listing.css" ]; then
+  has "aw-listing-css on a listing (no child, joined off)" /tmp/listing.html "id='aw-listing-css'"
+fi
+# Back on: the options cleaner keeps a saved value for a missing key, so "on" is set (and dropped as the default).
+wp eval '$o = (array) get_option( "kits_theme_options", array() ); $o["css_bundle"] = "on"; update_option( "kits_theme_options", $o );'
+curl -s -o /tmp/home.html http://127.0.0.1:8080/
 # Markers from the child's front-page template and header part, in no Kits template or part; written as the class
 # attribute so a stylesheet rule cannot match them.
 has "front-page template is the Animal Writes one (no child)" /tmp/home.html 'class="wp-block-group kit-static' # the front page's main group (only our front-page template uses kit-static); the Take part band went back to its pattern and the FAQ section is empty without FAQ items (5 Nov 2026)
