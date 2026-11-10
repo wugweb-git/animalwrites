@@ -264,6 +264,11 @@ So from 6 Nov until the owner sets Post, the page and Home still ask people to s
 - Used on the page: the three tags on the X share link (2fffe9c5) and "What people are saying" (2e978ca7).
 - Search: the tag phrases have almost no Google searches ("stop animal testing" 1 impression in 28 days); people search the rule words.
 
+## X and Google (read of 10 Nov 2026, read only)
+- X: others still share this page (one account's post with the link had 24 reposts; two more accounts linked it). Our own Lab post (31 Oct) had 28 views; the account has 1 follower. Tags in use: #WithdrawAnimalTestingRules, #SayNoToAnimalExperimentationBill, #StopAnimalTesting, #AnimalFreeScience. The Hindu ran an "In Focus" episode on the draft on 9 Nov (a Media & PR candidate; not added).
+- Google (signed out, India): "draft laboratory animals rules 2026" shows the Library draft at 2 and this page at 7; "animal testing laws in india" shows this page at 3, the testing-laws guide (13870) not on page 1. New searches seen: "draft laboratory animals rules 2026 pdf (download)", "draft rules on animal experimentation 2026", "animal experimentation rules 2026", "gsr 864 e pdf". The first four are in Search Insights already (622 and 634 impressions for the two experimentation phrases); the PDF phrases went to the keyword tools' seeds.
+- Nothing posted, liked or followed; no page change (the Lab page changes on the owner's word only).
+
 ## Off the page
 - Newsletter (3–4 Nov), one campaign: "Object to the draft lab animal rules 2026", to the 115 subscribed contacts tagged with the campaign, from noreply@ with Reply-To contact@, started 18:51 IST on 3 Nov. Result: 115 of 115 sent by 19:00 IST on 4 Nov. Status: archived.
 - How it went out: 71 on the first run; 44 went through PHP mail() during a deploy (33 failed at 18:53 with "Could not instantiate mail function", 11, contacts 22–31 and 68, were marked sent but never left), so those 44 got the same email again on 4 Nov. Cause: a deploy re-clones the plugin folder, so mailweb was missing for about 10 seconds and FluentCRM fell back to PHP mail(), which the host refuses.
