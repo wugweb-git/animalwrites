@@ -122,6 +122,7 @@ add_shortcode(
 		if ( $section ) {
 			$posts = get_posts( array( 'post_type' => $section[0], 'post_status' => 'publish', 'numberposts' => 3, 'orderby' => 'date', 'order' => 'DESC' ) );
 			if ( $posts ) {
+				aw_use_component_style( 'aw-lists' ); // aw-hub-group, aw-hub-news, aw-card-meta
 				$html .= '<section class="aw-hub-group"><h2>Latest from ' . esc_html( $section[1] ) . '</h2><ul' . ( 'aw_news' === $section[0] ? ' class="aw-hub-news"' : '' ) . '>';
 				foreach ( $posts as $p ) {
 					$html .= '<li>' . ( 'aw_news' === $p->post_type && function_exists( 'aw_news_meta_row' ) ? aw_news_meta_row( $p->ID ) : '' ) . ( 'aw_legal' === $p->post_type && function_exists( 'aw_legal_kind_tag' ) && ( $k = aw_legal_kind_tag( $p->ID ) ) ? '<p class="kit-tags">' . $k . '</p>' : '' ) . '<a href="' . esc_url( get_permalink( $p ) ) . '">' . esc_html( get_the_title( $p ) ) . '</a></li>';

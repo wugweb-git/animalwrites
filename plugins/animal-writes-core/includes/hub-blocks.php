@@ -495,6 +495,9 @@ add_filter(
 		}
 		$end = strrpos( $html, '</a>' );
 		$end = false !== $end ? $end : strrpos( $html, '</h' );
+		if ( false !== $end ) {
+			aw_use_component_style( 'aw-lists' ); // aw-verified-mark
+		}
 		return false === $end ? $html : substr_replace( $html, aw_verified_mark(), $end, 0 );
 	},
 	25,
@@ -733,6 +736,9 @@ add_filter(
 			}
 			$img  = '<img src="' . esc_url( $src ) . '" alt="" loading="lazy" decoding="async">';
 			$img  = ! empty( $block['attrs']['isLink'] ) && 'aw_press' !== get_post_type( $id ) ? '<a href="' . esc_url( get_permalink( $id ) ) . '" tabindex="-1" aria-hidden="true">' . $img . '</a>' : $img;
+			if ( $logo ) {
+				aw_use_component_style( 'aw-lists' ); // kit-card-media is-logo
+			}
 			$html = '<figure class="wp-block-post-featured-image kit-card-media' . ( $logo ? ' is-logo' : '' ) . ' ' . esc_attr( (string) $block['attrs']['className'] ) . '">' . $img . '</figure>';
 		}
 		$html = preg_replace( '#<div class="kit-placard[^"]*"[^>]*>.*?</div>#s', '', $html ); // no fallback tile behind the picture

@@ -76,6 +76,14 @@ function aw_component_style_files(): array {
 		'aw-forms' => array( // Fluent Forms skin of the site's own forms (aw_ff_form()) and the form-for line; the newsletter keeps its skin in aw.css.
 			'file' => 'assets/css/aw-forms.css',
 		),
+		'aw-lists' => array( // News, hub and related lists, hub groups, tasks, story and sponsored cards, the verified mark.
+			'file'   => 'assets/css/aw-lists.css',
+			'when'   => 'is_front_page', // Home's lists are stored blocks
+			'blocks' => array(
+				'core/query'         => 'aw-hub-list', // hub list patterns and stored pages
+				'core/post-template' => array( 'aw-news-list', 'aw-tasks', 'aw-news-grid' ),
+			),
+		),
 	);
 }
 
@@ -289,4 +297,17 @@ add_filter(
 		}
 		return trim( (string) $mce_css, ' ,' );
 	}
+);
+
+// Kits Core prints the relative time (aw-rel-time) in its post-date filter (priority 20); Kits names no Animal Writes
+// handle, so Animal Writes records aw-lists after it.
+add_filter(
+	'render_block_core/post-date',
+	function ( $html ) {
+		if ( false !== strpos( (string) $html, 'aw-rel-time' ) ) {
+			aw_use_component_style( 'aw-lists' );
+		}
+		return $html;
+	},
+	21
 );

@@ -24,6 +24,7 @@ function aw_block_sponsored_item( $a ) {
 	if ( ! $id || 'publish' !== get_post_status( $id ) || ! aw_is_sponsored( $id ) ) {
 		return '';
 	}
+	aw_use_component_style( 'aw-lists' ); // aw-sponsored-item, aw-sponsored-label
 	$url   = get_permalink( $id );
 	$thumb = get_the_post_thumbnail( $id, 'medium_large', array( 'alt' => '', 'loading' => 'lazy' ) );
 	$text  = function_exists( 'aw_text' ) ? aw_text( $id, 26 ) : get_the_excerpt( $id );
@@ -44,6 +45,7 @@ function aw_block_sponsored_banner( $a ) {
 	if ( '' === $heading && '' === $text && '' === $img ) {
 		return '';
 	}
+	aw_use_component_style( 'aw-lists' ); // aw-sponsored-banner, aw-sponsored-label
 	$h = '' !== $heading ? ( $url && '' === $link ? '<a href="' . $url . '" rel="sponsored noopener">' . esc_html( $heading ) . '</a>' : esc_html( $heading ) ) : '';
 	$sponsor = trim( (string) ( $a['sponsor'] ?? '' ) );
 	return '<aside class="aw-sponsored-banner" aria-label="Sponsored" data-sponsored-type="banner" data-sponsor="' . esc_attr( '' !== $sponsor ? $sponsor : 'sponsored' ) . '" data-sponsored-item="' . esc_attr( '' !== $heading ? $heading : $text ) . '">'

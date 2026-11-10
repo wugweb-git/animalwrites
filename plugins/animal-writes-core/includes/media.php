@@ -145,6 +145,7 @@ add_filter(
 			$src  = wp_get_attachment_image_src( $org, 'medium' );
 			$wh   = $src && ! empty( $src[1] ) && ! empty( $src[2] ) ? ' width="' . (int) $src[1] . '" height="' . (int) $src[2] . '"' : ''; // its box is known before it arrives: the card does not grow (layout shift, 20 Oct 2026)
 			aw_use_component_style( 'aw-single' ); // aw-story-fallback, aw-story-logo
+			aw_use_component_style( 'aw-lists' ); // kit-card-media is-logo
 			$logo = '<span class="aw-story-fallback"><img class="aw-story-logo" src="' . esc_url( $src ? $src[0] : '' ) . '"' . $wh . ' alt="' . esc_attr( (string) get_post_meta( $post_id, 'aw_org_name', true ) ) . '" loading="lazy"></span>';
 			$logo = ! empty( $block['attrs']['isLink'] ) ? '<a href="' . esc_url( get_permalink( $post_id ) ) . '" tabindex="-1" aria-hidden="true">' . $logo . '</a>' : $logo;
 			return '<figure class="wp-block-post-featured-image kit-card-media is-logo' . ( $cls ? ' ' . esc_attr( $cls ) : '' ) . '">' . $logo . '</figure>';

@@ -323,6 +323,7 @@ add_filter(
 		if ( false !== strpos( (string) ( $block['attrs']['className'] ?? '' ), 'aw-hide-empty' ) && false === strpos( $html, 'wp-block-post ' ) && false === strpos( $html, 'wp-block-post"' ) ) {
 			return '';
 		}
+		aw_use_component_style( 'aw-lists' ); // the hub lists (aw-hub-list, aw-news-list, aw-tasks, is-first-page)
 		$first = aw_hub_page() <= 1 ? ' is-first-page' : ' is-paged';
 		return preg_replace( '/class="wp-block-query/', 'class="wp-block-query' . $first, $html, 1 );
 	},

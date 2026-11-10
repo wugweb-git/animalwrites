@@ -260,6 +260,9 @@ add_shortcode(
 		if ( $links ) {
 			$html .= '<section class="aw-hub-group aw-hub-help"><h2>Find help</h2><ul>' . $links . '</ul></section>';
 		}
+		if ( '' !== $html ) {
+			aw_use_component_style( 'aw-lists' ); // aw-hub-group, aw-hub-news, aw-card-meta
+		}
 		return '<div class="aw-hub">' . $html . '</div>';
 	}
 );

@@ -122,6 +122,7 @@ add_filter(
 			$img  = $att ? wp_get_attachment_image( $att, 'medium_large', false, array( 'alt' => '', 'loading' => 'lazy', 'class' => 'Logo (stays whole)' === $label ? 'aw-story-logo' : '' ) ) : '';
 			if ( 'Logo (stays whole)' === $label ) {
 				aw_use_component_style( 'aw-single' ); // aw-story-fallback, aw-story-logo
+				aw_use_component_style( 'aw-lists' ); // kit-story-media, kit-card-media
 			}
 			$fig  = 'Logo (stays whole)' === $label ? '<figure class="wp-block-post-featured-image kit-card-media kit-story-media"><div class="aw-story-fallback" style="display:flex">' . $img . '</div></figure>' : '<figure class="wp-block-post-featured-image kit-card-media' . ( 'Document page' === $label ? ' kit-doc-cover' : '' ) . '">' . $img . '</figure>';
 			$out .= '<div class="aw-state-row"><p class="aw-state-name">' . esc_html( $label ) . '</p><div class="aw-state-out">' . ( $img ? $fig : '<em>No item in this state yet.</em>' ) . '</div></div>';

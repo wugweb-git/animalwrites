@@ -8,7 +8,7 @@ plugins/animal-writes-core/theme/assets/css/aw-single.css | height | .aw-pdf .wp
 themes/animal-writes/assets/css/aw.css | height | .aw-vol-banner-photo img | min-height: 320px
 themes/animal-writes/assets/css/aw.css | height | .aw-vol-page .aw-vol-banner-photo img | height: 240px
 themes/animal-writes/assets/css/aw.css | height | .aw-vol-page .aw-vol-banner-photo img | height: 360px
-themes/animal-writes/assets/css/aw.css | height | .aw-sponsored-banner-media img | min-height: 220px
+plugins/animal-writes-core/theme/assets/css/aw-lists.css | height | .aw-sponsored-banner-media img | min-height: 220px
 themes/animal-writes/assets/css/aw.css | imp | .home :is(.aw-ed-law > .kit-stack, .aw-ed-story-figures, .aw-ed-story-dates, .kit-section > .kit-stack:has(> .kit-photo-card)) | padding: 0 var(--kit-space-gutter) var(--kit-space-3) !important
 plugins/animal-writes-core/theme/assets/css/aw-home.css | pct | .aw-content-body | padding-top: 40%
 themes/kits-by-wugweb/assets/css/kit.css | height | .wp-block-navigation__responsive-container.is-menu-open | height: 100svh

@@ -1217,7 +1217,6 @@ header.wp-block-template-part.kit-header-hidden { transform: translateY(calc(-10
 .kit-card-chips > * { flex: 0 1 auto; min-width: 0; max-width: 100%; }
 .kit-card-chips .kit-tag-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
 .kit-card-chips .kit-src-icon { width: var(--kit-icon-sm, 16px); height: var(--kit-icon-sm, 16px); flex: none; border-radius: var(--kit-radius-mark); object-fit: contain; }
-.kit-card-chips .aw-sponsored-label { display: contents; }
 /* Meta and chips on one row (owner, 21 Oct 2026): .kit-card-metarow holds the meta row, then the chips, which take the
    space left; a chip that does not fit still wraps out of sight. */
 .kit-card-metarow { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); min-width: 0; }
@@ -1225,7 +1224,7 @@ header.wp-block-template-part.kit-header-hidden { transform: translateY(calc(-10
 .kit-card-metarow > .kit-card-chips { flex: 1 1 8rem; min-width: 0; margin: 0; } /* under the date only when the source chip would not fit (narrow cards) */
 .kit-card-chips-lead { display: inline-flex; flex-wrap: nowrap; gap: var(--s-1, 4px); min-width: 0; max-width: 100%; }
 .kit-card-chips-lead > * { min-width: 0; }
-.kit-card-chips-lead > :is(.kit-card-label, .aw-sponsored-label) { flex: none; }
+.kit-card-chips-lead > .kit-card-label { flex: none; }
 .kit-card .kit-card-title { font-size: var(--kit-type-h3) !important; font-weight: var(--kit-weight-strong); line-height: var(--kit-leading-heading) !important; letter-spacing: -0.01em; } /* the theme H3 (Layout rules 9; was the body size); 3 lines at most stay under 80px */
 .kit-card[class*="kit-card--"] .kit-card-title a { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; color: var(--kit-color-ink); }
 .kit-card .kit-card-title a::after { content: ""; position: absolute; inset: 0; }
@@ -1255,16 +1254,6 @@ header.wp-block-template-part.kit-header-hidden { transform: translateY(calc(-10
 .kit-card--stacked-sm > .kit-card-body { gap: var(--kit-space-1); }
 .kit-card--stacked-sm::before { content: ""; flex: none; width: 1.5rem; height: 1.5rem; background: var(--kit-card-icon-color, var(--kit-color-ink)); -webkit-mask: var(--kit-card-icon, var(--kit-ico-file, none)) center / contain no-repeat; mask: var(--kit-card-icon, var(--kit-ico-file, none)) center / contain no-repeat; }
 .kit-card--stacked-sm:has(> .kit-card-media)::before { content: none; }
-/* News hub lead (first page; not the Home mosaic): from 1200 the picture sits left of the text with the wide stacked
-   card's split (docs/card-sizes.md: picture 30%, 4.5 to 15rem; text column at least 10rem). It keeps the block card's
-   look: the picture flush to the card edge, at least its 4:3 shape, cropped to the text's height when that is taller
-   (at most --kit-card-media-max); the text keeps its 24px padding. The card is as tall as its text, not the three rows
-   beside it. So it stays under 600px (Layout rules 10; with the picture on top it was 618px at 1280 and 1440). */
-@media (min-width: 1200px) {
-	.is-first-page .aw-news-list:not(.aw-news-mosaic) > li:first-child > .kit-card--block-lg { flex-direction: row; height: auto; }
-	.is-first-page .aw-news-list:not(.aw-news-mosaic) > li:first-child > .kit-card--block-lg > .kit-card-media { flex: none; align-self: stretch; width: clamp(var(--kit-thumb-min), 30%, var(--kit-thumb-max)); }
-	.is-first-page .aw-news-list:not(.aw-news-mosaic) > li:first-child > .kit-card--block-lg > .kit-card-body { flex: 1 1 0; min-width: var(--kit-body-min); }
-}
 
 /* Step progress header for multi-step forms (kit.js adds it to .kit-steps; 12 Oct 2026). */
 .kit-steps-progress { list-style: none; margin: 0 0 var(--kit-space-5); padding: 0; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: var(--kit-space-2); counter-reset: none; }
