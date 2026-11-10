@@ -75,8 +75,8 @@ add_action(
 
 add_action(
 	'admin_menu',
-	fn() => add_submenu_page( AW_CORE_MENU, 'Modules', 'Modules', 'manage_options', 'aw-modules', 'aw_modules_screen' ),
-	13 // after Contact links (12)
+	fn() => add_submenu_page( aw_core_menu_parent(), 'Modules', 'Modules', 'manage_options', 'aw-modules', 'aw_modules_screen' ),
+	aw_core_menu_priority( 'aw-modules' ) // order: aw_core_screens() (admin-home.php)
 );
 
 /** Section text. */
@@ -105,6 +105,7 @@ function aw_modules_screen() {
 		wp_die( esc_html__( 'Sorry, you are not allowed to access this page.', 'animal-writes-core' ), 403 );
 	}
 	echo '<div class="wrap"><h1>' . esc_html( 'Modules' ) . '</h1>';
+	aw_core_screen_nav( 'aw-modules' );
 	settings_errors( 'general' ); // options.php's "Settings saved." (core prints it only under the Settings menu)
 	echo '<form method="post" action="' . esc_url( admin_url( 'options.php' ) ) . '">';
 	settings_fields( 'aw_modules' );

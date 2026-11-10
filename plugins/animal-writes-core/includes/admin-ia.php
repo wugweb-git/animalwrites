@@ -192,7 +192,8 @@ add_filter(
 	function () {
 		return array(
 			'index.php',
-			'kits', // Kits: second, under Dashboard, as a theme's hub (owner, 10 Nov 2026)
+			'kits', // Kits: second, under Dashboard, as a theme's hub (owner, 10 Nov 2026); the site's screens are its last items
+			'animal-writes', // the same Kits menu for editors (WordPress points it at the first screen they can open, the Overview); the plugin's own menu without Kits Core
 			'edit.php?post_type=aw_listing',
 			'edit.php?post_type=aw_news',
 			'edit.php',
@@ -205,7 +206,6 @@ add_filter(
 			'aw-classification',
 			'aw-sourcing-menu', // Sourcing (AW Sourcing): To review and the sourcing screens; was Inbox (removed 25 Oct 2026)
 			'mailweb', // Mail (Mailweb plugin): unread count and latest messages
-			'animal-writes', // Animal Writes: Overview, Dates, Check site, Contact links (admin-home.php)
 			'separator2',
 			'themes.php',
 			'plugins.php',

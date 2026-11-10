@@ -160,9 +160,9 @@ function aw_team_date_when( $ymd ) {
 add_action(
 	'admin_menu',
 	function () {
-		add_submenu_page( AW_CORE_MENU, 'Dates', 'Dates', AW_DATES_CAP, 'aw-dates', 'aw_team_dates_screen' ); // Animal Writes → Dates
+		add_submenu_page( aw_core_menu_parent(), 'Dates', 'Dates', AW_DATES_CAP, 'aw-dates', 'aw_team_dates_screen' ); // Animal Writes → Dates
 	},
-	10 // menu order: Overview (9) · Dates · Check site (11) · Contact links (12)
+	aw_core_menu_priority( 'aw-dates' ) // order: aw_core_screens() (admin-home.php)
 );
 
 /** Animal Writes → Dates. */
@@ -184,6 +184,7 @@ function aw_team_dates_screen() {
 	$days  = (int) wp_date( 't', $first );
 	$today = wp_date( 'Y-m-d' );
 	echo '<div class="wrap"><h1>Dates</h1>';
+	aw_core_screen_nav( 'aw-dates' );
 	echo '<p><a class="button" href="' . esc_url( add_query_arg( 'm', $prev, $base ) ) . '">‹ ' . esc_html( wp_date( 'F', strtotime( $prev . '-01 12:00:00' ) ) ) . '</a> <strong style="font-size:1.2em;margin:0 12px">' . esc_html( wp_date( 'F Y', $first ) ) . '</strong> <a class="button" href="' . esc_url( add_query_arg( 'm', $next, $base ) ) . '">' . esc_html( wp_date( 'F', strtotime( $next . '-01 12:00:00' ) ) ) . ' ›</a> <a class="button" href="' . esc_url( $base ) . '">Today</a></p>';
 	echo '<table class="widefat fixed" style="table-layout:fixed;max-width:1100px"><thead><tr>';
 	foreach ( array( 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun' ) as $h ) {

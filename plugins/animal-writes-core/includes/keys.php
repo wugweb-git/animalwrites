@@ -49,9 +49,9 @@ function aw_key_where( string $name ): string {
 add_action(
 	'admin_menu',
 	function () {
-		add_submenu_page( AW_CORE_MENU, 'Keys', 'Keys', 'manage_options', 'aw-keys', 'aw_keys_screen' ); // Animal Writes → Keys
+		add_submenu_page( aw_core_menu_parent(), 'Keys', 'Keys', 'manage_options', 'aw-keys', 'aw_keys_screen' ); // Animal Writes → Keys
 	},
-	13 // after Contact links (12)
+	aw_core_menu_priority( 'aw-keys' ) // order: aw_core_screens() (admin-home.php)
 );
 
 /** Animal Writes → Keys. */
@@ -60,6 +60,7 @@ function aw_keys_screen(): void {
 		return;
 	}
 	echo '<div class="wrap"><h1>Keys</h1>';
+	aw_core_screen_nav( 'aw-keys' );
 	if ( isset( $_GET['saved'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- display only.
 		$n = (int) $_GET['saved']; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		echo '<div class="notice notice-success is-dismissible"><p>' . esc_html( 1 === $n ? '1 key changed.' : $n . ' keys changed.' ) . '</p></div>';

@@ -1,12 +1,18 @@
 <?php
 /**
- * The plugin's own menu and Overview (owner, 25 Oct 2026: our plugins work like any marketplace plugin: one menu, an
- * overview of every feature and where it lives, links from the Plugins screen).
+ * The site's own screens, as the site's section of the Kits menu (owner, 25 Oct and 10 Nov 2026: our plugins work like
+ * any marketplace plugin: an overview of every feature and where it lives, links from the Plugins screen).
  *
- * Animal Writes → Overview (this file), Dates (team-dates.php), Check site (site-check.php), Contact links (pages.php),
- * Keys (keys.php), Edit screens (edit-screens.php).
+ * Kits → Site: Animal Writes (the Overview, this file), Dates (team-dates.php), Check site (site-check.php), Contact
+ * links (pages.php), Keys (keys.php), Modules (social-posts.php), Edit screens (edit-screens.php), after Kits' own
+ * screens. One "Animal Writes" tab in the Kits tabs opens them; each screen lists the others under the tabs.
+ * Without Kits Core the same screens form their own "Animal Writes" menu, as before.
  * Content menus (Directory, News, Resources, Library, Opportunities, Campaigns, Press coverage), Classification and
- * Inbox stay where the content is. Core WordPress only.
+ * Sourcing stay where the content is. Core WordPress only.
+ *
+ * Editors: the Kits menu needs manage_options, but WordPress shows a menu to anyone who can open one of its screens and
+ * points it at the first one they can open (here the Overview); the tabs and the list below them show only what the
+ * user can open.
  *
  * @package animal-writes-core
  */
@@ -15,18 +21,98 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_CORE_MENU = 'animal-writes';
+const AW_CORE_MENU = 'animal-writes'; // the Overview's slug: admin.php?page=animal-writes, as before.
+
+/** The menu the site's screens join: Kits when Kits Core is loaded, else the plugin's own menu. */
+function aw_core_menu_parent(): string {
+	return defined( 'KITS_MENU' ) && function_exists( 'kits_admin_tabs' ) ? KITS_MENU : AW_CORE_MENU;
+}
+
+/** The site's screens in menu order: slug => [label, capability]. */
+function aw_core_screens(): array {
+	return array(
+		AW_CORE_MENU      => array( 'Overview', 'edit_posts' ),
+		'aw-dates'        => array( 'Dates', defined( 'AW_DATES_CAP' ) ? AW_DATES_CAP : 'edit_others_posts' ),
+		'aw-site-check'   => array( 'Check site', 'manage_options' ),
+		'aw-elsewhere'    => array( 'Contact links', 'edit_pages' ),
+		'aw-keys'         => array( 'Keys', 'manage_options' ),
+		'aw-modules'      => array( 'Modules', 'manage_options' ),
+		'aw-edit-screens' => array( 'Edit screens', 'manage_options' ),
+	);
+}
+
+/**
+ * Menu position of a screen among the site's screens: after every Kits screen (those register at 8 to 12).
+ *
+ * @param string $slug Screen slug.
+ */
+function aw_core_menu_priority( string $slug ): int {
+	$i = array_search( $slug, array_keys( aw_core_screens() ), true );
+	return 20 + ( false === $i ? 9 : (int) $i );
+}
 
 add_action(
 	'admin_menu',
 	function () {
-		add_menu_page( 'Animal Writes', 'Animal Writes', 'edit_posts', AW_CORE_MENU, 'aw_core_overview_page', 'dashicons-pets', 28 );
-		add_submenu_page( AW_CORE_MENU, 'Animal Writes', 'Overview', 'edit_posts', AW_CORE_MENU, 'aw_core_overview_page' );
+		if ( AW_CORE_MENU === aw_core_menu_parent() ) {
+			add_menu_page( 'Animal Writes', 'Animal Writes', 'edit_posts', AW_CORE_MENU, 'aw_core_overview_page', 'dashicons-pets', 28 );
+			add_submenu_page( AW_CORE_MENU, 'Animal Writes', 'Overview', 'edit_posts', AW_CORE_MENU, 'aw_core_overview_page' );
+			return;
+		}
+		add_submenu_page( KITS_MENU, 'Animal Writes', 'Site: Animal Writes', 'edit_posts', AW_CORE_MENU, 'aw_core_overview_page' ); // Kits → Site: Animal Writes
 	},
-	9 // before the screens that join this menu, in this order: Dates (10), Check site (11), Contact links (12)
+	aw_core_menu_priority( AW_CORE_MENU )
 );
 
-// Plugins screen: Overview under the plugin's name.
+// Kits tabs: one tab for the site's screens; editors see it because they can open the Overview.
+add_filter(
+	'kits_admin_tabs',
+	function ( $tabs ) {
+		$tabs[ AW_CORE_MENU ] = array( 'Animal Writes', 'admin.php?page=' . AW_CORE_MENU, 'edit_posts' );
+		return $tabs;
+	}
+);
+
+/**
+ * Under a screen's heading: the Kits tabs with "Animal Writes" selected (when Kits Core is loaded), then the site's
+ * screens the user can open, as a core sub-list.
+ *
+ * @param string $current The screen's slug.
+ */
+function aw_core_screen_nav( string $current ): void {
+	if ( AW_CORE_MENU !== aw_core_menu_parent() ) {
+		kits_admin_tabs( AW_CORE_MENU );
+	}
+	$links = array();
+	foreach ( aw_core_screens() as $slug => $s ) {
+		if ( current_user_can( $s[1] ) ) {
+			$on      = $slug === $current;
+			$links[] = '<li><a href="' . esc_url( admin_url( 'admin.php?page=' . $slug ) ) . '"' . ( $on ? ' class="current" aria-current="page"' : '' ) . '>' . esc_html( $s[0] ) . '</a>';
+		}
+	}
+	if ( count( $links ) > 1 ) {
+		echo '<ul class="subsubsub">' . implode( ' |</li> ', $links ) . '</li></ul><br class="clear">'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from escaped parts.
+	}
+}
+
+// Kits → Welcome, System Status: the site's last check, backup and deploy, linked to Check site.
+add_filter(
+	'kits_status_rows',
+	function ( $rows ) {
+		$st   = aw_core_overview_status();
+		$link = ' ' . aw_core_link( 'Check site', 'admin.php?page=aw-site-check' );
+		foreach ( array(
+			'check'  => 'Animal Writes: pages',
+			'backup' => 'Animal Writes: backup',
+			'deploy' => 'Animal Writes: deploy',
+		) as $k => $label ) {
+			$rows[] = array( $label, $st[ $k ] . $link );
+		}
+		return $rows;
+	}
+);
+
+// Plugins screen: Overview under the plugin's name (the same address in both menus).
 add_filter(
 	'plugin_action_links_' . plugin_basename( AW_CORE_DIR . 'animal-writes-core.php' ),
 	fn( $links ) => array_merge( array( '<a href="' . esc_url( admin_url( 'admin.php?page=' . AW_CORE_MENU ) ) . '">Overview</a>' ), (array) $links )
@@ -79,7 +165,7 @@ function aw_core_overview_status(): array {
 	return $s;
 }
 
-/** Animal Writes → Overview. */
+/** Kits → Site: Animal Writes (the Overview). */
 function aw_core_overview_page() {
 	$st    = aw_core_overview_status();
 	$admin = current_user_can( 'manage_options' );
@@ -127,6 +213,7 @@ function aw_core_overview_page() {
 	);
 
 	echo '<div class="wrap"><h1>Animal Writes</h1>';
+	aw_core_screen_nav( AW_CORE_MENU );
 	echo '<p>The site\'s own plugin: its content model, Directory, campaigns, forms and the jobs that keep it running. Each row says where to find the feature.</p>';
 	aw_core_overview_attention( $groups );
 	$opts = array(

@@ -55,9 +55,9 @@ add_action(
 add_action(
 	'admin_menu',
 	function () {
-		add_submenu_page( AW_CORE_MENU, 'Check site', 'Check site', 'manage_options', 'aw-site-check', 'aw_site_check_page' ); // Animal Writes → Check site
+		add_submenu_page( aw_core_menu_parent(), 'Check site', 'Check site', 'manage_options', 'aw-site-check', 'aw_site_check_page' ); // Animal Writes → Check site
 	},
-	11 // after Dates (team-dates.php, 10)
+	aw_core_menu_priority( 'aw-site-check' ) // order: aw_core_screens() (admin-home.php)
 );
 
 add_action(
@@ -86,6 +86,7 @@ function aw_site_check_page() {
 	$last = get_option( 'aw_site_check_last' );
 	$run  = wp_nonce_url( admin_url( 'admin-post.php?action=aw_site_check' ), 'aw_site_check' );
 	echo '<div class="wrap"><h1 class="wp-heading-inline">Check site</h1> <a class="page-title-action" href="' . esc_url( $run ) . '">Run the check</a><hr class="wp-header-end">';
+	aw_core_screen_nav( 'aw-site-check' );
 	echo '<p>Loads one page of every kind and reports any that do not open cleanly. Nothing is changed.</p>';
 	if ( ! is_array( $last ) ) {
 		echo '<p>Not run yet.</p>';

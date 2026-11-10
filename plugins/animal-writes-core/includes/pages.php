@@ -387,9 +387,9 @@ add_shortcode(
 add_action(
 	'admin_menu',
 	function () {
-		add_submenu_page( AW_CORE_MENU, 'Contact links', 'Contact links', 'edit_pages', 'aw-elsewhere', 'aw_elsewhere_screen' ); // Animal Writes → Contact links
+		add_submenu_page( aw_core_menu_parent(), 'Contact links', 'Contact links', 'edit_pages', 'aw-elsewhere', 'aw_elsewhere_screen' ); // Animal Writes → Contact links
 	},
-	12 // after Check site (site-check.php, 11)
+	aw_core_menu_priority( 'aw-elsewhere' ) // order: aw_core_screens() (admin-home.php)
 );
 function aw_elsewhere_screen() {
 	if ( isset( $_POST['aw_elsewhere'] ) && check_admin_referer( 'aw_elsewhere' ) ) {
@@ -404,7 +404,9 @@ function aw_elsewhere_screen() {
 		echo '<div class="notice notice-success"><p>Saved.</p></div>';
 	}
 	$rows = array_merge( aw_elsewhere_links(), array_fill( 0, 4, array() ) );
-	echo '<div class="wrap"><h1>Contact links</h1><p>Shown under "Elsewhere" on the <a href="' . esc_url( home_url( '/contact/' ) ) . '" target="_blank">Contact</a> page; the section stays hidden while this list is empty. Use the platform name as the label (for example Instagram).</p><form method="post">';
+	echo '<div class="wrap"><h1>Contact links</h1>';
+	aw_core_screen_nav( 'aw-elsewhere' );
+	echo '<p>Shown under "Elsewhere" on the <a href="' . esc_url( home_url( '/contact/' ) ) . '" target="_blank">Contact</a> page; the section stays hidden while this list is empty. Use the platform name as the label (for example Instagram).</p><form method="post">';
 	wp_nonce_field( 'aw_elsewhere' );
 	$cells = array();
 	foreach ( $rows as $i => $r ) {

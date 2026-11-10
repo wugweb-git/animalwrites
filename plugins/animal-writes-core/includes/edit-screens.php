@@ -786,7 +786,7 @@ function aw_edit_screen_twice( array $rows ): array {
 add_action(
 	'admin_menu',
 	function () {
-		$hook = add_submenu_page( AW_CORE_MENU, 'Edit screens', 'Edit screens', 'manage_options', 'aw-edit-screens', 'aw_edit_screens_page' ); // Animal Writes → Edit screens
+		$hook = add_submenu_page( aw_core_menu_parent(), 'Edit screens', 'Edit screens', 'manage_options', 'aw-edit-screens', 'aw_edit_screens_page' ); // Animal Writes → Edit screens
 		if ( $hook ) {
 			add_action(
 				'load-' . $hook,
@@ -798,7 +798,7 @@ add_action(
 			);
 		}
 	},
-	14 // after Keys (13)
+	aw_core_menu_priority( 'aw-edit-screens' ) // order: aw_core_screens() (admin-home.php)
 );
 
 /** The note on rows that are listed from the map, not read live (page and command). */
@@ -968,6 +968,7 @@ function aw_edit_screens_render( array $all ): void {
 	$twice    = aw_edit_screen_twice( $all );
 
 	echo '<div class="wrap"><h1>Edit screens</h1>';
+	aw_core_screen_nav( 'aw-edit-screens' );
 	echo '<p>Every box on each edit screen, the keys it stores and where each key is used. Boxes are read from the plugins as they run now; what each key does comes from the map in <code>animal-writes-core/data/edit-screen-map.json</code> (see <code>docs/edit-screens.md</code>). Read-only.</p>';
 	$text = esc_html( sprintf( '%d boxes on %d edit screens, %d widgets on admin pages.', count( $ids ), count( $screens ), $admin ) );
 	$text .= ' ' . ( $unmapped ? '<a href="#aw-es-unmapped">' . esc_html( sprintf( '%d boxes or fields are not mapped yet.', $unmapped ) ) . '</a>' : 'Every box is mapped.' );
