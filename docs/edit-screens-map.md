@@ -10,7 +10,7 @@ Snapshot of live, 1 Nov 2026.
 
 **Active plugins (live):** animal-writes-core, aw-seo-extras, mailweb, seo-by-rank-math 1.0.280, secure-custom-fields 6.9.7, google-site-kit 1.190.0, litespeed-cache 7.9.2, link-whisper 0.9.8, fluent-crm 3.3.1, fluentform 6.2.16, simple-history, updraftplus, performance-lab + its modules (auto-sizes, dominant-color-images, embed-optimizer, image-prioritizer, optimization-detective, webp-uploads, speculation-rules, view-transitions, nocache-bfcache, performant-translations). **Not active:** Advanced Ads, Fluent SMTP, aw-sourcing as a separate plugin row (its files load; the provenance list in the listing box "Claimed and sources" comes from `plugins/aw-sourcing/`), kits-core as a row (its includes load). On live the plugins and themes run from `public_html/aw_deploy/`, not `wp-content`.
 
-**Edit-screen UI by plugin:** Rank Math (post sidebar/metabox + term box + term description editor), SCF (19 field groups, plus a block bindings sidebar panel), LiteSpeed (side box, public types), Link Whisper (post, page; box and a target keyword sidebar panel), WordPress core boxes, and ours. The themes and Mailweb add no edit-screen box (Mailweb adds a Dashboard widget, §8). Site Kit, FluentCRM, Fluent Forms, UpdraftPlus, Simple History and the Performance Lab modules add **no** post or term edit-screen box (none registered at runtime; Simple History only logs `created_term`).
+**Edit-screen UI by plugin:** Rank Math (post sidebar/metabox + term box + term description editor), SCF (19 field groups, plus a block bindings sidebar panel), LiteSpeed (side box, public types), Link Whisper (post, page; box and a target keyword sidebar panel), WordPress core boxes, and ours. The themes and MailWeb add no edit-screen box (MailWeb adds a Dashboard widget, §8). Site Kit, FluentCRM, Fluent Forms, UpdraftPlus, Simple History and the Performance Lab modules add **no** post or term edit-screen box (none registered at runtime; Simple History only logs `created_term`).
 
 **How to read the order.** WordPress prints contexts side, normal, advanced; inside each, priority high → core → default → low; then the user's saved order (`meta-box-order_{type}`) overrides. Block-editor types (post, page, aw_legal, aw_campaign, aw_opportunity, aw_listing) replace every core box flagged `__back_compat_meta_box` with a sidebar panel; Custom Fields shows only when switched on in Preferences → Panels; all other boxes (ours, SCF, LiteSpeed, Link Whisper) show in the meta-box area (normal/advanced at the bottom, side in the Settings sidebar). Classic-editor types: aw_news, aw_press, aw_message, aw_claim, aw_report, attachment.
 
@@ -44,8 +44,8 @@ The SCF groups ship in Animal Writes core (`acf-json/`); SCF only renders them.
 | Animal Writes core | Photo (category, tag), Banner image (category) | Image |
 | Animal Writes core | Find help: listing types (category) | Find help |
 | Animal Writes core | Guides linking here (tag) | Links |
-| AW SEO Plus | FAQ (post screens, category and tag screens) | FAQ |
-| AW SEO Plus | Search Insights report boxes (§8) | SEO report |
+| RankWeb | FAQ (post screens, category and tag screens) | FAQ |
+| RankWeb | Search Insights report boxes (§8) | SEO report |
 | Kits Core | Image context, Focus keyphrase (media) | Image |
 | Rank Math SEO | Rank Math SEO (posts, terms) | SEO |
 | Rank Math SEO | Rank Math sidebar panel (block editor) | SEO |
@@ -720,7 +720,7 @@ Not edit screens; listed on Animal Writes → Edit screens under "Dashboard (wid
 | id | title | plugin | purpose | file | stores |
 |---|---|---|---|---|---|
 | dashboard_right_now, dashboard_activity, dashboard_quick_press, dashboard_site_health, dashboard_primary | At a Glance, Activity, Quick Draft, Site Health Status, WordPress Events and News | WordPress (General row) | General | `wp-admin/includes/dashboard.php` | Quick Draft saves a draft post; the others nothing |
-| mailweb_widget | Mail | Mailweb | Mail | `plugins/mailweb/includes/overview.php:158` | nothing |
+| mailweb_widget | Mail | MailWeb | Mail | `plugins/mailweb/includes/overview.php:158` | nothing |
 | aw_team_dates | Dates | Animal Writes core | Team dates | `core/team-dates.php:210` | nothing |
 | aw_cl_widget | Campaign letters | Animal Writes core | Campaign letters | `core/campaign-letters.php:366` | nothing |
 | aw_cron_health | Scheduled tasks | Animal Writes core | Scheduled tasks | `core/cron-health.php:105` | nothing |
@@ -731,7 +731,7 @@ Not edit screens; listed on Animal Writes → Edit screens under "Dashboard (wid
 
 SCF adds no Dashboard widget (checked in SCF 6.9.6 code). There are no classic widgets (`register_widget`) in this repo.
 
-**Search Insights report page** (AW SEO Plus, Overview tab; `seo/search-insights/admin.php:119–128`, normal context, shown with `do_meta_boxes`)
+**Search Insights report page** (RankWeb, Overview tab; `seo/search-insights/admin.php:119–128`, normal context, shown with `do_meta_boxes`)
 
 | id | title |
 |---|---|
@@ -752,11 +752,11 @@ Purpose "SEO report". They read Search Insights data and store no post meta.
 
 ## 9. Admin page widgets
 
-The panels, boxes and tables on the admin pages of AW Sourcing, AW SEO Plus (with Search Insights), Animal Writes, Mailweb and Kits Core. Listed on Animal Writes → Edit screens with one heading per page (`"screen": "admin"`, `types` = the page id below), from the map, never read live and never counted as not mapped or as edited in two places. What each one reads, sets and its limits are in the row's notes (map fields `reads`, `sets`, `limits`); `option:`, `table:` and `transient:` mark options, custom tables and transients, other names are post meta. The ten Search Insights Overview boxes are in §8.
+The panels, boxes and tables on the admin pages of SourceWeb, RankWeb (with Search Insights), Animal Writes, MailWeb and Kits Core. Listed on Animal Writes → Edit screens with one heading per page (`"screen": "admin"`, `types` = the page id below), from the map, never read live and never counted as not mapped or as edited in two places. What each one reads, sets and its limits are in the row's notes (map fields `reads`, `sets`, `limits`); `option:`, `table:` and `transient:` mark options, custom tables and transients, other names are post meta. The ten Search Insights Overview boxes are in §8.
 
-### AW Sourcing
+### SourceWeb
 
-**AW Sourcing: Overview** (`aw-sourcing-menu`)
+**SourceWeb: Overview** (`aw-sourcing-menu`)
 
 | id | widget | kind | reads | limits | file |
 |---|---|---|---|---|---|
@@ -764,14 +764,14 @@ The panels, boxes and tables on the admin pages of AW Sourcing, AW SEO Plus (wit
 | ap-src-overview-runs | Last runs | table | `option:aw_worker_runs_*`, `option:aw_workers_meta`, `option:aw_workers_groups` | Administrators only; one row per worker, newest report | `src/admin-menu.php:350 (aw_sourcing_overview_page)` |
 | ap-src-overview-commands | Commands (WP-CLI on the server) | table | — | Fixed list of three commands | `src/admin-menu.php:370 (aw_sourcing_overview_page)` |
 
-**AW Sourcing: To review** (`aw-review`)
+**SourceWeb: To review** (`aw-review`)
 
 | id | widget | kind | reads | limits | file |
 |---|---|---|---|---|---|
 | ap-src-review-list | To review list (AW_Sourcing_Review_Table) | list-table | `post_status pending/draft of aw_news, aw_legal, aw_opportunity, aw_press, research posts`, `aw_review`, `aw_source_url`, `aw_press_url` | 50 per page (screen option aw_review_per_page); newest received first, sortable by title, type, received; views per type; search | `src/class-aw-sourcing-review-table.php:15 (AW_Sourcing_Review_Table), shown at src/review-queue.php:197` |
 | ap-src-review-notice | Result notice (published / moved to Drafts) | notice | — | After a bulk action only | `src/review-queue.php:180 (aw_review_page)` |
 
-**AW Sourcing: Enrichment review** (`aw-enrich-review`)
+**SourceWeb: Enrichment review** (`aw-enrich-review`)
 
 | id | widget | kind | reads | limits | file |
 |---|---|---|---|---|---|
@@ -779,7 +779,7 @@ The panels, boxes and tables on the admin pages of AW Sourcing, AW SEO Plus (wit
 | ap-src-enrich-filters | Status views and filters (source, confidence, state, field, flag) | form | `option:aw_enrich_sources`, `table:aw_places` | Views Waiting, Applied, Rejected, Failed, Undone, All; GET filter only | `src/enrichment-admin.php:320 (aw_enrich_review_page)` |
 | ap-src-enrich-list | Proposals list (AW_Sourcing_Enrichment_Table) | list-table | `table:aw_enrich`, `listing fields named in each proposal (SCF group group_aw_listing)` | 50 per page; high confidence first, then by listing, newest first | `src/class-aw-sourcing-enrichment-table.php:18 (AW_Sourcing_Enrichment_Table), shown at src/enrichment-admin.php:384` |
 
-**AW Sourcing: Sources** (`aw-sourcing-sources`)
+**SourceWeb: Sources** (`aw-sourcing-sources`)
 
 | id | widget | kind | reads | limits | file |
 |---|---|---|---|---|---|
@@ -788,7 +788,7 @@ The panels, boxes and tables on the admin pages of AW Sourcing, AW SEO Plus (wit
 | ap-src-sources-feeds | Feeds view (AW_Sourcing_Sources_Table) | list-table | `option:aw_sources` | Sources → Feeds view; per type News, Library, Opportunity | `src/class-aw-sourcing-sources-table.php:18 (AW_Sourcing_Sources_Table), shown at src/source-sites.php:461` |
 | ap-src-sources-edit | Add New Source / Edit Source form | form | `option:aw_publishers`, `option:aw_sources`, `option:aw_source_site_meta` | One source per screen, with its feeds below | `src/source-sites.php:486 (aw_sourcing_source_form)` |
 
-**AW Sourcing: Keywords** (`aw-sourcing-keywords`)
+**SourceWeb: Keywords** (`aw-sourcing-keywords`)
 
 | id | widget | kind | reads | limits | file |
 |---|---|---|---|---|---|
@@ -797,7 +797,7 @@ The panels, boxes and tables on the admin pages of AW Sourcing, AW SEO Plus (wit
 | ap-src-kw-test | Test a headline | form | `table:aw_si_keywords`, `option:aw_relevance` | One headline at a time (GET) | `src/keywords-admin.php:523 (aw_sourcing_kw_tab)` |
 | ap-src-kw-suggestions | Suggestions from Search Insights (AW_Sourcing_Suggestions_Table) | list-table | `table:aw_si_keywords`, `option:aw_sourcing_dismissed`, `transient:aw_sourcing_kw_stats_30` | 20 per page (screen option aw_suggestions_per_page, 1–200); English only; at least 20 impressions in 28 days | `src/keyword-suggestions.php:191 (aw_sourcing_keywords_tab_end), table src/class-aw-sourcing-suggestions-table.php:13` |
 
-**AW Sourcing: Rules** (`aw-sourcing-rules`)
+**SourceWeb: Rules** (`aw-sourcing-rules`)
 
 | id | widget | kind | reads | limits | file |
 |---|---|---|---|---|---|
@@ -808,7 +808,7 @@ The panels, boxes and tables on the admin pages of AW Sourcing, AW SEO Plus (wit
 | ap-src-rules-trust-order | Trust order | form | `option:aw_enrich_field_rules (priority)`, `option:aw_enrich_sources` | Positions 1–99; empty ranks last | `src/rules-admin.php:399 (aw_rules_priority_form)` |
 | ap-src-rules-field-rules | Field rules table | table | `option:aw_enrich_field_rules`, `SCF group group_aw_listing` | One row per listing field; Edit opens one field | `src/rules-admin.php:444 (aw_rules_field_rules_table)` |
 
-**AW Sourcing: AI models** (`aw-sourcing-ai`)
+**SourceWeb: AI models** (`aw-sourcing-ai`)
 
 | id | widget | kind | reads | limits | file |
 |---|---|---|---|---|---|
@@ -816,7 +816,7 @@ The panels, boxes and tables on the admin pages of AW Sourcing, AW SEO Plus (wit
 | ap-src-ai-key-form | Add New Key / Edit key | form | `option:aw_ai_models` | One key per screen | `src/ai-keys.php:1109 (aw_ai_key_add_screen, aw_ai_key_edit_screen)` |
 | ap-src-ai-overview | Keys overview (keys, usable keys per worker) | table | `option:aw_ai_models`, `option:aw_workers_meta`, `option:aw_workers_groups` | Read-only; never more than the last 4 characters of a key | `src/ai-keys.php:1078 (aw_ai_keys_overview_screen)` |
 
-**AW Sourcing: Workers** (`aw-sourcing-workers`)
+**SourceWeb: Workers** (`aw-sourcing-workers`)
 
 | id | widget | kind | reads | limits | file |
 |---|---|---|---|---|---|
@@ -825,7 +825,7 @@ The panels, boxes and tables on the admin pages of AW Sourcing, AW SEO Plus (wit
 | ap-src-workers-runs | Runs: one worker | table | `option:aw_worker_runs_*` | One worker per screen | `src/workers-admin.php:109 (aw_workers_runs_screen)` |
 | ap-src-workers-notices | Run now and token notices | notice | `option:aw_worker_dispatch_log` | After Run now, or when the GitHub token is missing | `src/workers-admin.php:79 (aw_workers_tab)` |
 
-**AW Sourcing: Reports (Rejected, Relay log, Change log)** (`aw-sourcing-reports`)
+**SourceWeb: Reports (Rejected, Relay log, Change log)** (`aw-sourcing-reports`)
 
 | id | widget | kind | reads | limits | file |
 |---|---|---|---|---|---|
@@ -833,7 +833,7 @@ The panels, boxes and tables on the admin pages of AW Sourcing, AW SEO Plus (wit
 | ap-src-relay-log | Relay log | table | `option:aw_relay_log` | 50 per page; last 200 requests kept; newest first; sortable; search | `src/relay.php:259 (aw_relay_log_view)` |
 | ap-src-change-log | Change log | table | `option:kits_sourcing_log` | 50 per page; sortable by date, user, tab; search | `src/sourcing-policy.php:645 (aw_sourcing_page)` |
 
-**AW Sourcing: Settings** (`aw-sourcing-settings`)
+**SourceWeb: Settings** (`aw-sourcing-settings`)
 
 | id | widget | kind | reads | limits | file |
 |---|---|---|---|---|---|
@@ -845,7 +845,7 @@ The panels, boxes and tables on the admin pages of AW Sourcing, AW SEO Plus (wit
 |---|---|---|---|---|---|
 | ap-src-si-sourcing-keywords | Sourcing keywords (AW_Sourcing_SI_Keywords_Table) | list-table | `transient:aw_sourcing_kw_stats_30`, `table:aw_si_keywords`, `table:aw_si_pages`, `aw_feed` | Items over 30 days per Google News search; page figures for 28 days and 3 months | `src/search-insights-tab.php:23 (aw_si_tab_sourcing), table src/class-aw-sourcing-si-keywords-table.php:14` |
 
-**AW Sourcing: Notices (admin pages)** (`aw-sourcing-notices`)
+**SourceWeb: Notices (admin pages)** (`aw-sourcing-notices`)
 
 | id | widget | kind | reads | limits | file |
 |---|---|---|---|---|---|
@@ -854,9 +854,9 @@ The panels, boxes and tables on the admin pages of AW Sourcing, AW SEO Plus (wit
 | ap-src-notice-workers | Workers need attention | notice | `option:aw_worker_runs_*`, `option:aw_workers_meta` | Administrators; Dashboard and the Sourcing page only | `src/workers.php:411 (admin_notices)` |
 | ap-src-notice-blocked | Blocked publisher notice | notice | — | After blocking a publisher from a list row | `src/sourcing-policy.php:593 (admin_notices)` |
 
-### AW SEO Plus
+### RankWeb
 
-**AW SEO Plus: Overview** (`aw-seo-plus`)
+**RankWeb: Overview** (`aw-seo-plus`)
 
 | id | widget | kind | reads | limits | file |
 |---|---|---|---|---|---|
@@ -864,13 +864,13 @@ The panels, boxes and tables on the admin pages of AW Sourcing, AW SEO Plus (wit
 | ap-seo-overview-boxes | On edit screens | table | — | — | `seo/overview.php:226 (aw_seo_overview_page)` |
 | ap-seo-overview-commands | Commands (WP-CLI on the server) | table | — | — | `seo/overview.php:250 (aw_seo_overview_page)` |
 
-**AW SEO Plus: Settings** (`aw-seo-settings`)
+**RankWeb: Settings** (`aw-seo-settings`)
 
 | id | widget | kind | reads | limits | file |
 |---|---|---|---|---|---|
 | ap-seo-settings | Settings (seven tabs) | form | `option:aw_seo_settings` | Tabs: Modules, Titles and descriptions, Indexing, Schema and FAQ, Share images and Open Graph, Focus keywords and content analysis, AI agents. Search Insights numbers are on Search Insights → Settings. Administrators only. | `seo/settings.php:512 (aw_seo_settings_page)` |
 
-**AW SEO Plus: FAQ** (`aw-faq`)
+**RankWeb: FAQ** (`aw-faq`)
 
 | id | widget | kind | reads | limits | file |
 |---|---|---|---|---|---|
@@ -993,9 +993,9 @@ The panels, boxes and tables on the admin pages of AW Sourcing, AW SEO Plus (wit
 |---|---|---|---|---|---|
 | ap-core-media-reuse | Reuse pictures | table | `data/media-reuse-plan.php`, `option:aw_media_reuse_log`, `option:aw_thumb_map`, `option:aw_category_images`, `transient:aw_media_reuse_notice_{user}`, `_thumbnail_id`, `aw_cover_reused`, `aw_source_image_off` | One row per offered picture (the plan file); Apply, Undo and Check again one picture at a time; news, Library items, listings and posts only. | `core/media-reuse.php:353 (aw_media_reuse_screen)` |
 
-### Mailweb
+### MailWeb
 
-**Mailweb: Inbox** (`mailweb`)
+**MailWeb: Inbox** (`mailweb`)
 
 | id | widget | kind | reads | limits | file |
 |---|---|---|---|---|---|
@@ -1003,13 +1003,13 @@ The panels, boxes and tables on the admin pages of AW Sourcing, AW SEO Plus (wit
 | ap-mail-message | Message (Attachments, Reply, Message boxes) | postbox | `IMAP mailboxes` | Pictures from the internet hidden until asked. | `plugins/mailweb/includes/inbox.php:405 (mailweb_inbox_page)` |
 | ap-mail-compose | Write, reply, forward (Send, Attachments boxes) | form | `option:mailweb_mailboxes`, `option:mailweb_aliases`, `option:mailweb_default_from`, `option:mailweb_profiles` | Attachments up to 10 MB in total. | `plugins/mailweb/includes/inbox.php:510 (mailweb_inbox_page)` |
 
-**Mailweb: Overview** (`mailweb-overview`)
+**MailWeb: Overview** (`mailweb-overview`)
 
 | id | widget | kind | reads | limits | file |
 |---|---|---|---|---|---|
 | ap-mail-overview | Features | table | `option:mailweb_box_addresses`, `option:mailweb_smtp`, `option:mailweb_cap` | — | `plugins/mailweb/includes/home.php:123 (mailweb_home_page)` |
 
-**Mailweb: Settings (incoming mail, mailboxes, profiles)** (`mailweb-settings`)
+**MailWeb: Settings (incoming mail, mailboxes, profiles)** (`mailweb-settings`)
 
 | id | widget | kind | reads | limits | file |
 |---|---|---|---|---|---|
@@ -1018,7 +1018,7 @@ The panels, boxes and tables on the admin pages of AW Sourcing, AW SEO Plus (wit
 | ap-mail-profiles | Profiles | form | `option:mailweb_profiles` | — | `plugins/mailweb/includes/profiles.php:164` |
 | ap-mail-crm | FluentCRM | form | `option:mailweb_crm`, `option:mailweb_crm_done` | Done list keeps the last 5000. | `plugins/mailweb/includes/crm-sync.php:314` |
 
-**Mailweb: Settings (site sending)** (`mailweb-settings-sending`)
+**MailWeb: Settings (site sending)** (`mailweb-settings-sending`)
 
 | id | widget | kind | reads | limits | file |
 |---|---|---|---|---|---|

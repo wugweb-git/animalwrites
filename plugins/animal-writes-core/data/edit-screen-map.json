@@ -193,8 +193,8 @@
 		},
 		"aw-faq": {
 			"title": "FAQ",
-			"source": "AW SEO Plus",
-			"plugin": "AW SEO Plus",
+			"source": "RankWeb",
+			"plugin": "RankWeb",
 			"purpose": "FAQ",
 			"file": "seo/faq.php (add_meta_boxes, aw_faq_editor)",
 			"screen": "post",
@@ -726,8 +726,8 @@
 		},
 		"mailweb_widget": {
 			"title": "Mail",
-			"source": "Mailweb",
-			"plugin": "Mailweb",
+			"source": "MailWeb",
+			"plugin": "MailWeb",
 			"purpose": "Mail",
 			"file": "plugins/mailweb/includes/overview.php:158",
 			"screen": "admin",
@@ -736,7 +736,7 @@
 				"dashboard"
 			],
 			"runtime": "map-only",
-			"notes": "Counts and the last 5 messages per mailbox; stores nothing. Users with the Mailweb capability only."
+			"notes": "Counts and the last 5 messages per mailbox; stores nothing. Users with the MailWeb capability only."
 		},
 		"aw_activity": {
 			"title": "Activity",
@@ -754,8 +754,8 @@
 		},
 		"aw_seo_dashboard": {
 			"title": "SEO",
-			"source": "AW SEO Plus",
-			"plugin": "AW SEO Plus",
+			"source": "RankWeb",
+			"plugin": "RankWeb",
 			"purpose": "SEO Dashboard box",
 			"file": "seo/search-insights/dashboard.php:131",
 			"screen": "admin",
@@ -768,8 +768,8 @@
 		},
 		"aw_sourcing_dashboard": {
 			"title": "Sourcing",
-			"source": "AW Sourcing",
-			"plugin": "AW Sourcing",
+			"source": "SourceWeb",
+			"plugin": "SourceWeb",
 			"purpose": "Sourcing Dashboard box",
 			"file": "src/dashboard.php:84",
 			"screen": "admin",
@@ -894,8 +894,8 @@
 		},
 		"aw-si-sources": {
 			"title": "Sources",
-			"source": "AW SEO Plus",
-			"plugin": "AW SEO Plus",
+			"source": "RankWeb",
+			"plugin": "RankWeb",
 			"purpose": "SEO report",
 			"file": "seo/search-insights/admin.php:119",
 			"screen": "admin",
@@ -908,8 +908,8 @@
 		},
 		"aw-si-priorities": {
 			"title": "Priorities",
-			"source": "AW SEO Plus",
-			"plugin": "AW SEO Plus",
+			"source": "RankWeb",
+			"plugin": "RankWeb",
 			"purpose": "SEO report",
 			"file": "seo/search-insights/admin.php:120",
 			"screen": "admin",
@@ -922,8 +922,8 @@
 		},
 		"aw-si-quick": {
 			"title": "Quick wins (position 8–20, at least 10 impressions)",
-			"source": "AW SEO Plus",
-			"plugin": "AW SEO Plus",
+			"source": "RankWeb",
+			"plugin": "RankWeb",
 			"purpose": "SEO report",
 			"file": "seo/search-insights/admin.php:121",
 			"screen": "admin",
@@ -936,8 +936,8 @@
 		},
 		"aw-si-movers": {
 			"title": "Movers (28 days against the 28 before)",
-			"source": "AW SEO Plus",
-			"plugin": "AW SEO Plus",
+			"source": "RankWeb",
+			"plugin": "RankWeb",
 			"purpose": "SEO report",
 			"file": "seo/search-insights/admin.php:122",
 			"screen": "admin",
@@ -950,8 +950,8 @@
 		},
 		"aw-si-brand": {
 			"title": "Brand",
-			"source": "AW SEO Plus",
-			"plugin": "AW SEO Plus",
+			"source": "RankWeb",
+			"plugin": "RankWeb",
 			"purpose": "SEO report",
 			"file": "seo/search-insights/admin.php:123",
 			"screen": "admin",
@@ -964,8 +964,8 @@
 		},
 		"aw-si-ai": {
 			"title": "AI referrals (GA4, 28 days)",
-			"source": "AW SEO Plus",
-			"plugin": "AW SEO Plus",
+			"source": "RankWeb",
+			"plugin": "RankWeb",
 			"purpose": "SEO report",
 			"file": "seo/search-insights/admin.php:124",
 			"screen": "admin",
@@ -978,8 +978,8 @@
 		},
 		"aw-si-referrers": {
 			"title": "Top referrers (GA4)",
-			"source": "AW SEO Plus",
-			"plugin": "AW SEO Plus",
+			"source": "RankWeb",
+			"plugin": "RankWeb",
 			"purpose": "SEO report",
 			"file": "seo/search-insights/admin.php:125",
 			"screen": "admin",
@@ -992,8 +992,8 @@
 		},
 		"aw-si-site-search": {
 			"title": "Searches on our site (28 days, minimum)",
-			"source": "AW SEO Plus",
-			"plugin": "AW SEO Plus",
+			"source": "RankWeb",
+			"plugin": "RankWeb",
 			"purpose": "SEO report",
 			"file": "seo/search-insights/admin.php:126",
 			"screen": "admin",
@@ -1006,8 +1006,8 @@
 		},
 		"aw-si-gaps": {
 			"title": "Content gaps (keyword map gaps and P2)",
-			"source": "AW SEO Plus",
-			"plugin": "AW SEO Plus",
+			"source": "RankWeb",
+			"plugin": "RankWeb",
 			"purpose": "SEO report",
 			"file": "seo/search-insights/admin.php:127",
 			"screen": "admin",
@@ -1020,8 +1020,8 @@
 		},
 		"aw-si-crawl": {
 			"title": "Crawler access (weekly)",
-			"source": "AW SEO Plus",
-			"plugin": "AW SEO Plus",
+			"source": "RankWeb",
+			"plugin": "RankWeb",
 			"purpose": "SEO report",
 			"file": "seo/search-insights/admin.php:128",
 			"screen": "admin",
@@ -1130,8 +1130,8 @@
 		},
 		"term-faq": {
 			"title": "FAQ",
-			"source": "AW SEO Plus",
-			"plugin": "AW SEO Plus",
+			"source": "RankWeb",
+			"plugin": "RankWeb",
 			"purpose": "FAQ",
 			"file": "seo/faq.php (aw_faq_term_box)",
 			"screen": "term",
@@ -1191,12 +1191,12 @@
 		},
 		"ap-src-overview-features": {
 			"title": "Features (Waiting for a person, What the workers fetch, Rules, AI and workers, Reports, Settings, Elsewhere)",
-			"source": "AW Sourcing",
-			"plugin": "AW Sourcing",
+			"source": "SourceWeb",
+			"plugin": "SourceWeb",
 			"purpose": "Sourcing overview",
 			"file": "src/admin-menu.php:289 (aw_sourcing_overview_page)",
 			"screen": "admin",
-			"page": "AW Sourcing: Overview",
+			"page": "SourceWeb: Overview",
 			"types": [
 				"aw-sourcing-menu"
 			],
@@ -1223,12 +1223,12 @@
 		},
 		"ap-src-overview-runs": {
 			"title": "Last runs",
-			"source": "AW Sourcing",
-			"plugin": "AW Sourcing",
+			"source": "SourceWeb",
+			"plugin": "SourceWeb",
 			"purpose": "Workers status",
 			"file": "src/admin-menu.php:350 (aw_sourcing_overview_page)",
 			"screen": "admin",
-			"page": "AW Sourcing: Overview",
+			"page": "SourceWeb: Overview",
 			"types": [
 				"aw-sourcing-menu"
 			],
@@ -1245,12 +1245,12 @@
 		},
 		"ap-src-overview-commands": {
 			"title": "Commands (WP-CLI on the server)",
-			"source": "AW Sourcing",
-			"plugin": "AW Sourcing",
+			"source": "SourceWeb",
+			"plugin": "SourceWeb",
 			"purpose": "Command list",
 			"file": "src/admin-menu.php:370 (aw_sourcing_overview_page)",
 			"screen": "admin",
-			"page": "AW Sourcing: Overview",
+			"page": "SourceWeb: Overview",
 			"types": [
 				"aw-sourcing-menu"
 			],
@@ -1263,12 +1263,12 @@
 		},
 		"ap-src-review-list": {
 			"title": "To review list (AW_Sourcing_Review_Table)",
-			"source": "AW Sourcing",
-			"plugin": "AW Sourcing",
+			"source": "SourceWeb",
+			"plugin": "SourceWeb",
 			"purpose": "Review queue",
 			"file": "src/class-aw-sourcing-review-table.php:15 (AW_Sourcing_Review_Table), shown at src/review-queue.php:197",
 			"screen": "admin",
-			"page": "AW Sourcing: To review",
+			"page": "SourceWeb: To review",
 			"types": [
 				"aw-review"
 			],
@@ -1286,12 +1286,12 @@
 		},
 		"ap-src-review-notice": {
 			"title": "Result notice (published / moved to Drafts)",
-			"source": "AW Sourcing",
-			"plugin": "AW Sourcing",
+			"source": "SourceWeb",
+			"plugin": "SourceWeb",
 			"purpose": "Action result",
 			"file": "src/review-queue.php:180 (aw_review_page)",
 			"screen": "admin",
-			"page": "AW Sourcing: To review",
+			"page": "SourceWeb: To review",
 			"types": [
 				"aw-review"
 			],
@@ -1304,12 +1304,12 @@
 		},
 		"ap-src-enrich-progress": {
 			"title": "Progress line (listings checked, proposals waiting)",
-			"source": "AW Sourcing",
-			"plugin": "AW Sourcing",
+			"source": "SourceWeb",
+			"plugin": "SourceWeb",
 			"purpose": "Enrichment progress",
 			"file": "src/enrichment-admin.php:312 (aw_enrich_review_page)",
 			"screen": "admin",
-			"page": "AW Sourcing: Enrichment review",
+			"page": "SourceWeb: Enrichment review",
 			"types": [
 				"aw-enrich-review"
 			],
@@ -1326,12 +1326,12 @@
 		},
 		"ap-src-enrich-filters": {
 			"title": "Status views and filters (source, confidence, state, field, flag)",
-			"source": "AW Sourcing",
-			"plugin": "AW Sourcing",
+			"source": "SourceWeb",
+			"plugin": "SourceWeb",
 			"purpose": "Queue filters",
 			"file": "src/enrichment-admin.php:320 (aw_enrich_review_page)",
 			"screen": "admin",
-			"page": "AW Sourcing: Enrichment review",
+			"page": "SourceWeb: Enrichment review",
 			"types": [
 				"aw-enrich-review"
 			],
@@ -1347,12 +1347,12 @@
 		},
 		"ap-src-enrich-list": {
 			"title": "Proposals list (AW_Sourcing_Enrichment_Table)",
-			"source": "AW Sourcing",
-			"plugin": "AW Sourcing",
+			"source": "SourceWeb",
+			"plugin": "SourceWeb",
 			"purpose": "Enrichment proposals",
 			"file": "src/class-aw-sourcing-enrichment-table.php:18 (AW_Sourcing_Enrichment_Table), shown at src/enrichment-admin.php:384",
 			"screen": "admin",
-			"page": "AW Sourcing: Enrichment review",
+			"page": "SourceWeb: Enrichment review",
 			"types": [
 				"aw-enrich-review"
 			],
@@ -1368,12 +1368,12 @@
 		},
 		"ap-src-sources-list": {
 			"title": "Sources list (AW_Sourcing_Publishers_Table)",
-			"source": "AW Sourcing",
-			"plugin": "AW Sourcing",
+			"source": "SourceWeb",
+			"plugin": "SourceWeb",
 			"purpose": "Publisher list",
 			"file": "src/class-aw-sourcing-publishers-table.php:27 (AW_Sourcing_Publishers_Table), shown at src/source-sites.php:476",
 			"screen": "admin",
-			"page": "AW Sourcing: Sources",
+			"page": "SourceWeb: Sources",
 			"types": [
 				"aw-sourcing-sources"
 			],
@@ -1393,12 +1393,12 @@
 		},
 		"ap-src-sources-notices": {
 			"title": "Search value and relay notices",
-			"source": "AW Sourcing",
-			"plugin": "AW Sourcing",
+			"source": "SourceWeb",
+			"plugin": "SourceWeb",
 			"purpose": "Status notes",
 			"file": "src/source-sites.php:466 (aw_sourcing_sources_tab)",
 			"screen": "admin",
-			"page": "AW Sourcing: Sources",
+			"page": "SourceWeb: Sources",
 			"types": [
 				"aw-sourcing-sources"
 			],
@@ -1413,12 +1413,12 @@
 		},
 		"ap-src-sources-feeds": {
 			"title": "Feeds view (AW_Sourcing_Sources_Table)",
-			"source": "AW Sourcing",
-			"plugin": "AW Sourcing",
+			"source": "SourceWeb",
+			"plugin": "SourceWeb",
 			"purpose": "Feed list",
 			"file": "src/class-aw-sourcing-sources-table.php:18 (AW_Sourcing_Sources_Table), shown at src/source-sites.php:461",
 			"screen": "admin",
-			"page": "AW Sourcing: Sources",
+			"page": "SourceWeb: Sources",
 			"types": [
 				"aw-sourcing-sources"
 			],
@@ -1433,12 +1433,12 @@
 		},
 		"ap-src-sources-edit": {
 			"title": "Add New Source / Edit Source form",
-			"source": "AW Sourcing",
-			"plugin": "AW Sourcing",
+			"source": "SourceWeb",
+			"plugin": "SourceWeb",
 			"purpose": "Source edit",
 			"file": "src/source-sites.php:486 (aw_sourcing_source_form)",
 			"screen": "admin",
-			"page": "AW Sourcing: Sources",
+			"page": "SourceWeb: Sources",
 			"types": [
 				"aw-sourcing-sources"
 			],
@@ -1455,12 +1455,12 @@
 		},
 		"ap-src-kw-add": {
 			"title": "Add New Keyword",
-			"source": "AW Sourcing",
-			"plugin": "AW Sourcing",
+			"source": "SourceWeb",
+			"plugin": "SourceWeb",
 			"purpose": "Add keywords",
 			"file": "src/keywords-admin.php:497 (aw_sourcing_kw_tab)",
 			"screen": "admin",
-			"page": "AW Sourcing: Keywords",
+			"page": "SourceWeb: Keywords",
 			"types": [
 				"aw-sourcing-keywords"
 			],
@@ -1475,12 +1475,12 @@
 		},
 		"ap-src-kw-list": {
 			"title": "Keywords list (AW_Sourcing_Keywords_Table)",
-			"source": "AW Sourcing",
-			"plugin": "AW Sourcing",
+			"source": "SourceWeb",
+			"plugin": "SourceWeb",
 			"purpose": "Keyword list",
 			"file": "src/class-aw-sourcing-keywords-table.php:21 (AW_Sourcing_Keywords_Table), shown at src/keywords-admin.php:519",
 			"screen": "admin",
-			"page": "AW Sourcing: Keywords",
+			"page": "SourceWeb: Keywords",
 			"types": [
 				"aw-sourcing-keywords"
 			],
@@ -1496,12 +1496,12 @@
 		},
 		"ap-src-kw-test": {
 			"title": "Test a headline",
-			"source": "AW Sourcing",
-			"plugin": "AW Sourcing",
+			"source": "SourceWeb",
+			"plugin": "SourceWeb",
 			"purpose": "Relevance test",
 			"file": "src/keywords-admin.php:523 (aw_sourcing_kw_tab)",
 			"screen": "admin",
-			"page": "AW Sourcing: Keywords",
+			"page": "SourceWeb: Keywords",
 			"types": [
 				"aw-sourcing-keywords"
 			],
@@ -1517,12 +1517,12 @@
 		},
 		"ap-src-kw-suggestions": {
 			"title": "Suggestions from Search Insights (AW_Sourcing_Suggestions_Table)",
-			"source": "AW Sourcing",
-			"plugin": "AW Sourcing",
+			"source": "SourceWeb",
+			"plugin": "SourceWeb",
 			"purpose": "Keyword suggestions",
 			"file": "src/keyword-suggestions.php:191 (aw_sourcing_keywords_tab_end), table src/class-aw-sourcing-suggestions-table.php:13",
 			"screen": "admin",
-			"page": "AW Sourcing: Keywords",
+			"page": "SourceWeb: Keywords",
 			"types": [
 				"aw-sourcing-keywords"
 			],
@@ -1539,12 +1539,12 @@
 		},
 		"ap-src-rules-sections": {
 			"title": "Section rules (AW_Sourcing_Sections_Table)",
-			"source": "AW Sourcing",
-			"plugin": "AW Sourcing",
+			"source": "SourceWeb",
+			"plugin": "SourceWeb",
 			"purpose": "Section rules",
 			"file": "src/class-aw-sourcing-sections-table.php:16 (AW_Sourcing_Sections_Table), shown at src/rules-admin.php:123",
 			"screen": "admin",
-			"page": "AW Sourcing: Rules",
+			"page": "SourceWeb: Rules",
 			"types": [
 				"aw-sourcing-rules"
 			],
@@ -1561,12 +1561,12 @@
 		},
 		"ap-src-rules-tags": {
 			"title": "Tag rules (Add New Rule and list)",
-			"source": "AW Sourcing",
-			"plugin": "AW Sourcing",
+			"source": "SourceWeb",
+			"plugin": "SourceWeb",
 			"purpose": "Tag rules",
 			"file": "src/rules-admin.php:125 (aw_rules_tab), list src/rules-admin.php:187 (aw_rules_tag_table)",
 			"screen": "admin",
-			"page": "AW Sourcing: Rules",
+			"page": "SourceWeb: Rules",
 			"types": [
 				"aw-sourcing-rules"
 			],
@@ -1583,12 +1583,12 @@
 		},
 		"ap-src-rules-summary": {
 			"title": "Summary rules",
-			"source": "AW Sourcing",
-			"plugin": "AW Sourcing",
+			"source": "SourceWeb",
+			"plugin": "SourceWeb",
 			"purpose": "Summary rules",
 			"file": "src/summary-rules-admin.php:237 (aw_summary_rules_tab)",
 			"screen": "admin",
-			"page": "AW Sourcing: Rules",
+			"page": "SourceWeb: Rules",
 			"types": [
 				"aw-sourcing-rules"
 			],
@@ -1603,12 +1603,12 @@
 		},
 		"ap-src-rules-enrich-settings": {
 			"title": "Directory enrichment (sources, Google key, monthly cap)",
-			"source": "AW Sourcing",
-			"plugin": "AW Sourcing",
+			"source": "SourceWeb",
+			"plugin": "SourceWeb",
 			"purpose": "Enrichment settings",
 			"file": "src/enrichment-admin.php:449 (aw_enrich_settings_tab)",
 			"screen": "admin",
-			"page": "AW Sourcing: Rules",
+			"page": "SourceWeb: Rules",
 			"types": [
 				"aw-sourcing-rules"
 			],
@@ -1625,12 +1625,12 @@
 		},
 		"ap-src-rules-trust-order": {
 			"title": "Trust order",
-			"source": "AW Sourcing",
-			"plugin": "AW Sourcing",
+			"source": "SourceWeb",
+			"plugin": "SourceWeb",
 			"purpose": "Source priority",
 			"file": "src/rules-admin.php:399 (aw_rules_priority_form)",
 			"screen": "admin",
-			"page": "AW Sourcing: Rules",
+			"page": "SourceWeb: Rules",
 			"types": [
 				"aw-sourcing-rules"
 			],
@@ -1646,12 +1646,12 @@
 		},
 		"ap-src-rules-field-rules": {
 			"title": "Field rules table",
-			"source": "AW Sourcing",
-			"plugin": "AW Sourcing",
+			"source": "SourceWeb",
+			"plugin": "SourceWeb",
 			"purpose": "Field rules",
 			"file": "src/rules-admin.php:444 (aw_rules_field_rules_table)",
 			"screen": "admin",
-			"page": "AW Sourcing: Rules",
+			"page": "SourceWeb: Rules",
 			"types": [
 				"aw-sourcing-rules"
 			],
@@ -1667,12 +1667,12 @@
 		},
 		"ap-src-ai-keys-list": {
 			"title": "Keys (AW_Sourcing_AI_Keys_Table)",
-			"source": "AW Sourcing",
-			"plugin": "AW Sourcing",
+			"source": "SourceWeb",
+			"plugin": "SourceWeb",
 			"purpose": "AI keys",
 			"file": "src/class-aw-sourcing-ai-keys-table.php:18 (AW_Sourcing_AI_Keys_Table), shown at src/ai-keys.php:1069",
 			"screen": "admin",
-			"page": "AW Sourcing: AI models",
+			"page": "SourceWeb: AI models",
 			"types": [
 				"aw-sourcing-ai"
 			],
@@ -1690,12 +1690,12 @@
 		},
 		"ap-src-ai-key-form": {
 			"title": "Add New Key / Edit key",
-			"source": "AW Sourcing",
-			"plugin": "AW Sourcing",
+			"source": "SourceWeb",
+			"plugin": "SourceWeb",
 			"purpose": "AI key edit",
 			"file": "src/ai-keys.php:1109 (aw_ai_key_add_screen, aw_ai_key_edit_screen)",
 			"screen": "admin",
-			"page": "AW Sourcing: AI models",
+			"page": "SourceWeb: AI models",
 			"types": [
 				"aw-sourcing-ai"
 			],
@@ -1710,12 +1710,12 @@
 		},
 		"ap-src-ai-overview": {
 			"title": "Keys overview (keys, usable keys per worker)",
-			"source": "AW Sourcing",
-			"plugin": "AW Sourcing",
+			"source": "SourceWeb",
+			"plugin": "SourceWeb",
 			"purpose": "AI keys summary",
 			"file": "src/ai-keys.php:1078 (aw_ai_keys_overview_screen)",
 			"screen": "admin",
-			"page": "AW Sourcing: AI models",
+			"page": "SourceWeb: AI models",
 			"types": [
 				"aw-sourcing-ai"
 			],
@@ -1732,12 +1732,12 @@
 		},
 		"ap-src-workers-list": {
 			"title": "Workers (AW_Workers_Table)",
-			"source": "AW Sourcing",
-			"plugin": "AW Sourcing",
+			"source": "SourceWeb",
+			"plugin": "SourceWeb",
 			"purpose": "Workflow list",
 			"file": "src/class-aw-workers-table.php:17 (AW_Workers_Table), shown at src/workers-admin.php:91",
 			"screen": "admin",
-			"page": "AW Sourcing: Workers",
+			"page": "SourceWeb: Workers",
 			"types": [
 				"aw-sourcing-workers"
 			],
@@ -1755,12 +1755,12 @@
 		},
 		"ap-src-workers-runlog": {
 			"title": "Run now log",
-			"source": "AW Sourcing",
-			"plugin": "AW Sourcing",
+			"source": "SourceWeb",
+			"plugin": "SourceWeb",
 			"purpose": "Dispatch log",
 			"file": "src/workers-admin.php:94 (aw_workers_tab)",
 			"screen": "admin",
-			"page": "AW Sourcing: Workers",
+			"page": "SourceWeb: Workers",
 			"types": [
 				"aw-sourcing-workers"
 			],
@@ -1775,12 +1775,12 @@
 		},
 		"ap-src-workers-runs": {
 			"title": "Runs: one worker",
-			"source": "AW Sourcing",
-			"plugin": "AW Sourcing",
+			"source": "SourceWeb",
+			"plugin": "SourceWeb",
 			"purpose": "Run history",
 			"file": "src/workers-admin.php:109 (aw_workers_runs_screen)",
 			"screen": "admin",
-			"page": "AW Sourcing: Workers",
+			"page": "SourceWeb: Workers",
 			"types": [
 				"aw-sourcing-workers"
 			],
@@ -1795,12 +1795,12 @@
 		},
 		"ap-src-workers-notices": {
 			"title": "Run now and token notices",
-			"source": "AW Sourcing",
-			"plugin": "AW Sourcing",
+			"source": "SourceWeb",
+			"plugin": "SourceWeb",
 			"purpose": "Status notes",
 			"file": "src/workers-admin.php:79 (aw_workers_tab)",
 			"screen": "admin",
-			"page": "AW Sourcing: Workers",
+			"page": "SourceWeb: Workers",
 			"types": [
 				"aw-sourcing-workers"
 			],
@@ -1815,12 +1815,12 @@
 		},
 		"ap-src-rejected": {
 			"title": "Rejected",
-			"source": "AW Sourcing",
-			"plugin": "AW Sourcing",
+			"source": "SourceWeb",
+			"plugin": "SourceWeb",
 			"purpose": "Relevance log",
 			"file": "src/relevance.php:426 (aw_relevance_rejected_tab)",
 			"screen": "admin",
-			"page": "AW Sourcing: Reports (Rejected, Relay log, Change log)",
+			"page": "SourceWeb: Reports (Rejected, Relay log, Change log)",
 			"types": [
 				"aw-sourcing-reports"
 			],
@@ -1835,12 +1835,12 @@
 		},
 		"ap-src-relay-log": {
 			"title": "Relay log",
-			"source": "AW Sourcing",
-			"plugin": "AW Sourcing",
+			"source": "SourceWeb",
+			"plugin": "SourceWeb",
 			"purpose": "Relay requests",
 			"file": "src/relay.php:259 (aw_relay_log_view)",
 			"screen": "admin",
-			"page": "AW Sourcing: Reports (Rejected, Relay log, Change log)",
+			"page": "SourceWeb: Reports (Rejected, Relay log, Change log)",
 			"types": [
 				"aw-sourcing-reports"
 			],
@@ -1855,12 +1855,12 @@
 		},
 		"ap-src-change-log": {
 			"title": "Change log",
-			"source": "AW Sourcing",
-			"plugin": "AW Sourcing",
+			"source": "SourceWeb",
+			"plugin": "SourceWeb",
 			"purpose": "Change history",
 			"file": "src/sourcing-policy.php:645 (aw_sourcing_page)",
 			"screen": "admin",
-			"page": "AW Sourcing: Reports (Rejected, Relay log, Change log)",
+			"page": "SourceWeb: Reports (Rejected, Relay log, Change log)",
 			"types": [
 				"aw-sourcing-reports"
 			],
@@ -1875,12 +1875,12 @@
 		},
 		"ap-src-settings-switch": {
 			"title": "Workers use these lists (switch)",
-			"source": "AW Sourcing",
-			"plugin": "AW Sourcing",
+			"source": "SourceWeb",
+			"plugin": "SourceWeb",
 			"purpose": "Workers switch",
 			"file": "src/sourcing-lists.php:121 (aw_sources_live_switch)",
 			"screen": "admin",
-			"page": "AW Sourcing: Settings",
+			"page": "SourceWeb: Settings",
 			"types": [
 				"aw-sourcing-settings"
 			],
@@ -1895,8 +1895,8 @@
 		},
 		"ap-src-si-sourcing-keywords": {
 			"title": "Sourcing keywords (AW_Sourcing_SI_Keywords_Table)",
-			"source": "AW Sourcing",
-			"plugin": "AW Sourcing",
+			"source": "SourceWeb",
+			"plugin": "SourceWeb",
 			"purpose": "Search value",
 			"file": "src/search-insights-tab.php:23 (aw_si_tab_sourcing), table src/class-aw-sourcing-si-keywords-table.php:14",
 			"screen": "admin",
@@ -1914,16 +1914,16 @@
 			],
 			"limits": "Items over 30 days per Google News search; page figures for 28 days and 3 months",
 			"decision": "",
-			"notes": "Tab added to Search Insights by AW Sourcing. Stores nothing."
+			"notes": "Tab added to Search Insights by SourceWeb. Stores nothing."
 		},
 		"ap-src-notice-ingest": {
 			"title": "Ingestion needs attention",
-			"source": "AW Sourcing",
-			"plugin": "AW Sourcing",
+			"source": "SourceWeb",
+			"plugin": "SourceWeb",
 			"purpose": "Ingest watchdog",
 			"file": "src/relevance.php:585 (admin_notices)",
 			"screen": "admin",
-			"page": "AW Sourcing: Notices (admin pages)",
+			"page": "SourceWeb: Notices (admin pages)",
 			"types": [
 				"aw-sourcing-notices"
 			],
@@ -1938,12 +1938,12 @@
 		},
 		"ap-src-notice-relevance": {
 			"title": "Relevance check could not run",
-			"source": "AW Sourcing",
-			"plugin": "AW Sourcing",
+			"source": "SourceWeb",
+			"plugin": "SourceWeb",
 			"purpose": "Relevance alert",
 			"file": "src/relevance.php:436 (admin_notices)",
 			"screen": "admin",
-			"page": "AW Sourcing: Notices (admin pages)",
+			"page": "SourceWeb: Notices (admin pages)",
 			"types": [
 				"aw-sourcing-notices"
 			],
@@ -1958,12 +1958,12 @@
 		},
 		"ap-src-notice-workers": {
 			"title": "Workers need attention",
-			"source": "AW Sourcing",
-			"plugin": "AW Sourcing",
+			"source": "SourceWeb",
+			"plugin": "SourceWeb",
 			"purpose": "Workers alert",
 			"file": "src/workers.php:411 (admin_notices)",
 			"screen": "admin",
-			"page": "AW Sourcing: Notices (admin pages)",
+			"page": "SourceWeb: Notices (admin pages)",
 			"types": [
 				"aw-sourcing-notices"
 			],
@@ -1979,12 +1979,12 @@
 		},
 		"ap-src-notice-blocked": {
 			"title": "Blocked publisher notice",
-			"source": "AW Sourcing",
-			"plugin": "AW Sourcing",
+			"source": "SourceWeb",
+			"plugin": "SourceWeb",
 			"purpose": "Action result",
 			"file": "src/sourcing-policy.php:593 (admin_notices)",
 			"screen": "admin",
-			"page": "AW Sourcing: Notices (admin pages)",
+			"page": "SourceWeb: Notices (admin pages)",
 			"types": [
 				"aw-sourcing-notices"
 			],
@@ -1997,12 +1997,12 @@
 		},
 		"ap-seo-overview-modules": {
 			"title": "Modules",
-			"source": "AW SEO Plus",
-			"plugin": "AW SEO Plus",
+			"source": "RankWeb",
+			"plugin": "RankWeb",
 			"purpose": "SEO overview",
 			"file": "seo/overview.php:213 (aw_seo_overview_page)",
 			"screen": "admin",
-			"page": "AW SEO Plus: Overview",
+			"page": "RankWeb: Overview",
 			"types": [
 				"aw-seo-plus"
 			],
@@ -2019,12 +2019,12 @@
 		},
 		"ap-seo-overview-boxes": {
 			"title": "On edit screens",
-			"source": "AW SEO Plus",
-			"plugin": "AW SEO Plus",
+			"source": "RankWeb",
+			"plugin": "RankWeb",
 			"purpose": "SEO overview",
 			"file": "seo/overview.php:226 (aw_seo_overview_page)",
 			"screen": "admin",
-			"page": "AW SEO Plus: Overview",
+			"page": "RankWeb: Overview",
 			"types": [
 				"aw-seo-plus"
 			],
@@ -2037,12 +2037,12 @@
 		},
 		"ap-seo-overview-commands": {
 			"title": "Commands (WP-CLI on the server)",
-			"source": "AW SEO Plus",
-			"plugin": "AW SEO Plus",
+			"source": "RankWeb",
+			"plugin": "RankWeb",
 			"purpose": "SEO overview",
 			"file": "seo/overview.php:250 (aw_seo_overview_page)",
 			"screen": "admin",
-			"page": "AW SEO Plus: Overview",
+			"page": "RankWeb: Overview",
 			"types": [
 				"aw-seo-plus"
 			],
@@ -2055,12 +2055,12 @@
 		},
 		"ap-seo-settings": {
 			"title": "Settings (seven tabs)",
-			"source": "AW SEO Plus",
-			"plugin": "AW SEO Plus",
+			"source": "RankWeb",
+			"plugin": "RankWeb",
 			"purpose": "SEO settings",
 			"file": "seo/settings.php:512 (aw_seo_settings_page)",
 			"screen": "admin",
-			"page": "AW SEO Plus: Settings",
+			"page": "RankWeb: Settings",
 			"types": [
 				"aw-seo-settings"
 			],
@@ -2075,12 +2075,12 @@
 		},
 		"ap-seo-faq-types": {
 			"title": "FAQ box on",
-			"source": "AW SEO Plus",
-			"plugin": "AW SEO Plus",
+			"source": "RankWeb",
+			"plugin": "RankWeb",
 			"purpose": "FAQ",
 			"file": "seo/faq-overview.php:170 (aw_faq_types_form)",
 			"screen": "admin",
-			"page": "AW SEO Plus: FAQ",
+			"page": "RankWeb: FAQ",
 			"types": [
 				"aw-faq"
 			],
@@ -2095,12 +2095,12 @@
 		},
 		"ap-seo-faq-list": {
 			"title": "Pages with an FAQ",
-			"source": "AW SEO Plus",
-			"plugin": "AW SEO Plus",
+			"source": "RankWeb",
+			"plugin": "RankWeb",
 			"purpose": "FAQ",
 			"file": "seo/faq-overview.php:232 (AW_FAQ_List_Table, class-aw-faq-list-table.php)",
 			"screen": "admin",
-			"page": "AW SEO Plus: FAQ",
+			"page": "RankWeb: FAQ",
 			"types": [
 				"aw-faq"
 			],
@@ -2116,12 +2116,12 @@
 		},
 		"ap-seo-faq-counts": {
 			"title": "Counts",
-			"source": "AW SEO Plus",
-			"plugin": "AW SEO Plus",
+			"source": "RankWeb",
+			"plugin": "RankWeb",
 			"purpose": "FAQ",
 			"file": "seo/faq-overview.php:242 (aw_faq_admin_page)",
 			"screen": "admin",
-			"page": "AW SEO Plus: FAQ",
+			"page": "RankWeb: FAQ",
 			"types": [
 				"aw-faq"
 			],
@@ -2136,8 +2136,8 @@
 		},
 		"ap-seo-si-keywords": {
 			"title": "Keywords",
-			"source": "AW SEO Plus",
-			"plugin": "AW SEO Plus",
+			"source": "RankWeb",
+			"plugin": "RankWeb",
 			"purpose": "SEO report",
 			"file": "seo/search-insights/admin.php:241 (AW_SI_Keywords_Table)",
 			"screen": "admin",
@@ -2159,8 +2159,8 @@
 		},
 		"ap-seo-si-rising": {
 			"title": "Rising terms",
-			"source": "AW SEO Plus",
-			"plugin": "AW SEO Plus",
+			"source": "RankWeb",
+			"plugin": "RankWeb",
 			"purpose": "SEO report",
 			"file": "seo/search-insights/rising.php:728 (aw_si_rising_tab, AW_SI_Rising_Table)",
 			"screen": "admin",
@@ -2182,8 +2182,8 @@
 		},
 		"ap-seo-si-rising-paste": {
 			"title": "Paste Trends figures",
-			"source": "AW SEO Plus",
-			"plugin": "AW SEO Plus",
+			"source": "RankWeb",
+			"plugin": "RankWeb",
 			"purpose": "SEO report",
 			"file": "seo/search-insights/rising.php:745 (aw_si_rising_tab)",
 			"screen": "admin",
@@ -2202,8 +2202,8 @@
 		},
 		"ap-seo-si-pages": {
 			"title": "Pages",
-			"source": "AW SEO Plus",
-			"plugin": "AW SEO Plus",
+			"source": "RankWeb",
+			"plugin": "RankWeb",
 			"purpose": "SEO report",
 			"file": "seo/search-insights/pages.php:144 (AW_SI_Pages_Table)",
 			"screen": "admin",
@@ -2224,8 +2224,8 @@
 		},
 		"ap-seo-si-clarity-note": {
 			"title": "Clarity note",
-			"source": "AW SEO Plus",
-			"plugin": "AW SEO Plus",
+			"source": "RankWeb",
+			"plugin": "RankWeb",
 			"purpose": "SEO report",
 			"file": "seo/search-insights/pages.php:134 (aw_si_clarity_note_save, clarity.php:261)",
 			"screen": "admin",
@@ -2244,8 +2244,8 @@
 		},
 		"ap-seo-si-live-check": {
 			"title": "Live Google check / Monthly live check",
-			"source": "AW SEO Plus",
-			"plugin": "AW SEO Plus",
+			"source": "RankWeb",
+			"plugin": "RankWeb",
 			"purpose": "SEO report",
 			"file": "seo/search-insights/checklist.php:302, :368",
 			"screen": "admin",
@@ -2266,8 +2266,8 @@
 		},
 		"ap-seo-si-checklist": {
 			"title": "Check list",
-			"source": "AW SEO Plus",
-			"plugin": "AW SEO Plus",
+			"source": "RankWeb",
+			"plugin": "RankWeb",
 			"purpose": "SEO report",
 			"file": "seo/search-insights/checklist.php:390 (AW_SI_Checklist_Table)",
 			"screen": "admin",
@@ -2288,8 +2288,8 @@
 		},
 		"ap-seo-si-links": {
 			"title": "Links to us",
-			"source": "AW SEO Plus",
-			"plugin": "AW SEO Plus",
+			"source": "RankWeb",
+			"plugin": "RankWeb",
 			"purpose": "SEO report",
 			"file": "seo/search-insights/links.php:188 (aw_si_links_tab, AW_SI_Links_Table)",
 			"screen": "admin",
@@ -2309,8 +2309,8 @@
 		},
 		"ap-seo-si-settings": {
 			"title": "Schedule, keys, seed, run now",
-			"source": "AW SEO Plus",
-			"plugin": "AW SEO Plus",
+			"source": "RankWeb",
+			"plugin": "RankWeb",
 			"purpose": "SEO report",
 			"file": "seo/search-insights/admin.php:523 (aw_si_settings_tab)",
 			"screen": "admin",
@@ -2331,8 +2331,8 @@
 		},
 		"ap-seo-si-imports": {
 			"title": "Imports",
-			"source": "AW SEO Plus",
-			"plugin": "AW SEO Plus",
+			"source": "RankWeb",
+			"plugin": "RankWeb",
 			"purpose": "SEO report",
 			"file": "seo/search-insights/imports.php:209 (aw_si_import_rows)",
 			"screen": "admin",
@@ -2352,8 +2352,8 @@
 		},
 		"ap-seo-si-delete": {
 			"title": "Delete Search Insights data",
-			"source": "AW SEO Plus",
-			"plugin": "AW SEO Plus",
+			"source": "RankWeb",
+			"plugin": "RankWeb",
 			"purpose": "SEO report",
 			"file": "seo/search-insights/admin.php:562 (aw_si_settings_tab)",
 			"screen": "admin",
@@ -2700,12 +2700,12 @@
 		},
 		"ap-mail-inbox": {
 			"title": "Inbox (mailbox picker and message list)",
-			"source": "Mailweb",
-			"plugin": "Mailweb",
+			"source": "MailWeb",
+			"plugin": "MailWeb",
 			"purpose": "Mail",
 			"file": "plugins/mailweb/includes/inbox.php:354 (mailweb_inbox_page, Mailweb_List_Table)",
 			"screen": "admin",
-			"page": "Mailweb: Inbox",
+			"page": "MailWeb: Inbox",
 			"types": [
 				"mailweb"
 			],
@@ -2722,12 +2722,12 @@
 		},
 		"ap-mail-message": {
 			"title": "Message (Attachments, Reply, Message boxes)",
-			"source": "Mailweb",
-			"plugin": "Mailweb",
+			"source": "MailWeb",
+			"plugin": "MailWeb",
 			"purpose": "Mail",
 			"file": "plugins/mailweb/includes/inbox.php:405 (mailweb_inbox_page)",
 			"screen": "admin",
-			"page": "Mailweb: Inbox",
+			"page": "MailWeb: Inbox",
 			"types": [
 				"mailweb"
 			],
@@ -2742,12 +2742,12 @@
 		},
 		"ap-mail-compose": {
 			"title": "Write, reply, forward (Send, Attachments boxes)",
-			"source": "Mailweb",
-			"plugin": "Mailweb",
+			"source": "MailWeb",
+			"plugin": "MailWeb",
 			"purpose": "Mail",
 			"file": "plugins/mailweb/includes/inbox.php:510 (mailweb_inbox_page)",
 			"screen": "admin",
-			"page": "Mailweb: Inbox",
+			"page": "MailWeb: Inbox",
 			"types": [
 				"mailweb"
 			],
@@ -2765,12 +2765,12 @@
 		},
 		"ap-mail-overview": {
 			"title": "Features",
-			"source": "Mailweb",
-			"plugin": "Mailweb",
+			"source": "MailWeb",
+			"plugin": "MailWeb",
 			"purpose": "Mail overview",
 			"file": "plugins/mailweb/includes/home.php:123 (mailweb_home_page)",
 			"screen": "admin",
-			"page": "Mailweb: Overview",
+			"page": "MailWeb: Overview",
 			"types": [
 				"mailweb-overview"
 			],
@@ -2787,12 +2787,12 @@
 		},
 		"ap-mail-incoming": {
 			"title": "Incoming mail",
-			"source": "Mailweb",
-			"plugin": "Mailweb",
+			"source": "MailWeb",
+			"plugin": "MailWeb",
 			"purpose": "Mail settings",
 			"file": "plugins/mailweb/includes/mail-in.php:232 (mailweb_in_screen)",
 			"screen": "admin",
-			"page": "Mailweb: Settings (incoming mail, mailboxes, profiles)",
+			"page": "MailWeb: Settings (incoming mail, mailboxes, profiles)",
 			"types": [
 				"mailweb-settings"
 			],
@@ -2809,12 +2809,12 @@
 		},
 		"ap-mail-mailboxes": {
 			"title": "Mailboxes and aliases",
-			"source": "Mailweb",
-			"plugin": "Mailweb",
+			"source": "MailWeb",
+			"plugin": "MailWeb",
 			"purpose": "Mail settings",
 			"file": "plugins/mailweb/includes/mailboxes.php:72",
 			"screen": "admin",
-			"page": "Mailweb: Settings (incoming mail, mailboxes, profiles)",
+			"page": "MailWeb: Settings (incoming mail, mailboxes, profiles)",
 			"types": [
 				"mailweb-settings"
 			],
@@ -2831,12 +2831,12 @@
 		},
 		"ap-mail-profiles": {
 			"title": "Profiles",
-			"source": "Mailweb",
-			"plugin": "Mailweb",
+			"source": "MailWeb",
+			"plugin": "MailWeb",
 			"purpose": "Mail settings",
 			"file": "plugins/mailweb/includes/profiles.php:164",
 			"screen": "admin",
-			"page": "Mailweb: Settings (incoming mail, mailboxes, profiles)",
+			"page": "MailWeb: Settings (incoming mail, mailboxes, profiles)",
 			"types": [
 				"mailweb-settings"
 			],
@@ -2851,12 +2851,12 @@
 		},
 		"ap-mail-crm": {
 			"title": "FluentCRM",
-			"source": "Mailweb",
-			"plugin": "Mailweb",
+			"source": "MailWeb",
+			"plugin": "MailWeb",
 			"purpose": "Mail settings",
 			"file": "plugins/mailweb/includes/crm-sync.php:314",
 			"screen": "admin",
-			"page": "Mailweb: Settings (incoming mail, mailboxes, profiles)",
+			"page": "MailWeb: Settings (incoming mail, mailboxes, profiles)",
 			"types": [
 				"mailweb-settings"
 			],
@@ -2872,12 +2872,12 @@
 		},
 		"ap-mail-smtp": {
 			"title": "Site sending (SMTP)",
-			"source": "Mailweb",
-			"plugin": "Mailweb",
+			"source": "MailWeb",
+			"plugin": "MailWeb",
 			"purpose": "Mail settings",
 			"file": "plugins/mailweb/includes/smtp.php:66 (mailweb_smtp_screen)",
 			"screen": "admin",
-			"page": "Mailweb: Settings (site sending)",
+			"page": "MailWeb: Settings (site sending)",
 			"types": [
 				"mailweb-settings-sending"
 			],
@@ -2892,12 +2892,12 @@
 		},
 		"ap-mail-cap": {
 			"title": "Daily sending limit",
-			"source": "Mailweb",
-			"plugin": "Mailweb",
+			"source": "MailWeb",
+			"plugin": "MailWeb",
 			"purpose": "Mail settings",
 			"file": "plugins/mailweb/includes/mail-cap.php:384",
 			"screen": "admin",
-			"page": "Mailweb: Settings (site sending)",
+			"page": "MailWeb: Settings (site sending)",
 			"types": [
 				"mailweb-settings-sending"
 			],
