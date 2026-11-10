@@ -102,6 +102,7 @@ function aw_form_page_listing() {
 
 /** Which item the page is about: its name (linked back to it) and, for a listing, its place; otherwise its type. */
 function aw_form_page_for( $listing ) {
+	aw_use_component_style( 'aw-forms' ); // aw-form-for
 	$place = 'aw_listing' !== $listing->post_type ? ( AW_REPORT_TYPES[ $listing->post_type ] ?? '' ) : ( function_exists( 'aw_listing_place' ) ? implode( ', ', array_filter( array_reverse( aw_listing_place( $listing->ID ) ) ) ) : '' );
 	return '<p class="aw-form-for"><a href="' . esc_url( get_permalink( $listing ) ) . '">' . esc_html( get_the_title( $listing ) ) . '</a>'
 		. ( '' !== $place ? '<span>' . esc_html( $place ) . '</span>' : '' ) . '</p>';
@@ -227,6 +228,9 @@ add_shortcode(
 		$more = 'newsletter' === $form && $full && defined( 'FLUENTFORM' )
 			? '<section class="aw-thanks-more"><h2 class="has-large-font-size">Choose your topics (optional)</h2><div class="kit-form aw-form-ff aw-newsletter-full-form" data-kit-form="newsletter_full">' . do_shortcode( '[fluentform id="' . $full . '"]' ) . '</div></section>'
 			: '';
+		if ( '' !== $more ) {
+			aw_use_component_style( 'aw-forms' ); // the full newsletter form carries aw-form-ff
+		}
 		// The heading and its line are the head band (aw_thanks_head()); the page keeps the analytics marker only.
 		return '<div class="aw-thanks" data-kit-thanks="' . esc_attr( $forms[ $form ][0] ) . '" hidden></div>' . $more
 			. ( $links ? '<p class="aw-thanks-links">' . $links . '</p>' : '' );

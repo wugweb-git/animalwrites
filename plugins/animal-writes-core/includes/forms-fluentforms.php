@@ -236,6 +236,7 @@ function aw_ff_form( $key, $ctx = array() ) {
 	if ( ! $id ) {
 		return aw_ff_missing( AW_FF_FORMS[ $key ]['title'] ?? $key, 'wp aw ff-form ' . $key . ' <form ID>' );
 	}
+	aw_use_component_style( 'aw-forms' ); // the kit-form aw-form-ff wrapper
 	$GLOBALS['aw_ff_ctx'] = (array) $ctx + array( 'key' => $key );
 	$form                 = do_shortcode( '[fluentform id="' . $id . '"]' );
 	$GLOBALS['aw_ff_ctx'] = array();

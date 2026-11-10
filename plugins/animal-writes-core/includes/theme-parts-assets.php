@@ -72,6 +72,9 @@ function aw_component_style_files(): array {
 			'file' => 'assets/css/aw-single.css',
 			'when' => fn() => is_singular( array( 'post', 'aw_news', 'aw_legal', 'aw_listing', 'aw_opportunity' ) ),
 		),
+		'aw-forms' => array( // Fluent Forms skin of the site's own forms (aw_ff_form()) and the form-for line; the newsletter keeps its skin in aw.css.
+			'file' => 'assets/css/aw-forms.css',
+		),
 	);
 }
 
