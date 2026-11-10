@@ -87,8 +87,8 @@ done
 # has NAME FILE PATTERN: an ok/FAIL line for a fixed-string match in a fetched page.
 has() { if grep -qF -- "$3" "$2"; then echo "ok   $1"; else echo "FAIL $1"; FAIL=1; fi; }
 curl -s -o /tmp/home.html http://127.0.0.1:8080/
-# The component stylesheet comes from the plugin's copy, not a theme folder.
-if grep -oE "<link[^>]*id=['\"]aw-components-css['\"][^>]*>" /tmp/home.html | grep -qF '/wp-content/plugins/animal-writes-core/theme/assets/css/aw.css'; then
+# The component stylesheet comes from the plugin's copy (aw.min.css, or aw.css when the min file is missing), not a theme folder.
+if grep -oE "<link[^>]*id=['\"]aw-components-css['\"][^>]*>" /tmp/home.html | grep -qE '/wp-content/plugins/animal-writes-core/theme/assets/css/aw(\.min)?\.css'; then
   echo "ok   aw-components-css from the plugin (no child)"
 else
   echo "FAIL aw-components-css from the plugin (no child)"; FAIL=1
