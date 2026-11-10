@@ -266,9 +266,9 @@ button.kit-dd-btn { font: inherit; font-size: var(--fluid-body-sm); }
 .kit-btn, .wp-block-button__link, .wp-element-button, .kit-form button[type=submit], .kit-finder button, .kit-print button {
 	display: inline-flex; align-items: center; justify-content: center; gap: var(--kit-btn-gap);
 	box-sizing: border-box; min-height: var(--kit-btn-height); padding: 0 var(--kit-btn-pad);
-	border: var(--kit-border-control) solid var(--_line); border-radius: var(--kit-radius-pill);
+	border: var(--kit-border-control) solid var(--_line); border-radius: var(--kit-btn-radius, var(--kit-radius-pill));
 	background: var(--_bg); color: var(--_fg);
-	font: inherit; font-size: var(--fluid-body-md); font-weight: var(--kit-weight-medium); line-height: 1.2;
+	font: inherit; font-size: var(--fluid-body-md); font-weight: var(--kit-btn-weight, var(--kit-weight-medium)); line-height: 1.2;
 	text-align: center; text-decoration: none; cursor: pointer;
 	transition: background-color var(--kit-motion-fast) var(--kit-motion-ease), color var(--kit-motion-fast) var(--kit-motion-ease),
 		border-color var(--kit-motion-fast) var(--kit-motion-ease), transform var(--kit-motion-fast) var(--kit-motion-ease);

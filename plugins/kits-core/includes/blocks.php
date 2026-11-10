@@ -10,6 +10,14 @@
  *     Styles > Blocks > Group > Section > Padding bottom   -> --kit-space-section-end (their bottom side)
  *   While a value is the theme default (the Section preset), nothing is printed and the tokens keep their 48 / 70 / 96
  *   steps at 768 and 1200 (--kit-space-section-base, kit-tokens.css). A value set in Styles is one value at every width.
+ * - Buttons: every button on the site (the core Button block and the .kit-btn links PHP prints) is one system that reads
+ *   --kit-btn-* tokens (kit-primitives.css), so the Button settings in Styles reach them all:
+ *     Styles > Blocks > Button > Colour (background, text)       -> --kit-btn-primary-bg / -fg (and their hover)
+ *     Styles > Blocks > Button > Border > Radius                 -> --kit-btn-radius
+ *     Styles > Blocks > Button > Typography > Font weight        -> --kit-btn-weight
+ *     Styles > Blocks > Button > Dimensions > Padding (left)     -> --kit-btn-pad (both sides)
+ *     Styles > Blocks > Button > Secondary / Ghost / Brand style -> --kit-btn-secondary-* / -ghost-* / -brand-*
+ *   The Button block's settings are the same as Styles > Elements > Button; either place can be used.
  *
  * @package kits-core
  */
@@ -72,6 +80,15 @@ function kits_style_value_css( $value ) {
  * @return string CSS, or ''.
  */
 function kits_style_tokens_css() {
+	$btn  = function ( array $path ) {
+		return wp_get_global_styles( array_merge( array( 'elements', 'button' ), $path ) );
+	};
+	$var  = function ( $slug, array $path ) {
+		return wp_get_global_styles( array_merge( array( 'variations', $slug ), $path ), array( 'block_name' => 'core/button' ) );
+	};
+	$hover = function ( $css ) {
+		return 'color-mix(in srgb, ' . $css . ' var(--kit-btn-hover-mix), var(--kit-color-ink))';
+	};
 	$map = array(
 		'--kit-hero-h'            => array(
 			'value'   => wp_get_global_styles( array( 'dimensions', 'minHeight' ), array( 'block_name' => 'kits/hero' ) ),
@@ -85,6 +102,56 @@ function kits_style_tokens_css() {
 			'value'   => wp_get_global_styles( array( 'variations', 'kits-section', 'spacing', 'padding', 'bottom' ), array( 'block_name' => 'core/group' ) ),
 			'default' => array( 'var(--wp--preset--spacing--section)', 'var(--kit-space-section-base)' ),
 		),
+		'--kit-btn-primary-bg'    => array(
+			'value'   => $btn( array( 'color', 'background' ) ),
+			'default' => array( 'var(--wp--preset--color--secondary)', 'var(--kit-btn-primary-bg)' ),
+			'also'    => array( '--kit-btn-primary-bg-hover' => $hover ),
+		),
+		'--kit-btn-primary-fg'    => array(
+			'value'   => $btn( array( 'color', 'text' ) ),
+			'default' => array( 'var(--wp--preset--color--on-ink)', 'var(--kit-btn-primary-fg)' ),
+			'also'    => array( '--kit-btn-primary-fg-hover' => null ),
+		),
+		'--kit-btn-radius'        => array(
+			'value'   => $btn( array( 'border', 'radius' ) ),
+			'default' => array( 'var(--wp--preset--border-radius--pill)', 'var(--kit-radius-pill)' ),
+		),
+		'--kit-btn-weight'        => array(
+			'value'   => $btn( array( 'typography', 'fontWeight' ) ),
+			'default' => array( '500', 'var(--kit-weight-medium)' ),
+		),
+		'--kit-btn-pad'           => array(
+			'value'   => $btn( array( 'spacing', 'padding', 'left' ) ),
+			'default' => array( 'var(--wp--preset--spacing--50)', 'var(--kit-btn-pad)' ),
+		),
+		'--kit-btn-secondary-bg'  => array(
+			'value'   => $var( 'kits-secondary', array( 'color', 'background' ) ),
+			'default' => array( 'var(--kit-btn-secondary-bg)' ),
+		),
+		'--kit-btn-secondary-fg'  => array(
+			'value'   => $var( 'kits-secondary', array( 'color', 'text' ) ),
+			'default' => array( 'var(--kit-btn-secondary-fg)' ),
+		),
+		'--kit-btn-secondary-line' => array(
+			'value'   => $var( 'kits-secondary', array( 'border', 'color' ) ),
+			'default' => array( 'var(--kit-btn-secondary-line)' ),
+		),
+		'--kit-btn-ghost-fg'      => array(
+			'value'   => $var( 'kits-ghost', array( 'color', 'text' ) ),
+			'default' => array( 'var(--kit-btn-ghost-fg)' ),
+		),
+		'--kit-btn-ghost-line'    => array(
+			'value'   => $var( 'kits-ghost', array( 'border', 'color' ) ),
+			'default' => array( 'var(--kit-btn-ghost-line)' ),
+		),
+		'--kit-btn-brand-bg'      => array(
+			'value'   => $var( 'kits-brand', array( 'color', 'background' ) ),
+			'default' => array( 'var(--kit-btn-brand-bg)' ),
+		),
+		'--kit-btn-brand-fg'      => array(
+			'value'   => $var( 'kits-brand', array( 'color', 'text' ) ),
+			'default' => array( 'var(--kit-btn-brand-fg)' ),
+		),
 	);
 	$out = '';
 	foreach ( $map as $token => $row ) {
@@ -94,6 +161,10 @@ function kits_style_tokens_css() {
 		$self = (bool) preg_match( '/(' . implode( '|', array_map( 'preg_quote', array_keys( $map ) ) ) . ')(?![\w-])/', $css );
 		if ( '' !== $css && ! in_array( $css, $row['default'], true ) && ! $self ) {
 			$out .= $token . ':' . $css . ';';
+			// Tokens that follow this one (a button's hover colour): derived from the value, or the same value.
+			foreach ( isset( $row['also'] ) ? $row['also'] : array() as $also => $derive ) {
+				$out .= $also . ':' . ( $derive ? $derive( $css ) : $css ) . ';';
+			}
 		}
 	}
 	return '' !== $out ? ':root{' . $out . '}' : '';

@@ -744,9 +744,13 @@ html.has-modal-open .kit-sticky-help { display: none !important; }
    tools/ci/footer_check.py). Own surface and a top rule so the sticky header reads as separate; the same grid line as
    the header logo. */
 .kit-footer { --kit-footer-bg: color-mix(in srgb, var(--neutral-8) 45%, var(--neutral-9)); --kit-footer-muted: color-mix(in srgb, var(--kit-color-on-ink) 72%, transparent); --kit-footer-dim: color-mix(in srgb, var(--kit-color-on-ink) 56%, transparent); --kit-footer-rule: color-mix(in srgb, var(--kit-color-on-ink) 14%, transparent); font-size: var(--kit-type-sm); }
-.kit-site-footer.kit-footer { display: flex; flex-direction: column; background: var(--kit-footer-bg) !important; border-top: var(--kit-border-width) solid color-mix(in srgb, var(--kit-color-on-ink) 22%, transparent); padding: var(--kit-space-7) var(--kit-space-4) var(--kit-space-4) !important; }
-@media (min-width: 768px) { .kit-site-footer.kit-footer { padding-inline: var(--kit-space-6) !important; } }
-@media (min-width: 1200px) { .kit-site-footer.kit-footer { padding-inline: var(--kit-space-gutter) !important; } } /* same edge as the header and the page sections */
+.kit-site-footer.kit-footer { display: flex; flex-direction: column; border-top: var(--kit-border-width) solid color-mix(in srgb, var(--kit-color-on-ink) 22%, transparent); }
+/* The footer's own colour and padding while it is left at the theme's (the Site Editor's "Dark" background, no padding set). A colour or
+   padding chosen on the footer group in Appearance > Editor > Patterns > Footer then shows instead. */
+.kit-site-footer.kit-footer.has-secondary-background-color { background: var(--kit-footer-bg) !important; }
+.kit-site-footer.kit-footer:not([style*="padding"]) { padding: var(--kit-space-7) var(--kit-space-4) var(--kit-space-4) !important; }
+@media (min-width: 768px) { .kit-site-footer.kit-footer:not([style*="padding"]) { padding-inline: var(--kit-space-6) !important; } }
+@media (min-width: 1200px) { .kit-site-footer.kit-footer:not([style*="padding"]) { padding-inline: var(--kit-space-gutter) !important; } } /* same edge as the header and the page sections */
 .kit-site-footer.kit-footer > * { width: 100%; max-width: var(--kit-width-nav) !important; margin-inline: auto !important; margin-block: 0 !important; }
 
 /* Row 1 */
@@ -805,7 +809,7 @@ html.has-modal-open .kit-sticky-help { display: none !important; }
    follows the content (footer_check.py). */
 .kit-footer-fold > summary { display: none; }
 @media (max-width: 767px) {
-	.kit-site-footer.kit-footer { padding-top: var(--kit-space-4) !important; }
+	.kit-site-footer.kit-footer:not([style*="padding"]) { padding-top: var(--kit-space-4) !important; }
 	.kit-footer-grid { grid-template-columns: minmax(0, 1fr); gap: 0; padding-bottom: var(--kit-space-4); }
 	.kit-footer-brand { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: var(--kit-space-1) var(--kit-space-3); padding-bottom: var(--kit-space-3); }
 	.kit-footer-brand > .kit-wordmark { grid-column: 1; grid-row: 1; }
