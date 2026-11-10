@@ -195,6 +195,9 @@ function aw_social_keys(): array {
  */
 function aw_social_clean( $v, string $kind ): string {
 	$v = is_scalar( $v ) ? trim( (string) $v ) : '';
+	// The edit screen's save can arrive still slashed, which stored India\'s for India's (10 Nov 2026): drop a backslash
+	// in front of a quote mark. Our fields never want one there.
+	$v = str_replace( array( "\\'", '\\"' ), array( "'", '"' ), $v );
 	switch ( $kind ) {
 		case 'url':
 			return esc_url_raw( $v, array( 'http', 'https' ) );
