@@ -79,6 +79,7 @@
   --kit-hero-min: 560px;
   --kit-hero-h: min(720px, 100svh); /* every hero's height at every width, phones too: 720px or one screen, whichever is less (owner, 2 Nov 2026: "fixed or within viewport sizes") */
   --kit-photo-card-h: 250px; /* photo card in a stack (Take action): 250 on phones, 350 from 768 (owner, 2 Nov 2026) */
+  --kit-file-embed-h: 60vh; /* PDF viewer in a file block (kit-file): 60vh on phones, 80vh up to 900px from 768 */
   --kit-space-gutter: 16px;
   --kit-space-grid: 16px;
   --kit-width-content: 720px;
@@ -224,6 +225,7 @@
     --kit-space-section-base: 70px;
     --kit-space-band-gap: var(--s-8);
     --kit-photo-card-h: 350px;
+    --kit-file-embed-h: min(80vh, 900px);
     --kit-space-gutter: 32px;
     --kit-space-grid: 24px;
     --kit-offset: 14px;

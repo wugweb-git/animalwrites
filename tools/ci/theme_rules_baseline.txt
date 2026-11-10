@@ -3,8 +3,6 @@
 # Format: file | kind | selector | declaration
 plugins/animal-writes-core/assets/css/campaign.css | height | .aw-letter-share-pic img | height: clamp(11rem, 34vw, 15rem)
 plugins/animal-writes-core/assets/css/dir-map.css | height | .aw-dir-map-canvas | height: clamp(360px, 70vh, 640px)
-plugins/animal-writes-core/theme/assets/css/aw-single.css | height | .aw-pdf .wp-block-file__embed | height: min(80vh, 900px)
-plugins/animal-writes-core/theme/assets/css/aw-single.css | height | .aw-pdf .wp-block-file__embed | height: 60vh
 themes/animal-writes/assets/css/aw.css | height | .aw-vol-banner-photo img | min-height: 320px
 themes/animal-writes/assets/css/aw.css | height | .aw-vol-page .aw-vol-banner-photo img | height: 240px
 themes/animal-writes/assets/css/aw.css | height | .aw-vol-page .aw-vol-banner-photo img | height: 360px

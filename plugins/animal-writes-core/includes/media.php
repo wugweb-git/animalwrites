@@ -285,8 +285,8 @@ add_filter(
 			$head = '<h2 class="has-x-large-font-size" id="pdf">' . esc_html( $number . ' PDF' ) . '</h2>';
 		}
 		$viewer = $head . sprintf(
-			'<div class="wp-block-file aw-pdf"><object class="wp-block-file__embed" data="%1$s#view=FitH" type="application/pdf" aria-label="%2$s"><p>%3$s</p></object>'
-			. '<p class="aw-pdf-actions"><a class="wp-block-file__button wp-element-button" href="%1$s" download>Download PDF (%4$s)</a></p></div>', // the original is linked in the Sources block (item-head.php)
+			'<div class="wp-block-file kit-file aw-pdf"><object class="wp-block-file__embed" data="%1$s#view=FitH" type="application/pdf" aria-label="%2$s"><p>%3$s</p></object>'
+			. '<p class="kit-file-actions aw-pdf-actions"><a class="wp-block-file__button wp-element-button" href="%1$s" download>Download PDF (%4$s)</a></p></div>', // the original is linked in the Sources block (item-head.php)
 			esc_url( $pdf ),
 			esc_attr( $title ),
 			esc_html__( 'Your browser cannot show this PDF here. Use the download link below.', 'animal-writes-core' ),

@@ -295,6 +295,11 @@
       "md": "350px",
       "lg": "350px"
     },
+    "file-embed-h": {
+      "sm": "60vh",
+      "md": "min(80vh, 900px)",
+      "lg": "min(80vh, 900px)"
+    },
     "space-gutter": {
       "sm": "16px",
       "md": "32px",

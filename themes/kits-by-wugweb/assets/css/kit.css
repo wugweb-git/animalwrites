@@ -600,6 +600,11 @@ ins.adsbygoogle:not([data-ad-status="filled"]) { height: 0 !important; min-heigh
 .kit-credit a { color: inherit; }
 /* Lead image on an item's own page: wide, capped height, rounded, elevated */
 body.single main .wp-block-post-featured-image:not(.kit-logo) img ,body.single main .wp-block-post-featured-image:not(.kit-logo):not(.kit-logo) img { width: 100%; max-height: min(56vh, 480px); object-fit: cover; border-radius: var(--kit-radius-hero); box-shadow: var(--kit-elevation-2); }
+/* File block with an embedded PDF: add kit-file to core's wp-block-file wrapper and kit-file-actions to the row under
+   the viewer. Only these classes are styled, so other file blocks keep core's look. Height: --kit-file-embed-h. */
+.kit-file { margin-block: var(--kit-space-6); }
+.kit-file .wp-block-file__embed { width: 100%; height: var(--kit-file-embed-h); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); }
+.kit-file-actions { display: flex; flex-wrap: wrap; gap: var(--kit-space-4); align-items: center; margin-top: var(--kit-space-4); }
 
 
 

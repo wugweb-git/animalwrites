@@ -1383,6 +1383,45 @@
    }
   },
   {
+   "name": "File viewer (PDF)",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-file",
+    "kit-file-actions"
+   ],
+   "states": [
+    "PDF shown in the page",
+    "browser cannot show it (fallback text inside the viewer)",
+    "actions row (download button)"
+   ],
+   "tokens": [
+    "kit-file-embed-h",
+    "kit-space-6",
+    "kit-space-4",
+    "kit-border-width",
+    "kit-color-line",
+    "kit-radius-card",
+    "kit-color-raised"
+   ],
+   "a11y": {
+    "element": "core file block markup: <div class=\"wp-block-file kit-file\"> with <object class=\"wp-block-file__embed\" aria-label> and a link button",
+    "aria": "aria-label on the <object> (document title)",
+    "keyboard": "the download link is a normal link",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "the download button's own size (Kits button)",
+    "motion": "none",
+    "sr": "the object's label; fallback text when the PDF cannot show"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "download link to the PDF",
+    "alt": "n/a",
+    "schema": "none"
+   },
+   "note": "Styles only the kit-file class, so core file blocks without it look as before."
+  },
+  {
    "name": "States sheet",
    "type": "tool",
    "status": "live",

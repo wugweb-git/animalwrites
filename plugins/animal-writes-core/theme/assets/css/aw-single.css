@@ -1,14 +1,10 @@
-/* Animal Writes: single items (More cards, Sources, item share, take-part cards, find-help line, PDF and document preview).
+/* Animal Writes: single items (More cards, Sources, item share, take-part cards, find-help line, document preview).
    Loads after aw.css (dependency aw-components). Rules copied unchanged from aw.css, in their original order. */
-.aw-pdf { margin-block: var(--kit-space-6); }
-.aw-pdf .wp-block-file__embed { width: 100%; height: min(80vh, 900px); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); }
-.aw-pdf-actions { display: flex; flex-wrap: wrap; gap: var(--kit-space-4); align-items: center; margin-top: var(--kit-space-4); }
 .aw-doc-preview { display: flex; flex-wrap: wrap; gap: var(--kit-space-6); align-items: center; margin-block: var(--kit-space-6); }
 .aw-doc-preview img { display: block; width: 240px; max-width: 100%; height: auto; border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); }
 .aw-doc-preview-text { flex: 1 1 240px; }
 @media (max-width: 767px) {
 	.aw-doc-preview-text .wp-element-button { display: flex; width: 100%; box-sizing: border-box; justify-content: flex-start; text-align: start; }
-	.aw-pdf .wp-block-file__embed { height: 60vh; }
 }
 .kit-print { display: flex; flex-wrap: wrap; gap: var(--kit-space-4); align-items: center; margin: 0 0 var(--kit-space-5); }
 .kit-print span { color: var(--kit-color-muted); }
