@@ -750,7 +750,7 @@ function kits_options_page() {
 		$current = 'general-header';
 	}
 	kits_admin_head( 'kits-options', 'Theme Options', 'Site-wide choices, in sections. Colours, fonts and sizes live in Styles; one page can still differ in its Page Options.' );
-	echo '<div id="col-container" class="wp-clearfix"><div id="col-left" style="width:24%"><div class="col-wrap"><div class="postbox"><div class="inside">';
+	echo '<div id="col-container" class="wp-clearfix"><div id="col-left"><div class="col-wrap"><div class="postbox"><div class="inside">';
 	foreach ( $sections as $group => $items ) {
 		echo '<h2>' . esc_html( $group ) . '</h2><ul>';
 		foreach ( $items as $slug => $label ) {
@@ -759,7 +759,7 @@ function kits_options_page() {
 		}
 		echo '</ul>';
 	}
-	echo '</div></div></div></div><div id="col-right" style="width:76%"><div class="col-wrap">';
+	echo '</div></div></div></div><div id="col-right"><div class="col-wrap">';
 	$group = '';
 	foreach ( $sections as $g => $items ) {
 		if ( isset( $items[ $current ] ) ) {
