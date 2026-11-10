@@ -55,7 +55,7 @@ add_action(
 add_action(
 	'admin_menu',
 	function () {
-		add_submenu_page( aw_core_menu_parent(), 'Check site', 'Check site', 'manage_options', 'aw-site-check', 'aw_site_check_page' ); // Animal Writes → Check site
+		add_submenu_page( aw_core_menu_parent(), 'Check site', 'Check site', aw_core_screen_cap( 'aw-site-check' ), 'aw-site-check', 'aw_site_check_page' ); // Animal Writes → Check site
 	},
 	aw_core_menu_priority( 'aw-site-check' ) // order: aw_core_screens() (admin-home.php)
 );

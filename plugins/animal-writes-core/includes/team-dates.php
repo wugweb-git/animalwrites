@@ -160,7 +160,7 @@ function aw_team_date_when( $ymd ) {
 add_action(
 	'admin_menu',
 	function () {
-		add_submenu_page( aw_core_menu_parent(), 'Dates', 'Dates', AW_DATES_CAP, 'aw-dates', 'aw_team_dates_screen' ); // Animal Writes → Dates
+		add_submenu_page( aw_core_menu_parent(), 'Dates', 'Dates', aw_core_screen_cap( 'aw-dates' ), 'aw-dates', 'aw_team_dates_screen' ); // Animal Writes → Dates
 	},
 	aw_core_menu_priority( 'aw-dates' ) // order: aw_core_screens() (admin-home.php)
 );

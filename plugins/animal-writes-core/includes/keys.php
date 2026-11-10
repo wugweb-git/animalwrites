@@ -49,7 +49,7 @@ function aw_key_where( string $name ): string {
 add_action(
 	'admin_menu',
 	function () {
-		add_submenu_page( aw_core_menu_parent(), 'Keys', 'Keys', 'manage_options', 'aw-keys', 'aw_keys_screen' ); // Animal Writes → Keys
+		add_submenu_page( aw_core_menu_parent(), 'Keys', 'Keys', aw_core_screen_cap( 'aw-keys' ), 'aw-keys', 'aw_keys_screen' ); // Animal Writes → Keys
 	},
 	aw_core_menu_priority( 'aw-keys' ) // order: aw_core_screens() (admin-home.php)
 );

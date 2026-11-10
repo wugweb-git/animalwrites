@@ -387,7 +387,7 @@ add_shortcode(
 add_action(
 	'admin_menu',
 	function () {
-		add_submenu_page( aw_core_menu_parent(), 'Contact links', 'Contact links', 'edit_pages', 'aw-elsewhere', 'aw_elsewhere_screen' ); // Animal Writes → Contact links
+		add_submenu_page( aw_core_menu_parent(), 'Contact links', 'Contact links', aw_core_screen_cap( 'aw-elsewhere' ), 'aw-elsewhere', 'aw_elsewhere_screen' ); // Animal Writes → Contact links
 	},
 	aw_core_menu_priority( 'aw-elsewhere' ) // order: aw_core_screens() (admin-home.php)
 );

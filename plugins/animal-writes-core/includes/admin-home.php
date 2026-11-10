@@ -42,7 +42,7 @@ function aw_core_screens(): array {
 }
 
 /**
- * Menu position of a screen among the site's screens: after every Kits screen (those register at 8 to 12).
+ * Menu position of a screen among the site's screens: after every Kits screen (those register at 8 to 11).
  *
  * @param string $slug Screen slug.
  */
@@ -51,15 +51,24 @@ function aw_core_menu_priority( string $slug ): int {
 	return 20 + ( false === $i ? 9 : (int) $i );
 }
 
+/**
+ * A screen's capability, from aw_core_screens().
+ *
+ * @param string $slug Screen slug (a key of aw_core_screens()).
+ */
+function aw_core_screen_cap( string $slug ): string {
+	return aw_core_screens()[ $slug ][1] ?? 'manage_options';
+}
+
 add_action(
 	'admin_menu',
 	function () {
 		if ( AW_CORE_MENU === aw_core_menu_parent() ) {
-			add_menu_page( 'Animal Writes', 'Animal Writes', 'edit_posts', AW_CORE_MENU, 'aw_core_overview_page', 'dashicons-pets', 28 );
-			add_submenu_page( AW_CORE_MENU, 'Animal Writes', 'Overview', 'edit_posts', AW_CORE_MENU, 'aw_core_overview_page' );
+			add_menu_page( 'Animal Writes', 'Animal Writes', aw_core_screen_cap( AW_CORE_MENU ), AW_CORE_MENU, 'aw_core_overview_page', 'dashicons-pets', 28 );
+			add_submenu_page( AW_CORE_MENU, 'Animal Writes', 'Overview', aw_core_screen_cap( AW_CORE_MENU ), AW_CORE_MENU, 'aw_core_overview_page' );
 			return;
 		}
-		add_submenu_page( KITS_MENU, 'Animal Writes', 'Site: Animal Writes', 'edit_posts', AW_CORE_MENU, 'aw_core_overview_page' ); // Kits → Site: Animal Writes
+		add_submenu_page( KITS_MENU, 'Animal Writes', 'Site: Animal Writes', aw_core_screen_cap( AW_CORE_MENU ), AW_CORE_MENU, 'aw_core_overview_page' ); // Kits → Site: Animal Writes
 	},
 	aw_core_menu_priority( AW_CORE_MENU )
 );
@@ -68,7 +77,7 @@ add_action(
 add_filter(
 	'kits_admin_tabs',
 	function ( $tabs ) {
-		$tabs[ AW_CORE_MENU ] = array( 'Animal Writes', 'admin.php?page=' . AW_CORE_MENU, 'edit_posts' );
+		$tabs[ AW_CORE_MENU ] = array( 'Animal Writes', 'admin.php?page=' . AW_CORE_MENU, aw_core_screen_cap( AW_CORE_MENU ) );
 		return $tabs;
 	}
 );
@@ -99,7 +108,7 @@ function aw_core_screen_nav( string $current ): void {
 add_filter(
 	'kits_status_rows',
 	function ( $rows ) {
-		$st   = aw_core_overview_status();
+		$st   = aw_core_overview_status( false );
 		$link = ' ' . aw_core_link( 'Check site', 'admin.php?page=aw-site-check' );
 		foreach ( array(
 			'check'  => 'Animal Writes: pages',
@@ -128,8 +137,12 @@ function aw_core_status( bool $ok, string $text ): string {
 	return '<span class="dashicons dashicons-' . ( $ok ? 'yes' : 'warning' ) . '" aria-hidden="true"></span> ' . esc_html( $text );
 }
 
-/** Status lines from the checks that already run. */
-function aw_core_overview_status(): array {
+/**
+ * Status lines from the checks that already run.
+ *
+ * @param bool $full False: only backup, check, cron and deploy (Kits → Welcome).
+ */
+function aw_core_overview_status( bool $full = true ): array {
 	$s = array();
 	$b = get_option( 'aw_backup_last' );
 	$s['backup'] = is_array( $b ) && ! empty( $b['at'] )
@@ -146,12 +159,15 @@ function aw_core_overview_status(): array {
 	$s['cron']   = $last ? aw_core_status( $last > time() - HOUR_IN_SECONDS, 'Last run ' . wp_date( 'j M Y, g:i a', $last ) . '.' ) : esc_html( 'No run recorded.' );
 	$head        = (string) get_option( 'aw_deployed_head', '' );
 	$s['deploy'] = $head ? esc_html( 'Deployed commit ' . substr( $head, 0, 7 ) . '; cache purged once for it.' ) : esc_html( 'No deploy recorded.' );
-	$ttl         = (int) get_option( 'aw_cdn_ttl', 0 ); // aw_cdn_ttl() is 0 in wp-admin (no header there), so the option itself
-	$ttl         = $ttl > 0 ? max( 60, min( 3600, $ttl ) ) : 0;
-	$long        = (int) get_option( 'aw_cdn_ttl_long', 3600 );
-	$s['cdn']    = esc_html( $ttl ? 'CDN keeps public pages ' . $ttl . ' s' . ( $long > $ttl ? '; listings, Library items and Resources ' . min( 3600, $long ) . ' s.' : '.' ) : 'CDN caching off.' );
-	$s['stage']  = esc_html( function_exists( 'aw_is_staging' ) && aw_is_staging() ? 'This is the staging site.' : 'Live site.' );
-	$next        = '';
+	if ( ! $full ) {
+		return $s;
+	}
+	$ttl        = (int) get_option( 'aw_cdn_ttl', 0 ); // aw_cdn_ttl() is 0 in wp-admin (no header there), so the option itself
+	$ttl        = $ttl > 0 ? max( 60, min( 3600, $ttl ) ) : 0;
+	$long       = (int) get_option( 'aw_cdn_ttl_long', 3600 );
+	$s['cdn']   = esc_html( $ttl ? 'CDN keeps public pages ' . $ttl . ' s' . ( $long > $ttl ? '; listings, Library items and Resources ' . min( 3600, $long ) . ' s.' : '.' ) : 'CDN caching off.' );
+	$s['stage'] = esc_html( function_exists( 'aw_is_staging' ) && aw_is_staging() ? 'This is the staging site.' : 'Live site.' );
+	$next       = '';
 	if ( function_exists( 'aw_team_dates' ) ) {
 		$today = wp_date( 'Y-m-d' );
 		foreach ( (array) aw_team_dates() as $d ) {

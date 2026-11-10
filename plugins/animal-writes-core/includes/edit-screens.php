@@ -786,7 +786,7 @@ function aw_edit_screen_twice( array $rows ): array {
 add_action(
 	'admin_menu',
 	function () {
-		$hook = add_submenu_page( aw_core_menu_parent(), 'Edit screens', 'Edit screens', 'manage_options', 'aw-edit-screens', 'aw_edit_screens_page' ); // Animal Writes → Edit screens
+		$hook = add_submenu_page( aw_core_menu_parent(), 'Edit screens', 'Edit screens', aw_core_screen_cap( 'aw-edit-screens' ), 'aw-edit-screens', 'aw_edit_screens_page' ); // Animal Writes → Edit screens
 		if ( $hook ) {
 			add_action(
 				'load-' . $hook,
