@@ -702,7 +702,7 @@ These Animal Writes groups are close to generic Kits parts. Each is a separate d
 
 ## Raw sizes: candidate tokens (unchanged in this phase)
 
-These values in load-bearing groups are literal sizes with no line in design-system.md or card-sizes.md (card-sizes.md covers the card limits in rule 1062). They move unchanged so the gate stays at 0. Each is a candidate token for the owner to name later.
+These values in load-bearing groups are literal sizes with no line in design-system.md or card-sizes.md (card-sizes.md covers the card limits in rule 1062). They move unchanged so the gate stays at 0. Each is a candidate token for the owner to name later. The proposed token names, with the rows that keep a literal, are in [awcss-raw-size-tokens.md](awcss-raw-size-tokens.md).
 
 | idx | goes to | selector (as it is today) | media | property | value |
 |---|---|---|---|---|---|
