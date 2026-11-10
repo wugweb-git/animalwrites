@@ -192,21 +192,7 @@
 			box.addEventListener('change', function () { render(); trackLater('ground_toggle', { ground: n, on: box.checked }); });
 		});
 		source.hidden = true; // the list stays in the page for readers without JavaScript
-		// Only the ticked grounds show at first; the rest open with one button (owner, 3 Nov 2026: the form was 4,400px on phones).
-		var rest = grounds.filter(function (g) { return !g.box.checked; });
-		if (rest.length) {
-			rest.forEach(function (g) { g.box.parentNode.hidden = true; });
-			var more = document.createElement('button');
-			more.type = 'button';
-			more.className = 'kit-btn kit-btn--secondary kit-btn--sm aw-letter-more';
-			more.textContent = 'Show all ' + grounds.length + ' grounds';
-			holder.parentNode.insertBefore(more, holder.nextSibling);
-			more.addEventListener('click', function () {
-				rest.forEach(function (g) { g.box.parentNode.hidden = false; });
-				more.remove();
-				rest[0].box.focus();
-			});
-		}
+		// All 14 grounds show at once (owner, 10 Nov 2026: "all 14 rules visible").
 	}
 	var pickedEl = form.querySelector('.aw-letter-picked');
 	function picked() {
