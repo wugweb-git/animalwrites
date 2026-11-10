@@ -23,10 +23,12 @@ Owner, 10 Nov: "we do only these": work goes to the Supreme Court phase (set to 
 
 Campaign links are not tied to the phase (owner, 10 Nov): linking News, Library, guides and press or media coverage to a campaign is done in any state (Pre, Active or Post) and is reported apart from the state. Checked in campaign-tools.php: linked items show in every state. Done 10 Nov: News 24313 linked to the Supreme Court campaign (term 1094).
 
-### New Instagram and Facebook accounts (owner, 10 Nov 2026)
-- Owner's own Instagram @animal_writes_ and Facebook page "Animal Writes" (profile.php?id=61596537146561) replace the team-run @animalwrites_india and /AnimalWritesIndia. Site footer, Contact links and schema sameAs point to the new ones (8688f0f6, live).
-- Done: name, bio with #AnimalWrites, and website link on both.
-- Left: profile photo on both (site icon), Facebook cover and links to X, LinkedIn and Instagram, Threads profile @animal_writes_ (needs the owner's sign-in), then Facebook–Instagram cross-posting (the owner said to finish the profiles first).
+### New social accounts, all @animal_writes_ (owner, 10 Nov 2026)
+- Owner's own Instagram, Threads and X are @animal_writes_; Facebook page "Animal Writes" (profile.php?id=61596537146561). They replace the team-run @animalwrites_india, /AnimalWritesIndia and the old X @animals_writes.
+- Live: site footer (Instagram, Facebook, X, Threads with its own icon, LinkedIn), Contact links and schema sameAs point to these.
+- Done on the accounts: name, logo, bio starting #AnimalWrites, website link; Facebook also links X, LinkedIn, Instagram and Threads.
+- Covers: owner said to leave them.
+- Left, owner's steps: sign in to Threads (then its bio and link), two-step login on each account; Facebook–Instagram cross-posting needs the Instagram sign-in in the connect popup.
 
 ### Diwali campaign page (1 Nov 2026)
 - **Diwali campaign page: live (1 Nov 2026):** `aw_campaign` 23202 published at /campaigns/diwali-firecrackers-animals-2026/ (live code 908ecbab). Built from `tools/content/diwali-campaign-page.php`; campaign link term `campaign-diwali-firecrackers-2026` (1093); Diwali palette in `campaign.css`. Open until 8 Nov 2026; Post state from 00:00 IST 9 Nov. Checked on live: 200, index, self-canonical, JSON-LD CreativeWork + FAQPage + BreadcrumbList, on the Campaigns hub, 375 with no sideways scroll. Hero changed 1 Nov (owner): the theme's page hero (core Cover, `kit-hero`) with photo 23397, overlay 50, the festive icon tip list and Kits buttons; no countdown on the hero or the phone bar (`[aw_sticky_cta days="0"]`). Photos uploaded 1 Nov: 23397 wide, 23398 tall, 23399 share JPG (the share image), 23400 (Home festive band's tall picture); 23348 in What's happening. Home AW_Festive button opens Who to call on the campaign. In `aw_campaign-sitemap.xml`. Done 1 Nov: campaign link on 3 News items, 6 guides and the PCA Act; Sourcing tag rule; Dates 4 Nov, 9 Nov, 6 Dec; share image 23226; keyphrase removed from News 19908; link line in guide 129 after its first paragraph.
