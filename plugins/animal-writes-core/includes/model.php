@@ -38,7 +38,7 @@ function aw_relations() {
 		'aw_participant'  => array( array( 'aw_campaign' ), 'aw_listing', 'Participating organisations', 'Campaigns joined', 0, array(), true ), // older key: partners are edited in the Organisations box (aw_campaign_partners); rows here are still read
 		'aw_organisation' => array( array( 'aw_opportunity', 'aw_campaign' ), 'aw_listing', 'Organisation', 'Opportunities', 1, array( 'aw_campaign' => array( 'Organiser', 'Campaigns organised' ) ) ),
 		'aw_rel_resource' => array( array( 'post' ), 'aw_legal', 'Library items (templates, documents)', 'Guides using this', 0 ),
-		'aw_rel_guide'    => array( array( 'post' ), 'post', 'Guides on this (shown at the end of the page)', 'Linked from (research)', 0 ), // e.g. dog-bite studies → the dog-bite guide (owner, 22 Oct 2026)
+		'aw_rel_guide'    => array( array( 'post', 'aw_news' ), 'post', 'Guides on this (shown at the end of the page)', 'Linked from (research)', 0, array( 'aw_news' => array( 'Guides on this (shown at the end of the page)', 'Linked from (news)' ) ) ), // e.g. dog-bite studies → the dog-bite guide (owner, 22 Oct 2026); News items too (owner, 10 Nov 2026)
 	);
 }
 

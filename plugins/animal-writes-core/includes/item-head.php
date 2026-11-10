@@ -410,6 +410,16 @@ function aw_block_item_share( $a, $id ) {
 /* ---------- 10. More ---------- */
 
 /**
+ * Guides linked by hand to a Resource or a News item (aw_rel_guide): published ones, at most three.
+ *
+ * @param int $id Item.
+ * @return int[]
+ */
+function aw_item_guides( $id ) {
+	return array_slice( array_values( array_filter( aw_related_set( $id, 'aw_rel_guide' ), fn( $g ) => 'publish' === get_post_status( $g ) ) ), 0, 3 );
+}
+
+/**
  * At most two groups of three: [heading, IDs] (owner, 20 Oct 2026). Cached for 12 hours, like the related lists.
  *
  * @param int $id Item.
@@ -430,6 +440,7 @@ function aw_item_more_groups( $id ) {
 		case 'aw_news':
 			$groups[] = array( $more ?: __( 'More news', 'animal-writes-core' ), aw_related_pick( $id, 'aw_news', 3, array(), $in ) );
 			$groups[] = array( __( 'From the Library', 'animal-writes-core' ), aw_related_pick( $id, 'aw_legal', 3, aw_related_set( $id, 'aw_rel_legal' ) ) );
+			$groups[] = array( __( 'Guides on this', 'animal-writes-core' ), aw_item_guides( $id ) ); // only guides linked by hand (aw_rel_guide)
 			break;
 		case 'aw_legal':
 			$groups[] = array( $more ?: __( 'More from the Library', 'animal-writes-core' ), aw_related_pick( $id, 'aw_legal', 3, array(), $in ) );
@@ -441,7 +452,7 @@ function aw_item_more_groups( $id ) {
 			$plural   = $t ? ( 'research' === $t[0]->slug ? __( 'More research', 'animal-writes-core' ) : sprintf( /* translators: %s: Resource type. */ __( 'More %s', 'animal-writes-core' ), mb_strtolower( $t[0]->name ) . 's' ) ) : __( 'More resources', 'animal-writes-core' );
 			$groups[] = array( $plural, aw_related_pick( $id, 'post', 3, array(), $t ? array( 'tag__in' => array( (int) $t[0]->term_id ) ) : array() ) );
 			$groups[] = array( __( 'From the Library', 'animal-writes-core' ), aw_related_pick( $id, 'aw_legal', 3, aw_related_set( $id, 'aw_rel_resource' ) ) );
-			$groups[] = array( __( 'Guides on this', 'animal-writes-core' ), array_slice( array_values( array_filter( aw_related_set( $id, 'aw_rel_guide' ), fn( $g ) => 'publish' === get_post_status( $g ) ) ), 0, 3 ) ); // only guides linked by hand (aw_rel_guide)
+			$groups[] = array( __( 'Guides on this', 'animal-writes-core' ), aw_item_guides( $id ) ); // only guides linked by hand (aw_rel_guide)
 			break;
 		case 'aw_opportunity':
 			$open     = function_exists( 'aw_open_opportunities_meta_query' ) ? array( 'meta_query' => aw_open_opportunities_meta_query() ) : array(); // phpcs:ignore WordPress.DB.SlowDBQuery
@@ -457,7 +468,7 @@ function aw_item_more_groups( $id ) {
 			}
 			break;
 	}
-	$groups = array_slice( array_values( array_filter( $groups, fn( $g ) => ! empty( $g[1] ) ) ), 0, in_array( get_post_type( $id ), array( 'aw_legal', 'post' ), true ) ? 3 : 2 ); // Library items and Resources: a third group only for hand-linked guides
+	$groups = array_slice( array_values( array_filter( $groups, fn( $g ) => ! empty( $g[1] ) ) ), 0, in_array( get_post_type( $id ), array( 'aw_legal', 'post', 'aw_news' ), true ) ? 3 : 2 ); // Library items, Resources and News: a third group only for hand-linked guides
 	set_transient( $key, $groups, 12 * HOUR_IN_SECONDS );
 	return $groups;
 }
@@ -498,7 +509,7 @@ function aw_item_more_card( $pid ) {
 
 function aw_block_item_more( $a, $id ) {
 	if ( ! aw_item_here( $id ) || 'publish' !== get_post_status( $id ) ) {
-		return aw_item_editor_preview( 'More: up to two groups of three items (Library: a third, "Guides on this", for hand-linked guides; listings: one group of up to six organisations)' );
+		return aw_item_editor_preview( 'More: up to two groups of three items (Library, Resources and News: a third, "Guides on this", for hand-linked guides; listings: one group of up to six organisations)' );
 	}
 	$out = '';
 	foreach ( aw_item_more_groups( $id ) as $n => $g ) {

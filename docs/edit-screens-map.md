@@ -282,7 +282,7 @@ Invalid input → transient `aw_place_error_{user}` notice, place kept. PIN look
 | Organisations featured | `aw_rel_org` → aw_listing | aw_news, aw_legal, post, aw_press, aw_campaign | ∞ |
 | Organisation (on campaigns: Organiser) | `aw_organisation` → aw_listing | aw_opportunity, aw_campaign | 1 |
 | Library items | `aw_rel_resource` → aw_legal | post | ∞ |
-| Guides on this | `aw_rel_guide` → post | post | ∞ |
+| Guides on this | `aw_rel_guide` → post | post, aw_news | ∞ |
 | Found in the text (ticks) | `aw_rel_org_auto` (found on save, `core/featured.php:253–300`); unticked → `aw_rel_org_not` (`core/featured.php:353–354`) | AW_FEATURED_TYPES (`core/featured.php:23`): aw_news, aw_legal, post, aw_press, aw_campaign | |
 | Listing types (post only) | `aw_rel_listing_type` (post_tag term IDs, multiple rows) | post | |
 
@@ -475,7 +475,7 @@ R = reads, W = writes. "Display" = front-end block/output. Only box-edited (or b
 | `aw_rel_org_auto` / `aw_rel_org_not` | same as aw_rel_org (`core/featured.php:270–395`) | same | — | — | `aw_featured_scan` on save | 252 news, 8 campaign rows |
 | `aw_rel_legal` | "From the Library" / "News about this" `core/related.php:240,244`; `core/item-head.php:431,435` | — | — | — | — | 2 rows |
 | `aw_rel_resource` | "Guides on this" / "From the Library" `core/related.php:245,249`; `core/item-head.php:436,442` | — | — | — | — | 1 row |
-| `aw_rel_guide` | "Guides on this" at the end of a research post `core/item-head.php:443` | — | — | — | — | 9 rows |
+| `aw_rel_guide` | "Guides on this" at the end of a research post or a News item (`aw_item_guides()`, core/item-head.php) | — | — | — | — | 9 rows |
 | `aw_rel_listing_type` | **none** | — | — | — | — | admin only: post_tag screen "Guides linking here" `core/model.php:320–332`; 0 rows |
 
 ### 3.2 aw_legal
