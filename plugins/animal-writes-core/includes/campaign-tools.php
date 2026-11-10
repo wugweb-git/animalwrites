@@ -687,7 +687,7 @@ add_action(
 add_action(
 	'wp_head',
 	function () {
-		$mode = function_exists( 'kits_option' ) ? kits_option( 'font_preload' ) : 'wide'; // Theme Options → Font preload.
+		$mode = function_exists( 'kits_option' ) ? kits_option( 'font_preload' ) : 'wide'; // Kits → Theme Options → Utility → Performance → Font preload.
 		if ( ! is_singular( 'aw_campaign' ) || 'off' === $mode ) {
 			return;
 		}

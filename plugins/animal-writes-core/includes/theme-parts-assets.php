@@ -104,25 +104,6 @@ add_action(
 			1
 		);
 
-		// Home page: the navigation and cover block rules it uses are printed inline in place of WordPress's two
-		// stylesheets, same position in the cascade. Only while WordPress is the version they were made from.
-		add_filter(
-			'style_loader_tag',
-			function ( $tag, $handle ) {
-				$files = array(
-					'wp-block-navigation' => 'home-navigation.css',
-					'wp-block-cover'      => 'home-cover.css',
-				);
-				if ( ! aw_core_theme_parts_on() || ! is_front_page() || is_admin() || ! isset( $files[ $handle ] ) || get_bloginfo( 'version' ) !== '7.1.3' ) { // The child theme's AW_HOME_CORE_CSS_WP.
-					return $tag;
-				}
-				$file = aw_theme_parts_path( 'assets/vendor/wp-core/' . $files[ $handle ] );
-				return is_readable( $file ) ? '<style id="' . esc_attr( $handle ) . '-home-css">' . file_get_contents( $file ) . "</style>\n" : $tag; // phpcs:ignore WordPress.WP.AlternativeFunctions
-			},
-			10,
-			2
-		);
-
 		// tokens.css is a few custom properties: printed inline in its link's place on every page. Same position in the cascade.
 		add_filter(
 			'style_loader_tag',

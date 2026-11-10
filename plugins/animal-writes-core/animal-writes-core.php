@@ -137,6 +137,7 @@ require_once AW_CORE_DIR . 'includes/cron-health.php';
 require_once AW_CORE_DIR . 'includes/error-count.php';
 require_once AW_CORE_DIR . 'includes/error-pages.php';
 require_once AW_CORE_DIR . 'includes/theme-parts.php'; // theme files, templates and patterns when Kits runs with no child theme
+require_once AW_CORE_DIR . 'includes/theme-parts-screen.php'; // Kits → Theme parts: the child theme's parts, where they live now, where to change them.
 
 // AW Sourcing (feeds, keywords, publishers, worker endpoints, AI keys, enrichment, review). Loaded from the sibling
 // plugin folder when it is not active on its own; after Core's includes, which it uses.

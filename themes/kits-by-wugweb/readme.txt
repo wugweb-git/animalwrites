@@ -27,7 +27,7 @@ tokens/tokens.json is the source. tools/build-tokens.py (and, for a child theme,
 * Needs WordPress 6.6 or later (Group styles in theme.json).
 * Updates can come from wugweb.com (Update URI, checked by Kits Core) once the update file is published there: Appearance > Themes then shows new versions with their details, and auto-updates can be turned on. Until then the check is off.
 * Colour sets: block styles for Group and Post content (styles/colours/), first one Colours: Ink; a page picks one in Page Options.
-* With Kits Core: Page Options per page (header, footer, sidebar, title, breadcrumbs, colour set), Theme Options on Kits > Overview (phone bar, announcement bar, font preload, share networks, switches for older parts), and one settings file to export and import them with the Styles.
+* With Kits Core: Page Options per page (header, footer, sidebar, title, breadcrumbs, colour set), Theme Options on Kits > Theme Options (phone bar, announcement bar, share networks; font preload under Utility > Performance), the speed and older-parts switches on Kits > Core Settings, and one settings file to export and import them with the Styles.
 
 = 2.0.0 =
 * Rebuilt: valid theme.json from Kits tokens, real header/footer, full template set, cleaned patterns, Inter Tight bundled.
