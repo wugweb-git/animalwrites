@@ -219,7 +219,7 @@ So from 6 Nov until the owner sets Post, the page and Home still ask people to s
 | Letter tool, Share, hero buttons, phone bar off | All hide in Post; the counter refuses | | When Post starts |
 | Closed hero | Owner's copy (17 Oct) in the build script | | The copy, on 7 Nov |
 | "Get updates on these rules" button | In the closed hero | Links to `#updates`, which the page does not have | Target (for example `#newsletter`), on 7 Nov |
-| Count in the closed hero | `[aw_campaign_count]`, from 100 | Label has no "by the campaign's count"; the count is self-reported "Yes, I sent it" clicks (1,012 on 3 Nov), so it will show | Show it or not (owner, 21 Oct: no count on the page) |
+| Count in the closed hero | `[aw_campaign_count]`, from 100 | Label has no "by the campaign's count"; the count is self-reported "Yes, I sent it" clicks (1,012 on 3 Nov), so it will show | Removed (owner, 10 Nov): not in the live page content, and taken out of the build script (3ffd9dd6) |
 | Home band in Post | | Not tied to the state | Outcome-only band text, or the standard Home hero |
 | Impact (Results, Real-world impact) | | No section | Numbers and words |
 | how-to-help in Post (what the campaign did) | | Nothing replaces it | Words |
@@ -295,6 +295,10 @@ So from 6 Nov until the owner sets Post, the page and Home still ask people to s
 - The pain meter (3 Nov).
 - Nothing closes the campaign by date; it closes only when its state is set to Post (2 Nov).
 - No reminder email to the senders who ticked the updates box (3 Nov).
+- Keep the theme H1 size and the compare-table headers that went live on 5 Nov (5 Nov).
+- The pictures plan: four pain-scale cards, two guide covers, News 12972 and Library 13904 placed; no picture slot for the sections (10 Nov).
+- No letter counter on the page (10 Nov).
+- Social posts archived for now (10 Nov).
 
 ## Still open
 - Letters: the target was 5,000. On 3 Nov, 1,012 people had answered "Yes, I sent it" (`aw_campaign_sent`); the letter log holds 3,981 send taps from 3,593 sends (see Letters and data below).
