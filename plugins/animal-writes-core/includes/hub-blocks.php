@@ -242,8 +242,11 @@ function aw_block_list_filters( $a ) {
 function aw_news_meta_row( $id ) {
 	$src  = function_exists( 'aw_source_row_html' ) ? aw_source_row_html( $id ) : '';
 	$time = function_exists( 'aw_rel_time_html' ) ? '<span class="wp-block-post-date kit-meta-item kit-meta-item--time aw-card-time">' . aw_rel_time_html( $id ) . '</span>' : '';
+	if ( '' === $src . $time ) {
+		return '';
+	}
 	aw_use_component_style( 'aw-meta' ); // aw-card-meta
-	return '' === $src . $time ? '' : '<div class="aw-card-meta kit-meta-row">' . $src . $time . '</div>';
+	return '<div class="aw-card-meta kit-meta-row">' . $src . $time . '</div>';
 }
 
 /** One-line date of a Library item: its own date ("1st November, 2025"), or the year of an Act or Rule; never the import date. */
