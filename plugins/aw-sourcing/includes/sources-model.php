@@ -502,3 +502,22 @@ function aw_match_term( $hay, $term ) {
 	$body = implode( '\s+', array_map( fn( $p ) => preg_quote( $p, '/' ), explode( ' ', $t ) ) );
 	return (bool) preg_match( '/(?<![a-z0-9])' . $body . ( $prefix ? '' : '(?:s|es)?(?![a-z0-9])' ) . '/u', $hay );
 }
+
+/**
+ * The PIB release number (PRID) in a pib.gov.in link, or '' for any other link. PIB serves one release under several
+ * addresses (PressReleasePage.aspx?PRID=N, PressReleaseDetail.aspx?PRID=N&reg=..&lang=..), so the duplicate check
+ * matches PIB items by this number (NHAI release 2320896 came in three times, Oct and Nov 2026).
+ *
+ * @param string $url Source URL.
+ * @return string Digits, or ''.
+ */
+function aw_src_pib_prid( $url ) {
+	$parts = parse_url( (string) $url ); // phpcs:ignore WordPress.WP.AlternativeFunctions.parse_url_parse_url -- no WordPress in tests/run.php
+	$host  = isset( $parts['host'] ) ? strtolower( $parts['host'] ) : '';
+	if ( ( 'pib.gov.in' !== $host && ! str_ends_with( $host, '.pib.gov.in' ) ) || empty( $parts['query'] ) ) {
+		return '';
+	}
+	parse_str( $parts['query'], $q );
+	$q = array_change_key_case( $q, CASE_LOWER );
+	return isset( $q['prid'] ) && is_string( $q['prid'] ) && preg_match( '/^\d{4,}$/', $q['prid'] ) ? $q['prid'] : '';
+}

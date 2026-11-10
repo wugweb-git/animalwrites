@@ -410,6 +410,15 @@ aw_t( false === strpos( $policy, "array( 'publishers' => 'sources', 'library' =>
 aw_t( false !== strpos( $rules, 'aw_rules_live()' ) && false !== strpos( $rules, "wp_safe_redirect( aw_rules_url( \$tab, array_map( 'rawurlencode', \$q ) ) ); // 302" ), 'the phase 3 switch (old tabs to Rules, 302) stays' );
 aw_t( false !== strpos( $rules, "'admin.php' !== \$pagenow" ), 'the phase 3 switch works on the page\'s new address' );
 
+// ---- PIB release number: one release, several addresses (duplicate check) ----
+aw_t( '2320896' === aw_src_pib_prid( 'https://www.pib.gov.in/PressReleasePage.aspx?PRID=2320896' ), 'PIB PressReleasePage gives its PRID' );
+aw_t( '2320896' === aw_src_pib_prid( 'https://www.pib.gov.in/PressReleaseDetail.aspx?PRID=2320896&reg=17&lang=1' ), 'PIB PressReleaseDetail with reg and lang gives the same PRID' );
+aw_t( '2320896' === aw_src_pib_prid( 'https://pib.gov.in/PressReleaseIframePage.aspx?prid=2320896' ), 'lower-case prid on pib.gov.in' );
+aw_t( '' === aw_src_pib_prid( 'https://example.com/PressReleasePage.aspx?PRID=2320896' ), 'other hosts give no PRID' );
+aw_t( '' === aw_src_pib_prid( 'https://notpib.gov.in/x?PRID=2320896' ), 'a look-alike host gives no PRID' );
+aw_t( '' === aw_src_pib_prid( 'https://www.pib.gov.in/allRel.aspx' ), 'a PIB page without PRID gives none' );
+aw_t( '' === aw_src_pib_prid( 'https://www.pib.gov.in/x.aspx?PRID=12a' ), 'a PRID that is not a number gives none' );
+
 // ---- one page per keyphrase (aw-seo-extras keyphrase-model.php) ----
 require dirname( __DIR__, 2 ) . '/aw-seo-extras/includes/keyphrase-model.php';
 aw_t( '' === aw_seo_kp_refusal( 'aw_news', array() ), 'a keyphrase nobody has is allowed' );

@@ -48,6 +48,26 @@ function aw_find_by_source( $post_type, $url ) {
 			'no_found_rows'  => true,
 		)
 	);
+	if ( $ids ) {
+		return (int) $ids[0];
+	}
+	// PIB: the same release under another address (PressReleasePage / PressReleaseDetail, reg and lang) is a duplicate.
+	$prid = function_exists( 'aw_src_pib_prid' ) ? aw_src_pib_prid( $url ) : '';
+	if ( '' === $prid || 'aw_listing' === $post_type ) {
+		return 0;
+	}
+	$ids = get_posts(
+		array(
+			'post_type'      => array( 'aw_news', 'aw_legal', 'post', 'aw_opportunity' ),
+			'post_status'    => array( 'publish', 'pending', 'draft', 'private', 'future', 'trash' ),
+			'meta_key'       => 'aw_source_url',
+			'meta_value'     => '^https?://([a-z0-9-]+\\.)*pib\\.gov\\.in/.*[?&][Pp][Rr][Ii][Dd]=' . $prid . '([^0-9]|$)',
+			'meta_compare'   => 'REGEXP',
+			'fields'         => 'ids',
+			'posts_per_page' => 1,
+			'no_found_rows'  => true,
+		)
+	);
 	return $ids ? (int) $ids[0] : 0;
 }
 
