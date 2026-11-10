@@ -295,6 +295,16 @@
       "md": "350px",
       "lg": "350px"
     },
+    "action-scrim-mix": {
+      "sm": "78%",
+      "md": "78%",
+      "lg": "78%"
+    },
+    "action-btn-size": {
+      "sm": "var(--fluid-body-lg)",
+      "md": "var(--fluid-body-md)",
+      "lg": "var(--fluid-body-lg)"
+    },
     "file-embed-h": {
       "sm": "60vh",
       "md": "min(80vh, 900px)",

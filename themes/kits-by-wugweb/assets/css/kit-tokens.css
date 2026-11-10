@@ -79,6 +79,8 @@
   --kit-hero-min: 560px;
   --kit-hero-h: min(720px, 100svh); /* every hero's height at every width, phones too: 720px or one screen, whichever is less (owner, 2 Nov 2026: "fixed or within viewport sizes") */
   --kit-photo-card-h: 250px; /* photo card in a stack (Take action): 250 on phones, 350 from 768 (owner, 2 Nov 2026) */
+  --kit-action-scrim-mix: 78%; /* Actions (kit-action-card): ink share of the dark band under the card text */
+  --kit-action-btn-size: var(--fluid-body-lg); /* Actions (kit-action-card): button text size; --fluid-body-md from 768 to 1199 and in the sidebar */
   --kit-file-embed-h: 60vh; /* PDF viewer in a file block (kit-file): 60vh on phones, 80vh up to 900px from 768 */
   --kit-space-gutter: 16px;
   --kit-space-grid: 16px;
@@ -225,6 +227,7 @@
     --kit-space-section-base: 70px;
     --kit-space-band-gap: var(--s-8);
     --kit-photo-card-h: 350px;
+    --kit-action-btn-size: var(--fluid-body-md);
     --kit-file-embed-h: min(80vh, 900px);
     --kit-space-gutter: 32px;
     --kit-space-grid: 24px;
@@ -244,6 +247,7 @@
     --kit-space-section-base: 96px;
     --kit-space-band-gap: var(--s-10);
     --kit-hero-min: 660px;
+    --kit-action-btn-size: var(--fluid-body-lg);
     --kit-space-gutter: 48px;
     --kit-space-grid: 32px;
     --kit-meta-size: 14px;

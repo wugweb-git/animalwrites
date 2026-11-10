@@ -1576,6 +1576,52 @@
    }
   },
   {
+   "name": "Actions (three big action cards)",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-actions",
+    "kit-action-card"
+   ],
+   "states": [
+    "row: one column on phones, three equal cards from 768 (kit-actions on a core Group, kit-action-card on each core Cover with kit-photo-card)",
+    "compact (in .kit-sidebar): one column, height from the text, H3-size titles",
+    "hover (pointer): card lifts, photo 1.03, shadow elevation-2; button lifts and brightens; pressed: darker",
+    "focus: the card shows the ring when its button has :focus-visible",
+    "none of the motion under prefers-reduced-motion"
+   ],
+   "tokens": [
+    "kit-photo-card-h",
+    "kit-action-scrim-mix",
+    "kit-action-btn-size",
+    "kit-space-grid",
+    "kit-space-5",
+    "kit-space-7",
+    "kit-elevation-1",
+    "kit-elevation-2",
+    "kit-motion-base",
+    "kit-motion-lift",
+    "kit-size-control",
+    "kit-color-accent",
+    "kit-color-ink"
+   ],
+   "a11y": {
+    "element": "core Group (kit-actions) with core Cover blocks (kit-photo-card kit-action-card), each with an H2, a line and one button",
+    "aria": "none",
+    "keyboard": "Tab to each button",
+    "focus": "ring on the card (:has(:focus-visible)), --kit-focus-width, --kit-focus-offset",
+    "target": "the whole card (the button's link covers it)",
+    "motion": "transform and box-shadow only; none under prefers-reduced-motion",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "an H2 per card",
+    "link": "one link per card",
+    "alt": "photos described (alt on each Cover image)",
+    "schema": "none"
+   }
+  },
+  {
    "name": "Newsletter band (kit-nl-band)",
    "type": "component",
    "status": "live",

@@ -1379,6 +1379,46 @@ header.wp-block-template-part.kit-header-hidden { transform: translateY(calc(-10
 .wp-block-cover.kit-photo-card .wp-block-buttons { margin: var(--kit-space-4) 0 0 !important; }
 .kit-stack > .wp-block-cover.kit-photo-card { min-height: var(--kit-photo-card-h); } /* photo cards in a stack (Take action): 250 on phones, 350 from 768 (owner, 2 Nov 2026); a minimum, so text is never cut off */
 @media (prefers-reduced-motion: reduce) { .kit-ed-more::after { transition: none; } }
+/* Actions (kit-actions, kit-action-card): a few big photo cards (core Cover with kit-photo-card), each one action with
+   its own H2, one line and one Brand button. One column on phones, three across from 768, one column in the sidebar.
+   The button's link covers the whole card; the card lifts on hover (pointer) and shows the focus ring of its button.
+   --kit-action-scrim-mix: the dark band under the text; --kit-action-btn-size: the button text size (smaller from 768 to 1199 and in the sidebar). */
+.kit-actions { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-grid); --kit-btn-brand-bg: var(--kit-color-accent); --kit-btn-brand-fg: var(--kit-color-on-accent); }
+@media (min-width: 768px) { .kit-actions { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.wp-block-cover.kit-action-card { margin: 0; min-height: var(--kit-photo-card-h); box-shadow: var(--kit-elevation-1); --kit-color-focus: var(--kit-color-on-ink); --kit-btn-height: var(--kit-size-control); transition: transform var(--kit-motion-base) var(--kit-motion-ease), box-shadow var(--kit-motion-base) var(--kit-motion-ease); }
+.wp-block-cover.kit-action-card > .wp-block-cover__image-background { transition: transform var(--kit-motion-base) var(--kit-motion-ease); }
+.wp-block-cover.kit-action-card.has-custom-content-position.has-custom-content-position.is-position-bottom-left > .wp-block-cover__inner-container {
+	box-sizing: border-box; width: calc(100% + 2 * var(--kit-space-5)); max-width: none; margin: 0 calc(-1 * var(--kit-space-5)) calc(-1 * var(--kit-space-5));
+	padding: var(--kit-space-7) var(--kit-space-5) var(--kit-space-5);
+	background: linear-gradient(0deg, color-mix(in srgb, var(--kit-color-ink) var(--kit-action-scrim-mix), transparent) calc(100% - var(--kit-space-7)), transparent);
+}
+.wp-block-cover.kit-action-card .wp-block-cover__inner-container > :last-child { margin-bottom: 0; }
+.kit-action-card h2 { font-size: var(--kit-type-h2); font-weight: var(--kit-weight-bold); line-height: var(--kit-leading-heading); }
+.kit-action-card .wp-block-button__link { font-size: var(--kit-action-btn-size); --_bg-h: color-mix(in srgb, var(--kit-btn-brand-bg) var(--kit-btn-hover-mix), var(--kit-color-on-ink)); --_line-h: var(--_bg-h); transition: background-color var(--kit-motion-base) var(--kit-motion-ease), transform var(--kit-motion-base) var(--kit-motion-ease); }
+@media (min-width: 768px) and (max-width: 1199px) {
+	.kit-action-card .wp-block-button__link { padding-inline: var(--kit-space-4); }
+}
+.kit-action-card .wp-block-button__link:active { background: color-mix(in srgb, var(--kit-btn-brand-bg) var(--kit-btn-hover-mix), var(--kit-color-ink)); transform: scale(.98); }
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+	.wp-block-cover.kit-action-card:hover { transform: translateY(var(--kit-motion-lift)); box-shadow: var(--kit-elevation-2); }
+	.wp-block-cover.kit-action-card:hover > .wp-block-cover__image-background { transform: scale(1.03); }
+	.kit-action-card .wp-block-button__link:hover { transform: translateY(var(--kit-motion-lift)); }
+}
+@media (prefers-reduced-motion: reduce) {
+	.wp-block-cover.kit-action-card, .wp-block-cover.kit-action-card > .wp-block-cover__image-background, .kit-action-card .wp-block-button__link { transition: none; }
+	.kit-action-card .wp-block-button__link:active { transform: none; }
+}
+.wp-block-cover.kit-action-card { isolation: isolate; cursor: pointer; }
+.wp-block-cover.kit-action-card > :is(.wp-block-cover__image-background, .wp-block-cover__background) { z-index: -1; }
+.wp-block-cover.kit-action-card.has-custom-content-position.has-custom-content-position.is-position-bottom-left > .wp-block-cover__inner-container { position: static; }
+.kit-action-card .wp-block-button__link::before { content: ""; position: absolute; inset: 0; border-radius: var(--kit-radius-card); }
+.kit-action-card .wp-block-button__link:focus-visible { outline: 0; }
+.kit-action-card .wp-block-button__link:is(:hover, :active) { transform: none; }
+.wp-block-cover.kit-action-card:has(.wp-block-button__link:focus-visible) { outline: var(--kit-focus-width) solid var(--kit-color-ink); outline-offset: var(--kit-focus-offset); }
+.kit-sidebar .kit-actions { grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-4); }
+.kit-sidebar .wp-block-cover.kit-action-card { min-height: 0; }
+.kit-sidebar .kit-action-card h2 { font-size: var(--kit-type-h3); }
+.kit-sidebar .kit-action-card .wp-block-button__link { --kit-action-btn-size: var(--fluid-body-md); }
 
 /* Contents list (kit-toc): a collapsible list of a long document's headings, before its text. Closed by default. */
 .kit-toc { margin: 0 0 var(--kit-space-5); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); }
