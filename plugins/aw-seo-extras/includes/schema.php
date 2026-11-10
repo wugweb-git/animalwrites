@@ -592,6 +592,8 @@ function aw_court_document_url( $id ) {
  * A campaign: an Event when its day and its place are stored (aw_event_date, Y-m-d; aw_event_place), organised by
  * its organiser or Animal Writes; otherwise (no day, or no place) a CreativeWork by the organiser. The stored day is the whole event (one day:
  * endDate the same). No offers (only when the campaign states free participation; none does), no performer.
+ * A finished campaign (Post) is a CreativeWork like the other campaigns, with its day as temporalCoverage: no Event
+ * with an InStock offer for a day that has passed (owner, 10 Nov 2026).
  *
  * @param int $id Post ID.
  * @return array
@@ -616,7 +618,8 @@ function aw_campaign_schema( $id ) {
 	if ( $doc && 'publish' === get_post_status( $doc ) ) {
 		$common['about'] = array_merge( array( array( '@id' => get_permalink( $doc ) . '#legislation' ) ), (array) $common['about'] );
 	}
-	if ( preg_match( '/^\d{4}-\d{2}-\d{2}$/', $day ) && '' !== $place ) { // an Event needs a place: without one, a CreativeWork
+	$done = function_exists( 'aw_camp_state' ) && 'post' === aw_camp_state( $id );
+	if ( ! $done && preg_match( '/^\d{4}-\d{2}-\d{2}$/', $day ) && '' !== $place ) { // an Event needs a place: without one, a CreativeWork
 		return array_filter(
 			array_merge(
 				array( '@type' => 'Event', '@id' => get_permalink( $id ) . '#event', 'startDate' => $day, 'endDate' => $day, 'eventAttendanceMode' => 'https://schema.org/OfflineEventAttendanceMode', 'eventStatus' => 'https://schema.org/EventScheduled' ),
@@ -634,7 +637,11 @@ function aw_campaign_schema( $id ) {
 		array_merge(
 			array( '@type' => 'CreativeWork', '@id' => get_permalink( $id ) . '#campaign', 'datePublished' => get_the_date( 'c', $id ), 'dateModified' => get_the_modified_date( 'c', $id ) ),
 			$common,
-			array( 'creator' => $by, 'publisher' => array( '@id' => home_url( '/#organization' ) ) )
+			array(
+				'creator'          => $by,
+				'publisher'        => array( '@id' => home_url( '/#organization' ) ),
+				'temporalCoverage' => $done && preg_match( '/^\d{4}-\d{2}-\d{2}$/', $day ) ? $day : null,
+			)
 		)
 	);
 }

@@ -27,7 +27,7 @@
  *
  * Library and Resources items carry the type of their own node (aw_article_nodes in schema.php): Legislation for
  * Acts, Rules and Notifications, DigitalDocument for templates, Article for the rest. A campaign carries Event
- * (CreativeWork when no day or no place is stored), as aw_campaign_schema() builds it.
+ * (CreativeWork when no day or no place is stored, and once it is in Post), as aw_campaign_schema() builds it.
  *
  * News carries NewsArticle (aw_article_nodes). An open Opportunity carries the type of what it is (aw_opportunity_schema):
  * JobPosting for a role, Event for an event with a day and a place (else CreativeWork), EducationalOccupationalProgram for a fellowship, MonetaryGrant

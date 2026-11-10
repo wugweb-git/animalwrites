@@ -78,12 +78,14 @@
 .aw-camp.aw-camp--community-dogs .kit-ed-head h2 { margin: 0 0 var(--kit-space-5) !important; max-width: 20ch; text-wrap: balance; }
 .aw-camp.aw-camp--community-dogs .aw-camp-section h3:not(.wp-block-post-title) { font-weight: var(--kit-weight-bold) !important; letter-spacing: var(--kit-tracking-heading); line-height: var(--kit-leading-heading) !important; margin: var(--kit-space-5) 0 var(--kit-space-3) !important; }
 .aw-camp.aw-camp--community-dogs .aw-date { white-space: nowrap; }
+/* Headings and figures at 700 from the main Inter file, not campaign.css's 800 (owner, 10 Nov 2026): phones no longer
+   fetch the 115 KB 800 file (campaign-tools.php skips its preload on this page) */
+.aw-camp.aw-camp--community-dogs :is(h1, h2, h3, .aw-camp-dates-when, .aw-cd-num, .aw-camp-tier h3, .aw-camp-count strong),
+.aw-camp.aw-camp--community-dogs .aw-camp-steps li::before { font-weight: var(--kit-weight-bold); }
 
 /* ---------- Hero: words left, the stamp and its postmark right (below on phones and tablets) ---------- */
-/* Owner, 18 Oct 2026: white text on the #ffa500 hero (asked after being told it is 2:1, under the 4.5:1 minimum).
-   Only the hero's ink token changes, so the palette (and the deploy contrast check, which reads the palette block)
-   keeps ink for brand buttons and the follow button. "Closed" becomes an ink pill so its orange text is not on white. */
-.aw-camp.aw-camp--community-dogs .aw-camp-hero { --camp-primary-ink: var(--kit-color-on-ink); }
+/* The hero's text is the palette's ink on #ffa500 (9.4:1, WCAG AA; owner, 10 Nov 2026). The white text of 18 Oct
+   was about 2:1. The source note stays at full ink, not faded. */
 .aw-camp.aw-camp--community-dogs .aw-camp-hero .aw-camp-metric-note { opacity: 1 !important; }
 .aw-camp.aw-camp--community-dogs .aw-camp-hero { column-gap: var(--kit-space-7); overflow: hidden; }
 .aw-camp.aw-camp--community-dogs .aw-camp-hero h1 { font-size: var(--kit-type-h1) !important; letter-spacing: var(--kit-tracking-display); line-height: var(--kit-leading-display) !important; margin: 0 0 var(--kit-space-4) !important; text-wrap: balance; }
@@ -113,7 +115,7 @@
 	width: 8.5rem; height: 8.5rem; margin: 0 0 var(--kit-space-5) !important; padding: 1rem; box-sizing: border-box; list-style: none;
 	border-radius: 50%; background: var(--camp-primary); color: var(--camp-primary-ink);
 	box-shadow: inset 0 0 0 2px var(--camp-primary-ink), inset 0 0 0 6px var(--camp-primary), inset 0 0 0 7.5px var(--camp-primary-ink);
-	font-size: 0.8125rem; font-weight: 800; line-height: 1.15; text-align: center; transform: rotate(-12deg);
+	font-size: 0.8125rem; font-weight: var(--kit-weight-bold); line-height: 1.15; text-align: center; transform: rotate(-12deg);
 }
 .aw-camp.aw-camp--community-dogs .aw-camp-postmark li { margin: 0; }
 .aw-camp.aw-camp--community-dogs .aw-camp-postmark li:first-child { font-size: 0.9375rem; }
@@ -258,6 +260,10 @@
 	.aw-camp.aw-camp--community-dogs #next-steps > h2 { grid-column: 1 / -1; }
 	.aw-camp.aw-camp--community-dogs #next-steps > p { margin-bottom: 0 !important; }
 }
+
+/* The FAQ after next-steps (faq.php): a plain band in the page's 1120 column, like the sections around it */
+.aw-camp.aw-camp--community-dogs > .aw-camp-faq { margin: 0; padding-block: var(--kit-space-section); padding-inline: var(--dg-inline); background: var(--dg-band); }
+.aw-camp.aw-camp--community-dogs > .aw-camp-faq + .aw-camp-section:not(.aw-camp-paper, .aw-camp-dark) { border-top: 1px solid var(--kit-color-line); }
 
 /* ---------- Supported by: logo tiles, whole logos, names under them ---------- */
 .aw-camp.aw-camp--community-dogs .aw-camp-partner-logos { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(var(--kit-thumb-md), 1fr)); gap: var(--kit-space-5) var(--kit-space-3); } /* phones: as many --kit-thumb-md logos as fit (375: four; 767: eight) */

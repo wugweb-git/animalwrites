@@ -788,6 +788,12 @@ add_filter(
 			return $html;
 		}
 		$class = 'hub' === $ctx['kind'] ? 'aw-hub-faq alignwide' : ( 'constrained' === ( $block['attrs']['layout']['type'] ?? '' ) ? 'aw-hub-faq' : 'aw-hub-faq has-global-padding is-layout-constrained' );
+		// A campaign page with a next-steps section: the FAQ goes right after it, before the next section (Campaign
+		// Content Standard v1.0, Post order: next-steps, faq, partners). Else it follows the content.
+		if ( 'aw_campaign' === get_post_type( $ctx['id'] ) && preg_match( '/<section\b[^>]*\bid="next-steps"[^>]*>/', $html, $m, PREG_OFFSET_CAPTURE )
+			&& preg_match( '/<section\b[^>]*\bclass="[^"]*\baw-camp-section\b/', $html, $n, PREG_OFFSET_CAPTURE, $m[0][1] + strlen( $m[0][0] ) ) ) {
+			return substr_replace( $html, '<div class="aw-hub-faq aw-camp-faq">' . $faq . '</div>', $n[0][1], 0 );
+		}
 		return $html . '<div class="' . esc_attr( $class ) . '">' . $faq . '</div>';
 	},
 	10,
