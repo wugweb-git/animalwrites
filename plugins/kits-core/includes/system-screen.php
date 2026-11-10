@@ -294,7 +294,7 @@ function kits_class_usage() {
 		$it = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $root, FilesystemIterator::SKIP_DOTS ) );
 		foreach ( $it as $file ) {
 			$ext = strtolower( $file->getExtension() );
-			if ( ! in_array( $ext, array( 'php', 'html', 'css', 'js' ), true ) || false !== strpos( $file->getPathname(), '/node_modules/' ) || ( '' !== $skip && 0 === strpos( (string) realpath( $file->getPathname() ), $skip ) ) ) {
+			if ( ! in_array( $ext, array( 'php', 'html', 'css', 'js' ), true ) || false !== strpos( $file->getPathname(), '/node_modules/' ) || str_ends_with( $file->getFilename(), '.min.css' ) || ( '' !== $skip && 0 === strpos( (string) realpath( $file->getPathname() ), $skip ) ) ) {
 				continue;
 			}
 			$s     = (string) file_get_contents( $file->getPathname() ); // phpcs:ignore WordPress.WP.AlternativeFunctions

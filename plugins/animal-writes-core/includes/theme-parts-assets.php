@@ -59,9 +59,10 @@ add_action(
 				if ( ! aw_core_theme_parts_on() ) {
 					return;
 				}
-				$v = fn( $f ) => (string) filemtime( aw_theme_parts_path( $f ) );
+				$v   = fn( $f ) => (string) filemtime( aw_theme_parts_path( $f ) );
 				wp_enqueue_style( 'aw-tokens', aw_theme_file_uri( 'assets/css/tokens.css' ), array( 'kit-tokens' ), $v( 'assets/css/tokens.css' ) ); // Brand values over the Kits defaults.
-				wp_enqueue_style( 'aw-components', aw_theme_file_uri( 'assets/css/aw.css' ), array( 'aw-tokens', 'kit-components' ), $v( 'assets/css/aw.css' ) );
+				$css = is_readable( aw_theme_parts_path( 'assets/css/aw.min.css' ) ) ? 'assets/css/aw.min.css' : 'assets/css/aw.css'; // aw.min.css: aw.css minified (tools/ci/css_min.py).
+				wp_enqueue_style( 'aw-components', aw_theme_file_uri( $css ), array( 'aw-tokens', 'kit-components' ), $v( $css ) );
 				wp_enqueue_script(
 					'aw-interactions',
 					aw_theme_file_uri( 'assets/js/aw.js' ),

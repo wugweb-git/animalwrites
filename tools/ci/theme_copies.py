@@ -8,6 +8,8 @@ registry has no copy. The child's fonts are not copied: Kits by Wugweb serves it
 same file as the child's (checked here too).
 The other checks read the child's file and skip its copy (is_copy), so a rule is not counted twice. Once the child
 theme is gone, the plugin's files are read in its place (theme_file).
+A generated .min.css in the plugin's folder (aw.min.css, from tools/ci/css_min.py) has no child file and needs none:
+the child theme serves its own aw.css. is_copy() counts it as a copy of its source, so the other checks read aw.css.
 
     python3 tools/ci/theme_copies.py        # exit 1 when a copy differs or is missing
 """
@@ -26,12 +28,15 @@ FONTS = (("themes/kits-by-wugweb/assets/fonts/inter/inter-latin.woff2", "themes/
 
 
 def is_copy(path):
-    """True for a file under the plugin's theme/ folder whose child theme file exists (that file is read instead)."""
+    """True for a file under the plugin's theme/ folder whose child theme file exists (that file is read instead), and
+    for a generated .min.css next to its source (tools/ci/css_min.py; the source is read instead, child theme or not)."""
     p = pathlib.Path(path).resolve()
     try:
         rel = p.relative_to(COPY)
     except ValueError:
         return False
+    if p.name.endswith(".min.css") and p.with_name(p.name[: -len(".min.css")] + ".css").is_file():
+        return True
     return (CHILD / rel).is_file()
 
 

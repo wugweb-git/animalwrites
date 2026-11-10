@@ -79,6 +79,8 @@ jobs:
         run: python3 tools/ci/registry_check.py
       - name: Animal Writes theme copies in animal-writes-core are the same as the child theme's files
         run: python3 tools/ci/theme_copies.py
+      - name: aw.min.css is aw.css minified (python3 tools/ci/css_min.py writes it; commit both)
+        run: python3 tools/ci/css_min.py --check
       - name: Workers registry matches animal-writes-workers docs/workers.json (public, raw, no token)
         run: php tools/ci/workers_registry_check.php
       - name: Mailweb address parser (typed lists, headers, API lists)
