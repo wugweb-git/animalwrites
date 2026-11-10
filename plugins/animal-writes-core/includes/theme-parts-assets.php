@@ -61,6 +61,25 @@ function aw_theme_parts_path( string $file ): string {
  */
 function aw_component_style_files(): array {
 	return array(
+		// These four print right after aw.css, where their rules were: aw-meta must come before aw-listing (.aw-claim-meta).
+		'aw-meta' => array( // An item's meta row and the claim head; places and News card rows by flag.
+			'file' => 'assets/css/aw-meta.css',
+			'when' => fn() => is_singular( array( 'post', 'aw_news', 'aw_legal', 'aw_listing', 'aw_opportunity' ) ) || is_page( 'claim' ),
+		),
+		'aw-volunteer' => array( // The volunteer page; the volunteer form and banner wherever they print.
+			'file'   => 'assets/css/aw-volunteer.css',
+			'when'   => fn() => is_page( 'volunteer' ),
+			'blocks' => array( 'core/group' => 'aw-vol-' ),
+		),
+		'aw-contact' => array( // The contact page; the Elsewhere list by flag.
+			'file'   => 'assets/css/aw-contact.css',
+			'when'   => fn() => is_page( 'contact' ),
+			'blocks' => array( 'core/group' => 'aw-contact' ),
+		),
+		'aw-search' => array( // The search page (?s= redirects to /search/?q=).
+			'file' => 'assets/css/aw-search.css',
+			'when' => fn() => is_page( 'search' ),
+		),
 		'aw-home' => array( // Home sections: the front page, plus the Home section patterns and blocks wherever they are placed.
 			'file'   => 'assets/css/aw-home.css',
 			'when'   => 'is_front_page',

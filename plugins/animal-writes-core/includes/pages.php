@@ -184,6 +184,7 @@ add_shortcode(
 	'aw_search',
 	function () {
 		$q    = sanitize_text_field( wp_unslash( $_GET['q'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
+		aw_use_component_style( 'aw-search' ); // the search form and results
 		// The Kits search field (as on the 404 page): one rounded field and the search button.
 		$html = '<form class="kit-error-search aw-search-form" role="search" method="get" action="' . esc_url( home_url( '/search/' ) ) . '">'
 			. '<label class="screen-reader-text" for="aw-search-q">Search</label><input type="search" id="aw-search-q" name="q" value="' . esc_attr( $q ) . '" placeholder="Search" autocomplete="off">'
@@ -380,6 +381,7 @@ add_shortcode(
 		if ( ! $links ) {
 			return '';
 		}
+		aw_use_component_style( 'aw-contact' ); // aw-elsewhere
 		$html = '<section class="aw-elsewhere"><h2>Elsewhere</h2><ul>';
 		foreach ( $links as $l ) {
 			$icon  = aw_social_icon( $l['url'] );
