@@ -1,0 +1,6 @@
+/* Animal Writes: the campaign countdown ([aw_countdown]). Loads after aw.css (dependency aw-components). Rules copied unchanged
+   from aw.css, in their original order. */
+.aw-countdown { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--kit-space-2) var(--kit-space-4); margin: 0 0 var(--kit-space-4); }
+.aw-cd-num { font-family: var(--kit-font-display); font-weight: var(--kit-weight-bold); letter-spacing: var(--kit-tracking-heading); font-size: var(--kit-type-display); line-height: 1; color: var(--kit-color-ink); }
+.aw-cd-unit { font-weight: var(--kit-weight-strong); font-size: var(--kit-type-lead); }
+.aw-cd-when { color: var(--kit-color-muted); flex-basis: 100%; }

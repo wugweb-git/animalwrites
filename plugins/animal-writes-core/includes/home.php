@@ -89,6 +89,7 @@ function aw_block_home_hero() {
 		return do_blocks( '<!-- wp:pattern {"slug":"animal-writes/hero"} /-->' );
 	}
 	$id    = AW_HOME_CAMPAIGN;
+	aw_use_component_style( 'aw-camp-band-aw' ); // the band's Animal Writes overrides
 	$url   = (string) get_permalink( $id );
 	$band  = aw_home_band_atts();
 	$theme = sanitize_html_class( (string) ( $band['theme'] ?? 'lab-rules' ) );
@@ -185,6 +186,7 @@ function aw_block_home_sc() {
 	if ( 'publish' !== get_post_status( $id ) ) {
 		return '';
 	}
+	aw_use_component_style( 'aw-sc-card' ); // aw-sc
 	$url = (string) get_permalink( $id );
 	$day = (string) get_post_meta( $id, 'aw_campaign_close', true );
 	$day = preg_match( '/^\d{4}-\d{2}-\d{2}$/', $day ) ? $day : '';

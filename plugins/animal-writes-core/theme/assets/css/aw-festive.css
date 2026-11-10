@@ -1,0 +1,6 @@
+/* Animal Writes: the festive card. Loads after aw.css (dependency aw-components). Rules copied unchanged
+   from aw.css, in their original order. */
+.aw-festive.wp-block-cover { flex-direction: column; }
+.aw-festive .wp-block-cover__inner-container { display: flex; flex: 1 1 auto; flex-direction: column; }
+.aw-festive .wp-block-cover__inner-container > :has(+ .wp-block-buttons) { margin-bottom: auto; }
+.aw-festive.aw-camp--diwali { --camp-primary: #a14a05; --camp-primary-ink: #ffffff; --kit-btn-brand-bg: var(--camp-primary); --kit-btn-brand-fg: var(--camp-primary-ink); }

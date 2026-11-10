@@ -52,7 +52,7 @@ plugins/mailweb/includes/overview.php | admin page | add_menu_page( __( 'Mail', 
 plugins/mailweb/includes/overview.php | admin page | add_submenu_page( 'mailweb', __( 'Mail overview', 'mailweb' ), __( 'Overview', 'mailweb' ), MAILWEB_CAP, 'mailweb-overview', 'mailweb_home_page' ); // home.php
 plugins/mailweb/includes/overview.php | admin page | add_submenu_page( 'mailweb', __( 'Mail settings', 'mailweb' ), __( 'Settings', 'mailweb' ), 'manage_options', 'mailweb-settings', 'mailweb_settings_page' ); //
 plugins/mailweb/includes/overview.php | admin page | add_submenu_page( 'mailweb', __( 'Mail', 'mailweb' ), __( 'Inbox', 'mailweb' ), MAILWEB_CAP, 'mailweb', 'mailweb_inbox_page' );
-themes/animal-writes/assets/css/aw.css | css Hero | section.aw-camp-band.aw-ed-hero--campaign | min-height: var(--kit-hero-h)
+plugins/animal-writes-core/theme/assets/css/aw-camp-band-aw.css | css Hero | section.aw-camp-band.aw-ed-hero--campaign | min-height: var(--kit-hero-h)
 themes/kits-by-wugweb/assets/css/kit.css | css Hero | .wp-block-cover.kit-hero | min-height: var(--kit-hero-h) !important
 plugins/animal-writes-core/assets/css/campaign.css | css Hero | .aw-camp--community-dogs .aw-camp-hero | min-height: var(--kit-hero-h)
 plugins/animal-writes-core/assets/css/campaign.css | css Hero | .aw-camp--community-dogs.aw-camp-hero | min-height: var(--kit-hero-h)

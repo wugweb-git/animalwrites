@@ -593,6 +593,7 @@ add_shortcode(
 			$out .= '<p class="aw-camp-band-actions"><a class="wp-element-button" data-track="home_campaign_click" href="' . esc_url( $url . '#next' ) . '">What happens next</a></p>';
 			return $out . '</section>';
 		}
+		aw_use_component_style( 'aw-camp-band-aw' ); // the open band's focus colour
 		aw_camp_cache_until( $post->ID );
 		// The objection window as one mark per day: days gone dimmed, today raised, the days left bright.
 		$open_ts  = aw_camp_open_ts( $post->ID );

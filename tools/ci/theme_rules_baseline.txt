@@ -17,7 +17,7 @@ themes/kits-by-wugweb/assets/css/kit.css | height | .wp-block-navigation__respon
 plugins/animal-writes-core/theme/assets/css/aw-directory.css | pad | .aw-org | padding: var(--kit-space-5) 0  # Directory row: a bottom rule only, no box at the sides (owner to confirm)
 plugins/animal-writes-core/theme/assets/css/aw-volunteer.css | pad | .aw-vol-page .aw-vol-banner-body | padding: 0  # /volunteer/ banner has no box (background: none)
 plugins/animal-writes-core/theme/assets/css/aw-home.css | pad | .aw-ed-learn .aw-tasks.is-three .kit-card > .kit-card-body | padding: 0  # body inside a card padded 24px
-themes/animal-writes/assets/css/aw.css | pad | .aw-camp-docs-q li:has(> .kit-card) | padding: 0  # list item wrapper, no box; the kit-card inside is padded
+plugins/animal-writes-core/theme/assets/css/aw-campaign-page.css | pad | .aw-camp-docs-q li:has(> .kit-card) | padding: 0  # list item wrapper, no box; the kit-card inside is padded
 themes/kits-by-wugweb/assets/css/kit.css | pad | .kit-card[class*="kit-card--stacked"] > .kit-card-body | padding: 0  # body inside a stacked card padded 24px
 themes/kits-by-wugweb/assets/css/kit.css | pad | .kit-toc ol | padding: 0 var(--kit-space-5) var(--kit-space-5) var(--kit-space-7)  # list under the summary, which has 24px below it
 themes/kits-by-wugweb/assets/css/kit.css | pad | .kit-share-inline .kit-share | padding-top: 0  # share row inside the text column has no rule or box (border-top: 0)

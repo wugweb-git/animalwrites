@@ -61,7 +61,30 @@ function aw_theme_parts_path( string $file ): string {
  */
 function aw_component_style_files(): array {
 	return array(
-		// These four print right after aw.css, where their rules were: aw-meta must come before aw-listing (.aw-claim-meta).
+		// Campaign blocks and campaign pages: first, so they print right after aw.css, where their rules were.
+		'aw-countdown' => array( // [aw_countdown]: the Home hero, the Supreme Court card, campaign heroes.
+			'file' => 'assets/css/aw-countdown.css',
+		),
+		'aw-campaign-page' => array( // Campaign pages; the steps list wherever it is placed.
+			'file'   => 'assets/css/aw-campaign-page.css',
+			'when'   => fn() => is_singular( 'aw_campaign' ),
+			'blocks' => array( 'core/list' => 'aw-steps' ),
+		),
+		'aw-camp-band-aw' => array( // The campaign band's overrides, where the Home campaign hero or the open band prints.
+			'file' => 'assets/css/aw-camp-band-aw.css',
+		),
+		'aw-sc-card' => array( // The Supreme Court campaign card.
+			'file' => 'assets/css/aw-sc-card.css',
+		),
+		'aw-camp-story' => array( // The Community dogs story band.
+			'file'   => 'assets/css/aw-camp-story.css',
+			'blocks' => array( 'core/cover' => 'aw-ed-story' ),
+		),
+		'aw-festive' => array( // The festive card.
+			'file'   => 'assets/css/aw-festive.css',
+			'blocks' => array( 'core/cover' => 'aw-festive' ),
+		),
+		// These four follow, where their rules were in aw.css: aw-meta must come before aw-listing (.aw-claim-meta).
 		'aw-meta' => array( // An item's meta row and the claim head; places and News card rows by flag.
 			'file' => 'assets/css/aw-meta.css',
 			'when' => fn() => is_singular( array( 'post', 'aw_news', 'aw_legal', 'aw_listing', 'aw_opportunity' ) ) || is_page( 'claim' ),
