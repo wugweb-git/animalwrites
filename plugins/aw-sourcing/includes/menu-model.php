@@ -1,6 +1,6 @@
 <?php
 /**
- * The Sourcing menu's shape (owner, 25 Oct 2026: AW Sourcing works like any other plugin: one menu, an Overview, links
+ * The Sourcing menu's shape (owner, 25 Oct 2026: SourceWeb works like any other plugin: one menu, an Overview, links
  * from the Plugins screen). Plain constants and functions with no WordPress, so tests/run.php checks them; the menu
  * itself is registered in admin-menu.php.
  *

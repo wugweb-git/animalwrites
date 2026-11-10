@@ -1,6 +1,6 @@
 <?php
 /**
- * The Sourcing menu and its Overview (owner, 25 Oct 2026: AW Sourcing meets the admin standard of the other plugins:
+ * The Sourcing menu and its Overview (owner, 25 Oct 2026: SourceWeb meets the admin standard of the other plugins:
  * one menu, an Overview of every feature and where it lives, links from the Plugins screen; core WordPress only).
  *
  * Sourcing → Overview (this file), To review (review-queue.php), Enrichment review (enrichment-admin.php), then one
@@ -84,7 +84,7 @@ add_action(
 				$hook = add_submenu_page( AW_SRC_MENU, (string) $t[0], (string) $t[0], AW_SRC_CAP, AW_SRC_PAGE, 'aw_sourcing_page' );
 				if ( $hook && AW_SRC_SCREEN !== $hook ) { // the menu title changed: the screens' hooks would not fire, so pass them on and say so
 					add_action( 'load-' . $hook, fn() => do_action( 'load-' . AW_SRC_SCREEN ) );
-					error_log( 'AW Sourcing: the Sourcing page is ' . $hook . ', not ' . AW_SRC_SCREEN . ' (menu-model.php); list-table settings and columns will not apply.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
+					error_log( 'SourceWeb: the Sourcing page is ' . $hook . ', not ' . AW_SRC_SCREEN . ' (menu-model.php); list-table settings and columns will not apply.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
 				}
 				$first = false;
 				continue;
@@ -134,7 +134,7 @@ add_filter(
 	PHP_INT_MAX
 );
 
-// Plugins screen: Overview and Settings under the plugin's name (when AW Sourcing is listed there as its own plugin).
+// Plugins screen: Overview and Settings under the plugin's name (when SourceWeb is listed there as its own plugin).
 add_filter(
 	'plugin_action_links_' . plugin_basename( AW_SOURCING_DIR . 'aw-sourcing.php' ),
 	function ( $links ) {

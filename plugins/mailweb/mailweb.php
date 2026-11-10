@@ -1,6 +1,6 @@
 <?php
 /**
- * Mailweb
+ * MailWeb
  *
  * @package           mailweb
  * @author            Wugweb
@@ -8,7 +8,7 @@
  * @license           GPL-2.0-or-later
  *
  * @wordpress-plugin
- * Plugin Name:       Mailweb
+ * Plugin Name:       MailWeb
  * Description:       Hostinger Mail inside WordPress: read, reply and send from your mailboxes, website form messages in the same inbox, plus SMTP sending with a daily limit and queue and a FluentCRM feed. Own menu: Mail (Inbox, Overview, Settings).
  * Version:           3.2.0
  * Requires at least: 6.4
@@ -17,6 +17,7 @@
  * Author URI:        https://wugweb.com/
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
+ * Update URI:        https://wugweb.com/plugins/mailweb/
  * Text Domain:       mailweb
  * Domain Path:       /languages
  */
@@ -63,8 +64,9 @@ require_once MAILWEB_DIR . 'includes/settings-tab.php';
 require_once MAILWEB_DIR . 'includes/crm-sync.php';
 require_once MAILWEB_DIR . 'includes/overview.php';
 require_once MAILWEB_DIR . 'includes/home.php';
+require_once MAILWEB_DIR . 'includes/kits-hub.php'; // a tab and a status row in the Kits admin, when Kits Core is loaded.
 
-// Deactivation stops Mailweb's scheduled jobs; settings, the queue and the mailboxes are left as they are.
+// Deactivation stops MailWeb's scheduled jobs; settings, the queue and the mailboxes are left as they are.
 register_deactivation_hook(
 	__FILE__,
 	function () {

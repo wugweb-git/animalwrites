@@ -144,5 +144,5 @@ function aw_sourcing_keyword_stats( $days = 30 ) {
 	return $out;
 }
 
-// For aw-seo-extras (Tools → Search Insights): null there means AW Sourcing is off.
+// For aw-seo-extras (Tools → Search Insights): null there means SourceWeb is off.
 add_filter( 'aw_sourcing_keyword_items', fn( $v, $days = 30 ) => aw_sourcing_keyword_stats( $days ), 10, 2 );

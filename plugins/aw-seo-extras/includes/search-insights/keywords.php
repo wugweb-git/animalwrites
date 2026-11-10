@@ -1,7 +1,7 @@
 <?php
 /**
  * Keyword records (plan §3): normalising and grouping, roles, the one-time seed from the keyword map and the daily role
- * sync from Rank Math and AW Sourcing. Everything here only reads Rank Math and Sourcing; it never writes to them.
+ * sync from Rank Math and SourceWeb. Everything here only reads Rank Math and Sourcing; it never writes to them.
  *
  * @package aw-seo-extras
  */
@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 // The role constants, AW_SI_BRAND, AW_SI_NOT_PLURAL, aw_si_roles(), aw_si_is_brand(), aw_si_norm() and aw_si_lang() moved
 // to Animal Writes Core with the keyword table (includes/keyword-model.php and keyword-table.php; owner's decision 3,
-// 25 Oct 2026), so AW Sourcing reads and writes the table without this plugin.
+// 25 Oct 2026), so SourceWeb reads and writes the table without this plugin.
 
 /** Map of norm => id for every keyword record. */
 function aw_si_kw_map(): array {
@@ -443,7 +443,7 @@ function aw_si_focus_parts( string $field ): array {
  * Daily role sync (read-only towards Rank Math and Sourcing):
  * - focus: Rank Math keyphrases of published items (AW_SEO_ITEM_TYPES without listings) and of terms; listings only mark
  *   matching records as entities (their names are not added one by one: plan, fixed decisions);
- * - sourcing: AW Sourcing's Include list (aw_relevance()['strong']), when AW Sourcing is active and before its phase 2
+ * - sourcing: SourceWeb's Include list (aw_relevance()['strong']), when SourceWeb is active and before its phase 2
  *   (from phase 2 the owner sets Include on the record and this leaves it alone);
  * - brand: AW_SI_BRAND.
  *
@@ -529,13 +529,13 @@ function aw_si_sync_roles(): array {
 		}
 	}
 
-	// Sourcing: read only, and only when AW Sourcing is active (the section hides otherwise). From sourcing phase 2 the
+	// Sourcing: read only, and only when SourceWeb is active (the section hides otherwise). From sourcing phase 2 the
 	// Include role is set on the records themselves (Sourcing → Keywords) and is never rebuilt here.
 	$sourcing = array();
 	$p2_busy = get_option( 'aw_sourcing_migrating' ) || get_option( 'aw_sourcing_phase2_record' ); // a phase 2 migration running or unfinished: leave the roles alone (Codex)
 	if ( $p2_busy ) {
 		$sourcing = (array) $wpdb->get_col( $wpdb->prepare( "SELECT id FROM {$k} WHERE roles & %d", AW_SI_ROLE_SOURCING ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- counted for the run log only
-	} elseif ( (int) get_option( 'aw_sourcing_phase', 0 ) < 2 ) { // the option itself: AW Sourcing may be off while this runs
+	} elseif ( (int) get_option( 'aw_sourcing_phase', 0 ) < 2 ) { // the option itself: SourceWeb may be off while this runs
 		$wpdb->query( $wpdb->prepare( "UPDATE {$k} SET roles = roles & ~%d", AW_SI_ROLE_SOURCING ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$sourcing = function_exists( 'aw_relevance' ) ? (array) ( aw_relevance()['strong'] ?? array() ) : array();
 		if ( $sourcing ) {

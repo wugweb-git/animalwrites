@@ -10,10 +10,10 @@
  * - Headers: Content-Type text/markdown; charset=utf-8, Vary: Accept, Cache-Control no-store, private (and LiteSpeed
  *   no-cache) and a canonical Link to the HTML page, so no shared cache keeps the Markdown or hands it to a browser. The HTML of
  *   these pages keeps its own cache headers (cdn-cache.php) and also gets Vary: Accept (owner, 3 Nov 2026), so a cache that
- *   honours Vary stores it per Accept header (AW_MD_VARY_HTML, AW SEO Plus → Settings; 0 turns it off). The server's page cache (LiteSpeed) and the Hostinger CDN answer from their
+ *   honours Vary stores it per Accept header (AW_MD_VARY_HTML, SearchWeb → Settings; 0 turns it off). The server's page cache (LiteSpeed) and the Hostinger CDN answer from their
  *   copy before WordPress runs; how agents get past them: docs/cdn.md, step C.
  * - Password-protected pages, previews and logged-in requests are never converted.
- * - Off with the "Markdown for agents" switch in AW SEO Plus → Settings.
+ * - Off with the "Markdown for agents" switch in SearchWeb → Settings.
  *
  * @package aw-seo-extras
  */

@@ -151,8 +151,8 @@ function aw_si_dry_report( string $day ): array {
 		'page_links'           => $links,
 	);
 
-	// AW Sourcing (read only).
-	// AW Sourcing's Include words: the keyword table from its phase 2 (the old list in aw_relevance is not used from phase 4).
+	// SourceWeb (read only).
+	// SourceWeb's Include words: the keyword table from its phase 2 (the old list in aw_relevance is not used from phase 4).
 	if ( function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ) {
 		$sourcing = (array) aw_sourcing_kw_lists()['strong'];
 	} else {
@@ -161,7 +161,7 @@ function aw_si_dry_report( string $day ): array {
 	foreach ( (array) $sourcing as $s ) {
 		$add( (string) $s, AW_SI_ROLE_SOURCING );
 	}
-	$out['sourcing'] = null === $sourcing ? 'AW Sourcing not active: the Sourcing role stays empty' : count( $sourcing ) . ' Google News searches';
+	$out['sourcing'] = null === $sourcing ? 'SourceWeb not active: the Sourcing role stays empty' : count( $sourcing ) . ' Google News searches';
 
 	// Search Console through Site Kit: one day for row counts, 28 days for what the tabs would show.
 	$end = ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( '-1 day' );

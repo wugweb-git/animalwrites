@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-// AW_SI_RM_LOW: AW SEO Plus → Settings (settings.php).
+// AW_SI_RM_LOW: SearchWeb → Settings (settings.php).
 
 /**
  * Rank Math SEO score per site path, for published items that have one. Cached for 12 hours.

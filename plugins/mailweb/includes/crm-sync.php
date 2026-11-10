@@ -1,6 +1,6 @@
 <?php
 /**
- * FluentCRM feed for mail. FluentCRM does not read mail; Mailweb feeds it (Mail → Settings → FluentCRM).
+ * FluentCRM feed for mail. FluentCRM does not read mail; MailWeb feeds it (Mail → Settings → FluentCRM).
  *
  * - Incoming email to the chosen mailboxes: the sender's contact is found or made (status "transactional", so they
  *   are never added to a list or sent marketing) with the chosen tag, and gets a note "Email: <subject>" with who it was

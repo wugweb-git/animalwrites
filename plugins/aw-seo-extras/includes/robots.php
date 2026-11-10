@@ -31,13 +31,13 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Owner, 21 Oct 2026: the 3-organisation rule of 20 Oct is withdrawn. A district × type page with at least 1 organisation is
  * indexed and in the sitemap; only a page with none (nothing to show) stays noindex (stored counts).
  */
-// AW_THIN_DISTRICT_TYPE: AW SEO Plus → Settings (settings.php).
+// AW_THIN_DISTRICT_TYPE: SearchWeb → Settings (settings.php).
 
 /**
  * Thin district × type pages that stay indexed: every one with Search Console clicks or impressions in the 90 days to
  * 20 Oct 2026 (owner). Paths under /directory/.
  */
-// AW_DIRECTORY_KEEP_INDEXED: AW SEO Plus → Settings (settings.php).
+// AW_DIRECTORY_KEEP_INDEXED: SearchWeb → Settings (settings.php).
 
 /** Whether a district × type page (its URL) is on the keep-indexed list. */
 function aw_directory_keep_indexed( $url ) {

@@ -1,10 +1,11 @@
 <?php
 /**
- * Plugin Name: AW Sourcing
+ * Plugin Name: SourceWeb
  * Description: What the workers fetch and how it arrives, in its own Sourcing menu: Overview, To review, Enrichment review, the settings screens (sources with their feeds and relay, keywords, rules, press queries, categories, AI models), the reports and jobs (workers, rejected items, relay log, change log) and Settings; the worker endpoints (ingest, relay, sourcing policy, relevance, same story, summaries, enrichment) and auto-review. Needs Animal Writes Core, which loads it from this folder; it can also be activated on its own.
  * Version: 0.1.0
  * Author: Wugweb
  * License: GPL-2.0-or-later
+ * Update URI: https://wugweb.com/plugins/sourceweb/
  *
  * Moved out of Animal Writes Core and Kits Core on 24 Oct 2026 with no change in behaviour: the same option keys,
  * REST routes, cron hooks, admin pages and actions. Core keeps the content types and templates.
@@ -26,7 +27,7 @@ if ( ! defined( 'AW_CORE_DIR' ) ) {
 	add_action(
 		'admin_notices',
 		function () {
-			echo '<div class="notice notice-error"><p>AW Sourcing needs Animal Writes Core. Sourcing is off until Core is active.</p></div>';
+			echo '<div class="notice notice-error"><p>SourceWeb needs Animal Writes Core. Sourcing is off until Core is active.</p></div>';
 		}
 	);
 	return;
@@ -80,3 +81,4 @@ require_once AW_SOURCING_DIR . 'includes/ai-provider-icons.php';
 // The Sourcing menu, its Overview and the Plugins screen links (owner, 25 Oct 2026).
 require_once AW_SOURCING_DIR . 'includes/admin-menu.php';
 require_once AW_SOURCING_DIR . 'includes/dashboard.php'; // the Dashboard box "Sourcing" (owner, 3 Nov 2026)
+require_once AW_SOURCING_DIR . 'includes/kits-hub.php'; // a tab and a status row in the Kits admin, when Kits Core is loaded.

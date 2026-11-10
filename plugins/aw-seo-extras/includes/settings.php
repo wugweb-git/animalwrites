@@ -1,6 +1,6 @@
 <?php
 /**
- * AW SEO Plus → Settings (owner, 25 Oct 2026: settings per module, like Rank Math's). Loaded first.
+ * SearchWeb → Settings (owner, 25 Oct 2026: settings per module, like Rank Math's). Loaded first.
  *
  * aw_seo_modules() lists every module: label, whether it can be switched off, the files it loads, and its settings.
  * Each setting is one of the plugin's former constants; its default is the value the code had, so nothing changes
@@ -203,7 +203,7 @@ function aw_seo_modules(): array {
 			'label'  => 'FAQ',
 			'switch' => true,
 			'files'  => array( 'faq' ),
-			'desc'   => 'The FAQ box on the edit screen of every public post type and taxonomy (which ones: AW SEO Plus → FAQ), and the questions and answers with FAQPage schema on the page. Automatic questions from a page\'s own fields fill the box where the site provides them.',
+			'desc'   => 'The FAQ box on the edit screen of every public post type and taxonomy (which ones: SearchWeb → FAQ), and the questions and answers with FAQPage schema on the page. Automatic questions from a page\'s own fields fill the box where the site provides them.',
 			'fields' => array(
 				'AW_FAQ_MIN' => array( 'type' => 'int', 'label' => 'Fewest questions (pages and every other type)', 'help' => 'Fewer than this: no FAQ and no schema.', 'default' => 3 ),
 				'AW_FAQ_MIN_GUIDE' => array( 'type' => 'int', 'label' => 'Fewest questions on a post (Resources guides)', 'help' => '', 'default' => 2 ),
@@ -403,7 +403,7 @@ function aw_seo_field_value( string $type, string $text ) {
 	return null;
 }
 
-/* ---------- AW SEO Plus → Settings ---------- */
+/* ---------- SearchWeb → Settings ---------- */
 
 /**
  * The Settings tabs and the modules whose settings each shows. The settings stay stored per module; a field with its
@@ -493,9 +493,9 @@ add_action(
 add_action(
 	'admin_menu',
 	function () {
-		add_submenu_page( AW_SEO_MENU, 'AW SEO Plus settings', 'Settings', 'manage_options', 'aw-seo-settings', 'aw_seo_settings_page' );
+		add_submenu_page( AW_SEO_MENU, 'SearchWeb settings', 'Settings', 'manage_options', 'aw-seo-settings', 'aw_seo_settings_page' );
 	},
-	200 // last under AW SEO Plus
+	200 // last under SearchWeb
 );
 
 /**
@@ -529,7 +529,7 @@ function aw_seo_settings_page() {
 		wp_die( 'Not allowed.', 403 );
 	}
 	$tab = aw_seo_settings_tab();
-	echo '<div class="wrap"><h1>AW SEO Plus settings</h1>';
+	echo '<div class="wrap"><h1>SearchWeb settings</h1>';
 	if ( isset( $_GET['saved'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		echo '<div class="notice notice-success is-dismissible"><p>' . ( 'reset' === $_GET['saved'] ? 'Defaults restored.' : 'Settings saved.' ) . ' A module switched on or off takes effect on the next page load.</p></div>'; // phpcs:ignore WordPress.Security.NonceVerification
 	}

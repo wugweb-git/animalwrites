@@ -216,5 +216,5 @@ add_action(
 	}
 );
 
-// FluentCRM's dashboard: no "Set Up FluentSMTP" card; Mailweb sends the site's email.
+// FluentCRM's dashboard: no "Set Up FluentSMTP" card; MailWeb sends the site's email.
 add_filter( 'fluent_crm/fluentmail_suggest', '__return_true' );

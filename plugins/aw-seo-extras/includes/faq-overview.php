@@ -1,6 +1,6 @@
 <?php
 /**
- * AW SEO Plus → FAQ (owner, 31 Oct 2026): which post types and taxonomies have the FAQ box ("FAQ box on": all ticked by
+ * SearchWeb → FAQ (owner, 31 Oct 2026): which post types and taxonomies have the FAQ box ("FAQ box on": all ticked by
  * default; the unticked ones are stored in option aw_faq_off_types), then the overview. Questions are written, edited
  * and approved in each item's own FAQ box; this screen lists the items that show an FAQ (one core list table: name, type, questions shown, auto /
  * edited / own; search, sort, filter by type), a "Waiting for approval" view of draft questions with bulk Approve, and
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-// The AW SEO Plus Overview's FAQ status asks for this when the hourly count has run out (5 Nov 2026).
+// The SearchWeb Overview's FAQ status asks for this when the hourly count has run out (5 Nov 2026).
 add_action( 'aw_faq_index_build', fn() => aw_faq_index( true ) );
 
 /**
@@ -113,7 +113,7 @@ function aw_faq_can_edit( $store, $id ) {
 add_action(
 	'admin_menu',
 	function () {
-		$hook = add_submenu_page( AW_SEO_MENU, 'FAQ', 'FAQ', 'manage_categories', 'aw-faq', 'aw_faq_admin_page' ); // AW SEO Plus → FAQ (overview.php has the menu)
+		$hook = add_submenu_page( AW_SEO_MENU, 'FAQ', 'FAQ', 'manage_categories', 'aw-faq', 'aw_faq_admin_page' ); // SearchWeb → FAQ (overview.php has the menu)
 		if ( $hook ) {
 			add_action( 'load-' . $hook, 'aw_faq_admin_load' );
 		}
@@ -211,7 +211,7 @@ add_action(
 	}
 );
 
-/** AW SEO Plus → FAQ. */
+/** SearchWeb → FAQ. */
 function aw_faq_admin_page() {
 	if ( ! class_exists( 'WP_List_Table' ) ) {
 		require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';

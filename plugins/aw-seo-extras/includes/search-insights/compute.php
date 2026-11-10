@@ -12,10 +12,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Keyword map rule: high demand is Trends T ≥ 20, or ≥ 50 Search Console impressions in 28 days.
-// AW_SI_HIGH_TRENDS: AW SEO Plus → Settings (settings.php).
-// AW_SI_HIGH_IMPR: AW SEO Plus → Settings (settings.php).
-// AW_SI_QUICK_MIN: AW SEO Plus → Settings (settings.php).
-// AW_SI_MOVERS: AW SEO Plus → Settings (settings.php).
+// AW_SI_HIGH_TRENDS: SearchWeb → Settings (settings.php).
+// AW_SI_HIGH_IMPR: SearchWeb → Settings (settings.php).
+// AW_SI_QUICK_MIN: SearchWeb → Settings (settings.php).
+// AW_SI_MOVERS: SearchWeb → Settings (settings.php).
 
 /** Suggested actions (plan §7). Keys are stored; labels are shown. */
 function aw_si_actions(): array {

@@ -387,7 +387,7 @@ aw_t( 'admin.php?page=aw-sourcing' === aw_src_tab_path( 'sources' ) && 'admin.ph
 aw_t( 'admin.php?page=aw-sourcing&tab=workers' === aw_src_tab_path( 'workers' ) && 'admin.php?page=aw-sourcing&tab=relay-log' === aw_src_tab_menu_slug( 'relay-log' ), 'a tab\'s address and menu slug' );
 aw_t( AW_SRC_PAGE === aw_src_tab_menu_slug( 'sources' ), 'the Sources item is the page itself' );
 aw_t( array( 'Overview' => 'admin.php?page=aw-sourcing-menu', 'Settings' => 'admin.php?page=aw-sourcing&tab=settings' ) === aw_src_action_link_paths(), 'Plugins screen links: Overview, Settings' );
-aw_t( false !== strpos( $menu, "'plugin_action_links_' . plugin_basename( AW_SOURCING_DIR . 'aw-sourcing.php' )" ), 'the links are added under AW Sourcing on the Plugins screen' );
+aw_t( false !== strpos( $menu, "'plugin_action_links_' . plugin_basename( AW_SOURCING_DIR . 'aw-sourcing.php' )" ), 'the links are added under SourceWeb on the Plugins screen' );
 // No screen is under Settings or Inbox any more, and no old screen id is used.
 $all_inc = '';
 foreach ( glob( $inc . '*.php' ) as $f ) {

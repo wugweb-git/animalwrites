@@ -40,7 +40,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Content types whose items carry stored titles, descriptions and focus keywords. */
-// AW_SEO_ITEM_TYPES: AW SEO Plus → Settings (settings.php).
+// AW_SEO_ITEM_TYPES: SearchWeb → Settings (settings.php).
 
 /** Whether a post is a section hub Page (a list, not an item). */
 function aw_seo_is_hub_page( $post ) {

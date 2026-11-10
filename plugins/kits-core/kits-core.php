@@ -5,6 +5,7 @@
  * Version: 1.0.0
  * Author: Wugweb
  * License: GPL-2.0-or-later
+ * Update URI: https://wugweb.com/plugins/kits-core/
  *
  * @package kits-core
  */

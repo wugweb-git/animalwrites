@@ -25,7 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Post types shared as articles. */
-// AW_SEO_ARTICLE_TYPES: AW SEO Plus → Settings (settings.php).
+// AW_SEO_ARTICLE_TYPES: SearchWeb → Settings (settings.php).
 
 foreach ( array( 'facebook', 'twitter' ) as $aw_seo_net ) {
 	add_action(

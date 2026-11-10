@@ -1,6 +1,6 @@
 <?php
 /**
- * A read-only core list table for Mailweb's plain admin tables (WP_List_Table, no
+ * A read-only core list table for MailWeb's plain admin tables (WP_List_Table, no
  * hand-built tables). Rows come ready as cells of escaped HTML; a 'cb'
  * column takes its cell as the row's checkbox. Optional pages: all rows at once (per_page), or one page the screen
  * already fetched (per_page and total). It prints no nonce and no bulk actions, so it may sit inside the screen's own form.

@@ -1,6 +1,6 @@
 <?php
 /**
- * AW SEO Plus → FAQ: the core list table of items with an FAQ (aw_faq_index() rows). Views: "With an FAQ" and
+ * SearchWeb → FAQ: the core list table of items with an FAQ (aw_faq_index() rows). Views: "With an FAQ" and
  * "Waiting for approval" (items with draft questions; bulk Approve). Search by name, sort by name, type or questions
  * shown, filter by type. Loaded by aw_faq_admin_page() only.
  *

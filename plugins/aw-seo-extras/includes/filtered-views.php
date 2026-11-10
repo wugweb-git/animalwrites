@@ -30,19 +30,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Fewest items for a filtered list to be indexed. */
-// AW_FILTERED_MIN_ITEMS: AW SEO Plus → Settings (settings.php).
+// AW_FILTERED_MIN_ITEMS: SearchWeb → Settings (settings.php).
 
 /** Hubs whose ?category_name= views can be indexed (Directory listings have no categories as a filter). */
-// AW_FILTERED_CATEGORY_HUBS: AW SEO Plus → Settings (settings.php).
+// AW_FILTERED_CATEGORY_HUBS: SearchWeb → Settings (settings.php).
 
 /**
  * Title shapes of a filtered view per section (words from the hub titles), longest first; %s is the category name.
  * No colon or comma: the only separator in a title is the " – " before Animal Writes (owner, 15 Oct 2026).
  */
-// AW_FILTERED_TITLE_WORDS: AW SEO Plus → Settings (settings.php).
+// AW_FILTERED_TITLE_WORDS: SearchWeb → Settings (settings.php).
 
 /** Hubs whose ?state= views are never indexed (owner, 24 Oct 2026: News, Library, Opportunities). */
-// AW_FILTERED_STATE_NOINDEX: AW SEO Plus → Settings (settings.php).
+// AW_FILTERED_STATE_NOINDEX: SearchWeb → Settings (settings.php).
 
 /** Title shapes of a ?state= or ?publisher= view, longest first; %s is the state or publisher name. */
 const AW_FILTERED_PLACE_TITLE_WORDS = array(

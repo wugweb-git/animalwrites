@@ -1,6 +1,6 @@
 <?php
 /**
- * Search Insights tables (plan §3). Built with dbDelta and a version option, like the enrichment table in AW Sourcing.
+ * Search Insights tables (plan §3). Built with dbDelta and a version option, like the enrichment table in SourceWeb.
  * Deactivating or deleting the plugin keeps the tables and options; only the owner's "Delete Search Insights data"
  * (Settings tab, nonce + typed confirmation) drops them.
  *

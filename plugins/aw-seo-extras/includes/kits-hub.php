@@ -1,0 +1,54 @@
+<?php
+/**
+ * SearchWeb in the Kits admin: a tab on the Kits screens and a row in Kits → Welcome's System Status, through Kits
+ * Core's filters kits_admin_tabs and kits_status_rows. Only when Kits Core is loaded; without it nothing here runs and
+ * the plugin's own menu works as before. Loaded whether or not Rank Math is active, so the row can say it is missing.
+ *
+ * @package aw-seo-extras
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+add_action(
+	'plugins_loaded',
+	function () {
+		if ( ! function_exists( 'kits_admin_tabs' ) ) {
+			return;
+		}
+		add_filter( 'kits_admin_tabs', 'aw_seo_extras_kits_tab' );
+		add_filter( 'kits_status_rows', 'aw_seo_extras_kits_status_row' );
+	},
+	20 // after the plugin's own plugins_loaded (5), which loads the menu.
+);
+
+/**
+ * The SearchWeb tab: its Overview, when the menu is there (it needs Rank Math, aw-seo-extras.php).
+ *
+ * @param array $tabs Kits tabs: slug => [label, address relative to wp-admin, capability].
+ */
+function aw_seo_extras_kits_tab( $tabs ) {
+	if ( defined( 'AW_SEO_MENU' ) ) {
+		$tabs[ AW_SEO_MENU ] = array( 'SearchWeb', 'admin.php?page=' . AW_SEO_MENU, 'manage_categories' );
+	}
+	return $tabs;
+}
+
+/**
+ * The SearchWeb row of the System Status table.
+ *
+ * @param array $rows Rows: [label, HTML value].
+ */
+function aw_seo_extras_kits_status_row( $rows ) {
+	$head = get_file_data( AW_SEO_EXTRAS_DIR . 'aw-seo-extras.php', array( 'Version' => 'Version' ) );
+	$text = 'Active, ' . $head['Version'];
+	if ( ! aw_seo_extras_rank_math() ) {
+		$fix    = 'Does nothing until Rank Math SEO is active.';
+		$rows[] = array( 'SearchWeb', function_exists( 'kits_status_cell' ) ? kits_status_cell( $text, $fix ) : esc_html( $text . '. ' . $fix ) );
+		return $rows;
+	}
+	$link   = defined( 'AW_SEO_MENU' ) ? ' <a href="' . esc_url( admin_url( 'admin.php?page=' . AW_SEO_MENU ) ) . '">' . esc_html( 'Overview' ) . '</a>' : '';
+	$rows[] = array( 'SearchWeb', esc_html( $text ) . $link );
+	return $rows;
+}

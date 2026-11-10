@@ -1,4 +1,4 @@
-=== Mailweb ===
+=== MailWeb ===
 Contributors: wugweb
 Tags: email, inbox, hostinger, smtp, signature
 Requires at least: 6.4
@@ -12,7 +12,7 @@ Hostinger Mail inside WordPress: read, reply and send from your mailboxes, plus 
 
 == Description ==
 
-Mailweb puts a site's Hostinger mailboxes inside WordPress, so the team reads and answers mail where they already work. Everything is read from and written to the mailboxes through the Hostinger Mail API, so webmail and WordPress always show the same messages, folders and read state. Nothing from the mailboxes is copied into WordPress.
+MailWeb puts a site's Hostinger mailboxes inside WordPress, so the team reads and answers mail where they already work. Everything is read from and written to the mailboxes through the Hostinger Mail API, so webmail and WordPress always show the same messages, folders and read state. Nothing from the mailboxes is copied into WordPress.
 
 = Inbox =
 
@@ -51,7 +51,7 @@ The Mail API token, webhook secrets and SMTP password can be set in `wp-config.p
 
 == Installation ==
 
-1. Upload the `mailweb` folder to `/wp-content/plugins/` and activate Mailweb.
+1. Upload the `mailweb` folder to `/wp-content/plugins/` and activate MailWeb.
 2. In hPanel, create a Mail API token for the domain's mailboxes. Save it in Mail → Settings, or add it to `wp-config.php`: `define( 'MAILWEB_API_TOKEN', '...' );`
 3. In Mail → Settings, choose which mailboxes may send and the default From, add aliases, and fill in the profiles.
 4. Optional: in hPanel, add a webhook for "message.received" on each mailbox pointing to `/wp-json/mailweb/v1/mail-in`, and save each webhook's secret in Mail → Settings, so unread counts refresh as soon as mail arrives.
@@ -74,6 +74,7 @@ Nothing is deleted. Settings and earlier data stay in place.
 == Changelog ==
 
 = 3.2.0 =
+* Shown as MailWeb (was Mailweb). The folder, text domain, settings, webhook address and everything saved stay the same.
 * Message view: no remote content loads while pictures are hidden (a Content-Security-Policy in the frame; protocol-relative and escaped URLs included), and an email's own CSS cannot break out of its style tag.
 * Replying or forwarding always flags the original Answered / Forwarded.
 * All mailboxes: paging reads deeper into each mailbox, so later pages no longer skip messages or come up empty; dates are compared as dates.

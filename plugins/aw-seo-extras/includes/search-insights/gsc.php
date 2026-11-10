@@ -346,7 +346,7 @@ function aw_si_gsc_run( array $args = array() ): array {
 
 /**
  * Search Console figures per page path over the last $days days (ending yesterday), summed from the daily page rows
- * (metric p, so searches Google hides are included). For other plugins, e.g. AW Sourcing's per-keyword view.
+ * (metric p, so searches Google hides are included). For other plugins, e.g. SourceWeb's per-keyword view.
  *
  * @param string[] $paths Site paths such as /news/x/; empty for every page.
  * @param int      $days  Window length.

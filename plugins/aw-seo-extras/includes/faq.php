@@ -2,7 +2,7 @@
 /**
  * FAQ system (owner-approved spec, 20 Oct 2026; every page, 31 Oct 2026). One FAQ per page, 3 to 6 questions, or none.
  *
- * Every public post type and every public taxonomy gets the FAQ box on its edit screen (AW SEO Plus → FAQ → "FAQ box
+ * Every public post type and every public taxonomy gets the FAQ box on its edit screen (SearchWeb → FAQ → "FAQ box
  * on": all ticked by default, untick a type to leave it out). A page shows its FAQ when the box holds enough questions to show (the minimum: 3;
  * posts 2).
  *
@@ -35,10 +35,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-require_once __DIR__ . '/admin-table.php'; // aw_seo_extras_simple_table() for AW SEO Plus → FAQ
-require_once __DIR__ . '/faq-overview.php'; // AW SEO Plus → FAQ
+require_once __DIR__ . '/admin-table.php'; // aw_seo_extras_simple_table() for SearchWeb → FAQ
+require_once __DIR__ . '/faq-overview.php'; // SearchWeb → FAQ
 
-// AW_FAQ_MIN, AW_FAQ_MIN_GUIDE, AW_FAQ_MAX, AW_FAQ_WORDS, AW_FAQ_HUBS: AW SEO Plus → Settings (settings.php).
+// AW_FAQ_MIN, AW_FAQ_MIN_GUIDE, AW_FAQ_MAX, AW_FAQ_WORDS, AW_FAQ_HUBS: SearchWeb → Settings (settings.php).
 
 /** Tags allowed in an answer written in the box (the page and the schema print the same HTML). */
 const AW_FAQ_ANSWER_HTML = array(
@@ -64,7 +64,7 @@ function aw_faq_min( $ctx ) {
 /* ---------- Which types have the box ---------- */
 
 /**
- * Post types and taxonomies without the FAQ box: the ones unticked on AW SEO Plus → FAQ (option aw_faq_off_types), so a
+ * Post types and taxonomies without the FAQ box: the ones unticked on SearchWeb → FAQ (option aw_faq_off_types), so a
  * type registered later has the box. Read straight from the option: aw_faq_taxonomies() runs on admin_init.
  *
  * @return string[]
@@ -87,13 +87,13 @@ function aw_faq_off_types() {
 	return $off;
 }
 
-/** Post types with the FAQ box: every public type, less those unticked on AW SEO Plus → FAQ. */
+/** Post types with the FAQ box: every public type, less those unticked on SearchWeb → FAQ. */
 function aw_faq_post_types() {
 	$types = array_diff( array_values( get_post_types( array( 'public' => true ) ) ), array( 'attachment' ), aw_faq_off_types() );
 	return array_values( (array) apply_filters( 'aw_faq_post_types', $types ) );
 }
 
-/** Taxonomies with the FAQ box: every public taxonomy with an edit screen, less those unticked on AW SEO Plus → FAQ. */
+/** Taxonomies with the FAQ box: every public taxonomy with an edit screen, less those unticked on SearchWeb → FAQ. */
 function aw_faq_taxonomies() {
 	$tax = array_diff( array_values( get_taxonomies( array( 'public' => true, 'show_ui' => true ) ) ), aw_faq_off_types() );
 	return array_values( (array) apply_filters( 'aw_faq_taxonomies', $tax ) );
@@ -478,7 +478,7 @@ function aw_faq_items( $store, $id ) {
 }
 
 /**
- * Store a post's or term's rows (the FAQ box, AW SEO Plus → FAQ, wp aw-faq import).
+ * Store a post's or term's rows (the FAQ box, SearchWeb → FAQ, wp aw-faq import).
  *
  * @param string $store 'term' or 'post'.
  * @param int    $id    Term or post ID.

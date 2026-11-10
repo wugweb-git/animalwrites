@@ -8,6 +8,7 @@
  * Author: Wugweb
  * Author URI: https://wugweb.com
  * License: GPL-2.0-or-later
+ * Update URI: https://wugweb.com/plugins/animal-writes-core/
  * Text Domain: animal-writes-core
  *
  * @package animal-writes-core
