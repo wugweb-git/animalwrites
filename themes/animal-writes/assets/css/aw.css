@@ -114,7 +114,6 @@
 .kit-item .aw-item-meta + *, body.single-aw_research .kit-item .aw-item-meta + .kit-lead-media + * { margin-top: var(--kit-space-head); }
 .aw-listing-upi { margin-right: var(--kit-space-2); font-family: var(--kit-font-mono, monospace); }
 .aw-listing-support .aw-facts { margin-top: var(--kit-space-3); }
-.aw-more-initials { font-size: var(--kit-type-h3); font-weight: var(--kit-weight-bold); color: var(--kit-color-muted); }
 .kit-sidebar .aw-vol-banner { grid-template-columns: minmax(0, 1fr); margin: 0; }
 .kit-sidebar .aw-vol-banner-photo img { height: 140px; min-height: 0; }
 .kit-sidebar .aw-vol-banner-body { padding: var(--kit-space-5); }

@@ -1866,6 +1866,63 @@
    ]
   },
   {
+   "name": "Mini card",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-minicard",
+    "kit-minicard-list",
+    "kit-minicard-media",
+    "kit-minicard-media--logo",
+    "kit-minicard-logo",
+    "kit-minicard-body",
+    "kit-minicard-meta",
+    "kit-minicard-title",
+    "kit-minicard-line",
+    "kit-minicard-initials"
+   ],
+   "states": [
+    "picture (4:3, cover)",
+    "logo picture (media--logo: whole, on the raised surface)",
+    "logo box (placard shape; initials when there is no logo)",
+    "hover: title underline",
+    "focus: card outline"
+   ],
+   "tokens": [
+    "kit-space-1",
+    "kit-space-2",
+    "kit-space-4",
+    "kit-space-5",
+    "kit-space-grid",
+    "kit-border-width",
+    "kit-color-line",
+    "kit-color-raised",
+    "kit-color-muted",
+    "kit-radius-card",
+    "kit-placard-ratio",
+    "kit-type-h3",
+    "kit-type-sm",
+    "kit-weight-bold"
+   ],
+   "a11y": {
+    "element": "<li> in a <ul> (kit-minicard-list); <article class=\"kit-card kit-minicard\">",
+    "aria": "none",
+    "keyboard": "Tab to the title link",
+    "focus": "outline on the card while its title link has :focus-visible (kit-card)",
+    "target": "the whole card (the title link covers it)",
+    "motion": "none",
+    "sr": "the title link, then the meta row and the line; initials are aria-hidden"
+   },
+   "seo": {
+    "heading": "H3 card title",
+    "link": "one link per card (the title)",
+    "alt": "picture alt from the item's featured image; logo alt from the organisation",
+    "schema": "none"
+   },
+   "anatomy": "media 4:3 (or logo box) > meta row > title > one line",
+   "note": "Used with kit-card (whole-card link, title underline, focus outline). Not a kit-card--* state: no hover shadow, no three-line title clamp. One column, three from 768."
+  },
+  {
    "name": "Preview only",
    "type": "utility",
    "status": "live",

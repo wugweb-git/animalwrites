@@ -477,8 +477,8 @@ function aw_listing_press_card( $pid ) {
 	$ext  = 'aw_press' === $type;
 	$ts   = function_exists( 'aw_item_date_ts' ) ? aw_item_date_ts( $pid ) : (int) get_post_time( 'U', true, $pid );
 	$name = defined( 'AW_FEATURED_TYPES' ) ? ( AW_FEATURED_TYPES[ $type ] ?? '' ) : '';
-	return '<li><article class="kit-card aw-more-card">' . ( function_exists( 'aw_item_card_media' ) ? aw_item_card_media( $pid ) : '' ) . '<div class="aw-more-body"><p class="aw-more-meta kit-meta-row">' . ( $ts ? aw_date( $ts ) : '' ) . ( '' !== $name ? '<span class="aw-more-type">' . esc_html( $name ) . '</span>' : '' ) . '</p>' // the date always first in a meta row (owner)
-		. '<h3 class="aw-more-title"><a href="' . esc_url( $url ) . '"' . ( $ext ? ' rel="noopener nofollow" target="_blank"' : '' ) . '>' . esc_html( html_entity_decode( get_the_title( $pid ), ENT_QUOTES ) ) . '</a></h3></div></article></li>';
+	return '<li><article class="kit-card kit-minicard aw-more-card">' . ( function_exists( 'aw_item_card_media' ) ? aw_item_card_media( $pid ) : '' ) . '<div class="kit-minicard-body aw-more-body"><p class="kit-minicard-meta aw-more-meta kit-meta-row">' . ( $ts ? aw_date( $ts ) : '' ) . ( '' !== $name ? '<span class="aw-more-type">' . esc_html( $name ) . '</span>' : '' ) . '</p>' // the date always first in a meta row (owner)
+		. '<h3 class="kit-minicard-title aw-more-title"><a href="' . esc_url( $url ) . '"' . ( $ext ? ' rel="noopener nofollow" target="_blank"' : '' ) . '>' . esc_html( html_entity_decode( get_the_title( $pid ), ENT_QUOTES ) ) . '</a></h3></div></article></li>';
 }
 
 function aw_block_listing_press( $a, $id ) {
@@ -494,7 +494,7 @@ function aw_block_listing_press( $a, $id ) {
 	$n    = $all ? count( $ids ) : count( aw_featured_items( $id, 100 ) );
 	$show = $all ? $ids : array_slice( $ids, 0, 5 );
 	$more = ! $all && $n > 5 ? '<p class="aw-more-all"><a href="' . esc_url( add_query_arg( 'press', 'all', get_permalink( $id ) ) . '#aw-press-h' ) . '">' . esc_html( sprintf( /* translators: %d: number. */ __( 'See all (%d)', 'animal-writes-core' ), $n ) ) . '</a></p>' : '';
-	return '<section class="aw-more-group aw-listing-press" aria-labelledby="aw-press-h"><h2 class="aw-more-head has-x-large-font-size" id="aw-press-h">' . esc_html__( 'In the press', 'animal-writes-core' ) . '</h2><ul class="aw-more-list">' . implode( '', array_map( 'aw_listing_press_card', $show ) ) . '</ul>' . $more . '</section>';
+	return '<section class="aw-more-group aw-listing-press" aria-labelledby="aw-press-h"><h2 class="aw-more-head has-x-large-font-size" id="aw-press-h">' . esc_html__( 'In the press', 'animal-writes-core' ) . '</h2><ul class="kit-minicard-list aw-more-list">' . implode( '', array_map( 'aw_listing_press_card', $show ) ) . '</ul>' . $more . '</section>';
 }
 
 
@@ -513,7 +513,7 @@ function aw_block_listing_opportunities( $a, $id ) {
 	}
 	aw_use_component_style( 'aw-single' ); // aw-more-card, aw-more-head, aw-more-list
 	/* translators: %s: organisation. */
-	return '<section class="aw-more-group aw-listing-opps" aria-labelledby="aw-opps-h"><h2 class="aw-more-head has-x-large-font-size" id="aw-opps-h">' . esc_html( sprintf( __( 'Opportunities at %s', 'animal-writes-core' ), get_the_title( $id ) ) ) . '</h2><ul class="aw-more-list">' . implode( '', array_map( 'aw_item_more_card', $ids ) ) . '</ul></section>';
+	return '<section class="aw-more-group aw-listing-opps" aria-labelledby="aw-opps-h"><h2 class="aw-more-head has-x-large-font-size" id="aw-opps-h">' . esc_html( sprintf( __( 'Opportunities at %s', 'animal-writes-core' ), get_the_title( $id ) ) ) . '</h2><ul class="kit-minicard-list aw-more-list">' . implode( '', array_map( 'aw_item_more_card', $ids ) ) . '</ul></section>';
 }
 
 /* ---------- Campaigns with {organisation} (owner, 20 Oct 2026): role chip, up to 3 ---------- */
@@ -555,10 +555,10 @@ function aw_block_listing_campaigns( $a, $id ) {
 	$cards = '';
 	foreach ( $roles as $c => $role ) {
 		$chip   = '<span class="kit-tag aw-camp-role">' . esc_html( $role ) . '</span>';
-		$cards .= preg_replace( '#(<p class="aw-more-meta kit-meta-row">.*?)(</p>)#s', '$1' . $chip . '$2', aw_item_more_card( $c ), 1 ); // after the date: the date always comes first
+		$cards .= preg_replace( '#(<p class="kit-minicard-meta aw-more-meta kit-meta-row">.*?)(</p>)#s', '$1' . $chip . '$2', aw_item_more_card( $c ), 1 ); // after the date: the date always comes first
 	}
 	/* translators: %s: organisation. */
-	return '<section class="aw-more-group aw-listing-campaigns" aria-labelledby="aw-camps-h"><h2 class="aw-more-head has-x-large-font-size" id="aw-camps-h">' . esc_html( sprintf( __( 'Campaigns with %s', 'animal-writes-core' ), get_the_title( $id ) ) ) . '</h2><ul class="aw-more-list">' . $cards . '</ul></section>';
+	return '<section class="aw-more-group aw-listing-campaigns" aria-labelledby="aw-camps-h"><h2 class="aw-more-head has-x-large-font-size" id="aw-camps-h">' . esc_html( sprintf( __( 'Campaigns with %s', 'animal-writes-core' ), get_the_title( $id ) ) ) . '</h2><ul class="kit-minicard-list aw-more-list">' . $cards . '</ul></section>';
 }
 
 /* ---------- Sidebar: Claim your listing (everywhere but an unclaimed profile, which has its own claim box) ---------- */

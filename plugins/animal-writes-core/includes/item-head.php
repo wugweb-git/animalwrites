@@ -485,7 +485,7 @@ add_action( 'save_post', fn( $id ) => delete_transient( 'aw_more_' . (int) $id )
 function aw_item_card_media( $pid ) {
 	aw_use_component_style( 'aw-lists' ); // kit-story-media
 	$b = new WP_Block(
-		array( 'blockName' => 'core/post-featured-image', 'attrs' => array( 'aspectRatio' => '4/3', 'scale' => 'cover', 'sizeSlug' => 'medium_large', 'className' => 'kit-story-media aw-more-media' . ( 'aw_opportunity' === get_post_type( $pid ) ? ' aw-more-media--logo' : '' ) ), 'innerBlocks' => array(), 'innerHTML' => '', 'innerContent' => array() ),
+		array( 'blockName' => 'core/post-featured-image', 'attrs' => array( 'aspectRatio' => '4/3', 'scale' => 'cover', 'sizeSlug' => 'medium_large', 'className' => 'kit-story-media kit-minicard-media aw-more-media' . ( 'aw_opportunity' === get_post_type( $pid ) ? ' kit-minicard-media--logo aw-more-media--logo' : '' ) ), 'innerBlocks' => array(), 'innerHTML' => '', 'innerContent' => array() ),
 		array( 'postId' => (int) $pid, 'postType' => get_post_type( $pid ) )
 	);
 	return (string) $b->render();
@@ -499,18 +499,18 @@ function aw_item_more_card( $pid ) {
 	if ( 'aw_listing' === get_post_type( $pid ) ) { // an organisation: its logo whole in the 4:3 box (or its initials), type and place
 		$logo  = get_the_post_thumbnail( $pid, 'medium', array( 'alt' => '', 'loading' => 'lazy' ) );
 		$words = array_values( array_filter( preg_split( '/\s+/', preg_replace( '/[^\p{L}\s]/u', '', get_the_title( $pid ) ) ) ) );
-		$mark  = $logo ? $logo : '<span class="aw-more-initials" aria-hidden="true">' . esc_html( mb_strtoupper( mb_substr( $words[0] ?? '', 0, 1 ) . mb_substr( $words[1] ?? '', 0, 1 ) ) ) . '</span>';
+		$mark  = $logo ? $logo : '<span class="kit-minicard-initials aw-more-initials" aria-hidden="true">' . esc_html( mb_strtoupper( mb_substr( $words[0] ?? '', 0, 1 ) . mb_substr( $words[1] ?? '', 0, 1 ) ) ) . '</span>';
 		$place = function_exists( 'aw_item_place' ) ? aw_item_place( $pid ) : null;
 		$line  = wp_strip_all_tags( (string) get_the_excerpt( $pid ) );
-		return '<li><article class="kit-card aw-more-card aw-more-card--org"><div class="aw-more-media aw-more-logo">' . $mark . '</div><div class="aw-more-body"><p class="aw-more-meta kit-meta-row">' . ( '' !== $name ? '<span class="aw-more-type">' . esc_html( $name ) . '</span>' : '' ) . ( $place ? '<span class="kit-meta-item">' . aw_i( 'map-pin' ) . esc_html( $place->name ) . '</span>' : '' ) . '</p>'
-			. '<h3 class="aw-more-title"><a href="' . esc_url( get_permalink( $pid ) ) . '">' . esc_html( get_the_title( $pid ) ) . '</a></h3>'
-			. ( '' !== $line ? '<p class="aw-more-line">' . esc_html( $line ) . '</p>' : '' ) . '</div></article></li>';
+		return '<li><article class="kit-card kit-minicard aw-more-card aw-more-card--org"><div class="kit-minicard-media kit-minicard-logo aw-more-media aw-more-logo">' . $mark . '</div><div class="kit-minicard-body aw-more-body"><p class="kit-minicard-meta aw-more-meta kit-meta-row">' . ( '' !== $name ? '<span class="aw-more-type">' . esc_html( $name ) . '</span>' : '' ) . ( $place ? '<span class="kit-meta-item">' . aw_i( 'map-pin' ) . esc_html( $place->name ) . '</span>' : '' ) . '</p>'
+			. '<h3 class="kit-minicard-title aw-more-title"><a href="' . esc_url( get_permalink( $pid ) ) . '">' . esc_html( get_the_title( $pid ) ) . '</a></h3>'
+			. ( '' !== $line ? '<p class="kit-minicard-line aw-more-line">' . esc_html( $line ) . '</p>' : '' ) . '</div></article></li>';
 	}
 	$ts   = aw_item_date_ts( $pid );
 	$line = wp_strip_all_tags( (string) get_the_excerpt( $pid ) );
-	return '<li><article class="kit-card aw-more-card">' . aw_item_card_media( $pid ) . '<div class="aw-more-body"><p class="aw-more-meta kit-meta-row">' . ( $ts ? aw_date( $ts ) : '' ) . ( '' !== $name ? '<span class="aw-more-type">' . esc_html( $name ) . '</span>' : '' ) . '</p>' // the date always first in a meta row (owner)
-		. '<h3 class="aw-more-title"><a href="' . esc_url( get_permalink( $pid ) ) . '">' . esc_html( get_the_title( $pid ) ) . '</a></h3>'
-		. ( '' !== $line ? '<p class="aw-more-line">' . esc_html( $line ) . '</p>' : '' ) . '</div></article></li>';
+	return '<li><article class="kit-card kit-minicard aw-more-card">' . aw_item_card_media( $pid ) . '<div class="kit-minicard-body aw-more-body"><p class="kit-minicard-meta aw-more-meta kit-meta-row">' . ( $ts ? aw_date( $ts ) : '' ) . ( '' !== $name ? '<span class="aw-more-type">' . esc_html( $name ) . '</span>' : '' ) . '</p>' // the date always first in a meta row (owner)
+		. '<h3 class="kit-minicard-title aw-more-title"><a href="' . esc_url( get_permalink( $pid ) ) . '">' . esc_html( get_the_title( $pid ) ) . '</a></h3>'
+		. ( '' !== $line ? '<p class="kit-minicard-line aw-more-line">' . esc_html( $line ) . '</p>' : '' ) . '</div></article></li>';
 }
 
 function aw_block_item_more( $a, $id ) {
@@ -521,7 +521,7 @@ function aw_block_item_more( $a, $id ) {
 	$out = '';
 	foreach ( aw_item_more_groups( $id ) as $n => $g ) {
 		$hid  = 'aw-more-' . $n;
-		$out .= '<section class="aw-more-group" aria-labelledby="' . $hid . '"><h2 class="aw-more-head has-x-large-font-size" id="' . $hid . '">' . esc_html( $g[0] ) . '</h2><ul class="aw-more-list">' . implode( '', array_map( 'aw_item_more_card', $g[1] ) ) . '</ul></section>';
+		$out .= '<section class="aw-more-group" aria-labelledby="' . $hid . '"><h2 class="aw-more-head has-x-large-font-size" id="' . $hid . '">' . esc_html( $g[0] ) . '</h2><ul class="kit-minicard-list aw-more-list">' . implode( '', array_map( 'aw_item_more_card', $g[1] ) ) . '</ul></section>';
 	}
 	return '' !== $out ? '<div class="aw-more">' . $out . '</div>' : '';
 }

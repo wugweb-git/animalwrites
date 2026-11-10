@@ -42,7 +42,7 @@ BASELINE = ROOT / "tools/ci/theme_rules_baseline.txt"
 SKIP = re.compile(r"/vendor/|\.min\.|/node_modules/|/dropins/")
 SECTIONISH = re.compile(r"\.kit-section\b(?!-)|\.alignfull\b|(^|[\s>+~,(])section\b|\.aw-camp-section\b|\.kit-section-band\b|\.kit-hero\b")
 BLOCKS = re.compile(
-    r"\.(kit-card|kit-card-body|kit-tile|kit-photo-card|is-style-kits-card|aw-more-card|aw-more-body|aw-story--card|aw-bento-tile"
+    r"\.(kit-card|kit-card-body|kit-tile|kit-photo-card|is-style-kits-card|kit-minicard|kit-minicard-body|aw-more-card|aw-more-body|aw-story--card|aw-bento-tile"
     r"|aw-org|aw-org-facts|aw-vol-banner|aw-vol-banner-body|kit-share|aw-camp-share-kit|aw-content|aw-festive|kit-claim|aw-report"
     r"|aw-side-camp|aw-side-camp-body|aw-side-claim|aw-activity-box|aw-helpline|aw-emergency|aw-form-for|aw-claim-summary"
     r"|aw-sponsored-item|aw-about-act|kit-form-summary|kit-form-done|kit-form-status|kit-toc|aw-near"

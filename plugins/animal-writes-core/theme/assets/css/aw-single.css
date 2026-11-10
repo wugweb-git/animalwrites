@@ -50,26 +50,9 @@
 .aw-term-end { margin-top: var(--kit-space-7); }
 .aw-more { display: grid; gap: var(--kit-space-7); margin: var(--kit-space-8) 0 0; }
 .aw-more-head { margin: 0 0 var(--kit-space-4); font-weight: var(--kit-weight-strong); }
-.aw-more-list { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-4); margin: 0; padding: 0; list-style: none; }
-@media (min-width: 768px) {
-	.aw-more-list { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--kit-space-grid); }
-}
-.aw-more-list > li { margin: 0; }
-.aw-more-card { height: 100%; box-sizing: border-box; display: flex; flex-direction: column; overflow: hidden; border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); }
-.aw-more-card .aw-more-media { margin: 0; aspect-ratio: 4 / 3; border-radius: 0; }
-.aw-more-card .aw-more-media img { width: 100%; height: 100%; object-fit: cover; }
-.aw-more-card .aw-more-media--logo { background: var(--kit-color-raised); }
-.aw-more-card .aw-more-media--logo img { object-fit: contain; padding: var(--kit-space-4); box-sizing: border-box; }
-.aw-more-body { padding: var(--kit-space-5); }
-.aw-more-meta { margin: 0 0 var(--kit-space-2); }
-.aw-more-title { margin: 0; font-size: var(--kit-type-h3); line-height: 1.25; }
-.aw-more-title a::after { content: ""; position: absolute; inset: 0; }
-.aw-more-line { margin: var(--kit-space-1) 0 0; font-size: var(--kit-type-sm); color: var(--kit-color-muted); display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
 .aw-item-verified .kit-ico { --kit-ico-size: 0.9em; }
 .aw-sources-list { margin: 0 0 var(--kit-space-2); }
 .aw-sources-updated { margin: 0 0 var(--kit-space-2); }
-.aw-more-card .aw-more-logo { display: flex; align-items: center; justify-content: center; aspect-ratio: var(--kit-placard-ratio); background: var(--kit-color-raised); border-bottom: var(--kit-border-width) solid var(--kit-color-line); }
-.aw-more-card .aw-more-logo img { max-width: 60%; max-height: 70%; width: auto; height: auto; object-fit: contain; }
 .aw-side-camp { overflow: hidden; border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); }
 .aw-side-camp-media { aspect-ratio: var(--kit-placard-ratio); background: var(--kit-color-raised); border-bottom: var(--kit-border-width) solid var(--kit-color-line); }
 .aw-side-camp-media img { display: block; width: 100%; height: 100%; object-fit: contain; }
