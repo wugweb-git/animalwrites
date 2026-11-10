@@ -787,6 +787,9 @@ add_filter(
 		if ( '' === $faq ) {
 			return $html;
 		}
+		if ( function_exists( 'aw_use_component_style' ) ) {
+			aw_use_component_style( 'aw-hubs' ); // aw-hub-faq
+		}
 		$class = 'hub' === $ctx['kind'] ? 'aw-hub-faq alignwide' : ( 'constrained' === ( $block['attrs']['layout']['type'] ?? '' ) ? 'aw-hub-faq' : 'aw-hub-faq has-global-padding is-layout-constrained' );
 		// A campaign page with a next-steps section: the FAQ goes right after it, before the next section (Campaign
 		// Content Standard v1.0, Post order: next-steps, faq, partners). Else it follows the content.

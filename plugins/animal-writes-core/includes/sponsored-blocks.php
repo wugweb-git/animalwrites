@@ -27,6 +27,9 @@ function aw_block_sponsored_item( $a ) {
 	aw_use_component_style( 'aw-lists' ); // aw-sponsored-item, aw-sponsored-label
 	$url   = get_permalink( $id );
 	$thumb = get_the_post_thumbnail( $id, 'medium_large', array( 'alt' => '', 'loading' => 'lazy' ) );
+	if ( $thumb ) {
+		aw_use_component_style( 'aw-hubs' ); // aw-sponsored-item-media
+	}
 	$text  = function_exists( 'aw_text' ) ? aw_text( $id, 26 ) : get_the_excerpt( $id );
 	$sponsor = trim( (string) get_post_meta( $id, 'aw_sponsor_name', true ) );
 	// data-sponsored-*: sponsored_view / sponsored_click (aw-analytics.js).

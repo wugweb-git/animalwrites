@@ -208,6 +208,7 @@ function aw_thanks_head() {
 add_shortcode(
 	'aw_thank_you',
 	function () {
+		aw_use_component_style( 'aw-hubs' ); // aw-thanks-links
 		$form  = kits_thanks_form();
 		$forms = aw_thanks_forms();
 		$links = '';

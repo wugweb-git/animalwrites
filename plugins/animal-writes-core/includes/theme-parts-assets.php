@@ -95,6 +95,14 @@ function aw_component_style_files(): array {
 			'file' => 'assets/css/aw-listing.css',
 			'when' => fn() => is_singular( 'aw_listing' ) || is_page( 'claim' ),
 		),
+		'aw-hubs' => array( // Hub pages, the category hub and index, term chips, the adoption page; flags print it elsewhere.
+			'file'   => 'assets/css/aw-hubs.css',
+			'when'   => fn() => is_page_template( 'page-hub' ) || ( function_exists( 'aw_hub_type' ) && '' !== aw_hub_type() ) || is_category() || is_tag() || is_page( 'adoption' ),
+			'blocks' => array(
+				'core/query'         => array( 'aw-hub-news', 'aw-hub-library', 'aw-hub-directory', 'aw-camp-more' ), // hub list patterns placed elsewhere
+				'core/post-template' => 'aw-cases',
+			),
+		),
 	);
 }
 
