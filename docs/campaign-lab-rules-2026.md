@@ -278,7 +278,7 @@ So from 6 Nov until the owner sets Post, the page and Home still ask people to s
   - Guide pictures: rule-by-rule (13854) 24152, was 16337; who approves (13855) 24147, was 16338.
   - News 12972 ("Explained", Hindustan Times): 24157, was 12984; the publisher's photo is turned off (aw_source_image_off).
   - Library 13904 (Delhi High Court, PETA India v. CCSEA): 24163 in place of the cat photo.
-  - Not placed: the other five guide pictures (24184, 24181, 24176, 24171, 24158 are 319–762px wide, below the 1200×900 covers); the section pictures (the sections have no picture slot); the Post pictures (the page is still Active); the share bases 24153 (1200×630), 24154 (1080×1350) and 24155 (1080×1920), big enough, for the share images; the spares.
+  - Not placed: the other five guide pictures (24184, 24181, 24176, 24171, 24158 are 319–762px wide, below the 1200×900 covers); the section pictures (the sections have no picture slot; owner, 10 Nov: no slot, leave them); the Post pictures (the page is still Active); the share bases 24153 (1200×630), 24154 (1080×1350) and 24155 (1080×1920), big enough, for the share images; the spares.
 - Social posts by page section (card, story, X, Instagram, LinkedIn, WhatsApp), each with #AnimalWrites first: drafts, not posted.
 
 ## Decided by the owner
