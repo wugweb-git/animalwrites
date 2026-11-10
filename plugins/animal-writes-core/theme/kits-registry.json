@@ -2395,7 +2395,7 @@
     "aw-social-card"
    ],
    "states": [
-    "off (Animal Writes → Modules → Show on pages; prints nothing)",
+    "off (Kits → Modules → Show on pages; prints nothing)",
     "no approved posts (prints nothing)",
     "cards: date, on platform, handle; person; summary",
     "X or YouTube post: Show the post button, embed after the click",

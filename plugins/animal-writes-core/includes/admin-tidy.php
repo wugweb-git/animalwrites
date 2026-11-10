@@ -7,7 +7,7 @@
  * Items are matched by their visible label under their menu (the plugins build their menus at run time, so labels are
  * steadier than internal slugs). Hidden:
  * - Tools: Available Tools (WordPress's old converters), Server-Timing (a Performance Lab developer tool), Scheduled
- *   Actions (FluentCRM's job queue; Animal Writes → Overview shows scheduled-task health).
+ *   Actions (FluentCRM's job queue; Kits → Site: Animal Writes shows scheduled-task health).
  * - Settings: Discussion (comments are off site-wide), Connectors (unused AI/MCP connectors).
  * - Upsells and paid features (owner: no paid plans): Rank Math's Unlock PRO, AI Visibility, Content AI, AI Link Genius,
  *   Help & Support; Link Whisper's AI Subscription, Get Premium; Fluent Forms' Support; FluentCRM's Addons, SMTP (a

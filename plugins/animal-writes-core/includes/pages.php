@@ -365,7 +365,7 @@ function aw_social_icon( $host_or_url ) {
 	return '';
 }
 
-/** Links the owner adds in Animal Writes → Contact links: list of [label, url]. Hidden while empty. */
+/** Links the owner adds in Kits → Contact links: list of [label, url]. Hidden while empty. */
 function aw_elsewhere_links() {
 	return array_values( array_filter( (array) get_option( 'aw_elsewhere', array() ), fn( $r ) => ! empty( $r['label'] ) && ! empty( $r['url'] ) ) );
 }
@@ -387,7 +387,7 @@ add_shortcode(
 add_action(
 	'admin_menu',
 	function () {
-		add_submenu_page( aw_core_menu_parent(), 'Contact links', 'Contact links', aw_core_screen_cap( 'aw-elsewhere' ), 'aw-elsewhere', 'aw_elsewhere_screen' ); // Animal Writes → Contact links
+		add_submenu_page( aw_core_menu_parent(), 'Contact links', 'Contact links', aw_core_screen_cap( 'aw-elsewhere' ), 'aw-elsewhere', 'aw_elsewhere_screen' ); // Kits → Contact links
 	},
 	aw_core_menu_priority( 'aw-elsewhere' ) // order: aw_core_screens() (admin-home.php)
 );

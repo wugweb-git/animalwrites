@@ -1,6 +1,6 @@
 <?php
 /**
- * Dates (owner, 21 Oct 2026): the team's own calendar inside WordPress. Animal Writes → Dates shows a month grid, the list of
+ * Dates (owner, 21 Oct 2026): the team's own calendar inside WordPress. Kits → Dates shows a month grid, the list of
  * dates with their notes, and a form to add or remove one; the Dashboard shows what is next. No plugin and no public page:
  * The Events Calendar was installed but inactive, and it would add public event pages and an /events/ archive to the
  * sitemap. The dates live in the option aw_team_dates: a list of {date Y-m-d, title, note}.
@@ -160,12 +160,12 @@ function aw_team_date_when( $ymd ) {
 add_action(
 	'admin_menu',
 	function () {
-		add_submenu_page( aw_core_menu_parent(), 'Dates', 'Dates', aw_core_screen_cap( 'aw-dates' ), 'aw-dates', 'aw_team_dates_screen' ); // Animal Writes → Dates
+		add_submenu_page( aw_core_menu_parent(), 'Dates', 'Dates', aw_core_screen_cap( 'aw-dates' ), 'aw-dates', 'aw_team_dates_screen' ); // Kits → Dates
 	},
 	aw_core_menu_priority( 'aw-dates' ) // order: aw_core_screens() (admin-home.php)
 );
 
-/** Animal Writes → Dates. */
+/** Kits → Dates. */
 function aw_team_dates_screen() {
 	if ( ! current_user_can( AW_DATES_CAP ) ) {
 		wp_die( 'Not allowed.', 403 );

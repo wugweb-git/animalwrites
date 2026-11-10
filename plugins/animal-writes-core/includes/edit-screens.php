@@ -1,6 +1,6 @@
 <?php
 /**
- * Animal Writes → Edit screens (owner, 1 Nov 2026): every box on every edit screen, the keys it stores and where each
+ * Kits → Edit screens (owner, 1 Nov 2026): every box on every edit screen, the keys it stores and where each
  * key is used on the site. Read-only: nothing here writes an option, meta or post.
  *
  * The map lives in data/edit-screen-map.json (boxes by id, keys by stored name) and is read by aw_edit_screen_map();
@@ -10,7 +10,7 @@
  * Term screens: the callbacks on each taxonomy's form hooks. A box or field the map does not know shows "Not mapped yet".
  * Also here: the boxes that start collapsed on post edit screens (aw_edit_screen_collapsed_boxes(), core filter only).
  *
- * Screen: Animal Writes → Edit screens (manage_options). WP-CLI: wp aw-edit-screens [--type=<type>] [--format=table|json].
+ * Screen: Kits → Edit screens (manage_options). WP-CLI: wp aw-edit-screens [--type=<type>] [--format=table|json].
  * How to add an entry: docs/edit-screens.md.
  *
  * @package animal-writes-core
@@ -786,7 +786,7 @@ function aw_edit_screen_twice( array $rows ): array {
 add_action(
 	'admin_menu',
 	function () {
-		$hook = add_submenu_page( aw_core_menu_parent(), 'Edit screens', 'Edit screens', aw_core_screen_cap( 'aw-edit-screens' ), 'aw-edit-screens', 'aw_edit_screens_page' ); // Animal Writes → Edit screens
+		$hook = add_submenu_page( aw_core_menu_parent(), 'Edit screens', 'Edit screens', aw_core_screen_cap( 'aw-edit-screens' ), 'aw-edit-screens', 'aw_edit_screens_page' ); // Kits → Edit screens
 		if ( $hook ) {
 			add_action(
 				'load-' . $hook,
@@ -930,7 +930,7 @@ function aw_edit_screens_grid( array $cols, array $rows ): void {
 	echo '</tbody></table>';
 }
 
-/** Animal Writes → Edit screens. */
+/** Kits → Edit screens. */
 function aw_edit_screens_page(): void {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		return;
@@ -1260,7 +1260,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			}
 			WP_CLI\Utils\format_items( 'table', $out, array( 'type', 'box', 'plugin', 'purpose', 'shows_on', 'fields', 'used', 'notes' ) );
 			if ( ! is_admin() ) {
-				WP_CLI::log( 'Some plugins add their boxes only in WP admin (for example LiteSpeed); they show on Animal Writes → Edit screens.' );
+				WP_CLI::log( 'Some plugins add their boxes only in WP admin (for example LiteSpeed); they show on Kits → Edit screens.' );
 			}
 			WP_CLI::log( aw_edit_screen_map_only_note() );
 			$twice = aw_edit_screen_twice( $rows );

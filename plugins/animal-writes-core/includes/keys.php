@@ -1,6 +1,6 @@
 <?php
 /**
- * Animal Writes → Keys (owner, 31 Oct 2026): every service key the site's plugins use, set in WP admin. A wp-config.php
+ * Kits → Keys (owner, 31 Oct 2026): every service key the site's plugins use, set in WP admin. A wp-config.php
  * constant of the same name always wins. Values are kept in one option that is not autoloaded and are never shown
  * again: the screen only says whether a key is set and where. Administrators only.
  *
@@ -22,7 +22,7 @@ function aw_keys_list(): array {
 }
 
 /**
- * A key's value: the wp-config.php constant if set, else the one saved under Animal Writes → Keys, else ''.
+ * A key's value: the wp-config.php constant if set, else the one saved under Kits → Keys, else ''.
  *
  * @param string $name Constant name, e.g. AW_BING_WEBMASTER_KEY.
  */
@@ -49,12 +49,12 @@ function aw_key_where( string $name ): string {
 add_action(
 	'admin_menu',
 	function () {
-		add_submenu_page( aw_core_menu_parent(), 'Keys', 'Keys', aw_core_screen_cap( 'aw-keys' ), 'aw-keys', 'aw_keys_screen' ); // Animal Writes → Keys
+		add_submenu_page( aw_core_menu_parent(), 'Keys', 'Keys', aw_core_screen_cap( 'aw-keys' ), 'aw-keys', 'aw_keys_screen' ); // Kits → Keys
 	},
 	aw_core_menu_priority( 'aw-keys' ) // order: aw_core_screens() (admin-home.php)
 );
 
-/** Animal Writes → Keys. */
+/** Kits → Keys. */
 function aw_keys_screen(): void {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		return;

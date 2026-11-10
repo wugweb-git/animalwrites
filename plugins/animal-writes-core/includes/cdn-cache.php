@@ -113,7 +113,7 @@ add_action(
 );
 
 /**
- * Animal Writes → Check site: a "Shared cache (CDN)" section for both lifetimes (owner, 2 Nov 2026). Core Settings API
+ * Kits → Check site: a "Shared cache (CDN)" section for both lifetimes (owner, 2 Nov 2026). Core Settings API
  * and core markup only. Whole seconds: 0 (off; for the long one, the same as the short one) or 60 to 3600; anything
  * else is clamped into that range. The header a public page gets now is shown under the fields.
  *
