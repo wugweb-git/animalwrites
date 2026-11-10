@@ -2984,7 +2984,7 @@
 			"reads": [
 				"active plugins"
 			],
-			"limits": "Install and Activate open WordPress's own Plugins screens (core nonce links); Kits Core shows \"Active (loaded by another plugin)\" when a site plugin loads it.",
+			"limits": "Install and Activate open WordPress's own Plugins screens (core nonce links); Kits Core shows \"Active (loaded by another plugin)\" when a site plugin loads it. Below it, \"This site's plugins\": a row per plugin that adds itself through the `kits_plugin_screens` filter (SourceWeb, RankWeb, MailWeb here), linking to its own screen; those are not top tabs.",
 			"decision": "",
 			"notes": "Stores nothing."
 		},

@@ -1039,7 +1039,7 @@ Tabs in this order on every Kits screen (`kits_admin_tabs`); Fonts is core's Fon
 
 | id | widget | kind | reads | limits | file |
 |---|---|---|---|---|---|
-| ap-kits-plugins | Required and recommended plugins | table | `active plugins` | Install and Activate open WordPress's own Plugins screens (core nonce links); Kits Core shows "Active (loaded by another plugin)" when a site plugin loads it. | `kits/admin-screens.php:253 (kits_plugins_page)` |
+| ap-kits-plugins | Required and recommended plugins | table | `active plugins` | Install and Activate open WordPress's own Plugins screens (core nonce links); Kits Core shows "Active (loaded by another plugin)" when a site plugin loads it. Below it, "This site's plugins": a row per plugin that adds itself through the `kits_plugin_screens` filter (SourceWeb, RankWeb, MailWeb here), linking to its own screen; those are not top tabs. | `kits/admin-screens.php:253 (kits_plugins_page)` |
 
 **Kits: Import / Export** (`kits-transfer`)
 
