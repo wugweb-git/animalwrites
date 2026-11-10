@@ -1,7 +1,7 @@
 <?php
 /**
- * SourceWeb in the Kits admin: a tab on the Kits screens and a row in Kits → Welcome's System Status, through Kits
- * Core's filters kits_admin_tabs and kits_status_rows. Only when Kits Core is loaded; without it nothing here runs and
+ * SourceWeb in the Kits admin: a row on Kits → Plugins and a row in Kits → Welcome's System Status, through Kits
+ * Core's filters kits_plugin_screens and kits_status_rows. Only when Kits Core is loaded; without it nothing here runs and
  * the Sourcing menu works as before.
  *
  * @package aw-sourcing
@@ -17,19 +17,19 @@ add_action(
 		if ( ! function_exists( 'kits_admin_tabs' ) ) {
 			return;
 		}
-		add_filter( 'kits_admin_tabs', 'aw_sourcing_kits_tab' );
+		add_filter( 'kits_plugin_screens', 'aw_sourcing_kits_tab' );
 		add_filter( 'kits_status_rows', 'aw_sourcing_kits_status_row' );
 	},
 	20
 );
 
 /**
- * The SourceWeb tab: Sourcing → Overview.
+ * The SourceWeb row on Kits → Plugins: Sourcing → Overview.
  *
- * @param array $tabs Kits tabs: slug => [label, address relative to wp-admin, capability].
+ * @param array $tabs Kits plugin screens: slug => [name, address relative to wp-admin, capability, what it is].
  */
 function aw_sourcing_kits_tab( $tabs ) {
-	$tabs[ AW_SRC_MENU ] = array( 'SourceWeb', 'admin.php?page=' . AW_SRC_MENU, AW_REVIEW_CAP );
+	$tabs[ AW_SRC_MENU ] = array( 'SourceWeb', 'admin.php?page=' . AW_SRC_MENU, AW_REVIEW_CAP, 'What the workers fetch and how it arrives: Sourcing → Overview.' );
 	return $tabs;
 }
 

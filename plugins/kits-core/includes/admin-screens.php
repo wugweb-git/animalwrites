@@ -37,6 +37,20 @@ function kits_admin_tabs_list(): array {
 }
 
 /**
+ * Screens that other plugins add under Kits → Plugins (not as top tabs): slug => [name, address relative to wp-admin,
+ * capability, one line on what it is]. On those screens the Plugins tab is the active one.
+ */
+function kits_plugin_screens(): array {
+	$list = array();
+	foreach ( (array) apply_filters( 'kits_plugin_screens', array() ) as $slug => $s ) {
+		if ( is_array( $s ) && isset( $s[0], $s[1], $s[2] ) ) {
+			$list[ (string) $slug ] = array( (string) $s[0], (string) $s[1], (string) $s[2], (string) ( $s[3] ?? '' ) );
+		}
+	}
+	return $list;
+}
+
+/**
  * The tabs every Kits screen starts with.
  *
  * @param string $current The screen's slug.
@@ -47,7 +61,7 @@ function kits_admin_tabs( string $current ): void {
 		if ( ! current_user_can( $t[2] ) ) {
 			continue;
 		}
-		$on = $slug === $current;
+		$on = $slug === $current || ( 'kits-plugins' === $slug && isset( kits_plugin_screens()[ $current ] ) );
 		echo '<a class="nav-tab' . ( $on ? ' nav-tab-active' : '' ) . '" href="' . esc_url( admin_url( $t[1] ) ) . '"' . ( $on ? ' aria-current="page"' : '' ) . '>' . esc_html( $t[0] ) . '</a>';
 	}
 	echo '</nav>';
@@ -291,6 +305,30 @@ function kits_plugins_page() {
 			'foot'    => false,
 		)
 	);
+	$own = array();
+	foreach ( kits_plugin_screens() as $s ) {
+		if ( current_user_can( $s[2] ) ) {
+			$own[] = array(
+				'plugin' => '<strong><a href="' . esc_url( admin_url( $s[1] ) ) . '">' . esc_html( $s[0] ) . '</a></strong>',
+				'what'   => esc_html( $s[3] ),
+			);
+		}
+	}
+	if ( $own ) {
+		echo '<h2>' . esc_html( 'This site\'s plugins' ) . '</h2>';
+		kits_simple_table(
+			'kits-plugin-screens',
+			array(
+				'plugin' => 'Plugin',
+				'what'   => 'What it does here',
+			),
+			$own,
+			array(
+				'primary' => 'plugin',
+				'foot'    => false,
+			)
+		);
+	}
 	echo '</div>';
 }
 

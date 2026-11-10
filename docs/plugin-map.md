@@ -156,7 +156,7 @@ Moved out of animal-writes-core and Kits Core on 24 Oct 2026 with no change in b
 
 | File | What it does |
 |---|---|
-| `includes/kits-hub.php` | When Kits Core is loaded: a SourceWeb tab on the Kits screens (filter `kits_admin_tabs`, to Sourcing → Overview) and a SourceWeb row in Kits → Welcome → System Status (filter `kits_status_rows`: version, how it is loaded, items to review). Without Kits Core nothing is added. |
+| `includes/kits-hub.php` | When Kits Core is loaded: a SourceWeb row on Kits → Plugins (filter `kits_plugin_screens`, to Sourcing → Overview) and a SourceWeb row in Kits → Welcome → System Status (filter `kits_status_rows`: version, how it is loaded, items to review). Without Kits Core nothing is added. |
 | `aw-sourcing.php` | Loader only (no functions): the include order sets the order of the Sourcing screens (reports and Settings go last, menu-model.php). |
 | `includes/menu-model.php` | The Sourcing menu's shape as plain constants and functions (tested by `tests/run.php`): the menu slug `aw-sourcing-menu` (its Overview), the page `aw-sourcing`, its screen id `sourcing_page_aw-sourcing`, the order (settings screens, then the reports and jobs Workers, Rejected, Relay log, Change log, then Settings), each screen's address `admin.php?page=aw-sourcing&tab=…`, and the Plugins screen links. |
 | `includes/admin-menu.php` | The Sourcing menu (owner, 25 Oct 2026; after Classification, before Mail; count of To review on it): Overview, To review, Enrichment review, then one item per screen of the Sourcing page (aw_sourcing_tabs(): Sources, Keywords, Rules or before phase 3 Sections / Summary rules / Directory enrichment, Press queries, Categories, AI models, Workers, Rejected, Relay log, Change log, Settings). Sourcing → Overview: every feature, what it does, where it lives and its status from the checks that already run (To review count, enrichment queue, ingest heartbeat from the Site Health test, Workers on time, AI keys by status and working providers, never any part of a key; Rejected, Relay log, last change, the Workers use these lists switch), the last run and next due of every workflow (aw_workers_runs, aw_workers_next), and the WP-CLI commands. Sourcing → Settings: the Workers use these lists switch. Plugins screen links Overview and Settings. The addresses before 25 Oct 2026 (options-general.php?page=aw-sourcing…, edit.php?post_type=aw_listing&page=aw-enrich-review…) redirect (301) to the same screen. Core WordPress only. |
@@ -209,7 +209,7 @@ A standalone product since 20 Oct 2026 (was `aw-mail`): nothing Animal Writes-on
 
 | File | What it does |
 |---|---|
-| `includes/kits-hub.php` | When Kits Core is loaded: a MailWeb tab on the Kits screens (filter `kits_admin_tabs`, to Mail → Overview) and a MailWeb row in Kits → Welcome → System Status (filter `kits_status_rows`). Without Kits Core nothing is added. |
+| `includes/kits-hub.php` | When Kits Core is loaded: a MailWeb row on Kits → Plugins (filter `kits_plugin_screens`, to Mail → Overview) and a MailWeb row in Kits → Welcome → System Status (filter `kits_status_rows`). Without Kits Core nothing is added. |
 | `mailweb.php` | Loader, plugin header, text domain, 5-minute schedule; deactivation clears its cron jobs. |
 | `includes/crypto.php` | Secrets saved on the settings screen (API token, webhook secrets, SMTP password) are encrypted (AES-256-GCM, key from the site's salts). wp-config / environment values are never stored. |
 | `includes/addresses.php` | `mailweb_addresses()`: the one email-address parser (typed To/Cc/Bcc, headers, API addresses and lists; lower case, is_email, each once). Tested in the Deploy check (`tools/ci/mailweb_addresses_test.php`). |
@@ -298,7 +298,7 @@ Plan: `docs/seo/search-insights-plan.md`. RankWeb → Search Insights (`admin.ph
 
 | File | What it does |
 |---|---|
-| `kits-hub.php` | When Kits Core is loaded: a RankWeb tab on the Kits screens (filter `kits_admin_tabs`, to the RankWeb Overview; only with Rank Math) and a RankWeb row in Kits → Welcome → System Status (filter `kits_status_rows`; warns when Rank Math is not active). Loaded with or without Rank Math. Without Kits Core nothing is added. |
+| `kits-hub.php` | When Kits Core is loaded: a RankWeb row on Kits → Plugins (filter `kits_plugin_screens`, to the RankWeb Overview; only with Rank Math) and a RankWeb row in Kits → Welcome → System Status (filter `kits_status_rows`; warns when Rank Math is not active). Loaded with or without Rank Math. Without Kits Core nothing is added. |
 | `aw-seo-extras.php` | Loader (plugin header, version, loads `includes/`; does nothing unless Rank Math is active). |
 | `analysis.php` | Rank Math's content analysis on what visitors see. Routes: `aw/v1/seo-score-items`, `aw/v1/seo-scores`. |
 | `breadcrumbs.php` | Breadcrumbs: Rank Math's trail is the one source; its items are replaced (rank_math/frontend/breadcrumb/items) by the site's trail for places, hubs, filtered hubs, categories, tags and items, and Rank Math prints it as the one BreadcrumbList. Core's `breadcrumbs.php` shows it. |
