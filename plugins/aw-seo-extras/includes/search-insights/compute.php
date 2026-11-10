@@ -238,7 +238,7 @@ function aw_si_decide( ?int $trends, int $impr, ?float $pos28, ?float $live, arr
 	// News items and archives share topic phrases by nature, so only other pages count as two owners. When only News
 	// items or archives own it, Google showing another News item or archive is no conflict either.
 	$conflict = count( $main ) > 1
-		|| ( $owners && '' !== $shown && (int) ( $top[1] ?? 0 ) >= AW_SI_QUICK_MIN && ! in_array( $shown, $owners, true ) && ( $main || empty( $ctx['shown_minor'] ) ) );
+		|| ( $owners && '' !== $shown && (int) ( $top[1] ?? 0 ) >= AW_SI_QUICK_MIN && ! in_array( $shown, $owners, true ) && ( $main || empty( $ctx['shown_minor'] ) ) && ! aw_si_same_subject( $shown, $owners ) ); // the owner's own Directory type or Library item is no conflict
 	$priority = aw_si_priority( $trends, $impr, $pos, $has_page );
 	$status   = $conflict ? 'conflict' : ( $has_page ? 'has-page' : ( 'P2' === $priority ? 'gap' : '' ) );
 	$label    = (string) ( $ctx['label'] ?? '' );
@@ -261,6 +261,53 @@ function aw_si_decide( ?int $trends, int $impr, ?float $pos28, ?float $live, arr
 		$action = 'sourcing'; // Our news items already show for it: more of them would help. Never for Hindi or Hinglish.
 	}
 	return compact( 'priority', 'status', 'action', 'conflict', 'pos', 'owners', 'shown' );
+}
+
+/**
+ * Whether the shown page is the owner's own subject: a Directory place × type page whose type is the slug of an owning
+ * tag or category (/directory/maharashtra/mumbai/animal-ambulance/ for /tag/animal-ambulance/), or a Library item an
+ * owning guide lists by hand (owner, 10 Nov 2026).
+ *
+ * @param string   $shown  Path Google showed most.
+ * @param string[] $owners Owner paths.
+ */
+function aw_si_same_subject( string $shown, array $owners ): bool {
+	if ( 0 === strpos( $shown, '/library/' ) || 0 === strpos( $shown, '/legal-watch/' ) ) {
+		return aw_si_library_of_owner( (string) preg_replace( '#^/legal-watch/#', '/library/', $shown ), $owners ); // the old address redirects to /library/
+	}
+	if ( ! preg_match( '#^/directory/[^/]+/(?:[^/]+/)?([a-z0-9-]+)/$#', $shown, $m ) ) {
+		return false;
+	}
+	foreach ( $owners as $o ) {
+		if ( preg_match( '#^/(?:tag|category)/' . preg_quote( $m[1], '#' ) . '/$#', (string) $o ) ) {
+			return true;
+		}
+	}
+	return false;
+}
+
+/**
+ * Whether the shown Library item is one an owning guide lists by hand as its Library item (aw_rel_resource): the
+ * AWBI circular for the World Animal Day guide (owner, 10 Nov 2026).
+ *
+ * @param string   $shown  Library path Google showed most.
+ * @param string[] $owners Owner paths.
+ */
+function aw_si_library_of_owner( string $shown, array $owners ): bool {
+	$lib = (int) url_to_postid( home_url( $shown ) );
+	if ( ! $lib ) {
+		return false;
+	}
+	foreach ( $owners as $o ) {
+		if ( 0 !== strpos( (string) $o, '/resources/' ) ) {
+			continue;
+		}
+		$guide = (int) url_to_postid( home_url( (string) $o ) );
+		if ( $guide && in_array( $lib, array_map( 'intval', (array) get_post_meta( $guide, 'aw_rel_resource' ) ), true ) ) {
+			return true;
+		}
+	}
+	return false;
 }
 
 /**
