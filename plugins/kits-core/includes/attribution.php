@@ -55,14 +55,14 @@ function aw_source_row_html( $id, $link = false ) {
 	}
 	$icon = $host ? aw_favicon_url( $host ) : '';
 	$mark = $icon
-		? '<img class="aw-src-icon" src="' . esc_url( $icon ) . '" alt="" width="16" height="16" loading="lazy" decoding="async">' // the name is printed beside it (aw-src-name), so the icon is decorative
-		: '<span class="aw-src-icon aw-src-icon--letter" aria-hidden="true">' . esc_html( mb_strtoupper( mb_substr( $name, 0, 1 ) ) ) . '</span>';
+		? '<img class="kit-src-icon aw-src-icon" src="' . esc_url( $icon ) . '" alt="" width="16" height="16" loading="lazy" decoding="async">' // the name is printed beside it (kit-src-name), so the icon is decorative
+		: '<span class="kit-src-icon kit-src-icon--letter aw-src-icon aw-src-icon--letter" aria-hidden="true">' . esc_html( mb_strtoupper( mb_substr( $name, 0, 1 ) ) ) . '</span>';
 	$url  = (string) get_post_meta( $id, 'aw_source_url', true );
-	$text = '<span class="aw-src-name">' . esc_html( $name ) . '</span>';
+	$text = '<span class="kit-src-name aw-src-name">' . esc_html( $name ) . '</span>';
 	if ( $link && $url ) {
-		return '<p class="aw-src aw-src--link"><a href="' . esc_url( $url ) . '" target="_blank" rel="noopener nofollow">' . $mark . $text . '</a></p>';
+		return '<p class="kit-src kit-src--link aw-src aw-src--link"><a href="' . esc_url( $url ) . '" target="_blank" rel="noopener nofollow">' . $mark . $text . '</a></p>';
 	}
-	return '<p class="aw-src">' . $mark . $text . '</p>';
+	return '<p class="kit-src aw-src">' . $mark . $text . '</p>';
 }
 
 add_shortcode(
@@ -117,7 +117,7 @@ add_filter(
 		if ( ! $id || kits_sourcing_menu_type() !== get_post_type( $id ) || ( is_singular() && get_queried_object_id() === $id ) ) {
 			return $html;
 		}
-		return '<div class="wp-block-post-date aw-card-time">' . aw_rel_time_html( $id ) . '</div>';
+		return '<div class="wp-block-post-date kit-meta-item kit-meta-item--time aw-card-time">' . aw_rel_time_html( $id ) . '</div>';
 	},
 	20,
 	3

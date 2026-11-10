@@ -61,8 +61,8 @@ function aw_enrich_icon( $src, $lid = 0 ) {
 	}
 	$name = (string) ( $src['name'] ?? $key );
 	return $url
-		? '<img class="aw-src-icon" src="' . esc_url( $url ) . '" alt="" width="16" height="16" loading="lazy" decoding="async">'
-		: '<span class="aw-src-icon aw-src-icon--letter" aria-hidden="true">' . esc_html( mb_strtoupper( mb_substr( $name, 0, 1 ) ) ) . '</span>';
+		? '<img class="kit-src-icon aw-src-icon" src="' . esc_url( $url ) . '" alt="" width="16" height="16" loading="lazy" decoding="async">'
+		: '<span class="kit-src-icon kit-src-icon--letter aw-src-icon aw-src-icon--letter" aria-hidden="true">' . esc_html( mb_strtoupper( mb_substr( $name, 0, 1 ) ) ) . '</span>';
 }
 
 /** Icon + name of each source, linked to the exact page, with the date on hover. */

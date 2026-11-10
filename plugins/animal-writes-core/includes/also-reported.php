@@ -32,8 +32,8 @@ function aw_also_logos_html( $id ) {
 		$name         = '' !== (string) ( $a['name'] ?? '' ) ? (string) $a['name'] : $host;
 		$icon         = $host && function_exists( 'aw_favicon_url' ) ? aw_favicon_url( $host ) : '';
 		$mark         = $icon
-			? '<img class="aw-src-icon" src="' . esc_url( $icon ) . '" alt="" width="16" height="16" loading="lazy" decoding="async">'
-			: '<span class="aw-src-icon aw-src-icon--letter" aria-hidden="true">' . esc_html( mb_strtoupper( mb_substr( $name, 0, 1 ) ) ) . '</span>';
+			? '<img class="kit-src-icon aw-src-icon" src="' . esc_url( $icon ) . '" alt="" width="16" height="16" loading="lazy" decoding="async">'
+			: '<span class="kit-src-icon kit-src-icon--letter aw-src-icon aw-src-icon--letter" aria-hidden="true">' . esc_html( mb_strtoupper( mb_substr( $name, 0, 1 ) ) ) . '</span>';
 		$label        = sprintf( 'Also reported by %s (opens in a new tab)', $name );
 		$out         .= '<li><a class="aw-src-also-link" href="' . esc_url( $url ) . '" target="_blank" rel="noopener nofollow" aria-label="' . esc_attr( $label ) . '" title="' . esc_attr( 'Also reported by ' . $name ) . '">' . $mark . '</a></li>';
 	}
@@ -51,12 +51,12 @@ add_filter(
 		if ( '' === $logos ) {
 			return $html;
 		}
-		$open = '<p class="aw-src aw-src--link">';
+		$open = '<p class="kit-src kit-src--link aw-src aw-src--link">';
 		$at   = strrpos( $html, '</p>' );
 		if ( 0 !== strpos( $html, $open ) || false === $at ) {
 			return $html;
 		}
-		return '<div class="aw-src aw-src--link aw-src--also">' . substr( $html, strlen( $open ), $at - strlen( $open ) ) . $logos . '</div>';
+		return '<div class="kit-src kit-src--link aw-src aw-src--link aw-src--also">' . substr( $html, strlen( $open ), $at - strlen( $open ) ) . $logos . '</div>';
 	},
 	10,
 	3

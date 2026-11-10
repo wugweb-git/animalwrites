@@ -1177,7 +1177,7 @@ function aw_sc_tracker_marks( $html ) {
 				if ( 1 === $n && false !== strpos( wp_strip_all_tags( $body ), ',' ) ) {
 					$open = $add( $open, 'aw-sc-states' );
 				} elseif ( 3 === $n ) {
-					$body = (string) preg_replace( '#^(\s*)<span class="aw-date"#', '$1<span class="aw-date aw-sc-lead"', $body, 1 );
+					$body = (string) preg_replace( '#^(\s*)<span class="kit-date aw-date"#', '$1<span class="kit-date aw-date aw-sc-lead"', $body, 1 );
 					$body = (string) preg_replace( '#<strong>((?:(?!<strong\b).)*)</strong>(\s*)$#s', '<strong class="aw-sc-due">$1</strong>$2', $body, 1 );
 				}
 				return $open . $body . $td[3];

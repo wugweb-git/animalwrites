@@ -214,6 +214,11 @@
       "sm": "var(--kit-card-media-max)",
       "md": "var(--kit-card-media-max)",
       "lg": "var(--kit-card-media-max)"
+    },
+    "lead-title-leading": {
+      "sm": "1.25",
+      "md": "1.25",
+      "lg": "1.25"
     }
   }
 }

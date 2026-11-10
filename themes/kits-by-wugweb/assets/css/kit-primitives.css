@@ -47,7 +47,7 @@ a.kit-tag { cursor: pointer; }
 .kit-tag--warning { --kit-status: var(--kit-color-warning) !important; }
 .kit-tag:is(.kit-tag--danger, .kit-tag--closed) { --kit-status: color-mix(in srgb, var(--kit-color-danger) 85%, #000) !important; }
 .kit-tag--featured { --kit-status: var(--kit-color-ink) !important; }
-.kit-tag:is(.kit-tag--success, .kit-tag--warning, .kit-tag--danger, .kit-tag--closed, .kit-tag--featured) .aw-date { color: inherit; }
+.kit-tag:is(.kit-tag--success, .kit-tag--warning, .kit-tag--danger, .kit-tag--closed, .kit-tag--featured) .kit-date { color: inherit; }
 .kit-tags { display: flex; flex-wrap: wrap; gap: var(--s-1); align-items: center; }
 .kit-chip::after, .wp-block-post-terms a::after { content: ""; position: absolute; inset: calc((var(--s-8) - var(--kit-size-target)) / 2) 0; }
 .kit-chip::after { inset: calc((100% - var(--kit-size-target)) / 2) 0; } /* a 44px hit area (--kit-size-target) from the chip's own height, the chip's look unchanged; it reaches 8px above and below, so chips in a row with an 8px gap (.aw-item-meta) meet in the gap and never cover each other */
@@ -495,3 +495,30 @@ form, .kit-form, .fluentform { --kit-btn-height: var(--kit-size-control); --kit-
 	background-repeat: no-repeat !important; background-position: right var(--s-3) center !important; background-size: 1rem !important;
 	padding-right: calc(var(--s-3) + 1.25rem) !important;
 }
+
+/* ---------- Source line (kit-src) and date (kit-date) ----------
+   kit-src: the publisher of a card or an item, as a chip with the site's icon (or its first letter, kit-src-icon--letter)
+   and its name; kit-src--link when it links to the original. Kits Core prints it (attribution.php). kit-date: a date with
+   its calendar icon, kept on one line. kit-meta-item--time: the card's time line, pushed to the card's foot. */
+.kit-src { margin: var(--kit-space-3) 0 var(--kit-space-1); }
+.kit-src--link { margin-bottom: 0; }
+.kit-src.kit-src { display: inline-flex; align-items: center; gap: var(--kit-meta-icon-gap) !important; width: fit-content; max-width: 100%; box-sizing: border-box; min-height: 1.75rem; padding: 0 var(--s-2); border: 1px solid var(--kit-chip-border); border-radius: var(--radius-sm); background: var(--kit-chip-bg); color: var(--kit-chip-fg) !important; font-size: var(--fluid-label) !important; font-weight: var(--kit-weight-regular) !important; line-height: 1.2; }
+.kit-src-icon { width: var(--kit-meta-icon) !important; height: var(--kit-meta-icon) !important; flex: none; object-fit: contain; border-radius: var(--kit-radius-mark); background: transparent; border: 0; padding: 0; }
+.kit-src-icon--letter { display: inline-flex; align-items: center; justify-content: center; font-size: var(--fluid-caption); font-weight: var(--kit-weight-bold); line-height: 1; }
+.kit-src-icon:not(.kit-src-icon--letter) { box-sizing: content-box; padding: 3px !important; background: var(--kit-color-raised) !important; border: var(--kit-border-width) solid var(--kit-color-line) !important; border-radius: var(--radius-sm) !important; }
+.kit-src-icon.kit-src-icon--letter { background: var(--kit-color-ink); color: var(--kit-color-on-ink); }
+.kit-src.kit-src .kit-src-icon:not(.kit-src-icon--letter), .kit-tag--source .kit-src-icon:not(.kit-src-icon--letter) { padding: 0 !important; border: 0 !important; background: transparent !important; }
+.kit-src-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kit-src .kit-src-name { font: inherit; color: inherit; }
+.kit-src--link a { display: inline-flex; align-items: center; text-decoration: none; }
+.kit-src.kit-src--link { position: relative; }
+.kit-src.kit-src--link a { min-height: 0; gap: var(--s-1); color: inherit; }
+.kit-src--link a::after { content: none !important; }
+.kit-src--link a::before { content: ""; position: absolute; inset: calc((var(--s-8) - var(--kit-size-target)) / 2) 0; }
+.kit-src--link a:is(:hover, :focus-visible) .kit-src-name { text-decoration: underline; text-underline-offset: var(--kit-underline-offset-sm); }
+@media (hover: hover) { .kit-src.kit-src--link:hover { background: var(--kit-chip-hover); border-color: var(--kit-chip-border-strong); } .kit-src--link a:hover .kit-src-name { text-decoration: none; } }
+.kit-src.kit-src--link:focus-within { background: var(--kit-chip-hover); border-color: var(--kit-chip-border-strong); outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
+.kit-src--link a:focus-visible { outline: 0; }
+.kit-date { white-space: nowrap; }
+.kit-date > .kit-ico { margin-right: var(--kit-meta-icon-gap); flex: none; }
+.kit-meta-item--time { display: flex; align-items: center; margin-top: auto; padding-right: var(--kit-space-7); }

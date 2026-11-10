@@ -241,7 +241,7 @@ function aw_block_list_filters( $a ) {
  */
 function aw_news_meta_row( $id ) {
 	$src  = function_exists( 'aw_source_row_html' ) ? aw_source_row_html( $id ) : '';
-	$time = function_exists( 'aw_rel_time_html' ) ? '<span class="wp-block-post-date aw-card-time kit-meta-item">' . aw_rel_time_html( $id ) . '</span>' : '';
+	$time = function_exists( 'aw_rel_time_html' ) ? '<span class="wp-block-post-date kit-meta-item kit-meta-item--time aw-card-time">' . aw_rel_time_html( $id ) . '</span>' : '';
 	return '' === $src . $time ? '' : '<div class="aw-card-meta kit-meta-row">' . $src . $time . '</div>';
 }
 
@@ -542,7 +542,7 @@ function aw_card_meta( $id ) {
 	$diff = time() - $ts;
 	/* translators: %s: time difference, e.g. 3 hours. */
 	$when = ( $diff >= 0 && $diff < 7 * DAY_IN_SECONDS ) ? ( $diff < 2 * MINUTE_IN_SECONDS ? __( 'Just now', 'animal-writes-core' ) : sprintf( __( '%s ago', 'animal-writes-core' ), human_time_diff( $ts, time() ) ) ) : wp_date( AW_DATE_FORMAT, $ts );
-	$out  = '<span class="kit-meta-item aw-date">' . aw_i( 'calendar' ) . '<time datetime="' . esc_attr( wp_date( 'Y-m-d', $ts ) ) . '" title="' . esc_attr( wp_date( AW_DATE_FORMAT, $ts ) ) . '">' . esc_html( $when ) . '</time></span>';
+	$out  = '<span class="kit-meta-item kit-date aw-date">' . aw_i( 'calendar' ) . '<time datetime="' . esc_attr( wp_date( 'Y-m-d', $ts ) ) . '" title="' . esc_attr( wp_date( AW_DATE_FORMAT, $ts ) ) . '">' . esc_html( $when ) . '</time></span>';
 	if ( 'post' === get_post_type( $id ) && ! aw_is_ingested( $id ) ) {
 		$mins = max( 1, (int) round( str_word_count( wp_strip_all_tags( (string) get_post_field( 'post_content', $id ) ) ) / 200 ) );
 		$out .= '<span class="kit-meta-item">' . aw_i( 'clock' ) . (int) $mins . ' min read</span>';
@@ -645,7 +645,7 @@ function aw_card_chips( $id, $state = 'block-md' ) {
 	$chips = array();
 	list( $short, $full, $icon ) = aw_card_source( $id );
 	if ( '' !== $short ) {
-		$mark    = $icon ? '<img class="aw-src-icon" src="' . esc_url( $icon ) . '" alt="" width="16" height="16" loading="lazy" decoding="async">' : '';
+		$mark    = $icon ? '<img class="kit-src-icon aw-src-icon" src="' . esc_url( $icon ) . '" alt="" width="16" height="16" loading="lazy" decoding="async">' : '';
 		$chips[] = '<span class="kit-tag kit-tag--source"' . ( $full !== $short ? ' title="' . esc_attr( $full ) . '"' : '' ) . '>' . $mark . '<span class="kit-tag-text">' . esc_html( $short ) . '</span></span>';
 	}
 	$kind = array();

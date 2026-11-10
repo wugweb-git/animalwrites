@@ -651,14 +651,14 @@ body.single main .wp-block-post-featured-image:not(.kit-logo) img ,body.single m
 .kit-ed-news-grid { display: grid; gap: var(--kit-space-6); }
 @media (min-width: 1200px) { .kit-ed-news-grid { grid-template-columns: 1.6fr 1fr; gap: var(--kit-space-7); } }
 .kit-ed-lead .wp-block-post-featured-image { border-radius: var(--kit-radius-media) !important; margin: 0 0 var(--kit-space-4) !important; aspect-ratio: 3/2; }
-.kit-ed-lead .wp-block-post-title { font-size: var(--kit-type-h3) !important; line-height: 1.2 !important; letter-spacing: var(--kit-tracking-heading) !important; margin: var(--kit-space-3) 0 !important; }
+.kit-ed-lead .wp-block-post-title { font-size: var(--kit-lead-title-size) !important; font-weight: var(--kit-lead-title-weight) !important; line-height: var(--kit-lead-title-leading) !important; letter-spacing: var(--kit-tracking-heading) !important; margin: var(--kit-space-3) 0 !important; }
 .kit-ed-lead .wp-block-post-excerpt { font-size: var(--kit-type-lead) !important; }
 .kit-ed-lead .wp-block-post-excerpt__excerpt { -webkit-line-clamp: 4 !important; }
 .kit-ed-list .wp-block-post-template > li { display: grid !important; grid-template-columns: 1fr 120px; grid-template-areas: "terms img" "title img" "date img"; column-gap: var(--kit-space-4); align-content: start; padding: var(--kit-space-4) 0 !important; border-top: var(--kit-border-width) solid var(--kit-color-ink) !important; }
 .kit-ed-list .wp-block-post-template > li:first-child { border-top: 0 !important; padding-top: 0 !important; }
 .kit-ed-list .wp-block-post-featured-image { grid-area: img; margin: 0 !important; border-radius: var(--kit-radius-media) !important; aspect-ratio: 4/3; }
 .kit-ed-list .wp-block-post-terms { grid-area: terms; }
-.kit-ed-list .wp-block-post-title { grid-area: title; font-size: var(--kit-type-h4) !important; line-height: 1.3 !important; margin: var(--kit-space-2) 0 !important; }
+.kit-ed-list .wp-block-post-title { grid-area: title; font-size: var(--kit-list-title-size) !important; font-weight: var(--kit-list-title-weight) !important; line-height: var(--kit-list-title-leading) !important; margin: var(--kit-space-2) 0 !important; }
 .kit-ed-list .wp-block-post-date { grid-area: date; padding-right: 0 !important; min-height: 0 !important; }
 
 
@@ -1199,8 +1199,8 @@ header.wp-block-template-part.kit-header-hidden { transform: translateY(calc(-10
 .kit-card[class*="kit-card--"]:has(a:focus-visible) { outline-offset: var(--kit-focus-offset); }
 .kit-card[class*="kit-card--"] > .kit-card-media { position: relative; flex: none; margin: 0 !important; aspect-ratio: var(--kit-card-media-ratio, 4 / 3); border-radius: 0; }
 .kit-card[class*="kit-card--"] > .kit-card-media img { width: 100%; height: 100%; object-fit: cover; }
-.kit-card[class*="kit-card--"] > .kit-card-media.is-logo, .kit-card[class*="kit-card--"] > .kit-card-media:has(.aw-story-logo) { background: var(--kit-color-raised); }
-.kit-card[class*="kit-card--"] > .kit-card-media.is-logo img, .kit-card[class*="kit-card--"] > .kit-card-media .aw-story-logo { object-fit: contain; padding: var(--kit-space-4); box-sizing: border-box; transform: none !important; }
+.kit-card[class*="kit-card--"] > .kit-card-media.is-logo { background: var(--kit-color-raised); }
+.kit-card[class*="kit-card--"] > .kit-card-media.is-logo img { object-fit: contain; padding: var(--kit-space-4); box-sizing: border-box; transform: none !important; }
 .kit-card:hover > .kit-card-media img { transform: scale(1.04); }
 .kit-card-label, .kit-tag.kit-card-label { display: inline-flex; align-items: center; box-sizing: border-box; min-height: 1.5rem; padding: 0 var(--kit-space-2); border: 1px solid var(--kit-card-label-bg, var(--kit-color-ink)); border-radius: var(--radius-sm, 4px); background: var(--kit-card-label-bg, var(--kit-color-ink)); color: var(--kit-card-label-fg, var(--kit-color-on-ink)); font-size: var(--fluid-label, 12px); font-weight: var(--kit-weight-strong) !important; line-height: 1.2; white-space: nowrap; }
 .kit-card-media > .kit-card-label { position: absolute; top: var(--kit-space-2); left: var(--kit-space-2); z-index: 1; max-width: calc(100% - 2 * var(--kit-space-2)); overflow: hidden; text-overflow: ellipsis; }
@@ -1211,11 +1211,11 @@ header.wp-block-template-part.kit-header-hidden { transform: translateY(calc(-10
 .kit-card-meta { flex-wrap: nowrap !important; overflow: hidden; white-space: nowrap; }
 .kit-card-meta > .kit-meta-item { flex: none; }
 .kit-card-meta > .kit-meta-item:last-child:not(:first-child) { flex: 0 1 auto; overflow: hidden; text-overflow: ellipsis; }
-.kit-card-meta .aw-date > .kit-ico { margin-right: 0; }
+.kit-card-meta .kit-date > .kit-ico { margin-right: 0; }
 .kit-card-chips { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-4) var(--s-1, 4px); height: 1.75rem; overflow: hidden; }
 .kit-card-chips > * { flex: 0 1 auto; min-width: 0; max-width: 100%; }
 .kit-card-chips .kit-tag-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
-.kit-card-chips .aw-src-icon { width: var(--kit-icon-sm, 16px); height: var(--kit-icon-sm, 16px); flex: none; border-radius: var(--kit-radius-mark); object-fit: contain; }
+.kit-card-chips .kit-src-icon { width: var(--kit-icon-sm, 16px); height: var(--kit-icon-sm, 16px); flex: none; border-radius: var(--kit-radius-mark); object-fit: contain; }
 .kit-card-chips .aw-sponsored-label { display: contents; }
 /* Meta and chips on one row (owner, 21 Oct 2026): .kit-card-metarow holds the meta row, then the chips, which take the
    space left; a chip that does not fit still wraps out of sight. */

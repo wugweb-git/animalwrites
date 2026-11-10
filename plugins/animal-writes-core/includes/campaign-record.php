@@ -65,7 +65,7 @@ function aw_camp_record_date( $day ) {
 		return aw_date( $day );
 	}
 	$ts = strtotime( $day . ' 12:00:00 Asia/Kolkata' );
-	return $ts ? '<span class="aw-date"><span class="kit-ico kit-ico--calendar" aria-hidden="true"></span><time datetime="' . esc_attr( $day ) . '">' . esc_html( wp_date( 'j M Y', $ts ) ) . '</time></span>' : '';
+	return $ts ? '<span class="kit-date aw-date"><span class="kit-ico kit-ico--calendar" aria-hidden="true"></span><time datetime="' . esc_attr( $day ) . '">' . esc_html( wp_date( 'j M Y', $ts ) ) . '</time></span>' : '';
 }
 
 /** The metric records of a campaign, by key. */

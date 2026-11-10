@@ -1589,13 +1589,60 @@
    }
   },
   {
+   "name": "Source line (kit-src)",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-src",
+    "kit-src-icon",
+    "kit-src-name"
+   ],
+   "states": [
+    "plain (no address)",
+    "link (kit-src--link, opens the original)",
+    "icon from the site",
+    "letter icon (kit-src-icon--letter)",
+    "hover",
+    "focus-visible (ring on the chip, name underlined)"
+   ],
+   "tokens": [
+    "kit-chip-bg",
+    "kit-chip-fg",
+    "kit-chip-border",
+    "kit-chip-hover",
+    "kit-chip-border-strong",
+    "kit-meta-icon",
+    "kit-meta-icon-gap",
+    "kit-radius-mark",
+    "kit-focus-width",
+    "kit-color-focus",
+    "kit-size-target"
+   ],
+   "a11y": {
+    "element": "<p> with an <a> when linked",
+    "aria": "icon aria-hidden; the name is the text",
+    "keyboard": "Tab to the link",
+    "focus": "ring on the chip (focus-within)",
+    "target": "44px hit area (::before)",
+    "motion": "none",
+    "sr": "the publisher's name"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "nofollow, new tab",
+    "alt": "n/a (decorative icon)",
+    "schema": "publisher where the item has one"
+   }
+  },
+  {
    "name": "Meta line (date, author, reading time, place)",
    "type": "primitive",
    "status": "live",
    "classes": [
     "kit-meta",
     "kit-meta-item",
-    "kit-meta-row"
+    "kit-meta-row",
+    "kit-date"
    ],
    "states": [
     "date (calendar)",

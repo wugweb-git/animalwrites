@@ -26,6 +26,7 @@
   --kit-card-stacked-body-flex: 1 1 0;
   --kit-card-stacked-body-min: var(--kit-body-min); /* docs/card-sizes.md: text column at least 10rem */
   --kit-card-block-media-max: var(--kit-card-media-max);
+  --kit-lead-title-leading: 1.25;
 }
 @media (min-width: 768px) {
   :root {

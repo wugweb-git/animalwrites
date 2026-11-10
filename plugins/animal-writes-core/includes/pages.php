@@ -517,7 +517,7 @@ function aw_inline_dates( $html ) {
 				$ts0  = '' !== $from && $ts ? strtotime( $from . ' ' . $m['mon'] . ' ' . $m['yr'] ) : 0;
 				$iso  = $ts ? wp_date( '' !== $day ? 'Y-m-d' : 'Y-m', $ts0 ? $ts0 : $ts ) : '';
 				$txt  = $ts ? ( $ts0 ? (int) $from . '–' : '' ) . wp_date( '' !== $day ? AW_DATE_FORMAT : 'M Y', $ts ) : $m[0]; // one format sitewide: "2 Oct 2026", "Nov 2025", a range "20–27 Jan 2025"
-				return '<span class="aw-date">' . aw_i( 'calendar' ) . '<time' . ( $iso ? ' datetime="' . esc_attr( $iso ) . '"' : '' ) . '>' . esc_html( $txt ) . '</time></span>';
+				return '<span class="kit-date aw-date">' . aw_i( 'calendar' ) . '<time' . ( $iso ? ' datetime="' . esc_attr( $iso ) . '"' : '' ) . '>' . esc_html( $txt ) . '</time></span>';
 			},
 			$part
 		);

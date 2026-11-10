@@ -47,7 +47,7 @@ function aw_date( $when, $fmt = AW_DATE_FORMAT ) {
 	if ( ! $ts ) {
 		return '';
 	}
-	return '<span class="aw-date">' . aw_i( 'calendar' ) . '<time datetime="' . esc_attr( wp_date( 'Y-m-d', $ts ) ) . '">' . esc_html( wp_date( $fmt, $ts ) ) . '</time></span>';
+	return '<span class="kit-date aw-date">' . aw_i( 'calendar' ) . '<time datetime="' . esc_attr( wp_date( 'Y-m-d', $ts ) ) . '">' . esc_html( wp_date( $fmt, $ts ) ) . '</time></span>';
 }
 
 /**
