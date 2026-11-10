@@ -21,6 +21,13 @@ Second revision (10 Nov, after a design-system review, a UI/UX review and a Word
   - the `aw-` selectors already in Kits get an owner step.
 - **Transfer size:** a gzip column next to the raw bytes. On transfer the saving is −46% on average, not −62%.
 
+Third revision (10 Nov, second owner review):
+- **One Animal Writes stylesheet per page, as today.** The page's files are joined into one cached file, the way the Kits "Joined stylesheet" switch joins Kits' five. Separate files would have raised Home from 2 render-blocking stylesheets back to about 7. A PageSpeed comparison joins the gate (section "Joined stylesheet").
+- **Stored content checked for renamed classes** before any rename (section "Renamed classes: stored content").
+- **Phase 0 result folded in:** each newly matched part has a home file, and each still-unmatched group either goes to the file loaded with the code that prints it or is dropped after its own check (section "Phase 0 result"). The capture's selector bug is fixed before any comparison counts.
+- **Contact, Volunteer and Search load with their components,** not by page address.
+- Live aw.css is **217,968 B** (10 Nov).
+
 ## Measurement used, and its limits
 
 - 10 Nov 2026 capture of the 23 page types at 1280, 768 and 375, logged out, analytics blocked. For each rule group it records the elements that change when the group is removed.
@@ -49,14 +56,60 @@ Two order changes remain and are checked by the TOTAL 0 gate:
     - `aw-home.css` on `is_front_page()`;
     - `aw-listing.css` on `is_singular( 'aw_listing' )` and the claim pages;
     - `aw-directory.css` on `is_tax( 'aw_place' )` and tag pages;
-    - `aw-search.css` on `is_search()`;
-    - `aw-volunteer.css` and `aw-contact.css` on `is_page()` with the page slug (page conditions, not template file names).
-  - *Component flag* for components printed on many templates. The PHP that prints the component records the handle in a static set: `aw_type_ico` (`hub-blocks.php:348`, `directory-map.php:295`), the Fluent wrapper (`forms-fluentforms.php:250`). The plugin's own blocks (`hub-blocks.php:74`, `sponsored-blocks.php:68`, registered in PHP with no block.json) get `style_handles` for `aw-lists`, `aw-hubs`, `aw-meta` and `aw-single`. Scanning block HTML for a class in `render_block` is the fallback, only where no PHP prints the class.
+    - `aw-about.css`: the /about/ sections are stored page content (`tools/content/about-page.php`), so no PHP prints them. They use the fallback below, limited to `core/group` blocks whose `className` starts with `aw-about-`.
+  - *Component flag* for components printed by PHP, wherever they appear. The PHP that prints the component records the handle in a static set:
+    - `aw_type_ico` (`hub-blocks.php:348`, `directory-map.php:295`);
+    - the Fluent wrapper (`forms-fluentforms.php:250`).
+    - **Contact** (`aw-contact.css`): `[aw_contact_form]` (`pages.php:94–97`), the Elsewhere links (`pages.php:372–379`) and the contact-pick headings (`pages.php:469`). The `aw-contact` wrapper itself is in the stored page, so it is confirmed by the stored-content search; if only stored content prints it, it uses the `className` fallback.
+    - **Volunteer** (`aw-volunteer.css`): the volunteer shortcode (`volunteers.php:97`) and its side photo (`volunteers.php:212`), the role checkboxes (`forms-fluentforms.php:475`), the banner (`form-blocks.php:258` and the `volunteer-banner` pattern, `kits-config.php:34`). This also covers the Contact and Campaigns pages, which print the banner.
+    - **Search** (`aw-search.css`): the search form (`pages.php:182–187`) and the result groups (`pages.php:205`). An empty search page prints the form, so it loads there too. The plugin's own blocks (`hub-blocks.php:74`, `sponsored-blocks.php:68`, registered in PHP with no block.json) get `style_handles` for `aw-lists`, `aw-hubs`, `aw-meta` and `aw-single`. Scanning block HTML for a class in `render_block` is the fallback, only where no PHP prints the class.
 - **Why recording, not enqueueing.** In a block theme, `template-canvas.php` renders the whole template (`get_the_block_template_html()`) before `wp_head`. So by `wp_enqueue_scripts` every flag is set and every file prints in the head. A file enqueued *during* render goes to the front of the queue and pulls its deps (`aw-components` → `aw-tokens` → `kits-bundle`) ahead of the Fluent Forms and campaign CSS, flipping their ties. Anything first printed in `wp_footer` (for example `aw_camp_dialogs`, `campaign-tools.php:219`) would fall to the footer, so those components use a template condition. This rests on the live head order; WP core is not in the repo, and the first commit's test confirms it.
 - **No inlining.** The `path` argument is not used: the 20 KB `styles_inline_size_limit` budget is shared with core block CSS and is already used up on live (`wp-block-navigation-css` and `wp-block-cover-css` print as links). Inlined CSS is also not cached between pages.
 - **Not `wp_enqueue_block_style( 'core/group' )`:** every page has groups, so it would load everywhere.
 - **Editors** (post editor, Site Editor, classic editor) load every file, through the two hooks aw.css uses now (`block_editor_settings_all`, `mce_css` in `theme-parts-assets.php`).
 - **Caching:** each file gets its own `filemtime` version. The Kits bundle hash changes only when a Kits file changes. Every deploy purges the cache already.
+
+### Joined stylesheet (one Animal Writes file per page)
+
+- **Why.** Separate files would take each page from 1 Animal Writes stylesheet to 4–8 render-blocking requests (Home from 2 blocking stylesheets back to about 7). The files stay separate in the repo and the editor; on the front end each page gets them joined into one cached file.
+- **How: the Kits code, extended.** `themes/kits-by-wugweb/functions.php:314–366` already joins Kits' five files at `wp_enqueue_scripts` 1000 into `uploads/kits-cache/kits-{hash}.css`. The five handles stay registered as aliases that print nothing, and it falls back to the separate files when a file carries inline CSS or the bundle cannot be written. The same callback gets a second pass, in Kits and generic:
+  - It takes `aw-components` plus the enqueued handles registered through `kits_component_styles`, in registry order, at priority 1000. That is after the component flags were turned into enqueues at priority 20.
+  - It joins them into `uploads/kits-cache/parts/{set}-{ver}.css`. `{set}` hashes the list of handles; `{ver}` hashes each file's mtime and size, as the Kits signature does.
+  - The handles become aliases with `deps = [ bundle ]`, so the bundle prints where aw.css prints today.
+- **Same switch.** Theme Options → Older parts → "Joined stylesheet" (`theme-options.php:64`, `css_bundle`) and the `kits_bundle_css` filter turn off both bundles. Off: the separate files load, for finding a style problem.
+- **Clean-up, not the Kits glob.** The Kits clean-up deletes every other `kits-*.css` older than a day. With one file per handle set, that would delete files other pages still use. So the parts bundles live in their own folder, and only a file whose `{set}` matches a newer file is removed.
+- **How many files.** The 23 measured pages give **14 different sets**, so 14 cached files. Pages of one kind share one: the four campaigns, guides and library items share one; state and district share one; Home and 404 share one.
+- **Trade-off.** Each joined file repeats aw.css (3.5 KB gzip), so a visitor's second page type downloads it again. That costs less than 3–7 extra blocking requests on every first view.
+
+Transfer per page with the joined file. The Kits additions and tokens ride in the Kits bundle and tokens, which load today:
+
+| page | gzip today | gzip after, joined | saved | AW stylesheets (today 1) | gzip after, separate files |
+|---|---|---|---|---|---|
+| Home | 25,952 | 16,970 | 35% | 1 | 19,681 |
+| Lab rules campaign | 25,952 | 13,657 | 47% | 1 | 15,778 |
+| Supreme Court campaign | 25,952 | 13,657 | 47% | 1 | 15,778 |
+| Diwali campaign | 25,952 | 13,657 | 47% | 1 | 15,778 |
+| Community dogs campaign | 25,952 | 13,657 | 47% | 1 | 15,778 |
+| Campaigns hub | 25,952 | 8,757 | 66% | 1 | 10,303 |
+| Guide | 25,952 | 13,657 | 47% | 1 | 15,778 |
+| Cruelty guide | 25,952 | 13,657 | 47% | 1 | 15,778 |
+| Resources hub | 25,952 | 11,984 | 54% | 1 | 13,351 |
+| News item | 25,952 | 10,046 | 61% | 1 | 12,060 |
+| News hub | 25,952 | 8,415 | 68% | 1 | 9,633 |
+| Library item | 25,952 | 13,657 | 47% | 1 | 15,778 |
+| Library hub | 25,952 | 11,984 | 54% | 1 | 13,351 |
+| Directory listing | 25,952 | 14,474 | 44% | 1 | 16,998 |
+| State page | 25,952 | 8,153 | 69% | 1 | 9,420 |
+| District page | 25,952 | 8,153 | 69% | 1 | 9,420 |
+| Contact | 25,952 | 9,033 | 65% | 1 | 10,953 |
+| Volunteer | 25,952 | 12,647 | 51% | 1 | 16,225 |
+| Claim | 25,952 | 7,935 | 69% | 1 | 9,047 |
+| Search results | 25,952 | 10,302 | 60% | 1 | 11,006 |
+| Tag page | 25,952 | 14,649 | 44% | 1 | 17,371 |
+| Category page | 25,952 | 13,880 | 47% | 1 | 16,284 |
+| 404 (renders Home) | 25,952 | 16,970 | 35% | 1 | 19,681 |
+
+Average with the joined file: **12,171 B gzip per page, against 25,952 B today (−53%), with 1 Animal Writes stylesheet as today.** Joining also compresses better than separate files (average 14,140 B). State and district get +3.7 KB gzip once the type icons of the hidden Near-me panel load (caveat below).
 
 ## CSS per page
 
@@ -145,17 +198,96 @@ Caveats:
 | aw-directory.css | 5,846 | Directory templates: state, district and tag pages (template condition) and the Directory search block (component flag) |
 | aw-listing.css | 4,526 | `single-aw_listing` and the claim pages (template condition) |
 | aw-hubs.css | 3,214 | hub templates (`page-hub.html`, archives) and where `aw-toolbar` / `aw-hub-faq` is printed |
-| aw-volunteer.css | 2,060 | `page-volunteer.html` and where `aw-vol-banner` is printed |
+| aw-volunteer.css | 2,060 | where the volunteer form, its roles, side photo or `aw-vol-banner` is printed (component flag) |
 | aw-meta.css | 1,698 | where `aw-item-meta`, `aw-card-time` or a place chip (`taxonomy-aw_place`) is printed |
-| aw-search.css | 1,494 | search results (`is_search()`) |
-| aw-contact.css | 1,316 | the Contact page (page condition `is_page( 'contact' )`) |
-| pending (phase 0) | 39,020 | not loaded on any of the 23 pages: phase 0 decides (delete, or join a component file) |
+| aw-search.css | 1,494 | where the search form or result groups are printed (component flag) |
+| aw-contact.css | 1,316 | where the contact form, Elsewhere links or contact-pick headings are printed (component flag) |
+| aw-about.css | 8,019 | the /about/ sections (`className` fallback on `aw-about-*` groups); new from phase 0 |
+| pending (phase 0) | 39,020 | now split by the phase 0 result (section "Phase 0 result"): 17.7 KB into component files, the rest moved with its printing code or dropped after a check |
 
 `aw-type-ico.css` (19.8 KB, 40 inline SVG masks) is the largest file that loads on many pages (15 of 23). A later step could cut it further with one SVG sprite or separate icon files. That is not in this plan.
 
+## Phase 0 result (10 Nov) and where each part goes
+
+Source: `aw-playground/snaps/awcss-phase0.md` and `awcss-unmatched-phase0.json`. 23 more pages were captured (About, Directory, adoption, opportunities, policy pages, claim results and form, report form, gov-verified / closed / unverified listings, resource item, empty search, a real 404), logged out, with menu, search and toggle states at 375.
+- Of the 57.5 KB "class exists but not seen" set, **173 rules (24,174 B) are now matched** and **288 rules (33,365 B) still match nothing**, plus 53 dead rules (40,562 B in all unmatched).
+- **Bug first.** The phase 0 run used the same capture script, so it has the same selector bug. Before any comparison counts, `tools/awcss-deps.js` is fixed:
+  - split selector lists only on top-level commas, not inside `:is()` / `:where()` / `:not()` / `:has()`;
+  - strip only whole pseudo-classes (`:focus` must not eat `:focus-visible`);
+  - count a selector that throws as an **error**, never as matched, and report the error count (the gate needs 0 errors).
+- **Then the capture is re-run.** Both page lists (23 + 23) are captured again, with `STATES=1` and `LOGGED_OUT=1`, and the tables below are rebuilt from the fixed run. Some of the 94 rules that looked matched everywhere will move to "unmatched".
+
+### Now matched: home file per part
+
+Figures in this table cover the rules that were in this plan's "pending (phase 0)" bucket: 157 of the 173 rules, 17,691 B. The other 16 rules were already in a file.
+
+| home file | rules | bytes | groups |
+|---|---|---|---|
+| aw-about.css | 74 | 8,019 | aw-about-band, aw-about-inner, aw-about-who, aw-about-how, aw-about-principle, aw-about-act, aw-about-what, aw-about-why, aw-about-help |
+| aw-listing.css | 28 | 3,345 | aw-listing-logo, aw-facts-part, aw-listing-wa, aw-listing-profiles, aw-listing-profile, aw-closed-mark, aw-claim-results, aw-claim-logo, aw-claim-meta, aw-claim-form, aw-claim-summary, aw-gov-mark, aw-item-gov, aw-unverified |
+| aw-directory.css | 23 | 2,694 | aw-orgs, aw-org, aw-org-mark, aw-org-meta, aw-org-tags, aw-org-actions, aw-org-go, aw-org-gallery, aw-org-photo |
+| aw-hubs.css | 20 | 2,062 | aw-categories-index, aw-categories-name, aw-categories-n, aw-thanks-links, aw-res-media, aw-adopt-beta, aw-adopt-soon, aw-adopt-plans, aw-hub-directory |
+| aw.css | 8 | 1,046 | kit-segment, aw-org-name, kit-site-header, kit-ed-list |
+| aw-single.css | 3 | 438 | aw-law-date, aw-posted-by |
+| aw-meta.css | 1 | 87 | aw-place |
+
+Changes against the first mapping:
+- `kit-site-header` #742 (menu open) goes to aw.css, because the header is on every page.
+- `aw-unverified` goes to aw-listing.css.
+- `aw-place` goes to aw-meta.css.
+- `aw-about-*` gets its own `aw-about.css` (8.0 KB), loaded only with the /about/ sections.
+
+### Still unmatched: move with the printing code, or drop after a check
+
+124 groups, 291 rules, 33,851 B (phase 0 counts 288 / 33,365 B against its 53-rule dead list; this plan uses 50). Each group is handled by one of three routes:
+- **Printed by code:** the group goes to the file that the printing PHP flags. It loads wherever that component appears, so states and data missing locally (sponsored, claimed) are covered.
+- **Only in `kits-registry.json`:** the stored-content search decides. Found: the group goes to the file of the page that holds it, through the `className` fallback. Not found: it is dropped.
+- **Printed nowhere:** dropped, each group in its own commit after its own check. The check is a stored-content search, a grep of PHP/JS/patterns, and a capture of the page type it names (claimed listing, sponsored item, Google live data) showing 0 differences.
+
+| route | home | rules | bytes | groups |
+|---|---|---|---|---|
+| printed by code | aw-listing.css | 56 | 5,932 | aw-org-fact, aw-org-phones, aw-org-hours, aw-org-facts, aw-datasrc-logo, aw-side-claim, aw-activity-box, aw-org-details, aw-listing-profile, aw-opps, aw-profile-h, aw-block-preview, aw-activity, aw-facts-ico, aw-activity-name, aw-activity-link, aw-datasrc-img, aw-activity-on, aw-activity-figures, aw-facts-part, aw-more-group, aw-more-all |
+| only in the registry | DB search decides | 38 | 4,257 | aw-report, aw-vol-page, kit-finder, aw-testimonial, aw-banner, aw-count, aw-mosaic, aw-res, aw-testimonials, aw-band, aw-counts, aw-org-none, aw-docs, aw-org-place, kit-hero-title |
+| printed by code | aw-single.css | 27 | 2,716 | aw-src-also, aw-doc-preview, aw-story-fallback, aw-story-logo, aw-related, aw-related-list, kit-print, aw-doc, aw-related-head, aw-sources-logo, aw-item-verified, aw-item-tags |
+| printed by code | aw-lists.css | 26 | 2,673 | aw-sponsored-banner, aw-sponsored-item, aw-verified-mark, aw-story, aw-sponsored-label, aw-story-body, aw-story-meta, aw-org-contact, aw-org-mark, kit-card-media, aw-org-meta |
+| group already in this file: rule-by-rule check (states, missing data) | aw-home.css | 23 | 2,659 | aw-profile-actions, aw-ed-hero, aw-content-ico, aw-content-list, aw-hero, aw-bento-tile, aw-content-trust, aw-news-mosaic, aw-bento, aw-ed-search |
+| group already in this file: rule-by-rule check (states, missing data) | aw-type-ico.css | 5 | 2,398 | aw-type-ico |
+| group already in this file: rule-by-rule check (states, missing data) | aw.css | 14 | 2,014 | aw-newsletter-form, aw-camp-band, aw-sc, aw-nl-band, aw-story-title |
+| printed nowhere | drop | 13 | 1,685 | aw-profile-badge, kit-doc-cover, aw-listing-card, aw-glive-attr, aw-report-link, aw-listing-upi, aw-glive-hours, aw-listing-support, aw-org-news |
+| printed by code | aw-directory.css | 10 | 1,175 | aw-local-card, aw-org-links, aw-featured-type, aw-featured-item |
+| group already in this file: rule-by-rule check (states, missing data) | aw-lists.css | 12 | 1,168 | aw-hub-list, aw-rel-time, aw-news-list |
+| group already in this file: rule-by-rule check (states, missing data) | Kits (step 3) | 9 | 1,141 | aw-src, aw-src-icon, kit-section-band |
+| group already in this file: rule-by-rule check (states, missing data) | aw-listing.css | 9 | 777 | aw-facts, aw-listing-help, aw-item-place, aw-datasrc |
+| states sheet only (/kits-demo/, administrators) | drop | 5 | 600 | kit-claim, aw-finder-band |
+| group already in this file: rule-by-rule check (states, missing data) | aw-single.css | 6 | 591 | aw-take-part, aw-more-card, aw-more-list |
+| printed by code | aw.css (campaign, stays) | 3 | 547 | aw-steps |
+| group already in this file: rule-by-rule check (states, missing data) | aw-forms.css | 4 | 510 | aw-form-ff |
+| printed by code | aw-forms.css | 4 | 459 | aw-form-for |
+| printed by aw.js on the claim pages | aw-listing.css | 5 | 441 | aw-org-opt, aw-claim-summary |
+| every page | aw.css | 3 | 384 | (element/root) |
+| group already in this file: rule-by-rule check (states, missing data) | aw-volunteer.css | 5 | 371 | aw-vol-banner |
+| printed by code | aw-hubs.css | 2 | 290 | aw-categories-index |
+| stored /about/ content | aw-about.css | 2 | 267 | aw-about-what, aw-about-act |
+| group already in this file: rule-by-rule check (states, missing data) | aw-directory.css | 3 | 266 | aw-dir-filter, aw-dir-search, aw-district-helplines |
+| printed by code | aw-home.css | 2 | 201 | aw-tile-logo, aw-tag-main |
+| group already in this file: rule-by-rule check (states, missing data) | aw-meta.css | 2 | 129 | aw-item-meta, aw-card-meta |
+| group already in this file: rule-by-rule check (states, missing data) | aw-hubs.css | 2 | 114 | aw-toolbar, aw-hub-news |
+| printed by code | aw.css | 1 | 86 | kit-ed-list |
+
+Corrections from this pass:
+- `aw-profile-actions` is printed by `bindings.php` on listings, so it goes to aw-listing.css, not aw-home.css.
+- `aw-steps` (`campaign.php`) is campaign-only and stays in aw.css with the other campaign rules.
+- `kit-claim` and `aw-finder-band` appear only on the states sheet (`/kits-demo/`, administrators). They are dropped, or kept if the owner wants the sheet to show them.
+
 ## Steps, one commit each, each gated by TOTAL 0
 
-Gate for every commit: before/after capture of the 23 pages at 1280, 768 and 375, compare = **TOTAL 0** (analytics blocked, reduced motion emulated). The re-run capture shows the moved group gone from aw.css. The post editor and Site Editor look the same. Theme rules, breakpoint and theme-copies checks are green. `component-map.md` is regenerated where a class or file list changes. The five campaign pages are in the 23 and must give 0 too.
+Gate for every commit: before/after capture of the 23 pages at 1280, 768 and 375, compare = **TOTAL 0** (analytics blocked, reduced motion emulated).
+
+**PageSpeed comparison** (commits 4–12, and once more after the last ship):
+- Pages: Home, one Directory listing, Volunteer. Before and after, at 375 wide, mobile throttling, median of 3 runs.
+- Recorded: render-blocking stylesheet count, FCP, LCP, CLS, TBT and total CSS transfer.
+- Passes when the blocking stylesheet count is not higher than before, and FCP, LCP, CLS and TBT are not worse than before beyond the spread of the three runs. No invented thresholds: the before run is the bar.
+- The PageSpeed Insights API needs no key, but its mobile run is fixed at 412 wide. A 375-wide Lighthouse run needs a local headless Chrome, which needs the owner's yes. Without it, the gate uses the PSI mobile run (412) on live before and after each ship, and the 375 check is the TOTAL 0 capture. The re-run capture shows the moved group gone from aw.css. The post editor and Site Editor look the same. Theme rules, breakpoint and theme-copies checks are green. `component-map.md` is regenerated where a class or file list changes. The five campaign pages are in the 23 and must give 0 too.
 
 | # | commit | what moves | to | bytes |
 |---|---|---|---|---|
@@ -239,6 +371,24 @@ Load-bearing on all 23 pages (768 and 1280 everywhere; 375 on contact, lab, libr
 | kit.css:1199 | `aw-opp-actions` | campaign rule: stays put; moved to aw.css beside the other campaign rules only with the owner's word |
 | kit.css:1225–1227 | `aw-news-list` | 8 (to `aw-lists.css`) |
 | kit.css:740 | comment naming `.aw-nl-band` | 2 (reworded) |
+
+## Renamed classes: stored content
+
+Steps 2 and 3 rename `aw-src*`, `aw-date`, `aw-nl-band*` and `aw-card-time` to `kit-…`. Code keeps the old class as a second class. Stored content may also carry the old class, with no code to add the new one. Before step 2, a **read-only** search runs once for every renamed class: `SELECT` only, through `wp db query` over the read-only SSH access, or through the admin REST in the built-in browser.
+
+| where | query (table prefix from `wp db prefix`) |
+|---|---|
+| posts of every type, including synced patterns (`wp_block`), templates, template parts and navigation | `SELECT ID, post_type, post_status FROM {p}posts WHERE post_content REGEXP 'aw-(src\|date\|nl-band\|card-time)([^a-z0-9_]\|$)'` |
+| post meta (Rank Math, block attributes, listing fields) | `SELECT post_id, meta_key FROM {p}postmeta WHERE meta_value REGEXP …` (same pattern) |
+| Fluent Forms | `SELECT id, title FROM {p}fluentform_forms WHERE form_fields REGEXP …`; `SELECT form_id, meta_key FROM {p}fluentform_form_meta WHERE value REGEXP …` |
+| options (widgets, theme mods, Kits options) | `SELECT option_name FROM {p}options WHERE option_value REGEXP …` |
+
+The same search also runs for the phase 0 classes found only in `kits-registry.json`, and for the drop list (section "Phase 0 result").
+
+Where a class is found:
+- **Small numbers (a few items):** keep the old class working. Animal Writes CSS gets an alias rule (`.aw-src` grouped with the Animal Writes rule that reads the same tokens), never an `aw-` selector in Kits. The alias is listed for removal later.
+- **Many items:** plan an update of the stored content. It is a separate task with the owner's yes, done through the admin REST with revisions kept, and checked by the same search returning 0 rows. The alias stays until then.
+- The result (class, table, count, IDs) is written into the step's commit message and `docs/pending.md`.
 
 ### 4–12. Animal Writes component files
 
@@ -470,7 +620,7 @@ About 8.4 KB of aw.css is campaign CSS that every page loads. **For the owner:**
 - **theme_rules_baseline.txt.** 14 lines name `themes/animal-writes/assets/css/aw.css`. Each moves to its rule's new file in the same commit. The check says a new exception needs the owner's word; a moved line is the same exception, and the commit says so.
 - **settings_parts_baseline.txt:49** (campaign hero min-height) stays: that rule stays in aw.css.
 - **Child theme.** With no child enqueue, a site running the child theme would not get the new files. That is fine once the child is retired, but until then the site must run Kits with the plugin's theme parts (as it does now).
-- **smoke.sh:91** keeps checking the `aw-components-css` link, because aw.css stays and is never inlined. Per-page asserts are added in the same script: `aw-home-css` present on `/` and absent on a state page, `aw-listing-css` on a listing.
+- **smoke.sh:91** keeps checking the `aw-components-css` link, because aw.css stays and is never inlined. Per-page asserts are added in the same script. With the joined stylesheet on: exactly one Animal Writes stylesheet link per page, and the joined file for `/` contains the `aw-home` marker comment while a state page's does not. With it off: `aw-home-css` is present on `/` and absent on a state page, and `aw-listing-css` is present on a listing.
 - **component_map.py** needs no code change, only regeneration; its "Used in" lists name the new files.
 - **States checked per (a) component** (design-system and UI/UX review): hover and a visible `:focus-visible` for every link or control, targets of 24px or more (WCAG 2.2) and 44px where design-system.md:289 / :353 ask for it, heading order, reduced motion. Colour-not-only and motion had no problems in these groups; `aw-take-part` already has a reduced-motion block (aw.css:1671).
 
@@ -597,6 +747,6 @@ These values in load-bearing groups are literal sizes with no line in design-sys
 
 1. Nothing with an `aw-` selector goes into Kits, and the ten already there get an owner step. Four groups become Kits components with Kits markup: the newsletter band `kit-nl-band` (art stays AW), the source line `kit-src`, the date `kit-date` and the card time (a `kit-meta-item` variant). List-title and button/section sizes become Kits tokens. Everything else stays in Animal Writes CSS.
 2. Animal Writes CSS splits into aw.css (newsletter form, heading overrides, campaign rules: 15,259 B) and 12 component files in the plugin only. Each file is loaded by a template condition or a component flag through a small Kits loader filter, as Uncode does per module. Files are enqueued at `wp_enqueue_scripts` 20 after aw.css, never from inside render.
-3. Average aw.css-derived CSS per page drops from 161 KB to about 62 KB raw (−62%). On transfer it drops from 26.0 KB to 14.1 KB gzip (−46%), with 4–8 cached stylesheet requests instead of 1. Biggest cuts: Directory, claim and news (−60 to −65% gzip); smallest: Home (−24%).
-4. There are 12 commits, each gated by TOTAL 0 on 23 pages × 3 widths. The gate first needs reduced motion in the capture, and the capture needs its comma bug fixed (94 rules looked matched everywhere).
+3. Average aw.css-derived CSS per page drops from 161 KB to about 62 KB raw (−62%). On transfer it drops from 26.0 KB to 12.2 KB gzip (−53%) with one joined Animal Writes stylesheet per page, as today (14 cached files for 23 page types). A PageSpeed comparison at 375 on Home, a listing and Volunteer is part of the gate.
+4. There are 12 commits, each gated by TOTAL 0 on 23 pages × 3 widths. The gate first needs reduced motion in the capture and the capture's selector bug fixed (94 rules looked matched everywhere); then both page lists are captured again. Renamed classes are searched for in stored content first. The phase 0 groups move with the code that prints them, or are dropped after their own check.
 5. Still for the owner: whether the 8.4 KB of campaign rules may load only on campaign pages, and names for 102 raw sizes listed as candidate tokens.
