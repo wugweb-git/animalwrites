@@ -330,6 +330,7 @@ function aw_related_group_html( $head, $type, $ids ) {
 	if ( false === strpos( $html, 'wp-block-post' ) ) {
 		return '';
 	}
+	aw_use_component_style( 'aw-single' ); // aw-related
 	$hid = 'aw-related-' . $qid;
 	return '<section class="aw-related alignwide" aria-labelledby="' . esc_attr( $hid ) . '"><h2 class="aw-related-head" id="' . esc_attr( $hid ) . '">' . esc_html( $head ) . '</h2>' . $html . '</section>';
 }

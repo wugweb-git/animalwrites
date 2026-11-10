@@ -1008,6 +1008,7 @@ function aw_social_card( WP_Post $p ): string {
  * @param int   $id Item (block context or the current post).
  */
 function aw_block_social_posts( $a = array(), $id = 0 ) {
+	aw_use_component_style( 'aw-single' ); // aw-more-head, aw-more-list
 	static $done = array();
 	if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
 		return function_exists( 'aw_item_editor_preview' ) ? aw_item_editor_preview( 'What people are saying: approved social posts linked to this page (Kits → Modules → Show on pages)' ) : '';

@@ -935,6 +935,7 @@ function aw_block_current_campaign( $a = array(), $id = 0 ) {
 	if ( ! $c || ( is_singular( 'aw_campaign' ) && get_queried_object_id() === $c ) ) {
 		return defined( 'REST_REQUEST' ) && REST_REQUEST ? '<p class="aw-block-preview">' . esc_html__( 'Current campaign (shows while a campaign is open)', 'animal-writes-core' ) . '</p>' : '';
 	}
+	aw_use_component_style( 'aw-single' ); // aw-side-camp
 	$url  = get_permalink( $c );
 	$days = aw_camp_days_left( $c );
 	$img  = get_the_post_thumbnail( $c, 'medium_large', array( 'alt' => '', 'loading' => 'lazy' ) );

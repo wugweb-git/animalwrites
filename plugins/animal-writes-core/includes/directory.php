@@ -616,6 +616,7 @@ function aw_browse_states() {
 	if ( aw_is_directory_view() && ( get_query_var( 'aw_place' ) || get_query_var( 'aw_dir_type' ) || ! empty( $_GET['tag'] ) || ! empty( $_GET['q'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		return ''; // the hub and the home page only
 	}
+	aw_use_component_style( 'aw-single' ); // aw-browse-states
 	$items = '';
 	foreach ( aw_place_states() as $st ) {
 		$n = aw_state_count( $st );

@@ -332,6 +332,7 @@ function aw_findhelp_states_window( $id ) {
  * @return string
  */
 function aw_findhelp_html( $id, $places, $head, $all_of = true ) {
+	aw_use_component_style( 'aw-single' ); // aw-findhelp-line, aw-browse-states, aw-findhelp (item More, campaign band)
 	$hid = 'aw-findhelp-' . (int) $id;
 	if ( ! $places ) {
 		return '<p class="aw-findhelp-line"><strong>' . esc_html__( 'Find help near you', 'animal-writes-core' ) . '</strong>'

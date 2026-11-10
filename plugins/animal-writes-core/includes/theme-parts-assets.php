@@ -68,6 +68,10 @@ function aw_component_style_files(): array {
 		'aw-type-ico' => array( // Type icons: wherever aw_type_icon() or the Directory map prints one.
 			'file' => 'assets/css/aw-type-ico.css',
 		),
+		'aw-single' => array( // Single items, plus a flag from the code that prints More, Sources, share, take-part, find-help and the rest elsewhere.
+			'file' => 'assets/css/aw-single.css',
+			'when' => fn() => is_singular( array( 'post', 'aw_news', 'aw_legal', 'aw_listing', 'aw_opportunity' ) ),
+		),
 	);
 }
 

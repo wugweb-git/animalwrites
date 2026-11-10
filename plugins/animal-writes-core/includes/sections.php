@@ -377,6 +377,9 @@ add_shortcode(
 		foreach ( array_slice( $counts, 0, 12 ) as $c ) {
 			$top .= '<li><a href="' . esc_url( aw_directory_url( $c[0]->slug ) ) . '"><span>' . esc_html( $c[0]->name ) . '</span>' . kits_count( $c[1] ) . '</a></li>';
 		}
+		if ( $top ) {
+			aw_use_component_style( 'aw-single' ); // aw-browse-states
+		}
 		return '<p class="has-large-font-size"><strong>' . esc_html( number_format_i18n( $total ) ) . '</strong> organisations in <strong>' . (int) $with . '</strong> states and union territories</p>'
 			. $form . '</form>'
 			. ( $top ? '<nav class="aw-browse-states" aria-labelledby="aw-top-states-h"><h3 id="aw-top-states-h">States with the most organisations</h3><ul>' . $top . '</ul></nav>'

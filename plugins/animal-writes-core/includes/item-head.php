@@ -183,6 +183,7 @@ function aw_block_item_meta( $a, $id ) {
 		$row .= function_exists( 'aw_gov_verified_line' ) ? aw_gov_verified_line( $id ) : ''; // Verified on {date}: registration from government documents
 		if ( get_post_meta( $id, 'aw_verified', true ) ) { // Claimed; one status: Needs re-check instead of Claimed while it is due
 			$on   = (string) get_post_meta( $id, 'aw_verified_on', true );
+			aw_use_component_style( 'aw-single' ); // aw-item-verified
 			$row .= get_post_meta( $id, 'aw_needs_reverify', true )
 				? '<span class="kit-tag kit-tag--warning">' . esc_html__( 'Needs re-check', 'animal-writes-core' ) . '</span>'
 				/* translators: %s: date. */
@@ -304,6 +305,7 @@ function aw_block_item_sources( $a, $id ) {
 	if ( ! aw_item_here( $id ) ) {
 		return aw_item_editor_preview( 'Sources: publisher, issuer or study, the original, notes, Editorial policy, Report a mistake' );
 	}
+	aw_use_component_style( 'aw-single' ); // aw-sources
 	$kind   = aw_item_kind( $id );
 	$links  = '<p class="aw-sources-links"><a href="' . esc_url( home_url( '/editorial-policy/' ) ) . '">' . esc_html__( 'Editorial policy', 'animal-writes-core' ) . '</a><a href="' . esc_url( aw_report_url( $id ) ) . '">' . esc_html__( 'Report a mistake', 'animal-writes-core' ) . '</a></p>';
 	$hid    = 'aw-sources-' . $id;
@@ -388,6 +390,7 @@ function aw_block_item_tags( $a, $id ) {
 	if ( ! aw_item_here( $id ) ) {
 		return aw_item_editor_preview( 'Tags: labels other than the type (no categories)' );
 	}
+	aw_use_component_style( 'aw-single' ); // aw-item-tags
 	$tags = get_the_terms( $id, 'post_tag' );
 	$type = wp_list_pluck( aw_item_type_terms( $id ), 'term_id' );
 	$out  = '';
@@ -403,6 +406,7 @@ function aw_block_item_share( $a, $id ) {
 	if ( ! aw_item_here( $id ) ) {
 		return aw_item_editor_preview( 'Share: X, Facebook, LinkedIn, WhatsApp, Email, Copy link' );
 	}
+	aw_use_component_style( 'aw-single' ); // aw-item-share
 	$bar = function_exists( 'aw_share_html' ) ? aw_share_html( $id ) : '';
 	return '' !== $bar ? '<div class="aw-item-share">' . $bar . '</div>' : '';
 }
@@ -488,6 +492,7 @@ function aw_item_card_media( $pid ) {
 
 /** A small card: 4:3 picture, type and date, title, one line (no category chips). */
 function aw_item_more_card( $pid ) {
+	aw_use_component_style( 'aw-single' ); // aw-more-card
 	$type = aw_item_type_terms( $pid );
 	$name = $type ? $type[0]->name : ( 'aw_news' === get_post_type( $pid ) ? __( 'News', 'animal-writes-core' ) : '' );
 	if ( 'aw_listing' === get_post_type( $pid ) ) { // an organisation: its logo whole in the 4:3 box (or its initials), type and place
@@ -511,6 +516,7 @@ function aw_block_item_more( $a, $id ) {
 	if ( ! aw_item_here( $id ) || 'publish' !== get_post_status( $id ) ) {
 		return aw_item_editor_preview( 'More: up to two groups of three items (Library, Resources and News: a third, "Guides on this", for hand-linked guides; listings: one group of up to six organisations)' );
 	}
+	aw_use_component_style( 'aw-single' ); // aw-more
 	$out = '';
 	foreach ( aw_item_more_groups( $id ) as $n => $g ) {
 		$hid  = 'aw-more-' . $n;

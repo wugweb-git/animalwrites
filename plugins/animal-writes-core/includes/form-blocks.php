@@ -281,6 +281,7 @@ add_filter(
 		if ( false !== strpos( $c, 'aw-take-part-card--claim' ) && is_singular( 'aw_listing' ) && ! get_post_meta( get_queried_object_id(), 'aw_verified', true ) ) {
 			return '';
 		}
+		aw_use_component_style( 'aw-single' ); // aw-take-part, aw-take-part-card
 		return $html;
 	},
 	10,

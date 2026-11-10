@@ -40,6 +40,7 @@ function aw_term_block_preview( $text ) {
 
 /** A section with an H2 at the item pages' section-heading size. */
 function aw_term_section( $slug, $head, $body ) {
+	aw_use_component_style( 'aw-single' ); // aw-more-head, aw-more-list
 	$hid = 'aw-term-' . $slug . '-h';
 	return '<section class="aw-more-group aw-term-' . esc_attr( $slug ) . '" aria-labelledby="' . esc_attr( $hid ) . '"><h2 class="aw-more-head has-x-large-font-size" id="' . esc_attr( $hid ) . '">' . esc_html( $head ) . '</h2>' . $body . '</section>';
 }
@@ -51,6 +52,7 @@ function aw_block_term_faq() {
 
 /** Share: the page's address and its name. */
 function aw_block_term_share() {
+	aw_use_component_style( 'aw-single' ); // aw-item-share
 	$term = aw_term_page_term();
 	if ( ! $term ) {
 		return aw_term_block_preview( 'Share: X, Facebook, LinkedIn, WhatsApp, Email, Copy link' );

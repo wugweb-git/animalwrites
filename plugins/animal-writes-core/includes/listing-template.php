@@ -468,6 +468,7 @@ function aw_block_listing_activity( $a, $id ) {
 
 /** A small card for "In the press": 4:3 picture, type and date, title (press coverage links to the article itself). */
 function aw_listing_press_card( $pid ) {
+	aw_use_component_style( 'aw-single' ); // aw-more-card, aw-more-head, aw-more-list
 	$type = get_post_type( $pid );
 	$url  = function_exists( 'aw_featured_url' ) ? aw_featured_url( $pid ) : get_permalink( $pid );
 	$ext  = 'aw_press' === $type;
@@ -478,6 +479,7 @@ function aw_listing_press_card( $pid ) {
 }
 
 function aw_block_listing_press( $a, $id ) {
+	aw_use_component_style( 'aw-single' ); // aw-more-card, aw-more-head, aw-more-list
 	if ( ! aw_listing_here( $id ) || ! function_exists( 'aw_featured_items' ) ) {
 		return function_exists( 'aw_item_editor_preview' ) ? aw_item_editor_preview( 'In the press: items on the site that name this organisation' ) : '';
 	}
@@ -494,6 +496,7 @@ function aw_block_listing_press( $a, $id ) {
 
 
 function aw_block_listing_opportunities( $a, $id ) {
+	aw_use_component_style( 'aw-single' ); // aw-more-card, aw-more-head, aw-more-list
 	if ( ! aw_listing_here( $id ) ) {
 		return function_exists( 'aw_item_editor_preview' ) ? aw_item_editor_preview( 'Opportunities at the organisation (open only)' ) : '';
 	}
@@ -538,6 +541,7 @@ function aw_listing_campaigns( $id, $max = 3 ) {
 }
 
 function aw_block_listing_campaigns( $a, $id ) {
+	aw_use_component_style( 'aw-single' ); // aw-more-card, aw-more-head, aw-more-list
 	if ( ! aw_listing_here( $id ) ) {
 		return function_exists( 'aw_item_editor_preview' ) ? aw_item_editor_preview( 'Campaigns with the organisation (Organiser / Partner / Supporter, up to 3)' ) : '';
 	}

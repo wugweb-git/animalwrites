@@ -303,6 +303,7 @@ function aw_block_opp_actions( $a, $id ) {
 
 /** Single opportunity: "Posted by {organisation}", linked to its Directory profile when there is one. */
 function aw_block_posted_by( $a, $id ) {
+	aw_use_component_style( 'aw-single' ); // aw-posted-by
 	$name    = (string) get_post_meta( $id, 'aw_org_name', true );
 	$listing = (int) get_post_meta( $id, 'aw_organisation', true );
 	if ( $listing && 'publish' === get_post_status( $listing ) ) {
