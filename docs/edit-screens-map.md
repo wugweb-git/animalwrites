@@ -1027,24 +1027,61 @@ The panels, boxes and tables on the admin pages of AW Sourcing, AW SEO Plus (wit
 
 ### Kits Core
 
-**Kits: Overview** (`kits`)
+Tabs in this order on every Kits screen (`kits_admin_tabs`); Fonts is core's Font Library (`font-library.php`) and has no widgets of its own. Theme parts is added by Animal Writes Core. Updated 10 Nov 2026 for the new Kits admin.
+
+**Kits: Welcome** (`kits`)
 
 | id | widget | kind | reads | limits | file |
 |---|---|---|---|---|---|
-| ap-kits-overview | Design and branding / Site features | table | `option:kits_preview_ips`, `option:kits_altcha_key` | — | `kits/admin-home.php:86, :119 (kits_overview_page)` |
+| ap-kits-welcome | Start here / System Status | table | `site_transient:update_themes`, `site_transient:kits_update_release`, `transient:health-check-site-status-result` | Start here: links to Theme Options, Styles, Header & footer, Templates, Navigation, Patterns and Fonts. System Status: theme version and update, Kits Core, child theme, WordPress, PHP, memory limits, max input vars, time limit, largest upload, Site Health; red rows need a server or wp-config.php change. Asks nothing over the network. | `kits/admin-screens.php:194 (kits_welcome_page)` |
+
+**Kits: Plugins** (`kits-plugins`)
+
+| id | widget | kind | reads | limits | file |
+|---|---|---|---|---|---|
+| ap-kits-plugins | Required and recommended plugins | table | `active plugins` | Install and Activate open WordPress's own Plugins screens (core nonce links); Kits Core shows "Active (loaded by another plugin)" when a site plugin loads it. | `kits/admin-screens.php:253 (kits_plugins_page)` |
+
+**Kits: Import / Export** (`kits-transfer`)
+
+| id | widget | kind | reads | limits | file |
+|---|---|---|---|---|---|
+| ap-kits-transfer | Export / Import / Put back | form | `option:kits_settings_backup`, `transient:kits_transfer_result_*` | One JSON file: Styles, Theme Options, Page Options defaults and synced patterns. Check the file changes nothing; import never deletes, and keeps a copy of the current settings first. Sets: `option:kits_theme_options`, `option:kits_page_defaults`, `option:kits_settings_backup`, `option:kits_settings_backup_defaults`, `post:wp_global_styles`, `post:wp_block`. | `kits/admin-screens.php:300 (kits_transfer_page)` |
+
+**Kits: Core Settings** (`kits-core-settings`)
+
+| id | widget | kind | reads | limits | file |
+|---|---|---|---|---|---|
+| ap-kits-core-settings | Switches | form | `option:kits_theme_options` | The Older parts fields: joined stylesheet, old section classes, largest image preload fix, jQuery at the end, deferred scripts, no emoji script, form styles only where forms are, one copy of Inter. All on by default. Sets: `option:kits_theme_options`. | `kits/admin-screens.php:662 (kits_core_settings_page)` |
+
+**Kits: Theme Options** (`kits-options`)
+
+| id | widget | kind | reads | limits | file |
+|---|---|---|---|---|---|
+| ap-kits-options | Theme Options (General, Single, Archives, Visual, Utility) | form | `option:kits_theme_options`, `option:kits_page_defaults`, `option:rank-math-options-titles`, `Styles (Palette, Typography, Buttons)` | Sections (?section=): General (Header, Layout, Footer), Single (each post type, 404), Archives (each archive, Search, Authors), Visual (Palette, Typography, Buttons, Colour sets: shown from Styles, changed there), Utility (Share bar, Socials from Rank Math, Performance with Font preload, Extra). Sets: `option:kits_theme_options`, `option:kits_page_defaults`. | `kits/admin-screens.php:753 (kits_options_page)` |
 
 **Kits: Design system** (`kits-system`)
 
 | id | widget | kind | reads | limits | file |
 |---|---|---|---|---|---|
-| ap-kits-system | Design system (Components, States sheet, Menu types, Colour contrast, Tokens) | table | `themes/*/kits-registry.json`, `token CSS files`, `option:kits_spot_map` | Notice at the top for classes in use with no registry entry. | `kits/system-screen.php:135 (kits_system_page)` |
+| ap-kits-system | Design system (Components, States sheet, Menu types, Colour contrast, Tokens) | table | `themes/*/kits-registry.json`, `token CSS files`, `option:kits_spot_map` | Notice at the top for classes in use with no registry entry. | `kits/system-screen.php:332 (kits_system_page)` |
+
+**Kits: Docs** (`kits-docs`)
+
+| id | widget | kind | reads | limits | file |
+|---|---|---|---|---|---|
+| ap-kits-docs | Design and branding / Site features | table | `option:kits_preview_ips`, `option:kits_altcha_key` | The old Kits → Overview address (kits_overview_page) opens this screen. | `kits/admin-screens.php:999 (kits_docs_page), kits/admin-home.php:78 (kits_overview_tables)` |
+
+**Kits: Theme parts** (`aw-theme-parts`)
+
+| id | widget | kind | reads | limits | file |
+|---|---|---|---|---|---|
+| ap-core-theme-parts | Functions / Templates, parts and patterns | table | `theme/templates`, `theme/parts`, `theme/patterns`, `theme/theme.json` | A Kits tab after Docs, added by Animal Writes Core (kits_admin_tabs filter). Each child theme function with the file that now holds it, whether it runs and where to change it; every template, part and pattern with a link to its Site Editor screen. | `core/theme-parts-screen.php:176 (aw_theme_parts_screen)` |
 
 **Kits: Preview** (`kits-preview`)
 
 | id | widget | kind | reads | limits | file |
 |---|---|---|---|---|---|
 | ap-kits-preview | Preview addresses | form | `option:kits_preview_ips` | One address per line. | `kits/preview.php:236` |
-
 **Keys set from an admin page, not from an edit-screen box**
 
 - `_thumbnail_id` (the cover), `aw_cover_reused`, `aw_source_image_off`: set by Apply on Media → Reuse pictures (`core/media-reuse.php:255–258`) and put back by Undo. `aw_cover_reused` keeps the PDF cover job (`core/cc0-images.php`) from replacing the chosen cover; `aw_source_image_off` switches the publisher image off so the cover shows. Featured image on the edit screen still edits the cover.

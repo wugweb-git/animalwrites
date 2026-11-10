@@ -2946,16 +2946,137 @@
 			"decision": "",
 			"notes": "Apply sets the page's cover (_thumbnail_id), aw_cover_reused (keeps the PDF cover job from replacing it) and, on news, Library items and posts, aw_source_image_off; Undo puts them back. These keys are set from Reuse pictures, not from an edit-screen box."
 		},
-		"ap-kits-overview": {
+		"ap-kits-welcome": {
+			"title": "Start here / System Status",
+			"source": "Kits Core",
+			"plugin": "Kits Core",
+			"purpose": "Kits welcome",
+			"file": "kits/admin-screens.php:194 (kits_welcome_page)",
+			"screen": "admin",
+			"page": "Kits: Welcome",
+			"types": [
+				"kits"
+			],
+			"runtime": "map-only",
+			"kind": "table",
+			"reads": [
+				"site_transient:update_themes",
+				"site_transient:kits_update_release",
+				"transient:health-check-site-status-result"
+			],
+			"limits": "Start here: links to Theme Options, Styles, Header & footer, Templates, Navigation, Patterns and Fonts. System Status: theme version and update, Kits Core, child theme, WordPress, PHP, memory limits, max input vars, time limit, largest upload, Site Health; red rows need a server or wp-config.php change. Asks nothing over the network.",
+			"decision": "",
+			"notes": "Stores nothing."
+		},
+		"ap-kits-plugins": {
+			"title": "Required and recommended plugins",
+			"source": "Kits Core",
+			"plugin": "Kits Core",
+			"purpose": "Plugins the theme works with",
+			"file": "kits/admin-screens.php:253 (kits_plugins_page)",
+			"screen": "admin",
+			"page": "Kits: Plugins",
+			"types": [
+				"kits-plugins"
+			],
+			"runtime": "map-only",
+			"kind": "table",
+			"reads": [
+				"active plugins"
+			],
+			"limits": "Install and Activate open WordPress's own Plugins screens (core nonce links); Kits Core shows \"Active (loaded by another plugin)\" when a site plugin loads it.",
+			"decision": "",
+			"notes": "Stores nothing."
+		},
+		"ap-kits-transfer": {
+			"title": "Export / Import / Put back",
+			"source": "Kits Core",
+			"plugin": "Kits Core",
+			"purpose": "Settings file",
+			"file": "kits/admin-screens.php:300 (kits_transfer_page)",
+			"screen": "admin",
+			"page": "Kits: Import / Export",
+			"types": [
+				"kits-transfer"
+			],
+			"runtime": "map-only",
+			"kind": "form",
+			"reads": [
+				"option:kits_settings_backup",
+				"transient:kits_transfer_result_*"
+			],
+			"sets": [
+				"option:kits_theme_options",
+				"option:kits_page_defaults",
+				"option:kits_settings_backup",
+				"option:kits_settings_backup_defaults",
+				"post:wp_global_styles",
+				"post:wp_block"
+			],
+			"limits": "One JSON file: Styles, Theme Options, Page Options defaults and synced patterns. Check the file changes nothing; import never deletes, and keeps a copy of the current settings first.",
+			"decision": "",
+			"notes": "Import saves the options in the file (kits_settings_transfer_options(): kits_page_defaults, kits_theme_options), the active theme's Styles record and synced patterns; keeps option kits_settings_backup (and kits_settings_backup_defaults). Same as wp kits export|import and kits/v1/settings."
+		},
+		"ap-kits-core-settings": {
+			"title": "Switches",
+			"source": "Kits Core",
+			"plugin": "Kits Core",
+			"purpose": "Speed and older-parts switches",
+			"file": "kits/admin-screens.php:662 (kits_core_settings_page)",
+			"screen": "admin",
+			"page": "Kits: Core Settings",
+			"types": [
+				"kits-core-settings"
+			],
+			"runtime": "map-only",
+			"kind": "form",
+			"reads": [
+				"option:kits_theme_options"
+			],
+			"sets": [
+				"option:kits_theme_options"
+			],
+			"limits": "The Older parts fields: joined stylesheet, old section classes, largest image preload fix, jQuery at the end, deferred scripts, no emoji script, form styles only where forms are, one copy of Inter. All on by default.",
+			"decision": "",
+			"notes": "Saves option kits_theme_options through options.php (group kits_options), merging: only this form's fields change."
+		},
+		"ap-kits-options": {
+			"title": "Theme Options (General, Single, Archives, Visual, Utility)",
+			"source": "Kits Core",
+			"plugin": "Kits Core",
+			"purpose": "Site-wide choices",
+			"file": "kits/admin-screens.php:753 (kits_options_page)",
+			"screen": "admin",
+			"page": "Kits: Theme Options",
+			"types": [
+				"kits-options"
+			],
+			"runtime": "map-only",
+			"kind": "form",
+			"reads": [
+				"option:kits_theme_options",
+				"option:kits_page_defaults",
+				"option:rank-math-options-titles",
+				"Styles (Palette, Typography, Buttons)"
+			],
+			"sets": [
+				"option:kits_theme_options",
+				"option:kits_page_defaults"
+			],
+			"limits": "Sections (?section=): General (Header, Layout, Footer), Single (each post type, 404), Archives (each archive, Search, Authors), Visual (Palette, Typography, Buttons, Colour sets: shown from Styles, changed there), Utility (Share bar, Socials from Rank Math, Performance with Font preload, Extra).",
+			"decision": "",
+			"notes": "Saves options kits_theme_options and kits_page_defaults through options.php (group kits_options), merging: a section's form changes only its own fields. Page Options on an item still win over these defaults."
+		},
+		"ap-kits-docs": {
 			"title": "Design and branding / Site features",
 			"source": "Kits Core",
 			"plugin": "Kits Core",
-			"purpose": "Kits overview",
-			"file": "kits/admin-home.php:86, :119 (kits_overview_page)",
+			"purpose": "What lives where",
+			"file": "kits/admin-screens.php:999 (kits_docs_page), kits/admin-home.php:78 (kits_overview_tables)",
 			"screen": "admin",
-			"page": "Kits: Overview",
+			"page": "Kits: Docs",
 			"types": [
-				"kits"
+				"kits-docs"
 			],
 			"runtime": "map-only",
 			"kind": "table",
@@ -2963,7 +3084,30 @@
 				"option:kits_preview_ips",
 				"option:kits_altcha_key"
 			],
-			"limits": "",
+			"limits": "The old Kits → Overview address (kits_overview_page) opens this screen.",
+			"decision": "",
+			"notes": "Stores nothing."
+		},
+		"ap-core-theme-parts": {
+			"title": "Functions / Templates, parts and patterns",
+			"source": "Animal Writes core",
+			"plugin": "Animal Writes core",
+			"purpose": "Child theme parts",
+			"file": "core/theme-parts-screen.php:176 (aw_theme_parts_screen)",
+			"screen": "admin",
+			"page": "Kits: Theme parts",
+			"types": [
+				"aw-theme-parts"
+			],
+			"runtime": "map-only",
+			"kind": "table",
+			"reads": [
+				"theme/templates",
+				"theme/parts",
+				"theme/patterns",
+				"theme/theme.json"
+			],
+			"limits": "A Kits tab after Docs, added by Animal Writes Core (kits_admin_tabs filter). Each child theme function with the file that now holds it, whether it runs and where to change it; every template, part and pattern with a link to its Site Editor screen.",
 			"decision": "",
 			"notes": "Stores nothing."
 		},
@@ -2972,7 +3116,7 @@
 			"source": "Kits Core",
 			"plugin": "Kits Core",
 			"purpose": "Design system",
-			"file": "kits/system-screen.php:135 (kits_system_page)",
+			"file": "kits/system-screen.php:332 (kits_system_page)",
 			"screen": "admin",
 			"page": "Kits: Design system",
 			"types": [
