@@ -3084,7 +3084,7 @@
 				"option:kits_preview_ips",
 				"option:kits_altcha_key"
 			],
-			"limits": "The old Kits → Overview address (kits_overview_page) opens this screen.",
+			"limits": "The old Overview's tables (`kits_overview_tables`) now show on Docs; `admin.php?page=kits` opens Welcome.",
 			"decision": "",
 			"notes": "Stores nothing."
 		},

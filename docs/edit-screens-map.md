@@ -1069,7 +1069,7 @@ Tabs in this order on every Kits screen (`kits_admin_tabs`); Fonts is core's Fon
 
 | id | widget | kind | reads | limits | file |
 |---|---|---|---|---|---|
-| ap-kits-docs | Design and branding / Site features | table | `option:kits_preview_ips`, `option:kits_altcha_key` | The old Kits → Overview address (kits_overview_page) opens this screen. | `kits/admin-screens.php:999 (kits_docs_page), kits/admin-home.php:78 (kits_overview_tables)` |
+| ap-kits-docs | Design and branding / Site features | table | `option:kits_preview_ips`, `option:kits_altcha_key` | The old Overview's tables (`kits_overview_tables`) now show on Docs; `admin.php?page=kits` opens Welcome. | `kits/admin-screens.php:999 (kits_docs_page), kits/admin-home.php:78 (kits_overview_tables)` |
 
 **Kits: Theme parts** (`aw-theme-parts`)
 
