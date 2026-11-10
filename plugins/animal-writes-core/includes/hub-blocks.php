@@ -345,6 +345,7 @@ function aw_block_badges( $a, $id ) {
  * @return string
  */
 function aw_type_icon( $slug ) {
+	aw_use_component_style( 'aw-type-ico' );
 	return '<span class="aw-type-ico aw-type-ico--' . esc_attr( $slug ) . '" aria-hidden="true"></span>';
 }
 

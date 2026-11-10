@@ -290,6 +290,7 @@ function aw_dir_tools_html() {
 
 /** The panels the toolbar opens, under it: Near me and the map (hidden until asked for). */
 function aw_dir_panels_html() {
+	aw_use_component_style( 'aw-type-ico' ); // the Near me panel: one icon per type, cloned by aw.js
 	$icons = '';
 	foreach ( aw_listing_type_slugs() as $slug ) {
 		$icons .= '<span class="aw-type-ico aw-type-ico--' . esc_attr( $slug ) . '" data-type="' . esc_attr( $slug ) . '"></span>';

@@ -65,6 +65,9 @@ function aw_component_style_files(): array {
 			'file' => 'assets/css/aw-home.css',
 			'when' => 'is_front_page',
 		),
+		'aw-type-ico' => array( // Type icons: wherever aw_type_icon() or the Directory map prints one.
+			'file' => 'assets/css/aw-type-ico.css',
+		),
 	);
 }
 

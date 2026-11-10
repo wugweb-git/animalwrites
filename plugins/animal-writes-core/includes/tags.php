@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Tags that have their own icon (aw-type-ico--{slug} in the theme's aw.css; Library types use lib-{slug}). Every other
+ * Tags that have their own icon (aw-type-ico--{slug} in the theme's aw-type-ico.css; Library types use lib-{slug}). Every other
  * tag shows the default icon and is listed on the Tags screen as "Tags without their own icon" (owner, 20 Oct 2026).
  * Services share their organisation type's icon (aw.css): Sheltering = Animal shelter, Ambulance service = Animal ambulance ...
  */
