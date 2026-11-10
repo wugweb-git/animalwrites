@@ -19,6 +19,19 @@ if ( defined( 'KITS_CORE_LOADED' ) ) {
 define( 'KITS_CORE_LOADED', '1.0.0' );
 define( 'KITS_CORE_DIR', __DIR__ . '/' );
 
+// When a site plugin loads Kits Core, WordPress does not know Kits Core's folder. If that folder is a symlink in
+// the plugins directory, __DIR__ is the link's target, and plugins_url() (block.json assets, scripts) would build
+// an address from the target's absolute path. Map the target back to the plugins directory, as WordPress does for
+// active plugins; if Kits Core is active itself, this sets the same mapping again. Without a kits-core folder or
+// link in the plugins directory, its files have no public address and nothing here changes.
+if ( defined( 'WP_PLUGIN_DIR' ) && function_exists( 'wp_register_plugin_realpath' ) ) {
+	$kits_core_link = WP_PLUGIN_DIR . '/' . basename( __DIR__ ) . '/kits-core.php';
+	if ( file_exists( $kits_core_link ) && realpath( $kits_core_link ) === __FILE__ ) {
+		wp_register_plugin_realpath( $kits_core_link );
+	}
+	unset( $kits_core_link );
+}
+
 require_once KITS_CORE_DIR . 'includes/admin-table.php';
 require_once KITS_CORE_DIR . 'includes/dashboard-cards.php';
 require_once KITS_CORE_DIR . 'includes/admin-home.php';
