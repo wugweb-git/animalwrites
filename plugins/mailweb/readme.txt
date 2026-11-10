@@ -4,7 +4,7 @@ Tags: email, inbox, hostinger, smtp, signature
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 3.2.0
+Stable tag: 3.2.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -73,8 +73,12 @@ Nothing is deleted. Settings and earlier data stay in place.
 
 == Changelog ==
 
-= 3.2.0 =
+= 3.2.1 =
 * Shown as MailWeb (was Mailweb). The folder, text domain, settings, webhook address and everything saved stay the same.
+* With Kits Core: a MailWeb tab on the Kits screens and a MailWeb row in Kits → Welcome → System Status.
+* Update URI header, so WordPress.org never offers another plugin as an update.
+
+= 3.2.0 =
 * Message view: no remote content loads while pictures are hidden (a Content-Security-Policy in the frame; protocol-relative and escaped URLs included), and an email's own CSS cannot break out of its style tag.
 * Replying or forwarding always flags the original Answered / Forwarded.
 * All mailboxes: paging reads deeper into each mailbox, so later pages no longer skip messages or come up empty; dates are compared as dates.
