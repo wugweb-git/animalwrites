@@ -194,7 +194,9 @@ function aw_block_org_details( $a, $id ) {
 	if ( '' === $links . $photos . $facts . $extra ) {
 		return '';
 	}
-	aw_use_component_style( 'aw-directory' ); // aw-org-gallery, aw-org-photo
+	if ( $photos ) {
+		aw_use_component_style( 'aw-directory' ); // aw-org-gallery, aw-org-photo
+	}
 	aw_use_component_style( 'aw-listing' ); // aw-org-details, aw-org-facts, aw-org-phones
 	return '<section class="aw-org-details" aria-label="About the organisation">'
 		. ( $links ? '<div class="aw-org-details-links">' . $links . '</div>' : '' )

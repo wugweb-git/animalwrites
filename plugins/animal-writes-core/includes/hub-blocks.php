@@ -497,7 +497,7 @@ add_filter(
 		}
 		$end = strrpos( $html, '</a>' );
 		$end = false !== $end ? $end : strrpos( $html, '</h' );
-		if ( false !== $end ) {
+		if ( false !== $end && ! ( function_exists( 'aw_listing_here' ) && aw_listing_here( $id ) && 1 === (int) ( $block['attrs']['level'] ?? 2 ) ) ) { // listing-template.php removes it from the profile's own H1
 			aw_use_component_style( 'aw-lists' ); // aw-verified-mark
 		}
 		return false === $end ? $html : substr_replace( $html, aw_verified_mark(), $end, 0 );
