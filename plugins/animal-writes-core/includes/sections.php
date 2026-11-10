@@ -334,6 +334,7 @@ add_action( 'save_post_aw_listing', fn() => delete_transient( 'aw_find_help_type
 add_shortcode(
 	'aw_find_help',
 	function ( $atts ) {
+		aw_use_component_style( 'aw-home' ); // aw-ed-search and the find-help bar, on any page that stores the shortcode.
 		$atts   = shortcode_atts( array( 'compact' => false ), $atts );
 		$total  = aw_listing_public_count();
 		$opts   = '<option value="">All states and UTs</option>';

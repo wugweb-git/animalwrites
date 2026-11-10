@@ -339,8 +339,8 @@ add_filter(
  * - 'deps'   Handles it prints after.
  * - 'when'   Callable, no arguments: true on pages that need the file whatever they print (a template condition,
  *            checked at wp_enqueue_scripts 20), for example 'is_front_page'.
- * - 'blocks' block name => class prefix: a block of that name with a class that starts so flags the file. Only for
- *            stored content that no PHP prints, shown on the page (not excerpts or feeds).
+ * - 'blocks' block name => class prefix (or a list of them): a block of that name with a class that starts so flags
+ *            the file. Only for stored content that no PHP prints, shown on the page (not excerpts or feeds).
  *
  * A handle with no 'when' loads only on pages whose PHP called kits_use_component_style( $handle ) while it rendered.
  *
@@ -370,7 +370,7 @@ function kits_component_styles(): array {
 			)
 		);
 		$args['deps']    = array_values( array_filter( (array) $args['deps'], 'is_string' ) );
-		$args['blocks']  = array_filter( (array) $args['blocks'], 'is_string' );
+		$args['blocks']  = array_filter( array_map( fn( $p ) => array_values( array_filter( (array) $p, fn( $x ) => is_string( $x ) && '' !== $x ) ), (array) $args['blocks'] ) );
 		$list[ $handle ] = $args;
 	}
 	return $list;
@@ -459,19 +459,20 @@ add_filter(
 			}
 			$map = array();
 			foreach ( kits_component_styles() as $handle => $s ) {
-				foreach ( $s['blocks'] as $name => $prefix ) {
-					if ( '' !== $prefix ) {
-						$map[ $name ][ $handle ] = $prefix;
-					}
+				foreach ( $s['blocks'] as $name => $prefixes ) {
+					$map[ $name ][ $handle ] = $prefixes;
 				}
 			}
 		}
 		$name = (string) ( $block['blockName'] ?? '' );
 		if ( isset( $map[ $name ] ) && ! doing_filter( 'get_the_excerpt' ) && ! is_feed() ) { // Excerpts and feeds do not flag.
 			$class = ' ' . (string) ( $block['attrs']['className'] ?? '' );
-			foreach ( $map[ $name ] as $handle => $prefix ) {
-				if ( preg_match( '/\s' . preg_quote( $prefix, '/' ) . '/', $class ) ) {
-					kits_use_component_style( $handle );
+			foreach ( $map[ $name ] as $handle => $prefixes ) {
+				foreach ( $prefixes as $prefix ) {
+					if ( preg_match( '/\s' . preg_quote( $prefix, '/' ) . '/', $class ) ) {
+						kits_use_component_style( $handle );
+						break;
+					}
 				}
 			}
 		}
@@ -518,33 +519,37 @@ function kits_joined_hash_save( string $key, string $sig, string $hash ): void {
 
 /**
  * Write a joined file: a temp file in the same folder, then a rename, so a reader never sees half a file.
- * A failed write is remembered for an hour (transient kits_joined_write_fail), so pages do not retry on every view.
+ * A failed write is remembered for an hour (transient $fail: one per joiner), so pages do not retry on every view.
  *
  * @param string $path Target path.
  * @param string $css  Contents.
+ * @param string $fail Transient that remembers a failed write.
  * @return bool Whether the file is in place.
  */
-function kits_joined_write( string $path, string $css ): bool {
+function kits_joined_write( string $path, string $css, string $fail = 'kits_joined_write_fail' ): bool {
 	$dir = dirname( $path );
 	$tmp = $path . '.' . wp_generate_password( 6, false ) . '.tmp';
 	if ( wp_mkdir_p( $dir ) && wp_is_writable( $dir ) && false !== @file_put_contents( $tmp, $css ) && @rename( $tmp, $path ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions, WordPress.PHP.NoSilencedErrors -- a failure is handled below.
 		return true;
 	}
 	wp_delete_file( $tmp );
-	set_transient( 'kits_joined_write_fail', time(), HOUR_IN_SECONDS );
+	set_transient( $fail, time(), HOUR_IN_SECONDS );
 	return false;
 }
 
 /**
- * Older versions of one joined file: deleted once the newest has been in place for a day, so cached pages that still
- * link to an older one keep it that long.
+ * Older versions of one joined file: each is deleted once the version that replaced it has been in place for a day,
+ * so cached pages that still link to it keep it that long. A file's mtime is when it was written (or last touched
+ * while newest), so the next newer file's mtime is when this one was replaced.
  *
  * @param array<string,int> $files Path => mtime, newest first.
  */
 function kits_joined_prune( array $files ): void {
-	if ( count( $files ) > 1 && reset( $files ) < time() - DAY_IN_SECONDS ) {
-		foreach ( array_slice( array_keys( $files ), 1 ) as $old ) {
-			wp_delete_file( $old );
+	$paths = array_keys( $files );
+	$count = count( $paths );
+	for ( $i = 1; $i < $count; $i++ ) {
+		if ( $files[ $paths[ $i - 1 ] ] < time() - DAY_IN_SECONDS ) {
+			wp_delete_file( $paths[ $i ] );
 		}
 	}
 }
@@ -641,7 +646,7 @@ function kits_parts_bundle_sets( string $dir ): array {
 /**
  * Clean-up of the joined component files, on each rebuild.
  *
- * - In each set, older versions go once the newest has been in place a day.
+ * - In each set, an older version goes a day after the version that replaced it was written.
  * - A set whose newest file is older than 30 days goes whole: no page uses it (files in use are touched weekly).
  * - Temp files left by a failed write go after an hour.
  *
@@ -660,6 +665,52 @@ function kits_parts_bundle_clean( string $dir ): void {
 	foreach ( (array) glob( $dir . '/*.tmp' ) as $t ) {
 		if ( filemtime( $t ) < time() - HOUR_IN_SECONDS ) {
 			wp_delete_file( $t );
+		}
+	}
+}
+
+/**
+ * Sweep of the joined component files after a release, for a plugin to start from its deploy step. Files no page has
+ * used since now are deleted once $delay has passed, so sets no page uses any more stop counting against the cap.
+ * Each page served before then touches the file it links to, so pages a cache made after the release keep theirs;
+ * $delay must outlast the longest time a cache keeps a page made before the release.
+ *
+ * @param int $delay Seconds before the sweep runs.
+ */
+function kits_parts_bundle_sweep_start( int $delay ): void {
+	update_option(
+		'kits_parts_sweep',
+		array(
+			'at'  => time(),
+			'run' => time() + max( 0, $delay ),
+		),
+		true
+	);
+}
+
+/**
+ * The sweep kits_parts_bundle_sweep_start() asked for, once its time has come: files untouched since the release go,
+ * with the version option of a set left with no file.
+ *
+ * @param string $dir Folder.
+ */
+function kits_parts_bundle_sweep( string $dir ): void {
+	$sweep = get_option( 'kits_parts_sweep' );
+	if ( ! is_array( $sweep ) || time() < (int) ( $sweep['run'] ?? 0 ) ) {
+		return;
+	}
+	delete_option( 'kits_parts_sweep' );
+	clearstatcache();
+	foreach ( kits_parts_bundle_sets( $dir ) as $set => $list ) {
+		$left = count( $list );
+		foreach ( $list as $f => $m ) {
+			if ( $m < (int) $sweep['at'] ) {
+				wp_delete_file( $f );
+				--$left;
+			}
+		}
+		if ( ! $left ) {
+			delete_option( 'kits_parts_ver_' . $set );
 		}
 	}
 }
@@ -799,7 +850,7 @@ function kits_bundle_component_css() {
 	$path  = $dir['path'] . '/' . $set . '-' . $hash . '.css';
 	$clean = false;
 	if ( '' === $hash || ! file_exists( $path ) ) {
-		if ( get_transient( 'kits_joined_write_fail' ) ) {
+		if ( get_transient( 'kits_parts_write_fail' ) ) {
 			return; // Uploads could not be written lately: separate files, no retry on every view.
 		}
 		$sets = kits_parts_bundle_sets( $dir['path'] );
@@ -820,14 +871,24 @@ function kits_bundle_component_css() {
 		}
 		$hash = substr( md5( $css ), 0, 10 );
 		$path = $dir['path'] . '/' . $set . '-' . $hash . '.css';
-		if ( ! file_exists( $path ) && ! kits_joined_write( $path, $css ) ) {
+		if ( ! file_exists( $path ) && ! kits_joined_write( $path, $css, 'kits_parts_write_fail' ) ) {
 			return;
 		}
 		kits_joined_hash_save( $key, $sig, $hash );
 		$clean = true;
 	}
-	if ( filemtime( $path ) < time() - WEEK_IN_SECONDS && wp_is_writable( $path ) ) {
-		touch( $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- in use: the 30-day clean-up keeps it.
+	clearstatcache( true, $path );
+	$mtime = file_exists( $path ) ? (int) filemtime( $path ) : 0;
+	if ( ! $mtime ) {
+		return; // Removed since the check above: separate files for this view.
+	}
+	$sweep = get_option( 'kits_parts_sweep' );
+	$since = is_array( $sweep ) ? (int) ( $sweep['at'] ?? 0 ) : 0;
+	if ( ( $mtime < time() - WEEK_IN_SECONDS || $mtime < $since ) && wp_is_writable( $path ) ) {
+		touch( $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- in use: the 30-day clean-up and the release sweep keep it.
+	}
+	if ( $since ) {
+		kits_parts_bundle_sweep( $dir['path'] );
 	}
 	if ( $clean ) {
 		kits_parts_bundle_clean( $dir['path'] );
@@ -849,7 +910,7 @@ function kits_parts_bundle_status(): array {
 	$cap   = kits_parts_bundle_cap();
 	$count = count( kits_parts_bundle_sets( kits_parts_bundle_dir()['path'] ) );
 	$hit   = (int) get_transient( 'kits_parts_cap_hit' );
-	$fail  = (int) get_transient( 'kits_joined_write_fail' );
+	$fail  = (int) get_transient( 'kits_parts_write_fail' );
 	if ( $hit && $count < $cap ) {
 		delete_transient( 'kits_parts_cap_hit' ); // Room again (cap raised or files removed).
 		$hit = 0;
@@ -858,7 +919,7 @@ function kits_parts_bundle_status(): array {
 	$text = $on ? sprintf( '%1$d of %2$d joined files', $count, $cap ) : 'Joined stylesheet is off: every component file loads on its own';
 	$fix  = '';
 	if ( $warn && $fail ) {
-		$fix = 'uploads/kits-cache/ could not be written on ' . wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $fail ) . ': pages load separate files. Make the folder writable; the next try is an hour after the failure. ';
+		$fix = 'uploads/kits-cache/parts/ could not be written on ' . wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $fail ) . ': pages load separate files. Make the folder writable; the next try is an hour after the failure. ';
 	}
 	if ( $warn && ( $hit || $count >= (int) ceil( $cap * 0.8 ) ) ) {
 		$fix .= $hit ? 'The cap was reached on ' . wp_date( get_option( 'date_format' ), $hit ) . ': pages with a new set of components load separate files. ' : 'Near the cap: once it is reached, pages with a new set of components load separate files. ';

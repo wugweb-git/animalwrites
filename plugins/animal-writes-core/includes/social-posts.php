@@ -1008,7 +1008,6 @@ function aw_social_card( WP_Post $p ): string {
  * @param int   $id Item (block context or the current post).
  */
 function aw_block_social_posts( $a = array(), $id = 0 ) {
-	aw_use_component_style( 'aw-single' ); // aw-more-head, aw-more-list
 	static $done = array();
 	if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
 		return function_exists( 'aw_item_editor_preview' ) ? aw_item_editor_preview( 'What people are saying: approved social posts linked to this page (Kits → Modules → Show on pages)' ) : '';
@@ -1023,6 +1022,7 @@ function aw_block_social_posts( $a = array(), $id = 0 ) {
 	}
 	$done[ $id ] = true;
 	$hid         = 'aw-more-social';
+	aw_use_component_style( 'aw-single' ); // aw-more-head, aw-more-list
 	return '<section class="aw-more-group" aria-labelledby="' . $hid . '"><h2 class="aw-more-head has-x-large-font-size" id="' . $hid . '">' . esc_html( 'What people are saying' ) . '</h2>'
 		. '<ul class="aw-more-list">' . implode( '', array_map( 'aw_social_card', $posts ) ) . '</ul></section>';
 }

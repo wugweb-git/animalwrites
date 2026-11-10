@@ -15,9 +15,10 @@
  * request whose headers are already sent. Storing the commit there would mark it done without purging anything.
  * tools/aw-ship.sh purges the same way: its last step requests ?aw_deploy_nudge=ship-<sha>-<time> (WP-CLI's
  * `wp litespeed-purge all` cannot notify the web server on this host, 24 Oct 2026). A second nudge is harmless.
- * The same request empties uploads/kits-cache/parts/ (the joined component stylesheets of Kits by Wugweb), so sets no
- * page uses any more do not count against the cap. Pages make their files again as they are visited, under the same
- * names while the CSS is unchanged (owner, 10 Nov 2026).
+ * The same request starts the sweep of uploads/kits-cache/parts/ (the joined component stylesheets of Kits by Wugweb),
+ * so sets no page uses any more do not count against the cap (owner, 10 Nov 2026). Files no page has used since the
+ * release go two hours later: past the longest time the CDN keeps a page (aw_cdn_ttl, at most an hour, plus
+ * stale-while-revalidate 600 s, cdn-cache.php), so a cached page never links to a deleted file.
  *
  * @package animal-writes-core
  */
@@ -26,11 +27,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/** Empty the folder of joined component stylesheets (Kits kits_parts_bundle_dir()). */
-function aw_deploy_empty_parts_css() {
-	$dir = function_exists( 'kits_parts_bundle_dir' ) ? kits_parts_bundle_dir()['path'] : trailingslashit( wp_upload_dir( null, false )['basedir'] ) . 'kits-cache/parts';
-	foreach ( array_merge( (array) glob( $dir . '/*.css' ), (array) glob( $dir . '/*.tmp' ) ) as $f ) {
-		wp_delete_file( $f );
+/** Start the sweep of joined component stylesheets (Kits kits_parts_bundle_sweep_start()), two hours from now. */
+function aw_deploy_sweep_parts_css() {
+	if ( function_exists( 'kits_parts_bundle_sweep_start' ) ) {
+		kits_parts_bundle_sweep_start( 2 * HOUR_IN_SECONDS );
 	}
 }
 
@@ -63,7 +63,7 @@ add_action(
 			return;
 		}
 		update_option( 'aw_deployed_head', $head, true );
-		aw_deploy_empty_parts_css();
+		aw_deploy_sweep_parts_css();
 		do_action( 'litespeed_purge_all' ); // LiteSpeed Cache's own hook; nothing happens if it is not active
 	},
 	99

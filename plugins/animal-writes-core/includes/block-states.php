@@ -120,6 +120,9 @@ add_filter(
 		$out .= '<h2>Pictures in a card</h2><p>Card pictures are 4:3, masked like WordPress (cover, centred): the whole file is served, the frame hides the edges. A document page is masked from the top. Logos stay whole.</p><div class="aw-state-grid">';
 		foreach ( $pick + array( 'Document page' => $doc, 'Logo (stays whole)' => $logo ) as $label => $att ) {
 			$img  = $att ? wp_get_attachment_image( $att, 'medium_large', false, array( 'alt' => '', 'loading' => 'lazy', 'class' => 'Logo (stays whole)' === $label ? 'aw-story-logo' : '' ) ) : '';
+			if ( 'Logo (stays whole)' === $label ) {
+				aw_use_component_style( 'aw-single' ); // aw-story-fallback, aw-story-logo
+			}
 			$fig  = 'Logo (stays whole)' === $label ? '<figure class="wp-block-post-featured-image kit-card-media kit-story-media"><div class="aw-story-fallback" style="display:flex">' . $img . '</div></figure>' : '<figure class="wp-block-post-featured-image kit-card-media' . ( 'Document page' === $label ? ' kit-doc-cover' : '' ) . '">' . $img . '</figure>';
 			$out .= '<div class="aw-state-row"><p class="aw-state-name">' . esc_html( $label ) . '</p><div class="aw-state-out">' . ( $img ? $fig : '<em>No item in this state yet.</em>' ) . '</div></div>';
 		}

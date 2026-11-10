@@ -64,6 +64,14 @@ done
 code=$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:8080/?rest_route=/aw/v1/sourcing-policy")
 if [ "$code" != "401" ]; then echo "FAIL $code /aw/v1/sourcing-policy (want 401)"; FAIL=1; else echo "ok   $code /aw/v1/sourcing-policy"; fi
 if [ -f /tmp/wp-debug.log ] && grep -E 'PHP (Fatal|Parse) error' /tmp/wp-debug.log; then FAIL=1; fi
+# The child's aw.css has no component rules (it is the plugin's copy), so the component files load from the plugin.
+curl -s -o /tmp/home-child.html http://127.0.0.1:8080/
+href=$(grep -oE "<link[^>]*id=['\"]kits-parts-css['\"][^>]*>" /tmp/home-child.html | grep -oE "href=['\"][^'\"]+" | head -1 | cut -c7-)
+if grep -qF "id='aw-home-css'" /tmp/home-child.html || { [ -n "$href" ] && curl -s "$href" | grep -qF '/* aw-home */'; }; then
+  echo "ok   aw-home on / (child)"
+else
+  echo "FAIL no aw-home on / (child)"; FAIL=1
+fi
 
 # Second pass: Kits by Wugweb with no child. animal-writes-core then serves the child's styles, scripts, templates,
 # parts and patterns (includes/theme-parts*.php); the same URLs must answer 200 and the page must be the child's.

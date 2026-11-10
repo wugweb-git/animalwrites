@@ -496,7 +496,6 @@ function aw_block_listing_press( $a, $id ) {
 
 
 function aw_block_listing_opportunities( $a, $id ) {
-	aw_use_component_style( 'aw-single' ); // aw-more-card, aw-more-head, aw-more-list
 	if ( ! aw_listing_here( $id ) ) {
 		return function_exists( 'aw_item_editor_preview' ) ? aw_item_editor_preview( 'Opportunities at the organisation (open only)' ) : '';
 	}
@@ -509,6 +508,7 @@ function aw_block_listing_opportunities( $a, $id ) {
 	if ( ! $ids || ! function_exists( 'aw_item_more_card' ) ) {
 		return '';
 	}
+	aw_use_component_style( 'aw-single' ); // aw-more-card, aw-more-head, aw-more-list
 	/* translators: %s: organisation. */
 	return '<section class="aw-more-group aw-listing-opps" aria-labelledby="aw-opps-h"><h2 class="aw-more-head has-x-large-font-size" id="aw-opps-h">' . esc_html( sprintf( __( 'Opportunities at %s', 'animal-writes-core' ), get_the_title( $id ) ) ) . '</h2><ul class="aw-more-list">' . implode( '', array_map( 'aw_item_more_card', $ids ) ) . '</ul></section>';
 }

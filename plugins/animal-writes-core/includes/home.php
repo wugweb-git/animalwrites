@@ -146,6 +146,7 @@ const AW_CONTENT_PHOTO = 19;
  * @return string
  */
 function aw_block_home_content() {
+	aw_use_component_style( 'aw-home' ); // The block can sit on any page.
 	$n    = function_exists( 'aw_listing_public_count' ) ? aw_listing_public_count() : 0;
 	$n    = $n >= 100 ? number_format_i18n( round( $n / 100 ) * 100 ) . '+' : ( $n ? number_format_i18n( $n ) : '' ); // 6,796 shows 6,800+
 	$img  = wp_attachment_is_image( AW_CONTENT_PHOTO ) ? wp_get_attachment_image( AW_CONTENT_PHOTO, 'full', false, array( 'class' => 'aw-content-bg', 'alt' => '', 'sizes' => '1280px', 'loading' => 'lazy', 'decoding' => 'async' ) ) : ''; // a wide strip covering a tall card: always the full file

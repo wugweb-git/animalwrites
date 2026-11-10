@@ -1,8 +1,8 @@
 <?php
 /**
  * See theme-parts.php. Styles, scripts, presets and head tags the animal-writes child theme adds today (its
- * theme.json and functions.php), for a site that runs Kits by Wugweb with no child. Nothing here runs while the child
- * is active.
+ * theme.json and functions.php), for a site that runs Kits by Wugweb with no child. While the child is active only the
+ * component stylesheets load from here (aw_child_theme_on()); the rest comes from the child.
  *
  * @package animal-writes-core
  */
@@ -48,7 +48,7 @@ function aw_theme_parts_path( string $file ): string {
  * with aw.css into one file per page by Kits (kits_component_styles, Kits functions.php). handle => [
  *   'file'   => path relative to the theme root; the .min.css next to it is served when it exists,
  *   'when'   => optional callable, no arguments: a template condition, e.g. 'is_front_page',
- *   'blocks' => optional [ block name => class prefix ]: stored content no PHP prints, e.g. [ 'core/group' => 'aw-about-' ],
+ *   'blocks' => optional [ block name => class prefix or list of prefixes ]: stored content no PHP prints, e.g. [ 'core/group' => 'aw-about-' ],
  * ]. With no 'when', the file loads on pages whose PHP called aw_use_component_style( $handle ) while printing.
  * The order here is the order in the joined file, after aw.css. Editors load every file (below). For example:
  *
@@ -61,9 +61,10 @@ function aw_theme_parts_path( string $file ): string {
  */
 function aw_component_style_files(): array {
 	return array(
-		'aw-home' => array( // Home sections: front page only (no campaign CSS rides on this condition).
-			'file' => 'assets/css/aw-home.css',
-			'when' => 'is_front_page',
+		'aw-home' => array( // Home sections: the front page, plus the Home section patterns and blocks wherever they are placed.
+			'file'   => 'assets/css/aw-home.css',
+			'when'   => 'is_front_page',
+			'blocks' => array( 'core/group' => array( 'aw-ed-', 'aw-pair' ) ), // help-now, find-help, animal-law, learn, whats-happening, aw-pair.
 		),
 		'aw-type-ico' => array( // Type icons: wherever aw_type_icon() or the Directory map prints one.
 			'file' => 'assets/css/aw-type-ico.css',
@@ -99,33 +100,62 @@ function aw_theme_css_served( string $file ): string {
 	return is_readable( aw_theme_parts_path( $min ) ) ? $min : $file;
 }
 
-/** Stylesheets the editors show: tokens, aw.css, then every component file (sources, not minified). */
+/**
+ * The animal-writes child theme is active (the way back from serving the theme parts). Its aw.css is the same file as
+ * this plugin's (tools/ci/theme_copies.py), so it has no component rules: the component files load from this plugin.
+ */
+function aw_child_theme_on(): bool {
+	return 'animal-writes' === get_stylesheet() && 'kits-by-wugweb' === get_template();
+}
+
+/**
+ * Address of this plugin's copy of a theme file, whichever theme is active.
+ *
+ * @param string $file Path relative to the theme root.
+ */
+function aw_theme_parts_uri( string $file ): string {
+	return plugins_url( 'theme/' . ltrim( $file, '/' ), AW_CORE_DIR . 'animal-writes-core.php' );
+}
+
+/**
+ * Stylesheets the editors show: tokens, aw.css, then every component file (sources, not minified). Under the child
+ * theme only the component files: the child's add_editor_style() gives tokens and aw.css.
+ */
 function aw_editor_style_files(): array {
-	return array_merge( array( 'assets/css/tokens.css', 'assets/css/aw.css' ), array_column( aw_component_style_files(), 'file' ) );
+	$parts = array_column( aw_component_style_files(), 'file' );
+	return aw_child_theme_on() ? $parts : array_merge( array( 'assets/css/tokens.css', 'assets/css/aw.css' ), $parts );
+}
+
+/** The editors load this plugin's files: while it serves the theme parts, and the component files under the child. */
+function aw_editor_styles_on(): bool {
+	return aw_core_theme_parts_on() || aw_child_theme_on();
 }
 
 /*
- * aw.css first (every page), then the component files, through the Kits registry. Only while this plugin serves the
- * theme parts; under the child theme the child's aw.css loads as before.
+ * aw.css first (every page), then the component files, through the Kits registry. Under the child theme the child
+ * registers aw-components (its own aw.css) and the component files come from this plugin, after it.
  */
 add_filter(
 	'kits_component_styles',
 	function ( $styles ) {
-		if ( ! aw_core_theme_parts_on() || ! is_array( $styles ) ) {
+		$child = aw_child_theme_on();
+		if ( ( ! $child && ! aw_core_theme_parts_on() ) || ! is_array( $styles ) ) {
 			return $styles;
 		}
-		// Registered and enqueued below (wp_enqueue_scripts 20). 'file' lets Kits join it when its address cannot be mapped.
-		$styles['aw-components'] = array(
-			'file' => aw_theme_parts_path( aw_theme_css_served( 'assets/css/aw.css' ) ),
-			'when' => '__return_true',
-		);
+		if ( ! $child ) {
+			// Registered and enqueued below (wp_enqueue_scripts 20). 'file' lets Kits join it when its address cannot be mapped.
+			$styles['aw-components'] = array(
+				'file' => aw_theme_parts_path( aw_theme_css_served( 'assets/css/aw.css' ) ),
+				'when' => '__return_true',
+			);
+		}
 		foreach ( aw_component_style_files() as $handle => $c ) {
 			if ( empty( $c['file'] ) ) {
 				continue;
 			}
 			$file              = aw_theme_css_served( (string) $c['file'] );
 			$styles[ $handle ] = array(
-				'src'    => aw_theme_file_uri( $file ),
+				'src'    => aw_theme_parts_uri( $file ),
 				'file'   => aw_theme_parts_path( $file ),
 				'deps'   => array( 'aw-components' ),
 				'when'   => $c['when'] ?? null,
@@ -224,7 +254,7 @@ add_action(
 add_filter(
 	'block_editor_settings_all',
 	function ( $settings ) {
-		if ( ! aw_core_theme_parts_on() || ! current_theme_supports( 'editor-styles' ) ) {
+		if ( ! aw_editor_styles_on() || ! current_theme_supports( 'editor-styles' ) ) {
 			return $settings;
 		}
 		foreach ( aw_editor_style_files() as $f ) {
@@ -232,7 +262,7 @@ add_filter(
 			if ( is_readable( $path ) ) {
 				$settings['styles'][] = array(
 					'css'            => (string) file_get_contents( $path ), // phpcs:ignore WordPress.WP.AlternativeFunctions
-					'baseURL'        => aw_theme_file_uri( $f ),
+					'baseURL'        => aw_theme_parts_uri( $f ),
 					'__unstableType' => 'theme',
 					'isGlobalStyles' => false,
 				);
@@ -249,12 +279,12 @@ add_filter(
 add_filter(
 	'mce_css',
 	function ( $mce_css ) {
-		if ( ! is_admin() || ! aw_core_theme_parts_on() ) {
+		if ( ! is_admin() || ! aw_editor_styles_on() ) {
 			return $mce_css;
 		}
 		foreach ( aw_editor_style_files() as $f ) {
 			if ( is_readable( aw_theme_parts_path( $f ) ) ) {
-				$mce_css .= ',' . str_replace( ',', '%2C', aw_theme_file_uri( $f ) );
+				$mce_css .= ',' . str_replace( ',', '%2C', aw_theme_parts_uri( $f ) );
 			}
 		}
 		return trim( (string) $mce_css, ' ,' );
