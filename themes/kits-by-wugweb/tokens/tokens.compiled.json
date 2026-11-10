@@ -555,6 +555,51 @@
       "md": "17rem",
       "lg": "17rem"
     },
+    "card-min-width": {
+      "sm": "auto",
+      "md": "auto",
+      "lg": "auto"
+    },
+    "card-stacked-gap": {
+      "sm": "var(--kit-space-5)",
+      "md": "var(--kit-space-5)",
+      "lg": "var(--kit-space-5)"
+    },
+    "card-stacked-media": {
+      "sm": "40%",
+      "md": "40%",
+      "lg": "40%"
+    },
+    "card-stacked-media-max": {
+      "sm": "40%",
+      "md": "40%",
+      "lg": "40%"
+    },
+    "card-stacked-media-flex": {
+      "sm": "none",
+      "md": "none",
+      "lg": "none"
+    },
+    "card-stacked-media-min": {
+      "sm": "auto",
+      "md": "auto",
+      "lg": "auto"
+    },
+    "card-stacked-body-flex": {
+      "sm": "1 1 auto",
+      "md": "1 1 auto",
+      "lg": "1 1 auto"
+    },
+    "card-stacked-body-min": {
+      "sm": "0",
+      "md": "0",
+      "lg": "0"
+    },
+    "card-block-media-max": {
+      "sm": "none",
+      "md": "none",
+      "lg": "none"
+    },
     "size-target-min": {
       "sm": "24px",
       "md": "24px",
@@ -779,6 +824,16 @@
       "sm": ".875rem",
       "md": ".875rem",
       "lg": ".875rem"
+    },
+    "btn-font-size": {
+      "sm": "var(--fluid-body-md)",
+      "md": "var(--fluid-body-md)",
+      "lg": "var(--fluid-body-md)"
+    },
+    "section-desc-size": {
+      "sm": "var(--kit-type-lead)",
+      "md": "var(--kit-type-lead)",
+      "lg": "var(--kit-type-lead)"
     },
     "field-hint-size": {
       "sm": "var(--fluid-body-sm)",

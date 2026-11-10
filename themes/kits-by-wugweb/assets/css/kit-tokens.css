@@ -131,6 +131,15 @@
   --kit-thumb-md: 72px;
   --kit-thumb-lg: 112px;
   --kit-card-min: 17rem;
+  --kit-card-min-width: auto; /* least width of a card with no state class; a site sets min(100%, var(--kit-card-min)) */
+  --kit-card-stacked-gap: var(--kit-space-5); /* gap between picture and text in kit-card--stacked-lg */
+  --kit-card-stacked-media: 40%; /* picture width in kit-card--stacked-lg */
+  --kit-card-stacked-media-max: 40%; /* picture max width in kit-card--stacked-lg */
+  --kit-card-stacked-media-flex: none; /* flex of the picture in a stacked card */
+  --kit-card-stacked-media-min: auto; /* least picture width in a stacked card */
+  --kit-card-stacked-body-flex: 1 1 auto; /* flex of the text column in a stacked card */
+  --kit-card-stacked-body-min: 0; /* least text column width in a stacked card */
+  --kit-card-block-media-max: none; /* picture max height in a block card */
   --kit-size-target-min: 24px;
   --kit-accent-bar: 6px;
   --kit-focus-outline: 2px;
@@ -176,6 +185,8 @@
   --kit-field-border: var(--neutral-5); /* #7D7D7D: 3.7:1 on the page (#F4F4F4), 4.1:1 on white (WCAG 1.4.11, 31 Oct 2026; was #BABABA, 1.8:1) */
   --kit-field-hint: var(--neutral-7); /* help text under a label: #4A4A4A, over 7:1 (WCAG 1.4.3; was #7D7D7D) */
   --kit-field-text-size: .875rem; /* what is typed in a box, and a fixed part before it ("+91"): 14px at every width */
+  --kit-btn-font-size: var(--fluid-body-md); /* label size of .kit-btn and the core Button block */
+  --kit-section-desc-size: var(--kit-type-lead); /* text size of the archive band description (.kit-section-desc) */
   --kit-field-hint-size: var(--fluid-body-sm); /* 13 to 14px (was the 10 to 12px caption size) */
   --kit-btn-pad: var(--s-4);
   --kit-btn-pad-sm: var(--s-4);

@@ -59,6 +59,8 @@ p, li { max-width: var(--kit-measure); text-wrap: pretty; }
 	padding: 0;
 	margin-block: var(--kit-space-5);
 }
+@media (max-width: 767px) { .wp-block-post-template.is-layout-grid { gap: var(--kit-space-4); } }
+.wp-block-post-content.alignwide.is-layout-constrained > :not(.alignwide):not(.alignfull) { max-width: var(--kit-width-content); margin-left: max(0px, calc((100% - var(--kit-width-wide)) / 2)) !important; margin-right: auto !important; }
 /* A Post Template set to two columns in the editor keeps two (at most), and one when two cards would be under the card
    width (--kit-card-min); without this the theme's auto-fill grid above would put three in a row */
 .wp-block-post-template.is-layout-grid.columns-2 { grid-template-columns: repeat(auto-fill, minmax(max(min(var(--kit-card-min), 100%), calc((100% - var(--kit-space-grid)) / 2)), 1fr)); }
@@ -214,6 +216,7 @@ body.single-aw_research .kit-lead-media { display: none; }
 /* Its background and padding are settings: Group style Head band (theme.json styles.blocks.core/group.variations.kits-head-band). */
 .kit-section-band { width: auto; max-width: none !important; margin: 0 calc(50% - 50vw) var(--kit-space-6) !important; }
 main > .kit-section-band:first-child, main > p:first-child + .kit-section-band { margin-top: 0 !important; }
+.wp-block-post-content > .kit-section-band:first-child { margin-top: 0 !important; }
 .kit-section-band:not(:has(.kit-section-filters)) { margin-bottom: 0 !important; } /* head band (breadcrumb, H1, description): its last row › what follows 16 */
 .kit-section-band:not(:has(.kit-section-filters)) + * { margin-block-start: 0; } /* no flow-layout gap under it */
 .kit-section-band:not(:has(.kit-section-filters)) + .kit-section-filters--below { margin-block-start: var(--kit-space-band-gap); } /* a list toolbar under the head band: 24 / 32 / 40, never touching it */
@@ -228,6 +231,10 @@ main > .kit-section-band:first-child, main > p:first-child + .kit-section-band {
 .kit-section-filters .kit-filter-active { margin-top: var(--kit-space-3); }
 .kit-section-filters .kit-filters, .kit-section-filters .kit-filter-active { margin-bottom: 0; }
 /* List pages: the filters and count sit under the head band, then the list and its pagination, 16 apart (--kit-space-collection) */
+.kit-section-band :where(.kit-section-inner, .kit-section-head, .kit-section-head > .wp-block-group) > * { margin-block-start: 0; }
+.kit-section-band .kit-section-desc { margin-top: var(--kit-space-head); }
+.kit-section-band .kit-section-count { margin-top: var(--kit-space-2); }
+.kit-section-band .kit-crumbs li > a:not([class]) { color: inherit; }
 .kit-section-filters--below { margin: 0 0 var(--kit-space-collection); }
 .kit-section-filters--below > .kit-section-count { margin-top: var(--kit-space-collection); }
 .kit-section-filters--below > .kit-section-count:first-child { margin-top: 0; }
@@ -248,7 +255,7 @@ main > .kit-section-band:first-child, main > p:first-child + .kit-section-band {
 html { overflow-x: clip; }
 .kit-section-head { display: grid; gap: var(--kit-space-5); align-items: end; max-width: var(--kit-width-wide); margin-inline: auto; }
 .kit-section-head :is(.wp-block-query-title, .wp-block-post-title) { margin: 0; } /* the band's H1, archive or Page */
-.kit-section-desc { font-size: var(--kit-type-lead); color: var(--kit-color-muted); margin: var(--kit-space-head) 0 0; }
+.kit-section-desc { font-size: var(--kit-section-desc-size); color: var(--kit-color-muted); margin: var(--kit-space-head) 0 0; }
 .kit-section-count { font-weight: var(--kit-weight-strong); color: var(--kit-color-ink); font-size: var(--kit-type-sm); margin: var(--kit-space-2) 0 0; } /* ink: accent-ink on kraft is only 4.3:1 */
 .kit-section-visual { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--kit-space-2); min-width: 0; }
 .kit-section-visual > * { min-width: 0; }
@@ -598,6 +605,9 @@ body.single main .wp-block-post-featured-image:not(.kit-logo) img ,body.single m
 .kit-pager { display: flex; flex-wrap: wrap; gap: var(--kit-space-2); margin-top: var(--kit-space-7); }
 .kit-pager .page-numbers { display: inline-flex; align-items: center; justify-content: center; min-width: var(--kit-size-target); min-height: var(--kit-size-target); padding: 0 var(--kit-space-3); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-control); background: var(--kit-color-raised); color: var(--kit-color-ink); text-decoration: none; font-weight: var(--kit-weight-medium); }
 .kit-pager .page-numbers.current { background: var(--kit-color-ink); color: var(--kit-color-on-ink); border-color: var(--kit-color-ink); }
+.kit-pager > a, .kit-pager .wp-block-query-pagination-numbers { display: inline-flex; gap: var(--kit-space-2); }
+.kit-pager > a { align-items: center; justify-content: center; min-height: var(--kit-size-target); padding: 0 var(--kit-space-3); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-control); background: var(--kit-color-raised); color: var(--kit-color-ink); text-decoration: none; font-weight: var(--kit-weight-medium); }
+.kit-pager > a:hover { background: var(--kit-color-ink); color: var(--kit-color-on-ink); border-color: var(--kit-color-ink); }
 .kit-empty { padding: var(--kit-space-7); text-align: center; border: var(--kit-border-width) dashed var(--kit-color-line); border-radius: var(--kit-radius-card); color: var(--kit-color-muted); }
 .kit-empty p { margin-inline: auto; }
 
@@ -768,6 +778,7 @@ html.has-modal-open .kit-sticky-help { display: none !important; }
 .kit-social:hover { color: var(--kit-color-on-ink); }
 .kit-social:hover::before { background: color-mix(in srgb, var(--kit-color-on-ink) 10%, transparent); border-color: color-mix(in srgb, var(--kit-color-on-ink) 32%, transparent); }
 .kit-footer-head { display: flex; align-items: center; gap: var(--kit-space-2); margin: 0 0 var(--kit-space-3); font-size: var(--kit-type-sm) !important; font-weight: var(--kit-weight-strong); letter-spacing: 0; line-height: 1.4 !important; color: var(--kit-color-on-ink) !important; }
+.kit-footer p.kit-footer-head { max-width: none; text-wrap: balance; }
 .kit-footer-list, .kit-legal-links, .kit-footer-inline, .kit-footer-helplines { list-style: none; padding: 0; margin: 0; }
 .kit-footer-list li { margin: 0; }
 .kit-footer-list a { display: flex; align-items: center; min-height: var(--kit-size-target); font-size: var(--kit-type-base); color: var(--kit-footer-muted); text-decoration: none; }
@@ -1136,7 +1147,7 @@ header.wp-block-template-part.kit-header-hidden { transform: translateY(calc(-10
 
 /* One card (owner, 9 Oct 2026): News, Resources, Library and Opportunities cards share one behaviour — the whole card
    is the link, the title underlines on hover, keyboard focus outlines the card, and the arrow (where shown) nudges. */
-.kit-card { position: relative; }
+.kit-card { position: relative; min-width: var(--kit-card-min-width); }
 .kit-card :is(.wp-block-post-title, h2, h3) a { text-decoration: none; }
 .kit-card:hover :is(.wp-block-post-title, h2, h3) a { text-decoration: underline; text-underline-offset: var(--kit-underline-offset); text-decoration-thickness: var(--kit-underline-thickness); }
 .kit-card:has(a:focus-visible) { outline: var(--kit-focus-width, 2px) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset-xl); border-radius: var(--kit-radius-card, 12px); }
@@ -1202,12 +1213,13 @@ header.wp-block-template-part.kit-header-hidden { transform: translateY(calc(-10
 .kit-card--block-lg .kit-card-title { font-size: var(--kit-type-h3) !important; }
 .kit-card.kit-card--block-lg .kit-card-sum .wp-block-post-excerpt__excerpt { -webkit-line-clamp: 3; }
 .kit-card--block-sm .kit-card-title { font-size: var(--kit-type-sm) !important; }
+.kit-card[class*="kit-card--block"] .kit-card-media { max-height: var(--kit-card-block-media-max); }
 /* Stacked: picture left, or none */
 .kit-card[class*="kit-card--stacked"] { flex-direction: row; align-items: flex-start; gap: var(--kit-space-4); padding: var(--kit-space-5); }
-.kit-card[class*="kit-card--stacked"] > .kit-card-body { padding: 0; }
-.kit-card[class*="kit-card--stacked"] > .kit-card-media { border-radius: var(--kit-radius-media); }
-.kit-card--stacked-lg { gap: var(--kit-space-5) !important; padding: var(--kit-space-5) !important; }
-.kit-card--stacked-lg > .kit-card-media { width: 40% !important; max-width: 40%; }
+.kit-card[class*="kit-card--stacked"] > .kit-card-body { padding: 0; flex: var(--kit-card-stacked-body-flex); min-width: var(--kit-card-stacked-body-min); }
+.kit-card[class*="kit-card--stacked"] > .kit-card-media { border-radius: var(--kit-radius-media); flex: var(--kit-card-stacked-media-flex); min-width: var(--kit-card-stacked-media-min); }
+.kit-card--stacked-lg { gap: var(--kit-card-stacked-gap) !important; padding: var(--kit-space-5) !important; }
+.kit-card--stacked-lg > .kit-card-media { width: var(--kit-card-stacked-media) !important; max-width: var(--kit-card-stacked-media-max); }
 .kit-card--stacked-lg .kit-card-title { font-size: var(--kit-type-h3) !important; }
 .kit-card--stacked-md > .kit-card-media { width: var(--kit-thumb-lg) !important; max-width: 40%; }
 .kit-card:is(.kit-card--stacked-md, .kit-card--stacked-sm, .kit-card--block-sm) .kit-card-sum { display: none; }
@@ -1249,6 +1261,7 @@ header.wp-block-template-part.kit-header-hidden { transform: translateY(calc(-10
    part). The text column is the reading width (--kit-width-content). Below lg the sidebar follows the text, at most the
    same width; at lg it is a second column beside it. A sidebar with nothing to show (no blocks print anything) takes no
    space, and the text column stays at the left edge. */
+.kit-sidebar { display: grid; gap: var(--kit-space-6); align-content: start; }
 .kit-with-sidebar { display: grid; grid-template-columns: minmax(0, 1fr); justify-items: start; } /* the text column starts at the page's left edge (owner, 20 Oct 2026) */
 .kit-with-sidebar > :is(.kit-main, .kit-sidebar) { width: 100%; max-width: var(--kit-width-content); margin-block: 0; }
 .kit-with-sidebar > .kit-sidebar:has(> *) { margin-top: var(--kit-space-7); }

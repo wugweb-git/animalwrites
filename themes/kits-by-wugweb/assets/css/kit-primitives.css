@@ -273,6 +273,7 @@ button.kit-dd-btn { font: inherit; font-size: var(--fluid-body-sm); }
 	transition: background-color var(--kit-motion-fast) var(--kit-motion-ease), color var(--kit-motion-fast) var(--kit-motion-ease),
 		border-color var(--kit-motion-fast) var(--kit-motion-ease), transform var(--kit-motion-fast) var(--kit-motion-ease);
 }
+.kit-btn, .wp-block-button__link { font-size: var(--kit-btn-font-size); }
 a:is(.kit-btn, .wp-block-button__link, .wp-element-button) { color: var(--_fg); } /* outranks "links in this area are light" rules */
 .kit-btn .kit-ico { --kit-ico-size: var(--kit-btn-ico-size); }
 

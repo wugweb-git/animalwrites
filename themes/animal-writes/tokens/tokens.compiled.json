@@ -109,6 +109,111 @@
       "sm": "#0062b8",
       "md": "#0062b8",
       "lg": "#0062b8"
+    },
+    "surface-page": {
+      "sm": "var(--kit-color-canvas)",
+      "md": "var(--kit-color-canvas)",
+      "lg": "var(--kit-color-canvas)"
+    },
+    "field-text-size": {
+      "sm": "1rem",
+      "md": ".875rem",
+      "lg": ".875rem"
+    },
+    "type-sm": {
+      "sm": "var(--fluid-body-sm)",
+      "md": "clamp(.75rem, .7273rem + .0909vw, .8125rem)",
+      "lg": "clamp(.75rem, .7273rem + .0909vw, .8125rem)"
+    },
+    "type-xs": {
+      "sm": "var(--fluid-label)",
+      "md": "clamp(.6875rem, .6591rem + .1136vw, .75rem)",
+      "lg": "clamp(.6875rem, .6591rem + .1136vw, .75rem)"
+    },
+    "meta-size": {
+      "sm": "12px",
+      "md": ".8125rem",
+      "lg": ".8125rem"
+    },
+    "btn-font-size": {
+      "sm": ".875rem",
+      "md": ".875rem",
+      "lg": ".875rem"
+    },
+    "section-desc-size": {
+      "sm": ".875rem",
+      "md": ".875rem",
+      "lg": ".875rem"
+    },
+    "card-min": {
+      "sm": "18rem",
+      "md": "18rem",
+      "lg": "18rem"
+    },
+    "card-media-max": {
+      "sm": "22.5rem",
+      "md": "22.5rem",
+      "lg": "22.5rem"
+    },
+    "thumb-min": {
+      "sm": "4.5rem",
+      "md": "4.5rem",
+      "lg": "4.5rem"
+    },
+    "thumb-max": {
+      "sm": "15rem",
+      "md": "15rem",
+      "lg": "15rem"
+    },
+    "body-min": {
+      "sm": "10rem",
+      "md": "10rem",
+      "lg": "10rem"
+    },
+    "card-min-width": {
+      "sm": "min(100%, var(--kit-card-min))",
+      "md": "min(100%, var(--kit-card-min))",
+      "lg": "min(100%, var(--kit-card-min))"
+    },
+    "card-stacked-gap": {
+      "sm": "clamp(var(--kit-space-3), 5vw, var(--kit-space-5))",
+      "md": "clamp(var(--kit-space-3), 5vw, var(--kit-space-5))",
+      "lg": "clamp(var(--kit-space-3), 5vw, var(--kit-space-5))"
+    },
+    "card-stacked-media": {
+      "sm": "clamp(var(--kit-thumb-min), 30%, var(--kit-thumb-max))",
+      "md": "clamp(var(--kit-thumb-min), 30%, var(--kit-thumb-max))",
+      "lg": "clamp(var(--kit-thumb-min), 30%, var(--kit-thumb-max))"
+    },
+    "card-stacked-media-max": {
+      "sm": "none",
+      "md": "none",
+      "lg": "none"
+    },
+    "card-stacked-media-flex": {
+      "sm": "0 1 auto",
+      "md": "0 1 auto",
+      "lg": "0 1 auto"
+    },
+    "card-stacked-media-min": {
+      "sm": "var(--kit-thumb-min)",
+      "md": "var(--kit-thumb-min)",
+      "lg": "var(--kit-thumb-min)"
+    },
+    "card-stacked-body-flex": {
+      "sm": "1 1 0",
+      "md": "1 1 0",
+      "lg": "1 1 0"
+    },
+    "card-stacked-body-min": {
+      "sm": "var(--kit-body-min)",
+      "md": "var(--kit-body-min)",
+      "lg": "var(--kit-body-min)"
+    },
+    "card-block-media-max": {
+      "sm": "var(--kit-card-media-max)",
+      "md": "var(--kit-card-media-max)",
+      "lg": "var(--kit-card-media-max)"
     }
   }
 }

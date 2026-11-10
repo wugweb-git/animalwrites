@@ -5,4 +5,33 @@
   --kit-color-danger-soft: #fff2f4;
   --kit-color-success-soft: #eef8f1;
   --kit-color-whatsapp: #1f7a44;
+  --kit-surface-page: var(--kit-color-canvas);
+  --kit-field-text-size: 1rem; /* 16px below 768 so iOS does not zoom into a field */
+  --kit-type-sm: var(--fluid-body-sm);
+  --kit-type-xs: var(--fluid-label);
+  --kit-meta-size: 12px;
+  --kit-btn-font-size: .875rem;
+  --kit-section-desc-size: .875rem;
+  --kit-card-min: 18rem; /* docs/card-sizes.md */
+  --kit-card-media-max: 22.5rem;
+  --kit-thumb-min: 4.5rem;
+  --kit-thumb-max: 15rem;
+  --kit-body-min: 10rem;
+  --kit-card-min-width: min(100%, var(--kit-card-min));
+  --kit-card-stacked-gap: clamp(var(--kit-space-3), 5vw, var(--kit-space-5));
+  --kit-card-stacked-media: clamp(var(--kit-thumb-min), 30%, var(--kit-thumb-max)); /* docs/card-sizes.md: picture 30%, 4.5 to 15rem */
+  --kit-card-stacked-media-max: none;
+  --kit-card-stacked-media-flex: 0 1 auto;
+  --kit-card-stacked-media-min: var(--kit-thumb-min);
+  --kit-card-stacked-body-flex: 1 1 0;
+  --kit-card-stacked-body-min: var(--kit-body-min); /* docs/card-sizes.md: text column at least 10rem */
+  --kit-card-block-media-max: var(--kit-card-media-max);
+}
+@media (min-width: 768px) {
+  :root {
+    --kit-field-text-size: .875rem;
+    --kit-type-sm: clamp(.75rem, .7273rem + .0909vw, .8125rem);
+    --kit-type-xs: clamp(.6875rem, .6591rem + .1136vw, .75rem);
+    --kit-meta-size: .8125rem;
+  }
 }
