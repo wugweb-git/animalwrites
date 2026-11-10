@@ -91,6 +91,10 @@ function aw_component_style_files(): array {
 				'core/post-template' => 'aw-orgs', // the Directory list pattern, placed elsewhere
 			),
 		),
+		'aw-listing' => array( // Directory listing pages and the claim page.
+			'file' => 'assets/css/aw-listing.css',
+			'when' => fn() => is_singular( 'aw_listing' ) || is_page( 'claim' ),
+		),
 	);
 }
 
