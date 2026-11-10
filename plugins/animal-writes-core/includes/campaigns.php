@@ -37,6 +37,7 @@ add_shortcode(
 		if ( ! $date ) {
 			return '';
 		}
+		aw_use_component_style( 'aw-countdown' ); // aw-countdown
 		$ts   = strtotime( $date . ' 00:00:00 Asia/Kolkata' );
 		$days = (int) ceil( ( $ts - time() ) / DAY_IN_SECONDS );
 		$when = wp_date( AW_DATE_FORMAT, $ts, new DateTimeZone( 'Asia/Kolkata' ) );
