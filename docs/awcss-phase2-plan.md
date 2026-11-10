@@ -80,6 +80,10 @@ Two order changes remain and are checked by the TOTAL 0 gate:
   - The handles become aliases with `deps = [ bundle ]`, so the bundle prints where aw.css prints today.
 - **Same switch.** Theme Options → Older parts → "Joined stylesheet" (`theme-options.php:64`, `css_bundle`) and the `kits_bundle_css` filter turn off both bundles. Off: the separate files load, for finding a style problem.
 - **Clean-up, not the Kits glob.** The Kits clean-up deletes every other `kits-*.css` older than a day. With one file per handle set, that would delete files other pages still use. So the parts bundles live in their own folder, and only a file whose `{set}` matches a newer file is removed.
+- **Cap on joined files.** Loading follows which blocks a page prints, so pages of one type can get different sets (Home with or without the Supreme Court card), and real content can add sets beyond the 16 measured.
+  - The number of joined files in the cache folder is capped, by a Kits setting with a default.
+  - When the cap is reached, a page whose set has no file yet gets the separate files, as with the switch off, and nothing new is written.
+  - A check reports the file count against the cap, in the Welcome status row and Site check, and warns near the cap.
 - **How many files.** The 23 measured pages give **16 different sets**, so 16 cached files. Pages of one kind share one: the four campaigns, guides and library items share one; state and district share one; Home and 404 share one.
 - **Trade-off.** Each joined file repeats aw.css (1.6 KB gzip after the campaign split), so a visitor's second page type downloads it again. That costs less than 3–7 extra blocking requests on every first view.
 
@@ -289,10 +293,9 @@ Corrections from this pass:
 Gate for every commit: before/after capture of the 23 pages at 1280, 768 and 375, compare = **TOTAL 0** (analytics blocked, reduced motion emulated).
 
 **PageSpeed comparison** (commits 4–12, and once more after the last ship):
-- Pages: Home, one Directory listing, Volunteer. Before and after, at 375 wide, mobile throttling, median of 3 runs.
+- Pages: Home, one Directory listing, Volunteer. Before and after, PageSpeed Insights API (free, no key), mobile strategy with its own throttling, at its own phone width (412 px), median of 3 runs. 412 instead of 375 does not change the result, and it avoids headless Chrome, which the owner has ruled out. The 375 layout is covered by the TOTAL 0 capture.
 - Recorded: render-blocking stylesheet count, FCP, LCP, CLS, TBT and total CSS transfer.
 - Passes when the blocking stylesheet count is not higher than before, and FCP, LCP, CLS and TBT are not worse than before beyond the spread of the three runs. No invented thresholds: the before run is the bar.
-- The PageSpeed Insights API needs no key, but its mobile run is fixed at 412 wide. A 375-wide Lighthouse run needs a local headless Chrome, which needs the owner's yes. Without it, the gate uses the PSI mobile run (412) on live before and after each ship, and the 375 check is the TOTAL 0 capture. The re-run capture shows the moved group gone from aw.css. The post editor and Site Editor look the same. Theme rules, breakpoint and theme-copies checks are green. `component-map.md` is regenerated where a class or file list changes. The five campaign pages are in the 23 and must give 0 too.
 
 | # | commit | what moves | to | bytes |
 |---|---|---|---|---|
@@ -810,6 +813,6 @@ These values in load-bearing groups are literal sizes with no line in design-sys
 
 1. Nothing with an `aw-` selector goes into Kits, and the ten already there get an owner step. Four groups become Kits components with Kits markup: the newsletter band `kit-nl-band` (art stays AW), the source line `kit-src`, the date `kit-date` and the card time (a `kit-meta-item` variant). List-title and button/section sizes become Kits tokens. Everything else stays in Animal Writes CSS.
 2. Animal Writes CSS splits into aw.css (newsletter form, heading overrides: 6,890 B) and component files in the plugin only, three of them for campaigns. Each file is loaded by a template condition or a component flag through a small Kits loader filter, as Uncode does per module. Files are enqueued at `wp_enqueue_scripts` 20 after aw.css, never from inside render.
-3. Average aw.css-derived CSS per page drops from 161 KB to about 62 KB raw (−62%). On transfer it drops from 26.0 KB to 12.2 KB gzip (−53%) with one joined Animal Writes stylesheet per page, as today (14 cached files for 23 page types). A PageSpeed comparison at 375 on Home, a listing and Volunteer is part of the gate.
+3. Average aw.css-derived CSS per page drops from 161 KB to about 56 KB raw (−65%). On transfer it drops from 26.0 KB to 10.9 KB gzip (−58%) with one joined Animal Writes stylesheet per page, as today (16 cached files for the 23 measured page types, capped and reported). A PageSpeed comparison (API mobile, 412 px) on Home, a listing and Volunteer is part of the gate.
 4. There are 13 commits after the minify step, each gated by TOTAL 0 on 23 pages × 3 widths. The gate first needs reduced motion in the capture and the capture's selector bug fixed (94 rules looked matched everywhere); then both page lists are captured again. Renamed classes are searched for in stored content first. The phase 0 groups move with the code that prints them, or are dropped after their own check.
 5. Still for the owner: a yes per step for changing the campaign CSS files (step 13), and names for 102 raw sizes listed as candidate tokens.
