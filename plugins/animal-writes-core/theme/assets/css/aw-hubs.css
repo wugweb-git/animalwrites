@@ -34,8 +34,8 @@
 .aw-hub-news .aw-card-meta > p { margin: 0; }
 .aw-hub-library .aw-cases { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 32rem), 1fr)); gap: var(--kit-space-grid); border: 0 !important; }
 .aw-hub-library .aw-cases > li { margin: 0 !important; min-width: 0; }
-:is(.aw-res-media, .aw-sponsored-item-media) { aspect-ratio: var(--kit-card-media-ratio); overflow: hidden; }
-:is(.aw-res-media, .aw-sponsored-item-media) img { width: 100%; height: 100%; object-fit: cover; object-position: center; }
+.aw-sponsored-item-media { aspect-ratio: var(--kit-card-media-ratio); overflow: hidden; }
+.aw-sponsored-item-media img { width: 100%; height: 100%; object-fit: cover; object-position: center; }
 .aw-adopt-beta { margin: 0; }
 .aw-adopt-soon { max-width: 62ch; }
 .aw-adopt-soon > * { margin: 0 !important; }

@@ -42,7 +42,7 @@ add_shortcode(
 			return '';
 		}
 		aw_use_component_style( 'aw-hubs' ); // aw-categories-index
-	$html = '<ul class="aw-categories-index">';
+		$html = '<ul class="aw-categories-index">';
 		foreach ( $terms as $t ) {
 			$img  = function_exists( 'aw_category_image_id' ) ? aw_category_image_id( $t ) : 0;
 			$html .= '<li><a href="' . esc_url( kits_term_url( $t ) ) . '">'
