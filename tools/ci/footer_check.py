@@ -11,7 +11,7 @@ import sys
 from theme_copies import COPY, is_copy
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
-FILES = list((ROOT / "themes").glob("*/assets/css/*.css")) + [f for f in COPY.glob("assets/css/*.css") if not is_copy(f)]
+FILES = [f for f in (ROOT / "themes").glob("*/assets/css/*.css") if not is_copy(f)] + [f for f in COPY.glob("assets/css/*.css") if not is_copy(f)]
 SEL = re.compile(r"\.kit-footer|\.kit-site-footer|\.kit-legal-links|\.kit-powered|#site-footer|(^|[\s,>])footer\b")
 BAD = [
     (re.compile(r"(^|;|\{)\s*max-height\s*:", re.I), "max-height"),

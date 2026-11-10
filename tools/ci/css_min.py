@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""aw.css → aw.min.css: comments and whitespace out, nothing else.
+"""aw.css → aw.min.css, and the Kits kit.css, kit-primitives.css, kit-tokens.css → .min.css: comments and whitespace
+out, nothing else.
 
-The site serves plugins/animal-writes-core/theme/assets/css/aw.min.css; aw.css stays the readable source in git. Edit
-aw.css (and its child theme copy), then run this and commit both files. The Deploy check runs it with --check and fails
-when aw.min.css is not what this writes from the current aw.css.
+The site serves the .min.css files; the sources stay the readable files in git (the block editor loads the sources).
+Edit a source (aw.css also in its child theme copy; kit-tokens.css comes from tools/build-tokens.py), then run this and
+commit both files. The Deploy check runs it with --check and fails when a .min.css is not what this writes from its
+source.
 
 Safe by design: strings, url(...) and escapes are copied as they are; a comment is dropped; a run of whitespace becomes
 one space, or nothing next to { } ; , > ~ (and after : or (, before ) or !). Spaces around + - * / stay (calc() needs
@@ -11,15 +13,18 @@ them), as does the space before ( (media queries: "and (" is not "and("). No rul
 no ; is dropped. A comment that sits between two word characters with no space (a/**/b) stops it: dropping it would
 join two tokens, so the source needs a space there.
 
-    python3 tools/ci/css_min.py           # write aw.min.css
-    python3 tools/ci/css_min.py --check   # exit 1 when aw.min.css is missing or out of date
+    python3 tools/ci/css_min.py           # write every .min.css
+    python3 tools/ci/css_min.py --check   # exit 1 when a .min.css is missing or out of date
     python3 tools/ci/css_min.py IN OUT    # any other file
 """
 import pathlib
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
-PAIRS = ((ROOT / "plugins/animal-writes-core/theme/assets/css/aw.css", ROOT / "plugins/animal-writes-core/theme/assets/css/aw.min.css"),)
+KITS_CSS = ROOT / "themes/kits-by-wugweb/assets/css"
+PAIRS = ((ROOT / "plugins/animal-writes-core/theme/assets/css/aw.css", ROOT / "plugins/animal-writes-core/theme/assets/css/aw.min.css"),) + tuple(
+    (KITS_CSS / (n + ".css"), KITS_CSS / (n + ".min.css")) for n in ("kit-tokens", "kit", "kit-primitives")
+)
 
 NO_SPACE_AROUND = set("{};,>~")
 NO_SPACE_AFTER = NO_SPACE_AROUND | set(":(")
@@ -110,6 +115,9 @@ def main(argv):
             else:
                 print("css min check passed: %s is %s minified (%d → %d bytes)" % (dst.name, src.name, src.stat().st_size, len(want.encode())))
         else:
+            if dst.is_file() and dst.read_text(encoding="utf-8") == want:
+                print("up to date %s (%d → %d bytes)" % (dst, src.stat().st_size, len(want.encode())))
+                continue  # unchanged: keep its mtime, so the version string and the joined stylesheet stay the same
             dst.write_text(want, encoding="utf-8")
             print("wrote %s (%d → %d bytes)" % (dst, src.stat().st_size, len(want.encode())))
     return bad

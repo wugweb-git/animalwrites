@@ -66,6 +66,20 @@ add_filter(
 	2
 );
 
+if ( ! function_exists( 'kits_css_file' ) ) {
+	/**
+	 * The file a Kits stylesheet is served from: its .min.css (tools/ci/css_min.py writes it from the source) when it is
+	 * there, else the source. The block editor keeps loading the sources.
+	 *
+	 * @param string $name File name without .css, in assets/css (kit-tokens, kit, kit-primitives).
+	 * @return string Path relative to the theme folder.
+	 */
+	function kits_css_file( $name ) {
+		$min = 'assets/css/' . $name . '.min.css';
+		return is_readable( get_template_directory() . '/' . $min ) ? $min : 'assets/css/' . $name . '.css';
+	}
+}
+
 /**
  * Front-end styles that theme.json cannot express.
  */
@@ -75,7 +89,8 @@ function kits_enqueue_styles() {
 	// Kits v4.2 tokens (bare names: --neutral-*, --color-*, --s-*, --r-*, --opacity-*, --fluid-*). Loads before kit-tokens so a child theme can override.
 	wp_enqueue_style( 'kits-v42', $uri . '/assets/css/kits-v42.css', array( 'global-styles' ), (string) filemtime( $dir . '/assets/css/kits-v42.css' ) );
 	// Design tokens (--kit-*): neutral defaults; a child theme overrides them with its own token file.
-	wp_enqueue_style( 'kit-tokens', $uri . '/assets/css/kit-tokens.css', array( 'global-styles' ), (string) filemtime( $dir . '/assets/css/kit-tokens.css' ) );
+	$css = kits_css_file( 'kit-tokens' );
+	wp_enqueue_style( 'kit-tokens', $uri . '/' . $css, array( 'global-styles' ), (string) filemtime( $dir . '/' . $css ) );
 	wp_enqueue_style(
 		'kits',
 		get_template_directory_uri() . '/assets/css/kits.css',
@@ -91,8 +106,10 @@ add_action( 'wp_enqueue_scripts', 'kits_enqueue_styles' );
 function kits_enqueue_components() {
 	$dir = get_template_directory();
 	$uri = get_template_directory_uri();
-	wp_enqueue_style( 'kit-components', $uri . '/assets/css/kit.css', array( 'kit-tokens', 'kits' ), (string) filemtime( $dir . '/assets/css/kit.css' ) );
-	wp_enqueue_style( 'kit-primitives', $uri . '/assets/css/kit-primitives.css', array( 'kit-components' ), (string) filemtime( $dir . '/assets/css/kit-primitives.css' ) );
+	$css = kits_css_file( 'kit' );
+	wp_enqueue_style( 'kit-components', $uri . '/' . $css, array( 'kit-tokens', 'kits' ), (string) filemtime( $dir . '/' . $css ) );
+	$css = kits_css_file( 'kit-primitives' );
+	wp_enqueue_style( 'kit-primitives', $uri . '/' . $css, array( 'kit-components' ), (string) filemtime( $dir . '/' . $css ) );
 	wp_enqueue_script( 'kit-interactions', $uri . '/assets/js/kit.js', array(), (string) filemtime( $dir . '/assets/js/kit.js' ), array( 'in_footer' => true, 'strategy' => 'defer' ) ); // scroll-in motion: the browser's own (element.animate), no GSAP (owner, 2 Nov 2026)
 }
 add_action( 'wp_enqueue_scripts', 'kits_enqueue_components', 15 );
