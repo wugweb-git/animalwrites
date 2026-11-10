@@ -122,7 +122,8 @@ function kits_page_context(): string {
 		$tax  = get_taxonomy( (string) get_query_var( 'taxonomy' ) );
 		$ctx  = $tax && $tax->object_type ? 'archive_' . (string) reset( $tax->object_type ) : '';
 	}
-	$ctx = (string) apply_filters( 'kits_page_options_context', $ctx );
+	// The second argument is the post being edited in the block editor; null on the front end.
+	$ctx = (string) apply_filters( 'kits_page_options_context', $ctx, null );
 	$ctx = isset( kits_page_contexts()[ $ctx ] ) ? $ctx : '';
 	if ( did_action( 'wp' ) ) {
 		$cached = $ctx; // One answer per request once the query has run.
@@ -375,6 +376,11 @@ add_action(
 			(string) filemtime( KITS_CORE_DIR . 'assets/js/page-options.js' ),
 			true
 		);
+		// Inherit names what the front end falls back to, so it uses the same context as the page drawn.
+		$post = get_post();
+		$ctx  = $post ? (string) apply_filters( 'kits_page_options_context', $type, $post ) : $type;
+		$ctx  = isset( kits_page_contexts()[ $ctx ] ) ? $ctx : $type;
+
 		$defaults = (array) get_option( 'kits_page_defaults', array() );
 		$fields   = array();
 		foreach ( kits_page_option_fields() as $key => $f ) {
@@ -382,7 +388,7 @@ add_action(
 			if ( ! $choices ) {
 				continue; // nothing to choose (for example no colour sets yet): no field.
 			}
-			$fallback = kits_page_option_clean( $key, $defaults[ $type ][ $key ] ?? '' );
+			$fallback = in_array( $key, kits_page_context_keys( $ctx ), true ) ? kits_page_option_clean( $key, $defaults[ $ctx ][ $key ] ?? '' ) : '';
 			$fallback = '' !== $fallback ? $fallback : kits_page_option_clean( $key, $defaults['_site'][ $key ] ?? '' );
 			$fields[] = array(
 				'key'     => $key,

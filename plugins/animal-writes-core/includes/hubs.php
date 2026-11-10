@@ -42,11 +42,21 @@ function aw_hub_type() {
 	if ( null !== $type ) {
 		return $type;
 	}
+	$type = is_page() ? aw_hub_type_of( get_queried_object_id() ) : '';
+	return $type;
+}
+
+/**
+ * The hub a Page is (post type), or ''.
+ *
+ * @param int|WP_Post|null $post The Page.
+ */
+function aw_hub_type_of( $post ) {
+	$post = get_post( $post );
 	$type = '';
-	if ( is_page() ) {
-		$slug = (string) get_post_field( 'post_name', get_queried_object_id() );
+	if ( $post && 'page' === $post->post_type && 0 === (int) $post->post_parent ) {
 		foreach ( AW_HUBS as $t => $h ) {
-			if ( $h[0] === $slug && 0 === (int) wp_get_post_parent_id( get_queried_object_id() ) ) {
+			if ( $h[0] === $post->post_name ) {
 				$type = $t;
 			}
 		}
@@ -662,7 +672,22 @@ add_filter(
 	}
 );
 // The /search/ Page (where /?s= goes) is the Search page; hub Pages are their list pages.
-add_filter( 'kits_page_options_context', fn( $ctx ) => '' !== aw_hub_type() ? 'archive_' . aw_hub_type() : ( is_page( 'search' ) ? '_search' : $ctx ) );
+// In the block editor the post being edited is passed in; on the front end the current query decides.
+add_filter(
+	'kits_page_options_context',
+	function ( $ctx, $post = null ) {
+		if ( $post instanceof WP_Post ) {
+			$hub    = aw_hub_type_of( $post );
+			$search = 'page' === $post->post_type && in_array( 'search', array( $post->post_name, $post->post_title ), true );
+		} else {
+			$hub    = aw_hub_type();
+			$search = is_page( 'search' );
+		}
+		return '' !== $hub ? 'archive_' . $hub : ( $search ? '_search' : $ctx );
+	},
+	10,
+	2
+);
 // News and Press items have no block editor but take the same defaults (Theme Options → Single).
 add_filter(
 	'kits_page_option_types',
