@@ -11,6 +11,7 @@ Check this list against git and the live site before acting on it. Refer to item
 - **Plugins join Kits through filters:** a tab through `kits_admin_tabs` and status rows through `kits_status_rows`; Kits Core names none of them.
 - **Child theme folder:** removal decided, on hold until the owner's word. When it happens, the Deploy check is repointed in the same change.
 - **Ship order:** Theme parts → Animal Writes under Kits → plugin renames → `aw.css` phase 0 and 1 → cards. Each ships through the Deploy check with the next deploy, one at a time, never while a FluentCRM email is sending.
+- Docs brought in line with the Kits menu and Animal Writes under Kits (10 Nov 2026).
 
 Owner, 25 Oct — not to be raised until their dates: the High Court judgments source stays off; Opportunities workers stay paused; the Community dogs campaign stays exactly as it is (new community-dog developments become new campaigns or content).
 

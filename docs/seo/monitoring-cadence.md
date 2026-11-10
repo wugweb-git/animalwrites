@@ -15,11 +15,11 @@ What to read, and how often, in AW SEO Plus → Search Insights. Each read is a 
 
 | When | Where | What |
 |---|---|---|
-| 1st | Animal Writes → Dates | "Search Console Links read": `wp aw-si links add` with the read date. |
+| 1st | Kits → Dates | "Search Console Links read": `wp aw-si links add` with the read date. |
 | 2nd (after 07:40 IST) | Settings → Bing searches | Count Bing searches without a keyword record; add records for the useful ones. |
 | Any day | Check list | The live Google check (bookmarklet) for the month's keywords. |
 | End of month | Settings → Snapshot | Download the monthly snapshot and keyword map. |
 
 ## Thresholds
 
-Rising flags Wikipedia pageviews at 2× the usual level and GDELT at 3×. GDELT is switched off while it refuses our requests (Settings → News (GDELT)). The thresholds are reviewed on the date in Animal Writes → Dates.
+Rising flags Wikipedia pageviews at 2× the usual level and GDELT at 3×. GDELT is switched off while it refuses our requests (Settings → News (GDELT)). The thresholds are reviewed on the date in Kits → Dates.

@@ -609,7 +609,7 @@ Live listing page = theme template `single-aw_listing.html` (blocks listing-abou
 
 ### 4.1 Same key edited in two boxes on one screen
 
-None. Every key has one box per type: the Place, Issued by, Library item, provenance and campaign fields are drawn inside SCF groups and have no box of their own. Source keys are SCF-only per type; the listing logo is the Featured image with an SCF message pointing to it. Animal Writes → Edit screens checks this on every load ("Edited in two places").
+None. Every key has one box per type: the Place, Issued by, Library item, provenance and campaign fields are drawn inside SCF groups and have no box of their own. Source keys are SCF-only per type; the listing logo is the Featured image with an SCF message pointing to it. Kits → Edit screens checks this on every load ("Edited in two places").
 
 ### 4.2 Same subject, different keys (overlap, not a key duplicate)
 
@@ -713,7 +713,7 @@ Keys edited in (or registered for) an edit screen with no reader outside the box
 
 ## 8. Dashboard widgets and report pages
 
-Not edit screens; listed on Animal Writes → Edit screens under "Dashboard (widgets)" and "Search Insights (report page)" from the map (`"screen": "admin"`), never read live and never counted as not mapped. None stores post meta.
+Not edit screens; listed on Kits → Edit screens under "Dashboard (widgets)" and "Search Insights (report page)" from the map (`"screen": "admin"`), never read live and never counted as not mapped. None stores post meta.
 
 **Dashboard widgets**
 
@@ -752,7 +752,7 @@ Purpose "SEO report". They read Search Insights data and store no post meta.
 
 ## 9. Admin page widgets
 
-The panels, boxes and tables on the admin pages of SourceWeb, RankWeb (with Search Insights), Animal Writes, MailWeb and Kits Core. Listed on Animal Writes → Edit screens with one heading per page (`"screen": "admin"`, `types` = the page id below), from the map, never read live and never counted as not mapped or as edited in two places. What each one reads, sets and its limits are in the row's notes (map fields `reads`, `sets`, `limits`); `option:`, `table:` and `transient:` mark options, custom tables and transients, other names are post meta. The ten Search Insights Overview boxes are in §8.
+The panels, boxes and tables on the admin pages of SourceWeb, RankWeb (with Search Insights), Animal Writes, MailWeb and Kits Core. Listed on Kits → Edit screens with one heading per page (`"screen": "admin"`, `types` = the page id below), from the map, never read live and never counted as not mapped or as edited in two places. What each one reads, sets and its limits are in the row's notes (map fields `reads`, `sets`, `limits`); `option:`, `table:` and `transient:` mark options, custom tables and transients, other names are post meta. The ten Search Insights Overview boxes are in §8.
 
 ### SourceWeb
 

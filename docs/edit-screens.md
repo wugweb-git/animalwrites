@@ -1,6 +1,6 @@
 # Edit screens
 
-**Animal Writes → Edit screens** (administrators) lists every box on every edit screen: post types and term screens, boxes from WordPress, plugins (Rank Math, LiteSpeed, Link Whisper), SCF field groups and our own plugins. It also lists the block-editor sidebar panels, the Dashboard widgets and the boxes on the Search Insights report page. For each box it shows the keys it stores, their type and where each key is used on the site. The same rows from the command line: `wp aw-edit-screens [--type=<post_type or taxonomy>] [--format=table|json]`. Nothing on the screen or in the command writes anything.
+**Kits → Edit screens** (administrators; under the Animal Writes tab) lists every box on every edit screen: post types and term screens, boxes from WordPress, plugins (Rank Math, LiteSpeed, Link Whisper), SCF field groups and our own plugins. It also lists the block-editor sidebar panels, the Dashboard widgets and the boxes on the Search Insights report page. For each box it shows the keys it stores, their type and where each key is used on the site. The same rows from the command line: `wp aw-edit-screens [--type=<post_type or taxonomy>] [--format=table|json]`. Nothing on the screen or in the command writes anything.
 
 Code: `plugins/animal-writes-core/includes/edit-screens.php`. Map: `plugins/animal-writes-core/data/edit-screen-map.json`. The full snapshot the map was filled from (box order per type, duplicates, saved-but-never-read keys, live row counts): [edit-screens-map.md](edit-screens-map.md).
 
@@ -56,6 +56,6 @@ Notes on each box: the box's own note, a key edited in two boxes on the same scr
    - `uses.kind`: `display`, `schema`, `faq`, `filter`, `sourcing`, `analytics` or `admin`. An empty `uses` list means saved but never read; say so in `notes`.
    - Short paths: `core/` = `animal-writes-core/includes/`, `seo/` = `aw-seo-extras/includes/`, `src/` = `aw-sourcing/includes/`, `kits/` = `kits-core/includes/`.
 2. A new box: add it under `boxes` with its id (the first argument of `add_meta_box()`), title, source, file, types, `plugin` and a one-line `purpose`. `runtime` is `live` (default), `scf`, `fallback` (only shown when it registers, e.g. when SCF is off), `edit-screen-only` (also used for the JavaScript sidebar panels) or `map-only` (admin pages). Term-screen entries have `"screen": "term"` and a `match` (file, hooks, priority). Admin-page entries have `"screen": "admin"`, `page` (the heading, e.g. "Dashboard (widgets)") and `types` (the page id, e.g. `dashboard`, `aw-search-insights`).
-3. Open Animal Writes → Edit screens (or run `wp aw-edit-screens --type=<type>`) and check the box shows with no "Not mapped yet".
+3. Open Kits → Edit screens (or run `wp aw-edit-screens --type=<type>`) and check the box shows with no "Not mapped yet".
 
 Another plugin can add entries without editing the file, with the filters `aw_edit_screen_boxes` (box id => entry) and `aw_edit_screen_map` (key => entry, boxes already resolved to id, title, source).
