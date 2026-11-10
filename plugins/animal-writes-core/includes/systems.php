@@ -406,6 +406,7 @@ function aw_sort_segment( $type, $base = '' ) {
 		$url   = add_query_arg( aw_filter_args( $active ) + ( array_key_first( $sorts ) === $k ? array() : array( 'sort' => $k ) ), '' !== $base ? $base : aw_hub_url( $type ) );
 		$html .= '<a href="' . esc_url( $url ) . '"' . ( $k === $cur ? ' aria-current="true"' : '' ) . '>' . esc_html( preg_replace( '/ first$/', '', $l ) ) . '</a>';
 	}
+	aw_use_component_style( 'aw-hubs' ); // aw-sort-seg in the toolbar
 	return '<nav class="kit-segment aw-sort-seg" aria-label="Sort">' . $html . '</nav>';
 }
 
