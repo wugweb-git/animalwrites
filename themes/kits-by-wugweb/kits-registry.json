@@ -1535,6 +1535,60 @@
    }
   },
   {
+   "name": "Newsletter band (kit-nl-band)",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-nl-band",
+    "kit-nl-band-inner",
+    "kit-nl-band-text",
+    "kit-nl-band-ico",
+    "kit-nl-band-head",
+    "kit-nl-band-line",
+    "kit-nl-band-art",
+    "kit-nl-band-form"
+   ],
+   "states": [
+    "band with icon, heading and line",
+    "art slot (top right from 768, drawn by the site)",
+    "sign-up form (styled by the site)",
+    "below 768: smaller heading and icon"
+   ],
+   "tokens": [
+    "kit-nl-mark",
+    "kit-color-raised",
+    "kit-color-line",
+    "kit-color-ink",
+    "kit-color-muted",
+    "kit-space-4",
+    "kit-space-5",
+    "kit-space-6",
+    "kit-space-7",
+    "kit-space-gutter",
+    "kit-width-content",
+    "kit-radius-card",
+    "kit-elevation-1",
+    "kit-border-mark",
+    "kit-type-h2",
+    "kit-type-h3"
+   ],
+   "a11y": {
+    "element": "<section aria-labelledby> with an <h2>",
+    "aria": "icon and art aria-hidden",
+    "keyboard": "the form's own fields",
+    "focus": "the form's own fields",
+    "target": "the form's own controls",
+    "motion": "none",
+    "sr": "the heading names the section"
+   },
+   "seo": {
+    "heading": "H2",
+    "link": "none",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
    "name": "Meta line (date, author, reading time, place)",
    "type": "primitive",
    "status": "live",
