@@ -631,9 +631,6 @@ add_shortcode(
 	}
 );
 
-/** The home band's campaign that campaign-home.css was generated for (tools/campaign-home-css). */
-const AW_CAMP_HOME_CSS_FOR = 'lab-animals-rules-2026';
-
 /* ---------- Assets, ads ---------- */
 add_action(
 	'wp_enqueue_scripts',
@@ -651,23 +648,17 @@ add_action(
 		if ( ! $page && ! $band ) {
 			return;
 		}
-		$slug = $band ? (string) get_post_field( 'post_name', AW_HOME_CAMPAIGN ) : '';
 		$lab  = is_singular( 'aw_campaign' ) && aw_camp_is_lab_page( $id ); // the Lab rules page: its own copy of both files, as on the morning of 2 Nov 2026 (owner)
 		$css  = $lab ? 'campaign-lab.css' : 'campaign.css';
 		$js   = $lab ? 'campaign-lab.js' : 'campaign.js';
-		if ( $band && ! is_singular( 'aw_campaign' ) && AW_CAMP_HOME_CSS_FOR === $slug && is_readable( AW_CORE_DIR . 'assets/css/campaign-home.css' ) ) {
-			// Home: only the band's rules (campaign-home.css; the campaign hero uses them), inline in campaign.css's place, so nothing blocks the first paint
-			// and the cascade order stays the same (owner, 22 Oct 2026). Any other campaign in the band: the full file.
-			wp_register_style( 'aw-campaign', false, array(), $v( 'assets/css/campaign-home.css' ) );
-			wp_enqueue_style( 'aw-campaign' );
-			wp_add_inline_style( 'aw-campaign', (string) file_get_contents( AW_CORE_DIR . 'assets/css/campaign-home.css' ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions
-		} elseif ( $band ) {
-			// Home with another campaign's hero: the tokens and the band's rules only, inline in campaign.css's place, so
-			// nothing blocks the first paint and the cascade order stays the same (before Kits and aw.css).
+		if ( $band ) {
+			// Home with a campaign hero: the tokens and the band's rules only, inline in campaign.css's place, so nothing
+			// blocks the first paint and the cascade order stays the same, before Kits and aw.css (owner, 22 Oct 2026).
 			foreach ( array( 'aw-camp-tokens' => array(), 'aw-camp-band' => array( 'aw-camp-tokens' ) ) as $h => $deps ) {
 				wp_register_style( $h, false, $deps, $v( 'assets/css/' . $h . '.css' ) );
 				wp_enqueue_style( $h );
-				wp_add_inline_style( $h, (string) file_get_contents( AW_CORE_DIR . 'assets/css/' . $h . '.css' ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+				$rules = (string) file_get_contents( AW_CORE_DIR . 'assets/css/' . $h . '.css' ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+				wp_add_inline_style( $h, trim( (string) preg_replace( '/\s*\n\s*/', "\n", (string) preg_replace( '#/\*.*?\*/#s', '', $rules ) ) ) ); // without the comments and indents (the files hold no strings or url()s)
 			}
 		} else {
 			$deps = array();

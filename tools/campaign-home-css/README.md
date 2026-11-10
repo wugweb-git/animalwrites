@@ -1,13 +1,13 @@
-# campaign-home.css
+# Home CSS extracts
 
-`extract.mjs` loads the home page in headless Chrome at 375, 768 and 1200 px and writes `used.css`. That file holds the campaign.css rules that match something on the page, Chrome's CSS coverage of campaign.css, and the band's state variants (closed). GTM, GA4 and Clarity are blocked, so no analytics hit is sent.
+`extract.mjs` loads the home page at 375, 768 and 1200 px and writes the rules of one stylesheet that match something on the page (its CSS coverage) and the state variants kept by `STATE`. GTM, GA4 and Clarity are blocked, so no analytics hit is sent.
 
 ```
-cd tools/campaign-home-css && npm i puppeteer-core@23.5.0 && node extract.mjs https://animalwrites.in/
+cd tools/campaign-home-css && npm i puppeteer-core@23.5.0 && node extract.mjs https://animalwrites.in/ /campaign-record.css record-used
 ```
 
-Copy `used.css` under the header of `plugins/animal-writes-core/assets/css/campaign-home.css`. Set `AW_CAMP_HOME_CSS_FOR` (campaign-tools.php) to the band's campaign slug. While the home band shows any other campaign, the full campaign.css loads as before.
+`campaign-home.css` is gone (10 Nov 2026): the Home campaign hero now uses `aw-camp-tokens.css` and `aw-camp-band.css`, which are kept by hand.
 
-The same script makes `campaign-record-home.css` (the community-dogs story, pattern `animal-writes/aw1-story`): `node extract.mjs https://animalwrites.in/ /campaign-record.css record-used`, then copy `record-used.css` under that file's header. While the pattern is missing from Home, the full campaign-record.css loads.
+The script makes `campaign-record-home.css` (the community-dogs story, pattern `animal-writes/aw1-story`): `node extract.mjs https://animalwrites.in/ /campaign-record.css record-used`, then copy `record-used.css` under that file's header. While the pattern is missing from Home, the full campaign-record.css loads.
 
 Core block stylesheets (home): `STATE='is-menu-open|has-modal-open|responsive-container|submenu|has-child' node extract.mjs https://animalwrites.in/ /navigation/style.min.css nav-used` and `STATE=zzzz node extract.mjs https://animalwrites.in/ /cover/style.min.css cover-used`; copy each result under the header of `themes/animal-writes/assets/vendor/wp-core/home-navigation.css` / `home-cover.css`. Copy the finished file to the same path under `plugins/animal-writes-core/theme/` too (`tools/ci/theme_copies.py` fails when the two differ); an `OUT` path under `themes/animal-writes/` is written to both places by the script. `STATE` is a regex for state variants to keep (default: the campaign band's). Used only while WordPress is `AW_HOME_CORE_CSS_WP` (themes/animal-writes/functions.php); change the constant after regenerating for a new version.

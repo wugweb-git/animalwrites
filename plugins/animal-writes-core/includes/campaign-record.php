@@ -273,7 +273,7 @@ add_action(
 		if ( ! is_singular( 'aw_campaign' ) && ! is_front_page() && ! is_page( 'campaigns' ) ) { // the campaign story block shows on Home and the Campaigns page
 			return;
 		}
-		$deps = wp_style_is( 'aw-campaign', 'registered' ) ? array( 'aw-campaign' ) : array(); // after campaign.css, so a campaign's colours win
+		$deps = wp_style_is( 'aw-campaign', 'registered' ) ? array( 'aw-campaign' ) : ( wp_style_is( 'aw-camp-band', 'registered' ) ? array( 'aw-camp-band' ) : array() ); // after campaign.css (Home: the band's file), so a campaign's colours win
 		$home = 'assets/css/campaign-record-home.css';
 		if ( is_front_page() && is_readable( AW_CORE_DIR . $home ) ) {
 			// Home: only the story's rules, inline in campaign-record.css's place, so nothing blocks the first paint (owner,
