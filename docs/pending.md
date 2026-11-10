@@ -2,6 +2,13 @@
 
 Check this list against git and the live site before acting on it. Refer to items by their bold title (owner, 24 Oct 2026). Failing AI keys are the owner's own job: never list them. This file is the list of open and finished work.
 
+**Sessions (owner, 10 Nov 2026):**
+- Animal Writes (content, SEO, campaign pages)
+- Animal Writes WordPress (theme, plugins, wp-admin, code, deploys)
+- Animal Writes Martech (social, marketing, email, the content and marketing calendar)
+
+Theme and WordPress items are tracked by Animal Writes WordPress. Code requests from Martech go to it.
+
 ## Open
 
 ### Decisions of 10 Nov 2026 (owner)
@@ -274,6 +281,8 @@ Status checked on 24 Oct against the live site, WP-CLI (read only) and git; the 
 
 ## Dates
 These live in WordPress: **Animal Writes → Dates** (month calendar, add and remove) and a Dashboard box; stored in the option `aw_team_dates` (animal-writes-core `includes/team-dates.php`). Keep both lists in step.
+
+**Animal Writes → Dates is also the content and marketing calendar (owner, 10 Nov).** Martech adds post, email and campaign dates. Planned fields: type, channel, owner, status, link. Martech writes the spec; Animal Writes WordPress builds it.
 
 - **17 Nov 2026**: Directory thin-page indexing re-check (10:00) and the 8 tracked keyword positions (11:00); both are scheduled tasks.
 - **25 Nov 2026**: Search Insights thresholds review (Wikipedia 2×, GDELT 3×).
