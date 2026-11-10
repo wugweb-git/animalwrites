@@ -13,6 +13,7 @@ Check this list against git and the live site before acting on it. Refer to item
 - **Ship order:** Theme parts → Animal Writes under Kits → plugin renames → `aw.css` phase 0 and 1 → cards. Each ships through the Deploy check with the next deploy, one at a time, never while a FluentCRM email is sending.
 - Docs brought in line with the Kits menu and Animal Writes under Kits (10 Nov 2026).
 - Menu paths in the registry, component map and Animal Writes Core comments now read Kits → … (10 Nov 2026).
+- **Cards: one look (owner, 10 Nov: "your decision"): built, ships last (bf1be8bb).** The Kits card (`kit-card--block-md`) is the one look; the theme templates' Query Loops (archive, tag, search, blog index) now print it, and the Card block style takes its values (white, 24px). Local compare: only the tag pages change; Home, About, News and the four campaign pages 0. Open: Card groups inside content (guide call to action, newsletter pattern) turn white with 24px padding; the card markup sits in eight template files, not one pattern; editor-built loops with a Card group keep the old look.
 
 Owner, 25 Oct — not to be raised until their dates: the High Court judgments source stays off; Opportunities workers stay paused; the Community dogs campaign stays exactly as it is (new community-dog developments become new campaigns or content).
 
