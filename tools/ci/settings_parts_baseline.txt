@@ -26,11 +26,11 @@ plugins/animal-writes-core/includes/media-merge.php | admin page | add_submenu_p
 plugins/animal-writes-core/includes/media-reuse.php | admin page | add_submenu_page( 'upload.php', 'Reuse pictures', 'Reuse pictures', 'manage_options', 'aw-media-reuse', 'aw_media_reuse_screen' );
 plugins/animal-writes-core/includes/media-webp.php | admin page | add_submenu_page( 'upload.php', 'Make WebP', 'Make WebP', 'manage_options', 'aw-media-webp', 'aw_media_webp_screen' );
 plugins/animal-writes-core/includes/pages.php | admin style | <style> block
-plugins/aw-seo-extras/includes/faq-overview.php | admin page | add_submenu_page( AW_SEO_MENU, 'FAQ', 'FAQ', 'manage_categories', 'aw-faq', 'aw_faq_admin_page' ); // AW SEO Plus → FAQ (overview.php has the menu)
-plugins/aw-seo-extras/includes/overview.php | admin page | add_menu_page( 'AW SEO Plus', 'AW SEO Plus', 'manage_categories', AW_SEO_MENU, 'aw_seo_overview_page', 'dashicons-chart-line', 81 );
-plugins/aw-seo-extras/includes/overview.php | admin page | add_submenu_page( AW_SEO_MENU, 'AW SEO Plus', 'Overview', 'manage_categories', AW_SEO_MENU, 'aw_seo_overview_page' );
+plugins/aw-seo-extras/includes/faq-overview.php | admin page | add_submenu_page( AW_SEO_MENU, 'FAQ', 'FAQ', 'manage_categories', 'aw-faq', 'aw_faq_admin_page' ); // RankWeb → FAQ (overview.php has the menu)
+plugins/aw-seo-extras/includes/overview.php | admin page | add_menu_page( 'RankWeb', 'RankWeb', 'manage_categories', AW_SEO_MENU, 'aw_seo_overview_page', 'dashicons-search', '27.5' );
+plugins/aw-seo-extras/includes/overview.php | admin page | add_submenu_page( AW_SEO_MENU, 'RankWeb', 'Overview', 'manage_categories', AW_SEO_MENU, 'aw_seo_overview_page' );
+plugins/aw-seo-extras/includes/settings.php | admin page | add_submenu_page( AW_SEO_MENU, 'RankWeb settings', 'Settings', 'manage_options', 'aw-seo-settings', 'aw_seo_settings_page' );
 plugins/aw-seo-extras/includes/search-insights/admin.php | admin page | add_submenu_page( AW_SEO_MENU, __( 'Search Insights', 'aw-seo-extras' ), __( 'Search Insights', 'aw-seo-extras' ), aw_si_cap(), AW_SI_SLUG, 'aw_si_screen' );
-plugins/aw-seo-extras/includes/settings.php | admin page | add_submenu_page( AW_SEO_MENU, 'AW SEO Plus settings', 'Settings', 'manage_options', 'aw-seo-settings', 'aw_seo_settings_page' );
 plugins/aw-sourcing/includes/admin-menu.php | admin page | add_menu_page( 'Sourcing', 'Sourcing', AW_REVIEW_CAP, AW_SRC_MENU, 'aw_sourcing_overview_page', 'dashicons-rss', 26 );
 plugins/aw-sourcing/includes/admin-menu.php | admin page | add_submenu_page( AW_SRC_MENU, 'Sourcing', 'Overview', AW_REVIEW_CAP, AW_SRC_MENU, 'aw_sourcing_overview_page' );
 plugins/aw-sourcing/includes/admin-menu.php | admin page | add_submenu_page( AW_SRC_MENU, (string) $t[0], (string) $t[0], AW_SRC_CAP, AW_SRC_PAGE, 'aw_sourcing_page' );
