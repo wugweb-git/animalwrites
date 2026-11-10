@@ -126,10 +126,18 @@ function kits_status_rows(): array {
 	$update = get_site_transient( 'update_themes' );
 	$new    = is_object( $update ) && isset( $update->response[ get_template() ]['new_version'] ) ? (string) $update->response[ get_template() ]['new_version'] : '';
 	$ver    = esc_html( $master->get( 'Version' ) );
+	// The last answer from the update file; read from cache only, so this page asks nothing.
+	$last = function_exists( 'kits_update_url' ) && '' !== kits_update_url() ? get_site_transient( 'kits_update_release' ) : false;
+	$seen = is_array( $last ) && ! empty( $last['version'] ) ? (string) $last['version'] : '';
+	if ( '' === $new && '' !== $seen && version_compare( $seen, (string) $master->get( 'Version' ), '>' ) ) {
+		$new = $seen;
+	}
 	if ( '' !== $new ) {
 		$ver .= ' <a href="' . esc_url( admin_url( 'update-core.php' ) ) . '">' . esc_html( 'Update to ' . $new ) . '</a>';
-	} else {
+	} elseif ( '' !== $seen ) {
 		$ver .= ' ' . esc_html( '(up to date)' );
+	} else {
+		$ver .= ' ' . esc_html( '(update check off)' );
 	}
 	if ( function_exists( 'kits_changelog_url' ) && kits_changelog_url() ) {
 		$ver .= ' · <a href="' . esc_url( kits_changelog_url() ) . '">' . esc_html( 'Change log' ) . '</a>';
