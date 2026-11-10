@@ -112,6 +112,32 @@ function aw_theme_parts_template_titles(): array {
 	return $out;
 }
 
+/**
+ * A template's or part's name when theme.json gives none: WordPress's own name for the standard templates (Pages,
+ * Single Posts, Front Page), "Single: <type>" for single-<post type>, "Page: <name>" for page-<slug>, else the slug in words.
+ *
+ * @param string $slug     File name without .html.
+ * @param bool   $template True for a template, false for a template part.
+ */
+function aw_theme_parts_template_name( string $slug, bool $template ): string {
+	$words = ucfirst( str_replace( array( '-', '_' ), ' ', $slug ) );
+	if ( ! $template ) {
+		return $words;
+	}
+	$types = function_exists( 'get_default_block_template_types' ) ? get_default_block_template_types() : array();
+	if ( ! empty( $types[ $slug ]['title'] ) ) {
+		return (string) $types[ $slug ]['title'];
+	}
+	if ( 0 === strpos( $slug, 'single-' ) ) {
+		$obj = get_post_type_object( substr( $slug, 7 ) );
+		return 'Single: ' . ( $obj ? $obj->labels->singular_name : substr( $words, 7 ) );
+	}
+	if ( 0 === strpos( $slug, 'page-' ) ) {
+		return 'Page: ' . ucfirst( str_replace( '-', ' ', substr( $slug, 5 ) ) );
+	}
+	return $words;
+}
+
 /** Rows for the files this plugin carries: file, kind, change it in, status. */
 function aw_theme_parts_file_rows(): array {
 	$parts  = aw_core_theme_parts_on();
@@ -128,7 +154,7 @@ function aw_theme_parts_file_rows(): array {
 		foreach ( is_array( $files ) ? $files : array() as $f ) {
 			$slug = basename( $f, ( '.html' === substr( $k[1], 1 ) ) ? '.html' : '.php' );
 			if ( '' !== $k[2] ) {
-				$name = $titles[ $slug ] ?? ucwords( str_replace( '-', ' ', $slug ) );
+				$name = $titles[ $slug ] ?? aw_theme_parts_template_name( $slug, 'wp_template' === $k[2] );
 				$link = aw_theme_parts_link( 'Open in the Site Editor', 'site-editor.php?postType=' . $k[2] . '&postId=' . rawurlencode( $theme . '//' . $slug ) . '&canvas=edit' );
 			} else {
 				$head = get_file_data( $f, array( 'title' => 'Title' ) );

@@ -718,7 +718,7 @@ html.has-modal-open .kit-sticky-help { display: none !important; }
 }
 
 /* Navigation: Kits shows the full menu from lg (1200px) and the menu button below it. */
-/* The .kit-site-header copies outrank core's 600px rules, which Home prints inline (assets/vendor/wp-core/home-navigation.css). */
+/* The .kit-site-header copies outrank core's 600px rules (the navigation block stylesheet). */
 @media (max-width: 1199px) {
 	.wp-block-navigation__responsive-container-open:not(.always-shown) ,.kit-site-header .wp-block-navigation__responsive-container-open:not(.always-shown) { display: flex; }
 	.wp-block-navigation__responsive-container:not(.hidden-by-default):not(.is-menu-open) ,.kit-site-header .wp-block-navigation__responsive-container:not(.hidden-by-default):not(.is-menu-open) { display: none; }
