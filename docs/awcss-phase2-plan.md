@@ -11,6 +11,16 @@
 - **Raw sizes stay as they are in this phase.** They are listed at the end as candidate tokens.
 - **Two corrections to the measurement**, below.
 
+Second revision (10 Nov, after a design-system review, a UI/UX review and a WordPress loading review):
+- **Loading:** render hooks only record a handle; files are enqueued at `wp_enqueue_scripts` priority 20 in a fixed order after `aw-components`. Enqueueing straight from `render_block` would move the Kits bundle and aw.css ahead of the Fluent Forms and campaign CSS (section "Per-component loading").
+- **(a)/(b) changes:**
+  - `aw-card-time` becomes Kits (Kits Core prints it);
+  - the newsletter art stays Animal Writes;
+  - the stacked-card limits become tokens instead of Kits values;
+  - rules 731–733 stay in aw.css;
+  - the `aw-` selectors already in Kits get an owner step.
+- **Transfer size:** a gzip column next to the raw bytes. On transfer the saving is −46% on average, not −62%.
+
 ## Measurement used, and its limits
 
 - 10 Nov 2026 capture of the 23 page types at 1280, 768 and 375, logged out, analytics blocked. For each rule group it records the elements that change when the group is removed.
@@ -25,15 +35,26 @@
 3. **Animal Writes component files** in `plugins/animal-writes-core/theme/assets/css/`, each loaded only where its component is used.
 4. **aw.css** keeps what every page needs and has no Kits form (the newsletter's Fluent Forms skin, heading overrides) and the campaign rules, which stay put.
 
-Load order is kept. Every Animal Writes file is enqueued after `kit-primitives.css` with `aw-tokens` and `kit-components` as dependencies, as aw.css is now. A rule that moves into the middle of `kit.css` loses ties with later Kits rules of the same specificity. Each such tie is fixed by editing the Kits declaration in place. The ties are listed per step.
+Load order: every component file depends on `aw-components` (aw.css) and is enqueued at `wp_enqueue_scripts` priority 20, so it prints after aw.css and before `aw-campaign-record` (priority 30, `campaign-record.php:270–288`), as today. Live order on Home today: Fluent Forms CSS → `kits-bundle` → `aw-components`. `aw-campaign` has no deps and is enqueued at priority 10 (`campaign-tools.php:641–659`).
+
+Two order changes remain and are checked by the TOTAL 0 gate:
+- A rule that moves into the middle of `kit.css` loses ties with later Kits rules of the same specificity. Each such tie is fixed by editing the Kits declaration in place. The ties are listed per step.
+- Moved rules now print after everything that stays in aw.css. On Home the campaign rules that stay (1075–1117) sit between `aw-ed-hero` rules (1077–1095), so the `aw-ed-hero` / `aw-camp-band` ties are re-checked in commit 4.
 
 ## Per-component loading (the Uncode way)
 
-- **Loader in Kits, files from Animal Writes.** Kits gets a small, generic registry: a filter `kits_component_styles` that maps a style handle to either a template condition (callback) or a list of trigger classes. Animal Writes registers its files through that filter, in line with the 10 Nov decision that plugins join Kits through filters. Kits names none of them.
+- **Loader in Kits, files from Animal Writes.** Kits gets a small, generic registry: a filter `kits_component_styles` that maps a style handle to either a template condition (callback) or a component flag set by the PHP that prints the component. Animal Writes registers its files through that filter, in line with the 10 Nov decision that plugins join Kits through filters. Kits names none of them.
 - **Two kinds of trigger:**
-  - *Template condition* for files tied to one template: `aw-home.css` (`is_front_page()`), `aw-listing.css` (`is_singular( 'aw_listing' )` and the claim pages), `aw-directory.css` (state, district and tag pages), `aw-search.css` (`is_search()`), `aw-volunteer.css` (`page-volunteer.html`).
-  - *Class trigger* for components printed on many templates: `aw-type-ico`, `aw-form-ff`, `aw-news-list` / `aw-hub-list`, More / Sources / take-part, item meta. A `render_block` filter looks for the class in each block's HTML and enqueues the file once.
-- **Why the class trigger still prints in `<head>`.** In a block theme, `template-canvas.php` renders the whole template (`get_the_block_template_html()`) before `wp_head`. A style enqueued during `render_block` therefore prints in the head, and there is no flash of unstyled content. A test in the first commit confirms this. If it fails, the class-trigger files fall back to a template condition.
+  - *Template condition*, checked at `wp_enqueue_scripts` 20:
+    - `aw-home.css` on `is_front_page()`;
+    - `aw-listing.css` on `is_singular( 'aw_listing' )` and the claim pages;
+    - `aw-directory.css` on `is_tax( 'aw_place' )` and tag pages;
+    - `aw-search.css` on `is_search()`;
+    - `aw-volunteer.css` and `aw-contact.css` on `is_page()` with the page slug (page conditions, not template file names).
+  - *Component flag* for components printed on many templates. The PHP that prints the component records the handle in a static set: `aw_type_ico` (`hub-blocks.php:348`, `directory-map.php:295`), the Fluent wrapper (`forms-fluentforms.php:250`). The plugin's own blocks (`hub-blocks.php:74`, `sponsored-blocks.php:68`, registered in PHP with no block.json) get `style_handles` for `aw-lists`, `aw-hubs`, `aw-meta` and `aw-single`. Scanning block HTML for a class in `render_block` is the fallback, only where no PHP prints the class.
+- **Why recording, not enqueueing.** In a block theme, `template-canvas.php` renders the whole template (`get_the_block_template_html()`) before `wp_head`. So by `wp_enqueue_scripts` every flag is set and every file prints in the head. A file enqueued *during* render goes to the front of the queue and pulls its deps (`aw-components` → `aw-tokens` → `kits-bundle`) ahead of the Fluent Forms and campaign CSS, flipping their ties. Anything first printed in `wp_footer` (for example `aw_camp_dialogs`, `campaign-tools.php:219`) would fall to the footer, so those components use a template condition. This rests on the live head order; WP core is not in the repo, and the first commit's test confirms it.
+- **No inlining.** The `path` argument is not used: the 20 KB `styles_inline_size_limit` budget is shared with core block CSS and is already used up on live (`wp-block-navigation-css` and `wp-block-cover-css` print as links). Inlined CSS is also not cached between pages.
+- **Not `wp_enqueue_block_style( 'core/group' )`:** every page has groups, so it would load everywhere.
 - **Editors** (post editor, Site Editor, classic editor) load every file, through the two hooks aw.css uses now (`block_editor_settings_all`, `mce_css` in `theme-parts-assets.php`).
 - **Caching:** each file gets its own `filemtime` version. The Kits bundle hash changes only when a Kits file changes. Every deploy purges the cache already.
 
@@ -72,6 +93,43 @@ Bytes are rule bytes (comments stripped), so the figures compare like with like.
 
 Average after phase 2: **61,897 B per page, against 161,133 B today (−62%).** The biggest savings are on Directory state/district pages (−77%), claim, news and campaigns hub (−75 to −78%). The smallest are on Home (−42%), which still loads its own 26 KB, and on pages that print type icons and many components (tag −52%, listing −53%).
 
+
+### Transfer size (gzip)
+
+The raw-byte table overstates the gain, because gzip shrinks one big file better than several small ones. Figures: each file rebuilt from its rules without comments, gzip level 6. Today the same rules as one file: 160,833 B raw, **25,952 B gzip**. For scale, live sends today's aw.css (with comments) as **43,216 B brotli** over HTTP/2, `cache-control: immutable`, one year (read-only request, 10 Nov). The figures below compare like with like (both minified).
+
+| page | gzip today | gzip after | saved | AW stylesheet requests after (today: 1) |
+|---|---|---|---|---|
+| Home | 25,952 | 19,681 | 24% | 6 |
+| Lab rules campaign | 25,952 | 15,778 | 39% | 6 |
+| Supreme Court campaign | 25,952 | 15,778 | 39% | 6 |
+| Diwali campaign | 25,952 | 15,778 | 39% | 6 |
+| Community dogs campaign | 25,952 | 15,778 | 39% | 6 |
+| Campaigns hub | 25,952 | 10,303 | 60% | 5 |
+| Guide | 25,952 | 15,778 | 39% | 6 |
+| Cruelty guide | 25,952 | 15,778 | 39% | 6 |
+| Resources hub | 25,952 | 13,351 | 49% | 5 |
+| News item | 25,952 | 12,060 | 54% | 5 |
+| News hub | 25,952 | 9,633 | 63% | 4 |
+| Library item | 25,952 | 15,778 | 39% | 6 |
+| Library hub | 25,952 | 13,351 | 49% | 5 |
+| Directory listing | 25,952 | 16,998 | 35% | 7 |
+| State page | 25,952 | 9,420 | 64% | 4 |
+| District page | 25,952 | 9,420 | 64% | 4 |
+| Contact | 25,952 | 10,953 | 58% | 6 |
+| Volunteer | 25,952 | 16,225 | 37% | 8 |
+| Claim | 25,952 | 9,047 | 65% | 4 |
+| Search results | 25,952 | 11,006 | 58% | 4 |
+| Tag page | 25,952 | 17,371 | 33% | 7 |
+| Category page | 25,952 | 16,284 | 37% | 7 |
+| 404 (renders Home) | 25,952 | 19,681 | 24% | 6 |
+
+Average after phase 2: **14,140 B gzip per page, against 25,952 B (−46%).** Requests: tokens and the Kits additions ride in files that load today, so the count is aw.css plus the component files, 4–8 per page instead of 1. On HTTP/2 these are parallel, and each file is cached on its own, so a second page loads only the files it has not seen.
+
+Caveats:
+- **State and district are low.** `aw_dir_panels_html()` (`directory-map.php:295`) prints type icons in the hidden Near-me panel, so with the component flag those pages also load `aw-type-ico.css` (+19,772 B raw, +3,718 B gzip). The capture did not see them because the panel is hidden.
+- **A cheaper first win on transfer is shipping aw.css minified.** The comment-stripped rules gzip to about 26 KB, against about 43 KB brotli for today's file. That needs a minify step in the deploy, which is not in this plan (no build step today).
+
 ### Files after phase 2
 
 | file | bytes | loads |
@@ -80,17 +138,17 @@ Average after phase 2: **61,897 B per page, against 161,133 B today (−62%).** 
 | Kits additions (`kit-` selectors) | 9,876 | every page (inside the Kits bundle; every Kits site) |
 | aw.css | 15,259 | every page |
 | aw-home.css | 26,411 | front page (template condition `is_front_page()`) |
-| aw-type-ico.css | 19,849 | where a `aw-type-ico` element is printed (class trigger) |
-| aw-single.css | 12,313 | single items: guide, news, library, listing (template condition `is_singular()`), and campaign pages that print the More / Sources / take-part blocks (class trigger) |
+| aw-type-ico.css | 19,849 | where an `aw-type-ico` element is printed (component flag in `aw_type_ico`, `hub-blocks.php:348`, and `directory-map.php:295`, so Directory pages too) |
+| aw-single.css | 12,313 | single items: guide, news, library, listing (template condition `is_singular()`), and campaign pages that print the More / Sources / take-part blocks (component flag) |
 | aw-forms.css | 9,629 | where a Fluent Forms form with `aw-form-ff` is printed (contact, volunteer, claim/report forms) |
 | aw-lists.css | 8,248 | where `aw-news-list` / `aw-hub-list` / `aw-hub-group` / `aw-tasks` is printed |
-| aw-directory.css | 5,846 | Directory templates: state, district and tag pages (template condition) and the Directory search block (class trigger) |
+| aw-directory.css | 5,846 | Directory templates: state, district and tag pages (template condition) and the Directory search block (component flag) |
 | aw-listing.css | 4,526 | `single-aw_listing` and the claim pages (template condition) |
 | aw-hubs.css | 3,214 | hub templates (`page-hub.html`, archives) and where `aw-toolbar` / `aw-hub-faq` is printed |
 | aw-volunteer.css | 2,060 | `page-volunteer.html` and where `aw-vol-banner` is printed |
 | aw-meta.css | 1,698 | where `aw-item-meta`, `aw-card-time` or a place chip (`taxonomy-aw_place`) is printed |
 | aw-search.css | 1,494 | search results (`is_search()`) |
-| aw-contact.css | 1,316 | the Contact page (class trigger `aw-contact`) |
+| aw-contact.css | 1,316 | the Contact page (page condition `is_page( 'contact' )`) |
 | pending (phase 0) | 39,020 | not loaded on any of the 23 pages: phase 0 decides (delete, or join a component file) |
 
 `aw-type-ico.css` (19.8 KB, 40 inline SVG masks) is the largest file that loads on many pages (15 of 23). A later step could cut it further with one SVG sprite or separate icon files. That is not in this plan.
@@ -102,17 +160,17 @@ Gate for every commit: before/after capture of the 23 pages at 1280, 768 and 375
 | # | commit | what moves | to | bytes |
 |---|---|---|---|---|
 | 1 | Brand tokens and Kits token hooks | `:root` values, body background, button and section-description sizes, card limits | AW tokens.json; Kits rules read new tokens | ≈ 2,500 |
-| 2 | Kits newsletter band (a) | band layout, card, art, heading line | `kit-nl-band` in Kits + markup | ≈ 3,500 |
-| 3 | Kits source line and date (a) | `aw-src*`, `aw-date`, list-title sizes | `kit-src`, `kit-date`, tokens + markup | ≈ 4,200 |
+| 2 | Kits newsletter band (a) | band layout, card, heading line (art stays AW) | `kit-nl-band` variant of the Kits newsletter pattern + markup | ≈ 3,000 |
+| 3 | Kits source line, date, card time (a) | `aw-src*`, `aw-date`, `aw-card-time`, list-title sizes | `kit-src`, `kit-date`, `kit-meta-item` time variant, tokens + markup | ≈ 4,400 |
 | 4 | Component loader + `aw-home.css` | loader in Kits, AW registry, Home sections | new files | 26,411 |
-| 5 | `aw-type-ico.css` | 41 type-icon rules | class trigger | 19,849 |
-| 6 | `aw-single.css` | More cards, Sources, item share, take-part, find-help line, PDF | template + class trigger | 12,313 |
-| 7 | `aw-forms.css` | Fluent Forms skin (not the newsletter) | class trigger | 9,629 |
-| 8 | `aw-lists.css` | news list, hub list, hub group, tasks | class trigger | 8,248 |
+| 5 | `aw-type-ico.css` | 41 type-icon rules | component flag | 19,849 |
+| 6 | `aw-single.css` | More cards, Sources, item share, take-part, find-help line, PDF | template + component flag | 12,313 |
+| 7 | `aw-forms.css` | Fluent Forms skin (not the newsletter) | component flag | 9,629 |
+| 8 | `aw-lists.css` | news list, hub list, hub group, tasks | component flag | 8,248 |
 | 9 | `aw-directory.css` | Directory search, filter, more, helplines, district | template condition | 5,846 |
 | 10 | `aw-listing.css` | facts, listing head/help/actions, data sources, claim link | template condition | 4,526 |
-| 11 | `aw-hubs.css` | toolbar, sort, hub FAQ, system wrapper, cases | template + class trigger | 3,214 |
-| 12 | `aw-volunteer.css`, `aw-contact.css`, `aw-search.css`, `aw-meta.css` | page-only and meta groups | template / class trigger | 6,568 |
+| 11 | `aw-hubs.css` | toolbar, sort, hub FAQ, system wrapper, cases | template + component flag | 3,214 |
+| 12 | `aw-volunteer.css`, `aw-contact.css`, `aw-search.css`, `aw-meta.css` | page-only and meta groups | template / component flag | 6,568 |
 | — | campaign rules | nothing moves | stay in aw.css | see step "Campaign" |
 
 Commit 4 carries the PHP (loader, registry, editor hooks) and is the bigger technical change. Commits 5–12 then only move CSS and add one registry line each. Commits 2 and 3 change markup and need the wp-plugin-audit and PHPCS gate on the touched PHP.
@@ -127,13 +185,13 @@ Commit 4 carries the PHP (loader, registry, editor hooks) and is the bigger tech
 | 116 | `body { background: var(--kit-color-canvas) }` | token | AW tokens.json `surface-page → {color.canvas}` | ties with kit.css:1019 `body { background: var(--kit-surface-page) }`; the token removes the tie |
 | 1054 | button font size .875rem | (a) token | kit-primitives.css:266 reads `--kit-btn-font-size` (Kits default: today's value); AW sets .875rem | same selector list; `.kit-btn--sm` / `--icon` still win on specificity |
 | 1056 | `.kit-section-desc` font size .875rem | (a) token | kit.css:251 reads `--kit-section-desc-size` (default `var(--kit-type-lead)`); AW sets .875rem | same selector |
-| 1059, 1063–1068 | stacked/block card limits (`!important`) | (a) in place | kit.css §4.2 Card: replace the declarations of `.kit-card--stacked-lg > .kit-card-media` and `.kit-card--stacked-lg` with the AW ones, reading the card-limit tokens | same selectors with `!important`; 1059 is overridden by 1064 (merged in phase 1) |
+| 1059, 1063–1068 | stacked/block card limits (`!important`) | (a) tokens only | kit.css §4.2 Card reads new tokens `--kit-card-stacked-media` and the narrow-screen gap, Kits defaults = today's Kits values (40%, kit.css:1209). AW sets its 30% / clamp (aw.css:1509, :1521, :1524) in tokens.json. Writing the AW values into Kits would change every Kits site | same selectors with `!important`; 1059 is overridden by 1064 (merged in phase 1). The 24px padding stays (card-sizes.md:13) |
 | 783 | `.kit-footer p.kit-footer-head` | (a) | kit.css §5 footer, by line 770 | higher specificity than `p, li`: order-safe |
 | 308 | `.kit-sidebar` grid | (a) | kit.css by `.kit-with-sidebar` | Kits' 1199px rule still wins on specificity |
-| 451–452 | `.kit-pager > a` | (a) | kit.css:598–600 | no tie |
+| 451–452 | `.kit-pager > a` | (a) | kit.css:598–600 | no tie. Add a hover state: kit.css:1004 covers only `.prev`/`.next` |
 | 487–489, 491 | `.kit-section-band` child margins, crumbs colour | (a) | kit.css §4.6 | 489 ties with `.kit-section-filters--below > .kit-section-count`: place it before that rule |
 | 69, 353, 439 | post-template gap below 768, post-content margins, first band margin | (a) | kit.css §3 Layout, next to the rules they override | 69 ties with `.wp-block-post-template.is-layout-grid`: edit in place |
-| 772–774, 1055 | h5 size, heading link colour/hover, field font size (`!important`) | (b) | stay in aw.css | Animal Writes' type choices on plain elements. As Kits tokens they would change Kits typography for every Kits site: a separate decision |
+| 772–774, 1055 | h5 size, heading link colour/hover, field font size (`!important`) | (b) | stay in aw.css | Animal Writes' type choices on plain elements. As Kits tokens they would change Kits typography for every Kits site: a separate decision. The heading-link hover underline (aw.css:1053) gets a `:focus-visible` twin. 1055 is the iOS zoom fix; a later Kits field rule could read `--kit-field-text-size` |
 
 Load-bearing on all 23 pages (768 and 1280 everywhere; 375 on contact, lab, library, news, volunteer). Risk: medium (every page); the traps are the 1200 meta size and five same-selector ties.
 
@@ -141,10 +199,13 @@ Load-bearing on all 23 pages (768 and 1280 everywhere; 375 on contact, lab, libr
 
 | group | (a)/(b) | reason |
 |---|---|---|
-| `aw-nl-band` layout rules (603–612, 619–621, 644–646: band, card, text, art, icon, head, line) and `aw-nl-art` (613–618) | **(a) `kit-nl-band`** | a newsletter band is a generic site part. Kits already has the dark-band form variant (kit-primitives.css "On a dark band (newsletter)") |
+| `aw-nl-band` layout rules (603–612, 619–621, 644–646: band, card, text, icon slot, head, line) | **(a) `kit-nl-band`** | a newsletter band is a generic site part, and Kits already has a newsletter pattern (`patterns/newsletter.php`). The band is light (aw.css:818), so the dark-band form variant (kit-primitives.css:471) is not its precedent |
+| `aw-nl-art` (613–618) and the art parts of the band rules | **(b)** stay in aw.css | the envelope SVG and its red `--nl-mark` (danger 82% mixed with ink, aw.css:821, 831–836) are brand illustration. Kits gives an empty art slot only |
 | `aw-nl-band` rules that style the Fluent form inside it (622–643 with `.aw-newsletter-form`/`.ff-*`) and `aw-newsletter-form` (584–601) | **(b)** stay in aw.css | they style Fluent Forms' own markup (`.ff-el-*`, `.ff-btn-submit`). Kits must not depend on one forms plugin; the newsletter is on every page, so aw.css is the right place |
 
-- Markup in the same commit: a Kits pattern `kits-by-wugweb/newsletter-band` carries the `kit-nl-band*` classes, and `theme/parts/newsletter.html` (plugin) adopts them.
+- Markup in the same commit: the band becomes a variant of the existing Kits `kits-by-wugweb/newsletter` pattern (no new pattern), with the `kit-nl-band*` classes, and `theme/parts/newsletter.html` (plugin) adopts them.
+- The band heading is a `<p class="aw-nl-band-head">` today, so it is not in the heading outline. The variant uses an `h2` with the same look (heading hierarchy).
+- Values still raw in the band (colour-mix 6–35%, strokes 1 / 1.5, `--kit-ico-size: 1.5rem` aw.css:837, `max-width: 46ch` :839, `calc(var(--kit-space-9) * 1.5)` :828) stay as they are and are listed under "Raw sizes". The `:has(> .aw-nl-band) + *` rule (:817) gets a `kit-nl-band` form.
 - The part **keeps `aw-nl-band` as a second class**, because `campaign.js` (line 714) and `campaign-lab.js` (line 765) select it and both are frozen. The Animal Writes rules for the form inside keep using it.
 - Tokens: Kits defaults are today's values (band padding `--kit-space-7`, card `--kit-space-5`/`--kit-space-6`, card width `--kit-width-content`), so Animal Writes sets nothing new. Padding stays ≥ 24px.
 - Kits overlaps: the band's button rules beat `.kit-btn` on specificity (0,4,0 against 0,1,0). The two equal-specificity ties are with `.kit-btn--icon.kit-btn--sm` and the filter-sheet button, which the newsletter button never is.
@@ -155,15 +216,29 @@ Load-bearing on all 23 pages (768 and 1280 everywhere; 375 on contact, lab, libr
 
 | group | (a)/(b) | reason and markup |
 |---|---|---|
-| `aw-src`, `aw-src-icon`, `aw-src-name` (204–212, 349–352, 734–737, 754–764) | **(a) `kit-src`** | Kits Core already prints this markup (`plugins/kits-core/includes/attribution.php` lines 58–65), so the component is Kits'. Markup: attribution.php, `hub-blocks.php` and `also-reported.php` print `kit-src kit-src--link` etc. They keep `aw-src` as a second class while Animal Writes rules (for example 457, 464 in `aw-lists.css`) still use it. Rule 735 also lists `.aw-datasrc-logo` (listing data sources): that part stays in `aw-listing.css` |
-| `aw-date` (885, 891) | **(a) `kit-date`** | a no-wrap date with its icon, part of the Kits meta row. Markup in 8 files that print `aw-date` (campaign-tools.php, hub-blocks.php, team-dates.php, campaign-record.php, admin-home.php, systems.php, block-states.php, pages.php) plus the Kits card pattern. `aw-date` stays as a second class (campaign rules such as `.aw-social-card .aw-date` use it). kit.css's existing `.kit-card-meta .aw-date > .kit-ico` becomes `.kit-date`, which removes one `aw-` selector from Kits |
+| `aw-src`, `aw-src-icon`, `aw-src-name` (204–212, 349–352, 734–737, 754–764) | **(a) `kit-src`** | Kits Core already prints this markup (`plugins/kits-core/includes/attribution.php` lines 58–65), so the component is Kits'. Markup: attribution.php, `hub-blocks.php` and `also-reported.php` print `kit-src kit-src--link` etc. They keep `aw-src` as a second class while Animal Writes rules (for example 457, 464 in `aw-lists.css`) still use it. Rule 735 also lists `.aw-datasrc-logo` (listing data sources): that part stays in `aw-listing.css`. kit.css:1181 `.kit-card-chips .aw-src-icon` becomes `.kit-src-icon`. The base rule sets ink colour and strong weight (aw.css:297) and aw.css:1016 resets them with `!important`: the Kits base reads the meta tokens instead, and 1016 loses its `aw-src` and `aw-card-time` parts. The hover underline (aw.css:302) gets a `:focus-visible` twin; the 44px link target (:301) stays. The `--also` variant and `aw-src-also-link` stay Animal Writes (component-map.md:83) |
+| `aw-date` (885, 891) | **(a) `kit-date`** | a no-wrap date with its icon, part of the Kits meta row. Markup in 8 files that print `aw-date` (campaign-tools.php, hub-blocks.php, team-dates.php, campaign-record.php, admin-home.php, systems.php, block-states.php, pages.php) plus the Kits card pattern. `aw-date` stays as a second class (campaign rules such as `.aw-social-card .aw-date` use it). two existing `aw-date` selectors in Kits (kit.css:1177 and kit-primitives.css:50) become `kit-date`. The icon gap reads `--kit-meta-icon-gap` / `--kit-meta-icon` (kit-tokens.css:123–124) instead of `margin-right: var(--kit-icon-gap)` (aw.css:1234) |
 | `aw-story-title` 770: the Kits parts (`.kit-ed-lead .wp-block-post-title`, `.kit-ed-list …`, `main h4 …`) | **(a) tokens only** | Kits' list-title rules read `--kit-list-title-size`, `-weight` and `-leading`, with Kits defaults = today's Kits values. Animal Writes sets its values in tokens.json. No markup change |
 | `aw-story-title` 143–145, 775 and `aw-org-name` | **(b)** stay in aw.css | Animal Writes list rows (`hubs.php`) |
-| `aw-item-meta`, `aw-card-time` | **(b)** `aw-meta.css` | Animal Writes item head (`item-head.php`) and reading time (`hub-blocks.php`) |
+| `aw-card-time` (347, 351) | **(a)** `kit-meta-item` time variant | Kits Core prints it (`plugins/kits-core/includes/attribution.php:120`), the same reason as `kit-src`. component-map.md:33 lists "time (clock)" in the Kits meta line, and `hub-blocks.php:244` already adds `kit-meta-item`. `min-height: 36px` (aw.css:457) has no doc line or token, so it stays in aw.css as is until it has a source. Alias `aw-card-time` kept |
+| `aw-item-meta` container (220) | **(a) markup only** | it repeats `kit-meta-row` (aw.css:317 against kit.css:984): `item-head.php:197` adds `kit-meta-row` and the repeated declarations go |
+| `aw-item-meta` children (deadline, verified on) | **(b)** `aw-meta.css` | Animal Writes item head (`item-head.php`) |
 | `aw-type-ico` (838–878) | **(b)** `aw-type-ico.css` | one inline SVG per Directory type (gaushala, veterinary dispensary …): domain content |
 
 - Kits overlap to watch: 770 against `.kit-ed-lead`, `.kit-ed-list` and `.kit-rows` titles, all `!important`. With tokens the rules stay where they are, so nothing flips. On `.kit-rows` titles (kit.css:1294) Kits wins on specificity today and still does.
-- Risk: medium (markup in 10 PHP files plus the Kits card markup; the second classes keep old selectors working).
+- Risk: medium (markup in 12 PHP files plus the Kits card markup; the second classes keep old selectors working).
+
+**`aw-` selectors already in Kits.** Kits holds about ten today. Each gets an owner step, so phase 2 ends with none:
+
+| Kits line | selector | step |
+|---|---|---|
+| kit.css:1177, kit-primitives.css:50 | `aw-date` | 3 (`kit-date`) |
+| kit.css:1181 | `aw-src-icon` | 3 (`kit-src-icon`) |
+| kit.css:1165–1166 | `aw-story-logo` | 3 (to aw.css with `aw-story-title`) |
+| kit.css:1182, :1190 | `aw-sponsored-label` | 8 (to `aw-lists.css`) |
+| kit.css:1199 | `aw-opp-actions` | campaign rule: stays put; moved to aw.css beside the other campaign rules only with the owner's word |
+| kit.css:1225–1227 | `aw-news-list` | 8 (to `aw-lists.css`) |
+| kit.css:740 | comment naming `.aw-nl-band` | 2 (reworded) |
 
 ### 4–12. Animal Writes component files
 
@@ -249,7 +324,7 @@ Also in this file: 13 groups (4,932 B) with no proven effect on the 23 pages (un
 
 Also in this file: 1 groups (53 B) with no proven effect on the 23 pages (unmatched, or an effect only at the noisy spots).
 
-- `aw-take-part`, `aw-browse-states`, `aw-findhelp` and `aw-findhelp-lede` also act on the four campaign pages. Their class trigger loads the file there; the gate on those pages is the check.
+- `aw-take-part`, `aw-browse-states`, `aw-findhelp` and `aw-findhelp-lede` also act on the four campaign pages. Their component flag loads the file there; the gate on those pages is the check.
 - `aw-side-camp` acts only at 1280 (the sidebar shows from 1200). Baseline lines to move: `.aw-item-share .kit-share | padding-top: 0` and the two `.aw-pdf …` heights.
 
 #### aw-forms.css
@@ -369,7 +444,7 @@ Also in this file: 1 groups (40 B) with no proven effect on the 23 pages (unmatc
 | group | rule indexes | bytes | load-bearing on | widths | campaign pages |
 |---|---|---|---|---|---|
 | aw-item-meta | 220–222, 228, 264 | 681 | cruelty, guide, libitem, listing, newsitem | all 3 | — |
-| (element/root) | 731–733 | 384 | all 23 | mixed (most at all 3) | diwali, dogs, lab, sc |
+| (element/root) | 731–733 | 384 | all 23 | mixed (most at all 3) | diwali, dogs, lab, sc. **Stays in aw.css**: it acts on all 23 pages, so a flag could miss a page |
 | aw-card-time | 347, 351 | 210 | category | all 3 | — |
 
 Also in this file: 1 groups (423 B) with no proven effect on the 23 pages (unmatched, or an effect only at the noisy spots).
@@ -395,7 +470,19 @@ About 8.4 KB of aw.css is campaign CSS that every page loads. **For the owner:**
 - **theme_rules_baseline.txt.** 14 lines name `themes/animal-writes/assets/css/aw.css`. Each moves to its rule's new file in the same commit. The check says a new exception needs the owner's word; a moved line is the same exception, and the commit says so.
 - **settings_parts_baseline.txt:49** (campaign hero min-height) stays: that rule stays in aw.css.
 - **Child theme.** With no child enqueue, a site running the child theme would not get the new files. That is fine once the child is retired, but until then the site must run Kits with the plugin's theme parts (as it does now).
-- **smoke.sh:91** keeps checking the `aw-components-css` link, because aw.css stays.
+- **smoke.sh:91** keeps checking the `aw-components-css` link, because aw.css stays and is never inlined. Per-page asserts are added in the same script: `aw-home-css` present on `/` and absent on a state page, `aw-listing-css` on a listing.
+- **component_map.py** needs no code change, only regeneration; its "Used in" lists name the new files.
+- **States checked per (a) component** (design-system and UI/UX review): hover and a visible `:focus-visible` for every link or control, targets of 24px or more (WCAG 2.2) and 44px where design-system.md:289 / :353 ask for it, heading order, reduced motion. Colour-not-only and motion had no problems in these groups; `aw-take-part` already has a reduced-motion block (aw.css:1671).
+
+### Later Kits candidates (not in this phase)
+
+These Animal Writes groups are close to generic Kits parts. Each is a separate decision:
+- `aw-toolbar` (with `-count` and `aw-dd-sort`) wraps `kit-filterbar` (aw.css:126–142), and the promotion plan calls the filter bar generic.
+- `aw-take-part`: the "three big actions" pattern (kits-promotion-plan.md:69).
+- `aw-more-card` repeats `kit-card`.
+- `aw-item-share` only spaces `kit-share`.
+- `aw-tasks`: `kit-task` already exists (kit.css:604).
+- `aw-pdf` styles the core file block.
 
 ## Raw sizes: candidate tokens (unchanged in this phase)
 
@@ -508,8 +595,8 @@ These values in load-bearing groups are literal sizes with no line in design-sys
 
 ## Summary
 
-1. Nothing with an `aw-` selector goes into Kits. Three groups become Kits components with Kits markup: the newsletter band `kit-nl-band`, the source line `kit-src` and the date `kit-date`. List-title and button/section sizes become Kits tokens. Everything else stays in Animal Writes CSS.
-2. Animal Writes CSS splits into aw.css (newsletter form, heading overrides, campaign rules: 15,259 B) and 12 component files in the plugin only. Each file is loaded by a template condition or a class trigger through a small Kits loader filter, as Uncode does per module.
-3. Average aw.css-derived CSS per page drops from 161 KB to about 62 KB (−62%): −77% on Directory state/district, −42% on Home.
+1. Nothing with an `aw-` selector goes into Kits, and the ten already there get an owner step. Four groups become Kits components with Kits markup: the newsletter band `kit-nl-band` (art stays AW), the source line `kit-src`, the date `kit-date` and the card time (a `kit-meta-item` variant). List-title and button/section sizes become Kits tokens. Everything else stays in Animal Writes CSS.
+2. Animal Writes CSS splits into aw.css (newsletter form, heading overrides, campaign rules: 15,259 B) and 12 component files in the plugin only. Each file is loaded by a template condition or a component flag through a small Kits loader filter, as Uncode does per module. Files are enqueued at `wp_enqueue_scripts` 20 after aw.css, never from inside render.
+3. Average aw.css-derived CSS per page drops from 161 KB to about 62 KB raw (−62%). On transfer it drops from 26.0 KB to 14.1 KB gzip (−46%), with 4–8 cached stylesheet requests instead of 1. Biggest cuts: Directory, claim and news (−60 to −65% gzip); smallest: Home (−24%).
 4. There are 12 commits, each gated by TOTAL 0 on 23 pages × 3 widths. The gate first needs reduced motion in the capture, and the capture needs its comma bug fixed (94 rules looked matched everywhere).
 5. Still for the owner: whether the 8.4 KB of campaign rules may load only on campaign pages, and names for 102 raw sizes listed as candidate tokens.
