@@ -640,10 +640,17 @@ add_action(
 	function () {
 		$id   = aw_camp_id( get_queried_object_id() );
 		$band = is_front_page() && function_exists( 'aw_home_hero_is_campaign' ) && aw_home_hero_is_campaign(); // the home hero is the campaign's, open or closed (home.php)
-		if ( ! ( is_singular( 'aw_campaign' ) && $id && get_post_meta( $id, 'aw_campaign_close', true ) ) && ! $band ) {
+		$page = is_singular( 'aw_campaign' ) && $id && get_post_meta( $id, 'aw_campaign_close', true );
+		$sc   = ! is_front_page() && is_singular() && has_shortcode( (string) get_post_field( 'post_content', get_queried_object_id() ), 'aw_campaign_band' ); // a band in a page's own content
+		$v    = fn( $f ) => (string) filemtime( AW_CORE_DIR . $f );
+		$url  = fn( $f ) => plugins_url( 'assets/css/' . $f, AW_CORE_DIR . 'animal-writes-core.php' );
+		if ( $sc ) { // the band's own files, after the page's stylesheet
+			wp_enqueue_style( 'aw-camp-band', $url( 'aw-camp-band.css' ), array_merge( array( 'aw-camp-tokens' ), $page ? array( 'aw-campaign' ) : array() ), $v( 'assets/css/aw-camp-band.css' ) );
+			wp_register_style( 'aw-camp-tokens', $url( 'aw-camp-tokens.css' ), array(), $v( 'assets/css/aw-camp-tokens.css' ) );
+		}
+		if ( ! $page && ! $band ) {
 			return;
 		}
-		$v    = fn( $f ) => (string) filemtime( AW_CORE_DIR . $f );
 		$slug = $band ? (string) get_post_field( 'post_name', AW_HOME_CAMPAIGN ) : '';
 		$lab  = is_singular( 'aw_campaign' ) && aw_camp_is_lab_page( $id ); // the Lab rules page: its own copy of both files, as on the morning of 2 Nov 2026 (owner)
 		$css  = $lab ? 'campaign-lab.css' : 'campaign.css';
@@ -654,13 +661,21 @@ add_action(
 			wp_register_style( 'aw-campaign', false, array(), $v( 'assets/css/campaign-home.css' ) );
 			wp_enqueue_style( 'aw-campaign' );
 			wp_add_inline_style( 'aw-campaign', (string) file_get_contents( AW_CORE_DIR . 'assets/css/campaign-home.css' ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+		} elseif ( $band ) {
+			// Home with another campaign's hero: the tokens and the band's rules only, inline in campaign.css's place, so
+			// nothing blocks the first paint and the cascade order stays the same (before Kits and aw.css).
+			foreach ( array( 'aw-camp-tokens' => array(), 'aw-camp-band' => array( 'aw-camp-tokens' ) ) as $h => $deps ) {
+				wp_register_style( $h, false, $deps, $v( 'assets/css/' . $h . '.css' ) );
+				wp_enqueue_style( $h );
+				wp_add_inline_style( $h, (string) file_get_contents( AW_CORE_DIR . 'assets/css/' . $h . '.css' ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+			}
 		} else {
 			$deps = array();
 			if ( ! $lab ) { // the campaign tokens, just before campaign.css (the Lab page's frozen copy carries its own)
-				wp_register_style( 'aw-camp-tokens', plugins_url( 'assets/css/aw-camp-tokens.css', AW_CORE_DIR . 'animal-writes-core.php' ), array(), $v( 'assets/css/aw-camp-tokens.css' ) );
+				wp_register_style( 'aw-camp-tokens', $url( 'aw-camp-tokens.css' ), array(), $v( 'assets/css/aw-camp-tokens.css' ) );
 				$deps = array( 'aw-camp-tokens' );
 			}
-			wp_enqueue_style( 'aw-campaign', plugins_url( 'assets/css/' . $css, AW_CORE_DIR . 'animal-writes-core.php' ), $deps, $v( 'assets/css/' . $css ) );
+			wp_enqueue_style( 'aw-campaign', $url( $css ), $deps, $v( 'assets/css/' . $css ) );
 		}
 		wp_enqueue_script( 'aw-campaign', plugins_url( 'assets/js/' . $js, AW_CORE_DIR . 'animal-writes-core.php' ), array(), $v( 'assets/js/' . $js ), array( 'in_footer' => true, 'strategy' => 'defer' ) );
 		if ( is_singular( 'aw_campaign' ) ) { // the Share button and the story/post images (campaign.js)

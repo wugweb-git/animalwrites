@@ -29,7 +29,8 @@ plugins/animal-writes-core/assets/css/campaign-home.css | type | .aw-camp-band h
 plugins/animal-writes-core/assets/css/campaign.css | type | .aw-camp h1 | font-size: clamp(2.25rem, 1.4rem + 3.6vw, 4rem)  # existed 2 Nov 2026
 plugins/animal-writes-core/assets/css/campaign.css | type | .aw-camp :is(h2, h3.aw-camp-mod-h) | font-size: clamp(1.75rem, 1.3rem + 1.8vw, 2.5rem)  # existed 2 Nov 2026
 plugins/animal-writes-core/assets/css/campaign.css | type | .aw-camp .aw-camp-grid > .aw-camp-card:first-child h3 | font-size: clamp(1.5rem, 1.1rem + 1.4vw, 2.25rem)  # existed 2 Nov 2026
-plugins/animal-writes-core/assets/css/campaign.css | type | .aw-camp-band h2.aw-camp-band-title | font-size: clamp(2.25rem, 1.4rem + 3.4vw, 4rem)  # existed 2 Nov 2026
+plugins/animal-writes-core/assets/css/aw-camp-band.css | type | .aw-camp :is(h2, h3.aw-camp-mod-h) | font-size: clamp(1.75rem, 1.3rem + 1.8vw, 2.5rem)  # existed 2 Nov 2026 (campaign.css; copied with the band, 10 Nov 2026)
+plugins/animal-writes-core/assets/css/aw-camp-band.css | type | .aw-camp-band h2.aw-camp-band-title | font-size: clamp(2.25rem, 1.4rem + 3.4vw, 4rem)  # existed 2 Nov 2026 (moved from campaign.css with the band, 10 Nov 2026)
 themes/animal-writes/assets/css/aw.css | type | .aw-contact-row h3 | font-size: var(--fluid-h5)  # existed 2 Nov 2026
 plugins/animal-writes-core/assets/css/campaign-lab.css | imp | .aw-camp.aw-camp--sc-stray-dogs .aw-camp-hero.aw-camp-section.alignfull | padding-bottom: 80vw !important  # Lab rules page kept as on the morning of 2 Nov 2026 (owner: "undo to previous version - lab page")
 plugins/animal-writes-core/assets/css/campaign-lab.css | imp | .aw-camp.aw-camp--sc-stray-dogs .aw-camp-hero.aw-camp-section.alignfull | padding-bottom: clamp(180px, 16vw, 260px) !important  # Lab rules page kept as on the morning of 2 Nov 2026 (owner: "undo to previous version - lab page")

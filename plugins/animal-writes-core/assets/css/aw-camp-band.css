@@ -1,0 +1,56 @@
+/* aw-camp-band.css: the campaign band (the Home hero, aw_block_home_hero in home.php; [aw_campaign_band] in
+   campaign-tools.php) and its closed state ("Latest campaign"). Loaded after aw-camp-tokens.css, at campaign.css's
+   place in the cascade (before Kits and aw.css, which sets the Home hero H1). */
+
+/* Type: the artwork's heavy, tight headlines (the same rules as campaign.css, which the campaign pages use) */
+.aw-camp :is(h1, h2, h3.aw-camp-mod-h) { font-weight: 800; letter-spacing: -0.03em; line-height: 1.05; text-wrap: balance; }
+.aw-camp :is(h2, h3.aw-camp-mod-h) { font-size: clamp(1.75rem, 1.3rem + 1.8vw, 2.5rem); margin: 0 0 var(--kit-space-4); }
+/* Lab rules: section titles are plain theme H2s (also the closed band's H2) */
+.aw-camp--lab-rules h2 { font-weight: var(--kit-weight-bold); letter-spacing: normal; line-height: 1.2; }
+
+/* Home band */
+.aw-camp-band {
+	padding: var(--kit-space-section) var(--kit-space-gutter); /* the section padding: 48/70/96 top and bottom, the gutter at the sides */
+	max-width: none; margin-inline: calc(50% - 50vw) !important; /* full width, like every section (out of the page padding; core sets auto !important); the content keeps the page column */
+	background: var(--camp-mark); color: var(--camp-on-mark);
+}
+.wp-block-post-content > .aw-camp-band { margin-block: 0; } /* sections: no block gap between them */
+/* The artwork is the background, nothing laid over it; the text sits on its plain left side (owner, 19 Oct 2026).
+   1200+: the artwork covers the band. Below: the whole scene under the text (phones get their own crop). */
+.aw-camp-band.has-art { position: relative; overflow: hidden; background-color: var(--camp-art-bg, var(--camp-mark)); }
+.aw-camp-band-art { position: absolute; inset: 0 0 0 auto; width: max(calc(50% + var(--kit-width-wide) / 2 - 34rem), 60rem); z-index: 0; } /* from the end of the text column to the right edge, so the scene never grows under the text on wide screens; its plain left side meets the band colour */
+.aw-camp-band-art img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: right center; }
+.aw-camp-band-inner { position: relative; z-index: 1; max-width: var(--kit-width-wide); margin-inline: auto; }
+.aw-camp-band-text { max-width: 36rem; }
+.aw-camp-band-pill { display: inline-block; margin: 0 0 var(--kit-space-5); padding: var(--kit-space-1) var(--kit-space-4); border: 2px solid var(--camp-on-mark); border-radius: var(--kit-radius-pill); font-weight: var(--kit-weight-bold); font-size: var(--kit-type-sm); }
+.aw-camp-band h2.aw-camp-band-title { margin: 0 0 var(--kit-space-4); font-size: clamp(2.25rem, 1.4rem + 3.4vw, 4rem); font-weight: 800; letter-spacing: -0.035em; line-height: 1.02; max-width: 14ch; } /* the band's headline, as on the campaign's link card (exempt from the site H2 size, aw.css) */
+.aw-camp-band-text > p:not(.aw-camp-band-pill, .aw-camp-band-actions, .aw-camp-band-range, .aw-countdown) { font-size: var(--kit-type-lead); max-width: 30rem; margin: 0; }
+.aw-camp-band .aw-countdown { margin: var(--kit-space-6) 0 var(--kit-space-3); align-items: baseline; }
+.aw-camp-band .aw-cd-num { font-size: clamp(3rem, 2rem + 3vw, 4.5rem); font-weight: 800; letter-spacing: -0.05em; line-height: 0.85; font-variant-numeric: tabular-nums; }
+.aw-camp-band .aw-countdown:has(+ .aw-camp-band-days) .aw-cd-when { display: none; } /* the dates are under the day marks */
+.aw-camp-band-days { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(var(--days), minmax(0, 1fr)); gap: 3px; align-items: end; height: 2rem; }
+.aw-camp-band-days li { height: 70%; border-radius: 2px; background: var(--camp-on-mark); }
+.aw-camp-band-days li.is-past { background: rgb(255 255 255 / 0.28); }
+.aw-camp-band-days li.is-today { height: 100%; }
+.aw-camp-band-range { justify-content: space-between; max-width: none; margin: var(--kit-space-3) 0 0; } /* the dates sit under the two ends of the day marks */
+.aw-camp-band-range .kit-meta-item { color: var(--camp-on-mark); }
+.aw-camp-band .aw-camp-band-actions { margin-top: var(--kit-space-6); }
+@media (max-width: 1199px) {
+	.aw-camp-band.has-art { padding-bottom: calc(52.5vw - 1rem); } /* the scene's height (1730 x 909) */
+	.aw-camp-band-art { inset: auto 0 0 0; width: auto; }
+	.aw-camp-band-art img { height: auto; object-fit: initial; }
+	.aw-camp-band-text { max-width: none; }
+}
+@media (max-width: 767px) {
+	.aw-camp-band.has-art { padding-bottom: calc(75vw + var(--kit-space-4)); } /* the phone crop is 4:3 */
+}
+.aw-camp-band :is(h2, p, .aw-cd-num, .aw-cd-unit, .aw-cd-when) { color: var(--camp-on-mark); }
+.aw-camp-band h2 { margin: 0 0 var(--kit-space-2); }
+.aw-camp .aw-camp-band-ghost { background: transparent; color: var(--camp-on-mark); box-shadow: inset 0 0 0 2px var(--camp-on-mark); }
+.aw-camp .aw-camp-band-ghost:hover { background: var(--camp-on-mark); color: var(--camp-mark); }
+.aw-camp-band-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-3); margin: var(--kit-space-3) 0 0; }
+
+/* Home band after closing: "Latest campaign", on paper */
+.aw-camp-band--closed { background: var(--camp-surface); color: var(--camp-dark); }
+.aw-camp-band.aw-camp-band--closed :is(h2, p, .aw-camp-band-kicker) { color: var(--camp-dark); }
+.aw-camp-band.aw-camp-band--closed .aw-camp-band-kicker { margin: 0 0 var(--kit-space-1); color: var(--camp-mark); font-weight: var(--kit-weight-strong); }
