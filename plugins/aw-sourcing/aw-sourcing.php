@@ -5,7 +5,7 @@
  * Version: 0.1.0
  * Author: Wugweb
  * License: GPL-2.0-or-later
- * Update URI: https://wugweb.com/plugins/sourceweb/
+ * Update URI: https://wugweb.com/plugins/aw-sourcing/
  *
  * Moved out of Animal Writes Core and Kits Core on 24 Oct 2026 with no change in behaviour: the same option keys,
  * REST routes, cron hooks, admin pages and actions. Core keeps the content types and templates.

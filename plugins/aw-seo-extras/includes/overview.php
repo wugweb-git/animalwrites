@@ -1,8 +1,8 @@
 <?php
 /**
- * SearchWeb menu and its Overview screen (owner, 25 Oct 2026: one menu, organised like any other plugin).
+ * RankWeb menu and its Overview screen (owner, 25 Oct 2026: one menu, organised like any other plugin).
  *
- * The menu: SearchWeb → Overview (this file), FAQ (faq.php), Search Insights (search-insights/admin.php, admins only),
+ * The menu: RankWeb → Overview (this file), FAQ (faq.php), Search Insights (search-insights/admin.php, admins only),
  * Settings (settings.php: every module's rules and switches).
  * Overview lists every module of the plugin: what it does, where it is set up (here or in Rank Math), its status from
  * the checks that already run, the boxes it adds to edit screens, and its WP-CLI commands. Core WordPress only.
@@ -21,10 +21,40 @@ const AW_SEO_MENU = 'aw-seo-plus';
 add_action(
 	'admin_menu',
 	function () {
-		add_menu_page( 'SearchWeb', 'SearchWeb', 'manage_categories', AW_SEO_MENU, 'aw_seo_overview_page', 'dashicons-chart-line', 81 );
-		add_submenu_page( AW_SEO_MENU, 'SearchWeb', 'Overview', 'manage_categories', AW_SEO_MENU, 'aw_seo_overview_page' );
+		// Away from Rank Math's menu (owner, 10 Nov 2026): its own icon, and a place among the site's work menus.
+		add_menu_page( 'RankWeb', 'RankWeb', 'manage_categories', AW_SEO_MENU, 'aw_seo_overview_page', 'dashicons-search', '27.5' );
+		// Screen ids of the screens under this menu start with the menu title; keep the old one (aw-seo-plus_page_…),
+		// so saved screen options, box order and hidden columns stay with them.
+		$GLOBALS['admin_page_hooks'][ AW_SEO_MENU ] = 'aw-seo-plus'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- the menu's hook prefix, as before the rename.
+		add_submenu_page( AW_SEO_MENU, 'RankWeb', 'Overview', 'manage_categories', AW_SEO_MENU, 'aw_seo_overview_page' );
 	},
 	9 // Before FAQ (10) and Search Insights (100), so Overview is the first item.
+);
+
+// When the site sets its own menu order and leaves RankWeb out, RankWeb would fall to the end, next to Rank Math:
+// put it after Mail (or Sourcing), else before the first separator. Runs after the site's own order (same priority, added later).
+add_filter(
+	'menu_order',
+	function ( $order ) {
+		if ( ! is_array( $order ) || in_array( AW_SEO_MENU, $order, true ) ) {
+			return $order;
+		}
+		foreach ( array( 'mailweb', 'aw-sourcing-menu' ) as $after ) {
+			$at = array_search( $after, $order, true );
+			if ( false !== $at ) {
+				array_splice( $order, $at + 1, 0, array( AW_SEO_MENU ) );
+				return $order;
+			}
+		}
+		foreach ( $order as $at => $slug ) {
+			if ( 0 === strpos( (string) $slug, 'separator' ) ) {
+				array_splice( $order, $at, 0, array( AW_SEO_MENU ) );
+				return $order;
+			}
+		}
+		return $order;
+	},
+	PHP_INT_MAX
 );
 
 // Plugins screen: Overview, FAQ and Search Insights under the plugin's name.
@@ -78,7 +108,7 @@ function aw_seo_overview_si_status(): string {
 function aw_seo_overview_faq_status(): string {
 	$ix = get_transient( 'aw_faq_index' );
 	if ( ! is_array( $ix ) || ! isset( $ix['counts'] ) ) {
-		// The count is kept for an hour after SearchWeb → FAQ builds it; rebuild it in the background, not on this view.
+		// The count is kept for an hour after RankWeb → FAQ builds it; rebuild it in the background, not on this view.
 		if ( function_exists( 'aw_faq_index' ) && ! wp_next_scheduled( 'aw_faq_index_build' ) ) {
 			wp_schedule_single_event( time(), 'aw_faq_index_build' );
 		}
@@ -89,7 +119,7 @@ function aw_seo_overview_faq_status(): string {
 	return esc_html( sprintf( '%s pages show an FAQ. %s', number_format_i18n( $faq ), $drafts ? sprintf( '%d draft questions waiting.', $drafts ) : 'No drafts waiting.' ) );
 }
 
-/** SearchWeb → Overview. */
+/** RankWeb → Overview. */
 function aw_seo_overview_page() {
 	$faq = add_query_arg( 'page', 'aw-faq', admin_url( 'admin.php' ) );
 	$si  = function_exists( 'aw_si_url' ) && current_user_can( aw_si_cap() );
@@ -106,7 +136,7 @@ function aw_seo_overview_page() {
 			'module' => '<strong>' . ( function_exists( 'aw_faq_admin_page' ) ? aw_seo_overview_link( 'FAQ', $faq ) : 'FAQ' ) . '</strong>',
 			'mods'   => array( 'faq' ),
 			'what'   => 'The FAQ box on every edit screen (pages, posts, every public type and taxonomy; automatic questions filled in where the page has data) and the questions with FAQPage schema on the page.',
-			'where'  => aw_seo_overview_link( 'SearchWeb → FAQ', $faq ) . '; each item’s FAQ box',
+			'where'  => aw_seo_overview_link( 'RankWeb → FAQ', $faq ) . '; each item’s FAQ box',
 			'status' => aw_seo_overview_faq_status(),
 		),
 	);
@@ -121,7 +151,7 @@ function aw_seo_overview_page() {
 			'module' => '<strong>' . aw_seo_overview_link( 'Search Insights', aw_si_url() ) . '</strong>',
 			'mods'   => array( 'search-insights' ),
 			'what'   => 'Keywords, Search Console and GA4 figures, rising terms, pages, the monthly check list and imports. Read-only.',
-			'where'  => aw_seo_overview_link( 'SearchWeb → Search Insights → Settings', aw_si_url( 'settings' ) ),
+			'where'  => aw_seo_overview_link( 'RankWeb → Search Insights → Settings', aw_si_url( 'settings' ) ),
 			'status' => aw_seo_overview_si_status(),
 		);
 	}
@@ -226,7 +256,7 @@ function aw_seo_overview_page() {
 		}
 	}
 
-	echo '<div class="wrap"><h1>SearchWeb</h1>';
+	echo '<div class="wrap"><h1>RankWeb</h1>';
 	echo '<p>' . esc_html__( 'What the plugin adds to Rank Math (free) for animalwrites.in. Rank Math holds everything else; where a module’s settings live in Rank Math, the link goes there.', 'aw-seo-extras' ) . '</p>';
 	if ( $attn ) {
 		echo '<div class="notice notice-warning inline"><p><strong>' . esc_html__( 'Needs attention', 'aw-seo-extras' ) . '</strong></p><ul class="ul-disc">' . implode( '', $attn ) . '</ul></div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from escaped parts.

@@ -1,6 +1,6 @@
 <?php
 /**
- * SearchWeb in the Kits admin: a tab on the Kits screens and a row in Kits → Welcome's System Status, through Kits
+ * RankWeb in the Kits admin: a tab on the Kits screens and a row in Kits → Welcome's System Status, through Kits
  * Core's filters kits_admin_tabs and kits_status_rows. Only when Kits Core is loaded; without it nothing here runs and
  * the plugin's own menu works as before. Loaded whether or not Rank Math is active, so the row can say it is missing.
  *
@@ -24,31 +24,32 @@ add_action(
 );
 
 /**
- * The SearchWeb tab: its Overview, when the menu is there (it needs Rank Math, aw-seo-extras.php).
+ * The RankWeb tab: its Overview, when the menu is there (it needs Rank Math, aw-seo-extras.php).
  *
  * @param array $tabs Kits tabs: slug => [label, address relative to wp-admin, capability].
  */
 function aw_seo_extras_kits_tab( $tabs ) {
 	if ( defined( 'AW_SEO_MENU' ) ) {
-		$tabs[ AW_SEO_MENU ] = array( 'SearchWeb', 'admin.php?page=' . AW_SEO_MENU, 'manage_categories' );
+		$tabs[ AW_SEO_MENU ] = array( __( 'RankWeb', 'aw-seo-extras' ), 'admin.php?page=' . AW_SEO_MENU, 'manage_categories' );
 	}
 	return $tabs;
 }
 
 /**
- * The SearchWeb row of the System Status table.
+ * The RankWeb row of the System Status table.
  *
  * @param array $rows Rows: [label, HTML value].
  */
 function aw_seo_extras_kits_status_row( $rows ) {
 	$head = get_file_data( AW_SEO_EXTRAS_DIR . 'aw-seo-extras.php', array( 'Version' => 'Version' ) );
-	$text = 'Active, ' . $head['Version'];
+	/* translators: %s: plugin version. */
+	$text = sprintf( __( 'Active, %s', 'aw-seo-extras' ), $head['Version'] );
 	if ( ! aw_seo_extras_rank_math() ) {
-		$fix    = 'Does nothing until Rank Math SEO is active.';
-		$rows[] = array( 'SearchWeb', function_exists( 'kits_status_cell' ) ? kits_status_cell( $text, $fix ) : esc_html( $text . '. ' . $fix ) );
+		$fix    = __( 'Does nothing until Rank Math SEO is active.', 'aw-seo-extras' );
+		$rows[] = array( __( 'RankWeb', 'aw-seo-extras' ), function_exists( 'kits_status_cell' ) ? kits_status_cell( $text, $fix ) : esc_html( $text . '. ' . $fix ) );
 		return $rows;
 	}
-	$link   = defined( 'AW_SEO_MENU' ) ? ' <a href="' . esc_url( admin_url( 'admin.php?page=' . AW_SEO_MENU ) ) . '">' . esc_html( 'Overview' ) . '</a>' : '';
-	$rows[] = array( 'SearchWeb', esc_html( $text ) . $link );
+	$link   = defined( 'AW_SEO_MENU' ) ? ' <a href="' . esc_url( admin_url( 'admin.php?page=' . AW_SEO_MENU ) ) . '">' . esc_html__( 'Overview', 'aw-seo-extras' ) . '</a>' : '';
+	$rows[] = array( __( 'RankWeb', 'aw-seo-extras' ), esc_html( $text ) . $link );
 	return $rows;
 }

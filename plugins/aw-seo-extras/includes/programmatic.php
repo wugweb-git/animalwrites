@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /* ---------- Directory data: listings per state, district and India, by type ---------- */
 
 /** Types named in a place's breakdown, in this order when counts tie ("veterinary" = every veterinary type, as the filter). */
-// AW_SEO_BREAKDOWN: SearchWeb → Settings (settings.php).
+// AW_SEO_BREAKDOWN: RankWeb → Settings (settings.php).
 
 /**
  * Published listings counted per state code, district code and for all of India, by listing type (its slug), by
@@ -714,7 +714,7 @@ add_action( 'aw_seo_fill_daily', 'aw_seo_sync_categories', 30 );
  * Search titles of the categories and tags, written to fit 55–58 characters with " – Animal Writes" (keyword first,
  * plain text, the site name only as the suffix). A term not listed gets aw_seo_term_title_rule().
  */
-// AW_SEO_TERM_TITLES: SearchWeb → Settings (settings.php).
+// AW_SEO_TERM_TITLES: RankWeb → Settings (settings.php).
 
 /** A category's or tag's search title, with " – Animal Writes". */
 function aw_seo_term_title( $term ) {

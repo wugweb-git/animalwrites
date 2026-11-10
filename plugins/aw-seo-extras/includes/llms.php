@@ -20,10 +20,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** The order of Pages in llms.txt, by slug ("" = the home page). Pages not named here follow, as Rank Math lists them. */
-// AW_LLMS_PAGE_ORDER: SearchWeb → Settings (settings.php).
+// AW_LLMS_PAGE_ORDER: RankWeb → Settings (settings.php).
 
 /** Resource types that are guides (listed before research). */
-// AW_LLMS_GUIDE_TYPES: SearchWeb → Settings (settings.php).
+// AW_LLMS_GUIDE_TYPES: RankWeb → Settings (settings.php).
 
 add_filter( 'rank_math/llms_txt/remove_credit', '__return_true' );
 

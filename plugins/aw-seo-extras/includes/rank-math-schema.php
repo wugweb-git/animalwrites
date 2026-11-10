@@ -74,7 +74,7 @@ function aw_rm_page_schema_type( $id ) {
 }
 
 /** Post types whose items get a Rank Math schema entry. */
-// AW_RM_SCHEMA_TYPES: SearchWeb → Settings (settings.php).
+// AW_RM_SCHEMA_TYPES: RankWeb → Settings (settings.php).
 
 /** Post meta set when this plugin wrote Rank Math's "no schema" flag (a closed Opportunity). */
 const AW_RM_SCHEMA_OFF = '_aw_rm_schema_off';

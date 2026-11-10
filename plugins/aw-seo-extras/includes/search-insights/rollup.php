@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-// AW_SI_KEEP_DAYS: SearchWeb → Settings (settings.php).
+// AW_SI_KEEP_DAYS: RankWeb → Settings (settings.php).
 
 /**
  * How a metric's value rolls up: sum (counts) or last (indexes, positions, text).

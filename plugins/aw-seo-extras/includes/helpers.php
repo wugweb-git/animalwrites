@@ -17,7 +17,7 @@ if ( ! function_exists( 'kits_term_url' ) ) { // Kits Core's helper (a term's ad
 }
 
 /** Longest search description, in characters (155: Google's desktop snippet fits about 151 of ours, so more would be cut). */
-// AW_SEO_DESC_MAX: SearchWeb → Settings (settings.php).
+// AW_SEO_DESC_MAX: RankWeb → Settings (settings.php).
 
 /**
  * Cut text at a word boundary to at most $max characters, adding $more ("…") when cut.
@@ -485,13 +485,13 @@ function aw_seo_listing_name( $id ) {
 }
 
 /** Fixed titles of the section hubs (post type => title). */
-// AW_HUB_TITLES: SearchWeb → Settings (settings.php).
+// AW_HUB_TITLES: RankWeb → Settings (settings.php).
 
 /** Fixed descriptions of the section hubs that are not built from their intro. */
-// AW_HUB_DESCRIPTIONS: SearchWeb → Settings (settings.php).
+// AW_HUB_DESCRIPTIONS: RankWeb → Settings (settings.php).
 
 /** Descriptions of the content types' own archives (post type => description). */
-// AW_ARCHIVE_DESCRIPTIONS: SearchWeb → Settings (settings.php).
+// AW_ARCHIVE_DESCRIPTIONS: RankWeb → Settings (settings.php).
 
 /** Plural of a listing type for a sentence: "Gaushalas" (always capitalised, owner 15 Oct 2026), "ABC centres", "veterinary dispensaries". */
 function aw_seo_type_plural( $slug ) {
@@ -751,10 +751,10 @@ function aw_seo_default_image() {
 }
 
 /** Share image of a listing without a logo of its own (owner, 15 Oct 2026): banner-aw_listing-wide.webp, the Directory band picture. */
-// AW_SEO_LISTING_SHARE_IMAGE: SearchWeb → Settings (settings.php).
+// AW_SEO_LISTING_SHARE_IMAGE: RankWeb → Settings (settings.php).
 
 /** Post types whose share image is the publisher's own image, linked (News, Library, research, Opportunities). */
-// AW_SEO_SOURCE_IMAGE_TYPES: SearchWeb → Settings (settings.php).
+// AW_SEO_SOURCE_IMAGE_TYPES: RankWeb → Settings (settings.php).
 
 /**
  * The item's own image (owner, 15 Oct 2026: ingested items use the publisher's image, linked; never a category photo

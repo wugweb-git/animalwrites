@@ -30,7 +30,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 require_once __DIR__ . '/keyphrase-model.php';
 
 /** Words that alone make no search phrase ("save animals", "animal welfare india"). */
-// AW_SEO_GENERIC_WORDS: SearchWeb → Settings (settings.php).
+// AW_SEO_GENERIC_WORDS: RankWeb → Settings (settings.php).
 
 /**
  * A keyword as stored: lower case, plain, no quotes, single spaces. '' when it is unusable:

@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Query parameters that filter a list: such a URL is indexed with its own canonical (owner, 10 Oct 2026). */
-// AW_FILTER_PARAMS: SearchWeb → Settings (settings.php).
+// AW_FILTER_PARAMS: RankWeb → Settings (settings.php).
 
 /** Canonical URL of a hub page: its path without filters, with /page/N/. */
 function aw_hub_canonical() {

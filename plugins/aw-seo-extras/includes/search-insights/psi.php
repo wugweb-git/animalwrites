@@ -21,7 +21,7 @@ const AW_SI_PSI_CRON   = 'aw_si_psi';
 const AW_SI_PSI_MORE   = 'aw_si_psi_more';
 const AW_SI_PSI_QUEUE  = 'aw_si_psi_queue';
 const AW_SI_PSI_BUDGET = 25; // Seconds: no new call starts after this, so a run stays inside host time limits.
-// AW_SI_PSI_FLAG: SearchWeb → Settings (settings.php).
+// AW_SI_PSI_FLAG: RankWeb → Settings (settings.php).
 
 /**
  * The key pages of the 20 Oct PageSpeed audit: the hubs, a state and a district page, the newest item of each type,

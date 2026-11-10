@@ -1,6 +1,6 @@
 <?php
 /**
- * SearchWeb → Search Insights (owner addendum, 24 Oct: core WordPress only, no custom CSS). Tabs: Overview (postboxes),
+ * RankWeb → Search Insights (owner addendum, 24 Oct: core WordPress only, no custom CSS). Tabs: Overview (postboxes),
  * Keywords (list table), tabs added by other files (Pages, Check list, Rising, Sourcing keywords) and Settings
  * (form-table: keys, run now, imports, snapshot, delete data). The old Search demand screen was removed on 25 Oct 2026;
  * its content gaps are an Overview box.
@@ -78,7 +78,7 @@ function aw_si_tab(): string {
 add_action(
 	'admin_menu',
 	function () {
-		// SearchWeb → Search Insights, after Overview and FAQ.
+		// RankWeb → Search Insights, after Overview and FAQ.
 		$hook = add_submenu_page( AW_SEO_MENU, __( 'Search Insights', 'aw-seo-extras' ), __( 'Search Insights', 'aw-seo-extras' ), aw_si_cap(), AW_SI_SLUG, 'aw_si_screen' );
 		if ( $hook ) {
 			add_action( 'load-' . $hook, 'aw_si_load' );

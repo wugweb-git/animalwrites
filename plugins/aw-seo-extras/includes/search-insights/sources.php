@@ -48,7 +48,7 @@ add_filter(
 	}
 );
 
-/** Days the daily figures are kept before they become monthly totals (SearchWeb → Settings, AW_SI_KEEP_DAYS). */
+/** Days the daily figures are kept before they become monthly totals (RankWeb → Settings, AW_SI_KEEP_DAYS). */
 function aw_si_keep_days(): int {
 	return max( 1, defined( 'AW_SI_KEEP_DAYS' ) ? (int) AW_SI_KEEP_DAYS : 90 );
 }

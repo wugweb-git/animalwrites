@@ -756,7 +756,7 @@ function aw_schema_language( $node ) {
 }
 
 /** Other names of the site and organisation (owner, 20 Oct 2026); Google reads the WebSite's for the site name in results. */
-// AW_SITE_ALT_NAMES: SearchWeb → Settings (settings.php).
+// AW_SITE_ALT_NAMES: RankWeb → Settings (settings.php).
 
 /** The site itself (shown on every page). */
 function aw_website_schema() {

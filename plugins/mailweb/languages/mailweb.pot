@@ -16,6 +16,8 @@ msgstr ""
 
 #. Plugin Name of the plugin
 #: mailweb.php
+#: includes/kits-hub.php:32
+#: includes/kits-hub.php:44
 msgid "MailWeb"
 msgstr ""
 
@@ -175,6 +177,7 @@ msgid "Inbox"
 msgstr ""
 
 #: includes/home.php:23
+#: includes/kits-hub.php:44
 #: includes/overview.php:148
 msgid "Overview"
 msgstr ""
@@ -1073,4 +1076,9 @@ msgstr ""
 
 #: mailweb.php:40
 msgid "Every 5 minutes"
+msgstr ""
+
+#. translators: %s: plugin version.
+#: includes/kits-hub.php:43
+msgid "Active, %s"
 msgstr ""

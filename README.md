@@ -6,7 +6,7 @@ Live at https://animalwrites.in. How changes are made, reviewed and shipped: [CL
 - `themes/animal-writes/` — the Animal Writes child theme (brand palette, templates).
 - `plugins/animal-writes-core/` — content types, templates, directory, campaigns, forms glue, deploy purge, branded error pages.
 - `plugins/aw-sourcing/` — SourceWeb: feeds, keywords, publishers, relay, AI keys, To review, enrichment, the Workers tab, the ingest API.
-- `plugins/aw-seo-extras/` — SearchWeb: all SEO code (with Rank Math), the FAQ system, Search Insights.
+- `plugins/aw-seo-extras/` — RankWeb: all SEO code (with Rank Math), the FAQ system, Search Insights.
 - `plugins/kits-core/` — reusable design-system parts (no site-specific code).
 - `plugins/mailweb/` — MailWeb 3.2: the WordPress inbox for the Hostinger mailboxes; replies go from support@.
 

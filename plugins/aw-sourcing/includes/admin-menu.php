@@ -316,7 +316,7 @@ function aw_sourcing_overview_page() {
 			array( 'Settings', 'Workers use these lists: whether the workers read these screens or sources.yaml.', $tab( AW_SRC_SETTINGS_TAB ), aw_sourcing_overview_status( ! empty( $cfg['live'] ), 'Workers use these lists: ' . ( ! empty( $cfg['live'] ) ? 'on.' : 'off.' ) ) ),
 		),
 		'Elsewhere' => array(
-			array( 'Sourcing keywords', 'Per Google News search: items brought in over 30 days and their pages\' Search Console figures.', function_exists( 'aw_si_url' ) && function_exists( 'aw_si_cap' ) && current_user_can( aw_si_cap() ) ? '<a href="' . esc_url( aw_si_url( 'sourcing' ) ) . '">' . esc_html( 'SearchWeb → Search Insights → Sourcing keywords' ) . '</a>' : esc_html( 'SearchWeb → Search Insights' ), $auto ),
+			array( 'Sourcing keywords', 'Per Google News search: items brought in over 30 days and their pages\' Search Console figures.', function_exists( 'aw_si_url' ) && function_exists( 'aw_si_cap' ) && current_user_can( aw_si_cap() ) ? '<a href="' . esc_url( aw_si_url( 'sourcing' ) ) . '">' . esc_html( 'RankWeb → Search Insights → Sourcing keywords' ) . '</a>' : esc_html( 'RankWeb → Search Insights' ), $auto ),
 			array( 'Site Health', 'Two tests: "Sourcing ran on time" (the ingest heartbeat) and "Workers report on time".', current_user_can( 'view_site_health_checks' ) ? '<a href="' . esc_url( admin_url( 'site-health.php' ) ) . '">' . esc_html( 'Tools → Site Health' ) . '</a>' : esc_html( 'Tools → Site Health' ), $auto ),
 		),
 	);
