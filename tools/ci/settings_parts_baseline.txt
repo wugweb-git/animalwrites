@@ -38,9 +38,14 @@ plugins/aw-sourcing/includes/admin-menu.php | admin page | add_submenu_page( AW_
 plugins/aw-sourcing/includes/enrichment-admin.php | admin page | add_submenu_page( AW_SRC_MENU, 'Enrichment review', 'Enrichment review' . ( $n && function_exists( 'aw_menu_count' ) ? aw_menu_count( $n ) : '' ), AW_ENRICH_CAP
 plugins/aw-sourcing/includes/enrichment-admin.php | admin style | <style> block
 plugins/aw-sourcing/includes/review-queue.php | admin page | add_submenu_page( AW_SRC_MENU, 'To review', 'To review' . ( function_exists( 'aw_menu_count' ) ? aw_menu_count( aw_review_count() ) : '' ), AW_REVIEW_CAP, 'aw-r
-plugins/kits-core/includes/admin-home.php | admin page | add_menu_page( 'Kits', 'Kits', 'manage_options', KITS_MENU, 'kits_overview_page', 'dashicons-layout', 61 );
-plugins/kits-core/includes/admin-home.php | admin page | add_submenu_page( KITS_MENU, $s[0], $s[0], 'edit_theme_options', $s[1] );
-plugins/kits-core/includes/admin-home.php | admin page | add_submenu_page( KITS_MENU, 'Kits', 'Overview', 'manage_options', KITS_MENU, 'kits_overview_page' );
+plugins/kits-core/includes/admin-home.php | admin page | add_menu_page( 'Kits', 'Kits', 'manage_options', KITS_MENU, 'kits_welcome_page', 'dashicons-layout', 3 ); // second, under Dashboard
+plugins/kits-core/includes/admin-home.php | admin page | add_submenu_page( KITS_MENU, 'Welcome', 'Welcome', 'manage_options', KITS_MENU, 'kits_welcome_page' );
+plugins/kits-core/includes/admin-screens.php | admin page | add_submenu_page( KITS_MENU, 'Core Settings', 'Core Settings', 'manage_options', 'kits-core-settings', 'kits_core_settings_page' );
+plugins/kits-core/includes/admin-screens.php | admin page | add_submenu_page( KITS_MENU, 'Docs', 'Docs', 'manage_options', 'kits-docs', 'kits_docs_page' );
+plugins/kits-core/includes/admin-screens.php | admin page | add_submenu_page( KITS_MENU, 'Fonts', 'Fonts', 'edit_theme_options', 'font-library.php' );
+plugins/kits-core/includes/admin-screens.php | admin page | add_submenu_page( KITS_MENU, 'Import / Export', 'Import / Export', 'edit_theme_options', 'kits-transfer', 'kits_transfer_page' );
+plugins/kits-core/includes/admin-screens.php | admin page | add_submenu_page( KITS_MENU, 'Plugins', 'Plugins', 'manage_options', 'kits-plugins', 'kits_plugins_page' );
+plugins/kits-core/includes/admin-screens.php | admin page | add_submenu_page( KITS_MENU, 'Theme Options', 'Theme Options', 'manage_options', 'kits-options', 'kits_options_page' );
 plugins/kits-core/includes/preview.php | admin page | add_submenu_page(
 plugins/kits-core/includes/system-screen.php | admin page | add_submenu_page( KITS_MENU, 'Design system', 'Design system', 'manage_options', 'kits-system', 'kits_system_page' ); // Kits → Design system
 plugins/mailweb/includes/overview.php | admin page | add_menu_page( __( 'Mail', 'mailweb' ), __( 'Mail', 'mailweb' ) . $badge, MAILWEB_CAP, 'mailweb', 'mailweb_inbox_page', 'dashicons-email', 27 ); // the inbox (i
