@@ -3,8 +3,10 @@
  * Page Options: a page can differ from the rest of the site, and each choice falls back page → post type → site.
  *
  * - Page: post meta, set in the editor's document sidebar (assets/js/page-options.js). Empty = Inherit.
- * - Post type: the default for every item of that type, on Kits → Overview (one setting, kits_page_defaults).
- * - Site: the theme's own templates, so Inherit everywhere changes nothing.
+ * - Kind of page: the default for every item of a post type, and for each list page (archive_<type>), Search, Authors
+ *   and 404, on Kits → Theme Options (one setting, kits_page_defaults, keyed by context; see kits_page_contexts()).
+ * - Site-wide: the _site context, on Theme Options → General.
+ * - Theme: its own templates, so Inherit everywhere changes nothing.
  *
  * Options: header part, footer part, sidebar (hide), page title (hide on screen; the H1 stays for screen readers; a site's
  * own title block can ask kits_page_option( 'title' ) too), breadcrumbs (hide; the site's trail reads it) and colour set
@@ -28,6 +30,104 @@ function kits_page_option_fields(): array {
 		'crumbs'  => array( 'Breadcrumbs', 'hide' ),
 		'colours' => array( 'Colour set', 'style' ),
 	);
+}
+
+/**
+ * Notes for the Theme Options rows.
+ *
+ * @param string $key Option key.
+ */
+function kits_page_option_note( string $key ): string {
+	$notes = array(
+		'header'  => 'Which header part. Parts are made in Appearance → Editor → Patterns → Header.',
+		'footer'  => 'Which footer part. Parts are made in Appearance → Editor → Patterns → Footer.',
+		'sidebar' => 'Pages whose template has a sidebar.',
+		'title'   => 'Hidden on screen only: the page keeps its H1 for screen readers and search.',
+		'crumbs'  => 'The trail above the title. Search engines still get it as data.',
+		'colours' => 'A colour set from Styles → Blocks → Group for the page\'s content.',
+	);
+	return $notes[ $key ] ?? '';
+}
+
+/** Which group an option shows under in the editor panel. */
+function kits_page_option_group( string $key ): string {
+	return array(
+		'header' => 'Header',
+		'footer' => 'Footer',
+	)[ $key ] ?? 'Content';
+}
+
+/** Post types whose list has a page of its own: type => label. A site adds its own list pages with kits_archive_types. */
+function kits_archive_types(): array {
+	$out = array();
+	foreach ( get_post_types( array( 'public' => true ), 'objects' ) as $t ) {
+		if ( 'post' === $t->name || ! empty( $t->has_archive ) ) {
+			$out[ $t->name ] = $t->labels->name;
+		}
+	}
+	return (array) apply_filters( 'kits_archive_types', $out );
+}
+
+/**
+ * Every context that can hold defaults: context => the option keys it takes.
+ * A post type (each item), archive_<type> (its list, category and tag pages), _search, _author, _404 and _site.
+ */
+function kits_page_contexts(): array {
+	$all  = array_keys( kits_page_option_fields() );
+	$list = array( 'header', 'footer', 'sidebar', 'title', 'crumbs' );
+	$out  = array( '_site' => $all );
+	foreach ( array_keys( kits_page_option_types() ) as $type ) {
+		$out[ $type ] = $all;
+	}
+	foreach ( array_keys( kits_archive_types() ) as $type ) {
+		$out[ 'archive_' . $type ] = $list;
+	}
+	$out['_search'] = $list;
+	$out['_author'] = $list;
+	$out['_404']    = array( 'header', 'footer', 'sidebar', 'crumbs' );
+	return $out;
+}
+
+/**
+ * The option keys one context takes.
+ *
+ * @param string $ctx Context.
+ */
+function kits_page_context_keys( string $ctx ): array {
+	return kits_page_contexts()[ $ctx ] ?? array();
+}
+
+/** The context of the page being drawn ('' when none applies), after the kits_page_options_context filter. */
+function kits_page_context(): string {
+	static $cached = null;
+	if ( null !== $cached ) {
+		return $cached;
+	}
+	$ctx = '';
+	if ( is_singular() ) {
+		$type = (string) get_post_type( get_queried_object_id() );
+		$ctx  = isset( kits_page_option_types()[ $type ] ) ? $type : '';
+	} elseif ( is_404() ) {
+		$ctx = '_404';
+	} elseif ( is_search() ) {
+		$ctx = '_search';
+	} elseif ( is_author() ) {
+		$ctx = '_author';
+	} elseif ( is_home() || is_category() || is_tag() ) {
+		$ctx = 'archive_post';
+	} elseif ( is_post_type_archive() ) {
+		$type = get_query_var( 'post_type' );
+		$ctx  = 'archive_' . (string) ( is_array( $type ) ? reset( $type ) : $type );
+	} elseif ( is_tax() ) {
+		$tax  = get_taxonomy( (string) get_query_var( 'taxonomy' ) );
+		$ctx  = $tax && $tax->object_type ? 'archive_' . (string) reset( $tax->object_type ) : '';
+	}
+	$ctx = (string) apply_filters( 'kits_page_options_context', $ctx );
+	$ctx = isset( kits_page_contexts()[ $ctx ] ) ? $ctx : '';
+	if ( did_action( 'wp' ) ) {
+		$cached = $ctx; // One answer per request once the query has run.
+	}
+	return $ctx;
 }
 
 /** Post types that get Page Options: public, with the block editor. */
@@ -106,7 +206,7 @@ add_action(
 			}
 		}
 		register_setting(
-			'kits_page_defaults',
+			'kits_options', // Kits → Theme Options and Core Settings save both options through one group.
 			'kits_page_defaults',
 			array(
 				'type'              => 'array',
@@ -119,47 +219,78 @@ add_action(
 );
 
 /**
- * Post-type defaults as saved: [type => [key => value]], only known types, keys and choices.
+ * Defaults as saved: [context => [key => value]], only known contexts, keys and choices. A context that is in the
+ * input replaces what is stored for it; contexts that are not in the input stay (a Theme Options section saves only
+ * its own, and an imported file never deletes).
  *
  * @param mixed $input Submitted value.
  */
 function kits_page_defaults_clean( $input ): array {
-	$out = array();
-	foreach ( array_keys( kits_page_option_types() ) as $type ) {
-		foreach ( array_keys( kits_page_option_fields() ) as $key ) {
-			$v = kits_page_option_clean( $key, $input[ $type ][ $key ] ?? '' );
-			if ( '' !== $v ) {
-				$out[ $type ][ $key ] = $v;
+	$input = is_array( $input ) ? $input : array();
+	$out   = (array) get_option( 'kits_page_defaults', array() );
+	foreach ( kits_page_contexts() as $ctx => $keys ) {
+		if ( ! isset( $input[ $ctx ] ) || ! is_array( $input[ $ctx ] ) ) {
+			continue;
+		}
+		$row = is_array( $out[ $ctx ] ?? null ) ? $out[ $ctx ] : array(); // Keys not on this form stay.
+		foreach ( $keys as $key ) {
+			if ( ! array_key_exists( $key, $input[ $ctx ] ) ) {
+				continue;
 			}
+			$v = kits_page_option_clean( $key, $input[ $ctx ][ $key ] );
+			if ( '' !== $v ) {
+				$row[ $key ] = $v;
+			} else {
+				unset( $row[ $key ] );
+			}
+		}
+		if ( $row ) {
+			$out[ $ctx ] = $row;
+		} else {
+			unset( $out[ $ctx ] );
 		}
 	}
 	return $out;
 }
 
 /**
- * The value that applies: the page's own, else its post type's default, else '' (the theme decides).
+ * The value that applies: the item's own, else its kind of page (post type, list page, Search, Authors, 404), else the
+ * site-wide default, else '' (the theme decides).
  *
  * @param string   $key     Option key.
  * @param int|null $post_id Item; the page being viewed when left out.
  */
 function kits_page_option( string $key, ?int $post_id = null ): string {
-	$post_id = $post_id ? $post_id : (int) get_queried_object_id();
-	if ( ! $post_id || ! isset( kits_page_option_fields()[ $key ] ) ) {
+	if ( ! isset( kits_page_option_fields()[ $key ] ) ) {
 		return '';
 	}
-	$own = kits_page_option_clean( $key, get_post_meta( $post_id, '_kits_' . $key, true ) );
-	if ( '' !== $own ) {
-		return $own;
+	$queried = did_action( 'wp' ) && is_singular() ? (int) get_queried_object_id() : 0;
+	$post_id = $post_id ? $post_id : $queried;
+	$ctx     = '';
+	if ( $post_id ) {
+		$own = kits_page_option_clean( $key, get_post_meta( $post_id, '_kits_' . $key, true ) );
+		if ( '' !== $own ) {
+			return $own;
+		}
+		$ctx = $post_id === $queried ? kits_page_context() : (string) get_post_type( $post_id );
+	} elseif ( did_action( 'wp' ) ) {
+		$ctx = kits_page_context();
 	}
 	$defaults = (array) get_option( 'kits_page_defaults', array() );
-	return kits_page_option_clean( $key, $defaults[ get_post_type( $post_id ) ][ $key ] ?? '' );
+	if ( '' !== $ctx && in_array( $key, kits_page_context_keys( $ctx ), true ) ) {
+		$v = kits_page_option_clean( $key, $defaults[ $ctx ][ $key ] ?? '' );
+		if ( '' !== $v ) {
+			return $v;
+		}
+	}
+	return kits_page_option_clean( $key, $defaults['_site'][ $key ] ?? '' );
 }
 
-/** True while drawing a single item on the front end, where Page Options apply. */
+/** True while drawing a page on the front end that Page Options apply to (an item, a list page, Search, Authors, 404). */
 function kits_page_options_apply(): bool {
 	static $apply = null;
 	if ( null === $apply && did_action( 'wp' ) ) {
-		$apply = ! is_admin() && is_singular() && ! wp_is_json_request() && isset( kits_page_option_types()[ get_post_type( get_queried_object_id() ) ] );
+		$apply = ! is_admin() && ! wp_is_json_request() && ( '' !== kits_page_context() || ( is_singular() && isset( kits_page_option_types()[ get_post_type( get_queried_object_id() ) ] ) ) );
 	}
 	return (bool) $apply;
 }
@@ -183,7 +314,7 @@ add_filter(
 	'render_block_data',
 	function ( $block, $source = null, $parent_block = null ) {
 		$name = (string) ( $block['blockName'] ?? '' );
-		if ( ! in_array( $name, array( 'core/template-part', 'core/post-title', 'core/post-content' ), true ) || ! kits_page_options_apply() ) {
+		if ( ! in_array( $name, array( 'core/template-part', 'core/post-title', 'core/query-title', 'core/post-content' ), true ) || ! kits_page_options_apply() ) {
 			return $block;
 		}
 		$empty = array(
@@ -208,10 +339,15 @@ add_filter(
 			}
 		} elseif ( 'core/post-title' === $name ) {
 			// Hidden on screen, kept for screen readers and search: the page keeps its H1.
-			if ( 'hide' === kits_page_option( 'title' ) && kits_page_option_is_main( $parent_block ) ) {
+			if ( is_singular() && 'hide' === kits_page_option( 'title' ) && kits_page_option_is_main( $parent_block ) ) {
 				$block['attrs']['className'] = trim( 'screen-reader-text ' . (string) ( $block['attrs']['className'] ?? '' ) );
 			}
-		} elseif ( kits_page_option_is_main( $parent_block ) ) {
+		} elseif ( 'core/query-title' === $name ) {
+			// A list page's title, the same way.
+			if ( ! is_singular() && 'hide' === kits_page_option( 'title' ) ) {
+				$block['attrs']['className'] = trim( 'screen-reader-text ' . (string) ( $block['attrs']['className'] ?? '' ) );
+			}
+		} elseif ( is_singular() && kits_page_option_is_main( $parent_block ) ) {
 			$style = kits_page_option( 'colours' );
 			if ( '' !== $style ) {
 				$block['attrs']['className'] = trim( 'is-style-' . $style . ' ' . (string) ( $block['attrs']['className'] ?? '' ) );
@@ -247,8 +383,10 @@ add_action(
 				continue; // nothing to choose (for example no colour sets yet): no field.
 			}
 			$fallback = kits_page_option_clean( $key, $defaults[ $type ][ $key ] ?? '' );
+			$fallback = '' !== $fallback ? $fallback : kits_page_option_clean( $key, $defaults['_site'][ $key ] ?? '' );
 			$fields[] = array(
 				'key'     => $key,
+				'group'   => kits_page_option_group( $key ),
 				'label'   => $f[0],
 				'inherit' => 'Inherit (' . ( '' !== $fallback ? $choices[ $fallback ] : 'theme' ) . ')',
 				'choices' => array_map(
@@ -262,44 +400,5 @@ add_action(
 			);
 		}
 		wp_add_inline_script( 'kits-page-options', 'window.kitsPageOptions = ' . wp_json_encode( array( 'fields' => $fields ) ) . ';', 'before' );
-	}
-);
-
-// Kits → Overview: the post-type defaults, as a core settings form.
-add_action(
-	'kits_overview_after',
-	function () {
-		if ( ! current_user_can( 'manage_options' ) ) {
-			return;
-		}
-		$types    = kits_page_option_types();
-		$defaults = (array) get_option( 'kits_page_defaults', array() );
-		echo '<h2 id="kits-page-defaults">' . esc_html( 'Page Options: defaults for each post type' ) . '</h2>';
-		echo '<p>' . esc_html( 'Each item can set its own in the editor (Page Options panel). Left on Inherit, an item uses the default of its post type below, and Inherit here leaves it to the theme.' ) . '</p>';
-		settings_errors();
-		echo '<form method="post" action="options.php">';
-		settings_fields( 'kits_page_defaults' );
-		echo '<table class="form-table" role="presentation"><tbody>';
-		foreach ( $types as $type => $label ) {
-			echo '<tr><th scope="row">' . esc_html( $label ) . '</th><td><fieldset><legend class="screen-reader-text">' . esc_html( $label ) . '</legend>';
-			foreach ( kits_page_option_fields() as $key => $f ) {
-				$choices = kits_page_option_choices( $key );
-				if ( ! $choices ) {
-					continue;
-				}
-				$id  = 'kits-page-defaults-' . $type . '-' . $key;
-				$cur = (string) ( $defaults[ $type ][ $key ] ?? '' );
-				echo '<label for="' . esc_attr( $id ) . '">' . esc_html( $f[0] ) . '</label> <select id="' . esc_attr( $id ) . '" name="' . esc_attr( 'kits_page_defaults[' . $type . '][' . $key . ']' ) . '">';
-				echo '<option value="">' . esc_html( 'Inherit (theme)' ) . '</option>';
-				foreach ( $choices as $v => $l ) {
-					echo '<option value="' . esc_attr( $v ) . '"' . selected( $cur, $v, false ) . '>' . esc_html( $l ) . '</option>';
-				}
-				echo '</select> ';
-			}
-			echo '</fieldset></td></tr>';
-		}
-		echo '</tbody></table>';
-		submit_button( 'Save defaults' );
-		echo '</form>';
 	}
 );

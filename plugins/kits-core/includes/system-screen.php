@@ -345,15 +345,18 @@ function kits_system_page() {
 	$missing = array_filter( array_keys( $used ), fn( $c ) => ! array_filter( $pref, fn( $p ) => $c === $p || 0 === strpos( $c, $p . '-' ) ) );
 
 	echo '<div class="wrap"><h1 class="wp-heading-inline">Design system</h1><hr class="wp-header-end">';
+	kits_admin_tabs( 'kits-system' );
 	echo '<p>The design system as it is in the code: ' . count( $reg['items'] ) . ' entries from the Kits master and this site\'s theme. Read-only; change a component in its file, then its entry in <code>kits-registry.json</code>. Colours, fonts and sizes: Appearance → Editor → Styles. Patterns: Editor → Patterns. Menus: Editor → Navigation.</p>';
 	if ( $missing ) {
 		echo '<div class="notice notice-error inline"><p><strong>' . count( $missing ) . ' class(es) in use with no registry entry:</strong> ' . esc_html( implode( ', ', $missing ) ) . '. The deploy check stops on these.</p></div>';
 	}
-	echo '<nav class="nav-tab-wrapper">';
+	// The Kits tabs are above; this screen's own parts are links under them, as on core list screens.
+	echo '<ul class="subsubsub">';
+	$last = array_key_last( $tabs );
 	foreach ( $tabs as $k => $label ) {
-		echo '<a class="nav-tab' . ( $k === $tab ? ' nav-tab-active' : '' ) . '" href="' . esc_url( add_query_arg( 'tab', $k, $base ) ) . '">' . esc_html( $label ) . '</a>';
+		echo '<li><a' . ( $k === $tab ? ' class="current" aria-current="page"' : '' ) . ' href="' . esc_url( add_query_arg( 'tab', $k, $base ) ) . '">' . esc_html( $label ) . '</a>' . ( $k === $last ? '' : ' |' ) . '</li> ';
 	}
-	echo '</nav>';
+	echo '</ul><br class="clear">';
 
 	if ( 'states' === $tab ) { // every primitive and block in every state, drawn by the site's own styles (the private page /kits-demo/)
 		if ( ! $demo ) {

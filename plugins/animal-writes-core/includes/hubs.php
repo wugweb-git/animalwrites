@@ -646,3 +646,33 @@ add_filter(
 	10,
 	2
 );
+
+// Kits → Theme Options → Archives: each hub Page is its post type's list page, so the list page's defaults apply to it
+// (after the Page's own Page Options).
+add_filter(
+	'kits_archive_types',
+	function ( $types ) {
+		foreach ( array_keys( AW_HUBS ) as $type ) {
+			$obj = get_post_type_object( $type );
+			if ( $obj && ! isset( $types[ $type ] ) ) {
+				$types[ $type ] = $obj->labels->name;
+			}
+		}
+		return $types;
+	}
+);
+// The /search/ Page (where /?s= goes) is the Search page; hub Pages are their list pages.
+add_filter( 'kits_page_options_context', fn( $ctx ) => '' !== aw_hub_type() ? 'archive_' . aw_hub_type() : ( is_page( 'search' ) ? '_search' : $ctx ) );
+// News and Press items have no block editor but take the same defaults (Theme Options → Single).
+add_filter(
+	'kits_page_option_types',
+	function ( $types ) {
+		foreach ( array( 'aw_news', 'aw_press' ) as $type ) {
+			$obj = get_post_type_object( $type );
+			if ( $obj && ! isset( $types[ $type ] ) ) {
+				$types[ $type ] = $obj->label;
+			}
+		}
+		return $types;
+	}
+);

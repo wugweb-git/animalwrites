@@ -1,12 +1,13 @@
 <?php
 /**
- * Kits menu and Overview (owner, 25 Oct 2026: our plugins and themes work like any marketplace product: one menu, an
- * overview of every feature and where it lives, links from the Plugins screen).
+ * The Kits menu, second under Dashboard (owner, 25 Oct and 10 Nov 2026: our plugins and themes work like any
+ * marketplace product, laid out like Uncode's hub).
  *
- * Kits → Overview (this file); Navigation, Styles, Templates, Header & footer, Patterns (the Site Editor's screens);
- * Design system (system-screen.php, was Appearance → Kits system); Preview (preview.php, was Settings → Preview). The Overview covers the plugin's features and the design and branding of the active Kits
- * theme and its child (colours, fonts, templates, parts, patterns, style variations, the design registry), read live
- * from WordPress, each linked to where it is edited. Core WordPress only.
+ * Kits → Welcome (admin-screens.php), then Plugins, Import / Export, Fonts, Core Settings, Theme Options
+ * (admin-screens.php), Design system (system-screen.php), Docs (admin-screens.php, the tables below) and Preview
+ * (preview.php). The Docs tables cover the plugin's features and the design and branding of the active Kits theme
+ * (colours, fonts, templates, parts, patterns, style variations, the design registry), read live from WordPress, each
+ * linked to where it is edited. Core WordPress only.
  *
  * @package kits-core
  */
@@ -20,17 +21,13 @@ const KITS_MENU = 'kits';
 add_action(
 	'admin_menu',
 	function () {
-		add_menu_page( 'Kits', 'Kits', 'manage_options', KITS_MENU, 'kits_overview_page', 'dashicons-layout', 61 );
-		add_submenu_page( KITS_MENU, 'Kits', 'Overview', 'manage_options', KITS_MENU, 'kits_overview_page' );
-		// The theme's own settings, each opening its Site Editor screen (owner, 25 Oct 2026: reachable from the menu).
-		foreach ( kits_theme_screens() as $slug => $s ) {
-			add_submenu_page( KITS_MENU, $s[0], $s[0], 'edit_theme_options', $s[1] );
-		}
+		add_menu_page( 'Kits', 'Kits', 'manage_options', KITS_MENU, 'kits_welcome_page', 'dashicons-layout', 3 ); // second, under Dashboard
+		add_submenu_page( KITS_MENU, 'Welcome', 'Welcome', 'manage_options', KITS_MENU, 'kits_welcome_page' );
 	},
-	9 // before Design system and Preview join the menu
+	8 // before the other Kits screens join the menu
 );
 
-/** The theme's settings in the Site Editor: menu label and address (relative to wp-admin), in menu order. */
+/** The theme's settings in the Site Editor: label and address (relative to wp-admin). Linked from Welcome and Docs. */
 function kits_theme_screens(): array {
 	return array(
 		'navigation' => array( 'Navigation', 'site-editor.php?path=/navigation' ),
@@ -44,7 +41,7 @@ function kits_theme_screens(): array {
 // Plugins screen: Overview under the plugin's name (when Kits Core is active on its own).
 add_filter(
 	'plugin_action_links_' . plugin_basename( KITS_CORE_DIR . 'kits-core.php' ),
-	fn( $links ) => array_merge( array( '<a href="' . esc_url( admin_url( 'admin.php?page=' . KITS_MENU ) ) . '">Overview</a>' ), (array) $links )
+	fn( $links ) => array_merge( array( '<a href="' . esc_url( admin_url( 'admin.php?page=' . KITS_MENU ) ) . '">Welcome</a>' ), (array) $links )
 );
 
 /** A link for the Overview tables. */
@@ -72,8 +69,13 @@ function kits_overview_table( string $name, array $rows ): void {
 	kits_simple_table( $name, array( 'feature' => 'Feature', 'what' => 'What it is', 'status' => 'On this site' ), $cells, $opts );
 }
 
-/** Kits → Overview. */
+/** Kits → Overview (old address): the Docs screen. */
 function kits_overview_page() {
+	kits_docs_page();
+}
+
+/** The Docs tables: design and branding, then the site features. */
+function kits_overview_tables() {
 	$theme  = wp_get_theme();
 	$parent = $theme->parent();
 	$auto   = 'Automatic';
@@ -83,9 +85,6 @@ function kits_overview_page() {
 	$clarity = function_exists( 'aw_clarity_id' ) ? (string) aw_clarity_id() : '';
 	$ips     = function_exists( 'kits_preview_ips' ) ? count( kits_preview_ips() ) : count( array_filter( preg_split( '/[\r\n,]+/', (string) get_option( 'kits_preview_ips', '' ) ) ) );
 	$devices = function_exists( 'kits_preview_devices' ) ? count( kits_preview_devices() ) : 0;
-
-	echo '<div class="wrap"><h1>Kits</h1>';
-	echo '<p>' . esc_html( 'Kits by Wugweb: the design system (master theme Kits by Wugweb with the site\'s child theme) and Kits Core, the site features every Kits site shares. Each row says where to find it.' ) . '</p>';
 
 	echo '<h2>Design and branding</h2>';
 	$palette = (array) ( wp_get_global_settings( array( 'color', 'palette', 'theme' ) ) ?? array() );
@@ -120,7 +119,7 @@ function kits_overview_page() {
 			array( 'Style variations', esc_html( count( $variants ) . ' saved look(s) of the site.' ), kits_link( 'Editor → Styles', 'site-editor.php?path=/wp_global_styles' ), $auto ),
 			array( 'Logo and site icon', esc_html( 'The site\'s logo in the header part; the site icon in the browser tab.' ), kits_link( 'Editor → Header', 'site-editor.php?postType=wp_template_part' ) . ', ' . kits_link( 'Settings → General', 'options-general.php' ), $auto ),
 			array( 'Design registry', esc_html( $reg_items . ' components, blocks and patterns of the child theme (plus the master\'s) with their states, accessibility and SEO; classes without an entry fail the deploy check.' ), kits_link( 'Kits → Design system', 'admin.php?page=kits-system' ), $auto ),
-			array( 'Export and import', esc_html( 'One JSON file with the site\'s Styles, Page Options defaults and synced patterns. Import it on another site with WP-CLI (wp kits import <file>) or the kits/v1/settings REST route.' ), function_exists( 'kits_settings_transfer_url' ) ? '<a href="' . esc_url( kits_settings_transfer_url() ) . '">' . esc_html( 'Download the settings file' ) . '</a>' : '', esc_html( 'Nothing is deleted on import.' ) ),
+			array( 'Export and import', esc_html( 'One JSON file with the site\'s Styles, Theme Options, Page Options defaults and synced patterns. Also with WP-CLI (wp kits export, wp kits import <file>) and the kits/v1/settings REST route.' ), kits_link( 'Kits → Import / Export', 'admin.php?page=kits-transfer' ), esc_html( 'Nothing is deleted on import.' ) ),
 			array( 'States sheet', esc_html( 'Every component and block in every state, drawn by the site\'s own styles (private page /kits-demo/).' ), kits_link( 'Design system → States sheet', 'admin.php?page=kits-system&tab=states' ), $auto ),
 		)
 	);
@@ -141,5 +140,4 @@ function kits_overview_page() {
 		)
 	);
 	do_action( 'kits_overview_after' );
-	echo '</div>';
 }

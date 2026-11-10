@@ -192,6 +192,7 @@ add_filter(
 	function () {
 		return array(
 			'index.php',
+			'kits', // Kits: second, under Dashboard, as a theme's hub (owner, 10 Nov 2026)
 			'edit.php?post_type=aw_listing',
 			'edit.php?post_type=aw_news',
 			'edit.php',
@@ -207,7 +208,6 @@ add_filter(
 			'animal-writes', // Animal Writes: Overview, Dates, Check site, Contact links (admin-home.php)
 			'separator2',
 			'themes.php',
-			'kits', // Kits: Overview, Design system, Preview (kits-core admin-home.php)
 			'plugins.php',
 			'users.php',
 			'tools.php',

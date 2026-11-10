@@ -1,9 +1,11 @@
 <?php
 /**
- * Kits Theme Options: the site-wide choices Styles cannot hold (switches, links, text), on Kits → Overview.
+ * Kits Theme Options: the site-wide choices Styles cannot hold (switches, links, text), on Kits → Theme Options and
+ * Kits → Core Settings (admin-screens.php).
  *
  * Saved as one option, kits_theme_options, which travels in the Kits settings file (settings-transfer.php). Only values
- * that differ from the default are stored, so an empty option means every part works as it did before.
+ * that differ from the default are stored, so an empty option means every part works as it did before. A save changes
+ * only the fields it sends (each screen and section sends its own).
  *
  * Every part reads a value through kits_option( $key, $post_id ):
  * the item's Page Options → its post type's default → Theme Options → theme.json settings.custom.kits → the default,
@@ -145,13 +147,14 @@ function kits_option( string $key, $post_id = null ) {
 }
 
 /**
- * Clean a submitted form: known keys, allowed values; values equal to the default are not stored.
+ * Clean a submitted form: known keys, allowed values; values equal to the default are not stored. Fields that are not
+ * in the input keep what is stored.
  *
  * @param mixed $input Submitted value.
  */
 function kits_theme_options_clean( $input ): array {
 	$input = is_array( $input ) ? $input : array();
-	$out   = array();
+	$out   = kits_theme_options_saved();
 	foreach ( kits_theme_option_fields() as $key => $f ) {
 		if ( ! array_key_exists( $key, $input ) && ! ( 'share' === $f['kind'] && isset( $input['share_seen'] ) ) ) {
 			continue; // An unticked share form sends only share_seen.
@@ -169,7 +172,7 @@ function kits_theme_options_clean( $input ): array {
 				$v = is_scalar( $raw ) ? mb_substr( sanitize_text_field( (string) $raw ), 0, 60 ) : '';
 				break;
 			case 'share':
-				$v    = array();
+				$v    = is_array( $out[ $key ] ?? null ) ? $out[ $key ] : array(); // Types not on this form stay.
 				$nets = array_keys( kits_theme_share_networks() );
 				$def  = kits_theme_share_default();
 				foreach ( array_keys( kits_theme_share_types() ) as $type ) {
@@ -184,6 +187,8 @@ function kits_theme_options_clean( $input ): array {
 					$csv    = $picked ? implode( ',', $picked ) : 'none';
 					if ( ( $def[ $type ] ?? 'none' ) !== $csv ) {
 						$v[ $type ] = $csv;
+					} else {
+						unset( $v[ $type ] );
 					}
 				}
 				break;
@@ -192,6 +197,8 @@ function kits_theme_options_clean( $input ): array {
 		}
 		if ( '' !== $v && array() !== $v && kits_theme_option_inherited( $key ) !== $v ) {
 			$out[ $key ] = $v;
+		} else {
+			unset( $out[ $key ] );
 		}
 	}
 	return $out;
@@ -201,7 +208,7 @@ add_action(
 	'init',
 	function () {
 		register_setting(
-			'kits_theme_options',
+			'kits_options', // Kits → Theme Options and Core Settings save both options through one group.
 			'kits_theme_options',
 			array(
 				'type'              => 'array',
@@ -221,62 +228,4 @@ add_filter(
 		$names[] = 'kits_theme_options';
 		return array_values( array_unique( $names ) );
 	}
-);
-
-// On Kits → Overview, after the Page Options defaults: one core settings form, a table per group.
-add_action(
-	'kits_overview_after',
-	function () {
-		if ( ! current_user_can( 'manage_options' ) ) {
-			return;
-		}
-		$fields = kits_theme_option_fields();
-		$groups = array();
-		foreach ( $fields as $key => $f ) {
-			$groups[ $f['group'] ][ $key ] = $f;
-		}
-		echo '<h2 id="kits-theme-options">' . esc_html( 'Theme Options' ) . '</h2>';
-		echo '<p>' . esc_html( 'Site-wide choices that Styles does not hold. Colours, type, spacing and widths stay in Editor → Styles; a single page can differ in its Page Options.' ) . '</p>';
-		echo '<form method="post" action="options.php">';
-		settings_fields( 'kits_theme_options' );
-		foreach ( $groups as $group => $items ) {
-			echo '<h3>' . esc_html( $group ) . '</h3><table class="form-table" role="presentation"><tbody>';
-			foreach ( $items as $key => $f ) {
-				$id    = 'kits-to-' . $key;
-				$name  = 'kits_theme_options[' . $key . ']';
-				$saved = kits_theme_options_saved();
-				$val   = $saved[ $key ] ?? kits_theme_option_inherited( $key ); // What Theme Options hold, not what one page shows.
-				echo '<tr><th scope="row">' . ( 'share' === $f['kind'] ? esc_html( $f['label'] ) : '<label for="' . esc_attr( $id ) . '">' . esc_html( $f['label'] ) . '</label>' ) . '</th><td>';
-				if ( 'switch' === $f['kind'] || 'choice' === $f['kind'] ) {
-					echo '<select id="' . esc_attr( $id ) . '" name="' . esc_attr( $name ) . '">';
-					foreach ( $f['choices'] as $c => $label ) {
-						echo '<option value="' . esc_attr( $c ) . '"' . selected( (string) $val, (string) $c, false ) . '>' . esc_html( $label . ( $c === $f['default'] ? ' (default)' : '' ) ) . '</option>';
-					}
-					echo '</select>';
-				} elseif ( 'share' === $f['kind'] ) {
-					$conf = array_merge( kits_theme_share_default(), is_array( $val ) ? $val : array() );
-					echo '<fieldset><legend class="screen-reader-text">' . esc_html( $f['label'] ) . '</legend>';
-					foreach ( kits_theme_share_types() as $type => $type_label ) {
-						$on = 'none' === ( $conf[ $type ] ?? 'none' ) ? array() : explode( ',', $conf[ $type ] );
-						echo '<p><input type="hidden" name="kits_theme_options[share_seen][' . esc_attr( $type ) . ']" value="1"><strong>' . esc_html( $type_label ) . ':</strong> ';
-						foreach ( kits_theme_share_networks() as $net => $net_label ) {
-							echo '<label><input type="checkbox" name="' . esc_attr( $name . '[' . $type . '][]' ) . '" value="' . esc_attr( $net ) . '"' . checked( in_array( $net, $on, true ), true, false ) . '> ' . esc_html( $net_label ) . '</label> ';
-						}
-						echo '</p>';
-					}
-					echo '</fieldset>';
-				} else {
-					echo '<input type="text"' . ( 'url' === $f['kind'] ? ' inputmode="url"' : '' ) . ' class="regular-text" id="' . esc_attr( $id ) . '" name="' . esc_attr( $name ) . '" value="' . esc_attr( is_scalar( $val ) ? (string) $val : '' ) . '"' . ( 'text' === $f['kind'] ? ' maxlength="60"' : '' ) . '>';
-				}
-				if ( '' !== $f['note'] ) {
-					echo '<p class="description">' . esc_html( $f['note'] ) . '</p>';
-				}
-				echo '</td></tr>';
-			}
-			echo '</tbody></table>';
-		}
-		submit_button( 'Save Theme Options' );
-		echo '</form>';
-	},
-	20
 );

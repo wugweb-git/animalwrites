@@ -55,7 +55,8 @@ function kits_group_html( $html, $attrs ) {
 
 /**
  * A Styles value as CSS: preset references (var:preset|spacing|section) become CSS variables. Only plain CSS length
- * values pass (numbers, units, var(), min(), max(), clamp(), calc()); anything else returns ''.
+ * and colour values pass (numbers, units, #hex, colour names, var(), rgb(), color-mix(), min(), max(), clamp(), calc());
+ * anything else returns ''.
  *
  * @param mixed $value Raw global styles value.
  * @return string
@@ -71,7 +72,7 @@ function kits_style_value_css( $value ) {
 	if ( false !== strpos( $value, '/*' ) || false !== strpos( $value, '*/' ) ) {
 		return '';
 	}
-	return preg_match( '/^[a-z0-9\s.%(),+*\/-]+$/i', $value ) ? $value : '';
+	return preg_match( '/^[a-z0-9\s.%(),+*\/#-]+$/i', $value ) ? $value : '';
 }
 
 /**

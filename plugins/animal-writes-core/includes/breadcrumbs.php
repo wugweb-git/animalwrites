@@ -67,11 +67,11 @@ function aw_breadcrumbs_html() {
 }
 
 /**
- * True when Page Options hide the trail on this item (the item, or its post type's default). Search engines still get
- * the BreadcrumbList.
+ * True when Page Options hide the trail on this page (the item, its kind of page or the site-wide default, from Kits →
+ * Theme Options). Search engines still get the BreadcrumbList.
  */
 function aw_breadcrumbs_hidden() {
-	return is_singular() && function_exists( 'kits_option' ) && 'hide' === kits_option( 'crumbs' );
+	return function_exists( 'kits_page_options_apply' ) && kits_page_options_apply() && 'hide' === kits_option( 'crumbs' );
 }
 
 /** The trail, once per page ('' after the first call): the section band places it itself, inside the band. */
