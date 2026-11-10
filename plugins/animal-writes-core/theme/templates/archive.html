@@ -5,15 +5,19 @@
 
 <!-- wp:query {"queryId":1,"query":{"perPage":12,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","inherit":true},"align":"wide"} -->
 <div class="wp-block-query alignwide"><!-- wp:post-template {"layout":{"type":"grid","columnCount":3,"minimumColumnWidth":"17rem"}} -->
-<!-- wp:post-featured-image {"isLink":true,"aspectRatio":"4/3"} /-->
+<!-- wp:group {"tagName":"article","className":"kit-card kit-card--block-md","layout":{"type":"default"}} -->
+<article class="wp-block-group kit-card kit-card--block-md"><!-- wp:post-featured-image {"isLink":true,"aspectRatio":"4/3","className":"kit-card-media"} /-->
 
-<!-- wp:post-terms {"term":"category"} /-->
+<!-- wp:group {"className":"kit-card-body","layout":{"type":"default"}} -->
+<div class="wp-block-group kit-card-body"><!-- wp:post-date {"className":"kit-card-meta kit-meta-row"} /-->
 
-<!-- wp:post-title {"level":2,"isLink":true} /-->
+<!-- wp:post-terms {"term":"category","className":"kit-card-chips kit-tags"} /-->
 
-<!-- wp:post-excerpt {"excerptLength":24} /-->
+<!-- wp:post-title {"level":2,"isLink":true,"className":"kit-card-title"} /-->
 
-<!-- wp:post-date /-->
+<!-- wp:post-excerpt {"excerptLength":30,"className":"kit-card-sum"} /--></div>
+<!-- /wp:group --></article>
+<!-- /wp:group -->
 <!-- /wp:post-template -->
 
 <!-- wp:query-pagination {"layout":{"type":"flex","justifyContent":"space-between"}} -->

@@ -12,6 +12,8 @@ Limits every list card keeps, set in `themes/animal-writes/assets/css/aw.css` (c
 
 Card states: `kit-card--block-lg|md|sm` (picture above the text) and `kit-card--stacked-lg|md|sm` (picture left). Every card and block has at least 24px padding (`--kit-space-5`) on every side at every width (owner, 2 Nov 2026; `tools/ci/theme_rules_check.py`, kind `pad`). The wide stacked card has a 30:70 picture-to-text split; its gap runs from 12px on the narrowest screens to 24px (`clamp`, no extra breakpoint: the CI check allows only 767/768 and 1199/1200). Three-across rows (`.is-three`: Home News and Resources sections) become two across when a third card would be under 18rem.
 
+One look (10 Nov 2026): the theme templates' Query Loops (archive, tag, search, blog index) print the same card, `kit-card--block-md` (`kits_card_markup()` in the Kits functions.php): white raised surface, 1px line border, card radius, no resting shadow, `--kit-elevation-2` and a title underline on hover, picture flush at 4:3, body padded 24px, date first. The Card block style (Group → Card, theme.json `kits-card`) uses the same values: background preset, border preset, card radius, padding preset 50 (24px).
+
 Campaign cards (`aw-story--card`) and Directory rows (`aw-org`) are separate components: Directory rows are capped at 720px (by their list container); campaign cards follow the card grid.
 
 To check: load a list page in an iframe at 320, 375, 480, 600, 768, 900, 1024, 1200 and 1440px wide and read each card's width, picture size and text-column width; none should be outside the limits above and no page should scroll sideways.

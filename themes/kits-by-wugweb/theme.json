@@ -440,7 +440,7 @@
 				"variations": {
 					"kits-card": {
 						"color": {
-							"background": "var(--wp--preset--color--surface)"
+							"background": "var(--wp--preset--color--background)"
 						},
 						"border": {
 							"width": "1px",
@@ -450,10 +450,10 @@
 						},
 						"spacing": {
 							"padding": {
-								"top": "var(--wp--preset--spacing--40)",
-								"right": "var(--wp--preset--spacing--40)",
-								"bottom": "var(--wp--preset--spacing--40)",
-								"left": "var(--wp--preset--spacing--40)"
+								"top": "var(--wp--preset--spacing--50)",
+								"right": "var(--wp--preset--spacing--50)",
+								"bottom": "var(--wp--preset--spacing--50)",
+								"left": "var(--wp--preset--spacing--50)"
 							}
 						}
 					},

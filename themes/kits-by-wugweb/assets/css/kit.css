@@ -1151,7 +1151,8 @@ header.wp-block-template-part.kit-header-hidden { transform: translateY(calc(-10
    top-left) › .kit-card-meta (date, read time, place) and .kit-card-chips on one row, .kit-card-metarow (one chip high: a chip that
    does not fit wraps out of sight, so the last goes first and the first, the source, stays) › .kit-card-title (3 lines,
    cut at a word by kit.js) › .kit-card-sum (block-lg/md, stacked-lg; plain text) › action. The whole card is the link. */
-.wp-block-post-template > li:has(> .kit-card[class*="kit-card--"]) { padding: 0 !important; background: none !important; border: 0 !important; box-shadow: none !important; transform: none !important; overflow: visible !important; }
+.wp-block-post-template > li:has(> .kit-card[class*="kit-card--"]) { padding: 0 !important; background: none !important; border: 0 !important; box-shadow: none !important; transform: none !important; overflow: visible !important; outline: 0 !important; } /* the card draws the focus ring */
+.kit-card[class*="kit-card--"] .wp-block-post-date { min-height: 0; padding-right: 0; } /* no arrow circle in a card */
 .wp-block-post-template > li:has(> .kit-card[class*="kit-card--"])::after { content: none !important; display: none !important; }
 .kit-card[class*="kit-card--"] {
 	display: flex; flex-direction: column; height: 100%; box-sizing: border-box; min-width: 0; margin: 0 !important;
