@@ -11,6 +11,7 @@
  *        SEO title (aw_seo_keyword_in_title); with replace, also over a keyword that is not in the SEO title.
  *        A keyphrase another published page already has (its focus keyphrase, or the owner of the keyword record in
  *        Search Insights) is refused, and a News item never takes one an evergreen page owns (keyphrase-model.php).
+ *        An item with clear: true takes its `keyword` off the item instead (the item's other keyphrases stay).
  *        With dry: true, nothing is written and `written` counts what would be.
  *        {written, skipped: [{id, why, owner?}], dry}
  *
@@ -239,6 +240,29 @@ add_action(
 							continue;
 						}
 						$have = trim( (string) get_post_meta( $id, 'rank_math_focus_keyword', true ) );
+						if ( ! empty( $it['clear'] ) ) {
+							// Take one keyphrase off the item, the others stay: press items have no Rank Math box and
+							// Rank Math's REST refuses them (owner, 10 Nov 2026).
+							$drop  = strtolower( trim( (string) ( $it['keyword'] ?? '' ) ) );
+							$parts = array_values( array_filter( array_map( 'trim', explode( ',', $have ) ), 'strlen' ) );
+							$keep  = array_values( array_filter( $parts, fn( $p ) => strtolower( $p ) !== $drop ) );
+							if ( '' === $drop || count( $keep ) === count( $parts ) ) {
+								$skipped[] = array( 'id' => $id, 'why' => 'keyword not set on the item' );
+								continue;
+							}
+							if ( ! $dry ) {
+								$hist   = (array) get_post_meta( $id, '_aw_focus_history', true );
+								$hist[] = array( 'keyword' => $have, 'replaced' => gmdate( 'c' ) );
+								update_post_meta( $id, '_aw_focus_history', $hist );
+								if ( $keep ) {
+									update_post_meta( $id, 'rank_math_focus_keyword', wp_slash( implode( ',', $keep ) ) );
+								} else {
+									delete_post_meta( $id, 'rank_math_focus_keyword' );
+								}
+							}
+							++$written;
+							continue;
+						}
 						$seo  = aw_seo_title_for_keyword( $post );
 						$rest = '';
 						if ( '' !== $have ) {
