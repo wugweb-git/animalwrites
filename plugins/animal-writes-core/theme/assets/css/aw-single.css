@@ -51,6 +51,9 @@
 .aw-item-tags { margin: var(--kit-space-5) 0 0; }
 .aw-item-share { margin: var(--kit-space-6) 0 0; }
 .aw-item-share .kit-share { border-top: 0; padding-top: 0; }
+/* Tag and category pages: their end group (FAQ, share), after the share row so its 48px gap wins as before. */
+.aw-term-end > * + * { margin-top: var(--kit-space-7); }
+.aw-term-end { margin-top: var(--kit-space-7); }
 .aw-more { display: grid; gap: var(--kit-space-7); margin: var(--kit-space-8) 0 0; }
 .aw-more-head { margin: 0 0 var(--kit-space-4); font-weight: var(--kit-weight-strong); }
 .aw-more-list { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-4); margin: 0; padding: 0; list-style: none; }

@@ -224,8 +224,6 @@
 .aw-activity-link { font-size: var(--kit-type-sm); }
 .aw-activity-link::after { content: none !important; }
 .kit-main > .aw-more-group { margin: var(--kit-space-7) 0 0; }
-.aw-term-end > * + * { margin-top: var(--kit-space-7); }
-.aw-term-end { margin-top: var(--kit-space-7); }
 .kit-item .kit-faq, .aw-hub-faq { margin-top: var(--kit-space-7); }
 .aw-hub-faq { margin-bottom: var(--kit-space-7); }
 .aw-term-chips { list-style: none; margin: 0; padding: 0; }
