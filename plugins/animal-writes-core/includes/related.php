@@ -318,7 +318,7 @@ function aw_related_group_html( $head, $type, $ids ) {
 		return '';
 	}
 	$qid   = AW_RELATED_QUERY_ID + ( $n++ );
-	$lists = array( 'aw_news' => 'aw-news-list', 'aw_legal' => 'aw-cases', 'post' => 'aw-tasks', 'aw_opportunity' => 'aw-opps', 'aw_listing' => 'aw-orgs' );
+	$lists = array( 'aw_news' => 'aw-news-list', 'aw_legal' => 'aw-cases', 'post' => 'kit-tasks aw-tasks', 'aw_opportunity' => 'aw-opps', 'aw_listing' => 'aw-orgs' );
 	aw_related_queries( $qid, array_map( 'intval', $ids ) );
 	$item  = str_replace( '"level":2', '"level":3', aw_hub_item( $type ) ); // under the group's h2
 	$block = '<!-- wp:query {"queryId":' . $qid . ',"query":{"perPage":' . count( $ids ) . ',"pages":1,"offset":0,"postType":"' . $type . '","order":"desc","orderBy":"date","inherit":false},"className":"aw-hub-list aw-related-list","layout":{"type":"default"}} -->

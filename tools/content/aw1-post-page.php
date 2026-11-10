@@ -349,7 +349,7 @@ $news = a1sec( // News and guides as the News and Resources sections' own cards 
 	a1html( '<header class="kit-ed-head"><div><h2>News and guides</h2></div><a class="kit-ed-more" href="/news/?tag=campaign-india-writes-community-dogs">All news ' . a1i( 'arrow-right' ) . '</a></header>' )
 	. a1cards( 96, 'aw_news', 6, $tq, 'aw-news-grid' )
 	. a1html( '<header class="kit-ed-head"><div><h3>Guides and research</h3></div><a class="kit-ed-more" href="/resources/?tag=campaign-india-writes-community-dogs">All guides ' . a1i( 'arrow-right' ) . '</a></header>' )
-	. a1cards( 97, 'post', 6, $tq, 'aw-tasks' )
+	. a1cards( 97, 'post', 6, $tq, 'kit-tasks aw-tasks' )
 );
 
 /* ---------- 13 support: none (owner, 17 Oct 2026: the Lessons learned module removed; nothing else in it, so the

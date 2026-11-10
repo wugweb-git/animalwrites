@@ -117,6 +117,11 @@ p, li { max-width: var(--kit-measure); text-wrap: pretty; }
 @media (min-width: 768px) { .kit-cards .wp-block-post-template.is-layout-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } }
 @media (min-width: 1200px) { .kit-cards .wp-block-post-template.is-layout-grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; } }
 
+/* Task list: a list of cards (kit-task, kit-card) in 1 / 2 / 3 columns; on a Query Loop post template, default layout */
+.kit-tasks { display: grid; gap: var(--kit-space-grid); grid-template-columns: minmax(0, 1fr); margin-bottom: var(--kit-space-8); }
+@media (min-width: 768px) { .kit-tasks { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1200px) { .kit-tasks { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
 /* 4.3 Media — remote image, placard fallback, logo, lead image. States: loading, loaded, failed (placard). */
 .kit-card-media ,.wp-block-post-featured-image {
 	margin: 0 0 var(--kit-space-3);
