@@ -1,4 +1,4 @@
-# aw.css phase 2: plan (waiting for the owner's review)
+# aw.css phase 2: plan (approved by the owner 10 Nov; built after phase 1 ships)
 
 10 Nov 2026. Plan only. Nothing here is built.
 
@@ -21,12 +21,14 @@ Second revision (10 Nov, after a design-system review, a UI/UX review and a Word
   - the `aw-` selectors already in Kits get an owner step.
 - **Transfer size:** a gzip column next to the raw bytes. On transfer the saving is −46% on average, not −62%.
 
-Third revision (10 Nov, second owner review):
+Third revision (10 Nov, owner's approved list):
 - **One Animal Writes stylesheet per page, as today.** The page's files are joined into one cached file, the way the Kits "Joined stylesheet" switch joins Kits' five. Separate files would have raised Home from 2 render-blocking stylesheets back to about 7. A PageSpeed comparison joins the gate (section "Joined stylesheet").
 - **Stored content checked for renamed classes** before any rename (section "Renamed classes: stored content").
 - **Phase 0 result folded in:** each newly matched part has a home file, and each still-unmatched group either goes to the file loaded with the code that prints it or is dropped after its own check (section "Phase 0 result"). The capture's selector bug is fixed before any comparison counts.
 - **Contact, Volunteer and Search load with their components,** not by page address.
-- Live aw.css is **217,968 B** (10 Nov).
+- **Home and campaigns are independent:** campaign-page rules load only on campaign pages. The Home campaign content becomes each block's own CSS, loaded where the block is printed, and the campaign CSS files are listed the same way (step 13).
+- **Minify at deploy** is its own step before phase 2, built separately; this plan references it.
+- Live aw.css is **217,968 B** (10 Nov). Phase 2 builds on the phase 1 file (165 KB), which ships first.
 
 ## Measurement used, and its limits
 
@@ -71,117 +73,117 @@ Two order changes remain and are checked by the TOTAL 0 gate:
 
 ### Joined stylesheet (one Animal Writes file per page)
 
-- **Why.** Separate files would take each page from 1 Animal Writes stylesheet to 4–8 render-blocking requests (Home from 2 blocking stylesheets back to about 7). The files stay separate in the repo and the editor; on the front end each page gets them joined into one cached file.
+- **Goal: no more render-blocking stylesheet requests than today** (Home: 2, the Kits bundle and aw.css). Separate files would take each page to 4–9 Animal Writes requests (Home back to about 9). The files stay separate in the repo and the editor; on the front end each page gets them joined into one cached file.
 - **How: the Kits code, extended.** `themes/kits-by-wugweb/functions.php:314–366` already joins Kits' five files at `wp_enqueue_scripts` 1000 into `uploads/kits-cache/kits-{hash}.css`. The five handles stay registered as aliases that print nothing, and it falls back to the separate files when a file carries inline CSS or the bundle cannot be written. The same callback gets a second pass, in Kits and generic:
   - It takes `aw-components` plus the enqueued handles registered through `kits_component_styles`, in registry order, at priority 1000. That is after the component flags were turned into enqueues at priority 20.
   - It joins them into `uploads/kits-cache/parts/{set}-{ver}.css`. `{set}` hashes the list of handles; `{ver}` hashes each file's mtime and size, as the Kits signature does.
   - The handles become aliases with `deps = [ bundle ]`, so the bundle prints where aw.css prints today.
 - **Same switch.** Theme Options → Older parts → "Joined stylesheet" (`theme-options.php:64`, `css_bundle`) and the `kits_bundle_css` filter turn off both bundles. Off: the separate files load, for finding a style problem.
 - **Clean-up, not the Kits glob.** The Kits clean-up deletes every other `kits-*.css` older than a day. With one file per handle set, that would delete files other pages still use. So the parts bundles live in their own folder, and only a file whose `{set}` matches a newer file is removed.
-- **How many files.** The 23 measured pages give **14 different sets**, so 14 cached files. Pages of one kind share one: the four campaigns, guides and library items share one; state and district share one; Home and 404 share one.
-- **Trade-off.** Each joined file repeats aw.css (3.5 KB gzip), so a visitor's second page type downloads it again. That costs less than 3–7 extra blocking requests on every first view.
+- **How many files.** The 23 measured pages give **16 different sets**, so 16 cached files. Pages of one kind share one: the four campaigns, guides and library items share one; state and district share one; Home and 404 share one.
+- **Trade-off.** Each joined file repeats aw.css (1.6 KB gzip after the campaign split), so a visitor's second page type downloads it again. That costs less than 3–7 extra blocking requests on every first view.
 
 Transfer per page with the joined file. The Kits additions and tokens ride in the Kits bundle and tokens, which load today:
 
 | page | gzip today | gzip after, joined | saved | AW stylesheets (today 1) | gzip after, separate files |
 |---|---|---|---|---|---|
-| Home | 25,952 | 16,970 | 35% | 1 | 19,681 |
-| Lab rules campaign | 25,952 | 13,657 | 47% | 1 | 15,778 |
-| Supreme Court campaign | 25,952 | 13,657 | 47% | 1 | 15,778 |
-| Diwali campaign | 25,952 | 13,657 | 47% | 1 | 15,778 |
-| Community dogs campaign | 25,952 | 13,657 | 47% | 1 | 15,778 |
-| Campaigns hub | 25,952 | 8,757 | 66% | 1 | 10,303 |
-| Guide | 25,952 | 13,657 | 47% | 1 | 15,778 |
-| Cruelty guide | 25,952 | 13,657 | 47% | 1 | 15,778 |
-| Resources hub | 25,952 | 11,984 | 54% | 1 | 13,351 |
-| News item | 25,952 | 10,046 | 61% | 1 | 12,060 |
-| News hub | 25,952 | 8,415 | 68% | 1 | 9,633 |
-| Library item | 25,952 | 13,657 | 47% | 1 | 15,778 |
-| Library hub | 25,952 | 11,984 | 54% | 1 | 13,351 |
-| Directory listing | 25,952 | 14,474 | 44% | 1 | 16,998 |
-| State page | 25,952 | 8,153 | 69% | 1 | 9,420 |
-| District page | 25,952 | 8,153 | 69% | 1 | 9,420 |
-| Contact | 25,952 | 9,033 | 65% | 1 | 10,953 |
-| Volunteer | 25,952 | 12,647 | 51% | 1 | 16,225 |
-| Claim | 25,952 | 7,935 | 69% | 1 | 9,047 |
-| Search results | 25,952 | 10,302 | 60% | 1 | 11,006 |
-| Tag page | 25,952 | 14,649 | 44% | 1 | 17,371 |
-| Category page | 25,952 | 13,880 | 47% | 1 | 16,284 |
-| 404 (renders Home) | 25,952 | 16,970 | 35% | 1 | 19,681 |
+| Home | 25,952 | 16,505 | 36% | 1 | 19,546 |
+| Lab rules campaign | 25,952 | 13,690 | 47% | 1 | 16,527 |
+| Supreme Court campaign | 25,952 | 13,690 | 47% | 1 | 16,527 |
+| Diwali campaign | 25,952 | 13,589 | 48% | 1 | 16,273 |
+| Community dogs campaign | 25,952 | 13,589 | 48% | 1 | 16,273 |
+| Campaigns hub | 25,952 | 7,064 | 73% | 1 | 8,413 |
+| Guide | 25,952 | 12,092 | 53% | 1 | 13,888 |
+| Cruelty guide | 25,952 | 12,092 | 53% | 1 | 13,888 |
+| Resources hub | 25,952 | 10,369 | 60% | 1 | 11,461 |
+| News item | 25,952 | 8,425 | 68% | 1 | 10,170 |
+| News hub | 25,952 | 6,713 | 74% | 1 | 7,743 |
+| Library item | 25,952 | 12,092 | 53% | 1 | 13,888 |
+| Library hub | 25,952 | 10,369 | 60% | 1 | 11,461 |
+| Directory listing | 25,952 | 12,797 | 51% | 1 | 15,108 |
+| State page | 25,952 | 6,414 | 75% | 1 | 7,530 |
+| District page | 25,952 | 6,414 | 75% | 1 | 7,530 |
+| Contact | 25,952 | 7,310 | 72% | 1 | 9,063 |
+| Volunteer | 25,952 | 10,946 | 58% | 1 | 14,335 |
+| Claim | 25,952 | 6,155 | 76% | 1 | 7,157 |
+| Search results | 25,952 | 8,578 | 67% | 1 | 9,116 |
+| Tag page | 25,952 | 13,013 | 50% | 1 | 15,481 |
+| Category page | 25,952 | 12,275 | 53% | 1 | 14,394 |
+| 404 (renders Home) | 25,952 | 16,505 | 36% | 1 | 19,546 |
 
-Average with the joined file: **12,171 B gzip per page, against 25,952 B today (−53%), with 1 Animal Writes stylesheet as today.** Joining also compresses better than separate files (average 14,140 B). State and district get +3.7 KB gzip once the type icons of the hidden Near-me panel load (caveat below).
+Average with the joined file: **10,899 B gzip per page, against 25,952 B today (−58%), with 1 Animal Writes stylesheet as today**, so Home keeps its 2 render-blocking stylesheets (Kits bundle + Animal Writes). Joining also compresses better than separate files (average 12,839 B). State and district get +3.7 KB gzip once the type icons of the hidden Near-me panel load (caveat below).
 
 ## CSS per page
 
-Bytes are rule bytes (comments stripped), so the figures compare like with like.
-- "aw.css today": the phase-1 file without the 50 dead rules, on every page.
+Bytes are rule bytes (comments and whitespace stripped, as the minify-at-deploy step ships them), so the figures compare like with like.
+- "aw.css today": the same rules as one file, without the 50 dead rules, on every page (160,833 B rebuilt this way). The build re-measures on the phase 1 file (218 KB → 165 KB), which ships first.
 - "after": tokens + the Kits additions + what is left in aw.css + the component files that page uses.
 - The 39,020 B of rules matched on none of the 23 pages are counted on no page. Phase 0 either deletes them or files them in a component file that loads only where it is used.
 
-| page | aw.css today | after phase 2 | saved | component files it loads |
+| page | aw.css today | after phase 2 | saved | files joined into its one Animal Writes stylesheet |
 |---|---|---|---|---|
-| Home | 161,133 | 94,028 | 42% | aw-home.css, aw-lists.css, aw-meta.css, aw-single.css, aw-type-ico.css |
-| Lab rules campaign | 161,133 | 70,831 | 56% | aw-hubs.css, aw-lists.css, aw-meta.css, aw-single.css, aw-type-ico.css |
-| Supreme Court campaign | 161,133 | 70,831 | 56% | aw-hubs.css, aw-lists.css, aw-meta.css, aw-single.css, aw-type-ico.css |
-| Diwali campaign | 161,133 | 70,831 | 56% | aw-hubs.css, aw-lists.css, aw-meta.css, aw-single.css, aw-type-ico.css |
-| Community dogs campaign | 161,133 | 70,831 | 56% | aw-hubs.css, aw-lists.css, aw-meta.css, aw-single.css, aw-type-ico.css |
-| Campaigns hub | 161,133 | 40,729 | 75% | aw-hubs.css, aw-lists.css, aw-meta.css, aw-volunteer.css |
-| Guide | 161,133 | 70,831 | 56% | aw-hubs.css, aw-lists.css, aw-meta.css, aw-single.css, aw-type-ico.css |
-| Cruelty guide | 161,133 | 70,831 | 56% | aw-hubs.css, aw-lists.css, aw-meta.css, aw-single.css, aw-type-ico.css |
-| Resources hub | 161,133 | 58,518 | 64% | aw-hubs.css, aw-lists.css, aw-meta.css, aw-type-ico.css |
-| News item | 161,133 | 50,982 | 68% | aw-hubs.css, aw-lists.css, aw-meta.css, aw-single.css |
-| News hub | 161,133 | 38,669 | 76% | aw-hubs.css, aw-lists.css, aw-meta.css |
-| Library item | 161,133 | 70,831 | 56% | aw-hubs.css, aw-lists.css, aw-meta.css, aw-single.css, aw-type-ico.css |
-| Library hub | 161,133 | 58,518 | 64% | aw-hubs.css, aw-lists.css, aw-meta.css, aw-type-ico.css |
-| Directory listing | 161,133 | 75,357 | 53% | aw-hubs.css, aw-listing.css, aw-lists.css, aw-meta.css, aw-single.css, aw-type-ico.css |
-| State page | 161,133 | 36,267 | 77% | aw-directory.css, aw-hubs.css, aw-meta.css |
-| District page | 161,133 | 36,267 | 77% | aw-directory.css, aw-hubs.css, aw-meta.css |
-| Contact | 161,133 | 43,426 | 73% | aw-contact.css, aw-forms.css, aw-hubs.css, aw-meta.css, aw-volunteer.css |
-| Volunteer | 161,133 | 68,517 | 57% | aw-directory.css, aw-forms.css, aw-hubs.css, aw-lists.css, aw-meta.css, aw-single.css, aw-volunteer.css |
-| Claim | 161,133 | 34,947 | 78% | aw-hubs.css, aw-listing.css, aw-meta.css |
-| Search results | 161,133 | 48,550 | 70% | aw-meta.css, aw-search.css, aw-type-ico.css |
-| Tag page | 161,133 | 76,677 | 52% | aw-directory.css, aw-hubs.css, aw-lists.css, aw-meta.css, aw-single.css, aw-type-ico.css |
-| Category page | 161,133 | 72,325 | 55% | aw-hubs.css, aw-lists.css, aw-meta.css, aw-search.css, aw-single.css, aw-type-ico.css |
-| 404 (renders Home) | 161,133 | 94,028 | 42% | aw-home.css, aw-lists.css, aw-meta.css, aw-single.css, aw-type-ico.css |
+| Home | 160,833 | 91,540 | 43% | aw.css, aw-camp-band.css, aw-countdown.css, aw-home.css, aw-lists.css, aw-meta.css, aw-single.css, aw-type-ico.css |
+| Lab rules campaign | 160,833 | 70,955 | 56% | aw.css, aw-camp-band.css, aw-campaign-page.css, aw-countdown.css, aw-hubs.css, aw-lists.css, aw-meta.css, aw-single.css, aw-type-ico.css |
+| Supreme Court campaign | 160,833 | 70,955 | 56% | aw.css, aw-camp-band.css, aw-campaign-page.css, aw-countdown.css, aw-hubs.css, aw-lists.css, aw-meta.css, aw-single.css, aw-type-ico.css |
+| Diwali campaign | 160,833 | 70,452 | 56% | aw.css, aw-camp-band.css, aw-campaign-page.css, aw-hubs.css, aw-lists.css, aw-meta.css, aw-single.css, aw-type-ico.css |
+| Community dogs campaign | 160,833 | 70,452 | 56% | aw.css, aw-camp-band.css, aw-campaign-page.css, aw-hubs.css, aw-lists.css, aw-meta.css, aw-single.css, aw-type-ico.css |
+| Campaigns hub | 160,833 | 32,504 | 80% | aw.css, aw-hubs.css, aw-lists.css, aw-meta.css, aw-volunteer.css |
+| Guide | 160,833 | 62,766 | 61% | aw.css, aw-hubs.css, aw-lists.css, aw-meta.css, aw-single.css, aw-type-ico.css |
+| Cruelty guide | 160,833 | 62,766 | 61% | aw.css, aw-hubs.css, aw-lists.css, aw-meta.css, aw-single.css, aw-type-ico.css |
+| Resources hub | 160,833 | 50,235 | 69% | aw.css, aw-hubs.css, aw-lists.css, aw-meta.css, aw-type-ico.css |
+| News item | 160,833 | 42,993 | 73% | aw.css, aw-hubs.css, aw-lists.css, aw-meta.css, aw-single.css |
+| News hub | 160,833 | 30,462 | 81% | aw.css, aw-hubs.css, aw-lists.css, aw-meta.css |
+| Library item | 160,833 | 62,766 | 61% | aw.css, aw-hubs.css, aw-lists.css, aw-meta.css, aw-single.css, aw-type-ico.css |
+| Library hub | 160,833 | 50,235 | 69% | aw.css, aw-hubs.css, aw-lists.css, aw-meta.css, aw-type-ico.css |
+| Directory listing | 160,833 | 67,272 | 58% | aw.css, aw-hubs.css, aw-listing.css, aw-lists.css, aw-meta.css, aw-single.css, aw-type-ico.css |
+| State page | 160,833 | 27,992 | 83% | aw.css, aw-directory.css, aw-hubs.css, aw-meta.css |
+| District page | 160,833 | 27,992 | 83% | aw.css, aw-directory.css, aw-hubs.css, aw-meta.css |
+| Contact | 160,833 | 34,281 | 79% | aw.css, aw-contact.css, aw-forms.css, aw-hubs.css, aw-meta.css, aw-volunteer.css |
+| Volunteer | 160,833 | 60,151 | 63% | aw.css, aw-directory.css, aw-forms.css, aw-hubs.css, aw-lists.css, aw-meta.css, aw-single.css, aw-volunteer.css |
+| Claim | 160,833 | 26,402 | 84% | aw.css, aw-hubs.css, aw-listing.css, aw-meta.css |
+| Search results | 160,833 | 39,922 | 75% | aw.css, aw-meta.css, aw-search.css, aw-type-ico.css |
+| Tag page | 160,833 | 68,862 | 57% | aw.css, aw-directory.css, aw-hubs.css, aw-lists.css, aw-meta.css, aw-single.css, aw-type-ico.css |
+| Category page | 160,833 | 64,205 | 60% | aw.css, aw-hubs.css, aw-lists.css, aw-meta.css, aw-search.css, aw-single.css, aw-type-ico.css |
+| 404 (renders Home) | 160,833 | 91,540 | 43% | aw.css, aw-camp-band.css, aw-countdown.css, aw-home.css, aw-lists.css, aw-meta.css, aw-single.css, aw-type-ico.css |
 
-Average after phase 2: **61,897 B per page, against 161,133 B today (−62%).** The biggest savings are on Directory state/district pages (−77%), claim, news and campaigns hub (−75 to −78%). The smallest are on Home (−42%), which still loads its own 26 KB, and on pages that print type icons and many components (tag −52%, listing −53%).
+Average after phase 2: **55,552 B per page, against 160,833 B today (−65%).** Campaign rules no longer load on the other pages (section "Home and campaigns"). Biggest savings: claim, state and district pages, news (−81 to −84%). Smallest: Home (−43%), which still loads its own 26 KB.
 
 
 ### Transfer size (gzip)
 
 The raw-byte table overstates the gain, because gzip shrinks one big file better than several small ones. Figures: each file rebuilt from its rules without comments, gzip level 6. Today the same rules as one file: 160,833 B raw, **25,952 B gzip**. For scale, live sends today's aw.css (with comments) as **43,216 B brotli** over HTTP/2, `cache-control: immutable`, one year (read-only request, 10 Nov). The figures below compare like with like (both minified).
 
-| page | gzip today | gzip after | saved | AW stylesheet requests after (today: 1) |
+| page | gzip today | gzip after | saved | files if not joined |
 |---|---|---|---|---|
-| Home | 25,952 | 19,681 | 24% | 6 |
-| Lab rules campaign | 25,952 | 15,778 | 39% | 6 |
-| Supreme Court campaign | 25,952 | 15,778 | 39% | 6 |
-| Diwali campaign | 25,952 | 15,778 | 39% | 6 |
-| Community dogs campaign | 25,952 | 15,778 | 39% | 6 |
-| Campaigns hub | 25,952 | 10,303 | 60% | 5 |
-| Guide | 25,952 | 15,778 | 39% | 6 |
-| Cruelty guide | 25,952 | 15,778 | 39% | 6 |
-| Resources hub | 25,952 | 13,351 | 49% | 5 |
-| News item | 25,952 | 12,060 | 54% | 5 |
-| News hub | 25,952 | 9,633 | 63% | 4 |
-| Library item | 25,952 | 15,778 | 39% | 6 |
-| Library hub | 25,952 | 13,351 | 49% | 5 |
-| Directory listing | 25,952 | 16,998 | 35% | 7 |
-| State page | 25,952 | 9,420 | 64% | 4 |
-| District page | 25,952 | 9,420 | 64% | 4 |
-| Contact | 25,952 | 10,953 | 58% | 6 |
-| Volunteer | 25,952 | 16,225 | 37% | 8 |
-| Claim | 25,952 | 9,047 | 65% | 4 |
-| Search results | 25,952 | 11,006 | 58% | 4 |
-| Tag page | 25,952 | 17,371 | 33% | 7 |
-| Category page | 25,952 | 16,284 | 37% | 7 |
-| 404 (renders Home) | 25,952 | 19,681 | 24% | 6 |
+| Home | 25,952 | 19,546 | 25% | 8 |
+| Lab rules campaign | 25,952 | 16,527 | 36% | 9 |
+| Supreme Court campaign | 25,952 | 16,527 | 36% | 9 |
+| Diwali campaign | 25,952 | 16,273 | 37% | 8 |
+| Community dogs campaign | 25,952 | 16,273 | 37% | 8 |
+| Campaigns hub | 25,952 | 8,413 | 68% | 5 |
+| Guide | 25,952 | 13,888 | 46% | 6 |
+| Cruelty guide | 25,952 | 13,888 | 46% | 6 |
+| Resources hub | 25,952 | 11,461 | 56% | 5 |
+| News item | 25,952 | 10,170 | 61% | 5 |
+| News hub | 25,952 | 7,743 | 70% | 4 |
+| Library item | 25,952 | 13,888 | 46% | 6 |
+| Library hub | 25,952 | 11,461 | 56% | 5 |
+| Directory listing | 25,952 | 15,108 | 42% | 7 |
+| State page | 25,952 | 7,530 | 71% | 4 |
+| District page | 25,952 | 7,530 | 71% | 4 |
+| Contact | 25,952 | 9,063 | 65% | 6 |
+| Volunteer | 25,952 | 14,335 | 45% | 8 |
+| Claim | 25,952 | 7,157 | 72% | 4 |
+| Search results | 25,952 | 9,116 | 65% | 4 |
+| Tag page | 25,952 | 15,481 | 40% | 7 |
+| Category page | 25,952 | 14,394 | 45% | 7 |
+| 404 (renders Home) | 25,952 | 19,546 | 25% | 8 |
 
-Average after phase 2: **14,140 B gzip per page, against 25,952 B (−46%).** Requests: tokens and the Kits additions ride in files that load today, so the count is aw.css plus the component files, 4–8 per page instead of 1. On HTTP/2 these are parallel, and each file is cached on its own, so a second page loads only the files it has not seen.
+With the switch off (separate files): **12,839 B gzip per page on average** (−51%), in 4–9 files. That is the fallback for finding a problem; normally the files are joined (section "Joined stylesheet").
 
 Caveats:
 - **State and district are low.** `aw_dir_panels_html()` (`directory-map.php:295`) prints type icons in the hidden Near-me panel, so with the component flag those pages also load `aw-type-ico.css` (+19,772 B raw, +3,718 B gzip). The capture did not see them because the panel is hidden.
-- **A cheaper first win on transfer is shipping aw.css minified.** The comment-stripped rules gzip to about 26 KB, against about 43 KB brotli for today's file. That needs a minify step in the deploy, which is not in this plan (no build step today).
+- **Minify at deploy (owner: yes, 10 Nov).** A separate step ships aw.css and the component files minified, with the source kept readable in the repo. It is its own small commit before phase 2, gated by 0 differences on the 23 pages, and is built separately; this plan only relies on it. The comment-stripped rules gzip to about 26 KB, against about 43 KB brotli for today's file.
 
 ### Files after phase 2
 
@@ -189,7 +191,10 @@ Caveats:
 |---|---|---|
 | AW tokens | 374 | every page (Animal Writes tokens.css) |
 | Kits additions (`kit-` selectors) | 9,876 | every page (inside the Kits bundle; every Kits site) |
-| aw.css | 15,259 | every page |
+| aw.css | 6,890 | every page (newsletter form, heading overrides, element rules) |
+| aw-campaign-page.css | 2,960 | campaign pages (`is_singular( 'aw_campaign' )`, the condition campaign.css uses) |
+| aw-camp-band.css | 4,724 | where the campaign band is printed (component flag in the band shortcode, `campaign-tools.php:589`, `:621`) |
+| aw-countdown.css | 502 | where a countdown is printed (component flag, `campaigns.php:53`) |
 | aw-home.css | 26,411 | front page (template condition `is_front_page()`) |
 | aw-type-ico.css | 19,849 | where an `aw-type-ico` element is printed (component flag in `aw_type_ico`, `hub-blocks.php:348`, and `directory-map.php:295`, so Directory pages too) |
 | aw-single.css | 12,313 | single items: guide, news, library, listing (template condition `is_singular()`), and campaign pages that print the More / Sources / take-part blocks (component flag) |
@@ -276,7 +281,7 @@ Changes against the first mapping:
 
 Corrections from this pass:
 - `aw-profile-actions` is printed by `bindings.php` on listings, so it goes to aw-listing.css, not aw-home.css.
-- `aw-steps` (`campaign.php`) is campaign-only and stays in aw.css with the other campaign rules.
+- `aw-steps` (`campaign.php`) is campaign-only, so it goes to `aw-campaign-page.css`.
 - `kit-claim` and `aw-finder-band` appear only on the states sheet (`/kits-demo/`, administrators). They are dropped, or kept if the owner wants the sheet to show them.
 
 ## Steps, one commit each, each gated by TOTAL 0
@@ -303,7 +308,7 @@ Gate for every commit: before/after capture of the 23 pages at 1280, 768 and 375
 | 10 | `aw-listing.css` | facts, listing head/help/actions, data sources, claim link | template condition | 4,526 |
 | 11 | `aw-hubs.css` | toolbar, sort, hub FAQ, system wrapper, cases | template + component flag | 3,214 |
 | 12 | `aw-volunteer.css`, `aw-contact.css`, `aw-search.css`, `aw-meta.css` | page-only and meta groups | template / component flag | 6,568 |
-| — | campaign rules | nothing moves | stay in aw.css | see step "Campaign" |
+| 13 | Home and campaigns | campaign-page rules; Home campaign blocks | `aw-campaign-page.css`, `aw-camp-band.css`, `aw-countdown.css` | 8,186 |
 
 Commit 4 carries the PHP (loader, registry, editor hooks) and is the bigger technical change. Commits 5–12 then only move CSS and add one registry line each. Commits 2 and 3 change markup and need the wp-plugin-audit and PHPCS gate on the touched PHP.
 
@@ -368,26 +373,26 @@ Load-bearing on all 23 pages (768 and 1280 everywhere; 375 on contact, lab, libr
 | kit.css:1181 | `aw-src-icon` | 3 (`kit-src-icon`) |
 | kit.css:1165–1166 | `aw-story-logo` | 3 (to aw.css with `aw-story-title`) |
 | kit.css:1182, :1190 | `aw-sponsored-label` | 8 (to `aw-lists.css`) |
-| kit.css:1199 | `aw-opp-actions` | campaign rule: stays put; moved to aw.css beside the other campaign rules only with the owner's word |
+| kit.css:1199 | `aw-opp-actions` | 13 (to `aw-campaign-page.css`) |
 | kit.css:1225–1227 | `aw-news-list` | 8 (to `aw-lists.css`) |
 | kit.css:740 | comment naming `.aw-nl-band` | 2 (reworded) |
 
 ## Renamed classes: stored content
 
-Steps 2 and 3 rename `aw-src*`, `aw-date`, `aw-nl-band*` and `aw-card-time` to `kit-…`. Code keeps the old class as a second class. Stored content may also carry the old class, with no code to add the new one. Before step 2, a **read-only** search runs once for every renamed class: `SELECT` only, through `wp db query` over the read-only SSH access, or through the admin REST in the built-in browser.
+Steps 2 and 3 rename `aw-src*`, `aw-date`, `aw-nl-band*` and `aw-card-time` to `kit-…`. Code keeps the old class as a second class. Stored content may also carry the old class, with no code to add the new one. Before step 2, a **read-only** search runs once for every renamed class. It reports **the count for each class** per table: `SELECT` only, through `wp db query` over the read-only SSH access, or through the admin REST in the built-in browser.
 
 | where | query (table prefix from `wp db prefix`) |
 |---|---|
-| posts of every type, including synced patterns (`wp_block`), templates, template parts and navigation | `SELECT ID, post_type, post_status FROM {p}posts WHERE post_content REGEXP 'aw-(src\|date\|nl-band\|card-time)([^a-z0-9_]\|$)'` |
+| posts of every type: post content, synced patterns (`wp_block`), template parts and templates stored in the database (`wp_template_part`, `wp_template`), navigation | `SELECT ID, post_type, post_status FROM {p}posts WHERE post_content REGEXP 'aw-(src\|date\|nl-band\|card-time)([^a-z0-9_]\|$)'` |
 | post meta (Rank Math, block attributes, listing fields) | `SELECT post_id, meta_key FROM {p}postmeta WHERE meta_value REGEXP …` (same pattern) |
-| Fluent Forms | `SELECT id, title FROM {p}fluentform_forms WHERE form_fields REGEXP …`; `SELECT form_id, meta_key FROM {p}fluentform_form_meta WHERE value REGEXP …` |
+| Fluent Forms HTML (custom HTML fields and section breaks live in `form_fields` JSON; confirmations in form meta) | `SELECT id, title FROM {p}fluentform_forms WHERE form_fields REGEXP …`; `SELECT form_id, meta_key FROM {p}fluentform_form_meta WHERE value REGEXP …` |
 | options (widgets, theme mods, Kits options) | `SELECT option_name FROM {p}options WHERE option_value REGEXP …` |
 
 The same search also runs for the phase 0 classes found only in `kits-registry.json`, and for the drop list (section "Phase 0 result").
 
 Where a class is found:
-- **Small numbers (a few items):** keep the old class working. Animal Writes CSS gets an alias rule (`.aw-src` grouped with the Animal Writes rule that reads the same tokens), never an `aw-` selector in Kits. The alias is listed for removal later.
-- **Many items:** plan an update of the stored content. It is a separate task with the owner's yes, done through the admin REST with revisions kept, and checked by the same search returning 0 rows. The alias stays until then.
+- **Either keep the old class working** alongside the new one: Animal Writes CSS gets an alias rule (`.aw-src` grouped with the Animal Writes rule that reads the same tokens), never an `aw-` selector in Kits.
+- **Or update the stored content in the same commit as the rename, with a backup.** Before writing, export the affected rows to a file with `wp db export` and check its size (a piped export gives an empty file). Write through the admin REST so revisions are kept. Then the same search must return 0 rows.
 - The result (class, table, count, IDs) is written into the step's commit message and `docs/pending.md`.
 
 ### 4–12. Animal Writes component files
@@ -601,15 +606,73 @@ Also in this file: 1 groups (423 B) with no proven effect on the 23 pages (unmat
 
 Baseline lines to move: the volunteer banner photo heights (3 lines), `.aw-vol-page .aw-vol-banner-body | padding: 0`, `.aw-contact-row h3 | font-size`. The About groups (`aw-about-*`, 2.6 KB) showed only noise; /about/ is a phase 0 page.
 
-### Campaign rules: stay in aw.css (owner's decision)
+### 13. Home and campaigns: independent (owner, 10 Nov)
 
-`campaign.css`, `campaign-lab.css` and `campaign-home.css` are frozen, so nothing moves. What stays in aw.css:
-- campaign pages only: aw-camp-end, aw-festive-tips, aw-festive-ico, aw-opp-actions, aw-social-card, aw-camp-docs (1.5 KB);
-- Community dogs: aw-ed-mosaic (1.3 KB);
-- the campaign bands on Home: aw-camp-band, aw-sc*, aw-festive, aw-camp (≈ 5 KB);
-- the countdown: aw-countdown, aw-cd-* (0.5 KB).
+Owner's rule (10 Nov): Home UI is independent of campaign UI.
+- CSS for campaign pages loads on campaign pages only.
+- CSS for campaign content shown on Home or anywhere else loads only where that block is printed, through a component flag.
+- **There is no "Home" condition.** A Home page with no campaign block loads no campaign CSS. Today `campaign-tools.php:641–659` loads campaign CSS on Home with `is_front_page() && aw_home_hero_is_campaign()`, and inlines `campaign-home.css` there. That condition goes. The band's flag (`campaign-tools.php:589`, `:621`) loads the band's own CSS instead, on any page that prints the band.
+- If a separate `campaign-css-scope` branch carries part of this, it follows the same rule and ships before phase 2 starts building, not alongside it. Phase 2 then re-measures on top of it.
 
-About 8.4 KB of aw.css is campaign CSS that every page loads. **For the owner:** loading those rules only on Home and the campaign pages would take 8.4 KB off the other 18 page types. But it means moving them out of aw.css, which needs the owner's word. Until then aw.css cannot be deleted in phase 3; it shrinks to 15,259 B.
+| group | rules | to | loads |
+|---|---|---|---|
+| aw-camp-end (`form-blocks.php:262`), aw-festive-tips, aw-festive-ico (Diwali hero, stored content), aw-camp-docs (query loops in campaign content), aw-ed-mosaic (Community dogs page), `aw-steps` (phase 0, `campaign.php`) | 25 | `aw-campaign-page.css` (≈ 2,730 B) | campaign pages only (`is_singular( 'aw_campaign' )`) |
+| aw-camp-band, aw-camp, `aw-ed-hero--campaign` (aw.css 1548–1579) | 15 | `aw-camp-band.css` (≈ 1,660 B) | flag in `aw_block_home_hero` (`home.php:87`, band at `:114`) and the `[aw_campaign_band]` callback (`campaign-tools.php:574`, open `:621`, closed `:589`) |
+| aw-sc* (Home Supreme Court card, aw.css 1602–1626) | 15 | `aw-sc-card.css` (≈ 2,770 B) | flag in `aw_block_home_sc` (`home.php:182`) |
+| aw-festive (Home festive card, carries the Diwali tokens) | 4 | `aw-festive.css` (≈ 425 B) | the festive pattern (`patterns/festive.php:13`) is static markup, so it uses the `className` fallback on `aw-festive` |
+| aw-countdown, aw-cd-* | 4 | `aw-countdown.css` (≈ 500 B) | flag in the `[aw_countdown]` callback (`campaigns.php:45–53`): Home hero, SC card, campaign heroes |
+
+- **Not campaign CSS, though the owner's list names them:** `aw-opp-actions` is printed by `hub-blocks.php:301` (opportunity cards) and `social-posts.php:988`, and `aw-social-card` by `social-posts.php:992`. Loading them only on campaign pages would unstyle the Opportunities cards and the social-post tool. They go to `aw-lists.css` with the code that prints them, and the owner is told.
+- `aw-camp-more` / `aw-camp-next` (Campaigns hub, `hubs.php:475`, `:514`; aw.css 291–294, 653) are hub blocks: they stay in `aw-hubs.css`, flagged by the hub code.
+- The per-page tables count these files together. Splitting them changes no page by more than a few hundred bytes.
+
+- `aw-ed-mosaic` looked matched on all 23 pages. That is the capture's selector bug: the owner lists it as campaign-page CSS, and the fixed capture confirms it.
+- `settings_parts_baseline.txt:49` (`section.aw-camp-band.aw-ed-hero--campaign | min-height`) moves with its rule to `aw-camp-band.css` in this commit.
+- Changing campaign CSS needs the owner's yes per step (the campaigns are no longer frozen since 7 Nov). This commit moves aw.css rules only; the campaign files are the next section.
+
+### 13b. The campaign files, sorted the same way (each step needs the owner's yes)
+
+P = campaign-page CSS (campaign pages only), B = block CSS (loaded where the block is printed), T = per-campaign tokens a block also needs, tie = one rule serving both. Bytes are summed between the files' comment headings.
+
+**campaign.css** (127,918 B): P 118,077 · B 4,083 · T 2,706 · ties 3,052
+
+| lines | bytes | kind | what, printed by |
+|---|---|---|---|
+| 1–17 | 919 | T | `.aw-camp` base tokens, on every block with `.aw-camp` |
+| 18–31, 38–50, 170–182 | 1,787 | T | Lab, Diwali and Supreme Court tokens (the Diwali values are also at aw.css:1904) |
+| 32–37, 51–169 | 12,331 | P | Lab / Diwali page overrides (steps, Who to call) |
+| 183–372 | 25,560 | P | Supreme Court page (hero, tracker, pickers; content and campaign.js) |
+| 373–406 | 3,533 | P | campaign hero and bands (`.aw-camp-hero`, pattern campaign.php) |
+| 407–416 | 859 | tie | `.aw-camp :is(h1, h2 …)`: page headings and the Home hero H1 |
+| 417–426 | 1,428 | tie | `.aw-camp--lab-rules h2`: also the closed band's H2 |
+| 427–854 | 44,762 | P | letter, ladder, share, chips, countdown settle, sticky bar (shortcodes `campaign-tools.php:259–569`) |
+| 855–862 | 765 | tie | "Home band": band padding (B) and `.aw-camp-end` / sticky-bar rules (P) |
+| 863–897 | 3,687 | B | band art, days, range, ghost: `aw_block_home_hero` (`home.php:87–124`), `[aw_campaign_band]` (`campaign-tools.php:621`) |
+| 914–917 | 396 | B | closed band (`campaign-tools.php:589`) |
+| 898–913, 918–1182 | 31,891 | P | press, roadmap, bento, record fold, share kit, focus |
+
+**campaign-lab.css** (112,569 B): the Lab page's frozen copy of 2 Nov.
+- Tokens: 2,706 B (T, a copy).
+- Home band and closed band: 4,848 B (B), never printed on the Lab page.
+- Everything else: 104,835 B (P).
+- The Lab page keeps its own copy (owner). The only change proposed here is to drop its 4.8 KB of band rules, which are dead weight there, and only with the owner's yes.
+
+**campaign-home.css** (5,494 B, 39 rules):
+- It is campaign.css's band, closed-band, token and Type rules in computed form (no drift since `cee9bc54`), without `.aw-camp h1` (aw.css:1551 sets the hero H1).
+- It is generated with headless Chrome (`tools/campaign-home-css/extract.mjs`), which is no longer allowed, so it is not regenerated. Its rules become `aw-camp-band.css` by hand: campaign.css 863–897 and 914–917, the band part of 855, the Type ties and the tokens.
+- `campaign-home.css` and the `is_front_page()` branch go.
+
+**Block files from the campaign CSS:**
+- `aw-camp-band.css` takes the band rules above.
+- `aw-camp-tokens.css` (T, about 2.7 KB) is loaded by any campaign block flag and by campaign pages, so each campaign has one token source. Today Diwali's tokens are duplicated in campaign.css:38 and aw.css:1904, and Community dogs' in campaign-record(-home).css.
+- `aw1-story` is already its own file (`campaign-record-home.css`, flag at `campaign-record.php:271–286`). The Campaigns hub still loads the full `campaign-record.css` (38.7 KB) for it, which is a later candidate.
+
+**Risks:**
+- **Cascade order.** `aw-campaign` prints at priority 10, before Kits and aw.css, and aw.css:1548–1579 overrides the band rules. `campaign-record` depends on `aw-campaign` (`campaign-record.php:276`). The campaign block files therefore keep the handle `aw-campaign`'s place: registered at priority 10 with no deps, joined into their own bundle ahead of Kits, never into the Animal Writes bundle.
+- **Ties** are copied into both the block file and the page file, or kept in the tokens file.
+- **Home today** loads all 128 KB of campaign.css when the band's campaign is not the Lab. Its `.aw-camp--diwali` rules then also style the festive card. The block files end that.
+- **Class names overlap:** the campaign page's `.aw-sc-pick` / `-more` / `-states` are not the Home card's `.aw-sc-*`, and `aw-camp-more` means two things (aw.css:291). The fixed capture checks each move.
+- **Stored content.** The classes printed only from stored content (`aw-ed-mosaic`, `aw-festive-tips`, `aw-camp-grid`, `aw-camp-docs-q`) were traced through `tools/content/*.php`. The stored-content search confirms them.
 
 ## Checks
 
@@ -746,7 +809,7 @@ These values in load-bearing groups are literal sizes with no line in design-sys
 ## Summary
 
 1. Nothing with an `aw-` selector goes into Kits, and the ten already there get an owner step. Four groups become Kits components with Kits markup: the newsletter band `kit-nl-band` (art stays AW), the source line `kit-src`, the date `kit-date` and the card time (a `kit-meta-item` variant). List-title and button/section sizes become Kits tokens. Everything else stays in Animal Writes CSS.
-2. Animal Writes CSS splits into aw.css (newsletter form, heading overrides, campaign rules: 15,259 B) and 12 component files in the plugin only. Each file is loaded by a template condition or a component flag through a small Kits loader filter, as Uncode does per module. Files are enqueued at `wp_enqueue_scripts` 20 after aw.css, never from inside render.
+2. Animal Writes CSS splits into aw.css (newsletter form, heading overrides: 6,890 B) and component files in the plugin only, three of them for campaigns. Each file is loaded by a template condition or a component flag through a small Kits loader filter, as Uncode does per module. Files are enqueued at `wp_enqueue_scripts` 20 after aw.css, never from inside render.
 3. Average aw.css-derived CSS per page drops from 161 KB to about 62 KB raw (−62%). On transfer it drops from 26.0 KB to 12.2 KB gzip (−53%) with one joined Animal Writes stylesheet per page, as today (14 cached files for 23 page types). A PageSpeed comparison at 375 on Home, a listing and Volunteer is part of the gate.
-4. There are 12 commits, each gated by TOTAL 0 on 23 pages × 3 widths. The gate first needs reduced motion in the capture and the capture's selector bug fixed (94 rules looked matched everywhere); then both page lists are captured again. Renamed classes are searched for in stored content first. The phase 0 groups move with the code that prints them, or are dropped after their own check.
-5. Still for the owner: whether the 8.4 KB of campaign rules may load only on campaign pages, and names for 102 raw sizes listed as candidate tokens.
+4. There are 13 commits after the minify step, each gated by TOTAL 0 on 23 pages × 3 widths. The gate first needs reduced motion in the capture and the capture's selector bug fixed (94 rules looked matched everywhere); then both page lists are captured again. Renamed classes are searched for in stored content first. The phase 0 groups move with the code that prints them, or are dropped after their own check.
+5. Still for the owner: a yes per step for changing the campaign CSS files (step 13), and names for 102 raw sizes listed as candidate tokens.
