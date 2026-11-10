@@ -74,7 +74,6 @@ Source: Search Insights Quick wins (404 keywords, 12,001 impressions, 57 clicks)
 - **Bird helplines (8 keywords, 233 impressions):** a Mumbai row for "bird rescue helpline number mumbai" (66); "bird helpline number" (178, position 7.2) waits on the 1800-11-8600 question (it is the Delhi forest department's green line, see Help-now guides).
 - **Lab rules P1 (19 keywords at 3.1–6.9, about 650 clicks):** no page changes until the owner's Post-phase decision; "animal testing rules" is held with it; "animal testing bill" (433 impressions, position 4.8) is a phrase for the Post copy.
 - **"Animal shelter" News item 22024:** no guide link (the Directory is a Page). A fixed "Find an animal shelter near you" Directory line on News items is new copy and a template change: owner's word.
-- **Campaign form entries:** the Search Insights header showed "Campaign form: 4,322 new entries" on 5 Nov, against "under 100 confirmed letters" in the campaign record. Check Mail → Website forms (unconfirmed sends, tests or duplicates) before the Lab Post-phase copy uses a number.
 - **Skipped (not worth work):** "yes" (163, junk); Nauheed Cyrusi children (off-mission); DLSA Ernakulam and Dibrugarh (legal-aid offices); World Animal Day 2026 (529 + 204 + 355; refresh the guide for 2027 in September 2027).
 - **Estimate, not a forecast:** moving the quick wins from about position 9 to about 5 is worth roughly 150–300 extra clicks a month.
 
