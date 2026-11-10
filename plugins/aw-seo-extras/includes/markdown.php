@@ -161,7 +161,7 @@ function aw_md_skip( DOMElement $el ): bool {
 	if ( $el->hasAttribute( 'hidden' ) || 'true' === $el->getAttribute( 'aria-hidden' ) ) {
 		return true;
 	}
-	return (bool) preg_match( '/(^|\s)(screen-reader-text|skip-link|wp-block-buttons|wp-block-search|kit-breadcrumbs|kit-crumbs|kit-share|aw-item-share|aw-sticky-cta)(\s|$)/', $el->getAttribute( 'class' ) );
+	return (bool) preg_match( '/(^|\s)(screen-reader-text|skip-link|wp-block-buttons|wp-block-search|kit-breadcrumbs|kit-crumbs|kit-share|kit-share-inline|aw-item-share|aw-sticky-cta)(\s|$)/', $el->getAttribute( 'class' ) );
 }
 
 /**

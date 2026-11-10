@@ -1163,11 +1163,13 @@
    "status": "replaced",
    "classes": [
     "kit-share",
+    "kit-share-inline",
     "kit-sh"
    ],
    "states": [
     "default",
-    "copied"
+    "copied",
+    "inline (in the text column, no rule above)"
    ],
    "tokens": [],
    "a11y": {

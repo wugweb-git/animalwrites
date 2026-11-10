@@ -49,9 +49,7 @@
 .aw-sources-refs :is(ul, ol) { margin: 0; padding-left: var(--kit-space-5); }
 .aw-sources-refs li + li { margin-top: var(--kit-space-1); }
 .aw-item-tags { margin: var(--kit-space-5) 0 0; }
-.aw-item-share { margin: var(--kit-space-6) 0 0; }
-.aw-item-share .kit-share { border-top: 0; padding-top: 0; }
-/* Tag and category pages: their end group (FAQ, share), after the share row so its 48px gap wins as before. */
+/* Tag and category pages: their end group (FAQ, share); its 48px gap wins over the share row's own top margin. */
 .aw-term-end > * + * { margin-top: var(--kit-space-7); }
 .aw-term-end { margin-top: var(--kit-space-7); }
 .aw-more { display: grid; gap: var(--kit-space-7); margin: var(--kit-space-8) 0 0; }

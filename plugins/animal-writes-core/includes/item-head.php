@@ -408,7 +408,7 @@ function aw_block_item_share( $a, $id ) {
 	}
 	aw_use_component_style( 'aw-single' ); // aw-item-share
 	$bar = function_exists( 'aw_share_html' ) ? aw_share_html( $id ) : '';
-	return '' !== $bar ? '<div class="aw-item-share">' . $bar . '</div>' : '';
+	return '' !== $bar ? '<div class="kit-share-inline aw-item-share">' . $bar . '</div>' : '';
 }
 
 /* ---------- 10. More ---------- */
