@@ -77,7 +77,7 @@ add_action(
 				'methods'             => 'GET',
 				'permission_callback' => '__return_true',
 				'callback'            => function () {
-					// LiteSpeed's REST cache (on, 7 days on Animal Writes) replaces the header below with its own, and a cached
+					// LiteSpeed's REST cache (often on, for 7 days) replaces the header below with its own, and a cached
 					// challenge works once: everyone after the first sender failed the check (found 21 Oct 2026). Its own API wins.
 					do_action( 'litespeed_control_set_nocache', 'ALTCHA challenge' );
 					$r = new WP_REST_Response( kits_altcha_challenge() );

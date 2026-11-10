@@ -201,7 +201,7 @@ function aw_clean_news_slug( $slug, $id ) {
 	usort( $cands, fn( $a, $b ) => strlen( $b ) - strlen( $a ) );
 	$title = sanitize_title( get_post_field( 'post_title', $id ) );
 	foreach ( $cands as $c ) {
-		// Never cut words that are part of the headline itself (e.g. "... Animal Welfare Board of India").
+		// Never cut words that are part of the headline itself (e.g. "... Board of Education of India").
 		if ( str_ends_with( $title, '-' . $c ) || $title === $c ) {
 			continue;
 		}

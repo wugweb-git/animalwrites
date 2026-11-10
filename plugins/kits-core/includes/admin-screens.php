@@ -922,7 +922,7 @@ function kits_options_typography(): void {
 	$rows  = array();
 	$fonts = (array) wp_get_global_settings( array( 'typography', 'fontFamilies' ) );
 	foreach ( array_merge( (array) ( $fonts['custom'] ?? array() ), (array) ( $fonts['theme'] ?? array() ) ) as $f ) {
-		$rows[] = array( esc_html( (string) ( $f['name'] ?? '' ) ), '<span style="font-family:' . esc_attr( (string) ( $f['fontFamily'] ?? '' ) ) . '">' . esc_html( 'Animals need a voice. 0123456789' ) . '</span>' );
+		$rows[] = array( esc_html( (string) ( $f['name'] ?? '' ) ), '<span style="font-family:' . esc_attr( (string) ( $f['fontFamily'] ?? '' ) ) . '">' . esc_html( 'Sphinx of black quartz, judge my vow. 0123456789' ) . '</span>' );
 	}
 	$styles = wp_get_global_styles();
 	$body   = (array) ( $styles['typography'] ?? array() );

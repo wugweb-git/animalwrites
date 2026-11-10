@@ -45,8 +45,8 @@ function kits_theme_option_fields(): array {
 	);
 	$fields = array(
 		'sticky_bar'          => array( 'Site parts', 'Phone bar', 'switch', $on_off, 'off', 'A bar fixed to the bottom of phone screens with one action. Campaign pages keep their own bar.' ),
-		'sticky_href'         => array( 'Site parts', 'Phone bar link', 'url', array(), '', 'Where the bar\'s action goes, for example tel:1962.' ),
-		'sticky_label'        => array( 'Site parts', 'Phone bar text', 'text', array(), '', 'The action\'s words, for example Call 1962.' ),
+		'sticky_href'         => array( 'Site parts', 'Phone bar link', 'url', array(), '', 'Where the bar\'s action goes, for example tel:5550100.' ),
+		'sticky_label'        => array( 'Site parts', 'Phone bar text', 'text', array(), '', 'The action\'s words, for example Call us now.' ),
 		'announce'            => array( 'Site parts', 'Announcement bar', 'switch', $on_off, 'on', 'The line above the header. Its text and link are edited in the header part (Editor → Patterns → Header).' ),
 		'font_preload'        => array(
 			'Site parts',

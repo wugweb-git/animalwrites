@@ -35,7 +35,7 @@ function kits_demo_panel( $suffix = '' ) {
 	$o .= $h( '4 Filter bar (dropdowns, Sort) · 5 Active filters' ) . kits_filter_bar( kits_filter_dropdown( 'Kind', 'kind', array( array( 'Act', 'act', true, 9 ), array( 'Rule', 'rule', false, 7 ), array( 'Judgment', 'judgment', false, 1 ) ) ) . kits_filter_dropdown( 'Category', 'category', array( array( 'Rabies', 'rabies', false, 3 ), array( 'Wildlife', 'wildlife', false, 5 ) ) ), array( array( 'Kind: Act', '#' ) ), '#', kits_sort_dropdown( array( array( 'Newest first', '#', true ), array( 'Oldest first', '#', false ) ) ) );
 	$o .= $h( '6 Badge' ) . '<div class="kit-tags">' . kits_badge( 'Verified', 'verified' ) . kits_badge( 'Not yet confirmed', 'unconfirmed' ) . kits_badge( 'Featured', 'featured' ) . kits_badge( 'Sponsored', 'sponsored' ) . kits_badge( 'Advertisement', 'ad' ) . kits_badge( 'Closed', 'closed' ) . kits_badge( 'New', 'new' ) . '</div>';
 	$mi = fn( $ico, $text ) => '<span class="kit-meta-item"><span class="kit-ico kit-ico--' . $ico . '" aria-hidden="true"></span>' . $text . '</span>';
-	$o .= $h( '6b Meta row (date, time, place, author, reading time)' ) . '<p class="kit-meta-row">' . $mi( 'calendar', '<time datetime="2026-10-18">18 Oct 2026</time>' ) . $mi( 'clock', '3 min read' ) . $mi( 'map-pin', 'Pune' ) . $mi( 'user', 'Posted by Blue Cross' ) . '</p>'
+	$o .= $h( '6b Meta row (date, time, place, author, reading time)' ) . '<p class="kit-meta-row">' . $mi( 'calendar', '<time datetime="2026-10-18">18 Oct 2026</time>' ) . $mi( 'clock', '3 min read' ) . $mi( 'map-pin', 'Pune' ) . $mi( 'user', 'Posted by Riverside' ) . '</p>'
 		. '<p class="kit-demo-note">One meta row for every such line: text 12 / 13 / 14px at 0 / 768 / 1200 (<code>--kit-meta-size</code>, "Meta" in the editor), weight 500, the muted colour; icons 16px; 6px icon to text, 16px between items. A date inside a sentence keeps the sentence\'s own text.</p>';
 	$o .= $h( '7 Eyebrow · 8 Count' ) . '<p>' . kits_eyebrow( 'Resources' ) . '</p><p>Act ' . kits_count( 1234 ) . '</p>';
 	$o .= $h( '9 Segmented control' ) . '<nav class="kit-segment" aria-label="Demo"><a href="#" aria-current="true">A–Z</a><a href="#">Most details first</a></nav>';
@@ -47,11 +47,11 @@ function kits_demo_panel( $suffix = '' ) {
 		. $f( 'Default', '', '<span class="kit-ico kit-ico--mail kit-field-icon" aria-hidden="true"></span><input type="email" placeholder="you@example.com">' )
 		. $f( 'Optional', 'Optional', '<span class="kit-ico kit-ico--name kit-field-icon" aria-hidden="true"></span><input type="text" placeholder="Your name">' )
 		. $f( 'Focus', '', '<input type="text" class="is-demo-focus" value="Focused">' )
-		. $f( 'Filled', '', '<input type="text" value="Blue Cross of India">' )
+		. $f( 'Filled', '', '<input type="text" value="Riverside Book Club">' )
 		. $f( 'Invalid', '', '<input type="email" aria-invalid="true" value="asha@">', 'Enter a full email address, like you@example.com' )
 		. $f( 'Valid', '', '<input type="email" class="is-valid" value="asha@example.com">' )
 		. $f( 'Disabled', '', '<select disabled><option>Choose a state first</option></select>' )
-		. $f( 'Read-only', '', '<input type="text" readonly value="AWBI code KL024/2002">' )
+		. $f( 'Read-only', '', '<input type="text" readonly value="Reference AB024/2002">' )
 		. $f( 'Select', '', '<select><option>What\'s this about?</option><option>General question</option></select>' )
 		. $f( 'Textarea', '', '<textarea placeholder="Page link and what\'s wrong"></textarea>' )
 		. '</div>';
@@ -182,7 +182,7 @@ function kits_demo_more() {
 	}
 	$o  = '<style>.kit-demo-static .kit-sticky-help{position:static!important;display:flex!important;transform:none!important}.kit-demo-state{margin:var(--s-3) 0 var(--s-1);font-size:var(--kit-meta-size);color:var(--kit-color-muted)}.kit-demo-grid>span{display:grid;place-items:center;min-height:2.5rem;background:var(--kit-color-surface);border-radius:var(--kit-radius-control);font-size:var(--kit-meta-size)}.kit-demo-surfaces{display:grid;gap:var(--s-3);grid-template-columns:repeat(auto-fill,minmax(10rem,1fr))}.kit-demo-surfaces>div{padding:var(--s-4);border-radius:var(--kit-radius-card);border:1px solid var(--kit-color-line);min-height:5rem}</style>';
 	$o .= $h( 'Sticky action bar' ) . $st( 'Default (phones only; fixed to the bottom of the screen, hidden while scrolling down)' )
-		. '<div class="kit-demo-static"><div class="kit-sticky-help"><a class="kit-sh-primary" href="#">' . $ico( 'helpline' ) . 'Call 1962</a><a class="kit-sh-secondary" href="#">Find help near you</a></div></div>';
+		. '<div class="kit-demo-static"><div class="kit-sticky-help"><a class="kit-sh-primary" href="#">' . $ico( 'helpline' ) . 'Call us now</a><a class="kit-sh-secondary" href="#">Find us near you</a></div></div>';
 	$o .= $h( 'Banner' ) . $st( 'Default (a section page banner; nothing is printed until it has a picture)' )
 		. ( $img ? '<div class="wp-block-cover kit-banner"><span aria-hidden="true" class="wp-block-cover__background has-secondary-background-color has-background-dim-30 has-background-dim"></span><img class="wp-block-cover__image-background" alt="" src="' . esc_url( $img ) . '" data-object-fit="cover"><div class="wp-block-cover__inner-container"></div></div>' : '<p><em>No picture on the site yet to draw it with.</em></p>' );
 	$share = function ( $copied ) use ( $ico ) {
@@ -196,20 +196,20 @@ function kits_demo_more() {
 	}
 	$o .= $h( 'Share' ) . $st( 'Default' ) . $share( false ) . $st( 'Copied (after Copy link)' ) . $share( true );
 	$o .= $h( 'Table' ) . $st( 'Default (zebra rows; hover darkens a row; tables wrap to fit; on phones a table of four or more columns scrolls inside its box)' )
-		. '<div class="kit-table" style="overflow-x:auto"><table><thead><tr><th>Who approves</th><th>Today</th><th>Draft 2026</th></tr></thead><tbody><tr><td>Small animals</td><td>Lab committee</td><td>Lab committee</td></tr><tr><td>Large animals</td><td>National committee</td><td>Lab committee</td></tr><tr><td>Penalty</td><td>Up to ₹200</td><td>Up to ₹200</td></tr></tbody></table></div>';
+		. '<div class="kit-table" style="overflow-x:auto"><table><thead><tr><th>Who signs off</th><th>Today</th><th>Next year</th></tr></thead><tbody><tr><td>Small orders</td><td>Team lead</td><td>Team lead</td></tr><tr><td>Large orders</td><td>Finance committee</td><td>Team lead</td></tr><tr><td>Late fee</td><td>Up to $200</td><td>Up to $200</td></tr></tbody></table></div>';
 	$o .= $h( 'Claim panel' ) . $st( 'Closed' ) . '<div class="kit-claim"><details><summary>Is this your organisation?</summary><p>Claim this listing to update its details.</p></details></div>'
 		. $st( 'Open' ) . '<div class="kit-claim"><details open><summary>Is this your organisation?</summary><p>Claim this listing to update its details.</p><p><a class="kit-btn kit-btn--sm" href="#">Claim this listing</a></p></details></div>';
-	$o .= $h( 'More link' ) . $st( 'Default' ) . '<p class="kit-more">More in the Library: <a href="#">all court orders</a></p>';
+	$o .= $h( 'More link' ) . $st( 'Default' ) . '<p class="kit-more">More in the Archive: <a href="#">all annual reports</a></p>';
 	$counter = fn( $n, $text ) => '<div class="kit-field"><label>Your message</label><div class="kit-field-control"><textarea rows="3" maxlength="1500" data-counter="1200">' . esc_html( str_repeat( 'Lorem ipsum dolor sit amet. ', $n ) ) . '</textarea></div><span class="kit-field-hint kit-counter" aria-live="polite">' . esc_html( $text ) . '</span></div>';
 	$o .= $h( 'Character counter' ) . $st( 'Default (nothing shown below the limit warning)' ) . $counter( 2, '' ) . $st( 'Near the limit (from 1,200 of 1,500 characters)' ) . $counter( 2, '1,240 of 1,500 characters' );
-	$o .= $h( 'Print button' ) . $st( 'Default (on a printable letter; hidden when printing)' ) . '<p class="kit-print"><button type="button" class="wp-element-button">Print this letter</button> <span>Sign it, then post it by Speed Post.</span></p>';
+	$o .= $h( 'Print button' ) . $st( 'Default (on a printable letter; hidden when printing)' ) . '<p class="kit-print"><button type="button" class="wp-element-button">Print this letter</button> <span>Sign it, then post it by registered mail.</span></p>';
 	$o .= $h( 'Layout grid' ) . $st( 'This frame shows the grid for its own width: 4 columns on phones, 8 from 768, 12 from 1200' ) . '<div class="kit-grid kit-demo-grid">' . implode( '', array_map( fn( $i ) => '<span>' . $i . '</span>', range( 1, 12 ) ) ) . '</div>';
 	$o .= $h( 'Surfaces and overlay' ) . '<div class="kit-demo-surfaces">'
 		. '<div style="background:var(--kit-color-bg)">' . $st( 'Page grey' ) . '</div><div class="kit-surface-section">' . $st( 'Section white' ) . '</div><div class="kit-surface-alt">' . $st( 'Section darker grey' ) . '</div><div style="background:var(--kit-surface-card,var(--kit-color-raised))">' . $st( 'Card white' ) . '</div>'
 		. '<div class="kit-overlay" style="background:' . ( $img ? 'url(' . esc_url( $img ) . ') center/cover' : 'var(--kit-color-ink)' ) . ';color:var(--kit-color-on-ink)"><p class="kit-demo-state" style="color:inherit">Image with dark overlay</p></div></div>';
 	$o .= $h( 'Preview only' ) . $st( 'Shown to administrators and in previews; hidden from visitors' ) . '<div class="kits-preview-only" style="padding:var(--s-3);border:1px dashed var(--kit-color-line)">Preview-only content (for example an empty ad slot or a note to editors).</div>';
 	$core = '<!-- wp:buttons --><div class="wp-block-buttons"><!-- wp:button --><div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="#">Primary</a></div><!-- /wp:button --><!-- wp:button {"className":"is-style-kits-secondary"} --><div class="wp-block-button is-style-kits-secondary"><a class="wp-block-button__link wp-element-button" href="#">Secondary</a></div><!-- /wp:button --><!-- wp:button {"className":"is-style-kits-ghost"} --><div class="wp-block-button is-style-kits-ghost"><a class="wp-block-button__link wp-element-button" href="#">Ghost</a></div><!-- /wp:button --></div><!-- /wp:buttons -->'
-		. '<!-- wp:quote --><blockquote class="wp-block-quote"><!-- wp:paragraph --><p>Every animal deserves a voice.</p><!-- /wp:paragraph --><cite>Animal Writes</cite></blockquote><!-- /wp:quote -->'
+		. '<!-- wp:quote --><blockquote class="wp-block-quote"><!-- wp:paragraph --><p>Every story deserves a reader.</p><!-- /wp:paragraph --><cite>Example Author</cite></blockquote><!-- /wp:quote -->'
 		. '<!-- wp:separator --><hr class="wp-block-separator has-alpha-channel-opacity"/><!-- /wp:separator -->'
 		. '<!-- wp:list --><ul class="wp-block-list"><!-- wp:list-item --><li>A list item</li><!-- /wp:list-item --><!-- wp:list-item --><li>Another list item</li><!-- /wp:list-item --></ul><!-- /wp:list -->'
 		. '<!-- wp:table --><figure class="wp-block-table"><table><thead><tr><th>Block</th><th>Style</th></tr></thead><tbody><tr><td>Table</td><td>Kits</td></tr></tbody></table></figure><!-- /wp:table -->';
@@ -262,7 +262,7 @@ add_action(
 // scrolled to its first use and outlined (kits_spot).
 /** Sample pages read daily to find where each entry is first used (kits_spot_map); a site adds its own (filter kits_spot_pages). */
 function kits_spot_pages() {
-	return array_values( array_unique( (array) apply_filters( 'kits_spot_pages', array( home_url( '/' ), home_url( '/?s=animal' ), home_url( '/kits-no-such-page/' ) ) ) ) );
+	return array_values( array_unique( (array) apply_filters( 'kits_spot_pages', array( home_url( '/' ), home_url( '/?s=help' ), home_url( '/kits-no-such-page/' ) ) ) ) );
 }
 
 add_action(
