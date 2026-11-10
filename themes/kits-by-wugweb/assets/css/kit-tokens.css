@@ -190,6 +190,7 @@
   --kit-overlay: color-mix(in srgb, var(--color-ash) 60%, transparent);
   --kit-btn-height: var(--kit-size-target);
   --kit-btn-height-sm: var(--kit-size-target);
+  --kit-toolbar-h: var(--kit-size-target); /* a collection toolbar's controls (dropdowns, buttons, segment) from 768: one height */
   --kit-field-height: var(--kit-size-control);
   --kit-field-border: var(--neutral-5); /* #7D7D7D: 3.7:1 on the page (#F4F4F4), 4.1:1 on white (WCAG 1.4.11, 31 Oct 2026; was #BABABA, 1.8:1) */
   --kit-field-hint: var(--neutral-7); /* help text under a label: #4A4A4A, over 7:1 (WCAG 1.4.3; was #7D7D7D) */

@@ -382,7 +382,7 @@ function aw_block_org_actions( $a, $id ) {
  * @return string
  */
 function aw_toolbar( $count, $controls = '' ) {
-	return '' === $count . $controls ? '' : '<div class="aw-toolbar">' . ( '' !== $count ? '<p class="aw-toolbar-count" role="status">' . esc_html( $count ) . '</p>' : '' ) . $controls . '</div>';
+	return '' === $count . $controls ? '' : '<div class="kit-toolbar aw-toolbar">' . ( '' !== $count ? '<p class="kit-toolbar-count aw-toolbar-count" role="status">' . esc_html( $count ) . '</p>' : '' ) . $controls . '</div>';
 }
 
 /**

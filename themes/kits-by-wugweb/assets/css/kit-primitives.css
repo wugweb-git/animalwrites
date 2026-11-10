@@ -522,3 +522,24 @@ form, .kit-form, .fluentform { --kit-btn-height: var(--kit-size-control); --kit-
 .kit-date { white-space: nowrap; }
 .kit-date > .kit-ico { margin-right: var(--kit-meta-icon-gap); flex: none; }
 .kit-meta-item--time { display: flex; align-items: center; margin-top: auto; padding-right: var(--kit-space-7); }
+
+/* Collection toolbar: the list's count on the left, its controls (filter bar, sort, view) on the right, one row that
+ * wraps; the chosen-filter chips go under it. On phones the count shares the row with the Filters button; from 768
+ * every control in it is one height (--kit-toolbar-h). .kit-dd--sheet-only: a dropdown kept for the phone sheet,
+ * hidden from 768 where another control in the toolbar does the same job. */
+.kit-toolbar { display: flex; flex-wrap: wrap; align-items: center; column-gap: var(--kit-space-3); row-gap: var(--kit-space-2); margin: 0 0 var(--kit-space-collection); }
+.kit-toolbar-count { margin: 0; flex: 1 0 100%; font-weight: var(--kit-weight-strong); color: var(--kit-color-ink); }
+.kit-toolbar > .kit-filterbar { flex: 0 1 auto; }
+.kit-toolbar > .kit-filter-active { order: 9; flex: 1 1 100%; margin: 0; }
+.kit-section-filters--below > .kit-toolbar { margin: 0; }
+@media (max-width: 767px) {
+	.kit-toolbar:has(> .kit-filterbar) > .kit-toolbar-count { flex: 1 1 8rem; min-width: 0; }
+	.kit-toolbar .kit-filter-sheet > summary { gap: var(--kit-space-2); }
+	.kit-toolbar .kit-filter-sheet > summary .kit-ico { --kit-ico-size: 1.125rem; }
+}
+@media (min-width: 768px) {
+	.kit-dd--sheet-only { display: none; }
+	.kit-toolbar-count { flex: 1 1 12rem; }
+	.kit-toolbar :is(.kit-dd-btn, .kit-btn, .kit-filter-sheet > summary) { min-height: var(--kit-toolbar-h); }
+	.kit-toolbar .kit-segment :is(a, button) { min-height: var(--kit-toolbar-h); }
+}

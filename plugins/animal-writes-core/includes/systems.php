@@ -382,7 +382,7 @@ function aw_sort_group( $type ) {
 	}
 	$cur  = aw_active_sort( $type );
 	$id   = 'kit-dd-sort-' . wp_unique_id();
-	$html = kits_dd_open( $id, 'aw-dd-sort' ) . '<button type="button" class="kit-dd-btn" aria-controls="' . esc_attr( $id ) . '" aria-expanded="false" data-wp-bind--aria-expanded="callbacks.isOpen" data-wp-on--click="actions.toggle"><span class="kit-dd-label">Sort by</span> <span class="kit-dd-current">' . esc_html( preg_replace( '/ first$/', '', $sorts[ $cur ] ) ) . '</span><span class="kit-ico kit-ico--chevron-down" aria-hidden="true"></span></button>'
+	$html = kits_dd_open( $id, 'kit-dd--sheet-only aw-dd-sort' ) . '<button type="button" class="kit-dd-btn" aria-controls="' . esc_attr( $id ) . '" aria-expanded="false" data-wp-bind--aria-expanded="callbacks.isOpen" data-wp-on--click="actions.toggle"><span class="kit-dd-label">Sort by</span> <span class="kit-dd-current">' . esc_html( preg_replace( '/ first$/', '', $sorts[ $cur ] ) ) . '</span><span class="kit-ico kit-ico--chevron-down" aria-hidden="true"></span></button>'
 		. '<fieldset class="kit-dd-panel" id="' . esc_attr( $id ) . '" data-wp-bind--hidden="!callbacks.isOpen"><legend class="screen-reader-text">Sort by</legend><ul class="kit-dd-list">';
 	foreach ( $sorts as $k => $l ) {
 		$html .= '<li><label class="kit-dd-opt"><input type="radio" class="kit-dd-check" name="sort" value="' . esc_attr( array_key_first( $sorts ) === $k ? '' : $k ) . '"' . checked( $k, $cur, false ) . '><span class="kit-dd-text">' . esc_html( preg_replace( '/ first$/', '', $l ) ) . '</span></label></li>';

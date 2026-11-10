@@ -573,6 +573,43 @@
    }
   },
   {
+   "name": "Collection toolbar (count, filters, sort)",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-toolbar",
+    "kit-toolbar-count",
+    "kit-dd--sheet-only"
+   ],
+   "states": [
+    "count only",
+    "count and filter bar",
+    "chosen filters (chips under the row)",
+    "phone (Filters sheet, sort in the sheet)",
+    "from 768 (sort as a segment, one control height)"
+   ],
+   "tokens": [
+    "kit-toolbar-h",
+    "kit-space-collection"
+   ],
+   "a11y": {
+    "element": "<div> holding <p role=status> (the count) and the filter bar <form>",
+    "aria": "the count is a status: a new count is read out",
+    "keyboard": "Tab through the controls in reading order",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px controls (--kit-toolbar-h from 768)",
+    "motion": "none",
+    "sr": "count read before the controls"
+   },
+   "note": "kit-toolbar-count is the toolbar's own count (a flex child of the row); kit-list-count is the count on its own, outside a toolbar. kit-dd--sheet-only hides a dropdown from 768: use it only when another control in the toolbar does the same job there.",
+   "seo": {
+    "heading": "none",
+    "link": "Sort options are real links (crawlable)",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
    "name": "Segmented control",
    "type": "primitive",
    "status": "live",

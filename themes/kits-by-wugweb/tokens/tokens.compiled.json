@@ -850,6 +850,11 @@
       "md": "var(--kit-size-target)",
       "lg": "var(--kit-size-target)"
     },
+    "toolbar-h": {
+      "sm": "var(--kit-size-target)",
+      "md": "var(--kit-size-target)",
+      "lg": "var(--kit-size-target)"
+    },
     "field-height": {
       "sm": "var(--kit-size-control)",
       "md": "var(--kit-size-control)",
