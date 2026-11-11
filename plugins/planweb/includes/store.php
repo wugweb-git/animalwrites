@@ -233,8 +233,19 @@ add_filter(
 		if ( ! $request['id'] && ! isset( $f['date'] ) ) {
 			$f['date'] = '';
 		}
+		// Type: one term of the fixed list, required on create (planweb_type holds term IDs in REST).
+		if ( isset( $request['planweb_type'] ) || ! $request['id'] ) {
+			$ids       = array_filter( array_map( 'absint', (array) ( $request['planweb_type'] ?? array() ) ) );
+			$term      = 1 === count( $ids ) ? get_term( reset( $ids ), 'planweb_type' ) : null;
+			$f['type'] = $term && ! is_wp_error( $term ) ? (string) $term->slug : '';
+		}
 		$err = planweb_check_fields( $f, (int) $request['id'] );
-		return $err ? $err : $prepared;
+		if ( $err ) {
+			return $err;
+		}
+		// Entries are always published (planweb_entries() reads only publish; the Trash is DELETE, not a status).
+		$prepared->post_status = 'publish';
+		return $prepared;
 	},
 	10,
 	2

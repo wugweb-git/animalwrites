@@ -147,8 +147,9 @@ if ( ! defined( 'AW_SOURCING_LOADED' ) && file_exists( dirname( AW_CORE_DIR ) . 
 }
 
 // PlanWeb (the team's calendar; owner, 11 Nov 2026). Loaded from the sibling plugin folder when it is not active on its
-// own. It does nothing until it is switched on in Kits → Modules; until then Kits → Dates works as before.
-if ( ! defined( 'PLANWEB_VERSION' ) && file_exists( dirname( AW_CORE_DIR ) . '/planweb/planweb.php' ) ) {
+// own. It does nothing until it is switched on in Kits → Modules; until then Kits → Dates works as before. It needs
+// PHP 8.0 (Core still runs on 7.4), so on older PHP it is not loaded and Dates stays.
+if ( PHP_VERSION_ID >= 80000 && ! defined( 'PLANWEB_VERSION' ) && file_exists( dirname( AW_CORE_DIR ) . '/planweb/planweb.php' ) ) {
 	require_once dirname( AW_CORE_DIR ) . '/planweb/planweb.php';
 }
 
