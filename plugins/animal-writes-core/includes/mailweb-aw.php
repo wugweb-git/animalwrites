@@ -125,7 +125,7 @@ function aw_mail_ff_subject( $e, $r ) {
 /** The fields shown with an entry, per form: response key => label. */
 function aw_mail_ff_fields( $key ) {
 	$map = array(
-		'contact'   => array( 'org_name' => 'Organisation', 'org_district' => 'District', 'org_phone' => 'Phone', 'org_services' => 'Services', 'org_website' => 'Website', 'opp_title' => 'Opportunity', 'opp_type' => 'Type', 'opp_ongoing' => 'Ongoing', 'opp_start' => 'Starts', 'opp_end' => 'Ends', 'opp_link' => 'Link', 'whatsapp' => 'WhatsApp' ),
+		'contact'   => array( 'org_name' => 'Organisation', 'org_district' => 'District', 'org_phone' => 'Phone', 'org_services' => 'Services', 'org_website' => 'Website', 'opp_title' => 'Opportunity', 'opp_type' => 'Type', 'opp_ongoing' => 'Ongoing', 'opp_start' => 'Starts', 'opp_end' => 'Ends', 'opp_link' => 'Link', 'phone' => 'Mobile', 'whatsapp' => 'WhatsApp' ),
 		'volunteer' => array( 'roles' => 'Wants to', 'phone' => 'Phone', 'whatsapp' => 'WhatsApp', 'pincode' => 'Pincode', 'district' => 'District', 'state' => 'State', 'availability' => 'Available', 'travel_range' => 'Travels', 'skills' => 'Skills', 'languages' => 'Languages', 'org_name' => 'Organisation' ),
 		'claim'     => array( 'role' => 'Role', 'phone' => 'Phone', 'whatsapp' => 'WhatsApp', 'aw_phone' => 'Listing phone', 'aw_whatsapp' => 'Listing WhatsApp', 'aw_email' => 'Listing email', 'aw_website' => 'Listing website', 'aw_area' => 'Area', 'aw_services' => 'Services' ),
 		'report'    => array( 'reason' => 'Reason' ),

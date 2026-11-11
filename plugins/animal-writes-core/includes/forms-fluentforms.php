@@ -566,7 +566,7 @@ function aw_ff_errors( $key, $data ) {
 	foreach ( AW_FF_PHONES as $k ) {
 		$v = trim( (string) ( is_string( $data[ $k ] ?? '' ) ? ( $data[ $k ] ?? '' ) : '' ) );
 		if ( '' !== $v && '' === aw_ff_phone10( $v ) && ! in_array( preg_replace( '/\D+/', '', $v ), $have, true ) ) { // a listing's own number may stay as it is (helplines like 1962)
-			$errors[ $k ] = 'Enter a 10-digit number, like 9876543210.';
+			$errors[ $k ] = 'contact' === $key ? 'Enter a 10-digit mobile number, without +91 or 0.' : 'Enter a 10-digit number, like 9876543210.'; // Contact wording: owner, 12 Nov 2026
 		}
 	}
 	if ( 'claim' === $key ) {
@@ -721,6 +721,11 @@ add_action(
 		}
 		if ( 'contact' === $key ) {
 			aw_crm_entry_note( $c, $entry_id, $data, (int) $form->id, aw_ff_ref( $key, $entry_id ) );
+			$ph = trim( sanitize_text_field( (string) ( $data['phone'] ?? '' ) ) ); // the mobile number (required since 12 Nov 2026) into the contact's own phone field, when it has none
+			if ( '' !== $ph && '' === (string) $c->phone ) {
+				$c->phone = $ph;
+				$c->save();
+			}
 		}
 		if ( 'claim' === $key ) {
 			aw_crm_claim_note( $c, $entry_id, $data, (int) $form->id, aw_ff_ref( $key, $entry_id ) );

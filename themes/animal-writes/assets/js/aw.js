@@ -107,7 +107,7 @@
 		sum.hidden = false;
 	});
 
-	/* Volunteer form, "Same as my phone" (owner, 31 Oct 2026): the WhatsApp number follows the phone number while ticked
+	/* Volunteer and Contact forms, "Same as my phone / mobile number" (owner, 31 Oct and 12 Nov 2026): the WhatsApp number follows the phone number while ticked
 	   (the server copies it too). The change event lets Fluent Forms show "OK to contact me on WhatsApp". */
 	document.querySelectorAll('input[name="wa_same[]"]').forEach(function (box) {
 		var f = box.form, ph = f && f.querySelector('input[name=phone]'), wa = f && f.querySelector('input[name=whatsapp]');
@@ -120,6 +120,7 @@
 		}
 		box.addEventListener('change', sync);
 		ph.addEventListener('input', function () { if (box.checked) sync(); });
+		if (box.checked) sync(); // ticked by default (Contact form, owner 12 Nov 2026)
 	});
 
 	/* Volunteer form, Organisation from the Directory (owner, 31 Oct 2026): typing three letters lists matching listings
