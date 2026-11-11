@@ -142,9 +142,16 @@ Phase 1 moves these with **the same names** (`animal-writes/*`, the same shortco
 - **No completeness badge.**
 - **A claim** is a Fluent Forms entry of form #6. Its decision is stored as submission meta `aw_claim_review` (`{by, at, status, fields[]}`, `:618`); its status is pending, approved or rejected.
 - **Per-field approval:** only fields that differ from the listing get a tick (`aw_claim_changes` `:271`). Each applied field first logs a row with its old value in the enrichment table, which is what makes **Undo** possible (SourceWeb `aw_enrich_undo`, `sw/enrichment.php:818`).
-- **Undo restores one field. It does not clear `aw_verified`.** Recorded as it is; whether Undo of the last field should un-claim is a claim-rules question for the owner.
+- **Undo restores one field and never clears the Claimed mark** (owner, 11 Nov 2026). Taking a claim off a listing is a separate action, **Remove claim** (§2.2):
+  - It clears `aw_verified`, `aw_verified_on` and `aw_needs_reverify`, and clears the `aw_verified_count` cache.
+  - It ends the claimant's link to the listing's people: tag `org-approved` and `vol_org_listing` for this listing. The FluentCRM contact itself is kept.
+  - It records `removed`, with who and when, in the claim's review (`aw_claim_review`, or `aw_c_status` on an old-form claim). The entry stays.
+  - It leaves every applied field as it is; fields are put back one by one with Undo.
 - **No email is sent** by any form, claim or approval (`aw_ff_mail_off`, option `aw_ff_send_email` = 0).
-- **Legacy `aw_claim` posts** stay readable. One gap: `aw_org_people_from_claim()` is called at `claims.php:226-227` (guarded) and defined nowhere, so a legacy approval never adds the claimant as a person. Recorded; not fixed in the move.
+- **Legacy `aw_claim` posts** stay readable. One gap: `aw_org_people_from_claim()` is called at `claims.php:226-227` (guarded) and defined nowhere, so a legacy approval never adds the claimant as a person. The new form's approval (`claims-review.php:604-610`) links the claimant only when they ticked "Show my name".
+  - **This is being fixed now**, in its own fix on `wordpress-dev`, outside this plan. Every approved claimant is linked to the listing privately (FluentCRM contact ↔ listing), and their name shows only if they opted in.
+  - Past approvals get a backfill, with a dry run first; nothing is written until the owner has seen the count.
+  - The move to DirectoryWeb keeps that fix: the function moves with `org-people.php`.
 
 ### 1.8 Fluent Forms, FluentCRM, workers' routes
 
@@ -165,7 +172,7 @@ Phase 1 moves these with **the same names** (`animal-writes/*`, the same shortco
 In phase 1 these become settings or data. Each starts with today's value, supplied by Core through one filter, `directoryweb_site_config`, until phase 3's Settings store them:
 - **Place sources:** the LGD file and India Post (`api.postalpincode.in`, `places.php:469`); the PIN pattern `^[1-9]\d{5}$`.
 - **Geocoder:** Nominatim with `countrycodes=in`, and the User-Agent and contact `AW_GEO_UA` (`geocode.php:32`, `:43`, `:83`); the India bounding box (`directory-map.php:205`).
-- **Map and assets:** map tile and library URLs (`directory-map.php:26-27`); Leaflet (`map-picker.php:18-30`).
+- **Map and assets:** the tile style URL (`directory-map.php:27`) becomes a setting (§2.3). The map library (`:26`) is **not** a setting: it stays a fixed URL with a pinned version, plus `integrity` and `crossorigin`. Today maplibre loads from unpkg with no integrity check; phase 1 adds it as part of the move, as Leaflet already has (`map-picker.php:18-30`).
 - **Registrations:** AWBI, 12A, 80G, FCRA, NGO Darpan, MHA, with issuer slugs and labels (`listing-template.php:113`, `:147-153`; `gov-verified.php:25-28`), and the government source list.
 - **Helplines:** 112 and 1962 (`district-helplines.php:103-107`).
 - **Copy:** "Animal Helpline Numbers in …" / "Help in …" (`directory.php:226-248`), "Animal welfare directory: %s" (`:307`), the intro (`:644-650`), the "Blue Cross" alias and placeholder (`:414`, `:575`), redirect-by "Animal Writes" (`:105`), "Claimed only" / "Verified only" (`:581-582`).
@@ -175,7 +182,7 @@ In phase 1 these become settings or data. Each starts with today's value, suppli
 
 ## 2. Admin: what DirectoryWeb registers into the Kits Core shell
 
-**DirectoryWeb only registers parts into the shell.** The shell and its look are Kits Core's: the Kits admin design system (Google Site Kit pattern for plugins), with WordPress packages as plumbing only (`@wordpress/data`, `api-fetch`, `i18n`, `icons`). Its parts are the app header, Dashboard chips and tiles, "Select metrics", the working list (search, filters, sort, columns, bulk and row actions, pagination, saved views), Settings rows, the setup flow, notices and the empty/loading/error states. DirectoryWeb designs none of it. It registers screens, tiles, list columns, settings groups and services through the Kits Core PHP/JS API, and serves its data from its own REST routes. New routes are in a new namespace, `directoryweb/v1`; the existing `aw/v1` addresses do not change.
+**DirectoryWeb only registers parts into the shell.** The shell and its look are Kits Core's: the Kits admin design system (Google Site Kit pattern for plugins), with WordPress packages as plumbing only (`@wordpress/data`, `api-fetch`, `i18n`, `icons`). Its parts are the app header, Dashboard chips and tiles, "Select metrics", the working list (search, filters, sort, columns, bulk and row actions, pagination, saved views), Settings rows, the setup flow, notices and the empty/loading/error states. DirectoryWeb designs none of it. It registers screens, tiles, list columns, settings groups and services through the Kits Core PHP/JS API, and serves its data from its own REST routes. New routes are under `kits/v1/directoryweb/…` (owner, 11 Nov: new code gets Kits names, as `kits/v1/insightweb` and `kits/v1/planweb`); the existing `aw/v1` addresses do not change.
 
 **Menu:** DirectoryWeb → Dashboard · Claims · Settings. Listings stay in WordPress's own list (`edit.php?post_type=aw_listing`), linked from the header. The old address `edit.php?post_type=aw_listing&page=aw-claims` redirects to Claims.
 
@@ -185,7 +192,7 @@ Each tile has a number, a sub-line, the source it names and a cached REST route 
 
 | Section chip | Tile | Number and sub-line | Source named | Route |
 |---|---|---|---|---|
-| Listings | Published listings | count, by type (top 5 + others) | DirectoryWeb (posts + listing-type tags) | `GET /directoryweb/v1/stats/listings` |
+| Listings | Published listings | count, by type (top 5 + others) | DirectoryWeb (posts + listing-type tags) | `GET /kits/v1/directoryweb/stats/listings` |
 | Listings | By state | published / draft / pending / private | WordPress post status | same |
 | Listings | Places covered | states and districts with a listing, of the LGD total | DirectoryWeb places (`aw_place_counts`) + LGD file version | `/stats/places` |
 | Indexing | Indexable vs no contact | indexable, no-contact (noindex), exempt (`aw_seo_keep_listings`) | **RankWeb** rule through `directoryweb_listing_indexable` (shows "RankWeb not active" otherwise) | `/stats/indexing` |
@@ -200,12 +207,19 @@ Each tile has a number, a sub-line, the source it names and a cached REST route 
 - **Columns:** date, listing (link), claimant name and role, contact (email/phone), fields changed (count), status, decided by/at.
 - **Filters:** status (pending, approved, rejected), listing state/district, listing type, has logo/photos/proof, date range. Search: listing name, claimant.
 - **Row view:** the per-field review as today (`aw_claim_changes`): listing value against claimed value, one tick per field, "Show my name" (people box). Approve applies the ticked fields; each one logs its old value through `directoryweb_field_changed`.
-- **Undo:** per field, on approved fields (through SourceWeb's change log; off, with a note, when SourceWeb is inactive).
+- **Undo:** per field, on approved fields (through SourceWeb's change log; off, with a note, when SourceWeb is inactive). Undo never clears the Claimed mark, even on the last field.
+- **Remove claim:** a row action on an approved claim that takes the claim back.
+  - It asks for confirmation before it runs, naming the listing and the claimant.
+  - The claimant loses the edit rights the claim gave and is removed from the listing's people.
+  - The listing itself stays, with its published status and its fields.
+  - Who removed it and when is logged in the claim's review.
+  - It does what §1.7 says, as `POST /kits/v1/directoryweb/claims/{id}/remove`. The Claimed / Verified tile and the listing's meta row follow at once.
 - **Bulk actions:** Reject; Approve all changed fields (asks first, lists the listings); Mark as seen.
 - **REST:**
-  - `GET /directoryweb/v1/claims`, `GET /claims/{id}`
+  - `GET /kits/v1/directoryweb/claims`, `GET /claims/{id}`
   - `POST /claims/{id}/decide` (`fields[]`, `status`)
   - `POST /claims/{id}/undo` (`field`)
+  - `POST /claims/{id}/remove`
   - Permission is `edit_aw_volunteers` (today's capability), and every write checks the REST nonce.
 
 ### 2.3 Settings
@@ -217,7 +231,7 @@ Each tile has a number, a sub-line, the source it names and a cached REST route 
 | Place source | "LGD, {file date}, {n} states / {n} districts" | Choose the place file (data file in the plugin; a different country ships its own file) and its version |
 | PIN code lookup | India Post on/off, last answer | On/off, rate limit |
 | Geocoder | Nominatim, last request, cache days | Contact address for the User-Agent, country code, on/off |
-| Map tiles | OpenFreeMap / library version | Tile and library URL |
+| Map tiles | OpenFreeMap | Tile style URL only, picked from an allowed list of hosts (OpenFreeMap by default), never free text. The library URL, version and `integrity` hash are fixed in code |
 | Fluent Forms | Claim form #{id} found / missing | Pick the claim form |
 | FluentCRM | active / not, tags found | Claimant / pending / approved tag names |
 | SourceWeb | active, queue size | Link to SourceWeb Settings (enrichment sources and keys stay there) |
@@ -227,7 +241,7 @@ Each tile has a number, a sub-line, the source it names and a cached REST route 
 **Admin settings groups, after the services:**
 - **Listing types:** the type list (today `aw_sources` → sections → `aw_listing` → tags) and each type's own fields. A type-only SCF box is shown by an SCF location rule on that type's tag, next to the 8 shared boxes.
 - **Places:** place types that carry a place (`AW_PLACE_TYPES`), district common names, place detection lists.
-- **Claim rules:** roles, re-verify days (180), what Undo of the last field does, "Show my name" default.
+- **Claim rules:** roles, re-verify days (180), "Show my name" default. Undo never un-claims; Remove claim does (§1.7).
 - **Badges:** Claimed label, Verified sources (government source list), the never-publish phone list (hashes only; the number is never shown again).
 - **Indexing:** read-only summary of RankWeb's rule with a link (it stays RankWeb's).
 - **Find help:** the number of states/places shown (`AW_FINDHELP_MAX`), types offered, where the links appear (item More, campaign band).
@@ -266,7 +280,11 @@ How plugins load today:
 The plan:
 1. **Folder and slug: `plugins/directoryweb/`, main file `directoryweb.php`, text domain `directoryweb`.**
    - It starts with `if ( defined( 'DIRECTORYWEB_LOADED' ) ) return; define( 'DIRECTORYWEB_LOADED', '1.0.0' );`.
-   - Its headers include `Requires Plugins: kits-core`.
+   - **No `Requires Plugins: kits-core` in phase 1** (owner, 11 Nov). It checks for Kits Core at runtime (`KITS_CORE_LOADED`), as SourceWeb does (`aw-sourcing.php:21-30`). Core loads Kits Core itself, so the header could block activation. It is added only once `wp plugin list` (read-only) shows Kits Core active as its own plugin, in the small header ship of step 7.
+   - **Header (plugin audit):** a `/** … @wordpress-plugin */` block with `@package directoryweb`, `Version`, `Requires at least: 6.7` (for `register_block_template`; Core says 6.5), `Requires PHP: 7.4` (as Core), `Text Domain: directoryweb`, `License: GPL-2.0-or-later`; `Requires Plugins: kits-core` only later, as above. The version constant equals the header `Version`.
+   - **No custom tables** (database): the claim decision stays in submission meta, the change log in SourceWeb's `{prefix}aw_enrich`, so there is no `dbDelta` and no schema version. Its own new options are only `directoryweb_rewrite_ver` and the Settings values (existing option names, §2.3); new ones are saved with autoload off.
+   - **Deactivation and uninstall never remove data** (never delete user data): deactivation only flushes rewrites; there is no `uninstall.php` that deletes listings, meta, options or claims.
+   - **Audit points for the PR** (plugin audit): every `kits/v1/directoryweb` write has a `permission_callback` with the capability (`edit_aw_volunteers` or `manage_options`), not only the REST nonce; every public `wp_ajax_nopriv_` route (Find help, PIN and organisation lookups) stays read-only and rate-limited as today; output escaped late; `$wpdb` only through `prepare()`; strings use the `directoryweb` text domain, with translator comments on placeholders.
 2. **Core loads DirectoryWeb exactly like SourceWeb.** At the place where the Directory files are required today (`animal-writes-core.php:58-64`), it does `if ( ! defined( 'DIRECTORYWEB_LOADED' ) && file_exists( dirname( AW_CORE_DIR ) . '/directoryweb/directoryweb.php' ) ) require_once …`.
    - On the first deploy the post type, fields and routes are therefore there before anyone activates the plugin. Plugins on the server are links into the deploy checkout, and a new folder has no link until it is made (hPanel), so this matters.
    - Once DirectoryWeb is active on its own and loads after Core (`a` < `d`), its own load returns at the constant.
@@ -287,10 +305,10 @@ The plan:
 7. **Header order:**
    - **First ship:** Core does the bundled require.
    - **Owner:** adds the plugin link in hPanel and activates DirectoryWeb.
-   - **Second, small ship:** Core's header gains `Requires Plugins: directoryweb`.
+   - **Second, small ship:** Core's header gains `Requires Plugins: directoryweb`; DirectoryWeb's gains `Requires Plugins: kits-core` after the check below.
 
    Adding the header to an already active Core with DirectoryWeb inactive would only show a notice. Adding it after activation keeps the Plugins screen clean. Two checks come first:
-   - **Kits Core activation:** `Requires Plugins: kits-core` on DirectoryWeb only holds if Kits Core is active as its own plugin, not only loaded by Core's `require_once`. Check `wp plugin list` read-only before the second ship. If it is not active, DirectoryWeb keeps the runtime check (`KITS_CORE_LOADED`) the way SourceWeb does, and the header waits for the Kits Core change.
+   - **Kits Core activation:** DirectoryWeb's `Requires Plugins: kits-core` is added in this same small ship, and only if `wp plugin list` (read-only) then shows Kits Core active as its own plugin (it did on 11 Nov 2026). Otherwise the header waits and the runtime check (`KITS_CORE_LOADED`) alone holds; the runtime check stays either way.
    - **The real folder name** is checked on the server at the same time.
 
 ### 3.2 Animal Writes Core
@@ -303,9 +321,10 @@ The plan:
 ### 3.3 Templates and patterns from the plugin
 
 - **The template:** `single-aw_listing.html` is registered with `register_block_template( 'directoryweb//single-aw_listing', … )` (WordPress 6.7+).
-  - WordPress prefers a theme file of the same slug. So while the child theme (`themes/animal-writes/templates/single-aw_listing.html`, identical) is active, the child's copy keeps winning, and nothing changes.
-  - When the child theme goes (on hold), the plugin's copy takes over with the same markup.
-  - Core's `theme/templates/single-aw_listing.html` (served by `theme-parts-templates.php` when there is no child) is deleted in the same commit, so the Kits-only path also falls to the plugin template.
+  - Live runs `kits-by-wugweb` with the child theme **inactive** (11 Nov 2026). The page is served today from Core's `theme/templates/single-aw_listing.html`, through `theme-parts-templates.php`, which ranks its files above Kits' files and above plugin-registered templates of the same slug.
+  - So Core's copy is deleted in the same commit as the plugin registers its own; otherwise Core's file keeps winning and the plugin's is never used. Kits has no `single-aw_listing.html`, so nothing else competes.
+  - The child theme's copy (`themes/animal-writes/templates/single-aw_listing.html`) matters only if the child is turned on again; it stays identical until the child theme is retired (on hold).
+  - The 0-difference check runs on staging (refreshed from live) before and after this commit.
 - **Before phase 1, check whether the live database holds an edited copy of this template.** An edited copy (a `wp_template` post) would win over both files.
 - **The pattern:** `find-help` is registered by DirectoryWeb on `init` 9 under the **same slug** `animal-writes/find-help`, because `front-page.html:8` references it. Core and the child stop registering it in the same commit.
 
@@ -355,13 +374,16 @@ Each phase is complete before the next. Each ships on the owner's yes, through t
 
 | Phase | What | Size | Risk and how it is held |
 |---|---|---|---|
-| **1. Move the code, no visible change** | §3 in full: new plugin folder, the 17 files, the Directory parts of the shared files in §1.2, 8 SCF groups, 2 data files, template, pattern, CSS, scripts; filters in place of the calls into RankWeb and SourceWeb; site text into `directoryweb_site_config`; SourceWeb `rules.php` and test path; tool paths; dead `aw_featured_html` removed (owner's yes). Then the plugin link + activation (owner), then the `Requires Plugins` header (small ship) | **Large**: about 5,500 lines moved, ~25 files touched; one PR (bigger technical work: branch → PR → code review, plugin audit, PHPCS, Deploy check, owner merges) | **High** if done loosely: post type, rewrites, template or SCF could go missing for a request. Held by the bundled require (§3.1), one commit with no duplicate file, identical keys and arguments, backup, and the §3.6 proof |
+| **1. Move the code, no visible change** | §3 in full: new plugin folder, the 17 files, the Directory parts of the shared files in §1.2, 8 SCF groups, 2 data files, template, pattern, CSS, scripts; filters in place of the calls into RankWeb and SourceWeb; site text into `directoryweb_site_config`; SourceWeb `rules.php` and test path; tool paths; dead `aw_featured_html` removed (owner's yes). No `Requires Plugins` header in the first ship (runtime check `KITS_CORE_LOADED`). Then the plugin link + activation (owner), then the `Requires Plugins` headers (small ship: `directoryweb` on Core; `kits-core` on DirectoryWeb only once `wp plugin list` shows Kits Core active on its own) | **Large**: about 5,500 lines moved, ~25 files touched; one PR (bigger technical work: branch → PR → code review, plugin audit, PHPCS, Deploy check, owner merges) | **High** if done loosely: post type, rewrites, template or SCF could go missing for a request. Held by the bundled require (§3.1), one commit with no duplicate file, identical keys and arguments, backup, and the §3.6 proof |
 | **2. Blocks and patterns** | §1.6: core blocks + bindings (`directoryweb/listing` source), the `directoryweb/fields` block, Query Loop variations, the claim and Find help patterns, the status block in place of 4 title filters, local card and helplines as blocks; template rewritten with them; old `animal-writes/*` blocks kept registered (rendering the same) so saved content and the child theme's copy keep working; `org-details` and `contact` deleted. `kits/collection-filter` only when Kits Core ships it | **Medium–large**: one PR, possibly two (profile; list and places) | **Medium**: markup changes. Held by the same 0-difference proof (HTML may differ by class names only where the CSS is adjusted in the same change; screenshots must match) |
-| **3. Admin UI** | §2, registered into the Kits Core shell (DirectoryWeb only registers parts): Dashboard tiles, the Claims working list, Settings, the §2.4 requests answered by Kits Core first, the `directoryweb/v1` routes, old Claims address redirect, settings seeded from constants with no value lost, tests | **Medium**, depends on the Kits Core shell | **Low–medium** (admin only). **Order:** the shell ships with InsightWeb as the pilot, then RankWeb, SourceWeb, MailWeb, **then DirectoryWeb**, then PlanWeb. Phase 3 waits for its turn. Phases 1 and 2 do not depend on the shell |
+| **3. Admin UI** | §2, registered into the Kits Core shell (DirectoryWeb only registers parts): Dashboard tiles, the Claims working list, Settings, the §2.4 requests answered by Kits Core first, the `kits/v1/directoryweb` routes, old Claims address redirect, settings seeded from constants with no value lost, tests | **Medium**, depends on the Kits Core shell | **Low–medium** (admin only). **Order:**
+  1. InsightWeb is extracted first, with no redesign (`docs/insightweb-plan.md`).
+  2. The Kits Core shell is piloted on InsightWeb only after that extraction passes its before/after check.
+  3. Then RankWeb, SourceWeb, MailWeb, **then DirectoryWeb**, then PlanWeb. Phase 3 waits for its turn. Phases 1 and 2 do not depend on the shell |
 
 ## 5. Not in this plan (recorded, not done)
 
 - The aw→kits rename of keys, block names and routes (deferred by the owner).
-- `aw_org_people_from_claim()` missing (§1.7) and `aw_cdn_purge_post()` missing (§1.5).
-- Undo and the Claimed mark (§1.7): an owner question.
+- `aw_org_people_from_claim()` missing (§1.7): being fixed now in its own fix on `wordpress-dev`, with a dry-run backfill of past approvals before anything is written; the move keeps it.
+- `aw_cdn_purge_post()` missing (§1.5).
 - `docs/listing-template.md` is out of date in two lines: `:13` still says "Verified on", where the code now prints "Claimed on" plus a separate government "Verified on"; `:22` still lists Donate and UPI, which were dropped 31 Oct. It is updated with phase 1.
