@@ -113,13 +113,14 @@ add_action(
 		}
 		$old  = (array) get_option( 'mailweb_smtp', array() );
 		$pass = (string) wp_unslash( $_POST['pass'] ?? '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- a password: any characters
-		$new  = array(
-			'user' => sanitize_email( wp_unslash( $_POST['user'] ?? '' ) ),
-			'name' => sanitize_text_field( wp_unslash( $_POST['name'] ?? '' ) ),
-			'host' => sanitize_text_field( wp_unslash( $_POST['host'] ?? '' ) ),
-			'port' => absint( $_POST['port'] ?? 0 ) ? absint( $_POST['port'] ) : '',
-			'pass' => '' !== $pass ? mailweb_encrypt( $pass ) : ( $old['pass'] ?? '' ),
-		);
+		$new  = mailweb_smtp_clean(
+			array(
+				'user' => wp_unslash( $_POST['user'] ?? '' ), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- cleaned by mailweb_smtp_clean()
+				'name' => wp_unslash( $_POST['name'] ?? '' ), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- same
+				'host' => wp_unslash( $_POST['host'] ?? '' ), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- same
+				'port' => wp_unslash( $_POST['port'] ?? 0 ), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- same
+			)
+		) + array( 'pass' => '' !== $pass ? mailweb_encrypt( $pass ) : ( $old['pass'] ?? '' ) );
 		update_option( 'mailweb_smtp', $new, false );
 		$note = 'saved';
 		if ( 'test' === sanitize_key( wp_unslash( $_POST['do'] ?? '' ) ) ) {

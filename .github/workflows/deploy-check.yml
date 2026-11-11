@@ -85,6 +85,8 @@ jobs:
         run: php tools/ci/workers_registry_check.php
       - name: Mailweb address parser (typed lists, headers, API lists)
         run: php tools/ci/mailweb_addresses_test.php
+      - name: MailWeb screens tests without WordPress (unchanged saves write nothing, clean-ups, Dashboard tiles; plugins/mailweb/tests)
+        run: php plugins/mailweb/tests/run.php
       - name: Sourcing tests without WordPress (shared keyword matcher, Sources model; plugins/aw-sourcing/tests)
         run: php plugins/aw-sourcing/tests/run.php
       - name: Claimant link to the listing's people (plugins/animal-writes-core/tests/org-people-tests.php)

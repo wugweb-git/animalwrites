@@ -343,16 +343,12 @@ add_action(
 		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'mailweb_crm' ) ) {
 			wp_die( esc_html__( 'Not allowed.', 'mailweb' ), 403 );
 		}
-		$boxes = array_values( array_intersect( array_keys( mailweb_all_boxes() ), array_map( 'sanitize_key', (array) wp_unslash( $_POST['boxes'] ?? array() ) ) ) );
-		update_option(
-			'mailweb_crm',
-			array(
-				'on'    => ! empty( $_POST['on'] ),
-				'tag'   => sanitize_text_field( wp_unslash( $_POST['tag'] ?? '' ) ),
-				'boxes' => $boxes ? $boxes : array( '-' ), // none ticked: no mailbox
-			),
-			false
+		$in = array(
+			'on'    => ! empty( $_POST['on'] ),
+			'tag'   => wp_unslash( $_POST['tag'] ?? '' ), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- cleaned by mailweb_crm_clean()
+			'boxes' => (array) wp_unslash( $_POST['boxes'] ?? array() ), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- same
 		);
+		update_option( 'mailweb_crm', mailweb_crm_clean( $in, array_keys( mailweb_all_boxes() ) ), false ); // none ticked: no mailbox
 		wp_safe_redirect( mailweb_settings_url( 'incoming', array( 'mailweb_crm' => 1 ), 'fluentcrm' ) );
 		exit;
 	}
