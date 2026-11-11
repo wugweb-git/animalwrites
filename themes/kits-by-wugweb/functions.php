@@ -968,7 +968,7 @@ function kits_bundle_component_css() {
 		}
 		if ( $capped && count( kits_parts_bundle_other_sets( $sets ) ) >= kits_parts_bundle_cap() ) {
 			if ( false === get_transient( 'kits_parts_cap_hit' ) ) {
-				set_transient( 'kits_parts_cap_hit', time(), WEEK_IN_SECONDS ); // Shown on Welcome and Site check.
+				set_transient( 'kits_parts_cap_hit', time(), WEEK_IN_SECONDS ); // Shown on Home and Site check.
 			}
 			return; // Cap reached: this set loads its separate files, nothing new is written.
 		}
