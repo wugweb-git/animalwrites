@@ -218,6 +218,32 @@ function aw_si_tool_seeds(): array {
 	return array_values( array_unique( array_filter( array_map( 'trim', (array) preg_split( '/\r\n|\r|\n/', $raw ) ), 'strlen' ) ) );
 }
 
+/**
+ * The seeds as stored: one search per line, trimmed, no blanks or repeats, at most 200 of at most 100 characters.
+ *
+ * @param string $raw Text as typed (already passed through sanitize_textarea_field()).
+ */
+function aw_si_tool_seeds_clean( string $raw ): string {
+	$lines = array_slice( array_values( array_unique( array_filter( array_map( 'trim', (array) preg_split( '/\r\n|\r|\n/', $raw ) ), 'strlen' ) ) ), 0, 200 );
+	return implode( "\n", array_map( fn( $l ) => mb_substr( $l, 0, 100 ), $lines ) );
+}
+
+/**
+ * Save the seeds (Settings → Seeds for keyword tools, and the Settings screen's route). Nothing is written when the
+ * cleaned text is what is stored.
+ *
+ * @param string $raw Text as typed (already passed through sanitize_textarea_field()).
+ * @return bool Whether the option was written.
+ */
+function aw_si_tool_seeds_save( string $raw ): bool {
+	$clean = aw_si_tool_seeds_clean( $raw );
+	if ( (string) get_option( AW_SI_TOOL_SEEDS, '' ) === $clean ) {
+		return false;
+	}
+	update_option( AW_SI_TOOL_SEEDS, $clean, false );
+	return true;
+}
+
 add_filter(
 	'aw_si_rising_lists',
 	function ( $lists ) {
@@ -246,9 +272,7 @@ add_action(
 		if ( ! current_user_can( aw_si_cap() ) || ! check_admin_referer( 'aw_si_tool_seeds' ) ) {
 			wp_die( esc_html__( 'Not allowed.', 'aw-seo-extras' ), 403 );
 		}
-		$raw   = isset( $_POST['seeds'] ) ? sanitize_textarea_field( wp_unslash( $_POST['seeds'] ) ) : '';
-		$lines = array_slice( array_values( array_unique( array_filter( array_map( 'trim', (array) preg_split( '/\r\n|\r|\n/', $raw ) ), 'strlen' ) ) ), 0, 200 );
-		update_option( AW_SI_TOOL_SEEDS, implode( "\n", array_map( fn( $l ) => mb_substr( $l, 0, 100 ), $lines ) ), false );
+		aw_si_tool_seeds_save( isset( $_POST['seeds'] ) ? sanitize_textarea_field( wp_unslash( $_POST['seeds'] ) ) : '' );
 		wp_safe_redirect( aw_si_url( 'settings' ) );
 		exit;
 	}

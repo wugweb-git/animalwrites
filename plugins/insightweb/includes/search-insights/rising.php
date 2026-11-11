@@ -106,6 +106,21 @@ function aw_si_gdelt_on(): bool {
 	return (bool) get_option( 'aw_si_gdelt_on', 0 );
 }
 
+/**
+ * Switch GDELT on or off (Settings → News (GDELT), and the Settings screen's route). Nothing is written when it is
+ * already so.
+ *
+ * @param bool $on On.
+ * @return bool Whether the option was written.
+ */
+function aw_si_gdelt_save( bool $on ): bool {
+	if ( aw_si_gdelt_on() === $on ) {
+		return false;
+	}
+	update_option( 'aw_si_gdelt_on', $on ? 1 : 0, false );
+	return true;
+}
+
 /** Whether the last Trends interest run failed with nothing stored after it (the Keywords list then says "source failed"). */
 function aw_si_trends_failed(): bool {
 	static $f = null;
@@ -829,7 +844,7 @@ add_action(
 		if ( ! current_user_can( aw_si_cap() ) || ! check_admin_referer( 'aw_si_gdelt' ) ) {
 			wp_die( esc_html__( 'Not allowed.', 'aw-seo-extras' ), 403 );
 		}
-		update_option( 'aw_si_gdelt_on', empty( $_POST['on'] ) ? 0 : 1, false );
+		aw_si_gdelt_save( ! empty( $_POST['on'] ) );
 		wp_safe_redirect( aw_si_url( 'settings' ) );
 		exit;
 	}

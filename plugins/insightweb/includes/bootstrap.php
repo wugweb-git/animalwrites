@@ -81,3 +81,8 @@ foreach ( array( 'sitesearch', 'ga4', 'psi', 'clarity', 'bing', 'sources', 'page
 	require_once __DIR__ . '/search-insights/' . $aw_si_file . '.php';
 }
 unset( $aw_si_file );
+
+// The new Dashboard and Settings on the Kits admin shell, behind &ui=next (11 Nov 2026).
+require_once INSIGHTWEB_DIR . 'includes/insightweb-dashboard.php';
+require_once INSIGHTWEB_DIR . 'includes/insightweb-rest.php';
+require_once INSIGHTWEB_DIR . 'includes/insightweb-ui.php';
