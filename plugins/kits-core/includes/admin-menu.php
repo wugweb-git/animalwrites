@@ -225,19 +225,37 @@ function kits_screen_sections( string $screen ): array {
  * @param string $intro  One line under it.
  */
 function kits_sections_page( string $screen, string $title, string $intro ): void {
-	kits_admin_head( $screen, $title, $intro );
 	$sections = kits_screen_sections( $screen );
+	if ( function_exists( 'kits_frame_ready' ) && kits_frame_ready() ) {
+		// &ui=next: the same sections as cards in the plugin screens' frame (includes/admin-kits-frame.php).
+		kits_frame_open( $screen, $title, $intro );
+		foreach ( $sections as $id => $s ) {
+			kits_frame_card( (string) $id, $s['title'], $s['render'] );
+		}
+		kits_sections_back( $sections );
+		kits_frame_close();
+		return;
+	}
+	kits_admin_head( $screen, $title, $intro );
 	foreach ( $sections as $id => $s ) {
 		echo '<div class="postbox" id="' . esc_attr( $id ) . '"><div class="postbox-header"><h2 class="hndle">' . esc_html( $s['title'] ) . '</h2></div><div class="inside">';
 		call_user_func( $s['render'] );
 		echo '</div></div>';
 	}
-	// After a form's save (options.php comes back without the #section): open the section it came from.
+	kits_sections_back( $sections );
+	echo '</div>';
+}
+
+/**
+ * After a form's save (options.php comes back without the #section): open the section it came from.
+ *
+ * @param array $sections The screen's sections (kits_screen_sections()).
+ */
+function kits_sections_back( array $sections ): void {
 	$back = isset( $_GET['kits_section'] ) ? sanitize_text_field( wp_unslash( $_GET['kits_section'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- which section to show.
 	if ( isset( $sections[ $back ] ) ) {
 		wp_print_inline_script_tag( 'if(!location.hash){location.hash=' . wp_json_encode( $back ) . ';}' );
 	}
-	echo '</div>';
 }
 
 /** Kits → Home. */
@@ -247,10 +265,6 @@ function kits_home_page() {
 
 /** Kits → Settings. */
 function kits_settings_page() {
-	if ( function_exists( 'kits_settings_next_ready' ) && kits_settings_next_ready() ) {
-		kits_shell_mount( 'kits-settings-next', __( 'Settings', 'kits-core' ), admin_url( 'admin.php?page=kits-settings' ), __( 'Open the current screen', 'kits-core' ) );
-		return;
-	}
 	kits_sections_page( 'kits-settings', 'Settings', 'Speed switches, older content and who sees preview-only items. Leave the switches on unless you are tracking down a problem.' );
 }
 

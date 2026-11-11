@@ -883,3 +883,54 @@
 		font-size: 13px;
 	}
 }
+
+/* ---------- Frame: Kits screens printed by PHP (includes/admin-kits-frame.php) ---------- */
+
+/* The line under the header. */
+.kits-shell-frame__intro {
+	color: var(--ks-g6);
+	max-width: 72ch;
+}
+
+/*
+ * A card whose body is today's markup (paragraphs, lists, WordPress form tables and buttons): the shell's resets give
+ * back the spacing that markup expects. Every value is a shell token (--ks-s2 8px, --ks-s3 12px, --ks-s5 24px).
+ */
+.kits-shell .kits-shell-prose {
+	display: block;
+	overflow-x: auto;
+}
+
+.kits-shell .kits-shell-prose p,
+.kits-shell .kits-shell-prose ul,
+.kits-shell .kits-shell-prose ol,
+.kits-shell .kits-shell-prose table,
+.kits-shell .kits-shell-prose form,
+.kits-shell .kits-shell-prose details {
+	margin: 0 0 var(--ks-s3);
+}
+
+.kits-shell .kits-shell-prose ul {
+	list-style: disc;
+	padding-left: var(--ks-s5);
+}
+
+.kits-shell .kits-shell-prose h2,
+.kits-shell .kits-shell-prose h3 {
+	margin: var(--ks-s5) 0 var(--ks-s2);
+	font-size: 15px;
+	font-weight: 600;
+}
+
+.kits-shell .kits-shell-prose > :first-child,
+.kits-shell .kits-shell-prose > div > :first-child {
+	margin-top: 0;
+}
+
+.kits-shell .kits-shell-prose .form-table {
+	margin-top: 0;
+}
+
+.kits-shell .kits-shell-prose .notice {
+	margin: 0 0 var(--ks-s3);
+}

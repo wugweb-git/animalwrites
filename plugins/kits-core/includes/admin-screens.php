@@ -320,31 +320,75 @@ function kits_home_status(): void {
 
 /** Kits → Tools: export, check a file, import, restore defaults, put the copy back (was Import / Export). */
 function kits_transfer_page() {
-	kits_admin_head( 'kits-tools', 'Tools', 'One JSON file with this site\'s Styles, Theme Options, Page Options defaults and synced patterns.' );
+	$intro = 'One JSON file with this site\'s Styles, Theme Options, Page Options defaults and synced patterns.';
+	$parts = kits_transfer_parts();
+	if ( function_exists( 'kits_frame_ready' ) && kits_frame_ready() ) {
+		// &ui=next: each part as a card in the plugin screens' frame (includes/admin-kits-frame.php).
+		kits_frame_open( 'kits-tools', 'Tools', $intro );
+		kits_transfer_result();
+		foreach ( $parts as $id => $part ) {
+			kits_frame_card( $id, $part[0], $part[1] );
+		}
+		kits_frame_close();
+		return;
+	}
+	kits_admin_head( 'kits-tools', 'Tools', $intro );
+	kits_transfer_result();
+	foreach ( $parts as $part ) {
+		echo '<h2>' . esc_html( $part[0] ) . '</h2>';
+		call_user_func( $part[1] );
+	}
+	echo '</div>';
+}
+
+/** The parts of Kits → Tools the user may use, in order: id => [ heading, prints the part ]. */
+function kits_transfer_parts(): array {
+	$parts = array(
+		'export' => array( 'Export', 'kits_transfer_export_part' ),
+		'import' => array( 'Import', 'kits_transfer_import_part' ),
+	);
+	if ( current_user_can( 'manage_options' ) ) {
+		$parts['restore'] = array( 'Restore defaults', 'kits_transfer_reset_part' );
+		$backup           = get_option( 'kits_settings_backup' );
+		if ( is_array( $backup ) && ! empty( $backup['file'] ) ) {
+			$parts['undo'] = array( 'Put the last copy back', 'kits_transfer_undo_part' );
+		}
+	}
+	return $parts;
+}
+
+/** What the last import, check, restore or put-back did (once, for the user who did it). */
+function kits_transfer_result(): void {
 	$user   = get_current_user_id();
 	$result = get_transient( 'kits_transfer_result_' . $user );
-	if ( is_array( $result ) ) {
-		delete_transient( 'kits_transfer_result_' . $user );
-		$ok = empty( $result['error'] );
-		echo '<div class="notice ' . ( $ok ? 'notice-success' : 'notice-error' ) . ' is-dismissible"><p><strong>' . esc_html( (string) $result['title'] ) . '</strong></p>';
-		if ( ! $ok ) {
-			echo '<p>' . esc_html( (string) $result['error'] ) . '</p>';
-		} else {
-			echo '<ul>';
-			foreach ( (array) $result['lines'] as $line ) {
-				echo '<li>' . esc_html( (string) $line ) . '</li>';
-			}
-			echo '</ul>';
-		}
-		echo '</div>';
+	if ( ! is_array( $result ) ) {
+		return;
 	}
-	$post = esc_url( admin_url( 'admin-post.php' ) );
+	delete_transient( 'kits_transfer_result_' . $user );
+	$ok = empty( $result['error'] );
+	echo '<div class="notice ' . ( $ok ? 'notice-success' : 'notice-error' ) . ' is-dismissible"><p><strong>' . esc_html( (string) $result['title'] ) . '</strong></p>';
+	if ( ! $ok ) {
+		echo '<p>' . esc_html( (string) $result['error'] ) . '</p>';
+	} else {
+		echo '<ul>';
+		foreach ( (array) $result['lines'] as $line ) {
+			echo '<li>' . esc_html( (string) $line ) . '</li>';
+		}
+		echo '</ul>';
+	}
+	echo '</div>';
+}
 
-	echo '<h2>' . esc_html( 'Export' ) . '</h2><p>' . esc_html( 'Downloads the file. Keep it as a backup, or import it on another Kits site.' ) . '</p>';
+/** Tools → Export. */
+function kits_transfer_export_part(): void {
+	echo '<p>' . esc_html( 'Downloads the file. Keep it as a backup, or import it on another Kits site.' ) . '</p>';
 	echo '<p><a class="button button-primary" href="' . esc_url( kits_settings_transfer_url() ) . '">' . esc_html( 'Download the settings file' ) . '</a></p>';
+}
 
-	echo '<h2>' . esc_html( 'Import' ) . '</h2><p>' . esc_html( 'Check a file first: it lists what would change and changes nothing. Importing never deletes; values that are not in the file stay as they are. A copy of the current settings is kept first, to put back below.' ) . '</p>';
-	echo '<form method="post" action="' . $post . '" enctype="multipart/form-data">'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above.
+/** Tools → Import (and Check the file). */
+function kits_transfer_import_part(): void {
+	echo '<p>' . esc_html( 'Check a file first: it lists what would change and changes nothing. Importing never deletes; values that are not in the file stay as they are. A copy of the current settings is kept first, to put back below.' ) . '</p>';
+	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" enctype="multipart/form-data">';
 	wp_nonce_field( 'kits_transfer_import' );
 	echo '<input type="hidden" name="action" value="kits_transfer_import"><table class="form-table" role="presentation"><tbody>';
 	echo '<tr><th scope="row"><label for="kits-file">' . esc_html( 'Settings file' ) . '</label></th><td><input type="file" id="kits-file" name="kits_file" accept=".json,application/json" required></td></tr>';
@@ -361,28 +405,27 @@ function kits_transfer_page() {
 	echo ' ';
 	submit_button( 'Import', 'primary', 'kits_import', false );
 	echo '</p></form>';
+}
 
-	if ( ! current_user_can( 'manage_options' ) ) {
-		echo '</div>';
-		return;
-	}
-	echo '<h2>' . esc_html( 'Restore defaults' ) . '</h2><p>' . esc_html( 'Clears Theme Options, Settings and the Page Options defaults, so every part works as the theme ships it. Styles, patterns and each page\'s own Page Options stay. A copy is kept first.' ) . '</p>';
-	echo '<form method="post" action="' . $post . '">'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above.
+/** Tools → Restore defaults. */
+function kits_transfer_reset_part(): void {
+	echo '<p>' . esc_html( 'Clears Theme Options, Settings and the Page Options defaults, so every part works as the theme ships it. Styles, patterns and each page\'s own Page Options stay. A copy is kept first.' ) . '</p>';
+	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
 	wp_nonce_field( 'kits_transfer_reset' );
 	echo '<input type="hidden" name="action" value="kits_transfer_reset"><p><label><input type="checkbox" name="kits_sure" value="1" required> ' . esc_html( 'Yes, restore the defaults' ) . '</label></p>';
 	submit_button( 'Restore defaults', 'delete', 'kits_reset', false );
 	echo '</form>';
+}
 
-	$backup = get_option( 'kits_settings_backup' );
-	if ( is_array( $backup ) && ! empty( $backup['file'] ) ) {
-		echo '<h2>' . esc_html( 'Put the last copy back' ) . '</h2><p>' . esc_html( 'The settings as they were before the last import or restore (' . wp_date( 'j M Y, H:i', (int) ( $backup['time'] ?? 0 ) ) . ', ' . (string) ( $backup['why'] ?? '' ) . ').' ) . '</p>';
-		echo '<form method="post" action="' . $post . '">'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above.
-		wp_nonce_field( 'kits_transfer_undo' );
-		echo '<input type="hidden" name="action" value="kits_transfer_undo">';
-		submit_button( 'Put the copy back', 'secondary', 'kits_undo', false );
-		echo '</form>';
-	}
-	echo '</div>';
+/** Tools → Put the last copy back. */
+function kits_transfer_undo_part(): void {
+	$backup = (array) get_option( 'kits_settings_backup' );
+	echo '<p>' . esc_html( 'The settings as they were before the last import or restore (' . wp_date( 'j M Y, H:i', (int) ( $backup['time'] ?? 0 ) ) . ', ' . (string) ( $backup['why'] ?? '' ) . ').' ) . '</p>';
+	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
+	wp_nonce_field( 'kits_transfer_undo' );
+	echo '<input type="hidden" name="action" value="kits_transfer_undo">';
+	submit_button( 'Put the copy back', 'secondary', 'kits_undo', false );
+	echo '</form>';
 }
 
 /**
@@ -446,7 +489,13 @@ function kits_transfer_lines( array $s ): array {
  */
 function kits_transfer_back( array $result ): void {
 	set_transient( 'kits_transfer_result_' . get_current_user_id(), $result, 5 * MINUTE_IN_SECONDS );
-	wp_safe_redirect( admin_url( 'admin.php?page=kits-tools' ) );
+	$back = admin_url( 'admin.php?page=kits-tools' );
+	$from = (string) wp_parse_url( (string) wp_get_referer(), PHP_URL_QUERY );
+	parse_str( $from, $q );
+	if ( 'next' === ( $q['ui'] ?? '' ) ) {
+		$back = add_query_arg( 'ui', 'next', $back ); // Sent from the new look: come back to it.
+	}
+	wp_safe_redirect( $back );
 	exit;
 }
 
@@ -717,6 +766,9 @@ function kits_core_settings_form( string $group, string $also = '', string $back
  * @param string $back Address relative to wp-admin (options.php adds settings-updated=true to it).
  */
 function kits_options_form_fields( string $back ): void {
+	if ( function_exists( 'kits_frame_ready' ) && kits_frame_ready() ) {
+		$back = add_query_arg( 'ui', 'next', $back ); // Saved from the new look: come back to it.
+	}
 	echo '<input type="hidden" name="option_page" value="kits_options"><input type="hidden" name="action" value="update">';
 	wp_nonce_field( 'kits_options-options', '_wpnonce', false );
 	echo '<input type="hidden" name="_wp_http_referer" value="' . esc_attr( wp_make_link_relative( admin_url( $back ) ) ) . '">';
