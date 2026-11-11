@@ -256,12 +256,12 @@ function kits_admin_app_page(): void {
 	echo '<div class="wrap"><h1 class="screen-reader-text">' . esc_html__( 'Theme Options', 'kits-core' ) . '</h1><hr class="wp-header-end">';
 	settings_errors(); // "Settings saved." after a section that saves through options.php.
 	if ( ! kits_admin_app_ready() ) {
-		// The screen's script or the shell could not load: the older screen still works.
-		echo '<div class="notice notice-warning"><p>' . esc_html__( 'This screen could not load.', 'kits-core' ) . ' <a href="' . esc_url( admin_url( 'admin.php?page=kits-options&ui=classic' ) ) . '">' . esc_html__( 'Open the older Theme Options screen', 'kits-core' ) . '</a></p></div></div>';
+		// The screen's script or the shell could not load.
+		echo '<div class="notice notice-warning"><p>' . esc_html__( 'This screen could not load.', 'kits-core' ) . '</p></div></div>';
 		return;
 	}
 	echo '<div id="kits-admin-app">';
-	echo '<noscript><h1>' . esc_html__( 'Theme Options', 'kits-core' ) . '</h1><p>' . esc_html__( 'This screen needs JavaScript.', 'kits-core' ) . ' <a href="' . esc_url( admin_url( 'admin.php?page=kits-options&ui=classic' ) ) . '">' . esc_html__( 'Open the older Theme Options screen', 'kits-core' ) . '</a> · <a href="' . esc_url( admin_url( 'admin.php?page=kits-tools' ) ) . '">' . esc_html__( 'Export the settings', 'kits-core' ) . '</a></p></noscript>';
+	echo '<noscript><h1>' . esc_html__( 'Theme Options', 'kits-core' ) . '</h1><p>' . esc_html__( 'This screen needs JavaScript.', 'kits-core' ) . ' <a href="' . esc_url( admin_url( 'admin.php?page=kits-tools' ) ) . '">' . esc_html__( 'Export the settings', 'kits-core' ) . '</a></p></noscript>';
 	echo '</div>';
 	// The app moves each of these into its section; until it runs they stay hidden.
 	echo '<div id="kits-legacy-holder" hidden>';

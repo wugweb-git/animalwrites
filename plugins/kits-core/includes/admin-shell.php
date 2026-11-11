@@ -97,17 +97,18 @@ function kits_shell_body_class( $classes ) {
 }
 
 /**
- * The mount point of a shell screen, with a way out when JavaScript does not run.
+ * The mount point of a shell screen, with a note when JavaScript does not run.
  *
  * @param string $id           Element id the script renders into.
  * @param string $title        Screen title (the no-script heading).
- * @param string $fallback_url The current screen (or an export) for when the script cannot run.
- * @param string $fallback     Words of that link.
+ * @param string $fallback_url Not used (was a link to the earlier screen).
+ * @param string $fallback     Not used.
  */
 function kits_shell_mount( string $id, string $title, string $fallback_url, string $fallback ): void {
 	// Notices from other plugins go after .wp-header-end, so they stay out of the app and its pinned header.
 	echo '<div class="wrap"><h1 class="screen-reader-text">' . esc_html( $title ) . '</h1><hr class="wp-header-end"><div id="' . esc_attr( $id ) . '">';
-	echo '<noscript><p>' . esc_html__( 'This screen needs JavaScript.', 'kits-core' ) . ' <a href="' . esc_url( $fallback_url ) . '">' . esc_html( $fallback ) . '</a></p></noscript>';
+	unset( $fallback_url, $fallback ); // Kept in the signature for the plugins that call it; no link to the earlier screen (owner, 12 Nov 2026).
+	echo '<noscript><p>' . esc_html__( 'This screen needs JavaScript.', 'kits-core' ) . '</p></noscript>';
 	echo '</div></div>';
 }
 
