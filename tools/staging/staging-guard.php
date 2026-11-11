@@ -14,7 +14,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( 0 === strpos( (string) wp_parse_url( (string) get_option( 'home' ), PHP_URL_HOST ), 'staging.' ) ) {
+/*
+ * On when AW_STAGING is set in staging's wp-config.php (refresh.sh step 1, before the live database comes in), or when
+ * the request or the site address is a staging. host. The constant keeps it on while the copied database still holds
+ * live's address (between the import and the search-replace).
+ */
+$aw_staging_guard_on = ( defined( 'AW_STAGING' ) && AW_STAGING )
+	|| 0 === strpos( strtolower( (string) ( $_SERVER['HTTP_HOST'] ?? '' ) ), 'staging.' ) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- compared only.
+	|| 0 === strpos( (string) wp_parse_url( (string) get_option( 'home' ), PHP_URL_HOST ), 'staging.' );
+
+if ( $aw_staging_guard_on ) {
 	// No email of any kind (wp_mail, FluentCRM, Fluent Forms, MailWeb all go through wp_mail).
 	add_filter( 'pre_wp_mail', '__return_true', 0 );
 

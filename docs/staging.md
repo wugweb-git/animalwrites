@@ -9,7 +9,8 @@ signed-in users can see it, and it sends no email (`plugins/animal-writes-core/i
 The staging site lives in `~/domains/staging.animalwrites.in/public_html` (not under the live folder). Refresh it
 with `tools/staging/refresh.sh [git-ref]`, run on the server. That copy keeps live's personal data, so:
 - `tools/staging/staging-guard.php` goes in first as a must-use plugin: no email, no outside requests, noindex,
-  signed-in users only. It acts only when the site's address starts with `staging.`.
+  signed-in users only. It is on when `AW_STAGING` is set in staging's `wp-config.php` (the script's first step, so
+  it holds while the imported database still has live's address), or when the host starts with `staging.`.
 - WordPress cron is off (`DISABLE_WP_CRON`); MailWeb (live mailbox) and UpdraftPlus (remote backups) are off.
 - Pictures load from live's address; nothing is written to live.
 - The code is `origin/wordpress` (live) unless a ref is given. For a 0-difference check: refresh, record each page

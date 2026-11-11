@@ -18,11 +18,13 @@ STAGING_URL='https://staging.animalwrites.in'
 W="wp --path=$STAGING_ROOT --skip-plugins --skip-themes"
 cfg() { wp --path="$1" config get "$2" --skip-plugins --skip-themes; }
 
-# 1. Guard first: no email, no outside requests, no cron, from the first request on the new database.
+# 1. Guard first: no email, no outside requests, no cron, from the first request on the new database. AW_STAGING in
+# wp-config.php keeps the guard on while the imported database still holds live's address (steps 3 to 4).
 git -C "$STAGING_ROOT/aw_deploy" fetch -q origin
 git -C "$STAGING_ROOT/aw_deploy" checkout -q --detach "$REF"
 mkdir -p "$STAGING_ROOT/wp-content/mu-plugins"
 cp "$STAGING_ROOT/aw_deploy/tools/staging/staging-guard.php" "$STAGING_ROOT/wp-content/mu-plugins/aw-staging-guard.php"
+$W config set AW_STAGING true --raw --quiet
 $W config set DISABLE_WP_CRON true --raw --quiet
 
 # 2. Same plugins and themes as live: the repo's own as links into staging's checkout, third-party ones copied from
@@ -62,5 +64,5 @@ wp --path="$STAGING_ROOT" cache flush --quiet || true
 wp --path="$STAGING_ROOT" litespeed-purge all --quiet 2>/dev/null || true
 
 echo "Staging: $(git -C "$STAGING_ROOT/aw_deploy" log -1 --format='%h %s')"
-echo "home=$($W option get home) blog_public=$($W option get blog_public) cron_off=$($W config get DISABLE_WP_CRON)"
+echo "home=$($W option get home) blog_public=$($W option get blog_public) cron_off=$($W config get DISABLE_WP_CRON) guard_const=$($W config get AW_STAGING)"
 echo "Active plugins: $(wp --path="$STAGING_ROOT" plugin list --status=active --field=name | tr '\n' ' ')"
