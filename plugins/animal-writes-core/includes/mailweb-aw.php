@@ -3,7 +3,7 @@
  * Animal Writes' side of Mailweb (owner, 20 Oct 2026: Mailweb is a product; what only Animal Writes uses lives here).
  *
  * - The Mail API token stays in wp-config as AW_HOSTINGER_MAIL_TOKEN; Mailweb reads MAILWEB_API_TOKEN.
- * - The open campaign's strip under every signature (mail-campaign-strip.php, `mailweb_after_signature`).
+ * - No strip under signatures since 12 Nov 2026: each signature has its own thin banner (mail-campaign-strip.php unused).
  * - Mail → Website forms: the Contact, Volunteer, Claim and Report forms' Fluent Forms entries and the older contact
  *   messages (aw_message), through `mailweb_forms_source`; a notice in wp-admin while any of them is unread (no email).
  *   Inbox → Contact messages opens it.
@@ -25,14 +25,8 @@ if ( ! defined( 'MAILWEB_API_TOKEN' ) && defined( 'AW_HOSTINGER_MAIL_TOKEN' ) &&
 	define( 'MAILWEB_API_TOKEN', AW_HOSTINGER_MAIL_TOKEN );
 }
 
-require_once AW_CORE_DIR . 'includes/mail-campaign-strip.php';
-
-add_filter(
-	'mailweb_after_signature',
-	fn( $html, $context = 'site' ) => $html . aw_mail_campaign_strip_html(),
-	10,
-	2
-);
+// No campaign strip under signatures (owner, 12 Nov 2026): each signature carries one thin banner of its own (campaign
+// or volunteer), set in MailWeb → Settings → profiles. mail-campaign-strip.php is kept but no longer loaded.
 
 // The one-time move of aw-mail's options, table and schedule to Mailweb ran on 20 Oct 2026 and was removed (audit item 16, flag confirmed on live 25 Oct 2026; see git history).
 
