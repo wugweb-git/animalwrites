@@ -294,6 +294,13 @@ PY
 want 200 "POST /kits/v1/settings unchanged Save (administrator)" -X POST -b /tmp/cj-ci -H "X-WP-Nonce: $NA" -H 'Content-Type: application/json' -d @/tmp/ks-values.json "$H/?rest_route=/kits/v1/settings"
 grep -q '"saved":false' /tmp/rw.out && echo "ok   unchanged Save reports nothing saved" || { echo "FAIL unchanged Save wrote"; FAIL=1; }
 same "Kits Settings" "$BEFORE" "$(optmd5 kits_theme_options)"
+# Each Kits plugin's new screens: tools/ci/smoke-ui-<plugin>.sh, using screen, route, post, optmd5 and same above.
+for f in "$(dirname "$0")"/smoke-ui-*.sh; do
+  [ -f "$f" ] || continue
+  echo "-- $(basename "$f" .sh)"
+  # shellcheck source=/dev/null
+  . "$f"
+done
 
 wp user delete rw-sub rw-ed --yes --quiet
 if [ -f /tmp/wp-debug.log ] && grep -E 'PHP (Fatal|Parse) error' /tmp/wp-debug.log; then FAIL=1; fi
