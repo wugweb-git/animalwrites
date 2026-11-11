@@ -4,7 +4,7 @@ Tags: email, inbox, hostinger, smtp, signature
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 3.2.1
+Stable tag: 3.3.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -72,6 +72,9 @@ No. The Hostinger Mail API sends only as a real mailbox, so choose a mailbox in 
 Nothing is deleted. Settings and earlier data stay in place.
 
 == Changelog ==
+
+= 3.3.0 =
+* Lists: a Status column (New, Read, Replied, Forwarded) in every folder except Sent, and in Website forms. Replied also counts replies sent from webmail or another tool: the sender was written to, from any mailbox, after the message arrived.
 
 = 3.2.1 =
 * Shown as MailWeb (was Mailweb). The folder, text domain, settings, webhook address and everything saved stay the same.

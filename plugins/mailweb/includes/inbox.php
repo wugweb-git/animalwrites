@@ -35,7 +35,7 @@ const MAILWEB_MAX_ATTACH = 10485760; // attachments per message: 10 MB in total
  * The website forms source, or null. A site shows its form messages in Mail by returning an array of callables from
  * the `mailweb_forms_source` filter:
  * - label  (string)                   Folder name (default "Website forms").
- * - list   fn( $page, $per ): array   ['items' => list of [id, name, email, subject, date, unread], 'total' => int].
+ * - list   fn( $page, $per ): array   ['items' => list of [id, name, email, subject, date, unread, replied?], 'total' => int].
  * - unread fn(): int                  Unread count.
  * - get    fn( $id ): array|null      [subject, email, date, text, fields => [label => value]].
  * - mark   fn( $id, $what ): bool     $what = read, unread or trash (to the WordPress Trash: restorable).
@@ -278,6 +278,8 @@ function mailweb_list_rows( $s ) {
 				'date'    => (string) ( $f['date'] ?? '' ),
 				'unseen'  => ! empty( $f['unread'] ),
 				'files'   => false,
+				'answered' => ! empty( $f['replied'] ),
+				'ts'      => (int) strtotime( get_gmt_from_date( (string) ( $f['date'] ?? '' ) ) . ' UTC' ), // forms give site time
 			);
 		}
 		return array(
@@ -335,6 +337,9 @@ function mailweb_list_rows( $s ) {
 					'unseen'  => ! empty( $m['unseen'] ),
 					'files'   => ! empty( $m['attachments'] ),
 					'mailbox' => $addr,
+					'answered' => in_array( '\\Answered', (array) ( $m['flags'] ?? array() ), true ),
+					'forwarded' => in_array( '$Forwarded', (array) ( $m['flags'] ?? array() ), true ),
+					'ts'      => (int) strtotime( (string) ( $m['date'] ?? '' ) ),
 				);
 			}
 			$got += count( $data );
@@ -360,6 +365,76 @@ function mailweb_list_rows( $s ) {
 		'total'  => $total,
 		'failed' => ! $okay && $boxes,
 	);
+}
+
+/**
+ * When each address was last written to from any mailbox: lower-case address => newest Sent time (Unix). Read from the
+ * newest 200 messages in each mailbox's Sent, cached for five minutes and cleared when Mail sends. A message counts as
+ * replied when its sender was written to after it arrived, so replies sent from webmail or another tool count too.
+ *
+ * @return array
+ */
+function mailweb_sent_times() {
+	$c = get_transient( 'mailweb_sent_times' );
+	if ( is_array( $c ) ) {
+		return $c;
+	}
+	$out  = array();
+	$ok   = false;
+	$path = mailweb_role_path( 'sent' );
+	foreach ( array_keys( mailweb_all_boxes() ) as $key ) {
+		if ( ! isset( mailweb_folders( $key )[ $path ] ) ) {
+			continue;
+		}
+		for ( $p = 1; $p <= 2; $p++ ) {
+			list( $code, $j ) = mailweb_call(
+				'GET',
+				mailweb_fpath( $key, $path ) . '/messages?' . http_build_query(
+					array(
+						'page'    => $p,
+						'perPage' => 100,
+						'sort'    => '-date',
+					)
+				)
+			);
+			if ( 200 !== $code ) {
+				break;
+			}
+			$ok   = true;
+			$data = (array) ( $j['data'] ?? array() );
+			foreach ( $data as $m ) {
+				$t = (int) strtotime( (string) ( $m['date'] ?? '' ) );
+				foreach ( mailweb_addresses( array_merge( (array) ( $m['to'] ?? array() ), (array) ( $m['cc'] ?? array() ) ) ) as $a ) {
+					$out[ $a ] = max( $out[ $a ] ?? 0, $t );
+				}
+			}
+			if ( count( $data ) < 100 ) {
+				break;
+			}
+		}
+	}
+	if ( $ok ) {
+		set_transient( 'mailweb_sent_times', $out, 5 * MINUTE_IN_SECONDS );
+	}
+	return $out;
+}
+
+/**
+ * A list row's status: forwarded, replied, new or read.
+ *
+ * @param array $row A row from mailweb_list_rows().
+ * @return string
+ */
+function mailweb_row_status( $row ) {
+	if ( ! empty( $row['forwarded'] ) ) {
+		return 'forwarded';
+	}
+	$email = strtolower( trim( (string) ( $row['email'] ?? '' ) ) );
+	$last  = '' !== $email ? (int) ( mailweb_sent_times()[ $email ] ?? 0 ) : 0;
+	if ( ! empty( $row['answered'] ) || ( $last && $last >= (int) ( $row['ts'] ?? 0 ) ) ) {
+		return 'replied';
+	}
+	return ! empty( $row['unseen'] ) ? 'new' : 'read';
 }
 
 /* ---------- The screen ---------- */
@@ -432,7 +507,7 @@ function mailweb_inbox_page() {
 		return; // the new screen (&ui=next, mailweb-ui.php).
 	}
 	$s   = mailweb_state();
-	echo '<style>#mailweb tr.unread td,#mailweb tr.unread th{background-color:#fcf9e8}#mailweb tr.unread .check-column{box-shadow:inset 4px 0 0 #2271b1}#mailweb tr.unread .column-from,#mailweb tr.unread .column-subject>a{font-weight:600}#mailweb .column-date{width:9em}#mailweb .column-mailbox{width:12em}#mailweb .column-from{width:22%}#mailweb .awm-box{float:right;margin-top:9px}#mailweb .awm-frame{width:100%;height:65vh;border:1px solid #c3c4c7;background:#fff;display:block}#mailweb .awm-actions .button{width:100%;text-align:center;margin:0 0 6px}#mailweb #titlewrap #title{padding:3px 8px;font-size:1.7em;height:1.7em;width:100%}#mailweb .awm-field{display:flex;gap:8px;align-items:center;margin:0 0 8px}#mailweb .awm-field label{flex:0 0 3.5em;color:#50575e}#mailweb .awm-field input{flex:1}@media (max-width:767px){#mailweb .awm-box{float:none;margin:8px 0}}</style>';
+	echo '<style>#mailweb tr.unread td,#mailweb tr.unread th{background-color:#fcf9e8}#mailweb tr.unread .check-column{box-shadow:inset 4px 0 0 #2271b1}#mailweb tr.unread .column-from,#mailweb tr.unread .column-subject>a{font-weight:600}#mailweb .column-date{width:9em}#mailweb .column-status{width:7em}#mailweb .column-mailbox{width:12em}#mailweb .column-from{width:22%}#mailweb .awm-box{float:right;margin-top:9px}#mailweb .awm-frame{width:100%;height:65vh;border:1px solid #c3c4c7;background:#fff;display:block}#mailweb .awm-actions .button{width:100%;text-align:center;margin:0 0 6px}#mailweb #titlewrap #title{padding:3px 8px;font-size:1.7em;height:1.7em;width:100%}#mailweb .awm-field{display:flex;gap:8px;align-items:center;margin:0 0 8px}#mailweb .awm-field label{flex:0 0 3.5em;color:#50575e}#mailweb .awm-field input{flex:1}@media (max-width:767px){#mailweb .awm-box{float:none;margin:8px 0}}</style>';
 	echo '<div class="wrap" id="mailweb">';
 	if ( isset( $_GET['compose'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		mailweb_compose_screen( $s, sanitize_key( $_GET['compose'] ) ); // phpcs:ignore WordPress.Security.NonceVerification
@@ -523,30 +598,12 @@ function mailweb_message_screen( $s ) {
 		echo '<div class="notice notice-error"><p>' . esc_html__( 'This message could not be opened (moved or deleted in webmail?).', 'mailweb' ) . '</p></div>';
 		return;
 	}
-	// The Mail API does not mark a message read when its text is fetched: mark it read here, as webmail does on open.
-	if ( ! in_array( '\\Seen', (array) ( $msg['m']['flags'] ?? array() ), true ) ) {
-		mailweb_call( 'PATCH', mailweb_fpath( $s['box'], $path ) . '/messages/' . (int) $s['uid'], array( 'addFlags' => array( '\\Seen' ) ) );
-	}
-	delete_transient( 'mailweb_folders_' . $s['box'] );
-	if ( function_exists( 'mailweb_overview_flush' ) ) {
-		mailweb_overview_flush();
-	}
-	$m      = $msg['m'];
-	$images = ! empty( $_GET['images'] ); // phpcs:ignore WordPress.Security.NonceVerification
-	$inline = array();
-	foreach ( (array) ( $m['attachments'] ?? array() ) as $a ) {
-		if ( ! empty( $a['contentId'] ) && (int) ( $a['sizeBytes'] ?? 0 ) < 1048576 && preg_match( '#^image/(png|jpe?g|gif|webp)$#', (string) ( $a['contentType'] ?? '' ) ) ) {
-			list( $code, $bin ) = mailweb_call( 'GET', mailweb_fpath( $s['box'], $path ) . '/messages/' . (int) $s['uid'] . '/attachments/' . rawurlencode( (string) $a['id'] ), null, true );
-			if ( 200 === $code ) {
-				$inline[ trim( (string) $a['contentId'], '<>' ) ] = 'data:' . $a['contentType'] . ';base64,' . base64_encode( $bin ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions
-			}
-		}
-	}
-	$html   = trim( (string) ( $msg['t']['html'] ?? '' ) );
-	$doc    = '' !== $html ? mailweb_safe_html( $html, $images, $inline ) : mailweb_text_html( (string) ( $msg['t']['text'] ?? '' ) );
-	$remote = '' !== $html && preg_match( '#<img\b[^>]*src=["\']\s*(?:https?:)?//|url\(\s*[\'"]?\s*(?:https?:)?//#i', $html );
-	$u      = array( 'box' => $s['box'], 'folder' => $path, 'uid' => $s['uid'], 'view' => $view );
-	$c      = fn( $mode ) => add_query_arg( array( 'page' => 'mailweb', 'box' => $s['box'], 'folder' => $s['folder'], 'uid' => $s['uid'], 'compose' => $mode, 'view' => $view ), admin_url( 'admin.php' ) );
+	mailweb_mark_seen( $s['box'], $path, (int) $s['uid'], $msg );
+	$m                    = $msg['m'];
+	$images               = ! empty( $_GET['images'] ); // phpcs:ignore WordPress.Security.NonceVerification
+	list( $doc, $remote ) = mailweb_message_doc( $s['box'], $path, (int) $s['uid'], $msg, $images );
+	$u                    = array( 'box' => $s['box'], 'folder' => $path, 'uid' => $s['uid'], 'view' => $view );
+	$c                    = fn( $mode ) => add_query_arg( array( 'page' => 'mailweb', 'box' => $s['box'], 'folder' => $s['folder'], 'uid' => $s['uid'], 'compose' => $mode, 'view' => $view ), admin_url( 'admin.php' ) );
 	echo '<div id="poststuff"><div id="post-body" class="metabox-holder columns-2"><div id="post-body-content">';
 	echo '<h2 style="font-size:1.5em;padding:0;margin:0 0 12px">' . esc_html( '' !== trim( (string) ( $m['subject'] ?? '' ) ) ? $m['subject'] : __( '(no subject)', 'mailweb' ) ) . '</h2>';
 	echo '<div class="postbox"><div class="inside"><table class="form-table" role="presentation"><tbody>';
@@ -724,6 +781,51 @@ function mailweb_form_item_screen( $s ) {
 
 
 /* ---------- Reading ---------- */
+
+/**
+ * Mark a message read, as webmail does on open (the Mail API does not when its text is fetched), and drop the cached
+ * unread counts.
+ *
+ * @param string $key  Mailbox key.
+ * @param string $path Folder path.
+ * @param int    $uid  Message.
+ * @param array  $msg  From mailweb_get().
+ */
+function mailweb_mark_seen( $key, $path, $uid, $msg ) {
+	if ( ! in_array( '\\Seen', (array) ( $msg['m']['flags'] ?? array() ), true ) ) {
+		mailweb_call( 'PATCH', mailweb_fpath( $key, $path ) . '/messages/' . (int) $uid, array( 'addFlags' => array( '\\Seen' ) ) );
+	}
+	delete_transient( 'mailweb_folders_' . $key );
+	if ( function_exists( 'mailweb_overview_flush' ) ) {
+		mailweb_overview_flush();
+	}
+}
+
+/**
+ * The message as a safe document for the sandboxed frame, and whether it asks for pictures from the internet.
+ *
+ * @param string $key    Mailbox key.
+ * @param string $path   Folder path.
+ * @param int    $uid    Message.
+ * @param array  $msg    From mailweb_get().
+ * @param bool   $images Show pictures from the internet.
+ * @return array [ document, remote pictures (bool) ].
+ */
+function mailweb_message_doc( $key, $path, $uid, $msg, $images ) {
+	$inline = array();
+	foreach ( (array) ( $msg['m']['attachments'] ?? array() ) as $a ) {
+		if ( ! empty( $a['contentId'] ) && (int) ( $a['sizeBytes'] ?? 0 ) < 1048576 && preg_match( '#^image/(png|jpe?g|gif|webp)$#', (string) ( $a['contentType'] ?? '' ) ) ) {
+			list( $code, $bin ) = mailweb_call( 'GET', mailweb_fpath( $key, $path ) . '/messages/' . (int) $uid . '/attachments/' . rawurlencode( (string) $a['id'] ), null, true );
+			if ( 200 === $code ) {
+				$inline[ trim( (string) $a['contentId'], '<>' ) ] = 'data:' . $a['contentType'] . ';base64,' . base64_encode( $bin ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions
+			}
+		}
+	}
+	$html   = trim( (string) ( $msg['t']['html'] ?? '' ) );
+	$doc    = '' !== $html ? mailweb_safe_html( $html, $images, $inline ) : mailweb_text_html( (string) ( $msg['t']['text'] ?? '' ) );
+	$remote = '' !== $html && (bool) preg_match( '#<img\b[^>]*src=["\']\s*(?:https?:)?//|url\(\s*[\'"]?\s*(?:https?:)?//#i', $html );
+	return array( $doc, $remote );
+}
 
 /** One message: meta and text, cached per request. Fetching does not mark it read; mailweb_message_screen() does. */
 function mailweb_get( $key, $folder, $uid ) {
@@ -981,6 +1083,7 @@ function mailweb_send_from_form( $in, $refbox ) {
 		call_user_func( mailweb_forms()['replied'], $item );
 	}
 	delete_transient( 'mailweb_folders_' . $from );
+	delete_transient( 'mailweb_sent_times' );
 	$dest = add_query_arg( array( 'page' => 'mailweb', 'box' => 'all', 'folder' => $orig ? mailweb_role_of( $orig[1] ) : 'sent' ), admin_url( 'admin.php' ) );
 	wp_safe_redirect( add_query_arg( 'mailweb_done', 'sent', $dest ) );
 	exit;

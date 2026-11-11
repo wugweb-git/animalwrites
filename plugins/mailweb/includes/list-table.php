@@ -29,9 +29,12 @@ class Mailweb_List_Table extends WP_List_Table {
 
 	public function get_columns() {
 		if ( MAILWEB_FORMS === $this->s['folder'] ) {
-			return array( 'cb' => '<input type="checkbox">', 'from' => __( 'From', 'mailweb' ), 'subject' => __( 'About', 'mailweb' ), 'date' => __( 'Date', 'mailweb' ) );
+			return array( 'cb' => '<input type="checkbox">', 'from' => __( 'From', 'mailweb' ), 'subject' => __( 'About', 'mailweb' ), 'status' => __( 'Status', 'mailweb' ), 'date' => __( 'Date', 'mailweb' ) );
 		}
 		$c = array( 'cb' => '<input type="checkbox">', 'from' => 'sent' === $this->s['folder'] ? __( 'To', 'mailweb' ) : __( 'From', 'mailweb' ), 'subject' => __( 'Subject', 'mailweb' ) );
+		if ( 'sent' !== $this->s['folder'] ) {
+			$c['status'] = __( 'Status', 'mailweb' );
+		}
 		if ( 'all' === $this->s['box'] ) {
 			$c['mailbox'] = __( 'Mailbox', 'mailweb' );
 		}
@@ -112,6 +115,18 @@ class Mailweb_List_Table extends WP_List_Table {
 			}
 		}
 		return $out . $this->row_actions( $acts );
+	}
+
+	/** New (bold), Read, Replied or Forwarded. */
+	public function column_status( $item ) {
+		$st = mailweb_row_status( $item );
+		$l  = array(
+			'new'       => __( 'New', 'mailweb' ),
+			'read'      => __( 'Read', 'mailweb' ),
+			'replied'   => __( 'Replied', 'mailweb' ),
+			'forwarded' => __( 'Forwarded', 'mailweb' ),
+		);
+		return 'new' === $st ? '<strong>' . esc_html( $l['new'] ) . '</strong>' : esc_html( $l[ $st ] );
 	}
 
 	public function column_mailbox( $item ) {

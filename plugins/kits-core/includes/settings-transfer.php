@@ -113,7 +113,8 @@ function kits_settings_export(): array {
 
 	$options = array();
 	foreach ( kits_settings_transfer_options() as $name ) {
-		$options[ $name ] = kits_settings_transfer_object( get_option( $name ) );
+		// A plugin may export only part of an option it shares (kits_settings_transfer_value).
+		$options[ $name ] = kits_settings_transfer_object( apply_filters( 'kits_settings_transfer_value', get_option( $name ), $name ) );
 	}
 
 	$patterns = array();
@@ -278,6 +279,8 @@ function kits_settings_import_options( $input, bool $dry_run ): array {
 			$out['ignored'][] = $name;
 			continue;
 		}
+		// A plugin that exports part of an option merges the file's part into the stored value here.
+		$value = apply_filters( 'kits_settings_transfer_import_value', $value, $name, get_option( $name ) );
 		// The value as it would be saved, to tell a real change from a no-op.
 		if ( sanitize_option( $name, $value ) === get_option( $name ) ) {
 			$out['unchanged'][] = $name;

@@ -1,0 +1,386 @@
+/*
+ * MailWeb Inbox as an email app (src/inbox.js).
+ * Colours, spaces and radii are the shell's tokens (--ks-*).
+ * Sizes from the design docs: the list pane's minimum is
+ * --kit-card-min (18rem, docs/design-system.md); the message
+ * frame keeps today's message screen height (65vh,
+ * includes/inbox.php); targets at least 44px; breakpoints
+ * 768 and 1200. Text sizes are the shell's (13px small, 18px
+ * card title, kits-core src/shell/shell.css).
+ */
+
+.mailweb-mail {
+	display: grid;
+	gap: var(--ks-s4);
+	grid-template-columns: minmax(0, 1fr);
+	align-items: start;
+}
+
+.mailweb-mail__folders,
+.mailweb-mail__list,
+.mailweb-mail__read {
+	min-width: 0;
+	background: var(--ks-white);
+	border: 1px solid var(--ks-g2);
+	border-radius: var(--ks-r-card);
+	padding: var(--ks-s4);
+}
+
+/* Folders */
+.mailweb-mail__new {
+	display: flex;
+	justify-content: center;
+	margin-bottom: var(--ks-s3);
+}
+
+/* The note and the mailbox picker take the column's width, never set it. */
+.mailweb-mail__box,
+.mailweb-mail__webmail {
+	contain: inline-size;
+}
+
+.mailweb-mail__box select {
+	width: 100%;
+	min-height: 44px;
+	margin-bottom: var(--ks-s3);
+}
+
+.mailweb-mail__views {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--ks-s1);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.mailweb-mail__view {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--ks-s2);
+	min-height: 44px;
+	padding: 0 var(--ks-s3);
+	border: 0;
+	border-radius: var(--ks-r-control);
+	background: transparent;
+	color: var(--ks-ink);
+	font: inherit;
+	cursor: pointer;
+}
+
+.mailweb-mail__view:hover {
+	background: var(--ks-g1);
+}
+
+.mailweb-mail__view[aria-current="page"] {
+	background: var(--ks-ink);
+	color: var(--ks-white);
+	font-weight: 600;
+}
+
+.mailweb-mail__count {
+	padding: 0 var(--ks-s2);
+	border-radius: var(--ks-r-pill);
+	background: var(--ks-g1);
+	color: var(--ks-ink);
+	font-size: 13px;
+	font-weight: 600;
+	text-align: center;
+}
+
+.mailweb-mail__webmail {
+	display: none;
+	margin: var(--ks-s4) 0 0;
+	color: var(--ks-g6);
+	font-size: 13px;
+}
+
+/* List */
+.mailweb-mail__list {
+	padding: 0;
+	overflow: hidden;
+}
+
+.mailweb-mail__search {
+	padding: var(--ks-s3) var(--ks-s3) 0;
+}
+
+.mailweb-mail__search input {
+	width: 100%;
+	min-height: 44px;
+	padding: 0 var(--ks-s3);
+	border: 1px solid var(--ks-g3);
+	border-radius: var(--ks-r-control);
+}
+
+.mailweb-mail__bar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--ks-s3);
+	min-height: 44px;
+	padding: var(--ks-s2) var(--ks-s3);
+	border-bottom: 1px solid var(--ks-g2);
+}
+
+.mailweb-mail__bar > :last-child {
+	margin-left: auto;
+}
+
+.mailweb-mail__list .kits-shell-notice {
+	margin: var(--ks-s3);
+}
+
+.mailweb-mail__rows {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.mailweb-mail__row {
+	display: flex;
+	align-items: flex-start;
+	gap: var(--ks-s2);
+	padding-left: var(--ks-s3);
+	border-bottom: 1px solid var(--ks-g2);
+	box-shadow: inset var(--ks-s1) 0 0 transparent;
+}
+
+.mailweb-mail__row:hover {
+	background: var(--ks-g1);
+}
+
+.mailweb-mail__row.is-open {
+	background: var(--ks-g1);
+	box-shadow: inset var(--ks-s1) 0 0 var(--ks-ink);
+}
+
+.mailweb-mail__pick {
+	flex: none;
+	margin: var(--ks-s4) 0 0;
+}
+
+.mailweb-mail__bar .mailweb-mail__pick {
+	margin: 0;
+}
+
+.mailweb-mail__open {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	gap: var(--ks-s1);
+	min-width: 0;
+	min-height: 44px;
+	padding: var(--ks-s3) var(--ks-s3) var(--ks-s3) 0;
+	border: 0;
+	background: transparent;
+	color: var(--ks-g7);
+	font: inherit;
+	text-align: left;
+	cursor: pointer;
+}
+
+.mailweb-mail__line {
+	display: flex;
+	align-items: center;
+	gap: var(--ks-s2);
+	min-width: 0;
+}
+
+.mailweb-mail__from,
+.mailweb-mail__title {
+	overflow: hidden;
+	flex: 1;
+	min-width: 0;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+.mailweb-mail__from {
+	color: var(--ks-ink);
+}
+
+.mailweb-mail__date {
+	flex: none;
+	color: var(--ks-g6);
+	font-size: 13px;
+}
+
+.mailweb-mail__row.is-unread .mailweb-mail__from,
+.mailweb-mail__row.is-unread .mailweb-mail__title,
+.mailweb-mail__row.is-unread .mailweb-mail__date {
+	color: var(--ks-ink);
+	font-weight: 700;
+}
+
+.mailweb-mail__row.is-unread .mailweb-mail__from::before {
+	content: "";
+	display: inline-block;
+	width: var(--ks-s2);
+	height: var(--ks-s2);
+	margin-right: var(--ks-s2);
+	border-radius: var(--ks-r-pill);
+	background: var(--ks-ink);
+	vertical-align: middle;
+}
+
+.mailweb-mail__clip {
+	flex: none;
+	color: var(--ks-g6);
+	vertical-align: middle;
+}
+
+.mailweb-mail__muted {
+	color: var(--ks-g6);
+	font-size: 13px;
+}
+
+.mailweb-mail__list .kits-shell-state {
+	padding: var(--ks-s5) var(--ks-s4);
+}
+
+.mailweb-mail__pager {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--ks-s3);
+	padding: var(--ks-s3);
+}
+
+/* Reading */
+.mailweb-mail__back {
+	min-height: 44px;
+	margin-bottom: var(--ks-s2);
+}
+
+.mailweb-mail__subject {
+	margin: 0 0 var(--ks-s3);
+	font-size: 18px;
+	line-height: 1.3;
+	overflow-wrap: anywhere;
+}
+
+.mailweb-mail__subject:focus {
+	outline: none;
+}
+
+.mailweb-mail__toolbar {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--ks-s2);
+	margin-bottom: var(--ks-s4);
+}
+
+.mailweb-mail__meta {
+	display: grid;
+	grid-template-columns: max-content minmax(0, 1fr);
+	gap: var(--ks-s1) var(--ks-s3);
+	margin: 0 0 var(--ks-s4);
+	padding: var(--ks-s3) 0;
+	border-top: 1px solid var(--ks-g2);
+	border-bottom: 1px solid var(--ks-g2);
+}
+
+.mailweb-mail__meta > div {
+	display: contents;
+}
+
+.mailweb-mail__meta dt {
+	color: var(--ks-g6);
+}
+
+.mailweb-mail__meta dd {
+	margin: 0;
+	min-width: 0;
+	overflow-wrap: anywhere;
+}
+
+.mailweb-mail__read .kits-shell-notice {
+	margin-bottom: var(--ks-s3);
+}
+
+.mailweb-mail__frame {
+	display: block;
+	width: 100%;
+	height: 65vh;
+	border: 1px solid var(--ks-g2);
+	border-radius: var(--ks-r-control);
+	background: var(--ks-white);
+}
+
+.mailweb-mail__text {
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+}
+
+.mailweb-mail__files {
+	margin-top: var(--ks-s4);
+}
+
+.mailweb-mail__files h3 {
+	margin: 0 0 var(--ks-s2);
+	font-size: 1em;
+}
+
+.mailweb-mail__files ul {
+	margin: 0 0 var(--ks-s3);
+	padding: 0;
+	list-style: none;
+}
+
+.mailweb-mail__files li {
+	display: flex;
+	align-items: center;
+	gap: var(--ks-s2);
+	min-height: 44px;
+}
+
+/* Phones and tablets: one pane at a time. */
+.mailweb-mail[data-pane="list"] .mailweb-mail__read,
+.mailweb-mail[data-pane="read"] .mailweb-mail__folders,
+.mailweb-mail[data-pane="read"] .mailweb-mail__list {
+	display: none;
+}
+
+/* Tablets: folders beside the list; the message replaces both. */
+@media (min-width: 768px) {
+
+	.mailweb-mail[data-pane="list"] {
+		grid-template-columns: max-content minmax(var(--kit-card-min, 18rem), 1fr);
+	}
+
+	.mailweb-mail__views {
+		flex-direction: column;
+	}
+
+	.mailweb-mail__webmail {
+		display: block;
+	}
+}
+
+/* Desktops: all three panes, as an email app. */
+@media (min-width: 1200px) {
+
+	.mailweb-mail,
+	.mailweb-mail[data-pane="list"],
+	.mailweb-mail[data-pane="read"] {
+		grid-template-columns: max-content minmax(var(--kit-card-min, 18rem), 2fr) minmax(0, 3fr);
+	}
+
+	.mailweb-mail[data-pane] .mailweb-mail__folders,
+	.mailweb-mail[data-pane] .mailweb-mail__list,
+	.mailweb-mail[data-pane] .mailweb-mail__read {
+		display: block;
+	}
+
+	.mailweb-mail[data-pane] .mailweb-mail__folders {
+		position: sticky;
+		top: var(--ks-s6);
+	}
+
+	.mailweb-mail__back {
+		display: none;
+	}
+}
