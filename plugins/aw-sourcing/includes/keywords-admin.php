@@ -634,7 +634,7 @@ add_action(
 				'id'      => 'aw-kw-searches',
 				'title'   => 'Searches and press',
 				'content' => '<p>Each English Include keyword, and each Search keyword, is a Google News search every run (India edition, the last two days, up to 40 new items). The Items column counts what each one brought in over 30 days.</p>'
-					. '<p>Press keywords are the weekly press-discovery queries (Google News and Google Search), from the date set in the Press view. Results wait in SourceWeb → To review.</p>',
+					. '<p>Press keywords are the weekly press-discovery queries (Google News and Google Search), from the date set in the Press view. Results wait in Plugins → SourceWeb → To review.</p>',
 			)
 		);
 		$screen->add_help_tab(

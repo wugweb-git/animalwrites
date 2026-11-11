@@ -78,7 +78,7 @@ add_action(
 				printf(
 					'<input type="checkbox" id="planweb_on" name="planweb_on" value="1"%1$s> <span class="description">%2$s</span>',
 					checked( '1', (string) get_option( 'planweb_on', '' ), false ),
-					esc_html__( 'On: Kits → Dates moves to PlanWeb → Calendar, and every date in Dates is copied there once (the Dates list itself is kept unchanged as a backup). Off: Kits → Dates as before; entries are kept.', 'planweb' )
+					esc_html__( 'On: Appearance → Kits → Dates moves to Plugins → PlanWeb → Calendar, and every date in Dates is copied there once (the Dates list itself is kept unchanged as a backup). Off: Appearance → Kits → Dates as before; entries are kept.', 'planweb' )
 				);
 			},
 			'aw-modules',

@@ -78,7 +78,7 @@ function kits_theme_option_fields(): array {
 				'200' => '200',
 			),
 			'50',
-			'Most joined component files kept in uploads/kits-cache/parts/ besides the one per kind of page (front page, page, single item of each type, term, search…), which is always kept. Once it is reached, a page with an unusual mix of parts loads them separately. Kits → Home → Joined files shows both counts.',
+			'Most joined component files kept in uploads/kits-cache/parts/ besides the one per kind of page (front page, page, single item of each type, term, search…), which is always kept. Once it is reached, a page with an unusual mix of parts loads them separately. Appearance → Kits → Home → Joined files shows both counts.',
 		),
 		'defer_scripts'       => array( 'Speed', 'Deferred scripts', 'switch', $on_off, 'on', 'jQuery, the Fluent Forms submit script, wp-hooks, wp-i18n and the Accessibility Checker fixes load without holding up the page. Off: each holds the page while it loads; forms and the letter tool work either way.' ),
 		'jquery_footer'       => array( 'Speed', 'jQuery at the end of the page', 'switch', $on_off, 'on', 'Moves jQuery out of the page head. Off: jQuery loads in the head again, which delays the first paint; forms and the letter tool work either way.' ),

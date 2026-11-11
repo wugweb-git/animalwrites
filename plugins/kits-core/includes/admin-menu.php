@@ -1,7 +1,9 @@
 <?php
 /**
- * The Kits menu: six items, which are also the tabs on every Kits screen (docs/admin-ui-spec.md §B, approved by the
- * owner on 11 Nov 2026). Home, Theme Options, Settings, Plugins, Tools, Help.
+ * The Kits screens: six, which are the tabs on every Kits screen (docs/admin-ui-spec.md §B, approved by the owner on
+ * 11 Nov 2026). Home, Theme Options, Settings, Plugins, Tools, Help. In the WordPress menu they are one item,
+ * Appearance → Kits, which opens Home (admin-home.php, admin-fold.php); the six stay registered under the Kits menu
+ * slug, so their addresses and hook names are as before.
  *
  * - The rules (the six, the old addresses, which entries stay) are plain PHP in admin-menu-model.php, tested by
  *   tests/admin-menu-tests.php without WordPress.
@@ -78,17 +80,12 @@ function kits_screen_tab( string $slug ): string {
 	return isset( kits_menu_six( KITS_MENU )[ $tab ] ) ? $tab : '';
 }
 
-// The Kits menu stays open on a hidden screen, with its tab's item lit (core menu highlighting).
+// A hidden screen linked from one of the six belongs to Kits: Appearance → Kits is lit on it (admin-fold.php).
 add_filter(
 	'parent_file',
 	function ( $parent_file ) {
-		global $plugin_page, $submenu_file;
-		$tab = is_string( $plugin_page ) ? kits_screen_tab( $plugin_page ) : '';
-		if ( '' === $tab ) {
-			return $parent_file;
-		}
-		$submenu_file = $tab; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- which Kits item is lit.
-		return KITS_MENU;
+		global $plugin_page;
+		return is_string( $plugin_page ) && '' !== kits_screen_tab( $plugin_page ) ? KITS_MENU : $parent_file;
 	}
 );
 

@@ -57,7 +57,8 @@ foreach ( array( 'aw_si_daily', 'aw_si_rollup', 'aw_si_ga4', 'aw_si_psi', 'aw_si
 	$aw_t( 1 === ( $aw_count[ $aw_hook ] ?? 0 ), "{$aw_hook} is booked once (" . (int) ( $aw_count[ $aw_hook ] ?? 0 ) . ')' );
 }
 
-// The screen: InsightWeb's own menu, the same slug as before (owner, 11 Nov 2026), not under RankWeb. Run as the CI admin
+// The screen: InsightWeb's own item, the same slug as before (owner, 11 Nov 2026), not under RankWeb; under Plugins
+// when Kits Core is loaded, else a menu of its own. Run as the CI admin
 // (smoke.sh passes --user=ci), so the capability checks in add_*_page pass.
 require_once ABSPATH . 'wp-admin/includes/plugin.php';
 global $submenu, $menu;
@@ -68,7 +69,7 @@ try {
 } catch ( Throwable $aw_e ) {
 	$aw_t( false, 'admin_menu ran without an error: ' . $aw_e->getMessage() );
 }
-$aw_own   = in_array( 'aw-search-insights', array_column( $menu, 2 ), true );
+$aw_own   = in_array( 'aw-search-insights', array_column( $menu, 2 ), true ) || in_array( 'admin.php?page=aw-search-insights', array_column( (array) ( $submenu['plugins.php'] ?? array() ), 2 ), true );
 $aw_under = in_array( 'aw-search-insights', array_column( (array) ( $submenu['aw-seo-plus'] ?? array() ), 2 ), true );
 $aw_t( $aw_own && ! $aw_under, 'Search Insights is InsightWeb\'s own menu, not under RankWeb (same address)' );
 

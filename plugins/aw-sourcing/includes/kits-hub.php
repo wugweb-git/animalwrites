@@ -29,7 +29,7 @@ add_action(
  * @param array $tabs Kits plugin screens: slug => [name, address relative to wp-admin, capability, what it is].
  */
 function aw_sourcing_kits_tab( $tabs ) {
-	$tabs[ AW_SRC_MENU ] = array( 'SourceWeb', 'admin.php?page=' . AW_SRC_MENU, AW_REVIEW_CAP, 'What the workers fetch and how it arrives: SourceWeb → Overview.' );
+	$tabs[ AW_SRC_MENU ] = array( 'SourceWeb', 'admin.php?page=' . AW_SRC_MENU, AW_REVIEW_CAP, 'What the workers fetch and how it arrives: Plugins → SourceWeb → Overview.' );
 	return $tabs;
 }
 

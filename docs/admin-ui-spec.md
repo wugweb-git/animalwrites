@@ -11,7 +11,7 @@ Scope: the Kits menu and the screens Animal Writes adds to it. The plugin dashbo
 All Kits screens follow one pattern, modelled on a theme-options app: one header, one section list, values edited where they are shown.
 
 1. **App header** (every Kits screen): site name, Kits version, Kits Core version, a **Save** button (disabled until something changes), and a "Saved" or error message beside it. Save works on the whole screen, not one box at a time.
-2. **Menu and tabs are the same list.** The six items in the left WordPress menu are the six tabs across the header. One source: filter `kits_admin_tabs` (kept), order filter `kits_menu_order` (kept).
+2. **Menu and tabs are the same list.** The six Kits screens are the six tabs across the header. In the WordPress menu they are one item, **Appearance → Kits**, which opens Home (owner, 11 Nov 2026; see B0). One source: filter `kits_admin_tabs` (kept), order filter `kits_menu_order` (kept).
 3. **Section list** on the left of each screen, with collapsible groups (for example Theme Options → Header → Announcement bar). The URL keeps the section (`#header/announce`) so a link opens the right box.
 4. **Values are editable where they are shown.** No read-only panels that say "change this elsewhere", except the Design system (read-only on purpose) and items WordPress owns (Font Library, Site Editor), which get a direct link.
 5. **"Reset to theme"** on every field that has a theme default: a small link beside the field. It removes the saved value, so the theme default shows again.
@@ -29,7 +29,43 @@ All Kits screens follow one pattern, modelled on a theme-options app: one header
 
 ---
 
-## B. Kits menu: six items
+## B0. Where the menus are (owner, 11 Nov 2026)
+
+"Kits to go inside appearance, so will plugins", "all plugins". As standard WordPress does it:
+
+- **Kits** is one item under **Appearance** (`themes.php`). It opens Home; the six screens are its tabs (B).
+- **Our plugins** are one item each under **Plugins** (`plugins.php`): RankWeb, InsightWeb, SourceWeb, MailWeb, PlanWeb, and Animal Writes when Kits Core is not loaded. Each opens its first screen; its other screens are its tabs (core `nav-tab` markup, printed under each screen's heading). Classification is a taxonomy menu, not a plugin, and stays where it is.
+- **Addresses do not change.** Every screen keeps its `admin.php?page=` address, its hook name and its screen id: the screens stay registered under the product's menu slug, which WordPress no longer lists (Kits Core `includes/admin-fold.php`, `kits_admin_fold_menu()` and `kits_admin_fold_tabs()`). No redirect is needed.
+- **Access does not change.** Each screen keeps its capability. WordPress shows Plugins to a user who may open one of its items, so an editor sees Plugins with RankWeb, SourceWeb, MailWeb and PlanWeb and nothing else; the Deploy check proves it as an administrator and as an editor (`tools/ci/smoke.sh`).
+- **Lit item.** On every screen of a product, Appearance or Plugins is open and the product's item is lit.
+- **Menu order.** Kits, SourceWeb, MailWeb, RankWeb, InsightWeb and PlanWeb have no top-level position any more; the rest of the site's order (content menus, Media, Appearance, Plugins, Users, Tools, Settings) is as before.
+- Without Kits Core a plugin keeps a menu of its own, as before.
+
+| Screen | Old menu path | New path | Address (`admin.php?page=`) | Who can open it |
+|---|---|---|---|---|
+| Kits Home | Kits → Home | Appearance → Kits (Home tab) | `kits` | administrators (`manage_options`) |
+| Kits Theme Options | Kits → Theme Options | Appearance → Kits → Theme Options tab | `kits-options` | administrators (`manage_options`) |
+| Kits Settings | Kits → Settings | Appearance → Kits → Settings tab | `kits-settings` | administrators (`manage_options`) |
+| Kits Plugins | Kits → Plugins | Appearance → Kits → Plugins tab | `kits-plugins` | administrators (`manage_options`) |
+| Kits Tools | Kits → Tools | Appearance → Kits → Tools tab | `kits-tools` | administrators (`edit_theme_options`) |
+| Kits Help | Kits → Help | Appearance → Kits → Help tab | `kits-help` | administrators (`manage_options`) |
+| Keys, Modules | linked from Kits → Settings | linked from Appearance → Kits → Settings | `aw-keys`, `aw-modules` | administrators (`manage_options`) |
+| Dates | linked from Kits → Home | linked from Appearance → Kits → Home; with PlanWeb on it opens PlanWeb | `aw-dates` | editors and administrators (`edit_others_posts`) |
+| RankWeb Overview | RankWeb → Overview | Plugins → RankWeb | `aw-seo-plus` | editors and administrators (`manage_categories`) |
+| RankWeb FAQ | RankWeb → FAQ | Plugins → RankWeb → FAQ tab | `aw-faq` | editors and administrators (`manage_categories`) |
+| Search Insights | InsightWeb (its own menu since 11 Nov 2026; RankWeb → Search Insights before) | Plugins → InsightWeb | `aw-search-insights` | administrators (`manage_options`) |
+| RankWeb Settings | RankWeb → Settings | Plugins → RankWeb → Settings tab | `aw-seo-settings` | administrators (`manage_options`) |
+| SourceWeb Overview | SourceWeb → Overview | Plugins → SourceWeb | `aw-sourcing-menu` | editors and administrators (`edit_others_posts`) |
+| To review | SourceWeb → To review | Plugins → SourceWeb → To review tab | `aw-review` | editors and administrators (`edit_others_posts`) |
+| Enrichment review | SourceWeb → Enrichment review | Plugins → SourceWeb → Enrichment review tab | `aw-enrich-review` | editors and administrators (`edit_others_posts`) |
+| Sources, Keywords, Rules, AI models, Workers, Rejected, Relay log, Change log, Settings | SourceWeb → (each) | Plugins → SourceWeb → (each) tab | `aw-sourcing`, `aw-sourcing&tab=…` | administrators (`manage_options`) |
+| MailWeb Inbox | MailWeb → Inbox | Plugins → MailWeb | `mailweb` | editors and administrators (`edit_others_posts`) |
+| MailWeb Overview | MailWeb → Overview | Plugins → MailWeb → Overview tab | `mailweb-overview` | editors and administrators (`edit_others_posts`) |
+| MailWeb Settings | MailWeb → Settings | Plugins → MailWeb → Settings tab | `mailweb-settings` | administrators (`manage_options`) |
+| PlanWeb Calendar | PlanWeb → Calendar | Plugins → PlanWeb (while PlanWeb is on) | `planweb` | editors and administrators (`edit_planweb_entries`) |
+| Animal Writes Overview (without Kits Core only) | Animal Writes → Overview | Plugins → Animal Writes | `animal-writes` | users with `edit_posts` |
+
+## B. Kits screens: six (the tabs of Appearance → Kits)
 
 | # | Menu item | Slug | Capability | Replaces |
 |---|---|---|---|---|
@@ -391,6 +427,7 @@ Every old admin slug redirects to its new place with a 302 on `admin_init`, kept
 ### E3. Extension points (so Kits Core stays generic)
 
 - `kits_admin_tabs`, `kits_menu_order`: kept.
+- `kits_admin_fold_menu()`, `kits_admin_fold_tabs()` (11 Nov 2026): a product's menu as one item under Appearance or Plugins, its screens as tabs, addresses and hook names unchanged (B0).
 - `kits_status_rows`: kept.
 - New `kits_home_sections`: add a Home section (id, title, render callback or REST source).
 - New `kits_settings_fields`: add a row to a Settings section (id, section, control, setting name).
@@ -426,6 +463,7 @@ Every old admin slug redirects to its new place with a 302 on `admin_init`, kept
 - `@wordpress/scripts` lint for JS and CSS.
 - PHPUnit: settings registered with schema; `kits_option()` lookup order unchanged; redirects; capability checks on each REST route.
 - The CI baseline `tools/ci/settings_parts_baseline.txt` lists every `add_submenu_page` line; it is updated in the same change that moves a screen.
+- The Deploy check's smoke test opens every screen of B0 as an administrator and as an editor: each address answers as before (200, or 403 where the role may not open it), Appearance or Plugins is open with the product's item lit, no product has a top-level menu, and an editor's Plugins holds only RankWeb, SourceWeb, MailWeb and PlanWeb (11 Nov 2026).
 - After each phase: open every Kits screen on live, save one field, reset it, and check the front end did not change (render compare on Home, a listing, a news item, Contact).
 - Accessibility: keyboard pass and screen-reader names on each screen.
 
