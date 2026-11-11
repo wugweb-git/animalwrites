@@ -47,7 +47,7 @@ function Header() {
 			tabs={ app.tabs }
 			aside={
 				<a href={ app.oldUrl }>
-					{ __( 'Open the current screen', 'aw-seo-extras' ) }
+					{ __( 'Open the earlier screen', 'aw-seo-extras' ) }
 				</a>
 			}
 		/>

@@ -157,6 +157,6 @@ function mailweb_ui_page( string $screen ): bool {
 		'inbox'     => __( 'MailWeb inbox', 'mailweb' ),
 		'settings'  => __( 'MailWeb settings', 'mailweb' ),
 	);
-	kits_shell_mount( 'mailweb-app', $titles[ $screen ], add_query_arg( 'ui', 'classic' ), __( 'Open the current screen', 'mailweb' ) );
+	kits_shell_mount( 'mailweb-app', $titles[ $screen ], add_query_arg( 'ui', 'classic' ), __( 'Open the earlier screen', 'mailweb' ) );
 	return true;
 }

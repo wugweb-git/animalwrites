@@ -59,7 +59,7 @@ function Header() {
 			tabs={ app.tabs }
 			aside={
 				<a href={ app.oldUrl }>
-					{ __( 'Open the current screen', 'aw-sourcing' ) }
+					{ __( 'Open the earlier screen', 'aw-sourcing' ) }
 				</a>
 			}
 		/>

@@ -146,6 +146,6 @@ function sourceweb_ui_page( string $screen ): bool {
 		'enrichment' => __( 'Enrichment review', 'aw-sourcing' ),
 		'settings'   => __( 'SourceWeb settings', 'aw-sourcing' ),
 	);
-	kits_shell_mount( 'sourceweb-app', $titles[ $screen ], add_query_arg( 'ui', 'classic' ), __( 'Open the current screen', 'aw-sourcing' ) );
+	kits_shell_mount( 'sourceweb-app', $titles[ $screen ], add_query_arg( 'ui', 'classic' ), __( 'Open the earlier screen', 'aw-sourcing' ) );
 	return true;
 }

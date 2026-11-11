@@ -94,7 +94,7 @@ whatever a part's own `display` is.
    It returns false when Kits Core's shell or the plugin's build file is missing. The plugin then shows its current
    screen. It also adds the body class `kits-shell-screen`, so the screen runs edge to edge.
 3. **Mount**, from the page callback, first thing:
-   `kits_shell_mount( 'myplugin-app', __( 'My plugin', … ), $current_screen_url, __( 'Open the current screen', … ) );`
+   `kits_shell_mount( 'myplugin-app', __( 'My plugin', … ), $current_screen_url, __( 'Open the earlier screen', … ) );`
    This prints the wrap, a screen-reader `h1`, `hr.wp-header-end` (other plugins' notices go after it, outside the app)
    and the mount `div`, with a no-script link to the current screen.
 4. **Data** comes from the plugin's own REST namespace (`<plugin>/v1`; `kits/v1` is Kits Core's). Every route has a
@@ -126,7 +126,7 @@ tabs, then cards (owner, 12 Nov 2026: "the ui used for plugins – use it for Ki
 ## The new screens are the default; `&ui=classic` shows the earlier one
 
 Owner, 12 Nov 2026: "Yes, switch". Every plugin's new screen (and Kits Home, Settings, Tools and Help) shows on its
-plain address. `&ui=classic` on the same address shows the earlier screen; the header's "Open the current screen" link
+plain address. `&ui=classic` on the same address shows the earlier screen; the header's "Open the earlier screen" link
 adds it. `&ui=next` still works (it is simply the default). Both screens save through the same function, so neither can
 drift from the other. DirectoryWeb → Claims: reviewing a claim (approve, reject, undo) stays on the earlier screen; each
 claim links to it with `&ui=classic`.

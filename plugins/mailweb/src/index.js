@@ -58,7 +58,7 @@ function Header() {
 			tabs={ app.tabs }
 			aside={
 				<a href={ app.oldUrl }>
-					{ __( 'Open the current screen', 'mailweb' ) }
+					{ __( 'Open the earlier screen', 'mailweb' ) }
 				</a>
 			}
 		/>

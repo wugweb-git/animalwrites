@@ -227,8 +227,8 @@ function aw_core_home_sections( $sections ) {
 }
 
 /**
- * Kits → Settings: CDN cache times (Performance), and links to Keys and Modules, which keep their own screens until the
- * RankWeb and SourceWeb settings screens exist.
+ * Kits → Settings: CDN cache times (Performance), and where the service keys and the optional parts are set now
+ * (RankWeb → Settings and SourceWeb → Settings).
  *
  * @param array $sections Kits' sections.
  */
@@ -239,8 +239,8 @@ function aw_core_settings_sections( $sections ) {
 		'Connected services and modules',
 		function () {
 			echo '<ul>';
-			echo '<li>' . aw_core_link( 'Keys', 'admin.php?page=aw-keys' ) . ': ' . esc_html( 'service keys the plugins use (Clarity, Bing Webmaster, PageSpeed). Moves to Plugins → RankWeb → Settings → Connected services.' ) . '</li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_core_link() escapes.
-			echo '<li>' . aw_core_link( 'Modules', 'admin.php?page=aw-modules' ) . ': ' . esc_html( 'optional parts of the site, such as Social posts. Moves to Plugins → SourceWeb → Settings.' ) . '</li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_core_link() escapes.
+			echo '<li>' . aw_core_link( 'RankWeb → Settings', 'admin.php?page=aw-seo-settings' ) . ': ' . esc_html( 'Connected services, the keys the plugins use (Clarity, Bing Webmaster, PageSpeed).' ) . '</li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_core_link() escapes.
+			echo '<li>' . aw_core_link( 'SourceWeb → Settings', 'admin.php?page=aw-sourcing&tab=settings' ) . ': ' . esc_html( 'optional parts of the site, such as Social posts.' ) . '</li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_core_link() escapes.
 			echo '</ul>';
 		},
 		40

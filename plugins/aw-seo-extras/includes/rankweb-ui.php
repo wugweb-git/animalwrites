@@ -121,6 +121,6 @@ function rankweb_ui_page( string $screen ): bool {
 	if ( rankweb_ui_wanted() !== $screen || ! rankweb_ui_ready() ) {
 		return false;
 	}
-	kits_shell_mount( 'rankweb-app', 'settings' === $screen ? __( 'RankWeb settings', 'aw-seo-extras' ) : __( 'RankWeb', 'aw-seo-extras' ), add_query_arg( 'ui', 'classic' ), __( 'Open the current screen', 'aw-seo-extras' ) );
+	kits_shell_mount( 'rankweb-app', 'settings' === $screen ? __( 'RankWeb settings', 'aw-seo-extras' ) : __( 'RankWeb', 'aw-seo-extras' ), add_query_arg( 'ui', 'classic' ), __( 'Open the earlier screen', 'aw-seo-extras' ) );
 	return true;
 }

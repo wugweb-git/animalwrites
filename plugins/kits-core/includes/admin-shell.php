@@ -8,7 +8,7 @@
  * against it and puts the screen in place with two calls:
  *
  *     kits_shell_app( array( 'handle' => …, 'src' => …, 'asset' => …, 'object' => …, 'data' => … ) ); // enqueue
- *     kits_shell_mount( 'my-app', __( 'My plugin', 'my-domain' ), $old_url, __( 'Open the current screen', … ) );
+ *     kits_shell_mount( 'my-app', __( 'My plugin', 'my-domain' ), $old_url, __( 'Open the earlier screen', … ) );
  *
  * Nothing here adds a menu or a screen of its own.
  *
@@ -113,7 +113,7 @@ function kits_shell_mount( string $id, string $title, string $fallback_url, stri
 
 /**
  * Every Kits plugin screen shows its new look by default (owner, 12 Nov 2026: "Yes, switch"); &ui=classic on the
- * same address shows the earlier screen (each new screen links to it as "Open the current screen").
+ * same address shows the earlier screen (each new screen links to it as "Open the earlier screen").
  */
 function kits_shell_ui_next(): bool {
 	return 'classic' !== sanitize_key( wp_unslash( $_GET['ui'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- which screen to show; nothing is saved here.

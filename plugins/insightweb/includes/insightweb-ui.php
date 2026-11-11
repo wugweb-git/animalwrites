@@ -134,6 +134,6 @@ function insightweb_ui_page( string $tab ): bool {
 	if ( '' === $screen || ! insightweb_ui_ready() || ( 'settings' === $screen ) !== ( 'settings' === $tab ) ) {
 		return false;
 	}
-	kits_shell_mount( 'insightweb-app', 'settings' === $screen ? __( 'Search Insights settings', 'aw-seo-extras' ) : __( 'Search Insights', 'aw-seo-extras' ), add_query_arg( 'ui', 'classic' ), __( 'Open the current screen', 'aw-seo-extras' ) );
+	kits_shell_mount( 'insightweb-app', 'settings' === $screen ? __( 'Search Insights settings', 'aw-seo-extras' ) : __( 'Search Insights', 'aw-seo-extras' ), add_query_arg( 'ui', 'classic' ), __( 'Open the earlier screen', 'aw-seo-extras' ) );
 	return true;
 }

@@ -121,8 +121,11 @@ function aw_site_check_summary(): array {
 	$text   = $result . '. Checked ' . $c['at'] . ( '' !== $ran ? ' on commit ' . substr( $ran, 0, 7 ) : '' ) . '.';
 	$stale  = '' !== $now && $ran !== $now;
 	if ( $stale ) {
-		$text .= ' The deployed commit is now ' . substr( $now, 0, 7 ) . ': this check is from before it'
-			. ( wp_next_scheduled( 'aw_site_check_deploy' ) ? '; a new check runs within a few minutes.' : '; run it again.' );
+		// The run after a deploy can be missed (a cron request that never came, or one cut short): schedule it again.
+		if ( ! wp_next_scheduled( 'aw_site_check_deploy' ) ) {
+			aw_site_check_after_deploy();
+		}
+		$text .= ' The deployed commit is now ' . substr( $now, 0, 7 ) . ': this check is from before it; a new check runs within a few minutes.';
 	}
 	return array(
 		'ok'   => ! $bad && ! $stale,

@@ -43,7 +43,7 @@ function Header() {
 			aside={
 				app.oldUrl ? (
 					<a href={ app.oldUrl }>
-						{ __( 'Open the current screen', 'directoryweb' ) }
+						{ __( 'Open the earlier screen', 'directoryweb' ) }
 					</a>
 				) : (
 					<a href={ app.listings }>
