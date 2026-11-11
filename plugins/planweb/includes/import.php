@@ -12,17 +12,23 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-// The first admin request after PlanWeb is switched on. Waits for Dates' 11 Nov note rename, so the notes copied
-// are the renamed ones (or runs at once when there is no Dates list at all).
+// An administrator's first admin page after PlanWeb is switched on (never Ajax, heartbeat or another role). Waits
+// for Dates' 11 Nov note rename, so the notes copied are the renamed ones (or runs at once when there is no Dates
+// list at all). It tries once: if a row fails, the result shows it and the Import button (or wp planweb import)
+// runs it again.
 add_action(
 	'admin_init',
 	function () {
-		if ( ! planweb_on() || get_option( 'planweb_import_done' ) || ! post_type_exists( PLANWEB_TYPE ) ) {
+		if ( ! planweb_on() || get_option( 'planweb_import_done' ) || get_option( 'planweb_import_tried' ) || ! post_type_exists( PLANWEB_TYPE ) ) {
+			return;
+		}
+		if ( wp_doing_ajax() || wp_doing_cron() || ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
 		if ( is_array( get_option( 'aw_team_dates', null ) ) && ! get_option( 'aw_team_dates_links_note_1111' ) ) {
 			return;
 		}
+		update_option( 'planweb_import_tried', time(), false );
 		planweb_import();
 	},
 	30

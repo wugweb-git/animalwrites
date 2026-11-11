@@ -28,6 +28,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 // Activating PlanWeb on its own switches it on (registered before the guard: Animal Writes Core may have loaded this
 // file already from another path).
 register_activation_hook( __FILE__, 'planweb_activate' );
+register_deactivation_hook( __FILE__, 'planweb_deactivate' );
 
 if ( defined( 'PLANWEB_VERSION' ) ) {
 	return; // Loaded already (active on its own and also loaded by Animal Writes Core).

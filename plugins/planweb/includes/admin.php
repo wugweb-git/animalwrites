@@ -144,6 +144,13 @@ function planweb_screen() {
 	$table->display();
 	echo '</form>';
 
+	if ( '' !== $error ) {
+		$draft = get_transient( 'planweb_draft_' . get_current_user_id() );
+		delete_transient( 'planweb_draft_' . get_current_user_id() );
+		if ( is_array( $draft ) && (int) ( $draft['id'] ?? 0 ) === (int) ( $edit['id'] ?? 0 ) ) {
+			$edit = array_merge( $edit ? $edit : array(), $draft );
+		}
+	}
 	planweb_form( $edit, $month );
 	if ( current_user_can( 'manage_options' ) ) {
 		planweb_import_panel();
@@ -285,6 +292,8 @@ add_action(
 		$month     = planweb_month_arg( $_POST['m'] ?? '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- planweb_month_arg() sanitizes.
 		$saved     = planweb_save_entry( $f, $id );
 		if ( is_wp_error( $saved ) ) {
+			// Keep what was typed for the form that comes back (this user only, read once, gone after 5 minutes).
+			set_transient( 'planweb_draft_' . get_current_user_id(), $f + array( 'id' => $id ), 5 * MINUTE_IN_SECONDS );
 			wp_safe_redirect(
 				planweb_url(
 					array_filter(

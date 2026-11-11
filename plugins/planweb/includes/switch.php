@@ -23,6 +23,26 @@ function planweb_activate() {
 	update_option( 'planweb_on', '1', true );
 }
 
+/**
+ * Deactivating PlanWeb switches it off. Animal Writes Core still loads it, so without this the calendar would stay on
+ * and Kits → Dates hidden. Entries and the Dates option are kept.
+ */
+function planweb_deactivate() {
+	update_option( 'planweb_on', '', true );
+}
+
+// Switching off (Kits → Modules or deactivation): the capabilities come off the roles, and setup runs again next time.
+add_action(
+	'update_option_planweb_on',
+	function ( $old, $value ) {
+		if ( '1' !== (string) $value ) {
+			planweb_remove_caps();
+		}
+	},
+	10,
+	2
+);
+
 /** Bump when the capabilities or the list values change, so planweb_setup() runs again. */
 const PLANWEB_SETUP = '1';
 
@@ -79,18 +99,32 @@ add_action(
 	20
 );
 
+/** The entry capabilities given to editors and administrators. */
+const PLANWEB_CAPS = array( 'edit_planweb_entries', 'edit_others_planweb_entries', 'edit_published_planweb_entries', 'edit_private_planweb_entries', 'publish_planweb_entries', 'read_private_planweb_entries', 'delete_planweb_entries', 'delete_others_planweb_entries', 'delete_published_planweb_entries', 'delete_private_planweb_entries' );
+
+/** Take PlanWeb's capabilities off every role, so they are not left behind while it is off. */
+function planweb_remove_caps() {
+	foreach ( wp_roles()->role_objects as $role ) {
+		foreach ( array_merge( PLANWEB_CAPS, array( 'planweb_approve' ) ) as $cap ) {
+			if ( $role->has_cap( $cap ) ) {
+				$role->remove_cap( $cap );
+			}
+		}
+	}
+	delete_option( 'planweb_setup' );
+}
+
 /**
  * Capabilities: editors and administrators work with entries (as edit_others_posts did for Dates); only
  * administrators set Approved or Sent (planweb_approve). The fixed list values as terms.
  */
 function planweb_setup() {
-	$caps = array( 'edit_planweb_entries', 'edit_others_planweb_entries', 'edit_published_planweb_entries', 'edit_private_planweb_entries', 'publish_planweb_entries', 'read_private_planweb_entries', 'delete_planweb_entries', 'delete_others_planweb_entries', 'delete_published_planweb_entries', 'delete_private_planweb_entries' );
 	foreach ( array( 'administrator', 'editor' ) as $name ) {
 		$role = get_role( $name );
 		if ( ! $role ) {
 			continue;
 		}
-		foreach ( $caps as $cap ) {
+		foreach ( PLANWEB_CAPS as $cap ) {
 			$role->add_cap( $cap );
 		}
 		if ( 'administrator' === $name ) {

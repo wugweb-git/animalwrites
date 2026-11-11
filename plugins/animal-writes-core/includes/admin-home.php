@@ -28,8 +28,12 @@ function aw_core_menu_parent(): string {
 	return defined( 'KITS_MENU' ) && function_exists( 'kits_admin_tabs' ) ? KITS_MENU : AW_CORE_MENU;
 }
 
-/** The site's screens in menu order: slug => [label, capability]. Dates leaves once PlanWeb is on (11 Nov 2026). */
-function aw_core_screens(): array {
+/**
+ * The site's screens in menu order: slug => [label, capability]. Dates leaves once PlanWeb is on (11 Nov 2026).
+ *
+ * @param bool $all Include Dates even when PlanWeb has it, so menu positions stay fixed.
+ */
+function aw_core_screens( bool $all = false ): array {
 	$screens = array(
 		AW_CORE_MENU      => array( 'Overview', 'edit_posts' ),
 		'aw-dates'        => array( 'Dates', defined( 'AW_DATES_CAP' ) ? AW_DATES_CAP : 'edit_others_posts' ),
@@ -39,7 +43,7 @@ function aw_core_screens(): array {
 		'aw-modules'      => array( 'Modules', 'manage_options' ),
 		'aw-edit-screens' => array( 'Edit screens', 'manage_options' ),
 	);
-	if ( function_exists( 'aw_team_dates_moved' ) && aw_team_dates_moved() ) {
+	if ( ! $all && function_exists( 'aw_team_dates_moved' ) && aw_team_dates_moved() ) {
 		unset( $screens['aw-dates'] );
 	}
 	return $screens;
@@ -51,7 +55,7 @@ function aw_core_screens(): array {
  * @param string $slug Screen slug.
  */
 function aw_core_menu_priority( string $slug ): int {
-	$i = array_search( $slug, array_keys( aw_core_screens() ), true );
+	$i = array_search( $slug, array_keys( aw_core_screens( true ) ), true );
 	return 20 + ( false === $i ? 9 : (int) $i );
 }
 
