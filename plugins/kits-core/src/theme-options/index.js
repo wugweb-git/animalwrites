@@ -1,13 +1,16 @@
 /**
  * Kits → Theme Options, new screen (trial: admin.php?page=kits-options&ui=next).
  *
- * One app header (site, versions, Save), the Kits tabs, a section list and the fields of the chosen section. Values
- * save through /wp/v2/settings (option kits_theme_options); a value equal to the theme's is not stored, so
- * "Reset to theme" sends the theme's value.
+ * One app header (site, versions, Save), the Kits tabs, a section list and the fields of the chosen section.
+ * Everything saves in one request to /wp/v2/settings, and only what changed is sent:
+ * - core: site title, tagline, logo, site icon (WordPress's own options);
+ * - to:   kits_theme_options fields (a value equal to the theme's is not stored, so Reset sends the theme's value);
+ * - pd:   kits_page_defaults._site, the site-wide header, footer, sidebar, title and breadcrumbs ('' = the theme's).
  */
 import { createRoot, useState, useEffect, useMemo } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { __, sprintf } from '@wordpress/i18n';
+import { MediaUpload } from '@wordpress/media-utils';
 import {
 	Button,
 	Card,
@@ -24,48 +27,129 @@ import {
 
 const data = window.kitsAdminApp || {};
 const fields = data.fields || {};
+const pdFields = data.pageDefaults?.fields || {};
 
 /**
- * Groups of fields, in field order.
+ * The sections, in order: Identity, Header, Footer, Layout, then the groups of the Theme Options fields not placed in
+ * them (today Speed and Older content, which move to Settings in phase 2).
  *
- * @param {Object} list Fields by key.
- * @return {Array} [ { slug, label, keys } ].
+ * @return {Array} [ { slug, label, items, links, info } ].
  */
-function groupsOf( list ) {
-	const out = [];
-	Object.keys( list ).forEach( ( key ) => {
-		const f = list[ key ];
+function sectionsOf() {
+	const placed = [ 'announce', 'sticky_bar', 'sticky_href', 'sticky_label' ];
+	const out = [
+		{
+			slug: 'identity',
+			label: __( 'Identity', 'kits-core' ),
+			items: [
+				[ 'core', 'title' ],
+				[ 'core', 'description' ],
+				[ 'media', 'site_logo' ],
+				[ 'media', 'site_icon' ],
+			],
+		},
+		{
+			slug: 'header',
+			label: __( 'Header', 'kits-core' ),
+			items: [
+				[ 'pd', 'header' ],
+				[ 'to', 'announce' ],
+			],
+			links: [
+				[
+					__(
+						'Edit what the header holds (logo, menu, buttons)',
+						'kits-core'
+					),
+					data.links?.parts,
+				],
+				[ __( 'Edit menus', 'kits-core' ), data.links?.menus ],
+			],
+		},
+		{
+			slug: 'footer',
+			label: __( 'Footer', 'kits-core' ),
+			items: [
+				[ 'pd', 'footer' ],
+				[ 'to', 'sticky_bar' ],
+				[ 'to', 'sticky_href' ],
+				[ 'to', 'sticky_label' ],
+			],
+			links: [
+				[
+					__( 'Edit what the footer holds', 'kits-core' ),
+					data.links?.parts,
+				],
+				[ __( 'Edit menus', 'kits-core' ), data.links?.menus ],
+			],
+		},
+		{
+			slug: 'layout',
+			label: __( 'Layout and spacing', 'kits-core' ),
+			items: [
+				[ 'pd', 'sidebar' ],
+				[ 'pd', 'title' ],
+				[ 'pd', 'crumbs' ],
+			],
+			info: data.layoutInfo || [],
+			links: [
+				[
+					__( 'Widths and spacing in Styles', 'kits-core' ),
+					data.links?.styles,
+				],
+			],
+		},
+	];
+	Object.keys( fields ).forEach( ( key ) => {
+		const f = fields[ key ];
+		if ( 'share' === f.kind || placed.includes( key ) ) {
+			return;
+		}
 		const slug = f.group.toLowerCase().replace( /[^a-z0-9]+/g, '-' );
 		let g = out.find( ( x ) => x.slug === slug );
 		if ( ! g ) {
-			g = { slug, label: f.group, keys: [] };
+			g = { slug, label: f.group, items: [] };
 			out.push( g );
 		}
-		g.keys.push( key );
+		g.items.push( [ 'to', key ] );
 	} );
 	return out;
 }
 
-function sectionFromHash( groups ) {
+function sectionFromHash( sections ) {
 	const h = window.location.hash.replace( '#', '' );
-	return groups.find( ( g ) => g.slug === h ) ? h : groups[ 0 ]?.slug;
+	return sections.find( ( s ) => s.slug === h ) ? h : sections[ 0 ]?.slug;
 }
 
-function Field( { name, field, value, inherited, onChange } ) {
-	const isTheme = value === inherited;
-	const reset = isTheme ? null : (
-		<Button
-			variant="link"
-			onClick={ () => onChange( inherited ) }
-			aria-label={ sprintf(
-				/* translators: %s: field label. */
-				__( 'Reset %s to theme', 'kits-core' ),
-				field.label
+function ThemeNote( { isTheme, themeLabel, label, onReset } ) {
+	return (
+		<p className="description">
+			{ isTheme
+				? __( 'Theme value', 'kits-core' )
+				: sprintf(
+						/* translators: %s: the theme's value. */
+						__( 'Theme value: %s', 'kits-core' ),
+						themeLabel || __( 'empty', 'kits-core' )
+					) }{ ' ' }
+			{ ! isTheme && (
+				<Button
+					variant="link"
+					onClick={ onReset }
+					aria-label={ sprintf(
+						/* translators: %s: field label. */
+						__( 'Reset %s to theme', 'kits-core' ),
+						label
+					) }
+				>
+					{ __( 'Reset to theme', 'kits-core' ) }
+				</Button>
 			) }
-		>
-			{ __( 'Reset to theme', 'kits-core' ) }
-		</Button>
+		</p>
 	);
+}
+
+// A kits_theme_options field.
+function ThemeOptionField( { field, value, inherited, onChange } ) {
 	let control;
 	if ( 'switch' === field.kind ) {
 		control = (
@@ -107,51 +191,199 @@ function Field( { name, field, value, inherited, onChange } ) {
 		);
 	}
 	return (
-		<div className="kits-app-field" data-field={ name }>
+		<div className="kits-app-field">
 			{ control }
-			<p className="description">
-				{ isTheme
-					? __( 'Theme value', 'kits-core' )
-					: sprintf(
-							/* translators: %s: the theme's value. */
-							__( 'Theme value: %s', 'kits-core' ),
-							field.choices?.[ inherited ] ??
-								( inherited || __( 'empty', 'kits-core' ) )
-						) }{ ' ' }
-				{ reset }
+			<ThemeNote
+				isTheme={ value === inherited }
+				themeLabel={ field.choices?.[ inherited ] ?? inherited }
+				label={ field.label }
+				onReset={ () => onChange( inherited ) }
+			/>
+		</div>
+	);
+}
+
+// A site-wide page default (kits_page_defaults._site): '' is the theme's own.
+function PageDefaultField( { name, value, onChange } ) {
+	const f = pdFields[ name ];
+	if ( ! f ) {
+		return null;
+	}
+	const keys = Object.keys( f.choices || {} );
+	if ( ! keys.length ) {
+		return (
+			<div className="kits-app-field">
+				<p>
+					<strong>{ f.label }</strong>
+				</p>
+				<p className="description">{ f.empty }</p>
+			</div>
+		);
+	}
+	return (
+		<div className="kits-app-field">
+			<SelectControl
+				__next40pxDefaultSize
+				__nextHasNoMarginBottom
+				label={ f.label }
+				help={ f.note }
+				value={ value }
+				options={ [
+					{ value: '', label: __( 'Theme', 'kits-core' ) },
+					...keys.map( ( k ) => ( {
+						value: k,
+						label: f.choices[ k ],
+					} ) ),
+				] }
+				onChange={ onChange }
+			/>
+			<ThemeNote
+				isTheme={ '' === value }
+				themeLabel={ __( 'the theme’s own', 'kits-core' ) }
+				label={ f.label }
+				onReset={ () => onChange( '' ) }
+			/>
+		</div>
+	);
+}
+
+// Site title or tagline.
+function CoreTextField( { name, value, onChange } ) {
+	const labels = {
+		title: [
+			__( 'Site title', 'kits-core' ),
+			__(
+				'Shown in the browser tab and search results, and wherever the theme prints the site name.',
+				'kits-core'
+			),
+		],
+		description: [
+			__( 'Tagline', 'kits-core' ),
+			__( 'A short line about the site.', 'kits-core' ),
+		],
+	};
+	return (
+		<div className="kits-app-field">
+			<TextControl
+				__next40pxDefaultSize
+				__nextHasNoMarginBottom
+				label={ labels[ name ][ 0 ] }
+				help={ labels[ name ][ 1 ] }
+				value={ value }
+				onChange={ onChange }
+			/>
+		</div>
+	);
+}
+
+// Logo or site icon: an image from the Media Library (0 = none).
+function MediaField( { name, value, onChange } ) {
+	const labels = {
+		site_logo: [
+			__( 'Logo', 'kits-core' ),
+			__( 'Shown by the Site Logo block in the header.', 'kits-core' ),
+		],
+		site_icon: [
+			__( 'Site icon', 'kits-core' ),
+			__(
+				'The small square image in browser tabs and on phone home screens. At least 512 × 512 pixels.',
+				'kits-core'
+			),
+		],
+	};
+	const [ urls, setUrls ] = useState( data.mediaUrls || {} );
+	const url = value ? urls[ value ] : '';
+	const id = 'kits-app-' + name;
+	return (
+		<div className="kits-app-field" role="group" aria-labelledby={ id }>
+			<p id={ id }>
+				<strong>{ labels[ name ][ 0 ] }</strong>
 			</p>
+			{ url ? (
+				<img
+					src={ url }
+					alt=""
+					style={ { maxWidth: 160, maxHeight: 80, display: 'block' } }
+				/>
+			) : (
+				<p className="description">
+					{ __( 'None chosen.', 'kits-core' ) }
+				</p>
+			) }
+			<Flex justify="flex-start" gap={ 2 }>
+				<MediaUpload
+					allowedTypes={ [ 'image' ] }
+					value={ value || undefined }
+					onSelect={ ( m ) => {
+						setUrls( {
+							...urls,
+							[ m.id ]: m.sizes?.thumbnail?.url || m.url,
+						} );
+						onChange( m.id );
+					} }
+					render={ ( { open } ) => (
+						<Button variant="secondary" onClick={ open }>
+							{ value
+								? __( 'Change', 'kits-core' )
+								: __( 'Choose an image', 'kits-core' ) }
+						</Button>
+					) }
+				/>
+				{ !! value && (
+					<Button
+						variant="tertiary"
+						isDestructive
+						onClick={ () => onChange( 0 ) }
+					>
+						{ __( 'Remove', 'kits-core' ) }
+					</Button>
+				) }
+			</Flex>
+			<p className="description">{ labels[ name ][ 1 ] }</p>
 		</div>
 	);
 }
 
 function App() {
-	const editable = useMemo( () => {
-		const out = {};
-		Object.keys( fields ).forEach( ( k ) => {
-			if ( 'share' !== fields[ k ].kind ) {
-				out[ k ] = fields[ k ];
-			}
-		} );
-		return out;
-	}, [] );
-	const groups = useMemo( () => groupsOf( editable ), [ editable ] );
-	const [ section, setSection ] = useState( () => sectionFromHash( groups ) );
-	const [ saved, setSaved ] = useState( data.saved || {} );
-	const [ edits, setEdits ] = useState( {} );
+	const sections = useMemo( () => sectionsOf(), [] );
+	const [ section, setSection ] = useState( () =>
+		sectionFromHash( sections )
+	);
+	const [ saved, setSaved ] = useState( {
+		core: data.core || {},
+		to: data.saved || {},
+		pd: data.pageDefaults?.site || {},
+	} );
+	const [ edits, setEdits ] = useState( { core: {}, to: {}, pd: {} } );
 	const [ status, setStatus ] = useState( null );
 	const [ busy, setBusy ] = useState( false );
+	const inherited = data.inherited || {};
 
 	useEffect( () => {
-		const on = () => setSection( sectionFromHash( groups ) );
+		const on = () => setSection( sectionFromHash( sections ) );
 		window.addEventListener( 'hashchange', on );
 		return () => window.removeEventListener( 'hashchange', on );
-	}, [ groups ] );
+	}, [ sections ] );
 
-	const inherited = data.inherited || {};
-	const valueOf = ( k ) =>
-		k in edits ? edits[ k ] : ( saved[ k ] ?? inherited[ k ] ?? '' );
-	const dirty = Object.keys( edits ).some(
-		( k ) => edits[ k ] !== ( saved[ k ] ?? inherited[ k ] ?? '' )
+	const base = ( store, k ) => {
+		if ( 'to' === store ) {
+			return saved.to[ k ] ?? inherited[ k ] ?? '';
+		}
+		if ( 'pd' === store ) {
+			return saved.pd[ k ] ?? '';
+		}
+		return saved.core[ k ] ?? '';
+	};
+	const valueOf = ( store, k ) =>
+		k in edits[ store ] ? edits[ store ][ k ] : base( store, k );
+	const set = ( store, k, v ) =>
+		setEdits( { ...edits, [ store ]: { ...edits[ store ], [ k ]: v } } );
+	const changed = ( store ) =>
+		Object.keys( edits[ store ] ).filter(
+			( k ) => edits[ store ][ k ] !== base( store, k )
+		);
+	const dirty = [ 'core', 'to', 'pd' ].some(
+		( s ) => changed( s ).length > 0
 	);
 
 	useEffect( () => {
@@ -166,24 +398,50 @@ function App() {
 	}, [ dirty ] );
 
 	const save = () => {
+		// Only what changed: every clean-up keeps what is not sent, so a change made elsewhere since this screen
+		// opened is not written back.
+		const body = {};
+		changed( 'core' ).forEach( ( k ) => ( body[ k ] = edits.core[ k ] ) );
+		const to = changed( 'to' );
+		if ( to.length ) {
+			body.kits_theme_options = Object.fromEntries(
+				to.map( ( k ) => [ k, edits.to[ k ] ] )
+			);
+		}
+		const pd = changed( 'pd' );
+		if ( pd.length ) {
+			body.kits_page_defaults = {
+				_site: Object.fromEntries(
+					pd.map( ( k ) => [ k, edits.pd[ k ] ] )
+				),
+			};
+		}
 		setBusy( true );
 		setStatus( null );
-		apiFetch( {
-			path: '/wp/v2/settings',
-			method: 'POST',
-			// Only the edited fields: the clean-up keeps every field that is not sent, so a change made
-			// elsewhere since this screen opened is not written back.
-			data: { kits_theme_options: edits },
-		} )
+		apiFetch( { path: '/wp/v2/settings', method: 'POST', data: body } )
 			.then( ( res ) => {
-				// A stored value the schema cannot read comes back as null: keep what this screen knows.
-				setSaved(
-					res.kits_theme_options &&
-						'object' === typeof res.kits_theme_options
-						? res.kits_theme_options
-						: { ...saved, ...edits }
-				);
-				setEdits( {} );
+				const obj = ( v, fallback ) =>
+					v && 'object' === typeof v ? v : fallback;
+				const core = { ...saved.core };
+				Object.keys( core ).forEach( ( k ) => {
+					if ( k in res ) {
+						core[ k ] = res[ k ] ?? core[ k ];
+					}
+				} );
+				setSaved( {
+					core,
+					// A stored value the schema cannot read comes back as null: keep what this screen knows.
+					to: obj( res.kits_theme_options, {
+						...saved.to,
+						...edits.to,
+					} ),
+					pd:
+						res.kits_page_defaults &&
+						'object' === typeof res.kits_page_defaults
+							? obj( res.kits_page_defaults._site, {} ) // No _site: every choice is the theme's.
+							: { ...saved.pd, ...edits.pd },
+				} );
+				setEdits( { core: {}, to: {}, pd: {} } );
 				setStatus( {
 					type: 'success',
 					text: __( 'Saved.', 'kits-core' ),
@@ -200,7 +458,52 @@ function App() {
 			.finally( () => setBusy( false ) );
 	};
 
-	const current = groups.find( ( g ) => g.slug === section ) || groups[ 0 ];
+	const current =
+		sections.find( ( s ) => s.slug === section ) || sections[ 0 ];
+
+	const item = ( [ store, k ] ) => {
+		const onChange = ( v ) => set( store, k, v );
+		const value = valueOf( store, k );
+		if ( 'to' === store ) {
+			return fields[ k ] ? (
+				<ThemeOptionField
+					key={ k }
+					field={ fields[ k ] }
+					value={ value }
+					inherited={ inherited[ k ] ?? '' }
+					onChange={ onChange }
+				/>
+			) : null;
+		}
+		if ( 'pd' === store ) {
+			return (
+				<PageDefaultField
+					key={ k }
+					name={ k }
+					value={ value }
+					onChange={ onChange }
+				/>
+			);
+		}
+		if ( 'media' === store ) {
+			return (
+				<MediaField
+					key={ k }
+					name={ k }
+					value={ valueOf( 'core', k ) }
+					onChange={ ( v ) => set( 'core', k, v ) }
+				/>
+			);
+		}
+		return (
+			<CoreTextField
+				key={ k }
+				name={ k }
+				value={ value }
+				onChange={ onChange }
+			/>
+		);
+	};
 
 	return (
 		<div className="kits-app">
@@ -222,7 +525,7 @@ function App() {
 										),
 										data.site,
 										data.theme,
-										data.core
+										data.coreVersion
 									) }
 								</p>
 							</FlexBlock>
@@ -290,20 +593,20 @@ function App() {
 						<Card>
 							<CardBody>
 								<ul>
-									{ groups.map( ( g ) => (
-										<li key={ g.slug }>
+									{ sections.map( ( s ) => (
+										<li key={ s.slug }>
 											<a
-												href={ '#' + g.slug }
+												href={ '#' + s.slug }
 												aria-current={
-													g.slug === current?.slug
+													s.slug === current?.slug
 														? 'true'
 														: undefined
 												}
 											>
-												{ g.slug === current?.slug ? (
-													<strong>{ g.label }</strong>
+												{ s.slug === current?.slug ? (
+													<strong>{ s.label }</strong>
 												) : (
-													g.label
+													s.label
 												) }
 											</a>
 										</li>
@@ -330,18 +633,19 @@ function App() {
 								<h2>{ current.label }</h2>
 							</CardHeader>
 							<CardBody>
-								{ current.keys.map( ( k ) => (
-									<Field
-										key={ k }
-										name={ k }
-										field={ editable[ k ] }
-										value={ valueOf( k ) }
-										inherited={ inherited[ k ] ?? '' }
-										onChange={ ( v ) =>
-											setEdits( { ...edits, [ k ]: v } )
-										}
-									/>
+								{ current.items.map( item ) }
+								{ ( current.info || [] ).map( ( [ k, v ] ) => (
+									<p key={ k }>
+										<strong>{ k }:</strong> { v }
+									</p>
 								) ) }
+								{ ( current.links || [] )
+									.filter( ( [ , href ] ) => href )
+									.map( ( [ label, href ] ) => (
+										<p key={ label }>
+											<a href={ href }>{ label }</a>
+										</p>
+									) ) }
 							</CardBody>
 						</Card>
 					) }

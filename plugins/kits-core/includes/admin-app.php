@@ -5,7 +5,9 @@
  *
  * For now it is a trial: Kits → Theme Options opens it only with &ui=next, and the current screen stays the default.
  * It edits the fields of kits_theme_options (theme-options.php) and saves them through /wp/v2/settings, which runs
- * the same clean-up as the current screen (kits_theme_options_clean). The share bar stays on the current screen.
+ * the same clean-up as the current screen (kits_theme_options_clean). Phase 1b adds Identity (site title, tagline, logo,
+ * site icon: WordPress's own options) and the site-wide header, footer and layout choices (kits_page_defaults._site).
+ * The share bar stays on the current screen.
  *
  * @package kits-core
  */
@@ -35,6 +37,7 @@ add_action(
 		$url = plugins_url( 'build/theme-options/index.js', KITS_CORE_DIR . 'kits-core.php' );
 		wp_enqueue_script( 'kits-admin-theme-options', $url, $a['dependencies'], $a['version'], true );
 		wp_enqueue_style( 'wp-components' );
+		wp_enqueue_media(); // Logo and site icon pickers.
 		wp_set_script_translations( 'kits-admin-theme-options', 'kits-core' );
 
 		$saved     = kits_theme_options_saved();
@@ -56,16 +59,66 @@ add_action(
 		}
 		$theme = wp_get_theme( get_template() );
 		$core  = get_file_data( KITS_CORE_DIR . 'kits-core.php', array( 'Version' => 'Version' ) );
-		$data  = array(
-			'site'      => get_bloginfo( 'name' ),
-			'theme'     => $theme->get( 'Name' ) . ' ' . $theme->get( 'Version' ),
-			'core'      => (string) $core['Version'],
-			'tabs'      => $tabs,
-			'fields'    => $fields,
-			'saved'     => (object) $saved,
-			'inherited' => (object) $inherited,
-			'oldUrl'    => admin_url( 'admin.php?page=kits-options' ),
-			'shareUrl'  => admin_url( 'admin.php?page=kits-options&section=utility-share' ),
+		$ids   = array(
+			'site_logo' => (int) get_option( 'site_logo' ),
+			'site_icon' => (int) get_option( 'site_icon' ),
+		);
+		$urls  = array();
+		foreach ( $ids as $id ) {
+			if ( $id ) {
+				$urls[ $id ] = (string) wp_get_attachment_image_url( $id, 'thumbnail' );
+			}
+		}
+		$pd_saved = (array) get_option( 'kits_page_defaults', array() );
+		$pd_site  = array();
+		$pd_keys  = array( 'header', 'footer', 'sidebar', 'title', 'crumbs' );
+		$pd       = array();
+		$names    = kits_page_option_fields();
+		$empty    = array(
+			'header' => __( 'The theme’s own. Make a second header in Appearance → Editor → Patterns → Header to choose it here.', 'kits-core' ),
+			'footer' => __( 'The theme’s own. Make a second footer in Appearance → Editor → Patterns → Footer to choose it here.', 'kits-core' ),
+		);
+		foreach ( $pd_keys as $key ) {
+			$pd[ $key ] = array(
+				'label'   => $names[ $key ][0],
+				'note'    => kits_page_option_note( $key ),
+				'choices' => (object) kits_page_option_choices( $key ),
+				'empty'   => $empty[ $key ] ?? '',
+			);
+			if ( isset( $pd_saved['_site'][ $key ] ) ) {
+				$pd_site[ $key ] = (string) $pd_saved['_site'][ $key ];
+			}
+		}
+		$data = array(
+			'site'         => get_bloginfo( 'name' ),
+			'theme'        => $theme->get( 'Name' ) . ' ' . $theme->get( 'Version' ),
+			'coreVersion'  => (string) $core['Version'],
+			'tabs'         => $tabs,
+			'fields'       => $fields,
+			'saved'        => (object) $saved,
+			'inherited'    => (object) $inherited,
+			'core'         => array_merge(
+				array(
+					'title'       => (string) get_option( 'blogname' ),
+					'description' => (string) get_option( 'blogdescription' ),
+				),
+				$ids
+			),
+			'mediaUrls'    => (object) $urls,
+			'pageDefaults' => array(
+				'fields' => $pd,
+				'site'   => (object) $pd_site,
+			),
+			'layoutInfo'   => array(
+				array( __( 'Breakpoints', 'kits-core' ), __( 'phones up to 767 px, tablets 768 to 1199 px, wide screens from 1200 px (fixed in the theme)', 'kits-core' ) ),
+			),
+			'links'        => array(
+				'parts'  => admin_url( 'site-editor.php?postType=wp_template_part' ),
+				'menus'  => admin_url( 'site-editor.php?postType=wp_navigation' ),
+				'styles' => admin_url( 'site-editor.php?path=/wp_global_styles' ),
+			),
+			'oldUrl'       => admin_url( 'admin.php?page=kits-options' ),
+			'shareUrl'     => admin_url( 'admin.php?page=kits-options&section=utility-share' ),
 		);
 		wp_add_inline_script( 'kits-admin-theme-options', 'window.kitsAdminApp = ' . wp_json_encode( $data ) . ';', 'before' );
 	}
@@ -73,7 +126,8 @@ add_action(
 
 /** The new screen's mount point (kits_options_page() calls this when &ui=next). */
 function kits_admin_app_page(): void {
-	echo '<div class="wrap"><div id="kits-admin-app"><h1>' . esc_html__( 'Theme Options', 'kits-core' ) . '</h1>';
-	echo '<noscript><p>' . esc_html__( 'This screen needs JavaScript.', 'kits-core' ) . ' <a href="' . esc_url( admin_url( 'admin.php?page=kits-options' ) ) . '">' . esc_html__( 'Open the current Theme Options', 'kits-core' ) . '</a></p></noscript>';
+	// Notices from other plugins go after .wp-header-end, so they stay out of the app and its pinned header.
+	echo '<div class="wrap"><hr class="wp-header-end"><div id="kits-admin-app">';
+	echo '<noscript><h1>' . esc_html__( 'Theme Options', 'kits-core' ) . '</h1><p>' . esc_html__( 'This screen needs JavaScript.', 'kits-core' ) . ' <a href="' . esc_url( admin_url( 'admin.php?page=kits-options' ) ) . '">' . esc_html__( 'Open the current Theme Options', 'kits-core' ) . '</a></p></noscript>';
 	echo '</div></div>';
 }

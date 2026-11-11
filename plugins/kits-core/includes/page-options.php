@@ -213,6 +213,15 @@ add_action(
 				'type'              => 'array',
 				'default'           => array(),
 				'sanitize_callback' => 'kits_page_defaults_clean',
+				'show_in_rest'      => array( // Kits → Theme Options (new screen) saves through /wp/v2/settings.
+					'schema' => array(
+						'type'                 => 'object',
+						'additionalProperties' => array(
+							'type'                 => 'object',
+							'additionalProperties' => array( 'type' => 'string' ),
+						),
+					),
+				),
 			)
 		);
 	},
