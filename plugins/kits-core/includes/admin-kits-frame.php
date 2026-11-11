@@ -72,11 +72,12 @@ function kits_frame_tabs( string $current ): array {
 	return $tabs;
 }
 
-/** The Kits icon, name and version the header shows. */
+/** The Kits icon (the theme's, as on today's Kits screens), name and version the header shows. */
 function kits_frame_brand(): array {
 	$theme = wp_get_theme( get_template() );
+	$icon  = kits_product_icon( 'Kits' );
 	return array(
-		'icon'    => plugins_url( 'assets/icon.svg', KITS_CORE_DIR . 'kits-core.php' ),
+		'icon'    => '' !== $icon ? $icon : plugins_url( 'assets/icon.svg', KITS_CORE_DIR . 'kits-core.php' ),
 		'name'    => __( 'Kits', 'kits-core' ),
 		'version' => (string) $theme->get( 'Version' ),
 	);
@@ -111,7 +112,7 @@ function kits_frame_open( string $current, string $title, string $intro = '' ): 
 	echo '<div class="wrap"><h1 class="screen-reader-text">' . esc_html( $title ) . '</h1><hr class="wp-header-end">';
 	settings_errors();
 	echo '<div class="kits-shell kits-shell-frame"><header class="kits-shell-header"><div class="kits-shell-header__brand">';
-	echo '<img class="kits-shell-header__icon" src="' . esc_url( $brand['icon'] ) . '" alt="" width="32" height="32">';
+	echo '<img class="kits-shell-header__icon" src="' . esc_url( $brand['icon'], array( 'https', 'http', 'data' ) ) . '" alt="" width="32" height="32">';
 	echo '<span class="kits-shell-header__name">' . esc_html( $brand['name'] ) . '</span>';
 	if ( '' !== $brand['version'] ) {
 		echo '<span class="kits-shell-header__version">' . esc_html( $brand['version'] ) . '</span>';
