@@ -4,8 +4,7 @@
 		'wp-api-fetch',
 		'wp-components',
 		'wp-element',
-		'wp-i18n',
-		'wp-media-utils'
+		'wp-i18n'
 	),
-	'version' => '170a9a3665cc7964413c'
+	'version' => '72f422e8a20ee04b23f4'
 );

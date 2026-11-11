@@ -47,8 +47,8 @@ function aw_theme_parts_function_rows(): array {
 	$here  = 'Animal Writes Core';
 	$kits  = 'Kits Core';
 	$repo  = 'In the repository only (file editing is off in wp-admin)';
-	$perf  = aw_theme_parts_link( 'Kits → Settings → Performance', 'admin.php?page=kits-settings#performance' );
-	$core  = aw_theme_parts_link( 'Kits → Settings', 'admin.php?page=kits-settings' );
+	$perf  = aw_theme_parts_link( 'Appearance → Kits → Settings → Performance', 'admin.php?page=kits-settings#performance' );
+	$core  = aw_theme_parts_link( 'Appearance → Kits → Settings', 'admin.php?page=kits-settings' );
 	$items = array(
 		array( 'Site styles and script', 'Loads tokens.css, aw.css (as aw.min.css, its minified copy) and aw.js over the Kits styles on every page.', $here, 'includes/theme-parts-assets.php', $repo, $parts ),
 		array( 'Editor uses the site styles', 'The block editor and the classic editor show content with tokens.css and aw.css.', $here, 'includes/theme-parts-assets.php', 'Automatic', $parts ),

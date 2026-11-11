@@ -20,6 +20,7 @@ function mailweb_settings_page() {
 	}
 	$sub = 'sending' === sanitize_key( $_GET['sub'] ?? '' ) ? 'sending' : 'incoming'; // phpcs:ignore WordPress.Security.NonceVerification
 	echo '<div class="wrap" id="mailweb-settings"><h1>' . esc_html__( 'Mail settings', 'mailweb' ) . '</h1>';
+	mailweb_screen_tabs();
 	mailweb_notice();
 	echo '<h2 class="nav-tab-wrapper">';
 	echo '<a class="nav-tab' . ( 'incoming' === $sub ? ' nav-tab-active' : '' ) . '" href="' . esc_url( mailweb_settings_url() ) . '">' . esc_html__( 'Incoming mail, mailboxes, profiles', 'mailweb' ) . '</a>';

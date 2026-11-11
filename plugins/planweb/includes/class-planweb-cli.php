@@ -31,7 +31,7 @@ class PlanWeb_CLI {
 	 */
 	public function verify( $args, $assoc ) {
 		if ( ! planweb_on() ) {
-			WP_CLI::error( 'PlanWeb is switched off (Kits → Modules).' );
+			WP_CLI::error( 'PlanWeb is switched off (Appearance → Kits → Modules).' );
 		}
 		$v    = planweb_verify();
 		$rows = array();
@@ -65,7 +65,7 @@ class PlanWeb_CLI {
 	 */
 	public function import() {
 		if ( ! planweb_on() ) {
-			WP_CLI::error( 'PlanWeb is switched off (Kits → Modules).' );
+			WP_CLI::error( 'PlanWeb is switched off (Appearance → Kits → Modules).' );
 		}
 		$r = planweb_import();
 		foreach ( (array) ( $r['failed'] ?? array() ) as $f ) {

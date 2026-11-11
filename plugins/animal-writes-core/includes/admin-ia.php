@@ -7,6 +7,7 @@
  * - "Inbox": Messages and Listing claims, with unread counts. Volunteers and the Newsletter live in FluentCRM (owner,
  *   17 Oct 2026): the site's Volunteers and Newsletter screens are hidden from the menu (their pages and tables stay).
  * - Menu order follows the site: Directory · News · Resources · Library · Opportunities · Campaigns · Pages · Media …
+ *   Kits is under Appearance, and our plugins (RankWeb, SourceWeb, MailWeb, PlanWeb) under Plugins.
  * - Labels: Library types → Kind, Source types → Issuers, Campaign Hub → Campaigns (slugs and URLs unchanged).
  *
  * @package animal-writes-core
@@ -185,15 +186,14 @@ add_filter(
 	}
 );
 
-// Menu order: the site's order, then WordPress's own screens.
+// Menu order: the site's order, then WordPress's own screens. Kits is under Appearance and our plugins under Plugins
+// (owner, 11 Nov 2026), so they are not in this list.
 add_filter( 'custom_menu_order', '__return_true', PHP_INT_MAX );
 add_filter(
 	'menu_order',
 	function () {
 		return array(
 			'index.php',
-			'kits', // Kits: second, under Dashboard, as a theme's hub (owner, 10 Nov 2026); the site's screens are its last items
-			'animal-writes', // the same Kits menu for editors (WordPress points it at the first screen they can open, the Overview); the plugin's own menu without Kits Core
 			'edit.php?post_type=aw_listing',
 			'edit.php?post_type=aw_news',
 			'edit.php',
@@ -204,8 +204,6 @@ add_filter(
 			'edit.php?post_type=page',
 			'upload.php',
 			'aw-classification',
-			'aw-sourcing-menu', // Sourcing (AW Sourcing): To review and the sourcing screens; was Inbox (removed 25 Oct 2026)
-			'mailweb', // Mail (Mailweb plugin): unread count and latest messages
 			'separator2',
 			'themes.php',
 			'plugins.php',

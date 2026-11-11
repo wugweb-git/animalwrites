@@ -8,8 +8,8 @@ plugins/animal-writes-core/assets/css/campaign-lab.css | css Hero | :is(.aw-camp
 plugins/animal-writes-core/assets/css/campaign.css | css Hero | .aw-camp--diwali .wp-block-cover.kit-hero | min-height: var(--kit-hero-h) !important
 plugins/animal-writes-core/assets/css/campaign.css | css Hero | .aw-camp--lab-rules .aw-camp-hero | min-height: var(--kit-hero-h)
 plugins/animal-writes-core/assets/css/campaign.css | css Hero | .aw-camp.aw-camp--sc-stray-dogs .aw-camp-hero.aw-camp-section.alignfull | min-height: var(--kit-hero-h)
-plugins/animal-writes-core/includes/admin-home.php | admin page | add_menu_page( 'Animal Writes', 'Animal Writes', aw_core_screen_cap( AW_CORE_MENU ), AW_CORE_MENU, 'aw_core_overview_page', 'dashicons-pets', 28 );
-plugins/animal-writes-core/includes/admin-home.php | admin page | add_submenu_page( AW_CORE_MENU, 'Animal Writes', 'Overview', aw_core_screen_cap( AW_CORE_MENU ), AW_CORE_MENU, 'aw_core_overview_page' );
+plugins/animal-writes-core/includes/admin-home.php | admin page | add_submenu_page( 'plugins.php', 'Animal Writes', 'Animal Writes', aw_core_screen_cap( AW_CORE_MENU ), AW_CORE_MENU, 'aw_core_overview_page' );  # 11 Nov 2026: Animal Writes under Plugins (without Kits Core)
+plugins/kits-core/includes/admin-fold.php | admin page | add_submenu_page( $into, wp_strip_all_tags( $title ), $title, $cap, kits_fold_link( $menu ) );  # 11 Nov 2026: a product's one item under Appearance or Plugins
 plugins/animal-writes-core/includes/keys.php | admin page | add_submenu_page( aw_core_menu_parent(), 'Keys', 'Keys', aw_core_screen_cap( 'aw-keys' ), 'aw-keys', 'aw_keys_screen' ); // Kits → Keys
 plugins/animal-writes-core/includes/social-posts.php | admin page | add_submenu_page( aw_core_menu_parent(), 'Modules', 'Modules', aw_core_screen_cap( 'aw-modules' ), 'aw-modules', 'aw_modules_screen' ),
 plugins/animal-writes-core/includes/team-dates.php | admin page | add_submenu_page( aw_core_menu_parent(), 'Dates', 'Dates', aw_core_screen_cap( 'aw-dates' ), 'aw-dates', 'aw_team_dates_screen' ); // Kits → Dates
@@ -59,11 +59,9 @@ plugins/planweb/includes/admin.php | admin style | wp_enqueue_style( 'planweb-ad
 plugins/animal-writes-core/includes/edit-screens.php | admin page | add_submenu_page( AW_CORE_MENU, 'Edit screens', 'Edit screens', aw_core_screen_cap( 'aw-edit-screens' ), 'aw-edit-screens', 'aw_edit_screens_page' );
 plugins/animal-writes-core/includes/pages.php | admin page | add_submenu_page( AW_CORE_MENU, 'Contact links', 'Contact links', aw_core_screen_cap( 'aw-elsewhere' ), 'aw-elsewhere', 'aw_elsewhere_screen' );
 plugins/animal-writes-core/includes/site-check.php | admin page | add_submenu_page( AW_CORE_MENU, 'Check site', 'Check site', aw_core_screen_cap( 'aw-site-check' ), 'aw-site-check', 'aw_site_check_page' );
-plugins/kits-core/includes/admin-home.php | admin page | add_menu_page( 'Kits', 'Kits', 'manage_options', KITS_MENU, 'kits_home_page', 'dashicons-layout', 3 ); // second, under Dashboard
 plugins/kits-core/includes/admin-home.php | admin page | add_submenu_page( KITS_MENU, 'Home', 'Home', 'manage_options', KITS_MENU, 'kits_home_page' );
 plugins/kits-core/includes/admin-menu.php | admin page | add_submenu_page( '', (string) ( $item[3] ?? $item[0] ), '', (string) $item[1], $slug, fn() => do_action( $hook ) ); // phpcs:ignore WordPress.NamingConventions
 plugins/kits-core/includes/admin-menu.php | admin page | add_submenu_page( KITS_MENU, 'Help', 'Help', 'manage_options', 'kits-help', 'kits_help_page' );
-plugins/kits-core/includes/admin-menu.php | admin page | add_submenu_page( KITS_MENU, 'Plugins', 'Plugins', 'manage_options', 'kits-plugins', 'kits_plugins_page' );
 plugins/kits-core/includes/admin-menu.php | admin page | add_submenu_page( KITS_MENU, 'Settings', 'Settings', 'manage_options', 'kits-settings', 'kits_settings_page' );
 plugins/kits-core/includes/admin-menu.php | admin page | add_submenu_page( KITS_MENU, 'Theme Options', 'Theme Options', 'manage_options', 'kits-options', 'kits_options_page' );
 plugins/kits-core/includes/admin-menu.php | admin page | add_submenu_page( KITS_MENU, 'Tools', 'Tools', 'edit_theme_options', 'kits-tools', 'kits_transfer_page' );

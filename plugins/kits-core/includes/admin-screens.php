@@ -1,6 +1,6 @@
 <?php
 /**
- * The Kits admin, laid out like a marketplace theme's hub: one menu second under Dashboard, the same tabs on every Kits
+ * The Kits admin, laid out like a marketplace theme's hub: one item under Appearance, the same tabs on every Kits
  * screen, and one screen per job. Core wp-admin parts only (nav tabs, form tables, postboxes, the Settings API, notices);
  * no admin stylesheet.
  *
@@ -21,13 +21,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * The Kits screens as tabs, before they are put in order: slug => [tab label, address relative to wp-admin, capability].
- * Always the six of kits_menu_six(); the kits_admin_tabs filter may change a label or a capability, and a tab it adds
- * is dropped (a site adds sections to the six instead: kits_home_sections, kits_settings_sections, kits_help_sections).
+ * Always the five of kits_menu_six(); the kits_admin_tabs filter may change a label or a capability, and a tab it adds
+ * is dropped (a site adds sections to the five instead: kits_home_sections, kits_settings_sections, kits_help_sections).
  */
 function kits_admin_tabs_unsorted(): array {
 	$six = kits_menu_six( KITS_MENU );
 	/**
-	 * Filters the six Kits tabs (label, address, capability). Only the six keys are kept.
+	 * Filters the five Kits tabs (label, address, capability). Only the five keys are kept.
 	 *
 	 * @param array $tabs Slug => [label, address relative to wp-admin, capability].
 	 */
@@ -35,7 +35,7 @@ function kits_admin_tabs_unsorted(): array {
 }
 
 /**
- * One order for the Kits menu and the Kits tabs: screen slugs (the page= value). The six in their order; the filter may
+ * One order for the Kits menu and the Kits tabs: screen slugs (the page= value). The five in their order; the filter may
  * reorder them.
  */
 function kits_menu_order(): array {
@@ -82,25 +82,10 @@ add_action(
 		if ( empty( $submenu[ KITS_MENU ] ) || ! is_array( $submenu[ KITS_MENU ] ) ) {
 			return;
 		}
-		$submenu[ KITS_MENU ] = array_values( kits_menu_sort( $submenu[ KITS_MENU ], fn( $item ) => $item[2] ?? '' ) ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- reorders the Kits submenu only (the six, admin-menu.php).
+		$submenu[ KITS_MENU ] = array_values( kits_menu_sort( $submenu[ KITS_MENU ], fn( $item ) => $item[2] ?? '' ) ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- reorders the Kits submenu only (the five, admin-menu.php).
 	},
 	1000 // After every plugin has added its screens.
 );
-
-/**
- * Screens that other plugins add under Kits → Plugins (not as top tabs): slug => [name, address relative to wp-admin,
- * capability, one line on what it is, state]. State is '' when the plugin is on ("Active"), else a short word such as
- * "Off" (the address then says where to switch it on). On those screens the Plugins tab is the active one.
- */
-function kits_plugin_screens(): array {
-	$list = array();
-	foreach ( (array) apply_filters( 'kits_plugin_screens', array() ) as $slug => $s ) {
-		if ( is_array( $s ) && isset( $s[0], $s[1], $s[2] ) ) {
-			$list[ (string) $slug ] = array( (string) $s[0], (string) $s[1], (string) $s[2], (string) ( $s[3] ?? '' ), (string) ( $s[4] ?? '' ) );
-		}
-	}
-	return $list;
-}
 
 /**
  * The tabs every Kits screen starts with.
@@ -109,7 +94,7 @@ function kits_plugin_screens(): array {
  */
 function kits_admin_tabs( string $current ): void {
 	if ( kits_admin_embedding() ) {
-		return; // Shown as a section of one of the six: that screen has the tabs.
+		return; // Shown as a section of one of the five: that screen has the tabs.
 	}
 	echo '<nav class="nav-tab-wrapper wp-clearfix" aria-label="' . esc_attr( 'Kits screens' ) . '">';
 	foreach ( kits_admin_tabs_list() as $slug => $t ) {
@@ -188,7 +173,7 @@ function kits_product_icon_img( string $name, int $size = 20 ): string {
  */
 function kits_admin_head( string $slug, string $title, string $intro = '' ): void {
 	if ( kits_admin_embedding() ) {
-		echo '<div>'; // A section of one of the six: no second heading or tabs. The screen closes it as it closes .wrap.
+		echo '<div>'; // A section of one of the five: no second heading or tabs. The screen closes it as it closes .wrap.
 		if ( '' !== $intro ) {
 			echo '<p>' . esc_html( $intro ) . '</p>';
 		}
@@ -329,110 +314,6 @@ function kits_home_status(): void {
 		echo '<tr><th scope="row">' . kits_product_icon_img( 'Theme version' === $label ? 'Kits' : $label ) . esc_html( $label ) . '</th><td>' . wp_kses_post( $r[1] ) . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- kits_product_icon_img() escapes its image address.
 	}
 	echo '</tbody></table>';
-}
-
-/* ---------- Plugins: required and recommended ---------- */
-
-/** Plugins the theme works with: slug => [name, why, required]. Kits Core comes with the theme. */
-function kits_plugin_list(): array {
-	return (array) apply_filters(
-		'kits_plugins',
-		array(
-			'kits-core'             => array( 'Kits Core', 'Theme Options, Page Options, forms, the share bar, the settings file and the design system screens.', true ),
-			'seo-by-rank-math'      => array( 'Rank Math SEO', 'Titles, descriptions, schema and the social profiles the Socials section shows.', false ),
-			'fluentform'            => array( 'Fluent Forms', 'The site\'s forms; Kits styles them and loads their styles only where a form is.', false ),
-			'google-site-kit'       => array( 'Site Kit by Google', 'Search Console and Analytics; Kits adds Tag Manager with consent mode.', false ),
-			'optimization-detective' => array( 'Optimization Detective', 'Measures which image is largest on each page; Core Settings keeps its priority.', false ),
-		)
-	);
-}
-
-/**
- * The installed plugin file of a slug (its folder), or ''.
- *
- * @param string $slug Plugin folder.
- */
-function kits_plugin_file( string $slug ): string {
-	if ( ! function_exists( 'get_plugins' ) ) {
-		require_once ABSPATH . 'wp-admin/includes/plugin.php';
-	}
-	foreach ( array_keys( get_plugins() ) as $file ) {
-		if ( 0 === strpos( $file, $slug . '/' ) ) {
-			return $file;
-		}
-	}
-	return '';
-}
-
-/** Kits → Plugins. */
-function kits_plugins_page() {
-	kits_admin_head( 'kits-plugins', 'Plugins', 'What the theme needs and what it works best with. Install and activate use WordPress\'s own Plugins screens.' );
-	$rows = array();
-	foreach ( kits_plugin_list() as $slug => list( $name, $why, $required ) ) {
-		$file = kits_plugin_file( $slug );
-		if ( 'kits-core' === $slug && function_exists( 'kits_option' ) ) {
-			$state  = is_plugin_active( 'kits-core/kits-core.php' ) ? 'Active' : 'Active (loaded by another plugin)';
-			$action = '';
-		} elseif ( $file && is_plugin_active( $file ) ) {
-			$state  = 'Active';
-			$action = '';
-		} elseif ( $file ) {
-			$state  = 'Installed, not active';
-			$action = current_user_can( 'activate_plugins' ) ? '<a class="button" href="' . esc_url( wp_nonce_url( self_admin_url( 'plugins.php?action=activate&plugin=' . rawurlencode( $file ) ), 'activate-plugin_' . $file ) ) . '">' . esc_html( 'Activate' ) . '</a>' : '';
-		} else {
-			$state  = 'Not installed';
-			$action = current_user_can( 'install_plugins' ) && 'kits-core' !== $slug ? '<a class="button" href="' . esc_url( wp_nonce_url( self_admin_url( 'update.php?action=install-plugin&plugin=' . rawurlencode( $slug ) ), 'install-plugin_' . $slug ) ) . '">' . esc_html( 'Install' ) . '</a>' : '';
-		}
-		$rows[] = array(
-			'plugin' => kits_product_icon_img( $name, 32 ) . '<strong>' . esc_html( $name ) . '</strong>',
-			'type'   => esc_html( $required ? 'Required' : 'Recommended' ),
-			'why'    => esc_html( $why ),
-			'state'  => ( 'Active' === substr( $state, 0, 6 ) ? '<span class="dashicons dashicons-yes" aria-hidden="true"></span> ' : '' ) . esc_html( $state ),
-			'action' => $action,
-		);
-	}
-	kits_simple_table(
-		'kits-plugins',
-		array(
-			'plugin' => 'Plugin',
-			'type'   => 'Type',
-			'why'    => 'What it does here',
-			'state'  => 'On this site',
-			'action' => '',
-		),
-		$rows,
-		array(
-			'primary' => 'plugin',
-			'foot'    => false,
-		)
-	);
-	$own = array();
-	foreach ( kits_plugin_screens() as $s ) {
-		if ( current_user_can( $s[2] ) ) {
-			$own[] = array(
-				'plugin' => kits_product_icon_img( $s[0], 32 ) . '<strong><a href="' . esc_url( admin_url( $s[1] ) ) . '">' . esc_html( $s[0] ) . '</a></strong>',
-				'state'  => '' === $s[4] ? '<span class="dashicons dashicons-yes" aria-hidden="true"></span> ' . esc_html( 'Active' ) : esc_html( $s[4] ),
-				'what'   => esc_html( $s[3] ),
-			);
-		}
-	}
-	if ( $own ) {
-		echo '<h2>' . esc_html( 'This site\'s plugins' ) . '</h2>';
-		kits_simple_table(
-			'kits-plugin-screens',
-			array(
-				'plugin' => 'Plugin',
-				'state'  => 'State',
-				'what'   => 'What it does here',
-			),
-			$own,
-			array(
-				'primary' => 'plugin',
-				'foot'    => false,
-			)
-		);
-	}
-	echo '</div>';
 }
 
 /* ---------- Import / Export ---------- */
@@ -713,12 +594,6 @@ function kits_theme_option_row( string $key, array $f, array $types = array() ):
 			echo '<option value="' . esc_attr( $c ) . '"' . selected( (string) $val, (string) $c, false ) . '>' . esc_html( $label . ( (string) $c === (string) $f['default'] ? ' (default)' : '' ) ) . '</option>';
 		}
 		echo '</select>';
-	} elseif ( 'menu' === $f['kind'] ) {
-		echo '<select id="' . esc_attr( $id ) . '" name="' . esc_attr( $name ) . '"><option value="">' . esc_html( 'The theme’s own (default)' ) . '</option>';
-		foreach ( kits_theme_menu_choices() as $c => $label ) {
-			echo '<option value="' . esc_attr( (string) $c ) . '"' . selected( (string) $val, (string) $c, false ) . '>' . esc_html( $label ) . '</option>';
-		}
-		echo '</select>';
 	} elseif ( 'share' === $f['kind'] ) {
 		$conf = array_merge( kits_theme_share_default(), is_array( $val ) ? $val : array() );
 		echo '<fieldset><legend class="screen-reader-text">' . esc_html( $f['label'] ) . '</legend>';
@@ -859,9 +734,6 @@ function kits_theme_option_section( string $key, array $f ): string {
 	$map = array(
 		'announce'       => 'general-header',
 		'sticky_header'  => 'general-header',
-		'header_menu'    => 'general-header',
-		'footer_menu_1'  => 'general-footer',
-		'footer_menu_2'  => 'general-footer',
 		'sticky_bar'     => 'general-footer',
 		'sticky_href'    => 'general-footer',
 		'sticky_label'   => 'general-footer',
@@ -897,13 +769,9 @@ function kits_options_sections(): array {
 			),
 			'Single'   => $single,
 			'Archives' => $archive,
+			// Palette, type, buttons, colour sets and spacing are Styles' (owner, 11 Nov 2026: no copies of WordPress).
 			'Visual'   => array(
-				'visual-palette'    => 'Palette',
-				'visual-typography' => 'Typography',
-				'visual-buttons'    => 'Buttons',
-				'visual-colours'    => 'Colour sets',
-				'visual-spacing'    => 'Spacing',
-				'visual-cards'      => 'Cards',
+				'visual-cards' => 'Cards',
 			),
 			'Utility'  => array(
 				'utility-share'       => 'Share bar',
@@ -986,21 +854,20 @@ function kits_options_section_body( string $section, string $label ): bool {
 	$styles = 'site-editor.php?path=/wp_global_styles';
 	switch ( $section ) {
 		case 'general-header':
-			kits_options_box( 'Header', fn() => kits_page_default_rows( '_site', array( 'header' ) ), 'The header every page uses unless its kind of page or the page itself picks another. What the header holds (logo, menu, buttons): ' . kits_options_link( 'Editor → Patterns → Header', 'site-editor.php?postType=wp_template_part' ) . '.' );
-			kits_options_box( 'Header settings', fn() => kits_theme_option_rows_of( 'general-header' ), 'Menus: ' . kits_options_link( 'Editor → Navigation', 'site-editor.php?postType=wp_navigation' ) . '.' );
+			// The header part and its menu are WordPress's (Editor → Patterns, Navigation): no pickers here (owner, 11 Nov 2026).
+			kits_options_box( 'Header settings', fn() => kits_theme_option_rows_of( 'general-header' ), 'What the header holds: ' . kits_options_link( 'Editor → Patterns → Header', 'site-editor.php?postType=wp_template_part' ) . '. Menus: ' . kits_options_link( 'Editor → Navigation', 'site-editor.php?postType=wp_navigation' ) . '.' );
 			return true;
 		case 'general-layout':
 			kits_options_box( 'Layout', fn() => kits_page_default_rows( '_site', array( 'sidebar', 'title', 'crumbs' ) ), 'Site-wide defaults; each kind of page can differ under Single and Archives. Widths and spacing: ' . kits_options_link( 'Styles → Layout', $styles ) . '.' );
 			return true;
 		case 'general-footer':
-			kits_options_box( 'Footer', fn() => kits_page_default_rows( '_site', array( 'footer' ) ), 'What the footer holds: ' . kits_options_link( 'Editor → Patterns → Footer', 'site-editor.php?postType=wp_template_part' ) . '.' );
-			kits_options_box( 'Footer settings', fn() => kits_theme_option_rows_of( 'general-footer' ) );
+			kits_options_box( 'Footer settings', fn() => kits_theme_option_rows_of( 'general-footer' ), 'What the footer holds: ' . kits_options_link( 'Editor → Patterns → Footer', 'site-editor.php?postType=wp_template_part' ) . '.' );
 			return true;
 		case 'utility-share':
 			kits_options_box( 'Share bar', fn() => kits_theme_option_rows_of( 'utility-share' ) );
 			return true;
 		case 'utility-performance':
-			kits_options_box( 'Performance', fn() => kits_theme_option_rows_of( 'utility-performance' ), 'More speed switches: ' . kits_options_link( 'Kits → Settings → Performance', 'admin.php?page=kits-settings#performance' ) . '.' );
+			kits_options_box( 'Performance', fn() => kits_theme_option_rows_of( 'utility-performance' ), 'More speed switches: ' . kits_options_link( 'Appearance → Kits → Settings → Performance', 'admin.php?page=kits-settings#performance' ) . '.' );
 			return true;
 		case 'utility-extra':
 			$has = (bool) array_filter( array_keys( kits_theme_option_fields() ), fn( $k ) => 'utility-extra' === kits_theme_option_section( $k, kits_theme_option_fields()[ $k ] ) );
@@ -1018,30 +885,8 @@ function kits_options_section_body( string $section, string $label ): bool {
 		case 'utility-socials':
 			kits_options_socials();
 			return false;
-		case 'visual-palette':
-			kits_options_palette();
-			return false;
-		case 'visual-typography':
-			kits_options_typography();
-			return false;
-		case 'visual-buttons':
-			kits_options_buttons();
-			return false;
-		case 'visual-spacing':
-			kits_options_spacing();
-			return false;
 		case 'visual-cards':
 			kits_options_cards();
-			return false;
-		case 'visual-colours':
-			$sets = WP_Block_Styles_Registry::get_instance()->get_registered_styles_for_block( 'core/post-content' );
-			kits_options_links_box(
-				'Colour sets',
-				array_merge(
-					array_map( fn( $s ) => array( (string) ( $s['label'] ?? $s['name'] ), '', 'A page picks it in Page Options → Colour set; a kind of page under Single.' ), array_values( $sets ) ),
-					array( array( 'Change them', $styles, 'Styles → Blocks → Group: each colour set is a Group style.' ) )
-				)
-			);
 			return false;
 	}
 	if ( 'single-404' === $section ) {
@@ -1083,76 +928,6 @@ function kits_options_links_box( string $title, array $links ): void {
 		echo '<tr><th scope="row">' . ( '' !== $l[1] ? kits_options_link( $l[0], $l[1] ) : esc_html( $l[0] ) ) . '</th><td>' . esc_html( $l[2] ) . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- kits_options_link escapes.
 	}
 	echo '</tbody></table></div></div>';
-}
-
-/** Visual → Palette: the colours as Styles holds them now. */
-function kits_options_palette(): void {
-	$sets = (array) wp_get_global_settings( array( 'color', 'palette' ) );
-	$rows = array();
-	foreach ( array(
-		'custom' => 'Your colours',
-		'theme'  => 'Theme colours',
-	) as $origin => $title ) {
-		foreach ( (array) ( $sets[ $origin ] ?? array() ) as $c ) {
-			$hex    = (string) ( $c['color'] ?? '' );
-			$rows[] = array( '<span class="dashicons" aria-hidden="true" style="background:' . esc_attr( $hex ) . '"></span> ' . esc_html( (string) ( $c['name'] ?? '' ) ), esc_html( $hex . ' · ' . $title ) );
-		}
-	}
-	kits_options_values_box( 'Palette', $rows, 'Change a colour in ' . kits_options_link( 'Styles → Colors → Palette', 'site-editor.php?path=/wp_global_styles' ) . '; every part that uses it follows. Contrast: ' . kits_options_link( 'Theme Options → Colours (contrast)', 'admin.php?page=kits-options#colours' ) . '.' );
-}
-
-/** Visual → Typography: font families and the sizes of text and headings. */
-function kits_options_typography(): void {
-	$rows  = array();
-	$fonts = (array) wp_get_global_settings( array( 'typography', 'fontFamilies' ) );
-	foreach ( array_merge( (array) ( $fonts['custom'] ?? array() ), (array) ( $fonts['theme'] ?? array() ) ) as $f ) {
-		$rows[] = array( esc_html( (string) ( $f['name'] ?? '' ) ), '<span style="font-family:' . esc_attr( (string) ( $f['fontFamily'] ?? '' ) ) . '">' . esc_html( 'Sphinx of black quartz, judge my vow. 0123456789' ) . '</span>' );
-	}
-	$styles = wp_get_global_styles();
-	$body   = (array) ( $styles['typography'] ?? array() );
-	$rows[] = array( esc_html( 'Body text' ), esc_html( trim( (string) ( $body['fontFamily'] ?? '' ) . ' ' . (string) ( $body['fontSize'] ?? '' ) . ' ' . (string) ( $body['lineHeight'] ?? '' ) ) ) );
-	foreach ( array( 'h1', 'h2', 'h3', 'h4', 'h5', 'h6' ) as $h ) {
-		$t = (array) ( $styles['elements'][ $h ]['typography'] ?? array() );
-		if ( $t ) {
-			$rows[] = array( esc_html( strtoupper( $h ) ), esc_html( trim( (string) ( $t['fontSize'] ?? '' ) . ' · weight ' . (string) ( $t['fontWeight'] ?? '' ) . ' · line ' . (string) ( $t['lineHeight'] ?? '' ) ) ) );
-		}
-	}
-	kits_options_values_box( 'Typography', $rows, 'Change them in ' . kits_options_link( 'Styles → Typography', 'site-editor.php?path=/wp_global_styles' ) . '. Install fonts in ' . kits_options_link( 'Appearance → Fonts', 'font-library.php' ) . '.' );
-}
-
-/** Visual → Buttons: what Styles → Blocks → Button sets, which every button on the site follows. */
-function kits_options_buttons(): void {
-	$b    = (array) wp_get_global_styles( array( 'elements', 'button' ) );
-	$rows = array(
-		array( esc_html( 'Background' ), esc_html( (string) ( $b['color']['background'] ?? '' ) ) ),
-		array( esc_html( 'Text' ), esc_html( (string) ( $b['color']['text'] ?? '' ) ) ),
-		array( esc_html( 'Corner radius' ), esc_html( (string) ( $b['border']['radius'] ?? '' ) ) ),
-		array( esc_html( 'Weight' ), esc_html( (string) ( $b['typography']['fontWeight'] ?? '' ) ) ),
-	);
-	foreach ( array(
-		'kits-secondary' => 'Secondary style',
-		'kits-ghost'     => 'Ghost style',
-		'kits-brand'     => 'Brand style',
-	) as $slug => $label ) {
-		$v      = (array) wp_get_global_styles( array( 'variations', $slug ), array( 'block_name' => 'core/button' ) );
-		$rows[] = array( esc_html( $label ), esc_html( trim( (string) ( $v['color']['background'] ?? '' ) . ' / ' . (string) ( $v['color']['text'] ?? '' ), ' /' ) ) );
-	}
-	kits_options_values_box( 'Buttons', $rows, 'Every button on the site (in the content, the header, forms and cards) follows ' . kits_options_link( 'Styles → Blocks → Button', 'site-editor.php?path=/wp_global_styles' ) . ', including its Secondary, Ghost and Brand styles.' );
-}
-
-/** Visual → Spacing: the spacing steps Styles holds now, which padding and gaps use. */
-function kits_options_spacing(): void {
-	$sets = (array) wp_get_global_settings( array( 'spacing', 'spacingSizes' ) );
-	$rows = array();
-	foreach ( array(
-		'custom' => 'Your sizes',
-		'theme'  => 'Theme sizes',
-	) as $origin => $title ) {
-		foreach ( (array) ( $sets[ $origin ] ?? array() ) as $size ) {
-			$rows[] = array( esc_html( (string) ( $size['name'] ?? '' ) ), '<code>' . esc_html( '--wp--preset--spacing--' . (string) ( $size['slug'] ?? '' ) ) . '</code> ' . esc_html( (string) ( $size['size'] ?? '' ) . ' · ' . $title ) );
-		}
-	}
-	kits_options_values_box( 'Spacing', $rows ? $rows : array( array( esc_html( 'None yet' ), '' ) ), 'The steps are set in the theme\'s theme.json (<code>settings.spacing.spacingSizes</code>); the Site Editor\'s Styles doesn\'t edit them. Every part that uses a step follows.' );
 }
 
 /**
@@ -1209,7 +984,7 @@ function kits_options_socials(): void {
 			$rows[] = array( esc_html( (string) wp_parse_url( $url, PHP_URL_HOST ) ), esc_html( $url ) );
 		}
 	}
-	$where = defined( 'RANK_MATH_VERSION' ) ? kits_options_link( 'Rank Math → Titles & Meta → Social Meta', 'admin.php?page=rank-math-options-titles#setting-panel-social' ) : esc_html( 'Rank Math SEO (not active: see Kits → Plugins)' );
+	$where = defined( 'RANK_MATH_VERSION' ) ? kits_options_link( 'Rank Math → Titles & Meta → Social Meta', 'admin.php?page=rank-math-options-titles#setting-panel-social' ) : esc_html( 'Rank Math SEO (not active: see Plugins)' );
 	kits_options_values_box( 'Socials', $rows ? $rows : array( array( esc_html( 'None yet' ), '' ) ), 'The site\'s profiles, read from ' . $where . '. Change them there; search engines read them too.' );
 }
 
