@@ -384,11 +384,13 @@ export default function Inbox() {
 	const load = useCallback( () => {
 		setLoading( true );
 		setError( '' );
+		// Rows from another folder are cleared while the new list loads, so none can be opened in the wrong folder.
+		setData( ( d ) => ( d && d.folder !== st.folder ? null : d ) );
 		apiFetch( {
 			path: `${ path( 'inbox' ) }?${ new URLSearchParams( st ).toString() }`,
 		} )
 			.then( ( r ) => {
-				setData( r );
+				setData( { ...r, folder: st.folder } );
 				setPicked( [] );
 			} )
 			.catch( ( e ) => setError( errText( e ) ) )
@@ -396,9 +398,9 @@ export default function Inbox() {
 	}, [ st ] );
 	useEffect( load, [ load ] );
 
-	const want = useRef( '' ); // the message (and pictures choice) last asked for: an older answer is dropped.
+	const want = useRef( '' ); // the message, pictures choice and folder last asked for: an older answer is dropped.
 	const loadMsg = useCallback( () => {
-		const key = `${ open }|${ images }`;
+		const key = `${ open }|${ images }|${ st.folder }`;
 		want.current = key;
 		if ( ! open ) {
 			setMsg( null );
@@ -444,6 +446,9 @@ export default function Inbox() {
 	};
 
 	const openRow = ( r ) => {
+		if ( ! data || data.folder !== st.folder ) {
+			return; // a row from the folder being left
+		}
 		setImages( false );
 		setOpen( r.id );
 		if ( r.unread ) {
