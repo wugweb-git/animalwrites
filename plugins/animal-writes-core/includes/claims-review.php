@@ -302,6 +302,9 @@ function aw_claims_screen() {
 	if ( ! current_user_can( 'edit_aw_volunteers' ) ) {
 		wp_die( 'Not allowed.', 403 );
 	}
+	if ( function_exists( 'directoryweb_ui_page' ) && directoryweb_ui_page( 'claims' ) ) {
+		return; // &ui=next: the new Claims screen (directoryweb-ui.php)
+	}
 	$entry = absint( wp_unslash( $_GET['entry'] ?? 0 ) ); // phpcs:ignore WordPress.Security.NonceVerification -- read only
 	echo '<div class="wrap">';
 	if ( ! aw_claim_ff_id() ) {
