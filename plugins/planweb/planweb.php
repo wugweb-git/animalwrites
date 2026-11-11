@@ -25,10 +25,11 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
-// Activating PlanWeb on its own switches it on (registered before the guard: Animal Writes Core may have loaded this
-// file already from another path).
-register_activation_hook( __FILE__, 'planweb_activate' );
-register_deactivation_hook( __FILE__, 'planweb_deactivate' );
+// Activating PlanWeb switches it on; deactivating switches it off. The hook names are fixed, not built from __FILE__:
+// Animal Writes Core loads this file first, before WordPress maps a symlinked plugin folder, so __FILE__ can give a
+// name WordPress never fires (the Deploy check's WordPress links plugins in this way).
+add_action( 'activate_planweb/planweb.php', 'planweb_activate' );
+add_action( 'deactivate_planweb/planweb.php', 'planweb_deactivate' );
 
 if ( defined( 'PLANWEB_VERSION' ) ) {
 	return; // Loaded already (active on its own and also loaded by Animal Writes Core).
