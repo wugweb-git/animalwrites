@@ -17,15 +17,15 @@
 
 ## Where the brief and the Notion log differ
 
-The brief's UI standard says "built with `@wordpress/components` and `@wordpress/dataviews` … no home-made design system". A later 11 Nov entry in the Notion decision log replaces that (owner: "WordPress own packages was a good thought but now it sucks… I gave you 2 references: Google Site Kit or Uncode"):
+The brief's first UI standard took the look from WordPress's own React packages. The owner replaced that later on 11 Nov (Notion decision log; owner: "WordPress own packages was a good thought but now it sucks… I gave you 2 references: Google Site Kit or Uncode"):
 
-- Kits plugins look like Google Site Kit.
-- A Kits admin design system (tokens and components) ships in Kits Core, and every Kits screen uses it.
-- WordPress packages are used only for plumbing: `@wordpress/element`, `@wordpress/data`, `@wordpress/api-fetch`, `@wordpress/i18n`.
+- **The look follows the Kits admin design system** (Google Site Kit pattern for plugins), shipped in Kits Core with the shell. Every Kits screen uses it.
+- **WordPress packages are plumbing only:** `@wordpress/data`, `@wordpress/api-fetch`, `@wordpress/i18n`, `@wordpress/icons`.
+- **InsightWeb only registers parts into the shell.** It styles nothing itself; a part the design system lacks is a request to Kits Core (2.2.5).
 - Own implementation: no code, CSS, icons, images or fonts copied from Site Kit.
 - Clickable HTML prototypes of the key screens, beside the reference, come before any build.
 
-A second 11 Nov owner decision makes that design system **one shared plugin shell in Kits Core** (app header, chips, tiles, "Select metrics", widgets, a DataView wrapper, Connected services rows with a DataForm, settings groups, setup flow, notices, empty, loading and error states), with **InsightWeb as its pilot**. Its spec is `docs/kits-plugin-ui.md`, beside `docs/admin-ui-spec.md`. Which WordPress packages sit inside the shell is the shell's decision, not this plan's.
+A second 11 Nov owner decision makes that design system **one shared plugin shell in Kits Core** (app header, chips, tiles, "Select metrics", widgets, a list for the working list, Connected services rows with an edit form, settings groups, setup flow, notices, empty, loading and error states), with **InsightWeb as its pilot**. Its spec is `docs/kits-plugin-ui.md`, beside `docs/admin-ui-spec.md`.
 
 This plan follows both entries: phase 2 (section 2.2) describes only what InsightWeb registers into the shell and the data it serves, and lists the shell parts the pilot needs (2.2.5). Neither `docs/kits-plugin-ui.md` nor `docs/admin-ui-spec.md` exists on any branch or in any worktree yet (checked with `git for-each-ref`, `git ls-tree` and a file search on 11 Nov). Phase 2 follows them once they are written, where they differ from this plan.
 
@@ -189,7 +189,7 @@ The screen is registered by InsightWeb, still as a submenu of RankWeb's menu (`A
 
 ### 2.2 Phase 2: InsightWeb as the pilot of the Kits plugin shell
 
-The admin is one shared shell in Kits Core (owner, 11 Nov), specified in `docs/kits-plugin-ui.md` (not on any branch yet on 11 Nov). The shell owns every component: app header, section chips, tiles, "Select metrics", widgets, the DataView wrapper, Connected services rows with their DataForm, settings groups, setup flow, notices and the empty, loading and error states. InsightWeb designs none of them. It is the first plugin to use the shell, so it is built together with the shell, and this section lists only what InsightWeb registers through the shell's PHP and JS API, plus the data it serves from its own REST routes.
+The admin is one shared shell in Kits Core (owner, 11 Nov), specified in `docs/kits-plugin-ui.md` (not on any branch yet on 11 Nov). The look follows the Kits admin design system (Google Site Kit pattern for plugins), shipped in Kits Core with the shell; WordPress packages are plumbing only (`@wordpress/data`, `@wordpress/api-fetch`, `@wordpress/i18n`, `@wordpress/icons`). The shell owns every component: app header, section chips, tiles, "Select metrics", widgets, the working list, Connected services rows with their edit form, settings groups, setup flow, notices and the empty, loading and error states. **InsightWeb only registers parts into the shell** and styles none of them. It is the first plugin to use the shell, so it is built together with the shell, and this section lists only what InsightWeb registers through the shell's PHP and JS API, plus the data it serves from its own REST routes.
 
 **Screens.** Three menu items, shown as tabs in the app header: Dashboard (`insightweb`), Keywords (`insightweb-keywords`), Settings (`insightweb-settings`). Capability: `aw_si_cap()` for Dashboard and Keywords, `manage_options` for Settings. Header extras: date range (28 days by default; 7, 28, 90 days), Help (links to `docs/seo/search-insights-plan.md` topics on the Help tab), and a "Run now" menu (2.2.4).
 
@@ -237,7 +237,7 @@ Chips: **Keywords · Pages · Rising · Links · Speed**. Each opens its section
 
 The Sources line (each source's last good run and last error, from `aw_si_runs`) shows in the header's status area or as the first widget, as the shell provides.
 
-#### 2.2.3 Keywords (the working list, shell DataView wrapper)
+#### 2.2.3 Keywords (the working list, the shell's list)
 
 - **Columns** (today's 18, same order): Keyword, Priority, Status, Topic, Page, Impressions (28 days), Clicks, Position, Change, Bing impressions (90 days), Live check, Trends, Volume (imports), Ubersuggest, vidIQ (YouTube), OpenSEO, Suggested action. Shown by default: Keyword, Priority, Status, Page, Impressions, Clicks, Position, Change, Suggested action; the rest are in the columns menu.
 - **Sortable:** Keyword, Priority, Topic, Impressions, Clicks, Position, Change, Trends (as today).
@@ -249,7 +249,7 @@ The Sources line (each source's last good run and last error, from `aw_si_runs`)
 
 #### 2.2.4 Settings
 
-**Connected services**, each a shell row (status → summary → Edit opens the DataForm with Save, Cancel and Disconnect). Status, in this order: "Not set up" (missing key or module), "Error" (last run failed, with its date and message from `aw_si_runs`), "Late" (last good run older than twice its schedule, the existing rule in `runs.php`), else "Connected, last run {date}". Keys never reach the browser: the form shows "set", "not set" or "set in wp-config.php" (then read-only: change it there).
+**Connected services**, each a shell row (status → summary → Edit opens the shell's edit form with Save, Cancel and Disconnect). Status, in this order: "Not set up" (missing key or module), "Error" (last run failed, with its date and message from `aw_si_runs`), "Late" (last good run older than twice its schedule, the existing rule in `runs.php`), else "Connected, last run {date}". Keys never reach the browser: the form shows "set", "not set" or "set in wp-config.php" (then read-only: change it there).
 
 | Service | Connect steps (Edit) | Status rule | Disconnect |
 |---|---|---|---|
@@ -274,20 +274,21 @@ Also shown as rows without a form (status only): Workers (Rising job and outside
 | Snapshot | Download the monthly snapshot CSV; the keyword map rebuild note | As today |
 | Data | Keyword map seed status; Delete Search Insights data (typed DELETE) | As today |
 
-#### 2.2.5 Shell parts the pilot needs that may not be in the shell yet
+#### 2.2.5 Requests to Kits Core: parts the pilot needs
 
-To check against `docs/kits-plugin-ui.md` once it exists:
+InsightWeb does not build or style any of these. Each is a request to Kits Core for the design system and shell, to check against `docs/kits-plugin-ui.md` once it exists:
 
-1. **Tiles anchored on the source's own last day,** not on today: a per-tile "to {day}" and the date range applied as "N days to the newest stored day".
-2. **A change chip that can be absent** (comparison window not fully stored) with its own text, and a count-type change ("+12") as well as a percentage and a position change where lower is better.
-3. **A full list inside a Dashboard section** (Pages, Rising, Links are paged lists with row and bulk actions), since the plugin has only three menu items. Either the DataView wrapper works inside a section, or the shell allows a secondary list screen per section.
-4. **Disconnect that a service can hide** (Search Console and GA4 belong to Site Kit), and a key field that is read-only when a `wp-config.php` constant wins.
-5. **Long-running actions with progress:** Run now for PageSpeed and URL Inspection work in steps over minutes; the shell needs a started / running / done state read from the run log.
-6. **A file upload field in DataForm** (imports) and a **file download action** (snapshot CSV).
-7. **A danger-zone action with a typed confirmation** (Delete data).
-8. **A custom slot above a list** for the bookmarklet link, and a **paste form** widget (Rising).
-9. **Sections added by another plugin** (`aw_si_tabs`, today SourceWeb's Sourcing keywords), only if owner question 3 keeps it in InsightWeb.
-10. **The WordPress Dashboard box** (`dashboard.php`) stays a core dashboard widget outside the shell, unless the shell offers one.
+1. **A chart widget:** clicks per day (line), Priorities (bar), PageSpeed and Clarity over time; with a text table of the same numbers for screen readers.
+2. **Tiles anchored on the source's own last day,** not on today: a per-tile "to {day}" and the date range applied as "N days to the newest stored day".
+3. **A change chip that can be absent** (comparison window not fully stored) with its own text, and a count-type change ("+12") as well as a percentage and a position change where lower is better.
+4. **A full list inside a Dashboard section** (Pages, Rising, Links are paged lists with row and bulk actions), since the plugin has only three menu items. Either the shell's list works inside a section, or the shell allows a secondary list screen per section.
+5. **Disconnect that a service can hide** (Search Console and GA4 belong to Site Kit), and a key field that is read-only when a `wp-config.php` constant wins.
+6. **Long-running actions with progress:** Run now for PageSpeed and URL Inspection work in steps over minutes; the shell needs a started / running / done state read from the run log.
+7. **A file upload field in the edit form** (imports) and a **file download action** (snapshot CSV).
+8. **A danger-zone action with a typed confirmation** (Delete data).
+9. **A custom slot above a list** for the bookmarklet link, and a **paste form** widget (Rising).
+10. **Sections added by another plugin** (`aw_si_tabs`, today SourceWeb's Sourcing keywords), only if owner question 3 keeps it in InsightWeb.
+11. **The WordPress Dashboard box** (`dashboard.php`) stays a core dashboard widget outside the shell, unless the shell offers one.
 
 **Build notes (shell-independent):** data comes from InsightWeb's REST routes with `api-fetch` nonces; capabilities per route as above; JS strings in the `insightweb` text domain with `wp_set_script_translations()`; InsightWeb's own script per screen registers its tiles, columns, groups and services and is enqueued only there; performance budget per screen as the shell sets it (proposed for the pilot: under 150 KB gzip of InsightWeb's own JS per screen, first data within 1 s on a warm cache, at most 3 requests on first render, no remote call on page load); notices only on InsightWeb's own screens, always dismissible; WCAG 2.2 AA through the shell's components.
 
@@ -361,6 +362,6 @@ Phase 2 runs alongside the shell's own first phase in Kits Core (shell plus pilo
 1. **Kits Core requirement:** InsightWeb checks for Kits Core and Animal Writes Core in code instead of a `Requires Plugins:` header, because Kits Core is loaded by Animal Writes Core on live and is not always active on its own. OK?
 2. **Proof "on a copy of live":** staging is stale and local test sites are off the table. OK to prove with the CI tests plus read-only before/after records on live (3.4), or should staging be refreshed first (hPanel steps in `docs/staging.md`)?
 3. **Sourcing keywords:** move it into SourceWeb's own Keywords list in phase 2 (recommended), or keep it as an extra section inside InsightWeb?
-4. **Admin UI:** phase 2 is the pilot of the shared Kits Core shell and registers into it (2.2), following the later 11 Nov log entries rather than the brief's `@wordpress/components` / `@wordpress/dataviews` line. Confirm.
+4. **Admin UI:** phase 2 is the pilot of the shared Kits Core shell; the look follows the Kits admin design system, WordPress packages are plumbing only, and InsightWeb only registers parts into the shell (2.2). Confirm.
 5. **Deactivation list (1.4):** clear all 18 InsightWeb jobs in 1.4 on deactivation from phase 2f, instead of today's 8?
 6. **Two new daily rows (2.2.1):** OK for the daily run to store the quick-win and conflict counts in `wp_aw_si_obs`, so those tiles can show a change? (No new call, no new table.)
