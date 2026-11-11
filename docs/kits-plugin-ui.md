@@ -157,8 +157,38 @@ screens save through the same function, so neither can drift from the other.
     - after an unchanged Save of every group, the three options are byte for byte the same.
 - Screens at 1280px and 375px: `docs/kits-plugin-ui/`.
 
+## SourceWeb
+
+- `plugins/aw-sourcing/includes/sourceweb-ui.php`: the trial switch (`sourceweb_ui_wanted()`), the enqueue and the
+  mount (`sourceweb-app`). Four screens, each with `&ui=next` on today's address:
+  - Overview (`aw-sourcing-menu`): Dashboard (`edit_others_posts`).
+  - To review (`aw-review`): list with type views, source and reason filters, search, Publish/Reject per row and for
+    the ticked rows, Publish all (`edit_others_posts`).
+  - Enrichment review (`aw-enrich-review`): one row per listing with status views and filters; Review opens
+    `FieldReview` for its values (approve, reject, undo, approve every high-confidence value) (`edit_others_posts`).
+  - Settings (`aw-sourcing&tab=settings`): Connected services (GitHub workers, Google Maps with its key and cap, each
+    enrichment source with its switch, AI providers, the relay) and the Workers, Directory enrichment and Social posts
+    groups (`manage_options`). Sources, Keywords, Rules, AI models and Workers stay on today's tabs, linked.
+- `includes/sourceweb-rest.php`, routes under `sourceweb/v1`: `dashboard`, `dashboard/count`, `review`,
+  `review/decide`, `review/publish-all`, `enrichment`, `enrichment/decide`, `settings`, `settings/<group>`,
+  `settings/google-key`. Every write calls the function today's screen calls (`aw_review_apply`,
+  `aw_enrich_approve/reject/undo`, `aw_sources_live_save`, `aw_enrich_sources_sanitize`). The Google key is never sent
+  out: Settings says only whether one is set, and an empty key keeps the stored one.
+- `includes/sourceweb-dashboard.php`: the job `sourceweb_dashboard_build` (hourly plus a single `now` event), the
+  transient `sourceweb_dashboard` (3 hours) and one row a day in `sourceweb_dashboard_log` (120 days, not autoloaded).
+  Other plugins add tiles through `aw_sourcing_dashboard_tiles`.
+- `includes/sourceweb-model.php`: the pure parts (list shaping, grouping per listing, what changed), tested without
+  WordPress in `plugins/aw-sourcing/tests/sourceweb-tests.php`.
+- Kits → Tools export carries `aw_sources`, `aw_enrich_sources`, `aw_enrich_live_cap`, `aw_social_on` and
+  `aw_social_show`; never the Google key.
+- `tools/ci/smoke-ui-sourceweb.sh`: the four screens, every route (401 signed out, 403 for a subscriber), the key never
+  in an answer, and an unchanged Save of every group leaving the options byte for byte the same.
+
 ## Not built yet
 
 - Kits Core has no translation files for the shell yet.
-- The other five plugins (InsightWeb, SourceWeb, MailWeb, DirectoryWeb, PlanWeb) do not use the shell yet.
+- The other four plugins (InsightWeb, MailWeb, DirectoryWeb, PlanWeb) do not use the shell yet.
+- Parts SourceWeb needed and worked around: a row view that opens inside a `DataList` (FieldReview sits in a card
+  above the list), "Reject ticked" in `FieldReview`, a write-only secret field, and a confirm with a count (the
+  browser's confirm is used).
 - The chart is one small part (`MiniChart`); there is no line chart or a chart with two series.

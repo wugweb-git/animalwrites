@@ -234,11 +234,27 @@ function aw_sourcing_overview_workers() {
  * any key.
  */
 function aw_sourcing_overview_ai() {
-	$rows = get_option( 'aw_ai_models', null );
-	if ( ! is_array( $rows ) ) {
-		return esc_html( get_option( 'aw_ai_keys' ) ? 'Keys saved the old way: opening the AI models screen converts them.' : 'No keys saved on the AI models screen yet.' );
+	$n = aw_sourcing_ai_counts();
+	if ( ! $n['saved'] ) {
+		return esc_html( $n['old'] ? 'Keys saved the old way: opening the AI models screen converts them.' : 'No keys saved on the AI models screen yet.' );
 	}
-	$n     = array( 'works' => 0, 'wait' => 0, 'bad' => 0, 'tool' => 0 );
+	$provs = $n['providers'];
+	$text  = sprintf( '%1$d AI keys: %2$d work, %3$d waiting or not checked, %4$d refused or out of credit; %5$d tool keys.', $n['works'] + $n['wait'] + $n['bad'], $n['works'], $n['wait'], $n['bad'], $n['tool'] ) . ( $provs ? ' Working: ' . implode( ', ', $provs ) . '.' : '' );
+	return aw_sourcing_overview_status( $n['works'] > 0, $text );
+}
+
+/**
+ * The AI keys' status counts, for the Overview and the Dashboard tile: keys that work, wait, are refused, tool keys, and
+ * the providers that work. Read only, from the saved rows as they are; no part of any key.
+ *
+ * @return array { saved: bool, old: bool, works, wait, bad, tool, providers: string[] }.
+ */
+function aw_sourcing_ai_counts() {
+	$rows = get_option( 'aw_ai_models', null );
+	$n    = array( 'saved' => is_array( $rows ), 'old' => ! is_array( $rows ) && (bool) get_option( 'aw_ai_keys' ), 'works' => 0, 'wait' => 0, 'bad' => 0, 'tool' => 0, 'providers' => array() );
+	if ( ! is_array( $rows ) ) {
+		return $n;
+	}
 	$provs = array();
 	foreach ( $rows as $r ) {
 		if ( ! is_array( $r ) || empty( $r['key'] ) ) {
@@ -257,10 +273,10 @@ function aw_sourcing_overview_ai() {
 			++$n['bad'];
 		}
 	}
-	$provs = array_filter( $provs );
+	$provs = array_values( array_filter( $provs ) );
 	sort( $provs );
-	$text = sprintf( '%1$d AI keys: %2$d work, %3$d waiting or not checked, %4$d refused or out of credit; %5$d tool keys.', $n['works'] + $n['wait'] + $n['bad'], $n['works'], $n['wait'], $n['bad'], $n['tool'] ) . ( $provs ? ' Working: ' . implode( ', ', $provs ) . '.' : '' );
-	return aw_sourcing_overview_status( $n['works'] > 0, $text );
+	$n['providers'] = $provs;
+	return $n;
 }
 
 /** The last entry of the Change log. */
@@ -275,7 +291,10 @@ function aw_sourcing_overview_page() {
 	if ( ! current_user_can( AW_REVIEW_CAP ) ) {
 		return;
 	}
-	$tabs  = current_user_can( AW_SRC_CAP ) ? aw_sourcing_tabs() : array();
+	if ( function_exists( 'sourceweb_ui_page' ) && sourceweb_ui_page( 'dashboard' ) ) {
+		return; // the new Dashboard (&ui=next, sourceweb-ui.php)
+	}
+	$tabs = current_user_can( AW_SRC_CAP ) ? aw_sourcing_tabs() : array();
 	$auto  = esc_html( 'Automatic' );
 	$admin = current_user_can( 'manage_options' );
 	$names = array( 'sources' => 'Sources', 'keywords' => 'Keywords', 'rules' => 'Rules', 'sections' => 'Sections', 'summary' => 'Summary rules', 'enrich' => 'Directory enrichment', 'ai' => 'AI models', 'workers' => 'Workers', 'rejected' => 'Rejected', 'relay-log' => 'Relay log', 'log' => 'Change log', AW_SRC_SETTINGS_TAB => 'Settings' );
