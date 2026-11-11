@@ -125,6 +125,58 @@ function kits_admin_tabs( string $current ): void {
 }
 
 /**
+ * The icon of a Kits product as an address, or '' when it has none. The Kits theme keeps the suite's icon in
+ * assets/images/kits-icon.svg; each plugin keeps its own in assets/icon.svg (docs/brand/plugin-icons/README.md).
+ *
+ * @param string $name Product name as the screens show it: Kits, Kits Core, RankWeb, SourceWeb, MailWeb, InsightWeb.
+ */
+function kits_product_icon( string $name ): string {
+	if ( 'Kits' === $name ) {
+		$file = get_template_directory() . '/assets/images/kits-icon.svg';
+		return file_exists( $file ) ? get_template_directory_uri() . '/assets/images/kits-icon.svg' : '';
+	}
+	if ( 'Kits Core' === $name ) {
+		return file_exists( KITS_CORE_DIR . 'assets/icon.svg' ) ? plugins_url( 'assets/icon.svg', KITS_CORE_DIR . 'kits-core.php' ) : '';
+	}
+	/**
+	 * Filters the plugin folder of each Kits product, for the icon in its assets/ folder.
+	 *
+	 * @param array $folders Product name => plugin folder.
+	 */
+	$folders = (array) apply_filters(
+		'kits_product_folders',
+		array(
+			'RankWeb'      => 'aw-seo-extras',
+			'SourceWeb'    => 'aw-sourcing',
+			'MailWeb'      => 'mailweb',
+			'InsightWeb'   => 'insightweb',
+			'DirectoryWeb' => 'directoryweb',
+			'PlanWeb'      => 'planweb',
+		)
+	);
+	$folder = isset( $folders[ $name ] ) ? (string) $folders[ $name ] : '';
+	if ( '' === $folder || ! file_exists( WP_PLUGIN_DIR . '/' . $folder . '/assets/icon.svg' ) ) {
+		return '';
+	}
+	return plugins_url( $folder . '/assets/icon.svg' );
+}
+
+/**
+ * A product's icon as an image tag before its name, or '' when it has none. The name next to it says what it is, so
+ * the image has empty alt text.
+ *
+ * @param string $name Product name.
+ * @param int    $size Width and height in pixels.
+ */
+function kits_product_icon_img( string $name, int $size = 20 ): string {
+	$url = kits_product_icon( $name );
+	if ( '' === $url ) {
+		return '';
+	}
+	return '<img src="' . esc_url( $url ) . '" width="' . $size . '" height="' . $size . '" alt="" style="vertical-align:middle;margin-inline-end:8px"> ';
+}
+
+/**
  * A screen's heading, intro and tabs.
  *
  * @param string $slug  The screen's slug.
@@ -133,7 +185,7 @@ function kits_admin_tabs( string $current ): void {
  */
 function kits_admin_head( string $slug, string $title, string $intro = '' ): void {
 	$theme = wp_get_theme( get_template() );
-	echo '<div class="wrap"><h1>' . esc_html( $title ) . '</h1>';
+	echo '<div class="wrap"><h1>' . kits_product_icon_img( 'Kits', 32 ) . esc_html( $title ) . '</h1>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- kits_product_icon_img() escapes its address.
 	if ( '' !== $intro ) {
 		echo '<p>' . esc_html( $intro ) . '</p>';
 	}
@@ -282,7 +334,8 @@ function kits_welcome_page() {
 	echo '<p>' . esc_html( 'Anything shown in red needs a change on the server or in wp-config.php.' ) . '</p>';
 	echo '<table class="widefat striped"><caption class="screen-reader-text">' . esc_html( 'System status' ) . '</caption><tbody>';
 	foreach ( kits_status_rows() as $r ) {
-		echo '<tr><th scope="row">' . esc_html( $r[0] ) . '</th><td>' . wp_kses_post( $r[1] ) . '</td></tr>';
+		$label = (string) $r[0];
+		echo '<tr><th scope="row">' . kits_product_icon_img( 'Theme version' === $label ? 'Kits' : $label ) . esc_html( $label ) . '</th><td>' . wp_kses_post( $r[1] ) . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- kits_product_icon_img() escapes its address.
 	}
 	echo '</tbody></table></div></div></div></div></div></div>';
 }
@@ -340,7 +393,7 @@ function kits_plugins_page() {
 			$action = current_user_can( 'install_plugins' ) && 'kits-core' !== $slug ? '<a class="button" href="' . esc_url( wp_nonce_url( self_admin_url( 'update.php?action=install-plugin&plugin=' . rawurlencode( $slug ) ), 'install-plugin_' . $slug ) ) . '">' . esc_html( 'Install' ) . '</a>' : '';
 		}
 		$rows[] = array(
-			'plugin' => '<strong>' . esc_html( $name ) . '</strong>',
+			'plugin' => kits_product_icon_img( $name, 32 ) . '<strong>' . esc_html( $name ) . '</strong>',
 			'type'   => esc_html( $required ? 'Required' : 'Recommended' ),
 			'why'    => esc_html( $why ),
 			'state'  => ( 'Active' === substr( $state, 0, 6 ) ? '<span class="dashicons dashicons-yes" aria-hidden="true"></span> ' : '' ) . esc_html( $state ),
@@ -366,7 +419,7 @@ function kits_plugins_page() {
 	foreach ( kits_plugin_screens() as $s ) {
 		if ( current_user_can( $s[2] ) ) {
 			$own[] = array(
-				'plugin' => '<strong><a href="' . esc_url( admin_url( $s[1] ) ) . '">' . esc_html( $s[0] ) . '</a></strong>',
+				'plugin' => kits_product_icon_img( $s[0], 32 ) . '<strong><a href="' . esc_url( admin_url( $s[1] ) ) . '">' . esc_html( $s[0] ) . '</a></strong>',
 				'what'   => esc_html( $s[3] ),
 			);
 		}

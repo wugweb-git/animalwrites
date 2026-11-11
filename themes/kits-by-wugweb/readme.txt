@@ -47,6 +47,10 @@ Inter Font (assets/fonts/inter, used by the Animal Writes style variation)
 Copyright 2016 The Inter Project Authors (https://github.com/rsms/inter)
 License: SIL Open Font License, 1.1, https://openfontlicense.org
 
+Kits icon (assets/images/kits-icon.svg, -256.png, -128.png), shown in the Kits admin header
+Copyright 2026 Wugweb
+License: GPLv2 or later, https://www.gnu.org/licenses/gpl-2.0.html
+
 Pattern images (assets/images) and the theme screenshot
 License: CC0, https://creativecommons.org/publicdomain/zero/1.0/
 museum.webp - https://www.rawpixel.com/image/3297419/free-photo-image-interior-hallway-architecture
