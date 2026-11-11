@@ -17,7 +17,7 @@
 
 ## Where the brief and the Notion log differ
 
-The brief's first UI standard took the look from WordPress's own React packages. The owner replaced that later on 11 Nov (Notion decision log; owner: "WordPress own packages was a good thought but now it sucks… I gave you 2 references: Google Site Kit or Uncode"):
+The brief's first UI standard took the look from WordPress's own React packages. The owner replaced that later on 11 Nov, with Google Site Kit and Uncode as the two references:
 
 - **The look follows the Kits admin design system** (Google Site Kit pattern for plugins), shipped in Kits Core with the shell. Every Kits screen uses it.
 - **WordPress packages are plumbing only:** `@wordpress/data`, `@wordpress/api-fetch`, `@wordpress/i18n`, `@wordpress/icons`.
