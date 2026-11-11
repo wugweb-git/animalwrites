@@ -4,7 +4,7 @@ Status: plan only, for the owner's yes (owner, 11 Nov 2026). No code until it is
 
 ## Fixed for this plan (owner)
 
-- **Data stays as it is.** Every option, the queue table, the webhook routes, hooks, filters, cron hooks, menu slugs and the `mailweb_` prefix keep their names. New REST routes go under `kits/v1/mailweb/…`. MailWeb is 3.2.1 and is already the model for release files (`readme.txt`, `languages/`, `MAILWEB_VERSION`).
+- **Data stays as it is.** Every option, the queue table, the webhook routes, hooks, filters, cron hooks, menu slugs and the `mailweb_` prefix keep their names. The one slug change is the owner's menu decision (§10): `mailweb` opens the Dashboard and the Inbox moves to `mailweb-inbox`, with redirects (§5). New REST routes go under MailWeb's own namespace, `mailweb/v1/…`, beside `mailweb/v1/mail-in` (as DirectoryWeb uses `directoryweb/v1`), never under `kits/v1`. MailWeb is 3.2.1 and is already the model for release files (`readme.txt`, `languages/`, `MAILWEB_VERSION`).
 - **Mail rules.** support@ sends outgoing mail and replies; noreply@ sends bulk and automatic mail only; vedanshu@ is for partnerships only; the public address is contact@. Nothing is sent without the owner's yes. No test sends, so no proof in this plan sends an email. Forms send no email (`aw_ff_mail_off()`, `animal-writes-core/includes/forms-fluentforms.php:34`), and nothing here changes that.
 - **No ship during a FluentCRM send.** `tools/aw-ship.sh` and the Deploy check already refuse (`tools/ci/mail_sending_check.py` reads `aw/v1/deploy-status`). Every phase ships on the owner's yes, one deploy at a time.
 - **The admin is the shared Kits Core shell.** MailWeb only registers parts into it.
@@ -14,7 +14,7 @@ Status: plan only, for the owner's yes (owner, 11 Nov 2026). No code until it is
 - `docs/admin-ui-spec.md` (approved 11 Nov) covers the Kits menu only. Its §F leaves the plugin dashboards (phases 3–6) "specified separately". Its §C already moves **Check site: email** (`mailweb_pause`, `mailweb_last_error`) to **MailWeb → Dashboard**, and this plan takes that row.
 - `docs/kits-plugin-ui.md` (the plugin shell) is on no branch yet. `git log --all -- docs/kits-plugin-ui.md` was empty on 11 Nov. This plan follows the brief's outline. The look comes from the Kits admin design system (Google Site Kit pattern), shipped in Kits Core. WordPress packages are plumbing only: `@wordpress/data`, `@wordpress/api-fetch`, `@wordpress/i18n`, `@wordpress/icons`. When the shell spec lands, it wins, and the names in §2–§4 are renamed to match.
 - `admin-ui-spec.md` §A.6 builds Kits screens with `@wordpress/components` and DataViews. The later owner entry (Notion decision log, 11 Nov; see the DirectoryWeb note in the shared notes folder) replaces that look with the Site Kit pattern. Plugin screens follow the later entry.
-- Shell order: InsightWeb pilot → RankWeb → SourceWeb → **MailWeb** → DirectoryWeb → PlanWeb. MailWeb's shell phases (§8, phases 2–4) wait for the shell to be live with InsightWeb and to have the parts in §7.
+- Shell order: InsightWeb pilot → RankWeb → SourceWeb → **MailWeb** → DirectoryWeb → PlanWeb. MailWeb's shell phases (§9, phases 2–4) wait for the shell to be live with InsightWeb and to have the parts in §7.
 
 ---
 
@@ -50,7 +50,7 @@ Status: plan only, for the owner's yes (owner, 11 Nov 2026). No code until it is
 
 | Screen (slug) | Item | Lands |
 |---|---|---|
-| **MailWeb → Inbox** (`mailweb`, `MAILWEB_CAP` = `edit_others_posts`) | Mailbox picker (All, or one mailbox with its aliases) | Inbox → filter "Mailbox" |
+| **MailWeb → Inbox** (`mailweb` today, `mailweb-inbox` from phase 2; `MAILWEB_CAP` = `edit_others_posts`) | Mailbox picker (All, or one mailbox with its aliases) | Inbox → filter "Mailbox" |
 | | Folder links with unread counts: Inbox, Sent, Archive, Spam, Trash, **Website forms** | Inbox → views |
 | | Search (not in Website forms) | Inbox → search |
 | | Columns, bulk and row actions | Inbox (§3) |
@@ -59,7 +59,7 @@ Status: plan only, for the owner's yes (owner, 11 Nov 2026). No code until it is
 | | Compose: To, Cc/Bcc, Subject, editor with signature, "Added under your signature" preview (campaign strip), From (send boxes only, signature swaps), attachments (10 MB total) | Inbox → compose panel (§3.4) |
 | | Website form item: fields, text, Reply, Mark unread, Move to Trash | Inbox → reading panel (forms) |
 | | "Read in step with Hostinger webmail" link | Inbox → footer line |
-| **MailWeb → Overview** (`mailweb-overview`, `MAILWEB_CAP`) | Feature table: Inbox, Mailboxes, Incoming mail (webhook), Profiles and signatures, Site sending (SMTP), Daily limit and queue, FluentCRM feed, Dashboard widget; "Needs attention" box; WP-CLI command | Dashboard: tiles and sections (§2); WP-CLI in Dashboard → Help line |
+| **MailWeb → Overview** (`mailweb-overview` today; the Dashboard at `mailweb` from phase 2; `MAILWEB_CAP`) | Feature table: Inbox, Mailboxes, Incoming mail (webhook), Profiles and signatures, Site sending (SMTP), Daily limit and queue, FluentCRM feed, Dashboard widget; "Needs attention" box; WP-CLI command | Dashboard: tiles and sections (§2); WP-CLI in Dashboard → Help line |
 | **MailWeb → Settings → Incoming mail, mailboxes, profiles** (`mailweb-settings`, `manage_options`) | Mail API token; webhook URL and last delivery; webhook secret per mailbox; mailbox IDs (read-only) | Settings → Connected services: Hostinger Mail API, Incoming mail (webhook) |
 | | Mailboxes table (send from it, default From) and aliases textarea | Settings → Mailboxes and aliases |
 | | Profiles (display name, signature HTML, picture) | Settings → Profiles |
@@ -71,8 +71,8 @@ Status: plan only, for the owner's yes (owner, 11 Nov 2026). No code until it is
 | **WordPress Dashboard → Mail widget** | Per mailbox: unread, status, newest 3 | Stays a core widget, outside the shell |
 | **Kits → Plugins / System Status** | MailWeb row, "Active, 3.2.1" | Stays (§2.3) |
 | **Kits → Check site** (Core, `aw_site_check_after`) | "Email sending: running/PAUSED", last error, link to resume | **Dashboard → Sending status.** Core's box becomes one line with a link (admin-ui-spec §C) |
-| **Plugins screen** | Inbox, Overview, Settings links | Same three: Inbox, Dashboard, Settings |
-| **Admin notices** | Pause notice: always on Dashboard, Inbox, Settings and Check site; elsewhere once a day | See §4.4 |
+| **Plugins screen** | Inbox, Overview, Settings links | Three links in menu order: Dashboard, Inbox, Settings |
+| **Admin notices** | Pause notice: always on Dashboard, Inbox, Settings and Check site; elsewhere once a day | Every admin screen, admins only, dismissible until the next pause (§4.4, owner 11 Nov) |
 
 ### 1.3 Options (none renamed)
 
@@ -97,7 +97,9 @@ Status: plan only, for the owner's yes (owner, 11 Nov 2026). No code until it is
 | `mailweb_queue_db` | schema version `2` | no | Internal |
 | `aw_mail_in_old_seen` (Core) | mailboxes still calling the old webhook | no | Incoming mail row (Core adds it through a filter) |
 
-Transients (cache only, unchanged): `mailweb_overview_<key>`, `mailweb_overview_down_<key>`, `mailweb_folders_<key>`, `mailweb_box_ids_wait`, `mailweb_flush_lock`, `mailweb_smtp_error`, `mailweb_pause_seen`.
+Transients (cache only, unchanged): `mailweb_overview_<key>`, `mailweb_overview_down_<key>`, `mailweb_folders_<key>`, `mailweb_box_ids_wait`, `mailweb_flush_lock`, `mailweb_smtp_error`, `mailweb_pause_seen` (no longer read once the pause notice changes in phase 1; it expires by itself).
+
+New, per user: user meta `mailweb_pause_dismissed`, holding the `at` time of the pause the user dismissed (§4.4). Nothing existing is renamed.
 
 ### 1.4 Table
 
@@ -111,7 +113,7 @@ Transients (cache only, unchanged): `mailweb_overview_<key>`, `mailweb_overview_
 | REST | `GET mailweb/v1/mail-in` | `mail-in.php:211` | `__return_true`: answers "ready" only, no data | Stays (checked, not a bug) |
 | REST (Core) | `POST` / `GET aw/v1/mail-in` | `mailweb-aw.php:338`, `353` | same | Stays until `aw_mail_in_old_seen` stays empty |
 | REST (Core) | `GET aw/v1/deploy-status` | `deploy-status.php` | yes/no only | Stays (deploy gate) |
-| admin-post | `mailweb_act` (archive, trash, spam, inbox, move, read, unread, file, formread, formunread, formtrash, send) | `inbox.php:645` | `MAILWEB_CAP` + nonce `mailweb_act` | Same work behind `kits/v1/mailweb/inbox/*`. Handler kept two releases for the no-JS fallback |
+| admin-post | `mailweb_act` (archive, trash, spam, inbox, move, read, unread, file, formread, formunread, formtrash, send) | `inbox.php:645` | `MAILWEB_CAP` + nonce `mailweb_act` | Same work behind `mailweb/v1/inbox/*`. Handler kept two releases for the no-JS fallback |
 | list bulk | `load-toplevel_page_mailweb` | `inbox.php:226` | nonce `bulk-messages` + `MAILWEB_CAP` | → `inbox/bulk` |
 | admin-post | `mailweb_cap` (save, resume, retry, flush) | `mail-cap.php:443` | `manage_options` + nonce | → `sending`, `sending/resume`, `queue/retry`, `queue/flush` |
 | admin-post | `mailweb_smtp_save` (save, test) | `smtp.php:108` | `manage_options` + nonce | → `services/smtp`, `services/smtp/test` |
@@ -122,12 +124,14 @@ Transients (cache only, unchanged): `mailweb_overview_<key>`, `mailweb_overview_
 | Cron | `mailweb_flush`, every 5 min (`mailweb_5min`) | `mail-cap.php:352–360` | — | Stays (Core also hooks it, `fluentcrm.php:325`) |
 | Cron | `mailweb_crm_sync`, every 5 min | `crm-sync.php:233–249` | — | Stays |
 | WP-CLI | `wp mailweb crm-sync [--all]` | `crm-sync.php:292` | — | Stays; listed on Dashboard → Help |
-| Site Health | **none today** | — | — | New test, phase 1 (§8): "Email sending" (paused = critical; held emails = recommended) |
+| Site Health | **none today** | — | — | New test, phase 1 (§9): "Email sending" (paused = critical; held emails = recommended) |
 | Filters and actions kept | `mailweb_forms_source`, `mailweb_after_signature`, `mailweb_head_html`, `mailweb_smtp_defaults`, `mailweb_smtp_reply_to`, `mailweb_crm_skip_email`, `mailweb_pause_notice_always`, `mailweb_settings_after`, `mailweb_smtp_screen_after`, `mailweb_webhook_noted`; FluentCRM `global_email_limit_per_second` → 1, `disable_email_processing`, `mailer_handler_chunk_size`, `fluentmail_suggest` | various | — | All kept. The two `*_after` screen actions keep firing on the no-JS fallback for two releases |
 
 ---
 
-## 2. Dashboard (`mailweb-overview`, `MAILWEB_CAP`)
+## 2. Dashboard (`mailweb`, `MAILWEB_CAP`)
+
+The MailWeb menu opens the Dashboard (owner, 11 Nov). From phase 2 the top-level slug `mailweb` is the Dashboard and its first submenu item is "Dashboard". Until then it lives at `mailweb-overview`, which afterwards redirects to `mailweb` (§5).
 
 The shell's spec row is: Dashboard (mailboxes, queue, sent and failed, sending status). The section chips use the same words, **Mailboxes · Queue · Sent and failed · Sending status**.
 
@@ -135,8 +139,8 @@ The shell's spec row is: Dashboard (mailboxes, queue, sent and failed, sending s
 
 | Route | Method | Capability |
 |---|---|---|
-| `kits/v1/mailweb/tiles` | GET | `MAILWEB_CAP` |
-| `kits/v1/mailweb/sections/<mailboxes\|queue\|sent\|status>` | GET | `MAILWEB_CAP` |
+| `mailweb/v1/tiles` | GET | `MAILWEB_CAP` |
+| `mailweb/v1/sections/<mailboxes\|queue\|sent\|status>` | GET | `MAILWEB_CAP` |
 
 ### 2.1 Tiles
 
@@ -167,29 +171,37 @@ Dashboard → Help line: `wp mailweb crm-sync --all`, the webhook URL, and the l
 
 ### 2.3 Rows outside the screen
 
-- **Kits → Plugins** (`kits_plugin_screens`): unchanged, pointing at the Dashboard.
+- **Kits → Plugins** (`kits_plugin_screens`): points at the Dashboard, so `kits-hub.php:32` changes from `mailweb-overview` to `mailweb` in phase 2.
 - **Kits Home → Plugin status** (`kits_status_rows`): "Active, 3.2.x · sending running" or "**sending paused since …**" (red, links to Dashboard → Sending status).
 - **Kits → Check site** (Core): the box becomes one line, "Email sending: running/paused, see MailWeb → Dashboard". Core's `aw_site_check_after` hook calls a new `mailweb_status_line()`, so Core reads no MailWeb option itself.
 - **WordPress Dashboard widget**: unchanged, server-rendered, no script.
 
 ---
 
-## 3. Inbox (the working list, `mailweb`, `MAILWEB_CAP`)
+## 3. Inbox (the working list, `mailweb-inbox`, `MAILWEB_CAP`)
 
-The slug stays `mailweb`. The menu badge, the "New form entries" notice (Core), the Dashboard widget and every bookmark already point at it. The header tabs read Dashboard · Inbox · Settings. If `kits-plugin-ui.md` requires the top-level item to open the Dashboard, then `mailweb` becomes the Dashboard and the Inbox moves to `mailweb-inbox`. In that case every `page=mailweb` address that carries `folder`, `box`, `uid`, `item` or `compose` is redirected there with its arguments.
+The Inbox is the second menu item, after the Dashboard (owner, 11 Nov). It moves from `mailweb` to `mailweb-inbox` in phase 2. The header tabs read Dashboard · Inbox · Settings, and the menu badge (unread mail plus unread forms) stays on the top-level MailWeb item, with the same count on the Inbox tab.
+
+Links that point at `page=mailweb` today and must follow the Inbox in phase 2:
+
+- every `page=mailweb` address that carries Inbox arguments is redirected to `mailweb-inbox` with them (§5);
+- Core's "New form entries" notice, `page=mailweb&folder=forms` (`mailweb-aw.php:325`), and Core's admin home link (`admin-home.php:206`) point at `mailweb-inbox` directly;
+- the WordPress Dashboard widget's "Open in Inbox" links, the Plugins-screen action links (`home.php:18–30`) and `mailweb_settings_url()` callers;
+- the screen id `toplevel_page_mailweb` (`list-table.php:27`) and the bulk hook `load-toplevel_page_mailweb` (`inbox.php:226`) become `mailweb_page_mailweb-inbox` and `load-mailweb_page_mailweb-inbox`;
+- `tools/ci/settings_parts_baseline.txt` in the same change.
 
 ### 3.1 Routes (`MAILWEB_CAP`, nonce `wp_rest`)
 
 | Route | Method | Does |
 |---|---|---|
-| `kits/v1/mailweb/inbox` | GET `box, folder, search, page, per_page` | List: mailbox, or "all" merged newest-first (500-row cap per mailbox, as today, `list-table.php:101`); Website forms through `mailweb_forms_source` |
-| `kits/v1/mailweb/inbox/folders` | GET `box` | Folders and unread counts (`mailweb_folders()`, 1-minute cache) |
-| `kits/v1/mailweb/inbox/message/<box>/<uid>` | GET `folder, images` | Meta and safe HTML (`mailweb_safe_html()`, CSP inside); marks it read, as today (`inbox.php:381`) |
-| `kits/v1/mailweb/inbox/message/<box>/<uid>/attachment/<id>` | GET | File download (`application/octet-stream`, `nosniff`, `sanitize_file_name`) |
-| `kits/v1/mailweb/inbox/form/<id>` | GET | Form item; marks it read through the source |
-| `kits/v1/mailweb/inbox/bulk` | POST `{action, ids:["box\|uid" or "form\|id"]}` | `mailweb_bulk()`: read, unread, archive, inbox, spam, trash |
-| `kits/v1/mailweb/inbox/move` | POST `{box, folder, uid, to}` | Move to any folder |
-| `kits/v1/mailweb/inbox/send` | POST multipart | `mailweb_send_from_form()` logic: From limited to send boxes, 30 an hour, 10 MB checked before any file is read, thread link, Answered / Forwarded flags, FluentCRM "Reply sent" note, form `replied` |
+| `mailweb/v1/inbox` | GET `box, folder, search, page, per_page` | List: mailbox, or "all" merged newest-first (500-row cap per mailbox, as today, `list-table.php:101`); Website forms through `mailweb_forms_source` |
+| `mailweb/v1/inbox/folders` | GET `box` | Folders and unread counts (`mailweb_folders()`, 1-minute cache) |
+| `mailweb/v1/inbox/message/<box>/<uid>` | GET `folder, images` | Meta and safe HTML (`mailweb_safe_html()`, CSP inside); marks it read, as today (`inbox.php:381`) |
+| `mailweb/v1/inbox/message/<box>/<uid>/attachment/<id>` | GET | File download (`application/octet-stream`, `nosniff`, `sanitize_file_name`) |
+| `mailweb/v1/inbox/form/<id>` | GET | Form item; marks it read through the source |
+| `mailweb/v1/inbox/bulk` | POST `{action, ids:["box\|uid" or "form\|id"]}` | `mailweb_bulk()`: read, unread, archive, inbox, spam, trash |
+| `mailweb/v1/inbox/move` | POST `{box, folder, uid, to}` | Move to any folder |
+| `mailweb/v1/inbox/send` | POST multipart | `mailweb_send_from_form()` logic: From limited to send boxes, 30 an hour, 10 MB checked before any file is read, thread link, Answered / Forwarded flags, FluentCRM "Reply sent" note, form `replied` |
 
 All the logic already exists. The routes call the same functions, which return values instead of redirecting. Folder names are checked against `^INBOX(\.[\w .-]+)?$`, as today.
 
@@ -214,11 +226,11 @@ All the logic already exists. The routes call the same functions, which return v
 
 - **From** lists only mailboxes with "Send from it" (`mailweb_send_boxes()`). The default is `mailweb_default_from()`. On live, only support@ sends, as set by the 20 Oct move (`mailweb-aw.php:13`), so every reply goes from support@ unless the owner ticks another mailbox.
 - A line under From reads "Replies go from support@ (Settings → Mailboxes and aliases)". If a message came in to another mailbox, the existing note stays: a reply from another mailbox carries no thread link (`inbox.php:532`).
-- vedanshu@ stays unticked. If the owner wants it for partnership replies, ticking it is the owner's choice in Settings, and this plan changes no data.
+- "Send from it" stays off for vedanshu@ (owner, 11 Nov), so it never appears under From. This plan changes no data and adds no way round it.
 - The signature swaps with From, as today. The campaign strip preview (`mailweb_after_signature`, context `inbox`) shows under the editor.
 - **Editor:** a rich-text field with paste-safe HTML. The server still runs `wp_kses_post` on save (request 4).
 - **Attachments:** a file field, 10 MB in total (request 5).
-- **Send** asks no extra question, because it is the user's own typed reply. Nobody sends from a proof (§8).
+- **Send** asks no extra question, because it is the user's own typed reply. Nobody sends from a proof (§9).
 
 ---
 
@@ -230,7 +242,7 @@ Secrets never reach the browser. Each field shows **"set"**, **"not set"** or **
 
 | Service | Fields in Edit | Status rule | Disconnect | Route |
 |---|---|---|---|---|
-| Hostinger Mail API | Token (secret) | "Not set up" with no token. "Error" when `/api/v1/me` fails, or when `mailweb_box_ids_wait` is set and no IDs are known. Otherwise "Connected: N mailboxes". Mailbox IDs are shown read-only | Clears `mailweb_api_token` only. Mailbox list and settings stay | `POST/DELETE kits/v1/mailweb/services/mail-api` |
+| Hostinger Mail API | Token (secret) | "Not set up" with no token. "Error" when `/api/v1/me` fails, or when `mailweb_box_ids_wait` is set and no IDs are known. Otherwise "Connected: N mailboxes". Mailbox IDs are shown read-only | Clears `mailweb_api_token` only. Mailbox list and settings stay | `POST/DELETE mailweb/v1/services/mail-api` |
 | Incoming mail (webhook), one row per mailbox | Webhook secret (secret); the webhook URL with a copy button and the hPanel path | "Not set up" with no secret. "Late" when no delivery in 7 days while the token works. Otherwise "Last mail in …" (`mailweb_last`). Core adds "old address last called …" from `aw_mail_in_old_seen` | Clears that mailbox's secret | `POST/DELETE …/services/webhook/<key>` |
 | Site sending (SMTP) | Mailbox address, sender name, server, port, password (secret) | "Sending through noreply@…" or "Not set up, using the server default". Paused shows as "Error" with the refusal | Clears the password only. The site then sends the server's default way; the form says so before it saves | `POST/DELETE …/services/smtp` |
 | FluentCRM feed | Notes on/off, tag, mailboxes | "Not active" without FluentCRM; "On: N mailboxes"; "Off" | Hidden (it is a switch) | `POST …/services/fluentcrm` |
@@ -242,9 +254,9 @@ The **test email** (`smtp.php:125–139`) stays an owner-only action in the SMTP
 - **Emails per 24 hours** (`mailweb_cap.budget`, 1–10,000, default 90). Help: "your mail plan's limit less a margin (Hostinger Business Email: 100, so 90)".
 - **Kept back from campaigns** (`mailweb_cap.reserve`, 0–99 and below the budget, default 10). Help: "campaigns use at most the limit minus this, so notices and confirmations always have room". On live today, campaigns get 80 (pending, 3–4 Nov), so the live values must be read before phase 1, and the proof checks they are unchanged.
 - Shown read-only beside them, the priorities: 0 replies typed in FluentCRM, 1 notices (everything else), 2 sign-up confirmations (Fluent Forms), 3 FluentCRM campaigns. An email may set its own with `X-Mailweb-Priority: n`.
-- **PlanWeb's digest** (`docs/calendar-plugin-plan.md` §3.1) goes through `wp_mail` with no header, so it is priority 1, a notice. It always has the full budget less what is sent (`mailweb_room(1)`), never the campaign share, and the reserve keeps campaigns from using up its room. Nothing in MailWeb changes for it. PlanWeb picks its recipient from MailWeb's mailbox list, so MailWeb adds `GET kits/v1/mailweb/mailboxes` (addresses only, `edit_others_posts`) for that picker. PlanWeb stores the key, never a typed address.
+- **PlanWeb's digest** (`docs/calendar-plugin-plan.md` §3.1) goes through `wp_mail` with no header, so it is priority 1, a notice. It always has the full budget less what is sent (`mailweb_room(1)`), never the campaign share, and the reserve keeps campaigns from using up its room. Nothing in MailWeb changes for it. PlanWeb picks its recipient from MailWeb's mailbox list, so MailWeb adds `GET mailweb/v1/mailboxes` (addresses only, `edit_others_posts`) for that picker. PlanWeb stores the key, never a typed address.
 - Actions here as on the Dashboard: Resume sending, Send queued emails now, Retry held emails.
-- Route: `POST kits/v1/mailweb/sending` (budget and reserve, same clamps as `mail-cap.php:39–42` and `466`); `POST …/sending/resume`, `POST …/queue/flush`, `POST …/queue/retry`.
+- Route: `POST mailweb/v1/sending` (budget and reserve, same clamps as `mail-cap.php:39–42` and `466`); `POST …/sending/resume`, `POST …/queue/flush`, `POST …/queue/retry`.
 
 ### 4.3 Mailboxes and aliases · Profiles (settings groups)
 
@@ -263,7 +275,12 @@ Non-secret options are registered with `register_setting( 'mailweb', …, [ 'sho
 ### 4.4 Notices
 
 - On MailWeb's own screens: shell notices, dismissible.
-- **The pause notice is one deviation.** Today it shows on every admin screen once a day, always on the WordPress Dashboard, MailWeb and Check site (`mail-cap.php:474–502`), because "no email is used to tell anyone". Since a pause stops all site mail, this plan keeps it as it is, outside the shell rule, unless the owner says otherwise.
+- **The sending-paused notice** (owner, 11 Nov) stays on every admin screen, outside the shell rule, because a pause stops all site mail and "no email is used to tell anyone". Today it shows once a day, and always on the WordPress Dashboard, MailWeb and Check site (`mail-cap.php:474–502`, transient `mailweb_pause_seen`). From phase 1:
+  - it shows only to admins (`manage_options`), on every admin screen, while `mailweb_paused()` is true;
+  - it has a dismiss button. Dismissing stores the pause's `mailweb_pause['at']` in the user's meta `mailweb_pause_dismissed`, through `POST mailweb/v1/notice/pause/dismiss` (`manage_options`, nonce `wp_rest`);
+  - it stays hidden for that user until the next pause: a new pause has a new `at`, so the notice comes back for everyone. Resuming does not clear the meta;
+  - the once-a-day rule and `mailweb_pause_seen` are no longer used. The filter `mailweb_pause_notice_always` is kept: when it returns true, the notice shows even after a dismiss;
+  - the notice text and its link to Dashboard → Sending status are unchanged, apart from the new link address in phase 2.
 - Core's "New form entries" notice is Core's and is not changed here.
 
 ---
@@ -272,8 +289,9 @@ Non-secret options are registered with `register_setting( 'mailweb', …, [ 'sho
 
 | Old | New | How |
 |---|---|---|
-| `admin.php?page=mailweb` (+ `box`, `folder`, `uid`, `item`, `compose`, `s`, `paged`) | same slug, Inbox | The shell reads the same query arguments, so links keep working. Bulk-action GETs keep working through the fallback |
-| `admin.php?page=mailweb-overview` | same slug, Dashboard (title "Dashboard") | none needed |
+| `admin.php?page=mailweb` with any of `box`, `folder`, `uid`, `item`, `compose`, `s`, `paged`, `message`, `action` | `admin.php?page=mailweb-inbox` with the same arguments | 302 on `load-toplevel_page_mailweb` (phase 2). Bulk-action GETs keep working through the fallback |
+| `admin.php?page=mailweb` with no Inbox arguments | the Dashboard | none needed: the slug is the Dashboard from phase 2 |
+| `admin.php?page=mailweb-overview` | `admin.php?page=mailweb` | 302, kept as a hidden page (phase 2) |
 | `mailweb-settings&sub=incoming` | `mailweb-settings#services` | 302 on `load-mailweb_page_mailweb-settings` when `sub` is present |
 | `mailweb-settings&sub=sending` | `mailweb-settings#sending` | same |
 | old anchors `#cap`, `#addresses`, `#profiles`, `#fluentcrm` | `#sending`, `#mailboxes`, `#profiles`, `#services/fluentcrm` | The browser keeps the anchor through the redirect; the shell maps the four old ones |
@@ -284,7 +302,7 @@ Non-secret options are registered with `register_setting( 'mailweb', …, [ 'sho
 1. Before phase 1, read on live (read-only SSH) every `mailweb_*` option name and a hash of its value. Secrets are recorded only as set or not set, and never printed. Also read the queue counts by status.
 2. After each phase, read again. Every name must be present with the same hash, except counters that move by themselves (`mailweb_stats`, `mailweb_last`, `mailweb_send_log`, `mailweb_overview_last_*`, `mailweb_crm_done`).
 3. The no-JS fallback keeps the classic screens and their `admin_post_*` handlers for two releases, behind "Open the classic screen" in the shell's no-JavaScript message (admin-ui-spec §A.10). Then the classic screens, `list-table.php` and `class-mailweb-simple-table.php` are removed in a release of their own, with the owner's yes.
-4. `tools/ci/settings_parts_baseline.txt` (rows 51–54) is updated in the same change that moves a screen.
+4. `tools/ci/settings_parts_baseline.txt` (rows 51–54) is updated in the same change that moves a screen, including the Inbox's move to `mailweb-inbox`.
 
 ---
 
@@ -331,7 +349,7 @@ Checked now with the `wp-plugin-audit` method (verified by reading each line). T
 
    `mailweb_addresses_test.php` moves in beside them.
 2. **`smoke.sh` additions** (phase 1). They run in CI's throwaway WordPress only:
-   - every `kits/v1/mailweb/*` route is registered and none uses `__return_true`;
+   - every `mailweb/v1/*` route is registered and none uses `__return_true`;
    - a logged-out request gets 401, a subscriber 403, an editor 200 on Dashboard and Inbox routes and 403 on Settings routes (`rest_do_request` in `wp eval`);
    - `GET /wp/v2/settings` as admin contains no `mailweb_smtp`, `mailweb_api_token` or `mailweb_secret_*`;
    - the queue table exists at schema 2;
@@ -375,12 +393,14 @@ MailWeb builds and styles none of these. Each is checked against `docs/kits-plug
 
 ## 8. Icon
 
-The MailWeb icon (an envelope with a yellow dot) is to land in `docs/brand/plugin-icons/`. The folder was on no branch on 11 Nov. When it lands, it is copied as `plugins/mailweb/assets/icon.svg` (the source stays in `docs/brand/`). It is used in four places:
+The source is `docs/brand/plugin-icons/`: `mailweb.svg`, plus PNGs at 128, 256 and 1024 pixels. The owner's set lands there separately; this plan does not draw or change it. When it lands, the files are copied into `plugins/mailweb/assets/` under the same names, and the source stays in `docs/brand/`. Where each is used:
 
-1. The shell's app header, beside "MailWeb".
-2. The Kits → Plugins row and the Kits Home plugin status row (`kits_plugin_screens` and `kits_status_rows` gain an icon field, if the shell spec adds one).
-3. The WordPress menu icon: `add_menu_page` takes the SVG as a `data:image/svg+xml;base64,…` URI in place of `dashicons-email` (`overview.php:202`). It is single colour, so WordPress can tint it; the yellow dot appears only in the header and Plugins rows. This follows the brand rule (black, white, grey; yellow as a rare accent).
-4. The update screen (`icons` in the Update URI response), when the Wugweb update server serves it.
+1. **`mailweb.svg`** in the shell's app header, beside "MailWeb", and in the Kits → Plugins and Kits Home plugin status rows (`kits_plugin_screens` and `kits_status_rows` gain an icon field, if the shell spec adds one).
+2. **`mailweb.svg`** as the WordPress menu icon: `add_menu_page` takes it as a `data:image/svg+xml;base64,…` URI in place of `dashicons-email` (`overview.php:202`). If the owner's SVG is not single colour, WordPress cannot tint it, so `dashicons-email` stays until a single-colour menu version is in the set. This follows the brand rule (black, white, grey; yellow as a rare accent).
+3. **PNG 128 and 256** on the update screen (`icons` → `1x` and `2x` in the Update URI response), when the Wugweb update server serves them.
+4. **PNG 1024** stays in `docs/brand/` as the master for listings and social cards; it is not shipped in the plugin zip.
+
+The icon lands in phase 4, or in any earlier phase once the set is on `wordpress-dev`.
 
 ---
 
@@ -398,15 +418,15 @@ The owner merges, then the phase ships with `tools/aw-ship.sh` on the owner's ye
 
 | Phase | What | Size | Risk | Proof (read-only on live; no email sent) |
 |---|---|---|---|---|
-| 1. Foundations (3.3.0) | Header and readme (A1–A3), `MAILWEB_CAP` move (A5), regenerated `.pot` (A4), the Site Health test "Email sending", `mailweb_status_line()` for Core's Check site box and the Kits Home row, `GET kits/v1/mailweb/mailboxes` (PlanWeb's picker), the `counts` key on the forms source, `tests/run.php`, smoke and Plugin Check additions. **No screen changes** | Small: ~6 files, no new UI | Low. Mail path untouched (`mail-cap.php` and `smtp.php` not edited) | Deploy check green with the new tests. On live: Plugins screen shows 3.3.0; Site Health lists "Email sending: running"; Check site shows the one line; the option snapshot is unchanged (§5); the PHP log has no new lines; the queue counts by status move only by normal traffic |
-| 2. Dashboard and Inbox on the shell (4.0.0) | `includes/rest.php` (Dashboard and Inbox routes), `includes/shell.php` (registers tiles, sections, list, panel), one JS entry; classic screens kept as the no-JS fallback; A7, A8 for the Inbox | Large: new build, ~8 routes, a working list with a reading panel and compose | Medium. The Inbox is daily work, so the fallback screen stays one click away, and actions reuse today's functions. The send path is the same `mailweb_send_from_form()` logic | CI: route permission tests (401/403/200). On live, as an editor and as admin: Dashboard tiles match the classic numbers on the same minute (unread, sent 24 h, waiting, failed/held, paused); Inbox lists the same first page as the classic screen for All and for support@; opening a message marks it read (as today); Archive and Mark unread on one message the owner names, then undo; **no Send pressed**; the owner sends the first real reply when ready |
+| 1. Foundations (3.3.0) | Header and readme (A1–A3), `MAILWEB_CAP` move (A5), regenerated `.pot` (A4), the Site Health test "Email sending", `mailweb_status_line()` for Core's Check site box and the Kits Home row, `GET mailweb/v1/mailboxes` (PlanWeb's picker), the `counts` key on the forms source, the sending-paused notice for admins with dismiss until the next pause (§4.4, `POST mailweb/v1/notice/pause/dismiss`), `tests/run.php`, smoke and Plugin Check additions. **No screen changes** | Small: ~7 files, no new screen | Low. Mail path untouched: in `mail-cap.php` only the notice (474–502) changes; the queue, `pre_wp_mail`, flush and `smtp.php` are not edited | Deploy check green with the new tests. On live: Plugins screen shows 3.3.0; Site Health lists "Email sending: running"; Check site shows the one line; the option snapshot is unchanged (§5); the PHP log has no new lines; the queue counts by status move only by normal traffic |
+| 2. Dashboard and Inbox on the shell (4.0.0) | `includes/rest.php` (Dashboard and Inbox routes), `includes/shell.php` (registers tiles, sections, list, panel), one JS entry; the menu change (`mailweb` = Dashboard, Inbox second at `mailweb-inbox`, redirects and link updates in §3 and §5); classic screens kept as the no-JS fallback; A7, A8 for the Inbox | Large: new build, ~8 routes, a working list with a reading panel and compose | Medium. The Inbox is daily work, so the fallback screen stays one click away, and actions reuse today's functions. The send path is the same `mailweb_send_from_form()` logic | CI: route permission tests (401/403/200). On live, as an editor and as admin: Dashboard tiles match the classic numbers on the same minute (unread, sent 24 h, waiting, failed/held, paused); Inbox lists the same first page as the classic screen for All and for support@; the MailWeb menu opens the Dashboard and Inbox is second; an old `page=mailweb&folder=forms` link and `page=mailweb-overview` land on the right screens; opening a message marks it read (as today); Archive and Mark unread on one message the owner names, then undo; **no Send pressed**; the owner sends the first real reply when ready |
 | 3. Settings on the shell (4.1.0) | Connected services (Mail API, webhooks, SMTP, FluentCRM), Sending, Mailboxes and aliases, Profiles; `register_setting` for the four non-secret options; `sub=` redirects; A6 | Medium: four services, three groups, one redirect rule | Medium. Settings hold the token and passwords: a wrong save can stop incoming mail or sending. Empty secret fields keep the stored value, and Disconnect asks first | CI: `/wp/v2/settings` exposes no secret. On live: every service row shows the same state as the classic screen (set / not set / wp-config); open each Edit and Cancel; old `sub=incoming` and `sub=sending` addresses land on the right section; the option snapshot is unchanged after opening and cancelling each form; **no Save on a secret, no test email** |
 | 4. Clean-up (4.2.0, after two releases) | Remove the classic screens, `list-table.php`, the simple-table helper and the fallback `admin_post_*` paths; update `settings_parts_baseline.txt`; the icon if landed | Small | Low. Only after the owner confirms the shell screens are in daily use | Smoke loads every MailWeb screen; old addresses still land; the option snapshot is unchanged |
 
 ---
 
-## 10. Owner questions
+## 10. Decisions (owner, 11 Nov 2026)
 
-1. **Pause notice outside MailWeb's screens** (§4.4): keep it as today (once a day on every admin screen, always on the Dashboard)? Recommended: keep.
-2. **Top-level menu opens the Inbox** (§3): keep `mailweb` as the Inbox, as today, unless the shell spec requires the Dashboard first?
-3. **vedanshu@ for partnership replies**: leave "Send from it" off, so every reply goes from support@ (as today)?
+1. **Sending-paused notice** (§4.4): it stays on every admin screen. It shows only to admins and can be dismissed until the next pause. Phase 1.
+2. **Menu** (§2, §3, §5): the MailWeb menu opens the Dashboard. Inbox is the second item. Phase 2.
+3. **vedanshu@** (§3.4): "Send from it" stays off, so every reply goes from support@.
