@@ -627,7 +627,7 @@ function Claims() {
 		} );
 	};
 
-	if ( data && ! data.form && 0 === data.total && 'all' === q.status ) {
+	if ( data && ! data.form && 0 === ( data.counts?.all ?? 0 ) ) {
 		return (
 			<EmptyState
 				title={ __( 'The claim form is not set up.', 'directoryweb' ) }

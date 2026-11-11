@@ -590,7 +590,10 @@ function aw_claim_apply_field( $c, $key ) {
  */
 function aw_claim_ff_decide_apply( $c, $approve, $want = array() ) {
 	$lid    = $c['listing'];
-	$review = array( 'by' => get_current_user_id(), 'at' => current_time( 'mysql' ) );
+	$review = array(
+		'by' => get_current_user_id(),
+		'at' => current_time( 'mysql' ),
+	);
 	if ( $approve ) {
 		$ok = array();
 		foreach ( (array) $want as $key ) {
@@ -598,18 +601,21 @@ function aw_claim_ff_decide_apply( $c, $approve, $want = array() ) {
 				$ok[] = $key;
 			}
 		}
-		delete_post_meta( $lid, 'aw_unverified' ); // the organisation has spoken: nothing on the listing is "unverified" any more
+		delete_post_meta( $lid, 'aw_unverified' ); // the organisation has spoken: nothing on the listing is "unverified" any more.
 		update_post_meta( $lid, 'aw_verified', true );
 		update_post_meta( $lid, 'aw_verified_on', wp_date( 'Y-m-d' ) );
 		update_post_meta( $lid, 'aw_needs_reverify', false );
 		delete_transient( 'aw_verified_count' );
-		if ( function_exists( 'aw_org_people_link' ) ) { // one of the listing's people, privately; name and role shown only if they ticked "Show my name"
+		if ( function_exists( 'aw_org_people_link' ) ) { // one of the listing's people, privately; name and role shown only if they ticked "Show my name".
 			aw_org_people_link( $lid, $c['email'], $c['role'], $c['show'] );
 		}
 		if ( function_exists( 'aw_enrich_after_change' ) ) {
 			aw_enrich_after_change( $lid );
 		}
-		$review += array( 'status' => 'approved', 'fields' => $ok );
+		$review += array(
+			'status' => 'approved',
+			'fields' => $ok,
+		);
 	} else {
 		$review += array( 'status' => 'rejected' );
 	}
@@ -630,7 +636,16 @@ add_action(
 		}
 		$approve = isset( $_POST['do_approve'] );
 		$review  = aw_claim_ff_decide_apply( $c, $approve, $approve ? array_map( 'sanitize_key', (array) wp_unslash( $_POST['fields'] ?? array() ) ) : array() );
-		wp_safe_redirect( add_query_arg( array( 'post_type' => 'aw_listing', 'page' => 'aw-claims', 'done' => $review['status'] ), admin_url( 'edit.php' ) ) );
+		wp_safe_redirect(
+			add_query_arg(
+				array(
+					'post_type' => 'aw_listing',
+					'page'      => 'aw-claims',
+					'done'      => $review['status'],
+				),
+				admin_url( 'edit.php' )
+			)
+		);
 		exit;
 	}
 );
