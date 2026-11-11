@@ -554,7 +554,14 @@ function Review() {
 
 /* ---------- Enrichment review ---------- */
 
-const FILTER_KEYS = [ 'source', 'confidence', 'field', 'flag', 'state' ];
+const FILTER_KEYS = [
+	'search',
+	'source',
+	'confidence',
+	'field',
+	'flag',
+	'state',
+];
 
 function Enrichment() {
 	const [ q, setQ ] = useState( {
@@ -866,7 +873,9 @@ function Group( { group, onSaved, onDirty } ) {
 	const [ v, setV ] = useState( () => valuesOf( group.fields ) );
 	const [ msg, setMsg ] = useState( null );
 	const [ busy, setBusy ] = useState( false );
-	useEffect( () => setV( valuesOf( group.fields ) ), [ group.fields ] );
+	// Reset only when this group's stored values change, so saving another group keeps unsaved edits here.
+	const stored = JSON.stringify( valuesOf( group.fields ) );
+	useEffect( () => setV( JSON.parse( stored ) ), [ stored ] );
 	const dirty = group.fields.some( ( f ) => v[ f.key ] !== f.value );
 	useEffect(
 		() => onDirty( group.slug, dirty ),

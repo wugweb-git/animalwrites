@@ -439,7 +439,7 @@ aw_t( 4 === $kp['keep']['id'] && 5 === $kp['refused'][0]['id'], 'between News it
 
 require __DIR__ . '/rules-tests.php'; // phase 3 (Rules)
 require __DIR__ . '/retire-tests.php'; // phase 4 (Retire)
-require __DIR__ . '/sourceweb-tests.php'; // the new screens on the Kits shell (&ui=next)
+require __DIR__ . '/sourceweb-tests.php'; // The new screens on the Kits shell (&ui=next).
 
 echo ( $fails ? "FAILED: $fails of $count\n" : "OK: $count checks\n" );
 exit( $fails ? 1 : 0 );

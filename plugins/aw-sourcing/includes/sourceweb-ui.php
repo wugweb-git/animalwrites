@@ -32,7 +32,7 @@ function sourceweb_ui_wanted(): string {
 		return '';
 	}
 	if ( AW_SRC_PAGE === $page ) {
-		return in_array( $tab, array( '', AW_SRC_SETTINGS_TAB ), true ) ? 'settings' : '';
+		return AW_SRC_SETTINGS_TAB === $tab ? 'settings' : '';
 	}
 	return array(
 		AW_SRC_MENU        => 'dashboard',

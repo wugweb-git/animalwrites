@@ -84,7 +84,7 @@ function sourceweb_count_review(): array {
 	foreach ( aw_review_items() as $p ) {
 		++$out['total'];
 		$out['by'][ $p->post_type ] = ( $out['by'][ $p->post_type ] ?? 0 ) + 1;
-		$t                          = (int) strtotime( $p->post_date_gmt . ' UTC' );
+		$t                          = (int) get_post_timestamp( $p );
 		$out['oldest']              = $out['oldest'] ? min( $out['oldest'], $t ) : $t;
 	}
 	arsort( $out['by'] );

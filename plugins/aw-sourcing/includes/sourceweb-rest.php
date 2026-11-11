@@ -138,6 +138,7 @@ add_action(
 					'field'      => $text,
 					'flag'       => $text,
 					'state'      => $text,
+					'search'     => $text,
 				),
 			),
 			'/settings'            => array( 'GET', AW_SRC_CAP, fn() => rest_ensure_response( sourceweb_settings_payload() ), array() ),
@@ -419,7 +420,7 @@ function sourceweb_review_row( WP_Post $p ): array {
 		'date'      => (string) $p->post_date,
 		'dateText'  => (string) get_the_date( 'j M Y', $p ),
 		'host'      => $url ? preg_replace( '/^www\./', '', strtolower( (string) wp_parse_url( $url, PHP_URL_HOST ) ) ) : '',
-		'url'       => $url,
+		'url'       => esc_url_raw( $url ),
 		'why'       => sourceweb_why_text( (string) get_post_meta( $p->ID, 'aw_review', true ), $p->post_status ),
 		'excerpt'   => wp_trim_words( wp_strip_all_tags( $p->post_excerpt ? $p->post_excerpt : $p->post_content ), 24 ),
 		'editUrl'   => (string) get_edit_post_link( $p->ID, 'raw' ),
@@ -580,11 +581,7 @@ function sourceweb_rest_enrichment( WP_REST_Request $request ) {
 	}
 	$t                    = aw_enrich_table();
 	list( $where, $args ) = aw_enrich_where( $q );
-	$words                = trim( sanitize_text_field( (string) $request['search'] ) );
-	if ( '' !== $words ) {
-		$where .= " AND e.listing_id IN ( SELECT ID FROM {$wpdb->posts} WHERE post_type = 'aw_listing' AND post_title LIKE %s )";
-		$args[] = '%' . $wpdb->esc_like( $words ) . '%';
-	}
+	list( $where, $args ) = sourceweb_enrich_search( $where, $args, $request );
 
 	// phpcs:disable WordPress.DB -- the plugin's own table; every value is a placeholder
 	$total = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT( DISTINCT e.listing_id ) FROM {$t} e WHERE {$where}", $args ) );
@@ -744,6 +741,24 @@ function sourceweb_enrich_filters( array $q ): array {
 }
 
 /**
+ * Narrow an enrichment WHERE to listings whose title holds the search words, so a bulk action covers what the list shows.
+ *
+ * @param string          $where   WHERE clause.
+ * @param array           $args    Its placeholder values.
+ * @param WP_REST_Request $request Request.
+ * @return array{0: string, 1: array}
+ */
+function sourceweb_enrich_search( string $where, array $args, WP_REST_Request $request ): array {
+	global $wpdb;
+	$words = trim( sanitize_text_field( (string) $request['search'] ) );
+	if ( '' !== $words ) {
+		$where .= " AND e.listing_id IN ( SELECT ID FROM {$wpdb->posts} WHERE post_type = 'aw_listing' AND post_title LIKE %s )";
+		$args[] = '%' . $wpdb->esc_like( $words ) . '%';
+	}
+	return array( $where, $args );
+}
+
+/**
  * POST enrichment/decide: rows by id, every waiting row of the ticked listings (merges left out: they are approved one
  * by one, as today), or every high one in the filter. The same functions as today's screen.
  *
@@ -763,6 +778,7 @@ function sourceweb_rest_enrichment_decide( WP_REST_Request $request ) {
 		$q                    = sourceweb_enrich_query( $request, 'pending' );
 		$q['confidence']      = 'high';
 		list( $where, $args ) = aw_enrich_where( $q );
+		list( $where, $args ) = sourceweb_enrich_search( $where, $args, $request );
 		$ids                  = array_map( 'intval', $wpdb->get_col( $wpdb->prepare( "SELECT e.id FROM {$t} e WHERE {$where} AND e.field <> 'merge_into'", $args ) ) );
 		$do                   = 'approve';
 	} elseif ( ! $ids && $listings && in_array( $do, array( 'approve', 'reject' ), true ) ) {

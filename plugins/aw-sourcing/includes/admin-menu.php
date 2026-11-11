@@ -253,7 +253,15 @@ function aw_sourcing_overview_ai() {
  */
 function aw_sourcing_ai_counts() {
 	$rows = get_option( 'aw_ai_models', null );
-	$n    = array( 'saved' => is_array( $rows ), 'old' => ! is_array( $rows ) && (bool) get_option( 'aw_ai_keys' ), 'works' => 0, 'wait' => 0, 'bad' => 0, 'tool' => 0, 'providers' => array() );
+	$n    = array(
+		'saved'     => is_array( $rows ),
+		'old'       => ! is_array( $rows ) && (bool) get_option( 'aw_ai_keys' ),
+		'works'     => 0,
+		'wait'      => 0,
+		'bad'       => 0,
+		'tool'      => 0,
+		'providers' => array(),
+	);
 	if ( ! is_array( $rows ) ) {
 		return $n;
 	}
@@ -294,9 +302,9 @@ function aw_sourcing_overview_page() {
 		return;
 	}
 	if ( function_exists( 'sourceweb_ui_page' ) && sourceweb_ui_page( 'dashboard' ) ) {
-		return; // the new Dashboard (&ui=next, sourceweb-ui.php)
+		return; // The new Dashboard (&ui=next, sourceweb-ui.php).
 	}
-	$tabs = current_user_can( AW_SRC_CAP ) ? aw_sourcing_tabs() : array();
+	$tabs  = current_user_can( AW_SRC_CAP ) ? aw_sourcing_tabs() : array();
 	$auto  = esc_html( 'Automatic' );
 	$admin = current_user_can( 'manage_options' );
 	$names = array( 'sources' => 'Sources', 'keywords' => 'Keywords', 'rules' => 'Rules', 'sections' => 'Sections', 'summary' => 'Summary rules', 'enrich' => 'Directory enrichment', 'ai' => 'AI models', 'workers' => 'Workers', 'rejected' => 'Rejected', 'relay-log' => 'Relay log', 'log' => 'Change log', AW_SRC_SETTINGS_TAB => 'Settings' );

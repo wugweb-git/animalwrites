@@ -604,7 +604,7 @@ function aw_sourcing_page() {
 		return;
 	}
 	if ( function_exists( 'sourceweb_ui_page' ) && sourceweb_ui_page( 'settings' ) ) {
-		return; // the new Settings (&ui=next, sourceweb-ui.php)
+		return; // The new Settings (&ui=next, sourceweb-ui.php).
 	}
 	$base = admin_url( 'admin.php?page=aw-sourcing' );
 	// Each tab is an item of the Sourcing menu (admin-menu.php aw_sourcing_tabs: slug => [label, render callback, own form?]).
