@@ -172,10 +172,7 @@ function kits_screen_sections( string $screen ): array {
 	$filter = '';
 	if ( KITS_MENU === $screen ) {
 		$filter = 'kits_home_sections';
-		$own    = array(
-			'versions' => array( 'Versions and limits', 'kits_home_status', 'manage_options', 10 ),
-			'setup'    => array( 'Setup checklist', 'kits_home_start', 'manage_options', 90 ),
-		);
+		$own    = array(); // Versions: Tools → Site Health; setup: done once (owner, 11 Nov 2026: no copies of what WordPress does).
 	} elseif ( 'kits-settings' === $screen ) {
 		$filter = 'kits_settings_sections';
 		$own    = array(
@@ -228,7 +225,8 @@ function kits_screen_sections( string $screen ): array {
 }
 
 /**
- * A screen made of sections: heading, the six tabs, the list of sections (links to #id), then a box per section.
+ * A screen made of sections: heading, the six tabs, then a box per section, one under the other (no row of section
+ * links: owner, 11 Nov 2026).
  *
  * @param string $screen The screen's slug.
  * @param string $title  Heading.
@@ -237,12 +235,6 @@ function kits_screen_sections( string $screen ): array {
 function kits_sections_page( string $screen, string $title, string $intro ): void {
 	kits_admin_head( $screen, $title, $intro );
 	$sections = kits_screen_sections( $screen );
-	echo '<nav aria-label="' . esc_attr( $title . ': sections' ) . '"><ul class="subsubsub">';
-	$last = array_key_last( $sections );
-	foreach ( $sections as $id => $s ) {
-		echo '<li><a href="#' . esc_attr( $id ) . '">' . esc_html( $s['title'] ) . '</a>' . ( $id === $last ? '' : ' |' ) . '</li> ';
-	}
-	echo '</ul></nav><br class="clear">';
 	foreach ( $sections as $id => $s ) {
 		echo '<div class="postbox" id="' . esc_attr( $id ) . '"><div class="postbox-header"><h2 class="hndle">' . esc_html( $s['title'] ) . '</h2></div><div class="inside">';
 		call_user_func( $s['render'] );

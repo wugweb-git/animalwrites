@@ -191,14 +191,14 @@ function aw_core_section( string $title, callable $render, int $order, string $c
 
 /**
  * Kits → Home: the site's checks (docs/admin-ui-spec.md §B1, §D6). Email, thumbnails and pictures stay here until the
- * MailWeb and SourceWeb dashboards have them (owner, 11 Nov 2026).
+ * MailWeb and SourceWeb dashboards have them (owner, 11 Nov 2026). Nothing WordPress or another plugin already shows
+ * (owner, 11 Nov 2026): backups are UpdraftPlus's, the theme is Appearance → Themes, dates are PlanWeb's.
  *
  * @param array $sections Kits' sections.
  */
 function aw_core_home_sections( $sections ) {
 	$sections                 = (array) $sections;
 	$sections['page-check']   = aw_core_section( 'Page check', 'aw_site_check_results', 20 );
-	$sections['backup']       = aw_core_section( 'Backup', 'aw_backup_site_check', 30 );
 	$sections['deploy']       = aw_core_section(
 		'Deployed commit',
 		function () {
@@ -208,20 +208,9 @@ function aw_core_home_sections( $sections ) {
 		40
 	);
 	$sections['joined-files'] = aw_core_section( 'Joined files', 'aw_site_check_joined', 50 );
-	$sections['dates']        = aw_core_section(
-		'Dates',
-		function () {
-			$st    = aw_core_overview_status();
-			$moved = function_exists( 'aw_team_dates_moved' ) && aw_team_dates_moved();
-			echo '<p>' . $st['dates'] . ' ' . ( $moved ? aw_core_link( 'PlanWeb → Calendar', 'admin.php?page=planweb' ) : aw_core_link( 'Open Dates', 'admin.php?page=aw-dates' ) ) . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped parts.
-		},
-		60,
-		defined( 'AW_DATES_CAP' ) ? AW_DATES_CAP : 'edit_others_posts'
-	);
 	$sections['email']        = aw_core_section( 'Email sending', 'aw_mail_site_check', 70 );
 	$sections['thumbnails']   = aw_core_section( 'Thumbnails', 'aw_thumbs_site_check', 71 );
 	$sections['pictures']     = aw_core_section( 'Pictures', 'aw_cc0_site_check', 72 );
-	$sections['theme-switch'] = aw_core_section( 'Theme switch', 'aw_theme_switch_site_check', 80, 'switch_themes' );
 	return $sections;
 }
 
