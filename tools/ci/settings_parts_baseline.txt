@@ -58,3 +58,5 @@ plugins/animal-writes-core/assets/css/campaign.css | css Hero | .aw-camp--commun
 plugins/animal-writes-core/assets/css/campaign.css | css Hero | .aw-camp--community-dogs.aw-camp-hero | min-height: var(--kit-hero-h)
 plugins/animal-writes-core/includes/team-dates.php | admin style | <style> block
 plugins/animal-writes-core/includes/theme-parts-screen.php | admin page | add_submenu_page( KITS_MENU, 'Theme parts', 'Theme parts', 'manage_options', 'aw-theme-parts', 'aw_theme_parts_screen' ); // Kits → Theme parts.
+# 11 Nov 2026, owner-approved admin UI spec (docs/admin-ui-spec.md): core's own component styles for the new Kits screens.
+plugins/kits-core/includes/admin-app.php | admin style | wp_enqueue_style( 'wp-components'

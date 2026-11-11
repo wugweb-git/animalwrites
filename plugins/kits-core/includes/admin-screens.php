@@ -855,6 +855,10 @@ function kits_options_link( string $label, string $path ): string {
 
 /** Kits → Theme Options. */
 function kits_options_page() {
+	if ( kits_admin_app_wanted() ) {
+		kits_admin_app_page(); // The new screen (trial), admin-app.php.
+		return;
+	}
 	$sections = kits_options_sections();
 	$all      = array_merge( ...array_values( $sections ) );
 	$current  = isset( $_GET['section'] ) ? sanitize_key( wp_unslash( $_GET['section'] ) ) : 'general-header'; // phpcs:ignore WordPress.Security.NonceVerification -- which section to show.

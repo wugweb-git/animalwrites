@@ -1,0 +1,13 @@
+{
+  "name": "kits-core-admin",
+  "private": true,
+  "description": "Kits Core admin screens (built with @wordpress/scripts; build/ is committed because the deploy does not run npm).",
+  "scripts": {
+    "build": "wp-scripts build src/theme-options/index.js --output-path=build/theme-options",
+    "lint:js": "wp-scripts lint-js src"
+  },
+  "devDependencies": {
+    "@babel/runtime": "^7.26.0",
+    "@wordpress/scripts": "30.6.0"
+  }
+}
