@@ -2,7 +2,8 @@
 /**
  * RankWeb menu and its Overview screen (owner, 25 Oct 2026: one menu, organised like any other plugin).
  *
- * The menu: RankWeb → Overview (this file), FAQ (faq.php), Settings (settings.php: every module's rules and switches).
+ * Plugins → RankWeb (one item since 11 Nov 2026) opens the Overview (this file); its tabs are Overview, FAQ (faq.php) and
+ * Settings (settings.php: every module's rules and switches), each at its own admin.php?page= address as before.
  * Overview lists every module of the plugin: what it does, where it is set up (here or in Rank Math), its status from
  * the checks that already run, the boxes it adds to edit screens, and its WP-CLI commands. Core WordPress only.
  *
@@ -20,41 +21,30 @@ const AW_SEO_MENU = 'aw-seo-plus';
 add_action(
 	'admin_menu',
 	function () {
-		// Away from Rank Math's menu (owner, 10 Nov 2026): its own icon, and a place among the site's work menus.
-		add_menu_page( 'RankWeb', 'RankWeb', 'manage_categories', AW_SEO_MENU, 'aw_seo_overview_page', 'dashicons-search', '27.5' );
-		// Screen ids of the screens under this menu start with the menu title; keep the old one (aw-seo-plus_page_…),
+		// Plugins → RankWeb (owner, 11 Nov 2026: "all plugins" under Plugins), opening the Overview; FAQ and Settings are
+		// its tabs (aw_seo_screen_tabs()). Without Kits Core, a menu of its own as before.
+		// Screen ids of the screens under this menu start with its hook prefix; keep the old one (aw-seo-plus_page_…),
 		// so saved screen options, box order and hidden columns stay with them.
-		$GLOBALS['admin_page_hooks'][ AW_SEO_MENU ] = 'aw-seo-plus'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- the menu's hook prefix, as before the rename.
+		if ( function_exists( 'kits_admin_fold_menu' ) ) {
+			kits_admin_fold_menu( AW_SEO_MENU, 'plugins.php', 'RankWeb', 'manage_categories', 'aw-seo-plus' );
+		} else {
+			add_menu_page( 'RankWeb', 'RankWeb', 'manage_categories', AW_SEO_MENU, 'aw_seo_overview_page', 'dashicons-search', '27.5' );
+			$GLOBALS['admin_page_hooks'][ AW_SEO_MENU ] = 'aw-seo-plus'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- the menu's hook prefix, as before the rename.
+		}
 		add_submenu_page( AW_SEO_MENU, 'RankWeb', 'Overview', 'manage_categories', AW_SEO_MENU, 'aw_seo_overview_page' );
 	},
-	9 // Before FAQ (10) and Search Insights (100), so Overview is the first item.
+	9 // Before FAQ (10), so Overview is the first item.
 );
 
-// When the site sets its own menu order and leaves RankWeb out, RankWeb would fall to the end, next to Rank Math:
-// put it after Mail (or Sourcing), else before the first separator. Runs after the site's own order (same priority, added later).
-add_filter(
-	'menu_order',
-	function ( $order ) {
-		if ( ! is_array( $order ) || in_array( AW_SEO_MENU, $order, true ) ) {
-			return $order;
-		}
-		foreach ( array( 'mailweb', 'aw-sourcing-menu' ) as $after ) {
-			$at = array_search( $after, $order, true );
-			if ( false !== $at ) {
-				array_splice( $order, $at + 1, 0, array( AW_SEO_MENU ) );
-				return $order;
-			}
-		}
-		foreach ( $order as $at => $slug ) {
-			if ( 0 === strpos( (string) $slug, 'separator' ) ) {
-				array_splice( $order, $at, 0, array( AW_SEO_MENU ) );
-				return $order;
-			}
-		}
-		return $order;
-	},
-	PHP_INT_MAX
-);
+/**
+ * RankWeb's screens as tabs under a screen's heading (Overview, FAQ, Settings; those the user may open). Printed only
+ * while RankWeb is one item under Plugins.
+ */
+function aw_seo_screen_tabs(): void {
+	if ( function_exists( 'kits_admin_fold_tabs' ) ) {
+		kits_admin_fold_tabs( AW_SEO_MENU, 'RankWeb screens' );
+	}
+}
 
 // Plugins screen: Overview and FAQ under the plugin's name (Search Insights is under InsightWeb's).
 add_filter(
@@ -135,7 +125,7 @@ function aw_seo_overview_page() {
 			'module' => '<strong>' . ( function_exists( 'aw_faq_admin_page' ) ? aw_seo_overview_link( 'FAQ', $faq ) : 'FAQ' ) . '</strong>',
 			'mods'   => array( 'faq' ),
 			'what'   => 'The FAQ box on every edit screen (pages, posts, every public type and taxonomy; automatic questions filled in where the page has data) and the questions with FAQPage schema on the page.',
-			'where'  => aw_seo_overview_link( 'RankWeb → FAQ', $faq ) . '; each item’s FAQ box',
+			'where'  => aw_seo_overview_link( 'Plugins → RankWeb → FAQ', $faq ) . '; each item’s FAQ box',
 			'status' => aw_seo_overview_faq_status(),
 		),
 	);
@@ -248,6 +238,7 @@ function aw_seo_overview_page() {
 	}
 
 	echo '<div class="wrap"><h1>RankWeb</h1>';
+	aw_seo_screen_tabs();
 	echo '<p>' . esc_html__( 'What the plugin adds to Rank Math (free) for animalwrites.in. Rank Math holds everything else; where a module’s settings live in Rank Math, the link goes there.', 'aw-seo-extras' ) . '</p>';
 	if ( $attn ) {
 		echo '<div class="notice notice-warning inline"><p><strong>' . esc_html__( 'Needs attention', 'aw-seo-extras' ) . '</strong></p><ul class="ul-disc">' . implode( '', $attn ) . '</ul></div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from escaped parts.

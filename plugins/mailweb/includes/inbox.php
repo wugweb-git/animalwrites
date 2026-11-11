@@ -484,6 +484,7 @@ function mailweb_list_screen( $s ) {
 	}
 	echo '</select> <noscript><button class="button">' . esc_html__( 'Show', 'mailweb' ) . '</button></noscript></form>';
 	echo '<hr class="wp-header-end">';
+	mailweb_screen_tabs();
 	mailweb_notice();
 	// Folder links, as WordPress lists have them.
 	$links = array();

@@ -1,8 +1,8 @@
 <?php
 /**
- * InsightWeb in the Kits admin and on the Plugins screen: a row on Kits → Plugins and in Kits → Home's System
- * Status (Kits Core's filters kits_plugin_screens and kits_status_rows), and a Search Insights link under the plugin's
- * name. The screen itself is unchanged; its menu is InsightWeb → Search Insights (11 Nov 2026).
+ * InsightWeb in the Kits admin and on the Plugins screen: a row in Kits → Home's System
+ * Status (Kits Core's filter kits_status_rows), and a Search Insights link under the plugin's
+ * name. The screen itself is unchanged; its menu item is Plugins → InsightWeb (11 Nov 2026).
  *
  * @package aw-seo-extras
  */
@@ -17,7 +17,6 @@ add_action(
 		if ( ! function_exists( 'kits_admin_tabs' ) ) {
 			return;
 		}
-		add_filter( 'kits_plugin_screens', 'insightweb_kits_tab' );
 		add_filter( 'kits_status_rows', 'insightweb_kits_status_row' );
 	},
 	20 // after the bootstrap (5), which loads the screen.
@@ -33,21 +32,6 @@ add_filter(
 		return $links;
 	}
 );
-
-/**
- * The InsightWeb row on Kits → Plugins: Search Insights, when it is loaded.
- *
- * @param array $tabs Kits plugin screens: slug => [name, address relative to wp-admin, capability, what it is, state].
- */
-function insightweb_kits_tab( $tabs ) {
-	if ( function_exists( 'aw_si_cap' ) && defined( 'AW_SI_SLUG' ) ) {
-		$tabs[ AW_SI_SLUG ] = array( __( 'InsightWeb', 'aw-seo-extras' ), 'admin.php?page=' . AW_SI_SLUG, aw_si_cap(), __( 'Search Insights: Search Console, GA4, Clarity, PageSpeed, Bing, keywords and rising terms.', 'aw-seo-extras' ) );
-	} else {
-		// Search Insights not loaded: the row stays, marked off, and links to Plugins.
-		$tabs['insightweb'] = array( __( 'InsightWeb', 'aw-seo-extras' ), 'plugins.php', 'activate_plugins', __( 'Search Insights: Search Console, GA4, Clarity, PageSpeed, Bing, keywords and rising terms.', 'aw-seo-extras' ), __( 'Off', 'aw-seo-extras' ) );
-	}
-	return $tabs;
-}
 
 /**
  * The InsightWeb row of the System Status table.

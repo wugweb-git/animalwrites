@@ -30,8 +30,8 @@ function kits_theme_share_networks(): array {
 }
 
 /**
- * The fields: key => [group, label, kind (switch|choice|text|url|share|menu), choices, default, note]. A menu field holds
- * the id of a published menu (Appearance → Editor → Navigation); its choices are read when shown (kits_theme_menu_choices()).
+ * The fields: key => [group, label, kind (switch|choice|text|url|share), choices, default, note]. Menus are WordPress's
+ * (Appearance → Editor → Navigation): no menu fields here (owner, 11 Nov 2026: no copies of what WordPress does).
  *
  * @return array<string,array>
  */
@@ -50,9 +50,6 @@ function kits_theme_option_fields(): array {
 		'sticky_label'        => array( 'Site parts', 'Phone bar text', 'text', array(), '', 'The action\'s words, for example Call us now.' ),
 		'announce'            => array( 'Site parts', 'Announcement bar', 'switch', $on_off, 'on', 'The line above the header. Its text and link are edited in the header part (Editor → Patterns → Header).' ),
 		'sticky_header'       => array( 'Site parts', 'Header stays at the top', 'switch', $on_off, 'on', 'The header stays in view while the page scrolls. Off: it scrolls away with the page.' ),
-		'header_menu'         => array( 'Site parts', 'Header menu', 'menu', array(), '', 'The menu in the header. The theme\'s own: the links saved in the header part.' ),
-		'footer_menu_1'       => array( 'Site parts', 'Footer menu 1', 'menu', array(), '', 'The first list of links in the footer. Only for a footer with menu blocks named Footer links 1 and 2.' ),
-		'footer_menu_2'       => array( 'Site parts', 'Footer menu 2', 'menu', array(), '', 'The second list of links in the footer.' ),
 		'font_preload'        => array(
 			'Site parts',
 			'Font preload',
@@ -78,7 +75,7 @@ function kits_theme_option_fields(): array {
 				'200' => '200',
 			),
 			'50',
-			'Most joined component files kept in uploads/kits-cache/parts/ besides the one per kind of page (front page, page, single item of each type, term, search…), which is always kept. Once it is reached, a page with an unusual mix of parts loads them separately. Kits → Home → Joined files shows both counts.',
+			'Most joined component files kept in uploads/kits-cache/parts/ besides the one per kind of page (front page, page, single item of each type, term, search…), which is always kept. Once it is reached, a page with an unusual mix of parts loads them separately. Appearance → Kits → Home → Joined files shows both counts.',
 		),
 		'defer_scripts'       => array( 'Speed', 'Deferred scripts', 'switch', $on_off, 'on', 'jQuery, the Fluent Forms submit script, wp-hooks, wp-i18n and the Accessibility Checker fixes load without holding up the page. Off: each holds the page while it loads; forms and the letter tool work either way.' ),
 		'jquery_footer'       => array( 'Speed', 'jQuery at the end of the page', 'switch', $on_off, 'on', 'Moves jQuery out of the page head. Off: jQuery loads in the head again, which delays the first paint; forms and the letter tool work either way.' ),
@@ -189,9 +186,6 @@ function kits_theme_options_clean( $input ): array {
 			case 'text':
 				$v = is_scalar( $raw ) ? mb_substr( sanitize_text_field( (string) $raw ), 0, 60 ) : '';
 				break;
-			case 'menu':
-				$v = is_scalar( $raw ) && isset( kits_theme_menu_choices()[ absint( $raw ) ] ) ? (string) absint( $raw ) : '';
-				break;
 			case 'share':
 				$v    = is_array( $out[ $key ] ?? null ) ? $out[ $key ] : array(); // Types not on this form stay.
 				$nets = array_keys( kits_theme_share_networks() );
@@ -224,52 +218,6 @@ function kits_theme_options_clean( $input ): array {
 	}
 	return $out;
 }
-
-/**
- * Published menus (wp_navigation posts): id => title.
- *
- * @return array<int,string>
- */
-function kits_theme_menu_choices(): array {
-	$out = array();
-	foreach ( get_posts(
-		array(
-			'post_type'      => 'wp_navigation',
-			'post_status'    => 'publish',
-			'posts_per_page' => 100,
-			'orderby'        => 'title',
-			'order'          => 'ASC',
-		)
-	) as $menu ) {
-		$out[ (int) $menu->ID ] = '' !== $menu->post_title ? $menu->post_title : '#' . $menu->ID;
-	}
-	return $out;
-}
-
-/**
- * The header's and footer's menu blocks show the menu picked in Theme Options. A menu block in a header or footer part
- * that has no menu of its own (no ref) is matched by its name for screen readers (ariaLabel): Main, Footer links 1,
- * Footer links 2. Nothing picked: the block stays as the part saved it.
- */
-add_filter(
-	'render_block_data',
-	function ( $block ) {
-		if ( 'core/navigation' !== ( $block['blockName'] ?? '' ) || ! empty( $block['attrs']['ref'] ) ) {
-			return $block;
-		}
-		$keys = array(
-			'Main'           => 'header_menu',
-			'Footer links 1' => 'footer_menu_1',
-			'Footer links 2' => 'footer_menu_2',
-		);
-		$key  = $keys[ (string) ( $block['attrs']['ariaLabel'] ?? '' ) ] ?? '';
-		$id   = '' !== $key ? absint( kits_option( $key ) ) : 0;
-		if ( $id && 'wp_navigation' === get_post_type( $id ) && 'publish' === get_post_status( $id ) ) {
-			$block['attrs']['ref'] = $id;
-		}
-		return $block;
-	}
-);
 
 // Theme Options: Header stays at the top, off.
 add_filter( 'body_class', fn( $c ) => 'off' === kits_option( 'sticky_header' ) ? array_merge( $c, array( 'kits-header-static' ) ) : $c );

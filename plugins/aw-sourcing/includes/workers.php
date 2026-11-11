@@ -462,7 +462,7 @@ add_filter(
 						'color' => $problems ? 'red' : 'blue',
 					),
 					'description' => '<p>' . ( $problems ? esc_html( implode( ' ', $problems ) ) : 'Every workflow of the workers repository that has reported is on time and its last run went through.' ) . '</p>',
-					'actions'     => '<p><a href="' . esc_url( admin_url( 'admin.php?page=aw-sourcing&tab=workers' ) ) . '">SourceWeb → Workers</a></p>',
+					'actions'     => '<p><a href="' . esc_url( admin_url( 'admin.php?page=aw-sourcing&tab=workers' ) ) . '">Plugins → SourceWeb → Workers</a></p>',
 					'test'        => 'aw_workers',
 				);
 			},

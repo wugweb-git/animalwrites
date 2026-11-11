@@ -119,7 +119,7 @@ add_action(
 				}
 				echo '</tbody></table></details>';
 
-				echo '<p>' . aw_sourcing_overview_link( 'SourceWeb → Workers', admin_url( 'admin.php?page=aw-sourcing&tab=workers' ) ) . ' | ' . $to_rev . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped by aw_sourcing_overview_link().
+				echo '<p>' . aw_sourcing_overview_link( 'Plugins → SourceWeb → Workers', admin_url( 'admin.php?page=aw-sourcing&tab=workers' ) ) . ' | ' . $to_rev . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped by aw_sourcing_overview_link().
 			}
 		);
 	},

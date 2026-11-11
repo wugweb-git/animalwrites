@@ -221,6 +221,7 @@ function aw_faq_admin_page() {
 	$table = new AW_FAQ_List_Table( $ix['rows'] );
 	$table->prepare_items();
 	echo '<div class="wrap"><h1 class="wp-heading-inline">FAQ</h1><hr class="wp-header-end">';
+	aw_seo_screen_tabs();
 	if ( isset( $_GET['approved'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- a notice after the redirect
 		echo '<div class="notice notice-success is-dismissible"><p>' . esc_html( sprintf( '%d questions approved.', (int) $_GET['approved'] ) ) . '</p></div>'; // phpcs:ignore WordPress.Security.NonceVerification
 	}

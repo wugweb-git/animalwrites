@@ -36,7 +36,7 @@ Clarity, Bing Webmaster, PageSpeed and Google Alerts keys are set under Animal W
 
 1. Upload the `insightweb` folder to `/wp-content/plugins/`.
 2. Activate InsightWeb on the Plugins screen.
-3. Open RankWeb → Search Insights.
+3. Open Plugins → InsightWeb.
 
 == Frequently Asked Questions ==
 
