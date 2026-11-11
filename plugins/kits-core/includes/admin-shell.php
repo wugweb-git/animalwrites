@@ -59,14 +59,22 @@ add_action(
  *     @type string $text_domain Translations of the script.
  *     @type string $lang_path   Folder of the script's JSON translations (optional).
  * }
- * @return bool False when the shell or the screen script is missing (the caller shows its current screen).
+ * @return bool False when the shell, the screen script or a script they need is missing (the caller shows its current
+ *              screen).
  */
 function kits_shell_app( array $args ): bool {
 	if ( ! wp_script_is( 'kits-shell', 'registered' ) || empty( $args['handle'] ) || empty( $args['src'] ) || empty( $args['asset'] ) || ! is_readable( $args['asset'] ) ) {
 		return false;
 	}
-	$a    = include $args['asset'];
-	$deps = array_values( array_unique( array_merge( (array) ( $a['dependencies'] ?? array() ), array( 'kits-shell' ) ) ) );
+	$a     = include $args['asset'];
+	$deps  = array_values( array_unique( array_merge( (array) ( $a['dependencies'] ?? array() ), array( 'kits-shell' ) ) ) );
+	$shell = wp_scripts()->registered['kits-shell']->deps ?? array();
+	// A script WordPress does not have (react-jsx-runtime is WordPress 6.6+) would leave the screen empty: show the current one.
+	foreach ( array_merge( $deps, (array) $shell ) as $dep ) {
+		if ( ! wp_script_is( $dep, 'registered' ) ) {
+			return false;
+		}
+	}
 	wp_enqueue_style( 'kits-shell' );
 	wp_enqueue_script( $args['handle'], $args['src'], $deps, $a['version'] ?? false, true );
 	if ( ! empty( $args['text_domain'] ) ) {
