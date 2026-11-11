@@ -490,7 +490,9 @@ function App() {
 	const current =
 		sections.find( ( s ) => s.slug === section ) || sections[ 0 ];
 
-	const item = ( [ store, k ] ) => {
+	const item = ( [ kind, k ] ) => {
+		// Logo and site icon are WordPress options like the title: they live in the core store.
+		const store = 'media' === kind ? 'core' : kind;
 		const onChange = ( v ) => set( store, k, v );
 		const value = valueOf( store, k );
 		if ( 'to' === store ) {
@@ -514,13 +516,13 @@ function App() {
 				/>
 			);
 		}
-		if ( 'media' === store ) {
+		if ( 'media' === kind ) {
 			return (
 				<MediaField
 					key={ k }
 					name={ k }
-					value={ valueOf( 'core', k ) }
-					onChange={ ( v ) => set( 'core', k, v ) }
+					value={ value }
+					onChange={ onChange }
 				/>
 			);
 		}
