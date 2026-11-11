@@ -19,7 +19,7 @@
  *     No match: tried again after 7 days, at most 3 times (aw_cc0_status, aw_cc0_attempts).
  *
  * Openverse: no key, a descriptive User-Agent, one request per 2 s, at most AW_CC0_DAILY_REQUESTS a day; result
- * pages are cached for a week. Counts and the log: Kits → Check site.
+ * pages are cached for a week. Counts and the log: Kits → Home → Pictures.
  *
  * @package animal-writes-core
  */
@@ -921,7 +921,7 @@ function aw_cc0_sideload( $post_id, $x, $q, &$used ) {
 	return (int) $att;
 }
 
-/** Counts for Kits → Check site. */
+/** Counts for Kits → Home → Pictures. */
 function aw_cc0_counts() {
 	global $wpdb;
 	$from = aw_cc0_items_sql();
@@ -950,33 +950,32 @@ function aw_cc0_counts() {
 	return array_map( 'intval', (array) $row );
 }
 
-add_action(
-	'aw_site_check_after',
-	function () {
-		$c = aw_cc0_counts();
-		echo '<h2>Pictures on News, Library and research items</h2><table class="form-table" role="presentation"><tbody>';
-		foreach (
-			array(
-				'Items (published, without a document page)'          => $c['total'] ?? 0,
-				'Publisher image checked and loading'                 => $c['pub_ok'] ?? 0,
-				'Publisher image not checked yet'                     => $c['pub_unchecked'] ?? 0,
-				'Publisher image failed (broken or not an image)'     => $c['pub_failed'] ?? 0,
-				'No publisher image'                                  => $c['pub_none'] ?? 0,
-				'CC0 photo assigned (Openverse)'                      => $c['cc0'] ?? 0,
-				'Still no photo of its own (category photo or placard)'  => $c['placard'] ?? 0,
-				'No suitable CC0 photo after ' . AW_CC0_MAX_ATTEMPTS . ' tries' => $c['gave_up'] ?? 0,
-			) as $k => $v
-		) {
-			echo '<tr><th scope="row">' . esc_html( $k ) . '</th><td>' . (int) $v . '</td></tr>';
-		}
-		$q = (array) get_option( 'aw_ov_quota', array() );
-		echo '</tbody></table><p>Openverse requests today: ' . (int) ( ( $q['d'] ?? '' ) === gmdate( 'Y-m-d' ) ? $q['n'] : 0 ) . ' of ' . (int) AW_CC0_DAILY_REQUESTS . '. Next run: ' . esc_html( wp_next_scheduled( 'aw_cc0_run' ) ? wp_date( 'j M H:i', wp_next_scheduled( 'aw_cc0_run' ) ) : 'not scheduled' ) . '.</p>';
-		$log = array_slice( (array) get_option( 'aw_cc0_log', array() ), -15 );
-		if ( $log ) {
-			echo '<details><summary>Last log lines</summary><pre style="white-space:pre-wrap;max-width:900px">' . esc_html( implode( "\n", array_reverse( $log ) ) ) . '</pre></details>';
-		}
+/** Kits → Home → Pictures (until the SourceWeb dashboard has it): publisher images and CC0 photos. */
+function aw_cc0_site_check() {
+	$c = aw_cc0_counts();
+	echo '<h2>Pictures on News, Library and research items</h2><table class="form-table" role="presentation"><tbody>';
+	foreach (
+		array(
+			'Items (published, without a document page)'          => $c['total'] ?? 0,
+			'Publisher image checked and loading'                 => $c['pub_ok'] ?? 0,
+			'Publisher image not checked yet'                     => $c['pub_unchecked'] ?? 0,
+			'Publisher image failed (broken or not an image)'     => $c['pub_failed'] ?? 0,
+			'No publisher image'                                  => $c['pub_none'] ?? 0,
+			'CC0 photo assigned (Openverse)'                      => $c['cc0'] ?? 0,
+			'Still no photo of its own (category photo or placard)'  => $c['placard'] ?? 0,
+			'No suitable CC0 photo after ' . AW_CC0_MAX_ATTEMPTS . ' tries' => $c['gave_up'] ?? 0,
+		) as $k => $v
+	) {
+		echo '<tr><th scope="row">' . esc_html( $k ) . '</th><td>' . (int) $v . '</td></tr>';
 	}
-);
+	$q = (array) get_option( 'aw_ov_quota', array() );
+	echo '</tbody></table><p>Openverse requests today: ' . (int) ( ( $q['d'] ?? '' ) === gmdate( 'Y-m-d' ) ? $q['n'] : 0 ) . ' of ' . (int) AW_CC0_DAILY_REQUESTS . '. Next run: ' . esc_html( wp_next_scheduled( 'aw_cc0_run' ) ? wp_date( 'j M H:i', wp_next_scheduled( 'aw_cc0_run' ) ) : 'not scheduled' ) . '.</p>';
+	$log = array_slice( (array) get_option( 'aw_cc0_log', array() ), -15 );
+	if ( $log ) {
+		echo '<details><summary>Last log lines</summary><pre style="white-space:pre-wrap;max-width:900px">' . esc_html( implode( "\n", array_reverse( $log ) ) ) . '</pre></details>';
+	}
+}
+add_action( 'aw_site_check_after', 'aw_cc0_site_check' );
 
 /*
  * The per-item switch for the publisher's image (aw_publisher_image() above), editable over the REST API so an editor

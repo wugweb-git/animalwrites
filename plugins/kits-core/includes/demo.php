@@ -237,13 +237,13 @@ add_shortcode(
 	}
 );
 
-// The states sheet lives in Kits → Design system (owner, 18 Oct 2026): opening the page directly goes there; inside
+// The states sheet lives in Kits → Help → Design system (owner, 18 Oct 2026): opening the page directly goes there; inside
 // that screen the page is shown without the site's header, footer and ads.
 add_action(
 	'template_redirect',
 	function () {
 		if ( is_page( 'kits-demo' ) && ! isset( $_GET['kits_embed'] ) && current_user_can( 'manage_options' ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-			wp_safe_redirect( admin_url( 'admin.php?page=kits-system&tab=states' ) );
+			wp_safe_redirect( admin_url( 'admin.php?page=kits-help&tab=states' ) . '#design-system' );
 			exit;
 		}
 	}

@@ -4,8 +4,9 @@
  * screen, and one screen per job. Core wp-admin parts only (nav tabs, form tables, postboxes, the Settings API, notices);
  * no admin stylesheet.
  *
- * Kits → Welcome (system status), Plugins, Import / Export, Fonts (core Font Library), Core Settings, Theme Options,
- * Design system (system-screen.php), Docs (what lives where), Preview (preview.php).
+ * Six items (docs/admin-ui-spec.md §B; admin-menu.php registers them and redirects the old addresses): Home, Theme
+ * Options, Settings, Plugins, Tools, Help. This file holds the parts they are made of: the status table, the plugin
+ * list, export and import, the Theme Options fields and sections, the Core Settings switches, the Docs tables.
  *
  * Theme Options keep their values where they always were: kits_theme_options (theme-options.php) and kits_page_defaults
  * (page-options.php), so the settings file, kits_option() and kits_page_option() read them as before. Both options save
@@ -20,29 +21,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * The Kits screens as tabs, before they are put in order: slug => [tab label, address relative to wp-admin, capability].
- * Kits' own in tab order; a site adds its own through the kits_admin_tabs filter.
+ * Always the six of kits_menu_six(); the kits_admin_tabs filter may change a label or a capability, and a tab it adds
+ * is dropped (a site adds sections to the six instead: kits_home_sections, kits_settings_sections, kits_help_sections).
  */
 function kits_admin_tabs_unsorted(): array {
-	return (array) apply_filters(
-		'kits_admin_tabs',
-		array(
-			KITS_MENU            => array( 'Welcome', 'admin.php?page=' . KITS_MENU, 'manage_options' ),
-			'kits-plugins'       => array( 'Plugins', 'admin.php?page=kits-plugins', 'manage_options' ),
-			'kits-transfer'      => array( 'Import / Export', 'admin.php?page=kits-transfer', 'edit_theme_options' ),
-			'font-library.php'   => array( 'Fonts', 'font-library.php', 'edit_theme_options' ),
-			'kits-core-settings' => array( 'Core Settings', 'admin.php?page=kits-core-settings', 'manage_options' ),
-			'kits-options'       => array( 'Theme Options', 'admin.php?page=kits-options', 'manage_options' ),
-			'kits-system'        => array( 'Design system', 'admin.php?page=kits-system', 'manage_options' ),
-			'kits-docs'          => array( 'Docs', 'admin.php?page=kits-docs', 'manage_options' ),
-			'kits-preview'       => array( 'Preview', 'admin.php?page=kits-preview', 'manage_options' ),
-		)
-	);
+	$six = kits_menu_six( KITS_MENU );
+	/**
+	 * Filters the six Kits tabs (label, address, capability). Only the six keys are kept.
+	 *
+	 * @param array $tabs Slug => [label, address relative to wp-admin, capability].
+	 */
+	return kits_menu_tabs_only_six( (array) apply_filters( 'kits_admin_tabs', $six ), $six );
 }
 
 /**
- * One order for the Kits menu and the Kits tabs: screen slugs (the page= value, or the file of a core screen such as
- * font-library.php). Kits' own screens in tab order, then the tabs a site adds (in the order kits_admin_tabs gives
- * them). Screens in neither list follow in the order they were added to the menu.
+ * One order for the Kits menu and the Kits tabs: screen slugs (the page= value). The six in their order; the filter may
+ * reorder them.
  */
 function kits_menu_order(): array {
 	/**
@@ -88,20 +82,21 @@ add_action(
 		if ( empty( $submenu[ KITS_MENU ] ) || ! is_array( $submenu[ KITS_MENU ] ) ) {
 			return;
 		}
-		$submenu[ KITS_MENU ] = array_values( kits_menu_sort( $submenu[ KITS_MENU ], fn( $item ) => $item[2] ?? '' ) ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- reorders the Kits submenu only.
+		$submenu[ KITS_MENU ] = array_values( kits_menu_sort( $submenu[ KITS_MENU ], fn( $item ) => $item[2] ?? '' ) ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- reorders the Kits submenu only (the six, admin-menu.php).
 	},
 	1000 // After every plugin has added its screens.
 );
 
 /**
  * Screens that other plugins add under Kits → Plugins (not as top tabs): slug => [name, address relative to wp-admin,
- * capability, one line on what it is]. On those screens the Plugins tab is the active one.
+ * capability, one line on what it is, state]. State is '' when the plugin is on ("Active"), else a short word such as
+ * "Off" (the address then says where to switch it on). On those screens the Plugins tab is the active one.
  */
 function kits_plugin_screens(): array {
 	$list = array();
 	foreach ( (array) apply_filters( 'kits_plugin_screens', array() ) as $slug => $s ) {
 		if ( is_array( $s ) && isset( $s[0], $s[1], $s[2] ) ) {
-			$list[ (string) $slug ] = array( (string) $s[0], (string) $s[1], (string) $s[2], (string) ( $s[3] ?? '' ) );
+			$list[ (string) $slug ] = array( (string) $s[0], (string) $s[1], (string) $s[2], (string) ( $s[3] ?? '' ), (string) ( $s[4] ?? '' ) );
 		}
 	}
 	return $list;
@@ -113,12 +108,15 @@ function kits_plugin_screens(): array {
  * @param string $current The screen's slug.
  */
 function kits_admin_tabs( string $current ): void {
+	if ( kits_admin_embedding() ) {
+		return; // Shown as a section of one of the six: that screen has the tabs.
+	}
 	echo '<nav class="nav-tab-wrapper wp-clearfix" aria-label="' . esc_attr( 'Kits screens' ) . '">';
 	foreach ( kits_admin_tabs_list() as $slug => $t ) {
 		if ( ! current_user_can( $t[2] ) ) {
 			continue;
 		}
-		$on = $slug === $current || ( 'kits-plugins' === $slug && isset( kits_plugin_screens()[ $current ] ) );
+		$on = $slug === $current || kits_screen_tab( $current ) === $slug;
 		echo '<a class="nav-tab' . ( $on ? ' nav-tab-active' : '' ) . '" href="' . esc_url( admin_url( $t[1] ) ) . '"' . ( $on ? ' aria-current="page"' : '' ) . '>' . esc_html( $t[0] ) . '</a>';
 	}
 	echo '</nav>';
@@ -189,6 +187,13 @@ function kits_product_icon_img( string $name, int $size = 20 ): string {
  * @param string $intro One line under it (plain text).
  */
 function kits_admin_head( string $slug, string $title, string $intro = '' ): void {
+	if ( kits_admin_embedding() ) {
+		echo '<div>'; // A section of one of the six: no second heading or tabs. The screen closes it as it closes .wrap.
+		if ( '' !== $intro ) {
+			echo '<p>' . esc_html( $intro ) . '</p>';
+		}
+		return;
+	}
 	$theme = wp_get_theme( get_template() );
 	echo '<div class="wrap"><h1>' . kits_product_icon_img( 'Kits', 32 ) . esc_html( $title ) . '</h1>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- kits_product_icon_img() escapes its image address.
 	if ( '' !== $intro ) {
@@ -199,27 +204,7 @@ function kits_admin_head( string $slug, string $title, string $intro = '' ): voi
 	settings_errors();
 }
 
-add_action(
-	'admin_menu',
-	function () {
-		add_submenu_page( KITS_MENU, 'Plugins', 'Plugins', 'manage_options', 'kits-plugins', 'kits_plugins_page' );
-		add_submenu_page( KITS_MENU, 'Import / Export', 'Import / Export', 'edit_theme_options', 'kits-transfer', 'kits_transfer_page' );
-		add_submenu_page( KITS_MENU, 'Fonts', 'Fonts', 'edit_theme_options', 'font-library.php' );
-		add_submenu_page( KITS_MENU, 'Core Settings', 'Core Settings', 'manage_options', 'kits-core-settings', 'kits_core_settings_page' );
-		add_submenu_page( KITS_MENU, 'Theme Options', 'Theme Options', 'manage_options', 'kits-options', 'kits_options_page' );
-	},
-	9 // After Welcome, before Design system, Docs and Preview.
-);
-
-add_action(
-	'admin_menu',
-	function () {
-		add_submenu_page( KITS_MENU, 'Docs', 'Docs', 'manage_options', 'kits-docs', 'kits_docs_page' );
-	},
-	11 // After Design system.
-);
-
-/* ---------- Welcome: system status ---------- */
+/* ---------- Home: versions and limits ---------- */
 
 /**
  * A size such as 256M in bytes.
@@ -318,13 +303,11 @@ function kits_status_rows(): array {
 	return (array) apply_filters( 'kits_status_rows', $rows );
 }
 
-/** Kits → Welcome. */
-function kits_welcome_page() {
-	kits_admin_head( KITS_MENU, 'Welcome to Kits', 'Kits by Wugweb is the site\'s design system: the theme draws every page, Kits Core adds the features every Kits site shares. Below: this site\'s setup, then where to change things.' );
-	echo '<div id="col-container" class="wp-clearfix"><div id="col-left"><div class="col-wrap">';
-	echo '<div class="postbox"><div class="postbox-header"><h2 class="hndle">' . esc_html( 'Start here' ) . '</h2></div><div class="inside"><ul>';
+/** Kits → Home → Setup checklist: where to change things. */
+function kits_home_start(): void {
+	echo '<ul>';
 	foreach ( array(
-		array( 'Theme Options', 'admin.php?page=kits-options', 'header, footer, each kind of page, share bar' ),
+		array( 'Theme Options', 'admin.php?page=kits-options', 'identity, header, footer, layout, each kind of page, share bar' ),
 		array( 'Styles', 'site-editor.php?path=/wp_global_styles', 'colours, fonts, sizes, buttons' ),
 		array( 'Header & footer', 'site-editor.php?postType=wp_template_part', 'what they hold' ),
 		array( 'Templates', 'site-editor.php?postType=wp_template', 'the layout of each kind of page' ),
@@ -334,15 +317,18 @@ function kits_welcome_page() {
 	) as $l ) {
 		echo '<li><a href="' . esc_url( admin_url( $l[1] ) ) . '"><strong>' . esc_html( $l[0] ) . '</strong></a>: ' . esc_html( $l[2] ) . '</li>';
 	}
-	echo '</ul></div></div></div></div>';
-	echo '<div id="col-right"><div class="col-wrap"><div class="postbox"><div class="postbox-header"><h2 class="hndle">' . esc_html( 'System Status' ) . '</h2></div><div class="inside">';
+	echo '</ul>';
+}
+
+/** Kits → Home → Versions and limits: the System Status table (kits_status_rows). */
+function kits_home_status(): void {
 	echo '<p>' . esc_html( 'Anything shown in red needs a change on the server or in wp-config.php.' ) . '</p>';
 	echo '<table class="widefat striped"><caption class="screen-reader-text">' . esc_html( 'System status' ) . '</caption><tbody>';
 	foreach ( kits_status_rows() as $r ) {
 		$label = (string) $r[0];
 		echo '<tr><th scope="row">' . kits_product_icon_img( 'Theme version' === $label ? 'Kits' : $label ) . esc_html( $label ) . '</th><td>' . wp_kses_post( $r[1] ) . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- kits_product_icon_img() escapes its image address.
 	}
-	echo '</tbody></table></div></div></div></div></div></div>';
+	echo '</tbody></table>';
 }
 
 /* ---------- Plugins: required and recommended ---------- */
@@ -425,6 +411,7 @@ function kits_plugins_page() {
 		if ( current_user_can( $s[2] ) ) {
 			$own[] = array(
 				'plugin' => kits_product_icon_img( $s[0], 32 ) . '<strong><a href="' . esc_url( admin_url( $s[1] ) ) . '">' . esc_html( $s[0] ) . '</a></strong>',
+				'state'  => '' === $s[4] ? '<span class="dashicons dashicons-yes" aria-hidden="true"></span> ' . esc_html( 'Active' ) : esc_html( $s[4] ),
 				'what'   => esc_html( $s[3] ),
 			);
 		}
@@ -435,6 +422,7 @@ function kits_plugins_page() {
 			'kits-plugin-screens',
 			array(
 				'plugin' => 'Plugin',
+				'state'  => 'State',
 				'what'   => 'What it does here',
 			),
 			$own,
@@ -449,9 +437,9 @@ function kits_plugins_page() {
 
 /* ---------- Import / Export ---------- */
 
-/** Kits → Import / Export. */
+/** Kits → Tools: export, check a file, import, restore defaults, put the copy back (was Import / Export). */
 function kits_transfer_page() {
-	kits_admin_head( 'kits-transfer', 'Import / Export', 'One JSON file with this site\'s Styles, Theme Options, Page Options defaults and synced patterns.' );
+	kits_admin_head( 'kits-tools', 'Tools', 'One JSON file with this site\'s Styles, Theme Options, Page Options defaults and synced patterns.' );
 	$user   = get_current_user_id();
 	$result = get_transient( 'kits_transfer_result_' . $user );
 	if ( is_array( $result ) ) {
@@ -497,7 +485,7 @@ function kits_transfer_page() {
 		echo '</div>';
 		return;
 	}
-	echo '<h2>' . esc_html( 'Restore defaults' ) . '</h2><p>' . esc_html( 'Clears Theme Options, Core Settings and the Page Options defaults, so every part works as the theme ships it. Styles, patterns and each page\'s own Page Options stay. A copy is kept first.' ) . '</p>';
+	echo '<h2>' . esc_html( 'Restore defaults' ) . '</h2><p>' . esc_html( 'Clears Theme Options, Settings and the Page Options defaults, so every part works as the theme ships it. Styles, patterns and each page\'s own Page Options stay. A copy is kept first.' ) . '</p>';
 	echo '<form method="post" action="' . $post . '">'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above.
 	wp_nonce_field( 'kits_transfer_reset' );
 	echo '<input type="hidden" name="action" value="kits_transfer_reset"><p><label><input type="checkbox" name="kits_sure" value="1" required> ' . esc_html( 'Yes, restore the defaults' ) . '</label></p>';
@@ -577,7 +565,7 @@ function kits_transfer_lines( array $s ): array {
  */
 function kits_transfer_back( array $result ): void {
 	set_transient( 'kits_transfer_result_' . get_current_user_id(), $result, 5 * MINUTE_IN_SECONDS );
-	wp_safe_redirect( admin_url( 'admin.php?page=kits-transfer' ) );
+	wp_safe_redirect( admin_url( 'admin.php?page=kits-tools' ) );
 	exit;
 }
 
@@ -659,7 +647,7 @@ add_action(
 		kits_transfer_back(
 			array(
 				'title' => 'Defaults restored.',
-				'lines' => array( 'Theme Options, Core Settings and the Page Options defaults are back to the theme\'s. The copy from before is kept below.' ),
+				'lines' => array( 'Theme Options, Settings and the Page Options defaults are back to the theme\'s. The copy from before is kept below.' ),
 			)
 		);
 	}
@@ -822,25 +810,41 @@ function kits_core_settings_groups(): array {
 	return array( 'Speed', 'Older content' );
 }
 
-/** Kits → Core Settings: the switches for speed fixes and older content, in a box per group, each with what it does. */
-function kits_core_settings_page() {
-	kits_admin_head( 'kits-core-settings', 'Core Settings', 'Switches for the theme\'s speed fixes and for older content. Leave them on unless you are tracking down a problem.' );
+/**
+ * One Core Settings group as a form of its own (Kits → Settings → Performance or Compatibility). The options save by
+ * merging, so a form changes only its own fields.
+ *
+ * @param string $group A group of kits_core_settings_groups().
+ * @param string $also  Also a Theme Options section's fields in the same form (font preload: utility-performance).
+ * @param string $back  Section of Kits → Settings to come back to after saving (kits_section=, see admin-menu.php).
+ */
+function kits_core_settings_form( string $group, string $also = '', string $back = '' ): void {
 	echo '<form method="post" action="options.php">';
-	settings_fields( 'kits_options' );
-	foreach ( kits_core_settings_groups() as $group ) {
-		kits_options_box(
-			$group,
-			function () use ( $group ) {
-				foreach ( kits_theme_option_fields() as $key => $f ) {
-					if ( $group === $f['group'] && 'core' === kits_theme_option_section( $key, $f ) ) {
-						kits_theme_option_row( $key, $f );
-					}
-				}
-			}
-		);
+	kits_options_form_fields( 'admin.php?page=kits-settings' . ( '' !== $back ? '&kits_section=' . rawurlencode( $back ) : '' ) );
+	echo '<table class="form-table" role="presentation"><tbody>';
+	foreach ( kits_theme_option_fields() as $key => $f ) {
+		if ( $group === $f['group'] && 'core' === kits_theme_option_section( $key, $f ) ) {
+			kits_theme_option_row( $key, $f );
+		}
 	}
-	submit_button( 'Save Core Settings' );
-	echo '</form></div>';
+	if ( '' !== $also ) {
+		kits_theme_option_rows_of( $also );
+	}
+	echo '</tbody></table>';
+	submit_button( 'Save ' . $group );
+	echo '</form>';
+}
+
+/**
+ * The hidden fields of a kits_options form (what settings_fields() prints), coming back to a given screen after the
+ * save instead of the one the form is on, so a section shown inside another screen comes back to its place.
+ *
+ * @param string $back Address relative to wp-admin (options.php adds settings-updated=true to it).
+ */
+function kits_options_form_fields( string $back ): void {
+	echo '<input type="hidden" name="option_page" value="kits_options"><input type="hidden" name="action" value="update">';
+	wp_nonce_field( 'kits_options-options', '_wpnonce', false );
+	echo '<input type="hidden" name="_wp_http_referer" value="' . esc_attr( wp_make_link_relative( admin_url( $back ) ) ) . '">';
 }
 
 /* ---------- Theme Options ---------- */
@@ -996,7 +1000,7 @@ function kits_options_section_body( string $section, string $label ): bool {
 			kits_options_box( 'Share bar', fn() => kits_theme_option_rows_of( 'utility-share' ) );
 			return true;
 		case 'utility-performance':
-			kits_options_box( 'Performance', fn() => kits_theme_option_rows_of( 'utility-performance' ), 'More speed switches: ' . kits_options_link( 'Kits → Core Settings', 'admin.php?page=kits-core-settings' ) . '.' );
+			kits_options_box( 'Performance', fn() => kits_theme_option_rows_of( 'utility-performance' ), 'More speed switches: ' . kits_options_link( 'Kits → Settings → Performance', 'admin.php?page=kits-settings#performance' ) . '.' );
 			return true;
 		case 'utility-extra':
 			$has = (bool) array_filter( array_keys( kits_theme_option_fields() ), fn( $k ) => 'utility-extra' === kits_theme_option_section( $k, kits_theme_option_fields()[ $k ] ) );
@@ -1006,8 +1010,8 @@ function kits_options_section_body( string $section, string $label ): bool {
 			kits_options_links_box(
 				'Extra',
 				array(
-					array( 'Preview', 'admin.php?page=kits-preview', 'Who sees preview-only items.' ),
-					array( 'Design system', 'admin.php?page=kits-system', 'Every component, its states and the colour contrast.' ),
+					array( 'Preview access', 'admin.php?page=kits-settings#preview', 'Who sees preview-only items.' ),
+					array( 'Design system', 'admin.php?page=kits-help#design-system', 'Every component and its states.' ),
 				)
 			);
 			return $has;
@@ -1094,7 +1098,7 @@ function kits_options_palette(): void {
 			$rows[] = array( '<span class="dashicons" aria-hidden="true" style="background:' . esc_attr( $hex ) . '"></span> ' . esc_html( (string) ( $c['name'] ?? '' ) ), esc_html( $hex . ' · ' . $title ) );
 		}
 	}
-	kits_options_values_box( 'Palette', $rows, 'Change a colour in ' . kits_options_link( 'Styles → Colors → Palette', 'site-editor.php?path=/wp_global_styles' ) . '; every part that uses it follows. Contrast: ' . kits_options_link( 'Design system → Colour contrast', 'admin.php?page=kits-system&tab=contrast' ) . '.' );
+	kits_options_values_box( 'Palette', $rows, 'Change a colour in ' . kits_options_link( 'Styles → Colors → Palette', 'site-editor.php?path=/wp_global_styles' ) . '; every part that uses it follows. Contrast: ' . kits_options_link( 'Theme Options → Colours (contrast)', 'admin.php?page=kits-options#colours' ) . '.' );
 }
 
 /** Visual → Typography: font families and the sizes of text and headings. */
@@ -1113,7 +1117,7 @@ function kits_options_typography(): void {
 			$rows[] = array( esc_html( strtoupper( $h ) ), esc_html( trim( (string) ( $t['fontSize'] ?? '' ) . ' · weight ' . (string) ( $t['fontWeight'] ?? '' ) . ' · line ' . (string) ( $t['lineHeight'] ?? '' ) ) ) );
 		}
 	}
-	kits_options_values_box( 'Typography', $rows, 'Change them in ' . kits_options_link( 'Styles → Typography', 'site-editor.php?path=/wp_global_styles' ) . '. Install fonts in ' . kits_options_link( 'Kits → Fonts', 'font-library.php' ) . '.' );
+	kits_options_values_box( 'Typography', $rows, 'Change them in ' . kits_options_link( 'Styles → Typography', 'site-editor.php?path=/wp_global_styles' ) . '. Install fonts in ' . kits_options_link( 'Appearance → Fonts', 'font-library.php' ) . '.' );
 }
 
 /** Visual → Buttons: what Styles → Blocks → Button sets, which every button on the site follows. */
@@ -1184,7 +1188,7 @@ function kits_options_cards(): void {
 			$rows[] = array( '<code>--' . esc_html( $t ) . '</code>', '<code>' . esc_html( $vals[ $t ] ) . '</code> ' . esc_html( kits_token_resolve( $t, $vals ) ) );
 		}
 	}
-	kits_options_values_box( 'Cards', $rows ? $rows : array( array( esc_html( 'None yet' ), '' ) ), 'The padding, corners and colours are the ' . kits_block_style_where( (string) $card['block'], (string) $card['variation'] ) . '; the Site Editor\'s Styles doesn\'t list them. The tokens are the theme\'s base values (phones): ' . kits_options_link( 'Design system → Tokens', 'admin.php?page=kits-system&tab=tokens' ) . '.' );
+	kits_options_values_box( 'Cards', $rows ? $rows : array( array( esc_html( 'None yet' ), '' ) ), 'The padding, corners and colours are the ' . kits_block_style_where( (string) $card['block'], (string) $card['variation'] ) . '; the Site Editor\'s Styles doesn\'t list them. The tokens are the theme\'s base values (phones): ' . kits_options_link( 'Help → Design system → Tokens', 'admin.php?page=kits-help&tab=tokens#design-system' ) . '.' );
 }
 
 /** Utility → Socials: the profiles Rank Math holds, which the footer and schema use. */
@@ -1232,9 +1236,9 @@ function kits_options_values_box( string $title, array $rows, string $intro ): v
 
 /* ---------- Docs ---------- */
 
-/** Kits → Docs: what the theme and Kits Core hold and where each is changed (was the Overview). */
+/** Kits → Help → Docs: what the theme and Kits Core hold and where each is changed (was Kits → Docs). */
 function kits_docs_page() {
-	kits_admin_head( 'kits-docs', 'Docs', 'What the theme and Kits Core hold, and where each is changed.' );
+	kits_admin_head( 'kits-help', 'Docs', 'What the theme and Kits Core hold, and where each is changed.' );
 	kits_overview_tables();
 	echo '</div>';
 }

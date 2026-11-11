@@ -2,7 +2,7 @@
 /**
  * Preview: things only the site owner should see before they go public (sample items). Ads are Advanced Ads' alone.
  *
- * Who previews: logged-in administrators, requests from a preview IP address (Kits → Preview; IPv4 exact, IPv6 by its
+ * Who previews: logged-in administrators, requests from a preview IP address (Kits → Settings → Preview access; IPv4 exact, IPv6 by its
  * /64 network), and registered preview devices (a long-lived HttpOnly cookie holding a random token; only its hash is
  * stored). Pages are served from a public cache, so the page HTML never varies by IP or device: it carries everything,
  * and CSS hides preview-only parts unless the page is marked html.kits-preview (set by a small script after asking the
@@ -42,7 +42,7 @@ function kits_preview_only_ids() {
 	return array_values( array_filter( array_map( 'intval', (array) apply_filters( 'kits_preview_only_ids', array() ) ) ) );
 }
 
-/** The preview IP list (one per line in Kits → Preview). */
+/** The preview IP list (one per line in Kits → Settings → Preview access). */
 function kits_preview_ips() {
 	return array_values( array_filter( array_map( 'trim', preg_split( '/[\r\n,]+/', (string) get_option( 'kits_preview_ips', '' ) ) ) ) );
 }
@@ -228,39 +228,34 @@ add_action(
 	1
 );
 
-/* ---------- Kits → Preview: preview IP addresses and devices (administrators only) ---------- */
+/* ---------- Kits → Settings → Preview access: preview IP addresses and devices (administrators only) ---------- */
 
-add_action(
-	'admin_menu',
-	function () {
-		add_submenu_page(
-			KITS_MENU, // Kits → Preview
-			'Preview',
-			'Preview',
-			'manage_options',
-			'kits-preview',
-			function () {
-				if ( isset( $_POST['kits_preview_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['kits_preview_nonce'] ) ), 'kits_preview_ips' ) ) {
-					$lines = array_filter( array_map( 'trim', preg_split( '/[\r\n]+/', sanitize_textarea_field( wp_unslash( $_POST['kits_preview_ips'] ?? '' ) ) ) ) );
-					update_option( 'kits_preview_ips', implode( "\n", $lines ), false );
-					echo '<div class="updated"><p>Saved.</p></div>';
-				}
-				echo '<div class="wrap"><h1>Preview</h1>';
-				kits_admin_tabs( 'kits-preview' );
-				echo '<form method="post">';
-				wp_nonce_field( 'kits_preview_ips', 'kits_preview_nonce' );
-				echo '<h2 class="title"><label for="kits-preview-ips">Preview IP addresses</label></h2><p class="description" id="kits-preview-ips-note">One per line. IPv4: exact address. IPv6: the whole /64 network (e.g. 2401:db8:1:2::/64). Requests from these addresses see preview-only items. Your address now: <code>' . esc_html( kits_client_ip() ) . '</code></p>';
-				echo '<textarea id="kits-preview-ips" name="kits_preview_ips" rows="4" class="large-text code" aria-describedby="kits-preview-ips-note">' . esc_textarea( (string) get_option( 'kits_preview_ips', '' ) ) . '</textarea>';
-				submit_button();
-				echo '</form>';
-				kits_preview_devices_screen();
-				echo '</div>';
-			}
-		);
+/**
+ * Kits → Settings → Preview access (admin-menu.php shows it; the old address kits-preview redirects there). The form
+ * posts to the screen it is on, so the save runs here, with its own capability check.
+ */
+function kits_preview_page() {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		return;
 	}
-);
+	if ( isset( $_POST['kits_preview_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['kits_preview_nonce'] ) ), 'kits_preview_ips' ) ) {
+		$lines = array_filter( array_map( 'trim', preg_split( '/[\r\n]+/', sanitize_textarea_field( wp_unslash( $_POST['kits_preview_ips'] ?? '' ) ) ) ) );
+		update_option( 'kits_preview_ips', implode( "\n", $lines ), false );
+		echo '<div class="updated"><p>Saved.</p></div>';
+	}
+	echo '<div class="wrap"><h1>Preview</h1>';
+	kits_admin_tabs( 'kits-preview' );
+	echo '<form method="post" action="' . esc_url( admin_url( 'admin.php?page=kits-settings&kits_section=preview' ) ) . '">'; // Back to Settings → Preview access after saving.
+	wp_nonce_field( 'kits_preview_ips', 'kits_preview_nonce' );
+	echo '<h2 class="title"><label for="kits-preview-ips">Preview IP addresses</label></h2><p class="description" id="kits-preview-ips-note">One per line. IPv4: exact address. IPv6: the whole /64 network (e.g. 2401:db8:1:2::/64). Requests from these addresses see preview-only items. Your address now: <code>' . esc_html( kits_client_ip() ) . '</code></p>';
+	echo '<textarea id="kits-preview-ips" name="kits_preview_ips" rows="4" class="large-text code" aria-describedby="kits-preview-ips-note">' . esc_textarea( (string) get_option( 'kits_preview_ips', '' ) ) . '</textarea>';
+	submit_button();
+	echo '</form>';
+	kits_preview_devices_screen();
+	echo '</div>';
+}
 
-/** The preview devices part of Kits → Preview. */
+/** The preview devices part of Kits → Settings → Preview access. */
 function kits_preview_devices_screen() {
 	$post = esc_url( admin_url( 'admin-post.php' ) );
 	echo '<h2 class="title">Preview devices</h2><p class="description">A registered device sees preview-only items on any network, without logging in.</p>';
@@ -290,9 +285,9 @@ function kits_preview_devices_screen() {
 		. '<label>Device name <input type="text" name="label" placeholder="Phone"></label> <button type="submit" class="button">Create a device link</button></p></form>';
 }
 
-/** Back to Kits → Preview. */
+/** Back to Kits → Settings → Preview access. */
 function kits_preview_back() {
-	wp_safe_redirect( admin_url( 'admin.php?page=kits-preview' ) );
+	wp_safe_redirect( admin_url( 'admin.php?page=kits-settings' ) . '#preview' );
 	exit;
 }
 

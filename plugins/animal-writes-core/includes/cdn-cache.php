@@ -113,7 +113,7 @@ add_action(
 );
 
 /**
- * Kits → Check site: a "Shared cache (CDN)" section for both lifetimes (owner, 2 Nov 2026). Core Settings API
+ * Kits → Settings → Performance (Check site without Kits): a "Shared cache (CDN)" section for both lifetimes (owner, 2 Nov 2026). Core Settings API
  * and core markup only. Whole seconds: 0 (off; for the long one, the same as the short one) or 60 to 3600; anything
  * else is clamped into that range. The header a public page gets now is shown under the fields.
  *
@@ -170,24 +170,24 @@ function aw_cdn_header_now( bool $long ): string {
 	return 'public, s-maxage=' . $ttl;
 }
 
-add_action(
-	'aw_site_check_after',
-	function () {
-		if ( ! current_user_can( 'manage_options' ) ) {
-			return;
-		}
-		settings_errors( 'general' ); // options.php's "Settings saved." (core prints it only under the Settings menu)
-		echo '<form method="post" action="' . esc_url( admin_url( 'options.php' ) ) . '">';
-		settings_fields( 'aw_cdn' );
-		do_settings_sections( 'aw-cdn' );
-		$short = aw_cdn_header_now( false );
-		$long  = aw_cdn_header_now( true );
-		echo '<p>' . esc_html( 'Header now:' ) . '</p><ul>';
-		echo '<li>' . esc_html( 'Public pages: ' ) . ( $short ? '<code>Cache-Control: ' . esc_html( $short ) . '</code>' : esc_html( 'none (CDN caching off)' ) ) . '</li>';
-		echo '<li>' . esc_html( 'Listings, Library items and Resources: ' ) . ( $long ? '<code>Cache-Control: ' . esc_html( $long ) . '</code>' : esc_html( 'none (CDN caching off)' ) ) . '</li>';
-		echo '</ul>';
-		submit_button();
-		echo '</form>';
-	},
-	20
-);
+/** Kits → Settings → Performance: CDN cache times (and Check site without Kits). */
+function aw_cdn_settings_box() {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		return;
+	}
+	if ( ! function_exists( 'kits_sections_page' ) ) {
+		settings_errors( 'general' ); // options.php's "Settings saved." (core prints it only under the Settings menu; Kits → Settings prints it itself)
+	}
+	echo '<form method="post" action="' . esc_url( admin_url( 'options.php' ) ) . '">';
+	settings_fields( 'aw_cdn' );
+	do_settings_sections( 'aw-cdn' );
+	$short = aw_cdn_header_now( false );
+	$long  = aw_cdn_header_now( true );
+	echo '<p>' . esc_html( 'Header now:' ) . '</p><ul>';
+	echo '<li>' . esc_html( 'Public pages: ' ) . ( $short ? '<code>Cache-Control: ' . esc_html( $short ) . '</code>' : esc_html( 'none (CDN caching off)' ) ) . '</li>';
+	echo '<li>' . esc_html( 'Listings, Library items and Resources: ' ) . ( $long ? '<code>Cache-Control: ' . esc_html( $long ) . '</code>' : esc_html( 'none (CDN caching off)' ) ) . '</li>';
+	echo '</ul>';
+	submit_button();
+	echo '</form>';
+}
+add_action( 'aw_site_check_after', 'aw_cdn_settings_box', 20 );

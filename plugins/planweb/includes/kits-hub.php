@@ -1,6 +1,6 @@
 <?php
 /**
- * PlanWeb in the Kits admin: a row on Kits → Plugins and a row in Kits → Welcome's System Status, through Kits Core's
+ * PlanWeb in the Kits admin: a row on Kits → Plugins and a row in Kits → Home's System Status, through Kits Core's
  * filters kits_plugin_screens and kits_status_rows. Kits Core is checked when it runs (it may be loaded by another
  * plugin rather than activated, so the Requires Plugins header is not used).
  *
@@ -38,8 +38,12 @@ function planweb_no_kits_notice() {
  * @param array $tabs slug => [name, address relative to wp-admin, capability, what it is].
  */
 function planweb_kits_tab( $tabs ) {
+	$what = __( 'The team\'s calendar: dates, plans and reminders.', 'planweb' );
 	if ( planweb_on() ) {
-		$tabs[ PLANWEB_MENU ] = array( __( 'PlanWeb', 'planweb' ), 'admin.php?page=' . PLANWEB_MENU, 'edit_planweb_entries', __( 'The team\'s calendar: dates, plans and reminders.', 'planweb' ) );
+		$tabs[ PLANWEB_MENU ] = array( __( 'PlanWeb', 'planweb' ), 'admin.php?page=' . PLANWEB_MENU, 'edit_planweb_entries', $what );
+	} else {
+		// Off: the row stays, and links to Plugins, where activating PlanWeb switches it on.
+		$tabs[ PLANWEB_MENU ] = array( __( 'PlanWeb', 'planweb' ), 'plugins.php', 'activate_plugins', $what, __( 'Off', 'planweb' ) );
 	}
 	return $tabs;
 }

@@ -11,7 +11,7 @@
  * (option aw_thumb_map: post ID => attachment ID) and rebuilt when an item is published, changed or removed, and daily.
  * Library items with their own document page (aw_file_id / aw_doc_preview) keep it: it is unique to them.
  *
- * Check: GET /wp-json/aw/v1/thumb-dupes → { "duplicates": n } (the deploy gate fails when n > 0); Kits → Check site.
+ * Check: GET /wp-json/aw/v1/thumb-dupes → { "duplicates": n } (the deploy gate fails when n > 0); Kits → Home → Thumbnails.
  *
  * @package animal-writes-core
  */
@@ -132,10 +132,9 @@ add_action(
 	}
 );
 
-add_action(
-	'aw_site_check_after',
-	function () {
-		$d = aw_thumb_duplicates();
-		echo '<h2>Thumbnails</h2><p>' . ( $d ? esc_html( count( $d ) . ' picture(s) used by more than one item: ' . implode( '; ', array_map( fn( $ids ) => '#' . implode( ', #', $ids ), $d ) ) ) : 'No picture is used twice.' ) . '</p>';
-	}
-);
+/** Kits → Home → Thumbnails (until the SourceWeb dashboard has it): pictures used by more than one item. */
+function aw_thumbs_site_check() {
+	$d = aw_thumb_duplicates();
+	echo '<h2>Thumbnails</h2><p>' . ( $d ? esc_html( count( $d ) . ' picture(s) used by more than one item: ' . implode( '; ', array_map( fn( $ids ) => '#' . implode( ', #', $ids ), $d ) ) ) : 'No picture is used twice.' ) . '</p>';
+}
+add_action( 'aw_site_check_after', 'aw_thumbs_site_check' );

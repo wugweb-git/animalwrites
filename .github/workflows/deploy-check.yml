@@ -91,6 +91,8 @@ jobs:
         run: php plugins/animal-writes-core/tests/org-people-tests.php
       - name: PlanWeb tests without WordPress (field checks, Dates import mapping; plugins/planweb/tests)
         run: php plugins/planweb/tests/run.php
+      - name: Kits menu, six items and old addresses (plugins/kits-core/tests/admin-menu-tests.php)
+        run: php plugins/kits-core/tests/admin-menu-tests.php
       - name: Footer height follows its content (no max-height, vh height or overflow hidden)
         run: python3 tools/ci/footer_check.py
       - name: Breakpoints only 767/768 and 1199/1200 (media queries and matchMedia)
@@ -112,6 +114,7 @@ jobs:
         env:
           BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
           HEAD: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+          KITS_SNAPSHOT: ${{ github.event_name == 'pull_request' && '/tmp/kits-screens' || '' }}
         run: |
           # Plugin Check (report) only when plugins/planweb changed, or when the base cannot be read (new branch).
           if git cat-file -e "$BASE" 2>/dev/null && git diff --quiet "$BASE" "$HEAD" -- plugins/planweb; then
@@ -120,6 +123,14 @@ jobs:
             export PLUGIN_CHECK=1
           fi
           bash tools/ci/smoke.sh
+      - name: Kits screens as offline pages (pull requests; for the PR's screenshots)
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: kits-screens
+          path: /tmp/kits-screens
+          if-no-files-found: ignore
+          retention-days: 14
       # Each deploy replaces the deployed folder, so mailweb is missing for a few seconds and a campaign batch that
       # starts then fails (3 Nov 2026). A push to wordpress-dev deploys through this job, so the check lives here too,
       # not only in tools/aw-ship.sh. It fails closed; the manual run's "skip_mail_check" overrides it.

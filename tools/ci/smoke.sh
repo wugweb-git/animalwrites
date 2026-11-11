@@ -92,6 +92,91 @@ if [ "$(wp option get planweb_on 2>/dev/null)" = "" ]; then echo "ok   planweb o
 if [ "$(wp eval 'echo isset( aw_core_screens()["aw-dates"] ) ? "yes" : "no";')" = "yes" ]; then echo "ok   planweb off: Kits → Dates back"; else echo "FAIL planweb off: Kits → Dates not back"; FAIL=1; fi
 if [ "$(wp eval 'echo get_role( "administrator" )->has_cap( "edit_planweb_entries" ) ? "yes" : "no";')" = "no" ]; then echo "ok   planweb off: capabilities removed"; else echo "FAIL planweb off: capabilities left on"; FAIL=1; fi
 if [ "$(wp eval 'global $wpdb; echo (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = \"planweb_entry\"" );')" = "4" ]; then echo "ok   planweb off: entries kept"; else echo "FAIL planweb off: entries not kept"; FAIL=1; fi
+# Kits menu (docs/admin-ui-spec.md §B, §E1; owner, 11 Nov 2026): as an administrator, the menu is exactly the six items,
+# each loads (200), Keys, Modules and Dates still open at their own address, every old address answers 302 to its new
+# place, and loading them all changes no setting (run logs and cache counters that page loads and scheduled tasks
+# write are left out: aw_cron_runs, aw_publishers, aw_seo_cache_gen, aw_error_pages).
+echo "-- kits menu (administrator)"
+has() { if grep -qF -- "$3" "$2"; then echo "ok   $1"; else echo "FAIL $1"; FAIL=1; fi; }
+opts() { wp eval 'global $wpdb; foreach ( $wpdb->get_results( "SELECT option_name, option_value FROM {$wpdb->options} WHERE option_name NOT LIKE \"%transient%\" AND option_name NOT IN (\"cron\",\"recently_activated\",\"aw_cron_runs\",\"aw_publishers\",\"aw_seo_cache_gen\",\"aw_error_pages\") ORDER BY option_name" ) as $r ) { echo $r->option_name, " ", md5( $r->option_value ), "\n"; }'; }
+JAR=/tmp/ci-cookies.txt; rm -f "$JAR"
+curl -s -o /dev/null -c "$JAR" http://127.0.0.1:8080/wp-login.php
+curl -s -o /dev/null -b "$JAR" -c "$JAR" --data-urlencode log=ci --data-urlencode pwd=ci-only --data-urlencode testcookie=1 --data-urlencode redirect_to=http://127.0.0.1:8080/wp-admin/ http://127.0.0.1:8080/wp-login.php
+adm() { curl -s -b "$JAR" -o /tmp/admin.html -w '%{http_code}' "http://127.0.0.1:8080/wp-admin/$1"; }
+adm "" >/dev/null # the first admin request runs the site's hourly checks (e.g. aw_error_pages); settings are read after it
+opts >/tmp/opts-before.txt
+admok() { # NAME PATH: 200, no PHP error, not refused
+  code=$(adm "$2")
+  if [ "$code" = "200" ] && ! grep -qiE 'critical error|Fatal error|Parse error|Sorry, you are not allowed' /tmp/admin.html; then echo "ok   $code $1"; else echo "FAIL $code $1"; FAIL=1; fi
+}
+for s in kits kits-options kits-settings kits-plugins kits-tools kits-help; do admok "Kits → $s" "admin.php?page=$s"; done
+adm "admin.php?page=kits" >/dev/null
+got=$(python3 - /tmp/admin.html <<'PY'
+import re, sys
+h = open(sys.argv[1], encoding='utf-8', errors='replace').read()
+m = re.search(r'id="toplevel_page_kits".*?<ul class=.wp-submenu wp-submenu-wrap.>(.*?)</ul>', h, re.S)
+print(' '.join(re.findall(r"href=.(?:admin\.php\?page=)?([^'\"]+)", m.group(1))) if m else 'no-menu')
+PY
+)
+if [ "$got" = "kits kits-options kits-settings kits-plugins kits-tools kits-help" ]; then echo "ok   Kits menu is the six items"; else echo "FAIL Kits menu: $got"; FAIL=1; fi
+n=$(grep -o '<a class="nav-tab' /tmp/admin.html | wc -l | tr -d ' ')
+if [ "$n" = "6" ]; then echo "ok   six Kits tabs"; else echo "FAIL $n Kits tabs, want 6"; FAIL=1; fi
+has "Home: page check (Animal Writes)" /tmp/admin.html 'id="page-check"'
+has "Home: backup" /tmp/admin.html 'id="backup"'
+has "Home: email, thumbnails and pictures stay" /tmp/admin.html 'id="pictures"'
+has "Home: Dates linked" /tmp/admin.html 'page=aw-dates'
+adm "admin.php?page=kits-plugins" >/dev/null
+# InsightWeb is not loaded on this test site, so only PlanWeb's and MailWeb's rows are checked.
+for n in PlanWeb MailWeb; do has "Plugins: $n row with its icon" /tmp/admin.html "data:image/svg+xml;base64,"; grep -q ">$n</a>" /tmp/admin.html && echo "ok   Plugins: $n row" || { echo "FAIL Plugins: no $n row"; FAIL=1; }; done
+adm "admin.php?page=kits-settings" >/dev/null
+has "Settings: CDN cache times" /tmp/admin.html 'id="cdn"'
+has "Settings: preview access" /tmp/admin.html 'id="kits-preview-ips"'
+has "Settings: Keys linked" /tmp/admin.html 'page=aw-keys'
+has "Settings: Modules linked" /tmp/admin.html 'page=aw-modules'
+adm "admin.php?page=kits-help" >/dev/null
+has "Help: docs" /tmp/admin.html 'id="docs"'
+has "Help: design system" /tmp/admin.html 'id="design-system"'
+has "Help: edit screens" /tmp/admin.html 'id="developer/edit-screens"'
+has "Help: theme parts" /tmp/admin.html 'id="developer/theme-parts"'
+adm "admin.php?page=kits-help&tab=components" >/dev/null # Design system: the plugins here are links into the repo checkout
+if grep -qF -e "$REPO/" -e "$WP/" /tmp/admin.html; then echo "FAIL Help → Design system prints a server path:"; grep -oF -e "$REPO/" -e "$WP/" /tmp/admin.html | sort | uniq -c | head -3; FAIL=1; else echo "ok   Help → Design system: no server paths"; fi
+adm "admin.php?page=kits-options" >/dev/null
+has "Theme Options: the app is the default" /tmp/admin.html 'kits-admin-theme-options-js'
+for l in content-types socials share layout-spacing; do has "Theme Options: $l shows today's fields" /tmp/admin.html "data-kits-legacy=\"$l\""; done
+has "Theme Options → Socials: Contact links" /tmp/admin.html 'name="aw_elsewhere[0][label]"'
+admok "Theme Options, older screen (&ui=classic)" "admin.php?page=kits-options&ui=classic"
+for s in aw-keys aw-modules aw-dates; do admok "$s keeps its address" "admin.php?page=$s"; done
+# Old address => where it goes (a 302, the other query values kept).
+while read -r old want; do
+  out=$(curl -s -b "$JAR" -o /dev/null -w '%{http_code} %{redirect_url}' "http://127.0.0.1:8080/wp-admin/admin.php?page=$old")
+  if [ "$out" = "302 http://127.0.0.1:8080/wp-admin/$want" ]; then echo "ok   302 $old → $want"; else echo "FAIL $old: $out (want 302 $want)"; FAIL=1; fi
+done <<'MAP'
+kits-core-settings admin.php?page=kits-settings
+kits-transfer admin.php?page=kits-tools
+kits-docs admin.php?page=kits-help#docs
+kits-system admin.php?page=kits-help#design-system
+kits-preview admin.php?page=kits-settings#preview
+animal-writes admin.php?page=kits
+aw-site-check admin.php?page=kits#page-check
+aw-elsewhere admin.php?page=kits-options#socials
+aw-edit-screens admin.php?page=kits-help#developer/edit-screens
+aw-theme-parts admin.php?page=kits-help#developer/theme-parts
+kits-system&tab=states admin.php?page=kits-help&tab=states#design-system
+MAP
+# Offline copies of the menu's six screens for the PR's screenshots (the Deploy check keeps them as an artifact).
+if [ -n "${KITS_SNAPSHOT:-}" ] && command -v wget >/dev/null; then
+  sed 's/^#HttpOnly_//' "$JAR" >/tmp/ci-cookies-wget.txt
+  for s in kits kits-options kits-settings kits-plugins kits-tools kits-help; do
+    wget -q -E -k -K -p -nH --restrict-file-names=windows --load-cookies /tmp/ci-cookies-wget.txt -P "$KITS_SNAPSHOT" "http://127.0.0.1:8080/wp-admin/admin.php?page=$s" || true
+  done
+  echo "ok   Kits screens saved to $KITS_SNAPSHOT"
+fi
+opts >/tmp/opts-after.txt
+# Every setting there before is there after with the same value (docs/admin-ui-spec.md §E2); options a plugin adds on
+# its first run are listed, not a failure.
+gone=$(comm -23 <(sort /tmp/opts-before.txt) <(sort /tmp/opts-after.txt))
+added=$(comm -13 <(cut -d' ' -f1 /tmp/opts-before.txt | sort) <(cut -d' ' -f1 /tmp/opts-after.txt | sort) | tr '\n' ' ')
+if [ -z "$gone" ]; then echo "ok   every setting kept with its value ($(wc -l </tmp/opts-before.txt | tr -d ' ') options)${added:+; new: $added}"; else echo "FAIL settings changed or gone:"; echo "$gone" | head -20; FAIL=1; fi
 # Plugin Check on PlanWeb (report only, printed, never fails the run): only when plugins/planweb changed (PLUGIN_CHECK=1
 # from the workflow), so wordpress.org is not asked on every Deploy check.
 if [ "${PLUGIN_CHECK:-0}" != "1" ]; then

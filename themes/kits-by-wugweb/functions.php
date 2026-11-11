@@ -644,6 +644,22 @@ function kits_parts_bundle_sets( string $dir ): array {
 }
 
 /**
+ * The joined sets the cap governs: every set except the kinds' own (a kind's set is named after md5( 'kind:' . kind ),
+ * for each kind in the kits_parts_kinds option). Kind sets are always written; only sets keyed on a page's own
+ * components (a kits_parts_page_kind filter that returned '') count against kits_parts_bundle_cap().
+ *
+ * @param array $sets kits_parts_bundle_sets().
+ * @return array The other sets, keyed as given.
+ */
+function kits_parts_bundle_other_sets( array $sets ): array {
+	$kinds = get_option( 'kits_parts_kinds', array() );
+	foreach ( array_keys( is_array( $kinds ) ? $kinds : array() ) as $kind ) {
+		unset( $sets[ substr( md5( 'kind:' . $kind ), 0, 10 ) ] );
+	}
+	return $sets;
+}
+
+/**
  * Clean-up of the joined component files, on each rebuild and when the cap is reached.
  *
  * - Any file no page has used for kits_parts_bundle_max_age() goes (files in use are touched hourly): an older version
@@ -795,7 +811,7 @@ function kits_parts_bundle_members( string $kind, array $members, array $registr
 	return $all;
 }
 
-/** Most joined component files kept (Kits → Core Settings → Joined files cap; kits_parts_bundle_cap filter). */
+/** Most joined component files kept (Kits → Settings → Performance → Joined files cap; kits_parts_bundle_cap filter). */
 function kits_parts_bundle_cap(): int {
 	$cap = function_exists( 'kits_option' ) ? (int) kits_option( 'css_parts_cap' ) : 0;
 	return max( 1, (int) apply_filters( 'kits_parts_bundle_cap', $cap > 0 ? $cap : 50 ) );
@@ -944,15 +960,15 @@ function kits_bundle_component_css() {
 		$sets = kits_parts_bundle_sets( $dir['path'] );
 		// A kind's set is always written (kinds are few, set by the page types); the cap holds back only sets keyed on a
 		// page's own components, from a kits_parts_page_kind filter that returned ''.
-		$capped = '' === $kind && ! isset( $sets[ $set ] ) && count( $sets ) >= kits_parts_bundle_cap();
+		$capped = '' === $kind && ! isset( $sets[ $set ] ) && count( kits_parts_bundle_other_sets( $sets ) ) >= kits_parts_bundle_cap();
 		if ( $capped && false === get_transient( 'kits_parts_cap_clean' ) ) {
 			set_transient( 'kits_parts_cap_clean', 1, HOUR_IN_SECONDS ); // At most once an hour: unused sets go, then count again.
 			kits_parts_bundle_clean( $dir['path'] );
 			$sets = kits_parts_bundle_sets( $dir['path'] );
 		}
-		if ( $capped && count( $sets ) >= kits_parts_bundle_cap() ) {
+		if ( $capped && count( kits_parts_bundle_other_sets( $sets ) ) >= kits_parts_bundle_cap() ) {
 			if ( false === get_transient( 'kits_parts_cap_hit' ) ) {
-				set_transient( 'kits_parts_cap_hit', time(), WEEK_IN_SECONDS ); // Shown on Welcome and Site check.
+				set_transient( 'kits_parts_cap_hit', time(), WEEK_IN_SECONDS ); // Shown on Home and Site check.
 			}
 			return; // Cap reached: this set loads its separate files, nothing new is written.
 		}
@@ -997,14 +1013,17 @@ function kits_bundle_component_css() {
 }
 
 /**
- * The joined component files against the cap, for Kits → Welcome and a site's own checks.
+ * The joined component files against the cap, for Kits → Home and a site's own checks. The kinds' sets are counted
+ * apart: the cap, the near-the-cap warning and the cap-reached notice concern only the other sets.
  *
- * @return array{on:bool,count:int,cap:int,warn:bool,hit:int,fail:int,text:string,fix:string}
+ * @return array{on:bool,kinds:int,count:int,cap:int,warn:bool,hit:int,fail:int,text:string,fix:string}
  */
 function kits_parts_bundle_status(): array {
 	$on    = kits_bundle_css_switch();
 	$cap   = kits_parts_bundle_cap();
-	$count = count( kits_parts_bundle_sets( kits_parts_bundle_dir()['path'] ) );
+	$sets  = kits_parts_bundle_sets( kits_parts_bundle_dir()['path'] );
+	$count = count( kits_parts_bundle_other_sets( $sets ) ); // What the cap governs.
+	$kinds = count( $sets ) - $count;
 	$hit   = (int) get_transient( 'kits_parts_cap_hit' );
 	$fail  = (int) get_transient( 'kits_parts_write_fail' );
 	if ( $hit && $count < $cap ) {
@@ -1012,16 +1031,16 @@ function kits_parts_bundle_status(): array {
 		$hit = 0;
 	}
 	$warn = $on && ( $fail > 0 || $hit > 0 || $count >= (int) ceil( $cap * 0.8 ) );
-	$text = $on ? sprintf( '%1$d of %2$d joined files', $count, $cap ) : 'Joined stylesheet is off: every component file loads on its own';
+	$text = $on ? sprintf( '%1$d page kinds · %2$d of %3$d other sets', $kinds, $count, $cap ) : 'Joined stylesheet is off: every component file loads on its own';
 	$fix  = '';
 	if ( $warn && $fail ) {
 		$fix = 'uploads/kits-cache/parts/ could not be written on ' . wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $fail ) . ': pages load separate files. Make the folder writable; the next try is an hour after the failure. ';
 	}
 	if ( $warn && ( $hit || $count >= (int) ceil( $cap * 0.8 ) ) ) {
-		$fix .= $hit ? 'The cap was reached on ' . wp_date( get_option( 'date_format' ), $hit ) . ': a new kind of page loads separate files. ' : 'Near the cap: once it is reached, a new kind of page loads separate files. ';
-		$fix .= 'Raise the cap in Kits → Core Settings (Joined files cap), or empty uploads/kits-cache/parts/ (the files are made again as pages are visited).';
+		$fix .= $hit ? 'The cap was reached on ' . wp_date( get_option( 'date_format' ), $hit ) . ': a page outside the page kinds with a new set of components loads separate files. ' : 'Near the cap: once it is reached, a page outside the page kinds with a new set of components loads separate files. ';
+		$fix .= 'Raise the cap in Kits → Settings → Performance (Joined files cap), or empty uploads/kits-cache/parts/ (the files are made again as pages are visited).';
 	}
-	return compact( 'on', 'count', 'cap', 'warn', 'hit', 'fail', 'text', 'fix' );
+	return compact( 'on', 'kinds', 'count', 'cap', 'warn', 'hit', 'fail', 'text', 'fix' );
 }
 
 // Kits → Welcome: one status row, shown once a plugin registers component styles.

@@ -1,7 +1,9 @@
 /**
- * Kits → Theme Options, new screen (trial: admin.php?page=kits-options&ui=next).
+ * Kits → Theme Options (admin.php?page=kits-options; the older screen is at &ui=classic until it is retired).
  *
  * One app header (site, versions, Save), the Kits tabs, a section list and the fields of the chosen section.
+ * Sections not built here yet show today's fields, printed by PHP (kits_admin_app_legacy()) and moved into the
+ * section; they save with their own button, as before.
  * Everything saves in one request to /wp/v2/settings, and only what changed is sent:
  * - core: site title, tagline, logo, site icon (WordPress's own options);
  * - to:   kits_theme_options fields (a value equal to the theme's is not stored, so Reset sends the theme's value);
@@ -9,7 +11,13 @@
  * Sections that edit Styles save the site's Global Styles in the same Save (global-styles.js); they are modules
  * { slug, label, Body } listed in extraSections.
  */
-import { createRoot, useState, useEffect, useMemo } from '@wordpress/element';
+import {
+	createRoot,
+	useState,
+	useEffect,
+	useMemo,
+	useRef,
+} from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { __, sprintf } from '@wordpress/i18n';
 import { MediaUpload } from '@wordpress/media-utils';
@@ -46,10 +54,11 @@ const menuLabel = ( id ) =>
 	'' === id ? themeOwn : menus.find( ( m ) => m.value === id )?.label || id;
 
 /**
- * The sections, in order: Identity, Header, Footer, Layout, then the groups of the Theme Options fields not placed in
- * them (today Speed and Older content, which move to Settings in phase 2).
+ * The sections, in order: Identity, Header, Footer, Layout, Colours, Typography, Buttons, Cards, then the sections
+ * that still show today's fields (Content types, Socials, Share bar; a built section replaces its fallback), then the
+ * groups of any Theme Options fields not placed in them. Fields shown on Kits → Settings (speed, older content, font preload) are left out.
  *
- * @return {Array} [ { slug, label, items, links, info } ].
+ * @return {Array} [ { slug, label, items, links, info, legacy } ].
  */
 function sectionsOf() {
 	const placed = [
@@ -130,13 +139,34 @@ function sectionsOf() {
 		},
 		...extraSections,
 	];
+	const into = data.legacyInto || {};
+	out.forEach( ( s ) => {
+		if ( into[ s.slug ] ) {
+			s.legacy = into[ s.slug ];
+		}
+	} );
+	// Today's fields for a section not built yet; once it is built, the built one wins.
+	( data.legacy || [] ).forEach( ( l ) => {
+		if ( ! out.some( ( x ) => x.slug === l.slug ) ) {
+			out.push( {
+				slug: l.slug,
+				label: l.label,
+				items: [],
+				legacy: l.slug,
+			} );
+		}
+	} );
+	const elsewhere = data.elsewhere || [];
 	Object.keys( fields ).forEach( ( key ) => {
 		const f = fields[ key ];
-		if ( 'share' === f.kind || placed.includes( key ) ) {
+		if (
+			'share' === f.kind ||
+			placed.includes( key ) ||
+			elsewhere.includes( key )
+		) {
 			return;
 		}
-		// Font preload is a speed setting (spec: Settings → Performance).
-		const group = 'font_preload' === key ? 'Speed' : f.group;
+		const group = f.group;
 		const slug = group.toLowerCase().replace( /[^a-z0-9]+/g, '-' );
 		let g = out.find( ( x ) => x.slug === slug );
 		if ( ! g ) {
@@ -150,7 +180,48 @@ function sectionsOf() {
 
 function sectionFromHash( sections ) {
 	const h = window.location.hash.replace( '#', '' );
-	return sections.find( ( s ) => s.slug === h ) ? h : sections[ 0 ]?.slug;
+	if ( sections.find( ( s ) => s.slug === h ) ) {
+		return h;
+	}
+	// After a section saved through options.php (&kits_section=…), or an older address (&section=…).
+	const asked = data.initial || '';
+	return sections.find( ( s ) => s.slug === asked )
+		? asked
+		: sections[ 0 ]?.slug;
+}
+
+/**
+ * Today's fields of a section not built here yet: the PHP-printed block is moved in while the section is open and
+ * back to its hidden holder when another opens, so its forms keep what was typed.
+ *
+ * @param {Object} props
+ * @param {string} props.slug The block's data-kits-legacy value.
+ */
+function Legacy( { slug } ) {
+	const ref = useRef( null );
+	useEffect( () => {
+		const node = document.querySelector(
+			'[data-kits-legacy="' + slug + '"]'
+		);
+		const box = ref.current;
+		if ( ! node || ! box ) {
+			return undefined;
+		}
+		const holder = document.getElementById( 'kits-legacy-holder' );
+		box.appendChild( node );
+		return () => holder && holder.appendChild( node );
+	}, [ slug ] );
+	return (
+		<>
+			<p className="description">
+				{ __(
+					'These fields save with their own button below.',
+					'kits-core'
+				) }
+			</p>
+			<div ref={ ref } />
+		</>
+	);
 }
 
 // A kits_theme_options field.
@@ -675,15 +746,6 @@ function App() {
 					{ status.text }
 				</Notice>
 			) }
-			<p>
-				{ __(
-					'Trial screen. The current screen keeps working:',
-					'kits-core'
-				) }{ ' ' }
-				<a href={ data.oldUrl }>
-					{ __( 'open the current Theme Options', 'kits-core' ) }
-				</a>
-			</p>
 			<Flex align="flex-start" gap={ 6 } wrap>
 				<FlexItem>
 					<nav aria-label={ __( 'Sections', 'kits-core' ) }>
@@ -708,16 +770,6 @@ function App() {
 											</a>
 										</li>
 									) ) }
-									{ data.shareUrl && (
-										<li>
-											<a href={ data.shareUrl }>
-												{ __(
-													'Share bar (current screen)',
-													'kits-core'
-												) }
-											</a>
-										</li>
-									) }
 								</ul>
 							</CardBody>
 						</Card>
@@ -747,6 +799,12 @@ function App() {
 											<a href={ href }>{ label }</a>
 										</p>
 									) ) }
+								{ current.legacy && (
+									<Legacy
+										key={ current.legacy }
+										slug={ current.legacy }
+									/>
+								) }
 							</CardBody>
 						</Card>
 					) }

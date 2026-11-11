@@ -1,6 +1,6 @@
 <?php
 /**
- * Kits → Design system: a read-only index of the design system, generated from kits-registry.json in the Kits
+ * Kits → Help → Design system: a read-only index of the design system, generated from kits-registry.json in the Kits
  * master theme, in a child theme when there is one, and in active plugins that ship one. Every component, block,
  * pattern and menu type with its states, its accessibility record and its SEO output; where each is used (from the
  * theme and plugin files); the colour pairs with their contrast worked out from the live values (colours, fonts and
@@ -269,7 +269,8 @@ function kits_contrast( $a, $b ) {
 
 /**
  * A file's path relative to wp-content (plugins/…, themes/…), built from the plugins, themes and content folders (also
- * through a symlink), so the screen never prints the server's own folders. A file outside them: its name only.
+ * through a symlink, each plugin and theme folder by its real path as well), so the screen never prints the server's own
+ * folders. A file elsewhere in the site: relative to the site's folder (ABSPATH); outside it: its name only.
  *
  * @param string $path Full path.
  */
@@ -277,11 +278,19 @@ function kits_content_path( $path ) {
 	static $roots = null;
 	if ( null === $roots ) {
 		$roots = array();
-		foreach ( array(
-			array( WP_PLUGIN_DIR, 'plugins/' ),
-			array( get_theme_root(), 'themes/' ),
-			array( WP_CONTENT_DIR, '' ),
-		) as list( $dir, $name ) ) {
+		$list  = array();
+		// Each plugin and theme folder by its own real path too: a folder linked in from a deploy folder outside
+		// wp-content still reads plugins/…, themes/….
+		foreach ( array( array( WP_PLUGIN_DIR, 'plugins/' ), array( get_theme_root(), 'themes/' ) ) as list( $base, $name ) ) {
+			foreach ( (array) glob( trailingslashit( $base ) . '*', GLOB_ONLYDIR ) as $sub ) {
+				$list[] = array( (string) $sub, $name . wp_basename( (string) $sub ) . '/' );
+			}
+		}
+		$list[] = array( WP_PLUGIN_DIR, 'plugins/' );
+		$list[] = array( get_theme_root(), 'themes/' );
+		$list[] = array( WP_CONTENT_DIR, '' );
+		$list[] = array( ABSPATH, '' ); // The site's folder: never the server's own path.
+		foreach ( $list as list( $dir, $name ) ) {
 			$real = realpath( $dir );
 			foreach ( array( $dir, false === $real ? '' : $real ) as $d ) {
 				if ( '' !== $d ) {
@@ -289,6 +298,7 @@ function kits_content_path( $path ) {
 				}
 			}
 		}
+		uksort( $roots, fn( $a, $b ) => strlen( $b ) <=> strlen( $a ) ); // The longest match first.
 	}
 	$path = wp_normalize_path( (string) $path );
 	$real = realpath( $path );
@@ -310,7 +320,7 @@ function kits_class_usage() {
 		$watch[] = $dir . '/assets/css/aw.css';
 	}
 	$watch  = array_unique( $watch );
-	$key    = 'kits_class_usage_3_' . md5( implode( '|', array_merge( $watch, array_map( fn( $f ) => is_readable( $f ) ? filemtime( $f ) : 0, $watch ) ) ) ); // New files or folders, new list.
+	$key    = 'kits_class_usage_4_' . md5( implode( '|', array_merge( $watch, array_map( fn( $f ) => is_readable( $f ) ? filemtime( $f ) : 0, $watch ) ) ) ); // New files or folders, new list.
 	$cached = get_transient( $key );
 	if ( is_array( $cached ) ) {
 		return $cached;
@@ -357,18 +367,43 @@ function kits_class_usage() {
 	return $used;
 }
 
-add_action(
-	'admin_menu',
-	function () {
-		add_submenu_page( KITS_MENU, 'Design system', 'Design system', 'manage_options', 'kits-system', 'kits_system_page' ); // Kits → Design system
-	}
-);
+/*
+ * Kits → Help → Design system (admin-menu.php): read-only. Its old address, kits-system, redirects there.
+ */
 
+/**
+ * The contrast of each component's text on its background, from the live values.
+ *
+ * @param array $reg  kits_registry().
+ * @param array $vals kits_token_values().
+ */
+function kits_system_contrast_table( array $reg, array $vals ): void {
+	$cells = array();
+	foreach ( $reg['items'] as $it ) {
+		$pair = $it['a11y']['contrast'] ?? null;
+		if ( ! $pair ) {
+			continue;
+		}
+		$fg      = kits_token_resolve( $pair[0], $vals );
+		$bg      = kits_token_resolve( $pair[1], $vals );
+		$r       = kits_contrast( $fg, $bg );
+		$cells[] = array(
+			'name'  => esc_html( $it['name'] ),
+			'text'  => '<code>' . esc_html( $pair[0] ) . '</code> ' . esc_html( $fg ),
+			'on'    => '<code>' . esc_html( $pair[1] ) . '</code> ' . esc_html( $bg ),
+			'ratio' => $r ? esc_html( number_format( $r, 2 ) ) . ':1' : '—',
+			'aa'    => $r ? ( $r >= 4.5 ? '✓ pass' : '<strong class="error-message">✗ fail</strong>' ) : 'not a plain colour',
+		);
+	}
+	kits_simple_table( 'contrast', array( 'name' => 'Component', 'text' => 'Text', 'on' => 'On', 'ratio' => 'Ratio', 'aa' => 'AA (4.5:1 text)' ), $cells );
+}
+
+/** Kits → Help → Design system. */
 function kits_system_page() {
 	$reg   = kits_registry();
 	$tab   = sanitize_key( $_GET['tab'] ?? 'components' ); // phpcs:ignore WordPress.Security.NonceVerification
 	$type  = sanitize_key( $_GET['type'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
-	$base  = admin_url( 'admin.php?page=kits-system' );
+	$base  = admin_url( 'admin.php?page=kits-help' ) . '#design-system';
 	$used  = kits_class_usage();
 	$vals  = kits_token_values();
 	$demo  = get_page_by_path( 'kits-demo' );
@@ -450,25 +485,8 @@ function kits_system_page() {
 		return;
 	}
 	if ( 'contrast' === $tab ) {
-		$cells = array();
-		foreach ( $reg['items'] as $it ) {
-			$pair = $it['a11y']['contrast'] ?? null;
-			if ( ! $pair ) {
-				continue;
-			}
-			$fg = kits_token_resolve( $pair[0], $vals );
-			$bg = kits_token_resolve( $pair[1], $vals );
-			$r  = kits_contrast( $fg, $bg );
-			$cells[] = array(
-				'name'  => esc_html( $it['name'] ),
-				'text'  => '<code>' . esc_html( $pair[0] ) . '</code> ' . esc_html( $fg ),
-				'on'    => '<code>' . esc_html( $pair[1] ) . '</code> ' . esc_html( $bg ),
-				'ratio' => $r ? esc_html( number_format( $r, 2 ) ) . ':1' : '—',
-				'aa'    => $r ? ( $r >= 4.5 ? '✓ pass' : '<strong class="error-message">✗ fail</strong>' ) : 'not a plain colour',
-			);
-		}
-		kits_simple_table( 'contrast', array( 'name' => 'Component', 'text' => 'Text', 'on' => 'On', 'ratio' => 'Ratio', 'aa' => 'AA (4.5:1 text)' ), $cells );
-		echo '<p>Change the colours, and see this table update before saving, in <a href="' . esc_url( admin_url( 'admin.php?page=kits-options&ui=next#colours' ) ) . '">Theme Options → Colours</a>.</p></div>';
+		kits_system_contrast_table( $reg, $vals );
+		echo '<p>Change the colours, and see this table update before saving, in <a href="' . esc_url( admin_url( 'admin.php?page=kits-options#colours' ) ) . '">Theme Options → Colours</a>.</p></div>';
 		return;
 	}
 	// Components, blocks and patterns.
