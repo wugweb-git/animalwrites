@@ -1,6 +1,6 @@
 <?php
 /**
- * RankWeb → Search Insights (owner addendum, 24 Oct: core WordPress only, no custom CSS). Tabs: Overview (postboxes),
+ * InsightWeb → Search Insights (owner addendum, 24 Oct: core WordPress only, no custom CSS). Tabs: Overview (postboxes),
  * Keywords (list table), tabs added by other files (Pages, Check list, Rising, Sourcing keywords) and Settings
  * (form-table: keys, run now, imports, snapshot, delete data). The old Search demand screen was removed on 25 Oct 2026;
  * its content gaps are an Overview box.
@@ -78,17 +78,36 @@ function aw_si_tab(): string {
 add_action(
 	'admin_menu',
 	function () {
-		// RankWeb → Search Insights, after Overview and FAQ: the same address and screen id as before InsightWeb.
-		// RankWeb is never switched off (tied to the theme and Rank Math), so there is no menu of its own.
-		if ( ! defined( 'AW_SEO_MENU' ) ) {
-			return;
-		}
-		$hook = add_submenu_page( AW_SEO_MENU, __( 'Search Insights', 'aw-seo-extras' ), __( 'Search Insights', 'aw-seo-extras' ), aw_si_cap(), AW_SI_SLUG, 'aw_si_screen' );
+		// InsightWeb's own menu, opening Search Insights (owner, 11 Nov 2026: Search Insights is InsightWeb's, not RankWeb's).
+		// Same address as before (admin.php?page=aw-search-insights); nothing reads the screen id.
+		$hook = add_menu_page( __( 'Search Insights', 'aw-seo-extras' ), 'InsightWeb', aw_si_cap(), AW_SI_SLUG, 'aw_si_screen', 'dashicons-chart-area', '27.6' );
+		add_submenu_page( AW_SI_SLUG, __( 'Search Insights', 'aw-seo-extras' ), __( 'Search Insights', 'aw-seo-extras' ), aw_si_cap(), AW_SI_SLUG, 'aw_si_screen' );
 		if ( $hook ) {
 			add_action( 'load-' . $hook, 'aw_si_load' );
 		}
 	},
 	100
+);
+
+// The site's own menu order leaves InsightWeb out: put it right after RankWeb (else after Mail, else at the end).
+add_filter(
+	'menu_order',
+	function ( $order ) {
+		if ( ! is_array( $order ) ) {
+			return $order;
+		}
+		$order = array_values( array_diff( $order, array( AW_SI_SLUG ) ) );
+		foreach ( array( defined( 'AW_SEO_MENU' ) ? AW_SEO_MENU : '', 'mailweb' ) as $after ) {
+			$at = '' === $after ? false : array_search( $after, $order, true );
+			if ( false !== $at ) {
+				array_splice( $order, $at + 1, 0, array( AW_SI_SLUG ) );
+				return $order;
+			}
+		}
+		$order[] = AW_SI_SLUG;
+		return $order;
+	},
+	PHP_INT_MAX
 );
 
 add_filter(

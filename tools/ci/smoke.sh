@@ -122,9 +122,10 @@ if [ "$got" = "kits kits-options kits-settings kits-plugins kits-tools kits-help
 n=$(grep -o '<a class="nav-tab' /tmp/admin.html | wc -l | tr -d ' ')
 if [ "$n" = "6" ]; then echo "ok   six Kits tabs"; else echo "FAIL $n Kits tabs, want 6"; FAIL=1; fi
 has "Home: page check (Animal Writes)" /tmp/admin.html 'id="page-check"'
-has "Home: backup" /tmp/admin.html 'id="backup"'
 has "Home: email, thumbnails and pictures stay" /tmp/admin.html 'id="pictures"'
-has "Home: Dates linked" /tmp/admin.html 'page=aw-dates'
+# Nothing WordPress or another plugin already shows (owner, 11 Nov 2026), and no row of section links.
+for id in versions backup dates theme-switch setup; do grep -qF "id=\"$id\"" /tmp/admin.html && { echo "FAIL Home still has $id"; FAIL=1; } || echo "ok   Home: no $id"; done
+grep -q 'class="subsubsub"' /tmp/admin.html && { echo "FAIL Home: section link row"; FAIL=1; } || echo "ok   Home: no section link row"
 adm "admin.php?page=kits-plugins" >/dev/null
 # InsightWeb is not loaded on this test site, so only PlanWeb's and MailWeb's rows are checked.
 for n in PlanWeb MailWeb; do has "Plugins: $n row with its icon" /tmp/admin.html "data:image/svg+xml;base64,"; grep -q ">$n</a>" /tmp/admin.html && echo "ok   Plugins: $n row" || { echo "FAIL Plugins: no $n row"; FAIL=1; }; done
