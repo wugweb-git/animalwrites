@@ -652,9 +652,8 @@ function kits_system_visual_row( $it, $vals, $demo ) {
 		}
 		$toks = array_merge( $rows, $toks );
 	}
-	$states = ! empty( $it['states'] ) ? '<ul>' . implode( '', array_map( fn( $x ) => '<li>' . esc_html( $x ) . '</li>', (array) $it['states'] ) ) . '</ul>' : '<p>—</p>';
-	return '<tr class="kits-vis"><td colspan="7"><details><summary>Visual, values and states</summary>'
-		. '<p><strong>States</strong></p>' . $states . '<p><strong>Values</strong></p>' . ( $toks ? '<table class="widefat striped"><tbody>' . implode( '', $toks ) . '</tbody></table>' : '<p>No tokens listed.</p>' )
+	return '<tr class="kits-vis"><td colspan="7"><details><summary>Visual and values</summary>' // The states are in the States column.
+		. '<p><strong>Values</strong></p>' . ( $toks ? '<table class="widefat striped"><tbody>' . implode( '', $toks ) . '</tbody></table>' : '<p>No tokens listed.</p>' )
 		. ( $src ? '<p><iframe class="widefat" height="560" loading="lazy" title="' . esc_attr( $it['name'] . ' in its states' ) . '" src="' . esc_url( $src ) . '"></iframe></p>' : '<p>No visual: this entry styles core blocks (see Appearance &gt; Editor &gt; Styles).</p>' )
 		. '</details></td></tr>';
 }

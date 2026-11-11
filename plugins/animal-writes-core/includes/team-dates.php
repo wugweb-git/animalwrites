@@ -69,9 +69,13 @@ function aw_team_dates_links_note_rename() {
 	if ( get_option( 'aw_team_dates_links_note_1111' ) ) {
 		return;
 	}
-	$all     = aw_team_dates();
+	$all     = get_option( 'aw_team_dates', array() ); // As stored: aw_team_dates() filters and sorts.
+	$all     = is_array( $all ) ? $all : array();
 	$changed = false;
 	foreach ( $all as $i => $d ) {
+		if ( ! is_array( $d ) ) {
+			continue;
+		}
 		$note = (string) ( $d['note'] ?? '' );
 		if ( 'Search Console Links read (Claude Code session)' === ( $d['title'] ?? '' ) && false !== strpos( $note, 'AW SEO Plus → Search Insights → Links' ) ) {
 			$all[ $i ]['note'] = str_replace( 'AW SEO Plus → Search Insights → Links', 'RankWeb → Search Insights → Links', $note );
