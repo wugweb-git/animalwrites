@@ -302,6 +302,9 @@ function aw_claims_screen() {
 	if ( ! current_user_can( 'edit_aw_volunteers' ) ) {
 		wp_die( 'Not allowed.', 403 );
 	}
+	if ( function_exists( 'directoryweb_ui_page' ) && directoryweb_ui_page( 'claims' ) ) {
+		return; // &ui=next: the new Claims screen (directoryweb-ui.php)
+	}
 	$entry = absint( wp_unslash( $_GET['entry'] ?? 0 ) ); // phpcs:ignore WordPress.Security.NonceVerification -- read only
 	echo '<div class="wrap">';
 	if ( ! aw_claim_ff_id() ) {
@@ -575,6 +578,45 @@ function aw_claim_apply_field( $c, $key ) {
 	}
 }
 
+/**
+ * Decide a pending claim: Approve writes the wanted fields (aw_claim_apply_field(), each logged for Undo), marks the
+ * listing claimed and links the claimant to its people; Reject only records it. The decision is stored in the claim's
+ * review (aw_claim_review). Used by the Approve / Reject form and by the directoryweb/v1 decide route.
+ *
+ * @param array    $c       aw_claim_entry(), pending, with a listing.
+ * @param bool     $approve True to approve, false to reject.
+ * @param string[] $want    Fields to apply (AW_CLAIM_L keys, logo, photos) when approving.
+ * @return array The stored review: by, at, status and, when approved, the fields that were applied.
+ */
+function aw_claim_ff_decide_apply( $c, $approve, $want = array() ) {
+	$lid    = $c['listing'];
+	$review = array( 'by' => get_current_user_id(), 'at' => current_time( 'mysql' ) );
+	if ( $approve ) {
+		$ok = array();
+		foreach ( (array) $want as $key ) {
+			if ( aw_claim_apply_field( $c, $key ) ) {
+				$ok[] = $key;
+			}
+		}
+		delete_post_meta( $lid, 'aw_unverified' ); // the organisation has spoken: nothing on the listing is "unverified" any more
+		update_post_meta( $lid, 'aw_verified', true );
+		update_post_meta( $lid, 'aw_verified_on', wp_date( 'Y-m-d' ) );
+		update_post_meta( $lid, 'aw_needs_reverify', false );
+		delete_transient( 'aw_verified_count' );
+		if ( function_exists( 'aw_org_people_link' ) ) { // one of the listing's people, privately; name and role shown only if they ticked "Show my name"
+			aw_org_people_link( $lid, $c['email'], $c['role'], $c['show'] );
+		}
+		if ( function_exists( 'aw_enrich_after_change' ) ) {
+			aw_enrich_after_change( $lid );
+		}
+		$review += array( 'status' => 'approved', 'fields' => $ok );
+	} else {
+		$review += array( 'status' => 'rejected' );
+	}
+	\FluentForm\App\Helpers\Helper::setSubmissionMeta( $c['id'], 'aw_claim_review', wp_json_encode( $review ), aw_claim_ff_id() );
+	return $review;
+}
+
 add_action(
 	'admin_post_aw_claim_ff_decide',
 	function () {
@@ -586,32 +628,8 @@ add_action(
 		if ( ! $c || ! $c['listing'] || 'pending' !== (string) ( $c['review']['status'] ?? 'pending' ) ) {
 			wp_die( 'This claim was already decided, or its listing is missing.', 400 );
 		}
-		$lid    = $c['listing'];
-		$review = array( 'by' => get_current_user_id(), 'at' => current_time( 'mysql' ) );
-		if ( isset( $_POST['do_approve'] ) ) {
-			$want = array_map( 'sanitize_key', (array) wp_unslash( $_POST['fields'] ?? array() ) );
-			$ok   = array();
-			foreach ( $want as $key ) {
-				if ( aw_claim_apply_field( $c, $key ) ) {
-					$ok[] = $key;
-				}
-			}
-			delete_post_meta( $lid, 'aw_unverified' ); // the organisation has spoken: nothing on the listing is "unverified" any more
-			update_post_meta( $lid, 'aw_verified', true );
-			update_post_meta( $lid, 'aw_verified_on', wp_date( 'Y-m-d' ) );
-			update_post_meta( $lid, 'aw_needs_reverify', false );
-			delete_transient( 'aw_verified_count' );
-			if ( function_exists( 'aw_org_people_link' ) ) { // one of the listing's people, privately; name and role shown only if they ticked "Show my name"
-				aw_org_people_link( $lid, $c['email'], $c['role'], $c['show'] );
-			}
-			if ( function_exists( 'aw_enrich_after_change' ) ) {
-				aw_enrich_after_change( $lid );
-			}
-			$review += array( 'status' => 'approved', 'fields' => $ok );
-		} else {
-			$review += array( 'status' => 'rejected' );
-		}
-		\FluentForm\App\Helpers\Helper::setSubmissionMeta( $id, 'aw_claim_review', wp_json_encode( $review ), aw_claim_ff_id() );
+		$approve = isset( $_POST['do_approve'] );
+		$review  = aw_claim_ff_decide_apply( $c, $approve, $approve ? array_map( 'sanitize_key', (array) wp_unslash( $_POST['fields'] ?? array() ) ) : array() );
 		wp_safe_redirect( add_query_arg( array( 'post_type' => 'aw_listing', 'page' => 'aw-claims', 'done' => $review['status'] ), admin_url( 'edit.php' ) ) );
 		exit;
 	}
