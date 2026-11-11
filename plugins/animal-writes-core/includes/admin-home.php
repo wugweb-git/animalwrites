@@ -234,7 +234,7 @@ function aw_core_home_sections( $sections ) {
  */
 function aw_core_settings_sections( $sections ) {
 	$sections                       = (array) $sections;
-	$sections['cdn']                = aw_core_section( 'Performance: CDN cache times', 'aw_cdn_settings_box', 15 );
+	$sections['cdn']                = aw_core_section( 'CDN cache times', 'aw_cdn_settings_box', 15 );
 	$sections['connected-services'] = aw_core_section(
 		'Connected services and modules',
 		function () {
@@ -462,7 +462,8 @@ function aw_core_overview_attention( array $groups ): void {
 	$items = array();
 	foreach ( $groups as $rows ) {
 		foreach ( $rows as $r ) {
-			if ( false !== strpos( (string) $r[3], 'dashicons-warning' ) ) {
+			// Check site is on Kits → Home → Page check already; not repeated here.
+			if ( 'Check site' !== $r[0] && false !== strpos( (string) $r[3], 'dashicons-warning' ) ) {
 				$items[] = '<li><strong>' . esc_html( $r[0] ) . '</strong>: ' . esc_html( trim( wp_strip_all_tags( (string) $r[3] ) ) ) . ( '' !== $r[2] && '—' !== $r[2] ? ' (' . $r[2] . ')' : '' ) . '</li>';
 			}
 		}

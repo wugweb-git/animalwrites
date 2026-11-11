@@ -152,7 +152,6 @@ function aw_theme_parts_screen() {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		wp_die( esc_html__( 'Sorry, you are not allowed to access this page.', 'animal-writes-core' ), 403 );
 	}
-	$child = wp_get_theme( 'animal-writes' );
 	$intro = 'What the Animal Writes child theme held, where each part lives now that Kits by Wugweb runs on its own, and where to change it. Animal Writes Core serves these parts whenever Kits by Wugweb is the active theme.';
 	if ( function_exists( 'kits_admin_head' ) ) {
 		kits_admin_head( 'kits-help', 'Theme parts', $intro ); // Opens .wrap (inside Help: a plain box).
@@ -161,8 +160,6 @@ function aw_theme_parts_screen() {
 	}
 	if ( ! aw_core_theme_parts_on() ) {
 		echo '<div class="notice notice-warning inline"><p>' . esc_html( 'The Animal Writes child theme is active, so it serves these parts itself and the copies listed here are not used.' ) . '</p></div>';
-	} elseif ( $child->exists() ) {
-		echo '<div class="notice notice-info inline"><p>' . esc_html( 'The Animal Writes child theme is still installed but inactive. Nothing on this screen uses it.' ) . '</p></div>';
 	}
 	echo '<h2>' . esc_html( 'Functions' ) . '</h2>';
 	aw_core_simple_table(

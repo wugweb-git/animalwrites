@@ -718,13 +718,31 @@ function kits_page_default_rows( string $ctx, array $keys = array() ): void {
  * @param string   $intro Optional line (HTML allowed: links).
  */
 function kits_options_box( string $title, callable $rows, string $intro = '' ): void {
-	echo '<div class="postbox"><div class="postbox-header"><h2 class="hndle">' . esc_html( $title ) . '</h2></div><div class="inside">';
+	echo '<div class="postbox">';
+	if ( kits_options_box_titled() ) {
+		echo '<div class="postbox-header"><h2 class="hndle">' . esc_html( $title ) . '</h2></div>';
+	}
+	echo '<div class="inside">';
 	if ( '' !== $intro ) {
 		echo '<p>' . wp_kses_post( $intro ) . '</p>';
 	}
 	echo '<table class="form-table" role="presentation"><tbody>';
 	$rows();
 	echo '</tbody></table></div></div>';
+}
+
+/**
+ * Whether kits_options_box() prints its heading. Theme Options → Content types turns it off while it prints a box under
+ * a heading that already names it.
+ *
+ * @param bool|null $set Set the flag.
+ */
+function kits_options_box_titled( ?bool $set = null ): bool {
+	static $on = true;
+	if ( null !== $set ) {
+		$on = $set;
+	}
+	return $on;
 }
 
 /* ---------- Core Settings ---------- */
@@ -948,11 +966,7 @@ function kits_options_section_body( string $section, string $label ): bool {
 	if ( 0 === strpos( $section, 'single-' ) ) {
 		$type = substr( $section, 7 );
 		kits_options_box( $label . ': each item', fn() => kits_page_default_rows( $type ), 'Every ' . $label . ' item uses these unless it picks its own in the editor (Page Options panel). Its layout: ' . kits_options_link( 'Editor → Templates', 'site-editor.php?postType=wp_template' ) . '.' );
-		if ( isset( kits_theme_share_types()[ $type ] ) ) {
-			$f = kits_theme_option_fields()['share_networks'];
-			kits_options_box( 'Share bar', fn() => kits_theme_option_row( 'share_networks', array_merge( $f, array( 'note' => 'Untick all to hide the bar on ' . $label . '. Copy link always shows.' ) ), array( $type ) ) );
-		}
-		return true;
+		return true; // The share bar's networks for every type are set once, in Share bar.
 	}
 	if ( 'archive-search' === $section || 'archive-author' === $section ) {
 		$ctx = '_' . substr( $section, 8 );

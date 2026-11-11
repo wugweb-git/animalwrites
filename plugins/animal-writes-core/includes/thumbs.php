@@ -135,6 +135,7 @@ add_action(
 /** Kits → Home → Thumbnails (until the SourceWeb dashboard has it): pictures used by more than one item. */
 function aw_thumbs_site_check() {
 	$d = aw_thumb_duplicates();
-	echo '<h2>Thumbnails</h2><p>' . ( $d ? esc_html( count( $d ) . ' picture(s) used by more than one item: ' . implode( '; ', array_map( fn( $ids ) => '#' . implode( ', #', $ids ), $d ) ) ) : 'No picture is used twice.' ) . '</p>';
+	// In a Kits → Home card its title is the card's; the Check site screen (without Kits) needs its own heading.
+	echo ( function_exists( 'kits_frame_ready' ) && kits_frame_ready() ? '' : '<h2>Thumbnails</h2>' ) . '<p>' . ( $d ? esc_html( count( $d ) . ' picture(s) used by more than one item: ' . implode( '; ', array_map( fn( $ids ) => '#' . implode( ', #', $ids ), $d ) ) ) : 'No picture is used twice.' ) . '</p>';
 }
 add_action( 'aw_site_check_after', 'aw_thumbs_site_check' );

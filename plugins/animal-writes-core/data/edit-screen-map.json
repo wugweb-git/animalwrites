@@ -1082,6 +1082,28 @@
 				"priority": 20
 			}
 		},
+		"term-campaign-news-line": {
+			"title": "News line",
+			"source": "Animal Writes core",
+			"plugin": "Animal Writes core",
+			"purpose": "Display",
+			"file": "core/campaign-links.php",
+			"screen": "term",
+			"types": [
+				"aw_campaign_link"
+			],
+			"runtime": "live",
+			"match": {
+				"file": "includes/campaign-links.php",
+				"taxonomies": [
+					"aw_campaign_link"
+				],
+				"hooks": [
+					"edit_form_fields"
+				],
+				"priority": 10
+			}
+		},
 		"term-help-types": {
 			"title": "Find help: listing types",
 			"source": "Animal Writes core",
@@ -7975,6 +7997,42 @@
 					"kind": "admin",
 					"where": "read by Link Whisper",
 					"file": ""
+				}
+			]
+		},
+		"aw_news_line": {
+			"store": "term_meta",
+			"label": "News line",
+			"type": "text",
+			"boxes": [
+				"term-campaign-news-line"
+			],
+			"types": [
+				"aw_campaign_link"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "line under the summary of the campaign's News items, before the link",
+					"file": "core/campaign-links.php"
+				}
+			]
+		},
+		"aw_news_line_link": {
+			"store": "term_meta",
+			"label": "News line link words",
+			"type": "text",
+			"boxes": [
+				"term-campaign-news-line"
+			],
+			"types": [
+				"aw_campaign_link"
+			],
+			"uses": [
+				{
+					"kind": "display",
+					"where": "the words that link to the campaign page in the News line",
+					"file": "core/campaign-links.php"
 				}
 			]
 		}

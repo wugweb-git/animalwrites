@@ -42,7 +42,8 @@ function kits_admin_app_legacy(): array {
 		};
 	};
 	$types = function () use ( $old, $form ) {
-		echo '<p>' . esc_html( 'Each kind of page, its list page, 404, Search and Authors. Open one to change it; each saves on its own.' ) . '</p>';
+		echo '<p>' . esc_html( 'Each kind of page, its list page, 404, Search and Authors. Open one to change it.' ) . '</p>';
+		kits_options_box_titled( false ); // The summary names each box.
 		foreach ( array( 'Single', 'Archives' ) as $group ) {
 			foreach ( (array) ( $old[ $group ] ?? array() ) as $slug => $label ) {
 				echo '<details><summary><strong>' . esc_html( ( 'Single' === $group ? 'Single: ' : 'List: ' ) . $label ) . '</strong></summary>';
@@ -50,6 +51,7 @@ function kits_admin_app_legacy(): array {
 				echo '</details>';
 			}
 		}
+		kits_options_box_titled( true );
 	};
 	$list = array(
 		// Colours, Typography, Buttons and Cards are built in the app (src/theme-options/sections/).
