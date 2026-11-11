@@ -146,6 +146,19 @@ if ( ! defined( 'AW_SOURCING_LOADED' ) && file_exists( dirname( AW_CORE_DIR ) . 
 	require_once dirname( AW_CORE_DIR ) . '/aw-sourcing/aw-sourcing.php';
 }
 
+// InsightWeb (Search Insights; owner, 11 Nov 2026: never off while the theme runs). Core loads its bootstrap whether or
+// not the InsightWeb plugin is active, at the priority InsightWeb uses; the bootstrap loads once, whoever calls it first.
+add_action(
+	'plugins_loaded',
+	function () {
+		$file = dirname( AW_CORE_DIR ) . '/insightweb/includes/bootstrap.php';
+		if ( PHP_VERSION_ID >= 80000 && ! defined( 'INSIGHTWEB_LOADED' ) && file_exists( $file ) ) { // InsightWeb needs PHP 8.0
+			require_once $file;
+		}
+	},
+	5
+);
+
 // PlanWeb (the team's calendar; owner, 11 Nov 2026). Loaded from the sibling plugin folder when it is not active on its
 // own. It does nothing until it is switched on in Kits → Modules; until then Kits → Dates works as before. It needs
 // PHP 8.0 (Core still runs on 7.4), so on older PHP it is not loaded and Dates stays.

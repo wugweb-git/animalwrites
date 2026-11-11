@@ -86,10 +86,7 @@ function aw_seo_extras_insightweb_bridge(): void {
 	if ( defined( 'INSIGHTWEB_FILE' ) ) {
 		return; // InsightWeb is active: it loads Search Insights itself.
 	}
-	$saved = (array) get_option( 'aw_seo_settings', array() );
-	if ( isset( $saved['search-insights']['on'] ) && empty( $saved['search-insights']['on'] ) ) {
-		return; // Switched off in RankWeb → Settings before the move: it stays off.
-	}
+	// Never off while the theme runs (owner, 11 Nov 2026): an old saved off switch is not read.
 	$file = WP_PLUGIN_DIR . '/insightweb/includes/bootstrap.php';
 	if ( file_exists( $file ) ) {
 		require_once $file;

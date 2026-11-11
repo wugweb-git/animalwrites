@@ -200,6 +200,12 @@ iw both
 wp eval '$a = array_values( (array) get_option( "active_plugins" ) ); usort( $a, fn( $x, $y ) => str_starts_with( $y, "insightweb/" ) <=> str_starts_with( $x, "insightweb/" ) ); update_option( "active_plugins", $a ); echo "order: " . implode( ", ", $a ) . "\n";'
 iw both
 curl -s -o /tmp/page.html -w '%{http_code}\n' http://127.0.0.1:8080/ | grep -q '^200$' && echo "ok   200 / with InsightWeb active" || { echo "FAIL / with InsightWeb active"; FAIL=1; }
+# Never off while the theme runs (owner, 11 Nov 2026): deactivated, and with the old RankWeb switch saved as off, it
+# still loads (Core or RankWeb's bridge) and every job keeps a handler.
+wp plugin deactivate insightweb --quiet
+wp eval '$s = (array) get_option( "aw_seo_settings", array() ); $s["search-insights"]["on"] = 0; update_option( "aw_seo_settings", $s );'
+iw bridge
+wp eval '$s = (array) get_option( "aw_seo_settings", array() ); unset( $s["search-insights"]["on"] ); update_option( "aw_seo_settings", $s );'
 if [ -f /tmp/wp-debug.log ] && tail -n +"$((LOG_START + 1))" /tmp/wp-debug.log | grep -E 'PHP (Fatal|Parse) error|PHP Warning'; then FAIL=1; fi
 wp theme activate animal-writes --quiet
 wp cache flush --quiet

@@ -47,13 +47,5 @@ add_action(
 	5
 );
 
-// Tables and data stay when the plugin is switched off (owner, 24 Oct 2026); only its scheduled jobs stop, the same
-// list RankWeb's deactivation cleared before the move.
-register_deactivation_hook(
-	__FILE__,
-	function () {
-		foreach ( function_exists( 'aw_si_cron_hooks' ) ? aw_si_cron_hooks() : array( 'aw_si_daily', 'aw_si_rollup' ) as $hook ) {
-			wp_clear_scheduled_hook( $hook );
-		}
-	}
-);
+// No deactivation hook: Search Insights is never off while the theme runs (owner, 11 Nov 2026). Animal Writes Core
+// loads it when this plugin is not active, so its scheduled jobs stay booked.
