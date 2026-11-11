@@ -44,7 +44,7 @@ add_action(
 		}
 		require_once AW_SEO_EXTRAS_DIR . 'includes/settings.php'; // first: the modules, their settings and switches
 		$off = aw_seo_files_off();
-		foreach ( array( 'helpers', 'overview', 'faq', 'programmatic', 'titles', 'canonical', 'filtered-views', 'robots', 'schema', 'rank-math-schema', 'opengraph', 'sitemap', 'redirects', 'breadcrumbs', 'focus-keywords', 'health', 'llms', 'markdown', 'analysis' ) as $file ) {
+		foreach ( array( 'helpers', 'overview', 'faq', 'programmatic', 'titles', 'canonical', 'filtered-views', 'robots', 'schema', 'rank-math-schema', 'opengraph', 'sitemap', 'redirects', 'breadcrumbs', 'focus-keywords', 'health', 'llms', 'markdown', 'analysis', 'rankweb-dashboard', 'rankweb-rest', 'rankweb-ui' ) as $file ) {
 			if ( ! in_array( $file, $off, true ) ) { // a module switched off in RankWeb → Settings is not loaded
 				require_once AW_SEO_EXTRAS_DIR . 'includes/' . $file . '.php';
 			}
@@ -97,9 +97,10 @@ function aw_seo_extras_insightweb_bridge(): void {
 register_deactivation_hook(
 	__FILE__,
 	function () {
-		// The SEO jobs: titles.php, health.php, sitemap.php.
-		foreach ( array( 'aw_seo_fill_daily', 'aw_seo_endpoints_watchdog', 'aw_seo_sitemap_daily' ) as $hook ) {
+		// The SEO jobs: titles.php, health.php, sitemap.php; the Dashboard counts: rankweb-dashboard.php.
+		foreach ( array( 'aw_seo_fill_daily', 'aw_seo_endpoints_watchdog', 'aw_seo_sitemap_daily', 'rankweb_health_build' ) as $hook ) {
 			wp_clear_scheduled_hook( $hook ); // repeating (no-argument) events only, as Core
 		}
+		wp_clear_scheduled_hook( 'rankweb_health_build', array( 'now' ) ); // A Count now that has not run yet.
 	}
 );

@@ -508,6 +508,9 @@ function aw_seo_settings_page() {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		wp_die( 'Not allowed.', 403 );
 	}
+	if ( function_exists( 'rankweb_ui_page' ) && rankweb_ui_page( 'settings' ) ) {
+		return; // the new Settings, on &ui=next (rankweb-ui.php)
+	}
 	$tab = aw_seo_settings_tab();
 	echo '<div class="wrap"><h1>RankWeb settings</h1>';
 	if ( isset( $_GET['saved'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
@@ -625,6 +628,69 @@ function aw_seo_settings_field_row( string $module, string $const, array $f, $va
 	echo '<p class="description">' . esc_html( trim( $f['help'] . ( $changed ? ' Changed from the default.' : '' ) ) ) . '</p></td></tr>';
 }
 
+/**
+ * Save one Settings tab: the form on this screen and the RankWeb settings route (rankweb-rest.php) both call this, so
+ * the two cannot drift. Only values that differ from the default are stored, the rest of the option (other tabs, and
+ * InsightWeb's 'search-insights' numbers) is kept as it is, and nothing is written when nothing changed (a Save
+ * with no change leaves the option byte for byte as it was, or absent when it was absent).
+ *
+ * @param string $tab    Tab key.
+ * @param array  $posted Field texts by constant (a field not posted goes back to its default, as the form does).
+ * @param bool   $reset  Restore the tab's defaults.
+ * @param array  $on     Modules tab: switchable module keys that are on (key => truthy).
+ * @return array The stored settings after the save.
+ */
+function aw_seo_settings_save( string $tab, array $posted, bool $reset = false, array $on = array() ): array {
+	$before = aw_seo_saved();
+	$all    = $before;
+	if ( 'modules' === $tab ) {
+		foreach ( aw_seo_modules() as $key => $mod ) {
+			if ( empty( $mod['switch'] ) ) {
+				continue;
+			}
+			// No 'on' key means on (aw_seo_module_on()), so only "off" is stored; an 'on' => true from an older save stays.
+			if ( empty( $on[ $key ] ) ) {
+				$all[ $key ]['on'] = false;
+			} elseif ( isset( $all[ $key ]['on'] ) && ! $all[ $key ]['on'] ) {
+				unset( $all[ $key ]['on'] );
+			}
+		}
+	} else {
+		foreach ( aw_seo_tab_fields( $tab ) as $key => $list ) {
+			foreach ( $list as $const => $f ) {
+				unset( $all[ $key ][ $const ] );
+				if ( $reset || ! isset( $posted[ $const ] ) ) {
+					continue;
+				}
+				$value = aw_seo_field_value( $f['type'], (string) $posted[ $const ] );
+				if ( $value !== $f['default'] ) { // store only what differs, so a later default change reaches unchanged fields
+					$all[ $key ][ $const ] = $value;
+				}
+			}
+		}
+	}
+	$all = array_filter( $all );
+	if ( aw_seo_settings_sorted( $all ) === aw_seo_settings_sorted( $before ) ) {
+		return $before; // the same settings (perhaps in another key order): nothing to write
+	}
+	update_option( AW_SEO_SETTINGS, $all, true ); // read on every request (the constants), so autoloaded
+	return $all;
+}
+
+/**
+ * A settings array with its keys sorted at every level, to compare two saves without the key order.
+ *
+ * @param mixed $value Settings or a part of them.
+ * @return mixed
+ */
+function aw_seo_settings_sorted( $value ) {
+	if ( ! is_array( $value ) ) {
+		return $value;
+	}
+	ksort( $value );
+	return array_map( 'aw_seo_settings_sorted', $value );
+}
+
 add_action(
 	'admin_post_aw_seo_settings',
 	function () {
@@ -634,34 +700,14 @@ add_action(
 			wp_die( 'Not allowed.', 403 );
 		}
 		check_admin_referer( 'aw_seo_settings_' . $tab );
-		$all  = aw_seo_saved();
-		$done = 'saved';
-		if ( 'modules' === $tab ) {
-			$on = (array) wp_unslash( $_POST['on'] ?? array() ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- only the keys of known modules are read
-			foreach ( aw_seo_modules() as $key => $mod ) {
-				if ( ! empty( $mod['switch'] ) ) {
-					$all[ $key ]['on'] = ! empty( $on[ $key ] );
-				}
-			}
-		} else {
-			$reset  = isset( $_POST['reset'] );
-			$posted = (array) wp_unslash( $_POST['f'] ?? array() ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- each field is sanitised by its type below
-			foreach ( aw_seo_tab_fields( $tab ) as $key => $list ) {
-				foreach ( $list as $const => $f ) {
-					unset( $all[ $key ][ $const ] );
-					if ( $reset || ! isset( $posted[ $const ] ) ) {
-						continue;
-					}
-					$value = aw_seo_field_value( $f['type'], (string) $posted[ $const ] );
-					if ( $value !== $f['default'] ) { // store only what differs, so a later default change reaches unchanged fields
-						$all[ $key ][ $const ] = $value;
-					}
-				}
-			}
-			$done = $reset ? 'reset' : 'saved';
-		}
-		// Read on every request (the constants), so autoloaded.
-		update_option( AW_SEO_SETTINGS, array_filter( $all ), true );
+		$reset = isset( $_POST['reset'] );
+		aw_seo_settings_save(
+			$tab,
+			(array) wp_unslash( $_POST['f'] ?? array() ), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- each field is sanitised by its type in aw_seo_settings_save()
+			$reset,
+			(array) wp_unslash( $_POST['on'] ?? array() ) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- only the keys of known modules are read
+		);
+		$done = 'modules' !== $tab && $reset ? 'reset' : 'saved';
 		wp_safe_redirect( add_query_arg( 'saved', $done, aw_seo_settings_url( $tab ) ) );
 		exit;
 	}

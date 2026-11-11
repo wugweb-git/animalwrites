@@ -187,6 +187,72 @@ elif wp plugin install plugin-check --activate --quiet 2>/dev/null; then
 else
   echo "-- Plugin Check could not be installed (report skipped)"
 fi
+# RankWeb's new screens (trial, &ui=next; includes/rankweb-ui.php) and the rankweb/v1 routes (includes/rankweb-rest.php):
+# both screens 200 for an administrator, the current screens still the default, every route 401 signed out, 401 with a
+# cookie but no nonce, 403 for a subscriber, and an unchanged Save of every group writes nothing.
+echo "-- rankweb new screens"
+H=http://127.0.0.1:8080
+login() { rm -f "/tmp/cj-$1"; curl -s -o /dev/null -c "/tmp/cj-$1" "$H/wp-login.php"; curl -s -o /dev/null -b "/tmp/cj-$1" -c "/tmp/cj-$1" --data-urlencode "log=$1" --data-urlencode "pwd=$2" -d "testcookie=1" -d "redirect_to=$H/wp-admin/" "$H/wp-login.php"; curl -s -b "/tmp/cj-$1" "$H/wp-admin/admin-ajax.php?action=rest-nonce"; }
+want() { # want CODE LABEL curl-args…
+  local w=$1 l=$2; shift 2
+  local c; c=$(curl -s -o /tmp/rw.out -w '%{http_code}' "$@")
+  if [ "$c" = "$w" ]; then echo "ok   $c $l"; else echo "FAIL $c $l (want $w)"; head -c 300 /tmp/rw.out; echo; FAIL=1; fi
+}
+wp user create rw-sub rw-sub@example.invalid --role=subscriber --user_pass=rw-sub-only --quiet
+wp user create rw-ed rw-ed@example.invalid --role=editor --user_pass=rw-ed-only --quiet
+NA=$(login ci ci-only); NS=$(login rw-sub rw-sub-only); NE=$(login rw-ed rw-ed-only)
+[ -n "$NA" ] && [ -n "$NS" ] && [ -n "$NE" ] && echo "ok   signed in: administrator, subscriber, editor" || { echo "FAIL sign-in for the route checks"; FAIL=1; }
+for p in "aw-seo-plus&ui=next" "aw-seo-settings&ui=next"; do
+  want 200 "admin.php?page=$p (administrator)" -b /tmp/cj-ci "$H/wp-admin/admin.php?page=$p"
+  if grep -q 'id="rankweb-app"' /tmp/rw.out && grep -q "rankweb-admin-js" /tmp/rw.out && grep -q "kits-shell-js" /tmp/rw.out; then echo "ok   $p draws the new screen (shell + RankWeb script)"; else echo "FAIL $p: new screen not drawn"; FAIL=1; fi
+done
+want 200 "admin.php?page=aw-seo-plus (current Overview)" -b /tmp/cj-ci "$H/wp-admin/admin.php?page=aw-seo-plus"
+if grep -q 'id="rankweb-app"' /tmp/rw.out; then echo "FAIL the Overview is not the default any more"; FAIL=1; else echo "ok   current Overview stays the default"; fi
+want 200 "admin.php?page=aw-seo-settings (current Settings)" -b /tmp/cj-ci "$H/wp-admin/admin.php?page=aw-seo-settings"
+if grep -q 'nav-tab-wrapper' /tmp/rw.out && ! grep -q 'id="rankweb-app"' /tmp/rw.out; then echo "ok   current Settings stays the default"; else echo "FAIL the current Settings is not the default"; FAIL=1; fi
+want 200 "admin.php?page=aw-seo-plus&ui=next (editor)" -b /tmp/cj-rw-ed "$H/wp-admin/admin.php?page=aw-seo-plus&ui=next"
+R="$H/?rest_route=/rankweb/v1"
+for r in dashboard settings services; do
+  want 401 "GET /rankweb/v1/$r signed out" "$R/$r"
+  want 401 "GET /rankweb/v1/$r cookie, no nonce" -b /tmp/cj-ci "$R/$r"
+  want 403 "GET /rankweb/v1/$r subscriber" -b /tmp/cj-rw-sub -H "X-WP-Nonce: $NS" "$R/$r"
+  want 200 "GET /rankweb/v1/$r administrator" -b /tmp/cj-ci -H "X-WP-Nonce: $NA" "$R/$r"
+done
+want 200 "GET /rankweb/v1/dashboard editor" -b /tmp/cj-rw-ed -H "X-WP-Nonce: $NE" "$R/dashboard"
+want 403 "GET /rankweb/v1/settings editor (administrators only)" -b /tmp/cj-rw-ed -H "X-WP-Nonce: $NE" "$R/settings"
+for r in dashboard/count settings/titles settings/modules settings/faq-types; do
+  want 401 "POST /rankweb/v1/$r signed out" -X POST -H 'Content-Type: application/json' -d '{"on":[]}' "$R/$r"
+  want 403 "POST /rankweb/v1/$r subscriber" -X POST -b /tmp/cj-rw-sub -H "X-WP-Nonce: $NS" -H 'Content-Type: application/json' -d '{"on":[]}' "$R/$r"
+done
+want 200 "POST /rankweb/v1/dashboard/count administrator" -X POST -b /tmp/cj-ci -H "X-WP-Nonce: $NA" "$R/dashboard/count"
+# No setting lost: Save every group as the screen shows it, and "FAQ box on" as it is; both options stay as they were.
+snap() { wp eval 'foreach ( array( "aw_seo_settings", "aw_faq_off_types", "aw_seo_keep_listings" ) as $o ) { echo $o, "=", md5( serialize( get_option( $o, "(absent)" ) ) ), " "; }'; }
+BEFORE=$(snap)
+curl -s -b /tmp/cj-ci -H "X-WP-Nonce: $NA" "$R/settings" > /tmp/rw-settings.json
+python3 - "$R" "$NA" <<'PY' || FAIL=1
+import json, subprocess, sys
+r, nonce = sys.argv[1], sys.argv[2]
+groups = json.load(open('/tmp/rw-settings.json'))['groups']
+bad = 0
+for g in groups:
+    if g['slug'] == 'modules':
+        body = {'on': {b['key']: b['on'] for b in g['blocks'] if b['switch']}}
+    else:
+        body = {'fields': {f['const']: f['text'] for b in g['blocks'] for f in b['fields']}}
+    calls = [('settings/' + g['slug'], body)]
+    if 'faqTypes' in g:
+        calls.append(('settings/faq-types', {'on': [x['slug'] for x in g['faqTypes'] if x['on']]}))
+    for route, data in calls:
+        out = subprocess.run(['curl', '-s', '-o', '/dev/null', '-w', '%{http_code}', '-X', 'POST', '-b', '/tmp/cj-ci', '-H', 'X-WP-Nonce: ' + nonce, '-H', 'Content-Type: application/json', '-d', json.dumps(data), r + '/' + route], capture_output=True, text=True).stdout
+        print(('ok  ' if out == '200' else 'FAIL') + ' ' + out + ' unchanged Save ' + route)
+        bad += out != '200'
+print(('ok  ' if len(groups) == 7 else 'FAIL') + ' %d settings groups' % len(groups))
+sys.exit(1 if bad or len(groups) != 7 else 0)
+PY
+AFTER=$(snap)
+if [ "$BEFORE" = "$AFTER" ]; then echo "ok   no setting changed by unchanged Saves: $AFTER"; else echo "FAIL settings changed: $BEFORE -> $AFTER"; FAIL=1; fi
+if wp eval 'exit( count( array_intersect( array( "aw_seo_settings", "aw_faq_off_types", "aw_seo_keep_listings" ), kits_settings_transfer_options() ) ) === 3 ? 0 : 1 );'; then echo "ok   RankWeb's three options are in the Kits export"; else echo "FAIL RankWeb's options missing from the Kits export"; FAIL=1; fi
+wp user delete rw-sub rw-ed --yes --quiet
 if [ -f /tmp/wp-debug.log ] && grep -E 'PHP (Fatal|Parse) error' /tmp/wp-debug.log; then FAIL=1; fi
 # The child's aw.css has no component rules (it is the plugin's copy), so the component files load from the plugin.
 curl -s -o /tmp/home-child.html http://127.0.0.1:8080/

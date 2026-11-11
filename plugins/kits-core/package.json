@@ -3,7 +3,9 @@
   "private": true,
   "description": "Kits Core admin screens (built with @wordpress/scripts; build/ is committed because the deploy does not run npm).",
   "scripts": {
-    "build": "wp-scripts build src/theme-options/index.js --output-path=build/theme-options",
+    "build": "npm run build:theme-options && npm run build:shell",
+    "build:theme-options": "wp-scripts build src/theme-options/index.js --output-path=build/theme-options",
+    "build:shell": "wp-scripts build src/shell/index.js --output-path=build/shell",
     "lint:js": "wp-scripts lint-js src"
   },
   "devDependencies": {
