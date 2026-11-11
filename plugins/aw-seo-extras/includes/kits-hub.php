@@ -1,6 +1,6 @@
 <?php
 /**
- * RankWeb in the Kits admin: a row on Kits → Plugins and a row in Kits → Welcome's System Status, through Kits
+ * RankWeb in the Kits admin: a row on Kits → Plugins and a row in Kits → Home's System Status, through Kits
  * Core's filters kits_plugin_screens and kits_status_rows. Only when Kits Core is loaded; without it nothing here runs and
  * the plugin's own menu works as before. Loaded whether or not Rank Math is active, so the row can say it is missing.
  *

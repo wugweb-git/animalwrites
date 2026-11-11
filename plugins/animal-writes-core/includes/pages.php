@@ -370,7 +370,7 @@ function aw_social_icon( $host_or_url ) {
 	return '';
 }
 
-/** Links the owner adds in Kits → Contact links: list of [label, url]. Hidden while empty. */
+/** Links the owner adds in Kits → Theme Options → Socials → Contact links: list of [label, url]. Hidden while empty. */
 function aw_elsewhere_links() {
 	return array_values( array_filter( (array) get_option( 'aw_elsewhere', array() ), fn( $r ) => ! empty( $r['label'] ) && ! empty( $r['url'] ) ) );
 }
@@ -390,14 +390,21 @@ add_shortcode(
 		return $html . '</ul></section>';
 	}
 );
+// Its own screen without Kits; with Kits it is under Kits → Theme Options → Socials (admin-home.php).
 add_action(
 	'admin_menu',
 	function () {
-		add_submenu_page( aw_core_menu_parent(), 'Contact links', 'Contact links', aw_core_screen_cap( 'aw-elsewhere' ), 'aw-elsewhere', 'aw_elsewhere_screen' ); // Kits → Contact links
+		if ( AW_CORE_MENU === aw_core_menu_parent() ) {
+			add_submenu_page( AW_CORE_MENU, 'Contact links', 'Contact links', aw_core_screen_cap( 'aw-elsewhere' ), 'aw-elsewhere', 'aw_elsewhere_screen' );
+		}
 	},
 	aw_core_menu_priority( 'aw-elsewhere' ) // order: aw_core_screens() (admin-home.php)
 );
+/** Contact links: Kits → Theme Options → Socials (its own screen without Kits). The form posts to the screen it is on. */
 function aw_elsewhere_screen() {
+	if ( ! current_user_can( aw_core_screen_cap( 'aw-elsewhere' ) ) ) {
+		return;
+	}
 	if ( isset( $_POST['aw_elsewhere'] ) && check_admin_referer( 'aw_elsewhere' ) ) {
 		$rows = array();
 		foreach ( (array) wp_unslash( $_POST['aw_elsewhere'] ) as $r ) {

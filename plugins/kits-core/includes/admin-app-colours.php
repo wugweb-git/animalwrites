@@ -95,7 +95,7 @@ function kits_admin_app_colours_data( array $data ): array {
 		'sets'        => $sets,
 		'pairs'       => $pairs,
 		'tokens'      => (object) $tokens,
-		'contrastUrl' => admin_url( 'admin.php?page=kits-system&tab=contrast' ),
+		'contrastUrl' => admin_url( 'admin.php?page=kits-help&tab=contrast' ) . '#design-system',
 	);
 
 	// The site colour set: a page default like header and footer, drawn by the app's page-default field.

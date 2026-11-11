@@ -3,9 +3,8 @@
  * The Kits menu, second under Dashboard (owner, 25 Oct and 10 Nov 2026: our plugins and themes work like any
  * marketplace product, laid out like Uncode's hub).
  *
- * Kits → Welcome (admin-screens.php), then Plugins, Import / Export, Fonts, Core Settings, Theme Options
- * (admin-screens.php), Design system (system-screen.php), Docs (admin-screens.php, the tables below) and Preview
- * (preview.php). The Docs tables cover the plugin's features and the design and branding of the active Kits theme
+ * Six items since 11 Nov 2026 (docs/admin-ui-spec.md §B, admin-menu.php): Home, Theme Options, Settings, Plugins,
+ * Tools, Help. Help → Docs shows the tables below. The Docs tables cover the plugin's features and the design and branding of the active Kits theme
  * (colours, fonts, templates, parts, patterns, style variations, the design registry), read live from WordPress, each
  * linked to where it is edited. Core WordPress only.
  *
@@ -21,13 +20,13 @@ const KITS_MENU = 'kits';
 add_action(
 	'admin_menu',
 	function () {
-		add_menu_page( 'Kits', 'Kits', 'manage_options', KITS_MENU, 'kits_welcome_page', 'dashicons-layout', 3 ); // second, under Dashboard
-		add_submenu_page( KITS_MENU, 'Welcome', 'Welcome', 'manage_options', KITS_MENU, 'kits_welcome_page' );
+		add_menu_page( 'Kits', 'Kits', 'manage_options', KITS_MENU, 'kits_home_page', 'dashicons-layout', 3 ); // second, under Dashboard
+		add_submenu_page( KITS_MENU, 'Home', 'Home', 'manage_options', KITS_MENU, 'kits_home_page' );
 	},
 	8 // before the other Kits screens join the menu
 );
 
-/** The theme's settings in the Site Editor: label and address (relative to wp-admin). Linked from Welcome and Docs. */
+/** The theme's settings in the Site Editor: label and address (relative to wp-admin). Linked from Home and Docs. */
 function kits_theme_screens(): array {
 	return array(
 		'navigation' => array( 'Navigation', 'site-editor.php?path=/navigation' ),
@@ -38,10 +37,10 @@ function kits_theme_screens(): array {
 	);
 }
 
-// Plugins screen: Overview under the plugin's name (when Kits Core is active on its own).
+// Plugins screen: Home under the plugin's name (when Kits Core is active on its own).
 add_filter(
 	'plugin_action_links_' . plugin_basename( KITS_CORE_DIR . 'kits-core.php' ),
-	fn( $links ) => array_merge( array( '<a href="' . esc_url( admin_url( 'admin.php?page=' . KITS_MENU ) ) . '">Welcome</a>' ), (array) $links )
+	fn( $links ) => array_merge( array( '<a href="' . esc_url( admin_url( 'admin.php?page=' . KITS_MENU ) ) . '">Home</a>' ), (array) $links )
 );
 
 /** A link for the Overview tables. */
@@ -69,9 +68,9 @@ function kits_overview_table( string $name, array $rows ): void {
 	kits_simple_table( $name, array( 'feature' => 'Feature', 'what' => 'What it is', 'status' => 'On this site' ), $cells, $opts );
 }
 
-/** Kits → Overview (old address): the Docs screen. */
+/** Kits → Overview (old address): Help → Docs. */
 function kits_overview_page() {
-	kits_docs_page();
+	kits_help_page();
 }
 
 /** The Docs tables: design and branding, then the site features. */
@@ -109,7 +108,7 @@ function kits_overview_tables() {
 		'kits-design',
 		array(
 			array( 'Themes', esc_html( 'Active: ' . $theme->get( 'Name' ) . ' ' . $theme->get( 'Version' ) . ( $parent ? ', a child of ' . $parent->get( 'Name' ) . ' ' . $parent->get( 'Version' ) : '' ) . '.' ), kits_link( 'Appearance → Themes', 'themes.php' ) . ( function_exists( 'kits_changelog_url' ) && kits_changelog_url() ? ', <a href="' . esc_url( kits_changelog_url() ) . '">' . esc_html( 'Change log (read before updating)' ) . '</a>' : '' ), $auto ),
-			array( 'Colours', esc_html( count( $palette ) . ' brand colours from the theme.' ) . '<br>' . $swatch, kits_link( 'Editor → Styles', 'site-editor.php?path=/wp_global_styles' ) . ', ' . kits_link( 'Design system → Tokens', 'admin.php?page=kits-system&tab=tokens' ), esc_html( 'Contrast worked out in Design system → Contrast.' ) ),
+			array( 'Colours', esc_html( count( $palette ) . ' brand colours from the theme.' ) . '<br>' . $swatch, kits_link( 'Editor → Styles', 'site-editor.php?path=/wp_global_styles' ) . ', ' . kits_link( 'Design system → Tokens', 'admin.php?page=kits-help&tab=tokens#design-system' ), esc_html( 'Contrast worked out in Theme Options → Colours.' ) ),
 			array( 'Fonts', esc_html( implode( ', ', array_unique( array_filter( array_map( fn( $f ) => (string) ( $f['name'] ?? '' ), $fonts ) ) ) ) ), kits_link( 'Editor → Styles → Typography', 'site-editor.php?path=/wp_global_styles' ) . ', ' . kits_link( 'Appearance → Fonts', 'font-library.php' ), $auto ),
 			array( 'Colour sets', esc_html( $colours ? implode( ', ', array_map( fn( $c ) => (string) ( $c['label'] ?? $c['name'] ), $colours ) ) . '. A page picks one in Page Options; a section picks one as its Group style.' : 'None yet.' ), kits_link( 'Editor → Styles → Blocks → Group', 'site-editor.php?path=/wp_global_styles' ), $auto ),
 			array( 'Templates', esc_html( count( $templates ) . ' page templates (home, item, Directory profile, hubs, category and tag pages, 404 …).' ), kits_link( 'Editor → Templates', 'site-editor.php?postType=wp_template' ), $auto ),
@@ -118,9 +117,9 @@ function kits_overview_tables() {
 			array( 'Menus', esc_html( 'Header, footer and Explore menus.' ), kits_link( 'Editor → Navigation', 'site-editor.php?path=/navigation' ), $auto ),
 			array( 'Style variations', esc_html( count( $variants ) . ' saved look(s) of the site.' ), kits_link( 'Editor → Styles', 'site-editor.php?path=/wp_global_styles' ), $auto ),
 			array( 'Logo and site icon', esc_html( 'The site\'s logo in the header part; the site icon in the browser tab.' ), kits_link( 'Editor → Header', 'site-editor.php?postType=wp_template_part' ) . ', ' . kits_link( 'Settings → General', 'options-general.php' ), $auto ),
-			array( 'Design registry', esc_html( $reg_items . ' components, blocks and patterns of the child theme (plus the master\'s) with their states, accessibility and SEO; classes without an entry fail the deploy check.' ), kits_link( 'Kits → Design system', 'admin.php?page=kits-system' ), $auto ),
-			array( 'Export and import', esc_html( 'One JSON file with the site\'s Styles, Theme Options, Page Options defaults and synced patterns. Also with WP-CLI (wp kits export, wp kits import <file>) and the kits/v1/settings REST route.' ), kits_link( 'Kits → Import / Export', 'admin.php?page=kits-transfer' ), esc_html( 'Nothing is deleted on import.' ) ),
-			array( 'States sheet', esc_html( 'Every component and block in every state, drawn by the site\'s own styles (private page /kits-demo/).' ), kits_link( 'Design system → States sheet', 'admin.php?page=kits-system&tab=states' ), $auto ),
+			array( 'Design registry', esc_html( $reg_items . ' components, blocks and patterns of the child theme (plus the master\'s) with their states, accessibility and SEO; classes without an entry fail the deploy check.' ), kits_link( 'Kits → Help → Design system', 'admin.php?page=kits-help#design-system' ), $auto ),
+			array( 'Export and import', esc_html( 'One JSON file with the site\'s Styles, Theme Options, Page Options defaults and synced patterns. Also with WP-CLI (wp kits export, wp kits import <file>) and the kits/v1/settings REST route.' ), kits_link( 'Kits → Tools', 'admin.php?page=kits-tools' ), esc_html( 'Nothing is deleted on import.' ) ),
+			array( 'States sheet', esc_html( 'Every component and block in every state, drawn by the site\'s own styles (private page /kits-demo/).' ), kits_link( 'Design system → States sheet', 'admin.php?page=kits-help&tab=states#design-system' ), $auto ),
 		)
 	);
 
@@ -131,7 +130,7 @@ function kits_overview_tables() {
 			array( 'Forms', esc_html( 'One field dictionary for every form, per-field errors, expandable and multi-step forms, a fresh key on cached pages.' ), esc_html( 'Every site form' ), $auto ),
 			array( 'Spam guard (ALTCHA)', esc_html( 'Free proof-of-work check on every form: no third-party service, no cookies.' ), esc_html( 'Every site form' ), esc_html( '' !== (string) get_option( 'kits_altcha_key', '' ) ? 'Key set.' : 'Key made on first use.' ) ),
 			array( 'Analytics', esc_html( 'Google Tag Manager with consent mode, Microsoft Clarity, the page context for GA4.' ), kits_link( 'Site Kit', 'admin.php?page=googlesitekit-dashboard' ), esc_html( ( $gtm ? 'Tag Manager ' . $gtm : 'No Tag Manager container' ) . ( $clarity ? '; Clarity ' . $clarity : '' ) . '.' ) ),
-			array( 'Preview', esc_html( 'Preview-only items seen only by administrators, preview IP addresses and registered devices.' ), kits_link( 'Kits → Preview', 'admin.php?page=kits-preview' ), esc_html( $ips . ' IP address(es), ' . $devices . ' device(s).' ) ),
+			array( 'Preview', esc_html( 'Preview-only items seen only by administrators, preview IP addresses and registered devices.' ), kits_link( 'Kits → Settings → Preview access', 'admin.php?page=kits-settings#preview' ), esc_html( $ips . ' IP address(es), ' . $devices . ' device(s).' ) ),
 			array( 'Share bar', esc_html( 'Plain share links and copy link: no third-party scripts, no tracking.' ), esc_html( 'Item pages' ), $auto ),
 			array( 'Source attribution', esc_html( 'Publisher favicon, name and time on News items (Google News pattern).' ), esc_html( 'News items' ), $auto ),
 			array( 'Page structure', esc_html( 'One labelled <main>, sticky header, labelled sections, skip link.' ), esc_html( 'Every page' ), $auto ),

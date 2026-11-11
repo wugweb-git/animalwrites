@@ -783,10 +783,15 @@ function aw_edit_screen_twice( array $rows ): array {
 	return $out;
 }
 
+// Its own screen without Kits; with Kits it is a section of Kits → Help → Developer (admin-home.php).
 add_action(
 	'admin_menu',
 	function () {
-		$hook = add_submenu_page( aw_core_menu_parent(), 'Edit screens', 'Edit screens', aw_core_screen_cap( 'aw-edit-screens' ), 'aw-edit-screens', 'aw_edit_screens_page' ); // Kits → Edit screens
+		if ( AW_CORE_MENU === aw_core_menu_parent() ) {
+			$hook = add_submenu_page( AW_CORE_MENU, 'Edit screens', 'Edit screens', aw_core_screen_cap( 'aw-edit-screens' ), 'aw-edit-screens', 'aw_edit_screens_page' );
+		} else {
+			$hook = get_plugin_page_hookname( 'kits-help', KITS_MENU );
+		}
 		if ( $hook ) {
 			add_action(
 				'load-' . $hook,
@@ -930,7 +935,7 @@ function aw_edit_screens_grid( array $cols, array $rows ): void {
 	echo '</tbody></table>';
 }
 
-/** Kits → Edit screens. */
+/** Kits → Help → Developer → Edit screens (its own screen without Kits). */
 function aw_edit_screens_page(): void {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		return;
@@ -951,7 +956,7 @@ function aw_edit_screens_render( array $all ): void {
 	);
 	$tab  = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only tab.
 	$tab  = isset( $tabs[ $tab ] ) ? $tab : 'mapping';
-	$base = admin_url( 'admin.php?page=aw-edit-screens' );
+	$base = AW_CORE_MENU === aw_core_menu_parent() ? admin_url( 'admin.php?page=aw-edit-screens' ) : admin_url( 'admin.php?page=kits-help' ) . '#developer/edit-screens';
 
 	$screens = array(); // post type or taxonomy => post|term, in screen order
 	$ids     = array();

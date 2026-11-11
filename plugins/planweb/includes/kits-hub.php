@@ -1,6 +1,6 @@
 <?php
 /**
- * PlanWeb in the Kits admin: a row on Kits → Plugins and a row in Kits → Welcome's System Status, through Kits Core's
+ * PlanWeb in the Kits admin: a row on Kits → Plugins and a row in Kits → Home's System Status, through Kits Core's
  * filters kits_plugin_screens and kits_status_rows. Kits Core is checked when it runs (it may be loaded by another
  * plugin rather than activated, so the Requires Plugins header is not used).
  *

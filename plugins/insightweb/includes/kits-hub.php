@@ -1,6 +1,6 @@
 <?php
 /**
- * InsightWeb in the Kits admin and on the Plugins screen: a row on Kits → Plugins and in Kits → Welcome's System
+ * InsightWeb in the Kits admin and on the Plugins screen: a row on Kits → Plugins and in Kits → Home's System
  * Status (Kits Core's filters kits_plugin_screens and kits_status_rows), and a Search Insights link under the plugin's
  * name. The screen itself is unchanged: RankWeb → Search Insights.
  *

@@ -1,8 +1,8 @@
 <?php
 /**
- * Kits → Theme parts (owner, 10 Nov 2026): what the animal-writes child theme used to hold, where each piece lives now
+ * Kits → Help → Developer → Theme parts (owner, 10 Nov 2026): what the animal-writes child theme used to hold, where each piece lives now
  * that Kits by Wugweb runs alone, and where to change it in wp-admin. Read-only: nothing here writes an option,
- * meta or post. Added to the Kits menu by this plugin, so Kits Core itself stays free of Animal Writes parts.
+ * meta or post. Added to Kits → Help by this plugin, so Kits Core itself stays free of Animal Writes parts.
  *
  * Two core list tables: the child theme's functions (functions.php and theme.json), each with its file here or in
  * Kits Core and whether it runs on this site; and the files this plugin carries (theme/templates, theme/parts,
@@ -15,33 +15,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-add_action(
-	'admin_menu',
-	function () {
-		if ( defined( 'KITS_MENU' ) ) {
-			add_submenu_page( KITS_MENU, 'Theme parts', 'Theme parts', 'manage_options', 'aw-theme-parts', 'aw_theme_parts_screen' ); // Kits → Theme parts.
-		}
-	},
-	20 // After the Kits screens.
-);
-
-// The same screen as a tab on every Kits screen, after Docs.
-add_filter(
-	'kits_admin_tabs',
-	function ( $tabs ) {
-		$out = array();
-		foreach ( (array) $tabs as $slug => $t ) {
-			$out[ $slug ] = $t;
-			if ( 'kits-docs' === $slug ) {
-				$out['aw-theme-parts'] = array( 'Theme parts', 'admin.php?page=aw-theme-parts', 'manage_options' );
-			}
-		}
-		if ( ! isset( $out['aw-theme-parts'] ) ) {
-			$out['aw-theme-parts'] = array( 'Theme parts', 'admin.php?page=aw-theme-parts', 'manage_options' );
-		}
-		return $out;
-	}
-);
+// Kits → Help → Developer → Theme parts: a section added in admin-home.php (kits_help_sections); its old address
+// aw-theme-parts redirects there.
 
 /**
  * A wp-admin link.
@@ -72,8 +47,8 @@ function aw_theme_parts_function_rows(): array {
 	$here  = 'Animal Writes Core';
 	$kits  = 'Kits Core';
 	$repo  = 'In the repository only (file editing is off in wp-admin)';
-	$perf  = aw_theme_parts_link( 'Kits → Theme Options → Utility → Performance', 'admin.php?page=kits-options&section=utility-performance' );
-	$core  = aw_theme_parts_link( 'Kits → Core Settings', 'admin.php?page=kits-core-settings' );
+	$perf  = aw_theme_parts_link( 'Kits → Settings → Performance', 'admin.php?page=kits-settings#performance' );
+	$core  = aw_theme_parts_link( 'Kits → Settings', 'admin.php?page=kits-settings' );
 	$items = array(
 		array( 'Site styles and script', 'Loads tokens.css, aw.css (as aw.min.css, its minified copy) and aw.js over the Kits styles on every page.', $here, 'includes/theme-parts-assets.php', $repo, $parts ),
 		array( 'Editor uses the site styles', 'The block editor and the classic editor show content with tokens.css and aw.css.', $here, 'includes/theme-parts-assets.php', 'Automatic', $parts ),
@@ -180,7 +155,7 @@ function aw_theme_parts_screen() {
 	$child = wp_get_theme( 'animal-writes' );
 	$intro = 'What the Animal Writes child theme held, where each part lives now that Kits by Wugweb runs on its own, and where to change it. Animal Writes Core serves these parts whenever Kits by Wugweb is the active theme.';
 	if ( function_exists( 'kits_admin_head' ) ) {
-		kits_admin_head( 'aw-theme-parts', 'Theme parts', $intro ); // Opens .wrap, with the Kits tabs.
+		kits_admin_head( 'kits-help', 'Theme parts', $intro ); // Opens .wrap (inside Help: a plain box).
 	} else {
 		echo '<div class="wrap"><h1>' . esc_html( 'Theme parts' ) . '</h1><p>' . esc_html( $intro ) . '</p>';
 	}

@@ -58,6 +58,7 @@ require_once KITS_CORE_DIR . 'includes/page-options.php';
 require_once KITS_CORE_DIR . 'includes/settings-transfer.php';
 require_once KITS_CORE_DIR . 'includes/theme-options.php';
 require_once KITS_CORE_DIR . 'includes/admin-screens.php';
+require_once KITS_CORE_DIR . 'includes/admin-menu.php';
 require_once KITS_CORE_DIR . 'includes/admin-app.php';
 require_once KITS_CORE_DIR . 'includes/admin-app-global-styles.php';
 require_once KITS_CORE_DIR . 'includes/admin-app-colours.php';

@@ -1,7 +1,7 @@
 <?php
 /**
  * Kits Theme Options: the site-wide choices Styles cannot hold (switches, links, text), on Kits → Theme Options and
- * Kits → Core Settings (admin-screens.php).
+ * Kits → Settings (admin-menu.php, admin-screens.php).
  *
  * Saved as one option, kits_theme_options, which travels in the Kits settings file (settings-transfer.php). Only values
  * that differ from the default are stored, so an empty option means every part works as it did before. A save changes

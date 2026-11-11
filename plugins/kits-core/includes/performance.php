@@ -22,7 +22,7 @@
  *   - no emoji script or styles (the site shows emoji as text).
  *   Ads scripts (Advanced Ads, AdSense) are left as they are.
  * jQuery at the end, the main picture fix, the deferred scripts, the later form styles and no emoji each have an on/off
- * switch in Kits → Core Settings; all are on by default.
+ * switch in Kits → Settings → Performance; all are on by default.
  *
  * @package kits-core
  */

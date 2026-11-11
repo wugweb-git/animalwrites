@@ -385,7 +385,7 @@ function aw_core_theme_register_patterns() {
 add_action( 'init', 'aw_core_theme_register_patterns', 9 );
 
 /**
- * Kits → Design system reads the Animal Writes registry and tokens (kits-registry.json, assets/css/tokens.css) from
+ * Kits → Help → Design system reads the Animal Writes registry and tokens (kits-registry.json, assets/css/tokens.css) from
  * this plugin's theme folder when there is no child theme.
  *
  * @param string[] $dirs Folders with design system files.

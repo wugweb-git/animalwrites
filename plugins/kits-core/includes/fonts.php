@@ -9,7 +9,7 @@
  *   screens (1200px and up) also preload the body font so it is there for the first paint; phones do not, so it never
  *   competes with their main picture. Kits → Theme Options → Utility → Performance → Font preload: "all" preloads it on every screen, "off" not at
  *   all; the file is the body font's first file in Styles (else the theme's assets/fonts/inter/inter-latin.woff2).
- * - Inter is served once (Kits → Core Settings → One copy of Inter). The theme's variable file (weights 100 to 900,
+ * - Inter is served once (Kits → Settings → Performance → One copy of Inter). The theme's variable file (weights 100 to 900,
  *   font-display: swap) covers every upright weight; the Font Library copy of Inter also declares each weight as a
  *   static file without swap, and as the later rules they won (extra files per page, text hidden while they load).
  *   The upright library faces inside the range the theme's file is declared for, as resolved (Global Styles can
@@ -74,7 +74,7 @@ add_action(
 		add_action(
 			'init',
 			function () {
-				if ( 'off' === ( function_exists( 'kits_option' ) ? kits_option( 'inter_dedupe' ) : 'on' ) ) { // Kits → Core Settings → One copy of Inter.
+				if ( 'off' === ( function_exists( 'kits_option' ) ? kits_option( 'inter_dedupe' ) : 'on' ) ) { // Kits → Settings → Performance → One copy of Inter.
 					return;
 				}
 				if ( 'kits-by-wugweb' !== get_template() || 'animal-writes' === get_stylesheet() || ! class_exists( 'WP_Font_Face_Resolver' ) ) {

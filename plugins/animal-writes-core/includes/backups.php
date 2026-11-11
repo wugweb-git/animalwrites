@@ -3,7 +3,7 @@
  * Daily backup (S0): the database and the deployed code, once a day, into ~/backups on the server (outside the web
  * root), kept 14 days. Runs on WordPress's scheduler (this host has no user cron). Files: auto-db-YYYY-MM-DD.sql.gz and
  * auto-code-YYYY-MM-DD.tar.gz; only files with the auto- prefix are ever removed by the rotation.
- * Last run and size show on Kits → Check site. Restoring: docs/rollback.md.
+ * Last run and size show on Kits → Home → Backup. Restoring: docs/rollback.md.
  *
  * @package animal-writes-core
  */
@@ -101,21 +101,20 @@ function aw_run_backup() {
 	return $report;
 }
 
-// Shown on Kits → Check site.
-add_action(
-	'aw_site_check_after',
-	function () {
-		$b = get_option( 'aw_backup_last' );
-		$n = wp_next_scheduled( 'aw_daily_backup' );
-		echo '<h2>Daily backup</h2><p>';
-		if ( is_array( $b ) ) {
-			echo 'Last: ' . esc_html( $b['at'] ) . ( isset( $b['db'] ) ? ' · database ' . esc_html( size_format( $b['db'][1] ) ) : ' · database: not written' ) . ( isset( $b['code'] ) ? ' · code ' . esc_html( size_format( $b['code'][1] ) ) : ' · code: not written' ) . '.';
-		} else {
-			echo 'Not run yet.';
-		}
-		echo ' Next: ' . esc_html( $n ? wp_date( 'j M Y, g:i a', $n ) : 'not scheduled' ) . '. Kept ' . (int) AW_BACKUP_KEEP_DAYS . ' days in ~/backups on the server.</p>';
+// Shown on Kits → Home → Backup.
+/** Kits → Home → Backup (and Check site without Kits): the last daily backup and the next run. */
+function aw_backup_site_check() {
+	$b = get_option( 'aw_backup_last' );
+	$n = wp_next_scheduled( 'aw_daily_backup' );
+	echo '<h2>Daily backup</h2><p>';
+	if ( is_array( $b ) ) {
+		echo 'Last: ' . esc_html( $b['at'] ) . ( isset( $b['db'] ) ? ' · database ' . esc_html( size_format( $b['db'][1] ) ) : ' · database: not written' ) . ( isset( $b['code'] ) ? ' · code ' . esc_html( size_format( $b['code'][1] ) ) : ' · code: not written' ) . '.';
+	} else {
+		echo 'Not run yet.';
 	}
-);
+	echo ' Next: ' . esc_html( $n ? wp_date( 'j M Y, g:i a', $n ) : 'not scheduled' ) . '. Kept ' . (int) AW_BACKUP_KEEP_DAYS . ' days in ~/backups on the server.</p>';
+}
+add_action( 'aw_site_check_after', 'aw_backup_site_check' );
 
 /*
  * Off-server copy (owner's choice, 8 Oct 2026: GitHub). The workers repository (private) downloads the latest
