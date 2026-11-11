@@ -28,6 +28,11 @@ import {
 const data = window.kitsAdminApp || {};
 const fields = data.fields || {};
 const pdFields = data.pageDefaults?.fields || {};
+// Published menus for the menu fields: [ { value: id, label: title } ].
+const menus = data.menus || [];
+const themeOwn = __( 'The theme’s own', 'kits-core' );
+const menuLabel = ( id ) =>
+	'' === id ? themeOwn : menus.find( ( m ) => m.value === id )?.label || id;
 
 /**
  * The sections, in order: Identity, Header, Footer, Layout, then the groups of the Theme Options fields not placed in
@@ -36,7 +41,16 @@ const pdFields = data.pageDefaults?.fields || {};
  * @return {Array} [ { slug, label, items, links, info } ].
  */
 function sectionsOf() {
-	const placed = [ 'announce', 'sticky_bar', 'sticky_href', 'sticky_label' ];
+	const placed = [
+		'announce',
+		'sticky_header',
+		'header_menu',
+		'sticky_bar',
+		'sticky_href',
+		'sticky_label',
+		'footer_menu_1',
+		'footer_menu_2',
+	];
 	const out = [
 		{
 			slug: 'identity',
@@ -53,6 +67,8 @@ function sectionsOf() {
 			label: __( 'Header', 'kits-core' ),
 			items: [
 				[ 'pd', 'header' ],
+				[ 'to', 'sticky_header' ],
+				[ 'to', 'header_menu' ],
 				[ 'to', 'announce' ],
 			],
 			links: [
@@ -71,6 +87,8 @@ function sectionsOf() {
 			label: __( 'Footer', 'kits-core' ),
 			items: [
 				[ 'pd', 'footer' ],
+				[ 'to', 'footer_menu_1' ],
+				[ 'to', 'footer_menu_2' ],
 				[ 'to', 'sticky_bar' ],
 				[ 'to', 'sticky_href' ],
 				[ 'to', 'sticky_label' ],
@@ -178,6 +196,36 @@ function ThemeOptionField( { field, value, inherited, onChange } ) {
 				onChange={ onChange }
 			/>
 		);
+	} else if ( 'menu' === field.kind ) {
+		control = (
+			<SelectControl
+				__next40pxDefaultSize
+				__nextHasNoMarginBottom
+				label={ field.label }
+				help={ field.note }
+				value={ value }
+				options={ [
+					{ value: '', label: themeOwn },
+					...menus,
+					...( value && ! menus.some( ( m ) => m.value === value )
+						? [
+								{
+									value,
+									label: sprintf(
+										/* translators: %s: menu id. */
+										__(
+											'Menu %s (not published)',
+											'kits-core'
+										),
+										value
+									),
+								},
+							]
+						: [] ),
+				] }
+				onChange={ onChange }
+			/>
+		);
 	} else {
 		control = (
 			<TextControl
@@ -197,7 +245,11 @@ function ThemeOptionField( { field, value, inherited, onChange } ) {
 			{ control }
 			<ThemeNote
 				isTheme={ value === inherited }
-				themeLabel={ field.choices?.[ inherited ] ?? inherited }
+				themeLabel={
+					'menu' === field.kind
+						? menuLabel( inherited )
+						: ( field.choices?.[ inherited ] ?? inherited )
+				}
 				label={ field.label }
 				onReset={ () => onChange( inherited ) }
 			/>

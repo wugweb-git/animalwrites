@@ -720,6 +720,12 @@ function kits_theme_option_row( string $key, array $f, array $types = array() ):
 			echo '<option value="' . esc_attr( $c ) . '"' . selected( (string) $val, (string) $c, false ) . '>' . esc_html( $label . ( (string) $c === (string) $f['default'] ? ' (default)' : '' ) ) . '</option>';
 		}
 		echo '</select>';
+	} elseif ( 'menu' === $f['kind'] ) {
+		echo '<select id="' . esc_attr( $id ) . '" name="' . esc_attr( $name ) . '"><option value="">' . esc_html( 'The theme’s own (default)' ) . '</option>';
+		foreach ( kits_theme_menu_choices() as $c => $label ) {
+			echo '<option value="' . esc_attr( (string) $c ) . '"' . selected( (string) $val, (string) $c, false ) . '>' . esc_html( $label ) . '</option>';
+		}
+		echo '</select>';
 	} elseif ( 'share' === $f['kind'] ) {
 		$conf = array_merge( kits_theme_share_default(), is_array( $val ) ? $val : array() );
 		echo '<fieldset><legend class="screen-reader-text">' . esc_html( $f['label'] ) . '</legend>';
@@ -843,6 +849,10 @@ function kits_core_settings_page() {
 function kits_theme_option_section( string $key, array $f ): string {
 	$map = array(
 		'announce'       => 'general-header',
+		'sticky_header'  => 'general-header',
+		'header_menu'    => 'general-header',
+		'footer_menu_1'  => 'general-footer',
+		'footer_menu_2'  => 'general-footer',
 		'sticky_bar'     => 'general-footer',
 		'sticky_href'    => 'general-footer',
 		'sticky_label'   => 'general-footer',
@@ -968,14 +978,14 @@ function kits_options_section_body( string $section, string $label ): bool {
 	switch ( $section ) {
 		case 'general-header':
 			kits_options_box( 'Header', fn() => kits_page_default_rows( '_site', array( 'header' ) ), 'The header every page uses unless its kind of page or the page itself picks another. What the header holds (logo, menu, buttons): ' . kits_options_link( 'Editor → Patterns → Header', 'site-editor.php?postType=wp_template_part' ) . '.' );
-			kits_options_box( 'Announcement bar', fn() => kits_theme_option_rows_of( 'general-header' ) );
+			kits_options_box( 'Header settings', fn() => kits_theme_option_rows_of( 'general-header' ), 'Menus: ' . kits_options_link( 'Editor → Navigation', 'site-editor.php?postType=wp_navigation' ) . '.' );
 			return true;
 		case 'general-layout':
 			kits_options_box( 'Layout', fn() => kits_page_default_rows( '_site', array( 'sidebar', 'title', 'crumbs' ) ), 'Site-wide defaults; each kind of page can differ under Single and Archives. Widths and spacing: ' . kits_options_link( 'Styles → Layout', $styles ) . '.' );
 			return true;
 		case 'general-footer':
 			kits_options_box( 'Footer', fn() => kits_page_default_rows( '_site', array( 'footer' ) ), 'What the footer holds: ' . kits_options_link( 'Editor → Patterns → Footer', 'site-editor.php?postType=wp_template_part' ) . '.' );
-			kits_options_box( 'Phone bar', fn() => kits_theme_option_rows_of( 'general-footer' ) );
+			kits_options_box( 'Footer settings', fn() => kits_theme_option_rows_of( 'general-footer' ) );
 			return true;
 		case 'utility-share':
 			kits_options_box( 'Share bar', fn() => kits_theme_option_rows_of( 'utility-share' ) );

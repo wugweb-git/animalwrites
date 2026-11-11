@@ -89,6 +89,13 @@ add_action(
 				$pd_site[ $key ] = (string) $pd_saved['_site'][ $key ];
 			}
 		}
+		$menus = array();
+		foreach ( kits_theme_menu_choices() as $menu_id => $title ) {
+			$menus[] = array(
+				'value' => (string) $menu_id,
+				'label' => (string) $title,
+			);
+		}
 		$data = array(
 			'site'         => get_bloginfo( 'name' ),
 			'theme'        => $theme->get( 'Name' ) . ' ' . $theme->get( 'Version' ),
@@ -105,6 +112,7 @@ add_action(
 				$ids
 			),
 			'mediaUrls'    => (object) $urls,
+			'menus'        => $menus,
 			'pageDefaults' => array(
 				'fields' => $pd,
 				'site'   => (object) $pd_site,

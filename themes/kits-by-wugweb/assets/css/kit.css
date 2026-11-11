@@ -927,6 +927,10 @@ main.wp-block-group.kit-item-page[style*="padding-top"] { padding-top: var(--kit
 
 /* ---------- Header / nav: 100 tall, sticky, inner max 1280; side padding 16 · 32 · gutter (48) from 1200 ---------- */
 header.wp-block-template-part:has(.kit-site-header) { position: sticky; top: calc(var(--wp-admin--admin-bar--height, 0px) - var(--kit-announce-h, 0px)); z-index: var(--kit-layer-nav); }
+/* Theme Options → Header stays at the top, off (Kits Core adds .kits-header-static): the header scrolls with the page, and links to a section no longer leave room for it */
+body.kits-header-static header.wp-block-template-part:has(.kit-site-header) { position: relative; top: auto; }
+html:has(body.kits-header-static) { scroll-padding-top: var(--wp-admin--admin-bar--height, 0px); }
+body.kits-header-static :is(main section, main > .alignfull, .wp-block-post-content > .alignfull, main [id]:where(section, .alignfull)) { scroll-margin-top: var(--wp-admin--admin-bar--height, 0px); }
 .kit-site-header { min-height: var(--kit-header-height); display: flex; align-items: center; padding: var(--kit-space-4) !important; box-sizing: border-box; cursor: grab; }
 .kit-site-header :is(a, button, input, label) { cursor: pointer; }
 .kit-site-header input { cursor: text; }
