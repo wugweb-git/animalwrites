@@ -77,7 +77,7 @@ foreach ( array( 'schema', 'runs', 'sitekit', 'keywords', 'gsc', 'compute', 'rol
 // Search Console types (3 Nov 2026): Discover and Google News per page, and URL Inspection index status.
 // Bing crawl (3 Nov 2026): Bing's crawl statistics weekly and keyword volumes monthly.
 // Google Alerts (3 Nov 2026): up to two alert feeds from Animal Writes → Keys, as Mention rows on the Links tab.
-foreach ( array( 'sitesearch', 'ga4', 'psi', 'clarity', 'bing', 'sources', 'pages', 'checklist', 'imports', 'snapshot', 'rankmath', 'links', 'links-seed', 'crawlcheck', 'server', 'visitors', 'selfcheck', 'dashboard', 'referrer-icons', 'gsc-types', 'bing-crawl', 'alerts', 'tool-imports' ) as $aw_si_file ) {
+foreach ( array( 'sitesearch', 'ga4', 'psi', 'clarity', 'bing', 'sources', 'pages', 'checklist', 'imports', 'snapshot', 'rankmath', 'links', 'links-seed', 'crawlcheck', 'server', 'visitors', 'selfcheck', 'dashboard', 'referrer-icons', 'gsc-types', 'bing-crawl', 'alerts', 'tool-imports', 'openseo-positions' ) as $aw_si_file ) {
 	require_once __DIR__ . '/search-insights/' . $aw_si_file . '.php';
 }
 unset( $aw_si_file );

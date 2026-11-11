@@ -233,7 +233,7 @@ function aw_si_import_rows(): void {
 	global $wpdb;
 	if ( aw_si_ready() ) {
 		$o    = aw_si_table( 'obs' );
-		$last = (array) $wpdb->get_results( "SELECT src, MAX(fetched) f, COUNT(*) n FROM {$o} WHERE src IN ('kp', 'gov') OR (src = 'trends' AND txt = 'import') GROUP BY src" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+		$last = (array) $wpdb->get_results( "SELECT src, MAX(fetched) f, COUNT(*) n FROM {$o} WHERE src IN ('kp', 'gov', 'openseo_serp') OR (src = 'trends' AND txt = 'import') GROUP BY src" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
 		if ( $last ) {
 			echo '<ul>';
 			foreach ( $last as $l ) {
@@ -314,6 +314,10 @@ add_action(
 		}
 		/* translators: 1: import kind, 2: rows stored, 3: rows skipped. */
 		$msg = sprintf( __( '%1$s: %2$s rows stored, %3$s skipped.', 'aw-seo-extras' ), aw_si_import_kinds()[ $r['kind'] ] ?? $r['kind'], number_format_i18n( (int) $r['rows'] ), number_format_i18n( (int) $r['skipped'] ) );
+		if ( ! empty( $r['other'] ) ) {
+			/* translators: %s: rows. */
+			$msg .= ' ' . sprintf( __( '%s rows from another source (such as the browser checks) were left out.', 'aw-seo-extras' ), number_format_i18n( (int) $r['other'] ) );
+		}
 		if ( ! empty( $r['rising'] ) ) {
 			/* translators: %s: terms. */
 			$msg .= ' ' . sprintf( __( '%s terms that are not keywords yet went to Rising.', 'aw-seo-extras' ), number_format_i18n( (int) $r['rising'] ) );
