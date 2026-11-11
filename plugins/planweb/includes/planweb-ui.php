@@ -149,6 +149,6 @@ function planweb_ui_page(): bool {
 		'entries'   => __( 'PlanWeb entries', 'planweb' ),
 		'settings'  => __( 'PlanWeb settings', 'planweb' ),
 	);
-	kits_shell_mount( 'planweb-app', $titles[ $screen ], add_query_arg( 'ui', 'classic', remove_query_arg( 'tab' ) ), __( 'Open the earlier screen', 'planweb' ) );
+	kits_shell_mount( 'planweb-app', $titles[ $screen ] );
 	return true;
 }

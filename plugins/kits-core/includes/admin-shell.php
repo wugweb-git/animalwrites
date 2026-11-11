@@ -8,7 +8,7 @@
  * against it and puts the screen in place with two calls:
  *
  *     kits_shell_app( array( 'handle' => …, 'src' => …, 'asset' => …, 'object' => …, 'data' => … ) ); // enqueue
- *     kits_shell_mount( 'my-app', __( 'My plugin', 'my-domain' ), $old_url, __( 'Open the earlier screen', … ) );
+ *     kits_shell_mount( 'my-app', __( 'My plugin', 'my-domain' ) );
  *
  * Nothing here adds a menu or a screen of its own.
  *
@@ -99,22 +99,19 @@ function kits_shell_body_class( $classes ) {
 /**
  * The mount point of a shell screen, with a note when JavaScript does not run.
  *
- * @param string $id           Element id the script renders into.
- * @param string $title        Screen title (the no-script heading).
- * @param string $fallback_url Not used (was a link to the earlier screen).
- * @param string $fallback     Not used.
+ * @param string $id    Element id the script renders into.
+ * @param string $title Screen title (the no-script heading).
  */
-function kits_shell_mount( string $id, string $title, string $fallback_url, string $fallback ): void {
+function kits_shell_mount( string $id, string $title ): void {
 	// Notices from other plugins go after .wp-header-end, so they stay out of the app and its pinned header.
 	echo '<div class="wrap"><h1 class="screen-reader-text">' . esc_html( $title ) . '</h1><hr class="wp-header-end"><div id="' . esc_attr( $id ) . '">';
-	unset( $fallback_url, $fallback ); // Kept in the signature for the plugins that call it; no link to the earlier screen (owner, 12 Nov 2026).
 	echo '<noscript><p>' . esc_html__( 'This screen needs JavaScript.', 'kits-core' ) . '</p></noscript>';
 	echo '</div></div>';
 }
 
 /**
  * Every Kits plugin screen shows its new look by default (owner, 12 Nov 2026: "Yes, switch"); &ui=classic on the
- * same address shows the earlier screen (each new screen links to it as "Open the earlier screen").
+ * same address shows the earlier screen (nothing links to it: owner, 12 Nov 2026).
  */
 function kits_shell_ui_next(): bool {
 	return 'classic' !== sanitize_key( wp_unslash( $_GET['ui'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- which screen to show; nothing is saved here.

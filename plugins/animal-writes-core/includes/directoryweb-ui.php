@@ -186,8 +186,7 @@ function directoryweb_ui_page( string $screen ): bool {
 		'claims'    => __( 'Claims', 'directoryweb' ),
 		'settings'  => __( 'DirectoryWeb settings', 'directoryweb' ),
 	);
-	$back   = 'claims' === $screen ? add_query_arg( 'ui', 'classic' ) : add_query_arg( 'post_type', 'aw_listing', admin_url( 'edit.php' ) );
-	kits_shell_mount( 'directoryweb-app', $titles[ $screen ], $back, 'claims' === $screen ? __( 'Open the earlier screen', 'directoryweb' ) : __( 'Open the Directory listings', 'directoryweb' ) );
+	kits_shell_mount( 'directoryweb-app', $titles[ $screen ] );
 	return true;
 }
 
