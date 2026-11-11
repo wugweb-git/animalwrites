@@ -393,12 +393,14 @@ want 200 "POST /kits/v1/settings-panel unchanged Save (administrator)" -X POST -
 grep -q '"saved":false' /tmp/rw.out && echo "ok   unchanged Save reports nothing saved" || { echo "FAIL unchanged Save wrote"; FAIL=1; }
 same "Kits Settings" "$BEFORE" "$(optmd5 kits_theme_options)"
 # Each Kits plugin's new screens: tools/ci/smoke-ui-<plugin>.sh, using screen, route, post, optmd5 and same above.
-for f in "$(dirname "$0")"/smoke-ui-*.sh; do
+for f in "$REPO"/tools/ci/smoke-ui-*.sh; do
   [ -f "$f" ] || continue
   echo "-- $(basename "$f" .sh)"
   # shellcheck source=/dev/null
   . "$f"
+  UI_RAN=$((${UI_RAN:-0} + 1))
 done
+if [ "${UI_RAN:-0}" -ge 5 ]; then echo "ok   $UI_RAN plugin screen files ran (tools/ci/smoke-ui-*.sh)"; else echo "FAIL only ${UI_RAN:-0} plugin screen files ran (tools/ci/smoke-ui-*.sh)"; FAIL=1; fi
 
 wp user delete rw-sub rw-ed --yes --quiet
 if [ -f /tmp/wp-debug.log ] && grep -E 'PHP (Fatal|Parse) error' /tmp/wp-debug.log; then FAIL=1; fi
