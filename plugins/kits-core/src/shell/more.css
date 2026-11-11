@@ -362,6 +362,7 @@
 	display: flex;
 	gap: var(--ks-s1);
 	overflow-x: auto;
+	scrollbar-width: none;
 }
 
 .kits-shell-panel .kits-shell-panel__tabs a {
@@ -412,7 +413,8 @@
 .kits-shell-panel__main {
 	display: grid;
 	grid-template-columns: 240px minmax(0, 1fr);
-	align-items: start;
+	align-items: stretch;
+	align-content: start;
 	flex: 1 1 auto;
 }
 
@@ -737,6 +739,7 @@
 
 	.kits-shell-panel__main {
 		grid-template-columns: minmax(0, 1fr);
+		align-items: start;
 	}
 
 	/* The section list becomes a row that scrolls sideways. */
@@ -751,6 +754,7 @@
 	.kits-shell-panel__nav ul {
 		display: flex;
 		overflow-x: auto;
+		scrollbar-width: none;
 	}
 
 	.kits-shell-panel__nav button {
