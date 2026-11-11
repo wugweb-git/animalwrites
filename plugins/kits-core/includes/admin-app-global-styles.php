@@ -13,6 +13,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 add_filter( 'kits_admin_app_data', 'kits_admin_app_global_styles_data' );
 
+// A Global Styles save (this screen, or Styles in the Site Editor) changes the CSS every page prints inline: empty the
+// page cache so the change shows. LiteSpeed Cache's own hook; nothing happens when it is not active.
+add_action(
+	'rest_after_insert_wp_global_styles',
+	function () {
+		do_action( 'litespeed_purge_all' );
+	}
+);
+
 /**
  * Adds globalStyles: { id, settings, styles } (the user origin as saved; id 0 when this user cannot edit Styles).
  *
