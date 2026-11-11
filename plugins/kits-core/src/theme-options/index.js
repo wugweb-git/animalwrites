@@ -6,6 +6,8 @@
  * - core: site title, tagline, logo, site icon (WordPress's own options);
  * - to:   kits_theme_options fields (a value equal to the theme's is not stored, so Reset sends the theme's value);
  * - pd:   kits_page_defaults._site, the site-wide header, footer, sidebar, title and breadcrumbs ('' = the theme's).
+ * Sections with their own store (panels: sections/*.js, { slug, label, enabled, initial, Panel, isDirty, save }) save
+ * after that, one after another (two Global Styles saves at once would drop each other's keys).
  */
 import { createRoot, useState, useEffect, useMemo } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
@@ -24,8 +26,10 @@ import {
 	TextControl,
 	ToggleControl,
 } from '@wordpress/components';
+import buttons from './sections/buttons';
 
 const data = window.kitsAdminApp || {};
+const panels = [ buttons ].filter( ( p ) => p.enabled );
 const fields = data.fields || {};
 const pdFields = data.pageDefaults?.fields || {};
 // Published menus for the menu fields: [ { value: id, label: title } ].
@@ -117,6 +121,11 @@ function sectionsOf() {
 				],
 			],
 		},
+		...panels.map( ( p ) => ( {
+			slug: p.slug,
+			label: p.label,
+			panel: p,
+		} ) ),
 	];
 	Object.keys( fields ).forEach( ( key ) => {
 		const f = fields[ key ];
@@ -436,6 +445,9 @@ function App() {
 		pd: data.pageDefaults?.site || {},
 	} );
 	const [ edits, setEdits ] = useState( { core: {}, to: {}, pd: {} } );
+	const [ panelEdits, setPanelEdits ] = useState( () =>
+		Object.fromEntries( panels.map( ( p ) => [ p.slug, p.initial ] ) )
+	);
 	const [ status, setStatus ] = useState( null );
 	const [ busy, setBusy ] = useState( false );
 	const inherited = data.inherited || {};
@@ -463,9 +475,13 @@ function App() {
 		Object.keys( edits[ store ] ).filter(
 			( k ) => edits[ store ][ k ] !== base( store, k )
 		);
-	const dirty = [ 'core', 'to', 'pd' ].some(
+	const settingsDirty = [ 'core', 'to', 'pd' ].some(
 		( s ) => changed( s ).length > 0
 	);
+	const dirtyPanels = panels.filter( ( p ) =>
+		p.isDirty( panelEdits[ p.slug ] )
+	);
+	const dirty = settingsDirty || dirtyPanels.length > 0;
 
 	useEffect( () => {
 		const warn = ( e ) => {
@@ -477,6 +493,32 @@ function App() {
 		window.addEventListener( 'beforeunload', warn );
 		return () => window.removeEventListener( 'beforeunload', warn );
 	}, [ dirty ] );
+
+	// Keeps what /wp/v2/settings saved and clears those edits.
+	const afterSettings = ( res ) => {
+		const obj = ( v, fallback ) =>
+			v && 'object' === typeof v ? v : fallback;
+		const core = { ...saved.core };
+		Object.keys( core ).forEach( ( k ) => {
+			if ( k in res ) {
+				core[ k ] = res[ k ] ?? core[ k ];
+			}
+		} );
+		setSaved( {
+			core,
+			// A stored value the schema cannot read comes back as null: keep what this screen knows.
+			to: obj( res.kits_theme_options, {
+				...saved.to,
+				...edits.to,
+			} ),
+			pd:
+				res.kits_page_defaults &&
+				'object' === typeof res.kits_page_defaults
+					? obj( res.kits_page_defaults._site, {} ) // No _site: every choice is the theme's.
+					: { ...saved.pd, ...edits.pd },
+		} );
+		setEdits( { core: {}, to: {}, pd: {} } );
+	};
 
 	const save = () => {
 		// Only what changed: every clean-up keeps what is not sent, so a change made elsewhere since this screen
@@ -499,35 +541,29 @@ function App() {
 		}
 		setBusy( true );
 		setStatus( null );
-		apiFetch( { path: '/wp/v2/settings', method: 'POST', data: body } )
-			.then( ( res ) => {
-				const obj = ( v, fallback ) =>
-					v && 'object' === typeof v ? v : fallback;
-				const core = { ...saved.core };
-				Object.keys( core ).forEach( ( k ) => {
-					if ( k in res ) {
-						core[ k ] = res[ k ] ?? core[ k ];
-					}
-				} );
-				setSaved( {
-					core,
-					// A stored value the schema cannot read comes back as null: keep what this screen knows.
-					to: obj( res.kits_theme_options, {
-						...saved.to,
-						...edits.to,
-					} ),
-					pd:
-						res.kits_page_defaults &&
-						'object' === typeof res.kits_page_defaults
-							? obj( res.kits_page_defaults._site, {} ) // No _site: every choice is the theme's.
-							: { ...saved.pd, ...edits.pd },
-				} );
-				setEdits( { core: {}, to: {}, pd: {} } );
-				setStatus( {
-					type: 'success',
-					text: __( 'Saved.', 'kits-core' ),
-				} );
+		let run = settingsDirty
+			? apiFetch( {
+					path: '/wp/v2/settings',
+					method: 'POST',
+					data: body,
+				} ).then( afterSettings )
+			: Promise.resolve();
+		dirtyPanels.forEach( ( p ) => {
+			run = run
+				.then( () => p.save( panelEdits[ p.slug ] ) )
+				.then( () =>
+					setPanelEdits( ( e ) => ( {
+						...e,
+						[ p.slug ]: p.initial,
+					} ) )
+				);
+		} );
+		run.then( () =>
+			setStatus( {
+				type: 'success',
+				text: __( 'Saved.', 'kits-core' ),
 			} )
+		)
 			.catch( ( err ) =>
 				setStatus( {
 					type: 'error',
@@ -716,7 +752,19 @@ function App() {
 								<h2>{ current.label }</h2>
 							</CardHeader>
 							<CardBody>
-								{ current.items.map( item ) }
+								{ current.panel ? (
+									<current.panel.Panel
+										edits={ panelEdits[ current.slug ] }
+										setEdits={ ( v ) =>
+											setPanelEdits( ( e ) => ( {
+												...e,
+												[ current.slug ]: v,
+											} ) )
+										}
+									/>
+								) : (
+									current.items.map( item )
+								) }
 								{ ( current.info || [] ).map( ( [ k, v ] ) => (
 									<p key={ k }>
 										<strong>{ k }:</strong> { v }
