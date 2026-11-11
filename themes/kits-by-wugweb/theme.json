@@ -450,10 +450,10 @@
 						},
 						"spacing": {
 							"padding": {
-								"top": "var(--wp--preset--spacing--50)",
-								"right": "var(--wp--preset--spacing--50)",
-								"bottom": "var(--wp--preset--spacing--50)",
-								"left": "var(--wp--preset--spacing--50)"
+								"top": "var(--wp--custom--kits--card--padding, var(--wp--preset--spacing--40))",
+								"right": "var(--wp--custom--kits--card--padding, var(--wp--preset--spacing--40))",
+								"bottom": "var(--wp--custom--kits--card--padding, var(--wp--preset--spacing--40))",
+								"left": "var(--wp--custom--kits--card--padding, var(--wp--preset--spacing--40))"
 							}
 						}
 					},
