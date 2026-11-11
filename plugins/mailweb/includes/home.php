@@ -39,6 +39,9 @@ function mailweb_home_page() {
 	if ( ! current_user_can( MAILWEB_CAP ) ) {
 		wp_die( esc_html__( 'Not allowed.', 'mailweb' ), 403 );
 	}
+	if ( mailweb_ui_page( 'dashboard' ) ) {
+		return; // the new screen (&ui=next, mailweb-ui.php)
+	}
 	$admin   = current_user_can( 'manage_options' );
 	$set     = fn( $label, $sub = 'incoming', $anchor = '' ) => $admin ? '<a href="' . esc_url( mailweb_settings_url( $sub, array(), $anchor ) ) . '">' . esc_html( $label ) . '</a>' : esc_html__( 'Administrators', 'mailweb' );
 	$boxes   = array_filter( (array) get_option( 'mailweb_box_addresses', array() ), 'is_email' );

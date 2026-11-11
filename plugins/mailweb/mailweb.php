@@ -54,6 +54,7 @@ add_action(
 require_once MAILWEB_DIR . 'includes/admin-table.php';
 require_once MAILWEB_DIR . 'includes/crypto.php';
 require_once MAILWEB_DIR . 'includes/addresses.php';
+require_once MAILWEB_DIR . 'includes/mailweb-settings-save.php';
 require_once MAILWEB_DIR . 'includes/mail-in.php';
 require_once MAILWEB_DIR . 'includes/smtp.php';
 require_once MAILWEB_DIR . 'includes/mail-cap.php';
@@ -64,13 +65,16 @@ require_once MAILWEB_DIR . 'includes/settings-tab.php';
 require_once MAILWEB_DIR . 'includes/crm-sync.php';
 require_once MAILWEB_DIR . 'includes/overview.php';
 require_once MAILWEB_DIR . 'includes/home.php';
+require_once MAILWEB_DIR . 'includes/mailweb-ui.php'; // the new screens on the Kits shell (&ui=next)
+require_once MAILWEB_DIR . 'includes/mailweb-rest.php';
+require_once MAILWEB_DIR . 'includes/mailweb-dashboard.php';
 require_once MAILWEB_DIR . 'includes/kits-hub.php'; // a tab and a status row in the Kits admin, when Kits Core is loaded.
 
 // Deactivation stops MailWeb's scheduled jobs; settings, the queue and the mailboxes are left as they are.
 register_deactivation_hook(
 	__FILE__,
 	function () {
-		foreach ( array( 'mailweb_flush', 'mailweb_crm_sync' ) as $hook ) {
+		foreach ( array( 'mailweb_flush', 'mailweb_crm_sync', 'mailweb_dashboard_build' ) as $hook ) {
 			wp_clear_scheduled_hook( $hook );
 		}
 	}
