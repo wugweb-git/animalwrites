@@ -11,8 +11,27 @@
  * kits_shell_app() in includes/admin-shell.php enqueues both.
  */
 import { useEffect, useId, useRef, useState } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
+import { DataList, FieldReview, RowAction } from './list';
+import { SetupFlow } from './setup';
+import { Panel, PanelGroup, OnOff } from './panel';
+import { MiniChart, HashList, LinkedSetting, MetricPicker } from './extras';
 import './shell.css';
+import './more.css';
+
+export {
+	DataList,
+	FieldReview,
+	RowAction,
+	SetupFlow,
+	Panel,
+	PanelGroup,
+	OnOff,
+	MiniChart,
+	HashList,
+	LinkedSetting,
+	MetricPicker,
+};
 
 const cx = ( ...names ) => names.filter( Boolean ).join( ' ' );
 
@@ -201,8 +220,39 @@ const toneLabel = () => ( {
  * @param {string}  props.href    Where the number goes.
  * @param {string}  props.tone    '' | 'warn' | 'error'.
  * @param {boolean} props.loading Show "Counting…" instead of the number.
+ * @param {string}  props.missing The plugin the number comes from, when it is not active: the tile says
+ *                                "{plugin} not active" in place of the number (or pass hide to leave the tile out).
+ * @param {boolean} props.hide    Leave the tile out when its source is missing.
  */
-export function Tile( { label, value, delta, sub, href, tone = '', loading } ) {
+export function Tile( {
+	label,
+	value,
+	delta,
+	sub,
+	href,
+	tone = '',
+	loading,
+	missing,
+	hide,
+} ) {
+	if ( missing && hide ) {
+		return null;
+	}
+	if ( missing ) {
+		return (
+			<li className="kits-shell-tile is-missing">
+				<p className="kits-shell-tile__label">{ label }</p>
+				<p className="kits-shell-tile__value is-missing">
+					{ sprintf(
+						/* translators: %s: plugin name. */
+						__( '%s not active', 'kits-core' ),
+						missing
+					) }
+				</p>
+				{ sub && <p className="kits-shell-tile__sub">{ sub }</p> }
+			</li>
+		);
+	}
 	const tones = toneLabel();
 	const number = loading ? (
 		<span className="kits-shell-tile__counting">
@@ -663,6 +713,17 @@ const shell = {
 	ErrorState,
 	Button,
 	RefTable,
+	DataList,
+	FieldReview,
+	RowAction,
+	SetupFlow,
+	Panel,
+	PanelGroup,
+	OnOff,
+	MiniChart,
+	HashList,
+	LinkedSetting,
+	MetricPicker,
 };
 
 window.kits = window.kits || {};

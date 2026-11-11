@@ -34,6 +34,29 @@ every admin screen (`includes/admin-shell.php`). Nothing is printed until a scre
 | `EmptyState`, `LoadingState { label }`, `ErrorState { message, onRetry }` | The three states every screen needs. |
 | `Button { variant, busy }` | `primary` (black), `secondary` (outline), `link`. `busy` disables it and shows a spinner. |
 | `RefTable { caption, head, rows }` | A two-column reference table that stacks on phones. |
+| `DataList { label, columns, rows, total, page, pages, onPage, search, onSearch, filters, onFilter, views, view, onView, sort, onSort, bulkActions, onBulk, rowActions, loading, error, onRetry, emptyTitle, empty }` | The working list. The screen fetches each page from its own route (search, filters, sort and paging are done on the server). Saved views as pills with counts, a search box, filter selects, sortable headings (`aria-sort`), tick boxes with a bulk action, row actions under the primary cell, Previous/Next with "Page 2 of 5 · 93 rows", and the empty, loading and error states. On phones each row is a card, every cell with its column's name. |
+| `RowAction { action: { label, href, onClick, disabled, why, tone } }` | One row action. `disabled` with `why` shows it off and says why ("Undo needs SourceWeb"). |
+| `FieldReview { title, fields: [ { key, label, current, proposed, applied, undoOff } ], onApply, onUndo, busy, after }` | One proposed change field by field: now beside proposed, a tick per field, Apply the ticked fields, Undo on an applied field (off with a reason when `undoOff`). Claims and enrichment proposals. |
+| `SetupFlow { title, steps: [ { slug, label, done } ], current, onStep, canContinue, busy, onFinish, finishLabel, aside }` | A first run or a service's connection as numbered steps: the steps (a step opens once the one before is done), one step's content, Back and Continue (Finish on the last). |
+| `Panel { title, icon, tabs, sections, section, onSection, aside }` | The options panel for Kits Core's own screens: a dark bar with the Kits tabs (the open one with the yellow bar), the screen's sections listed on the left (a sideways row on phones), the open section on the right. |
+| `PanelGroup { title, description, summary, defaultOpen }` | A group of settings that folds open and shut (`aria-expanded`); `summary` shows while shut ("6 of 7 on"). |
+| `OnOff { label, checked, onChange, help, changed, onReset, disabled }` | An On/Off toggle: two options side by side, the chosen one filled black (a radio group). |
+| `MiniChart { label, points: [ { label, value } ], unit }` | One series as grey bars, today's bar black, with the same numbers as a table for screen readers. |
+| `HashList { label, help, items: [ { id, note } ], onAdd, onRemove, busy }` | A write-only list: a value is sent once, kept as a fingerprint and never shown again; rows show only "Entry 1 · Added 3 Nov". |
+| `LinkedSetting { label, value, plugin, href }` | A setting another Kits plugin keeps, read-only, with "Kept in RankWeb: change it there" (or "…, which is not active"). |
+| `MetricPicker { options, value, onChange, busy }` | "Select metrics": which tiles a Dashboard shows, as a fold-out list of tick boxes with Save. |
+
+`Tile` also takes `missing` ("RankWeb"): the tile says "RankWeb not active" in place of a number, or is left out with `hide`.
+A data-file service (a bundled file with its date and counts, nothing to connect) is a `ServiceRow` with no children:
+it has no Edit button.
+
+PHP helpers in `includes/admin-shell.php`:
+- `kits_shell_ui_next()`: the request has `&ui=next`.
+- `kits_shell_rest_can( $cap )`: the `permission_callback` every shell route uses (401 signed out; 403 without a valid
+  `wp_rest` nonce in a browser request; 403 without the capability).
+
+The second set of parts is in `src/shell/list.js`, `setup.js`, `panel.js`, `extras.js` and `more.css`, built into the
+same `build/shell/` files.
 
 CSS classes all start `kits-shell-`. The shell's own values are `--ks-*` variables, each copied from a Kits token and
 named in the comment at the top of `shell.css`:
@@ -82,6 +105,20 @@ whatever a part's own `display` is.
 
    Nothing slow is worked out while a screen loads. Counts come from a background job, and the route only formats them.
 
+## Kits Core's own screens: the options panel
+
+Kits Core's settings screens use `Panel`, the pattern of a theme options panel (a dark tab bar, a section list,
+groups that fold, On/Off toggles). The first is **Kits → Settings with `&ui=next`** (`includes/admin-settings-next.php`,
+`src/settings-next/`, built to `build/settings-next/`):
+- Sections: Performance (Scripts and styles, Fonts), Compatibility (Older content), and Preview access, which links to
+  the current screen's section for now.
+- The fields are the current screen's (`kits_theme_options`: the Speed and Older content switches, the joined files
+  cap and the font preload). Save sends only the changed fields to `kits/v1/settings`, which runs them through the
+  option's own clean-up (`kits_theme_options_clean()`); nothing is written when nothing changed.
+- `smoke.sh` checks the screen (200 and drawn for an administrator, 403 for a subscriber, the current screen still the
+  default), the route (401 signed out or without a nonce, 403 for a subscriber, 200 for an administrator), and that an
+  unchanged Save leaves `kits_theme_options` byte for byte the same.
+
 ## A trial behind `&ui=next`
 
 A new screen ships behind `&ui=next` on the current screen's own address. Without it the current screen shows, and it
@@ -124,4 +161,4 @@ screens save through the same function, so neither can drift from the other.
 
 - Kits Core has no translation files for the shell yet.
 - The other five plugins (InsightWeb, SourceWeb, MailWeb, DirectoryWeb, PlanWeb) do not use the shell yet.
-- There is no shared chart part. The Dashboard shows changes as text ("+3 in 28 days").
+- The chart is one small part (`MiniChart`); there is no line chart or a chart with two series.

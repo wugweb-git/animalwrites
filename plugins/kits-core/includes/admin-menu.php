@@ -255,6 +255,10 @@ function kits_home_page() {
 
 /** Kits → Settings. */
 function kits_settings_page() {
+	if ( function_exists( 'kits_settings_next_ready' ) && kits_settings_next_ready() ) {
+		kits_shell_mount( 'kits-settings-next', 'Settings', admin_url( 'admin.php?page=kits-settings' ), 'Open the current screen' );
+		return;
+	}
 	kits_sections_page( 'kits-settings', 'Settings', 'Speed switches, older content and who sees preview-only items. Leave the switches on unless you are tracking down a problem.' );
 }
 
