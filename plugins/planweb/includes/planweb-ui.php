@@ -25,8 +25,14 @@ function planweb_ui_wanted(): string {
 	$page = sanitize_key( wp_unslash( $_GET['page'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- which screen to show; nothing is saved here.
 	$ui   = sanitize_key( wp_unslash( $_GET['ui'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- same.
 	$tab  = sanitize_key( wp_unslash( $_GET['tab'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- same.
-	if ( 'next' !== $ui || PLANWEB_MENU !== $page ) {
+	if ( 'classic' === $ui || PLANWEB_MENU !== $page ) {
 		return '';
+	}
+	// The month calendar, its edit form and the notice after a save are only on the earlier screen.
+	foreach ( array( 'm', 'edit', 'done', 'error' ) as $k ) {
+		if ( isset( $_GET[ $k ] ) && '' === $tab ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- which screen to show.
+			return '';
+		}
 	}
 	return in_array( $tab, array( 'entries', 'settings' ), true ) ? $tab : 'dashboard';
 }
@@ -110,7 +116,7 @@ add_action(
 					'version'     => PLANWEB_VERSION,
 					'icon'        => PLANWEB_URL . 'assets/icon.svg',
 					'tabs'        => $tabs,
-					'oldUrl'      => remove_query_arg( array( 'ui', 'tab' ) ),
+					'oldUrl'      => add_query_arg( 'ui', 'classic', remove_query_arg( 'tab' ) ),
 					'rest'        => PLANWEB_REST,
 					'entriesUrl'  => planweb_ui_url( 'entries' ),
 					'today'       => wp_date( 'Y-m-d' ),
@@ -144,6 +150,6 @@ function planweb_ui_page(): bool {
 		'entries'   => __( 'PlanWeb entries', 'planweb' ),
 		'settings'  => __( 'PlanWeb settings', 'planweb' ),
 	);
-	kits_shell_mount( 'planweb-app', $titles[ $screen ], remove_query_arg( array( 'ui', 'tab' ) ), __( 'Open the current screen', 'planweb' ) );
+	kits_shell_mount( 'planweb-app', $titles[ $screen ], add_query_arg( 'ui', 'classic', remove_query_arg( 'tab' ) ), __( 'Open the current screen', 'planweb' ) );
 	return true;
 }

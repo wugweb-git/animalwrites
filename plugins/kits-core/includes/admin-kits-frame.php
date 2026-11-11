@@ -48,14 +48,12 @@ function kits_frame_ready( ?bool $set = null ): bool {
 }
 
 /**
- * The five Kits tabs for a screen on the new look. On a &ui=next request every tab keeps &ui=next, so the trial stays
- * on while moving between tabs; otherwise (Theme Options, the default screen) the tabs open the current screens.
+ * The five Kits tabs for a screen on the new look. The new look is the default, so the tabs are the plain addresses.
  *
  * @param string $current The open screen's slug.
  * @return array [ { slug, label, url, current } ].
  */
 function kits_frame_tabs( string $current ): array {
-	$keep = kits_shell_ui_next();
 	$tabs = array();
 	foreach ( kits_admin_tabs_list() as $slug => $t ) {
 		if ( ! current_user_can( (string) ( $t[2] ?? 'manage_options' ) ) ) {
@@ -65,7 +63,7 @@ function kits_frame_tabs( string $current ): array {
 		$tabs[] = array(
 			'slug'    => (string) $slug,
 			'label'   => (string) $t[0],
-			'url'     => $keep ? add_query_arg( 'ui', 'next', $url ) : $url,
+			'url'     => $url,
 			'current' => $current === (string) $slug,
 		);
 	}
@@ -121,7 +119,7 @@ function kits_frame_open( string $current, string $title, string $intro = '' ): 
 	foreach ( kits_frame_tabs( $current ) as $t ) {
 		echo '<li><a href="' . esc_url( $t['url'] ) . '" class="kits-shell-tab' . ( $t['current'] ? ' is-current' : '' ) . '"' . ( $t['current'] ? ' aria-current="page"' : '' ) . '>' . esc_html( $t['label'] ) . '</a></li>';
 	}
-	echo '</ul></nav><div class="kits-shell-header__aside"><a href="' . esc_url( remove_query_arg( 'ui' ) ) . '">' . esc_html__( 'Open the current screen', 'kits-core' ) . '</a></div></header>';
+	echo '</ul></nav><div class="kits-shell-header__aside"><a href="' . esc_url( add_query_arg( 'ui', 'classic' ) ) . '">' . esc_html__( 'Open the current screen', 'kits-core' ) . '</a></div></header>';
 	echo '<div class="kits-shell__body">';
 	if ( '' !== $intro ) {
 		echo '<p class="kits-shell-frame__intro">' . esc_html( $intro ) . '</p>';

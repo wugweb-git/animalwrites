@@ -114,7 +114,7 @@ add_action(
 					'version' => (string) $head['Version'],
 					'icon'    => plugins_url( 'assets/icon.svg', $main ),
 					'tabs'    => $tabs,
-					'oldUrl'  => remove_query_arg( 'ui' ),
+					'oldUrl'  => add_query_arg( 'ui', 'classic' ),
 					'rest'    => INSIGHTWEB_REST,
 					'admin'   => current_user_can( 'manage_options' ),
 				),
@@ -135,6 +135,6 @@ function insightweb_ui_page( string $tab ): bool {
 	if ( '' === $screen || ! insightweb_ui_ready() || ( 'settings' === $screen ) !== ( 'settings' === $tab ) ) {
 		return false;
 	}
-	kits_shell_mount( 'insightweb-app', 'settings' === $screen ? __( 'Search Insights settings', 'aw-seo-extras' ) : __( 'Search Insights', 'aw-seo-extras' ), remove_query_arg( 'ui' ), __( 'Open the current screen', 'aw-seo-extras' ) );
+	kits_shell_mount( 'insightweb-app', 'settings' === $screen ? __( 'Search Insights settings', 'aw-seo-extras' ) : __( 'Search Insights', 'aw-seo-extras' ), add_query_arg( 'ui', 'classic' ), __( 'Open the current screen', 'aw-seo-extras' ) );
 	return true;
 }

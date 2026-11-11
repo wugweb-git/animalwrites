@@ -51,7 +51,7 @@ A data-file service (a bundled file with its date and counts, nothing to connect
 it has no Edit button.
 
 PHP helpers in `includes/admin-shell.php`:
-- `kits_shell_ui_next()`: the request has `&ui=next`.
+- `kits_shell_ui_next()`: the new screen is wanted (any request without `&ui=classic`).
 - `kits_shell_rest_can( $cap )`: the `permission_callback` every shell route uses (401 signed out; 403 without a valid
   `wp_rest` nonce in a browser request; 403 without the capability).
 
@@ -123,11 +123,13 @@ tabs, then cards (owner, 12 Nov 2026: "the ui used for plugins – use it for Ki
 - `smoke.sh` checks each of the four with `&ui=next` (200, the frame, five tabs, a known section, no PHP error), that
   the current screen is still the default, that a subscriber is refused, and that Theme Options loads on the shell.
 
-## A trial behind `&ui=next`
+## The new screens are the default; `&ui=classic` shows the earlier one
 
-A new screen ships behind `&ui=next` on the current screen's own address. Without it the current screen shows, and it
-stays the default until the owner says switch. The header's "Open the current screen" link drops `&ui=next`. Both
-screens save through the same function, so neither can drift from the other.
+Owner, 12 Nov 2026: "Yes, switch". Every plugin's new screen (and Kits Home, Settings, Tools and Help) shows on its
+plain address. `&ui=classic` on the same address shows the earlier screen; the header's "Open the current screen" link
+adds it. `&ui=next` still works (it is simply the default). Both screens save through the same function, so neither can
+drift from the other. DirectoryWeb → Claims: reviewing a claim (approve, reject, undo) stays on the earlier screen; each
+claim links to it with `&ui=classic`.
 
 ## RankWeb (the first plugin on the shell)
 

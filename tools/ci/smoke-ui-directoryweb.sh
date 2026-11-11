@@ -11,8 +11,10 @@ screen directoryweb-settings directoryweb-app directoryweb-admin
 C="$H/wp-admin/edit.php?post_type=aw_listing&page=aw-claims"
 want 200 "Directory → Claims &ui=next (administrator)" -b /tmp/cj-ci "$C&ui=next"
 if grep -q 'id="directoryweb-app"' /tmp/rw.out && grep -q 'directoryweb-admin-js' /tmp/rw.out && grep -q 'kits-shell-js' /tmp/rw.out; then echo "ok   Claims &ui=next draws the new screen"; else echo "FAIL Claims &ui=next: new screen not drawn"; FAIL=1; fi
-want 200 "Directory → Claims (current screen)" -b /tmp/cj-ci "$C"
-if grep -q 'id="directoryweb-app"' /tmp/rw.out; then echo "FAIL Claims: the current screen is not the default any more"; FAIL=1; else echo "ok   Claims: current screen stays the default"; fi
+want 200 "Directory → Claims (default)" -b /tmp/cj-ci "$C"
+if grep -q 'id="directoryweb-app"' /tmp/rw.out; then echo "ok   Claims: the new screen is the default"; else echo "FAIL Claims: the new screen is not the default"; FAIL=1; fi
+want 200 "Directory → Claims &ui=classic (review screen)" -b /tmp/cj-ci "$C&ui=classic"
+if grep -q 'id="directoryweb-app"' /tmp/rw.out; then echo "FAIL Claims &ui=classic: still the new screen"; FAIL=1; else echo "ok   Claims &ui=classic: the review screen"; fi
 want 403 "Directory → Claims &ui=next (subscriber)" -b /tmp/cj-rw-sub "$C&ui=next"
 
 # Routes: every GET, and every write refused signed out and for a subscriber.

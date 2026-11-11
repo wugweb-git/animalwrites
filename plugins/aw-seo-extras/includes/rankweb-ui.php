@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 function rankweb_ui_wanted(): string {
 	$page = sanitize_key( wp_unslash( $_GET['page'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- which screen to show; nothing is saved here
 	$ui   = sanitize_key( wp_unslash( $_GET['ui'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- same
-	if ( 'next' !== $ui ) {
+	if ( 'classic' === $ui ) {
 		return '';
 	}
 	return array(
@@ -101,7 +101,7 @@ add_action(
 					'version' => (string) $head['Version'],
 					'icon'    => plugins_url( 'assets/icon.svg', AW_SEO_EXTRAS_DIR . 'aw-seo-extras.php' ),
 					'tabs'    => $tabs,
-					'oldUrl'  => remove_query_arg( 'ui' ),
+					'oldUrl'  => add_query_arg( 'ui', 'classic' ),
 					'rest'    => RANKWEB_REST,
 					'faqUrl'  => add_query_arg( 'page', 'aw-faq', admin_url( 'admin.php' ) ),
 				),
@@ -121,6 +121,6 @@ function rankweb_ui_page( string $screen ): bool {
 	if ( rankweb_ui_wanted() !== $screen || ! rankweb_ui_ready() ) {
 		return false;
 	}
-	kits_shell_mount( 'rankweb-app', 'settings' === $screen ? __( 'RankWeb settings', 'aw-seo-extras' ) : __( 'RankWeb', 'aw-seo-extras' ), remove_query_arg( 'ui' ), __( 'Open the current screen', 'aw-seo-extras' ) );
+	kits_shell_mount( 'rankweb-app', 'settings' === $screen ? __( 'RankWeb settings', 'aw-seo-extras' ) : __( 'RankWeb', 'aw-seo-extras' ), add_query_arg( 'ui', 'classic' ), __( 'Open the current screen', 'aw-seo-extras' ) );
 	return true;
 }

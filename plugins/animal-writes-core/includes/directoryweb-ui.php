@@ -38,7 +38,11 @@ function directoryweb_ui_screens(): array {
 function directoryweb_ui_wanted(): string {
 	$page = sanitize_key( wp_unslash( $_GET['page'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- which screen to show; nothing is saved here
 	$ui   = sanitize_key( wp_unslash( $_GET['ui'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- same
-	if ( 'next' !== $ui ) {
+	if ( 'classic' === $ui ) {
+		return '';
+	}
+	// One claim to review, and the notice after a review, are only on the earlier Claims screen.
+	if ( 'aw-claims' === $page && ( isset( $_GET['entry'] ) || isset( $_GET['done'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- same
 		return '';
 	}
 	return directoryweb_ui_screens()[ $page ][0] ?? '';
@@ -158,7 +162,7 @@ add_action(
 					'version'  => AW_CORE_VERSION,
 					'icon'     => plugins_url( 'directoryweb/icon.svg', AW_CORE_DIR . 'animal-writes-core.php' ),
 					'tabs'     => $tabs,
-					'oldUrl'   => 'claims' === $screen ? remove_query_arg( 'ui' ) : '',
+					'oldUrl'   => 'claims' === $screen ? add_query_arg( 'ui', 'classic' ) : '',
 					'listings' => add_query_arg( 'post_type', 'aw_listing', admin_url( 'edit.php' ) ),
 					'rest'     => DIRECTORYWEB_REST,
 				),
@@ -183,7 +187,7 @@ function directoryweb_ui_page( string $screen ): bool {
 		'claims'    => __( 'Claims', 'directoryweb' ),
 		'settings'  => __( 'DirectoryWeb settings', 'directoryweb' ),
 	);
-	$back   = 'claims' === $screen ? remove_query_arg( 'ui' ) : add_query_arg( 'post_type', 'aw_listing', admin_url( 'edit.php' ) );
+	$back   = 'claims' === $screen ? add_query_arg( 'ui', 'classic' ) : add_query_arg( 'post_type', 'aw_listing', admin_url( 'edit.php' ) );
 	kits_shell_mount( 'directoryweb-app', $titles[ $screen ], $back, 'claims' === $screen ? __( 'Open the current screen', 'directoryweb' ) : __( 'Open the Directory listings', 'directoryweb' ) );
 	return true;
 }

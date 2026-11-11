@@ -28,7 +28,7 @@ function sourceweb_ui_wanted(): string {
 	$ui   = sanitize_key( wp_unslash( $_GET['ui'] ?? '' ) );
 	$tab  = sanitize_key( wp_unslash( $_GET['tab'] ?? '' ) );
 	// phpcs:enable WordPress.Security.NonceVerification.Recommended
-	if ( 'next' !== $ui ) {
+	if ( 'classic' === $ui ) {
 		return '';
 	}
 	if ( AW_SRC_PAGE === $page ) {
@@ -120,7 +120,7 @@ add_action(
 					'version' => (string) $head['Version'],
 					'icon'    => plugins_url( 'assets/icon.svg', AW_SOURCING_DIR . 'aw-sourcing.php' ),
 					'tabs'    => $tabs,
-					'oldUrl'  => remove_query_arg( 'ui' ),
+					'oldUrl'  => add_query_arg( 'ui', 'classic' ),
 					'rest'    => SOURCEWEB_REST,
 					'isAdmin' => current_user_can( AW_SRC_CAP ),
 				),
@@ -146,6 +146,6 @@ function sourceweb_ui_page( string $screen ): bool {
 		'enrichment' => __( 'Enrichment review', 'aw-sourcing' ),
 		'settings'   => __( 'SourceWeb settings', 'aw-sourcing' ),
 	);
-	kits_shell_mount( 'sourceweb-app', $titles[ $screen ], remove_query_arg( 'ui' ), __( 'Open the current screen', 'aw-sourcing' ) );
+	kits_shell_mount( 'sourceweb-app', $titles[ $screen ], add_query_arg( 'ui', 'classic' ), __( 'Open the current screen', 'aw-sourcing' ) );
 	return true;
 }

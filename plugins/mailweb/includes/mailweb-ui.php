@@ -23,7 +23,7 @@ const MAILWEB_REST = 'mailweb/v1';
 function mailweb_ui_wanted(): string {
 	$page = sanitize_key( wp_unslash( $_GET['page'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- which screen to show; nothing is saved here
 	$ui   = sanitize_key( wp_unslash( $_GET['ui'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- same
-	if ( 'next' !== $ui ) {
+	if ( 'classic' === $ui ) {
 		return '';
 	}
 	// Today's Inbox handles its message, form item and compose views itself.
@@ -118,7 +118,7 @@ add_action(
 					'version'    => MAILWEB_VERSION,
 					'icon'       => plugins_url( 'assets/icon.svg', MAILWEB_FILE ),
 					'tabs'       => $tabs,
-					'oldUrl'     => remove_query_arg( 'ui' ),
+					'oldUrl'     => add_query_arg( 'ui', 'classic' ),
 					'rest'       => MAILWEB_REST,
 					'admin'      => $admin,
 					'inboxUrl'   => mailweb_ui_url( 'inbox' ),
@@ -157,6 +157,6 @@ function mailweb_ui_page( string $screen ): bool {
 		'inbox'     => __( 'MailWeb inbox', 'mailweb' ),
 		'settings'  => __( 'MailWeb settings', 'mailweb' ),
 	);
-	kits_shell_mount( 'mailweb-app', $titles[ $screen ], remove_query_arg( 'ui' ), __( 'Open the current screen', 'mailweb' ) );
+	kits_shell_mount( 'mailweb-app', $titles[ $screen ], add_query_arg( 'ui', 'classic' ), __( 'Open the current screen', 'mailweb' ) );
 	return true;
 }

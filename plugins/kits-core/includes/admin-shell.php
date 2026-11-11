@@ -112,10 +112,11 @@ function kits_shell_mount( string $id, string $title, string $fallback_url, stri
 }
 
 /**
- * The trial switch every new screen sits behind: the current screen's address with &ui=next.
+ * Every Kits plugin screen shows its new look by default (owner, 12 Nov 2026: "Yes, switch"); &ui=classic on the
+ * same address shows the earlier screen (each new screen links to it as "Open the current screen").
  */
 function kits_shell_ui_next(): bool {
-	return 'next' === sanitize_key( wp_unslash( $_GET['ui'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- which screen to show; nothing is saved here.
+	return 'classic' !== sanitize_key( wp_unslash( $_GET['ui'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- which screen to show; nothing is saved here.
 }
 
 /**
