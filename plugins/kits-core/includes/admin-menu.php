@@ -7,7 +7,7 @@
  *   tests/admin-menu-tests.php without WordPress.
  * - Any other screen a plugin adds under Kits leaves the menu but keeps its address (a hidden screen), so a link to it
  *   still opens. A site says which of the six tabs is lit on such a screen through kits_screen_tabs.
- * - Old addresses redirect with a 302 on admin_init (§E1), only for GET, keeping their other query values. Kits Core's
+ * - Old addresses redirect with a 302 at the end of admin_menu (§E1), only for GET, keeping their other query values. Kits Core's
  *   own are in kits_menu_redirects_core(); a site adds its own through kits_admin_redirects. Kept for two releases.
  * - Home, Settings and Help are made of sections: one box each, listed at the top and opened by #id. Kits Core adds its
  *   own; a site adds more through kits_home_sections, kits_settings_sections and kits_help_sections (§E3). A section
@@ -102,9 +102,10 @@ function kits_admin_redirects(): array {
 	return (array) apply_filters( 'kits_admin_redirects', kits_menu_redirects_core() );
 }
 
-// Old addresses: a 302 to the new place, on GET only (a form sent to an old address is not turned into a GET).
+// Old addresses: a 302 to the new place, on GET only (a form sent to an old address is not turned into a GET). On
+// admin_menu, after every screen is added: WordPress refuses an address no screen has before admin_init runs.
 add_action(
-	'admin_init',
+	'admin_menu',
 	function () {
 		if ( ! isset( $_GET['page'] ) || 'get' !== sanitize_key( wp_unslash( $_SERVER['REQUEST_METHOD'] ?? 'GET' ) ) || wp_doing_ajax() ) { // phpcs:ignore WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- which screen is asked for; nothing is saved.
 			return;
@@ -122,7 +123,7 @@ add_action(
 			exit;
 		}
 	},
-	1 // Before the screens' own admin_init work.
+	10000 // After the menu is complete (admin-screens.php sorts it at 1000).
 );
 
 /**

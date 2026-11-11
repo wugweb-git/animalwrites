@@ -98,11 +98,12 @@ if [ "$(wp eval 'global $wpdb; echo (int) $wpdb->get_var( "SELECT COUNT(*) FROM 
 echo "-- kits menu (administrator)"
 has() { if grep -qF -- "$3" "$2"; then echo "ok   $1"; else echo "FAIL $1"; FAIL=1; fi; }
 opts() { wp eval 'global $wpdb; foreach ( $wpdb->get_results( "SELECT option_name, option_value FROM {$wpdb->options} WHERE option_name NOT LIKE \"%transient%\" AND option_name NOT IN (\"cron\",\"recently_activated\") ORDER BY option_name" ) as $r ) { echo $r->option_name, " ", md5( $r->option_value ), "\n"; }'; }
-opts >/tmp/opts-before.txt
 JAR=/tmp/ci-cookies.txt; rm -f "$JAR"
 curl -s -o /dev/null -c "$JAR" http://127.0.0.1:8080/wp-login.php
 curl -s -o /dev/null -b "$JAR" -c "$JAR" --data-urlencode log=ci --data-urlencode pwd=ci-only --data-urlencode testcookie=1 --data-urlencode redirect_to=http://127.0.0.1:8080/wp-admin/ http://127.0.0.1:8080/wp-login.php
 adm() { curl -s -b "$JAR" -o /tmp/admin.html -w '%{http_code}' "http://127.0.0.1:8080/wp-admin/$1"; }
+adm "" >/dev/null # the first admin request runs the site's hourly checks (e.g. aw_error_pages); settings are read after it
+opts >/tmp/opts-before.txt
 admok() { # NAME PATH: 200, no PHP error, not refused
   code=$(adm "$2")
   if [ "$code" = "200" ] && ! grep -qiE 'critical error|Fatal error|Parse error|Sorry, you are not allowed' /tmp/admin.html; then echo "ok   $code $1"; else echo "FAIL $code $1"; FAIL=1; fi
@@ -160,7 +161,7 @@ MAP
 if [ -n "${KITS_SNAPSHOT:-}" ] && command -v wget >/dev/null; then
   sed 's/^#HttpOnly_//' "$JAR" >/tmp/ci-cookies-wget.txt
   for s in kits kits-options kits-settings kits-plugins kits-tools kits-help; do
-    wget -q -E -k -K -p --load-cookies /tmp/ci-cookies-wget.txt -P "$KITS_SNAPSHOT" "http://127.0.0.1:8080/wp-admin/admin.php?page=$s" || true
+    wget -q -E -k -K -p -nH --restrict-file-names=windows --load-cookies /tmp/ci-cookies-wget.txt -P "$KITS_SNAPSHOT" "http://127.0.0.1:8080/wp-admin/admin.php?page=$s" || true
   done
   echo "ok   Kits screens saved to $KITS_SNAPSHOT"
 fi
