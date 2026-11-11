@@ -45,6 +45,8 @@ plugins/animal-writes-core/assets/css/campaign.css | css Hero | .aw-camp--commun
 plugins/animal-writes-core/includes/team-dates.php | admin style | <style> block
 # 11 Nov 2026, owner-approved admin UI spec (docs/admin-ui-spec.md): core's own component styles for the new Kits screens.
 plugins/kits-core/includes/admin-app.php | admin style | wp_enqueue_style( 'wp-components'
+plugins/kits-core/includes/admin-shell.php | admin style | wp_enqueue_style( 'kits-shell'
+plugins/kits-core/includes/admin-shell.php | admin style | wp_register_style( 'kits-shell'
 # PlanWeb (owner, 11 Nov 2026): its own menu and the interim Calendar screen until the Kits Core shell (docs/calendar-plugin-plan.md).
 plugins/planweb/assets/admin.css | admin style | stylesheet file
 plugins/planweb/includes/admin.php | admin page | add_menu_page( __( 'Calendar', 'planweb' ), __( 'PlanWeb', 'planweb' ), 'edit_planweb_entries', PLANWEB_MENU, 'planweb_screen', 'dashicons-calendar-alt', 3 );
