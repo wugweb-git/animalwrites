@@ -57,12 +57,6 @@
                                 "image": ""
                             },
                             {
-                                "label": "Report a mistake",
-                                "value": "correction",
-                                "calc_value": "",
-                                "image": ""
-                            },
-                            {
                                 "label": "Remove my data",
                                 "value": "remove",
                                 "calc_value": "",
@@ -1065,6 +1059,42 @@
                     },
                     "settings": {
                         "admin_field_label": "Page title"
+                    },
+                    "editor_options": {
+                        "title": "Hidden Field",
+                        "icon_class": "ff-edit-hidden-field",
+                        "template": "inputHidden"
+                    }
+                },
+                {
+                    "index": 21,
+                    "element": "input_hidden",
+                    "uniqElKey": "el_aw_report_item",
+                    "attributes": {
+                        "type": "hidden",
+                        "name": "report_item",
+                        "value": "{aw.report_item}"
+                    },
+                    "settings": {
+                        "admin_field_label": "Reported item ID"
+                    },
+                    "editor_options": {
+                        "title": "Hidden Field",
+                        "icon_class": "ff-edit-hidden-field",
+                        "template": "inputHidden"
+                    }
+                },
+                {
+                    "index": 21,
+                    "element": "input_hidden",
+                    "uniqElKey": "el_aw_report_path",
+                    "attributes": {
+                        "type": "hidden",
+                        "name": "report_path",
+                        "value": "{aw.report_path}"
+                    },
+                    "settings": {
+                        "admin_field_label": "Reported page path"
                     },
                     "editor_options": {
                         "title": "Hidden Field",

@@ -85,13 +85,14 @@ function aw_claim_url( $id ) {
 const AW_CORRECTION_FIELDS = array( 'picture', 'about', 'phone', 'email', 'address', 'hours' );
 
 /**
- * Report a mistake is a Contact reason (owner, 31 Oct 2026): /contact/?about=correction&item=<ID> for a listing, News,
- * Library or Resource item, and &field= for an empty listing field. The form fills the page from the link
- * ({aw.item_title}, reports.php) and the field ({get.field}). Escape the result once, where it is printed.
+ * Report a mistake and Suggest an update link to the Contact form (owner, 12 Nov 2026: no Report a mistake reason in the
+ * menu): /contact/?about=general&item=<ID> for a listing, News, Library or Resource item, and &field= for an empty listing
+ * field. The form fills the Message box from the link and saves the item's ID and path in the hidden fields report_item
+ * and report_path (reports.php). Escape the result once, where it is printed.
  */
 function aw_report_url( $id, $field = '' ) {
 	$field = in_array( $field, AW_CORRECTION_FIELDS, true ) ? $field : '';
-	return add_query_arg( array_filter( array( 'about' => 'correction', 'item' => (int) $id, 'field' => $field ) ), home_url( '/contact/' ) );
+	return add_query_arg( array_filter( array( 'about' => 'general', 'item' => (int) $id, 'field' => $field ) ), home_url( '/contact/' ) );
 }
 // /report/ and /remove-my-data/ are Rank Math redirects to the Contact reasons; Rank Math keeps the query string, so
 // /report/?item=<ID> and the older /report/?listing=<ID> still name the item (reports.php reads both).

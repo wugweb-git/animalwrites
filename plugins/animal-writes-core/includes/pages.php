@@ -62,11 +62,11 @@ const AW_CONTACT_ABOUT = array(
 	'listing'     => 'List your organisation',
 	'opportunity' => 'Post an opportunity',
 	'partnership' => 'Partner with us',
-	'correction'  => 'Report a mistake',
+	'correction'  => 'Report a mistake', // entries from before 12 Nov 2026 (no longer a reason in the menu)
 	'remove'      => 'Remove my data',
 	'remove-data' => 'Remove my data', // messages from before 21 Oct 2026
 );
-/** Message placeholder by reason (Phase 11 H4). Report a mistake fills the Message itself ({aw.correction_message}). */
+/** Message placeholder by reason (Phase 11 H4). A Report a mistake link fills the Message itself ({aw.correction_message}). */
 const AW_CONTACT_PLACEHOLDER = array(
 	'listing' => 'Organisation name, district, services, phone or email',
 );
@@ -434,14 +434,25 @@ function aw_elsewhere_screen() {
 	echo '</form></div>';
 }
 
-// Report a mistake and Remove my data are Contact reasons again (owner, 31 Oct 2026: one Contact form; the Report and
-// Remove pages are Rank Math redirects here). Older links to the removal reason, ?about=remove-data, open ?about=remove.
+// Remove my data is a Contact reason (owner, 31 Oct 2026: one Contact form; the Report and Remove pages are Rank Math
+// redirects here). Older links to the removal reason, ?about=remove-data, open ?about=remove. Report a mistake is no
+// longer a reason (owner, 12 Nov 2026): older ?about=correction links open ?about=general with the same item and field.
 add_action(
 	'template_redirect',
 	function () {
+		if ( ! is_page( 'contact' ) ) {
+			return;
+		}
 		$about = sanitize_key( wp_unslash( $_GET['about'] ?? ( $_GET['type'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
-		if ( 'remove-data' === $about && is_page( 'contact' ) ) {
+		if ( 'remove-data' === $about ) {
 			wp_safe_redirect( add_query_arg( 'about', 'remove', home_url( '/contact/' ) ), 301, 'Animal Writes' );
+			exit;
+		}
+		if ( 'correction' === $about ) {
+			$item  = function_exists( 'aw_report_get_item' ) ? aw_report_get_item() : null;
+			$field = sanitize_key( wp_unslash( $_GET['field'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
+			$url   = $item && function_exists( 'aw_report_url' ) ? aw_report_url( $item->ID, $field ) : add_query_arg( 'about', 'general', home_url( '/contact/' ) );
+			wp_safe_redirect( $url, 301, 'Animal Writes' );
 			exit;
 		}
 	}
@@ -467,7 +478,7 @@ add_filter(
 );
 
 /*
- * Contact page: the "For organisations" rows and "Report a mistake" lead to the contact form on the same page with that
+ * Contact page: the "For organisations" rows and "Remove my data" lead to the contact form on the same page with that
  * reason chosen (/contact/?about=listing#write; aw.js chooses it in place without a reload).
  */
 add_filter(
@@ -478,7 +489,7 @@ add_filter(
 		}
 		$text = trim( html_entity_decode( wp_strip_all_tags( $html ), ENT_QUOTES ) );
 		$key  = array_search( $text, AW_CONTACT_ABOUT, true );
-		if ( ! $key || ! in_array( $key, array( 'listing', 'opportunity', 'partnership', 'correction', 'remove' ), true ) ) {
+		if ( ! $key || ! in_array( $key, array( 'listing', 'opportunity', 'partnership', 'remove' ), true ) ) {
 			return $html;
 		}
 		$url = add_query_arg( 'about', $key, get_permalink() ) . '#write';

@@ -65,22 +65,36 @@ function aw_report_item( $id ) {
 	return $p && isset( AW_REPORT_TYPES[ $p->post_type ] ) && 'publish' === $p->post_status ? $p : null;
 }
 
+/** The item a Report a mistake or Suggest an update link names (/contact/?item=<ID>, or the older ?listing=), or null. */
+function aw_report_get_item() {
+	return aw_report_item( absint( wp_unslash( $_GET['item'] ?? ( $_GET['listing'] ?? 0 ) ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
+}
+
 /**
- * {aw.correction_message}: the Contact form's Message box, pre-filled for Report a mistake (owner, 31 Oct 2026: one
- * standard form, no extra fields). /contact/?about=correction&item=<ID>[&field=<x>] (or the older ?listing=) gives
- * "Page: {title}", "Field: {field}" (only when given), the page's link and an empty line. Otherwise empty. Only a
- * published listing, News, Library or Resource item. Fluent Forms has no smartcode for another page's title.
+ * The Contact form's fields filled from a Report a mistake or Suggest an update link (/contact/?about=general&item=<ID>
+ * [&field=<x>], aw_report_url(); owner, 12 Nov 2026: no Report a mistake reason in the menu, the item's ID and path are
+ * captured instead). Only a published listing, News, Library or Resource item; otherwise empty.
+ * - {aw.correction_message}: the Message box, "Page: {title}", "Field: {field}" (only when given), the page's link and an
+ *   empty line. Fluent Forms has no smartcode for another page's title.
+ * - {aw.report_item}: the hidden field report_item, the item's ID.
+ * - {aw.report_path}: the hidden field report_path, the item's path (/directory/…/).
  */
 add_filter(
 	'fluentform/editor_shortcode_callback_group_aw',
 	function ( $value, $form, $keys ) {
-		if ( 'correction_message' !== (string) ( $keys[0] ?? '' ) ) {
+		$key = (string) ( $keys[0] ?? '' );
+		if ( ! in_array( $key, array( 'correction_message', 'report_item', 'report_path' ), true ) ) {
 			return $value;
 		}
-		$about = sanitize_key( wp_unslash( $_GET['about'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
-		$item  = 'correction' === $about ? aw_report_item( absint( wp_unslash( $_GET['item'] ?? ( $_GET['listing'] ?? 0 ) ) ) ) : null; // phpcs:ignore WordPress.Security.NonceVerification
+		$item = aw_report_get_item();
 		if ( ! $item ) {
 			return '';
+		}
+		if ( 'report_item' === $key ) {
+			return (string) $item->ID;
+		}
+		if ( 'report_path' === $key ) {
+			return esc_html( (string) wp_parse_url( (string) get_permalink( $item ), PHP_URL_PATH ) );
 		}
 		$fields = array( 'picture' => 'Picture', 'about' => 'About', 'phone' => 'Phone', 'email' => 'Email', 'address' => 'Address', 'hours' => 'Opening hours' );
 		$field  = $fields[ sanitize_key( wp_unslash( $_GET['field'] ?? '' ) ) ] ?? ''; // phpcs:ignore WordPress.Security.NonceVerification

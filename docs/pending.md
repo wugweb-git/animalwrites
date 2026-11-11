@@ -373,6 +373,7 @@ These live in WordPress: **Kits → Dates** (month calendar, add and remove) and
 
 ## Done (12 Nov 2026)
 
+- **Contact form: Report a mistake off the menu (owner, 12 Nov):** the "What's this about?" menu no longer lists Report a mistake. Report a mistake and Suggest an update links open `/contact/?about=general&item=<ID>[&field=]`: General question chosen, the Message box filled as before, and the item's ID and path saved in the hidden fields `report_item` and `report_path` (shown in Mail → Website forms and the FluentCRM note). Older `?about=correction` links redirect there. GA4: `report_sent` (which keys on `contact_reason` = `correction`) no longer fires and these sends now count as `contact_sent`; GTM is unchanged.
 - Inbox round (12 Nov): every mailbox, Spam and all 30 Website forms entries answered from support@, except AW-12 (junk). Bounces checked: only bad, full or fake addresses; nothing from our side. abc@gmail.com and test@gmail.com taken off the Newsletter list (contacts kept).
 - MailWeb 3.3.0 live (d093a1fc): a Status column (New, Read, Replied, Forwarded) in every list except Sent, and in Website forms. Replied also counts replies sent outside MailWeb.
 
