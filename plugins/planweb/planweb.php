@@ -9,7 +9,7 @@
  *
  * @wordpress-plugin
  * Plugin Name:       PlanWeb
- * Description:       The team's calendar inside WordPress: dates, content, social, email and campaign plans with type, channel, owner and status, a month view and a Dashboard box. Nothing is posted or sent from it. A Kits plugin (needs Kits Core).
+ * Description:       The team's calendar in WordPress: dates and content, social, email and campaign plans. Nothing is posted or sent from it. Needs Kits Core.
  * Version:           0.1.0
  * Requires at least: 6.4
  * Requires PHP:      8.0
