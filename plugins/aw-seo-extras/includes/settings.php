@@ -203,7 +203,7 @@ function aw_seo_modules(): array {
 			'label'  => 'FAQ',
 			'switch' => true,
 			'files'  => array( 'faq' ),
-			'desc'   => 'The FAQ box on the edit screen of every public post type and taxonomy (which ones: RankWeb → FAQ), and the questions and answers with FAQPage schema on the page. Automatic questions from a page\'s own fields fill the box where the site provides them.',
+			'desc'   => 'The FAQ box on the edit screen of every public post type and taxonomy (which ones: Plugins → RankWeb → FAQ), and the questions and answers with FAQPage schema on the page. Automatic questions from a page\'s own fields fill the box where the site provides them.',
 			'fields' => array(
 				'AW_FAQ_MIN' => array( 'type' => 'int', 'label' => 'Fewest questions (pages and every other type)', 'help' => 'Fewer than this: no FAQ and no schema.', 'default' => 3 ),
 				'AW_FAQ_MIN_GUIDE' => array( 'type' => 'int', 'label' => 'Fewest questions on a post (Resources guides)', 'help' => '', 'default' => 2 ),
@@ -513,6 +513,7 @@ function aw_seo_settings_page() {
 	}
 	$tab = aw_seo_settings_tab();
 	echo '<div class="wrap"><h1>RankWeb settings</h1>';
+	aw_seo_screen_tabs();
 	if ( isset( $_GET['saved'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		echo '<div class="notice notice-success is-dismissible"><p>' . ( 'reset' === $_GET['saved'] ? 'Defaults restored.' : 'Settings saved.' ) . ' A module switched on or off takes effect on the next page load.</p></div>'; // phpcs:ignore WordPress.Security.NonceVerification
 	}

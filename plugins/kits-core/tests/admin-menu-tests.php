@@ -17,6 +17,7 @@ if ( 'cli' !== PHP_SAPI ) {
 }
 define( 'ABSPATH', __DIR__ . '/' );
 require dirname( __DIR__ ) . '/includes/admin-menu-model.php';
+require dirname( __DIR__ ) . '/includes/admin-fold-model.php';
 
 $fails = 0;
 $count = 0;
@@ -38,8 +39,8 @@ function kits_t( bool $ok, string $name ) {
 
 // The six, in order (§B), with their capabilities.
 $six = kits_menu_six( 'kits' );
-kits_t( array( 'kits', 'kits-options', 'kits-settings', 'kits-plugins', 'kits-tools', 'kits-help' ) === array_keys( $six ), 'six items in the spec order' );
-kits_t( array( 'Home', 'Theme Options', 'Settings', 'Plugins', 'Tools', 'Help' ) === array_column( $six, 0 ), 'six labels' );
+kits_t( array( 'kits', 'kits-options', 'kits-settings', 'kits-tools', 'kits-help' ) === array_keys( $six ), 'five items in the spec order (Plugins is WordPress\'s own)' );
+kits_t( array( 'Home', 'Theme Options', 'Settings', 'Tools', 'Help' ) === array_column( $six, 0 ), 'five labels' );
 kits_t( 'edit_theme_options' === $six['kits-tools'][2], 'Tools: edit_theme_options' );
 kits_t( 'manage_options' === $six['kits'][2] && 'manage_options' === $six['kits-help'][2], 'Home and Help: manage_options' );
 foreach ( $six as $slug => $t ) {
@@ -64,6 +65,7 @@ $want = array(
 	'kits-docs'          => 'admin.php?page=kits-help#docs',
 	'kits-system'        => 'admin.php?page=kits-help#design-system',
 	'kits-preview'       => 'admin.php?page=kits-settings#preview',
+	'kits-plugins'       => 'plugins.php',
 	'animal-writes'      => 'admin.php?page=kits',
 	'aw-site-check'      => 'admin.php?page=kits#page-check',
 	'aw-elsewhere'       => 'admin.php?page=kits-options#socials',
@@ -74,7 +76,7 @@ foreach ( $want as $old => $to ) {
 	kits_t( kits_menu_redirect_target( $old, array( 'page' => $old ), $map ) === $to, "$old redirects to $to" );
 }
 // They stay where they are: the six, Keys, Modules, Dates (owner, 11 Nov 2026), and anything unknown.
-foreach ( array( 'kits', 'kits-options', 'kits-settings', 'kits-plugins', 'kits-tools', 'kits-help', 'aw-keys', 'aw-modules', 'aw-dates', 'planweb', 'something-else', '' ) as $stay ) {
+foreach ( array( 'kits', 'kits-options', 'kits-settings', 'kits-tools', 'kits-help', 'aw-keys', 'aw-modules', 'aw-dates', 'planweb', 'something-else', '' ) as $stay ) {
 	kits_t( '' === kits_menu_redirect_target( $stay, array( 'page' => $stay ), $map ), "$stay does not redirect" );
 }
 // Other query values are kept, the section goes last, and odd values are encoded.
@@ -105,10 +107,10 @@ $items = array(
 	array( 'Home again', 'manage_options', 'kits', 'Home again' ),
 );
 list( $kept, $hidden ) = kits_menu_split( $items, $six );
-kits_t( array_keys( $six ) === array_column( $kept, 2 ), 'menu is the six in order' );
-kits_t( array( 'aw-keys', 'aw-modules', 'aw-dates', 'kits' ) === array_column( $hidden, 2 ), 'Keys, Modules, Dates and a second Home leave the menu' );
+kits_t( array_keys( $six ) === array_column( $kept, 2 ), 'menu is the five in order' );
+kits_t( array( 'kits-plugins', 'aw-keys', 'aw-modules', 'aw-dates', 'kits' ) === array_column( $hidden, 2 ), 'Plugins, Keys, Modules, Dates and a second Home leave the menu' );
 list( $kept ) = kits_menu_split( array_slice( $items, 0, 3 ), $six );
-kits_t( array( 'kits', 'kits-plugins' ) === array_column( $kept, 2 ), 'a missing item leaves no gap' );
+kits_t( array( 'kits' ) === array_column( $kept, 2 ), 'a missing item leaves no gap' );
 
 // The tabs filter cannot add a seventh tab; it may change a label.
 $filtered                  = $six;
@@ -119,6 +121,40 @@ kits_t( array_keys( $six ) === array_keys( $tabs ), 'a seventh tab is dropped' )
 kits_t( 'Help and docs' === $tabs['kits-help'][0], 'a label can change' );
 $tabs = kits_menu_tabs_only_six( array( 'kits' => 'broken' ), $six );
 kits_t( $six['kits'] === $tabs['kits'], 'a broken tab falls back to the default' );
+
+// Folded menus (owner, 11 Nov 2026: Kits under Appearance, our plugins under Plugins; includes/admin-fold-model.php).
+kits_t( 'admin.php?page=kits' === kits_fold_link( 'kits' ), 'a folded menu\'s item opens its first screen at the old address' );
+$folds = array(
+	'kits'    => 'themes.php',
+	'mailweb' => 'plugins.php',
+);
+$sub   = array(
+	'themes.php'  => array( array( 'Themes', 'switch_themes', 'themes.php' ), array( 'Kits', 'manage_options', 'admin.php?page=kits' ) ),
+	'plugins.php' => array( array( 'Installed Plugins', 'activate_plugins', 'plugins.php' ), array( 'MailWeb', 'edit_posts', 'admin.php?page=mailweb' ) ),
+	'kits'        => array( array( 'Home', 'manage_options', 'kits' ), array( 'Settings', 'manage_options', 'kits-settings' ) ),
+	'mailweb'     => array( array( 'Inbox', 'edit_posts', 'mailweb' ), array( 'Settings', 'manage_options', 'mailweb-settings' ) ),
+	''            => array( array( 'Keys', 'manage_options', 'aw-keys' ) ),
+	'tools.php'   => array( array( 'Tools', 'edit_posts', 'tools.php' ), array( 'Other', 'manage_options', 'other-page' ) ),
+);
+kits_t( 'kits' === kits_fold_owner( $sub, $folds, 'kits-settings', 'kits' ), 'a Kits screen belongs to Kits' );
+kits_t( 'mailweb' === kits_fold_owner( $sub, $folds, 'mailweb-settings', 'kits' ), 'the first submenu that lists a screen wins over a parent another filter named' );
+kits_t( 'kits' === kits_fold_owner( $sub, $folds, 'aw-keys', 'kits' ), 'a hidden screen belongs to the folded menu its parent_file filter named' );
+kits_t( '' === kits_fold_owner( $sub, $folds, 'aw-keys', '' ), 'a hidden screen no filter claims belongs to none' );
+kits_t( '' === kits_fold_owner( $sub, $folds, 'other-page', 'tools.php' ), 'a screen under an ordinary menu belongs to none' );
+kits_t( '' === kits_fold_owner( $sub, $folds, '', 'tools.php' ), 'a core screen (no page=) belongs to none' );
+$tabs = kits_fold_tabs(
+	array(
+		array( 'Inbox <span class="awaiting-mod count-3"><span class="pending-count">3</span></span>', 'edit_posts', 'mailweb' ),
+		array( 'Settings', 'manage_options', 'mailweb-settings' ),
+		array( 'Keywords', 'manage_options', 'admin.php?page=aw-sourcing&tab=keywords' ),
+		array( '', 'manage_options', 'no-label' ),
+		'broken',
+	),
+	'admin.php?page=aw-sourcing&tab=keywords'
+);
+kits_t( array( 'Inbox', 'Settings', 'Keywords', 'no-label' ) === array_column( $tabs, 0 ), 'tab labels: the text before any count bubble, else the slug; broken entries left out' );
+kits_t( array( 'admin.php?page=mailweb', 'admin.php?page=mailweb-settings', 'admin.php?page=aw-sourcing&tab=keywords', 'admin.php?page=no-label' ) === array_column( $tabs, 1 ), 'tab addresses: page= for a screen, as is for an address' );
+kits_t( array( false, false, true, false ) === array_column( $tabs, 2 ), 'the current tab is the one asked for' );
 
 echo "$count checks, $fails failed\n";
 exit( $fails ? 1 : 0 );

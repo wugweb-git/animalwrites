@@ -616,6 +616,7 @@ function aw_sourcing_page() {
 		echo ' <a href="' . esc_url( $add[ $tab ][1] ) . '" class="page-title-action">' . esc_html( $add[ $tab ][0] ) . '</a>';
 	}
 	echo '<hr class="wp-header-end">';
+	aw_sourcing_screen_tabs();
 	settings_errors(); // the Settings API forms' notices: WordPress prints them by itself only on Settings screens
 	if ( ! empty( $_GET['updated'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		echo '<div class="notice notice-success is-dismissible"><p>Saved. The workers use this from their next run.</p></div>';

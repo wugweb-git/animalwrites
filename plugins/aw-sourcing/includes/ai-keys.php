@@ -1026,7 +1026,7 @@ function aw_ai_keys_screen() {
 		$skip = absint( wp_unslash( $_GET['skip'] ?? 0 ) ); // phpcs:ignore WordPress.Security.NonceVerification
 		$msg  = array(
 			/* translators: %d: number of keys. */
-			'remove'  => _n( '%d key removed. The news workers stop using it from their next run; it is noted in SourceWeb → Change log.', '%d keys removed. The news workers stop using them from their next run; they are noted in SourceWeb → Change log.', $n ),
+			'remove'  => _n( '%d key removed. The news workers stop using it from their next run; it is noted in Plugins → SourceWeb → Change log.', '%d keys removed. The news workers stop using them from their next run; they are noted in Plugins → SourceWeb → Change log.', $n ),
 			/* translators: %d: number of keys. */
 			'recheck' => _n( '%d key is being checked again in the background: reload in a few minutes.', '%d keys are being checked again in the background: reload in a few minutes.', $n ),
 			'up'      => 'Moved up. The workers try the keys from the top down.',

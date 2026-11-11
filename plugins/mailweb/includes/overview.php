@@ -190,7 +190,8 @@ function mailweb_overview_widget( $max ) {
 	echo '<p><a href="' . esc_url( $inbox ) . '">' . esc_html__( 'Open Mail', 'mailweb' ) . '</a></p>';
 }
 
-// Top-level "MailWeb" menu with the unread badge (hidden at 0).
+// Plugins → MailWeb with the unread badge (hidden at 0), opening the inbox (owner, 11 Nov 2026: "all plugins" under
+// Plugins); Overview and Settings are its tabs (mailweb_screen_tabs()). Without Kits Core, a menu of its own as before.
 add_action(
 	'admin_menu',
 	function () {
@@ -199,7 +200,11 @@ add_action(
 		}
 		$n     = mailweb_overview_unread() + ( function_exists( 'mailweb_forms_unread' ) ? mailweb_forms_unread() : 0 );
 		$badge = $n ? ' <span class="awaiting-mod count-' . (int) $n . '"><span class="pending-count">' . (int) $n . '</span></span>' : '';
-		add_menu_page( __( 'MailWeb', 'mailweb' ), __( 'MailWeb', 'mailweb' ) . $badge, MAILWEB_CAP, 'mailweb', 'mailweb_inbox_page', 'dashicons-email', 27 ); // the inbox (inbox.php)
+		if ( function_exists( 'kits_admin_fold_menu' ) ) {
+			kits_admin_fold_menu( 'mailweb', 'plugins.php', __( 'MailWeb', 'mailweb' ) . $badge, MAILWEB_CAP, 'mailweb' ); // the screens: toplevel_page_mailweb, mailweb_page_…
+		} else {
+			add_menu_page( __( 'MailWeb', 'mailweb' ), __( 'MailWeb', 'mailweb' ) . $badge, MAILWEB_CAP, 'mailweb', 'mailweb_inbox_page', 'dashicons-email', 27 ); // the inbox (inbox.php)
+		}
 		add_submenu_page( 'mailweb', __( 'MailWeb', 'mailweb' ), __( 'Inbox', 'mailweb' ), MAILWEB_CAP, 'mailweb', 'mailweb_inbox_page' );
 		add_submenu_page( 'mailweb', __( 'MailWeb overview', 'mailweb' ), __( 'Overview', 'mailweb' ), MAILWEB_CAP, 'mailweb-overview', 'mailweb_home_page' ); // home.php
 		add_submenu_page( 'mailweb', __( 'MailWeb settings', 'mailweb' ), __( 'Settings', 'mailweb' ), 'manage_options', 'mailweb-settings', 'mailweb_settings_page' ); // settings-tab.php
@@ -218,3 +223,10 @@ add_action(
 
 // FluentCRM's dashboard: no "Set Up FluentSMTP" card; MailWeb sends the site's email.
 add_filter( 'fluent_crm/fluentmail_suggest', '__return_true' );
+
+/** MailWeb's screens as tabs under a screen's heading (Inbox, Overview, Settings; those the user may open). */
+function mailweb_screen_tabs() {
+	if ( function_exists( 'kits_admin_fold_tabs' ) ) {
+		kits_admin_fold_tabs( 'mailweb', __( 'MailWeb screens', 'mailweb' ) );
+	}
+}

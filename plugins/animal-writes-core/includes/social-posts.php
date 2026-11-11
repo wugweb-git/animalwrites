@@ -68,7 +68,7 @@ add_action(
 		register_setting( 'aw_modules', 'aw_social_on', $flag );
 		register_setting( 'aw_modules', 'aw_social_show', $flag );
 		add_settings_section( 'aw_modules_social', 'Social posts', 'aw_social_settings_intro', 'aw-modules' );
-		add_settings_field( 'aw_social_on', 'Social posts type', 'aw_social_settings_field', 'aw-modules', 'aw_modules_social', array( 'label_for' => 'aw_social_on', 'note' => 'The Social posts list under News, its intake (paste a link in SourceWeb → To review, the CSV import, the workers\' routes) and the hashtag box on each campaign. Off: hidden; saved records are kept.' ) );
+		add_settings_field( 'aw_social_on', 'Social posts type', 'aw_social_settings_field', 'aw-modules', 'aw_modules_social', array( 'label_for' => 'aw_social_on', 'note' => 'The Social posts list under News, its intake (paste a link in Plugins → SourceWeb → To review, the CSV import, the workers\' routes) and the hashtag box on each campaign. Off: hidden; saved records are kept.' ) );
 		add_settings_field( 'aw_social_show', 'Show on pages', 'aw_social_settings_field', 'aw-modules', 'aw_modules_social', array( 'label_for' => 'aw_social_show', 'note' => 'Approved social posts as "What people are saying" on the campaign, News, Library and Directory pages they are linked to. Needs the type on.' ) );
 	}
 );
@@ -81,7 +81,7 @@ add_action(
 
 /** Section text. */
 function aw_social_settings_intro() {
-	echo '<p>' . esc_html( 'Other people\'s public posts about a campaign or an item. Every record waits in SourceWeb → To review; nothing is published on its own.' ) . '</p>';
+	echo '<p>' . esc_html( 'Other people\'s public posts about a campaign or an item. Every record waits in Plugins → SourceWeb → To review; nothing is published on its own.' ) . '</p>';
 }
 
 /**
@@ -737,7 +737,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 		'aw social-import',
 		function ( $args, $assoc ) {
 			if ( ! aw_social_on() ) {
-				WP_CLI::error( 'Social posts are switched off (Kits → Modules).' );
+				WP_CLI::error( 'Social posts are switched off (Appearance → Kits → Modules).' );
 			}
 			$file = (string) ( $args[0] ?? '' );
 			if ( '' === $file || ! is_readable( $file ) ) {
@@ -1010,7 +1010,7 @@ function aw_social_card( WP_Post $p ): string {
 function aw_block_social_posts( $a = array(), $id = 0 ) {
 	static $done = array();
 	if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
-		return function_exists( 'aw_item_editor_preview' ) ? aw_item_editor_preview( 'What people are saying: approved social posts linked to this page (Kits → Modules → Show on pages)' ) : '';
+		return function_exists( 'aw_item_editor_preview' ) ? aw_item_editor_preview( 'What people are saying: approved social posts linked to this page (Appearance → Kits → Modules → Show on pages)' ) : '';
 	}
 	$id = (int) ( $id ? $id : get_the_ID() );
 	if ( ! aw_social_show() || ! $id || isset( $done[ $id ] ) || ! is_singular() || get_queried_object_id() !== $id || 'publish' !== get_post_status( $id ) ) {
@@ -1068,7 +1068,7 @@ function aw_social_embed_script() {
 add_filter(
 	'aw_edit_screen_boxes',
 	function ( $boxes ) {
-		$boxes['acf-group_aw_social']          = array( 'title' => 'Social post', 'source' => 'Secure Custom Fields', 'plugin' => 'Animal Writes core', 'purpose' => 'Details', 'file' => 'acf-json/group_aw_social.json; core/social-posts.php', 'screen' => 'post', 'types' => array( AW_SOCIAL_TYPE ), 'runtime' => 'scf', 'notes' => 'Only while Kits → Modules → Social posts type is on. The link must be unique (acf/validate_value).' );
+		$boxes['acf-group_aw_social']          = array( 'title' => 'Social post', 'source' => 'Secure Custom Fields', 'plugin' => 'Animal Writes core', 'purpose' => 'Details', 'file' => 'acf-json/group_aw_social.json; core/social-posts.php', 'screen' => 'post', 'types' => array( AW_SOCIAL_TYPE ), 'runtime' => 'scf', 'notes' => 'Only while Appearance → Kits → Modules → Social posts type is on. The link must be unique (acf/validate_value).' );
 		$boxes['acf-group_aw_campaign_social'] = array( 'title' => 'Social posts', 'source' => 'Secure Custom Fields', 'plugin' => 'Animal Writes core', 'purpose' => 'Sourcing', 'file' => 'acf-json/group_aw_campaign_social.json; core/social-posts.php', 'screen' => 'post', 'types' => array( 'aw_campaign' ), 'runtime' => 'scf', 'notes' => 'Removed from the screen while the Social posts type is off.' );
 		return $boxes;
 	}

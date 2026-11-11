@@ -368,17 +368,22 @@ $kw_up = array( 'search_on' => 1, 'lang' => 'en', 'roles' => AW_KW_ROLE_SEARCH, 
 $kw_us = aw_kw_searches( $kw_up, array() );
 aw_t( isset( $kw_us[0]['url'] ) && ! isset( $kw_us[0]['q'] ), 'an HTTPS:// search address is a feed URL' );
 
-// ---- the Sourcing menu (owner, 25 Oct 2026: its own menu, Overview first, Plugins screen links, retired addresses gone) ----
+// ---- the SourceWeb screens (owner, 25 Oct 2026: Overview first, Plugins screen links, retired addresses gone; 11 Nov
+// 2026: one item under Plugins, the screens as tabs, the same addresses) ----
 $inc   = dirname( __DIR__ ) . '/includes/';
 $menu  = (string) file_get_contents( $inc . 'admin-menu.php' );
 aw_t( 'aw-sourcing-menu' === AW_SRC_MENU, 'the menu has its own slug' );
 aw_t( ! in_array( AW_SRC_MENU, array( AW_SRC_PAGE, 'aw-review', 'aw-enrich-review', 'aw-inbox' ), true ), 'the menu slug is no screen\'s slug' );
 aw_t( 'sourcing_page_' . AW_SRC_PAGE === AW_SRC_SCREEN, 'the page\'s screen id follows the menu\'s hook prefix ("sourcing")' );
-aw_t( false !== strpos( $menu, "add_menu_page( 'SourceWeb', 'SourceWeb', AW_REVIEW_CAP, AW_SRC_MENU, 'aw_sourcing_overview_page'" ), 'the menu is registered with the title "SourceWeb" and opens the Overview' );
-aw_t( false !== strpos( $menu, "\$GLOBALS['admin_page_hooks'][ AW_SRC_MENU ] = 'sourcing';" ), 'the menu\'s hook prefix stays "sourcing" (the screen id depends on it)' );
+aw_t( false !== strpos( $menu, "kits_admin_fold_menu( AW_SRC_MENU, 'plugins.php', 'SourceWeb' . \$count, AW_REVIEW_CAP, 'sourcing' );" ), 'Plugins → SourceWeb, with the To review count, opens the Overview; the hook prefix stays "sourcing" (the screen id depends on it)' );
+aw_t( false === strpos( $menu, "'menu_order'" ), 'no top-level menu order of its own' );
+aw_t( false !== strpos( $menu, "add_menu_page( 'SourceWeb', 'SourceWeb', AW_REVIEW_CAP, AW_SRC_MENU, 'aw_sourcing_overview_page'" ) && false !== strpos( $menu, "\$GLOBALS['admin_page_hooks'][ AW_SRC_MENU ] = 'sourcing';" ), 'without Kits Core: its own menu, titled "SourceWeb", hook prefix "sourcing"' );
+foreach ( array( 'admin-menu.php', 'review-queue.php', 'enrichment-admin.php', 'sourcing-policy.php' ) as $f ) {
+	aw_t( false !== strpos( (string) file_get_contents( $inc . $f ), 'aw_sourcing_screen_tabs();' ), "the screen in $f shows the SourceWeb tabs" );
+}
 aw_t( false !== strpos( $menu, "add_submenu_page( AW_SRC_MENU, 'SourceWeb', 'Overview', AW_REVIEW_CAP, AW_SRC_MENU, 'aw_sourcing_overview_page' )" ), 'Overview is the first item, at the menu\'s slug' );
-aw_t( false !== strpos( (string) file_get_contents( $inc . 'review-queue.php' ), "add_submenu_page( AW_SRC_MENU, 'To review'" ), 'To review is on the Sourcing menu' );
-aw_t( false !== strpos( (string) file_get_contents( $inc . 'enrichment-admin.php' ), "add_submenu_page( AW_SRC_MENU, 'Enrichment review'" ), 'Enrichment review is on the Sourcing menu' );
+aw_t( false !== strpos( (string) file_get_contents( $inc . 'review-queue.php' ), "add_submenu_page( AW_SRC_MENU, 'To review'" ), 'To review is a SourceWeb screen' );
+aw_t( false !== strpos( (string) file_get_contents( $inc . 'enrichment-admin.php' ), "add_submenu_page( AW_SRC_MENU, 'Enrichment review'" ), 'Enrichment review is a SourceWeb screen' );
 // Phase 2 as on live, 25 Oct 2026 (kits_sourcing_tabs), plus the Relay log and Settings.
 $tabs  = array( 'sources' => 'Sources', 'keywords' => 'Keywords', 'press' => 'Press queries', 'categories' => 'Categories', 'sections' => 'Sections', 'summary' => 'Summary rules', 'enrich' => 'Directory enrichment', 'relay-log' => 'Relay log', 'settings' => 'Settings', 'ai' => 'AI models', 'workers' => 'Workers', 'rejected' => 'Rejected', 'log' => 'Change log' );
 aw_t( array( 'sources', 'keywords', 'press', 'categories', 'sections', 'summary', 'enrich', 'ai', 'workers', 'rejected', 'relay-log', 'log', 'settings' ) === array_keys( aw_src_menu_order( $tabs ) ), 'menu order: settings screens, then reports and jobs, then Settings' );

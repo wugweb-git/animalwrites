@@ -57,7 +57,7 @@ function mailweb_home_page() {
 		array(
 			__( 'Inbox', 'mailweb' ),
 			__( 'Read, reply, reply all, forward and write from every mailbox; folders, search, archive, spam, trash, attachments. Website forms appear as their own folder.', 'mailweb' ),
-			'<a href="' . esc_url( admin_url( 'admin.php?page=mailweb' ) ) . '">' . esc_html__( 'MailWeb → Inbox', 'mailweb' ) . '</a>',
+			'<a href="' . esc_url( admin_url( 'admin.php?page=mailweb' ) ) . '">' . esc_html__( 'Plugins → MailWeb → Inbox', 'mailweb' ) . '</a>',
 			esc_html( sprintf( /* translators: 1: unread emails, 2: unread form messages */ __( '%1$d unread emails, %2$d unread form messages.', 'mailweb' ), $unread, $forms ) ),
 		),
 		array(
@@ -116,6 +116,7 @@ function mailweb_home_page() {
 		}
 	}
 	echo '<div class="wrap"><h1>' . esc_html__( 'Mail', 'mailweb' ) . '</h1>';
+	mailweb_screen_tabs();
 	echo '<p>' . esc_html__( 'Hostinger Mail inside WordPress, and the site\'s own sending. Secrets are encrypted; nothing is deleted on uninstall.', 'mailweb' ) . '</p>';
 	if ( $attn ) { // Rows whose status is a warning, first and together.
 		echo '<div class="notice notice-warning inline"><p><strong>' . esc_html__( 'Needs attention', 'mailweb' ) . '</strong></p><ul class="ul-disc">' . implode( '', $attn ) . '</ul></div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from escaped parts.
