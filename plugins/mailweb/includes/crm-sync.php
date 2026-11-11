@@ -348,7 +348,7 @@ add_action(
 			'tag'   => wp_unslash( $_POST['tag'] ?? '' ), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- cleaned by mailweb_crm_clean()
 			'boxes' => (array) wp_unslash( $_POST['boxes'] ?? array() ), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- same
 		);
-		update_option( 'mailweb_crm', mailweb_crm_clean( $in, array_keys( mailweb_all_boxes() ) ), false ); // none ticked: no mailbox
+		update_option( 'mailweb_crm', mailweb_crm_clean( $in, array_keys( mailweb_all_boxes() ) ), false ); // none ticked: no mailbox.
 		wp_safe_redirect( mailweb_settings_url( 'incoming', array( 'mailweb_crm' => 1 ), 'fluentcrm' ) );
 		exit;
 	}

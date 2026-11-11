@@ -65,7 +65,7 @@ require_once MAILWEB_DIR . 'includes/settings-tab.php';
 require_once MAILWEB_DIR . 'includes/crm-sync.php';
 require_once MAILWEB_DIR . 'includes/overview.php';
 require_once MAILWEB_DIR . 'includes/home.php';
-require_once MAILWEB_DIR . 'includes/mailweb-ui.php'; // the new screens on the Kits shell (&ui=next)
+require_once MAILWEB_DIR . 'includes/mailweb-ui.php'; // the new screens on the Kits shell (&ui=next).
 require_once MAILWEB_DIR . 'includes/mailweb-rest.php';
 require_once MAILWEB_DIR . 'includes/mailweb-dashboard.php';
 require_once MAILWEB_DIR . 'includes/kits-hub.php'; // a tab and a status row in the Kits admin, when Kits Core is loaded.
@@ -75,7 +75,7 @@ register_deactivation_hook(
 	__FILE__,
 	function () {
 		foreach ( array( 'mailweb_flush', 'mailweb_crm_sync', 'mailweb_dashboard_build' ) as $hook ) {
-			wp_clear_scheduled_hook( $hook );
+			wp_unschedule_hook( $hook ); // Every event of the hook, with or without arguments.
 		}
 	}
 );

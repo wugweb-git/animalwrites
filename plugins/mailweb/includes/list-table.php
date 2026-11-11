@@ -56,7 +56,12 @@ class Mailweb_List_Table extends WP_List_Table {
 		$res                   = mailweb_list_rows( $this->s );
 		$this->items           = $res['items'];
 		$this->failed          = $res['failed'];
-		$this->set_pagination_args( array( 'total_items' => $res['total'], 'per_page' => MAILWEB_PER_PAGE ) );
+		$this->set_pagination_args(
+			array(
+				'total_items' => $res['total'],
+				'per_page'    => MAILWEB_PER_PAGE,
+			)
+		);
 	}
 
 	/** Unread rows carry the class "unread". */

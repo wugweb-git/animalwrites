@@ -301,7 +301,7 @@ function mailweb_list_rows( $s ) {
 	$sent = 'sent' === $s['folder'];
 	foreach ( $boxes as $key => $addr ) {
 		if ( ! isset( mailweb_folders( $key )[ $path ] ) ) {
-			continue; // this mailbox has no such folder (yet)
+			continue; // this mailbox has no such folder (yet).
 		}
 		$ok  = false;
 		$got = 0;
@@ -339,7 +339,7 @@ function mailweb_list_rows( $s ) {
 			}
 			$got += count( $data );
 			if ( count( $data ) < $size || ( $sum && $got >= $sum ) ) {
-				break; // this mailbox has no more
+				break; // this mailbox has no more.
 			}
 		}
 		if ( ! $ok ) {
@@ -352,7 +352,7 @@ function mailweb_list_rows( $s ) {
 		// Each mailbox is read to at most $cap, so only the newest $cap merged messages are in the right order:
 		// the pager offers no more than that. Older mail: choose one mailbox.
 		$total = min( $total, $cap );
-		usort( $rows, fn( $a, $b ) => (int) strtotime( $b['date'] ) <=> (int) strtotime( $a['date'] ) ); // newest first; unreadable dates last
+		usort( $rows, fn( $a, $b ) => (int) strtotime( $b['date'] ) <=> (int) strtotime( $a['date'] ) ); // newest first; unreadable dates last.
 		$rows = array_slice( $rows, ( $page - 1 ) * $per, $per );
 	}
 	return array(
@@ -429,7 +429,7 @@ function mailweb_inbox_page() {
 		wp_die( esc_html__( 'Not allowed.', 'mailweb' ), 403 );
 	}
 	if ( mailweb_ui_page( 'inbox' ) ) {
-		return; // the new screen (&ui=next, mailweb-ui.php)
+		return; // the new screen (&ui=next, mailweb-ui.php).
 	}
 	$s   = mailweb_state();
 	echo '<style>#mailweb tr.unread td,#mailweb tr.unread th{background-color:#fcf9e8}#mailweb tr.unread .check-column{box-shadow:inset 4px 0 0 #2271b1}#mailweb tr.unread .column-from,#mailweb tr.unread .column-subject>a{font-weight:600}#mailweb .column-date{width:9em}#mailweb .column-mailbox{width:12em}#mailweb .column-from{width:22%}#mailweb .awm-box{float:right;margin-top:9px}#mailweb .awm-frame{width:100%;height:65vh;border:1px solid #c3c4c7;background:#fff;display:block}#mailweb .awm-actions .button{width:100%;text-align:center;margin:0 0 6px}#mailweb #titlewrap #title{padding:3px 8px;font-size:1.7em;height:1.7em;width:100%}#mailweb .awm-field{display:flex;gap:8px;align-items:center;margin:0 0 8px}#mailweb .awm-field label{flex:0 0 3.5em;color:#50575e}#mailweb .awm-field input{flex:1}@media (max-width:767px){#mailweb .awm-box{float:none;margin:8px 0}}</style>';
