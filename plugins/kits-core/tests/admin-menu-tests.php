@@ -39,8 +39,8 @@ function kits_t( bool $ok, string $name ) {
 
 // The six, in order (§B), with their capabilities.
 $six = kits_menu_six( 'kits' );
-kits_t( array( 'kits', 'kits-options', 'kits-settings', 'kits-plugins', 'kits-tools', 'kits-help' ) === array_keys( $six ), 'six items in the spec order' );
-kits_t( array( 'Home', 'Theme Options', 'Settings', 'Plugins', 'Tools', 'Help' ) === array_column( $six, 0 ), 'six labels' );
+kits_t( array( 'kits', 'kits-options', 'kits-settings', 'kits-tools', 'kits-help' ) === array_keys( $six ), 'five items in the spec order (Plugins is WordPress\'s own)' );
+kits_t( array( 'Home', 'Theme Options', 'Settings', 'Tools', 'Help' ) === array_column( $six, 0 ), 'five labels' );
 kits_t( 'edit_theme_options' === $six['kits-tools'][2], 'Tools: edit_theme_options' );
 kits_t( 'manage_options' === $six['kits'][2] && 'manage_options' === $six['kits-help'][2], 'Home and Help: manage_options' );
 foreach ( $six as $slug => $t ) {
@@ -65,6 +65,7 @@ $want = array(
 	'kits-docs'          => 'admin.php?page=kits-help#docs',
 	'kits-system'        => 'admin.php?page=kits-help#design-system',
 	'kits-preview'       => 'admin.php?page=kits-settings#preview',
+	'kits-plugins'       => 'plugins.php',
 	'animal-writes'      => 'admin.php?page=kits',
 	'aw-site-check'      => 'admin.php?page=kits#page-check',
 	'aw-elsewhere'       => 'admin.php?page=kits-options#socials',
@@ -75,7 +76,7 @@ foreach ( $want as $old => $to ) {
 	kits_t( kits_menu_redirect_target( $old, array( 'page' => $old ), $map ) === $to, "$old redirects to $to" );
 }
 // They stay where they are: the six, Keys, Modules, Dates (owner, 11 Nov 2026), and anything unknown.
-foreach ( array( 'kits', 'kits-options', 'kits-settings', 'kits-plugins', 'kits-tools', 'kits-help', 'aw-keys', 'aw-modules', 'aw-dates', 'planweb', 'something-else', '' ) as $stay ) {
+foreach ( array( 'kits', 'kits-options', 'kits-settings', 'kits-tools', 'kits-help', 'aw-keys', 'aw-modules', 'aw-dates', 'planweb', 'something-else', '' ) as $stay ) {
 	kits_t( '' === kits_menu_redirect_target( $stay, array( 'page' => $stay ), $map ), "$stay does not redirect" );
 }
 // Other query values are kept, the section goes last, and odd values are encoded.
@@ -106,10 +107,10 @@ $items = array(
 	array( 'Home again', 'manage_options', 'kits', 'Home again' ),
 );
 list( $kept, $hidden ) = kits_menu_split( $items, $six );
-kits_t( array_keys( $six ) === array_column( $kept, 2 ), 'menu is the six in order' );
-kits_t( array( 'aw-keys', 'aw-modules', 'aw-dates', 'kits' ) === array_column( $hidden, 2 ), 'Keys, Modules, Dates and a second Home leave the menu' );
+kits_t( array_keys( $six ) === array_column( $kept, 2 ), 'menu is the five in order' );
+kits_t( array( 'kits-plugins', 'aw-keys', 'aw-modules', 'aw-dates', 'kits' ) === array_column( $hidden, 2 ), 'Plugins, Keys, Modules, Dates and a second Home leave the menu' );
 list( $kept ) = kits_menu_split( array_slice( $items, 0, 3 ), $six );
-kits_t( array( 'kits', 'kits-plugins' ) === array_column( $kept, 2 ), 'a missing item leaves no gap' );
+kits_t( array( 'kits' ) === array_column( $kept, 2 ), 'a missing item leaves no gap' );
 
 // The tabs filter cannot add a seventh tab; it may change a label.
 $filtered                  = $six;

@@ -1,7 +1,7 @@
 <?php
 /**
- * PlanWeb in the Kits admin: a row on Kits → Plugins and a row in Kits → Home's System Status, through Kits Core's
- * filters kits_plugin_screens and kits_status_rows. Kits Core is checked when it runs (it may be loaded by another
+ * PlanWeb in the Kits admin: a row in Kits → Home's System Status, through Kits Core's
+ * filter kits_status_rows. Kits Core is checked when it runs (it may be loaded by another
  * plugin rather than activated, so the Requires Plugins header is not used).
  *
  * @package planweb
@@ -18,7 +18,6 @@ add_action(
 			add_action( 'admin_notices', 'planweb_no_kits_notice' );
 			return;
 		}
-		add_filter( 'kits_plugin_screens', 'planweb_kits_tab' );
 		add_filter( 'kits_status_rows', 'planweb_kits_status_row' );
 	},
 	20
@@ -30,22 +29,6 @@ function planweb_no_kits_notice() {
 	if ( $screen && 'toplevel_page_' . PLANWEB_MENU === $screen->id ) {
 		echo '<div class="notice notice-warning is-dismissible"><p>' . esc_html__( 'PlanWeb is a Kits plugin: Kits Core is not loaded, so it is not listed under Kits.', 'planweb' ) . '</p></div>';
 	}
-}
-
-/**
- * The PlanWeb row on Kits → Plugins.
- *
- * @param array $tabs slug => [name, address relative to wp-admin, capability, what it is].
- */
-function planweb_kits_tab( $tabs ) {
-	$what = __( 'The team\'s calendar: dates, plans and reminders.', 'planweb' );
-	if ( planweb_on() ) {
-		$tabs[ PLANWEB_MENU ] = array( __( 'PlanWeb', 'planweb' ), 'admin.php?page=' . PLANWEB_MENU, 'edit_planweb_entries', $what );
-	} else {
-		// Off: the row stays, and links to Plugins, where activating PlanWeb switches it on.
-		$tabs[ PLANWEB_MENU ] = array( __( 'PlanWeb', 'planweb' ), 'plugins.php', 'activate_plugins', $what, __( 'Off', 'planweb' ) );
-	}
-	return $tabs;
 }
 
 /**

@@ -1,14 +1,14 @@
 <?php
 /**
- * The Kits screens: six, which are the tabs on every Kits screen (docs/admin-ui-spec.md §B, approved by the owner on
- * 11 Nov 2026). Home, Theme Options, Settings, Plugins, Tools, Help. In the WordPress menu they are one item,
- * Appearance → Kits, which opens Home (admin-home.php, admin-fold.php); the six stay registered under the Kits menu
- * slug, so their addresses and hook names are as before.
+ * The Kits screens: five, which are the tabs on every Kits screen (docs/admin-ui-spec.md §B, approved by the owner on
+ * 11 Nov 2026). Home, Theme Options, Settings, Tools, Help; plugins are on WordPress's own Plugins screen. In the
+ * WordPress menu they are one item, Appearance → Kits, which opens Home (admin-home.php, admin-fold.php); the five stay
+ * registered under the Kits menu slug, so their addresses and hook names are as before.
  *
- * - The rules (the six, the old addresses, which entries stay) are plain PHP in admin-menu-model.php, tested by
+ * - The rules (the five, the old addresses, which entries stay) are plain PHP in admin-menu-model.php, tested by
  *   tests/admin-menu-tests.php without WordPress.
  * - Any other screen a plugin adds under Kits leaves the menu but keeps its address (a hidden screen), so a link to it
- *   still opens. A site says which of the six tabs is lit on such a screen through kits_screen_tabs.
+ *   still opens. A site says which of the five tabs is lit on such a screen through kits_screen_tabs.
  * - Old addresses redirect with a 302 at the end of admin_menu (§E1), only for GET, keeping their other query values. Kits Core's
  *   own are in kits_menu_redirects_core(); a site adds its own through kits_admin_redirects. Kept for two releases.
  * - Home, Settings and Help are made of sections: one box each, listed at the top and opened by #id. Kits Core adds its
@@ -30,14 +30,13 @@ add_action(
 	function () {
 		add_submenu_page( KITS_MENU, 'Theme Options', 'Theme Options', 'manage_options', 'kits-options', 'kits_options_page' );
 		add_submenu_page( KITS_MENU, 'Settings', 'Settings', 'manage_options', 'kits-settings', 'kits_settings_page' );
-		add_submenu_page( KITS_MENU, 'Plugins', 'Plugins', 'manage_options', 'kits-plugins', 'kits_plugins_page' );
 		add_submenu_page( KITS_MENU, 'Tools', 'Tools', 'edit_theme_options', 'kits-tools', 'kits_transfer_page' );
 		add_submenu_page( KITS_MENU, 'Help', 'Help', 'manage_options', 'kits-help', 'kits_help_page' );
 	},
 	9 // After Home (admin-home.php, 8).
 );
 
-// Exactly six items: every other entry under Kits leaves the menu and stays a hidden screen at the same address.
+// Exactly five items: every other entry under Kits leaves the menu and stays a hidden screen at the same address.
 add_action(
 	'admin_menu',
 	function () {
@@ -61,19 +60,15 @@ add_action(
 );
 
 /**
- * Which of the six tabs is lit on a screen that is not one of them: the Plugins tab on a plugin's screen
- * (kits_plugin_screens), else what a site says through kits_screen_tabs, else none.
+ * Which Kits tab is lit on a screen that is not one of them: what a site says through kits_screen_tabs, else none.
  *
  * @param string $slug The screen's slug.
  */
 function kits_screen_tab( string $slug ): string {
-	if ( isset( kits_plugin_screens()[ $slug ] ) ) {
-		return 'kits-plugins';
-	}
 	/**
-	 * Filters which of the six tabs is lit on a screen outside them, e.g. a hidden screen linked from Settings.
+	 * Filters which of the five tabs is lit on a screen outside them, e.g. a hidden screen linked from Settings.
 	 *
-	 * @param array $tabs Screen slug => one of the six slugs.
+	 * @param array $tabs Screen slug => one of the five slugs.
 	 */
 	$map = (array) apply_filters( 'kits_screen_tabs', array() );
 	$tab = isset( $map[ $slug ] ) ? (string) $map[ $slug ] : '';
@@ -124,7 +119,7 @@ add_action(
 );
 
 /**
- * True while a screen prints as a section of one of the six (kits_admin_embed()); kits_admin_head() and
+ * True while a screen prints as a section of one of the five (kits_admin_embed()); kits_admin_head() and
  * kits_admin_tabs() then print no heading or tabs.
  *
  * @param bool|null $set Set the state (kits_admin_embed() only).
@@ -222,7 +217,7 @@ function kits_screen_sections( string $screen ): array {
 }
 
 /**
- * A screen made of sections: heading, the six tabs, then a box per section, one under the other (no row of section
+ * A screen made of sections: heading, the five tabs, then a box per section, one under the other (no row of section
  * links: owner, 11 Nov 2026).
  *
  * @param string $screen The screen's slug.

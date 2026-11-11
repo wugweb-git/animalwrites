@@ -5,9 +5,9 @@
  * Sections not built here yet show today's fields, printed by PHP (kits_admin_app_legacy()) and moved into the
  * section; they save with their own button, as before.
  * Everything saves in one request to /wp/v2/settings, and only what changed is sent:
- * - core: site title, tagline, logo, site icon (WordPress's own options);
  * - to:   kits_theme_options fields (a value equal to the theme's is not stored, so Reset sends the theme's value);
- * - pd:   kits_page_defaults._site, the site-wide header, footer, sidebar, title and breadcrumbs ('' = the theme's).
+ * - pd:   kits_page_defaults._site, the site-wide sidebar, title and breadcrumbs ('' = the theme's).
+ * Site title, logo, icon, menus and header/footer parts are WordPress's own screens (Settings, Site Editor).
  * Sections that edit Styles save the site's Global Styles in the same Save (global-styles.js); they are modules
  * { slug, label, Body } listed in extraSections.
  */
@@ -20,7 +20,6 @@ import {
 } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { __, sprintf } from '@wordpress/i18n';
-import { MediaUpload } from '@wordpress/media-utils';
 import {
 	Button,
 	Card,
@@ -36,25 +35,17 @@ import {
 } from '@wordpress/components';
 import { useGlobalStyles } from './global-styles';
 import { ThemeNote } from './theme-note';
-import colours from './sections/colours';
-import typography from './sections/typography';
-import buttons from './sections/buttons';
 import cards from './sections/cards';
 
 // Sections in their own files, after Layout, in this order.
-const extraSections = [ colours, typography, buttons, cards ];
+const extraSections = [ cards ]; // Colours, type and buttons are Styles' (owner, 11 Nov 2026).
 
 const data = window.kitsAdminApp || {};
 const fields = data.fields || {};
 const pdFields = data.pageDefaults?.fields || {};
-// Published menus for the menu fields: [ { value: id, label: title } ].
-const menus = data.menus || [];
-const themeOwn = __( 'The theme’s own', 'kits-core' );
-const menuLabel = ( id ) =>
-	'' === id ? themeOwn : menus.find( ( m ) => m.value === id )?.label || id;
 
 /**
- * The sections, in order: Identity, Header, Footer, Layout, Colours, Typography, Buttons, Cards, then the sections
+ * The sections, in order: Header, Footer, Layout, Cards, then the sections
  * that still show today's fields (Content types, Socials, Share bar; a built section replaces its fallback), then the
  * groups of any Theme Options fields not placed in them. Fields shown on Kits → Settings (speed, older content, font preload) are left out.
  *
@@ -64,31 +55,16 @@ function sectionsOf() {
 	const placed = [
 		'announce',
 		'sticky_header',
-		'header_menu',
 		'sticky_bar',
 		'sticky_href',
 		'sticky_label',
-		'footer_menu_1',
-		'footer_menu_2',
 	];
 	const out = [
-		{
-			slug: 'identity',
-			label: __( 'Identity', 'kits-core' ),
-			items: [
-				[ 'core', 'title' ],
-				[ 'core', 'description' ],
-				[ 'media', 'site_logo' ],
-				[ 'media', 'site_icon' ],
-			],
-		},
 		{
 			slug: 'header',
 			label: __( 'Header', 'kits-core' ),
 			items: [
-				[ 'pd', 'header' ],
 				[ 'to', 'sticky_header' ],
-				[ 'to', 'header_menu' ],
 				[ 'to', 'announce' ],
 			],
 			links: [
@@ -106,9 +82,6 @@ function sectionsOf() {
 			slug: 'footer',
 			label: __( 'Footer', 'kits-core' ),
 			items: [
-				[ 'pd', 'footer' ],
-				[ 'to', 'footer_menu_1' ],
-				[ 'to', 'footer_menu_2' ],
 				[ 'to', 'sticky_bar' ],
 				[ 'to', 'sticky_href' ],
 				[ 'to', 'sticky_label' ],
@@ -252,36 +225,6 @@ function ThemeOptionField( { field, value, inherited, onChange } ) {
 				onChange={ onChange }
 			/>
 		);
-	} else if ( 'menu' === field.kind ) {
-		control = (
-			<SelectControl
-				__next40pxDefaultSize
-				__nextHasNoMarginBottom
-				label={ field.label }
-				help={ field.note }
-				value={ value }
-				options={ [
-					{ value: '', label: themeOwn },
-					...menus,
-					...( value && ! menus.some( ( m ) => m.value === value )
-						? [
-								{
-									value,
-									label: sprintf(
-										/* translators: %s: menu id. */
-										__(
-											'Menu %s (not published)',
-											'kits-core'
-										),
-										value
-									),
-								},
-							]
-						: [] ),
-				] }
-				onChange={ onChange }
-			/>
-		);
 	} else {
 		control = (
 			<TextControl
@@ -301,11 +244,7 @@ function ThemeOptionField( { field, value, inherited, onChange } ) {
 			{ control }
 			<ThemeNote
 				isTheme={ value === inherited }
-				themeLabel={
-					'menu' === field.kind
-						? menuLabel( inherited )
-						: ( field.choices?.[ inherited ] ?? inherited )
-				}
+				themeLabel={ field.choices?.[ inherited ] ?? inherited }
 				label={ field.label }
 				onReset={ () => onChange( inherited ) }
 			/>
@@ -321,22 +260,7 @@ function PageDefaultField( { name, value, onChange } ) {
 	}
 	const keys = Object.keys( f.choices || {} );
 	if ( ! keys.length ) {
-		return (
-			<div className="kits-app-field">
-				<p>
-					<strong>{ f.label }</strong>
-				</p>
-				<p className="description">{ f.empty }</p>
-				{ '' !== value && (
-					<ThemeNote
-						isTheme={ false }
-						themeLabel={ __( 'the theme’s own', 'kits-core' ) }
-						label={ f.label }
-						onReset={ () => onChange( '' ) }
-					/>
-				) }
-			</div>
-		);
+		return null;
 	}
 	return (
 		<div className="kits-app-field">
@@ -365,133 +289,16 @@ function PageDefaultField( { name, value, onChange } ) {
 	);
 }
 
-// Site title or tagline.
-function CoreTextField( { name, value, onChange } ) {
-	const labels = {
-		title: [
-			__( 'Site title', 'kits-core' ),
-			__(
-				'Shown in the browser tab and search results, and wherever the theme prints the site name.',
-				'kits-core'
-			),
-		],
-		description: [
-			__( 'Tagline', 'kits-core' ),
-			__( 'A short line about the site.', 'kits-core' ),
-		],
-	};
-	return (
-		<div className="kits-app-field">
-			<TextControl
-				__next40pxDefaultSize
-				__nextHasNoMarginBottom
-				label={ labels[ name ][ 0 ] }
-				help={ labels[ name ][ 1 ] }
-				value={ value }
-				onChange={ onChange }
-			/>
-		</div>
-	);
-}
-
-// Logo or site icon: an image from the Media Library (0 = none).
-function MediaField( { name, value, onChange } ) {
-	const labels = {
-		site_logo: [
-			__( 'Logo', 'kits-core' ),
-			__( 'Shown by the Site Logo block in the header.', 'kits-core' ),
-		],
-		site_icon: [
-			__( 'Site icon', 'kits-core' ),
-			__(
-				'The small square image in browser tabs and on phone home screens. At least 512 × 512 pixels.',
-				'kits-core'
-			),
-		],
-	};
-	const [ urls, setUrls ] = useState( data.mediaUrls || {} );
-	const [ error, setError ] = useState( '' );
-	const url = value ? urls[ value ] : '';
-	const id = 'kits-app-' + name;
-	return (
-		<div className="kits-app-field" role="group" aria-labelledby={ id }>
-			<p id={ id }>
-				<strong>{ labels[ name ][ 0 ] }</strong>
-			</p>
-			{ url ? (
-				<img
-					src={ url }
-					alt=""
-					style={ { maxWidth: 160, maxHeight: 80, display: 'block' } }
-				/>
-			) : (
-				<p className="description">
-					{ __( 'None chosen.', 'kits-core' ) }
-				</p>
-			) }
-			<Flex justify="flex-start" gap={ 2 }>
-				<MediaUpload
-					allowedTypes={ [ 'image' ] }
-					value={ value || undefined }
-					onSelect={ ( m ) => {
-						if (
-							'site_icon' === name &&
-							( m.width !== m.height || m.width < 512 )
-						) {
-							setError(
-								__(
-									'The site icon must be a square image of at least 512 × 512 pixels.',
-									'kits-core'
-								)
-							);
-							return;
-						}
-						setError( '' );
-						setUrls( {
-							...urls,
-							[ m.id ]: m.sizes?.thumbnail?.url || m.url,
-						} );
-						onChange( m.id );
-					} }
-					render={ ( { open } ) => (
-						<Button variant="secondary" onClick={ open }>
-							{ value
-								? __( 'Change', 'kits-core' )
-								: __( 'Choose an image', 'kits-core' ) }
-						</Button>
-					) }
-				/>
-				{ !! value && (
-					<Button
-						variant="tertiary"
-						isDestructive
-						onClick={ () => onChange( 0 ) }
-					>
-						{ __( 'Remove', 'kits-core' ) }
-					</Button>
-				) }
-			</Flex>
-			{ error && (
-				<Notice status="error" isDismissible={ false }>
-					{ error }
-				</Notice>
-			) }
-			<p className="description">{ labels[ name ][ 1 ] }</p>
-		</div>
-	);
-}
-
 function App() {
 	const sections = useMemo( () => sectionsOf(), [] );
 	const [ section, setSection ] = useState( () =>
 		sectionFromHash( sections )
 	);
 	const [ saved, setSaved ] = useState( {
-		core: data.core || {},
 		to: data.saved || {},
 		pd: data.pageDefaults?.site || {},
 	} );
-	const [ edits, setEdits ] = useState( { core: {}, to: {}, pd: {} } );
+	const [ edits, setEdits ] = useState( { to: {}, pd: {} } );
 	const [ status, setStatus ] = useState( null );
 	const [ busy, setBusy ] = useState( false );
 	const inherited = data.inherited || {};
@@ -507,10 +314,7 @@ function App() {
 		if ( 'to' === store ) {
 			return saved.to[ k ] ?? inherited[ k ] ?? '';
 		}
-		if ( 'pd' === store ) {
-			return saved.pd[ k ] ?? '';
-		}
-		return saved.core[ k ] ?? '';
+		return saved.pd[ k ] ?? '';
 	};
 	const valueOf = ( store, k ) =>
 		k in edits[ store ] ? edits[ store ][ k ] : base( store, k );
@@ -521,8 +325,7 @@ function App() {
 			( k ) => edits[ store ][ k ] !== base( store, k )
 		);
 	const dirty =
-		gs.dirty ||
-		[ 'core', 'to', 'pd' ].some( ( s ) => changed( s ).length > 0 );
+		gs.dirty || [ 'to', 'pd' ].some( ( s ) => changed( s ).length > 0 );
 
 	useEffect( () => {
 		const warn = ( e ) => {
@@ -539,7 +342,6 @@ function App() {
 		// Only what changed: every clean-up keeps what is not sent, so a change made elsewhere since this screen
 		// opened is not written back.
 		const body = {};
-		changed( 'core' ).forEach( ( k ) => ( body[ k ] = edits.core[ k ] ) );
 		const to = changed( 'to' );
 		if ( to.length ) {
 			body.kits_theme_options = Object.fromEntries(
@@ -568,14 +370,7 @@ function App() {
 				settings.then( ( res ) => {
 					const obj = ( v, fallback ) =>
 						v && 'object' === typeof v ? v : fallback;
-					const core = { ...saved.core };
-					Object.keys( core ).forEach( ( k ) => {
-						if ( k in res ) {
-							core[ k ] = res[ k ] ?? core[ k ];
-						}
-					} );
 					setSaved( {
-						core,
 						// A stored value the schema cannot read comes back as null: keep what this screen knows.
 						to: obj( res.kits_theme_options, {
 							...saved.to,
@@ -587,7 +382,7 @@ function App() {
 								? obj( res.kits_page_defaults._site, {} ) // No _site: every choice is the theme's.
 								: { ...saved.pd, ...edits.pd },
 					} );
-					setEdits( { core: {}, to: {}, pd: {} } );
+					setEdits( { to: {}, pd: {} } );
 				} ),
 			gs.dirty ? gs.save() : null,
 		].filter( Boolean );
@@ -628,8 +423,7 @@ function App() {
 		sections.find( ( s ) => s.slug === section ) || sections[ 0 ];
 
 	const item = ( [ kind, k ] ) => {
-		// Logo and site icon are WordPress options like the title: they live in the core store.
-		const store = 'media' === kind ? 'core' : kind;
+		const store = kind;
 		const onChange = ( v ) => set( store, k, v );
 		const value = valueOf( store, k );
 		if ( 'to' === store ) {
@@ -643,28 +437,8 @@ function App() {
 				/>
 			) : null;
 		}
-		if ( 'pd' === store ) {
-			return (
-				<PageDefaultField
-					key={ k }
-					name={ k }
-					value={ value }
-					onChange={ onChange }
-				/>
-			);
-		}
-		if ( 'media' === kind ) {
-			return (
-				<MediaField
-					key={ k }
-					name={ k }
-					value={ value }
-					onChange={ onChange }
-				/>
-			);
-		}
 		return (
-			<CoreTextField
+			<PageDefaultField
 				key={ k }
 				name={ k }
 				value={ value }
@@ -691,7 +465,7 @@ function App() {
 											'%1$s · %2$s · Kits Core %3$s',
 											'kits-core'
 										),
-										saved.core.title || data.site,
+										data.site,
 										data.theme,
 										data.coreVersion
 									) }

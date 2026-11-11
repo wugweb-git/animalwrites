@@ -109,21 +109,22 @@ admok() { # NAME PATH: 200, no PHP error, not refused
   code=$(adm "$2")
   if [ "$code" = "200" ] && ! grep -qiE 'critical error|Fatal error|Parse error|Sorry, you are not allowed' /tmp/admin.html; then echo "ok   $code $1"; else echo "FAIL $code $1"; FAIL=1; fi
 }
-for s in kits kits-options kits-settings kits-plugins kits-tools kits-help; do admok "Kits → $s" "admin.php?page=$s"; done
+for s in kits kits-options kits-settings kits-tools kits-help; do admok "Kits → $s" "admin.php?page=$s"; done
 adm "admin.php?page=kits" >/dev/null
-# Kits is one item under Appearance (owner, 11 Nov 2026); the six are its tabs, in order.
+# Kits is one item under Appearance (owner, 11 Nov 2026); the five are its tabs, in order (Plugins is WordPress's).
 got=$(grep -oE '<a class="nav-tab[^"]*" href="[^"]*page=[^"&]+' /tmp/admin.html | sed 's/.*page=//' | tr '\n' ' ' | sed 's/ $//')
-if [ "$got" = "kits kits-options kits-settings kits-plugins kits-tools kits-help" ]; then echo "ok   Kits tabs are the six"; else echo "FAIL Kits tabs: $got"; FAIL=1; fi
+if [ "$got" = "kits kits-options kits-settings kits-tools kits-help" ]; then echo "ok   Kits tabs are the five"; else echo "FAIL Kits tabs: $got"; FAIL=1; fi
 n=$(grep -o '<a class="nav-tab' /tmp/admin.html | wc -l | tr -d ' ')
-if [ "$n" = "6" ]; then echo "ok   six Kits tabs"; else echo "FAIL $n Kits tabs, want 6"; FAIL=1; fi
+if [ "$n" = "5" ]; then echo "ok   five Kits tabs"; else echo "FAIL $n Kits tabs, want 5"; FAIL=1; fi
 has "Home: page check (Animal Writes)" /tmp/admin.html 'id="page-check"'
 has "Home: email, thumbnails and pictures stay" /tmp/admin.html 'id="pictures"'
 # Nothing WordPress or another plugin already shows (owner, 11 Nov 2026), and no row of section links.
 for id in versions backup dates theme-switch setup; do grep -qF "id=\"$id\"" /tmp/admin.html && { echo "FAIL Home still has $id"; FAIL=1; } || echo "ok   Home: no $id"; done
 grep -q 'class="subsubsub"' /tmp/admin.html && { echo "FAIL Home: section link row"; FAIL=1; } || echo "ok   Home: no section link row"
-adm "admin.php?page=kits-plugins" >/dev/null
-# InsightWeb is not loaded on this test site, so only PlanWeb's and MailWeb's rows are checked.
-for n in PlanWeb MailWeb; do has "Plugins: $n row with its icon" /tmp/admin.html "data:image/svg+xml;base64,"; grep -q ">$n</a>" /tmp/admin.html && echo "ok   Plugins: $n row" || { echo "FAIL Plugins: no $n row"; FAIL=1; }; done
+# Kits → Plugins is gone (owner, 11 Nov 2026): its old address opens WordPress's own Plugins screen.
+to=$(curl -s -b "$JAR" -o /dev/null -w '%{redirect_url}' "http://127.0.0.1:8080/wp-admin/admin.php?page=kits-plugins")
+case "$to" in */wp-admin/plugins.php) echo "ok   kits-plugins goes to Plugins";; *) echo "FAIL kits-plugins goes to: $to"; FAIL=1;; esac
+grep -q 'page=kits-plugins' /tmp/admin.html && { echo "FAIL Home still links to Kits → Plugins"; FAIL=1; } || echo "ok   no Kits → Plugins link"
 adm "admin.php?page=kits-settings" >/dev/null
 has "Settings: CDN cache times" /tmp/admin.html 'id="cdn"'
 has "Settings: preview access" /tmp/admin.html 'id="kits-preview-ips"'
@@ -159,10 +160,10 @@ aw-edit-screens admin.php?page=kits-help#developer/edit-screens
 aw-theme-parts admin.php?page=kits-help#developer/theme-parts
 kits-system&tab=states admin.php?page=kits-help&tab=states#design-system
 MAP
-# Offline copies of the menu's six screens for the PR's screenshots (the Deploy check keeps them as an artifact).
+# Offline copies of the five Kits screens for the PR's screenshots (the Deploy check keeps them as an artifact).
 if [ -n "${KITS_SNAPSHOT:-}" ] && command -v wget >/dev/null; then
   sed 's/^#HttpOnly_//' "$JAR" >/tmp/ci-cookies-wget.txt
-  for s in kits kits-options kits-settings kits-plugins kits-tools kits-help; do
+  for s in kits kits-options kits-settings kits-tools kits-help; do
     wget -q -E -k -K -p -nH --restrict-file-names=windows --load-cookies /tmp/ci-cookies-wget.txt -P "$KITS_SNAPSHOT" "http://127.0.0.1:8080/wp-admin/admin.php?page=$s" || true
   done
   echo "ok   Kits screens saved to $KITS_SNAPSHOT"
@@ -202,7 +203,6 @@ done <<'PAGES'
 administrator kits 200 menu-appearance kits
 administrator kits-options 200 menu-appearance kits
 administrator kits-settings 200 menu-appearance kits
-administrator kits-plugins 200 menu-appearance kits
 administrator kits-tools 200 menu-appearance kits
 administrator kits-help 200 menu-appearance kits
 administrator aw-keys 200 menu-appearance kits

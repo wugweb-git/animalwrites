@@ -62,7 +62,6 @@ plugins/animal-writes-core/includes/site-check.php | admin page | add_submenu_pa
 plugins/kits-core/includes/admin-home.php | admin page | add_submenu_page( KITS_MENU, 'Home', 'Home', 'manage_options', KITS_MENU, 'kits_home_page' );
 plugins/kits-core/includes/admin-menu.php | admin page | add_submenu_page( '', (string) ( $item[3] ?? $item[0] ), '', (string) $item[1], $slug, fn() => do_action( $hook ) ); // phpcs:ignore WordPress.NamingConventions
 plugins/kits-core/includes/admin-menu.php | admin page | add_submenu_page( KITS_MENU, 'Help', 'Help', 'manage_options', 'kits-help', 'kits_help_page' );
-plugins/kits-core/includes/admin-menu.php | admin page | add_submenu_page( KITS_MENU, 'Plugins', 'Plugins', 'manage_options', 'kits-plugins', 'kits_plugins_page' );
 plugins/kits-core/includes/admin-menu.php | admin page | add_submenu_page( KITS_MENU, 'Settings', 'Settings', 'manage_options', 'kits-settings', 'kits_settings_page' );
 plugins/kits-core/includes/admin-menu.php | admin page | add_submenu_page( KITS_MENU, 'Theme Options', 'Theme Options', 'manage_options', 'kits-options', 'kits_options_page' );
 plugins/kits-core/includes/admin-menu.php | admin page | add_submenu_page( KITS_MENU, 'Tools', 'Tools', 'edit_theme_options', 'kits-tools', 'kits_transfer_page' );

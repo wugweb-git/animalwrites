@@ -29,11 +29,24 @@ All Kits screens follow one pattern, modelled on a theme-options app: one header
 
 ---
 
+## B00. What Kits no longer repeats (owner, 11 Nov 2026)
+
+"remove overlapping / repeting fucntuion - use standard theme wordpress"; "Yes, remove all 4". Kits shows nothing that WordPress already edits:
+
+| Removed from Kits | Where it is edited |
+|---|---|
+| Theme Options → Identity (site title, tagline, logo, site icon) | Settings → General; the Site Logo block in the Site Editor |
+| Header and footer part pickers, header and footer menu pickers (`header_menu`, `footer_menu_1`, `footer_menu_2`, `kits_page_defaults._site.header/footer` on this screen) | Appearance → Editor → Patterns (Header, Footer) and Navigation |
+| Theme Options → Colours, Typography, Buttons | Appearance → Editor → Styles (Colours, Typography, Blocks → Button). Button hover colours set there still reach the theme's hover tokens (`kits-core/includes/button-hover.php`) |
+| Kits → Plugins (required and recommended list, "This site's plugins", the `kits_plugin_screens` filter) | WordPress's own Plugins screen (each plugin is listed there and in the Plugins menu). The old address `admin.php?page=kits-plugins` answers 302 to `plugins.php` |
+
+Live had no saved menu or part choices, so the front end does not change. Sections D1.1, D1.5–D1.7, B4 and D3 below are kept for the record only.
+
 ## B0. Where the menus are (owner, 11 Nov 2026)
 
 "Kits to go inside appearance, so will plugins", "all plugins". As standard WordPress does it:
 
-- **Kits** is one item under **Appearance** (`themes.php`). It opens Home; the six screens are its tabs (B).
+- **Kits** is one item under **Appearance** (`themes.php`). It opens Home; the five screens are its tabs (B).
 - **Our plugins** are one item each under **Plugins** (`plugins.php`): RankWeb, InsightWeb, SourceWeb, MailWeb, PlanWeb, and Animal Writes when Kits Core is not loaded. Each opens its first screen; its other screens are its tabs (core `nav-tab` markup, printed under each screen's heading). Classification is a taxonomy menu, not a plugin, and stays where it is.
 - **Addresses do not change.** Every screen keeps its `admin.php?page=` address, its hook name and its screen id: the screens stay registered under the product's menu slug, which WordPress no longer lists (Kits Core `includes/admin-fold.php`, `kits_admin_fold_menu()` and `kits_admin_fold_tabs()`). No redirect is needed.
 - **Access does not change.** Each screen keeps its capability. WordPress shows Plugins to a user who may open one of its items, so an editor sees Plugins with RankWeb, SourceWeb, MailWeb and PlanWeb and nothing else; the Deploy check proves it as an administrator and as an editor (`tools/ci/smoke.sh`).
@@ -46,7 +59,7 @@ All Kits screens follow one pattern, modelled on a theme-options app: one header
 | Kits Home | Kits → Home | Appearance → Kits (Home tab) | `kits` | administrators (`manage_options`) |
 | Kits Theme Options | Kits → Theme Options | Appearance → Kits → Theme Options tab | `kits-options` | administrators (`manage_options`) |
 | Kits Settings | Kits → Settings | Appearance → Kits → Settings tab | `kits-settings` | administrators (`manage_options`) |
-| Kits Plugins | Kits → Plugins | Appearance → Kits → Plugins tab | `kits-plugins` | administrators (`manage_options`) |
+| Kits Plugins (removed 11 Nov 2026) | Kits → Plugins | WordPress's Plugins screen (302) | `kits-plugins` | administrators (`manage_options`) |
 | Kits Tools | Kits → Tools | Appearance → Kits → Tools tab | `kits-tools` | administrators (`edit_theme_options`) |
 | Kits Help | Kits → Help | Appearance → Kits → Help tab | `kits-help` | administrators (`manage_options`) |
 | Keys, Modules | linked from Kits → Settings | linked from Appearance → Kits → Settings | `aw-keys`, `aw-modules` | administrators (`manage_options`) |
@@ -65,18 +78,17 @@ All Kits screens follow one pattern, modelled on a theme-options app: one header
 | PlanWeb Calendar | PlanWeb → Calendar | Plugins → PlanWeb (while PlanWeb is on) | `planweb` | editors and administrators (`edit_planweb_entries`) |
 | Animal Writes Overview (without Kits Core only) | Animal Writes → Overview | Plugins → Animal Writes | `animal-writes` | users with `edit_posts` |
 
-## B. Kits screens: six (the tabs of Appearance → Kits)
+## B. Kits screens: five (the tabs of Appearance → Kits)
 
 | # | Menu item | Slug | Capability | Replaces |
 |---|---|---|---|---|
 | 1 | Home | `kits` | `manage_options` | Welcome, Site: Animal Writes (status part), Check site (page check, backup, joined files) |
 | 2 | Theme Options | `kits-options` | `edit_theme_options` | Theme Options, Fonts, Contact links, the contrast tab of Design system |
 | 3 | Settings | `kits-settings` | `manage_options` | Core Settings, Preview |
-| 4 | Plugins | `kits-plugins` | `manage_options` | Plugins |
-| 5 | Tools | `kits-tools` | `edit_theme_options` | Import / Export |
-| 6 | Help | `kits-help` | `manage_options` | Docs, Design system, Edit screens, Theme parts, Site: Animal Writes notes |
+| 4 | Tools | `kits-tools` | `edit_theme_options` | Import / Export |
+| 5 | Help | `kits-help` | `manage_options` | Docs, Design system, Edit screens, Theme parts, Site: Animal Writes notes |
 
-No "Animal Writes" tab and no separate tenant menu. Animal Writes adds rows and sections into these six through filters (see E3).
+No "Animal Writes" tab and no separate tenant menu. Animal Writes adds rows and sections into these five through filters (see E3).
 
 ### B1. Home
 
@@ -95,17 +107,13 @@ Sections:
 
 Section list (groups are collapsible):
 
-1. **Identity**: site title, tagline, logo, site icon.
-2. **Header**: header part, sticky header, announcement bar, header menu.
-3. **Footer**: footer part, phone bar (sticky bar), footer menu.
-4. **Layout and spacing**: default sidebar, title, breadcrumbs; section spacing (48 / 70 / 96); breakpoints shown (767/768 and 1199/1200).
-5. **Colours**: palette, colour sets, live contrast check.
-6. **Typography**: fonts per role, sizes, link to the Font Library.
-7. **Buttons**: button styles.
-8. **Cards**: padding, gap, stacked card, side-by-side card, meta row.
-9. **Content types**: single and archive for each public type, plus 404, Search, Authors.
-10. **Socials**: the one list of profiles.
-11. **Share bar**: networks.
+1. **Header**: sticky header, announcement bar; links to the header part and Navigation in the Site Editor.
+2. **Footer**: phone bar (sticky bar); links to the footer part and Navigation.
+3. **Layout and spacing**: default sidebar, title, breadcrumbs; breakpoints shown (767/768 and 1199/1200).
+4. **Cards**: padding, gap, stacked card, side-by-side card, meta row.
+5. **Content types**: single and archive for each public type, plus 404, Search, Authors.
+6. **Socials**: the one list of profiles.
+7. **Share bar**: networks.
 
 Field-by-field table: section D1 below.
 
@@ -116,7 +124,7 @@ Field-by-field table: section D1 below.
 3. **Preview access**: allowed IPs and devices.
 4. **Features**: on/off switches for Kits features that other parts can turn off (one row per registered feature; see E3).
 
-### B4. Plugins
+### B4. Plugins (removed 11 Nov 2026, see B00)
 
 The required/recommended list (`kits_plugins`), each with status and an install or activate button, plus "This site's plugins" (`kits_plugin_screens`), each with a link to its dashboard.
 
@@ -339,7 +347,7 @@ Migration (one time, on first load after update): copy `aw_elsewhere` into `soci
 
 The Preview admin-post actions (register, remove, link, device) become REST routes under `kits/v1/preview/*` with the same nonce and capability.
 
-### D3. Plugins
+### D3. Plugins (removed 11 Nov 2026, see B00)
 
 | Item | Now | Goes to | Control | Storage | Cap |
 |---|---|---|---|---|---|
