@@ -129,12 +129,21 @@ function aw_sources_live_switch() {
 add_action(
 	'kits_sourcing_save_settings',
 	function () {
-		$c         = aw_sources_config();
-		$c['live'] = ! empty( $_POST['live'] ); // phpcs:ignore WordPress.Security.NonceVerification -- checked by the Kits save handler
-		update_option( 'aw_sources', $c, false );
-		kits_sourcing_log( 'log', 'workers use these lists: ' . ( $c['live'] ? 'on' : 'off' ) );
+		aw_sources_live_save( ! empty( $_POST['live'] ) ); // phpcs:ignore WordPress.Security.NonceVerification -- checked by the Kits save handler
 	}
 );
+
+/**
+ * Save "Workers use these lists" (the form above and SourceWeb → Settings with &ui=next) and log it.
+ *
+ * @param bool $on On or off.
+ */
+function aw_sources_live_save( $on ) {
+	$c         = aw_sources_config();
+	$c['live'] = (bool) $on;
+	update_option( 'aw_sources', $c, false );
+	kits_sourcing_log( 'log', 'workers use these lists: ' . ( $c['live'] ? 'on' : 'off' ) );
+}
 
 /*
  * Sources sync when the lists are saved (owner, 25 Oct 2026), instead of every hour: a save of the source lists or the
