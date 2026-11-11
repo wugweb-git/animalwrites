@@ -128,6 +128,7 @@ add_action(
 			'oldUrl'       => admin_url( 'admin.php?page=kits-options' ),
 			'shareUrl'     => admin_url( 'admin.php?page=kits-options&section=utility-share' ),
 		);
+		$data = (array) apply_filters( 'kits_admin_app_data', $data ); // Sections in their own files add their data.
 		wp_add_inline_script( 'kits-admin-theme-options', 'window.kitsAdminApp = ' . wp_json_encode( $data ) . ';', 'before' );
 	}
 );

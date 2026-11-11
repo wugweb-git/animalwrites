@@ -6,7 +6,8 @@
  * - core: site title, tagline, logo, site icon (WordPress's own options);
  * - to:   kits_theme_options fields (a value equal to the theme's is not stored, so Reset sends the theme's value);
  * - pd:   kits_page_defaults._site, the site-wide header, footer, sidebar, title and breadcrumbs ('' = the theme's).
- * Sections in sections/ keep their own values and save them themselves (Global Styles); the same Save runs them.
+ * Sections that edit Styles save the site's Global Styles in the same Save (global-styles.js); they are modules
+ * { slug, label, Body } listed in extraSections.
  */
 import { createRoot, useState, useEffect, useMemo } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
@@ -25,7 +26,13 @@ import {
 	TextControl,
 	ToggleControl,
 } from '@wordpress/components';
-import cardsSection from './sections/cards';
+import { useGlobalStyles } from './global-styles';
+import { ThemeNote } from './theme-note';
+import colours from './sections/colours';
+import cards from './sections/cards';
+
+// Sections in their own files, after Layout, in this order.
+const extraSections = [ colours, cards ];
 
 const data = window.kitsAdminApp || {};
 const fields = data.fields || {};
@@ -33,8 +40,6 @@ const pdFields = data.pageDefaults?.fields || {};
 // Published menus for the menu fields: [ { value: id, label: title } ].
 const menus = data.menus || [];
 const themeOwn = __( 'The theme’s own', 'kits-core' );
-// Sections with their own store and save: { slug, label, available, Component, subscribe, isDirty, save }.
-const ownSections = [ cardsSection ].filter( ( s ) => s.available );
 const menuLabel = ( id ) =>
 	'' === id ? themeOwn : menus.find( ( m ) => m.value === id )?.label || id;
 
@@ -121,7 +126,7 @@ function sectionsOf() {
 				],
 			],
 		},
-		...ownSections,
+		...extraSections,
 	];
 	Object.keys( fields ).forEach( ( key ) => {
 		const f = fields[ key ];
@@ -144,33 +149,6 @@ function sectionsOf() {
 function sectionFromHash( sections ) {
 	const h = window.location.hash.replace( '#', '' );
 	return sections.find( ( s ) => s.slug === h ) ? h : sections[ 0 ]?.slug;
-}
-
-function ThemeNote( { isTheme, themeLabel, label, onReset } ) {
-	return (
-		<p className="description">
-			{ isTheme
-				? __( 'Theme value', 'kits-core' )
-				: sprintf(
-						/* translators: %s: the theme's value. */
-						__( 'Theme value: %s', 'kits-core' ),
-						themeLabel || __( 'empty', 'kits-core' )
-					) }{ ' ' }
-			{ ! isTheme && (
-				<Button
-					variant="link"
-					onClick={ onReset }
-					aria-label={ sprintf(
-						/* translators: %s: field label. */
-						__( 'Reset %s to theme', 'kits-core' ),
-						label
-					) }
-				>
-					{ __( 'Reset to theme', 'kits-core' ) }
-				</Button>
-			) }
-		</p>
-	);
 }
 
 // A kits_theme_options field.
@@ -443,16 +421,8 @@ function App() {
 	const [ edits, setEdits ] = useState( { core: {}, to: {}, pd: {} } );
 	const [ status, setStatus ] = useState( null );
 	const [ busy, setBusy ] = useState( false );
-	const [ , setTick ] = useState( 0 );
 	const inherited = data.inherited || {};
-
-	// A change in a section's own store redraws the header (Save, "Changes not saved").
-	useEffect( () => {
-		const offs = ownSections.map( ( s ) =>
-			s.subscribe( () => setTick( ( t ) => t + 1 ) )
-		);
-		return () => offs.forEach( ( off ) => off() );
-	}, [] );
+	const gs = useGlobalStyles();
 
 	useEffect( () => {
 		const on = () => setSection( sectionFromHash( sections ) );
@@ -478,8 +448,8 @@ function App() {
 			( k ) => edits[ store ][ k ] !== base( store, k )
 		);
 	const dirty =
-		[ 'core', 'to', 'pd' ].some( ( s ) => changed( s ).length > 0 ) ||
-		ownSections.some( ( s ) => s.isDirty() );
+		gs.dirty ||
+		[ 'core', 'to', 'pd' ].some( ( s ) => changed( s ).length > 0 );
 
 	useEffect( () => {
 		const warn = ( e ) => {
@@ -513,14 +483,16 @@ function App() {
 		}
 		setBusy( true );
 		setStatus( null );
-		const jobs = [];
-		if ( Object.keys( body ).length ) {
-			jobs.push(
-				apiFetch( {
+		const settings = Object.keys( body ).length
+			? apiFetch( {
 					path: '/wp/v2/settings',
 					method: 'POST',
 					data: body,
-				} ).then( ( res ) => {
+				} )
+			: null;
+		const jobs = [
+			settings &&
+				settings.then( ( res ) => {
 					const obj = ( v, fallback ) =>
 						v && 'object' === typeof v ? v : fallback;
 					const core = { ...saved.core };
@@ -543,25 +515,38 @@ function App() {
 								: { ...saved.pd, ...edits.pd },
 					} );
 					setEdits( { core: {}, to: {}, pd: {} } );
-				} )
-			);
-		}
-		ownSections
-			.filter( ( s ) => s.isDirty() )
-			.forEach( ( s ) => jobs.push( s.save() ) );
+				} ),
+			gs.dirty ? gs.save() : null,
+		].filter( Boolean );
 		Promise.allSettled( jobs )
 			.then( ( results ) => {
 				const failed = results.find( ( r ) => 'rejected' === r.status );
-				setStatus(
-					failed
-						? {
-								type: 'error',
-								text:
-									failed.reason?.message ||
-									__( 'Not saved. Try again.', 'kits-core' ),
-							}
-						: { type: 'success', text: __( 'Saved.', 'kits-core' ) }
-				);
+				if ( ! failed ) {
+					setStatus( {
+						type: 'success',
+						text: __( 'Saved.', 'kits-core' ),
+					} );
+					return;
+				}
+				const msg =
+					failed.reason?.message ||
+					__( 'Not saved. Try again.', 'kits-core' );
+				setStatus( {
+					type: 'error',
+					// The other request went through: say so, and what is left stays marked not saved.
+					text:
+						results.length > 1 &&
+						results.some( ( r ) => 'fulfilled' === r.status )
+							? sprintf(
+									/* translators: %s: error message. */
+									__(
+										'Partly saved. The rest was not saved: %s',
+										'kits-core'
+									),
+									msg
+								)
+							: msg,
+				} );
 			} )
 			.finally( () => setBusy( false ) );
 	};
@@ -743,10 +728,8 @@ function App() {
 								<h2>{ current.label }</h2>
 							</CardHeader>
 							<CardBody>
-								{ current.Component ? (
-									<current.Component
-										ThemeNote={ ThemeNote }
-									/>
+								{ current.Body ? (
+									<current.Body gs={ gs } item={ item } />
 								) : (
 									current.items.map( item )
 								) }
