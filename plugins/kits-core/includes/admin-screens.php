@@ -125,40 +125,45 @@ function kits_admin_tabs( string $current ): void {
 }
 
 /**
- * The icon of a Kits product as an address, or '' when it has none. The Kits theme keeps the suite's icon in
- * assets/images/kits-icon.svg; each plugin keeps its own in assets/icon.svg (docs/brand/plugin-icons/README.md).
+ * The icon of a Kits product as a data: address, or '' when it has none. Read from disk, so it shows however the
+ * plugin is loaded (Animal Writes Core loads SourceWeb from outside wp-content/plugins, where it has no web address).
+ * The Kits theme keeps the suite's icon in assets/images/kits-icon.svg; each plugin keeps its own in assets/icon.svg
+ * (docs/brand/plugin-icons/README.md).
  *
  * @param string $name Product name as the screens show it: Kits, Kits Core, RankWeb, SourceWeb, MailWeb, InsightWeb.
  */
 function kits_product_icon( string $name ): string {
-	if ( 'Kits' === $name ) {
-		$file = get_template_directory() . '/assets/images/kits-icon.svg';
-		return file_exists( $file ) ? get_template_directory_uri() . '/assets/images/kits-icon.svg' : '';
-	}
-	if ( 'Kits Core' === $name ) {
-		return file_exists( KITS_CORE_DIR . 'assets/icon.svg' ) ? plugins_url( 'assets/icon.svg', KITS_CORE_DIR . 'kits-core.php' ) : '';
-	}
 	/**
-	 * Filters the plugin folder of each Kits product, for the icon in its assets/ folder.
+	 * Filters where each Kits product's folder is: product name => [constant holding its folder, plugin folder name].
 	 *
-	 * @param array $folders Product name => plugin folder.
+	 * @param array $folders Product name => [constant, folder].
 	 */
 	$folders = (array) apply_filters(
 		'kits_product_folders',
 		array(
-			'RankWeb'      => 'aw-seo-extras',
-			'SourceWeb'    => 'aw-sourcing',
-			'MailWeb'      => 'mailweb',
-			'InsightWeb'   => 'insightweb',
-			'DirectoryWeb' => 'directoryweb',
-			'PlanWeb'      => 'planweb',
+			'Kits Core'    => array( 'KITS_CORE_DIR', 'kits-core' ),
+			'RankWeb'      => array( 'AW_SEO_EXTRAS_DIR', 'aw-seo-extras' ),
+			'SourceWeb'    => array( 'AW_SOURCING_DIR', 'aw-sourcing' ),
+			'MailWeb'      => array( 'MAILWEB_DIR', 'mailweb' ),
+			'InsightWeb'   => array( 'INSIGHTWEB_DIR', 'insightweb' ),
+			'DirectoryWeb' => array( 'DIRECTORYWEB_DIR', 'directoryweb' ),
+			'PlanWeb'      => array( 'PLANWEB_DIR', 'planweb' ),
 		)
 	);
-	$folder = isset( $folders[ $name ] ) ? (string) $folders[ $name ] : '';
-	if ( '' === $folder || ! file_exists( WP_PLUGIN_DIR . '/' . $folder . '/assets/icon.svg' ) ) {
+	if ( 'Kits' === $name ) {
+		$file = get_template_directory() . '/assets/images/kits-icon.svg';
+	} elseif ( isset( $folders[ $name ] ) ) {
+		list( $const, $folder ) = array_values( (array) $folders[ $name ] ) + array( '', '' );
+		$dir  = '' !== $const && defined( $const ) ? trailingslashit( (string) constant( $const ) ) : WP_PLUGIN_DIR . '/' . $folder . '/';
+		$file = $dir . 'assets/icon.svg';
+	} else {
 		return '';
 	}
-	return plugins_url( $folder . '/assets/icon.svg' );
+	if ( ! is_readable( $file ) || filesize( $file ) > 20000 ) {
+		return '';
+	}
+	$svg = (string) file_get_contents( $file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- a local file.
+	return '' === $svg ? '' : 'data:image/svg+xml;base64,' . base64_encode( $svg ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- an image address.
 }
 
 /**
@@ -169,11 +174,11 @@ function kits_product_icon( string $name ): string {
  * @param int    $size Width and height in pixels.
  */
 function kits_product_icon_img( string $name, int $size = 20 ): string {
-	$url = kits_product_icon( $name );
-	if ( '' === $url ) {
+	$src = kits_product_icon( $name );
+	if ( '' === $src ) {
 		return '';
 	}
-	return '<img src="' . esc_url( $url ) . '" width="' . $size . '" height="' . $size . '" alt="" style="vertical-align:middle;margin-inline-end:8px"> ';
+	return '<img src="' . esc_attr( $src ) . '" width="' . $size . '" height="' . $size . '" alt="" style="vertical-align:middle;margin-inline-end:8px"> ';
 }
 
 /**
@@ -185,7 +190,7 @@ function kits_product_icon_img( string $name, int $size = 20 ): string {
  */
 function kits_admin_head( string $slug, string $title, string $intro = '' ): void {
 	$theme = wp_get_theme( get_template() );
-	echo '<div class="wrap"><h1>' . kits_product_icon_img( 'Kits', 32 ) . esc_html( $title ) . '</h1>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- kits_product_icon_img() escapes its address.
+	echo '<div class="wrap"><h1>' . kits_product_icon_img( 'Kits', 32 ) . esc_html( $title ) . '</h1>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- kits_product_icon_img() escapes its image address.
 	if ( '' !== $intro ) {
 		echo '<p>' . esc_html( $intro ) . '</p>';
 	}
@@ -335,7 +340,7 @@ function kits_welcome_page() {
 	echo '<table class="widefat striped"><caption class="screen-reader-text">' . esc_html( 'System status' ) . '</caption><tbody>';
 	foreach ( kits_status_rows() as $r ) {
 		$label = (string) $r[0];
-		echo '<tr><th scope="row">' . kits_product_icon_img( 'Theme version' === $label ? 'Kits' : $label ) . esc_html( $label ) . '</th><td>' . wp_kses_post( $r[1] ) . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- kits_product_icon_img() escapes its address.
+		echo '<tr><th scope="row">' . kits_product_icon_img( 'Theme version' === $label ? 'Kits' : $label ) . esc_html( $label ) . '</th><td>' . wp_kses_post( $r[1] ) . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- kits_product_icon_img() escapes its image address.
 	}
 	echo '</tbody></table></div></div></div></div></div></div>';
 }
