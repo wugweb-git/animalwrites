@@ -1,0 +1,108 @@
+# Plugin screens: classic vs new (audit, 12 Nov 2026)
+
+Code read at live `d9163bf7`. **Have** = on the new screen. **Classic only** = still works at its old address, but the new screens don't show it and nothing links to it. **Missing** = gone from the new screen.
+
+How to add, by letter:
+- **(a)** an existing shell part (DataList, SettingsGroup, Field, Switch, Tile, RefTable, SectionCard, FieldReview, LinkedSetting, MiniChart …);
+- **(b)** a new REST route in the plugin's own namespace, with the capability shown;
+- **(c)** a shell part not built yet (pending list): styled select and date inputs, calendar grid, FieldReview "Reject ticked", secret field, confirm-with-count, detail panel, media fields, pair-list editor, row view in a list.
+
+## Main reason things look missing
+
+The new screens cover only a few pages of each plugin. The other pages still draw the classic screen at their old address, but the new header has no tab for them, and the plugin is folded into one Plugins menu item.
+
+| Plugin | New screens | Classic-only pages |
+|---|---|---|
+| SourceWeb | Dashboard, To review, Enrichment review, Settings | **Sources, Keywords (+ Suggestions), Rules, AI models, Workers**, Rejected, Relay log, Change log |
+| InsightWeb | Dashboard, Settings | Keywords, Rising, Pages, Clarity, Check list, Sourcing keywords, Links, Server |
+| RankWeb | Dashboard, Settings | FAQ |
+| MailWeb | Inbox, Settings | Compose (stays classic: it sends email) |
+| PlanWeb | Dashboard, Entries, Settings | the month grid |
+| DirectoryWeb | Dashboard, Claims, Settings | Listings (WordPress's own list) |
+| Kits | Home, Settings, Tools, Help, Theme Options | Keys, Modules, Dates (no new look) |
+
+**Step 1, which needs no new part:** add header tabs for every classic-only page, each pointing at its classic address, until that page is rebuilt. That brings back every section at once. In SourceWeb that means `sourceweb_ui_caps()` and its labels in `sourceweb-ui.php`; InsightWeb and RankWeb take the same change.
+
+## SourceWeb
+
+| Page | Missing on new | How to add |
+|---|---|---|
+| Sources | whole list: views, search, columns, short names, bulk/row actions; add/edit source; feeds list and feed form | (a) DataList + SettingsGroup; (b) `GET sources`, `POST sources/decide`, `POST sources/save`, `GET/POST sources/feeds` (manage_options); (c) styled select (status, feed type) |
+| Keywords | relevance + aggregator switches; press settings; list with roles/categories; add/edit; Test a headline; Suggestions | (a) DataList, SettingsGroup, Switch, Field; (b) `GET keywords`, `POST keywords/decide`, `POST keywords/save`, `GET keywords/test`, `GET/POST keywords/suggestions`, `POST settings/keywords` (manage_options); (c) date input, category checklist, confirm-with-count |
+| Rules | section rules, tag rules, summary rules, trust order, field rules | (a) DataList, SettingsGroup, SettingsBlock, Field; (b) GET and save routes for each part (manage_options); (c) pair-list editor (entities), styled select, confirm (Reset) |
+| AI models | keys list, at-a-glance, daily caps, groups, add/edit key, attach/detach | (a) TileGrid, RefTable, DataList; (b) `GET ai` (last 4 characters only, never the key) and write routes like the classic handlers (manage_options); (c) secret field. Never reuse the worker route `aw/v1/ai-keys`. |
+| Workers | list with views, **Run now**, runs log, add/edit/delete planned worker | (a) DataList, RefTable, SettingsGroup; (b) `GET workers`, `POST workers/run`, `GET workers/<id>/runs`, save/delete (manage_options); (c) styled select, confirm |
+| Rejected / Relay log / Change log | the tables (search, sort, paging) | (a) DataList; (b) three read routes (manage_options) |
+| Dashboard | keyword status, last change, relay count, links to Keywords, Rules, Press and Categories | (a) Tile + RefTable fed by the existing `GET dashboard` |
+| To review | "Add a social post from its link"; items per page | (a) SectionCard + Field + Button; (b) `POST review/social-add` (edit_others_posts); a `per` parameter on `GET review` |
+| Enrichment review | reject one value; bulk Undo; thumbnails, source and duplicate links; `listing=` filter | (c) FieldReview "Reject ticked" (the route already takes `do=reject`); (a) bulk actions + a small change to the decide route; (c) media fields; extend `GET enrichment` |
+
+**Bug found:** `sourceweb-rest.php:598` uses `$words` before it is set (it is set only at :753). The view counts on Enrichment review ignore the search, and PHP logs a warning on each load. Fix: read the search into `$words` before line 598.
+
+## InsightWeb
+
+| Page | Missing on new | How to add |
+|---|---|---|
+| Dashboard | 16 of the 17 Overview boxes: Priorities, Quick wins, Rising, Movers, Brand, AI referrals, Top referrers, Campaigns by source, Not found, Index status, Discover/News, Clarity, Site search, Content gaps, Crawler access, Bing crawl | (a) SectionCard + DataList/RefTable/MiniChart per box; (b) `GET dashboard/box/<key>` (read) |
+| Keywords, Rising, Pages, Clarity, Check list, Sourcing keywords, Links, Server | the whole tabs | (a) DataList each; (b) one read route per tab |
+| Settings | schedule, seed date; Run now, snapshots, imports, Bing count/add, Delete data | (a) SettingsGroup + Field; (b) `POST insightweb/v1/run` as a background job, plus import routes (manage_options); (c) date input, confirm-with-count (Delete data) |
+
+## RankWeb
+
+| Page | Missing on new | How to add |
+|---|---|---|
+| Dashboard | Modules table with "where to set up" links, per-module Off state, Search Insights row | (a) DataList; add `modules[]` to `GET dashboard` |
+| FAQ | the whole tab | (a) DataList; (b) `GET faq`, `POST faq/approve`, `POST faq/recount` |
+| Settings | nothing missing | — |
+
+## MailWeb
+
+| Page | Missing on new | How to add |
+|---|---|---|
+| Inbox | Move to folder, row actions, media picker | (a) RowAction + DataList bulk; (b) `POST messages/move`; (c) media fields |
+| Overview | several rows | (a) RefTable in `GET dashboard` |
+| **Broken links** | `mailweb_settings_url()` (`includes/mail-in.php:50`) has no `ui=classic`: Test email and Send queued now can't be reached, the paused notice has no Resume, and classic saves land on the new screen | PHP only: add `ui=classic` to that link and to the redirects that follow a save |
+| Notices | `mailweb_done` notices are lost after a save | PHP: carry `done` to the screen and show a Notice (a) |
+
+## PlanWeb
+
+| Page | Missing on new | How to add |
+|---|---|---|
+| Calendar | month grid, previous/next/Today, today highlighted, entry in a cell opens its form | (c) calendar grid; (b) `GET planweb/v1/month?m=Y-m` (edit_planweb_entries); the cell opens the existing EntryForm |
+| Entries | open one entry by address (`?edit=ID`); Type/Status badges; past dates greyed | (b) `GET entries/<id>`; (a) column `render` using the existing badge classes |
+| Settings | the import mismatch table shows 2 columns instead of 3 | (a) RefTable with 3 columns |
+| Links | System Status "Calendar" link points to a `#planweb-import` that doesn't exist; the Import check tile has no link | PHP: link to `planweb_ui_url('settings') . '#import'` |
+
+## DirectoryWeb
+
+| Page | Missing on new | How to add |
+|---|---|---|
+| Menu | Dashboard and Settings have **no menu entry** (`directoryweb-ui.php:93-94`, empty parent) | PHP: put them under `edit.php?post_type=aw_listing` |
+| Claims list | Reference column, and search by reference | extend `GET claims` with `ref`; (a) one DataList column |
+| One claim | current logo picture; link to Enrichment review for Undo | extend `GET claims/<id>` (read only) |
+| Dashboard | Places covered and Claimed tiles have no link | (b) `GET listings` (edit_posts) + (a) DataList on a Listings tab, or leave them without a link |
+| Settings | Types has no link to Tags | (a) LinkedSetting |
+
+Claims stay read-only: approve, reject and apply stay on Directory → Claims. That is by design, not a gap.
+
+## Kits
+
+Home, Settings, Tools and Help show the same content in both looks; nothing was lost when the new look became the default. What was removed on 11 Nov was removed from both looks by the owner (Versions and limits, Backup, Theme switch log, Setup checklist).
+
+| Item | Problem | How to add |
+|---|---|---|
+| Keys, Modules, Dates | no new look; not linked from Settings | PHP: add links to the "Connected services and modules" card; to draw them in the frame, add them to `kits_frame_screens()` |
+| Settings card wording | says keys are in RankWeb → Settings, but RankWeb says keys stay in Kits → Keys | PHP copy fix |
+| Theme Options → Cards | the read-only Card style values (corners, colours, token values) are gone | (a) RefTable fed by the existing `kits_admin_app_data` |
+| Theme Options → Layout | prints an empty "Spacing" form | PHP: remove `layout-spacing` (`admin-app.php:72`, `:219`) |
+| Theme Options → Extra | the links box isn't in the app | (a) `links` on the section |
+| Help → Docs | "Backup" and "Log" links point to sections that no longer exist | PHP: fix the links |
+| Keys on the new look | — | (c) secret field; (b) `aw/v1/keys` (manage_options) |
+
+## Suggested order
+
+1. **Fixes:** MailWeb `ui=classic` link-outs and notices; the SourceWeb `$words` bug; DirectoryWeb menu entries; PlanWeb and Kits dead links; the Kits empty Spacing form. All PHP, all small.
+2. **Tabs for classic-only pages** in SourceWeb, InsightWeb and RankWeb. Nothing is hidden after this.
+3. **SourceWeb Workers (with Run now) and Sources**, then Keywords, Rules and AI models. Each is a DataList plus its routes.
+4. **InsightWeb Dashboard boxes and tabs**; **RankWeb Modules and FAQ**.
+5. **Shell parts** the rest needs: calendar grid (PlanWeb), secret field (AI models, Keys), "Reject ticked", styled select and date inputs, confirm-with-count.
