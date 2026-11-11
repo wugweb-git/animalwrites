@@ -40,23 +40,7 @@ class Mailweb_List_Table extends WP_List_Table {
 	}
 
 	protected function get_bulk_actions() {
-		if ( MAILWEB_FORMS === $this->s['folder'] ) {
-			return array( 'read' => __( 'Mark read', 'mailweb' ), 'unread' => __( 'Mark unread', 'mailweb' ), 'trash' => __( 'Move to Trash', 'mailweb' ) );
-		}
-		$a = array( 'read' => __( 'Mark read', 'mailweb' ), 'unread' => __( 'Mark unread', 'mailweb' ) );
-		if ( ! in_array( $this->s['folder'], array( 'archive', 'trash' ), true ) ) {
-			$a['archive'] = __( 'Archive', 'mailweb' );
-		}
-		if ( 'inbox' !== $this->s['folder'] ) {
-			$a['inbox'] = 'spam' === $this->s['folder'] ? __( 'Not spam', 'mailweb' ) : __( 'Move to Inbox', 'mailweb' );
-		}
-		if ( ! in_array( $this->s['folder'], array( 'spam', 'sent' ), true ) ) {
-			$a['spam'] = __( 'Spam', 'mailweb' );
-		}
-		if ( 'trash' !== $this->s['folder'] ) {
-			$a['trash'] = __( 'Move to Trash', 'mailweb' );
-		}
-		return $a;
+		return mailweb_bulk_actions( $this->s['folder'] );
 	}
 
 	public function no_items() {
@@ -69,96 +53,10 @@ class Mailweb_List_Table extends WP_List_Table {
 
 	public function prepare_items() {
 		$this->_column_headers = array( $this->get_columns(), array(), array(), 'subject' );
-		$per                   = MAILWEB_PER_PAGE;
-		$page                  = $this->s['page'];
-		if ( MAILWEB_FORMS === $this->s['folder'] ) {
-			$res         = mailweb_forms() ? (array) call_user_func( mailweb_forms()['list'], $page, $per ) : array();
-			$this->items = array();
-			foreach ( (array) ( $res['items'] ?? array() ) as $f ) {
-				$name          = trim( (string) ( $f['name'] ?? '' ) );
-				$email         = trim( (string) ( $f['email'] ?? '' ) );
-				$this->items[] = array(
-					'id'      => 'form|' . (int) $f['id'],
-					'item'    => (int) $f['id'],
-					'from'    => '' !== $name ? $name : $email,
-					'email'   => $email,
-					'subject' => (string) ( $f['subject'] ?? '' ),
-					'date'    => (string) ( $f['date'] ?? '' ),
-					'unseen'  => ! empty( $f['unread'] ),
-					'files'   => false,
-				);
-			}
-			$this->set_pagination_args( array( 'total_items' => (int) ( $res['total'] ?? 0 ), 'per_page' => $per ) );
-			return;
-		}
-		$path  = mailweb_role_path( $this->s['folder'] );
-		$rows  = array();
-		$total = 0;
-		$boxes = mailweb_view_boxes( $this->s['box'] );
-		$mixed = count( $boxes ) > 1;
-		// Mixed: each mailbox's newest page*per (at most $cap), read in API pages of up to 100, merged by date.
-		// One mailbox: its own page.
-		$cap  = 500;
-		$need = $mixed ? min( $page * $per, $cap ) : $per;
-		$size = $mixed ? min( 100, $need ) : $per;
-		$asks = $mixed ? (int) ceil( $need / $size ) : 1;
-		$okay = 0;
-		$sent = 'sent' === $this->s['folder'];
-		foreach ( $boxes as $key => $addr ) {
-			if ( ! isset( mailweb_folders( $key )[ $path ] ) ) {
-				continue; // this mailbox has no such folder (yet)
-			}
-			$ok  = false;
-			$got = 0;
-			$sum = 0;
-			for ( $p = 1; $p <= $asks; $p++ ) {
-				$qs = array( 'page' => $mixed ? $p : $page, 'perPage' => $size, 'sort' => '-date' );
-				if ( '' !== $this->s['q'] ) {
-					list( $code, $j ) = mailweb_call( 'POST', mailweb_fpath( $key, $path ) . '/messages/search?' . http_build_query( $qs ), array( 'text' => $this->s['q'] ) );
-				} else {
-					list( $code, $j ) = mailweb_call( 'GET', mailweb_fpath( $key, $path ) . '/messages?' . http_build_query( $qs ) );
-				}
-				if ( 200 !== $code ) {
-					break;
-				}
-				$ok   = true;
-				$sum  = (int) ( $j['pagination']['total'] ?? 0 );
-				$data = (array) ( $j['data'] ?? array() );
-				foreach ( $data as $m ) {
-					$rows[] = array(
-						'id'      => $key . '|' . (int) $m['uid'],
-						'box'     => $key,
-						'uid'     => (int) $m['uid'],
-						'from'    => $sent ? implode( ', ', array_map( fn( $a ) => mailweb_who( $a, true ), (array) ( $m['to'] ?? array() ) ) ) : mailweb_who( $m['from'] ?? array(), true ),
-						'email'   => $sent ? '' : implode( '', mailweb_addresses( array( $m['from'] ?? array() ) ) ),
-						'subject' => trim( (string) ( $m['subject'] ?? '' ) ),
-						'date'    => (string) ( $m['date'] ?? '' ),
-						'unseen'  => ! empty( $m['unseen'] ),
-						'files'   => ! empty( $m['attachments'] ),
-						'mailbox' => $addr,
-					);
-				}
-				$got += count( $data );
-				if ( count( $data ) < $size || ( $sum && $got >= $sum ) ) {
-					break; // this mailbox has no more
-				}
-			}
-			if ( ! $ok ) {
-				continue;
-			}
-			++$okay;
-			$total += $sum;
-		}
-		$this->failed = ! $okay && $boxes;
-		if ( $mixed ) {
-			// Each mailbox is read to at most $cap, so only the newest $cap merged messages are in the right order:
-			// the pager offers no more than that. Older mail: choose one mailbox.
-			$total = min( $total, $cap );
-			usort( $rows, fn( $a, $b ) => (int) strtotime( $b['date'] ) <=> (int) strtotime( $a['date'] ) ); // newest first; unreadable dates last
-			$rows = array_slice( $rows, ( $page - 1 ) * $per, $per );
-		}
-		$this->items = $rows;
-		$this->set_pagination_args( array( 'total_items' => $total, 'per_page' => $per ) );
+		$res                   = mailweb_list_rows( $this->s );
+		$this->items           = $res['items'];
+		$this->failed          = $res['failed'];
+		$this->set_pagination_args( array( 'total_items' => $res['total'], 'per_page' => MAILWEB_PER_PAGE ) );
 	}
 
 	/** Unread rows carry the class "unread". */

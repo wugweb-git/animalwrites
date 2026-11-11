@@ -194,11 +194,7 @@ add_action(
 		$all   = (array) get_option( 'mailweb_profiles', array() );
 		foreach ( (array) wp_unslash( $_POST['p'] ?? array() ) as $key => $v ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- each field sanitised below
 			if ( isset( $boxes[ $key ] ) && is_array( $v ) ) {
-				$all[ $boxes[ $key ] ] = array(
-					'name'      => sanitize_text_field( (string) ( $v['name'] ?? '' ) ),
-					'signature' => wp_kses_post( (string) ( $v['signature'] ?? '' ) ),
-					'picture'   => absint( $v['picture'] ?? 0 ),
-				);
+				$all[ $boxes[ $key ] ] = mailweb_profile_clean( $v );
 			}
 		}
 		update_option( 'mailweb_profiles', $all, false );

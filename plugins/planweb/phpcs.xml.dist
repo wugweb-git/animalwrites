@@ -3,6 +3,8 @@
 	<description>WordPress-Extra for PlanWeb, with its own capabilities, prefix and text domain.</description>
 	<file>.</file>
 	<arg name="extensions" value="php"/>
+	<exclude-pattern>build/*</exclude-pattern>
+	<exclude-pattern>node_modules/*</exclude-pattern>
 	<rule ref="WordPress-Extra"/>
 	<rule ref="WordPress.WP.I18n">
 		<properties>

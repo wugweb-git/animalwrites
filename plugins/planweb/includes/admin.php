@@ -32,8 +32,12 @@ add_action(
 		add_action(
 			'load-' . $hook,
 			function () {
-				$m = planweb_month_arg( $_GET['m'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification,WordPress.Security.ValidatedSanitizedInput -- a redirect; planweb_month_arg() sanitizes.
-				wp_safe_redirect( planweb_url( '' !== $m ? array( 'm' => $m ) : array() ) );
+				$m    = planweb_month_arg( $_GET['m'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification,WordPress.Security.ValidatedSanitizedInput -- a redirect; planweb_month_arg() sanitizes.
+				$args = '' !== $m ? array( 'm' => $m ) : array();
+				if ( function_exists( 'kits_shell_ui_next' ) && kits_shell_ui_next() ) {
+					$args['ui'] = 'next'; // The new screens' trial follows the old address too.
+				}
+				wp_safe_redirect( planweb_url( $args ) );
 				exit;
 			}
 		);
@@ -117,6 +121,9 @@ function planweb_status_badge( string $status ): string {
 function planweb_screen() {
 	if ( ! current_user_can( 'edit_planweb_entries' ) ) {
 		wp_die( esc_html__( 'Sorry, you are not allowed to access this page.', 'planweb' ), 403 );
+	}
+	if ( planweb_ui_page() ) {
+		return; // The new screens (&ui=next), includes/planweb-ui.php.
 	}
 	// phpcs:disable WordPress.Security.NonceVerification.Recommended -- filters and messages only; every change is a nonce-checked admin-post.
 	$month = planweb_month_arg( $_GET['m'] ?? '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- planweb_month_arg() sanitizes.
@@ -282,6 +289,22 @@ function planweb_form( $e, string $month ) {
 	echo '</form>';
 }
 
+/**
+ * The entry's fields from a form or a request, cleaned (the Calendar's form and the planweb/v1 routes).
+ *
+ * @param array $raw Unslashed values: date, time, title, note, type, channel, owner, status, link.
+ * @return array The same keys, as planweb_save_entry() takes them.
+ */
+function planweb_clean_form( array $raw ): array {
+	$f = array();
+	foreach ( array( 'date', 'time', 'title', 'type', 'channel', 'owner', 'status', 'link' ) as $k ) {
+		$f[ $k ] = sanitize_text_field( is_scalar( $raw[ $k ] ?? '' ) ? (string) ( $raw[ $k ] ?? '' ) : '' );
+	}
+	$f['link'] = esc_url_raw( is_scalar( $raw['link'] ?? '' ) ? (string) ( $raw['link'] ?? '' ) : '' );
+	$f['note'] = sanitize_textarea_field( is_scalar( $raw['note'] ?? '' ) ? (string) ( $raw['note'] ?? '' ) : '' );
+	return $f;
+}
+
 add_action(
 	'admin_post_planweb_save',
 	function () {
@@ -289,14 +312,9 @@ add_action(
 		if ( ! check_admin_referer( 'planweb_save_' . $id ) || ! current_user_can( $id ? 'edit_post' : 'edit_planweb_entries', $id ) || ( $id && ( ! planweb_entry( $id ) || 'publish' !== get_post_status( $id ) ) ) ) {
 			wp_die( esc_html__( 'Sorry, you are not allowed to do that.', 'planweb' ), 403 );
 		}
-		$f = array();
-		foreach ( array( 'date', 'time', 'title', 'type', 'channel', 'owner', 'status', 'link' ) as $k ) {
-			$f[ $k ] = sanitize_text_field( wp_unslash( $_POST[ $k ] ?? '' ) );
-		}
-		$f['link'] = esc_url_raw( wp_unslash( $_POST['link'] ?? '' ) );
-		$f['note'] = sanitize_textarea_field( wp_unslash( $_POST['note'] ?? '' ) );
-		$month     = planweb_month_arg( $_POST['m'] ?? '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- planweb_month_arg() sanitizes.
-		$saved     = planweb_save_entry( $f, $id );
+		$f     = planweb_clean_form( wp_unslash( $_POST ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- planweb_clean_form() sanitizes each field.
+		$month = planweb_month_arg( $_POST['m'] ?? '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- planweb_month_arg() sanitizes.
+		$saved = planweb_save_entry( $f, $id );
 		if ( is_wp_error( $saved ) ) {
 			// Keep what was typed for the form that comes back (this user only, read once, gone after 5 minutes).
 			set_transient( 'planweb_draft_' . get_current_user_id(), $f + array( 'id' => $id ), 5 * MINUTE_IN_SECONDS );
