@@ -266,6 +266,7 @@ Plan: `docs/seo/search-insights-plan.md`. RankWeb → Search Insights (`admin.ph
 | `readme.txt` | Stable tag, requirements, keys, installation, FAQ, changelog and upgrade notice. |
 | `composer.json` | `composer lint` (php -l) and `composer make-pot`. |
 | `languages/aw-seo-extras.pot` | Translation template (named after the text domain, which stays `aw-seo-extras`). |
+| `assets/icon.svg`, `icon-256x256.png`, `icon-128x128.png` | The plugin icon, copied from `docs/brand/plugin-icons/insightweb*`. |
 | `includes/bootstrap.php` | Loads the files below, once (`INSIGHTWEB_LOADED`), whoever calls it first: InsightWeb, or RankWeb's bridge while InsightWeb is not active. Needs Kits Core and Rank Math (checked here, no Requires Plugins header) and Animal Writes Core (the keyword table). |
 | `includes/settings.php` | The seven numbers (`AW_SI_*` constants), stored where RankWeb kept them (`aw_seo_settings['search-insights']`), their form on Settings (action `aw_si_settings`), and `aw_si_api_allowed()` (administrator or `aw_worker`). |
 | `includes/kits-hub.php` | When Kits Core is loaded: an InsightWeb row on Kits → Plugins and in System Status; a Search Insights link on the Plugins screen. |
