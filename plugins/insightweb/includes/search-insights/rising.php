@@ -3,7 +3,7 @@
  * Search Insights, phase 3: rising terms (plan §3 `rising`, §5.3, §5.5, §7–8; owner, 24 Oct 2026).
  *
  * - REST route aw/v1/search-insights for the workers' search-insights job (animal-writes-workers,
- *   aw_workers/search_insights.py), signed in as the ingest user (aw_seo_api_allowed()):
+ *   aw_workers/search_insights.py), signed in as the ingest user (aw_si_api_allowed()):
  *   GET gives the job its lists (English keywords, topics, species, watchlists, seeds); POST takes one source's rising
  *   terms and figures and records that source's run (Trends trending now, Wikipedia, GDELT daily; autocomplete and
  *   Trends related queries weekly; Trends interest monthly).
@@ -507,12 +507,12 @@ add_action(
 			array(
 				array(
 					'methods'             => 'GET',
-					'permission_callback' => 'aw_seo_api_allowed',
+					'permission_callback' => 'aw_si_api_allowed',
 					'callback'            => fn() => rest_ensure_response( aw_si_rising_lists() ),
 				),
 				array(
 					'methods'             => 'POST',
-					'permission_callback' => 'aw_seo_api_allowed',
+					'permission_callback' => 'aw_si_api_allowed',
 					'callback'            => function ( WP_REST_Request $req ) {
 						$body = $req->get_json_params();
 						$out  = aw_si_rising_receive( is_array( $body ) ? $body : array() );

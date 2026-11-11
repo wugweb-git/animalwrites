@@ -78,8 +78,13 @@ function aw_si_tab(): string {
 add_action(
 	'admin_menu',
 	function () {
-		// RankWeb → Search Insights, after Overview and FAQ.
-		$hook = add_submenu_page( AW_SEO_MENU, __( 'Search Insights', 'aw-seo-extras' ), __( 'Search Insights', 'aw-seo-extras' ), aw_si_cap(), AW_SI_SLUG, 'aw_si_screen' );
+		// RankWeb → Search Insights, after Overview and FAQ: the same address and screen id as before InsightWeb.
+		// Without RankWeb, the same page as a menu of its own, so it stays reachable.
+		if ( defined( 'AW_SEO_MENU' ) ) {
+			$hook = add_submenu_page( AW_SEO_MENU, __( 'Search Insights', 'aw-seo-extras' ), __( 'Search Insights', 'aw-seo-extras' ), aw_si_cap(), AW_SI_SLUG, 'aw_si_screen' );
+		} else {
+			$hook = add_menu_page( __( 'Search Insights', 'aw-seo-extras' ), __( 'Search Insights', 'aw-seo-extras' ), aw_si_cap(), AW_SI_SLUG, 'aw_si_screen', 'dashicons-chart-line', 81 );
+		}
 		if ( $hook ) {
 			add_action( 'load-' . $hook, 'aw_si_load' );
 		}
@@ -1008,12 +1013,12 @@ function aw_si_settings_tab(): void {
 		? esc_html( sprintf( __( 'Seeded once on %s from docs/seo/keyword-map.md and the 21 Oct rankings. The table here is the source of truth now.', 'aw-seo-extras' ), wp_date( 'j M Y, H:i', $seeded ) ) )
 		: esc_html__( 'Not seeded yet: the first run seeds it.', 'aw-seo-extras' );
 	echo '</p></td></tr>';
-	if ( function_exists( 'aw_seo_settings_embed' ) && current_user_can( 'manage_options' ) ) {
+	if ( current_user_can( 'manage_options' ) ) {
 		echo '<tr><th scope="row">' . esc_html__( 'Numbers', 'aw-seo-extras' ) . '</th><td>';
 		if ( isset( $_GET['saved'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- a notice only.
 			echo '<div class="notice notice-success inline"><p>' . esc_html( 'reset' === $_GET['saved'] ? __( 'Defaults restored.', 'aw-seo-extras' ) : __( 'Settings saved.', 'aw-seo-extras' ) ) . '</p></div>'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		}
-		aw_seo_settings_embed( 'search-insights' );
+		aw_si_settings_form();
 		echo '</td></tr>';
 	}
 	echo '<tr><th scope="row">' . esc_html__( 'Run now', 'aw-seo-extras' ) . '</th><td>';

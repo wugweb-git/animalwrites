@@ -150,6 +150,22 @@ if [ "$got" = "$want" ]; then echo "ok   $got animal-writes/ patterns registered
 # The child's saved Styles were copied to Kits on the switch, and Kits uses them.
 got=$(wp eval '$p = get_posts( array( "post_type" => "wp_global_styles", "name" => "wp-global-styles-kits-by-wugweb", "posts_per_page" => 1, "tax_query" => array( array( "taxonomy" => "wp_theme", "field" => "name", "terms" => "kits-by-wugweb" ) ) ) ); $c = wp_list_pluck( (array) ( wp_get_global_settings( array( "color", "palette" ) )["custom"] ?? array() ), "color" ); echo ( $p && false !== strpos( $p[0]->post_content, "#123456" ) ? "post" : "nopost" ) . "," . ( in_array( "#123456", $c, true ) ? "used" : "unused" );' 2>/dev/null || echo error)
 if [ "$got" = "post,used" ]; then echo "ok   child's saved Styles copied to Kits and used (no child)"; else echo "FAIL child's saved Styles copied to Kits and used: $got (no child)"; FAIL=1; fi
+# InsightWeb (Search Insights, moved out of RankWeb; docs/insightweb-plan.md 3.2): it loads once and every job has a
+# handler whoever loads it: RankWeb's bridge while InsightWeb is inactive, InsightWeb in either plugin order, and
+# InsightWeb alone. Switching RankWeb off leaves Search Insights' jobs booked.
+echo "-- insightweb"
+iw() { wp eval-file "$REPO/tools/ci/insightweb_load_check.php" "$1" --user=ci || FAIL=1; }
+iw bridge
+wp plugin activate insightweb --quiet
+iw both
+wp eval '$a = array_values( (array) get_option( "active_plugins" ) ); usort( $a, fn( $x, $y ) => str_starts_with( $y, "insightweb/" ) <=> str_starts_with( $x, "insightweb/" ) ); update_option( "active_plugins", $a ); echo "order: " . implode( ", ", $a ) . "\n";'
+iw both
+curl -s -o /tmp/page.html -w '%{http_code}\n' http://127.0.0.1:8080/ | grep -q '^200$' && echo "ok   200 / with InsightWeb active" || { echo "FAIL / with InsightWeb active"; FAIL=1; }
+wp plugin deactivate aw-seo-extras --quiet
+got=$(wp eval --skip-plugins --skip-themes 'echo wp_next_scheduled( "aw_si_daily" ) && wp_next_scheduled( "aw_si_ga4" ) ? "booked" : "cleared";' 2>/dev/null || echo error)
+if [ "$got" = "booked" ]; then echo "ok   RankWeb switched off: Search Insights' jobs stay booked"; else echo "FAIL RankWeb switched off: Search Insights' jobs $got"; FAIL=1; fi
+iw alone
+wp plugin activate aw-seo-extras --quiet
 if [ -f /tmp/wp-debug.log ] && tail -n +"$((LOG_START + 1))" /tmp/wp-debug.log | grep -E 'PHP (Fatal|Parse) error|PHP Warning'; then FAIL=1; fi
 wp theme activate animal-writes --quiet
 wp cache flush --quiet

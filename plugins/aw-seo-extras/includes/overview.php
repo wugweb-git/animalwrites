@@ -2,7 +2,7 @@
 /**
  * RankWeb menu and its Overview screen (owner, 25 Oct 2026: one menu, organised like any other plugin).
  *
- * The menu: RankWeb → Overview (this file), FAQ (faq.php), Search Insights (search-insights/admin.php, admins only),
+ * The menu: RankWeb → Overview (this file), FAQ (faq.php), Search Insights (InsightWeb's search-insights/admin.php),
  * Settings (settings.php: every module's rules and switches).
  * Overview lists every module of the plugin: what it does, where it is set up (here or in Rank Math), its status from
  * the checks that already run, the boxes it adds to edit screens, and its WP-CLI commands. Core WordPress only.
@@ -57,7 +57,7 @@ add_filter(
 	PHP_INT_MAX
 );
 
-// Plugins screen: Overview, FAQ and Search Insights under the plugin's name.
+// Plugins screen: Overview and FAQ under the plugin's name (Search Insights is under InsightWeb's).
 add_filter(
 	'plugin_action_links_' . plugin_basename( AW_SEO_EXTRAS_DIR . 'aw-seo-extras.php' ),
 	function ( $links ) {
@@ -65,9 +65,6 @@ add_filter(
 			'<a href="' . esc_url( add_query_arg( 'page', AW_SEO_MENU, admin_url( 'admin.php' ) ) ) . '">Overview</a>',
 			'<a href="' . esc_url( add_query_arg( 'page', 'aw-faq', admin_url( 'admin.php' ) ) ) . '">FAQ</a>',
 		);
-		if ( function_exists( 'aw_si_url' ) && current_user_can( aw_si_cap() ) ) {
-			$own[] = '<a href="' . esc_url( aw_si_url() ) . '">Search Insights</a>';
-		}
 		return array_merge( $own, (array) $links );
 	}
 );
@@ -140,21 +137,13 @@ function aw_seo_overview_page() {
 			'status' => aw_seo_overview_faq_status(),
 		),
 	);
-	if ( $si || ! aw_seo_module_on( 'search-insights' ) ) {
-		$rows[] = ! $si ? array(
-			'module' => '<strong>Search Insights</strong>',
-			'mods'   => array( 'search-insights' ),
-			'what'   => 'Keywords, Search Console and GA4 figures, rising terms, pages, the monthly check list and imports. Read-only.',
-			'where'  => '',
-			'status' => '',
-		) : array(
-			'module' => '<strong>' . aw_seo_overview_link( 'Search Insights', aw_si_url() ) . '</strong>',
-			'mods'   => array( 'search-insights' ),
-			'what'   => 'Keywords, Search Console and GA4 figures, rising terms, pages, the monthly check list and imports. Read-only.',
-			'where'  => aw_seo_overview_link( 'RankWeb → Search Insights → Settings', aw_si_url( 'settings' ) ),
-			'status' => aw_seo_overview_si_status(),
-		);
-	}
+	// Search Insights is InsightWeb's since 11 Nov 2026: one row, the same link, no RankWeb setting.
+	$rows[] = array(
+		'module' => '<strong>' . ( $si ? aw_seo_overview_link( 'Search Insights', aw_si_url() ) : 'Search Insights' ) . '</strong>',
+		'what'   => 'Search Insights is now its own plugin, InsightWeb.',
+		'where'  => '',
+		'status' => $si ? aw_seo_overview_si_status() : '',
+	);
 	$rows = array_merge(
 		$rows,
 		array(
