@@ -6,7 +6,7 @@
 
 ## 0. What this plan has to settle first (owner questions)
 
-1. **The admin look.** This plan's brief says the screens are built with `@wordpress/components` and `@wordpress/dataviews`, with no home-made design system. The later Notion decision of 11 Nov ("WordPress own packages was a good thought but now it sucks…") says the opposite. Under it, a Kits admin design system styled after Google Site Kit ships in Kits Core, and WordPress packages are used only for plumbing (element, data, api-fetch, i18n). It also says clickable prototypes come before any build. The shared shell (`docs/kits-plugin-ui.md`, being written next to `docs/admin-ui-spec.md`) will settle this; neither file existed on any branch on 11 Nov. **This plan does not design any admin parts.** §2 lists only what DirectoryWeb registers into the Kits Core shell, so it holds either way.
+1. **The admin look (settled by the owner, 11 Nov).** The admin look follows the Kits admin design system, which ships in Kits Core with the shell and follows the Google Site Kit pattern for plugins. WordPress packages are plumbing only: `@wordpress/data`, `api-fetch`, `i18n`, `icons`. Clickable prototypes come before any build. The shell is specified in `docs/kits-plugin-ui.md`, next to `docs/admin-ui-spec.md`; neither file was on any branch on 11 Nov. **DirectoryWeb only registers parts into the shell.** It designs no header, tile, list or settings row; any part the design system lacks is listed in §2.4 as a request to Kits Core. This is about admin screens only: the front-end blocks stay WordPress-native (core blocks, Block Bindings, patterns, Query Loop variations; §1.6).
 2. **Three things the brief takes as given do not exist yet.** Each one is a dependency or a small Kits task, not DirectoryWeb work:
    - **`Requires Plugins:`:** no plugin in this repo has the header, including RankWeb, MailWeb and SourceWeb. They check for Kits at runtime instead (`aw-sourcing.php:21-30`, `includes/kits-hub.php` in each). Animal Writes Core also loads Kits Core and SourceWeb by `require_once` (`animal-writes-core.php:39-41`, `:143-147`).
    - **`kits/collection-filter`:** there is no such block. Kits has `kits/hero` and `kits/dropdown`; the collection toolbar is only a component in `kits-registry.json:576`.
@@ -175,7 +175,7 @@ In phase 1 these become settings or data. Each starts with today's value, suppli
 
 ## 2. Admin: what DirectoryWeb registers into the Kits Core shell
 
-The shell is Kits Core's: app header, Dashboard chips and tiles, "Select metrics", the DataView list, Settings rows, setup flow, notices and empty/loading/error states. DirectoryWeb designs none of it. It registers screens, tiles, list columns, settings groups and services through the Kits Core PHP/JS API, and serves its data from its own REST routes. New routes are in a new namespace, `directoryweb/v1`; the existing `aw/v1` addresses do not change.
+**DirectoryWeb only registers parts into the shell.** The shell and its look are Kits Core's: the Kits admin design system (Google Site Kit pattern for plugins), with WordPress packages as plumbing only (`@wordpress/data`, `api-fetch`, `i18n`, `icons`). Its parts are the app header, Dashboard chips and tiles, "Select metrics", the working list (search, filters, sort, columns, bulk and row actions, pagination, saved views), Settings rows, the setup flow, notices and the empty/loading/error states. DirectoryWeb designs none of it. It registers screens, tiles, list columns, settings groups and services through the Kits Core PHP/JS API, and serves its data from its own REST routes. New routes are in a new namespace, `directoryweb/v1`; the existing `aw/v1` addresses do not change.
 
 **Menu:** DirectoryWeb → Dashboard · Claims · Settings. Listings stay in WordPress's own list (`edit.php?post_type=aw_listing`), linked from the header. The old address `edit.php?post_type=aw_listing&page=aw-claims` redirects to Claims.
 
@@ -194,7 +194,7 @@ Each tile has a number, a sub-line, the source it names and a cached REST route 
 | Claims | Claimed / Verified | claimed (`aw_verified`), verified (`aw_gov_verified_on`), needs re-check | DirectoryWeb meta | `/stats/badges` |
 | Enrichment | Enrichment queue | waiting proposals, Google-pending listings, last run | **SourceWeb** (`aw_enrich`, `aw_enrich_google_pending`); links to SourceWeb → Enrichment review | `/stats/enrichment` (empty with "SourceWeb not active") |
 
-### 2.2 Working list: Claims (DataView over REST)
+### 2.2 Working list: Claims (the shell's working list, over REST)
 
 - **Rows:** one Fluent Forms entry of form #6, plus legacy `aw_claim` posts marked "old form".
 - **Columns:** date, listing (link), claimant name and role, contact (email/phone), fields changed (count), status, decided by/at.
@@ -240,9 +240,19 @@ Each tile has a number, a sub-line, the source it names and a cached REST route 
 **Technical (per the standard):**
 - Capability and nonce per screen: `edit_aw_volunteers` for Claims, `manage_options` for Settings.
 - JS translations through `wp_set_script_translations( …, 'directoryweb' )`.
-- One script per screen through `@wordpress/scripts` (with `.asset.php`).
+- One script per screen, which only registers DirectoryWeb's parts with the shell. Its dependencies are the shell's script and the plumbing packages (`@wordpress/data`, `api-fetch`, `i18n`, `icons`), built through `@wordpress/scripts` (with `.asset.php`). It has no styles of its own.
 - Performance budget per screen as the shell sets it.
 - Tests: PHPUnit for the claim apply/undo and the REST permissions; the existing SourceWeb rules tests pointed at `directoryweb_fields()`.
+
+### 2.4 Requests to Kits Core: parts the design system may lack
+
+Before DirectoryWeb's admin phase, these are asked of Kits Core. DirectoryWeb does not build them itself.
+1. **A field-by-field review view** for one row of the working list: the current value beside the proposed value, a tick per field, apply the ticked fields, Undo per applied field. Claims need it; SourceWeb's Enrichment review would use the same part.
+2. **A row status that says why an action is off**, for example "Undo needs SourceWeb", inside the list.
+3. **A data-file service row:** a bundled file with its date and counts (the place file), with no account to connect.
+4. **A write-only list setting:** values stored as hashes and never shown again, with add and remove (the never-publish phone list).
+5. **A read-only setting that links to another Kits plugin's setting** (the indexing rule, which stays RankWeb's).
+6. **A tile that hides itself, or says "{plugin} not active",** when its source plugin is missing (the RankWeb, InsightWeb and SourceWeb tiles).
 
 ## 3. Moving it out of Animal Writes Core
 
@@ -347,7 +357,7 @@ Each phase is complete before the next. Each ships on the owner's yes, through t
 |---|---|---|---|
 | **1. Move the code, no visible change** | §3 in full: new plugin folder, the 17 files, the Directory parts of the shared files in §1.2, 8 SCF groups, 2 data files, template, pattern, CSS, scripts; filters in place of the calls into RankWeb and SourceWeb; site text into `directoryweb_site_config`; SourceWeb `rules.php` and test path; tool paths; dead `aw_featured_html` removed (owner's yes). Then the plugin link + activation (owner), then the `Requires Plugins` header (small ship) | **Large**: about 5,500 lines moved, ~25 files touched; one PR (bigger technical work: branch → PR → code review, plugin audit, PHPCS, Deploy check, owner merges) | **High** if done loosely: post type, rewrites, template or SCF could go missing for a request. Held by the bundled require (§3.1), one commit with no duplicate file, identical keys and arguments, backup, and the §3.6 proof |
 | **2. Blocks and patterns** | §1.6: core blocks + bindings (`directoryweb/listing` source), the `directoryweb/fields` block, Query Loop variations, the claim and Find help patterns, the status block in place of 4 title filters, local card and helplines as blocks; template rewritten with them; old `animal-writes/*` blocks kept registered (rendering the same) so saved content and the child theme's copy keep working; `org-details` and `contact` deleted. `kits/collection-filter` only when Kits Core ships it | **Medium–large**: one PR, possibly two (profile; list and places) | **Medium**: markup changes. Held by the same 0-difference proof (HTML may differ by class names only where the CSS is adjusted in the same change; screenshots must match) |
-| **3. Admin UI** | §2: Dashboard tiles, Claims DataView, Settings, the `directoryweb/v1` routes, old Claims address redirect, settings seeded from constants with no value lost, tests | **Medium**, depends on the Kits Core shell | **Low–medium** (admin only). **Order:** the shell ships with InsightWeb as the pilot, then RankWeb, SourceWeb, MailWeb, **then DirectoryWeb**, then PlanWeb. Phase 3 waits for its turn. Phases 1 and 2 do not depend on the shell |
+| **3. Admin UI** | §2, registered into the Kits Core shell (DirectoryWeb only registers parts): Dashboard tiles, the Claims working list, Settings, the §2.4 requests answered by Kits Core first, the `directoryweb/v1` routes, old Claims address redirect, settings seeded from constants with no value lost, tests | **Medium**, depends on the Kits Core shell | **Low–medium** (admin only). **Order:** the shell ships with InsightWeb as the pilot, then RankWeb, SourceWeb, MailWeb, **then DirectoryWeb**, then PlanWeb. Phase 3 waits for its turn. Phases 1 and 2 do not depend on the shell |
 
 ## 5. Not in this plan (recorded, not done)
 
