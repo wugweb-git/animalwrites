@@ -511,7 +511,7 @@ function kits_system_page() {
 		$states  = (array) ( $it['states'] ?? array() );
 		$style   = kits_registry_style( $it );
 		$cells[] = array(
-			'name'   => '<strong>' . esc_html( $it['name'] ) . '</strong><br><span class="description">' . esc_html( $it['type'] . ( 'live' !== $it['status'] ? ' · ' . $it['status'] : '' ) ) . '</span>' . ( ! empty( $it['note'] ) ? '<br><em>' . esc_html( $it['note'] ) . '</em>' : '' ) . ( $style ? '<br>' . kits_block_style_link( $style[0], $style[1] ) : '' ),
+			'name'   => '<strong>' . esc_html( $it['name'] ) . '</strong><br><span class="description">' . esc_html( $it['type'] . ( 'live' !== $it['status'] ? ' · ' . $it['status'] : '' ) ) . '</span>' . ( ! empty( $it['note'] ) ? '<br><em>' . esc_html( $it['note'] ) . '</em>' : '' ) . ( $style ? '<br>' . kits_block_style_where( $style[0], $style[1] ) : '' ),
 			'owner'  => esc_html( $it['owner'] ),
 			'what'   => count( (array) ( $it['classes'] ?? array() ) ) > 3 ? '<details><summary>' . esc_html( count( (array) $it['classes'] ) . ' classes' ) . '</summary>' . $what . '</details>' : $what,
 			'states' => $states ? kits_system_fold( count( $states ) . ' state' . ( 1 === count( $states ) ? '' : 's' ), implode( '<br>', array_map( 'esc_html', $states ) ) ) : '—',
@@ -552,26 +552,17 @@ function kits_registry_style( $it ) {
 }
 
 /**
- * The Site Editor's Styles at one panel (relative to wp-admin), e.g. /layout or /blocks/core%2Fgroup.
- *
- * @param string $section The Styles panel's path.
- */
-function kits_styles_section_path( $section ) {
-	return 'site-editor.php?p=' . rawurlencode( '/styles' ) . '&section=' . rawurlencode( (string) $section );
-}
-
-/**
- * A link to a block style in Styles → Blocks → its block → the style.
+ * Where a block style's values are set: the block, the style and its place in theme.json. The Site Editor's Styles
+ * lists no styles for some blocks (Group in WordPress 7.1), so this names the file rather than linking to a screen.
  *
  * @param string $block     Block name, e.g. core/group.
  * @param string $variation Block style name.
  */
-function kits_block_style_link( $block, $variation ) {
+function kits_block_style_where( $block, $variation ) {
 	$type  = class_exists( 'WP_Block_Type_Registry' ) ? WP_Block_Type_Registry::get_instance()->get_registered( $block ) : null;
 	$style = class_exists( 'WP_Block_Styles_Registry' ) ? WP_Block_Styles_Registry::get_instance()->get_registered( $block, $variation ) : null;
-	$label = 'Styles → Blocks → ' . ( $type && $type->title ? $type->title : $block ) . ' → ' . ( is_array( $style ) && ! empty( $style['label'] ) ? $style['label'] : $variation );
-	$path  = kits_styles_section_path( '/blocks/' . rawurlencode( $block ) . '/variations/' . rawurlencode( $variation ) );
-	return '<a href="' . esc_url( admin_url( $path ) ) . '">' . esc_html( $label ) . '</a>';
+	$label = ( $type && $type->title ? $type->title : $block ) . ' → ' . ( is_array( $style ) && ! empty( $style['label'] ) ? $style['label'] : $variation ) . ' style';
+	return esc_html( $label ) . ', in the theme\'s theme.json: <code>' . esc_html( 'styles.blocks.' . $block . '.variations.' . $variation ) . '</code>';
 }
 
 /**

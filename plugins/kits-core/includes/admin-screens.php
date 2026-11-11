@@ -1076,7 +1076,7 @@ function kits_options_spacing(): void {
 			$rows[] = array( esc_html( (string) ( $size['name'] ?? '' ) ), '<code>' . esc_html( '--wp--preset--spacing--' . (string) ( $size['slug'] ?? '' ) ) . '</code> ' . esc_html( (string) ( $size['size'] ?? '' ) . ' · ' . $title ) );
 		}
 	}
-	kits_options_values_box( 'Spacing', $rows ? $rows : array( array( esc_html( 'None yet' ), '' ) ), 'Change them in ' . kits_options_link( 'Styles → Layout', kits_styles_section_path( '/layout' ) ) . '; every part that uses a step follows.' );
+	kits_options_values_box( 'Spacing', $rows ? $rows : array( array( esc_html( 'None yet' ), '' ) ), 'The steps are set in the theme\'s theme.json (<code>settings.spacing.spacingSizes</code>); the Site Editor\'s Styles doesn\'t edit them. Every part that uses a step follows.' );
 }
 
 /**
@@ -1112,7 +1112,7 @@ function kits_options_cards(): void {
 			$rows[] = array( '<code>--' . esc_html( $t ) . '</code>', '<code>' . esc_html( $vals[ $t ] ) . '</code> ' . esc_html( kits_token_resolve( $t, $vals ) ) );
 		}
 	}
-	kits_options_values_box( 'Cards', $rows ? $rows : array( array( esc_html( 'None yet' ), '' ) ), 'Change the padding, corners and colours in ' . kits_block_style_link( (string) $card['block'], (string) $card['variation'] ) . '. The tokens are the theme\'s base values (phones): ' . kits_options_link( 'Design system → Tokens', 'admin.php?page=kits-system&tab=tokens' ) . '.' );
+	kits_options_values_box( 'Cards', $rows ? $rows : array( array( esc_html( 'None yet' ), '' ) ), 'The padding, corners and colours are the ' . kits_block_style_where( (string) $card['block'], (string) $card['variation'] ) . '; the Site Editor\'s Styles doesn\'t list them. The tokens are the theme\'s base values (phones): ' . kits_options_link( 'Design system → Tokens', 'admin.php?page=kits-system&tab=tokens' ) . '.' );
 }
 
 /** Utility → Socials: the profiles Rank Math holds, which the footer and schema use. */
