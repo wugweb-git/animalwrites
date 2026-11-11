@@ -160,5 +160,6 @@ screens save through the same function, so neither can drift from the other.
 ## Not built yet
 
 - Kits Core has no translation files for the shell yet.
-- The other five plugins (InsightWeb, SourceWeb, MailWeb, DirectoryWeb, PlanWeb) do not use the shell yet.
+- InsightWeb, SourceWeb, MailWeb, DirectoryWeb and PlanWeb have screens on the shell in pull requests (#123 to #127), not merged.
+- Parts the plugins need that the shell does not have: styled select and date inputs, a calendar grid, a secret field, a confirm step with a count, a detail panel, rich text, file and media fields, a pair-list editor, a row view inside a list, read-only HashList and ServiceRow details, and FieldReview options (start unticked, reject ticked).
 - The chart is one small part (`MiniChart`); there is no line chart or a chart with two series.
