@@ -48,14 +48,14 @@ function kits_frame_ready( ?bool $set = null ): bool {
 }
 
 /**
- * The five Kits tabs for a screen on the new look. A tab whose screen has a new look keeps &ui=next, so the trial
- * stays on while moving between tabs; Theme Options' screen is already the new one.
+ * The five Kits tabs for a screen on the new look. On a &ui=next request every tab keeps &ui=next, so the trial stays
+ * on while moving between tabs; otherwise (Theme Options, the default screen) the tabs open the current screens.
  *
  * @param string $current The open screen's slug.
  * @return array [ { slug, label, url, current } ].
  */
 function kits_frame_tabs( string $current ): array {
-	$next = array_keys( kits_frame_screens() );
+	$keep = kits_shell_ui_next();
 	$tabs = array();
 	foreach ( kits_admin_tabs_list() as $slug => $t ) {
 		if ( ! current_user_can( (string) ( $t[2] ?? 'manage_options' ) ) ) {
@@ -65,7 +65,7 @@ function kits_frame_tabs( string $current ): array {
 		$tabs[] = array(
 			'slug'    => (string) $slug,
 			'label'   => (string) $t[0],
-			'url'     => in_array( (string) $slug, $next, true ) ? add_query_arg( 'ui', 'next', $url ) : $url,
+			'url'     => $keep ? add_query_arg( 'ui', 'next', $url ) : $url,
 			'current' => $current === (string) $slug,
 		);
 	}

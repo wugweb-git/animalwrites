@@ -153,6 +153,7 @@ add_action(
 		foreach ( $fields as $key => $f ) {
 			$inherited[ $key ] = kits_theme_option_inherited( $key );
 		}
+		$brand = kits_frame_brand();
 		$theme = wp_get_theme( get_template() );
 		$core  = get_file_data( KITS_CORE_DIR . 'kits-core.php', array( 'Version' => 'Version' ) );
 		$pd_saved = (array) get_option( 'kits_page_defaults', array() );
@@ -195,8 +196,8 @@ add_action(
 			'theme'        => $theme->get( 'Name' ) . ' ' . $theme->get( 'Version' ),
 			'coreVersion'  => (string) $core['Version'],
 			'tabs'         => kits_frame_tabs( 'kits-options' ),
-			'icon'         => kits_frame_brand()['icon'],
-			'version'      => kits_frame_brand()['version'],
+			'icon'         => $brand['icon'],
+			'version'      => $brand['version'],
 			'fields'       => $fields,
 			'saved'        => (object) $saved,
 			'inherited'    => (object) $inherited,
