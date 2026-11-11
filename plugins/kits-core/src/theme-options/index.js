@@ -25,7 +25,12 @@ import {
 const data = window.kitsAdminApp || {};
 const fields = data.fields || {};
 
-/** Groups of fields, in field order: [ { slug, label, keys } ]. */
+/**
+ * Groups of fields, in field order.
+ *
+ * @param {Object} list Fields by key.
+ * @return {Array} [ { slug, label, keys } ].
+ */
 function groupsOf( list ) {
 	const out = [];
 	Object.keys( list ).forEach( ( key ) => {
@@ -110,8 +115,9 @@ function Field( { name, field, value, inherited, onChange } ) {
 					: sprintf(
 							/* translators: %s: the theme's value. */
 							__( 'Theme value: %s', 'kits-core' ),
-							field.choices?.[ inherited ] ?? ( inherited || __( 'empty', 'kits-core' ) )
-					  ) }{ ' ' }
+							field.choices?.[ inherited ] ??
+								( inherited || __( 'empty', 'kits-core' ) )
+						) }{ ' ' }
 				{ reset }
 			</p>
 		</div>
@@ -143,7 +149,7 @@ function App() {
 
 	const inherited = data.inherited || {};
 	const valueOf = ( k ) =>
-		k in edits ? edits[ k ] : saved[ k ] ?? inherited[ k ] ?? '';
+		k in edits ? edits[ k ] : ( saved[ k ] ?? inherited[ k ] ?? '' );
 	const dirty = Object.keys( edits ).some(
 		( k ) => edits[ k ] !== ( saved[ k ] ?? inherited[ k ] ?? '' )
 	);
@@ -165,10 +171,18 @@ function App() {
 		apiFetch( {
 			path: '/wp/v2/settings',
 			method: 'POST',
-			data: { kits_theme_options: { ...saved, ...edits } },
+			// Only the edited fields: the clean-up keeps every field that is not sent, so a change made
+			// elsewhere since this screen opened is not written back.
+			data: { kits_theme_options: edits },
 		} )
 			.then( ( res ) => {
-				setSaved( res.kits_theme_options || {} );
+				// A stored value the schema cannot read comes back as null: keep what this screen knows.
+				setSaved(
+					res.kits_theme_options &&
+						'object' === typeof res.kits_theme_options
+						? res.kits_theme_options
+						: { ...saved, ...edits }
+				);
 				setEdits( {} );
 				setStatus( {
 					type: 'success',
@@ -179,7 +193,8 @@ function App() {
 				setStatus( {
 					type: 'error',
 					text:
-						err?.message || __( 'Not saved. Try again.', 'kits-core' ),
+						err?.message ||
+						__( 'Not saved. Try again.', 'kits-core' ),
 				} )
 			)
 			.finally( () => setBusy( false ) );
@@ -199,7 +214,10 @@ function App() {
 							<p className="description">
 								{ sprintf(
 									/* translators: 1: site name, 2: theme name and version, 3: Kits Core version. */
-									__( '%1$s · %2$s · Kits Core %3$s', 'kits-core' ),
+									__(
+										'%1$s · %2$s · Kits Core %3$s',
+										'kits-core'
+									),
 									data.site,
 									data.theme,
 									data.core
@@ -287,6 +305,16 @@ function App() {
 											</a>
 										</li>
 									) ) }
+									{ data.shareUrl && (
+										<li>
+											<a href={ data.shareUrl }>
+												{ __(
+													'Share bar (current screen)',
+													'kits-core'
+												) }
+											</a>
+										</li>
+									) }
 								</ul>
 							</CardBody>
 						</Card>

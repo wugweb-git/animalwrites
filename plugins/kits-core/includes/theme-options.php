@@ -217,6 +217,30 @@ function kits_theme_options_clean( $input ): array {
 	return $out;
 }
 
+/**
+ * JSON schema of kits_theme_options for the REST settings route: one property per field.
+ *
+ * @return array
+ */
+function kits_theme_options_schema(): array {
+	$props = array();
+	foreach ( kits_theme_option_fields() as $key => $f ) {
+		if ( 'share' === $f['kind'] ) {
+			$props[ $key ] = array(
+				'type'                 => 'object',
+				'additionalProperties' => array( 'type' => 'string' ),
+			);
+		} else {
+			$props[ $key ] = array( 'type' => 'string' );
+		}
+	}
+	return array(
+		'type'                 => 'object',
+		'properties'           => $props,
+		'additionalProperties' => true, // Keys a site no longer has stay readable; the clean-up drops them on save.
+	);
+}
+
 add_action(
 	'init',
 	function () {
@@ -227,6 +251,7 @@ add_action(
 				'type'              => 'array',
 				'default'           => array(),
 				'sanitize_callback' => 'kits_theme_options_clean',
+				'show_in_rest'      => array( 'schema' => kits_theme_options_schema() ), // Kits → Theme Options (new screen) saves through /wp/v2/settings.
 			)
 		);
 	},
