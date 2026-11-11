@@ -1035,6 +1035,9 @@ function aw_si_settings_tab(): void {
 	echo '<button type="submit" name="what" value="psi" class="button">' . esc_html__( 'Start PageSpeed', 'aw-seo-extras' ) . '</button>';
 	if ( aw_si_bing_on() ) {
 		echo ' <button type="submit" name="what" value="bing" class="button">' . esc_html__( 'Run Bing Webmaster', 'aw-seo-extras' ) . '</button>';
+		if ( function_exists( 'aw_si_bing_kw_run' ) ) {
+			echo ' <button type="submit" name="what" value="bing_kw" class="button">' . esc_html__( 'Run Bing keyword volumes', 'aw-seo-extras' ) . '</button>';
+		}
 	}
 	if ( aw_si_clarity_on() ) {
 		echo ' <button type="submit" name="what" value="clarity" class="button">' . esc_html__( 'Run Clarity (uses 2 of its 10 daily calls)', 'aw-seo-extras' ) . '</button>';
@@ -1070,6 +1073,8 @@ add_action(
 			aw_si_clarity_run();
 		} elseif ( 'bing' === $what ) {
 			aw_si_bing_run();
+		} elseif ( 'bing_kw' === $what && function_exists( 'aw_si_bing_kw_run' ) ) {
+			aw_si_bing_kw_run(); // Monthly job; by hand before its first scheduled run (12 Nov 2026).
 		} else {
 			aw_si_daily( true );
 		}

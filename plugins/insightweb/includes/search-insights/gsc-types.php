@@ -23,7 +23,7 @@ const AW_SI_INSPECT_CRON   = 'aw_si_inspect';
 const AW_SI_INSPECT_MORE   = 'aw_si_inspect_more';
 const AW_SI_INSPECT_QUEUE  = 'aw_si_inspect_queue';
 const AW_SI_INSPECT_CAP    = 2000; // Google's daily URL Inspection limit per site. Filter aw_si_inspect_cap lowers it.
-const AW_SI_INSPECT_BUDGET = 25;   // Seconds per cron step.
+const AW_SI_INSPECT_BUDGET = 15;   // Seconds per cron step (12 Nov 2026: 25 left too little room under the host's 30-second PHP limit; the 11 Nov run died mid-step).
 const AW_SI_INSPECT_D      = '2000-01-01'; // The one fixed date of the index-state rows.
 
 add_filter(
@@ -202,7 +202,7 @@ function aw_si_gsc_types_pages( int $days = 28, int $limit = 10 ): array {
 	$o     = aw_si_table( 'obs' );
 	$since = ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( "-{$days} days" )->format( 'Y-m-d' );
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
-	return (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, SUM(IF(metric = 'discover', clicks, 0)) dc, SUM(IF(metric = 'discover', impr, 0)) di, SUM(IF(metric = 'gnews', clicks, 0)) nc, SUM(IF(metric = 'gnews', impr, 0)) ni FROM {$o} WHERE src = 'gsc-types' AND metric IN ('discover', 'gnews') AND period = 'day' AND d >= %s GROUP BY page ORDER BY (di + ni) DESC LIMIT %d", $since, $limit ) );
+	return (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, SUM(IF(metric = 'discover', clicks, 0)) dc, SUM(IF(metric = 'discover', impr, 0)) di, SUM(IF(metric = 'gnews', clicks, 0)) nc, SUM(IF(metric = 'gnews', impr, 0)) ni FROM {$o} WHERE src = 'gsc-types' AND metric IN ('discover', 'gnews') AND period = 'day' AND d >= %s GROUP BY page ORDER BY SUM(impr) DESC LIMIT %d", $since, $limit ) );
 }
 
 /** Overview box: Discover and Google News. */
@@ -350,6 +350,8 @@ function aw_si_inspect_step(): array {
 					}
 					array_shift( $q['todo'] );
 					$q['errors'][] = $path . ': ' . wp_html_excerpt( wp_strip_all_tags( $e->getMessage() ), 160, '…' );
+					$q['errors']   = array_slice( (array) $q['errors'], -20 );
+					update_option( AW_SI_INSPECT_QUEUE, $q, false ); // Saved after every page, so a step cut short loses nothing.
 					continue;
 				}
 				array_shift( $q['todo'] );
@@ -371,6 +373,8 @@ function aw_si_inspect_step(): array {
 				);
 				++$q['done'];
 				$q['indexed'] += $indexed ? 1 : 0;
+				update_option( AW_SI_INSPECT_QUEUE, $q, false ); // Saved after every page, so a step cut short loses nothing.
+				aw_si_run_beat( 'inspect' );
 			}
 			return true;
 		}

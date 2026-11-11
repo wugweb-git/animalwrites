@@ -424,7 +424,7 @@ function insightweb_settings_payload( bool $admin ): array {
 	$groups[] = insightweb_rising_group();
 	return array(
 		'groups'  => $groups,
-		'moreUrl' => aw_si_url( 'settings' ),
+		'moreUrl' => add_query_arg( 'ui', 'classic', aw_si_url( 'settings' ) ), // Run now, imports and Delete data live on the classic Settings.
 	);
 }
 
@@ -508,7 +508,7 @@ function insightweb_services(): array {
 	$sitekit = class_exists( '\Google\Site_Kit\Plugin' );
 	$sk_url  = add_query_arg( 'page', 'googlesitekit-settings', admin_url( 'admin.php' ) );
 	$keys    = current_user_can( 'manage_options' ) ? admin_url( 'admin.php?page=aw-keys' ) : '';
-	$run     = aw_si_url( 'settings' );
+	$run     = add_query_arg( 'ui', 'classic', aw_si_url( 'settings' ) );
 	$out     = array();
 	$module  = function ( string $slug, string $src, string $name, string $prop ) use ( $sitekit, $sk_url, $run ) {
 		$s                             = get_option( 'googlesitekit_' . $slug . '_settings' );
