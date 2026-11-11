@@ -118,7 +118,7 @@ function kits_frame_open( string $current, string $title, string $intro = '' ): 
 	foreach ( kits_frame_tabs( $current ) as $t ) {
 		echo '<li><a href="' . esc_url( $t['url'] ) . '" class="kits-shell-tab' . ( $t['current'] ? ' is-current' : '' ) . '"' . ( $t['current'] ? ' aria-current="page"' : '' ) . '>' . esc_html( $t['label'] ) . '</a></li>';
 	}
-	echo '</ul></nav><div class="kits-shell-header__aside"><a href="' . esc_url( add_query_arg( 'ui', 'classic' ) ) . '">' . esc_html__( 'Open the earlier screen', 'kits-core' ) . '</a></div></header>';
+	echo '</ul></nav></header>';
 	echo '<div class="kits-shell__body">';
 	if ( '' !== $intro ) {
 		echo '<p class="kits-shell-frame__intro">' . esc_html( $intro ) . '</p>';

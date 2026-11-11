@@ -162,7 +162,6 @@ add_action(
 					'version'  => AW_CORE_VERSION,
 					'icon'     => plugins_url( 'directoryweb/icon.svg', AW_CORE_DIR . 'animal-writes-core.php' ),
 					'tabs'     => $tabs,
-					'oldUrl'   => 'claims' === $screen ? add_query_arg( 'ui', 'classic' ) : '',
 					'listings' => add_query_arg( 'post_type', 'aw_listing', admin_url( 'edit.php' ) ),
 					'rest'     => DIRECTORYWEB_REST,
 				),

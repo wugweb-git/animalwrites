@@ -113,7 +113,6 @@ add_action(
 					'version' => (string) $head['Version'],
 					'icon'    => plugins_url( 'assets/icon.svg', $main ),
 					'tabs'    => $tabs,
-					'oldUrl'  => add_query_arg( 'ui', 'classic' ),
 					'rest'    => INSIGHTWEB_REST,
 					'admin'   => current_user_can( 'manage_options' ),
 				),

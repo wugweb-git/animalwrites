@@ -101,7 +101,6 @@ add_action(
 					'version' => (string) $head['Version'],
 					'icon'    => plugins_url( 'assets/icon.svg', AW_SEO_EXTRAS_DIR . 'aw-seo-extras.php' ),
 					'tabs'    => $tabs,
-					'oldUrl'  => add_query_arg( 'ui', 'classic' ),
 					'rest'    => RANKWEB_REST,
 					'faqUrl'  => add_query_arg( 'page', 'aw-faq', admin_url( 'admin.php' ) ),
 				),

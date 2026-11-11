@@ -118,7 +118,6 @@ add_action(
 					'version'    => MAILWEB_VERSION,
 					'icon'       => plugins_url( 'assets/icon.svg', MAILWEB_FILE ),
 					'tabs'       => $tabs,
-					'oldUrl'     => add_query_arg( 'ui', 'classic' ),
 					'rest'       => MAILWEB_REST,
 					'admin'      => $admin,
 					'inboxUrl'   => mailweb_ui_url( 'inbox' ),

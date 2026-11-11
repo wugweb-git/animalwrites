@@ -116,7 +116,6 @@ add_action(
 					'version'     => PLANWEB_VERSION,
 					'icon'        => PLANWEB_URL . 'assets/icon.svg',
 					'tabs'        => $tabs,
-					'oldUrl'      => add_query_arg( 'ui', 'classic', remove_query_arg( 'tab' ) ),
 					'rest'        => PLANWEB_REST,
 					'entriesUrl'  => planweb_ui_url( 'entries' ),
 					'today'       => wp_date( 'Y-m-d' ),

@@ -47,11 +47,6 @@ function Header() {
 			name={ app.name }
 			version={ app.version }
 			tabs={ app.tabs }
-			aside={
-				<a href={ app.oldUrl }>
-					{ __( 'Open the earlier screen', 'planweb' ) }
-				</a>
-			}
 		/>
 	);
 }

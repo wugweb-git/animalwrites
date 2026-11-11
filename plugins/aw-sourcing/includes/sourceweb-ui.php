@@ -120,7 +120,6 @@ add_action(
 					'version' => (string) $head['Version'],
 					'icon'    => plugins_url( 'assets/icon.svg', AW_SOURCING_DIR . 'aw-sourcing.php' ),
 					'tabs'    => $tabs,
-					'oldUrl'  => add_query_arg( 'ui', 'classic' ),
 					'rest'    => SOURCEWEB_REST,
 					'isAdmin' => current_user_can( AW_SRC_CAP ),
 				),

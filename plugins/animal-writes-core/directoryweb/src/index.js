@@ -41,15 +41,9 @@ function Header() {
 			version={ app.version }
 			tabs={ app.tabs }
 			aside={
-				app.oldUrl ? (
-					<a href={ app.oldUrl }>
-						{ __( 'Open the earlier screen', 'directoryweb' ) }
-					</a>
-				) : (
-					<a href={ app.listings }>
-						{ __( 'Directory listings', 'directoryweb' ) }
-					</a>
-				)
+				<a href={ app.listings }>
+					{ __( 'Directory listings', 'directoryweb' ) }
+				</a>
 			}
 		/>
 	);
