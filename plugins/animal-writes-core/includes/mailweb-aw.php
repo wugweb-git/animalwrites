@@ -182,7 +182,7 @@ add_filter(
 				$e = aw_mail_ff_entry( $row[1] );
 				if ( $e ) {
 					$r       = (array) json_decode( (string) $e->response, true );
-					$items[] = array( 'id' => $row[1], 'name' => (string) ( $r['name'] ?? '' ), 'email' => (string) ( $r['email'] ?? '' ), 'subject' => aw_mail_ff_subject( $e, $r ), 'date' => $row[0], 'unread' => 'unread' === $e->status );
+					$items[] = array( 'id' => $row[1], 'name' => (string) ( $r['name'] ?? '' ), 'email' => (string) ( $r['email'] ?? '' ), 'subject' => aw_mail_ff_subject( $e, $r ), 'date' => $row[0], 'unread' => 'unread' === $e->status, 'replied' => (bool) $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}fluentform_submission_meta WHERE response_id = %d AND meta_key = '_notes' AND value = 'Reply sent from Mail' LIMIT 1", (int) $e->id ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 					continue;
 				}
 				$p = get_post( $row[1] );
@@ -196,6 +196,7 @@ add_filter(
 					'subject' => 'Contact: ' . trim( preg_replace( '/^Contact form:\s*/', '', $p->post_title ) ),
 					'date'    => $p->post_date,
 					'unread'  => '' === (string) get_post_meta( $p->ID, 'aw_read', true ),
+					'replied' => '' !== (string) get_post_meta( $p->ID, 'aw_m_replied', true ),
 				);
 			}
 			return array(
