@@ -64,7 +64,7 @@ function aw_team_dates_add_links_read() {
 	for ( $i = 0; $i < 12; $i++ ) {
 		$ymd = $first->modify( '+' . $i . ' months' )->format( 'Y-m-d' );
 		if ( ! isset( $have[ $ymd . '|' . $title ] ) ) {
-			$all[] = array( 'date' => $ymd, 'title' => $title, 'note' => 'Read Search Console → Links and add new linking pages with wp aw-si links add (they show in RankWeb → Search Insights → Links).' );
+			$all[] = array( 'date' => $ymd, 'title' => $title, 'note' => 'Read Search Console → Links and add new linking pages with wp aw-si links add (they show in InsightWeb → Search Insights → Links).' );
 		}
 	}
 	update_option( 'aw_team_dates', $all, false );
@@ -91,7 +91,7 @@ function aw_team_dates_links_note_rename() {
 		}
 		$note = (string) ( $d['note'] ?? '' );
 		if ( 'Search Console Links read (Claude Code session)' === ( $d['title'] ?? '' ) && false !== strpos( $note, 'AW SEO Plus → Search Insights → Links' ) ) {
-			$all[ $i ]['note'] = str_replace( 'AW SEO Plus → Search Insights → Links', 'RankWeb → Search Insights → Links', $note );
+			$all[ $i ]['note'] = str_replace( 'AW SEO Plus → Search Insights → Links', 'InsightWeb → Search Insights → Links', $note );
 			$changed           = true;
 		}
 	}

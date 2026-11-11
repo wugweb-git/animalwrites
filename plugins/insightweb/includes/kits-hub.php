@@ -2,7 +2,7 @@
 /**
  * InsightWeb in the Kits admin and on the Plugins screen: a row on Kits → Plugins and in Kits → Home's System
  * Status (Kits Core's filters kits_plugin_screens and kits_status_rows), and a Search Insights link under the plugin's
- * name. The screen itself is unchanged: RankWeb → Search Insights.
+ * name. The screen itself is unchanged; its menu is InsightWeb → Search Insights (11 Nov 2026).
  *
  * @package aw-seo-extras
  */

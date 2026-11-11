@@ -2,8 +2,7 @@
 /**
  * RankWeb menu and its Overview screen (owner, 25 Oct 2026: one menu, organised like any other plugin).
  *
- * The menu: RankWeb → Overview (this file), FAQ (faq.php), Search Insights (InsightWeb's search-insights/admin.php),
- * Settings (settings.php: every module's rules and switches).
+ * The menu: RankWeb → Overview (this file), FAQ (faq.php), Settings (settings.php: every module's rules and switches).
  * Overview lists every module of the plugin: what it does, where it is set up (here or in Rank Math), its status from
  * the checks that already run, the boxes it adds to edit screens, and its WP-CLI commands. Core WordPress only.
  *
@@ -296,7 +295,7 @@ function aw_seo_overview_page() {
 	);
 	echo '</details>';
 
-	echo '<details><summary><strong>' . esc_html__( 'Commands (WP-CLI on the server)', 'aw-seo-extras' ) . '</strong> (5)</summary>';
+	echo '<details><summary><strong>' . esc_html__( 'Commands (WP-CLI on the server)', 'aw-seo-extras' ) . '</strong> (4)</summary>';
 	aw_seo_extras_simple_table(
 		'aw-seo-commands',
 		array(
@@ -307,10 +306,6 @@ function aw_seo_overview_page() {
 			array(
 				'cmd'  => '<code>wp aw-faq</code>',
 				'what' => 'report, check, import, convert-guides, undo-guide',
-			),
-			array(
-				'cmd'  => '<code>wp aw-si</code>, <code>wp aw-si-rising</code>',
-				'what' => 'Search Insights: status, dry-run, run, fetch, snapshot, rollup, delete-data; rising terms and spikes',
 			),
 			array(
 				'cmd'  => '<code>wp aw-seo rank-math-schema</code>',

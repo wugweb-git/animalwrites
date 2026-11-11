@@ -79,14 +79,7 @@ add_action(
 				'current' => false,
 			),
 		);
-		if ( function_exists( 'aw_si_url' ) && function_exists( 'aw_si_cap' ) && current_user_can( aw_si_cap() ) ) {
-			$tabs[] = array(
-				'slug'    => 'search-insights',
-				'label'   => __( 'Search Insights', 'aw-seo-extras' ),
-				'url'     => aw_si_url(),
-				'current' => false,
-			);
-		}
+		// No Search Insights tab: it is InsightWeb's, with its own menu (owner, 11 Nov 2026).
 		if ( current_user_can( 'manage_options' ) ) {
 			$tabs[] = array(
 				'slug'    => 'settings',
