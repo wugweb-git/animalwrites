@@ -16,7 +16,7 @@ any branch on 11 Nov, so section 4 follows the brief's outline of them. Where th
 
 - **Menu:** Kits → Dates (`admin.php?page=aw-dates`), not Tools → Dates. Since 10 Nov (642e7e76) it is one of the seven
   Animal Writes screens at the end of the Kits menu. Capability `edit_others_posts` (editors and administrators).
-  `docs/pending.md` still says "Animal Writes → Dates"; that name is from before 10 Nov.
+  `docs/pending.md` said "Animal Writes → Dates" (from before 10 Nov); corrected to Kits → Dates on 11 Nov.
 - **Storage:** one option, `aw_team_dates` (autoload off). It holds a list of `{date Y-m-d, title, note}`. Entries have
   no ID: delete uses the list index plus the date.
 - **One-time writers** (each runs once on `admin_init` and sets a flag):
@@ -324,22 +324,16 @@ send).
 **Month and week views: PlanWeb's own widgets inside the shell.** The working list's view switch (List · Month · Week)
 loads them, and each view has its own address (`&view=month&m=2026-11`).
 
-- **Built only from `@wordpress/components`:**
-  - `Grid` and `__experimentalGrid` / `VStack` / `HStack` for the day cells;
-  - `Card` and `CardBody` for a day;
-  - `Button` for an item (opens the same DataForm);
-  - `Popover` or `Dropdown` for "+3 more";
-  - `Tooltip` for the full title;
-  - `VisuallyHidden` for date labels;
-  - `Icon` with `@wordpress/icons` for the Type marks;
-  - `__experimentalText` or `Truncate` for titles;
-  - the shell's empty, loading and error states.
+- **Built from the Kits admin design system's parts** (shipped in Kits Core with the shell): its card, button,
+  popover, tooltip, icon and the shared empty, loading and error states. WordPress packages are plumbing only
+  (`@wordpress/data`, `api-fetch`, `i18n`, `icons`). If the design system has no day-grid part yet, PlanWeb asks for
+  one in Kits Core rather than styling its own.
 - **Styling:** layout only (the grid's columns, and greying past days). No colours of our own: the Type marks use the
-  admin theme variables. Each Type also has its own icon and an accessible name, so colour is never the only signal
+  design system's tokens. Each Type also has its own icon and an accessible name, so colour is never the only signal
   (WCAG 2.2 AA, 1.4.1). Status is a text label.
 - **Data:** the same `planweb/v1/items` route, by date range. Days are buttons in a grid with arrow-key moves and a
   "today" marker (`aria-current="date"`).
-- If `@wordpress/dataviews` ships a calendar layout by then, PlanWeb uses it instead and drops its own widgets.
+- If the shell's working-list part gains a calendar layout by then, PlanWeb uses it instead and drops its own widgets.
 
 ### 4.4 Settings
 
@@ -375,7 +369,8 @@ loads them, and each view has its own address (`&view=month&m=2026-11`).
 ### 4.6 Technical
 
 - **Build.** `@wordpress/scripts`, one entry that registers PlanWeb's parts into the shell (tiles, list config, the
-  month and week widgets, settings groups). It imports only `@wordpress/*` and Kits Core's shell API.
+  month and week widgets, settings groups). It imports Kits Core's shell and design-system API, plus `@wordpress/*`
+  packages for plumbing.
 - **Built files are committed**, because the deploy has no build step. The Deploy check gains a Node step that runs
   `npm ci && npm run build` and fails if `build/` differs.
 - **Security.**
@@ -441,16 +436,17 @@ Before the shell ships, phases can run in the order 1 → 3 → 4 (routes only).
 
 ## 7. Differences found while planning
 
-- The brief says "Tools → Dates". The screen is **Kits → Dates** (`aw-dates`) since 10 Nov; `docs/pending.md` still
-  calls it "Animal Writes → Dates".
+- The brief says "Tools → Dates". The screen is **Kits → Dates** (`aw-dates`) since 10 Nov; `docs/pending.md` called
+  it "Animal Writes → Dates" until 11 Nov.
 - The 11 Nov Martech update says the 25 Nov "Search Insights thresholds review" no longer shows in Dates, although
   `aw_team_dates_1101b` added it once. It may have been removed by hand. The import takes the list as stored on the
   day it runs; the verify table will show what is there.
 - The Martech page lists four campaign dates missing from Dates (17 Nov Supreme Court reports, 30 Nov MP model city,
   3 Dec Jharkhand, 15 Dec stray-dog checkpoint). They are added only on the owner's yes, as normal entries after
   phase 1. They are not part of the import.
-- The earlier rule "admin UI core-only (WP_List_Table, Settings API, no custom CSS)" is replaced for Kits plugins by
-  the 11 Nov standard (`@wordpress/components`, DataViews, REST). PlanWeb follows the 11 Nov standard.
+- The earlier rule "admin UI core-only (WP_List_Table, Settings API, no custom CSS)" is replaced for Kits plugins.
+  The look follows the Kits admin design system (Google Site Kit pattern for plugins), shipped in Kits Core;
+  WordPress packages are plumbing only (owner, 11 Nov). PlanWeb only registers parts into the shell.
 - The admin is the Kits Core shell, so PlanWeb registers parts rather than building screens. Its phase 2 waits for
   the shell, which ships first with InsightWeb, then RankWeb, SourceWeb, MailWeb and DirectoryWeb; PlanWeb is last.
 - "Reminders fire on a local copy only" is met with the Deploy check's throwaway WordPress on the GitHub runner. No
