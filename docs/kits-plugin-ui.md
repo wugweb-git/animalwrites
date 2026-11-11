@@ -113,7 +113,7 @@ groups that fold, On/Off toggles). The first is **Kits → Settings with `&ui=ne
 - Sections: Performance (Scripts and styles, Fonts), Compatibility (Older content), and Preview access, which links to
   the current screen's section for now.
 - The fields are the current screen's (`kits_theme_options`: the Speed and Older content switches, the joined files
-  cap and the font preload). Save sends only the changed fields to `kits/v1/settings`, which runs them through the
+  cap and the font preload). Save sends only the changed fields to `kits/v1/settings-panel`, which runs them through the
   option's own clean-up (`kits_theme_options_clean()`); nothing is written when nothing changed.
 - `smoke.sh` checks the screen (200 and drawn for an administrator, 403 for a subscriber, the current screen still the
   default), the route (401 signed out or without a nonce, 403 for a subscriber, 200 for an administrator), and that an
