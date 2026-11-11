@@ -64,7 +64,7 @@ add_action(
 		);
 		register_rest_route(
 			DIRECTORYWEB_REST,
-			'/stats/(?P<key>published|status|places|indexing|search|claims|badges|enrichment)',
+			'/stats/(?P<key>[a-z]+)',
 			array(
 				'methods'             => 'GET',
 				'permission_callback' => $claims,

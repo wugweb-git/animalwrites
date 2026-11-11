@@ -242,6 +242,24 @@ function directoryweb_claim_light_rows(): array {
 }
 
 /**
+ * An old-form claim's details or decision changed (claims.php writes them with update_post_meta, which leaves the
+ * post's modified date as it is): read the claim rows again.
+ *
+ * @param int    $meta_id  Unused.
+ * @param int    $post_id  Post.
+ * @param string $meta_key Meta key.
+ */
+function directoryweb_claim_rows_forget( $meta_id, $post_id, $meta_key ): void {
+	unset( $meta_id );
+	if ( 0 === strpos( (string) $meta_key, 'aw_c_' ) && 'aw_claim' === get_post_type( (int) $post_id ) ) {
+		delete_transient( DIRECTORYWEB_CLAIM_ROWS );
+	}
+}
+add_action( 'added_post_meta', 'directoryweb_claim_rows_forget', 10, 3 );
+add_action( 'updated_post_meta', 'directoryweb_claim_rows_forget', 10, 3 );
+add_action( 'deleted_post_meta', 'directoryweb_claim_rows_forget', 10, 3 );
+
+/**
  * What the claim rows depend on, in two small queries: the claim form's entries (how many, the newest, the newest
  * change) and their reviews (the newest review row and change), plus the old-form claims (how many, the newest change).
  * Any new entry, trashed entry, review or old-form edit changes it, so a stored list is never out of date.
