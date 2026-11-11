@@ -56,7 +56,7 @@ PHP helpers in `includes/admin-shell.php`:
   `wp_rest` nonce in a browser request; 403 without the capability).
 
 The second set of parts is in `src/shell/list.js`, `setup.js`, `panel.js`, `extras.js` and `more.css`, built into the
-same `build/shell/` files.
+same `build/shell/` files. The empty, loading and error states are in `states.js`, so the list and screens share them.
 
 CSS classes all start `kits-shell-`. The shell's own values are `--ks-*` variables, each copied from a Kits token and
 named in the comment at the top of `shell.css`:
