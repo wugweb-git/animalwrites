@@ -79,12 +79,11 @@ add_action(
 	'admin_menu',
 	function () {
 		// RankWeb → Search Insights, after Overview and FAQ: the same address and screen id as before InsightWeb.
-		// Without RankWeb, the same page as a menu of its own, so it stays reachable.
-		if ( defined( 'AW_SEO_MENU' ) ) {
-			$hook = add_submenu_page( AW_SEO_MENU, __( 'Search Insights', 'aw-seo-extras' ), __( 'Search Insights', 'aw-seo-extras' ), aw_si_cap(), AW_SI_SLUG, 'aw_si_screen' );
-		} else {
-			$hook = add_menu_page( __( 'Search Insights', 'aw-seo-extras' ), __( 'Search Insights', 'aw-seo-extras' ), aw_si_cap(), AW_SI_SLUG, 'aw_si_screen', 'dashicons-chart-line', 81 );
+		// RankWeb is never switched off (tied to the theme and Rank Math), so there is no menu of its own.
+		if ( ! defined( 'AW_SEO_MENU' ) ) {
+			return;
 		}
+		$hook = add_submenu_page( AW_SEO_MENU, __( 'Search Insights', 'aw-seo-extras' ), __( 'Search Insights', 'aw-seo-extras' ), aw_si_cap(), AW_SI_SLUG, 'aw_si_screen' );
 		if ( $hook ) {
 			add_action( 'load-' . $hook, 'aw_si_load' );
 		}

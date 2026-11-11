@@ -5,7 +5,6 @@
  *
  *   bridge    RankWeb active, InsightWeb not: RankWeb's bridge loads it (docs/insightweb-plan.md 3.2).
  *   both      both active, in either order: InsightWeb loads it, the bridge does nothing.
- *   alone     InsightWeb active, RankWeb not: it still loads, with its own menu.
  *
  * Each case also checks that no Search Insights job is booked twice. Prints ok/FAIL lines; exits 1 on any FAIL.
  *
@@ -25,10 +24,10 @@ $aw_t    = function ( bool $ok, string $what ) use ( &$aw_fail, $aw_case ) {
 
 $aw_t( defined( 'INSIGHTWEB_LOADED' ) && function_exists( 'aw_si_url' ) && function_exists( 'aw_si_page_metrics' ), 'Search Insights is loaded' );
 $aw_t( ( 'bridge' !== $aw_case ) === defined( 'INSIGHTWEB_FILE' ), 'bridge' === $aw_case ? 'loaded by RankWeb\'s bridge (InsightWeb not active)' : 'loaded by InsightWeb itself' );
-$aw_t( ( 'alone' !== $aw_case ) === function_exists( 'aw_seo_api_allowed' ), 'alone' === $aw_case ? 'RankWeb is not loaded' : 'RankWeb is loaded' );
+$aw_t( function_exists( 'aw_seo_api_allowed' ), 'RankWeb is loaded' );
 $aw_t( function_exists( 'aw_si_api_allowed' ) && 'aw_si_api_allowed' === ( rest_get_server()->get_routes()['/aw/v1/search-insights'][0]['permission_callback'] ?? '' ), 'aw/v1/search-insights uses aw_si_api_allowed' );
 $aw_t( isset( rest_get_server()->get_routes()['/aw/v1/search-insights/crawl'] ), 'aw/v1/search-insights/crawl is registered' );
-$aw_t( 'alone' === $aw_case || isset( rest_get_server()->get_routes()['/aw/v1/seo-focus'] ), 'aw/v1/seo-focus stays RankWeb\'s' );
+$aw_t( isset( rest_get_server()->get_routes()['/aw/v1/seo-focus'] ), 'aw/v1/seo-focus stays RankWeb\'s' );
 
 // The seven numbers are constants, with the defaults when nothing is saved (as RankWeb defined them).
 foreach ( array( 'AW_SI_HIGH_TRENDS', 'AW_SI_HIGH_IMPR', 'AW_SI_QUICK_MIN', 'AW_SI_MOVERS', 'AW_SI_PSI_FLAG', 'AW_SI_RM_LOW', 'AW_SI_KEEP_DAYS' ) as $aw_const ) {
@@ -58,7 +57,7 @@ foreach ( array( 'aw_si_daily', 'aw_si_rollup', 'aw_si_ga4', 'aw_si_psi', 'aw_si
 	$aw_t( 1 === ( $aw_count[ $aw_hook ] ?? 0 ), "{$aw_hook} is booked once (" . (int) ( $aw_count[ $aw_hook ] ?? 0 ) . ')' );
 }
 
-// The screen: under RankWeb with RankWeb, its own menu without it; the same slug either way. Run as the CI admin
+// The screen: under RankWeb, the same slug and screen id as before. Run as the CI admin
 // (smoke.sh passes --user=ci), so the capability checks in add_*_page pass.
 require_once ABSPATH . 'wp-admin/includes/plugin.php';
 global $submenu, $menu;
@@ -70,8 +69,7 @@ try {
 	$aw_t( false, 'admin_menu ran without an error: ' . $aw_e->getMessage() );
 }
 $aw_under = in_array( 'aw-search-insights', array_column( (array) ( $submenu['aw-seo-plus'] ?? array() ), 2 ), true );
-$aw_top   = in_array( 'aw-search-insights', array_column( (array) $menu, 2 ), true );
-$aw_t( 'alone' === $aw_case ? $aw_top : $aw_under, 'alone' === $aw_case ? 'Search Insights is its own menu' : 'Search Insights is under RankWeb (same screen id)' );
+$aw_t( $aw_under, 'Search Insights is under RankWeb (same screen id)' );
 
 if ( $aw_fail ) {
 	exit( 1 );
