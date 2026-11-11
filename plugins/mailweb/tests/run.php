@@ -122,17 +122,66 @@ function reset_options( array $o = array() ) {
 
 // 1. The daily limit.
 reset_options();
-check( 'limit: unchanged Save with the option absent writes nothing', ! mailweb_save_changed( 'mailweb_cap', mailweb_cap_current(), array( 'budget' => 90, 'reserve' => 10 ), 'mailweb_cap_clean' ) && 0 === $GLOBALS['mw_writes'] && ! array_key_exists( 'mailweb_cap', $GLOBALS['mw_options'] ) );
+check(
+	'limit: unchanged Save with the option absent writes nothing',
+	! mailweb_save_changed(
+		'mailweb_cap',
+		mailweb_cap_current(),
+		array(
+			'budget'  => 90,
+			'reserve' => 10,
+		),
+		'mailweb_cap_clean'
+	) && 0 === $GLOBALS['mw_writes'] && ! array_key_exists(
+		'mailweb_cap',
+		$GLOBALS['mw_options']
+	)
+);
 check( 'limit: an empty Save writes nothing', ! mailweb_save_changed( 'mailweb_cap', mailweb_cap_current(), array(), 'mailweb_cap_clean' ) );
-reset_options( array( 'mailweb_cap' => array( 'budget' => 90, 'reserve' => 10 ) ) );
-check( 'limit: unchanged Save of stored values writes nothing', ! mailweb_save_changed( 'mailweb_cap', mailweb_cap_current(), array( 'budget' => '90', 'reserve' => '10' ), 'mailweb_cap_clean' ) && 0 === $GLOBALS['mw_writes'] );
-check( 'limit: a changed budget is written, reserve kept', mailweb_save_changed( 'mailweb_cap', mailweb_cap_current(), array( 'budget' => 80 ), 'mailweb_cap_clean' ) && array( 'budget' => 80, 'reserve' => 10 ) === get_option( 'mailweb_cap' ) );
-check( 'limit: budget clamped 1–10,000 and reserve a whole number, as today', array( 'budget' => 10000, 'reserve' => 3 ) === mailweb_cap_clean( array( 'budget' => 99999, 'reserve' => -3 ) ) && 1 === mailweb_cap_clean( array( 'budget' => 0 ) )['budget'] );
+reset_options(
+	array(
+		'mailweb_cap' => array(
+			'budget'  => 90,
+			'reserve' => 10,
+		),
+	)
+);
+check(
+	'limit: unchanged Save of stored values writes nothing',
+	! mailweb_save_changed(
+		'mailweb_cap',
+		mailweb_cap_current(),
+		array(
+			'budget'  => '90',
+			'reserve' => '10',
+		),
+		'mailweb_cap_clean'
+	) && 0 === $GLOBALS['mw_writes']
+);
+check(
+	'limit: a changed budget is written, reserve kept',
+	mailweb_save_changed( 'mailweb_cap', mailweb_cap_current(), array( 'budget' => 80 ), 'mailweb_cap_clean' ) && array(
+		'budget'  => 80,
+		'reserve' => 10,
+	) === get_option( 'mailweb_cap' )
+);
+check(
+	'limit: budget clamped 1–10,000 and reserve a whole number, as today',
+	array(
+		'budget'  => 10000,
+		'reserve' => 3,
+	) === mailweb_cap_clean(
+		array(
+			'budget'  => 99999,
+			'reserve' => -3,
+		)
+	) && 1 === mailweb_cap_clean( array( 'budget' => 0 ) )['budget']
+);
 check( 'limit: fields not in the form are ignored', ! mailweb_save_changed( 'mailweb_cap', mailweb_cap_current(), array( 'other' => 5 ), 'mailweb_cap_clean' ) );
 
 // 2. Aliases and mailboxes.
 $map = array(
-	'hello@example.in'  => 'support@example.in',
+	'hello@example.in'   => 'support@example.in',
 	'contact@example.in' => 'support@example.in',
 );
 check( 'aliases: lines and map round trip', mailweb_aliases_clean( mailweb_aliases_text( $map ) ) === $map );
@@ -165,7 +214,14 @@ $p = mailweb_profile_clean(
 		'picture'   => '12',
 	)
 );
-check( 'profile: cleaned as today', array( 'name' => 'Support team', 'signature' => 'Hi <b>there</b>', 'picture' => 12 ) === $p );
+check(
+	'profile: cleaned as today',
+	array(
+		'name'      => 'Support team',
+		'signature' => 'Hi <b>there</b>',
+		'picture'   => 12,
+	) === $p
+);
 check( 'profile: clean is stable (an unchanged Save compares equal)', mailweb_profile_clean( $p ) === $p );
 check( 'fluentcrm: no mailbox ticked is kept as [ "-" ]', array( '-' ) === mailweb_crm_clean( array( 'boxes' => array() ), array( 'support' ) )['boxes'] );
 check( 'fluentcrm: only known mailboxes', array( 'support' ) === mailweb_crm_clean( array( 'boxes' => array( 'support', 'evil' ) ), array( 'support' ) )['boxes'] );
@@ -252,7 +308,77 @@ $c['boxes']['support']['ok'] = false;
 check( 'tiles: a mailbox not reachable needs attention', 'warn' === array_column( mailweb_dashboard_tiles( $c, $live ), null, 'key' )['unread']['tone'] );
 check( 'tiles: while the first count runs, every tile still has its fields', 7 === count( mailweb_dashboard_tiles( array(), $live ) ) && false === mailweb_dashboard_tiles( array(), $live )[1]['hide'] );
 $n = mailweb_dashboard_numbers( $c );
-check( 'log row: the compared numbers', array( 'unread' => 3, 'sent24' => 12, 'waiting' => 5, 'failed' => 3, 'sent' => 5 ) === $n );
+check(
+	'log row: the compared numbers',
+	array(
+		'unread'  => 3,
+		'sent24'  => 12,
+		'waiting' => 5,
+		'failed'  => 3,
+		'sent'    => 5,
+	) === $n
+);
+
+// Writes from a settings file (Kits import and undo) are cleaned like the screens' fields.
+if ( ! function_exists( 'mailweb_all_boxes' ) ) {
+	/** Two mailboxes. */
+	function mailweb_all_boxes() {
+		return array(
+			'support'      => 'support@example.com',
+			'partnerships' => 'partnerships@example.com',
+		);
+	}
+}
+$clean = array(
+	'budget'  => 80,
+	'reserve' => 10,
+);
+check(
+	'import: the limit is made whole numbers',
+	array(
+		'budget'  => 5,
+		'reserve' => 0,
+	) === mailweb_option_clean(
+		array(
+			'budget'  => -5,
+			'reserve' => 'x',
+		),
+		'mailweb_cap'
+	)
+);
+check( 'import: a clean limit is kept', mailweb_option_clean( $clean, 'mailweb_cap' ) === $clean );
+check( 'import: a signature loses its script', 'Hi' === mailweb_option_clean( array( 'support@example.com' => array( 'signature' => 'Hi<script>x</script>' ) ), 'mailweb_profiles' )['support@example.com']['signature'] );
+check(
+	'import: unknown mailboxes are dropped, absent ones stay unset',
+	array( 'support' => array( 'send' => false ) ) === mailweb_option_clean(
+		array(
+			'support' => array( 'send' => 0 ),
+			'other'   => array( 'send' => 1 ),
+		),
+		'mailweb_mailboxes'
+	)
+);
+check(
+	'import: an empty feed list still means every mailbox',
+	array() === mailweb_option_clean(
+		array(
+			'on'    => 1,
+			'boxes' => array(),
+		),
+		'mailweb_crm'
+	)['boxes']
+);
+check( 'import: feed boxes of another site mean none', array( '-' ) === mailweb_option_clean( array( 'boxes' => array( 'elsewhere' ) ), 'mailweb_crm' )['boxes'] );
+check(
+	'import: aliases keep address pairs only',
+	array( 'hello@example.com' => 'support@example.com' ) === mailweb_option_clean(
+		array(
+			'hello@example.com' => 'support@example.com',
+			'bad'               => 'x',
+		),
+		'mailweb_aliases'
+	)
+);
 
 echo $fails ? "\n$fails failed\n" : "\nall passed\n";
 exit( $fails ? 1 : 0 );

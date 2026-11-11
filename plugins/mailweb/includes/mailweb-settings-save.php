@@ -159,3 +159,65 @@ function mailweb_crm_clean( array $in, array $keys ): array {
 		'boxes' => $boxes ? $boxes : array( '-' ),
 	);
 }
+
+/* ---------- Writes that come from outside these screens (Kits → Tools import and undo) ---------- */
+
+/**
+ * Mailbox keys a stored value may name: today's mailboxes, or, when none are known yet, the keys given.
+ *
+ * @param array $given Keys in the value.
+ */
+function mailweb_option_box_keys( array $given ): array {
+	$keys = array_keys( mailweb_all_boxes() );
+	return $keys ? $keys : array_map( 'sanitize_key', $given );
+}
+
+/**
+ * The value of a MailWeb option as it may be stored, whoever writes it. Runs on sanitize_option_{name}, so a settings
+ * file is cleaned the same way as the screens clean their fields. Values already cleaned come back unchanged.
+ *
+ * @param mixed  $value  The value.
+ * @param string $option Option name.
+ * @return mixed
+ */
+function mailweb_option_clean( $value, $option ) {
+	switch ( $option ) {
+		case 'mailweb_cap':
+			return mailweb_cap_clean( (array) $value );
+		case 'mailweb_default_from':
+			return sanitize_key( is_scalar( $value ) ? (string) $value : '' );
+		case 'mailweb_aliases':
+			$lines = array();
+			foreach ( (array) $value as $alias => $box ) {
+				if ( is_string( $alias ) && is_string( $box ) ) {
+					$lines[ $alias ] = $box;
+				}
+			}
+			return mailweb_aliases_clean( mailweb_aliases_text( $lines ) );
+		case 'mailweb_profiles':
+			$out = array();
+			foreach ( (array) $value as $addr => $p ) {
+				if ( is_email( (string) $addr ) && is_array( $p ) ) {
+					$out[ (string) $addr ] = mailweb_profile_clean( $p );
+				}
+			}
+			return $out;
+		case 'mailweb_mailboxes':
+			$out = array();
+			$in  = (array) $value;
+			foreach ( mailweb_option_box_keys( array_keys( $in ) ) as $key ) {
+				if ( isset( $in[ $key ] ) ) {
+					$out[ $key ] = array( 'send' => is_array( $in[ $key ] ) ? ! empty( $in[ $key ]['send'] ) : ! empty( $in[ $key ] ) );
+				}
+			}
+			return $out;
+		case 'mailweb_crm':
+			$in  = (array) $value;
+			$out = mailweb_crm_clean( $in, mailweb_option_box_keys( (array) ( $in['boxes'] ?? array() ) ) );
+			if ( empty( $in['boxes'] ) ) {
+				$out['boxes'] = array(); // An empty list means every mailbox.
+			}
+			return $out;
+	}
+	return $value;
+}

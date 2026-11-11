@@ -473,7 +473,13 @@ add_action(
 			wp_safe_redirect( mailweb_settings_url( 'sending', array( 'mailweb_cap' => 'flushed', 'n' => (int) $n ), 'cap' ) );
 			exit;
 		}
-		update_option( 'mailweb_cap', mailweb_cap_clean( array( 'budget' => wp_unslash( $_POST['budget'] ?? 90 ), 'reserve' => wp_unslash( $_POST['reserve'] ?? 10 ) ) ), false ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- mailweb_cap_clean() takes whole numbers only
+		// phpcs:disable WordPress.Security.ValidatedSanitizedInput -- mailweb_cap_clean() takes whole numbers only.
+		$in = array(
+			'budget'  => wp_unslash( $_POST['budget'] ?? 90 ),
+			'reserve' => wp_unslash( $_POST['reserve'] ?? 10 ),
+		);
+		// phpcs:enable WordPress.Security.ValidatedSanitizedInput
+		update_option( 'mailweb_cap', mailweb_cap_clean( $in ), false );
 		wp_safe_redirect( mailweb_settings_url( 'sending', array( 'mailweb_cap' => 'saved' ), 'cap' ) );
 		exit;
 	}

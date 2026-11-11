@@ -630,7 +630,7 @@ function mailweb_rest_save_group( WP_REST_Request $r ) {
 			$saved = mailweb_save_changed( 'mailweb_mailboxes', $now, (array) $sent['send'], fn( $v ) => mailweb_mailboxes_clean( $v, $keys ) ) || $saved;
 		}
 		if ( isset( $sent['default_from'] ) ) {
-			$saved = mailweb_save_changed( 'mailweb_default_from', array( 'v' => mailweb_default_from() ), array( 'v' => $sent['default_from'] ), fn( $v ) => sanitize_key( (string) $v['v'] ) ) || $saved;
+			$saved = mailweb_save_changed( 'mailweb_default_from', array( 'v' => (string) get_option( 'mailweb_default_from', '' ) ), array( 'v' => $sent['default_from'] ), fn( $v ) => sanitize_key( (string) $v['v'] ) ) || $saved;
 		}
 		if ( isset( $sent['aliases'] ) ) {
 			$saved = mailweb_save_changed( 'mailweb_aliases', array( 'v' => mailweb_aliases_text( mailweb_aliases() ) ), array( 'v' => $sent['aliases'] ), fn( $v ) => mailweb_aliases_clean( (string) $v['v'] ) ) || $saved;
