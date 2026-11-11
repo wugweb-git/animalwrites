@@ -20,6 +20,7 @@ route directoryweb/v1/dashboard
 route directoryweb/v1/claims
 route "directoryweb/v1/claims&status=all&days=30&sort=listing&dir=asc"
 route directoryweb/v1/settings
+for t in published status places indexing search claims badges enrichment; do route directoryweb/v1/stats/$t; done
 post directoryweb/v1/dashboard/count '{}'
 post directoryweb/v1/settings/claim-form '{"form":0}'
 # No route decides, applies or undoes a claim: those addresses are not there, even for an administrator.
@@ -42,4 +43,5 @@ else
 fi
 same "DirectoryWeb Settings" "$BEFORE" "$(optmd5 aw_ff_forms)"
 python3 -c "import json,sys; s=json.load(open('/tmp/dw-settings.json')); sys.exit(0 if len(s['groups'])==7 and len(s['services'])==9 else 1)" && echo "ok   DirectoryWeb Settings: 9 services, 7 groups" || { echo "FAIL DirectoryWeb Settings: services or groups missing"; FAIL=1; }
-if wp eval 'exit( in_array( "aw_ff_forms", kits_settings_transfer_options(), true ) ? 0 : 1 );'; then echo "ok   aw_ff_forms is in the Kits export"; else echo "FAIL aw_ff_forms missing from the Kits export"; FAIL=1; fi
+# The form map holds every form's ID for this site only, so it stays out of the Kits export (owner, 12 Nov 2026).
+if wp eval 'exit( in_array( "aw_ff_forms", kits_settings_transfer_options(), true ) ? 1 : 0 );'; then echo "ok   aw_ff_forms is not in the Kits export"; else echo "FAIL aw_ff_forms is in the Kits export"; FAIL=1; fi

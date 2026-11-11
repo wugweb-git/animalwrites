@@ -4,6 +4,8 @@
  *
  *   GET  dashboard                 edit_aw_volunteers  the tiles, from the background counts (directoryweb-dashboard.php)
  *   POST dashboard/count           edit_aw_volunteers  ask for a count now (one background event)
+ *   GET  stats/<tile>              edit_aw_volunteers  one tile (published, status, places, indexing, search, claims,
+ *                                                      badges, enrichment), from the same stored counts
  *   GET  claims                    edit_aw_volunteers  the Claims list: views, search, filters, sort, pages
  *   GET  claims/<id>               edit_aw_volunteers  one claim, field by field, with the proposed changes
  *   GET  settings                  manage_options      the services and the groups, with today's values
@@ -58,6 +60,15 @@ add_action(
 				'methods'             => 'POST',
 				'permission_callback' => $claims,
 				'callback'            => fn() => rest_ensure_response( array( 'waiting' => directoryweb_stats_request() ) ),
+			)
+		);
+		register_rest_route(
+			DIRECTORYWEB_REST,
+			'/stats/(?P<key>published|status|places|indexing|search|claims|badges|enrichment)',
+			array(
+				'methods'             => 'GET',
+				'permission_callback' => $claims,
+				'callback'            => 'directoryweb_rest_stat',
 			)
 		);
 		register_rest_route(
@@ -311,6 +322,29 @@ function directoryweb_dashboard_payload(): array {
 		),
 		'tiles'    => $tiles,
 	);
+}
+
+/**
+ * GET stats/<key>: one Dashboard tile, from the same stored counts as the Dashboard (nothing is counted here).
+ *
+ * @param WP_REST_Request $request Request.
+ * @return WP_REST_Response|WP_Error
+ */
+function directoryweb_rest_stat( WP_REST_Request $request ) {
+	$p = directoryweb_dashboard_payload();
+	foreach ( $p['tiles'] as $tile ) {
+		if ( (string) $request['key'] === $tile['key'] ) {
+			return rest_ensure_response(
+				array(
+					'counting' => $p['counting'],
+					'at'       => $p['at'],
+					'atText'   => $p['atText'],
+					'tile'     => $tile,
+				)
+			);
+		}
+	}
+	return new WP_Error( 'directoryweb_no_tile', __( 'No such tile.', 'directoryweb' ), array( 'status' => 404 ) );
 }
 
 /* ---------- Claims ---------- */

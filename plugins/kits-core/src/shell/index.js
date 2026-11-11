@@ -577,10 +577,18 @@ export function Notice( { tone = 'info', onDismiss, children } ) {
  * @param {Object}  props
  * @param {string}  props.variant  'primary' (black) | 'secondary' (outlined) | 'link'.
  * @param {boolean} props.busy     Working: disabled, aria-busy.
+ * @param {boolean} props.disabled Off; busy always wins over disabled={ false }.
  * @param {Object}  props.rest     Any other button attributes.
  * @param {Element} props.children Words.
  */
-export function Button( { variant = 'secondary', busy, children, ...rest } ) {
+export function Button( {
+	variant = 'secondary',
+	busy,
+	disabled,
+	children,
+	...rest
+} ) {
+	// `disabled` is taken out of rest, so disabled={ false } can never undo busy (a second click during a save).
 	return (
 		<button
 			type="button"
@@ -589,9 +597,9 @@ export function Button( { variant = 'secondary', busy, children, ...rest } ) {
 					? 'kits-shell-link'
 					: cx( 'kits-shell-button', `is-${ variant }` )
 			}
-			aria-busy={ busy || undefined }
-			disabled={ busy || rest.disabled }
 			{ ...rest }
+			aria-busy={ busy || undefined }
+			disabled={ !! ( busy || disabled ) }
 		>
 			{ children }
 		</button>

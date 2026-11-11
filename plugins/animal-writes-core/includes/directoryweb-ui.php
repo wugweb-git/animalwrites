@@ -204,13 +204,9 @@ function directoryweb_plain_page( string $title, string $screen ): void {
 	echo '<p><a href="' . esc_url( add_query_arg( 'post_type', 'aw_listing', admin_url( 'edit.php' ) ) ) . '">' . esc_html__( 'Directory listings', 'directoryweb' ) . '</a></p></div>';
 }
 
-// Kits → Tools export: the one option the new Settings saves (the claim form, in the site's form map).
-add_filter(
-	'kits_settings_transfer_options',
-	function ( $names ) {
-		return array_values( array_unique( array_merge( (array) $names, array( defined( 'AW_FF_OPTION' ) ? AW_FF_OPTION : 'aw_ff_forms' ) ) ) );
-	}
-);
+// Not in the Kits → Tools export: the claim form lives in the site's form map (aw_ff_forms), which holds every form's
+// ID. Form IDs belong to one site, and the export carries whole options, so importing it elsewhere would point every
+// form at the wrong one (owner, 12 Nov 2026).
 
 /** Dashboard page callback. */
 function directoryweb_dashboard_page(): void {

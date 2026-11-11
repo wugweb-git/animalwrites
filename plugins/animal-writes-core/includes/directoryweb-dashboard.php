@@ -15,8 +15,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const DIRECTORYWEB_STATS     = 'directoryweb_stats';
-const DIRECTORYWEB_STATS_JOB = 'directoryweb_stats_build';
+const DIRECTORYWEB_STATS      = 'directoryweb_stats';
+const DIRECTORYWEB_STATS_JOB  = 'directoryweb_stats_build';
+const DIRECTORYWEB_CLAIM_ROWS = 'directoryweb_claim_rows';
 
 add_action( DIRECTORYWEB_STATS_JOB, 'directoryweb_stats_build' );
 
@@ -223,6 +224,63 @@ function directoryweb_count_enrichment(): ?array {
  * @return array[] [ id, entry, old, status, sent, listing, name, role, email, phone, has, review ].
  */
 function directoryweb_claim_light_rows(): array {
+	$fp     = directoryweb_claim_rows_fingerprint();
+	$cached = get_transient( DIRECTORYWEB_CLAIM_ROWS );
+	if ( is_array( $cached ) && isset( $cached['fp'], $cached['rows'] ) && $fp === $cached['fp'] ) {
+		return (array) $cached['rows'];
+	}
+	$rows = directoryweb_claim_light_rows_read();
+	set_transient(
+		DIRECTORYWEB_CLAIM_ROWS,
+		array(
+			'fp'   => $fp,
+			'rows' => $rows,
+		),
+		10 * MINUTE_IN_SECONDS
+	);
+	return $rows;
+}
+
+/**
+ * What the claim rows depend on, in two small queries: the claim form's entries (how many, the newest, the newest
+ * change) and their reviews (the newest review row and change), plus the old-form claims (how many, the newest change).
+ * Any new entry, trashed entry, review or old-form edit changes it, so a stored list is never out of date.
+ *
+ * @return string
+ */
+function directoryweb_claim_rows_fingerprint(): string {
+	global $wpdb;
+	$form  = function_exists( 'aw_claim_ff_id' ) ? aw_claim_ff_id() : 0;
+	$parts = array( (string) $form );
+	if ( $form ) {
+		$parts[] = (string) wp_json_encode(
+			$wpdb->get_row( // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- a fingerprint of the claim form's entries
+				$wpdb->prepare(
+					"SELECT COUNT(*) n, MAX( s.id ) last_id, MAX( s.updated_at ) changed, ( SELECT CONCAT( COUNT(*), '|', COALESCE( MAX( m.id ), 0 ), '|', COALESCE( MAX( m.updated_at ), '' ), '|', COALESCE( SUM( CHAR_LENGTH( m.value ) ), 0 ) ) FROM {$wpdb->prefix}fluentform_submission_meta m JOIN {$wpdb->prefix}fluentform_submissions r ON r.id = m.response_id AND r.form_id = %d WHERE m.meta_key = 'aw_claim_review' ) reviews FROM {$wpdb->prefix}fluentform_submissions s WHERE s.form_id = %d AND s.status <> 'trashed'",
+					$form,
+					$form
+				),
+				ARRAY_A
+			)
+		);
+	}
+	if ( post_type_exists( 'aw_claim' ) ) {
+		$parts[] = (string) wp_json_encode(
+			$wpdb->get_row( // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- a fingerprint of the old-form claims
+				"SELECT COUNT(*) n, MAX( post_modified_gmt ) changed FROM {$wpdb->posts} WHERE post_type = 'aw_claim' AND post_status NOT IN ( 'trash', 'auto-draft' )",
+				ARRAY_A
+			)
+		);
+	}
+	return md5( implode( '#', $parts ) );
+}
+
+/**
+ * Every claim as a light row, read from the database (directoryweb_claim_light_rows() keeps it for 10 minutes).
+ *
+ * @return array[]
+ */
+function directoryweb_claim_light_rows_read(): array {
 	global $wpdb;
 	$out  = array();
 	$form = function_exists( 'aw_claim_ff_id' ) ? aw_claim_ff_id() : 0;
