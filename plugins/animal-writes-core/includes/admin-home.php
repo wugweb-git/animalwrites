@@ -28,9 +28,9 @@ function aw_core_menu_parent(): string {
 	return defined( 'KITS_MENU' ) && function_exists( 'kits_admin_tabs' ) ? KITS_MENU : AW_CORE_MENU;
 }
 
-/** The site's screens in menu order: slug => [label, capability]. */
+/** The site's screens in menu order: slug => [label, capability]. Dates leaves once PlanWeb is on (11 Nov 2026). */
 function aw_core_screens(): array {
-	return array(
+	$screens = array(
 		AW_CORE_MENU      => array( 'Overview', 'edit_posts' ),
 		'aw-dates'        => array( 'Dates', defined( 'AW_DATES_CAP' ) ? AW_DATES_CAP : 'edit_others_posts' ),
 		'aw-site-check'   => array( 'Check site', 'manage_options' ),
@@ -39,6 +39,10 @@ function aw_core_screens(): array {
 		'aw-modules'      => array( 'Modules', 'manage_options' ),
 		'aw-edit-screens' => array( 'Edit screens', 'manage_options' ),
 	);
+	if ( function_exists( 'aw_team_dates_moved' ) && aw_team_dates_moved() ) {
+		unset( $screens['aw-dates'] );
+	}
+	return $screens;
 }
 
 /**
@@ -163,7 +167,10 @@ function aw_core_overview_status( bool $full = true ): array {
 	$s['cdn']   = esc_html( $ttl ? 'CDN keeps public pages ' . $ttl . ' s' . ( $long > $ttl ? '; listings, Library items and Resources ' . min( 3600, $long ) . ' s.' : '.' ) : 'CDN caching off.' );
 	$s['stage'] = esc_html( function_exists( 'aw_is_staging' ) && aw_is_staging() ? 'This is the staging site.' : 'Live site.' );
 	$next       = '';
-	if ( function_exists( 'aw_team_dates' ) ) {
+	if ( function_exists( 'aw_team_dates_moved' ) && aw_team_dates_moved() && function_exists( 'planweb_next' ) ) {
+		$next = planweb_next();
+		$next = $next ? $next : '';
+	} elseif ( function_exists( 'aw_team_dates' ) ) {
 		$today = wp_date( 'Y-m-d' );
 		foreach ( (array) aw_team_dates() as $d ) {
 			if ( ! empty( $d['date'] ) && $d['date'] >= $today && ( '' === $next || $d['date'] < $next[0] ) ) {
@@ -210,7 +217,9 @@ function aw_core_overview_page() {
 			array( 'Press coverage and sponsored blocks', 'Coverage of Animal Writes on /media/; the Sponsored block group.', aw_core_link( 'Press coverage', 'edit.php?post_type=aw_press' ), $auto ),
 		),
 		'Running the site' => array(
-			array( 'Dates', 'The team\'s calendar (observance days, deadlines) and the Dates dashboard widget.', aw_core_link( 'Kits → Dates', 'admin.php?page=aw-dates' ), $st['dates'] ),
+			function_exists( 'aw_team_dates_moved' ) && aw_team_dates_moved()
+				? array( 'Dates', 'Dates moved to PlanWeb: the team\'s calendar, plans and reminders, and the Next 7 days dashboard box.', aw_core_link( 'PlanWeb → Calendar', 'admin.php?page=planweb' ), $st['dates'] )
+				: array( 'Dates', 'The team\'s calendar (observance days, deadlines) and the Dates dashboard widget.', aw_core_link( 'Kits → Dates', 'admin.php?page=aw-dates' ), $st['dates'] ),
 			array( 'Check site', 'Loads one page of every kind and reports any that do not open cleanly; also in the admin bar.', $admin ? aw_core_link( 'Kits → Check site', 'admin.php?page=aw-site-check' ) : 'Administrators', $st['check'] ),
 			array( 'Contact links', 'The "Elsewhere" links on the Contact page.', aw_core_link( 'Kits → Contact links', 'admin.php?page=aw-elsewhere' ), $auto ),
 			array( 'Keys', 'Service keys the plugins use (Clarity, Bing Webmaster, PageSpeed): paste once, never shown again; a wp-config.php constant wins.', $admin ? aw_core_link( 'Kits → Keys', 'admin.php?page=aw-keys' ) : 'Administrators', $auto ),

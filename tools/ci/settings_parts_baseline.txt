@@ -60,3 +60,9 @@ plugins/animal-writes-core/includes/team-dates.php | admin style | <style> block
 plugins/animal-writes-core/includes/theme-parts-screen.php | admin page | add_submenu_page( KITS_MENU, 'Theme parts', 'Theme parts', 'manage_options', 'aw-theme-parts', 'aw_theme_parts_screen' ); // Kits → Theme parts.
 # 11 Nov 2026, owner-approved admin UI spec (docs/admin-ui-spec.md): core's own component styles for the new Kits screens.
 plugins/kits-core/includes/admin-app.php | admin style | wp_enqueue_style( 'wp-components'
+# PlanWeb (owner, 11 Nov 2026): its own menu and the interim Calendar screen until the Kits Core shell (docs/calendar-plugin-plan.md).
+plugins/planweb/assets/admin.css | admin style | stylesheet file
+plugins/planweb/includes/admin.php | admin page | add_menu_page( __( 'Calendar', 'planweb' ), __( 'PlanWeb', 'planweb' ), 'edit_planweb_entries', PLANWEB_MENU, 'planweb_screen', 'dashicons-calendar-alt', 3 );
+plugins/planweb/includes/admin.php | admin page | add_submenu_page( '', __( 'Dates', 'planweb' ), '', 'edit_planweb_entries', 'aw-dates', '__return_empty_string' );
+plugins/planweb/includes/admin.php | admin page | add_submenu_page( PLANWEB_MENU, __( 'Calendar', 'planweb' ), __( 'Calendar', 'planweb' ), 'edit_planweb_entries', PLANWEB_MENU, 'planweb_screen' );
+plugins/planweb/includes/admin.php | admin style | wp_enqueue_style( 'planweb-admin'

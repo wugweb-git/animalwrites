@@ -1,0 +1,35 @@
+/* PlanWeb admin (Calendar screen and the Dashboard box). Core admin colours only; each Type has its own mark shape
+   as well as its colour, so colour is never the only signal (WCAG 2.2, 1.4.1). Interim until the Kits Core shell. */
+
+.planweb-type { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+.planweb-mark { display: inline-block; width: 8px; height: 8px; flex: 0 0 auto; background: currentColor; }
+.planweb-type--content { color: #2271b1; }
+.planweb-type--content .planweb-mark { border-radius: 0; }
+.planweb-type--social { color: #996800; }
+.planweb-type--social .planweb-mark { border-radius: 50%; }
+.planweb-type--email { color: #007017; }
+.planweb-type--email .planweb-mark { transform: rotate(45deg); width: 7px; height: 7px; }
+.planweb-type--campaign { color: #b32d2e; }
+.planweb-type--campaign .planweb-mark { width: 10px; height: 5px; }
+.planweb-type--reminder { color: #50575e; }
+.planweb-type--reminder .planweb-mark { background: none; border: 2px solid currentColor; border-radius: 50%; width: 6px; height: 6px; }
+
+.planweb-status { display: inline-block; padding: 0 6px; border: 1px solid #c3c4c7; border-radius: 3px; color: #1d2327; background: #f6f7f7; font-size: 12px; line-height: 18px; white-space: nowrap; }
+.planweb-status--approved, .planweb-status--due { border-color: #2271b1; }
+.planweb-status--sent { background: #fff; color: #50575e; }
+.planweb-flag { color: #b32d2e; font-weight: 600; }
+
+.planweb-month td { vertical-align: top; height: 84px; }
+.planweb-month .planweb-item { margin: 4px 0; overflow-wrap: anywhere; }
+.planweb-past, .planweb-month td.planweb-past { color: #646970; }
+.planweb-month td.planweb-past { background: #fbfbfc; }
+
+/* Dashboard box: month and day on a tile, the entry beside it (as Dates had it). */
+.planweb-tiles { margin: 0; padding: 0; list-style: none; }
+.planweb-tile-row { display: flex; gap: 12px; align-items: center; margin: 0 0 10px; }
+.planweb-tile { flex: 0 0 auto; width: 48px; border: 1px solid #c3c4c7; border-radius: 4px; text-align: center; background: #fff; overflow: hidden; }
+.planweb-tile-mon { display: block; background: #2271b1; color: #fff; font-size: 11px; font-weight: 600; line-height: 18px; text-transform: uppercase; }
+.planweb-tile-day { display: block; color: #1d2327; font-size: 20px; font-weight: 600; line-height: 30px; }
+.planweb-tile-row--today .planweb-tile { border-color: #2271b1; box-shadow: 0 0 0 1px #2271b1; }
+.planweb-tile-text { min-width: 0; overflow-wrap: anywhere; }
+.planweb-tile-meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; color: #50575e; margin-top: 2px; }

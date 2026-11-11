@@ -146,6 +146,12 @@ if ( ! defined( 'AW_SOURCING_LOADED' ) && file_exists( dirname( AW_CORE_DIR ) . 
 	require_once dirname( AW_CORE_DIR ) . '/aw-sourcing/aw-sourcing.php';
 }
 
+// PlanWeb (the team's calendar; owner, 11 Nov 2026). Loaded from the sibling plugin folder when it is not active on its
+// own. It does nothing until it is switched on in Kits → Modules; until then Kits → Dates works as before.
+if ( ! defined( 'PLANWEB_VERSION' ) && file_exists( dirname( AW_CORE_DIR ) . '/planweb/planweb.php' ) ) {
+	require_once dirname( AW_CORE_DIR ) . '/planweb/planweb.php';
+}
+
 register_activation_hook(
 	__FILE__,
 	function () {
