@@ -5,6 +5,10 @@
  * The Events Calendar was installed but inactive, and it would add public event pages and an /events/ archive to the
  * sitemap. The dates live in the option aw_team_dates: a list of {date Y-m-d, title, note}.
  *
+ * PlanWeb (owner, 11 Nov 2026): once PlanWeb is switched on (Kits → Modules), the calendar is PlanWeb → Calendar. This
+ * file then adds no menu, form or Dashboard box and writes nothing; aw_team_dates() still reads the option, which is
+ * kept unchanged as the backup of what was imported. Switched off again, Dates works as before.
+ *
  * @package animal-writes-core
  */
 
@@ -13,6 +17,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 const AW_DATES_CAP = 'edit_others_posts'; // editors and administrators
+
+/** Whether the calendar has moved to PlanWeb (switched on in Kits → Modules). */
+function aw_team_dates_moved(): bool {
+	return function_exists( 'planweb_on' ) && planweb_on();
+}
 
 /** The dates that start the calendar (seeded once; docs/pending.md lists the same ones). */
 function aw_team_dates_seed() {
@@ -26,6 +35,9 @@ function aw_team_dates_seed() {
 function aw_team_dates() {
 	$dates = get_option( 'aw_team_dates', null );
 	if ( ! is_array( $dates ) ) {
+		if ( aw_team_dates_moved() ) {
+			return array(); // PlanWeb holds the calendar; nothing is seeded any more.
+		}
 		$dates = aw_team_dates_seed();
 		add_option( 'aw_team_dates', $dates, '', false );
 	}
@@ -39,7 +51,7 @@ function aw_team_dates() {
  * next 12 months are added once (flag aw_team_dates_links_read); each can be removed like any other date.
  */
 function aw_team_dates_add_links_read() {
-	if ( get_option( 'aw_team_dates_links_read' ) ) {
+	if ( aw_team_dates_moved() || get_option( 'aw_team_dates_links_read' ) ) {
 		return;
 	}
 	$title = 'Search Console Links read (Claude Code session)';
@@ -66,6 +78,7 @@ add_action( 'admin_init', 'aw_team_dates_add_links_read' );
  * aw_team_dates_links_note_1111); only those words in those entries' notes change.
  */
 function aw_team_dates_links_note_rename() {
+	// Runs even with PlanWeb on: PlanWeb's import (admin_init 30) waits for this flag, so the renamed notes are copied.
 	if ( get_option( 'aw_team_dates_links_note_1111' ) ) {
 		return;
 	}
@@ -94,7 +107,7 @@ add_action( 'admin_init', 'aw_team_dates_links_note_rename' );
  * the same title is not added again; each can be removed like any other date.
  */
 function aw_team_dates_add_1101() {
-	if ( get_option( 'aw_team_dates_1101' ) ) {
+	if ( aw_team_dates_moved() || get_option( 'aw_team_dates_1101' ) ) {
 		return;
 	}
 	$add  = array(
@@ -124,7 +137,7 @@ add_action( 'admin_init', 'aw_team_dates_add_1101' );
  * 25 Nov; the stray-dog pages' 28-day checkpoint on 15 Dec. A date already on the calendar under the same title is not added again.
  */
 function aw_team_dates_add_1101b() {
-	if ( get_option( 'aw_team_dates_1101b' ) ) {
+	if ( aw_team_dates_moved() || get_option( 'aw_team_dates_1101b' ) ) {
 		return;
 	}
 	$all = aw_team_dates();
@@ -157,7 +170,7 @@ add_action( 'admin_init', 'aw_team_dates_add_1101b' );
  * aw_team_dates_faq_holdout_off).
  */
 function aw_team_dates_drop_faq_holdout() {
-	if ( get_option( 'aw_team_dates_faq_holdout_off' ) ) {
+	if ( aw_team_dates_moved() || get_option( 'aw_team_dates_faq_holdout_off' ) ) {
 		return;
 	}
 	$all  = aw_team_dates();
@@ -189,6 +202,9 @@ function aw_team_date_when( $ymd ) {
 add_action(
 	'admin_menu',
 	function () {
+		if ( aw_team_dates_moved() ) {
+			return; // PlanWeb opens admin.php?page=aw-dates as its Calendar.
+		}
 		add_submenu_page( aw_core_menu_parent(), 'Dates', 'Dates', aw_core_screen_cap( 'aw-dates' ), 'aw-dates', 'aw_team_dates_screen' ); // Kits → Dates
 	},
 	aw_core_menu_priority( 'aw-dates' ) // order: aw_core_screens() (admin-home.php)
@@ -259,6 +275,9 @@ function aw_team_dates_screen() {
 add_action(
 	'admin_post_aw_dates_add',
 	function () {
+		if ( aw_team_dates_moved() ) {
+			wp_die( 'Dates moved to PlanWeb → Calendar; the Dates list is kept unchanged as a backup.', 403 );
+		}
 		if ( ! current_user_can( AW_DATES_CAP ) || ! check_admin_referer( 'aw_dates_add' ) ) {
 			wp_die( 'Not allowed.', 403 );
 		}
@@ -277,6 +296,9 @@ add_action(
 add_action(
 	'admin_post_aw_dates_delete',
 	function () {
+		if ( aw_team_dates_moved() ) {
+			wp_die( 'Dates moved to PlanWeb → Calendar; the Dates list is kept unchanged as a backup.', 403 );
+		}
 		$i = (int) ( $_GET['i'] ?? -1 );
 		if ( ! current_user_can( AW_DATES_CAP ) || ! check_admin_referer( 'aw_dates_delete_' . $i ) ) {
 			wp_die( 'Not allowed.', 403 );
@@ -295,8 +317,8 @@ add_action(
 add_action(
 	'wp_dashboard_setup',
 	function () {
-		if ( ! current_user_can( AW_DATES_CAP ) ) {
-			return;
+		if ( aw_team_dates_moved() || ! current_user_can( AW_DATES_CAP ) ) {
+			return; // With PlanWeb on, its own box (Next 7 days) replaces this one.
 		}
 		wp_add_dashboard_widget(
 			'aw_team_dates',

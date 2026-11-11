@@ -2547,6 +2547,107 @@
 			"decision": "Animal Writes → Dates (owner, 21 Oct 2026).",
 			"notes": "Saves a date in option aw_team_dates."
 		},
+		"planweb_next": {
+			"title": "Next 7 days",
+			"source": "PlanWeb",
+			"plugin": "PlanWeb",
+			"purpose": "Team calendar",
+			"file": "planweb/includes/dashboard.php (planweb_dashboard_widget)",
+			"screen": "admin",
+			"page": "Dashboard (widgets)",
+			"types": [
+				"dashboard"
+			],
+			"runtime": "map-only",
+			"kind": "table",
+			"reads": [
+				"post_type:planweb_entry"
+			],
+			"limits": "Up to 10 entries, with Type and Status; only when PlanWeb is on.",
+			"decision": "PlanWeb (owner, 11 Nov 2026): the calendar moves from Kits → Dates once PlanWeb is switched on in Kits → Modules (docs/calendar-plugin-plan.md).",
+			"notes": "Stores nothing. Replaces the Dates box (aw_team_dates) while PlanWeb is on."
+		},
+		"ap-planweb-month": {
+			"title": "Month calendar",
+			"source": "PlanWeb",
+			"plugin": "PlanWeb",
+			"purpose": "Team calendar",
+			"file": "planweb/includes/admin.php (planweb_month_grid)",
+			"screen": "admin",
+			"page": "PlanWeb: Calendar",
+			"types": [
+				"planweb"
+			],
+			"runtime": "map-only",
+			"kind": "table",
+			"reads": [
+				"post_type:planweb_entry"
+			],
+			"limits": "One month, previous and next buttons; past days greyed.",
+			"decision": "PlanWeb (owner, 11 Nov 2026): the calendar moves from Kits → Dates once PlanWeb is switched on in Kits → Modules (docs/calendar-plugin-plan.md).",
+			"notes": "Stores nothing."
+		},
+		"ap-planweb-list": {
+			"title": "All entries",
+			"source": "PlanWeb",
+			"plugin": "PlanWeb",
+			"purpose": "Team calendar",
+			"file": "planweb/includes/class-planweb-list-table.php",
+			"screen": "admin",
+			"page": "PlanWeb: Calendar",
+			"types": [
+				"planweb"
+			],
+			"runtime": "map-only",
+			"kind": "table",
+			"reads": [
+				"post_type:planweb_entry"
+			],
+			"limits": "Filters Type, Channel, Owner, Status; from 30 days ago or all dates; 50 a page.",
+			"decision": "PlanWeb (owner, 11 Nov 2026): the calendar moves from Kits → Dates once PlanWeb is switched on in Kits → Modules (docs/calendar-plugin-plan.md).",
+			"notes": "Trash moves an entry to the Trash (never deleted for good)."
+		},
+		"ap-planweb-form": {
+			"title": "Add or edit an entry",
+			"source": "PlanWeb",
+			"plugin": "PlanWeb",
+			"purpose": "Team calendar",
+			"file": "planweb/includes/admin.php (planweb_form)",
+			"screen": "admin",
+			"page": "PlanWeb: Calendar",
+			"types": [
+				"planweb"
+			],
+			"runtime": "map-only",
+			"kind": "form",
+			"reads": [
+				"post_type:planweb_entry"
+			],
+			"limits": "Approved and Sent only for administrators; Due only by the scheduler; links only to this site or social sites; no email or phone.",
+			"decision": "PlanWeb (owner, 11 Nov 2026): the calendar moves from Kits → Dates once PlanWeb is switched on in Kits → Modules (docs/calendar-plugin-plan.md).",
+			"notes": "Saves a planweb_entry (title, note, meta planweb_date, planweb_time, planweb_status, planweb_link; terms planweb_type, planweb_channel, planweb_owner)."
+		},
+		"ap-planweb-import": {
+			"title": "Import from Dates",
+			"source": "PlanWeb",
+			"plugin": "PlanWeb",
+			"purpose": "Team calendar",
+			"file": "planweb/includes/admin.php (planweb_import_panel)",
+			"screen": "admin",
+			"page": "PlanWeb: Calendar",
+			"types": [
+				"planweb"
+			],
+			"runtime": "map-only",
+			"kind": "table",
+			"reads": [
+				"option:aw_team_dates",
+				"option:planweb_import_result"
+			],
+			"limits": "Administrators. One-for-one check; \"Run the import again\" adds only dates not imported yet.",
+			"decision": "PlanWeb (owner, 11 Nov 2026): the calendar moves from Kits → Dates once PlanWeb is switched on in Kits → Modules (docs/calendar-plugin-plan.md).",
+			"notes": "Never writes aw_team_dates (kept as the backup)."
+		},
 		"ap-core-site-check": {
 			"title": "Check site",
 			"source": "Animal Writes core",

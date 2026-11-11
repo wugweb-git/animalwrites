@@ -63,6 +63,45 @@ done
 # AW Sourcing is loaded by Core: its private worker endpoint must exist and refuse a visitor (401, not 404).
 code=$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:8080/?rest_route=/aw/v1/sourcing-policy")
 if [ "$code" != "401" ]; then echo "FAIL $code /aw/v1/sourcing-policy (want 401)"; FAIL=1; else echo "ok   $code /aw/v1/sourcing-policy"; fi
+# PlanWeb (loaded by Core, off until switched on): Dates is imported one for one, a second import adds nothing, the
+# Dates option is unchanged, Kits → Dates leaves the menu, and the calendar's routes refuse a visitor.
+DATES='[{"date":"2026-11-05","title":"Lab rules objections close","note":"Campaign 13848 & the home page."},{"date":"2026-11-17","title":"Rankings recheck","note":"Search Insights → Pages."},{"date":"2026-11-05","title":"Lab rules objections close","note":"Campaign 13848 & the home page."},{"date":"soon","title":"Not a date"},{"date":"2026-12-01","title":"Search Console Links read (Claude Code session)","note":"RankWeb → Search Insights → Links"}]'
+wp option update aw_team_dates "$DATES" --format=json --quiet
+wp option update aw_team_dates_links_note_1111 1 --quiet
+BEFORE=$(wp option get aw_team_dates --format=json)
+# Off first, as on live today: Kits → Dates is in the menu and the calendar's post type does not exist.
+if [ "$(wp eval 'echo isset( aw_core_screens()["aw-dates"] ) ? "yes" : "no";')" = "yes" ]; then echo "ok   planweb off: Kits → Dates in the menu"; else echo "FAIL planweb off: Kits → Dates missing"; FAIL=1; fi
+if [ "$(wp eval 'echo post_type_exists( "planweb_entry" ) ? "yes" : "no";')" = "no" ]; then echo "ok   planweb off: no entry type"; else echo "FAIL planweb off: entry type registered"; FAIL=1; fi
+wp plugin activate planweb --quiet # Core already loads it; activating also switches it on, as ticking Kits → Modules does.
+if [ "$(wp option get planweb_on)" = "1" ]; then echo "ok   planweb on after activation"; else echo "FAIL planweb not on after activation"; FAIL=1; fi
+if out=$(wp planweb import 2>&1) && echo "$out" | grep -q "5 dates in Dates, 4 entries made, 0 already there, 1 not dates"; then echo "ok   planweb import: $out"; else echo "FAIL planweb import: $out"; FAIL=1; fi
+if out=$(wp planweb verify 2>&1) && echo "$out" | grep -q "4 the same, 0 different, 0 missing, 0 extra"; then echo "ok   planweb verify"; else echo "FAIL planweb verify: $out"; FAIL=1; fi
+if out=$(wp planweb import 2>&1) && echo "$out" | grep -q "0 entries made, 4 already there"; then echo "ok   planweb import again adds nothing"; else echo "FAIL planweb import again: $out"; FAIL=1; fi
+if out=$(wp planweb verify 2>&1); then echo "ok   planweb verify again"; else echo "FAIL planweb verify again: $out"; FAIL=1; fi
+if [ "$(wp option get aw_team_dates --format=json)" = "$BEFORE" ]; then echo "ok   aw_team_dates unchanged"; else echo "FAIL aw_team_dates changed by the import"; FAIL=1; fi
+if [ "$(wp eval 'echo isset( aw_core_screens()["aw-dates"] ) ? "yes" : "no";')" = "no" ]; then echo "ok   Kits → Dates left the menu"; else echo "FAIL Kits → Dates still in the menu"; FAIL=1; fi
+for r in /wp/v2/planweb-entries /wp/v2/planweb_type; do
+  code=$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:8080/?rest_route=$r")
+  if [ "$code" != "401" ]; then echo "FAIL $code $r (want 401)"; FAIL=1; else echo "ok   $code $r"; fi
+done
+if [ "$(wp eval 'echo planweb_check_fields( array( "link" => "https://wa.me/919999999999" ) ) ? "refused" : "allowed";')" = "refused" ]; then echo "ok   planweb refuses a wa.me link"; else echo "FAIL planweb allowed a wa.me link"; FAIL=1; fi
+# Off again at the end: deactivating switches PlanWeb off, Kits → Dates comes back, the capabilities come off the
+# roles, and the entries are kept.
+wp plugin deactivate planweb --quiet
+if [ "$(wp option get planweb_on 2>/dev/null)" = "" ]; then echo "ok   planweb off after deactivation"; else echo "FAIL planweb still on after deactivation"; FAIL=1; fi
+if [ "$(wp eval 'echo isset( aw_core_screens()["aw-dates"] ) ? "yes" : "no";')" = "yes" ]; then echo "ok   planweb off: Kits → Dates back"; else echo "FAIL planweb off: Kits → Dates not back"; FAIL=1; fi
+if [ "$(wp eval 'echo get_role( "administrator" )->has_cap( "edit_planweb_entries" ) ? "yes" : "no";')" = "no" ]; then echo "ok   planweb off: capabilities removed"; else echo "FAIL planweb off: capabilities left on"; FAIL=1; fi
+if [ "$(wp eval 'global $wpdb; echo (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = \"planweb_entry\"" );')" = "4" ]; then echo "ok   planweb off: entries kept"; else echo "FAIL planweb off: entries not kept"; FAIL=1; fi
+# Plugin Check on PlanWeb (report only, printed, never fails the run): only when plugins/planweb changed (PLUGIN_CHECK=1
+# from the workflow), so wordpress.org is not asked on every Deploy check.
+if [ "${PLUGIN_CHECK:-0}" != "1" ]; then
+  echo "-- Plugin Check skipped (plugins/planweb unchanged)"
+elif wp plugin install plugin-check --activate --quiet 2>/dev/null; then
+  echo "-- Plugin Check: planweb (report)"; wp plugin check planweb --exclude-directories=tests --format=table 2>&1 | tail -40 || true
+  wp plugin deactivate plugin-check --quiet || true
+else
+  echo "-- Plugin Check could not be installed (report skipped)"
+fi
 if [ -f /tmp/wp-debug.log ] && grep -E 'PHP (Fatal|Parse) error' /tmp/wp-debug.log; then FAIL=1; fi
 # The child's aw.css has no component rules (it is the plugin's copy), so the component files load from the plugin.
 curl -s -o /tmp/home-child.html http://127.0.0.1:8080/

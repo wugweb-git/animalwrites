@@ -114,7 +114,7 @@ Where they meet, the line stays: the keyword table is Core's (`keyword-table.php
 | `sponsored-blocks.php` | Sponsored blocks (inserter group "Sponsored", owner 12 Oct 2026). |
 | `staging.php` | Staging site (staging.animalwrites.in): the same code and a copy of the database without personal data. |
 | `tags.php` | Labels are WordPress's own Tags (owner, 15 Oct 2026): Library types, Resource types, Opportunity types, Listing types and Services are tags (post_tag) on every section, at /tag/{slug}/, filtered on the hubs by ?tag=. |
-| `team-dates.php` | Kits → Dates (owner, 21 Oct 2026): the team's own calendar inside WordPress. One-off dates only; the monthly "Search Console Links read" reminder on the 1st is added once for the next 12 months (flag `aw_team_dates_links_read`). |
+| `team-dates.php` | Kits → Dates (owner, 21 Oct 2026): the team's own calendar inside WordPress. One-off dates only; the monthly "Search Console Links read" reminder on the 1st is added once for the next 12 months (flag `aw_team_dates_links_read`). Once PlanWeb is switched on (Kits → Modules), it adds no menu, form or Dashboard box and writes nothing except the one-time 11 Nov note rename (PlanWeb's import waits for it); the option `aw_team_dates` stays as the backup (`aw_team_dates_moved()`). |
 | `term-page.php` | Category and tag pages (owner, 20 Oct 2026): one archive layout for every term. |
 | `faq-data.php` | The site's FAQ data for RankWeb (31 Oct 2026): automatic questions from Directory listing and Library fields (`aw_faq_registry`), names and schema nodes (`aw_faq_context`), no page FAQ on Directory place views (`aw_faq_show_here`); the Library "Library item" box (Short name, Issued under, Key sections). |
 | `thumbs.php` | Thumbnails never repeat (owner, 9 Oct 2026) — for content WE create. Routes: `aw/v1/thumb-dupes`. |
@@ -230,6 +230,23 @@ A standalone product since 20 Oct 2026 (was `aw-mail`): nothing Animal Writes-on
 | `uninstall.php` | Deletes nothing. |
 
 Animal Writes' side (`animal-writes-core/includes/mailweb-aw.php`, with `mail-campaign-strip.php`): `MAILWEB_API_TOKEN` from wp-config `AW_HOSTINGER_MAIL_TOKEN`; the campaign countdown strip under signatures; Website forms = Contact, Volunteer, Claim and Report entries (Fluent Forms) and the older Contact messages (`aw_message`), with a wp-admin notice while any is unread (no email); Inbox → Contact messages redirects there; the old webhook address; the Check site line. The one-time move from aw-mail (20 Oct 2026: options copied, secrets encrypted, table renamed, old options kept; send from support@ only, contact@ → vedanshu@, FluentCRM for vedanshu@ and support@, tag "Emailed us") ran and was removed (audit 16, 25 Oct 2026).
+
+## planweb (PlanWeb)
+
+The team's calendar as its own Kits plugin (owner, 11 Nov 2026; plan `docs/calendar-plugin-plan.md`). Loaded by Animal Writes Core from the sibling folder (like SourceWeb), or active on its own. **Off until switched on** in Kits → Modules → PlanWeb (option `planweb_on`); off, it adds only that switch and Kits → Dates works as before. Prefix `planweb_`, text domain `planweb`. Nothing in it posts, schedules out or sends.
+
+| File | What it does |
+|---|---|
+| `planweb.php` | Header, constants, loads the files below; returns at once if loaded already (active on its own and loaded by Core). Activating it on its own switches it on. |
+| `includes/model.php` | Rules with no WordPress (tested by `tests/run.php`): Types, Channels, Owners, Statuses; date and time checks; Link only to this site, X, LinkedIn, Instagram, Facebook, Threads, Reddit or a WhatsApp channel (never wa.me, tel:, mailto:); no email address or phone number in title or note; the Dates import mapping (key = date, title, note, copy number) and the one-for-one comparison. |
+| `includes/switch.php` | `planweb_on()`; the Modules switch; once on, `planweb_setup()` gives editors and administrators the entry capabilities (`edit_planweb_entries` …), administrators `planweb_approve` (Approved and Sent), and adds the list values as terms (option `planweb_setup`). |
+| `includes/store.php` | Post type `planweb_entry` (not public, no core screens, in REST at `/wp/v2/planweb-entries`), taxonomies `planweb_type`, `planweb_channel`, `planweb_owner`, meta `planweb_date`, `planweb_time`, `planweb_status`, `planweb_link`, `planweb_repeat`, `planweb_repeat_until` (revisions on), read-only `planweb_flag`; REST answers only people with `edit_planweb_entries` and checks every save (`planweb_check_fields()`); REST filters `planweb_from`, `planweb_to`, `planweb_status`; `planweb_entries()`, `planweb_next()`, `planweb_save_entry()`. |
+| `includes/import.php` | Import from Dates: the first admin request after switching on (after Dates' 11 Nov note rename) copies every element of `aw_team_dates` as stored into one entry (Type reminder, Status idea, meta `planweb_source`, `planweb_source_key`); a second run adds nothing; the option is never written. Result in `planweb_import_result`, done flag `planweb_import_done`. `planweb_verify()` compares the two one for one. |
+| `includes/admin.php`, `includes/class-planweb-list-table.php`, `assets/admin.css` | PlanWeb → Calendar (interim until the Kits Core shell): the month grid, the list (core WP_List_Table, filters Type, Channel, Owner, Status, from 30 days ago or all dates), the add and edit form, and the import check for administrators. `admin.php?page=aw-dates` opens it (with its month). |
+| `includes/dashboard.php` | The Dashboard box "Next 7 days" (replaces the Dates box): calendar tiles with Type and Status. |
+| `includes/kits-hub.php` | When Kits Core is loaded: a PlanWeb row on Kits → Plugins and one in Kits → Welcome → System Status (the import check). Kits Core is checked when it runs, not with the Requires Plugins header. |
+| `includes/class-planweb-cli.php` | `wp planweb verify` (reads only; fails unless every date matches) and `wp planweb import`. |
+| `tests/run.php` | The model's checks, no WordPress (Deploy check). The import itself runs twice against a real WordPress in `tools/ci/smoke.sh`. |
 
 ## kits-core
 

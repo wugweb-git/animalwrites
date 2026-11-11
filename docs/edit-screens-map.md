@@ -722,6 +722,7 @@ Not edit screens; listed on Kits → Edit screens under "Dashboard (widgets)" an
 | dashboard_right_now, dashboard_activity, dashboard_quick_press, dashboard_site_health, dashboard_primary | At a Glance, Activity, Quick Draft, Site Health Status, WordPress Events and News | WordPress (General row) | General | `wp-admin/includes/dashboard.php` | Quick Draft saves a draft post; the others nothing |
 | mailweb_widget | Mail | MailWeb | Mail | `plugins/mailweb/includes/overview.php:158` | nothing |
 | aw_team_dates | Dates | Animal Writes core | Team dates | `core/team-dates.php:210` | nothing |
+| planweb_next | Next 7 days | PlanWeb | Team calendar (replaces Dates' box while PlanWeb is on) | `planweb/includes/dashboard.php` | nothing |
 | aw_cl_widget | Campaign letters | Animal Writes core | Campaign letters | `core/campaign-letters.php:366` | nothing |
 | aw_cron_health | Scheduled tasks | Animal Writes core | Scheduled tasks | `core/cron-health.php:105` | nothing |
 | rank_math_dashboard_widget | Rank Math Overview | Rank Math SEO | SEO | `seo-by-rank-math/includes/admin/class-dashboard-widget.php:52` (Analytics module on) | not read live; confirm on the Dashboard |
@@ -949,6 +950,15 @@ The panels, boxes and tables on the admin pages of SourceWeb, RankWeb (with Sear
 | ap-core-dates-month | Month calendar | table | `option:aw_team_dates` | One month, previous and next buttons. | `core/team-dates.php:126 (aw_team_dates_screen)` |
 | ap-core-dates-list | All dates | table | `option:aw_team_dates` | — | `core/team-dates.php:162 (aw_team_dates_screen)` |
 | ap-core-dates-add | Add a date | form | `option:aw_team_dates` | — | `core/team-dates.php:164 (aw_team_dates_screen)` |
+
+**PlanWeb: Calendar** (`planweb`; `aw-dates` opens it while PlanWeb is on)
+
+| id | widget | kind | reads | limits | file |
+|---|---|---|---|---|---|
+| ap-planweb-month | Month calendar | table | `post_type:planweb_entry` | One month, previous and next buttons; past days greyed. | `planweb/includes/admin.php (planweb_month_grid)` |
+| ap-planweb-list | All entries | table | `post_type:planweb_entry` | Filters Type, Channel, Owner, Status; from 30 days ago or all dates. | `planweb/includes/class-planweb-list-table.php` |
+| ap-planweb-form | Add or edit an entry | form | `post_type:planweb_entry` | Approved and Sent only for administrators; links only to this site or social sites; no email or phone. | `planweb/includes/admin.php (planweb_form)` |
+| ap-planweb-import | Import from Dates | table | `option:aw_team_dates`, `option:planweb_import_result` | Administrators; one-for-one check; never writes Dates. | `planweb/includes/admin.php (planweb_import_panel)` |
 
 **Animal Writes: Check site** (`aw-site-check`)
 
