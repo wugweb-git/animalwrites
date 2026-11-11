@@ -195,9 +195,13 @@ How the feeds behave:
 
 ## 3. Scheduler: Action Scheduler jobs
 
-- **The library.** PlanWeb loads Action Scheduler through Composer (`woocommerce/action-scheduler`). Action Scheduler
-  picks the newest copy loaded, so the one shipped by FluentCRM or Fluent Forms on live can win, and PlanWeb works if
-  either is removed.
+- **The library: committed inside the plugin (owner, 11 Nov).** The deploy is a git pull with no install step, and no
+  plugin in the repo commits a `vendor/` folder, so Composer cannot load it. PlanWeb commits the Action Scheduler library
+  at a pinned version in `plugins/planweb/lib/action-scheduler/` and loads it with `require_once` from the main file.
+  Action Scheduler registers every copy and runs the newest, so a newer copy from FluentCRM or Fluent Forms still wins,
+  and PlanWeb keeps working on its own if both are removed. `lib/` is excluded from PHPCS, Plugin Check and
+  `wp i18n make-pot`. (Not chosen: relying on FluentCRM's or Fluent Forms' copy and showing "Scheduler needs FluentCRM
+  or Fluent Forms" when neither is active.)
 - **Check before phase 3, read-only on live:** which copy and version is active (`ActionScheduler_Versions`), and that
   its queue runs. The site's cron health check (`aw_cron_last`) shows whether WP-Cron is firing.
 - **Group and timing.** All jobs are in group `planweb`. Recurring times are in IST and stored as UTC timestamps
@@ -228,8 +232,10 @@ How the feeds behave:
     typed in. No personal address is stored.
   - It goes through `wp_mail`, so MailWeb's daily limit and queue apply (priority 1, "notices"). It can never use the
     campaign share.
-  - Body: date, title, Type, Status and a link to PlanWeb. Plain text plus a simple HTML part, using core's email
-    header and footer only.
+  - Body: date, title, Type, Status and a link to PlanWeb, from two template files (`templates/emails/base.php`, the
+    shared shell with inline CSS, and `templates/emails/digest.php`, which escapes every value). Sent with
+    `Content-Type: text/html; charset=UTF-8`. The lead times in the copy come from the same Settings values the job
+    uses, so the text cannot drift from what runs.
 - **Owner labels.** Main, WordPress and Martech are working sessions, not mailboxes. Their items show up in the lists
   and the notice, filtered by Owner. No email is linked to an Owner label.
 
@@ -263,7 +269,7 @@ shell draws:
 - the row on Kits → Plugins and the status row on Kits Home.
 
 PlanWeb builds none of these. It registers its parts through Kits Core's PHP and JS API, and serves its data from its
-own REST routes under `planweb/v1`, besides the core `/wp/v2/planweb-entries` for the entries. If
+own REST routes under `planweb/v1` (its own namespace; `kits/v1` is Kits Core's), besides the core `/wp/v2/planweb-entries` for the entries. If
 `docs/kits-plugin-ui.md` names things differently, it wins and this section is renamed to match.
 
 ### 4.1 Screens
@@ -385,7 +391,21 @@ loads them, and each view has its own address (`&view=month&m=2026-11`).
   - each route under 300 ms on live for one month;
   - the WordPress Dashboard widget no script and at most 2 queries (cached 5 minutes).
 - **Uninstall** removes nothing. Deactivation unschedules the `planweb` actions.
-- **Code standard:** PHPCS (WordPress-Extra, prefix and text domain `planweb`), `wp-scripts lint-js`.
+- **Code standard:** PHPCS (WordPress-Extra, prefix and text domain `planweb`; `lib/` and `build/` excluded),
+  `wp-scripts lint-js`.
+- **Release (as MailWeb).** A PHPDoc header with `@wordpress-plugin`, `Update URI` and `Domain Path`; the
+  `PLANWEB_VERSION` constant always equal to the header `Version`; `readme.txt` with `Stable tag`, `Tested up to` and a
+  changelog block per version; `languages/planweb.pot` regenerated with `wp i18n make-pot` on each version bump.
+- **Plugin Check.** It runs in the Deploy check after the smoke test, as a report only (printed, never failing the
+  run). No phase claims "Plugin Check passes"; making it a gate is a later decision.
+- **Icon.** The PlanWeb icon (a calendar with a yellow dot) comes from `docs/brand/plugin-icons/`. It is used on the
+  Kits → Plugins row and in the app header, and copied to `assets/icon-256x256.png`, `assets/icon-128x128.png` and
+  `assets/icon.svg`.
+- **UI standard.** The same as the other Kits plugins: the Kits admin design-system shell; PlanWeb only registers its
+  parts, and comes last in the shell's order.
+- **Skills for every phase (same set as the other Kits plugin plans):** wp-plugin-audit, wp-plugin-release,
+  wp-plugin-testing, wp-coding-standards, wp-database, wp-background-processing, wp-email-templates, wp-i18n-workflow,
+  wp-build-tools, wp-github-flow and the code-review skill, plus any other that fits the phase.
 
 ---
 
@@ -412,10 +432,10 @@ gap.
 
 | Phase | What | Needs the shell? | Size | Risk | Proof |
 |---|---|---|---|---|---|
-| **1. The store + migration** | Post type, taxonomies, meta, caps, REST routes and checks, import from Dates, `wp planweb verify`, the Animal Writes Core switch and redirect (2.4), the interim Calendar page and Dashboard widget, docs and baselines. | No | M (about 2.5 days) | Medium: it touches live data. Mitigated: the option stays untouched, the import is safe to re-run, and without PlanWeb nothing changes. | **The migrated entries match one-for-one** (`wp planweb verify`, read-only on live). Pure-PHP tests for keys, duplicates, link and personal-data checks. In the CI WordPress: seed `aw_team_dates`, activate, verify, re-run, verify again. PHPCS and Plugin Check (CI) clean. |
+| **1. The store + migration** | Post type, taxonomies, meta, caps, REST routes and checks, import from Dates, `wp planweb verify`, the Animal Writes Core switch and redirect (2.4), the interim Calendar page and Dashboard widget, docs and baselines. | No | M (about 2.5 days) | Medium: it touches live data. Mitigated: the option stays untouched, the import is safe to re-run, and without PlanWeb nothing changes. | **The migrated entries match one-for-one** (`wp planweb verify`, read-only on live). Pure-PHP tests for keys, duplicates, link and personal-data checks. In the CI WordPress: seed `aw_team_dates`, activate, verify, re-run, verify again (`smoke.sh` activates it with `wp plugin activate planweb`). PHPCS clean on changed files. Plugin Check runs in the Deploy check as a report, not a gate. |
 | **2. Calendar views + dashboard in the shell** | Register tiles, the list config, month and week widgets, and settings groups into the shell; remove the interim page; add the build step to CI. | **Yes: ships after the shell and the five plugins before it** | M (about 3 days; the shell does the heavy parts) | Low to medium: new screens; data rules come from phase 1. | **Screenshots against the Site Kit pattern** (Dashboard, Calendar list, month and week, Settings) at 1280 and 375 in the CI WordPress. Keyboard-only run and axe (WCAG 2.2 AA). Budget measured. JS unit tests for the date grids. |
-| **3. Scheduler + reminders** | Action Scheduler jobs (3), notices, digest email (off), job status row. | No (can follow phase 1 directly) | M (about 2 days) | Medium: background jobs on live. Mitigated: idempotent, local data only, email off by default, MailWeb limit. | **Reminders fire on a copy only:** in the Deploy check's throwaway WordPress (not a local install), seed entries around a fixed date, run `wp action-scheduler run --group=planweb`, assert flags, approved → due, repeats and one queued digest, with `pre_wp_mail` catching the email so nothing is sent. Pure-PHP tests with a fixed clock. On live: read-only check of the `planweb` actions; digest stays off. |
-| **4. Read-only feeds** | Future posts, FluentCRM scheduled campaigns, Social posts drafts, campaign dates in `planweb/v1/items`, tiles and widget. | Routes no; showing them in the shell yes | S to M (about 1.5 days) | Low: reads only. | CI WordPress with FluentCRM absent shows "not available". Read-only live check that a known future post and the campaign dates appear on the right days. PHPCS, Plugin Check. |
+| **3. Scheduler + reminders** | Action Scheduler committed in `lib/` at a pinned version, its jobs (3), notices, digest email (off), job status row. | No (can follow phase 1 directly) | M (about 2 days) | Medium: background jobs on live. Mitigated: idempotent, local data only, email off by default, MailWeb limit. | **Reminders fire on a copy only:** in the Deploy check's throwaway WordPress (not a local install), seed entries around a fixed date, run `wp action-scheduler run --group=planweb`, assert flags, approved → due, repeats and one queued digest, with `pre_wp_mail` catching the email so nothing is sent. Pure-PHP tests with a fixed clock. In the same CI WordPress, with no other copy active, the committed library loads and runs the queue (`ActionScheduler_Versions` shows PlanWeb's copy). PHPCS excludes `lib/`. On live: read-only check of which copy wins and of the `planweb` actions; digest stays off. |
+| **4. Read-only feeds** | Future posts, FluentCRM scheduled campaigns, Social posts drafts, campaign dates in `planweb/v1/items`, tiles and widget. | Routes no; showing them in the shell yes | S to M (about 1.5 days) | Low: reads only. | CI WordPress with FluentCRM absent shows "not available". Read-only live check that a known future post and the campaign dates appear on the right days. PHPCS clean; Plugin Check report read. |
 | **5. Connected services** | Only after the owner chooses one: the shell's service row, connect steps (4.4), "Send to …" per approved entry, for review only. | Yes | S to M | Medium: the only part that reaches outside the site. Every post needs its own approval. | Plan first, for the owner's yes. Tests with a mocked HTTP layer (`pre_http_request`). No real post in testing. |
 
 Before the shell ships, phases can run in the order 1 → 3 → 4 (routes only). Phases 2 and 5 wait for the shell.
