@@ -7,6 +7,7 @@
  *   POST sending/resume             manage_options  resume sending after a pause (as today's Resume button)
  *   POST queue/retry                manage_options  held emails get another try (as today's Retry button)
  *   GET  inbox                      MAILWEB_CAP     one page of the list: box, folder, search, page
+ *   GET  inbox/message              MAILWEB_CAP     one message (or form message) for the reading pane; opening marks it read
  *   POST inbox/bulk                 MAILWEB_CAP     read, unread, archive, inbox, spam, trash (mailweb_bulk())
  *   GET  settings                   manage_options  the Sending, Mailboxes and aliases, and Profiles groups
  *   POST settings/<group>           manage_options  save the fields sent, only when they change a value
@@ -91,6 +92,36 @@ add_action(
 					'type'    => 'integer',
 					'minimum' => 1,
 					'default' => 1,
+				),
+			)
+		);
+		$route(
+			'/inbox/message',
+			'GET',
+			$cap,
+			'mailweb_rest_message',
+			array(
+				'box'    => array(
+					'type'    => 'string',
+					'default' => '',
+				),
+				'folder' => array(
+					'type'    => 'string',
+					'default' => 'inbox',
+				),
+				'uid'    => array(
+					'type'    => 'integer',
+					'minimum' => 0,
+					'default' => 0,
+				),
+				'item'   => array(
+					'type'    => 'integer',
+					'minimum' => 0,
+					'default' => 0,
+				),
+				'images' => array(
+					'type'    => 'boolean',
+					'default' => false,
 				),
 			)
 		);
@@ -485,6 +516,144 @@ function mailweb_inbox_payload( array $s ): array {
 			'mailbox' => ! $forms && 'all' === $s['box'],
 			'search'  => ! $forms,
 		),
+	);
+}
+
+/**
+ * One message for the reading pane, as today's message screen shows it (mailweb_message_screen()): the header, the
+ * text as a safe document for a sandboxed frame, attachments, the compose links and the actions the folder offers.
+ * Opening marks it read, as webmail and today's screen do. A form message (folder "forms") comes from the forms source.
+ *
+ * @param WP_REST_Request $r Request.
+ */
+function mailweb_rest_message( WP_REST_Request $r ) {
+	$folder  = sanitize_key( (string) $r['folder'] );
+	$forms   = MAILWEB_FORMS === $folder && mailweb_forms();
+	$folder  = $forms || isset( mailweb_roles()[ $folder ] ) ? $folder : 'inbox';
+	$actions = array();
+	foreach ( mailweb_bulk_actions( $folder ) as $value => $label ) {
+		if ( 'read' !== $value ) {
+			$actions[] = array(
+				'value' => $value,
+				'label' => $label,
+			);
+		}
+	}
+	$missing = new WP_Error( 'mailweb_not_found', __( 'This message could not be opened (moved or deleted in webmail?).', 'mailweb' ), array( 'status' => 404 ) );
+	if ( $forms ) {
+		$id  = (int) $r['item'];
+		$src = mailweb_forms();
+		$f   = $id ? call_user_func( $src['get'], $id ) : null;
+		if ( ! is_array( $f ) ) {
+			return $missing;
+		}
+		call_user_func( $src['mark'], $id, 'read' );
+		$fields = array();
+		foreach ( (array) ( $f['fields'] ?? array() ) as $k => $v ) {
+			if ( '' !== trim( (string) $v ) ) {
+				$fields[] = array(
+					'label' => (string) $k,
+					'value' => (string) $v,
+				);
+			}
+		}
+		$t     = ! empty( $f['date'] ) ? strtotime( (string) $f['date'] ) : false;
+		$email = (string) ( $f['email'] ?? '' );
+		return rest_ensure_response(
+			array(
+				'kind'    => 'form',
+				'id'      => 'form|' . $id,
+				'subject' => '' !== trim( (string) ( $f['subject'] ?? '' ) ) ? (string) $f['subject'] : __( '(no subject)', 'mailweb' ),
+				'fields'  => $fields,
+				'text'    => (string) ( $f['text'] ?? '' ),
+				'date'    => $t ? wp_date( 'j M Y, g:i a', $t ) : '',
+				'compose' => is_email( $email ) ? array(
+					'reply' => add_query_arg(
+						array(
+							'page'    => 'mailweb',
+							'folder'  => MAILWEB_FORMS,
+							'item'    => $id,
+							'compose' => 'reply',
+						),
+						admin_url( 'admin.php' )
+					),
+				) : array(),
+				'actions' => $actions,
+			)
+		);
+	}
+	$boxes = mailweb_all_boxes();
+	$box   = sanitize_key( (string) $r['box'] );
+	$uid   = (int) $r['uid'];
+	if ( ! isset( $boxes[ $box ] ) || ! $uid ) {
+		return $missing;
+	}
+	$path = mailweb_role_path( $folder );
+	$msg  = mailweb_get( $box, $path, $uid );
+	if ( ! $msg ) {
+		return $missing;
+	}
+	mailweb_mark_seen( $box, $path, $uid, $msg );
+	$m                    = $msg['m'];
+	$images               = (bool) $r['images'];
+	list( $doc, $remote ) = mailweb_message_doc( $box, $path, $uid, $msg, $images );
+	$u                    = array(
+		'box'    => $box,
+		'folder' => $path,
+		'uid'    => $uid,
+		'view'   => $box,
+	);
+	$files                = array();
+	foreach ( (array) ( $m['attachments'] ?? array() ) as $a ) {
+		if ( empty( $a['inline'] ) || empty( $a['contentId'] ) ) {
+			$files[] = array(
+				'name' => (string) ( $a['filename'] ?? __( 'attachment', 'mailweb' ) ),
+				'size' => size_format( (int) ( $a['sizeBytes'] ?? 0 ) ),
+				'url'  => mailweb_act_url( 'file', $u + array( 'att' => (string) ( $a['id'] ?? '' ) ) ),
+			);
+		}
+	}
+	$compose = array();
+	foreach ( array( 'reply', 'all', 'forward' ) as $mode ) {
+		$compose[ $mode ] = add_query_arg(
+			array(
+				'page'    => 'mailweb',
+				'box'     => $box,
+				'folder'  => $folder,
+				'uid'     => $uid,
+				'compose' => $mode,
+				'view'    => $box,
+			),
+			admin_url( 'admin.php' )
+		);
+	}
+	$t = ! empty( $m['date'] ) ? strtotime( (string) $m['date'] ) : false;
+	return rest_ensure_response(
+		array(
+			'kind'    => 'mail',
+			'id'      => $box . '|' . $uid,
+			'subject' => '' !== trim( (string) ( $m['subject'] ?? '' ) ) ? (string) $m['subject'] : __( '(no subject)', 'mailweb' ),
+			'from'    => mailweb_who( $m['from'] ?? array() ),
+			'to'      => implode( ', ', array_map( 'mailweb_who', (array) ( $m['to'] ?? array() ) ) ),
+			'cc'      => implode( ', ', array_map( 'mailweb_who', (array) ( $m['cc'] ?? array() ) ) ),
+			'date'    => $t ? wp_date( 'j M Y, g:i a', $t ) : '',
+			'mailbox' => (string) $boxes[ $box ],
+			'doc'     => $doc,
+			'remote'  => $remote && ! $images,
+			'files'   => $files,
+			'compose' => $compose,
+			'actions' => $actions,
+			'oldUrl'  => add_query_arg(
+				array(
+					'page'   => 'mailweb',
+					'box'    => $box,
+					'folder' => $folder,
+					'uid'    => $uid,
+					'view'   => $box,
+				),
+				admin_url( 'admin.php' )
+			),
+		)
 	);
 }
 

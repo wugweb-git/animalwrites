@@ -523,30 +523,12 @@ function mailweb_message_screen( $s ) {
 		echo '<div class="notice notice-error"><p>' . esc_html__( 'This message could not be opened (moved or deleted in webmail?).', 'mailweb' ) . '</p></div>';
 		return;
 	}
-	// The Mail API does not mark a message read when its text is fetched: mark it read here, as webmail does on open.
-	if ( ! in_array( '\\Seen', (array) ( $msg['m']['flags'] ?? array() ), true ) ) {
-		mailweb_call( 'PATCH', mailweb_fpath( $s['box'], $path ) . '/messages/' . (int) $s['uid'], array( 'addFlags' => array( '\\Seen' ) ) );
-	}
-	delete_transient( 'mailweb_folders_' . $s['box'] );
-	if ( function_exists( 'mailweb_overview_flush' ) ) {
-		mailweb_overview_flush();
-	}
-	$m      = $msg['m'];
-	$images = ! empty( $_GET['images'] ); // phpcs:ignore WordPress.Security.NonceVerification
-	$inline = array();
-	foreach ( (array) ( $m['attachments'] ?? array() ) as $a ) {
-		if ( ! empty( $a['contentId'] ) && (int) ( $a['sizeBytes'] ?? 0 ) < 1048576 && preg_match( '#^image/(png|jpe?g|gif|webp)$#', (string) ( $a['contentType'] ?? '' ) ) ) {
-			list( $code, $bin ) = mailweb_call( 'GET', mailweb_fpath( $s['box'], $path ) . '/messages/' . (int) $s['uid'] . '/attachments/' . rawurlencode( (string) $a['id'] ), null, true );
-			if ( 200 === $code ) {
-				$inline[ trim( (string) $a['contentId'], '<>' ) ] = 'data:' . $a['contentType'] . ';base64,' . base64_encode( $bin ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions
-			}
-		}
-	}
-	$html   = trim( (string) ( $msg['t']['html'] ?? '' ) );
-	$doc    = '' !== $html ? mailweb_safe_html( $html, $images, $inline ) : mailweb_text_html( (string) ( $msg['t']['text'] ?? '' ) );
-	$remote = '' !== $html && preg_match( '#<img\b[^>]*src=["\']\s*(?:https?:)?//|url\(\s*[\'"]?\s*(?:https?:)?//#i', $html );
-	$u      = array( 'box' => $s['box'], 'folder' => $path, 'uid' => $s['uid'], 'view' => $view );
-	$c      = fn( $mode ) => add_query_arg( array( 'page' => 'mailweb', 'box' => $s['box'], 'folder' => $s['folder'], 'uid' => $s['uid'], 'compose' => $mode, 'view' => $view ), admin_url( 'admin.php' ) );
+	mailweb_mark_seen( $s['box'], $path, (int) $s['uid'], $msg );
+	$m                    = $msg['m'];
+	$images               = ! empty( $_GET['images'] ); // phpcs:ignore WordPress.Security.NonceVerification
+	list( $doc, $remote ) = mailweb_message_doc( $s['box'], $path, (int) $s['uid'], $msg, $images );
+	$u                    = array( 'box' => $s['box'], 'folder' => $path, 'uid' => $s['uid'], 'view' => $view );
+	$c                    = fn( $mode ) => add_query_arg( array( 'page' => 'mailweb', 'box' => $s['box'], 'folder' => $s['folder'], 'uid' => $s['uid'], 'compose' => $mode, 'view' => $view ), admin_url( 'admin.php' ) );
 	echo '<div id="poststuff"><div id="post-body" class="metabox-holder columns-2"><div id="post-body-content">';
 	echo '<h2 style="font-size:1.5em;padding:0;margin:0 0 12px">' . esc_html( '' !== trim( (string) ( $m['subject'] ?? '' ) ) ? $m['subject'] : __( '(no subject)', 'mailweb' ) ) . '</h2>';
 	echo '<div class="postbox"><div class="inside"><table class="form-table" role="presentation"><tbody>';
@@ -724,6 +706,51 @@ function mailweb_form_item_screen( $s ) {
 
 
 /* ---------- Reading ---------- */
+
+/**
+ * Mark a message read, as webmail does on open (the Mail API does not when its text is fetched), and drop the cached
+ * unread counts.
+ *
+ * @param string $key  Mailbox key.
+ * @param string $path Folder path.
+ * @param int    $uid  Message.
+ * @param array  $msg  From mailweb_get().
+ */
+function mailweb_mark_seen( $key, $path, $uid, $msg ) {
+	if ( ! in_array( '\\Seen', (array) ( $msg['m']['flags'] ?? array() ), true ) ) {
+		mailweb_call( 'PATCH', mailweb_fpath( $key, $path ) . '/messages/' . (int) $uid, array( 'addFlags' => array( '\\Seen' ) ) );
+	}
+	delete_transient( 'mailweb_folders_' . $key );
+	if ( function_exists( 'mailweb_overview_flush' ) ) {
+		mailweb_overview_flush();
+	}
+}
+
+/**
+ * The message as a safe document for the sandboxed frame, and whether it asks for pictures from the internet.
+ *
+ * @param string $key    Mailbox key.
+ * @param string $path   Folder path.
+ * @param int    $uid    Message.
+ * @param array  $msg    From mailweb_get().
+ * @param bool   $images Show pictures from the internet.
+ * @return array [ document, remote pictures (bool) ].
+ */
+function mailweb_message_doc( $key, $path, $uid, $msg, $images ) {
+	$inline = array();
+	foreach ( (array) ( $msg['m']['attachments'] ?? array() ) as $a ) {
+		if ( ! empty( $a['contentId'] ) && (int) ( $a['sizeBytes'] ?? 0 ) < 1048576 && preg_match( '#^image/(png|jpe?g|gif|webp)$#', (string) ( $a['contentType'] ?? '' ) ) ) {
+			list( $code, $bin ) = mailweb_call( 'GET', mailweb_fpath( $key, $path ) . '/messages/' . (int) $uid . '/attachments/' . rawurlencode( (string) $a['id'] ), null, true );
+			if ( 200 === $code ) {
+				$inline[ trim( (string) $a['contentId'], '<>' ) ] = 'data:' . $a['contentType'] . ';base64,' . base64_encode( $bin ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions
+			}
+		}
+	}
+	$html   = trim( (string) ( $msg['t']['html'] ?? '' ) );
+	$doc    = '' !== $html ? mailweb_safe_html( $html, $images, $inline ) : mailweb_text_html( (string) ( $msg['t']['text'] ?? '' ) );
+	$remote = '' !== $html && (bool) preg_match( '#<img\b[^>]*src=["\']\s*(?:https?:)?//|url\(\s*[\'"]?\s*(?:https?:)?//#i', $html );
+	return array( $doc, $remote );
+}
 
 /** One message: meta and text, cached per request. Fetching does not mark it read; mailweb_message_screen() does. */
 function mailweb_get( $key, $folder, $uid ) {
