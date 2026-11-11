@@ -373,9 +373,10 @@ $inc   = dirname( __DIR__ ) . '/includes/';
 $menu  = (string) file_get_contents( $inc . 'admin-menu.php' );
 aw_t( 'aw-sourcing-menu' === AW_SRC_MENU, 'the menu has its own slug' );
 aw_t( ! in_array( AW_SRC_MENU, array( AW_SRC_PAGE, 'aw-review', 'aw-enrich-review', 'aw-inbox' ), true ), 'the menu slug is no screen\'s slug' );
-aw_t( 'sourcing_page_' . AW_SRC_PAGE === AW_SRC_SCREEN, 'the page\'s screen id follows the menu title' );
-aw_t( false !== strpos( $menu, "add_menu_page( 'Sourcing', 'Sourcing', AW_REVIEW_CAP, AW_SRC_MENU, 'aw_sourcing_overview_page'" ), 'the menu is registered with the plain title "Sourcing" (the screen id depends on it) and opens the Overview' );
-aw_t( false !== strpos( $menu, "add_submenu_page( AW_SRC_MENU, 'Sourcing', 'Overview', AW_REVIEW_CAP, AW_SRC_MENU, 'aw_sourcing_overview_page' )" ), 'Overview is the first item, at the menu\'s slug' );
+aw_t( 'sourcing_page_' . AW_SRC_PAGE === AW_SRC_SCREEN, 'the page\'s screen id follows the menu\'s hook prefix ("sourcing")' );
+aw_t( false !== strpos( $menu, "add_menu_page( 'SourceWeb', 'SourceWeb', AW_REVIEW_CAP, AW_SRC_MENU, 'aw_sourcing_overview_page'" ), 'the menu is registered with the title "SourceWeb" and opens the Overview' );
+aw_t( false !== strpos( $menu, "\$GLOBALS['admin_page_hooks'][ AW_SRC_MENU ] = 'sourcing';" ), 'the menu\'s hook prefix stays "sourcing" (the screen id depends on it)' );
+aw_t( false !== strpos( $menu, "add_submenu_page( AW_SRC_MENU, 'SourceWeb', 'Overview', AW_REVIEW_CAP, AW_SRC_MENU, 'aw_sourcing_overview_page' )" ), 'Overview is the first item, at the menu\'s slug' );
 aw_t( false !== strpos( (string) file_get_contents( $inc . 'review-queue.php' ), "add_submenu_page( AW_SRC_MENU, 'To review'" ), 'To review is on the Sourcing menu' );
 aw_t( false !== strpos( (string) file_get_contents( $inc . 'enrichment-admin.php' ), "add_submenu_page( AW_SRC_MENU, 'Enrichment review'" ), 'Enrichment review is on the Sourcing menu' );
 // Phase 2 as on live, 25 Oct 2026 (kits_sourcing_tabs), plus the Relay log and Settings.

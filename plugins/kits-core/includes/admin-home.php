@@ -91,7 +91,7 @@ function kits_overview_tables() {
 	$swatch  = implode(
 		' ',
 		array_map(
-			fn( $c ) => '<span title="' . esc_attr( ( $c['name'] ?? '' ) . ' ' . ( $c['color'] ?? '' ) ) . '" style="display:inline-block;width:1.2em;height:1.2em;border:1px solid #c3c4c7;vertical-align:middle;background:' . esc_attr( (string) ( $c['color'] ?? '' ) ) . '"></span>',
+			fn( $c ) => '<span title="' . esc_attr( ( $c['name'] ?? '' ) . ' ' . ( $c['color'] ?? '' ) ) . '" class="dashicons" style="background:' . esc_attr( (string) ( $c['color'] ?? '' ) ) . '"></span>',
 			array_slice( $palette, 0, 20 )
 		)
 	);

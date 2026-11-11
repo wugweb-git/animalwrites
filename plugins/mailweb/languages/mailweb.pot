@@ -18,6 +18,8 @@ msgstr ""
 #: mailweb.php
 #: includes/kits-hub.php:32
 #: includes/kits-hub.php:44
+#: includes/overview.php:202
+#: includes/overview.php:203
 msgid "MailWeb"
 msgstr ""
 
@@ -196,7 +198,7 @@ msgid "Read, reply, reply all, forward and write from every mailbox; folders, se
 msgstr ""
 
 #: includes/home.php:60
-msgid "Mail → Inbox"
+msgid "MailWeb → Inbox"
 msgstr ""
 
 #. translators: 1: unread emails, 2: unread form messages
@@ -783,14 +785,14 @@ msgstr ""
 msgid "The mail server refused an email (%s). Emails are waiting in the queue, not lost."
 msgstr ""
 
-#. translators: %s: link to Mail → Settings → Site sending
+#. translators: %s: link to MailWeb → Settings → Site sending
 #: includes/mail-cap.php:498
 #, php-format
 msgid "%s to resume once the mailbox works."
 msgstr ""
 
 #: includes/mail-cap.php:499
-msgid "Open Mail → Settings → Site sending"
+msgid "Open MailWeb → Settings → Site sending"
 msgstr ""
 
 #: includes/mail-in.php:249
@@ -939,11 +941,14 @@ msgstr ""
 msgid "(unread)"
 msgstr ""
 
-#: includes/overview.php:148
-msgid "Mail overview"
+#: includes/overview.php:204
+msgid "MailWeb overview"
 msgstr ""
 
-#: includes/overview.php:149
+#: includes/overview.php:205
+msgid "MailWeb settings"
+msgstr ""
+
 #: includes/settings-tab.php:22
 msgid "Mail settings"
 msgstr ""

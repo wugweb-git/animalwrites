@@ -61,9 +61,9 @@ function kits_theme_option_fields(): array {
 			'Asks for the body font file early so text shows sooner. The file is the first woff2 file of the body font in Styles, else the theme\'s Inter. Campaign pages also preload it on phones under Wide screens only.',
 		),
 		'share_networks'      => array( 'Share bar', 'Networks', 'share', array(), array(), 'Which buttons the share bar shows on each kind of item, wherever the bar appears today; untick all to hide that bar. Copy link always shows. Campaigns keep their own bar. Profiles for search engines stay in Rank Math → Titles & Meta → Social Meta.' ),
-		'css_bundle'          => array( 'Older parts', 'Joined stylesheet', 'switch', $on_off, 'on', 'Serves the theme\'s five stylesheets as one cached file, and the component stylesheets a page loads as a second one. Off: every file loads on its own, slower; only for finding a style problem.' ),
+		'css_bundle'          => array( 'Speed', 'Joined stylesheet', 'switch', $on_off, 'on', 'Serves the theme\'s five stylesheets as one cached file, and the component stylesheets a page loads as a second one. Off: every file loads on its own, slower; only for finding a style problem.' ),
 		'css_parts_cap'       => array(
-			'Older parts',
+			'Speed',
 			'Joined files cap',
 			'choice',
 			array(
@@ -75,13 +75,13 @@ function kits_theme_option_fields(): array {
 			'50',
 			'Most joined component files kept in uploads/kits-cache/parts/ (one per set of components a page prints). Once it is reached, a page with a new set loads its component files separately. Kits → Welcome shows the count.',
 		),
-		'legacy_group_styles' => array( 'Older parts', 'Old section classes', 'switch', $on_off, 'on', 'Old content that uses earlier group class names is drawn as Section and Head band styles, and the editor adds the style when such a block is opened. Off: such blocks lose their look until they are saved again.' ),
-		'lcp_fix'             => array( 'Older parts', 'Largest image preload fix', 'switch', $on_off, 'on', 'Keeps the main image\'s high priority with Optimization Detective. Off: on wide screens it has not measured yet, the main image may lose its high priority and load later.' ),
-		'jquery_footer'       => array( 'Older parts', 'jQuery at the end of the page', 'switch', $on_off, 'on', 'Moves jQuery out of the page head. Off: jQuery loads in the head again, which delays the first paint; forms and the letter tool work either way.' ),
-		'defer_scripts'       => array( 'Older parts', 'Deferred scripts', 'switch', $on_off, 'on', 'jQuery, the Fluent Forms submit script, wp-hooks, wp-i18n and the Accessibility Checker fixes load without holding up the page. Off: each holds the page while it loads; forms and the letter tool work either way.' ),
-		'no_emoji'            => array( 'Older parts', 'No emoji script', 'switch', $on_off, 'on', 'Leaves out WordPress\'s emoji script; browsers draw emoji themselves. Off: the script loads on every page.' ),
-		'form_css_lazy'       => array( 'Older parts', 'Form styles only where forms are', 'switch', $on_off, 'on', 'On pages whose content has no form, Fluent Forms styles are added after the page loads (the footer sign-up still gets them). Off: they hold up the first paint on every page.' ),
-		'inter_dedupe'        => array( 'Older parts', 'One copy of Inter', 'switch', $on_off, 'on', 'Leaves out the duplicate Inter files from the Font Library. Off: both copies load.' ),
+		'defer_scripts'       => array( 'Speed', 'Deferred scripts', 'switch', $on_off, 'on', 'jQuery, the Fluent Forms submit script, wp-hooks, wp-i18n and the Accessibility Checker fixes load without holding up the page. Off: each holds the page while it loads; forms and the letter tool work either way.' ),
+		'jquery_footer'       => array( 'Speed', 'jQuery at the end of the page', 'switch', $on_off, 'on', 'Moves jQuery out of the page head. Off: jQuery loads in the head again, which delays the first paint; forms and the letter tool work either way.' ),
+		'no_emoji'            => array( 'Speed', 'No emoji script', 'switch', $on_off, 'on', 'Leaves out WordPress\'s emoji script; browsers draw emoji themselves. Off: the script loads on every page.' ),
+		'form_css_lazy'       => array( 'Speed', 'Form styles only where forms are', 'switch', $on_off, 'on', 'On pages whose content has no form, Fluent Forms styles are added after the page loads (the footer sign-up still gets them). Off: they hold up the first paint on every page.' ),
+		'inter_dedupe'        => array( 'Speed', 'One copy of Inter', 'switch', $on_off, 'on', 'Leaves out the duplicate Inter files from the Font Library. Off: both copies load.' ),
+		'lcp_fix'             => array( 'Speed', 'Largest image preload fix', 'switch', $on_off, 'on', 'Keeps the main image\'s high priority with Optimization Detective. Off: on wide screens it has not measured yet, the main image may lose its high priority and load later.' ),
+		'legacy_group_styles' => array( 'Older content', 'Old section classes', 'switch', $on_off, 'on', 'Old content that uses earlier group class names is drawn as Section and Head band styles, and the editor adds the style when such a block is opened. Off: such blocks lose their look until they are saved again.' ),
 	);
 	$list   = array();
 	foreach ( $fields as $key => list( $group, $label, $kind, $choices, $default, $note ) ) {

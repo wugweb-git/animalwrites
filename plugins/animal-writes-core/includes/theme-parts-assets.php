@@ -57,6 +57,12 @@ function aw_theme_parts_path( string $file ): string {
  *
  * tools/ci/css_min.py writes and checks the .min.css of every theme/assets/css/aw*.css.
  *
+ * In every joined file (11 Nov 2026): the small files (under about 1 KB gzipped each, 6.9 KB together) and aw-hubs,
+ * which most list pages print, are in every page's joined file ('when' => '__return_true'). Keyed by what each page
+ * printed, they made 37 joined files in one day; the larger page-type files (aw-home, aw-type-ico, aw-single, aw-lists,
+ * aw-directory, aw-listing, aw-forms) still decide which file a page gets. All their rules are scoped to their own
+ * component classes, and they were all in aw.css on every page before phase 2.
+ *
  * @return array<string,array>
  */
 function aw_component_style_files(): array {
@@ -64,44 +70,44 @@ function aw_component_style_files(): array {
 		// Campaign blocks and campaign pages: first, so they print right after aw.css, where their rules were.
 		'aw-countdown' => array( // [aw_countdown]: the Home hero, the Supreme Court card, campaign heroes.
 			'file' => 'assets/css/aw-countdown.css',
+			'when' => '__return_true', // In every joined file (see above).
 		),
 		'aw-campaign-page' => array( // Campaign pages; the steps list wherever it is placed.
-			'file'   => 'assets/css/aw-campaign-page.css',
-			'when'   => fn() => is_singular( 'aw_campaign' ),
-			'blocks' => array( 'core/list' => 'aw-steps' ),
+			'file' => 'assets/css/aw-campaign-page.css',
+			'when' => '__return_true', // In every joined file (see above).
 		),
 		'aw-camp-band-aw' => array( // The campaign band's overrides, where the Home campaign hero or the open band prints.
 			'file' => 'assets/css/aw-camp-band-aw.css',
+			'when' => '__return_true', // In every joined file (see above).
 		),
 		'aw-sc-card' => array( // The Supreme Court campaign card.
 			'file' => 'assets/css/aw-sc-card.css',
+			'when' => '__return_true', // In every joined file (see above).
 		),
 		'aw-camp-story' => array( // The Community dogs story band.
-			'file'   => 'assets/css/aw-camp-story.css',
-			'blocks' => array( 'core/cover' => 'aw-ed-story' ),
+			'file' => 'assets/css/aw-camp-story.css',
+			'when' => '__return_true', // In every joined file (see above).
 		),
 		'aw-festive' => array( // The festive card.
-			'file'   => 'assets/css/aw-festive.css',
-			'blocks' => array( 'core/cover' => 'aw-festive' ),
+			'file' => 'assets/css/aw-festive.css',
+			'when' => '__return_true', // In every joined file (see above).
 		),
 		// These four follow, where their rules were in aw.css: aw-meta must come before aw-listing (.aw-claim-meta).
 		'aw-meta' => array( // An item's meta row and the claim head; places and News card rows by flag.
 			'file' => 'assets/css/aw-meta.css',
-			'when' => fn() => is_singular( array( 'post', 'aw_news', 'aw_legal', 'aw_listing', 'aw_opportunity' ) ) || is_page( 'claim' ),
+			'when' => '__return_true', // In every joined file (see above).
 		),
 		'aw-volunteer' => array( // The volunteer page; the volunteer form and banner wherever they print.
-			'file'   => 'assets/css/aw-volunteer.css',
-			'when'   => fn() => is_page( 'volunteer' ),
-			'blocks' => array( 'core/group' => 'aw-vol-' ),
+			'file' => 'assets/css/aw-volunteer.css',
+			'when' => '__return_true', // In every joined file (see above).
 		),
 		'aw-contact' => array( // The contact page; the Elsewhere list by flag.
-			'file'   => 'assets/css/aw-contact.css',
-			'when'   => fn() => is_page( 'contact' ),
-			'blocks' => array( 'core/group' => 'aw-contact' ),
+			'file' => 'assets/css/aw-contact.css',
+			'when' => '__return_true', // In every joined file (see above).
 		),
 		'aw-search' => array( // The search page (?s= redirects to /search/?q=).
 			'file' => 'assets/css/aw-search.css',
-			'when' => fn() => is_page( 'search' ),
+			'when' => '__return_true', // In every joined file (see above).
 		),
 		'aw-home' => array( // Home sections: the front page, plus the Home section patterns and blocks wherever they are placed.
 			'file'   => 'assets/css/aw-home.css',
@@ -138,12 +144,8 @@ function aw_component_style_files(): array {
 			'when' => fn() => is_singular( 'aw_listing' ) || is_page( 'claim' ),
 		),
 		'aw-hubs' => array( // Hub pages, the category hub and index, term chips, the adoption page; flags print it elsewhere.
-			'file'   => 'assets/css/aw-hubs.css',
-			'when'   => fn() => is_page_template( 'page-hub' ) || ( function_exists( 'aw_hub_type' ) && '' !== aw_hub_type() ) || is_category() || is_tag() || is_page( 'adoption' ),
-			'blocks' => array(
-				'core/query'         => array( 'aw-hub-news', 'aw-hub-library', 'aw-hub-directory', 'aw-camp-more' ), // hub list patterns placed elsewhere
-				'core/post-template' => 'aw-cases',
-			),
+			'file' => 'assets/css/aw-hubs.css',
+			'when' => '__return_true', // In every joined file (see above).
 		),
 	);
 }

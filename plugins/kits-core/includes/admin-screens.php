@@ -18,8 +18,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/** The Kits screens in tab order: slug => [tab label, address relative to wp-admin, capability]. */
-function kits_admin_tabs_list(): array {
+/**
+ * The Kits screens as tabs, before they are put in order: slug => [tab label, address relative to wp-admin, capability].
+ * Kits' own in tab order; a site adds its own through the kits_admin_tabs filter.
+ */
+function kits_admin_tabs_unsorted(): array {
 	return (array) apply_filters(
 		'kits_admin_tabs',
 		array(
@@ -35,6 +38,60 @@ function kits_admin_tabs_list(): array {
 		)
 	);
 }
+
+/**
+ * One order for the Kits menu and the Kits tabs: screen slugs (the page= value, or the file of a core screen such as
+ * font-library.php). Kits' own screens in tab order, then the tabs a site adds (in the order kits_admin_tabs gives
+ * them). Screens in neither list follow in the order they were added to the menu.
+ */
+function kits_menu_order(): array {
+	/**
+	 * Filters the order of the Kits screens in the Kits menu and the tabs, e.g. to place a site's screen between two
+	 * of Kits' own.
+	 *
+	 * @param string[] $slugs Screen slugs in order.
+	 */
+	$order = (array) apply_filters( 'kits_menu_order', array_keys( kits_admin_tabs_unsorted() ) );
+	return array_values( array_unique( array_map( 'strval', $order ) ) );
+}
+
+/**
+ * Put items in the Kits order: those whose slug is in kits_menu_order() first, in that order, then the rest as they
+ * came.
+ *
+ * @param array    $items   Items.
+ * @param callable $slug_of Item => its slug.
+ * @return array The items in order (keys kept).
+ */
+function kits_menu_sort( array $items, callable $slug_of ): array {
+	$pos  = array_flip( kits_menu_order() );
+	$rank = array();
+	$i    = 0;
+	foreach ( $items as $key => $item ) {
+		$slug         = (string) $slug_of( $item, $key );
+		$rank[ $key ] = array( $pos[ $slug ] ?? PHP_INT_MAX, $i++ );
+	}
+	uksort( $items, fn( $a, $b ) => $rank[ $a ] <=> $rank[ $b ] );
+	return $items;
+}
+
+/** The Kits screens in tab order (kits_menu_order()): slug => [tab label, address relative to wp-admin, capability]. */
+function kits_admin_tabs_list(): array {
+	return kits_menu_sort( kits_admin_tabs_unsorted(), fn( $t, $slug ) => $slug );
+}
+
+// The Kits menu in the same order as the tabs, once every plugin has added its screens.
+add_action(
+	'admin_menu',
+	function () {
+		global $submenu;
+		if ( empty( $submenu[ KITS_MENU ] ) || ! is_array( $submenu[ KITS_MENU ] ) ) {
+			return;
+		}
+		$submenu[ KITS_MENU ] = array_values( kits_menu_sort( $submenu[ KITS_MENU ], fn( $item ) => $item[2] ?? '' ) ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- reorders the Kits submenu only.
+	},
+	1000 // After every plugin has added its screens.
+);
 
 /**
  * Screens that other plugins add under Kits → Plugins (not as top tabs): slug => [name, address relative to wp-admin,
@@ -126,7 +183,7 @@ function kits_status_cell( string $value, string $fix = '' ): string {
 	if ( '' === $fix ) {
 		return esc_html( $value );
 	}
-	return '<span style="color:#b32d2e"><span class="dashicons dashicons-warning" aria-hidden="true"></span> ' . esc_html( $value ) . '</span><br><span class="description">' . esc_html( $fix ) . '</span>';
+	return '<span class="error-message"><span class="dashicons dashicons-warning" aria-hidden="true"></span> ' . esc_html( $value ) . '</span><br><span class="description">' . esc_html( $fix ) . '</span>';
 }
 
 /** Rows of the status table: [label, HTML value]. */
@@ -223,9 +280,9 @@ function kits_welcome_page() {
 	echo '</ul></div></div></div></div>';
 	echo '<div id="col-right"><div class="col-wrap"><div class="postbox"><div class="postbox-header"><h2 class="hndle">' . esc_html( 'System Status' ) . '</h2></div><div class="inside">';
 	echo '<p>' . esc_html( 'Anything shown in red needs a change on the server or in wp-config.php.' ) . '</p>';
-	echo '<table class="widefat striped" role="presentation"><tbody>';
+	echo '<table class="widefat striped"><caption class="screen-reader-text">' . esc_html( 'System status' ) . '</caption><tbody>';
 	foreach ( kits_status_rows() as $r ) {
-		echo '<tr><th scope="row" style="width:40%">' . esc_html( $r[0] ) . '</th><td>' . wp_kses_post( $r[1] ) . '</td></tr>';
+		echo '<tr><th scope="row">' . esc_html( $r[0] ) . '</th><td>' . wp_kses_post( $r[1] ) . '</td></tr>';
 	}
 	echo '</tbody></table></div></div></div></div></div></div>';
 }
@@ -696,21 +753,28 @@ function kits_options_box( string $title, callable $rows, string $intro = '' ): 
 
 /* ---------- Core Settings ---------- */
 
-/** Kits → Core Settings: the switches for older parts and speed fixes, each with what it does. */
+/** The groups of fields that Core Settings shows, in order (theme-options.php): the speed fixes, then older content. */
+function kits_core_settings_groups(): array {
+	return array( 'Speed', 'Older content' );
+}
+
+/** Kits → Core Settings: the switches for speed fixes and older content, in a box per group, each with what it does. */
 function kits_core_settings_page() {
 	kits_admin_head( 'kits-core-settings', 'Core Settings', 'Switches for the theme\'s speed fixes and for older content. Leave them on unless you are tracking down a problem.' );
 	echo '<form method="post" action="options.php">';
 	settings_fields( 'kits_options' );
-	kits_options_box(
-		'Switches',
-		function () {
-			foreach ( kits_theme_option_fields() as $key => $f ) {
-				if ( 'core' === kits_theme_option_section( $key, $f ) ) {
-					kits_theme_option_row( $key, $f );
+	foreach ( kits_core_settings_groups() as $group ) {
+		kits_options_box(
+			$group,
+			function () use ( $group ) {
+				foreach ( kits_theme_option_fields() as $key => $f ) {
+					if ( $group === $f['group'] && 'core' === kits_theme_option_section( $key, $f ) ) {
+						kits_theme_option_row( $key, $f );
+					}
 				}
 			}
-		}
-	);
+		);
+	}
 	submit_button( 'Save Core Settings' );
 	echo '</form></div>';
 }
@@ -735,7 +799,7 @@ function kits_theme_option_section( string $key, array $f ): string {
 	if ( isset( $map[ $key ] ) ) {
 		return $map[ $key ];
 	}
-	return 'Older parts' === $f['group'] ? 'core' : 'utility-extra';
+	return in_array( $f['group'], kits_core_settings_groups(), true ) ? 'core' : 'utility-extra';
 }
 
 /** Theme Options sections: group => [slug => label]. */
@@ -766,6 +830,8 @@ function kits_options_sections(): array {
 				'visual-typography' => 'Typography',
 				'visual-buttons'    => 'Buttons',
 				'visual-colours'    => 'Colour sets',
+				'visual-spacing'    => 'Spacing',
+				'visual-cards'      => 'Cards',
 			),
 			'Utility'  => array(
 				'utility-share'       => 'Share bar',
@@ -796,16 +862,15 @@ function kits_options_page() {
 		$current = 'general-header';
 	}
 	kits_admin_head( 'kits-options', 'Theme Options', 'Site-wide choices, in sections. Colours, fonts and sizes live in Styles; one page can still differ in its Page Options.' );
-	echo '<div id="col-container" class="wp-clearfix"><div id="col-left"><div class="col-wrap"><div class="postbox"><div class="inside">';
+	echo '<div id="col-container" class="wp-clearfix"><div id="col-left"><div class="col-wrap"><nav class="postbox" aria-label="' . esc_attr( 'Theme Options sections' ) . '"><div class="inside">';
 	foreach ( $sections as $group => $items ) {
-		echo '<h2>' . esc_html( $group ) . '</h2><ul>';
+		echo '<h3>' . esc_html( $group ) . '</h3><ul>';
 		foreach ( $items as $slug => $label ) {
-			$on = $slug === $current;
-			echo '<li><a href="' . esc_url( admin_url( 'admin.php?page=kits-options&section=' . $slug ) ) . '"' . ( $on ? ' aria-current="page" style="font-weight:600"' : '' ) . '>' . esc_html( $label ) . '</a></li>';
+			echo '<li><a href="' . esc_url( admin_url( 'admin.php?page=kits-options&section=' . $slug ) ) . '"' . ( $slug === $current ? ' aria-current="page"' : '' ) . '>' . esc_html( $label ) . '</a></li>';
 		}
 		echo '</ul>';
 	}
-	echo '</div></div></div></div><div id="col-right"><div class="col-wrap">';
+	echo '</div></nav></div></div><div id="col-right"><div class="col-wrap">';
 	$group = '';
 	foreach ( $sections as $g => $items ) {
 		if ( isset( $items[ $current ] ) ) {
@@ -869,7 +934,6 @@ function kits_options_section_body( string $section, string $label ): bool {
 			kits_options_links_box(
 				'Extra',
 				array(
-					array( 'Additional CSS', $styles, 'Styles → ⋮ → Additional CSS: CSS for the whole site.' ),
 					array( 'Preview', 'admin.php?page=kits-preview', 'Who sees preview-only items.' ),
 					array( 'Design system', 'admin.php?page=kits-system', 'Every component, its states and the colour contrast.' ),
 				)
@@ -886,6 +950,12 @@ function kits_options_section_body( string $section, string $label ): bool {
 			return false;
 		case 'visual-buttons':
 			kits_options_buttons();
+			return false;
+		case 'visual-spacing':
+			kits_options_spacing();
+			return false;
+		case 'visual-cards':
+			kits_options_cards();
 			return false;
 		case 'visual-colours':
 			$sets = WP_Block_Styles_Registry::get_instance()->get_registered_styles_for_block( 'core/post-content' );
@@ -934,7 +1004,7 @@ function kits_options_section_body( string $section, string $label ): bool {
 function kits_options_links_box( string $title, array $links ): void {
 	echo '<div class="postbox"><div class="postbox-header"><h2 class="hndle">' . esc_html( $title ) . '</h2></div><div class="inside"><table class="widefat striped" role="presentation"><tbody>';
 	foreach ( $links as $l ) {
-		echo '<tr><th scope="row" style="width:30%">' . ( '' !== $l[1] ? kits_options_link( $l[0], $l[1] ) : esc_html( $l[0] ) ) . '</th><td>' . esc_html( $l[2] ) . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- kits_options_link escapes.
+		echo '<tr><th scope="row">' . ( '' !== $l[1] ? kits_options_link( $l[0], $l[1] ) : esc_html( $l[0] ) ) . '</th><td>' . esc_html( $l[2] ) . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- kits_options_link escapes.
 	}
 	echo '</tbody></table></div></div>';
 }
@@ -949,7 +1019,7 @@ function kits_options_palette(): void {
 	) as $origin => $title ) {
 		foreach ( (array) ( $sets[ $origin ] ?? array() ) as $c ) {
 			$hex    = (string) ( $c['color'] ?? '' );
-			$rows[] = array( '<span style="display:inline-block;width:1.5em;height:1.5em;border:1px solid #c3c4c7;vertical-align:middle;background:' . esc_attr( $hex ) . '"></span> ' . esc_html( (string) ( $c['name'] ?? '' ) ), esc_html( $hex . ' · ' . $title ) );
+			$rows[] = array( '<span class="dashicons" aria-hidden="true" style="background:' . esc_attr( $hex ) . '"></span> ' . esc_html( (string) ( $c['name'] ?? '' ) ), esc_html( $hex . ' · ' . $title ) );
 		}
 	}
 	kits_options_values_box( 'Palette', $rows, 'Change a colour in ' . kits_options_link( 'Styles → Colors → Palette', 'site-editor.php?path=/wp_global_styles' ) . '; every part that uses it follows. Contrast: ' . kits_options_link( 'Design system → Colour contrast', 'admin.php?page=kits-system&tab=contrast' ) . '.' );
@@ -994,6 +1064,57 @@ function kits_options_buttons(): void {
 	kits_options_values_box( 'Buttons', $rows, 'Every button on the site (in the content, the header, forms and cards) follows ' . kits_options_link( 'Styles → Blocks → Button', 'site-editor.php?path=/wp_global_styles' ) . ', including its Secondary, Ghost and Brand styles.' );
 }
 
+/** Visual → Spacing: the spacing steps Styles holds now, which padding and gaps use. */
+function kits_options_spacing(): void {
+	$sets = (array) wp_get_global_settings( array( 'spacing', 'spacingSizes' ) );
+	$rows = array();
+	foreach ( array(
+		'custom' => 'Your sizes',
+		'theme'  => 'Theme sizes',
+	) as $origin => $title ) {
+		foreach ( (array) ( $sets[ $origin ] ?? array() ) as $size ) {
+			$rows[] = array( esc_html( (string) ( $size['name'] ?? '' ) ), '<code>' . esc_html( '--wp--preset--spacing--' . (string) ( $size['slug'] ?? '' ) ) . '</code> ' . esc_html( (string) ( $size['size'] ?? '' ) . ' · ' . $title ) );
+		}
+	}
+	kits_options_values_box( 'Spacing', $rows ? $rows : array( array( esc_html( 'None yet' ), '' ) ), 'Change them in ' . kits_options_link( 'Styles → Layout', kits_styles_section_path( '/layout' ) ) . '; every part that uses a step follows.' );
+}
+
+/**
+ * The card: its block style in Styles and the theme's card tokens (names without the leading dashes).
+ *
+ * @return array block, variation, tokens.
+ */
+function kits_card_parts(): array {
+	return (array) apply_filters(
+		'kits_card_parts',
+		array(
+			'block'     => 'core/group',
+			'variation' => 'kits-card',
+			'tokens'    => array( 'kit-radius-card', 'kit-surface-card', 'kit-card-min', 'kit-card-columns', 'kit-card-media-ratio' ),
+		)
+	) + array(
+		'block'     => '',
+		'variation' => '',
+		'tokens'    => array(),
+	);
+}
+
+/** Visual → Cards: the Card style's values in Styles (padding step, corners, colours) and the card tokens. */
+function kits_options_cards(): void {
+	$card = kits_card_parts();
+	$rows = array();
+	foreach ( kits_block_style_values( (string) $card['block'], (string) $card['variation'] ) as $label => $v ) {
+		$rows[] = array( esc_html( $label ), '<code>' . esc_html( $v[0] ) . '</code> ' . esc_html( $v[1] ) );
+	}
+	$vals = kits_token_values();
+	foreach ( (array) $card['tokens'] as $t ) {
+		if ( isset( $vals[ $t ] ) ) {
+			$rows[] = array( '<code>--' . esc_html( $t ) . '</code>', '<code>' . esc_html( $vals[ $t ] ) . '</code> ' . esc_html( kits_token_resolve( $t, $vals ) ) );
+		}
+	}
+	kits_options_values_box( 'Cards', $rows ? $rows : array( array( esc_html( 'None yet' ), '' ) ), 'Change the padding, corners and colours in ' . kits_block_style_link( (string) $card['block'], (string) $card['variation'] ) . '. The tokens are the theme\'s base values (phones): ' . kits_options_link( 'Design system → Tokens', 'admin.php?page=kits-system&tab=tokens' ) . '.' );
+}
+
 /** Utility → Socials: the profiles Rank Math holds, which the footer and schema use. */
 function kits_options_socials(): void {
 	$rm   = (array) get_option( 'rank-math-options-titles', array() );
@@ -1026,7 +1147,13 @@ function kits_options_socials(): void {
 function kits_options_values_box( string $title, array $rows, string $intro ): void {
 	echo '<div class="postbox"><div class="postbox-header"><h2 class="hndle">' . esc_html( $title ) . '</h2></div><div class="inside"><p>' . wp_kses_post( $intro ) . '</p><table class="widefat striped" role="presentation"><tbody>';
 	foreach ( $rows as $r ) {
-		echo '<tr><th scope="row" style="width:30%">' . wp_kses_post( $r[0] ) . '</th><td>' . wp_kses( $r[1], array( 'span' => array( 'style' => true ) ) ) . '</td></tr>';
+		echo '<tr><th scope="row">' . wp_kses_post( $r[0] ) . '</th><td>' . wp_kses(
+			$r[1],
+			array(
+				'span' => array( 'style' => true ),
+				'code' => array(),
+			)
+		) . '</td></tr>';
 	}
 	echo '</tbody></table></div></div>';
 }

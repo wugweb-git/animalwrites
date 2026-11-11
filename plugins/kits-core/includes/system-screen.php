@@ -267,7 +267,42 @@ function kits_contrast( $a, $b ) {
 	return ( max( $la, $lb ) + 0.05 ) / ( min( $la, $lb ) + 0.05 );
 }
 
-/** Where each class is used: class => list of files (theme and plugin files; kept 12 hours). */
+/**
+ * A file's path relative to wp-content (plugins/…, themes/…), built from the plugins, themes and content folders (also
+ * through a symlink), so the screen never prints the server's own folders. A file outside them: its name only.
+ *
+ * @param string $path Full path.
+ */
+function kits_content_path( $path ) {
+	static $roots = null;
+	if ( null === $roots ) {
+		$roots = array();
+		foreach ( array(
+			array( WP_PLUGIN_DIR, 'plugins/' ),
+			array( get_theme_root(), 'themes/' ),
+			array( WP_CONTENT_DIR, '' ),
+		) as list( $dir, $name ) ) {
+			$real = realpath( $dir );
+			foreach ( array( $dir, false === $real ? '' : $real ) as $d ) {
+				if ( '' !== $d ) {
+					$roots[ trailingslashit( wp_normalize_path( $d ) ) ] = $name;
+				}
+			}
+		}
+	}
+	$path = wp_normalize_path( (string) $path );
+	$real = realpath( $path );
+	foreach ( array( $path, false === $real ? '' : wp_normalize_path( $real ) ) as $p ) {
+		foreach ( $roots as $root => $name ) {
+			if ( '' !== $p && 0 === strpos( $p, $root ) ) {
+				return $name . substr( $p, strlen( $root ) );
+			}
+		}
+	}
+	return wp_basename( $path );
+}
+
+/** Where each class is used: class => list of files relative to wp-content, each once (theme and plugin files; kept 12 hours). */
 function kits_class_usage() {
 	$watch = array( get_template_directory() . '/assets/css/kit.css' );
 	foreach ( kits_system_dirs() as $dir ) {
@@ -275,7 +310,7 @@ function kits_class_usage() {
 		$watch[] = $dir . '/assets/css/aw.css';
 	}
 	$watch  = array_unique( $watch );
-	$key    = 'kits_class_usage_2_' . md5( implode( '|', array_merge( $watch, array_map( fn( $f ) => is_readable( $f ) ? filemtime( $f ) : 0, $watch ) ) ) ); // New files or folders, new list.
+	$key    = 'kits_class_usage_3_' . md5( implode( '|', array_merge( $watch, array_map( fn( $f ) => is_readable( $f ) ? filemtime( $f ) : 0, $watch ) ) ) ); // New files or folders, new list.
 	$cached = get_transient( $key );
 	if ( is_array( $cached ) ) {
 		return $cached;
@@ -311,13 +346,13 @@ function kits_class_usage() {
 					}
 				}
 			}
-			$rel = str_replace( array( dirname( get_template_directory() ) . '/', WP_PLUGIN_DIR . '/' ), '', $file->getPathname() );
+			$rel = kits_content_path( $file->getPathname() );
 			foreach ( array_unique( $found ) as $c ) {
 				$used[ rtrim( explode( '--', $c )[0], '-' ) ][ $rel ] = true;
 			}
 		}
 	}
-	$used = array_map( 'array_keys', $used );
+	$used = array_map( fn( $files ) => array_map( 'strval', array_keys( $files ) ), $used );
 	set_transient( $key, $used, 12 * HOUR_IN_SECONDS );
 	return $used;
 }
@@ -348,7 +383,7 @@ function kits_system_page() {
 	kits_admin_tabs( 'kits-system' );
 	echo '<p>The design system as it is in the code: ' . count( $reg['items'] ) . ' entries from the Kits master and this site\'s theme. Read-only; change a component in its file, then its entry in <code>kits-registry.json</code>. Colours, fonts and sizes: Appearance → Editor → Styles. Patterns: Editor → Patterns. Menus: Editor → Navigation.</p>';
 	if ( $missing ) {
-		echo '<div class="notice notice-error inline"><p><strong>' . count( $missing ) . ' class(es) in use with no registry entry:</strong> ' . esc_html( implode( ', ', $missing ) ) . '. The deploy check stops on these.</p></div>';
+		echo '<div class="notice notice-error inline"><p><strong>' . count( $missing ) . ' class(es) in use with no registry entry.</strong> The deploy check stops on these.</p><details><summary>' . esc_html( 'Classes' ) . '</summary><p>' . esc_html( implode( ', ', $missing ) ) . '</p></details></div>';
 	}
 	// The Kits tabs are above; this screen's own parts are links under them, as on core list screens.
 	echo '<ul class="subsubsub">';
@@ -363,8 +398,8 @@ function kits_system_page() {
 			echo '<p>No states sheet yet: create a private page with the slug <code>kits-demo</code> holding <code>[kits_demo]</code>.</p></div>';
 			return;
 		}
-		echo '<p style="margin:1em 0 .5em"><a href="' . esc_url( add_query_arg( 'kits_embed', '1', get_permalink( $demo ) ) ) . '" target="_blank" rel="noopener">Open the sheet on its own</a></p>'
-			. '<iframe title="States sheet" src="' . esc_url( add_query_arg( 'kits_embed', '1', get_permalink( $demo ) ) ) . '" style="width:100%;height:calc(100vh - 210px);min-height:640px;border:1px solid #c3c4c7;background:#fff"></iframe></div>';
+		echo '<p><a href="' . esc_url( add_query_arg( 'kits_embed', '1', get_permalink( $demo ) ) ) . '" target="_blank" rel="noopener">Open the sheet on its own</a></p>'
+			. '<iframe class="widefat" height="800" title="States sheet" src="' . esc_url( add_query_arg( 'kits_embed', '1', get_permalink( $demo ) ) ) . '"></iframe></div>';
 		return;
 	}
 	if ( 'menus' === $tab ) {
@@ -379,7 +414,7 @@ function kits_system_page() {
 	}
 	if ( 'tokens' === $tab ) {
 		$cells  = array();
-		$swatch = fn( $r ) => preg_match( '/^#[0-9a-f]{3,8}$/', $r ) ? '<span style="display:inline-block;width:14px;height:14px;border:1px solid #ccc;vertical-align:middle;margin-right:6px;background:' . esc_attr( $r ) . '"></span>' : '';
+		$swatch = fn( $r ) => preg_match( '/^#[0-9a-f]{3,8}$/', $r ) ? '<span class="dashicons" aria-hidden="true" style="background:' . esc_attr( $r ) . '"></span> ' : '';
 		foreach ( kits_styles_root() as $label => $v ) { // Site-wide choices in Styles.
 			$r       = kits_token_resolve( '_', array_merge( $vals, array( '_' => $v ) ) );
 			$cells[] = array(
@@ -429,7 +464,7 @@ function kits_system_page() {
 				'text'  => '<code>' . esc_html( $pair[0] ) . '</code> ' . esc_html( $fg ),
 				'on'    => '<code>' . esc_html( $pair[1] ) . '</code> ' . esc_html( $bg ),
 				'ratio' => $r ? esc_html( number_format( $r, 2 ) ) . ':1' : '—',
-				'aa'    => $r ? ( $r >= 4.5 ? '✓ pass' : '<strong style="color:#b32d2e">✗ fail</strong>' ) : 'not a plain colour',
+				'aa'    => $r ? ( $r >= 4.5 ? '✓ pass' : '<strong class="error-message">✗ fail</strong>' ) : 'not a plain colour',
 			);
 		}
 		kits_simple_table( 'contrast', array( 'name' => 'Component', 'text' => 'Text', 'on' => 'On', 'ratio' => 'Ratio', 'aa' => 'AA (4.5:1 text)' ), $cells );
@@ -438,12 +473,12 @@ function kits_system_page() {
 	}
 	// Components, blocks and patterns.
 	$types = array_unique( array_map( fn( $i ) => $i['type'], $reg['items'] ) );
-	echo '<ul class="subsubsub" style="float:none"><li><a href="' . esc_url( $base ) . '"' . ( '' === $type ? ' class="current"' : '' ) . '>All (' . count( $reg['items'] ) . ')</a></li>';
+	echo '<ul class="subsubsub"><li><a href="' . esc_url( $base ) . '"' . ( '' === $type ? ' class="current"' : '' ) . '>All (' . count( $reg['items'] ) . ')</a></li>';
 	foreach ( $types as $t ) {
 		$n = count( array_filter( $reg['items'], fn( $i ) => $i['type'] === $t ) );
 		echo '<li> | <a href="' . esc_url( add_query_arg( 'type', $t, $base ) ) . '"' . ( $t === $type ? ' class="current"' : '' ) . '>' . esc_html( ucfirst( $t ) ) . ' (' . (int) $n . ')</a></li>';
 	}
-	echo '</ul>';
+	echo '</ul><br class="clear">';
 	$cells = array();
 	foreach ( $reg['items'] as $it ) {
 		if ( $type && $it['type'] !== $type ) {
@@ -472,15 +507,17 @@ function kits_system_page() {
 				$seo[] = '<strong>' . esc_html( $l ) . ':</strong> ' . esc_html( $s[ $k ] );
 			}
 		}
-		$what = ! empty( $it['block'] ) ? '<code>' . esc_html( $it['block'] ) . '</code>' : implode( ' ', array_map( fn( $c ) => '<code>' . esc_html( $c ) . '</code>', (array) $it['classes'] ) );
+		$what    = ! empty( $it['block'] ) ? '<code>' . esc_html( $it['block'] ) . '</code>' : implode( ' ', array_map( fn( $c ) => '<code>' . esc_html( $c ) . '</code>', (array) $it['classes'] ) );
+		$states  = (array) ( $it['states'] ?? array() );
+		$style   = kits_registry_style( $it );
 		$cells[] = array(
-			'name'   => '<strong>' . esc_html( $it['name'] ) . '</strong><br><span style="color:#646970">' . esc_html( $it['type'] . ( 'live' !== $it['status'] ? ' · ' . $it['status'] : '' ) ) . '</span>' . ( ! empty( $it['note'] ) ? '<br><em>' . esc_html( $it['note'] ) . '</em>' : '' ),
+			'name'   => '<strong>' . esc_html( $it['name'] ) . '</strong><br><span class="description">' . esc_html( $it['type'] . ( 'live' !== $it['status'] ? ' · ' . $it['status'] : '' ) ) . '</span>' . ( ! empty( $it['note'] ) ? '<br><em>' . esc_html( $it['note'] ) . '</em>' : '' ) . ( $style ? '<br>' . kits_block_style_link( $style[0], $style[1] ) : '' ),
 			'owner'  => esc_html( $it['owner'] ),
-			'what'   => $what,
-			'states' => esc_html( implode( ' · ', (array) $it['states'] ) ),
-			'a11y'   => implode( '<br>', $acc ),
-			'seo'    => $seo ? implode( '<br>', $seo ) : '—',
-			'used'   => ! empty( $it['block'] ) ? '—' : ( $files ? '<details><summary>' . count( $files ) . ' file' . ( 1 === count( $files ) ? '' : 's' ) . '</summary>' . implode( '<br>', array_map( 'esc_html', $files ) ) . '</details>' : '<span style="color:#b32d2e">not used</span>' ),
+			'what'   => count( (array) ( $it['classes'] ?? array() ) ) > 3 ? '<details><summary>' . esc_html( count( (array) $it['classes'] ) . ' classes' ) . '</summary>' . $what . '</details>' : $what,
+			'states' => $states ? kits_system_fold( count( $states ) . ' state' . ( 1 === count( $states ) ? '' : 's' ), implode( '<br>', array_map( 'esc_html', $states ) ) ) : '—',
+			'a11y'   => $acc ? kits_system_fold( count( $acc ) . ' note' . ( 1 === count( $acc ) ? '' : 's' ), implode( '<br>', $acc ) ) : '—',
+			'seo'    => $seo ? kits_system_fold( count( $seo ) . ' note' . ( 1 === count( $seo ) ? '' : 's' ), implode( '<br>', $seo ) ) : '—',
+			'used'   => ! empty( $it['block'] ) ? '—' : ( $files ? kits_system_fold( count( $files ) . ' file' . ( 1 === count( $files ) ? '' : 's' ), implode( '<br>', array_map( 'esc_html', $files ) ) ) : '<span class="error-message">not used</span>' ),
 			'_after' => kits_system_visual_row( $it, $vals, $demo ),
 		);
 	}
@@ -491,6 +528,81 @@ function kits_system_page() {
 		array( 'empty' => 'No entries.' )
 	);
 	echo '</div>';
+}
+
+/**
+ * A long cell folded: a summary (plain text) that opens to the whole (escaped HTML).
+ *
+ * @param string $summary Plain text.
+ * @param string $html    Escaped HTML.
+ */
+function kits_system_fold( $summary, $html ) {
+	return '<details><summary>' . esc_html( $summary ) . '</summary>' . $html . '</details>';
+}
+
+/**
+ * A registry entry's block style ("style": {"block": "core/group", "variation": "kits-card"}): [block, variation], or
+ * an empty array when it has none.
+ *
+ * @param array $it Registry entry.
+ */
+function kits_registry_style( $it ) {
+	$s = (array) ( $it['style'] ?? array() );
+	return ! empty( $s['block'] ) && ! empty( $s['variation'] ) ? array( (string) $s['block'], (string) $s['variation'] ) : array();
+}
+
+/**
+ * The Site Editor's Styles at one panel (relative to wp-admin), e.g. /layout or /blocks/core%2Fgroup.
+ *
+ * @param string $section The Styles panel's path.
+ */
+function kits_styles_section_path( $section ) {
+	return 'site-editor.php?p=' . rawurlencode( '/styles' ) . '&section=' . rawurlencode( (string) $section );
+}
+
+/**
+ * A link to a block style in Styles → Blocks → its block → the style.
+ *
+ * @param string $block     Block name, e.g. core/group.
+ * @param string $variation Block style name.
+ */
+function kits_block_style_link( $block, $variation ) {
+	$type  = class_exists( 'WP_Block_Type_Registry' ) ? WP_Block_Type_Registry::get_instance()->get_registered( $block ) : null;
+	$style = class_exists( 'WP_Block_Styles_Registry' ) ? WP_Block_Styles_Registry::get_instance()->get_registered( $block, $variation ) : null;
+	$label = 'Styles → Blocks → ' . ( $type && $type->title ? $type->title : $block ) . ' → ' . ( is_array( $style ) && ! empty( $style['label'] ) ? $style['label'] : $variation );
+	$path  = kits_styles_section_path( '/blocks/' . rawurlencode( $block ) . '/variations/' . rawurlencode( $variation ) );
+	return '<a href="' . esc_url( admin_url( $path ) ) . '">' . esc_html( $label ) . '</a>';
+}
+
+/**
+ * A block style's values in Styles: padding (the spacing step), corner radius, background and border, with each
+ * preset written as its custom property and the value it stands for. Label => [value as set, value it resolves to].
+ *
+ * @param string $block     Block name.
+ * @param string $variation Block style name.
+ */
+function kits_block_style_values( $block, $variation ) {
+	$out = array();
+	if ( ! function_exists( 'wp_get_global_styles' ) ) {
+		return $out;
+	}
+	$v    = (array) wp_get_global_styles( array( 'variations', $variation ), array( 'block_name' => $block ) );
+	$pad  = array_values( array_map( 'strval', (array) ( $v['spacing']['padding'] ?? array() ) ) );
+	$rows = array(
+		'Padding'       => count( array_unique( $pad ) ) > 1 ? implode( ' ', $pad ) : (string) ( $pad[0] ?? '' ),
+		'Corner radius' => $v['border']['radius'] ?? '',
+		'Background'    => $v['color']['background'] ?? '',
+		'Border'        => trim( (string) ( $v['border']['width'] ?? '' ) . ' ' . (string) ( $v['border']['style'] ?? '' ) . ' ' . (string) ( $v['border']['color'] ?? '' ) ),
+	);
+	$vals = kits_token_values();
+	foreach ( $rows as $label => $value ) {
+		if ( ! is_string( $value ) || '' === $value ) {
+			continue;
+		}
+		$value         = preg_replace( '/var:preset\|([a-z0-9-]+)\|([a-z0-9-]+)/i', 'var(--wp--preset--$1--$2)', $value );
+		$out[ $label ] = array( $value, kits_token_resolve( '_', array_merge( $vals, array( '_' => $value ) ) ) );
+	}
+	return $out;
 }
 
 /**
@@ -532,12 +644,19 @@ function kits_system_visual_row( $it, $vals, $demo ) {
 			$src  = add_query_arg( 'kits_spot_url', rawurlencode( '' !== $spot ? $spot : 'none' ), $src );
 		}
 	}
-	$states = ! empty( $it['states'] ) ? '<ul style="margin:.25em 0 1em 1.2em;list-style:disc">' . implode( '', array_map( fn( $x ) => '<li>' . esc_html( $x ) . '</li>', (array) $it['states'] ) ) . '</ul>' : '<p>—</p>';
-	return '<tr class="kits-vis"><td colspan="7" style="padding-top:0"><details><summary style="cursor:pointer;color:#2271b1">Visual, values and states</summary>'
-		. '<div style="display:grid;grid-template-columns:minmax(240px,340px) minmax(0,1fr);gap:16px;align-items:start;margin:8px 0">'
-		. '<div><strong>States</strong>' . $states . '<strong>Values</strong>' . ( $toks ? '<table class="widefat" style="margin-top:.25em"><tbody>' . implode( '', $toks ) . '</tbody></table>' : '<p>No tokens listed.</p>' ) . '</div>'
-		. ( $src ? '<iframe loading="lazy" title="' . esc_attr( $it['name'] . ' in its states' ) . '" src="' . esc_url( $src ) . '" style="width:100%;height:560px;border:1px solid #c3c4c7;background:#fff"></iframe>' : '<p>No visual: this entry styles core blocks (see Appearance &gt; Editor &gt; Styles).</p>' )
-		. '</div></details></td></tr>';
+	$style = kits_registry_style( $it );
+	if ( $style ) { // The block style's own values in Styles first (e.g. the card's padding step).
+		$rows = array();
+		foreach ( kits_block_style_values( $style[0], $style[1] ) as $label => $v ) {
+			$rows[] = '<tr><td>' . esc_html( $label ) . '</td><td><code>' . esc_html( $v[0] ) . '</code> ' . esc_html( $v[1] ) . '</td></tr>';
+		}
+		$toks = array_merge( $rows, $toks );
+	}
+	$states = ! empty( $it['states'] ) ? '<ul>' . implode( '', array_map( fn( $x ) => '<li>' . esc_html( $x ) . '</li>', (array) $it['states'] ) ) . '</ul>' : '<p>—</p>';
+	return '<tr class="kits-vis"><td colspan="7"><details><summary>Visual, values and states</summary>'
+		. '<p><strong>States</strong></p>' . $states . '<p><strong>Values</strong></p>' . ( $toks ? '<table class="widefat striped"><tbody>' . implode( '', $toks ) . '</tbody></table>' : '<p>No tokens listed.</p>' )
+		. ( $src ? '<p><iframe class="widefat" height="560" loading="lazy" title="' . esc_attr( $it['name'] . ' in its states' ) . '" src="' . esc_url( $src ) . '"></iframe></p>' : '<p>No visual: this entry styles core blocks (see Appearance &gt; Editor &gt; Styles).</p>' )
+		. '</details></td></tr>';
 }
 
 /**

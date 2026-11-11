@@ -57,7 +57,7 @@ function mailweb_home_page() {
 		array(
 			__( 'Inbox', 'mailweb' ),
 			__( 'Read, reply, reply all, forward and write from every mailbox; folders, search, archive, spam, trash, attachments. Website forms appear as their own folder.', 'mailweb' ),
-			'<a href="' . esc_url( admin_url( 'admin.php?page=mailweb' ) ) . '">' . esc_html__( 'Mail → Inbox', 'mailweb' ) . '</a>',
+			'<a href="' . esc_url( admin_url( 'admin.php?page=mailweb' ) ) . '">' . esc_html__( 'MailWeb → Inbox', 'mailweb' ) . '</a>',
 			esc_html( sprintf( /* translators: 1: unread emails, 2: unread form messages */ __( '%1$d unread emails, %2$d unread form messages.', 'mailweb' ), $unread, $forms ) ),
 		),
 		array(

@@ -644,18 +644,20 @@ function kits_parts_bundle_sets( string $dir ): array {
 }
 
 /**
- * Clean-up of the joined component files, on each rebuild.
+ * Clean-up of the joined component files, on each rebuild and when the cap is reached.
  *
  * - In each set, an older version goes a day after the version that replaced it was written.
- * - A set whose newest file is older than 30 days goes whole: no page uses it (files in use are touched weekly).
+ * - A set whose newest file has not been used for kits_parts_bundle_max_age() goes whole (files in use are touched
+ *   daily), so sets that only a few pages made stop counting against the cap.
  * - Temp files left by a failed write go after an hour.
  *
  * @param string $dir Folder.
  */
 function kits_parts_bundle_clean( string $dir ): void {
 	clearstatcache();
+	$old = time() - kits_parts_bundle_max_age();
 	foreach ( kits_parts_bundle_sets( $dir ) as $set => $list ) {
-		if ( reset( $list ) < time() - 30 * DAY_IN_SECONDS ) {
+		if ( reset( $list ) < $old ) {
 			array_map( 'wp_delete_file', array_keys( $list ) );
 			delete_option( 'kits_parts_ver_' . $set );
 		} else {
@@ -713,6 +715,15 @@ function kits_parts_bundle_sweep( string $dir ): void {
 			delete_option( 'kits_parts_ver_' . $set );
 		}
 	}
+}
+
+/**
+ * How long a joined component file no page has used is kept (kits_parts_bundle_max_age filter; default 14 days). A
+ * file in use is touched once a day, so this must outlast the longest time a page cache keeps a page without PHP
+ * running (plus that day), or a cached page could link to a removed file. Never less than 8 days.
+ */
+function kits_parts_bundle_max_age(): int {
+	return max( 8 * DAY_IN_SECONDS, (int) apply_filters( 'kits_parts_bundle_max_age', 14 * DAY_IN_SECONDS ) );
 }
 
 /** Most joined component files kept (Kits → Core Settings → Joined files cap; kits_parts_bundle_cap filter). */
@@ -854,6 +865,11 @@ function kits_bundle_component_css() {
 			return; // Uploads could not be written lately: separate files, no retry on every view.
 		}
 		$sets = kits_parts_bundle_sets( $dir['path'] );
+		if ( ! isset( $sets[ $set ] ) && count( $sets ) >= kits_parts_bundle_cap() && false === get_transient( 'kits_parts_cap_clean' ) ) {
+			set_transient( 'kits_parts_cap_clean', 1, HOUR_IN_SECONDS ); // At most once an hour: unused sets go, then count again.
+			kits_parts_bundle_clean( $dir['path'] );
+			$sets = kits_parts_bundle_sets( $dir['path'] );
+		}
 		if ( ! isset( $sets[ $set ] ) && count( $sets ) >= kits_parts_bundle_cap() ) {
 			if ( false === get_transient( 'kits_parts_cap_hit' ) ) {
 				set_transient( 'kits_parts_cap_hit', time(), WEEK_IN_SECONDS ); // Shown on Welcome and Site check.
@@ -884,8 +900,8 @@ function kits_bundle_component_css() {
 	}
 	$sweep = get_option( 'kits_parts_sweep' );
 	$since = is_array( $sweep ) ? (int) ( $sweep['at'] ?? 0 ) : 0;
-	if ( ( $mtime < time() - WEEK_IN_SECONDS || $mtime < $since ) && wp_is_writable( $path ) ) {
-		touch( $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- in use: the 30-day clean-up and the release sweep keep it.
+	if ( ( $mtime < time() - DAY_IN_SECONDS || $mtime < $since ) && wp_is_writable( $path ) ) {
+		touch( $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- in use: the unused-age clean-up and the release sweep keep it.
 	}
 	if ( $since ) {
 		kits_parts_bundle_sweep( $dir['path'] );

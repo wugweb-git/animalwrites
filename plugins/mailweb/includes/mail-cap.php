@@ -494,9 +494,9 @@ add_action(
 				(string) $pause['error']
 			)
 		) . ' ' . sprintf(
-			/* translators: %s: link to Mail → Settings → Site sending */
+			/* translators: %s: link to MailWeb → Settings → Site sending */
 			esc_html__( '%s to resume once the mailbox works.', 'mailweb' ),
-			'<a href="' . esc_url( mailweb_settings_url( 'sending', array(), 'cap' ) ) . '">' . esc_html__( 'Open Mail → Settings → Site sending', 'mailweb' ) . '</a>'
+			'<a href="' . esc_url( mailweb_settings_url( 'sending', array(), 'cap' ) ) . '">' . esc_html__( 'Open MailWeb → Settings → Site sending', 'mailweb' ) . '</a>'
 		) . '</p></div>';
 	}
 );

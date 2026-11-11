@@ -61,6 +61,31 @@ function aw_team_dates_add_links_read() {
 add_action( 'admin_init', 'aw_team_dates_add_links_read' );
 
 /**
+ * The monthly Links reads already on the calendar name the screen by its menu path (owner, 11 Nov 2026: RankWeb →
+ * Search Insights → Links; they were added on 31 Oct under the old name AW SEO Plus). Once (flag
+ * aw_team_dates_links_note_1111); only those words in those entries' notes change.
+ */
+function aw_team_dates_links_note_rename() {
+	if ( get_option( 'aw_team_dates_links_note_1111' ) ) {
+		return;
+	}
+	$all     = aw_team_dates();
+	$changed = false;
+	foreach ( $all as $i => $d ) {
+		$note = (string) ( $d['note'] ?? '' );
+		if ( 'Search Console Links read (Claude Code session)' === ( $d['title'] ?? '' ) && false !== strpos( $note, 'AW SEO Plus → Search Insights → Links' ) ) {
+			$all[ $i ]['note'] = str_replace( 'AW SEO Plus → Search Insights → Links', 'RankWeb → Search Insights → Links', $note );
+			$changed           = true;
+		}
+	}
+	if ( $changed ) {
+		update_option( 'aw_team_dates', $all, false );
+	}
+	update_option( 'aw_team_dates_links_note_1111', time(), false );
+}
+add_action( 'admin_init', 'aw_team_dates_links_note_rename' );
+
+/**
  * Dates from the 1 Nov 2026 search analysis, added once (flag aw_team_dates_1101). A date already on the calendar under
  * the same title is not added again; each can be removed like any other date.
  */
@@ -185,33 +210,32 @@ function aw_team_dates_screen() {
 	$today = wp_date( 'Y-m-d' );
 	echo '<div class="wrap"><h1>Dates</h1>';
 	aw_core_screen_nav( 'aw-dates' );
-	echo '<p><a class="button" href="' . esc_url( add_query_arg( 'm', $prev, $base ) ) . '">‹ ' . esc_html( wp_date( 'F', strtotime( $prev . '-01 12:00:00' ) ) ) . '</a> <strong style="font-size:1.2em;margin:0 12px">' . esc_html( wp_date( 'F Y', $first ) ) . '</strong> <a class="button" href="' . esc_url( add_query_arg( 'm', $next, $base ) ) . '">' . esc_html( wp_date( 'F', strtotime( $next . '-01 12:00:00' ) ) ) . ' ›</a> <a class="button" href="' . esc_url( $base ) . '">Today</a></p>';
-	echo '<table class="widefat fixed" style="table-layout:fixed;max-width:1100px"><thead><tr>';
+	echo '<p><a class="button" href="' . esc_url( add_query_arg( 'm', $prev, $base ) ) . '">‹ ' . esc_html( wp_date( 'F', strtotime( $prev . '-01 12:00:00' ) ) ) . '</a> <strong>' . esc_html( wp_date( 'F Y', $first ) ) . '</strong> <a class="button" href="' . esc_url( add_query_arg( 'm', $next, $base ) ) . '">' . esc_html( wp_date( 'F', strtotime( $next . '-01 12:00:00' ) ) ) . ' ›</a> <a class="button" href="' . esc_url( $base ) . '">Today</a></p>';
+	echo '<table class="widefat fixed"><thead><tr>';
 	foreach ( array( 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun' ) as $h ) {
-		echo '<th>' . esc_html( $h ) . '</th>';
+		echo '<th scope="col">' . esc_html( $h ) . '</th>';
 	}
 	echo '</tr></thead><tbody><tr>';
 	for ( $i = 0; $i < $lead; $i++ ) {
-		echo '<td style="background:#f6f7f7"></td>';
+		echo '<td class="alternate"></td>'; // core's grey: a day of another month
 	}
 	for ( $day = 1; $day <= $days; $day++ ) {
 		$ymd = sprintf( '%s-%02d', $month, $day );
 		if ( 0 === ( $lead + $day - 1 ) % 7 && $day > 1 ) {
 			echo '</tr><tr>';
 		}
-		$style = 'vertical-align:top;height:84px;' . ( $ymd === $today ? 'background:#fff8e5;' : '' );
-		echo '<td style="' . esc_attr( $style ) . '"><strong>' . (int) $day . '</strong>';
+		echo '<td' . ( $ymd === $today ? ' class="highlight" aria-current="date"' : '' ) . '><strong>' . (int) $day . '</strong>'; // core's highlight: today
 		foreach ( $by[ $ymd ] ?? array() as $d ) {
-			echo '<div style="margin-top:4px;padding:2px 6px;background:#2271b1;color:#fff;border-radius:3px;font-size:12px;line-height:1.35">' . esc_html( $d['title'] ) . '</div>';
+			echo '<p><span class="dashicons dashicons-calendar-alt" aria-hidden="true"></span> ' . esc_html( $d['title'] ) . '</p>';
 		}
 		echo '</td>';
 	}
 	for ( $i = ( 7 - ( $lead + $days ) % 7 ) % 7; $i > 0; $i-- ) {
-		echo '<td style="background:#f6f7f7"></td>';
+		echo '<td class="alternate"></td>';
 	}
 	echo '</tr></tbody></table>';
 
-	echo '<h2 style="margin-top:28px">All dates</h2>';
+	echo '<h2>All dates</h2>';
 	$cells = array();
 	foreach ( $dates as $i => $d ) {
 		$del     = wp_nonce_url( admin_url( 'admin-post.php?action=aw_dates_delete&i=' . (int) $i . '&d=' . rawurlencode( $d['date'] ) ), 'aw_dates_delete_' . $i );
@@ -224,8 +248,8 @@ function aw_team_dates_screen() {
 	}
 	aw_core_simple_table( 'dates', array( 'date' => 'Date', 'when' => 'When', 'what' => 'What', 'remove' => '<span class="screen-reader-text">Remove</span>' ), $cells, array( 'empty' => 'No dates yet.' ) );
 
-	echo '<h2 style="margin-top:28px">Add a date</h2><form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_dates_add">' . wp_nonce_field( 'aw_dates_add', '_wpnonce', true, false );
-	echo '<p><label>Date <input type="date" name="date" required></label> <label>What <input type="text" name="title" class="regular-text" required></label></p><p><label>Note<br><textarea name="note" rows="3" class="large-text" style="max-width:640px"></textarea></label></p><p><button class="button button-primary">Add</button></p></form></div>';
+	echo '<h2>Add a date</h2><form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_dates_add">' . wp_nonce_field( 'aw_dates_add', '_wpnonce', true, false );
+	echo '<p><label>Date <input type="date" name="date" required></label> <label>What <input type="text" name="title" class="regular-text" required></label></p><p><label>Note<br><textarea name="note" rows="3" class="large-text"></textarea></label></p><p><button class="button button-primary">Add</button></p></form></div>';
 }
 
 add_action(

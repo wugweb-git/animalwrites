@@ -29,7 +29,7 @@ add_action(
  * @param array $tabs Kits plugin screens: slug => [name, address relative to wp-admin, capability, what it is].
  */
 function mailweb_kits_tab( $tabs ) {
-	$tabs['mailweb-overview'] = array( __( 'MailWeb', 'mailweb' ), 'admin.php?page=mailweb-overview', MAILWEB_CAP, __( 'Mailboxes, form messages and sending: Mail → Overview.', 'mailweb' ) );
+	$tabs['mailweb-overview'] = array( __( 'MailWeb', 'mailweb' ), 'admin.php?page=mailweb-overview', MAILWEB_CAP, __( 'Mailboxes, form messages and sending: MailWeb → Overview.', 'mailweb' ) );
 	return $tabs;
 }
 

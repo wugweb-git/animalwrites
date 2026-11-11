@@ -1097,49 +1097,6 @@
    "note": "Fixed head height: 12rem from 640px, 15rem from 1200px."
   },
   {
-   "name": "Cards",
-   "type": "component",
-   "status": "live",
-   "classes": [
-    "kit-card",
-    "kit-cards",
-    "kit-story",
-    "kit-doc",
-    "kit-case",
-    "kit-res",
-    "kit-tile",
-    "kit-tiles",
-    "kit-task",
-    "kit-tasks",
-    "kit-placard",
-    "kit-img",
-    "kit-link-row"
-   ],
-   "states": [
-    "default",
-    "hover",
-    "focus (via the title link)",
-    "no picture (placard)"
-   ],
-   "tokens": [],
-   "a11y": {
-    "element": "<li> in a list; the title is the link",
-    "aria": "pictures alt=\"\" when the title says the same",
-    "keyboard": "Tab to the title link",
-    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
-    "target": "n/a",
-    "motion": "lift on hover off with reduced motion",
-    "sr": "one link per card (the title)"
-   },
-   "seo": {
-    "heading": "H2 or H3 by context",
-    "link": "the item title",
-    "alt": "empty when decorative",
-    "schema": "part of the list's ItemList"
-   },
-   "note": "Several card styles share these classes; one kit-card with variants is the next step."
-  },
-  {
    "name": "Home editorial sections",
    "type": "component",
    "status": "live",
@@ -1920,7 +1877,19 @@
     "kit-card-title",
     "kit-card-sum",
     "kit-card-label",
-    "kit-card-label--icon"
+    "kit-card-label--icon",
+    "kit-cards",
+    "kit-story",
+    "kit-doc",
+    "kit-case",
+    "kit-res",
+    "kit-tile",
+    "kit-tiles",
+    "kit-task",
+    "kit-tasks",
+    "kit-placard",
+    "kit-img",
+    "kit-link-row"
    ],
    "states": [
     "block-lg",
@@ -1930,15 +1899,40 @@
     "stacked-md",
     "stacked-sm (picture left or none; reference list)",
     "hover: title underline",
-    "focus: card outline"
+    "focus: card outline",
+    "default",
+    "hover",
+    "focus (via the title link)",
+    "no picture (placard)"
    ],
+   "tokens": [
+    "kit-radius-card",
+    "kit-surface-card",
+    "kit-card-min",
+    "kit-card-columns",
+    "kit-card-media-ratio"
+   ],
+   "style": {
+    "block": "core/group",
+    "variation": "kits-card"
+   },
    "a11y": {
+    "element": "<li> in a list; the title is the link",
+    "aria": "pictures alt=\"\" when the title says the same",
+    "keyboard": "Tab to the title link",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "n/a",
+    "motion": "lift on hover off with reduced motion",
+    "sr": "one link per card (the title)",
     "link": "the title link covers the card"
    },
    "seo": {
-    "heading": "card title",
-    "schema": "none"
+    "heading": "H2 or H3 by context",
+    "link": "the item title",
+    "alt": "empty when decorative",
+    "schema": "part of the list's ItemList"
    },
+   "note": "Several card styles share these classes; one kit-card with variants is the next step.",
    "anatomy": "media 4:3 (logo whole; label top-left) > meta row (date, read time, place) > chips (source, type, category; lg 3, md 2, sm 1; one row) > title (3 lines, word-safe) > summary (block-lg/md, stacked-lg) > action",
    "patterns": [
     "kits-by-wugweb/card-block-lg",

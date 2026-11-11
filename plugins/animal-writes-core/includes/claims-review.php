@@ -316,7 +316,7 @@ function aw_claims_screen() {
 	echo '<h1>Claims</h1>';
 	$done = sanitize_key( wp_unslash( $_GET['done'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
 	if ( '' !== $done ) {
-		echo '<div class="notice notice-success is-dismissible"><p>' . esc_html( 'approved' === $done ? 'Claim approved: the ticked fields are on the listing (Undo in Sourcing → Enrichment review).' : 'Claim rejected.' ) . '</p></div>';
+		echo '<div class="notice notice-success is-dismissible"><p>' . esc_html( 'approved' === $done ? 'Claim approved: the ticked fields are on the listing (Undo in SourceWeb → Enrichment review).' : 'Claim rejected.' ) . '</p></div>';
 	}
 	global $wpdb;
 	$per   = 20;
@@ -408,7 +408,7 @@ function aw_claim_review_screen( $entry_id ) {
 	}
 	aw_core_simple_table( 'aw-claim-changes', array( 'cb' => '<span class="screen-reader-text">Approve</span>', 'field' => 'Field', 'now' => 'Now', 'new' => 'Proposed' ), $rows, array( 'primary' => 'field', 'empty' => 'Nothing differs from the listing.' ) );
 	if ( $pending ) {
-		echo '<p class="description">Approve writes the ticked fields to the listing (source "Claimed by organisation", today) and marks it claimed. Each field can be undone in Sourcing → Enrichment review.</p>';
+		echo '<p class="description">Approve writes the ticked fields to the listing (source "Claimed by organisation", today) and marks it claimed. Each field can be undone in SourceWeb → Enrichment review.</p>';
 		echo '<p>';
 		submit_button( 'Approve ticked fields', 'primary', 'do_approve', false );
 		echo ' ';

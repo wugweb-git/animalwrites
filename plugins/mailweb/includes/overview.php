@@ -190,7 +190,7 @@ function mailweb_overview_widget( $max ) {
 	echo '<p><a href="' . esc_url( $inbox ) . '">' . esc_html__( 'Open Mail', 'mailweb' ) . '</a></p>';
 }
 
-// Top-level "Mail" menu with the unread badge (hidden at 0).
+// Top-level "MailWeb" menu with the unread badge (hidden at 0).
 add_action(
 	'admin_menu',
 	function () {
@@ -199,10 +199,10 @@ add_action(
 		}
 		$n     = mailweb_overview_unread() + ( function_exists( 'mailweb_forms_unread' ) ? mailweb_forms_unread() : 0 );
 		$badge = $n ? ' <span class="awaiting-mod count-' . (int) $n . '"><span class="pending-count">' . (int) $n . '</span></span>' : '';
-		add_menu_page( __( 'Mail', 'mailweb' ), __( 'Mail', 'mailweb' ) . $badge, MAILWEB_CAP, 'mailweb', 'mailweb_inbox_page', 'dashicons-email', 27 ); // the inbox (inbox.php)
-		add_submenu_page( 'mailweb', __( 'Mail', 'mailweb' ), __( 'Inbox', 'mailweb' ), MAILWEB_CAP, 'mailweb', 'mailweb_inbox_page' );
-		add_submenu_page( 'mailweb', __( 'Mail overview', 'mailweb' ), __( 'Overview', 'mailweb' ), MAILWEB_CAP, 'mailweb-overview', 'mailweb_home_page' ); // home.php
-		add_submenu_page( 'mailweb', __( 'Mail settings', 'mailweb' ), __( 'Settings', 'mailweb' ), 'manage_options', 'mailweb-settings', 'mailweb_settings_page' ); // settings-tab.php
+		add_menu_page( __( 'MailWeb', 'mailweb' ), __( 'MailWeb', 'mailweb' ) . $badge, MAILWEB_CAP, 'mailweb', 'mailweb_inbox_page', 'dashicons-email', 27 ); // the inbox (inbox.php)
+		add_submenu_page( 'mailweb', __( 'MailWeb', 'mailweb' ), __( 'Inbox', 'mailweb' ), MAILWEB_CAP, 'mailweb', 'mailweb_inbox_page' );
+		add_submenu_page( 'mailweb', __( 'MailWeb overview', 'mailweb' ), __( 'Overview', 'mailweb' ), MAILWEB_CAP, 'mailweb-overview', 'mailweb_home_page' ); // home.php
+		add_submenu_page( 'mailweb', __( 'MailWeb settings', 'mailweb' ), __( 'Settings', 'mailweb' ), 'manage_options', 'mailweb-settings', 'mailweb_settings_page' ); // settings-tab.php
 	}
 );
 

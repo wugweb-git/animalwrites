@@ -52,6 +52,25 @@ class AW_Core_Simple_Table extends WP_List_Table {
 		echo '</tbody></table>';
 	}
 
+	/**
+	 * Core's header row, with ids unique to this table: core prints each heading as id='column', so two tables on one
+	 * screen repeat the same ids. Each id (and the select-all checkbox's) gets the table's name in front.
+	 *
+	 * @param bool $with_id Print the ids (core: the header row yes, the footer row no).
+	 */
+	public function print_column_headers( $with_id = true ) {
+		ob_start();
+		parent::print_column_headers( $with_id );
+		$html   = (string) ob_get_clean();
+		$prefix = $this->_args['plural'] . '-'; // core keeps plural as sanitize_key()
+		if ( $with_id ) {
+			foreach ( array_keys( $this->get_columns() ) as $key ) {
+				$html = str_replace( "id='" . $key . "'", "id='" . esc_attr( $prefix . $key ) . "'", $html );
+			}
+		}
+		echo str_replace( 'cb-select-all-', esc_attr( $prefix ) . 'cb-select-all-', $html ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core's own header markup.
+	}
+
 	public function get_columns() {
 		return $this->cols;
 	}

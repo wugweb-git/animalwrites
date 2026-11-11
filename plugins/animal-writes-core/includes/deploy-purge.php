@@ -19,6 +19,7 @@
  * so sets no page uses any more do not count against the cap (owner, 10 Nov 2026). Files no page has used since the
  * release go two hours later: past the longest time the CDN keeps a page (aw_cdn_ttl, at most an hour, plus
  * stale-while-revalidate 600 s, cdn-cache.php), so a cached page never links to a deleted file.
+ * It also schedules Check site for the new commit, two minutes later (site-check.php; owner, 11 Nov 2026).
  *
  * @package animal-writes-core
  */
@@ -64,6 +65,9 @@ add_action(
 		}
 		update_option( 'aw_deployed_head', $head, true );
 		aw_deploy_sweep_parts_css();
+		if ( function_exists( 'aw_site_check_after_deploy' ) ) {
+			aw_site_check_after_deploy(); // Check site runs again for the new commit (site-check.php).
+		}
 		do_action( 'litespeed_purge_all' ); // LiteSpeed Cache's own hook; nothing happens if it is not active
 	},
 	99

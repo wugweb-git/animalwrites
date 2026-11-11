@@ -31,8 +31,8 @@ plugins/aw-seo-extras/includes/overview.php | admin page | add_menu_page( 'RankW
 plugins/aw-seo-extras/includes/overview.php | admin page | add_submenu_page( AW_SEO_MENU, 'RankWeb', 'Overview', 'manage_categories', AW_SEO_MENU, 'aw_seo_overview_page' );
 plugins/aw-seo-extras/includes/settings.php | admin page | add_submenu_page( AW_SEO_MENU, 'RankWeb settings', 'Settings', 'manage_options', 'aw-seo-settings', 'aw_seo_settings_page' );
 plugins/aw-seo-extras/includes/search-insights/admin.php | admin page | add_submenu_page( AW_SEO_MENU, __( 'Search Insights', 'aw-seo-extras' ), __( 'Search Insights', 'aw-seo-extras' ), aw_si_cap(), AW_SI_SLUG, 'aw_si_screen' );
-plugins/aw-sourcing/includes/admin-menu.php | admin page | add_menu_page( 'Sourcing', 'Sourcing', AW_REVIEW_CAP, AW_SRC_MENU, 'aw_sourcing_overview_page', 'dashicons-rss', 26 );
-plugins/aw-sourcing/includes/admin-menu.php | admin page | add_submenu_page( AW_SRC_MENU, 'Sourcing', 'Overview', AW_REVIEW_CAP, AW_SRC_MENU, 'aw_sourcing_overview_page' );
+plugins/aw-sourcing/includes/admin-menu.php | admin page | add_menu_page( 'SourceWeb', 'SourceWeb', AW_REVIEW_CAP, AW_SRC_MENU, 'aw_sourcing_overview_page', 'dashicons-rss', 26 );
+plugins/aw-sourcing/includes/admin-menu.php | admin page | add_submenu_page( AW_SRC_MENU, 'SourceWeb', 'Overview', AW_REVIEW_CAP, AW_SRC_MENU, 'aw_sourcing_overview_page' );
 plugins/aw-sourcing/includes/admin-menu.php | admin page | add_submenu_page( AW_SRC_MENU, (string) $t[0], (string) $t[0], AW_SRC_CAP, AW_SRC_PAGE, 'aw_sourcing_page' );
 plugins/aw-sourcing/includes/admin-menu.php | admin page | add_submenu_page( AW_SRC_MENU, (string) $t[0], (string) $t[0], AW_SRC_CAP, aw_src_tab_menu_slug( $tab ) );
 plugins/aw-sourcing/includes/enrichment-admin.php | admin page | add_submenu_page( AW_SRC_MENU, 'Enrichment review', 'Enrichment review' . ( $n && function_exists( 'aw_menu_count' ) ? aw_menu_count( $n ) : '' ), AW_ENRICH_CAP
@@ -48,10 +48,10 @@ plugins/kits-core/includes/admin-screens.php | admin page | add_submenu_page( KI
 plugins/kits-core/includes/admin-screens.php | admin page | add_submenu_page( KITS_MENU, 'Theme Options', 'Theme Options', 'manage_options', 'kits-options', 'kits_options_page' );
 plugins/kits-core/includes/preview.php | admin page | add_submenu_page(
 plugins/kits-core/includes/system-screen.php | admin page | add_submenu_page( KITS_MENU, 'Design system', 'Design system', 'manage_options', 'kits-system', 'kits_system_page' ); // Kits → Design system
-plugins/mailweb/includes/overview.php | admin page | add_menu_page( __( 'Mail', 'mailweb' ), __( 'Mail', 'mailweb' ) . $badge, MAILWEB_CAP, 'mailweb', 'mailweb_inbox_page', 'dashicons-email', 27 ); // the inbox (i
-plugins/mailweb/includes/overview.php | admin page | add_submenu_page( 'mailweb', __( 'Mail overview', 'mailweb' ), __( 'Overview', 'mailweb' ), MAILWEB_CAP, 'mailweb-overview', 'mailweb_home_page' ); // home.php
-plugins/mailweb/includes/overview.php | admin page | add_submenu_page( 'mailweb', __( 'Mail settings', 'mailweb' ), __( 'Settings', 'mailweb' ), 'manage_options', 'mailweb-settings', 'mailweb_settings_page' ); //
-plugins/mailweb/includes/overview.php | admin page | add_submenu_page( 'mailweb', __( 'Mail', 'mailweb' ), __( 'Inbox', 'mailweb' ), MAILWEB_CAP, 'mailweb', 'mailweb_inbox_page' );
+plugins/mailweb/includes/overview.php | admin page | add_menu_page( __( 'MailWeb', 'mailweb' ), __( 'MailWeb', 'mailweb' ) . $badge, MAILWEB_CAP, 'mailweb', 'mailweb_inbox_page', 'dashicons-email', 27 ); // the in
+plugins/mailweb/includes/overview.php | admin page | add_submenu_page( 'mailweb', __( 'MailWeb overview', 'mailweb' ), __( 'Overview', 'mailweb' ), MAILWEB_CAP, 'mailweb-overview', 'mailweb_home_page' ); // home.p
+plugins/mailweb/includes/overview.php | admin page | add_submenu_page( 'mailweb', __( 'MailWeb settings', 'mailweb' ), __( 'Settings', 'mailweb' ), 'manage_options', 'mailweb-settings', 'mailweb_settings_page' );
+plugins/mailweb/includes/overview.php | admin page | add_submenu_page( 'mailweb', __( 'MailWeb', 'mailweb' ), __( 'Inbox', 'mailweb' ), MAILWEB_CAP, 'mailweb', 'mailweb_inbox_page' );
 plugins/animal-writes-core/theme/assets/css/aw-camp-band-aw.css | css Hero | section.aw-camp-band.aw-ed-hero--campaign | min-height: var(--kit-hero-h)
 themes/kits-by-wugweb/assets/css/kit.css | css Hero | .wp-block-cover.kit-hero | min-height: var(--kit-hero-h) !important
 plugins/animal-writes-core/assets/css/campaign.css | css Hero | .aw-camp--community-dogs .aw-camp-hero | min-height: var(--kit-hero-h)

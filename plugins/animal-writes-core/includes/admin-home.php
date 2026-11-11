@@ -148,13 +148,8 @@ function aw_core_overview_status( bool $full = true ): array {
 	$s['backup'] = is_array( $b ) && ! empty( $b['at'] )
 		? aw_core_status( isset( $b['db'], $b['code'] ) && strtotime( (string) $b['at'] ) > time() - 2 * DAY_IN_SECONDS, 'Last backup ' . $b['at'] . '.' )
 		: aw_core_status( false, 'No backup recorded yet.' );
-	$c = get_option( 'aw_site_check_last' );
-	if ( is_array( $c ) && ! empty( $c['rows'] ) ) {
-		$bad          = count( array_filter( $c['rows'], fn( $r ) => '' !== $r[4] ) );
-		$s['check'] = aw_core_status( 0 === $bad, ( $bad ? $bad . ' of ' . count( $c['rows'] ) . ' pages had a problem' : 'All ' . count( $c['rows'] ) . ' pages opened cleanly' ) . ' (' . $c['at'] . ').' );
-	} else {
-		$s['check'] = esc_html( 'Not run yet.' );
-	}
+	$c          = aw_site_check_summary(); // Result, time and commit of the last check (site-check.php).
+	$s['check'] = 'Not run yet.' === $c['text'] ? esc_html( $c['text'] ) : aw_core_status( $c['ok'], $c['text'] );
 	$last        = function_exists( 'aw_cron_last' ) ? (int) aw_cron_last() : 0;
 	$s['cron']   = $last ? aw_core_status( $last > time() - HOUR_IN_SECONDS, 'Last run ' . wp_date( 'j M Y, g:i a', $last ) . '.' ) : esc_html( 'No run recorded.' );
 	$head        = (string) get_option( 'aw_deployed_head', '' );
@@ -220,7 +215,7 @@ function aw_core_overview_page() {
 			array( 'Contact links', 'The "Elsewhere" links on the Contact page.', aw_core_link( 'Kits → Contact links', 'admin.php?page=aw-elsewhere' ), $auto ),
 			array( 'Keys', 'Service keys the plugins use (Clarity, Bing Webmaster, PageSpeed): paste once, never shown again; a wp-config.php constant wins.', $admin ? aw_core_link( 'Kits → Keys', 'admin.php?page=aw-keys' ) : 'Administrators', $auto ),
 			array( 'Edit screens', 'Every box on each edit screen (WordPress, plugins and ours), the keys it stores and where each key is used.', $admin ? aw_core_link( 'Kits → Edit screens', 'admin.php?page=aw-edit-screens' ) : 'Administrators', $auto ),
-			array( 'To review', 'Items waiting for a person (from SourceWeb).', aw_core_link( 'Sourcing → To review', 'admin.php?page=aw-review' ), $st['review'] ),
+			array( 'To review', 'Items waiting for a person (from SourceWeb).', aw_core_link( 'SourceWeb → To review', 'admin.php?page=aw-review' ), $st['review'] ),
 			array( 'Scheduled tasks', 'Who triggers WP-Cron (Hostinger, GitHub, UptimeRobot) and the longest gap; dashboard widget.', aw_core_link( 'Dashboard', 'index.php' ), $st['cron'] ),
 			array( 'Daily backup', 'Database and deployed code into ~/backups on the server, kept 14 days.', $admin ? aw_core_link( 'Check site', 'admin.php?page=aw-site-check' ) : '—', $st['backup'] ),
 			array( 'Deploys and cache', 'LiteSpeed purged once after each deploy; CDN lifetime for anonymous public pages.', $admin ? aw_core_link( 'Check site → Shared cache (CDN)', 'admin.php?page=aw-site-check' ) : '—', $st['deploy'] . ' ' . $st['cdn'] ),

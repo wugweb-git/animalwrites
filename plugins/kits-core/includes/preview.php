@@ -249,8 +249,8 @@ add_action(
 				kits_admin_tabs( 'kits-preview' );
 				echo '<form method="post">';
 				wp_nonce_field( 'kits_preview_ips', 'kits_preview_nonce' );
-				echo '<h2 class="title">Preview IP addresses</h2><p class="description">One per line. IPv4: exact address. IPv6: the whole /64 network (e.g. 2401:db8:1:2::/64). Requests from these addresses see preview-only items. Your address now: <code>' . esc_html( kits_client_ip() ) . '</code></p>';
-				echo '<textarea name="kits_preview_ips" rows="4" class="large-text code">' . esc_textarea( (string) get_option( 'kits_preview_ips', '' ) ) . '</textarea>';
+				echo '<h2 class="title"><label for="kits-preview-ips">Preview IP addresses</label></h2><p class="description" id="kits-preview-ips-note">One per line. IPv4: exact address. IPv6: the whole /64 network (e.g. 2401:db8:1:2::/64). Requests from these addresses see preview-only items. Your address now: <code>' . esc_html( kits_client_ip() ) . '</code></p>';
+				echo '<textarea id="kits-preview-ips" name="kits_preview_ips" rows="4" class="large-text code" aria-describedby="kits-preview-ips-note">' . esc_textarea( (string) get_option( 'kits_preview_ips', '' ) ) . '</textarea>';
 				submit_button();
 				echo '</form>';
 				kits_preview_devices_screen();
@@ -263,7 +263,7 @@ add_action(
 /** The preview devices part of Kits → Preview. */
 function kits_preview_devices_screen() {
 	$post = esc_url( admin_url( 'admin-post.php' ) );
-	echo '<h2 class="title" style="margin-top:2em">Preview devices</h2><p class="description">A registered device sees preview-only items on any network, without logging in.</p>';
+	echo '<h2 class="title">Preview devices</h2><p class="description">A registered device sees preview-only items on any network, without logging in.</p>';
 	$link = get_transient( 'kits_preview_link_' . get_current_user_id() );
 	if ( $link ) {
 		delete_transient( 'kits_preview_link_' . get_current_user_id() );
@@ -284,10 +284,10 @@ function kits_preview_devices_screen() {
 		}
 		kits_simple_table( 'preview-devices', array( 'device' => 'Device', 'added' => 'Added', 'seen' => 'Last seen', 'remove' => '<span class="screen-reader-text">Remove</span>' ), $cells );
 	}
-	echo '<form method="post" action="' . $post . '" style="margin-top:1em"><input type="hidden" name="action" value="kits_preview_register">' . wp_nonce_field( 'kits_preview_register', '_wpnonce', true, false ) // phpcs:ignore WordPress.Security.EscapeOutput
-		. '<label>Device name <input type="text" name="label" placeholder="Laptop"></label> <button type="submit" class="button">Register this device</button></form>';
-	echo '<form method="post" action="' . $post . '" style="margin-top:1em"><input type="hidden" name="action" value="kits_preview_link">' . wp_nonce_field( 'kits_preview_link', '_wpnonce', true, false ) // phpcs:ignore WordPress.Security.EscapeOutput
-		. '<label>Device name <input type="text" name="label" placeholder="Phone"></label> <button type="submit" class="button">Create a device link</button></form>';
+	echo '<form method="post" action="' . $post . '"><p><input type="hidden" name="action" value="kits_preview_register">' . wp_nonce_field( 'kits_preview_register', '_wpnonce', true, false ) // phpcs:ignore WordPress.Security.EscapeOutput
+		. '<label>Device name <input type="text" name="label" placeholder="Laptop"></label> <button type="submit" class="button">Register this device</button></p></form>';
+	echo '<form method="post" action="' . $post . '"><p><input type="hidden" name="action" value="kits_preview_link">' . wp_nonce_field( 'kits_preview_link', '_wpnonce', true, false ) // phpcs:ignore WordPress.Security.EscapeOutput
+		. '<label>Device name <input type="text" name="label" placeholder="Phone"></label> <button type="submit" class="button">Create a device link</button></p></form>';
 }
 
 /** Back to Kits → Preview. */

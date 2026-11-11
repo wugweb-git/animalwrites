@@ -969,10 +969,12 @@ function aw_edit_screens_render( array $all ): void {
 
 	echo '<div class="wrap"><h1>Edit screens</h1>';
 	aw_core_screen_nav( 'aw-edit-screens' );
-	echo '<p>Every box on each edit screen, the keys it stores and where each key is used. Boxes are read from the plugins as they run now; what each key does comes from the map in <code>animal-writes-core/data/edit-screen-map.json</code> (see <code>docs/edit-screens.md</code>). Read-only.</p>';
-	$text = esc_html( sprintf( '%d boxes on %d edit screens, %d widgets on admin pages.', count( $ids ), count( $screens ), $admin ) );
-	$text .= ' ' . ( $unmapped ? '<a href="#aw-es-unmapped">' . esc_html( sprintf( '%d boxes or fields are not mapped yet.', $unmapped ) ) . '</a>' : 'Every box is mapped.' );
-	$text .= ' ' . ( $twice ? '<a href="#aw-es-twice">' . esc_html( sprintf( '%d fields are edited in two places.', count( $twice ) ) ) . '</a>' : 'No field is edited in two places.' );
+	echo '<p>Reference for developers: every box on each edit screen, the keys it stores and where each key is used. Boxes are read from the plugins as they run now; what each key does comes from the map in <code>animal-writes-core/data/edit-screen-map.json</code> (see <code>docs/edit-screens.md</code>). Read-only.</p>';
+	$n_box = count( $ids );
+	$n_scr = count( $screens );
+	$text  = esc_html( sprintf( '%d %s on %d %s, %d %s on admin pages.', $n_box, 1 === $n_box ? 'box' : 'boxes', $n_scr, 1 === $n_scr ? 'edit screen' : 'edit screens', $admin, 1 === $admin ? 'widget' : 'widgets' ) );
+	$text .= ' ' . ( $unmapped ? '<a href="#aw-es-unmapped">' . esc_html( sprintf( 1 === $unmapped ? '%d box or field is not mapped yet.' : '%d boxes or fields are not mapped yet.', $unmapped ) ) . '</a>' : 'Every box is mapped.' );
+	$text .= ' ' . ( $twice ? '<a href="#aw-es-twice">' . esc_html( sprintf( 1 === count( $twice ) ? '%d field is edited in two places.' : '%d fields are edited in two places.', count( $twice ) ) ) . '</a>' : 'No field is edited in two places.' );
 	echo '<div class="notice ' . ( $unmapped || $twice ? 'notice-warning' : 'notice-success' ) . ' inline"><p>' . $text . '</p></div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above.
 	if ( $unmapped ) {
 		aw_edit_screens_unmapped_section( $all, $screens );
@@ -1050,7 +1052,7 @@ function aw_edit_screens_mapping_tab( array $display, array $screens, callable $
 			);
 		}
 	}
-	echo '<details><summary>' . esc_html( sprintf( 'Admin pages: %d widgets', count( $widgets ) ) ) . '</summary>';
+	echo '<details><summary>' . esc_html( sprintf( 1 === count( $widgets ) ? 'Admin pages: %d widget' : 'Admin pages: %d widgets', count( $widgets ) ) ) . '</summary>';
 	aw_edit_screens_grid(
 		array(
 			'page'    => 'Page',

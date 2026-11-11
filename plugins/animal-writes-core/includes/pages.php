@@ -416,9 +416,10 @@ function aw_elsewhere_screen() {
 	wp_nonce_field( 'aw_elsewhere' );
 	$cells = array();
 	foreach ( $rows as $i => $r ) {
+		$n       = (int) $i + 1; // rows are numbered from 1 for the field labels
 		$cells[] = array(
-			'label' => '<input type="text" name="aw_elsewhere[' . (int) $i . '][label]" value="' . esc_attr( (string) ( $r['label'] ?? '' ) ) . '">',
-			'url'   => '<input type="url" class="large-text" name="aw_elsewhere[' . (int) $i . '][url]" value="' . esc_attr( (string) ( $r['url'] ?? '' ) ) . '">',
+			'label' => '<label class="screen-reader-text" for="aw-elsewhere-label-' . $n . '">Label, row ' . $n . '</label><input type="text" id="aw-elsewhere-label-' . $n . '" name="aw_elsewhere[' . (int) $i . '][label]" value="' . esc_attr( (string) ( $r['label'] ?? '' ) ) . '">',
+			'url'   => '<label class="screen-reader-text" for="aw-elsewhere-url-' . $n . '">Link, row ' . $n . '</label><input type="url" class="large-text" id="aw-elsewhere-url-' . $n . '" name="aw_elsewhere[' . (int) $i . '][url]" value="' . esc_attr( (string) ( $r['url'] ?? '' ) ) . '">',
 		);
 	}
 	aw_core_simple_table( 'contact-links', array( 'label' => 'Label', 'url' => 'Link' ), $cells ); // inside the form: the table prints no nonce of its own
