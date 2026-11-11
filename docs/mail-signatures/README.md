@@ -2,10 +2,10 @@
 
 The two reply signatures are locked: their layout, logo, icons, colours and sizes stay as in these files. Change them only on the owner's word.
 
-| File | Strip | Profiles (MailWeb → Settings → profiles) |
+| Name and file | Strip | Profiles (MailWeb → Settings → profiles) |
 |---|---|---|
-| `signature-1-campaign.html` | Crimson campaign strip with texture, "Object now" | support@, vedanshu@ (own name and address) |
-| `signature-2-volunteer.html` | Blue volunteer strip with texture, "Register" | noreply@, contact@ |
+| **Campaign signature**: `signature-1-campaign.html` | Crimson campaign strip with texture, "Object now" | support@, vedanshu@ (own name and address) |
+| **Volunteer signature**: `signature-2-volunteer.html` | Blue volunteer strip with texture, "Register" | noreply@, contact@ |
 
 Layout: black and white logo (70px, as tall as the text) | name, grey social icons (X, Instagram, Facebook, LinkedIn), email and website with grey icons, the site tagline. Below it, one strip, 460px wide.
 
