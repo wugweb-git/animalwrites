@@ -354,7 +354,7 @@ loads them, and each view has its own address (`&view=month&m=2026-11`).
 2. **Reminders:**
    - lead days per Type;
    - the email digest switch (off) and its recipient, chosen from the site's mailboxes;
-   - "count past reminders as overdue" (D3).
+   - "count past reminders as overdue" (D3: on).
 3. **Import from Dates:** the result panel and verify table (2.3), through the shell's setup flow. It can be stopped
    and resumed, and is safe to run again.
 
@@ -422,17 +422,20 @@ Before the shell ships, phases can run in the order 1 → 3 → 4 (routes only).
 
 ---
 
-## 6. Decisions for the owner
+## 6. Decisions (owner, 11 Nov 2026: "Yes, all as recommended")
 
-1. **D1 – Go ahead with phase 1** on this plan, with storage (a), a non-public post type and the interim Calendar page,
-   ahead of the shell; then phase 3.
-2. **D2 – The 12 monthly "Search Console Links read" entries:** keep them as 12 entries (default), or fold them into one
-   monthly repeating entry once the import matches.
-3. **D3 – Past reminders:** count them as overdue, or not (default: not). The Martech page listed 7 Nov "Decide the
-   lab rules Post phase" as overdue, which suggests yes.
-4. **D4 – Email digest:** stays off (default), or on to which site mailbox.
-5. **D5 – Posting to social:** Metricool, Postiz or none. This is phase 5, and is listed only.
-6. **D6 – When the `aw_team_dates` backup may be removed** (default: kept).
+1. **D1 – Phase 1 goes ahead before the shell:** storage (a), a non-public post type, and the interim Calendar page.
+   Today's Dates screen keeps working until the shell is ready. Phase 3 follows.
+2. **D2 – The 12 monthly "Search Console Links read" entries** are folded into one monthly repeating entry once the
+   import matches one-for-one.
+3. **D3 – Past reminders count as overdue**, so an open item such as 7 Nov "Decide the lab rules Post phase" shows
+   instead of disappearing. The Reminders setting defaults to on.
+4. **D4 – Email digest: off.** The PlanWeb Dashboard and the WordPress Dashboard widget are enough.
+5. **D5 – Posting to social: none for now.** Metricool or Postiz is chosen later. Nothing ever posts without the
+   owner's yes.
+6. **D6 – The `aw_team_dates` backup** may be removed 30 days after `wp planweb verify` passes on live.
+7. **The four campaign dates** missing from Dates are added as normal entries after phase 1: 17 Nov Supreme Court
+   reports due; 30 Nov MP model city; 3 Dec Jharkhand; 15 Dec stray-dog checkpoint.
 
 ## 7. Differences found while planning
 
@@ -442,8 +445,8 @@ Before the shell ships, phases can run in the order 1 → 3 → 4 (routes only).
   `aw_team_dates_1101b` added it once. It may have been removed by hand. The import takes the list as stored on the
   day it runs; the verify table will show what is there.
 - The Martech page lists four campaign dates missing from Dates (17 Nov Supreme Court reports, 30 Nov MP model city,
-  3 Dec Jharkhand, 15 Dec stray-dog checkpoint). They are added only on the owner's yes, as normal entries after
-  phase 1. They are not part of the import.
+  3 Dec Jharkhand, 15 Dec stray-dog checkpoint). The owner said yes on 11 Nov (section 6): they are added as
+  normal entries after phase 1, not as part of the import.
 - The earlier rule "admin UI core-only (WP_List_Table, Settings API, no custom CSS)" is replaced for Kits plugins.
   The look follows the Kits admin design system (Google Site Kit pattern for plugins), shipped in Kits Core;
   WordPress packages are plumbing only (owner, 11 Nov). PlanWeb only registers parts into the shell.

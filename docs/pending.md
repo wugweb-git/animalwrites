@@ -305,6 +305,8 @@ These live in WordPress: **Kits → Dates** (month calendar, add and remove) and
 
 **Kits → Dates is also the content and marketing calendar (owner, 10 Nov).** Martech adds post, email and campaign dates. Planned fields: type, channel, owner, status, link. Martech writes the spec; Animal Writes WordPress builds it.
 
+**PlanWeb plan (11 Nov 2026): `docs/calendar-plugin-plan.md`; the owner approved its decisions ("Yes, all as recommended", 11 Nov). Nothing is built.** Dates moves into PlanWeb, a Kits plugin (non-public post type; one-for-one import from `aw_team_dates`, checked with `wp planweb verify`). Phase 1 (store and migration) goes before the Kits Core admin shell, and today's screen keeps working until then. The 12 monthly Links reads become one monthly repeating entry once the import matches. Past reminders count as overdue. Email digest off. No social posting for now. The `aw_team_dates` backup goes 30 days after the verify passes on live. After phase 1, add 17 Nov Supreme Court reports due, 30 Nov MP model city, 3 Dec Jharkhand and 15 Dec stray-dog checkpoint as normal entries. Next: phase 1 on a branch → PR (review gate).
+
 - **17 Nov 2026**: Directory thin-page indexing re-check (10:00) and the 8 tracked keyword positions (11:00); both are scheduled tasks.
 - **25 Nov 2026**: Search Insights thresholds review (Wikipedia 2×, GDELT 3×).
 - **29 Nov 2026**: help-now guides 28-day checkpoint: 1962 (13798), who-to-call (9031), injured-animal (126) and dog-bite (17307) against the 28 days to 31 Oct (figures in Done, 1 Nov).
