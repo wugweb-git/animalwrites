@@ -4,7 +4,7 @@
 # Needs the staging site (STAGING_ROOT) to exist with its own wp-config.php (hPanel, docs/staging.md).
 set -euo pipefail
 LIVE_ROOT="$HOME/domains/animalwrites.in/public_html"
-STAGING_ROOT="${STAGING_ROOT:-$HOME/domains/animalwrites.in/public_html/staging}"
+STAGING_ROOT="${STAGING_ROOT:-$HOME/domains/staging.animalwrites.in/public_html}"
 [ -f "$STAGING_ROOT/wp-config.php" ] || { echo "No staging wp-config.php at $STAGING_ROOT"; exit 1; }
 TMP="$(mktemp -d)"; trap 'rm -rf "$TMP"' EXIT
 cfg() { wp --path="$1" config get "$2" --skip-plugins --skip-themes; }
