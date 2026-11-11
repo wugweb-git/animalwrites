@@ -20,6 +20,7 @@ route directoryweb/v1/dashboard
 route directoryweb/v1/claims
 route "directoryweb/v1/claims&status=all&days=30&sort=listing&dir=asc"
 route directoryweb/v1/settings
+for t in published status places indexing search claims badges enrichment; do route directoryweb/v1/stats/$t; done
 post directoryweb/v1/dashboard/count '{}'
 post directoryweb/v1/settings/claim-form '{"form":0}'
 # No route decides, applies or undoes a claim: those addresses are not there, even for an administrator.
