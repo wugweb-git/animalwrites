@@ -42,9 +42,11 @@ wp post create --post_type=aw_campaign --post_title="CI campaign" --post_status=
 L=$(wp post create --post_type=aw_listing --post_title="CI listing Ernakulam" --post_status=publish --porcelain)
 wp eval "aw_set_item_places( $L, array( array( 32, 555 ) ) );"
 wp rewrite flush --quiet
-php -S 127.0.0.1:8080 -t "$WP" >/tmp/php-server.log 2>&1 &
+# Several workers: a request to the site itself (cron, loopback) must not wait on the one being answered.
+PHP_CLI_SERVER_WORKERS=4 php -S 127.0.0.1:8080 -t "$WP" >/tmp/php-server.log 2>&1 &
 SERVER=$!
-trap 'kill $SERVER 2>/dev/null || true' EXIT
+stop_server() { pkill -P "$SERVER" 2>/dev/null || true; kill "$SERVER" 2>/dev/null || true; } # the workers, then the server
+trap 'stop_server' EXIT
 sleep 2
 curl -s -o /dev/null http://127.0.0.1:8080/ || true # first request runs the one-time steps
 single() { wp post list --post_type="$1" --posts_per_page=1 --field=url | sed 's#http://127.0.0.1:8080##'; }
@@ -530,7 +532,7 @@ if [ -n "${KITS_SNAPSHOT:-}" ] && command -v wget >/dev/null && [ -n "${BASE:-}"
     for p in "$1"/plugins/*/; do ln -sfn "$p" "wp-content/plugins/$(basename "$p")"; done
     for t in "$1"/themes/*/; do ln -sfn "$t" "wp-content/themes/$(basename "$t")"; done
   }
-  serve() { kill "$SERVER" 2>/dev/null || true; sleep 1; php -S 127.0.0.1:8080 -t "$WP" >>/tmp/php-server.log 2>&1 & SERVER=$!; sleep 2; }
+  serve() { stop_server; sleep 1; PHP_CLI_SERVER_WORKERS=4 php -S 127.0.0.1:8080 -t "$WP" >>/tmp/php-server.log 2>&1 & SERVER=$!; sleep 2; }
   snap menu-after
   if git -C "$REPO" worktree add --quiet --detach /tmp/base-tree "$BASE"; then
     relink /tmp/base-tree; serve

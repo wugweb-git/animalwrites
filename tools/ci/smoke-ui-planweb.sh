@@ -47,8 +47,10 @@ if [ "$(wp post get "$ID" --field=post_status)" = "trash" ]; then echo "ok   ent
 BEFORE=$(optmd5 planweb_on aw_team_dates)
 want 200 "POST /$PW/settings/switch unchanged Save" -X POST "${AJ[@]}" -d '{"on":true}' "$P/settings/switch"
 grep -q '"saved":false' /tmp/rw.out && echo "ok   unchanged Save reports nothing saved" || { echo "FAIL unchanged Save wrote"; FAIL=1; }
+PW_N=$(wp post list --post_type=planweb_entry --post_status=any --format=count)
 want 200 "POST /$PW/import again" -X POST "${AJ[@]}" "$P/import"
-grep -q '"created":0' /tmp/rw.out && echo "ok   import again adds nothing" || { echo "FAIL import again added entries"; FAIL=1; }
+PW_M=$(wp post list --post_type=planweb_entry --post_status=any --format=count)
+[ "$PW_N" = "$PW_M" ] && echo "ok   import again adds nothing ($PW_M entries)" || { echo "FAIL import again added entries: $PW_N -> $PW_M"; FAIL=1; }
 same "PlanWeb Settings" "$BEFORE" "$(optmd5 planweb_on aw_team_dates)"
 if wp eval 'exit( in_array( "planweb_on", kits_settings_transfer_options(), true ) ? 0 : 1 );'; then echo "ok   planweb_on is in the Kits export"; else echo "FAIL planweb_on missing from the Kits export"; FAIL=1; fi
 
