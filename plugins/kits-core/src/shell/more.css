@@ -934,3 +934,65 @@
 .kits-shell .kits-shell-prose .notice {
 	margin: 0 0 var(--ks-s3);
 }
+
+/*
+ * WordPress's own controls inside the shell (today's forms in the Kits cards, Theme Options' fields): black and greys
+ * like the shell's parts, not the admin colour scheme's blue. --ks-ink #141414 (--neutral-9), --ks-g7 #4a4a4a
+ * (--neutral-7) for hover, --ks-g3 #bababa (--neutral-3) for borders. WordPress components read --wp-admin-theme-color.
+ */
+.kits-shell {
+	--wp-admin-theme-color: #141414;
+	--wp-admin-theme-color--rgb: 20, 20, 20;
+	--wp-admin-theme-color-darker-10: #4a4a4a;
+	--wp-admin-theme-color-darker-10--rgb: 74, 74, 74;
+	--wp-admin-theme-color-darker-20: #4a4a4a;
+	--wp-admin-theme-color-darker-20--rgb: 74, 74, 74;
+}
+
+.kits-shell input[type="checkbox"],
+.kits-shell input[type="radio"] {
+	accent-color: var(--ks-ink);
+}
+
+.kits-shell input[type="checkbox"]:checked {
+	background: var(--ks-ink);
+	border-color: var(--ks-ink);
+}
+
+.kits-shell input[type="checkbox"]:checked::before {
+	content: url(data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2020%2020%27%3E%3Cpath%20d%3D%27M14.83%204.89l1.34.94-5.81%208.38H9.02L5.78%209.67l1.34-1.25%202.57%202.4z%27%20fill%3D%27%23ffffff%27%2F%3E%3C%2Fsvg%3E);
+}
+
+.kits-shell input[type="radio"]:checked::before {
+	background: var(--ks-ink);
+}
+
+.kits-shell .button-primary,
+.kits-shell .button.button-primary {
+	background: var(--ks-ink);
+	border-color: var(--ks-ink);
+	color: var(--ks-white);
+}
+
+.kits-shell .button-primary:hover,
+.kits-shell .button-primary:focus {
+	background: var(--ks-g7);
+	border-color: var(--ks-g7);
+	color: var(--ks-white);
+}
+
+.kits-shell .button:not(.button-primary):not(.delete),
+.kits-shell .button-secondary {
+	border-color: var(--ks-ink);
+	color: var(--ks-ink);
+	background: var(--ks-white);
+}
+
+.kits-shell .button:not(.button-primary):not(.delete):hover {
+	background: var(--ks-g1);
+	color: var(--ks-ink);
+}
+
+.kits-shell .kits-shell-prose a:not(.button) {
+	color: var(--ks-ink);
+}
