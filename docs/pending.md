@@ -368,6 +368,11 @@ These live in WordPress: **Kits → Dates** (month calendar, add and remove) and
 - **404 and error tracking (31 Oct):** the 404 page answers with status 404 and sends `404_view` with the path; form errors are tracked as `form_error`; 500 and 503 cannot be tracked in GA4, so they are covered by the branded error pages and the daily count of PHP fatal errors.
 - **Rollback:** a rollback to a release older than 24 Oct must be purged by hand (rollback.yml warns); newer releases are purged by `deploy-purge.php`.
 
+## Done (12 Nov 2026)
+
+- Inbox round (12 Nov): every mailbox, Spam and all 30 Website forms entries answered from support@, except AW-12 (junk). Bounces checked: only bad, full or fake addresses; nothing from our side. abc@gmail.com and test@gmail.com taken off the Newsletter list (contacts kept).
+- MailWeb 3.3.0 live (d093a1fc): a Status column (New, Read, Replied, Forwarded) in every list except Sent, and in Website forms. Replied also counts replies sent outside MailWeb.
+
 ## Done (4 Nov 2026)
 - **Deploy of 4 Nov (b38e9d16, live):** wordpress-dev shipped (Kits with no child theme, Lab pain scale as four cards, crimson newsletter band, smooth scrolling to #sections and the rest since 9f1561f2). Checked on live: Home, the three open campaigns, Resources, a guide, the Library draft, Directory, News, About, Volunteer and Contact answer 200 with no PHP errors; the animal-writes child theme on Kits is still active; no new lines in the server error logs.
 - **Mail gate, why deploys waited (4 Nov):** the gate was right. FluentCRM campaigns 3 and 4 ("working") still hold 11 scheduled emails each, and the mailbox's rolling 24-hour limit (Hostinger 100; Mailweb gives campaigns 80) was used by the 95 emails sent 18:51–19:59 IST on 3 Nov, so they go out as that window frees. A deploy while emails wait would send them through PHP mail() for the few seconds mailweb is missing. Lasting fix: **Owner:** install the AW Mail Guard zip once (Plugins → Add New → Upload).
