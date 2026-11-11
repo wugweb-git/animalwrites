@@ -35,6 +35,7 @@ if ( defined( 'WP_PLUGIN_DIR' ) && function_exists( 'wp_register_plugin_realpath
 
 require_once KITS_CORE_DIR . 'includes/admin-table.php';
 require_once KITS_CORE_DIR . 'includes/dashboard-cards.php';
+require_once KITS_CORE_DIR . 'includes/admin-fold.php';
 require_once KITS_CORE_DIR . 'includes/admin-home.php';
 require_once KITS_CORE_DIR . 'includes/altcha.php';
 require_once KITS_CORE_DIR . 'includes/forms.php';

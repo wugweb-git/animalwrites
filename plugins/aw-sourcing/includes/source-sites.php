@@ -384,7 +384,7 @@ add_action(
 		}
 		$screen = get_current_screen();
 		$view   = aw_sourcing_sources_screen();
-		$relay  = '<p><strong>Relay</strong> ("Fetch through this site"): some publishers refuse GitHub\'s servers but answer this site. When one of them answers the workers with 403, the workers ask this site to fetch the feed or page for them. The switch is on the source; its subdomains are included. SourceWeb → Relay log lists every such request (the last 200), and the list shows each source\'s last result.</p>'
+		$relay  = '<p><strong>Relay</strong> ("Fetch through this site"): some publishers refuse GitHub\'s servers but answer this site. When one of them answers the workers with 403, the workers ask this site to fetch the feed or page for them. The switch is on the source; its subdomains are included. Plugins → SourceWeb → Relay log lists every such request (the last 200), and the list shows each source\'s last result.</p>'
 			. ( aw_sourcing_phase() < 1 ? '<p>Until the phase 1 migration (<code>wp aw-sourcing migrate --phase=1</code>) the relay list is the list of before: ' . esc_html( implode( ', ', aw_relay_hosts_legacy() ) ) . '.</p>' : '' );
 		$screen->add_help_tab(
 			array(

@@ -12,7 +12,7 @@
  * - Theme Options → Socials: Contact links. Help: the Overview below (Docs) and Edit screens and Theme parts
  *   (Developer).
  * The old addresses (animal-writes, aw-site-check, aw-elsewhere, aw-edit-screens, aw-theme-parts) redirect there.
- * Without Kits Core the screens form their own "Animal Writes" menu, as before.
+ * Without Kits Core the screens are Plugins → Animal Writes (one item, the Overview), linked from each other.
  * Content menus (Directory, News, Resources, Library, Opportunities, Campaigns, Press coverage), Classification and
  * Sourcing stay where the content is. Core WordPress only.
  *
@@ -70,16 +70,28 @@ function aw_core_screen_cap( string $slug ): string {
 	return aw_core_screens()[ $slug ][1] ?? 'manage_options';
 }
 
-// The site's own menu, only without Kits Core.
+// Only without Kits Core: Plugins → Animal Writes, opening the Overview (owner, 11 Nov 2026: "all plugins" under
+// Plugins). The other screens stay under the AW_CORE_MENU slug, which WordPress does not list, at their addresses
+// and with their hook names (toplevel_page_animal-writes, animal-writes_page_…); aw_core_screen_nav() links them.
 add_action(
 	'admin_menu',
 	function () {
 		if ( AW_CORE_MENU === aw_core_menu_parent() ) {
-			add_menu_page( 'Animal Writes', 'Animal Writes', aw_core_screen_cap( AW_CORE_MENU ), AW_CORE_MENU, 'aw_core_overview_page', 'dashicons-pets', 28 );
-			add_submenu_page( AW_CORE_MENU, 'Animal Writes', 'Overview', aw_core_screen_cap( AW_CORE_MENU ), AW_CORE_MENU, 'aw_core_overview_page' );
+			$GLOBALS['admin_page_hooks'][ AW_CORE_MENU ] = 'animal-writes'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- the hook names the top-level menu gave.
+			add_submenu_page( 'plugins.php', 'Animal Writes', 'Animal Writes', aw_core_screen_cap( AW_CORE_MENU ), AW_CORE_MENU, 'aw_core_overview_page' );
 		}
 	},
 	aw_core_menu_priority( AW_CORE_MENU )
+);
+// Its item is lit on the Overview (WordPress lights an admin.php?page= item under Plugins only when told).
+add_filter(
+	'submenu_file',
+	function ( $file, $parent ) {
+		global $plugin_page;
+		return 'plugins.php' === $parent && AW_CORE_MENU === $plugin_page && AW_CORE_MENU === aw_core_menu_parent() ? AW_CORE_MENU : $file;
+	},
+	10,
+	2
 );
 
 /**
@@ -227,8 +239,8 @@ function aw_core_settings_sections( $sections ) {
 		'Connected services and modules',
 		function () {
 			echo '<ul>';
-			echo '<li>' . aw_core_link( 'Keys', 'admin.php?page=aw-keys' ) . ': ' . esc_html( 'service keys the plugins use (Clarity, Bing Webmaster, PageSpeed). Moves to RankWeb → Settings → Connected services.' ) . '</li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_core_link() escapes.
-			echo '<li>' . aw_core_link( 'Modules', 'admin.php?page=aw-modules' ) . ': ' . esc_html( 'optional parts of the site, such as Social posts. Moves to SourceWeb → Settings.' ) . '</li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_core_link() escapes.
+			echo '<li>' . aw_core_link( 'Keys', 'admin.php?page=aw-keys' ) . ': ' . esc_html( 'service keys the plugins use (Clarity, Bing Webmaster, PageSpeed). Moves to Plugins → RankWeb → Settings → Connected services.' ) . '</li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_core_link() escapes.
+			echo '<li>' . aw_core_link( 'Modules', 'admin.php?page=aw-modules' ) . ': ' . esc_html( 'optional parts of the site, such as Social posts. Moves to Plugins → SourceWeb → Settings.' ) . '</li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_core_link() escapes.
 			echo '</ul>';
 		},
 		40
@@ -360,13 +372,13 @@ function aw_core_overview_page() {
 		),
 		'Running the site' => array(
 			function_exists( 'aw_team_dates_moved' ) && aw_team_dates_moved()
-				? array( 'Dates', 'Dates moved to PlanWeb: the team\'s calendar, plans and reminders, and the Next 7 days dashboard box.', aw_core_link( 'PlanWeb → Calendar', 'admin.php?page=planweb' ), $st['dates'] )
+				? array( 'Dates', 'Dates moved to PlanWeb: the team\'s calendar, plans and reminders, and the Next 7 days dashboard box.', aw_core_link( 'Plugins → PlanWeb → Calendar', 'admin.php?page=planweb' ), $st['dates'] )
 				: array( 'Dates', 'The team\'s calendar (observance days, deadlines) and the Dates dashboard widget.', aw_core_link( 'Dates', 'admin.php?page=aw-dates' ), $st['dates'] ),
-			array( 'Check site', 'Loads one page of every kind and reports any that do not open cleanly; also in the admin bar.', $admin ? aw_core_link( 'Kits → Home → Page check', aw_core_screen_url( 'aw-site-check' ) ) : 'Administrators', $st['check'] ),
+			array( 'Check site', 'Loads one page of every kind and reports any that do not open cleanly; also in the admin bar.', $admin ? aw_core_link( 'Appearance → Kits → Home → Page check', aw_core_screen_url( 'aw-site-check' ) ) : 'Administrators', $st['check'] ),
 			array( 'Contact links', 'The "Elsewhere" links on the Contact page.', aw_core_link( 'Contact links', aw_core_screen_url( 'aw-elsewhere' ) ), $auto ),
 			array( 'Keys', 'Service keys the plugins use (Clarity, Bing Webmaster, PageSpeed): paste once, never shown again; a wp-config.php constant wins.', $admin ? aw_core_link( 'Keys', 'admin.php?page=aw-keys' ) : 'Administrators', $auto ),
 			array( 'Edit screens', 'Every box on each edit screen (WordPress, plugins and ours), the keys it stores and where each key is used.', $admin ? aw_core_link( 'Edit screens', aw_core_screen_url( 'aw-edit-screens' ) ) : 'Administrators', $auto ),
-			array( 'To review', 'Items waiting for a person (from SourceWeb).', aw_core_link( 'SourceWeb → To review', 'admin.php?page=aw-review' ), $st['review'] ),
+			array( 'To review', 'Items waiting for a person (from SourceWeb).', aw_core_link( 'Plugins → SourceWeb → To review', 'admin.php?page=aw-review' ), $st['review'] ),
 			array( 'Scheduled tasks', 'Who triggers WP-Cron (Hostinger, GitHub, UptimeRobot) and the longest gap; dashboard widget.', aw_core_link( 'Dashboard', 'index.php' ), $st['cron'] ),
 			array( 'Daily backup', 'Database and deployed code into ~/backups on the server, kept 14 days.', $admin ? aw_core_link( 'Backup', aw_core_screen_url( 'aw-site-check' ) ) : '—', $st['backup'] ),
 			array( 'Deploys and cache', 'LiteSpeed purged once after each deploy; CDN lifetime for anonymous public pages.', $admin ? aw_core_link( 'CDN cache times', aw_core_screen_url( 'cdn' ) ) : '—', $st['deploy'] . ' ' . $st['cdn'] ),

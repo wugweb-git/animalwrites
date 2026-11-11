@@ -1,6 +1,6 @@
 <?php
 /**
- * The Kits admin, laid out like a marketplace theme's hub: one menu second under Dashboard, the same tabs on every Kits
+ * The Kits admin, laid out like a marketplace theme's hub: one item under Appearance, the same tabs on every Kits
  * screen, and one screen per job. Core wp-admin parts only (nav tabs, form tables, postboxes, the Settings API, notices);
  * no admin stylesheet.
  *
@@ -1000,7 +1000,7 @@ function kits_options_section_body( string $section, string $label ): bool {
 			kits_options_box( 'Share bar', fn() => kits_theme_option_rows_of( 'utility-share' ) );
 			return true;
 		case 'utility-performance':
-			kits_options_box( 'Performance', fn() => kits_theme_option_rows_of( 'utility-performance' ), 'More speed switches: ' . kits_options_link( 'Kits → Settings → Performance', 'admin.php?page=kits-settings#performance' ) . '.' );
+			kits_options_box( 'Performance', fn() => kits_theme_option_rows_of( 'utility-performance' ), 'More speed switches: ' . kits_options_link( 'Appearance → Kits → Settings → Performance', 'admin.php?page=kits-settings#performance' ) . '.' );
 			return true;
 		case 'utility-extra':
 			$has = (bool) array_filter( array_keys( kits_theme_option_fields() ), fn( $k ) => 'utility-extra' === kits_theme_option_section( $k, kits_theme_option_fields()[ $k ] ) );
@@ -1209,7 +1209,7 @@ function kits_options_socials(): void {
 			$rows[] = array( esc_html( (string) wp_parse_url( $url, PHP_URL_HOST ) ), esc_html( $url ) );
 		}
 	}
-	$where = defined( 'RANK_MATH_VERSION' ) ? kits_options_link( 'Rank Math → Titles & Meta → Social Meta', 'admin.php?page=rank-math-options-titles#setting-panel-social' ) : esc_html( 'Rank Math SEO (not active: see Kits → Plugins)' );
+	$where = defined( 'RANK_MATH_VERSION' ) ? kits_options_link( 'Rank Math → Titles & Meta → Social Meta', 'admin.php?page=rank-math-options-titles#setting-panel-social' ) : esc_html( 'Rank Math SEO (not active: see Appearance → Kits → Plugins)' );
 	kits_options_values_box( 'Socials', $rows ? $rows : array( array( esc_html( 'None yet' ), '' ) ), 'The site\'s profiles, read from ' . $where . '. Change them there; search engines read them too.' );
 }
 

@@ -306,6 +306,7 @@ function aw_enrich_review_page() {
 	$prog  = aw_enrich_progress();
 
 	echo '<div class="wrap"><h1>Enrichment review</h1>';
+	aw_sourcing_screen_tabs();
 	if ( isset( $q['done'] ) ) {
 		echo '<div class="notice notice-success is-dismissible"><p>' . (int) $q['done'] . ' updated.</p></div>';
 	}

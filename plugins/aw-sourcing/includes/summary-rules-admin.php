@@ -115,7 +115,7 @@ add_action(
 			function () {
 				aw_sourcing_settings_marker( AW_SUMMARY_RULES_OPTION, 'summary' );
 				if ( ! ( function_exists( 'aw_rules_live' ) && aw_rules_live() ) ) { // from phase 3 the text is in the screen's Help tab
-					echo '<p>One rule set for every summary on the site: the workers write and check new summaries and same-story rewrites from these rules (GET aw/v1/summary-rules), and the site holds an item whose summary is over the maximum or not plain text in SourceWeb → To review. A short summary is never held: the workers read the source again, then other coverage of the same story, and publish the best summary that follows the rules. A summary is never shorter than the search description, which is its lead sentence (at most ' . (int) aw_summary_rules()['description_max_chars'] . ' characters).</p>';
+					echo '<p>One rule set for every summary on the site: the workers write and check new summaries and same-story rewrites from these rules (GET aw/v1/summary-rules), and the site holds an item whose summary is over the maximum or not plain text in Plugins → SourceWeb → To review. A short summary is never held: the workers read the source again, then other coverage of the same story, and publish the best summary that follows the rules. A summary is never shorter than the search description, which is its lead sentence (at most ' . (int) aw_summary_rules()['description_max_chars'] . ' characters).</p>';
 				}
 			},
 			$page
