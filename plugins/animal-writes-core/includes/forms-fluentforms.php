@@ -147,7 +147,10 @@ function aw_ff_normalise( $data ) {
 		}
 	}
 	if ( aw_ff_ticked( $data, 'wa_same' ) && '' !== trim( (string) ( $data['phone'] ?? '' ) ) ) {
-		$data['whatsapp'] = (string) $data['phone']; // "Same as my phone"
+		$data['whatsapp'] = (string) $data['phone']; // "Same as my phone" (entries before 12 Nov 2026)
+	}
+	if ( aw_ff_ticked( $data, 'wa_optin' ) && '' === trim( (string) ( $data['whatsapp'] ?? '' ) ) && '' !== trim( (string) ( $data['phone'] ?? '' ) ) ) {
+		$data['whatsapp'] = (string) $data['phone']; // one Mobile field; "On WhatsApp" ticked = it is their WhatsApp (owner, 12 Nov 2026)
 	}
 	foreach ( AW_FF_PHONES as $k ) {
 		if ( isset( $data[ $k ] ) && is_string( $data[ $k ] ) && '' !== trim( $data[ $k ] ) ) {
@@ -566,7 +569,7 @@ function aw_ff_errors( $key, $data ) {
 	foreach ( AW_FF_PHONES as $k ) {
 		$v = trim( (string) ( is_string( $data[ $k ] ?? '' ) ? ( $data[ $k ] ?? '' ) : '' ) );
 		if ( '' !== $v && '' === aw_ff_phone10( $v ) && ! in_array( preg_replace( '/\D+/', '', $v ), $have, true ) ) { // a listing's own number may stay as it is (helplines like 1962)
-			$errors[ $k ] = 'contact' === $key ? 'Enter a 10-digit mobile number, without +91 or 0.' : 'Enter a 10-digit number, like 9876543210.'; // Contact wording: owner, 12 Nov 2026
+			$errors[ $k ] = in_array( $k, array( 'phone', 'whatsapp' ), true ) ? 'Enter 10 digits.' : 'Enter a 10-digit number, like 9876543210.'; // Mobile wording: owner, 12 Nov 2026
 		}
 	}
 	if ( 'claim' === $key ) {
@@ -721,19 +724,24 @@ add_action(
 		}
 		if ( 'contact' === $key ) {
 			aw_crm_entry_note( $c, $entry_id, $data, (int) $form->id, aw_ff_ref( $key, $entry_id ) );
-			$ph = trim( sanitize_text_field( (string) ( $data['phone'] ?? '' ) ) ); // the mobile number (required since 12 Nov 2026) into the contact's own phone field, when it has none
-			if ( '' !== $ph && '' === (string) $c->phone ) {
-				$c->phone = $ph;
-				$c->save();
-			}
+		}
+		$ph = trim( sanitize_text_field( (string) ( $data['phone'] ?? '' ) ) ); // the Mobile (required since 12 Nov 2026) into the contact's own phone field, when it has none
+		$ph = '' !== $ph ? aw_ff_phone_store( $ph ) : '';
+		$wa = trim( sanitize_text_field( (string) ( $data['whatsapp'] ?? '' ) ) );
+		$wa = '' !== $wa ? aw_ff_phone_store( $wa ) : ( aw_ff_ticked( $data, 'wa_optin' ) ? $ph : '' ); // ticked "On WhatsApp": the Mobile
+		if ( 'volunteer' === $key && '' !== $wa ) {
+			$c->syncCustomFieldValues( array( 'vol_whatsapp' => $wa ), false );
+		}
+		if ( '' !== $ph && '' === (string) $c->phone ) {
+			$c->phone = $ph;
+			$c->save();
 		}
 		if ( 'claim' === $key ) {
 			aw_crm_claim_note( $c, $entry_id, $data, (int) $form->id, aw_ff_ref( $key, $entry_id ) );
 		}
 		if ( in_array( $key, array( 'contact', 'claim' ), true ) ) { // Claim asks for WhatsApp too (found 21 Oct 2026: not copied)
-			$wa = trim( sanitize_text_field( (string) ( $data['whatsapp'] ?? '' ) ) );
-			if ( '' !== $wa ) { // as the link maps them, also for a sender who left the newsletter unticked (the link does not run)
-				$c->syncCustomFieldValues( array( 'whatsapp' => $wa, 'wa_optin' => aw_ff_ticked( $data, 'wa_optin' ) ? '1' : '0' ), false );
+			if ( '' !== $wa || '' !== $ph ) { // as the link maps them, also for a sender who left the newsletter unticked (the link does not run)
+				$c->syncCustomFieldValues( array_filter( array( 'whatsapp' => $wa ) ) + array( 'wa_optin' => aw_ff_ticked( $data, 'wa_optin' ) ? '1' : '0' ), false );
 			}
 		}
 	},

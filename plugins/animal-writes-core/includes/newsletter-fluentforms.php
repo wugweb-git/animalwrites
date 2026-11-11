@@ -41,6 +41,81 @@ function aw_newsletter_ff_form() {
 }
 add_shortcode( 'aw_newsletter', 'aw_newsletter_ff_form' );
 
+/* ---------- Mobile (optional) and "On WhatsApp" (owner, 12 Nov 2026) ---------- */
+
+/** Whether a form is one of the two Newsletter forms (#3 and the full #9). */
+function aw_nl_ff_is( $form ) {
+	$id = (int) ( is_object( $form ) ? $form->id : $form );
+	return $id && ( aw_nl_ff_id() === $id || (int) get_option( 'aw_nl_ff_form_full' ) === $id );
+}
+
+// The same check as the other forms: 10 digits, or nothing.
+add_filter(
+	'fluentform/validation_errors',
+	function ( $errors, $data, $form ) {
+		$v = trim( (string) ( is_string( $data['phone'] ?? '' ) ? ( $data['phone'] ?? '' ) : '' ) );
+		if ( aw_nl_ff_is( $form ) && '' !== $v && function_exists( 'aw_ff_phone10' ) && '' === aw_ff_phone10( $v ) && empty( $errors['phone'] ) ) {
+			$errors['phone'] = array( 'aw' => 'Enter 10 digits.' );
+		}
+		return $errors;
+	},
+	20,
+	3
+);
+
+// Saved as "+91 …"; ticked "On WhatsApp" = the same number is their WhatsApp.
+add_filter(
+	'fluentform/insert_response_data',
+	function ( $data, $form_id ) {
+		if ( ! aw_nl_ff_is( $form_id ) || ! function_exists( 'aw_ff_phone_store' ) ) {
+			return $data;
+		}
+		$ph = trim( (string) ( is_string( $data['phone'] ?? '' ) ? ( $data['phone'] ?? '' ) : '' ) );
+		if ( '' !== $ph ) {
+			$data['phone'] = aw_ff_phone_store( $ph );
+			if ( aw_ff_ticked( $data, 'wa_optin' ) ) {
+				$data['whatsapp'] = $data['phone'];
+			}
+		}
+		return $data;
+	},
+	10,
+	2
+);
+
+/**
+ * The Mobile into the FluentCRM contact (its phone when it has none; WhatsApp and the tick as 1/0). The form's own link
+ * makes the contact and may run later, so a contact not there yet is tried once more two minutes on.
+ */
+function aw_nl_ff_phone_sync( $email, $phone, $wa, $again = true ) {
+	$c = function_exists( 'aw_crm_on' ) && aw_crm_on() && is_email( $email ) ? FluentCrmApi( 'contacts' )->getContact( $email ) : null;
+	if ( ! $c ) {
+		if ( $again ) {
+			wp_schedule_single_event( time() + 120, 'aw_nl_ff_phone_sync', array( $email, $phone, $wa, false ) );
+		}
+		return;
+	}
+	if ( '' === (string) $c->phone ) {
+		$c->phone = $phone;
+		$c->save();
+	}
+	$c->syncCustomFieldValues( array_filter( array( 'whatsapp' => $wa ? $phone : '' ) ) + array( 'wa_optin' => $wa ? '1' : '0' ), false );
+}
+add_action( 'aw_nl_ff_phone_sync', 'aw_nl_ff_phone_sync', 10, 4 );
+
+add_action(
+	'fluentform/submission_inserted',
+	function ( $entry_id, $data, $form ) {
+		$ph = trim( sanitize_text_field( (string) ( $data['phone'] ?? '' ) ) );
+		if ( aw_nl_ff_is( $form ) && '' !== $ph && function_exists( 'aw_ff_ticked' ) ) {
+			$ph = aw_ff_phone_store( $ph );
+			aw_nl_ff_phone_sync( strtolower( trim( (string) ( $data['email'] ?? '' ) ) ), $ph, aw_ff_ticked( $data, 'wa_optin' ) );
+		}
+	},
+	20,
+	3
+);
+
 // Each sign-up is a FluentCRM contact through the form's own Fluent Forms → FluentCRM link (everyone → Newsletter list,
 // tag newsletter; /forms/3-newsletter.json). The site's subscriber table is no longer written by the form (owner, 21 Oct
 // 2026: FluentCRM keeps people); its rows stay as the backup.

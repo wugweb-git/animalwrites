@@ -366,9 +366,9 @@ add_shortcode(
 ?><?php echo esc_html( $to ); ?></span><span><strong>Subject:</strong> <?php echo esc_html( $a['subject'] ); ?></span></p>
 		<div class="aw-letter-preview" aria-live="polite" tabindex="0" aria-label="Your letter"></div>
 		<div class="kit-field kit-field--checkbox aw-letter-optin"><label class="kit-checkbox kit-check" for="aw-letter-optin"><input type="checkbox" id="aw-letter-optin" name="optin" value="1" checked> <span><?php echo esc_html( defined( 'AW_CL_OPTIN' ) ? AW_CL_OPTIN : '' ); ?></span></label></div>
-		<div class="kit-field kit-field--tel aw-letter-field"><label for="aw-letter-wa">WhatsApp number <span class="kit-optional aw-letter-hint">(optional)</span></label>
-			<div class="kit-field-control"><span class="kit-ico kit-ico--brand-whatsapp kit-field-icon" aria-hidden="true"></span><input id="aw-letter-wa" name="whatsapp" type="tel" inputmode="tel" autocomplete="tel" enterkeyhint="done" maxlength="16" placeholder="WhatsApp number"></div></div>
-		<div class="kit-field kit-field--checkbox aw-letter-optin"><label class="kit-checkbox kit-check" for="aw-letter-wa-optin"><input type="checkbox" id="aw-letter-wa-optin" name="wa_optin" value="1" checked> <span>OK to contact me on WhatsApp.</span></label></div>
+		<div class="kit-field kit-field--tel aw-letter-field"><label for="aw-letter-wa">Mobile <span class="kit-optional aw-letter-hint">(optional)</span></label>
+			<div class="kit-field-control"><span class="kit-ico kit-ico--phone kit-field-icon" aria-hidden="true"></span><input id="aw-letter-wa" name="whatsapp" type="tel" inputmode="tel" autocomplete="tel" enterkeyhint="done" maxlength="16" placeholder="10 digits"></div></div>
+		<div class="kit-field kit-field--checkbox aw-letter-optin"><label class="kit-checkbox kit-check" for="aw-letter-wa-optin"><input type="checkbox" id="aw-letter-wa-optin" name="wa_optin" value="1" checked> <span>On WhatsApp</span></label></div>
 		<p class="kit-form-status aw-letter-error" role="alert" hidden>Add your name, city and email first.</p>
 		<?php echo function_exists( 'kits_altcha_widget' ) ? str_replace( '<div class="kit-captcha', '<div data-placed class="kit-captcha', kits_altcha_widget( 'invisible' ) ) : ''; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in kits_altcha_widget; the sign-up's bot check (campaign.js) ?>
 		<div class="aw-letter-routes">
@@ -419,9 +419,9 @@ add_shortcode(
 		<p class="aw-letter-meta"><span class="aw-letter-to"><?php echo aw_i( 'mail' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_i() returns a trusted inline SVG icon.
 ?><?php echo esc_html( $to ); ?></span><span><strong>Subject:</strong> <?php echo esc_html( $a['subject'] ); ?></span></p>
 		<p class="aw-letter-optin"><input type="checkbox" id="aw-letter-optin" name="optin" value="1" checked> <label for="aw-letter-optin"><?php echo esc_html( defined( 'AW_CL_OPTIN' ) ? AW_CL_OPTIN : '' ); ?></label></p>
-		<p class="aw-letter-field"><label for="aw-letter-wa">WhatsApp number <span class="aw-letter-hint">(optional)</span></label>
-			<input id="aw-letter-wa" name="whatsapp" type="tel" inputmode="tel" autocomplete="tel" maxlength="16"></p>
-		<p class="aw-letter-optin"><input type="checkbox" id="aw-letter-wa-optin" name="wa_optin" value="1" checked> <label for="aw-letter-wa-optin">OK to contact me on WhatsApp.</label></p>
+		<p class="aw-letter-field"><label for="aw-letter-wa">Mobile <span class="aw-letter-hint">(optional)</span></label>
+			<input id="aw-letter-wa" name="whatsapp" type="tel" inputmode="tel" autocomplete="tel" maxlength="16" placeholder="10 digits"></p>
+		<p class="aw-letter-optin"><input type="checkbox" id="aw-letter-wa-optin" name="wa_optin" value="1" checked> <label for="aw-letter-wa-optin">On WhatsApp</label></p>
 		<p class="aw-letter-error" role="alert" hidden>Add your name, city and email first.</p>
 		<?php echo function_exists( 'kits_altcha_widget' ) ? str_replace( '<div class="kit-captcha', '<div data-placed class="kit-captcha', kits_altcha_widget( 'invisible' ) ) : ''; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in kits_altcha_widget; the sign-up's bot check (campaign.js) ?>
 		<div class="aw-letter-routes">
