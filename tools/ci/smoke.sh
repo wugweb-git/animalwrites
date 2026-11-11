@@ -130,8 +130,9 @@ grep -q 'page=kits-plugins' /tmp/admin.html && { echo "FAIL Home still links to 
 adm "admin.php?page=kits-settings&ui=classic" >/dev/null
 has "Settings: CDN cache times" /tmp/admin.html 'id="cdn"'
 has "Settings: preview access" /tmp/admin.html 'id="kits-preview-ips"'
-has "Settings: Keys linked" /tmp/admin.html 'page=aw-keys'
-has "Settings: Modules linked" /tmp/admin.html 'page=aw-modules'
+# Keys and modules are set in RankWeb → Settings and SourceWeb → Settings now (0b010493, 12 Nov 2026).
+has "Settings: RankWeb Settings linked" /tmp/admin.html 'page=aw-seo-settings'
+has "Settings: SourceWeb Settings linked" /tmp/admin.html 'page=aw-sourcing&#038;tab=settings'
 adm "admin.php?page=kits-help&ui=classic" >/dev/null
 has "Help: docs" /tmp/admin.html 'id="docs"'
 has "Help: design system" /tmp/admin.html 'id="design-system"'
