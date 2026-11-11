@@ -63,5 +63,6 @@ require_once KITS_CORE_DIR . 'includes/admin-app-global-styles.php';
 require_once KITS_CORE_DIR . 'includes/admin-app-colours.php';
 require_once KITS_CORE_DIR . 'includes/admin-app-typography.php';
 require_once KITS_CORE_DIR . 'includes/admin-app-buttons.php';
+require_once KITS_CORE_DIR . 'includes/admin-app-cards.php';
 require_once KITS_CORE_DIR . 'includes/site-parts.php';
 require_once KITS_CORE_DIR . 'includes/fonts.php';

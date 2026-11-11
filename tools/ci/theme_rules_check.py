@@ -11,9 +11,11 @@ This check fails on a NEW rule in our CSS (themes/, plugins/*/assets/, not vendo
           (.kit-section, .alignfull, section, .aw-camp-section, .kit-section-band, .kit-hero), unless the value is the
           theme's own section padding (var(--kit-space-section) or var(--kit-section-y));
   pad     sets padding (or padding-top/right/bottom/left/block/inline) on a card or block (BLOCKS below, the selector's
-          last part) to under 24px on any side: the card padding is var(--kit-space-5) on every side at every width
-          (owner, 2 Nov 2026; docs/card-sizes.md). var(--kit-space-1..4), var(--s-1..4), the gutter/head/grid tokens,
-          numbers under 24px (1rem = 16px) and 0 are under; var(--kit-space-5..9) and --kit-space-section are fine.
+          last part) to under 24px on any side (owner, 2 Nov 2026), or a list card (kit-card, kit-card-body; CARDS) to
+          under 16px: the card padding is var(--kit-space-4) by default and can be set higher in Theme Options → Cards
+          (owner, 11 Nov 2026; docs/card-sizes.md). var(--kit-space-1..3), var(--s-1..3), numbers under 16px and 0 are
+          under both; var(--kit-space-4), var(--s-4), the gutter/head/grid tokens and 16px are under 24px only;
+          var(--kit-space-5..9) and --kit-space-section are fine. var(--wp--custom--…, X) is read as its fallback X.
           A child reset to 0 inside a padded box (.kit-card-body in a padded stacked card) is listed in the baseline.
   motion  sets scroll-behavior: smooth outside @media (prefers-reduced-motion: no-preference), unless the same file sets
           that selector back to auto under (prefers-reduced-motion: reduce) (WCAG 2.2, owner 2 Nov 2026).
@@ -56,6 +58,11 @@ BLOCK_PARTS = re.compile(
 PAD_PROPS = ("padding", "padding-top", "padding-right", "padding-bottom", "padding-left", "padding-block", "padding-inline",
              "padding-block-start", "padding-block-end", "padding-inline-start", "padding-inline-end")
 PAD_MIN = 24
+# List cards (kit-card states and their body): 16px, --kit-space-4 (owner, 11 Nov 2026).
+CARD_PAD_MIN = 16
+CARDS = re.compile(r"\.kit-card(-body)?(--[\w-]+)?(?![\w-])")
+# --kit-space-N and --s-N under 24px (kit-tokens.css, kits-v42.css).
+SPACE_PX = {"kit-space": {0: 0, 1: 4, 2: 8, 3: 12, 4: 16}, "s": {0: 0, 1: 4, 2: 8, 3: 12, 4: 16}}
 THEME_PAD = re.compile(r"^\s*var\(--kit-(space-section|section-y)\)(\s+var\(--kit-(space-section|section-y)\))?\s*!important\s*$")
 
 
@@ -184,10 +191,13 @@ def split_values(v):
 def px(tok):
     """A padding value in px at its smallest (phones), or None when it cannot be told (unknown variable, calc, percent)."""
     tok = tok.strip()
+    m = re.fullmatch(r"var\(\s*--wp--custom--[\w-]+\s*,\s*(.+)\)", tok)  # a Styles value: its fallback is the theme's
+    if m:
+        return px(m.group(1))
     m = re.fullmatch(r"var\(\s*--(kit-space|s)-(\d+)\s*(?:,.*)?\)", tok)
     if m:
         n = int(m.group(2))
-        return 0 if n < (5 if m.group(1) == "kit-space" else 6) else PAD_MIN
+        return SPACE_PX[m.group(1)].get(n, 0) if n < (5 if m.group(1) == "kit-space" else 6) else PAD_MIN
     if re.fullmatch(r"var\(\s*--kit-space-(section|band-gap)\s*(?:,.*)?\)", tok):
         return PAD_MIN
     if re.fullmatch(r"var\(\s*--kit-space-(gutter|grid|head|head-meta|collection)\s*(?:,.*)?\)", tok):
@@ -202,11 +212,17 @@ def px(tok):
     return None
 
 
-def thin(k, v):
+def thin(k, v, least=PAD_MIN):
     vals = split_values(v.replace("!important", ""))
     if not vals or len(vals) > 4:
         return False
-    return any(p is not None and p < PAD_MIN for p in map(px, vals))
+    return any(p is not None and p < least for p in map(px, vals))
+
+
+def pad_min(sel):
+    """16px when every box the rule styles is a list card (CARDS), else 24px."""
+    boxes = [last for whole, last in subjects(sel) if BLOCKS.search(last) or BLOCK_PARTS.search(whole)]
+    return CARD_PAD_MIN if boxes and all(CARDS.search(b) for b in boxes) else PAD_MIN
 
 
 HEADING = re.compile(r"(^|[\s>+~,(])h[1-3](?![\w-])")
@@ -234,7 +250,7 @@ def findings():
                     kinds.append("height")
                 if k in ("padding", "padding-block", "padding-top", "padding-bottom") and "!important" in v and SECTIONISH.search(sel) and not THEME_PAD.match(v):
                     kinds.append("imp")
-                if k in PAD_PROPS and any(BLOCKS.search(last) or BLOCK_PARTS.search(whole) for whole, last in subjects(sel)) and thin(k, v):
+                if k in PAD_PROPS and any(BLOCKS.search(last) or BLOCK_PARTS.search(whole) for whole, last in subjects(sel)) and thin(k, v, pad_min(sel)):
                     kinds.append("pad")
                 if k == "font-size" and any(HEADING.search(last) for _, last in subjects(sel)) and not TYPE_OK.match(v):
                     kinds.append("type")

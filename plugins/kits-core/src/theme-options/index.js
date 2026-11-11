@@ -31,9 +31,10 @@ import { ThemeNote } from './theme-note';
 import colours from './sections/colours';
 import typography from './sections/typography';
 import buttons from './sections/buttons';
+import cards from './sections/cards';
 
 // Sections in their own files, after Layout, in this order.
-const extraSections = [ colours, typography, buttons ];
+const extraSections = [ colours, typography, buttons, cards ];
 
 const data = window.kitsAdminApp || {};
 const fields = data.fields || {};
