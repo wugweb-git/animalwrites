@@ -144,6 +144,28 @@ require_once AW_CORE_DIR . 'includes/error-pages.php';
 require_once AW_CORE_DIR . 'includes/theme-parts.php'; // theme files, templates and patterns when Kits runs with no child theme
 require_once AW_CORE_DIR . 'includes/theme-parts-screen.php'; // Kits → Theme parts: the child theme's parts, where they live now, where to change them.
 
+/**
+ * A sibling plugin Core loads (SourceWeb, InsightWeb, PlanWeb) is loaded from its real folder, so WordPress does not
+ * know its link in the plugins directory and plugins_url() would build an address from the real path (a 404). Map the
+ * real folder back to the link, as WordPress does for active plugins and as Kits Core does for itself. Without a link
+ * in the plugins directory nothing changes.
+ *
+ * @param string $main The plugin's main file, relative to the plugins directory (e.g. 'planweb/planweb.php').
+ */
+function aw_core_map_sibling( string $main ): void {
+	if ( ! defined( 'WP_PLUGIN_DIR' ) || ! function_exists( 'wp_register_plugin_realpath' ) ) {
+		return;
+	}
+	$link = WP_PLUGIN_DIR . '/' . $main;
+	$real = dirname( AW_CORE_DIR ) . '/' . $main;
+	if ( file_exists( $link ) && file_exists( $real ) && realpath( $link ) === realpath( $real ) ) {
+		wp_register_plugin_realpath( $link );
+	}
+}
+aw_core_map_sibling( 'aw-sourcing/aw-sourcing.php' );
+aw_core_map_sibling( 'insightweb/insightweb.php' );
+aw_core_map_sibling( 'planweb/planweb.php' );
+
 // AW Sourcing (feeds, keywords, publishers, worker endpoints, AI keys, enrichment, review). Loaded from the sibling
 // plugin folder when it is not active on its own; after Core's includes, which it uses.
 if ( ! defined( 'AW_SOURCING_LOADED' ) && file_exists( dirname( AW_CORE_DIR ) . '/aw-sourcing/aw-sourcing.php' ) ) {
