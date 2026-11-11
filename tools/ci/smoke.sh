@@ -172,7 +172,11 @@ if [ -n "${KITS_SNAPSHOT:-}" ] && command -v wget >/dev/null; then
   echo "ok   Kits screens saved to $KITS_SNAPSHOT"
 fi
 opts >/tmp/opts-after.txt
-if diff -q /tmp/opts-before.txt /tmp/opts-after.txt >/dev/null; then echo "ok   no setting changed by the Kits screens ($(wc -l </tmp/opts-before.txt | tr -d ' ') options)"; else echo "FAIL settings changed:"; diff /tmp/opts-before.txt /tmp/opts-after.txt | head -20; FAIL=1; fi
+# Every setting there before is there after with the same value (docs/admin-ui-spec.md §E2); options a plugin adds on
+# its first run are listed, not a failure.
+gone=$(comm -23 /tmp/opts-before.txt /tmp/opts-after.txt)
+added=$(comm -13 <(cut -d' ' -f1 /tmp/opts-before.txt) <(cut -d' ' -f1 /tmp/opts-after.txt) | tr '\n' ' ')
+if [ -z "$gone" ]; then echo "ok   every setting kept with its value ($(wc -l </tmp/opts-before.txt | tr -d ' ') options)${added:+; new: $added}"; else echo "FAIL settings changed or gone:"; echo "$gone" | head -20; FAIL=1; fi
 # Plugin Check on PlanWeb (report only, printed, never fails the run): only when plugins/planweb changed (PLUGIN_CHECK=1
 # from the workflow), so wordpress.org is not asked on every Deploy check.
 if [ "${PLUGIN_CHECK:-0}" != "1" ]; then
