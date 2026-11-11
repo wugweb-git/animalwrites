@@ -204,9 +204,12 @@ function SetField( { label, setLabel, value, theme, hexOf, onChange } ) {
 		value: c.slug,
 		label: `${ c.name } (${ hexOf( c.slug ) })`,
 	} ) );
-	// A value that is not a palette colour (set in the Site Editor) stays listed.
-	if ( ! slug && value ) {
-		options.unshift( { value: '', label: value } );
+	// A value that is not a palette colour (set in the Site Editor) stays listed; no value shows as not set.
+	if ( ! slug ) {
+		options.unshift( {
+			value: '',
+			label: value || __( 'Not set', 'kits-core' ),
+		} );
 	}
 	const full = sprintf(
 		/* translators: 1: colour set, 2: field (Background, Text…). */

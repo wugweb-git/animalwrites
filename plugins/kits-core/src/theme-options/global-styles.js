@@ -46,7 +46,18 @@ function withPath( node, path, value ) {
 	return out;
 }
 
-const same = ( a, b ) => JSON.stringify( a ) === JSON.stringify( b );
+// JSON with object keys sorted, so { slug, name, color } and { color, name, slug } compare the same.
+const stable = ( v ) =>
+	JSON.stringify( v, ( k, x ) =>
+		x && 'object' === typeof x && ! Array.isArray( x )
+			? Object.fromEntries(
+					Object.keys( x )
+						.sort()
+						.map( ( n ) => [ n, x[ n ] ] )
+				)
+			: x
+	);
+const same = ( a, b ) => stable( a ) === stable( b );
 
 export function useGlobalStyles() {
 	const id = Number( data.id ) || 0;
@@ -54,10 +65,12 @@ export function useGlobalStyles() {
 	// JSON of a path => the new value (undefined: removed).
 	const [ edits, setEdits ] = useState( {} );
 
-	const get = ( path ) => {
-		const key = JSON.stringify( path );
-		return key in edits ? edits[ key ] : getPath( base, path );
-	};
+	// The saved document with every edit applied, so a parent path also shows its children's edits.
+	const current = Object.keys( edits ).reduce(
+		( doc, key ) => withPath( doc, JSON.parse( key ), edits[ key ] ),
+		base
+	);
+	const get = ( path ) => getPath( current, path );
 	const set = ( path, value ) =>
 		setEdits( ( e ) => ( { ...e, [ JSON.stringify( path ) ]: value } ) );
 	const changed = Object.keys( edits ).filter(
@@ -69,11 +82,12 @@ export function useGlobalStyles() {
 			return Promise.resolve();
 		}
 		const sent = { ...edits };
+		let doc;
 		return apiFetch( {
 			path: `/wp/v2/global-styles/${ id }?context=edit`,
 		} )
 			.then( ( fresh ) => {
-				let doc = docOf( fresh );
+				doc = docOf( fresh );
 				changed.forEach( ( key ) => {
 					doc = withPath( doc, JSON.parse( key ), sent[ key ] );
 				} );
@@ -84,7 +98,8 @@ export function useGlobalStyles() {
 				} );
 			} )
 			.then( ( res ) => {
-				setBase( docOf( res ) );
+				// What was sent, if the answer leaves settings or styles out.
+				setBase( res?.settings && res?.styles ? docOf( res ) : doc );
 				// Edits made while saving stay.
 				setEdits( ( e ) =>
 					Object.fromEntries(

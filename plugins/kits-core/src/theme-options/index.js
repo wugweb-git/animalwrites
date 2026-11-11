@@ -489,7 +489,7 @@ function App() {
 					data: body,
 				} )
 			: null;
-		Promise.all( [
+		const jobs = [
 			settings &&
 				settings.then( ( res ) => {
 					const obj = ( v, fallback ) =>
@@ -515,22 +515,38 @@ function App() {
 					} );
 					setEdits( { core: {}, to: {}, pd: {} } );
 				} ),
-			gs.save(),
-		] )
-			.then( () => {
-				setStatus( {
-					type: 'success',
-					text: __( 'Saved.', 'kits-core' ),
-				} );
-			} )
-			.catch( ( err ) =>
+			gs.dirty ? gs.save() : null,
+		].filter( Boolean );
+		Promise.allSettled( jobs )
+			.then( ( results ) => {
+				const failed = results.find( ( r ) => 'rejected' === r.status );
+				if ( ! failed ) {
+					setStatus( {
+						type: 'success',
+						text: __( 'Saved.', 'kits-core' ),
+					} );
+					return;
+				}
+				const msg =
+					failed.reason?.message ||
+					__( 'Not saved. Try again.', 'kits-core' );
 				setStatus( {
 					type: 'error',
+					// The other request went through: say so, and what is left stays marked not saved.
 					text:
-						err?.message ||
-						__( 'Not saved. Try again.', 'kits-core' ),
-				} )
-			)
+						results.length > 1 &&
+						results.some( ( r ) => 'fulfilled' === r.status )
+							? sprintf(
+									/* translators: %s: error message. */
+									__(
+										'Partly saved. The rest was not saved: %s',
+										'kits-core'
+									),
+									msg
+								)
+							: msg,
+				} );
+			} )
 			.finally( () => setBusy( false ) );
 	};
 
