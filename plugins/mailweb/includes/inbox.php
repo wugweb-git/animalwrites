@@ -220,6 +220,148 @@ function mailweb_role_unread( $role, $box ) {
 	return $n;
 }
 
+/**
+ * The bulk actions a folder offers (the list's Bulk actions menu and the Inbox route's check).
+ *
+ * @param string $folder Folder role, or MAILWEB_FORMS.
+ * @return array action => label
+ */
+function mailweb_bulk_actions( $folder ) {
+	if ( MAILWEB_FORMS === $folder ) {
+		return array(
+			'read'   => __( 'Mark read', 'mailweb' ),
+			'unread' => __( 'Mark unread', 'mailweb' ),
+			'trash'  => __( 'Move to Trash', 'mailweb' ),
+		);
+	}
+	$a = array(
+		'read'   => __( 'Mark read', 'mailweb' ),
+		'unread' => __( 'Mark unread', 'mailweb' ),
+	);
+	if ( ! in_array( $folder, array( 'archive', 'trash' ), true ) ) {
+		$a['archive'] = __( 'Archive', 'mailweb' );
+	}
+	if ( 'inbox' !== $folder ) {
+		$a['inbox'] = 'spam' === $folder ? __( 'Not spam', 'mailweb' ) : __( 'Move to Inbox', 'mailweb' );
+	}
+	if ( ! in_array( $folder, array( 'spam', 'sent' ), true ) ) {
+		$a['spam'] = __( 'Spam', 'mailweb' );
+	}
+	if ( 'trash' !== $folder ) {
+		$a['trash'] = __( 'Move to Trash', 'mailweb' );
+	}
+	return $a;
+}
+
+/**
+ * One page of the list, for one mailbox, all mailboxes mixed (newest first) or the Website forms folder. Read from the
+ * Mail API (or the forms source); nothing is marked or moved.
+ *
+ * @param array $s State: box, folder, page, q (mailweb_state()).
+ * @return array { items: rows, total: int, failed: bool }
+ */
+function mailweb_list_rows( $s ) {
+	$per  = MAILWEB_PER_PAGE;
+	$page = max( 1, (int) $s['page'] );
+	if ( MAILWEB_FORMS === $s['folder'] ) {
+		$res   = mailweb_forms() ? (array) call_user_func( mailweb_forms()['list'], $page, $per ) : array();
+		$items = array();
+		foreach ( (array) ( $res['items'] ?? array() ) as $f ) {
+			$name    = trim( (string) ( $f['name'] ?? '' ) );
+			$email   = trim( (string) ( $f['email'] ?? '' ) );
+			$items[] = array(
+				'id'      => 'form|' . (int) $f['id'],
+				'item'    => (int) $f['id'],
+				'from'    => '' !== $name ? $name : $email,
+				'email'   => $email,
+				'subject' => (string) ( $f['subject'] ?? '' ),
+				'date'    => (string) ( $f['date'] ?? '' ),
+				'unseen'  => ! empty( $f['unread'] ),
+				'files'   => false,
+			);
+		}
+		return array(
+			'items'  => $items,
+			'total'  => (int) ( $res['total'] ?? 0 ),
+			'failed' => false,
+		);
+	}
+	$path  = mailweb_role_path( $s['folder'] );
+	$rows  = array();
+	$total = 0;
+	$boxes = mailweb_view_boxes( $s['box'] );
+	$mixed = count( $boxes ) > 1;
+	// Mixed: each mailbox's newest page*per (at most $cap), read in API pages of up to 100, merged by date.
+	// One mailbox: its own page.
+	$cap  = 500;
+	$need = $mixed ? min( $page * $per, $cap ) : $per;
+	$size = $mixed ? min( 100, $need ) : $per;
+	$asks = $mixed ? (int) ceil( $need / $size ) : 1;
+	$okay = 0;
+	$sent = 'sent' === $s['folder'];
+	foreach ( $boxes as $key => $addr ) {
+		if ( ! isset( mailweb_folders( $key )[ $path ] ) ) {
+			continue; // this mailbox has no such folder (yet).
+		}
+		$ok  = false;
+		$got = 0;
+		$sum = 0;
+		for ( $p = 1; $p <= $asks; $p++ ) {
+			$qs = array(
+				'page'    => $mixed ? $p : $page,
+				'perPage' => $size,
+				'sort'    => '-date',
+			);
+			if ( '' !== $s['q'] ) {
+				list( $code, $j ) = mailweb_call( 'POST', mailweb_fpath( $key, $path ) . '/messages/search?' . http_build_query( $qs ), array( 'text' => $s['q'] ) );
+			} else {
+				list( $code, $j ) = mailweb_call( 'GET', mailweb_fpath( $key, $path ) . '/messages?' . http_build_query( $qs ) );
+			}
+			if ( 200 !== $code ) {
+				break;
+			}
+			$ok   = true;
+			$sum  = (int) ( $j['pagination']['total'] ?? 0 );
+			$data = (array) ( $j['data'] ?? array() );
+			foreach ( $data as $m ) {
+				$rows[] = array(
+					'id'      => $key . '|' . (int) $m['uid'],
+					'box'     => $key,
+					'uid'     => (int) $m['uid'],
+					'from'    => $sent ? implode( ', ', array_map( fn( $a ) => mailweb_who( $a, true ), (array) ( $m['to'] ?? array() ) ) ) : mailweb_who( $m['from'] ?? array(), true ),
+					'email'   => $sent ? '' : implode( '', mailweb_addresses( array( $m['from'] ?? array() ) ) ),
+					'subject' => trim( (string) ( $m['subject'] ?? '' ) ),
+					'date'    => (string) ( $m['date'] ?? '' ),
+					'unseen'  => ! empty( $m['unseen'] ),
+					'files'   => ! empty( $m['attachments'] ),
+					'mailbox' => $addr,
+				);
+			}
+			$got += count( $data );
+			if ( count( $data ) < $size || ( $sum && $got >= $sum ) ) {
+				break; // this mailbox has no more.
+			}
+		}
+		if ( ! $ok ) {
+			continue;
+		}
+		++$okay;
+		$total += $sum;
+	}
+	if ( $mixed ) {
+		// Each mailbox is read to at most $cap, so only the newest $cap merged messages are in the right order:
+		// the pager offers no more than that. Older mail: choose one mailbox.
+		$total = min( $total, $cap );
+		usort( $rows, fn( $a, $b ) => (int) strtotime( $b['date'] ) <=> (int) strtotime( $a['date'] ) ); // newest first; unreadable dates last.
+		$rows = array_slice( $rows, ( $page - 1 ) * $per, $per );
+	}
+	return array(
+		'items'  => $rows,
+		'total'  => $total,
+		'failed' => ! $okay && $boxes,
+	);
+}
+
 /* ---------- The screen ---------- */
 
 // Bulk actions from the list (WordPress list table form, GET to this page): done before any output, then back.
@@ -285,6 +427,9 @@ function mailweb_bulk( $act, $ids, $role ) {
 function mailweb_inbox_page() {
 	if ( ! current_user_can( MAILWEB_CAP ) ) {
 		wp_die( esc_html__( 'Not allowed.', 'mailweb' ), 403 );
+	}
+	if ( mailweb_ui_page( 'inbox' ) ) {
+		return; // the new screen (&ui=next, mailweb-ui.php).
 	}
 	$s   = mailweb_state();
 	echo '<style>#mailweb tr.unread td,#mailweb tr.unread th{background-color:#fcf9e8}#mailweb tr.unread .check-column{box-shadow:inset 4px 0 0 #2271b1}#mailweb tr.unread .column-from,#mailweb tr.unread .column-subject>a{font-weight:600}#mailweb .column-date{width:9em}#mailweb .column-mailbox{width:12em}#mailweb .column-from{width:22%}#mailweb .awm-box{float:right;margin-top:9px}#mailweb .awm-frame{width:100%;height:65vh;border:1px solid #c3c4c7;background:#fff;display:block}#mailweb .awm-actions .button{width:100%;text-align:center;margin:0 0 6px}#mailweb #titlewrap #title{padding:3px 8px;font-size:1.7em;height:1.7em;width:100%}#mailweb .awm-field{display:flex;gap:8px;align-items:center;margin:0 0 8px}#mailweb .awm-field label{flex:0 0 3.5em;color:#50575e}#mailweb .awm-field input{flex:1}@media (max-width:767px){#mailweb .awm-box{float:none;margin:8px 0}}</style>';

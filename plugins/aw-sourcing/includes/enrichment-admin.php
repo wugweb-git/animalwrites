@@ -291,6 +291,9 @@ function aw_enrich_show( $field, $v ) {
 
 function aw_enrich_review_page() {
 	global $wpdb;
+	if ( function_exists( 'sourceweb_ui_page' ) && sourceweb_ui_page( 'enrichment' ) ) {
+		return; // The new Enrichment review (&ui=next, sourceweb-ui.php).
+	}
 	if ( ! get_option( 'aw_enrich_db' ) ) {
 		aw_enrich_install();
 	}

@@ -82,3 +82,8 @@ require_once AW_SOURCING_DIR . 'includes/ai-provider-icons.php';
 require_once AW_SOURCING_DIR . 'includes/admin-menu.php';
 require_once AW_SOURCING_DIR . 'includes/dashboard.php'; // the Dashboard box "Sourcing" (owner, 3 Nov 2026)
 require_once AW_SOURCING_DIR . 'includes/kits-hub.php'; // a tab and a status row in the Kits admin, when Kits Core is loaded.
+// The new screens on the Kits admin shell, behind &ui=next (Dashboard, To review, Enrichment review, Settings).
+require_once AW_SOURCING_DIR . 'includes/sourceweb-model.php';
+require_once AW_SOURCING_DIR . 'includes/sourceweb-dashboard.php';
+require_once AW_SOURCING_DIR . 'includes/sourceweb-rest.php';
+require_once AW_SOURCING_DIR . 'includes/sourceweb-ui.php';

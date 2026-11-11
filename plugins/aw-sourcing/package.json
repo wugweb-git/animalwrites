@@ -1,0 +1,20 @@
+{
+  "name": "sourceweb-admin",
+  "private": true,
+  "description": "SourceWeb's admin screens on the Kits shell (built with @wordpress/scripts; build/ is committed because the deploy does not run npm).",
+  "scripts": {
+    "build": "wp-scripts build src/index.js --output-path=build",
+    "lint:js": "wp-scripts lint-js src"
+  },
+  "devDependencies": {
+    "@wordpress/scripts": "32.6.0"
+  },
+  "dependencies": {
+    "@wordpress/api-fetch": "^8.1.0",
+    "@wordpress/element": "^10.1.0",
+    "@wordpress/i18n": "^7.1.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

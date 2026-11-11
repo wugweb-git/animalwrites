@@ -96,12 +96,8 @@ add_action(
 			);
 		}
 		mailweb_simple_table( 'mailboxes', array( 'box' => esc_html__( 'Mailbox', 'mailweb' ), 'aliases' => esc_html__( 'Aliases', 'mailweb' ), 'send' => esc_html__( 'Send from it', 'mailweb' ), 'from' => esc_html__( 'Default From', 'mailweb' ) ), $rows ); // inside the form: the table prints no nonce of its own
-		$lines = array();
-		foreach ( mailweb_aliases() as $a => $m ) {
-			$lines[] = $a . ' = ' . $m;
-		}
 		echo '<table class="form-table"><tr><th scope="row"><label for="mailweb-aliases">' . esc_html__( 'Aliases', 'mailweb' ) . '</label></th><td>';
-		echo '<textarea class="large-text code" rows="4" id="mailweb-aliases" name="aliases">' . esc_textarea( implode( "\n", $lines ) ) . '</textarea>';
+		echo '<textarea class="large-text code" rows="4" id="mailweb-aliases" name="aliases">' . esc_textarea( mailweb_aliases_text( mailweb_aliases() ) ) . '</textarea>';
 		echo '<p class="description">' . esc_html__( 'One per line: alias = mailbox (as in hPanel → Emails → Email Alias). The Mail API does not list aliases, so keep this in step when one is added or removed there.', 'mailweb' ) . '</p></td></tr></table>';
 		submit_button( __( 'Save mailboxes and aliases', 'mailweb' ) );
 		echo '</form>';
@@ -115,20 +111,9 @@ add_action(
 		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'mailweb_alias' ) ) {
 			wp_die( esc_html__( 'Not allowed.', 'mailweb' ), 403 );
 		}
-		$map = array();
-		foreach ( preg_split( '/\R/', sanitize_textarea_field( wp_unslash( $_POST['aliases'] ?? '' ) ) ) as $line ) {
-			$p = array_map( 'trim', explode( '=', strtolower( $line ), 2 ) );
-			if ( 2 === count( $p ) && is_email( $p[0] ) && is_email( $p[1] ) ) {
-				$map[ $p[0] ] = $p[1];
-			}
-		}
-		update_option( 'mailweb_aliases', $map, false );
+		update_option( 'mailweb_aliases', mailweb_aliases_clean( (string) wp_unslash( $_POST['aliases'] ?? '' ) ), false ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- cleaned by mailweb_aliases_clean()
 		$send = array_map( 'absint', (array) wp_unslash( $_POST['send'] ?? array() ) );
-		$set  = array();
-		foreach ( array_keys( mailweb_all_boxes() ) as $key ) {
-			$set[ $key ] = array( 'send' => ! empty( $send[ $key ] ) );
-		}
-		update_option( 'mailweb_mailboxes', $set, false );
+		update_option( 'mailweb_mailboxes', mailweb_mailboxes_clean( $send, array_keys( mailweb_all_boxes() ) ), false );
 		update_option( 'mailweb_default_from', sanitize_key( wp_unslash( $_POST['default_from'] ?? '' ) ), false );
 		wp_safe_redirect( mailweb_settings_url( 'incoming', array( 'mailweb_alias' => 1 ), 'addresses' ) );
 		exit;

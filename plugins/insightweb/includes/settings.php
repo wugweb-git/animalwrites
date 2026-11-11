@@ -104,6 +104,53 @@ function aw_si_settings_form(): void {
 	echo '</form>';
 }
 
+/**
+ * Save the numbers. The form on Search Insights → Settings and the Settings screen's route both come here.
+ * - Only values that differ from the default are stored, so a later default change reaches unchanged fields.
+ * - A field not sent keeps its stored value.
+ * - Nothing is written when nothing changed (the stored values compared, whatever their order).
+ *
+ * @param array $posted const => number as sent (strings or integers).
+ * @param bool  $reset  Restore defaults: every number goes back to its default.
+ * @return bool Whether the option was written.
+ */
+function aw_si_settings_save( array $posted, bool $reset = false ): bool {
+	$all  = (array) get_option( 'aw_seo_settings', array() ); // RankWeb's option: every other key stays as it is.
+	$had  = (array) ( $all['search-insights'] ?? array() );
+	$mine = $had;
+	foreach ( aw_si_setting_fields() as $const => $f ) {
+		if ( ! $reset && ! array_key_exists( $const, $posted ) ) {
+			continue;
+		}
+		$value = max( 0, (int) ( $posted[ $const ] ?? 0 ) );
+		$now   = array_key_exists( $const, $had ) ? (int) $had[ $const ] : $f['default'];
+		if ( ! $reset && $value === $now ) {
+			continue; // Unchanged: kept exactly as stored.
+		}
+		unset( $mine[ $const ] );
+		if ( $reset ) {
+			continue;
+		}
+		if ( $value !== $f['default'] ) {
+			$mine[ $const ] = $value;
+		}
+	}
+	$a = $mine;
+	$b = $had;
+	ksort( $a );
+	ksort( $b );
+	if ( $a === $b ) {
+		return false;
+	}
+	if ( $mine ) {
+		$all['search-insights'] = $mine;
+	} else {
+		unset( $all['search-insights'] );
+	}
+	update_option( 'aw_seo_settings', $all, true ); // read on every request (the constants), so autoloaded.
+	return true;
+}
+
 add_action(
 	'admin_post_aw_si_settings',
 	function () {
@@ -112,25 +159,14 @@ add_action(
 		}
 		check_admin_referer( 'aw_si_settings' );
 		$reset  = isset( $_POST['reset'] );
-		$posted = (array) wp_unslash( $_POST['f'] ?? array() ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- each known field is read as an integer below.
-		$all    = (array) get_option( 'aw_seo_settings', array() ); // RankWeb's option: every other key stays as it is.
-		$mine   = (array) ( $all['search-insights'] ?? array() );
+		$posted = (array) wp_unslash( $_POST['f'] ?? array() ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- each known field is read as an integer in aw_si_settings_save().
+		// The form sends every field; one it leaves out goes back to its default, as before.
 		foreach ( aw_si_setting_fields() as $const => $f ) {
-			unset( $mine[ $const ] );
-			if ( $reset || ! isset( $posted[ $const ] ) ) {
-				continue;
-			}
-			$value = max( 0, (int) $posted[ $const ] );
-			if ( $value !== $f['default'] ) { // store only what differs, so a later default change reaches unchanged fields
-				$mine[ $const ] = $value;
+			if ( ! isset( $posted[ $const ] ) ) {
+				$posted[ $const ] = $f['default'];
 			}
 		}
-		if ( $mine ) {
-			$all['search-insights'] = $mine;
-		} else {
-			unset( $all['search-insights'] );
-		}
-		update_option( 'aw_seo_settings', $all, true ); // read on every request (the constants), so autoloaded
+		aw_si_settings_save( $posted, $reset );
 		wp_safe_redirect( add_query_arg( 'saved', $reset ? 'reset' : 'saved', aw_si_url( 'settings' ) ) );
 		exit;
 	}

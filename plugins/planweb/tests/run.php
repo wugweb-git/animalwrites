@@ -95,7 +95,7 @@ $stored = array(
 		'date'  => '2026-11-05',
 		'title' => 'Lab rules objections close',
 		'note'  => 'Campaign 13848.',
-	), // an identical copy
+	), // An identical copy.
 	array(
 		'date'  => 'soon',
 		'title' => 'Not a date',
@@ -143,6 +143,165 @@ $entries['other'] = array(
 );
 $cmp              = planweb_compare( $mapped['rows'], $entries );
 check( 1 === $cmp['differs'] && 1 === $cmp['missing'] && 1 === $cmp['extra'] && 2 === $cmp['same'], 'differs, missing and extra counted' );
+
+// The new screens (includes/ui-model.php): the counts, the tiles, the list's arguments, the switch. WordPress's
+// translation and number functions are stood in for.
+require dirname( __DIR__ ) . '/includes/ui-model.php';
+if ( ! function_exists( '__' ) ) {
+	/**
+	 * Stand-in.
+	 *
+	 * @param string $t Text.
+	 */
+	function __( $t ) {
+		return $t;
+	}
+	/**
+	 * Stand-in.
+	 *
+	 * @param string $one  Singular.
+	 * @param string $many Plural.
+	 * @param int    $n    Number.
+	 */
+	function _n( $one, $many, $n ) {
+		return 1 === $n ? $one : $many;
+	}
+	/**
+	 * Stand-in.
+	 *
+	 * @param int $n Number.
+	 */
+	function number_format_i18n( $n ) {
+		return number_format( $n );
+	}
+}
+
+check( '2026-12-01' === planweb_add_days( '2026-11-30', 1 ) && '2026-10-12' === planweb_add_days( '2026-11-11', -30 ), 'days added across months' );
+$today = '2026-11-11';
+$es    = array(
+	array(
+		'id'     => 1,
+		'date'   => '2026-11-11',
+		'time'   => '',
+		'title'  => 'Today',
+		'type'   => 'social',
+		'status' => 'draft',
+	),
+	array(
+		'id'     => 2,
+		'date'   => '2026-11-17',
+		'time'   => '10:00',
+		'title'  => 'Rankings',
+		'type'   => 'content',
+		'status' => 'approved',
+	),
+	array(
+		'id'     => 3,
+		'date'   => '2026-12-05',
+		'time'   => '',
+		'title'  => 'Jharkhand',
+		'type'   => 'campaign',
+		'status' => 'idea',
+	),
+	array(
+		'id'     => 4,
+		'date'   => '2026-11-07',
+		'time'   => '',
+		'title'  => 'Lab rules',
+		'type'   => 'reminder',
+		'status' => 'idea',
+	),
+	array(
+		'id'     => 5,
+		'date'   => '2026-11-01',
+		'time'   => '',
+		'title'  => 'Sent one',
+		'type'   => 'email',
+		'status' => 'sent',
+	),
+	array(
+		'id'     => 6,
+		'date'   => '2027-03-01',
+		'time'   => '',
+		'title'  => 'Far',
+		'type'   => 'bogus',
+		'status' => 'bogus',
+	),
+);
+$c     = planweb_count_entries( $es, $today, array( 'same' => 4 ) );
+check( 6 === $c['total'] && 1 === $c['today'], 'total and today counted' );
+check( 2 === $c['ahead'][7]['total'], 'next 7 days: today and 17 Nov' );
+check( 3 === $c['ahead'][30]['total'] && 3 === $c['ahead'][90]['total'], 'next 30 and 90 days' );
+check( 1 === $c['ahead'][30]['types']['campaign'] && 0 === $c['ahead'][30]['types']['email'], 'by type' );
+check( 2 === $c['types']['reminder'], 'unknown type counts as reminder' );
+check( 1 === $c['overdue']['total'] && '2026-11-07' === $c['overdue']['oldest'], 'overdue: open and past only, not sent' );
+check( 1 === $c['waiting'] && 1 === $c['ready'], 'waiting (draft) and ready (approved)' );
+check( 3 === $c['statuses']['idea'] && 1 === $c['statuses']['sent'], 'by status; unknown status counts as idea' );
+check( 1 === $c['next']['id'] && ! isset( $c['next']['key'] ), 'next date is today\'s entry' );
+check(
+	array(
+		'same'    => 4,
+		'differs' => 0,
+		'missing' => 0,
+		'extra'   => 0,
+	) === $c['check'],
+	'import check kept'
+);
+check( planweb_is_overdue( array( 'flag' => 'overdue' ), $today ), 'scheduler flag is overdue' );
+$empty = planweb_count_entries( array(), $today );
+check( 0 === $empty['total'] && null === $empty['next'] && array() === $empty['check'], 'no entries, zero counts' );
+
+$seen_urls = array();
+$tiles     = planweb_dashboard_tiles(
+	$c + array( 'at' => 1 ),
+	7,
+	function ( array $a ) use ( &$seen_urls ) {
+		$seen_urls[] = $a;
+		return 'u?' . http_build_query( $a );
+	},
+	fn( $d ) => 'L' . $d
+);
+$keys      = array_column( $tiles, 'key' );
+check( array( 'ahead', 'overdue', 'waiting', 'ready', 'next', 'today', 'total', 'check' ) === $keys, 'eight tiles in order' );
+check( '2' === $tiles[0]['value'] && 'Coming up in 7 days' === $tiles[0]['label'] && 'u?when=next7' === $tiles[0]['href'], 'coming-up tile for the range' );
+check( '1 social, 1 content' === $tiles[0]['sub'] || '1 content, 1 social' === $tiles[0]['sub'], 'coming-up sub-line by type' );
+check( 'warn' === $tiles[1]['tone'] && 'Oldest from L2026-11-07' === $tiles[1]['sub'], 'overdue tile warns with the oldest date' );
+check( 'L2026-11-11' === $tiles[4]['value'] && 'Today' === $tiles[4]['sub'], 'next date tile' );
+check( 'Matches' === $tiles[7]['value'] && '' === $tiles[7]['tone'], 'import check tile' );
+$t90 = planweb_dashboard_tiles( $empty, 99, fn() => '', fn( $d ) => $d );
+check( 'Coming up in 30 days' === $t90[0]['label'] && 7 === count( $t90 ) && '' === $t90[1]['tone'], 'unknown range is 30; no check tile without an import' );
+
+$a = planweb_list_args( array(), $today );
+check( 'from30' === $a['when'] && '2026-10-12' === $a['from'] && '' === $a['to'] && 'date' === $a['sort'] && 'asc' === $a['dir'] && 1 === $a['page'], 'list defaults: from 30 days ago, by date' );
+$a = planweb_list_args(
+	array(
+		'when'   => 'next7',
+		'type'   => 'social',
+		'status' => 'nope',
+		'sort'   => 'title',
+		'dir'    => 'desc',
+		'page'   => '3',
+	),
+	$today
+);
+check( '2026-11-11' === $a['from'] && '2026-11-17' === $a['to'] && 'social' === $a['type'] && '' === $a['status'] && 'title' === $a['sort'] && 'desc' === $a['dir'] && 3 === $a['page'], 'list arguments checked' );
+$a = planweb_list_args( array( 'view' => 'overdue' ), $today );
+check( 'all' === $a['when'] && '' === $a['from'] && $today === $a['before'], 'overdue view: before today, any date' );
+$a = planweb_list_args( array( 'when' => 'past' ), $today );
+check( $today === $a['before'] && '' === $a['from'], 'before today' );
+$a = planweb_list_args(
+	array(
+		'when' => 'all',
+		'view' => 'x',
+	),
+	$today
+);
+check( '' === $a['from'] . $a['to'] . $a['before'] && 'all' === $a['view'], 'all dates; unknown view is all' );
+
+// Save only what changed: the switch is written only when its stored form changes.
+check( null === planweb_switch_change( true, '1' ) && null === planweb_switch_change( false, '' ), 'unchanged switch writes nothing' );
+check( '' === planweb_switch_change( false, '1' ) && '1' === planweb_switch_change( true, '' ), 'changed switch gives the new stored value' );
+check( '1' === planweb_on_clean( '1' ) && '' === planweb_on_clean( '' ) && '' === planweb_on_clean( 0 ), 'the same clean-up as Kits → Modules' );
 
 echo $fails ? "$fails of $count checks failed.\n" : "All $count checks passed.\n";
 exit( $fails ? 1 : 0 );

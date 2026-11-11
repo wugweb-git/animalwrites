@@ -85,6 +85,8 @@ jobs:
         run: php tools/ci/workers_registry_check.php
       - name: Mailweb address parser (typed lists, headers, API lists)
         run: php tools/ci/mailweb_addresses_test.php
+      - name: MailWeb screens tests without WordPress (unchanged saves write nothing, clean-ups, Dashboard tiles; plugins/mailweb/tests)
+        run: php plugins/mailweb/tests/run.php
       - name: Sourcing tests without WordPress (shared keyword matcher, Sources model; plugins/aw-sourcing/tests)
         run: php plugins/aw-sourcing/tests/run.php
       - name: Claimant link to the listing's people (plugins/animal-writes-core/tests/org-people-tests.php)
@@ -97,6 +99,8 @@ jobs:
         run: php plugins/kits-core/tests/admin-menu-tests.php
       - name: RankWeb settings tests without WordPress (defaults round trip, unchanged saves write nothing; plugins/aw-seo-extras/tests)
         run: php plugins/aw-seo-extras/tests/run.php
+      - name: InsightWeb tests without WordPress (unchanged saves write nothing, Dashboard tiles; plugins/insightweb/tests)
+        run: php plugins/insightweb/tests/run.php
       - name: Footer height follows its content (no max-height, vh height or overflow hidden)
         run: python3 tools/ci/footer_check.py
       - name: Breakpoints only 767/768 and 1199/1200 (media queries and matchMedia)

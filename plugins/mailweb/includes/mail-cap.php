@@ -440,6 +440,17 @@ add_action(
 	}
 );
 
+/** Resume sending after a pause (the queue goes out again on the next 5-minute run). */
+function mailweb_resume() {
+	delete_option( 'mailweb_pause' );
+}
+
+/** Held emails go back in line for another try (from the next 5-minute run, within the limit). */
+function mailweb_retry_held() {
+	global $wpdb;
+	$wpdb->query( "UPDATE " . mailweb_table() . " SET status = 'failed', tries = 0, next_try = NULL WHERE status = 'held' AND mail IS NOT NULL" ); // phpcs:ignore
+}
+
 add_action(
 	'admin_post_mailweb_cap',
 	function () {
@@ -448,13 +459,12 @@ add_action(
 		}
 		$do = sanitize_key( wp_unslash( $_POST['do'] ?? '' ) );
 		if ( 'resume' === $do ) {
-			delete_option( 'mailweb_pause' );
+			mailweb_resume();
 			wp_safe_redirect( mailweb_settings_url( 'sending', array( 'mailweb_cap' => 'resumed' ), 'cap' ) );
 			exit;
 		}
 		if ( 'retry' === $do ) {
-			global $wpdb;
-			$wpdb->query( "UPDATE " . mailweb_table() . " SET status = 'failed', tries = 0, next_try = NULL WHERE status = 'held' AND mail IS NOT NULL" ); // phpcs:ignore
+			mailweb_retry_held();
 			wp_safe_redirect( mailweb_settings_url( 'sending', array( 'mailweb_cap' => 'retry' ), 'cap' ) );
 			exit;
 		}
@@ -463,7 +473,13 @@ add_action(
 			wp_safe_redirect( mailweb_settings_url( 'sending', array( 'mailweb_cap' => 'flushed', 'n' => (int) $n ), 'cap' ) );
 			exit;
 		}
-		update_option( 'mailweb_cap', array( 'budget' => min( 10000, max( 1, absint( $_POST['budget'] ?? 90 ) ) ), 'reserve' => absint( $_POST['reserve'] ?? 10 ) ), false );
+		// phpcs:disable WordPress.Security.ValidatedSanitizedInput -- mailweb_cap_clean() takes whole numbers only.
+		$in = array(
+			'budget'  => wp_unslash( $_POST['budget'] ?? 90 ),
+			'reserve' => wp_unslash( $_POST['reserve'] ?? 10 ),
+		);
+		// phpcs:enable WordPress.Security.ValidatedSanitizedInput
+		update_option( 'mailweb_cap', mailweb_cap_clean( $in ), false );
 		wp_safe_redirect( mailweb_settings_url( 'sending', array( 'mailweb_cap' => 'saved' ), 'cap' ) );
 		exit;
 	}

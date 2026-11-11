@@ -56,7 +56,7 @@ add_action(
 			array(
 				'type'              => 'string',
 				'default'           => '',
-				'sanitize_callback' => fn( $v ) => $v ? '1' : '',
+				'sanitize_callback' => 'planweb_on_clean',
 				'show_in_rest'      => false,
 			)
 		);

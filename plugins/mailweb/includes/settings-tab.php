@@ -18,6 +18,9 @@ function mailweb_settings_page() {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		wp_die( esc_html__( 'Not allowed.', 'mailweb' ), 403 );
 	}
+	if ( mailweb_ui_page( 'settings' ) ) {
+		return; // the new screen (&ui=next, mailweb-ui.php).
+	}
 	$sub = 'sending' === sanitize_key( $_GET['sub'] ?? '' ) ? 'sending' : 'incoming'; // phpcs:ignore WordPress.Security.NonceVerification
 	echo '<div class="wrap" id="mailweb-settings"><h1>' . esc_html__( 'Mail settings', 'mailweb' ) . '</h1>';
 	mailweb_screen_tabs();
