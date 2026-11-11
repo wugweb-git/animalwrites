@@ -1038,7 +1038,7 @@ function kits_parts_bundle_status(): array {
 	}
 	if ( $warn && ( $hit || $count >= (int) ceil( $cap * 0.8 ) ) ) {
 		$fix .= $hit ? 'The cap was reached on ' . wp_date( get_option( 'date_format' ), $hit ) . ': a page outside the page kinds with a new set of components loads separate files. ' : 'Near the cap: once it is reached, a page outside the page kinds with a new set of components loads separate files. ';
-		$fix .= 'Raise the cap in Kits → Settings → Performance (Joined files cap), or empty uploads/kits-cache/parts/ (the files are made again as pages are visited).';
+		$fix .= 'Raise the cap in Appearance → Kits → Settings → Performance (Joined files cap), or empty uploads/kits-cache/parts/ (the files are made again as pages are visited).';
 	}
 	return compact( 'on', 'kinds', 'count', 'cap', 'warn', 'hit', 'fail', 'text', 'fix' );
 }

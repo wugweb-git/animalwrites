@@ -104,10 +104,6 @@ function kits_admin_app_section_of( string $old ): string {
 		'general-footer'    => 'footer',
 		'general-layout'    => 'layout',
 		'visual-spacing'    => 'layout',
-		'visual-palette'    => 'colours',
-		'visual-colours'    => 'colours',
-		'visual-typography' => 'typography',
-		'visual-buttons'    => 'buttons',
 		'visual-cards'      => 'cards',
 		'utility-socials'   => 'socials',
 		'utility-share'     => 'share',
@@ -176,42 +172,20 @@ add_action(
 		}
 		$theme = wp_get_theme( get_template() );
 		$core  = get_file_data( KITS_CORE_DIR . 'kits-core.php', array( 'Version' => 'Version' ) );
-		$ids   = array(
-			'site_logo' => (int) get_option( 'site_logo' ),
-			'site_icon' => (int) get_option( 'site_icon' ),
-		);
-		$urls  = array();
-		foreach ( $ids as $id ) {
-			if ( $id ) {
-				$urls[ $id ] = (string) wp_get_attachment_image_url( $id, 'thumbnail' );
-			}
-		}
 		$pd_saved = (array) get_option( 'kits_page_defaults', array() );
 		$pd_site  = array();
-		$pd_keys  = array( 'header', 'footer', 'sidebar', 'title', 'crumbs' );
+		$pd_keys  = array( 'sidebar', 'title', 'crumbs' ); // Header and footer parts are chosen in the Site Editor.
 		$pd       = array();
 		$names    = kits_page_option_fields();
-		$empty    = array(
-			'header' => __( 'The theme’s own. Make a second header in Appearance → Editor → Patterns → Header to choose it here.', 'kits-core' ),
-			'footer' => __( 'The theme’s own. Make a second footer in Appearance → Editor → Patterns → Footer to choose it here.', 'kits-core' ),
-		);
 		foreach ( $pd_keys as $key ) {
 			$pd[ $key ] = array(
 				'label'   => $names[ $key ][0],
 				'note'    => kits_page_option_note( $key ),
 				'choices' => (object) kits_page_option_choices( $key ),
-				'empty'   => $empty[ $key ] ?? '',
 			);
 			if ( isset( $pd_saved['_site'][ $key ] ) ) {
 				$pd_site[ $key ] = (string) $pd_saved['_site'][ $key ];
 			}
-		}
-		$menus = array();
-		foreach ( kits_theme_menu_choices() as $menu_id => $title ) {
-			$menus[] = array(
-				'value' => (string) $menu_id,
-				'label' => (string) $title,
-			);
 		}
 		$legacy = array();
 		foreach ( kits_admin_app_legacy() as $slug => $l ) {
@@ -241,15 +215,6 @@ add_action(
 			'fields'       => $fields,
 			'saved'        => (object) $saved,
 			'inherited'    => (object) $inherited,
-			'core'         => array_merge(
-				array(
-					'title'       => (string) get_option( 'blogname' ),
-					'description' => (string) get_option( 'blogdescription' ),
-				),
-				$ids
-			),
-			'mediaUrls'    => (object) $urls,
-			'menus'        => $menus,
 			'pageDefaults' => array(
 				'fields' => $pd,
 				'site'   => (object) $pd_site,
