@@ -95,6 +95,8 @@ jobs:
         run: php plugins/kits-core/tests/admin-menu-tests.php
       - name: RankWeb settings tests without WordPress (defaults round trip, unchanged saves write nothing; plugins/aw-seo-extras/tests)
         run: php plugins/aw-seo-extras/tests/run.php
+      - name: InsightWeb tests without WordPress (unchanged saves write nothing, Dashboard tiles; plugins/insightweb/tests)
+        run: php plugins/insightweb/tests/run.php
       - name: Footer height follows its content (no max-height, vh height or overflow hidden)
         run: python3 tools/ci/footer_check.py
       - name: Breakpoints only 767/768 and 1199/1200 (media queries and matchMedia)
