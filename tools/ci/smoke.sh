@@ -331,6 +331,59 @@ PY
 AFTER=$(snap)
 if [ "$BEFORE" = "$AFTER" ]; then echo "ok   no setting changed by unchanged Saves: $AFTER"; else echo "FAIL settings changed: $BEFORE -> $AFTER"; FAIL=1; fi
 if wp eval 'exit( count( array_intersect( array( "aw_seo_settings", "aw_faq_off_types", "aw_seo_keep_listings" ), kits_settings_transfer_options() ) ) === 3 ? 0 : 1 );'; then echo "ok   RankWeb's three options are in the Kits export"; else echo "FAIL RankWeb's options missing from the Kits export"; FAIL=1; fi
+# Shell screens of the other Kits plugins (docs/kits-plugin-ui.md): each new screen 200 for an administrator and drawn
+# (mount + script + shell), its current screen still the default, a subscriber refused (403), and every route 401 signed
+# out, 401 with a cookie and no nonce, 403 for a subscriber, 200 for an administrator.
+# screen PAGE MOUNT-ID SCRIPT-HANDLE: the &ui=next screen and its current screen.
+screen() {
+  want 200 "admin.php?page=$1&ui=next (administrator)" -b /tmp/cj-ci "$H/wp-admin/admin.php?page=$1&ui=next"
+  if grep -q "id=\"$2\"" /tmp/rw.out && grep -q "$3-js" /tmp/rw.out && grep -q "kits-shell-js" /tmp/rw.out; then echo "ok   $1&ui=next draws the new screen"; else echo "FAIL $1&ui=next: new screen not drawn"; FAIL=1; fi
+  want 200 "admin.php?page=$1 (current screen)" -b /tmp/cj-ci "$H/wp-admin/admin.php?page=$1"
+  if grep -q "id=\"$2\"" /tmp/rw.out; then echo "FAIL $1: the current screen is not the default any more"; FAIL=1; else echo "ok   $1: current screen stays the default"; fi
+  want 403 "admin.php?page=$1&ui=next (subscriber)" -b /tmp/cj-rw-sub "$H/wp-admin/admin.php?page=$1&ui=next"
+}
+# route NAMESPACE/PATH: GET checks.
+route() {
+  want 401 "GET /$1 signed out" "$H/?rest_route=/$1"
+  want 401 "GET /$1 cookie, no nonce" -b /tmp/cj-ci "$H/?rest_route=/$1"
+  want 403 "GET /$1 subscriber" -b /tmp/cj-rw-sub -H "X-WP-Nonce: $NS" "$H/?rest_route=/$1"
+  want 200 "GET /$1 administrator" -b /tmp/cj-ci -H "X-WP-Nonce: $NA" "$H/?rest_route=/$1"
+}
+# post NAMESPACE/PATH JSON: a write refused signed out and for a subscriber.
+post() {
+  want 401 "POST /$1 signed out" -X POST -H 'Content-Type: application/json' -d "$2" "$H/?rest_route=/$1"
+  want 403 "POST /$1 subscriber" -X POST -b /tmp/cj-rw-sub -H "X-WP-Nonce: $NS" -H 'Content-Type: application/json' -d "$2" "$H/?rest_route=/$1"
+}
+# optmd5 NAME…: md5 of each option (or "(absent)").
+optmd5() { local l; l=$(printf '"%s",' "$@"); wp eval "foreach ( array( ${l%,} ) as \$o ) { echo \$o, '=', md5( serialize( get_option( \$o, '(absent)' ) ) ), ' '; }"; }
+# same LABEL BEFORE AFTER: no setting lost.
+same() { if [ "$2" = "$3" ]; then echo "ok   $1: every option identical after an unchanged Save"; else echo "FAIL $1: options changed: $2 -> $3"; FAIL=1; fi; }
+
+echo "-- kits settings panel (&ui=next)"
+screen kits-settings kits-settings-next kits-settings-next
+route kits/v1/settings-panel
+post kits/v1/settings-panel '{"values":{}}'
+BEFORE=$(optmd5 kits_theme_options)
+want 200 "GET /kits/v1/settings-panel for the unchanged Save" -b /tmp/cj-ci -H "X-WP-Nonce: $NA" "$H/?rest_route=/kits/v1/settings-panel"
+cp /tmp/rw.out /tmp/ks.json
+python3 - > /tmp/ks-values.json <<'PY' || { echo "FAIL kits/v1/settings-panel answer has no sections: $(head -c 400 /tmp/ks.json)"; FAIL=1; }
+import json, sys
+d = json.load(open('/tmp/ks.json'))
+if not isinstance(d, dict) or 'sections' not in d:
+    sys.exit(1)
+print(json.dumps({'values': {f['key']: f['value'] for s in d['sections'] for g in s['groups'] for f in g['fields']}}))
+PY
+want 200 "POST /kits/v1/settings-panel unchanged Save (administrator)" -X POST -b /tmp/cj-ci -H "X-WP-Nonce: $NA" -H 'Content-Type: application/json' -d @/tmp/ks-values.json "$H/?rest_route=/kits/v1/settings-panel"
+grep -q '"saved":false' /tmp/rw.out && echo "ok   unchanged Save reports nothing saved" || { echo "FAIL unchanged Save wrote"; FAIL=1; }
+same "Kits Settings" "$BEFORE" "$(optmd5 kits_theme_options)"
+# Each Kits plugin's new screens: tools/ci/smoke-ui-<plugin>.sh, using screen, route, post, optmd5 and same above.
+for f in "$(dirname "$0")"/smoke-ui-*.sh; do
+  [ -f "$f" ] || continue
+  echo "-- $(basename "$f" .sh)"
+  # shellcheck source=/dev/null
+  . "$f"
+done
+
 wp user delete rw-sub rw-ed --yes --quiet
 if [ -f /tmp/wp-debug.log ] && grep -E 'PHP (Fatal|Parse) error' /tmp/wp-debug.log; then FAIL=1; fi
 # The child's aw.css has no component rules (it is the plugin's copy), so the component files load from the plugin.

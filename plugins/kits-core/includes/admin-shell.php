@@ -110,3 +110,37 @@ function kits_shell_mount( string $id, string $title, string $fallback_url, stri
 	echo '<noscript><p>' . esc_html__( 'This screen needs JavaScript.', 'kits-core' ) . ' <a href="' . esc_url( $fallback_url ) . '">' . esc_html( $fallback ) . '</a></p></noscript>';
 	echo '</div></div>';
 }
+
+/**
+ * The trial switch every new screen sits behind: the current screen's address with &ui=next.
+ */
+function kits_shell_ui_next(): bool {
+	return 'next' === sanitize_key( wp_unslash( $_GET['ui'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- which screen to show; nothing is saved here.
+}
+
+/**
+ * The permission check of a shell screen's REST route (docs/kits-plugin-ui.md, Data):
+ * 401 when signed out; 403 when a browser request has no valid wp_rest nonce (an Application Password request has
+ * none); 403 without the capability.
+ *
+ * @param string $cap Capability the route needs.
+ * @return callable A permission_callback.
+ */
+function kits_shell_rest_can( string $cap ): callable {
+	return function ( $request ) use ( $cap ) {
+		if ( ! is_user_logged_in() ) {
+			return new WP_Error( 'rest_not_logged_in', __( 'Sign in to use this.', 'kits-core' ), array( 'status' => 401 ) );
+		}
+		$app = function_exists( 'rest_get_authenticated_app_password' ) && null !== rest_get_authenticated_app_password();
+		if ( ! $app ) {
+			$nonce = (string) ( $request->get_header( 'X-WP-Nonce' ) ?? $request->get_param( '_wpnonce' ) ?? '' );
+			if ( ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
+				return new WP_Error( 'rest_cookie_invalid_nonce', __( 'The page has expired. Reload it and try again.', 'kits-core' ), array( 'status' => 403 ) );
+			}
+		}
+		if ( ! current_user_can( $cap ) ) {
+			return new WP_Error( 'rest_forbidden', __( 'You are not allowed to do this.', 'kits-core' ), array( 'status' => 403 ) );
+		}
+		return true;
+	};
+}
