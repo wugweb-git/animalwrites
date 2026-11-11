@@ -323,7 +323,7 @@ function kits_transfer_page() {
 	$intro = 'One JSON file with this site\'s Styles, Theme Options, Page Options defaults and synced patterns.';
 	$parts = kits_transfer_parts();
 	if ( function_exists( 'kits_frame_ready' ) && kits_frame_ready() ) {
-		// &ui=next: each part as a card in the plugin screens' frame (includes/admin-kits-frame.php).
+		// The default (not &ui=classic): each part as a card in the plugin screens' frame (includes/admin-kits-frame.php).
 		kits_frame_open( 'kits-tools', 'Tools', $intro );
 		kits_transfer_result();
 		foreach ( $parts as $id => $part ) {
@@ -492,8 +492,8 @@ function kits_transfer_back( array $result ): void {
 	$back = admin_url( 'admin.php?page=kits-tools' );
 	$from = (string) wp_parse_url( (string) wp_get_referer(), PHP_URL_QUERY );
 	parse_str( $from, $q );
-	if ( 'next' === ( $q['ui'] ?? '' ) ) {
-		$back = add_query_arg( 'ui', 'next', $back ); // Sent from the new look: come back to it.
+	if ( 'classic' === ( $q['ui'] ?? '' ) ) {
+		$back = add_query_arg( 'ui', 'classic', $back ); // Sent from the earlier screen: come back to it.
 	}
 	wp_safe_redirect( $back );
 	exit;
@@ -766,8 +766,8 @@ function kits_core_settings_form( string $group, string $also = '', string $back
  * @param string $back Address relative to wp-admin (options.php adds settings-updated=true to it).
  */
 function kits_options_form_fields( string $back ): void {
-	if ( function_exists( 'kits_frame_ready' ) && kits_frame_ready() ) {
-		$back = add_query_arg( 'ui', 'next', $back ); // Saved from the new look: come back to it.
+	if ( function_exists( 'kits_shell_ui_next' ) && ! kits_shell_ui_next() ) {
+		$back = add_query_arg( 'ui', 'classic', $back ); // Saved from the earlier screen: come back to it.
 	}
 	echo '<input type="hidden" name="option_page" value="kits_options"><input type="hidden" name="action" value="update">';
 	wp_nonce_field( 'kits_options-options', '_wpnonce', false );

@@ -34,9 +34,7 @@ add_action(
 			function () {
 				$m    = planweb_month_arg( $_GET['m'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification,WordPress.Security.ValidatedSanitizedInput -- a redirect; planweb_month_arg() sanitizes.
 				$args = '' !== $m ? array( 'm' => $m ) : array();
-				if ( function_exists( 'kits_shell_ui_next' ) && kits_shell_ui_next() ) {
-					$args['ui'] = 'next'; // The new screens' trial follows the old address too.
-				}
+				$args['ui'] = 'classic'; // The old Dates address opens the Calendar, which is on the earlier screen.
 				wp_safe_redirect( planweb_url( $args ) );
 				exit;
 			}
@@ -123,7 +121,7 @@ function planweb_screen() {
 		wp_die( esc_html__( 'Sorry, you are not allowed to access this page.', 'planweb' ), 403 );
 	}
 	if ( planweb_ui_page() ) {
-		return; // The new screens (&ui=next), includes/planweb-ui.php.
+		return; // The new screens, includes/planweb-ui.php (&ui=classic shows this one).
 	}
 	// phpcs:disable WordPress.Security.NonceVerification.Recommended -- filters and messages only; every change is a nonce-checked admin-post.
 	$month = planweb_month_arg( $_GET['m'] ?? '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- planweb_month_arg() sanitizes.

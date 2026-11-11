@@ -227,7 +227,7 @@ function kits_screen_sections( string $screen ): array {
 function kits_sections_page( string $screen, string $title, string $intro ): void {
 	$sections = kits_screen_sections( $screen );
 	if ( function_exists( 'kits_frame_ready' ) && kits_frame_ready() ) {
-		// &ui=next: the same sections as cards in the plugin screens' frame (includes/admin-kits-frame.php).
+		// The default (not &ui=classic): the same sections as cards in the plugin screens' frame (includes/admin-kits-frame.php).
 		kits_frame_open( $screen, $title, $intro );
 		foreach ( $sections as $id => $s ) {
 			kits_frame_card( (string) $id, $s['title'], $s['render'] );

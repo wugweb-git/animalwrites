@@ -176,7 +176,7 @@ add_action(
 
 function aw_review_page() {
 	if ( function_exists( 'sourceweb_ui_page' ) && sourceweb_ui_page( 'review' ) ) {
-		return; // The new To review (&ui=next, sourceweb-ui.php).
+		return; // The new To review (sourceweb-ui.php; &ui=classic shows this one).
 	}
 	if ( ! class_exists( 'WP_List_Table' ) ) {
 		require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';

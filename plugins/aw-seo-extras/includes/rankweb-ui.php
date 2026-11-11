@@ -1,11 +1,11 @@
 <?php
 /**
- * RankWeb's new screens on the Kits admin shell (trial): admin.php?page=aw-seo-plus&ui=next (Dashboard) and
- * admin.php?page=aw-seo-settings&ui=next (Settings). Without &ui=next the current screens show, as before; they stay
- * the default until the owner switches. The screens are one script (build/index.js, from src/), drawn with Kits Core's
- * shell parts (kits-core/includes/admin-shell.php) and fed by the rankweb/v1 routes (rankweb-rest.php).
+ * RankWeb's screens on the Kits admin shell, the default since 12 Nov 2026: admin.php?page=aw-seo-plus (Dashboard) and
+ * admin.php?page=aw-seo-settings (Settings); &ui=classic shows the earlier screens. The screens are one script
+ * (build/index.js, from src/), drawn with Kits Core's shell parts (kits-core/includes/admin-shell.php) and fed by the
+ * rankweb/v1 routes (rankweb-rest.php).
  *
- * When Kits Core or a build file is missing, &ui=next shows the current screen.
+ * When Kits Core or a build file is missing, the earlier screen shows.
  *
  * @package aw-seo-extras
  */

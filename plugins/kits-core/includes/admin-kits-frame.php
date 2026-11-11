@@ -1,13 +1,12 @@
 <?php
 /**
- * Kits → Home, Settings, Tools and Help on the plugin screens' look (trial, &ui=next): admin.php?page=kits&ui=next,
- * admin.php?page=kits-settings&ui=next, admin.php?page=kits-tools&ui=next, admin.php?page=kits-help&ui=next.
+ * Kits → Home, Settings, Tools and Help on the plugin screens' look, the default since 12 Nov 2026: admin.php?page=kits,
+ * admin.php?page=kits-settings, admin.php?page=kits-tools, admin.php?page=kits-help (&ui=classic: the earlier screens).
  * Theme Options' own screen (includes/admin-app.php) uses the same header, chips and cards.
  *
  * The same frame as the Kits plugins (docs/kits-plugin-ui.md): the app header with the Kits icon, name and version and
  * the five Kits tabs (yellow bar on the open one), then each section as a card. The cards hold today's sections, printed
- * by the same functions, so every form, button and link works as on the current screens. Without &ui=next the current
- * screens show; they stay the default until the owner switches.
+ * by the same functions, so every form, button and link works as on the earlier screens.
  *
  * The frame is printed by PHP with the shell's classes (only the kits-shell stylesheet is loaded; no script is needed).
  *

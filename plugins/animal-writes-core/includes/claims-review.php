@@ -303,7 +303,7 @@ function aw_claims_screen() {
 		wp_die( 'Not allowed.', 403 );
 	}
 	if ( function_exists( 'directoryweb_ui_page' ) && directoryweb_ui_page( 'claims' ) ) {
-		return; // &ui=next: the new Claims screen (directoryweb-ui.php)
+		return; // The new Claims screen (directoryweb-ui.php; &ui=classic shows this one)
 	}
 	$entry = absint( wp_unslash( $_GET['entry'] ?? 0 ) ); // phpcs:ignore WordPress.Security.NonceVerification -- read only
 	echo '<div class="wrap">';

@@ -1,6 +1,6 @@
 <?php
 /**
- * PlanWeb's new screens (&ui=next): the rules that need no database. The counts the Dashboard shows (worked out by the
+ * PlanWeb's new screens: the rules that need no database. The counts the Dashboard shows (worked out by the
  * background job from a list of entries), the tiles made from them, the list's request arguments and the module switch
  * as a "save only what changed" step. tests/run.php covers them.
  *

@@ -302,7 +302,7 @@ function aw_sourcing_overview_page() {
 		return;
 	}
 	if ( function_exists( 'sourceweb_ui_page' ) && sourceweb_ui_page( 'dashboard' ) ) {
-		return; // The new Dashboard (&ui=next, sourceweb-ui.php).
+		return; // The new Dashboard (sourceweb-ui.php; &ui=classic shows this one).
 	}
 	$tabs  = current_user_can( AW_SRC_CAP ) ? aw_sourcing_tabs() : array();
 	$auto  = esc_html( 'Automatic' );

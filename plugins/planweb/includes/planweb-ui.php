@@ -1,15 +1,15 @@
 <?php
 /**
- * PlanWeb's new screens on the Kits admin shell (trial), all on the Calendar's own address with &ui=next.
+ * PlanWeb's screens on the Kits admin shell, the default since 12 Nov 2026, on the Calendar's own address.
  *
  * Address, screen and capability:
- *   admin.php?page=planweb&ui=next               Dashboard  edit_planweb_entries
- *   admin.php?page=planweb&ui=next&tab=entries   Entries    edit_planweb_entries
- *   admin.php?page=planweb&ui=next&tab=settings  Settings   manage_options
+ *   admin.php?page=planweb               Dashboard  edit_planweb_entries
+ *   admin.php?page=planweb&tab=entries   Entries    edit_planweb_entries
+ *   admin.php?page=planweb&tab=settings  Settings   manage_options
  *
- * Without &ui=next the Calendar shows, as before; it stays the default until the owner switches. One script
+ * &ui=classic (or a month, edit form or saved notice) shows the Calendar, the earlier screen. One script
  * (build/index.js, from src/) draws the three screens with Kits Core's shell parts, fed by the planweb/v1 routes
- * (planweb-rest.php). When Kits Core or the build file is missing, &ui=next shows the Calendar.
+ * (planweb-rest.php). When Kits Core or the build file is missing, the Calendar shows.
  *
  * @package planweb
  */

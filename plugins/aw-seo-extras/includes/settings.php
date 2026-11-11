@@ -509,7 +509,7 @@ function aw_seo_settings_page() {
 		wp_die( 'Not allowed.', 403 );
 	}
 	if ( function_exists( 'rankweb_ui_page' ) && rankweb_ui_page( 'settings' ) ) {
-		return; // the new Settings, on &ui=next (rankweb-ui.php)
+		return; // the new Settings (rankweb-ui.php; &ui=classic shows this one)
 	}
 	$tab = aw_seo_settings_tab();
 	echo '<div class="wrap"><h1>RankWeb settings</h1>';

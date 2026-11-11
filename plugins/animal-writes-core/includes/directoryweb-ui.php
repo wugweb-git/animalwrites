@@ -1,17 +1,17 @@
 <?php
 /**
- * DirectoryWeb's new screens on the Kits admin shell (trial, docs/directory-plugin-plan.md §2).
+ * DirectoryWeb's screens on the Kits admin shell (docs/directory-plugin-plan.md §2), the default since 12 Nov 2026.
  *
  * Addresses:
- *   admin.php?page=directoryweb&ui=next                              Dashboard   edit_aw_volunteers
- *   edit.php?post_type=aw_listing&page=aw-claims&ui=next              Claims      edit_aw_volunteers
- *   admin.php?page=directoryweb-settings&ui=next                      Settings    manage_options
+ *   admin.php?page=directoryweb                              Dashboard   edit_aw_volunteers
+ *   edit.php?post_type=aw_listing&page=aw-claims              Claims      edit_aw_volunteers
+ *   admin.php?page=directoryweb-settings                      Settings    manage_options
  *
- * Without &ui=next Directory → Claims shows the current screen, as before. The Dashboard and Settings addresses are new
- * and not in the menu; without &ui=next they show a short page with the way in. The screens are one script
- * (directoryweb/build/index.js, from directoryweb/src/), drawn with Kits Core's shell parts and fed by the
- * directoryweb/v1 routes (directoryweb-rest.php). When Kits Core's shell or the build file is missing, &ui=next shows
- * the current screen.
+ * &ui=classic (or one claim, or the notice after a review) shows the earlier Claims screen. The Dashboard and Settings
+ * addresses are new and not in the menu; on &ui=classic they show a short page with the way in. The screens are one
+ * script (directoryweb/build/index.js, from directoryweb/src/), drawn with Kits Core's shell parts and fed by the
+ * directoryweb/v1 routes (directoryweb-rest.php). When Kits Core's shell or the build file is missing, the earlier
+ * screen shows.
  *
  * @package animal-writes-core
  */
@@ -62,7 +62,7 @@ function directoryweb_ui_ready( ?bool $set = null ): bool {
 }
 
 /**
- * The address of a screen, with &ui=next.
+ * The address of a screen.
  *
  * @param string $screen 'dashboard', 'claims' or 'settings'.
  */
@@ -193,7 +193,7 @@ function directoryweb_ui_page( string $screen ): bool {
 }
 
 /**
- * The page for a new address without &ui=next (or without the shell): its name and the way in.
+ * The page for a new address on &ui=classic (or without the shell): its name and the way in.
  *
  * @param string $title  Heading.
  * @param string $screen 'dashboard' or 'settings'.

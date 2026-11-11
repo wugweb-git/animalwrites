@@ -98,7 +98,7 @@ require_once AW_CORE_DIR . 'includes/backups.php';
 require_once AW_CORE_DIR . 'includes/staging.php';
 require_once AW_CORE_DIR . 'includes/claims.php';
 require_once AW_CORE_DIR . 'includes/claims-review.php';
-require_once AW_CORE_DIR . 'includes/directoryweb-shape.php'; // DirectoryWeb's new screens (&ui=next): pure parts.
+require_once AW_CORE_DIR . 'includes/directoryweb-shape.php'; // DirectoryWeb's new screens: pure parts.
 require_once AW_CORE_DIR . 'includes/directoryweb-dashboard.php'; // the Dashboard's background counts.
 require_once AW_CORE_DIR . 'includes/directoryweb-rest.php'; // directoryweb/v1.
 require_once AW_CORE_DIR . 'includes/directoryweb-ui.php'; // Dashboard, Claims and Settings on the Kits admin shell.

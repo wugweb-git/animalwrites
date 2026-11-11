@@ -246,8 +246,8 @@ function kits_preview_page() {
 	echo '<div class="wrap"><h1>Preview</h1>';
 	kits_admin_tabs( 'kits-preview' );
 	$back = admin_url( 'admin.php?page=kits-settings&kits_section=preview' );
-	if ( function_exists( 'kits_frame_ready' ) && kits_frame_ready() ) {
-		$back = add_query_arg( 'ui', 'next', $back ); // Saved from the new look: come back to it.
+	if ( function_exists( 'kits_shell_ui_next' ) && ! kits_shell_ui_next() ) {
+		$back = add_query_arg( 'ui', 'classic', $back ); // Saved from the earlier screen: come back to it.
 	}
 	echo '<form method="post" action="' . esc_url( $back ) . '">'; // Back to Settings → Preview access after saving.
 	wp_nonce_field( 'kits_preview_ips', 'kits_preview_nonce' );

@@ -1,14 +1,14 @@
 <?php
 /**
- * MailWeb's new screens on the Kits admin shell (trial), each behind &ui=next on today's address:
+ * MailWeb's screens on the Kits admin shell, the default since 12 Nov 2026:
  *
- * - admin.php?page=mailweb-overview&ui=next   Dashboard (MAILWEB_CAP)
- * - admin.php?page=mailweb&ui=next            Inbox, the working list (MAILWEB_CAP)
- * - admin.php?page=mailweb-settings&ui=next   Settings (manage_options)
+ * - admin.php?page=mailweb-overview   Dashboard (MAILWEB_CAP)
+ * - admin.php?page=mailweb            Inbox, the working list (MAILWEB_CAP)
+ * - admin.php?page=mailweb-settings   Settings (manage_options)
  *
- * Without &ui=next today's screens show, as before; they stay the default until the owner switches. The screens are
- * one script (build/index.js, from src/), drawn with Kits Core's shell parts and fed by the mailweb/v1 routes
- * (mailweb-rest.php). When Kits Core or a build file is missing, &ui=next shows today's screen.
+ * &ui=classic shows the earlier screens. The screens are one script (build/index.js, from src/), drawn with Kits
+ * Core's shell parts and fed by the mailweb/v1 routes (mailweb-rest.php). When Kits Core or a build file is missing,
+ * the earlier screen shows.
  *
  * @package mailweb
  */

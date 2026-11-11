@@ -134,7 +134,7 @@ add_action(
 );
 
 /**
- * Save "Workers use these lists" (the form above and SourceWeb → Settings with &ui=next) and log it.
+ * Save "Workers use these lists" (the form above and SourceWeb → Settings) and log it.
  *
  * @param bool $on On or off.
  */

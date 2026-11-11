@@ -290,7 +290,7 @@ function aw_si_screen(): void {
 	}
 	$tab = aw_si_tab();
 	if ( function_exists( 'insightweb_ui_page' ) && insightweb_ui_page( $tab ) ) {
-		return; // &ui=next: the new screen (insightweb-ui.php).
+		return; // The new screen (insightweb-ui.php; &ui=classic shows this one).
 	}
 	echo '<div class="wrap"><h1 class="wp-heading-inline">' . esc_html__( 'Search Insights', 'aw-seo-extras' ) . '</h1><hr class="wp-header-end">';
 	echo '<nav class="nav-tab-wrapper" aria-label="' . esc_attr__( 'Search Insights sections', 'aw-seo-extras' ) . '">';

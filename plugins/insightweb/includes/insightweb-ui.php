@@ -1,13 +1,12 @@
 <?php
 /**
- * InsightWeb's new screens on the Kits admin shell (trial):
- * - admin.php?page=aw-search-insights&ui=next: the Dashboard;
- * - admin.php?page=aw-search-insights&tab=settings&ui=next: Settings.
+ * InsightWeb's screens on the Kits admin shell, the default since 12 Nov 2026:
+ * - admin.php?page=aw-search-insights: the Dashboard;
+ * - admin.php?page=aw-search-insights&tab=settings: Settings.
  *
- * Without &ui=next the current tabs show, as before; they stay the default until the owner switches. The screens are one
- * script (build/index.js, from src/), drawn with Kits Core's shell parts (kits-core/includes/admin-shell.php) and fed
- * by the insightweb/v1 routes (insightweb-rest.php). When Kits Core or a build file is missing, &ui=next shows the
- * current tab.
+ * &ui=classic shows the earlier tabs. The screens are one script (build/index.js, from src/), drawn with Kits Core's
+ * shell parts (kits-core/includes/admin-shell.php) and fed by the insightweb/v1 routes (insightweb-rest.php). When Kits
+ * Core or a build file is missing, the earlier tab shows.
  *
  * @package aw-seo-extras
  */

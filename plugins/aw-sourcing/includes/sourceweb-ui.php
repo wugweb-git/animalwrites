@@ -1,16 +1,16 @@
 <?php
 /**
- * SourceWeb's new screens on the Kits admin shell (trial), each behind &ui=next on the current screen's own address.
+ * SourceWeb's screens on the Kits admin shell, the default since 12 Nov 2026, on each earlier screen's own address.
  *
  * Addresses:
- *   admin.php?page=aw-sourcing-menu&ui=next              Dashboard          (edit_others_posts)
- *   admin.php?page=aw-review&ui=next                     To review          (edit_others_posts)
- *   admin.php?page=aw-enrich-review&ui=next              Enrichment review  (edit_others_posts)
- *   admin.php?page=aw-sourcing&tab=settings&ui=next      Settings           (manage_options)
+ *   admin.php?page=aw-sourcing-menu              Dashboard          (edit_others_posts)
+ *   admin.php?page=aw-review                     To review          (edit_others_posts)
+ *   admin.php?page=aw-enrich-review              Enrichment review  (edit_others_posts)
+ *   admin.php?page=aw-sourcing&tab=settings      Settings           (manage_options)
  *
- * Without &ui=next the current screens show, as before; they stay the default until the owner switches. The screens
- * are one script (build/index.js, from src/), drawn with Kits Core's shell parts and fed by the sourceweb/v1 routes
- * (sourceweb-rest.php). When Kits Core or a build file is missing, &ui=next shows the current screen.
+ * &ui=classic shows the earlier screens. The screens are one script (build/index.js, from src/), drawn with Kits
+ * Core's shell parts and fed by the sourceweb/v1 routes (sourceweb-rest.php). When Kits Core or a build file is
+ * missing, the earlier screen shows.
  *
  * @package aw-sourcing
  */

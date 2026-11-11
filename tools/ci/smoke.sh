@@ -381,9 +381,9 @@ optmd5() { local l; l=$(printf '"%s",' "$@"); wp eval "foreach ( array( ${l%,} )
 # same LABEL BEFORE AFTER: no setting lost.
 same() { if [ "$2" = "$3" ]; then echo "ok   $1: every option identical after an unchanged Save"; else echo "FAIL $1: options changed: $2 -> $3"; FAIL=1; fi; }
 
-echo "-- kits screens on the plugin look (&ui=next; includes/admin-kits-frame.php)"
-# Home, Settings, Tools and Help: 200 and drawn in the frame (shell stylesheet, header, five tabs keeping &ui=next) with
-# the same sections as the current screen; the current screen stays the default; a subscriber is refused.
+echo "-- kits screens on the plugin look (the default; includes/admin-kits-frame.php)"
+# Home, Settings, Tools and Help: 200 and drawn in the frame (shell stylesheet, header, five tabs) with the same
+# sections as the earlier screen, on &ui=next and the plain address; &ui=classic is the earlier screen; a subscriber is refused.
 while read -r page section; do
   want 200 "admin.php?page=$page&ui=next (administrator)" -b /tmp/cj-ci "$H/wp-admin/admin.php?page=$page&ui=next"
   if grep -q 'class="kits-shell-header"' /tmp/rw.out && grep -q "kits-shell-css" /tmp/rw.out && grep -q "id=\"$section\"" /tmp/rw.out; then echo "ok   $page&ui=next draws the frame with $section"; else echo "FAIL $page&ui=next: frame or $section missing"; FAIL=1; fi
@@ -401,9 +401,11 @@ kits-settings preview
 kits-tools export
 kits-help docs
 FRAME
-# A save from the new look comes back to it (options.php forms carry &ui=next in their return address).
-want 200 "admin.php?page=kits-settings&ui=next (save address)" -b /tmp/cj-ci "$H/wp-admin/admin.php?page=kits-settings&ui=next"
-if grep -q 'name="_wp_http_referer" value="[^"]*page=kits-settings[^"]*ui=next' /tmp/rw.out; then echo "ok   Settings forms come back to &ui=next"; else echo "FAIL Settings forms do not come back to &ui=next"; FAIL=1; fi
+# A save comes back to the screen it was made on: the plain address from the new look, &ui=classic from the earlier one.
+want 200 "admin.php?page=kits-settings (save address)" -b /tmp/cj-ci "$H/wp-admin/admin.php?page=kits-settings"
+if grep -q 'name="_wp_http_referer" value="[^"]*page=kits-settings' /tmp/rw.out && ! grep -q 'name="_wp_http_referer" value="[^"]*ui=classic' /tmp/rw.out; then echo "ok   Settings forms come back to the new look"; else echo "FAIL Settings forms do not come back to the new look"; FAIL=1; fi
+want 200 "admin.php?page=kits-settings&ui=classic (save address)" -b /tmp/cj-ci "$H/wp-admin/admin.php?page=kits-settings&ui=classic"
+if grep -q 'name="_wp_http_referer" value="[^"]*page=kits-settings[^"]*ui=classic' /tmp/rw.out; then echo "ok   Settings forms come back to &ui=classic"; else echo "FAIL Settings forms do not come back to &ui=classic"; FAIL=1; fi
 # Theme Options is drawn by its app on the shell; its tabs are the plain addresses (the new look is the default).
 
 want 200 "admin.php?page=kits-options (administrator)" -b /tmp/cj-ci "$H/wp-admin/admin.php?page=kits-options"
