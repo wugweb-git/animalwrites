@@ -89,13 +89,14 @@ add_action(
 
 /**
  * Screens that other plugins add under Kits → Plugins (not as top tabs): slug => [name, address relative to wp-admin,
- * capability, one line on what it is]. On those screens the Plugins tab is the active one.
+ * capability, one line on what it is, state]. State is '' when the plugin is on ("Active"), else a short word such as
+ * "Off" (the address then says where to switch it on). On those screens the Plugins tab is the active one.
  */
 function kits_plugin_screens(): array {
 	$list = array();
 	foreach ( (array) apply_filters( 'kits_plugin_screens', array() ) as $slug => $s ) {
 		if ( is_array( $s ) && isset( $s[0], $s[1], $s[2] ) ) {
-			$list[ (string) $slug ] = array( (string) $s[0], (string) $s[1], (string) $s[2], (string) ( $s[3] ?? '' ) );
+			$list[ (string) $slug ] = array( (string) $s[0], (string) $s[1], (string) $s[2], (string) ( $s[3] ?? '' ), (string) ( $s[4] ?? '' ) );
 		}
 	}
 	return $list;
@@ -410,6 +411,7 @@ function kits_plugins_page() {
 		if ( current_user_can( $s[2] ) ) {
 			$own[] = array(
 				'plugin' => kits_product_icon_img( $s[0], 32 ) . '<strong><a href="' . esc_url( admin_url( $s[1] ) ) . '">' . esc_html( $s[0] ) . '</a></strong>',
+				'state'  => '' === $s[4] ? '<span class="dashicons dashicons-yes" aria-hidden="true"></span> ' . esc_html( 'Active' ) : esc_html( $s[4] ),
 				'what'   => esc_html( $s[3] ),
 			);
 		}
@@ -420,6 +422,7 @@ function kits_plugins_page() {
 			'kits-plugin-screens',
 			array(
 				'plugin' => 'Plugin',
+				'state'  => 'State',
 				'what'   => 'What it does here',
 			),
 			$own,

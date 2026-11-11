@@ -269,7 +269,8 @@ function kits_contrast( $a, $b ) {
 
 /**
  * A file's path relative to wp-content (plugins/…, themes/…), built from the plugins, themes and content folders (also
- * through a symlink), so the screen never prints the server's own folders. A file outside them: its name only.
+ * through a symlink, each plugin and theme folder by its real path as well), so the screen never prints the server's own
+ * folders. A file elsewhere in the site: relative to the site's folder (ABSPATH); outside it: its name only.
  *
  * @param string $path Full path.
  */
@@ -277,11 +278,19 @@ function kits_content_path( $path ) {
 	static $roots = null;
 	if ( null === $roots ) {
 		$roots = array();
-		foreach ( array(
-			array( WP_PLUGIN_DIR, 'plugins/' ),
-			array( get_theme_root(), 'themes/' ),
-			array( WP_CONTENT_DIR, '' ),
-		) as list( $dir, $name ) ) {
+		$list  = array();
+		// Each plugin and theme folder by its own real path too: a folder linked in from a deploy folder outside
+		// wp-content still reads plugins/…, themes/….
+		foreach ( array( array( WP_PLUGIN_DIR, 'plugins/' ), array( get_theme_root(), 'themes/' ) ) as list( $base, $name ) ) {
+			foreach ( (array) glob( trailingslashit( $base ) . '*', GLOB_ONLYDIR ) as $sub ) {
+				$list[] = array( (string) $sub, $name . wp_basename( (string) $sub ) . '/' );
+			}
+		}
+		$list[] = array( WP_PLUGIN_DIR, 'plugins/' );
+		$list[] = array( get_theme_root(), 'themes/' );
+		$list[] = array( WP_CONTENT_DIR, '' );
+		$list[] = array( ABSPATH, '' ); // The site's folder: never the server's own path.
+		foreach ( $list as list( $dir, $name ) ) {
 			$real = realpath( $dir );
 			foreach ( array( $dir, false === $real ? '' : $real ) as $d ) {
 				if ( '' !== $d ) {
@@ -289,6 +298,7 @@ function kits_content_path( $path ) {
 				}
 			}
 		}
+		uksort( $roots, fn( $a, $b ) => strlen( $b ) <=> strlen( $a ) ); // The longest match first.
 	}
 	$path = wp_normalize_path( (string) $path );
 	$real = realpath( $path );
@@ -310,7 +320,7 @@ function kits_class_usage() {
 		$watch[] = $dir . '/assets/css/aw.css';
 	}
 	$watch  = array_unique( $watch );
-	$key    = 'kits_class_usage_3_' . md5( implode( '|', array_merge( $watch, array_map( fn( $f ) => is_readable( $f ) ? filemtime( $f ) : 0, $watch ) ) ) ); // New files or folders, new list.
+	$key    = 'kits_class_usage_4_' . md5( implode( '|', array_merge( $watch, array_map( fn( $f ) => is_readable( $f ) ? filemtime( $f ) : 0, $watch ) ) ) ); // New files or folders, new list.
 	$cached = get_transient( $key );
 	if ( is_array( $cached ) ) {
 		return $cached;

@@ -38,8 +38,12 @@ function planweb_no_kits_notice() {
  * @param array $tabs slug => [name, address relative to wp-admin, capability, what it is].
  */
 function planweb_kits_tab( $tabs ) {
+	$what = __( 'The team\'s calendar: dates, plans and reminders.', 'planweb' );
 	if ( planweb_on() ) {
-		$tabs[ PLANWEB_MENU ] = array( __( 'PlanWeb', 'planweb' ), 'admin.php?page=' . PLANWEB_MENU, 'edit_planweb_entries', __( 'The team\'s calendar: dates, plans and reminders.', 'planweb' ) );
+		$tabs[ PLANWEB_MENU ] = array( __( 'PlanWeb', 'planweb' ), 'admin.php?page=' . PLANWEB_MENU, 'edit_planweb_entries', $what );
+	} else {
+		// Off: the row stays, and links to Plugins, where activating PlanWeb switches it on.
+		$tabs[ PLANWEB_MENU ] = array( __( 'PlanWeb', 'planweb' ), 'plugins.php', 'activate_plugins', $what, __( 'Off', 'planweb' ) );
 	}
 	return $tabs;
 }

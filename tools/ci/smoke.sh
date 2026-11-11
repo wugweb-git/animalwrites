@@ -124,6 +124,8 @@ has "Home: page check (Animal Writes)" /tmp/admin.html 'id="page-check"'
 has "Home: backup" /tmp/admin.html 'id="backup"'
 has "Home: email, thumbnails and pictures stay" /tmp/admin.html 'id="pictures"'
 has "Home: Dates linked" /tmp/admin.html 'page=aw-dates'
+adm "admin.php?page=kits-plugins" >/dev/null
+for n in PlanWeb InsightWeb MailWeb; do has "Plugins: $n row with its icon" /tmp/admin.html "data:image/svg+xml;base64,"; grep -q ">$n</a>" /tmp/admin.html && echo "ok   Plugins: $n row" || { echo "FAIL Plugins: no $n row"; FAIL=1; }; done
 adm "admin.php?page=kits-settings" >/dev/null
 has "Settings: CDN cache times" /tmp/admin.html 'id="cdn"'
 has "Settings: preview access" /tmp/admin.html 'id="kits-preview-ips"'
@@ -134,6 +136,8 @@ has "Help: docs" /tmp/admin.html 'id="docs"'
 has "Help: design system" /tmp/admin.html 'id="design-system"'
 has "Help: edit screens" /tmp/admin.html 'id="developer/edit-screens"'
 has "Help: theme parts" /tmp/admin.html 'id="developer/theme-parts"'
+adm "admin.php?page=kits-help&tab=components" >/dev/null # Design system: the plugins here are links into the repo checkout
+if grep -qF -e "$REPO/" -e "$WP/" /tmp/admin.html; then echo "FAIL Help → Design system prints a server path:"; grep -oF -e "$REPO/" -e "$WP/" /tmp/admin.html | sort | uniq -c | head -3; FAIL=1; else echo "ok   Help → Design system: no server paths"; fi
 adm "admin.php?page=kits-options" >/dev/null
 has "Theme Options: the app is the default" /tmp/admin.html 'kits-admin-theme-options-js'
 for l in content-types socials share layout-spacing; do has "Theme Options: $l shows today's fields" /tmp/admin.html "data-kits-legacy=\"$l\""; done
