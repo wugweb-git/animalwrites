@@ -19,6 +19,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+require_once __DIR__ . '/org-people-link.php'; // aw_org_people_link_plan(): the claimant link decision, tested without WordPress
+
 /** A name for matching: lower case, letters and digits only. */
 function aw_org_people_norm( $s ) {
 	return trim( preg_replace( '/[^a-z0-9]+/', ' ', strtolower( (string) $s ) ) );
@@ -99,6 +101,162 @@ add_shortcode(
 function aw_org_people_schema( $lid ) {
 	$people = array_values( array_filter( aw_org_people_crm( $lid ), fn( $p ) => $p['show'] && '' !== $p['name'] ) );
 	return array_map( fn( $p ) => array( '@type' => 'OrganizationRole', 'roleName' => '' !== $p['role'] ? $p['role'] : 'Volunteer', 'member' => array( '@type' => 'Person', 'name' => $p['name'] ) ), $people );
+}
+
+/* ---------- Approved claimants become the listing's people (owner, 18 Oct 2026; fixed 11 Nov 2026) ---------- */
+
+/**
+ * Link a claimant's FluentCRM contact to a listing, privately unless they ticked "Show my name"
+ * (aw_org_people_link_plan()).
+ *
+ * @param int    $lid   Listing.
+ * @param string $email The claimant's email.
+ * @param string $role  Their role (label).
+ * @param bool   $show  They ticked "Show my name".
+ * @param bool   $apply False: work out what would change and write nothing.
+ * @return string crm-off | no-email | no-contact | no-listing | elsewhere | already | updated | linked
+ */
+function aw_org_people_link( $lid, $email, $role, $show, $apply = true ) {
+	if ( ! function_exists( 'aw_crm_on' ) || ! aw_crm_on() ) {
+		return 'crm-off';
+	}
+	$email = strtolower( trim( (string) $email ) );
+	if ( ! is_email( $email ) ) {
+		return 'no-email';
+	}
+	$lid = (int) $lid;
+	if ( 'aw_listing' !== get_post_type( $lid ) ) {
+		return 'no-listing';
+	}
+	$contact = FluentCrmApi( 'contacts' )->getContact( $email );
+	if ( ! $contact ) {
+		return 'no-contact'; // the claim form adds every claimant to FluentCRM; an old entry may predate that
+	}
+	$tag     = FluentCrmApi( 'tags' )->getInstance()->where( 'slug', 'org-approved' )->first();
+	$has_tag = $tag && \FluentCrm\App\Models\Subscriber::filterByTags( array( (int) $tag->id ) )->where( 'id', (int) $contact->id )->first();
+	$plan    = aw_org_people_link_plan( (array) $contact->custom_fields(), (bool) $has_tag, $lid, (bool) $show, html_entity_decode( get_the_title( $lid ), ENT_QUOTES ), (string) $role );
+	if ( $apply ) {
+		if ( $plan['tag'] ) {
+			$contact->attachTags( aw_crm_tag_ids( array( 'org-approved' ) ) );
+		}
+		if ( $plan['sync'] ) {
+			$contact->syncCustomFieldValues( $plan['sync'], false );
+		}
+	}
+	return $plan['status'];
+}
+
+/**
+ * An approved claim on the old form (aw_claim post, claims.php): the claimant becomes one of the listing's people,
+ * not shown (the old form had no "Show my name").
+ *
+ * @param int  $claim aw_claim post.
+ * @param int  $lid   Listing.
+ * @param bool $apply False: write nothing.
+ * @return string aw_org_people_link() status.
+ */
+function aw_org_people_from_claim( $claim, $lid, $apply = true ) {
+	$role = (string) get_post_meta( $claim, 'aw_c_role', true );
+	$role = defined( 'AW_CLAIM_ROLES' ) && '' !== $role ? ( AW_CLAIM_ROLES[ $role ] ?? $role ) : $role;
+	return aw_org_people_link( $lid, (string) get_post_meta( $claim, 'aw_c_email', true ), $role, false, $apply );
+}
+
+/**
+ * Past approved claims, old form and form #6: link each claimant (dry run unless $apply).
+ *
+ * @param bool $apply Write the links.
+ * @return array{counts: array<string, int>, rows: array<int, array{claim: string, listing: int, status: string}>}
+ */
+function aw_org_people_backfill( $apply = false ) {
+	$todo = array();
+	$old  = get_posts(
+		array(
+			'post_type'      => 'aw_claim',
+			'post_status'    => 'any',
+			'posts_per_page' => -1,
+			'fields'         => 'ids',
+			'meta_key'       => 'aw_c_status', // phpcs:ignore WordPress.DB.SlowDBQuery
+			'meta_value'     => 'approved', // phpcs:ignore WordPress.DB.SlowDBQuery
+		)
+	);
+	foreach ( $old as $id ) {
+		$todo[] = array(
+			'claim' => 'old #' . $id,
+			'lid'   => (int) get_post_meta( $id, 'aw_c_listing', true ),
+			'run'   => fn( $lid, $go ) => aw_org_people_from_claim( $id, $lid, $go ),
+		);
+	}
+	if ( function_exists( 'aw_claim_ff_id' ) && function_exists( 'aw_claim_entry' ) && aw_claim_ff_id() ) {
+		global $wpdb;
+		$ids = $wpdb->get_col( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}fluentform_submissions WHERE form_id = %d ORDER BY id", aw_claim_ff_id() ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		foreach ( $ids as $eid ) {
+			$c = aw_claim_entry( (int) $eid );
+			if ( ! $c || 'approved' !== ( $c['review']['status'] ?? '' ) ) {
+				continue;
+			}
+			$todo[] = array(
+				'claim' => '' !== $c['ref'] ? $c['ref'] : 'entry #' . $c['id'],
+				'lid'   => (int) $c['listing'],
+				'run'   => fn( $lid, $go ) => aw_org_people_link( $lid, $c['email'], $c['role'], $c['show'], $go ),
+			);
+		}
+	}
+	$counts = array();
+	$rows   = array();
+	foreach ( $todo as $t ) {
+		$status            = ( $t['run'] )( $t['lid'], $apply );
+		$counts[ $status ] = ( $counts[ $status ] ?? 0 ) + 1;
+		$rows[]            = array(
+			'claim'   => $t['claim'],
+			'listing' => $t['lid'],
+			'status'  => $status,
+		);
+	}
+	ksort( $counts );
+	return array(
+		'counts' => $counts,
+		'rows'   => $rows,
+	);
+}
+
+/*
+ * The same backfill from a signed-in administrator's browser (no SSH write): GET /wp-json/aw/v1/claim-people is the dry
+ * run, POST with apply=1 writes the links. Counts and claim references only; no email or name.
+ */
+add_action(
+	'rest_api_init',
+	function () {
+		register_rest_route(
+			'aw/v1',
+			'/claim-people',
+			array(
+				'methods'             => array( 'GET', 'POST' ),
+				'permission_callback' => fn() => current_user_can( 'manage_options' ),
+				'callback'            => function ( WP_REST_Request $req ) {
+					$apply = 'POST' === $req->get_method() && rest_sanitize_boolean( $req->get_param( 'apply' ) );
+					return rest_ensure_response( array( 'applied' => $apply ) + aw_org_people_backfill( $apply ) );
+				},
+			)
+		);
+	}
+);
+
+if ( defined( 'WP_CLI' ) && WP_CLI ) {
+	/*
+	 * wp aw claim-people [--apply]: link the claimants of past approved claims to their listings. A dry run unless
+	 * --apply; prints one row per claim (reference, listing, what happens) and the counts. No email or name is printed.
+	 */
+	WP_CLI::add_command(
+		'aw claim-people',
+		function ( $args, $assoc ) {
+			$apply = ! empty( $assoc['apply'] );
+			$out   = aw_org_people_backfill( $apply );
+			foreach ( $out['rows'] as $r ) {
+				WP_CLI::log( $r['claim'] . "\t" . $r['listing'] . "\t" . $r['status'] );
+			}
+			WP_CLI::success( ( $apply ? 'Applied. ' : 'Dry run, nothing written. ' ) . wp_json_encode( $out['counts'] ) );
+		}
+	);
 }
 
 /* ---------- WP Admin: the Volunteers box on a listing (read-only) ---------- */

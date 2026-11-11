@@ -601,12 +601,8 @@ add_action(
 			update_post_meta( $lid, 'aw_verified_on', wp_date( 'Y-m-d' ) );
 			update_post_meta( $lid, 'aw_needs_reverify', false );
 			delete_transient( 'aw_verified_count' );
-			if ( $c['show'] && function_exists( 'aw_crm_on' ) && aw_crm_on() && is_email( $c['email'] ) ) { // their name and role on the listing
-				$contact = FluentCrmApi( 'contacts' )->getContact( strtolower( $c['email'] ) );
-				if ( $contact ) {
-					$contact->attachTags( aw_crm_tag_ids( array( 'org-approved' ) ) );
-					$contact->syncCustomFieldValues( array( 'vol_org_listing' => (string) $lid, 'vol_org_show' => '1', 'vol_organisation' => get_the_title( $lid ), 'vol_org_role' => $c['role'] ), false );
-				}
+			if ( function_exists( 'aw_org_people_link' ) ) { // one of the listing's people, privately; name and role shown only if they ticked "Show my name"
+				aw_org_people_link( $lid, $c['email'], $c['role'], $c['show'] );
 			}
 			if ( function_exists( 'aw_enrich_after_change' ) ) {
 				aw_enrich_after_change( $lid );
