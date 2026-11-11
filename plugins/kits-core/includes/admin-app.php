@@ -146,12 +146,6 @@ add_action(
 		if ( ! is_readable( $asset ) ) {
 			return;
 		}
-		$a   = include $asset;
-		$url = plugins_url( 'build/theme-options/index.js', KITS_CORE_DIR . 'kits-core.php' );
-		wp_enqueue_script( 'kits-admin-theme-options', $url, $a['dependencies'], $a['version'], true );
-		wp_enqueue_style( 'wp-components' );
-		wp_enqueue_media(); // Logo and site icon pickers.
-		wp_set_script_translations( 'kits-admin-theme-options', 'kits-core' );
 
 		$saved     = kits_theme_options_saved();
 		$fields    = kits_theme_option_fields();
@@ -159,17 +153,7 @@ add_action(
 		foreach ( $fields as $key => $f ) {
 			$inherited[ $key ] = kits_theme_option_inherited( $key );
 		}
-		$tabs = array();
-		foreach ( kits_admin_tabs_list() as $slug => $t ) {
-			if ( current_user_can( $t[2] ) ) {
-				$tabs[] = array(
-					'slug'    => (string) $slug,
-					'label'   => (string) $t[0],
-					'url'     => admin_url( $t[1] ),
-					'current' => 'kits-options' === $slug,
-				);
-			}
-		}
+		$brand = kits_frame_brand();
 		$theme = wp_get_theme( get_template() );
 		$core  = get_file_data( KITS_CORE_DIR . 'kits-core.php', array( 'Version' => 'Version' ) );
 		$pd_saved = (array) get_option( 'kits_page_defaults', array() );
@@ -211,7 +195,9 @@ add_action(
 			'site'         => get_bloginfo( 'name' ),
 			'theme'        => $theme->get( 'Name' ) . ' ' . $theme->get( 'Version' ),
 			'coreVersion'  => (string) $core['Version'],
-			'tabs'         => $tabs,
+			'tabs'         => kits_frame_tabs( 'kits-options' ),
+			'icon'         => $brand['icon'],
+			'version'      => $brand['version'],
 			'fields'       => $fields,
 			'saved'        => (object) $saved,
 			'inherited'    => (object) $inherited,
@@ -233,15 +219,47 @@ add_action(
 			'initial'      => $asked,
 		);
 		$data = (array) apply_filters( 'kits_admin_app_data', $data ); // Sections in their own files add their data.
-		wp_add_inline_script( 'kits-admin-theme-options', 'window.kitsAdminApp = ' . wp_json_encode( $data ) . ';', 'before' );
+		// On the Kits plugins' look: the shell's header, chips and cards (docs/kits-plugin-ui.md).
+		$ok = kits_shell_app(
+			array(
+				'handle'      => 'kits-admin-theme-options',
+				'src'         => plugins_url( 'build/theme-options/index.js', KITS_CORE_DIR . 'kits-core.php' ),
+				'asset'       => $asset,
+				'object'      => 'kitsAdminApp',
+				'data'        => $data,
+				'text_domain' => 'kits-core',
+			)
+		);
+		if ( $ok ) {
+			wp_enqueue_style( 'wp-components' );
+		}
+		kits_admin_app_ready( $ok );
 	}
 );
+
+/**
+ * The screen's script is enqueued on this request. Set on admin_enqueue_scripts.
+ *
+ * @param bool|null $set Set the flag.
+ */
+function kits_admin_app_ready( ?bool $set = null ): bool {
+	static $ready = false;
+	if ( null !== $set ) {
+		$ready = $set;
+	}
+	return $ready;
+}
 
 /** The screen's mount point (kits_options_page() calls this), and today's fields of the sections not built yet. */
 function kits_admin_app_page(): void {
 	// Notices from other plugins go after .wp-header-end, so they stay out of the app and its pinned header.
-	echo '<div class="wrap"><hr class="wp-header-end">';
+	echo '<div class="wrap"><h1 class="screen-reader-text">' . esc_html__( 'Theme Options', 'kits-core' ) . '</h1><hr class="wp-header-end">';
 	settings_errors(); // "Settings saved." after a section that saves through options.php.
+	if ( ! kits_admin_app_ready() ) {
+		// The screen's script or the shell could not load: the older screen still works.
+		echo '<div class="notice notice-warning"><p>' . esc_html__( 'This screen could not load.', 'kits-core' ) . ' <a href="' . esc_url( admin_url( 'admin.php?page=kits-options&ui=classic' ) ) . '">' . esc_html__( 'Open the older Theme Options screen', 'kits-core' ) . '</a></p></div></div>';
+		return;
+	}
 	echo '<div id="kits-admin-app">';
 	echo '<noscript><h1>' . esc_html__( 'Theme Options', 'kits-core' ) . '</h1><p>' . esc_html__( 'This screen needs JavaScript.', 'kits-core' ) . ' <a href="' . esc_url( admin_url( 'admin.php?page=kits-options&ui=classic' ) ) . '">' . esc_html__( 'Open the older Theme Options screen', 'kits-core' ) . '</a> · <a href="' . esc_url( admin_url( 'admin.php?page=kits-tools' ) ) . '">' . esc_html__( 'Export the settings', 'kits-core' ) . '</a></p></noscript>';
 	echo '</div>';

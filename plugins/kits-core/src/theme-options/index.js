@@ -1,7 +1,8 @@
 /**
  * Kits → Theme Options (admin.php?page=kits-options; the older screen is at &ui=classic until it is retired).
  *
- * One app header (site, versions, Save), the Kits tabs, a section list and the fields of the chosen section.
+ * On the Kits plugins' look (docs/kits-plugin-ui.md, window.kits.shell): the app header (Kits icon, name, version, the
+ * five Kits tabs, Save), the sections as chips and the chosen section as a card with its fields.
  * Sections not built here yet show today's fields, printed by PHP (kits_admin_app_legacy()) and moved into the
  * section; they save with their own button, as before.
  * Everything saves in one request to /wp/v2/settings, and only what changed is sent:
@@ -21,14 +22,6 @@ import {
 import apiFetch from '@wordpress/api-fetch';
 import { __, sprintf } from '@wordpress/i18n';
 import {
-	Button,
-	Card,
-	CardBody,
-	CardHeader,
-	Flex,
-	FlexBlock,
-	FlexItem,
-	Notice,
 	SelectControl,
 	TextControl,
 	ToggleControl,
@@ -40,6 +33,8 @@ import cards from './sections/cards';
 // Sections in their own files, after Layout, in this order.
 const extraSections = [ cards ]; // Colours, type and buttons are Styles' (owner, 11 Nov 2026).
 
+const { AppShell, AppHeader, ChipRow, SectionCard, Notice, Button } =
+	window.kits.shell;
 const data = window.kitsAdminApp || {};
 const fields = data.fields || {};
 const pdFields = data.pageDefaults?.fields || {};
@@ -448,143 +443,96 @@ function App() {
 	};
 
 	return (
-		<div className="kits-app">
-			{ /* The header stays in view while the fields scroll (32px: the admin bar). */ }
-			<div style={ { position: 'sticky', top: 32, zIndex: 20 } }>
-				<Card>
-					<CardHeader>
-						<Flex align="center" wrap>
-							<FlexBlock>
-								<h1 className="kits-app-title">
-									{ __( 'Theme Options', 'kits-core' ) }
-								</h1>
-								<p className="description">
-									{ sprintf(
-										/* translators: 1: site name, 2: theme name and version, 3: Kits Core version. */
-										__(
-											'%1$s · %2$s · Kits Core %3$s',
-											'kits-core'
-										),
-										data.site,
-										data.theme,
-										data.coreVersion
-									) }
-								</p>
-							</FlexBlock>
-							<FlexItem>
-								<span
-									className="kits-app-status"
-									role="status"
-									aria-live="polite"
-								>
-									{ dirty && ! busy
-										? __( 'Changes not saved', 'kits-core' )
-										: '' }
-								</span>{ ' ' }
-								<Button
-									variant="primary"
-									onClick={ save }
-									disabled={ ! dirty || busy }
-									isBusy={ busy }
-									__next40pxDefaultSize
-								>
-									{ __( 'Save', 'kits-core' ) }
-								</Button>
-							</FlexItem>
-						</Flex>
-					</CardHeader>
-				</Card>
-			</div>
-			<nav
-				className="nav-tab-wrapper wp-clearfix"
-				aria-label={ __( 'Kits screens', 'kits-core' ) }
-			>
-				{ ( data.tabs || [] ).map( ( t ) => (
-					<a
-						key={ t.slug }
-						className={
-							'nav-tab' + ( t.current ? ' nav-tab-active' : '' )
-						}
-						href={ t.url }
-						aria-current={ t.current ? 'page' : undefined }
-					>
-						{ t.label }
-					</a>
-				) ) }
-			</nav>
+		<AppShell
+			header={
+				<AppHeader
+					icon={ data.icon }
+					name={ __( 'Kits', 'kits-core' ) }
+					version={ data.version }
+					tabs={ data.tabs || [] }
+					aside={
+						<>
+							<span
+								className="kits-app-status"
+								role="status"
+								aria-live="polite"
+							>
+								{ dirty && ! busy
+									? __( 'Changes not saved', 'kits-core' )
+									: '' }
+							</span>
+							<Button
+								variant="primary"
+								onClick={ save }
+								disabled={ ! dirty || busy }
+								busy={ busy }
+							>
+								{ __( 'Save', 'kits-core' ) }
+							</Button>
+						</>
+					}
+				/>
+			}
+		>
+			<p className="kits-shell-frame__intro">
+				{ sprintf(
+					/* translators: 1: site name, 2: theme name and version, 3: Kits Core version. */
+					__( '%1$s · %2$s · Kits Core %3$s', 'kits-core' ),
+					data.site,
+					data.theme,
+					data.coreVersion
+				) }
+			</p>
+			<ChipRow
+				label={ __( 'Sections', 'kits-core' ) }
+				chips={ sections.map( ( s ) => ( {
+					value: s.slug,
+					label: s.label,
+					href: '#' + s.slug,
+				} ) ) }
+				value={ current?.slug }
+			/>
 			{ status && (
 				<Notice
-					status={ status.type }
-					onRemove={ () => setStatus( null ) }
+					tone={ status.type }
+					onDismiss={ () => setStatus( null ) }
 				>
 					{ status.text }
 				</Notice>
 			) }
-			<Flex align="flex-start" gap={ 6 } wrap>
-				<FlexItem>
-					<nav aria-label={ __( 'Sections', 'kits-core' ) }>
-						<Card>
-							<CardBody>
-								<ul>
-									{ sections.map( ( s ) => (
-										<li key={ s.slug }>
-											<a
-												href={ '#' + s.slug }
-												aria-current={
-													s.slug === current?.slug
-														? 'true'
-														: undefined
-												}
-											>
-												{ s.slug === current?.slug ? (
-													<strong>{ s.label }</strong>
-												) : (
-													s.label
-												) }
-											</a>
-										</li>
-									) ) }
-								</ul>
-							</CardBody>
-						</Card>
-					</nav>
-				</FlexItem>
-				<FlexBlock>
-					{ current && (
-						<Card>
-							<CardHeader>
-								<h2>{ current.label }</h2>
-							</CardHeader>
-							<CardBody>
-								{ current.Body ? (
-									<current.Body gs={ gs } item={ item } />
-								) : (
-									current.items.map( item )
-								) }
-								{ ( current.info || [] ).map( ( [ k, v ] ) => (
-									<p key={ k }>
-										<strong>{ k }:</strong> { v }
-									</p>
-								) ) }
-								{ ( current.links || [] )
-									.filter( ( [ , href ] ) => href )
-									.map( ( [ label, href ] ) => (
-										<p key={ label }>
-											<a href={ href }>{ label }</a>
-										</p>
-									) ) }
-								{ current.legacy && (
-									<Legacy
-										key={ current.legacy }
-										slug={ current.legacy }
-									/>
-								) }
-							</CardBody>
-						</Card>
-					) }
-				</FlexBlock>
-			</Flex>
-		</div>
+			{ current && (
+				<SectionCard
+					id={ 'section-' + current.slug }
+					title={ current.label }
+				>
+					<div className="kits-shell-prose">
+						{ current.Body ? (
+							<current.Body gs={ gs } item={ item } />
+						) : (
+							current.items.map( item )
+						) }
+						{ ( current.info || [] ).map( ( [ k, v ] ) => (
+							<p key={ k }>
+								<strong>{ k }:</strong> { v }
+							</p>
+						) ) }
+						{ ( current.links || [] )
+							.filter( ( [ , href ] ) => href )
+							.map( ( [ label, href ] ) => (
+								<p key={ label }>
+									<a href={ href }>{ label }</a>
+								</p>
+							) ) }
+						{ current.legacy && (
+							<Legacy
+								key={ current.legacy }
+								slug={ current.legacy }
+							/>
+						) }
+					</div>
+				</SectionCard>
+			) }
+		</AppShell>
 	);
 }
 

@@ -105,19 +105,23 @@ whatever a part's own `display` is.
 
    Nothing slow is worked out while a screen loads. Counts come from a background job, and the route only formats them.
 
-## Kits Core's own screens: the options panel
+## Kits Core's own screens on the same look
 
-Kits Core's settings screens use `Panel`, the pattern of a theme options panel (a dark tab bar, a section list,
-groups that fold, On/Off toggles). The first is **Kits → Settings with `&ui=next`** (`includes/admin-settings-next.php`,
-`src/settings-next/`, built to `build/settings-next/`):
-- Sections: Performance (Scripts and styles, Fonts), Compatibility (Older content), and Preview access, which links to
-  the current screen's section for now.
-- The fields are the current screen's (`kits_theme_options`: the Speed and Older content switches, the joined files
-  cap and the font preload). Save sends only the changed fields to `kits/v1/settings-panel`, which runs them through the
-  option's own clean-up (`kits_theme_options_clean()`); nothing is written when nothing changed.
-- `smoke.sh` checks the screen (200 and drawn for an administrator, 403 for a subscriber, the current screen still the
-  default), the route (401 signed out or without a nonce, 403 for a subscriber, 200 for an administrator), and that an
-  unchanged Save leaves `kits_theme_options` byte for byte the same.
+The five Kits screens use the plugins' frame: the app header with the Kits icon, name and version and the five Kits
+tabs, then cards (owner, 12 Nov 2026: "the ui used for plugins – use it for Kits").
+- **Home, Settings, Tools and Help with `&ui=next`** (`includes/admin-kits-frame.php`): PHP prints the frame with the
+  shell's classes (`kits_frame_open()`, `kits_frame_card()`, `kits_frame_close()`); only the `kits-shell` stylesheet
+  loads. Each card holds today's section, printed by the same function, so every form, button and link works as on the
+  current screen; a save comes back to the new look (`kits_options_form_fields()`, Preview access, Tools results).
+  Cards keep the current screen's section ids, so `#links` still land. `.kits-shell-prose` gives today's markup its
+  spacing inside a card. The tabs keep `&ui=next` between these four screens (`kits_frame_tabs()`).
+- **Theme Options** (the default screen, `includes/admin-app.php`): its app runs on the shell (`kits_shell_app()`):
+  `AppHeader` with Save, the sections as `ChipRow` links (`#slug`), the open section in a `SectionCard`. The fields
+  are still WordPress components. If the shell or the app cannot load, the screen links to `&ui=classic`.
+- The options panel parts (`Panel`, `PanelGroup`, `OnOff`) stay in the shell; no Kits screen uses `Panel` now. The
+  earlier Settings panel (`kits/v1/settings-panel`, `src/settings-next/`) is removed: it held 3 of Settings' sections.
+- `smoke.sh` checks each of the four with `&ui=next` (200, the frame, five tabs, a known section, no PHP error), that
+  the current screen is still the default, that a subscriber is refused, and that Theme Options loads on the shell.
 
 ## A trial behind `&ui=next`
 
@@ -187,6 +191,5 @@ screens save through the same function, so neither can drift from the other.
 ## Not built yet
 
 - Kits Core has no translation files for the shell yet.
-- InsightWeb, SourceWeb, MailWeb, DirectoryWeb and PlanWeb have screens on the shell in pull requests (#123 to #127), not merged.
 - Parts the plugins need that the shell does not have: styled select and date inputs, a calendar grid, a secret field, a confirm step with a count, a detail panel, rich text, file and media fields, a pair-list editor, a row view inside a list, read-only HashList and ServiceRow details, and FieldReview options (start unticked, reject ticked).
 - The chart is one small part (`MiniChart`); there is no line chart or a chart with two series.

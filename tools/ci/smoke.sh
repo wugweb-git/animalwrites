@@ -359,23 +359,32 @@ optmd5() { local l; l=$(printf '"%s",' "$@"); wp eval "foreach ( array( ${l%,} )
 # same LABEL BEFORE AFTER: no setting lost.
 same() { if [ "$2" = "$3" ]; then echo "ok   $1: every option identical after an unchanged Save"; else echo "FAIL $1: options changed: $2 -> $3"; FAIL=1; fi; }
 
-echo "-- kits settings panel (&ui=next)"
-screen kits-settings kits-settings-next kits-settings-next
-route kits/v1/settings-panel
-post kits/v1/settings-panel '{"values":{}}'
-BEFORE=$(optmd5 kits_theme_options)
-want 200 "GET /kits/v1/settings-panel for the unchanged Save" -b /tmp/cj-ci -H "X-WP-Nonce: $NA" "$H/?rest_route=/kits/v1/settings-panel"
-cp /tmp/rw.out /tmp/ks.json
-python3 - > /tmp/ks-values.json <<'PY' || { echo "FAIL kits/v1/settings-panel answer has no sections: $(head -c 400 /tmp/ks.json)"; FAIL=1; }
-import json, sys
-d = json.load(open('/tmp/ks.json'))
-if not isinstance(d, dict) or 'sections' not in d:
-    sys.exit(1)
-print(json.dumps({'values': {f['key']: f['value'] for s in d['sections'] for g in s['groups'] for f in g['fields']}}))
-PY
-want 200 "POST /kits/v1/settings-panel unchanged Save (administrator)" -X POST -b /tmp/cj-ci -H "X-WP-Nonce: $NA" -H 'Content-Type: application/json' -d @/tmp/ks-values.json "$H/?rest_route=/kits/v1/settings-panel"
-grep -q '"saved":false' /tmp/rw.out && echo "ok   unchanged Save reports nothing saved" || { echo "FAIL unchanged Save wrote"; FAIL=1; }
-same "Kits Settings" "$BEFORE" "$(optmd5 kits_theme_options)"
+echo "-- kits screens on the plugin look (&ui=next; includes/admin-kits-frame.php)"
+# Home, Settings, Tools and Help: 200 and drawn in the frame (shell stylesheet, header, five tabs keeping &ui=next) with
+# the same sections as the current screen; the current screen stays the default; a subscriber is refused.
+while read -r page section; do
+  want 200 "admin.php?page=$page&ui=next (administrator)" -b /tmp/cj-ci "$H/wp-admin/admin.php?page=$page&ui=next"
+  if grep -q 'class="kits-shell-header"' /tmp/rw.out && grep -q "kits-shell-css" /tmp/rw.out && grep -q "id=\"$section\"" /tmp/rw.out; then echo "ok   $page&ui=next draws the frame with $section"; else echo "FAIL $page&ui=next: frame or $section missing"; FAIL=1; fi
+  n=$(grep -o 'class="kits-shell-tab' /tmp/rw.out | wc -l | tr -d ' ')
+  if [ "$n" = "5" ]; then echo "ok   $page&ui=next: five tabs"; else echo "FAIL $page&ui=next: $n tabs"; FAIL=1; fi
+  if grep -qiE 'critical error|Fatal error|Parse error' /tmp/rw.out; then echo "FAIL $page&ui=next: PHP error"; FAIL=1; fi
+  want 200 "admin.php?page=$page (current screen)" -b /tmp/cj-ci "$H/wp-admin/admin.php?page=$page"
+  if grep -q 'class="kits-shell-header"' /tmp/rw.out; then echo "FAIL $page: the current screen is not the default any more"; FAIL=1; else echo "ok   $page: current screen stays the default"; fi
+  want 403 "admin.php?page=$page&ui=next (subscriber)" -b /tmp/cj-rw-sub "$H/wp-admin/admin.php?page=$page&ui=next"
+done <<'FRAME'
+kits page-check
+kits-settings preview
+kits-tools export
+kits-help docs
+FRAME
+# A save from the new look comes back to it (options.php forms carry &ui=next in their return address).
+want 200 "admin.php?page=kits-settings&ui=next (save address)" -b /tmp/cj-ci "$H/wp-admin/admin.php?page=kits-settings&ui=next"
+if grep -q 'name="_wp_http_referer" value="[^"]*page=kits-settings[^"]*ui=next' /tmp/rw.out; then echo "ok   Settings forms come back to &ui=next"; else echo "FAIL Settings forms do not come back to &ui=next"; FAIL=1; fi
+# Theme Options (the default screen) is drawn by its app on the shell; its tabs open the current screens.
+
+want 200 "admin.php?page=kits-options (administrator)" -b /tmp/cj-ci "$H/wp-admin/admin.php?page=kits-options"
+if grep -q "kits-admin-theme-options-js" /tmp/rw.out && grep -q "kits-shell-js" /tmp/rw.out && grep -q 'id="kits-admin-app"' /tmp/rw.out; then echo "ok   Theme Options app on the shell"; else echo "FAIL Theme Options: app or shell missing"; FAIL=1; fi
+if grep -q 'page=kits&amp;ui=next\|page=kits\\u0026ui=next\|page=kits&ui=next' /tmp/rw.out; then echo "FAIL Theme Options tabs open the trial screens"; FAIL=1; else echo "ok   Theme Options tabs open the current screens"; fi
 # Each Kits plugin's new screens: tools/ci/smoke-ui-<plugin>.sh, using screen, route, post, optmd5 and same above.
 for f in "$(dirname "$0")"/smoke-ui-*.sh; do
   [ -f "$f" ] || continue
