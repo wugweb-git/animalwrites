@@ -1,10 +1,9 @@
 <?php
 /**
- * The Kits menu, second under Dashboard (owner, 25 Oct and 10 Nov 2026: our plugins and themes work like any
- * marketplace product, laid out like Uncode's hub).
- *
- * Six items since 11 Nov 2026 (docs/admin-ui-spec.md §B, admin-menu.php): Home, Theme Options, Settings, Plugins,
- * Tools, Help. Help → Docs shows the tables below. The Docs tables cover the plugin's features and the design and branding of the active Kits theme
+ * Kits: one item under Appearance since 11 Nov 2026 ("kits to go inside appearance"; admin-fold.php), as a theme's
+ * hub does in standard WordPress. It opens Home; the six screens (docs/admin-ui-spec.md §B, admin-menu.php: Home, Theme
+ * Options, Settings, Plugins, Tools, Help) are the tabs on every Kits screen, at the same addresses as before.
+ * Help → Docs shows the tables below: the plugin's features and the design and branding of the active Kits theme
  * (colours, fonts, templates, parts, patterns, style variations, the design registry), read live from WordPress, each
  * linked to where it is edited. Core WordPress only.
  *
@@ -20,7 +19,7 @@ const KITS_MENU = 'kits';
 add_action(
 	'admin_menu',
 	function () {
-		add_menu_page( 'Kits', 'Kits', 'manage_options', KITS_MENU, 'kits_home_page', 'dashicons-layout', 3 ); // second, under Dashboard
+		kits_admin_fold_menu( KITS_MENU, 'themes.php', 'Kits', 'manage_options', 'kits' ); // Appearance → Kits (admin-fold.php)
 		add_submenu_page( KITS_MENU, 'Home', 'Home', 'manage_options', KITS_MENU, 'kits_home_page' );
 	},
 	8 // before the other Kits screens join the menu
@@ -117,8 +116,8 @@ function kits_overview_tables() {
 			array( 'Menus', esc_html( 'Header, footer and Explore menus.' ), kits_link( 'Editor → Navigation', 'site-editor.php?path=/navigation' ), $auto ),
 			array( 'Style variations', esc_html( count( $variants ) . ' saved look(s) of the site.' ), kits_link( 'Editor → Styles', 'site-editor.php?path=/wp_global_styles' ), $auto ),
 			array( 'Logo and site icon', esc_html( 'The site\'s logo in the header part; the site icon in the browser tab.' ), kits_link( 'Editor → Header', 'site-editor.php?postType=wp_template_part' ) . ', ' . kits_link( 'Settings → General', 'options-general.php' ), $auto ),
-			array( 'Design registry', esc_html( $reg_items . ' components, blocks and patterns of the child theme (plus the master\'s) with their states, accessibility and SEO; classes without an entry fail the deploy check.' ), kits_link( 'Kits → Help → Design system', 'admin.php?page=kits-help#design-system' ), $auto ),
-			array( 'Export and import', esc_html( 'One JSON file with the site\'s Styles, Theme Options, Page Options defaults and synced patterns. Also with WP-CLI (wp kits export, wp kits import <file>) and the kits/v1/settings REST route.' ), kits_link( 'Kits → Tools', 'admin.php?page=kits-tools' ), esc_html( 'Nothing is deleted on import.' ) ),
+			array( 'Design registry', esc_html( $reg_items . ' components, blocks and patterns of the child theme (plus the master\'s) with their states, accessibility and SEO; classes without an entry fail the deploy check.' ), kits_link( 'Appearance → Kits → Help → Design system', 'admin.php?page=kits-help#design-system' ), $auto ),
+			array( 'Export and import', esc_html( 'One JSON file with the site\'s Styles, Theme Options, Page Options defaults and synced patterns. Also with WP-CLI (wp kits export, wp kits import <file>) and the kits/v1/settings REST route.' ), kits_link( 'Appearance → Kits → Tools', 'admin.php?page=kits-tools' ), esc_html( 'Nothing is deleted on import.' ) ),
 			array( 'States sheet', esc_html( 'Every component and block in every state, drawn by the site\'s own styles (private page /kits-demo/).' ), kits_link( 'Design system → States sheet', 'admin.php?page=kits-help&tab=states#design-system' ), $auto ),
 		)
 	);
@@ -130,7 +129,7 @@ function kits_overview_tables() {
 			array( 'Forms', esc_html( 'One field dictionary for every form, per-field errors, expandable and multi-step forms, a fresh key on cached pages.' ), esc_html( 'Every site form' ), $auto ),
 			array( 'Spam guard (ALTCHA)', esc_html( 'Free proof-of-work check on every form: no third-party service, no cookies.' ), esc_html( 'Every site form' ), esc_html( '' !== (string) get_option( 'kits_altcha_key', '' ) ? 'Key set.' : 'Key made on first use.' ) ),
 			array( 'Analytics', esc_html( 'Google Tag Manager with consent mode, Microsoft Clarity, the page context for GA4.' ), kits_link( 'Site Kit', 'admin.php?page=googlesitekit-dashboard' ), esc_html( ( $gtm ? 'Tag Manager ' . $gtm : 'No Tag Manager container' ) . ( $clarity ? '; Clarity ' . $clarity : '' ) . '.' ) ),
-			array( 'Preview', esc_html( 'Preview-only items seen only by administrators, preview IP addresses and registered devices.' ), kits_link( 'Kits → Settings → Preview access', 'admin.php?page=kits-settings#preview' ), esc_html( $ips . ' IP address(es), ' . $devices . ' device(s).' ) ),
+			array( 'Preview', esc_html( 'Preview-only items seen only by administrators, preview IP addresses and registered devices.' ), kits_link( 'Appearance → Kits → Settings → Preview access', 'admin.php?page=kits-settings#preview' ), esc_html( $ips . ' IP address(es), ' . $devices . ' device(s).' ) ),
 			array( 'Share bar', esc_html( 'Plain share links and copy link: no third-party scripts, no tracking.' ), esc_html( 'Item pages' ), $auto ),
 			array( 'Source attribution', esc_html( 'Publisher favicon, name and time on News items (Google News pattern).' ), esc_html( 'News items' ), $auto ),
 			array( 'Page structure', esc_html( 'One labelled <main>, sticky header, labelled sections, skip link.' ), esc_html( 'Every page' ), $auto ),

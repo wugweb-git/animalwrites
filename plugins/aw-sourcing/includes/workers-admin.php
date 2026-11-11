@@ -244,7 +244,7 @@ function aw_workers_keys_checkboxes( $id ) {
 			. ' <span class="description">(' . esc_html( $ws ? 'for ' . count( $ws ) . ' worker' . ( 1 === count( $ws ) ? '' : 's' ) : 'all workers' ) . ')</span></label><br>';
 	}
 	echo '<input type="hidden" name="worker_keys_shown" value="1"></fieldset>';
-	echo '<p class="description">Ticked: this worker may use the key. Unticking a key that is for all workers makes it for every other worker. The same is on SourceWeb → AI models (Edit, or Attach to / Detach from worker).</p>';
+	echo '<p class="description">Ticked: this worker may use the key. Unticking a key that is for all workers makes it for every other worker. The same is on Plugins → SourceWeb → AI models (Edit, or Attach to / Detach from worker).</p>';
 }
 
 /**

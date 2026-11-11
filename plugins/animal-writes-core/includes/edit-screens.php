@@ -1267,7 +1267,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			}
 			WP_CLI\Utils\format_items( 'table', $out, array( 'type', 'box', 'plugin', 'purpose', 'shows_on', 'fields', 'used', 'notes' ) );
 			if ( ! is_admin() ) {
-				WP_CLI::log( 'Some plugins add their boxes only in WP admin (for example LiteSpeed); they show on Kits → Edit screens.' );
+				WP_CLI::log( 'Some plugins add their boxes only in WP admin (for example LiteSpeed); they show on Appearance → Kits → Edit screens.' );
 			}
 			WP_CLI::log( aw_edit_screen_map_only_note() );
 			$twice = aw_edit_screen_twice( $rows );

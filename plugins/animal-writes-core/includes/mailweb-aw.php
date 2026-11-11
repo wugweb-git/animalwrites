@@ -323,7 +323,7 @@ add_action(
 			}
 		}
 		$url = add_query_arg( array( 'page' => 'mailweb', 'folder' => 'forms' ), admin_url( 'admin.php' ) );
-		echo '<div class="notice notice-info"><p><strong>New form entries:</strong> ' . esc_html( implode( ', ', $parts ) ) . '. <a href="' . esc_url( $url ) . '">Open MailWeb → Website forms</a></p></div>';
+		echo '<div class="notice notice-info"><p><strong>New form entries:</strong> ' . esc_html( implode( ', ', $parts ) ) . '. <a href="' . esc_url( $url ) . '">Open Plugins → MailWeb → Website forms</a></p></div>';
 	}
 );
 
@@ -380,7 +380,7 @@ function aw_mail_site_check() {
 	$pause = mailweb_paused();
 	echo '<div class="notice ' . ( $pause ? 'notice-error' : 'notice-success' ) . ' inline"><p><strong>Email sending: ' . ( $pause ? 'PAUSED' : 'running' ) . '.</strong> ';
 	if ( $pause ) {
-		echo esc_html( 'Refused ' . wp_date( 'j M Y, H:i', (int) $pause['at'] ) . ': ' . $pause['error'] ) . ' <a href="' . esc_url( mailweb_settings_url( 'sending', array(), 'cap' ) ) . '">Resume on MailWeb → Settings → Site sending</a>.';
+		echo esc_html( 'Refused ' . wp_date( 'j M Y, H:i', (int) $pause['at'] ) . ': ' . $pause['error'] ) . ' <a href="' . esc_url( mailweb_settings_url( 'sending', array(), 'cap' ) ) . '">Resume on Plugins → MailWeb → Settings → Site sending</a>.';
 	} else {
 		$last = (array) get_option( 'mailweb_last_error', array() );
 		echo $last ? esc_html( 'Last error ' . wp_date( 'j M H:i', (int) $last['at'] ) . ': ' . $last['error'] ) : 'No errors recorded.';
