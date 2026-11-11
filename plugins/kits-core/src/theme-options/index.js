@@ -105,10 +105,12 @@ function sectionsOf() {
 		if ( 'share' === f.kind || placed.includes( key ) ) {
 			return;
 		}
-		const slug = f.group.toLowerCase().replace( /[^a-z0-9]+/g, '-' );
+		// Font preload is a speed setting (spec: Settings → Performance).
+		const group = 'font_preload' === key ? 'Speed' : f.group;
+		const slug = group.toLowerCase().replace( /[^a-z0-9]+/g, '-' );
 		let g = out.find( ( x ) => x.slug === slug );
 		if ( ! g ) {
-			g = { slug, label: f.group, items: [] };
+			g = { slug, label: group, items: [] };
 			out.push( g );
 		}
 		g.items.push( [ 'to', key ] );
@@ -217,6 +219,14 @@ function PageDefaultField( { name, value, onChange } ) {
 					<strong>{ f.label }</strong>
 				</p>
 				<p className="description">{ f.empty }</p>
+				{ '' !== value && (
+					<ThemeNote
+						isTheme={ false }
+						themeLabel={ __( 'the theme’s own', 'kits-core' ) }
+						label={ f.label }
+						onReset={ () => onChange( '' ) }
+					/>
+				) }
 			</div>
 		);
 	}
@@ -292,6 +302,7 @@ function MediaField( { name, value, onChange } ) {
 		],
 	};
 	const [ urls, setUrls ] = useState( data.mediaUrls || {} );
+	const [ error, setError ] = useState( '' );
 	const url = value ? urls[ value ] : '';
 	const id = 'kits-app-' + name;
 	return (
@@ -315,6 +326,19 @@ function MediaField( { name, value, onChange } ) {
 					allowedTypes={ [ 'image' ] }
 					value={ value || undefined }
 					onSelect={ ( m ) => {
+						if (
+							'site_icon' === name &&
+							( m.width !== m.height || m.width < 512 )
+						) {
+							setError(
+								__(
+									'The site icon must be a square image of at least 512 × 512 pixels.',
+									'kits-core'
+								)
+							);
+							return;
+						}
+						setError( '' );
 						setUrls( {
 							...urls,
 							[ m.id ]: m.sizes?.thumbnail?.url || m.url,
@@ -339,6 +363,11 @@ function MediaField( { name, value, onChange } ) {
 					</Button>
 				) }
 			</Flex>
+			{ error && (
+				<Notice status="error" isDismissible={ false }>
+					{ error }
+				</Notice>
+			) }
 			<p className="description">{ labels[ name ][ 1 ] }</p>
 		</div>
 	);
@@ -523,7 +552,7 @@ function App() {
 											'%1$s · %2$s · Kits Core %3$s',
 											'kits-core'
 										),
-										data.site,
+										saved.core.title || data.site,
 										data.theme,
 										data.coreVersion
 									) }
