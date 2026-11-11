@@ -89,7 +89,18 @@ export function MiniChart( { label, points = [], unit = '' } ) {
  */
 export function HashList( { label, help, items = [], onAdd, onRemove, busy } ) {
 	const [ value, setValue ] = useState( '' );
+	const [ failed, setFailed ] = useState( '' );
 	const id = useId();
+	const add = () => {
+		setFailed( '' );
+		Promise.resolve( onAdd?.( value.trim() ) )
+			.then( () => setValue( '' ) )
+			.catch( ( e ) =>
+				setFailed(
+					e?.message || __( 'This could not be added.', 'kits-core' )
+				)
+			);
+	};
 	return (
 		<div className="kits-shell-hashlist">
 			<label className="kits-shell-field__label" htmlFor={ id }>
@@ -108,11 +119,7 @@ export function HashList( { label, help, items = [], onAdd, onRemove, busy } ) {
 					type="button"
 					className="kits-shell-button is-secondary"
 					disabled={ busy || '' === value.trim() }
-					onClick={ () =>
-						Promise.resolve( onAdd?.( value.trim() ) ).then( () =>
-							setValue( '' )
-						)
-					}
+					onClick={ add }
 				>
 					{ __( 'Add', 'kits-core' ) }
 				</button>
@@ -124,6 +131,11 @@ export function HashList( { label, help, items = [], onAdd, onRemove, busy } ) {
 						'kits-core'
 					) }
 			</p>
+			{ failed && (
+				<p className="kits-shell-field__help is-error" role="alert">
+					{ failed }
+				</p>
+			) }
 			<p className="kits-shell-hashlist__count">
 				{ sprintf(
 					/* translators: %d: number of entries. */

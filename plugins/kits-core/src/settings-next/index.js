@@ -5,7 +5,7 @@
  * toggles for switches and a select for choices. Save sends only the changed fields to kits/v1/settings.
  * The shell parts come from window.kits.shell (script kits-shell, a dependency kits_shell_app() adds).
  */
-import { createRoot, useEffect, useState, useId } from '@wordpress/element';
+import { createRoot, useEffect, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { __, _n, sprintf } from '@wordpress/i18n';
 
@@ -23,7 +23,6 @@ const {
 const data = window.kitsSettingsNext || {};
 
 function Choice( { field, value, onChange } ) {
-	const helpId = useId();
 	return (
 		<Field
 			label={ field.label }
@@ -34,7 +33,7 @@ function Choice( { field, value, onChange } ) {
 				<select
 					id={ id }
 					value={ value }
-					aria-describedby={ describedBy || helpId }
+					aria-describedby={ describedBy }
 					onChange={ ( e ) => onChange( e.target.value ) }
 				>
 					{ field.choices.map( ( c ) => (

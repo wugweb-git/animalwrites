@@ -157,7 +157,7 @@ function kits_settings_next_save( WP_REST_Request $request ) {
 		$after   = kits_theme_options_clean( $send );
 		$changed = $after !== $before;
 		if ( $changed ) {
-			update_option( 'kits_theme_options', $after );
+			update_option( 'kits_theme_options', $send ); // The sanitize callback merges $send into the saved values, once.
 		}
 	}
 	return rest_ensure_response( array( 'saved' => $changed ) + kits_settings_next_payload() );

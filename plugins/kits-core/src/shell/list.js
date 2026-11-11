@@ -7,6 +7,7 @@
  */
 import { useEffect, useId, useState } from '@wordpress/element';
 import { __, _n, sprintf } from '@wordpress/i18n';
+import { EmptyState, LoadingState, ErrorState } from './states';
 
 const cx = ( ...names ) => names.filter( Boolean ).join( ' ' );
 
@@ -68,26 +69,6 @@ function FilterSelect( { filter, onFilter } ) {
 					</option>
 				) ) }
 			</select>
-		</div>
-	);
-}
-
-function ListError( { error, onRetry } ) {
-	return (
-		<div className="kits-shell-state is-error" role="alert">
-			<p className="kits-shell-state__title">
-				{ __( 'This could not be loaded.', 'kits-core' ) }
-			</p>
-			<p>{ error }</p>
-			{ onRetry && (
-				<button
-					type="button"
-					className="kits-shell-button is-secondary"
-					onClick={ onRetry }
-				>
-					{ __( 'Try again', 'kits-core' ) }
-				</button>
-			) }
 		</div>
 	);
 }
@@ -161,9 +142,10 @@ export function DataList( {
 	const bulkId = useId();
 	useEffect( () => setWords( search ), [ search ] );
 	// A new page of rows starts with nothing ticked.
-	useEffect( () => setPicked( [] ), [ rows ] );
-
 	const ids = rows.map( ( r ) => r[ rowKey ] );
+	const idList = ids.join( '\n' );
+	useEffect( () => setPicked( ( p ) => ( p.length ? [] : p ) ), [ idList ] );
+
 	const all = ids.length > 0 && ids.every( ( id ) => picked.includes( id ) );
 	const tick = ( id, on ) =>
 		setPicked( ( p ) =>
@@ -203,25 +185,17 @@ export function DataList( {
 
 	let body;
 	if ( error ) {
-		body = <ListError error={ error } onRetry={ onRetry } />;
+		body = <ErrorState message={ error } onRetry={ onRetry } />;
 	} else if ( ! loading && 0 === rows.length ) {
 		body = (
-			<div className="kits-shell-state is-empty">
-				<p className="kits-shell-state__title">
-					{ emptyTitle || __( 'Nothing here.', 'kits-core' ) }
-				</p>
+			<EmptyState
+				title={ emptyTitle || __( 'Nothing here.', 'kits-core' ) }
+			>
 				{ empty }
-			</div>
+			</EmptyState>
 		);
 	} else if ( loading && 0 === rows.length ) {
-		body = (
-			<div className="kits-shell-state is-loading" role="status">
-				<span className="kits-shell-spinner" aria-hidden="true" />
-				<p className="kits-shell-state__title">
-					{ __( 'Loading…', 'kits-core' ) }
-				</p>
-			</div>
-		);
+		body = <LoadingState />;
 	} else {
 		body = (
 			<table
@@ -515,11 +489,11 @@ export function FieldReview( {
 	after,
 } ) {
 	const open = fields.filter( ( f ) => ! f.applied ).map( ( f ) => f.key );
-	const [ picked, setPicked ] = useState( open );
+	// Kept as the fields the user unticked, so fields that become applied (or undone) need no reset.
+	const [ off, setOff ] = useState( [] );
+	const picked = open.filter( ( k ) => ! off.includes( k ) );
 	const tick = ( k, on ) =>
-		setPicked( ( p ) =>
-			on ? [ ...p, k ] : p.filter( ( x ) => x !== k )
-		);
+		setOff( ( o ) => ( on ? o.filter( ( x ) => x !== k ) : [ ...o, k ] ) );
 	const blank = (
 		<span className="kits-shell-review__empty">
 			{ __( '(empty)', 'kits-core' ) }

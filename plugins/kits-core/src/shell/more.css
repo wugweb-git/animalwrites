@@ -635,6 +635,12 @@
 	min-width: 0;
 }
 
+/* A failed add: black and bold, like the error notice's border (the Kits look has no red). */
+.kits-shell-hashlist .kits-shell-field__help.is-error {
+	color: var(--ks-ink);
+	font-weight: 600;
+}
+
 .kits-shell-hashlist__count {
 	font-weight: 600;
 }
