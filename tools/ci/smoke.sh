@@ -277,6 +277,20 @@ want() { # want CODE LABEL curl-args…
   local c; c=$(curl -s -o /tmp/rw.out -w '%{http_code}' "$@")
   if [ "$c" = "$w" ]; then echo "ok   $c $l"; else echo "FAIL $c $l (want $w)"; head -c 300 /tmp/rw.out; echo; FAIL=1; fi
 }
+# jsok LABEL HANDLE PAGE-FILE: the screen's script and the shell's, as printed on the page, answer 200 as JavaScript
+# (a plugin loaded from outside wp-content/plugins once got an address that answered 404 as text/html).
+jsok() {
+  local h u c
+  for h in "$2" kits-shell; do
+    u=$(grep -oE "<script[^>]*id=['\"]$h-js['\"][^>]*>" "$3" | grep -oE "src=['\"][^'\"]+" | head -1 | cut -c6- | sed 's/&#038;/\&/g; s/&amp;/\&/g')
+    if [ -z "$u" ]; then echo "FAIL $1: no $h script on the page"; FAIL=1; continue; fi
+    c=$(curl -s -o /dev/null -w '%{http_code} %{content_type}' "$u")
+    case "$c" in
+      "200 "*javascript*) echo "ok   $1: $h script $c" ;;
+      *) echo "FAIL $1: $h script $c ($u)"; FAIL=1 ;;
+    esac
+  done
+}
 wp user create rw-sub rw-sub@example.invalid --role=subscriber --user_pass=rw-sub-only --quiet
 wp user create rw-ed rw-ed@example.invalid --role=editor --user_pass=rw-ed-only --quiet
 NA=$(login ci ci-only); NS=$(login rw-sub rw-sub-only); NE=$(login rw-ed rw-ed-only)
@@ -284,6 +298,7 @@ NA=$(login ci ci-only); NS=$(login rw-sub rw-sub-only); NE=$(login rw-ed rw-ed-o
 for p in "aw-seo-plus&ui=next" "aw-seo-settings&ui=next"; do
   want 200 "admin.php?page=$p (administrator)" -b /tmp/cj-ci "$H/wp-admin/admin.php?page=$p"
   if grep -q 'id="rankweb-app"' /tmp/rw.out && grep -q "rankweb-admin-js" /tmp/rw.out && grep -q "kits-shell-js" /tmp/rw.out; then echo "ok   $p draws the new screen (shell + RankWeb script)"; else echo "FAIL $p: new screen not drawn"; FAIL=1; fi
+  jsok "$p" rankweb-admin /tmp/rw.out
 done
 want 200 "admin.php?page=aw-seo-plus (current Overview)" -b /tmp/cj-ci "$H/wp-admin/admin.php?page=aw-seo-plus"
 if grep -q 'id="rankweb-app"' /tmp/rw.out; then echo "FAIL the Overview is not the default any more"; FAIL=1; else echo "ok   current Overview stays the default"; fi
@@ -338,6 +353,7 @@ if wp eval 'exit( count( array_intersect( array( "aw_seo_settings", "aw_faq_off_
 screen() {
   want 200 "admin.php?page=$1&ui=next (administrator)" -b /tmp/cj-ci "$H/wp-admin/admin.php?page=$1&ui=next"
   if grep -q "id=\"$2\"" /tmp/rw.out && grep -q "$3-js" /tmp/rw.out && grep -q "kits-shell-js" /tmp/rw.out; then echo "ok   $1&ui=next draws the new screen"; else echo "FAIL $1&ui=next: new screen not drawn"; FAIL=1; fi
+  jsok "$1&ui=next" "$3" /tmp/rw.out
   want 200 "admin.php?page=$1 (current screen)" -b /tmp/cj-ci "$H/wp-admin/admin.php?page=$1"
   if grep -q "id=\"$2\"" /tmp/rw.out; then echo "FAIL $1: the current screen is not the default any more"; FAIL=1; else echo "ok   $1: current screen stays the default"; fi
   want 403 "admin.php?page=$1&ui=next (subscriber)" -b /tmp/cj-rw-sub "$H/wp-admin/admin.php?page=$1&ui=next"
