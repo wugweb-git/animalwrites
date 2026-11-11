@@ -1,7 +1,8 @@
 <?php
 /**
- * PlanWeb's new screens on the Kits admin shell (trial), all on the Calendar's own address with &ui=next:
+ * PlanWeb's new screens on the Kits admin shell (trial), all on the Calendar's own address with &ui=next.
  *
+ * Address, screen and capability:
  *   admin.php?page=planweb&ui=next               Dashboard  edit_planweb_entries
  *   admin.php?page=planweb&ui=next&tab=entries   Entries    edit_planweb_entries
  *   admin.php?page=planweb&ui=next&tab=settings  Settings   manage_options

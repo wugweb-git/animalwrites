@@ -289,8 +289,8 @@ function planweb_list_args( array $p, string $today ): array {
 		'to'      => '',
 		'before'  => '',
 	);
-	if ( 'overdue' === $a['view'] ) {
-		$a['when'] = 'all'; // Overdue is in the past by itself.
+	if ( 'all' !== $a['view'] ) {
+		$a['when'] = 'all'; // Overdue is in the past by itself; Waiting counts every draft, whatever its date.
 	}
 	$days = PLANWEB_WINDOWS[ $a['when'] ];
 	if ( 'past' === $a['when'] ) {

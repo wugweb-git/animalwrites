@@ -258,11 +258,20 @@ function planweb_rest_entries( WP_REST_Request $request ) {
 	}
 	if ( '' !== $a['status'] ) {
 		// "Approved" also lists Due: an approved entry on its day.
-		$mq[] = array(
+		$status = array(
 			'key'     => 'planweb_status',
 			'value'   => 'approved' === $a['status'] ? array( 'approved', 'due' ) : array( $a['status'] ),
 			'compare' => 'IN',
 		);
+		// An entry with no stored status is an idea (planweb_entry()).
+		$mq[] = 'idea' === $a['status'] ? array(
+			'relation' => 'OR',
+			$status,
+			array(
+				'key'     => 'planweb_status',
+				'compare' => 'NOT EXISTS',
+			),
+		) : $status;
 	}
 	if ( 'waiting' === $a['view'] ) {
 		$mq[] = array(
@@ -356,16 +365,20 @@ function planweb_rest_entries( WP_REST_Request $request ) {
  * @param WP_REST_Request $request Request.
  */
 function planweb_rest_save( WP_REST_Request $request ) {
-	$id = (int) ( $request['id'] ?? 0 );
+	$id = (int) ( $request->get_url_params()['id'] ?? 0 );
 	if ( $id && ( ! planweb_entry( $id ) || 'publish' !== get_post_status( $id ) ) ) {
 		return new WP_Error( 'rest_post_invalid_id', __( 'No such entry.', 'planweb' ), array( 'status' => 404 ) );
 	}
 	if ( $id && ! current_user_can( 'edit_post', $id ) ) {
 		return new WP_Error( 'rest_forbidden', __( 'You are not allowed to do this.', 'planweb' ), array( 'status' => 403 ) );
 	}
-	$f = planweb_clean_form( $request->get_params() );
+	$stored = $id ? planweb_entry( $id ) : array();
+	$params = $request->get_params();
+	unset( $params['id'] );
+	// A change keeps the stored value of every field the request leaves out.
+	$f = planweb_clean_form( array_merge( $stored, $params ) );
 	if ( '' === $f['status'] ) {
-		$f['status'] = $id ? (string) planweb_entry( $id )['status'] : 'idea';
+		$f['status'] = $id ? (string) $stored['status'] : 'idea';
 	}
 	$saved = planweb_save_entry( $f, $id );
 	if ( is_wp_error( $saved ) ) {
@@ -386,14 +399,19 @@ function planweb_rest_save( WP_REST_Request $request ) {
  * @param WP_REST_Request $request Request.
  */
 function planweb_rest_trash( WP_REST_Request $request ) {
-	$id = (int) $request['id'];
+	$id = (int) ( $request->get_url_params()['id'] ?? 0 );
 	if ( ! planweb_entry( $id ) || 'publish' !== get_post_status( $id ) ) {
 		return new WP_Error( 'rest_post_invalid_id', __( 'No such entry.', 'planweb' ), array( 'status' => 404 ) );
 	}
 	if ( ! current_user_can( 'delete_post', $id ) ) {
 		return new WP_Error( 'rest_forbidden', __( 'You are not allowed to do this.', 'planweb' ), array( 'status' => 403 ) );
 	}
-	wp_trash_post( $id );
+	if ( ! EMPTY_TRASH_DAYS ) {
+		return new WP_Error( 'rest_trash_not_supported', __( 'The Trash is turned off on this site, so the entry was kept.', 'planweb' ), array( 'status' => 501 ) );
+	}
+	if ( ! wp_trash_post( $id ) ) {
+		return new WP_Error( 'rest_cannot_delete', __( 'The entry could not be moved to the Trash.', 'planweb' ), array( 'status' => 500 ) );
+	}
 	return rest_ensure_response(
 		array(
 			'id'      => $id,

@@ -95,7 +95,7 @@ $stored = array(
 		'date'  => '2026-11-05',
 		'title' => 'Lab rules objections close',
 		'note'  => 'Campaign 13848.',
-	), // an identical copy
+	), // An identical copy.
 	array(
 		'date'  => 'soon',
 		'title' => 'Not a date',

@@ -7,6 +7,7 @@ import {
 	createRoot,
 	useCallback,
 	useEffect,
+	useRef,
 	useState,
 } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
@@ -235,13 +236,16 @@ const FILTER_KEYS = [
 	'page',
 ];
 
+/* The address keeps the list's page as "paged": "page" there is the admin screen (page=planweb). */
+const urlKey = ( k ) => ( 'page' === k ? 'paged' : k );
+
 /** The list's filters from the address (so a Dashboard tile opens the right list). */
 function argsFromUrl() {
 	const q = new URLSearchParams( window.location.search );
 	const a = {};
 	FILTER_KEYS.forEach( ( k ) => {
-		if ( q.get( k ) ) {
-			a[ k ] = q.get( k );
+		if ( q.get( urlKey( k ) ) ) {
+			a[ k ] = q.get( urlKey( k ) );
 		}
 	} );
 	return a;
@@ -254,10 +258,10 @@ function argsFromUrl() {
  */
 function argsToUrl( a ) {
 	const u = new URL( window.location.href );
-	FILTER_KEYS.forEach( ( k ) => u.searchParams.delete( k ) );
+	FILTER_KEYS.forEach( ( k ) => u.searchParams.delete( urlKey( k ) ) );
 	Object.entries( a ).forEach( ( [ k, v ] ) => {
 		if ( v !== '' && v !== undefined && v !== null ) {
-			u.searchParams.set( k, String( v ) );
+			u.searchParams.set( urlKey( k ), String( v ) );
 		}
 	} );
 	window.history.replaceState( null, '', u.toString() );
@@ -551,13 +555,16 @@ function Entries() {
 	const [ editing, setEditing ] = useState( null );
 	const [ msg, setMsg ] = useState( null );
 
+	const latest = useRef( 0 );
 	const load = useCallback( () => {
+		const ticket = ++latest.current;
+		const current = () => ticket === latest.current;
 		setLoading( true );
 		setError( '' );
 		apiFetch( { path: `${ path( 'entries' ) }?${ query( args ) }` } )
-			.then( setData )
-			.catch( ( e ) => setError( errText( e ) ) )
-			.finally( () => setLoading( false ) );
+			.then( ( r ) => current() && setData( r ) )
+			.catch( ( e ) => current() && setError( errText( e ) ) )
+			.finally( () => current() && setLoading( false ) );
 	}, [ args ] );
 	useEffect( () => {
 		argsToUrl( args );
