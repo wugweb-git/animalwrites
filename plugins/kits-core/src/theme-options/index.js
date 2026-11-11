@@ -30,9 +30,10 @@ import { useGlobalStyles } from './global-styles';
 import { ThemeNote } from './theme-note';
 import colours from './sections/colours';
 import typography from './sections/typography';
+import buttons from './sections/buttons';
 
 // Sections in their own files, after Layout, in this order.
-const extraSections = [ colours, typography ];
+const extraSections = [ colours, typography, buttons ];
 
 const data = window.kitsAdminApp || {};
 const fields = data.fields || {};
