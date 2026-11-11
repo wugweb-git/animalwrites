@@ -69,6 +69,7 @@ DATES='[{"date":"2026-11-05","title":"Lab rules objections close","note":"Campai
 wp option update aw_team_dates "$DATES" --format=json --quiet
 wp option update aw_team_dates_links_note_1111 1 --quiet
 BEFORE=$(wp option get aw_team_dates --format=json)
+wp plugin activate planweb --quiet # Core already loads it; activating also switches it on, as ticking Kits → Modules does.
 wp option update planweb_on 1 --quiet
 if out=$(wp planweb import 2>&1) && echo "$out" | grep -q "5 dates in Dates, 4 entries made, 0 already there, 1 not dates"; then echo "ok   planweb import: $out"; else echo "FAIL planweb import: $out"; FAIL=1; fi
 if out=$(wp planweb verify 2>&1) && echo "$out" | grep -q "4 the same, 0 different, 0 missing, 0 extra"; then echo "ok   planweb verify"; else echo "FAIL planweb verify: $out"; FAIL=1; fi
