@@ -156,6 +156,14 @@ aw-edit-screens admin.php?page=kits-help#developer/edit-screens
 aw-theme-parts admin.php?page=kits-help#developer/theme-parts
 kits-system&tab=states admin.php?page=kits-help&tab=states#design-system
 MAP
+# Offline copies of the menu's six screens for the PR's screenshots (the Deploy check keeps them as an artifact).
+if [ -n "${KITS_SNAPSHOT:-}" ] && command -v wget >/dev/null; then
+  sed 's/^#HttpOnly_//' "$JAR" >/tmp/ci-cookies-wget.txt
+  for s in kits kits-options kits-settings kits-plugins kits-tools kits-help; do
+    wget -q -E -k -K -p --load-cookies /tmp/ci-cookies-wget.txt -P "$KITS_SNAPSHOT" "http://127.0.0.1:8080/wp-admin/admin.php?page=$s" || true
+  done
+  echo "ok   Kits screens saved to $KITS_SNAPSHOT"
+fi
 opts >/tmp/opts-after.txt
 if diff -q /tmp/opts-before.txt /tmp/opts-after.txt >/dev/null; then echo "ok   no setting changed by the Kits screens ($(wc -l </tmp/opts-before.txt | tr -d ' ') options)"; else echo "FAIL settings changed:"; diff /tmp/opts-before.txt /tmp/opts-after.txt | head -20; FAIL=1; fi
 # Plugin Check on PlanWeb (report only, printed, never fails the run): only when plugins/planweb changed (PLUGIN_CHECK=1
