@@ -20,9 +20,20 @@ add_action(
 		}
 		add_filter( 'kits_plugin_screens', 'planweb_kits_tab' );
 		add_filter( 'kits_status_rows', 'planweb_kits_status_row' );
+		add_filter( 'kits_settings_transfer_options', 'planweb_kits_export' );
 	},
 	20
 );
+
+/**
+ * Kits → Tools export: the one option PlanWeb's Settings saves (the switch). Entries are content, not settings.
+ *
+ * @param array $names Option names.
+ */
+function planweb_kits_export( $names ) {
+	$names[] = 'planweb_on';
+	return $names;
+}
 
 /** Without Kits Core: one notice, on PlanWeb's own screen only. */
 function planweb_no_kits_notice() {
