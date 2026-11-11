@@ -286,10 +286,13 @@ screen kits-settings kits-settings-next kits-settings-next
 route kits/v1/settings
 post kits/v1/settings '{"values":{}}'
 BEFORE=$(optmd5 kits_theme_options)
-curl -s -b /tmp/cj-ci -H "X-WP-Nonce: $NA" "$H/?rest_route=/kits/v1/settings" > /tmp/ks.json
-python3 - > /tmp/ks-values.json <<'PY'
-import json
+want 200 "GET /kits/v1/settings for the unchanged Save" -b /tmp/cj-ci -H "X-WP-Nonce: $NA" "$H/?rest_route=/kits/v1/settings"
+cp /tmp/rw.out /tmp/ks.json
+python3 - > /tmp/ks-values.json <<'PY' || { echo "FAIL kits/v1/settings answer has no sections: $(head -c 400 /tmp/ks.json)"; FAIL=1; }
+import json, sys
 d = json.load(open('/tmp/ks.json'))
+if not isinstance(d, dict) or 'sections' not in d:
+    sys.exit(1)
 print(json.dumps({'values': {f['key']: f['value'] for s in d['sections'] for g in s['groups'] for f in g['fields']}}))
 PY
 want 200 "POST /kits/v1/settings unchanged Save (administrator)" -X POST -b /tmp/cj-ci -H "X-WP-Nonce: $NA" -H 'Content-Type: application/json' -d @/tmp/ks-values.json "$H/?rest_route=/kits/v1/settings"
