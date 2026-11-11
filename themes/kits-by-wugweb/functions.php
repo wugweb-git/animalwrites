@@ -683,6 +683,7 @@ function kits_parts_bundle_clean( string $dir ): void {
  * @param int $delay Seconds before the sweep runs.
  */
 function kits_parts_bundle_sweep_start( int $delay ): void {
+	delete_option( 'kits_parts_kinds' ); // Each kind's list starts again from what the release's pages print.
 	update_option(
 		'kits_parts_sweep',
 		array(
@@ -732,7 +733,8 @@ function kits_parts_bundle_max_age(): int {
 
 /**
  * The kind of page this is, for the joined component file: pages of one kind share one file, which holds every
- * component that kind has needed so far (kits_parts_bundle_members). '' keys the file on this page's own components.
+ * component that kind has needed so far (kits_parts_bundle_members). A filter returning '' keys the file on this page's
+ * own components instead.
  * Filter: kits_parts_page_kind (a site can split a kind, e.g. one of its own views).
  */
 function kits_parts_page_kind(): string {
@@ -759,6 +761,8 @@ function kits_parts_page_kind(): string {
 		$kind = 'search';
 	} elseif ( is_404() ) {
 		$kind = '404';
+	} else {
+		$kind = 'other'; // Feeds, embeds and routes a plugin adds: one shared file.
 	}
 	$kind = (string) apply_filters( 'kits_parts_page_kind', $kind );
 	return (string) preg_replace( '/[^a-z0-9_-]/', '', strtolower( $kind ) );
@@ -766,8 +770,10 @@ function kits_parts_page_kind(): string {
 
 /**
  * The components of this kind of page's joined file: the ones this page needs, plus every one an earlier page of the
- * kind needed (kept in the kits_parts_kinds option, in registry order). A kind's list only grows, so its file
- * changes only when the kind first meets a component; registry entries that are gone drop out.
+ * kind needed (kept in the kits_parts_kinds option, in registry order). A kind's list grows until the next release
+ * (kits_parts_bundle_sweep_start empties it, so a component no page prints any more drops out), so its file changes
+ * only when the kind first meets a component; registry entries that are gone drop out at once. Two pages adding at
+ * the same moment can lose one addition; the next page that needs it adds it again.
  *
  * @param string $kind     Page kind ('' = none).
  * @param array  $members  Handles this page needs, in registry order.
@@ -936,12 +942,15 @@ function kits_bundle_component_css() {
 			return; // Uploads could not be written lately: separate files, no retry on every view.
 		}
 		$sets = kits_parts_bundle_sets( $dir['path'] );
-		if ( ! isset( $sets[ $set ] ) && count( $sets ) >= kits_parts_bundle_cap() && false === get_transient( 'kits_parts_cap_clean' ) ) {
+		// A kind's set is always written (kinds are few, set by the page types); the cap holds back only sets keyed on a
+		// page's own components, from a kits_parts_page_kind filter that returned ''.
+		$capped = '' === $kind && ! isset( $sets[ $set ] ) && count( $sets ) >= kits_parts_bundle_cap();
+		if ( $capped && false === get_transient( 'kits_parts_cap_clean' ) ) {
 			set_transient( 'kits_parts_cap_clean', 1, HOUR_IN_SECONDS ); // At most once an hour: unused sets go, then count again.
 			kits_parts_bundle_clean( $dir['path'] );
 			$sets = kits_parts_bundle_sets( $dir['path'] );
 		}
-		if ( ! isset( $sets[ $set ] ) && count( $sets ) >= kits_parts_bundle_cap() ) {
+		if ( $capped && count( $sets ) >= kits_parts_bundle_cap() ) {
 			if ( false === get_transient( 'kits_parts_cap_hit' ) ) {
 				set_transient( 'kits_parts_cap_hit', time(), WEEK_IN_SECONDS ); // Shown on Welcome and Site check.
 			}
