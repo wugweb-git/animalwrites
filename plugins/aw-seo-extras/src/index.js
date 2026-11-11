@@ -3,7 +3,12 @@
  * window.kits.shell from Kits Core) and fed by the rankweb/v1 routes. Data and the screen come from window.rankwebApp
  * (includes/rankweb-ui.php).
  */
-import { createRoot, useEffect, useState } from '@wordpress/element';
+import {
+	createRoot,
+	useCallback,
+	useEffect,
+	useState,
+} from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import {
@@ -60,8 +65,8 @@ const RANGES = [ 7, 28, 90 ];
  * @return {Array|null} [ date, row ].
  */
 function rowBefore( log, today, days ) {
-	const at = new Date( `${ today }T12:00:00` );
-	at.setDate( at.getDate() - days );
+	const at = new Date( `${ today }T12:00:00Z` ); // UTC: the browser's timezone must not move the day
+	at.setUTCDate( at.getUTCDate() - days );
 	const limit = at.toISOString().slice( 0, 10 );
 	const dates = Object.keys( log || {} )
 		.filter( ( d ) => d <= limit )
@@ -77,6 +82,7 @@ function Dashboard() {
 	const [ note, setNote ] = useState( '' );
 	const [ busy, setBusy ] = useState( false );
 	const [ tries, setTries ] = useState( 0 );
+	const [ waitFor, setWaitFor ] = useState( null ); // the count time before Count now
 
 	const load = () => {
 		setError( '' );
@@ -86,8 +92,17 @@ function Dashboard() {
 	};
 	useEffect( load, [] );
 	// While the first count runs in the background, look again every 20 seconds (a read; nothing is counted).
+	const waiting =
+		!! data &&
+		( data.counting || ( null !== waitFor && data.at === waitFor ) );
 	useEffect( () => {
-		if ( ! data?.counting || tries >= 15 ) {
+		if ( data && null !== waitFor && data.at !== waitFor ) {
+			setWaitFor( null );
+			setNote( '' );
+		}
+	}, [ data, waitFor ] );
+	useEffect( () => {
+		if ( ! waiting || tries >= 15 ) {
 			return;
 		}
 		const t = setTimeout( () => {
@@ -95,19 +110,21 @@ function Dashboard() {
 			load();
 		}, 20000 );
 		return () => clearTimeout( t );
-	}, [ data, tries ] );
+	}, [ waiting, data, tries ] );
 
 	const countNow = () => {
 		setBusy( true );
 		apiFetch( { path: path( 'dashboard/count' ), method: 'POST' } )
-			.then( () =>
+			.then( () => {
+				setTries( 0 );
+				setWaitFor( data?.at ?? 0 );
 				setNote(
 					__(
 						'A count is running in the background. The numbers change when it is done (about a minute).',
 						'aw-seo-extras'
 					)
-				)
-			)
+				);
+			} )
 			.catch( ( e ) => setNote( e.message || String( e ) ) )
 			.finally( () => setBusy( false ) );
 	};
@@ -157,6 +174,14 @@ function Dashboard() {
 					'aw-seo-extras'
 				),
 				days
+			);
+	}
+	if ( waiting && tries >= 15 ) {
+		after +=
+			' ' +
+			__(
+				'The count is taking longer than usual; reload this page later.',
+				'aw-seo-extras'
 			);
 	}
 	const noindex = data.tiles.find( ( t ) => 'noindex' === t.key );
@@ -380,17 +405,16 @@ function faqOf( group ) {
  * @param {Object}   props
  * @param {Object}   props.group   Group from the route.
  * @param {Function} props.onSaved New group from the route after a save.
- * @param {Function} props.onDirty Unsaved changes or not.
+ * @param {Function} props.onDirty ( slug, unsaved ) when that changes.
  */
 function Group( { group, onSaved, onDirty } ) {
 	const [ state, setState ] = useState( () => startOf( group ) );
 	const [ msg, setMsg ] = useState( null );
 	const [ busy, setBusy ] = useState( false );
 	const [ faq, setFaq ] = useState( () => faqOf( group ) );
-	useEffect( () => {
-		setState( startOf( group ) );
-		setFaq( faqOf( group ) );
-	}, [ group ] );
+	// Reset each part only when the route sent it anew, so saving the FAQ box keeps unsaved fields and the other way round.
+	useEffect( () => setState( startOf( group ) ), [ group.blocks ] ); // eslint-disable-line react-hooks/exhaustive-deps
+	useEffect( () => setFaq( faqOf( group ) ), [ group.faqTypes ] ); // eslint-disable-line react-hooks/exhaustive-deps
 
 	const isModules = 'modules' === group.slug;
 	const fieldsDirty = group.blocks.some( ( b ) =>
@@ -406,16 +430,21 @@ function Group( { group, onSaved, onDirty } ) {
 		b.fields.some( ( f ) => f.changed )
 	);
 	useEffect(
-		() => onDirty( onDirty_ || faqDirty ),
-		[ onDirty_, faqDirty, onDirty ]
+		() => onDirty( group.slug, onDirty_ || faqDirty ),
+		[ group.slug, onDirty_, faqDirty, onDirty ]
 	);
 
 	const save = ( body, route = `settings/${ group.slug }` ) => {
+		const faqOnly = 'settings/faq-types' === route;
 		setBusy( true );
 		setMsg( null );
 		return apiFetch( { path: path( route ), method: 'POST', data: body } )
 			.then( ( r ) => {
-				onSaved( r.group );
+				onSaved(
+					faqOnly
+						? { ...group, faqTypes: r.group.faqTypes }
+						: { ...r.group, faqTypes: group.faqTypes }
+				);
 				setMsg( { tone: 'success', text: r.message } );
 			} )
 			.catch( ( e ) =>
@@ -720,6 +749,20 @@ function Settings() {
 	const [ error, setError ] = useState( '' );
 	const [ open, setOpen ] = useState( SERVICES );
 	const [ dirty, setDirty ] = useState( {} );
+	const markDirty = useCallback(
+		( slug, d ) =>
+			setDirty( ( o ) =>
+				o[ slug ] === d ? o : { ...o, [ slug ]: d }
+			),
+		[]
+	);
+	const replaceGroup = useCallback(
+		( ng ) =>
+			setGroups( ( gs ) =>
+				gs.map( ( x ) => ( x.slug === ng.slug ? ng : x ) )
+			),
+		[]
+	);
 
 	const load = () => {
 		setError( '' );
@@ -784,18 +827,8 @@ function Settings() {
 				<div key={ g.slug } hidden={ g.slug !== open }>
 					<Group
 						group={ g }
-						onSaved={ ( ng ) =>
-							setGroups(
-								groups.map( ( x ) =>
-									x.slug === ng.slug ? ng : x
-								)
-							)
-						}
-						onDirty={ ( d ) =>
-							setDirty( ( o ) =>
-								o[ g.slug ] === d ? o : { ...o, [ g.slug ]: d }
-							)
-						}
+						onSaved={ replaceGroup }
+						onDirty={ markDirty }
 					/>
 				</div>
 			) ) }

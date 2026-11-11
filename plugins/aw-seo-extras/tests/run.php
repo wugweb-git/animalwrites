@@ -9,6 +9,7 @@
  *    11 Nov 2026), and stays byte for byte the same when it holds values, including InsightWeb's 'search-insights'.
  * 3. A changed field is stored, and Restore defaults takes it out again without touching other groups.
  * 4. Modules: an unchanged Save writes nothing; switching one off stores only { on: false }.
+ * 5. An 'on' => true from an older save is kept: an unchanged modules Save writes nothing.
  *
  * Usage: php plugins/aw-seo-extras/tests/run.php
  *
@@ -195,6 +196,12 @@ rw_check( array( 'redirects' => array( 'on' => false ) ) === get_option( AW_SEO_
 $on['redirects'] = true;
 aw_seo_settings_save( 'modules', array(), false, $on );
 rw_check( array() === get_option( AW_SEO_SETTINGS ), 'module on again: nothing stored' );
+
+// 5. An 'on' => true left by an older save: an unchanged modules Save keeps it and writes nothing.
+$GLOBALS['rw_options'] = array( AW_SEO_SETTINGS => array( 'faq' => array( 'on' => true ) ) );
+$GLOBALS['rw_writes']  = 0;
+aw_seo_settings_save( 'modules', array(), false, rw_on() );
+rw_check( 0 === $GLOBALS['rw_writes'], "older 'on' => true: no write after an unchanged modules Save" );
 
 echo $fails ? "{$fails} of {$count} checks failed\n" : "all {$count} RankWeb settings checks passed\n";
 exit( $fails ? 1 : 0 );

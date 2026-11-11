@@ -414,7 +414,9 @@ function rankweb_settings_group( string $tab ): array {
 		$group['blocks'][] = $b;
 	}
 	if ( 'schema' === $tab && function_exists( 'aw_faq_type_choices' ) ) {
-		$off               = aw_faq_off_types();
+		// The option itself, not aw_faq_off_types(): that keeps a per-request copy, stale right after a save here.
+		$stored            = get_option( 'aw_faq_off_types', null );
+		$off               = array_map( 'strval', null === $stored ? aw_faq_off_types() : (array) $stored );
 		$choices           = aw_faq_type_choices();
 		$group['faqTypes'] = array();
 		foreach ( array( 'post', 'term' ) as $store ) {

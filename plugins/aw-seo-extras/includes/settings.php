@@ -648,9 +648,11 @@ function aw_seo_settings_save( string $tab, array $posted, bool $reset = false, 
 			if ( empty( $mod['switch'] ) ) {
 				continue;
 			}
-			unset( $all[ $key ]['on'] ); // no 'on' key means on (aw_seo_module_on()), so only "off" is stored
+			// No 'on' key means on (aw_seo_module_on()), so only "off" is stored; an 'on' => true from an older save stays.
 			if ( empty( $on[ $key ] ) ) {
 				$all[ $key ]['on'] = false;
+			} elseif ( isset( $all[ $key ]['on'] ) && ! $all[ $key ]['on'] ) {
+				unset( $all[ $key ]['on'] );
 			}
 		}
 	} else {
