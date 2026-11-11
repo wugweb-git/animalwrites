@@ -94,10 +94,11 @@ if [ "$(wp eval 'echo get_role( "administrator" )->has_cap( "edit_planweb_entrie
 if [ "$(wp eval 'global $wpdb; echo (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = \"planweb_entry\"" );')" = "4" ]; then echo "ok   planweb off: entries kept"; else echo "FAIL planweb off: entries not kept"; FAIL=1; fi
 # Kits menu (docs/admin-ui-spec.md §B, §E1; owner, 11 Nov 2026): as an administrator, the menu is exactly the six items,
 # each loads (200), Keys, Modules and Dates still open at their own address, every old address answers 302 to its new
-# place, and loading them all changes no setting.
+# place, and loading them all changes no setting (run logs and cache counters that page loads and scheduled tasks
+# write are left out: aw_cron_runs, aw_publishers, aw_seo_cache_gen, aw_error_pages).
 echo "-- kits menu (administrator)"
 has() { if grep -qF -- "$3" "$2"; then echo "ok   $1"; else echo "FAIL $1"; FAIL=1; fi; }
-opts() { wp eval 'global $wpdb; foreach ( $wpdb->get_results( "SELECT option_name, option_value FROM {$wpdb->options} WHERE option_name NOT LIKE \"%transient%\" AND option_name NOT IN (\"cron\",\"recently_activated\") ORDER BY option_name" ) as $r ) { echo $r->option_name, " ", md5( $r->option_value ), "\n"; }'; }
+opts() { wp eval 'global $wpdb; foreach ( $wpdb->get_results( "SELECT option_name, option_value FROM {$wpdb->options} WHERE option_name NOT LIKE \"%transient%\" AND option_name NOT IN (\"cron\",\"recently_activated\",\"aw_cron_runs\",\"aw_publishers\",\"aw_seo_cache_gen\",\"aw_error_pages\") ORDER BY option_name" ) as $r ) { echo $r->option_name, " ", md5( $r->option_value ), "\n"; }'; }
 JAR=/tmp/ci-cookies.txt; rm -f "$JAR"
 curl -s -o /dev/null -c "$JAR" http://127.0.0.1:8080/wp-login.php
 curl -s -o /dev/null -b "$JAR" -c "$JAR" --data-urlencode log=ci --data-urlencode pwd=ci-only --data-urlencode testcookie=1 --data-urlencode redirect_to=http://127.0.0.1:8080/wp-admin/ http://127.0.0.1:8080/wp-login.php
@@ -125,7 +126,8 @@ has "Home: backup" /tmp/admin.html 'id="backup"'
 has "Home: email, thumbnails and pictures stay" /tmp/admin.html 'id="pictures"'
 has "Home: Dates linked" /tmp/admin.html 'page=aw-dates'
 adm "admin.php?page=kits-plugins" >/dev/null
-for n in PlanWeb InsightWeb MailWeb; do has "Plugins: $n row with its icon" /tmp/admin.html "data:image/svg+xml;base64,"; grep -q ">$n</a>" /tmp/admin.html && echo "ok   Plugins: $n row" || { echo "FAIL Plugins: no $n row"; FAIL=1; }; done
+# InsightWeb is not loaded on this test site, so only PlanWeb's and MailWeb's rows are checked.
+for n in PlanWeb MailWeb; do has "Plugins: $n row with its icon" /tmp/admin.html "data:image/svg+xml;base64,"; grep -q ">$n</a>" /tmp/admin.html && echo "ok   Plugins: $n row" || { echo "FAIL Plugins: no $n row"; FAIL=1; }; done
 adm "admin.php?page=kits-settings" >/dev/null
 has "Settings: CDN cache times" /tmp/admin.html 'id="cdn"'
 has "Settings: preview access" /tmp/admin.html 'id="kits-preview-ips"'
