@@ -92,6 +92,7 @@ add_action(
 		}
 		wp_enqueue_style( 'kits-shell' );
 		add_filter( 'admin_body_class', 'kits_shell_body_class' );
+		kits_shell_screen_plain();
 		kits_frame_ready( true );
 	}
 );

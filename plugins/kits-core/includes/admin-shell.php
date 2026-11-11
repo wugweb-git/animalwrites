@@ -84,7 +84,26 @@ function kits_shell_app( array $args ): bool {
 		wp_add_inline_script( $args['handle'], 'window.' . $args['object'] . ' = ' . wp_json_encode( (array) ( $args['data'] ?? array() ) ) . ';', 'before' );
 	}
 	add_filter( 'admin_body_class', 'kits_shell_body_class' );
+	kits_shell_screen_plain();
 	return true;
+}
+
+/**
+ * A shell screen has no Screen Options or Help tab: they belong to the earlier screen's list tables and do nothing here.
+ * Core's own switches: the screen_options_show_screen filter and WP_Screen::remove_help_tabs().
+ */
+function kits_shell_screen_plain(): void {
+	add_filter( 'screen_options_show_screen', '__return_false', 99 );
+	add_action(
+		'admin_head',
+		function () {
+			$screen = get_current_screen();
+			if ( $screen ) {
+				$screen->remove_help_tabs();
+			}
+		},
+		99
+	);
 }
 
 /**
