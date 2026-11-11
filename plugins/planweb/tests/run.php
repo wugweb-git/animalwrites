@@ -73,6 +73,8 @@ $live = array(
 	'Campaign form #10: 8,089 entries (8,079 yesterday)',
 	'Supreme Court stray-dog case: High Court compliance reports due (19 May 2026 judgment)',
 );
+check( '' === planweb_personal_data_problem( 'Recheck 2026-11-13 2026-11-14' ), 'two Y-m-d dates are not a phone' );
+check( '' !== planweb_personal_data_problem( 'On 2026-11-13 call 98765 43210' ), 'phone next to a date still refused' );
 foreach ( $live as $i => $text ) {
 	check( '' === planweb_personal_data_problem( $text ), "live text $i passes" );
 }

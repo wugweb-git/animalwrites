@@ -120,6 +120,7 @@ function planweb_personal_data_problem( string $text ): string {
 	if ( preg_match( '/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i', $text ) ) {
 		return 'Remove the email address: PlanWeb holds no personal data.';
 	}
+	$text = (string) preg_replace( '/\b\d{4}-\d{2}-\d{2}\b/', '/', $text ); // Y-m-d dates are not phone digits.
 	if ( preg_match_all( '/\+?\d[\d\s().-]{8,}\d/', $text, $m ) ) {
 		foreach ( $m[0] as $run ) {
 			if ( strlen( (string) preg_replace( '/\D/', '', $run ) ) >= 10 ) {

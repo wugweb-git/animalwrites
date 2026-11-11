@@ -265,10 +265,6 @@ function planweb_form( $e, string $month ) {
 	submit_button( $e['id'] ? __( 'Save entry', 'planweb' ) : __( 'Add entry', 'planweb' ), 'primary', 'submit', false );
 	if ( $e['id'] ) {
 		echo ' <a class="button" href="' . esc_url( planweb_url( array( 'm' => $month ) ) ) . '">' . esc_html__( 'Cancel', 'planweb' ) . '</a>';
-		$revisions = wp_get_post_revisions( $e['id'], array( 'fields' => 'ids' ) );
-		if ( $revisions && current_user_can( 'edit_post', $e['id'] ) ) {
-			echo ' <a href="' . esc_url( admin_url( 'revision.php?revision=' . (int) reset( $revisions ) ) ) . '">' . esc_html__( 'Revisions', 'planweb' ) . '</a>';
-		}
 	}
 	echo '</form>';
 }

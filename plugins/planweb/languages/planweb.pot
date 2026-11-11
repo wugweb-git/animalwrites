@@ -211,10 +211,6 @@ msgstr ""
 msgid "Cancel"
 msgstr ""
 
-#: includes/admin.php:270
-msgid "Revisions"
-msgstr ""
-
 #: includes/admin.php:281
 #: includes/admin.php:322
 #: includes/admin.php:334
