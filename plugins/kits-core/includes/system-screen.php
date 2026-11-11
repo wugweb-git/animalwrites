@@ -468,7 +468,7 @@ function kits_system_page() {
 			);
 		}
 		kits_simple_table( 'contrast', array( 'name' => 'Component', 'text' => 'Text', 'on' => 'On', 'ratio' => 'Ratio', 'aa' => 'AA (4.5:1 text)' ), $cells );
-		echo '</div>';
+		echo '<p>Change the colours, and see this table update before saving, in <a href="' . esc_url( admin_url( 'admin.php?page=kits-options&ui=next#colours' ) ) . '">Theme Options → Colours</a>.</p></div>';
 		return;
 	}
 	// Components, blocks and patterns.
