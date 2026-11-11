@@ -283,19 +283,19 @@ same() { if [ "$2" = "$3" ]; then echo "ok   $1: every option identical after an
 
 echo "-- kits settings panel (&ui=next)"
 screen kits-settings kits-settings-next kits-settings-next
-route kits/v1/settings
-post kits/v1/settings '{"values":{}}'
+route kits/v1/settings-panel
+post kits/v1/settings-panel '{"values":{}}'
 BEFORE=$(optmd5 kits_theme_options)
-want 200 "GET /kits/v1/settings for the unchanged Save" -b /tmp/cj-ci -H "X-WP-Nonce: $NA" "$H/?rest_route=/kits/v1/settings"
+want 200 "GET /kits/v1/settings-panel for the unchanged Save" -b /tmp/cj-ci -H "X-WP-Nonce: $NA" "$H/?rest_route=/kits/v1/settings-panel"
 cp /tmp/rw.out /tmp/ks.json
-python3 - > /tmp/ks-values.json <<'PY' || { echo "FAIL kits/v1/settings answer has no sections: $(head -c 400 /tmp/ks.json)"; FAIL=1; }
+python3 - > /tmp/ks-values.json <<'PY' || { echo "FAIL kits/v1/settings-panel answer has no sections: $(head -c 400 /tmp/ks.json)"; FAIL=1; }
 import json, sys
 d = json.load(open('/tmp/ks.json'))
 if not isinstance(d, dict) or 'sections' not in d:
     sys.exit(1)
 print(json.dumps({'values': {f['key']: f['value'] for s in d['sections'] for g in s['groups'] for f in g['fields']}}))
 PY
-want 200 "POST /kits/v1/settings unchanged Save (administrator)" -X POST -b /tmp/cj-ci -H "X-WP-Nonce: $NA" -H 'Content-Type: application/json' -d @/tmp/ks-values.json "$H/?rest_route=/kits/v1/settings"
+want 200 "POST /kits/v1/settings-panel unchanged Save (administrator)" -X POST -b /tmp/cj-ci -H "X-WP-Nonce: $NA" -H 'Content-Type: application/json' -d @/tmp/ks-values.json "$H/?rest_route=/kits/v1/settings-panel"
 grep -q '"saved":false' /tmp/rw.out && echo "ok   unchanged Save reports nothing saved" || { echo "FAIL unchanged Save wrote"; FAIL=1; }
 same "Kits Settings" "$BEFORE" "$(optmd5 kits_theme_options)"
 # Each Kits plugin's new screens: tools/ci/smoke-ui-<plugin>.sh, using screen, route, post, optmd5 and same above.
