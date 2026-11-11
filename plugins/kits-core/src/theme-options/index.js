@@ -6,6 +6,7 @@
  * - core: site title, tagline, logo, site icon (WordPress's own options);
  * - to:   kits_theme_options fields (a value equal to the theme's is not stored, so Reset sends the theme's value);
  * - pd:   kits_page_defaults._site, the site-wide header, footer, sidebar, title and breadcrumbs ('' = the theme's).
+ * Sections in sections/ keep their own values and save them themselves (Global Styles); the same Save runs them.
  */
 import { createRoot, useState, useEffect, useMemo } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
@@ -24,6 +25,7 @@ import {
 	TextControl,
 	ToggleControl,
 } from '@wordpress/components';
+import cardsSection from './sections/cards';
 
 const data = window.kitsAdminApp || {};
 const fields = data.fields || {};
@@ -31,6 +33,8 @@ const pdFields = data.pageDefaults?.fields || {};
 // Published menus for the menu fields: [ { value: id, label: title } ].
 const menus = data.menus || [];
 const themeOwn = __( 'The theme’s own', 'kits-core' );
+// Sections with their own store and save: { slug, label, available, Component, subscribe, isDirty, save }.
+const ownSections = [ cardsSection ].filter( ( s ) => s.available );
 const menuLabel = ( id ) =>
 	'' === id ? themeOwn : menus.find( ( m ) => m.value === id )?.label || id;
 
@@ -117,6 +121,7 @@ function sectionsOf() {
 				],
 			],
 		},
+		...ownSections,
 	];
 	Object.keys( fields ).forEach( ( key ) => {
 		const f = fields[ key ];
@@ -438,7 +443,16 @@ function App() {
 	const [ edits, setEdits ] = useState( { core: {}, to: {}, pd: {} } );
 	const [ status, setStatus ] = useState( null );
 	const [ busy, setBusy ] = useState( false );
+	const [ , setTick ] = useState( 0 );
 	const inherited = data.inherited || {};
+
+	// A change in a section's own store redraws the header (Save, "Changes not saved").
+	useEffect( () => {
+		const offs = ownSections.map( ( s ) =>
+			s.subscribe( () => setTick( ( t ) => t + 1 ) )
+		);
+		return () => offs.forEach( ( off ) => off() );
+	}, [] );
 
 	useEffect( () => {
 		const on = () => setSection( sectionFromHash( sections ) );
@@ -463,9 +477,9 @@ function App() {
 		Object.keys( edits[ store ] ).filter(
 			( k ) => edits[ store ][ k ] !== base( store, k )
 		);
-	const dirty = [ 'core', 'to', 'pd' ].some(
-		( s ) => changed( s ).length > 0
-	);
+	const dirty =
+		[ 'core', 'to', 'pd' ].some( ( s ) => changed( s ).length > 0 ) ||
+		ownSections.some( ( s ) => s.isDirty() );
 
 	useEffect( () => {
 		const warn = ( e ) => {
@@ -499,43 +513,56 @@ function App() {
 		}
 		setBusy( true );
 		setStatus( null );
-		apiFetch( { path: '/wp/v2/settings', method: 'POST', data: body } )
-			.then( ( res ) => {
-				const obj = ( v, fallback ) =>
-					v && 'object' === typeof v ? v : fallback;
-				const core = { ...saved.core };
-				Object.keys( core ).forEach( ( k ) => {
-					if ( k in res ) {
-						core[ k ] = res[ k ] ?? core[ k ];
-					}
-				} );
-				setSaved( {
-					core,
-					// A stored value the schema cannot read comes back as null: keep what this screen knows.
-					to: obj( res.kits_theme_options, {
-						...saved.to,
-						...edits.to,
-					} ),
-					pd:
-						res.kits_page_defaults &&
-						'object' === typeof res.kits_page_defaults
-							? obj( res.kits_page_defaults._site, {} ) // No _site: every choice is the theme's.
-							: { ...saved.pd, ...edits.pd },
-				} );
-				setEdits( { core: {}, to: {}, pd: {} } );
-				setStatus( {
-					type: 'success',
-					text: __( 'Saved.', 'kits-core' ),
-				} );
-			} )
-			.catch( ( err ) =>
-				setStatus( {
-					type: 'error',
-					text:
-						err?.message ||
-						__( 'Not saved. Try again.', 'kits-core' ),
+		const jobs = [];
+		if ( Object.keys( body ).length ) {
+			jobs.push(
+				apiFetch( {
+					path: '/wp/v2/settings',
+					method: 'POST',
+					data: body,
+				} ).then( ( res ) => {
+					const obj = ( v, fallback ) =>
+						v && 'object' === typeof v ? v : fallback;
+					const core = { ...saved.core };
+					Object.keys( core ).forEach( ( k ) => {
+						if ( k in res ) {
+							core[ k ] = res[ k ] ?? core[ k ];
+						}
+					} );
+					setSaved( {
+						core,
+						// A stored value the schema cannot read comes back as null: keep what this screen knows.
+						to: obj( res.kits_theme_options, {
+							...saved.to,
+							...edits.to,
+						} ),
+						pd:
+							res.kits_page_defaults &&
+							'object' === typeof res.kits_page_defaults
+								? obj( res.kits_page_defaults._site, {} ) // No _site: every choice is the theme's.
+								: { ...saved.pd, ...edits.pd },
+					} );
+					setEdits( { core: {}, to: {}, pd: {} } );
 				} )
-			)
+			);
+		}
+		ownSections
+			.filter( ( s ) => s.isDirty() )
+			.forEach( ( s ) => jobs.push( s.save() ) );
+		Promise.allSettled( jobs )
+			.then( ( results ) => {
+				const failed = results.find( ( r ) => 'rejected' === r.status );
+				setStatus(
+					failed
+						? {
+								type: 'error',
+								text:
+									failed.reason?.message ||
+									__( 'Not saved. Try again.', 'kits-core' ),
+							}
+						: { type: 'success', text: __( 'Saved.', 'kits-core' ) }
+				);
+			} )
 			.finally( () => setBusy( false ) );
 	};
 
@@ -716,7 +743,13 @@ function App() {
 								<h2>{ current.label }</h2>
 							</CardHeader>
 							<CardBody>
-								{ current.items.map( item ) }
+								{ current.Component ? (
+									<current.Component
+										ThemeNote={ ThemeNote }
+									/>
+								) : (
+									current.items.map( item )
+								) }
 								{ ( current.info || [] ).map( ( [ k, v ] ) => (
 									<p key={ k }>
 										<strong>{ k }:</strong> { v }
