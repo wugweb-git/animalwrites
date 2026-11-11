@@ -204,49 +204,52 @@ function App() {
 
 	return (
 		<div className="kits-app">
-			<Card>
-				<CardHeader>
-					<Flex align="center" wrap>
-						<FlexBlock>
-							<h1 className="kits-app-title">
-								{ __( 'Theme Options', 'kits-core' ) }
-							</h1>
-							<p className="description">
-								{ sprintf(
-									/* translators: 1: site name, 2: theme name and version, 3: Kits Core version. */
-									__(
-										'%1$s · %2$s · Kits Core %3$s',
-										'kits-core'
-									),
-									data.site,
-									data.theme,
-									data.core
-								) }
-							</p>
-						</FlexBlock>
-						<FlexItem>
-							<span
-								className="kits-app-status"
-								role="status"
-								aria-live="polite"
-							>
-								{ dirty && ! busy
-									? __( 'Changes not saved', 'kits-core' )
-									: '' }
-							</span>{ ' ' }
-							<Button
-								variant="primary"
-								onClick={ save }
-								disabled={ ! dirty || busy }
-								isBusy={ busy }
-								__next40pxDefaultSize
-							>
-								{ __( 'Save', 'kits-core' ) }
-							</Button>
-						</FlexItem>
-					</Flex>
-				</CardHeader>
-			</Card>
+			{ /* The header stays in view while the fields scroll (32px: the admin bar). */ }
+			<div style={ { position: 'sticky', top: 32, zIndex: 20 } }>
+				<Card>
+					<CardHeader>
+						<Flex align="center" wrap>
+							<FlexBlock>
+								<h1 className="kits-app-title">
+									{ __( 'Theme Options', 'kits-core' ) }
+								</h1>
+								<p className="description">
+									{ sprintf(
+										/* translators: 1: site name, 2: theme name and version, 3: Kits Core version. */
+										__(
+											'%1$s · %2$s · Kits Core %3$s',
+											'kits-core'
+										),
+										data.site,
+										data.theme,
+										data.core
+									) }
+								</p>
+							</FlexBlock>
+							<FlexItem>
+								<span
+									className="kits-app-status"
+									role="status"
+									aria-live="polite"
+								>
+									{ dirty && ! busy
+										? __( 'Changes not saved', 'kits-core' )
+										: '' }
+								</span>{ ' ' }
+								<Button
+									variant="primary"
+									onClick={ save }
+									disabled={ ! dirty || busy }
+									isBusy={ busy }
+									__next40pxDefaultSize
+								>
+									{ __( 'Save', 'kits-core' ) }
+								</Button>
+							</FlexItem>
+						</Flex>
+					</CardHeader>
+				</Card>
+			</div>
 			<nav
 				className="nav-tab-wrapper wp-clearfix"
 				aria-label={ __( 'Kits screens', 'kits-core' ) }
