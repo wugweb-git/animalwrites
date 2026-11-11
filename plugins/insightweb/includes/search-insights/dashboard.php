@@ -115,6 +115,7 @@ function aw_seo_dash_sources(): array {
 			'last'    => $ok,
 			'status'  => $status,
 			'problem' => in_array( $status, array( 'failed', 'late' ), true ),
+			'why'     => $err,
 		);
 	}
 	$order = array_flip( array( 'failed', 'late', 'refused', 'notrun', 'ok' ) );

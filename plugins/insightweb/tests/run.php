@@ -179,6 +179,7 @@ $h = insightweb_health_shape(
 			'last'    => 0,
 			'status'  => 'failed',
 			'problem' => true,
+			'why'     => 'HTTP 403',
 		),
 		array(
 			'name'    => 'Search Console',
@@ -197,5 +198,6 @@ $h = insightweb_health_shape(
 iw_check( 'Figures up to 8 Nov 2026' === $h['tiles'][0]['sub'] && '' === $h['tiles'][0]['tone'], 'import tile: date of the figures, no tone when working' );
 iw_check( 'error' === $h['tiles'][1]['tone'] && '1 needs attention' === $h['tiles'][1]['value'] && 'GA4' === $h['tiles'][1]['sub'], 'jobs tile names the failed source' );
 iw_check( 'Failed' === $h['sources'][0]['status'] && 'Never' === $h['sources'][0]['last'], 'sources list in plain words' );
+iw_check( 'HTTP 403' === $h['sources'][0]['why'] && '' === $h['sources'][1]['why'], 'a failed source says why' );
 
 exit( $GLOBALS['iw_fail'] );

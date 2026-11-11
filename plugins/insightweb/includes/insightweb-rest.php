@@ -234,7 +234,7 @@ function insightweb_dash_shape( array $r, array $links ): array {
 /**
  * The two health tiles and the sources list, from the run log (stored state; nothing is counted here).
  *
- * @param array  $sources Rows from aw_seo_dash_sources(): name, last, status, problem.
+ * @param array  $sources Rows from aw_seo_dash_sources(): name, last, status, problem, why.
  * @param array  $gsc     The run log's gsc entry (ok, error, info).
  * @param string $state   The Search Console source's status (failed, late, refused, notrun, ok).
  * @param array  $links   overview, settings: addresses of the current tabs.
@@ -295,6 +295,7 @@ function insightweb_health_shape( array $sources, array $gsc, string $state, arr
 			'last'   => ! empty( $s['last'] ) ? wp_date( 'j M Y, H:i', (int) $s['last'] ) : __( 'Never', 'aw-seo-extras' ),
 			'status' => $words[ $s['status'] ] ?? (string) $s['status'],
 			'tone'   => $tones[ $s['status'] ] ?? '',
+			'why'    => (string) ( $s['why'] ?? '' ), // The failed run's own message.
 		);
 	}
 	return array(

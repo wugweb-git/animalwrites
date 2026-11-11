@@ -349,7 +349,10 @@ function Dashboard() {
 							label: __( 'State', 'aw-seo-extras' ),
 							render: ( r ) =>
 								r.tone ? (
-									<strong>{ r.status }</strong>
+									<>
+										<strong>{ r.status }</strong>
+										{ r.why ? ` ${ r.why }` : '' }
+									</>
 								) : (
 									r.status
 								),
