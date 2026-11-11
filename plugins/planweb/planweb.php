@@ -41,12 +41,16 @@ define( 'PLANWEB_DIR', plugin_dir_path( __FILE__ ) );
 define( 'PLANWEB_URL', plugin_dir_url( __FILE__ ) );
 
 require_once PLANWEB_DIR . 'includes/model.php';
+require_once PLANWEB_DIR . 'includes/ui-model.php';
 require_once PLANWEB_DIR . 'includes/switch.php';
 require_once PLANWEB_DIR . 'includes/store.php';
 require_once PLANWEB_DIR . 'includes/import.php';
 require_once PLANWEB_DIR . 'includes/admin.php';
 require_once PLANWEB_DIR . 'includes/dashboard.php';
 require_once PLANWEB_DIR . 'includes/kits-hub.php';
+require_once PLANWEB_DIR . 'includes/planweb-dashboard.php';
+require_once PLANWEB_DIR . 'includes/planweb-rest.php';
+require_once PLANWEB_DIR . 'includes/planweb-ui.php';
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	require_once PLANWEB_DIR . 'includes/class-planweb-cli.php';
 }
