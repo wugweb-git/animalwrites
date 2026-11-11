@@ -491,20 +491,36 @@ function SentFailed( { data, days, busy, act } ) {
 			description={ s.allTime }
 			actions={
 				data.admin && s.heldN > 0 ? (
-					<Button
-						busy={ 'queue/retry' === busy }
-						onClick={ () =>
-							act(
-								'queue/retry',
-								__(
-									'Put the held emails back in line? They are sent on the next runs, within the daily limit.',
-									'mailweb'
+					<>
+						<Button
+							busy={ 'queue/retry' === busy }
+							onClick={ () =>
+								act(
+									'queue/retry',
+									__(
+										'Put the held emails back in line? They are sent on the next runs, within the daily limit.',
+										'mailweb'
+									)
 								)
-							)
-						}
-					>
-						{ __( 'Retry held emails', 'mailweb' ) }
-					</Button>
+							}
+						>
+							{ __( 'Retry held emails', 'mailweb' ) }
+						</Button>{ ' ' }
+						<Button
+							busy={ 'queue/clear' === busy }
+							onClick={ () =>
+								act(
+									'queue/clear',
+									__(
+										'Clear the held emails? They are not sent. The log keeps a line for each for 30 days.',
+										'mailweb'
+									)
+								)
+							}
+						>
+							{ __( 'Clear held emails', 'mailweb' ) }
+						</Button>
+					</>
 				) : null
 			}
 		>

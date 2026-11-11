@@ -343,7 +343,7 @@ function mailweb_flush( $max = 40 ) {
 		}
 	}
 	// The log keeps 30 days (time, priority, status only once sent).
-	$wpdb->query( $wpdb->prepare( "DELETE FROM {$t} WHERE status = 'sent' AND sent_at < %s", gmdate( 'Y-m-d H:i:s', time() - 30 * DAY_IN_SECONDS ) ) ); // phpcs:ignore
+	$wpdb->query( $wpdb->prepare( "DELETE FROM {$t} WHERE status IN ( 'sent', 'cleared' ) AND sent_at < %s", gmdate( 'Y-m-d H:i:s', time() - 30 * DAY_IN_SECONDS ) ) ); // phpcs:ignore
 	delete_transient( 'mailweb_flush_lock' );
 	return $sent;
 }
@@ -388,6 +388,8 @@ add_action(
 			echo '<div class="notice notice-success inline"><p>' . esc_html__( 'Sending resumed.', 'mailweb' ) . '</p></div>';
 		} elseif ( 'retry' === $note ) {
 			echo '<div class="notice notice-success inline"><p>' . esc_html__( 'Held emails will be tried again.', 'mailweb' ) . '</p></div>';
+		} elseif ( 'cleared' === $note ) {
+			echo '<div class="notice notice-success inline"><p>' . esc_html__( 'Held emails cleared.', 'mailweb' ) . '</p></div>';
 		} elseif ( 'flushed' === $note ) {
 			$sent_n = absint( wp_unslash( $_GET['n'] ?? 0 ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- a count in the redirect after the nonced action
 			/* translators: %d: number of queued emails sent */
@@ -436,13 +438,19 @@ add_action(
 		echo '<input type="hidden" name="action" value="mailweb_cap"><table class="form-table">';
 		echo '<tr><th scope="row"><label for="mailweb-cap-budget">' . esc_html__( 'Emails per 24 hours', 'mailweb' ) . '</label></th><td><input id="mailweb-cap-budget" name="budget" type="number" min="1" max="10000" value="' . (int) $s['budget'] . '"><p class="description">' . esc_html__( 'Your mail plan\'s daily limit, less a margin (Hostinger Business Email free: 100, so 90).', 'mailweb' ) . '</p></td></tr>';
 		echo '<tr><th scope="row"><label for="mailweb-cap-reserve">' . esc_html__( 'Kept back from campaigns', 'mailweb' ) . '</label></th><td><input id="mailweb-cap-reserve" name="reserve" type="number" min="0" max="99" value="' . (int) $s['reserve'] . '"><p class="description">' . esc_html__( 'Campaigns use at most the limit minus this, so notices and confirmations always have room.', 'mailweb' ) . '</p></td></tr>';
-		echo '</table><p><button class="button button-primary" name="do" value="save">' . esc_html__( 'Save limit', 'mailweb' ) . '</button> <button class="button" name="do" value="flush">' . esc_html__( 'Send queued emails now (within the limit)', 'mailweb' ) . '</button> <button class="button" name="do" value="retry">' . esc_html__( 'Retry held emails', 'mailweb' ) . '</button></p></form>';
+		echo '</table><p><button class="button button-primary" name="do" value="save">' . esc_html__( 'Save limit', 'mailweb' ) . '</button> <button class="button" name="do" value="flush">' . esc_html__( 'Send queued emails now (within the limit)', 'mailweb' ) . '</button> <button class="button" name="do" value="retry">' . esc_html__( 'Retry held emails', 'mailweb' ) . '</button> <button class="button" name="do" value="clear">' . esc_html__( 'Clear held emails', 'mailweb' ) . '</button></p></form>';
 	}
 );
 
 /** Resume sending after a pause (the queue goes out again on the next 5-minute run). */
 function mailweb_resume() {
 	delete_option( 'mailweb_pause' );
+}
+
+/** Held emails are dropped: their content is cleared and the log row stays as 'cleared' (removed with the sent rows after 30 days). */
+function mailweb_clear_held() {
+	global $wpdb;
+	return (int) $wpdb->query( "UPDATE " . mailweb_table() . " SET status = 'cleared', mail = NULL, next_try = NULL, sent_at = UTC_TIMESTAMP() WHERE status = 'held'" ); // phpcs:ignore
 }
 
 /** Held emails go back in line for another try (from the next 5-minute run, within the limit). */
@@ -461,6 +469,11 @@ add_action(
 		if ( 'resume' === $do ) {
 			mailweb_resume();
 			wp_safe_redirect( mailweb_settings_url( 'sending', array( 'mailweb_cap' => 'resumed' ), 'cap' ) );
+			exit;
+		}
+		if ( 'clear' === $do ) {
+			mailweb_clear_held();
+			wp_safe_redirect( mailweb_settings_url( 'sending', array( 'mailweb_cap' => 'cleared' ), 'cap' ) );
 			exit;
 		}
 		if ( 'retry' === $do ) {

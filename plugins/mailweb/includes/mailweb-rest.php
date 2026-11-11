@@ -6,6 +6,7 @@
  *   POST dashboard/count            MAILWEB_CAP     ask for a count now (one background event)
  *   POST sending/resume             manage_options  resume sending after a pause (as today's Resume button)
  *   POST queue/retry                manage_options  held emails get another try (as today's Retry button)
+ *   POST queue/clear                manage_options  held emails are dropped (content cleared, log row kept 30 days)
  *   GET  inbox                      MAILWEB_CAP     one page of the list: box, folder, search, page
  *   GET  inbox/message              MAILWEB_CAP     one message (or form message) for the reading pane; opening marks it read
  *   POST inbox/bulk                 MAILWEB_CAP     read, unread, archive, inbox, spam, trash (mailweb_bulk())
@@ -68,6 +69,17 @@ add_action(
 				mailweb_retry_held();
 				mailweb_dashboard_request();
 				return rest_ensure_response( array( 'message' => __( 'Held emails will be tried again on the next run, within the limit.', 'mailweb' ) ) );
+			}
+		);
+		$route(
+			'/queue/clear',
+			'POST',
+			$admin,
+			function () {
+				$n = mailweb_clear_held();
+				mailweb_dashboard_request();
+				/* translators: %d: number of held emails cleared. */
+				return rest_ensure_response( array( 'message' => sprintf( _n( '%d held email cleared.', '%d held emails cleared.', $n, 'mailweb' ), $n ) ) );
 			}
 		);
 		$route(
