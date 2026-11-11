@@ -118,6 +118,9 @@ function aw_seo_overview_faq_status(): string {
 
 /** RankWeb → Overview. */
 function aw_seo_overview_page() {
+	if ( function_exists( 'rankweb_ui_page' ) && rankweb_ui_page( 'dashboard' ) ) {
+		return; // the new Dashboard, on &ui=next (rankweb-ui.php)
+	}
 	$faq = add_query_arg( 'page', 'aw-faq', admin_url( 'admin.php' ) );
 	$si  = function_exists( 'aw_si_url' ) && current_user_can( aw_si_cap() );
 	$rm  = array(

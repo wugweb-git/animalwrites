@@ -1,0 +1,133 @@
+<?php
+/**
+ * RankWeb's new screens on the Kits admin shell (trial): admin.php?page=aw-seo-plus&ui=next (Dashboard) and
+ * admin.php?page=aw-seo-settings&ui=next (Settings). Without &ui=next the current screens show, as before; they stay
+ * the default until the owner switches. The screens are one script (build/index.js, from src/), drawn with Kits Core's
+ * shell parts (kits-core/includes/admin-shell.php) and fed by the rankweb/v1 routes (rankweb-rest.php).
+ *
+ * When Kits Core or a build file is missing, &ui=next shows the current screen.
+ *
+ * @package aw-seo-extras
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
+ * Which new screen this request asks for: 'dashboard', 'settings' or ''.
+ */
+function rankweb_ui_wanted(): string {
+	$page = sanitize_key( wp_unslash( $_GET['page'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- which screen to show; nothing is saved here
+	$ui   = sanitize_key( wp_unslash( $_GET['ui'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- same
+	if ( 'next' !== $ui ) {
+		return '';
+	}
+	return array(
+		AW_SEO_MENU       => 'dashboard',
+		'aw-seo-settings' => 'settings',
+	)[ $page ] ?? '';
+}
+
+/**
+ * The new screen is on this request (its script enqueued). Set on admin_enqueue_scripts.
+ *
+ * @param bool|null $set Set the flag.
+ */
+function rankweb_ui_ready( ?bool $set = null ): bool {
+	static $ready = false;
+	if ( null !== $set ) {
+		$ready = $set;
+	}
+	return $ready;
+}
+
+/**
+ * The address of a new screen.
+ *
+ * @param string $screen 'dashboard' or 'settings'.
+ */
+function rankweb_ui_url( string $screen ): string {
+	return add_query_arg(
+		array(
+			'page' => 'settings' === $screen ? 'aw-seo-settings' : AW_SEO_MENU,
+			'ui'   => 'next',
+		),
+		admin_url( 'admin.php' )
+	);
+}
+
+add_action(
+	'admin_enqueue_scripts',
+	function () {
+		$screen = rankweb_ui_wanted();
+		if ( '' === $screen || ! function_exists( 'kits_shell_app' ) || ! current_user_can( 'settings' === $screen ? 'manage_options' : 'manage_categories' ) ) {
+			return;
+		}
+		$head = get_file_data( AW_SEO_EXTRAS_DIR . 'aw-seo-extras.php', array( 'Version' => 'Version' ) );
+		$tabs = array(
+			array(
+				'slug'    => 'dashboard',
+				'label'   => __( 'Dashboard', 'aw-seo-extras' ),
+				'url'     => rankweb_ui_url( 'dashboard' ),
+				'current' => 'dashboard' === $screen,
+			),
+			array(
+				'slug'    => 'faq',
+				'label'   => __( 'FAQ', 'aw-seo-extras' ),
+				'url'     => add_query_arg( 'page', 'aw-faq', admin_url( 'admin.php' ) ),
+				'current' => false,
+			),
+		);
+		if ( function_exists( 'aw_si_url' ) && function_exists( 'aw_si_cap' ) && current_user_can( aw_si_cap() ) ) {
+			$tabs[] = array(
+				'slug'    => 'search-insights',
+				'label'   => __( 'Search Insights', 'aw-seo-extras' ),
+				'url'     => aw_si_url(),
+				'current' => false,
+			);
+		}
+		if ( current_user_can( 'manage_options' ) ) {
+			$tabs[] = array(
+				'slug'    => 'settings',
+				'label'   => __( 'Settings', 'aw-seo-extras' ),
+				'url'     => rankweb_ui_url( 'settings' ),
+				'current' => 'settings' === $screen,
+			);
+		}
+		$ok = kits_shell_app(
+			array(
+				'handle'      => 'rankweb-admin',
+				'src'         => plugins_url( 'build/index.js', AW_SEO_EXTRAS_DIR . 'aw-seo-extras.php' ),
+				'asset'       => AW_SEO_EXTRAS_DIR . 'build/index.asset.php',
+				'object'      => 'rankwebApp',
+				'text_domain' => 'aw-seo-extras',
+				'data'        => array(
+					'screen'  => $screen,
+					'name'    => 'RankWeb',
+					'version' => (string) $head['Version'],
+					'icon'    => plugins_url( 'assets/icon.svg', AW_SEO_EXTRAS_DIR . 'aw-seo-extras.php' ),
+					'tabs'    => $tabs,
+					'oldUrl'  => remove_query_arg( 'ui' ),
+					'rest'    => RANKWEB_REST,
+					'faqUrl'  => add_query_arg( 'page', 'aw-faq', admin_url( 'admin.php' ) ),
+				),
+			)
+		);
+		rankweb_ui_ready( $ok );
+	}
+);
+
+/**
+ * Draw the new screen in place of the current one, when it is ready. The page callbacks call this first.
+ *
+ * @param string $screen 'dashboard' or 'settings'.
+ * @return bool True when the new screen was drawn.
+ */
+function rankweb_ui_page( string $screen ): bool {
+	if ( rankweb_ui_wanted() !== $screen || ! rankweb_ui_ready() ) {
+		return false;
+	}
+	kits_shell_mount( 'rankweb-app', 'settings' === $screen ? __( 'RankWeb settings', 'aw-seo-extras' ) : __( 'RankWeb', 'aw-seo-extras' ), remove_query_arg( 'ui' ), __( 'Open the current screen', 'aw-seo-extras' ) );
+	return true;
+}

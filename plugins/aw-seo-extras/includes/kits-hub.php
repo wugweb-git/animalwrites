@@ -19,6 +19,7 @@ add_action(
 		}
 		add_filter( 'kits_plugin_screens', 'aw_seo_extras_kits_tab' );
 		add_filter( 'kits_status_rows', 'aw_seo_extras_kits_status_row' );
+		add_filter( 'kits_settings_transfer_options', 'aw_seo_extras_kits_export' );
 	},
 	20 // after the plugin's own plugins_loaded (5), which loads the menu.
 );
@@ -52,4 +53,14 @@ function aw_seo_extras_kits_status_row( $rows ) {
 	$link   = defined( 'AW_SEO_MENU' ) ? ' <a href="' . esc_url( admin_url( 'admin.php?page=' . AW_SEO_MENU ) ) . '">' . esc_html__( 'Overview', 'aw-seo-extras' ) . '</a>' : '';
 	$rows[] = array( __( 'RankWeb', 'aw-seo-extras' ), esc_html( $text ) . $link );
 	return $rows;
+}
+
+/**
+ * RankWeb's three settings options in Kits → Import / Export (docs/rankweb-plan.md §0, answer 3): the rules, the
+ * FAQ box types and the listings kept indexed. An export before and after a change shows that no setting was lost.
+ *
+ * @param array $names Option names in the export.
+ */
+function aw_seo_extras_kits_export( $names ) {
+	return array_values( array_unique( array_merge( (array) $names, array( 'aw_seo_settings', 'aw_faq_off_types', 'aw_seo_keep_listings' ) ) ) );
 }
