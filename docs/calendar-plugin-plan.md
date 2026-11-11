@@ -6,9 +6,9 @@ until the owner says yes.**
 
 Sources: the current code (`plugins/animal-writes-core/includes/team-dates.php` and `admin-home.php` on
 `wordpress-dev` at `b0512a4e`; live is `637e9e64`, which `wordpress-dev` contains), `docs/pending.md` (Dates), and the
-Notion page "Martech status, Dates spec and 11–24 Nov plan" (10 Nov, updated 11 Nov). The admin UI spec
-(`docs/admin-ui-spec.md`) was not on any branch on 11 Nov, so this plan follows the Kits plugin standard excerpt in the
-brief. If the spec lands first and differs, the spec wins.
+Notion page "Martech status, Dates spec and 11–24 Nov plan" (10 Nov, updated 11 Nov). The admin UI is the shared Kits
+Core shell (owner, 11 Nov), being specified as `docs/admin-ui-spec.md` and `docs/kits-plugin-ui.md`. Neither was on
+any branch on 11 Nov, so section 4 follows the brief's outline of them. Where they differ, they win.
 
 ---
 
@@ -249,101 +249,148 @@ Rules for any option:
 
 ---
 
-## 4. Admin (Kits plugin standard, Site Kit pattern)
+## 4. Admin: what PlanWeb registers into the Kits Core shell
 
-### 4.1 Menu and screens
+**The shared shell (owner, 11 Nov 2026).** The admin UI is one shell in Kits Core, and every Kits plugin uses it. It is
+being specified as `docs/kits-plugin-ui.md`, next to `docs/admin-ui-spec.md`; neither was on any branch on 11 Nov. The
+shell draws:
 
-- **Menu.** PlanWeb has its own top-level menu with three items: **Dashboard**, **Calendar** (the working list) and
-  **Settings**. The app header carries the PlanWeb name, the page title and a "New entry" button.
-- **In the Kits admin.** A row on Kits → Plugins (`kits_plugin_screens`) and a row in Welcome → System status
-  (`kits_status_rows`, the last sweep's result).
-- **Requires Kits Core.** The check is at run time (`function_exists( 'kits_admin_tabs' )`), because Kits Core can be
-  loaded by another plugin rather than activated, so the `Requires Plugins` header could block activation. Without
-  Kits Core, PlanWeb shows one notice on its own pages and does nothing else.
+- the app header, with tabs for Dashboard, the working list and Settings;
+- section chips, tiles and "Select metrics" (saved per user);
+- the DataView wrapper for the working list;
+- Settings, with Connected services rows that open a DataForm, and admin settings groups;
+- a setup flow, notices, and the shared empty, loading and error states;
+- the row on Kits → Plugins and the status row on Kits Home.
 
-### 4.2 Dashboard
+PlanWeb builds none of these. It registers its parts through Kits Core's PHP and JS API, and serves its data from its
+own REST routes under `planweb/v1`, besides the core `/wp/v2/planweb-entries` for the entries. If
+`docs/kits-plugin-ui.md` names things differently, it wins and this section is renamed to match.
 
-- **Section chips** jump down the page: Coming up · Needs action · Channels · Email.
-- **Uniform tiles**: label, info icon, number, sub-line, change chip and source. **Select metrics** shows or hides
-  tiles, per user (user meta).
+### 4.1 Screens
 
-| Tile | Number | Source named on the tile |
+| Shell slot | PlanWeb registers | Capability |
 |---|---|---|
-| Next 7 days | entries plus feed items dated today to +6 days | "PlanWeb entries, scheduled posts, FluentCRM, Social posts, campaigns" |
-| Overdue | entries with flag overdue | "PlanWeb sweep, last run …" |
-| Waiting for approval | entries with Status draft | "PlanWeb entries" |
-| By channel this month | count per Channel (bar list) | "PlanWeb entries, this month" |
-| Next FluentCRM send | date and time of the next scheduled campaign, or "none scheduled" | "FluentCRM campaigns (read-only)" |
+| Dashboard | the tiles in 4.2 | `edit_planweb_entries` |
+| Working list | **Calendar**: the list in 4.3 plus two widgets of its own (month, week) | `edit_planweb_entries` |
+| Settings | the services and groups in 4.4 | `manage_options` |
+| Status row on Kits Home | "Last sweep: …" from `planweb_job_sweep` (ok, failed, late) | — |
+| Hidden page | `aw-dates`, which redirects to Calendar (2.4) | `edit_planweb_entries` |
 
-The change chip compares with the same window last week or month. A tile with no data says so; it never shows 0 as if
-it were a measurement.
+Header extras:
+
+- the shell's Save area is used only on Settings;
+- the date range sets the window for the Dashboard and Calendar (default: this month);
+- the primary action is "New entry", which opens the entry DataForm (4.3).
+
+### 4.2 Dashboard tiles
+
+Each tile is registered with a label, info text, a route, a sub-line, a change chip and a named source. Numbers are
+cached for 5 minutes (the shell's refresh clears the cache), and a tile without data uses the shell's empty state.
+
+| Tile | Route (`GET`) | Number and sub-line | Change chip | Source named |
+|---|---|---|---|---|
+| Next 7 days | `planweb/v1/tiles/next7` | count of entries plus feed items from today to +6 days; sub-line "3 social, 2 content…" | vs the same 7 days last week | "PlanWeb entries, scheduled posts, FluentCRM, Social posts, campaigns" (links to Calendar, week) |
+| Overdue | `planweb/v1/tiles/overdue` | entries with flag overdue; sub-line the oldest date | vs yesterday | "PlanWeb sweep, last run …" (links to the list filtered by flag) |
+| Waiting for approval | `planweb/v1/tiles/waiting` | entries with Status draft | vs last week | "PlanWeb entries" (links to the list filtered by Status draft) |
+| By channel this month | `planweb/v1/tiles/channels` | a bar list, count per Channel | vs last month | "PlanWeb entries, this month" |
+| Next FluentCRM send | `planweb/v1/tiles/fluentcrm` | date and time of the next scheduled campaign, or "none scheduled" | none | "FluentCRM campaigns (read-only)" (links to FluentCRM) |
+
+Section chips: Coming up (Next 7 days, Overdue) · Needs action (Waiting for approval) · Channels · Email (Next FluentCRM
+send).
 
 ### 4.3 Calendar (the working list)
 
-- **Views.** Month, week and list, in one screen with a view switch. Each view has its own address (`&view=month`,
-  `&m=2026-11`), so a link opens the same view.
-- **List view.** A DataView (`@wordpress/dataviews`) over the entries plus the feeds:
-  - filters: Type, Channel, Owner, Status, plus "show read-only items";
-  - sort by date; search;
-  - bulk actions: change Status (approved and sent only for `planweb_approve`), and move to Trash (it never deletes
-    for good).
-- **Month and week views.**
-  - Each day lists its items. Each item has a **coloured mark for its Type** plus a **text label for its Status**.
-  - Colour is never the only signal: each Type also has its own icon and an accessible name (WCAG 2.2 AA, 1.4.1).
-  - The colours come from the WordPress admin palette (`@wordpress/components` theme variables), not the brand palette.
-  - If the shipped `@wordpress/dataviews` has no calendar layout, the grid is a small component built from
-    `@wordpress/components` (Grid, Card, Button, Popover) with no stylesheet of our own beyond layout.
-- **Old dates stay visible.** Past days are shown greyed, never hidden. The list's default filter is "from 30 days
-  ago" and can be cleared.
-- **Editing.** "New entry" and clicking an entry open a side panel with the fields from 1.1, including the field
-  checks. Saving goes to the REST API (the entity's `edit` and `save`); the revision list is in the panel.
+**List (the shell's DataView wrapper).**
+
+- **Data:** `planweb/v1/items`, which merges entries and the read-only feeds for the date range (paged and sorted on the
+  server). Saved views come from the shell.
+- **Columns:**
+  - Date (with time);
+  - Title, with a lock icon on feed items;
+  - Type (mark plus label);
+  - Channel, Owner, Status (label), Flag;
+  - Link;
+  - Source (PlanWeb, scheduled post, FluentCRM, Social posts, campaign).
+- **Filters:** Type, Channel, Owner, Status, Flag, and Source (to hide read-only items). Default: from 30 days ago;
+  old dates stay visible once cleared.
+- **Sort:** date (default, ascending), title, status. Search covers title and note.
+- **Row actions:** Edit (entries only), Open (feed items open their own edit screen), Approve (`planweb_approve`), Mark
+  sent (`planweb_approve`), Move to Trash.
+- **Bulk actions:** set Status (approved and sent only with `planweb_approve`), set Owner, Move to Trash. Feed items
+  are never selectable. There is no delete for good.
+- **Entry form:** a DataForm (shell) over the fields in 1.1, with the REST checks from 1.1. Revisions open from the
+  form.
+
+**Month and week views: PlanWeb's own widgets inside the shell.** The working list's view switch (List · Month · Week)
+loads them, and each view has its own address (`&view=month&m=2026-11`).
+
+- **Built only from `@wordpress/components`:**
+  - `Grid` and `__experimentalGrid` / `VStack` / `HStack` for the day cells;
+  - `Card` and `CardBody` for a day;
+  - `Button` for an item (opens the same DataForm);
+  - `Popover` or `Dropdown` for "+3 more";
+  - `Tooltip` for the full title;
+  - `VisuallyHidden` for date labels;
+  - `Icon` with `@wordpress/icons` for the Type marks;
+  - `__experimentalText` or `Truncate` for titles;
+  - the shell's empty, loading and error states.
+- **Styling:** layout only (the grid's columns, and greying past days). No colours of our own: the Type marks use the
+  admin theme variables. Each Type also has its own icon and an accessible name, so colour is never the only signal
+  (WCAG 2.2 AA, 1.4.1). Status is a text label.
+- **Data:** the same `planweb/v1/items` route, by date range. Days are buttons in a grid with arrow-key moves and a
+  "today" marker (`aria-current="date"`).
+- If `@wordpress/dataviews` ships a calendar layout by then, PlanWeb uses it instead and drops its own widgets.
 
 ### 4.4 Settings
 
-1. **Connected services first**, as rows with a status, each opening to a summary with **Edit**:
-   - FluentCRM (read-only feed: "connected" or "not active");
-   - Social posts ("off" on live);
-   - Metricool and Postiz: **"not connected"** until the owner chooses one (3.2).
-2. **Then toggles and lists with plain descriptions:**
-   - Types, Channels, Owners: add, rename, reorder. Removing a value that is in use is refused and says how many
-     entries use it.
-   - Reminders: lead days per Type; the email digest switch and its recipient (from the site's mailboxes); "count
-     past reminders as overdue" (D3).
-   - Import from Dates: the result panel from 2.3.
-3. **Storage.** One option, `planweb_settings`, through `register_setting` with `show_in_rest` and a full schema.
-   Taxonomy values are edited through the core terms endpoints. No raw tables of options.
+**Connected services (shell rows: status → summary → Edit opens a DataForm with Save, Cancel and Disconnect).**
+
+| Service | Status shown | Summary | Connect steps |
+|---|---|---|---|
+| FluentCRM | "connected" or "not active" (read-only feed) | next scheduled send | none: read only when the plugin is active |
+| Social posts | "on" or "off" (off on live) | drafts and scheduled count | none: follows the module switch |
+| Metricool | **"not connected"** | — | Only after the owner chooses it (D5): (1) the owner links the networks in Metricool; (2) the owner adds the API key in Settings, stored like the site's other keys and never sent to the browser ("set" or "not set"); (3) "Check connection" reads the brand, and posts nothing. |
+| Postiz | **"not connected"** | — | Same steps, if chosen instead. |
+
+**Settings groups (shell admin groups, each saved through `register_setting` with `show_in_rest` and a schema; option
+`planweb_settings`):**
+
+1. **Lists:** Types, Channels, Owners. Add, rename and reorder through the core terms routes. Removing a value that is
+   in use is refused and says how many entries use it.
+2. **Reminders:**
+   - lead days per Type;
+   - the email digest switch (off) and its recipient, chosen from the site's mailboxes;
+   - "count past reminders as overdue" (D3).
+3. **Import from Dates:** the result panel and verify table (2.3), through the shell's setup flow. It can be stopped
+   and resumed, and is safe to run again.
 
 ### 4.5 WordPress Dashboard widget
 
-- Shows the next 7 days of entries plus feed items, each with date, Type mark, title and Status label, and an "Open the
-  calendar" link.
-- Server-rendered (no JS), and replaces the Dates widget.
-- Its styles move into the plugin's admin stylesheet. The inline `<style>` goes, which also clears the
-  `settings_parts_baseline` "admin style" line.
+- Shows the next 7 days of entries plus feed items: date, Type mark, title, Status label, and an "Open the calendar"
+  link.
+- Server-rendered, with no JS. It replaces the Dates widget, and its few rules go in the plugin's admin stylesheet,
+  so the inline `<style>` goes.
+- It sits outside the shell (core's Dashboard). If the shell offers a widget API by then, PlanWeb uses it.
 
 ### 4.6 Technical
 
-- **Build.** `@wordpress/scripts` with one entry per screen: `dashboard`, `calendar`, `settings`. Imports come only from
-  `@wordpress/*` (components, dataviews, data, core-data, api-fetch, i18n, element). No home-made design system.
+- **Build.** `@wordpress/scripts`, one entry that registers PlanWeb's parts into the shell (tiles, list config, the
+  month and week widgets, settings groups). It imports only `@wordpress/*` and Kits Core's shell API.
 - **Built files are committed**, because the deploy has no build step. The Deploy check gains a Node step that runs
-  `npm ci && npm run build` and fails if `build/` differs, like `css_min.py --check`.
+  `npm ci && npm run build` and fails if `build/` differs.
 - **Security.**
-  - Each screen checks its capability.
-  - REST uses core's cookie nonce (`wp_rest`).
-  - The import and the "Send to …" buttons use their own nonces and capability checks.
-  - Every REST field has a schema with `sanitize_callback` and `validate_callback`.
-- **Notices** appear only on PlanWeb's own pages, always dismissible.
-- **i18n.** Text domain `planweb`; `wp_set_script_translations` per script; `.pot` from `wp i18n make-pot`; JSON from
-  `make-json`.
-- **Performance budget per screen:**
-  - own JS no more than 60 KB gzipped (WordPress packages come from core);
-  - at most 3 REST requests on first load;
-  - server time under 300 ms on live for one month of entries;
-  - the WordPress Dashboard widget adds no script and at most 2 queries (cached 5 minutes).
-- **Uninstall** removes nothing. Entries and settings stay (no data is deleted without asking). Deactivation
-  unschedules the `planweb` actions.
-- **Code standard:** PHPCS (WordPress-Extra, prefix `planweb`, text domain `planweb`) on every PHP file; `wp-scripts
-  lint-js` on JS.
+  - Every route has a `permission_callback` with the capabilities in 4.1, and full args schemas with sanitize and
+    validate callbacks.
+  - REST uses core's `wp_rest` nonce.
+  - The import and any "Send to …" have their own capability checks.
+- **i18n.** Text domain `planweb`; `wp_set_script_translations`; `.pot` and JSON with `wp i18n`.
+- **Performance budget** (inside the shell's own):
+  - PlanWeb's JS no more than 40 KB gzipped;
+  - Calendar's first load no more than 2 PlanWeb requests;
+  - each route under 300 ms on live for one month;
+  - the WordPress Dashboard widget no script and at most 2 queries (cached 5 minutes).
+- **Uninstall** removes nothing. Deactivation unschedules the `planweb` actions.
+- **Code standard:** PHPCS (WordPress-Extra, prefix and text domain `planweb`), `wp-scripts lint-js`.
 
 ---
 
@@ -354,19 +401,36 @@ wp-plugin-audit, PHPCS, Deploy check green, Codex comments answered) → the own
 **A phase never ships while a FluentCRM campaign is sending.** `aw-ship.sh` is run only after checking that FluentCRM
 has no campaign in "working" and that MailWeb's queue holds no campaign emails.
 
-| Phase | What | Size | Risk | Proof |
-|---|---|---|---|---|
-| **1. The store + migration** | Post type, taxonomies, meta, caps, REST schema and checks, import from Dates, `wp planweb verify`, the Animal Writes Core switch and redirect (2.4), docs and baselines. Calendar is a plain read-only list for this phase only. | M (about 2 days) | Medium: it touches live data. Mitigated: the option stays untouched, the import is safe to re-run, and without PlanWeb nothing changes. | **The migrated entries match one-for-one** (`wp planweb verify` table, read-only on live). Pure-PHP tests for keys, duplicates, link and personal-data checks. In the CI WordPress: seed `aw_team_dates`, activate, verify, re-run, verify again. PHPCS clean; Plugin Check (in CI) clean. |
-| **2. Calendar views + dashboards** | Dashboard tiles, Calendar (month, week, list DataView), side-panel editing, Settings (lists), WordPress Dashboard widget, build step in CI. | L (about 4 days) | Low to medium: new screens only; data rules come from phase 1. | **Screenshots against the Site Kit pattern** (Dashboard, Calendar three views, Settings) at 1280 and 375, in the CI WordPress. Keyboard-only run and axe check (WCAG 2.2 AA). Budget measured. JS unit tests (`wp-scripts test-unit-js`) for filters and date grids. |
-| **3. Scheduler + reminders** | Action Scheduler jobs (3), notices, digest email (off), job status rows. | M (about 2 days) | Medium: background jobs on live. Mitigated: idempotent, local data only, email off by default, MailWeb limit. | **Reminders fire on a copy only:** in the Deploy check's throwaway WordPress (not a local install), seed entries around a fixed date, run `wp action-scheduler run --group=planweb`, assert flags, approved → due, repeats and one queued digest, with `pre_wp_mail` catching the email so nothing is sent. Pure-PHP tests with a fixed clock for every rule. On live after shipping: read-only check of the `planweb` actions and job status; digest stays off. |
-| **4. Read-only feeds** | Future posts, FluentCRM scheduled campaigns, Social posts drafts, campaign open and close dates in the views, tiles and widget. | S to M (about 1.5 days) | Low: reads only. FluentCRM is read through its model, never written. | CI WordPress with FluentCRM absent shows "not available". Read-only live check that a known future post and the campaign dates appear on the right days. PHPCS, Plugin Check. |
-| **5. Connected services** | Only after the owner chooses one (Metricool, Postiz or none): connect row, "Send to …" per approved entry, for review only. | S to M | Medium: the only part that reaches outside the site. Every post needs its own approval. | Plan first, for the owner's yes. Then tests against the service's sandbox or a mocked HTTP layer (`pre_http_request`). No real post in testing. |
+**Order relative to the shell.** The Kits Core shell ships first, with InsightWeb as the pilot, then RankWeb,
+SourceWeb, MailWeb and DirectoryWeb; **PlanWeb is last.** Phase 2 below therefore waits for the shell to be shipped.
+
+**What phase 1 does before the shell:**
+
+- the store, the REST routes and the migration, with `wp planweb verify`;
+- the Animal Writes Core switch and redirect;
+- the scheduler can be built here too (phase 3 does not need the UI).
+
+Until phase 2, the team works in a **plain server-rendered Calendar page**: a `WP_List_Table` over the entries, plus
+the Add and Edit form and the WordPress Dashboard widget. Phase 2 replaces it and adds nothing new to the shell's
+baseline. Dates' month grid stays as-is on that page, read from PlanWeb, so nothing the team uses today is lost in the
+gap.
+
+| Phase | What | Needs the shell? | Size | Risk | Proof |
+|---|---|---|---|---|---|
+| **1. The store + migration** | Post type, taxonomies, meta, caps, REST routes and checks, import from Dates, `wp planweb verify`, the Animal Writes Core switch and redirect (2.4), the interim Calendar page and Dashboard widget, docs and baselines. | No | M (about 2.5 days) | Medium: it touches live data. Mitigated: the option stays untouched, the import is safe to re-run, and without PlanWeb nothing changes. | **The migrated entries match one-for-one** (`wp planweb verify`, read-only on live). Pure-PHP tests for keys, duplicates, link and personal-data checks. In the CI WordPress: seed `aw_team_dates`, activate, verify, re-run, verify again. PHPCS and Plugin Check (CI) clean. |
+| **2. Calendar views + dashboard in the shell** | Register tiles, the list config, month and week widgets, and settings groups into the shell; remove the interim page; add the build step to CI. | **Yes: ships after the shell and the five plugins before it** | M (about 3 days; the shell does the heavy parts) | Low to medium: new screens; data rules come from phase 1. | **Screenshots against the Site Kit pattern** (Dashboard, Calendar list, month and week, Settings) at 1280 and 375 in the CI WordPress. Keyboard-only run and axe (WCAG 2.2 AA). Budget measured. JS unit tests for the date grids. |
+| **3. Scheduler + reminders** | Action Scheduler jobs (3), notices, digest email (off), job status row. | No (can follow phase 1 directly) | M (about 2 days) | Medium: background jobs on live. Mitigated: idempotent, local data only, email off by default, MailWeb limit. | **Reminders fire on a copy only:** in the Deploy check's throwaway WordPress (not a local install), seed entries around a fixed date, run `wp action-scheduler run --group=planweb`, assert flags, approved → due, repeats and one queued digest, with `pre_wp_mail` catching the email so nothing is sent. Pure-PHP tests with a fixed clock. On live: read-only check of the `planweb` actions; digest stays off. |
+| **4. Read-only feeds** | Future posts, FluentCRM scheduled campaigns, Social posts drafts, campaign dates in `planweb/v1/items`, tiles and widget. | Routes no; showing them in the shell yes | S to M (about 1.5 days) | Low: reads only. | CI WordPress with FluentCRM absent shows "not available". Read-only live check that a known future post and the campaign dates appear on the right days. PHPCS, Plugin Check. |
+| **5. Connected services** | Only after the owner chooses one: the shell's service row, connect steps (4.4), "Send to …" per approved entry, for review only. | Yes | S to M | Medium: the only part that reaches outside the site. Every post needs its own approval. | Plan first, for the owner's yes. Tests with a mocked HTTP layer (`pre_http_request`). No real post in testing. |
+
+Before the shell ships, phases can run in the order 1 → 3 → 4 (routes only). Phases 2 and 5 wait for the shell.
 
 ---
 
 ## 6. Decisions for the owner
 
-1. **D1 – Go ahead with phase 1** on this plan, with storage (a), a non-public post type.
+1. **D1 – Go ahead with phase 1** on this plan, with storage (a), a non-public post type and the interim Calendar page,
+   ahead of the shell; then phase 3.
 2. **D2 – The 12 monthly "Search Console Links read" entries:** keep them as 12 entries (default), or fold them into one
    monthly repeating entry once the import matches.
 3. **D3 – Past reminders:** count them as overdue, or not (default: not). The Martech page listed 7 Nov "Decide the
@@ -387,5 +451,7 @@ has no campaign in "working" and that MailWeb's queue holds no campaign emails.
   phase 1. They are not part of the import.
 - The earlier rule "admin UI core-only (WP_List_Table, Settings API, no custom CSS)" is replaced for Kits plugins by
   the 11 Nov standard (`@wordpress/components`, DataViews, REST). PlanWeb follows the 11 Nov standard.
+- The admin is the Kits Core shell, so PlanWeb registers parts rather than building screens. Its phase 2 waits for
+  the shell, which ships first with InsightWeb, then RankWeb, SourceWeb, MailWeb and DirectoryWeb; PlanWeb is last.
 - "Reminders fire on a local copy only" is met with the Deploy check's throwaway WordPress on the GitHub runner. No
   local WordPress or MySQL is set up.
