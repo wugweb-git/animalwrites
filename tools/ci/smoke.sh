@@ -42,9 +42,11 @@ wp post create --post_type=aw_campaign --post_title="CI campaign" --post_status=
 L=$(wp post create --post_type=aw_listing --post_title="CI listing Ernakulam" --post_status=publish --porcelain)
 wp eval "aw_set_item_places( $L, array( array( 32, 555 ) ) );"
 wp rewrite flush --quiet
-php -S 127.0.0.1:8080 -t "$WP" >/tmp/php-server.log 2>&1 &
+# Several workers: a request to the site itself (cron, loopback) must not wait on the one being answered.
+PHP_CLI_SERVER_WORKERS=4 php -S 127.0.0.1:8080 -t "$WP" >/tmp/php-server.log 2>&1 &
 SERVER=$!
-trap 'kill $SERVER 2>/dev/null || true' EXIT
+stop_server() { pkill -P "$SERVER" 2>/dev/null || true; kill "$SERVER" 2>/dev/null || true; } # the workers, then the server
+trap 'stop_server' EXIT
 sleep 2
 curl -s -o /dev/null http://127.0.0.1:8080/ || true # first request runs the one-time steps
 single() { wp post list --post_type="$1" --posts_per_page=1 --field=url | sed 's#http://127.0.0.1:8080##'; }
@@ -277,6 +279,20 @@ want() { # want CODE LABEL curl-args…
   local c; c=$(curl -s -o /tmp/rw.out -w '%{http_code}' "$@")
   if [ "$c" = "$w" ]; then echo "ok   $c $l"; else echo "FAIL $c $l (want $w)"; head -c 300 /tmp/rw.out; echo; FAIL=1; fi
 }
+# jsok LABEL HANDLE PAGE-FILE: the screen's script and the shell's, as printed on the page, answer 200 as JavaScript
+# (a plugin loaded from outside wp-content/plugins once got an address that answered 404 as text/html).
+jsok() {
+  local h u c
+  for h in "$2" kits-shell; do
+    u=$(grep -oE "<script[^>]*id=['\"]$h-js['\"][^>]*>" "$3" | grep -oE "src=['\"][^'\"]+" | head -1 | cut -c6- | sed 's/&#038;/\&/g; s/&amp;/\&/g')
+    if [ -z "$u" ]; then echo "FAIL $1: no $h script on the page"; FAIL=1; continue; fi
+    c=$(curl -s -o /dev/null -w '%{http_code} %{content_type}' "$u")
+    case "$c" in
+      "200 "*javascript*) echo "ok   $1: $h script $c" ;;
+      *) echo "FAIL $1: $h script $c ($u)"; FAIL=1 ;;
+    esac
+  done
+}
 wp user create rw-sub rw-sub@example.invalid --role=subscriber --user_pass=rw-sub-only --quiet
 wp user create rw-ed rw-ed@example.invalid --role=editor --user_pass=rw-ed-only --quiet
 NA=$(login ci ci-only); NS=$(login rw-sub rw-sub-only); NE=$(login rw-ed rw-ed-only)
@@ -284,6 +300,7 @@ NA=$(login ci ci-only); NS=$(login rw-sub rw-sub-only); NE=$(login rw-ed rw-ed-o
 for p in "aw-seo-plus&ui=next" "aw-seo-settings&ui=next"; do
   want 200 "admin.php?page=$p (administrator)" -b /tmp/cj-ci "$H/wp-admin/admin.php?page=$p"
   if grep -q 'id="rankweb-app"' /tmp/rw.out && grep -q "rankweb-admin-js" /tmp/rw.out && grep -q "kits-shell-js" /tmp/rw.out; then echo "ok   $p draws the new screen (shell + RankWeb script)"; else echo "FAIL $p: new screen not drawn"; FAIL=1; fi
+  jsok "$p" rankweb-admin /tmp/rw.out
 done
 want 200 "admin.php?page=aw-seo-plus (current Overview)" -b /tmp/cj-ci "$H/wp-admin/admin.php?page=aw-seo-plus"
 if grep -q 'id="rankweb-app"' /tmp/rw.out; then echo "FAIL the Overview is not the default any more"; FAIL=1; else echo "ok   current Overview stays the default"; fi
@@ -338,6 +355,7 @@ if wp eval 'exit( count( array_intersect( array( "aw_seo_settings", "aw_faq_off_
 screen() {
   want 200 "admin.php?page=$1&ui=next (administrator)" -b /tmp/cj-ci "$H/wp-admin/admin.php?page=$1&ui=next"
   if grep -q "id=\"$2\"" /tmp/rw.out && grep -q "$3-js" /tmp/rw.out && grep -q "kits-shell-js" /tmp/rw.out; then echo "ok   $1&ui=next draws the new screen"; else echo "FAIL $1&ui=next: new screen not drawn"; FAIL=1; fi
+  jsok "$1&ui=next" "$3" /tmp/rw.out
   want 200 "admin.php?page=$1 (current screen)" -b /tmp/cj-ci "$H/wp-admin/admin.php?page=$1"
   if grep -q "id=\"$2\"" /tmp/rw.out; then echo "FAIL $1: the current screen is not the default any more"; FAIL=1; else echo "ok   $1: current screen stays the default"; fi
   want 403 "admin.php?page=$1&ui=next (subscriber)" -b /tmp/cj-rw-sub "$H/wp-admin/admin.php?page=$1&ui=next"
@@ -386,12 +404,14 @@ want 200 "admin.php?page=kits-options (administrator)" -b /tmp/cj-ci "$H/wp-admi
 if grep -q "kits-admin-theme-options-js" /tmp/rw.out && grep -q "kits-shell-js" /tmp/rw.out && grep -q 'id="kits-admin-app"' /tmp/rw.out; then echo "ok   Theme Options app on the shell"; else echo "FAIL Theme Options: app or shell missing"; FAIL=1; fi
 if grep -q 'page=kits&amp;ui=next\|page=kits\\u0026ui=next\|page=kits&ui=next' /tmp/rw.out; then echo "FAIL Theme Options tabs open the trial screens"; FAIL=1; else echo "ok   Theme Options tabs open the current screens"; fi
 # Each Kits plugin's new screens: tools/ci/smoke-ui-<plugin>.sh, using screen, route, post, optmd5 and same above.
-for f in "$(dirname "$0")"/smoke-ui-*.sh; do
+for f in "$REPO"/tools/ci/smoke-ui-*.sh; do
   [ -f "$f" ] || continue
   echo "-- $(basename "$f" .sh)"
   # shellcheck source=/dev/null
   . "$f"
+  UI_RAN=$((${UI_RAN:-0} + 1))
 done
+if [ "${UI_RAN:-0}" -ge 5 ]; then echo "ok   $UI_RAN plugin screen files ran (tools/ci/smoke-ui-*.sh)"; else echo "FAIL only ${UI_RAN:-0} plugin screen files ran (tools/ci/smoke-ui-*.sh)"; FAIL=1; fi
 
 wp user delete rw-sub rw-ed --yes --quiet
 if [ -f /tmp/wp-debug.log ] && grep -E 'PHP (Fatal|Parse) error' /tmp/wp-debug.log; then FAIL=1; fi
@@ -521,7 +541,7 @@ if [ -n "${KITS_SNAPSHOT:-}" ] && command -v wget >/dev/null && [ -n "${BASE:-}"
     for p in "$1"/plugins/*/; do ln -sfn "$p" "wp-content/plugins/$(basename "$p")"; done
     for t in "$1"/themes/*/; do ln -sfn "$t" "wp-content/themes/$(basename "$t")"; done
   }
-  serve() { kill "$SERVER" 2>/dev/null || true; sleep 1; php -S 127.0.0.1:8080 -t "$WP" >>/tmp/php-server.log 2>&1 & SERVER=$!; sleep 2; }
+  serve() { stop_server; sleep 1; PHP_CLI_SERVER_WORKERS=4 php -S 127.0.0.1:8080 -t "$WP" >>/tmp/php-server.log 2>&1 & SERVER=$!; sleep 2; }
   snap menu-after
   if git -C "$REPO" worktree add --quiet --detach /tmp/base-tree "$BASE"; then
     relink /tmp/base-tree; serve
