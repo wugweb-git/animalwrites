@@ -52,9 +52,8 @@ function insightweb_kits_tab( $tabs ) {
  * @param array $rows Rows: [label, HTML value].
  */
 function insightweb_kits_status_row( $rows ) {
-	$head = get_file_data( INSIGHTWEB_FILE, array( 'Version' => 'Version' ) );
 	/* translators: %s: plugin version. */
-	$text = sprintf( __( 'Active, %s', 'aw-seo-extras' ), $head['Version'] );
+	$text = sprintf( __( 'Active, %s', 'aw-seo-extras' ), INSIGHTWEB_VERSION );
 	if ( ! function_exists( 'aw_si_url' ) ) {
 		$fix    = __( 'Does nothing until Kits Core, Animal Writes Core and Rank Math SEO are active.', 'aw-seo-extras' );
 		$rows[] = array( __( 'InsightWeb', 'aw-seo-extras' ), function_exists( 'kits_status_cell' ) ? kits_status_cell( $text, $fix ) : esc_html( $text . '. ' . $fix ) );
