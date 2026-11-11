@@ -174,8 +174,8 @@ fi
 opts >/tmp/opts-after.txt
 # Every setting there before is there after with the same value (docs/admin-ui-spec.md §E2); options a plugin adds on
 # its first run are listed, not a failure.
-gone=$(comm -23 /tmp/opts-before.txt /tmp/opts-after.txt)
-added=$(comm -13 <(cut -d' ' -f1 /tmp/opts-before.txt) <(cut -d' ' -f1 /tmp/opts-after.txt) | tr '\n' ' ')
+gone=$(comm -23 <(sort /tmp/opts-before.txt) <(sort /tmp/opts-after.txt))
+added=$(comm -13 <(cut -d' ' -f1 /tmp/opts-before.txt | sort) <(cut -d' ' -f1 /tmp/opts-after.txt | sort) | tr '\n' ' ')
 if [ -z "$gone" ]; then echo "ok   every setting kept with its value ($(wc -l </tmp/opts-before.txt | tr -d ' ') options)${added:+; new: $added}"; else echo "FAIL settings changed or gone:"; echo "$gone" | head -20; FAIL=1; fi
 # Plugin Check on PlanWeb (report only, printed, never fails the run): only when plugins/planweb changed (PLUGIN_CHECK=1
 # from the workflow), so wordpress.org is not asked on every Deploy check.
