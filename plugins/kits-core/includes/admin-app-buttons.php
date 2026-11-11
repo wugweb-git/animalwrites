@@ -131,7 +131,7 @@ function kits_admin_buttons_node( array $styles, string $key, bool $hover = fals
 /**
  * The values of one button style in Global Styles data, by field ('' fields left out).
  *
- * @param array  $styles A theme.json 'styles' array.
+ * @param array  $styles A theme.json 'styles' array (the theme's).
  * @param string $key    'fill' or a variation slug.
  * @param array  $fields Field names.
  * @return object field => value (an object, so an empty list is {} in JSON).
@@ -201,14 +201,9 @@ function kits_admin_buttons_data(): ?array {
 	if ( ! current_user_can( 'edit_theme_options' ) || ! class_exists( 'WP_Theme_JSON_Resolver' ) ) {
 		return null;
 	}
-	$post_id = (int) WP_Theme_JSON_Resolver::get_user_global_styles_post_id();
-	if ( ! $post_id ) {
-		return null;
-	}
+	// The site's own values come with the app's Global Styles store (admin-app-global-styles.php).
 	$theme_raw = WP_Theme_JSON_Resolver::get_theme_data()->get_raw_data();
-	$user_raw  = WP_Theme_JSON_Resolver::get_user_data()->get_raw_data();
 	$theme_st  = is_array( $theme_raw['styles'] ?? null ) ? $theme_raw['styles'] : array();
-	$user_st   = is_array( $user_raw['styles'] ?? null ) ? $user_raw['styles'] : array();
 
 	$styles = array();
 	foreach ( kits_admin_buttons_styles() as $key => $s ) {
@@ -226,7 +221,6 @@ function kits_admin_buttons_data(): ?array {
 				) : array()
 			),
 			'theme'  => kits_admin_buttons_values( $theme_st, (string) $key, $s['fields'] ),
-			'user'   => kits_admin_buttons_values( $user_st, (string) $key, $s['fields'] ),
 		);
 	}
 
@@ -251,7 +245,6 @@ function kits_admin_buttons_data(): ?array {
 	}
 
 	return array(
-		'postId'  => $post_id,
 		'styles'  => $styles,
 		'palette' => $palette,
 		'spacing' => $spacing,
@@ -261,20 +254,16 @@ function kits_admin_buttons_data(): ?array {
 	);
 }
 
-// The section's data, after admin-app.php has set window.kitsAdminApp (priority 10).
-add_action(
-	'admin_enqueue_scripts',
-	function () {
-		if ( ! function_exists( 'kits_admin_app_wanted' ) || ! kits_admin_app_wanted() || ! wp_script_is( 'kits-admin-theme-options', 'enqueued' ) ) {
-			return;
+// The section's data in window.kitsAdminApp.buttons (admin-app.php's kits_admin_app_data filter).
+add_filter(
+	'kits_admin_app_data',
+	function ( array $data ): array {
+		$buttons = kits_admin_buttons_data();
+		if ( null !== $buttons ) {
+			$data['buttons'] = $buttons;
 		}
-		$data = kits_admin_buttons_data();
-		if ( null === $data ) {
-			return;
-		}
-		wp_add_inline_script( 'kits-admin-theme-options', 'window.kitsAdminApp = window.kitsAdminApp || {}; window.kitsAdminApp.buttons = ' . wp_json_encode( $data ) . ';', 'before' );
-	},
-	11
+		return $data;
+	}
 );
 
 /**

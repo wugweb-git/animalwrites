@@ -181,10 +181,12 @@ Breakpoints stay fixed in CSS. They are shown so the owner knows them; they are 
 
 | Field | Now | Goes to | Control | Default | Storage | Cap |
 |---|---|---|---|---|---|---|
-| Palette | Theme Options → Visual → Palette (read-only) | Colours | ColorPalette editor per slug (name fixed, colour editable) | theme.json palette | Global Styles `settings.color.palette` (user origin) | `edit_theme_options` |
-| Colour sets | Theme Options → Visual → Colours (read-only) | Colours | one row per set: background, text, link, line | theme.json `custom.kits` sets | Global Styles `settings.custom.kits` (user origin) | `edit_theme_options` |
+| Palette | Theme Options → Visual → Palette (read-only) | Colours | ColorPicker per slug (name fixed, colour editable) | theme.json palette | Global Styles `settings.color.palette.theme` (user origin; the whole list, removed when every colour is the theme's) | `edit_theme_options` |
+| Colour sets | Theme Options → Visual → Colours (read-only) | Colours | one row per set: background, text, headings, link (picked from the palette) | the section style files in `styles/colours/*.json` (blockTypes core/group, core/post-content) | Global Styles `styles.blocks.<block>.variations.<set>` (user origin), for each of the set's block types | `edit_theme_options` |
 | Site colour set | **no UI today** (`kits_page_defaults._site.colours`) | Colours | SelectControl of sets | theme default | `kits_page_defaults._site.colours` | `edit_theme_options` |
 | Contrast check | Design system → Contrast | Colours | live table: each text/background pair, ratio, AA pass/fail | — | computed, not stored | — |
+
+Correction (built): colour sets are not in `settings.custom.kits`; in this theme they are section styles, so their edits go to the block style variations path above. The contrast table lists the design registry's pairs and each set's text, headings and link on its background, from the colours on screen before saving; Design system → Contrast stays and links here.
 
 #### D1.6 Typography
 

@@ -9,77 +9,23 @@
  * spacing sizes. Corner radius and padding are one setting for every button (blocks.php: --kit-btn-radius, --kit-btn-pad),
  * so they sit under Primary. Data: includes/admin-app-buttons.php (window.kitsAdminApp.buttons).
  *
- * The app's one Save calls save() below, which writes through saveGlobalStyles().
+ * Values are read and written through the app's Global Styles store (global-styles.js), which the one Save writes.
+ * Colours chosen in the Colours section show in the previews before saving.
  */
-import apiFetch from '@wordpress/api-fetch';
 import { __, sprintf } from '@wordpress/i18n';
 import {
-	Button,
 	ColorIndicator,
 	Flex,
 	FlexBlock,
 	FlexItem,
 	SelectControl,
 } from '@wordpress/components';
+import { ThemeNote } from '../theme-note';
 
 const data = window.kitsAdminApp?.buttons || null;
-const vars = data?.vars || {};
-const palette = data?.palette || [];
-
-const isPlain = ( v ) => !! v && 'object' === typeof v && ! Array.isArray( v );
-
-/**
- * A copy of target with patch merged in: a key set to undefined in patch is removed, and an object left empty by that
- * is removed too. Values that are not plain objects (Global Styles keeps an empty list as []) count as {}.
- *
- * @param {Object} target Current data.
- * @param {Object} patch  Changes.
- * @return {Object} Merged copy.
- */
-export function mergeGlobalStyles( target, patch ) {
-	const out = isPlain( target ) ? { ...target } : {};
-	Object.keys( patch ).forEach( ( k ) => {
-		const v = patch[ k ];
-		if ( undefined === v ) {
-			delete out[ k ];
-		} else if ( isPlain( v ) ) {
-			const merged = mergeGlobalStyles( out[ k ], v );
-			if ( Object.keys( merged ).length ) {
-				out[ k ] = merged;
-			} else {
-				delete out[ k ];
-			}
-		} else {
-			out[ k ] = v;
-		}
-	} );
-	return out;
-}
-
-/**
- * Saves changes to the site's Global Styles (user origin) and keeps everything else in the post: reads the post fresh,
- * merges only the changed keys, then writes settings and styles back.
- *
- * @param {number} postId Global Styles post id.
- * @param {Object} patch  { styles, settings }: nested changes; undefined removes a key (back to the theme's value).
- * @return {Promise<Object>} The saved post.
- */
-export function saveGlobalStyles( postId, patch ) {
-	const path = '/wp/v2/global-styles/' + postId;
-	return apiFetch( { path: path + '?context=edit' } ).then( ( post ) =>
-		apiFetch( {
-			path,
-			method: 'POST',
-			data: {
-				settings: mergeGlobalStyles(
-					post?.settings,
-					patch.settings || {}
-				),
-				styles: mergeGlobalStyles( post?.styles, patch.styles || {} ),
-			},
-		} )
-	);
-}
+// The palette and the values var() names resolve to; Body() puts the Colours section's unsaved edits in.
+let vars = data?.vars || {};
+let palette = data?.palette || [];
 
 // Where a field sits inside a style's node (as in admin-app-buttons.php). Padding is kept on both sides.
 const PATHS = {
@@ -112,44 +58,6 @@ function stylesPath( key, field ) {
 	return ':hover' === p[ 0 ]
 		? [ ...base, 'elements', 'button', ...p ]
 		: [ ...base, ...p ];
-}
-
-// Writes value at path in obj (in place); undefined is kept, so mergeGlobalStyles() removes that key.
-function setIn( obj, path, value ) {
-	let o = obj;
-	path.slice( 0, -1 ).forEach( ( k ) => {
-		o[ k ] = isPlain( o[ k ] ) ? o[ k ] : {};
-		o = o[ k ];
-	} );
-	o[ path[ path.length - 1 ] ] = value;
-}
-
-function readPath( obj, path ) {
-	return path.reduce(
-		( o, k ) => ( isPlain( o ) ? o[ k ] : undefined ),
-		obj
-	);
-}
-
-// The site's own values after a save, read back from the saved post.
-let saved = Object.fromEntries(
-	( data?.styles || [] ).map( ( s ) => [ s.key, { ...( s.user || {} ) } ] )
-);
-
-function readSaved( styles ) {
-	return Object.fromEntries(
-		( data?.styles || [] ).map( ( s ) => [
-			s.key,
-			Object.fromEntries(
-				s.fields
-					.map( ( f ) => [
-						f,
-						readPath( styles, stylesPath( s.key, f ) ),
-					] )
-					.filter( ( [ , v ] ) => 'string' === typeof v && '' !== v )
-			),
-		] )
-	);
 }
 
 /**
@@ -232,40 +140,19 @@ function describe( field, value, isThemeValue = false ) {
 		: css || String( value );
 }
 
-// The value a field has now: an edit (null = back to the theme), else the site's saved value.
-function current( edits, key, field ) {
-	const e = edits?.[ key ];
-	if ( e && field in e ) {
-		return e[ field ] ?? undefined;
-	}
-	return saved[ key ]?.[ field ];
+// The site's own value of a field now (saved or being edited), or undefined for the theme's.
+function current( gs, key, field ) {
+	const v = gs.get( [ 'styles', ...stylesPath( key, field ) ] );
+	return 'string' === typeof v && '' !== v ? v : undefined;
 }
 
-function ThemeNote( { isTheme, themeLabel, label, onReset } ) {
-	return (
-		<p className="description">
-			{ isTheme
-				? __( 'Theme value', 'kits-core' )
-				: sprintf(
-						/* translators: %s: the theme's value. */
-						__( 'Theme value: %s', 'kits-core' ),
-						themeLabel
-					) }{ ' ' }
-			{ ! isTheme && (
-				<Button
-					variant="link"
-					onClick={ onReset }
-					aria-label={ sprintf(
-						/* translators: %s: field label. */
-						__( 'Reset %s to theme', 'kits-core' ),
-						label
-					) }
-				>
-					{ __( 'Reset to theme', 'kits-core' ) }
-				</Button>
-			) }
-		</p>
-	);
+// Writes a field; undefined gives the theme's value back. Padding is kept the same on both sides.
+function write( gs, key, field, v ) {
+	const path = [ 'styles', ...stylesPath( key, field ) ];
+	gs.set( path, v );
+	if ( 'padding' === field ) {
+		gs.set( [ ...path.slice( 0, -1 ), 'right' ], v );
+	}
 }
 
 function Field( { style, field, value, onChange } ) {
@@ -320,7 +207,9 @@ function Field( { style, field, value, onChange } ) {
 						label={ label }
 						value={ value || '' }
 						options={ options }
-						onChange={ ( v ) => onChange( '' === v ? null : v ) }
+						onChange={ ( v ) =>
+							onChange( '' === v ? undefined : v )
+						}
 					/>
 				</FlexBlock>
 				{ isColor && (
@@ -335,7 +224,7 @@ function Field( { style, field, value, onChange } ) {
 				isTheme={ ! value }
 				themeLabel={ describe( field, themeValue, true ) }
 				label={ label }
-				onReset={ () => onChange( null ) }
+				onReset={ () => onChange( undefined ) }
 			/>
 		</div>
 	);
@@ -346,14 +235,14 @@ function Field( { style, field, value, onChange } ) {
  * kit-primitives.css section 10: the border is the background (Primary, Brand) or the Border colour, and on hover the
  * border follows the hover background.
  *
- * @param {Object} edits This section's edits.
+ * @param {Object} gs    The app's Global Styles store.
  * @param {Object} style A style from data.styles.
  * @return {Object} { normal, hover } inline styles.
  */
-function previewOf( edits, style ) {
+function previewOf( gs, style ) {
 	const fill = data.styles.find( ( s ) => 'fill' === s.key ) || style;
 	const val = ( s, field ) => {
-		const v = current( edits, s.key, field );
+		const v = current( gs, s.key, field );
 		if ( v ) {
 			return v;
 		}
@@ -379,22 +268,21 @@ function previewOf( edits, style ) {
 	const mix = resolve( 'var(--kit-btn-hover-mix)' );
 	const ink = resolve( 'var(--kit-color-ink)' );
 	// No hover colour of its own: Primary with a chosen background, and Brand, darken their background (blocks.php).
-	const ownBg =
-		'fill' === style.key && current( edits, 'fill', 'background' );
+	const ownBg = 'fill' === style.key && current( gs, 'fill', 'background' );
 	if (
 		bg &&
 		mix &&
 		ink &&
 		( 'kits-brand' === style.key ||
-			( ownBg && ! current( edits, 'fill', 'hover_background' ) ) )
+			( ownBg && ! current( gs, 'fill', 'hover_background' ) ) )
 	) {
 		hbg = `color-mix(in srgb, ${ bg } ${ mix }, ${ ink })`;
 	}
 	if (
 		'kits-brand' === style.key ||
 		( 'fill' === style.key &&
-			current( edits, 'fill', 'text' ) &&
-			! current( edits, 'fill', 'hover_text' ) )
+			current( gs, 'fill', 'text' ) &&
+			! current( gs, 'fill', 'hover_text' ) )
 	) {
 		hfg = fg;
 	}
@@ -424,8 +312,8 @@ function previewOf( edits, style ) {
 	};
 }
 
-function Preview( { edits, style } ) {
-	const { normal, hover } = previewOf( edits, style );
+function Preview( { gs, style } ) {
+	const { normal, hover } = previewOf( gs, style );
 	return (
 		<Flex
 			gap={ 4 }
@@ -450,13 +338,42 @@ function Preview( { edits, style } ) {
 	);
 }
 
-function Panel( { edits, setEdits } ) {
-	const styles = data?.styles || [];
-	const set = ( key, field, v ) =>
-		setEdits( {
-			...edits,
-			[ key ]: { ...( edits?.[ key ] || {} ), [ field ]: v },
-		} );
+// The palette with the Colours section's edits (settings.color.palette.theme), so previews follow them before saving.
+function paletteWith( gs ) {
+	const edited = gs.get( [ 'settings', 'color', 'palette', 'theme' ] );
+	const base = data?.palette || [];
+	if ( ! Array.isArray( edited ) ) {
+		return base;
+	}
+	const bySlug = Object.fromEntries(
+		edited
+			.filter( ( c ) => c?.slug && c?.color )
+			.map( ( c ) => [ c.slug, c ] )
+	);
+	return base.map( ( [ slug, name, color ] ) =>
+		bySlug[ slug ]
+			? [ slug, bySlug[ slug ].name || name, bySlug[ slug ].color ]
+			: [ slug, name, color ]
+	);
+}
+
+function ButtonsBody( { gs } ) {
+	if ( ! data || ! gs.ready ) {
+		return (
+			<p className="description">
+				{ __(
+					'Buttons are edited in Styles, which this account cannot change.',
+					'kits-core'
+				) }
+			</p>
+		);
+	}
+	palette = paletteWith( gs );
+	vars = { ...( data.vars || {} ) };
+	palette.forEach( ( [ slug, , color ] ) => {
+		vars[ '--wp--preset--color--' + slug ] = color;
+	} );
+	const styles = data.styles || [];
 	return (
 		<>
 			<p>
@@ -479,14 +396,16 @@ function Panel( { edits, setEdits } ) {
 					{ style.note && (
 						<p className="description">{ style.note }</p>
 					) }
-					<Preview edits={ edits } style={ style } />
+					<Preview gs={ gs } style={ style } />
 					{ style.fields.map( ( field ) => (
 						<Field
 							key={ field }
 							style={ style }
 							field={ field }
-							value={ current( edits, style.key, field ) }
-							onChange={ ( v ) => set( style.key, field, v ) }
+							value={ current( gs, style.key, field ) }
+							onChange={ ( v ) =>
+								write( gs, style.key, field, v )
+							}
 						/>
 					) ) }
 				</section>
@@ -495,41 +414,8 @@ function Panel( { edits, setEdits } ) {
 	);
 }
 
-// The changed fields: [ [ styleKey, field, value ] ], value undefined = back to the theme.
-function changes( edits ) {
-	const out = [];
-	Object.keys( edits || {} ).forEach( ( key ) =>
-		Object.keys( edits[ key ] ).forEach( ( field ) => {
-			const v = edits[ key ][ field ] ?? undefined;
-			if ( v !== saved[ key ]?.[ field ] ) {
-				out.push( [ key, field, v ] );
-			}
-		} )
-	);
-	return out;
-}
-
 export default {
 	slug: 'buttons',
 	label: __( 'Buttons', 'kits-core' ),
-	enabled: !! data,
-	initial: {},
-	Panel,
-	isDirty: ( edits ) => changes( edits ).length > 0,
-	save( edits ) {
-		const styles = {};
-		changes( edits ).forEach( ( [ key, field, v ] ) => {
-			const path = stylesPath( key, field );
-			setIn( styles, path, v );
-			if ( 'padding' === field ) {
-				setIn( styles, [ ...path.slice( 0, -1 ), 'right' ], v ); // Both sides.
-			}
-		} );
-		return saveGlobalStyles( data.postId, {
-			styles,
-		} ).then( ( post ) => {
-			saved = readSaved( isPlain( post?.styles ) ? post.styles : {} );
-			return post;
-		} );
-	},
+	Body: ButtonsBody,
 };
