@@ -482,7 +482,7 @@ function kits_transfer_page() {
 		echo '</div>';
 		return;
 	}
-	echo '<h2>' . esc_html( 'Restore defaults' ) . '</h2><p>' . esc_html( 'Clears Theme Options, Core Settings and the Page Options defaults, so every part works as the theme ships it. Styles, patterns and each page\'s own Page Options stay. A copy is kept first.' ) . '</p>';
+	echo '<h2>' . esc_html( 'Restore defaults' ) . '</h2><p>' . esc_html( 'Clears Theme Options, Settings and the Page Options defaults, so every part works as the theme ships it. Styles, patterns and each page\'s own Page Options stay. A copy is kept first.' ) . '</p>';
 	echo '<form method="post" action="' . $post . '">'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above.
 	wp_nonce_field( 'kits_transfer_reset' );
 	echo '<input type="hidden" name="action" value="kits_transfer_reset"><p><label><input type="checkbox" name="kits_sure" value="1" required> ' . esc_html( 'Yes, restore the defaults' ) . '</label></p>';
@@ -644,7 +644,7 @@ add_action(
 		kits_transfer_back(
 			array(
 				'title' => 'Defaults restored.',
-				'lines' => array( 'Theme Options, Core Settings and the Page Options defaults are back to the theme\'s. The copy from before is kept below.' ),
+				'lines' => array( 'Theme Options, Settings and the Page Options defaults are back to the theme\'s. The copy from before is kept below.' ),
 			)
 		);
 	}
