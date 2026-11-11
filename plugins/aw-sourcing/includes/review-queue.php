@@ -186,6 +186,7 @@ function aw_review_page() {
 	$table->prepare_items();
 	$type = sanitize_key( $_GET['type'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
 	echo '<div class="wrap"><h1 class="wp-heading-inline">To review</h1><hr class="wp-header-end">';
+	aw_sourcing_screen_tabs();
 	echo '<p>Items that came in automatically and need a person: why each was held is shown beside it. Publish puts it live; Reject moves it to Drafts (nothing is deleted).</p>';
 	if ( isset( $_GET['done'], $_GET['n'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		$n = (int) $_GET['n']; // phpcs:ignore WordPress.Security.NonceVerification

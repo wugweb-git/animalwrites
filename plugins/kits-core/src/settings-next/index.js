@@ -2,7 +2,7 @@
  * Kits → Settings in the options panel (trial, &ui=next): includes/admin-settings-next.php.
  *
  * Dark tab bar with the six Kits tabs, the sections on the left, each section's fields in groups that fold, On/Off
- * toggles for switches and a select for choices. Save sends only the changed fields to kits/v1/settings.
+ * toggles for switches and a select for choices. Save sends only the changed fields to kits/v1/settings-panel.
  * The shell parts come from window.kits.shell (script kits-shell, a dependency kits_shell_app() adds).
  */
 import { createRoot, useEffect, useState } from '@wordpress/element';

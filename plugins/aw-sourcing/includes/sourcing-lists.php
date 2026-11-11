@@ -464,10 +464,10 @@ add_action(
 			function () {
 				aw_sourcing_settings_marker( 'aw_sources', 'press' );
 				if ( function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ) { // phase 2: the queries are the Press keywords below
-					echo '<p>Weekly searches for coverage of Animal Writes through Google News and Google Search: each keyword in this view (the Press role) is a query. Results wait in SourceWeb → To review.</p>';
+					echo '<p>Weekly searches for coverage of Animal Writes through Google News and Google Search: each keyword in this view (the Press role) is a query. Results wait in Plugins → SourceWeb → To review.</p>';
 					return;
 				}
-				echo '<p>Searches for coverage of Animal Writes (Brave Search, weekly). Each query runs on each press site and on the open web. Results wait in SourceWeb → To review. The press sites are chosen on the <a href="' . esc_url( admin_url( 'admin.php?page=aw-sourcing&tab=sources&status=press' ) ) . '">Sources</a> tab ("Search here for coverage").</p>';
+				echo '<p>Searches for coverage of Animal Writes (Brave Search, weekly). Each query runs on each press site and on the open web. Results wait in Plugins → SourceWeb → To review. The press sites are chosen on the <a href="' . esc_url( admin_url( 'admin.php?page=aw-sourcing&tab=sources&status=press' ) ) . '">Sources</a> tab ("Search here for coverage").</p>';
 			},
 			'aw-sourcing-press'
 		);

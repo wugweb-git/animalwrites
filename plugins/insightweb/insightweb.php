@@ -36,7 +36,7 @@ if ( ! defined( 'INSIGHTWEB_DIR' ) ) { // already set by the bootstrap on the re
 	define( 'INSIGHTWEB_DIR', plugin_dir_path( __FILE__ ) );
 }
 
-require_once INSIGHTWEB_DIR . 'includes/kits-hub.php'; // a row on Kits → Plugins and in System Status, when Kits Core is loaded.
+require_once INSIGHTWEB_DIR . 'includes/kits-hub.php'; // a row in Kits System Status, when Kits Core is loaded.
 
 // Priority 5, as Search Insights loaded inside RankWeb. The bootstrap loads once, whoever calls it first.
 add_action(

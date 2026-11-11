@@ -109,26 +109,22 @@ admok() { # NAME PATH: 200, no PHP error, not refused
   code=$(adm "$2")
   if [ "$code" = "200" ] && ! grep -qiE 'critical error|Fatal error|Parse error|Sorry, you are not allowed' /tmp/admin.html; then echo "ok   $code $1"; else echo "FAIL $code $1"; FAIL=1; fi
 }
-for s in kits kits-options kits-settings kits-plugins kits-tools kits-help; do admok "Kits → $s" "admin.php?page=$s"; done
+for s in kits kits-options kits-settings kits-tools kits-help; do admok "Kits → $s" "admin.php?page=$s"; done
 adm "admin.php?page=kits" >/dev/null
-got=$(python3 - /tmp/admin.html <<'PY'
-import re, sys
-h = open(sys.argv[1], encoding='utf-8', errors='replace').read()
-m = re.search(r'id="toplevel_page_kits".*?<ul class=.wp-submenu wp-submenu-wrap.>(.*?)</ul>', h, re.S)
-print(' '.join(re.findall(r"href=.(?:admin\.php\?page=)?([^'\"]+)", m.group(1))) if m else 'no-menu')
-PY
-)
-if [ "$got" = "kits kits-options kits-settings kits-plugins kits-tools kits-help" ]; then echo "ok   Kits menu is the six items"; else echo "FAIL Kits menu: $got"; FAIL=1; fi
+# Kits is one item under Appearance (owner, 11 Nov 2026); the five are its tabs, in order (Plugins is WordPress's).
+got=$(grep -oE '<a class="nav-tab[^"]*" href="[^"]*page=[^"&]+' /tmp/admin.html | sed 's/.*page=//' | tr '\n' ' ' | sed 's/ $//')
+if [ "$got" = "kits kits-options kits-settings kits-tools kits-help" ]; then echo "ok   Kits tabs are the five"; else echo "FAIL Kits tabs: $got"; FAIL=1; fi
 n=$(grep -o '<a class="nav-tab' /tmp/admin.html | wc -l | tr -d ' ')
-if [ "$n" = "6" ]; then echo "ok   six Kits tabs"; else echo "FAIL $n Kits tabs, want 6"; FAIL=1; fi
+if [ "$n" = "5" ]; then echo "ok   five Kits tabs"; else echo "FAIL $n Kits tabs, want 5"; FAIL=1; fi
 has "Home: page check (Animal Writes)" /tmp/admin.html 'id="page-check"'
 has "Home: email, thumbnails and pictures stay" /tmp/admin.html 'id="pictures"'
 # Nothing WordPress or another plugin already shows (owner, 11 Nov 2026), and no row of section links.
 for id in versions backup dates theme-switch setup; do grep -qF "id=\"$id\"" /tmp/admin.html && { echo "FAIL Home still has $id"; FAIL=1; } || echo "ok   Home: no $id"; done
 grep -q 'class="subsubsub"' /tmp/admin.html && { echo "FAIL Home: section link row"; FAIL=1; } || echo "ok   Home: no section link row"
-adm "admin.php?page=kits-plugins" >/dev/null
-# InsightWeb is not loaded on this test site, so only PlanWeb's and MailWeb's rows are checked.
-for n in PlanWeb MailWeb; do has "Plugins: $n row with its icon" /tmp/admin.html "data:image/svg+xml;base64,"; grep -q ">$n</a>" /tmp/admin.html && echo "ok   Plugins: $n row" || { echo "FAIL Plugins: no $n row"; FAIL=1; }; done
+# Kits → Plugins is gone (owner, 11 Nov 2026): its old address opens WordPress's own Plugins screen.
+to=$(curl -s -b "$JAR" -o /dev/null -w '%{redirect_url}' "http://127.0.0.1:8080/wp-admin/admin.php?page=kits-plugins")
+case "$to" in */wp-admin/plugins.php) echo "ok   kits-plugins goes to Plugins";; *) echo "FAIL kits-plugins goes to: $to"; FAIL=1;; esac
+grep -q 'page=kits-plugins' /tmp/admin.html && { echo "FAIL Home still links to Kits → Plugins"; FAIL=1; } || echo "ok   no Kits → Plugins link"
 adm "admin.php?page=kits-settings" >/dev/null
 has "Settings: CDN cache times" /tmp/admin.html 'id="cdn"'
 has "Settings: preview access" /tmp/admin.html 'id="kits-preview-ips"'
@@ -164,10 +160,10 @@ aw-edit-screens admin.php?page=kits-help#developer/edit-screens
 aw-theme-parts admin.php?page=kits-help#developer/theme-parts
 kits-system&tab=states admin.php?page=kits-help&tab=states#design-system
 MAP
-# Offline copies of the menu's six screens for the PR's screenshots (the Deploy check keeps them as an artifact).
+# Offline copies of the five Kits screens for the PR's screenshots (the Deploy check keeps them as an artifact).
 if [ -n "${KITS_SNAPSHOT:-}" ] && command -v wget >/dev/null; then
   sed 's/^#HttpOnly_//' "$JAR" >/tmp/ci-cookies-wget.txt
-  for s in kits kits-options kits-settings kits-plugins kits-tools kits-help; do
+  for s in kits kits-options kits-settings kits-tools kits-help; do
     wget -q -E -k -K -p -nH --restrict-file-names=windows --load-cookies /tmp/ci-cookies-wget.txt -P "$KITS_SNAPSHOT" "http://127.0.0.1:8080/wp-admin/admin.php?page=$s" || true
   done
   echo "ok   Kits screens saved to $KITS_SNAPSHOT"
@@ -178,6 +174,88 @@ opts >/tmp/opts-after.txt
 gone=$(comm -23 <(sort /tmp/opts-before.txt) <(sort /tmp/opts-after.txt))
 added=$(comm -13 <(cut -d' ' -f1 /tmp/opts-before.txt | sort) <(cut -d' ' -f1 /tmp/opts-after.txt | sort) | tr '\n' ' ')
 if [ -z "$gone" ]; then echo "ok   every setting kept with its value ($(wc -l </tmp/opts-before.txt | tr -d ' ') options)${added:+; new: $added}"; else echo "FAIL settings changed or gone:"; echo "$gone" | head -20; FAIL=1; fi
+# Kits under Appearance, our plugins under Plugins (owner, 11 Nov 2026). As an administrator and as an editor, each
+# screen's old address (admin.php?page=…) answers as before: 200 where the role may open it, 403 where it may not. On
+# each screen that opens, Appearance or Plugins is the open menu with the product's item lit, and no product has a
+# top-level menu; an editor sees Plugins with only the items they may open. PlanWeb is on for this part, off after.
+echo "-- menus under Appearance and Plugins"
+wp plugin activate planweb --quiet
+wp user create ci-editor ci-editor@example.invalid --role=editor --user_pass=ci-editor-only --quiet
+EJAR=/tmp/ci-cookies-editor.txt; rm -f "$EJAR"
+curl -s -o /dev/null -c "$EJAR" http://127.0.0.1:8080/wp-login.php
+curl -s -o /dev/null -b "$EJAR" -c "$EJAR" --data-urlencode log=ci-editor --data-urlencode pwd=ci-editor-only --data-urlencode testcookie=1 --data-urlencode redirect_to=http://127.0.0.1:8080/wp-admin/ http://127.0.0.1:8080/wp-login.php
+as_role() { if [ "$1" = "editor" ]; then echo "$EJAR"; else echo "$JAR"; fi; }
+menu_read() { python3 "$REPO/tools/ci/admin_menu_read.py" /tmp/admin.html "$1"; }
+# ROLE PAGE CODE MENU ITEM: the page's address answers CODE; when 200, MENU (its li id) is open with ITEM lit.
+while read -r role page want mid item; do
+  [ -z "$role" ] && continue
+  code=$(curl -s -b "$(as_role "$role")" -o /tmp/admin.html -w '%{http_code}' "http://127.0.0.1:8080/wp-admin/admin.php?page=$page")
+  if [ "$want" != "200" ]; then
+    if [ "$code" = "$want" ]; then echo "ok   $code $role $page (not theirs, as before)"; else echo "FAIL $code $role $page (want $want)"; FAIL=1; fi
+    continue
+  fi
+  if [ "$code" != "200" ] || grep -qiE 'critical error|Fatal error|Parse error|Sorry, you are not allowed' /tmp/admin.html; then echo "FAIL $code $role $page"; FAIL=1; continue; fi
+  m=$(menu_read "$mid")
+  if echo "$m" | grep -qx "open yes" && echo "$m" | grep -qx "current $item"; then echo "ok   200 $role $page: $mid open, $item lit"; else echo "FAIL $role $page: want $mid open with $item lit, got: $(echo "$m" | head -2 | tr '\n' ' ')"; FAIL=1; fi
+  top=$(echo "$m" | sed -n 's/^toplevel //p' | tr ' ' '\n' | grep -E '^toplevel_page_(kits|aw-seo-plus|aw-search-insights|aw-sourcing-menu|mailweb|planweb|animal-writes)$' || true)
+  if [ -n "$top" ]; then echo "FAIL $role $page: top-level menus left: $top"; FAIL=1; fi
+done <<'PAGES'
+administrator kits 200 menu-appearance kits
+administrator kits-options 200 menu-appearance kits
+administrator kits-settings 200 menu-appearance kits
+administrator kits-tools 200 menu-appearance kits
+administrator kits-help 200 menu-appearance kits
+administrator aw-keys 200 menu-appearance kits
+administrator aw-modules 200 menu-appearance kits
+administrator aw-seo-plus 200 menu-plugins aw-seo-plus
+administrator aw-faq 200 menu-plugins aw-seo-plus
+administrator aw-seo-settings 200 menu-plugins aw-seo-plus
+administrator aw-search-insights 200 menu-plugins aw-search-insights
+administrator aw-sourcing-menu 200 menu-plugins aw-sourcing-menu
+administrator aw-review 200 menu-plugins aw-sourcing-menu
+administrator aw-enrich-review 200 menu-plugins aw-sourcing-menu
+administrator aw-sourcing 200 menu-plugins aw-sourcing-menu
+administrator aw-sourcing&tab=keywords 200 menu-plugins aw-sourcing-menu
+administrator mailweb 200 menu-plugins mailweb
+administrator mailweb-overview 200 menu-plugins mailweb
+administrator mailweb-settings 200 menu-plugins mailweb
+administrator planweb 200 menu-plugins planweb
+editor aw-seo-plus 200 menu-plugins aw-seo-plus
+editor aw-faq 200 menu-plugins aw-seo-plus
+editor aw-sourcing-menu 200 menu-plugins aw-sourcing-menu
+editor aw-review 200 menu-plugins aw-sourcing-menu
+editor aw-enrich-review 200 menu-plugins aw-sourcing-menu
+editor mailweb 200 menu-plugins mailweb
+editor mailweb-overview 200 menu-plugins mailweb
+editor planweb 200 menu-plugins planweb
+editor aw-seo-settings 403
+editor aw-search-insights 403
+editor aw-sourcing 403
+editor mailweb-settings 403
+editor kits 403
+editor kits-tools 403
+PAGES
+# The items each role sees under Plugins and Appearance (read on a screen where the menu is open).
+curl -s -b "$JAR" -o /tmp/admin.html "http://127.0.0.1:8080/wp-admin/admin.php?page=aw-seo-plus"
+got=$(menu_read menu-plugins | sed -n 's/^items //p')
+for i in aw-seo-plus aw-search-insights aw-sourcing-menu mailweb planweb; do case " $got " in *" $i "*) echo "ok   administrator: Plugins has $i" ;; *) echo "FAIL administrator: no $i under Plugins ($got)"; FAIL=1 ;; esac; done
+curl -s -b "$JAR" -o /tmp/admin.html "http://127.0.0.1:8080/wp-admin/admin.php?page=kits"
+got=$(menu_read menu-appearance | sed -n 's/^items //p')
+case " $got " in *" kits "*) echo "ok   administrator: Appearance has Kits" ;; *) echo "FAIL administrator: no Kits under Appearance ($got)"; FAIL=1 ;; esac
+curl -s -b "$EJAR" -o /tmp/admin.html "http://127.0.0.1:8080/wp-admin/admin.php?page=aw-seo-plus"
+got=$(menu_read menu-plugins | sed -n 's/^items //p' | tr ' ' '\n' | sort | tr '\n' ' ' | sed 's/ $//')
+if [ "$got" = "aw-seo-plus aw-sourcing-menu mailweb planweb" ]; then echo "ok   editor: Plugins holds RankWeb, SourceWeb, MailWeb, PlanWeb only"; else echo "FAIL editor: Plugins holds: $got"; FAIL=1; fi
+if menu_read menu-appearance | grep -qx "items"; then echo "ok   editor: no Appearance (as before)"; else echo "FAIL editor: Appearance shown"; FAIL=1; fi
+# A product's tabs reach its other screens; the tab shown is marked.
+curl -s -b "$JAR" -o /tmp/admin.html "http://127.0.0.1:8080/wp-admin/admin.php?page=aw-sourcing&tab=keywords"
+has "SourceWeb tabs: Keywords marked" /tmp/admin.html 'nav-tab nav-tab-active" href="http://127.0.0.1:8080/wp-admin/admin.php?page=aw-sourcing&#038;tab=keywords"'
+curl -s -b "$JAR" -o /tmp/admin.html "http://127.0.0.1:8080/wp-admin/admin.php?page=mailweb-overview"
+has "MailWeb tabs: Overview marked" /tmp/admin.html 'nav-tab nav-tab-active" href="http://127.0.0.1:8080/wp-admin/admin.php?page=mailweb-overview"'
+has "MailWeb tabs: Settings linked" /tmp/admin.html 'class="nav-tab" href="http://127.0.0.1:8080/wp-admin/admin.php?page=mailweb-settings"'
+curl -s -b "$EJAR" -o /tmp/admin.html "http://127.0.0.1:8080/wp-admin/admin.php?page=aw-seo-plus"
+has "RankWeb tabs (editor): FAQ linked" /tmp/admin.html 'class="nav-tab" href="http://127.0.0.1:8080/wp-admin/admin.php?page=aw-faq"'
+if grep -qF 'class="nav-tab" href="http://127.0.0.1:8080/wp-admin/admin.php?page=aw-seo-settings"' /tmp/admin.html; then echo "FAIL RankWeb tabs (editor): Settings tab shown"; FAIL=1; else echo "ok   RankWeb tabs (editor): no Settings tab"; fi
+wp plugin deactivate planweb --quiet
 # Plugin Check on PlanWeb (report only, printed, never fails the run): only when plugins/planweb changed (PLUGIN_CHECK=1
 # from the workflow), so wordpress.org is not asked on every Deploy check.
 if [ "${PLUGIN_CHECK:-0}" != "1" ]; then
@@ -283,19 +361,19 @@ same() { if [ "$2" = "$3" ]; then echo "ok   $1: every option identical after an
 
 echo "-- kits settings panel (&ui=next)"
 screen kits-settings kits-settings-next kits-settings-next
-route kits/v1/settings
-post kits/v1/settings '{"values":{}}'
+route kits/v1/settings-panel
+post kits/v1/settings-panel '{"values":{}}'
 BEFORE=$(optmd5 kits_theme_options)
-want 200 "GET /kits/v1/settings for the unchanged Save" -b /tmp/cj-ci -H "X-WP-Nonce: $NA" "$H/?rest_route=/kits/v1/settings"
+want 200 "GET /kits/v1/settings-panel for the unchanged Save" -b /tmp/cj-ci -H "X-WP-Nonce: $NA" "$H/?rest_route=/kits/v1/settings-panel"
 cp /tmp/rw.out /tmp/ks.json
-python3 - > /tmp/ks-values.json <<'PY' || { echo "FAIL kits/v1/settings answer has no sections: $(head -c 400 /tmp/ks.json)"; FAIL=1; }
+python3 - > /tmp/ks-values.json <<'PY' || { echo "FAIL kits/v1/settings-panel answer has no sections: $(head -c 400 /tmp/ks.json)"; FAIL=1; }
 import json, sys
 d = json.load(open('/tmp/ks.json'))
 if not isinstance(d, dict) or 'sections' not in d:
     sys.exit(1)
 print(json.dumps({'values': {f['key']: f['value'] for s in d['sections'] for g in s['groups'] for f in g['fields']}}))
 PY
-want 200 "POST /kits/v1/settings unchanged Save (administrator)" -X POST -b /tmp/cj-ci -H "X-WP-Nonce: $NA" -H 'Content-Type: application/json' -d @/tmp/ks-values.json "$H/?rest_route=/kits/v1/settings"
+want 200 "POST /kits/v1/settings-panel unchanged Save (administrator)" -X POST -b /tmp/cj-ci -H "X-WP-Nonce: $NA" -H 'Content-Type: application/json' -d @/tmp/ks-values.json "$H/?rest_route=/kits/v1/settings-panel"
 grep -q '"saved":false' /tmp/rw.out && echo "ok   unchanged Save reports nothing saved" || { echo "FAIL unchanged Save wrote"; FAIL=1; }
 same "Kits Settings" "$BEFORE" "$(optmd5 kits_theme_options)"
 # Each Kits plugin's new screens: tools/ci/smoke-ui-<plugin>.sh, using screen, route, post, optmd5 and same above.
@@ -414,4 +492,37 @@ wp eval '$s = (array) get_option( "aw_seo_settings", array() ); unset( $s["searc
 if [ -f /tmp/wp-debug.log ] && tail -n +"$((LOG_START + 1))" /tmp/wp-debug.log | grep -E 'PHP (Fatal|Parse) error|PHP Warning'; then FAIL=1; fi
 wp theme activate animal-writes --quiet
 wp cache flush --quiet
+# Menu pages for the PR's before and after screenshots (pull requests only; the Deploy check keeps them with the Kits
+# screens): as an administrator and as an editor, the same screens on this commit (menu-after) and on the base commit
+# (menu-before), saved as offline pages. The base is served from its own checkout by a fresh PHP server (a running one
+# would keep the old symlink targets in its path cache), and everything is put back afterwards. PlanWeb is on.
+if [ -n "${KITS_SNAPSHOT:-}" ] && command -v wget >/dev/null && [ -n "${BASE:-}" ] && git -C "$REPO" cat-file -e "$BASE" 2>/dev/null; then
+  wp plugin activate planweb --quiet
+  sed 's/^#HttpOnly_//' "$JAR" >/tmp/ci-cookies-wget.txt
+  sed 's/^#HttpOnly_//' "$EJAR" >/tmp/ci-cookies-editor-wget.txt
+  snap() { # STATE: menu-before or menu-after
+    for s in kits aw-seo-plus mailweb; do
+      wget -q -E -k -K -p -nH --restrict-file-names=windows --load-cookies /tmp/ci-cookies-wget.txt -P "$KITS_SNAPSHOT/$1/administrator" "http://127.0.0.1:8080/wp-admin/admin.php?page=$s" || true
+    done
+    for s in aw-seo-plus mailweb; do
+      wget -q -E -k -K -p -nH --restrict-file-names=windows --load-cookies /tmp/ci-cookies-editor-wget.txt -P "$KITS_SNAPSHOT/$1/editor" "http://127.0.0.1:8080/wp-admin/admin.php?page=$s" || true
+    done
+  }
+  relink() { # FOLDER: point the test site's plugins and themes at that checkout
+    for p in "$1"/plugins/*/; do ln -sfn "$p" "wp-content/plugins/$(basename "$p")"; done
+    for t in "$1"/themes/*/; do ln -sfn "$t" "wp-content/themes/$(basename "$t")"; done
+  }
+  serve() { kill "$SERVER" 2>/dev/null || true; sleep 1; php -S 127.0.0.1:8080 -t "$WP" >>/tmp/php-server.log 2>&1 & SERVER=$!; sleep 2; }
+  snap menu-after
+  if git -C "$REPO" worktree add --quiet --detach /tmp/base-tree "$BASE"; then
+    relink /tmp/base-tree; serve
+    snap menu-before
+    relink "$REPO"; serve
+    git -C "$REPO" worktree remove --force /tmp/base-tree || true
+    echo "ok   menu pages before ($BASE) and after saved to $KITS_SNAPSHOT"
+  else
+    echo "-- menu pages before: the base commit could not be checked out (after only)"
+  fi
+  wp plugin deactivate planweb --quiet
+fi
 exit $FAIL

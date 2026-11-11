@@ -3,8 +3,9 @@
  * The Sourcing menu and its Overview (owner, 25 Oct 2026: SourceWeb meets the admin standard of the other plugins:
  * one menu, an Overview of every feature and where it lives, links from the Plugins screen; core WordPress only).
  *
- * Sourcing → Overview (this file), To review (review-queue.php), Enrichment review (enrichment-admin.php), then one
- * item per screen of the Sourcing page (admin.php?page=aw-sourcing&tab=…, sourcing-policy.php aw_sourcing_page): the
+ * Plugins → SourceWeb (one item since 11 Nov 2026) opens the Overview (this file). Its screens, at the same addresses
+ * as before and shown as tabs on each: Overview, To review (review-queue.php), Enrichment review (enrichment-admin.php),
+ * then one per screen of the Sourcing page (admin.php?page=aw-sourcing&tab=…, sourcing-policy.php aw_sourcing_page): the
  * settings screens (Sources, Keywords, Rules or their parts, Press queries, Categories, AI models), the reports and
  * jobs (Workers, Rejected, Relay log, Change log), and Settings (the plugin's own switch). The order and the addresses
  * are in menu-model.php. Until 25 Oct 2026 the screens were Settings → Sourcing (tabs), Inbox → To review and
@@ -59,19 +60,26 @@ function aw_sourcing_url( $tab = '', array $args = array() ) {
 add_action(
 	'admin_menu',
 	function () {
-		// The menu reads SourceWeb (owner, 11 Nov 2026). WordPress names the screens under a menu after its title, so the
-		// hook prefix stays "sourcing" (AW_SRC_SCREEN, sourcing_page_…): saved screen options and columns stay. The count goes on below.
-		add_menu_page( 'SourceWeb', 'SourceWeb', AW_REVIEW_CAP, AW_SRC_MENU, 'aw_sourcing_overview_page', 'dashicons-rss', 26 );
-		$GLOBALS['admin_page_hooks'][ AW_SRC_MENU ] = 'sourcing'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- the menu's hook prefix, as before the rename.
-		add_submenu_page( AW_SRC_MENU, 'SourceWeb', 'Overview', AW_REVIEW_CAP, AW_SRC_MENU, 'aw_sourcing_overview_page' );
-		if ( current_user_can( AW_REVIEW_CAP ) && function_exists( 'aw_review_count' ) && function_exists( 'aw_menu_count' ) ) {
-			global $menu;
-			foreach ( (array) $menu as $i => $item ) {
-				if ( AW_SRC_MENU === ( $item[2] ?? '' ) ) {
-					$menu[ $i ][0] .= aw_menu_count( aw_review_count() ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride -- the count bubble, as WordPress adds its own
+		// Plugins → SourceWeb (owner, 11 Nov 2026: "all plugins" under Plugins), opening the Overview, with the To review
+		// count; the other screens are its tabs (aw_sourcing_screen_tabs()). Without Kits Core, a menu of its own as before.
+		// WordPress names the screens under a menu after its hook prefix, which stays "sourcing" (AW_SRC_SCREEN,
+		// sourcing_page_…): saved screen options and columns stay.
+		$count = current_user_can( AW_REVIEW_CAP ) && function_exists( 'aw_review_count' ) && function_exists( 'aw_menu_count' ) ? aw_menu_count( aw_review_count() ) : '';
+		if ( function_exists( 'kits_admin_fold_menu' ) ) {
+			kits_admin_fold_menu( AW_SRC_MENU, 'plugins.php', 'SourceWeb' . $count, AW_REVIEW_CAP, 'sourcing' );
+		} else {
+			add_menu_page( 'SourceWeb', 'SourceWeb', AW_REVIEW_CAP, AW_SRC_MENU, 'aw_sourcing_overview_page', 'dashicons-rss', 26 );
+			$GLOBALS['admin_page_hooks'][ AW_SRC_MENU ] = 'sourcing'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- the menu's hook prefix, as before the rename.
+			if ( '' !== $count ) {
+				global $menu;
+				foreach ( (array) $menu as $i => $item ) {
+					if ( AW_SRC_MENU === ( $item[2] ?? '' ) ) {
+						$menu[ $i ][0] .= $count; // phpcs:ignore WordPress.WP.GlobalVariablesOverride -- the count bubble, as WordPress adds its own
+					}
 				}
 			}
 		}
+		add_submenu_page( AW_SRC_MENU, 'SourceWeb', 'Overview', AW_REVIEW_CAP, AW_SRC_MENU, 'aw_sourcing_overview_page' );
 	},
 	9 // before To review (10) and Enrichment review (11)
 );
@@ -118,23 +126,17 @@ add_filter(
 	2
 );
 
-// Where Inbox was: after Classification, before Mail (Core's menu order lists the site's menus; this one joins it).
-add_filter(
-	'menu_order',
-	function ( $order ) {
-		$order = array_values( array_diff( (array) $order, array( AW_SRC_MENU ) ) );
-		foreach ( array( 'aw-inbox' => 1, 'mailweb' => 0, 'aw-classification' => 1 ) as $next_to => $after ) {
-			$at = array_search( $next_to, $order, true );
-			if ( false !== $at ) {
-				array_splice( $order, $at + $after, 0, array( AW_SRC_MENU ) );
-				return $order;
-			}
-		}
-		$order[] = AW_SRC_MENU;
-		return $order;
-	},
-	PHP_INT_MAX
-);
+/**
+ * SourceWeb's screens as tabs under a screen's heading: Overview, To review, Enrichment review, then one per screen of
+ * the Sourcing page, as the menu lists them (those the user may open). Printed only while SourceWeb is one item under
+ * Plugins.
+ */
+function aw_sourcing_screen_tabs() {
+	if ( function_exists( 'kits_admin_fold_tabs' ) ) {
+		$on_page = AW_SRC_PAGE === sanitize_key( $_GET['page'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification -- which tab to mark
+		kits_admin_fold_tabs( AW_SRC_MENU, 'SourceWeb screens', $on_page ? aw_src_tab_menu_slug( aw_sourcing_current_tab() ) : '' );
+	}
+}
 
 // Plugins screen: Overview and Settings under the plugin's name (when SourceWeb is listed there as its own plugin).
 add_filter(
@@ -298,7 +300,7 @@ function aw_sourcing_overview_page() {
 	$auto  = esc_html( 'Automatic' );
 	$admin = current_user_can( 'manage_options' );
 	$names = array( 'sources' => 'Sources', 'keywords' => 'Keywords', 'rules' => 'Rules', 'sections' => 'Sections', 'summary' => 'Summary rules', 'enrich' => 'Directory enrichment', 'ai' => 'AI models', 'workers' => 'Workers', 'rejected' => 'Rejected', 'relay-log' => 'Relay log', 'log' => 'Change log', AW_SRC_SETTINGS_TAB => 'Settings' );
-	$tab   = fn( $k ) => isset( $tabs[ $k ] ) ? aw_sourcing_overview_link( 'SourceWeb → ' . $tabs[ $k ][0], aw_sourcing_url( $k ) ) : esc_html( 'SourceWeb → ' . ( $names[ $k ] ?? $k ) . ' (administrators)' );
+	$tab   = fn( $k ) => isset( $tabs[ $k ] ) ? aw_sourcing_overview_link( 'Plugins → SourceWeb → ' . $tabs[ $k ][0], aw_sourcing_url( $k ) ) : esc_html( 'Plugins → SourceWeb → ' . ( $names[ $k ] ?? $k ) . ' (administrators)' );
 	$pubs  = function_exists( 'aw_publishers' ) ? aw_publishers() : array();
 	$by    = array_count_values( array_map( fn( $p ) => (string) ( $p['status'] ?? 'neutral' ), array_filter( $pubs, fn( $p ) => empty( $p['kind'] ) ) ) );
 	$cfg   = function_exists( 'aw_sources_config' ) ? aw_sources_config() : array();
@@ -308,8 +310,8 @@ function aw_sourcing_overview_page() {
 
 	$groups = array(
 		'Waiting for a person' => array(
-			array( 'To review', 'Items that came in automatically (News, Library, Opportunities, Press, research papers) and wait for a person, with why each was held. Publish or reject one by one or together.', aw_sourcing_overview_link( 'SourceWeb → To review', admin_url( 'admin.php?page=aw-review' ), AW_REVIEW_CAP ), esc_html( sprintf( _n( '%d item waiting.', '%d items waiting.', aw_review_count() ), aw_review_count() ) ) ),
-			array( 'Enrichment review', 'Proposed details for Directory listings from the enrichment worker: approve, reject or undo; high-confidence values for empty fields are applied automatically.', aw_sourcing_overview_link( 'SourceWeb → Enrichment review', admin_url( 'admin.php?page=aw-enrich-review' ), AW_ENRICH_CAP ), esc_html( sprintf( '%1$d of %2$d listings checked; %3$d proposals waiting.', (int) $prog['checked'], (int) $prog['total'], (int) $prog['pending'] ) ) ),
+			array( 'To review', 'Items that came in automatically (News, Library, Opportunities, Press, research papers) and wait for a person, with why each was held. Publish or reject one by one or together.', aw_sourcing_overview_link( 'Plugins → SourceWeb → To review', admin_url( 'admin.php?page=aw-review' ), AW_REVIEW_CAP ), esc_html( sprintf( _n( '%d item waiting.', '%d items waiting.', aw_review_count() ), aw_review_count() ) ) ),
+			array( 'Enrichment review', 'Proposed details for Directory listings from the enrichment worker: approve, reject or undo; high-confidence values for empty fields are applied automatically.', aw_sourcing_overview_link( 'Plugins → SourceWeb → Enrichment review', admin_url( 'admin.php?page=aw-enrich-review' ), AW_ENRICH_CAP ), esc_html( sprintf( '%1$d of %2$d listings checked; %3$d proposals waiting.', (int) $prog['checked'], (int) $prog['total'], (int) $prog['pending'] ) ) ),
 		),
 		'What the workers fetch' => array(
 			array( 'Sources', 'Every publisher and site the workers read: Allowed, Neutral or Blocked, short names, feeds, press sites and the relay switch.', $tab( 'sources' ), esc_html( sprintf( '%1$d allowed, %2$d neutral, %3$d blocked publishers.', (int) ( $by['allow'] ?? 0 ), (int) ( $by['neutral'] ?? 0 ), (int) ( $by['block'] ?? 0 ) ) ) ),
@@ -337,7 +339,7 @@ function aw_sourcing_overview_page() {
 			array( 'Settings', 'Workers use these lists: whether the workers read these screens or sources.yaml.', $tab( AW_SRC_SETTINGS_TAB ), aw_sourcing_overview_status( ! empty( $cfg['live'] ), 'Workers use these lists: ' . ( ! empty( $cfg['live'] ) ? 'on.' : 'off.' ) ) ),
 		),
 		'Elsewhere' => array(
-			array( 'Sourcing keywords', 'Per Google News search: items brought in over 30 days and their pages\' Search Console figures.', function_exists( 'aw_si_url' ) && function_exists( 'aw_si_cap' ) && current_user_can( aw_si_cap() ) ? '<a href="' . esc_url( aw_si_url( 'sourcing' ) ) . '">' . esc_html( 'InsightWeb → Search Insights → Sourcing keywords' ) . '</a>' : esc_html( 'InsightWeb → Search Insights' ), $auto ),
+			array( 'Sourcing keywords', 'Per Google News search: items brought in over 30 days and their pages\' Search Console figures.', function_exists( 'aw_si_url' ) && function_exists( 'aw_si_cap' ) && current_user_can( aw_si_cap() ) ? '<a href="' . esc_url( aw_si_url( 'sourcing' ) ) . '">' . esc_html( 'Plugins → InsightWeb → Search Insights → Sourcing keywords' ) . '</a>' : esc_html( 'Plugins → InsightWeb → Search Insights' ), $auto ),
 			array( 'Site Health', 'Two tests: "Sourcing ran on time" (the ingest heartbeat) and "Workers report on time".', current_user_can( 'view_site_health_checks' ) ? '<a href="' . esc_url( admin_url( 'site-health.php' ) ) . '">' . esc_html( 'Tools → Site Health' ) . '</a>' : esc_html( 'Tools → Site Health' ), $auto ),
 		),
 	);
@@ -345,13 +347,14 @@ function aw_sourcing_overview_page() {
 	// categories (with a Keywords column); from phase 4 the old screens are gone.
 	$kw_on = function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on();
 	if ( isset( $tabs['press'] ) || $kw_on ) {
-		$groups['What the workers fetch'][] = array( 'Press queries', 'Weekly searches for coverage of Animal Writes; results wait in To review.', $kw_on ? aw_sourcing_overview_link( 'SourceWeb → Keywords → Press', aw_sourcing_url( 'keywords', array( 'view' => 'press' ) ) ) : $tab( 'press' ), $auto );
+		$groups['What the workers fetch'][] = array( 'Press queries', 'Weekly searches for coverage of Animal Writes; results wait in To review.', $kw_on ? aw_sourcing_overview_link( 'Plugins → SourceWeb → Keywords → Press', aw_sourcing_url( 'keywords', array( 'view' => 'press' ) ) ) : $tab( 'press' ), $auto );
 	}
 	if ( isset( $tabs['categories'] ) || $kw_on ) {
 		$groups['What the workers fetch'][] = array( 'Categories', 'The words that put an item in each category.', $kw_on ? aw_sourcing_overview_link( 'Posts → Categories (Keywords column)', admin_url( 'edit-tags.php?taxonomy=category' ), 'manage_categories' ) : $tab( 'categories' ), $auto );
 	}
 
 	echo '<div class="wrap"><h1>' . esc_html( 'Sourcing' ) . '</h1>';
+	aw_sourcing_screen_tabs();
 	echo '<p>' . esc_html( sprintf( 'What the workers fetch, how it arrives and what waits for a person. Each row says where the feature lives in this menu. Sourcing restructure phase %d is in place.', function_exists( 'aw_sourcing_phase' ) ? aw_sourcing_phase() : 0 ) ) . '</p>';
 	// Rows whose status is a warning, first and together (core notice); nothing when every check is fine.
 	$attn = array();
@@ -398,7 +401,7 @@ function aw_sourcing_overview_page() {
 		}
 		echo '<details><summary><strong>' . esc_html( 'Last runs' ) . '</strong> ' . esc_html( sprintf( '(%1$d of %2$d successful)', $good, count( $cells ) ) ) . '</summary>';
 		aw_sourcing_simple_table( 'aw-sourcing-runs', array( 'worker' => 'Worker', 'last' => 'Last report', 'result' => 'Result', 'next' => 'Next due' ), $cells, array( 'primary' => 'worker', 'empty' => 'No worker has reported yet.', 'foot' => false ) );
-		echo '<p>' . aw_sourcing_overview_link( 'SourceWeb → Workers', aw_sourcing_url( 'workers' ) ) . '</p></details>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in the helper
+		echo '<p>' . aw_sourcing_overview_link( 'Plugins → SourceWeb → Workers', aw_sourcing_url( 'workers' ) ) . '</p></details>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in the helper
 	}
 
 	echo '<details><summary><strong>' . esc_html( 'Commands (WP-CLI on the server)' ) . '</strong> (3)</summary>';

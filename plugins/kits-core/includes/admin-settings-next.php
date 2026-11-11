@@ -11,7 +11,7 @@
  * preload, Older content). Both screens save through the option's one sanitize callback (kits_theme_options_clean), and
  * the new one sends only the fields that were changed, so an unchanged Save writes nothing.
  *
- * Route: kits/v1/settings (GET, POST), manage_options, with the wp_rest nonce (kits_shell_rest_can()).
+ * Route: kits/v1/settings-panel (GET, POST), manage_options, with the wp_rest nonce (kits_shell_rest_can()).
  *
  * @package kits-core
  */
@@ -168,7 +168,7 @@ add_action(
 	function () {
 		register_rest_route(
 			'kits/v1',
-			'/settings',
+			'/settings-panel',
 			array(
 				array(
 					'methods'             => 'GET',
@@ -219,7 +219,7 @@ add_action(
 				'data'        => array(
 					'icon'    => plugins_url( 'assets/icon.svg', KITS_CORE_DIR . 'kits-core.php' ),
 					'tabs'    => $tabs,
-					'route'   => 'kits/v1/settings',
+					'route'   => 'kits/v1/settings-panel',
 					'current' => admin_url( 'admin.php?page=kits-settings' ),
 					'preview' => admin_url( 'admin.php?page=kits-settings#preview' ),
 				),
