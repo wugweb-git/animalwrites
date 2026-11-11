@@ -646,9 +646,8 @@ function kits_parts_bundle_sets( string $dir ): array {
 /**
  * Clean-up of the joined component files, on each rebuild and when the cap is reached.
  *
- * - In each set, an older version goes a day after the version that replaced it was written.
- * - A set whose newest file has not been used for kits_parts_bundle_max_age() goes whole (files in use are touched
- *   daily), so sets that only a few pages made stop counting against the cap.
+ * - Any file no page has used for kits_parts_bundle_max_age() goes (files in use are touched hourly): an older version
+ *   of a set once no cached page can still link to it, a whole set once no page makes it any more.
  * - Temp files left by a failed write go after an hour.
  *
  * @param string $dir Folder.
@@ -657,11 +656,15 @@ function kits_parts_bundle_clean( string $dir ): void {
 	clearstatcache();
 	$old = time() - kits_parts_bundle_max_age();
 	foreach ( kits_parts_bundle_sets( $dir ) as $set => $list ) {
-		if ( reset( $list ) < $old ) {
-			array_map( 'wp_delete_file', array_keys( $list ) );
+		$left = count( $list );
+		foreach ( $list as $f => $m ) {
+			if ( $m < $old ) {
+				wp_delete_file( $f );
+				--$left;
+			}
+		}
+		if ( ! $left ) {
 			delete_option( 'kits_parts_ver_' . $set );
-		} else {
-			kits_joined_prune( $list );
 		}
 	}
 	foreach ( (array) glob( $dir . '/*.tmp' ) as $t ) {
@@ -718,12 +721,72 @@ function kits_parts_bundle_sweep( string $dir ): void {
 }
 
 /**
- * How long a joined component file no page has used is kept (kits_parts_bundle_max_age filter; default 14 days). A
- * file in use is touched once a day, so this must outlast the longest time a page cache keeps a page without PHP
- * running (plus that day), or a cached page could link to a removed file. Never less than 8 days.
+ * How long a joined component file no page has used is kept (kits_parts_bundle_max_age filter): 7 days, plus 3 hours
+ * so that a page a cache made just before the file's last use (the touch is hourly) and kept for 7 days, with a CDN
+ * copy on top, never links to a removed file. Never less than that: raise it if a page cache keeps pages longer.
  */
 function kits_parts_bundle_max_age(): int {
-	return max( 8 * DAY_IN_SECONDS, (int) apply_filters( 'kits_parts_bundle_max_age', 14 * DAY_IN_SECONDS ) );
+	$min = 7 * DAY_IN_SECONDS + 3 * HOUR_IN_SECONDS;
+	return max( $min, (int) apply_filters( 'kits_parts_bundle_max_age', $min ) );
+}
+
+/**
+ * The kind of page this is, for the joined component file: pages of one kind share one file, which holds every
+ * component that kind has needed so far (kits_parts_bundle_members). '' keys the file on this page's own components.
+ * Filter: kits_parts_page_kind (a site can split a kind, e.g. one of its own views).
+ */
+function kits_parts_page_kind(): string {
+	$kind = '';
+	if ( is_front_page() ) {
+		$kind = 'front';
+	} elseif ( is_home() ) {
+		$kind = 'posts';
+	} elseif ( is_page() ) {
+		$tpl  = (string) get_page_template_slug();
+		$kind = 'page' . ( '' !== $tpl && 'default' !== $tpl ? '-' . $tpl : '' );
+	} elseif ( is_singular() ) {
+		$kind = 'single-' . get_post_type();
+	} elseif ( is_post_type_archive() ) {
+		$kind = 'archive-' . (string) get_query_var( 'post_type' );
+	} elseif ( is_category() || is_tag() || is_tax() ) {
+		$term = get_queried_object();
+		$kind = 'term-' . ( $term instanceof WP_Term ? $term->taxonomy : 'any' );
+	} elseif ( is_author() ) {
+		$kind = 'author';
+	} elseif ( is_date() ) {
+		$kind = 'date';
+	} elseif ( is_search() ) {
+		$kind = 'search';
+	} elseif ( is_404() ) {
+		$kind = '404';
+	}
+	$kind = (string) apply_filters( 'kits_parts_page_kind', $kind );
+	return (string) preg_replace( '/[^a-z0-9_-]/', '', strtolower( $kind ) );
+}
+
+/**
+ * The components of this kind of page's joined file: the ones this page needs, plus every one an earlier page of the
+ * kind needed (kept in the kits_parts_kinds option, in registry order). A kind's list only grows, so its file
+ * changes only when the kind first meets a component; registry entries that are gone drop out.
+ *
+ * @param string $kind     Page kind ('' = none).
+ * @param array  $members  Handles this page needs, in registry order.
+ * @param array  $registry Component registry.
+ * @return array Handles, in registry order.
+ */
+function kits_parts_bundle_members( string $kind, array $members, array $registry ): array {
+	if ( '' === $kind ) {
+		return $members;
+	}
+	$kinds = get_option( 'kits_parts_kinds', array() );
+	$kinds = is_array( $kinds ) ? $kinds : array();
+	$known = array_values( array_filter( (array) ( $kinds[ $kind ] ?? array() ), fn( $h ) => is_string( $h ) && isset( $registry[ $h ] ) ) );
+	$all   = array_values( array_filter( array_keys( $registry ), fn( $h ) => in_array( $h, $known, true ) || in_array( $h, $members, true ) ) );
+	if ( $all !== $known ) {
+		$kinds[ $kind ] = $all;
+		update_option( 'kits_parts_kinds', $kinds, true );
+	}
+	return $all;
 }
 
 /** Most joined component files kept (Kits → Core Settings → Joined files cap; kits_parts_bundle_cap filter). */
@@ -803,8 +866,9 @@ function kits_styles_needed( WP_Styles $styles, ?array $from = null ): array {
 
 /**
  * One component stylesheet per page: the component stylesheets this page loads (kits_component_styles, in
- * registry order) are joined into uploads/kits-cache/parts/{set}-{hash}.css. {set} hashes the list of handles, {hash}
- * the joined CSS, so the address changes only when the CSS does. The handles stay registered as aliases that print
+ * registry order) are joined into uploads/kits-cache/parts/{set}-{hash}.css. {set} hashes the kind of page
+ * (kits_parts_page_kind), so pages of one kind share one file holding every component that kind has needed; {hash}
+ * hashes the joined CSS, so the address changes only when the CSS does. The handles stay registered as aliases that print
  * nothing, with deps = [ kits-parts ], so the joined file prints where the first of them would.
  *
  * The separate files load instead when one of them carries inline CSS, another media, an RTL copy or an @import, when
@@ -822,6 +886,13 @@ function kits_bundle_component_css() {
 	if ( ! $members ) {
 		return;
 	}
+	$kind = kits_parts_page_kind();
+	foreach ( kits_parts_bundle_members( $kind, $members, $registry ) as $h ) {
+		if ( ! in_array( $h, $members, true ) && kits_component_style_register( $h ) ) {
+			$members[] = $h; // Another page of this kind needed it: in the file too, so the kind shares one file.
+		}
+	}
+	$members = array_values( array_filter( array_keys( $registry ), fn( $h ) => in_array( $h, $members, true ) ) );
 	$deps = array();
 	foreach ( $members as $h ) {
 		foreach ( (array) $styles->registered[ $h ]->deps as $d ) {
@@ -853,7 +924,7 @@ function kits_bundle_component_css() {
 		$files[ $h ] = $f;
 		$bases[ $h ] = dirname( (string) preg_replace( '/[?#].*$/', '', $o->src ) );
 	}
-	$set   = substr( md5( implode( ',', $members ) ), 0, 10 );
+	$set   = substr( md5( '' !== $kind ? 'kind:' . $kind : implode( ',', $members ) ), 0, 10 );
 	$sig   = md5( implode( ',', array_map( fn( $f ) => $f . ':' . filemtime( $f ) . ':' . filesize( $f ), $files ) ) );
 	$dir   = kits_parts_bundle_dir();
 	$key   = 'kits_parts_ver_' . $set;
@@ -900,7 +971,7 @@ function kits_bundle_component_css() {
 	}
 	$sweep = get_option( 'kits_parts_sweep' );
 	$since = is_array( $sweep ) ? (int) ( $sweep['at'] ?? 0 ) : 0;
-	if ( ( $mtime < time() - DAY_IN_SECONDS || $mtime < $since ) && wp_is_writable( $path ) ) {
+	if ( ( $mtime < time() - HOUR_IN_SECONDS || $mtime < $since ) && wp_is_writable( $path ) ) {
 		touch( $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- in use: the unused-age clean-up and the release sweep keep it.
 	}
 	if ( $since ) {
@@ -938,7 +1009,7 @@ function kits_parts_bundle_status(): array {
 		$fix = 'uploads/kits-cache/parts/ could not be written on ' . wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $fail ) . ': pages load separate files. Make the folder writable; the next try is an hour after the failure. ';
 	}
 	if ( $warn && ( $hit || $count >= (int) ceil( $cap * 0.8 ) ) ) {
-		$fix .= $hit ? 'The cap was reached on ' . wp_date( get_option( 'date_format' ), $hit ) . ': pages with a new set of components load separate files. ' : 'Near the cap: once it is reached, pages with a new set of components load separate files. ';
+		$fix .= $hit ? 'The cap was reached on ' . wp_date( get_option( 'date_format' ), $hit ) . ': a new kind of page loads separate files. ' : 'Near the cap: once it is reached, a new kind of page loads separate files. ';
 		$fix .= 'Raise the cap in Kits → Core Settings (Joined files cap), or empty uploads/kits-cache/parts/ (the files are made again as pages are visited).';
 	}
 	return compact( 'on', 'count', 'cap', 'warn', 'hit', 'fail', 'text', 'fix' );

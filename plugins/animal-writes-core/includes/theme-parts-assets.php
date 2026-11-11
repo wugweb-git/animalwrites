@@ -63,6 +63,10 @@ function aw_theme_parts_path( string $file ): string {
  * aw-directory, aw-listing, aw-forms) still decide which file a page gets. All their rules are scoped to their own
  * component classes, and they were all in aw.css on every page before phase 2.
  *
+ * One file per kind of page (11 Nov 2026): Kits keys the joined file on the kind of page (front, page, page-{template},
+ * single-{type}, term-{taxonomy}, search, 404...), not on the exact list, and the Directory views are their own kind
+ * (aw_parts_page_kind below), so pages of one kind share one file.
+ *
  * @return array<string,array>
  */
 function aw_component_style_files(): array {
@@ -201,6 +205,16 @@ function aw_editor_style_files(): array {
 function aw_editor_styles_on(): bool {
 	return aw_core_theme_parts_on() || aw_child_theme_on();
 }
+
+/**
+ * The Directory views (hub, place, place × type) are pages, but load the Directory files: their own kind of joined file.
+ *
+ * @param string $kind Kind from Kits.
+ */
+function aw_parts_page_kind( $kind ) {
+	return function_exists( 'aw_is_directory_view' ) && aw_is_directory_view() ? 'directory' : $kind;
+}
+add_filter( 'kits_parts_page_kind', 'aw_parts_page_kind' );
 
 /*
  * aw.css first (every page), then the component files, through the Kits registry. Under the child theme the child
