@@ -615,6 +615,7 @@ add_action(
 			$review += array( 'status' => 'rejected' );
 		}
 		\FluentForm\App\Helpers\Helper::setSubmissionMeta( $id, 'aw_claim_review', wp_json_encode( $review ), aw_claim_ff_id() );
+		delete_transient( 'directoryweb_claim_rows' ); // DirectoryWeb's Claims list reads it again.
 		wp_safe_redirect( add_query_arg( array( 'post_type' => 'aw_listing', 'page' => 'aw-claims', 'done' => $review['status'] ), admin_url( 'edit.php' ) ) );
 		exit;
 	}
