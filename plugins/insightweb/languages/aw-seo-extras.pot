@@ -1,0 +1,3014 @@
+# Copyright (C) 2026 Wugweb
+# This file is distributed under the GPL-2.0-or-later.
+msgid ""
+msgstr ""
+"Project-Id-Version: InsightWeb 1.0.0\n"
+"Report-Msgid-Bugs-To: https://wugweb.com/\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-11-11T10:36:34+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: aw-seo-extras\n"
+
+#. Plugin Name of the plugin
+#: insightweb.php
+#: includes/kits-hub.php:44
+#: includes/kits-hub.php:59
+#: includes/kits-hub.php:62
+msgid "InsightWeb"
+msgstr ""
+
+#. Description of the plugin
+#: insightweb.php
+msgid "Search Console, GA4, Clarity, PageSpeed, Bing, keywords and rising terms for Kits sites."
+msgstr ""
+
+#. Author of the plugin
+#: insightweb.php
+msgid "Wugweb"
+msgstr ""
+
+#. Author URI of the plugin
+#: insightweb.php
+msgid "https://wugweb.com/"
+msgstr ""
+
+#. translators: %s: plugin names.
+#: includes/bootstrap.php:41
+#, php-format
+msgid "InsightWeb does nothing until %s is active."
+msgstr ""
+
+#: includes/bootstrap.php:57
+msgid "Search Insights needs Animal Writes Core (the keyword table lives there). It is off until Core is active."
+msgstr ""
+
+#: includes/kits-hub.php:31
+#: includes/kits-hub.php:62
+#: includes/search-insights/admin.php:86
+#: includes/search-insights/admin.php:289
+#: includes/search-insights/alerts.php:21
+#: includes/search-insights/crawlcheck.php:472
+#: includes/search-insights/dashboard.php:213
+#: includes/search-insights/health.php:40
+#: includes/search-insights/runs.php:56
+msgid "Search Insights"
+msgstr ""
+
+#: includes/kits-hub.php:44
+msgid "Search Insights: Search Console, GA4, Clarity, PageSpeed, Bing, keywords and rising terms."
+msgstr ""
+
+#. translators: %s: plugin version.
+#: includes/kits-hub.php:56
+#, php-format
+msgid "Active, %s"
+msgstr ""
+
+#: includes/kits-hub.php:58
+msgid "Does nothing until Kits Core, Animal Writes Core and Rank Math SEO are active."
+msgstr ""
+
+#: includes/search-insights/admin.php:107
+msgid "high demand, and we have a page or rank 4–20. Improve that page first."
+msgstr ""
+
+#: includes/search-insights/admin.php:108
+msgid "high demand and no page of ours. Write one."
+msgstr ""
+
+#: includes/search-insights/admin.php:109
+msgid "low demand, or already in the top 3."
+msgstr ""
+
+#. translators: 1: Trends index, 2: impressions.
+#: includes/search-insights/admin.php:111
+msgid "High demand"
+msgstr ""
+
+#. translators: 1: Trends index, 2: impressions.
+#: includes/search-insights/admin.php:111
+#, php-format
+msgid "Google Trends %1$d or more, or %2$d or more Search Console impressions in 28 days."
+msgstr ""
+
+#. translators: %d: impressions.
+#: includes/search-insights/admin.php:113
+msgid "Quick win"
+msgstr ""
+
+#. translators: %d: impressions.
+#: includes/search-insights/admin.php:113
+#, php-format
+msgid "we rank 8 to 20 with at least %d impressions in 28 days. A small update can reach page one."
+msgstr ""
+
+#: includes/search-insights/admin.php:114
+#: includes/search-insights/admin.php:814
+#: includes/search-insights/class-aw-si-keywords-table.php:456
+msgid "Gap"
+msgstr ""
+
+#: includes/search-insights/admin.php:114
+msgid "high demand, and no page of ours."
+msgstr ""
+
+#: includes/search-insights/admin.php:115
+#: includes/search-insights/class-aw-si-keywords-table.php:457
+msgid "Conflict"
+msgstr ""
+
+#: includes/search-insights/admin.php:115
+msgid "two of our pages compete for one search, or Google shows a different page from the one meant for it."
+msgstr ""
+
+#: includes/search-insights/admin.php:116
+#: includes/search-insights/class-aw-si-keywords-table.php:455
+msgid "Has page"
+msgstr ""
+
+#: includes/search-insights/admin.php:116
+msgid "one of our pages owns the keyword."
+msgstr ""
+
+#: includes/search-insights/admin.php:117
+#: includes/search-insights/admin.php:506
+#: includes/search-insights/class-aw-si-keywords-table.php:136
+msgid "Tracked, not ranking"
+msgstr ""
+
+#: includes/search-insights/admin.php:117
+msgid "on our list, with no impressions in 28 days."
+msgstr ""
+
+#: includes/search-insights/admin.php:118
+#: includes/search-insights/class-aw-si-keywords-table.php:413
+msgid "Entity"
+msgstr ""
+
+#: includes/search-insights/admin.php:118
+msgid "a listing's name, shown as one combined row."
+msgstr ""
+
+#: includes/search-insights/admin.php:119
+#: includes/search-insights/admin.php:523
+#: includes/search-insights/admin.php:549
+#: includes/search-insights/class-aw-si-keywords-table.php:79
+#: includes/search-insights/class-aw-si-pages-table.php:63
+msgid "Position"
+msgstr ""
+
+#: includes/search-insights/admin.php:119
+msgid "average place in Google over 28 days (1 is the top)."
+msgstr ""
+
+#: includes/search-insights/admin.php:120
+#: includes/search-insights/admin.php:524
+#: includes/search-insights/admin.php:538
+#: includes/search-insights/admin.php:550
+msgid "Impressions"
+msgstr ""
+
+#: includes/search-insights/admin.php:120
+msgid "how often we showed in Google for this search in 28 days."
+msgstr ""
+
+#: includes/search-insights/admin.php:139
+#: includes/search-insights/checklist.php:234
+msgid "Keywords per page"
+msgstr ""
+
+#: includes/search-insights/admin.php:148
+msgid "Terms"
+msgstr ""
+
+#: includes/search-insights/admin.php:155
+#: includes/search-insights/class-aw-si-rising-table.php:48
+#: includes/search-insights/rising.php:781
+msgid "Sources"
+msgstr ""
+
+#: includes/search-insights/admin.php:156
+msgid "Priorities"
+msgstr ""
+
+#. translators: %d: minimum impressions.
+#: includes/search-insights/admin.php:158
+#, php-format
+msgid "Quick wins (position 8–20, at least %d impressions)"
+msgstr ""
+
+#: includes/search-insights/admin.php:159
+msgid "Rising this week"
+msgstr ""
+
+#: includes/search-insights/admin.php:160
+msgid "Movers (28 days against the 28 before)"
+msgstr ""
+
+#: includes/search-insights/admin.php:161
+msgid "Brand"
+msgstr ""
+
+#: includes/search-insights/admin.php:162
+msgid "AI referrals (GA4, 28 days)"
+msgstr ""
+
+#: includes/search-insights/admin.php:163
+msgid "Top referrers (GA4)"
+msgstr ""
+
+#: includes/search-insights/admin.php:164
+msgid "Campaigns by source (GA4, 28 days)"
+msgstr ""
+
+#: includes/search-insights/admin.php:165
+msgid "Not found (404s, GA4, 28 days)"
+msgstr ""
+
+#: includes/search-insights/admin.php:166
+msgid "Index status (URL Inspection)"
+msgstr ""
+
+#: includes/search-insights/admin.php:167
+msgid "Discover and Google News (Search Console, 28 days)"
+msgstr ""
+
+#: includes/search-insights/admin.php:168
+#: includes/search-insights/class-aw-si-pages-table.php:68
+msgid "Clarity (28 days)"
+msgstr ""
+
+#: includes/search-insights/admin.php:169
+msgid "Searches on our site (28 days, minimum)"
+msgstr ""
+
+#: includes/search-insights/admin.php:170
+msgid "Content gaps (keyword map gaps and P2)"
+msgstr ""
+
+#: includes/search-insights/admin.php:171
+msgid "Crawler access (weekly)"
+msgstr ""
+
+#: includes/search-insights/admin.php:172
+msgid "Bing crawl (12 weeks)"
+msgstr ""
+
+#: includes/search-insights/admin.php:193
+#: includes/search-insights/admin.php:1054
+#: includes/search-insights/admin.php:1079
+#: includes/search-insights/bing.php:465
+#: includes/search-insights/checklist.php:268
+#: includes/search-insights/clarity.php:512
+#: includes/search-insights/imports.php:262
+#: includes/search-insights/links.php:154
+#: includes/search-insights/rising.php:597
+#: includes/search-insights/rising.php:681
+#: includes/search-insights/rising.php:830
+#: includes/search-insights/snapshot.php:210
+#: includes/search-insights/tool-imports.php:247
+msgid "Not allowed."
+msgstr ""
+
+#. translators: %s: date and time.
+#: includes/search-insights/admin.php:222
+#, php-format
+msgid "Search Insights is off: its data was deleted on %s and nothing runs on schedule. Settings → Run the daily update starts it again."
+msgstr ""
+
+#. translators: 1: source, 2: date and time.
+#: includes/search-insights/admin.php:232
+#, php-format
+msgid "%1$s: %2$s"
+msgstr ""
+
+#. translators: 1: source, 2: date and time.
+#: includes/search-insights/admin.php:232
+#, php-format
+msgid "%s: not run yet"
+msgstr ""
+
+#: includes/search-insights/admin.php:234
+msgid "Paste the figures on the Rising tab."
+msgstr ""
+
+#. translators: 1: source, 2: date and time.
+#: includes/search-insights/admin.php:237
+#, php-format
+msgid "%1$s: the service refuses automated requests from our servers (HTTP 429), so it is not fetched; figures from %2$s."
+msgstr ""
+
+#. translators: %s: source.
+#: includes/search-insights/admin.php:239
+#, php-format
+msgid "%s: the service refuses automated requests from our servers (HTTP 429), so it is not fetched; no figures yet."
+msgstr ""
+
+#. translators: 1: source, 2: the problem, 3: date of the data still shown.
+#: includes/search-insights/admin.php:243
+#, php-format
+msgid "%1$s: %2$s The figures shown are from %3$s."
+msgstr ""
+
+#. translators: 1: source, 2: the problem, 3: date of the data still shown.
+#: includes/search-insights/admin.php:243
+msgid "no earlier run"
+msgstr ""
+
+#. translators: 1: source, 2: date and time.
+#: includes/search-insights/admin.php:248
+#, php-format
+msgid "%1$s ran on %2$s and recorded the usual level of each term (a baseline): rising terms show from its next run."
+msgstr ""
+
+#. translators: 1: source, 2: date and time.
+#: includes/search-insights/admin.php:250
+#, php-format
+msgid "%1$s ran on %2$s and kept nothing: the source answered, and no term passed the filters."
+msgstr ""
+
+#. translators: %s: source.
+#: includes/search-insights/admin.php:254
+#, php-format
+msgid "%s has not updated on schedule."
+msgstr ""
+
+#. translators: %s: dates.
+#: includes/search-insights/admin.php:260
+#, php-format
+msgid "Search Console hit the 5,000-row maximum on %s even after fetching the busiest pages one by one, so the rarest searches of those days may be missing."
+msgstr ""
+
+#. translators: %s: dates.
+#: includes/search-insights/admin.php:262
+#, php-format
+msgid "GA4 returned its row maximum on %s, so the smallest pages or terms of those days may be missing."
+msgstr ""
+
+#: includes/search-insights/admin.php:268
+msgid "404s"
+msgstr ""
+
+#: includes/search-insights/admin.php:269
+msgid "campaign events"
+msgstr ""
+
+#. translators: %s: 404s and/or campaign events.
+#: includes/search-insights/admin.php:274
+#, php-format
+msgid "GA4 returned its row maximum for the 28-day %s report, so the rarest rows of that window may be missing."
+msgstr ""
+
+#: includes/search-insights/admin.php:278
+msgid "News (GDELT) is switched off (Settings): GDELT refuses our requests (HTTP 429), so Rising uses the other sources."
+msgstr ""
+
+#: includes/search-insights/admin.php:280
+#: includes/search-insights/admin.php:393
+msgid "Last updated"
+msgstr ""
+
+#: includes/search-insights/admin.php:290
+msgid "Search Insights sections"
+msgstr ""
+
+#: includes/search-insights/admin.php:293
+msgid "Overview"
+msgstr ""
+
+#: includes/search-insights/admin.php:294
+msgid "Keywords"
+msgstr ""
+
+#: includes/search-insights/admin.php:297
+msgid "Settings"
+msgstr ""
+
+#: includes/search-insights/admin.php:305
+msgid "Priority saved."
+msgstr ""
+
+#: includes/search-insights/admin.php:308
+msgid "No keyword was selected, so nothing changed."
+msgstr ""
+
+#: includes/search-insights/admin.php:311
+msgid "Run finished. See the notices above for each source."
+msgstr ""
+
+#: includes/search-insights/admin.php:322
+msgid "Search keywords"
+msgstr ""
+
+#: includes/search-insights/admin.php:363
+#: includes/search-insights/admin.php:497
+#: includes/search-insights/admin.php:576
+#: includes/search-insights/admin.php:608
+#: includes/search-insights/admin.php:667
+#: includes/search-insights/admin.php:777
+#: includes/search-insights/admin.php:811
+#: includes/search-insights/bing-crawl.php:210
+msgid "Nothing yet."
+msgstr ""
+
+#: includes/search-insights/admin.php:366
+#: includes/search-insights/class-aw-si-checklist-table.php:37
+#: includes/search-insights/class-aw-si-keywords-table.php:72
+msgid "Keyword"
+msgstr ""
+
+#: includes/search-insights/admin.php:393
+#: includes/search-insights/admin.php:627
+#: includes/search-insights/class-aw-si-links-table.php:52
+#: includes/search-insights/dashboard.php:193
+msgid "Source"
+msgstr ""
+
+#: includes/search-insights/admin.php:393
+msgid "State"
+msgstr ""
+
+#: includes/search-insights/admin.php:393
+msgid "Detail"
+msgstr ""
+
+#: includes/search-insights/admin.php:399
+#: includes/search-insights/dashboard.php:184
+msgid "Failed"
+msgstr ""
+
+#: includes/search-insights/admin.php:399
+msgid "Not run yet"
+msgstr ""
+
+#: includes/search-insights/admin.php:399
+#: includes/search-insights/dashboard.php:185
+msgid "Late"
+msgstr ""
+
+#: includes/search-insights/admin.php:399
+#: includes/search-insights/dashboard.php:188
+msgid "OK"
+msgstr ""
+
+#: includes/search-insights/admin.php:404
+msgid "Never"
+msgstr ""
+
+#. translators: %s: date.
+#: includes/search-insights/admin.php:422
+#, php-format
+msgid "figures up to %s"
+msgstr ""
+
+#. translators: %s: number of rows.
+#: includes/search-insights/admin.php:426
+#, php-format
+msgid "%s rows"
+msgstr ""
+
+#. translators: 1: focus keyphrases, 2: posts, 3: terms, 4: listing names, 5: Sourcing keywords, 6: brand searches.
+#: includes/search-insights/admin.php:433
+#, php-format
+msgid "%1$s focus keyphrases on %2$s posts and %3$s terms; %4$s listing names; %5$s Sourcing keywords; %6$s brand searches"
+msgstr ""
+
+#. translators: 1–4: keywords at P1, P2, P3, P4.
+#: includes/search-insights/admin.php:436
+#, php-format
+msgid "priorities worked out: P1 %1$s, P2 %2$s, P3 %3$s, P4 %4$s"
+msgstr ""
+
+#. translators: 1: daily rows, 2: days, 3: monthly rows.
+#: includes/search-insights/admin.php:441
+#, php-format
+msgid "%1$s daily rows older than %2$d days rolled into %3$s monthly rows"
+msgstr ""
+
+#. translators: %s: date.
+#: includes/search-insights/admin.php:444
+#, php-format
+msgid "daily rows kept from %s"
+msgstr ""
+
+#. translators: 1: checks, 2: problems.
+#: includes/search-insights/admin.php:449
+#, php-format
+msgid "%1$s checks, %2$s problems (Crawler access box)"
+msgstr ""
+
+#. translators: 1: searches, 2: pages.
+#: includes/search-insights/admin.php:453
+#, php-format
+msgid "%1$s searches, %2$s pages"
+msgstr ""
+
+#. translators: 1: pages, 2: pages flagged that day.
+#: includes/search-insights/admin.php:457
+#, php-format
+msgid "%1$s pages, %2$s flagged that day"
+msgstr ""
+
+#. translators: %s: number of paths.
+#: includes/search-insights/admin.php:462
+#, php-format
+msgid "%s 404 paths"
+msgstr ""
+
+#. translators: %s: number of rows.
+#: includes/search-insights/admin.php:466
+#, php-format
+msgid "%s campaign rows"
+msgstr ""
+
+#. translators: %s: number of rising terms.
+#: includes/search-insights/admin.php:471
+#, php-format
+msgid "%s rising"
+msgstr ""
+
+#. translators: %s: pages indexed.
+#: includes/search-insights/admin.php:475
+#, php-format
+msgid "%s indexed"
+msgstr ""
+
+#: includes/search-insights/admin.php:478
+msgid "pasted on the Rising tab"
+msgstr ""
+
+#: includes/search-insights/admin.php:481
+msgid "monthly, by hand (Check list tab)"
+msgstr ""
+
+#. translators: 1: number of problems, 2: the first one.
+#: includes/search-insights/admin.php:487
+#, php-format
+msgid "%1$s problem: %2$s"
+msgid_plural "%1$s problems, the first: %2$s"
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/search-insights/admin.php:503
+msgid "P2 (gaps)"
+msgstr ""
+
+#: includes/search-insights/admin.php:504
+#: includes/search-insights/class-aw-si-keywords-table.php:134
+msgid "Conflicts"
+msgstr ""
+
+#: includes/search-insights/admin.php:505
+#: includes/search-insights/class-aw-si-keywords-table.php:135
+msgid "Quick wins"
+msgstr ""
+
+#: includes/search-insights/admin.php:507
+msgid "All keywords"
+msgstr ""
+
+#: includes/search-insights/admin.php:525
+#: includes/search-insights/admin.php:539
+#: includes/search-insights/class-aw-si-clarity-table.php:70
+#: includes/search-insights/class-aw-si-keywords-table.php:76
+#: includes/search-insights/class-aw-si-pages-table.php:60
+#: includes/search-insights/gsc-types.php:216
+msgid "Page"
+msgstr ""
+
+#: includes/search-insights/admin.php:526
+#: includes/search-insights/class-aw-si-keywords-table.php:88
+#: includes/search-insights/class-aw-si-rising-table.php:53
+#: includes/search-insights/rising.php:781
+msgid "Suggested action"
+msgstr ""
+
+#: includes/search-insights/admin.php:536
+msgid "Before"
+msgstr ""
+
+#: includes/search-insights/admin.php:537
+msgid "Now"
+msgstr ""
+
+#: includes/search-insights/admin.php:551
+#: includes/search-insights/class-aw-si-keywords-table.php:78
+#: includes/search-insights/class-aw-si-pages-table.php:62
+msgid "Clicks"
+msgstr ""
+
+#: includes/search-insights/admin.php:552
+#: includes/search-insights/class-aw-si-keywords-table.php:82
+msgid "Live check"
+msgstr ""
+
+#. translators: 1: brand search, 2: number of our links.
+#: includes/search-insights/admin.php:564
+#, php-format
+msgid "%1$s (%2$d links)"
+msgstr ""
+
+#. translators: %s: brand searches with their link counts.
+#: includes/search-insights/admin.php:567
+#, php-format
+msgid "Sitelinks in the last live check: %s."
+msgstr ""
+
+#: includes/search-insights/admin.php:569
+msgid "AI referrals have their own box. Sitelinks come from the monthly live check (Check list tab); unlinked mentions come in a later phase."
+msgstr ""
+
+#: includes/search-insights/admin.php:587
+msgid "No AI referrals recorded yet (GA4 runs daily at 07:20 IST)."
+msgstr ""
+
+#: includes/search-insights/admin.php:597
+msgid "Landing page"
+msgstr ""
+
+#: includes/search-insights/admin.php:597
+#: includes/search-insights/admin.php:901
+#: includes/search-insights/class-aw-si-clarity-table.php:71
+msgid "Sessions"
+msgstr ""
+
+#: includes/search-insights/admin.php:624
+msgid "No referrals recorded yet (GA4 runs daily at 07:20 IST)."
+msgstr ""
+
+#: includes/search-insights/admin.php:627
+msgid "Sessions (28 days)"
+msgstr ""
+
+#: includes/search-insights/admin.php:627
+msgid "Engaged"
+msgstr ""
+
+#: includes/search-insights/admin.php:627
+#: includes/search-insights/admin.php:737
+msgid "Key events"
+msgstr ""
+
+#. translators: %d: days.
+#: includes/search-insights/admin.php:627
+#, php-format
+msgid "Sessions (%d days)"
+msgstr ""
+
+#. translators: %s: first date with referral figures.
+#: includes/search-insights/admin.php:633
+#, php-format
+msgid "Figures from %s."
+msgstr ""
+
+#: includes/search-insights/admin.php:635
+msgid "Referral and social sessions by source (GA4 channels Referral, Organic Social and Paid Social, plus Instagram, Facebook, X, LinkedIn, Reddit, WhatsApp, Telegram and Linktree). 22 Oct 2026 is left out (GA4 test events). GA4 page views changed on 25 Oct 2026, when the site moved to one GA4 tag."
+msgstr ""
+
+#: includes/search-insights/admin.php:683
+msgid "No published campaigns."
+msgstr ""
+
+#: includes/search-insights/admin.php:727
+msgid "No campaign visits recorded yet (GA4 runs daily at 07:20 IST)."
+msgstr ""
+
+#: includes/search-insights/admin.php:732
+msgid "X"
+msgstr ""
+
+#: includes/search-insights/admin.php:733
+msgid "All social"
+msgstr ""
+
+#: includes/search-insights/admin.php:734
+#: includes/search-insights/class-aw-si-rising-table.php:122
+msgid "All sources"
+msgstr ""
+
+#: includes/search-insights/admin.php:737
+msgid "Campaign"
+msgstr ""
+
+#: includes/search-insights/admin.php:737
+msgid "From"
+msgstr ""
+
+#: includes/search-insights/admin.php:737
+msgid "Sessions (landed)"
+msgstr ""
+
+#: includes/search-insights/admin.php:737
+msgid "Sessions (viewed)"
+msgstr ""
+
+#: includes/search-insights/admin.php:737
+msgid "Objections sent"
+msgstr ""
+
+#: includes/search-insights/admin.php:737
+msgid "Confirmed"
+msgstr ""
+
+#. translators: 1: first day, 2: last day.
+#: includes/search-insights/admin.php:751
+#, php-format
+msgid "%1$s to %2$s. X: t.co, x.com and twitter.com. All social includes X."
+msgstr ""
+
+#: includes/search-insights/admin.php:752
+msgid "Sessions (landed) and key events: sessions that started on the campaign page or a short link to it, from referral and social sources (direct, search and email visits are not in these rows). Key events count every GA4 key event in those sessions, not only objections."
+msgstr ""
+
+#: includes/search-insights/admin.php:754
+msgid "Sessions (viewed), objections sent and confirmed: sessions with a campaign_view, and objection_sent and objection_confirmed events, on the campaign page, by the session's source, from every source. 22 Oct 2026 is left out (GA4 test events)."
+msgstr ""
+
+#: includes/search-insights/admin.php:756
+msgid "Sessions (viewed), objections sent and confirmed arrive with the next GA4 run (daily at 07:20 IST)."
+msgstr ""
+
+#: includes/search-insights/admin.php:784
+msgid "No 404s recorded yet (GA4 runs daily at 07:20 IST)."
+msgstr ""
+
+#: includes/search-insights/admin.php:787
+#: includes/search-insights/dashboard.php:203
+msgid "Path"
+msgstr ""
+
+#: includes/search-insights/admin.php:787
+#: includes/search-insights/dashboard.php:203
+msgid "Views"
+msgstr ""
+
+#: includes/search-insights/admin.php:787
+#: includes/search-insights/class-aw-si-keywords-table.php:74
+#: includes/search-insights/class-aw-si-rising-table.php:54
+#: includes/search-insights/dashboard.php:193
+msgid "Status"
+msgstr ""
+
+#. translators: %s: path the redirect ends at.
+#: includes/search-insights/admin.php:792
+#, php-format
+msgid "Redirects to %s"
+msgstr ""
+
+#: includes/search-insights/admin.php:794
+msgid "Loads now (the 404s were earlier)"
+msgstr ""
+
+#: includes/search-insights/admin.php:796
+msgid "Still 404"
+msgstr ""
+
+#: includes/search-insights/admin.php:802
+msgid "page path (the custom dimension \"path\" is not registered in GA4 yet)"
+msgstr ""
+
+#: includes/search-insights/admin.php:802
+msgid "the event's path parameter"
+msgstr ""
+
+#. translators: 1: last day of the window, 2: what the path comes from.
+#: includes/search-insights/admin.php:804
+#, php-format
+msgid "404_view events in the 28 days to %1$s, by %2$s. 22 Oct 2026 is left out (GA4 test events). Status follows Rank Math redirects (exact and regex) and old slugs; \"Loads now\" means the address opens a published page today (the 404s came before it existed or during an update); \"Still 404\" means neither, not that the address was checked again."
+msgstr ""
+
+#: includes/search-insights/admin.php:814
+#: includes/search-insights/admin.php:834
+msgid "Searches"
+msgstr ""
+
+#: includes/search-insights/admin.php:825
+msgid "Nothing yet: searches are counted from today."
+msgstr ""
+
+#: includes/search-insights/admin.php:829
+msgid "Site search (WordPress or GA4, the higher count)"
+msgstr ""
+
+#: includes/search-insights/admin.php:830
+msgid "Directory search"
+msgstr ""
+
+#: includes/search-insights/admin.php:831
+msgid "Directory PIN code"
+msgstr ""
+
+#: includes/search-insights/admin.php:832
+msgid "Near me (district found)"
+msgstr ""
+
+#: includes/search-insights/admin.php:834
+#: includes/search-insights/class-aw-si-rising-table.php:47
+#: includes/search-insights/rising.php:781
+msgid "Term"
+msgstr ""
+
+#: includes/search-insights/admin.php:834
+msgid "Where"
+msgstr ""
+
+#: includes/search-insights/admin.php:839
+msgid "Minimum counts: a search answered from the page cache never reaches WordPress, so it is not counted (mostly Directory searches; WordPress search results are normally not cached). Daily counts per term only: no IP address, user or session is stored, and terms that look like emails or phone numbers are dropped."
+msgstr ""
+
+#. translators: %s: seconds.
+#: includes/search-insights/admin.php:858
+#, php-format
+msgid "%s s"
+msgstr ""
+
+#: includes/search-insights/admin.php:887
+#: includes/search-insights/clarity.php:241
+msgid "No Clarity token: add it under Animal Writes → Keys."
+msgstr ""
+
+#: includes/search-insights/admin.php:889
+msgid "No Clarity data yet; it imports daily at 06:30."
+msgstr ""
+
+#: includes/search-insights/admin.php:902
+#: includes/search-insights/class-aw-si-clarity-table.php:72
+msgid "Pages per session"
+msgstr ""
+
+#: includes/search-insights/admin.php:903
+#: includes/search-insights/class-aw-si-clarity-table.php:73
+msgid "Scroll depth"
+msgstr ""
+
+#: includes/search-insights/admin.php:904
+#: includes/search-insights/class-aw-si-clarity-table.php:74
+msgid "Active time"
+msgstr ""
+
+#: includes/search-insights/admin.php:905
+#: includes/search-insights/class-aw-si-clarity-table.php:75
+msgid "Dead clicks"
+msgstr ""
+
+#: includes/search-insights/admin.php:906
+#: includes/search-insights/class-aw-si-clarity-table.php:76
+msgid "Rage clicks"
+msgstr ""
+
+#: includes/search-insights/admin.php:907
+#: includes/search-insights/class-aw-si-clarity-table.php:77
+msgid "Quick backs"
+msgstr ""
+
+#: includes/search-insights/admin.php:908
+#: includes/search-insights/class-aw-si-clarity-table.php:78
+msgid "Excessive scrolling"
+msgstr ""
+
+#: includes/search-insights/admin.php:909
+#: includes/search-insights/class-aw-si-clarity-table.php:79
+msgid "Script errors"
+msgstr ""
+
+#: includes/search-insights/admin.php:910
+msgid "Pages flagged (3+ days)"
+msgstr ""
+
+#: includes/search-insights/admin.php:911
+msgid "Mobile / PC / Tablet sessions"
+msgstr ""
+
+#. translators: %s: number of days.
+#: includes/search-insights/admin.php:920
+#, php-format
+msgid "%s day of data"
+msgid_plural "%s days of data"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %s: date.
+#: includes/search-insights/admin.php:923
+#, php-format
+msgid "last day %s"
+msgstr ""
+
+#: includes/search-insights/admin.php:926
+#: includes/search-insights/admin.php:938
+#: includes/search-insights/admin.php:942
+#: includes/search-insights/admin.php:1000
+#: includes/search-insights/class-aw-si-pages-table.php:189
+#: includes/search-insights/sources.php:26
+msgid "Clarity"
+msgstr ""
+
+#: includes/search-insights/admin.php:964
+#: includes/search-insights/pages.php:37
+msgid "Pages per page"
+msgstr ""
+
+#: includes/search-insights/admin.php:987
+#: includes/search-insights/pages.php:166
+msgid "Search pages"
+msgstr ""
+
+#: includes/search-insights/admin.php:998
+msgid "Schedule"
+msgstr ""
+
+#. translators: 1: days of daily figures stored, 2: the same.
+#: includes/search-insights/admin.php:998
+#, php-format
+msgid "Daily at 06:30 IST: Clarity (once the token is set). Daily at 07:10 IST: Search Console (the last 4 days again, plus up to 15 older days until %1$d days are stored), keyword roles from Rank Math and Sourcing, then priorities; at 07:15 IST Discover and Google News; from 07:40 IST URL Inspection (up to 2,000 pages a day, not indexed and never checked first). Daily at 07:20 IST: GA4 (site search, AI referrals, all referral and social sources, organic landing pages; the last 3 days; 404s and campaign events for the last 28 days). Daily at 08:10 IST: Google Alerts feeds (once set on Keys). Sundays at 06:00 IST: PageSpeed (lab scores and Chrome users' figures) for the key pages and every campaign page, a few at a time. Mondays at 06:45 IST: Bing crawl figures; at 08:45 IST crawler access from the server; at 09:15 IST from outside (workers). Daily at 23:30 IST: rows older than %2$d days become monthly totals. The 2nd of each month at 07:40 IST: Bing Webmaster (links to us, and clicks and impressions by search and by page; once the key is set); once a month Bing search volumes for the top keywords. Searches on the site are counted as they happen."
+msgstr ""
+
+#. translators: 1: days of daily figures stored, 2: the same.
+#: includes/search-insights/admin.php:999
+msgid "Keys"
+msgstr ""
+
+#: includes/search-insights/admin.php:1000
+#: includes/search-insights/bing.php:43
+msgid "Bing Webmaster"
+msgstr ""
+
+#: includes/search-insights/admin.php:1000
+msgid "PageSpeed (optional)"
+msgstr ""
+
+#: includes/search-insights/admin.php:1002
+msgid "set"
+msgstr ""
+
+#: includes/search-insights/admin.php:1002
+msgid "not set"
+msgstr ""
+
+#: includes/search-insights/admin.php:1006
+msgid "Animal Writes → Keys"
+msgstr ""
+
+#: includes/search-insights/admin.php:1008
+msgid "Keys are set under Animal Writes → Keys (or as wp-config.php constants, which win); their values are never shown."
+msgstr ""
+
+#: includes/search-insights/admin.php:1009
+msgid "Keyword map seed"
+msgstr ""
+
+#. translators: %s: date.
+#: includes/search-insights/admin.php:1012
+#, php-format
+msgid "Seeded once on %s from docs/seo/keyword-map.md and the 21 Oct rankings. The table here is the source of truth now."
+msgstr ""
+
+#: includes/search-insights/admin.php:1013
+msgid "Not seeded yet: the first run seeds it."
+msgstr ""
+
+#: includes/search-insights/admin.php:1016
+msgid "Numbers"
+msgstr ""
+
+#: includes/search-insights/admin.php:1018
+msgid "Defaults restored."
+msgstr ""
+
+#: includes/search-insights/admin.php:1018
+msgid "Settings saved."
+msgstr ""
+
+#: includes/search-insights/admin.php:1023
+msgid "Run now"
+msgstr ""
+
+#: includes/search-insights/admin.php:1026
+msgid "Run the daily update"
+msgstr ""
+
+#. translators: %d: days.
+#: includes/search-insights/admin.php:1027
+#, php-format
+msgid "Run the %d-day rollup"
+msgstr ""
+
+#. translators: %d: days.
+#: includes/search-insights/admin.php:1028
+msgid "Run GA4"
+msgstr ""
+
+#: includes/search-insights/admin.php:1029
+msgid "Start PageSpeed"
+msgstr ""
+
+#: includes/search-insights/admin.php:1031
+msgid "Run Bing Webmaster"
+msgstr ""
+
+#: includes/search-insights/admin.php:1034
+msgid "Run Clarity (uses 2 of its 10 daily calls)"
+msgstr ""
+
+#: includes/search-insights/admin.php:1038
+msgid "The daily update can take a minute on the first run (it fetches up to 19 days of Search Console)."
+msgstr ""
+
+#: includes/search-insights/admin.php:1040
+msgid "Delete Search Insights data"
+msgstr ""
+
+#: includes/search-insights/admin.php:1043
+msgid "Drops the Search Insights tables and settings. Deactivating or deleting the plugin never does this. Type DELETE to confirm."
+msgstr ""
+
+#: includes/search-insights/admin.php:1045
+msgid "Delete data"
+msgstr ""
+
+#: includes/search-insights/admin.php:1084
+msgid "Not deleted: type DELETE to confirm."
+msgstr ""
+
+#. translators: %d: 1 or 2.
+#: includes/search-insights/alerts.php:24
+#, php-format
+msgid "Google Alerts feed %d (RSS address)"
+msgstr ""
+
+#. translators: %d: 1 or 2.
+#: includes/search-insights/alerts.php:24
+msgid "google.com/alerts → create an alert → Show options → Deliver to: RSS feed → copy the feed address (https://www.google.com/alerts/feeds/…)."
+msgstr ""
+
+#: includes/search-insights/alerts.php:47
+msgid "Google Alerts (mentions)"
+msgstr ""
+
+#: includes/search-insights/alerts.php:57
+msgid "Mention"
+msgstr ""
+
+#. translators: 1: feed number, 2: the problem.
+#: includes/search-insights/alerts.php:104
+#, php-format
+msgid "Feed %1$d could not be read: %2$s"
+msgstr ""
+
+#: includes/search-insights/bing-crawl.php:36
+msgid "Bing crawl (weekly)"
+msgstr ""
+
+#: includes/search-insights/bing-crawl.php:40
+msgid "Bing keyword volumes (monthly)"
+msgstr ""
+
+#: includes/search-insights/bing-crawl.php:218
+msgid "No Bing crawl figures yet (weekly, Monday 06:45 IST)."
+msgstr ""
+
+#: includes/search-insights/bing-crawl.php:222
+#: includes/search-insights/server.php:295
+msgid "Week from"
+msgstr ""
+
+#: includes/search-insights/bing-crawl.php:222
+msgid "Pages crawled"
+msgstr ""
+
+#: includes/search-insights/bing-crawl.php:222
+msgid "Crawl errors"
+msgstr ""
+
+#: includes/search-insights/bing-crawl.php:222
+msgid "Blocked by robots.txt"
+msgstr ""
+
+#: includes/search-insights/bing-crawl.php:222
+msgid "In Bing's index"
+msgstr ""
+
+#: includes/search-insights/bing-crawl.php:227
+msgid "Bing Webmaster crawl statistics by week (Monday to Sunday); \"In Bing's index\" is the highest count of the week."
+msgstr ""
+
+#. translators: 1: API method, 2: HTTP status, 3: Bing's message.
+#: includes/search-insights/bing.php:76
+#, php-format
+msgid "Bing %1$s answered %2$d. %3$s"
+msgstr ""
+
+#: includes/search-insights/bing.php:281
+msgid "Bing Webmaster is not set up: add its API key under Animal Writes → Keys."
+msgstr ""
+
+#: includes/search-insights/bing.php:285
+msgid "Search Insights is off (its data was deleted), so Bing Webmaster did not run."
+msgstr ""
+
+#. translators: %s: Bing's error.
+#: includes/search-insights/bing.php:339
+#, php-format
+msgid "Some linked pages could not be read (%s); the next run carries on from there."
+msgstr ""
+
+#: includes/search-insights/bing.php:341
+msgid "Not every linked page was read in time; the next run carries on from there."
+msgstr ""
+
+#. translators: %d: links.
+#: includes/search-insights/bing.php:377
+#, php-format
+msgid "%d links had no usable address and were skipped."
+msgstr ""
+
+#. translators: %d: rows.
+#: includes/search-insights/bing.php:382
+#, php-format
+msgid "%d Bing rows could not be saved."
+msgstr ""
+
+#: includes/search-insights/bing.php:451
+msgid "Bing searches"
+msgstr ""
+
+#: includes/search-insights/bing.php:454
+msgid "Count Bing searches without a keyword record"
+msgstr ""
+
+#: includes/search-insights/bing.php:455
+msgid "Add keyword records for them"
+msgstr ""
+
+#: includes/search-insights/bing.php:457
+msgid "Bing's figures are stored only for searches that have a keyword record. Adding records (role: seen in search) runs Bing Webmaster again, so their figures are stored too. Nothing is added to Rank Math or Sourcing."
+msgstr ""
+
+#. translators: 1: searches without a record, 2: records written, 3: the searches.
+#: includes/search-insights/bing.php:500
+#, php-format
+msgid "Bing searches without a keyword record: %1$s. Records written: %2$s. %3$s"
+msgstr ""
+
+#: includes/search-insights/checklist.php:30
+msgid "Check list"
+msgstr ""
+
+#: includes/search-insights/checklist.php:183
+msgid "The live-check token has expired. Start a new live check."
+msgstr ""
+
+#: includes/search-insights/checklist.php:187
+msgid "Not on the check list."
+msgstr ""
+
+#: includes/search-insights/checklist.php:215
+msgid "The result could not be saved."
+msgstr ""
+
+#: includes/search-insights/checklist.php:297
+msgid "This live-check link has expired or is not yours. Start a new live check on the Check list tab."
+msgstr ""
+
+#: includes/search-insights/checklist.php:301
+msgid "Live Google check"
+msgstr ""
+
+#. translators: %d: keywords left to check this month.
+#: includes/search-insights/checklist.php:303
+#, php-format
+msgid "%d keywords to check this month. Keep this window and the Google tab open."
+msgstr ""
+
+#: includes/search-insights/checklist.php:304
+msgid "Stop"
+msgstr ""
+
+#. translators: %d: keywords left.
+#: includes/search-insights/checklist.php:314
+#, php-format
+msgid "%d left."
+msgstr ""
+
+#: includes/search-insights/checklist.php:315
+msgid "All done for this month. You can close this window."
+msgstr ""
+
+#: includes/search-insights/checklist.php:316
+msgid "Google asked for a check (\"unusual traffic\"), so the run stopped. Solve it or wait a few hours, then click the bookmarklet again: it carries on where it stopped."
+msgstr ""
+
+#: includes/search-insights/checklist.php:317
+msgid "Stopped. Click the bookmarklet again to carry on."
+msgstr ""
+
+#: includes/search-insights/checklist.php:318
+msgid "not in the top 20"
+msgstr ""
+
+#: includes/search-insights/checklist.php:319
+msgid "not saved"
+msgstr ""
+
+#: includes/search-insights/checklist.php:320
+msgid "could not be read in the Google tab, not saved (it stays on the list)"
+msgstr ""
+
+#: includes/search-insights/checklist.php:354
+msgid "Removed from the check list."
+msgstr ""
+
+#: includes/search-insights/checklist.php:355
+msgid "Added to the check list."
+msgstr ""
+
+#: includes/search-insights/checklist.php:356
+msgid "Check list rebuilt from the rules (P1/P2, brand, quick wins, the 21 Oct rankings)."
+msgstr ""
+
+#: includes/search-insights/checklist.php:367
+msgid "Monthly live check"
+msgstr ""
+
+#. translators: 1: keywords checked this month, 2: searchable keywords on the list.
+#: includes/search-insights/checklist.php:369
+#, php-format
+msgid "%1$d of %2$d keywords checked this month."
+msgstr ""
+
+#. translators: %d: Directory patterns such as "animal rescue {district}".
+#: includes/search-insights/checklist.php:372
+#, php-format
+msgid "%d Directory pattern ({district}) is on the list but is not searched."
+msgid_plural "%d Directory patterns ({district}) are on the list but are not searched."
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/search-insights/checklist.php:377
+msgid "Drag this button to your bookmarks bar (it works for 2 hours), open google.com in this browser and click it. A small window opens here and the check runs in the Google tab, 8–15 seconds per keyword. Nothing is sent to GA4."
+msgstr ""
+
+#: includes/search-insights/checklist.php:379
+msgid "AW live check"
+msgstr ""
+
+#: includes/search-insights/checklist.php:383
+msgid "Start live check"
+msgstr ""
+
+#: includes/search-insights/checklist.php:384
+msgid "Rebuild the list from the rules"
+msgstr ""
+
+#: includes/search-insights/checklist.php:385
+msgid "Add keywords"
+msgstr ""
+
+#: includes/search-insights/checklist.php:386
+msgid "One keyword per line"
+msgstr ""
+
+#: includes/search-insights/checklist.php:387
+msgid "Add to the list"
+msgstr ""
+
+#: includes/search-insights/checklist.php:392
+msgid "Search the list"
+msgstr ""
+
+#: includes/search-insights/clarity.php:110
+msgid "Clarity: the calls allowed today are used up; the next run tries again."
+msgstr ""
+
+#: includes/search-insights/clarity.php:140
+msgid "the token is missing, wrong or expired"
+msgstr ""
+
+#: includes/search-insights/clarity.php:141
+msgid "the token is not allowed to export data"
+msgstr ""
+
+#: includes/search-insights/clarity.php:142
+msgid "the daily limit of 10 calls is used up"
+msgstr ""
+
+#. translators: 1: HTTP status, 2: reason.
+#: includes/search-insights/clarity.php:145
+#, php-format
+msgid "Clarity answered %1$d: %2$s."
+msgstr ""
+
+#. translators: 1: HTTP status, 2: reason.
+#: includes/search-insights/clarity.php:145
+msgid "unexpected answer"
+msgstr ""
+
+#: includes/search-insights/clarity.php:148
+msgid "Clarity returned no data."
+msgstr ""
+
+#: includes/search-insights/class-aw-si-checklist-table.php:38
+msgid "This month"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-checklist-table.php:39
+msgid "Last live check"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-checklist-table.php:40
+msgid "Top 3 domains"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-checklist-table.php:41
+msgid "People also ask"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-checklist-table.php:42
+msgid "Search Console position"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-checklist-table.php:43
+#: includes/search-insights/class-aw-si-keywords-table.php:77
+#: includes/search-insights/class-aw-si-pages-table.php:61
+msgid "Impressions (28 days)"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-checklist-table.php:63
+msgid "Remove from the list"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-checklist-table.php:130
+msgid "The check list is empty. Add keywords above, or rebuild it from the rules."
+msgstr ""
+
+#: includes/search-insights/class-aw-si-checklist-table.php:158
+msgid "Remove"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-checklist-table.php:168
+msgid "not searched (Directory pattern)"
+msgstr ""
+
+#. translators: %s: date the country file was downloaded, or "not yet".
+#: includes/search-insights/class-aw-si-checklist-table.php:171
+#: includes/search-insights/visitors.php:249
+msgid "not yet"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-clarity-table.php:80
+msgid "Mobile / PC / Tablet"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-clarity-table.php:81
+msgid "Flag"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-clarity-table.php:118
+#: includes/search-insights/class-aw-si-keywords-table.php:129
+#: includes/search-insights/class-aw-si-links-table.php:82
+#: includes/search-insights/class-aw-si-pages-table.php:118
+#: includes/search-insights/class-aw-si-rising-table.php:104
+msgid "All"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-clarity-table.php:119
+msgid "Flagged"
+msgstr ""
+
+#. translators: %s: number of days.
+#: includes/search-insights/class-aw-si-clarity-table.php:202
+#, php-format
+msgid "Flagged (%s day)"
+msgid_plural "Flagged (%s days)"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %s: number of days.
+#: includes/search-insights/class-aw-si-clarity-table.php:205
+#, php-format
+msgid "%s day"
+msgid_plural "%s days"
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/search-insights/class-aw-si-keywords-table.php:73
+msgid "Priority"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-keywords-table.php:75
+#: includes/search-insights/class-aw-si-keywords-table.php:233
+msgid "Topic"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-keywords-table.php:80
+msgid "Change"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-keywords-table.php:81
+msgid "Bing impressions (90 days)"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-keywords-table.php:83
+msgid "Trends"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-keywords-table.php:84
+msgid "Volume (imports)"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-keywords-table.php:85
+#: includes/search-insights/tool-imports.php:33
+msgid "Ubersuggest"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-keywords-table.php:86
+msgid "vidIQ (YouTube)"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-keywords-table.php:87
+#: includes/search-insights/tool-imports.php:45
+msgid "OpenSEO"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-keywords-table.php:114
+msgid "Set priority P1"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-keywords-table.php:115
+msgid "Set priority P2"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-keywords-table.php:116
+msgid "Set priority P3"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-keywords-table.php:117
+msgid "Use the calculated priority"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-keywords-table.php:133
+msgid "Gaps"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-keywords-table.php:137
+msgid "Entities"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-keywords-table.php:223
+msgid "All roles"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-keywords-table.php:226
+msgid "All topics"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-keywords-table.php:229
+msgid "All page types"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-keywords-table.php:231
+msgid "Hub"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-keywords-table.php:232
+#: includes/search-insights/links.php:23
+#: includes/search-insights/snapshot.php:158
+msgid "Directory"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-keywords-table.php:234
+msgid "Guide"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-keywords-table.php:235
+msgid "Key page"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-keywords-table.php:236
+msgid "Added 21 Oct"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-keywords-table.php:241
+msgid "All languages"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-keywords-table.php:243
+msgid "English"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-keywords-table.php:244
+#: includes/search-insights/class-aw-si-keywords-table.php:410
+msgid "Hindi"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-keywords-table.php:245
+#: includes/search-insights/class-aw-si-keywords-table.php:410
+msgid "Hinglish"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-keywords-table.php:248
+#: includes/search-insights/class-aw-si-rising-table.php:127
+msgid "Filter"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-keywords-table.php:371
+msgid "Nothing here yet: the first daily run (07:10 IST) seeds the keyword map and reads Search Console. Settings → Run now starts it at once."
+msgstr ""
+
+#: includes/search-insights/class-aw-si-keywords-table.php:374
+msgid "No keywords match."
+msgstr ""
+
+#. translators: %s: number of listing names.
+#: includes/search-insights/class-aw-si-keywords-table.php:397
+#, php-format
+msgid "Listing names (%s)"
+msgstr ""
+
+#. translators: %d: number of listing names listed one by one.
+#: includes/search-insights/class-aw-si-keywords-table.php:399
+#, php-format
+msgid "All Directory listing names in one row. The %d that moved most are listed one by one; the Entities view lists them all."
+msgstr ""
+
+#: includes/search-insights/class-aw-si-keywords-table.php:413
+msgid "Entity, top mover"
+msgstr ""
+
+#. translators: %s: priority such as P1.
+#: includes/search-insights/class-aw-si-keywords-table.php:425
+#, php-format
+msgid "Set %s"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-keywords-table.php:429
+msgid "Use calculated"
+msgstr ""
+
+#. translators: 1: owner's priority, 2: calculated priority.
+#: includes/search-insights/class-aw-si-keywords-table.php:442
+#, php-format
+msgid "%1$s (owner; calculated %2$s)"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-keywords-table.php:461
+msgid "Directory pattern, not searched"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-keywords-table.php:463
+msgid "not ranking"
+msgstr ""
+
+#. translators: %s: positions gained or lost.
+#: includes/search-insights/class-aw-si-keywords-table.php:497
+#, php-format
+msgid "up %s"
+msgstr ""
+
+#. translators: %s: positions gained or lost.
+#: includes/search-insights/class-aw-si-keywords-table.php:497
+#, php-format
+msgid "down %s"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-keywords-table.php:538
+msgid "Google Trends refused the last request, so there is no figure: this says nothing about demand."
+msgstr ""
+
+#: includes/search-insights/class-aw-si-keywords-table.php:538
+msgid "source failed"
+msgstr ""
+
+#. translators: %s: searches a month.
+#: includes/search-insights/class-aw-si-keywords-table.php:549
+#, php-format
+msgid "%s a month"
+msgstr ""
+
+#. translators: %s: searches a week.
+#: includes/search-insights/class-aw-si-keywords-table.php:561
+#, php-format
+msgid "%s a week (Bing)"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-links-table.php:46
+msgid "Linking site"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-links-table.php:47
+msgid "Linked page"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-links-table.php:48
+msgid "Anchor text"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-links-table.php:49
+#: includes/search-insights/links.php:101
+msgid "Links"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-links-table.php:50
+#: includes/search-insights/class-aw-si-rising-table.php:50
+msgid "First seen"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-links-table.php:51
+#: includes/search-insights/class-aw-si-rising-table.php:51
+msgid "Last seen"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-links-table.php:53
+msgid "Type"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-links-table.php:86
+#: includes/search-insights/class-aw-si-links-table.php:233
+msgid "Unsorted"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-links-table.php:87
+msgid "Hidden (not spam)"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-links-table.php:149
+msgid "No links here."
+msgstr ""
+
+#: includes/search-insights/class-aw-si-links-table.php:235
+msgid "Hidden"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-pages-table.php:64
+msgid "Keywords owned"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-pages-table.php:65
+msgid "Organic sessions (GA4)"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-pages-table.php:66
+#: includes/search-insights/class-aw-si-pages-table.php:120
+msgid "AI referrals"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-pages-table.php:67
+msgid "Referrals (GA4)"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-pages-table.php:69
+msgid "PageSpeed (mobile / desktop)"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-pages-table.php:70
+msgid "Bing (90 days)"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-pages-table.php:71
+msgid "Google index"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-pages-table.php:72
+msgid "SEO score (Rank Math)"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-pages-table.php:73
+msgid "Clarity note"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-pages-table.php:119
+msgid "Page quality flagged"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-pages-table.php:121
+msgid "With referrals"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-pages-table.php:122
+msgid "With conflicts"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-pages-table.php:123
+msgid "With Clarity notes"
+msgstr ""
+
+#. translators: %d: score limit, e.g. 50.
+#: includes/search-insights/class-aw-si-pages-table.php:125
+#, php-format
+msgid "Rank Math score under %d"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-pages-table.php:126
+msgid "Not indexed (Google)"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-pages-table.php:176
+msgid "No pages yet: they appear after the daily runs of Search Console, GA4, Clarity and PageSpeed."
+msgstr ""
+
+#: includes/search-insights/class-aw-si-pages-table.php:192
+msgid "PageSpeed"
+msgstr ""
+
+#. translators: %s: Clarity and/or PageSpeed.
+#: includes/search-insights/class-aw-si-pages-table.php:195
+#, php-format
+msgid "Page quality (%s)"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-pages-table.php:198
+msgid "Add Clarity note"
+msgstr ""
+
+#. translators: %s: number of conflicts.
+#: includes/search-insights/class-aw-si-pages-table.php:215
+#, php-format
+msgid "%s conflict"
+msgid_plural "%s conflicts"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %s: sessions.
+#: includes/search-insights/class-aw-si-pages-table.php:254
+#, php-format
+msgid "%s sessions"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-pages-table.php:256
+msgid "rage"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-pages-table.php:257
+msgid "dead"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-pages-table.php:258
+msgid "quick-back"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-pages-table.php:259
+msgid "scroll"
+msgstr ""
+
+#. translators: 1: rage, dead, quick-back or scroll; 2: share of sessions in per cent.
+#: includes/search-insights/class-aw-si-pages-table.php:263
+#, php-format
+msgid "%1$s %2$s%%"
+msgstr ""
+
+#. translators: %s: seconds.
+#: includes/search-insights/class-aw-si-pages-table.php:283
+#: includes/search-insights/class-aw-si-pages-table.php:292
+#, php-format
+msgid "LCP %s s"
+msgstr ""
+
+#. translators: %s: layout shift score.
+#: includes/search-insights/class-aw-si-pages-table.php:287
+#: includes/search-insights/class-aw-si-pages-table.php:300
+#, php-format
+msgid "CLS %s"
+msgstr ""
+
+#. translators: %s: milliseconds.
+#: includes/search-insights/class-aw-si-pages-table.php:296
+#, php-format
+msgid "INP %s ms"
+msgstr ""
+
+#. translators: %s: lab figures.
+#: includes/search-insights/class-aw-si-pages-table.php:305
+#, php-format
+msgid "Mobile test: %s"
+msgstr ""
+
+#. translators: %s: real-user figures.
+#: includes/search-insights/class-aw-si-pages-table.php:309
+#, php-format
+msgid "Chrome users, mobile: %s"
+msgstr ""
+
+#. translators: 1: impressions, 2: clicks.
+#: includes/search-insights/class-aw-si-pages-table.php:324
+#, php-format
+msgid "%1$s impressions, %2$s clicks"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-pages-table.php:334
+msgid "Not checked yet"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-pages-table.php:336
+msgid "Indexed"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-pages-table.php:336
+msgid "Not indexed"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-rising-table.php:49
+#: includes/search-insights/rising.php:781
+msgid "Growth"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-rising-table.php:52
+msgid "Matching page"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-rising-table.php:76
+msgid "Mark as noted"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-rising-table.php:77
+#: includes/search-insights/class-aw-si-rising-table.php:231
+msgid "Dismiss"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-rising-table.php:78
+#: includes/search-insights/class-aw-si-rising-table.php:232
+msgid "Back to new"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-rising-table.php:85
+msgid "New"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-rising-table.php:86
+#: includes/search-insights/class-aw-si-rising-table.php:230
+msgid "Noted"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-rising-table.php:87
+msgid "Dismissed"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-rising-table.php:121
+msgid "Filter by source"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-rising-table.php:192
+msgid "No rising terms here yet. The workers send them daily (and weekly for autocomplete and Trends related searches)."
+msgstr ""
+
+#. translators: %s: times the usual level, such as 2.6.
+#: includes/search-insights/class-aw-si-rising-table.php:268
+#: includes/search-insights/rising.php:788
+#, php-format
+msgid "×%s"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-rising-table.php:290
+msgid "None"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-server-table.php:47
+#: includes/search-insights/selfcheck.php:221
+#: includes/search-insights/visitors.php:251
+msgid "Day"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-server-table.php:48
+#: includes/search-insights/server.php:361
+msgid "Crawler requests"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-server-table.php:49
+msgid "4xx"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-server-table.php:50
+msgid "Top 4xx addresses"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-server-table.php:51
+msgid "5xx"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-server-table.php:52
+msgid "Top 5xx addresses"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-server-table.php:53
+msgid "PHP errors"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-server-table.php:77
+msgid "Nothing counted yet. Counting starts with the first crawler request or error after this update."
+msgstr ""
+
+#: includes/search-insights/class-aw-si-server-table.php:103
+msgid "Read the next morning"
+msgstr ""
+
+#: includes/search-insights/class-aw-si-server-table.php:106
+msgid "Log not found"
+msgstr ""
+
+#: includes/search-insights/compute.php:23
+msgid "Fix conflict"
+msgstr ""
+
+#: includes/search-insights/compute.php:24
+msgid "New page: guide"
+msgstr ""
+
+#: includes/search-insights/compute.php:25
+msgid "New page: district or state page"
+msgstr ""
+
+#: includes/search-insights/compute.php:26
+msgid "New page"
+msgstr ""
+
+#: includes/search-insights/compute.php:27
+msgid "Update the page"
+msgstr ""
+
+#: includes/search-insights/compute.php:28
+msgid "Add as secondary keyphrase"
+msgstr ""
+
+#: includes/search-insights/compute.php:29
+msgid "FAQ answer"
+msgstr ""
+
+#: includes/search-insights/compute.php:30
+msgid "News explainer"
+msgstr ""
+
+#: includes/search-insights/compute.php:31
+msgid "Consider as Sourcing keyword"
+msgstr ""
+
+#: includes/search-insights/compute.php:32
+msgid "Check page quality"
+msgstr ""
+
+#: includes/search-insights/compute.php:457
+msgid "Some keyword records could not be updated: "
+msgstr ""
+
+#. translators: %d: seconds.
+#: includes/search-insights/crawlcheck.php:184
+#, php-format
+msgid "The check stopped after %d seconds; some agents were not asked."
+msgstr ""
+
+#: includes/search-insights/crawlcheck.php:229
+#: includes/search-insights/crawlcheck.php:245
+msgid "no answer"
+msgstr ""
+
+#: includes/search-insights/crawlcheck.php:245
+msgid "challenge page"
+msgstr ""
+
+#: includes/search-insights/crawlcheck.php:250
+msgid "The check stopped early: some agents and pages were not asked."
+msgstr ""
+
+#. translators: 1: agent, 2: pages that answered, 3: pages asked.
+#: includes/search-insights/crawlcheck.php:255
+#, php-format
+msgid "Burst as %1$s: %2$d of %3$d pages answered"
+msgstr ""
+
+#: includes/search-insights/crawlcheck.php:310
+#: includes/search-insights/crawlcheck.php:495
+msgid "From the server"
+msgstr ""
+
+#: includes/search-insights/crawlcheck.php:311
+msgid "From outside"
+msgstr ""
+
+#: includes/search-insights/crawlcheck.php:354
+msgid "No checks in the request."
+msgstr ""
+
+#: includes/search-insights/crawlcheck.php:431
+msgid "Crawler access, from the server"
+msgstr ""
+
+#: includes/search-insights/crawlcheck.php:436
+msgid "Crawler access, from outside (workers)"
+msgstr ""
+
+#: includes/search-insights/crawlcheck.php:451
+msgid "From the server (user-agent rules only)"
+msgstr ""
+
+#: includes/search-insights/crawlcheck.php:452
+msgid "From outside (GitHub runner, weekly)"
+msgstr ""
+
+#: includes/search-insights/crawlcheck.php:456
+msgid "no result from the last 15 days."
+msgstr ""
+
+#. translators: 1: date, 2: checks, 3: problems.
+#: includes/search-insights/crawlcheck.php:463
+#, php-format
+msgid "%1$s: %2$d checks, %3$d problems"
+msgstr ""
+
+#: includes/search-insights/crawlcheck.php:469
+msgid "Some search or AI crawlers cannot read the site"
+msgstr ""
+
+#: includes/search-insights/crawlcheck.php:469
+#: includes/search-insights/crawlcheck.php:485
+msgid "Search and AI crawlers can read the site"
+msgstr ""
+
+#: includes/search-insights/crawlcheck.php:469
+msgid "Crawler access checked from the server only (the outside check has not reported yet)"
+msgstr ""
+
+#: includes/search-insights/crawlcheck.php:469
+msgid "Crawler access has not been checked yet"
+msgstr ""
+
+#: includes/search-insights/crawlcheck.php:475
+msgid "Each week the home page and five sample pages are asked with the user agents of a browser, Googlebot, Bingbot, GPTBot, OAI-SearchBot, ChatGPT-User, PerplexityBot, ClaudeBot, Google-Extended, Applebot and a generic SEO crawler: from this server, and from outside by the workers. A page that is not a 200, or a challenge page, is a problem. From outside, a refused request with a named crawler's name is a refused fake (expected: the CDN lets the real crawlers in by their own addresses), so it is not counted."
+msgstr ""
+
+#: includes/search-insights/crawlcheck.php:476
+#: includes/search-insights/health.php:44
+msgid "Open Search Insights"
+msgstr ""
+
+#: includes/search-insights/crawlcheck.php:496
+msgid "From outside (workers)"
+msgstr ""
+
+#: includes/search-insights/crawlcheck.php:500
+msgid "no result from the last 15 days (weekly, Monday morning)."
+msgstr ""
+
+#. translators: 1: date, 2: checks.
+#: includes/search-insights/crawlcheck.php:506
+#, php-format
+msgid "%1$s, %2$d checks"
+msgstr ""
+
+#: includes/search-insights/crawlcheck.php:507
+msgid "every agent got every page."
+msgstr ""
+
+#. translators: %d: refused requests.
+#: includes/search-insights/crawlcheck.php:510
+#, php-format
+msgid "%d request with a search or AI crawler's name was refused as a fake (expected: the CDN lets the real crawlers in by their own addresses)."
+msgid_plural "%d requests with a search or AI crawler's name were refused as fakes (expected: the CDN lets the real crawlers in by their own addresses)."
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/search-insights/crawlcheck.php:513
+msgid "The server check only shows user-agent rules: blocks that depend on the caller's address show only in the outside check."
+msgstr ""
+
+#: includes/search-insights/cron.php:39
+msgid "The keyword map seed file is missing, so the map was not loaded."
+msgstr ""
+
+#: includes/search-insights/cron.php:51
+msgid "Priorities could not be worked out: "
+msgstr ""
+
+#: includes/search-insights/cron.php:56
+msgid "Topics could not be updated: "
+msgstr ""
+
+#: includes/search-insights/dashboard.php:133
+msgid "SEO"
+msgstr ""
+
+#: includes/search-insights/dashboard.php:139
+msgid "on the 28 days before"
+msgstr ""
+
+#: includes/search-insights/dashboard.php:143
+msgid "Clicks, 28 days"
+msgstr ""
+
+#: includes/search-insights/dashboard.php:147
+msgid "Impressions, 28 days"
+msgstr ""
+
+#: includes/search-insights/dashboard.php:151
+msgid "404s still open"
+msgstr ""
+
+#: includes/search-insights/dashboard.php:155
+msgid "Sources with a problem"
+msgstr ""
+
+#. translators: %s: date.
+#: includes/search-insights/dashboard.php:173
+#, php-format
+msgid "Search Console, the 28 days to %s."
+msgstr ""
+
+#: includes/search-insights/dashboard.php:179
+msgid "Clicks per day, last 28 days"
+msgstr ""
+
+#: includes/search-insights/dashboard.php:186
+msgid "Refused"
+msgstr ""
+
+#: includes/search-insights/dashboard.php:187
+msgid "Not run"
+msgstr ""
+
+#. translators: 1: number of sources, 2: how many have a problem.
+#: includes/search-insights/dashboard.php:191
+#, php-format
+msgid "Sources (%1$s, %2$s with a problem)"
+msgstr ""
+
+#: includes/search-insights/dashboard.php:193
+msgid "Last update"
+msgstr ""
+
+#: includes/search-insights/dashboard.php:196
+msgid "never"
+msgstr ""
+
+#. translators: %s: number of paths.
+#: includes/search-insights/dashboard.php:201
+#, php-format
+msgid "404s still open (%s)"
+msgstr ""
+
+#: includes/search-insights/dashboard.php:209
+msgid "None."
+msgstr ""
+
+#. translators: 1: date, 2: error message.
+#: includes/search-insights/ga4.php:409
+#, php-format
+msgid "GA4 could not be read for %1$s: %2$s"
+msgstr ""
+
+#. translators: 1: dates, 2: GA4's error.
+#: includes/search-insights/ga4.php:501
+#, php-format
+msgid "GA4 referral figures could not be read for %1$s (the earlier figures were kept): %2$s"
+msgstr ""
+
+#. translators: %s: GA4's error.
+#: includes/search-insights/ga4.php:505
+#, php-format
+msgid "GA4 404 figures could not be read (the earlier figures were kept): %s"
+msgstr ""
+
+#. translators: %s: GA4's error.
+#: includes/search-insights/ga4.php:509
+#, php-format
+msgid "GA4 campaign figures could not be read (the earlier figures were kept): %s"
+msgstr ""
+
+#: includes/search-insights/gsc-types.php:33
+msgid "Search Console: Discover and Google News"
+msgstr ""
+
+#: includes/search-insights/gsc-types.php:37
+msgid "URL Inspection (index status)"
+msgstr ""
+
+#: includes/search-insights/gsc-types.php:70
+msgid "This Site Kit version has no Search Console client to call."
+msgstr ""
+
+#: includes/search-insights/gsc-types.php:75
+msgid "Search Console is not connected in Site Kit."
+msgstr ""
+
+#. translators: 1: Discover or Google News, 2: the problem.
+#: includes/search-insights/gsc-types.php:136
+#, php-format
+msgid "%1$s could not be read: %2$s"
+msgstr ""
+
+#: includes/search-insights/gsc-types.php:212
+msgid "No Discover or Google News figures yet (Search Console, daily at 07:15 IST). Google shows these only once a page has appeared there."
+msgstr ""
+
+#: includes/search-insights/gsc-types.php:216
+msgid "Discover impressions"
+msgstr ""
+
+#: includes/search-insights/gsc-types.php:216
+msgid "Discover clicks"
+msgstr ""
+
+#: includes/search-insights/gsc-types.php:216
+msgid "Google News impressions"
+msgstr ""
+
+#: includes/search-insights/gsc-types.php:216
+msgid "Google News clicks"
+msgstr ""
+
+#: includes/search-insights/gsc-types.php:221
+msgid "Search Console, 28 days. Google News here means the Google News app and news.google.com, not the News tab of Google Search."
+msgstr ""
+
+#. translators: %d: pages.
+#: includes/search-insights/gsc-types.php:293
+#, php-format
+msgid "%d pages were not reached that day."
+msgstr ""
+
+#. translators: %d: HTTP status.
+#: includes/search-insights/gsc-types.php:348
+#, php-format
+msgid "Google refused URL Inspection (HTTP %d), so it stops for today."
+msgstr ""
+
+#. translators: %s: the problem.
+#: includes/search-insights/gsc-types.php:400
+#, php-format
+msgid "No URL Inspection call worked: %s"
+msgstr ""
+
+#: includes/search-insights/gsc-types.php:433
+msgid "No pages inspected yet (URL Inspection, daily from 07:40 IST, up to 2,000 pages a day)."
+msgstr ""
+
+#: includes/search-insights/gsc-types.php:442
+msgid "No reason given"
+msgstr ""
+
+#. translators: 1: pages inspected, 2: indexed, 3: not indexed.
+#: includes/search-insights/gsc-types.php:447
+#, php-format
+msgid "%1$s pages inspected: %2$s indexed, %3$s not indexed."
+msgstr ""
+
+#: includes/search-insights/gsc-types.php:449
+msgid "Not indexed: Google's reason"
+msgstr ""
+
+#: includes/search-insights/gsc-types.php:449
+#: includes/search-insights/pages.php:17
+msgid "Pages"
+msgstr ""
+
+#: includes/search-insights/gsc-types.php:456
+msgid "Each page's state is on the Pages tab (Index column)."
+msgstr ""
+
+#. translators: 1: date, 2: database error.
+#: includes/search-insights/gsc.php:223
+#, php-format
+msgid "Search Console rows for %1$s could not be saved, so the earlier rows were kept: %2$s"
+msgstr ""
+
+#. translators: 1: date, 2: error message.
+#: includes/search-insights/gsc.php:283
+#, php-format
+msgid "Search Console could not be read for %1$s: %2$s"
+msgstr ""
+
+#. translators: %d: days.
+#: includes/search-insights/health.php:30
+#, php-format
+msgid "source failed: its runs have stored no rows for %d days."
+msgstr ""
+
+#: includes/search-insights/health.php:37
+msgid "Search Insights sources are fresh"
+msgstr ""
+
+#: includes/search-insights/health.php:37
+msgid "Some Search Insights sources are late or failing"
+msgstr ""
+
+#: includes/search-insights/health.php:43
+msgid "Each Search Insights source keeps its last good data when a run fails, and shows when it was last updated."
+msgstr ""
+
+#. translators: %s: source name.
+#: includes/search-insights/health.php:54
+#, php-format
+msgid "%s: not updated on schedule."
+msgstr ""
+
+#: includes/search-insights/health.php:65
+msgid "Search Insights sources fresh"
+msgstr ""
+
+#: includes/search-insights/imports.php:24
+msgid "Keyword Planner (CSV export: Keyword, Avg. monthly searches)"
+msgstr ""
+
+#: includes/search-insights/imports.php:25
+msgid "Google Trends averages (paste: keyword, value; \"animal welfare\" = 100)"
+msgstr ""
+
+#: includes/search-insights/imports.php:26
+msgid "data.gov.in / IDSP figures (paste: state, measure, value, as of, source URL)"
+msgstr ""
+
+#: includes/search-insights/imports.php:182
+msgid "No header row was found. Check that the file is the right export."
+msgstr ""
+
+#: includes/search-insights/imports.php:188
+msgid "The file needs a keyword column and a volume column."
+msgstr ""
+
+#: includes/search-insights/imports.php:220
+msgid "Imports"
+msgstr ""
+
+#: includes/search-insights/imports.php:228
+msgid "CSV file"
+msgstr ""
+
+#: includes/search-insights/imports.php:229
+msgid "Or paste"
+msgstr ""
+
+#: includes/search-insights/imports.php:230
+msgid "Import"
+msgstr ""
+
+#: includes/search-insights/imports.php:231
+msgid "Files are read once and deleted. Volumes and positions are stored for this month; a second import in the same month replaces the first."
+msgstr ""
+
+#. translators: 1: source, 2: rows, 3: date and time.
+#: includes/search-insights/imports.php:241
+#, php-format
+msgid "%1$s: %2$s rows, last import %3$s"
+msgstr ""
+
+#: includes/search-insights/imports.php:266
+msgid "Unknown import."
+msgstr ""
+
+#: includes/search-insights/imports.php:275
+msgid "Upload a .csv, .tsv or .txt file."
+msgstr ""
+
+#: includes/search-insights/imports.php:293
+msgid "Nothing to import: choose a file or paste the rows."
+msgstr ""
+
+#. translators: 1: import kind, 2: rows stored, 3: rows skipped.
+#: includes/search-insights/imports.php:316
+#, php-format
+msgid "%1$s: %2$s rows stored, %3$s skipped."
+msgstr ""
+
+#. translators: %s: terms.
+#: includes/search-insights/imports.php:319
+#, php-format
+msgid "%s terms that are not keywords yet went to Rising."
+msgstr ""
+
+#: includes/search-insights/imports.php:329
+msgid "Live Google check (bookmarklet)"
+msgstr ""
+
+#. translators: 1: source, 2: date, 3: database error.
+#: includes/search-insights/keywords.php:426
+#, php-format
+msgid "%1$s rows for %2$s could not be saved, so the earlier rows were kept: %3$s"
+msgstr ""
+
+#: includes/search-insights/keywords.php:500
+msgid "Focus keyphrase links could not be saved, so yesterday's were kept: "
+msgstr ""
+
+#: includes/search-insights/keywords.php:527
+msgid "Listing-name flags could not be saved, so the earlier flags were kept: "
+msgstr ""
+
+#: includes/search-insights/links.php:20
+msgid "Press"
+msgstr ""
+
+#: includes/search-insights/links.php:21
+msgid "Organisation"
+msgstr ""
+
+#: includes/search-insights/links.php:22
+msgid "Social"
+msgstr ""
+
+#: includes/search-insights/links.php:24
+msgid "Copy"
+msgstr ""
+
+#: includes/search-insights/links.php:25
+msgid "Spam"
+msgstr ""
+
+#: includes/search-insights/links.php:117
+msgid "Hide"
+msgstr ""
+
+#: includes/search-insights/links.php:118
+msgid "Unhide"
+msgstr ""
+
+#. translators: %s: link type.
+#: includes/search-insights/links.php:122
+#, php-format
+msgid "Set type: %s"
+msgstr ""
+
+#: includes/search-insights/links.php:124
+msgid "Set type: Unsorted"
+msgstr ""
+
+#: includes/search-insights/links.php:136
+msgid "Links per page"
+msgstr ""
+
+#: includes/search-insights/links.php:182
+msgid "No Bing Webmaster API key yet: add it under Animal Writes → Keys."
+msgstr ""
+
+#: includes/search-insights/links.php:186
+#: includes/search-insights/rising.php:618
+msgid "Saved."
+msgstr ""
+
+#: includes/search-insights/links.php:186
+msgid "No link was selected, so nothing changed."
+msgstr ""
+
+#: includes/search-insights/links.php:188
+msgid "Sites that link to us: from Bing Webmaster (monthly, on the 2nd), the monthly Search Console Links read, and the 25–26 Oct lists. Spam is hidden and shows only in the Spam view; nothing here is deleted. Set a type with the bulk actions."
+msgstr ""
+
+#: includes/search-insights/links.php:197
+msgid "Search links"
+msgstr ""
+
+#: includes/search-insights/pages.php:142
+msgid "Clarity note saved."
+msgstr ""
+
+#: includes/search-insights/pages.php:145
+msgid "The note was empty or the page unknown, so nothing was saved."
+msgstr ""
+
+#: includes/search-insights/pages.php:148
+msgid "Clarity figures start once the Clarity token is added under Animal Writes → Keys as AW_CLARITY_TOKEN (Clarity → Settings → Data Export → Generate new API token)."
+msgstr ""
+
+#. translators: %s: page path.
+#: includes/search-insights/pages.php:156
+#, php-format
+msgid "Clarity note for %s"
+msgstr ""
+
+#: includes/search-insights/pages.php:158
+msgid "A short summary of what the recordings show (Clarity Copilot or your own), dated today. Never paste personal data."
+msgstr ""
+
+#: includes/search-insights/pages.php:159
+msgid "Save note"
+msgstr ""
+
+#: includes/search-insights/pages.php:160
+msgid "Cancel"
+msgstr ""
+
+#. translators: 1: Site Kit's problem, 2: HTTP status.
+#: includes/search-insights/psi.php:173
+#, php-format
+msgid "%1$s The PageSpeed API answered %2$d."
+msgstr ""
+
+#: includes/search-insights/psi.php:181
+msgid "PageSpeed returned no performance score."
+msgstr ""
+
+#. translators: %s: first error.
+#: includes/search-insights/psi.php:265
+#, php-format
+msgid "No PageSpeed call worked: %s"
+msgstr ""
+
+#: includes/search-insights/rankmath.php:61
+msgid "Rank Math Analytics is not connected (no rank_math_analytics_gsc table)."
+msgstr ""
+
+#. translators: %s: date.
+#: includes/search-insights/rankmath.php:67
+#, php-format
+msgid "Rank Math Analytics has no Search Console rows for %s."
+msgstr ""
+
+#. translators: %s: why Site Kit could not be used.
+#: includes/search-insights/rankmath.php:158
+#, php-format
+msgid "Rank Math Analytics (Site Kit: %s)"
+msgstr ""
+
+#: includes/search-insights/rising.php:43
+msgid "Trends: trending now"
+msgstr ""
+
+#: includes/search-insights/rising.php:48
+msgid "Wikipedia pageviews"
+msgstr ""
+
+#: includes/search-insights/rising.php:53
+#: includes/search-insights/rising.php:816
+msgid "News (GDELT)"
+msgstr ""
+
+#: includes/search-insights/rising.php:58
+msgid "Google autocomplete (English)"
+msgstr ""
+
+#: includes/search-insights/rising.php:63
+msgid "Trends: rising related searches"
+msgstr ""
+
+#: includes/search-insights/rising.php:68
+msgid "Trends interest (animal welfare = 100)"
+msgstr ""
+
+#: includes/search-insights/rising.php:74
+msgid "Ubersuggest (import)"
+msgstr ""
+
+#: includes/search-insights/rising.php:80
+msgid "vidIQ (import)"
+msgstr ""
+
+#: includes/search-insights/rising.php:86
+msgid "OpenSEO (import)"
+msgstr ""
+
+#: includes/search-insights/rising.php:92
+msgid "Our News counts (stopped 3 Nov 2026)"
+msgstr ""
+
+#: includes/search-insights/rising.php:546
+msgid "Rising"
+msgstr ""
+
+#: includes/search-insights/rising.php:579
+msgid "Terms per page"
+msgstr ""
+
+#: includes/search-insights/rising.php:618
+msgid "No term was selected, so nothing changed."
+msgstr ""
+
+#. translators: 1: lines stored, 2: lines skipped.
+#: includes/search-insights/rising.php:622
+#, php-format
+msgid "Pasted: %1$d lines stored, %2$d skipped."
+msgstr ""
+
+#: includes/search-insights/rising.php:625
+msgid "Terms rising in India from free sources: Trends trending now, Wikipedia pageviews and Indian news (GDELT) daily; Google autocomplete and Trends rising related searches weekly. Growth is how many times the usual level (– when the source gives no ratio). Nothing here changes Rank Math or the Sourcing lists: mark each term Noted or Dismissed."
+msgstr ""
+
+#: includes/search-insights/rising.php:634
+msgid "Search terms"
+msgstr ""
+
+#: includes/search-insights/rising.php:643
+msgid "Paste Trends figures"
+msgstr ""
+
+#: includes/search-insights/rising.php:644
+msgid "When Google Trends refuses the worker (the notice above says so), copy the figures from trends.google.com (India) and paste them here, one per line: the search, a comma, then the figure."
+msgstr ""
+
+#: includes/search-insights/rising.php:648
+msgid "What it is"
+msgstr ""
+
+#: includes/search-insights/rising.php:649
+msgid "Rising related searches: the search, then its rise (+250% or Breakout)"
+msgstr ""
+
+#: includes/search-insights/rising.php:650
+msgid "Interest over 12 months: the keyword, then its average with \"animal welfare\" in the same comparison scaled to 100"
+msgstr ""
+
+#: includes/search-insights/rising.php:652
+msgid "Lines"
+msgstr ""
+
+#: includes/search-insights/rising.php:653
+msgid "Interest lines are stored only for searches that are keyword records already."
+msgstr ""
+
+#: includes/search-insights/rising.php:655
+msgid "Store the figures"
+msgstr ""
+
+#: includes/search-insights/rising.php:685
+msgid "Search Insights is off (its data was deleted), so nothing was stored. Settings → Run the daily update starts it again."
+msgstr ""
+
+#. translators: %s: the figure pasted, such as +250% or Breakout.
+#: includes/search-insights/rising.php:729
+#, php-format
+msgid "Trends: rising related search, %s (pasted by the owner)"
+msgstr ""
+
+#: includes/search-insights/rising.php:777
+msgid "No rising terms in the last 7 days."
+msgstr ""
+
+#: includes/search-insights/rising.php:781
+msgid "Our page"
+msgstr ""
+
+#: includes/search-insights/rising.php:793
+msgid "All rising terms"
+msgstr ""
+
+#: includes/search-insights/rising.php:819
+msgid "Use GDELT for Rising (Indian news counts, daily)"
+msgstr ""
+
+#: includes/search-insights/rising.php:820
+msgid "Save"
+msgstr ""
+
+#: includes/search-insights/rising.php:822
+msgid "Off by default: GDELT refuses requests from the workers' and the site's addresses (HTTP 429). While it is off its results are not stored, and it is not shown as late or failing."
+msgstr ""
+
+#. translators: %s: database error.
+#: includes/search-insights/rollup.php:148
+#, php-format
+msgid "The rollup could not save the monthly rows, so the daily rows were kept: %s"
+msgstr ""
+
+#: includes/search-insights/runs.php:23
+msgid "Search Console (Site Kit)"
+msgstr ""
+
+#: includes/search-insights/runs.php:27
+msgid "Keyword roles (Rank Math, Sourcing)"
+msgstr ""
+
+#. translators: %d: days.
+#: includes/search-insights/runs.php:32
+#, php-format
+msgid "Retention (%d-day rollup)"
+msgstr ""
+
+#: includes/search-insights/runs.php:57
+msgid "Clarity Data Export token"
+msgstr ""
+
+#: includes/search-insights/runs.php:57
+msgid "Clarity → Settings → Data Export → Generate new API token."
+msgstr ""
+
+#: includes/search-insights/runs.php:58
+msgid "Bing Webmaster API key"
+msgstr ""
+
+#: includes/search-insights/runs.php:58
+msgid "Bing Webmaster Tools → Settings (gear) → API access. Not an IndexNow key."
+msgstr ""
+
+#: includes/search-insights/runs.php:59
+msgid "PageSpeed Insights API key (Google, optional)"
+msgstr ""
+
+#: includes/search-insights/runs.php:59
+msgid "Google Cloud → APIs → PageSpeed Insights API → Credentials. Only needed if Site Kit's PageSpeed can't be used."
+msgstr ""
+
+#. translators: %s: date and time.
+#: includes/search-insights/runs.php:108
+#, php-format
+msgid "The run started on %s did not finish (probably a time limit)."
+msgstr ""
+
+#: includes/search-insights/searches.php:33
+msgid "High demand, no page yet (P2)"
+msgstr ""
+
+#. translators: 1: search phrase, 2: impressions in 28 days, 3: average position.
+#: includes/search-insights/searches.php:35
+#, php-format
+msgid "\"%1$s\": %2$s impressions (28 days)"
+msgstr ""
+
+#. translators: 1: search phrase, 2: impressions in 28 days, 3: average position.
+#: includes/search-insights/searches.php:35
+#, php-format
+msgid "\"%1$s\": %2$s impressions (28 days), position %3$s"
+msgstr ""
+
+#. translators: 1: gap line, 2: suggested page type such as "New page: guide".
+#: includes/search-insights/searches.php:38
+#, php-format
+msgid "%1$s (suggested: %2$s)"
+msgstr ""
+
+#: includes/search-insights/selfcheck.php:201
+msgid "robots.txt has a Content-Signal line"
+msgstr ""
+
+#: includes/search-insights/selfcheck.php:202
+msgid "robots.txt lets the AI crawlers in"
+msgstr ""
+
+#: includes/search-insights/selfcheck.php:203
+msgid "Markdown answered for Accept: text/markdown"
+msgstr ""
+
+#: includes/search-insights/selfcheck.php:204
+msgid "WebMCP tools on the home page"
+msgstr ""
+
+#: includes/search-insights/selfcheck.php:205
+msgid "Organization JSON-LD valid"
+msgstr ""
+
+#: includes/search-insights/selfcheck.php:206
+msgid "llms.txt present"
+msgstr ""
+
+#: includes/search-insights/selfcheck.php:215
+msgid "Speed and AI visibility"
+msgstr ""
+
+#: includes/search-insights/selfcheck.php:216
+msgid "Checked every morning: PageSpeed performance of the home page, and the site asking itself for the AI visibility items."
+msgstr ""
+
+#: includes/search-insights/selfcheck.php:218
+msgid "The first check runs tomorrow morning."
+msgstr ""
+
+#: includes/search-insights/selfcheck.php:221
+msgid "Speed, mobile"
+msgstr ""
+
+#: includes/search-insights/selfcheck.php:221
+msgid "Speed, desktop"
+msgstr ""
+
+#: includes/search-insights/selfcheck.php:221
+msgid "AI visibility"
+msgstr ""
+
+#: includes/search-insights/selfcheck.php:240
+msgid "Pass"
+msgstr ""
+
+#: includes/search-insights/selfcheck.php:240
+msgid "Fail"
+msgstr ""
+
+#: includes/search-insights/server.php:294
+msgid "Crawler requests by week (12 weeks)"
+msgstr ""
+
+#: includes/search-insights/server.php:295
+msgid "All crawlers"
+msgstr ""
+
+#: includes/search-insights/server.php:299
+msgid "Others"
+msgstr ""
+
+#: includes/search-insights/server.php:311
+msgid "Weeks before counting started (3 Nov 2026) show 0."
+msgstr ""
+
+#: includes/search-insights/server.php:320
+msgid "Server"
+msgstr ""
+
+#: includes/search-insights/server.php:340
+msgid "What the server sees, per day, kept for good. Everything here is counted when a request reaches WordPress: a page the CDN or the server's page cache (LiteSpeed) answers from a stored copy is not counted, unless that cache lets the request through (docs/cdn.md, step C). Bandwidth is only in hPanel. No full IP address or user agent is stored."
+msgstr ""
+
+#: includes/search-insights/server.php:345
+msgid "Today"
+msgstr ""
+
+#: includes/search-insights/server.php:346
+msgid "Last 7 days"
+msgstr ""
+
+#: includes/search-insights/server.php:347
+msgid "Last 30 days"
+msgstr ""
+
+#: includes/search-insights/server.php:348
+msgid "All days"
+msgstr ""
+
+#: includes/search-insights/server.php:362
+msgid "Crawler"
+msgstr ""
+
+#: includes/search-insights/server.php:366
+msgid "Note"
+msgstr ""
+
+#: includes/search-insights/server.php:379
+msgid "robots.txt name only, never visits"
+msgstr ""
+
+#: includes/search-insights/server.php:388
+msgid "Per day"
+msgstr ""
+
+#: includes/search-insights/sitekit.php:45
+#: includes/search-insights/sitekit.php:72
+msgid "Site Kit by Google is not active."
+msgstr ""
+
+#. translators: %s: Site Kit module slug, e.g. search-console.
+#: includes/search-insights/sitekit.php:62
+#, php-format
+msgid "Site Kit module %s has no owner. Connect it under Site Kit → Settings."
+msgstr ""
+
+#: includes/search-insights/sitekit.php:65
+msgid "Search Console is not connected in Site Kit. Connect it under Site Kit → Settings."
+msgstr ""
+
+#. translators: %s: Site Kit module slug.
+#: includes/search-insights/sitekit.php:77
+#, php-format
+msgid "Site Kit module %s is not connected."
+msgstr ""
+
+#. translators: 1: Site Kit module slug, 2: error message.
+#: includes/search-insights/sitekit.php:82
+#, php-format
+msgid "Site Kit module %1$s could not be used: %2$s"
+msgstr ""
+
+#: includes/search-insights/snapshot.php:157
+msgid "Section hubs"
+msgstr ""
+
+#: includes/search-insights/snapshot.php:159
+msgid "Topics"
+msgstr ""
+
+#: includes/search-insights/snapshot.php:160
+msgid "Resources guides"
+msgstr ""
+
+#: includes/search-insights/snapshot.php:161
+msgid "Key pages"
+msgstr ""
+
+#: includes/search-insights/snapshot.php:162
+msgid "Rows added since 20 Oct 2026"
+msgstr ""
+
+#: includes/search-insights/snapshot.php:163
+msgid "Other"
+msgstr ""
+
+#: includes/search-insights/snapshot.php:242
+msgid "Monthly snapshot"
+msgstr ""
+
+#. translators: %s: month such as 2026-10.
+#: includes/search-insights/snapshot.php:244
+#, php-format
+msgid "Download search-insights-%s.csv"
+msgstr ""
+
+#: includes/search-insights/snapshot.php:245
+msgid "Download keyword-map.md"
+msgstr ""
+
+#: includes/search-insights/snapshot.php:246
+msgid "The check list and every tracked P1/P2 keyword, in the columns of the 21 Oct rankings CSV plus demand, priority, status and action; and the keyword map rebuilt from the table. Once a month a session commits both to docs/seo/ (also: wp aw-si snapshot csv|map)."
+msgstr ""
+
+#: includes/search-insights/sources.php:17
+msgid "GA4 (Site Kit)"
+msgstr ""
+
+#: includes/search-insights/sources.php:21
+msgid "PageSpeed (Site Kit)"
+msgstr ""
+
+#: includes/search-insights/tool-imports.php:35
+msgid "Google searches a month, India"
+msgstr ""
+
+#: includes/search-insights/tool-imports.php:39
+msgid "vidIQ"
+msgstr ""
+
+#: includes/search-insights/tool-imports.php:41
+msgid "YouTube searches a month"
+msgstr ""
+
+#: includes/search-insights/tool-imports.php:47
+msgid "Google searches a month (12-month trend)"
+msgstr ""
+
+#: includes/search-insights/tool-imports.php:56
+msgid "Ubersuggest (paste or CSV: keyword, volume; optional: SD, CPC)"
+msgstr ""
+
+#: includes/search-insights/tool-imports.php:57
+msgid "vidIQ (paste or CSV: keyword, volume; optional: competition, score)"
+msgstr ""
+
+#: includes/search-insights/tool-imports.php:58
+msgid "OpenSEO (paste or CSV: keyword, month, volume; one row per month for the trend)"
+msgstr ""
+
+#: includes/search-insights/tool-imports.php:108
+msgid "The rows need a header with a keyword column and a volume column."
+msgstr ""
+
+#. translators: 1: tool, 2: searches a month, 3: what the figure is, 4: extra figures.
+#: includes/search-insights/tool-imports.php:174
+#, php-format
+msgid "%1$s: %2$s (%3$s)%4$s"
+msgstr ""
+
+#: includes/search-insights/tool-imports.php:232
+msgid "Seeds for keyword tools"
+msgstr ""
+
+#: includes/search-insights/tool-imports.php:236
+msgid "Save seeds"
+msgstr ""
+
+#: includes/search-insights/tool-imports.php:237
+msgid "One search per line. The Ubersuggest, vidIQ and OpenSEO reports start from these (in turn); their results come back through Imports above: figures for our keywords go to the Keywords tab, new terms to Rising."
+msgstr ""
+
+#: includes/search-insights/visitors.php:241
+msgid "Visitors"
+msgstr ""
+
+#: includes/search-insights/visitors.php:243
+msgid "Counting starts once this page has been opened after the update."
+msgstr ""
+
+#: includes/search-insights/visitors.php:247
+msgid "Front-end requests the server answered (not logged-in users, wp-admin, the REST API or cron; not pages the CDN or the server's page cache answered from a stored copy), by country and by shortened address (IPv4 with the last number zeroed, IPv6 to 48 bits). Shortened addresses are kept 30 days, countries for good."
+msgstr ""
+
+#. translators: %s: date the country file was downloaded, or "not yet".
+#: includes/search-insights/visitors.php:249
+#, php-format
+msgid "Countries: the CDN's country header when sent, else IP Geolocation by DB-IP (db-ip.com, CC BY 4.0), file of %s."
+msgstr ""
+
+#: includes/search-insights/visitors.php:251
+#: includes/search-insights/visitors.php:281
+msgid "Requests"
+msgstr ""
+
+#: includes/search-insights/visitors.php:251
+msgid "Top countries"
+msgstr ""
+
+#: includes/search-insights/visitors.php:251
+msgid "Top shortened addresses"
+msgstr ""
+
+#: includes/search-insights/visitors.php:272
+msgid "Top countries, all days"
+msgstr ""
+
+#: includes/search-insights/visitors.php:272
+msgid "Country"
+msgstr ""
+
+#: includes/search-insights/visitors.php:273
+msgid "Top shortened addresses, 30 days"
+msgstr ""
+
+#: includes/search-insights/visitors.php:273
+msgid "Shortened address"
+msgstr ""
+
+#: includes/search-insights/visitors.php:278
+msgid "None counted yet."
+msgstr ""

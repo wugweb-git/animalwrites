@@ -30,7 +30,7 @@ add_action(
  */
 function aw_seo_extras_kits_tab( $tabs ) {
 	if ( defined( 'AW_SEO_MENU' ) ) {
-		$tabs[ AW_SEO_MENU ] = array( __( 'RankWeb', 'aw-seo-extras' ), 'admin.php?page=' . AW_SEO_MENU, 'manage_categories', __( 'SEO rules, FAQ, schema and Search Insights.', 'aw-seo-extras' ) );
+		$tabs[ AW_SEO_MENU ] = array( __( 'RankWeb', 'aw-seo-extras' ), 'admin.php?page=' . AW_SEO_MENU, 'manage_categories', __( 'What Rank Math doesn\'t do or keeps for Premium.', 'aw-seo-extras' ) );
 	}
 	return $tabs;
 }

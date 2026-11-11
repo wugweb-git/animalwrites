@@ -1,13 +1,11 @@
 <?php
 /**
- * Search Insights (owner, 24 Oct 2026; plan in docs/seo/search-insights-plan.md). One record per keyword, with its
- * roles, owning pages, Search Console figures by day, priority and a suggested action. Read-only data and suggestions:
- * nothing here edits Rank Math keyphrases or the Sourcing lists.
+ * InsightWeb's bootstrap: Search Insights (owner, 24 Oct 2026; plan in docs/seo/search-insights-plan.md). One record
+ * per keyword, with its roles, owning pages, Search Console figures by day, priority and a suggested action. Read-only
+ * data and suggestions: nothing here edits Rank Math keyphrases or the Sourcing lists.
  *
- * Phase 1: tables, the one-time seed from the keyword map, Search Console through Site Kit (each module as its own
- * owner, one call per calendar day), keyword roles, priority, the 90-day rollup, Overview and Keywords tabs, a Site
- * Health test and the `wp aw-si` commands. The old Search demand screen (search-demand.php) was removed on 25 Oct 2026:
- * its Search Console call is aw_si_gsc_query() and its gaps are an Overview box (searches.php).
+ * Moved out of RankWeb on 11 Nov 2026 with no other change (docs/insightweb-plan.md). Called on plugins_loaded by
+ * insightweb.php, or by RankWeb's bridge while InsightWeb is not active yet; whichever calls first loads it, once.
  *
  * @package aw-seo-extras
  */
@@ -15,6 +13,39 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+if ( defined( 'INSIGHTWEB_LOADED' ) ) {
+	return; // Already loaded on this request (InsightWeb or RankWeb's bridge, whichever came first).
+}
+define( 'INSIGHTWEB_LOADED', true );
+if ( ! defined( 'INSIGHTWEB_DIR' ) ) {
+	define( 'INSIGHTWEB_DIR', dirname( __DIR__ ) . '/' );
+}
+
+// Kits Core (loaded by Animal Writes Core on live) and Rank Math are needed, as for RankWeb's Search Insights module
+// (owner, 11 Nov 2026: checked here, not with a Requires Plugins header).
+$aw_si_missing = array_keys(
+	array_filter(
+		array(
+			'Kits Core' => ! defined( 'KITS_CORE_LOADED' ),
+			'Rank Math' => ! ( defined( 'RANK_MATH_VERSION' ) && class_exists( '\RankMath\Helper' ) ),
+		)
+	)
+);
+if ( $aw_si_missing ) {
+	add_action(
+		'admin_notices',
+		function () use ( $aw_si_missing ) {
+			if ( current_user_can( 'activate_plugins' ) ) {
+				/* translators: %s: plugin names. */
+				echo '<div class="notice notice-warning"><p>' . esc_html( sprintf( __( 'InsightWeb does nothing until %s is active.', 'aw-seo-extras' ), implode( ' and ', $aw_si_missing ) ) ) . '</p></div>';
+			}
+		}
+	);
+	unset( $aw_si_missing );
+	return;
+}
+unset( $aw_si_missing );
 
 // The keyword table and its helpers are Animal Writes Core's (owner's decision 3, 25 Oct 2026): without Core, Search
 // Insights stays off.
@@ -29,6 +60,8 @@ if ( ! function_exists( 'aw_kw_install' ) ) {
 	);
 	return;
 }
+
+require_once INSIGHTWEB_DIR . 'includes/settings.php'; // the seven numbers (constants) and the API rule, first
 
 foreach ( array( 'schema', 'runs', 'sitekit', 'keywords', 'gsc', 'compute', 'rollup', 'cron', 'health', 'searches', 'dryrun', 'rising', 'admin', 'cli' ) as $aw_si_file ) {
 	require_once __DIR__ . '/search-insights/' . $aw_si_file . '.php';

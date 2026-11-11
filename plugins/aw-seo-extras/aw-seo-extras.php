@@ -2,8 +2,8 @@
 /**
  * Plugin Name:       RankWeb
  * Plugin URI:        https://animalwrites.in/
- * Description:       SEO rules, FAQ, schema and Search Insights for Kits sites.
- * Version:           1.9.3
+ * Description:       Everything Rank Math doesn't do or keeps for Premium, for Kits sites.
+ * Version:           2.0.0
  * Requires at least: 6.4
  * Requires PHP:      8.0
  * Author:            Wugweb
@@ -44,11 +44,12 @@ add_action(
 		}
 		require_once AW_SEO_EXTRAS_DIR . 'includes/settings.php'; // first: the modules, their settings and switches
 		$off = aw_seo_files_off();
-		foreach ( array( 'helpers', 'overview', 'faq', 'programmatic', 'titles', 'canonical', 'filtered-views', 'robots', 'schema', 'rank-math-schema', 'opengraph', 'sitemap', 'redirects', 'breadcrumbs', 'focus-keywords', 'health', 'search-insights', 'llms', 'markdown', 'analysis' ) as $file ) {
+		foreach ( array( 'helpers', 'overview', 'faq', 'programmatic', 'titles', 'canonical', 'filtered-views', 'robots', 'schema', 'rank-math-schema', 'opengraph', 'sitemap', 'redirects', 'breadcrumbs', 'focus-keywords', 'health', 'llms', 'markdown', 'analysis' ) as $file ) {
 			if ( ! in_array( $file, $off, true ) ) { // a module switched off in RankWeb → Settings is not loaded
 				require_once AW_SEO_EXTRAS_DIR . 'includes/' . $file . '.php';
 			}
 		}
+		aw_seo_extras_insightweb_bridge();
 		// A switched-off module's scheduled job is taken off (its file, which runs and reschedules it, is not loaded).
 		// Checked in admin and cron requests only, so a page view never writes.
 		$jobs = array(
@@ -75,14 +76,31 @@ add_action(
 	5
 );
 
-// Search Insights keeps its tables and data when the plugin is switched off (owner, 24 Oct 2026); only its cron stops.
+/**
+ * Bridge while InsightWeb is not active yet (docs/insightweb-plan.md 3.2). Search Insights moved to its own plugin on
+ * 11 Nov 2026; a new plugin is inactive until someone activates it, and in that gap its scheduled jobs would run with no
+ * handler. So, while InsightWeb is not active and Search Insights was not switched off here, RankWeb loads InsightWeb's
+ * bootstrap, which loads once whoever calls it first. Removed once InsightWeb is active on live and a daily run is OK.
+ */
+function aw_seo_extras_insightweb_bridge(): void {
+	if ( defined( 'INSIGHTWEB_FILE' ) ) {
+		return; // InsightWeb is active: it loads Search Insights itself.
+	}
+	$saved = (array) get_option( 'aw_seo_settings', array() );
+	if ( isset( $saved['search-insights']['on'] ) && empty( $saved['search-insights']['on'] ) ) {
+		return; // Switched off in RankWeb → Settings before the move: it stays off.
+	}
+	$file = WP_PLUGIN_DIR . '/insightweb/includes/bootstrap.php';
+	if ( file_exists( $file ) ) {
+		require_once $file;
+	}
+}
+
+// Search Insights' scheduled jobs are InsightWeb's now: switching RankWeb off never stops them.
 register_deactivation_hook(
 	__FILE__,
 	function () {
-		foreach ( function_exists( 'aw_si_cron_hooks' ) ? aw_si_cron_hooks() : array( 'aw_si_daily', 'aw_si_rollup' ) as $hook ) {
-			wp_clear_scheduled_hook( $hook );
-		}
-		// The SEO jobs too: titles.php, health.php, sitemap.php.
+		// The SEO jobs: titles.php, health.php, sitemap.php.
 		foreach ( array( 'aw_seo_fill_daily', 'aw_seo_endpoints_watchdog', 'aw_seo_sitemap_daily' ) as $hook ) {
 			wp_clear_scheduled_hook( $hook ); // repeating (no-argument) events only, as Core
 		}

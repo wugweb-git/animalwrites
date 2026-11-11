@@ -1,0 +1,28 @@
+{
+	"name": "wugweb/insightweb",
+	"description": "Search Console, GA4, Clarity, PageSpeed, Bing, keywords and rising terms for Kits sites.",
+	"type": "wordpress-plugin",
+	"license": "GPL-2.0-or-later",
+	"authors": [
+		{
+			"name": "Wugweb",
+			"homepage": "https://wugweb.com/"
+		}
+	],
+	"require": {
+		"php": ">=8.0"
+	},
+	"require-dev": {
+		"wp-coding-standards/wpcs": "^3.1",
+		"dealerdirect/phpcodesniffer-composer-installer": "^1.0"
+	},
+	"config": {
+		"allow-plugins": {
+			"dealerdirect/phpcodesniffer-composer-installer": true
+		}
+	},
+	"scripts": {
+		"lint": "phpcs --standard=WordPress --extensions=php --ignore=vendor .",
+		"make-pot": "wp i18n make-pot . languages/aw-seo-extras.pot --domain=aw-seo-extras --exclude=vendor"
+	}
+}

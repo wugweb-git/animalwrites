@@ -217,21 +217,6 @@ function aw_seo_modules(): array {
 					) ),
 			),
 		),
-		'search-insights' => array(
-			'label'  => 'Search Insights',
-			'switch' => true,
-			'files'  => array( 'search-insights' ),
-			'desc'   => 'Keywords, Search Console and GA4 figures, rising terms, pages, the check list and imports. Read-only.',
-			'fields' => array(
-				'AW_SI_HIGH_TRENDS' => array( 'type' => 'int', 'label' => 'High demand: Trends at least', 'help' => '', 'default' => 20 ),
-				'AW_SI_HIGH_IMPR' => array( 'type' => 'int', 'label' => 'High demand: impressions in 28 days at least', 'help' => '', 'default' => 50 ),
-				'AW_SI_QUICK_MIN' => array( 'type' => 'int', 'label' => 'Quick win: impressions at least', 'help' => 'At position 8 to 20.', 'default' => 10 ),
-				'AW_SI_MOVERS' => array( 'type' => 'int', 'label' => 'Listing names shown one by one', 'help' => 'The rest are one "entity" row.', 'default' => 20 ),
-				'AW_SI_PSI_FLAG' => array( 'type' => 'int', 'label' => 'PageSpeed mobile score that flags a page (under)', 'help' => '', 'default' => 50 ),
-				'AW_SI_RM_LOW' => array( 'type' => 'int', 'label' => 'Rank Math SEO score that is "low" (under)', 'help' => '', 'default' => 50 ),
-				'AW_SI_KEEP_DAYS' => array( 'type' => 'int', 'label' => 'Daily figures kept (days)', 'help' => 'Older days become monthly totals.', 'default' => 90 ),
-			),
-		),
 		'rank-math-schema' => array(
 			'label'  => 'Rank Math schema entries',
 			'switch' => true,
@@ -407,8 +392,8 @@ function aw_seo_field_value( string $type, string $text ) {
 
 /**
  * The Settings tabs and the modules whose settings each shows. The settings stay stored per module; a field with its
- * own 'tab' shows on that tab. Modules holds every on/off switch. Search Insights' numbers show on Search Insights →
- * Settings, not here.
+ * own 'tab' shows on that tab. Modules holds every on/off switch. Search Insights moved to InsightWeb on 11 Nov 2026;
+ * its numbers stay in this option under 'search-insights', and InsightWeb's Settings tab writes them.
  */
 function aw_seo_setting_tabs(): array {
 	return array(
@@ -439,11 +424,6 @@ function aw_seo_setting_tabs(): array {
 		'ai'              => array(
 			'label'   => 'AI agents',
 			'modules' => array( 'llms', 'markdown' ),
-		),
-		'search-insights' => array(
-			'label'   => 'Search Insights',
-			'modules' => array( 'search-insights' ),
-			'hidden'  => true,
 		),
 	);
 }
@@ -482,7 +462,7 @@ add_action(
 		if ( function_exists( 'wp_set_option_autoload' ) && false !== get_option( AW_SEO_SETTINGS ) && ! array_key_exists( AW_SEO_SETTINGS, wp_load_alloptions() ) ) {
 			wp_set_option_autoload( AW_SEO_SETTINGS, true );
 		}
-		// An old link to Search Insights' module tab: its numbers are on Search Insights → Settings.
+		// An old link to Search Insights' module tab: its numbers are on Search Insights → Settings (InsightWeb).
 		if ( 'aw-seo-settings' === sanitize_key( wp_unslash( $_GET['page'] ?? '' ) ) && 'search-insights' === sanitize_key( wp_unslash( $_GET['tab'] ?? '' ) ) && function_exists( 'aw_si_url' ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- navigation only
 			wp_safe_redirect( aw_si_url( 'settings' ) );
 			exit;
