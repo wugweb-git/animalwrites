@@ -46,6 +46,7 @@ python3 -c "import json,sys; s=json.load(open('/tmp/dw-settings.json')); sys.exi
 if wp eval 'exit( in_array( "aw_ff_forms", kits_settings_transfer_options(), true ) ? 0 : 1 );'; then echo "ok   aw_ff_forms is in the Kits export"; else echo "FAIL aw_ff_forms missing from the Kits export"; FAIL=1; fi
 # Owner, 12 Nov 2026: the export carries only the claim form; an import changes only that key.
 if wp eval '$f = kits_settings_export()["options"]["aw_ff_forms"] ?? null; exit( is_array( $f ) && array( "claim" ) === array_keys( $f ) ? 0 : 1 );'; then echo "ok   the Kits export carries only the claim form"; else echo "FAIL the Kits export carries more than the claim form"; FAIL=1; fi
-FF_BEFORE=$(wp option get aw_ff_forms --format=json)
+# A fresh install may have no form map yet: remember that, and put it back the same way afterwards.
+FF_BEFORE=$(wp option get aw_ff_forms --format=json 2>/dev/null || true)
 if wp eval '$s = (array) get_option( "aw_ff_forms" ); $r = kits_settings_import_options( array( "aw_ff_forms" => array( "claim" => 987654, "contact" => 1 ) ), false ); $n = (array) get_option( "aw_ff_forms" ); $want = $s; $want["claim"] = 987654; exit( $n == $want ? 0 : 1 );'; then echo "ok   an import changes only the claim form"; else echo "FAIL an import changed other form IDs"; FAIL=1; fi
-wp option update aw_ff_forms "$FF_BEFORE" --format=json --quiet
+if [ -n "$FF_BEFORE" ]; then wp option update aw_ff_forms "$FF_BEFORE" --format=json --quiet; else wp option delete aw_ff_forms --quiet || true; fi
