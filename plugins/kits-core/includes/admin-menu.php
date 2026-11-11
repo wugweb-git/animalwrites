@@ -111,8 +111,9 @@ add_action(
 		}
 		$query = array();
 		foreach ( wp_unslash( $_GET ) as $k => $v ) { // phpcs:ignore WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- passed on as query values, escaped by the redirect.
-			if ( is_scalar( $v ) ) {
-				$query[ sanitize_key( (string) $k ) ] = sanitize_text_field( (string) $v );
+			$k = preg_replace( '/[^A-Za-z0-9_\-]/', '', (string) $k ); // Names as they were (case kept); values as sent, encoded by the redirect.
+			if ( '' !== $k && is_scalar( $v ) ) {
+				$query[ $k ] = (string) $v;
 			}
 		}
 		$to = kits_menu_redirect_target( sanitize_key( (string) $query['page'] ), $query, kits_admin_redirects() );

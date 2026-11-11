@@ -196,10 +196,10 @@ function aw_core_section( string $title, callable $render, int $order, string $c
  * @param array $sections Kits' sections.
  */
 function aw_core_home_sections( $sections ) {
-	$sections               = (array) $sections;
-	$sections['page-check'] = aw_core_section( 'Page check', 'aw_site_check_results', 20 );
-	$sections['backup']     = aw_core_section( 'Backup', 'aw_backup_site_check', 30 );
-	$sections['deploy']     = aw_core_section(
+	$sections                 = (array) $sections;
+	$sections['page-check']   = aw_core_section( 'Page check', 'aw_site_check_results', 20 );
+	$sections['backup']       = aw_core_section( 'Backup', 'aw_backup_site_check', 30 );
+	$sections['deploy']       = aw_core_section(
 		'Deployed commit',
 		function () {
 			$st = aw_core_overview_status();
@@ -232,8 +232,8 @@ function aw_core_home_sections( $sections ) {
  * @param array $sections Kits' sections.
  */
 function aw_core_settings_sections( $sections ) {
-	$sections        = (array) $sections;
-	$sections['cdn'] = aw_core_section( 'Performance: CDN cache times', 'aw_cdn_settings_box', 15 );
+	$sections                       = (array) $sections;
+	$sections['cdn']                = aw_core_section( 'Performance: CDN cache times', 'aw_cdn_settings_box', 15 );
 	$sections['connected-services'] = aw_core_section(
 		'Connected services and modules',
 		function () {
@@ -253,10 +253,10 @@ function aw_core_settings_sections( $sections ) {
  * @param array $sections Kits' sections.
  */
 function aw_core_help_sections( $sections ) {
-	$sections                             = (array) $sections;
-	$sections['docs/animal-writes']       = aw_core_section( 'Docs: Animal Writes', fn() => kits_admin_embed( 'aw_core_overview_page' ), 15 );
-	$sections['developer/edit-screens']   = aw_core_section( 'Developer: edit screens', fn() => kits_admin_embed( 'aw_edit_screens_page' ), 30 );
-	$sections['developer/theme-parts']    = aw_core_section( 'Developer: theme parts', fn() => kits_admin_embed( 'aw_theme_parts_screen' ), 31 );
+	$sections                           = (array) $sections;
+	$sections['docs/animal-writes']     = aw_core_section( 'Docs: Animal Writes', fn() => kits_admin_embed( 'aw_core_overview_page' ), 15 );
+	$sections['developer/edit-screens'] = aw_core_section( 'Developer: edit screens', fn() => kits_admin_embed( 'aw_edit_screens_page' ), 30 );
+	$sections['developer/theme-parts']  = aw_core_section( 'Developer: theme parts', fn() => kits_admin_embed( 'aw_theme_parts_screen' ), 31 );
 	return $sections;
 }
 
