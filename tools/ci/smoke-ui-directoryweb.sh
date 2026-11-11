@@ -43,5 +43,9 @@ else
 fi
 same "DirectoryWeb Settings" "$BEFORE" "$(optmd5 aw_ff_forms)"
 python3 -c "import json,sys; s=json.load(open('/tmp/dw-settings.json')); sys.exit(0 if len(s['groups'])==7 and len(s['services'])==9 else 1)" && echo "ok   DirectoryWeb Settings: 9 services, 7 groups" || { echo "FAIL DirectoryWeb Settings: services or groups missing"; FAIL=1; }
-# The form map holds every form's ID for this site only, so it stays out of the Kits export (owner, 12 Nov 2026).
-if wp eval 'exit( in_array( "aw_ff_forms", kits_settings_transfer_options(), true ) ? 1 : 0 );'; then echo "ok   aw_ff_forms is not in the Kits export"; else echo "FAIL aw_ff_forms is in the Kits export"; FAIL=1; fi
+if wp eval 'exit( in_array( "aw_ff_forms", kits_settings_transfer_options(), true ) ? 0 : 1 );'; then echo "ok   aw_ff_forms is in the Kits export"; else echo "FAIL aw_ff_forms missing from the Kits export"; FAIL=1; fi
+# Owner, 12 Nov 2026: the export carries only the claim form; an import changes only that key.
+if wp eval '$f = kits_settings_export()["options"]["aw_ff_forms"] ?? null; exit( is_array( $f ) && array( "claim" ) === array_keys( $f ) ? 0 : 1 );'; then echo "ok   the Kits export carries only the claim form"; else echo "FAIL the Kits export carries more than the claim form"; FAIL=1; fi
+FF_BEFORE=$(wp option get aw_ff_forms --format=json)
+if wp eval '$s = (array) get_option( "aw_ff_forms" ); $r = kits_settings_import_options( array( "aw_ff_forms" => array( "claim" => 987654, "contact" => 1 ) ), false ); $n = (array) get_option( "aw_ff_forms" ); $want = $s; $want["claim"] = 987654; exit( $n == $want ? 0 : 1 );'; then echo "ok   an import changes only the claim form"; else echo "FAIL an import changed other form IDs"; FAIL=1; fi
+wp option update aw_ff_forms "$FF_BEFORE" --format=json --quiet

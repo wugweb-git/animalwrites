@@ -204,9 +204,46 @@ function directoryweb_plain_page( string $title, string $screen ): void {
 	echo '<p><a href="' . esc_url( add_query_arg( 'post_type', 'aw_listing', admin_url( 'edit.php' ) ) ) . '">' . esc_html__( 'Directory listings', 'directoryweb' ) . '</a></p></div>';
 }
 
-// Not in the Kits → Tools export: the claim form lives in the site's form map (aw_ff_forms), which holds every form's
-// ID. Form IDs belong to one site, and the export carries whole options, so importing it elsewhere would point every
-// form at the wrong one (owner, 12 Nov 2026).
+// Kits → Tools export: only the claim form's ID from the site's form map (owner, 12 Nov 2026), the one value the new
+// Settings saves. On import only that key changes; every other form ID stays as stored.
+add_filter(
+	'kits_settings_transfer_options',
+	function ( $names ) {
+		return array_values( array_unique( array_merge( (array) $names, array( directoryweb_forms_option() ) ) ) );
+	}
+);
+add_filter(
+	'kits_settings_transfer_value',
+	function ( $value, $name ) {
+		if ( directoryweb_forms_option() !== $name ) {
+			return $value;
+		}
+		return array( 'claim' => absint( ( (array) $value )['claim'] ?? 0 ) );
+	},
+	10,
+	2
+);
+add_filter(
+	'kits_settings_transfer_import_value',
+	function ( $value, $name, $stored ) {
+		if ( directoryweb_forms_option() !== $name ) {
+			return $value;
+		}
+		$stored = (array) $stored;
+		$claim  = absint( ( (array) $value )['claim'] ?? 0 );
+		if ( $claim ) {
+			$stored['claim'] = $claim;
+		}
+		return $stored;
+	},
+	10,
+	3
+);
+
+/** The option that maps form keys to Fluent Forms IDs. */
+function directoryweb_forms_option(): string {
+	return defined( 'AW_FF_OPTION' ) ? AW_FF_OPTION : 'aw_ff_forms';
+}
 
 /** Dashboard page callback. */
 function directoryweb_dashboard_page(): void {
