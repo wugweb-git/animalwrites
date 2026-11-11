@@ -25,7 +25,9 @@ The brief's UI standard says "built with `@wordpress/components` and `@wordpress
 - Own implementation: no code, CSS, icons, images or fonts copied from Site Kit.
 - Clickable HTML prototypes of the key screens, beside the reference, come before any build.
 
-This plan follows the later entry. `docs/admin-ui-spec.md` does not exist on any branch yet (checked with `git for-each-ref` and `git ls-tree` on 11 Nov). Phase 2 follows that spec once it is written, where it differs from this plan. The DirectoryWeb plan hit the same difference.
+A second 11 Nov owner decision makes that design system **one shared plugin shell in Kits Core** (app header, chips, tiles, "Select metrics", widgets, a DataView wrapper, Connected services rows with a DataForm, settings groups, setup flow, notices, empty, loading and error states), with **InsightWeb as its pilot**. Its spec is `docs/kits-plugin-ui.md`, beside `docs/admin-ui-spec.md`. Which WordPress packages sit inside the shell is the shell's decision, not this plan's.
+
+This plan follows both entries: phase 2 (section 2.2) describes only what InsightWeb registers into the shell and the data it serves, and lists the shell parts the pilot needs (2.2.5). Neither `docs/kits-plugin-ui.md` nor `docs/admin-ui-spec.md` exists on any branch or in any worktree yet (checked with `git for-each-ref`, `git ls-tree` and a file search on 11 Nov). Phase 2 follows them once they are written, where they differ from this plan.
 
 ## 1. Inventory
 
@@ -87,7 +89,7 @@ Deactivating or deleting InsightWeb keeps every table and option, as today. Only
 All keep their names. InsightWeb reads and writes them as Search Insights does now.
 
 - **Run log and state:** `aw_si_runs`, `aw_si_db`, `aw_si_vis_db`, `aw_si_installed`, `aw_si_seeded`, `aw_si_backfill`, `aw_si_off`, `aw_si_live_seed_run`, `aw_si_rising_since`, `aw_si_geo_updated`, `aw_si_crawl_inside`, `aw_si_crawl_outside`, `aw_si_crawl_mailed`, `aw_si_srv_checks`, `aw_si_clarity_calls`, `aw_si_clarity_retried`, `aw_si_bing_cursor`, `aw_si_links_seeded_20261102`, queues `aw_si_psi_queue`, `aw_si_inspect_queue`.
-- **Owner's choices:** `aw_si_checklist`, `aw_si_gdelt_on`, `aw_si_clarity_on`, `aw_si_bing_on`, `aw_si_tool_seeds` ("Seeds for keyword tools", 25 searches saved 10 Nov), `aw_si_live_token`.
+- **Owner's choices:** `aw_si_checklist`, `aw_si_gdelt_on`, `aw_si_tool_seeds` ("Seeds for keyword tools", 25 searches saved 10 Nov), `aw_si_live_token`.
 - **The 7 numbers:** stored today in RankWeb's option `aw_seo_settings`, under the key `search-insights` (only values that differ from the default). They stay there. InsightWeb defines the same `AW_SI_*` constants from `aw_seo_settings['search-insights']` with the same defaults, and its own Settings writes only that key. RankWeb's save starts from the whole stored array (`aw_seo_saved()`), so it never drops the key once the module is gone from its list.
 - **The module switch:** `aw_seo_settings['search-insights']['on']`. If it is stored as off, InsightWeb loads only its Settings screen until the owner switches it on there. Its value on live is read once, read only, before phase 1 ships.
 - **Screen options (user meta):** `aw_si_keywords_per_page`, `aw_si_pages_per_page`, `aw_si_rising_per_page`, `aw_si_links_per_page`, `aw_si_checklist_per_page`, `aw_si_clarity_per_page`. Kept in phase 1 (same screen id, 2.1). Phase 2's lists keep their own per-user choices.
@@ -185,44 +187,111 @@ All read only, all move with InsightWeb: focus keyphrases for the roles (`keywor
 
 The screen is registered by InsightWeb, still as a submenu of RankWeb's menu (`AW_SEO_MENU`) while RankWeb is active, so the address, the screen id (`aw-seo-plus_page_aw-search-insights`), saved screen options and box order all stay. Without RankWeb it becomes a top-level InsightWeb menu. The only visible change is a new row on the Plugins screen and on Kits → Plugins.
 
-### 2.2 Phase 2: InsightWeb's own app (Site Kit pattern)
+### 2.2 Phase 2: InsightWeb as the pilot of the Kits plugin shell
 
-An app header (InsightWeb, last update, a "Run now" menu) and three menu items:
+The admin is one shared shell in Kits Core (owner, 11 Nov), specified in `docs/kits-plugin-ui.md` (not on any branch yet on 11 Nov). The shell owns every component: app header, section chips, tiles, "Select metrics", widgets, the DataView wrapper, Connected services rows with their DataForm, settings groups, setup flow, notices and the empty, loading and error states. InsightWeb designs none of them. It is the first plugin to use the shell, so it is built together with the shell, and this section lists only what InsightWeb registers through the shell's PHP and JS API, plus the data it serves from its own REST routes.
 
-**Dashboard**
-- Tiles, all one size and one layout: label, info icon (what it counts and over which days), number, sub-line, change chip (against the 28 days before), source named ("Search Console, to 8 Nov").
-  - Impressions (28 days), Clicks (28 days), Average position, Quick wins, Conflicts. From stored rows only, the same queries as the Overview boxes and `aw_seo_dash_gsc()`, so the numbers match.
-- Section chips: **Keywords · Pages · Rising · Links · Speed**. Each chip opens its section below the tiles; the Overview's 17 boxes map onto them (Priorities, Movers, Brand, Content gaps → Keywords; Pages, Not found, Index status, Discover and Google News, Searches on our site, Referrers, AI referrals, Campaigns by source → Pages; Rising this week and the Rising list → Rising; Links, Alerts → Links; PageSpeed, Clarity, Server, Crawler access, Bing crawl → Speed).
-- "Select metrics": the owner picks which tiles show; saved per user (user meta `kits_insightweb_metrics`).
-- Sources line: each source's last good run and its last error, from `aw_si_runs` (the Sources box today).
+**Screens.** Three menu items, shown as tabs in the app header: Dashboard (`insightweb`), Keywords (`insightweb-keywords`), Settings (`insightweb-settings`). Capability: `aw_si_cap()` for Dashboard and Keywords, `manage_options` for Settings. Header extras: date range (28 days by default; 7, 28, 90 days), Help (links to `docs/seo/search-insights-plan.md` topics on the Help tab), and a "Run now" menu (2.2.4).
 
-**Keywords (the working list)**
-- One list from the Kits admin design system, with the DataView behaviour: views, filters, sort, search, columns to show, rows per page.
-- Views: All, P1, P2, P3, Gaps, Conflicts, Quick wins, Tracked not ranking, plus Entities and Check list (both are tabs or views today, so nothing is lost).
-- Fields as today: keyword, priority, status, topic, page, impressions, clicks, position, change, Bing, live check, Trends, volume, Ubersuggest, vidIQ, OpenSEO, suggested action.
-- Row actions: Note, set priority (today's bulk actions), and **Apply focus keyword** where the suggested action is one. Apply calls `POST aw/v1/seo-focus` with `{items: [{id, keyword}]}`, first with `dry: true` to show what RankWeb would write or why it refuses (another page owns it, not in the SEO title, a News item against an evergreen owner), then for real on a second press. InsightWeb never writes `rank_math_focus_keyword` itself.
-- Data: a read-only REST route per screen that answers from the stored rows with paging; it never calls Google.
+**REST routes** (new code, so `kits/v1/insightweb/…`; each read-only route answers from stored rows only, never calls Google, and is cached in a transient that the daily run clears; the shell's refresh asks again with `refresh=1`):
 
-**Settings**
-- Connected services first, each a row with its status ("Connected" with the date of its last good run, or "Set up"), opening to a summary with Edit:
-  - Search Console and GA4: through Site Kit. Status from Site Kit's module owner and the run log; Edit links to Site Kit's own settings. InsightWeb changes nothing in GA4, GTM or Site Kit.
-  - Clarity, Bing Webmaster, PageSpeed (optional key), Google Alerts (two feeds): keys as in 1.6.
-- Then admin settings with plain descriptions: the 7 numbers (thresholds), the schedule (read-only times, with Run now per source), GDELT on/off, seeds for keyword tools, imports and paste forms, the monthly snapshot, Delete Search Insights data (nonce plus typed DELETE).
-- No raw tables of options.
+| Route | Method | Serves |
+|---|---|---|
+| `kits/v1/insightweb/tiles` | GET `?days=28` | Every tile below |
+| `kits/v1/insightweb/sections/<key>` | GET | One Dashboard section's widgets |
+| `kits/v1/insightweb/keywords` | GET (search, filters, sort, page, per_page, view) | The Keywords list |
+| `kits/v1/insightweb/keywords/bulk` | POST | Priority bulk actions |
+| `kits/v1/insightweb/services` | GET | Each connected service's status and summary |
+| `kits/v1/insightweb/services/<key>` | POST, DELETE | Save or clear that service's keys or switch (`manage_options`) |
+| `kits/v1/insightweb/settings` | GET, POST | The settings groups |
+| `kits/v1/insightweb/run/<source>` | POST | Run one source now (2.2.4) |
+| `aw/v1/seo-focus` (RankWeb, existing) | POST | Apply focus keyword, `dry: true` first |
 
-**Build (from the 11 Nov decision log)**
-- Look: the Kits admin design system in Kits Core (it has to exist first), styled after Site Kit, own implementation.
-- Plumbing: `@wordpress/element`, `@wordpress/data`, `@wordpress/api-fetch`, `@wordpress/i18n`, built with `@wordpress/scripts`, one entry per screen, each enqueued only on its own screen from its `.asset.php`.
-- Settings stored with `register_setting( …, array( 'show_in_rest' => … ) )` where the value is a whole option of ours; values inside `aw_seo_settings` and `aw_keys` go through small REST routes that write only their own keys.
-- Capabilities per screen (Dashboard and Keywords: `aw_si_cap()`; Settings and keys: `manage_options`), REST nonces through `api-fetch`.
-- Notices only on InsightWeb's own screens, always dismissible.
-- JS translations with `wp_set_script_translations()`; text domain `insightweb`.
-- WCAG 2.2 AA (keyboard, focus, contrast, labels on every icon button).
-- Performance budget per screen (proposed: under 150 KB gzip of JS per screen including shared chunks, first data on screen within 1 s on a warm cache, no remote call on page load).
-- New code is named `kits` (11 Nov): REST namespace `kits/v1/insightweb/…`, PHP `kits_insightweb_…`. Moved code keeps `aw_si_`.
-- Clickable HTML prototypes of Dashboard, Keywords and Settings beside the Site Kit reference, for the owner's yes, before any build.
+#### 2.2.1 Dashboard tiles
 
-**What RankWeb is left with** (its own UI work, after this plan): Dashboard (SEO health: items missing titles, descriptions or schema; FAQ coverage; noindex counts) · FAQ · Settings (rules and modules). In phase 1 RankWeb only loses the Search Insights items; its new Dashboard is a separate piece of work.
+Every window is "28 days to the newest stored day" (Search Console runs 2–3 days behind), compared with the 28 days before; the change chip shows only when both windows are fully stored, as `aw_seo_dash_gsc()` does today. Source line: the source's name and the newest stored day, linking to its row in Settings → Connected services.
+
+| Tile | Number | Sub-line | Change chip | From |
+|---|---|---|---|---|
+| Impressions | Sum of `impr` | "Search Console, to {day}" | % against the 28 days before | `wp_aw_si_obs` src `gsc`, metric `total`, period `day` (same query as `aw_seo_dash_gsc()`) |
+| Clicks | Sum of `clicks` | Click rate (clicks ÷ impressions) | % against the 28 days before | Same rows |
+| Average position | Impression-weighted mean of `pos` | "Lower is better" | Places up or down (text label "up 0.4", never colour alone) | Same rows. New query: the number must be checked once against Search Console's own site average |
+| Quick wins | Count of keyword records matching `aw_si_quick_sql()` (position 8–20, at least `AW_SI_QUICK_MIN` impressions) | Their impressions in total | Count against 28 days before | `wp_aw_si_keywords`; history needs the daily counts below |
+| Conflicts | Count with `status = 'conflict'` | Keywords with two owning pages or Google showing another page | Count against 28 days before | `wp_aw_si_keywords`; same note |
+
+Counts of quick wins and conflicts are not kept by day today. The daily run (`aw_si_daily`, after the calculation) writes one row each into `wp_aw_si_obs` (src `si`, metric `quick_count` / `conflict_count`, period `day`): existing table and columns, no new call. Until 56 days are stored those two tiles show no change chip. The rollup keeps the last value per month for them (added through the existing `aw_si_last_value_metrics` filter). Clarity and Bing have no separate on/off option: each is on when its key is set (`aw_si_clarity_on()`, `aw_si_bing_on()`).
+
+"Select metrics" (shell, saved per user) may also offer, from stored rows: Brand clicks, AI referrals (GA4), 404s still open, Index status (indexed share), PageSpeed mobile median, Clarity pages flagged, Rising terms new this week, External links. Default set: the five above.
+
+#### 2.2.2 Dashboard section chips
+
+Chips: **Keywords · Pages · Rising · Links · Speed**. Each opens its section of shell widgets (charts and short tables) fed by `sections/<key>`, with a link into the full list where there is one. Every Overview box of today lands in one section, so nothing is lost:
+
+| Chip | Widgets (from today's boxes and tabs) |
+|---|---|
+| Keywords | Clicks per day (chart), Priorities (counts per P1–P4), Movers, Brand, Content gaps; links into the Keywords views |
+| Pages | Pages (per page: Search Console, GA4, PageSpeed, Clarity, Rank Math score), Not found (404s), Index status, Discover and Google News, Searches on our site, Top referrers, AI referrals, Campaigns by source |
+| Rising | Rising this week; the Rising list with Mark as noted / Dismiss / Back to new; the paste form |
+| Links | The Links list (views by type, Unsorted, Hidden, Spam; its row and bulk actions), Google Alerts mentions |
+| Speed | PageSpeed, Clarity (site summary, pages by device, notes), Server (crawler requests, 4xx/5xx, PHP errors, hPanel figures), Crawler access, Bing crawl |
+
+The Sources line (each source's last good run and last error, from `aw_si_runs`) shows in the header's status area or as the first widget, as the shell provides.
+
+#### 2.2.3 Keywords (the working list, shell DataView wrapper)
+
+- **Columns** (today's 18, same order): Keyword, Priority, Status, Topic, Page, Impressions (28 days), Clicks, Position, Change, Bing impressions (90 days), Live check, Trends, Volume (imports), Ubersuggest, vidIQ (YouTube), OpenSEO, Suggested action. Shown by default: Keyword, Priority, Status, Page, Impressions, Clicks, Position, Change, Suggested action; the rest are in the columns menu.
+- **Sortable:** Keyword, Priority, Topic, Impressions, Clicks, Position, Change, Trends (as today).
+- **Views:** All, P1, P2, P3, Gaps, Conflicts, Quick wins, Tracked not ranking, Entities, Check list. Each is a saved view whose rule is `aw_si_view_sql()` (Check list: the records in `aw_si_checklist`). In All, the listing names stay one combined "Listing names" row plus the top movers, as today.
+- **Filters:** Topic, Page type (Hub, Directory, Topic, Guide), Role (sourcing, focus, tracked, brand, searched), Language (en, hi, hinglish), plus search.
+- **Bulk actions:** Set priority P1, P2, P3; Use the calculated priority. Check list view: Remove.
+- **Row actions:** Open page; Apply focus keyword, shown only where the suggested action is one. It sends `POST aw/v1/seo-focus` with `dry: true` and shows RankWeb's answer (would write, or why it refuses: another page owns it, not in the SEO title, a News item against an evergreen owner). A second press sends it for real. InsightWeb never writes `rank_math_focus_keyword`.
+- **Check list view:** the bookmarklet for the live check (a draggable link carrying the token from `aw_si_live_token`) sits above the list.
+
+#### 2.2.4 Settings
+
+**Connected services**, each a shell row (status → summary → Edit opens the DataForm with Save, Cancel and Disconnect). Status, in this order: "Not set up" (missing key or module), "Error" (last run failed, with its date and message from `aw_si_runs`), "Late" (last good run older than twice its schedule, the existing rule in `runs.php`), else "Connected, last run {date}". Keys never reach the browser: the form shows "set", "not set" or "set in wp-config.php" (then read-only: change it there).
+
+| Service | Connect steps (Edit) | Status rule | Disconnect |
+|---|---|---|---|
+| Search Console | None in InsightWeb: link to Site Kit's Search Console settings | Site Kit active and its Search Console module connected with an owner; run log `gsc` | Hidden (Site Kit owns it) |
+| GA4 | None in InsightWeb: link to Site Kit's Analytics settings. No GA4 or GTM change | Site Kit's Analytics module connected with an owner; run log `ga4` | Hidden |
+| Clarity | Paste the Data Export token (`AW_CLARITY_TOKEN`). Help: "Clarity → Settings → Data Export → Generate new API token." | Token set (`aw_si_clarity_on()`); run log `clarity`; calls used today of 10 (`aw_si_clarity_calls`) | Clears the token in `aw_keys` |
+| Bing Webmaster | Paste the API key (`AW_BING_WEBMASTER_KEY`). Help as on Keys today | Key set (`aw_si_bing_on()`); run logs `bing`, `bing_crawl`, `bing_kw` | Clears the key |
+| PageSpeed | Optional key (`AW_PSI_KEY`); without one it runs as the Search Console owner, as today | Run log `psi`; "Connected" also with no key | Clears the key |
+| Google Alerts | Up to two RSS feed addresses (`AW_GOOGLE_ALERTS_FEED_1`, `_2`), checked against the Google Alerts feed pattern | At least one valid feed; run log `alerts` | Clears the feeds |
+
+Also shown as rows without a form (status only): Workers (Rising job and outside crawler check, from their last `aw/v1/search-insights` posts) and GDELT (on or off, `aw_si_gdelt_on`; its switch sits in the Sources group below).
+
+**Admin settings groups** (shell groups, plain descriptions, no raw option tables):
+
+| Group | Fields | Stored in |
+|---|---|---|
+| Thresholds | The 7 numbers: High demand Trends, High demand impressions, Quick win impressions, Listing names shown one by one, PageSpeed flag score, Rank Math low score, Daily figures kept (days); "Restore defaults" | `aw_seo_settings['search-insights']` (only values that differ from the default, as today) |
+| Schedules | Read-only times per source (the table in 1.4) and Run now per source: daily update, rollup, GA4, PageSpeed, Bing Webmaster, Clarity ("uses 2 of its 10 daily calls") | Cron; run log |
+| Sources | GDELT on/off | `aw_si_gdelt_on` |
+| Keyword tools | Seeds for keyword tools (one per line) | `aw_si_tool_seeds` |
+| Imports | File imports and paste forms (today's `aw_si_settings_rows`: Ubersuggest, vidIQ, OpenSEO and the other kinds in `aw_si_import_kinds`) | As today |
+| Snapshot | Download the monthly snapshot CSV; the keyword map rebuild note | As today |
+| Data | Keyword map seed status; Delete Search Insights data (typed DELETE) | As today |
+
+#### 2.2.5 Shell parts the pilot needs that may not be in the shell yet
+
+To check against `docs/kits-plugin-ui.md` once it exists:
+
+1. **Tiles anchored on the source's own last day,** not on today: a per-tile "to {day}" and the date range applied as "N days to the newest stored day".
+2. **A change chip that can be absent** (comparison window not fully stored) with its own text, and a count-type change ("+12") as well as a percentage and a position change where lower is better.
+3. **A full list inside a Dashboard section** (Pages, Rising, Links are paged lists with row and bulk actions), since the plugin has only three menu items. Either the DataView wrapper works inside a section, or the shell allows a secondary list screen per section.
+4. **Disconnect that a service can hide** (Search Console and GA4 belong to Site Kit), and a key field that is read-only when a `wp-config.php` constant wins.
+5. **Long-running actions with progress:** Run now for PageSpeed and URL Inspection work in steps over minutes; the shell needs a started / running / done state read from the run log.
+6. **A file upload field in DataForm** (imports) and a **file download action** (snapshot CSV).
+7. **A danger-zone action with a typed confirmation** (Delete data).
+8. **A custom slot above a list** for the bookmarklet link, and a **paste form** widget (Rising).
+9. **Sections added by another plugin** (`aw_si_tabs`, today SourceWeb's Sourcing keywords), only if owner question 3 keeps it in InsightWeb.
+10. **The WordPress Dashboard box** (`dashboard.php`) stays a core dashboard widget outside the shell, unless the shell offers one.
+
+**Build notes (shell-independent):** data comes from InsightWeb's REST routes with `api-fetch` nonces; capabilities per route as above; JS strings in the `insightweb` text domain with `wp_set_script_translations()`; InsightWeb's own script per screen registers its tiles, columns, groups and services and is enqueued only there; performance budget per screen as the shell sets it (proposed for the pilot: under 150 KB gzip of InsightWeb's own JS per screen, first data within 1 s on a warm cache, at most 3 requests on first render, no remote call on page load); notices only on InsightWeb's own screens, always dismissible; WCAG 2.2 AA through the shell's components.
+
+**What RankWeb is left with** (its own UI work, after the pilot): Dashboard (SEO health: items missing titles, descriptions or schema; FAQ coverage; noindex counts) · FAQ · Settings (rules and modules), on the same shell. In phase 1 RankWeb only loses the Search Insights items.
 
 ## 3. Moving it out
 
@@ -278,18 +347,20 @@ Each phase is complete and checked on live before the next starts. Each ships on
 |---|---|---|---|
 | **1. Move the code, no visible change** | `insightweb/` with the loader, the 37 files it loads (7 of them pull in the 7 list tables) and `data/`; bootstrap with guard; the bridge in RankWeb; RankWeb's loader, module list, deactivation, Overview row, Kits row and header edited (1.1); `aw_si_api_allowed()`, InsightWeb's own form for the 7 numbers, guard on `aw_seo_kp_replay()`; Rank Math checks per read; text domain; smoke test and load-order test; `docs/plugin-map.md` rows moved. About 14,000 lines moved, about 300 changed. | M (mostly moves) | Medium: load order and cron gaps (3.2); a missed RankWeb helper would show as a fatal in the smoke test, not on live |
 | **1b. Activate, then remove the bridge** | Owner activates InsightWeb; after one clean daily run, the bridge goes | S | Low |
-| **2a. Prototypes** | Clickable HTML prototypes of Dashboard, Keywords and Settings beside the Site Kit reference; owner's yes. Needs `docs/admin-ui-spec.md` and the Kits admin design system plan | S | Low |
-| **2b. REST and Settings** | Read-only REST routes per screen, the settings and keys routes, Connected services, the thresholds and schedules; Core hides Kits → Keys when empty | M | Medium: keys and settings must round-trip with nothing lost; checked by the before/after record |
-| **2c. Dashboard** | Tiles, chips and sections, Select metrics, the Sources line | M | Low: read only |
-| **2d. Keywords** | The working list with its views, row actions and Apply through `aw/v1/seo-focus` | M | Medium: the only write path (to RankWeb, through its own rules) |
-| **2e. Menu and redirects** | Own top-level menu, the old tabbed screen retired, redirects (3.3), Sourcing keywords handed to SourceWeb, full deactivation list (1.4) | S | Low |
+| **2a. Prototypes (with the shell)** | Clickable HTML prototypes of InsightWeb's Dashboard, Keywords and Settings, made from the shell's prototype beside the Site Kit reference; owner's yes. The 2.2.5 list checked against `docs/kits-plugin-ui.md` | S | Low |
+| **2b. REST routes** | The `kits/v1/insightweb/…` routes (2.2), cached reads, the daily `quick_count` / `conflict_count` rows; can ship before the shell, with no screen change | M | Low: read only, except the services and settings writes, checked by the before/after record |
+| **2c. Settings on the shell** | Connected services and settings groups registered; Core hides Kits → Keys when empty | M | Medium: keys and settings must round-trip with nothing lost |
+| **2d. Dashboard on the shell** | Tiles, chips and sections registered | M | Low: read only |
+| **2e. Keywords on the shell** | Columns, views, filters, bulk and row actions; Apply through `aw/v1/seo-focus` | M | Medium: the only write path (to RankWeb, through its own rules) |
+| **2f. Menu and redirects** | Own top-level menu, the old tabbed screen retired, redirects (3.3), Sourcing keywords handed to SourceWeb, full deactivation list (1.4) | S | Low |
 
-Phase 2 depends on the Kits admin design system being in Kits Core; if that comes later, 2b can ship its REST routes first and the screens wait.
+Phase 2 runs alongside the shell's own first phase in Kits Core (shell plus pilot first, then RankWeb, SourceWeb, MailWeb, DirectoryWeb, PlanWeb). 2c–2e wait for the shell parts they use; 2b does not.
 
 ## 5. Owner questions
 
 1. **Kits Core requirement:** InsightWeb checks for Kits Core and Animal Writes Core in code instead of a `Requires Plugins:` header, because Kits Core is loaded by Animal Writes Core on live and is not always active on its own. OK?
 2. **Proof "on a copy of live":** staging is stale and local test sites are off the table. OK to prove with the CI tests plus read-only before/after records on live (3.4), or should staging be refreshed first (hPanel steps in `docs/staging.md`)?
 3. **Sourcing keywords:** move it into SourceWeb's own Keywords list in phase 2 (recommended), or keep it as an extra section inside InsightWeb?
-4. **Admin UI:** this plan follows the later 11 Nov log entry (Kits admin design system, WordPress packages for plumbing only), not the brief's `@wordpress/components` / `@wordpress/dataviews` line. Confirm.
-5. **Deactivation list (1.4):** clear all 18 InsightWeb jobs in 1.4 on deactivation from phase 2e, instead of today's 8?
+4. **Admin UI:** phase 2 is the pilot of the shared Kits Core shell and registers into it (2.2), following the later 11 Nov log entries rather than the brief's `@wordpress/components` / `@wordpress/dataviews` line. Confirm.
+5. **Deactivation list (1.4):** clear all 18 InsightWeb jobs in 1.4 on deactivation from phase 2f, instead of today's 8?
+6. **Two new daily rows (2.2.1):** OK for the daily run to store the quick-win and conflict counts in `wp_aw_si_obs`, so those tiles can show a change? (No new call, no new table.)
