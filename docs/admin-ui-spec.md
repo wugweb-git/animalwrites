@@ -1,6 +1,6 @@
 # Kits admin UI: spec
 
-Status: draft for review, 11 Nov 2026. Spec only. Nothing here is built yet.
+Status: approved by the owner, 11 Nov 2026. Phase 1 is being built one part at a time; the four questions at the end take the answers written in the spec (sticky header switch added; Kits writes Socials into Rank Math; breakpoints read-only; Keys and Modules stay until the plugin screens exist).
 
 Scope: the Kits menu and the screens Animal Writes adds to it. The plugin dashboards (RankWeb, SourceWeb, MailWeb, Directory) are specified separately. This document only names where items moved out of Kits land in them.
 
