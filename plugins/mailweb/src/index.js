@@ -3,7 +3,8 @@
  * (@kits/shell is window.kits.shell from Kits Core) and fed by the mailweb/v1 routes. Data and the screen come from
  * window.mailwebApp (includes/mailweb-ui.php).
  *
- * Nothing here sends an email. Opening a message, replying and writing a new one stay on the current Inbox screen.
+ * Nothing here sends an email. The Inbox (src/inbox.js) reads messages in place; replying and writing a new one
+ * stay on the current compose screen.
  */
 import {
 	createRoot,
@@ -18,7 +19,6 @@ import {
 	AppHeader,
 	Button,
 	ChipRow,
-	DataList,
 	EmptyState,
 	ErrorState,
 	Field,
@@ -35,6 +35,7 @@ import {
 	Tile,
 	TileGrid,
 } from '@kits/shell'; // eslint-disable-line import/no-unresolved -- Kits Core's shell script (window.kits.shell), mapped in webpack.config.js
+import Inbox from './inbox';
 
 const app = window.mailwebApp || {};
 const path = ( p ) => `/${ app.rest }/${ p }`;
@@ -618,231 +619,6 @@ function SendingStatus( { data, busy, act } ) {
 					[ __( 'Order', 'mailweb' ), st.rule ],
 					[ __( 'FluentCRM', 'mailweb' ), st.pacing ],
 				] }
-			/>
-		</SectionCard>
-	);
-}
-
-/* ---------- Inbox ---------- */
-
-/** The list's place from the address, so a reload or a link opens the same view. */
-function inboxStart() {
-	const q = new URLSearchParams( window.location.search );
-	return {
-		box: q.get( 'box' ) || 'all',
-		folder: q.get( 'folder' ) || 'inbox',
-		search: q.get( 's' ) || '',
-		page: Math.max( 1, parseInt( q.get( 'paged' ) || '1', 10 ) || 1 ),
-	};
-}
-
-function Inbox() {
-	const [ st, setSt ] = useState( inboxStart );
-	const [ data, setData ] = useState( null );
-	const [ loading, setLoading ] = useState( true );
-	const [ error, setError ] = useState( '' );
-	const [ note, setNote ] = useState( null );
-
-	const load = useCallback( () => {
-		setLoading( true );
-		setError( '' );
-		apiFetch( {
-			path: `${ path( 'inbox' ) }?${ new URLSearchParams( st ).toString() }`,
-		} )
-			.then( ( r ) => setData( r ) )
-			.catch( ( e ) => setError( errText( e ) ) )
-			.finally( () => setLoading( false ) );
-	}, [ st ] );
-	useEffect( load, [ load ] );
-	// Keep the address in step (same page, &ui=next kept).
-	useEffect( () => {
-		const url = new URL( window.location.href );
-		[
-			[ 'box', 'all' === st.box ? '' : st.box ],
-			[ 'folder', 'inbox' === st.folder ? '' : st.folder ],
-			[ 's', st.search ],
-			[ 'paged', st.page > 1 ? String( st.page ) : '' ],
-		].forEach( ( [ k, v ] ) =>
-			v ? url.searchParams.set( k, v ) : url.searchParams.delete( k )
-		);
-		window.history.replaceState( null, '', url.toString() );
-	}, [ st ] );
-
-	const go = ( patch ) => setSt( ( s ) => ( { ...s, page: 1, ...patch } ) );
-	const run = ( action, ids ) =>
-		apiFetch( {
-			path: path( 'inbox/bulk' ),
-			method: 'POST',
-			data: { action, ids, folder: st.folder },
-		} )
-			.then( ( r ) => {
-				setNote( {
-					tone: r.ok ? 'success' : 'error',
-					text: r.message,
-				} );
-				load();
-			} )
-			.catch( ( e ) => setNote( { tone: 'error', text: errText( e ) } ) );
-
-	const cols = data?.columns || {};
-	const columns = [
-		{
-			key: 'from',
-			label: cols.from || __( 'From', 'mailweb' ),
-			render: ( r ) => (
-				<>
-					{ r.unread ? <strong>{ r.from }</strong> : r.from }
-					{ r.unread && (
-						<span className="screen-reader-text">
-							{ ' ' }
-							{ __( '(unread)', 'mailweb' ) }
-						</span>
-					) }
-					{ r.email && (
-						<>
-							<br />
-							<span className="kits-shell-field__help">
-								{ r.email }
-							</span>
-						</>
-					) }
-				</>
-			),
-		},
-		{
-			key: 'subject',
-			label: cols.subject || __( 'Subject', 'mailweb' ),
-			primary: true,
-			render: ( r ) => (
-				<>
-					<a href={ r.openUrl }>
-						{ r.unread ? (
-							<strong>{ r.subject }</strong>
-						) : (
-							r.subject
-						) }
-					</a>
-					{ r.files && (
-						<span>
-							{ ' · ' }
-							{ __( 'Has attachments', 'mailweb' ) }
-						</span>
-					) }
-				</>
-			),
-		},
-		...( cols.mailbox
-			? [ { key: 'mailbox', label: __( 'Mailbox', 'mailweb' ) } ]
-			: [] ),
-		{ key: 'date', label: __( 'Date', 'mailweb' ) },
-	];
-	const offered = ( a ) =>
-		( data?.bulk || [] ).some( ( b ) => b.value === a );
-	const rowActions = ( r ) => {
-		const acts = [ { label: __( 'Open', 'mailweb' ), href: r.openUrl } ];
-		if ( r.replyUrl ) {
-			acts.push( { label: __( 'Reply', 'mailweb' ), href: r.replyUrl } );
-		}
-		if ( offered( 'archive' ) ) {
-			acts.push( {
-				label: __( 'Archive', 'mailweb' ),
-				onClick: () => run( 'archive', [ r.id ] ),
-			} );
-		}
-		acts.push(
-			r.unread
-				? {
-						label: __( 'Mark read', 'mailweb' ),
-						onClick: () => run( 'read', [ r.id ] ),
-					}
-				: {
-						label: __( 'Mark unread', 'mailweb' ),
-						onClick: () => run( 'unread', [ r.id ] ),
-					}
-		);
-		if ( offered( 'trash' ) ) {
-			acts.push( {
-				label: __( 'Trash', 'mailweb' ),
-				tone: 'error',
-				onClick: () => run( 'trash', [ r.id ] ),
-			} );
-		}
-		return acts;
-	};
-	let emptyTitle = __( 'No messages.', 'mailweb' );
-	if ( data?.failed ) {
-		emptyTitle = __(
-			'The mailbox could not be read just now. Try again in a minute.',
-			'mailweb'
-		);
-	} else if ( st.search ) {
-		emptyTitle = __( 'Nothing matches your search.', 'mailweb' );
-	}
-
-	return (
-		<SectionCard
-			id="inbox"
-			title={ __( 'Inbox', 'mailweb' ) }
-			description={ __(
-				'Read in step with Hostinger webmail: what you read, move or send here shows there too.',
-				'mailweb'
-			) }
-			actions={
-				<a
-					className="kits-shell-button is-primary"
-					href={ app.composeUrl }
-				>
-					{ __( 'New message', 'mailweb' ) }
-				</a>
-			}
-		>
-			{ note && (
-				<Notice tone={ note.tone } onDismiss={ () => setNote( null ) }>
-					{ note.text }
-				</Notice>
-			) }
-			<DataList
-				label={ __( 'Messages', 'mailweb' ) }
-				columns={ columns }
-				rows={ data?.rows || [] }
-				rowTitle="subject"
-				total={ data?.total || 0 }
-				page={ st.page }
-				pages={ data?.pages || 1 }
-				onPage={ ( p ) => setSt( ( s ) => ( { ...s, page: p } ) ) }
-				search={ st.search }
-				onSearch={
-					false === cols.search
-						? undefined
-						: ( w ) => go( { search: w } )
-				}
-				searchLabel={ __( 'Search mail', 'mailweb' ) }
-				filters={
-					( data?.boxes || [] ).length > 1
-						? [
-								{
-									key: 'box',
-									label: __( 'Mailbox', 'mailweb' ),
-									options: data.boxes,
-									value: st.box,
-								},
-							]
-						: []
-				}
-				onFilter={ ( k, v ) => go( { [ k ]: v } ) }
-				views={ ( data?.views || [] ).map( ( v ) => ( {
-					...v,
-					count: v.count || undefined,
-				} ) ) }
-				view={ st.folder }
-				onView={ ( v ) => go( { folder: v, search: '' } ) }
-				bulkActions={ data?.bulk || [] }
-				onBulk={ run }
-				rowActions={ rowActions }
-				loading={ loading }
-				error={ error }
-				onRetry={ load }
-				emptyTitle={ emptyTitle }
 			/>
 		</SectionCard>
 	);
