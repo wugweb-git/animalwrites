@@ -36,7 +36,13 @@ function mailweb_table() {
 
 /** Settings: budget per rolling 24 hours, and the part kept back from campaigns. */
 function mailweb_cap_settings() {
-	$s = wp_parse_args( (array) get_option( 'mailweb_cap', array() ), array( 'budget' => 90, 'reserve' => 10 ) );
+	$s            = wp_parse_args(
+		(array) get_option( 'mailweb_cap', array() ),
+		array(
+			'budget'  => 90,
+			'reserve' => 10,
+		)
+	);
 	$s['budget']  = max( 1, (int) $s['budget'] );
 	$s['reserve'] = min( $s['budget'] - 1, max( 0, (int) $s['reserve'] ) );
 	return $s;
@@ -118,7 +124,14 @@ function mailweb_is_block_error( $msg ) {
 /** Stop all sending until someone presses Resume. No email is used to tell anyone. */
 function mailweb_pause( $msg ) {
 	if ( ! mailweb_paused() ) {
-		update_option( 'mailweb_pause', array( 'at' => time(), 'error' => $msg ), false );
+		update_option(
+			'mailweb_pause',
+			array(
+				'at'    => time(),
+				'error' => $msg,
+			),
+			false
+		);
 		mailweb_stat( 'paused' );
 	}
 }
@@ -131,7 +144,11 @@ function mailweb_mark_failed( $id, $msg ) {
 		return;
 	}
 	$tries = (int) $row->tries + 1;
-	$wait  = array( 1 => 15 * MINUTE_IN_SECONDS, 2 => HOUR_IN_SECONDS, 3 => 6 * HOUR_IN_SECONDS );
+	$wait  = array(
+		1 => 15 * MINUTE_IN_SECONDS,
+		2 => HOUR_IN_SECONDS,
+		3 => 6 * HOUR_IN_SECONDS,
+	);
 	$wpdb->update( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own queue table
 		mailweb_table(),
 		array(
@@ -142,7 +159,14 @@ function mailweb_mark_failed( $id, $msg ) {
 		),
 		array( 'id' => (int) $id )
 	); // phpcs:ignore
-	update_option( 'mailweb_last_error', array( 'at' => time(), 'error' => $msg ), false );
+	update_option(
+		'mailweb_last_error',
+		array(
+			'at'    => time(),
+			'error' => $msg,
+		),
+		false
+	);
 	mailweb_stat( 'rejected' );
 	if ( mailweb_is_block_error( $msg ) ) {
 		mailweb_pause( $msg );
@@ -153,9 +177,9 @@ function mailweb_mark_failed( $id, $msg ) {
 add_action(
 	'wp_mail_failed',
 	function ( $err ) {
-		$msg = mailweb_clean_error( is_wp_error( $err ) ? $err->get_error_message() : 'Send failed' );
+		$msg                           = mailweb_clean_error( is_wp_error( $err ) ? $err->get_error_message() : 'Send failed' );
 		$GLOBALS['mailweb_last_error'] = '' === $msg ? 'Send failed' : $msg;
-		$id = (int) ( $GLOBALS['mailweb_direct_id'] ?? 0 );
+		$id                            = (int) ( $GLOBALS['mailweb_direct_id'] ?? 0 );
 		if ( $id ) {
 			unset( $GLOBALS['mailweb_direct_id'] );
 			mailweb_mark_failed( $id, $GLOBALS['mailweb_last_error'] );
@@ -247,11 +271,11 @@ add_filter(
 
 add_filter(
 	'pre_wp_mail',
-	function ( $return, $atts ) {
+	function ( $pre, $atts ) {
 		$p = mailweb_priority();
 		unset( $GLOBALS['mailweb_next_priority'], $GLOBALS['mailweb_direct_id'], $GLOBALS['mailweb_last_error'] ); // for this email only
-		if ( null !== $return || ! empty( $GLOBALS['mailweb_flushing'] ) ) {
-			return $return; // another filter decided, or this is the queue sending
+		if ( null !== $pre || ! empty( $GLOBALS['mailweb_flushing'] ) ) {
+			return $pre; // another filter decided, or this is the queue sending
 		}
 		global $wpdb;
 		$now    = gmdate( 'Y-m-d H:i:s' );
@@ -263,17 +287,34 @@ add_filter(
 			'headers'     => $atts['headers'] ?? '',
 			'attachments' => array_values( array_filter( (array) ( $atts['attachments'] ?? array() ), 'is_string' ) ),
 		);
-		$json = wp_json_encode( $mail );
+		$json   = wp_json_encode( $mail );
 		if ( ! $resend && ! mailweb_paused() && mailweb_room( $p ) > 0 && 0 === mailweb_queued( $p ) ) {
 			// Sent at once, but kept as "sending" with its content until the mail server accepts it.
-			$ok = $json ? $wpdb->insert( mailweb_table(), array( 'priority' => $p, 'status' => 'sending', 'mail' => $json, 'created_at' => $now ) ) : false; // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			$ok = $json ? $wpdb->insert(
+				mailweb_table(),
+				array(
+					'priority'   => $p,
+					'status'     => 'sending',
+					'mail'       => $json,
+					'created_at' => $now,
+				)
+			) : false; // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 			if ( $ok ) {
 				$GLOBALS['mailweb_direct_id'] = (int) $wpdb->insert_id;
 				mailweb_stat( 'sent_direct' );
 			}
 			return null; // wp_mail sends it now
 		}
-		$ok = $wpdb->insert( mailweb_table(), array( 'priority' => $p, 'status' => 'queued', 'mail' => $json, 'created_at' => $now, 'resend' => $resend ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$ok = $wpdb->insert(
+			mailweb_table(),
+			array(
+				'priority'   => $p,
+				'status'     => 'queued',
+				'mail'       => $json,
+				'created_at' => $now,
+				'resend'     => $resend,
+			)
+		); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		if ( ! $ok ) {
 			return null; // could not queue: send rather than lose it
 		}
@@ -313,7 +354,7 @@ function mailweb_flush( $max = 40 ) {
 		if ( mailweb_room( 1 ) < 1 ) {
 			break;
 		}
-		$now      = gmdate( 'Y-m-d H:i:s' );
+		$now       = gmdate( 'Y-m-d H:i:s' );
 		$resent_h = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$t} WHERE resend = 1 AND status IN ('sent','sending') AND sent_at > %s", gmdate( 'Y-m-d H:i:s', time() - HOUR_IN_SECONDS ) ) ); // phpcs:ignore
 		$no_resend = $resent_h >= 5 ? ' AND resend = 0' : ''; // re-sends of lost emails: at most 5 an hour
 		$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$t} WHERE status IN ('queued','failed') AND mail IS NOT NULL AND (next_try IS NULL OR next_try <= %s) AND priority <= %d{$no_resend} ORDER BY priority, id LIMIT 1", $now, $camp ) ); // phpcs:ignore
@@ -329,9 +370,9 @@ function mailweb_flush( $max = 40 ) {
 		$wpdb->update( $t, array( 'status' => 'sending', 'sent_at' => $now ), array( 'id' => (int) $row->id ) ); // phpcs:ignore
 		unset( $GLOBALS['mailweb_last_error'], $GLOBALS['mailweb_direct_id'] );
 		$GLOBALS['mailweb_flushing'] = true;
-		$ok = wp_mail( $m['to'], (string) ( $m['subject'] ?? '' ), (string) ( $m['message'] ?? '' ), $m['headers'] ?? '', $files );
+		$ok                          = wp_mail( $m['to'], (string) ( $m['subject'] ?? '' ), (string) ( $m['message'] ?? '' ), $m['headers'] ?? '', $files );
 		$GLOBALS['mailweb_flushing'] = false;
-		$err = $GLOBALS['mailweb_last_error'] ?? '';
+		$err                         = $GLOBALS['mailweb_last_error'] ?? '';
 		if ( $ok && '' === $err ) {
 			$wpdb->update( $t, array( 'status' => 'sent', 'sent_at' => gmdate( 'Y-m-d H:i:s' ), 'mail' => null, 'error' => null ), array( 'id' => (int) $row->id ) ); // phpcs:ignore
 			mailweb_stat( 'sent_from_queue' );
@@ -411,22 +452,22 @@ add_action(
 		echo '<p>' . esc_html__( 'Mail plans limit how many emails a mailbox may send in any 24 hours. The site keeps under the limit below; anything over it waits in the queue and is sent as the limit frees: replies typed in FluentCRM first, then notices, then sign-up confirmations, then newsletter campaigns.', 'mailweb' ) . '</p>';
 		echo '<table class="form-table" role="presentation"><tbody>';
 		$rows = array(
-			__( 'Sent in the last 24 hours', 'mailweb' )                 => sprintf(
+			__( 'Sent in the last 24 hours', 'mailweb' )  => sprintf(
 				/* translators: 1: emails sent in the last 24 hours, 2: the daily limit */
 				__( '%1$d of %2$d', 'mailweb' ),
 				mailweb_sent_24h(),
 				$s['budget']
 			),
-			__( 'Waiting: replies from FluentCRM', 'mailweb' )           => (int) ( $q[0] ?? 0 ),
-			__( 'Waiting: notices', 'mailweb' )                          => (int) ( $q[1] ?? 0 ),
-			__( 'Waiting: sign-up confirmations', 'mailweb' )            => (int) ( $q[2] ?? 0 ),
-			__( 'Waiting: newsletter campaigns', 'mailweb' )             => (int) ( $q[3] ?? 0 ),
-			__( 'Oldest waiting since (UTC)', 'mailweb' )                => $old ? $old : '–',
-			__( 'Queued (waiting for the limit or a slot)', 'mailweb' )  => (int) ( $by['queued'] ?? 0 ),
-			__( 'Failed, will be retried', 'mailweb' )                   => (int) ( $by['failed'] ?? 0 ),
-			__( 'Held after 4 failed tries', 'mailweb' )                 => (int) ( $by['held'] ?? 0 ),
-			__( 'Sent today', 'mailweb' )                                => $today,
-			__( 'Last error', 'mailweb' )                                => $last ? wp_date( 'j M H:i', (int) $last['at'] ) . ': ' . $last['error'] : '–',
+			__( 'Waiting: replies from FluentCRM', 'mailweb' ) => (int) ( $q[0] ?? 0 ),
+			__( 'Waiting: notices', 'mailweb' )           => (int) ( $q[1] ?? 0 ),
+			__( 'Waiting: sign-up confirmations', 'mailweb' ) => (int) ( $q[2] ?? 0 ),
+			__( 'Waiting: newsletter campaigns', 'mailweb' ) => (int) ( $q[3] ?? 0 ),
+			__( 'Oldest waiting since (UTC)', 'mailweb' ) => $old ? $old : '–',
+			__( 'Queued (waiting for the limit or a slot)', 'mailweb' ) => (int) ( $by['queued'] ?? 0 ),
+			__( 'Failed, will be retried', 'mailweb' )    => (int) ( $by['failed'] ?? 0 ),
+			__( 'Held after 4 failed tries', 'mailweb' )  => (int) ( $by['held'] ?? 0 ),
+			__( 'Sent today', 'mailweb' )                 => $today,
+			__( 'Last error', 'mailweb' )                 => $last ? wp_date( 'j M H:i', (int) $last['at'] ) . ': ' . $last['error'] : '–',
 			__( 'All time: sent at once / queued / sent from the queue', 'mailweb' ) => (int) ( $stats['sent_direct'] ?? 0 ) . ' / ' . (int) ( $stats['queued'] ?? 0 ) . ' / ' . (int) ( $stats['sent_from_queue'] ?? 0 ),
 		);
 		foreach ( $rows as $k => $v ) {
@@ -483,7 +524,16 @@ add_action(
 		}
 		if ( 'flush' === $do ) {
 			$n = mailweb_flush();
-			wp_safe_redirect( mailweb_settings_url( 'sending', array( 'mailweb_cap' => 'flushed', 'n' => (int) $n ), 'cap' ) );
+			wp_safe_redirect(
+				mailweb_settings_url(
+					'sending',
+					array(
+						'mailweb_cap' => 'flushed',
+						'n'           => (int) $n,
+					),
+					'cap'
+				)
+			);
 			exit;
 		}
 		// phpcs:disable WordPress.Security.ValidatedSanitizedInput -- mailweb_cap_clean() takes whole numbers only.
