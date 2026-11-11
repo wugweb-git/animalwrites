@@ -165,7 +165,12 @@ function Reader( {
 } ) {
 	const head = useRef( null );
 	useEffect( () => {
-		if ( msg && head.current ) {
+		// Below 1200px the message replaces the list, so focus moves to it; beside the list it stays put.
+		if (
+			msg &&
+			head.current &&
+			! window.matchMedia( '(min-width: 1200px)' ).matches
+		) {
 			head.current.focus();
 		}
 	}, [ msg ] );
@@ -391,9 +396,10 @@ export default function Inbox() {
 	}, [ st ] );
 	useEffect( load, [ load ] );
 
-	const want = useRef( '' ); // the message last asked for: a slower, older answer is dropped.
+	const want = useRef( '' ); // the message (and pictures choice) last asked for: an older answer is dropped.
 	const loadMsg = useCallback( () => {
-		want.current = open;
+		const key = `${ open }|${ images }`;
+		want.current = key;
 		if ( ! open ) {
 			setMsg( null );
 			return;
@@ -409,11 +415,11 @@ export default function Inbox() {
 				args
 			).toString() }`,
 		} )
-			.then( ( r ) => want.current === open && setMsg( r ) )
+			.then( ( r ) => want.current === key && setMsg( r ) )
 			.catch(
-				( e ) => want.current === open && setMsgError( errText( e ) )
+				( e ) => want.current === key && setMsgError( errText( e ) )
 			)
-			.finally( () => want.current === open && setMsgLoading( false ) );
+			.finally( () => want.current === key && setMsgLoading( false ) );
 	}, [ open, images, st.folder ] );
 	useEffect( loadMsg, [ loadMsg ] );
 
@@ -468,8 +474,9 @@ export default function Inbox() {
 					tone: r.ok ? 'success' : 'error',
 					text: r.message,
 				} );
-				if ( r.ok && ids.includes( open ) ) {
-					setOpen( '' ); // moved, or marked unread: back to the list.
+				if ( r.ok ) {
+					// Moved, or marked unread: back to the list, unless another message was opened meanwhile.
+					setOpen( ( o ) => ( ids.includes( o ) ? '' : o ) );
 				}
 				load();
 			} )
