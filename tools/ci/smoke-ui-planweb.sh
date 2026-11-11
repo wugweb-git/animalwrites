@@ -47,6 +47,9 @@ if [ "$(wp post get "$ID" --field=post_status)" = "trash" ]; then echo "ok   ent
 BEFORE=$(optmd5 planweb_on aw_team_dates)
 want 200 "POST /$PW/settings/switch unchanged Save" -X POST "${AJ[@]}" -d '{"on":true}' "$P/settings/switch"
 grep -q '"saved":false' /tmp/rw.out && echo "ok   unchanged Save reports nothing saved" || { echo "FAIL unchanged Save wrote"; FAIL=1; }
+# Core's one-time admin steps may have added Dates rows since the first import: the route takes those in first, then
+# a run on the same Dates adds nothing.
+want 200 "POST /$PW/import (rows added since the first import)" -X POST "${AJ[@]}" "$P/import"
 PW_N=$(wp post list --post_type=planweb_entry --post_status=any --format=count)
 want 200 "POST /$PW/import again" -X POST "${AJ[@]}" "$P/import"
 PW_M=$(wp post list --post_type=planweb_entry --post_status=any --format=count)
