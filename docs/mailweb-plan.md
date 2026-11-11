@@ -5,7 +5,7 @@ Status: plan only, for the owner's yes (owner, 11 Nov 2026). No code until it is
 ## Fixed for this plan (owner)
 
 - **Data stays as it is.** Every option, the queue table, the webhook routes, hooks, filters, cron hooks, menu slugs and the `mailweb_` prefix keep their names. The one slug change is the owner's menu decision (§10): `mailweb` opens the Dashboard and the Inbox moves to `mailweb-inbox`, with redirects (§5). New REST routes go under MailWeb's own namespace, `mailweb/v1/…`, beside `mailweb/v1/mail-in` (as DirectoryWeb uses `directoryweb/v1`), never under `kits/v1`. MailWeb is 3.2.1 and is already the model for release files (`readme.txt`, `languages/`, `MAILWEB_VERSION`).
-- **Mail rules.** support@ sends outgoing mail and replies; noreply@ sends bulk and automatic mail only; vedanshu@ is for partnerships only; the public address is contact@. Nothing is sent without the owner's yes. No test sends, so no proof in this plan sends an email. Forms send no email (`aw_ff_mail_off()`, `animal-writes-core/includes/forms-fluentforms.php:34`), and nothing here changes that.
+- **Mail rules.** support@ sends outgoing mail and replies; noreply@ sends bulk and automatic mail only; the partnership mailbox is for partnerships only; the public address is contact@. Nothing is sent without the owner's yes. No test sends, so no proof in this plan sends an email. Forms send no email (`aw_ff_mail_off()`, `animal-writes-core/includes/forms-fluentforms.php:34`), and nothing here changes that.
 - **No ship during a FluentCRM send.** `tools/aw-ship.sh` and the Deploy check already refuse (`tools/ci/mail_sending_check.py` reads `aw/v1/deploy-status`). Every phase ships on the owner's yes, one deploy at a time.
 - **The admin is the shared Kits Core shell.** MailWeb only registers parts into it.
 
@@ -146,7 +146,7 @@ The shell's spec row is: Dashboard (mailboxes, queue, sent and failed, sending s
 
 | Tile | Number | Sub-line | Change chip | Source named |
 |---|---|---|---|---|
-| Unread mail | Sum of each mailbox's Inbox `unreadCount` (`mailweb_overview_unread()`) | Per mailbox, for example "support@ 3 · vedanshu@ 0". "Shown from 4:12 pm" when the API is down (`stale`) | none (live count) | "Hostinger Mail API, cached 5 minutes, refreshed when mail arrives" |
+| Unread mail | Sum of each mailbox's Inbox `unreadCount` (`mailweb_overview_unread()`) | Per mailbox, for example "support@ 3 · partnerships 0". "Shown from 4:12 pm" when the API is down (`stale`) | none (live count) | "Hostinger Mail API, cached 5 minutes, refreshed when mail arrives" |
 | Website forms | `mailweb_forms_unread()` | Per form when the source gives counts (new optional `counts` key, §7). Otherwise "unread entries" | none | The source's label ("Website forms: Fluent Forms and Contact messages", from Core) |
 | Sent in 24 hours | `mailweb_sent_24h()` "of" `budget` | "Room: notices N · campaigns M" (`mailweb_room(1)`, `mailweb_room(3)`) | vs the 24 hours before (sent rows, `sent_at`) | "Site sending queue (`mailweb_queue`)" |
 | Waiting | `mailweb_queued()` | "Replies a · notices b · confirmations c · campaigns d; oldest since …" | none | same |
@@ -226,7 +226,7 @@ All the logic already exists. The routes call the same functions, which return v
 
 - **From** lists only mailboxes with "Send from it" (`mailweb_send_boxes()`). The default is `mailweb_default_from()`. On live, only support@ sends, as set by the 20 Oct move (`mailweb-aw.php:13`), so every reply goes from support@ unless the owner ticks another mailbox.
 - A line under From reads "Replies go from support@ (Settings → Mailboxes and aliases)". If a message came in to another mailbox, the existing note stays: a reply from another mailbox carries no thread link (`inbox.php:532`).
-- "Send from it" stays off for vedanshu@ (owner, 11 Nov), so it never appears under From. This plan changes no data and adds no way round it.
+- "Send from it" stays off for the partnership mailbox (owner, 11 Nov), so it never appears under From. This plan changes no data and adds no way round it.
 - The signature swaps with From, as today. The campaign strip preview (`mailweb_after_signature`, context `inbox`) shows under the editor.
 - **Editor:** a rich-text field with paste-safe HTML. The server still runs `wp_kses_post` on save (request 4).
 - **Attachments:** a file field, 10 MB in total (request 5).
@@ -247,7 +247,7 @@ Secrets never reach the browser. Each field shows **"set"**, **"not set"** or **
 | Site sending (SMTP) | Mailbox address, sender name, server, port, password (secret) | "Sending through noreply@…" or "Not set up, using the server default". Paused shows as "Error" with the refusal | Clears the password only. The site then sends the server's default way; the form says so before it saves | `POST/DELETE …/services/smtp` |
 | FluentCRM feed | Notes on/off, tag, mailboxes | "Not active" without FluentCRM; "On: N mailboxes"; "Off" | Hidden (it is a switch) | `POST …/services/fluentcrm` |
 
-The **test email** (`smtp.php:125–139`) stays an owner-only action in the SMTP edit form, `POST …/services/smtp/test`, labelled "Sends one email to the admin address". No session presses it, and no proof uses it.
+The **test email** (`smtp.php:125–139`) stays an owner-only action in the SMTP edit form, `POST …/services/smtp/test`, labelled "Sends one email to the admin address". No proof uses it.
 
 ### 4.2 Sending (settings group)
 
@@ -312,10 +312,10 @@ Checked now with the `wp-plugin-audit` method (verified by reading each line). T
 
 | # | Finding | File:line | Fix | Phase |
 |---|---|---|---|---|
-| A1 | Header is in PHPDoc style with `@wordpress-plugin`, `@package`, `@author`, `@copyright`, `@license` ✓, but `Description` is 228 characters (limit 140) and still says "Own menu: Mail (Inbox, Overview, Settings)" | `mailweb.php:12` | Shorten, for example "Hostinger Mail in WordPress: inbox, website form messages, SMTP sending with a daily limit and queue, and a FluentCRM feed." (123 characters). Add `Requires Plugins: kits-core` only when the shell becomes required (phase 2) | 1 |
+| A1 | Header is in PHPDoc style with `@wordpress-plugin`, `@package`, `@author`, `@copyright`, `@license` ✓, but `Description` is 228 characters (limit 140) and still says "Own menu: Mail (Inbox, Overview, Settings)" | `mailweb.php:12` | Shorten, for example "Hostinger Mail in WordPress: inbox, website form messages, SMTP sending with a daily limit and queue, and a FluentCRM feed." (123 characters). No `Requires Plugins` header: no Kits plugin uses it. Animal Writes Core loads Kits Core, and MailWeb checks for the shell in code (`function_exists` / `defined`) and keeps its classic screens when it is missing | 1 |
 | A2 | `readme.txt` has no `== Upgrade Notice ==` | `readme.txt` | Add, one line per release | 1 |
 | A3 | Changelog 3.2.1 says "a MailWeb tab on the Kits screens"; since 10 Nov it is a row on Kits → Plugins (`kits-hub.php:20`) | `readme.txt:78` | Correct in the next changelog entry; history is not rewritten | 1 |
-| A4 | `mailweb.pot` was edited by hand. Its `Report-Msgid-Bugs-To` points at wordpress.org/support (MailWeb is not on WordPress.org). Dated 31 Oct, 227 strings | `languages/mailweb.pot:5–12` | `wp i18n make-pot . languages/mailweb.pot --domain=mailweb --exclude=vendor,node_modules,build --headers='{"Report-Msgid-Bugs-To":"https://wugweb.com/plugins/mailweb/"}'` (the `composer make-pot` script gains the header). From phase 2 also `wp i18n make-json`, with `wp_set_script_translations( …, 'mailweb' )` | every release |
+| A4 | `mailweb.pot` was edited by hand. Its `Report-Msgid-Bugs-To` points at wordpress.org/support (MailWeb is not on WordPress.org). Dated 31 Oct, 227 strings, hand-edited at 3.2.1 | `languages/mailweb.pot:5–12` | Phase 1 regenerates it with `wp i18n make-pot`, and every release after: `wp i18n make-pot . languages/mailweb.pot --domain=mailweb --exclude=vendor,node_modules,build --headers='{"Report-Msgid-Bugs-To":"https://wugweb.com/plugins/mailweb/"}'` (the `composer make-pot` script gains the header). From phase 2 also `wp i18n make-json`, with `wp_set_script_translations( …, 'mailweb' )` | every release |
 | A5 | `MAILWEB_CAP` is defined in `inbox.php:28` but used by `overview.php`, `home.php` and `kits-hub.php` (works because of the require order) | `inbox.php:28` | Move it to `mailweb.php` with the other constants | 1 |
 | A6 | Incoming mail saves during page output, with no redirect after the POST | `mail-in.php:233` | Becomes `POST …/services/mail-api` and `…/webhook/<key>` | 3 |
 | A7 | State-changing GET links (nonced `admin-post.php?action=mailweb_act&do=trash…`) | `inbox.php:204` | REST POST in the shell; the GET handler only in the fallback | 2 |
@@ -338,27 +338,27 @@ Checked now with the `wp-plugin-audit` method (verified by reading each line). T
 
 **Tests and CI.** Today the Deploy check runs `tools/ci/mailweb_addresses_test.php`, PHP lint, the PHPCS security delta and `smoke.sh` (which activates MailWeb). There is no PHPUnit and no Plugin Check. The plan follows the repo's way, pure-PHP tests plus `smoke.sh`, with no local WordPress or MySQL (owner rule):
 
-1. **`plugins/mailweb/tests/run.php`** (pure PHP, small stubs for `get_option` and `update_option`), run by the Deploy check like the SourceWeb tests. It covers:
+1. **Pure-PHP tests as Deploy check steps**, extending `tools/ci/mailweb_addresses_test.php` (small stubs for `get_option` and `update_option`; no WordPress loaded). They cover:
    - `mailweb_is_block_error()`, with every message in its docblock and the recipient cases;
    - `mailweb_clean_error()` (addresses removed, 250 characters);
    - the `X-Mailweb-Priority` header parse;
    - `mailweb_cap_settings()` clamps and `mailweb_room()` for priorities 0–3, including that 1 never takes the campaign share;
    - `mailweb_crypt` round trip and the `mwenc1:` prefix;
    - the alias line parser;
-   - the settings sanitize callbacks.
+   - the settings sanitize callbacks;
+   - the pause-notice rule: shown for a new pause, hidden after a dismiss of the same `at`, shown again for the next pause.
 
-   `mailweb_addresses_test.php` moves in beside them.
 2. **`smoke.sh` additions** (phase 1). They run in CI's throwaway WordPress only:
    - every `mailweb/v1/*` route is registered and none uses `__return_true`;
-   - a logged-out request gets 401, a subscriber 403, an editor 200 on Dashboard and Inbox routes and 403 on Settings routes (`rest_do_request` in `wp eval`);
+   - every `mailweb/v1/*` route refuses signed-out requests (401) and subscriber requests (403); an editor gets 200 on Dashboard and Inbox routes and 403 on Settings routes (`rest_do_request` in `wp eval`);
    - `GET /wp/v2/settings` as admin contains no `mailweb_smtp`, `mailweb_api_token` or `mailweb_secret_*`;
    - the queue table exists at schema 2;
    - `mailweb_flush` and `mailweb_crm_sync` are scheduled.
 
    No mail is sent: there is no SMTP password in CI, and `pre_wp_mail` is short-circuited in the smoke config.
-3. **Plugin Check** in the Deploy check, report mode first (`continue-on-error`, like the settings-parts step): `wp plugin install plugin-check --activate` then `wp plugin check mailweb`, with WordPress.org-only checks left out (`plugin_updater`, `trademarks`), since MailWeb ships by Update URI. It becomes a hard step once the report is clean.
+3. **Plugin Check** in the Deploy check, report mode first (`continue-on-error`, like the settings-parts step): `wp plugin install plugin-check --activate` then `wp plugin check mailweb`, with WordPress.org-only checks left out (`plugin_updater`, `trademarks`), since MailWeb ships by Update URI. It is a report only and never fails the check.
 4. **JS** (phase 2): `wp-scripts lint-js`. The built files are committed, and a Deploy check Node step runs `npm ci && npm run build` and fails if `build/` differs (as PlanWeb §4.6).
-5. PHPUnit is not added. If the owner later wants it, `WP_UnitTestCase` runs in CI's MySQL service, which already exists.
+5. No PHPUnit and no local WordPress or MySQL. Everything runs in the Deploy check as it runs today.
 
 **Release (every phase, `wp-plugin-release`):**
 
@@ -393,20 +393,21 @@ MailWeb builds and styles none of these. Each is checked against `docs/kits-plug
 
 ## 8. Icon
 
-The source is `docs/brand/plugin-icons/`: `mailweb.svg`, plus PNGs at 128, 256 and 1024 pixels. The owner's set lands there separately; this plan does not draw or change it. When it lands, the files are copied into `plugins/mailweb/assets/` under the same names, and the source stays in `docs/brand/`. Where each is used:
+The icon set is on `wordpress-dev` (d5e2bcbb): the source is `docs/brand/plugin-icons/mailweb.svg`, `mailweb-256.png` and `mailweb-128.png`, already copied into the plugin as:
 
-1. **`mailweb.svg`** in the shell's app header, beside "MailWeb", and in the Kits → Plugins and Kits Home plugin status rows (`kits_plugin_screens` and `kits_status_rows` gain an icon field, if the shell spec adds one).
-2. **`mailweb.svg`** as the WordPress menu icon: `add_menu_page` takes it as a `data:image/svg+xml;base64,…` URI in place of `dashicons-email` (`overview.php:202`). If the owner's SVG is not single colour, WordPress cannot tint it, so `dashicons-email` stays until a single-colour menu version is in the set. This follows the brand rule (black, white, grey; yellow as a rare accent).
-3. **PNG 128 and 256** on the update screen (`icons` → `1x` and `2x` in the Update URI response), when the Wugweb update server serves them.
-4. **PNG 1024** stays in `docs/brand/` as the master for listings and social cards; it is not shipped in the plugin zip.
+| Plugin file | From | Shown on |
+|---|---|---|
+| `plugins/mailweb/assets/icon.svg` | `mailweb.svg` | The Kits → Plugins row and the shell's app header, beside "MailWeb" (`kits_plugin_screens` gains an icon field if the shell spec adds one) |
+| `plugins/mailweb/assets/icon-256x256.png` | `mailweb-256.png` | The update screen (`icons` → `2x` in the Update URI response), when the update server serves it |
+| `plugins/mailweb/assets/icon-128x128.png` | `mailweb-128.png` | The update screen (`icons` → `1x`) |
 
-The icon lands in phase 4, or in any earlier phase once the set is on `wordpress-dev`.
+The source stays in `docs/brand/`; a change to the icon is made there and copied again. The WordPress menu keeps `dashicons-email` (`overview.php:202`) unless a single-colour menu version is added to the set, since WordPress can only tint a single-colour SVG.
 
 ---
 
 ## 9. Phases
 
-Each phase is its own branch and PR into `wordpress-dev` (bigger technical work, CLAUDE.md rule 3). The review gate runs before the owner merges:
+Each phase is its own branch and PR into `wordpress-dev`, with the review gate before merge:
 
 - the code-review skill;
 - wp-plugin-audit;
@@ -418,10 +419,10 @@ The owner merges, then the phase ships with `tools/aw-ship.sh` on the owner's ye
 
 | Phase | What | Size | Risk | Proof (read-only on live; no email sent) |
 |---|---|---|---|---|
-| 1. Foundations (3.3.0) | Header and readme (A1–A3), `MAILWEB_CAP` move (A5), regenerated `.pot` (A4), the Site Health test "Email sending", `mailweb_status_line()` for Core's Check site box and the Kits Home row, `GET mailweb/v1/mailboxes` (PlanWeb's picker), the `counts` key on the forms source, the sending-paused notice for admins with dismiss until the next pause (§4.4, `POST mailweb/v1/notice/pause/dismiss`), `tests/run.php`, smoke and Plugin Check additions. **No screen changes** | Small: ~7 files, no new screen | Low. Mail path untouched: in `mail-cap.php` only the notice (474–502) changes; the queue, `pre_wp_mail`, flush and `smtp.php` are not edited | Deploy check green with the new tests. On live: Plugins screen shows 3.3.0; Site Health lists "Email sending: running"; Check site shows the one line; the option snapshot is unchanged (§5); the PHP log has no new lines; the queue counts by status move only by normal traffic |
+| 1. Foundations (3.3.0) | Header and readme (A1–A3), `MAILWEB_CAP` move (A5), regenerated `.pot` (A4), the Site Health test "Email sending", `mailweb_status_line()` for Core's Check site box and the Kits Home row, `GET mailweb/v1/mailboxes` (PlanWeb's picker), the `counts` key on the forms source, the sending-paused notice for admins with dismiss until the next pause (§4.4, `POST mailweb/v1/notice/pause/dismiss`), the extended pure-PHP tests, smoke and Plugin Check additions. **No screen changes** | Small: ~7 files, no new screen | Low. Mail path untouched: in `mail-cap.php` only the notice (474–502) changes; the queue, `pre_wp_mail`, flush and `smtp.php` are not edited | Deploy check green with the new tests. On live: Plugins screen shows 3.3.0; Site Health lists "Email sending: running"; Check site shows the one line; the option snapshot is unchanged (§5); the PHP log has no new lines; the queue counts by status move only by normal traffic |
 | 2. Dashboard and Inbox on the shell (4.0.0) | `includes/rest.php` (Dashboard and Inbox routes), `includes/shell.php` (registers tiles, sections, list, panel), one JS entry; the menu change (`mailweb` = Dashboard, Inbox second at `mailweb-inbox`, redirects and link updates in §3 and §5); classic screens kept as the no-JS fallback; A7, A8 for the Inbox | Large: new build, ~8 routes, a working list with a reading panel and compose | Medium. The Inbox is daily work, so the fallback screen stays one click away, and actions reuse today's functions. The send path is the same `mailweb_send_from_form()` logic | CI: route permission tests (401/403/200). On live, as an editor and as admin: Dashboard tiles match the classic numbers on the same minute (unread, sent 24 h, waiting, failed/held, paused); Inbox lists the same first page as the classic screen for All and for support@; the MailWeb menu opens the Dashboard and Inbox is second; an old `page=mailweb&folder=forms` link and `page=mailweb-overview` land on the right screens; opening a message marks it read (as today); Archive and Mark unread on one message the owner names, then undo; **no Send pressed**; the owner sends the first real reply when ready |
 | 3. Settings on the shell (4.1.0) | Connected services (Mail API, webhooks, SMTP, FluentCRM), Sending, Mailboxes and aliases, Profiles; `register_setting` for the four non-secret options; `sub=` redirects; A6 | Medium: four services, three groups, one redirect rule | Medium. Settings hold the token and passwords: a wrong save can stop incoming mail or sending. Empty secret fields keep the stored value, and Disconnect asks first | CI: `/wp/v2/settings` exposes no secret. On live: every service row shows the same state as the classic screen (set / not set / wp-config); open each Edit and Cancel; old `sub=incoming` and `sub=sending` addresses land on the right section; the option snapshot is unchanged after opening and cancelling each form; **no Save on a secret, no test email** |
-| 4. Clean-up (4.2.0, after two releases) | Remove the classic screens, `list-table.php`, the simple-table helper and the fallback `admin_post_*` paths; update `settings_parts_baseline.txt`; the icon if landed | Small | Low. Only after the owner confirms the shell screens are in daily use | Smoke loads every MailWeb screen; old addresses still land; the option snapshot is unchanged |
+| 4. Clean-up (4.2.0, after two releases) | Remove the classic screens, `list-table.php`, the simple-table helper and the fallback `admin_post_*` paths; update `settings_parts_baseline.txt` | Small | Low. Only after the owner confirms the shell screens are in daily use | Smoke loads every MailWeb screen; old addresses still land; the option snapshot is unchanged |
 
 ---
 
@@ -429,4 +430,10 @@ The owner merges, then the phase ships with `tools/aw-ship.sh` on the owner's ye
 
 1. **Sending-paused notice** (§4.4): it stays on every admin screen. It shows only to admins and can be dismissed until the next pause. Phase 1.
 2. **Menu** (§2, §3, §5): the MailWeb menu opens the Dashboard. Inbox is the second item. Phase 2.
-3. **vedanshu@** (§3.4): "Send from it" stays off, so every reply goes from support@.
+3. **The partnership mailbox** (§3.4): "Send from it" stays off, so every reply goes from support@.
+
+---
+
+## 11. Skills report
+
+Skills used: wp-plugin-audit (the checks in §6), wp-i18n-workflow (`.pot`, JSON translations), wp-plugin-release (versions, readme, Upgrade Notice), wp-coding-standards (PHPCS on changed files), wp-plugin-testing (pure-PHP tests and smoke checks as CI runs them), wp-build-tools (the JS entry in phase 2). Connectors used: none. Missing: `docs/kits-plugin-ui.md` (the plugin shell spec) is on no branch yet; §2–§4 are renamed to match it when it lands.
