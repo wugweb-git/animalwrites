@@ -15,6 +15,14 @@ want 200 "GET /mailweb/v1/dashboard editor" -b /tmp/cj-rw-ed -H "X-WP-Nonce: $NE
 grep -q '"tiles"' /tmp/rw.out && echo "ok   dashboard answers with tiles" || { echo "FAIL dashboard has no tiles"; FAIL=1; }
 want 200 "GET /mailweb/v1/inbox editor" -b /tmp/cj-rw-ed -H "X-WP-Nonce: $NE" "$H/?rest_route=/mailweb/v1/inbox&folder=inbox&page=1"
 grep -q '"views"' /tmp/rw.out && echo "ok   inbox answers with views" || { echo "FAIL inbox has no views"; FAIL=1; }
+# The reading pane: one message. CI has no Mail API token, so a message is never found (404); nothing is marked read.
+want 401 "GET /mailweb/v1/inbox/message signed out" "$H/?rest_route=/mailweb/v1/inbox/message&box=support&uid=1"
+want 401 "GET /mailweb/v1/inbox/message cookie, no nonce" -b /tmp/cj-ci "$H/?rest_route=/mailweb/v1/inbox/message&box=support&uid=1"
+want 403 "GET /mailweb/v1/inbox/message subscriber" -b /tmp/cj-rw-sub -H "X-WP-Nonce: $NS" "$H/?rest_route=/mailweb/v1/inbox/message&box=support&uid=1"
+want 404 "GET /mailweb/v1/inbox/message editor, no such message" -b /tmp/cj-rw-ed -H "X-WP-Nonce: $NE" "$H/?rest_route=/mailweb/v1/inbox/message&box=support&uid=1"
+want 404 "GET /mailweb/v1/inbox/message unknown mailbox" -b /tmp/cj-ci -H "X-WP-Nonce: $NA" "$H/?rest_route=/mailweb/v1/inbox/message&box=nobody&uid=1"
+want 200 "admin.php?page=mailweb&ui=next (inbox stylesheet)" -b /tmp/cj-ci "$H/wp-admin/admin.php?page=mailweb&ui=next"
+grep -q "mailweb-admin-css" /tmp/rw.out && echo "ok   the Inbox loads its stylesheet" || { echo "FAIL the Inbox has no stylesheet"; FAIL=1; }
 want 403 "GET /mailweb/v1/settings editor (administrators only)" -b /tmp/cj-rw-ed -H "X-WP-Nonce: $NE" "$H/?rest_route=/mailweb/v1/settings"
 post mailweb/v1/dashboard/count '{}'
 post mailweb/v1/sending/resume '{}'

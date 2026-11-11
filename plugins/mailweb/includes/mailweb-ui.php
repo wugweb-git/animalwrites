@@ -134,6 +134,10 @@ add_action(
 				),
 			)
 		);
+		if ( $ok && 'inbox' === $screen && file_exists( MAILWEB_DIR . 'build/index.css' ) ) {
+			$asset = include MAILWEB_DIR . 'build/index.asset.php';
+			wp_enqueue_style( 'mailweb-admin', plugins_url( 'build/index.css', MAILWEB_FILE ), array( 'kits-shell' ), $asset['version'] ?? MAILWEB_VERSION );
+		}
 		mailweb_ui_ready( $ok );
 	}
 );
