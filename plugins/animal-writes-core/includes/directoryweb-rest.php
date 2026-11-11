@@ -5,14 +5,15 @@
  *   GET  dashboard                 edit_aw_volunteers  the tiles, from the background counts (directoryweb-dashboard.php)
  *   POST dashboard/count           edit_aw_volunteers  ask for a count now (one background event)
  *   GET  claims                    edit_aw_volunteers  the Claims list: views, search, filters, sort, pages
- *   GET  claims/<id>               edit_aw_volunteers  one claim, field by field
- *   POST claims/<id>/decide        edit_aw_volunteers  approve (ticked fields) or reject: aw_claim_ff_decide_apply()
- *   POST claims/<id>/undo          edit_aw_volunteers  put one applied field back (SourceWeb's aw_enrich_undo())
+ *   GET  claims/<id>               edit_aw_volunteers  one claim, field by field, with the proposed changes
  *   GET  settings                  manage_options      the services and the groups, with today's values
  *   POST settings/claim-form       manage_options      which Fluent Forms form is the claim form (option aw_ff_forms)
  *
  * Every route uses kits_shell_rest_can(): 401 signed out, 403 without the wp_rest nonce in a browser, 403 without the
  * capability. The aw/v1 routes are not touched. No key is read or sent.
+ *
+ * The Claims routes only read: no route here decides, applies or undoes a claim, or changes a listing. Claims are
+ * reviewed on Directory → Claims (claims-review.php).
  *
  * @package animal-writes-core
  */
@@ -119,46 +120,6 @@ add_action(
 				'methods'             => 'GET',
 				'permission_callback' => $claims,
 				'callback'            => 'directoryweb_rest_claim',
-			)
-		);
-		register_rest_route(
-			DIRECTORYWEB_REST,
-			'/claims/(?P<id>\d+)/decide',
-			array(
-				'methods'             => 'POST',
-				'permission_callback' => $claims,
-				'args'                => array(
-					'status'     => array(
-						'type'     => 'string',
-						'enum'     => array( 'approved', 'rejected' ),
-						'required' => true,
-					),
-					'fields'     => array(
-						'type'    => 'array',
-						'items'   => array( 'type' => 'string' ),
-						'default' => array(),
-					),
-					'allChanged' => array(
-						'type'    => 'boolean',
-						'default' => false,
-					),
-				),
-				'callback'            => 'directoryweb_rest_decide',
-			)
-		);
-		register_rest_route(
-			DIRECTORYWEB_REST,
-			'/claims/(?P<id>\d+)/undo',
-			array(
-				'methods'             => 'POST',
-				'permission_callback' => $claims,
-				'args'                => array(
-					'field' => array(
-						'type'     => 'string',
-						'required' => true,
-					),
-				),
-				'callback'            => 'directoryweb_rest_undo',
 			)
 		);
 		register_rest_route(
@@ -410,15 +371,14 @@ function directoryweb_rest_claims( WP_REST_Request $request ) {
 	}
 	return rest_ensure_response(
 		array(
-			'rows'     => array_map( 'directoryweb_claim_row', $q['rows'] ),
-			'total'    => $q['total'],
-			'page'     => $q['page'],
-			'pages'    => $q['pages'],
-			'counts'   => $q['counts'],
-			'form'     => function_exists( 'aw_claim_ff_id' ) ? aw_claim_ff_id() : 0,
-			'states'   => $states,
-			'types'    => $type_opts,
-			'enrichOn' => function_exists( 'aw_enrich_undo' ),
+			'rows'   => array_map( 'directoryweb_claim_row', $q['rows'] ),
+			'total'  => $q['total'],
+			'page'   => $q['page'],
+			'pages'  => $q['pages'],
+			'counts' => $q['counts'],
+			'form'   => function_exists( 'aw_claim_ff_id' ) ? aw_claim_ff_id() : 0,
+			'states' => $states,
+			'types'  => $type_opts,
 		)
 	);
 }
@@ -519,21 +479,6 @@ function directoryweb_claim_log_row( array $c, string $key ): ?array {
 }
 
 /**
- * Why Undo is off for a field, in words ('' when it is on).
- *
- * @param string $code directoryweb_undo_state().
- */
-function directoryweb_undo_why( string $code ): string {
-	return array(
-		''             => '',
-		'no-sourceweb' => __( 'Undo needs SourceWeb', 'directoryweb' ),
-		'no-right'     => __( 'Undo needs the right to review enrichment', 'directoryweb' ),
-		'not-logged'   => __( 'Not in the change log, so it cannot be undone here', 'directoryweb' ),
-		'undone'       => __( 'Already undone', 'directoryweb' ),
-	)[ $code ] ?? '';
-}
-
-/**
  * One claim field by field.
  *
  * @param int $id Fluent Forms entry ID.
@@ -559,13 +504,11 @@ function directoryweb_claim_detail( int $id ): ?array {
 	$fields = array();
 	$undone = array();
 	$notes  = array();
-	$sw     = function_exists( 'aw_enrich_undo' );
-	$can    = current_user_can( defined( 'AW_ENRICH_CAP' ) ? AW_ENRICH_CAP : 'edit_others_posts' );
 	if ( 'approved' === $status ) {
 		foreach ( (array) ( $c['review']['fields'] ?? array() ) as $key ) {
-			$key  = (string) $key;
-			$code = directoryweb_undo_state( $sw, $can, directoryweb_claim_log_row( $c, $key ) );
-			if ( 'undone' === $code ) {
+			$key = (string) $key;
+			$row = directoryweb_claim_log_row( $c, $key );
+			if ( 'undone' === ( $row['status'] ?? '' ) ) {
 				$undone[] = directoryweb_field_label( $key );
 				continue;
 			}
@@ -575,7 +518,6 @@ function directoryweb_claim_detail( int $id ): ?array {
 				'current'  => in_array( $key, array( 'logo', 'photos' ), true ) ? '' : aw_claim_now( $lid, $key, false ),
 				'proposed' => in_array( $key, array( 'logo', 'photos' ), true ) ? __( 'Uploaded with the claim', 'directoryweb' ) : (string) ( $c['propose'][ $key ] ?? '' ),
 				'applied'  => true,
-				'undoOff'  => directoryweb_undo_why( $code ),
 			);
 		}
 	} elseif ( $lid ) {
@@ -586,7 +528,7 @@ function directoryweb_claim_detail( int $id ): ?array {
 				continue;
 			}
 			if ( 'phones' === $key && directoryweb_phones_bad( (string) $ch[2], 'aw_claim_phone_ok' ) ) {
-				$notes[] = __( 'A line of the phone numbers is not a phone number: approving keeps the list as it is.', 'directoryweb' );
+				$notes[] = __( 'A line of the phone numbers is not a phone number: approving on the Claims screen keeps the list as it is.', 'directoryweb' );
 			}
 			$fields[] = array(
 				'key'      => (string) $key,
@@ -594,7 +536,6 @@ function directoryweb_claim_detail( int $id ): ?array {
 				'current'  => (string) $ch[1],
 				'proposed' => '' !== (string) $ch[2] ? (string) $ch[2] : __( '(remove)', 'directoryweb' ),
 				'applied'  => false,
-				'undoOff'  => '',
 			);
 		}
 		if ( '' !== $c['logo'] ) {
@@ -604,7 +545,6 @@ function directoryweb_claim_detail( int $id ): ?array {
 				'current'  => has_post_thumbnail( $lid ) ? __( 'Has a logo', 'directoryweb' ) : '',
 				'proposed' => __( 'New logo uploaded', 'directoryweb' ),
 				'applied'  => false,
-				'undoOff'  => '',
 			);
 		}
 		if ( $c['photos'] ) {
@@ -617,7 +557,6 @@ function directoryweb_claim_detail( int $id ): ?array {
 				/* translators: %s: number of photos. */
 				'proposed' => sprintf( __( '%s uploaded', 'directoryweb' ), number_format_i18n( count( $c['photos'] ) ) ),
 				'applied'  => false,
-				'undoOff'  => '',
 			);
 		}
 	}
@@ -655,7 +594,6 @@ function directoryweb_claim_detail( int $id ): ?array {
 		'fields'     => $fields,
 		'undone'     => $undone,
 		'notes'      => $notes,
-		'removeWhy'  => __( 'Remove claim is not built yet: clear Claimed on the listing’s edit screen', 'directoryweb' ),
 	);
 }
 
@@ -670,78 +608,6 @@ function directoryweb_rest_claim( WP_REST_Request $request ) {
 		return new WP_Error( 'rest_not_found', __( 'No such claim.', 'directoryweb' ), array( 'status' => 404 ) );
 	}
 	return rest_ensure_response( $d );
-}
-
-/**
- * POST claims/<id>/decide: the same decision as the claim's own screen (aw_claim_ff_decide_apply()).
- *
- * @param WP_REST_Request $request Request.
- */
-function directoryweb_rest_decide( WP_REST_Request $request ) {
-	$id = (int) $request['id'];
-	$c  = function_exists( 'aw_claim_entry' ) && aw_claim_ff_id() ? aw_claim_entry( $id ) : null;
-	if ( ! $c ) {
-		return new WP_Error( 'rest_not_found', __( 'No such claim.', 'directoryweb' ), array( 'status' => 404 ) );
-	}
-	if ( ! $c['listing'] || 'pending' !== directoryweb_claim_status( $c['review'] ) ) {
-		return new WP_Error( 'rest_conflict', __( 'This claim was already decided, or its listing is missing.', 'directoryweb' ), array( 'status' => 409 ) );
-	}
-	$approve = 'approved' === (string) $request['status'];
-	$want    = array();
-	if ( $approve ) {
-		$want = $request['allChanged']
-			? directoryweb_claim_default_fields( aw_claim_changes( $c ), '' !== $c['logo'], (bool) $c['photos'], 'aw_claim_phone_ok' )
-			: array_map( 'sanitize_key', (array) $request['fields'] );
-	}
-	$review = aw_claim_ff_decide_apply( $c, $approve, $want );
-	delete_transient( DIRECTORYWEB_STATS ); // The tiles count again in the background.
-	directoryweb_stats_request();
-	if ( $approve ) {
-		$n   = count( (array) $review['fields'] );
-		$msg = count( $want ) > $n
-			/* translators: 1: fields applied, 2: fields ticked. */
-			? sprintf( __( 'Claim approved: %1$d of %2$d fields are on the listing; the others could not be used as they are.', 'directoryweb' ), $n, count( $want ) )
-			/* translators: %d: fields applied. */
-			: sprintf( _n( 'Claim approved: %d field is on the listing.', 'Claim approved: %d fields are on the listing.', $n, 'directoryweb' ), $n );
-	} else {
-		$msg = __( 'Claim rejected.', 'directoryweb' );
-	}
-	return rest_ensure_response(
-		array(
-			'message' => $msg,
-			'claim'   => directoryweb_claim_detail( $id ),
-		)
-	);
-}
-
-/**
- * POST claims/<id>/undo: put one applied field back through SourceWeb's change log (aw_enrich_undo(), as the
- * Enrichment review does). The listing stays Claimed.
- *
- * @param WP_REST_Request $request Request.
- */
-function directoryweb_rest_undo( WP_REST_Request $request ) {
-	$id  = (int) $request['id'];
-	$key = sanitize_key( (string) $request['field'] );
-	$c   = function_exists( 'aw_claim_entry' ) && aw_claim_ff_id() ? aw_claim_entry( $id ) : null;
-	if ( ! $c || 'approved' !== directoryweb_claim_status( $c['review'] ) || ! in_array( $key, array_map( 'strval', (array) ( $c['review']['fields'] ?? array() ) ), true ) ) {
-		return new WP_Error( 'rest_not_found', __( 'This field was not applied by this claim.', 'directoryweb' ), array( 'status' => 404 ) );
-	}
-	$row  = directoryweb_claim_log_row( $c, $key );
-	$code = directoryweb_undo_state( function_exists( 'aw_enrich_undo' ), current_user_can( defined( 'AW_ENRICH_CAP' ) ? AW_ENRICH_CAP : 'edit_others_posts' ), $row );
-	if ( '' !== $code ) {
-		return new WP_Error( 'rest_forbidden', directoryweb_undo_why( $code ), array( 'status' => 'no-right' === $code ? 403 : 409 ) );
-	}
-	if ( ! aw_enrich_undo( (int) $row['id'] ) ) {
-		return new WP_Error( 'rest_conflict', __( 'This field could not be put back.', 'directoryweb' ), array( 'status' => 409 ) );
-	}
-	return rest_ensure_response(
-		array(
-			/* translators: %s: field name. */
-			'message' => sprintf( __( '%s is back to what it was. The listing stays Claimed.', 'directoryweb' ), directoryweb_field_label( $key ) ),
-			'claim'   => directoryweb_claim_detail( $id ),
-		)
-	);
 }
 
 /* ---------- Settings ---------- */

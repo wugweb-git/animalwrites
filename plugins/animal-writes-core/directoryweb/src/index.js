@@ -15,12 +15,10 @@ import {
 	EmptyState,
 	ErrorState,
 	Field,
-	FieldReview,
 	LinkedSetting,
 	LoadingState,
 	Notice,
 	RefTable,
-	RowAction,
 	SectionCard,
 	ServiceList,
 	ServiceRow,
@@ -244,18 +242,15 @@ function hashClaim() {
 }
 
 /**
- * One claim: who sent it, the fields with a tick each, and Approve / Reject; on an approved claim, Undo per field.
+ * One claim, read only: who sent it and the changes it proposes. Claims are reviewed on the Claims screen.
  *
  * @param {Object}   props
  * @param {number}   props.id      Entry ID.
  * @param {Function} props.onClose Back to the list.
- * @param {Function} props.onDone  After a decision or an Undo (the list reloads).
  */
-function Claim( { id, onClose, onDone } ) {
+function Claim( { id, onClose } ) {
 	const [ c, setC ] = useState( null );
 	const [ error, setError ] = useState( '' );
-	const [ busy, setBusy ] = useState( false );
-	const [ msg, setMsg ] = useState( null );
 	const load = () => {
 		setError( '' );
 		apiFetch( { path: path( `claims/${ id }` ) } )
@@ -263,36 +258,6 @@ function Claim( { id, onClose, onDone } ) {
 			.catch( ( e ) => setError( errText( e ) ) );
 	};
 	useEffect( load, [ id ] );
-
-	const send = ( route, data ) => {
-		setBusy( true );
-		setMsg( null );
-		return apiFetch( { path: path( route ), method: 'POST', data } )
-			.then( ( r ) => {
-				setC( r.claim );
-				setMsg( { tone: 'success', text: r.message } );
-				onDone();
-			} )
-			.catch( ( e ) => setMsg( { tone: 'error', text: errText( e ) } ) )
-			.finally( () => setBusy( false ) );
-	};
-	const reject = () => {
-		if (
-			// eslint-disable-next-line no-alert -- a plain browser confirm before a decision, as core's list tables do
-			window.confirm(
-				sprintf(
-					/* translators: %s: listing name. */
-					__(
-						'Reject the claim on %s? Nothing on the listing changes.',
-						'directoryweb'
-					),
-					c.title
-				)
-			)
-		) {
-			send( `claims/${ id }/decide`, { status: 'rejected' } );
-		}
-	};
 
 	let body;
 	if ( error ) {
@@ -353,16 +318,23 @@ function Claim( { id, onClose, onDone } ) {
 				) }
 			</>
 		);
+		let head = [
+			__( 'Field', 'directoryweb' ),
+			__( 'Listing now', 'directoryweb' ),
+			__( 'Proposed', 'directoryweb' ),
+		];
+		let caption = __( 'Proposed changes', 'directoryweb' );
+		if ( 'rejected' === c.status ) {
+			head = [
+				__( 'Field', 'directoryweb' ),
+				__( 'Proposed (rejected)', 'directoryweb' ),
+			];
+			caption = __( 'What the claim proposed', 'directoryweb' );
+		} else if ( 'approved' === c.status ) {
+			caption = __( 'Applied fields', 'directoryweb' );
+		}
 		body = (
 			<>
-				{ msg && (
-					<Notice
-						tone={ msg.tone }
-						onDismiss={ () => setMsg( null ) }
-					>
-						{ msg.text }
-					</Notice>
-				) }
 				<RefTable
 					caption={ __( 'Who sent it', 'directoryweb' ) }
 					head={ [
@@ -391,93 +363,41 @@ function Claim( { id, onClose, onDone } ) {
 						],
 					] }
 				/>
-				{ 'rejected' === c.status ? (
-					<>
-						<RefTable
-							caption={ __(
-								'What the claim proposed',
-								'directoryweb'
-							) }
-							head={ [
-								__( 'Field', 'directoryweb' ),
-								__( 'Proposed (rejected)', 'directoryweb' ),
-							] }
-							rows={ c.fields.map( ( f ) => [
-								f.label,
-								f.proposed,
-							] ) }
-						/>
-						{ pictures }
-					</>
-				) : (
-					<FieldReview
-						key={ `${ c.id }-${ c.status }-${ c.fields.length }` }
-						title={
-							c.pending
-								? __( 'Changes', 'directoryweb' )
-								: __( 'Applied fields', 'directoryweb' )
-						}
-						fields={ c.fields }
-						busy={ busy }
-						onApply={
-							c.pending && app.canDecide
-								? ( keys ) =>
-										send( `claims/${ id }/decide`, {
-											status: 'approved',
-											fields: keys,
-										} )
-								: undefined
-						}
-						onUndo={
-							'approved' === c.status
-								? ( key ) =>
-										send( `claims/${ id }/undo`, {
-											field: key,
-										} )
-								: undefined
-						}
-						after={ pictures }
+				{ c.fields.length > 0 ? (
+					<RefTable
+						caption={ caption }
+						head={ head }
+						rows={ c.fields.map( ( f ) =>
+							'rejected' === c.status
+								? [ f.label, f.proposed ]
+								: [ f.label, f.current || '—', f.proposed ]
+						) }
 					/>
-				) }
-				{ c.pending && 0 === c.fields.length && (
+				) : (
 					<p>
 						{ __(
-							'Nothing differs from the listing. Approving marks it Claimed.',
+							'Nothing differs from the listing.',
 							'directoryweb'
 						) }
 					</p>
 				) }
-				<p className="kits-shell-rowactions">
-					{ c.pending && (
-						<>
-							{ 0 === c.fields.length && (
-								<Button
-									variant="primary"
-									busy={ busy }
-									onClick={ () =>
-										send( `claims/${ id }/decide`, {
-											status: 'approved',
-											fields: [],
-										} )
-									}
-								>
-									{ __( 'Approve', 'directoryweb' ) }
-								</Button>
+				{ pictures }
+				<p>
+					{ 'pending' === c.status
+						? __(
+								'This screen only shows the claim. Approve or reject it on the Claims screen.',
+								'directoryweb'
+							)
+						: __(
+								'This screen only shows the claim. Changes to it are made on the Claims screen.',
+								'directoryweb'
 							) }{ ' ' }
-							<Button busy={ busy } onClick={ reject }>
-								{ __( 'Reject', 'directoryweb' ) }
-							</Button>
-						</>
-					) }
-					{ 'approved' === c.status && (
-						<RowAction
-							action={ {
-								label: __( 'Remove claim', 'directoryweb' ),
-								disabled: true,
-								why: c.removeWhy,
-							} }
-						/>
-					) }
+					<a href={ c.oldScreen }>
+						{ __(
+							'Open this claim on the Claims screen',
+							'directoryweb'
+						) }
+					</a>
 				</p>
 				<p>
 					{ c.listingUrl && (
@@ -493,13 +413,6 @@ function Claim( { id, onClose, onDone } ) {
 							</a>
 						</>
 					) }
-					{ ' · ' }
-					<a href={ c.oldScreen }>
-						{ __(
-							'This claim on the current screen',
-							'directoryweb'
-						) }
-					</a>
 				</p>
 			</>
 		);
@@ -535,7 +448,6 @@ function Claims() {
 	const [ loading, setLoading ] = useState( true );
 	const [ error, setError ] = useState( '' );
 	const [ open, setOpen ] = useState( hashClaim );
-	const [ msg, setMsg ] = useState( null );
 	const [ tick, setTick ] = useState( 0 );
 
 	useEffect( () => {
@@ -561,71 +473,6 @@ function Claims() {
 	};
 	const set = ( k, v ) =>
 		setQ( ( o ) => ( { ...o, [ k ]: v, page: 'page' === k ? v : 1 } ) );
-
-	const bulk = ( action, ids ) => {
-		const rows = ( data?.rows || [] ).filter(
-			( r ) => ids.includes( r.id ) && ! r.old && 'pending' === r.status
-		);
-		if ( ! rows.length ) {
-			setMsg( {
-				tone: 'warning',
-				text: __(
-					'Only waiting claims sent with the claim form can be decided here. Old-form claims are decided on their own screen.',
-					'directoryweb'
-				),
-			} );
-			return;
-		}
-		const names = rows.map( ( r ) => r.title ).join( ', ' );
-		const ask =
-			'approve' === action
-				? sprintf(
-						/* translators: %s: listing names. */
-						__(
-							'Approve every changed field and mark these listings Claimed? %s',
-							'directoryweb'
-						),
-						names
-					)
-				: sprintf(
-						/* translators: %s: listing names. */
-						__(
-							'Reject these claims? Nothing on the listings changes. %s',
-							'directoryweb'
-						),
-						names
-					);
-		// eslint-disable-next-line no-alert -- a plain browser confirm before a bulk decision, as core's list tables do
-		if ( ! window.confirm( ask ) ) {
-			return;
-		}
-		setLoading( true );
-		const data_ =
-			'approve' === action
-				? { status: 'approved', allChanged: true }
-				: { status: 'rejected' };
-		Promise.allSettled(
-			rows.map( ( r ) =>
-				apiFetch( {
-					path: path( `claims/${ r.entry }/decide` ),
-					method: 'POST',
-					data: data_,
-				} )
-			)
-		).then( ( out ) => {
-			const ok = out.filter( ( o ) => 'fulfilled' === o.status ).length;
-			setMsg( {
-				tone: ok === rows.length ? 'success' : 'warning',
-				text: sprintf(
-					/* translators: 1: claims decided, 2: claims ticked. */
-					__( '%1$d of %2$d claims decided.', 'directoryweb' ),
-					ok,
-					rows.length
-				),
-			} );
-			setTick( ( t ) => t + 1 );
-		} );
-	};
 
 	if ( data && ! data.form && 0 === ( data.counts?.all ?? 0 ) ) {
 		return (
@@ -698,23 +545,12 @@ function Claims() {
 	const sortKey = 'listing' === q.sort ? 'title' : 'sent';
 	return (
 		<>
-			{ msg && (
-				<Notice tone={ msg.tone } onDismiss={ () => setMsg( null ) }>
-					{ msg.text }
-				</Notice>
-			) }
-			{ open > 0 && (
-				<Claim
-					id={ open }
-					onClose={ () => show( 0 ) }
-					onDone={ () => setTick( ( t ) => t + 1 ) }
-				/>
-			) }
+			{ open > 0 && <Claim id={ open } onClose={ () => show( 0 ) } /> }
 			<SectionCard
 				id="directoryweb-claims"
 				title={ __( 'Claims', 'directoryweb' ) }
 				description={ __(
-					'Claims sent with the claim form. Nothing a claimant sends is on the listing until it is approved here.',
+					'Claims sent with the claim form, to read. Nothing here changes a claim or a listing: claims are approved or rejected on the Claims screen.',
 					'directoryweb'
 				) }
 			>
@@ -826,24 +662,6 @@ function Claims() {
 							page: 1,
 						} ) )
 					}
-					bulkActions={
-						app.canDecide
-							? [
-									{
-										value: 'reject',
-										label: __( 'Reject', 'directoryweb' ),
-									},
-									{
-										value: 'approve',
-										label: __(
-											'Approve all changed fields',
-											'directoryweb'
-										),
-									},
-								]
-							: []
-					}
-					onBulk={ bulk }
 					rowActions={ ( r ) =>
 						r.old
 							? [
@@ -857,7 +675,7 @@ function Claims() {
 								]
 							: [
 									{
-										label: __( 'Review', 'directoryweb' ),
+										label: __( 'View', 'directoryweb' ),
 										onClick: () => show( r.entry ),
 									},
 									...( r.listingUrl

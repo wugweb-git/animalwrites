@@ -121,18 +121,10 @@ $q = directoryweb_claims_query(
 );
 check( 1 === $q['page'], 'a page past the end shows the last page' );
 
-// The fields an Approve ticks.
-$ok      = fn( $v ) => (bool) preg_match( '/^[0-9+ ]{6,}$/', trim( (string) $v ) );
-$changes = array(
-	'l_email' => array( 'Listing email', '', 'a@b.in' ),
-	'l_hours' => array( 'Opening hours', '', 'Mon 09:00–18:00' ),
-	'phones'  => array( 'Phone numbers', '', "+91 98765 43210 | Office\nnot a number" ),
-);
-$f       = directoryweb_claim_default_fields( $changes, true, false, $ok );
-check( array( 'l_email', 'logo' ) === $f, 'hours and a bad phone list are left out; the logo is in' );
-$changes['phones'][2] = '+91 98765 43210 | Office | WhatsApp';
-check( in_array( 'phones', directoryweb_claim_default_fields( $changes, false, true, $ok ), true ), 'a good phone list is ticked' );
-check( in_array( 'photos', directoryweb_claim_default_fields( array(), false, true, $ok ), true ), 'photos ticked when sent' );
+// A proposed phone list with a line that is not a phone number (the claim's note).
+$ok = fn( $v ) => (bool) preg_match( '/^[0-9+ ]{6,}$/', trim( (string) $v ) );
+check( directoryweb_phones_bad( "+91 98765 43210 | Office\nnot a number", $ok ), 'a bad phone line is noticed' );
+check( ! directoryweb_phones_bad( "+91 98765 43210 | Office | WhatsApp\n", $ok ), 'a good phone list passes' );
 
 // Change-log field names.
 $l = array(
@@ -146,12 +138,11 @@ check( 'phone' === directoryweb_enrich_field( 'phones', $l ), 'phones log as pho
 check( 'logo' === directoryweb_enrich_field( 'logo', $l ), 'logo' );
 check( '' === directoryweb_enrich_field( 'nope', $l ), 'unknown field' );
 
-// Undo: on only with SourceWeb, the right and a logged, not yet undone row. Never anything about Claimed.
-check( 'no-sourceweb' === directoryweb_undo_state( false, true, array( 'status' => 'approved' ) ), 'Undo needs SourceWeb' );
-check( 'not-logged' === directoryweb_undo_state( true, true, null ), 'no log row' );
-check( 'undone' === directoryweb_undo_state( true, true, array( 'status' => 'undone' ) ), 'already undone' );
-check( 'no-right' === directoryweb_undo_state( true, false, array( 'status' => 'approved' ) ), 'needs the right' );
-check( '' === directoryweb_undo_state( true, true, array( 'status' => 'approved' ) ), 'Undo on' );
+// The Claims routes only read: nothing decides, applies or undoes a claim from the new screen.
+$rest = (string) file_get_contents( dirname( __DIR__ ) . '/includes/directoryweb-rest.php' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- a local file read by the test
+check( false === strpos( $rest, '/decide' ) && false === strpos( $rest, '/undo' ), 'no decide or undo route' );
+check( false === strpos( $rest, 'aw_claim_ff_decide' ) && false === strpos( $rest, 'aw_claim_apply_field' ) && false === strpos( $rest, 'aw_enrich_undo(' ), 'no claim or listing write' );
+check( 2 === preg_match_all( "/'methods'\s*=>\s*'POST'/", $rest ), 'POST only for dashboard/count and settings/claim-form' );
 
 // The claim form: an unchanged Save writes nothing; a change keeps the other forms.
 $ids = array(

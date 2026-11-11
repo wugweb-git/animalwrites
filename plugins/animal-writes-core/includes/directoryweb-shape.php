@@ -1,8 +1,8 @@
 <?php
 /**
  * DirectoryWeb screens: the pure parts (no WordPress calls), so tests/directoryweb-tests.php runs them without
- * WordPress. Claim status, the Claims list's filter, sort and pages, which fields an Approve ticks, the Undo state of an
- * applied field, the claim form choice, and the top listing types of the Dashboard.
+ * WordPress. Claim status, the Claims list's filter, sort and pages, a proposed phone list's check, the change-log name
+ * of a claim field, the claim form choice, and the top listing types of the Dashboard.
  *
  * @package animal-writes-core
  */
@@ -86,36 +86,6 @@ function directoryweb_claims_query( array $rows, array $q ): array {
 }
 
 /**
- * The fields an Approve ticks by default, as the claim's own screen does: every changed field but Opening hours (entered
- * by hand) and a phone list with a line that is not a phone number; the logo and photos when sent.
- *
- * @param array    $changes  aw_claim_changes(): key => [ label, now, proposed ].
- * @param bool     $logo     A logo was sent.
- * @param bool     $photos   Photos were sent.
- * @param callable $phone_ok Is one value a phone number.
- * @return string[]
- */
-function directoryweb_claim_default_fields( array $changes, bool $logo, bool $photos, callable $phone_ok ): array {
-	$out = array();
-	foreach ( $changes as $key => $ch ) {
-		if ( 'l_hours' === $key ) {
-			continue;
-		}
-		if ( 'phones' === $key && directoryweb_phones_bad( (string) ( $ch[2] ?? '' ), $phone_ok ) ) {
-			continue;
-		}
-		$out[] = (string) $key;
-	}
-	if ( $logo ) {
-		$out[] = 'logo';
-	}
-	if ( $photos ) {
-		$out[] = 'photos';
-	}
-	return $out;
-}
-
-/**
  * A proposed phone list has a line that is not a phone number.
  *
  * @param string   $lines    One "number | label | WhatsApp" a line.
@@ -149,30 +119,6 @@ function directoryweb_enrich_field( string $key, array $fields ): string {
 		'services' => 'services',
 		'about'    => 'about',
 	)[ $def[1] ] ?? (string) $def[2];
-}
-
-/**
- * Whether an applied field can be undone here, as a code: '' (it can), 'no-sourceweb' (the change log is SourceWeb's),
- * 'no-right' (Undo needs the Enrichment review's right), 'not-logged' (no change-log row for it) or 'undone'.
- *
- * @param bool       $sw_on    SourceWeb's change log is there.
- * @param bool       $can      The user may undo changes (the Enrichment review's capability).
- * @param array|null $row      The newest change-log row for the field: [ 'status' => … ], or null.
- */
-function directoryweb_undo_state( bool $sw_on, bool $can, ?array $row ): string {
-	if ( ! $sw_on ) {
-		return 'no-sourceweb';
-	}
-	if ( null === $row ) {
-		return 'not-logged';
-	}
-	if ( 'undone' === ( $row['status'] ?? '' ) ) {
-		return 'undone';
-	}
-	if ( ! $can ) {
-		return 'no-right';
-	}
-	return '';
 }
 
 /**

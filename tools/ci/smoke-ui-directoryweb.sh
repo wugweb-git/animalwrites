@@ -1,7 +1,7 @@
 # shellcheck shell=bash
 # DirectoryWeb's new screens (Animal Writes Core, includes/directoryweb-*.php), sourced by smoke.sh with $H, $NA, $NS,
 # the cookie jars /tmp/cj-ci and /tmp/cj-rw-sub, and want, screen, route, post, optmd5 and same.
-# Animal Writes Core is active already (smoke.sh). No claim is decided or undone here: claim data is never changed.
+# Animal Writes Core is active already (smoke.sh). The Claims routes only read: claims are reviewed on Directory → Claims.
 
 # Dashboard and Settings: pages with no menu entry.
 screen directoryweb directoryweb-app directoryweb-admin
@@ -21,10 +21,12 @@ route directoryweb/v1/claims
 route "directoryweb/v1/claims&status=all&days=30&sort=listing&dir=asc"
 route directoryweb/v1/settings
 post directoryweb/v1/dashboard/count '{}'
-post directoryweb/v1/claims/1/decide '{"status":"rejected"}'
-post directoryweb/v1/claims/1/undo '{"field":"l_email"}'
 post directoryweb/v1/settings/claim-form '{"form":0}'
-want 401 "POST /directoryweb/v1/claims/1/decide cookie, no nonce" -X POST -b /tmp/cj-ci -H 'Content-Type: application/json' -d '{"status":"rejected"}' "$H/?rest_route=/directoryweb/v1/claims/1/decide"
+# No route decides, applies or undoes a claim: those addresses are not there, even for an administrator.
+want 404 "POST /directoryweb/v1/claims/1/decide administrator (no such route)" -X POST -b /tmp/cj-ci -H "X-WP-Nonce: $NA" -H 'Content-Type: application/json' -d '{"status":"rejected"}' "$H/?rest_route=/directoryweb/v1/claims/1/decide"
+want 404 "POST /directoryweb/v1/claims/1/undo administrator (no such route)" -X POST -b /tmp/cj-ci -H "X-WP-Nonce: $NA" -H 'Content-Type: application/json' -d '{"field":"l_email"}' "$H/?rest_route=/directoryweb/v1/claims/1/undo"
+want 404 "POST /directoryweb/v1/claims/1 administrator (read only)" -X POST -b /tmp/cj-ci -H "X-WP-Nonce: $NA" -H 'Content-Type: application/json' -d '{}' "$H/?rest_route=/directoryweb/v1/claims/1"
+want 401 "POST /directoryweb/v1/settings/claim-form cookie, no nonce" -X POST -b /tmp/cj-ci -H 'Content-Type: application/json' -d '{"form":0}' "$H/?rest_route=/directoryweb/v1/settings/claim-form"
 want 200 "POST /directoryweb/v1/dashboard/count administrator" -X POST -b /tmp/cj-ci -H "X-WP-Nonce: $NA" "$H/?rest_route=/directoryweb/v1/dashboard/count"
 want 404 "GET /directoryweb/v1/claims/999999999 administrator (no such claim)" -b /tmp/cj-ci -H "X-WP-Nonce: $NA" "$H/?rest_route=/directoryweb/v1/claims/999999999"
 
