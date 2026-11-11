@@ -248,7 +248,7 @@
 .aw-about-act > .aw-about-act-ico .kit-ico { --kit-ico-size: 1.5rem; }
 .aw-about-what .aw-about-inner > .wp-block-group:not(.aw-about-how) { grid-template-columns: minmax(0, 1fr) !important; gap: var(--kit-space-4); }
 @media (min-width: 1200px) { .aw-about-what .aw-about-inner > .wp-block-group:not(.aw-about-how) { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } }
-.aw-about-what .is-style-kits-card { position: relative; display: flex; flex-direction: column; gap: var(--kit-space-2); height: 100%; margin: 0 !important; padding: var(--kit-space-5) !important; background: var(--kit-color-canvas) !important; border: 0 !important; border-radius: var(--kit-radius-card) !important; transition: background-color var(--kit-motion-base) var(--kit-motion-ease); }
+.aw-about-what .is-style-kits-card { position: relative; display: flex; flex-direction: column; gap: var(--kit-space-2); height: 100%; margin: 0 !important; padding: var(--wp--custom--kits--card--padding, var(--kit-space-4)) !important; background: var(--kit-color-canvas) !important; border: 0 !important; border-radius: var(--kit-radius-card) !important; transition: background-color var(--kit-motion-base) var(--kit-motion-ease); }
 .aw-about-what .is-style-kits-card > * { margin: 0 !important; }
 .aw-about-what .is-style-kits-card > h3 + p { font-size: var(--kit-type-lead); }
 .aw-about-what .is-style-kits-card > h3 + p strong { font-weight: var(--kit-weight-strong); }

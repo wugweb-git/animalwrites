@@ -11,7 +11,7 @@ This check fails on a NEW rule in our CSS (themes/, plugins/*/assets/, not vendo
           (.kit-section, .alignfull, section, .aw-camp-section, .kit-section-band, .kit-hero), unless the value is the
           theme's own section padding (var(--kit-space-section) or var(--kit-section-y));
   pad     sets padding (or padding-top/right/bottom/left/block/inline) on a card or block (BLOCKS below, the selector's
-          last part) to under 24px on any side (owner, 2 Nov 2026), or a list card (kit-card, kit-card-body; CARDS) to
+          last part) to under 24px on any side (owner, 2 Nov 2026), or a card (kit-card, kit-card-body, the Card block style is-style-kits-card; CARDS) to
           under 16px: the card padding is var(--kit-space-4) by default and can be set higher in Theme Options → Cards
           (owner, 11 Nov 2026; docs/card-sizes.md). var(--kit-space-1..3), var(--s-1..3), numbers under 16px and 0 are
           under both; var(--kit-space-4), var(--s-4), the gutter/head/grid tokens and 16px are under 24px only;
@@ -60,7 +60,7 @@ PAD_PROPS = ("padding", "padding-top", "padding-right", "padding-bottom", "paddi
 PAD_MIN = 24
 # List cards (kit-card states and their body): 16px, --kit-space-4 (owner, 11 Nov 2026).
 CARD_PAD_MIN = 16
-CARDS = re.compile(r"\.kit-card(-body)?(--[\w-]+)?(?![\w-])")
+CARDS = re.compile(r"\.(kit-card(-body)?(--[\w-]+)?|is-style-kits-card)(?![\w-])")
 # --kit-space-N and --s-N under 24px (kit-tokens.css, kits-v42.css).
 SPACE_PX = {"kit-space": {0: 0, 1: 4, 2: 8, 3: 12, 4: 16}, "s": {0: 0, 1: 4, 2: 8, 3: 12, 4: 16}}
 THEME_PAD = re.compile(r"^\s*var\(--kit-(space-section|section-y)\)(\s+var\(--kit-(space-section|section-y)\))?\s*!important\s*$")
