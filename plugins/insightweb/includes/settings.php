@@ -125,7 +125,7 @@ function aw_si_settings_save( array $posted, bool $reset = false ): bool {
 		$value = max( 0, (int) ( $posted[ $const ] ?? 0 ) );
 		$now   = array_key_exists( $const, $had ) ? (int) $had[ $const ] : $f['default'];
 		if ( ! $reset && $value === $now ) {
-			continue; // unchanged: kept exactly as stored
+			continue; // Unchanged: kept exactly as stored.
 		}
 		unset( $mine[ $const ] );
 		if ( $reset ) {
@@ -147,7 +147,7 @@ function aw_si_settings_save( array $posted, bool $reset = false ): bool {
 	} else {
 		unset( $all['search-insights'] );
 	}
-	update_option( 'aw_seo_settings', $all, true ); // read on every request (the constants), so autoloaded
+	update_option( 'aw_seo_settings', $all, true ); // read on every request (the constants), so autoloaded.
 	return true;
 }
 

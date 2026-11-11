@@ -58,6 +58,10 @@ function insightweb_dash_request(): bool {
  */
 function insightweb_dash_build( $why = '' ) {
 	unset( $why );
+	if ( get_option( 'aw_si_off' ) ) { // After Delete data: keep no figures.
+		delete_transient( INSIGHTWEB_DASH );
+		return array();
+	}
 	$c = array(
 		'at'     => time(),
 		'end'    => '',

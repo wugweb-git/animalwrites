@@ -306,7 +306,11 @@ function insightweb_health_shape( array $sources, array $gsc, string $state, arr
 
 /** The Dashboard: every range from the stored counts, the health tiles and the sources. */
 function insightweb_dashboard_payload(): array {
-	$c        = get_transient( INSIGHTWEB_DASH );
+	$off = (bool) get_option( 'aw_si_off' );
+	if ( $off ) { // After Delete data: no stored figures are shown and no count is booked.
+		delete_transient( INSIGHTWEB_DASH );
+	}
+	$c        = $off ? array() : get_transient( INSIGHTWEB_DASH );
 	$counting = ! is_array( $c );
 	if ( $counting ) {
 		insightweb_dash_request(); // The first view after a deploy: count in the background.
