@@ -23,7 +23,7 @@ Where they meet, the line stays: the keyword table is Core's (`keyword-table.php
 | File | What it does |
 |---|---|
 | `admin-home.php` | The site's screens as the last items of the Kits menu (10 Nov 2026): Site: Animal Writes (the Overview, `admin.php?page=animal-writes`, same address as before), Dates, Check site, Contact links, Keys, Modules, Edit screens, same slugs and capabilities (order and capabilities in `aw_core_screens()`; each file registers its screen under `aw_core_menu_parent()` with `aw_core_screen_cap()` at `aw_core_menu_priority()`, 20–26, after Kits' 8–11). One "Animal Writes" tab in the Kits tabs (`kits_admin_tabs` filter, capability edit_posts); each screen prints the Kits tabs and the site's screens the user can open as a core sub-list (`aw_core_screen_nav()`). Editors: WordPress shows them the Kits menu pointing at the Overview, with Overview, Dates and Contact links; the Kits tabs show them the Animal Writes tab only. Without Kits Core the screens form the old top-level Animal Writes menu. Kits → Welcome's System Status gets three rows (last page check, backup, deploy; `kits_status_rows`). The Overview: every feature by group with where to find it and live status (backup, site check, scheduled tasks, deploy, CDN, staging, next date, To review), dashboard widgets, WP-CLI commands. Overview link on the Plugins screen. |
-| `admin-tidy.php` | Admin menu tidy (owner, 25 Oct 2026): hides, by visible label, links nobody uses (Tools: Available Tools, Server-Timing, Scheduled Actions; Settings: Discussion, Connectors; upsells of Rank Math, Link Whisper, Fluent Forms, FluentCRM; SCF; admin-bar Rank Math and UpdraftPlus). Screens still open at their address. Fluent Forms entries of the campaign and newsletter forms are marked read on arrival, so the unread count shows only entries to act on. |
+| `admin-tidy.php` | Admin menu tidy (owner, 25 Oct 2026): hides, by visible label, links nobody uses (Tools: Available Tools, Server-Timing, Scheduled Actions; Settings: Discussion, Connectors; upsells of Rank Math, Link Whisper, Fluent Forms, FluentCRM, and any submenu link to another site in those menus (sale pages, 12 Nov 2026); SCF; admin-bar Rank Math and UpdraftPlus). Screens still open at their address. Fluent Forms entries of the campaign and newsletter forms are marked read on arrival, so the unread count shows only entries to act on. |
 | `admin-ia.php` | WP Admin information architecture (Phase 11 J): menu order, Classification (Categories, Tags), Sourcing in the menu order where Inbox was (Inbox removed 25 Oct 2026; To review is under SourceWeb's Sourcing menu), labels that match the site. No old-address redirects (owner, 25 Oct 2026); retired lists (Contact messages, Listing claims, Reports) are out of the menu, their items keep their data. |
 | `also-reported.php` | "Also reported by": publisher logos in an item's source row (meta aw_also_reported, written by the same-story fold in aw-sourcing). |
 | `bindings.php` | Block Bindings source "animal-writes/field" so templates can show meta with core blocks. |
@@ -365,7 +365,7 @@ Kits Core and SourceWeb are not in the list: animal-writes-core loads them from 
 | LiteSpeed Cache (`litespeed-cache`) | Page cache; purged after every deploy (`deploy-purge.php`). | active |
 | UpdraftPlus (`updraftplus`) | Backup and restore plugin (the daily server backups are in `rollback.md`). | active |
 | Simple History (`simple-history`) | Log of admin actions and changes. | active |
-| Link Whisper Free (`link-whisper`) | Internal-link suggestions and reports in the editor. | active |
+| Link Whisper Free (`link-whisper`) | Internal-link suggestions and reports in the editor. | inactive (12 Nov 2026; RankWeb's content panel lists internal links to add) |
 | Secure Custom Fields (`secure-custom-fields`) | Custom fields framework (ACF fork). | active |
 | Performance Lab (`performance-lab`) | WordPress Performance Team features; its modules are the next eight rows. | active |
 | Embed Optimizer (`embed-optimizer`) | Lazy-loads embeds and reserves their space. | active |
@@ -385,7 +385,7 @@ Kits Core and SourceWeb are not in the list: animal-writes-core loads them from 
 | Advanced Ads – Google AdSense In-feed Placement (`advanced-ads-adsense-in-feed`) | In-feed AdSense placement for Advanced Ads. | inactive |
 | Accessibility Checker (`accessibility-checker`) | In-editor accessibility scan. | inactive |
 | Advanced Custom Fields (`advanced-custom-fields`) | Custom fields (replaced by Secure Custom Fields). | inactive |
-| Create Block Theme (`create-block-theme`) | Theme export tool. | inactive |
+| Create Block Theme (`create-block-theme`) | Theme export tool. | active (12 Nov 2026) |
 | Dark Mode (`wp-dark-mode`) | Dark theme switcher. | inactive |
 | IndexNow (`indexnow`) | URL submission; Rank Math sends IndexNow instead. | inactive |
 | reSmush.it Image Optimizer (`resmushit-image-optimizer`) | Image compression. | inactive |
