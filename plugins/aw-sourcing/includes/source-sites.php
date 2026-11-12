@@ -424,6 +424,75 @@ add_action(
 	}
 );
 
+/**
+ * Every source of the Sources list (publishers, relay-only sites, press sites and the sites feeds come from), host =>
+ * row, with the numbers of the list's columns: for today's list table and the new Sources screen.
+ *
+ * @return array{rows: array, si: bool, stale: bool}
+ */
+function aw_sourcing_source_rows() {
+	$all = array();
+	$stats       = aw_sourcing_host_stats();
+	$si          = ! empty( $stats['si'] );
+	$stale       = ! empty( $stats['stale'] );
+	$meta        = get_option( AW_SOURCING_SITE_META, array() );
+	$meta        = is_array( $meta ) ? $meta : array();
+	$press       = array_flip( aw_sourcing_press_hosts() );
+	$pubs        = aw_publishers();
+	$feeds       = aw_sourcing_feeds_by_host();
+	$relay       = aw_relay_hosts();
+	$log         = aw_src_relay_index( (array) get_option( 'aw_relay_log', array() ) ); // newest row per host named
+	// A host kept only for its icon (kind=directory-source) is not listed; a relay-only one (kind=relay) is.
+	$hosts = array_keys( array_filter( $pubs, fn( $p ) => empty( $p['kind'] ) || 'relay' === $p['kind'] ) );
+	foreach ( array_unique( array_merge( $hosts, array_keys( $press ), array_keys( $feeds ) ) ) as $h ) {
+		if ( '' === (string) $h ) {
+			continue;
+		}
+		$p   = $pubs[ $h ] ?? array();
+		$pub = isset( $pubs[ $h ] ) && empty( $p['kind'] );
+		$s   = $stats['hosts'][ $h ] ?? array();
+		$m   = $meta[ $h ] ?? array();
+		$fl  = $feeds[ $h ] ?? array();
+		$rel = aw_src_host_in( $h, $relay );
+		$all[ $h ] = array(
+			'host'    => $h,
+			'pub'     => $pub,
+			'kind'    => $pub ? 'publisher' : ( 'relay' === ( $p['kind'] ?? '' ) ? 'relay' : ( $fl ? 'feeds' : 'press' ) ),
+			'feeds'   => count( $fl ),
+			'feeds_on' => count( array_filter( $fl, fn( $x ) => ! empty( $x['on'] ) ) ),
+			'code_n'  => count( array_filter( $fl, fn( $x ) => 'code' === aw_src_read_by( $x ) ) ), // sources read by code ('code' is the SEO HTTP status below)
+			'fnames'  => implode( ' ', array_map( fn( $x ) => (string) ( $x['name'] ?? '' ), $fl ) ),
+			'relay'   => $rel,
+			'relay_own' => ! empty( $p['relay'] ),
+			'relay_last' => aw_src_relay_last( $log, $h ),
+			'count'   => (int) ( $p['count'] ?? 0 ),
+			'press'   => isset( $press[ $h ] ),
+			'name'    => $pub || 'relay' === ( $p['kind'] ?? '' ) ? (string) ( $p['name'] ?? '' ) : '',
+			'short'   => $pub ? (string) ( $p['short'] ?? '' ) : '',
+			'status'  => $pub ? (string) ( $p['status'] ?? 'neutral' ) : '',
+			'rec'     => $pub ? $p : array(),
+			'dr'      => $pub && isset( $p['dr'] ) && is_numeric( $p['dr'] ) ? (int) $p['dr'] : null,
+			'dr_at'   => $pub ? (string) ( $p['dr_at'] ?? '' ) : '',
+			'f30'     => (int) ( $s['f30'] ?? 0 ),
+			'pub_n'   => (int) ( $s['pub'] ?? 0 ),
+			'impr'    => (int) ( $s['impr'] ?? 0 ),
+			'clicks'  => (int) ( $s['clicks'] ?? 0 ),
+			'impr3'   => (int) ( $s['impr3'] ?? 0 ),
+			'clicks3' => (int) ( $s['clicks3'] ?? 0 ),
+			'title'   => (string) ( $m['title'] ?? '' ),
+			'desc'    => (string) ( $m['desc'] ?? '' ),
+			'code'    => (string) ( $m['code'] ?? '' ),
+			'at'      => (string) ( $m['at'] ?? '' ),
+			'last'    => $pub ? (string) ( $p['last'] ?? '' ) : '',
+		);
+	}
+	return array(
+		'rows'  => $all,
+		'si'    => $si,
+		'stale' => $stale,
+	);
+}
+
 /** The Sources list table (built once per request: the views of every Sources screen come from it). */
 function aw_sourcing_publishers_table() {
 	static $table = null;
@@ -542,18 +611,31 @@ function aw_sourcing_source_form( $host ) {
  * own changes are, with old → new: status, name and short name as tab publishers, press sites as tab press, the
  * relay switch as tab relay.
  *
+ * @param array|null $in { host, status, name, short, press, relay_shown, relay } from the new Sources screen; null reads
+ *                       the classic form's fields.
  * @return array{0: bool, 1: string} changed, error code ('' when none).
  */
-function aw_sourcing_source_save() {
-	// phpcs:disable WordPress.Security.NonceVerification -- checked by the aw_sourcing handler.
-	$host   = aw_sourcing_norm_host( sanitize_text_field( wp_unslash( $_POST['src_host'] ?? '' ) ) );
-	$status = sanitize_key( $_POST['src_status'] ?? '' );
-	$name   = sanitize_text_field( wp_unslash( $_POST['src_name'] ?? '' ) );
-	$short  = sanitize_text_field( wp_unslash( $_POST['src_short'] ?? '' ) );
-	$press  = ! empty( $_POST['src_press'] );
-	$shown  = ! empty( $_POST['src_relay_shown'] ) && aw_sourcing_phase() >= 1; // the relay switch was on the form
-	$relay  = ! empty( $_POST['src_relay'] );
-	// phpcs:enable WordPress.Security.NonceVerification
+function aw_sourcing_source_save( $in = null ) {
+	if ( null === $in ) {
+		// phpcs:disable WordPress.Security.NonceVerification -- checked by the aw_sourcing handler.
+		$in = array(
+			'host'        => sanitize_text_field( wp_unslash( $_POST['src_host'] ?? '' ) ),
+			'status'      => sanitize_key( $_POST['src_status'] ?? '' ),
+			'name'        => sanitize_text_field( wp_unslash( $_POST['src_name'] ?? '' ) ),
+			'short'       => sanitize_text_field( wp_unslash( $_POST['src_short'] ?? '' ) ),
+			'press'       => ! empty( $_POST['src_press'] ),
+			'relay_shown' => ! empty( $_POST['src_relay_shown'] ),
+			'relay'       => ! empty( $_POST['src_relay'] ),
+		);
+		// phpcs:enable WordPress.Security.NonceVerification
+	}
+	$host   = aw_sourcing_norm_host( sanitize_text_field( (string) ( $in['host'] ?? '' ) ) );
+	$status = sanitize_key( (string) ( $in['status'] ?? '' ) );
+	$name   = sanitize_text_field( (string) ( $in['name'] ?? '' ) );
+	$short  = mb_substr( sanitize_text_field( (string) ( $in['short'] ?? '' ) ), 0, 24 );
+	$press  = ! empty( $in['press'] );
+	$shown  = ! empty( $in['relay_shown'] ) && aw_sourcing_phase() >= 1; // the relay switch was on the form
+	$relay  = ! empty( $in['relay'] );
 	if ( '' === $host ) {
 		return array( false, 'host' );
 	}

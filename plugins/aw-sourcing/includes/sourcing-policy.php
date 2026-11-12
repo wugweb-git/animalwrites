@@ -327,6 +327,62 @@ add_action(
 add_filter( 'set_screen_option_aw_publishers_per_page', fn( $keep, $option, $value ) => max( 1, min( 500, (int) $value ) ), 10, 3 );
 add_filter( 'set_screen_option_aw_keywords_per_page', fn( $keep, $option, $value ) => max( 1, min( 500, (int) $value ) ), 10, 3 );
 
+/**
+ * A Sources list action on some hosts, for today's list and the new Sources screen: allow, neutral or block (publishers
+ * and relay-only sites), press_add / press_remove (before phase 2), relay_on / relay_off (from phase 1), delete (a
+ * source with nothing attached). Logged as each was before. The caller writes the records.
+ *
+ * @param array  $pubs   aw_publishers(), read just before.
+ * @param string $status The action.
+ * @param array  $hosts  Hosts.
+ * @return array [ records, press sites changed ].
+ */
+function aw_sourcing_sources_apply( array $pubs, $status, array $hosts ) {
+	$press = false;
+	if ( in_array( $status, array( 'press_add', 'press_remove' ), true ) ) { // Search here for coverage / Stop searching here
+		$hosts = array_values( array_filter( array_map( 'aw_sourcing_norm_host', $hosts ) ) );
+		$press = aw_sourcing_press_change( 'press_add' === $status ? $hosts : array(), 'press_remove' === $status ? $hosts : array() );
+	} elseif ( in_array( $status, array( 'relay_on', 'relay_off' ), true ) && aw_sourcing_phase() >= 1 ) { // logged per host
+		$pubs = aw_relay_switch( $pubs, $hosts, 'relay_on' === $status );
+	} elseif ( 'delete' === $status ) {
+		foreach ( $hosts as $h ) {
+			$pubs = aw_sourcing_source_delete( $pubs, $h );
+		}
+	} elseif ( in_array( $status, array( 'allow', 'neutral', 'block' ), true ) ) {
+		$was = array();
+		foreach ( $hosts as $h ) {
+			$kind = (string) ( $pubs[ $h ]['kind'] ?? '' );
+			if ( isset( $pubs[ $h ] ) && ( '' === $kind || 'relay' === $kind ) && ( ( $pubs[ $h ]['status'] ?? 'neutral' ) !== $status || 'relay' === $kind ) ) {
+				$was[ $h ]            = 'relay' === $kind ? 'relay only' : (string) ( $pubs[ $h ]['status'] ?? 'neutral' );
+				$pubs[ $h ]['status'] = $status;
+				unset( $pubs[ $h ]['kind'] ); // a relay-only site given a status is a publisher
+			}
+		}
+		if ( $was ) {
+			kits_sourcing_log( 'publishers', implode( ', ', array_keys( $was ) ) . ' → ' . $status, $was, $status );
+		}
+	}
+	return array( $pubs, $press );
+}
+
+/**
+ * Short names for card chips (host => name), publishers only. Logged per host. The caller writes the records.
+ *
+ * @param array $pubs   aw_publishers().
+ * @param array $shorts Host => short name (sanitised).
+ * @return array The records.
+ */
+function aw_sourcing_shorts_apply( array $pubs, array $shorts ) {
+	foreach ( $shorts as $h => $v ) {
+		$v = mb_substr( (string) $v, 0, 24 );
+		if ( isset( $pubs[ $h ] ) && empty( $pubs[ $h ]['kind'] ) && (string) ( $pubs[ $h ]['short'] ?? '' ) !== $v ) {
+			kits_sourcing_log( 'publishers', $h . ' short name → ' . ( '' === $v ? '(none)' : $v ), (string) ( $pubs[ $h ]['short'] ?? '' ), $v );
+			$pubs[ $h ]['short'] = $v;
+		}
+	}
+	return $pubs;
+}
+
 /** Save handlers. */
 add_action(
 	'admin_post_aw_sourcing',
@@ -370,30 +426,7 @@ add_action(
 				$status = '' !== $status ? $status : sanitize_key( $_POST['bulk_status2'] ?? '' );
 				$hosts  = array_map( 'sanitize_text_field', (array) wp_unslash( $_POST['hosts'] ?? array() ) );
 			}
-			$press = false;
-			if ( in_array( $status, array( 'press_add', 'press_remove' ), true ) ) { // Search here for coverage / Stop searching here
-				$hosts = array_values( array_filter( array_map( 'aw_sourcing_norm_host', $hosts ) ) );
-				$press = aw_sourcing_press_change( 'press_add' === $status ? $hosts : array(), 'press_remove' === $status ? $hosts : array() );
-			} elseif ( in_array( $status, array( 'relay_on', 'relay_off' ), true ) && aw_sourcing_phase() >= 1 ) { // logged per host
-				$pubs = aw_relay_switch( $pubs, $hosts, 'relay_on' === $status );
-			} elseif ( 'delete' === $status ) {
-				foreach ( $hosts as $h ) {
-					$pubs = aw_sourcing_source_delete( $pubs, $h );
-				}
-			} elseif ( in_array( $status, array( 'allow', 'neutral', 'block' ), true ) ) {
-				$was = array();
-				foreach ( $hosts as $h ) {
-					$kind = (string) ( $pubs[ $h ]['kind'] ?? '' );
-					if ( isset( $pubs[ $h ] ) && ( '' === $kind || 'relay' === $kind ) && ( ( $pubs[ $h ]['status'] ?? 'neutral' ) !== $status || 'relay' === $kind ) ) {
-						$was[ $h ]            = 'relay' === $kind ? 'relay only' : (string) ( $pubs[ $h ]['status'] ?? 'neutral' );
-						$pubs[ $h ]['status'] = $status;
-						unset( $pubs[ $h ]['kind'] ); // a relay-only site given a status is a publisher
-					}
-				}
-				if ( $was ) {
-					kits_sourcing_log( 'publishers', implode( ', ', array_keys( $was ) ) . ' → ' . $status, $was, $status );
-				}
-			}
+			list( $pubs, $press ) = aw_sourcing_sources_apply( $pubs, $status, $hosts );
 			$new = aw_host( 'https://' . preg_replace( '#^https?://#', '', sanitize_text_field( wp_unslash( $_POST['new_host'] ?? '' ) ) ) );
 			$ns  = sanitize_key( $_POST['new_status'] ?? 'block' );
 			if ( $new && in_array( $ns, array( 'allow', 'neutral', 'block' ), true ) ) {
@@ -404,13 +437,7 @@ add_action(
 				}
 				kits_sourcing_log( 'publishers', 'added ' . $new . ' as ' . $ns, null === $prev ? '' : (string) ( $prev['status'] ?? 'neutral' ), $ns );
 			}
-			$shorts = array_map( 'sanitize_text_field', (array) wp_unslash( $_POST['short'] ?? array() ) ); // short names for card chips
-			foreach ( $shorts as $h => $v ) {
-				if ( isset( $pubs[ $h ] ) && (string) ( $pubs[ $h ]['short'] ?? '' ) !== $v ) {
-					kits_sourcing_log( 'publishers', $h . ' short name → ' . ( '' === $v ? '(none)' : $v ), (string) ( $pubs[ $h ]['short'] ?? '' ), $v );
-					$pubs[ $h ]['short'] = $v;
-				}
-			}
+			$pubs   = aw_sourcing_shorts_apply( $pubs, array_map( 'sanitize_text_field', (array) wp_unslash( $_POST['short'] ?? array() ) ) ); // short names for card chips
 			update_option( AW_PUB_OPTION, $pubs, false );
 			$changed = $pubs !== $before || $press; // a page change alone saves nothing
 		}
@@ -427,6 +454,9 @@ add_action(
 			$page = absint( wp_unslash( $_POST['paged'] ?? 0 ) ); // the page-number box of the list
 			$back = $page > 1 ? add_query_arg( 'paged', $page, $back ) : $back;
 			$back = empty( $changed ) ? $back : add_query_arg( 'updated', 1, $back );
+		}
+		if ( false !== strpos( (string) wp_get_referer(), 'ui=classic' ) ) { // a save on today's screen goes back to it
+			$back = add_query_arg( 'ui', 'classic', $back );
 		}
 		wp_safe_redirect( $back );
 		exit;

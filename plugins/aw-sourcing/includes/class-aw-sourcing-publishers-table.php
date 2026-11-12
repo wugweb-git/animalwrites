@@ -40,60 +40,10 @@ class AW_Sourcing_Publishers_Table extends WP_List_Table {
 
 	public function __construct() {
 		parent::__construct( array( 'singular' => 'source', 'plural' => 'sources', 'ajax' => false, 'screen' => AW_SRC_SCREEN ) );
-		$stats       = aw_sourcing_host_stats();
-		$this->si    = ! empty( $stats['si'] );
-		$this->stale = ! empty( $stats['stale'] );
-		$meta        = get_option( AW_SOURCING_SITE_META, array() );
-		$meta        = is_array( $meta ) ? $meta : array();
-		$press       = array_flip( aw_sourcing_press_hosts() );
-		$pubs        = aw_publishers();
-		$feeds       = aw_sourcing_feeds_by_host();
-		$relay       = aw_relay_hosts();
-		$log         = aw_src_relay_index( (array) get_option( 'aw_relay_log', array() ) ); // newest row per host named
-		// A host kept only for its icon (kind=directory-source) is not listed; a relay-only one (kind=relay) is.
-		$hosts = array_keys( array_filter( $pubs, fn( $p ) => empty( $p['kind'] ) || 'relay' === $p['kind'] ) );
-		foreach ( array_unique( array_merge( $hosts, array_keys( $press ), array_keys( $feeds ) ) ) as $h ) {
-			if ( '' === (string) $h ) {
-				continue;
-			}
-			$p   = $pubs[ $h ] ?? array();
-			$pub = isset( $pubs[ $h ] ) && empty( $p['kind'] );
-			$s   = $stats['hosts'][ $h ] ?? array();
-			$m   = $meta[ $h ] ?? array();
-			$fl  = $feeds[ $h ] ?? array();
-			$rel = aw_src_host_in( $h, $relay );
-			$this->all[ $h ] = array(
-				'host'    => $h,
-				'pub'     => $pub,
-				'kind'    => $pub ? 'publisher' : ( 'relay' === ( $p['kind'] ?? '' ) ? 'relay' : ( $fl ? 'feeds' : 'press' ) ),
-				'feeds'   => count( $fl ),
-				'feeds_on' => count( array_filter( $fl, fn( $x ) => ! empty( $x['on'] ) ) ),
-				'code_n'  => count( array_filter( $fl, fn( $x ) => 'code' === aw_src_read_by( $x ) ) ), // sources read by code ('code' is the SEO HTTP status below)
-				'fnames'  => implode( ' ', array_map( fn( $x ) => (string) ( $x['name'] ?? '' ), $fl ) ),
-				'relay'   => $rel,
-				'relay_own' => ! empty( $p['relay'] ),
-				'relay_last' => aw_src_relay_last( $log, $h ),
-				'count'   => (int) ( $p['count'] ?? 0 ),
-				'press'   => isset( $press[ $h ] ),
-				'name'    => $pub || 'relay' === ( $p['kind'] ?? '' ) ? (string) ( $p['name'] ?? '' ) : '',
-				'short'   => $pub ? (string) ( $p['short'] ?? '' ) : '',
-				'status'  => $pub ? (string) ( $p['status'] ?? 'neutral' ) : '',
-				'rec'     => $pub ? $p : array(),
-				'dr'      => $pub && isset( $p['dr'] ) && is_numeric( $p['dr'] ) ? (int) $p['dr'] : null,
-				'dr_at'   => $pub ? (string) ( $p['dr_at'] ?? '' ) : '',
-				'f30'     => (int) ( $s['f30'] ?? 0 ),
-				'pub_n'   => (int) ( $s['pub'] ?? 0 ),
-				'impr'    => (int) ( $s['impr'] ?? 0 ),
-				'clicks'  => (int) ( $s['clicks'] ?? 0 ),
-				'impr3'   => (int) ( $s['impr3'] ?? 0 ),
-				'clicks3' => (int) ( $s['clicks3'] ?? 0 ),
-				'title'   => (string) ( $m['title'] ?? '' ),
-				'desc'    => (string) ( $m['desc'] ?? '' ),
-				'code'    => (string) ( $m['code'] ?? '' ),
-				'at'      => (string) ( $m['at'] ?? '' ),
-				'last'    => $pub ? (string) ( $p['last'] ?? '' ) : '',
-			);
-		}
+		$src         = aw_sourcing_source_rows();
+		$this->si    = $src['si'];
+		$this->stale = $src['stale'];
+		$this->all   = $src['rows'];
 	}
 
 	/** Search Console ran, but not within 28 days (the screen says so once). */

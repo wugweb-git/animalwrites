@@ -237,3 +237,8 @@ aw_t( false === strpos( $pages, "\$r['key']," ) && false === strpos( $pages, "'k
 aw_t( false !== strpos( $pages, 'aw_worker_save(' ) && false !== strpos( $pages, 'aw_worker_delete(' ) && false !== strpos( $pages, 'aw_workers_run_now(' ), 'workers routes: the same save, delete and Run now as the classic screen' );
 $wa = file_get_contents( dirname( __DIR__ ) . '/includes/workers-admin.php' );
 aw_t( 1 === substr_count( $wa, "update_option( 'aw_workers_meta', \$meta, false );\n\t\$after" ) && false !== strpos( $wa, "'admin_post_aw_worker_save'" ) && false !== strpos( $wa, 'aw_worker_save(' ), 'workers: the classic form saves through aw_worker_save()' );
+aw_t( false !== strpos( $pages, 'aw_sourcing_sources_apply(' ) && false !== strpos( $pages, 'aw_sourcing_shorts_apply(' ) && false !== strpos( $pages, 'aw_sourcing_source_save(' ) && false !== strpos( $pages, 'aw_sources_feed_op(' ), 'sources routes: the same list actions, short names, source save and feed actions as the classic screen' );
+$pol = file_get_contents( dirname( __DIR__ ) . '/includes/sourcing-policy.php' );
+aw_t( false !== strpos( $pol, 'list( $pubs, $press ) = aw_sourcing_sources_apply( $pubs, $status, $hosts );' ) && false !== strpos( $pol, '$pubs   = aw_sourcing_shorts_apply( $pubs,' ), 'sources: the classic list saves through the shared functions' );
+$ui = file_get_contents( dirname( __DIR__ ) . '/includes/sourceweb-ui.php' );
+aw_t( false !== strpos( $ui, "const SOURCEWEB_UI_TABS = array( 'sources', 'workers', 'settings' );" ), 'ui: Sources, Workers and Settings are drawn on the new screens' );

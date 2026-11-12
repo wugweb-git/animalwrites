@@ -300,6 +300,19 @@ function aw_sources_list_action() {
 		}
 		return false;
 	}
+	aw_sources_list_back( aw_sources_feed_op( $op, $ids ) );
+	return true;
+}
+
+/**
+ * A feeds list action, for today's list and the new Sources screen: on, off, filter_on, filter_off (the keyword check)
+ * or delete (feeds only; sources read by code are kept). Logged per feed.
+ *
+ * @param string $op  The action.
+ * @param array  $ids "type|id" (or "id") keys.
+ * @return bool Something changed.
+ */
+function aw_sources_feed_op( $op, array $ids ) {
 	$want = array();
 	foreach ( $ids as $one ) {
 		$parts  = explode( '|', (string) $one, 2 );
@@ -336,8 +349,7 @@ function aw_sources_list_action() {
 		}
 	}
 	kits_sourcing_log_many( $log );
-	aw_sources_list_back( (bool) $what );
-	return true;
+	return (bool) $what;
 }
 
 /** After a list action: back to the same view, search and page; "Saved" only when something changed. */

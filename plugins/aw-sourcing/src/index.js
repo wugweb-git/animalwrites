@@ -1258,7 +1258,9 @@ function useSub( keys ) {
  */
 const subHref = ( next ) => {
 	const u = new URL( window.location.href );
-	[ 'edit', 'runs' ].forEach( ( k ) => u.searchParams.delete( k ) );
+	[ 'edit', 'runs', 'view', 'status' ].forEach( ( k ) =>
+		u.searchParams.delete( k )
+	);
 	Object.keys( next ).forEach( ( k ) => u.searchParams.set( k, next[ k ] ) );
 	return u.toString();
 };
@@ -2094,12 +2096,922 @@ function WorkerRuns( { id, onBack } ) {
 	);
 }
 
+/* ---------- Sources ---------- */
+
+const SOURCE_ACTIONS = {
+	allow: __( 'Change to Allowed', 'aw-sourcing' ),
+	neutral: __( 'Change to Neutral', 'aw-sourcing' ),
+	block: __( 'Change to Blocked', 'aw-sourcing' ),
+	press_add: __( 'Search here for coverage', 'aw-sourcing' ),
+	press_remove: __( 'Stop searching here', 'aw-sourcing' ),
+	relay_on: __( 'Relay on (fetch through this site)', 'aw-sourcing' ),
+	relay_off: __( 'Relay off', 'aw-sourcing' ),
+};
+
+function Sources() {
+	const [ sub, go ] = useSub( [ 'edit', 'view' ] );
+	const [ msg, setMsg ] = useState( null );
+	const back = ( m ) => {
+		setMsg( m || null );
+		go( {} );
+	};
+	if ( sub.edit ) {
+		return (
+			<SourceForm
+				host={ 'new' === sub.edit ? '' : sub.edit }
+				onDone={ back }
+				go={ go }
+			/>
+		);
+	}
+	if ( 'feeds' === sub.view ) {
+		return (
+			<SectionCard
+				id="feeds"
+				title={ __( 'Feeds', 'aw-sourcing' ) }
+				description={ __(
+					'Every feed and source read by code (News, Library and Opportunity), with the site each belongs to.',
+					'aw-sourcing'
+				) }
+				actions={
+					<Button onClick={ () => back() }>
+						{ __( 'Back to Sources', 'aw-sourcing' ) }
+					</Button>
+				}
+			>
+				<Feeds host="" go={ go } />
+			</SectionCard>
+		);
+	}
+	return <SourceList go={ go } msg={ msg } setMsg={ setMsg } />;
+}
+
+function SourceList( { go, msg, setMsg } ) {
+	const first = new URLSearchParams( window.location.search ).get( 'status' );
+	const [ q, setQ ] = useState( {
+		view: first || '',
+		search: '',
+		orderby: '',
+		order: 'desc',
+		page: 1,
+	} );
+	const [ data, setData ] = useState( null );
+	const [ loading, setLoading ] = useState( true );
+	const [ error, setError ] = useState( '' );
+	const [ shorts, setShorts ] = useState( {} );
+	const [ busy, setBusy ] = useState( false );
+	const load = useCallback( () => {
+		setLoading( true );
+		setError( '' );
+		apiFetch( { path: path( 'sources', q ) } )
+			.then( ( r ) => {
+				setData( r );
+				setShorts( {} );
+			} )
+			.catch( ( e ) => setError( errText( e ) ) )
+			.finally( () => setLoading( false ) );
+	}, [ q ] );
+	useEffect( load, [ load ] );
+	const set = ( part ) => setQ( ( o ) => ( { ...o, page: 1, ...part } ) );
+	const send = ( route, data2 ) => {
+		setMsg( null );
+		setBusy( true );
+		return apiFetch( { path: path( route ), method: 'POST', data: data2 } )
+			.then( ( r ) =>
+				setMsg( {
+					tone: r.changed ? 'success' : 'info',
+					text: r.message,
+				} )
+			)
+			.catch( ( e ) => setMsg( { tone: 'error', text: errText( e ) } ) )
+			.finally( () => {
+				setBusy( false );
+				load();
+			} );
+	};
+	const decide = ( action, hosts ) =>
+		send( 'sources/decide', { action, hosts } );
+	const remove = ( r ) => {
+		if (
+			// eslint-disable-next-line no-alert -- a plain browser confirm, as today's screen
+			window.confirm(
+				sprintf(
+					/* translators: %s: host. */
+					__(
+						'Delete the source %s? This cannot be undone.',
+						'aw-sourcing'
+					),
+					r.id
+				)
+			)
+		) {
+			decide( 'delete', [ r.id ] );
+		}
+	};
+	const phase = data?.phase ?? 0;
+	const bulk = Object.keys( SOURCE_ACTIONS )
+		.filter(
+			( k ) =>
+				! ( k.startsWith( 'press_' ) && phase >= 2 ) &&
+				! ( k.startsWith( 'relay_' ) && phase < 1 )
+		)
+		.map( ( k ) => ( { value: k, label: SOURCE_ACTIONS[ k ] } ) );
+	const edited = Object.keys( shorts ).length > 0;
+	const views = [
+		...( data?.views || [] ),
+		...( data
+			? [
+					{
+						value: '__feeds',
+						label: __( 'Feeds', 'aw-sourcing' ),
+						count: data.feedCount,
+					},
+				]
+			: [] ),
+	];
+	return (
+		<SectionCard
+			id="sources"
+			title={ __( 'Sources', 'aw-sourcing' ) }
+			description={ __(
+				'Every host the workers have sent, and every site a feed or a source read by code comes from. Blocked publishers are refused; Neutral is the default for new hosts; Allowed publishers skip the keyword check. Short name: what cards show on the source chip.',
+				'aw-sourcing'
+			) }
+			actions={
+				<>
+					<Button
+						busy={ busy }
+						disabled={ ! edited }
+						onClick={ () =>
+							send( 'sources/short', { short: shorts } )
+						}
+					>
+						{ __( 'Save short names', 'aw-sourcing' ) }
+					</Button>
+					<a
+						className="kits-shell-button is-primary"
+						href={ subHref( { edit: 'new' } ) }
+						onClick={ inPlace( go, { edit: 'new' } ) }
+					>
+						{ __( 'Add New Source', 'aw-sourcing' ) }
+					</a>
+				</>
+			}
+		>
+			{ msg && (
+				<Notice tone={ msg.tone } onDismiss={ () => setMsg( null ) }>
+					{ msg.text }
+				</Notice>
+			) }
+			{ data?.stale && (
+				<Notice tone="info">
+					{ __(
+						'Search value: Search Console has not run within 28 days, so there are no figures for this window.',
+						'aw-sourcing'
+					) }
+				</Notice>
+			) }
+			<DataList
+				label={ __( 'Sources', 'aw-sourcing' ) }
+				columns={ [
+					{
+						key: 'title',
+						label: __( 'Site', 'aw-sourcing' ),
+						sortable: true,
+						primary: true,
+						render: ( r ) => (
+							<>
+								<a
+									href={ subHref( { edit: r.id } ) }
+									onClick={ inPlace( go, { edit: r.id } ) }
+								>
+									<strong>{ r.id }</strong>
+								</a>
+								{ r.name && (
+									<span className="kits-shell-field__help">
+										{ ' ' }
+										{ r.name }
+									</span>
+								) }
+								{ 'block' === r.status && (
+									<span className="kits-shell-field__help">
+										{ ' ' }
+										<Status
+											tone="error"
+											label={ __(
+												'Blocked: new items from it are refused. Items already on the site are unchanged.',
+												'aw-sourcing'
+											) }
+										/>
+									</span>
+								) }
+							</>
+						),
+					},
+					{
+						key: 'short',
+						label: __( 'Short name', 'aw-sourcing' ),
+						render: ( r ) =>
+							r.pub ? (
+								<input
+									type="text"
+									maxLength="24"
+									size="12"
+									aria-label={ sprintf(
+										/* translators: %s: host. */
+										__(
+											'Short name for %s',
+											'aw-sourcing'
+										),
+										r.id
+									) }
+									value={ shorts[ r.id ] ?? r.short }
+									onChange={ ( e ) =>
+										setShorts( {
+											...shorts,
+											[ r.id ]: e.target.value,
+										} )
+									}
+								/>
+							) : (
+								'—'
+							),
+					},
+					{
+						key: 'status',
+						label: __( 'Status', 'aw-sourcing' ),
+						sortable: true,
+						render: ( r ) => (
+							<>
+								{ r.pub ? (
+									<Status
+										tone={
+											{
+												allow: 'success',
+												block: 'error',
+											}[ r.status ] || 'info'
+										}
+										label={ r.statusText }
+									/>
+								) : (
+									<span className="kits-shell-field__help">
+										{ r.statusText }
+									</span>
+								) }
+								{ r.press && (
+									<span className="kits-shell-field__help">
+										{ ' ' }
+										{ __(
+											'Searched for coverage',
+											'aw-sourcing'
+										) }
+									</span>
+								) }
+							</>
+						),
+					},
+					{
+						key: 'rating',
+						label: __( 'Rating', 'aw-sourcing' ),
+						render: ( r ) => {
+							if ( ! r.rating ) {
+								return '–';
+							}
+							return r.ratingUrl ? (
+								<a href={ r.ratingUrl }>{ r.rating }</a>
+							) : (
+								r.rating
+							);
+						},
+					},
+					{
+						key: 'dr',
+						label: __( 'Domain Rating', 'aw-sourcing' ),
+						sortable: true,
+						render: ( r ) =>
+							null === r.dr ? (
+								'—'
+							) : (
+								<>
+									{ r.dr }
+									{ r.drAt && (
+										<span className="kits-shell-field__help">
+											{ ' ' }
+											{ r.drAt }
+										</span>
+									) }
+								</>
+							),
+					},
+					{
+						key: 'feeds',
+						label: __( 'Feeds', 'aw-sourcing' ),
+						sortable: true,
+						render: ( r ) =>
+							r.feeds ? (
+								<a
+									href={ subHref( { edit: r.id } ) }
+									onClick={ inPlace( go, { edit: r.id } ) }
+								>
+									{ r.feedsText }
+								</a>
+							) : (
+								'—'
+							),
+					},
+					{
+						key: 'relay',
+						label: __( 'Relay', 'aw-sourcing' ),
+						render: ( r ) => {
+							if ( ! r.relay ) {
+								return '—';
+							}
+							return (
+								<>
+									{ __( 'On', 'aw-sourcing' ) }
+									<span className="kits-shell-field__help">
+										{ ' ' }
+										{ r.relayLast
+											? sprintf(
+													/* translators: %s: last result. */
+													__(
+														'Last: %s',
+														'aw-sourcing'
+													),
+													r.relayLast
+												)
+											: __(
+													'Not used yet',
+													'aw-sourcing'
+												) }
+									</span>
+								</>
+							);
+						},
+					},
+					{
+						key: 'items',
+						label: __(
+							'Items (30 days / published)',
+							'aw-sourcing'
+						),
+						sortable: true,
+					},
+					{
+						key: 'search',
+						label: __( 'Search value', 'aw-sourcing' ),
+						sortable: true,
+						render: ( r ) => r.search || '—',
+					},
+					{
+						key: 'seo',
+						label: __( 'SEO', 'aw-sourcing' ),
+						render: ( r ) =>
+							r.seoAt ? (
+								<>
+									{ r.seoTitle }
+									{ r.seoDesc && (
+										<span className="kits-shell-field__help">
+											{ ' ' }
+											{ r.seoDesc }
+										</span>
+									) }
+									<span className="kits-shell-field__help">
+										{ ' ' }
+										{ r.seoAt }
+									</span>
+								</>
+							) : (
+								__( 'Not checked yet', 'aw-sourcing' )
+							),
+					},
+					{
+						key: 'last',
+						label: __( 'Last seen', 'aw-sourcing' ),
+						sortable: true,
+						render: ( r ) => r.last || '—',
+					},
+				] }
+				rows={ data?.rows || [] }
+				total={ data?.total || 0 }
+				page={ data?.page || 1 }
+				pages={ data?.pages || 1 }
+				onPage={ ( page ) => setQ( ( o ) => ( { ...o, page } ) ) }
+				search={ q.search }
+				onSearch={ ( search ) => set( { search } ) }
+				searchLabel={ __( 'Search sources', 'aw-sourcing' ) }
+				views={ views }
+				view={ q.view }
+				onView={ ( view ) =>
+					'__feeds' === view
+						? go( { view: 'feeds' } )
+						: set( { view } )
+				}
+				sort={ { key: q.orderby, dir: q.order } }
+				onSort={ ( orderby, order ) => set( { orderby, order } ) }
+				bulkActions={ bulk }
+				onBulk={ decide }
+				rowActions={ ( r ) => [
+					{
+						label: __( 'Edit', 'aw-sourcing' ),
+						onClick: () => go( { edit: r.id } ),
+					},
+					...( r.pub
+						? [ 'allow', 'neutral', 'block' ]
+								.filter( ( st ) => st !== r.status )
+								.map( ( st ) => ( {
+									label: {
+										allow: __( 'Allow', 'aw-sourcing' ),
+										neutral: __( 'Neutral', 'aw-sourcing' ),
+										block: __( 'Block', 'aw-sourcing' ),
+									}[ st ],
+									tone: 'block' === st ? 'error' : '',
+									onClick: () => decide( st, [ r.id ] ),
+								} ) )
+						: [] ),
+					...( phase < 2
+						? [
+								{
+									label: r.press
+										? SOURCE_ACTIONS.press_remove
+										: SOURCE_ACTIONS.press_add,
+									onClick: () =>
+										decide(
+											r.press
+												? 'press_remove'
+												: 'press_add',
+											[ r.id ]
+										),
+								},
+							]
+						: [] ),
+					...( phase >= 1
+						? [
+								{
+									label: r.relayOwn
+										? __( 'Relay off', 'aw-sourcing' )
+										: __( 'Relay on', 'aw-sourcing' ),
+									onClick: () =>
+										decide(
+											r.relayOwn
+												? 'relay_off'
+												: 'relay_on',
+											[ r.id ]
+										),
+								},
+							]
+						: [] ),
+					...( r.canDelete
+						? [
+								{
+									label: __( 'Delete', 'aw-sourcing' ),
+									tone: 'error',
+									onClick: () => remove( r ),
+								},
+							]
+						: [] ),
+				] }
+				loading={ loading }
+				error={ error }
+				onRetry={ load }
+				emptyTitle={ __( 'No sources.', 'aw-sourcing' ) }
+			/>
+		</SectionCard>
+	);
+}
+
+/**
+ * Add a source or edit one, then its feeds.
+ *
+ * @param {Object}   props
+ * @param {string}   props.host   Host, or '' to add.
+ * @param {Function} props.onDone Back to the list, with a notice.
+ * @param {Function} props.go     From useSub().
+ */
+function SourceForm( { host, onDone, go } ) {
+	const [ s, setS ] = useState( null );
+	const [ v, setV ] = useState( null );
+	const [ error, setError ] = useState( '' );
+	const [ msg, setMsg ] = useState( null );
+	const [ busy, setBusy ] = useState( false );
+	const load = () => {
+		setError( '' );
+		apiFetch( { path: path( 'sources/one', { host } ) } )
+			.then( ( r ) => {
+				setS( r );
+				setV( {
+					host: r.host,
+					name: r.name,
+					short: r.short,
+					status: r.status,
+					press: r.press,
+					relay: r.relay,
+				} );
+			} )
+			.catch( ( e ) => setError( errText( e ) ) );
+	};
+	useEffect( load, [ host ] );
+	if ( error ) {
+		return <ErrorState message={ error } onRetry={ load } />;
+	}
+	if ( ! s || ! v ) {
+		return (
+			<LoadingState
+				label={ __( 'Loading the source…', 'aw-sourcing' ) }
+			/>
+		);
+	}
+	const put = ( k ) => ( val ) => setV( { ...v, [ k ]: val } );
+	const save = () => {
+		setBusy( true );
+		setMsg( null );
+		apiFetch( { path: path( 'sources/save' ), method: 'POST', data: v } )
+			.then( ( r ) =>
+				onDone( {
+					tone: r.changed ? 'success' : 'info',
+					text: r.message,
+				} )
+			)
+			.catch( ( e ) => {
+				setMsg( { tone: 'error', text: errText( e ) } );
+				setBusy( false );
+			} );
+	};
+	return (
+		<>
+			<SettingsGroup
+				id="source-form"
+				title={
+					s.new
+						? __( 'Add New Source', 'aw-sourcing' )
+						: sprintf(
+								/* translators: %s: host. */
+								__( 'Edit Source: %s', 'aw-sourcing' ),
+								s.host
+							)
+				}
+				footer={
+					<>
+						<Button
+							variant="primary"
+							busy={ busy }
+							onClick={ save }
+						>
+							{ s.new
+								? __( 'Add Source', 'aw-sourcing' )
+								: __( 'Update', 'aw-sourcing' ) }
+						</Button>{ ' ' }
+						<Button onClick={ () => onDone() }>
+							{ __( 'Cancel', 'aw-sourcing' ) }
+						</Button>
+					</>
+				}
+			>
+				{ msg && (
+					<Notice
+						tone={ msg.tone }
+						onDismiss={ () => setMsg( null ) }
+					>
+						{ msg.text }
+					</Notice>
+				) }
+				{ s.new ? (
+					<TextField
+						label={ __( 'Host', 'aw-sourcing' ) }
+						help={ __(
+							"The site's host or any address on it (https://www.example.com/news/ becomes example.com).",
+							'aw-sourcing'
+						) }
+						value={ v.host }
+						onChange={ put( 'host' ) }
+						input={ { placeholder: 'example.com' } }
+					/>
+				) : (
+					<p>
+						<strong>{ s.host }</strong>{ ' ' }
+						<a href={ `https://${ s.host }/` }>
+							{ __( 'Visit site', 'aw-sourcing' ) }
+						</a>
+					</p>
+				) }
+				<TextField
+					label={ __( 'Name', 'aw-sourcing' ) }
+					help={ __(
+						"The publisher's name, shown on item pages. Kept on publisher records only.",
+						'aw-sourcing'
+					) }
+					value={ v.name }
+					onChange={ put( 'name' ) }
+				/>
+				<TextField
+					label={ __( 'Short name', 'aw-sourcing' ) }
+					help={ __(
+						'What cards show on the source chip (e.g. TOI, PIB, Sentinel).',
+						'aw-sourcing'
+					) }
+					value={ v.short }
+					onChange={ put( 'short' ) }
+					input={ { maxLength: 24 } }
+				/>
+				<SelectField
+					label={ __( 'Status', 'aw-sourcing' ) }
+					help={ __(
+						'Blocked publishers are refused when the workers send their items. Neutral is the default for new hosts the workers find. Allowed publishers skip the keyword check.',
+						'aw-sourcing'
+					) }
+					value={ v.status }
+					options={ s.options }
+					onChange={ put( 'status' ) }
+				/>
+				{ s.pressShown && (
+					<Switch
+						label={ __(
+							'Search here for coverage',
+							'aw-sourcing'
+						) }
+						help={ __(
+							'The press queries also run on this site.',
+							'aw-sourcing'
+						) }
+						checked={ v.press }
+						onChange={ put( 'press' ) }
+					/>
+				) }
+				{ s.relayShown && (
+					<Switch
+						label={ __(
+							'Fetch through this site (relay)',
+							'aw-sourcing'
+						) }
+						help={
+							__(
+								"When this site refuses the workers (GitHub's servers) with 403, they ask this site to fetch the feed or page. Its subdomains are included.",
+								'aw-sourcing'
+							) +
+							( s.relayLast
+								? ' ' +
+									sprintf(
+										/* translators: %s: last result. */
+										__(
+											'Last relay result: %s.',
+											'aw-sourcing'
+										),
+										s.relayLast
+									)
+								: '' )
+						}
+						checked={ v.relay }
+						onChange={ put( 'relay' ) }
+					/>
+				) }
+			</SettingsGroup>
+			{ ! s.new && (
+				<SectionCard
+					id="source-feeds"
+					title={ __( 'Feeds', 'aw-sourcing' ) }
+					description={ __(
+						"This site's feeds and sources read by code.",
+						'aw-sourcing'
+					) }
+				>
+					<Feeds host={ s.host } go={ go } />
+				</SectionCard>
+			) }
+		</>
+	);
+}
+
+/**
+ * The feeds list: every feed, or one site's. On, off, keyword check and delete here; the feed form opens today's screen.
+ *
+ * @param {Object}   props
+ * @param {string}   props.host One site, or ''.
+ * @param {Function} props.go   From useSub().
+ */
+function Feeds( { host, go } ) {
+	const [ q, setQ ] = useState( { view: '', search: '', page: 1 } );
+	const [ data, setData ] = useState( null );
+	const [ loading, setLoading ] = useState( true );
+	const [ error, setError ] = useState( '' );
+	const [ msg, setMsg ] = useState( null );
+	const load = useCallback( () => {
+		setLoading( true );
+		setError( '' );
+		const view = q.view;
+		apiFetch( {
+			path: path( 'sources/feeds', {
+				host,
+				type: [ 'on', 'off' ].includes( view ) ? '' : view,
+				state: [ 'on', 'off' ].includes( view ) ? view : '',
+				search: q.search,
+				page: q.page,
+			} ),
+		} )
+			.then( setData )
+			.catch( ( e ) => setError( errText( e ) ) )
+			.finally( () => setLoading( false ) );
+	}, [ q, host ] );
+	useEffect( load, [ load ] );
+	const set = ( part ) => setQ( ( o ) => ( { ...o, page: 1, ...part } ) );
+	const op = ( o, ids ) => {
+		setMsg( null );
+		return apiFetch( {
+			path: path( 'sources/feeds/decide' ),
+			method: 'POST',
+			data: { op: o, ids },
+		} )
+			.then( ( r ) =>
+				setMsg( {
+					tone: r.changed ? 'success' : 'info',
+					text: r.message,
+				} )
+			)
+			.catch( ( e ) => setMsg( { tone: 'error', text: errText( e ) } ) )
+			.finally( load );
+	};
+	const remove = ( r ) => {
+		if (
+			// eslint-disable-next-line no-alert -- a plain browser confirm, as today's screen
+			window.confirm(
+				sprintf(
+					/* translators: %s: feed name. */
+					__(
+						'Delete the feed "%s"? This cannot be undone.',
+						'aw-sourcing'
+					),
+					r.title
+				)
+			)
+		) {
+			op( 'delete', [ r.id ] );
+		}
+	};
+	return (
+		<>
+			{ msg && (
+				<Notice tone={ msg.tone } onDismiss={ () => setMsg( null ) }>
+					{ msg.text }
+				</Notice>
+			) }
+			{ data && (
+				<p>
+					<a href={ data.addUrl }>
+						{ __( 'Add New Feed', 'aw-sourcing' ) }
+					</a>
+				</p>
+			) }
+			<DataList
+				label={ __( 'Feeds', 'aw-sourcing' ) }
+				columns={ [
+					{
+						key: 'title',
+						label: __( 'Name', 'aw-sourcing' ),
+						primary: true,
+						render: ( r ) => (
+							<a href={ r.editUrl }>
+								<strong>{ r.title }</strong>
+							</a>
+						),
+					},
+					{
+						key: 'typeText',
+						label: __( 'Type', 'aw-sourcing' ),
+					},
+					{
+						key: 'address',
+						label: __( 'Address', 'aw-sourcing' ),
+						render: ( r ) => (
+							<>
+								<code>{ r.address }</code>
+								{ r.note && (
+									<span className="kits-shell-field__help">
+										{ ' ' }
+										{ r.note }
+									</span>
+								) }
+							</>
+						),
+					},
+					...( host
+						? []
+						: [
+								{
+									key: 'host',
+									label: __( 'Publisher', 'aw-sourcing' ),
+									render: ( r ) =>
+										r.host ? (
+											<a
+												href={ subHref( {
+													edit: r.host,
+												} ) }
+												onClick={ inPlace( go, {
+													edit: r.host,
+												} ) }
+											>
+												{ r.host }
+											</a>
+										) : (
+											'—'
+										),
+								},
+							] ),
+					{
+						key: 'on',
+						label: __( 'On', 'aw-sourcing' ),
+						render: ( r ) =>
+							r.on ? (
+								<Status
+									tone="success"
+									label={ __( 'On', 'aw-sourcing' ) }
+								/>
+							) : (
+								<Status
+									tone="info"
+									label={ __( 'Off', 'aw-sourcing' ) }
+								/>
+							),
+					},
+					{
+						key: 'filter',
+						label: __( 'Keyword check', 'aw-sourcing' ),
+					},
+				] }
+				rows={ data?.rows || [] }
+				total={ data?.total || 0 }
+				page={ data?.page || 1 }
+				pages={ data?.pages || 1 }
+				onPage={ ( page ) => setQ( ( o ) => ( { ...o, page } ) ) }
+				search={ q.search }
+				onSearch={ host ? undefined : ( search ) => set( { search } ) }
+				searchLabel={ __( 'Search feeds', 'aw-sourcing' ) }
+				views={ host ? [] : data?.views || [] }
+				view={ q.view }
+				onView={ ( view ) => set( { view } ) }
+				bulkActions={ [
+					{ value: 'on', label: __( 'Turn on', 'aw-sourcing' ) },
+					{ value: 'off', label: __( 'Turn off', 'aw-sourcing' ) },
+					{
+						value: 'filter_on',
+						label: __( 'Keyword check on', 'aw-sourcing' ),
+					},
+					{
+						value: 'filter_off',
+						label: __( 'Keyword check off', 'aw-sourcing' ),
+					},
+				] }
+				onBulk={ op }
+				rowActions={ ( r ) => [
+					{ label: __( 'Edit', 'aw-sourcing' ), href: r.editUrl },
+					{
+						label: r.on
+							? __( 'Turn off', 'aw-sourcing' )
+							: __( 'Turn on', 'aw-sourcing' ),
+						onClick: () => op( r.on ? 'off' : 'on', [ r.id ] ),
+					},
+					...( r.rss
+						? [
+								{
+									label: r.filterOn
+										? __(
+												'Keyword check off',
+												'aw-sourcing'
+											)
+										: __(
+												'Keyword check on',
+												'aw-sourcing'
+											),
+									onClick: () =>
+										op(
+											r.filterOn
+												? 'filter_off'
+												: 'filter_on',
+											[ r.id ]
+										),
+								},
+								{
+									label: __( 'Delete', 'aw-sourcing' ),
+									tone: 'error',
+									onClick: () => remove( r ),
+								},
+							]
+						: [] ),
+				] }
+				loading={ loading }
+				error={ error }
+				onRetry={ load }
+				emptyTitle={ __( 'No feeds.', 'aw-sourcing' ) }
+			/>
+		</>
+	);
+}
+
 const SCREENS = {
 	dashboard: Dashboard,
 	review: Review,
 	enrichment: Enrichment,
 	settings: Settings,
 	workers: Workers,
+	sources: Sources,
 };
 
 function App() {

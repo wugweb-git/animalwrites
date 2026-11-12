@@ -6,6 +6,8 @@
  *   admin.php?page=aw-sourcing-menu              Dashboard          (edit_others_posts)
  *   admin.php?page=aw-review                     To review          (edit_others_posts)
  *   admin.php?page=aw-enrich-review              Enrichment review  (edit_others_posts)
+ *   admin.php?page=aw-sourcing                   Sources            (manage_options; &edit=<host|new>, &view=feeds;
+ *                                                &feed=<id> is still today's feed form)
  *   admin.php?page=aw-sourcing&tab=workers       Workers            (manage_options; &edit=<id|new>, &runs=<id>)
  *   admin.php?page=aw-sourcing&tab=settings      Settings           (manage_options)
  *
@@ -21,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** The Sourcing page's tabs drawn on the new screens (the others still draw today's screen). */
-const SOURCEWEB_UI_TABS = array( 'workers', 'settings' );
+const SOURCEWEB_UI_TABS = array( 'sources', 'workers', 'settings' );
 
 /**
  * Which new screen this request asks for: 'dashboard', 'review', 'enrichment', a tab of SOURCEWEB_UI_TABS or ''.
@@ -36,6 +38,10 @@ function sourceweb_ui_wanted(): string {
 		return '';
 	}
 	if ( AW_SRC_PAGE === $page ) {
+		$tab = '' === $tab ? 'sources' : $tab; // Sources is the page's first screen
+		if ( 'sources' === $tab && '' !== sanitize_key( wp_unslash( $_GET['feed'] ?? '' ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- which screen to show
+			return ''; // the feed form stays on today's screen for now, at its own address
+		}
 		return in_array( $tab, SOURCEWEB_UI_TABS, true ) ? $tab : '';
 	}
 	return array(
@@ -51,6 +57,7 @@ function sourceweb_ui_caps(): array {
 		'dashboard'  => AW_REVIEW_CAP,
 		'review'     => AW_REVIEW_CAP,
 		'enrichment' => AW_ENRICH_CAP,
+		'sources'    => AW_SRC_CAP,
 		'workers'    => AW_SRC_CAP,
 		'settings'   => AW_SRC_CAP,
 	);
@@ -79,6 +86,7 @@ function sourceweb_ui_url( string $screen ): string {
 		'dashboard'  => array( 'page' => AW_SRC_MENU ),
 		'review'     => array( 'page' => 'aw-review' ),
 		'enrichment' => array( 'page' => 'aw-enrich-review' ),
+		'sources'    => array( 'page' => AW_SRC_PAGE ),
 	)[ $screen ] ?? ( in_array( $screen, SOURCEWEB_UI_TABS, true ) ? array(
 		'page' => AW_SRC_PAGE,
 		'tab'  => $screen,
@@ -99,7 +107,7 @@ add_action(
 			'dashboard'  => array( __( 'Dashboard', 'aw-sourcing' ), null ),
 			'review'     => array( __( 'To review', 'aw-sourcing' ), null ),
 			'enrichment' => array( __( 'Enrichment review', 'aw-sourcing' ), null ),
-			'sources'    => array( __( 'Sources', 'aw-sourcing' ), '' ),
+			'sources'    => array( __( 'Sources', 'aw-sourcing' ), null ),
 			'keywords'   => array( __( 'Keywords', 'aw-sourcing' ), 'keywords' ),
 			'rules'      => array( __( 'Rules', 'aw-sourcing' ), 'rules' ),
 			'ai'         => array( __( 'AI models', 'aw-sourcing' ), 'ai' ),
@@ -156,6 +164,7 @@ function sourceweb_ui_page( string $screen ): bool {
 		'dashboard'  => __( 'SourceWeb', 'aw-sourcing' ),
 		'review'     => __( 'To review', 'aw-sourcing' ),
 		'enrichment' => __( 'Enrichment review', 'aw-sourcing' ),
+		'sources'    => __( 'Sources', 'aw-sourcing' ),
 		'workers'    => __( 'Workers', 'aw-sourcing' ),
 		'settings'   => __( 'SourceWeb settings', 'aw-sourcing' ),
 	);
