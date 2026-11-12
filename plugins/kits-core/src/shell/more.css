@@ -197,6 +197,24 @@
 	font-weight: 400;
 }
 
+/* Icon row actions (edit, delete, cancel, success, view, undo, external): ink, red or green; the label is the tooltip. */
+.kits-shell .kits-shell-iconaction.kits-shell-iconaction {
+	color: var(--ks-ink);
+}
+
+.kits-shell .kits-shell-iconaction.is-danger.is-danger {
+	color: var(--ks-danger);
+}
+
+.kits-shell .kits-shell-iconaction.is-success.is-success {
+	color: var(--ks-success);
+}
+
+.kits-shell .kits-shell-iconaction.kits-shell-iconaction:disabled,
+.kits-shell .kits-shell-iconaction.kits-shell-iconaction[aria-disabled="true"] {
+	color: var(--ks-g6);
+}
+
 .kits-shell-rowaction.is-off {
 	display: inline-flex;
 	flex-wrap: wrap;

@@ -7,19 +7,92 @@
  */
 import { Fragment, useEffect, useId, useState } from '@wordpress/element';
 import { __, _n, sprintf } from '@wordpress/i18n';
+import { Button } from '@wordpress/components';
+import {
+	check,
+	closeSmall,
+	external,
+	pencil,
+	seen,
+	trash,
+	undo,
+} from '@wordpress/icons';
 import { EmptyState, LoadingState, ErrorState } from './states';
 
 const cx = ( ...names ) => names.filter( Boolean ).join( ' ' );
 
 /**
+ * The icon for each named row action (@wordpress/icons). The tone follows the name: delete and cancel are red, success is
+ * green; edit, view and external stay ink.
+ */
+const ROW_ICONS = {
+	edit: { icon: pencil },
+	delete: { icon: trash, tone: 'danger' },
+	cancel: { icon: closeSmall, tone: 'danger' },
+	success: { icon: check, tone: 'success' },
+	view: { icon: seen },
+	undo: { icon: undo },
+	external: { icon: external },
+};
+
+/**
  * A row action: a link or a button. `disabled` with `why` shows the action off and says why ("Undo needs SourceWeb").
+ * With `icon` (edit, delete, cancel, success, view, undo, external) it is an icon button: the label is its accessible
+ * name and its tooltip. `external` opens a new tab and says so to screen readers.
  *
  * @param {Object} props
- * @param {Object} props.action { label, href, onClick, disabled, why, tone, expanded, controls }. expanded and
+ * @param {Object} props.action { label, href, onClick, disabled, why, tone, icon, expanded, controls }. expanded and
  *                              controls: a button that opens a part of the page (aria-expanded, aria-controls).
  */
 export function RowAction( { action } ) {
 	const id = useId();
+	const named = ROW_ICONS[ action.icon ];
+	if ( named ) {
+		const ext = 'external' === action.icon;
+		const label = ext
+			? sprintf(
+					/* translators: %s: action label. */
+					__( '%s (opens in a new tab)', 'kits-core' ),
+					action.label
+				)
+			: action.label;
+		const button = (
+			<Button
+				className={ cx(
+					'kits-shell-iconaction',
+					named.tone && 'is-' + named.tone
+				) }
+				icon={ named.icon }
+				label={ label }
+				showTooltip
+				size="small"
+				href={ action.disabled ? undefined : action.href }
+				target={ ext && action.href ? '_blank' : undefined }
+				rel={ ext && action.href ? 'noopener noreferrer' : undefined }
+				onClick={ action.disabled ? undefined : action.onClick }
+				disabled={ action.disabled }
+				accessibleWhenDisabled={ action.disabled }
+				aria-describedby={
+					action.disabled && action.why ? id : undefined
+				}
+				aria-expanded={
+					undefined === action.expanded ? undefined : action.expanded
+				}
+				aria-controls={ action.controls }
+			/>
+		);
+		if ( action.disabled && action.why ) {
+			return (
+				<span className="kits-shell-rowaction is-off">
+					{ button }
+					<span className="kits-shell-rowaction__why" id={ id }>
+						{ action.why }
+					</span>
+				</span>
+			);
+		}
+		return button;
+	}
 	const cls = cx( 'kits-shell-link', 'error' === action.tone && 'is-danger' );
 	if ( action.disabled ) {
 		return (
