@@ -272,8 +272,22 @@ add_action(
 		if ( ! current_user_can( aw_si_cap() ) || ! check_admin_referer( 'aw_si_tool_seeds' ) ) {
 			wp_die( esc_html__( 'Not allowed.', 'aw-seo-extras' ), 403 );
 		}
-		aw_si_tool_seeds_save( isset( $_POST['seeds'] ) ? sanitize_textarea_field( wp_unslash( $_POST['seeds'] ) ) : '' );
-		wp_safe_redirect( aw_si_return_url( 'settings' ) );
+		$changed = aw_si_tool_seeds_save( isset( $_POST['seeds'] ) ? sanitize_textarea_field( wp_unslash( $_POST['seeds'] ) ) : '' );
+		wp_safe_redirect( add_query_arg( 'seeds', $changed ? 'saved' : 'same', aw_si_return_url( 'settings' ) ) );
 		exit;
+	}
+);
+
+// The result of Save seeds, on the classic and the new Settings (12 Nov 2026: the save had no notice).
+add_action(
+	'aw_si_settings_notices',
+	function () {
+		$r = isset( $_GET['seeds'] ) ? sanitize_key( wp_unslash( $_GET['seeds'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- message only.
+		if ( 'saved' === $r ) {
+			/* translators: %s: number of seeds. */
+			echo '<div class="notice notice-success inline"><p>' . esc_html( sprintf( _n( 'Seeds saved: %s search.', 'Seeds saved: %s searches.', count( aw_si_tool_seeds() ), 'aw-seo-extras' ), number_format_i18n( count( aw_si_tool_seeds() ) ) ) ) . '</p></div>';
+		} elseif ( 'same' === $r ) {
+			echo '<div class="notice notice-info inline"><p>' . esc_html__( 'Seeds unchanged: nothing to save.', 'aw-seo-extras' ) . '</p></div>';
+		}
 	}
 );
