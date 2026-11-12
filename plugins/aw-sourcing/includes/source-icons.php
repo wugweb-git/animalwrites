@@ -8,7 +8,7 @@
  * - PNG, ICO, JPEG, GIF or WebP up to 100 KB that PHP reads as an image; never SVG (it can carry script).
  * - Stored as an attachment titled "Source icon: host" (file source-icon-host), Media group "Source icon".
  * - A host that has an icon is not fetched again; one with none is tried again after 7 days. Nothing is deleted.
- * - Option aw_source_icons (autoload off): host => { id, at, src, miss }.
+ * - Option aw_source_icons (autoload off): host => { id, at, src, miss, v }.
  *
  * @package aw-sourcing
  */
@@ -107,7 +107,14 @@ function aw_src_icon_fetch( $url, $host ) {
 		return 'could not write a temp file';
 	}
 	$name = 'source-icon-' . sanitize_title( str_replace( '.', '-', $host ) ) . '.' . $ext;
-	$id   = media_handle_sideload(
+	$mime = image_type_to_mime_type( (int) $size[2] );
+	// The type was read from the bytes above. WordPress's own check names an ICO image/vnd.microsoft.icon and then
+	// refuses it against its list (image/x-icon); for this one file, its type is the one just read.
+	$type = function ( $data, $file, $filename ) use ( $name, $ext, $mime ) {
+		return $filename === $name ? array( 'ext' => $ext, 'type' => 'ico' === $ext ? 'image/x-icon' : $mime, 'proper_filename' => false ) : $data;
+	};
+	add_filter( 'wp_check_filetype_and_ext', $type, 99, 3 );
+	$id = media_handle_sideload(
 		array(
 			'name'     => $name,
 			'tmp_name' => $tmp,
@@ -116,6 +123,7 @@ function aw_src_icon_fetch( $url, $host ) {
 		mb_substr( 'Source icon: ' . $host, 0, 100 ),
 		array( 'post_content' => mb_substr( 'Site icon of ' . $host . ', fetched from ' . $url, 0, 160 ) )
 	);
+	remove_filter( 'wp_check_filetype_and_ext', $type, 99 );
 	if ( file_exists( $tmp ) ) {
 		wp_delete_file( $tmp );
 	}
@@ -151,12 +159,12 @@ function aw_src_icons_run( $limit = 10 ) {
 	$retry = gmdate( 'Y-m-d H:i', time() - 7 * DAY_IN_SECONDS );
 	$todo  = array_filter(
 		array_keys( $want ),
-		fn( $h ) => empty( $icons[ $h ]['id'] ) && (string) ( $icons[ $h ]['at'] ?? '' ) < $retry && preg_match( '/^[a-z0-9.-]+\.[a-z0-9-]+$/', $h )
+		fn( $h ) => empty( $icons[ $h ]['id'] ) && ( (int) ( $icons[ $h ]['v'] ?? 1 ) < 2 || (string) ( $icons[ $h ]['at'] ?? '' ) < $retry ) && preg_match( '/^[a-z0-9.-]+\.[a-z0-9-]+$/', $h )
 	);
 	usort( $todo, fn( $a, $b ) => ( (int) $want[ $b ] <=> (int) $want[ $a ] ) ?: strcmp( (string) ( $icons[ $a ]['at'] ?? '' ), (string) ( $icons[ $b ]['at'] ?? '' ) ) ?: strcmp( $a, $b ) );
 	foreach ( array_slice( $todo, 0, max( 1, (int) $limit ) ) as $h ) {
 		$tries = array_unique( array_filter( array( aw_src_icon_abs( (string) ( $meta[ $h ]['icon'] ?? '' ), $h ), 'https://' . $h . '/favicon.ico' ) ) );
-		$rec   = array( 'id' => 0, 'at' => gmdate( 'Y-m-d H:i' ), 'src' => '', 'miss' => '' );
+		$rec   = array( 'id' => 0, 'at' => gmdate( 'Y-m-d H:i' ), 'src' => '', 'miss' => '', 'v' => 2 ); // v2: ICO files accepted (a v1 miss is tried again at once)
 		foreach ( $tries as $url ) {
 			$got = aw_src_icon_fetch( $url, $h );
 			if ( is_int( $got ) ) {
