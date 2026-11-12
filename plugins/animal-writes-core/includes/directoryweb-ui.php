@@ -4,7 +4,7 @@
  *
  * Addresses:
  *   admin.php?page=directoryweb                              Dashboard   edit_aw_volunteers
- *   edit.php?post_type=aw_listing&page=aw-claims              Claims      edit_aw_volunteers
+ *   edit.php?post_type=aw_listing&page=aw-claims              Claims      edit_aw_volunteers (menu: Fluent Forms → Claims)
  *   admin.php?page=directoryweb-settings                      Settings    manage_options
  *
  * &ui=classic (or one claim, or the notice after a review) shows the earlier Claims screen. The Dashboard and Settings
@@ -92,7 +92,7 @@ function directoryweb_ui_url( string $screen ): string {
 }
 
 // Plugins → DirectoryWeb opens the Dashboard (owner, 12 Nov 2026: "Yes, add it", as the other Kits plugins); Settings
-// opens from the Dashboard and lights the same item (kits-core admin-fold.php). Directory → Claims stays where it is.
+// opens from the Dashboard and lights the same item (kits-core admin-fold.php). Claims: Fluent Forms → Claims (claims-review.php).
 add_action(
 	'admin_menu',
 	function () {

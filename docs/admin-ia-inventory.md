@@ -12,7 +12,7 @@ the same with or without Kits Core), then third-party plugins as their vendors s
 | Dashboard › Home, Updates | core | keep |
 | Dashboard › Simple History | Simple History | keep |
 | Directory › Directory, Add Listing | Core (CPT `aw_listing`) | keep |
-| Directory › Claims | Core `claims-review.php:296` | keep: claim review stays here; DirectoryWeb › Claims is read-only (owner, 11–12 Nov) |
+| Directory › Claims | Core `claims-review.php:296` | **done 12 Nov**: the item is Fluent Forms › Claims, after Entries (owner: "With form entries"); same screen, address and review; DirectoryWeb › Claims stays read-only |
 | News › News, Add News item | Core (CPT `aw_news`) | keep |
 | News › Linked campaigns | taxonomy `aw_campaign_link` | **done 12 Nov**: one entry under Classification |
 | News › Social posts | Core `social-posts.php:146` (CPT `aw_social`) | keep under News (no Animal Writes menu: Animal Writes is the site layer and goes with the child theme (plan 4.3), so its screens stay in Kits (owner, 12 Nov)) |

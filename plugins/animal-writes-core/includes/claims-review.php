@@ -288,13 +288,69 @@ function aw_claim_changes( $c ) {
 	return $out;
 }
 
-/* ---------- Directory → Claims ---------- */
+/* ---------- Fluent Forms → Claims (with the other form entries) ---------- */
+
+/** The Claims screen's address (registered under Directory, so every old link keeps working). */
+const AW_CLAIMS_LINK = 'edit.php?post_type=aw_listing&page=aw-claims';
 
 add_action(
 	'admin_menu',
 	function () {
 		add_submenu_page( 'edit.php?post_type=aw_listing', 'Claims', 'Claims', 'edit_aw_volunteers', 'aw-claims', 'aw_claims_screen' );
 	}
+);
+
+/**
+ * Claims are form entries (owner, 12 Nov 2026: "With form entries"): the menu item sits under Fluent Forms, after
+ * Entries, for a user who can open Fluent Forms; anyone else keeps it under Directory. Only the item moves: the screen,
+ * its address and its review are as before.
+ */
+function aw_claims_in_forms(): bool {
+	global $menu;
+	foreach ( (array) $menu as $item ) {
+		if ( is_array( $item ) && 'fluent_forms' === ( $item[2] ?? '' ) ) {
+			return current_user_can( (string) $item[1] ) && current_user_can( 'edit_aw_volunteers' ); // phpcs:ignore WordPress.WP.Capabilities.Unknown -- the Directory's own capability (volunteers.php)
+		}
+	}
+	return false;
+}
+add_action(
+	'admin_menu',
+	function () {
+		global $submenu;
+		if ( ! aw_claims_in_forms() ) {
+			return;
+		}
+		remove_submenu_page( 'edit.php?post_type=aw_listing', 'aw-claims' ); // the screen stays registered at its address
+		$items = array_values( (array) ( $submenu['fluent_forms'] ?? array() ) );
+		$at    = count( $items );
+		foreach ( $items as $i => $item ) {
+			if ( 'fluent_forms_all_entries' === ( $item[2] ?? '' ) ) {
+				$at = $i + 1;
+				break;
+			}
+		}
+		array_splice( $items, $at, 0, array( array( 'Claims', 'edit_aw_volunteers', AW_CLAIMS_LINK, 'Claims' ) ) );
+		$submenu['fluent_forms'] = $items; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- one item added to Fluent Forms' menu.
+	},
+	999
+);
+// On the Claims screen, Fluent Forms is the open menu and Claims the lit item.
+add_filter(
+	'parent_file',
+	function ( $parent ) {
+		global $plugin_page;
+		return 'aw-claims' === $plugin_page && aw_claims_in_forms() ? 'fluent_forms' : $parent;
+	},
+	PHP_INT_MAX - 1
+);
+add_filter(
+	'submenu_file',
+	function ( $file ) {
+		global $plugin_page;
+		return 'aw-claims' === $plugin_page && aw_claims_in_forms() ? AW_CLAIMS_LINK : $file;
+	},
+	PHP_INT_MAX - 1
 );
 
 /** Directory → Claims: the list, or one claim (&entry=). */
