@@ -28,12 +28,19 @@ require_once __DIR__ . '/admin-fold-model.php'; // kits_fold_tabs() for the prod
  * @param string $cap    Who sees the item: the first screen's capability.
  * @param string $prefix The hook prefix of the menu's screens ({prefix}_page_{slug}); the default is the one
  *                       the top-level call would give, the title sanitised.
+ * @param string $icon_file The product's one-colour menu mark (an SVG file; WordPress paints it in the admin colour
+ *                       scheme). Empty or unreadable: the Dashicon in kits_wugweb_menu_slots().
  */
-function kits_admin_fold_menu( string $menu, string $into, string $title, string $cap, string $prefix = '' ): void {
+function kits_admin_fold_menu( string $menu, string $into, string $title, string $cap, string $prefix = '', string $icon_file = '' ): void {
 	global $admin_page_hooks;
 	unset( $into );
 	$slot = kits_wugweb_menu_slots()[ $menu ] ?? array( 'dashicons-admin-generic', '58.9' );
-	add_menu_page( wp_strip_all_tags( $title ), $title, $cap, $menu, '', $slot[0], $slot[1] );
+	$icon = $slot[0];
+	if ( '' !== $icon_file && is_readable( $icon_file ) ) {
+		// A data URI is how WordPress takes an SVG menu icon (add_menu_page); the file is the plugin's own, a few hundred bytes.
+		$icon = 'data:image/svg+xml;base64,' . base64_encode( (string) file_get_contents( $icon_file ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode, WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- see above.
+	}
+	add_menu_page( wp_strip_all_tags( $title ), $title, $cap, $menu, '', $icon, $slot[1] );
 	// The hook prefix the screens already use ({prefix}_page_{slug}), whatever the menu title says.
 	$admin_page_hooks[ $menu ] = '' !== $prefix ? $prefix : sanitize_title( wp_strip_all_tags( $title ) ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- keeps the screens' hook names.
 	kits_wugweb_menu_separator();

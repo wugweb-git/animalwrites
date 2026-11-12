@@ -98,7 +98,7 @@ add_action(
 		// our plugins sit under Plugins). Same address as before (admin.php?page=aw-search-insights) and the same hook name.
 		// Without Kits Core it is a menu of its own.
 		if ( function_exists( 'kits_admin_fold_menu' ) ) {
-			kits_admin_fold_menu( AW_SI_SLUG, 'plugins.php', 'InsightWeb', aw_si_cap(), 'insightweb' );
+			kits_admin_fold_menu( AW_SI_SLUG, 'plugins.php', 'InsightWeb', aw_si_cap(), 'insightweb', dirname( __DIR__, 2 ) . '/assets/menu-icon.svg' );
 		} else {
 			add_menu_page( __( 'Search Insights', 'insightweb' ), 'InsightWeb', aw_si_cap(), AW_SI_SLUG, 'aw_si_screen', 'dashicons-chart-area', '58.5' );
 		}

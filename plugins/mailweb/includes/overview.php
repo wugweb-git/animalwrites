@@ -201,7 +201,7 @@ add_action(
 		$n     = mailweb_overview_unread() + ( function_exists( 'mailweb_forms_unread' ) ? mailweb_forms_unread() : 0 );
 		$badge = $n ? ' <span class="awaiting-mod count-' . (int) $n . '"><span class="pending-count">' . (int) $n . '</span></span>' : '';
 		if ( function_exists( 'kits_admin_fold_menu' ) ) {
-			kits_admin_fold_menu( 'mailweb', 'plugins.php', __( 'MailWeb', 'mailweb' ) . $badge, MAILWEB_CAP, 'mailweb' ); // the screens: toplevel_page_mailweb, mailweb_page_…
+			kits_admin_fold_menu( 'mailweb', 'plugins.php', __( 'MailWeb', 'mailweb' ) . $badge, MAILWEB_CAP, 'mailweb', dirname( __DIR__ ) . '/assets/menu-icon.svg' ); // the screens: toplevel_page_mailweb, mailweb_page_…
 		} else {
 			add_menu_page( __( 'MailWeb', 'mailweb' ), __( 'MailWeb', 'mailweb' ) . $badge, MAILWEB_CAP, 'mailweb', 'mailweb_inbox_page', 'dashicons-email', '58.6' ); // the inbox (inbox.php)
 		}

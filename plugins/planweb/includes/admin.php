@@ -22,7 +22,7 @@ add_action(
 		// Plugins → PlanWeb, opening the Calendar (owner, 11 Nov 2026: "all plugins" under Plugins). Its one screen keeps
 		// its address and screen id (toplevel_page_planweb). Without Kits Core, a menu of its own as before.
 		if ( function_exists( 'kits_admin_fold_menu' ) ) {
-			kits_admin_fold_menu( PLANWEB_MENU, 'plugins.php', __( 'PlanWeb', 'planweb' ), 'edit_planweb_entries', 'planweb' );
+			kits_admin_fold_menu( PLANWEB_MENU, 'plugins.php', __( 'PlanWeb', 'planweb' ), 'edit_planweb_entries', 'planweb', dirname( __DIR__ ) . '/assets/menu-icon.svg' );
 		} else {
 			add_menu_page( __( 'Calendar', 'planweb' ), __( 'PlanWeb', 'planweb' ), 'edit_planweb_entries', PLANWEB_MENU, 'planweb_screen', 'dashicons-calendar-alt', '58.7' );
 		}

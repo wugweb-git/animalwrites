@@ -26,7 +26,7 @@ add_action(
 		// Screen ids of the screens under this menu start with its hook prefix; keep the old one (aw-seo-plus_page_…),
 		// so saved screen options, box order and hidden columns stay with them.
 		if ( function_exists( 'kits_admin_fold_menu' ) ) {
-			kits_admin_fold_menu( AW_SEO_MENU, 'plugins.php', 'RankWeb', 'manage_categories', 'aw-seo-plus' );
+			kits_admin_fold_menu( AW_SEO_MENU, 'plugins.php', 'RankWeb', 'manage_categories', 'aw-seo-plus', dirname( __DIR__ ) . '/assets/menu-icon.svg' );
 		} else {
 			add_menu_page( 'RankWeb', 'RankWeb', 'manage_categories', AW_SEO_MENU, 'aw_seo_overview_page', 'dashicons-search', '58.4' );
 			$GLOBALS['admin_page_hooks'][ AW_SEO_MENU ] = 'aw-seo-plus'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- the menu's hook prefix, as before the rename.
