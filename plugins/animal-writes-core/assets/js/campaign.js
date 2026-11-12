@@ -90,8 +90,15 @@
 	   stays as it was): the Share button sends the story on a phone, the post elsewhere (the other one, then the link
 	   preview image, if unset), with the message and link; the link alone where files can't go. */
 	var cdFrozen = !!document.querySelector('.aw-camp--community-dogs');
+	/* One share picture, 1080x1080, for every network (owner, 13 Nov 2026: one size, so it is made once and reused);
+	   campaigns made before it keep their story and post pictures. */
+	function picList() {
+		if (sh.image) return [['image', 'X, Facebook, Instagram or LinkedIn', 'Picture, 1:1']];
+		return [['story', 'Instagram or Facebook story', 'Story, 9:16'], ['post', 'Instagram or Facebook post', 'Post, 4:5']].filter(function (k) { return sh[k[0]]; });
+	}
 	function picKind() {
 		if (cdFrozen) return 'og';
+		if (sh.image) return 'image';
 		var phone = window.matchMedia && window.matchMedia('(max-width: 767px)').matches;
 		return [phone ? 'story' : 'post', phone ? 'post' : 'story', 'og'].filter(function (k) { return k === 'og' ? sh.og && sh.og.image : sh[k]; })[0] || '';
 	}
@@ -194,7 +201,7 @@
 	/* The story (9:16) and post (4:5) pictures, shown as they are: a tap shares the picture (phone) or saves it (computer).
 	   In the letter tool's share box, and under the page's own share row on campaigns without a letter tool (2 Nov 2026). */
 	function sharePics(box, row) {
-		var pics = [['story', 'Instagram or Facebook story', 'Story, 9:16'], ['post', 'Instagram or Facebook post', 'Post, 4:5']].filter(function (k) { return sh[k[0]]; });
+		var pics = picList();
 		if (!pics.length) return;
 		var wrap = document.createElement('div');
 		wrap.className = 'aw-letter-share-pics';
@@ -276,7 +283,7 @@
 		var t = encodeURIComponent(sh.text || sh.title || ''), u = function (src) { return encodeURIComponent(tagged(src)); };
 		var nets = { x: 'https://x.com/intent/post?text=' + t + '&url=' + u('x') + (sh.hashtags ? '&hashtags=' + encodeURIComponent(sh.hashtags) : ''), whatsapp: 'https://wa.me/?text=' + t + '%20' + u('whatsapp'), email: 'mailto:?subject=' + encodeURIComponent(sh.title || '') + '&body=' + t + '%20' + u('email') };
 		holder.querySelectorAll('.kit-share a[data-kit-share]').forEach(function (a) { if (nets[a.dataset.kitShare] && sh.text) a.href = nets[a.dataset.kitShare]; });
-		var pics = [['story', 'Instagram or Facebook story', 'Story, 9:16'], ['post', 'Instagram or Facebook post', 'Post, 4:5']].filter(function (k) { return sh[k[0]]; });
+		var pics = picList();
 		if (pics.length) {
 			/* The theme's fold (kit.css .wp-block-details): closed when the pictures sit under the bar (phones, a narrow
 			   column), open and fixed when they sit beside the button (the band at least 44rem wide). */

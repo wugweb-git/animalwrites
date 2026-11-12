@@ -346,6 +346,15 @@ Newsletter band above it on every page (`.aw-nl-band`, `#newsletter`): a card on
 ### Other components
 PDF viewer (inline document + download + official source), helplines grid, data table, countdown and live counts, steps, ad placements (Advanced Ads block), details/FAQ (+ rotates to ×), pagination, search, print button. All use the same tokens and states.
 
+## Share pictures: one size
+
+Owner, 13 Nov 2026: every shareable picture is one size, so it is made once and reused on every network.
+
+- **Size: 1080 × 1080 px (1:1).** X, Facebook, Instagram, LinkedIn, Threads and WhatsApp all show a square uncropped in the feed. LinkedIn crops pictures taller than 4:5. In a story (9:16), Instagram and Facebook place the square on a background.
+- **Safe band:** keep the words and the main subject inside the middle 1080 × 566 px (1.91:1). Then the same picture also works where a network crops to a link-preview shape.
+- **On a campaign:** the "Share picture ID (1080×1080)" field (`aw_campaign_share_image`). When it is set, the Share button, the share box and the link-preview fallback all use this one picture. The older story (1080×1920) and post (1080×1350) fields stay only for campaigns made before this rule.
+- Words on a share picture still need the owner's yes. Page pictures stay without text.
+
 ## One orchestrated moment
 Only the homepage hero animates on entry (`aw-rise`, once per session). Everything else is still until someone interacts.
 

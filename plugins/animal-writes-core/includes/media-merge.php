@@ -24,7 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /** Post meta keys that hold an attachment ID and may be repointed (the same picture; nothing is "used once"). */
 function aw_media_merge_meta_keys() {
-	return array( 'aw_source_image_att', 'rank_math_facebook_image_id', 'rank_math_twitter_image_id', 'kits_og_image', 'aw_campaign_share_story', 'aw_campaign_share_post' );
+	return array( 'aw_source_image_att', 'rank_math_facebook_image_id', 'rank_math_twitter_image_id', 'kits_og_image', 'aw_campaign_share_image', 'aw_campaign_share_story', 'aw_campaign_share_post' );
 }
 
 /** Post meta keys that hold the address of the picture next to an ID key above (repointed with it). */

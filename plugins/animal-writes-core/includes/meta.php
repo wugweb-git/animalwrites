@@ -102,6 +102,7 @@ function aw_meta_schema() {
 		'aw_campaign_metric_min' => array( 'string', array( 'aw_campaign' ), 'Show the count from this number' ),
 		'aw_campaign_share_text' => array( 'string', array( 'aw_campaign' ), 'Line shared with the link' ),
 		'aw_campaign_share_hashtags' => array( 'string', array( 'aw_campaign' ), 'Hashtags for X (comma-separated, without #)' ),
+		'aw_campaign_share_image' => array( 'string', array( 'aw_campaign' ), 'Share picture (attachment ID, 1080x1080): one picture for every network' ),
 		'aw_campaign_share_story' => array( 'string', array( 'aw_campaign' ), 'Story image (attachment ID, 1080x1920)' ),
 		'aw_campaign_share_post' => array( 'string', array( 'aw_campaign' ), 'Post image (attachment ID, 1080x1350)' ),
 		'aw_campaign_metric_stale' => array( 'string', array( 'aw_campaign' ), 'Days without a new letter before the count shows an as-of date' ),

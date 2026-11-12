@@ -664,6 +664,7 @@
 .aw-letter-share-pic img { display: block; height: clamp(11rem, 34vw, 15rem); width: auto; border-radius: var(--kit-radius-sm, 8px); box-shadow: 0 0 0 1px var(--kit-color-line), 0 8px 20px rgb(29 20 24 / 0.12); transition: transform 0.15s ease; }
 .aw-letter-share-pic--story img { aspect-ratio: 9 / 16; }
 .aw-letter-share-pic--post img { aspect-ratio: 4 / 5; }
+.aw-letter-share-pic--image img { aspect-ratio: 1; }
 .aw-letter-share-pic:hover img, .aw-letter-share-pic:focus-visible img { transform: translateY(-2px); }
 .aw-letter-share-pic > span { display: inline-flex; align-items: center; gap: var(--kit-space-1); font-size: var(--kit-type-sm); font-weight: 600; }
 @media (prefers-reduced-motion: reduce) { .aw-letter-share-pic img { transition: none; } }
