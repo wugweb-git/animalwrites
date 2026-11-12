@@ -115,6 +115,7 @@ add_action(
 					'tabs'    => $tabs,
 					'rest'    => INSIGHTWEB_REST,
 					'admin'   => current_user_can( 'manage_options' ),
+					'boxes'   => 'dashboard' === $screen ? insightweb_box_list() : array(), // the Overview boxes (insightweb-boxes.php)
 				),
 			)
 		);

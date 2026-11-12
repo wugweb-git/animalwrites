@@ -23,6 +23,7 @@ import {
 	LoadingState,
 	MiniChart,
 	Notice,
+	RefTable,
 	SectionCard,
 	ServiceList,
 	ServiceRow,
@@ -362,8 +363,137 @@ function Dashboard() {
 					emptyTitle={ __( 'No sources yet.', 'aw-seo-extras' ) }
 				/>
 			</SectionCard>
+			<OverviewBoxes />
 		</>
 	);
+}
+
+/**
+ * A part of a box's text: a link when it has one (http(s) or a relative address, from the route).
+ *
+ * @param {Object} props
+ * @param {Object} props.cell { text, href, external }.
+ */
+function Cell( { cell } ) {
+	if ( ! cell.href ) {
+		return cell.text;
+	}
+	return cell.external ? (
+		<a href={ cell.href } target="_blank" rel="noopener noreferrer">
+			{ cell.text }
+		</a>
+	) : (
+		<a href={ cell.href }>{ cell.text }</a>
+	);
+}
+
+/**
+ * One box's parts: paragraphs, notes, headings, lists, tables, notices.
+ *
+ * @param {Object} props
+ * @param {Array}  props.blocks Parts from GET dashboard/box.
+ * @param {string} props.title  The box's title (table captions).
+ */
+function BoxParts( { blocks, title } ) {
+	return blocks.map( ( b, i ) => {
+		const key = `${ b.type }-${ i }`;
+		if ( 'table' === b.type ) {
+			return (
+				<RefTable
+					key={ key }
+					caption={ title }
+					head={ b.head }
+					rows={ b.rows.map( ( r ) =>
+						r.map( ( c, j ) => <Cell key={ j } cell={ c } /> )
+					) }
+				/>
+			);
+		}
+		if ( 'list' === b.type ) {
+			return (
+				<ul key={ key }>
+					{ b.items.map( ( c, j ) => (
+						<li key={ j }>
+							<Cell cell={ c } />
+						</li>
+					) ) }
+				</ul>
+			);
+		}
+		if ( 'notice' === b.type ) {
+			return (
+				<Notice key={ key } tone={ b.tone }>
+					<Cell cell={ b } />
+				</Notice>
+			);
+		}
+		if ( 'heading' === b.type ) {
+			return <h3 key={ key }>{ b.text }</h3>;
+		}
+		return (
+			<p
+				key={ key }
+				className={ 'note' === b.type ? 'kits-shell-field__help' : '' }
+			>
+				<Cell cell={ b } />
+			</p>
+		);
+	} );
+}
+
+/** The Overview boxes (the same as the classic Overview), loaded one after another. */
+function OverviewBoxes() {
+	const boxes = app.boxes || [];
+	const [ got, setGot ] = useState( {} );
+	useEffect( () => {
+		let stop = false;
+		( async () => {
+			for ( const b of boxes ) {
+				if ( stop ) {
+					return;
+				}
+				try {
+					const r = await apiFetch( {
+						path: `${ path( 'dashboard/box' ) }?key=${ encodeURIComponent( b.key ) }`,
+					} );
+					setGot( ( o ) => ( {
+						...o,
+						[ b.key ]: { blocks: r.blocks },
+					} ) );
+				} catch ( e ) {
+					setGot( ( o ) => ( {
+						...o,
+						[ b.key ]: { error: errText( e ) },
+					} ) );
+				}
+			}
+		} )();
+		return () => {
+			stop = true;
+		};
+	}, [] ); // eslint-disable-line react-hooks/exhaustive-deps -- the list comes with the page
+	return boxes.map( ( b ) => {
+		const g = got[ b.key ];
+		let body;
+		if ( ! g ) {
+			body = <LoadingState label={ __( 'Loading…', 'aw-seo-extras' ) } />;
+		} else if ( g.error ) {
+			body = <Notice tone="error">{ g.error }</Notice>;
+		} else if ( ! g.blocks.length ) {
+			body = <p>{ __( 'Nothing yet.', 'aw-seo-extras' ) }</p>;
+		} else {
+			body = <BoxParts blocks={ g.blocks } title={ b.title } />;
+		}
+		return (
+			<SectionCard
+				key={ b.key }
+				id={ `box-${ b.key }` }
+				title={ b.title }
+			>
+				{ body }
+			</SectionCard>
+		);
+	} );
 }
 
 // Tiles shown while the first count runs.

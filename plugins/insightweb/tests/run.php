@@ -9,6 +9,8 @@
  * 3. The Dashboard shaper: six tiles, a change only against a fully stored window before, click rate and position
  *    worked out from the stored sums, page addresses only for site paths.
  * 4. The health shaper: the import tile and the jobs tile with their tones.
+ * 5. The Overview boxes as plain parts: paragraphs, notes, lists with links, tables, notices; no markup or script
+ *    goes out, and only http(s) or relative links are kept.
  *
  * Usage: php plugins/insightweb/tests/run.php
  *
@@ -34,6 +36,11 @@ function update_option( $name, $value, $autoload = null ) {
 	++$GLOBALS['iw_writes'];
 	$GLOBALS['iw_options'][ $name ] = $value;
 	return true;
+}
+
+/** JSON for the checks. */
+function wp_json_encode_stub( $v ) {
+	return json_encode( $v );
 }
 
 /** Stubs: hooks are not run here. */
@@ -199,5 +206,27 @@ iw_check( 'Figures up to 8 Nov 2026' === $h['tiles'][0]['sub'] && '' === $h['til
 iw_check( 'error' === $h['tiles'][1]['tone'] && '1 needs attention' === $h['tiles'][1]['value'] && 'GA4' === $h['tiles'][1]['sub'], 'jobs tile names the failed source' );
 iw_check( 'Failed' === $h['sources'][0]['status'] && 'Never' === $h['sources'][0]['last'], 'sources list in plain words' );
 iw_check( 'HTTP 403' === $h['sources'][0]['why'] && '' === $h['sources'][1]['why'], 'a failed source says why' );
+
+// 5. The Overview boxes as plain parts.
+if ( ! function_exists( 'esc_url_raw' ) ) {
+	/** Stub. */
+	function esc_url_raw( $u ) {
+		return (string) $u;
+	}
+}
+require dirname( __DIR__ ) . '/includes/insightweb-boxes.php';
+$b = insightweb_html_blocks(
+	'<p>Hello <strong>there</strong></p><p class="description">A note</p><ul><li><a href="https://x.test/k">P1</a>: 3</li><li><a href="javascript:alert(1)">bad</a></li></ul>'
+	. '<table class="widefat striped"><thead><tr><th scope="col">Keyword</th><th scope="col">Page</th></tr></thead><tbody><tr><td>dog</td><td><a href="/news/x/" target="_blank">/news/x/</a></td></tr></tbody></table>'
+	. '<div class="notice notice-warning inline"><p>Careful</p></div><form><input name="x"></form><script>alert(1)</script><details><summary>More</summary><p>Inside</p></details>'
+);
+$types = array_column( $b, 'type' );
+iw_check( array( 'p', 'note', 'list', 'table', 'notice', 'heading', 'p' ) === $types, 'box parts in order: ' . implode( ', ', $types ) );
+iw_check( 'Hello there' === $b[0]['text'] && 'A note' === $b[1]['text'], 'paragraph and note as text' );
+iw_check( 'https://x.test/k' === $b[2]['items'][0]['href'] && 'P1: 3' === $b[2]['items'][0]['text'] && ! isset( $b[2]['items'][1]['href'] ), 'list links kept for http(s) only' );
+iw_check( array( 'Keyword', 'Page' ) === $b[3]['head'] && '/news/x/' === $b[3]['rows'][0][1]['href'] && true === $b[3]['rows'][0][1]['external'], 'table head, rows and a relative link' );
+iw_check( 'warn' === $b[4]['tone'] && 'Careful' === $b[4]['text'], 'notice tone and text' );
+iw_check( false === strpos( wp_json_encode_stub( $b ), 'alert' ) && false === strpos( wp_json_encode_stub( $b ), '<' ), 'no script, form or markup goes out' );
+iw_check( array() === insightweb_html_blocks( '   ' ), 'an empty box has no parts' );
 
 exit( $GLOBALS['iw_fail'] );

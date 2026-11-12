@@ -155,27 +155,41 @@ function aw_si_load(): void {
 	}
 	if ( 'overview' === $tab ) {
 		$screen = get_current_screen();
-		add_meta_box( 'aw-si-sources', __( 'Sources', 'aw-seo-extras' ), 'aw_si_box_sources', $screen, 'normal' );
-		add_meta_box( 'aw-si-priorities', __( 'Priorities', 'aw-seo-extras' ), 'aw_si_box_priorities', $screen, 'normal' );
-		/* translators: %d: minimum impressions. */
-		add_meta_box( 'aw-si-quick', sprintf( __( 'Quick wins (position 8–20, at least %d impressions)', 'aw-seo-extras' ), AW_SI_QUICK_MIN ), 'aw_si_box_quick', $screen, 'normal' );
-		add_meta_box( 'aw-si-rising-week', __( 'Rising this week', 'aw-seo-extras' ), 'aw_si_box_rising_week', $screen, 'normal' );
-		add_meta_box( 'aw-si-movers', __( 'Movers (28 days against the 28 before)', 'aw-seo-extras' ), 'aw_si_box_movers', $screen, 'normal' );
-		add_meta_box( 'aw-si-brand', __( 'Brand', 'aw-seo-extras' ), 'aw_si_box_brand', $screen, 'normal' );
-		add_meta_box( 'aw-si-ai', __( 'AI referrals (GA4, 28 days)', 'aw-seo-extras' ), 'aw_si_box_ai', $screen, 'normal' );
-		add_meta_box( 'aw-si-referrers', __( 'Top referrers (GA4)', 'aw-seo-extras' ), 'aw_si_box_referrers', $screen, 'normal' );
-		add_meta_box( 'aw-si-campaigns', __( 'Campaigns by source (GA4, 28 days)', 'aw-seo-extras' ), 'aw_si_box_campaigns', $screen, 'normal' );
-		add_meta_box( 'aw-si-nf', __( 'Not found (404s, GA4, 28 days)', 'aw-seo-extras' ), 'aw_si_box_nf', $screen, 'normal' );
-		add_meta_box( 'aw-si-index', __( 'Index status (URL Inspection)', 'aw-seo-extras' ), 'aw_si_box_index', $screen, 'normal' );
-		add_meta_box( 'aw-si-gsc-types', __( 'Discover and Google News (Search Console, 28 days)', 'aw-seo-extras' ), 'aw_si_box_gsc_types', $screen, 'normal' );
-		add_meta_box( 'aw-si-clarity', __( 'Clarity (28 days)', 'aw-seo-extras' ), 'aw_si_box_clarity', $screen, 'normal' );
-		add_meta_box( 'aw-si-site-search', __( 'Searches on our site (28 days, minimum)', 'aw-seo-extras' ), 'aw_si_box_site_search', $screen, 'normal' );
-		add_meta_box( 'aw-si-gaps', __( 'Content gaps (keyword map gaps and P2)', 'aw-seo-extras' ), 'aw_si_box_gaps', $screen, 'normal' );
-		add_meta_box( 'aw-si-crawl', __( 'Crawler access (weekly)', 'aw-seo-extras' ), 'aw_si_box_crawl', $screen, 'normal' );
-		add_meta_box( 'aw-si-bing-crawl', __( 'Bing crawl (12 weeks)', 'aw-seo-extras' ), 'aw_si_box_bing_crawl', $screen, 'normal' );
+		foreach ( aw_si_overview_boxes() as $key => $box ) {
+			add_meta_box( 'aw-si-' . $key, $box[0], $box[1], $screen, 'normal' );
+		}
 		wp_enqueue_script( 'postbox' );
 		wp_add_inline_script( 'postbox', 'jQuery( function () { postboxes.add_postbox_toggles( pagenow ); } );' );
 	}
+}
+
+/**
+ * The Overview boxes in order: key => [ title, callback ]. The key is the meta box id without "aw-si-". The classic
+ * Overview draws them as meta boxes; the new Dashboard reads each through GET insightweb/v1/dashboard/box.
+ *
+ * @return array[]
+ */
+function aw_si_overview_boxes(): array {
+	return array(
+		'sources'     => array( __( 'Sources', 'aw-seo-extras' ), 'aw_si_box_sources' ),
+		'priorities'  => array( __( 'Priorities', 'aw-seo-extras' ), 'aw_si_box_priorities' ),
+		/* translators: %d: minimum impressions. */
+		'quick'       => array( sprintf( __( 'Quick wins (position 8–20, at least %d impressions)', 'aw-seo-extras' ), AW_SI_QUICK_MIN ), 'aw_si_box_quick' ),
+		'rising-week' => array( __( 'Rising this week', 'aw-seo-extras' ), 'aw_si_box_rising_week' ),
+		'movers'      => array( __( 'Movers (28 days against the 28 before)', 'aw-seo-extras' ), 'aw_si_box_movers' ),
+		'brand'       => array( __( 'Brand', 'aw-seo-extras' ), 'aw_si_box_brand' ),
+		'ai'          => array( __( 'AI referrals (GA4, 28 days)', 'aw-seo-extras' ), 'aw_si_box_ai' ),
+		'referrers'   => array( __( 'Top referrers (GA4)', 'aw-seo-extras' ), 'aw_si_box_referrers' ),
+		'campaigns'   => array( __( 'Campaigns by source (GA4, 28 days)', 'aw-seo-extras' ), 'aw_si_box_campaigns' ),
+		'nf'          => array( __( 'Not found (404s, GA4, 28 days)', 'aw-seo-extras' ), 'aw_si_box_nf' ),
+		'index'       => array( __( 'Index status (URL Inspection)', 'aw-seo-extras' ), 'aw_si_box_index' ),
+		'gsc-types'   => array( __( 'Discover and Google News (Search Console, 28 days)', 'aw-seo-extras' ), 'aw_si_box_gsc_types' ),
+		'clarity'     => array( __( 'Clarity (28 days)', 'aw-seo-extras' ), 'aw_si_box_clarity' ),
+		'site-search' => array( __( 'Searches on our site (28 days, minimum)', 'aw-seo-extras' ), 'aw_si_box_site_search' ),
+		'gaps'        => array( __( 'Content gaps (keyword map gaps and P2)', 'aw-seo-extras' ), 'aw_si_box_gaps' ),
+		'crawl'       => array( __( 'Crawler access (weekly)', 'aw-seo-extras' ), 'aw_si_box_crawl' ),
+		'bing-crawl'  => array( __( 'Bing crawl (12 weeks)', 'aw-seo-extras' ), 'aw_si_box_bing_crawl' ),
+	);
 }
 
 /** Bulk and row priority overrides. The only write this screen makes, and only to Search Insights' own table. */

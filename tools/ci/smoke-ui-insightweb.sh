@@ -4,9 +4,33 @@
 # shellcheck shell=bash
 screen aw-search-insights insightweb-app insightweb-admin
 screen "aw-search-insights&tab=settings" insightweb-app insightweb-admin
-for r in dashboard settings services; do
+for r in dashboard settings services "dashboard/box&key=priorities"; do
   route "insightweb/v1/$r"
 done
+# The Overview boxes on the Dashboard: every box answers 200 as plain parts (no markup); an unknown box is 404; the
+# options stay the same.
+want 404 "GET /insightweb/v1/dashboard/box unknown key" -b /tmp/cj-ci -H "X-WP-Nonce: $NA" "$H/?rest_route=/insightweb/v1/dashboard/box&key=nosuchbox"
+BOXES_BEFORE=$(optmd5 aw_seo_settings aw_si_runs aw_si_off)
+wp eval 'echo implode( " ", array_column( insightweb_box_list(), "key" ) );' > /tmp/iw-boxes.txt
+python3 - "$H/?rest_route=/insightweb/v1/dashboard/box" "$NA" <<'PY' || FAIL=1
+import json, re, subprocess, sys
+r, nonce = sys.argv[1], sys.argv[2]
+keys = open('/tmp/iw-boxes.txt').read().split()
+bad = 0 if len(keys) == 16 else 1
+print(('ok  ' if not bad else 'FAIL') + ' %d Overview boxes on the Dashboard' % len(keys))
+for k in keys:
+    out = subprocess.run(['curl', '-s', '-w', '\n%{http_code}', '-b', '/tmp/cj-ci', '-H', 'X-WP-Nonce: ' + nonce, r + '&key=' + k], capture_output=True, text=True).stdout
+    body, code = out.rsplit('\n', 1)
+    try:
+        d = json.loads(body)
+    except ValueError:
+        d = {}
+    ok = code == '200' and isinstance(d.get('blocks'), list) and not re.search(r'<[a-z/!]', json.dumps(d.get('blocks')))
+    print(('ok  ' if ok else 'FAIL') + ' %s box %s: %d parts' % (code, k, len(d.get('blocks') or [])))
+    bad += not ok
+sys.exit(1 if bad else 0)
+PY
+same "InsightWeb boxes" "$BOXES_BEFORE" "$(optmd5 aw_seo_settings aw_si_runs aw_si_off)"
 post insightweb/v1/dashboard/count '{}'
 post insightweb/v1/settings/numbers '{"fields":{}}'
 post insightweb/v1/settings/rising '{}'
