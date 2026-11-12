@@ -590,6 +590,7 @@ function aw_si_box_index(): void {
 	}
 	arsort( $by );
 	/* translators: 1: pages inspected, 2: indexed, 3: not indexed. */
+	/* translators: 1: pages inspected, 2: indexed, 3: not indexed. */
 	echo '<p>' . esc_html( sprintf( __( 'Sample: %1$s pages inspected: %2$s indexed, %3$s not indexed.', 'aw-seo-extras' ), number_format_i18n( count( $states ) ), number_format_i18n( $yes ), number_format_i18n( count( $states ) - $yes ) ) ) . '</p>';
 	if ( $by ) {
 		echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Not indexed: Google\'s reason', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Pages', 'aw-seo-extras' ) . '</th></tr></thead><tbody>';
