@@ -272,6 +272,17 @@ function Claim( { id, onClose } ) {
 				) ) }
 				{ ( c.logoUrl || c.photoUrls.length > 0 ) && (
 					<p>
+						{ c.logoNowUrl && (
+							<img
+								src={ c.logoNowUrl }
+								alt={ __(
+									'The listing’s current logo',
+									'directoryweb'
+								) }
+								width="80"
+								height="80"
+							/>
+						) }{ ' ' }
 						{ c.logoUrl && (
 							<img
 								src={ c.logoUrl }
@@ -508,6 +519,11 @@ function Claims() {
 			render: ( r ) => r.sentText,
 		},
 		{
+			key: 'ref',
+			label: __( 'Reference', 'directoryweb' ),
+			render: ( r ) => r.ref || '—',
+		},
+		{
 			key: 'name',
 			label: __( 'From', 'directoryweb' ),
 			render: ( r ) => ( r.role ? `${ r.name }, ${ r.role }` : r.name ),
@@ -559,7 +575,7 @@ function Claims() {
 					search={ q.search }
 					onSearch={ ( v ) => set( 'search', v ) }
 					searchLabel={ __(
-						'Search listing or claimant',
+						'Search listing, claimant or reference',
 						'directoryweb'
 					) }
 					views={ [

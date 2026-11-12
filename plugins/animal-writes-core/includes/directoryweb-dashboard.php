@@ -305,7 +305,7 @@ function directoryweb_claim_light_rows_read(): array {
 	if ( $form ) {
 		$rows = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- the claim form's entries
 			$wpdb->prepare(
-				"SELECT s.id, s.response, s.created_at, m.value review FROM {$wpdb->prefix}fluentform_submissions s LEFT JOIN {$wpdb->prefix}fluentform_submission_meta m ON m.response_id = s.id AND m.meta_key = 'aw_claim_review' WHERE s.form_id = %d AND s.status <> 'trashed' ORDER BY s.id DESC",
+				"SELECT s.id, s.serial_number, s.response, s.created_at, m.value review FROM {$wpdb->prefix}fluentform_submissions s LEFT JOIN {$wpdb->prefix}fluentform_submission_meta m ON m.response_id = s.id AND m.meta_key = 'aw_claim_review' WHERE s.form_id = %d AND s.status <> 'trashed' ORDER BY s.id DESC",
 				$form
 			),
 			ARRAY_A
@@ -319,6 +319,7 @@ function directoryweb_claim_light_rows_read(): array {
 			$out[]  = array(
 				'id'      => 'ff-' . (int) $r['id'],
 				'entry'   => (int) $r['id'],
+				'ref'     => (int) $r['serial_number'] ? 'AW-C-' . (int) $r['serial_number'] : '', // as aw_ff_ref( 'claim', id )
 				'old'     => false,
 				'status'  => directoryweb_claim_status( $review ),
 				'sent'    => (string) $r['created_at'],
@@ -352,6 +353,7 @@ function directoryweb_claim_light_rows_read(): array {
 			$out[] = array(
 				'id'      => 'old-' . (int) $id,
 				'entry'   => (int) $id,
+				'ref'     => '',
 				'old'     => true,
 				'status'  => directoryweb_claim_status( (string) get_post_meta( $id, 'aw_c_status', true ) ),
 				'sent'    => (string) get_post_field( 'post_date', $id ),

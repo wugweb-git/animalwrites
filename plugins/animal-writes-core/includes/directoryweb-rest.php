@@ -450,6 +450,7 @@ function directoryweb_claim_row( array $r ): array {
 	return array(
 		'id'         => $r['id'],
 		'entry'      => (int) $r['entry'],
+		'ref'        => (string) ( $r['ref'] ?? '' ),
 		'old'        => (bool) $r['old'],
 		'title'      => '' !== $r['listing_title'] ? $r['listing_title'] : __( '(no listing)', 'directoryweb' ),
 		'listingId'  => (int) $r['listing'],
@@ -625,6 +626,7 @@ function directoryweb_claim_detail( int $id ): ?array {
 		),
 		'proofUrl'   => '' !== $c['proof'] ? esc_url_raw( $c['proof'] ) : '',
 		'logoUrl'    => '' !== $c['logo'] ? $file( $c['logo'] ) : '',
+		'logoNowUrl' => '' !== $c['logo'] && $lid && has_post_thumbnail( $lid ) ? (string) get_the_post_thumbnail_url( $lid, 'thumbnail' ) : '',
 		'photoUrls'  => array_map( $file, (array) $c['photos'] ),
 		'fields'     => $fields,
 		'undone'     => $undone,

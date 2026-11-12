@@ -70,6 +70,16 @@ $q = directoryweb_claims_query(
 	)
 );
 check( 2 === $q['total'], 'search by claimant, any case' );
+$rows[0]['ref'] = 'AW-C-17';
+$q              = directoryweb_claims_query(
+	$rows,
+	array(
+		'status' => 'all',
+		'search' => 'aw-c-17',
+		'now'    => $now,
+	)
+);
+check( 1 === $q['total'] && 'Paws Trust' === $q['rows'][0]['listing_title'], 'search by reference' );
 $q = directoryweb_claims_query(
 	$rows,
 	array(

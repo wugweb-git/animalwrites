@@ -43,7 +43,7 @@ function directoryweb_claims_query( array $rows, array $q ): array {
 	$keep   = array();
 	foreach ( $rows as $r ) {
 		if ( '' !== $words ) {
-			$hay = $r['listing_title'] . ' ' . $r['name'];
+			$hay = $r['listing_title'] . ' ' . $r['name'] . ' ' . ( $r['ref'] ?? '' );
 			$hay = function_exists( 'mb_strtolower' ) ? mb_strtolower( $hay ) : strtolower( $hay );
 			if ( false === strpos( $hay, $words ) ) {
 				continue;

@@ -21,6 +21,7 @@ want 403 "Directory → Claims &ui=next (subscriber)" -b /tmp/cj-rw-sub "$C&ui=n
 route directoryweb/v1/dashboard
 route directoryweb/v1/claims
 route "directoryweb/v1/claims&status=all&days=30&sort=listing&dir=asc"
+route "directoryweb/v1/claims&status=all&search=AW-C-1" # search by reference (tests/directoryweb-tests.php checks the match)
 route directoryweb/v1/settings
 for t in published status places indexing search claims badges enrichment; do route directoryweb/v1/stats/$t; done
 post directoryweb/v1/dashboard/count '{}'
