@@ -719,18 +719,18 @@ FAQ: all 167 topic FAQs and the 4 new ones (directory free, volunteer 18+, claim
 
 | Item | Status |
 |---|---|
-| A1 city redirects (Bengaluru/Bangalore, Delhi, Guwahati, Gurgaon, Noida, Gautam Buddh Nagar) | code on wordpress-dev (35393502, b7febc5b); live once shipped; check `curl -I` 301 → 200 |
-| A2 old lab campaign addresses, ^campaign/(.+) regex, Niagara News item | same commits; Chamba item already 301 |
+| A1 city redirects (Bengaluru/Bangalore, Delhi, Guwahati, Gurgaon, Noida, Gautam Buddh Nagar) | live 12 Nov (shipped in 55a36e24); every address checked 301 → 200 |
+| A2 old lab campaign addresses, ^campaign/(.+) regex, Niagara News item | live 12 Nov; checked. /campaign/lab-animal-rules-2026/ takes two Rank Math hops (regex, then an older rule) and ends on the campaign page |
 | A3 links to removed News items | checked: no stored content links to either; nothing to change |
-| A4 UTM on share buttons | share bar + campaign.js on wordpress-dev. The Lab page's own frozen campaign-lab.js is not changed: owner's yes needed. wa.me chats to listings carry no UTM (they go to WhatsApp) |
+| A4 UTM on share buttons | live 12 Nov; share bar checked (utm_source=x, whatsapp; utm_campaign=post). The Lab page's own frozen campaign-lab.js is not changed: owner's yes needed. wa.me chats to listings carry no UTM (they go to WhatsApp) |
 | A5 data noise | `(not set)` explained in docs/analytics/ga4-setup.md; no_results sends term_empty=1 (GTM must map it: owner's OK) |
 | A6 GA4 12 Nov changes | recorded in docs/analytics/ga4-setup.md |
 | B1 funnel measured | docs/campaign-lab-rules-2026.md: "confirmed" is the "Yes, I sent it" tap, not an email; no confirm email exists |
 | B2–B5 | do not apply as written (nothing to resend or remind); owner decides what to do for future campaigns |
 | B6 form defaults | recorded; owner's call |
-| C2 404 box note, test paths hidden | on wordpress-dev |
-| C3 classic actions keep &ui=classic | on wordpress-dev; result notices and the Seeds box on the new screens still open |
-| C10 confirm rate per source and per day | on wordpress-dev (685d9432); per day from the next GA4 run |
+| C2 404 box note, test paths hidden | live 12 Nov; checked on the classic Overview |
+| C3 classic actions keep &ui=classic | live 12 Nov; result notices and the Seeds box on the new screens still open |
+| C10 confirm rate per source and per day | live 12 Nov; checked: Lab 22% overall (direct 23%, google 28%, ig 16%); per day from the next GA4 run |
 | C1, C4–C9, C11 | open |
 | D1, D2, D5 drafts | Claude outputs/drafts/2026-11-12-d1-d2-d5-emergency-pages.md, awaiting owner |
 | D3, D7 drafts | Claude outputs/drafts/2026-11-12-d3-d7-lab-and-rabies.md, awaiting owner |
