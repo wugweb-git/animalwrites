@@ -11,6 +11,21 @@ Theme and WordPress items are tracked by Animal Writes WordPress. Code requests 
 
 ## Open
 
+### Indexing, Discover/News, Rising sources, email UTM (owner, 12 Nov 2026). Branch `claude/indexing-1112`, PR into wordpress-dev, not merged
+- **Library Acts and Rules (A2):** before: the Library hub (newest first) and the law guide linked neither the Wildlife Protection Act 1972 nor the Fines Rules 1978. Built: "Acts and Rules" A–Z (all 15) on every page of /library/ and on category pages that hold them; a guide that names an Act or Rule shows it in "From the Library", and the Act shows the guide in "Guides on this" (14 name patterns, `law-links.php`). **Check after ship:** /library/ and /category/laws-rules/ list all 15; /library/wildlife-protection-act-1972/ shows guides.
+- **Resources (A3):** the cruelty guide's state table already links all 13 state pages; the hub links Acts and Rules. Guides now reach the Library through the name links above. No other change.
+- **Directory (A4):** before: Kerala's state page linked 3 of 14 districts (the rest only in the filter's select); 1–2 result type pages linked up only. Built: "Districts in {State}" chips on state pages, "More in {District}" chips on district × type pages. Listings already link district, type, state and 6 nearby.
+- **IndexNow (C12):** already on for every public type (Rank Math Instant Indexing); 99 of 100 submissions OK, 10–12 Nov. No change.
+- **Google News (B8–B9):** `news-sitemap.xml` (News items of the last 48 hours) in `sitemap_index.xml` and robots.txt. NewsArticle author is now the Organization "Animal Writes editorial team" with /editorial-policy/. **After ship:** Rich Results test on 5 News items.
+- **Small images (B10):** 536 of 1,671 News items have a share image under 1,200 px wide, 5 unknown; list kept outside the repo, ask for it.
+- **Owner's step (B11):** Google Publisher Center: add the publication and the News sitemap; Search Console → Sitemaps → submit news-sitemap.xml.
+- **Email UTM (E16–E17):** FluentCRM campaigns get newsletter / email / campaign slug when made and on link clicks (the 3 existing campaigns already had them). Site emails and Inbox messages tag the site's own links site-email / email / {type}; signatures, quoted text, wp-admin, login and unsubscribe links are left alone; no address or name ever goes in a link.
+- **Rising (D15):** paste form takes topics read on X, Google News, Instagram, Facebook or elsewhere, with the day read and the link; stored as their own sources, never as Trends.
+- **Search Insights (C13–C14):** "Request indexing (10 a day)" box (not indexed, no links in first, then impressions); the Index box is labelled a sample and takes hand-entered Search Console coverage totals (the form is on the classic Overview; the new Dashboard shows the table).
+- **HTML sitemap (A6):** the footer already linked /sitemap/, which answered 404. Built `[aw_html_sitemap]` and the /sitemap/ page (made once on the first admin visit after ship).
+- **Orphans (A1, A7):** live crawl running; before/after counts and 5 URLs per type to recheck follow.
+- **New visible labels, for the owner's yes:** "Districts in {State}", "More in {District}", "All in {District}", "Animal Writes editorial team" (author). "Acts and Rules" and "Sitemap" are the owner's words.
+
 ### Martech audit fixes and SEO work (owner, 12 Nov 2026). Order 1, 2, 4, 3, 8, 9, 5, 6, 10–14
 - **Hub lists with an array filter (item 1):** `/news/?state[]=kerala`, and on News, Resources, Library and Directory any `?x[]=…` whose list had more than one page, answered 500. Cause: the pagination links, the old `?query-N-page` redirect, the Directory sort link and the Directory place redirect ran `array_map( 'rawurlencode' )` over the query (a TypeError in PHP 8 on a list value). Fixed with `map_deep` (353f5899). Nothing was in the PHP log: the site writes no fatal errors there.
 - **Opportunities sitemap (item 2):** `aw_opportunity-sitemap.xml` was in `sitemap_index.xml` and answered 404 (all 16 opportunities closed). The type is left out through `rank_math/sitemap/exclude_post_type` while none is open (73a03cf8). `aw_listing_type-sitemap.xml` is no longer in the index and no such taxonomy exists in the code: the 16 hits are crawlers' old copies; it goes on the 410 list of item 5.
