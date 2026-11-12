@@ -392,6 +392,7 @@ function aw_worker_save( array $in ) {
 	}
 	$group = isset( aw_worker_groups()[ $group ] ) ? $group : ( $w['group'] ?? 'one-off' );
 	$meta  = aw_workers_meta();
+	$was   = $meta;
 	$m     = (array) ( $meta[ $id ] ?? array() );
 	if ( $planned ) {
 		$m = array_merge(
@@ -440,7 +441,9 @@ function aw_worker_save( array $in ) {
 	} else {
 		unset( $meta[ $id ] );
 	}
-	update_option( 'aw_workers_meta', $meta, false );
+	if ( $meta !== $was ) { // a Save with no change writes nothing
+		update_option( 'aw_workers_meta', $meta, false );
+	}
 	$after = aw_workers_all()[ $id ];
 	if ( $new ) {
 		$log[] = 'added planned worker ' . $id . ' "' . $name . '" (' . ( aw_worker_groups()[ $group ][0] ?? $group ) . ( '' !== $sched ? ', wanted: ' . $sched : '' ) . ')';
