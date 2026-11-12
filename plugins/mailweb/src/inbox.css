@@ -140,11 +140,37 @@
 
 .mailweb-mail__row {
 	display: flex;
+	flex-wrap: wrap;
 	align-items: flex-start;
 	gap: var(--ks-s2);
 	padding-left: var(--ks-s3);
 	border-bottom: 1px solid var(--ks-g2);
 	box-shadow: inset var(--ks-s1) 0 0 transparent;
+}
+
+/* The row's actions (Archive, Mark read, Trash) on their own line under the
+   message, as wp-admin's row actions: the line keeps its place and shows on
+   hover, on keyboard focus and on the open row. */
+.mailweb-mail__acts {
+	display: flex;
+	flex-basis: 100%;
+	flex-wrap: wrap;
+	gap: var(--ks-s3);
+	padding: 0 var(--ks-s3) var(--ks-s2) var(--ks-s5);
+	opacity: 0;
+}
+
+.mailweb-mail__row:hover .mailweb-mail__acts,
+.mailweb-mail__row:focus-within .mailweb-mail__acts,
+.mailweb-mail__row.is-open .mailweb-mail__acts {
+	opacity: 1;
+}
+
+@media (hover: none) {
+
+	.mailweb-mail__acts {
+		opacity: 1;
+	}
 }
 
 .mailweb-mail__row:hover {

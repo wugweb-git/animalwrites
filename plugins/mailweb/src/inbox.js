@@ -550,6 +550,18 @@ export default function Inbox() {
 		emptyTitle = __( 'Nothing matches your search.', 'mailweb' );
 	}
 
+	// A row's own actions, as the classic list's row links: Archive, Mark read or unread, Trash (those the folder offers).
+	const offered = Object.fromEntries(
+		( data?.bulk || [] ).map( ( b ) => [ b.value, b.label ] )
+	);
+	const rowActs = ( r ) =>
+		[ 'archive', r.unread ? 'read' : 'unread', 'trash' ]
+			.filter( ( v ) => offered[ v ] )
+			.map( ( v ) => ( {
+				value: v,
+				label: 'trash' === v ? __( 'Trash', 'mailweb' ) : offered[ v ],
+			} ) );
+
 	let list;
 	if ( loading && ! data ) {
 		list = <LoadingState label={ __( 'Loading messages…', 'mailweb' ) } />;
@@ -627,6 +639,29 @@ export default function Inbox() {
 								</span>
 							) }
 						</button>
+						{ rowActs( r ).length > 0 && (
+							<span className="mailweb-mail__acts">
+								{ rowActs( r ).map( ( a ) => (
+									<Button
+										key={ a.value }
+										variant="link"
+										busy={ busy === a.value }
+										disabled={ !! busy }
+										onClick={ () =>
+											run( a.value, [ r.id ] )
+										}
+										aria-label={ sprintf(
+											/* translators: 1: action, 2: message subject. */
+											__( '%1$s: “%2$s”', 'mailweb' ),
+											a.label,
+											r.subject
+										) }
+									>
+										{ a.label }
+									</Button>
+								) ) }
+							</span>
+						) }
 					</li>
 				) ) }
 			</ul>
