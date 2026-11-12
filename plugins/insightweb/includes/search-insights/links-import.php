@@ -46,15 +46,24 @@ function aw_si_link_source_key( string $source ): string {
 }
 
 /**
+ * Domain of a URL without www, or the text itself when it is a bare domain.
+ *
+ * @param string $url URL or domain.
+ */
+function aw_si_link_domain( string $url ): string {
+	$host = wp_parse_url( false === strpos( $url, '//' ) ? 'https://' . $url : $url, PHP_URL_HOST );
+	return strtolower( preg_replace( '/^www\./i', '', (string) $host ) );
+}
+
+/**
  * A host without www, lower case, or '' when the text is not a plain domain name.
  *
  * @param string $v URL or domain.
  */
 function aw_si_links_import_host( string $v ): string {
-	$v    = trim( $v );
-	$host = (string) wp_parse_url( false === strpos( $v, '//' ) ? 'https://' . $v : $v, PHP_URL_HOST );
-	$host = strtolower( preg_replace( '/^www\./i', '', $host ) );
-	return preg_match( '/^(?=.{3,191}$)([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/', $host ) ? $host : '';
+	$host = aw_si_link_domain( trim( $v ) );
+	// Labels of letters, digits and hyphens; the last one letters, or an IDN in punycode (xn--…).
+	return preg_match( '/^(?=.{3,191}$)([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+(?:[a-z]{2,63}|xn--[a-z0-9-]{1,59})$/', $host ) ? $host : '';
 }
 
 /**
@@ -96,6 +105,15 @@ function aw_si_links_import_parse( string $raw, string $home, string $source, st
 		'error'   => '',
 	);
 	list( $head, $rows ) = aw_si_parse_table( $raw );
+	if ( ! $head ) {
+		// A one-column list (the shared table reader wants two columns): Site, Linking page, Domain or URL, one per line.
+		$lines = array_values( array_filter( array_map( 'trim', (array) preg_split( '/\r\n|\r|\n/', (string) preg_replace( '/^\xEF\xBB\xBF/', '', $raw ) ) ), 'strlen' ) );
+		$one   = strtolower( trim( (string) ( $lines[0] ?? '' ), " \t\"," ) );
+		if ( in_array( $one, array( 'site', 'linking site', 'domain', 'referring domain', 'linking page', 'url' ), true ) ) {
+			$head = array( $one );
+			$rows = array_map( fn( $v ) => array( $one => trim( $v, " \t\"," ) ), array_slice( $lines, 1 ) );
+		}
+	}
 	if ( ! $head ) {
 		$out['error'] = __( 'No header row was found: the first line must name the columns (as Search Console\'s export does).', 'aw-seo-extras' );
 		return $out;
@@ -235,7 +253,9 @@ function aw_si_links_import_store( array $parsed, string $source, string $day ):
 	if ( $parsed['dr'] ) {
 		$all = (array) get_option( AW_SI_LINK_DR_OPTION, array() );
 		foreach ( $parsed['dr'] as $domain => $v ) {
-			$all[ $domain ] = array( (int) $v, $day );
+			if ( (string) ( $all[ $domain ][1] ?? '' ) <= $day ) { // an older read never replaces a newer one
+				$all[ $domain ] = array( (int) $v, $day );
+			}
 		}
 		update_option( AW_SI_LINK_DR_OPTION, $all, false );
 	}
@@ -376,16 +396,19 @@ function aw_si_links_reads_section(): void {
 			);
 		}
 	}
-	$runs = aw_si_runs();
-	$rows = array();
+	$runs  = aw_si_runs();
+	$reads = (array) get_option( AW_SI_LINK_READS_OPTION, array() );
+	$rows  = array();
 	foreach ( $by as $k => $v ) {
-		$read = '' !== $v[1] ? mysql2date( 'j M Y', $v[1] ) : '–';
+		// The day of the read itself when one was logged: rows keep their own (older) last seen from the export.
+		$day  = max( $v[1], is_array( $reads[ $k ] ?? null ) ? (string) ( $reads[ $k ][2] ?? '' ) : '' );
+		$read = '' !== $day ? mysql2date( 'j M Y', $day ) : '–';
 		if ( defined( 'AW_SI_BING_SOURCE' ) && AW_SI_BING_SOURCE === $k && ! empty( $runs['bing']['ok'] ) ) {
 			$read = wp_date( 'j M Y', (int) $runs['bing']['ok'] ); // the monthly run itself, even when it found nothing new
 		}
 		$rows[] = array( $k, number_format_i18n( $v[0] ), $read );
 	}
-	foreach ( (array) get_option( AW_SI_LINK_READS_OPTION, array() ) as $src => $r ) {
+	foreach ( $reads as $src => $r ) {
 		if ( ! isset( $by[ $src ] ) && is_array( $r ) ) {
 			$rows[] = array( (string) $src, '–', mysql2date( 'j M Y', (string) ( $r[2] ?? '' ) ) ); // a read with no link rows (Top linked pages only)
 		}

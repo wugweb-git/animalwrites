@@ -24,7 +24,8 @@
 // phpcs:disable WordPress.WP.AlternativeFunctions, WordPress.Security.EscapeOutput, WordPress.PHP.DiscouragedPHPFunctions, WordPress.WP.GlobalVariablesOverride, WordPress.DateTime.RestrictedFunctions, Squiz.Commenting.FunctionComment.MissingParamTag, Universal.Files.SeparateFunctionsFromOO -- a command-line test runner with WordPress stubs.
 
 define( 'ABSPATH', __DIR__ . '/' );
-const DAY_IN_SECONDS = 86400;
+const DAY_IN_SECONDS    = 86400;
+const MINUTE_IN_SECONDS = 60;
 
 $GLOBALS['iw_options'] = array();
 $GLOBALS['iw_writes']  = 0;
@@ -257,9 +258,20 @@ $qr = aw_si_inspect_info(
 		'indexed' => 1,
 		'errors'  => array(),
 		'refused' => 'Google refused URL Inspection (HTTP 429), so it stops for today.',
+		'quota'   => true,
 	)
 );
 iw_check( false !== strpos( $qr['warnings'][0], 'its quota' ) && 2 === count( $qr['warnings'] ) && ! isset( $qr['never_left'] ), 'not reached: says the quota when Google refused; no estimate without the never count' );
+iw_check( '' === aw_si_inspect_info_eta( $qr ) && false !== strpos( aw_si_inspect_info_eta( $qi ), 'by about 13 Nov 2026' ), 'estimate from a run: none without the never count' );
+$qe = aw_si_inspect_info(
+	array(
+		'todo'    => array( '/a/' ),
+		'done'    => 2,
+		'refused' => 'Site Kit is not connected.',
+	)
+);
+iw_check( false !== strpos( $qe['warnings'][0], 'could not be reached' ) && false === strpos( $qe['warnings'][0], 'quota' ), 'not reached: another error is not called the quota' );
+iw_check( false !== strpos( $qi['warnings'][0], '15 s of calls per step, a step every 5 min' ) && false !== strpos( $qi['warnings'][0], '2,000-a-day' ), 'not reached: the budget, gap and cap come from the constants' );
 iw_check( array() === aw_si_inspect_info( array( 'todo' => array(), 'done' => 4 ) )['warnings'], 'a finished queue has no not-reached line' );
 iw_check( false !== strpos( aw_si_inspect_eta( 1500, 1000, '2026-11-11' ), 'by about 13 Nov 2026' ), 'estimate: 1,500 pages at 1,000 a day end two days on' );
 iw_check( 0 === strpos( aw_si_inspect_eta( 0, 1000, '2026-11-11' ), 'every page has been inspected' ) && '' === aw_si_inspect_eta( 10, 0, '2026-11-11' ), 'estimate: done, or nothing without a rate' );
@@ -313,6 +325,13 @@ iw_check( 'list' === $lx['kind'] && 2 === count( $lx['rows'] ) && 1 === $lx['ski
 iw_check( array( 'a.example.org' => 54 ) === $lx['dr'], 'list: DR kept per domain, only 0–100' );
 iw_check( '' !== aw_si_links_import_parse( "Keyword,Volume\ndog,10\n", $home, $src, '2026-11-12', '2026-11-12' )['error'] && '' !== aw_si_links_import_parse( 'just text', $home, $src, '2026-11-12', '2026-11-12' )['error'], 'unknown columns or no header: an error, nothing stored' );
 iw_check( 'Search Console Links' === aw_si_link_source_key( 'Search Console Links, read 2 Nov 2026' ) && 'Bing Webmaster' === aw_si_link_source_key( 'Bing Webmaster' ), 'reads group by source without the read date' );
+$l1 = aw_si_links_import_parse( "Site\nexample.org\nwww.xn--p1ai.xn--p1ai\nanimalwrites.in\n", $home, $src, '2026-11-12', '2026-11-12' );
+iw_check( 'list' === $l1['kind'] && 2 === count( $l1['rows'] ) && 'xn--p1ai.xn--p1ai' === $l1['rows'][1]['domain'] && 1 === $l1['skipped'], 'one-column list; an IDN (punycode) domain is a domain' );
+iw_check( 'example.org' === aw_si_link_domain( 'https://WWW.Example.org/x' ) && '' === aw_si_links_import_host( 'not a domain' ), 'one domain rule for links and the import' );
+$GLOBALS['iw_options']['aw_si_link_dr'] = array( 'a.example.org' => array( 60, '2026-11-20' ) );
+$dr_in                                 = array( 'rows' => array(), 'dr' => array( 'a.example.org' => 40, 'b.example.org' => 10 ), 'pages' => array(), 'skipped' => 0, 'kind' => 'list', 'error' => '' );
+aw_si_links_import_store( $dr_in, 'Pasted list', '2026-11-12' );
+iw_check( array( 60, '2026-11-20' ) === $GLOBALS['iw_options']['aw_si_link_dr']['a.example.org'] && array( 10, '2026-11-12' ) === $GLOBALS['iw_options']['aw_si_link_dr']['b.example.org'], 'DR: an older read never replaces a newer one' );
 
 
 exit( $GLOBALS['iw_fail'] );

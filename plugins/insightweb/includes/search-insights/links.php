@@ -39,16 +39,6 @@ function aw_si_link_auto_type( string $anchor ): string {
 }
 
 /**
- * Domain of a URL without www, or the text itself when it is a bare domain.
- *
- * @param string $url URL or domain.
- */
-function aw_si_link_domain( string $url ): string {
-	$host = wp_parse_url( false === strpos( $url, '//' ) ? 'https://' . $url : $url, PHP_URL_HOST );
-	return strtolower( preg_replace( '/^www\./i', '', (string) $host ) );
-}
-
-/**
  * Add a link, or move its dates when it is there already (first_seen only earlier, last_seen only later). The type and
  * hidden flag of a row already there are the owner's and never change here.
  *
