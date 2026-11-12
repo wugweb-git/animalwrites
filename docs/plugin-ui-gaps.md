@@ -59,8 +59,8 @@ The new screens cover only a few pages of each plugin. The other pages still dra
 
 | Page | Missing on new | How to add |
 |---|---|---|
-| Inbox | Move to folder, row actions, media picker | (a) RowAction + DataList bulk; (b) `POST messages/move`; (c) media fields |
-| Overview | several rows | (a) RefTable in `GET dashboard` |
+| Inbox | media picker (Move to folder and row actions done 12 Nov) | (c) media fields |
+| Overview | done 12 Nov: the feature table is on the Dashboard | — |
 | **Broken links** | `mailweb_settings_url()` (`includes/mail-in.php:50`) has no `ui=classic`: Test email and Send queued now can't be reached, the paused notice has no Resume, and classic saves land on the new screen | PHP only: add `ui=classic` to that link and to the redirects that follow a save |
 | Notices | `mailweb_done` notices are lost after a save | PHP: carry `done` to the screen and show a Notice (a) |
 
@@ -69,8 +69,8 @@ The new screens cover only a few pages of each plugin. The other pages still dra
 | Page | Missing on new | How to add |
 |---|---|---|
 | Calendar | month grid, previous/next/Today, today highlighted, entry in a cell opens its form | (c) calendar grid; (b) `GET planweb/v1/month?m=Y-m` (edit_planweb_entries); the cell opens the existing EntryForm |
-| Entries | open one entry by address (`?edit=ID`); Type/Status badges; past dates greyed | (b) `GET entries/<id>`; (a) column `render` using the existing badge classes |
-| Settings | the import mismatch table shows 2 columns instead of 3 | (a) RefTable with 3 columns |
+| Entries | done 12 Nov: `&edit=ID`, Type/Status badges, past dates greyed | — |
+| Settings | done 12 Nov: the mismatch table has 3 columns | — |
 | Links | System Status "Calendar" link points to a `#planweb-import` that doesn't exist; the Import check tile has no link | PHP: link to `planweb_ui_url('settings') . '#import'` |
 
 ## DirectoryWeb
@@ -78,8 +78,8 @@ The new screens cover only a few pages of each plugin. The other pages still dra
 | Page | Missing on new | How to add |
 |---|---|---|
 | Menu | Dashboard and Settings have **no menu entry** (`directoryweb-ui.php:93-94`, empty parent) | PHP: put them under `edit.php?post_type=aw_listing` |
-| Claims list | Reference column, and search by reference | extend `GET claims` with `ref`; (a) one DataList column |
-| One claim | current logo picture; link to Enrichment review for Undo | extend `GET claims/<id>` (read only) |
+| Claims list | done 12 Nov: Reference column, search by reference | — |
+| One claim | link to Enrichment review for Undo (current logo done 12 Nov) | extend `GET claims/<id>` (read only) |
 | Dashboard | Places covered and Claimed tiles have no link | (b) `GET listings` (edit_posts) + (a) DataList on a Listings tab, or leave them without a link |
 | Settings | Types has no link to Tags | (a) LinkedSetting |
 
@@ -123,6 +123,10 @@ Home, Settings, Tools and Help show the same content in both looks; nothing was 
 - **InsightWeb Settings → Runs and data** (`&tab=settings#more`): Schedule, Keys, Keyword map seed, Run now, the snapshot and import rows (CSV upload included) and Delete data (type DELETE), from the Settings tab's own rows through Kits page parts; the Numbers row stays in its own groups. The link to the classic Settings is gone.
 - **RankWeb Dashboard → Modules**: Needs attention, the Modules table (where each is set up, Off and Partly off), On edit screens and Commands, from the Overview's own body (`rankweb_overview_parts()`).
 - **MailWeb Inbox → Move to folder**: the open message has a Move to folder choice with its mailbox's other folders; `POST mailweb/v1/inbox/move` calls `mailweb_move_to()` (the same Mail API move as Archive). The link to the current screen for moving is gone.
+- **MailWeb Dashboard → Features**: the classic Overview's feature table (where each feature is set up and its state), from `mailweb_home_body()` through Kits page parts.
+- **MailWeb Inbox row actions**: Archive, Mark read or unread and Trash on each row (those the folder offers), through `POST mailweb/v1/inbox/bulk`.
+- **PlanWeb Entries**: `&tab=entries&edit=ID` opens the entry's form (`GET planweb/v1/entries/<id>`, not from the Trash); Type and Status badges and greyed past dates as on the Calendar; the import mismatch table has Check, In Dates and In PlanWeb.
+- **DirectoryWeb Claims**: a Reference column (AW-C-<serial>) and search by reference; a claim with a new logo shows the listing's current logo beside it. Still read only.
 
 ## Suggested order
 
