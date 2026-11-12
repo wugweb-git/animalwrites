@@ -306,6 +306,20 @@ So from 6 Nov until the owner sets Post, the page and Home still ask people to s
   - Not placed: the other five guide pictures (24184, 24181, 24176, 24171, 24158 are 319–762px wide, below the 1200×900 covers); the section pictures (the sections have no picture slot; owner, 10 Nov: no slot, leave them); the Post pictures (the page is still Active); the share bases 24153 (1200×630), 24154 (1080×1350) and 24155 (1080×1920), big enough, for the share images; the spares.
 - Social posts by page section (card, story, X, Instagram, LinkedIn, WhatsApp), each with #AnimalWrites first: drafts, not posted.
 
+## Wait-period wording (owner's yes on all 15 lines, 13 Nov 2026)
+- Live on 13848 (content, meta and Rank Math; revision 28038 is the version before):
+  - search title "Draft Lab Animal Rules 2026 (GSR 864E): What Happens Now";
+  - search description "Objections to G.S.R. 864(E), the "animal testing bill", closed on 5 Nov 2026 at cpcsea-mef@gov.in. The final rules are not out yet. See what the draft changes.";
+  - a status line under What's happening ("Are the draft lab animal rules final? Not yet. Status on 13 Nov 2026: …"), linking to the newsletter;
+  - "The public had 30 days, until 5 Nov 2026, to send objections …";
+  - Share heading "Share what the draft would change" and its new lede;
+  - share message "India's draft lab animal rules (GSR 864E), in plain words:" and hashtags AnimalWrites, LabAnimalRules, StopAnimalTesting;
+  - the question "What happens after 5 November?" is now "Are the draft lab animal rules 2026 final?" with the new answer (FAQ block and FAQPage schema; the question id is kept);
+  - What happens next, step 1: "Objections closed / 5 Nov 2026".
+- Code (455f1678): hero date chip `[aw_countdown … past_label="Objections closed:"]` shows "Objections closed: 5 Nov 2026"; phone bar `[aw_sticky_cta … after_label="Closed 5 Nov · decision awaited"]` replaces "Last day today"; Home hero top line "objections closed 5 Nov 2026", summary "Objections closed on 5 Nov; the final rules are not out yet.", date line "Last day was 5 Nov 2026".
+- Unchanged: the "Send your objection" buttons (the tool stays on), the H1, the timeline's "Last day for objections", card dates.
+- Not covered by the 15 lines: the link-preview picture still says "Objections close 5 November 2026" (needs a new picture); the letter tool's share box heading "Get three more letters in" (campaign-lab.js); the build script and the home-band script still carry the old lines (do not rerun them over live); the email strip.
+
 ## Decided by the owner
 - Palette A, Gazette crimson (17 Oct).
 - Bands white, grey, black or brand only; every band title an H2 (19 Oct).
