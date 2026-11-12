@@ -262,5 +262,30 @@ iw_check( 0 === strpos( aw_si_inspect_eta( 0, 1000, '2026-11-11' ), 'every page 
 iw_check( array( 4390, 4803, '2026-11-12', false ) === aw_si_coverage_totals( array( 'indexed' => 4390, 'not_indexed' => 4803, 'discovered' => 10, 'day' => '2026-11-12' ) ), 'Search Console totals: the typed Not indexed total wins' );
 iw_check( array( 10, 7, '', true ) === aw_si_coverage_totals( array( 'indexed' => 10, 'discovered' => 3, 'crawled' => 4 ) ) && null === aw_si_coverage_totals( array( 'crawled' => 4 ) ), 'Search Console totals: reasons added up when no total; none without Indexed' );
 
+// 7. Rising (12 Nov 2026): what a run dropped and why.
+/** Stub. */
+function sanitize_text_field( $s ) {
+	return trim( strip_tags( (string) $s ) );
+}
+/** Stub. */
+function sanitize_key( $s ) {
+	return preg_replace( '/[^a-z0-9_\-]/', '', strtolower( (string) $s ) );
+}
+require dirname( __DIR__ ) . '/includes/search-insights/rising-drops.php';
+$wd = aw_si_rising_worker_dropped( array( array( 'term' => 'Tiger Shroff film', 'filter' => 'exclude' ), array( 'term' => '' ), 'x', array( 'term' => 'ok' ) ) );
+iw_check( array( array( 'Tiger Shroff film', 'worker:exclude' ) ) === $wd, 'worker drops: only rows with a term and a filter' );
+iw_check( 101 > count( aw_si_rising_worker_dropped( array_fill( 0, 500, array( 'term' => 't', 'filter' => 'old' ) ) ) ), 'worker drops: capped' );
+iw_check( array() === aw_si_rising_worker_dropped( 'nonsense' ), 'worker drops: anything but a list is ignored' );
+$dc = aw_si_rising_drop_counts(
+	array(
+		'rising'  => 2,
+		'worker'  => array( 'trending' => '20', 'kept' => '3', 'excluded' => '1' ),
+		'dropped' => array( array( 'चाय', 'not-english' ), array( 'x', 'worker:vocabulary' ) ),
+	)
+);
+iw_check( 20 === $dc['seen'] && 17 === $dc['worker_dropped'] && 1 === $dc['excluded'] && 2 === $dc['sent'] && 1 === $dc['stored'] && 2 === count( $dc['terms'] ), 'drop counts: seen, dropped by the worker, excluded, sent and stored' );
+iw_check( null === aw_si_rising_drop_counts( array( 'rising' => 0 ) )['seen'] && null === aw_si_rising_drop_counts( array() )['worker_dropped'], 'drop counts: unknown without the worker counts' );
+iw_check( false !== strpos( aw_si_rising_drop_label( 'not-english' ), 'not English' ) && 'worker filter: odd' === aw_si_rising_drop_label( 'worker:odd' ), 'drop labels in plain words' );
+
 
 exit( $GLOBALS['iw_fail'] );

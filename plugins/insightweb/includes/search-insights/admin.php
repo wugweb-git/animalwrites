@@ -283,7 +283,7 @@ function aw_si_source_notices(): void {
 				/* translators: 1: source, 2: date and time. */
 				? __( '%1$s ran on %2$s and recorded the usual level of each term (a baseline): rising terms show from its next run.', 'aw-seo-extras' )
 				/* translators: 1: source, 2: date and time. */
-				: __( '%1$s ran on %2$s and kept nothing: the source answered, and no term passed the filters.', 'aw-seo-extras' );
+				: __( '%1$s ran on %2$s and kept nothing: the source answered, and no term passed the filters (the Rising tab shows what was dropped and why).', 'aw-seo-extras' );
 			echo '<div class="notice notice-info inline"><p>' . esc_html( sprintf( $msg, $s['label'], wp_date( 'j M, H:i', $ok ) ) ) . '</p></div>';
 		} elseif ( $ok && aw_si_stale( $src ) ) {
 			/* translators: %s: source. */

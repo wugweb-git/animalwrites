@@ -32,6 +32,8 @@ const AW_SI_RISING_MAX_ROWS  = 500; // Per POST: rising terms.
 const AW_SI_RISING_MAX_OBS   = 3000; // Per POST: figures.
 const AW_SI_RISING_NEWS_SRCS = array( 'trends_rss', 'gdelt', 'paste_gnews' ); // Sources that mean "in the news".
 
+require_once __DIR__ . '/rising-drops.php'; // what each run dropped and why (12 Nov 2026)
+
 /**
  * The rising sources: key => label, schedule and whether the workers send it.
  *
@@ -465,15 +467,21 @@ function aw_si_rising_receive( array $body ): array {
 	aw_si_install(); // The REST request may come before any admin visit has built the tables.
 	$key = 'rising_' . $source;
 	aw_si_run_start( $key );
+	$dropped = aw_si_rising_worker_dropped( $body['dropped'] ?? array() ); // terms the worker's own filters dropped, when it sends them
 	foreach ( $rising as $r ) {
-		$d = is_scalar( $r['d'] ?? '' ) ? aw_si_rising_date( (string) ( $r['d'] ?? '' ) ) : '';
+		$term = is_scalar( $r['term'] ?? '' ) ? sanitize_text_field( (string) ( $r['term'] ?? '' ) ) : '';
+		$d    = is_scalar( $r['d'] ?? '' ) ? aw_si_rising_date( (string) ( $r['d'] ?? '' ) ) : '';
 		if ( ! $d || ! is_scalar( $r['term'] ?? '' ) || ! is_scalar( $r['note'] ?? '' ) ) {
 			++$out['skipped'];
+			$dropped[] = array( $term, 'bad-row' );
 			continue;
 		}
 		$g                        = isset( $r['growth'] ) && is_numeric( $r['growth'] ) ? (float) $r['growth'] : null;
-		$result                   = aw_si_rising_put( sanitize_text_field( (string) ( $r['term'] ?? '' ) ), $source, $g, $d, sanitize_text_field( (string) ( $r['note'] ?? '' ) ) );
+		$result                   = aw_si_rising_put( $term, $source, $g, $d, sanitize_text_field( (string) ( $r['note'] ?? '' ) ) );
 		$out['rising'][ $result ] = ( $out['rising'][ $result ] ?? 0 ) + 1;
+		if ( ! in_array( $result, array( 'created', 'updated' ), true ) ) {
+			$dropped[] = array( $term, $result ); // not-english, empty or db-error
+		}
 	}
 	$map = aw_si_kw_map();
 	foreach ( $obs as $o ) {
@@ -516,6 +524,7 @@ function aw_si_rising_receive( array $body ): array {
 		'rising'  => count( $rising ),
 		'figures' => $out['figures'],
 		'worker'  => array_map( 'sanitize_text_field', array_filter( (array) ( $body['info'] ?? array() ), 'is_scalar' ) ),
+		'dropped' => array_slice( $dropped, 0, AW_SI_RISING_MAX_DROPPED ), // shown on the Rising tab (12 Nov 2026)
 	);
 	// What 0 rows means (1 Nov 2026): the source refused ("source failed"), the run only recorded the usual level of each
 	// term ("baseline"), or the source answered and nothing passed the filters ("no rows"). Never "no demand".
@@ -544,6 +553,93 @@ function aw_si_rising_date( string $d ): string {
 	$floor = ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( '-400 days' )->format( 'Y-m-d' );
 	return ( $d <= $today && $d >= $floor ) ? $d : '';
 }
+
+/** Where a hand-added term was seen: form value => label (the paste sources, paste_<value>). */
+function aw_si_rising_add_where(): array {
+	return aw_si_rising_paste_kinds();
+}
+
+/** The Add term form on the Rising tab (12 Nov 2026): one term seen by a person, stored like any rising term. */
+function aw_si_rising_add_form(): void {
+	$today = ( new DateTimeImmutable( 'today', wp_timezone() ) )->format( 'Y-m-d' );
+	echo '<h2>' . esc_html__( 'Add term', 'aw-seo-extras' ) . '</h2>';
+	echo '<p>' . esc_html__( 'A term you saw rising on X, Instagram or elsewhere. It shows in the list above as New, under the source you pick.', 'aw-seo-extras' ) . '</p>';
+	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_si_rising_add">';
+	wp_nonce_field( 'aw_si_rising_add' );
+	echo '<table class="form-table" role="presentation"><tbody>';
+	echo '<tr><th scope="row"><label for="aw-si-add-term">' . esc_html__( 'Term', 'aw-seo-extras' ) . '</label></th><td><input type="text" id="aw-si-add-term" name="term" class="regular-text" maxlength="255" required></td></tr>';
+	echo '<tr><th scope="row"><label for="aw-si-add-where">' . esc_html__( 'Seen on', 'aw-seo-extras' ) . '</label></th><td><select id="aw-si-add-where" name="where">';
+	foreach ( aw_si_rising_add_where() as $k => $label ) {
+		echo '<option value="' . esc_attr( $k ) . '">' . esc_html( ucfirst( $label ) ) . '</option>';
+	}
+	echo '</select></td></tr>';
+	echo '<tr><th scope="row"><label for="aw-si-add-label">' . esc_html__( 'Source label', 'aw-seo-extras' ) . '</label></th><td><input type="text" id="aw-si-add-label" name="label" class="regular-text" maxlength="60" placeholder="' . esc_attr__( 'X scan', 'aw-seo-extras' ) . '"><p class="description">' . esc_html__( 'How it was found, such as X scan or Instagram scan.', 'aw-seo-extras' ) . '</p></td></tr>';
+	echo '<tr><th scope="row"><label for="aw-si-add-note">' . esc_html__( 'Note', 'aw-seo-extras' ) . '</label></th><td><input type="text" id="aw-si-add-note" name="note" class="large-text" maxlength="160"><p class="description">' . esc_html__( 'Why it matters, or the link it was seen at. Never personal data.', 'aw-seo-extras' ) . '</p></td></tr>';
+	echo '<tr><th scope="row"><label for="aw-si-add-day">' . esc_html__( 'Date seen', 'aw-seo-extras' ) . '</label></th><td><input type="date" id="aw-si-add-day" name="day" value="' . esc_attr( $today ) . '" max="' . esc_attr( $today ) . '"></td></tr>';
+	echo '</tbody></table>';
+	submit_button( __( 'Add term', 'aw-seo-extras' ), 'secondary' );
+	echo '</form>';
+}
+
+/**
+ * Store a hand-added term.
+ *
+ * @param string $term  Term.
+ * @param string $where A key of aw_si_rising_add_where().
+ * @param string $label Source label, such as X scan.
+ * @param string $note  Note.
+ * @param string $day   Date seen (Y-m-d), within the last 400 days.
+ * @return string created, updated, or why it was not stored (where, day, not-english, empty, db-error).
+ */
+function aw_si_rising_add( string $term, string $where, string $label, string $note, string $day ): string {
+	$kinds = aw_si_rising_add_where();
+	if ( ! isset( $kinds[ $where ] ) ) {
+		return 'where';
+	}
+	$day = aw_si_rising_date( $day );
+	if ( '' === $day ) {
+		return 'day';
+	}
+	$label = '' !== trim( $label ) ? trim( $label ) : $kinds[ $where ];
+	/* translators: 1: source label, 2: date seen, 3: note. */
+	$text   = trim( sprintf( __( 'Added by hand (%1$s, %2$s): %3$s', 'aw-seo-extras' ), $label, wp_date( 'j M Y', (int) strtotime( $day . ' 12:00:00' ) ), $note ), ': ' );
+	$result = aw_si_rising_put( $term, 'paste_' . $where, null, $day, $text );
+	if ( in_array( $result, array( 'created', 'updated' ), true ) ) {
+		aw_si_run_ok(
+			'rising_paste_' . $where,
+			array(
+				'rows'   => 1,
+				'pasted' => true,
+			)
+		);
+	}
+	return $result;
+}
+
+add_action(
+	'admin_post_aw_si_rising_add',
+	function () {
+		if ( ! current_user_can( aw_si_cap() ) || ! check_admin_referer( 'aw_si_rising_add' ) ) {
+			wp_die( esc_html__( 'Not allowed.', 'aw-seo-extras' ), 403 );
+		}
+		if ( get_option( 'aw_si_off' ) ) {
+			wp_die(
+				esc_html__( 'Search Insights is off (its data was deleted), so nothing was stored. Settings → Run the daily update starts it again.', 'aw-seo-extras' ),
+				'',
+				array(
+					'back_link' => true,
+					'response'  => 409,
+				)
+			);
+		}
+		aw_si_install();
+		$get   = fn( string $k ) => isset( $_POST[ $k ] ) ? sanitize_text_field( wp_unslash( $_POST[ $k ] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- checked above.
+		$result = aw_si_rising_add( mb_substr( $get( 'term' ), 0, 255 ), sanitize_key( $get( 'where' ) ), mb_substr( $get( 'label' ), 0, 60 ), mb_substr( $get( 'note' ), 0, 160 ), $get( 'day' ) );
+		$ok     = in_array( $result, array( 'created', 'updated' ), true );
+		wp_safe_redirect( add_query_arg( $ok ? 'added' : 'not_added', $ok ? $result : sanitize_key( $result ), aw_si_return_url( 'rising' ) ) );
+		exit;
+	}
+);
 
 add_action(
 	'rest_api_init',
@@ -607,7 +703,7 @@ add_filter(
 add_filter( 'aw_si_cron_hooks', fn( $h ) => array_merge( (array) $h, array( AW_SI_RISING_CRON ) ) );
 
 // The tab's message flags are dropped from the address after showing, so sort and page links do not repeat them.
-add_filter( 'removable_query_args', fn( $args ) => array_merge( (array) $args, array( 'marked', 'pasted', 'skipped' ) ) );
+add_filter( 'removable_query_args', fn( $args ) => array_merge( (array) $args, array( 'marked', 'pasted', 'skipped', 'added', 'not_added' ) ) );
 
 add_filter(
 	'set_screen_option_aw_si_rising_per_page',
@@ -668,6 +764,21 @@ function aw_si_rising_tab(): void {
 		/* translators: 1: lines stored, 2: lines skipped. */
 		echo '<div class="notice notice-success inline"><p>' . esc_html( sprintf( __( 'Pasted: %1$d lines stored, %2$d skipped.', 'aw-seo-extras' ), absint( wp_unslash( $_GET['pasted'] ) ), absint( wp_unslash( $_GET['skipped'] ?? 0 ) ) ) ) . '</p></div>';
 	}
+	if ( isset( $_GET['added'] ) ) {
+		$msg = 'updated' === sanitize_key( wp_unslash( $_GET['added'] ) ) ? __( 'Term added to the one already in the list (its source and dates updated).', 'aw-seo-extras' ) : __( 'Term added: it shows under New.', 'aw-seo-extras' );
+		echo '<div class="notice notice-success inline"><p>' . esc_html( $msg ) . '</p></div>';
+	}
+	if ( isset( $_GET['not_added'] ) ) {
+		$why = array(
+			'day'         => __( 'the date seen must be today or within the last 400 days', 'aw-seo-extras' ),
+			'where'       => __( 'pick where it was seen', 'aw-seo-extras' ),
+			'empty'       => __( 'the term is empty or longer than 255 characters', 'aw-seo-extras' ),
+			'not-english' => __( 'only English terms are kept for now', 'aw-seo-extras' ),
+		);
+		$key = sanitize_key( wp_unslash( $_GET['not_added'] ) );
+		/* translators: %s: the reason. */
+		echo '<div class="notice notice-warning inline"><p>' . esc_html( sprintf( __( 'Term not added: %s.', 'aw-seo-extras' ), $why[ $key ] ?? __( 'it could not be stored', 'aw-seo-extras' ) ) ) . '</p></div>';
+	}
 	// phpcs:enable
 	echo '<p>' . esc_html__( 'Terms rising in India from free sources: Trends trending now, Wikipedia pageviews and Indian news (GDELT) daily; Google autocomplete and Trends rising related searches weekly. Growth is how many times the usual level (– when the source gives no ratio). Nothing here changes Rank Math or the Sourcing lists: mark each term Noted or Dismissed.', 'aw-seo-extras' ) . '</p>';
 	$table = new AW_SI_Rising_Table();
@@ -681,6 +792,8 @@ function aw_si_rising_tab(): void {
 	$table->search_box( __( 'Search terms', 'aw-seo-extras' ), 'aw-si-rising' );
 	$table->display();
 	echo '</form>';
+	aw_si_rising_drops_section();
+	aw_si_rising_add_form();
 	aw_si_rising_paste_form();
 }
 add_action( 'aw_si_tab_rising', 'aw_si_rising_tab' );
@@ -807,7 +920,7 @@ add_action(
 						'pasted'  => $done,
 						'skipped' => $skip,
 					),
-					aw_si_url( 'rising' )
+					aw_si_return_url( 'rising' ) // back to the screen it was sent from (classic or new)
 				)
 			);
 			exit;
