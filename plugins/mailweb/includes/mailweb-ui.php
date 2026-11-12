@@ -130,6 +130,7 @@ add_action(
 					),
 					'webmail'    => MAILWEB_WEBMAIL,
 					'oldSending' => mailweb_settings_url( 'sending', array(), 'cap' ),
+					'features'   => 'dashboard' === $screen && function_exists( 'mailweb_home_parts' ) ? mailweb_home_parts() : array(),
 				),
 			)
 		);

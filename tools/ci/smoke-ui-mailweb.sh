@@ -23,6 +23,9 @@ want 404 "GET /mailweb/v1/inbox/message editor, no such message" -b /tmp/cj-rw-e
 want 404 "GET /mailweb/v1/inbox/message unknown mailbox" -b /tmp/cj-ci -H "X-WP-Nonce: $NA" "$H/?rest_route=/mailweb/v1/inbox/message&box=nobody&uid=1"
 want 200 "admin.php?page=mailweb&ui=next (inbox stylesheet)" -b /tmp/cj-ci "$H/wp-admin/admin.php?page=mailweb&ui=next"
 grep -q "mailweb-admin-css" /tmp/rw.out && echo "ok   the Inbox loads its stylesheet" || { echo "FAIL the Inbox has no stylesheet"; FAIL=1; }
+# The Dashboard carries the Overview's feature table as page parts (Inbox, Site sending, FluentCRM feed rows).
+want 200 "admin.php?page=mailweb-overview&ui=next (features)" -b /tmp/cj-ci "$H/wp-admin/admin.php?page=mailweb-overview&ui=next"
+grep -q '"features":\[{"type":"listtable"' /tmp/rw.out && grep -q 'FluentCRM feed' /tmp/rw.out && echo "ok   the Dashboard has the feature table" || { echo "FAIL the Dashboard has no feature table"; FAIL=1; }
 want 403 "GET /mailweb/v1/settings editor (administrators only)" -b /tmp/cj-rw-ed -H "X-WP-Nonce: $NE" "$H/?rest_route=/mailweb/v1/settings"
 post mailweb/v1/dashboard/count '{}'
 post mailweb/v1/sending/resume '{}'

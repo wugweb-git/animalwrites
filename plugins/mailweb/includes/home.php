@@ -42,6 +42,23 @@ function mailweb_home_page() {
 	if ( mailweb_ui_page( 'dashboard' ) ) {
 		return; // the new screen (mailweb-ui.php; &ui=classic shows this one).
 	}
+	echo '<div class="wrap"><h1>' . esc_html__( 'Mail', 'mailweb' ) . '</h1>';
+	mailweb_screen_tabs();
+	echo '<p>' . esc_html__( 'Hostinger Mail inside WordPress, and the site\'s own sending. Secrets are encrypted; nothing is deleted on uninstall.', 'mailweb' ) . '</p>';
+	mailweb_home_body();
+	echo '<details><summary><strong>' . esc_html__( 'Command (WP-CLI on the server)', 'mailweb' ) . '</strong></summary>';
+	echo '<p><code>wp mailweb crm-sync --all</code> ' . esc_html__( 'Run the FluentCRM feed for every mailbox.', 'mailweb' ) . '</p></details>';
+	echo '</div>';
+}
+
+/**
+ * The Overview's feature table: each feature, what it does, where it is set up and its state on this site. The
+ * classic Overview shows it with a "Needs attention" list first; the new Dashboard (mailweb-ui.php) shows the table
+ * only, since its own tiles carry the warnings.
+ *
+ * @param bool $attn Also print the rows whose state is a warning, first and together.
+ */
+function mailweb_home_body( bool $attn = true ) {
 	$admin   = current_user_can( 'manage_options' );
 	$set     = fn( $label, $sub = 'incoming', $anchor = '' ) => $admin ? '<a href="' . esc_url( mailweb_settings_url( $sub, array(), $anchor ) ) . '">' . esc_html( $label ) . '</a>' : esc_html__( 'Administrators', 'mailweb' );
 	$boxes   = array_filter( (array) get_option( 'mailweb_box_addresses', array() ), 'is_email' );
@@ -107,7 +124,7 @@ function mailweb_home_page() {
 		),
 	);
 	$cells = array();
-	$attn  = array();
+	$warn  = array();
 	foreach ( $rows as $r ) {
 		$cells[] = array(
 			'feature' => '<strong>' . esc_html( $r[0] ) . '</strong><div class="row-actions visible">' . $r[2] . '</div>',
@@ -115,21 +132,25 @@ function mailweb_home_page() {
 			'status'  => $r[3],
 		);
 		if ( false !== strpos( (string) $r[3], 'dashicons-warning' ) ) {
-			$attn[] = '<li><strong>' . esc_html( $r[0] ) . '</strong>: ' . esc_html( trim( wp_strip_all_tags( (string) $r[3] ) ) ) . ' (' . $r[2] . ')</li>';
+			$warn[] = '<li><strong>' . esc_html( $r[0] ) . '</strong>: ' . esc_html( trim( wp_strip_all_tags( (string) $r[3] ) ) ) . ' (' . $r[2] . ')</li>';
 		}
 	}
-	echo '<div class="wrap"><h1>' . esc_html__( 'Mail', 'mailweb' ) . '</h1>';
-	mailweb_screen_tabs();
-	echo '<p>' . esc_html__( 'Hostinger Mail inside WordPress, and the site\'s own sending. Secrets are encrypted; nothing is deleted on uninstall.', 'mailweb' ) . '</p>';
-	if ( $attn ) { // Rows whose status is a warning, first and together.
-		echo '<div class="notice notice-warning inline"><p><strong>' . esc_html__( 'Needs attention', 'mailweb' ) . '</strong></p><ul class="ul-disc">' . implode( '', $attn ) . '</ul></div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from escaped parts.
+	if ( $attn && $warn ) { // Rows whose status is a warning, first and together.
+		echo '<div class="notice notice-warning inline"><p><strong>' . esc_html__( 'Needs attention', 'mailweb' ) . '</strong></p><ul class="ul-disc">' . implode( '', $warn ) . '</ul></div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from escaped parts.
 	}
 	$opts = array(
 		'primary' => 'feature',
 		'foot'    => false,
 	);
 	mailweb_simple_table( 'mailweb-overview', array( 'feature' => __( 'Feature', 'mailweb' ), 'what' => __( 'What it does', 'mailweb' ), 'status' => __( 'On this site', 'mailweb' ) ), $cells, $opts );
-	echo '<details><summary><strong>' . esc_html__( 'Command (WP-CLI on the server)', 'mailweb' ) . '</strong></summary>';
-	echo '<p><code>wp mailweb crm-sync --all</code> ' . esc_html__( 'Run the FluentCRM feed for every mailbox.', 'mailweb' ) . '</p></details>';
-	echo '</div>';
+}
+
+/** The feature table as Kits page parts (admin-shell-parts.php), for the new Dashboard. */
+function mailweb_home_parts(): array {
+	if ( ! function_exists( 'kits_shell_html_parts' ) ) {
+		return array();
+	}
+	ob_start();
+	mailweb_home_body( false );
+	return kits_shell_html_parts( (string) ob_get_clean() );
 }

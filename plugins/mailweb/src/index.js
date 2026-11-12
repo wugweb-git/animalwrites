@@ -25,6 +25,7 @@ import {
 	LoadingState,
 	MiniChart,
 	Notice,
+	PageParts,
 	RefTable,
 	SectionCard,
 	ServiceList,
@@ -292,6 +293,21 @@ function Dashboard() {
 				</>
 			) }
 			<SendingStatus data={ data } busy={ busy } act={ act } />
+			{ ( app.features || [] ).length > 0 && (
+				<SectionCard
+					id="features"
+					title={ __( 'Features', 'mailweb' ) }
+					description={ __(
+						'Each feature, what it does, where it is set up and its state on this site.',
+						'mailweb'
+					) }
+				>
+					<PageParts
+						parts={ app.features }
+						title={ __( 'Features', 'mailweb' ) }
+					/>
+				</SectionCard>
+			) }
 			<SectionCard
 				id="help"
 				title={ __( 'Help', 'mailweb' ) }
