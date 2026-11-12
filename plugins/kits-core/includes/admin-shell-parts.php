@@ -541,6 +541,17 @@ function kits_shell_parts_listtable_block( DOMElement $table, ?DOMElement $form 
 					}
 					break;
 				}
+				foreach ( kits_shell_parts_find( $td, 'div', 'row-actions' ) as $ra ) {
+					// Words in the row's links line that are not a link ("; each item's FAQ box") stay as a note.
+					$words = kits_shell_parts_text_no_sr( $ra );
+					foreach ( kits_shell_parts_find( $ra, 'a' ) as $a ) {
+						$words = str_replace( $a->textContent, ' ', $words );
+					}
+					$words = trim( kits_shell_parts_squash( $words ), " \t|;,·" );
+					if ( '' !== $words ) {
+						$cell['note'] = $words;
+					}
+				}
 				$row['cells'][ $key ] = $cell;
 				foreach ( kits_shell_parts_find( $td, 'div', 'row-actions' ) as $ra ) {
 					foreach ( kits_shell_parts_find( $ra, 'a' ) as $a ) {

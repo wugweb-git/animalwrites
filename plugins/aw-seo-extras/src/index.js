@@ -299,6 +299,21 @@ function Dashboard() {
 					] ) }
 				/>
 			</SectionCard>
+			{ ( app.modules || [] ).length > 0 && (
+				<SectionCard
+					id="modules"
+					title={ __( 'Modules', 'aw-seo-extras' ) }
+					description={ __(
+						'What each module adds, where it is set up, and whether it is on.',
+						'aw-seo-extras'
+					) }
+				>
+					<PageParts
+						parts={ app.modules }
+						title={ __( 'Modules', 'aw-seo-extras' ) }
+					/>
+				</SectionCard>
+			) }
 		</>
 	);
 }

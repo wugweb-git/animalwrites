@@ -110,6 +110,17 @@ function aw_seo_overview_page() {
 	if ( function_exists( 'rankweb_ui_page' ) && rankweb_ui_page( 'dashboard' ) ) {
 		return; // the new Dashboard (rankweb-ui.php; &ui=classic shows this one)
 	}
+	echo '<div class="wrap"><h1>RankWeb</h1>';
+	aw_seo_screen_tabs();
+	aw_seo_overview_body();
+	echo '</div>';
+}
+
+/**
+ * The Overview under its heading and tabs: what RankWeb adds, Needs attention, the Modules table (where each is set
+ * up, Off state), On edit screens and Commands. The new Dashboard draws it too, through Kits' page parts.
+ */
+function aw_seo_overview_body() {
 	$faq = add_query_arg( 'page', 'aw-faq', admin_url( 'admin.php' ) );
 	$si  = function_exists( 'aw_si_url' ) && current_user_can( aw_si_cap() );
 	$rm  = array(
@@ -237,8 +248,6 @@ function aw_seo_overview_page() {
 		}
 	}
 
-	echo '<div class="wrap"><h1>RankWeb</h1>';
-	aw_seo_screen_tabs();
 	echo '<p>' . esc_html__( 'What the plugin adds to Rank Math (free) for animalwrites.in. Rank Math holds everything else; where a module’s settings live in Rank Math, the link goes there.', 'aw-seo-extras' ) . '</p>';
 	if ( $attn ) {
 		echo '<div class="notice notice-warning inline"><p><strong>' . esc_html__( 'Needs attention', 'aw-seo-extras' ) . '</strong></p><ul class="ul-disc">' . implode( '', $attn ) . '</ul></div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from escaped parts.
@@ -316,5 +325,5 @@ function aw_seo_overview_page() {
 			'foot'    => false,
 		)
 	);
-	echo '<p>' . esc_html__( 'Each command lists its options with --help.', 'aw-seo-extras' ) . '</p></details></div>';
+	echo '<p>' . esc_html__( 'Each command lists its options with --help.', 'aw-seo-extras' ) . '</p></details>';
 }

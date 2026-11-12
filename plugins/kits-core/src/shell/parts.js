@@ -149,9 +149,19 @@ function PageList( { part, title } ) {
 				label: c.label,
 				sortable: !! c.sortHref,
 				primary: c.primary,
-				render: ( r ) => (
-					<Cell cell={ r.cells[ c.key ] || { text: '' } } />
-				),
+				render: ( r ) => {
+					const cell = r.cells[ c.key ] || { text: '' };
+					return cell.note ? (
+						<>
+							<Cell cell={ cell } />
+							<span className="kits-shell-field__help">
+								{ cell.note }
+							</span>
+						</>
+					) : (
+						<Cell cell={ cell } />
+					);
+				},
 			} ) ) }
 			rows={ rows }
 			total={ part.total }

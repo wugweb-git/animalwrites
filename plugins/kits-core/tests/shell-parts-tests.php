@@ -118,4 +118,8 @@ kits_parts_check( array( 'heading', 'p', 'heading', 'form', 'heading', 'form' ) 
 kits_parts_check( 'multipart/form-data' === $st[3]['enctype'] && 'file' === $st[3]['fields'][0]['type'] && '.csv' === $st[3]['fields'][0]['accept'] && 'CSV file' === $st[3]['fields'][0]['label'], 'an upload form keeps its file field and encoding' );
 kits_parts_check( 'Delete data' === $st[5]['fields'][0]['label'] && '' === $st[5]['enctype'], 'a field labelled from the row heading' );
 
+$mt = kits_shell_html_parts( '<table class="wp-list-table widefat"><thead><tr><th id="module" class="column-primary">Module</th><th id="what">What</th></tr></thead><tbody><tr><td class="column-module column-primary"><strong>FAQ</strong><div class="row-actions visible"><a href="admin.php?page=aw-faq">Plugins → RankWeb → FAQ</a>; each item’s FAQ box<br><a href="admin.php?page=aw-seo-settings">Settings</a></div></td><td class="column-what">The FAQ box</td></tr><tr><td class="column-module column-primary"><strong>Schema</strong><div class="row-actions visible">Each item’s Rank Math Schema tab</div></td><td class="column-what">JSON-LD</td></tr></tbody></table>' );
+kits_parts_check( 'listtable' === $mt[0]['type'] && 2 === count( $mt[0]['rows'][0]['actions'] ) && 'each item’s FAQ box' === $mt[0]['rows'][0]['cells']['module']['note'] && 'FAQ' === $mt[0]['rows'][0]['cells']['module']['text'], 'row links kept as actions, the words between them as a note' );
+kits_parts_check( array() === $mt[0]['rows'][1]['actions'] && 'Each item’s Rank Math Schema tab' === $mt[0]['rows'][1]['cells']['module']['note'], 'a links line with no link is a note' );
+
 exit( $GLOBALS['kits_parts_fail'] );
