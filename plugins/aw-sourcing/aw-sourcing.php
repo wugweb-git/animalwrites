@@ -36,6 +36,7 @@ define( 'AW_SOURCING_LOADED', '0.1.0' );
 define( 'AW_SOURCING_DIR', __DIR__ . '/' );
 
 // The menu's shape and the Sources model (plain functions, tested without WordPress by tests/run.php) first.
+require_once AW_SOURCING_DIR . 'includes/sourcing-basics.php'; // own capability, option names and host helpers (also in Kits Core)
 require_once AW_SOURCING_DIR . 'includes/menu-model.php'; // the Sourcing menu: slugs, screen id, order (admin-menu.php registers it)
 require_once AW_SOURCING_DIR . 'includes/sources-model.php';
 require_once AW_SOURCING_DIR . 'includes/keywords-model.php'; // phase 2: the lists in the keyword table (Core's)

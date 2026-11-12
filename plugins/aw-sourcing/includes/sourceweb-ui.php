@@ -195,6 +195,9 @@ function sourceweb_ui_page( string $screen ): bool {
 		'log'        => __( 'Change log', 'aw-sourcing' ),
 		'settings'   => __( 'SourceWeb settings', 'aw-sourcing' ),
 	);
+	if ( ! function_exists( 'kits_shell_mount' ) ) {
+		return false;
+	}
 	kits_shell_mount( 'sourceweb-app', $titles[ $screen ] );
 	return true;
 }
