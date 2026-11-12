@@ -150,7 +150,7 @@ function aw_rules_notice() {
 	);
 	if ( isset( $msg[ $done ] ) ) {
 		$for = 'none' === $done ? ( '' !== $for ? ' for ' . $for : '' ) : $for;
-		echo '<div class="notice notice-' . esc_attr( $msg[ $done ][0] ) . ' is-dismissible"><p>' . esc_html( sprintf( $msg[ $done ][1], $for ) ) . '</p></div>';
+		wp_admin_notice( esc_html( sprintf( $msg[ $done ][1], $for ) ), array( 'type' => $msg[ $done ][0], 'dismissible' => true ) );
 	}
 }
 add_filter( 'removable_query_args', fn( $args ) => array_merge( $args, array( 'aw_rules_done', 'aw_rules_for' ) ) );
@@ -302,7 +302,7 @@ function aw_rules_tag_fields( $slug, array $r ) {
 function aw_rules_tag_form( $slug ) {
 	$rules = aw_rules_tag_rules();
 	if ( ! isset( $rules[ $slug ] ) ) {
-		echo '<div class="notice notice-error inline"><p>No such tag rule. <a href="' . esc_url( aw_rules_url( 'sections' ) ) . '">Back to Section rules</a></p></div>';
+		wp_admin_notice( 'No such tag rule. <a href="' . esc_url( aw_rules_url( 'sections' ) ) . '">Back to Section rules</a>', array( 'type' => 'error', 'additional_classes' => array( 'inline' ) ) );
 		return;
 	}
 	echo '<h2>' . esc_html( 'Edit tag rule: ' . urldecode( $slug ) ) . '</h2>';
@@ -541,7 +541,7 @@ function aw_rules_field_form( $field ) {
 	$rows = aw_rules_field_rows();
 	$back = aw_rules_url( 'enrich' );
 	if ( ! isset( $rows[ $field ] ) ) {
-		echo '<div class="notice notice-error inline"><p>No such field. <a href="' . esc_url( $back ) . '">Back to Directory enrichment</a></p></div>';
+		wp_admin_notice( 'No such field. <a href="' . esc_url( $back ) . '">Back to Directory enrichment</a>', array( 'type' => 'error', 'additional_classes' => array( 'inline' ) ) );
 		return;
 	}
 	$row  = $rows[ $field ];

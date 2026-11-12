@@ -67,7 +67,7 @@ function aw_sourcing_category_words_form( $slug ) {
 	$words = (array) aw_sources_config()['categories'];
 	$term  = get_term_by( 'slug', $slug, 'category' );
 	if ( ! $term && ! isset( $words[ $slug ] ) ) {
-		echo '<div class="notice notice-error inline"><p>No such category. <a href="' . esc_url( $back ) . '">Back to Categories</a></p></div>';
+		wp_admin_notice( 'No such category. <a href="' . esc_url( $back ) . '">Back to Categories</a>', array( 'type' => 'error', 'additional_classes' => array( 'inline' ) ) );
 		return;
 	}
 	$name = $term ? $term->name : urldecode( $slug );
@@ -180,7 +180,7 @@ function aw_sourcing_section_form( $type ) {
 	$back  = aw_rules_url( 'sections' );
 	$types = aw_rules_section_labels(); // the sections are the site's content types (rules.php)
 	if ( ! isset( $types[ $type ] ) ) {
-		echo '<div class="notice notice-error inline"><p>No such section. <a href="' . esc_url( $back ) . '">Back to Sections</a></p></div>';
+		wp_admin_notice( 'No such section. <a href="' . esc_url( $back ) . '">Back to Sections</a>', array( 'type' => 'error', 'additional_classes' => array( 'inline' ) ) );
 		return;
 	}
 	if ( ! function_exists( 'wp_terms_checklist' ) ) {
@@ -320,11 +320,11 @@ function aw_sourcing_terms_notice() {
 		$for = aw_rules_section_labels()[ $for ];
 	}
 	if ( 'saved' === $done ) {
-		echo '<div class="notice notice-success is-dismissible"><p>' . esc_html( ( $sections ? 'Saved the ' . $for . ' section.' : 'Saved the words for ' . $for . '.' ) . ' The workers use this from their next run.' ) . '</p></div>';
+		wp_admin_notice( esc_html( ( $sections ? 'Saved the ' . $for . ' section.' : 'Saved the words for ' . $for . '.' ) . ' The workers use this from their next run.' ), array( 'type' => 'success', 'dismissible' => true ) );
 	} elseif ( 'none' === $done ) {
-		echo '<div class="notice notice-info is-dismissible"><p>' . esc_html( 'Nothing changed for ' . $for . '.' ) . '</p></div>';
+		wp_admin_notice( esc_html( 'Nothing changed for ' . $for . '.' ), array( 'type' => 'info', 'dismissible' => true ) );
 	} elseif ( 'nosuch' === $done ) {
-		echo '<div class="notice notice-error is-dismissible"><p>No such category.</p></div>';
+		wp_admin_notice( 'No such category.', array( 'type' => 'error', 'dismissible' => true ) );
 	}
 }
 add_filter( 'removable_query_args', fn( $args ) => 'aw-sourcing' === sanitize_key( $_GET['page'] ?? '' ) ? array_merge( $args, array( 'aw_terms_done', 'aw_terms_for' ) ) : $args ); // phpcs:ignore WordPress.Security.NonceVerification -- only on this screen

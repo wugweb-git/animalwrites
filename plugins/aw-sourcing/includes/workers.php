@@ -336,8 +336,11 @@ function aw_workers_badge( $last, $problem, $note = '' ) {
 	} elseif ( 'skipped' === $last['result'] ) {
 		$step = ': step "' . ( $last['main_step'] ?? 'main' ) . '" did not run';
 	}
-	return '<div class="notice inline notice-' . esc_attr( $kind ) . ' notice-alt"><p><span class="dashicons dashicons-' . esc_attr( $icon ) . '" aria-hidden="true"></span> '
-		. esc_html( $label . $step ) . ( ! empty( $last['dry_run'] ) ? ' (dry run)' : '' ) . ( $note ? '<br>' . esc_html( $note ) : '' ) . '</p></div>';
+	return wp_get_admin_notice(
+		'<span class="dashicons dashicons-' . esc_attr( $icon ) . '" aria-hidden="true"></span> '
+		. esc_html( $label . $step ) . ( ! empty( $last['dry_run'] ) ? ' (dry run)' : '' ) . ( $note ? '<br>' . esc_html( $note ) : '' ),
+		array( 'type' => $kind, 'additional_classes' => array( 'inline', 'notice-alt' ) )
+	);
 }
 
 /** Column slug => label (also the Screen Options checkboxes). */
@@ -416,7 +419,7 @@ add_action(
 		}
 		$problems = aw_workers_problems();
 		if ( $problems ) {
-			echo '<div class="notice notice-error is-dismissible"><p><strong>Workers need attention.</strong> ' . esc_html( implode( ' ', $problems ) ) . ' <a href="' . esc_url( admin_url( 'admin.php?page=aw-sourcing&tab=workers' ) ) . '">Workers</a></p></div>';
+			wp_admin_notice( '<strong>Workers need attention.</strong> ' . esc_html( implode( ' ', $problems ) ) . ' <a href="' . esc_url( admin_url( 'admin.php?page=aw-sourcing&tab=workers' ) ) . '">Workers</a>', array( 'type' => 'error', 'dismissible' => true ) );
 		}
 	}
 );
@@ -438,7 +441,7 @@ add_action(
 					return;
 				}
 				foreach ( $problems as $msg ) {
-					echo '<div class="notice inline notice-error notice-alt"><p><span class="dashicons dashicons-dismiss" aria-hidden="true"></span> ' . esc_html( $msg ) . '</p></div>';
+					wp_admin_notice( '<span class="dashicons dashicons-dismiss" aria-hidden="true"></span> ' . esc_html( $msg ), array( 'type' => 'error', 'additional_classes' => array( 'inline', 'notice-alt' ) ) );
 				}
 				echo '<p><a href="' . esc_url( $url ) . '">Workers</a></p>';
 			}

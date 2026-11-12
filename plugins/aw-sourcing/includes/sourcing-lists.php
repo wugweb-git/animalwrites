@@ -225,11 +225,13 @@ function aw_sources_edit_form( $id, $type, $host = '' ) {
 		? add_query_arg( array( 'page' => 'aw-sourcing', 'tab' => 'sources', 'edit' => rawurlencode( $home ) ), admin_url( 'admin.php' ) )
 		: admin_url( 'admin.php?page=aw-sourcing&tab=sources&view=feeds' );
 	if ( ! $new && ! $src ) {
-		echo '<div class="notice notice-error inline"><p>No such feed.</p></div><p><a href="' . esc_url( $back ) . '">Back to Feeds</a></p>';
+		wp_admin_notice( 'No such feed.', array( 'type' => 'error', 'additional_classes' => array( 'inline' ) ) );
+		echo '<p><a href="' . esc_url( $back ) . '">Back to Feeds</a></p>';
 		return;
 	}
 	if ( $new && 'opportunity' === $type ) {
-		echo '<div class="notice notice-warning inline"><p>New kinds of opportunity site need code.</p></div><p><a href="' . esc_url( $back ) . '">Back to Feeds</a></p>';
+		wp_admin_notice( 'New kinds of opportunity site need code.', array( 'type' => 'warning', 'additional_classes' => array( 'inline' ) ) );
+		echo '<p><a href="' . esc_url( $back ) . '">Back to Feeds</a></p>';
 		return;
 	}
 	$src = $src ? $src : array( 'id' => '', 'name' => '', 'kind' => 'rss', 'type' => in_array( $type, array( 'news', 'legal' ), true ) ? $type : 'news', 'url' => '', 'on' => true, 'filter' => true );

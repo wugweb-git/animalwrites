@@ -90,7 +90,7 @@ function aw_workers_tab() {
 		$f  = sanitize_file_name( wp_unslash( $_GET['aw_ran'] ) ); // phpcs:ignore WordPress.Security.NonceVerification
 		$l  = (array) ( get_option( 'aw_worker_dispatch_log', array() )[0] ?? array() );
 		$w  = aw_worker( aw_worker_id( $f ) );
-		echo '<div class="notice notice-' . ( $ok ? 'success' : 'error' ) . ' is-dismissible"><p>' . esc_html( ( $w ? $w['name'] : $f ) . ': ' . ( $ok ? 'started on GitHub. Its start report appears here within a minute or two.' : 'not started — ' . ( $l['msg'] ?? '' ) ) ) . '</p></div>';
+		wp_admin_notice( esc_html( ( $w ? $w['name'] : $f ) . ': ' . ( $ok ? 'started on GitHub. Its start report appears here within a minute or two.' : 'not started — ' . ( $l['msg'] ?? '' ) ) ), array( 'type' => ( $ok ? 'success' : 'error' ), 'dismissible' => true ) );
 	}
 	$done = sanitize_key( $_GET['worker_done'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
 	if ( $done ) {
@@ -102,18 +102,18 @@ function aw_workers_tab() {
 			'deleted' => 'Planned worker "%s" deleted.',
 		);
 		if ( isset( $msg[ $done ] ) ) {
-			echo '<div class="notice notice-' . ( 'same' === $done ? 'info' : 'success' ) . ' is-dismissible"><p>' . esc_html( sprintf( $msg[ $done ], $name ) ) . '</p></div>';
+			wp_admin_notice( esc_html( sprintf( $msg[ $done ], $name ) ), array( 'type' => ( 'same' === $done ? 'info' : 'success' ), 'dismissible' => true ) );
 		}
 		$skip = absint( $_GET['worker_skip'] ?? 0 ); // phpcs:ignore WordPress.Security.NonceVerification
 		if ( $skip ) {
 			/* translators: %d: number of keys. */
-			echo '<div class="notice notice-warning is-dismissible"><p>' . esc_html( sprintf( _n( '%d key was left ticked: it is for this worker only, and a key needs at least one worker. Remove it on AI models instead.', '%d keys were left ticked: each is for this worker only, and a key needs at least one worker. Remove them on AI models instead.', $skip ), $skip ) ) . '</p></div>';
+			wp_admin_notice( esc_html( sprintf( _n( '%d key was left ticked: it is for this worker only, and a key needs at least one worker. Remove it on AI models instead.', '%d keys were left ticked: each is for this worker only, and a key needs at least one worker. Remove them on AI models instead.', $skip ), $skip ) ), array( 'type' => 'warning', 'dismissible' => true ) );
 		}
 	}
 	echo '<p>One worker per workflow of <a href="https://github.com/wugweb-git/animal-writes-workers/actions" target="_blank" rel="noopener">wugweb-git/animal-writes-workers</a>, which reports its start and end here. Schedules are changed in the workflows, not here; names, groups and late limits can be changed here. A problem (a failed, cancelled, skipped or stuck run, or no report within the late limit) is emailed to the owner once. Planned workers never raise an alert.'
 		. ' <a href="' . esc_url( aw_workers_url( array( 'edit' => 'new' ) ) ) . '" class="page-title-action">Add New Worker</a></p>';
 	if ( ! defined( 'AW_GITHUB_DISPATCH_TOKEN' ) || '' === (string) AW_GITHUB_DISPATCH_TOKEN ) {
-		echo '<div class="notice notice-warning inline"><p>Run now is off: set <code>AW_GITHUB_DISPATCH_TOKEN</code> in wp-config.php (a fine-grained GitHub token for wugweb-git/animal-writes-workers only, Actions read and write).</p></div>';
+		wp_admin_notice( 'Run now is off: set <code>AW_GITHUB_DISPATCH_TOKEN</code> in wp-config.php (a fine-grained GitHub token for wugweb-git/animal-writes-workers only, Actions read and write).', array( 'type' => 'warning', 'additional_classes' => array( 'inline' ) ) );
 	}
 	if ( ! class_exists( 'WP_List_Table' ) ) {
 		require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
@@ -146,7 +146,7 @@ function aw_workers_tab() {
 function aw_workers_runs_screen( $id ) {
 	$w = aw_worker( $id );
 	if ( ! $w ) {
-		echo '<div class="notice notice-error inline"><p>No such worker. <a href="' . esc_url( aw_workers_url() ) . '">Back to the workers</a></p></div>';
+		wp_admin_notice( 'No such worker. <a href="' . esc_url( aw_workers_url() ) . '">Back to the workers</a>', array( 'type' => 'error', 'additional_classes' => array( 'inline' ) ) );
 		return;
 	}
 	echo '<h2>' . esc_html( 'Runs: ' . $w['name'] ) . ' <a href="' . esc_url( aw_workers_url() ) . '" class="page-title-action">Back to the workers</a>'
@@ -195,7 +195,7 @@ function aw_workers_edit_screen( $id ) {
 	$new = 'new' === $id;
 	$w   = $new ? null : aw_worker( $id );
 	if ( ! $new && ! $w ) {
-		echo '<div class="notice notice-error inline"><p>No such worker. <a href="' . esc_url( aw_workers_url() ) . '">Back to the workers</a></p></div>';
+		wp_admin_notice( 'No such worker. <a href="' . esc_url( aw_workers_url() ) . '">Back to the workers</a>', array( 'type' => 'error', 'additional_classes' => array( 'inline' ) ) );
 		return;
 	}
 	// After a refused save, the values typed (kept for 5 minutes for this user only).
@@ -208,7 +208,7 @@ function aw_workers_edit_screen( $id ) {
 		'name'  => 'Give the worker a name.',
 	);
 	if ( isset( $msg[ $err ] ) ) {
-		echo '<div class="notice notice-error is-dismissible"><p>' . esc_html( $msg[ $err ] ) . '</p></div>';
+		wp_admin_notice( esc_html( $msg[ $err ] ), array( 'type' => 'error', 'dismissible' => true ) );
 	}
 	$v       = array_merge(
 		$w ? $w : array(

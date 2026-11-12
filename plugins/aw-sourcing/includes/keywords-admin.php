@@ -532,7 +532,7 @@ function aw_sourcing_kw_tab() {
 	$edit = absint( $_GET['edit'] ?? 0 ); // phpcs:ignore WordPress.Security.NonceVerification
 	$err  = sanitize_text_field( wp_unslash( $_GET['kw_err'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
 	if ( '' !== $err ) {
-		echo '<div class="notice notice-error is-dismissible"><p>' . esc_html( $err ) . '</p></div>';
+		wp_admin_notice( esc_html( $err ), array( 'type' => 'error', 'dismissible' => true ) );
 	}
 	$done = sanitize_key( $_GET['kw_done'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
 	$msg  = array(
@@ -543,7 +543,7 @@ function aw_sourcing_kw_tab() {
 		'none'    => 'Nothing changed.',
 	);
 	if ( isset( $msg[ $done ] ) ) {
-		echo '<div class="notice notice-' . ( 'none' === $done ? 'warning' : 'success' ) . ' is-dismissible"><p>' . esc_html( $msg[ $done ] ) . '</p></div>';
+		wp_admin_notice( esc_html( $msg[ $done ] ), array( 'type' => ( 'none' === $done ? 'warning' : 'success' ), 'dismissible' => true ) );
 	}
 	if ( $edit ) {
 		aw_sourcing_kw_edit_form( $edit );
@@ -615,7 +615,7 @@ function aw_sourcing_kw_edit_form( $id ) {
 	$back = admin_url( 'admin.php?page=aw-sourcing&tab=keywords' );
 	$r    = aw_kw_get( $id );
 	if ( ! $r ) {
-		echo '<div class="notice notice-error inline"><p>No such keyword. <a href="' . esc_url( $back ) . '">Back to Keywords</a></p></div>';
+		wp_admin_notice( 'No such keyword. <a href="' . esc_url( $back ) . '">Back to Keywords</a>', array( 'type' => 'error', 'additional_classes' => array( 'inline' ) ) );
 		return;
 	}
 	echo '<h2>' . esc_html( 'Edit keyword: ' . $r['label'] ) . '</h2>';

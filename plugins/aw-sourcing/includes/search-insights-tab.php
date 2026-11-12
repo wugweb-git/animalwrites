@@ -35,8 +35,11 @@ add_action(
 			. 'Items from before 24 Oct 2026 did not record their search: they are counted by the word in their title or summary and marked estimated, and one with several of the words counts under each. Hindi Include words are not searches and are not listed.</p>';
 		if ( ! $table->has_page_data() ) { // Search Insights has not stored a Search Console run yet, or is switched off
 			$off = function_exists( 'aw_si_ready' ) && ! aw_si_ready();
-			echo '<div class="notice notice-info inline"><p><span class="dashicons dashicons-info" aria-hidden="true"></span> '
-				. esc_html( $off ? 'Search Insights is off, so there are no page figures. Settings → Run the daily update starts it again.' : ( $table->page_data_stale() ? 'Search Insights has not had a successful Search Console run in the last 28 days, so there are no current page figures. Check Search Insights → Settings.' : 'Page figures appear after Search Insights\' next daily Search Console run (07:10 IST); the first 30 days fill in over about two runs, the 3 months over about a week.' ) ) . '</p></div>';
+			wp_admin_notice(
+				'<span class="dashicons dashicons-info" aria-hidden="true"></span> '
+				. esc_html( $off ? 'Search Insights is off, so there are no page figures. Settings → Run the daily update starts it again.' : ( $table->page_data_stale() ? 'Search Insights has not had a successful Search Console run in the last 28 days, so there are no current page figures. Check Search Insights → Settings.' : 'Page figures appear after Search Insights\' next daily Search Console run (07:10 IST); the first 30 days fill in over about two runs, the 3 months over about a week.' ) ),
+				array( 'type' => 'info', 'additional_classes' => array( 'inline' ) )
+			);
 		}
 		$table->display();
 	}

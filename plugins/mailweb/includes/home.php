@@ -136,7 +136,7 @@ function mailweb_home_body( bool $attn = true ) {
 		}
 	}
 	if ( $attn && $warn ) { // Rows whose status is a warning, first and together.
-		echo '<div class="notice notice-warning inline"><p><strong>' . esc_html__( 'Needs attention', 'mailweb' ) . '</strong></p><ul class="ul-disc">' . implode( '', $warn ) . '</ul></div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from escaped parts.
+		wp_admin_notice( '<p><strong>' . esc_html__( 'Needs attention', 'mailweb' ) . '</strong></p><ul class="ul-disc">' . implode( '', $warn ) . '</ul>', array( 'type' => 'warning', 'additional_classes' => array( 'inline' ), 'paragraph_wrap' => false ) );
 	}
 	$opts = array(
 		'primary' => 'feature',

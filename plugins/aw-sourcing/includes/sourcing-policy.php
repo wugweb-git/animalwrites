@@ -623,7 +623,7 @@ add_action(
 	'admin_notices',
 	function () {
 		if ( ! empty( $_GET['aw_blocked'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-			echo '<div class="notice notice-success is-dismissible"><p>Blocked ' . esc_html( sanitize_text_field( wp_unslash( $_GET['aw_blocked'] ) ) ) . '. New items from it will be refused. Items already on the site are unchanged. <a href="' . esc_url( admin_url( 'admin.php?page=aw-sourcing&tab=sources&status=block' ) ) . '">Manage sources</a></p></div>'; // phpcs:ignore WordPress.Security.NonceVerification
+			wp_admin_notice( 'Blocked ' . esc_html( sanitize_text_field( wp_unslash( $_GET['aw_blocked'] ) ) ) . '. New items from it will be refused. Items already on the site are unchanged. <a href="' . esc_url( admin_url( 'admin.php?page=aw-sourcing&tab=sources&status=block' ) ) . '">Manage sources</a>', array( 'type' => 'success', 'dismissible' => true ) ); // phpcs:ignore WordPress.Security.NonceVerification
 		}
 	}
 );
@@ -691,7 +691,7 @@ function aw_sourcing_page() {
 	aw_sourcing_screen_tabs();
 	settings_errors(); // the Settings API forms' notices: WordPress prints them by itself only on Settings screens
 	if ( ! empty( $_GET['updated'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-		echo '<div class="notice notice-success is-dismissible"><p>Saved. The workers use this from their next run.</p></div>';
+		wp_admin_notice( 'Saved. The workers use this from their next run.', array( 'type' => 'success', 'dismissible' => true ) );
 	}
 	do_action( 'kits_sourcing_page_top' );
 	if ( 'log' === $tab ) {
@@ -753,7 +753,7 @@ function aw_sourcing_keywords_tab() {
 		. '<li><a href="' . esc_url( $base . '&kw=suggestions' ) . '"' . ( $sugg ? ' class="current" aria-current="page"' : '' ) . '>Suggestions from Search Insights</a></li></ul><br class="clear">';
 	if ( $sugg ) {
 		if ( ! has_action( 'aw_sourcing_keywords_tab_end' ) || ( function_exists( 'aw_sourcing_si_available' ) && ! aw_sourcing_si_available() ) ) {
-			echo '<div class="notice notice-info inline"><p>Suggestions need Search Insights (aw-seo-extras), which is off.</p></div>';
+			wp_admin_notice( 'Suggestions need Search Insights (aw-seo-extras), which is off.', array( 'type' => 'info', 'additional_classes' => array( 'inline' ) ) );
 		}
 		do_action( 'aw_sourcing_keywords_tab_end' ); // suggestions from Search Insights (keyword-suggestions.php)
 		return;
@@ -761,7 +761,7 @@ function aw_sourcing_keywords_tab() {
 	$post = admin_url( 'admin-post.php' );
 	$done = sanitize_key( $_GET['kw_done'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
 	if ( 'none' === $done ) {
-		echo '<div class="notice notice-warning is-dismissible"><p>Nothing changed: choose an action and at least one word (a word already in a list is not added to it again).</p></div>';
+		wp_admin_notice( 'Nothing changed: choose an action and at least one word (a word already in a list is not added to it again).', array( 'type' => 'warning', 'dismissible' => true ) );
 	} elseif ( $done ) {
 		$n   = absint( wp_unslash( $_GET['kw_n'] ?? 0 ) ); // phpcs:ignore WordPress.Security.NonceVerification
 		$msg = array(
@@ -773,7 +773,7 @@ function aw_sourcing_keywords_tab() {
 			'move'   => _n( '%d word moved.', '%d words moved.', $n ),
 		);
 		if ( isset( $msg[ $done ] ) ) {
-			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html( sprintf( $msg[ $done ], $n ) . ' The workers use the lists from their next run.' ) . '</p></div>';
+			wp_admin_notice( esc_html( sprintf( $msg[ $done ], $n ) . ' The workers use the lists from their next run.' ), array( 'type' => 'success', 'dismissible' => true ) );
 		}
 	}
 	echo '<p>An item from an <strong>allowed</strong> publisher goes live when it has an <strong>include</strong> word (or an animal word with a context word) and no <strong>exclude</strong> word; otherwise it waits in review. Blocked publishers are refused. Hindi works.</p>';

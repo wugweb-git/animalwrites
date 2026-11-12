@@ -522,7 +522,7 @@ function aw_sourcing_sources_tab() {
 	}
 	$table = aw_sourcing_publishers_table();
 	if ( aw_sourcing_phase() < 1 ) {
-		echo '<div class="notice notice-info inline"><p>Relay switches take over once the phase 1 migration has run (<code>wp aw-sourcing migrate --phase=1</code>). Until then the workers may fetch these sites through this one: ' . esc_html( implode( ', ', aw_relay_hosts_legacy() ) ) . '.</p></div>';
+		wp_admin_notice( 'Relay switches take over once the phase 1 migration has run (<code>wp aw-sourcing migrate --phase=1</code>). Until then the workers may fetch these sites through this one: ' . esc_html( implode( ', ', aw_relay_hosts_legacy() ) ) . '.', array( 'type' => 'info', 'additional_classes' => array( 'inline' ) ) );
 	}
 	if ( 'feeds' === $screen ) {
 		$table->views();
@@ -532,7 +532,7 @@ function aw_sourcing_sources_tab() {
 	}
 	$table->prepare_items();
 	if ( $table->search_stale() ) {
-		echo '<div class="notice notice-info inline"><p>Search value: Search Console has not run within 28 days, so there are no figures for this window.</p></div>';
+		wp_admin_notice( 'Search value: Search Console has not run within 28 days, so there are no figures for this window.', array( 'type' => 'info', 'additional_classes' => array( 'inline' ) ) );
 	}
 	$table->views();
 	$st = sanitize_key( $_GET['status'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
@@ -560,7 +560,8 @@ function aw_sourcing_source_form( $host ) {
 	$feeds = $new ? array() : ( aw_sourcing_feeds_by_host()[ $host ] ?? array() );
 	$back  = admin_url( 'admin.php?page=aw-sourcing&tab=sources' );
 	if ( ! $new && null === $rec && ! $press && ! $feeds ) {
-		echo '<div class="notice notice-error inline"><p>No such source.</p></div><p><a href="' . esc_url( $back ) . '">Back to Sources</a></p>';
+		wp_admin_notice( 'No such source.', array( 'type' => 'error', 'additional_classes' => array( 'inline' ) ) );
+		echo '<p><a href="' . esc_url( $back ) . '">Back to Sources</a></p>';
 		return;
 	}
 	$pub    = null !== $rec && empty( $rec['kind'] ); // a host kept only for its icon (kind) or for the relay is not a publisher
@@ -738,7 +739,7 @@ add_action(
 			'nothing' => 'Nothing saved: a source that is not a publisher must be searched for coverage, relayed or have feeds.',
 		);
 		if ( isset( $msg[ $err ] ) ) {
-			echo '<div class="notice notice-error is-dismissible"><p>' . esc_html( $msg[ $err ] ) . '</p></div>';
+			wp_admin_notice( esc_html( $msg[ $err ] ), array( 'type' => 'error', 'dismissible' => true ) );
 		}
 	}
 );

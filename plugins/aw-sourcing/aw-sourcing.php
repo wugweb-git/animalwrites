@@ -27,7 +27,7 @@ if ( ! defined( 'AW_CORE_DIR' ) ) {
 	add_action(
 		'admin_notices',
 		function () {
-			echo '<div class="notice notice-error"><p>SourceWeb needs Animal Writes Core. Sourcing is off until Core is active.</p></div>';
+			wp_admin_notice( 'SourceWeb needs Animal Writes Core. Sourcing is off until Core is active.', array( 'type' => 'error' ) );
 		}
 	);
 	return;

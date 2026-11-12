@@ -71,7 +71,7 @@ add_action(
 		$boxes = mailweb_all_boxes();
 		echo '<h2 id="addresses">' . esc_html__( 'Mailboxes and aliases', 'mailweb' ) . '</h2>';
 		if ( isset( $_GET['mailweb_alias'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-			echo '<div class="notice notice-success inline"><p>' . esc_html__( 'Saved.', 'mailweb' ) . '</p></div>';
+			wp_admin_notice( esc_html__( 'Saved.', 'mailweb' ), array( 'type' => 'success', 'additional_classes' => array( 'inline' ) ) );
 		}
 		if ( ! $boxes ) {
 			echo '<p>' . esc_html__( 'No mailboxes yet: save the Mail API token above.', 'mailweb' ) . '</p>';

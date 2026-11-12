@@ -191,9 +191,9 @@ function aw_review_page() {
 	if ( isset( $_GET['done'], $_GET['n'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		$n = (int) $_GET['n']; // phpcs:ignore WordPress.Security.NonceVerification
 		if ( in_array( $_GET['done'], array( 'publish', 'reject' ), true ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html( sprintf( 'publish' === $_GET['done'] ? _n( '%d item published.', '%d items published.', $n ) : _n( '%d item moved to Drafts.', '%d items moved to Drafts.', $n ), $n ) ) . '</p></div>'; // phpcs:ignore WordPress.Security.NonceVerification
+			wp_admin_notice( esc_html( sprintf( 'publish' === $_GET['done'] ? _n( '%d item published.', '%d items published.', $n ) : _n( '%d item moved to Drafts.', '%d items moved to Drafts.', $n ), $n ) ), array( 'type' => 'success', 'dismissible' => true ) ); // phpcs:ignore WordPress.Security.NonceVerification
 		} else {
-			echo '<div class="notice notice-warning is-dismissible"><p>Nothing changed: choose Publish or Reject and tick at least one item.</p></div>';
+			wp_admin_notice( 'Nothing changed: choose Publish or Reject and tick at least one item.', array( 'type' => 'warning', 'dismissible' => true ) );
 		}
 	}
 	do_action( 'aw_review_intake' ); // other plugins' intake forms (core social-posts.php: add a social post from its link)
@@ -265,7 +265,7 @@ add_action(
 	function () {
 		if ( isset( $_GET['aw_published'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 			$n = (int) $_GET['aw_published']; // phpcs:ignore WordPress.Security.NonceVerification
-			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html( sprintf( _n( '%d item published.', '%d items published.', $n ), $n ) ) . '</p></div>';
+			wp_admin_notice( esc_html( sprintf( _n( '%d item published.', '%d items published.', $n ), $n ) ), array( 'type' => 'success', 'dismissible' => true ) );
 		}
 	}
 );

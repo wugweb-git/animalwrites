@@ -1240,7 +1240,7 @@ function aw_ai_keys_screen() {
 			/* translators: %d: number of keys. */
 			$msg .= ' ' . sprintf( _n( '%d was already saved and was skipped.', '%d were already saved and were skipped.', $dupes ), $dupes );
 		}
-		echo '<div class="notice notice-success is-dismissible"><p>' . esc_html( $msg . ' New keys are being checked in the background: reload in a few minutes to see their status.' ) . '</p></div>';
+		wp_admin_notice( esc_html( $msg . ' New keys are being checked in the background: reload in a few minutes to see their status.' ), array( 'type' => 'success', 'dismissible' => true ) );
 	}
 	$listed = sanitize_key( $_GET['listed'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
 	if ( $listed ) {
@@ -1260,15 +1260,15 @@ function aw_ai_keys_screen() {
 			'edited'  => 'Key saved. The workers use the change from their next run.',
 		);
 		if ( 'noworker' === $listed ) {
-			echo '<div class="notice notice-warning is-dismissible"><p>Nothing changed: choose the worker to attach to or detach from, next to the bulk action.</p></div>';
+			wp_admin_notice( 'Nothing changed: choose the worker to attach to or detach from, next to the bulk action.', array( 'type' => 'warning', 'dismissible' => true ) );
 		} elseif ( isset( $msg[ $listed ] ) && $n ) {
-			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html( sprintf( $msg[ $listed ], $n ) ) . '</p></div>';
+			wp_admin_notice( esc_html( sprintf( $msg[ $listed ], $n ) ), array( 'type' => 'success', 'dismissible' => true ) );
 		} else {
-			echo '<div class="notice notice-warning is-dismissible"><p>' . esc_html( 'edited' === $listed ? 'Nothing changed.' : 'Nothing changed: choose an action and at least one key.' ) . '</p></div>';
+			wp_admin_notice( esc_html( 'edited' === $listed ? 'Nothing changed.' : 'Nothing changed: choose an action and at least one key.' ), array( 'type' => 'warning', 'dismissible' => true ) );
 		}
 		if ( $skip ) {
 			/* translators: %d: number of keys. */
-			echo '<div class="notice notice-warning is-dismissible"><p>' . esc_html( sprintf( _n( '%d key was not detached: it is for that worker only, and a key needs at least one worker. Remove the key instead.', '%d keys were not detached: each is for that worker only, and a key needs at least one worker. Remove them instead.', $skip ), $skip ) ) . '</p></div>';
+			wp_admin_notice( esc_html( sprintf( _n( '%d key was not detached: it is for that worker only, and a key needs at least one worker. Remove the key instead.', '%d keys were not detached: each is for that worker only, and a key needs at least one worker. Remove them instead.', $skip ), $skip ) ), array( 'type' => 'warning', 'dismissible' => true ) );
 		}
 	}
 	echo '<p>Keys the workers use, tried from the top down. Each key is for every worker unless it is attached to some (Edit, or the bulk actions Attach to worker / Detach from worker). <a href="' . esc_url( aw_ai_keys_url( array( 'edit' => 'new' ) ) ) . '" class="page-title-action">Add New Key</a> <a href="' . esc_url( aw_ai_keys_url( array( 'overview' => 1 ) ) ) . '" class="page-title-action">Keys overview</a></p>';
@@ -1331,7 +1331,7 @@ function aw_ai_keys_overview_screen() {
 function aw_ai_key_add_screen() {
 	$nokey = sanitize_key( $_GET['nokey'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
 	if ( $nokey ) {
-		echo '<div class="notice notice-error is-dismissible"><p>' . esc_html( 'dupe' === $nokey ? 'Nothing added: that key is already saved.' : 'Nothing added: paste a key.' ) . '</p></div>';
+		wp_admin_notice( esc_html( 'dupe' === $nokey ? 'Nothing added: that key is already saved.' : 'Nothing added: paste a key.' ), array( 'type' => 'error', 'dismissible' => true ) );
 	}
 	echo '<h2>Add New Key</h2><form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_ai_keys">';
 	wp_nonce_field( 'aw_ai_keys' );
@@ -1357,7 +1357,7 @@ function aw_ai_key_edit_screen( $id ) {
 	}
 	if ( ! $row ) {
 		$secret = isset( aw_ai_usage()[ $id ] );
-		echo '<div class="notice notice-error inline"><p>' . esc_html( $secret ? 'This key is in the workers\' GitHub secrets: it is changed in GitHub and cannot be attached to workers.' : 'No such key.' ) . ' <a href="' . esc_url( aw_ai_keys_url() ) . '">Back to the keys</a></p></div>';
+		wp_admin_notice( esc_html( $secret ? 'This key is in the workers\' GitHub secrets: it is changed in GitHub and cannot be attached to workers.' : 'No such key.' ) . ' <a href="' . esc_url( aw_ai_keys_url() ) . '">Back to the keys</a>', array( 'type' => 'error', 'additional_classes' => array( 'inline' ) ) );
 		return;
 	}
 	$prov = (string) $row['provider'];

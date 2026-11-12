@@ -38,7 +38,7 @@ function planweb_kits_export( $names ) {
 function planweb_no_kits_notice() {
 	$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
 	if ( $screen && 'toplevel_page_' . PLANWEB_MENU === $screen->id ) {
-		echo '<div class="notice notice-warning is-dismissible"><p>' . esc_html__( 'PlanWeb is a Kits plugin: Kits Core is not loaded, so it is not listed under Kits.', 'planweb' ) . '</p></div>';
+		wp_admin_notice( esc_html__( 'PlanWeb is a Kits plugin: Kits Core is not loaded, so it is not listed under Kits.', 'planweb' ), array( 'type' => 'warning', 'dismissible' => true ) );
 	}
 }
 

@@ -424,17 +424,17 @@ add_action(
 		$note  = sanitize_key( $_GET['mailweb_cap'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
 		echo '<hr><h2 id="cap">' . esc_html__( 'Daily sending limit', 'mailweb' ) . '</h2>';
 		if ( 'saved' === $note ) {
-			echo '<div class="notice notice-success inline"><p>' . esc_html__( 'Saved.', 'mailweb' ) . '</p></div>';
+			wp_admin_notice( esc_html__( 'Saved.', 'mailweb' ), array( 'type' => 'success', 'additional_classes' => array( 'inline' ) ) );
 		} elseif ( 'resumed' === $note ) {
-			echo '<div class="notice notice-success inline"><p>' . esc_html__( 'Sending resumed.', 'mailweb' ) . '</p></div>';
+			wp_admin_notice( esc_html__( 'Sending resumed.', 'mailweb' ), array( 'type' => 'success', 'additional_classes' => array( 'inline' ) ) );
 		} elseif ( 'retry' === $note ) {
-			echo '<div class="notice notice-success inline"><p>' . esc_html__( 'Held emails will be tried again.', 'mailweb' ) . '</p></div>';
+			wp_admin_notice( esc_html__( 'Held emails will be tried again.', 'mailweb' ), array( 'type' => 'success', 'additional_classes' => array( 'inline' ) ) );
 		} elseif ( 'cleared' === $note ) {
-			echo '<div class="notice notice-success inline"><p>' . esc_html__( 'Held emails cleared.', 'mailweb' ) . '</p></div>';
+			wp_admin_notice( esc_html__( 'Held emails cleared.', 'mailweb' ), array( 'type' => 'success', 'additional_classes' => array( 'inline' ) ) );
 		} elseif ( 'flushed' === $note ) {
 			$sent_n = absint( wp_unslash( $_GET['n'] ?? 0 ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- a count in the redirect after the nonced action
 			/* translators: %d: number of queued emails sent */
-			echo '<div class="notice notice-success inline"><p>' . esc_html( sprintf( _n( 'Sent %d queued email.', 'Sent %d queued emails.', $sent_n, 'mailweb' ), $sent_n ) ) . '</p></div>';
+			wp_admin_notice( esc_html( sprintf( _n( 'Sent %d queued email.', 'Sent %d queued emails.', $sent_n, 'mailweb' ), $sent_n ) ), array( 'type' => 'success', 'additional_classes' => array( 'inline' ) ) );
 		}
 		if ( $pause ) {
 			echo '<div class="notice notice-error inline"><p><strong>' . esc_html__( 'Sending is paused.', 'mailweb' ) . '</strong> ' . esc_html(
@@ -566,16 +566,19 @@ add_action(
 			}
 			set_transient( 'mailweb_pause_seen', 1, DAY_IN_SECONDS );
 		}
-		echo '<div class="notice notice-error"><p><strong>' . esc_html__( 'Email sending is paused.', 'mailweb' ) . '</strong> ' . esc_html(
-			sprintf(
-				/* translators: %s: the mail server's error message */
-				__( 'The mail server refused an email (%s). Emails are waiting in the queue, not lost.', 'mailweb' ),
-				(string) $pause['error']
-			)
-		) . ' ' . sprintf(
-			/* translators: %s: link to MailWeb → Settings → Site sending */
-			esc_html__( '%s to resume once the mailbox works.', 'mailweb' ),
-			'<a href="' . esc_url( mailweb_settings_url( 'sending', array(), 'cap' ) ) . '">' . esc_html__( 'Open Plugins → MailWeb → Settings → Site sending', 'mailweb' ) . '</a>'
-		) . '</p></div>';
+		wp_admin_notice(
+			'<strong>' . esc_html__( 'Email sending is paused.', 'mailweb' ) . '</strong> ' . esc_html(
+				sprintf(
+					/* translators: %s: the mail server's error message */
+					__( 'The mail server refused an email (%s). Emails are waiting in the queue, not lost.', 'mailweb' ),
+					(string) $pause['error']
+				)
+			) . ' ' . sprintf(
+				/* translators: %s: link to MailWeb → Settings → Site sending */
+				esc_html__( '%s to resume once the mailbox works.', 'mailweb' ),
+				'<a href="' . esc_url( mailweb_settings_url( 'sending', array(), 'cap' ) ) . '">' . esc_html__( 'Open Plugins → MailWeb → Settings → Site sending', 'mailweb' ) . '</a>'
+			),
+			array( 'type' => 'error' )
+		);
 	}
 );

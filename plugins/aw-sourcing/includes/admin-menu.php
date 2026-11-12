@@ -426,7 +426,7 @@ function aw_sourcing_overview_page() {
 		}
 	}
 	if ( $attn ) {
-		echo '<div class="notice notice-warning inline"><p><strong>' . esc_html( 'Needs attention' ) . '</strong></p><ul class="ul-disc">' . implode( '', $attn ) . '</ul></div>'; // phpcs:ignore WordPress.Security.EscapeOutput -- built from escaped parts
+		wp_admin_notice( '<p><strong>' . esc_html( 'Needs attention' ) . '</strong></p><ul class="ul-disc">' . implode( '', $attn ) . '</ul>', array( 'type' => 'warning', 'additional_classes' => array( 'inline' ), 'paragraph_wrap' => false ) );
 	}
 	foreach ( $groups as $title => $rows ) {
 		echo '<h2>' . esc_html( $title ) . '</h2>';

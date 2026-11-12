@@ -333,7 +333,7 @@ add_action(
 		$set = mailweb_crm_settings();
 		echo '<h2 id="fluentcrm">' . esc_html__( 'FluentCRM', 'mailweb' ) . '</h2>';
 		if ( isset( $_GET['mailweb_crm'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-			echo '<div class="notice notice-success inline"><p>' . esc_html__( 'Saved.', 'mailweb' ) . '</p></div>';
+			wp_admin_notice( esc_html__( 'Saved.', 'mailweb' ), array( 'type' => 'success', 'additional_classes' => array( 'inline' ) ) );
 		}
 		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
 		wp_nonce_field( 'mailweb_crm' );

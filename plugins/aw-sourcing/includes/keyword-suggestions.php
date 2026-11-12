@@ -218,9 +218,9 @@ add_action(
 				'restore' => _n( '%d suggestion shown again.', '%d suggestions shown again.', $n ),
 			);
 			if ( isset( $msg[ $done ] ) && $n ) {
-				echo '<div class="notice notice-success is-dismissible inline"><p>' . esc_html( sprintf( $msg[ $done ], $n ) ) . '</p></div>';
+				wp_admin_notice( esc_html( sprintf( $msg[ $done ], $n ) ), array( 'type' => 'success', 'dismissible' => true, 'additional_classes' => array( 'inline' ) ) );
 			} else {
-				echo '<div class="notice notice-warning is-dismissible inline"><p>Nothing changed: choose an action and at least one search.</p></div>';
+				wp_admin_notice( 'Nothing changed: choose an action and at least one search.', array( 'type' => 'warning', 'dismissible' => true, 'additional_classes' => array( 'inline' ) ) );
 			}
 		}
 		echo '<p>Searches people make (Search Console) with at least 20 impressions in the last 28 days that no Include or Exclude word covers. Brand and non-English searches are not listed. Nothing is added unless you add it.</p>';

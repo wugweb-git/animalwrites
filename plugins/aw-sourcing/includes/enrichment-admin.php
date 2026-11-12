@@ -311,7 +311,7 @@ function aw_enrich_review_page() {
 	echo '<div class="wrap"><h1>Enrichment review</h1>';
 	aw_sourcing_screen_tabs();
 	if ( isset( $q['done'] ) ) {
-		echo '<div class="notice notice-success is-dismissible"><p>' . (int) $q['done'] . ' updated.</p></div>';
+		wp_admin_notice( (int) $q['done'] . ' updated.', array( 'type' => 'success', 'dismissible' => true ) );
 	}
 	echo '<p>' . (int) $prog['checked'] . ' of ' . (int) $prog['total'] . ' listings checked · ' . (int) $prog['pending'] . ' proposals waiting. High-confidence values for empty fields of unclaimed listings are applied automatically and listed under Applied (with Undo).</p>';
 	echo '<ul class="subsubsub">';

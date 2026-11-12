@@ -163,7 +163,7 @@ add_action(
 		$saved = isset( $_GET['mailweb_profile'] ); // phpcs:ignore WordPress.Security.NonceVerification
 		echo '<h2 id="profiles">' . esc_html__( 'Profiles', 'mailweb' ) . '</h2>';
 		if ( $saved ) {
-			echo '<div class="notice notice-success inline"><p>' . esc_html__( 'Profiles saved.', 'mailweb' ) . '</p></div>';
+			wp_admin_notice( esc_html__( 'Profiles saved.', 'mailweb' ), array( 'type' => 'success', 'additional_classes' => array( 'inline' ) ) );
 		}
 		echo '<p>' . esc_html__( 'Each mailbox\'s display name, signature and picture, as set in Hostinger webmail (Settings → Identities / Signature). The Mail page shows them; an email the site sends from that address uses the name and ends with the signature (FluentCRM emails excepted).', 'mailweb' ) . '</p>';
 		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';

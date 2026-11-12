@@ -76,7 +76,7 @@ function mailweb_smtp_screen() {
 	);
 	echo '<h2>' . esc_html__( 'Site sending', 'mailweb' ) . '</h2>';
 	if ( isset( $msgs[ $note ] ) ) {
-		echo '<div class="notice notice-' . esc_attr( $msgs[ $note ][0] ) . '"><p>' . esc_html( $msgs[ $note ][1] ) . '</p></div>';
+		wp_admin_notice( esc_html( $msgs[ $note ][1] ), array( 'type' => $msgs[ $note ][0] ) );
 	}
 	/* translators: %s: the sending mailbox address. */
 	$status = '' === $s['pass'] ? __( 'not set up, using the server default', 'mailweb' ) : sprintf( __( 'sending through %s', 'mailweb' ), $s['user'] );

@@ -536,7 +536,7 @@ function mailweb_notice() {
 		'toolarge' => array( 'error', __( 'Attachments are limited to 10 MB in total.', 'mailweb' ) ),
 	);
 	if ( isset( $t[ $n ] ) ) {
-		echo '<div class="notice notice-' . esc_attr( $t[ $n ][0] ) . ' is-dismissible"><p>' . esc_html( $t[ $n ][1] ) . '</p></div>';
+		wp_admin_notice( esc_html( $t[ $n ][1] ), array( 'type' => $t[ $n ][0], 'dismissible' => true ) );
 	}
 }
 
@@ -595,7 +595,7 @@ function mailweb_message_screen( $s ) {
 	echo '<h1 class="wp-heading-inline">' . esc_html( mailweb_roles()[ $s['folder'] ][0] ?? __( 'Inbox', 'mailweb' ) ) . '</h1> <a class="page-title-action" href="' . esc_url( $back ) . '">' . esc_html__( 'Back to the list', 'mailweb' ) . '</a><hr class="wp-header-end">';
 	mailweb_notice();
 	if ( ! $msg ) {
-		echo '<div class="notice notice-error"><p>' . esc_html__( 'This message could not be opened (moved or deleted in webmail?).', 'mailweb' ) . '</p></div>';
+		wp_admin_notice( esc_html__( 'This message could not be opened (moved or deleted in webmail?).', 'mailweb' ), array( 'type' => 'error' ) );
 		return;
 	}
 	mailweb_mark_seen( $s['box'], $path, (int) $s['uid'], $msg );
@@ -615,7 +615,7 @@ function mailweb_message_screen( $s ) {
 	echo '<tr><th scope="row">' . esc_html__( 'Date', 'mailweb' ) . '</th><td>' . mailweb_day( $m['date'] ?? '' ) . ( ! empty( $m['date'] ) ? ', ' . esc_html( wp_date( 'g:i a', strtotime( (string) $m['date'] ) ) ) : '' ) . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput
 	echo '</tbody></table></div></div>';
 	if ( $remote && ! $images ) {
-		echo '<div class="notice notice-info inline" style="margin:0 0 12px"><p>' . esc_html__( 'Pictures from the internet are hidden: they can tell the sender you opened the message.', 'mailweb' ) . ' <a href="' . esc_url( add_query_arg( 'images', 1 ) ) . '">' . esc_html__( 'Show pictures', 'mailweb' ) . '</a></p></div>';
+		wp_admin_notice( esc_html__( 'Pictures from the internet are hidden: they can tell the sender you opened the message.', 'mailweb' ) . ' <a href="' . esc_url( add_query_arg( 'images', 1 ) ) . '">' . esc_html__( 'Show pictures', 'mailweb' ) . '</a>', array( 'type' => 'info', 'additional_classes' => array( 'inline' ), 'attributes' => array( 'style' => 'margin:0 0 12px' ) ) );
 	}
 	echo '<iframe class="awm-frame" title="' . esc_attr__( 'Message', 'mailweb' ) . '" sandbox="allow-popups allow-popups-to-escape-sandbox" referrerpolicy="no-referrer" srcdoc="' . esc_attr( $doc ) . '"></iframe>';
 	$files = array_filter( (array) ( $m['attachments'] ?? array() ), fn( $a ) => empty( $a['inline'] ) || empty( $a['contentId'] ) );

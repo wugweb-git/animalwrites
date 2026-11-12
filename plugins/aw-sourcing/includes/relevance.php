@@ -461,7 +461,7 @@ add_action(
 		if ( ! is_array( $a ) || empty( $a['held'] ) || ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
-		echo '<div class="notice notice-error"><p><strong>Relevance check could not run.</strong> ' . esc_html( (int) $a['held'] . ' new item(s) held since ' . $a['since'] . ': no AI service answered, so nothing was created for them. They are tried again every 6 hours. Adding credit to an AI key clears it.' ) . ( ! empty( $a['run'] ) ? ' <a href="' . esc_url( $a['run'] ) . '" target="_blank" rel="noopener">Run details</a>' : '' ) . '</p></div>';
+		wp_admin_notice( '<strong>Relevance check could not run.</strong> ' . esc_html( (int) $a['held'] . ' new item(s) held since ' . $a['since'] . ': no AI service answered, so nothing was created for them. They are tried again every 6 hours. Adding credit to an AI key clears it.' ) . ( ! empty( $a['run'] ) ? ' <a href="' . esc_url( $a['run'] ) . '" target="_blank" rel="noopener">Run details</a>' : '' ), array( 'type' => 'error' ) );
 	}
 );
 
@@ -614,6 +614,6 @@ add_action(
 			return;
 		}
 		$hb = (array) get_option( 'aw_ingest_heartbeat', array() );
-		echo '<div class="notice notice-error"><p><strong>Ingestion needs attention.</strong> ' . esc_html( implode( ' ', $problems ) ) . ( ! empty( $hb['last_link'] ) ? ' <a href="' . esc_url( $hb['last_link'] ) . '" target="_blank" rel="noopener">Last run</a>' : '' ) . '</p></div>';
+		wp_admin_notice( '<strong>Ingestion needs attention.</strong> ' . esc_html( implode( ' ', $problems ) ) . ( ! empty( $hb['last_link'] ) ? ' <a href="' . esc_url( $hb['last_link'] ) . '" target="_blank" rel="noopener">Last run</a>' : '' ), array( 'type' => 'error' ) );
 	}
 );

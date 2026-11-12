@@ -242,7 +242,7 @@ function mailweb_in_screen() {
 			}
 		}
 		mailweb_box_ids( true ); // the mailboxes and their IDs, from the token
-		echo '<div class="notice notice-success"><p>' . esc_html__( 'Saved.', 'mailweb' ) . '</p></div>';
+		wp_admin_notice( esc_html__( 'Saved.', 'mailweb' ), array( 'type' => 'success' ) );
 	}
 	$ids  = '' !== mailweb_setting( 'api_token' ) ? mailweb_box_ids() : array();
 	$last = get_option( 'mailweb_last' );
