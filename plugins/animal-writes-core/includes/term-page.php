@@ -90,15 +90,16 @@ function aw_term_siblings( $term ) {
 	return array( __( 'Related tags', 'animal-writes-core' ), $sec ? array_values( array_diff( aw_section_tags( $sec ), $types, $services ) ) : array() );
 }
 
-/** Related: the term's group, as chips (most items first; empty terms left out). */
+/** Related: the term's group, as chips (most items first; empty terms left out). A category page first lists its Acts and Rules (law-links.php). */
 function aw_block_term_related() {
 	$term = aw_term_page_term();
 	if ( ! $term ) {
 		return aw_term_block_preview( 'Related: the other organisation types, services or categories.' );
 	}
+	$law = 'category' === $term->taxonomy && function_exists( 'aw_law_index_html' ) ? aw_law_index_html( $term->term_id ) : ''; // the category's Acts and Rules (law-links.php)
 	list( $head, $slugs ) = aw_term_siblings( $term );
 	if ( is_array( $slugs ) && ! $slugs ) {
-		return '';
+		return $law;
 	}
 	$args = array( 'taxonomy' => $term->taxonomy, 'hide_empty' => true, 'exclude' => array( $term->term_id ), 'orderby' => 'count', 'order' => 'DESC', 'number' => 12 );
 	if ( is_array( $slugs ) ) {
@@ -108,13 +109,13 @@ function aw_block_term_related() {
 	}
 	$terms = get_terms( $args );
 	if ( ! $terms || is_wp_error( $terms ) ) {
-		return '';
+		return $law;
 	}
 	$out = '<ul class="kit-tags aw-term-chips">';
 	foreach ( $terms as $t ) {
 		$ico  = 'post_tag' === $t->taxonomy && function_exists( 'aw_tag_icon' ) ? aw_tag_icon( $t->slug ) : '';
 		$out .= '<li><a class="kit-chip" href="' . esc_url( kits_term_url( $t ) ) . '">' . $ico . esc_html( html_entity_decode( $t->name, ENT_QUOTES ) ) . '</a></li>';
 	}
-	return aw_term_section( 'related', $head, $out . '</ul>' );
+	return $law . aw_term_section( 'related', $head, $out . '</ul>' );
 }
 

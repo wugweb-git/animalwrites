@@ -1044,6 +1044,7 @@ function mailweb_send_from_form( $in, $refbox ) {
 		wp_safe_redirect( add_query_arg( 'mailweb_done', 'limit', $retry ) );
 		exit;
 	}
+	$html = mailweb_utm_body( $html, (string) apply_filters( 'mailweb_email_type', 'inbox', array() ), true ); // the site's own links tagged (utm.php)
 	$req = array(
 		'to'          => $to,
 		'subject'     => '' !== $subj ? $subj : __( '(no subject)', 'mailweb' ),

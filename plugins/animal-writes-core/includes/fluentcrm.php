@@ -586,6 +586,68 @@ add_action(
 	20
 );
 
+/* ---------- Campaign tags (UTM) on email links (owner, 12 Nov 2026) ---------- */
+
+/*
+ * Every FluentCRM email's links to the site carry utm_source=newsletter, utm_medium=email, utm_campaign={campaign slug},
+ * so GA4 shows email visits as email. Never an address or a name (owner, 21 Oct 2026).
+ * - A new campaign gets these in FluentCRM's own UTM settings (its Settings step shows them; an editor can change them).
+ * - Automation emails and any campaign without its own tags: FluentCRM adds a campaign's tags on its click redirect only
+ *   when the campaign's UTM switch is on, so the same tags are added there to a link to the site that has none.
+ * The site's other emails are tagged by Mailweb (utm_source=site-email, mailweb/includes/utm.php).
+ */
+
+/** A campaign's slug as its utm_campaign: a duplicate's "-1793715277" ending dropped. */
+function aw_crm_utm_campaign( $slug ) {
+	$slug = sanitize_title( (string) $slug );
+	return '' !== $slug ? (string) preg_replace( '/-\d{9,}$/', '', $slug ) : 'newsletter';
+}
+
+// A new campaign: FluentCRM's own UTM settings filled in, unless it already has its own.
+add_action(
+	'fluent_crm/campaign_created',
+	function ( $campaign ) {
+		if ( ! is_object( $campaign ) || ! empty( $campaign->utm_status ) || '' !== (string) $campaign->utm_source ) {
+			return;
+		}
+		$campaign->utm_status   = 1;
+		$campaign->utm_source   = 'newsletter';
+		$campaign->utm_medium   = 'email';
+		$campaign->utm_campaign = aw_crm_utm_campaign( $campaign->slug );
+		$campaign->save();
+	}
+);
+
+// The click redirect: a link to the site with no tags gets the campaign's (or automation email's) tags.
+add_action(
+	'fluentcrm_email_url_click',
+	function ( $url, $mail_id ) {
+		add_filter(
+			'wp_redirect',
+			function ( $to ) use ( $mail_id ) {
+				$host = wp_parse_url( (string) $to, PHP_URL_HOST );
+				$home = wp_parse_url( home_url(), PHP_URL_HOST );
+				if ( ! $host || strtolower( preg_replace( '/^www\./i', '', (string) $host ) ) !== strtolower( preg_replace( '/^www\./i', '', (string) $home ) ) || preg_match( '/[?&]utm_source=/i', (string) $to ) ) {
+					return $to;
+				}
+				global $wpdb;
+				$slug = $mail_id ? (string) $wpdb->get_var( $wpdb->prepare( "SELECT c.slug FROM {$wpdb->prefix}fc_campaign_emails e JOIN {$wpdb->prefix}fc_campaigns c ON c.id = e.campaign_id WHERE e.id = %d", (int) $mail_id ) ) : ''; // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+				return add_query_arg(
+					array(
+						'utm_source'   => 'newsletter',
+						'utm_medium'   => 'email',
+						'utm_campaign' => aw_crm_utm_campaign( $slug ),
+					),
+					$to
+				);
+			},
+			5
+		);
+	},
+	10,
+	2
+);
+
 /* ---------- Setup commands (send nothing) ---------- */
 
 if ( defined( 'WP_CLI' ) && WP_CLI ) {

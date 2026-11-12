@@ -60,6 +60,7 @@ require_once MAILWEB_DIR . 'includes/smtp.php';
 require_once MAILWEB_DIR . 'includes/mail-cap.php';
 require_once MAILWEB_DIR . 'includes/mailboxes.php';
 require_once MAILWEB_DIR . 'includes/profiles.php';
+require_once MAILWEB_DIR . 'includes/utm.php'; // the site's own links in its emails tagged (utm_source=site-email).
 require_once MAILWEB_DIR . 'includes/inbox.php';
 require_once MAILWEB_DIR . 'includes/settings-tab.php';
 require_once MAILWEB_DIR . 'includes/crm-sync.php';

@@ -488,6 +488,12 @@ function aw_article_nodes( $id ) {
 			$node['citation'] = $also;
 		}
 		$node['contentLocation'] = aw_schema_place( $id );
+		$node['author']          = array( // the editorial team, with its policy page (owner, 12 Nov 2026: Google News and Discover)
+			'@type'              => 'Organization',
+			'name'               => 'Animal Writes editorial team',
+			'url'                => home_url( '/editorial-policy/' ),
+			'parentOrganization' => $us,
+		);
 		$nodes[]                 = $node;
 	} elseif ( in_array( $ks, array( 'act', 'rule', 'notification' ), true ) ) {
 		$node = array_merge(

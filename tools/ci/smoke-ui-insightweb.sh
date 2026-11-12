@@ -28,7 +28,7 @@ python3 - "$H/?rest_route=/insightweb/v1/dashboard/box" "$NA" <<'PY' || FAIL=1
 import json, re, subprocess, sys
 r, nonce = sys.argv[1], sys.argv[2]
 keys = open('/tmp/iw-boxes.txt').read().split()
-bad = 0 if len(keys) == 16 else 1
+bad = 0 if len(keys) == 17 else 1  # 16 + Request indexing (12 Nov 2026)
 print(('ok  ' if not bad else 'FAIL') + ' %d Overview boxes on the Dashboard' % len(keys))
 for k in keys:
     out = subprocess.run(['curl', '-s', '-w', '\n%{http_code}', '-b', '/tmp/cj-ci', '-H', 'X-WP-Nonce: ' + nonce, r + '&key=' + k], capture_output=True, text=True).stdout
