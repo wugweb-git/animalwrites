@@ -44,6 +44,12 @@ want 401 "GET /$PW/entries/$ID signed out" "$P/entries/$ID"
 want 403 "GET /$PW/entries/$ID subscriber" -b /tmp/cj-rw-sub -H "X-WP-Nonce: $NS" "$P/entries/$ID"
 want 200 "GET /$PW/entries/$ID" -b /tmp/cj-ci -H "X-WP-Nonce: $NA" "$P/entries/$ID"
 grep -q '"title":"MP model city"' /tmp/rw.out && echo "ok   one entry by its id" || { echo "FAIL one entry by its id"; FAIL=1; }
+# The Dashboard's month grid: the entry (dated 2026-12-01 by now) is in December with its form's address.
+want 401 "GET /$PW/month signed out" "$P/month&m=2026-12"
+want 403 "GET /$PW/month subscriber" -b /tmp/cj-rw-sub -H "X-WP-Nonce: $NS" "$P/month&m=2026-12"
+want 400 "GET /$PW/month bad month" -b /tmp/cj-ci -H "X-WP-Nonce: $NA" "$P/month&m=2026-13"
+want 200 "GET /$PW/month" -b /tmp/cj-ci -H "X-WP-Nonce: $NA" "$P/month&m=2026-12"
+if python3 -c 'import json,sys; d=json.load(open("/tmp/rw.out")); sys.exit(0 if d["month"]=="2026-12" and any(e["title"]=="MP model city" and "edit=" in e["editUrl"] for e in d["entries"]) else 1)'; then echo "ok   month: the entry with its edit address"; else echo "FAIL month grid data"; FAIL=1; fi
 want 403 "POST /$PW/entries/$ID/trash subscriber" -X POST -b /tmp/cj-rw-sub -H "X-WP-Nonce: $NS" "$P/entries/$ID/trash"
 want 200 "POST /$PW/entries/$ID/trash" -X POST "${AJ[@]}" "$P/entries/$ID/trash"
 if [ "$(wp post get "$ID" --field=post_status)" = "trash" ]; then echo "ok   entry $ID in the Trash (not deleted)"; else echo "FAIL entry $ID not in the Trash"; FAIL=1; fi

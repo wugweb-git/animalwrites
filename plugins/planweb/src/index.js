@@ -13,6 +13,7 @@ import {
 import apiFetch from '@wordpress/api-fetch';
 import { __, sprintf } from '@wordpress/i18n';
 import {
+	CalendarGrid,
 	AppShell,
 	AppHeader,
 	Button,
@@ -160,6 +161,7 @@ function Dashboard() {
 					/>
 				) ) }
 			</TileGrid>
+			<Month />
 			{ ! data.counting && (
 				<>
 					<SectionCard
@@ -213,6 +215,94 @@ function Dashboard() {
 				</>
 			) }
 		</>
+	);
+}
+
+/* ---------- Month ---------- */
+
+/**
+ * The Calendar's month grid: each entry with its Type badge, time, title (opening its form on Entries) and Status.
+ * The month shown is kept in the address as "month" ("m" is the Calendar's own address).
+ */
+function Month() {
+	const [ month, setMonth ] = useState(
+		() => new URLSearchParams( window.location.search ).get( 'month' ) || ''
+	);
+	const [ data, setData ] = useState( null );
+	const [ error, setError ] = useState( '' );
+	const [ loading, setLoading ] = useState( true );
+	const load = useCallback( () => {
+		setLoading( true );
+		setError( '' );
+		apiFetch( {
+			path: `${ path( 'month' ) }${
+				month ? `?m=${ encodeURIComponent( month ) }` : ''
+			}`,
+		} )
+			.then( setData )
+			.catch( ( e ) => setError( errText( e ) ) )
+			.finally( () => setLoading( false ) );
+	}, [ month ] );
+	useEffect( load, [ load ] );
+	const go = ( m ) => {
+		const u = new URL( window.location.href );
+		if ( data && m === data.today.slice( 0, 7 ) ) {
+			u.searchParams.delete( 'month' );
+		} else {
+			u.searchParams.set( 'month', m );
+		}
+		window.history.replaceState( null, '', u.toString() );
+		setMonth( m );
+	};
+	let body;
+	if ( error ) {
+		body = <ErrorState message={ error } onRetry={ load } />;
+	} else if ( ! data ) {
+		body = <LoadingState label={ __( 'Loading the month…', 'planweb' ) } />;
+	} else {
+		const days = {};
+		data.entries.forEach( ( e ) => {
+			( days[ e.date ] = days[ e.date ] || [] ).push(
+				<p key={ e.id } className="planweb-item">
+					<span
+						className={ `planweb-type planweb-type--${ e.type }` }
+					>
+						<span className="planweb-mark" aria-hidden="true" />
+						{ e.typeText }
+					</span>{ ' ' }
+					<a href={ e.editUrl }>
+						{ e.time ? `${ e.time } ` : '' }
+						{ e.title }
+					</a>{ ' ' }
+					<span
+						className={ `planweb-status planweb-status--${ e.status }` }
+					>
+						{ e.statusText }
+					</span>
+				</p>
+			);
+		} );
+		body = (
+			<CalendarGrid
+				month={ data.month }
+				today={ data.today }
+				days={ days }
+				onMonth={ go }
+				loading={ loading }
+			/>
+		);
+	}
+	return (
+		<SectionCard
+			id="calendar"
+			title={ __( 'Calendar', 'planweb' ) }
+			description={ __(
+				'The month’s entries by day. An entry opens its form on Entries.',
+				'planweb'
+			) }
+		>
+			{ body }
+		</SectionCard>
 	);
 }
 

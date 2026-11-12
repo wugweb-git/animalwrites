@@ -101,6 +101,22 @@ add_action(
 				)
 			);
 		}
+		// One month for the Dashboard's calendar grid.
+		register_rest_route(
+			PLANWEB_REST,
+			'/month',
+			array(
+				'methods'             => 'GET',
+				'permission_callback' => planweb_rest_can( 'edit_planweb_entries' ),
+				'callback'            => 'planweb_rest_month',
+				'args'                => array(
+					'm' => array(
+						'type'    => 'string',
+						'pattern' => '^\\d{4}-(0[1-9]|1[0-2])$',
+					),
+				),
+			)
+		);
 		// One entry, for its address (Entries &edit=ID opens its form).
 		register_rest_route(
 			PLANWEB_REST,
@@ -236,6 +252,29 @@ function planweb_rest_row( array $e, string $today ): array {
 				'm'    => substr( $e['date'], 0, 7 ),
 			)
 		) . '#planweb-form',
+	);
+}
+
+/**
+ * GET month?m=Y-m: the month's entries (not the Trash), as the Calendar's grid shows them, each with the address
+ * that opens its form on Entries. No m: this month.
+ *
+ * @param WP_REST_Request $request Request.
+ */
+function planweb_rest_month( WP_REST_Request $request ) {
+	$today = wp_date( 'Y-m-d' );
+	$month = preg_match( '/^\d{4}-(0[1-9]|1[0-2])$/', (string) $request['m'] ) ? (string) $request['m'] : substr( $today, 0, 7 );
+	$last  = (int) wp_date( 't', strtotime( $month . '-01 12:00:00' ) );
+	$rows  = array();
+	foreach ( planweb_entries( $month . '-01', sprintf( '%s-%02d', $month, $last ) ) as $e ) {
+		$rows[] = planweb_rest_row( $e, $today ) + array( 'editUrl' => planweb_ui_url( 'entries', array( 'edit' => $e['id'] ) ) );
+	}
+	return rest_ensure_response(
+		array(
+			'month'   => $month,
+			'today'   => $today,
+			'entries' => $rows,
+		)
 	);
 }
 
