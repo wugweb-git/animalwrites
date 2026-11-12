@@ -714,3 +714,25 @@ These live in WordPress: **Kits → Dates** (month calendar, add and remove) and
 
 ## Done (21 Oct 2026)
 FAQ: all 167 topic FAQs and the 4 new ones (directory free, volunteer 18+, claims 4 to 5 days, opportunities free) are approved. AWO list imported (559 new, 63 filled). ngobase: 296 of 306 live; the 10 drafts are held duplicates, never publish. Forms send no email except the Remove-my-data confirmation link. Share images are never AVIF. Fallback picture is the grey logo (attachment 17878). hPanel Git auto-deploy is on.
+
+## Martech plan of 12 Nov 2026 (status 12 Nov)
+
+| Item | Status |
+|---|---|
+| A1 city redirects (Bengaluru/Bangalore, Delhi, Guwahati, Gurgaon, Noida, Gautam Buddh Nagar) | code on wordpress-dev (35393502, b7febc5b); live once shipped; check `curl -I` 301 → 200 |
+| A2 old lab campaign addresses, ^campaign/(.+) regex, Niagara News item | same commits; Chamba item already 301 |
+| A3 links to removed News items | checked: no stored content links to either; nothing to change |
+| A4 UTM on share buttons | share bar + campaign.js on wordpress-dev. The Lab page's own frozen campaign-lab.js is not changed: owner's yes needed. wa.me chats to listings carry no UTM (they go to WhatsApp) |
+| A5 data noise | `(not set)` explained in docs/analytics/ga4-setup.md; no_results sends term_empty=1 (GTM must map it: owner's OK) |
+| A6 GA4 12 Nov changes | recorded in docs/analytics/ga4-setup.md |
+| B1 funnel measured | docs/campaign-lab-rules-2026.md: "confirmed" is the "Yes, I sent it" tap, not an email; no confirm email exists |
+| B2–B5 | do not apply as written (nothing to resend or remind); owner decides what to do for future campaigns |
+| B6 form defaults | recorded; owner's call |
+| C2 404 box note, test paths hidden | on wordpress-dev |
+| C3 classic actions keep &ui=classic | on wordpress-dev; result notices and the Seeds box on the new screens still open |
+| C10 confirm rate per source and per day | on wordpress-dev (685d9432); per day from the next GA4 run |
+| C1, C4–C9, C11 | open |
+| D1, D2, D5 drafts | Claude outputs/drafts/2026-11-12-d1-d2-d5-emergency-pages.md, awaiting owner |
+| D3, D7 drafts | Claude outputs/drafts/2026-11-12-d3-d7-lab-and-rabies.md, awaiting owner |
+| E1–E3 briefs | Claude outputs/drafts/2026-11-12-e1-e3-new-guides-briefs.md, awaiting owner; E3 proposed as an update of /resources/rabies-facts-who/ |
+| D4, D6, D8, E4–E7, F, G, H | open |
