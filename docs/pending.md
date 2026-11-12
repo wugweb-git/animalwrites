@@ -747,10 +747,17 @@ FAQ: all 167 topic FAQs and the 4 new ones (directory free, volunteer 18+, claim
 | C2 404 box note, test paths hidden | live 12 Nov; checked on the classic Overview |
 | C3 classic actions keep &ui=classic | live 12 Nov; result notices and the Seeds box on the new screens still open |
 | C10 confirm rate per source and per day | live 12 Nov; checked: Lab 22% overall (direct 23%, google 28%, ig 16%); per day from the next GA4 run |
-| C1, C4–C9, C11 | open |
+| C1, C4, C6, C9, C11 | owner asked 12 Nov; InsightWeb branch in progress (not pushed). C5, C7, C8 open |
 | D1, D2, D5 | live 12 Nov (owner's yes): #126 street-dog section, city links, free-help FAQ; #9031 1962 by state + cross-link; #13798 FAQ (What number is 1962?, Why 1962?) + state links; /about/ "What we do and don't do"; contact line. Titles, metas, keyphrases set. FAQ max 6: "What details will rescuers ask for?" (#126) and "What if 1962 does not answer?" (#13798) now not shown; both are page sections |
 | D3, D7 | live 12 Nov (owner's yes): "In plain words" box on #13854; #17307 dog-bite answer replaced, "How is rabies treated in humans?" added (heading now "eleven questions"); link line on #12409 and #12411; study keyphrases narrowed. Lab page dates (5 Nov) untouched: owner's word |
-| E1–E3 briefs | Claude outputs/drafts/2026-11-12-e1-e3-new-guides-briefs.md, awaiting owner; E3 proposed as an update of /resources/rabies-facts-who/ |
-| D4, D6 | live 12 Nov (owner's yes): #13869 Read next line, NAMs section (cell cultures, organ-on-a-chip, in-silico), 3 FAQ, OECD TG 439/492 sources, keyphrases; #13859 IAEC 2 FAQ; #13797 4 Oct 2027 line + keyphrase 2027; cpcsea email keyphrase. D6-3 district helplines row above the toolbar: f84c05f6, shipping |
+| E1 | owner 12 Nov: no letter campaign; a standalone guide "Who is responsible for street dogs in your city, and how to reach them" (not a Community dogs post), linked to the Directory and existing guides. Draft in progress; text needs the owner's yes |
+| E2 | brief awaiting the owner's yes |
+| E3 | live 12 Nov (owner: "do it"): /resources/rabies-facts-who/ (#125) updated in place, not a new page: symptoms, timing, why no cure, national programme, FAQ. Focus "rabies symptoms in humans"; 15400 line corrected to give its coverage limits |
+| D4, D6 | live 12 Nov (owner's yes): #13869 Read next line, NAMs section (cell cultures, organ-on-a-chip, in-silico), 3 FAQ, OECD TG 439/492 sources, keyphrases; #13859 IAEC 2 FAQ; #13797 4 Oct 2027 line + keyphrase 2027; cpcsea email keyphrase. D6-3 district helplines row above the toolbar: live 12 Nov (f84c05f6 via 6dc68a01); its "All numbers" link goes to `#district-helplines` (346261e0, live; the footer already used `#helplines`) |
 | D8 | schema alternateName in a107f67a (shipping); Home title and meta done by another session: not touched here |
-| E4–E7, F, G, H | open |
+| E4 | Hindi plain-words page on the Lab rules drafted (no dates). Owner to choose: (a) separate Hindi page with hreflang (needs RankWeb code, own branch) or (b) a Hindi section on #13854. Hindi search demand looks near zero. Text needs yes |
+| E5 | "How to write a letter to your MP" guide drafted (focus "how to write a letter to mp in india"; no HowTo schema). Sample letter uses the Lab draft without dates; owner may want a neutral topic. Text needs yes |
+| E6 | intros for Mumbai, Delhi, Bengaluru, Pune, Kolkata, Hyderabad drafted. Place pages have no intro field: needs a new option + template line (own branch). Owner 12 Nov: "Not now". Kolkata has no official complaint channel; some facts press-only. Side finding, also not now: those city titles read "Animal Helpline Numbers in Mumbai Maharashtra" (no comma, no brand) |
+| E7 | "animal aid mumbai": no such Mumbai organisation; no page, alias or rename (same as item 13) |
+| F | social sets drafted, same size for all handles (owner); 15400 wording fixed in set 6. Nothing posted: waiting on "yes F" |
+| B2–B6, G, H | deferred by the owner 12 Nov. The Lab page's share script: no change (owner) |
