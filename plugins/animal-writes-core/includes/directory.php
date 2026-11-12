@@ -266,7 +266,8 @@ add_filter(
 		if ( ! aw_is_directory_view() || false === strpos( $html, 'kit-section-desc' ) || ! aw_current_place() ) {
 			return $html;
 		}
-		return preg_replace( '#(<p[^>]*kit-section-desc[^>]*>)(.*?)(</p>)#s', '$1' . esc_html( aw_directory_intro() ) . '$3', $html, 1 );
+		$html = preg_replace( '#(<p[^>]*kit-section-desc[^>]*>)(.*?)(</p>)#s', '$1' . esc_html( aw_directory_intro() ) . '$3', $html, 1 );
+		return function_exists( 'aw_place_intro_html' ) ? $html . aw_place_intro_html() : $html; // the place's own intro, when it has one (place-intros.php)
 	}
 );
 

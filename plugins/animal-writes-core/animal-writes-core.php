@@ -103,6 +103,7 @@ require_once AW_CORE_DIR . 'includes/directoryweb-dashboard.php'; // the Dashboa
 require_once AW_CORE_DIR . 'includes/directoryweb-rest.php'; // directoryweb/v1.
 require_once AW_CORE_DIR . 'includes/directoryweb-listings.php'; // the Listings tab and its route (read only).
 require_once AW_CORE_DIR . 'includes/directoryweb-ui.php'; // Dashboard, Claims and Settings on the Kits admin shell.
+require_once AW_CORE_DIR . 'includes/place-intros.php'; // DirectoryWeb → Place intros: a short paragraph on a state or district page.
 require_once AW_CORE_DIR . 'includes/unverified.php';
 require_once AW_CORE_DIR . 'includes/systems.php';
 require_once AW_CORE_DIR . 'includes/reports.php';

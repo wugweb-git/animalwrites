@@ -145,6 +145,12 @@ add_action(
 				'url'     => directoryweb_ui_url( 'settings' ),
 				'current' => 'settings' === $screen,
 			);
+			$tabs[] = array(
+				'slug'    => 'place-intros',
+				'label'   => __( 'Place intros', 'directoryweb' ),
+				'url'     => aw_place_intros_url(), // a core screen (place-intros.php)
+				'current' => false,
+			);
 		}
 		$ok = kits_shell_app(
 			array(
