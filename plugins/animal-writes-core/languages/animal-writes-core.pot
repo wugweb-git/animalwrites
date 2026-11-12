@@ -1,0 +1,828 @@
+# Copyright (C) 2026 Wugweb
+# This file is distributed under the GPL-2.0-or-later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Animal Writes Core 1.0.0\n"
+"Report-Msgid-Bugs-To: https://wugweb.com/\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-11-12T21:10:50+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: animal-writes-core\n"
+
+#. Plugin Name of the plugin
+#: animal-writes-core.php
+msgid "Animal Writes Core"
+msgstr ""
+
+#. Description of the plugin
+#: animal-writes-core.php
+msgid "The Animal Writes site: content types and fields, the Directory with its map and places, campaigns and letters, forms and people (Fluent Forms, FluentCRM), card pictures, and the jobs that keep it running (backups, site check, scheduled tasks, deploy purge, CDN cache). Its screens are in the Kits menu (Home, Settings, Theme Options, Help). Theme-independent."
+msgstr ""
+
+#. Author of the plugin
+#: animal-writes-core.php
+msgid "Wugweb"
+msgstr ""
+
+#. Author URI of the plugin
+#: animal-writes-core.php
+msgid "https://wugweb.com"
+msgstr ""
+
+#. translators: %s: source name.
+#: includes/bindings.php:85
+#, php-format
+msgid "Read at %s"
+msgstr ""
+
+#. translators: %s: source name.
+#: includes/bindings.php:85
+msgid "Read at source"
+msgstr ""
+
+#. translators: %s: sponsor name.
+#: includes/bindings.php:94
+#, php-format
+msgid "Sponsored by %s"
+msgstr ""
+
+#. translators: %s: sponsor name.
+#: includes/bindings.php:94
+msgid "Sponsored"
+msgstr ""
+
+#: includes/bindings.php:100
+#: includes/item-head.php:188
+msgid "Needs re-check"
+msgstr ""
+
+#. translators: %s: date.
+#: includes/bindings.php:104
+#: includes/item-head.php:190
+#, php-format
+msgid "Claimed on %s"
+msgstr ""
+
+#. translators: %s: date.
+#: includes/bindings.php:104
+#: includes/item-head.php:190
+msgid "Claimed"
+msgstr ""
+
+#: includes/bindings.php:106
+msgid "Blacklisted on NGO Darpan"
+msgstr ""
+
+#. translators: %s: date.
+#: includes/bindings.php:147
+#, php-format
+msgid "Apply by %s"
+msgstr ""
+
+#: includes/bindings.php:154
+msgid "Closed"
+msgstr ""
+
+#: includes/bindings.php:154
+msgid "Applications closed on"
+msgstr ""
+
+#: includes/bindings.php:156
+msgid "Apply by"
+msgstr ""
+
+#: includes/bindings.php:173
+msgid "Animal Writes field"
+msgstr ""
+
+#: includes/block-states.php:89
+msgid "Thank you for signing up."
+msgstr ""
+
+#: includes/block-states.php:89
+msgid "We will contact you when there is work in your area. You can ask us to delete your details at any time."
+msgstr ""
+
+#: includes/campaign-letters.php:297
+#, php-format
+msgid "%s letter sent"
+msgid_plural "%s letters sent"
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/campaign-tools.php:572
+#, php-format
+msgid "%d day to go"
+msgid_plural "%d days to go"
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/campaign-tools.php:943
+msgid "Current campaign (shows while a campaign is open)"
+msgstr ""
+
+#. translators: %d: days.
+#: includes/campaign-tools.php:951
+#, php-format
+msgid "%d day left"
+msgid_plural "%d days left"
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/campaign-tools.php:954
+msgid "Current campaign"
+msgstr ""
+
+#: includes/campaign-tools.php:957
+msgid "Take part"
+msgstr ""
+
+#. translators: 1: listing type, 2: city.
+#: includes/directory.php:304
+#, php-format
+msgid "%1$s in %2$s"
+msgstr ""
+
+#. translators: %s: city.
+#: includes/directory.php:308
+#, php-format
+msgid "Animal welfare directory: %s"
+msgstr ""
+
+#: includes/display.php:20
+msgid "New items appear here after review. Know something that belongs here? Write to contact@animalwrites.in."
+msgstr ""
+
+#: includes/district-helplines.php:135
+#: includes/district-helplines.php:167
+msgid "Mobile Veterinary Units"
+msgstr ""
+
+#. translators: %s: district.
+#: includes/district-helplines.php:143
+#: includes/district-helplines.php:172
+#, php-format
+msgid "Animal helpline numbers in %s"
+msgstr ""
+
+#: includes/district-helplines.php:144
+msgid "Helplines"
+msgstr ""
+
+#: includes/district-helplines.php:145
+msgid "All numbers"
+msgstr ""
+
+#: includes/district-helplines.php:158
+msgid "From the listing (source on its page)"
+msgstr ""
+
+#: includes/district-helplines.php:163
+msgid "Emergency"
+msgstr ""
+
+#: includes/district-helplines.php:163
+msgid "Police, fire and ambulance, anywhere in India."
+msgstr ""
+
+#: includes/district-helplines.php:163
+msgid "Ministry of Home Affairs"
+msgstr ""
+
+#: includes/district-helplines.php:167
+msgid "A vet comes to the animal."
+msgstr ""
+
+#: includes/district-helplines.php:174
+msgid "An animal in danger right now: call 112 first."
+msgstr ""
+
+#. translators: %d: number of errors.
+#: includes/error-count.php:333
+#, php-format
+msgid "Animal Writes: %d server error in the last 24 hours"
+msgid_plural "Animal Writes: %d server errors in the last 24 hours"
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/find-help.php:338
+#: includes/find-help.php:347
+msgid "Find help near you"
+msgstr ""
+
+#: includes/find-help.php:339
+#: includes/find-help.php:350
+msgid "All states and districts"
+msgstr ""
+
+#: includes/find-help.php:340
+msgid "Near me"
+msgstr ""
+
+#. translators: %s: state.
+#: includes/find-help.php:344
+#, php-format
+msgid "All of %s"
+msgstr ""
+
+#: includes/find-help.php:348
+msgid "Animal welfare organisations, Gaushalas and government vets, with their contact details."
+msgstr ""
+
+#. translators: %s: date.
+#: includes/gov-verified.php:163
+#, php-format
+msgid "Verified on %s"
+msgstr ""
+
+#: includes/gov-verified.php:208
+#: includes/listing-template.php:147
+msgid "Not on the current AWBI list"
+msgstr ""
+
+#. translators: %s: time difference, e.g. 3 hours.
+#: includes/hub-blocks.php:562
+msgid "Just now"
+msgstr ""
+
+#. translators: %s: time difference, e.g. 3 hours.
+#: includes/hub-blocks.php:562
+#, php-format
+msgid "%s ago"
+msgstr ""
+
+#. translators: %s: date.
+#: includes/item-head.php:155
+#, php-format
+msgid "Dated %s"
+msgstr ""
+
+#: includes/item-head.php:310
+msgid "Editorial policy"
+msgstr ""
+
+#: includes/item-head.php:310
+msgid "Report a mistake"
+msgstr ""
+
+#: includes/item-head.php:315
+#: includes/item-head.php:379
+msgid "Sources"
+msgstr ""
+
+#: includes/item-head.php:317
+msgid "Last updated:"
+msgstr ""
+
+#: includes/item-head.php:323
+msgid "Read the original"
+msgstr ""
+
+#: includes/item-head.php:323
+#: includes/listing-template.php:180
+msgid "(opens in a new tab)"
+msgstr ""
+
+#: includes/item-head.php:326
+msgid "Summary written by Animal Writes. Read the original before relying on it."
+msgstr ""
+
+#. translators: %s: body that issued the document.
+#: includes/item-head.php:334
+#, php-format
+msgid "Issued by %s."
+msgstr ""
+
+#: includes/item-head.php:339
+msgid "Created by Animal Writes"
+msgstr ""
+
+#. translators: %s: authors.
+#: includes/item-head.php:349
+#, php-format
+msgid "by %s"
+msgstr ""
+
+#. translators: %s: journal.
+#: includes/item-head.php:353
+#, php-format
+msgid "in %s"
+msgstr ""
+
+#: includes/item-head.php:355
+msgid "Study:"
+msgstr ""
+
+#. translators: %s: organisation that published the original.
+#: includes/item-head.php:364
+#, php-format
+msgid "Source: %s"
+msgstr ""
+
+#: includes/item-head.php:369
+msgid "By Animal Writes"
+msgstr ""
+
+#. translators: %s: category.
+#: includes/item-head.php:441
+#, php-format
+msgid "More in %s"
+msgstr ""
+
+#: includes/item-head.php:445
+msgid "More news"
+msgstr ""
+
+#: includes/item-head.php:446
+#: includes/item-head.php:460
+msgid "From the Library"
+msgstr ""
+
+#: includes/item-head.php:447
+#: includes/item-head.php:453
+#: includes/item-head.php:461
+msgid "Guides on this"
+msgstr ""
+
+#: includes/item-head.php:450
+msgid "More from the Library"
+msgstr ""
+
+#: includes/item-head.php:451
+msgid "News about this"
+msgstr ""
+
+#: includes/item-head.php:457
+msgid "More research"
+msgstr ""
+
+#. translators: %s: Resource type.
+#: includes/item-head.php:457
+#, php-format
+msgid "More %s"
+msgstr ""
+
+#. translators: %s: Resource type.
+#: includes/item-head.php:457
+msgid "More resources"
+msgstr ""
+
+#: includes/item-head.php:465
+msgid "More opportunities"
+msgstr ""
+
+#. translators: %s: district or state.
+#: includes/item-head.php:473
+#, php-format
+msgid "More organisations in %s"
+msgstr ""
+
+#: includes/item-head.php:500
+msgid "News"
+msgstr ""
+
+#: includes/item-head.php:584
+msgid "Contents"
+msgstr ""
+
+#: includes/law-links.php:48
+msgid "Acts and Rules"
+msgstr ""
+
+#: includes/listing-template.php:82
+msgid "Data not yet available"
+msgstr ""
+
+#: includes/listing-template.php:83
+msgid "Suggest an update"
+msgstr ""
+
+#: includes/listing-template.php:94
+msgid "Expired"
+msgstr ""
+
+#: includes/listing-template.php:95
+msgid "valid until"
+msgstr ""
+
+#: includes/listing-template.php:147
+msgid "AWBI number"
+msgstr ""
+
+#. translators: %s: registration type, e.g. Trust.
+#: includes/listing-template.php:149
+#, php-format
+msgid "Registration (%s)"
+msgstr ""
+
+#. translators: %s: registration type, e.g. Trust.
+#: includes/listing-template.php:149
+msgid "Registration"
+msgstr ""
+
+#: includes/listing-template.php:153
+msgid "NGO Darpan ID"
+msgstr ""
+
+#: includes/listing-template.php:155
+msgid "Registrations"
+msgstr ""
+
+#. translators: %s: phone number.
+#: includes/listing-template.php:171
+#, php-format
+msgid "Call %s"
+msgstr ""
+
+#: includes/listing-template.php:174
+msgid "WhatsApp"
+msgstr ""
+
+#: includes/listing-template.php:177
+#: includes/listing-template.php:186
+#: includes/listing-template.php:202
+msgid "Email"
+msgstr ""
+
+#: includes/listing-template.php:180
+#: includes/listing-template.php:186
+#: includes/listing-template.php:205
+msgid "Website"
+msgstr ""
+
+#: includes/listing-template.php:183
+#: includes/listing-template.php:184
+msgid "Directions"
+msgstr ""
+
+#: includes/listing-template.php:186
+#: includes/listing-template.php:198
+msgid "Phone"
+msgstr ""
+
+#: includes/listing-template.php:207
+msgid "Contact"
+msgstr ""
+
+#: includes/listing-template.php:225
+msgid "Address"
+msgstr ""
+
+#: includes/listing-template.php:226
+msgid "District"
+msgstr ""
+
+#: includes/listing-template.php:227
+msgid "Opening hours"
+msgstr ""
+
+#: includes/listing-template.php:229
+msgid "Location"
+msgstr ""
+
+#: includes/listing-template.php:242
+msgid "Based on type"
+msgstr ""
+
+#. translators: %s: who stated the services.
+#: includes/listing-template.php:247
+#, php-format
+msgid "Stated by %s"
+msgstr ""
+
+#. translators: %s: who stated the services.
+#: includes/listing-template.php:247
+msgid "the organisation"
+msgstr ""
+
+#: includes/listing-template.php:250
+#: includes/listing-template.php:255
+msgid "Services"
+msgstr ""
+
+#: includes/listing-template.php:251
+msgid "Animals helped"
+msgstr ""
+
+#: includes/listing-template.php:252
+msgid "Areas served"
+msgstr ""
+
+#: includes/listing-template.php:253
+msgid "Languages"
+msgstr ""
+
+#: includes/listing-template.php:302
+msgid "Established"
+msgstr ""
+
+#: includes/listing-template.php:303
+msgid "Incorporated"
+msgstr ""
+
+#: includes/listing-template.php:304
+msgid "Head of the organisation"
+msgstr ""
+
+#: includes/listing-template.php:306
+msgid "Organisation"
+msgstr ""
+
+#. translators: 1: organisation, 2: network.
+#: includes/listing-template.php:320
+#, php-format
+msgid "%1$s on %2$s"
+msgstr ""
+
+#: includes/listing-template.php:325
+msgid "Online profiles"
+msgstr ""
+
+#: includes/listing-template.php:337
+msgid "Volunteer"
+msgstr ""
+
+#: includes/listing-template.php:337
+msgid "Adopt"
+msgstr ""
+
+#: includes/listing-template.php:343
+msgid "Support"
+msgstr ""
+
+#: includes/listing-template.php:372
+msgid "Photos"
+msgstr ""
+
+#: includes/listing-template.php:449
+msgid "out of 5"
+msgstr ""
+
+#. translators: %s: number.
+#: includes/listing-template.php:449
+#, php-format
+msgid "%s review"
+msgid_plural "%s reviews"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %s: number.
+#: includes/listing-template.php:450
+msgid "Google"
+msgstr ""
+
+#: includes/listing-template.php:451
+#: includes/listing-template.php:464
+msgid "as on"
+msgstr ""
+
+#: includes/listing-template.php:452
+msgid "View on Google"
+msgstr ""
+
+#. translators: %s: number.
+#: includes/listing-template.php:458
+#, php-format
+msgid "%s followers"
+msgstr ""
+
+#. translators: %s: number.
+#: includes/listing-template.php:459
+#, php-format
+msgid "%s posts"
+msgstr ""
+
+#. translators: %s: number.
+#: includes/listing-template.php:460
+msgid "last post"
+msgstr ""
+
+#: includes/listing-template.php:463
+msgid "Instagram"
+msgstr ""
+
+#: includes/listing-template.php:465
+msgid "View on Instagram"
+msgstr ""
+
+#: includes/listing-template.php:467
+msgid "Activity"
+msgstr ""
+
+#. translators: %d: number.
+#: includes/listing-template.php:496
+#, php-format
+msgid "See all (%d)"
+msgstr ""
+
+#. translators: %d: number.
+#: includes/listing-template.php:497
+msgid "In the press"
+msgstr ""
+
+#. translators: %s: organisation.
+#: includes/listing-template.php:516
+#, php-format
+msgid "Opportunities at %s"
+msgstr ""
+
+#: includes/listing-template.php:527
+msgid "Organiser"
+msgstr ""
+
+#: includes/listing-template.php:533
+msgid "Partner"
+msgstr ""
+
+#: includes/listing-template.php:539
+msgid "Supporter"
+msgstr ""
+
+#. translators: %s: organisation.
+#: includes/listing-template.php:561
+#, php-format
+msgid "Campaigns with %s"
+msgstr ""
+
+#: includes/listing-template.php:569
+#: includes/listing-template.php:571
+#: includes/listing-template.php:573
+msgid "Claim your listing"
+msgstr ""
+
+#: includes/listing-template.php:572
+msgid "Run an organisation listed in our Directory? Claim it to correct its details and add your logo and photos."
+msgstr ""
+
+#: includes/media.php:292
+msgid "Your browser cannot show this PDF here. Use the download link below."
+msgstr ""
+
+#: includes/media.php:397
+msgid "Print this letter"
+msgstr ""
+
+#: includes/media.php:398
+msgid "Sign it, then post it by Speed Post."
+msgstr ""
+
+#: includes/scf.php:52
+msgid "Secure Custom Fields stays on while Animal Writes core is on: the edit screens use it. Deactivate Animal Writes core first."
+msgstr ""
+
+#: includes/scf.php:53
+msgid "Secure Custom Fields stays on"
+msgstr ""
+
+#: includes/social-posts.php:105
+#: includes/theme-parts-screen.php:153
+msgid "Sorry, you are not allowed to access this page."
+msgstr ""
+
+#: includes/term-page.php:76
+msgid "Other categories"
+msgstr ""
+
+#: includes/term-page.php:80
+msgid "Other organisation types"
+msgstr ""
+
+#: includes/term-page.php:84
+msgid "Other services"
+msgstr ""
+
+#: includes/term-page.php:87
+msgid "Other document types"
+msgstr ""
+
+#: includes/term-page.php:90
+msgid "Related tags"
+msgstr ""
+
+#: includes/theme-parts-assets.php:295
+msgid "Animal Writes"
+msgstr ""
+
+#. translators: %s: file name.
+#: includes/theme-parts-templates.php:307
+#, php-format
+msgid "Could not register file \"%s\" as a block pattern (\"Slug\" field missing)"
+msgstr ""
+
+#. translators: 1: file name; 2: slug value found.
+#: includes/theme-parts-templates.php:312
+#, php-format
+msgid "Could not register file \"%1$s\" as a block pattern (invalid slug \"%2$s\")"
+msgstr ""
+
+#. translators: %s: file name.
+#: includes/theme-parts-templates.php:316
+#, php-format
+msgid "Could not register file \"%s\" as a block pattern (\"Title\" field missing)"
+msgstr ""
+
+#. translators: %s: file name.
+#: includes/theme-parts-templates.php:372
+#, php-format
+msgid "Could not register file \"%s\" as a block pattern as the file does not exist."
+msgstr ""
+
+#: theme/theme.json
+msgctxt "Color name"
+msgid "Accent"
+msgstr ""
+
+#: theme/theme.json
+msgctxt "Color name"
+msgid "Accent ink"
+msgstr ""
+
+#: theme/theme.json
+msgctxt "Color name"
+msgid "Ink"
+msgstr ""
+
+#: theme/theme.json
+msgctxt "Color name"
+msgid "Text"
+msgstr ""
+
+#: theme/theme.json
+msgctxt "Color name"
+msgid "Muted"
+msgstr ""
+
+#: theme/theme.json
+msgctxt "Color name"
+msgid "Line"
+msgstr ""
+
+#: theme/theme.json
+msgctxt "Color name"
+msgid "Page"
+msgstr ""
+
+#: theme/theme.json
+msgctxt "Color name"
+msgid "Surface"
+msgstr ""
+
+#: theme/theme.json
+msgctxt "Color name"
+msgid "Raised"
+msgstr ""
+
+#: theme/theme.json
+msgctxt "Color name"
+msgid "On ink"
+msgstr ""
+
+#: theme/theme.json
+msgctxt "Color name"
+msgid "Focus"
+msgstr ""
+
+#: theme/theme.json
+msgctxt "Color name"
+msgid "Danger"
+msgstr ""
+
+#: theme/theme.json
+msgctxt "Color name"
+msgid "Success"
+msgstr ""
+
+#: theme/theme.json
+msgctxt "Color name"
+msgid "Warning"
+msgstr ""
+
+#: theme/theme.json
+msgctxt "Font family name"
+msgid "Inter"
+msgstr ""
+
+#: theme/theme.json
+msgctxt "Font family name"
+msgid "Inter (headings)"
+msgstr ""
+
+#: theme/theme.json
+msgctxt "Custom template name"
+msgid "Page — Wide"
+msgstr ""
+
+#: theme/theme.json
+msgctxt "Custom template name"
+msgid "Hub (section band + list)"
+msgstr ""
+
+#: theme/theme.json
+msgctxt "Custom template name"
+msgid "Campaign page (full width; the page's own H1)"
+msgstr ""

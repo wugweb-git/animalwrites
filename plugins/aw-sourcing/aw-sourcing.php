@@ -1,11 +1,16 @@
 <?php
 /**
  * Plugin Name: SourceWeb
- * Description: What the workers fetch and how it arrives, in its own Sourcing menu: Overview, To review, Enrichment review, the settings screens (sources with their feeds and relay, keywords, rules, press queries, categories, AI models), the reports and jobs (workers, rejected items, relay log, change log) and Settings; the worker endpoints (ingest, relay, sourcing policy, relevance, same story, summaries, enrichment) and auto-review. Needs Animal Writes Core, which loads it from this folder; it can also be activated on its own.
+ * Description: What the workers fetch and how it arrives, in its own SourceWeb menu: Overview, To review, Enrichment review, the settings screens (sources with their feeds and relay, keywords, rules, press queries, categories, AI models), the reports and jobs (workers, rejected items, relay log, change log) and Settings; the worker endpoints (ingest, relay, sourcing policy, relevance, same story, summaries, enrichment) and auto-review. Needs Animal Writes Core, which loads it from this folder; it can also be activated on its own.
  * Version: 0.1.0
+ * Requires at least: 6.5
+ * Requires PHP: 8.0
  * Author: Wugweb
+ * Author URI: https://wugweb.com
  * License: GPL-2.0-or-later
  * Update URI: https://wugweb.com/plugins/aw-sourcing/
+ * Text Domain: aw-sourcing
+ * Domain Path: /languages
  *
  * Moved out of Animal Writes Core and Kits Core on 24 Oct 2026 with no change in behaviour: the same option keys,
  * REST routes, cron hooks, admin pages and actions. Core keeps the content types and templates.
@@ -40,6 +45,7 @@ define( 'AW_SOURCING_DIR', __DIR__ . '/' );
 // The menu's shape and the Sources model (plain functions, tested without WordPress by tests/run.php) first.
 require_once AW_SOURCING_DIR . 'includes/sourcing-basics.php'; // own capability, option names and host helpers (also in Kits Core)
 require_once AW_SOURCING_DIR . 'includes/summary-rules.php'; // the summary rules (option aw_summary_rules); moved from Core 12 Nov 2026
+require_once AW_SOURCING_DIR . 'includes/help-tab.php';
 require_once AW_SOURCING_DIR . 'includes/menu-model.php'; // the Sourcing menu: slugs, screen id, order (admin-menu.php registers it)
 require_once AW_SOURCING_DIR . 'includes/sources-model.php';
 require_once AW_SOURCING_DIR . 'includes/keywords-model.php'; // phase 2: the lists in the keyword table (Core's)

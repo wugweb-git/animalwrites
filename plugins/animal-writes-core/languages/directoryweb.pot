@@ -1,0 +1,1314 @@
+# Copyright (C) 2026 Wugweb
+# This file is distributed under the GPL-2.0-or-later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Animal Writes Core 1.0.0\n"
+"Report-Msgid-Bugs-To: https://wugweb.com/\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-11-12T21:10:53+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: directoryweb\n"
+
+#. Plugin Name of the plugin
+#: animal-writes-core.php
+msgid "Animal Writes Core"
+msgstr ""
+
+#. Description of the plugin
+#: animal-writes-core.php
+msgid "The Animal Writes site: content types and fields, the Directory with its map and places, campaigns and letters, forms and people (Fluent Forms, FluentCRM), card pictures, and the jobs that keep it running (backups, site check, scheduled tasks, deploy purge, CDN cache). Its screens are in the Kits menu (Home, Settings, Theme Options, Help). Theme-independent."
+msgstr ""
+
+#. Author of the plugin
+#: animal-writes-core.php
+msgid "Wugweb"
+msgstr ""
+
+#. Author URI of the plugin
+#: animal-writes-core.php
+msgid "https://wugweb.com"
+msgstr ""
+
+#: includes/directoryweb-listings.php:23
+#: includes/directoryweb-rest.php:305
+#: directoryweb/build/index.js:5
+msgid "All"
+msgstr ""
+
+#: includes/directoryweb-listings.php:24
+msgid "Published"
+msgstr ""
+
+#: includes/directoryweb-listings.php:25
+#: includes/directoryweb-rest.php:205
+msgid "Not published"
+msgstr ""
+
+#: includes/directoryweb-listings.php:26
+#: includes/directoryweb-rest.php:867
+#: directoryweb/build/index.js:5
+msgid "Claimed"
+msgstr ""
+
+#: includes/directoryweb-listings.php:27
+#: includes/directoryweb-rest.php:869
+#: directoryweb/build/index.js:5
+msgid "Verified"
+msgstr ""
+
+#: includes/directoryweb-listings.php:28
+#: directoryweb/build/index.js:5
+msgid "Needs re-check"
+msgstr ""
+
+#: includes/directoryweb-listings.php:163
+msgid "Every state"
+msgstr ""
+
+#: includes/directoryweb-listings.php:175
+msgid "Every type"
+msgstr ""
+
+#: includes/directoryweb-listings.php:241
+#: includes/directoryweb-ui.php:265
+#: includes/place-intros.php:168
+#: includes/place-intros.php:283
+msgid "You are not allowed to do this."
+msgstr ""
+
+#: includes/directoryweb-listings.php:246
+#: includes/directoryweb-ui.php:105
+#: includes/directoryweb-ui.php:190
+#: includes/directoryweb-ui.php:210
+#: directoryweb/build/index.js:1
+msgid "Directory listings"
+msgstr ""
+
+#: includes/directoryweb-rest.php:40
+msgid "This needs Kits Core."
+msgstr ""
+
+#. translators: %s: number of listings.
+#: includes/directoryweb-rest.php:190
+#, php-format
+msgid "other types %s"
+msgstr ""
+
+#: includes/directoryweb-rest.php:195
+msgid "Published listings"
+msgstr ""
+
+#: includes/directoryweb-rest.php:197
+msgid "No listing type counted yet"
+msgstr ""
+
+#. translators: 1: drafts, 2: waiting for review, 3: private.
+#: includes/directoryweb-rest.php:208
+#, php-format
+msgid "%1$s drafts · %2$s waiting for review · %3$s private"
+msgstr ""
+
+#: includes/directoryweb-rest.php:215
+msgid "Places covered"
+msgstr ""
+
+#. translators: 1: states with a listing, 2: all states.
+#: includes/directoryweb-rest.php:217
+#, php-format
+msgid "%1$s of %2$s states"
+msgstr ""
+
+#. translators: 1: districts with a listing, 2: all districts, 3: place file version.
+#: includes/directoryweb-rest.php:219
+#, php-format
+msgid "%1$s of %2$s districts · place file %3$s"
+msgstr ""
+
+#: includes/directoryweb-rest.php:227
+msgid "Indexable listings"
+msgstr ""
+
+#. translators: 1: listings with no contact, 2: listings kept indexed.
+#: includes/directoryweb-rest.php:236
+#, php-format
+msgid "%1$s with no contact (kept out of search) · %2$s kept indexed on purpose"
+msgstr ""
+
+#: includes/directoryweb-rest.php:243
+msgid "Directory search clicks"
+msgstr ""
+
+#: includes/directoryweb-rest.php:244
+msgid "In InsightWeb"
+msgstr ""
+
+#: includes/directoryweb-rest.php:245
+msgid "Search Console clicks for /directory/ pages are in Search Insights"
+msgstr ""
+
+#: includes/directoryweb-rest.php:255
+msgid "Claims waiting"
+msgstr ""
+
+#. translators: %s: number of days.
+#: includes/directoryweb-rest.php:265
+#, php-format
+msgid "The oldest has waited %s day"
+msgid_plural "The oldest has waited %s days"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %s: number of days.
+#: includes/directoryweb-rest.php:265
+msgid "None waiting"
+msgstr ""
+
+#: includes/directoryweb-rest.php:273
+msgid "Claimed listings"
+msgstr ""
+
+#. translators: 1: Verified listings, 2: listings that need a re-check.
+#: includes/directoryweb-rest.php:276
+#, php-format
+msgid "%1$s Verified from government records · %2$s need a re-check"
+msgstr ""
+
+#: includes/directoryweb-rest.php:284
+msgid "Enrichment queue"
+msgstr ""
+
+#: includes/directoryweb-rest.php:292
+msgid "never"
+msgstr ""
+
+#. translators: 1: listings waiting for Google, 2: date of the newest change.
+#: includes/directoryweb-rest.php:294
+#, php-format
+msgid "%1$s listings waiting for Google · newest change %2$s"
+msgstr ""
+
+#: includes/directoryweb-rest.php:309
+#: includes/directoryweb-ui.php:105
+#: includes/directoryweb-ui.php:136
+#: directoryweb/build/index.js:5
+msgid "Listings"
+msgstr ""
+
+#: includes/directoryweb-rest.php:313
+#: includes/directoryweb-rest.php:876
+msgid "Indexing"
+msgstr ""
+
+#: includes/directoryweb-rest.php:317
+#: includes/directoryweb-ui.php:130
+#: includes/directoryweb-ui.php:189
+#: directoryweb/build/index.js:5
+msgid "Claims"
+msgstr ""
+
+#: includes/directoryweb-rest.php:321
+msgid "Enrichment"
+msgstr ""
+
+#: includes/directoryweb-rest.php:348
+msgid "No such tile."
+msgstr ""
+
+#: includes/directoryweb-rest.php:428
+#: directoryweb/build/index.js:5
+msgid "Waiting"
+msgstr ""
+
+#: includes/directoryweb-rest.php:429
+#: directoryweb/build/index.js:5
+msgid "Approved"
+msgstr ""
+
+#: includes/directoryweb-rest.php:430
+#: directoryweb/build/index.js:5
+msgid "Rejected"
+msgstr ""
+
+#: includes/directoryweb-rest.php:456
+#: includes/directoryweb-rest.php:607
+msgid "(no listing)"
+msgstr ""
+
+#: includes/directoryweb-rest.php:482
+#: directoryweb/build/index.js:5
+msgid "Logo"
+msgstr ""
+
+#: includes/directoryweb-rest.php:485
+msgid "Photos (added before the current ones, 6 at most)"
+msgstr ""
+
+#: includes/directoryweb-rest.php:555
+msgid "Uploaded with the claim"
+msgstr ""
+
+#. translators: %s: the proposed opening hours.
+#: includes/directoryweb-rest.php:563
+#, php-format
+msgid "Opening hours proposed: %s. Enter them by hand in the listing’s Opening hours."
+msgstr ""
+
+#. translators: %s: the proposed opening hours.
+#: includes/directoryweb-rest.php:563
+msgid "(none)"
+msgstr ""
+
+#: includes/directoryweb-rest.php:567
+msgid "A line of the phone numbers is not a phone number: approving on the Claims screen keeps the list as it is."
+msgstr ""
+
+#: includes/directoryweb-rest.php:573
+msgid "(remove)"
+msgstr ""
+
+#: includes/directoryweb-rest.php:581
+msgid "Has a logo"
+msgstr ""
+
+#: includes/directoryweb-rest.php:582
+msgid "New logo uploaded"
+msgstr ""
+
+#. translators: %s: number of photos.
+#: includes/directoryweb-rest.php:592
+#, php-format
+msgid "%s now"
+msgstr ""
+
+#. translators: %s: number of photos.
+#: includes/directoryweb-rest.php:594
+#, php-format
+msgid "%s uploaded"
+msgstr ""
+
+#: includes/directoryweb-rest.php:620
+#: directoryweb/build/index.js:5
+msgid "From"
+msgstr ""
+
+#: includes/directoryweb-rest.php:621
+msgid "Email"
+msgstr ""
+
+#: includes/directoryweb-rest.php:622
+msgid "Phone"
+msgstr ""
+
+#: includes/directoryweb-rest.php:623
+msgid "Show name on listing"
+msgstr ""
+
+#: includes/directoryweb-rest.php:623
+#: directoryweb/build/index.js:5
+msgid "Yes"
+msgstr ""
+
+#: includes/directoryweb-rest.php:623
+#: includes/directoryweb-rest.php:858
+msgid "No"
+msgstr ""
+
+#: includes/directoryweb-rest.php:624
+msgid "Anything else"
+msgstr ""
+
+#: includes/directoryweb-rest.php:625
+#: directoryweb/build/index.js:5
+msgid "Sent"
+msgstr ""
+
+#: includes/directoryweb-rest.php:626
+#: directoryweb/build/index.js:5
+msgid "Decided"
+msgstr ""
+
+#: includes/directoryweb-rest.php:646
+msgid "No such claim."
+msgstr ""
+
+#: includes/directoryweb-rest.php:677
+msgid "Set in code"
+msgstr ""
+
+#: includes/directoryweb-rest.php:706
+msgid "Place source"
+msgstr ""
+
+#. translators: %s: file version.
+#: includes/directoryweb-rest.php:708
+#, php-format
+msgid "LGD, %s"
+msgstr ""
+
+#. translators: 1: states, 2: districts, 3: source.
+#: includes/directoryweb-rest.php:711
+#, php-format
+msgid "%1$s states / %2$s districts, from %3$s. A data file in the plugin; another country ships its own file."
+msgstr ""
+
+#: includes/directoryweb-rest.php:716
+msgid "PIN code lookup"
+msgstr ""
+
+#: includes/directoryweb-rest.php:717
+msgid "India Post, on"
+msgstr ""
+
+#: includes/directoryweb-rest.php:719
+msgid "Answers are kept for a week."
+msgstr ""
+
+#: includes/directoryweb-rest.php:721
+msgid "Service"
+msgstr ""
+
+#: includes/directoryweb-rest.php:722
+msgid "PIN pattern"
+msgstr ""
+
+#: includes/directoryweb-rest.php:727
+msgid "Geocoder"
+msgstr ""
+
+#: includes/directoryweb-rest.php:728
+msgid "Nominatim, on"
+msgstr ""
+
+#. translators: %s: date and time.
+#: includes/directoryweb-rest.php:731
+#, php-format
+msgid "Last request %s."
+msgstr ""
+
+#. translators: %s: date and time.
+#: includes/directoryweb-rest.php:731
+msgid "No request yet."
+msgstr ""
+
+#: includes/directoryweb-rest.php:733
+msgid "Country"
+msgstr ""
+
+#. translators: %s: number of days.
+#: includes/directoryweb-rest.php:735
+msgid "Answers kept"
+msgstr ""
+
+#. translators: %s: number of days.
+#: includes/directoryweb-rest.php:735
+#: includes/directoryweb-rest.php:857
+#, php-format
+msgid "%s days"
+msgstr ""
+
+#: includes/directoryweb-rest.php:736
+msgid "Contact sent with each request"
+msgstr ""
+
+#: includes/directoryweb-rest.php:741
+msgid "Map tiles"
+msgstr ""
+
+#: includes/directoryweb-rest.php:742
+msgid "OpenFreeMap"
+msgstr ""
+
+#: includes/directoryweb-rest.php:744
+msgid "The tile style and the map library are fixed in code."
+msgstr ""
+
+#: includes/directoryweb-rest.php:746
+msgid "Tile style"
+msgstr ""
+
+#: includes/directoryweb-rest.php:747
+msgid "Map library"
+msgstr ""
+
+#: includes/directoryweb-rest.php:752
+msgid "Fluent Forms"
+msgstr ""
+
+#. translators: %d: form ID.
+#: includes/directoryweb-rest.php:754
+#: includes/directoryweb-rest.php:773
+#: includes/directoryweb-rest.php:785
+#: includes/directoryweb-rest.php:797
+#: includes/directoryweb-rest.php:808
+msgid "Not active"
+msgstr ""
+
+#. translators: %d: form ID.
+#: includes/directoryweb-rest.php:754
+#, php-format
+msgid "Claim form #%d found"
+msgstr ""
+
+#. translators: %d: form ID.
+#: includes/directoryweb-rest.php:754
+msgid "Claim form missing"
+msgstr ""
+
+#: includes/directoryweb-rest.php:756
+msgid "Claims cannot be sent until a claim form is chosen."
+msgstr ""
+
+#. translators: 1: form ID, 2: form title.
+#: includes/directoryweb-rest.php:763
+#, php-format
+msgid "#%1$d %2$s"
+msgstr ""
+
+#: includes/directoryweb-rest.php:772
+msgid "FluentCRM"
+msgstr ""
+
+#: includes/directoryweb-rest.php:773
+#: includes/directoryweb-rest.php:785
+#: includes/directoryweb-rest.php:797
+#: includes/directoryweb-rest.php:808
+msgid "Active"
+msgstr ""
+
+#: includes/directoryweb-rest.php:775
+msgid "An approved claimant is tagged and linked to the listing’s people."
+msgstr ""
+
+#: includes/directoryweb-rest.php:775
+msgid "Approved claimants are not linked to the listing’s people until FluentCRM is active."
+msgstr ""
+
+#. translators: %s: tag slug.
+#: includes/directoryweb-rest.php:778
+#, php-format
+msgid "Tag %s"
+msgstr ""
+
+#. translators: %s: tag slug.
+#: includes/directoryweb-rest.php:778
+msgid "Found"
+msgstr ""
+
+#. translators: %s: tag slug.
+#: includes/directoryweb-rest.php:778
+msgid "Not found"
+msgstr ""
+
+#. translators: %s: number of proposals.
+#: includes/directoryweb-rest.php:788
+#, php-format
+msgid "%s proposals waiting. Enrichment sources and keys stay in SourceWeb."
+msgstr ""
+
+#. translators: %s: number of proposals.
+#: includes/directoryweb-rest.php:788
+msgid "Enrichment sources and keys stay in SourceWeb."
+msgstr ""
+
+#. translators: %s: number of proposals.
+#: includes/directoryweb-rest.php:788
+msgid "Undo of a claimed field needs SourceWeb’s change log."
+msgstr ""
+
+#: includes/directoryweb-rest.php:790
+msgid "SourceWeb settings"
+msgstr ""
+
+#: includes/directoryweb-rest.php:799
+msgid "A published listing with no way to reach it is kept out of search."
+msgstr ""
+
+#: includes/directoryweb-rest.php:801
+msgid "RankWeb settings"
+msgstr ""
+
+#: includes/directoryweb-rest.php:810
+msgid "Search Console clicks for the Directory pages."
+msgstr ""
+
+#: includes/directoryweb-rest.php:812
+msgid "Search Insights"
+msgstr ""
+
+#. translators: %s: a WP-CLI command.
+#: includes/directoryweb-rest.php:825
+#, php-format
+msgid "Set with %s"
+msgstr ""
+
+#: includes/directoryweb-rest.php:831
+msgid "Listing types"
+msgstr ""
+
+#: includes/directoryweb-rest.php:832
+msgid "The Directory’s tags that are not services. They come from the sourcing lists (SourceWeb → Sources)."
+msgstr ""
+
+#: includes/directoryweb-rest.php:834
+msgid "Types"
+msgstr ""
+
+#: includes/directoryweb-rest.php:834
+msgid "Set in the sourcing lists"
+msgstr ""
+
+#: includes/directoryweb-rest.php:835
+msgid "Veterinary as one filter"
+msgstr ""
+
+#: includes/directoryweb-rest.php:840
+msgid "Places"
+msgstr ""
+
+#: includes/directoryweb-rest.php:843
+msgid "Content types that carry a place"
+msgstr ""
+
+#. translators: %s: number.
+#: includes/directoryweb-rest.php:845
+msgid "District common names"
+msgstr ""
+
+#. translators: %s: number.
+#: includes/directoryweb-rest.php:845
+#, php-format
+msgid "%s names"
+msgstr ""
+
+#. translators: %s: number.
+#: includes/directoryweb-rest.php:847
+msgid "Cities found in text"
+msgstr ""
+
+#. translators: %s: number.
+#: includes/directoryweb-rest.php:847
+#, php-format
+msgid "%s cities"
+msgstr ""
+
+#: includes/directoryweb-rest.php:852
+msgid "Claim rules"
+msgstr ""
+
+#: includes/directoryweb-rest.php:853
+msgid "Undo puts one field back and never takes the Claimed mark off."
+msgstr ""
+
+#: includes/directoryweb-rest.php:855
+msgid "Roles"
+msgstr ""
+
+#. translators: %s: number of days.
+#: includes/directoryweb-rest.php:857
+msgid "Re-check a Claimed listing after"
+msgstr ""
+
+#: includes/directoryweb-rest.php:858
+msgid "\"Show my name\" starts as"
+msgstr ""
+
+#: includes/directoryweb-rest.php:858
+msgid "Set in the claim form"
+msgstr ""
+
+#: includes/directoryweb-rest.php:859
+msgid "Emails from forms and claims"
+msgstr ""
+
+#: includes/directoryweb-rest.php:859
+#: includes/directoryweb-rest.php:869
+#: includes/directoryweb-rest.php:880
+msgid "On"
+msgstr ""
+
+#: includes/directoryweb-rest.php:859
+#: includes/directoryweb-rest.php:869
+msgid "Off"
+msgstr ""
+
+#: includes/directoryweb-rest.php:864
+msgid "Badges"
+msgstr ""
+
+#: includes/directoryweb-rest.php:865
+msgid "Claimed is set by an approved claim. Verified comes from government records."
+msgstr ""
+
+#: includes/directoryweb-rest.php:867
+msgid "Claimed label"
+msgstr ""
+
+#: includes/directoryweb-rest.php:868
+msgid "Verified sources"
+msgstr ""
+
+#. translators: %s: number.
+#: includes/directoryweb-rest.php:871
+msgid "Phone numbers never published"
+msgstr ""
+
+#. translators: %s: number.
+#: includes/directoryweb-rest.php:871
+#, php-format
+msgid "%s kept as fingerprints only"
+msgstr ""
+
+#: includes/directoryweb-rest.php:879
+msgid "Listings with no contact are kept out of search"
+msgstr ""
+
+#: includes/directoryweb-rest.php:880
+msgid "Not applied"
+msgstr ""
+
+#: includes/directoryweb-rest.php:888
+msgid "Find help"
+msgstr ""
+
+#: includes/directoryweb-rest.php:891
+msgid "Places shown at most"
+msgstr ""
+
+#: includes/directoryweb-rest.php:892
+msgid "States found in one text at most"
+msgstr ""
+
+#: includes/directoryweb-rest.php:897
+msgid "Directory copy"
+msgstr ""
+
+#: includes/directoryweb-rest.php:898
+msgid "Titles, the intro and the helpline cards are written in the Directory’s code for now."
+msgstr ""
+
+#. translators: %s: number.
+#: includes/directoryweb-rest.php:901
+msgid "Search aliases"
+msgstr ""
+
+#: includes/directoryweb-rest.php:920
+msgid "No such form."
+msgstr ""
+
+#: includes/directoryweb-rest.php:931
+msgid "Saved."
+msgstr ""
+
+#: includes/directoryweb-rest.php:931
+msgid "Nothing changed."
+msgstr ""
+
+#: includes/directoryweb-ui.php:100
+#: includes/directoryweb-ui.php:102
+#: includes/directoryweb-ui.php:104
+#: includes/directoryweb-ui.php:188
+#: includes/directoryweb-ui.php:259
+#: includes/place-intros.php:175
+msgid "DirectoryWeb"
+msgstr ""
+
+#: includes/directoryweb-ui.php:104
+#: includes/directoryweb-ui.php:124
+msgid "Dashboard"
+msgstr ""
+
+#: includes/directoryweb-ui.php:106
+#: includes/directoryweb-ui.php:191
+#: includes/directoryweb-ui.php:270
+msgid "DirectoryWeb settings"
+msgstr ""
+
+#: includes/directoryweb-ui.php:106
+#: includes/directoryweb-ui.php:144
+msgid "Settings"
+msgstr ""
+
+#: includes/directoryweb-ui.php:150
+#: includes/place-intros.php:150
+#: includes/place-intros.php:173
+msgid "Place intros"
+msgstr ""
+
+#: includes/directoryweb-ui.php:206
+msgid "Open the new screen"
+msgstr ""
+
+#: includes/directoryweb-ui.php:208
+msgid "This screen needs Kits Core."
+msgstr ""
+
+#: includes/place-intros.php:73
+#: includes/place-intros.php:182
+msgid "The intro has characters that are not text (often from a paste). Type them again. Nothing was saved."
+msgstr ""
+
+#. translators: %d: number of characters.
+#: includes/place-intros.php:78
+#: includes/place-intros.php:180
+#, php-format
+msgid "The intro is longer than %d characters. Nothing was saved."
+msgstr ""
+
+#. translators: %d: number of characters.
+#: includes/place-intros.php:92
+#: includes/place-intros.php:181
+msgid "The checked date is not a date (YYYY-MM-DD). Nothing was saved."
+msgstr ""
+
+#: includes/place-intros.php:178
+msgid "Intro saved."
+msgstr ""
+
+#: includes/place-intros.php:179
+msgid "Intro removed. The page shows only its usual line."
+msgstr ""
+
+#: includes/place-intros.php:188
+#: includes/place-intros.php:288
+msgid "That place is not in the list of states and districts."
+msgstr ""
+
+#: includes/place-intros.php:200
+msgid "A short paragraph under the usual line on a state or district page of the Directory, on its first page only. A place with no intro shows only its usual line."
+msgstr ""
+
+#: includes/place-intros.php:202
+#: includes/place-intros.php:239
+#: directoryweb/build/index.js:5
+msgid "Place"
+msgstr ""
+
+#: includes/place-intros.php:202
+msgid "States and union territories"
+msgstr ""
+
+#: includes/place-intros.php:215
+msgid "Write or edit"
+msgstr ""
+
+#: includes/place-intros.php:227
+#: directoryweb/build/index.js:5
+msgid "Edit"
+msgstr ""
+
+#: includes/place-intros.php:228
+#: includes/place-intros.php:261
+msgid "View page"
+msgstr ""
+
+#: includes/place-intros.php:229
+msgid "District"
+msgstr ""
+
+#: includes/place-intros.php:229
+#: directoryweb/build/index.js:5
+msgid "State"
+msgstr ""
+
+#: includes/place-intros.php:235
+msgid "Intros on the site"
+msgstr ""
+
+#: includes/place-intros.php:240
+msgid "Kind"
+msgstr ""
+
+#: includes/place-intros.php:241
+#: includes/place-intros.php:266
+msgid "Intro"
+msgstr ""
+
+#: includes/place-intros.php:242
+#: includes/place-intros.php:269
+msgid "Sources"
+msgstr ""
+
+#: includes/place-intros.php:243
+#: includes/place-intros.php:272
+msgid "Checked"
+msgstr ""
+
+#: includes/place-intros.php:246
+msgid "No place has an intro yet."
+msgstr ""
+
+#: includes/place-intros.php:261
+msgid "All place intros"
+msgstr ""
+
+#. translators: %d: number of characters.
+#: includes/place-intros.php:268
+#, php-format
+msgid "One short paragraph, up to %d characters. Links as <a href=\"https://…\">words</a>; no other formatting. Leave empty to remove the intro."
+msgstr ""
+
+#. translators: %d: number of addresses.
+#: includes/place-intros.php:271
+#, php-format
+msgid "Where the facts come from, one address per line (up to %d). Kept for editors; not shown on the page."
+msgstr ""
+
+#: includes/place-intros.php:273
+msgid "The day the facts were last checked against the sources."
+msgstr ""
+
+#: includes/place-intros.php:275
+msgid "Save intro"
+msgstr ""
+
+#: directoryweb/build/index.js:1
+msgid "Loading the counts…"
+msgstr ""
+
+#. translators: %s: date and time.
+#: directoryweb/build/index.js:2
+#, js-format
+msgid "Counted %s."
+msgstr ""
+
+#: directoryweb/build/index.js:2
+msgid "Counting for the first time…"
+msgstr ""
+
+#: directoryweb/build/index.js:2
+msgid "Show"
+msgstr ""
+
+#: directoryweb/build/index.js:2
+msgid "The count is taking longer than usual; reload this page later."
+msgstr ""
+
+#: directoryweb/build/index.js:2
+msgid "A count is running in the background. The numbers change when it is done (about a minute)."
+msgstr ""
+
+#: directoryweb/build/index.js:2
+msgid "Count now"
+msgstr ""
+
+#: directoryweb/build/index.js:2
+msgid "Needs attention"
+msgstr ""
+
+#: directoryweb/build/index.js:2
+msgid "The Directory at a glance"
+msgstr ""
+
+#: directoryweb/build/index.js:2
+msgid "Published listings by type"
+msgstr ""
+
+#: directoryweb/build/index.js:2
+msgid "The listing’s current logo"
+msgstr ""
+
+#: directoryweb/build/index.js:2
+msgid "Logo sent with the claim"
+msgstr ""
+
+#. translators: %d: photo number.
+#: directoryweb/build/index.js:3
+#, js-format
+msgid "Photo %d sent with the claim"
+msgstr ""
+
+#. translators: %s: field names.
+#: directoryweb/build/index.js:4
+#, js-format
+msgid "Undone: %s."
+msgstr ""
+
+#: directoryweb/build/index.js:4
+msgid "Field"
+msgstr ""
+
+#: directoryweb/build/index.js:4
+msgid "Listing now"
+msgstr ""
+
+#: directoryweb/build/index.js:4
+msgid "Proposed"
+msgstr ""
+
+#: directoryweb/build/index.js:4
+msgid "Proposed changes"
+msgstr ""
+
+#: directoryweb/build/index.js:4
+msgid "Proposed (rejected)"
+msgstr ""
+
+#: directoryweb/build/index.js:4
+msgid "What the claim proposed"
+msgstr ""
+
+#: directoryweb/build/index.js:4
+msgid "Applied fields"
+msgstr ""
+
+#: directoryweb/build/index.js:4
+msgid "Who sent it"
+msgstr ""
+
+#: directoryweb/build/index.js:4
+#: directoryweb/build/index.js:5
+msgid "Claim"
+msgstr ""
+
+#: directoryweb/build/index.js:4
+#: directoryweb/build/index.js:5
+msgid "Details"
+msgstr ""
+
+#: directoryweb/build/index.js:4
+#: directoryweb/build/index.js:5
+msgid "Proof"
+msgstr ""
+
+#: directoryweb/build/index.js:4
+msgid "Open the document"
+msgstr ""
+
+#: directoryweb/build/index.js:4
+msgid "Nothing differs from the listing."
+msgstr ""
+
+#: directoryweb/build/index.js:4
+msgid "This screen only shows the claim. Approve or reject it on the Claims screen."
+msgstr ""
+
+#: directoryweb/build/index.js:4
+msgid "This screen only shows the claim. Changes to it are made on the Claims screen."
+msgstr ""
+
+#: directoryweb/build/index.js:4
+msgid "Open this claim on the Claims screen"
+msgstr ""
+
+#: directoryweb/build/index.js:4
+#: directoryweb/build/index.js:5
+msgid "Edit listing"
+msgstr ""
+
+#: directoryweb/build/index.js:4
+msgid "View listing"
+msgstr ""
+
+#: directoryweb/build/index.js:4
+msgid "Loading the claim…"
+msgstr ""
+
+#. translators: 1: listing name, 2: claim reference.
+#: directoryweb/build/index.js:5
+#, js-format
+msgid "Claim: %1$s %2$s"
+msgstr ""
+
+#: directoryweb/build/index.js:5
+msgid "Back to all claims"
+msgstr ""
+
+#: directoryweb/build/index.js:5
+msgid "The claim form is not set up."
+msgstr ""
+
+#: directoryweb/build/index.js:5
+msgid "Choose the claim form under Settings → Fluent Forms. Claims sent with the old form still show here."
+msgstr ""
+
+#: directoryweb/build/index.js:5
+msgid "Listing"
+msgstr ""
+
+#: directoryweb/build/index.js:5
+msgid "old form"
+msgstr ""
+
+#: directoryweb/build/index.js:5
+msgid "Reference"
+msgstr ""
+
+#: directoryweb/build/index.js:5
+msgid "Contact"
+msgstr ""
+
+#: directoryweb/build/index.js:5
+msgid "Fields changed"
+msgstr ""
+
+#: directoryweb/build/index.js:5
+msgid "Status"
+msgstr ""
+
+#: directoryweb/build/index.js:5
+msgid "Claims sent with the claim form, to read. Nothing here changes a claim or a listing: claims are approved or rejected on the Claims screen."
+msgstr ""
+
+#: directoryweb/build/index.js:5
+msgid "Search listing, claimant or reference"
+msgstr ""
+
+#: directoryweb/build/index.js:5
+msgid "All states"
+msgstr ""
+
+#: directoryweb/build/index.js:5
+msgid "Listing type"
+msgstr ""
+
+#: directoryweb/build/index.js:5
+msgid "All types"
+msgstr ""
+
+#: directoryweb/build/index.js:5
+msgid "Sent with"
+msgstr ""
+
+#: directoryweb/build/index.js:5
+msgid "Anything"
+msgstr ""
+
+#: directoryweb/build/index.js:5
+msgid "A logo"
+msgstr ""
+
+#: directoryweb/build/index.js:5
+msgid "Photos"
+msgstr ""
+
+#: directoryweb/build/index.js:5
+msgid "Any time"
+msgstr ""
+
+#: directoryweb/build/index.js:5
+msgid "Last 7 days"
+msgstr ""
+
+#: directoryweb/build/index.js:5
+msgid "Last 30 days"
+msgstr ""
+
+#: directoryweb/build/index.js:5
+msgid "Last 90 days"
+msgstr ""
+
+#: directoryweb/build/index.js:5
+msgid "Review on its own screen"
+msgstr ""
+
+#: directoryweb/build/index.js:5
+msgid "View"
+msgstr ""
+
+#: directoryweb/build/index.js:5
+msgid "No claims waiting."
+msgstr ""
+
+#: directoryweb/build/index.js:5
+msgid "No claims match."
+msgstr ""
+
+#: directoryweb/build/index.js:5
+msgid "Setting"
+msgstr ""
+
+#: directoryweb/build/index.js:5
+msgid "Now"
+msgstr ""
+
+#: directoryweb/build/index.js:5
+msgid "Claim form"
+msgstr ""
+
+#: directoryweb/build/index.js:5
+msgid "The Fluent Forms form shown as “Claim this listing”."
+msgstr ""
+
+#: directoryweb/build/index.js:5
+msgid "Choose a form"
+msgstr ""
+
+#: directoryweb/build/index.js:5
+msgid "Save changes"
+msgstr ""
+
+#: directoryweb/build/index.js:5
+msgid "Fluent Forms has no forms, or is not active."
+msgstr ""
+
+#: directoryweb/build/index.js:5
+msgid "Connected services"
+msgstr ""
+
+#: directoryweb/build/index.js:5
+msgid "What the Directory works with. Keys stay in Kits → Keys and are never shown here."
+msgstr ""
+
+#: directoryweb/build/index.js:5
+msgid "Read only: these are set in code or with WP-CLI today."
+msgstr ""
+
+#: directoryweb/build/index.js:5
+msgid "Loading the settings…"
+msgstr ""
+
+#: directoryweb/build/index.js:5
+msgid "Picture"
+msgstr ""
+
+#: directoryweb/build/index.js:5
+msgid "Area"
+msgstr ""
+
+#: directoryweb/build/index.js:5
+msgid "Services"
+msgstr ""
+
+#: directoryweb/build/index.js:5
+msgid "Website"
+msgstr ""
+
+#: directoryweb/build/index.js:5
+msgid "Verified (government record)"
+msgstr ""
+
+#: directoryweb/build/index.js:5
+msgid "Needs a re-check"
+msgstr ""
+
+#: directoryweb/build/index.js:5
+msgid "Added"
+msgstr ""
+
+#: directoryweb/build/index.js:5
+msgid "Last changed"
+msgstr ""
+
+#: directoryweb/build/index.js:5
+msgid "View on the site"
+msgstr ""
+
+#: directoryweb/build/index.js:5
+msgid "Type"
+msgstr ""
+
+#: directoryweb/build/index.js:5
+msgid "The Directory’s listings, to read. View opens a listing’s details; Edit listing opens its own edit screen, where every change is made. Claims are reviewed on Directory → Claims."
+msgstr ""
+
+#: directoryweb/build/index.js:5
+msgid "Add New Listing"
+msgstr ""
+
+#: directoryweb/build/index.js:5
+msgid "Search listings"
+msgstr ""
+
+#: directoryweb/build/index.js:5
+msgid "No listing matches."
+msgstr ""
+
+#: theme/theme.json
+msgctxt "Color name"
+msgid "Accent"
+msgstr ""
+
+#: theme/theme.json
+msgctxt "Color name"
+msgid "Accent ink"
+msgstr ""
+
+#: theme/theme.json
+msgctxt "Color name"
+msgid "Ink"
+msgstr ""
+
+#: theme/theme.json
+msgctxt "Color name"
+msgid "Text"
+msgstr ""
+
+#: theme/theme.json
+msgctxt "Color name"
+msgid "Muted"
+msgstr ""
+
+#: theme/theme.json
+msgctxt "Color name"
+msgid "Line"
+msgstr ""
+
+#: theme/theme.json
+msgctxt "Color name"
+msgid "Page"
+msgstr ""
+
+#: theme/theme.json
+msgctxt "Color name"
+msgid "Surface"
+msgstr ""
+
+#: theme/theme.json
+msgctxt "Color name"
+msgid "Raised"
+msgstr ""
+
+#: theme/theme.json
+msgctxt "Color name"
+msgid "On ink"
+msgstr ""
+
+#: theme/theme.json
+msgctxt "Color name"
+msgid "Focus"
+msgstr ""
+
+#: theme/theme.json
+msgctxt "Color name"
+msgid "Danger"
+msgstr ""
+
+#: theme/theme.json
+msgctxt "Color name"
+msgid "Success"
+msgstr ""
+
+#: theme/theme.json
+msgctxt "Color name"
+msgid "Warning"
+msgstr ""
+
+#: theme/theme.json
+msgctxt "Font family name"
+msgid "Inter"
+msgstr ""
+
+#: theme/theme.json
+msgctxt "Font family name"
+msgid "Inter (headings)"
+msgstr ""
+
+#: theme/theme.json
+msgctxt "Custom template name"
+msgid "Page — Wide"
+msgstr ""
+
+#: theme/theme.json
+msgctxt "Custom template name"
+msgid "Hub (section band + list)"
+msgstr ""
+
+#: theme/theme.json
+msgctxt "Custom template name"
+msgid "Campaign page (full width; the page's own H1)"
+msgstr ""

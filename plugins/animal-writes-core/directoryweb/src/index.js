@@ -1064,7 +1064,29 @@ function Listings() {
 			label: __( 'Listing', 'directoryweb' ),
 			primary: true,
 			sortable: true,
-			render: ( r ) => <strong>{ r.title }</strong>,
+			// The listing's own picture (its logo once claimed), else its first letter.
+			render: ( r ) => (
+				<span className="kits-shell-withicon">
+					{ r.thumb ? (
+						<img
+							className="kits-shell-service__icon"
+							src={ r.thumb }
+							alt=""
+							width="32"
+							height="32"
+							loading="lazy"
+						/>
+					) : (
+						<span
+							className="kits-shell-service__icon is-blank"
+							aria-hidden="true"
+						>
+							{ ( r.title || '?' ).charAt( 0 ).toUpperCase() }
+						</span>
+					) }
+					<strong>{ r.title }</strong>
+				</span>
+			),
 		},
 		{
 			key: 'modified',
