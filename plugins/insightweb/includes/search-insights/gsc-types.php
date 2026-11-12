@@ -411,16 +411,17 @@ function aw_si_inspect_info( array $q ): array {
 	$refused = (string) ( $q['refused'] ?? '' );
 	$warn    = array_values( array_filter( array_merge( array( $refused ), (array) ( $q['errors'] ?? array() ) ) ) );
 	if ( $left ) {
-		$pages = number_format_i18n( $left );
+		/* translators: %s: number of pages. */
+		$pages = sprintf( _n( '%s page', '%s pages', $left, 'aw-seo-extras' ), number_format_i18n( $left ) );
 		if ( '' !== $refused && ! empty( $q['quota'] ) ) {
-			/* translators: %s: pages. */
-			$why = sprintf( __( '%s pages not reached that day: Google refused URL Inspection (HTTP 403 or 429, its quota), so the queue stopped.', 'aw-seo-extras' ), $pages );
+			/* translators: %s: "3 pages". */
+			$why = sprintf( __( '%s not reached that day: Google refused URL Inspection (HTTP 403 or 429, its quota), so the queue stopped.', 'aw-seo-extras' ), $pages );
 		} elseif ( '' !== $refused ) {
-			/* translators: %s: pages. */
-			$why = sprintf( __( '%s pages not reached that day: Search Console could not be reached (the reason follows), so the queue stopped.', 'aw-seo-extras' ), $pages );
+			/* translators: %s: "3 pages". */
+			$why = sprintf( __( '%s not reached that day: Search Console could not be reached (the reason follows), so the queue stopped.', 'aw-seo-extras' ), $pages );
 		} else {
-			/* translators: 1: pages, 2: seconds of calls per step, 3: minutes between steps, 4: Google's daily limit. */
-			$why = sprintf( __( '%1$s pages not reached that day: the time budget ran out (%2$s s of calls per step, a step every %3$s min when the site has visits), not Google\'s %4$s-a-day quota.', 'aw-seo-extras' ), $pages, number_format_i18n( AW_SI_INSPECT_BUDGET ), number_format_i18n( AW_SI_INSPECT_GAP / MINUTE_IN_SECONDS ), number_format_i18n( AW_SI_INSPECT_CAP ) );
+			/* translators: 1: "3 pages", 2: seconds of calls per step, 3: minutes between steps, 4: Google's daily limit. */
+			$why = sprintf( __( '%1$s not reached that day: the time budget ran out (%2$s s of calls per step, a step every %3$s min when the site has visits), not Google\'s %4$s-a-day quota.', 'aw-seo-extras' ), $pages, number_format_i18n( AW_SI_INSPECT_BUDGET ), number_format_i18n( AW_SI_INSPECT_GAP / MINUTE_IN_SECONDS ), number_format_i18n( AW_SI_INSPECT_CAP ) );
 		}
 		array_unshift( $warn, $why );
 	}
