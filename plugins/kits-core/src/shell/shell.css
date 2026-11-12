@@ -29,6 +29,7 @@
 	--ks-g7: #4a4a4a;
 	--ks-ink: #141414;
 	--ks-accent: #ffc300;
+
 	/* Row action icons only: delete and cancel, success (docs/design-system.md, color-danger and color-success). */
 	--ks-danger: #c8102e;
 	--ks-success: #137a3b;
@@ -488,8 +489,21 @@ body.kits-shell-screen .wrap > .updated {
 	max-width: 72ch;
 }
 
-.kits-shell-field__label {
+.kits-shell-field__label,
+.kits-shell .kits-shell-field .components-base-control__label {
+	margin: 0;
+	color: var(--ks-ink);
+	font-size: 14px;
 	font-weight: 600;
+	line-height: 1.5;
+	text-transform: none;
+}
+
+/* Field is WordPress's BaseControl: label, control and help one under the other, 4px apart, as before. */
+.kits-shell .kits-shell-field .components-base-control__field {
+	display: grid;
+	gap: var(--ks-s1);
+	margin: 0;
 }
 
 .kits-shell textarea,
@@ -546,9 +560,12 @@ body.kits-shell-screen .wrap > .updated {
 	border-color: var(--ks-ink);
 }
 
-.kits-shell-field__help {
+.kits-shell-field__help,
+.kits-shell .kits-shell-field .components-base-control__help {
+	margin: 0;
 	color: var(--ks-g6);
 	font-size: 13px;
+	font-style: normal;
 }
 
 .kits-shell-field__changed {

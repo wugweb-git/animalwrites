@@ -27,7 +27,7 @@ every admin screen (`includes/admin-shell.php`). Nothing is printed until a scre
 | `SectionCard { id, title, description, actions }` | A white card with a heading. |
 | `SettingsGroup { id, title, description, footer }` | A card with a grey footer for its own Save. |
 | `SettingsBlock { title, description, note }` | A part of a group (one module), with a rule between blocks. |
-| `Field { label, help, changed, onReset, render( id, helpId ) }` | Label, control and help. "Changed from the default." and a Reset to default link when changed. |
+| `Field { label, help, changed, onReset, render( id, helpId ) }` | WordPress's `BaseControl`: label, control and help. "Changed from the default." and a Reset to default link when changed. `helpId` is undefined when there is no help line. |
 | `Switch { label, checked, onChange, disabled, help }` | A checkbox with `role="switch"`. |
 | `ServiceList`, `ServiceRow { icon, name, status, tone, summary, editLabel }` | A row: icon (or the name's first letter), name, one line, status with a dot, and Edit/Close (`aria-expanded`) that shows the row's children. |
 | `Notice { tone, onDismiss }` | `info`, `success`, `warning`, `error`. Errors use `role="alert"`, the others `role="status"`. |
@@ -35,12 +35,9 @@ every admin screen (`includes/admin-shell.php`). Nothing is printed until a scre
 | `Button { variant, busy }` | `primary` (black), `secondary` (outline), `link`. `busy` disables it and shows a spinner. |
 | `RefTable { caption, head, rows }` | A two-column reference table that stacks on phones. |
 | `DataList { label, columns, rows, total, page, pages, onPage, search, onSearch, filters, onFilter, views, view, onView, sort, onSort, bulkActions, onBulk, rowActions, loading, error, onRetry, emptyTitle, empty }` | The working list. The screen fetches each page from its own route (search, filters, sort and paging are done on the server). Saved views as pills with counts, a search box, filter selects, sortable headings (`aria-sort`), tick boxes with a bulk action, row actions under the primary cell, Previous/Next with "Page 2 of 5 · 93 rows", and the empty, loading and error states. On phones each row is a card, every cell with its column's name. |
-| `RowAction { action: { label, href, onClick, disabled, why, tone } }` | One row action. `disabled` with `why` shows it off and says why ("Undo needs SourceWeb"). |
+| `RowAction { action: { label, href, onClick, disabled, why, tone, icon } }` | One row action. `disabled` with `why` shows it off and says why ("Undo needs SourceWeb"). `icon` (`edit`, `delete`, `cancel`, `success`, `view`, `undo`, `external`) makes it an icon button from `@wordpress/icons`, the label its name and tooltip; delete and cancel red, success green; `external` opens a new tab. |
 | `FieldReview { title, fields: [ { key, label, current, proposed, applied, undoOff } ], onApply, onUndo, busy, after }` | One proposed change field by field: now beside proposed, a tick per field, Apply the ticked fields, Undo on an applied field (off with a reason when `undoOff`). Claims and enrichment proposals. |
 | `SetupFlow { title, steps: [ { slug, label, done } ], current, onStep, canContinue, busy, onFinish, finishLabel, aside }` | A first run or a service's connection as numbered steps: the steps (a step opens once the one before is done), one step's content, Back and Continue (Finish on the last). |
-| `Panel { title, icon, tabs, sections, section, onSection, aside }` | The options panel for Kits Core's own screens: a dark bar with the Kits tabs (the open one with the yellow bar), the screen's sections listed on the left (a sideways row on phones), the open section on the right. |
-| `PanelGroup { title, description, summary, defaultOpen }` | A group of settings that folds open and shut (`aria-expanded`); `summary` shows while shut ("6 of 7 on"). |
-| `OnOff { label, checked, onChange, help, changed, onReset, disabled }` | An On/Off toggle: two options side by side, the chosen one filled black (a radio group). |
 | `MiniChart { label, points: [ { label, value } ], unit }` | One series as grey bars, today's bar black, with the same numbers as a table for screen readers. |
 | `HashList { label, help, items: [ { id, note } ], onAdd, onRemove, busy }` | A write-only list: a value is sent once, kept as a fingerprint and never shown again; rows show only "Entry 1 · Added 3 Nov". |
 | `LinkedSetting { label, value, plugin, href }` | A setting another Kits plugin keeps, read-only, with "Kept in RankWeb: change it there" (or "…, which is not active"). |
@@ -55,7 +52,7 @@ PHP helpers in `includes/admin-shell.php`:
 - `kits_shell_rest_can( $cap )`: the `permission_callback` every shell route uses (401 signed out; 403 without a valid
   `wp_rest` nonce in a browser request; 403 without the capability).
 
-The second set of parts is in `src/shell/list.js`, `setup.js`, `panel.js`, `extras.js` and `more.css`, built into the
+The second set of parts is in `src/shell/list.js`, `setup.js`, `extras.js` and `more.css`, built into the
 same `build/shell/` files. The empty, loading and error states are in `states.js`, so the list and screens share them.
 
 CSS classes all start `kits-shell-`. The shell's own values are `--ks-*` variables, each copied from a Kits token and
@@ -118,7 +115,7 @@ tabs, then cards (owner, 12 Nov 2026: "the ui used for plugins – use it for Ki
 - **Theme Options** (the default screen, `includes/admin-app.php`): its app runs on the shell (`kits_shell_app()`):
   `AppHeader` with Save, the sections as `ChipRow` links (`#slug`), the open section in a `SectionCard`. The fields
   are still WordPress components. If the shell or the app cannot load, the screen links to `&ui=classic`.
-- The options panel parts (`Panel`, `PanelGroup`, `OnOff`) stay in the shell; no Kits screen uses `Panel` now. The
+- The options panel parts (`Panel`, `PanelGroup`, `OnOff`) were removed on 13 Nov 2026: no screen used them. The
   earlier Settings panel (`kits/v1/settings-panel`, `src/settings-next/`) is removed: it held 3 of Settings' sections.
 - `smoke.sh` checks each of the four with `&ui=next` (200, the frame, five tabs, a known section, no PHP error), that
   the current screen is still the default, that a subscriber is refused, and that Theme Options loads on the shell.

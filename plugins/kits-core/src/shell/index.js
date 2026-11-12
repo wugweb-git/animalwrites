@@ -14,6 +14,7 @@
 import { useEffect, useId, useRef, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import {
+	BaseControl,
 	Button as WPButton,
 	Card,
 	CardBody,
@@ -25,7 +26,6 @@ import {
 import { DataList, FieldReview, RowAction } from './list';
 import { SetupFlow } from './setup';
 import { EmptyState, LoadingState, ErrorState } from './states';
-import { Panel, PanelGroup, OnOff } from './panel';
 import { MiniChart, HashList, LinkedSetting, MetricPicker } from './extras';
 import { PageParts, BlockParts, Cell } from './parts';
 import { CalendarGrid } from './calendar';
@@ -42,9 +42,6 @@ export {
 	FieldReview,
 	RowAction,
 	SetupFlow,
-	Panel,
-	PanelGroup,
-	OnOff,
 	MiniChart,
 	HashList,
 	LinkedSetting,
@@ -405,35 +402,40 @@ export function SettingsBlock( { title, description, note, children } ) {
  */
 export function Field( { label, help, changed, onReset, render } ) {
 	const id = useId();
-	const helpId = `${ id }-help`;
+	const note = ( help || changed ) && (
+		<>
+			{ help }
+			{ changed && (
+				<span className="kits-shell-field__changed">
+					{ ' ' }
+					{ __( 'Changed from the default.', 'kits-core' ) }
+				</span>
+			) }
+			{ changed && onReset && (
+				<>
+					{ ' ' }
+					<button
+						type="button"
+						className="kits-shell-link"
+						onClick={ onReset }
+					>
+						{ __( 'Reset to default', 'kits-core' ) }
+					</button>
+				</>
+			) }
+		</>
+	);
+	// BaseControl prints the help line with the id `${ id }__help`; the control is described by it only when it is there.
 	return (
-		<div className="kits-shell-field">
-			<label className="kits-shell-field__label" htmlFor={ id }>
-				{ label }
-			</label>
-			{ render( id, helpId ) }
-			<p className="kits-shell-field__help" id={ helpId }>
-				{ help }
-				{ changed && (
-					<span className="kits-shell-field__changed">
-						{ ' ' }
-						{ __( 'Changed from the default.', 'kits-core' ) }
-					</span>
-				) }
-				{ changed && onReset && (
-					<>
-						{ ' ' }
-						<button
-							type="button"
-							className="kits-shell-link"
-							onClick={ onReset }
-						>
-							{ __( 'Reset to default', 'kits-core' ) }
-						</button>
-					</>
-				) }
-			</p>
-		</div>
+		<BaseControl
+			__nextHasNoMarginBottom
+			id={ id }
+			label={ label }
+			help={ note || undefined }
+			className="kits-shell-field"
+		>
+			{ render( id, note ? `${ id }__help` : undefined ) }
+		</BaseControl>
 	);
 }
 
@@ -691,9 +693,6 @@ const shell = {
 	FieldReview,
 	RowAction,
 	SetupFlow,
-	Panel,
-	PanelGroup,
-	OnOff,
 	MiniChart,
 	HashList,
 	LinkedSetting,
