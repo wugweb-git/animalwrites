@@ -544,7 +544,7 @@ function aw_si_run_detail( string $src, array $info ): array {
 	if ( 'inspect' === $src && isset( $info['indexed'] ) ) {
 		/* translators: %s: pages indexed. */
 		$det[] = sprintf( __( '%s indexed', 'aw-seo-extras' ), $n( 'indexed' ) );
-		$eta = function_exists( 'aw_si_inspect_info_eta' ) ? aw_si_inspect_info_eta( $info ) : '';
+		$eta   = function_exists( 'aw_si_inspect_info_eta' ) ? aw_si_inspect_info_eta( $info ) : '';
 		if ( '' !== $eta ) {
 			$det[] = $eta; // why pages were not reached is the first warning (aw_si_inspect_info())
 		}

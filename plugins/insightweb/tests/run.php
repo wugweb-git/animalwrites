@@ -271,6 +271,8 @@ $qe = aw_si_inspect_info(
 	)
 );
 iw_check( false !== strpos( $qe['warnings'][0], 'could not be reached' ) && false === strpos( $qe['warnings'][0], 'quota' ), 'not reached: another error is not called the quota' );
+$ql = aw_si_inspect_queue_lines( $qi );
+iw_check( 2 === count( $ql ) && $qi['warnings'][0] === $ql[0] && false !== strpos( $ql[1], 'by about 13 Nov 2026' ) && array() === aw_si_inspect_queue_lines( array( 'left' => 0 ) ), 'queue lines: the not-reached reason, then the estimate; none for a finished old run' );
 iw_check( false !== strpos( $qi['warnings'][0], '15 s of calls per step, a step every 5 min' ) && false !== strpos( $qi['warnings'][0], '2,000-a-day' ), 'not reached: the budget, gap and cap come from the constants' );
 iw_check( array() === aw_si_inspect_info( array( 'todo' => array(), 'done' => 4 ) )['warnings'], 'a finished queue has no not-reached line' );
 iw_check( false !== strpos( aw_si_inspect_eta( 1500, 1000, '2026-11-11' ), 'by about 13 Nov 2026' ), 'estimate: 1,500 pages at 1,000 a day end two days on' );
@@ -327,9 +329,20 @@ iw_check( '' !== aw_si_links_import_parse( "Keyword,Volume\ndog,10\n", $home, $s
 iw_check( 'Search Console Links' === aw_si_link_source_key( 'Search Console Links, read 2 Nov 2026' ) && 'Bing Webmaster' === aw_si_link_source_key( 'Bing Webmaster' ), 'reads group by source without the read date' );
 $l1 = aw_si_links_import_parse( "Site\nexample.org\nwww.xn--p1ai.xn--p1ai\nanimalwrites.in\n", $home, $src, '2026-11-12', '2026-11-12' );
 iw_check( 'list' === $l1['kind'] && 2 === count( $l1['rows'] ) && 'xn--p1ai.xn--p1ai' === $l1['rows'][1]['domain'] && 1 === $l1['skipped'], 'one-column list; an IDN (punycode) domain is a domain' );
+iw_check( '2026-11-02' === aw_si_links_import_date( '2 Nov 2026', '2026-11-12' ) && '' === aw_si_links_import_date( '1999-12-31', '2026-11-12' ) && '' === aw_si_links_import_date( 'soon', '2026-11-12' ), 'import dates: read, too old, not a date' );
 iw_check( 'example.org' === aw_si_link_domain( 'https://WWW.Example.org/x' ) && '' === aw_si_links_import_host( 'not a domain' ), 'one domain rule for links and the import' );
 $GLOBALS['iw_options']['aw_si_link_dr'] = array( 'a.example.org' => array( 60, '2026-11-20' ) );
-$dr_in                                 = array( 'rows' => array(), 'dr' => array( 'a.example.org' => 40, 'b.example.org' => 10 ), 'pages' => array(), 'skipped' => 0, 'kind' => 'list', 'error' => '' );
+$dr_in                                  = array(
+	'rows'    => array(),
+	'dr'      => array(
+		'a.example.org' => 40,
+		'b.example.org' => 10,
+	),
+	'pages'   => array(),
+	'skipped' => 0,
+	'kind'    => 'list',
+	'error'   => '',
+);
 aw_si_links_import_store( $dr_in, 'Pasted list', '2026-11-12' );
 iw_check( array( 60, '2026-11-20' ) === $GLOBALS['iw_options']['aw_si_link_dr']['a.example.org'] && array( 10, '2026-11-12' ) === $GLOBALS['iw_options']['aw_si_link_dr']['b.example.org'], 'DR: an older read never replaces a newer one' );
 
