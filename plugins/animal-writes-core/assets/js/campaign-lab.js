@@ -65,6 +65,11 @@
 	/* Share: the phone's own share sheet (Instagram, WhatsApp, Telegram, Snapchat...) plus the story and post images,
 	   which go straight to Instagram or Facebook stories through the same sheet; on a computer the images download. */
 	var sh = window.awCampShare || {};
+	/* Animal Writes' own accounts, as in the site footer (parts/footer.html). */
+	function followLinks() {
+		return [['https://x.com/animal_writes_', 'X'], ['https://www.instagram.com/animal_writes_/', 'Instagram'], ['https://www.threads.com/@animal_writes_', 'Threads'], ['https://www.linkedin.com/company/animalwrites/', 'LinkedIn'], ['https://www.facebook.com/profile.php?id=61596537146561', 'Facebook']]
+			.map(function (l) { return '<a href="' + l[0] + '" rel="noopener">' + l[1] + '</a>'; }).join(', ') + '.';
+	}
 	if (sh.short) sh.url = sh.short; /* the campaign's short link (/lab): what Share and Copy link hand out; the page's canonical stays the full address */
 	var canShare = !!navigator.share;
 	/* The pictures are fetched once, ahead of the tap where possible: a phone only opens its share sheet straight from a tap. */
@@ -558,7 +563,9 @@
 			if (!holder) sendShare.setAttribute('aria-labelledby', 'aw-letter-share-title');
 			sendShare.innerHTML = '<div class="aw-letter-share-copy">'
 				+ (holder ? '' : '<h3 class="aw-letter-share-head" id="aw-letter-share-title"></h3>'
-				+ '<p class="aw-letter-share-lede">One letter is one voice. Send this page to three people who care about animals, so each of them can send their own objection' + (sh.close ? ' before ' + sh.close : '') + '.</p>')
+				+ (sh.closed
+					? '<p class="aw-letter-share-lede">The final rules are not out yet. We will post the decision here first. Follow Animal Writes: ' + followLinks() + '</p>'
+					: '<p class="aw-letter-share-lede">One letter is one voice. Send this page to three people who care about animals, so each of them can send their own objection' + (sh.close ? ' before ' + sh.close : '') + '.</p>'))
 				+ '<p class="aw-letter-share"></p></div>';
 			shareHead = sendShare.querySelector('.aw-letter-share-head');
 			if (holder) holder.appendChild(sendShare);
@@ -566,11 +573,13 @@
 			var row = sendShare.querySelector('.aw-letter-share');
 			shareKit(row);
 		}
-		if (shareHead) shareHead.textContent = sent ? 'Sent? Now get three more letters in.' : 'Get three more letters in.';
+		if (shareHead) shareHead.textContent = sh.closed ? 'Follow us for the decision.' : (sent ? 'Sent? Now get three more letters in.' : 'Get three more letters in.');
 		if (sent && sendShare.classList.contains('is-in-section') && !form.querySelector('.aw-letter-next')) { // a pointer from the letter tool to the Share section
 			var nx = document.createElement('p');
 			nx.className = 'aw-letter-next';
-			nx.innerHTML = '<a href="#share"><strong>Sent? Now get three more letters in.</strong> Share this page ' + '<span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span></a>';
+			nx.innerHTML = sh.closed // after the close day: follow us for the decision (owner, 13 Nov 2026); the Share section is already on the page
+				? '<strong>Sent? Follow us for the decision.</strong> ' + followLinks()
+				: '<a href="#share"><strong>Sent? Now get three more letters in.</strong> Share this page ' + '<span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span></a>';
 			thanks.parentNode.insertBefore(nx, thanks.nextSibling); // under the thank-you
 		}
 	}

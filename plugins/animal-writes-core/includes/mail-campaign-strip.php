@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * and the second line: what the campaign is about, in the campaign page's own words (owner, 18 Oct 2026).
  */
 const AW_MAIL_CAMPAIGN_LOOKS = array(
-	'lab-animals-rules-2026'              => array( '#a3122f', '#6b0f22', 'Object now', 'Objections close', 'Labs could approve most animal tests themselves' ), // "Gazette crimson" (owner, 17 Oct 2026)
+	'lab-animals-rules-2026'              => array( '#a3122f', '#6b0f22', 'See what happens next', 'Objections closed', 'Labs could approve most animal tests themselves' ), // "Gazette crimson" (owner, 17 Oct 2026); wording after the close (owner, 13 Nov 2026)
 	'india-writes-for-its-community-dogs' => array( '#141414', '#000000', 'Take part', 'Closes', '' ),
 );
 
@@ -115,7 +115,9 @@ function aw_mail_campaign_strip_html() {
 		// Only the date block changes, counting down each day (owner, 21 Oct 2026: "the date should change"); the owner's HTML is otherwise untouched.
 		$days = aw_mail_campaign_days_left( $c[2] );
 		$html = AW_MAIL_STRIP_LAB_RULES;
-		if ( null !== $days ) {
+		if ( $c[2] && current_time( 'Y-m-d' ) > $c[2] ) { // after the close day: "5 Nov / Closed" and "See what happens next" (owner, 13 Nov 2026)
+			$html = str_replace( array( '>DEADLINE<', 'Object now &rarr;' ), array( '>CLOSED<', 'See what happens next &rarr;' ), $html );
+		} elseif ( null !== $days ) {
 			$html = str_replace( array( '>5 NOV<', '>DEADLINE<' ), 0 === $days ? array( '>LAST<', '>DAY<' ) : array( '>' . (int) $days . '<', 1 === $days ? '>DAY LEFT<' : '>DAYS LEFT<' ), $html );
 		}
 		// On a phone the three cells stack: the date block, the words, the button, each the full width (the markup is not edited; this sheet only restyles it).

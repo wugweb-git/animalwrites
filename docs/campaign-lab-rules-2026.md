@@ -320,6 +320,12 @@ So from 6 Nov until the owner sets Post, the page and Home still ask people to s
 - Unchanged: the "Send your objection" buttons (the tool stays on), the H1, the timeline's "Last day for objections", card dates.
 - Not covered by the 15 lines: the link-preview picture still says "Objections close 5 November 2026" (needs a new picture); the letter tool's share box heading "Get three more letters in" (campaign-lab.js); the build script and the home-band script still carry the old lines (do not rerun them over live); the email strip.
 
+## Wait period across the site (owner's yes "Yes, all", 13 Nov 2026)
+- Live: campaign summary (the "Current campaign" side card and the page's schema description) now says objections closed on 5 Nov 2026 and the final rules are not out yet; the guide cards on 13854–13858, 13869, 13870 and Library 13844 say the same, and their button is "See what happens next" to the campaign page; FAQ answers on 13854 and 13870 (FAQ box) and the 13870 body say "closed"; the Library draft says objections "could be sent" until 5 November 2026.
+- Link preview: Media 28138 `lab-rules-2026-og-v3.jpg` (v2 with "Closed 5 Nov · decision awaited" and "See what happens next"), set as the Facebook and X image; v2 kept in Media.
+- Code (branch lab-wait-blocks-1113): the guide-cta pattern; the Lab email strip after the close shows "5 NOV / CLOSED" and "See what happens next"; the letter tool's share box after the close asks people to follow Animal Writes on X, Instagram, Threads, LinkedIn and Facebook for the decision (owner, 13 Nov), in place of "Get three more letters in".
+- Partner outreach: dropped (owner, 13 Nov: "no partners").
+
 ## Decided by the owner
 - Palette A, Gazette crimson (17 Oct).
 - Bands white, grey, black or brand only; every band title an H2 (19 Oct).
