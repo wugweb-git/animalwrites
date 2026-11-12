@@ -41,6 +41,8 @@
 | /campaigns/ | stray dog petition | letter petition supreme court | I/N | Stray Dog Petition and Citizen Campaigns – Animal Writes | T 0, AC Y; GSC: "petition campaign" 113, "letter petition" 48, "stray dog petition india" 14 (all on Home); hub 18 | not top 10 (change.org, sci.gov.in, thehindu) | P3 |
 | /media/ | letter petition campaign | animal writes in the news | N | Letter Petition Campaign: Press Coverage – Animal Writes | AC –, T 0; brand-only (GSC "nodogsnovote" 605 on Home) | #1 (with /campaigns/animal-writes-1-0/); /media/ now 301s to /press-coverage/ | P3 |
 
+12 Nov 2026: on hub pages with a one-word slug the Rank Math focus is now the slug word (news, library, resources, directory, opportunities), so the URL check can pass. The primary above moves to second place and stays in the title and description. See §10.
+
 ## 2. Directory (programmatic; titles built live, never stored)
 
 | Page type | Primary keyword pattern | Secondary keyword patterns | Intent | Title rule (aw-seo-extras, 60 characters) | Demand (15 Oct 2026) | Rank (21 Oct) | Priority |
@@ -139,6 +141,8 @@ Rules for the focus-keyword job, the same on the site (`aw_seo_clean_keyword`) a
 | Volunteer | register as a volunteer | T | The page's own heading | – | – |
 | Claim / Report | claim this listing / report a mistake | T | Claim, report and thank-you are noindex | – | – |
 | Corrections, policies | as set | N | The owner's wording | – | – |
+
+12 Nov 2026: About, Contact, Volunteer, Disclaimer, Adoption, Corrections and Categories now hold the slug word as the Rank Math focus (about, contact, volunteer, disclaimer, adoption, corrections, categories). The keyword above is second and unchanged. See §10.
 
 ## 7. Cannibalisation watch
 
@@ -254,3 +258,24 @@ Also set on 12 Nov 2026:
 - #13869 alternatives to animal testing: secondaries new approach methodologies, nams india, organ on a chip india, 3rs animal testing.
 - #13797 World Animal Day: "world animal day 2026" → "world animal day 2027" (the 2026 searches stay with Library #142).
 
+### Rank Math 90 pass, 12 Nov 2026 (later the same day)
+One-word slugs take the slug word as focus (the URL check needs the whole phrase in the slug); the map primary follows as the first secondary.
+
+| Page | Focus | Secondaries |
+|---|---|---|
+| About (#58) | about | animal writes, citizen letter campaign |
+| News (#8935) | news | animal welfare news, animal welfare news india, stray dogs news, animal cruelty news |
+| Library (#8939) | library | animal laws in india, animal welfare court orders, animal welfare rules, supreme court stray dogs judgment |
+| Resources (#8937) | resources | animal welfare guides, how to report animal cruelty, injured animal help, feeding community dogs law |
+| Directory (#8945) | directory | animal welfare ngos in india, animal ngo near me, gaushala, government veterinary hospital |
+| Opportunities (#8941) | opportunities | animal welfare volunteer, animal welfare jobs india, animal welfare internship, foster animals |
+| Categories (#8759) | categories | animal welfare categories, types of animal welfare |
+| Volunteer (#8965) | volunteer | register as a volunteer |
+| Contact (#61) | contact | contact us |
+| Disclaimer (#62) | disclaimer | legal disclaimer |
+| Adoption (#15573) | adoption | animal adoption in india |
+| Corrections (#8760) | corrections | corrections and updates |
+| 13 state cruelty guides | animal cruelty complaint {state} | report animal cruelty {state}, {state} animal welfare board (was "… in {state}", which the slug lacks) |
+| E1 (#25436) | stray dog complaint | stray dog complaint to municipal corporation, who is responsible for stray dogs, complaint against stray dogs, stray dog helpline number |
+| E5 (#25455) | letter to mp | how to write a letter to mp in india, how to contact your mp, how to write letter to minister in india, find your mp india |
+| Research #24839 | human elephant conflict in odisha india | none. "human elephant conflict in odisha" already belongs to #12517, so the study keeps its own longer title phrase |
