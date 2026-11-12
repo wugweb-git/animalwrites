@@ -258,7 +258,7 @@ function planweb_dashboard_tiles( array $c, int $range, callable $url, callable 
 				? sprintf( _n( '%s date differs from Dates', '%s dates differ from Dates', $bad, 'planweb' ), $num( $bad ) )
 				/* translators: %s: number of dates. */
 				: sprintf( __( '%s dates the same as in Dates', 'planweb' ), $num( $check['same'] ) ),
-			'href'  => current_user_can( 'manage_options' ) && function_exists( 'planweb_ui_url' ) ? planweb_ui_url( 'settings' ) . '#import' : '',
+			'href'  => function_exists( 'planweb_ui_url' ) && current_user_can( 'manage_options' ) ? planweb_ui_url( 'settings' ) . '#import' : '',
 			'tone'  => $bad ? 'warn' : '',
 		);
 	}
