@@ -12,11 +12,13 @@ import {
 	Button,
 	ChipRow,
 	DataList,
+	DetailPanel,
 	EmptyState,
 	ErrorState,
 	Field,
 	LinkedSetting,
 	LoadingState,
+	MediaThumbs,
 	Notice,
 	RefTable,
 	SectionCard,
@@ -933,10 +935,245 @@ function Settings() {
 	);
 }
 
+/* ---------- Listings (read only) ---------- */
+
+const LISTING_VIEWS = [
+	'all',
+	'publish',
+	'draft',
+	'claimed',
+	'verified',
+	'recheck',
+];
+
+/** The list's first view, from the address (?view=claimed from the Dashboard's tiles). */
+function firstListingView() {
+	const v = new URLSearchParams( window.location.search ).get( 'view' );
+	return LISTING_VIEWS.includes( v ) ? v : 'all';
+}
+
+/**
+ * One listing's reading panel, opened in its row.
+ *
+ * @param {Object} props
+ * @param {Object} props.r The row.
+ */
+function ListingDetail( { r } ) {
+	const yes = __( 'Yes', 'directoryweb' );
+	return (
+		<DetailPanel
+			title={ r.title }
+			subtitle={ [ r.status, r.types ].filter( Boolean ).join( ' · ' ) }
+			items={ [
+				{
+					label: __( 'Picture', 'directoryweb' ),
+					value: r.thumb && (
+						<MediaThumbs
+							urls={ [ r.thumb ] }
+							label={ __( 'Logo', 'directoryweb' ) }
+						/>
+					),
+				},
+				{ label: __( 'Place', 'directoryweb' ), value: r.place },
+				{ label: __( 'Area', 'directoryweb' ), value: r.area },
+				{ label: __( 'Services', 'directoryweb' ), value: r.services },
+				{
+					label: __( 'Website', 'directoryweb' ),
+					value: r.website && (
+						<a
+							href={ r.website }
+							target="_blank"
+							rel="noopener noreferrer nofollow"
+						>
+							{ r.website }
+						</a>
+					),
+				},
+				{
+					label: __( 'Claimed', 'directoryweb' ),
+					value: r.claimed ? yes : '',
+				},
+				{
+					label: __( 'Verified (government record)', 'directoryweb' ),
+					value: r.verified,
+				},
+				{
+					label: __( 'Needs a re-check', 'directoryweb' ),
+					value: r.recheck ? yes : '',
+				},
+				{ label: __( 'Added', 'directoryweb' ), value: r.created },
+				{
+					label: __( 'Last changed', 'directoryweb' ),
+					value: r.modified,
+				},
+			] }
+			actions={
+				<>
+					{ r.editUrl && (
+						<a
+							className="kits-shell-button is-primary"
+							href={ r.editUrl }
+						>
+							{ __( 'Edit listing', 'directoryweb' ) }
+						</a>
+					) }
+					{ r.viewUrl && (
+						<a
+							className="kits-shell-button is-secondary"
+							href={ r.viewUrl }
+						>
+							{ __( 'View on the site', 'directoryweb' ) }
+						</a>
+					) }
+				</>
+			}
+		/>
+	);
+}
+
+function Listings() {
+	const [ q, setQ ] = useState( () => ( {
+		view: firstListingView(),
+		search: '',
+		state: '0',
+		type: '',
+		sort: 'modified',
+		dir: 'desc',
+		page: 1,
+	} ) );
+	const [ data, setData ] = useState( null );
+	const [ loading, setLoading ] = useState( true );
+	const [ error, setError ] = useState( '' );
+	const [ tick, setTick ] = useState( 0 );
+	useEffect( () => {
+		setLoading( true );
+		setError( '' );
+		const args = new URLSearchParams(
+			Object.entries( q ).filter( ( [ , v ] ) => '' !== v && null !== v )
+		).toString();
+		apiFetch( { path: `${ path( 'listings' ) }?${ args }` } )
+			.then( setData )
+			.catch( ( e ) => setError( errText( e ) ) )
+			.finally( () => setLoading( false ) );
+	}, [ q, tick ] );
+	const set = ( k, v ) =>
+		setQ( ( o ) => ( { ...o, [ k ]: v, page: 'page' === k ? v : 1 } ) );
+	const columns = [
+		{
+			key: 'title',
+			label: __( 'Listing', 'directoryweb' ),
+			primary: true,
+			sortable: true,
+			render: ( r ) => <strong>{ r.title }</strong>,
+		},
+		{
+			key: 'modified',
+			label: __( 'Last changed', 'directoryweb' ),
+			sortable: true,
+			render: ( r ) => r.modified,
+		},
+		{
+			key: 'types',
+			label: __( 'Type', 'directoryweb' ),
+			render: ( r ) => r.types || '—',
+		},
+		{
+			key: 'place',
+			label: __( 'Place', 'directoryweb' ),
+			render: ( r ) => r.place || '—',
+		},
+		{
+			key: 'status',
+			label: __( 'Status', 'directoryweb' ),
+			render: ( r ) =>
+				[
+					r.status,
+					r.claimed && __( 'Claimed', 'directoryweb' ),
+					r.verified && __( 'Verified', 'directoryweb' ),
+					r.recheck && __( 'Needs re-check', 'directoryweb' ),
+				]
+					.filter( Boolean )
+					.join( ' · ' ),
+		},
+	];
+	return (
+		<SectionCard
+			id="directoryweb-listings"
+			title={ __( 'Listings', 'directoryweb' ) }
+			description={ __(
+				'The Directory’s listings, to read. View opens a listing’s details; Edit listing opens its own edit screen, where every change is made. Claims are reviewed on Directory → Claims.',
+				'directoryweb'
+			) }
+			actions={
+				data?.newUrl && (
+					<a
+						className="kits-shell-button is-secondary"
+						href={ data.newUrl }
+					>
+						{ __( 'Add New Listing', 'directoryweb' ) }
+					</a>
+				)
+			}
+		>
+			<DataList
+				label={ __( 'Listings', 'directoryweb' ) }
+				columns={ columns }
+				rows={ data?.rows || [] }
+				total={ data?.total || 0 }
+				page={ data?.page || 1 }
+				pages={ data?.pages || 1 }
+				onPage={ ( p ) => set( 'page', p ) }
+				search={ q.search }
+				onSearch={ ( v ) => set( 'search', v ) }
+				searchLabel={ __( 'Search listings', 'directoryweb' ) }
+				views={ data?.views || [] }
+				view={ q.view }
+				onView={ ( v ) => set( 'view', v ) }
+				filters={ [
+					{
+						key: 'state',
+						label: __( 'State', 'directoryweb' ),
+						value: q.state,
+						options: data?.filters?.state || [],
+					},
+					{
+						key: 'type',
+						label: __( 'Listing type', 'directoryweb' ),
+						value: q.type,
+						options: data?.filters?.type || [],
+					},
+				] }
+				onFilter={ set }
+				sort={ { key: q.sort, dir: q.dir } }
+				onSort={ ( key, dir ) =>
+					setQ( ( o ) => ( { ...o, sort: key, dir, page: 1 } ) )
+				}
+				rowActions={ ( r ) =>
+					r.editUrl
+						? [
+								{
+									label: __( 'Edit', 'directoryweb' ),
+									href: r.editUrl,
+								},
+							]
+						: []
+				}
+				rowView={ ( r ) => <ListingDetail r={ r } /> }
+				loading={ loading }
+				error={ error }
+				onRetry={ () => setTick( ( t ) => t + 1 ) }
+				emptyTitle={ __( 'No listing matches.', 'directoryweb' ) }
+			/>
+		</SectionCard>
+	);
+}
+
 function App() {
 	let screen = <Dashboard />;
 	if ( 'claims' === app.screen ) {
 		screen = <Claims />;
+	} else if ( 'listings' === app.screen ) {
+		screen = <Listings />;
 	} else if ( 'settings' === app.screen ) {
 		screen = <Settings />;
 	}

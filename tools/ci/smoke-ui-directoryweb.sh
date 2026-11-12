@@ -6,6 +6,10 @@
 # Dashboard and Settings: pages with no menu entry.
 screen directoryweb directoryweb-app directoryweb-admin
 screen directoryweb-settings directoryweb-app directoryweb-admin
+# Listings (12 Nov): read only, under Plugins → DirectoryWeb.
+screen directoryweb-listings directoryweb-app directoryweb-admin
+want 200 "Listings ?view=claimed (administrator)" -b /tmp/cj-ci "$H/wp-admin/admin.php?page=directoryweb-listings&view=claimed"
+if grep -q '"screen":"listings"' /tmp/rw.out; then echo "ok   Listings: the Listings screen"; else echo "FAIL Listings: screen not set"; FAIL=1; fi
 
 # Claims, on Directory → Claims's own address.
 C="$H/wp-admin/edit.php?post_type=aw_listing&page=aw-claims"
@@ -23,6 +27,11 @@ route directoryweb/v1/claims
 route "directoryweb/v1/claims&status=all&days=30&sort=listing&dir=asc"
 route "directoryweb/v1/claims&status=all&search=AW-C-1" # search by reference (tests/directoryweb-tests.php checks the match)
 route directoryweb/v1/settings
+route directoryweb/v1/listings
+route "directoryweb/v1/listings&view=claimed&sort=title&dir=asc&state=0&page=1"
+if python3 -c "import json;d=json.load(open('/tmp/rw.out'));r=d['rows'];assert {'views','filters','total'}<=set(d);assert all(set(x)>={'id','title','editUrl','viewUrl','claimed'} and 'phone' not in x and 'email' not in x for x in r)"; then echo "ok   GET listings: rows, views and filters; no phone or e-mail"; else echo "FAIL GET listings: shape"; FAIL=1; fi
+want 400 "GET /directoryweb/v1/listings unknown view" -b /tmp/cj-ci -H "X-WP-Nonce: $NA" "$H/?rest_route=/directoryweb/v1/listings&view=nosuch"
+want 404 "POST /directoryweb/v1/listings administrator (read only)" -X POST -b /tmp/cj-ci -H "X-WP-Nonce: $NA" -H 'Content-Type: application/json' -d '{}' "$H/?rest_route=/directoryweb/v1/listings"
 for t in published status places indexing search claims badges enrichment; do route directoryweb/v1/stats/$t; done
 post directoryweb/v1/dashboard/count '{}'
 post directoryweb/v1/settings/claim-form '{"form":0}'

@@ -181,5 +181,12 @@ check( array( 'b' => 9, 'c' => 5 ) === $t['top'] && 3 === $t['others'], 'top two
 check( 3 === directoryweb_age_days( '2026-11-08 11:00:00', $now ), 'age in whole days' );
 check( 0 === directoryweb_age_days( 'not a date', $now ), 'bad date' );
 
+// Listings tab: one GET route, nothing written, no phone or e-mail read.
+$lst = (string) file_get_contents( dirname( __DIR__ ) . '/includes/directoryweb-listings.php' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- a local file read by the test
+check( 1 === substr_count( $lst, 'register_rest_route(' ) && 1 === substr_count( $lst, "'methods'" ) && false !== strpos( $lst, "'methods'             => 'GET'" ), 'Listings: one route, GET only' );
+check( ! preg_match( '/\b(update_post_meta|delete_post_meta|add_post_meta|wp_update_post|wp_insert_post|wp_delete_post|wp_trash_post|update_option)\s*\(/', $lst ), 'Listings: nothing is written' );
+check( ! preg_match( "/'aw_(phone|whatsapp|emergency|email)'/", $lst ), 'Listings: no phone or e-mail is read' );
+check( false !== strpos( $lst, "current_user_can( 'edit_post', \$id )" ), 'Listings: Edit link only for who may edit the listing' );
+
 echo "{$count} checks, {$fails} failed\n";
 exit( $fails ? 1 : 0 );

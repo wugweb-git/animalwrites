@@ -10,6 +10,7 @@
  *   GET  claims/<id>               edit_aw_volunteers  one claim, field by field, with the proposed changes
  *   GET  settings                  manage_options      the services and the groups, with today's values
  *   POST settings/claim-form       manage_options      which Fluent Forms form is the claim form (option aw_ff_forms)
+ *   GET  listings                  edit_posts          the Listings tab, read only (directoryweb-listings.php)
  *
  * Every route uses kits_shell_rest_can(): 401 signed out, 403 without the wp_rest nonce in a browser, 403 without the
  * capability. The aw/v1 routes are not touched. No key is read or sent.
@@ -216,7 +217,7 @@ function directoryweb_dashboard_payload(): array {
 		'value'   => is_array( $p ) ? sprintf( __( '%1$s of %2$s states', 'directoryweb' ), $num( $p['states'] ), $num( $p['states_all'] ) ) : '',
 		/* translators: 1: districts with a listing, 2: all districts, 3: place file version. */
 		'sub'     => is_array( $p ) ? sprintf( __( '%1$s of %2$s districts · place file %3$s', 'directoryweb' ), $num( $p['districts'] ), $num( $p['districts_all'] ), $p['version'] ) : '',
-		'href'    => '',
+		'href'    => current_user_can( DIRECTORYWEB_LISTINGS_CAP ) ? add_query_arg( 'view', 'publish', directoryweb_ui_url( 'listings' ) ) : '',
 	);
 	$x       = $c['indexing'] ?? null;
 	$rank    = function_exists( 'rankweb_ui_url' ) && current_user_can( 'manage_options' ) ? rankweb_ui_url( 'settings' ) . '#indexing' : '';
@@ -273,7 +274,7 @@ function directoryweb_dashboard_payload(): array {
 		'value'   => $num( $b['claimed'] ?? 0 ),
 		/* translators: 1: Verified listings, 2: listings that need a re-check. */
 		'sub'     => sprintf( __( '%1$s Verified from government records · %2$s need a re-check', 'directoryweb' ), $num( $b['verified'] ?? 0 ), $num( $b['recheck'] ?? 0 ) ),
-		'href'    => '',
+		'href'    => current_user_can( DIRECTORYWEB_LISTINGS_CAP ) ? add_query_arg( 'view', 'claimed', directoryweb_ui_url( 'listings' ) ) : '',
 		'tone'    => ! empty( $b['recheck'] ) ? 'warn' : '',
 	);
 	$e       = $c['enrichment'] ?? null;

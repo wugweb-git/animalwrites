@@ -29,11 +29,12 @@ function directoryweb_ui_screens(): array {
 		DIRECTORYWEB_PAGE          => array( 'dashboard', 'edit_aw_volunteers' ),
 		'aw-claims'                => array( 'claims', 'edit_aw_volunteers' ),
 		DIRECTORYWEB_SETTINGS_PAGE => array( 'settings', 'manage_options' ),
+		DIRECTORYWEB_LISTINGS_PAGE => array( 'listings', DIRECTORYWEB_LISTINGS_CAP ),
 	);
 }
 
 /**
- * Which new screen this request asks for: 'dashboard', 'claims', 'settings' or ''.
+ * Which new screen this request asks for: 'dashboard', 'claims', 'listings', 'settings' or ''.
  */
 function directoryweb_ui_wanted(): string {
 	$page = sanitize_key( wp_unslash( $_GET['page'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- which screen to show; nothing is saved here
@@ -64,9 +65,13 @@ function directoryweb_ui_ready( ?bool $set = null ): bool {
 /**
  * The address of a screen.
  *
- * @param string $screen 'dashboard', 'claims' or 'settings'.
+ * @param string $screen 'dashboard', 'claims', 'listings' or 'settings'.
  */
 function directoryweb_ui_url( string $screen ): string {
+	$pages = array(
+		'settings' => DIRECTORYWEB_SETTINGS_PAGE,
+		'listings' => DIRECTORYWEB_LISTINGS_PAGE,
+	);
 	if ( 'claims' === $screen ) {
 		return add_query_arg(
 			array(
@@ -79,7 +84,7 @@ function directoryweb_ui_url( string $screen ): string {
 	}
 	return add_query_arg(
 		array(
-			'page' => 'settings' === $screen ? DIRECTORYWEB_SETTINGS_PAGE : DIRECTORYWEB_PAGE,
+			'page' => $pages[ $screen ] ?? DIRECTORYWEB_PAGE,
 			'ui'   => 'next',
 		),
 		admin_url( 'admin.php' )
@@ -97,6 +102,7 @@ add_action(
 			add_menu_page( __( 'DirectoryWeb', 'directoryweb' ), __( 'DirectoryWeb', 'directoryweb' ), 'edit_aw_volunteers', DIRECTORYWEB_PAGE, 'directoryweb_dashboard_page', 'dashicons-location-alt', 26 ); // phpcs:ignore WordPress.WP.Capabilities.Unknown -- as above
 		}
 		add_submenu_page( DIRECTORYWEB_PAGE, __( 'DirectoryWeb', 'directoryweb' ), __( 'Dashboard', 'directoryweb' ), 'edit_aw_volunteers', DIRECTORYWEB_PAGE, 'directoryweb_dashboard_page' ); // phpcs:ignore WordPress.WP.Capabilities.Unknown -- as above, as Directory → Claims
+		add_submenu_page( DIRECTORYWEB_PAGE, __( 'Directory listings', 'directoryweb' ), __( 'Listings', 'directoryweb' ), DIRECTORYWEB_LISTINGS_CAP, DIRECTORYWEB_LISTINGS_PAGE, 'directoryweb_listings_page' );
 		add_submenu_page( DIRECTORYWEB_PAGE, __( 'DirectoryWeb settings', 'directoryweb' ), __( 'Settings', 'directoryweb' ), 'manage_options', DIRECTORYWEB_SETTINGS_PAGE, 'directoryweb_settings_page' );
 	}
 );
@@ -128,8 +134,8 @@ add_action(
 			array(
 				'slug'    => 'listings',
 				'label'   => __( 'Listings', 'directoryweb' ),
-				'url'     => add_query_arg( 'post_type', 'aw_listing', admin_url( 'edit.php' ) ),
-				'current' => false,
+				'url'     => current_user_can( DIRECTORYWEB_LISTINGS_CAP ) ? directoryweb_ui_url( 'listings' ) : add_query_arg( 'post_type', 'aw_listing', admin_url( 'edit.php' ) ),
+				'current' => 'listings' === $screen,
 			),
 		);
 		if ( current_user_can( 'manage_options' ) ) {
@@ -165,7 +171,7 @@ add_action(
 /**
  * Draw the new screen in place of the current one, when it is ready. The page callbacks call this first.
  *
- * @param string $screen 'dashboard', 'claims' or 'settings'.
+ * @param string $screen 'dashboard', 'claims', 'listings' or 'settings'.
  * @return bool True when the new screen was drawn.
  */
 function directoryweb_ui_page( string $screen ): bool {
@@ -175,6 +181,7 @@ function directoryweb_ui_page( string $screen ): bool {
 	$titles = array(
 		'dashboard' => __( 'DirectoryWeb', 'directoryweb' ),
 		'claims'    => __( 'Claims', 'directoryweb' ),
+		'listings'  => __( 'Directory listings', 'directoryweb' ),
 		'settings'  => __( 'DirectoryWeb settings', 'directoryweb' ),
 	);
 	kits_shell_mount( 'directoryweb-app', $titles[ $screen ] );
@@ -185,7 +192,7 @@ function directoryweb_ui_page( string $screen ): bool {
  * The page for a new address on &ui=classic (or without the shell): its name and the way in.
  *
  * @param string $title  Heading.
- * @param string $screen 'dashboard' or 'settings'.
+ * @param string $screen 'dashboard', 'listings' or 'settings'.
  */
 function directoryweb_plain_page( string $title, string $screen ): void {
 	echo '<div class="wrap"><h1>' . esc_html( $title ) . '</h1>';
