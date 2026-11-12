@@ -38,7 +38,7 @@ if ( $aw_si_missing ) {
 		function () use ( $aw_si_missing ) {
 			if ( current_user_can( 'activate_plugins' ) ) {
 				/* translators: %s: plugin names. */
-				echo '<div class="notice notice-warning"><p>' . esc_html( sprintf( __( 'InsightWeb does nothing until %s is active.', 'aw-seo-extras' ), implode( ' and ', $aw_si_missing ) ) ) . '</p></div>';
+				wp_admin_notice( esc_html( sprintf( __( 'InsightWeb does nothing until %s is active.', 'aw-seo-extras' ), implode( ' and ', $aw_si_missing ) ) ), array( 'type' => 'warning' ) );
 			}
 		}
 	);
@@ -54,7 +54,7 @@ if ( ! function_exists( 'aw_kw_install' ) ) {
 		'admin_notices',
 		function () {
 			if ( current_user_can( 'manage_options' ) ) {
-				echo '<div class="notice notice-warning"><p>' . esc_html__( 'Search Insights needs Animal Writes Core (the keyword table lives there). It is off until Core is active.', 'aw-seo-extras' ) . '</p></div>';
+				wp_admin_notice( esc_html__( 'Search Insights needs Animal Writes Core (the keyword table lives there). It is off until Core is active.', 'aw-seo-extras' ), array( 'type' => 'warning' ) );
 			}
 		}
 	);

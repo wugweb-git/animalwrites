@@ -396,7 +396,7 @@ function aw_media_reuse_screen() {
 	if ( is_array( $notice ) ) {
 		delete_transient( $key );
 		$class = in_array( $notice[0], array( 'success', 'warning', 'error' ), true ) ? $notice[0] : 'info';
-		echo '<div class="notice notice-' . esc_attr( $class ) . ' is-dismissible"><p>' . esc_html( (string) $notice[1] ) . '</p></div>';
+		wp_admin_notice( esc_html( (string) $notice[1] ), array( 'type' => $class, 'dismissible' => true ) );
 	}
 	$applied = 0;
 	foreach ( $log as $e ) {

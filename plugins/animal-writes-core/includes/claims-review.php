@@ -364,7 +364,9 @@ function aw_claims_screen() {
 	$entry = absint( wp_unslash( $_GET['entry'] ?? 0 ) ); // phpcs:ignore WordPress.Security.NonceVerification -- read only
 	echo '<div class="wrap">';
 	if ( ! aw_claim_ff_id() ) {
-		echo '<h1>Claims</h1><div class="notice notice-warning"><p>The claim form is not set up (Fluent Forms off, or <code>wp aw ff-form claim &lt;ID&gt;</code>).</p></div></div>';
+		echo '<h1>Claims</h1>';
+		wp_admin_notice( 'The claim form is not set up (Fluent Forms off, or <code>wp aw ff-form claim &lt;ID&gt;</code>).', array( 'type' => 'warning' ) );
+		echo '</div>';
 		return;
 	}
 	if ( $entry ) {
@@ -375,7 +377,7 @@ function aw_claims_screen() {
 	echo '<h1>Claims</h1>';
 	$done = sanitize_key( wp_unslash( $_GET['done'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
 	if ( '' !== $done ) {
-		echo '<div class="notice notice-success is-dismissible"><p>' . esc_html( 'approved' === $done ? 'Claim approved: the ticked fields are on the listing (Undo in Plugins → SourceWeb → Enrichment review).' : 'Claim rejected.' ) . '</p></div>';
+		wp_admin_notice( esc_html( 'approved' === $done ? 'Claim approved: the ticked fields are on the listing (Undo in Plugins → SourceWeb → Enrichment review).' : 'Claim rejected.' ), array( 'type' => 'success', 'dismissible' => true ) );
 	}
 	global $wpdb;
 	$per   = 20;

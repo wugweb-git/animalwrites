@@ -171,11 +171,11 @@ add_action( 'aw_si_load_tab_links', 'aw_si_links_load' );
 function aw_si_links_tab(): void {
 	require_once __DIR__ . '/class-aw-si-links-table.php';
 	if ( ! function_exists( 'aw_si_bing_on' ) || ! aw_si_bing_on() ) {
-		echo '<div class="notice notice-info inline"><p>' . esc_html__( 'No Bing Webmaster API key yet: add it under Animal Writes → Keys.', 'aw-seo-extras' ) . '</p></div>';
+		wp_admin_notice( esc_html__( 'No Bing Webmaster API key yet: add it under Animal Writes → Keys.', 'aw-seo-extras' ), array( 'type' => 'info', 'additional_classes' => array( 'inline' ) ) );
 	}
 	if ( isset( $_GET['linked'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- message only.
 		$n = absint( wp_unslash( $_GET['linked'] ) ); // phpcs:ignore WordPress.Security.NonceVerification -- message only.
-		echo '<div class="notice ' . ( $n ? 'notice-success' : 'notice-warning' ) . ' inline"><p>' . esc_html( $n ? __( 'Saved.', 'aw-seo-extras' ) : __( 'No link was selected, so nothing changed.', 'aw-seo-extras' ) ) . '</p></div>';
+		wp_admin_notice( esc_html( $n ? __( 'Saved.', 'aw-seo-extras' ) : __( 'No link was selected, so nothing changed.', 'aw-seo-extras' ) ), array( 'type' => $n ? 'success' : 'warning', 'additional_classes' => array( 'inline' ) ) );
 	}
 	aw_si_links_import_notice();
 	echo '<p>' . esc_html__( 'Sites that link to us: from Bing Webmaster (monthly, on the 2nd), the Search Console Links exports imported below, Google Alerts, and the 25–26 Oct lists. Spam is hidden and shows only in the Spam view; nothing here is deleted. Set a type with the bulk actions.', 'aw-seo-extras' ) . '</p>';

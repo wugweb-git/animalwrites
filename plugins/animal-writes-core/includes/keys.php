@@ -63,7 +63,7 @@ function aw_keys_screen(): void {
 	aw_core_screen_nav( 'aw-keys' );
 	if ( isset( $_GET['saved'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- display only.
 		$n = (int) $_GET['saved']; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		echo '<div class="notice notice-success is-dismissible"><p>' . esc_html( 1 === $n ? '1 key changed.' : $n . ' keys changed.' ) . '</p></div>';
+		wp_admin_notice( esc_html( 1 === $n ? '1 key changed.' : $n . ' keys changed.' ), array( 'type' => 'success', 'dismissible' => true ) );
 	}
 	echo '<p>Service keys the site\'s plugins use. Paste a key and save; it is never shown again, only whether it is set. A key in wp-config.php always wins.</p>';
 	$list = aw_keys_list();

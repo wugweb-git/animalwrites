@@ -255,7 +255,7 @@ function aw_si_source_notices(): void {
 	$off = (int) get_option( 'aw_si_off' );
 	if ( $off ) {
 		/* translators: %s: date and time. */
-		echo '<div class="notice notice-warning inline"><p>' . esc_html( sprintf( __( 'Search Insights is off: its data was deleted on %s and nothing runs on schedule. Settings → Run the daily update starts it again.', 'aw-seo-extras' ), wp_date( 'j M Y, H:i', $off ) ) ) . '</p></div>';
+		wp_admin_notice( esc_html( sprintf( __( 'Search Insights is off: its data was deleted on %s and nothing runs on schedule. Settings → Run the daily update starts it again.', 'aw-seo-extras' ), wp_date( 'j M Y, H:i', $off ) ) ), array( 'type' => 'warning', 'additional_classes' => array( 'inline' ) ) );
 		return;
 	}
 	$runs  = aw_si_runs();
@@ -273,21 +273,21 @@ function aw_si_source_notices(): void {
 				? sprintf( __( '%1$s: the service refuses automated requests from our servers (HTTP 429), so it is not fetched; figures from %2$s.', 'aw-seo-extras' ), $s['label'], wp_date( 'j M, H:i', $ok ) )
 				/* translators: %s: source. */
 				: sprintf( __( '%s: the service refuses automated requests from our servers (HTTP 429), so it is not fetched; no figures yet.', 'aw-seo-extras' ), $s['label'] );
-			echo '<div class="notice notice-info inline"><p>' . esc_html( $msg . $paste ) . '</p></div>';
+			wp_admin_notice( esc_html( $msg . $paste ), array( 'type' => 'info', 'additional_classes' => array( 'inline' ) ) );
 		} elseif ( $err ) {
 			/* translators: 1: source, 2: the problem, 3: date of the data still shown. */
 			$msg = sprintf( __( '%1$s: %2$s The figures shown are from %3$s.', 'aw-seo-extras' ), $s['label'], $err, $ok ? wp_date( 'j M, H:i', $ok ) : __( 'no earlier run', 'aw-seo-extras' ) );
-			echo '<div class="notice notice-error inline"><p><span class="dashicons dashicons-warning" aria-hidden="true"></span> ' . esc_html( $msg ) . '</p></div>';
+			wp_admin_notice( '<span class="dashicons dashicons-warning" aria-hidden="true"></span> ' . esc_html( $msg ), array( 'type' => 'error', 'additional_classes' => array( 'inline' ) ) );
 		} elseif ( $ok && in_array( $r['info']['status'] ?? '', array( 'baseline', 'no rows' ), true ) ) {
 			$msg = 'baseline' === $r['info']['status']
 				/* translators: 1: source, 2: date and time. */
 				? __( '%1$s ran on %2$s and recorded the usual level of each term (a baseline): rising terms show from its next run.', 'aw-seo-extras' )
 				/* translators: 1: source, 2: date and time. */
 				: __( '%1$s ran on %2$s and kept nothing: the source answered, and no term passed the filters (the Rising tab shows what was dropped and why).', 'aw-seo-extras' );
-			echo '<div class="notice notice-info inline"><p>' . esc_html( sprintf( $msg, $s['label'], wp_date( 'j M, H:i', $ok ) ) ) . '</p></div>';
+			wp_admin_notice( esc_html( sprintf( $msg, $s['label'], wp_date( 'j M, H:i', $ok ) ) ), array( 'type' => 'info', 'additional_classes' => array( 'inline' ) ) );
 		} elseif ( $ok && aw_si_stale( $src ) ) {
 			/* translators: %s: source. */
-			echo '<div class="notice notice-warning inline"><p><span class="dashicons dashicons-clock" aria-hidden="true"></span> ' . esc_html( sprintf( __( '%s has not updated on schedule.', 'aw-seo-extras' ), $s['label'] ) ) . '</p></div>';
+			wp_admin_notice( '<span class="dashicons dashicons-clock" aria-hidden="true"></span> ' . esc_html( sprintf( __( '%s has not updated on schedule.', 'aw-seo-extras' ), $s['label'] ) ), array( 'type' => 'warning', 'additional_classes' => array( 'inline' ) ) );
 		}
 		if ( ! empty( $r['info']['truncated'] ) ) {
 			$days = implode( ', ', array_keys( (array) $r['info']['truncated'] ) );
@@ -296,7 +296,7 @@ function aw_si_source_notices(): void {
 				? __( 'Search Console hit the 5,000-row maximum on %s even after fetching the busiest pages one by one, so the rarest searches of those days may be missing.', 'aw-seo-extras' )
 				/* translators: %s: dates. */
 				: __( 'GA4 returned its row maximum on %s, so the smallest pages or terms of those days may be missing.', 'aw-seo-extras' );
-			echo '<div class="notice notice-warning inline"><p>' . esc_html( sprintf( $msg, $days ) ) . '</p></div>';
+			wp_admin_notice( esc_html( sprintf( $msg, $days ) ), array( 'type' => 'warning', 'additional_classes' => array( 'inline' ) ) );
 		}
 		// The 28-day 404 and campaign-event reports are one window each, not days: they have their own flag.
 		$cut = array_filter(
@@ -307,13 +307,13 @@ function aw_si_source_notices(): void {
 		);
 		if ( 'ga4' === $src && $cut ) {
 			/* translators: %s: 404s and/or campaign events. */
-			echo '<div class="notice notice-warning inline"><p>' . esc_html( sprintf( __( 'GA4 returned its row maximum for the 28-day %s report, so the rarest rows of that window may be missing.', 'aw-seo-extras' ), implode( ', ', array_keys( $cut ) ) ) ) . '</p></div>';
+			wp_admin_notice( esc_html( sprintf( __( 'GA4 returned its row maximum for the 28-day %s report, so the rarest rows of that window may be missing.', 'aw-seo-extras' ), implode( ', ', array_keys( $cut ) ) ) ), array( 'type' => 'warning', 'additional_classes' => array( 'inline' ) ) );
 		}
 	}
 	if ( function_exists( 'aw_si_gdelt_on' ) && ! aw_si_gdelt_on() ) {
-		echo '<div class="notice notice-info inline"><p>' . esc_html__( 'News (GDELT) is switched off (Settings): GDELT refuses our requests (HTTP 429), so Rising uses the other sources.', 'aw-seo-extras' ) . '</p></div>';
+		wp_admin_notice( esc_html__( 'News (GDELT) is switched off (Settings): GDELT refuses our requests (HTTP 429), so Rising uses the other sources.', 'aw-seo-extras' ), array( 'type' => 'info', 'additional_classes' => array( 'inline' ) ) );
 	}
-	echo '<div class="notice notice-info inline"><p>' . esc_html__( 'Last updated', 'aw-seo-extras' ) . ' — ' . esc_html( implode( ' · ', $parts ) ) . '</p></div>';
+	wp_admin_notice( esc_html__( 'Last updated', 'aw-seo-extras' ) . ' — ' . esc_html( implode( ' · ', $parts ) ), array( 'type' => 'info', 'additional_classes' => array( 'inline' ) ) );
 }
 
 /** The Search Insights screen: tabs, source notices, then the tab. */
@@ -365,13 +365,13 @@ function aw_si_screen_notices(): void {
 /** The result of the last action (a priority saved, a run finished). */
 function aw_si_action_notices(): void {
 	if ( isset( $_GET['updated'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- message only.
-		echo '<div class="notice notice-success inline"><p>' . esc_html__( 'Priority saved.', 'aw-seo-extras' ) . '</p></div>';
+		wp_admin_notice( esc_html__( 'Priority saved.', 'aw-seo-extras' ), array( 'type' => 'success', 'additional_classes' => array( 'inline' ) ) );
 	}
 	if ( isset( $_GET['none'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- message only.
-		echo '<div class="notice notice-warning inline"><p>' . esc_html__( 'No keyword was selected, so nothing changed.', 'aw-seo-extras' ) . '</p></div>';
+		wp_admin_notice( esc_html__( 'No keyword was selected, so nothing changed.', 'aw-seo-extras' ), array( 'type' => 'warning', 'additional_classes' => array( 'inline' ) ) );
 	}
 	if ( isset( $_GET['ran'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- message only.
-		echo '<div class="notice notice-success inline"><p>' . esc_html__( 'Run finished. See the notices above for each source.', 'aw-seo-extras' ) . '</p></div>';
+		wp_admin_notice( esc_html__( 'Run finished. See the notices above for each source.', 'aw-seo-extras' ), array( 'type' => 'success', 'additional_classes' => array( 'inline' ) ) );
 	}
 }
 
@@ -1183,7 +1183,7 @@ function aw_si_settings_tab( bool $numbers = true ): void {
 	if ( $numbers && current_user_can( 'manage_options' ) ) {
 		echo '<tr><th scope="row">' . esc_html__( 'Numbers', 'aw-seo-extras' ) . '</th><td>';
 		if ( isset( $_GET['saved'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- a notice only.
-			echo '<div class="notice notice-success inline"><p>' . esc_html( 'reset' === $_GET['saved'] ? __( 'Defaults restored.', 'aw-seo-extras' ) : __( 'Settings saved.', 'aw-seo-extras' ) ) . '</p></div>'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			wp_admin_notice( esc_html( 'reset' === $_GET['saved'] ? __( 'Defaults restored.', 'aw-seo-extras' ) : __( 'Settings saved.', 'aw-seo-extras' ) ), array( 'type' => 'success', 'additional_classes' => array( 'inline' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		}
 		aw_si_settings_form();
 		echo '</td></tr>';

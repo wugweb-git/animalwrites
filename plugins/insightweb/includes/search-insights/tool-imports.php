@@ -285,9 +285,9 @@ add_action(
 		$r = isset( $_GET['seeds'] ) ? sanitize_key( wp_unslash( $_GET['seeds'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- message only.
 		if ( 'saved' === $r ) {
 			/* translators: %s: number of seeds. */
-			echo '<div class="notice notice-success inline"><p>' . esc_html( sprintf( _n( 'Seeds saved: %s search.', 'Seeds saved: %s searches.', count( aw_si_tool_seeds() ), 'aw-seo-extras' ), number_format_i18n( count( aw_si_tool_seeds() ) ) ) ) . '</p></div>';
+			wp_admin_notice( esc_html( sprintf( _n( 'Seeds saved: %s search.', 'Seeds saved: %s searches.', count( aw_si_tool_seeds() ), 'aw-seo-extras' ), number_format_i18n( count( aw_si_tool_seeds() ) ) ) ), array( 'type' => 'success', 'additional_classes' => array( 'inline' ) ) );
 		} elseif ( 'same' === $r ) {
-			echo '<div class="notice notice-success inline"><p>' . esc_html__( 'Seeds unchanged: nothing to save.', 'aw-seo-extras' ) . '</p></div>';
+			wp_admin_notice( esc_html__( 'Seeds unchanged: nothing to save.', 'aw-seo-extras' ), array( 'type' => 'success', 'additional_classes' => array( 'inline' ) ) );
 		}
 	}
 );

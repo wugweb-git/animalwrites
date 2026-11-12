@@ -473,6 +473,6 @@ function aw_core_overview_attention( array $groups ): void {
 		}
 	}
 	if ( $items ) {
-		echo '<div class="notice notice-warning inline"><p><strong>Needs attention</strong></p><ul class="ul-disc">' . implode( '', $items ) . '</ul></div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from escaped parts.
+		wp_admin_notice( '<p><strong>Needs attention</strong></p><ul class="ul-disc">' . implode( '', $items ) . '</ul>', array( 'type' => 'warning', 'additional_classes' => array( 'inline' ), 'paragraph_wrap' => false ) );
 	}
 }

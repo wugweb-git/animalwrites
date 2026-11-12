@@ -414,7 +414,7 @@ function aw_elsewhere_screen() {
 			}
 		}
 		update_option( 'aw_elsewhere', $rows, false );
-		echo '<div class="notice notice-success"><p>Saved.</p></div>';
+		wp_admin_notice( 'Saved.', array( 'type' => 'success' ) );
 	}
 	$rows = array_merge( aw_elsewhere_links(), array_fill( 0, 4, array() ) );
 	echo '<div class="wrap"><h1>Contact links</h1>';

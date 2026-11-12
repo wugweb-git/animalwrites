@@ -118,7 +118,7 @@ add_action(
 		$msg = get_transient( 'aw_place_error_' . get_current_user_id() );
 		if ( $msg ) {
 			delete_transient( 'aw_place_error_' . get_current_user_id() );
-			echo '<div class="notice notice-error"><p>' . esc_html( $msg ) . '</p></div>';
+			wp_admin_notice( esc_html( $msg ), array( 'type' => 'error' ) );
 		}
 	}
 );

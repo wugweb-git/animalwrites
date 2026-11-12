@@ -205,7 +205,7 @@ function directoryweb_plain_page( string $title, string $screen ): void {
 	if ( function_exists( 'kits_shell_app' ) ) {
 		echo '<p><a class="button button-primary" href="' . esc_url( directoryweb_ui_url( $screen ) ) . '">' . esc_html__( 'Open the new screen', 'directoryweb' ) . '</a></p>';
 	} else {
-		echo '<div class="notice notice-warning inline"><p>' . esc_html__( 'This screen needs Kits Core.', 'directoryweb' ) . '</p></div>';
+		wp_admin_notice( esc_html__( 'This screen needs Kits Core.', 'directoryweb' ), array( 'type' => 'warning', 'additional_classes' => array( 'inline' ) ) );
 	}
 	echo '<p><a href="' . esc_url( add_query_arg( 'post_type', 'aw_listing', admin_url( 'edit.php' ) ) ) . '">' . esc_html__( 'Directory listings', 'directoryweb' ) . '</a></p></div>';
 }

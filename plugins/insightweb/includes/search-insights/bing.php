@@ -493,10 +493,10 @@ add_action(
 			return;
 		}
 		if ( '' !== $r['error'] ) {
-			echo '<div class="notice notice-error inline"><p>' . esc_html( $r['error'] ) . '</p></div>';
+			wp_admin_notice( esc_html( $r['error'] ), array( 'type' => 'error', 'additional_classes' => array( 'inline' ) ) );
 			return;
 		}
 		/* translators: 1: searches without a record, 2: records written, 3: the searches. */
-		echo '<div class="notice notice-success inline"><p>' . esc_html( sprintf( __( 'Bing searches without a keyword record: %1$s. Records written: %2$s. %3$s', 'aw-seo-extras' ), number_format_i18n( (int) $r['count'] ), number_format_i18n( (int) $r['added'] ), implode( ', ', (array) $r['list'] ) ) ) . '</p></div>';
+		wp_admin_notice( esc_html( sprintf( __( 'Bing searches without a keyword record: %1$s. Records written: %2$s. %3$s', 'aw-seo-extras' ), number_format_i18n( (int) $r['count'] ), number_format_i18n( (int) $r['added'] ), implode( ', ', (array) $r['list'] ) ) ), array( 'type' => 'success', 'additional_classes' => array( 'inline' ) ) );
 	}
 );

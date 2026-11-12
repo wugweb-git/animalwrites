@@ -318,7 +318,7 @@ add_action(
 			}
 		}
 		$url = add_query_arg( array( 'page' => 'mailweb', 'folder' => 'forms' ), admin_url( 'admin.php' ) );
-		echo '<div class="notice notice-info"><p><strong>New form entries:</strong> ' . esc_html( implode( ', ', $parts ) ) . '. <a href="' . esc_url( $url ) . '">Open Plugins → MailWeb → Website forms</a></p></div>';
+		wp_admin_notice( '<strong>New form entries:</strong> ' . esc_html( implode( ', ', $parts ) ) . '. <a href="' . esc_url( $url ) . '">Open Plugins → MailWeb → Website forms</a>', array( 'type' => 'info' ) );
 	}
 );
 
@@ -376,12 +376,12 @@ function aw_mail_site_check() {
 	$last = (array) get_option( 'mailweb_last_error', array() );
 	// An error older than a week, with sending running, is history: MailWeb → Dashboard keeps it.
 	$recent = $last && (int) ( $last['at'] ?? 0 ) > time() - WEEK_IN_SECONDS;
-	echo '<div class="notice ' . ( $pause ? 'notice-error' : ( $recent ? 'notice-warning' : 'notice-success' ) ) . ' inline"><p><strong>' . ( $pause ? 'Paused.' : 'Running.' ) . '</strong> ';
+	$text = '<strong>' . ( $pause ? 'Paused.' : 'Running.' ) . '</strong> ';
 	if ( $pause ) {
-		echo esc_html( 'Refused ' . wp_date( 'j M Y, H:i', (int) $pause['at'] ) . ': ' . $pause['error'] ) . ' <a href="' . esc_url( mailweb_settings_url( 'sending', array(), 'cap' ) ) . '">Resume on Plugins → MailWeb → Settings → Site sending</a>.';
+		$text .= esc_html( 'Refused ' . wp_date( 'j M Y, H:i', (int) $pause['at'] ) . ': ' . $pause['error'] ) . ' <a href="' . esc_url( mailweb_settings_url( 'sending', array(), 'cap' ) ) . '">Resume on Plugins → MailWeb → Settings → Site sending</a>.';
 	} else {
-		echo $recent ? esc_html( 'Last error ' . wp_date( 'j M H:i', (int) $last['at'] ) . ': ' . $last['error'] ) : 'No errors in the last 7 days.';
+		$text .= $recent ? esc_html( 'Last error ' . wp_date( 'j M H:i', (int) $last['at'] ) . ': ' . $last['error'] ) : 'No errors in the last 7 days.';
 	}
-	echo '</p></div>';
+	wp_admin_notice( $text, array( 'type' => $pause ? 'error' : ( $recent ? 'warning' : 'success' ), 'additional_classes' => array( 'inline' ) ) );
 }
 add_action( 'aw_site_check_after', 'aw_mail_site_check' );

@@ -250,7 +250,7 @@ function aw_seo_overview_body() {
 
 	echo '<p>' . esc_html__( 'What the plugin adds to Rank Math (free) for animalwrites.in. Rank Math holds everything else; where a module’s settings live in Rank Math, the link goes there.', 'aw-seo-extras' ) . '</p>';
 	if ( $attn ) {
-		echo '<div class="notice notice-warning inline"><p><strong>' . esc_html__( 'Needs attention', 'aw-seo-extras' ) . '</strong></p><ul class="ul-disc">' . implode( '', $attn ) . '</ul></div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from escaped parts.
+		wp_admin_notice( '<p><strong>' . esc_html__( 'Needs attention', 'aw-seo-extras' ) . '</strong></p><ul class="ul-disc">' . implode( '', $attn ) . '</ul>', array( 'type' => 'warning', 'additional_classes' => array( 'inline' ), 'paragraph_wrap' => false ) );
 	}
 	echo '<h2>' . esc_html__( 'Modules', 'aw-seo-extras' ) . '</h2>';
 	aw_seo_extras_simple_table(

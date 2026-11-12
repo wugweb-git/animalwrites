@@ -847,7 +847,7 @@ function aw_faq_editor( $ctx ) {
 		$fall = '' === $own ? (string) ( $ctx['subject'] ?? '' ) : ''; // the subject the heading uses now (after the aw_faq_context filters)
 		echo '<p><label for="aw-faq-subject"><strong>Subject</strong> (the heading reads “' . esc_html( aw_faq_heading( 'Subject' ) ) . '”; a long subject gets a plain heading)</label><br><input type="text" class="large-text" id="aw-faq-subject" name="aw_faq_subject" value="' . esc_attr( $own ) . '" placeholder="' . esc_attr( $fall ) . '"></p>';
 		if ( '' === $own && ! empty( $ctx['subject_missing'] ) ) {
-			echo '<div class="notice notice-warning inline"><p>' . esc_html( 'No subject: the heading uses the page title, “' . $ctx['head'] . '”.' ) . '</p></div>';
+			wp_admin_notice( esc_html( 'No subject: the heading uses the page title, “' . $ctx['head'] . '”.' ), array( 'type' => 'warning', 'additional_classes' => array( 'inline' ) ) );
 		}
 		$line = (string) get_post_meta( $ctx['id'], 'aw_faq_line', true );
 		echo '<p><label for="aw-faq-line"><strong>Subtitle</strong> (one line under the heading; leave empty for none)</label><br><input type="text" class="large-text" id="aw-faq-line" name="aw_faq_line" value="' . esc_attr( $line ) . '"></p>';
@@ -873,9 +873,9 @@ function aw_faq_editor( $ctx ) {
 	);
 	$shown = count( array_filter( $rows, fn( $x ) => $x['shown'] ) );
 	if ( '' !== $r['note'] ) {
-		echo '<div class="notice notice-warning inline"><p>' . esc_html( $r['note'] ) . '</p></div>';
+		wp_admin_notice( esc_html( $r['note'] ), array( 'type' => 'warning', 'additional_classes' => array( 'inline' ) ) );
 	} elseif ( $r['ok'] ) {
-		echo '<div class="notice notice-info inline"><p>' . esc_html( sprintf( 'The page shows %d questions.', $shown ) ) . '</p></div>';
+		wp_admin_notice( esc_html( sprintf( 'The page shows %d questions.', $shown ) ), array( 'type' => 'info', 'additional_classes' => array( 'inline' ) ) );
 	}
 	$labels = array( 'auto' => 'Auto (from this page’s data)', 'edited' => 'Edited (kept as written)', 'removed' => 'Auto, removed', 'own' => 'Own' );
 	$blanks = max( 1, 6 - count( $rows ) );

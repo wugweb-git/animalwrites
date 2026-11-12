@@ -516,7 +516,7 @@ function aw_seo_settings_page() {
 	echo '<div class="wrap"><h1>RankWeb settings</h1>';
 	aw_seo_screen_tabs();
 	if ( isset( $_GET['saved'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-		echo '<div class="notice notice-success is-dismissible"><p>' . ( 'reset' === $_GET['saved'] ? 'Defaults restored.' : 'Settings saved.' ) . ' A module switched on or off takes effect on the next page load.</p></div>'; // phpcs:ignore WordPress.Security.NonceVerification
+		wp_admin_notice( ( 'reset' === $_GET['saved'] ? 'Defaults restored.' : 'Settings saved.' ) . ' A module switched on or off takes effect on the next page load.', array( 'type' => 'success', 'dismissible' => true ) ); // phpcs:ignore WordPress.Security.NonceVerification
 	}
 	echo '<nav class="nav-tab-wrapper" aria-label="Settings">';
 	foreach ( aw_seo_setting_tabs() as $k => $t ) {

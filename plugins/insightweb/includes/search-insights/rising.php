@@ -758,15 +758,15 @@ function aw_si_rising_tab(): void {
 	// phpcs:disable WordPress.Security.NonceVerification -- messages only.
 	if ( isset( $_GET['marked'] ) ) {
 		$n = absint( wp_unslash( $_GET['marked'] ) );
-		echo '<div class="notice ' . ( $n ? 'notice-success' : 'notice-warning' ) . ' inline"><p>' . esc_html( $n ? __( 'Saved.', 'aw-seo-extras' ) : __( 'No term was selected, so nothing changed.', 'aw-seo-extras' ) ) . '</p></div>';
+		wp_admin_notice( esc_html( $n ? __( 'Saved.', 'aw-seo-extras' ) : __( 'No term was selected, so nothing changed.', 'aw-seo-extras' ) ), array( 'type' => $n ? 'success' : 'warning', 'additional_classes' => array( 'inline' ) ) );
 	}
 	if ( isset( $_GET['pasted'] ) ) {
 		/* translators: 1: lines stored, 2: lines skipped. */
-		echo '<div class="notice notice-success inline"><p>' . esc_html( sprintf( __( 'Pasted: %1$d lines stored, %2$d skipped.', 'aw-seo-extras' ), absint( wp_unslash( $_GET['pasted'] ) ), absint( wp_unslash( $_GET['skipped'] ?? 0 ) ) ) ) . '</p></div>';
+		wp_admin_notice( esc_html( sprintf( __( 'Pasted: %1$d lines stored, %2$d skipped.', 'aw-seo-extras' ), absint( wp_unslash( $_GET['pasted'] ) ), absint( wp_unslash( $_GET['skipped'] ?? 0 ) ) ) ), array( 'type' => 'success', 'additional_classes' => array( 'inline' ) ) );
 	}
 	if ( isset( $_GET['added'] ) ) {
 		$msg = 'updated' === sanitize_key( wp_unslash( $_GET['added'] ) ) ? __( 'Term added to the one already in the list (its source and dates updated).', 'aw-seo-extras' ) : __( 'Term added: it shows under New.', 'aw-seo-extras' );
-		echo '<div class="notice notice-success inline"><p>' . esc_html( $msg ) . '</p></div>';
+		wp_admin_notice( esc_html( $msg ), array( 'type' => 'success', 'additional_classes' => array( 'inline' ) ) );
 	}
 	if ( isset( $_GET['not_added'] ) ) {
 		$why = array(
@@ -777,7 +777,7 @@ function aw_si_rising_tab(): void {
 		);
 		$key = sanitize_key( wp_unslash( $_GET['not_added'] ) );
 		/* translators: %s: the reason. */
-		echo '<div class="notice notice-warning inline"><p>' . esc_html( sprintf( __( 'Term not added: %s.', 'aw-seo-extras' ), $why[ $key ] ?? __( 'it could not be stored', 'aw-seo-extras' ) ) ) . '</p></div>';
+		wp_admin_notice( esc_html( sprintf( __( 'Term not added: %s.', 'aw-seo-extras' ), $why[ $key ] ?? __( 'it could not be stored', 'aw-seo-extras' ) ) ), array( 'type' => 'warning', 'additional_classes' => array( 'inline' ) ) );
 	}
 	// phpcs:enable
 	echo '<p>' . esc_html__( 'Terms rising in India from free sources: Trends trending now, Wikipedia pageviews and Indian news (GDELT) daily; Google autocomplete and Trends rising related searches weekly. Growth is how many times the usual level (– when the source gives no ratio). Nothing here changes Rank Math or the Sourcing lists: mark each term Noted or Dismissed.', 'aw-seo-extras' ) . '</p>';

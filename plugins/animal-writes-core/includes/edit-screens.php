@@ -980,7 +980,7 @@ function aw_edit_screens_render( array $all ): void {
 	$text  = esc_html( sprintf( '%d %s on %d %s, %d %s on admin pages.', $n_box, 1 === $n_box ? 'box' : 'boxes', $n_scr, 1 === $n_scr ? 'edit screen' : 'edit screens', $admin, 1 === $admin ? 'widget' : 'widgets' ) );
 	$text .= ' ' . ( $unmapped ? '<a href="#aw-es-unmapped">' . esc_html( sprintf( 1 === $unmapped ? '%d box or field is not mapped yet.' : '%d boxes or fields are not mapped yet.', $unmapped ) ) . '</a>' : 'Every box is mapped.' );
 	$text .= ' ' . ( $twice ? '<a href="#aw-es-twice">' . esc_html( sprintf( 1 === count( $twice ) ? '%d field is edited in two places.' : '%d fields are edited in two places.', count( $twice ) ) ) . '</a>' : 'No field is edited in two places.' );
-	echo '<div class="notice ' . ( $unmapped || $twice ? 'notice-warning' : 'notice-success' ) . ' inline"><p>' . $text . '</p></div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above.
+	wp_admin_notice( $text, array( 'type' => $unmapped || $twice ? 'warning' : 'success', 'additional_classes' => array( 'inline' ) ) );
 	if ( $unmapped ) {
 		aw_edit_screens_unmapped_section( $all, $screens );
 	}

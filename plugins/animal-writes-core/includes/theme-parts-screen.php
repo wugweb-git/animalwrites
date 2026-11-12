@@ -159,7 +159,7 @@ function aw_theme_parts_screen() {
 		echo '<div class="wrap"><h1>' . esc_html( 'Theme parts' ) . '</h1><p>' . esc_html( $intro ) . '</p>';
 	}
 	if ( ! aw_core_theme_parts_on() ) {
-		echo '<div class="notice notice-warning inline"><p>' . esc_html( 'The Animal Writes child theme is active, so it serves these parts itself and the copies listed here are not used.' ) . '</p></div>';
+		wp_admin_notice( esc_html( 'The Animal Writes child theme is active, so it serves these parts itself and the copies listed here are not used.' ), array( 'type' => 'warning', 'additional_classes' => array( 'inline' ) ) );
 	}
 	echo '<h2>' . esc_html( 'Functions' ) . '</h2>';
 	aw_core_simple_table(

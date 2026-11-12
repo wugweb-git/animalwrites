@@ -442,10 +442,10 @@ function aw_media_merge_screen() {
 	$log    = aw_media_merge_log();
 	echo '<div class="wrap"><h1>Duplicate files</h1>';
 	if ( isset( $_GET['aw_mm'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		echo '<div class="notice notice-success is-dismissible"><p>Checked ' . (int) $_GET['aw_mm'] . ' group(s). Merged groups show the date; blocked ones show why.</p></div>'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		wp_admin_notice( 'Checked ' . (int) $_GET['aw_mm'] . ' group(s). Merged groups show the date; blocked ones show why.', array( 'type' => 'success', 'dismissible' => true ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	}
 	if ( isset( $_GET['aw_mm_undo'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		echo '<div class="notice notice-success is-dismissible"><p>Group ' . (int) $_GET['aw_mm_undo'] . ' put back as it was.' . ( ! empty( $_GET['aw_mm_skip'] ) ? ' ' . (int) $_GET['aw_mm_skip'] . ' item(s) changed after the merge and keep their newer value.' : '' ) . '</p></div>'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		wp_admin_notice( 'Group ' . (int) $_GET['aw_mm_undo'] . ' put back as it was.' . ( ! empty( $_GET['aw_mm_skip'] ) ? ' ' . (int) $_GET['aw_mm_skip'] . ' item(s) changed after the merge and keep their newer value.' : '' ), array( 'type' => 'success', 'dismissible' => true ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	}
 	echo '<p>The same picture uploaded more than once. A merge points every use at one copy and gives the extra copies the Trash status; files stay on disk and nothing is deleted. Undo puts everything back. A group is blocked when an extra is a featured image, hosted file, category photo or named in an option.</p>';
 	$merged  = 0;

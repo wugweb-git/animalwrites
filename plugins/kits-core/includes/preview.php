@@ -242,7 +242,7 @@ function kits_preview_page() {
 	if ( isset( $_POST['kits_preview_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['kits_preview_nonce'] ) ), 'kits_preview_ips' ) ) {
 		$lines = array_filter( array_map( 'trim', preg_split( '/[\r\n]+/', sanitize_textarea_field( wp_unslash( $_POST['kits_preview_ips'] ?? '' ) ) ) ) );
 		update_option( 'kits_preview_ips', implode( "\n", $lines ), false );
-		echo '<div class="updated"><p>Saved.</p></div>';
+		wp_admin_notice( 'Saved.', array( 'type' => 'success' ) );
 	}
 	echo '<div class="wrap"><h1>Preview</h1>';
 	kits_admin_tabs( 'kits-preview' );

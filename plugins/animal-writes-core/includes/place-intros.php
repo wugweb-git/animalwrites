@@ -182,10 +182,10 @@ function aw_place_intros_page(): void {
 		'utf8'    => array( 'error', __( 'The intro has characters that are not text (often from a paste). Type them again. Nothing was saved.', 'directoryweb' ) ),
 	);
 	if ( isset( $notices[ $msg ] ) ) {
-		echo '<div class="notice notice-' . esc_attr( $notices[ $msg ][0] ) . ' is-dismissible"><p>' . esc_html( $notices[ $msg ][1] ) . '</p></div>';
+		wp_admin_notice( esc_html( $notices[ $msg ][1] ), array( 'type' => $notices[ $msg ][0], 'dismissible' => true ) );
 	}
 	if ( '' !== $key && ! $place ) {
-		echo '<div class="notice notice-error"><p>' . esc_html__( 'That place is not in the list of states and districts.', 'directoryweb' ) . '</p></div>';
+		wp_admin_notice( esc_html__( 'That place is not in the list of states and districts.', 'directoryweb' ), array( 'type' => 'error' ) );
 	}
 	if ( $place ) {
 		aw_place_intro_form( $place );

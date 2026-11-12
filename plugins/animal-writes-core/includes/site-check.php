@@ -170,7 +170,7 @@ function aw_site_check_results() {
 	}
 	$bad = array_filter( $last['rows'], fn( $r ) => '' !== $r[4] );
 	$sum = aw_site_check_summary();
-	echo '<div class="notice ' . esc_attr( $bad ? 'notice-error' : ( $sum['ok'] ? 'notice-success' : 'notice-warning' ) ) . ' inline"><p>' . esc_html( $sum['text'] ) . '</p></div>';
+	wp_admin_notice( esc_html( $sum['text'] ), array( 'type' => $bad ? 'error' : ( $sum['ok'] ? 'success' : 'warning' ), 'additional_classes' => array( 'inline' ) ) );
 	$cells = array();
 	foreach ( $last['rows'] as $r ) {
 		$cells[] = array(
@@ -194,6 +194,6 @@ function aw_site_check_joined() {
 		return;
 	}
 	$s = kits_parts_bundle_status();
-	echo '<div class="notice ' . esc_attr( $s['warn'] ? 'notice-warning' : 'notice-info' ) . ' inline"><p><strong>' . esc_html( 'Joined component files:' ) . '</strong> ' . esc_html( trim( $s['text'] . '. ' . $s['fix'] ) ) . '</p></div>';
+	wp_admin_notice( '<strong>' . esc_html( 'Joined component files:' ) . '</strong> ' . esc_html( trim( $s['text'] . '. ' . $s['fix'] ) ), array( 'type' => $s['warn'] ? 'warning' : 'info', 'additional_classes' => array( 'inline' ) ) );
 }
 add_action( 'aw_site_check_after', 'aw_site_check_joined' );

@@ -258,7 +258,8 @@ function kits_admin_app_page(): void {
 	settings_errors(); // "Settings saved." after a section that saves through options.php.
 	if ( ! kits_admin_app_ready() ) {
 		// The screen's script or the shell could not load.
-		echo '<div class="notice notice-warning"><p>' . esc_html__( 'This screen could not load.', 'kits-core' ) . '</p></div></div>';
+		wp_admin_notice( esc_html__( 'This screen could not load.', 'kits-core' ), array( 'type' => 'warning' ) );
+		echo '</div>';
 		return;
 	}
 	echo '<div id="kits-admin-app">';

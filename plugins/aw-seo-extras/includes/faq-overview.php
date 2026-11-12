@@ -232,13 +232,13 @@ function aw_faq_admin_body() {
 	$table = new AW_FAQ_List_Table( $ix['rows'] );
 	$table->prepare_items();
 	if ( isset( $_GET['approved'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- a notice after the redirect
-		echo '<div class="notice notice-success is-dismissible"><p>' . esc_html( sprintf( '%d questions approved.', (int) $_GET['approved'] ) ) . '</p></div>'; // phpcs:ignore WordPress.Security.NonceVerification
+		wp_admin_notice( esc_html( sprintf( '%d questions approved.', (int) $_GET['approved'] ) ), array( 'type' => 'success', 'dismissible' => true ) ); // phpcs:ignore WordPress.Security.NonceVerification
 	}
 	if ( isset( $_GET['counted'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- a notice after the redirect
-		echo '<div class="notice notice-success is-dismissible"><p>Counted again.</p></div>';
+		wp_admin_notice( 'Counted again.', array( 'type' => 'success', 'dismissible' => true ) );
 	}
 	if ( isset( $_GET['types_saved'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- a notice after the redirect
-		echo '<div class="notice notice-success is-dismissible"><p>Saved: the FAQ box is on the ticked types.</p></div>';
+		wp_admin_notice( 'Saved: the FAQ box is on the ticked types.', array( 'type' => 'success', 'dismissible' => true ) );
 	}
 	echo '<p>Every page’s questions are in its own FAQ box: open it with Edit. A page shows its FAQ when its box has enough questions to show. This list: the pages that show one, and the draft questions waiting for approval.</p>';
 	aw_faq_types_form();

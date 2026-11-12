@@ -367,7 +367,7 @@ function aw_si_links_import_notice(): void {
 	}
 	delete_transient( 'aw_si_links_import_' . get_current_user_id() );
 	if ( '' !== (string) ( $r['error'] ?? '' ) ) {
-		echo '<div class="notice notice-error inline"><p>' . esc_html( (string) $r['error'] ) . '</p></div>';
+		wp_admin_notice( esc_html( (string) $r['error'] ), array( 'type' => 'error', 'additional_classes' => array( 'inline' ) ) );
 		return;
 	}
 	$kinds = array(
@@ -378,7 +378,7 @@ function aw_si_links_import_notice(): void {
 	);
 	/* translators: 1: kind of export, 2: links added, 3: links already there (dates updated), 4: linked pages, 5: DR values, 6: rows skipped. */
 	$msg = sprintf( __( '%1$s imported: %2$s links added, %3$s already there (dates updated), %4$s linked pages, %5$s DR values; %6$s rows skipped.', 'aw-seo-extras' ), $kinds[ $r['kind'] ] ?? '', number_format_i18n( (int) $r['added'] ), number_format_i18n( (int) $r['updated'] ), number_format_i18n( (int) $r['pages'] ), number_format_i18n( (int) $r['dr'] ), number_format_i18n( (int) $r['skipped'] + (int) $r['failed'] ) );
-	echo '<div class="notice notice-success inline"><p>' . esc_html( $msg ) . '</p></div>';
+	wp_admin_notice( esc_html( $msg ), array( 'type' => 'success', 'additional_classes' => array( 'inline' ) ) );
 }
 
 /** The last read of each source: Search Console imports and reads, Bing Webmaster's run, Google Alerts, DR. */

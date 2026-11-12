@@ -663,11 +663,11 @@ add_action(
 		$done = sanitize_key( wp_unslash( $_GET['aw_social'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification -- a result notice only
 		$id   = absint( wp_unslash( $_GET['aw_social_id'] ?? 0 ) ); // phpcs:ignore WordPress.Security.NonceVerification
 		if ( 'created' === $done && $id ) {
-			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html( 'Social post added as pending: ' ) . '<a href="' . esc_url( (string) get_edit_post_link( $id ) ) . '">' . esc_html( get_the_title( $id ) ) . '</a>. ' . esc_html( 'Write its summary, then publish it.' ) . '</p></div>';
+			wp_admin_notice( esc_html( 'Social post added as pending: ' ) . '<a href="' . esc_url( (string) get_edit_post_link( $id ) ) . '">' . esc_html( get_the_title( $id ) ) . '</a>. ' . esc_html( 'Write its summary, then publish it.' ), array( 'type' => 'success', 'dismissible' => true ) );
 		} elseif ( 'duplicate' === $done && $id ) {
-			echo '<div class="notice notice-warning is-dismissible"><p>' . esc_html( 'That post is already saved: ' ) . '<a href="' . esc_url( (string) get_edit_post_link( $id ) ) . '">' . esc_html( get_the_title( $id ) ) . '</a> (' . esc_html( (string) get_post_status( $id ) ) . ').</p></div>';
+			wp_admin_notice( esc_html( 'That post is already saved: ' ) . '<a href="' . esc_url( (string) get_edit_post_link( $id ) ) . '">' . esc_html( get_the_title( $id ) ) . '</a> (' . esc_html( (string) get_post_status( $id ) ) . ').', array( 'type' => 'warning', 'dismissible' => true ) );
 		} elseif ( 'invalid' === $done ) {
-			echo '<div class="notice notice-error is-dismissible"><p>' . esc_html( 'Nothing added: paste the full link to the post (https://…).' ) . '</p></div>';
+			wp_admin_notice( esc_html( 'Nothing added: paste the full link to the post (https://…).' ), array( 'type' => 'error', 'dismissible' => true ) );
 		}
 		$terms = defined( 'AW_CAMPAIGN_LINK' ) ? get_terms( array( 'taxonomy' => AW_CAMPAIGN_LINK, 'hide_empty' => false ) ) : array();
 		echo '<h2>' . esc_html( 'Add a social post from its link' ) . '</h2>';

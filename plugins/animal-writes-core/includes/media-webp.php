@@ -414,16 +414,16 @@ function aw_media_webp_screen() {
 	// phpcs:disable WordPress.Security.NonceVerification.Recommended
 	echo '<div class="wrap"><h1>Make WebP</h1>';
 	if ( isset( $_GET['aw_mw'] ) ) {
-		echo '<div class="notice notice-success is-dismissible"><p>' . (int) $_GET['aw_mw'] . ' image(s) converted.' . ( ! empty( $_GET['aw_mw_fail'] ) ? ' ' . (int) $_GET['aw_mw_fail'] . ' could not be converted and keep their old sizes (see Status).' : '' ) . '</p></div>';
+		wp_admin_notice( (int) $_GET['aw_mw'] . ' image(s) converted.' . ( ! empty( $_GET['aw_mw_fail'] ) ? ' ' . (int) $_GET['aw_mw_fail'] . ' could not be converted and keep their old sizes (see Status).' : '' ), array( 'type' => 'success', 'dismissible' => true ) );
 	}
 	if ( isset( $_GET['aw_mw_undo'] ) ) {
-		echo '<div class="notice notice-success is-dismissible"><p>Image ' . (int) $_GET['aw_mw_undo'] . ' has its old sizes back.</p></div>';
+		wp_admin_notice( 'Image ' . (int) $_GET['aw_mw_undo'] . ' has its old sizes back.', array( 'type' => 'success', 'dismissible' => true ) );
 	}
 	if ( isset( $_GET['aw_mw_undo_fail'] ) ) {
-		echo '<div class="notice notice-error is-dismissible"><p>Image ' . (int) $_GET['aw_mw_undo_fail'] . ' could not be put back.</p></div>';
+		wp_admin_notice( 'Image ' . (int) $_GET['aw_mw_undo_fail'] . ' could not be put back.', array( 'type' => 'error', 'dismissible' => true ) );
 	}
 	if ( isset( $_GET['aw_mw_off'] ) ) {
-		echo '<div class="notice notice-error is-dismissible"><p>This server cannot write WebP, so nothing was converted.</p></div>';
+		wp_admin_notice( 'This server cannot write WebP, so nothing was converted.', array( 'type' => 'error', 'dismissible' => true ) );
 	}
 	// phpcs:enable WordPress.Security.NonceVerification.Recommended
 	$supported = wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) );

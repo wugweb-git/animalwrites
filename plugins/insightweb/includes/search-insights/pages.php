@@ -144,13 +144,13 @@ add_action(
 	'aw_si_tab_pages',
 	function () {
 		if ( isset( $_GET['noted'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- message only.
-			echo '<div class="notice notice-success inline"><p>' . esc_html__( 'Clarity note saved.', 'aw-seo-extras' ) . '</p></div>';
+			wp_admin_notice( esc_html__( 'Clarity note saved.', 'aw-seo-extras' ), array( 'type' => 'success', 'additional_classes' => array( 'inline' ) ) );
 		}
 		if ( isset( $_GET['not_noted'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- message only.
-			echo '<div class="notice notice-warning inline"><p>' . esc_html__( 'The note was empty or the page unknown, so nothing was saved.', 'aw-seo-extras' ) . '</p></div>';
+			wp_admin_notice( esc_html__( 'The note was empty or the page unknown, so nothing was saved.', 'aw-seo-extras' ), array( 'type' => 'warning', 'additional_classes' => array( 'inline' ) ) );
 		}
 		if ( ! aw_si_clarity_on() ) {
-			echo '<div class="notice notice-info inline"><p>' . esc_html__( 'Clarity figures start once the Clarity token is added under Animal Writes → Keys as AW_CLARITY_TOKEN (Clarity → Settings → Data Export → Generate new API token).', 'aw-seo-extras' ) . '</p></div>';
+			wp_admin_notice( esc_html__( 'Clarity figures start once the Clarity token is added under Animal Writes → Keys as AW_CLARITY_TOKEN (Clarity → Settings → Data Export → Generate new API token).', 'aw-seo-extras' ), array( 'type' => 'info', 'additional_classes' => array( 'inline' ) ) );
 		}
 		$note = isset( $_GET['note'] ) ? aw_si_path( home_url( sanitize_text_field( wp_unslash( $_GET['note'] ) ) ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- opens a form only.
 		if ( '' !== $note ) {

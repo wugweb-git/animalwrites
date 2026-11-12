@@ -366,17 +366,17 @@ function kits_transfer_result(): void {
 	}
 	delete_transient( 'kits_transfer_result_' . $user );
 	$ok = empty( $result['error'] );
-	echo '<div class="notice ' . ( $ok ? 'notice-success' : 'notice-error' ) . ' is-dismissible"><p><strong>' . esc_html( (string) $result['title'] ) . '</strong></p>';
+	$body = '<p><strong>' . esc_html( (string) $result['title'] ) . '</strong></p>';
 	if ( ! $ok ) {
-		echo '<p>' . esc_html( (string) $result['error'] ) . '</p>';
+		$body .= '<p>' . esc_html( (string) $result['error'] ) . '</p>';
 	} else {
-		echo '<ul>';
+		$body .= '<ul>';
 		foreach ( (array) $result['lines'] as $line ) {
-			echo '<li>' . esc_html( (string) $line ) . '</li>';
+			$body .= '<li>' . esc_html( (string) $line ) . '</li>';
 		}
-		echo '</ul>';
+		$body .= '</ul>';
 	}
-	echo '</div>';
+	wp_admin_notice( $body, array( 'type' => $ok ? 'success' : 'error', 'dismissible' => true, 'paragraph_wrap' => false ) );
 }
 
 /** Tools → Export. */

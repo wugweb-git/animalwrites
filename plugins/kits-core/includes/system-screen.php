@@ -418,7 +418,7 @@ function kits_system_page() {
 	kits_admin_tabs( 'kits-system' );
 	echo '<p>The design system as it is in the code: ' . count( $reg['items'] ) . ' entries from the Kits master and this site\'s theme. Read-only; change a component in its file, then its entry in <code>kits-registry.json</code>. Colours, fonts and sizes: Appearance → Editor → Styles. Patterns: Editor → Patterns. Menus: Editor → Navigation.</p>';
 	if ( $missing ) {
-		echo '<div class="notice notice-error inline"><p><strong>' . count( $missing ) . ' class(es) in use with no registry entry.</strong> The deploy check stops on these.</p><details><summary>' . esc_html( 'Classes' ) . '</summary><p>' . esc_html( implode( ', ', $missing ) ) . '</p></details></div>';
+		wp_admin_notice( '<p><strong>' . count( $missing ) . ' class(es) in use with no registry entry.</strong> The deploy check stops on these.</p><details><summary>' . esc_html( 'Classes' ) . '</summary><p>' . esc_html( implode( ', ', $missing ) ) . '</p></details>', array( 'type' => 'error', 'additional_classes' => array( 'inline' ), 'paragraph_wrap' => false ) );
 	}
 	// The Kits tabs are above; this screen's own parts are links under them, as on core list screens.
 	echo '<ul class="subsubsub">';

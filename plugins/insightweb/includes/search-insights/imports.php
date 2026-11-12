@@ -309,7 +309,7 @@ add_action(
 			return;
 		}
 		if ( '' !== $r['error'] ) {
-			echo '<div class="notice notice-error inline"><p>' . esc_html( $r['error'] ) . '</p></div>';
+			wp_admin_notice( esc_html( $r['error'] ), array( 'type' => 'error', 'additional_classes' => array( 'inline' ) ) );
 			return;
 		}
 		/* translators: 1: import kind, 2: rows stored, 3: rows skipped. */
@@ -322,7 +322,7 @@ add_action(
 			/* translators: %s: terms. */
 			$msg .= ' ' . sprintf( __( '%s terms that are not keywords yet went to Rising.', 'aw-seo-extras' ), number_format_i18n( (int) $r['rising'] ) );
 		}
-		echo '<div class="notice notice-success inline"><p>' . esc_html( $msg ) . '</p></div>';
+		wp_admin_notice( esc_html( $msg ), array( 'type' => 'success', 'additional_classes' => array( 'inline' ) ) );
 	}
 );
 

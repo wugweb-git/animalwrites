@@ -162,7 +162,7 @@ add_action(
 		$msg = get_transient( $key );
 		if ( $msg ) {
 			delete_transient( $key );
-			echo '<div class="notice notice-error is-dismissible"><p>' . esc_html( $msg ) . '</p></div>';
+			wp_admin_notice( esc_html( $msg ), array( 'type' => 'error', 'dismissible' => true ) );
 		}
 	}
 );

@@ -36,7 +36,7 @@ add_action(
 				'admin_notices',
 				function () {
 					if ( current_user_can( 'activate_plugins' ) ) {
-						echo '<div class="notice notice-warning"><p>' . esc_html__( 'RankWeb does nothing until Rank Math SEO is active.', 'aw-seo-extras' ) . '</p></div>';
+						wp_admin_notice( esc_html__( 'RankWeb does nothing until Rank Math SEO is active.', 'aw-seo-extras' ), array( 'type' => 'warning' ) );
 					}
 				}
 			);

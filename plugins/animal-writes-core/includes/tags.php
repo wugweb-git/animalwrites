@@ -215,7 +215,7 @@ add_action(
 				$missing[] = $t->name . ' (' . $t->slug . ')';
 			}
 		}
-		echo '<div class="notice ' . ( $missing ? 'notice-warning' : 'notice-success' ) . '"><p><strong>Tags without their own icon:</strong> ' . ( $missing ? esc_html( implode( ', ', $missing ) ) . '. They show the default icon until one is added in the theme (aw.css) and in AW_TAG_ICONS (tags.php).' : 'none. Every tag has its own icon.' ) . '</p></div>';
+		wp_admin_notice( '<strong>Tags without their own icon:</strong> ' . ( $missing ? esc_html( implode( ', ', $missing ) ) . '. They show the default icon until one is added in the theme (aw.css) and in AW_TAG_ICONS (tags.php).' : 'none. Every tag has its own icon.' ), array( 'type' => $missing ? 'warning' : 'success' ) );
 	}
 );
 

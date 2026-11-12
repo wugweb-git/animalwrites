@@ -294,7 +294,7 @@ function aw_si_checklist_handle(): void {
 function aw_si_live_window(): void {
 	$token = isset( $_GET['token'] ) ? sanitize_text_field( wp_unslash( $_GET['token'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- the live token is checked here.
 	if ( ! aw_si_live_token_ok( $token ) ) {
-		echo '<div class="notice notice-error inline"><p>' . esc_html__( 'This live-check link has expired or is not yours. Start a new live check on the Check list tab.', 'aw-seo-extras' ) . '</p></div>';
+		wp_admin_notice( esc_html__( 'This live-check link has expired or is not yours. Start a new live check on the Check list tab.', 'aw-seo-extras' ), array( 'type' => 'error', 'additional_classes' => array( 'inline' ) ) );
 		return;
 	}
 	$pending = aw_si_live_pending();
@@ -357,7 +357,7 @@ add_action(
 		);
 		$cl   = isset( $_GET['cl'] ) ? sanitize_key( wp_unslash( $_GET['cl'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- message only.
 		if ( isset( $msgs[ $cl ] ) ) {
-			echo '<div class="notice notice-success inline"><p>' . esc_html( $msgs[ $cl ] ) . '</p></div>';
+			wp_admin_notice( esc_html( $msgs[ $cl ] ), array( 'type' => 'success', 'additional_classes' => array( 'inline' ) ) );
 		}
 		global $wpdb;
 		$pending  = count( aw_si_live_pending() );
