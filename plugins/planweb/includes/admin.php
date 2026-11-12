@@ -24,7 +24,7 @@ add_action(
 		if ( function_exists( 'kits_admin_fold_menu' ) ) {
 			kits_admin_fold_menu( PLANWEB_MENU, 'plugins.php', __( 'PlanWeb', 'planweb' ), 'edit_planweb_entries', 'planweb' );
 		} else {
-			add_menu_page( __( 'Calendar', 'planweb' ), __( 'PlanWeb', 'planweb' ), 'edit_planweb_entries', PLANWEB_MENU, 'planweb_screen', 'dashicons-calendar-alt', 3 );
+			add_menu_page( __( 'Calendar', 'planweb' ), __( 'PlanWeb', 'planweb' ), 'edit_planweb_entries', PLANWEB_MENU, 'planweb_screen', 'dashicons-calendar-alt', '58.7' );
 		}
 		add_submenu_page( PLANWEB_MENU, __( 'Calendar', 'planweb' ), __( 'Calendar', 'planweb' ), 'edit_planweb_entries', PLANWEB_MENU, 'planweb_screen' );
 		// Dates (once Kits → Dates) moved here: the old address (with its month) opens the Calendar.

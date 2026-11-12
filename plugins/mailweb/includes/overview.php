@@ -203,7 +203,7 @@ add_action(
 		if ( function_exists( 'kits_admin_fold_menu' ) ) {
 			kits_admin_fold_menu( 'mailweb', 'plugins.php', __( 'MailWeb', 'mailweb' ) . $badge, MAILWEB_CAP, 'mailweb' ); // the screens: toplevel_page_mailweb, mailweb_page_…
 		} else {
-			add_menu_page( __( 'MailWeb', 'mailweb' ), __( 'MailWeb', 'mailweb' ) . $badge, MAILWEB_CAP, 'mailweb', 'mailweb_inbox_page', 'dashicons-email', 27 ); // the inbox (inbox.php)
+			add_menu_page( __( 'MailWeb', 'mailweb' ), __( 'MailWeb', 'mailweb' ) . $badge, MAILWEB_CAP, 'mailweb', 'mailweb_inbox_page', 'dashicons-email', '58.6' ); // the inbox (inbox.php)
 		}
 		add_submenu_page( 'mailweb', __( 'MailWeb', 'mailweb' ), __( 'Inbox', 'mailweb' ), MAILWEB_CAP, 'mailweb', 'mailweb_inbox_page' );
 		add_submenu_page( 'mailweb', __( 'MailWeb overview', 'mailweb' ), __( 'Overview', 'mailweb' ), MAILWEB_CAP, 'mailweb-overview', 'mailweb_home_page' ); // home.php

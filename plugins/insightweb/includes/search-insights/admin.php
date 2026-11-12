@@ -100,7 +100,7 @@ add_action(
 		if ( function_exists( 'kits_admin_fold_menu' ) ) {
 			kits_admin_fold_menu( AW_SI_SLUG, 'plugins.php', 'InsightWeb', aw_si_cap(), 'insightweb' );
 		} else {
-			add_menu_page( __( 'Search Insights', 'aw-seo-extras' ), 'InsightWeb', aw_si_cap(), AW_SI_SLUG, 'aw_si_screen', 'dashicons-chart-area', '27.6' );
+			add_menu_page( __( 'Search Insights', 'aw-seo-extras' ), 'InsightWeb', aw_si_cap(), AW_SI_SLUG, 'aw_si_screen', 'dashicons-chart-area', '58.5' );
 		}
 		$hook = add_submenu_page( AW_SI_SLUG, __( 'Search Insights', 'aw-seo-extras' ), __( 'Search Insights', 'aw-seo-extras' ), aw_si_cap(), AW_SI_SLUG, 'aw_si_screen' );
 		if ( $hook ) {

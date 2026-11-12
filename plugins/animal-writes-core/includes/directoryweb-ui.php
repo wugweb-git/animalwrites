@@ -99,7 +99,7 @@ add_action(
 		if ( function_exists( 'kits_admin_fold_menu' ) ) {
 			kits_admin_fold_menu( DIRECTORYWEB_PAGE, 'plugins.php', __( 'DirectoryWeb', 'directoryweb' ), 'edit_aw_volunteers', 'directoryweb' ); // phpcs:ignore WordPress.WP.Capabilities.Unknown -- the Directory's own capability (volunteers.php)
 		} else {
-			add_menu_page( __( 'DirectoryWeb', 'directoryweb' ), __( 'DirectoryWeb', 'directoryweb' ), 'edit_aw_volunteers', DIRECTORYWEB_PAGE, 'directoryweb_dashboard_page', 'dashicons-location-alt', 26 ); // phpcs:ignore WordPress.WP.Capabilities.Unknown -- as above
+			add_menu_page( __( 'DirectoryWeb', 'directoryweb' ), __( 'DirectoryWeb', 'directoryweb' ), 'edit_aw_volunteers', DIRECTORYWEB_PAGE, 'directoryweb_dashboard_page', 'dashicons-location-alt', '58.2' ); // phpcs:ignore WordPress.WP.Capabilities.Unknown -- as above
 		}
 		add_submenu_page( DIRECTORYWEB_PAGE, __( 'DirectoryWeb', 'directoryweb' ), __( 'Dashboard', 'directoryweb' ), 'edit_aw_volunteers', DIRECTORYWEB_PAGE, 'directoryweb_dashboard_page' ); // phpcs:ignore WordPress.WP.Capabilities.Unknown -- as above, as Directory → Claims
 		add_submenu_page( DIRECTORYWEB_PAGE, __( 'Directory listings', 'directoryweb' ), __( 'Listings', 'directoryweb' ), DIRECTORYWEB_LISTINGS_CAP, DIRECTORYWEB_LISTINGS_PAGE, 'directoryweb_listings_page' );

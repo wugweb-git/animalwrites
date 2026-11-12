@@ -21,14 +21,14 @@ const AW_SEO_MENU = 'aw-seo-plus';
 add_action(
 	'admin_menu',
 	function () {
-		// Plugins → RankWeb (owner, 11 Nov 2026: "all plugins" under Plugins), opening the Overview; FAQ and Settings are
+		// RankWeb's own top-level menu in the Wugweb block (owner, 12 Nov 2026; Kits Core's kits_wugweb_menu_slots()), opening the Overview; FAQ and Settings are
 		// its tabs (aw_seo_screen_tabs()). Without Kits Core, a menu of its own as before.
 		// Screen ids of the screens under this menu start with its hook prefix; keep the old one (aw-seo-plus_page_…),
 		// so saved screen options, box order and hidden columns stay with them.
 		if ( function_exists( 'kits_admin_fold_menu' ) ) {
 			kits_admin_fold_menu( AW_SEO_MENU, 'plugins.php', 'RankWeb', 'manage_categories', 'aw-seo-plus' );
 		} else {
-			add_menu_page( 'RankWeb', 'RankWeb', 'manage_categories', AW_SEO_MENU, 'aw_seo_overview_page', 'dashicons-search', '27.5' );
+			add_menu_page( 'RankWeb', 'RankWeb', 'manage_categories', AW_SEO_MENU, 'aw_seo_overview_page', 'dashicons-search', '58.4' );
 			$GLOBALS['admin_page_hooks'][ AW_SEO_MENU ] = 'aw-seo-plus'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- the menu's hook prefix, as before the rename.
 		}
 		add_submenu_page( AW_SEO_MENU, 'RankWeb', 'Overview', 'manage_categories', AW_SEO_MENU, 'aw_seo_overview_page' );

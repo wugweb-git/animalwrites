@@ -55,9 +55,38 @@ function kits_admin_folds( string $menu = '', string $into = '' ): array {
  */
 function kits_admin_fold_menu( string $menu, string $into, string $title, string $cap, string $prefix = '' ): void {
 	global $admin_page_hooks;
-	$admin_page_hooks[ $menu ] = '' !== $prefix ? $prefix : sanitize_title( wp_strip_all_tags( $title ) ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- what the top-level menu call would set: the screens' hook names.
-	add_submenu_page( $into, wp_strip_all_tags( $title ), $title, $cap, kits_fold_link( $menu ) );
-	kits_admin_folds( $menu, $into );
+	// Owner, 12 Nov 2026: every product has its own top-level menu, all in one Wugweb block after the content menus
+	// (kits_wugweb_menu_slots()), the same with or without Kits Core. $into is kept for callers; nothing is folded now.
+	unset( $into );
+	$slot = kits_wugweb_menu_slots()[ $menu ] ?? array( 'dashicons-admin-generic', '58.9' );
+	add_menu_page( wp_strip_all_tags( $title ), $title, $cap, $menu, '', $slot[0], $slot[1] );
+	// The hook prefix the screens already use ({prefix}_page_{slug}), whatever the menu title says.
+	$admin_page_hooks[ $menu ] = '' !== $prefix ? $prefix : sanitize_title( wp_strip_all_tags( $title ) ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- keeps the screens' hook names.
+	kits_wugweb_menu_separator();
+}
+
+/**
+ * The Wugweb block: menu slug => [ dashicon, position ]. Positions sit just before core's second separator (59), after
+ * the content menus. Each plugin uses the same position in its own add_menu_page() call when Kits Core is absent.
+ */
+function kits_wugweb_menu_slots(): array {
+	return array(
+		'kits'               => array( 'dashicons-admin-appearance', '58.1' ),
+		'directoryweb'       => array( 'dashicons-location-alt', '58.2' ),
+		'aw-sourcing-menu'   => array( 'dashicons-rss', '58.3' ),
+		'aw-seo-plus'        => array( 'dashicons-search', '58.4' ),
+		'aw-search-insights' => array( 'dashicons-chart-area', '58.5' ),
+		'mailweb'            => array( 'dashicons-email', '58.6' ),
+		'planweb'            => array( 'dashicons-calendar-alt', '58.7' ),
+	);
+}
+
+/** One separator above the Wugweb block (added once). */
+function kits_wugweb_menu_separator(): void {
+	global $menu;
+	if ( ! isset( $menu['58.05'] ) ) {
+		$menu['58.05'] = array( '', 'read', 'separator-wugweb', '', 'wp-menu-separator' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- a menu separator, as core adds its own.
+	}
 }
 
 /**

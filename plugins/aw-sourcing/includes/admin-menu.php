@@ -68,7 +68,7 @@ add_action(
 		if ( function_exists( 'kits_admin_fold_menu' ) ) {
 			kits_admin_fold_menu( AW_SRC_MENU, 'plugins.php', 'SourceWeb' . $count, AW_REVIEW_CAP, 'sourcing' );
 		} else {
-			add_menu_page( 'SourceWeb', 'SourceWeb', AW_REVIEW_CAP, AW_SRC_MENU, 'aw_sourcing_overview_page', 'dashicons-rss', 26 );
+			add_menu_page( 'SourceWeb', 'SourceWeb', AW_REVIEW_CAP, AW_SRC_MENU, 'aw_sourcing_overview_page', 'dashicons-rss', '58.3' );
 			$GLOBALS['admin_page_hooks'][ AW_SRC_MENU ] = 'sourcing'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- the menu's hook prefix, as before the rename.
 			if ( '' !== $count ) {
 				global $menu;
