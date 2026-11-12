@@ -43,6 +43,8 @@ function kits_menu_redirects_core(): array {
 		'kits-system'        => 'kits-help#design-system',
 		'kits-preview'       => 'kits-settings#preview',
 		'kits-plugins'       => 'plugins.php', // WordPress's own Plugins screen (owner, 11 Nov 2026).
+		'kits-fonts'         => 'font-library.php', // WordPress's own Fonts screen (12 Nov 2026: the old address answered 403).
+		'kits-design-system' => 'kits-help#design-system',
 	);
 }
 

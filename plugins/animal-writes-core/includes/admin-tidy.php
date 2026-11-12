@@ -9,7 +9,8 @@
  * - Tools: Available Tools (WordPress's old converters), Server-Timing (a Performance Lab developer tool), Scheduled
  *   Actions (FluentCRM's job queue; Kits → Site: Animal Writes shows scheduled-task health).
  * - Settings: Discussion (comments are off site-wide), Connectors (unused AI/MCP connectors).
- * - Upsells and paid features (owner: no paid plans): Rank Math's Unlock PRO, AI Visibility, Content AI, AI Link Genius,
+ * - Upsells and paid features (owner: no paid plans): any submenu link to another site in these menus (sales and
+ *   pricing pages, 12 Nov 2026), Rank Math's Unlock PRO, AI Visibility, Content AI, AI Link Genius,
  *   Help & Support; Link Whisper's AI Subscription, Get Premium; Fluent Forms' Support; FluentCRM's Addons, SMTP (a
  *   FluentSMTP promotion: Mail sends the site's email), Help, Forms (FluentCRM's own forms: the site's forms are Fluent
  *   Forms), Recurring Campaigns and Email Sequences (not used).
@@ -82,7 +83,9 @@ add_action(
 						break;
 					}
 				}
-				if ( $match ) {
+				// A submenu item that leaves the site (a vendor's sale or pricing page, e.g. Rank Math's "Black Friday Sale")
+				// is an upsell whatever its label says this month.
+				if ( $match || preg_match( '#^https?://#i', (string) ( $item[2] ?? '' ) ) ) {
 					unset( $submenu[ $slug ][ $j ] ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride
 				}
 			}

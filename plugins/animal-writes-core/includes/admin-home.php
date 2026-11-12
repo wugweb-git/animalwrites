@@ -145,6 +145,8 @@ function aw_core_kits_hooks(): void {
 				'aw-elsewhere'    => 'kits-options#socials',
 				'aw-edit-screens' => 'kits-help#developer/edit-screens',
 				'aw-theme-parts'  => 'kits-help#developer/theme-parts',
+				'aw-core'         => KITS_MENU, // 12 Nov 2026: these two answered 403
+				'aw-cron-health'  => 'index.php', // the Scheduled tasks box is on the Dashboard
 			)
 		)
 	);

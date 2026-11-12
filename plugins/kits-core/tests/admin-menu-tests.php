@@ -57,6 +57,8 @@ $map = array_merge(
 		'aw-elsewhere'    => 'kits-options#socials',
 		'aw-edit-screens' => 'kits-help#developer/edit-screens',
 		'aw-theme-parts'  => 'kits-help#developer/theme-parts',
+		'aw-core'         => 'kits',
+		'aw-cron-health'  => 'index.php',
 	)
 );
 $want = array(
@@ -71,6 +73,10 @@ $want = array(
 	'aw-elsewhere'       => 'admin.php?page=kits-options#socials',
 	'aw-edit-screens'    => 'admin.php?page=kits-help#developer/edit-screens',
 	'aw-theme-parts'     => 'admin.php?page=kits-help#developer/theme-parts',
+	'kits-fonts'         => 'font-library.php',
+	'kits-design-system' => 'admin.php?page=kits-help#design-system',
+	'aw-core'            => 'admin.php?page=kits',
+	'aw-cron-health'     => 'index.php',
 );
 foreach ( $want as $old => $to ) {
 	kits_t( kits_menu_redirect_target( $old, array( 'page' => $old ), $map ) === $to, "$old redirects to $to" );
