@@ -119,7 +119,9 @@ add_filter(
 add_action(
 	'wp_enqueue_scripts',
 	function () {
-		$f = 'assets/js/aw-analytics.js';
+		// The minified copy (tools/ci/js_min.py writes it from the source; the Deploy check keeps them equal), or the
+		// readable source with SCRIPT_DEBUG on.
+		$f = ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) || ! is_readable( AW_CORE_DIR . 'assets/js/aw-analytics.min.js' ) ? 'assets/js/aw-analytics.js' : 'assets/js/aw-analytics.min.js';
 		wp_enqueue_script( 'aw-analytics', plugins_url( $f, AW_CORE_DIR . 'animal-writes-core.php' ), array(), (string) filemtime( AW_CORE_DIR . $f ), array( 'in_footer' => true, 'strategy' => 'defer' ) );
 		// The forms' hidden fields: GA4 and Clarity IDs are read only with analytics consent (the consent time zones).
 		wp_localize_script( 'aw-analytics', 'awVisitCfg', array( 'zones' => function_exists( 'kits_consent_timezones' ) ? kits_consent_timezones() : array() ) );
