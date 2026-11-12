@@ -628,6 +628,45 @@ add_action(
 	}
 );
 
+/**
+ * The Change log as plain text, newest first: when, who, the tab (tabs since merged are named after their new home:
+ * Feeds and Relay moved into Sources on 25 Oct 2026; Sections, Summary rules and Directory enrichment into Rules in
+ * phase 3), what changed, and "old → new" when the entry has them. Used by the Change log tab and GET
+ * sourceweb/v1/changes.
+ *
+ * @return array[] { at, user, tab, what, change }
+ */
+function aw_sourcing_change_rows(): array {
+	$tabs = array_map( fn( $t ) => $t[0], aw_sourcing_tabs() );
+	$old  = array(
+		'publishers'    => 'Sources',
+		'feeds'         => 'Sources (feeds)',
+		'library'       => 'Sources (Library feeds)',
+		'opportunities' => 'Sources (Opportunity feeds)',
+		'relay'         => 'Sources (relay)',
+	);
+	if ( function_exists( 'aw_rules_live' ) && aw_rules_live() ) {
+		$old += array(
+			'sections' => 'Rules (section rules)',
+			'summary'  => 'Rules (summary rules)',
+			'enrich'   => 'Rules (Directory enrichment)',
+		);
+	}
+	$rows = array();
+	foreach ( (array) get_option( 'kits_sourcing_log', array() ) as $e ) {
+		$e      = (array) $e;
+		$has    = array_key_exists( 'old', $e ) || array_key_exists( 'new', $e );
+		$rows[] = array(
+			'at'     => (string) ( $e['at'] ?? '' ),
+			'user'   => (string) ( $e['user'] ?? '' ),
+			'tab'    => (string) ( $old[ $e['tab'] ?? '' ] ?? ( $tabs[ $e['tab'] ?? '' ] ?? ( $e['tab'] ?? '' ) ) ),
+			'what'   => (string) ( $e['what'] ?? '' ),
+			'change' => $has ? aw_src_log_value( $e['old'] ?? '' ) . ' → ' . aw_src_log_value( $e['new'] ?? '' ) : '',
+		);
+	}
+	return $rows;
+}
+
 /** Admin page. */
 function aw_sourcing_page() {
 	if ( ! current_user_can( AW_SRC_CAP ) ) {
@@ -656,24 +695,15 @@ function aw_sourcing_page() {
 	}
 	do_action( 'kits_sourcing_page_top' );
 	if ( 'log' === $tab ) {
-		// Entries keep the tab they were made on; tabs since merged are named after their new home (Feeds and Relay
-		// moved into Sources on 25 Oct 2026).
-		$old  = array( 'publishers' => 'Sources', 'feeds' => 'Sources (feeds)', 'library' => 'Sources (Library feeds)', 'opportunities' => 'Sources (Opportunity feeds)', 'relay' => 'Sources (relay)' );
-		if ( function_exists( 'aw_rules_live' ) && aw_rules_live() ) { // Sections, Summary rules and Directory enrichment moved into Rules (phase 3)
-			$old += array( 'sections' => 'Rules (section rules)', 'summary' => 'Rules (summary rules)', 'enrich' => 'Rules (Directory enrichment)' );
-		}
 		$rows = array();
-		foreach ( (array) get_option( 'kits_sourcing_log', array() ) as $e ) {
-			$tl     = (string) ( $old[ $e['tab'] ] ?? ( $tabs[ $e['tab'] ] ?? $e['tab'] ) );
-			$has    = array_key_exists( 'old', (array) $e ) || array_key_exists( 'new', (array) $e );
-			$change = $has ? aw_src_log_value( $e['old'] ?? '' ) . ' → ' . aw_src_log_value( $e['new'] ?? '' ) : '';
+		foreach ( aw_sourcing_change_rows() as $e ) {
 			$rows[] = array(
 				'at'     => esc_html( $e['at'] ),
 				'user'   => esc_html( $e['user'] ),
-				'tab'    => esc_html( $tl ),
+				'tab'    => esc_html( $e['tab'] ),
 				'what'   => esc_html( $e['what'] ),
-				'change' => $has ? esc_html( $change ) : '—',
-				'_find'  => $e['user'] . ' ' . $tl . ' ' . $e['what'] . ' ' . $change,
+				'change' => '' !== $e['change'] ? esc_html( $e['change'] ) : '—',
+				'_find'  => $e['user'] . ' ' . $e['tab'] . ' ' . $e['what'] . ' ' . $e['change'],
 			);
 		}
 		aw_sourcing_simple_table(

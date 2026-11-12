@@ -239,20 +239,43 @@ add_filter(
  */
 add_filter( 'aw_sources_save_relay', fn( $c ) => $c );
 
+/**
+ * The relay requests, newest first (last 200), as plain text. Used by the Relay log tab and GET sourceweb/v1/relay-log.
+ *
+ * @return array[] { at, when, host, path, status, ok, bytes, size, ms, note }
+ */
+function aw_relay_log_rows(): array {
+	$rows = array();
+	foreach ( array_slice( array_reverse( (array) get_option( 'aw_relay_log', array() ) ), 0, 200 ) as $r ) {
+		$rows[] = array(
+			'at'     => (int) ( $r['at'] ?? 0 ),
+			'when'   => wp_date( 'j M Y, g:i a', (int) ( $r['at'] ?? 0 ) ),
+			'host'   => (string) ( $r['host'] ?? '' ),
+			'path'   => (string) ( $r['path'] ?? '' ),
+			'status' => (string) ( $r['status'] ?? '' ),
+			'ok'     => is_int( $r['status'] ?? null ) && $r['status'] < 400,
+			'bytes'  => (int) ( $r['bytes'] ?? 0 ),
+			'size'   => (string) size_format( (int) ( $r['bytes'] ?? 0 ) ),
+			'ms'     => (int) ( $r['ms'] ?? 0 ),
+			'note'   => (string) ( $r['note'] ?? '' ),
+		);
+	}
+	return $rows;
+}
+
 /** Sourcing → Relay log: every request the workers made through the site (last 200). */
 function aw_relay_log_view() {
-	$log  = array_reverse( (array) get_option( 'aw_relay_log', array() ) );
 	$rows = array();
-	foreach ( array_slice( $log, 0, 200 ) as $r ) {
+	foreach ( aw_relay_log_rows() as $r ) {
 		$rows[] = array(
-			'at'     => esc_html( wp_date( 'j M Y, g:i a', (int) $r['at'] ) ),
+			'at'     => esc_html( $r['when'] ),
 			'host'   => esc_html( $r['host'] ),
 			'path'   => esc_html( $r['path'] ),
-			'status' => esc_html( (string) $r['status'] ),
-			'bytes'  => esc_html( size_format( (int) $r['bytes'] ) ),
-			'ms'     => (int) $r['ms'] . ' ms',
+			'status' => esc_html( $r['status'] ),
+			'bytes'  => esc_html( $r['size'] ),
+			'ms'     => $r['ms'] . ' ms',
 			'note'   => esc_html( $r['note'] ),
-			'_sort'  => array( 'at' => (int) $r['at'], 'bytes' => (int) $r['bytes'], 'ms' => (int) $r['ms'] ),
+			'_sort'  => array( 'at' => $r['at'], 'bytes' => $r['bytes'], 'ms' => $r['ms'] ),
 			'_find'  => $r['host'] . ' ' . $r['path'] . ' ' . $r['status'] . ' ' . $r['note'],
 		);
 	}

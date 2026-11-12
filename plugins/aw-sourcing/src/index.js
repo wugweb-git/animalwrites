@@ -5778,6 +5778,212 @@ function AiOverview( { onBack } ) {
 	);
 }
 
+/* ---------- Reports: Rejected, Relay log, Change log ---------- */
+
+/**
+ * A read-only report: a server-driven list with views, search, sort and pages.
+ *
+ * @param {Object} props
+ * @param {string} props.route       Route.
+ * @param {string} props.title       Title.
+ * @param {string} props.description What it lists.
+ * @param {Array}  props.columns     DataList columns.
+ * @param {string} props.searchLabel Search label.
+ * @param {string} props.emptyTitle  Empty list.
+ */
+function Report( {
+	route,
+	title,
+	description,
+	columns,
+	searchLabel,
+	emptyTitle,
+} ) {
+	const [ q, setQ ] = useState( {
+		view: '',
+		search: '',
+		orderby: '',
+		order: 'asc',
+		page: 1,
+	} );
+	const { data, error, loading, load } = useRoute( route, q );
+	const set = ( part ) => setQ( ( o ) => ( { ...o, page: 1, ...part } ) );
+	return (
+		<SectionCard id={ route } title={ title } description={ description }>
+			<DataList
+				label={ title }
+				columns={ columns }
+				rows={ data?.rows || [] }
+				total={ data?.total || 0 }
+				page={ data?.page || 1 }
+				pages={ data?.pages || 1 }
+				onPage={ ( page ) => setQ( ( o ) => ( { ...o, page } ) ) }
+				search={ q.search }
+				onSearch={ ( search ) => set( { search } ) }
+				searchLabel={ searchLabel }
+				views={ data?.views || [] }
+				view={ q.view }
+				onView={ ( view ) => set( { view } ) }
+				sort={ { key: q.orderby, dir: q.order } }
+				onSort={ ( orderby, order ) => set( { orderby, order } ) }
+				loading={ loading }
+				error={ error }
+				onRetry={ load }
+				emptyTitle={ emptyTitle }
+			/>
+		</SectionCard>
+	);
+}
+
+function Rejected() {
+	return (
+		<Report
+			route="rejected"
+			title={ __( 'Rejected', 'aw-sourcing' ) }
+			description={ __(
+				'Items the relevance check refused, with the reason. They were never created. An item from an allowed publisher is rarely refused: worth a look.',
+				'aw-sourcing'
+			) }
+			searchLabel={ __( 'Search rejected items', 'aw-sourcing' ) }
+			emptyTitle={ __( 'Nothing rejected.', 'aw-sourcing' ) }
+			columns={ [
+				{
+					key: 'title',
+					label: __( 'Item', 'aw-sourcing' ),
+					primary: true,
+					render: ( r ) => (
+						<>
+							<a
+								href={ r.url }
+								target="_blank"
+								rel="noopener noreferrer"
+							>
+								{ r.title }
+							</a>
+							<span className="kits-shell-field__help">
+								{ ' — ' }
+								{ r.host }
+							</span>
+							{ r.problem && (
+								<Notice tone="warn">{ r.problem }</Notice>
+							) }
+						</>
+					),
+				},
+				{
+					key: 'type',
+					label: __( 'Type', 'aw-sourcing' ),
+					sortable: true,
+				},
+				{
+					key: 'found',
+					label: __( 'Found by', 'aw-sourcing' ),
+					sortable: true,
+				},
+				{ key: 'reason', label: __( 'Reason', 'aw-sourcing' ) },
+				{
+					key: 'at',
+					label: __( 'Date', 'aw-sourcing' ),
+					sortable: true,
+				},
+			] }
+		/>
+	);
+}
+
+function RelayLog() {
+	return (
+		<Report
+			route="relay-log"
+			title={ __( 'Relay log', 'aw-sourcing' ) }
+			description={ __(
+				'Every request the workers made through this site for a publisher that refuses GitHub (the last 200). Each source has its relay switch on Sources.',
+				'aw-sourcing'
+			) }
+			searchLabel={ __( 'Search requests', 'aw-sourcing' ) }
+			emptyTitle={ __( 'None yet.', 'aw-sourcing' ) }
+			columns={ [
+				{
+					key: 'at',
+					label: __( 'Time', 'aw-sourcing' ),
+					sortable: true,
+					primary: true,
+					render: ( r ) => r.when,
+				},
+				{
+					key: 'host',
+					label: __( 'Host', 'aw-sourcing' ),
+					sortable: true,
+				},
+				{ key: 'path', label: __( 'Path', 'aw-sourcing' ) },
+				{
+					key: 'status',
+					label: __( 'Result', 'aw-sourcing' ),
+					sortable: true,
+					render: ( r ) => (
+						<Status
+							tone={ r.ok ? 'success' : 'warn' }
+							label={ r.status }
+						/>
+					),
+				},
+				{
+					key: 'bytes',
+					label: __( 'Size', 'aw-sourcing' ),
+					sortable: true,
+					render: ( r ) => r.size,
+				},
+				{
+					key: 'ms',
+					label: __( 'Time taken', 'aw-sourcing' ),
+					sortable: true,
+					render: ( r ) => `${ r.ms } ms`,
+				},
+				{ key: 'note', label: __( 'Note', 'aw-sourcing' ) },
+			] }
+		/>
+	);
+}
+
+function ChangeLog() {
+	return (
+		<Report
+			route="changes"
+			title={ __( 'Change log', 'aw-sourcing' ) }
+			description={ __(
+				'Who changed what on these screens and when, with the value before and after (newest first, the last 1,000).',
+				'aw-sourcing'
+			) }
+			searchLabel={ __( 'Search changes', 'aw-sourcing' ) }
+			emptyTitle={ __( 'No changes yet.', 'aw-sourcing' ) }
+			columns={ [
+				{
+					key: 'at',
+					label: __( 'When', 'aw-sourcing' ),
+					sortable: true,
+					primary: true,
+				},
+				{
+					key: 'user',
+					label: __( 'Who', 'aw-sourcing' ),
+					sortable: true,
+				},
+				{
+					key: 'tab',
+					label: __( 'Tab', 'aw-sourcing' ),
+					sortable: true,
+				},
+				{ key: 'what', label: __( 'What changed', 'aw-sourcing' ) },
+				{
+					key: 'change',
+					label: __( 'Old → new', 'aw-sourcing' ),
+					render: ( r ) => r.change || '—',
+				},
+			] }
+		/>
+	);
+}
+
 const SCREENS = {
 	dashboard: Dashboard,
 	review: Review,
@@ -5788,6 +5994,9 @@ const SCREENS = {
 	keywords: Keywords,
 	rules: Rules,
 	ai: AiModels,
+	rejected: Rejected,
+	'relay-log': RelayLog,
+	log: ChangeLog,
 };
 
 function App() {

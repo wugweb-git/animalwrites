@@ -241,7 +241,7 @@ aw_t( false !== strpos( $pages, 'aw_sourcing_sources_apply(' ) && false !== strp
 $pol = file_get_contents( dirname( __DIR__ ) . '/includes/sourcing-policy.php' );
 aw_t( false !== strpos( $pol, 'list( $pubs, $press ) = aw_sourcing_sources_apply( $pubs, $status, $hosts );' ) && false !== strpos( $pol, '$pubs   = aw_sourcing_shorts_apply( $pubs,' ), 'sources: the classic list saves through the shared functions' );
 $ui = file_get_contents( dirname( __DIR__ ) . '/includes/sourceweb-ui.php' );
-aw_t( false !== strpos( $ui, "const SOURCEWEB_UI_TABS = array( 'sources', 'keywords', 'rules', 'ai', 'workers', 'settings' );" ), 'ui: Sources, Keywords, Rules, AI models, Workers and Settings are drawn on the new screens' );
+aw_t( false !== strpos( $ui, "const SOURCEWEB_UI_TABS = array( 'sources', 'keywords', 'rules', 'ai', 'workers', 'rejected', 'relay-log', 'log', 'settings' );" ), 'ui: every Sourcing tab is drawn on the new screens' );
 aw_t( false !== strpos( $ui, "if ( 'rules' === \$tab && ! ( function_exists( 'aw_rules_live' ) && aw_rules_live() ) ) {" ), 'ui: Rules before the phase 3 migration stays on today\'s screens' );
 aw_t( 12 === substr_count( $pages, '$ready = sourceweb_rules_ready();' ), 'rules routes: every route refuses before the phase 3 migration (409)' );
 aw_t( false !== strpos( $pages, 'aw_sourcing_section_save(' ) && false !== strpos( $pages, 'aw_rules_tag_save(' ) && false !== strpos( $pages, 'aw_rules_tag_delete(' ) && false !== strpos( $pages, 'aw_rules_priority_save(' ) && false !== strpos( $pages, 'aw_rules_field_save(' ) && false !== strpos( $pages, 'aw_summary_rules_sanitize(' ), 'rules routes: the same section, tag rule, trust order, field rule and summary saves as today\'s screen' );
@@ -267,4 +267,12 @@ aw_t( substr_count( $air, "\$r['key']" ) === substr_count( $air, "aw_ai_key_id( 
 aw_t( false !== strpos( $air, 'aw_ai_keys_add(' ) && false !== strpos( $air, 'aw_ai_key_edit_save(' ) && false !== strpos( $air, 'aw_ai_keys_list_op(' ) && false !== strpos( $air, 'aw_ai_key_records()' ) && false !== strpos( $air, 'aw_ai_overview_data(' ), 'ai routes: the same add, edit, list actions, list and overview as today\'s tab' );
 aw_t( false !== strpos( $aik, '$res = aw_ai_keys_add(' ) && false !== strpos( $aik, '$n = (int) aw_ai_key_edit_save(' ) && false !== strpos( $aik, '$res  = aw_ai_keys_list_op(' ) && false !== strpos( $ait, '$this->all = aw_ai_key_records();' ), 'ai: today\'s forms and list use the shared functions' );
 aw_t( false !== strpos( $aik, "if ( \$rows !== \$orig ) {\n\t\tupdate_option( 'aw_ai_models', \$rows, false );" ) && false !== strpos( $aik, "if ( ! \$what ) {\n\t\t\treturn 0;" ), 'ai: a list action or edit with no change writes nothing' );
+
+// ---- Rejected, Relay log, Change log: read-only, the rows today's tabs read ----
+$lg = file_get_contents( dirname( __DIR__ ) . '/includes/sourceweb-rest-logs.php' );
+aw_t( 1 === substr_count( $lg, "'permission_callback' => sourceweb_rest_can( AW_SRC_CAP )" ) && 1 === substr_count( $lg, "'methods'             => 'GET'" ) && false === strpos( $lg, 'update_option' ), 'report routes: GET only, manage_options, nothing written' );
+aw_t( false !== strpos( $lg, 'aw_relevance_rejected_rows()' ) && false !== strpos( $lg, 'aw_relay_log_rows()' ) && false !== strpos( $lg, 'aw_sourcing_change_rows()' ), 'report routes: the same rows as today\'s tabs' );
+$rel = file_get_contents( dirname( __DIR__ ) . '/includes/relevance.php' );
+$rly = file_get_contents( dirname( __DIR__ ) . '/includes/relay.php' );
+aw_t( false !== strpos( $rel, '$log = aw_relevance_rejected_rows();' ) && false !== strpos( $rly, 'foreach ( aw_relay_log_rows() as $r ) {' ) && false !== strpos( $pol, 'foreach ( aw_sourcing_change_rows() as $e ) {' ), 'reports: today\'s tabs read through the shared functions' );
 

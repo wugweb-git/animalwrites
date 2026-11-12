@@ -398,29 +398,51 @@ add_filter(
 	20
 );
 
+/**
+ * The Rejected log as plain text: the item (title, or its host), where it was found (keyword or feed), the reason, the
+ * date, and a note when it came from an allowed publisher (rarely refused: worth a look). Used by the Rejected tab and
+ * GET sourceweb/v1/rejected.
+ *
+ * @return array[] { url, host, title, type, found, reason, at, problem }
+ */
+function aw_relevance_rejected_rows(): array {
+	$pubs = aw_publishers();
+	$rows = array();
+	foreach ( (array) get_option( AW_RELEVANCE_LOG, array() ) as $e ) {
+		$url    = (string) ( $e['url'] ?? '' );
+		$host   = (string) wp_parse_url( $url, PHP_URL_HOST );
+		$title  = (string) ( $e['title'] ?? '' );
+		$rows[] = array(
+			'url'     => $url,
+			'host'    => $host,
+			'title'   => '' !== $title ? $title : $host,
+			'type'    => (string) ( $e['type'] ?? '' ),
+			'found'   => '' !== (string) ( $e['kw'] ?? '' ) ? 'Keyword: ' . $e['kw'] : (string) ( $e['feed'] ?? '' ),
+			'reason'  => (string) ( $e['reason'] ?? '' ),
+			'at'      => (string) ( $e['at'] ?? '' ),
+			'problem' => 'allow' === ( $pubs[ aw_host( $url ) ]['status'] ?? '' ) ? 'From an allowed publisher (' . aw_host( $url ) . '): check whether it should have been kept.' : '',
+		);
+	}
+	return $rows;
+}
+
 /** The Rejected tab. */
 function aw_relevance_rejected_tab() {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		return;
 	}
-	$log = (array) get_option( AW_RELEVANCE_LOG, array() );
+	$log = aw_relevance_rejected_rows();
 	echo '<p>' . esc_html( sprintf( 'Rejected: %d', count( $log ) ) ) . '</p>';
 	$rows = array();
-	$pubs = aw_publishers();
 	foreach ( $log as $e ) {
-		$url    = (string) ( $e['url'] ?? '' );
-		$host   = (string) wp_parse_url( $url, PHP_URL_HOST );
-		$title  = (string) ( $e['title'] ?? '' );
-		$found  = '' !== (string) ( $e['kw'] ?? '' ) ? 'Keyword: ' . $e['kw'] : (string) ( $e['feed'] ?? '' );
 		$rows[] = array(
-			'item'   => '<a href="' . esc_url( $url ) . '" target="_blank" rel="noopener">' . esc_html( '' !== $title ? $title : $host ) . '</a><br><span class="description">' . esc_html( $host ) . '</span>',
-			'type'   => esc_html( (string) ( $e['type'] ?? '' ) ),
-			'found'  => esc_html( $found ),
-			'reason' => esc_html( (string) ( $e['reason'] ?? '' ) ),
-			'at'     => esc_html( (string) ( $e['at'] ?? '' ) ),
-			'_find'  => $title . ' ' . $host . ' ' . $found . ' ' . ( $e['reason'] ?? '' ),
-			// An allowed publisher's item is rarely refused: worth a look (problem row).
-			'_problem' => 'allow' === ( $pubs[ aw_host( $url ) ]['status'] ?? '' ) ? 'From an allowed publisher (' . aw_host( $url ) . '): check whether it should have been kept.' : '',
+			'item'     => '<a href="' . esc_url( $e['url'] ) . '" target="_blank" rel="noopener">' . esc_html( $e['title'] ) . '</a><br><span class="description">' . esc_html( $e['host'] ) . '</span>',
+			'type'     => esc_html( $e['type'] ),
+			'found'    => esc_html( $e['found'] ),
+			'reason'   => esc_html( $e['reason'] ),
+			'at'       => esc_html( $e['at'] ),
+			'_find'    => $e['title'] . ' ' . $e['host'] . ' ' . $e['found'] . ' ' . $e['reason'],
+			'_problem' => $e['problem'],
 		);
 	}
 	aw_sourcing_simple_table(

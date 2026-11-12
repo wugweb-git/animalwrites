@@ -14,6 +14,9 @@
  *                                                &tagrule=<tag|new>, &field=<key>; from phase 3)
  *   admin.php?page=aw-sourcing&tab=ai            AI models          (manage_options; &edit=<key id|new>, &overview=1)
  *   admin.php?page=aw-sourcing&tab=workers       Workers            (manage_options; &edit=<id|new>, &runs=<id>)
+ *   admin.php?page=aw-sourcing&tab=rejected      Rejected           (manage_options; read-only)
+ *   admin.php?page=aw-sourcing&tab=relay-log     Relay log          (manage_options; read-only)
+ *   admin.php?page=aw-sourcing&tab=log           Change log         (manage_options; read-only)
  *   admin.php?page=aw-sourcing&tab=settings      Settings           (manage_options)
  *
  * &ui=classic shows the earlier screens. The screens are one script (build/index.js, from src/), drawn with Kits
@@ -28,7 +31,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** The Sourcing page's tabs drawn on the new screens (the others still draw today's screen). */
-const SOURCEWEB_UI_TABS = array( 'sources', 'keywords', 'rules', 'ai', 'workers', 'settings' );
+const SOURCEWEB_UI_TABS = array( 'sources', 'keywords', 'rules', 'ai', 'workers', 'rejected', 'relay-log', 'log', 'settings' );
 
 /**
  * Which new screen this request asks for: 'dashboard', 'review', 'enrichment', a tab of SOURCEWEB_UI_TABS or ''.
@@ -73,6 +76,9 @@ function sourceweb_ui_caps(): array {
 		'rules'      => AW_SRC_CAP,
 		'ai'         => AW_SRC_CAP,
 		'workers'    => AW_SRC_CAP,
+		'rejected'   => AW_SRC_CAP,
+		'relay-log'  => AW_SRC_CAP,
+		'log'        => AW_SRC_CAP,
 		'settings'   => AW_SRC_CAP,
 	);
 }
@@ -126,6 +132,9 @@ add_action(
 			'rules'      => array( __( 'Rules', 'aw-sourcing' ), 'rules' ),
 			'ai'         => array( __( 'AI models', 'aw-sourcing' ), 'ai' ),
 			'workers'    => array( __( 'Workers', 'aw-sourcing' ), null ),
+			'rejected'   => array( __( 'Rejected', 'aw-sourcing' ), null ),
+			'relay-log'  => array( __( 'Relay log', 'aw-sourcing' ), null ),
+			'log'        => array( __( 'Change log', 'aw-sourcing' ), null ),
 			'settings'   => array( __( 'Settings', 'aw-sourcing' ), null ),
 		);
 		$caps  = sourceweb_ui_caps();
@@ -183,6 +192,9 @@ function sourceweb_ui_page( string $screen ): bool {
 		'rules'      => __( 'Rules', 'aw-sourcing' ),
 		'ai'         => __( 'AI models', 'aw-sourcing' ),
 		'workers'    => __( 'Workers', 'aw-sourcing' ),
+		'rejected'   => __( 'Rejected', 'aw-sourcing' ),
+		'relay-log'  => __( 'Relay log', 'aw-sourcing' ),
+		'log'        => __( 'Change log', 'aw-sourcing' ),
 		'settings'   => __( 'SourceWeb settings', 'aw-sourcing' ),
 	);
 	kits_shell_mount( 'sourceweb-app', $titles[ $screen ] );
