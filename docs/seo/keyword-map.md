@@ -247,7 +247,7 @@ Set in Rank Math on live, 12 Nov 2026. The first phrase is the focus; the rest a
 | Rabies treatment in North India study (#12411) | category iii bite prophylaxis study north india | none | D7: stops it competing with #17307 for "rabies treatment in humans" |
 | CPCSEA full form (#13868) | cpcsea full form | ccsea, ccsea full form, cpcsea new name, full form of cpcsea, cpcsea mef gov in email | D6 |
 
-Proposed, not live yet:
+Also set on 12 Nov 2026:
 - #13869 alternatives to animal testing: secondaries new approach methodologies, nams india, organ on a chip india, 3rs animal testing.
 - #13797 World Animal Day: "world animal day 2026" → "world animal day 2027" (the 2026 searches stay with Library #142).
 
