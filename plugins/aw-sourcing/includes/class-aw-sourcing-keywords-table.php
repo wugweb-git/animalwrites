@@ -28,18 +28,6 @@ class AW_Sourcing_Keywords_Table extends WP_List_Table {
 		'exclude' => 'Exclude',
 	);
 
-	/** Phase 2 views: slug => [label, role bit (0: the Hindi view)]. */
-	const VIEWS = array(
-		'include'  => array( 'Include', AW_KW_ROLE_INCLUDE ),
-		'animal'   => array( 'Animal', AW_KW_ROLE_ANIMAL ),
-		'context'  => array( 'Context', AW_KW_ROLE_CONTEXT ),
-		'exclude'  => array( 'Exclude', AW_KW_ROLE_EXCLUDE ),
-		'search'   => array( 'Search', AW_KW_ROLE_SEARCH ),
-		'press'    => array( 'Press', AW_KW_ROLE_PRESS ),
-		'category' => array( 'Category words', AW_KW_ROLE_CATEGORY ),
-		'hindi'    => array( 'Hindi (no Sourcing role)', 0 ),
-	);
-
 	/** @var array list => terms */
 	private $rel;
 
@@ -48,9 +36,6 @@ class AW_Sourcing_Keywords_Table extends WP_List_Table {
 
 	/** @var array[] Phase 2: every record shown in some view (id => record). */
 	private $all = array();
-
-	/** @var array Phase 2: feed id => items fetched / published in 30 days. */
-	private $stats = array();
 
 	public function __construct() {
 		parent::__construct( array( 'singular' => 'keyword', 'plural' => 'keywords', 'ajax' => false, 'screen' => AW_SRC_SCREEN ) );
@@ -61,7 +46,7 @@ class AW_Sourcing_Keywords_Table extends WP_List_Table {
 	/** Phase 2: the view shown ('' for all). */
 	public function view() {
 		$v = sanitize_key( $_GET['view'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
-		return isset( self::VIEWS[ $v ] ) ? $v : '';
+		return isset( aw_sourcing_kw_views()[ $v ] ) ? $v : '';
 	}
 
 	/** Phase 2: the base address of the list, with its category filter. */
@@ -70,20 +55,9 @@ class AW_Sourcing_Keywords_Table extends WP_List_Table {
 		return add_query_arg( $args + ( '' !== $cat ? array( 'cat' => $cat ) : array() ), admin_url( 'admin.php?page=aw-sourcing&tab=keywords' ) );
 	}
 
-	/**
-	 * Phase 2: whether a record belongs to a view.
-	 *
-	 * @param array  $r Record.
-	 * @param string $v View.
-	 */
+	/** Phase 2: whether a record belongs to a view. */
 	private function in_view( array $r, $v ) {
-		if ( 'hindi' === $v ) {
-			return 'en' !== $r['lang'];
-		}
-		if ( 'en' !== $r['lang'] ) {
-			return false;
-		}
-		return '' === $v ? (bool) ( $r['roles'] & AW_KW_WORKER_ROLES ) : (bool) ( $r['roles'] & self::VIEWS[ $v ][1] );
+		return aw_sourcing_kw_in_view( $r, $v );
 	}
 
 	private function which() {
@@ -95,7 +69,7 @@ class AW_Sourcing_Keywords_Table extends WP_List_Table {
 		if ( $this->records ) {
 			$out = array();
 			$cur = $this->view();
-			foreach ( array( '' => array( 'All', 0 ) ) + self::VIEWS as $k => $def ) {
+			foreach ( array( '' => array( 'All', 0 ) ) + aw_sourcing_kw_views() as $k => $def ) {
 				$n                             = count( array_filter( $this->all, fn( $r ) => $this->in_view( $r, $k ) ) );
 				$out[ '' === $k ? 'all' : $k ] = '<a href="' . esc_url( $this->url( '' === $k ? array() : array( 'view' => $k ) ) ) . '"' . ( $cur === $k ? ' class="current" aria-current="page"' : '' ) . '>' . esc_html( $def[0] ) . ' <span class="count">(' . esc_html( number_format_i18n( $n ) ) . ')</span></a>';
 			}
@@ -276,17 +250,7 @@ class AW_Sourcing_Keywords_Table extends WP_List_Table {
 
 	/** Phase 2: the records of the view, searched, filtered, sorted and paged. */
 	private function prepare_records() {
-		global $wpdb;
-		$k         = aw_si_table( 'keywords' );
-		$hindi_ids = (array) $wpdb->get_col( "SELECT id FROM {$k} WHERE lang <> 'en' AND src_note IS NOT NULL AND src_note <> ''" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only; the Hindi words the lists had
-		$this->all = aw_kw_rows( AW_KW_WORKER_ROLES );
-		foreach ( aw_kw_attach_maps( $hindi_ids ? (array) $wpdb->get_results( 'SELECT id, norm, label, lang, roles, variants, query, feed_id, search_on, dismissed, src_note, impr28 FROM ' . $k . ' WHERE id IN (' . implode( ',', array_map( 'intval', $hindi_ids ) ) . ')', ARRAY_A ) : array() ) as $id => $r ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.NotPrepared -- table name and integers only.
-			$this->all[ $id ] = $r;
-		}
-		foreach ( (array) ( aw_sourcing_keyword_stats( 30 )['rows'] ?? array() ) as $feed => $st ) {
-			$this->stats[ $feed ] = array( count( $st['news']['fetched'] ) + count( $st['legal']['fetched'] ), count( $st['news']['published'] ) + count( $st['legal']['published'] ) );
-		}
-		$by_id = array_column( array_filter( (array) aw_sources_config()['sources'], 'is_array' ), null, 'id' );
+		$this->all = aw_sourcing_kw_records();
 		$v     = $this->view();
 		$cat   = sanitize_title( wp_unslash( $_GET['cat'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
 		$s     = mb_strtolower( sanitize_text_field( wp_unslash( $_GET['s'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
@@ -297,12 +261,6 @@ class AW_Sourcing_Keywords_Table extends WP_List_Table {
 			}
 			if ( '' !== $s && false === mb_strpos( mb_strtolower( implode( ' ', aw_kw_spellings( $r ) ) ), $s ) ) {
 				continue;
-			}
-			$r['searches'] = aw_kw_searches( $r, $by_id );
-			$r['items']    = array( 0, 0 );
-			foreach ( $r['searches'] as $x ) {
-				$r['items'][0] += $this->stats[ $x['feed'] ][0] ?? 0;
-				$r['items'][1] += $this->stats[ $x['feed'] ][1] ?? 0;
 			}
 			$rows[] = $r;
 		}

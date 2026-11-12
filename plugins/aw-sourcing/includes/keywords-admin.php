@@ -337,6 +337,109 @@ function aw_sourcing_kw_add( $label, array $set ) {
 	return is_wp_error( $r ) ? $r : $id;
 }
 
+/** The Keywords list's views: slug => [label, role bit (0: the Hindi view)]. */
+function aw_sourcing_kw_views() {
+	return array(
+		'include'  => array( 'Include', AW_KW_ROLE_INCLUDE ),
+		'animal'   => array( 'Animal', AW_KW_ROLE_ANIMAL ),
+		'context'  => array( 'Context', AW_KW_ROLE_CONTEXT ),
+		'exclude'  => array( 'Exclude', AW_KW_ROLE_EXCLUDE ),
+		'search'   => array( 'Search', AW_KW_ROLE_SEARCH ),
+		'press'    => array( 'Press', AW_KW_ROLE_PRESS ),
+		'category' => array( 'Category words', AW_KW_ROLE_CATEGORY ),
+		'hindi'    => array( 'Hindi (no Sourcing role)', 0 ),
+	);
+}
+
+/**
+ * Whether a record belongs to a view of the Keywords list ('' for All).
+ *
+ * @param array  $r Record.
+ * @param string $v View.
+ */
+function aw_sourcing_kw_in_view( array $r, $v ) {
+	if ( 'hindi' === $v ) {
+		return 'en' !== $r['lang'];
+	}
+	if ( 'en' !== $r['lang'] ) {
+		return false;
+	}
+	$views = aw_sourcing_kw_views();
+	return '' === $v ? (bool) ( $r['roles'] & AW_KW_WORKER_ROLES ) : (bool) ( $r['roles'] & ( $views[ $v ][1] ?? 0 ) );
+}
+
+/**
+ * Every record the Keywords list shows in some view (the worker roles, and the Hindi words the old lists had), each with
+ * its searches and the items they fetched and published in 30 days.
+ *
+ * @return array[] id => record, plus searches and items [fetched, published].
+ */
+function aw_sourcing_kw_records() {
+	global $wpdb;
+	$k         = aw_si_table( 'keywords' );
+	$hindi_ids = (array) $wpdb->get_col( "SELECT id FROM {$k} WHERE lang <> 'en' AND src_note IS NOT NULL AND src_note <> ''" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only; the Hindi words the lists had
+	$all       = aw_kw_rows( AW_KW_WORKER_ROLES );
+	foreach ( aw_kw_attach_maps( $hindi_ids ? (array) $wpdb->get_results( 'SELECT id, norm, label, lang, roles, variants, query, feed_id, search_on, dismissed, src_note, impr28 FROM ' . $k . ' WHERE id IN (' . implode( ',', array_map( 'intval', $hindi_ids ) ) . ')', ARRAY_A ) : array() ) as $id => $r ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.NotPrepared -- table name and integers only.
+		$all[ $id ] = $r;
+	}
+	$stats = array();
+	foreach ( (array) ( aw_sourcing_keyword_stats( 30 )['rows'] ?? array() ) as $feed => $st ) {
+		$stats[ $feed ] = array( count( $st['news']['fetched'] ) + count( $st['legal']['fetched'] ), count( $st['news']['published'] ) + count( $st['legal']['published'] ) );
+	}
+	$by_id = array_column( array_filter( (array) aw_sources_config()['sources'], 'is_array' ), null, 'id' );
+	foreach ( $all as $id => $r ) {
+		$r['searches'] = aw_kw_searches( $r, $by_id );
+		$r['items']    = array( 0, 0 );
+		foreach ( $r['searches'] as $x ) {
+			$r['items'][0] += $stats[ $x['feed'] ][0] ?? 0;
+			$r['items'][1] += $stats[ $x['feed'] ][1] ?? 0;
+		}
+		$all[ $id ] = $r;
+	}
+	return $all;
+}
+
+/**
+ * A row or bulk action of the Keywords list on some records: delete (from sourcing), add_<bit>, remove_<bit> or
+ * cat_<slug> (map to a category, with the Category word role).
+ *
+ * @param string $op  Action.
+ * @param int[]  $ids Record ids.
+ * @return array{0: int, 1: string[]} How many changed, and the refusals.
+ */
+function aw_sourcing_kw_bulk( $op, array $ids ) {
+	$n    = 0;
+	$errs = array();
+	foreach ( array_filter( array_map( 'absint', $ids ) ) as $one ) {
+		$cur = aw_kw_get( $one );
+		if ( ! $cur ) {
+			continue;
+		}
+		$set = null;
+		if ( 'delete' === $op ) {
+			$set = array( 'roles' => 0 );
+		} elseif ( preg_match( '/^(add|remove)_(\d+)$/', $op, $m ) && isset( aw_sourcing_kw_roles()[ (int) $m[2] ] ) ) {
+			$has = $cur['roles'] & AW_KW_WORKER_ROLES;
+			$set = array( 'roles' => 'add' === $m[1] ? $has | (int) $m[2] : $has & ~(int) $m[2] );
+		} elseif ( preg_match( '/^cat_([a-z0-9_-]+)$/', $op, $m ) && get_term_by( 'slug', $m[1], 'category' ) ) {
+			$set = array(
+				'categories' => array_values( array_unique( array_merge( $cur['categories'], array( $m[1] ) ) ) ),
+				'roles'      => ( $cur['roles'] & AW_KW_WORKER_ROLES ) | AW_KW_ROLE_CATEGORY,
+			);
+		}
+		if ( null === $set ) {
+			continue;
+		}
+		$r = aw_sourcing_kw_apply( $one, $set );
+		if ( is_wp_error( $r ) ) {
+			$errs[] = $cur['label'] . ': ' . $r->get_error_message();
+		} elseif ( $r ) {
+			++$n;
+		}
+	}
+	return array( $n, $errs );
+}
+
 /** The keyword screen's forms: add, edit, delete, row and bulk actions. */
 add_action(
 	'admin_post_aw_sourcing_kw',
@@ -348,6 +451,7 @@ add_action(
 			wp_die( 'Not allowed.', 403 );
 		}
 		$base = admin_url( 'admin.php?page=aw-sourcing&tab=keywords' );
+		$base = false !== strpos( (string) wp_get_referer(), 'ui=classic' ) ? add_query_arg( 'ui', 'classic', $base ) : $base; // a save on today's screen goes back to it
 		$back = wp_get_referer() ? remove_query_arg( array( 'kw_done', 'kw_n', 'kw_err' ), wp_get_referer() ) : $base;
 		if ( ! aw_sourcing_kw_on() ) {
 			wp_safe_redirect( $base );
@@ -409,34 +513,7 @@ add_action(
 			$op  = '' !== $op ? $op : sanitize_text_field( wp_unslash( $_POST['kw_bulk2'] ?? '' ) );
 			$ids = array_map( 'absint', (array) wp_unslash( $_POST['kw'] ?? array() ) );
 		}
-		$errs = array();
-		foreach ( array_filter( $ids ) as $one ) {
-			$cur = aw_kw_get( $one );
-			if ( ! $cur ) {
-				continue;
-			}
-			$set = null;
-			if ( 'delete' === $op ) {
-				$set = array( 'roles' => 0 );
-			} elseif ( preg_match( '/^(add|remove)_(\d+)$/', $op, $m ) && isset( aw_sourcing_kw_roles()[ (int) $m[2] ] ) ) {
-				$has = $cur['roles'] & AW_KW_WORKER_ROLES;
-				$set = array( 'roles' => 'add' === $m[1] ? $has | (int) $m[2] : $has & ~(int) $m[2] );
-			} elseif ( preg_match( '/^cat_([a-z0-9_-]+)$/', $op, $m ) && get_term_by( 'slug', $m[1], 'category' ) ) {
-				$set = array(
-					'categories' => array_values( array_unique( array_merge( $cur['categories'], array( $m[1] ) ) ) ),
-					'roles'      => ( $cur['roles'] & AW_KW_WORKER_ROLES ) | AW_KW_ROLE_CATEGORY,
-				);
-			}
-			if ( null === $set ) {
-				continue;
-			}
-			$r      = aw_sourcing_kw_apply( $one, $set );
-			if ( is_wp_error( $r ) ) {
-				$errs[] = $cur['label'] . ': ' . $r->get_error_message();
-			} elseif ( $r ) {
-				++$n;
-			}
-		}
+		list( $n, $errs ) = aw_sourcing_kw_bulk( $op, $ids );
 		$args = array( 'kw_done' => $n ? 'changed' : 'none', 'kw_n' => $n );
 		if ( $errs ) {
 			$args['kw_err'] = rawurlencode( implode( ' ', $errs ) );

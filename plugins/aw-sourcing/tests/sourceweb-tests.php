@@ -241,4 +241,10 @@ aw_t( false !== strpos( $pages, 'aw_sourcing_sources_apply(' ) && false !== strp
 $pol = file_get_contents( dirname( __DIR__ ) . '/includes/sourcing-policy.php' );
 aw_t( false !== strpos( $pol, 'list( $pubs, $press ) = aw_sourcing_sources_apply( $pubs, $status, $hosts );' ) && false !== strpos( $pol, '$pubs   = aw_sourcing_shorts_apply( $pubs,' ), 'sources: the classic list saves through the shared functions' );
 $ui = file_get_contents( dirname( __DIR__ ) . '/includes/sourceweb-ui.php' );
-aw_t( false !== strpos( $ui, "const SOURCEWEB_UI_TABS = array( 'sources', 'workers', 'settings' );" ), 'ui: Sources, Workers and Settings are drawn on the new screens' );
+aw_t( false !== strpos( $ui, "const SOURCEWEB_UI_TABS = array( 'sources', 'keywords', 'workers', 'settings' );" ), 'ui: Sources, Keywords, Workers and Settings are drawn on the new screens' );
+aw_t( false !== strpos( $ui, "if ( 'keywords' === \$tab && ! ( function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ) ) {" ), 'ui: Keywords before the keyword table stays on today\'s screen' );
+aw_t( false !== strpos( $pages, 'aw_sourcing_kw_add(' ) && false !== strpos( $pages, 'aw_sourcing_kw_apply(' ) && false !== strpos( $pages, 'aw_sourcing_kw_bulk(' ) && false !== strpos( $pages, 'aw_relevance_verdict(' ) && false !== strpos( $pages, 'aw_relevance_switches_sanitize(' ) && false !== strpos( $pages, 'aw_sources_sanitize(' ) && false !== strpos( $pages, 'aw_sourcing_suggestions()' ) && false !== strpos( $pages, 'aw_sourcing_suggest_apply(' ), 'keywords routes: the same add, edit, list actions, test, switches, Press settings and suggestions as today\'s screen' );
+$kwa = file_get_contents( dirname( __DIR__ ) . '/includes/keywords-admin.php' );
+$kwt = file_get_contents( dirname( __DIR__ ) . '/includes/class-aw-sourcing-keywords-table.php' );
+aw_t( false !== strpos( $kwa, 'list( $n, $errs ) = aw_sourcing_kw_bulk( $op, $ids );' ) && false !== strpos( $kwt, '$this->all = aw_sourcing_kw_records();' ) && false !== strpos( $kwt, 'aw_sourcing_kw_in_view( $r, $v )' ), 'keywords: the classic list and its actions use the shared functions' );
+aw_t( 7 === substr_count( $pages, '$ready = sourceweb_keywords_ready();' ), 'keywords routes: every save and list refuses before the keyword table (409)' );

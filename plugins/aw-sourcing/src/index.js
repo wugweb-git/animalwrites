@@ -1258,7 +1258,7 @@ function useSub( keys ) {
  */
 const subHref = ( next ) => {
 	const u = new URL( window.location.href );
-	[ 'edit', 'runs', 'view', 'status' ].forEach( ( k ) =>
+	[ 'edit', 'runs', 'view', 'status', 'kw' ].forEach( ( k ) =>
 		u.searchParams.delete( k )
 	);
 	Object.keys( next ).forEach( ( k ) => u.searchParams.set( k, next[ k ] ) );
@@ -3005,6 +3005,991 @@ function Feeds( { host, go } ) {
 	);
 }
 
+/* ---------- Keywords ---------- */
+
+/**
+ * Checkboxes for a list of values.
+ *
+ * @param {Object}   props
+ * @param {string}   props.id       Id prefix.
+ * @param {string}   props.legend   Legend (for screen readers).
+ * @param {Array}    props.options  [ { value, label, help } ].
+ * @param {Array}    props.value    Ticked values.
+ * @param {Function} props.onChange New ticked values.
+ */
+function Checks( { id, legend, options, value, onChange } ) {
+	return (
+		<fieldset className="kits-shell-checks">
+			<legend className="screen-reader-text">{ legend }</legend>
+			{ options.map( ( o ) => (
+				<label key={ o.value } htmlFor={ `${ id }-${ o.value }` }>
+					<input
+						id={ `${ id }-${ o.value }` }
+						type="checkbox"
+						checked={ value.includes( o.value ) }
+						onChange={ ( e ) =>
+							onChange(
+								e.target.checked
+									? [ ...value, o.value ]
+									: value.filter( ( x ) => x !== o.value )
+							)
+						}
+					/>{ ' ' }
+					{ o.help ? <strong>{ o.label }</strong> : o.label }
+					{ o.help && (
+						<span className="kits-shell-field__help">
+							{ ' — ' }
+							{ o.help }
+						</span>
+					) }
+				</label>
+			) ) }
+		</fieldset>
+	);
+}
+
+/** The view's role, ticked first on Add New Keyword. */
+const VIEW_ROLE = {
+	include: 'Include',
+	animal: 'Animal',
+	context: 'Context',
+	exclude: 'Exclude',
+	search: 'Search',
+	press: 'Press',
+	category: 'Category word',
+};
+
+function Keywords() {
+	const [ sub, go ] = useSub( [ 'edit', 'kw' ] );
+	const [ msg, setMsg ] = useState( null );
+	const back = ( m ) => {
+		setMsg( m || null );
+		go( {} );
+	};
+	if ( sub.edit ) {
+		return (
+			<KeywordForm
+				id={ 'new' === sub.edit ? 0 : parseInt( sub.edit, 10 ) || 0 }
+				onDone={ back }
+				go={ go }
+			/>
+		);
+	}
+	if ( 'suggestions' === sub.kw ) {
+		return <Suggestions onBack={ () => back() } />;
+	}
+	return <KeywordList go={ go } msg={ msg } setMsg={ setMsg } />;
+}
+
+/**
+ * The relevance filter and aggregator switches, and the Press settings in the Press view.
+ *
+ * @param {Object}   props
+ * @param {Object}   props.settings As GET keywords gives them.
+ * @param {boolean}  props.press    Show the Press settings.
+ * @param {Function} props.onSaved  New settings.
+ */
+function KeywordSettings( { settings, press, onSaved } ) {
+	const [ v, setV ] = useState( settings );
+	const [ msg, setMsg ] = useState( null );
+	const [ busy, setBusy ] = useState( false );
+	useEffect( () => setV( settings ), [ settings ] );
+	const dirty = JSON.stringify( v ) !== JSON.stringify( settings );
+	const save = () => {
+		setBusy( true );
+		setMsg( null );
+		apiFetch( {
+			path: path( 'keywords/settings' ),
+			method: 'POST',
+			data: { ...v, press: press ? v.press : {} },
+		} )
+			.then( ( r ) => {
+				setMsg( {
+					tone: r.saved ? 'success' : 'info',
+					text: r.message,
+				} );
+				onSaved( r.settings );
+			} )
+			.catch( ( e ) => setMsg( { tone: 'error', text: errText( e ) } ) )
+			.finally( () => setBusy( false ) );
+	};
+	return (
+		<SettingsGroup
+			id="keyword-switches"
+			title={ __( 'Keyword check', 'aw-sourcing' ) }
+			footer={
+				<Button
+					variant="primary"
+					busy={ busy }
+					disabled={ ! dirty }
+					onClick={ save }
+				>
+					{ __( 'Save changes', 'aw-sourcing' ) }
+				</Button>
+			}
+		>
+			{ msg && (
+				<Notice tone={ msg.tone } onDismiss={ () => setMsg( null ) }>
+					{ msg.text }
+				</Notice>
+			) }
+			<Switch
+				label={ __( 'Relevance filter', 'aw-sourcing' ) }
+				help={ __(
+					'Off: every item from a non-blocked publisher is kept.',
+					'aw-sourcing'
+				) }
+				checked={ v.enabled }
+				onChange={ ( on ) => setV( { ...v, enabled: on } ) }
+			/>
+			<Switch
+				label={ __(
+					'Aggregator feeds: only allowed publishers',
+					'aw-sourcing'
+				) }
+				help={ __(
+					'Google News, Apple News and similar: items from Neutral publishers are refused. Keep off unless the allow list is complete.',
+					'aw-sourcing'
+				) }
+				checked={ v.gnews_allow_only }
+				onChange={ ( on ) => setV( { ...v, gnews_allow_only: on } ) }
+			/>
+			{ press && (
+				<SettingsBlock
+					title={ __( 'Press discovery', 'aw-sourcing' ) }
+					description={ __(
+						'The queries are the Press keywords below: Google News and Google Search for coverage of Animal Writes.',
+						'aw-sourcing'
+					) }
+				>
+					<Switch
+						label={ __( 'Press discovery', 'aw-sourcing' ) }
+						checked={ v.press.enabled }
+						onChange={ ( on ) =>
+							setV( { ...v, press: { ...v.press, enabled: on } } )
+						}
+					/>
+					<TextField
+						label={ __( 'Every (days)', 'aw-sourcing' ) }
+						value={ String( v.press.every_days ) }
+						onChange={ ( d ) =>
+							setV( {
+								...v,
+								press: { ...v.press, every_days: d },
+							} )
+						}
+						input={ {
+							type: 'number',
+							min: '1',
+							max: '60',
+							step: '1',
+						} }
+					/>
+				</SettingsBlock>
+			) }
+		</SettingsGroup>
+	);
+}
+
+/** Test a headline: kept or dropped, and why. */
+function HeadlineTest() {
+	const [ text, setText ] = useState( '' );
+	const [ res, setRes ] = useState( null );
+	const [ busy, setBusy ] = useState( false );
+	const test = () => {
+		setBusy( true );
+		apiFetch( { path: path( 'keywords/test', { text } ) } )
+			.then( ( r ) => setRes( r ) )
+			.catch( ( e ) => setRes( { error: errText( e ) } ) )
+			.finally( () => setBusy( false ) );
+	};
+	return (
+		<SettingsGroup
+			id="keyword-test"
+			title={ __( 'Test a headline', 'aw-sourcing' ) }
+			footer={
+				<Button
+					busy={ busy }
+					disabled={ '' === text.trim() }
+					onClick={ test }
+				>
+					{ __( 'Test', 'aw-sourcing' ) }
+				</Button>
+			}
+		>
+			<TextField
+				label={ __( 'Headline', 'aw-sourcing' ) }
+				value={ text }
+				onChange={ setText }
+				input={ {
+					placeholder: __( 'Paste a headline', 'aw-sourcing' ),
+				} }
+			/>
+			{ res &&
+				( res.error ? (
+					<Notice tone="error">{ res.error }</Notice>
+				) : (
+					<p>
+						<Status
+							tone={ res.kept ? 'success' : 'error' }
+							label={
+								res.kept
+									? __( 'Kept', 'aw-sourcing' )
+									: __( 'Dropped', 'aw-sourcing' )
+							}
+						/>{ ' ' }
+						({ res.why })
+					</p>
+				) ) }
+		</SettingsGroup>
+	);
+}
+
+function KeywordList( { go, msg, setMsg } ) {
+	const first = new URLSearchParams( window.location.search );
+	const [ q, setQ ] = useState( {
+		view: first.get( 'view' ) || '',
+		cat: first.get( 'cat' ) || '',
+		search: '',
+		orderby: '',
+		order: 'asc',
+		page: 1,
+	} );
+	const [ data, setData ] = useState( null );
+	const [ loading, setLoading ] = useState( true );
+	const [ error, setError ] = useState( '' );
+	const load = useCallback( () => {
+		setLoading( true );
+		setError( '' );
+		apiFetch( { path: path( 'keywords', q ) } )
+			.then( setData )
+			.catch( ( e ) => setError( errText( e ) ) )
+			.finally( () => setLoading( false ) );
+	}, [ q ] );
+	useEffect( load, [ load ] );
+	const set = ( part ) => setQ( ( o ) => ( { ...o, page: 1, ...part } ) );
+	const decide = ( op, ids ) => {
+		setMsg( null );
+		return apiFetch( {
+			path: path( 'keywords/decide' ),
+			method: 'POST',
+			data: { op, ids },
+		} )
+			.then( ( r ) =>
+				setMsg( {
+					tone:
+						( r.errors.length && 'error' ) ||
+						( r.changed && 'success' ) ||
+						'info',
+					text: [ r.message, ...r.errors ].join( ' ' ),
+				} )
+			)
+			.catch( ( e ) => setMsg( { tone: 'error', text: errText( e ) } ) )
+			.finally( load );
+	};
+	const remove = ( ids, label ) => {
+		if (
+			// eslint-disable-next-line no-alert -- a plain browser confirm, as today's screen
+			window.confirm(
+				label
+					? sprintf(
+							/* translators: %s: keyword. */
+							__(
+								'Remove "%s" from sourcing? Its Sourcing and Press roles go; Search Insights keeps the record.',
+								'aw-sourcing'
+							),
+							label
+						)
+					: sprintf(
+							/* translators: %d: number of keywords. */
+							_n(
+								'Remove %d keyword from sourcing? Its Sourcing and Press roles go; Search Insights keeps the record.',
+								'Remove %d keywords from sourcing? Their Sourcing and Press roles go; Search Insights keeps the records.',
+								ids.length,
+								'aw-sourcing'
+							),
+							ids.length
+						)
+			)
+		) {
+			decide( 'delete', ids );
+		}
+	};
+	const roles = data?.roles || [];
+	const bulk = [
+		...roles.map( ( r ) => ( {
+			value: `add_${ r.value }`,
+			label: sprintf(
+				/* translators: %s: role. */
+				__( 'Add role: %s', 'aw-sourcing' ),
+				r.label
+			),
+		} ) ),
+		...roles.map( ( r ) => ( {
+			value: `remove_${ r.value }`,
+			label: sprintf(
+				/* translators: %s: role. */
+				__( 'Remove role: %s', 'aw-sourcing' ),
+				r.label
+			),
+		} ) ),
+		...( data?.categories || [] ).map( ( c ) => ( {
+			value: `cat_${ c.value }`,
+			label: sprintf(
+				/* translators: %s: category. */
+				__( 'Map to category: %s', 'aw-sourcing' ),
+				c.label
+			),
+		} ) ),
+		{ value: 'delete', label: __( 'Delete from sourcing', 'aw-sourcing' ) },
+	];
+	const views = [
+		...( data?.views || [] ),
+		...( data
+			? [
+					{
+						value: '__suggestions',
+						label: __(
+							'Suggestions from Search Insights',
+							'aw-sourcing'
+						),
+					},
+				]
+			: [] ),
+	];
+	const catName = ( data?.categories || [] ).find(
+		( c ) => c.value === q.cat
+	)?.label;
+	const addNew = { edit: 'new', ...( q.view ? { view: q.view } : {} ) };
+	return (
+		<>
+			{ data && (
+				<KeywordSettings
+					settings={ data.settings }
+					press={ 'press' === q.view }
+					onSaved={ ( s ) => setData( { ...data, settings: s } ) }
+				/>
+			) }
+			<SectionCard
+				id="keywords"
+				title={ __( 'Keywords', 'aw-sourcing' ) }
+				description={ __(
+					'Every keyword with a Sourcing or Press role. English only for Sourcing and Press. Plurals and dots do not matter: "dogs" adds to "dog". Include and Exclude cannot go together.',
+					'aw-sourcing'
+				) }
+				actions={
+					<a
+						className="kits-shell-button is-primary"
+						href={ subHref( addNew ) }
+						onClick={ inPlace( go, addNew ) }
+					>
+						{ __( 'Add New Keyword', 'aw-sourcing' ) }
+					</a>
+				}
+			>
+				{ msg && (
+					<Notice
+						tone={ msg.tone }
+						onDismiss={ () => setMsg( null ) }
+					>
+						{ msg.text }
+					</Notice>
+				) }
+				{ q.cat && (
+					<Notice tone="info">
+						{ sprintf(
+							/* translators: %s: category. */
+							__( 'Category: %s.', 'aw-sourcing' ),
+							catName || q.cat
+						) }{ ' ' }
+						<Button onClick={ () => set( { cat: '' } ) }>
+							{ __( 'Show every category', 'aw-sourcing' ) }
+						</Button>
+					</Notice>
+				) }
+				<DataList
+					label={ __( 'Keywords', 'aw-sourcing' ) }
+					columns={ [
+						{
+							key: 'title',
+							label: __( 'Keyword', 'aw-sourcing' ),
+							sortable: true,
+							primary: true,
+							render: ( r ) => (
+								<>
+									<a
+										href={ subHref( { edit: r.id } ) }
+										onClick={ inPlace( go, {
+											edit: r.id,
+										} ) }
+									>
+										<strong>{ r.title }</strong>
+									</a>
+									{ r.langLabel && (
+										<span className="kits-shell-field__help">
+											{ ' — ' }
+											{ r.langLabel }
+										</span>
+									) }
+								</>
+							),
+						},
+						{
+							key: 'spellings',
+							label: __( 'Other spellings', 'aw-sourcing' ),
+						},
+						{
+							key: 'rolesText',
+							label: __( 'Roles', 'aw-sourcing' ),
+							render: ( r ) => r.rolesText || '—',
+						},
+						{
+							key: 'categories',
+							label: __( 'Categories', 'aw-sourcing' ),
+							render: ( r ) =>
+								r.categories.length
+									? r.categories.map( ( c, i ) => (
+											<span key={ c.slug }>
+												{ i > 0 && ', ' }
+												<Button
+													variant="link"
+													onClick={ () =>
+														set( {
+															view: 'category',
+															cat: c.slug,
+														} )
+													}
+												>
+													{ c.name }
+												</Button>
+											</span>
+										) )
+									: '—',
+						},
+						{
+							key: 'search',
+							label: __( 'Google News search', 'aw-sourcing' ),
+						},
+						{
+							key: 'items',
+							label: __( 'Items (30 days)', 'aw-sourcing' ),
+							sortable: true,
+						},
+						{
+							key: 'impr',
+							label: __( 'Impressions (28 days)', 'aw-sourcing' ),
+							sortable: true,
+						},
+					] }
+					rows={ data?.rows || [] }
+					total={ data?.total || 0 }
+					page={ data?.page || 1 }
+					pages={ data?.pages || 1 }
+					onPage={ ( page ) => setQ( ( o ) => ( { ...o, page } ) ) }
+					search={ q.search }
+					onSearch={ ( search ) => set( { search } ) }
+					searchLabel={ __( 'Search keywords', 'aw-sourcing' ) }
+					views={ views }
+					view={ q.view }
+					onView={ ( view ) =>
+						'__suggestions' === view
+							? go( { kw: 'suggestions' } )
+							: set( { view } )
+					}
+					sort={ { key: q.orderby, dir: q.order } }
+					onSort={ ( orderby, order ) => set( { orderby, order } ) }
+					bulkActions={ bulk }
+					onBulk={ ( op, ids ) =>
+						'delete' === op ? remove( ids ) : decide( op, ids )
+					}
+					rowActions={ ( r ) => [
+						{
+							label: __( 'Edit', 'aw-sourcing' ),
+							onClick: () => go( { edit: r.id } ),
+						},
+						...( 'en' === r.lang
+							? [
+									...roles
+										.filter( ( x ) =>
+											[
+												data.include,
+												data.exclude,
+											].includes( x.value )
+										)
+										.map( ( x ) => {
+											const has = r.roles & x.value; // eslint-disable-line no-bitwise -- role bits
+											return {
+												label: has
+													? sprintf(
+															/* translators: %s: role. */
+															__(
+																'Remove %s',
+																'aw-sourcing'
+															),
+															x.label
+														)
+													: sprintf(
+															/* translators: %s: role. */
+															__(
+																'Add %s',
+																'aw-sourcing'
+															),
+															x.label
+														),
+												onClick: () =>
+													decide(
+														`${
+															has
+																? 'remove'
+																: 'add'
+														}_${ x.value }`,
+														[ r.id ]
+													),
+											};
+										} ),
+									{
+										label: __( 'Delete', 'aw-sourcing' ),
+										tone: 'error',
+										onClick: () =>
+											remove( [ r.id ], r.title ),
+									},
+								]
+							: [] ),
+					] }
+					loading={ loading }
+					error={ error }
+					onRetry={ load }
+					emptyTitle={ __( 'No keywords.', 'aw-sourcing' ) }
+				/>
+			</SectionCard>
+			<HeadlineTest />
+		</>
+	);
+}
+
+/**
+ * Add New Keyword or edit one: other spellings, roles, categories, sections, language, search and its query.
+ *
+ * @param {Object}   props
+ * @param {number}   props.id     Record id, 0 to add.
+ * @param {Function} props.onDone Back to the list, with a notice.
+ * @param {Function} props.go     From useSub().
+ */
+function KeywordForm( { id, onDone, go } ) {
+	const [ k, setK ] = useState( null );
+	const [ v, setV ] = useState( null );
+	const [ error, setError ] = useState( '' );
+	const [ msg, setMsg ] = useState( null );
+	const [ busy, setBusy ] = useState( false );
+	const load = () => {
+		setError( '' );
+		apiFetch( { path: path( 'keywords/one', { id } ) } )
+			.then( ( r ) => {
+				const l = r.choices;
+				const pre = new URLSearchParams( window.location.search ).get(
+					'view'
+				);
+				const preRole = ( l.roles || [] ).find(
+					( x ) => x.label === VIEW_ROLE[ pre ]
+				);
+				setK( r );
+				setV( {
+					label: r.label,
+					variants: r.variants,
+					lang: r.lang,
+					roles: id || ! preRole ? r.roles : [ preRole.value ],
+					categories: r.cats,
+					sections: r.sections,
+					search_on: !! r.search_on,
+					query: r.query || '',
+				} );
+			} )
+			.catch( ( e ) => setError( errText( e ) ) );
+	};
+	useEffect( load, [ id ] );
+	if ( error ) {
+		return <ErrorState message={ error } onRetry={ load } />;
+	}
+	if ( ! k || ! v ) {
+		return (
+			<LoadingState
+				label={ __( 'Loading the keyword…', 'aw-sourcing' ) }
+			/>
+		);
+	}
+	const put = ( key ) => ( val ) => setV( { ...v, [ key ]: val } );
+	const send = ( extra = {} ) => {
+		setBusy( true );
+		setMsg( null );
+		apiFetch( {
+			path: path( 'keywords/save' ),
+			method: 'POST',
+			data: { ...v, id, ...extra },
+		} )
+			.then( ( r ) =>
+				onDone( {
+					tone: 'none' === r.done ? 'info' : 'success',
+					text: r.message,
+				} )
+			)
+			.catch( ( e ) => {
+				setBusy( false );
+				setMsg( { tone: 'error', text: errText( e ) } );
+				if ( ! id && e?.data?.id ) {
+					go( { edit: e.data.id } ); // refused on a record that exists: open it, where it can be corrected
+				}
+			} );
+	};
+	const del = () => {
+		if (
+			// eslint-disable-next-line no-alert -- a plain browser confirm, as today's screen
+			window.confirm(
+				__(
+					'Remove this keyword from sourcing? Its Sourcing and Press roles go; Search Insights keeps the record.',
+					'aw-sourcing'
+				)
+			)
+		) {
+			send( { delete: true } );
+		}
+	};
+	const langs = [
+		{ value: 'en', label: __( 'English', 'aw-sourcing' ) },
+		{ value: 'hinglish', label: __( 'Hinglish', 'aw-sourcing' ) },
+		{ value: 'hi', label: __( 'Hindi', 'aw-sourcing' ) },
+	];
+	return (
+		<SettingsGroup
+			id="keyword-form"
+			title={
+				id
+					? sprintf(
+							/* translators: %s: keyword. */
+							__( 'Edit keyword: %s', 'aw-sourcing' ),
+							k.label
+						)
+					: __( 'Add New Keyword', 'aw-sourcing' )
+			}
+			footer={
+				<>
+					<Button
+						variant="primary"
+						busy={ busy }
+						onClick={ () => send() }
+					>
+						{ id
+							? __( 'Update', 'aw-sourcing' )
+							: __( 'Add New Keyword', 'aw-sourcing' ) }
+					</Button>{ ' ' }
+					{ id > 0 && (
+						<>
+							<Button disabled={ busy } onClick={ del }>
+								{ __( 'Delete', 'aw-sourcing' ) }
+							</Button>{ ' ' }
+						</>
+					) }
+					<Button onClick={ () => onDone() }>
+						{ __( 'Cancel', 'aw-sourcing' ) }
+					</Button>
+				</>
+			}
+		>
+			{ msg && (
+				<Notice tone={ msg.tone } onDismiss={ () => setMsg( null ) }>
+					{ msg.text }
+				</Notice>
+			) }
+			{ id ? (
+				<RefTable
+					caption={ __( 'The keyword', 'aw-sourcing' ) }
+					head={ [
+						__( 'Item', 'aw-sourcing' ),
+						__( 'Value', 'aw-sourcing' ),
+					] }
+					rows={ [
+						[
+							__( 'Keyword', 'aw-sourcing' ),
+							<>
+								<strong>{ k.label }</strong>{ ' ' }
+								<code>{ k.norm }</code>{ ' ' }
+								<span className="kits-shell-field__help">
+									{ __(
+										'Fixed once saved: it is the record Search Insights keeps its figures on. Add other spellings below.',
+										'aw-sourcing'
+									) }
+								</span>
+							</>,
+						],
+						[
+							__( 'Search Insights roles', 'aw-sourcing' ),
+							sprintf(
+								/* translators: %s: roles. */
+								__( '%s (not changed here)', 'aw-sourcing' ),
+								k.otherRoles
+							),
+						],
+					] }
+				/>
+			) : (
+				<TextField
+					label={ __( 'Keyword', 'aw-sourcing' ) }
+					help={ __(
+						'English only for Sourcing and Press. Plurals and dots do not matter: "dogs" adds to "dog".',
+						'aw-sourcing'
+					) }
+					value={ v.label }
+					onChange={ put( 'label' ) }
+					input={ { required: true } }
+				/>
+			) }
+			<TextField
+				label={ __( 'Other spellings', 'aw-sourcing' ) }
+				help={ __(
+					'One per line. Every spelling counts for every role. A trailing * matches the start of a word (steriliz* matches sterilized and sterilization).',
+					'aw-sourcing'
+				) }
+				value={ v.variants }
+				onChange={ put( 'variants' ) }
+				input={ { rows: 4 } }
+			/>
+			<SelectField
+				label={ __( 'Language', 'aw-sourcing' ) }
+				help={ __(
+					'Detected automatically; correct it when an English phrase was taken for Hinglish. Sourcing and Press roles are for English keywords only.',
+					'aw-sourcing'
+				) }
+				value={ v.lang }
+				options={ langs }
+				onChange={ put( 'lang' ) }
+			/>
+			<SettingsBlock
+				title={ __( 'Roles', 'aw-sourcing' ) }
+				description={ __(
+					'Include and Exclude cannot go together.',
+					'aw-sourcing'
+				) }
+			>
+				<Checks
+					id="sw-kw-role"
+					legend={ __( 'Roles', 'aw-sourcing' ) }
+					options={ k.choices.roles }
+					value={ v.roles }
+					onChange={ put( 'roles' ) }
+				/>
+			</SettingsBlock>
+			<SettingsBlock
+				title={ __( 'Categories', 'aw-sourcing' ) }
+				description={ __(
+					"With the Category word role, an item that has this keyword gets these categories (the section's rule still limits them). An item a search of this keyword found gets them too.",
+					'aw-sourcing'
+				) }
+			>
+				<Checks
+					id="sw-kw-cat"
+					legend={ __( 'Categories', 'aw-sourcing' ) }
+					options={ k.choices.categories }
+					value={ v.categories }
+					onChange={ put( 'categories' ) }
+				/>
+			</SettingsBlock>
+			<SettingsBlock
+				title={ __( 'Sections', 'aw-sourcing' ) }
+				description={ __(
+					'Where items its search finds go (News for a keyword search; Media & PR files them as press).',
+					'aw-sourcing'
+				) }
+			>
+				<Checks
+					id="sw-kw-sec"
+					legend={ __( 'Sections', 'aw-sourcing' ) }
+					options={ k.choices.sections }
+					value={ v.sections }
+					onChange={ put( 'sections' ) }
+				/>
+			</SettingsBlock>
+			{ id > 0 && (
+				<>
+					<Switch
+						label={ __( 'Google News search', 'aw-sourcing' ) }
+						help={ sprintf(
+							/* translators: %s: feed ids. */
+							__(
+								'An English Include or Search keyword is searched every run. Searches: %s.',
+								'aw-sourcing'
+							),
+							k.searches
+						) }
+						checked={ v.search_on }
+						onChange={ put( 'search_on' ) }
+					/>
+					<TextField
+						label={ __( 'Search query', 'aw-sourcing' ) }
+						help={ sprintf(
+							/* translators: %s: feed id. */
+							__(
+								'For the Search role: the words searched (the keyword itself when empty), or a whole Google News search address. Feed id: %s (fixed, so the items it found stay counted).',
+								'aw-sourcing'
+							),
+							k.feedId
+						) }
+						value={ v.query }
+						onChange={ put( 'query' ) }
+						input={ { className: 'code' } }
+					/>
+				</>
+			) }
+		</SettingsGroup>
+	);
+}
+
+/**
+ * Suggestions from Search Insights: searches people made (20 impressions in 28 days) that no keyword covers.
+ *
+ * @param {Object}   props
+ * @param {Function} props.onBack Back to the list.
+ */
+function Suggestions( { onBack } ) {
+	const [ q, setQ ] = useState( {
+		view: '',
+		search: '',
+		orderby: '',
+		order: 'desc',
+		page: 1,
+	} );
+	const [ data, setData ] = useState( null );
+	const [ loading, setLoading ] = useState( true );
+	const [ error, setError ] = useState( '' );
+	const [ msg, setMsg ] = useState( null );
+	const load = useCallback( () => {
+		setLoading( true );
+		setError( '' );
+		apiFetch( { path: path( 'keywords/suggestions', q ) } )
+			.then( setData )
+			.catch( ( e ) => setError( errText( e ) ) )
+			.finally( () => setLoading( false ) );
+	}, [ q ] );
+	useEffect( load, [ load ] );
+	const set = ( part ) => setQ( ( o ) => ( { ...o, page: 1, ...part } ) );
+	const decide = ( op, qs ) => {
+		setMsg( null );
+		return apiFetch( {
+			path: path( 'keywords/suggestions/decide' ),
+			method: 'POST',
+			data: { op, qs },
+		} )
+			.then( ( r ) =>
+				setMsg( {
+					tone: r.changed ? 'success' : 'info',
+					text: r.message,
+				} )
+			)
+			.catch( ( e ) => setMsg( { tone: 'error', text: errText( e ) } ) )
+			.finally( load );
+	};
+	const ops = {
+		include: __( 'Add as Include', 'aw-sourcing' ),
+		exclude: __( 'Add as Exclude', 'aw-sourcing' ),
+		search: __( 'Add as Search', 'aw-sourcing' ),
+		dismiss: __( 'Dismiss', 'aw-sourcing' ),
+		restore: __( 'Show again', 'aw-sourcing' ),
+	};
+	const dismissed = 'dismissed' === q.view;
+	const bulk = Object.keys( ops )
+		.filter( ( k ) => ( dismissed ? 'dismiss' !== k : 'restore' !== k ) )
+		.map( ( k ) => ( { value: k, label: ops[ k ] } ) );
+	return (
+		<SectionCard
+			id="suggestions"
+			title={ __( 'Suggestions from Search Insights', 'aw-sourcing' ) }
+			description={ __(
+				'Searches people made (20 impressions or more in 28 days) that no keyword covers yet. Add one as a keyword, or dismiss it.',
+				'aw-sourcing'
+			) }
+			actions={
+				<Button onClick={ onBack }>
+					{ __( 'Back to Keywords', 'aw-sourcing' ) }
+				</Button>
+			}
+		>
+			{ msg && (
+				<Notice tone={ msg.tone } onDismiss={ () => setMsg( null ) }>
+					{ msg.text }
+				</Notice>
+			) }
+			{ data?.none && (
+				<Notice tone="info">
+					{ __(
+						'Search Insights has no search data yet.',
+						'aw-sourcing'
+					) }
+				</Notice>
+			) }
+			<DataList
+				label={ __( 'Suggestions', 'aw-sourcing' ) }
+				columns={ [
+					{
+						key: 'title',
+						label: __( 'Search', 'aw-sourcing' ),
+						sortable: true,
+						primary: true,
+						render: ( r ) => (
+							<>
+								<strong>{ r.title }</strong>
+								{ r.rising && (
+									<span className="kits-shell-field__help">
+										{ ' ' }
+										{ __( 'Rising', 'aw-sourcing' ) }
+									</span>
+								) }
+							</>
+						),
+					},
+					{
+						key: 'impr',
+						label: __( 'Impressions (28 days)', 'aw-sourcing' ),
+						sortable: true,
+					},
+					{
+						key: 'clicks',
+						label: __( 'Clicks', 'aw-sourcing' ),
+						sortable: true,
+					},
+					{
+						key: 'pos',
+						label: __( 'Position', 'aw-sourcing' ),
+						sortable: true,
+					},
+				] }
+				rows={ data?.rows || [] }
+				total={ data?.total || 0 }
+				page={ data?.page || 1 }
+				pages={ data?.pages || 1 }
+				onPage={ ( page ) => setQ( ( o ) => ( { ...o, page } ) ) }
+				search={ q.search }
+				onSearch={ ( search ) => set( { search } ) }
+				searchLabel={ __( 'Search suggestions', 'aw-sourcing' ) }
+				views={ data?.views || [] }
+				view={ q.view }
+				onView={ ( view ) => set( { view } ) }
+				sort={ { key: q.orderby, dir: q.order } }
+				onSort={ ( orderby, order ) => set( { orderby, order } ) }
+				bulkActions={ bulk }
+				onBulk={ decide }
+				rowActions={ ( r ) =>
+					bulk.map( ( b ) => ( {
+						label: b.label,
+						onClick: () => decide( b.value, [ r.id ] ),
+					} ) )
+				}
+				loading={ loading }
+				error={ error }
+				onRetry={ load }
+				emptyTitle={ __( 'No suggestions.', 'aw-sourcing' ) }
+			/>
+		</SectionCard>
+	);
+}
+
 const SCREENS = {
 	dashboard: Dashboard,
 	review: Review,
@@ -3012,6 +3997,7 @@ const SCREENS = {
 	settings: Settings,
 	workers: Workers,
 	sources: Sources,
+	keywords: Keywords,
 };
 
 function App() {

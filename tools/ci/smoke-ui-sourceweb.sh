@@ -93,6 +93,65 @@ sys.exit(1 if bad else 0)
 PY2
 # shellcheck disable=SC2086
 same "SourceWeb Sources" "$BEFORE" "$(optmd5 $S_OPTS)"
+# Keywords: today's word lists before the keyword table (phase 0 here), the new screen from phase 2.
+want 200 "admin.php?page=aw-sourcing&tab=keywords before phase 2" -b /tmp/cj-ci "$H/wp-admin/admin.php?page=aw-sourcing&tab=keywords"
+if grep -q 'id="sourceweb-app"' /tmp/rw.out; then echo "FAIL Keywords before phase 2 draws the new screen"; FAIL=1; else echo "ok   Keywords before phase 2 stays on today's screen"; fi
+want 409 "GET /sourceweb/v1/keywords before phase 2" -b /tmp/cj-ci -H "X-WP-Nonce: $NA" "$H/?rest_route=/sourceweb/v1/keywords"
+post sourceweb/v1/keywords/save '{"id":0}'
+post sourceweb/v1/keywords/decide '{"op":"delete","ids":[]}'
+post sourceweb/v1/keywords/settings '{}'
+post sourceweb/v1/keywords/suggestions/decide '{"op":"dismiss","qs":[]}'
+PHASE_WAS=$(wp option get aw_sourcing_phase 2>/dev/null || echo absent)
+if wp eval 'exit( aw_kw_ready() ? 0 : 1 );'; then
+  wp option update aw_sourcing_phase 2 --quiet
+  screen "aw-sourcing&tab=keywords" sourceweb-app sourceweb-admin
+  for r in keywords "keywords&view=include&orderby=impr&order=desc" keywords/one "keywords/one&id=999999999" keywords/suggestions "keywords/test&text=stray+dogs+fed+in+Pune"; do
+    case "$r" in
+      keywords/one\&id=*) want 404 "GET /sourceweb/v1/$r administrator" -b /tmp/cj-ci -H "X-WP-Nonce: $NA" "$H/?rest_route=/sourceweb/v1/$r" ;;
+      *) route "sourceweb/v1/$r" ;;
+    esac
+  done
+  K_OPTS="aw_relevance aw_sources kits_sourcing_log"
+  # shellcheck disable=SC2086
+  BEFORE=$(optmd5 $K_OPTS)
+  curl -s -b /tmp/cj-ci -H "X-WP-Nonce: $NA" "$H/?rest_route=/sourceweb/v1/keywords" > /tmp/sw-keywords.json
+  python3 - "$H/?rest_route=/sourceweb/v1" "$NA" <<'PY2' || FAIL=1
+import json, subprocess, sys
+r, nonce = sys.argv[1], sys.argv[2]
+def call(route, data=None):
+    args = ['curl', '-s', '-b', '/tmp/cj-ci', '-H', 'X-WP-Nonce: ' + nonce, '-w', '\n%{http_code}']
+    if data is not None:
+        args += ['-X', 'POST', '-H', 'Content-Type: application/json', '-d', json.dumps(data)]
+    body, code = subprocess.run(args + [r + '/' + route], capture_output=True, text=True).stdout.rsplit('\n', 1)
+    return code, json.loads(body)
+lst = json.load(open('/tmp/sw-keywords.json'))
+bad = 0
+print('ok   keywords list: %d keywords, %d views, %d roles' % (lst['total'], len(lst['views']), len(lst['roles'])))
+st = lst['settings']
+for route, data, key in (('keywords/settings', dict(st), 'saved'), ('keywords/decide', {'op': 'delete', 'ids': []}, 'changed'), ('keywords/suggestions/decide', {'op': 'dismiss', 'qs': []}, 'changed')):
+    code, res = call(route, data)
+    ok = code == '200' and not res.get(key)
+    print(('ok  ' if ok else 'FAIL') + ' ' + code + ' unchanged ' + route)
+    bad += not ok
+for row in lst['rows'][:5]:
+    code, k = call('keywords/one&id=%d' % row['id'])
+    data = {'id': k['id'], 'variants': k['variants'], 'lang': k['lang'], 'roles': k['roles'], 'categories': k['cats'], 'sections': k['sections'], 'search_on': k['search_on'], 'query': k['query']}
+    code, res = call('keywords/save', data)
+    ok = code == '200' and res.get('done') == 'none'
+    print(('ok  ' if ok else 'FAIL') + ' ' + code + ' unchanged Save of keyword ' + row['title'])
+    bad += not ok
+code, res = call('keywords/save', {'id': 0, 'label': 'ci dog', 'roles': []})
+ok = code == '400'
+print(('ok  ' if ok else 'FAIL') + ' ' + code + ' Add New Keyword with no role is refused')
+bad += not ok
+sys.exit(1 if bad else 0)
+PY2
+  # shellcheck disable=SC2086
+  same "SourceWeb Keywords" "$BEFORE" "$(optmd5 $K_OPTS)"
+  if [ "$PHASE_WAS" = absent ]; then wp option delete aw_sourcing_phase --quiet; else wp option update aw_sourcing_phase "$PHASE_WAS" --quiet; fi
+else
+  echo "ok   (the keyword table is not set up here: the phase 2 Keywords checks are skipped)"
+fi
 want 200 "POST /sourceweb/v1/dashboard/count administrator" -X POST -b /tmp/cj-ci -H "X-WP-Nonce: $NA" "$H/?rest_route=/sourceweb/v1/dashboard/count"
 # The Google key never goes out: Settings says only whether one is set.
 wp option update aw_enrich_google_key ci-secret-key-abcd --quiet
