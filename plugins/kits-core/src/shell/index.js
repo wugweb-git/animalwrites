@@ -17,6 +17,7 @@ import { SetupFlow } from './setup';
 import { EmptyState, LoadingState, ErrorState } from './states';
 import { Panel, PanelGroup, OnOff } from './panel';
 import { MiniChart, HashList, LinkedSetting, MetricPicker } from './extras';
+import { PageParts, BlockParts, Cell } from './parts';
 import './shell.css';
 import './more.css';
 
@@ -35,6 +36,9 @@ export {
 	HashList,
 	LinkedSetting,
 	MetricPicker,
+	PageParts,
+	BlockParts,
+	Cell,
 };
 
 const cx = ( ...names ) => names.filter( Boolean ).join( ' ' );
@@ -676,6 +680,9 @@ const shell = {
 	HashList,
 	LinkedSetting,
 	MetricPicker,
+	PageParts,
+	BlockParts,
+	Cell,
 };
 
 window.kits = window.kits || {};

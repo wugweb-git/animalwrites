@@ -97,6 +97,8 @@ jobs:
         run: php plugins/planweb/tests/run.php
       - name: Kits menu, six items and old addresses (plugins/kits-core/tests/admin-menu-tests.php)
         run: php plugins/kits-core/tests/admin-menu-tests.php
+      - name: Kits page parts, a classic screen's output as shell parts (plugins/kits-core/tests/shell-parts-tests.php)
+        run: php plugins/kits-core/tests/shell-parts-tests.php
       - name: RankWeb settings tests without WordPress (defaults round trip, unchanged saves write nothing; plugins/aw-seo-extras/tests)
         run: php plugins/aw-seo-extras/tests/run.php
       - name: InsightWeb tests without WordPress (unchanged saves write nothing, Dashboard tiles; plugins/insightweb/tests)
