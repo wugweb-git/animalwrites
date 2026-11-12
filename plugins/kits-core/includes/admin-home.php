@@ -18,7 +18,7 @@ const KITS_MENU = 'kits';
 add_action(
 	'admin_menu',
 	function () {
-		kits_admin_fold_menu( KITS_MENU, 'themes.php', 'Kits', 'manage_options', 'kits' ); // Kits' own top-level menu in the Wugweb block (admin-fold.php, owner 12 Nov 2026)
+		kits_admin_fold_menu( KITS_MENU, 'themes.php', 'Kits', 'manage_options', 'kits', dirname( __DIR__ ) . '/assets/menu-icon.svg' ); // Kits' own top-level menu in the Wugweb block (admin-fold.php, owner 12 Nov 2026)
 		add_submenu_page( KITS_MENU, 'Home', 'Home', 'manage_options', KITS_MENU, 'kits_home_page' );
 	},
 	8 // before the other Kits screens join the menu

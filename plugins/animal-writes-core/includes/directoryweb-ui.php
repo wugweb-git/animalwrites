@@ -97,7 +97,7 @@ add_action(
 	'admin_menu',
 	function () {
 		if ( function_exists( 'kits_admin_fold_menu' ) ) {
-			kits_admin_fold_menu( DIRECTORYWEB_PAGE, 'plugins.php', __( 'DirectoryWeb', 'directoryweb' ), 'edit_aw_volunteers', 'directoryweb' ); // phpcs:ignore WordPress.WP.Capabilities.Unknown -- the Directory's own capability (volunteers.php)
+			kits_admin_fold_menu( DIRECTORYWEB_PAGE, 'plugins.php', __( 'DirectoryWeb', 'directoryweb' ), 'edit_aw_volunteers', 'directoryweb', dirname( __DIR__ ) . '/directoryweb/menu-icon.svg' ); // phpcs:ignore WordPress.WP.Capabilities.Unknown -- the Directory's own capability (volunteers.php)
 		} else {
 			add_menu_page( __( 'DirectoryWeb', 'directoryweb' ), __( 'DirectoryWeb', 'directoryweb' ), 'edit_aw_volunteers', DIRECTORYWEB_PAGE, 'directoryweb_dashboard_page', 'dashicons-location-alt', '58.2' ); // phpcs:ignore WordPress.WP.Capabilities.Unknown -- as above
 		}
