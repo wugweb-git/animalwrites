@@ -11,16 +11,16 @@
 ?>
 <!-- wp:cover {"url":"/wp-content/uploads/2026/11/woman-giving-water-to-street-dog-diwali-night-tall-768x1024.avif","id":23398,"alt":"A woman sets down a bowl of water for a street dog outside a gate lit with diyas on Diwali night.","dimRatio":50,"overlayColor":"foreground","isUserOverlayColor":true,"focalPoint":{"x":0.55,"y":0.7},"contentPosition":"top left","isDark":true,"metadata":{"name":"AW_Festive"},"anchor":"festive-season","className":"kit-photo-card aw-festive aw-camp--diwali","layout":{"type":"default"}} -->
 <div id="festive-season" class="wp-block-cover is-dark has-custom-content-position is-position-top-left kit-photo-card aw-festive aw-camp--diwali"><span aria-hidden="true" class="wp-block-cover__background has-foreground-background-color has-background-dim-50 has-background-dim"></span><img class="wp-block-cover__image-background wp-image-23398" alt="A woman sets down a bowl of water for a street dog outside a gate lit with diyas on Diwali night." src="/wp-content/uploads/2026/11/woman-giving-water-to-street-dog-diwali-night-tall-768x1024.avif" style="object-position:55% 70%" data-object-fit="cover" data-object-position="55% 70%"/><div class="wp-block-cover__inner-container"><!-- wp:heading {"anchor":"aw-festive-h"} -->
-<h2 class="wp-block-heading" id="aw-festive-h">Diwali is loud. Keep pets and street dogs safe.</h2>
+<h2 class="wp-block-heading" id="aw-festive-h">After Diwali: burnt, lost or injured animals</h2>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
-<p>Firecrackers frighten and hurt pets, street animals and birds.</p>
+<p>Burnt fur, limping, shaking or hiding mean an animal needs a vet or a rescue group.</p>
 <!-- /wp:paragraph -->
 
 <!-- wp:buttons -->
 <div class="wp-block-buttons"><!-- wp:button {"className":"is-style-kits-brand"} -->
-<div class="wp-block-button is-style-kits-brand"><a class="wp-block-button__link wp-element-button" href="/campaigns/diwali-firecrackers-animals-2026/#tonight">What to do on Diwali night</a></div>
+<div class="wp-block-button is-style-kits-brand"><a class="wp-block-button__link wp-element-button" href="/campaigns/diwali/#after">What to do after Diwali</a></div>
 <!-- /wp:button --></div>
 <!-- /wp:buttons --></div></div>
 <!-- /wp:cover -->
