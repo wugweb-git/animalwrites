@@ -156,6 +156,9 @@ function mailweb_ui_page( string $screen ): bool {
 		'inbox'     => __( 'MailWeb inbox', 'mailweb' ),
 		'settings'  => __( 'MailWeb settings', 'mailweb' ),
 	);
+	if ( 'inbox' === $screen && function_exists( 'mailweb_notice' ) ) {
+		mailweb_notice(); // the result of a send, move or flag from the classic message screens
+	}
 	kits_shell_mount( 'mailweb-app', $titles[ $screen ] );
 	return true;
 }

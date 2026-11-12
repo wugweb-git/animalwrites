@@ -595,10 +595,7 @@ function sourceweb_rest_enrichment( WP_REST_Request $request ) {
 	unset( $vq['status'] );
 	$vq['status']           = 'all';
 	list( $vwhere, $vargs ) = aw_enrich_where( $vq );
-	if ( '' !== $words ) {
-		$vwhere .= " AND e.listing_id IN ( SELECT ID FROM {$wpdb->posts} WHERE post_type = 'aw_listing' AND post_title LIKE %s )";
-		$vargs[] = '%' . $wpdb->esc_like( $words ) . '%';
-	}
+	list( $vwhere, $vargs ) = sourceweb_enrich_search( $vwhere, $vargs, $request ); // view counts follow the search box
 	$by = array();
 	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT e.status, COUNT(*) AS n FROM {$t} e WHERE {$vwhere} GROUP BY e.status", $vargs ) ) as $v ) {
 		$by[ (string) $v->status ] = (int) $v->n;

@@ -99,6 +99,15 @@ Home, Settings, Tools and Help show the same content in both looks; nothing was 
 | Help → Docs | "Backup" and "Log" links point to sections that no longer exist | PHP: fix the links |
 | Keys on the new look | — | (c) secret field; (b) `aw/v1/keys` (manage_options) |
 
+## Done (12 Nov 2026)
+
+- MailWeb: links to Site sending open the classic screen (Test email, Send queued now, Resume); send, move and flag results show on the new Inbox.
+- SourceWeb: tabs for Sources, Keywords, Rules, AI models and Workers (administrators), opening today's screens; Enrichment review view counts follow the search box.
+- InsightWeb and RankWeb already had tabs for their classic-only pages.
+- DirectoryWeb: in the Plugins menu (Plugins → DirectoryWeb), from another session the same day.
+- PlanWeb: System Status "Calendar" link and the Import check tile open Settings → Import from Dates.
+- Kits: the empty Spacing form is gone from Theme Options → Layout; Settings → Connected services and modules links Keys and Modules and says where keys are; Help → Docs "Daily backup" links UpdraftPlus.
+
 ## Suggested order
 
 1. **Fixes:** MailWeb `ui=classic` link-outs and notices; the SourceWeb `$words` bug; DirectoryWeb menu entries; PlanWeb and Kits dead links; the Kits empty Spacing form. All PHP, all small.

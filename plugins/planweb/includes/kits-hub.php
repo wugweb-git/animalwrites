@@ -60,7 +60,7 @@ function planweb_kits_status_row( $rows ) {
 		/* translators: %d: number of dates that do not match. */
 		? ( $bad ? sprintf( _n( 'Import check: %d date does not match.', 'Import check: %d dates do not match.', $bad, 'planweb' ), $bad ) : __( 'Import check: every date matches.', 'planweb' ) )
 		: __( 'Import not run yet.', 'planweb' );
-	$link   = ' <a href="' . esc_url( planweb_url() . '#planweb-import' ) . '">' . esc_html__( 'Calendar', 'planweb' ) . '</a>';
+	$link   = ' <a href="' . esc_url( ( function_exists( 'planweb_ui_url' ) ? planweb_ui_url( 'settings' ) : planweb_url() ) . '#import' ) . '">' . esc_html__( 'Calendar', 'planweb' ) . '</a>';
 	$rows[] = array( __( 'PlanWeb', 'planweb' ), ( function_exists( 'kits_status_cell' ) && $bad ? kits_status_cell( $text, $note ) : esc_html( $text . '. ' . $note ) ) . $link );
 	return $rows;
 }

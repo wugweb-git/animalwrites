@@ -142,7 +142,7 @@ adm "admin.php?page=kits-help&tab=components&ui=classic" >/dev/null # Design sys
 if grep -qF -e "$REPO/" -e "$WP/" /tmp/admin.html; then echo "FAIL Help → Design system prints a server path:"; grep -oF -e "$REPO/" -e "$WP/" /tmp/admin.html | sort | uniq -c | head -3; FAIL=1; else echo "ok   Help → Design system: no server paths"; fi
 adm "admin.php?page=kits-options" >/dev/null
 has "Theme Options: the app is the default" /tmp/admin.html 'kits-admin-theme-options-js'
-for l in content-types socials share layout-spacing; do has "Theme Options: $l shows today's fields" /tmp/admin.html "data-kits-legacy=\"$l\""; done
+for l in content-types socials share; do has "Theme Options: $l shows today's fields" /tmp/admin.html "data-kits-legacy=\"$l\""; done
 has "Theme Options → Socials: Contact links" /tmp/admin.html 'name="aw_elsewhere[0][label]"'
 admok "Theme Options, older screen (&ui=classic)" "admin.php?page=kits-options&ui=classic"
 for s in aw-keys aw-modules aw-dates; do admok "$s keeps its address" "admin.php?page=$s"; done

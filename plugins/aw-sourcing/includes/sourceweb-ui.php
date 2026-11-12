@@ -107,6 +107,24 @@ add_action(
 				);
 			}
 		}
+		// Screens not rebuilt yet: the tab opens today's screen at its own address (owner, 12 Nov 2026).
+		if ( current_user_can( AW_SRC_CAP ) ) {
+			$classic = array(
+				'sources'  => array( __( 'Sources', 'aw-sourcing' ), '' ),
+				'keywords' => array( __( 'Keywords', 'aw-sourcing' ), 'keywords' ),
+				'rules'    => array( __( 'Rules', 'aw-sourcing' ), 'rules' ),
+				'ai'       => array( __( 'AI models', 'aw-sourcing' ), 'ai' ),
+				'workers'  => array( __( 'Workers', 'aw-sourcing' ), 'workers' ),
+			);
+			foreach ( $classic as $slug => $t ) {
+				$tabs[] = array(
+					'slug'    => $slug,
+					'label'   => $t[0],
+					'url'     => aw_sourcing_url( $t[1] ),
+					'current' => false,
+				);
+			}
+		}
 		$ok = kits_shell_app(
 			array(
 				'handle'      => 'sourceweb-admin',

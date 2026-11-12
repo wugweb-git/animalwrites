@@ -69,7 +69,6 @@ function kits_admin_app_legacy(): array {
 			},
 		),
 		'share'         => array( __( 'Share bar', 'kits-core' ), $form( 'utility-share', 'Share bar', 'share' ) ),
-		'layout-spacing' => array( __( 'Spacing', 'kits-core' ), $form( 'visual-spacing', 'Spacing', 'layout' ) ),
 	);
 	// Sections a plugin added to the older screen and that have no place above.
 	$placed = array( 'General', 'Single', 'Archives', 'Visual', 'Utility' );
@@ -216,7 +215,7 @@ add_action(
 				'styles' => admin_url( 'site-editor.php?path=/wp_global_styles' ),
 			),
 			'legacy'       => $legacy,
-			'legacyInto'   => array( 'layout' => 'layout-spacing' ),
+			'legacyInto'   => array(), // a built section can show today's fields of another below its own
 			'elsewhere'    => $elsewhere,
 			'initial'      => $asked,
 		);

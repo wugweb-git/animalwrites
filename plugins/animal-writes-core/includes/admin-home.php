@@ -239,8 +239,10 @@ function aw_core_settings_sections( $sections ) {
 		'Connected services and modules',
 		function () {
 			echo '<ul>';
-			echo '<li>' . aw_core_link( 'RankWeb → Settings', 'admin.php?page=aw-seo-settings' ) . ': ' . esc_html( 'Connected services, the keys the plugins use (Clarity, Bing Webmaster, PageSpeed).' ) . '</li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_core_link() escapes.
-			echo '<li>' . aw_core_link( 'SourceWeb → Settings', 'admin.php?page=aw-sourcing&tab=settings' ) . ': ' . esc_html( 'optional parts of the site, such as Social posts.' ) . '</li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_core_link() escapes.
+			echo '<li>' . aw_core_link( 'Keys', 'admin.php?page=aw-keys' ) . ': ' . esc_html( 'the service keys the plugins use (Clarity, Bing Webmaster, PageSpeed).' ) . '</li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_core_link() escapes.
+			echo '<li>' . aw_core_link( 'Modules', 'admin.php?page=aw-modules' ) . ': ' . esc_html( 'optional parts of the site: Social posts and the PlanWeb calendar.' ) . '</li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_core_link() escapes.
+			echo '<li>' . aw_core_link( 'RankWeb → Settings', 'admin.php?page=aw-seo-settings' ) . ': ' . esc_html( 'connected services for search.' ) . '</li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_core_link() escapes.
+			echo '<li>' . aw_core_link( 'SourceWeb → Settings', 'admin.php?page=aw-sourcing&tab=settings' ) . ': ' . esc_html( 'Social posts, sourcing lists and Directory enrichment.' ) . '</li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_core_link() escapes.
 			echo '</ul>';
 		},
 		40
@@ -380,7 +382,7 @@ function aw_core_overview_page() {
 			array( 'Edit screens', 'Every box on each edit screen (WordPress, plugins and ours), the keys it stores and where each key is used.', $admin ? aw_core_link( 'Edit screens', aw_core_screen_url( 'aw-edit-screens' ) ) : 'Administrators', $auto ),
 			array( 'To review', 'Items waiting for a person (from SourceWeb).', aw_core_link( 'Plugins → SourceWeb → To review', 'admin.php?page=aw-review' ), $st['review'] ),
 			array( 'Scheduled tasks', 'Who triggers WP-Cron (Hostinger, GitHub, UptimeRobot) and the longest gap; dashboard widget.', aw_core_link( 'Dashboard', 'index.php' ), $st['cron'] ),
-			array( 'Daily backup', 'Database and deployed code into ~/backups on the server, kept 14 days.', $admin ? aw_core_link( 'Backup', aw_core_screen_url( 'aw-site-check' ) ) : '—', $st['backup'] ),
+			array( 'Daily backup', 'Database and deployed code into ~/backups on the server, kept 14 days.', $admin ? aw_core_link( 'UpdraftPlus', 'options-general.php?page=updraftplus' ) : '—', $st['backup'] ),
 			array( 'Deploys and cache', 'LiteSpeed purged once after each deploy; CDN lifetime for anonymous public pages.', $admin ? aw_core_link( 'CDN cache times', aw_core_screen_url( 'cdn' ) ) : '—', $st['deploy'] . ' ' . $st['cdn'] ),
 			array( 'Staging', 'staging.animalwrites.in: same code, database without personal data, marked in the admin bar.', '—', $st['stage'] ),
 		),
