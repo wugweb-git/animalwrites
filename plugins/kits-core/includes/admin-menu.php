@@ -54,6 +54,9 @@ add_action(
 			// The screen's callback was hooked on its Kits hook name; the hidden screen runs it from there.
 			$hook = get_plugin_page_hookname( $slug, KITS_MENU );
 			add_submenu_page( '', (string) ( $item[3] ?? $item[0] ), '', (string) $item[1], $slug, fn() => do_action( $hook ) ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- the screen's own WordPress hook name.
+			// Registered (address and capability kept), but out of the hidden list: there WordPress would reset the lit
+			// menu to none after the parent_file filter below (get_admin_page_parent() in menu-header.php).
+			remove_submenu_page( '', $slug );
 		}
 	},
 	999 // After every plugin has added its screens, before the order (admin-screens.php, 1000).

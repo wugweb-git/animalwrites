@@ -4,7 +4,8 @@
     python3 tools/ci/admin_menu_read.py PAGE.html MENU_ID
 
 MENU_ID is a top-level item's id, e.g. menu-plugins or menu-appearance. Prints three lines:
-    open <yes|no>          the item is the lit one (WordPress's wp-has-current-submenu)
+    open <yes|no>          the item is the lit one (WordPress's wp-has-current-submenu, or current on a menu whose only
+                           sub-item WordPress dropped because it repeats the menu)
     current <slug>         the page= value of its lit sub-item ("-" when none)
     items <slug> ...       the page= values (or addresses) of its sub-items, in order
 and a fourth, the ids of every top-level plugin menu on the page (li id="toplevel_page_…"):
@@ -31,7 +32,8 @@ def main():
         sub = li.group(2).split("<ul class='wp-submenu wp-submenu-wrap'>", 1)
         links = re.findall(r"<a href='([^']*)'([^>]*)>", sub[1]) if len(sub) > 1 else []
         cur = [slug(h) for h, attrs in links if 'aria-current="page"' in attrs]
-        print("open " + ("yes" if "wp-has-current-submenu" in li.group(1) else "no"))
+        classes = li.group(1).split()
+        print("open " + ("yes" if "wp-has-current-submenu" in classes or "current" in classes else "no"))
         print("current " + (cur[0] if cur else "-"))
         print("items " + " ".join(slug(h) for h, _ in links))
     print("toplevel " + " ".join(re.findall(r'<li class="[^"]*" id="(toplevel_page_[^"]+)"', page)))
