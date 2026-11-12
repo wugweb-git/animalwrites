@@ -28,7 +28,16 @@ Theme and WordPress items are tracked by Animal Writes WordPress. Code requests 
   - IAEC guide (13859): first line gives "Institutional Animal Ethics Committee" and the 1998 Rules wording; SEO title "IAEC full form, members and approvals – Animal Writes".
   - World Animal Day Library item (142): focus keyphrase now only "awbi world animal day circular" (date phrases go to the guide /resources/world-animal-day-4-october/, which the item already links). Modified date unchanged.
   - Titles (owner's yes, 12 Nov, written from 28 days of Search Console queries): 9031 "Animal ambulance and emergency numbers – Animal Writes", 13798 "1962 helpline number, timing and charges – Animal Writes". Live.
-  - The other 75 follow in batches.
+  - Batch 2, live 12 Nov (owner's yes; from 28 days of Search Console queries):
+    - NGO Darpan guide (17308): opening says how to search by name or ID; title "NGO Darpan search by name or ID, and login – Animal Writes"; new description.
+    - AWBI guide (13800): opening says "headquarters"; title "Animal Welfare Board of India (AWBI) – Animal Writes".
+    - Tiger Day guide (20310): opening adds "often called National Tiger Day"; title "International Tiger Day in India, 29 July – Animal Writes".
+    - Bird helplines guide (13843): title "Bird helpline numbers in India by city – Animal Writes". More Mumbai numbers need a checked source first.
+    - Injured animal guide (126): title "Injured animal, what to do and who to call – Animal Writes".
+    - News 16989 (rabies vaccine): links the dog-bite guide (17307) in "Guides on this"; title "Rabies vaccine missing at 126 govt hospitals – Animal Writes".
+    - News 13460: title "Big Cat Alliance HQ opens in New Delhi – Animal Writes". News 19778: title "International Snow Leopard Day, 23 October – Animal Writes".
+    - News items kept their modified dates. Left out: Directory hub (item 14, waiting) and the SPCA Ghaziabad listing (listing content).
+  - The rest follow in batches.
 - **Secondary keyphrases (item 10), dry run, no writes:** 556 "Add as secondary keyphrase" rows: 108 can be written, 76 need a check (83 pages already at Rank Math's 5, 12 phrases are another page's keyphrase, 6 Lab phrases held to the Post phase), 372 skipped (222 are Directory place pages with no keyphrase field, 143 already on the page, 7 no page). List to the owner.
 - **Focus keyphrase not in title (item 12):** the Analyzer's 322 are checked against the post title (323 today: 141 News, 101 Resources, 62 Library, 14 Pages, 3 Directory, 2 Campaigns). 197 already have the keyphrase in the SEO title search shows; 126 do not (78 Resources, 33 News, 14 Library, 1 Page). No title changes without the owner's yes.
 - **Conflicts (item 11):** six in Search Insights: animal testing rules, draft laboratory animals rules 2026, draft laboratory animals rules, animal testing, lab animal rules (all Lab: held to the Post phase), animal bite (0 impressions; page /resources/animal-bite-cases-eastern-india/). Kukur Tihar is not marked as a conflict: Search Insights has the News item as owner ("Update the page").
