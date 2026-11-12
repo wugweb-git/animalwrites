@@ -1131,10 +1131,13 @@ function Listings() {
 				onView={ ( v ) => set( 'view', v ) }
 				filters={ [
 					{
+						// The route's "every state" is 0; the list's "none chosen" is ''.
 						key: 'state',
 						label: __( 'State', 'directoryweb' ),
-						value: q.state,
-						options: data?.filters?.state || [],
+						value: '0' === String( q.state ) ? '' : q.state,
+						options: ( data?.filters?.state || [] ).map( ( o ) =>
+							'0' === String( o.value ) ? { ...o, value: '' } : o
+						),
 					},
 					{
 						key: 'type',
@@ -1143,7 +1146,9 @@ function Listings() {
 						options: data?.filters?.type || [],
 					},
 				] }
-				onFilter={ set }
+				onFilter={ ( k, v ) =>
+					set( k, 'state' === k && '' === v ? '0' : v )
+				}
 				sort={ { key: q.sort, dir: q.dir } }
 				onSort={ ( key, dir ) =>
 					setQ( ( o ) => ( { ...o, sort: key, dir, page: 1 } ) )
