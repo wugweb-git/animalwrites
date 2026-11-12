@@ -25,6 +25,18 @@
  *   POST keywords/settings       relevance filter, aggregator feeds, Press discovery (the Settings API forms' own sanitizers)
  *   GET  keywords/suggestions    searches from Search Insights no keyword covers (aw_sourcing_suggestions())
  *   POST keywords/suggestions/decide  include, exclude, search, dismiss, restore (aw_sourcing_suggest_apply())
+ *   GET  rules/sections          Section rules: the sections and the tag rules
+ *   GET  rules/section           one section's allowed categories and tags (type)
+ *   POST rules/section/save      save them (aw_sourcing_section_save())
+ *   GET  rules/tag               one tag rule for its form (tag; '' for Add New Rule), with the tags to choose from
+ *   POST rules/tag/save          add or edit a tag rule (aw_rules_tag_save())
+ *   POST rules/tag/delete        delete a tag rule (aw_rules_tag_delete())
+ *   GET  rules/enrich            Directory enrichment: the trust order and the field rules
+ *   POST rules/priority          save the trust order (aw_rules_priority_save())
+ *   GET  rules/field             one field's rule for its form (field)
+ *   POST rules/field/save        save it (aw_rules_field_save())
+ *   GET  rules/summary           Summary rules, as the form shows them
+ *   POST rules/summary/save      save them through the form's sanitizer (aw_summary_rules_sanitize())
  *
  * Keys never go out: a key is its id (a hash) and its last 4 characters.
  *
@@ -243,6 +255,74 @@ add_action(
 						'required' => true,
 					),
 					'qs' => $hosts,
+				),
+			),
+			'/rules/sections'                         => array( 'GET', AW_SRC_CAP, 'sourceweb_rest_rules_sections', array() ),
+			'/rules/section'                          => array( 'GET', AW_SRC_CAP, 'sourceweb_rest_rules_section', array( 'type' => $text ) ),
+			'/rules/section/save'                     => array(
+				'POST',
+				AW_SRC_CAP,
+				'sourceweb_rest_rules_section_save',
+				array(
+					'type'       => $text,
+					'categories' => $hosts,
+					'tags'       => $hosts,
+					'gone'       => array(
+						'type'    => 'object',
+						'default' => array(),
+					),
+				),
+			),
+			'/rules/tag'                              => array( 'GET', AW_SRC_CAP, 'sourceweb_rest_rules_tag', array( 'tag' => $text ) ),
+			'/rules/tag/save'                         => array(
+				'POST',
+				AW_SRC_CAP,
+				'sourceweb_rest_rules_tag_save',
+				array(
+					'tag'         => $text,
+					'original'    => $text,
+					'any'         => $text,
+					'hold'        => $text,
+					'unless'      => $text,
+					'hold_reason' => $text,
+				),
+			),
+			'/rules/tag/delete'                       => array( 'POST', AW_SRC_CAP, 'sourceweb_rest_rules_tag_delete', array( 'tag' => $worker ) ),
+			'/rules/enrich'                           => array( 'GET', AW_SRC_CAP, 'sourceweb_rest_rules_enrich', array() ),
+			'/rules/priority'                         => array(
+				'POST',
+				AW_SRC_CAP,
+				'sourceweb_rest_rules_priority',
+				array(
+					'pos' => array(
+						'type'    => 'object',
+						'default' => array(),
+					),
+				),
+			),
+			'/rules/field'                            => array( 'GET', AW_SRC_CAP, 'sourceweb_rest_rules_field', array( 'field' => $text ) ),
+			'/rules/field/save'                       => array(
+				'POST',
+				AW_SRC_CAP,
+				'sourceweb_rest_rules_field_save',
+				array(
+					'field' => $worker,
+					'rule'  => array(
+						'type'    => 'object',
+						'default' => array(),
+					),
+				),
+			),
+			'/rules/summary'                          => array( 'GET', AW_SRC_CAP, 'sourceweb_rest_rules_summary', array() ),
+			'/rules/summary/save'                     => array(
+				'POST',
+				AW_SRC_CAP,
+				'sourceweb_rest_rules_summary_save',
+				array(
+					'values' => array(
+						'type'    => 'object',
+						'default' => array(),
+					),
 				),
 			),
 		);
@@ -1379,6 +1459,597 @@ function sourceweb_rest_suggestions_decide( WP_REST_Request $request ) {
 			'changed' => $n,
 			/* translators: %d: number of searches. */
 			'message' => $n ? sprintf( _n( '%d search changed.', '%d searches changed.', $n, 'aw-sourcing' ), $n ) : __( 'Nothing changed.', 'aw-sourcing' ),
+		)
+	);
+}
+
+/* ---------- Rules ---------- */
+
+/** Rules is one tab from the phase 3 migration; before it the routes refuse. */
+function sourceweb_rules_ready() {
+	return aw_rules_live() ? true : new WP_Error( 'aw_rules_not_ready', __( 'Rules is not set up yet (the phase 3 migration).', 'aw-sourcing' ), array( 'status' => 409 ) );
+}
+
+/**
+ * Term names for slugs in the stored order; a slug with no term shows as "slug (no such …)".
+ *
+ * @param array  $slugs Slugs.
+ * @param string $tax   category or post_tag.
+ */
+function sourceweb_rules_names( array $slugs, string $tax ): array {
+	$out = array();
+	foreach ( $slugs as $slug ) {
+		$t     = get_term_by( 'slug', (string) $slug, $tax );
+		$out[] = $t ? $t->name : urldecode( (string) $slug ) . ( 'category' === $tax ? ' (no such category)' : ' (no such tag)' );
+	}
+	return $out;
+}
+
+/**
+ * GET rules/sections: every section with its allowed categories and tags, workers file and summary rule, and the tag
+ * rules with the sections that may give each tag.
+ */
+function sourceweb_rest_rules_sections() {
+	$ready = sourceweb_rules_ready();
+	if ( is_wp_error( $ready ) ) {
+		return $ready;
+	}
+	$secs  = (array) ( aw_sources_config()['sections'] ?? array() );
+	$sums  = aw_rules_summary_by_type();
+	$what  = array(
+		'news'        => __( 'News items', 'aw-sourcing' ),
+		'legal'       => __( 'Library items', 'aw-sourcing' ),
+		'research'    => __( 'Research', 'aw-sourcing' ),
+		'opportunity' => __( 'Opportunities', 'aw-sourcing' ),
+		'press'       => __( 'Press coverage', 'aw-sourcing' ),
+	);
+	$rows  = array();
+	foreach ( aw_rules_sections() as $type => $def ) {
+		$cats   = array_values( (array) ( $secs[ $type ]['categories'] ?? array() ) );
+		$tags   = array_values( (array) ( $secs[ $type ]['tags'] ?? array() ) );
+		$sum    = $sums[ $type ] ?? array();
+		$rows[] = array(
+			'id'         => $type,
+			'title'      => $def['label'],
+			'stored'     => array_key_exists( $type, $secs ),
+			'categories' => $cats ? implode( ', ', sourceweb_rules_names( $cats, 'category' ) ) : __( 'Every category', 'aw-sourcing' ),
+			'tags'       => $tags ? implode( ', ', sourceweb_rules_names( $tags, 'post_tag' ) ) : '—',
+			'tagCount'   => count( $tags ),
+			'worker'     => '' === $def['worker_type'] ? '—' : ( $what[ $def['worker_type'] ] ?? $def['worker_type'] ),
+			'summary'    => $sum ? sprintf( '%d–%d words', (int) $sum['min_words'], (int) $sum['max_words'] ) . ( '' !== (string) ( $sum['inherit'] ?? '' ) ? ' (inherits News)' : '' ) : '—',
+		);
+	}
+	$labs  = aw_rules_section_labels();
+	$rules = array();
+	foreach ( aw_rules_tag_rules() as $slug => $r ) {
+		$slug = (string) $slug;
+		$term = get_term_by( 'slug', $slug, 'post_tag' );
+		if ( ! $term && 0 === strpos( $slug, 'campaign-' ) && taxonomy_exists( 'aw_campaign_link' ) ) {
+			$term = get_term_by( 'slug', $slug, 'aw_campaign_link' );
+		}
+		$in = array();
+		foreach ( $secs as $t => $sec ) {
+			if ( in_array( $slug, array_map( 'strval', (array) ( $sec['tags'] ?? array() ) ), true ) ) {
+				$in[] = $labs[ $t ] ?? $t;
+			}
+		}
+		$rules[] = array(
+			'id'       => $slug,
+			'title'    => $term ? $term->name : urldecode( $slug ) . ' (no such tag)',
+			'slug'     => urldecode( $slug ),
+			'any'      => implode( ', ', (array) ( $r['any'] ?? array() ) ),
+			'hold'     => array_values( array_map( 'strval', (array) ( $r['hold'] ?? array() ) ) ),
+			'unless'   => implode( ', ', (array) ( $r['unless'] ?? array() ) ),
+			'reason'   => (string) ( $r['hold_reason'] ?? '' ),
+			'sections' => $in ? implode( ', ', $in ) : __( 'No section allows this tag yet', 'aw-sourcing' ),
+		);
+	}
+	return rest_ensure_response(
+		array(
+			'sections' => $rows,
+			'tagRules' => $rules,
+		)
+	);
+}
+
+/**
+ * The terms of a taxonomy as choices (slug, name), and the ticked ones of a list.
+ *
+ * @param string $tax    category or post_tag.
+ * @param array  $ticked Stored slugs.
+ */
+function sourceweb_rules_term_choices( string $tax, array $ticked ): array {
+	$out = array();
+	foreach ( get_terms(
+		array(
+			'taxonomy'   => $tax,
+			'hide_empty' => false,
+			'orderby'    => 'name',
+		)
+	) as $t ) {
+		$out[] = array(
+			'value' => $t->slug,
+			'label' => $t->name,
+		);
+	}
+	$gone = array();
+	foreach ( $ticked as $slug ) {
+		if ( ! get_term_by( 'slug', (string) $slug, $tax ) ) {
+			$gone[] = (string) $slug;
+		}
+	}
+	return array( $out, $gone );
+}
+
+/**
+ * GET rules/section: one section's allowed categories and tags as checklists; a stored slug with no term is kept
+ * (ticked) until unticked.
+ *
+ * @param WP_REST_Request $request Request.
+ */
+function sourceweb_rest_rules_section( WP_REST_Request $request ) {
+	$ready = sourceweb_rules_ready();
+	if ( is_wp_error( $ready ) ) {
+		return $ready;
+	}
+	$type  = sanitize_key( (string) $request['type'] );
+	$types = aw_rules_section_labels();
+	if ( ! isset( $types[ $type ] ) ) {
+		return new WP_Error( 'rest_not_found', __( 'No such section.', 'aw-sourcing' ), array( 'status' => 404 ) );
+	}
+	$sec                 = (array) ( aw_sources_config()['sections'][ $type ] ?? array() );
+	$cat                 = array_values( array_map( 'strval', (array) ( $sec['categories'] ?? array() ) ) );
+	$tag                 = array_values( array_map( 'strval', (array) ( $sec['tags'] ?? array() ) ) );
+	list( $cats, $cgone ) = sourceweb_rules_term_choices( 'category', $cat );
+	list( $tags, $tgone ) = sourceweb_rules_term_choices( 'post_tag', $tag );
+	return rest_ensure_response(
+		array(
+			'type'       => $type,
+			'label'      => $types[ $type ],
+			'categories' => array_values( array_diff( $cat, $cgone ) ),
+			'tags'       => array_values( array_diff( $tag, $tgone ) ),
+			'gone'       => array(
+				'categories' => $cgone,
+				'tags'       => $tgone,
+			),
+			'choices'    => array(
+				'categories' => $cats,
+				'tags'       => $tags,
+			),
+		)
+	);
+}
+
+/**
+ * POST rules/section/save: the ticked slugs as term IDs, then today's save.
+ *
+ * @param WP_REST_Request $request Request.
+ */
+function sourceweb_rest_rules_section_save( WP_REST_Request $request ) {
+	$ready = sourceweb_rules_ready();
+	if ( is_wp_error( $ready ) ) {
+		return $ready;
+	}
+	$type = sanitize_key( (string) $request['type'] );
+	if ( ! isset( aw_rules_sections()[ $type ] ) ) {
+		return new WP_Error( 'rest_not_found', __( 'No such section.', 'aw-sourcing' ), array( 'status' => 404 ) );
+	}
+	$ids  = function ( array $slugs, string $tax ) {
+		$out = array();
+		foreach ( array_map( 'sanitize_title', $slugs ) as $slug ) {
+			$t = get_term_by( 'slug', $slug, $tax );
+			if ( $t ) {
+				$out[] = (int) $t->term_id;
+			}
+		}
+		return $out;
+	};
+	$gone = (array) $request['gone'];
+	$done = aw_sourcing_section_save(
+		$type,
+		array(
+			'categories' => $ids( (array) $request['categories'], 'category' ),
+			'tags'       => $ids( (array) $request['tags'], 'post_tag' ),
+		),
+		array(
+			'categories' => array_map( 'sanitize_title', array_map( 'strval', (array) ( $gone['categories'] ?? array() ) ) ),
+			'tags'       => array_map( 'sanitize_title', array_map( 'strval', (array) ( $gone['tags'] ?? array() ) ) ),
+		)
+	);
+	$label = aw_rules_section_labels()[ $type ];
+	return rest_ensure_response(
+		array(
+			'done'    => $done,
+			/* translators: %s: section. */
+			'message' => 'saved' === $done ? sprintf( __( 'Saved the %s section. The workers use this from their next run.', 'aw-sourcing' ), $label ) : sprintf( __( 'Nothing changed for %s.', 'aw-sourcing' ), $label ), // phpcs:ignore WordPress.WP.I18n.MissingTranslatorsComment -- the comment above covers both
+		)
+	);
+}
+
+/**
+ * GET rules/tag: one tag rule for its form ('' for Add New Rule), with the tags to choose from.
+ *
+ * @param WP_REST_Request $request Request.
+ */
+function sourceweb_rest_rules_tag( WP_REST_Request $request ) {
+	$ready = sourceweb_rules_ready();
+	if ( is_wp_error( $ready ) ) {
+		return $ready;
+	}
+	$slug  = sanitize_title( (string) $request['tag'] );
+	$rules = aw_rules_tag_rules();
+	if ( '' !== $slug && ! isset( $rules[ $slug ] ) ) {
+		return new WP_Error( 'rest_not_found', __( 'No such tag rule.', 'aw-sourcing' ), array( 'status' => 404 ) );
+	}
+	$r     = '' === $slug ? array() : (array) $rules[ $slug ];
+	$lines = fn( $k ) => implode( "\n", array_map( 'strval', (array) ( $r[ $k ] ?? array() ) ) );
+	list( $tags ) = sourceweb_rules_term_choices( 'post_tag', array() );
+	if ( '' !== $slug && ! in_array( $slug, array_column( $tags, 'value' ), true ) ) {
+		$tags[] = array(
+			'value' => $slug,
+			'label' => urldecode( $slug ) . ' (no such tag)',
+		);
+	}
+	return rest_ensure_response(
+		array(
+			'tag'         => $slug,
+			'any'         => $lines( 'any' ),
+			'hold'        => $lines( 'hold' ),
+			'unless'      => $lines( 'unless' ),
+			'hold_reason' => (string) ( $r['hold_reason'] ?? '' ),
+			'choices'     => $tags,
+		)
+	);
+}
+
+/** Notice key => [tone, words] for a Rules save (as today's notices). */
+function sourceweb_rules_message( string $done, string $for ): array {
+	$msg = array(
+		/* translators: %s: tag. */
+		'tag_added'   => array( 'success', __( 'Tag rule %s added. The workers use it from their next run.', 'aw-sourcing' ) ),
+		/* translators: %s: tag. */
+		'tag_saved'   => array( 'success', __( 'Tag rule %s saved. The workers use it from their next run.', 'aw-sourcing' ) ),
+		/* translators: %s: tag. */
+		'tag_deleted' => array( 'success', __( 'Tag rule %s deleted.', 'aw-sourcing' ) ),
+		/* translators: %s: tag. */
+		'tag_exists'  => array( 'error', __( 'A tag rule for %s exists already: edit it instead.', 'aw-sourcing' ) ),
+		'tag_empty'   => array( 'error', __( 'Choose a tag and give at least one phrase.', 'aw-sourcing' ) ),
+		/* translators: %s: the patterns. */
+		'tag_badre'   => array( 'error', __( 'Not saved: a hold pattern is not a valid regular expression (%s).', 'aw-sourcing' ) ),
+		/* translators: %s: field. */
+		'field_saved' => array( 'success', __( 'Field rule %s saved. The enrichment worker uses it from its next run.', 'aw-sourcing' ) ),
+		/* translators: %s: the order. */
+		'order_saved' => array( 'success', __( 'Trust order saved: %s.', 'aw-sourcing' ) ),
+		/* translators: %s: what it is about. */
+		'none'        => array( 'info', __( 'Nothing changed for %s.', 'aw-sourcing' ) ),
+		/* translators: %s: field. */
+		'nosuch'      => array( 'error', __( 'No such field: %s.', 'aw-sourcing' ) ),
+	);
+	$m = $msg[ $done ] ?? array( 'info', '%s' );
+	return array( $m[0], sprintf( $m[1], $for ) );
+}
+
+/**
+ * A Rules save's answer: 200 with the notice, or 400 for a refusal.
+ *
+ * @param array $res [notice key, what it is about].
+ */
+function sourceweb_rules_answer( array $res ) {
+	list( $tone, $text ) = sourceweb_rules_message( $res[0], (string) $res[1] );
+	if ( 'error' === $tone ) {
+		return new WP_Error( 'aw_rules_' . $res[0], $text, array( 'status' => 400 ) );
+	}
+	return rest_ensure_response(
+		array(
+			'done'    => $res[0],
+			'tone'    => $tone,
+			'message' => $text,
+		)
+	);
+}
+
+/**
+ * POST rules/tag/save: add or edit a tag rule.
+ *
+ * @param WP_REST_Request $request Request.
+ */
+function sourceweb_rest_rules_tag_save( WP_REST_Request $request ) {
+	$ready = sourceweb_rules_ready();
+	if ( is_wp_error( $ready ) ) {
+		return $ready;
+	}
+	$in = array();
+	foreach ( array( 'any', 'unless', 'hold_reason' ) as $k ) {
+		$in[ $k ] = sanitize_textarea_field( (string) $request[ $k ] );
+	}
+	$in['hold'] = wp_check_invalid_utf8( (string) $request['hold'] ); // regular expressions: checked to compile (aw_rules_tag_rule_clean), as today's form
+	return sourceweb_rules_answer( aw_rules_tag_save( sanitize_title( (string) $request['tag'] ), sanitize_title( (string) $request['original'] ), $in ) );
+}
+
+/**
+ * POST rules/tag/delete: delete a tag rule.
+ *
+ * @param WP_REST_Request $request Request.
+ */
+function sourceweb_rest_rules_tag_delete( WP_REST_Request $request ) {
+	$ready = sourceweb_rules_ready();
+	if ( is_wp_error( $ready ) ) {
+		return $ready;
+	}
+	$tag = sanitize_title( (string) $request['tag'] );
+	$res = aw_rules_tag_delete( $tag );
+	return sourceweb_rules_answer( 'none' === $res[0] ? array( 'none', $tag ) : $res );
+}
+
+/** GET rules/enrich: the trust order and every field rule. */
+function sourceweb_rest_rules_enrich() {
+	$ready = sourceweb_rules_ready();
+	if ( is_wp_error( $ready ) ) {
+		return $ready;
+	}
+	$order = aw_enrich_field_rules()['priority'];
+	$names = array_map( fn( $s ) => $s[0], aw_enrich_sources() );
+	$prio  = array();
+	foreach ( $names as $k => $label ) {
+		$pos    = array_search( $k, $order, true );
+		$prio[] = array(
+			'key'   => $k,
+			'label' => $label,
+			'pos'   => false === $pos ? '' : (string) ( $pos + 1 ),
+		);
+	}
+	$fields = array();
+	foreach ( aw_rules_field_rows() as $k => $row ) {
+		$r        = $row['rule'];
+		$why      = (string) ( $row['why'] ?? '' );
+		$fields[] = array(
+			'id'       => $k,
+			'title'    => $row['label'],
+			'note'     => $row['set'] || isset( aw_enrich_fields()[ $k ] ) ? '' : __( 'Added in the listing field group: off until its rule is set.', 'aw-sourcing' ),
+			'group'    => $row['group'],
+			'store'    => $row['store'] . ( $row['acf'] ? '' : ' (kept by code)' ),
+			'on'       => '' !== $why ? 'Off: ' . $why : ( $r['on'] ? 'On' : 'Off' ),
+			'sources'  => $r['sources'] ? implode( ', ', array_map( fn( $x ) => $names[ $x ] ?? $x, $r['sources'] ) ) : 'Any',
+			'multi'    => $r['multi'] ? sprintf( 'Up to %d', (int) $r['multi'] ) : 'One',
+			'official' => '' !== $r['official'] ? ( $names[ $r['official'] ] ?? $r['official'] ) : '—',
+			'ai'       => $r['ai'] ? 'Yes' : '—',
+			'invite'   => $r['invite'] ? 'Yes' : '—',
+			'apply'    => ucfirst( (string) $r['apply'] ),
+		);
+	}
+	return rest_ensure_response(
+		array(
+			'priority' => $prio,
+			'fields'   => $fields,
+		)
+	);
+}
+
+/**
+ * POST rules/priority: save the trust order.
+ *
+ * @param WP_REST_Request $request Request.
+ */
+function sourceweb_rest_rules_priority( WP_REST_Request $request ) {
+	$ready = sourceweb_rules_ready();
+	if ( is_wp_error( $ready ) ) {
+		return $ready;
+	}
+	$pos = array();
+	foreach ( (array) $request['pos'] as $k => $v ) {
+		$pos[ sanitize_key( (string) $k ) ] = '' === trim( (string) $v ) ? '' : absint( $v );
+	}
+	return sourceweb_rules_answer( aw_rules_priority_save( $pos ) );
+}
+
+/**
+ * GET rules/field: one field's rule for its form, with the sources and the Apply choices it may have.
+ *
+ * @param WP_REST_Request $request Request.
+ */
+function sourceweb_rest_rules_field( WP_REST_Request $request ) {
+	$ready = sourceweb_rules_ready();
+	if ( is_wp_error( $ready ) ) {
+		return $ready;
+	}
+	$field = sanitize_key( (string) $request['field'] );
+	$rows  = aw_rules_field_rows();
+	if ( ! isset( $rows[ $field ] ) ) {
+		return new WP_Error( 'rest_not_found', __( 'No such field.', 'aw-sourcing' ), array( 'status' => 404 ) );
+	}
+	$row     = $rows[ $field ];
+	$sources = array();
+	foreach ( aw_enrich_sources() as $k => $s ) {
+		$sources[] = array(
+			'value' => $k,
+			'label' => $s[0],
+		);
+	}
+	$apply = array();
+	foreach ( AW_ENRICH_APPLY as $k => $label ) {
+		if ( ( 'both' === $k && ! in_array( $field, AW_ENRICH_TWO_FIELDS, true ) ) || ( 'review' !== $k && in_array( $field, AW_ENRICH_REVIEW_FIELDS, true ) ) ) {
+			continue; // two values only where a field can hold them; closed and merge_into always to a person
+		}
+		$apply[] = array(
+			'value' => $k,
+			'label' => $label,
+		);
+	}
+	return rest_ensure_response(
+		array(
+			'field'   => $field,
+			'label'   => $row['label'],
+			'group'   => $row['group'],
+			'store'   => $row['store'],
+			'why'     => (string) ( $row['why'] ?? '' ),
+			'rule'    => array(
+				'on'       => (bool) $row['rule']['on'],
+				'sources'  => array_values( (array) $row['rule']['sources'] ),
+				'multi'    => (int) $row['rule']['multi'],
+				'official' => (string) $row['rule']['official'],
+				'ai'       => (bool) $row['rule']['ai'],
+				'invite'   => (bool) $row['rule']['invite'],
+				'social'   => (bool) $row['rule']['social'],
+				'apply'    => (string) $row['rule']['apply'],
+			),
+			'choices' => array(
+				'sources' => $sources,
+				'apply'   => $apply,
+			),
+		)
+	);
+}
+
+/**
+ * POST rules/field/save: save one field's rule.
+ *
+ * @param WP_REST_Request $request Request.
+ */
+function sourceweb_rest_rules_field_save( WP_REST_Request $request ) {
+	$ready = sourceweb_rules_ready();
+	if ( is_wp_error( $ready ) ) {
+		return $ready;
+	}
+	$raw = (array) $request['rule'];
+	$in  = array(
+		'on'       => ! empty( $raw['on'] ),
+		'ai'       => ! empty( $raw['ai'] ),
+		'invite'   => ! empty( $raw['invite'] ),
+		'social'   => ! empty( $raw['social'] ),
+		'multi'    => absint( $raw['multi'] ?? 0 ),
+		'official' => sanitize_key( (string) ( $raw['official'] ?? '' ) ),
+		'sources'  => array_map( 'sanitize_key', array_map( 'strval', (array) ( $raw['sources'] ?? array() ) ) ),
+		'apply'    => sanitize_key( (string) ( $raw['apply'] ?? '' ) ),
+	);
+	$res = aw_rules_field_save( sanitize_key( (string) $request['field'] ), $in );
+	if ( 'nosuch' === $res[0] ) {
+		return new WP_Error( 'rest_not_found', __( 'No such field.', 'aw-sourcing' ), array( 'status' => 404 ) );
+	}
+	return sourceweb_rules_answer( $res );
+}
+
+/** The Summary rules form's fields that are numbers, lists (one per line) and texts: key => label. */
+function sourceweb_summary_fields(): array {
+	return array(
+		'numbers' => array(
+			'lead_max_words'        => __( 'Lead sentence, about this many words or fewer', 'aw-sourcing' ),
+			'max_quotes'            => __( 'Direct quotes per summary, at most', 'aw-sourcing' ),
+			'max_quote_words'       => __( 'Words in a quote, at most', 'aw-sourcing' ),
+			'max_copied_run'        => __( 'Words copied in a row outside a quote, at most', 'aw-sourcing' ),
+			'description_max_chars' => __( 'Search description, characters', 'aw-sourcing' ),
+		),
+		'lists'   => array(
+			'general'        => array( __( 'Rules', 'aw-sourcing' ), __( 'One rule per line. The facts-only, date, length, plain-text, no-AI-marker, English-only and searched-words rules are here.', 'aw-sourcing' ) ),
+			'stock_phrases'  => array( __( 'Banned stock and praise wording', 'aw-sourcing' ), __( 'One per line. A summary using any of them is written again.', 'aw-sourcing' ) ),
+			'ai_markers'     => array( __( 'AI markers', 'aw-sourcing' ), __( 'One per line. A summary containing any of them is written again.', 'aw-sourcing' ) ),
+			'searched_terms' => array( __( 'Searched words', 'aw-sourcing' ), __( 'One group per line, words separated by |. When the source names one, the summary keeps one of the group.', 'aw-sourcing' ) ),
+			'entities'       => array( __( 'Linkable entities: names', 'aw-sourcing' ), __( "One entity per line: the site's name first, then other spellings, separated by |. A summary using another spelling is written again.", 'aw-sourcing' ) ),
+		),
+		'texts'   => array(
+			'description'   => __( 'Search description and summary', 'aw-sourcing' ),
+			'card'          => __( 'Card excerpt', 'aw-sourcing' ),
+			'merge'         => __( 'Same-story merges', 'aw-sourcing' ),
+			'fallback'      => __( 'Short fallback', 'aw-sourcing' ),
+			'entities_note' => __( 'Linkable entities: how summaries name things', 'aw-sourcing' ),
+		),
+	);
+}
+
+/** GET rules/summary: the rules as the form shows them, one row per section. */
+function sourceweb_rest_rules_summary() {
+	$ready = sourceweb_rules_ready();
+	if ( is_wp_error( $ready ) ) {
+		return $ready;
+	}
+	$r     = aw_summary_rules();
+	$below = aw_summary_below_counts();
+	$secs  = array();
+	foreach ( aw_rules_summary_by_type() as $pt => $sec ) {
+		$own    = isset( $sec['alias'] );
+		$b      = $own ? ( $below[ $sec['alias'] ] ?? array( 0, 0 ) ) : null;
+		$secs[] = array(
+			'type'        => $pt,
+			'label'       => $sec['label'],
+			'own'         => $own,
+			'inherit'     => ! $own && '' !== (string) ( $sec['inherit'] ?? '' ),
+			'min_words'   => (int) $sec['min_words'],
+			'max_words'   => (int) $sec['max_words'],
+			'structure'   => (string) $sec['structure'],
+			'attribution' => (string) $sec['attribution'],
+			'below'       => $b ? sprintf( '%d of %d', (int) $b[0], (int) $b[1] ) : '—',
+		);
+	}
+	$f      = sourceweb_summary_fields();
+	$values = array();
+	foreach ( array_keys( $f['numbers'] ) as $k ) {
+		$values[ $k ] = (int) $r[ $k ];
+	}
+	foreach ( array_keys( $f['lists'] ) as $k ) {
+		$values[ $k ] = implode( "\n", (array) $r[ $k ] );
+	}
+	foreach ( array_keys( $f['texts'] ) as $k ) {
+		$values[ $k ] = (string) $r[ $k ];
+	}
+	return rest_ensure_response(
+		array(
+			'sections' => $secs,
+			'values'   => $values,
+			'fields'   => $f,
+		)
+	);
+}
+
+/**
+ * POST rules/summary/save: the form's values through the form's own sanitizer (same log lines; a Save with no change
+ * writes nothing; reset goes back to the defaults).
+ *
+ * @param WP_REST_Request $request Request.
+ */
+function sourceweb_rest_rules_summary_save( WP_REST_Request $request ) {
+	$ready = sourceweb_rules_ready();
+	if ( is_wp_error( $ready ) ) {
+		return $ready;
+	}
+	if ( ! function_exists( 'add_settings_error' ) ) {
+		require_once ABSPATH . 'wp-admin/includes/template.php'; // The sanitizer adds the "Saved" notice.
+	}
+	$v  = (array) $request['values'];
+	$in = array( '_aw_tab' => 'summary' );
+	if ( ! empty( $v['_reset'] ) ) {
+		$in['_reset'] = 1;
+	}
+	$f = sourceweb_summary_fields();
+	foreach ( array_merge( array_keys( $f['numbers'] ), array_keys( $f['lists'] ), array_keys( $f['texts'] ) ) as $k ) {
+		if ( isset( $v[ $k ] ) && is_scalar( $v[ $k ] ) ) {
+			$in[ $k ] = (string) $v[ $k ];
+		}
+	}
+	$in['sections'] = array();
+	foreach ( (array) ( $v['sections'] ?? array() ) as $pt => $sec ) {
+		if ( ! is_array( $sec ) ) {
+			continue;
+		}
+		$one = array( 'shown' => 1 );
+		foreach ( array( 'min_words', 'max_words', 'structure', 'attribution' ) as $k ) {
+			if ( isset( $sec[ $k ] ) && is_scalar( $sec[ $k ] ) ) {
+				$one[ $k ] = (string) $sec[ $k ];
+			}
+		}
+		if ( ! empty( $sec['inherit'] ) ) {
+			$one['inherit'] = 1;
+		}
+		$in['sections'][ sanitize_key( (string) $pt ) ] = $one;
+	}
+	$before = get_option( AW_SUMMARY_RULES_OPTION );
+	$new    = aw_summary_rules_sanitize( $in );
+	$saved  = $new !== $before;
+	if ( $saved ) {
+		update_option( AW_SUMMARY_RULES_OPTION, $new, false );
+	}
+	return rest_ensure_response(
+		array(
+			'saved'   => $saved,
+			'message' => $saved ? __( 'Saved. The workers use this from their next run.', 'aw-sourcing' ) : __( 'Nothing changed.', 'aw-sourcing' ),
 		)
 	);
 }

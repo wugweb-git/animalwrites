@@ -164,6 +164,9 @@ add_filter( 'removable_query_args', fn( $args ) => array_merge( $args, array( 'a
  * @param array  $args More query arguments.
  */
 function aw_rules_back( $part, $done, $for = '', array $args = array() ) {
+	if ( false !== strpos( (string) wp_get_referer(), 'ui=classic' ) ) {
+		$args['ui'] = 'classic'; // a save on today's screen goes back to it
+	}
 	wp_safe_redirect(
 		aw_rules_url(
 			$part,
@@ -306,7 +309,77 @@ function aw_rules_tag_form( $slug ) {
 	aw_rules_tag_fields( $slug, (array) $rules[ $slug ] );
 }
 
-/** Save a tag rule (add or edit; a changed tag renames the rule in its place). */
+/**
+ * Save a tag rule (add or edit; a changed tag renames the rule in its place, and the sections that allow the old tag
+ * allow the new one). Shared by today's form and the new screen.
+ *
+ * @param string $tag      Tag slug.
+ * @param string $original The rule's tag before ('' for a new rule).
+ * @param array  $in       any, unless, hold_reason (sanitized text), hold (regular expressions, one per line).
+ * @return array{0: string, 1: string} Notice key (tag_added, tag_saved, tag_exists, tag_empty, tag_badre, none) and what it is about.
+ */
+function aw_rules_tag_save( $tag, $original, array $in ) {
+	list( $rule, $bad ) = aw_rules_tag_rule_clean( $in );
+	if ( '' === $tag || ! $rule['any'] ) {
+		return array( 'tag_empty', '' );
+	}
+	if ( $bad ) {
+		return array( 'tag_badre', implode( ', ', $bad ) );
+	}
+	$c     = aw_sources_config();
+	$rules = (array) ( $c['topic_tags'] ?? array() );
+	if ( $tag !== $original && isset( $rules[ $tag ] ) ) {
+		return array( 'tag_exists', $tag );
+	}
+	$old = '' !== $original ? ( $rules[ $original ] ?? null ) : null;
+	if ( null !== $old && $tag === $original && $old === $rule ) {
+		return array( 'none', $tag );
+	}
+	$out   = array();
+	$moved = array(); // sections whose allowed tags follow a rule to its new tag
+	if ( null === $old ) {
+		$out = $rules + array( $tag => $rule ); // a new rule goes last
+	} else {
+		foreach ( $rules as $k => $v ) { // an edited rule keeps its place, under its (new) tag
+			$out[ $k === $original ? $tag : $k ] = $k === $original ? $rule : $v;
+		}
+		if ( $tag !== $original ) {
+			foreach ( (array) ( $c['sections'] ?? array() ) as $t => $sec ) {
+				$list = array_map( 'strval', (array) ( $sec['tags'] ?? array() ) );
+				$at   = array_search( $original, $list, true );
+				if ( false !== $at ) {
+					$list[ $at ]                 = $tag;
+					$c['sections'][ $t ]['tags'] = array_values( array_unique( $list ) );
+					$moved[]                     = $t;
+				}
+			}
+		}
+	}
+	$c['topic_tags'] = $out;
+	update_option( 'aw_sources', $c, false );
+	kits_sourcing_log( 'sections', null === $old ? "Tag rule $tag added" : ( $tag === $original ? "Tag rule $tag edited" : "Tag rule $original moved to the tag $tag and edited" . ( $moved ? ' (allowed tag changed with it in ' . implode( ', ', $moved ) . ')' : '' ) ), null === $old ? '' : array( $original => $old ), array( $tag => $rule ) );
+	return array( null === $old ? 'tag_added' : 'tag_saved', $tag );
+}
+
+/**
+ * Delete a tag rule (the tag itself stays; items keep the tags they have).
+ *
+ * @param string $tag Tag slug.
+ * @return array{0: string, 1: string} tag_deleted or none, and the tag.
+ */
+function aw_rules_tag_delete( $tag ) {
+	$c = aw_sources_config();
+	if ( '' === $tag || ! isset( $c['topic_tags'][ $tag ] ) ) {
+		return array( 'none', $tag );
+	}
+	$old = $c['topic_tags'][ $tag ];
+	unset( $c['topic_tags'][ $tag ] );
+	update_option( 'aw_sources', $c, false );
+	kits_sourcing_log( 'sections', "Tag rule $tag deleted", array( $tag => $old ), '' );
+	return array( 'tag_deleted', $tag );
+}
+
+/** Save a tag rule from today's form. */
 add_action(
 	'admin_post_aw_rules_tag_save',
 	function () {
@@ -321,53 +394,15 @@ add_action(
 		}
 		// Regular expressions: sanitize_textarea_field would strip a < or a %-sequence. Each line is checked to compile
 		// (aw_rules_tag_rule_clean), escaped wherever it is shown, and only ever used as a pattern by the workers.
-		$hold               = wp_unslash( $_POST['hold'] ?? '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- see above
-		$in['hold']         = is_string( $hold ) ? wp_check_invalid_utf8( $hold ) : '';
-		list( $rule, $bad ) = aw_rules_tag_rule_clean( $in );
-		$back               = '' !== $original ? array( 'tagrule' => $original ) : array();
-		if ( '' === $tag || ! $rule['any'] ) {
-			aw_rules_back( 'sections', 'tag_empty', '', $back );
-		}
-		if ( $bad ) {
-			aw_rules_back( 'sections', 'tag_badre', implode( ', ', $bad ), $back );
-		}
-		$c     = aw_sources_config();
-		$rules = (array) ( $c['topic_tags'] ?? array() );
-		if ( $tag !== $original && isset( $rules[ $tag ] ) ) {
-			aw_rules_back( 'sections', 'tag_exists', $tag, $back );
-		}
-		$old = '' !== $original ? ( $rules[ $original ] ?? null ) : null;
-		if ( null !== $old && $tag === $original && $old === $rule ) {
-			aw_rules_back( 'sections', 'none', $tag, $back );
-		}
-		$out   = array();
-		$moved = array(); // sections whose allowed tags follow a rule to its new tag
-		if ( null === $old ) {
-			$out = $rules + array( $tag => $rule ); // a new rule goes last
-		} else {
-			foreach ( $rules as $k => $v ) { // an edited rule keeps its place, under its (new) tag
-				$out[ $k === $original ? $tag : $k ] = $k === $original ? $rule : $v;
-			}
-			if ( $tag !== $original ) {
-				foreach ( (array) ( $c['sections'] ?? array() ) as $t => $sec ) {
-					$list = array_map( 'strval', (array) ( $sec['tags'] ?? array() ) );
-					$at   = array_search( $original, $list, true );
-					if ( false !== $at ) {
-						$list[ $at ]                 = $tag;
-						$c['sections'][ $t ]['tags'] = array_values( array_unique( $list ) );
-						$moved[]                     = $t;
-					}
-				}
-			}
-		}
-		$c['topic_tags'] = $out;
-		update_option( 'aw_sources', $c, false );
-		kits_sourcing_log( 'sections', null === $old ? "Tag rule $tag added" : ( $tag === $original ? "Tag rule $tag edited" : "Tag rule $original moved to the tag $tag and edited" . ( $moved ? ' (allowed tag changed with it in ' . implode( ', ', $moved ) . ')' : '' ) ), null === $old ? '' : array( $original => $old ), array( $tag => $rule ) );
-		aw_rules_back( 'sections', null === $old ? 'tag_added' : 'tag_saved', $tag );
+		$hold             = wp_unslash( $_POST['hold'] ?? '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- see above
+		$in['hold']       = is_string( $hold ) ? wp_check_invalid_utf8( $hold ) : '';
+		list( $done, $for ) = aw_rules_tag_save( $tag, $original, $in );
+		$ok               = in_array( $done, array( 'tag_added', 'tag_saved' ), true );
+		aw_rules_back( 'sections', $done, $for, ! $ok && '' !== $original ? array( 'tagrule' => $original ) : array() );
 	}
 );
 
-/** Delete a tag rule (the tag itself stays; items keep the tags they have). */
+/** Delete a tag rule from today's list. */
 add_action(
 	'admin_post_aw_rules_tag_delete',
 	function () {
@@ -375,15 +410,8 @@ add_action(
 		if ( ! current_user_can( AW_SRC_CAP ) || '' === $tag || ! check_admin_referer( 'aw_rules_tag_delete_' . $tag ) ) {
 			wp_die( 'Not allowed.', 403 );
 		}
-		$c = aw_sources_config();
-		if ( ! isset( $c['topic_tags'][ $tag ] ) ) {
-			aw_rules_back( 'sections', 'none', $tag );
-		}
-		$old = $c['topic_tags'][ $tag ];
-		unset( $c['topic_tags'][ $tag ] );
-		update_option( 'aw_sources', $c, false );
-		kits_sourcing_log( 'sections', "Tag rule $tag deleted", array( $tag => $old ), '' );
-		aw_rules_back( 'sections', 'tag_deleted', $tag );
+		list( $done, $for ) = aw_rules_tag_delete( $tag );
+		aw_rules_back( 'sections', $done, $for );
 	}
 );
 
@@ -422,18 +450,29 @@ add_action(
 		foreach ( (array) wp_unslash( $_POST['pos'] ?? array() ) as $k => $v ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- each key and number is sanitized here
 			$pos[ sanitize_key( $k ) ] = '' === trim( (string) $v ) ? '' : absint( $v );
 		}
-		$opt = aw_rules_enrich_option();
-		$old = aw_enrich_field_rules()['priority'];
-		$new = aw_enrich_priority_from_positions( $pos, aw_enrich_source_keys(), $old );
-		if ( $new === $old ) {
-			aw_rules_back( 'enrich', 'none', 'the trust order' );
-		}
-		$opt['priority'] = $new;
-		update_option( AW_ENRICH_RULES_OPTION, $opt, false );
-		kits_sourcing_log( 'enrich', 'Trust order changed', $old, $new );
-		aw_rules_back( 'enrich', 'order_saved', implode( ', ', $new ) );
+		list( $done, $for ) = aw_rules_priority_save( $pos );
+		aw_rules_back( 'enrich', $done, $for );
 	}
 );
+
+/**
+ * Save the trust order from positions (source => 1…99, or '' for after every numbered one).
+ *
+ * @param array $pos Source key => position.
+ * @return array{0: string, 1: string} order_saved or none, and the order in words.
+ */
+function aw_rules_priority_save( array $pos ) {
+	$opt = aw_rules_enrich_option();
+	$old = aw_enrich_field_rules()['priority'];
+	$new = aw_enrich_priority_from_positions( $pos, aw_enrich_source_keys(), $old );
+	if ( $new === $old ) {
+		return array( 'none', 'the trust order' );
+	}
+	$opt['priority'] = $new;
+	update_option( AW_ENRICH_RULES_OPTION, $opt, false );
+	kits_sourcing_log( 'enrich', 'Trust order changed', $old, $new );
+	return array( 'order_saved', implode( ', ', $new ) );
+}
 
 /** Every Field rules row: the enrichment fields and the listing fields (rules-model.php aw_enrich_field_rule_rows). */
 function aw_rules_field_rows() {
@@ -549,8 +588,7 @@ add_action(
 		if ( ! current_user_can( AW_SRC_CAP ) || '' === $field || ! check_admin_referer( 'aw_rules_field_' . $field ) ) {
 			wp_die( 'Not allowed.', 403 );
 		}
-		$rows = aw_rules_field_rows();
-		if ( ! isset( $rows[ $field ] ) ) {
+		if ( ! isset( aw_rules_field_rows()[ $field ] ) ) {
 			wp_die( 'No such field.', 400 );
 		}
 		$raw = isset( $_POST['rule'] ) && is_array( $_POST['rule'] ) ? wp_unslash( $_POST['rule'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- each value is checked against what it may be in aw_enrich_rule_clean
@@ -564,21 +602,37 @@ add_action(
 			'sources'  => array_map( 'sanitize_key', (array) ( $raw['sources'] ?? array() ) ),
 			'apply'    => sanitize_key( $raw['apply'] ?? '' ),
 		);
-		if ( '' !== ( $rows[ $field ]['why'] ?? '' ) ) {
-			$in['on'] = false; // a field type enrichment cannot write stays off
-		}
-		$old = $rows[ $field ]['rule'];
-		$new = aw_enrich_rule_clean( $field, $in, aw_enrich_source_keys(), $old );
-		if ( $new === $old && $rows[ $field ]['set'] ) {
-			aw_rules_back( 'enrich', 'none', $rows[ $field ]['label'], array( 'field' => $field ) );
-		}
-		$opt                     = aw_rules_enrich_option();
-		$opt['fields'][ $field ] = $new;
-		update_option( AW_ENRICH_RULES_OPTION, $opt, false );
-		kits_sourcing_log( 'enrich', 'Field rule ' . $rows[ $field ]['label'] . ' (' . $field . ')' . ( $rows[ $field ]['set'] ? ' edited' : ' set' ), $old, $new );
-		aw_rules_back( 'enrich', 'field_saved', $rows[ $field ]['label'] );
+		list( $done, $for ) = aw_rules_field_save( $field, $in );
+		aw_rules_back( 'enrich', $done, $for, 'none' === $done ? array( 'field' => $field ) : array() );
 	}
 );
+
+/**
+ * Save one field's rule.
+ *
+ * @param string $field Field key (one of aw_rules_field_rows()).
+ * @param array  $in    on, ai, invite, social (bool), multi (int), official (key), sources (keys), apply (key).
+ * @return array{0: string, 1: string} field_saved or none, and the field's label.
+ */
+function aw_rules_field_save( $field, array $in ) {
+	$rows = aw_rules_field_rows();
+	if ( ! isset( $rows[ $field ] ) ) {
+		return array( 'nosuch', $field );
+	}
+	if ( '' !== ( $rows[ $field ]['why'] ?? '' ) ) {
+		$in['on'] = false; // a field type enrichment cannot write stays off
+	}
+	$old = $rows[ $field ]['rule'];
+	$new = aw_enrich_rule_clean( $field, $in, aw_enrich_source_keys(), $old );
+	if ( $new === $old && $rows[ $field ]['set'] ) {
+		return array( 'none', $rows[ $field ]['label'] );
+	}
+	$opt                     = aw_rules_enrich_option();
+	$opt['fields'][ $field ] = $new;
+	update_option( AW_ENRICH_RULES_OPTION, $opt, false );
+	kits_sourcing_log( 'enrich', 'Field rule ' . $rows[ $field ]['label'] . ' (' . $field . ')' . ( $rows[ $field ]['set'] ? ' edited' : ' set' ), $old, $new );
+	return array( 'field_saved', $rows[ $field ]['label'] );
+}
 
 /* ---------- Help tabs ---------- */
 

@@ -1258,9 +1258,16 @@ function useSub( keys ) {
  */
 const subHref = ( next ) => {
 	const u = new URL( window.location.href );
-	[ 'edit', 'runs', 'view', 'status', 'kw' ].forEach( ( k ) =>
-		u.searchParams.delete( k )
-	);
+	[
+		'edit',
+		'runs',
+		'view',
+		'status',
+		'kw',
+		'part',
+		'tagrule',
+		'field',
+	].forEach( ( k ) => u.searchParams.delete( k ) );
 	Object.keys( next ).forEach( ( k ) => u.searchParams.set( k, next[ k ] ) );
 	return u.toString();
 };
@@ -3990,6 +3997,1119 @@ function Suggestions( { onBack } ) {
 	);
 }
 
+/* ---------- Rules ---------- */
+
+const RULE_PARTS = [
+	{ value: 'sections', label: __( 'Section rules', 'aw-sourcing' ) },
+	{ value: 'summary', label: __( 'Summary rules', 'aw-sourcing' ) },
+	{ value: 'enrich', label: __( 'Directory enrichment', 'aw-sourcing' ) },
+];
+
+/**
+ * A save's answer as a notice: success, info (nothing changed) or the refusal.
+ *
+ * @param {Object} r Answer.
+ */
+const answerMsg = ( r ) => ( {
+	tone: r.tone || ( r.saved || 'saved' === r.done ? 'success' : 'info' ),
+	text: r.message,
+} );
+
+function Rules() {
+	const [ sub, go ] = useSub( [ 'part', 'edit', 'tagrule', 'field' ] );
+	const [ msg, setMsg ] = useState( null );
+	const part = RULE_PARTS.some( ( p ) => p.value === sub.part )
+		? sub.part
+		: 'sections';
+	const back = ( m ) => {
+		setMsg( m || null );
+		go( 'sections' === part ? {} : { part } );
+	};
+	if ( sub.edit ) {
+		return <SectionForm type={ sub.edit } onDone={ back } />;
+	}
+	if ( sub.tagrule ) {
+		return (
+			<TagRuleForm
+				tag={ 'new' === sub.tagrule ? '' : sub.tagrule }
+				onDone={ back }
+			/>
+		);
+	}
+	if ( sub.field ) {
+		return <FieldRuleForm field={ sub.field } onDone={ back } />;
+	}
+	const parts = (
+		<ChipRow
+			label={ __( 'Rules', 'aw-sourcing' ) }
+			chips={ RULE_PARTS }
+			value={ part }
+			onChange={ ( p ) => {
+				setMsg( null );
+				go( 'sections' === p ? {} : { part: p } );
+			} }
+		/>
+	);
+	const notice = msg && (
+		<Notice tone={ msg.tone } onDismiss={ () => setMsg( null ) }>
+			{ msg.text }
+		</Notice>
+	);
+	return (
+		<>
+			{ parts }
+			{ notice }
+			{ 'sections' === part && <SectionRules go={ go } /> }
+			{ 'summary' === part && <SummaryRules /> }
+			{ 'enrich' === part && <EnrichRules go={ go } /> }
+		</>
+	);
+}
+
+/**
+ * A loader for a GET route: data, error, reload.
+ *
+ * @param {string} route Route.
+ * @param {Object} args  Query arguments.
+ */
+function useRoute( route, args = {} ) {
+	const key = JSON.stringify( args );
+	const [ data, setData ] = useState( null );
+	const [ error, setError ] = useState( '' );
+	const [ loading, setLoading ] = useState( true );
+	const load = useCallback( () => {
+		setLoading( true );
+		setError( '' );
+		apiFetch( { path: path( route, JSON.parse( key ) ) } )
+			.then( setData )
+			.catch( ( e ) => setError( errText( e ) ) )
+			.finally( () => setLoading( false ) );
+	}, [ route, key ] );
+	useEffect( load, [ load ] );
+	return { data, error, loading, load };
+}
+
+function SectionRules( { go } ) {
+	const { data, error, loading, load } = useRoute( 'rules/sections' );
+	const [ msg, setMsg ] = useState( null );
+	const del = ( r ) => {
+		if (
+			// eslint-disable-next-line no-alert -- a plain browser confirm, as today's screen
+			! window.confirm(
+				sprintf(
+					/* translators: %s: tag. */
+					__(
+						'Delete the tag rule for %s? The tag itself stays; items keep the tags they have.',
+						'aw-sourcing'
+					),
+					r.title
+				)
+			)
+		) {
+			return;
+		}
+		apiFetch( {
+			path: path( 'rules/tag/delete' ),
+			method: 'POST',
+			data: { tag: r.id },
+		} )
+			.then( ( res ) => setMsg( answerMsg( res ) ) )
+			.catch( ( e ) => setMsg( { tone: 'error', text: errText( e ) } ) )
+			.finally( load );
+	};
+	const empty = () => {};
+	return (
+		<>
+			<SectionCard
+				id="sections"
+				title={ __( 'Section rules', 'aw-sourcing' ) }
+				description={ __(
+					"Which categories and tags each section uses. The workers pick only from these, and each section's filters show only these. A section with no category ticked uses every category.",
+					'aw-sourcing'
+				) }
+			>
+				<DataList
+					label={ __( 'Sections', 'aw-sourcing' ) }
+					columns={ [
+						{
+							key: 'title',
+							label: __( 'Section', 'aw-sourcing' ),
+							primary: true,
+							render: ( r ) => (
+								<>
+									<a
+										href={ subHref( { edit: r.id } ) }
+										onClick={ inPlace( go, {
+											edit: r.id,
+										} ) }
+									>
+										<strong>{ r.title }</strong>
+									</a>{ ' ' }
+									<code>{ r.id }</code>
+									{ ! r.stored && (
+										<span className="kits-shell-field__help">
+											{ ' ' }
+											{ __(
+												'No rule saved yet: every category, no tags.',
+												'aw-sourcing'
+											) }
+										</span>
+									) }
+								</>
+							),
+						},
+						{
+							key: 'categories',
+							label: __( 'Allowed categories', 'aw-sourcing' ),
+						},
+						{
+							key: 'tags',
+							label: __( 'Allowed tags', 'aw-sourcing' ),
+						},
+						{
+							key: 'worker',
+							label: __( 'Workers file', 'aw-sourcing' ),
+						},
+						{
+							key: 'summary',
+							label: __( 'Summary rule', 'aw-sourcing' ),
+						},
+					] }
+					rows={ data?.sections || [] }
+					total={ data?.sections?.length || 0 }
+					page={ 1 }
+					pages={ 1 }
+					onPage={ empty }
+					rowActions={ ( r ) => [
+						{
+							label: __( 'Edit', 'aw-sourcing' ),
+							onClick: () => go( { edit: r.id } ),
+						},
+					] }
+					loading={ loading }
+					error={ error }
+					onRetry={ load }
+					emptyTitle={ __( 'No sections.', 'aw-sourcing' ) }
+				/>
+			</SectionCard>
+			<SectionCard
+				id="tag-rules"
+				title={ __( 'Tag rules', 'aw-sourcing' ) }
+				description={ __(
+					'An item gets the tag when its title or text has one of the phrases, in a section that allows the tag. An item that also matches a "Hold when" pattern, and has none of the "Unless" words, waits for a person with the hold reason.',
+					'aw-sourcing'
+				) }
+				actions={
+					<a
+						className="kits-shell-button is-primary"
+						href={ subHref( { tagrule: 'new' } ) }
+						onClick={ inPlace( go, { tagrule: 'new' } ) }
+					>
+						{ __( 'Add New Rule', 'aw-sourcing' ) }
+					</a>
+				}
+			>
+				{ msg && (
+					<Notice
+						tone={ msg.tone }
+						onDismiss={ () => setMsg( null ) }
+					>
+						{ msg.text }
+					</Notice>
+				) }
+				<DataList
+					label={ __( 'Tag rules', 'aw-sourcing' ) }
+					columns={ [
+						{
+							key: 'title',
+							label: __( 'Tag', 'aw-sourcing' ),
+							primary: true,
+							render: ( r ) => (
+								<>
+									<a
+										href={ subHref( { tagrule: r.id } ) }
+										onClick={ inPlace( go, {
+											tagrule: r.id,
+										} ) }
+									>
+										<strong>{ r.title }</strong>
+									</a>{ ' ' }
+									<code>{ r.slug }</code>
+								</>
+							),
+						},
+						{ key: 'any', label: __( 'Phrases', 'aw-sourcing' ) },
+						{
+							key: 'hold',
+							label: __( 'Hold when', 'aw-sourcing' ),
+							render: ( r ) =>
+								r.hold.length
+									? r.hold.map( ( h, i ) => (
+											<span key={ i }>
+												{ i > 0 && ', ' }
+												<code>{ h }</code>
+											</span>
+										) )
+									: '—',
+						},
+						{ key: 'unless', label: __( 'Unless', 'aw-sourcing' ) },
+						{
+							key: 'reason',
+							label: __( 'Hold reason', 'aw-sourcing' ),
+						},
+						{
+							key: 'sections',
+							label: __(
+								'Sections that may give it',
+								'aw-sourcing'
+							),
+						},
+					] }
+					rows={ data?.tagRules || [] }
+					total={ data?.tagRules?.length || 0 }
+					page={ 1 }
+					pages={ 1 }
+					onPage={ empty }
+					rowActions={ ( r ) => [
+						{
+							label: __( 'Edit', 'aw-sourcing' ),
+							onClick: () => go( { tagrule: r.id } ),
+						},
+						{
+							label: __( 'Delete', 'aw-sourcing' ),
+							tone: 'error',
+							onClick: () => del( r ),
+						},
+					] }
+					loading={ loading }
+					error={ error }
+					onRetry={ load }
+					emptyTitle={ __( 'No tag rules yet.', 'aw-sourcing' ) }
+				/>
+			</SectionCard>
+		</>
+	);
+}
+
+/**
+ * The buttons of a form: Save, Cancel.
+ *
+ * @param {Object}   props
+ * @param {string}   props.label  Save button.
+ * @param {boolean}  props.busy   Saving.
+ * @param {Function} props.onSave Save.
+ * @param {Function} props.onDone Cancel.
+ */
+function FormButtons( { label, busy, onSave, onDone } ) {
+	return (
+		<>
+			<Button variant="primary" busy={ busy } onClick={ onSave }>
+				{ label }
+			</Button>{ ' ' }
+			<Button onClick={ () => onDone() }>
+				{ __( 'Cancel', 'aw-sourcing' ) }
+			</Button>
+		</>
+	);
+}
+
+/**
+ * One form: load, edit a copy, save; back to the list with the notice on success, the refusal shown in place.
+ *
+ * @param {string}   route  GET route.
+ * @param {Object}   args   Its arguments.
+ * @param {Function} toForm Data → form values.
+ */
+function useForm( route, args, toForm ) {
+	const { data, error, load } = useRoute( route, args );
+	const [ v, setV ] = useState( null );
+	const [ msg, setMsg ] = useState( null );
+	const [ busy, setBusy ] = useState( false );
+	useEffect( () => {
+		if ( data ) {
+			setV( toForm( data ) );
+		}
+	}, [ data ] ); // eslint-disable-line react-hooks/exhaustive-deps -- toForm is the same every time
+	const send = ( to, body, onDone ) => {
+		setBusy( true );
+		setMsg( null );
+		apiFetch( { path: path( to ), method: 'POST', data: body } )
+			.then( ( r ) => onDone( answerMsg( r ) ) )
+			.catch( ( e ) => {
+				setBusy( false );
+				setMsg( { tone: 'error', text: errText( e ) } );
+			} );
+	};
+	return { data, error, load, v, setV, msg, setMsg, busy, send };
+}
+
+/**
+ * One section's allowed categories and tags.
+ *
+ * @param {Object}   props
+ * @param {string}   props.type   Post type.
+ * @param {Function} props.onDone Back with a notice.
+ */
+function SectionForm( { type, onDone } ) {
+	const f = useForm( 'rules/section', { type }, ( d ) => ( {
+		categories: d.categories,
+		tags: d.tags,
+		gone: d.gone,
+	} ) );
+	if ( f.error ) {
+		return <ErrorState message={ f.error } onRetry={ f.load } />;
+	}
+	if ( ! f.data || ! f.v ) {
+		return (
+			<LoadingState
+				label={ __( 'Loading the section…', 'aw-sourcing' ) }
+			/>
+		);
+	}
+	const d = f.data;
+	const gone = ( k ) =>
+		d.gone[ k ].map( ( slug ) => ( {
+			value: `__gone:${ slug }`,
+			label:
+				'categories' === k
+					? sprintf(
+							/* translators: %s: slug. */
+							__( '%s (no such category)', 'aw-sourcing' ),
+							decodeURIComponent( slug )
+						)
+					: sprintf(
+							/* translators: %s: slug. */
+							__( '%s (no such tag)', 'aw-sourcing' ),
+							decodeURIComponent( slug )
+						),
+		} ) );
+	const ticked = ( k ) => [
+		...f.v[ k ],
+		...f.v.gone[ k ].map( ( s ) => `__gone:${ s }` ),
+	];
+	const tick = ( k ) => ( list ) =>
+		f.setV( {
+			...f.v,
+			[ k ]: list.filter( ( x ) => ! x.startsWith( '__gone:' ) ),
+			gone: {
+				...f.v.gone,
+				[ k ]: list
+					.filter( ( x ) => x.startsWith( '__gone:' ) )
+					.map( ( x ) => x.slice( 7 ) ),
+			},
+		} );
+	return (
+		<SettingsGroup
+			id="section-form"
+			title={ sprintf(
+				/* translators: %s: section. */
+				__( 'Edit section: %s', 'aw-sourcing' ),
+				d.label
+			) }
+			footer={
+				<FormButtons
+					label={ __( 'Save section', 'aw-sourcing' ) }
+					busy={ f.busy }
+					onSave={ () =>
+						f.send( 'rules/section/save', { type, ...f.v }, onDone )
+					}
+					onDone={ onDone }
+				/>
+			}
+		>
+			{ f.msg && <Notice tone={ f.msg.tone }>{ f.msg.text }</Notice> }
+			<SettingsBlock
+				title={ __( 'Allowed categories', 'aw-sourcing' ) }
+				description={ __(
+					'None ticked: every category.',
+					'aw-sourcing'
+				) }
+			>
+				<Checks
+					id="sw-sec-cat"
+					legend={ __( 'Allowed categories', 'aw-sourcing' ) }
+					options={ [
+						...d.choices.categories,
+						...gone( 'categories' ),
+					] }
+					value={ ticked( 'categories' ) }
+					onChange={ tick( 'categories' ) }
+				/>
+			</SettingsBlock>
+			<SettingsBlock
+				title={ __( 'Allowed tags', 'aw-sourcing' ) }
+				description={ __(
+					"The tags the workers may give this section's items, and its filters show.",
+					'aw-sourcing'
+				) }
+			>
+				<Checks
+					id="sw-sec-tag"
+					legend={ __( 'Allowed tags', 'aw-sourcing' ) }
+					options={ [ ...d.choices.tags, ...gone( 'tags' ) ] }
+					value={ ticked( 'tags' ) }
+					onChange={ tick( 'tags' ) }
+				/>
+			</SettingsBlock>
+		</SettingsGroup>
+	);
+}
+
+/**
+ * Add a tag rule or edit one.
+ *
+ * @param {Object}   props
+ * @param {string}   props.tag    Tag slug, '' to add.
+ * @param {Function} props.onDone Back with a notice.
+ */
+function TagRuleForm( { tag, onDone } ) {
+	const f = useForm( 'rules/tag', { tag }, ( d ) => ( {
+		tag: d.tag,
+		any: d.any,
+		hold: d.hold,
+		unless: d.unless,
+		hold_reason: d.hold_reason,
+	} ) );
+	if ( f.error ) {
+		return <ErrorState message={ f.error } onRetry={ f.load } />;
+	}
+	if ( ! f.data || ! f.v ) {
+		return (
+			<LoadingState label={ __( 'Loading the rule…', 'aw-sourcing' ) } />
+		);
+	}
+	const put = ( k ) => ( val ) => f.setV( { ...f.v, [ k ]: val } );
+	return (
+		<SettingsGroup
+			id="tag-rule-form"
+			title={
+				tag
+					? sprintf(
+							/* translators: %s: tag. */
+							__( 'Edit tag rule: %s', 'aw-sourcing' ),
+							decodeURIComponent( tag )
+						)
+					: __( 'Add New Rule', 'aw-sourcing' )
+			}
+			footer={
+				<FormButtons
+					label={
+						tag
+							? __( 'Update', 'aw-sourcing' )
+							: __( 'Add New Rule', 'aw-sourcing' )
+					}
+					busy={ f.busy }
+					onSave={ () =>
+						f.send(
+							'rules/tag/save',
+							{ ...f.v, original: tag },
+							onDone
+						)
+					}
+					onDone={ onDone }
+				/>
+			}
+		>
+			{ f.msg && <Notice tone={ f.msg.tone }>{ f.msg.text }</Notice> }
+			<SelectField
+				label={ __( 'Tag', 'aw-sourcing' ) }
+				help={ __(
+					'The tag an item gets when its title or text has one of the phrases (only in a section that allows the tag).',
+					'aw-sourcing'
+				) }
+				value={ f.v.tag }
+				options={ [
+					...( tag
+						? []
+						: [
+								{
+									value: '',
+									label: __( 'Choose a tag', 'aw-sourcing' ),
+								},
+							] ),
+					...f.data.choices,
+				] }
+				onChange={ put( 'tag' ) }
+			/>
+			<TextField
+				label={ __( 'Phrases', 'aw-sourcing' ) }
+				help={ __(
+					'One per line. An item with any of them gets the tag.',
+					'aw-sourcing'
+				) }
+				value={ f.v.any }
+				onChange={ put( 'any' ) }
+				input={ { rows: 5 } }
+			/>
+			<TextField
+				label={ __( 'Hold when', 'aw-sourcing' ) }
+				help={ __(
+					'One regular expression per line (case does not matter). An item that also matches one waits for a person.',
+					'aw-sourcing'
+				) }
+				value={ f.v.hold }
+				onChange={ put( 'hold' ) }
+				input={ { rows: 2 } }
+			/>
+			<TextField
+				label={ __( 'Unless', 'aw-sourcing' ) }
+				help={ __(
+					'One per line. An item with any of these words is not held.',
+					'aw-sourcing'
+				) }
+				value={ f.v.unless }
+				onChange={ put( 'unless' ) }
+				input={ { rows: 3 } }
+			/>
+			<TextField
+				label={ __( 'Hold reason', 'aw-sourcing' ) }
+				help={ __(
+					'What the person checking a held item should look at.',
+					'aw-sourcing'
+				) }
+				value={ f.v.hold_reason }
+				onChange={ put( 'hold_reason' ) }
+				input={ { rows: 2 } }
+			/>
+		</SettingsGroup>
+	);
+}
+
+/** The Summary rules form: lengths per section, quotes and the lead, each section's wording, every summary. */
+function SummaryRules() {
+	const f = useForm( 'rules/summary', {}, ( d ) => ( {
+		...d.values,
+		sections: Object.fromEntries(
+			d.sections.map( ( s ) => [
+				s.type,
+				{
+					min_words: String( s.min_words ),
+					max_words: String( s.max_words ),
+					structure: s.structure,
+					attribution: s.attribution,
+					inherit: s.inherit,
+				},
+			] )
+		),
+		_reset: false,
+	} ) );
+	const [ done, setDone ] = useState( null );
+	if ( f.error ) {
+		return <ErrorState message={ f.error } onRetry={ f.load } />;
+	}
+	if ( ! f.data || ! f.v ) {
+		return (
+			<LoadingState
+				label={ __( 'Loading the summary rules…', 'aw-sourcing' ) }
+			/>
+		);
+	}
+	const d = f.data;
+	const put = ( k ) => ( val ) => f.setV( { ...f.v, [ k ]: val } );
+	const putSec = ( pt, k ) => ( val ) =>
+		f.setV( {
+			...f.v,
+			sections: {
+				...f.v.sections,
+				[ pt ]: { ...f.v.sections[ pt ], [ k ]: val },
+			},
+		} );
+	const save = () => {
+		if (
+			f.v._reset &&
+			// eslint-disable-next-line no-alert -- a plain browser confirm
+			! window.confirm(
+				__(
+					'Go back to the default summary rules? Every rule on this form is replaced.',
+					'aw-sourcing'
+				)
+			)
+		) {
+			return;
+		}
+		f.send( 'rules/summary/save', { values: f.v }, ( m ) => {
+			setDone( m );
+			f.load();
+		} );
+	};
+	const num = ( val, onChange, label ) => (
+		<input
+			type="number"
+			min="1"
+			max="400"
+			size="4"
+			aria-label={ label }
+			value={ val }
+			onChange={ ( e ) => onChange( e.target.value ) }
+		/>
+	);
+	return (
+		<SettingsGroup
+			id="summary-rules"
+			title={ __( 'Summary rules', 'aw-sourcing' ) }
+			description={ __(
+				'One rule set for every summary on the site: the workers write and check new summaries and same-story rewrites from these rules, and the site holds a News, Library or research item whose summary is over the maximum or not plain text in To review. A short summary is never held. A summary is never shorter than the search description, which is its lead sentence.',
+				'aw-sourcing'
+			) }
+			footer={
+				<Button variant="primary" busy={ f.busy } onClick={ save }>
+					{ __( 'Save summary rules', 'aw-sourcing' ) }
+				</Button>
+			}
+		>
+			{ ( done || f.msg ) && (
+				<Notice
+					tone={ ( f.msg || done ).tone }
+					onDismiss={ () => {
+						setDone( null );
+						f.setMsg( null );
+					} }
+				>
+					{ ( f.msg || done ).text }
+				</Notice>
+			) }
+			<SettingsBlock title={ __( 'Length per section', 'aw-sourcing' ) }>
+				<RefTable
+					caption={ __( 'Length per section', 'aw-sourcing' ) }
+					head={ [
+						__( 'Section', 'aw-sourcing' ),
+						__( 'Minimum words', 'aw-sourcing' ),
+						__( 'Maximum words', 'aw-sourcing' ),
+						__( 'Rule', 'aw-sourcing' ),
+						__(
+							'Published summaries below the minimum',
+							'aw-sourcing'
+						),
+					] }
+					rows={ d.sections.map( ( s ) => {
+						const sv = f.v.sections[ s.type ];
+						return [
+							<>
+								{ s.label } <code>{ s.type }</code>
+							</>,
+							num(
+								sv.min_words,
+								putSec( s.type, 'min_words' ),
+								`${ s.label } ${ __(
+									'minimum words',
+									'aw-sourcing'
+								) }`
+							),
+							num(
+								sv.max_words,
+								putSec( s.type, 'max_words' ),
+								`${ s.label } ${ __(
+									'maximum words',
+									'aw-sourcing'
+								) }`
+							),
+							s.own ? (
+								__( 'Its own', 'aw-sourcing' )
+							) : (
+								<label htmlFor={ `sw-sr-inh-${ s.type }` }>
+									<input
+										id={ `sw-sr-inh-${ s.type }` }
+										type="checkbox"
+										checked={ !! sv.inherit }
+										onChange={ ( e ) =>
+											putSec(
+												s.type,
+												'inherit'
+											)( e.target.checked )
+										}
+									/>{ ' ' }
+									{ __( 'Inherits News', 'aw-sourcing' ) }
+								</label>
+							),
+							s.below,
+						];
+					} ) }
+				/>
+			</SettingsBlock>
+			<SettingsBlock title={ __( 'Quotes and the lead', 'aw-sourcing' ) }>
+				{ Object.keys( d.fields.numbers ).map( ( k ) => (
+					<TextField
+						key={ k }
+						label={ d.fields.numbers[ k ] }
+						value={ String( f.v[ k ] ) }
+						onChange={ put( k ) }
+						input={ {
+							type: 'number',
+							min: '1',
+							max: '400',
+							step: '1',
+						} }
+					/>
+				) ) }
+			</SettingsBlock>
+			{ d.sections.map( ( s ) => (
+				<SettingsBlock
+					key={ s.type }
+					title={
+						f.v.sections[ s.type ].inherit
+							? sprintf(
+									/* translators: %s: section. */
+									__(
+										'%s (inherits News: these fields apply once it has its own rule)',
+										'aw-sourcing'
+									),
+									s.label
+								)
+							: s.label
+					}
+				>
+					<TextField
+						label={ __( 'Structure', 'aw-sourcing' ) }
+						value={ f.v.sections[ s.type ].structure }
+						onChange={ putSec( s.type, 'structure' ) }
+						input={ { rows: 4 } }
+					/>
+					<TextField
+						label={ __( 'Attribution', 'aw-sourcing' ) }
+						value={ f.v.sections[ s.type ].attribution }
+						onChange={ putSec( s.type, 'attribution' ) }
+						input={ { rows: 3 } }
+					/>
+				</SettingsBlock>
+			) ) }
+			<SettingsBlock title={ __( 'Every summary', 'aw-sourcing' ) }>
+				{ Object.keys( d.fields.lists ).map( ( k ) => (
+					<TextField
+						key={ k }
+						label={ d.fields.lists[ k ][ 0 ] }
+						help={ d.fields.lists[ k ][ 1 ] }
+						value={ f.v[ k ] }
+						onChange={ put( k ) }
+						input={ { rows: 'general' === k ? 12 : 5 } }
+					/>
+				) ) }
+				{ Object.keys( d.fields.texts ).map( ( k ) => (
+					<TextField
+						key={ k }
+						label={ d.fields.texts[ k ] }
+						value={ f.v[ k ] }
+						onChange={ put( k ) }
+						input={ { rows: 3 } }
+					/>
+				) ) }
+			</SettingsBlock>
+			<Switch
+				label={ __( 'Go back to the default rules', 'aw-sourcing' ) }
+				help={ __(
+					'On Save, every rule on this form goes back to its default.',
+					'aw-sourcing'
+				) }
+				checked={ !! f.v._reset }
+				onChange={ put( '_reset' ) }
+			/>
+		</SettingsGroup>
+	);
+}
+
+function EnrichRules( { go } ) {
+	const { data, error, loading, load } = useRoute( 'rules/enrich' );
+	const [ pos, setPos ] = useState( {} );
+	const [ msg, setMsg ] = useState( null );
+	const [ busy, setBusy ] = useState( false );
+	useEffect( () => {
+		if ( data ) {
+			setPos(
+				Object.fromEntries(
+					data.priority.map( ( p ) => [ p.key, p.pos ] )
+				)
+			);
+		}
+	}, [ data ] );
+	const settings = ( app.tabs || [] ).find( ( t ) => 'settings' === t.slug );
+	const saveOrder = () => {
+		setBusy( true );
+		setMsg( null );
+		apiFetch( {
+			path: path( 'rules/priority' ),
+			method: 'POST',
+			data: { pos },
+		} )
+			.then( ( r ) => setMsg( answerMsg( r ) ) )
+			.catch( ( e ) => setMsg( { tone: 'error', text: errText( e ) } ) )
+			.finally( () => {
+				setBusy( false );
+				load();
+			} );
+	};
+	if ( error ) {
+		return <ErrorState message={ error } onRetry={ load } />;
+	}
+	return (
+		<>
+			{ settings && (
+				<Notice tone="info">
+					{ __(
+						'The sources, the Google key and the monthly cap are on Settings, under Connected services.',
+						'aw-sourcing'
+					) }{ ' ' }
+					<a href={ settings.url }>
+						{ __( 'Open Settings', 'aw-sourcing' ) }
+					</a>
+				</Notice>
+			) }
+			<SettingsGroup
+				id="trust-order"
+				title={ __( 'Trust order', 'aw-sourcing' ) }
+				description={ __(
+					"When sources give different values for a field, the organisation's own claim wins first, then the value most sources agree on, then the source higher in this order. 1 is trusted most. Leave a source empty to rank it after every numbered one.",
+					'aw-sourcing'
+				) }
+				footer={
+					<Button busy={ busy } onClick={ saveOrder }>
+						{ __( 'Save trust order', 'aw-sourcing' ) }
+					</Button>
+				}
+			>
+				{ msg && (
+					<Notice
+						tone={ msg.tone }
+						onDismiss={ () => setMsg( null ) }
+					>
+						{ msg.text }
+					</Notice>
+				) }
+				{ ! data && (
+					<LoadingState
+						label={ __( 'Loading the rules…', 'aw-sourcing' ) }
+					/>
+				) }
+				{ ( data?.priority || [] ).map( ( p ) => (
+					<TextField
+						key={ p.key }
+						label={ p.label }
+						help={ p.key }
+						value={ pos[ p.key ] ?? '' }
+						onChange={ ( val ) =>
+							setPos( { ...pos, [ p.key ]: val } )
+						}
+						input={ { type: 'number', min: '1', max: '99' } }
+					/>
+				) ) }
+			</SettingsGroup>
+			<SectionCard
+				id="field-rules"
+				title={ __( 'Field rules', 'aw-sourcing' ) }
+				description={ __(
+					'Every listing field: the enrichment fields and the fields of the listing field group. A claimed or verified listing is never changed, and a low-confidence value always waits for review; otherwise each field follows its Apply rule.',
+					'aw-sourcing'
+				) }
+			>
+				<DataList
+					label={ __( 'Field rules', 'aw-sourcing' ) }
+					columns={ [
+						{
+							key: 'title',
+							label: __( 'Field', 'aw-sourcing' ),
+							primary: true,
+							render: ( r ) => (
+								<>
+									<a
+										href={ subHref( {
+											part: 'enrich',
+											field: r.id,
+										} ) }
+										onClick={ inPlace( go, {
+											part: 'enrich',
+											field: r.id,
+										} ) }
+									>
+										<strong>{ r.title }</strong>
+									</a>{ ' ' }
+									<code>{ r.id }</code>
+									{ r.note && (
+										<span className="kits-shell-field__help">
+											{ ' ' }
+											{ r.note }
+										</span>
+									) }
+								</>
+							),
+						},
+						{ key: 'group', label: __( 'Group', 'aw-sourcing' ) },
+						{
+							key: 'store',
+							label: __( 'Stored in', 'aw-sourcing' ),
+						},
+						{ key: 'on', label: __( 'On', 'aw-sourcing' ) },
+						{
+							key: 'sources',
+							label: __( 'May be filled by', 'aw-sourcing' ),
+						},
+						{ key: 'multi', label: __( 'Values', 'aw-sourcing' ) },
+						{
+							key: 'official',
+							label: __( 'Official source', 'aw-sourcing' ),
+						},
+						{
+							key: 'ai',
+							label: __( 'Read by the AI', 'aw-sourcing' ),
+						},
+						{
+							key: 'invite',
+							label: __( 'Invite to claim', 'aw-sourcing' ),
+						},
+						{ key: 'apply', label: __( 'Apply', 'aw-sourcing' ) },
+					] }
+					rows={ data?.fields || [] }
+					total={ data?.fields?.length || 0 }
+					page={ 1 }
+					pages={ 1 }
+					onPage={ () => {} }
+					rowActions={ ( r ) => [
+						{
+							label: __( 'Edit', 'aw-sourcing' ),
+							onClick: () =>
+								go( { part: 'enrich', field: r.id } ),
+						},
+					] }
+					loading={ loading }
+					error={ error }
+					onRetry={ load }
+					emptyTitle={ __( 'No fields.', 'aw-sourcing' ) }
+				/>
+			</SectionCard>
+		</>
+	);
+}
+
+/**
+ * One field's rule.
+ *
+ * @param {Object}   props
+ * @param {string}   props.field  Field key.
+ * @param {Function} props.onDone Back with a notice.
+ */
+function FieldRuleForm( { field, onDone } ) {
+	const f = useForm( 'rules/field', { field }, ( d ) => ( {
+		...d.rule,
+		multi: String( d.rule.multi ),
+	} ) );
+	if ( f.error ) {
+		return <ErrorState message={ f.error } onRetry={ f.load } />;
+	}
+	if ( ! f.data || ! f.v ) {
+		return (
+			<LoadingState label={ __( 'Loading the field…', 'aw-sourcing' ) } />
+		);
+	}
+	const d = f.data;
+	const put = ( k ) => ( val ) => f.setV( { ...f.v, [ k ]: val } );
+	return (
+		<SettingsGroup
+			id="field-rule-form"
+			title={ sprintf(
+				/* translators: %s: field. */
+				__( 'Edit field rule: %s', 'aw-sourcing' ),
+				d.label
+			) }
+			description={ `${ d.field } · ${ d.group } · ${ d.store }` }
+			footer={
+				<FormButtons
+					label={ __( 'Update', 'aw-sourcing' ) }
+					busy={ f.busy }
+					onSave={ () =>
+						f.send(
+							'rules/field/save',
+							{ field, rule: f.v },
+							onDone
+						)
+					}
+					onDone={ onDone }
+				/>
+			}
+		>
+			{ f.msg && <Notice tone={ f.msg.tone }>{ f.msg.text }</Notice> }
+			<Switch
+				label={ __(
+					'The worker may propose values for this field',
+					'aw-sourcing'
+				) }
+				help={ d.why }
+				checked={ !! f.v.on && ! d.why }
+				disabled={ !! d.why }
+				onChange={ put( 'on' ) }
+			/>
+			<SettingsBlock
+				title={ __( 'May be filled by', 'aw-sourcing' ) }
+				description={ __( 'None ticked: any source.', 'aw-sourcing' ) }
+			>
+				<Checks
+					id="sw-fr-src"
+					legend={ __( 'May be filled by', 'aw-sourcing' ) }
+					options={ d.choices.sources }
+					value={ f.v.sources }
+					onChange={ put( 'sources' ) }
+				/>
+			</SettingsBlock>
+			<TextField
+				label={ __( 'Values', 'aw-sourcing' ) }
+				help={ __(
+					'0: one value, and sources that disagree make it low confidence. A number: up to that many different values, never low for disagreeing (phone numbers).',
+					'aw-sourcing'
+				) }
+				value={ f.v.multi }
+				onChange={ put( 'multi' ) }
+				input={ { type: 'number', min: '0', max: '5' } }
+			/>
+			<SelectField
+				label={ __( 'Official source', 'aw-sourcing' ) }
+				help={ __(
+					'Its value alone is high confidence (the AWBI list for the address and PIN code).',
+					'aw-sourcing'
+				) }
+				value={ f.v.official }
+				options={ [
+					{ value: '', label: __( 'None', 'aw-sourcing' ) },
+					...d.choices.sources,
+				] }
+				onChange={ put( 'official' ) }
+			/>
+			<Switch
+				label={ __( 'Read by the AI', 'aw-sourcing' ) }
+				help={ __(
+					'Values the AI reads from pages: at most medium confidence unless the organisation said so.',
+					'aw-sourcing'
+				) }
+				checked={ !! f.v.ai }
+				onChange={ put( 'ai' ) }
+			/>
+			<Switch
+				label={ __( 'Invite to claim', 'aw-sourcing' ) }
+				help={ __(
+					'When only Google has it, the listing is flagged "Invite to claim".',
+					'aw-sourcing'
+				) }
+				checked={ !! f.v.invite }
+				onChange={ put( 'invite' ) }
+			/>
+			<Switch
+				label={ __( 'Profile link', 'aw-sourcing' ) }
+				help={ __(
+					'A social profile: the website linking to it and the page preview count as one source.',
+					'aw-sourcing'
+				) }
+				checked={ !! f.v.social }
+				onChange={ put( 'social' ) }
+			/>
+			<SelectField
+				label={ __( 'Apply', 'aw-sourcing' ) }
+				help={ __(
+					'Claimed and verified listings, and low-confidence values, always wait for review.',
+					'aw-sourcing'
+				) }
+				value={ f.v.apply }
+				options={ d.choices.apply }
+				onChange={ put( 'apply' ) }
+			/>
+		</SettingsGroup>
+	);
+}
+
 const SCREENS = {
 	dashboard: Dashboard,
 	review: Review,
@@ -3998,6 +5118,7 @@ const SCREENS = {
 	workers: Workers,
 	sources: Sources,
 	keywords: Keywords,
+	rules: Rules,
 };
 
 function App() {

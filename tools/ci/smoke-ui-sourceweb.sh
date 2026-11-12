@@ -152,6 +152,65 @@ PY2
 else
   echo "ok   (the keyword table is not set up here: the phase 2 Keywords checks are skipped)"
 fi
+# Rules: today's Sections, Summary rules and Directory enrichment tabs before the phase 3 migration, Rules from it.
+want 409 "GET /sourceweb/v1/rules/sections before phase 3" -b /tmp/cj-ci -H "X-WP-Nonce: $NA" "$H/?rest_route=/sourceweb/v1/rules/sections"
+post sourceweb/v1/rules/section/save '{"type":"aw_news"}'
+post sourceweb/v1/rules/tag/save '{"tag":""}'
+post sourceweb/v1/rules/tag/delete '{"tag":"x"}'
+post sourceweb/v1/rules/priority '{"pos":{}}'
+post sourceweb/v1/rules/field/save '{"field":"phone","rule":{}}'
+post sourceweb/v1/rules/summary/save '{"values":{}}'
+PHASE_WAS=$(wp option get aw_sourcing_phase 2>/dev/null || echo absent)
+wp option update aw_sourcing_phase 3 --quiet
+screen "aw-sourcing&tab=rules" sourceweb-app sourceweb-admin
+for r in rules/sections "rules/section&type=aw_news" rules/tag rules/enrich rules/summary; do
+  route "sourceweb/v1/$r"
+done
+R_OPTS="aw_sources aw_summary_rules aw_enrich_field_rules kits_sourcing_log"
+# shellcheck disable=SC2086
+BEFORE=$(optmd5 $R_OPTS)
+python3 - "$H/?rest_route=/sourceweb/v1" "$NA" <<'PY2' || FAIL=1
+import json, subprocess, sys
+r, nonce = sys.argv[1], sys.argv[2]
+def call(route, data=None):
+    args = ['curl', '-s', '-b', '/tmp/cj-ci', '-H', 'X-WP-Nonce: ' + nonce, '-w', '\n%{http_code}']
+    if data is not None:
+        args += ['-X', 'POST', '-H', 'Content-Type: application/json', '-d', json.dumps(data)]
+    body, code = subprocess.run(args + [r + '/' + route], capture_output=True, text=True).stdout.rsplit('\n', 1)
+    return code, json.loads(body)
+bad = 0
+def check(ok, label):
+    global bad
+    print(('ok  ' if ok else 'FAIL') + ' ' + label)
+    bad += not ok
+code, secs = call('rules/sections')
+check(code == '200' and secs['sections'], 'rules: %d sections, %d tag rules' % (len(secs['sections']), len(secs['tagRules'])))
+for row in secs['sections'][:4]:
+    code, s = call('rules/section&type=' + row['id'])
+    code, res = call('rules/section/save', {'type': row['id'], 'categories': s['categories'], 'tags': s['tags'], 'gone': s['gone']})
+    check(code == '200' and res.get('done') == 'none', code + ' unchanged Save of section ' + row['id'])
+for row in secs['tagRules'][:4]:
+    code, t = call('rules/tag&tag=' + row['id'])
+    code, res = call('rules/tag/save', {k: t[k] for k in ('tag', 'any', 'hold', 'unless', 'hold_reason')} | {'original': t['tag']})
+    check(code == '200' and res.get('done') == 'none', code + ' unchanged Save of tag rule ' + row['id'])
+code, res = call('rules/tag/save', {'tag': '', 'any': ''})
+check(code == '400', code + ' a tag rule with no tag is refused')
+code, en = call('rules/enrich')
+code, res = call('rules/priority', {'pos': {p['key']: p['pos'] for p in en['priority']}})
+check(code == '200' and res.get('done') == 'none', code + ' unchanged Save of the trust order')
+for row in en['fields'][:4]:
+    code, f = call('rules/field&field=' + row['id'])
+    check(code == '200' and f.get('field') == row['id'] and f['choices']['apply'], code + ' field rule form ' + row['id'])
+code, res = call('rules/field/save', {'field': 'no-such-field', 'rule': {}})
+check(code == '404', code + ' a field rule for no such field is refused')
+code, sm = call('rules/summary')
+vals = dict(sm['values'])
+vals['sections'] = {x['type']: {'min_words': x['min_words'], 'max_words': x['max_words'], 'structure': x['structure'], 'attribution': x['attribution'], 'inherit': x['inherit']} for x in sm['sections']}
+code, res = call('rules/summary/save', {'values': vals})
+check(code == '200' and res.get('saved') is False, code + ' unchanged Save of the summary rules')
+sys.exit(1 if bad else 0)
+PY2
+if [ "$PHASE_WAS" = absent ]; then wp option delete aw_sourcing_phase --quiet; else wp option update aw_sourcing_phase "$PHASE_WAS" --quiet; fi
 want 200 "POST /sourceweb/v1/dashboard/count administrator" -X POST -b /tmp/cj-ci -H "X-WP-Nonce: $NA" "$H/?rest_route=/sourceweb/v1/dashboard/count"
 # The Google key never goes out: Settings says only whether one is set.
 wp option update aw_enrich_google_key ci-secret-key-abcd --quiet

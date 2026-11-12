@@ -274,9 +274,7 @@ add_action(
 		$slugs            = fn( $v ) => array_map( 'sanitize_title', array_map( 'strval', (array) $v ) );
 		$tax_in           = isset( $_POST['tax_input'] ) && is_array( $_POST['tax_input'] ) ? array_map( 'absint', (array) wp_unslash( $_POST['tax_input']['post_tag'] ?? array() ) ) : array();
 		$gone             = isset( $_POST['aw_missing'] ) && is_array( $_POST['aw_missing'] ) ? wp_unslash( $_POST['aw_missing'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- each list is sanitized just below
-		$was              = (array) ( aw_sources_config()['sections'][ $type ] ?? array() );
-		list( $c, $what ) = aw_sourcing_section_apply(
-			aw_sources_config(),
+		$done = aw_sourcing_section_save(
 			$type,
 			array(
 				'categories' => array_map( 'absint', (array) wp_unslash( $_POST['post_category'] ?? array() ) ),
@@ -287,17 +285,30 @@ add_action(
 				'tags'       => $slugs( $gone['tags'] ?? array() ),
 			)
 		);
-		$back = aw_rules_url( 'sections' );
-		if ( ! $what ) {
-			wp_safe_redirect( add_query_arg( array( 'aw_terms_done' => 'none', 'aw_terms_for' => $type ), $back ) );
-			exit;
-		}
-		update_option( 'aw_sources', $c, false );
-		kits_sourcing_log( 'sections', implode( ' · ', $what ), $was, $c['sections'][ $type ] ); // old → new (phase 3: Rules → Section rules)
-		wp_safe_redirect( add_query_arg( array( 'aw_terms_done' => 'saved', 'aw_terms_for' => $type ), $back ) );
+		$back = aw_rules_url( 'sections', false !== strpos( (string) wp_get_referer(), 'ui=classic' ) ? array( 'ui' => 'classic' ) : array() ); // a save on today's screen goes back to it
+		wp_safe_redirect( add_query_arg( array( 'aw_terms_done' => $done, 'aw_terms_for' => $type ), $back ) );
 		exit;
 	}
 );
+
+/**
+ * Save one section's lists (aw_sourcing_section_apply()), logged; a Save with no change writes nothing.
+ *
+ * @param string $type   Post type.
+ * @param array  $ticked categories|tags => term IDs.
+ * @param array  $gone   categories|tags => ticked stored slugs that have no term.
+ * @return string saved or none.
+ */
+function aw_sourcing_section_save( $type, array $ticked, array $gone ) {
+	$was              = (array) ( aw_sources_config()['sections'][ $type ] ?? array() );
+	list( $c, $what ) = aw_sourcing_section_apply( aw_sources_config(), $type, $ticked, $gone );
+	if ( ! $what ) {
+		return 'none';
+	}
+	update_option( 'aw_sources', $c, false );
+	kits_sourcing_log( 'sections', implode( ' · ', $what ), $was, $c['sections'][ $type ] ); // old → new (phase 3: Rules → Section rules)
+	return 'saved';
+}
 
 /** After a Categories or Sections save: what happened, as a core notice. */
 function aw_sourcing_terms_notice() {
