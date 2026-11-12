@@ -2,7 +2,9 @@
 /**
  * InsightWeb's screens on the Kits admin shell, the default since 12 Nov 2026:
  * - admin.php?page=aw-search-insights: the Dashboard;
- * - admin.php?page=aw-search-insights&tab=settings: Settings.
+ * - admin.php?page=aw-search-insights&tab=settings: Settings;
+ * - admin.php?page=aw-search-insights&tab=<keywords|pages|checklist|rising|clarity|links|server|sourcing|…>: the other
+ *   tabs, each from its own output (insightweb-tabs.php), since 12 Nov 2026.
  *
  * &ui=classic shows the earlier tabs. The screens are one script (build/index.js, from src/), drawn with Kits Core's
  * shell parts (kits-core/includes/admin-shell.php) and fed by the insightweb/v1 routes (insightweb-rest.php). When Kits
@@ -27,17 +29,21 @@ function insightweb_kits_export( $names ) {
 add_filter( 'kits_settings_transfer_options', 'insightweb_kits_export' );
 
 /**
- * Which new screen this request asks for: 'dashboard', 'settings' or ''.
+ * Which new screen this request asks for: 'dashboard', 'settings', a tab of insightweb_tab_keys() or ''.
  */
 function insightweb_ui_wanted(): string {
 	$page = sanitize_key( wp_unslash( $_GET['page'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- which screen to show; nothing is saved here
 	if ( AW_SI_SLUG !== $page || ! function_exists( 'kits_shell_ui_next' ) || ! kits_shell_ui_next() ) {
 		return '';
 	}
+	$tab = aw_si_tab();
+	if ( function_exists( 'insightweb_tab_keys' ) && in_array( $tab, insightweb_tab_keys(), true ) ) {
+		return $tab; // Keywords and the other tabs (insightweb-tabs.php)
+	}
 	return array(
 		'overview' => 'dashboard',
 		'settings' => 'settings',
-	)[ aw_si_tab() ] ?? '';
+	)[ $tab ] ?? '';
 }
 
 /**
@@ -78,20 +84,14 @@ add_action(
 				'url'     => insightweb_ui_url( 'dashboard' ),
 				'current' => 'dashboard' === $screen,
 			),
-			array(
-				'slug'    => 'keywords',
-				'label'   => __( 'Keywords', 'aw-seo-extras' ),
-				'url'     => aw_si_url( 'keywords' ),
-				'current' => false,
-			),
 		);
-		// The other tabs open the current screens, as on today's tab row.
-		foreach ( aw_si_extra_tabs() as $key => $label ) {
+		// Keywords and the other tabs, each on its own address (insightweb-tabs.php).
+		foreach ( insightweb_tab_labels() as $key => $label ) {
 			$tabs[] = array(
 				'slug'    => $key,
 				'label'   => $label,
 				'url'     => aw_si_url( $key ),
-				'current' => false,
+				'current' => $key === $screen,
 			);
 		}
 		$tabs[] = array(
@@ -116,6 +116,9 @@ add_action(
 					'rest'    => INSIGHTWEB_REST,
 					'admin'   => current_user_can( 'manage_options' ),
 					'boxes'   => 'dashboard' === $screen ? insightweb_box_list() : array(), // the Overview boxes (insightweb-boxes.php)
+					'title'   => insightweb_tab_labels()[ $screen ] ?? '',
+					// The tab's own output as parts, drawn after its load hook has run (insightweb-tabs.php).
+					'parts'   => insightweb_tab_parts( $screen ),
 				),
 			)
 		);
@@ -131,9 +134,17 @@ add_action(
  */
 function insightweb_ui_page( string $tab ): bool {
 	$screen = insightweb_ui_wanted();
-	if ( '' === $screen || ! insightweb_ui_ready() || ( 'settings' === $screen ) !== ( 'settings' === $tab ) ) {
+	$want = array(
+		'overview' => 'dashboard',
+		'settings' => 'settings',
+	)[ $tab ] ?? $tab;
+	if ( '' === $screen || ! insightweb_ui_ready() || $want !== $screen ) {
 		return false;
 	}
-	kits_shell_mount( 'insightweb-app', 'settings' === $screen ? __( 'Search Insights settings', 'aw-seo-extras' ) : __( 'Search Insights', 'aw-seo-extras' ) );
+	$title = array(
+		'dashboard' => __( 'Search Insights', 'aw-seo-extras' ),
+		'settings'  => __( 'Search Insights settings', 'aw-seo-extras' ),
+	)[ $screen ] ?? ( insightweb_tab_labels()[ $screen ] ?? __( 'Search Insights', 'aw-seo-extras' ) );
+	kits_shell_mount( 'insightweb-app', $title );
 	return true;
 }

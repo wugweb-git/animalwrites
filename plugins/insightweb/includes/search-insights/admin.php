@@ -320,28 +320,9 @@ function aw_si_screen(): void {
 		echo '<a class="nav-tab' . ( $key === $tab ? ' nav-tab-active' : '' ) . '" href="' . esc_url( aw_si_url( $key ) ) . '"' . ( $key === $tab ? ' aria-current="page"' : '' ) . '>' . esc_html( $label ) . '</a>';
 	}
 	echo '</nav>';
-	aw_si_source_notices();
-	if ( isset( $_GET['updated'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- message only.
-		echo '<div class="notice notice-success inline"><p>' . esc_html__( 'Priority saved.', 'aw-seo-extras' ) . '</p></div>';
-	}
-	if ( isset( $_GET['none'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- message only.
-		echo '<div class="notice notice-warning inline"><p>' . esc_html__( 'No keyword was selected, so nothing changed.', 'aw-seo-extras' ) . '</p></div>';
-	}
-	if ( isset( $_GET['ran'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- message only.
-		echo '<div class="notice notice-success inline"><p>' . esc_html__( 'Run finished. See the notices above for each source.', 'aw-seo-extras' ) . '</p></div>';
-	}
+	aw_si_screen_notices();
 	if ( 'keywords' === $tab ) {
-		$table = new AW_SI_Keywords_Table();
-		$table->prepare_items();
-		$table->views();
-		echo '<form method="get"><input type="hidden" name="page" value="' . esc_attr( AW_SI_SLUG ) . '"><input type="hidden" name="tab" value="keywords">';
-		$view = isset( $_GET['view'] ) ? sanitize_key( wp_unslash( $_GET['view'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- navigation only.
-		if ( $view ) {
-			echo '<input type="hidden" name="view" value="' . esc_attr( $view ) . '">';
-		}
-		$table->search_box( __( 'Search keywords', 'aw-seo-extras' ), 'aw-si-kw' );
-		$table->display();
-		echo '</form>';
+		aw_si_keywords_tab();
 	} elseif ( 'settings' === $tab ) {
 		aw_si_settings_tab();
 	} elseif ( isset( aw_si_extra_tabs()[ $tab ] ) ) {
@@ -354,6 +335,35 @@ function aw_si_screen(): void {
 		echo '</div></div></div>';
 	}
 	echo '</div>';
+}
+
+/** The notices above every tab: each source's state, then the result of the last action. */
+function aw_si_screen_notices(): void {
+	aw_si_source_notices();
+	if ( isset( $_GET['updated'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- message only.
+		echo '<div class="notice notice-success inline"><p>' . esc_html__( 'Priority saved.', 'aw-seo-extras' ) . '</p></div>';
+	}
+	if ( isset( $_GET['none'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- message only.
+		echo '<div class="notice notice-warning inline"><p>' . esc_html__( 'No keyword was selected, so nothing changed.', 'aw-seo-extras' ) . '</p></div>';
+	}
+	if ( isset( $_GET['ran'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- message only.
+		echo '<div class="notice notice-success inline"><p>' . esc_html__( 'Run finished. See the notices above for each source.', 'aw-seo-extras' ) . '</p></div>';
+	}
+}
+
+/** The Keywords tab: views, search and the list (bulk and row priority overrides). */
+function aw_si_keywords_tab(): void {
+	$table = new AW_SI_Keywords_Table();
+	$table->prepare_items();
+	$table->views();
+	echo '<form method="get"><input type="hidden" name="page" value="' . esc_attr( AW_SI_SLUG ) . '"><input type="hidden" name="tab" value="keywords">';
+	$view = isset( $_GET['view'] ) ? sanitize_key( wp_unslash( $_GET['view'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- navigation only.
+	if ( $view ) {
+		echo '<input type="hidden" name="view" value="' . esc_attr( $view ) . '">';
+	}
+	$table->search_box( __( 'Search keywords', 'aw-seo-extras' ), 'aw-si-kw' );
+	$table->display();
+	echo '</form>';
 }
 
 /**

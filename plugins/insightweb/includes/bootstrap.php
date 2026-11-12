@@ -86,4 +86,5 @@ unset( $aw_si_file );
 require_once INSIGHTWEB_DIR . 'includes/insightweb-dashboard.php';
 require_once INSIGHTWEB_DIR . 'includes/insightweb-rest.php';
 require_once INSIGHTWEB_DIR . 'includes/insightweb-boxes.php'; // the Overview boxes on the new Dashboard (12 Nov 2026)
+require_once INSIGHTWEB_DIR . 'includes/insightweb-tabs.php'; // the other tabs on the new screen (12 Nov 2026)
 require_once INSIGHTWEB_DIR . 'includes/insightweb-ui.php';

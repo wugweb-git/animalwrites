@@ -1,5 +1,5 @@
 /**
- * InsightWeb's new screens (trial, &ui=next): Dashboard and Settings, drawn with the Kits admin shell (@kits/shell is
+ * InsightWeb's new screens: Dashboard, Settings, and Keywords with the other tabs (from each tab's own output), drawn with the Kits admin shell (@kits/shell is
  * window.kits.shell from Kits Core) and fed by the insightweb/v1 routes. Data and the screen come from
  * window.insightwebApp (includes/insightweb-ui.php).
  */
@@ -877,10 +877,316 @@ function Settings() {
 	);
 }
 
+/* ---------- Keywords and the other tabs ---------- */
+
+/**
+ * Open this tab's address with some query arguments changed (a view, a search, a filter, a page).
+ *
+ * @param {Object} set  Arguments to set ('' removes one).
+ * @param {Array}  drop Arguments to remove.
+ */
+function go( set, drop = [] ) {
+	const url = new URL( window.location.href );
+	drop.forEach( ( k ) => url.searchParams.delete( k ) );
+	Object.keys( set ).forEach( ( k ) =>
+		'' === set[ k ]
+			? url.searchParams.delete( k )
+			: url.searchParams.set( k, set[ k ] )
+	);
+	window.location.assign( url.toString() );
+}
+
+/**
+ * Send what the tab's own form sends (its hidden fields and nonce, plus the choice), so its own handler saves it.
+ *
+ * @param {Object} props
+ * @param {string} props.method 'get' or 'post'.
+ * @param {string} props.action The form's address ('' for this one).
+ * @param {Array}  props.pairs  [ name, value ] pairs.
+ */
+function sendForm( { method, action, pairs } ) {
+	const form = document.createElement( 'form' );
+	form.method = method;
+	form.action = action || window.location.href;
+	pairs.forEach( ( [ name, value ] ) => {
+		const input = document.createElement( 'input' );
+		input.type = 'hidden';
+		input.name = name;
+		input.value = value;
+		form.appendChild( input );
+	} );
+	document.body.appendChild( form );
+	form.submit();
+}
+
+/**
+ * A tab's list (its WP_List_Table): views, search, filters, sort, pages, bulk and row actions. Every change opens the
+ * tab's own address or sends its own form, as the current screen does.
+ *
+ * @param {Object} props
+ * @param {Object} props.part The listtable part.
+ */
+function TabList( { part } ) {
+	const current = part.views.find( ( v ) => v.current );
+	const sorted = part.columns.find( ( c ) => c.sorted );
+	const primary =
+		part.columns.find( ( c ) => c.primary ) || part.columns[ 0 ];
+	const rows = part.rows.map( ( r ) => ( {
+		...r,
+		title:
+			primary && r.cells[ primary.key ]
+				? r.cells[ primary.key ].text
+				: r.id,
+	} ) );
+	return (
+		<DataList
+			label={ app.title }
+			columns={ part.columns.map( ( c ) => ( {
+				key: c.key,
+				label: c.label,
+				sortable: !! c.sortHref,
+				primary: c.primary,
+				render: ( r ) => (
+					<Cell cell={ r.cells[ c.key ] || { text: '' } } />
+				),
+			} ) ) }
+			rows={ rows }
+			total={ part.total }
+			page={ part.page }
+			pages={ part.pages }
+			onPage={ ( n ) => go( { paged: String( n ) } ) }
+			search={ part.search ? part.search.value : undefined }
+			searchLabel={ part.search ? part.search.label : undefined }
+			onSearch={
+				part.search
+					? ( words ) =>
+							go( { [ part.search.name ]: words }, [ 'paged' ] )
+					: undefined
+			}
+			filters={ part.filters }
+			onFilter={ ( key, value ) => go( { [ key ]: value }, [ 'paged' ] ) }
+			views={ part.views }
+			view={ current ? current.value : undefined }
+			onView={ ( value ) => {
+				const v = part.views.find( ( x ) => x.value === value );
+				if ( v ) {
+					window.location.assign( v.href );
+				}
+			} }
+			sort={
+				sorted ? { key: sorted.key, dir: sorted.sorted } : undefined
+			}
+			onSort={ ( key, dir ) => {
+				const c = part.columns.find( ( x ) => x.key === key );
+				if ( c && c.sortHref ) {
+					const url = new URL( c.sortHref, window.location.href );
+					url.searchParams.set( 'order', dir );
+					window.location.assign( url.toString() );
+				}
+			} }
+			bulkActions={ part.cb ? part.bulk : [] }
+			onBulk={ ( value, ids ) =>
+				sendForm( {
+					method: part.method,
+					action: part.action,
+					pairs: [
+						...part.hidden,
+						[ 'action', value ],
+						...rows
+							.filter( ( r ) => ids.includes( r.id ) && r.pick )
+							.map( ( r ) => [ part.cb, r.pick ] ),
+					],
+				} )
+			}
+			rowActions={ ( r ) =>
+				r.actions.map( ( a ) => ( { label: a.label, href: a.href } ) )
+			}
+			emptyTitle={ part.empty || __( 'Nothing here.', 'aw-seo-extras' ) }
+		/>
+	);
+}
+
+/**
+ * An id for a tick box or choice of a tab's form.
+ *
+ * @param {string} name  The field's name.
+ * @param {string} value Its value.
+ */
+const fieldId = ( name, value ) =>
+	`iw-${ name }-${ value }`.replace( /[^A-Za-z0-9_-]/g, '-' );
+
+/**
+ * One field of a tab's form, as a plain control the form sends as it is.
+ *
+ * @param {Object} props
+ * @param {Object} props.f The field.
+ */
+function TabField( { f } ) {
+	if ( 'checkbox' === f.type ) {
+		return (
+			<p>
+				<input
+					id={ fieldId( f.name, f.value ) }
+					type="checkbox"
+					name={ f.name }
+					value={ f.value }
+					defaultChecked={ f.checked }
+				/>{ ' ' }
+				<label htmlFor={ fieldId( f.name, f.value ) }>
+					{ f.label }
+				</label>
+				{ f.help && (
+					<span className="kits-shell-field__help">{ f.help }</span>
+				) }
+			</p>
+		);
+	}
+	if ( 'radio' === f.type ) {
+		return (
+			<fieldset>
+				<legend>{ f.label }</legend>
+				{ f.options.map( ( o ) => (
+					<p key={ o.value }>
+						<input
+							id={ fieldId( f.name, o.value ) }
+							type="radio"
+							name={ f.name }
+							value={ o.value }
+							defaultChecked={ o.value === f.value }
+						/>{ ' ' }
+						<label htmlFor={ fieldId( f.name, o.value ) }>
+							{ o.label }
+						</label>
+					</p>
+				) ) }
+			</fieldset>
+		);
+	}
+	return (
+		<Field
+			label={ f.label }
+			help={ f.help }
+			render={ ( id, helpId ) => {
+				if ( 'select' === f.type ) {
+					return (
+						<select
+							id={ id }
+							name={ f.name }
+							multiple={ f.multiple }
+							defaultValue={ f.value }
+							aria-describedby={ helpId }
+						>
+							{ f.options.map( ( o ) => (
+								<option key={ o.value } value={ o.value }>
+									{ o.label }
+								</option>
+							) ) }
+						</select>
+					);
+				}
+				if ( 'textarea' === f.type ) {
+					return (
+						<textarea
+							id={ id }
+							name={ f.name }
+							rows={ f.rows }
+							defaultValue={ f.value }
+							aria-describedby={ helpId }
+						/>
+					);
+				}
+				return (
+					<input
+						id={ id }
+						type={ f.type }
+						name={ f.name }
+						defaultValue={ f.value }
+						placeholder={ f.placeholder }
+						min={ f.min }
+						max={ f.max }
+						step={ f.step }
+						required={ f.required }
+						aria-describedby={ helpId }
+					/>
+				);
+			} }
+		/>
+	);
+}
+
+/**
+ * Any other form of a tab: its words, fields and buttons, sent to the same address with the same nonce.
+ *
+ * @param {Object} props
+ * @param {Object} props.part The form part.
+ */
+function TabForm( { part } ) {
+	return (
+		<form method={ part.method } action={ part.action || undefined }>
+			{ part.hidden.map( ( [ name, value ], i ) => (
+				<input key={ i } type="hidden" name={ name } value={ value } />
+			) ) }
+			<BoxParts blocks={ part.blocks } title={ app.title } />
+			{ part.fields.map( ( f, i ) => (
+				<TabField key={ `${ f.name }-${ i }` } f={ f } />
+			) ) }
+			{ part.buttons.length > 0 && (
+				<p className="kits-shell-actions">
+					{ part.buttons.map( ( b, i ) => (
+						<button
+							key={ i }
+							type="submit"
+							name={ b.name || undefined }
+							value={ b.value }
+							className={ `kits-shell-button ${
+								b.primary ? 'is-primary' : 'is-secondary'
+							}` }
+						>
+							{ b.label }
+						</button>
+					) ) }{ ' ' }
+				</p>
+			) }
+		</form>
+	);
+}
+
+/** Keywords or another tab: its own output, part by part. */
+function TabScreen() {
+	const parts = app.parts || [];
+	return (
+		<SectionCard id={ app.screen } title={ app.title }>
+			{ 0 === parts.length && (
+				<p>
+					{ __(
+						'Nothing to show on this tab yet.',
+						'aw-seo-extras'
+					) }
+				</p>
+			) }
+			{ parts.map( ( p, i ) => {
+				if ( 'listtable' === p.type ) {
+					return <TabList key={ i } part={ p } />;
+				}
+				if ( 'form' === p.type ) {
+					return <TabForm key={ i } part={ p } />;
+				}
+				return (
+					<BoxParts key={ i } blocks={ [ p ] } title={ app.title } />
+				);
+			} ) }
+		</SectionCard>
+	);
+}
+
 function App() {
 	return (
 		<AppShell header={ <Header /> }>
-			{ 'settings' === app.screen ? <Settings /> : <Dashboard /> }
+			{ 'settings' === app.screen && <Settings /> }
+			{ 'dashboard' === app.screen && <Dashboard /> }
+			{ 'settings' !== app.screen && 'dashboard' !== app.screen && (
+				<TabScreen />
+			) }
 		</AppShell>
 	);
 }

@@ -4,6 +4,14 @@
 # shellcheck shell=bash
 screen aw-search-insights insightweb-app insightweb-admin
 screen "aw-search-insights&tab=settings" insightweb-app insightweb-admin
+# Keywords and the other tabs on the new screen, each from its own output (insightweb-tabs.php): the screen is the tab's,
+# and its parts carry no markup or script.
+for t in keywords pages checklist rising clarity links server; do
+  screen "aw-search-insights&tab=$t" insightweb-app insightweb-admin
+  want 200 "admin.php?page=aw-search-insights&tab=$t (parts)" -b /tmp/cj-ci "$H/wp-admin/admin.php?page=aw-search-insights&tab=$t"
+  if grep -q "\"screen\":\"$t\"" /tmp/rw.out && grep -o '"parts":\[.*' /tmp/rw.out | grep -q '"type":"'; then echo "ok   tab=$t: its own parts"; else echo "FAIL tab=$t: no parts for the tab"; FAIL=1; fi
+  if grep -o '"parts":\[.*' /tmp/rw.out | head -c 400000 | grep -qiE '<(script|form|input|a )|javascript:'; then echo "FAIL tab=$t: markup in its parts"; FAIL=1; else echo "ok   tab=$t: parts are text and links only"; fi
+done
 for r in dashboard settings services "dashboard/box&key=priorities"; do
   route "insightweb/v1/$r"
 done

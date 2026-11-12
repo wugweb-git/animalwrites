@@ -120,10 +120,14 @@ function insightweb_html_blocks( string $html ): array {
  * Walk a node's children into parts. Forms, inputs and scripts are left out (the box's controls stay on the classic
  * Overview); a details element is walked as its content.
  *
- * @param DOMNode $node Node.
- * @param array   $out  Parts so far.
+ * With $forms (the tabs, insightweb-tabs.php), a form becomes a listtable or form part, a list's views a views part,
+ * and a list table outside a form a listtable part.
+ *
+ * @param DOMNode $node  Node.
+ * @param array   $out   Parts so far.
+ * @param bool    $forms Keep forms and list tables as parts.
  */
-function insightweb_blocks_walk( DOMNode $node, array &$out ): void {
+function insightweb_blocks_walk( DOMNode $node, array &$out, bool $forms = false ): void {
 	$text  = '';
 	$flush = function () use ( &$text, &$out ) {
 		$t = trim( preg_replace( '/\s+/u', ' ', $text ) );
@@ -144,7 +148,28 @@ function insightweb_blocks_walk( DOMNode $node, array &$out ): void {
 			continue;
 		}
 		$tag   = strtolower( $c->nodeName );
-		$class = ' ' . $c->getAttribute( 'class' ) . ' ';
+		$class = ' ' . preg_replace( '/\s+/', ' ', $c->getAttribute( 'class' ) ) . ' ';
+		if ( $forms ) {
+			if ( 'form' === $tag ) {
+				$flush();
+				$list  = array_values( array_filter( insightweb_find( $c, 'table' ), fn( $t ) => insightweb_has_class( $t, 'wp-list-table' ) ) );
+				$out[] = $list ? insightweb_listtable_block( $list[0], $c ) : insightweb_form_block( $c );
+				continue;
+			}
+			if ( 'table' === $tag && false !== strpos( $class, ' wp-list-table ' ) ) {
+				$flush();
+				$out[] = insightweb_listtable_block( $c, null );
+				continue;
+			}
+			if ( 'ul' === $tag && false !== strpos( $class, ' subsubsub ' ) ) {
+				$flush();
+				$out[] = insightweb_views_block( $c );
+				continue;
+			}
+			if ( ( 'div' === $tag && false !== strpos( $class, ' tablenav ' ) ) || ( 'p' === $tag && false !== strpos( $class, ' search-box ' ) ) ) {
+				continue; // read with the list table
+			}
+		}
 		if ( in_array( $tag, array( 'script', 'style', 'form', 'input', 'button', 'select', 'textarea', 'noscript' ), true ) ) {
 			continue;
 		}
@@ -191,7 +216,7 @@ function insightweb_blocks_walk( DOMNode $node, array &$out ): void {
 				);
 			}
 		} else {
-			insightweb_blocks_walk( $c, $out ); // div, details, section …
+			insightweb_blocks_walk( $c, $out, $forms ); // div, details, section …
 		}
 	}
 	$flush();
