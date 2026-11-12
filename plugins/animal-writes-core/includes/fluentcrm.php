@@ -279,6 +279,14 @@ function aw_crm_contact_for( $email, $name, $tags, $source ) {
 	if ( ! aw_crm_on() || ! is_email( $email ) || aw_crm_blocked( $email ) || str_ends_with( $email, '@animalwrites.in' ) || preg_match( '/^(mailer-daemon|postmaster|no-?reply)@/i', $email ) ) {
 		return null;
 	}
+	if ( function_exists( 'mailweb_crm_upsert' ) ) {
+		$c = mailweb_crm_upsert( $email, $name, $source ); // MailWeb's copy of the step below (one place to change)
+		if ( $c && $tags ) {
+			$c->attachTags( aw_crm_tag_ids( $tags ) );
+		}
+		return $c;
+	}
+	// Without MailWeb: the same step here, so Core works on its own.
 	$c = FluentCrmApi( 'contacts' )->getContact( $email );
 	if ( ! $c ) {
 		$data  = array( 'email' => $email, 'status' => 'transactional', 'source' => $source );

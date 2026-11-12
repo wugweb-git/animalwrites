@@ -49,17 +49,7 @@ function mailweb_crm_on() {
  * @return object|null
  */
 function mailweb_crm_contact_for( $email, $name ) {
-	$c = FluentCrmApi( 'contacts' )->getContact( $email );
-	if ( ! $c ) {
-		$data  = array( 'email' => $email, 'status' => 'transactional', 'source' => 'mailweb' );
-		$name  = false !== strpos( (string) $name, '@' ) ? '' : trim( (string) $name, " \t\"'" );
-		$parts = preg_split( '/\s+/', $name, 2 );
-		if ( '' !== ( $parts[0] ?? '' ) ) {
-			$data['first_name'] = $parts[0];
-			$data['last_name']  = $parts[1] ?? '';
-		}
-		$c = FluentCrmApi( 'contacts' )->createOrUpdate( $data );
-	}
+	$c     = mailweb_crm_upsert( $email, $name, 'mailweb' );
 	$title = trim( (string) mailweb_crm_settings()['tag'] );
 	if ( $c && '' !== $title ) {
 		$tags = FluentCrmApi( 'tags' )->getInstance();
@@ -70,6 +60,30 @@ function mailweb_crm_contact_for( $email, $name ) {
 		if ( $tag ) {
 			$c->attachTags( array( (int) $tag->id ) );
 		}
+	}
+	return $c ? $c : null;
+}
+
+/**
+ * A FluentCRM contact by email: found, or made as "transactional" (no list, no marketing) with the name split into
+ * first and last. The one copy of this step; Animal Writes Core's aw_crm_contact_for() calls it when MailWeb is active.
+ *
+ * @param string $email  Address.
+ * @param string $name   Display name ('' or an address: no name).
+ * @param string $source Where the contact came from (FluentCRM's source field), for a new contact.
+ * @return object|null
+ */
+function mailweb_crm_upsert( $email, $name, $source ) {
+	$c = FluentCrmApi( 'contacts' )->getContact( $email );
+	if ( ! $c ) {
+		$data  = array( 'email' => $email, 'status' => 'transactional', 'source' => $source );
+		$name  = false !== strpos( (string) $name, '@' ) ? '' : trim( (string) $name, " \t\"'" );
+		$parts = preg_split( '/\s+/', $name, 2 );
+		if ( '' !== ( $parts[0] ?? '' ) ) {
+			$data['first_name'] = $parts[0];
+			$data['last_name']  = $parts[1] ?? '';
+		}
+		$c = FluentCrmApi( 'contacts' )->createOrUpdate( $data );
 	}
 	return $c ? $c : null;
 }
