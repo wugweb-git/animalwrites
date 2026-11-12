@@ -142,7 +142,7 @@ function aw_district_helplines_row() {
 	/* translators: %s: district. */
 	$label = sprintf( __( 'Animal helpline numbers in %s', 'animal-writes-core' ), $d->name );
 	return '<nav class="kit-tags aw-dh-row" aria-label="' . esc_attr( $label ) . '"><span class="aw-dh-row-label">' . esc_html__( 'Helplines', 'animal-writes-core' ) . '</span>'
-		. $chips . '<a class="aw-dh-row-all" href="#helplines">' . esc_html__( 'All numbers', 'animal-writes-core' ) . '</a></nav>';
+		. $chips . '<a class="aw-dh-row-all" href="#district-helplines">' . esc_html__( 'All numbers', 'animal-writes-core' ) . '</a></nav>';
 }
 
 /** The block for a district place, or ''. */
@@ -169,7 +169,7 @@ function aw_district_helplines_html( $d ) {
 	aw_use_component_style( 'aw-directory' ); // aw-district-helplines, aw-helpline
 	$id = 'aw-dh-' . wp_unique_id();
 	/* translators: %s: district. */
-	return '<section class="aw-district-helplines" id="helplines" aria-labelledby="' . esc_attr( $id ) . '"><h2 id="' . esc_attr( $id ) . '">' . esc_html( sprintf( __( 'Animal helpline numbers in %s', 'animal-writes-core' ), $d->name ) ) . '</h2>'
+	return '<section class="aw-district-helplines" id="district-helplines" aria-labelledby="' . esc_attr( $id ) . '"><h2 id="' . esc_attr( $id ) . '">' . esc_html( sprintf( __( 'Animal helpline numbers in %s', 'animal-writes-core' ), $d->name ) ) . '</h2>'
 		. '<div class="aw-helplines">' . $cards . $own . '</div>'
 		. '<p class="aw-emergency">' . esc_html__( 'An animal in danger right now: call 112 first.', 'animal-writes-core' ) . '</p></section>';
 }
