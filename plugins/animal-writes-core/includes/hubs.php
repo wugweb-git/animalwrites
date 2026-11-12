@@ -702,3 +702,18 @@ add_filter(
 		return $types;
 	}
 );
+
+/*
+ * A hub's filter bar uses the kits/dropdown store (kits-core primitives.php). kits_dd_render() queues its module while
+ * the band renders, but on live (WordPress 7.1, block theme) that queue was never printed: the dropdowns showed and did
+ * nothing (12 Nov 2026). Hub pages queue the module before the page renders, so it prints in the head with the import
+ * map.
+ */
+add_action(
+	'wp_enqueue_scripts',
+	function () {
+		if ( aw_hub_type() && function_exists( 'kits_dd_render' ) ) {
+			wp_enqueue_script_module( 'kits-dropdown' );
+		}
+	}
+);
