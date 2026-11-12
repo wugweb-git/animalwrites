@@ -86,6 +86,8 @@ on `@wordpress/components`): **merge** to one screen per product once the shell 
 `aw_category_card`, `aw_pinned`, `aw_short_name`, `aw_campaign_short`; post meta `aw_campaign_metrics`, `aw_legal_dated`.
 Proposal: **add** each to its owner's Settings section or edit box.
 
+**Done 12 Nov:** `aw_ff_send_email`, `aw_nl_ff_form_full`, `aw_sample_listing_ids` on Animal Writes › Modules › Forms and sample listings (`site-options.php`). Next: RankWeb (`aw_default_share_image`, `aw_seo_keep_listings`), SourceWeb (`aw_backfill_floor`), the two Core lists (`aw_district_helplines`, `aw_issuer_short`), `kits_ga4_via_gtm` read-only, then the term and post meta.
+
 ## 7. Plugin list vs docs
 
 Create Block Theme is active (docs: inactive). Link Whisper Free is inactive (docs and edit-screens map still list its

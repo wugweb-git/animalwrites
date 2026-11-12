@@ -1,7 +1,7 @@
 <?php
 /**
  * Social posts (owner's plan, 1 Nov 2026; go 2 Nov 2026): other people's public posts about a campaign or an item
- * (activists' posts, reels, videos), kept as records a person reviews. Type aw_social, listed under News.
+ * (activists' posts, reels, videos), kept as records a person reviews. Type aw_social, listed under Animal Writes.
  *
  * Switches (Kits → Modules, both off by default):
  * - aw_social_on: the type, its box, its intake (paste a link in Sourcing → To review, `wp aw social-import`, the
@@ -59,7 +59,7 @@ function aw_social_show(): bool {
 	return aw_social_on() && '1' === (string) get_option( 'aw_social_show', '' );
 }
 
-/* ---------- Kits → Modules ---------- */
+/* ---------- Animal Writes → Modules ---------- */
 
 add_action(
 	'admin_init',
@@ -68,7 +68,7 @@ add_action(
 		register_setting( 'aw_modules', 'aw_social_on', $flag );
 		register_setting( 'aw_modules', 'aw_social_show', $flag );
 		add_settings_section( 'aw_modules_social', 'Social posts', 'aw_social_settings_intro', 'aw-modules' );
-		add_settings_field( 'aw_social_on', 'Social posts type', 'aw_social_settings_field', 'aw-modules', 'aw_modules_social', array( 'label_for' => 'aw_social_on', 'note' => 'The Social posts list under News, its intake (paste a link in Plugins → SourceWeb → To review, the CSV import, the workers\' routes) and the hashtag box on each campaign. Off: hidden; saved records are kept.' ) );
+		add_settings_field( 'aw_social_on', 'Social posts type', 'aw_social_settings_field', 'aw-modules', 'aw_modules_social', array( 'label_for' => 'aw_social_on', 'note' => 'The Social posts list (Animal Writes → Social posts), its intake (paste a link in SourceWeb → To review, the CSV import, the workers\' routes) and the hashtag box on each campaign. Off: hidden; saved records are kept.' ) );
 		add_settings_field( 'aw_social_show', 'Show on pages', 'aw_social_settings_field', 'aw-modules', 'aw_modules_social', array( 'label_for' => 'aw_social_show', 'note' => 'Approved social posts as "What people are saying" on the campaign, News, Library and Directory pages they are linked to. Needs the type on.' ) );
 	}
 );
@@ -81,7 +81,7 @@ add_action(
 
 /** Section text. */
 function aw_social_settings_intro() {
-	echo '<p>' . esc_html( 'Other people\'s public posts about a campaign or an item. Every record waits in Plugins → SourceWeb → To review; nothing is published on its own.' ) . '</p>';
+	echo '<p>' . esc_html( 'Other people\'s public posts about a campaign or an item. Every record waits in SourceWeb → To review; nothing is published on its own.' ) . '</p>';
 }
 
 /**

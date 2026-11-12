@@ -119,7 +119,8 @@ require_once AW_CORE_DIR . 'includes/listing-template.php';
 require_once AW_CORE_DIR . 'includes/pages.php';
 require_once AW_CORE_DIR . 'includes/not-found.php';
 require_once AW_CORE_DIR . 'includes/press.php';
-require_once AW_CORE_DIR . 'includes/social-posts.php'; // Social posts (aw_social, under News): off by default, Kits → Modules (owner, 2 Nov 2026)
+require_once AW_CORE_DIR . 'includes/social-posts.php'; // Social posts (aw_social, Animal Writes → Social posts): off by default, Animal Writes → Modules (owner, 2 Nov 2026)
+require_once AW_CORE_DIR . 'includes/site-options.php'; // Animal Writes → Modules → Forms and sample listings (12 Nov 2026)
 require_once AW_CORE_DIR . 'includes/block-states.php';
 require_once AW_CORE_DIR . 'includes/listing-profile.php';
 require_once AW_CORE_DIR . 'includes/map-picker.php';
