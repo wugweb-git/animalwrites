@@ -15,7 +15,7 @@
  *   The home page is asked with a query string, so the CDN's cached copy is not the one checked.
  * - Stored in option aw_si_srv_checks (Ymd => speed, ai), every day kept.
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -198,12 +198,12 @@ add_action(
 /** Item labels. */
 function aw_si_chk_labels(): array {
 	return array(
-		'content_signal' => __( 'robots.txt has a Content-Signal line', 'aw-seo-extras' ),
-		'ai_allowed'     => __( 'robots.txt lets the AI crawlers in', 'aw-seo-extras' ),
-		'markdown'       => __( 'Markdown answered for Accept: text/markdown', 'aw-seo-extras' ),
-		'webmcp'         => __( 'WebMCP tools on the home page', 'aw-seo-extras' ),
-		'organization'   => __( 'Organization JSON-LD valid', 'aw-seo-extras' ),
-		'llms'           => __( 'llms.txt present', 'aw-seo-extras' ),
+		'content_signal' => __( 'robots.txt has a Content-Signal line', 'insightweb' ),
+		'ai_allowed'     => __( 'robots.txt lets the AI crawlers in', 'insightweb' ),
+		'markdown'       => __( 'Markdown answered for Accept: text/markdown', 'insightweb' ),
+		'webmcp'         => __( 'WebMCP tools on the home page', 'insightweb' ),
+		'organization'   => __( 'Organization JSON-LD valid', 'insightweb' ),
+		'llms'           => __( 'llms.txt present', 'insightweb' ),
 	);
 }
 
@@ -212,13 +212,13 @@ function aw_si_chk_section(): void {
 	$all = get_option( 'aw_si_srv_checks', array() );
 	$all = is_array( $all ) ? $all : array();
 	krsort( $all );
-	echo '<h2>' . esc_html__( 'Speed and AI visibility', 'aw-seo-extras' ) . '</h2>';
-	echo '<p class="description">' . esc_html__( 'Checked every morning: PageSpeed performance of the home page, and the site asking itself for the AI visibility items.', 'aw-seo-extras' ) . '</p>';
+	echo '<h2>' . esc_html__( 'Speed and AI visibility', 'insightweb' ) . '</h2>';
+	echo '<p class="description">' . esc_html__( 'Checked every morning: PageSpeed performance of the home page, and the site asking itself for the AI visibility items.', 'insightweb' ) . '</p>';
 	if ( ! $all ) {
-		echo '<p>' . esc_html__( 'The first check runs tomorrow morning.', 'aw-seo-extras' ) . '</p>';
+		echo '<p>' . esc_html__( 'The first check runs tomorrow morning.', 'insightweb' ) . '</p>';
 		return;
 	}
-	echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Day', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Speed, mobile', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Speed, desktop', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'AI visibility', 'aw-seo-extras' ) . '</th></tr></thead><tbody>';
+	echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Day', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'Speed, mobile', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'Speed, desktop', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'AI visibility', 'insightweb' ) . '</th></tr></thead><tbody>';
 	$cell = fn( $v ) => null === $v || '' === $v ? '—' : number_format_i18n( (int) $v );
 	foreach ( array_slice( $all, 0, 7, true ) as $ymd => $d ) {
 		$t = strtotime( (string) $ymd );
@@ -237,7 +237,7 @@ function aw_si_chk_section(): void {
 		foreach ( aw_si_chk_labels() as $k => $label ) {
 			$pass = ! empty( $last['items'][ $k ] );
 			$more = 'ai_allowed' === $k && ! empty( $last['blocked'] ) ? ' (' . implode( ', ', (array) $last['blocked'] ) . ')' : '';
-			echo '<li>' . esc_html( ( $pass ? __( 'Pass', 'aw-seo-extras' ) : __( 'Fail', 'aw-seo-extras' ) ) . ': ' . $label . $more ) . '</li>';
+			echo '<li>' . esc_html( ( $pass ? __( 'Pass', 'insightweb' ) : __( 'Fail', 'insightweb' ) ) . ': ' . $label . $more ) . '</li>';
 		}
 		echo '</ul>';
 	}

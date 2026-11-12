@@ -3,7 +3,7 @@
  * Clarity tab list table: one row per page over 28 days (aw_si_clarity_pages() in clarity.php), with views, search,
  * sorting and pagination. Read only.
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -67,18 +67,18 @@ class AW_SI_Clarity_Table extends WP_List_Table {
 	/** Columns. */
 	public function get_columns() {
 		return array(
-			'page'      => __( 'Page', 'aw-seo-extras' ),
-			'sessions'  => __( 'Sessions', 'aw-seo-extras' ),
-			'pps'       => __( 'Pages per session', 'aw-seo-extras' ),
-			'scroll'    => __( 'Scroll depth', 'aw-seo-extras' ),
-			'active'    => __( 'Active time', 'aw-seo-extras' ),
-			'dead'      => __( 'Dead clicks', 'aw-seo-extras' ),
-			'rage'      => __( 'Rage clicks', 'aw-seo-extras' ),
-			'quickback' => __( 'Quick backs', 'aw-seo-extras' ),
-			'xscroll'   => __( 'Excessive scrolling', 'aw-seo-extras' ),
-			'jserror'   => __( 'Script errors', 'aw-seo-extras' ),
-			'devices'   => __( 'Mobile / PC / Tablet', 'aw-seo-extras' ),
-			'flag'      => __( 'Flag', 'aw-seo-extras' ),
+			'page'      => __( 'Page', 'insightweb' ),
+			'sessions'  => __( 'Sessions', 'insightweb' ),
+			'pps'       => __( 'Pages per session', 'insightweb' ),
+			'scroll'    => __( 'Scroll depth', 'insightweb' ),
+			'active'    => __( 'Active time', 'insightweb' ),
+			'dead'      => __( 'Dead clicks', 'insightweb' ),
+			'rage'      => __( 'Rage clicks', 'insightweb' ),
+			'quickback' => __( 'Quick backs', 'insightweb' ),
+			'xscroll'   => __( 'Excessive scrolling', 'insightweb' ),
+			'jserror'   => __( 'Script errors', 'insightweb' ),
+			'devices'   => __( 'Mobile / PC / Tablet', 'insightweb' ),
+			'flag'      => __( 'Flag', 'insightweb' ),
 		);
 	}
 
@@ -115,8 +115,8 @@ class AW_SI_Clarity_Table extends WP_List_Table {
 	/** Views with their counts. */
 	protected function get_views() {
 		$labels  = array(
-			'all'     => __( 'All', 'aw-seo-extras' ),
-			'flagged' => __( 'Flagged', 'aw-seo-extras' ),
+			'all'     => __( 'All', 'insightweb' ),
+			'flagged' => __( 'Flagged', 'insightweb' ),
 		);
 		$current = $this->arg( 'view' ) ? $this->arg( 'view' ) : 'all';
 		$out     = array();
@@ -199,10 +199,10 @@ class AW_SI_Clarity_Table extends WP_List_Table {
 		}
 		if ( ! empty( $item['flagged'] ) ) {
 			/* translators: %s: number of days. */
-			return '<span class="dashicons dashicons-flag" aria-hidden="true"></span> ' . esc_html( sprintf( _n( 'Flagged (%s day)', 'Flagged (%s days)', $days, 'aw-seo-extras' ), number_format_i18n( $days ) ) );
+			return '<span class="dashicons dashicons-flag" aria-hidden="true"></span> ' . esc_html( sprintf( _n( 'Flagged (%s day)', 'Flagged (%s days)', $days, 'insightweb' ), number_format_i18n( $days ) ) );
 		}
 		/* translators: %s: number of days. */
-		return esc_html( sprintf( _n( '%s day', '%s days', $days, 'aw-seo-extras' ), number_format_i18n( $days ) ) );
+		return esc_html( sprintf( _n( '%s day', '%s days', $days, 'insightweb' ), number_format_i18n( $days ) ) );
 	}
 
 	/**

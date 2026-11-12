@@ -3,7 +3,7 @@
  * Phase 2 sources (plan §5.1, §5.2, §5.5): their entries in the run log and Site Health, their schedule (IST), how the
  * rollup keeps their monthly values, and the redirect map that counts an old address as the page it redirects to.
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -14,16 +14,16 @@ add_filter(
 	'aw_si_sources',
 	function ( $s ) {
 		$s['ga4'] = array(
-			'label' => __( 'GA4 (Site Kit)', 'aw-seo-extras' ),
+			'label' => __( 'GA4 (Site Kit)', 'insightweb' ),
 			'every' => DAY_IN_SECONDS,
 		);
 		$s['psi'] = array(
-			'label' => __( 'PageSpeed (Site Kit)', 'aw-seo-extras' ),
+			'label' => __( 'PageSpeed (Site Kit)', 'insightweb' ),
 			'every' => WEEK_IN_SECONDS,
 		);
 		if ( aw_si_clarity_on() ) { // Listed only once the owner has added the token, so it never shows as late before.
 			$s['clarity'] = array(
-				'label' => __( 'Clarity', 'aw-seo-extras' ),
+				'label' => __( 'Clarity', 'insightweb' ),
 				'every' => DAY_IN_SECONDS,
 			);
 		}

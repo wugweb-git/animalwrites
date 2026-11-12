@@ -9,7 +9,7 @@
  * The shell's PageParts sends every change as the same link or form request the current tab sends, so nothing is
  * saved in a new way.
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -23,7 +23,7 @@ function insightweb_tab_keys(): array {
 
 /** Each tab's label: key => label. */
 function insightweb_tab_labels(): array {
-	return array( 'keywords' => __( 'Keywords', 'aw-seo-extras' ) ) + aw_si_extra_tabs();
+	return array( 'keywords' => __( 'Keywords', 'insightweb' ) ) + aw_si_extra_tabs();
 }
 
 /**

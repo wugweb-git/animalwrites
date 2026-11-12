@@ -3,7 +3,7 @@
  * Pages tab list table: views, search, sorting, pagination and a "Clarity note" row action. Read only, except the
  * note form it opens.
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -57,20 +57,20 @@ class AW_SI_Pages_Table extends WP_List_Table {
 	/** Columns. */
 	public function get_columns() {
 		return array(
-			'path'     => __( 'Page', 'aw-seo-extras' ),
-			'impr'     => __( 'Impressions (28 days)', 'aw-seo-extras' ),
-			'clicks'   => __( 'Clicks', 'aw-seo-extras' ),
-			'pos'      => __( 'Position', 'aw-seo-extras' ),
-			'keywords' => __( 'Keywords owned', 'aw-seo-extras' ),
-			'organic'  => __( 'Organic sessions (GA4)', 'aw-seo-extras' ),
-			'ai'       => __( 'AI referrals', 'aw-seo-extras' ),
-			'ref'      => __( 'Referrals (GA4)', 'aw-seo-extras' ),
-			'clarity'  => __( 'Clarity (28 days)', 'aw-seo-extras' ),
-			'psi'      => __( 'PageSpeed (mobile / desktop)', 'aw-seo-extras' ),
-			'bing'     => __( 'Bing (90 days)', 'aw-seo-extras' ),
-			'index'    => __( 'Google index', 'aw-seo-extras' ),
-			'rm_score' => __( 'SEO score (Rank Math)', 'aw-seo-extras' ),
-			'note'     => __( 'Clarity note', 'aw-seo-extras' ),
+			'path'     => __( 'Page', 'insightweb' ),
+			'impr'     => __( 'Impressions (28 days)', 'insightweb' ),
+			'clicks'   => __( 'Clicks', 'insightweb' ),
+			'pos'      => __( 'Position', 'insightweb' ),
+			'keywords' => __( 'Keywords owned', 'insightweb' ),
+			'organic'  => __( 'Organic sessions (GA4)', 'insightweb' ),
+			'ai'       => __( 'AI referrals', 'insightweb' ),
+			'ref'      => __( 'Referrals (GA4)', 'insightweb' ),
+			'clarity'  => __( 'Clarity (28 days)', 'insightweb' ),
+			'psi'      => __( 'PageSpeed (mobile / desktop)', 'insightweb' ),
+			'bing'     => __( 'Bing (90 days)', 'insightweb' ),
+			'index'    => __( 'Google index', 'insightweb' ),
+			'rm_score' => __( 'SEO score (Rank Math)', 'insightweb' ),
+			'note'     => __( 'Clarity note', 'insightweb' ),
 		);
 	}
 
@@ -115,15 +115,15 @@ class AW_SI_Pages_Table extends WP_List_Table {
 	/** Views with their counts. */
 	protected function get_views() {
 		$labels  = array(
-			'all'       => __( 'All', 'aw-seo-extras' ),
-			'flagged'   => __( 'Page quality flagged', 'aw-seo-extras' ),
-			'ai'        => __( 'AI referrals', 'aw-seo-extras' ),
-			'ref'       => __( 'With referrals', 'aw-seo-extras' ),
-			'conflicts' => __( 'With conflicts', 'aw-seo-extras' ),
-			'noted'     => __( 'With Clarity notes', 'aw-seo-extras' ),
+			'all'       => __( 'All', 'insightweb' ),
+			'flagged'   => __( 'Page quality flagged', 'insightweb' ),
+			'ai'        => __( 'AI referrals', 'insightweb' ),
+			'ref'       => __( 'With referrals', 'insightweb' ),
+			'conflicts' => __( 'With conflicts', 'insightweb' ),
+			'noted'     => __( 'With Clarity notes', 'insightweb' ),
 			/* translators: %d: score limit, e.g. 50. */
-			'lowseo'    => sprintf( __( 'Rank Math score under %d', 'aw-seo-extras' ), AW_SI_RM_LOW ),
-			'unindexed' => __( 'Not indexed (URL Inspection)', 'aw-seo-extras' ),
+			'lowseo'    => sprintf( __( 'Rank Math score under %d', 'insightweb' ), AW_SI_RM_LOW ),
+			'unindexed' => __( 'Not indexed (URL Inspection)', 'insightweb' ),
 		);
 		$current = $this->arg( 'view' ) ? $this->arg( 'view' ) : 'all';
 		$out     = array();
@@ -173,7 +173,7 @@ class AW_SI_Pages_Table extends WP_List_Table {
 
 	/** Message for an empty list. */
 	public function no_items() {
-		esc_html_e( 'No pages yet: they appear after the daily runs of Search Console, GA4, Clarity and PageSpeed.', 'aw-seo-extras' );
+		esc_html_e( 'No pages yet: they appear after the daily runs of Search Console, GA4, Clarity and PageSpeed.', 'insightweb' );
 	}
 
 	/**
@@ -186,16 +186,16 @@ class AW_SI_Pages_Table extends WP_List_Table {
 		if ( ! empty( $item['flagged'] ) ) {
 			$why = array();
 			if ( ! empty( $item['c_flag'] ) ) {
-				$why[] = __( 'Clarity', 'aw-seo-extras' );
+				$why[] = __( 'Clarity', 'insightweb' );
 			}
 			if ( ! empty( $item['psi_flag'] ) ) {
-				$why[] = __( 'PageSpeed', 'aw-seo-extras' );
+				$why[] = __( 'PageSpeed', 'insightweb' );
 			}
 			/* translators: %s: Clarity and/or PageSpeed. */
-			$out .= ' — <span class="post-state"><span class="dashicons dashicons-flag" aria-hidden="true"></span> ' . esc_html( sprintf( __( 'Page quality (%s)', 'aw-seo-extras' ), implode( ', ', $why ) ) ) . '</span>';
+			$out .= ' — <span class="post-state"><span class="dashicons dashicons-flag" aria-hidden="true"></span> ' . esc_html( sprintf( __( 'Page quality (%s)', 'insightweb' ), implode( ', ', $why ) ) ) . '</span>';
 		}
 		$actions = array(
-			'note' => '<a href="' . esc_url( add_query_arg( 'note', rawurlencode( $item['path'] ), aw_si_url( 'pages' ) ) ) . '">' . esc_html__( 'Add Clarity note', 'aw-seo-extras' ) . '</a>',
+			'note' => '<a href="' . esc_url( add_query_arg( 'note', rawurlencode( $item['path'] ), aw_si_url( 'pages' ) ) ) . '">' . esc_html__( 'Add Clarity note', 'insightweb' ) . '</a>',
 		);
 		return $out . $this->row_actions( $actions );
 	}
@@ -212,7 +212,7 @@ class AW_SI_Pages_Table extends WP_List_Table {
 		$out = esc_html( number_format_i18n( (int) $item['keywords'] ) );
 		if ( ! empty( $item['conflicts'] ) ) {
 			/* translators: %s: number of conflicts. */
-			$out .= '<br><span class="description">' . esc_html( sprintf( _n( '%s conflict', '%s conflicts', (int) $item['conflicts'], 'aw-seo-extras' ), number_format_i18n( (int) $item['conflicts'] ) ) ) . '</span>';
+			$out .= '<br><span class="description">' . esc_html( sprintf( _n( '%s conflict', '%s conflicts', (int) $item['conflicts'], 'insightweb' ), number_format_i18n( (int) $item['conflicts'] ) ) ) . '</span>';
 		}
 		return $out;
 	}
@@ -251,16 +251,16 @@ class AW_SI_Pages_Table extends WP_List_Table {
 			return '–';
 		}
 		/* translators: %s: sessions. */
-		$parts = array( sprintf( __( '%s sessions', 'aw-seo-extras' ), number_format_i18n( (int) $item['c_sessions'] ) ) );
+		$parts = array( sprintf( __( '%s sessions', 'insightweb' ), number_format_i18n( (int) $item['c_sessions'] ) ) );
 		foreach ( array(
-			'c_rage'      => __( 'rage', 'aw-seo-extras' ),
-			'c_dead'      => __( 'dead', 'aw-seo-extras' ),
-			'c_quickback' => __( 'quick-back', 'aw-seo-extras' ),
-			'c_scroll'    => __( 'scroll', 'aw-seo-extras' ),
+			'c_rage'      => __( 'rage', 'insightweb' ),
+			'c_dead'      => __( 'dead', 'insightweb' ),
+			'c_quickback' => __( 'quick-back', 'insightweb' ),
+			'c_scroll'    => __( 'scroll', 'insightweb' ),
 		) as $k => $label ) {
 			if ( isset( $item[ $k ] ) ) {
 				/* translators: 1: rage, dead, quick-back or scroll; 2: share of sessions in per cent. */
-				$parts[] = sprintf( __( '%1$s %2$s%%', 'aw-seo-extras' ), $label, number_format_i18n( (float) $item[ $k ], 1 ) );
+				$parts[] = sprintf( __( '%1$s %2$s%%', 'insightweb' ), $label, number_format_i18n( (float) $item[ $k ], 1 ) );
 			}
 		}
 		return esc_html( array_shift( $parts ) ) . ( $parts ? '<br><span class="description">' . esc_html( implode( ' · ', $parts ) ) . '</span>' : '' );
@@ -280,33 +280,33 @@ class AW_SI_Pages_Table extends WP_List_Table {
 		$lab = array();
 		if ( isset( $item['psi_lcp-mobile'] ) ) {
 			/* translators: %s: seconds. */
-			$lab[] = sprintf( __( 'LCP %s s', 'aw-seo-extras' ), number_format_i18n( (float) $item['psi_lcp-mobile'] / 1000, 1 ) );
+			$lab[] = sprintf( __( 'LCP %s s', 'insightweb' ), number_format_i18n( (float) $item['psi_lcp-mobile'] / 1000, 1 ) );
 		}
 		if ( isset( $item['psi_cls-mobile'] ) ) {
 			/* translators: %s: layout shift score. */
-			$lab[] = sprintf( __( 'CLS %s', 'aw-seo-extras' ), number_format_i18n( (float) $item['psi_cls-mobile'], 2 ) );
+			$lab[] = sprintf( __( 'CLS %s', 'insightweb' ), number_format_i18n( (float) $item['psi_cls-mobile'], 2 ) );
 		}
 		$field = array();
 		if ( isset( $item['psi_field-lcp-mobile'] ) ) {
 			/* translators: %s: seconds. */
-			$field[] = sprintf( __( 'LCP %s s', 'aw-seo-extras' ), number_format_i18n( (float) $item['psi_field-lcp-mobile'] / 1000, 1 ) );
+			$field[] = sprintf( __( 'LCP %s s', 'insightweb' ), number_format_i18n( (float) $item['psi_field-lcp-mobile'] / 1000, 1 ) );
 		}
 		if ( isset( $item['psi_field-inp-mobile'] ) ) {
 			/* translators: %s: milliseconds. */
-			$field[] = sprintf( __( 'INP %s ms', 'aw-seo-extras' ), number_format_i18n( (float) $item['psi_field-inp-mobile'] ) );
+			$field[] = sprintf( __( 'INP %s ms', 'insightweb' ), number_format_i18n( (float) $item['psi_field-inp-mobile'] ) );
 		}
 		if ( isset( $item['psi_field-cls-mobile'] ) ) {
 			/* translators: %s: layout shift score. */
-			$field[] = sprintf( __( 'CLS %s', 'aw-seo-extras' ), number_format_i18n( (float) $item['psi_field-cls-mobile'], 2 ) );
+			$field[] = sprintf( __( 'CLS %s', 'insightweb' ), number_format_i18n( (float) $item['psi_field-cls-mobile'], 2 ) );
 		}
 		$out = esc_html( $m . ' / ' . $d );
 		if ( $lab ) {
 			/* translators: %s: lab figures. */
-			$out .= '<br><span class="description">' . esc_html( sprintf( __( 'Mobile test: %s', 'aw-seo-extras' ), implode( ', ', $lab ) ) ) . '</span>';
+			$out .= '<br><span class="description">' . esc_html( sprintf( __( 'Mobile test: %s', 'insightweb' ), implode( ', ', $lab ) ) ) . '</span>';
 		}
 		if ( $field ) {
 			/* translators: %s: real-user figures. */
-			$out .= '<br><span class="description">' . esc_html( sprintf( __( 'Chrome users, mobile: %s', 'aw-seo-extras' ), implode( ', ', $field ) ) ) . '</span>';
+			$out .= '<br><span class="description">' . esc_html( sprintf( __( 'Chrome users, mobile: %s', 'insightweb' ), implode( ', ', $field ) ) ) . '</span>';
 		}
 		return $out . ( ! empty( $item['psi_d'] ) ? '<br><span class="description">' . esc_html( mysql2date( 'j M', $item['psi_d'] ) ) . '</span>' : '' );
 	}
@@ -321,7 +321,7 @@ class AW_SI_Pages_Table extends WP_List_Table {
 			return '–';
 		}
 		/* translators: 1: impressions, 2: clicks. */
-		return esc_html( sprintf( __( '%1$s impressions, %2$s clicks', 'aw-seo-extras' ), number_format_i18n( (int) $item['bing_impr'] ), number_format_i18n( (int) ( $item['bing_clicks'] ?? 0 ) ) ) );
+		return esc_html( sprintf( __( '%1$s impressions, %2$s clicks', 'insightweb' ), number_format_i18n( (int) $item['bing_impr'] ), number_format_i18n( (int) ( $item['bing_clicks'] ?? 0 ) ) ) );
 	}
 
 	/**
@@ -331,9 +331,9 @@ class AW_SI_Pages_Table extends WP_List_Table {
 	 */
 	protected function column_index( $item ) {
 		if ( ! isset( $item['index'] ) ) {
-			return esc_html__( 'Not checked yet', 'aw-seo-extras' );
+			return esc_html__( 'Not checked yet', 'insightweb' );
 		}
-		$word = $item['index'] ? __( 'Indexed', 'aw-seo-extras' ) : __( 'Not indexed', 'aw-seo-extras' );
+		$word = $item['index'] ? __( 'Indexed', 'insightweb' ) : __( 'Not indexed', 'insightweb' );
 		$out  = '<span class="dashicons dashicons-' . ( $item['index'] ? 'yes-alt' : 'warning' ) . '" aria-hidden="true"></span> ' . esc_html( $word );
 		if ( ! $item['index'] && '' !== (string) ( $item['index_t'] ?? '' ) ) {
 			$out .= '<br><span class="description">' . esc_html( (string) $item['index_t'] ) . '</span>';

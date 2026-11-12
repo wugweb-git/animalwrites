@@ -5,7 +5,7 @@
  * Listing names (entity records) stay out of every view but Entities: the All view shows them as one combined row,
  * and the 20 that moved most one by one (plan §8).
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -69,24 +69,24 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 	public function get_columns() {
 		return array(
 			'cb'       => '<input type="checkbox">',
-			'label'    => __( 'Keyword', 'aw-seo-extras' ),
-			'priority' => __( 'Priority', 'aw-seo-extras' ),
-			'status'   => __( 'Status', 'aw-seo-extras' ),
-			'topic'    => __( 'Topic', 'aw-seo-extras' ),
-			'page'     => __( 'Page', 'aw-seo-extras' ),
-			'impr28'   => __( 'Impressions (28 days)', 'aw-seo-extras' ),
-			'clicks28' => __( 'Clicks', 'aw-seo-extras' ),
-			'pos28'    => __( 'Position', 'aw-seo-extras' ),
-			'change'   => __( 'Change', 'aw-seo-extras' ),
-			'bing'     => __( 'Bing impressions (90 days)', 'aw-seo-extras' ),
-			'live'     => __( 'Live check', 'aw-seo-extras' ),
-			'trends'   => __( 'Trends', 'aw-seo-extras' ),
-			'volume'   => __( 'Volume (imports)', 'aw-seo-extras' ),
-			'ubersuggest' => __( 'Ubersuggest', 'aw-seo-extras' ),
-			'vidiq'       => __( 'vidIQ (YouTube)', 'aw-seo-extras' ),
-			'openseo'     => __( 'OpenSEO', 'aw-seo-extras' ),
-			'openseo_pos' => __( 'OpenSEO position', 'aw-seo-extras' ),
-			'action'   => __( 'Suggested action', 'aw-seo-extras' ),
+			'label'    => __( 'Keyword', 'insightweb' ),
+			'priority' => __( 'Priority', 'insightweb' ),
+			'status'   => __( 'Status', 'insightweb' ),
+			'topic'    => __( 'Topic', 'insightweb' ),
+			'page'     => __( 'Page', 'insightweb' ),
+			'impr28'   => __( 'Impressions (28 days)', 'insightweb' ),
+			'clicks28' => __( 'Clicks', 'insightweb' ),
+			'pos28'    => __( 'Position', 'insightweb' ),
+			'change'   => __( 'Change', 'insightweb' ),
+			'bing'     => __( 'Bing impressions (90 days)', 'insightweb' ),
+			'live'     => __( 'Live check', 'insightweb' ),
+			'trends'   => __( 'Trends', 'insightweb' ),
+			'volume'   => __( 'Volume (imports)', 'insightweb' ),
+			'ubersuggest' => __( 'Ubersuggest', 'insightweb' ),
+			'vidiq'       => __( 'vidIQ (YouTube)', 'insightweb' ),
+			'openseo'     => __( 'OpenSEO', 'insightweb' ),
+			'openseo_pos' => __( 'OpenSEO position', 'insightweb' ),
+			'action'   => __( 'Suggested action', 'insightweb' ),
 		);
 	}
 
@@ -112,10 +112,10 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 	/** Priority overrides: the only change this list makes, to its own table. */
 	protected function get_bulk_actions() {
 		return array(
-			'override_p1'    => __( 'Set priority P1', 'aw-seo-extras' ),
-			'override_p2'    => __( 'Set priority P2', 'aw-seo-extras' ),
-			'override_p3'    => __( 'Set priority P3', 'aw-seo-extras' ),
-			'override_clear' => __( 'Use the calculated priority', 'aw-seo-extras' ),
+			'override_p1'    => __( 'Set priority P1', 'insightweb' ),
+			'override_p2'    => __( 'Set priority P2', 'insightweb' ),
+			'override_p3'    => __( 'Set priority P3', 'insightweb' ),
+			'override_clear' => __( 'Use the calculated priority', 'insightweb' ),
 		);
 	}
 
@@ -127,15 +127,15 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 	/** Labels of the views. */
 	private function view_labels(): array {
 		return array(
-			'all'       => __( 'All', 'aw-seo-extras' ),
+			'all'       => __( 'All', 'insightweb' ),
 			'p1'        => 'P1',
 			'p2'        => 'P2',
 			'p3'        => 'P3',
-			'gap'       => __( 'Gaps', 'aw-seo-extras' ),
-			'conflict'  => __( 'Conflicts', 'aw-seo-extras' ),
-			'quick'     => __( 'Quick wins', 'aw-seo-extras' ),
-			'notranked' => __( 'Tracked, not ranking', 'aw-seo-extras' ),
-			'entity'    => __( 'Entities', 'aw-seo-extras' ),
+			'gap'       => __( 'Gaps', 'insightweb' ),
+			'conflict'  => __( 'Conflicts', 'insightweb' ),
+			'quick'     => __( 'Quick wins', 'insightweb' ),
+			'notranked' => __( 'Tracked, not ranking', 'insightweb' ),
+			'entity'    => __( 'Entities', 'insightweb' ),
 		);
 	}
 
@@ -221,32 +221,32 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 			return;
 		}
 		echo '<div class="alignleft actions">';
-		$this->dropdown( 'role', __( 'All roles', 'aw-seo-extras' ), array_map( 'strval', aw_si_roles() ) );
+		$this->dropdown( 'role', __( 'All roles', 'insightweb' ), array_map( 'strval', aw_si_roles() ) );
 		global $wpdb;
 		$topics = (array) $wpdb->get_col( 'SELECT DISTINCT topic FROM ' . aw_si_table( 'keywords' ) . " WHERE topic <> '' ORDER BY topic" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.NotPrepared -- table name only.
-		$this->dropdown( 'topic', __( 'All topics', 'aw-seo-extras' ), array_combine( $topics, $topics ), true );
+		$this->dropdown( 'topic', __( 'All topics', 'insightweb' ), array_combine( $topics, $topics ), true );
 		$this->dropdown(
 			'page_type',
-			__( 'All page types', 'aw-seo-extras' ),
+			__( 'All page types', 'insightweb' ),
 			array(
-				'hub'       => __( 'Hub', 'aw-seo-extras' ),
-				'directory' => __( 'Directory', 'aw-seo-extras' ),
-				'topic'     => __( 'Topic', 'aw-seo-extras' ),
-				'guide'     => __( 'Guide', 'aw-seo-extras' ),
-				'key-page'  => __( 'Key page', 'aw-seo-extras' ),
-				'new-row'   => __( 'Added 21 Oct', 'aw-seo-extras' ),
+				'hub'       => __( 'Hub', 'insightweb' ),
+				'directory' => __( 'Directory', 'insightweb' ),
+				'topic'     => __( 'Topic', 'insightweb' ),
+				'guide'     => __( 'Guide', 'insightweb' ),
+				'key-page'  => __( 'Key page', 'insightweb' ),
+				'new-row'   => __( 'Added 21 Oct', 'insightweb' ),
 			)
 		);
 		$this->dropdown(
 			'lang',
-			__( 'All languages', 'aw-seo-extras' ),
+			__( 'All languages', 'insightweb' ),
 			array(
-				'en'       => __( 'English', 'aw-seo-extras' ),
-				'hi'       => __( 'Hindi', 'aw-seo-extras' ),
-				'hinglish' => __( 'Hinglish', 'aw-seo-extras' ),
+				'en'       => __( 'English', 'insightweb' ),
+				'hi'       => __( 'Hindi', 'insightweb' ),
+				'hinglish' => __( 'Hinglish', 'insightweb' ),
 			)
 		);
-		submit_button( __( 'Filter', 'aw-seo-extras' ), '', 'filter_action', false );
+		submit_button( __( 'Filter', 'insightweb' ), '', 'filter_action', false );
 		echo '</div>';
 	}
 
@@ -371,10 +371,10 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 	/** Message for an empty list. */
 	public function no_items() {
 		if ( ! get_option( 'aw_si_seeded' ) ) {
-			esc_html_e( 'Nothing here yet: the first daily run (07:10 IST) seeds the keyword map and reads Search Console. Settings → Run now starts it at once.', 'aw-seo-extras' );
+			esc_html_e( 'Nothing here yet: the first daily run (07:10 IST) seeds the keyword map and reads Search Console. Settings → Run now starts it at once.', 'insightweb' );
 			return;
 		}
-		esc_html_e( 'No keywords match.', 'aw-seo-extras' );
+		esc_html_e( 'No keywords match.', 'insightweb' );
 	}
 
 	/**
@@ -397,9 +397,9 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 	protected function column_label( $item ) {
 		if ( ! empty( $item->aggregate ) ) {
 			/* translators: %s: number of listing names. */
-			$out = '<strong><a href="' . esc_url( add_query_arg( 'view', 'entity', aw_si_url( 'keywords' ) ) ) . '">' . esc_html( sprintf( __( 'Listing names (%s)', 'aw-seo-extras' ), number_format_i18n( (int) $item->aggregate ) ) ) . '</a></strong>';
+			$out = '<strong><a href="' . esc_url( add_query_arg( 'view', 'entity', aw_si_url( 'keywords' ) ) ) . '">' . esc_html( sprintf( __( 'Listing names (%s)', 'insightweb' ), number_format_i18n( (int) $item->aggregate ) ) ) . '</a></strong>';
 			/* translators: %d: number of listing names listed one by one. */
-			$out .= '<br><span class="description">' . esc_html( sprintf( __( 'All Directory listing names in one row. The %d that moved most are listed one by one; the Entities view lists them all.', 'aw-seo-extras' ), AW_SI_MOVERS ) ) . '</span>';
+			$out .= '<br><span class="description">' . esc_html( sprintf( __( 'All Directory listing names in one row. The %d that moved most are listed one by one; the Entities view lists them all.', 'insightweb' ), AW_SI_MOVERS ) ) . '</span>';
 			return $out;
 		}
 		$out   = '<strong>' . esc_html( $item->label ) . '</strong>';
@@ -410,10 +410,10 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 			}
 		}
 		if ( 'en' !== $item->lang ) {
-			$roles[] = 'hi' === $item->lang ? __( 'Hindi', 'aw-seo-extras' ) : __( 'Hinglish', 'aw-seo-extras' );
+			$roles[] = 'hi' === $item->lang ? __( 'Hindi', 'insightweb' ) : __( 'Hinglish', 'insightweb' );
 		}
 		if ( (int) $item->entity ) {
-			$roles[] = in_array( (int) $item->id, $this->movers(), true ) && 'entity' !== $this->arg( 'view' ) ? __( 'Entity, top mover', 'aw-seo-extras' ) : __( 'Entity', 'aw-seo-extras' );
+			$roles[] = in_array( (int) $item->id, $this->movers(), true ) && 'entity' !== $this->arg( 'view' ) ? __( 'Entity, top mover', 'insightweb' ) : __( 'Entity', 'insightweb' );
 		}
 		if ( $roles ) {
 			$out .= ' — <span class="post-state">' . esc_html( implode( ', ', $roles ) ) . '</span>';
@@ -425,11 +425,11 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 		foreach ( array( 'P1', 'P2', 'P3' ) as $p ) {
 			if ( $p !== $item->priority_override ) {
 				/* translators: %s: priority such as P1. */
-				$actions[ 'set_' . strtolower( $p ) ] = '<a href="' . esc_url( aw_si_kw_action_url( 'override_' . strtolower( $p ), (int) $item->id ) ) . '">' . esc_html( sprintf( __( 'Set %s', 'aw-seo-extras' ), $p ) ) . '</a>';
+				$actions[ 'set_' . strtolower( $p ) ] = '<a href="' . esc_url( aw_si_kw_action_url( 'override_' . strtolower( $p ), (int) $item->id ) ) . '">' . esc_html( sprintf( __( 'Set %s', 'insightweb' ), $p ) ) . '</a>';
 			}
 		}
 		if ( '' !== $item->priority_override ) {
-			$actions['clear'] = '<a href="' . esc_url( aw_si_kw_action_url( 'override_clear', (int) $item->id ) ) . '">' . esc_html__( 'Use calculated', 'aw-seo-extras' ) . '</a>';
+			$actions['clear'] = '<a href="' . esc_url( aw_si_kw_action_url( 'override_clear', (int) $item->id ) ) . '">' . esc_html__( 'Use calculated', 'insightweb' ) . '</a>';
 		}
 		return $out . $this->row_actions( $actions );
 	}
@@ -442,7 +442,7 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 	protected function column_priority( $item ) {
 		if ( '' !== $item->priority_override ) {
 			/* translators: 1: owner's priority, 2: calculated priority. */
-			return esc_html( sprintf( __( '%1$s (owner; calculated %2$s)', 'aw-seo-extras' ), $item->priority_override, $item->priority ? $item->priority : '–' ) );
+			return esc_html( sprintf( __( '%1$s (owner; calculated %2$s)', 'insightweb' ), $item->priority_override, $item->priority ? $item->priority : '–' ) );
 		}
 		return esc_html( $item->priority ? $item->priority : '–' );
 	}
@@ -455,15 +455,15 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 	 */
 	protected function column_status( $item ) {
 		$labels = array(
-			'has-page' => __( 'Has page', 'aw-seo-extras' ),
-			'gap'      => __( 'Gap', 'aw-seo-extras' ),
-			'conflict' => __( 'Conflict', 'aw-seo-extras' ),
+			'has-page' => __( 'Has page', 'insightweb' ),
+			'gap'      => __( 'Gap', 'insightweb' ),
+			'conflict' => __( 'Conflict', 'insightweb' ),
 		);
 		$s      = $labels[ $item->status ] ?? '–';
 		if ( false !== strpos( $item->label, '{' ) ) {
-			$s .= ' · ' . __( 'Directory pattern, not searched', 'aw-seo-extras' );
+			$s .= ' · ' . __( 'Directory pattern, not searched', 'insightweb' );
 		} elseif ( ( (int) $item->roles & AW_SI_ROLE_TRACKED ) && 0 === (int) $item->impr28 ) {
-			$s .= ' · ' . __( 'not ranking', 'aw-seo-extras' );
+			$s .= ' · ' . __( 'not ranking', 'insightweb' );
 		}
 		return esc_html( $s );
 	}
@@ -497,7 +497,7 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 			return '0';
 		}
 		/* translators: %s: positions gained or lost. */
-		$text = $d > 0 ? sprintf( __( 'up %s', 'aw-seo-extras' ), number_format_i18n( $d, 1 ) ) : sprintf( __( 'down %s', 'aw-seo-extras' ), number_format_i18n( -$d, 1 ) );
+		$text = $d > 0 ? sprintf( __( 'up %s', 'insightweb' ), number_format_i18n( $d, 1 ) ) : sprintf( __( 'down %s', 'insightweb' ), number_format_i18n( -$d, 1 ) );
 		return '<span class="dashicons dashicons-arrow-' . ( $d > 0 ? 'up' : 'down' ) . '-alt" aria-hidden="true"></span> ' . esc_html( $text );
 	}
 
@@ -538,7 +538,7 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 				return null === $item->pos28 ? '–' : esc_html( number_format_i18n( (float) $item->pos28, 1 ) );
 			case 'trends':
 				if ( null === $item->trends && aw_si_trends_failed() ) {
-					return '<span title="' . esc_attr__( 'Google Trends refused the last request, so there is no figure: this says nothing about demand.', 'aw-seo-extras' ) . '">' . esc_html__( 'source failed', 'aw-seo-extras' ) . '</span>';
+					return '<span title="' . esc_attr__( 'Google Trends refused the last request, so there is no figure: this says nothing about demand.', 'insightweb' ) . '">' . esc_html__( 'source failed', 'insightweb' ) . '</span>';
 				}
 				return null === $item->trends ? '–' : esc_html( number_format_i18n( (int) $item->trends ) );
 			case 'ubersuggest':
@@ -549,7 +549,7 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 					return '–';
 				}
 				/* translators: %s: searches a month. */
-				$line = esc_html( sprintf( __( '%s a month', 'aw-seo-extras' ), number_format_i18n( (float) $f->value ) ) );
+				$line = esc_html( sprintf( __( '%s a month', 'insightweb' ), number_format_i18n( (float) $f->value ) ) );
 				return $line . ( '' !== (string) $f->txt ? '<br><span class="description">' . esc_html( (string) $f->txt ) . '</span>' : '' );
 			case 'openseo_pos':
 				$f = $item->oseo_pos ?? null;
@@ -568,7 +568,7 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 				}
 				if ( isset( $item->bing_vol ) ) {
 					/* translators: %s: searches a week. */
-					$lines[] = esc_html( sprintf( __( '%s a week (Bing)', 'aw-seo-extras' ), number_format_i18n( (int) round( $item->bing_vol ) ) ) );
+					$lines[] = esc_html( sprintf( __( '%s a week (Bing)', 'insightweb' ), number_format_i18n( (int) round( $item->bing_vol ) ) ) );
 				}
 				return $lines ? implode( '<br>', $lines ) : '–';
 			case 'topic':

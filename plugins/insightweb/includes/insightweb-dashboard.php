@@ -7,7 +7,7 @@
  * The job runs twice a day, once more right after the daily Search Console import, and once when the Dashboard finds
  * nothing stored (a single event).
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

@@ -20,7 +20,7 @@
  * path, which always starts with "/") and the matching keyword's ID (0 when none), so they stay one row per term, day
  * and metric; nothing reads them by keyword ID (Search Console and Trends T rows have their own sources).
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -42,50 +42,50 @@ require_once __DIR__ . '/rising-drops.php'; // what each run dropped and why (12
 function aw_si_rising_sources(): array {
 	return array(
 		'trends_rss'      => array(
-			'label'  => __( 'Trends: trending now', 'aw-seo-extras' ),
+			'label'  => __( 'Trends: trending now', 'insightweb' ),
 			'every'  => DAY_IN_SECONDS,
 			'worker' => true,
 		),
 		'wikipedia'       => array(
-			'label'  => __( 'Wikipedia pageviews', 'aw-seo-extras' ),
+			'label'  => __( 'Wikipedia pageviews', 'insightweb' ),
 			'every'  => DAY_IN_SECONDS,
 			'worker' => true,
 		),
 		'gdelt'           => array(
-			'label'  => __( 'News (GDELT)', 'aw-seo-extras' ),
+			'label'  => __( 'News (GDELT)', 'insightweb' ),
 			'every'  => DAY_IN_SECONDS,
 			'worker' => true,
 		),
 		'autocomplete'    => array(
-			'label'  => __( 'Google autocomplete (English)', 'aw-seo-extras' ),
+			'label'  => __( 'Google autocomplete (English)', 'insightweb' ),
 			'every'  => WEEK_IN_SECONDS,
 			'worker' => true,
 		),
 		'trends_related'  => array(
-			'label'  => __( 'Trends: rising related searches', 'aw-seo-extras' ),
+			'label'  => __( 'Trends: rising related searches', 'insightweb' ),
 			'every'  => WEEK_IN_SECONDS,
 			'worker' => true,
 		),
 		'trends_interest' => array(
-			'label'  => __( 'Trends interest (animal welfare = 100)', 'aw-seo-extras' ),
+			'label'  => __( 'Trends interest (animal welfare = 100)', 'insightweb' ),
 			'every'  => 31 * DAY_IN_SECONDS,
 			'worker' => true,
 		),
 		// Keyword tools (tool-imports.php): pasted on Settings → Imports by hand or by the scheduled task.
 		'ubersuggest'     => array(
-			'label'  => __( 'Ubersuggest (import)', 'aw-seo-extras' ),
+			'label'  => __( 'Ubersuggest (import)', 'insightweb' ),
 			'every'  => DAY_IN_SECONDS,
 			'worker' => false,
 			'import' => true,
 		),
 		'vidiq'           => array(
-			'label'  => __( 'vidIQ (import)', 'aw-seo-extras' ),
+			'label'  => __( 'vidIQ (import)', 'insightweb' ),
 			'every'  => WEEK_IN_SECONDS,
 			'worker' => false,
 			'import' => true,
 		),
 		'openseo'         => array(
-			'label'  => __( 'OpenSEO (import)', 'aw-seo-extras' ),
+			'label'  => __( 'OpenSEO (import)', 'insightweb' ),
 			'every'  => 31 * DAY_IN_SECONDS,
 			'worker' => false,
 			'import' => true,
@@ -93,37 +93,37 @@ function aw_si_rising_sources(): array {
 		// Pasted by hand from what a person read (owner, 12 Nov 2026: "put it"): each its own source, never Trends data,
 		// never late. Each line carries the link it was read at; the day read is the paste form's date.
 		'paste_x'         => array(
-			'label'  => __( 'X (pasted)', 'aw-seo-extras' ),
+			'label'  => __( 'X (pasted)', 'insightweb' ),
 			'every'  => WEEK_IN_SECONDS,
 			'worker' => false,
 			'manual' => true,
 		),
 		'paste_gnews'     => array(
-			'label'  => __( 'Google News (pasted)', 'aw-seo-extras' ),
+			'label'  => __( 'Google News (pasted)', 'insightweb' ),
 			'every'  => WEEK_IN_SECONDS,
 			'worker' => false,
 			'manual' => true,
 		),
 		'paste_instagram' => array(
-			'label'  => __( 'Instagram (pasted)', 'aw-seo-extras' ),
+			'label'  => __( 'Instagram (pasted)', 'insightweb' ),
 			'every'  => WEEK_IN_SECONDS,
 			'worker' => false,
 			'manual' => true,
 		),
 		'paste_facebook'  => array(
-			'label'  => __( 'Facebook (pasted)', 'aw-seo-extras' ),
+			'label'  => __( 'Facebook (pasted)', 'insightweb' ),
 			'every'  => WEEK_IN_SECONDS,
 			'worker' => false,
 			'manual' => true,
 		),
 		'paste_other'     => array(
-			'label'  => __( 'Other source (pasted)', 'aw-seo-extras' ),
+			'label'  => __( 'Other source (pasted)', 'insightweb' ),
 			'every'  => WEEK_IN_SECONDS,
 			'worker' => false,
 			'manual' => true,
 		),
 		'sourcing'        => array( // Removed 3 Nov 2026: only its old rows show, as history.
-			'label'   => __( 'Our News counts (stopped 3 Nov 2026)', 'aw-seo-extras' ),
+			'label'   => __( 'Our News counts (stopped 3 Nov 2026)', 'insightweb' ),
 			'every'   => DAY_IN_SECONDS,
 			'worker'  => false,
 			'history' => true,
@@ -562,22 +562,22 @@ function aw_si_rising_add_where(): array {
 /** The Add term form on the Rising tab (12 Nov 2026): one term seen by a person, stored like any rising term. */
 function aw_si_rising_add_form(): void {
 	$today = ( new DateTimeImmutable( 'today', wp_timezone() ) )->format( 'Y-m-d' );
-	echo '<h2>' . esc_html__( 'Add term', 'aw-seo-extras' ) . '</h2>';
-	echo '<p>' . esc_html__( 'A term you saw rising on X, Instagram or elsewhere. It shows in the list above as New, under the source you pick.', 'aw-seo-extras' ) . '</p>';
+	echo '<h2>' . esc_html__( 'Add term', 'insightweb' ) . '</h2>';
+	echo '<p>' . esc_html__( 'A term you saw rising on X, Instagram or elsewhere. It shows in the list above as New, under the source you pick.', 'insightweb' ) . '</p>';
 	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_si_rising_add">';
 	wp_nonce_field( 'aw_si_rising_add' );
 	echo '<table class="form-table" role="presentation"><tbody>';
-	echo '<tr><th scope="row"><label for="aw-si-add-term">' . esc_html__( 'Term', 'aw-seo-extras' ) . '</label></th><td><input type="text" id="aw-si-add-term" name="term" class="regular-text" maxlength="255" required></td></tr>';
-	echo '<tr><th scope="row"><label for="aw-si-add-where">' . esc_html__( 'Seen on', 'aw-seo-extras' ) . '</label></th><td><select id="aw-si-add-where" name="where">';
+	echo '<tr><th scope="row"><label for="aw-si-add-term">' . esc_html__( 'Term', 'insightweb' ) . '</label></th><td><input type="text" id="aw-si-add-term" name="term" class="regular-text" maxlength="255" required></td></tr>';
+	echo '<tr><th scope="row"><label for="aw-si-add-where">' . esc_html__( 'Seen on', 'insightweb' ) . '</label></th><td><select id="aw-si-add-where" name="where">';
 	foreach ( aw_si_rising_add_where() as $k => $label ) {
 		echo '<option value="' . esc_attr( $k ) . '">' . esc_html( ucfirst( $label ) ) . '</option>';
 	}
 	echo '</select></td></tr>';
-	echo '<tr><th scope="row"><label for="aw-si-add-label">' . esc_html__( 'Source label', 'aw-seo-extras' ) . '</label></th><td><input type="text" id="aw-si-add-label" name="label" class="regular-text" maxlength="60" placeholder="' . esc_attr__( 'X scan', 'aw-seo-extras' ) . '"><p class="description">' . esc_html__( 'How it was found, such as X scan or Instagram scan.', 'aw-seo-extras' ) . '</p></td></tr>';
-	echo '<tr><th scope="row"><label for="aw-si-add-note">' . esc_html__( 'Note', 'aw-seo-extras' ) . '</label></th><td><input type="text" id="aw-si-add-note" name="note" class="large-text" maxlength="160"><p class="description">' . esc_html__( 'Why it matters, or the link it was seen at. Never personal data.', 'aw-seo-extras' ) . '</p></td></tr>';
-	echo '<tr><th scope="row"><label for="aw-si-add-day">' . esc_html__( 'Date seen', 'aw-seo-extras' ) . '</label></th><td><input type="date" id="aw-si-add-day" name="day" value="' . esc_attr( $today ) . '" max="' . esc_attr( $today ) . '"></td></tr>';
+	echo '<tr><th scope="row"><label for="aw-si-add-label">' . esc_html__( 'Source label', 'insightweb' ) . '</label></th><td><input type="text" id="aw-si-add-label" name="label" class="regular-text" maxlength="60" placeholder="' . esc_attr__( 'X scan', 'insightweb' ) . '"><p class="description">' . esc_html__( 'How it was found, such as X scan or Instagram scan.', 'insightweb' ) . '</p></td></tr>';
+	echo '<tr><th scope="row"><label for="aw-si-add-note">' . esc_html__( 'Note', 'insightweb' ) . '</label></th><td><input type="text" id="aw-si-add-note" name="note" class="large-text" maxlength="160"><p class="description">' . esc_html__( 'Why it matters, or the link it was seen at. Never personal data.', 'insightweb' ) . '</p></td></tr>';
+	echo '<tr><th scope="row"><label for="aw-si-add-day">' . esc_html__( 'Date seen', 'insightweb' ) . '</label></th><td><input type="date" id="aw-si-add-day" name="day" value="' . esc_attr( $today ) . '" max="' . esc_attr( $today ) . '"></td></tr>';
 	echo '</tbody></table>';
-	submit_button( __( 'Add term', 'aw-seo-extras' ), 'secondary' );
+	submit_button( __( 'Add term', 'insightweb' ), 'secondary' );
 	echo '</form>';
 }
 
@@ -602,7 +602,7 @@ function aw_si_rising_add( string $term, string $where, string $label, string $n
 	}
 	$label = '' !== trim( $label ) ? trim( $label ) : $kinds[ $where ];
 	/* translators: 1: source label, 2: date seen, 3: note. */
-	$text   = trim( sprintf( __( 'Added by hand (%1$s, %2$s): %3$s', 'aw-seo-extras' ), $label, wp_date( 'j M Y', (int) strtotime( $day . ' 12:00:00' ) ), $note ), ': ' );
+	$text   = trim( sprintf( __( 'Added by hand (%1$s, %2$s): %3$s', 'insightweb' ), $label, wp_date( 'j M Y', (int) strtotime( $day . ' 12:00:00' ) ), $note ), ': ' );
 	$result = aw_si_rising_put( $term, 'paste_' . $where, null, $day, $text );
 	if ( in_array( $result, array( 'created', 'updated' ), true ) ) {
 		aw_si_run_ok(
@@ -620,11 +620,11 @@ add_action(
 	'admin_post_aw_si_rising_add',
 	function () {
 		if ( ! current_user_can( aw_si_cap() ) || ! check_admin_referer( 'aw_si_rising_add' ) ) {
-			wp_die( esc_html__( 'Not allowed.', 'aw-seo-extras' ), 403 );
+			wp_die( esc_html__( 'Not allowed.', 'insightweb' ), 403 );
 		}
 		if ( get_option( 'aw_si_off' ) ) {
 			wp_die(
-				esc_html__( 'Search Insights is off (its data was deleted), so nothing was stored. Settings → Run the daily update starts it again.', 'aw-seo-extras' ),
+				esc_html__( 'Search Insights is off (its data was deleted), so nothing was stored. Settings → Run the daily update starts it again.', 'insightweb' ),
 				'',
 				array(
 					'back_link' => true,
@@ -686,7 +686,7 @@ add_action(
  * The Rising tab.
  */
 
-add_filter( 'aw_si_tabs', fn( $tabs ) => array( 'rising' => __( 'Rising', 'aw-seo-extras' ) ) + (array) $tabs );
+add_filter( 'aw_si_tabs', fn( $tabs ) => array( 'rising' => __( 'Rising', 'insightweb' ) ) + (array) $tabs );
 
 // A month of rising sightings keeps its last growth, never a sum of ratios (rollup.php).
 add_filter(
@@ -719,7 +719,7 @@ function aw_si_rising_load(): void {
 	add_screen_option(
 		'per_page',
 		array(
-			'label'   => __( 'Terms per page', 'aw-seo-extras' ),
+			'label'   => __( 'Terms per page', 'insightweb' ),
 			'default' => 50,
 			'option'  => 'aw_si_rising_per_page',
 		)
@@ -737,7 +737,7 @@ function aw_si_rising_load(): void {
 	}
 	check_admin_referer( 'bulk-rising' );
 	if ( ! current_user_can( aw_si_cap() ) ) {
-		wp_die( esc_html__( 'Not allowed.', 'aw-seo-extras' ), 403 );
+		wp_die( esc_html__( 'Not allowed.', 'insightweb' ), 403 );
 	}
 	$ids = array_filter( array_map( 'intval', (array) wp_unslash( $_REQUEST['rising_id'] ?? array() ) ) );
 	if ( $ids ) {
@@ -758,29 +758,29 @@ function aw_si_rising_tab(): void {
 	// phpcs:disable WordPress.Security.NonceVerification -- messages only.
 	if ( isset( $_GET['marked'] ) ) {
 		$n = absint( wp_unslash( $_GET['marked'] ) );
-		wp_admin_notice( esc_html( $n ? __( 'Saved.', 'aw-seo-extras' ) : __( 'No term was selected, so nothing changed.', 'aw-seo-extras' ) ), array( 'type' => $n ? 'success' : 'warning', 'additional_classes' => array( 'inline' ) ) );
+		wp_admin_notice( esc_html( $n ? __( 'Saved.', 'insightweb' ) : __( 'No term was selected, so nothing changed.', 'insightweb' ) ), array( 'type' => $n ? 'success' : 'warning', 'additional_classes' => array( 'inline' ) ) );
 	}
 	if ( isset( $_GET['pasted'] ) ) {
 		/* translators: 1: lines stored, 2: lines skipped. */
-		wp_admin_notice( esc_html( sprintf( __( 'Pasted: %1$d lines stored, %2$d skipped.', 'aw-seo-extras' ), absint( wp_unslash( $_GET['pasted'] ) ), absint( wp_unslash( $_GET['skipped'] ?? 0 ) ) ) ), array( 'type' => 'success', 'additional_classes' => array( 'inline' ) ) );
+		wp_admin_notice( esc_html( sprintf( __( 'Pasted: %1$d lines stored, %2$d skipped.', 'insightweb' ), absint( wp_unslash( $_GET['pasted'] ) ), absint( wp_unslash( $_GET['skipped'] ?? 0 ) ) ) ), array( 'type' => 'success', 'additional_classes' => array( 'inline' ) ) );
 	}
 	if ( isset( $_GET['added'] ) ) {
-		$msg = 'updated' === sanitize_key( wp_unslash( $_GET['added'] ) ) ? __( 'Term added to the one already in the list (its source and dates updated).', 'aw-seo-extras' ) : __( 'Term added: it shows under New.', 'aw-seo-extras' );
+		$msg = 'updated' === sanitize_key( wp_unslash( $_GET['added'] ) ) ? __( 'Term added to the one already in the list (its source and dates updated).', 'insightweb' ) : __( 'Term added: it shows under New.', 'insightweb' );
 		wp_admin_notice( esc_html( $msg ), array( 'type' => 'success', 'additional_classes' => array( 'inline' ) ) );
 	}
 	if ( isset( $_GET['not_added'] ) ) {
 		$why = array(
-			'day'         => __( 'the date seen must be today or within the last 400 days', 'aw-seo-extras' ),
-			'where'       => __( 'pick where it was seen', 'aw-seo-extras' ),
-			'empty'       => __( 'the term is empty or longer than 255 characters', 'aw-seo-extras' ),
-			'not-english' => __( 'only English terms are kept for now', 'aw-seo-extras' ),
+			'day'         => __( 'the date seen must be today or within the last 400 days', 'insightweb' ),
+			'where'       => __( 'pick where it was seen', 'insightweb' ),
+			'empty'       => __( 'the term is empty or longer than 255 characters', 'insightweb' ),
+			'not-english' => __( 'only English terms are kept for now', 'insightweb' ),
 		);
 		$key = sanitize_key( wp_unslash( $_GET['not_added'] ) );
 		/* translators: %s: the reason. */
-		wp_admin_notice( esc_html( sprintf( __( 'Term not added: %s.', 'aw-seo-extras' ), $why[ $key ] ?? __( 'it could not be stored', 'aw-seo-extras' ) ) ), array( 'type' => 'warning', 'additional_classes' => array( 'inline' ) ) );
+		wp_admin_notice( esc_html( sprintf( __( 'Term not added: %s.', 'insightweb' ), $why[ $key ] ?? __( 'it could not be stored', 'insightweb' ) ) ), array( 'type' => 'warning', 'additional_classes' => array( 'inline' ) ) );
 	}
 	// phpcs:enable
-	echo '<p>' . esc_html__( 'Terms rising in India from free sources: Trends trending now, Wikipedia pageviews and Indian news (GDELT) daily; Google autocomplete and Trends rising related searches weekly. Growth is how many times the usual level (– when the source gives no ratio). Nothing here changes Rank Math or the Sourcing lists: mark each term Noted or Dismissed.', 'aw-seo-extras' ) . '</p>';
+	echo '<p>' . esc_html__( 'Terms rising in India from free sources: Trends trending now, Wikipedia pageviews and Indian news (GDELT) daily; Google autocomplete and Trends rising related searches weekly. Growth is how many times the usual level (– when the source gives no ratio). Nothing here changes Rank Math or the Sourcing lists: mark each term Noted or Dismissed.', 'insightweb' ) . '</p>';
 	$table = new AW_SI_Rising_Table();
 	$table->prepare_items();
 	$table->views();
@@ -789,7 +789,7 @@ function aw_si_rising_tab(): void {
 	if ( $view ) {
 		echo '<input type="hidden" name="view" value="' . esc_attr( $view ) . '">';
 	}
-	$table->search_box( __( 'Search terms', 'aw-seo-extras' ), 'aw-si-rising' );
+	$table->search_box( __( 'Search terms', 'insightweb' ), 'aw-si-rising' );
 	$table->display();
 	echo '</form>';
 	aw_si_rising_drops_section();
@@ -800,35 +800,35 @@ add_action( 'aw_si_tab_rising', 'aw_si_rising_tab' );
 
 /** The paste form: Trends figures when the worker was refused (plan §5.3 fallback), and topics read elsewhere. */
 function aw_si_rising_paste_form(): void {
-	echo '<h2>' . esc_html__( 'Paste Trends figures or topics read elsewhere', 'aw-seo-extras' ) . '</h2>';
-	echo '<p>' . esc_html__( 'When Google Trends refuses the worker (the notice above says so), copy the figures from trends.google.com (India) and paste them here, one per line: the search, a comma, then the figure.', 'aw-seo-extras' ) . '</p>';
+	echo '<h2>' . esc_html__( 'Paste Trends figures or topics read elsewhere', 'insightweb' ) . '</h2>';
+	echo '<p>' . esc_html__( 'When Google Trends refuses the worker (the notice above says so), copy the figures from trends.google.com (India) and paste them here, one per line: the search, a comma, then the figure.', 'insightweb' ) . '</p>';
 	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_si_rising_paste">';
 	wp_nonce_field( 'aw_si_rising_paste' );
 	echo '<table class="form-table" role="presentation"><tbody>';
-	echo '<tr><th scope="row">' . esc_html__( 'What it is', 'aw-seo-extras' ) . '</th><td><fieldset>';
-	echo '<label><input type="radio" name="kind" value="related" checked> ' . esc_html__( 'Rising related searches: the search, then its rise (+250% or Breakout)', 'aw-seo-extras' ) . '</label><br>';
-	echo '<label><input type="radio" name="kind" value="interest"> ' . esc_html__( 'Interest over 12 months: the keyword, then its average with "animal welfare" in the same comparison scaled to 100', 'aw-seo-extras' ) . '</label>';
+	echo '<tr><th scope="row">' . esc_html__( 'What it is', 'insightweb' ) . '</th><td><fieldset>';
+	echo '<label><input type="radio" name="kind" value="related" checked> ' . esc_html__( 'Rising related searches: the search, then its rise (+250% or Breakout)', 'insightweb' ) . '</label><br>';
+	echo '<label><input type="radio" name="kind" value="interest"> ' . esc_html__( 'Interest over 12 months: the keyword, then its average with "animal welfare" in the same comparison scaled to 100', 'insightweb' ) . '</label>';
 	foreach ( aw_si_rising_paste_kinds() as $key => $label ) {
 		/* translators: %s: where it was read, such as X or Google News. */
-		echo '<br><label><input type="radio" name="kind" value="' . esc_attr( $key ) . '"> ' . esc_html( sprintf( __( 'Read on %s: the topic, then the link it was read at (never Trends figures)', 'aw-seo-extras' ), $label ) ) . '</label>';
+		echo '<br><label><input type="radio" name="kind" value="' . esc_attr( $key ) . '"> ' . esc_html( sprintf( __( 'Read on %s: the topic, then the link it was read at (never Trends figures)', 'insightweb' ), $label ) ) . '</label>';
 	}
 	echo '</fieldset></td></tr>';
-	echo '<tr><th scope="row"><label for="aw-si-paste-day">' . esc_html__( 'Day read', 'aw-seo-extras' ) . '</label></th><td><input type="date" id="aw-si-paste-day" name="day" value="' . esc_attr( ( new DateTimeImmutable( 'today', wp_timezone() ) )->format( 'Y-m-d' ) ) . '"> <span class="description">' . esc_html__( 'For the X, Google News, Instagram, Facebook and other lines.', 'aw-seo-extras' ) . '</span></td></tr>';
-	echo '<tr><th scope="row"><label for="aw-si-paste">' . esc_html__( 'Lines', 'aw-seo-extras' ) . '</label></th><td><textarea id="aw-si-paste" name="lines" rows="8" class="large-text code" placeholder="stray dog bite, +140%&#10;stray dog bite, https://x.com/…"></textarea>';
-	echo '<p class="description">' . esc_html__( 'Interest lines are stored only for searches that are keyword records already.', 'aw-seo-extras' ) . '</p></td></tr>';
+	echo '<tr><th scope="row"><label for="aw-si-paste-day">' . esc_html__( 'Day read', 'insightweb' ) . '</label></th><td><input type="date" id="aw-si-paste-day" name="day" value="' . esc_attr( ( new DateTimeImmutable( 'today', wp_timezone() ) )->format( 'Y-m-d' ) ) . '"> <span class="description">' . esc_html__( 'For the X, Google News, Instagram, Facebook and other lines.', 'insightweb' ) . '</span></td></tr>';
+	echo '<tr><th scope="row"><label for="aw-si-paste">' . esc_html__( 'Lines', 'insightweb' ) . '</label></th><td><textarea id="aw-si-paste" name="lines" rows="8" class="large-text code" placeholder="stray dog bite, +140%&#10;stray dog bite, https://x.com/…"></textarea>';
+	echo '<p class="description">' . esc_html__( 'Interest lines are stored only for searches that are keyword records already.', 'insightweb' ) . '</p></td></tr>';
 	echo '</tbody></table>';
-	submit_button( __( 'Store the figures', 'aw-seo-extras' ), 'secondary' );
+	submit_button( __( 'Store the figures', 'insightweb' ), 'secondary' );
 	echo '</form>';
 }
 
 /** The pasted kinds that are not Trends: form value => where it was read. Their source key is "paste_" + value. */
 function aw_si_rising_paste_kinds(): array {
 	return array(
-		'x'         => __( 'X', 'aw-seo-extras' ),
-		'gnews'     => __( 'Google News', 'aw-seo-extras' ),
-		'instagram' => __( 'Instagram', 'aw-seo-extras' ),
-		'facebook'  => __( 'Facebook', 'aw-seo-extras' ),
-		'other'     => __( 'another source', 'aw-seo-extras' ),
+		'x'         => __( 'X', 'insightweb' ),
+		'gnews'     => __( 'Google News', 'insightweb' ),
+		'instagram' => __( 'Instagram', 'insightweb' ),
+		'facebook'  => __( 'Facebook', 'insightweb' ),
+		'other'     => __( 'another source', 'insightweb' ),
 	);
 }
 
@@ -874,11 +874,11 @@ add_action(
 	'admin_post_aw_si_rising_paste',
 	function () {
 		if ( ! current_user_can( aw_si_cap() ) || ! check_admin_referer( 'aw_si_rising_paste' ) ) {
-			wp_die( esc_html__( 'Not allowed.', 'aw-seo-extras' ), 403 );
+			wp_die( esc_html__( 'Not allowed.', 'insightweb' ), 403 );
 		}
 		if ( get_option( 'aw_si_off' ) ) {
 			wp_die(
-				esc_html__( 'Search Insights is off (its data was deleted), so nothing was stored. Settings → Run the daily update starts it again.', 'aw-seo-extras' ),
+				esc_html__( 'Search Insights is off (its data was deleted), so nothing was stored. Settings → Run the daily update starts it again.', 'insightweb' ),
 				'',
 				array(
 					'back_link' => true,
@@ -900,7 +900,7 @@ add_action(
 			$skip = max( 0, count( array_filter( preg_split( '/\R/u', $raw ), fn( $l ) => '' !== trim( $l ) ) ) - count( $rows ) );
 			foreach ( $rows as list( $term, $url ) ) {
 				/* translators: 1: where it was read, 2: day read, 3: link. */
-				$note = sprintf( __( 'Read on %1$s, %2$s: %3$s', 'aw-seo-extras' ), $kinds[ $kind ], wp_date( 'j M Y', strtotime( $day . ' 12:00' ) ), $url );
+				$note = sprintf( __( 'Read on %1$s, %2$s: %3$s', 'insightweb' ), $kinds[ $kind ], wp_date( 'j M Y', strtotime( $day . ' 12:00' ) ), $url );
 				$ok   = in_array( aw_si_rising_put( $term, 'paste_' . $kind, null, $day, $note ), array( 'created', 'updated' ), true );
 				$done += $ok ? 1 : 0;
 				$skip += $ok ? 0 : 1;
@@ -959,7 +959,7 @@ add_action(
 				}
 				$growth = $breakout ? null : round( 1 + (float) $pct / 100, 2 );
 				/* translators: %s: the figure pasted, such as +250% or Breakout. */
-				$ok = in_array( aw_si_rising_put( $term, 'trends_related', $growth, $today, sprintf( __( 'Trends: rising related search, %s (pasted by the owner)', 'aw-seo-extras' ), $fig ) ), array( 'created', 'updated' ), true );
+				$ok = in_array( aw_si_rising_put( $term, 'trends_related', $growth, $today, sprintf( __( 'Trends: rising related search, %s (pasted by the owner)', 'insightweb' ), $fig ) ), array( 'created', 'updated' ), true );
 			}
 			$done += $ok ? 1 : 0;
 			$skip += $ok ? 0 : 1;
@@ -1007,23 +1007,23 @@ function aw_si_rising_top( int $limit = 10, string $since = '' ): array {
 function aw_si_box_rising_week(): void {
 	$rows = aw_si_rising_top( 10 );
 	if ( ! $rows ) {
-		echo '<p>' . esc_html__( 'No rising terms in the last 7 days.', 'aw-seo-extras' ) . '</p>';
+		echo '<p>' . esc_html__( 'No rising terms in the last 7 days.', 'insightweb' ) . '</p>';
 		return;
 	}
 	$all = aw_si_rising_sources();
-	echo '<table class="widefat fixed striped"><thead><tr><th scope="col">' . esc_html__( 'Term', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Growth', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Sources', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Our page', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Suggested action', 'aw-seo-extras' ) . '</th></tr></thead><tbody>';
+	echo '<table class="widefat fixed striped"><thead><tr><th scope="col">' . esc_html__( 'Term', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'Growth', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'Sources', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'Our page', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'Suggested action', 'insightweb' ) . '</th></tr></thead><tbody>';
 	foreach ( $rows as $r ) {
 		$src = array();
 		foreach ( array_filter( explode( ',', (string) $r['sources'] ) ) as $s ) {
 			$src[] = (string) ( $all[ $s ]['label'] ?? $s );
 		}
 		/* translators: %s: times the usual level, such as 2.6. */
-		$growth = null === $r['growth'] ? '–' : sprintf( __( '×%s', 'aw-seo-extras' ), number_format_i18n( (float) $r['growth'], 1 ) );
+		$growth = null === $r['growth'] ? '–' : sprintf( __( '×%s', 'insightweb' ), number_format_i18n( (float) $r['growth'], 1 ) );
 		$page   = (string) $r['page'];
 		echo '<tr><td>' . esc_html( (string) $r['term'] ) . '</td><td>' . esc_html( $growth ) . '</td><td>' . esc_html( implode( ', ', $src ) ) . '</td><td>' . ( '' !== $page && '/' === $page[0] ? '<a href="' . esc_url( home_url( $page ) ) . '">' . esc_html( $page ) . '</a>' : '–' ) . '</td><td>' . esc_html( aw_si_actions()[ (string) $r['action'] ] ?? '–' ) . '</td></tr>';
 	}
 	echo '</tbody></table>';
-	echo '<p><a href="' . esc_url( aw_si_url( 'rising' ) ) . '">' . esc_html__( 'All rising terms', 'aw-seo-extras' ) . '</a></p>';
+	echo '<p><a href="' . esc_url( aw_si_url( 'rising' ) ) . '">' . esc_html__( 'All rising terms', 'insightweb' ) . '</a></p>';
 }
 
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
@@ -1046,13 +1046,13 @@ add_action(
 	'aw_si_settings_rows',
 	function () {
 		$on = aw_si_gdelt_on();
-		echo '<tr><th scope="row">' . esc_html__( 'News (GDELT)', 'aw-seo-extras' ) . '</th><td>';
+		echo '<tr><th scope="row">' . esc_html__( 'News (GDELT)', 'insightweb' ) . '</th><td>';
 		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_si_gdelt">';
 		wp_nonce_field( 'aw_si_gdelt' );
-		echo '<label><input type="checkbox" name="on" value="1"' . checked( $on, true, false ) . '> ' . esc_html__( 'Use GDELT for Rising (Indian news counts, daily)', 'aw-seo-extras' ) . '</label> ';
-		submit_button( __( 'Save', 'aw-seo-extras' ), 'secondary', 'submit', false );
+		echo '<label><input type="checkbox" name="on" value="1"' . checked( $on, true, false ) . '> ' . esc_html__( 'Use GDELT for Rising (Indian news counts, daily)', 'insightweb' ) . '</label> ';
+		submit_button( __( 'Save', 'insightweb' ), 'secondary', 'submit', false );
 		echo '</form>';
-		echo '<p class="description">' . esc_html__( 'Off by default: GDELT refuses requests from the workers\' and the site\'s addresses (HTTP 429). While it is off its results are not stored, and it is not shown as late or failing.', 'aw-seo-extras' ) . '</p></td></tr>';
+		echo '<p class="description">' . esc_html__( 'Off by default: GDELT refuses requests from the workers\' and the site\'s addresses (HTTP 429). While it is off its results are not stored, and it is not shown as late or failing.', 'insightweb' ) . '</p></td></tr>';
 	}
 );
 
@@ -1060,7 +1060,7 @@ add_action(
 	'admin_post_aw_si_gdelt',
 	function () {
 		if ( ! current_user_can( aw_si_cap() ) || ! check_admin_referer( 'aw_si_gdelt' ) ) {
-			wp_die( esc_html__( 'Not allowed.', 'aw-seo-extras' ), 403 );
+			wp_die( esc_html__( 'Not allowed.', 'insightweb' ), 403 );
 		}
 		aw_si_gdelt_save( ! empty( $_POST['on'] ) );
 		wp_safe_redirect( aw_si_return_url( 'settings' ) );

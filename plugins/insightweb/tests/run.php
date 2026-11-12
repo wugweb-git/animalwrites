@@ -18,7 +18,7 @@
  *
  * Usage: php plugins/insightweb/tests/run.php
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 // phpcs:disable WordPress.WP.AlternativeFunctions, WordPress.Security.EscapeOutput, WordPress.PHP.DiscouragedPHPFunctions, WordPress.WP.GlobalVariablesOverride, WordPress.DateTime.RestrictedFunctions, Squiz.Commenting.FunctionComment.MissingParamTag, Universal.Files.SeparateFunctionsFromOO -- a command-line test runner with WordPress stubs.

@@ -11,7 +11,7 @@
  * - trends (period 12m, d = import day): index per keyword, the same rows the worker writes, so priority uses it;
  * - gov: one figure per state and measure (txt = "state | measure | source | as of"), page_key = md5 of state|measure.
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -21,9 +21,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 /** The import kinds and their labels. */
 function aw_si_import_kinds(): array {
 	$kinds = array(
-		'kp'     => __( 'Keyword Planner (CSV export: Keyword, Avg. monthly searches)', 'aw-seo-extras' ),
-		'trends' => __( 'Google Trends averages (paste: keyword, value; "animal welfare" = 100)', 'aw-seo-extras' ),
-		'gov'    => __( 'data.gov.in / IDSP figures (paste: state, measure, value, as of, source URL)', 'aw-seo-extras' ),
+		'kp'     => __( 'Keyword Planner (CSV export: Keyword, Avg. monthly searches)', 'insightweb' ),
+		'trends' => __( 'Google Trends averages (paste: keyword, value; "animal welfare" = 100)', 'insightweb' ),
+		'gov'    => __( 'data.gov.in / IDSP figures (paste: state, measure, value, as of, source URL)', 'insightweb' ),
 	);
 	return (array) apply_filters( 'aw_si_import_kinds', $kinds ); // tool-imports.php adds Ubersuggest, vidIQ, OpenSEO.
 }
@@ -179,13 +179,13 @@ function aw_si_import( string $kind, string $raw ): array {
 	}
 	list( $head, $rows ) = aw_si_parse_table( $raw, 'keyword' );
 	if ( ! $head ) {
-		$out['error'] = __( 'No header row was found. Check that the file is the right export.', 'aw-seo-extras' );
+		$out['error'] = __( 'No header row was found. Check that the file is the right export.', 'insightweb' );
 		return $out;
 	}
 	$kcol = aw_si_import_col( $head, array( 'keyword' ) );
 	$vcol = aw_si_import_col( $head, array( 'avg. monthly searches', 'monthly searches', 'volume' ) );
 	if ( '' === $kcol || '' === $vcol ) {
-		$out['error'] = __( 'The file needs a keyword column and a volume column.', 'aw-seo-extras' );
+		$out['error'] = __( 'The file needs a keyword column and a volume column.', 'insightweb' );
 		return $out;
 	}
 	$labels = array_filter( array_map( fn( $r ) => sanitize_text_field( (string) $r[ $kcol ] ), $rows ) );
@@ -217,7 +217,7 @@ function aw_si_import( string $kind, string $raw ): array {
 
 /** Settings tab rows: imports and paste forms (added to the form-table through aw_si_settings_rows). */
 function aw_si_import_rows(): void {
-	echo '<tr><th scope="row"><label for="aw-si-import-kind">' . esc_html__( 'Imports', 'aw-seo-extras' ) . '</label></th><td>';
+	echo '<tr><th scope="row"><label for="aw-si-import-kind">' . esc_html__( 'Imports', 'insightweb' ) . '</label></th><td>';
 	echo '<form method="post" enctype="multipart/form-data" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_si_import">';
 	wp_nonce_field( 'aw_si_import' );
 	echo '<p><select id="aw-si-import-kind" name="kind">';
@@ -225,10 +225,10 @@ function aw_si_import_rows(): void {
 		echo '<option value="' . esc_attr( $k ) . '">' . esc_html( $label ) . '</option>';
 	}
 	echo '</select></p>';
-	echo '<p><label for="aw-si-import-file">' . esc_html__( 'CSV file', 'aw-seo-extras' ) . '</label> <input type="file" id="aw-si-import-file" name="file" accept=".csv,.tsv,.txt,text/csv,text/plain"></p>';
-	echo '<p><label for="aw-si-import-paste">' . esc_html__( 'Or paste', 'aw-seo-extras' ) . '</label><br><textarea id="aw-si-import-paste" name="paste" rows="5" class="large-text"></textarea></p>';
-	submit_button( __( 'Import', 'aw-seo-extras' ), 'secondary', 'submit', false );
-	echo '<p class="description">' . esc_html__( 'Files are read once and deleted. Volumes and positions are stored for this month; a second import in the same month replaces the first.', 'aw-seo-extras' ) . '</p>';
+	echo '<p><label for="aw-si-import-file">' . esc_html__( 'CSV file', 'insightweb' ) . '</label> <input type="file" id="aw-si-import-file" name="file" accept=".csv,.tsv,.txt,text/csv,text/plain"></p>';
+	echo '<p><label for="aw-si-import-paste">' . esc_html__( 'Or paste', 'insightweb' ) . '</label><br><textarea id="aw-si-import-paste" name="paste" rows="5" class="large-text"></textarea></p>';
+	submit_button( __( 'Import', 'insightweb' ), 'secondary', 'submit', false );
+	echo '<p class="description">' . esc_html__( 'Files are read once and deleted. Volumes and positions are stored for this month; a second import in the same month replaces the first.', 'insightweb' ) . '</p>';
 	echo '</form>';
 	global $wpdb;
 	if ( aw_si_ready() ) {
@@ -238,7 +238,7 @@ function aw_si_import_rows(): void {
 			echo '<ul>';
 			foreach ( $last as $l ) {
 				/* translators: 1: source, 2: rows, 3: date and time. */
-				echo '<li>' . esc_html( sprintf( __( '%1$s: %2$s rows, last import %3$s', 'aw-seo-extras' ), $l->src, number_format_i18n( (int) $l->n ), mysql2date( 'j M Y, H:i', $l->f ) ) ) . '</li>';
+				echo '<li>' . esc_html( sprintf( __( '%1$s: %2$s rows, last import %3$s', 'insightweb' ), $l->src, number_format_i18n( (int) $l->n ), mysql2date( 'j M Y, H:i', $l->f ) ) ) . '</li>';
 			}
 			echo '</ul>';
 		}
@@ -259,11 +259,11 @@ add_action(
 	'admin_post_aw_si_import',
 	function () {
 		if ( ! aw_si_can_import() || ! check_admin_referer( 'aw_si_import' ) ) {
-			wp_die( esc_html__( 'Not allowed.', 'aw-seo-extras' ), 403 );
+			wp_die( esc_html__( 'Not allowed.', 'insightweb' ), 403 );
 		}
 		$kind = isset( $_POST['kind'] ) ? sanitize_key( wp_unslash( $_POST['kind'] ) ) : '';
 		if ( ! isset( aw_si_import_kinds()[ $kind ] ) ) {
-			wp_die( esc_html__( 'Unknown import.', 'aw-seo-extras' ), 400 );
+			wp_die( esc_html__( 'Unknown import.', 'insightweb' ), 400 );
 		}
 		$raw = isset( $_POST['paste'] ) ? (string) wp_unslash( $_POST['paste'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- parsed as CSV; each value is sanitised where it is stored.
 		if ( ! empty( $_FILES['file']['name'] ) ) {
@@ -272,7 +272,7 @@ add_action(
 			// exports are often detected as binary and refused. The file is only read as text and deleted at once.
 			$name = sanitize_file_name( wp_unslash( $_FILES['file']['name'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitised here.
 			if ( ! in_array( strtolower( pathinfo( $name, PATHINFO_EXTENSION ) ), array( 'csv', 'tsv', 'txt' ), true ) ) {
-				wp_die( esc_html__( 'Upload a .csv, .tsv or .txt file.', 'aw-seo-extras' ), '', array( 'back_link' => true ) );
+				wp_die( esc_html__( 'Upload a .csv, .tsv or .txt file.', 'insightweb' ), '', array( 'back_link' => true ) );
 			}
 			$up = wp_handle_upload(
 				$_FILES['file'], // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- core upload handling checks it.
@@ -290,7 +290,7 @@ add_action(
 		$res = '' === trim( $raw ) ? array(
 			'rows'    => 0,
 			'skipped' => 0,
-			'error'   => __( 'Nothing to import: choose a file or paste the rows.', 'aw-seo-extras' ),
+			'error'   => __( 'Nothing to import: choose a file or paste the rows.', 'insightweb' ),
 		) : aw_si_import( $kind, $raw );
 		set_transient( 'aw_si_import_result_' . get_current_user_id(), $res + array( 'kind' => $kind ), 5 * MINUTE_IN_SECONDS );
 		wp_safe_redirect( add_query_arg( 'imported', 1, aw_si_return_url( 'settings' ) ) );
@@ -313,14 +313,14 @@ add_action(
 			return;
 		}
 		/* translators: 1: import kind, 2: rows stored, 3: rows skipped. */
-		$msg = sprintf( __( '%1$s: %2$s rows stored, %3$s skipped.', 'aw-seo-extras' ), aw_si_import_kinds()[ $r['kind'] ] ?? $r['kind'], number_format_i18n( (int) $r['rows'] ), number_format_i18n( (int) $r['skipped'] ) );
+		$msg = sprintf( __( '%1$s: %2$s rows stored, %3$s skipped.', 'insightweb' ), aw_si_import_kinds()[ $r['kind'] ] ?? $r['kind'], number_format_i18n( (int) $r['rows'] ), number_format_i18n( (int) $r['skipped'] ) );
 		if ( ! empty( $r['other'] ) ) {
 			/* translators: %s: rows. */
-			$msg .= ' ' . sprintf( __( '%s rows from another source (such as the browser checks) were left out.', 'aw-seo-extras' ), number_format_i18n( (int) $r['other'] ) );
+			$msg .= ' ' . sprintf( __( '%s rows from another source (such as the browser checks) were left out.', 'insightweb' ), number_format_i18n( (int) $r['other'] ) );
 		}
 		if ( ! empty( $r['rising'] ) ) {
 			/* translators: %s: terms. */
-			$msg .= ' ' . sprintf( __( '%s terms that are not keywords yet went to Rising.', 'aw-seo-extras' ), number_format_i18n( (int) $r['rising'] ) );
+			$msg .= ' ' . sprintf( __( '%s terms that are not keywords yet went to Rising.', 'insightweb' ), number_format_i18n( (int) $r['rising'] ) );
 		}
 		wp_admin_notice( esc_html( $msg ), array( 'type' => 'success', 'additional_classes' => array( 'inline' ) ) );
 	}
@@ -330,7 +330,7 @@ add_filter(
 	'aw_si_sources',
 	function ( $s ) {
 		$s['live'] = array(
-			'label' => __( 'Live Google check (bookmarklet)', 'aw-seo-extras' ),
+			'label' => __( 'Live Google check (bookmarklet)', 'insightweb' ),
 			'every' => MONTH_IN_SECONDS,
 		);
 		return $s;

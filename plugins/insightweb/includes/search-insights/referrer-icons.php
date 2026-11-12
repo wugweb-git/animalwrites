@@ -7,7 +7,7 @@
  * aw_fetch_favicons event, five hosts a run: Google's favicon service, then the host's /favicon.ico, saved once into
  * the Media Library as "Favicon: host". Nothing is fetched while a page is drawn; until then a core dashicon shows.
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

@@ -13,7 +13,7 @@
  * - Each import is a run in the run log (Rising source rising_<tool>), listed once the tool has sent something.
  * - No email, nothing fetched from the tools here, no keys stored.
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -30,21 +30,21 @@ const AW_SI_TOOL_SEEDS = 'aw_si_tool_seeds';
 function aw_si_tools(): array {
 	return array(
 		'ubersuggest' => array(
-			'label'  => __( 'Ubersuggest', 'aw-seo-extras' ),
+			'label'  => __( 'Ubersuggest', 'insightweb' ),
 			'metric' => 'volume',
-			'what'   => __( 'Google searches a month, India', 'aw-seo-extras' ),
+			'what'   => __( 'Google searches a month, India', 'insightweb' ),
 			'every'  => DAY_IN_SECONDS,
 		),
 		'vidiq'       => array(
-			'label'  => __( 'vidIQ', 'aw-seo-extras' ),
+			'label'  => __( 'vidIQ', 'insightweb' ),
 			'metric' => 'yt-volume',
-			'what'   => __( 'YouTube searches a month', 'aw-seo-extras' ),
+			'what'   => __( 'YouTube searches a month', 'insightweb' ),
 			'every'  => WEEK_IN_SECONDS,
 		),
 		'openseo'     => array(
-			'label'  => __( 'OpenSEO', 'aw-seo-extras' ),
+			'label'  => __( 'OpenSEO', 'insightweb' ),
 			'metric' => 'volume',
-			'what'   => __( 'Google searches a month (12-month trend)', 'aw-seo-extras' ),
+			'what'   => __( 'Google searches a month (12-month trend)', 'insightweb' ),
 			'every'  => 31 * DAY_IN_SECONDS,
 		),
 	);
@@ -53,9 +53,9 @@ function aw_si_tools(): array {
 add_filter(
 	'aw_si_import_kinds',
 	function ( $kinds ) {
-		$kinds['ubersuggest'] = __( 'Ubersuggest (paste or CSV: keyword, volume; optional: SD, CPC)', 'aw-seo-extras' );
-		$kinds['vidiq']       = __( 'vidIQ (paste or CSV: keyword, volume; optional: competition, score)', 'aw-seo-extras' );
-		$kinds['openseo']     = __( 'OpenSEO (paste or CSV: keyword, month, volume; one row per month for the trend)', 'aw-seo-extras' );
+		$kinds['ubersuggest'] = __( 'Ubersuggest (paste or CSV: keyword, volume; optional: SD, CPC)', 'insightweb' );
+		$kinds['vidiq']       = __( 'vidIQ (paste or CSV: keyword, volume; optional: competition, score)', 'insightweb' );
+		$kinds['openseo']     = __( 'OpenSEO (paste or CSV: keyword, month, volume; one row per month for the trend)', 'insightweb' );
 		return $kinds;
 	}
 );
@@ -105,7 +105,7 @@ function aw_si_tool_import( string $tool, string $raw ): array {
 	$kcol                = $head ? aw_si_import_col( $head, array( 'keyword', 'query', 'term' ) ) : '';
 	$vcol                = $head ? aw_si_import_col( $head, array( 'search volume', 'monthly searches', 'volume', 'searches' ) ) : '';
 	if ( '' === $kcol || '' === $vcol ) {
-		$out['error'] = __( 'The rows need a header with a keyword column and a volume column.', 'aw-seo-extras' );
+		$out['error'] = __( 'The rows need a header with a keyword column and a volume column.', 'insightweb' );
 		return $out;
 	}
 	$mcol  = (string) current( array_intersect( $head, array( 'month', 'date' ) ) ); // exact: "monthly searches" is the volume
@@ -171,7 +171,7 @@ function aw_si_tool_import( string $tool, string $raw ): array {
 			continue;
 		}
 		/* translators: 1: tool, 2: searches a month, 3: what the figure is, 4: extra figures. */
-		$note = sprintf( __( '%1$s: %2$s (%3$s)%4$s', 'aw-seo-extras' ), $t['label'], number_format_i18n( $latest ), $t['what'], '' !== $x['txt'] ? ', ' . $x['txt'] : '' );
+		$note = sprintf( __( '%1$s: %2$s (%3$s)%4$s', 'insightweb' ), $t['label'], number_format_i18n( $latest ), $t['what'], '' !== $x['txt'] ? ', ' . $x['txt'] : '' );
 		$res  = aw_si_rising_put( (string) $x['term'], $tool, aw_si_tool_growth( $x['months'] ), $today, $note );
 		in_array( $res, array( 'created', 'updated' ), true ) ? ++$out['rising'] : ++$out['skipped'];
 	}
@@ -255,12 +255,12 @@ add_filter(
 add_action(
 	'aw_si_settings_rows',
 	function () {
-		echo '<tr><th scope="row"><label for="aw-si-tool-seeds">' . esc_html__( 'Seeds for keyword tools', 'aw-seo-extras' ) . '</label></th><td>';
+		echo '<tr><th scope="row"><label for="aw-si-tool-seeds">' . esc_html__( 'Seeds for keyword tools', 'insightweb' ) . '</label></th><td>';
 		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_si_tool_seeds">';
 		wp_nonce_field( 'aw_si_tool_seeds' );
 		echo '<textarea id="aw-si-tool-seeds" name="seeds" rows="6" class="large-text">' . esc_textarea( implode( "\n", aw_si_tool_seeds() ) ) . '</textarea>';
-		submit_button( __( 'Save seeds', 'aw-seo-extras' ), 'secondary', 'submit', false );
-		echo '<p class="description">' . esc_html__( 'One search per line. The Ubersuggest, vidIQ and OpenSEO reports start from these (in turn); their results come back through Imports above: figures for our keywords go to the Keywords tab, new terms to Rising.', 'aw-seo-extras' ) . '</p>';
+		submit_button( __( 'Save seeds', 'insightweb' ), 'secondary', 'submit', false );
+		echo '<p class="description">' . esc_html__( 'One search per line. The Ubersuggest, vidIQ and OpenSEO reports start from these (in turn); their results come back through Imports above: figures for our keywords go to the Keywords tab, new terms to Rising.', 'insightweb' ) . '</p>';
 		echo '</form></td></tr>';
 	},
 	20
@@ -270,7 +270,7 @@ add_action(
 	'admin_post_aw_si_tool_seeds',
 	function () {
 		if ( ! current_user_can( aw_si_cap() ) || ! check_admin_referer( 'aw_si_tool_seeds' ) ) {
-			wp_die( esc_html__( 'Not allowed.', 'aw-seo-extras' ), 403 );
+			wp_die( esc_html__( 'Not allowed.', 'insightweb' ), 403 );
 		}
 		$changed = aw_si_tool_seeds_save( isset( $_POST['seeds'] ) ? sanitize_textarea_field( wp_unslash( $_POST['seeds'] ) ) : '' );
 		wp_safe_redirect( add_query_arg( 'seeds', $changed ? 'saved' : 'same', aw_si_return_url( 'settings' ) ) );
@@ -285,9 +285,9 @@ add_action(
 		$r = isset( $_GET['seeds'] ) ? sanitize_key( wp_unslash( $_GET['seeds'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- message only.
 		if ( 'saved' === $r ) {
 			/* translators: %s: number of seeds. */
-			wp_admin_notice( esc_html( sprintf( _n( 'Seeds saved: %s search.', 'Seeds saved: %s searches.', count( aw_si_tool_seeds() ), 'aw-seo-extras' ), number_format_i18n( count( aw_si_tool_seeds() ) ) ) ), array( 'type' => 'success', 'additional_classes' => array( 'inline' ) ) );
+			wp_admin_notice( esc_html( sprintf( _n( 'Seeds saved: %s search.', 'Seeds saved: %s searches.', count( aw_si_tool_seeds() ), 'insightweb' ), number_format_i18n( count( aw_si_tool_seeds() ) ) ) ), array( 'type' => 'success', 'additional_classes' => array( 'inline' ) ) );
 		} elseif ( 'same' === $r ) {
-			wp_admin_notice( esc_html__( 'Seeds unchanged: nothing to save.', 'aw-seo-extras' ), array( 'type' => 'success', 'additional_classes' => array( 'inline' ) ) );
+			wp_admin_notice( esc_html__( 'Seeds unchanged: nothing to save.', 'insightweb' ), array( 'type' => 'success', 'additional_classes' => array( 'inline' ) ) );
 		}
 	}
 );

@@ -7,7 +7,7 @@
  * A page served from the full-page cache never reaches WordPress, so its searches are not counted: the figures are a
  * floor, not a total (WordPress ?s= results are normally not cached; Directory ?q= pages may be).
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

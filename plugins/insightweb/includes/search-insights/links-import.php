@@ -14,7 +14,7 @@
  * export is used), kept per domain with the day read (option aw_si_link_dr) and shown in the list's DR column.
  * Rows go through aw_si_link_put(), so a link read again only moves its dates. Loaded by links.php.
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -30,8 +30,8 @@ const AW_SI_LINK_MAX_BYTES    = 2097152;                 // 2 MB per file or pas
 /** The import's sources: form value => the source name stored on each row (with ", read <date>"). */
 function aw_si_links_import_sources(): array {
 	return array(
-		'gsc'   => __( 'Search Console Links', 'aw-seo-extras' ),
-		'other' => __( 'Pasted list', 'aw-seo-extras' ),
+		'gsc'   => __( 'Search Console Links', 'insightweb' ),
+		'other' => __( 'Pasted list', 'insightweb' ),
 	);
 }
 
@@ -115,7 +115,7 @@ function aw_si_links_import_parse( string $raw, string $home, string $source, st
 		}
 	}
 	if ( ! $head ) {
-		$out['error'] = __( 'No header row was found: the first line must name the columns (as Search Console\'s export does).', 'aw-seo-extras' );
+		$out['error'] = __( 'No header row was found: the first line must name the columns (as Search Console\'s export does).', 'insightweb' );
 		return $out;
 	}
 	// Column names exactly as written (Search Console's "Linking pages" is a count, not a "Linking page" address).
@@ -146,7 +146,7 @@ function aw_si_links_import_parse( string $raw, string $home, string $source, st
 	} elseif ( '' !== $from || '' !== $site ) {
 		$out['kind'] = '' !== $from && '' !== $when && '' === $to && '' === $anch ? 'latest' : 'list';
 	} else {
-		$out['error'] = __( 'The columns were not recognised: Search Console\'s Top linking sites, Top linked pages or Latest links export, or a list with a Linking page or Site column.', 'aw-seo-extras' );
+		$out['error'] = __( 'The columns were not recognised: Search Console\'s Top linking sites, Top linked pages or Latest links export, or a list with a Linking page or Site column.', 'insightweb' );
 		return $out;
 	}
 	$num = function ( string $v ): int {
@@ -177,10 +177,10 @@ function aw_si_links_import_parse( string $raw, string $home, string $source, st
 		$seen  = '' !== $when ? aw_si_links_import_date( (string) $r[ $when ], $today ) : '';
 		$since = '' !== $first ? aw_si_links_import_date( (string) $r[ $first ], $today ) : '';
 		$links = '' !== $n ? $num( (string) $r[ $n ] ) : 1;
-		$note  = '' === $target ? __( 'Linked page not named in the export; home page used.', 'aw-seo-extras' ) : '';
+		$note  = '' === $target ? __( 'Linked page not named in the export; home page used.', 'insightweb' ) : '';
 		if ( '' !== $targets && $num( (string) $r[ $targets ] ) > 0 ) {
 			/* translators: %s: number of our pages it links to. */
-			$note = sprintf( __( 'Links to %s of our pages (Search Console); the export names none, so the home page is used.', 'aw-seo-extras' ), number_format_i18n( $num( (string) $r[ $targets ] ) ) );
+			$note = sprintf( __( 'Links to %s of our pages (Search Console); the export names none, so the home page is used.', 'insightweb' ), number_format_i18n( $num( (string) $r[ $targets ] ) ) );
 		}
 		$out['rows'][] = array(
 			'from_url'   => $page,
@@ -279,21 +279,21 @@ function aw_si_links_import_store( array $parsed, string $source, string $day ):
 /** The import form on the Links tab: source, day read, a file or a paste. */
 function aw_si_links_import_form(): void {
 	$today = wp_date( 'Y-m-d' );
-	echo '<h2>' . esc_html__( 'Import links', 'aw-seo-extras' ) . '</h2>';
-	echo '<p>' . esc_html__( 'Search Console has no links API: export a table from Search Console → Links (Top linking sites, Top linked pages, or Export external links → Latest links) and upload the CSV or paste it here. A list of your own works too: a header row with Linking page or Site, and Linked page, Anchor, Links or DR when you have them. DR is Ahrefs\' Domain Rating typed by hand from its free checker; no Ahrefs data is fetched.', 'aw-seo-extras' ) . '</p>';
+	echo '<h2>' . esc_html__( 'Import links', 'insightweb' ) . '</h2>';
+	echo '<p>' . esc_html__( 'Search Console has no links API: export a table from Search Console → Links (Top linking sites, Top linked pages, or Export external links → Latest links) and upload the CSV or paste it here. A list of your own works too: a header row with Linking page or Site, and Linked page, Anchor, Links or DR when you have them. DR is Ahrefs\' Domain Rating typed by hand from its free checker; no Ahrefs data is fetched.', 'insightweb' ) . '</p>';
 	echo '<form method="post" enctype="multipart/form-data" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_si_links_import">';
 	wp_nonce_field( 'aw_si_links_import' );
 	echo '<table class="form-table" role="presentation"><tbody>';
-	echo '<tr><th scope="row"><label for="aw-si-li-source">' . esc_html__( 'Source', 'aw-seo-extras' ) . '</label></th><td><select id="aw-si-li-source" name="source">';
+	echo '<tr><th scope="row"><label for="aw-si-li-source">' . esc_html__( 'Source', 'insightweb' ) . '</label></th><td><select id="aw-si-li-source" name="source">';
 	foreach ( aw_si_links_import_sources() as $k => $label ) {
 		echo '<option value="' . esc_attr( $k ) . '">' . esc_html( $label ) . '</option>';
 	}
 	echo '</select></td></tr>';
-	echo '<tr><th scope="row"><label for="aw-si-li-day">' . esc_html__( 'Day read', 'aw-seo-extras' ) . '</label></th><td><input type="date" id="aw-si-li-day" name="day" value="' . esc_attr( $today ) . '" max="' . esc_attr( $today ) . '"><p class="description">' . esc_html__( 'First and last seen for rows without a date of their own.', 'aw-seo-extras' ) . '</p></td></tr>';
-	echo '<tr><th scope="row"><label for="aw-si-li-file">' . esc_html__( 'CSV file', 'aw-seo-extras' ) . '</label></th><td><input type="file" id="aw-si-li-file" name="file" accept=".csv,.txt,text/csv,text/plain"><p class="description">' . esc_html__( 'Up to 2 MB and 2,000 rows. Read once, then deleted.', 'aw-seo-extras' ) . '</p></td></tr>';
-	echo '<tr><th scope="row"><label for="aw-si-li-paste">' . esc_html__( 'Or paste', 'aw-seo-extras' ) . '</label></th><td><textarea id="aw-si-li-paste" name="paste" rows="6" class="large-text code" placeholder="Site,Linking pages,Target pages&#10;example.org,3,1"></textarea></td></tr>';
+	echo '<tr><th scope="row"><label for="aw-si-li-day">' . esc_html__( 'Day read', 'insightweb' ) . '</label></th><td><input type="date" id="aw-si-li-day" name="day" value="' . esc_attr( $today ) . '" max="' . esc_attr( $today ) . '"><p class="description">' . esc_html__( 'First and last seen for rows without a date of their own.', 'insightweb' ) . '</p></td></tr>';
+	echo '<tr><th scope="row"><label for="aw-si-li-file">' . esc_html__( 'CSV file', 'insightweb' ) . '</label></th><td><input type="file" id="aw-si-li-file" name="file" accept=".csv,.txt,text/csv,text/plain"><p class="description">' . esc_html__( 'Up to 2 MB and 2,000 rows. Read once, then deleted.', 'insightweb' ) . '</p></td></tr>';
+	echo '<tr><th scope="row"><label for="aw-si-li-paste">' . esc_html__( 'Or paste', 'insightweb' ) . '</label></th><td><textarea id="aw-si-li-paste" name="paste" rows="6" class="large-text code" placeholder="Site,Linking pages,Target pages&#10;example.org,3,1"></textarea></td></tr>';
 	echo '</tbody></table>';
-	submit_button( __( 'Import links', 'aw-seo-extras' ), 'secondary' );
+	submit_button( __( 'Import links', 'insightweb' ), 'secondary' );
 	echo '</form>';
 }
 
@@ -301,7 +301,7 @@ add_action(
 	'admin_post_aw_si_links_import',
 	function () {
 		if ( ! current_user_can( aw_si_cap() ) || ! check_admin_referer( 'aw_si_links_import' ) ) {
-			wp_die( esc_html__( 'Not allowed.', 'aw-seo-extras' ), 403 );
+			wp_die( esc_html__( 'Not allowed.', 'insightweb' ), 403 );
 		}
 		$back = aw_si_return_url( 'links' );
 		$fail = function ( string $msg ) use ( $back ) {
@@ -310,7 +310,7 @@ add_action(
 			exit;
 		};
 		if ( get_option( 'aw_si_off' ) || ! aw_si_ready() ) {
-			$fail( __( 'Search Insights is off (its data was deleted), so nothing was stored. Settings → Run the daily update starts it again.', 'aw-seo-extras' ) );
+			$fail( __( 'Search Insights is off (its data was deleted), so nothing was stored. Settings → Run the daily update starts it again.', 'insightweb' ) );
 		}
 		$sources = aw_si_links_import_sources();
 		$src     = isset( $_POST['source'] ) ? sanitize_key( wp_unslash( $_POST['source'] ) ) : 'gsc';
@@ -323,7 +323,7 @@ add_action(
 			require_once ABSPATH . 'wp-admin/includes/file.php';
 			$size = isset( $_FILES['file']['size'] ) ? absint( $_FILES['file']['size'] ) : 0;
 			if ( $size > AW_SI_LINK_MAX_BYTES ) {
-				$fail( __( 'The file is larger than 2 MB.', 'aw-seo-extras' ) );
+				$fail( __( 'The file is larger than 2 MB.', 'insightweb' ) );
 			}
 			$up = wp_handle_upload(
 				$_FILES['file'], // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- core upload handling checks it.
@@ -342,13 +342,13 @@ add_action(
 			wp_delete_file( $up['file'] );
 		}
 		if ( '' === trim( $raw ) ) {
-			$fail( __( 'Nothing to import: choose a file or paste the rows.', 'aw-seo-extras' ) );
+			$fail( __( 'Nothing to import: choose a file or paste the rows.', 'insightweb' ) );
 		}
 		if ( strlen( $raw ) > AW_SI_LINK_MAX_BYTES ) {
-			$fail( __( 'The paste is larger than 2 MB.', 'aw-seo-extras' ) );
+			$fail( __( 'The paste is larger than 2 MB.', 'insightweb' ) );
 		}
 		/* translators: 1: source, 2: date read. */
-		$source = sprintf( __( '%1$s, read %2$s', 'aw-seo-extras' ), $sources[ $src ], wp_date( 'j M Y', (int) strtotime( $day . ' 12:00:00' ) ) );
+		$source = sprintf( __( '%1$s, read %2$s', 'insightweb' ), $sources[ $src ], wp_date( 'j M Y', (int) strtotime( $day . ' 12:00:00' ) ) );
 		$res    = aw_si_links_import_store( aw_si_links_import_parse( $raw, home_url( '/' ), $source, $day, $today ), $sources[ $src ], $day );
 		set_transient( 'aw_si_links_import_' . get_current_user_id(), $res, 5 * MINUTE_IN_SECONDS );
 		wp_safe_redirect( add_query_arg( 'links_imported', 1, $back ) );
@@ -371,13 +371,13 @@ function aw_si_links_import_notice(): void {
 		return;
 	}
 	$kinds = array(
-		'sites'  => __( 'Top linking sites', 'aw-seo-extras' ),
-		'pages'  => __( 'Top linked pages', 'aw-seo-extras' ),
-		'latest' => __( 'Latest links', 'aw-seo-extras' ),
-		'list'   => __( 'List', 'aw-seo-extras' ),
+		'sites'  => __( 'Top linking sites', 'insightweb' ),
+		'pages'  => __( 'Top linked pages', 'insightweb' ),
+		'latest' => __( 'Latest links', 'insightweb' ),
+		'list'   => __( 'List', 'insightweb' ),
 	);
 	/* translators: 1: kind of export, 2: links added, 3: links already there (dates updated), 4: linked pages, 5: DR values, 6: rows skipped. */
-	$msg = sprintf( __( '%1$s imported: %2$s links added, %3$s already there (dates updated), %4$s linked pages, %5$s DR values; %6$s rows skipped.', 'aw-seo-extras' ), $kinds[ $r['kind'] ] ?? '', number_format_i18n( (int) $r['added'] ), number_format_i18n( (int) $r['updated'] ), number_format_i18n( (int) $r['pages'] ), number_format_i18n( (int) $r['dr'] ), number_format_i18n( (int) $r['skipped'] + (int) $r['failed'] ) );
+	$msg = sprintf( __( '%1$s imported: %2$s links added, %3$s already there (dates updated), %4$s linked pages, %5$s DR values; %6$s rows skipped.', 'insightweb' ), $kinds[ $r['kind'] ] ?? '', number_format_i18n( (int) $r['added'] ), number_format_i18n( (int) $r['updated'] ), number_format_i18n( (int) $r['pages'] ), number_format_i18n( (int) $r['dr'] ), number_format_i18n( (int) $r['skipped'] + (int) $r['failed'] ) );
 	wp_admin_notice( esc_html( $msg ), array( 'type' => 'success', 'additional_classes' => array( 'inline' ) ) );
 }
 
@@ -389,7 +389,7 @@ function aw_si_links_reads_section(): void {
 		$t = aw_si_table( 'links' );
 		foreach ( (array) $wpdb->get_results( "SELECT source, COUNT(*) n, MAX(last_seen) d FROM {$t} GROUP BY source" ) as $r ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
 			$k        = aw_si_link_source_key( (string) $r->source );
-			$k        = '' !== $k ? $k : __( 'No source', 'aw-seo-extras' );
+			$k        = '' !== $k ? $k : __( 'No source', 'insightweb' );
 			$by[ $k ] = array(
 				( $by[ $k ][0] ?? 0 ) + (int) $r->n,
 				max( (string) ( $by[ $k ][1] ?? '' ), (string) $r->d ),
@@ -415,26 +415,26 @@ function aw_si_links_reads_section(): void {
 	}
 	$pages = (array) get_option( AW_SI_LINK_PAGES_OPTION, array() );
 	if ( ! empty( $pages['day'] ) ) {
-		$rows[] = array( __( 'Search Console Links: top linked pages', 'aw-seo-extras' ), number_format_i18n( count( (array) ( $pages['rows'] ?? array() ) ) ), mysql2date( 'j M Y', (string) $pages['day'] ) );
+		$rows[] = array( __( 'Search Console Links: top linked pages', 'insightweb' ), number_format_i18n( count( (array) ( $pages['rows'] ?? array() ) ) ), mysql2date( 'j M Y', (string) $pages['day'] ) );
 	}
 	$dr = (array) get_option( AW_SI_LINK_DR_OPTION, array() );
 	if ( $dr ) {
-		$rows[] = array( __( 'DR (Ahrefs, typed by hand)', 'aw-seo-extras' ), number_format_i18n( count( $dr ) ), mysql2date( 'j M Y', (string) max( array_map( fn( $x ) => (string) ( $x[1] ?? '' ), $dr ) ) ) );
+		$rows[] = array( __( 'DR (Ahrefs, typed by hand)', 'insightweb' ), number_format_i18n( count( $dr ) ), mysql2date( 'j M Y', (string) max( array_map( fn( $x ) => (string) ( $x[1] ?? '' ), $dr ) ) ) );
 	}
-	echo '<h2>' . esc_html__( 'Last read per source', 'aw-seo-extras' ) . '</h2>';
+	echo '<h2>' . esc_html__( 'Last read per source', 'insightweb' ) . '</h2>';
 	if ( ! $rows ) {
-		echo '<p>' . esc_html__( 'Nothing read yet.', 'aw-seo-extras' ) . '</p>';
+		echo '<p>' . esc_html__( 'Nothing read yet.', 'insightweb' ) . '</p>';
 		return;
 	}
-	echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Source', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Rows', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Last read', 'aw-seo-extras' ) . '</th></tr></thead><tbody>';
+	echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Source', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'Rows', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'Last read', 'insightweb' ) . '</th></tr></thead><tbody>';
 	foreach ( $rows as $r ) {
 		echo '<tr><td>' . esc_html( $r[0] ) . '</td><td>' . esc_html( $r[1] ) . '</td><td>' . esc_html( $r[2] ) . '</td></tr>';
 	}
 	echo '</tbody></table>';
 	if ( ! empty( $pages['rows'] ) ) {
 		/* translators: %s: date read. */
-		echo '<h2>' . esc_html( sprintf( __( 'Top linked pages (Search Console, read %s)', 'aw-seo-extras' ), mysql2date( 'j M Y', (string) $pages['day'] ) ) ) . '</h2>';
-		echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Our page', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Incoming links', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Linking sites', 'aw-seo-extras' ) . '</th></tr></thead><tbody>';
+		echo '<h2>' . esc_html( sprintf( __( 'Top linked pages (Search Console, read %s)', 'insightweb' ), mysql2date( 'j M Y', (string) $pages['day'] ) ) ) . '</h2>';
+		echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Our page', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'Incoming links', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'Linking sites', 'insightweb' ) . '</th></tr></thead><tbody>';
 		foreach ( array_slice( (array) $pages['rows'], 0, 10 ) as $p ) {
 			$path = aw_si_path( (string) $p[0] );
 			echo '<tr><td><a href="' . esc_url( (string) $p[0] ) . '" target="_blank" rel="noopener">' . esc_html( '' !== $path ? $path : (string) $p[0] ) . '</a></td><td>' . esc_html( number_format_i18n( (int) $p[1] ) ) . '</td><td>' . esc_html( number_format_i18n( (int) $p[2] ) ) . '</td></tr>';

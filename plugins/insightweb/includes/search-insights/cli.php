@@ -6,7 +6,7 @@
  * `dry-run` writes nothing: it reads the seed, Rank Math, Sourcing and one day of Search Console (through Site Kit, as
  * the module's owner) and reports what phase 1 would store.
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

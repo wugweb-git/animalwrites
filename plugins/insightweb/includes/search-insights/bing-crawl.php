@@ -9,7 +9,7 @@
  *   English) for the P1 and quick-win keywords, at most AW_SI_BING_KW a run, into obs src bing, period week, metric
  *   kw-volume (value = Impressions, txt = broad impressions), kw_id set. Only the last 12 weeks are kept.
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -33,11 +33,11 @@ add_filter(
 	function ( $s ) {
 		if ( function_exists( 'aw_si_bing_on' ) && aw_si_bing_on() ) {
 			$s['bing_crawl'] = array(
-				'label' => __( 'Bing crawl (weekly)', 'aw-seo-extras' ),
+				'label' => __( 'Bing crawl (weekly)', 'insightweb' ),
 				'every' => WEEK_IN_SECONDS,
 			);
 			$s['bing_kw']    = array(
-				'label' => __( 'Bing keyword volumes (monthly)', 'aw-seo-extras' ),
+				'label' => __( 'Bing keyword volumes (monthly)', 'insightweb' ),
 				'every' => 31 * DAY_IN_SECONDS,
 			);
 		}
@@ -207,7 +207,7 @@ add_action( AW_SI_BING_KW_CRON, fn() => aw_si_bing_kw_run() );
 function aw_si_box_bing_crawl(): void {
 	global $wpdb;
 	if ( ! aw_si_ready() ) {
-		echo '<p>' . esc_html__( 'Nothing yet.', 'aw-seo-extras' ) . '</p>';
+		echo '<p>' . esc_html__( 'Nothing yet.', 'insightweb' ) . '</p>';
 		return;
 	}
 	$o    = aw_si_table( 'obs' );
@@ -215,14 +215,14 @@ function aw_si_box_bing_crawl(): void {
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
 	$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT YEARWEEK(d, 3) wk, MIN(d) since, MAX(d) last, SUM(IF(metric = 'crawl-pages', value, 0)) pages, SUM(IF(metric = 'crawl-errors', value, 0)) errors, SUM(IF(metric = 'code-4xx', value, 0)) c4, SUM(IF(metric = 'code-5xx', value, 0)) c5, SUM(IF(metric = 'robots-blocked', value, 0)) robots, MAX(IF(metric = 'in-index', value, 0)) idx FROM {$o} WHERE src = 'bing' AND period = 'day' AND metric IN ('crawl-pages', 'crawl-errors', 'code-4xx', 'code-5xx', 'robots-blocked', 'in-index') AND d >= %s GROUP BY wk ORDER BY wk DESC LIMIT 12", $from ) );
 	if ( ! $rows ) {
-		echo '<p>' . esc_html__( 'No Bing crawl figures yet (weekly, Monday 06:45 IST).', 'aw-seo-extras' ) . '</p>';
+		echo '<p>' . esc_html__( 'No Bing crawl figures yet (weekly, Monday 06:45 IST).', 'insightweb' ) . '</p>';
 		return;
 	}
 	$n = fn( $v ) => esc_html( number_format_i18n( (int) $v ) );
-	echo '<table class="widefat fixed striped"><thead><tr><th scope="col">' . esc_html__( 'Week from', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Pages crawled', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Crawl errors', 'aw-seo-extras' ) . '</th><th scope="col">4xx</th><th scope="col">5xx</th><th scope="col">' . esc_html__( 'Blocked by robots.txt', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'In Bing\'s index', 'aw-seo-extras' ) . '</th></tr></thead><tbody>';
+	echo '<table class="widefat fixed striped"><thead><tr><th scope="col">' . esc_html__( 'Week from', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'Pages crawled', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'Crawl errors', 'insightweb' ) . '</th><th scope="col">4xx</th><th scope="col">5xx</th><th scope="col">' . esc_html__( 'Blocked by robots.txt', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'In Bing\'s index', 'insightweb' ) . '</th></tr></thead><tbody>';
 	foreach ( $rows as $r ) {
 		echo '<tr><td>' . esc_html( wp_date( 'j M', strtotime( (string) $r->since ) ) ) . '</td><td>' . $n( $r->pages ) . '</td><td>' . $n( $r->errors ) . '</td><td>' . $n( $r->c4 ) . '</td><td>' . $n( $r->c5 ) . '</td><td>' . $n( $r->robots ) . '</td><td>' . $n( $r->idx ) . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped by $n.
 	}
 	echo '</tbody></table>';
-	echo '<p class="description">' . esc_html__( 'Bing Webmaster crawl statistics by week (Monday to Sunday); "In Bing\'s index" is the highest count of the week.', 'aw-seo-extras' ) . '</p>';
+	echo '<p class="description">' . esc_html__( 'Bing Webmaster crawl statistics by week (Monday to Sunday); "In Bing\'s index" is the highest count of the week.', 'insightweb' ) . '</p>';
 }

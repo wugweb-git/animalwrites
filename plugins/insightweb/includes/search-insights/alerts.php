@@ -5,7 +5,7 @@
  * "Mention": the page that mentions us (Google's redirect removed), its title as the anchor, source "Google Alerts",
  * linked page = our home page (a mention, not necessarily a link). The owner's type and hidden flag are never changed.
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -18,10 +18,10 @@ const AW_SI_ALERTS_KEYS = array( 'AW_GOOGLE_ALERTS_FEED_1', 'AW_GOOGLE_ALERTS_FE
 add_filter(
 	'aw_keys',
 	function ( $keys ) {
-		$by = __( 'Search Insights', 'aw-seo-extras' );
+		$by = __( 'Search Insights', 'insightweb' );
 		foreach ( AW_SI_ALERTS_KEYS as $i => $name ) {
 			/* translators: %d: 1 or 2. */
-			$keys[ $name ] = array( sprintf( __( 'Google Alerts feed %d (RSS address)', 'aw-seo-extras' ), $i + 1 ), __( 'google.com/alerts → create an alert → Show options → Deliver to: RSS feed → copy the feed address (https://www.google.com/alerts/feeds/…).', 'aw-seo-extras' ), $by );
+			$keys[ $name ] = array( sprintf( __( 'Google Alerts feed %d (RSS address)', 'insightweb' ), $i + 1 ), __( 'google.com/alerts → create an alert → Show options → Deliver to: RSS feed → copy the feed address (https://www.google.com/alerts/feeds/…).', 'insightweb' ), $by );
 		}
 		return $keys;
 	}
@@ -44,7 +44,7 @@ add_filter(
 	function ( $s ) {
 		if ( aw_si_alerts_feeds() ) {
 			$s['alerts'] = array(
-				'label' => __( 'Google Alerts (mentions)', 'aw-seo-extras' ),
+				'label' => __( 'Google Alerts (mentions)', 'insightweb' ),
 				'every' => DAY_IN_SECONDS,
 			);
 		}
@@ -54,7 +54,7 @@ add_filter(
 add_filter( 'aw_si_cron_hooks', fn( $h ) => array_merge( (array) $h, array( AW_SI_ALERTS_CRON ) ) );
 add_filter(
 	'aw_si_link_types',
-	fn( $t ) => (array) $t + array( 'mention' => __( 'Mention', 'aw-seo-extras' ) )
+	fn( $t ) => (array) $t + array( 'mention' => __( 'Mention', 'insightweb' ) )
 );
 
 add_action(
@@ -101,7 +101,7 @@ function aw_si_alerts_run( bool $dry = false ): array {
 		$feed = fetch_feed( $url );
 		if ( is_wp_error( $feed ) ) {
 			/* translators: 1: feed number, 2: the problem. */
-			$rep['warnings'][] = sprintf( __( 'Feed %1$d could not be read: %2$s', 'aw-seo-extras' ), $i + 1, $feed->get_error_message() );
+			$rep['warnings'][] = sprintf( __( 'Feed %1$d could not be read: %2$s', 'insightweb' ), $i + 1, $feed->get_error_message() );
 			continue;
 		}
 		foreach ( (array) $feed->get_items( 0, 50 ) as $item ) {

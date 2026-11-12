@@ -16,7 +16,7 @@
  *
  * obs rows: src crawl, period day, metric inside / outside, txt = agent, value = problems in that run.
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -181,7 +181,7 @@ function aw_si_crawl_run( bool $dry = false ): array {
 		aw_si_crawl_store( 'inside', $run );
 		if ( $cut ) {
 			/* translators: %d: seconds. */
-			aw_si_run_fail( 'crawl-in', sprintf( __( 'The check stopped after %d seconds; some agents were not asked.', 'aw-seo-extras' ), AW_SI_CRAWL_TIME ) );
+			aw_si_run_fail( 'crawl-in', sprintf( __( 'The check stopped after %d seconds; some agents were not asked.', 'insightweb' ), AW_SI_CRAWL_TIME ) );
 		}
 	}
 	return $run;
@@ -226,7 +226,7 @@ function aw_si_crawl_refused_fakes( array $run ): array {
 	$out = array();
 	foreach ( (array) ( $run['checks'] ?? array() ) as $c ) {
 		if ( 'ok' !== ( $c['result'] ?? '' ) && aw_si_crawl_expected( $run, $c ) ) {
-			$out[] = sprintf( '%s, %s: %s', $c['agent'], $c['kind'], $c['code'] ? 'HTTP ' . $c['code'] : __( 'no answer', 'aw-seo-extras' ) );
+			$out[] = sprintf( '%s, %s: %s', $c['agent'], $c['kind'], $c['code'] ? 'HTTP ' . $c['code'] : __( 'no answer', 'insightweb' ) );
 		}
 	}
 	return $out;
@@ -242,17 +242,17 @@ function aw_si_crawl_problems( array $run ): array {
 	$out = array();
 	foreach ( (array) ( $run['checks'] ?? array() ) as $c ) {
 		if ( 'ok' !== ( $c['result'] ?? '' ) && ! aw_si_crawl_expected( $run, $c ) ) {
-			$what  = 'challenge' === $c['result'] ? __( 'challenge page', 'aw-seo-extras' ) : ( $c['code'] ? 'HTTP ' . $c['code'] : __( 'no answer', 'aw-seo-extras' ) );
+			$what  = 'challenge' === $c['result'] ? __( 'challenge page', 'insightweb' ) : ( $c['code'] ? 'HTTP ' . $c['code'] : __( 'no answer', 'insightweb' ) );
 			$out[] = sprintf( '%s, %s: %s', $c['agent'], $c['kind'], $what );
 		}
 	}
 	if ( ! empty( $run['cut'] ) ) {
-		$out[] = __( 'The check stopped early: some agents and pages were not asked.', 'aw-seo-extras' );
+		$out[] = __( 'The check stopped early: some agents and pages were not asked.', 'insightweb' );
 	}
 	foreach ( (array) ( $run['burst'] ?? array() ) as $b ) {
 		if ( (int) ( $b['ok'] ?? 0 ) < (int) ( $b['n'] ?? 0 ) ) {
 			/* translators: 1: agent, 2: pages that answered, 3: pages asked. */
-			$out[] = sprintf( __( 'Burst as %1$s: %2$d of %3$d pages answered', 'aw-seo-extras' ), $b['agent'], (int) $b['ok'], (int) $b['n'] );
+			$out[] = sprintf( __( 'Burst as %1$s: %2$d of %3$d pages answered', 'insightweb' ), $b['agent'], (int) $b['ok'], (int) $b['n'] );
 		}
 	}
 	return $out;
@@ -307,8 +307,8 @@ function aw_si_crawl_store( string $side, array $run ): void {
 function aw_si_crawl_alert(): void {
 	$all = array();
 	foreach ( array(
-		__( 'From the server', 'aw-seo-extras' )  => AW_SI_CRAWL_IN,
-		__( 'From outside', 'aw-seo-extras' )     => AW_SI_CRAWL_OUT,
+		__( 'From the server', 'insightweb' )  => AW_SI_CRAWL_IN,
+		__( 'From outside', 'insightweb' )     => AW_SI_CRAWL_OUT,
 	) as $label => $opt ) {
 		foreach ( aw_si_crawl_problems( aw_si_crawl_last( $opt ) ) as $p ) {
 			$all[] = $label . ': ' . $p;
@@ -351,7 +351,7 @@ function aw_si_crawl_receive( array $body ) {
 		);
 	}
 	if ( ! $checks ) {
-		return new WP_Error( 'aw_si_crawl', __( 'No checks in the request.', 'aw-seo-extras' ), array( 'status' => 400 ) );
+		return new WP_Error( 'aw_si_crawl', __( 'No checks in the request.', 'insightweb' ), array( 'status' => 400 ) );
 	}
 	$burst = array();
 	foreach ( array_slice( (array) ( $body['burst'] ?? array() ), 0, 20 ) as $b ) {
@@ -428,12 +428,12 @@ add_filter(
 	'aw_si_sources',
 	function ( $s ) {
 		$s['crawl-in'] = array(
-			'label' => __( 'Crawler access, from the server', 'aw-seo-extras' ),
+			'label' => __( 'Crawler access, from the server', 'insightweb' ),
 			'every' => WEEK_IN_SECONDS,
 		);
 		if ( get_option( AW_SI_CRAWL_OUT ) ) { // Listed once the workers job has reported, so it never shows as late before.
 			$s['crawl-out'] = array(
-				'label' => __( 'Crawler access, from outside (workers)', 'aw-seo-extras' ),
+				'label' => __( 'Crawler access, from outside (workers)', 'insightweb' ),
 				'every' => WEEK_IN_SECONDS,
 			);
 		}
@@ -448,32 +448,32 @@ function aw_si_crawl_health_test(): array {
 	$bad   = 0;
 	$out   = (bool) aw_si_crawl_last( AW_SI_CRAWL_OUT );
 	foreach ( array(
-		__( 'From the server (user-agent rules only)', 'aw-seo-extras' ) => AW_SI_CRAWL_IN,
-		__( 'From outside (GitHub runner, weekly)', 'aw-seo-extras' )    => AW_SI_CRAWL_OUT,
+		__( 'From the server (user-agent rules only)', 'insightweb' ) => AW_SI_CRAWL_IN,
+		__( 'From outside (GitHub runner, weekly)', 'insightweb' )    => AW_SI_CRAWL_OUT,
 	) as $label => $opt ) {
 		$run = aw_si_crawl_last( $opt );
 		if ( empty( $run['at'] ) ) {
-			$items .= '<li>' . esc_html( $label . ': ' . __( 'no result from the last 15 days.', 'aw-seo-extras' ) ) . '</li>';
+			$items .= '<li>' . esc_html( $label . ': ' . __( 'no result from the last 15 days.', 'insightweb' ) ) . '</li>';
 			continue;
 		}
 		$any      = true;
 		$problems = aw_si_crawl_problems( $run );
 		$bad     += count( $problems );
 		/* translators: 1: date, 2: checks, 3: problems. */
-		$line   = sprintf( __( '%1$s: %2$d checks, %3$d problems', 'aw-seo-extras' ), wp_date( 'j M, H:i', (int) $run['at'] ), count( (array) $run['checks'] ), count( $problems ) );
+		$line   = sprintf( __( '%1$s: %2$d checks, %3$d problems', 'insightweb' ), wp_date( 'j M, H:i', (int) $run['at'] ), count( (array) $run['checks'] ), count( $problems ) );
 		$items .= '<li>' . esc_html( $label . ' — ' . $line ) . ( $problems ? '<ul><li>' . implode( '</li><li>', array_map( 'esc_html', array_slice( $problems, 0, 20 ) ) ) . '</li></ul>' : '' ) . '</li>';
 	}
 	// Good only with an outside result: the server's own check cannot see blocks that depend on the caller's address.
 	$status = $bad ? 'critical' : ( $out ? 'good' : 'recommended' );
 	return array(
-		'label'       => $bad ? __( 'Some search or AI crawlers cannot read the site', 'aw-seo-extras' ) : ( $out ? __( 'Search and AI crawlers can read the site', 'aw-seo-extras' ) : ( $any ? __( 'Crawler access checked from the server only (the outside check has not reported yet)', 'aw-seo-extras' ) : __( 'Crawler access has not been checked yet', 'aw-seo-extras' ) ) ),
+		'label'       => $bad ? __( 'Some search or AI crawlers cannot read the site', 'insightweb' ) : ( $out ? __( 'Search and AI crawlers can read the site', 'insightweb' ) : ( $any ? __( 'Crawler access checked from the server only (the outside check has not reported yet)', 'insightweb' ) : __( 'Crawler access has not been checked yet', 'insightweb' ) ) ),
 		'status'      => $status,
 		'badge'       => array(
-			'label' => __( 'Search Insights', 'aw-seo-extras' ),
+			'label' => __( 'Search Insights', 'insightweb' ),
 			'color' => $bad ? 'red' : 'blue',
 		),
-		'description' => '<p>' . esc_html__( 'Each week the home page and five sample pages are asked with the user agents of a browser, Googlebot, Bingbot, GPTBot, OAI-SearchBot, ChatGPT-User, PerplexityBot, ClaudeBot, Google-Extended, Applebot and a generic SEO crawler: from this server, and from outside by the workers. A page that is not a 200, or a challenge page, is a problem. From outside, a refused request with a named crawler\'s name is a refused fake (expected: the CDN lets the real crawlers in by their own addresses), so it is not counted.', 'aw-seo-extras' ) . '</p><ul>' . $items . '</ul>',
-		'actions'     => '<p><a href="' . esc_url( aw_si_url() ) . '">' . esc_html__( 'Open Search Insights', 'aw-seo-extras' ) . '</a></p>',
+		'description' => '<p>' . esc_html__( 'Each week the home page and five sample pages are asked with the user agents of a browser, Googlebot, Bingbot, GPTBot, OAI-SearchBot, ChatGPT-User, PerplexityBot, ClaudeBot, Google-Extended, Applebot and a generic SEO crawler: from this server, and from outside by the workers. A page that is not a 200, or a challenge page, is a problem. From outside, a refused request with a named crawler\'s name is a refused fake (expected: the CDN lets the real crawlers in by their own addresses), so it is not counted.', 'insightweb' ) . '</p><ul>' . $items . '</ul>',
+		'actions'     => '<p><a href="' . esc_url( aw_si_url() ) . '">' . esc_html__( 'Open Search Insights', 'insightweb' ) . '</a></p>',
 		'test'        => 'aw_search_insights_crawl',
 	);
 }
@@ -482,7 +482,7 @@ add_filter(
 	'site_status_tests',
 	function ( $tests ) {
 		$tests['direct']['aw_search_insights_crawl'] = array(
-			'label' => __( 'Search and AI crawlers can read the site', 'aw-seo-extras' ),
+			'label' => __( 'Search and AI crawlers can read the site', 'insightweb' ),
 			'test'  => 'aw_si_crawl_health_test',
 		);
 		return $tests;
@@ -492,25 +492,25 @@ add_filter(
 /** Overview box: the last inside and outside runs, problems first. */
 function aw_si_box_crawl(): void {
 	foreach ( array(
-		__( 'From the server', 'aw-seo-extras' )         => AW_SI_CRAWL_IN,
-		__( 'From outside (workers)', 'aw-seo-extras' ) => AW_SI_CRAWL_OUT,
+		__( 'From the server', 'insightweb' )         => AW_SI_CRAWL_IN,
+		__( 'From outside (workers)', 'insightweb' ) => AW_SI_CRAWL_OUT,
 	) as $label => $opt ) {
 		$run = aw_si_crawl_last( $opt );
 		if ( empty( $run['at'] ) ) {
-			echo '<p><strong>' . esc_html( $label ) . ':</strong> ' . esc_html__( 'no result from the last 15 days (weekly, Monday morning).', 'aw-seo-extras' ) . '</p>';
+			echo '<p><strong>' . esc_html( $label ) . ':</strong> ' . esc_html__( 'no result from the last 15 days (weekly, Monday morning).', 'insightweb' ) . '</p>';
 			continue;
 		}
 		$problems = aw_si_crawl_problems( $run );
 		$fakes    = aw_si_crawl_refused_fakes( $run );
 		/* translators: 1: date, 2: checks. */
-		$line = sprintf( __( '%1$s, %2$d checks', 'aw-seo-extras' ), wp_date( 'j M, H:i', (int) $run['at'] ), count( (array) $run['checks'] ) );
-		echo '<p><strong>' . esc_html( $label ) . ':</strong> ' . esc_html( $line ) . ' — ' . ( $problems ? '<span class="dashicons dashicons-warning" aria-hidden="true"></span> ' . esc_html( implode( '; ', array_slice( $problems, 0, 8 ) ) ) : '<span class="dashicons dashicons-yes" aria-hidden="true"></span> ' . esc_html__( 'every agent got every page.', 'aw-seo-extras' ) ) . '</p>';
+		$line = sprintf( __( '%1$s, %2$d checks', 'insightweb' ), wp_date( 'j M, H:i', (int) $run['at'] ), count( (array) $run['checks'] ) );
+		echo '<p><strong>' . esc_html( $label ) . ':</strong> ' . esc_html( $line ) . ' — ' . ( $problems ? '<span class="dashicons dashicons-warning" aria-hidden="true"></span> ' . esc_html( implode( '; ', array_slice( $problems, 0, 8 ) ) ) : '<span class="dashicons dashicons-yes" aria-hidden="true"></span> ' . esc_html__( 'every agent got every page.', 'insightweb' ) ) . '</p>';
 		if ( $fakes ) {
 			/* translators: %d: refused requests. */
-			echo '<p class="description">' . esc_html( sprintf( _n( '%d request with a search or AI crawler\'s name was refused as a fake (expected: the CDN lets the real crawlers in by their own addresses).', '%d requests with a search or AI crawler\'s name were refused as fakes (expected: the CDN lets the real crawlers in by their own addresses).', count( $fakes ), 'aw-seo-extras' ), count( $fakes ) ) ) . '</p>';
+			echo '<p class="description">' . esc_html( sprintf( _n( '%d request with a search or AI crawler\'s name was refused as a fake (expected: the CDN lets the real crawlers in by their own addresses).', '%d requests with a search or AI crawler\'s name were refused as fakes (expected: the CDN lets the real crawlers in by their own addresses).', count( $fakes ), 'insightweb' ), count( $fakes ) ) ) . '</p>';
 		}
 	}
-	echo '<p class="description">' . esc_html__( 'The server check only shows user-agent rules: blocks that depend on the caller\'s address show only in the outside check.', 'aw-seo-extras' ) . '</p>';
+	echo '<p class="description">' . esc_html__( 'The server check only shows user-agent rules: blocks that depend on the caller\'s address show only in the outside check.', 'insightweb' ) . '</p>';
 }
 
 if ( defined( 'WP_CLI' ) && WP_CLI ) {

@@ -6,7 +6,7 @@
  * from the default. The constants are defined here from that key, with the same defaults. The form on Search Insights →
  * Settings prints the same fields and writes only that key.
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

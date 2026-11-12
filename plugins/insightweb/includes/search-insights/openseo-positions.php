@@ -11,7 +11,7 @@
  * - Only our keywords are stored; other searches are skipped. Position: a number is stored as the value, anything else
  *   (">9", "not found") as text. Stored as month rows with the day of the read (as the browser checks are), so the rollup leaves them; sending the same day again replaces it.
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -23,7 +23,7 @@ const AW_SI_OPENSEO_POS = 'openseo_serp';
 add_filter(
 	'aw_si_import_kinds',
 	function ( $kinds ) {
-		$kinds[ AW_SI_OPENSEO_POS ] = __( 'OpenSEO positions (CSV: date, query, position; optional: url, top3, paa, source). Kept apart from the browser checks.', 'aw-seo-extras' );
+		$kinds[ AW_SI_OPENSEO_POS ] = __( 'OpenSEO positions (CSV: date, query, position; optional: url, top3, paa, source). Kept apart from the browser checks.', 'insightweb' );
 		return $kinds;
 	}
 );
@@ -54,7 +54,7 @@ function aw_si_openseo_pos_import( string $raw ): array {
 	$qcol                = $head ? (string) current( array_intersect( $head, array( 'query', 'keyword', 'search', 'term' ) ) ) : '';
 	$pcol                = $head ? (string) current( array_intersect( $head, array( 'position', 'rank' ) ) ) : '';
 	if ( '' === $qcol || '' === $pcol ) {
-		$out['error'] = __( 'The rows need a header with a query column and a position column.', 'aw-seo-extras' );
+		$out['error'] = __( 'The rows need a header with a query column and a position column.', 'insightweb' );
 		return $out;
 	}
 	$col   = fn( array $names ) => (string) current( array_intersect( $head, $names ) );

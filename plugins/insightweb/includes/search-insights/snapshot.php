@@ -4,7 +4,7 @@
  * demand, priority, status and action, and keyword-map.md rebuilt from the keyword table. Both are downloads (Settings)
  * and `wp aw-si snapshot csv|map`; a session commits them to docs/seo/ each month. Nothing is committed from the site.
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -154,13 +154,13 @@ function aw_si_keyword_map_md(): string {
 		}
 	}
 	$titles = array(
-		'hub'       => __( 'Section hubs', 'aw-seo-extras' ),
-		'directory' => __( 'Directory', 'aw-seo-extras' ),
-		'topic'     => __( 'Topics', 'aw-seo-extras' ),
-		'guide'     => __( 'Resources guides', 'aw-seo-extras' ),
-		'key-page'  => __( 'Key pages', 'aw-seo-extras' ),
-		'new-row'   => __( 'Rows added since 20 Oct 2026', 'aw-seo-extras' ),
-		'other'     => __( 'Other', 'aw-seo-extras' ),
+		'hub'       => __( 'Section hubs', 'insightweb' ),
+		'directory' => __( 'Directory', 'insightweb' ),
+		'topic'     => __( 'Topics', 'insightweb' ),
+		'guide'     => __( 'Resources guides', 'insightweb' ),
+		'key-page'  => __( 'Key pages', 'insightweb' ),
+		'new-row'   => __( 'Rows added since 20 Oct 2026', 'insightweb' ),
+		'other'     => __( 'Other', 'insightweb' ),
 	);
 	$md     = "# Keyword map — Animal Writes 2.0\n\n";
 	$md    .= '**Rebuilt by Search Insights on ' . wp_date( 'j F Y' ) . ".** The keyword table on the site is the source of truth (plan §2); this file is its monthly copy. The hand-written notes of the 15 Oct map (search titles, the method, cannibalisation notes) are in git history.\n\n";
@@ -207,7 +207,7 @@ add_action(
 	'admin_post_aw_si_download',
 	function () {
 		if ( ! current_user_can( aw_si_cap() ) || ! check_admin_referer( 'aw_si_download' ) ) {
-			wp_die( esc_html__( 'Not allowed.', 'aw-seo-extras' ), 403 );
+			wp_die( esc_html__( 'Not allowed.', 'insightweb' ), 403 );
 		}
 		$what = isset( $_GET['what'] ) ? sanitize_key( wp_unslash( $_GET['what'] ) ) : '';
 		if ( 'map' === $what ) {
@@ -239,10 +239,10 @@ function aw_si_snapshot_row(): void {
 		),
 		'aw_si_download'
 	);
-	echo '<tr><th scope="row">' . esc_html__( 'Monthly snapshot', 'aw-seo-extras' ) . '</th><td><p>';
+	echo '<tr><th scope="row">' . esc_html__( 'Monthly snapshot', 'insightweb' ) . '</th><td><p>';
 	/* translators: %s: month such as 2026-10. */
-	echo '<a class="button" href="' . esc_url( $url( 'csv' ) ) . '">' . esc_html( sprintf( __( 'Download search-insights-%s.csv', 'aw-seo-extras' ), wp_date( 'Y-m' ) ) ) . '</a> ';
-	echo '<a class="button" href="' . esc_url( $url( 'map' ) ) . '">' . esc_html__( 'Download keyword-map.md', 'aw-seo-extras' ) . '</a></p>';
-	echo '<p class="description">' . esc_html__( 'The check list and every tracked P1/P2 keyword, in the columns of the 21 Oct rankings CSV plus demand, priority, status and action; and the keyword map rebuilt from the table. Once a month a session commits both to docs/seo/ (also: wp aw-si snapshot csv|map).', 'aw-seo-extras' ) . '</p></td></tr>';
+	echo '<a class="button" href="' . esc_url( $url( 'csv' ) ) . '">' . esc_html( sprintf( __( 'Download search-insights-%s.csv', 'insightweb' ), wp_date( 'Y-m' ) ) ) . '</a> ';
+	echo '<a class="button" href="' . esc_url( $url( 'map' ) ) . '">' . esc_html__( 'Download keyword-map.md', 'insightweb' ) . '</a></p>';
+	echo '<p class="description">' . esc_html__( 'The check list and every tracked P1/P2 keyword, in the columns of the 21 Oct rankings CSV plus demand, priority, status and action; and the keyword map rebuilt from the table. Once a month a session commits both to docs/seo/ (also: wp aw-si snapshot csv|map).', 'insightweb' ) . '</p></td></tr>';
 }
 add_action( 'aw_si_settings_rows', 'aw_si_snapshot_row', 5 );

@@ -18,7 +18,7 @@
  * Shares and averages are weighted by sessions wherever rows are combined. Clarity notes (the owner's dated
  * summaries): src clarity-note, metric note, txt = the note.
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -107,7 +107,7 @@ function aw_si_clarity_call( array $dimensions ) {
 	$calls = get_option( 'aw_si_clarity_calls', array() );
 	$used  = (int) ( is_array( $calls ) && ( $calls['d'] ?? '' ) === $day ? $calls['n'] : 0 );
 	if ( $used >= AW_SI_CLARITY_MAX ) {
-		return new WP_Error( 'aw_si_clarity', __( 'Clarity: the calls allowed today are used up; the next run tries again.', 'aw-seo-extras' ) );
+		return new WP_Error( 'aw_si_clarity', __( 'Clarity: the calls allowed today are used up; the next run tries again.', 'insightweb' ) );
 	}
 	update_option(
 		'aw_si_clarity_calls',
@@ -137,15 +137,15 @@ function aw_si_clarity_call( array $dimensions ) {
 	$code = (int) wp_remote_retrieve_response_code( $http );
 	if ( 200 !== $code ) {
 		$why = array(
-			401 => __( 'the token is missing, wrong or expired', 'aw-seo-extras' ),
-			403 => __( 'the token is not allowed to export data', 'aw-seo-extras' ),
-			429 => __( 'the daily limit of 10 calls is used up', 'aw-seo-extras' ),
+			401 => __( 'the token is missing, wrong or expired', 'insightweb' ),
+			403 => __( 'the token is not allowed to export data', 'insightweb' ),
+			429 => __( 'the daily limit of 10 calls is used up', 'insightweb' ),
 		);
 		/* translators: 1: HTTP status, 2: reason. */
-		return new WP_Error( 'aw_si_clarity', sprintf( __( 'Clarity answered %1$d: %2$s.', 'aw-seo-extras' ), $code, $why[ $code ] ?? __( 'unexpected answer', 'aw-seo-extras' ) ) );
+		return new WP_Error( 'aw_si_clarity', sprintf( __( 'Clarity answered %1$d: %2$s.', 'insightweb' ), $code, $why[ $code ] ?? __( 'unexpected answer', 'insightweb' ) ) );
 	}
 	$data = json_decode( (string) wp_remote_retrieve_body( $http ), true );
-	return is_array( $data ) ? $data : new WP_Error( 'aw_si_clarity', __( 'Clarity returned no data.', 'aw-seo-extras' ) );
+	return is_array( $data ) ? $data : new WP_Error( 'aw_si_clarity', __( 'Clarity returned no data.', 'insightweb' ) );
 }
 
 /**
@@ -238,7 +238,7 @@ function aw_si_clarity_flagged( array $m ): bool {
 function aw_si_clarity_run( array $args = array() ): array {
 	$dry = ! empty( $args['dry'] );
 	if ( ! aw_si_clarity_on() ) {
-		return array( 'error' => __( 'No Clarity token: add it under Animal Writes → Keys.', 'aw-seo-extras' ) );
+		return array( 'error' => __( 'No Clarity token: add it under Animal Writes → Keys.', 'insightweb' ) );
 	}
 	if ( ! $dry ) {
 		aw_si_run_start( 'clarity' );
@@ -509,7 +509,7 @@ add_action(
 	'admin_post_aw_si_note',
 	function () {
 		if ( ! current_user_can( aw_si_cap() ) || ! check_admin_referer( 'aw_si_note' ) ) {
-			wp_die( esc_html__( 'Not allowed.', 'aw-seo-extras' ), 403 );
+			wp_die( esc_html__( 'Not allowed.', 'insightweb' ), 403 );
 		}
 		$path = isset( $_POST['path'] ) ? aw_si_path( home_url( sanitize_text_field( wp_unslash( $_POST['path'] ) ) ) ) : '';
 		$note = isset( $_POST['note'] ) ? sanitize_textarea_field( wp_unslash( $_POST['note'] ) ) : '';

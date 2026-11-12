@@ -6,7 +6,7 @@
  * scheduled jobs and routes (docs/insightweb-plan.md). It needs Kits Core, Animal Writes Core and Rank Math, checked in
  * includes/bootstrap.php (not with a Requires Plugins header: on live Kits Core is loaded by Animal Writes Core).
  *
- * @package           aw-seo-extras
+ * @package           insightweb
  * @author            Wugweb
  * @copyright         2026 Wugweb
  * @license           GPL-2.0-or-later
@@ -22,7 +22,7 @@
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Update URI:        https://wugweb.com/plugins/insightweb/
- * Text Domain:       aw-seo-extras
+ * Text Domain:       insightweb
  * Domain Path:       /languages
  */
 

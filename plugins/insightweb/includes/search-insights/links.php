@@ -7,7 +7,7 @@
  * Rows come from the one-time seed (links-seed.php), the monthly Bing Webmaster run (bing.php) and
  * `wp aw-si links add`, and the Search Console Links exports imported on the tab (links-import.php).
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -19,12 +19,12 @@ require_once __DIR__ . '/links-import.php'; // the Search Console Links import, 
 /** Link types and their labels; '' is unsorted. Filter aw_si_link_types adds more. */
 function aw_si_link_types(): array {
 	$types = array(
-		'press'        => __( 'Press', 'aw-seo-extras' ),
-		'organisation' => __( 'Organisation', 'aw-seo-extras' ),
-		'social'       => __( 'Social', 'aw-seo-extras' ),
-		'directory'    => __( 'Directory', 'aw-seo-extras' ),
-		'copy'         => __( 'Copy', 'aw-seo-extras' ),
-		'spam'         => __( 'Spam', 'aw-seo-extras' ),
+		'press'        => __( 'Press', 'insightweb' ),
+		'organisation' => __( 'Organisation', 'insightweb' ),
+		'social'       => __( 'Social', 'insightweb' ),
+		'directory'    => __( 'Directory', 'insightweb' ),
+		'copy'         => __( 'Copy', 'insightweb' ),
+		'spam'         => __( 'Spam', 'insightweb' ),
 	);
 	return (array) apply_filters( 'aw_si_link_types', $types ); // alerts.php adds Mention.
 }
@@ -90,7 +90,7 @@ function aw_si_link_put( array $l ): int {
  * The Links tab.
  */
 
-add_filter( 'aw_si_tabs', fn( $tabs ) => (array) $tabs + array( 'links' => __( 'Links', 'aw-seo-extras' ) ) );
+add_filter( 'aw_si_tabs', fn( $tabs ) => (array) $tabs + array( 'links' => __( 'Links', 'insightweb' ) ) );
 
 add_filter( 'removable_query_args', fn( $args ) => array_merge( (array) $args, array( 'linked', 'links_imported' ) ) );
 
@@ -106,14 +106,14 @@ add_filter(
 /** The bulk and row actions: hide, unhide, and set a type. */
 function aw_si_link_actions(): array {
 	$out = array(
-		'link_hide'   => __( 'Hide', 'aw-seo-extras' ),
-		'link_unhide' => __( 'Unhide', 'aw-seo-extras' ),
+		'link_hide'   => __( 'Hide', 'insightweb' ),
+		'link_unhide' => __( 'Unhide', 'insightweb' ),
 	);
 	foreach ( aw_si_link_types() as $key => $label ) {
 		/* translators: %s: link type. */
-		$out[ 'link_type_' . $key ] = sprintf( __( 'Set type: %s', 'aw-seo-extras' ), $label );
+		$out[ 'link_type_' . $key ] = sprintf( __( 'Set type: %s', 'insightweb' ), $label );
 	}
-	$out['link_type_unsorted'] = __( 'Set type: Unsorted', 'aw-seo-extras' );
+	$out['link_type_unsorted'] = __( 'Set type: Unsorted', 'insightweb' );
 	return $out;
 }
 
@@ -125,7 +125,7 @@ function aw_si_links_load(): void {
 	add_screen_option(
 		'per_page',
 		array(
-			'label'   => __( 'Links per page', 'aw-seo-extras' ),
+			'label'   => __( 'Links per page', 'insightweb' ),
 			'default' => 50,
 			'option'  => 'aw_si_links_per_page',
 		)
@@ -143,7 +143,7 @@ function aw_si_links_load(): void {
 	}
 	check_admin_referer( 'bulk-links' );
 	if ( ! current_user_can( aw_si_cap() ) ) {
-		wp_die( esc_html__( 'Not allowed.', 'aw-seo-extras' ), 403 );
+		wp_die( esc_html__( 'Not allowed.', 'insightweb' ), 403 );
 	}
 	$ids = array_filter( array_map( 'intval', (array) wp_unslash( $_REQUEST['link_id'] ?? array() ) ) );
 	if ( $ids ) {
@@ -171,14 +171,14 @@ add_action( 'aw_si_load_tab_links', 'aw_si_links_load' );
 function aw_si_links_tab(): void {
 	require_once __DIR__ . '/class-aw-si-links-table.php';
 	if ( ! function_exists( 'aw_si_bing_on' ) || ! aw_si_bing_on() ) {
-		wp_admin_notice( esc_html__( 'No Bing Webmaster API key yet: add it under Animal Writes → Keys.', 'aw-seo-extras' ), array( 'type' => 'info', 'additional_classes' => array( 'inline' ) ) );
+		wp_admin_notice( esc_html__( 'No Bing Webmaster API key yet: add it under Animal Writes → Keys.', 'insightweb' ), array( 'type' => 'info', 'additional_classes' => array( 'inline' ) ) );
 	}
 	if ( isset( $_GET['linked'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- message only.
 		$n = absint( wp_unslash( $_GET['linked'] ) ); // phpcs:ignore WordPress.Security.NonceVerification -- message only.
-		wp_admin_notice( esc_html( $n ? __( 'Saved.', 'aw-seo-extras' ) : __( 'No link was selected, so nothing changed.', 'aw-seo-extras' ) ), array( 'type' => $n ? 'success' : 'warning', 'additional_classes' => array( 'inline' ) ) );
+		wp_admin_notice( esc_html( $n ? __( 'Saved.', 'insightweb' ) : __( 'No link was selected, so nothing changed.', 'insightweb' ) ), array( 'type' => $n ? 'success' : 'warning', 'additional_classes' => array( 'inline' ) ) );
 	}
 	aw_si_links_import_notice();
-	echo '<p>' . esc_html__( 'Sites that link to us: from Bing Webmaster (monthly, on the 2nd), the Search Console Links exports imported below, Google Alerts, and the 25–26 Oct lists. Spam is hidden and shows only in the Spam view; nothing here is deleted. Set a type with the bulk actions.', 'aw-seo-extras' ) . '</p>';
+	echo '<p>' . esc_html__( 'Sites that link to us: from Bing Webmaster (monthly, on the 2nd), the Search Console Links exports imported below, Google Alerts, and the 25–26 Oct lists. Spam is hidden and shows only in the Spam view; nothing here is deleted. Set a type with the bulk actions.', 'insightweb' ) . '</p>';
 	aw_si_links_reads_section();
 	$table = new AW_SI_Links_Table();
 	$table->prepare_items();
@@ -188,7 +188,7 @@ function aw_si_links_tab(): void {
 	if ( $view ) {
 		echo '<input type="hidden" name="view" value="' . esc_attr( $view ) . '">';
 	}
-	$table->search_box( __( 'Search links', 'aw-seo-extras' ), 'aw-si-links' );
+	$table->search_box( __( 'Search links', 'insightweb' ), 'aw-si-links' );
 	$table->display();
 	echo '</form>';
 	aw_si_links_import_form();

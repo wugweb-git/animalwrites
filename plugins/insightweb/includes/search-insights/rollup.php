@@ -8,7 +8,7 @@
  * position is the mean weighted by impressions, and value is summed for counts or kept as the month's last value for
  * indexes (aw_si_metric_kind). A month rolled up over several runs is merged into the same monthly row.
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -145,7 +145,7 @@ function aw_si_rollup( bool $dry = false, int $limit = 50000 ): array {
 		$error = $wpdb->last_error;
 		$wpdb->query( 'ROLLBACK' );
 		/* translators: %s: database error. */
-		return array( 'error' => sprintf( __( 'The rollup could not save the monthly rows, so the daily rows were kept: %s', 'aw-seo-extras' ), $error ) );
+		return array( 'error' => sprintf( __( 'The rollup could not save the monthly rows, so the daily rows were kept: %s', 'insightweb' ), $error ) );
 	}
 	$wpdb->query( 'COMMIT' );
 	// phpcs:enable

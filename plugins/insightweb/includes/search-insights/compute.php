@@ -4,7 +4,7 @@
  * position, the latest live check, the owning page, priority, status and a suggested action. Results are copied onto
  * the keyword record so the lists sort without aggregating obs. Suggestions only: nothing else on the site changes.
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -20,16 +20,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 /** Suggested actions (plan §7). Keys are stored; labels are shown. */
 function aw_si_actions(): array {
 	return array(
-		'fix-conflict'   => __( 'Fix conflict', 'aw-seo-extras' ),
-		'new-guide'      => __( 'New page: guide', 'aw-seo-extras' ),
-		'new-district'   => __( 'New page: district or state page', 'aw-seo-extras' ),
-		'new-page'       => __( 'New page', 'aw-seo-extras' ), // Before 25 Oct; the next daily calculation replaces it.
-		'guide-update'   => __( 'Update the page', 'aw-seo-extras' ),
-		'add-secondary'  => __( 'Add as secondary keyphrase', 'aw-seo-extras' ),
-		'faq-answer'     => __( 'FAQ answer', 'aw-seo-extras' ),
-		'news-explainer' => __( 'News explainer', 'aw-seo-extras' ),
-		'sourcing'       => __( 'Consider as Sourcing keyword', 'aw-seo-extras' ),
-		'page-quality'   => __( 'Check page quality', 'aw-seo-extras' ),
+		'fix-conflict'   => __( 'Fix conflict', 'insightweb' ),
+		'new-guide'      => __( 'New page: guide', 'insightweb' ),
+		'new-district'   => __( 'New page: district or state page', 'insightweb' ),
+		'new-page'       => __( 'New page', 'insightweb' ), // Before 25 Oct; the next daily calculation replaces it.
+		'guide-update'   => __( 'Update the page', 'insightweb' ),
+		'add-secondary'  => __( 'Add as secondary keyphrase', 'insightweb' ),
+		'faq-answer'     => __( 'FAQ answer', 'insightweb' ),
+		'news-explainer' => __( 'News explainer', 'insightweb' ),
+		'sourcing'       => __( 'Consider as Sourcing keyword', 'insightweb' ),
+		'page-quality'   => __( 'Check page quality', 'insightweb' ),
 	);
 }
 
@@ -471,7 +471,7 @@ function aw_si_compute(): array {
 			if ( false === $wpdb->update( $k, $set, array( 'id' => $id ) ) ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 				$count['failed'] = ( $count['failed'] ?? 0 ) + 1;
 				if ( empty( $count['errors'] ) ) {
-					$count['errors'] = array( __( 'Some keyword records could not be updated: ', 'aw-seo-extras' ) . $wpdb->last_error );
+					$count['errors'] = array( __( 'Some keyword records could not be updated: ', 'insightweb' ) . $wpdb->last_error );
 				}
 			}
 		}

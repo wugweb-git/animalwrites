@@ -24,7 +24,7 @@
  * camp rows: period 28d, d = the last day of the window, metric camp_view (sessions), camp_sent or camp_conf (events),
  * page = page path, txt = source; replaced and kept the same way as nf.
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -421,7 +421,7 @@ function aw_si_ga4_run( array $args = array() ): array {
 				$data = aw_si_ga4_fetch_day( $module, $day );
 				if ( is_wp_error( $data ) ) {
 					/* translators: 1: date, 2: error message. */
-					$rep['error'] = sprintf( __( 'GA4 could not be read for %1$s: %2$s', 'aw-seo-extras' ), $day, $data->get_error_message() );
+					$rep['error'] = sprintf( __( 'GA4 could not be read for %1$s: %2$s', 'insightweb' ), $day, $data->get_error_message() );
 					break;
 				}
 				$rows = aw_si_ga4_obs_rows( $data );
@@ -514,15 +514,15 @@ function aw_si_ga4_run( array $args = array() ): array {
 			);
 			if ( ! empty( $rep['warnings'] ) ) {
 				/* translators: 1: dates, 2: GA4's error. */
-				aw_si_run_fail( 'ga4', sprintf( __( 'GA4 referral figures could not be read for %1$s (the earlier figures were kept): %2$s', 'aw-seo-extras' ), implode( ', ', array_keys( $rep['warnings'] ) ), (string) reset( $rep['warnings'] )[0] ) );
+				aw_si_run_fail( 'ga4', sprintf( __( 'GA4 referral figures could not be read for %1$s (the earlier figures were kept): %2$s', 'insightweb' ), implode( ', ', array_keys( $rep['warnings'] ) ), (string) reset( $rep['warnings'] )[0] ) );
 			}
 			if ( ! empty( $rep['nf_error'] ) ) {
 				/* translators: %s: GA4's error. */
-				aw_si_run_fail( 'ga4', sprintf( __( 'GA4 404 figures could not be read (the earlier figures were kept): %s', 'aw-seo-extras' ), $rep['nf_error'] ) );
+				aw_si_run_fail( 'ga4', sprintf( __( 'GA4 404 figures could not be read (the earlier figures were kept): %s', 'insightweb' ), $rep['nf_error'] ) );
 			}
 			if ( ! empty( $rep['camp_error'] ) ) {
 				/* translators: %s: GA4's error. */
-				aw_si_run_fail( 'ga4', sprintf( __( 'GA4 campaign figures could not be read (the earlier figures were kept): %s', 'aw-seo-extras' ), $rep['camp_error'] ) );
+				aw_si_run_fail( 'ga4', sprintf( __( 'GA4 campaign figures could not be read (the earlier figures were kept): %s', 'insightweb' ), $rep['camp_error'] ) );
 			}
 		}
 	}

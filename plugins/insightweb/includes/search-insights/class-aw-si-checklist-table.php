@@ -3,7 +3,7 @@
  * Check list tab list table: the keywords of the monthly live check, this month's result and the last one, with
  * Remove as a row and bulk action. Changes only the list (option aw_si_checklist).
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -34,13 +34,13 @@ class AW_SI_Checklist_Table extends WP_List_Table {
 	public function get_columns() {
 		return array(
 			'cb'     => '<input type="checkbox">',
-			'label'  => __( 'Keyword', 'aw-seo-extras' ),
-			'month'  => __( 'This month', 'aw-seo-extras' ),
-			'last'   => __( 'Last live check', 'aw-seo-extras' ),
-			'top3'   => __( 'Top 3 domains', 'aw-seo-extras' ),
-			'paa'    => __( 'People also ask', 'aw-seo-extras' ),
-			'pos28'  => __( 'Search Console position', 'aw-seo-extras' ),
-			'impr28' => __( 'Impressions (28 days)', 'aw-seo-extras' ),
+			'label'  => __( 'Keyword', 'insightweb' ),
+			'month'  => __( 'This month', 'insightweb' ),
+			'last'   => __( 'Last live check', 'insightweb' ),
+			'top3'   => __( 'Top 3 domains', 'insightweb' ),
+			'paa'    => __( 'People also ask', 'insightweb' ),
+			'pos28'  => __( 'Search Console position', 'insightweb' ),
+			'impr28' => __( 'Impressions (28 days)', 'insightweb' ),
 		);
 	}
 
@@ -60,7 +60,7 @@ class AW_SI_Checklist_Table extends WP_List_Table {
 
 	/** Bulk action. */
 	protected function get_bulk_actions() {
-		return array( 'remove' => __( 'Remove from the list', 'aw-seo-extras' ) );
+		return array( 'remove' => __( 'Remove from the list', 'insightweb' ) );
 	}
 
 	/** The list with this month's and the latest live results. */
@@ -127,7 +127,7 @@ class AW_SI_Checklist_Table extends WP_List_Table {
 
 	/** Message for an empty list. */
 	public function no_items() {
-		esc_html_e( 'The check list is empty. Add keywords above, or rebuild it from the rules.', 'aw-seo-extras' );
+		esc_html_e( 'The check list is empty. Add keywords above, or rebuild it from the rules.', 'insightweb' );
 	}
 
 	/**
@@ -155,7 +155,7 @@ class AW_SI_Checklist_Table extends WP_List_Table {
 			),
 			'bulk-checklist'
 		);
-		return '<strong>' . esc_html( $item->label ) . '</strong>' . $this->row_actions( array( 'remove' => '<a href="' . esc_url( $url ) . '">' . esc_html__( 'Remove', 'aw-seo-extras' ) . '</a>' ) );
+		return '<strong>' . esc_html( $item->label ) . '</strong>' . $this->row_actions( array( 'remove' => '<a href="' . esc_url( $url ) . '">' . esc_html__( 'Remove', 'insightweb' ) . '</a>' ) );
 	}
 
 	/**
@@ -165,10 +165,10 @@ class AW_SI_Checklist_Table extends WP_List_Table {
 	 */
 	protected function column_month( $item ) {
 		if ( false !== strpos( $item->label, '{' ) ) {
-			return '<span class="description">' . esc_html__( 'not searched (Directory pattern)', 'aw-seo-extras' ) . '</span>';
+			return '<span class="description">' . esc_html__( 'not searched (Directory pattern)', 'insightweb' ) . '</span>';
 		}
 		$m = $item->live['month'] ?? null;
-		return $m ? esc_html( (string) $m->txt ) : '<span class="description">' . esc_html__( 'not yet', 'aw-seo-extras' ) . '</span>';
+		return $m ? esc_html( (string) $m->txt ) : '<span class="description">' . esc_html__( 'not yet', 'insightweb' ) . '</span>';
 	}
 
 	/**

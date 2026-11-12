@@ -58,9 +58,9 @@ const RANGES = [ 7, 28, 90 ];
 
 const figureColumns = ( first ) => [
 	{ key: 'title', label: first, primary: true },
-	{ key: 'clicks', label: __( 'Clicks', 'aw-seo-extras' ) },
-	{ key: 'impr', label: __( 'Impressions', 'aw-seo-extras' ) },
-	{ key: 'pos', label: __( 'Position', 'aw-seo-extras' ) },
+	{ key: 'clicks', label: __( 'Clicks', 'insightweb' ) },
+	{ key: 'impr', label: __( 'Impressions', 'insightweb' ) },
+	{ key: 'pos', label: __( 'Position', 'insightweb' ) },
 ];
 
 function Dashboard() {
@@ -109,7 +109,7 @@ function Dashboard() {
 				setNote(
 					__(
 						'A count is running in the background. The numbers change when it is done.',
-						'aw-seo-extras'
+						'insightweb'
 					)
 				);
 			} )
@@ -123,7 +123,7 @@ function Dashboard() {
 	if ( ! data ) {
 		return (
 			<LoadingState
-				label={ __( 'Loading the figures…', 'aw-seo-extras' ) }
+				label={ __( 'Loading the figures…', 'insightweb' ) }
 			/>
 		);
 	}
@@ -131,11 +131,11 @@ function Dashboard() {
 	let after = data.atText
 		? sprintf(
 				/* translators: 1: date of the newest figures, 2: date and time of the count. */
-				__( 'Figures up to %1$s, counted %2$s.', 'aw-seo-extras' ),
+				__( 'Figures up to %1$s, counted %2$s.', 'insightweb' ),
 				data.endText || '–',
 				data.atText
 			)
-		: __( 'Counting for the first time…', 'aw-seo-extras' );
+		: __( 'Counting for the first time…', 'insightweb' );
 	if ( range && ! range.compared && ! data.counting ) {
 		after +=
 			' ' +
@@ -143,7 +143,7 @@ function Dashboard() {
 				/* translators: %d: number of days. */
 				__(
 					'The %d days before are not all stored, so no change is shown.',
-					'aw-seo-extras'
+					'insightweb'
 				),
 				days
 			);
@@ -153,7 +153,7 @@ function Dashboard() {
 			' ' +
 			__(
 				'The count is taking longer than usual; reload this page later.',
-				'aw-seo-extras'
+				'insightweb'
 			);
 	}
 	const health = data.health || { tiles: [], sources: [] };
@@ -166,18 +166,18 @@ function Dashboard() {
 				<Notice tone="warning">
 					{ __(
 						'Search Insights is off: its data was deleted and nothing runs on schedule. Run the daily update on the current Settings to start it again.',
-						'aw-seo-extras'
+						'insightweb'
 					) }
 				</Notice>
 			) }
 			<ChipRow
-				label={ __( 'Time range', 'aw-seo-extras' ) }
+				label={ __( 'Time range', 'insightweb' ) }
 				value={ days }
 				onChange={ setDays }
 				chips={ RANGES.map( ( n ) => ( {
 					value: n,
 					/* translators: %d: number of days. */
-					label: sprintf( __( 'Last %d days', 'aw-seo-extras' ), n ),
+					label: sprintf( __( 'Last %d days', 'insightweb' ), n ),
 				} ) ) }
 				after={
 					<>
@@ -187,7 +187,7 @@ function Dashboard() {
 							busy={ busy }
 							onClick={ countNow }
 						>
-							{ __( 'Count now', 'aw-seo-extras' ) }
+							{ __( 'Count now', 'insightweb' ) }
 						</Button>
 					</>
 				}
@@ -200,7 +200,7 @@ function Dashboard() {
 			{ attention.length > 0 && (
 				<Notice tone="warning">
 					<strong>
-						{ __( 'Needs attention', 'aw-seo-extras' ) }
+						{ __( 'Needs attention', 'insightweb' ) }
 					</strong>
 					<ul>
 						{ attention.map( ( t ) => (
@@ -212,7 +212,7 @@ function Dashboard() {
 				</Notice>
 			) }
 			<TileGrid
-				label={ __( 'Search Insights at a glance', 'aw-seo-extras' ) }
+				label={ __( 'Search Insights at a glance', 'insightweb' ) }
 			>
 				{ ( range?.tiles || PLACEHOLDER ).map( ( t ) => (
 					<Tile
@@ -224,7 +224,7 @@ function Dashboard() {
 							noRows
 								? __(
 										'No Search Console rows stored yet',
-										'aw-seo-extras'
+										'insightweb'
 									)
 								: t.sub
 						}
@@ -246,19 +246,19 @@ function Dashboard() {
 			{ range && range.chart.length > 1 && (
 				<SectionCard
 					id="clicks-per-day"
-					title={ __( 'Clicks per day', 'aw-seo-extras' ) }
+					title={ __( 'Clicks per day', 'insightweb' ) }
 				>
 					<MiniChart
 						label={ sprintf(
 							/* translators: %d: number of days. */
 							__(
 								'Clicks per day, last %d days',
-								'aw-seo-extras'
+								'insightweb'
 							),
 							days
 						) }
 						points={ range.chart }
-						unit={ __( 'clicks', 'aw-seo-extras' ) }
+						unit={ __( 'clicks', 'insightweb' ) }
 					/>
 				</SectionCard>
 			) }
@@ -266,23 +266,23 @@ function Dashboard() {
 				<>
 					<SectionCard
 						id="top-pages"
-						title={ __( 'Top pages', 'aw-seo-extras' ) }
+						title={ __( 'Top pages', 'insightweb' ) }
 						description={ __(
 							'The pages with the most clicks from Google in this range.',
-							'aw-seo-extras'
+							'insightweb'
 						) }
 						actions={
 							<a href={ data.links?.pages }>
-								{ __( 'All pages', 'aw-seo-extras' ) }
+								{ __( 'All pages', 'insightweb' ) }
 							</a>
 						}
 					>
 						<DataList
-							label={ __( 'Top pages', 'aw-seo-extras' ) }
+							label={ __( 'Top pages', 'insightweb' ) }
 							columns={ [
 								{
 									...figureColumns(
-										__( 'Page', 'aw-seo-extras' )
+										__( 'Page', 'insightweb' )
 									)[ 0 ],
 									render: ( r ) =>
 										r.url ? (
@@ -296,32 +296,32 @@ function Dashboard() {
 							rows={ range?.topPages || [] }
 							emptyTitle={ __(
 								'No page figures stored for this range yet.',
-								'aw-seo-extras'
+								'insightweb'
 							) }
 						/>
 					</SectionCard>
 					<SectionCard
 						id="top-searches"
-						title={ __( 'Top searches', 'aw-seo-extras' ) }
+						title={ __( 'Top searches', 'insightweb' ) }
 						description={ __(
 							'The searches that brought the most clicks in this range.',
-							'aw-seo-extras'
+							'insightweb'
 						) }
 						actions={
 							<a href={ data.links?.keywords }>
-								{ __( 'All keywords', 'aw-seo-extras' ) }
+								{ __( 'All keywords', 'insightweb' ) }
 							</a>
 						}
 					>
 						<DataList
-							label={ __( 'Top searches', 'aw-seo-extras' ) }
+							label={ __( 'Top searches', 'insightweb' ) }
 							columns={ figureColumns(
-								__( 'Search', 'aw-seo-extras' )
+								__( 'Search', 'insightweb' )
 							) }
 							rows={ range?.topQueries || [] }
 							emptyTitle={ __(
 								'No search figures stored for this range yet.',
-								'aw-seo-extras'
+								'insightweb'
 							) }
 						/>
 					</SectionCard>
@@ -329,27 +329,27 @@ function Dashboard() {
 			) }
 			<SectionCard
 				id="sources"
-				title={ __( 'Daily jobs', 'aw-seo-extras' ) }
+				title={ __( 'Daily jobs', 'insightweb' ) }
 				description={ __(
 					'Each source’s last good run. A failed run keeps the figures it had.',
-					'aw-seo-extras'
+					'insightweb'
 				) }
 			>
 				<DataList
-					label={ __( 'Daily jobs', 'aw-seo-extras' ) }
+					label={ __( 'Daily jobs', 'insightweb' ) }
 					columns={ [
 						{
 							key: 'title',
-							label: __( 'Source', 'aw-seo-extras' ),
+							label: __( 'Source', 'insightweb' ),
 							primary: true,
 						},
 						{
 							key: 'last',
-							label: __( 'Last good run', 'aw-seo-extras' ),
+							label: __( 'Last good run', 'insightweb' ),
 						},
 						{
 							key: 'status',
-							label: __( 'State', 'aw-seo-extras' ),
+							label: __( 'State', 'insightweb' ),
 							render: ( r ) =>
 								r.tone ? (
 									<>
@@ -362,7 +362,7 @@ function Dashboard() {
 						},
 					] }
 					rows={ health.sources }
-					emptyTitle={ __( 'No sources yet.', 'aw-seo-extras' ) }
+					emptyTitle={ __( 'No sources yet.', 'insightweb' ) }
 				/>
 			</SectionCard>
 			<OverviewBoxes />
@@ -405,11 +405,11 @@ function OverviewBoxes() {
 		const g = got[ b.key ];
 		let body;
 		if ( ! g ) {
-			body = <LoadingState label={ __( 'Loading…', 'aw-seo-extras' ) } />;
+			body = <LoadingState label={ __( 'Loading…', 'insightweb' ) } />;
 		} else if ( g.error ) {
 			body = <Notice tone="error">{ g.error }</Notice>;
 		} else if ( ! g.blocks.length ) {
-			body = <p>{ __( 'Nothing yet.', 'aw-seo-extras' ) }</p>;
+			body = <p>{ __( 'Nothing yet.', 'insightweb' ) }</p>;
 		} else {
 			body = <BlockParts blocks={ g.blocks } title={ b.title } />;
 		}
@@ -427,12 +427,12 @@ function OverviewBoxes() {
 
 // Tiles shown while the first count runs.
 const PLACEHOLDER = [
-	[ 'clicks', __( 'Clicks', 'aw-seo-extras' ) ],
-	[ 'impr', __( 'Impressions', 'aw-seo-extras' ) ],
-	[ 'ctr', __( 'Click rate', 'aw-seo-extras' ) ],
-	[ 'pos', __( 'Average position', 'aw-seo-extras' ) ],
-	[ 'pages', __( 'Pages in search', 'aw-seo-extras' ) ],
-	[ 'queries', __( 'Searches', 'aw-seo-extras' ) ],
+	[ 'clicks', __( 'Clicks', 'insightweb' ) ],
+	[ 'impr', __( 'Impressions', 'insightweb' ) ],
+	[ 'ctr', __( 'Click rate', 'insightweb' ) ],
+	[ 'pos', __( 'Average position', 'insightweb' ) ],
+	[ 'pages', __( 'Pages in search', 'insightweb' ) ],
+	[ 'queries', __( 'Searches', 'insightweb' ) ],
 ].map( ( [ key, label ] ) => ( { key, label, value: '', sub: '' } ) );
 
 /* ---------- Settings ---------- */
@@ -554,17 +554,17 @@ function Group( { group, onSaved, onDirty } ) {
 				disabled={ ! dirty }
 				onClick={ () => save( body ) }
 			>
-				{ __( 'Save changes', 'aw-seo-extras' ) }
+				{ __( 'Save changes', 'insightweb' ) }
 			</Button>
 			{ anyChanged && (
 				<ConfirmButton
-					label={ __( 'Restore defaults', 'aw-seo-extras' ) }
+					label={ __( 'Restore defaults', 'insightweb' ) }
 					question={
 						/* translators: %d: number of changed numbers. */ _n(
 							'Put %d changed number back to its default?',
 							'Put %d changed numbers back to their defaults?',
 							changedCount,
-							'aw-seo-extras'
+							'insightweb'
 						)
 					}
 					count={ changedCount }
@@ -619,11 +619,11 @@ function Group( { group, onSaved, onDirty } ) {
 				</SettingsBlock>
 			) ) }
 			{ group.gdelt && (
-				<SettingsBlock title={ __( 'News (GDELT)', 'aw-seo-extras' ) }>
+				<SettingsBlock title={ __( 'News (GDELT)', 'insightweb' ) }>
 					<Switch
 						label={ __(
 							'Use GDELT for Rising (Indian news counts, daily)',
-							'aw-seo-extras'
+							'insightweb'
 						) }
 						checked={ !! state.gdelt }
 						help={ group.gdelt.help }
@@ -635,10 +635,10 @@ function Group( { group, onSaved, onDirty } ) {
 			) }
 			{ group.seeds && (
 				<SettingsBlock
-					title={ __( 'Seeds for keyword tools', 'aw-seo-extras' ) }
+					title={ __( 'Seeds for keyword tools', 'insightweb' ) }
 				>
 					<Field
-						label={ __( 'Searches', 'aw-seo-extras' ) }
+						label={ __( 'Searches', 'insightweb' ) }
 						help={ group.seeds.help }
 						render={ ( id, helpId ) => (
 							<textarea
@@ -679,20 +679,20 @@ function Services() {
 	if ( ! list.length ) {
 		return (
 			<EmptyState
-				title={ __( 'No connected services.', 'aw-seo-extras' ) }
+				title={ __( 'No connected services.', 'insightweb' ) }
 			/>
 		);
 	}
 	return (
 		<SectionCard
 			id={ `insightweb-group-${ SERVICES }` }
-			title={ __( 'Connected services', 'aw-seo-extras' ) }
+			title={ __( 'Connected services', 'insightweb' ) }
 			description={ __(
 				'Where the figures come from. Search Insights only reads them. Keys stay in Kits → Keys and are never shown.',
-				'aw-seo-extras'
+				'insightweb'
 			) }
 		>
-			<ServiceList label={ __( 'Connected services', 'aw-seo-extras' ) }>
+			<ServiceList label={ __( 'Connected services', 'insightweb' ) }>
 				{ list.map( ( s ) => (
 					<ServiceRow
 						key={ s.slug }
@@ -778,14 +778,14 @@ function Settings() {
 	if ( ! data ) {
 		return (
 			<LoadingState
-				label={ __( 'Loading the settings…', 'aw-seo-extras' ) }
+				label={ __( 'Loading the settings…', 'insightweb' ) }
 			/>
 		);
 	}
 	const chips = [
 		{
 			value: SERVICES,
-			label: __( 'Connected services', 'aw-seo-extras' ),
+			label: __( 'Connected services', 'insightweb' ),
 			href: `#${ SERVICES }`,
 		},
 		...data.groups.map( ( g ) => ( {
@@ -795,14 +795,14 @@ function Settings() {
 		} ) ),
 		{
 			value: MORE,
-			label: __( 'Runs and data', 'aw-seo-extras' ),
+			label: __( 'Runs and data', 'insightweb' ),
 			href: `#${ MORE }`,
 		},
 	];
 	return (
 		<>
 			<ChipRow
-				label={ __( 'Settings groups', 'aw-seo-extras' ) }
+				label={ __( 'Settings groups', 'insightweb' ) }
 				chips={ chips }
 				value={ open }
 				onChange={ setOpen }
@@ -811,15 +811,15 @@ function Settings() {
 			{ MORE === open && (
 				<SectionCard
 					id={ MORE }
-					title={ __( 'Runs and data', 'aw-seo-extras' ) }
+					title={ __( 'Runs and data', 'insightweb' ) }
 					description={ __(
 						'The schedule, keys, Run now, snapshots, imports and Delete data.',
-						'aw-seo-extras'
+						'insightweb'
 					) }
 				>
 					<PageParts
 						parts={ app.more || [] }
-						title={ __( 'Runs and data', 'aw-seo-extras' ) }
+						title={ __( 'Runs and data', 'insightweb' ) }
 					/>
 				</SectionCard>
 			) }
@@ -845,7 +845,7 @@ function TabScreen() {
 				<p>
 					{ __(
 						'Nothing to show on this tab yet.',
-						'aw-seo-extras'
+						'insightweb'
 					) }
 				</p>
 			) }

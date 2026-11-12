@@ -10,7 +10,7 @@
  * come in the same answer: field-lcp/inp/cls-{strategy} per page when Chrome has them for it, and the whole site's
  * site-lcp/inp/cls-{strategy} on the home page row.
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -170,7 +170,7 @@ function aw_si_psi_call( string $path, string $strategy ) {
 		}
 		if ( 200 !== (int) wp_remote_retrieve_response_code( $http ) ) {
 			/* translators: 1: Site Kit's problem, 2: HTTP status. */
-			return new WP_Error( 'aw_si_psi', sprintf( __( '%1$s The PageSpeed API answered %2$d.', 'aw-seo-extras' ), $resp->get_error_message(), (int) wp_remote_retrieve_response_code( $http ) ) );
+			return new WP_Error( 'aw_si_psi', sprintf( __( '%1$s The PageSpeed API answered %2$d.', 'insightweb' ), $resp->get_error_message(), (int) wp_remote_retrieve_response_code( $http ) ) );
 		}
 		$resp = json_decode( (string) wp_remote_retrieve_body( $http ), true );
 	}
@@ -178,7 +178,7 @@ function aw_si_psi_call( string $path, string $strategy ) {
 		return $resp;
 	}
 	$fig = aw_si_psi_figures( $resp );
-	return null === $fig['score'] ? new WP_Error( 'aw_si_psi', __( 'PageSpeed returned no performance score.', 'aw-seo-extras' ) ) : $fig;
+	return null === $fig['score'] ? new WP_Error( 'aw_si_psi', __( 'PageSpeed returned no performance score.', 'insightweb' ) ) : $fig;
 }
 
 /** Start this week's queue: every key page, mobile and desktop. */
@@ -262,7 +262,7 @@ function aw_si_psi_step(): array {
 		);
 	} else {
 		/* translators: %s: first error. */
-		aw_si_run_fail( 'psi', sprintf( __( 'No PageSpeed call worked: %s', 'aw-seo-extras' ), (string) ( $q['errors'][0] ?? '' ) ) );
+		aw_si_run_fail( 'psi', sprintf( __( 'No PageSpeed call worked: %s', 'insightweb' ), (string) ( $q['errors'][0] ?? '' ) ) );
 	}
 	return $q;
 }

@@ -5,7 +5,7 @@
  * module's owner, except PageSpeed, which Site Kit gives no owner (it runs as the Search Console owner; owner,
  * 25 Oct 2026). Site Kit's own module layer; its tokens are never read here.
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -44,7 +44,7 @@ function aw_si_with_module( string $slug, callable $callback ) {
 		return $callback( $fake );
 	}
 	if ( ! class_exists( '\Google\Site_Kit\Core\Modules\Modules' ) ) {
-		return new WP_Error( 'aw_si_sitekit', __( 'Site Kit by Google is not active.', 'aw-seo-extras' ) );
+		return new WP_Error( 'aw_si_sitekit', __( 'Site Kit by Google is not active.', 'insightweb' ) );
 	}
 	$settings = get_option( 'googlesitekit_' . $slug . '_settings' );
 	$owner    = is_array( $settings ) ? (int) ( $settings['ownerID'] ?? 0 ) : 0;
@@ -61,27 +61,27 @@ function aw_si_with_module( string $slug, callable $callback ) {
 	}
 	if ( ! $owner || ! get_userdata( $owner ) ) {
 		/* translators: %s: Site Kit module slug, e.g. search-console. */
-		return new WP_Error( 'aw_si_sitekit', sprintf( __( 'Site Kit module %s has no owner. Connect it under Site Kit → Settings.', 'aw-seo-extras' ), $slug ) );
+		return new WP_Error( 'aw_si_sitekit', sprintf( __( 'Site Kit module %s has no owner. Connect it under Site Kit → Settings.', 'insightweb' ), $slug ) );
 	}
 	if ( 'search-console' === $slug && empty( $settings['propertyID'] ) ) {
-		return new WP_Error( 'aw_si_sitekit', __( 'Search Console is not connected in Site Kit. Connect it under Site Kit → Settings.', 'aw-seo-extras' ) );
+		return new WP_Error( 'aw_si_sitekit', __( 'Search Console is not connected in Site Kit. Connect it under Site Kit → Settings.', 'insightweb' ) );
 	}
 	$was = get_current_user_id();
 	wp_set_current_user( $owner ); // Site Kit binds the Google client to the current user when the module is built.
 	try {
 		$ctx = aw_si_sitekit_context();
 		if ( ! $ctx ) {
-			return new WP_Error( 'aw_si_sitekit', __( 'Site Kit by Google is not active.', 'aw-seo-extras' ) );
+			return new WP_Error( 'aw_si_sitekit', __( 'Site Kit by Google is not active.', 'insightweb' ) );
 		}
 		$module = ( new \Google\Site_Kit\Core\Modules\Modules( $ctx ) )->get_module( $slug );
 		if ( method_exists( $module, 'is_connected' ) && ! $module->is_connected() ) {
 			/* translators: %s: Site Kit module slug. */
-			return new WP_Error( 'aw_si_sitekit', sprintf( __( 'Site Kit module %s is not connected.', 'aw-seo-extras' ), $slug ) );
+			return new WP_Error( 'aw_si_sitekit', sprintf( __( 'Site Kit module %s is not connected.', 'insightweb' ), $slug ) );
 		}
 		return $callback( $module );
 	} catch ( Throwable $e ) {
 		/* translators: 1: Site Kit module slug, 2: error message. */
-		return new WP_Error( 'aw_si_sitekit', sprintf( __( 'Site Kit module %1$s could not be used: %2$s', 'aw-seo-extras' ), $slug, wp_strip_all_tags( $e->getMessage() ) ) );
+		return new WP_Error( 'aw_si_sitekit', sprintf( __( 'Site Kit module %1$s could not be used: %2$s', 'insightweb' ), $slug, wp_strip_all_tags( $e->getMessage() ) ) );
 	} finally {
 		wp_set_current_user( $was );
 	}

@@ -4,7 +4,7 @@
  * Deactivating or deleting the plugin keeps the tables and options; only the owner's "Delete Search Insights data"
  * (Settings tab, nonce + typed confirmation) drops them.
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

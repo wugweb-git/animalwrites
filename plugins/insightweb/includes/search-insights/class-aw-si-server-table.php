@@ -2,7 +2,7 @@
 /**
  * Server tab list table: one row per stored day (aw_si_srv_days() in server.php), newest first, paged. Read only.
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -44,13 +44,13 @@ class AW_SI_Server_Table extends WP_List_Table {
 	/** Columns. */
 	public function get_columns() {
 		return array(
-			'day'  => __( 'Day', 'aw-seo-extras' ),
-			'bots' => __( 'Crawler requests', 'aw-seo-extras' ),
-			'c4'   => __( '4xx', 'aw-seo-extras' ),
-			'u4'   => __( 'Top 4xx addresses', 'aw-seo-extras' ),
-			'c5'   => __( '5xx', 'aw-seo-extras' ),
-			'u5'   => __( 'Top 5xx addresses', 'aw-seo-extras' ),
-			'php'  => __( 'PHP errors', 'aw-seo-extras' ),
+			'day'  => __( 'Day', 'insightweb' ),
+			'bots' => __( 'Crawler requests', 'insightweb' ),
+			'c4'   => __( '4xx', 'insightweb' ),
+			'u4'   => __( 'Top 4xx addresses', 'insightweb' ),
+			'c5'   => __( '5xx', 'insightweb' ),
+			'u5'   => __( 'Top 5xx addresses', 'insightweb' ),
+			'php'  => __( 'PHP errors', 'insightweb' ),
 		);
 	}
 
@@ -74,7 +74,7 @@ class AW_SI_Server_Table extends WP_List_Table {
 
 	/** Shown when nothing is stored yet. */
 	public function no_items() {
-		esc_html_e( 'Nothing counted yet. Counting starts with the first crawler request or error after this update.', 'aw-seo-extras' );
+		esc_html_e( 'Nothing counted yet. Counting starts with the first crawler request or error after this update.', 'insightweb' );
 	}
 
 	/**
@@ -100,10 +100,10 @@ class AW_SI_Server_Table extends WP_List_Table {
 			case 'php':
 				$php = (array) ( $item['php'] ?? array() );
 				if ( ! $php ) {
-					return esc_html__( 'Read the next morning', 'aw-seo-extras' );
+					return esc_html__( 'Read the next morning', 'insightweb' );
 				}
 				if ( 'ok' !== ( $php['status'] ?? '' ) ) {
-					return esc_html__( 'Log not found', 'aw-seo-extras' );
+					return esc_html__( 'Log not found', 'insightweb' );
 				}
 				$kinds = (array) ( $php['kinds'] ?? array() );
 				$out   = esc_html( $kinds ? number_format_i18n( array_sum( $kinds ) ) . ': ' . aw_si_srv_list( $kinds, 6 ) : '0' );

@@ -7,7 +7,7 @@
  * Moved out of RankWeb on 11 Nov 2026 with no other change (docs/insightweb-plan.md). Called on plugins_loaded by
  * insightweb.php, or by RankWeb's bridge while InsightWeb is not active yet; whichever calls first loads it, once.
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -38,7 +38,7 @@ if ( $aw_si_missing ) {
 		function () use ( $aw_si_missing ) {
 			if ( current_user_can( 'activate_plugins' ) ) {
 				/* translators: %s: plugin names. */
-				wp_admin_notice( esc_html( sprintf( __( 'InsightWeb does nothing until %s is active.', 'aw-seo-extras' ), implode( ' and ', $aw_si_missing ) ) ), array( 'type' => 'warning' ) );
+				wp_admin_notice( esc_html( sprintf( __( 'InsightWeb does nothing until %s is active.', 'insightweb' ), implode( ' and ', $aw_si_missing ) ) ), array( 'type' => 'warning' ) );
 			}
 		}
 	);
@@ -54,7 +54,7 @@ if ( ! function_exists( 'aw_kw_install' ) ) {
 		'admin_notices',
 		function () {
 			if ( current_user_can( 'manage_options' ) ) {
-				wp_admin_notice( esc_html__( 'Search Insights needs Animal Writes Core (the keyword table lives there). It is off until Core is active.', 'aw-seo-extras' ), array( 'type' => 'warning' ) );
+				wp_admin_notice( esc_html__( 'Search Insights needs Animal Writes Core (the keyword table lives there). It is off until Core is active.', 'insightweb' ), array( 'type' => 'warning' ) );
 			}
 		}
 	);

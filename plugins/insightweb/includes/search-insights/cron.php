@@ -3,7 +3,7 @@
  * Schedule (plan §6, IST): the daily run at 07:10 (after the Search demand refresh at 07:00) and the rollup at 23:30.
  * Each step records its own result in the run log, so one failure never hides the others.
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -36,7 +36,7 @@ function aw_si_daily( bool $by_hand = false ): array {
 	aw_si_run_start( 'roles' );
 	$errors = array();
 	if ( ! empty( $out['seed']['error'] ) ) {
-		$errors[] = __( 'The keyword map seed file is missing, so the map was not loaded.', 'aw-seo-extras' );
+		$errors[] = __( 'The keyword map seed file is missing, so the map was not loaded.', 'insightweb' );
 	}
 	$failed = '';
 	try {
@@ -48,12 +48,12 @@ function aw_si_daily( bool $by_hand = false ): array {
 	try {
 		$out['compute'] = aw_si_compute();
 	} catch ( Throwable $e ) {
-		$errors[] = __( 'Priorities could not be worked out: ', 'aw-seo-extras' ) . $e->getMessage();
+		$errors[] = __( 'Priorities could not be worked out: ', 'insightweb' ) . $e->getMessage();
 	}
 	try {
 		$out['topics'] = aw_si_sync_topics(); // After the calculation: it reads the page Google shows most.
 	} catch ( Throwable $e ) {
-		$errors[] = __( 'Topics could not be updated: ', 'aw-seo-extras' ) . $e->getMessage();
+		$errors[] = __( 'Topics could not be updated: ', 'insightweb' ) . $e->getMessage();
 	}
 	$info           = $out['roles'];
 	$info['errors'] = array_merge( $errors, (array) ( $info['errors'] ?? array() ), (array) ( $out['compute']['errors'] ?? array() ) );

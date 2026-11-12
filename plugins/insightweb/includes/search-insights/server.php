@@ -18,7 +18,7 @@
  *   Every day is kept (owner, 3 Nov 2026: nothing is dropped).
  * - Speed and AI visibility are checked automatically every morning: selfcheck.php.
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -291,12 +291,12 @@ function aw_si_srv_weeks_table( array $days ): void {
 	}
 	arsort( $tot );
 	$top = array_slice( array_keys( $tot ), 0, 5 );
-	echo '<h2>' . esc_html__( 'Crawler requests by week (12 weeks)', 'aw-seo-extras' ) . '</h2>';
-	echo '<table class="widefat fixed striped"><thead><tr><th scope="col">' . esc_html__( 'Week from', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'All crawlers', 'aw-seo-extras' ) . '</th>';
+	echo '<h2>' . esc_html__( 'Crawler requests by week (12 weeks)', 'insightweb' ) . '</h2>';
+	echo '<table class="widefat fixed striped"><thead><tr><th scope="col">' . esc_html__( 'Week from', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'All crawlers', 'insightweb' ) . '</th>';
 	foreach ( $top as $b ) {
 		echo '<th scope="col">' . esc_html( $b ) . '</th>';
 	}
-	echo '<th scope="col">' . esc_html__( 'Others', 'aw-seo-extras' ) . '</th></tr></thead><tbody>';
+	echo '<th scope="col">' . esc_html__( 'Others', 'insightweb' ) . '</th></tr></thead><tbody>';
 	foreach ( $weeks as $wk => $by ) {
 		$all  = array_sum( $by );
 		$rest = $all;
@@ -308,7 +308,7 @@ function aw_si_srv_weeks_table( array $days ): void {
 		echo '<td>' . esc_html( number_format_i18n( $rest ) ) . '</td></tr>';
 	}
 	echo '</tbody></table>';
-	echo '<p class="description">' . esc_html__( 'Weeks before counting started (3 Nov 2026) show 0.', 'aw-seo-extras' ) . '</p>';
+	echo '<p class="description">' . esc_html__( 'Weeks before counting started (3 Nov 2026) show 0.', 'insightweb' ) . '</p>';
 }
 
 /* ---------- The tab ---------- */
@@ -317,7 +317,7 @@ add_filter(
 	'aw_si_tabs',
 	function ( $tabs ) {
 		$tabs           = (array) $tabs;
-		$tabs['server'] = __( 'Server', 'aw-seo-extras' );
+		$tabs['server'] = __( 'Server', 'insightweb' );
 		return $tabs;
 	},
 	30
@@ -337,15 +337,15 @@ add_action(
 			return;
 		}
 		$days = aw_si_srv_days();
-		echo '<p>' . esc_html__( 'What the server sees, per day, kept for good. Everything here is counted when a request reaches WordPress: a page the CDN or the server\'s page cache (LiteSpeed) answers from a stored copy is not counted, unless that cache lets the request through (docs/cdn.md, step C). Bandwidth is only in hPanel. No full IP address or user agent is stored.', 'aw-seo-extras' ) . '</p>';
+		echo '<p>' . esc_html__( 'What the server sees, per day, kept for good. Everything here is counted when a request reaches WordPress: a page the CDN or the server\'s page cache (LiteSpeed) answers from a stored copy is not counted, unless that cache lets the request through (docs/cdn.md, step C). Bandwidth is only in hPanel. No full IP address or user agent is stored.', 'insightweb' ) . '</p>';
 
 		// Every crawler on the watch list, with 0 when it made no requests.
 		$today   = wp_date( 'Ymd' );
 		$periods = array(
-			'today' => array( __( 'Today', 'aw-seo-extras' ), 1 ),
-			'd7'    => array( __( 'Last 7 days', 'aw-seo-extras' ), 7 ),
-			'd30'   => array( __( 'Last 30 days', 'aw-seo-extras' ), 30 ),
-			'all'   => array( __( 'All days', 'aw-seo-extras' ), PHP_INT_MAX ),
+			'today' => array( __( 'Today', 'insightweb' ), 1 ),
+			'd7'    => array( __( 'Last 7 days', 'insightweb' ), 7 ),
+			'd30'   => array( __( 'Last 30 days', 'insightweb' ), 30 ),
+			'all'   => array( __( 'All days', 'insightweb' ), PHP_INT_MAX ),
 		);
 		$sums    = array();
 		foreach ( $days as $ymd => $d ) {
@@ -358,12 +358,12 @@ add_action(
 				}
 			}
 		}
-		echo '<h2>' . esc_html__( 'Crawler requests', 'aw-seo-extras' ) . '</h2>';
-		echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Crawler', 'aw-seo-extras' ) . '</th>';
+		echo '<h2>' . esc_html__( 'Crawler requests', 'insightweb' ) . '</h2>';
+		echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Crawler', 'insightweb' ) . '</th>';
 		foreach ( $periods as $per ) {
 			echo '<th scope="col">' . esc_html( $per[0] ) . '</th>';
 		}
-		echo '<th scope="col">' . esc_html__( 'Note', 'aw-seo-extras' ) . '</th></tr></thead><tbody>';
+		echo '<th scope="col">' . esc_html__( 'Note', 'insightweb' ) . '</th></tr></thead><tbody>';
 		$names = array_keys( aw_si_srv_bots() );
 		foreach ( array_keys( $sums ) as $b ) {
 			if ( ! in_array( $b, $names, true ) ) {
@@ -376,19 +376,19 @@ add_action(
 			foreach ( array_keys( $periods ) as $pk ) {
 				echo '<td>' . esc_html( number_format_i18n( (int) ( $sums[ $b ][ $pk ] ?? 0 ) ) ) . '</td>';
 			}
-			echo '<td>' . ( $only ? esc_html__( 'robots.txt name only, never visits', 'aw-seo-extras' ) : '' ) . '</td></tr>';
+			echo '<td>' . ( $only ? esc_html__( 'robots.txt name only, never visits', 'insightweb' ) : '' ) . '</td></tr>';
 		}
 		echo '</tbody></table>';
 		// 12 Nov 2026: Googlebot showed 2,099 requests in 30 days because cached hits never reach PHP. There is no access
 		// log on this host to read instead (only PHP error logs), so the table says what it leaves out.
-		echo '<p class="description">' . esc_html__( 'These are lower bounds. Most crawler hits are answered from a stored copy by the server\'s page cache (LiteSpeed) or the Hostinger CDN; those requests never reach PHP, so they are not counted here. hPanel shows the full traffic. Letting crawlers past the caches is step C of docs/cdn.md:', 'aw-seo-extras' ) . ' <a href="' . esc_url( 'https://github.com/wugweb-git/animalwrites/blob/wordpress/docs/cdn.md#c-let-ai-agents-and-crawlers-past-the-caches-3-nov-2026' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'docs/cdn.md, C. Let AI agents and crawlers past the caches', 'aw-seo-extras' ) . '</a>.</p>';
+		echo '<p class="description">' . esc_html__( 'These are lower bounds. Most crawler hits are answered from a stored copy by the server\'s page cache (LiteSpeed) or the Hostinger CDN; those requests never reach PHP, so they are not counted here. hPanel shows the full traffic. Letting crawlers past the caches is step C of docs/cdn.md:', 'insightweb' ) . ' <a href="' . esc_url( 'https://github.com/wugweb-git/animalwrites/blob/wordpress/docs/cdn.md#c-let-ai-agents-and-crawlers-past-the-caches-3-nov-2026' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'docs/cdn.md, C. Let AI agents and crawlers past the caches', 'insightweb' ) . '</a>.</p>';
 		aw_si_srv_weeks_table( $days );
 
 		if ( function_exists( 'aw_si_vis_section' ) ) {
 			aw_si_vis_section();
 		}
 
-		echo '<h2>' . esc_html__( 'Per day', 'aw-seo-extras' ) . '</h2>';
+		echo '<h2>' . esc_html__( 'Per day', 'insightweb' ) . '</h2>';
 		$table = new AW_SI_Server_Table( $days );
 		$table->prepare_items();
 		$table->display();

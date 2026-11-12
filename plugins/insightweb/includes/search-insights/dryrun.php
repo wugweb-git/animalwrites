@@ -8,7 +8,7 @@
  * Search Console calls: 4 for one day (total, query, query + page, page: the daily row counts) and 2 for the last
  * 28 days (query, query + page: the figures the tabs would show once the backfill has run).
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

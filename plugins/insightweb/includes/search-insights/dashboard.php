@@ -5,7 +5,7 @@
  * and status (problems first) and the 404s still open. Read-only: Search Insights' stored rows and run log; no remote
  * calls.
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -131,29 +131,29 @@ add_action(
 		}
 		wp_add_dashboard_widget(
 			'aw_seo_dashboard',
-			__( 'SEO', 'aw-seo-extras' ),
+			__( 'SEO', 'insightweb' ),
 			function () {
 				$gsc     = aw_seo_dash_gsc();
 				$nf      = aw_seo_dash_nf_open();
 				$sources = aw_seo_dash_sources();
 				$need    = count( array_filter( $sources, fn( $r ) => $r['problem'] ) );
-				$before  = __( 'on the 28 days before', 'aw-seo-extras' );
+				$before  = __( 'on the 28 days before', 'insightweb' );
 				if ( function_exists( 'kits_dash_cards' ) ) {
 					$cards = array(
 						array(
-							'label' => __( 'Clicks, 28 days', 'aw-seo-extras' ),
+							'label' => __( 'Clicks, 28 days', 'insightweb' ),
 							'value' => $gsc ? number_format_i18n( $gsc['clicks'] ) : '–',
 						),
 						array(
-							'label' => __( 'Impressions, 28 days', 'aw-seo-extras' ),
+							'label' => __( 'Impressions, 28 days', 'insightweb' ),
 							'value' => $gsc ? number_format_i18n( $gsc['impr'] ) : '–',
 						),
 						array(
-							'label' => __( '404s still open', 'aw-seo-extras' ),
+							'label' => __( '404s still open', 'insightweb' ),
 							'value' => number_format_i18n( count( $nf ) ),
 						),
 						array(
-							'label' => __( 'Sources with a problem', 'aw-seo-extras' ),
+							'label' => __( 'Sources with a problem', 'insightweb' ),
 							'value' => number_format_i18n( $need ),
 						),
 					);
@@ -171,47 +171,47 @@ add_action(
 				}
 				if ( $gsc ) {
 					/* translators: %s: date. */
-					echo '<p class="description">' . esc_html( sprintf( __( 'Search Console, the 28 days to %s.', 'aw-seo-extras' ), wp_date( 'j M Y', strtotime( $gsc['end'] ) ) ) ) . '</p>';
+					echo '<p class="description">' . esc_html( sprintf( __( 'Search Console, the 28 days to %s.', 'insightweb' ), wp_date( 'j M Y', strtotime( $gsc['end'] ) ) ) ) . '</p>';
 					if ( count( $gsc['days'] ) > 1 && function_exists( 'kits_dash_bars' ) ) {
 						$days = array();
 						foreach ( $gsc['days'] as $d => $c ) {
 							$days[ wp_date( 'j M', strtotime( $d ) ) ] = $c;
 						}
-						echo kits_dash_bars( $days, __( 'Clicks per day, last 28 days', 'aw-seo-extras' ), true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside; true: the figures table under the chart.
+						echo kits_dash_bars( $days, __( 'Clicks per day, last 28 days', 'insightweb' ), true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside; true: the figures table under the chart.
 					}
 				}
 
 				$status = array(
-					'failed'  => array( 'dismiss', '#b32d2e', __( 'Failed', 'aw-seo-extras' ) ),
-					'late'    => array( 'clock', '#b32d2e', __( 'Late', 'aw-seo-extras' ) ),
-					'refused' => array( 'info-outline', '#50575e', __( 'Refused', 'aw-seo-extras' ) ),
-					'notrun'  => array( 'minus', '#50575e', __( 'Not run', 'aw-seo-extras' ) ),
-					'ok'      => array( 'yes-alt', '#007017', __( 'OK', 'aw-seo-extras' ) ),
+					'failed'  => array( 'dismiss', '#b32d2e', __( 'Failed', 'insightweb' ) ),
+					'late'    => array( 'clock', '#b32d2e', __( 'Late', 'insightweb' ) ),
+					'refused' => array( 'info-outline', '#50575e', __( 'Refused', 'insightweb' ) ),
+					'notrun'  => array( 'minus', '#50575e', __( 'Not run', 'insightweb' ) ),
+					'ok'      => array( 'yes-alt', '#007017', __( 'OK', 'insightweb' ) ),
 				);
 				/* translators: 1: number of sources, 2: how many have a problem. */
-				$summary = sprintf( __( 'Sources (%1$s, %2$s with a problem)', 'aw-seo-extras' ), number_format_i18n( count( $sources ) ), number_format_i18n( $need ) );
+				$summary = sprintf( __( 'Sources (%1$s, %2$s with a problem)', 'insightweb' ), number_format_i18n( count( $sources ) ), number_format_i18n( $need ) );
 				echo '<details' . ( $need ? ' open' : '' ) . '><summary>' . esc_html( $summary ) . '</summary>';
-				echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Source', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Last update', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Status', 'aw-seo-extras' ) . '</th></tr></thead><tbody>';
+				echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Source', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'Last update', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'Status', 'insightweb' ) . '</th></tr></thead><tbody>';
 				foreach ( $sources as $r ) {
 					$s = $status[ $r['status'] ];
-					echo '<tr><td style="overflow-wrap:anywhere">' . esc_html( $r['name'] ) . '</td><td>' . esc_html( $r['last'] ? wp_date( 'j M, g:i a', $r['last'] ) : __( 'never', 'aw-seo-extras' ) ) . '</td><td><span class="dashicons dashicons-' . esc_attr( $s[0] ) . '" style="color:' . esc_attr( $s[1] ) . '" aria-hidden="true"></span> ' . esc_html( $s[2] ) . '</td></tr>';
+					echo '<tr><td style="overflow-wrap:anywhere">' . esc_html( $r['name'] ) . '</td><td>' . esc_html( $r['last'] ? wp_date( 'j M, g:i a', $r['last'] ) : __( 'never', 'insightweb' ) ) . '</td><td><span class="dashicons dashicons-' . esc_attr( $s[0] ) . '" style="color:' . esc_attr( $s[1] ) . '" aria-hidden="true"></span> ' . esc_html( $s[2] ) . '</td></tr>';
 				}
 				echo '</tbody></table></details>';
 
 				/* translators: %s: number of paths. */
-				echo '<details><summary>' . esc_html( sprintf( __( '404s still open (%s)', 'aw-seo-extras' ), number_format_i18n( count( $nf ) ) ) ) . '</summary>';
+				echo '<details><summary>' . esc_html( sprintf( __( '404s still open (%s)', 'insightweb' ), number_format_i18n( count( $nf ) ) ) ) . '</summary>';
 				if ( $nf ) {
-					echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Path', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Views', 'aw-seo-extras' ) . '</th></tr></thead><tbody>';
+					echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Path', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'Views', 'insightweb' ) . '</th></tr></thead><tbody>';
 					foreach ( array_slice( $nf, 0, 10 ) as $r ) {
 						echo '<tr><td style="overflow-wrap:anywhere">' . esc_html( $r['path'] ) . '</td><td>' . esc_html( number_format_i18n( $r['views'] ) ) . '</td></tr>';
 					}
 					echo '</tbody></table>';
 				} else {
-					echo '<p>' . esc_html__( 'None.', 'aw-seo-extras' ) . '</p>';
+					echo '<p>' . esc_html__( 'None.', 'insightweb' ) . '</p>';
 				}
 				echo '</details>';
 
-				echo '<p><a href="' . esc_url( aw_si_url() ) . '">' . esc_html__( 'Search Insights', 'aw-seo-extras' ) . '</a></p>';
+				echo '<p><a href="' . esc_url( aw_si_url() ) . '">' . esc_html__( 'Search Insights', 'insightweb' ) . '</a></p>';
 			}
 		);
 	},

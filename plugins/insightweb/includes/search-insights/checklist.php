@@ -14,7 +14,7 @@
  *   ">20"), ours (how many of our links in the top 20; 2 or more on a brand search = sitelinks), top3, paa, url.
  *   Nothing is sent to GA4.
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -27,7 +27,7 @@ const AW_SI_LIVE_TTL   = 2 * HOUR_IN_SECONDS;
 add_filter(
 	'aw_si_tabs',
 	function ( $tabs ) {
-		$tabs['checklist'] = __( 'Check list', 'aw-seo-extras' );
+		$tabs['checklist'] = __( 'Check list', 'insightweb' );
 		return $tabs;
 	},
 	6
@@ -180,11 +180,11 @@ function aw_si_bookmarklet( string $token ): string {
 function aw_si_live_save(): void {
 	check_ajax_referer( 'aw_si_live', 'nonce' );
 	if ( ! current_user_can( aw_si_cap() ) || ! aw_si_live_token_ok( isset( $_POST['token'] ) ? sanitize_text_field( wp_unslash( $_POST['token'] ) ) : '' ) ) {
-		wp_send_json_error( array( 'message' => __( 'The live-check token has expired. Start a new live check.', 'aw-seo-extras' ) ), 403 );
+		wp_send_json_error( array( 'message' => __( 'The live-check token has expired. Start a new live check.', 'insightweb' ) ), 403 );
 	}
 	$id = isset( $_POST['id'] ) ? absint( $_POST['id'] ) : 0;
 	if ( ! $id || ! in_array( $id, aw_si_checklist(), true ) ) {
-		wp_send_json_error( array( 'message' => __( 'Not on the check list.', 'aw-seo-extras' ) ), 400 );
+		wp_send_json_error( array( 'message' => __( 'Not on the check list.', 'insightweb' ) ), 400 );
 	}
 	$pos   = isset( $_POST['pos'] ) && '' !== $_POST['pos'] ? absint( $_POST['pos'] ) : 0;
 	$pos   = $pos >= 1 && $pos <= 20 ? $pos : 0;
@@ -212,7 +212,7 @@ function aw_si_live_save(): void {
 		$ok = $ok && aw_si_obs_put( $id, '', 'live', 'url', 'month', $month, array( 'txt' => $url ) );
 	}
 	if ( ! $ok ) {
-		wp_send_json_error( array( 'message' => __( 'The result could not be saved.', 'aw-seo-extras' ) ), 500 );
+		wp_send_json_error( array( 'message' => __( 'The result could not be saved.', 'insightweb' ) ), 500 );
 	}
 	aw_si_run_ok(
 		'live',
@@ -231,7 +231,7 @@ add_action(
 		add_screen_option(
 			'per_page',
 			array(
-				'label'   => __( 'Keywords per page', 'aw-seo-extras' ),
+				'label'   => __( 'Keywords per page', 'insightweb' ),
 				'default' => 50,
 				'option'  => 'aw_si_checklist_per_page',
 			)
@@ -265,7 +265,7 @@ function aw_si_checklist_handle(): void {
 	}
 	check_admin_referer( 'bulk-checklist' );
 	if ( ! current_user_can( aw_si_cap() ) ) {
-		wp_die( esc_html__( 'Not allowed.', 'aw-seo-extras' ), 403 );
+		wp_die( esc_html__( 'Not allowed.', 'insightweb' ), 403 );
 	}
 	$list = aw_si_checklist();
 	$msg  = '';
@@ -294,14 +294,14 @@ function aw_si_checklist_handle(): void {
 function aw_si_live_window(): void {
 	$token = isset( $_GET['token'] ) ? sanitize_text_field( wp_unslash( $_GET['token'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- the live token is checked here.
 	if ( ! aw_si_live_token_ok( $token ) ) {
-		wp_admin_notice( esc_html__( 'This live-check link has expired or is not yours. Start a new live check on the Check list tab.', 'aw-seo-extras' ), array( 'type' => 'error', 'additional_classes' => array( 'inline' ) ) );
+		wp_admin_notice( esc_html__( 'This live-check link has expired or is not yours. Start a new live check on the Check list tab.', 'insightweb' ), array( 'type' => 'error', 'additional_classes' => array( 'inline' ) ) );
 		return;
 	}
 	$pending = aw_si_live_pending();
-	echo '<h2>' . esc_html__( 'Live Google check', 'aw-seo-extras' ) . '</h2>';
+	echo '<h2>' . esc_html__( 'Live Google check', 'insightweb' ) . '</h2>';
 	/* translators: %d: keywords left to check this month. */
-	echo '<p id="aw-si-live-status">' . esc_html( sprintf( __( '%d keywords to check this month. Keep this window and the Google tab open.', 'aw-seo-extras' ), count( $pending ) ) ) . '</p>';
-	echo '<p><button type="button" class="button" id="aw-si-live-stop">' . esc_html__( 'Stop', 'aw-seo-extras' ) . '</button></p>';
+	echo '<p id="aw-si-live-status">' . esc_html( sprintf( __( '%d keywords to check this month. Keep this window and the Google tab open.', 'insightweb' ), count( $pending ) ) ) . '</p>';
+	echo '<p><button type="button" class="button" id="aw-si-live-stop">' . esc_html__( 'Stop', 'insightweb' ) . '</button></p>';
 	echo '<ol id="aw-si-live-log"></ol>';
 	$cfg = array(
 		'ajax'    => admin_url( 'admin-ajax.php' ),
@@ -311,13 +311,13 @@ function aw_si_live_window(): void {
 		'google'  => (array) apply_filters( 'aw_si_live_origins', array( 'https://www.google.com', 'https://www.google.co.in' ) ),
 		'text'    => array(
 			/* translators: %d: keywords left. */
-			'left'    => __( '%d left.', 'aw-seo-extras' ),
-			'done'    => __( 'All done for this month. You can close this window.', 'aw-seo-extras' ),
-			'captcha' => __( 'Google asked for a check ("unusual traffic"), so the run stopped. Solve it or wait a few hours, then click the bookmarklet again: it carries on where it stopped.', 'aw-seo-extras' ),
-			'stopped' => __( 'Stopped. Click the bookmarklet again to carry on.', 'aw-seo-extras' ),
-			'nopos'   => __( 'not in the top 20', 'aw-seo-extras' ),
-			'failed'  => __( 'not saved', 'aw-seo-extras' ),
-			'noread'  => __( 'could not be read in the Google tab, not saved (it stays on the list)', 'aw-seo-extras' ),
+			'left'    => __( '%d left.', 'insightweb' ),
+			'done'    => __( 'All done for this month. You can close this window.', 'insightweb' ),
+			'captcha' => __( 'Google asked for a check ("unusual traffic"), so the run stopped. Solve it or wait a few hours, then click the bookmarklet again: it carries on where it stopped.', 'insightweb' ),
+			'stopped' => __( 'Stopped. Click the bookmarklet again to carry on.', 'insightweb' ),
+			'nopos'   => __( 'not in the top 20', 'insightweb' ),
+			'failed'  => __( 'not saved', 'insightweb' ),
+			'noread'  => __( 'could not be read in the Google tab, not saved (it stays on the list)', 'insightweb' ),
 		),
 	);
 	wp_print_inline_script_tag(
@@ -351,9 +351,9 @@ add_action(
 			return;
 		}
 		$msgs = array(
-			'removed' => __( 'Removed from the check list.', 'aw-seo-extras' ),
-			'added'   => __( 'Added to the check list.', 'aw-seo-extras' ),
-			'rebuilt' => __( 'Check list rebuilt from the rules (P1/P2, brand, quick wins, the 21 Oct rankings).', 'aw-seo-extras' ),
+			'removed' => __( 'Removed from the check list.', 'insightweb' ),
+			'added'   => __( 'Added to the check list.', 'insightweb' ),
+			'rebuilt' => __( 'Check list rebuilt from the rules (P1/P2, brand, quick wins, the 21 Oct rankings).', 'insightweb' ),
 		);
 		$cl   = isset( $_GET['cl'] ) ? sanitize_key( wp_unslash( $_GET['cl'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- message only.
 		if ( isset( $msgs[ $cl ] ) ) {
@@ -364,32 +364,32 @@ add_action(
 		$ids      = aw_si_checklist();
 		$patterns = $ids && aw_si_ready() ? (int) $wpdb->get_var( 'SELECT COUNT(*) FROM ' . aw_si_table( 'keywords' ) . " WHERE label LIKE '%{%' AND id IN (" . implode( ',', $ids ) . ')' ) : 0; // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.NotPrepared -- integers and a table name.
 		$total    = count( $ids ) - $patterns;
-		echo '<h2>' . esc_html__( 'Monthly live check', 'aw-seo-extras' ) . '</h2>';
+		echo '<h2>' . esc_html__( 'Monthly live check', 'insightweb' ) . '</h2>';
 		/* translators: 1: keywords checked this month, 2: searchable keywords on the list. */
-		$line = sprintf( __( '%1$d of %2$d keywords checked this month.', 'aw-seo-extras' ), $total - $pending, $total );
+		$line = sprintf( __( '%1$d of %2$d keywords checked this month.', 'insightweb' ), $total - $pending, $total );
 		if ( $patterns ) {
 			/* translators: %d: Directory patterns such as "animal rescue {district}". */
-			$line .= ' ' . sprintf( _n( '%d Directory pattern ({district}) is on the list but is not searched.', '%d Directory patterns ({district}) are on the list but are not searched.', $patterns, 'aw-seo-extras' ), $patterns );
+			$line .= ' ' . sprintf( _n( '%d Directory pattern ({district}) is on the list but is not searched.', '%d Directory patterns ({district}) are on the list but are not searched.', $patterns, 'insightweb' ), $patterns );
 		}
 		echo '<p>' . esc_html( $line ) . '</p>';
 		$token = get_transient( 'aw_si_live_new_' . get_current_user_id() );
 		if ( $token && aw_si_live_token_ok( (string) $token ) ) {
-			echo '<div class="notice notice-info inline"><p>' . esc_html__( 'Drag this button to your bookmarks bar (it works for 2 hours), open google.com in this browser and click it. A small window opens here and the check runs in the Google tab, 8–15 seconds per keyword. Nothing is sent to GA4.', 'aw-seo-extras' ) . '</p>';
+			echo '<div class="notice notice-info inline"><p>' . esc_html__( 'Drag this button to your bookmarks bar (it works for 2 hours), open google.com in this browser and click it. A small window opens here and the check runs in the Google tab, 8–15 seconds per keyword. Nothing is sent to GA4.', 'insightweb' ) . '</p>';
 			// The javascript: link is the bookmarklet itself; esc_url() would strip it, so it is built from rawurlencode() only.
-			echo '<p><a class="button button-primary" href="' . esc_attr( aw_si_bookmarklet( (string) $token ) ) . '">' . esc_html__( 'AW live check', 'aw-seo-extras' ) . '</a></p></div>';
+			echo '<p><a class="button button-primary" href="' . esc_attr( aw_si_bookmarklet( (string) $token ) ) . '">' . esc_html__( 'AW live check', 'insightweb' ) . '</a></p></div>';
 		}
 		echo '<form method="post">';
 		wp_nonce_field( 'bulk-checklist' );
-		echo '<p><button type="submit" name="aw_si_cl" value="start" class="button button-primary">' . esc_html__( 'Start live check', 'aw-seo-extras' ) . '</button> ';
-		echo '<button type="submit" name="aw_si_cl" value="rebuild" class="button">' . esc_html__( 'Rebuild the list from the rules', 'aw-seo-extras' ) . '</button></p>';
-		echo '<table class="form-table" role="presentation"><tbody><tr><th scope="row"><label for="aw-si-add">' . esc_html__( 'Add keywords', 'aw-seo-extras' ) . '</label></th><td>';
-		echo '<textarea id="aw-si-add" name="keywords" rows="3" class="large-text" placeholder="' . esc_attr__( 'One keyword per line', 'aw-seo-extras' ) . '"></textarea>';
-		echo '<p><button type="submit" name="aw_si_cl" value="add" class="button">' . esc_html__( 'Add to the list', 'aw-seo-extras' ) . '</button></p></td></tr></tbody></table>';
+		echo '<p><button type="submit" name="aw_si_cl" value="start" class="button button-primary">' . esc_html__( 'Start live check', 'insightweb' ) . '</button> ';
+		echo '<button type="submit" name="aw_si_cl" value="rebuild" class="button">' . esc_html__( 'Rebuild the list from the rules', 'insightweb' ) . '</button></p>';
+		echo '<table class="form-table" role="presentation"><tbody><tr><th scope="row"><label for="aw-si-add">' . esc_html__( 'Add keywords', 'insightweb' ) . '</label></th><td>';
+		echo '<textarea id="aw-si-add" name="keywords" rows="3" class="large-text" placeholder="' . esc_attr__( 'One keyword per line', 'insightweb' ) . '"></textarea>';
+		echo '<p><button type="submit" name="aw_si_cl" value="add" class="button">' . esc_html__( 'Add to the list', 'insightweb' ) . '</button></p></td></tr></tbody></table>';
 		echo '</form>';
 		$table = new AW_SI_Checklist_Table();
 		$table->prepare_items();
 		echo '<form method="post"><input type="hidden" name="page" value="' . esc_attr( AW_SI_SLUG ) . '"><input type="hidden" name="tab" value="checklist">';
-		$table->search_box( __( 'Search the list', 'aw-seo-extras' ), 'aw-si-cl' );
+		$table->search_box( __( 'Search the list', 'insightweb' ), 'aw-si-cl' );
 		$table->display();
 		echo '</form>';
 	}

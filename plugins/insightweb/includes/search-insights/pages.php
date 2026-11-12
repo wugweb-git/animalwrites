@@ -4,7 +4,7 @@
  * keywords it owns and their conflicts, GA4 organic sessions and AI referrals, Clarity totals and the page-quality
  * flag, the latest PageSpeed scores and the owner's Clarity note. Added through the aw_si_tabs filter.
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 add_filter(
 	'aw_si_tabs',
 	function ( $tabs ) {
-		return array( 'pages' => __( 'Pages', 'aw-seo-extras' ) ) + (array) $tabs;
+		return array( 'pages' => __( 'Pages', 'insightweb' ) ) + (array) $tabs;
 	},
 	5
 );
@@ -34,7 +34,7 @@ add_action(
 		add_screen_option(
 			'per_page',
 			array(
-				'label'   => __( 'Pages per page', 'aw-seo-extras' ),
+				'label'   => __( 'Pages per page', 'insightweb' ),
 				'default' => 50,
 				'option'  => 'aw_si_pages_per_page',
 			)
@@ -144,13 +144,13 @@ add_action(
 	'aw_si_tab_pages',
 	function () {
 		if ( isset( $_GET['noted'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- message only.
-			wp_admin_notice( esc_html__( 'Clarity note saved.', 'aw-seo-extras' ), array( 'type' => 'success', 'additional_classes' => array( 'inline' ) ) );
+			wp_admin_notice( esc_html__( 'Clarity note saved.', 'insightweb' ), array( 'type' => 'success', 'additional_classes' => array( 'inline' ) ) );
 		}
 		if ( isset( $_GET['not_noted'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- message only.
-			wp_admin_notice( esc_html__( 'The note was empty or the page unknown, so nothing was saved.', 'aw-seo-extras' ), array( 'type' => 'warning', 'additional_classes' => array( 'inline' ) ) );
+			wp_admin_notice( esc_html__( 'The note was empty or the page unknown, so nothing was saved.', 'insightweb' ), array( 'type' => 'warning', 'additional_classes' => array( 'inline' ) ) );
 		}
 		if ( ! aw_si_clarity_on() ) {
-			wp_admin_notice( esc_html__( 'Clarity figures start once the Clarity token is added under Animal Writes → Keys as AW_CLARITY_TOKEN (Clarity → Settings → Data Export → Generate new API token).', 'aw-seo-extras' ), array( 'type' => 'info', 'additional_classes' => array( 'inline' ) ) );
+			wp_admin_notice( esc_html__( 'Clarity figures start once the Clarity token is added under Animal Writes → Keys as AW_CLARITY_TOKEN (Clarity → Settings → Data Export → Generate new API token).', 'insightweb' ), array( 'type' => 'info', 'additional_classes' => array( 'inline' ) ) );
 		}
 		$note = isset( $_GET['note'] ) ? aw_si_path( home_url( sanitize_text_field( wp_unslash( $_GET['note'] ) ) ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- opens a form only.
 		if ( '' !== $note ) {
@@ -158,20 +158,20 @@ add_action(
 			wp_nonce_field( 'aw_si_note' );
 			echo '<table class="form-table" role="presentation"><tbody><tr><th scope="row"><label for="aw-si-note">';
 			/* translators: %s: page path. */
-			echo esc_html( sprintf( __( 'Clarity note for %s', 'aw-seo-extras' ), $note ) );
+			echo esc_html( sprintf( __( 'Clarity note for %s', 'insightweb' ), $note ) );
 			echo '</label></th><td><textarea id="aw-si-note" name="note" rows="3" class="large-text" maxlength="255"></textarea>';
-			echo '<p class="description">' . esc_html__( 'A short summary of what the recordings show (Clarity Copilot or your own), dated today. Never paste personal data.', 'aw-seo-extras' ) . '</p>';
-			submit_button( __( 'Save note', 'aw-seo-extras' ), 'primary', 'submit', false );
-			echo ' <a class="button" href="' . esc_url( aw_si_url( 'pages' ) ) . '">' . esc_html__( 'Cancel', 'aw-seo-extras' ) . '</a></td></tr></tbody></table></form>';
+			echo '<p class="description">' . esc_html__( 'A short summary of what the recordings show (Clarity Copilot or your own), dated today. Never paste personal data.', 'insightweb' ) . '</p>';
+			submit_button( __( 'Save note', 'insightweb' ), 'primary', 'submit', false );
+			echo ' <a class="button" href="' . esc_url( aw_si_url( 'pages' ) ) . '">' . esc_html__( 'Cancel', 'insightweb' ) . '</a></td></tr></tbody></table></form>';
 		}
 		$table = new AW_SI_Pages_Table();
 		$table->prepare_items();
 		$table->views();
 		if ( 'unindexed' === ( isset( $_GET['view'] ) ? sanitize_key( wp_unslash( $_GET['view'] ) ) : '' ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- navigation only.
-			echo '<p class="description">' . esc_html__( 'Pages whose latest URL Inspection result is not indexed: the same rule, and the same count, as the Overview\'s "pages we inspected, latest result" figure. Pages with no search figures in 28 days are listed too. Search Console\'s own Page indexing total counts the whole site, so it differs.', 'aw-seo-extras' ) . '</p>';
+			echo '<p class="description">' . esc_html__( 'Pages whose latest URL Inspection result is not indexed: the same rule, and the same count, as the Overview\'s "pages we inspected, latest result" figure. Pages with no search figures in 28 days are listed too. Search Console\'s own Page indexing total counts the whole site, so it differs.', 'insightweb' ) . '</p>';
 		}
 		echo '<form method="get"><input type="hidden" name="page" value="' . esc_attr( AW_SI_SLUG ) . '"><input type="hidden" name="tab" value="pages">';
-		$table->search_box( __( 'Search pages', 'aw-seo-extras' ), 'aw-si-pages' );
+		$table->search_box( __( 'Search pages', 'insightweb' ), 'aw-si-pages' );
 		$table->display();
 		echo '</form>';
 	}

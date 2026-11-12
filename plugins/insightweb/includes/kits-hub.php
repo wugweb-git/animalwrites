@@ -4,7 +4,7 @@
  * Status (Kits Core's filter kits_status_rows), and a Search Insights link under the plugin's
  * name. The screen itself is unchanged; its menu item is Plugins → InsightWeb (11 Nov 2026).
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -27,7 +27,7 @@ add_filter(
 	'plugin_action_links_' . plugin_basename( INSIGHTWEB_FILE ),
 	function ( $links ) {
 		if ( function_exists( 'aw_si_url' ) && current_user_can( aw_si_cap() ) ) {
-			array_unshift( $links, '<a href="' . esc_url( aw_si_url() ) . '">' . esc_html__( 'Search Insights', 'aw-seo-extras' ) . '</a>' );
+			array_unshift( $links, '<a href="' . esc_url( aw_si_url() ) . '">' . esc_html__( 'Search Insights', 'insightweb' ) . '</a>' );
 		}
 		return $links;
 	}
@@ -40,12 +40,12 @@ add_filter(
  */
 function insightweb_kits_status_row( $rows ) {
 	/* translators: %s: plugin version. */
-	$text = sprintf( __( 'Active, %s', 'aw-seo-extras' ), INSIGHTWEB_VERSION );
+	$text = sprintf( __( 'Active, %s', 'insightweb' ), INSIGHTWEB_VERSION );
 	if ( ! function_exists( 'aw_si_url' ) ) {
-		$fix    = __( 'Does nothing until Kits Core, Animal Writes Core and Rank Math SEO are active.', 'aw-seo-extras' );
-		$rows[] = array( __( 'InsightWeb', 'aw-seo-extras' ), function_exists( 'kits_status_cell' ) ? kits_status_cell( $text, $fix ) : esc_html( $text . '. ' . $fix ) );
+		$fix    = __( 'Does nothing until Kits Core, Animal Writes Core and Rank Math SEO are active.', 'insightweb' );
+		$rows[] = array( __( 'InsightWeb', 'insightweb' ), function_exists( 'kits_status_cell' ) ? kits_status_cell( $text, $fix ) : esc_html( $text . '. ' . $fix ) );
 		return $rows;
 	}
-	$rows[] = array( __( 'InsightWeb', 'aw-seo-extras' ), esc_html( $text ) . ' <a href="' . esc_url( aw_si_url() ) . '">' . esc_html__( 'Search Insights', 'aw-seo-extras' ) . '</a>' );
+	$rows[] = array( __( 'InsightWeb', 'insightweb' ), esc_html( $text ) . ' <a href="' . esc_url( aw_si_url() ) . '">' . esc_html__( 'Search Insights', 'insightweb' ) . '</a>' );
 	return $rows;
 }

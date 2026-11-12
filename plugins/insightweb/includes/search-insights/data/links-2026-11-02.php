@@ -3,7 +3,7 @@
  * Links seed, second batch (owner, 2 Nov 2026): 22 new linking pages from Search Console → Links, read 2 Nov 2026.
  * The Reddit rows use the thread address without its title (the read gave IDs only); Reddit redirects to the thread.
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

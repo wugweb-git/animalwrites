@@ -4,7 +4,7 @@
  * actions, screen options, pagination). Noted, Dismiss and Back to new are the only changes it makes, and only to
  * Search Insights' own rising table.
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -44,14 +44,14 @@ class AW_SI_Rising_Table extends WP_List_Table {
 	public function get_columns() {
 		return array(
 			'cb'         => '<input type="checkbox">',
-			'term'       => __( 'Term', 'aw-seo-extras' ),
-			'sources'    => __( 'Sources', 'aw-seo-extras' ),
-			'growth'     => __( 'Growth', 'aw-seo-extras' ),
-			'first_seen' => __( 'First seen', 'aw-seo-extras' ),
-			'last_seen'  => __( 'Last seen', 'aw-seo-extras' ),
-			'page'       => __( 'Matching page', 'aw-seo-extras' ),
-			'action'     => __( 'Suggested action', 'aw-seo-extras' ),
-			'status'     => __( 'Status', 'aw-seo-extras' ),
+			'term'       => __( 'Term', 'insightweb' ),
+			'sources'    => __( 'Sources', 'insightweb' ),
+			'growth'     => __( 'Growth', 'insightweb' ),
+			'first_seen' => __( 'First seen', 'insightweb' ),
+			'last_seen'  => __( 'Last seen', 'insightweb' ),
+			'page'       => __( 'Matching page', 'insightweb' ),
+			'action'     => __( 'Suggested action', 'insightweb' ),
+			'status'     => __( 'Status', 'insightweb' ),
 		);
 	}
 
@@ -73,18 +73,18 @@ class AW_SI_Rising_Table extends WP_List_Table {
 	/** The owner's decisions: the only change this list makes, to its own table. */
 	protected function get_bulk_actions() {
 		return array(
-			'noted'     => __( 'Mark as noted', 'aw-seo-extras' ),
-			'dismissed' => __( 'Dismiss', 'aw-seo-extras' ),
-			'new'       => __( 'Back to new', 'aw-seo-extras' ),
+			'noted'     => __( 'Mark as noted', 'insightweb' ),
+			'dismissed' => __( 'Dismiss', 'insightweb' ),
+			'new'       => __( 'Back to new', 'insightweb' ),
 		);
 	}
 
 	/** Labels of the statuses (the views). */
 	private function statuses(): array {
 		return array(
-			'new'       => __( 'New', 'aw-seo-extras' ),
-			'noted'     => __( 'Noted', 'aw-seo-extras' ),
-			'dismissed' => __( 'Dismissed', 'aw-seo-extras' ),
+			'new'       => __( 'New', 'insightweb' ),
+			'noted'     => __( 'Noted', 'insightweb' ),
+			'dismissed' => __( 'Dismissed', 'insightweb' ),
 		);
 	}
 
@@ -101,7 +101,7 @@ class AW_SI_Rising_Table extends WP_List_Table {
 		$counts = aw_si_ready() ? array_column( (array) $wpdb->get_results( "SELECT status, COUNT(*) n FROM {$t} GROUP BY status", ARRAY_A ), 'n', 'status' ) : array(); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
 		$out    = array();
 		$cur    = $this->view();
-		foreach ( array_merge( $this->statuses(), array( 'all' => __( 'All', 'aw-seo-extras' ) ) ) as $key => $label ) {
+		foreach ( array_merge( $this->statuses(), array( 'all' => __( 'All', 'insightweb' ) ) ) as $key => $label ) {
 			$n           = 'all' === $key ? array_sum( array_map( 'intval', $counts ) ) : (int) ( $counts[ $key ] ?? 0 );
 			$out[ $key ] = '<a href="' . esc_url( add_query_arg( 'view', $key, aw_si_url( 'rising' ) ) ) . '"' . ( $key === $cur ? ' class="current" aria-current="page"' : '' ) . '>' . esc_html( $label ) . ' <span class="count">(' . esc_html( number_format_i18n( $n ) ) . ')</span></a>';
 		}
@@ -118,13 +118,13 @@ class AW_SI_Rising_Table extends WP_List_Table {
 			return;
 		}
 		$cur = $this->arg( 'source' );
-		echo '<div class="alignleft actions"><label class="screen-reader-text" for="aw-si-rising-source">' . esc_html__( 'Filter by source', 'aw-seo-extras' ) . '</label>';
-		echo '<select name="source" id="aw-si-rising-source"><option value="">' . esc_html__( 'All sources', 'aw-seo-extras' ) . '</option>';
+		echo '<div class="alignleft actions"><label class="screen-reader-text" for="aw-si-rising-source">' . esc_html__( 'Filter by source', 'insightweb' ) . '</label>';
+		echo '<select name="source" id="aw-si-rising-source"><option value="">' . esc_html__( 'All sources', 'insightweb' ) . '</option>';
 		foreach ( aw_si_rising_sources() as $key => $s ) {
 			echo '<option value="' . esc_attr( $key ) . '"' . selected( $cur, $key, false ) . '>' . esc_html( $s['label'] ) . '</option>';
 		}
 		echo '</select>';
-		submit_button( __( 'Filter', 'aw-seo-extras' ), '', 'filter_action', false );
+		submit_button( __( 'Filter', 'insightweb' ), '', 'filter_action', false );
 		echo '</div>';
 	}
 
@@ -189,7 +189,7 @@ class AW_SI_Rising_Table extends WP_List_Table {
 
 	/** Message when the list is empty. */
 	public function no_items() {
-		echo esc_html__( 'No rising terms here yet. The workers send them daily (and weekly for autocomplete and Trends related searches).', 'aw-seo-extras' );
+		echo esc_html__( 'No rising terms here yet. The workers send them daily (and weekly for autocomplete and Trends related searches).', 'insightweb' );
 	}
 
 	/**
@@ -227,9 +227,9 @@ class AW_SI_Rising_Table extends WP_List_Table {
 	 */
 	protected function column_term( $item ) {
 		$labels = array(
-			'noted'     => __( 'Noted', 'aw-seo-extras' ),
-			'dismissed' => __( 'Dismiss', 'aw-seo-extras' ),
-			'new'       => __( 'Back to new', 'aw-seo-extras' ),
+			'noted'     => __( 'Noted', 'insightweb' ),
+			'dismissed' => __( 'Dismiss', 'insightweb' ),
+			'new'       => __( 'Back to new', 'insightweb' ),
 		);
 		$acts   = array();
 		foreach ( $labels as $status => $label ) {
@@ -265,7 +265,7 @@ class AW_SI_Rising_Table extends WP_List_Table {
 	 */
 	protected function column_growth( $item ) {
 		/* translators: %s: times the usual level, such as 2.6. */
-		return null === $item->growth ? '–' : esc_html( sprintf( __( '×%s', 'aw-seo-extras' ), number_format_i18n( (float) $item->growth, 1 ) ) );
+		return null === $item->growth ? '–' : esc_html( sprintf( __( '×%s', 'insightweb' ), number_format_i18n( (float) $item->growth, 1 ) ) );
 	}
 
 	/**
@@ -287,7 +287,7 @@ class AW_SI_Rising_Table extends WP_List_Table {
 	protected function column_page( $item ) {
 		$p = (string) $item->page;
 		if ( '' === $p ) {
-			return '<span class="description">' . esc_html__( 'None', 'aw-seo-extras' ) . '</span>';
+			return '<span class="description">' . esc_html__( 'None', 'insightweb' ) . '</span>';
 		}
 		if ( 0 === strpos( $p, '/' ) && false === strpos( $p, '{' ) ) {
 			return '<a href="' . esc_url( home_url( $p ) ) . '" target="_blank" rel="noopener">' . esc_html( $p ) . '</a>';

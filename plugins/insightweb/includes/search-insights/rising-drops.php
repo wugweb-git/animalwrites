@@ -6,7 +6,7 @@
  * always recorded. Kept in the run log (aw_si_runs), at most AW_SI_RISING_MAX_DROPPED terms per run. Loaded by
  * rising.php.
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -46,17 +46,17 @@ function aw_si_rising_worker_dropped( $list ): array {
  */
 function aw_si_rising_drop_label( string $why ): string {
 	$words = array(
-		'bad-row'            => __( 'no date within the last 400 days, or not text (site)', 'aw-seo-extras' ),
-		'not-english'        => __( 'not English: Hindi and Hinglish wait for a later phase (site)', 'aw-seo-extras' ),
-		'empty'              => __( 'empty, or longer than 255 characters (site)', 'aw-seo-extras' ),
-		'db-error'           => __( 'could not be stored (database error)', 'aw-seo-extras' ),
-		'worker:exclude'     => __( 'has an exclude word, such as film, song or cricket (worker)', 'aw-seo-extras' ),
-		'worker:vocabulary'  => __( 'names none of our species, topics or keywords (worker)', 'aw-seo-extras' ),
-		'worker:not-english' => __( 'not English (worker)', 'aw-seo-extras' ),
-		'worker:old'         => __( 'older than the days asked for (worker)', 'aw-seo-extras' ),
+		'bad-row'            => __( 'no date within the last 400 days, or not text (site)', 'insightweb' ),
+		'not-english'        => __( 'not English: Hindi and Hinglish wait for a later phase (site)', 'insightweb' ),
+		'empty'              => __( 'empty, or longer than 255 characters (site)', 'insightweb' ),
+		'db-error'           => __( 'could not be stored (database error)', 'insightweb' ),
+		'worker:exclude'     => __( 'has an exclude word, such as film, song or cricket (worker)', 'insightweb' ),
+		'worker:vocabulary'  => __( 'names none of our species, topics or keywords (worker)', 'insightweb' ),
+		'worker:not-english' => __( 'not English (worker)', 'insightweb' ),
+		'worker:old'         => __( 'older than the days asked for (worker)', 'insightweb' ),
 	);
 	/* translators: %s: the filter's name as the worker sent it. */
-	return $words[ $why ] ?? ( 0 === strpos( $why, 'worker:' ) ? sprintf( __( 'worker filter: %s', 'aw-seo-extras' ), substr( $why, 7 ) ) : $why );
+	return $words[ $why ] ?? ( 0 === strpos( $why, 'worker:' ) ? sprintf( __( 'worker filter: %s', 'insightweb' ), substr( $why, 7 ) ) : $why );
 }
 
 /**
@@ -95,25 +95,25 @@ function aw_si_rising_drops_section(): void {
 		}
 		$rows[ $key ] = array( $s['label'], (int) $r['ok'], aw_si_rising_drop_counts( (array) ( $r['info'] ?? array() ) ) );
 	}
-	echo '<h2>' . esc_html__( 'Latest run per source: kept and dropped', 'aw-seo-extras' ) . '</h2>';
+	echo '<h2>' . esc_html__( 'Latest run per source: kept and dropped', 'insightweb' ) . '</h2>';
 	if ( ! $rows ) {
-		echo '<p>' . esc_html__( 'No source has sent terms yet.', 'aw-seo-extras' ) . '</p>';
+		echo '<p>' . esc_html__( 'No source has sent terms yet.', 'insightweb' ) . '</p>';
 		return;
 	}
-	echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Source', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Run', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Terms the source showed', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Dropped by the worker', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Sent and stored', 'aw-seo-extras' ) . '</th></tr></thead><tbody>';
+	echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Source', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'Run', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'Terms the source showed', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'Dropped by the worker', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'Sent and stored', 'insightweb' ) . '</th></tr></thead><tbody>';
 	$terms = array();
 	foreach ( $rows as $key => list( $label, $at, $c ) ) {
 		$why = array();
 		if ( null !== $c['worker_dropped'] ) {
 			/* translators: %s: terms. */
-			$why[] = sprintf( _n( '%s names none of our species, topics or keywords, or is not English or too old', '%s name none of our species, topics or keywords, or are not English or too old', (int) $c['worker_dropped'], 'aw-seo-extras' ), number_format_i18n( $c['worker_dropped'] ) );
+			$why[] = sprintf( _n( '%s names none of our species, topics or keywords, or is not English or too old', '%s name none of our species, topics or keywords, or are not English or too old', (int) $c['worker_dropped'], 'insightweb' ), number_format_i18n( $c['worker_dropped'] ) );
 		}
 		if ( $c['excluded'] ) {
 			/* translators: %s: terms. */
-			$why[] = sprintf( _n( '%s has an exclude word (film, song, cricket …)', '%s have an exclude word (film, song, cricket …)', (int) $c['excluded'], 'aw-seo-extras' ), number_format_i18n( $c['excluded'] ) );
+			$why[] = sprintf( _n( '%s has an exclude word (film, song, cricket …)', '%s have an exclude word (film, song, cricket …)', (int) $c['excluded'], 'insightweb' ), number_format_i18n( $c['excluded'] ) );
 		}
 		/* translators: 1: terms sent, 2: terms stored. */
-		$sent = sprintf( __( '%1$s sent, %2$s stored', 'aw-seo-extras' ), number_format_i18n( $c['sent'] ), number_format_i18n( $c['stored'] ) );
+		$sent = sprintf( __( '%1$s sent, %2$s stored', 'insightweb' ), number_format_i18n( $c['sent'] ), number_format_i18n( $c['stored'] ) );
 		echo '<tr><td>' . esc_html( $label ) . '</td><td>' . esc_html( wp_date( 'j M, H:i', $at ) ) . '</td><td>' . esc_html( null === $c['seen'] ? '–' : number_format_i18n( $c['seen'] ) ) . '</td><td>' . esc_html( $why ? implode( '; ', $why ) : '–' ) . '</td><td>' . esc_html( $sent ) . '</td></tr>';
 		foreach ( $c['terms'] as $t ) {
 			$terms[] = array( $label, (string) ( $t[0] ?? '' ), aw_si_rising_drop_label( (string) ( $t[1] ?? '' ) ) );
@@ -121,11 +121,11 @@ function aw_si_rising_drops_section(): void {
 	}
 	echo '</tbody></table>';
 	if ( $terms ) {
-		echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Source', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Dropped term', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Filter that dropped it', 'aw-seo-extras' ) . '</th></tr></thead><tbody>';
+		echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Source', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'Dropped term', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'Filter that dropped it', 'insightweb' ) . '</th></tr></thead><tbody>';
 		foreach ( $terms as $t ) {
 			echo '<tr><td>' . esc_html( $t[0] ) . '</td><td>' . esc_html( '' !== $t[1] ? $t[1] : '–' ) . '</td><td>' . esc_html( $t[2] ) . '</td></tr>';
 		}
 		echo '</tbody></table>';
 	}
-	echo '<p class="description">' . esc_html__( 'The worker sends counts for its own filters; the terms it dropped are listed one by one only once it sends them. Terms the site itself refused are always listed. A term you saw elsewhere can be added by hand below.', 'aw-seo-extras' ) . '</p>';
+	echo '<p class="description">' . esc_html__( 'The worker sends counts for its own filters; the terms it dropped are listed one by one only once it sends them. Terms the site itself refused are always listed. A term you saw elsewhere can be added by hand below.', 'insightweb' ) . '</p>';
 }

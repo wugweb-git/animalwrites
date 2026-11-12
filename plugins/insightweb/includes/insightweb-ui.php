@@ -10,7 +10,7 @@
  * shell parts (kits-core/includes/admin-shell.php) and fed by the insightweb/v1 routes (insightweb-rest.php). When Kits
  * Core or a build file is missing, the earlier tab shows.
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -80,7 +80,7 @@ add_action(
 		$tabs = array(
 			array(
 				'slug'    => 'dashboard',
-				'label'   => __( 'Dashboard', 'aw-seo-extras' ),
+				'label'   => __( 'Dashboard', 'insightweb' ),
 				'url'     => insightweb_ui_url( 'dashboard' ),
 				'current' => 'dashboard' === $screen,
 			),
@@ -96,7 +96,7 @@ add_action(
 		}
 		$tabs[] = array(
 			'slug'    => 'settings',
-			'label'   => __( 'Settings', 'aw-seo-extras' ),
+			'label'   => __( 'Settings', 'insightweb' ),
 			'url'     => insightweb_ui_url( 'settings' ),
 			'current' => 'settings' === $screen,
 		);
@@ -106,7 +106,7 @@ add_action(
 				'src'         => plugins_url( 'build/index.js', $main ),
 				'asset'       => INSIGHTWEB_DIR . 'build/index.asset.php',
 				'object'      => 'insightwebApp',
-				'text_domain' => 'aw-seo-extras',
+				'text_domain' => 'insightweb',
 				'data'        => array(
 					'screen'  => $screen,
 					'name'    => 'InsightWeb',
@@ -144,9 +144,9 @@ function insightweb_ui_page( string $tab ): bool {
 		return false;
 	}
 	$title = array(
-		'dashboard' => __( 'Search Insights', 'aw-seo-extras' ),
-		'settings'  => __( 'Search Insights settings', 'aw-seo-extras' ),
-	)[ $screen ] ?? ( insightweb_tab_labels()[ $screen ] ?? __( 'Search Insights', 'aw-seo-extras' ) );
+		'dashboard' => __( 'Search Insights', 'insightweb' ),
+		'settings'  => __( 'Search Insights settings', 'insightweb' ),
+	)[ $screen ] ?? ( insightweb_tab_labels()[ $screen ] ?? __( 'Search Insights', 'insightweb' ) );
 	kits_shell_mount( 'insightweb-app', $title );
 	return true;
 }

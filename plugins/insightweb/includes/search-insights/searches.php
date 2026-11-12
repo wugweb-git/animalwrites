@@ -2,7 +2,7 @@
 /**
  * Content gaps for the Overview box (the old Search demand screen's Gaps list, removed with that screen on 25 Oct 2026).
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -30,12 +30,12 @@ function aw_si_searches_gaps(): array {
 		if ( aw_si_gap_variant_covered( (string) $r->label ) ) {
 			continue; // "order/judgement": one of the phrases has a page already.
 		}
-		$title = 0 === strpos( (string) $r->note, 'Gap' ) ? trim( (string) preg_replace( '/^Gap \([^)]*\):\s*/', '', (string) $r->note ) ) : __( 'High demand, no page yet (P2)', 'aw-seo-extras' );
+		$title = 0 === strpos( (string) $r->note, 'Gap' ) ? trim( (string) preg_replace( '/^Gap \([^)]*\):\s*/', '', (string) $r->note ) ) : __( 'High demand, no page yet (P2)', 'insightweb' );
 		/* translators: 1: search phrase, 2: impressions in 28 days, 3: average position. */
-		$line = null === $r->pos28 ? sprintf( __( '"%1$s": %2$s impressions (28 days)', 'aw-seo-extras' ), $r->label, number_format_i18n( (int) $r->impr28 ) ) : sprintf( __( '"%1$s": %2$s impressions (28 days), position %3$s', 'aw-seo-extras' ), $r->label, number_format_i18n( (int) $r->impr28 ), number_format_i18n( (float) $r->pos28, 1 ) );
+		$line = null === $r->pos28 ? sprintf( __( '"%1$s": %2$s impressions (28 days)', 'insightweb' ), $r->label, number_format_i18n( (int) $r->impr28 ) ) : sprintf( __( '"%1$s": %2$s impressions (28 days), position %3$s', 'insightweb' ), $r->label, number_format_i18n( (int) $r->impr28 ), number_format_i18n( (float) $r->pos28, 1 ) );
 		if ( 'gap' === $r->status && isset( aw_si_actions()[ $r->action ] ) ) {
 			/* translators: 1: gap line, 2: suggested page type such as "New page: guide". */
-			$line = sprintf( __( '%1$s (suggested: %2$s)', 'aw-seo-extras' ), $line, aw_si_actions()[ $r->action ] );
+			$line = sprintf( __( '%1$s (suggested: %2$s)', 'insightweb' ), $line, aw_si_actions()[ $r->action ] );
 		}
 		$groups[ $title ][] = $line;
 	}

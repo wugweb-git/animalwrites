@@ -15,7 +15,7 @@
  * Rows in obs: src gsc, period day; metric total (kw 0), q (query, page ''), qp (query + page), p (page, kw 0: the
  * page's full figures, including the searches Google hides, which qp rows leave out).
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -220,7 +220,7 @@ function aw_si_gsc_store_day( string $day, array $data ) {
 	$n    = aw_si_obs_replace_day( 'gsc', $day, $rows, 'day', array( 'total', 'q', 'qp', 'p' ), 'gsc' ); // only the rows this run writes
 	if ( is_wp_error( $n ) ) {
 		/* translators: 1: date, 2: database error. */
-		return new WP_Error( 'aw_si_store', sprintf( __( 'Search Console rows for %1$s could not be saved, so the earlier rows were kept: %2$s', 'aw-seo-extras' ), $day, $n->get_error_message() ) );
+		return new WP_Error( 'aw_si_store', sprintf( __( 'Search Console rows for %1$s could not be saved, so the earlier rows were kept: %2$s', 'insightweb' ), $day, $n->get_error_message() ) );
 	}
 	return $n;
 }
@@ -280,7 +280,7 @@ function aw_si_gsc_run( array $args = array() ): array {
 				$data = aw_si_gsc_fetch_day( $module, $day, $start + AW_SI_GSC_BUDGET );
 				if ( is_wp_error( $data ) ) {
 					/* translators: 1: date, 2: error message. */
-					$rep['error'] = sprintf( __( 'Search Console could not be read for %1$s: %2$s', 'aw-seo-extras' ), $day, $data->get_error_message() );
+					$rep['error'] = sprintf( __( 'Search Console could not be read for %1$s: %2$s', 'insightweb' ), $day, $data->get_error_message() );
 					break;
 				}
 				if ( $data['truncated'] ) {

@@ -3,7 +3,7 @@
  * Links tab list table: who links to us, as a core list table (views by type, search, sorting, bulk and row actions,
  * screen options, pagination). Hide, Unhide and Set type are the only changes it makes, and only to wp_aw_si_links.
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -43,15 +43,15 @@ class AW_SI_Links_Table extends WP_List_Table {
 	public function get_columns() {
 		return array(
 			'cb'         => '<input type="checkbox">',
-			'domain'     => __( 'Linking site', 'aw-seo-extras' ),
-			'linked_url' => __( 'Linked page', 'aw-seo-extras' ),
-			'anchor'     => __( 'Anchor text', 'aw-seo-extras' ),
-			'links'      => __( 'Links', 'aw-seo-extras' ),
-			'dr'         => __( 'DR (Ahrefs)', 'aw-seo-extras' ),
-			'first_seen' => __( 'First seen', 'aw-seo-extras' ),
-			'last_seen'  => __( 'Last seen', 'aw-seo-extras' ),
-			'source'     => __( 'Source', 'aw-seo-extras' ),
-			'type'       => __( 'Type', 'aw-seo-extras' ),
+			'domain'     => __( 'Linking site', 'insightweb' ),
+			'linked_url' => __( 'Linked page', 'insightweb' ),
+			'anchor'     => __( 'Anchor text', 'insightweb' ),
+			'links'      => __( 'Links', 'insightweb' ),
+			'dr'         => __( 'DR (Ahrefs)', 'insightweb' ),
+			'first_seen' => __( 'First seen', 'insightweb' ),
+			'last_seen'  => __( 'Last seen', 'insightweb' ),
+			'source'     => __( 'Source', 'insightweb' ),
+			'type'       => __( 'Type', 'insightweb' ),
 		);
 	}
 
@@ -80,12 +80,12 @@ class AW_SI_Links_Table extends WP_List_Table {
 
 	/** Views: All (not hidden), one per type, Unsorted, Hidden. Spam rows show only in Spam, even when unhidden. */
 	private function views_sql(): array {
-		$out = array( 'all' => array( __( 'All', 'aw-seo-extras' ), "hidden = 0 AND type <> 'spam'" ) );
+		$out = array( 'all' => array( __( 'All', 'insightweb' ), "hidden = 0 AND type <> 'spam'" ) );
 		foreach ( aw_si_link_types() as $key => $label ) {
 			$out[ $key ] = array( $label, 'spam' === $key ? "type = 'spam'" : "type = '{$key}' AND hidden = 0" );
 		}
-		$out['unsorted'] = array( __( 'Unsorted', 'aw-seo-extras' ), "type = '' AND hidden = 0" );
-		$out['hidden']   = array( __( 'Hidden (not spam)', 'aw-seo-extras' ), "hidden = 1 AND type <> 'spam'" );
+		$out['unsorted'] = array( __( 'Unsorted', 'insightweb' ), "type = '' AND hidden = 0" );
+		$out['hidden']   = array( __( 'Hidden (not spam)', 'insightweb' ), "hidden = 1 AND type <> 'spam'" );
 		return $out;
 	}
 
@@ -147,7 +147,7 @@ class AW_SI_Links_Table extends WP_List_Table {
 
 	/** Message when the list is empty. */
 	public function no_items() {
-		echo esc_html__( 'No links here.', 'aw-seo-extras' );
+		echo esc_html__( 'No links here.', 'insightweb' );
 	}
 
 	/**
@@ -244,9 +244,9 @@ class AW_SI_Links_Table extends WP_List_Table {
 	 * @param object $item Row.
 	 */
 	protected function column_type( $item ) {
-		$out = esc_html( aw_si_link_types()[ (string) $item->type ] ?? __( 'Unsorted', 'aw-seo-extras' ) );
+		$out = esc_html( aw_si_link_types()[ (string) $item->type ] ?? __( 'Unsorted', 'insightweb' ) );
 		if ( (int) $item->hidden ) {
-			$out .= '<br><span class="description">' . esc_html__( 'Hidden', 'aw-seo-extras' ) . '</span>';
+			$out .= '<br><span class="description">' . esc_html__( 'Hidden', 'insightweb' ) . '</span>';
 		}
 		return $out;
 	}

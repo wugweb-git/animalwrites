@@ -5,7 +5,7 @@
  * the shell draws: paragraphs, notes, lists, tables and notices. Text and links only: no markup goes out, and a link
  * is kept only when it is http(s) or a relative address.
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -59,7 +59,7 @@ function insightweb_rest_box( WP_REST_Request $request ) {
 	$key   = sanitize_key( (string) $request['key'] );
 	$boxes = aw_si_overview_boxes();
 	if ( ! isset( $boxes[ $key ] ) || ! is_callable( $boxes[ $key ][1] ) ) {
-		return new WP_Error( 'insightweb_no_box', __( 'No such box.', 'aw-seo-extras' ), array( 'status' => 404 ) );
+		return new WP_Error( 'insightweb_no_box', __( 'No such box.', 'insightweb' ), array( 'status' => 404 ) );
 	}
 	if ( get_option( 'aw_si_off' ) ) {
 		return rest_ensure_response(
@@ -69,7 +69,7 @@ function insightweb_rest_box( WP_REST_Request $request ) {
 				'blocks' => array(
 					array(
 						'type' => 'p',
-						'text' => __( 'Search Insights is off: its data was deleted. Settings → Run the daily update starts it again.', 'aw-seo-extras' ),
+						'text' => __( 'Search Insights is off: its data was deleted. Settings → Run the daily update starts it again.', 'insightweb' ),
 					),
 				),
 			)

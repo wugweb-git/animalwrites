@@ -15,7 +15,7 @@
  * A failed run is logged with aw_si_run_fail( 'bing' ) and the stored rows stay. A failed or timed-out GetUrlLinks call
  * only makes the run partial: what was read is saved, with a warning.
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -40,7 +40,7 @@ add_filter(
 	function ( $s ) {
 		if ( aw_si_bing_on() ) { // Listed only once the key is set, so it never shows as late or failed before.
 			$s['bing'] = array(
-				'label' => __( 'Bing Webmaster', 'aw-seo-extras' ),
+				'label' => __( 'Bing Webmaster', 'insightweb' ),
 				'every' => 31 * DAY_IN_SECONDS,
 			);
 		}
@@ -73,7 +73,7 @@ function aw_si_bing_call( string $method, array $args = array() ) {
 	if ( 200 !== $code || ! is_array( $body ) || ! array_key_exists( 'd', $body ) ) {
 		$msg = is_array( $body ) && ! empty( $body['Message'] ) ? (string) $body['Message'] : '';
 		/* translators: 1: API method, 2: HTTP status, 3: Bing's message. */
-		return new WP_Error( 'aw_si_bing', str_replace( array( $key, rawurlencode( $key ) ), '…', trim( sprintf( __( 'Bing %1$s answered %2$d. %3$s', 'aw-seo-extras' ), $method, $code, mb_substr( $msg, 0, 200 ) ) ) ) );
+		return new WP_Error( 'aw_si_bing', str_replace( array( $key, rawurlencode( $key ) ), '…', trim( sprintf( __( 'Bing %1$s answered %2$d. %3$s', 'insightweb' ), $method, $code, mb_substr( $msg, 0, 200 ) ) ) ) );
 	}
 	return $body['d'];
 }
@@ -278,11 +278,11 @@ function aw_si_bing_obs_rows( array $queries, array $pages ): array {
  */
 function aw_si_bing_run( array $args = array() ): array {
 	if ( ! aw_si_bing_on() ) {
-		return array( 'error' => __( 'Bing Webmaster is not set up: add its API key under Animal Writes → Keys.', 'aw-seo-extras' ) );
+		return array( 'error' => __( 'Bing Webmaster is not set up: add its API key under Animal Writes → Keys.', 'insightweb' ) );
 	}
 	$dry = ! empty( $args['dry'] );
 	if ( ! $dry && get_option( 'aw_si_off' ) ) { // After Delete data nothing is written until Search Insights is switched back on.
-		return array( 'error' => __( 'Search Insights is off (its data was deleted), so Bing Webmaster did not run.', 'aw-seo-extras' ) );
+		return array( 'error' => __( 'Search Insights is off (its data was deleted), so Bing Webmaster did not run.', 'insightweb' ) );
 	}
 	@set_time_limit( 300 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 	if ( ! $dry ) {
@@ -336,9 +336,9 @@ function aw_si_bing_run( array $args = array() ): array {
 				$rep['partial'] = $l['partial'];
 				if ( '' !== $l['warning'] ) {
 					/* translators: %s: Bing's error. */
-					$rep['warnings'][] = sprintf( __( 'Some linked pages could not be read (%s); the next run carries on from there.', 'aw-seo-extras' ), $l['warning'] );
+					$rep['warnings'][] = sprintf( __( 'Some linked pages could not be read (%s); the next run carries on from there.', 'insightweb' ), $l['warning'] );
 				} elseif ( $l['partial'] ) {
-					$rep['warnings'][] = __( 'Not every linked page was read in time; the next run carries on from there.', 'aw-seo-extras' );
+					$rep['warnings'][] = __( 'Not every linked page was read in time; the next run carries on from there.', 'insightweb' );
 				}
 				if ( ! $dry && ! empty( $l['resume'] ) && ! wp_next_scheduled( AW_SI_BING_CRON ) ) {
 					wp_schedule_single_event( time() + HOUR_IN_SECONDS, AW_SI_BING_CRON ); // Carry on in an hour, not next month.
@@ -374,12 +374,12 @@ function aw_si_bing_run( array $args = array() ): array {
 				}
 				if ( $rep['skipped'] ) {
 					/* translators: %d: links. */
-					$rep['warnings'][] = sprintf( __( '%d links had no usable address and were skipped.', 'aw-seo-extras' ), $rep['skipped'] );
+					$rep['warnings'][] = sprintf( __( '%d links had no usable address and were skipped.', 'insightweb' ), $rep['skipped'] );
 				}
 			}
 			if ( empty( $rep['error'] ) && $rep['failed'] ) {
 				/* translators: %d: rows. */
-				$rep['error'] = sprintf( __( '%d Bing rows could not be saved.', 'aw-seo-extras' ), $rep['failed'] );
+				$rep['error'] = sprintf( __( '%d Bing rows could not be saved.', 'insightweb' ), $rep['failed'] );
 			}
 		}
 	} catch ( Throwable $e ) {
@@ -448,13 +448,13 @@ add_action(
 		if ( ! aw_si_bing_on() ) {
 			return;
 		}
-		echo '<tr><th scope="row">' . esc_html__( 'Bing searches', 'aw-seo-extras' ) . '</th><td>';
+		echo '<tr><th scope="row">' . esc_html__( 'Bing searches', 'insightweb' ) . '</th><td>';
 		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_si_bing_kw">';
 		wp_nonce_field( 'aw_si_bing_kw' );
-		echo '<p><button type="submit" name="what" value="count" class="button">' . esc_html__( 'Count Bing searches without a keyword record', 'aw-seo-extras' ) . '</button> ';
-		echo '<button type="submit" name="what" value="add" class="button">' . esc_html__( 'Add keyword records for them', 'aw-seo-extras' ) . '</button></p>';
+		echo '<p><button type="submit" name="what" value="count" class="button">' . esc_html__( 'Count Bing searches without a keyword record', 'insightweb' ) . '</button> ';
+		echo '<button type="submit" name="what" value="add" class="button">' . esc_html__( 'Add keyword records for them', 'insightweb' ) . '</button></p>';
 		echo '</form>';
-		echo '<p class="description">' . esc_html__( 'Bing\'s figures are stored only for searches that have a keyword record. Adding records (role: seen in search) runs Bing Webmaster again, so their figures are stored too. Nothing is added to Rank Math or Sourcing.', 'aw-seo-extras' ) . '</p></td></tr>';
+		echo '<p class="description">' . esc_html__( 'Bing\'s figures are stored only for searches that have a keyword record. Adding records (role: seen in search) runs Bing Webmaster again, so their figures are stored too. Nothing is added to Rank Math or Sourcing.', 'insightweb' ) . '</p></td></tr>';
 	}
 );
 
@@ -462,7 +462,7 @@ add_action(
 	'admin_post_aw_si_bing_kw',
 	function () {
 		if ( ! current_user_can( aw_si_cap() ) || ! check_admin_referer( 'aw_si_bing_kw' ) ) {
-			wp_die( esc_html__( 'Not allowed.', 'aw-seo-extras' ), 403 );
+			wp_die( esc_html__( 'Not allowed.', 'insightweb' ), 403 );
 		}
 		$what = isset( $_POST['what'] ) ? sanitize_key( wp_unslash( $_POST['what'] ) ) : 'count';
 		$miss = aw_si_bing_missing();
@@ -497,6 +497,6 @@ add_action(
 			return;
 		}
 		/* translators: 1: searches without a record, 2: records written, 3: the searches. */
-		wp_admin_notice( esc_html( sprintf( __( 'Bing searches without a keyword record: %1$s. Records written: %2$s. %3$s', 'aw-seo-extras' ), number_format_i18n( (int) $r['count'] ), number_format_i18n( (int) $r['added'] ), implode( ', ', (array) $r['list'] ) ) ), array( 'type' => 'success', 'additional_classes' => array( 'inline' ) ) );
+		wp_admin_notice( esc_html( sprintf( __( 'Bing searches without a keyword record: %1$s. Records written: %2$s. %3$s', 'insightweb' ), number_format_i18n( (int) $r['count'] ), number_format_i18n( (int) $r['added'] ), implode( ', ', (array) $r['list'] ) ) ), array( 'type' => 'success', 'additional_classes' => array( 'inline' ) ) );
 	}
 );

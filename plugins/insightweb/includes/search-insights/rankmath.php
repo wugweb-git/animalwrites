@@ -7,7 +7,7 @@
  *   position filter and rounds positions, and leaves out pages with a query string, so Site Kit stays the first choice.
  * Focus keyphrases and redirections were already read (keywords.php, sources.php).
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -58,13 +58,13 @@ function aw_si_rankmath_gsc_day( string $day ) {
 	global $wpdb;
 	$t = aw_si_rankmath_gsc_table();
 	if ( '' === $t ) {
-		return new WP_Error( 'aw_si_rm', __( 'Rank Math Analytics is not connected (no rank_math_analytics_gsc table).', 'aw-seo-extras' ) );
+		return new WP_Error( 'aw_si_rm', __( 'Rank Math Analytics is not connected (no rank_math_analytics_gsc table).', 'insightweb' ) );
 	}
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
 	$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT query, page, SUM(clicks) c, SUM(impressions) i, SUM(position * impressions) / NULLIF(SUM(impressions), 0) p FROM {$t} WHERE created >= %s AND created < %s GROUP BY query, page", $day . ' 00:00:00', gmdate( 'Y-m-d', strtotime( $day . ' +1 day' ) ) . ' 00:00:00' ) );
 	if ( ! $rows ) {
 		/* translators: %s: date. */
-		return new WP_Error( 'aw_si_rm', sprintf( __( 'Rank Math Analytics has no Search Console rows for %s.', 'aw-seo-extras' ), $day ) );
+		return new WP_Error( 'aw_si_rm', sprintf( __( 'Rank Math Analytics has no Search Console rows for %s.', 'insightweb' ), $day ) );
 	}
 	$out = array(
 		'total'     => array(),
@@ -155,7 +155,7 @@ function aw_si_rankmath_gsc_run( array $days, bool $dry, string $sitekit ): ?arr
 					'rows'  => $rep['rows'],
 					'up_to' => max( array_keys( $rep['days'] ) ),
 					/* translators: %s: why Site Kit could not be used. */
-					'via'   => sprintf( __( 'Rank Math Analytics (Site Kit: %s)', 'aw-seo-extras' ), $sitekit ),
+					'via'   => sprintf( __( 'Rank Math Analytics (Site Kit: %s)', 'insightweb' ), $sitekit ),
 				)
 			);
 		}

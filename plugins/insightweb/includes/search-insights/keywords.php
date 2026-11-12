@@ -3,7 +3,7 @@
  * Keyword records (plan §3): normalising and grouping, roles, the one-time seed from the keyword map and the daily role
  * sync from Rank Math and SourceWeb. Everything here only reads Rank Math and Sourcing; it never writes to them.
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -423,7 +423,7 @@ function aw_si_obs_replace_day( string $src, string $day, array $rows, string $p
 		$error = $wpdb->last_error;
 		$wpdb->query( 'ROLLBACK' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		/* translators: 1: source, 2: date, 3: database error. */
-		return new WP_Error( 'aw_si_store', sprintf( __( '%1$s rows for %2$s could not be saved, so the earlier rows were kept: %3$s', 'aw-seo-extras' ), $src, $day, $error ) );
+		return new WP_Error( 'aw_si_store', sprintf( __( '%1$s rows for %2$s could not be saved, so the earlier rows were kept: %3$s', 'insightweb' ), $src, $day, $error ) );
 	}
 	$wpdb->query( 'COMMIT' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	return count( $rows );
@@ -497,7 +497,7 @@ function aw_si_sync_roles(): array {
 	if ( $ok ) {
 		$wpdb->query( 'COMMIT' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	} else {
-		$errors[] = __( 'Focus keyphrase links could not be saved, so yesterday\'s were kept: ', 'aw-seo-extras' ) . $wpdb->last_error;
+		$errors[] = __( 'Focus keyphrase links could not be saved, so yesterday\'s were kept: ', 'insightweb' ) . $wpdb->last_error;
 		$wpdb->query( 'ROLLBACK' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	}
 
@@ -524,7 +524,7 @@ function aw_si_sync_roles(): array {
 		if ( $ok ) {
 			$wpdb->query( 'COMMIT' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		} else {
-			$errors[] = __( 'Listing-name flags could not be saved, so the earlier flags were kept: ', 'aw-seo-extras' ) . $wpdb->last_error;
+			$errors[] = __( 'Listing-name flags could not be saved, so the earlier flags were kept: ', 'insightweb' ) . $wpdb->last_error;
 			$wpdb->query( 'ROLLBACK' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		}
 	}

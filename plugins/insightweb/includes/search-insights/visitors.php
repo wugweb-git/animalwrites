@@ -13,7 +13,7 @@
  *   No paid service and no lookup per request leaves the server.
  * - Storage: table {prefix}aw_si_visits (day, kind c = country / i = shortened IP, key, count); one write per request.
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -238,17 +238,17 @@ function aw_si_vis_top( string $kind, int $days, int $limit ): array {
 
 /** The visitors section of the Server tab. */
 function aw_si_vis_section(): void {
-	echo '<h2>' . esc_html__( 'Visitors', 'aw-seo-extras' ) . '</h2>';
+	echo '<h2>' . esc_html__( 'Visitors', 'insightweb' ) . '</h2>';
 	if ( AW_SI_VIS_DB !== get_option( 'aw_si_vis_db' ) ) {
-		echo '<p>' . esc_html__( 'Counting starts once this page has been opened after the update.', 'aw-seo-extras' ) . '</p>';
+		echo '<p>' . esc_html__( 'Counting starts once this page has been opened after the update.', 'insightweb' ) . '</p>';
 		return;
 	}
 	$geo = (string) get_option( 'aw_si_geo_updated' );
-	echo '<p class="description">' . esc_html__( 'Front-end requests the server answered (not logged-in users, wp-admin, the REST API or cron; not pages the CDN or the server\'s page cache answered from a stored copy), by country and by shortened address (IPv4 with the last number zeroed, IPv6 to 48 bits). Shortened addresses are kept 30 days, countries for good.', 'aw-seo-extras' ) . ' ';
+	echo '<p class="description">' . esc_html__( 'Front-end requests the server answered (not logged-in users, wp-admin, the REST API or cron; not pages the CDN or the server\'s page cache answered from a stored copy), by country and by shortened address (IPv4 with the last number zeroed, IPv6 to 48 bits). Shortened addresses are kept 30 days, countries for good.', 'insightweb' ) . ' ';
 	/* translators: %s: date the country file was downloaded, or "not yet". */
-	echo esc_html( sprintf( __( 'Countries: the CDN\'s country header when sent, else IP Geolocation by DB-IP (db-ip.com, CC BY 4.0), file of %s.', 'aw-seo-extras' ), '' !== $geo ? $geo : __( 'not yet', 'aw-seo-extras' ) ) ) . '</p>';
+	echo esc_html( sprintf( __( 'Countries: the CDN\'s country header when sent, else IP Geolocation by DB-IP (db-ip.com, CC BY 4.0), file of %s.', 'insightweb' ), '' !== $geo ? $geo : __( 'not yet', 'insightweb' ) ) ) . '</p>';
 
-	echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Day', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Requests', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Top countries', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Top shortened addresses', 'aw-seo-extras' ) . '</th></tr></thead><tbody>';
+	echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Day', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'Requests', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'Top countries', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'Top shortened addresses', 'insightweb' ) . '</th></tr></thead><tbody>';
 	global $wpdb;
 	$t = aw_si_vis_table();
 	for ( $i = 0; $i < 7; $i++ ) {
@@ -269,16 +269,16 @@ function aw_si_vis_section(): void {
 
 	foreach (
 		array(
-			array( __( 'Top countries, all days', 'aw-seo-extras' ), __( 'Country', 'aw-seo-extras' ), aw_si_vis_top( 'c', 0, 10 ) ),
-			array( __( 'Top shortened addresses, 30 days', 'aw-seo-extras' ), __( 'Shortened address', 'aw-seo-extras' ), aw_si_vis_top( 'i', AW_SI_VIS_IP_DAYS, 10 ) ),
+			array( __( 'Top countries, all days', 'insightweb' ), __( 'Country', 'insightweb' ), aw_si_vis_top( 'c', 0, 10 ) ),
+			array( __( 'Top shortened addresses, 30 days', 'insightweb' ), __( 'Shortened address', 'insightweb' ), aw_si_vis_top( 'i', AW_SI_VIS_IP_DAYS, 10 ) ),
 		) as $sec
 	) {
 		echo '<h3>' . esc_html( $sec[0] ) . '</h3>';
 		if ( ! $sec[2] ) {
-			echo '<p>' . esc_html__( 'None counted yet.', 'aw-seo-extras' ) . '</p>';
+			echo '<p>' . esc_html__( 'None counted yet.', 'insightweb' ) . '</p>';
 			continue;
 		}
-		echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html( $sec[1] ) . '</th><th scope="col">' . esc_html__( 'Requests', 'aw-seo-extras' ) . '</th></tr></thead><tbody>';
+		echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html( $sec[1] ) . '</th><th scope="col">' . esc_html__( 'Requests', 'insightweb' ) . '</th></tr></thead><tbody>';
 		foreach ( $sec[2] as $k => $n ) {
 			echo '<tr><td>' . esc_html( $k ) . '</td><td>' . esc_html( number_format_i18n( $n ) ) . '</td></tr>';
 		}

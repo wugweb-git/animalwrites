@@ -9,7 +9,7 @@
  * Run on the schema upgrade, on opening the Links tab, or with `wp aw-si links seed`. Each batch is marked done (its own
  * option) only when every row was written; a repeat only moves dates, never types or hidden flags.
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

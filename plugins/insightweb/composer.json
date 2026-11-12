@@ -23,6 +23,6 @@
 	},
 	"scripts": {
 		"lint": "phpcs --standard=WordPress --extensions=php --ignore=vendor .",
-		"make-pot": "wp i18n make-pot . languages/aw-seo-extras.pot --domain=aw-seo-extras --exclude=vendor"
+		"make-pot": "wp i18n make-pot . languages/insightweb.pot --domain=insightweb --exclude=vendor"
 	}
 }

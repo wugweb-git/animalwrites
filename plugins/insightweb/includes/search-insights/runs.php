@@ -3,7 +3,7 @@
  * Run log per source (option aw_si_runs): last good run, last error, rows written. Feeds the "last updated" notices on
  * every tab and the Site Health test. A failed run never clears the last good data (plan §5, failure rule).
  *
- * @package aw-seo-extras
+ * @package insightweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -20,16 +20,16 @@ const AW_SI_RUNS = 'aw_si_runs';
 function aw_si_sources(): array {
 	$s = array(
 		'gsc'    => array(
-			'label' => __( 'Search Console (Site Kit)', 'aw-seo-extras' ),
+			'label' => __( 'Search Console (Site Kit)', 'insightweb' ),
 			'every' => DAY_IN_SECONDS,
 		),
 		'roles'  => array(
-			'label' => __( 'Keyword roles (Rank Math, Sourcing)', 'aw-seo-extras' ),
+			'label' => __( 'Keyword roles (Rank Math, Sourcing)', 'insightweb' ),
 			'every' => DAY_IN_SECONDS,
 		),
 		'rollup' => array(
 			/* translators: %d: days. */
-			'label' => sprintf( __( 'Retention (%d-day rollup)', 'aw-seo-extras' ), aw_si_keep_days() ),
+			'label' => sprintf( __( 'Retention (%d-day rollup)', 'insightweb' ), aw_si_keep_days() ),
 			'every' => DAY_IN_SECONDS,
 		),
 	);
@@ -53,10 +53,10 @@ function aw_si_key( string $name ): string {
 add_filter(
 	'aw_keys',
 	function ( $keys ) {
-		$by                             = __( 'Search Insights', 'aw-seo-extras' );
-		$keys['AW_CLARITY_TOKEN']       = array( __( 'Clarity Data Export token', 'aw-seo-extras' ), __( 'Clarity → Settings → Data Export → Generate new API token.', 'aw-seo-extras' ), $by );
-		$keys['AW_BING_WEBMASTER_KEY']  = array( __( 'Bing Webmaster API key', 'aw-seo-extras' ), __( 'Bing Webmaster Tools → Settings (gear) → API access. Not an IndexNow key.', 'aw-seo-extras' ), $by );
-		$keys['AW_PSI_KEY']             = array( __( 'PageSpeed Insights API key (Google, optional)', 'aw-seo-extras' ), __( 'Google Cloud → APIs → PageSpeed Insights API → Credentials. Only needed if Site Kit\'s PageSpeed can\'t be used.', 'aw-seo-extras' ), $by );
+		$by                             = __( 'Search Insights', 'insightweb' );
+		$keys['AW_CLARITY_TOKEN']       = array( __( 'Clarity Data Export token', 'insightweb' ), __( 'Clarity → Settings → Data Export → Generate new API token.', 'insightweb' ), $by );
+		$keys['AW_BING_WEBMASTER_KEY']  = array( __( 'Bing Webmaster API key', 'insightweb' ), __( 'Bing Webmaster Tools → Settings (gear) → API access. Not an IndexNow key.', 'insightweb' ), $by );
+		$keys['AW_PSI_KEY']             = array( __( 'PageSpeed Insights API key (Google, optional)', 'insightweb' ), __( 'Google Cloud → APIs → PageSpeed Insights API → Credentials. Only needed if Site Kit\'s PageSpeed can\'t be used.', 'insightweb' ), $by );
 		return $keys;
 	}
 );
@@ -105,7 +105,7 @@ function aw_si_run_problem( string $src ): string {
 	$last = max( (int) ( $r['started'] ?? 0 ), (int) ( $r['beat'] ?? 0 ) ); // A run in steps (URL Inspection, PageSpeed) beats at each step.
 	if ( ! empty( $r['started'] ) && (int) $r['started'] > $end && time() - $last > HOUR_IN_SECONDS ) {
 		/* translators: %s: date and time. */
-		return sprintf( __( 'The run started on %s did not finish (probably a time limit).', 'aw-seo-extras' ), wp_date( 'j M, H:i', (int) $r['started'] ) );
+		return sprintf( __( 'The run started on %s did not finish (probably a time limit).', 'insightweb' ), wp_date( 'j M, H:i', (int) $r['started'] ) );
 	}
 	return $err ? (string) $err['message'] : '';
 }
