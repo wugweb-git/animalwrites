@@ -866,6 +866,11 @@
 	.aw-camp--diwali .aw-camp-dates :is(.aw-date, .aw-date time) { white-space: normal; } /* the three dates wrap inside their third of the row instead of running past the screen */
 }
 
+/* Diwali Who to call: 112 and 1962 are call buttons, at least 44px (--kit-size-target; design-system.md rule 6; owner,
+   13 Nov 2026). A number inside a sentence stays a text link. */
+.aw-camp--diwali #help td > strong > a[href^="tel:"] { display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; min-width: var(--kit-size-target); min-height: var(--kit-size-target); padding-inline: var(--kit-space-3); border: var(--kit-border-width) solid currentColor; border-radius: var(--kit-radius-control); color: var(--kit-color-link); text-decoration: none; }
+.aw-camp--diwali #help td > strong > a[href^="tel:"]:active { background: color-mix(in srgb, currentColor 12%, transparent); } /* tap feedback */
+.aw-camp--diwali #help td > strong > a[href^="tel:"]:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
 /* Diwali Who to call: the table wraps to fit, no sideways scrolling (owner, 2 Nov 2026) */
 .aw-camp--diwali #help .wp-block-table { overflow-x: visible; }
 .aw-camp--diwali #help .wp-block-table :is(th, td) { white-space: normal; overflow-wrap: anywhere; }
