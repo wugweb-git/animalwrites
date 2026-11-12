@@ -43,6 +43,7 @@ require_once KITS_CORE_DIR . 'includes/dashboard-cards.php';
 require_once KITS_CORE_DIR . 'includes/admin-fold.php';
 require_once KITS_CORE_DIR . 'includes/admin-home.php';
 require_once KITS_CORE_DIR . 'includes/help-tab.php';
+require_once KITS_CORE_DIR . 'includes/plugin-info.php';
 require_once KITS_CORE_DIR . 'includes/altcha.php';
 require_once KITS_CORE_DIR . 'includes/forms.php';
 require_once KITS_CORE_DIR . 'includes/form-kit.php';

@@ -46,6 +46,7 @@ define( 'AW_SOURCING_DIR', __DIR__ . '/' );
 require_once AW_SOURCING_DIR . 'includes/sourcing-basics.php'; // own capability, option names and host helpers (also in Kits Core)
 require_once AW_SOURCING_DIR . 'includes/summary-rules.php'; // the summary rules (option aw_summary_rules); moved from Core 12 Nov 2026
 require_once AW_SOURCING_DIR . 'includes/help-tab.php';
+require_once AW_SOURCING_DIR . 'includes/plugin-info.php';
 require_once AW_SOURCING_DIR . 'includes/menu-model.php'; // the Sourcing menu: slugs, screen id, order (admin-menu.php registers it)
 require_once AW_SOURCING_DIR . 'includes/sources-model.php';
 require_once AW_SOURCING_DIR . 'includes/keywords-model.php'; // phase 2: the lists in the keyword table (Core's)

@@ -53,6 +53,7 @@ add_action(
 
 require_once MAILWEB_DIR . 'includes/admin-table.php';
 require_once MAILWEB_DIR . 'includes/help-tab.php';
+require_once MAILWEB_DIR . 'includes/plugin-info.php';
 require_once MAILWEB_DIR . 'includes/crypto.php';
 require_once MAILWEB_DIR . 'includes/addresses.php';
 require_once MAILWEB_DIR . 'includes/mailweb-settings-save.php';

@@ -47,6 +47,7 @@ require_once PLANWEB_DIR . 'includes/store.php';
 require_once PLANWEB_DIR . 'includes/import.php';
 require_once PLANWEB_DIR . 'includes/admin.php';
 require_once PLANWEB_DIR . 'includes/help-tab.php';
+require_once PLANWEB_DIR . 'includes/plugin-info.php';
 require_once PLANWEB_DIR . 'includes/dashboard.php';
 require_once PLANWEB_DIR . 'includes/kits-hub.php';
 require_once PLANWEB_DIR . 'includes/planweb-dashboard.php';
