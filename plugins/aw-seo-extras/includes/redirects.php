@@ -62,6 +62,50 @@ function aw_rank_math_redirect( $pattern, $to, $comparison = 'exact' ) {
 	return (int) $r->save();
 }
 
+/**
+ * Seed redirects, added once per version to Rank Math's list (they can be edited or removed there afterwards; an exact
+ * path already in the list is left alone). 12 Nov 2026: common city spellings that are not the Directory's district
+ * slug (each checked as 404 on live, its target as 200), the old campaign addresses still asked for, and a removed
+ * News item.
+ */
+const AW_SEED_REDIRECTS_VERSION = '1';
+add_action(
+	'init',
+	function () {
+		if ( AW_SEED_REDIRECTS_VERSION === get_option( 'aw_seed_redirects_version' ) || ! class_exists( '\RankMath\Redirections\Redirection' ) ) {
+			return;
+		}
+		$exact = array(
+			'directory/karnataka/bengaluru'                => '/directory/karnataka/bengaluru-urban/',
+			'directory/karnataka/bangalore'                => '/directory/karnataka/bengaluru-urban/',
+			'directory/karnataka/bangalore-urban'          => '/directory/karnataka/bengaluru-urban/',
+			'directory/delhi/delhi'                        => '/directory/delhi/',
+			'directory/assam/guwahati'                     => '/directory/assam/kamrup-metro/',
+			'directory/haryana/gurgaon'                    => '/directory/haryana/gurugram/',
+			'directory/uttar-pradesh/noida'                => '/directory/uttar-pradesh/gautam-buddha-nagar/',
+			'directory/uttar-pradesh/gautam-buddh-nagar'   => '/directory/uttar-pradesh/gautam-buddha-nagar/',
+			'campaign/lab-animal-rules-2026'               => '/campaigns/lab-animals-rules-2026/',
+			'campaigns/draft-laboratory-animals-rules-2026' => '/campaigns/lab-animals-rules-2026/',
+			'news/niagara-falls-man-charged-after-cat-found-severely-emaciated-at-motel' => '/news/',
+		);
+		$ok = true;
+		foreach ( $exact as $from => $to ) {
+			$ok = aw_rank_math_redirect( $from, home_url( $to ) ) && $ok;
+		}
+		// Any other /campaign/{slug}/ goes to /campaigns/{slug}/. Bare /campaign/ keeps its own exact rule.
+		global $wpdb;
+		$table = $wpdb->prefix . 'rank_math_redirections';
+		$have  = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE sources LIKE %s", '%' . $wpdb->esc_like( '^campaign/(.+?)/?$' ) . '%' ) ); // phpcs:ignore WordPress.DB
+		if ( ! $have ) {
+			$ok = aw_rank_math_redirect( '^campaign/(.+?)/?$', home_url( '/campaigns/$1/' ), 'regex' ) && $ok;
+		}
+		if ( $ok ) {
+			update_option( 'aw_seed_redirects_version', AW_SEED_REDIRECTS_VERSION, false );
+		}
+	},
+	20
+);
+
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	/**
 	 * `wp aw redirects-list`: every active redirect in Rank Math's list as CSV (path, target, code, comparison), read

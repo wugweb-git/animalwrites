@@ -38,6 +38,14 @@ const AW_SI_GA4_ROWS = 10000; // Rows per report; a report that returns this man
 /** Days left out of referral counts: 22 Oct 2026 has GA4 test events (owner, 31 Oct 2026). */
 const AW_SI_GA4_SKIP_DAYS = array( '2026-10-22' );
 
+/** Addresses opened on purpose to test the 404 page; never counted as 404s (12 Nov 2026). */
+const AW_SI_NF_TEST_PATHS = array( '/no-such-page/', '/no-such-page-xyz/' );
+
+/** Whether a 404 path is one of the test addresses (with or without the trailing slash). */
+function aw_si_nf_is_test( string $path ): bool {
+	return in_array( trailingslashit( $path ), AW_SI_NF_TEST_PATHS, true );
+}
+
 /** Social sources counted as referrals even when GA4 files them under another channel. Filter aw_si_social_sources. */
 function aw_si_social_sources(): array {
 	return (array) apply_filters( 'aw_si_social_sources', array( 'ig', 'instagram.com', 'l.instagram.com', 'instagram', 'facebook.com', 'm.facebook.com', 'l.facebook.com', 'lm.facebook.com', 'facebook', 't.co', 'x.com', 'twitter.com', 'linkedin.com', 'lnkd.in', 'linkedin', 'reddit.com', 'out.reddit.com', 'reddit', 'whatsapp', 'wa.me', 'web.whatsapp.com', 'telegram', 't.me', 'web.telegram.org', 'linktr.ee' ) );
@@ -226,7 +234,7 @@ function aw_si_ga4_fetch_nf( $module, string $end ) {
 	foreach ( array( 'customEvent:path', 'pagePath' ) as $dim ) {
 		$res = aw_si_ga4_report( $module, $args + array( 'dimensions' => array( $dim, 'date' ) ) );
 		if ( is_wp_error( $res ) ) {
-			$err = $res; // Most often: the custom dimension is not registered yet. Try pagePath.
+			$err = $res; // The custom dimension was missing (it is registered since 12 Nov 2026) or the report failed. Try pagePath.
 			continue;
 		}
 		// Events sent before the custom dimension was registered have no path ("(not set)"). While any row lacks it,
@@ -243,7 +251,7 @@ function aw_si_ga4_fetch_nf( $module, string $end ) {
 	$out  = array();
 	foreach ( $res as $r ) {
 		$path = aw_si_landing_path( (string) ( $r[0][0] ?? '' ) );
-		if ( '' === $path || in_array( (string) ( $r[0][1] ?? '' ), $skip, true ) ) {
+		if ( '' === $path || aw_si_nf_is_test( $path ) || in_array( (string) ( $r[0][1] ?? '' ), $skip, true ) ) {
 			continue;
 		}
 		$path         = mb_substr( $path, 0, 255 );

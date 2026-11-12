@@ -286,7 +286,7 @@ function aw_si_checklist_handle(): void {
 		$msg = 'started';
 	}
 	update_option( 'aw_si_checklist', array_slice( $list, 0, 500 ), false );
-	wp_safe_redirect( add_query_arg( 'cl', $msg, aw_si_url( 'checklist' ) ) );
+	wp_safe_redirect( add_query_arg( 'cl', $msg, aw_si_return_url( 'checklist' ) ) );
 	exit;
 }
 

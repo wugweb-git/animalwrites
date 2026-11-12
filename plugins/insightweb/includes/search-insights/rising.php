@@ -761,7 +761,7 @@ add_action(
 					'pasted'  => $done,
 					'skipped' => $skip,
 				),
-				aw_si_url( 'rising' )
+				aw_si_return_url( 'rising' )
 			)
 		);
 		exit;
@@ -845,7 +845,7 @@ add_action(
 			wp_die( esc_html__( 'Not allowed.', 'aw-seo-extras' ), 403 );
 		}
 		aw_si_gdelt_save( ! empty( $_POST['on'] ) );
-		wp_safe_redirect( aw_si_url( 'settings' ) );
+		wp_safe_redirect( aw_si_return_url( 'settings' ) );
 		exit;
 	}
 );

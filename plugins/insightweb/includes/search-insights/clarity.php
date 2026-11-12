@@ -514,7 +514,7 @@ add_action(
 		$path = isset( $_POST['path'] ) ? aw_si_path( home_url( sanitize_text_field( wp_unslash( $_POST['path'] ) ) ) ) : '';
 		$note = isset( $_POST['note'] ) ? sanitize_textarea_field( wp_unslash( $_POST['note'] ) ) : '';
 		$ok   = '' !== $path && '' !== trim( $note ) && aw_si_clarity_note_save( $path, mb_substr( trim( $note ), 0, 255 ) );
-		wp_safe_redirect( add_query_arg( $ok ? 'noted' : 'not_noted', 1, aw_si_url( 'pages' ) ) );
+		wp_safe_redirect( add_query_arg( $ok ? 'noted' : 'not_noted', 1, aw_si_return_url( 'pages' ) ) );
 		exit;
 	}
 );

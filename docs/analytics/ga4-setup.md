@@ -239,3 +239,39 @@ itself. Keep Page views on. (31 Oct 2026: Form interactions and Video engagement
 - Clarity: outside those regions it loads without waiting for consent (its script is fetched after the first scroll, tap or key press); inside them (judged by the browser's time zone) only once analytics storage is granted, then it gets `consentv2`.
 - There is no consent banner of the site's own. The code expects Google's CMP, loaded by AdSense, to send the update; with Advanced Ads switched off on live nothing loads it, so visitors in those regions stay denied.
 - India (DPDP Act 2023, Rules notified Nov 2025): consent duties for personal data phase in through 2027; analytics cookies are not singled out, but notice and consent for personal data are. Owner decision whether to add a banner.
+
+## GA4 Admin changes, 12 Nov 2026 (read in GA4 Admin the same day)
+
+**Key events**
+- Unmarked: `close_convert_lead` and `qualify_lead` (Site Kit defaults, never received data) and `pin_search`.
+- `file_download` and `pdf_download` stay key events (owner: every download counts).
+- `purchase` is a GA4 default and cannot be unmarked.
+- Open, owner: whether `newsletter_optin` stays a key event. It fires with most `objection_sent`, so "All key events"
+  per channel double counts; judge channels by objections sent and confirmed.
+
+**Enhanced measurement** (this replaces the 31 Oct note above)
+- Site search: on.
+- Scrolls and Outbound clicks: off on purpose (the site sends `scroll_depth` and `outbound_click`).
+- Form interactions and Video engagement: on.
+
+**Checked, no change needed**
+- Data retention: 14 months.
+- Search Console link: in place since 22 Jun.
+- Internal-traffic filter: active (rule "Claude test browsers (UAE)").
+- Custom dimension `path`: registered (event scope). 45 of the 50 event dimensions are used, so new events reuse the
+  existing params (`campaign_slug`, `step`, `network`, `term`) before a new dimension is registered.
+- Unwanted referrals: empty; no payment or login domain needs adding.
+- GA4 already reports an "AI assistant" medium (28 days to 11 Nov: ChatGPT 436 sessions, Gemini 21).
+
+**Data notes**
+- `(not set)` landing page (866 sessions in 28 days, 11% engaged): sessions with no `page_view`, mostly a session that
+  restarts on an event after 30 minutes idle (a tab left open, then a scroll or click), which GA4 counts as a new
+  session without a landing page. Not a tagging fault; the consent default is set before GTM, and LiteSpeed-cached
+  pages carry the same tags. Left as is; read landing-page reports without the `(not set)` row.
+- `no_results` from a filtered Directory list with no search term (408 of 530 in 28 days) now sends no `term` and
+  `term_empty=1` (aw-analytics.js). GA4 only receives `term_empty` once the GTM `no_results` tag maps it (a GTM change:
+  owner's OK first); until then those events simply carry no term.
+- Share buttons tag the shared address: `utm_source=<x|facebook|linkedin|whatsapp|email|copy|native>`,
+  `utm_medium=social_share`, `utm_campaign=<campaign slug, post type or term>` (kits-core share.php, campaign.js).
+  Canonicals stay clean (Rank Math) and LiteSpeed serves the cached copy for `?utm_*` addresses. Chats with a listing
+  (`wa.me/<number>`) go to WhatsApp, not to this site, so they carry no tags.

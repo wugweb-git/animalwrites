@@ -273,7 +273,7 @@ add_action(
 			wp_die( esc_html__( 'Not allowed.', 'aw-seo-extras' ), 403 );
 		}
 		aw_si_tool_seeds_save( isset( $_POST['seeds'] ) ? sanitize_textarea_field( wp_unslash( $_POST['seeds'] ) ) : '' );
-		wp_safe_redirect( aw_si_url( 'settings' ) );
+		wp_safe_redirect( aw_si_return_url( 'settings' ) );
 		exit;
 	}
 );

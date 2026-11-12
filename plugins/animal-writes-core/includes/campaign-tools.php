@@ -1083,7 +1083,7 @@ add_filter(
 			return $html;
 		}
 		$short = aw_camp_short_url( get_the_ID() ); // the short link, when the campaign has one (campaign-short.php)
-		$bar   = $short && function_exists( 'kits_share_html' ) ? kits_share_html( $short, html_entity_decode( get_the_title(), ENT_QUOTES ) ) : aw_share_html( get_the_ID() );
+		$bar   = $short && function_exists( 'kits_share_html' ) ? kits_share_html( $short, html_entity_decode( get_the_title(), ENT_QUOTES ), null, (string) get_post_field( 'post_name', get_the_ID() ) ) : aw_share_html( get_the_ID() );
 		$tags  = aw_camp_x_hashtags( get_post_meta( get_the_ID(), 'aw_campaign_share_hashtags', true ) );
 		if ( '' !== $tags ) { // the campaign's hashtags on the X link only (owner, 2 Nov 2026)
 			$bar = (string) preg_replace( '#(class="kit-share-btn kit-share-x" href="[^"]+)"#', '$1&#038;hashtags=' . rawurlencode( $tags ) . '"', $bar, 1 );

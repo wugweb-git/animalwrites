@@ -10,7 +10,7 @@
  *   social, donate, volunteer, claim, report, suggest_update, share, type_link, place_link, breadcrumb; a greyed-out
  *   button that was tapped: call_missing, whatsapp_missing, email_missing, website_missing, directions_missing.
  * - generate_lead (lead_source: call | whatsapp | email): a visitor contacting a listed organisation.
- * - no_results (hub, term, filters): a hub list that came back empty.
+ * - no_results (hub, term or term_empty=1, filters): a hub list that came back empty.
  *   Every Directory event carries listing_id, listing_name, listing_type, state, district where they apply.
  * Campaigns: campaign_view on every campaign page; campaign_action (action, ...) for every link on it, FAQ answers
  *   opened, and the home band (promo_click). campaign.js adds the letter tool's actions. Always campaign_slug and
@@ -126,7 +126,10 @@
 		if (empty && page.page_type !== 'search') {
 			var f = new URLSearchParams(location.search);
 			['aw_filter', 'paged'].forEach(function (k) { f.delete(k); });
-			track('no_results', { hub: page.section || '', term: (qs.get('q') || '').slice(0, 100), filters: f.toString().slice(0, 200), listing_type: page.listing_type || undefined, state: page.state || undefined, district: page.district || undefined });
+			// A filtered list with no search term sends no term, and term_empty=1, so empty lists never show as an empty
+			// search term in reports (12 Nov 2026: 408 of 530 no_results had none).
+			var term = (qs.get('q') || '').trim().slice(0, 100);
+			track('no_results', { hub: page.section || '', term: term || undefined, term_empty: term ? undefined : 1, filters: f.toString().slice(0, 200), listing_type: page.listing_type || undefined, state: page.state || undefined, district: page.district || undefined });
 		}
 	});
 

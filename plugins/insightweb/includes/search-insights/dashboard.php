@@ -76,7 +76,7 @@ function aw_seo_dash_nf_open(): array {
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
 	foreach ( (array) $wpdb->get_results( "SELECT txt, value FROM {$o} WHERE src = 'ga4' AND metric = 'nf' AND period = '28d' ORDER BY value DESC, txt" ) as $r ) {
 		$path = (string) $r->txt;
-		if ( untrailingslashit( aw_si_final_path( $path ) ) === untrailingslashit( $path ) ) {
+		if ( ! aw_si_nf_is_test( $path ) && untrailingslashit( aw_si_final_path( $path ) ) === untrailingslashit( $path ) ) {
 			$open[] = array(
 				'path'  => $path,
 				'views' => (int) $r->value,

@@ -293,7 +293,7 @@ add_action(
 			'error'   => __( 'Nothing to import: choose a file or paste the rows.', 'aw-seo-extras' ),
 		) : aw_si_import( $kind, $raw );
 		set_transient( 'aw_si_import_result_' . get_current_user_id(), $res + array( 'kind' => $kind ), 5 * MINUTE_IN_SECONDS );
-		wp_safe_redirect( add_query_arg( 'imported', 1, aw_si_url( 'settings' ) ) );
+		wp_safe_redirect( add_query_arg( 'imported', 1, aw_si_return_url( 'settings' ) ) );
 		exit;
 	}
 );

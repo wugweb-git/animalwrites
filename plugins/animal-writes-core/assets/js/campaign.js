@@ -65,6 +65,12 @@
 	   which go straight to Instagram or Facebook stories through the same sheet; on a computer the images download. */
 	var sh = window.awCampShare || {};
 	if (sh.short) sh.url = sh.short; /* the campaign's short link (/lab): what Share and Copy link hand out; the page's canonical stays the full address */
+	/* The shared address carries utm tags so the visit it brings back counts under its network, not Direct (12 Nov 2026);
+	   kits-core share.php tags the server's bar the same way. */
+	function tagged(src) {
+		if (!sh.url) return '';
+		return sh.url + (sh.url.indexOf('?') < 0 ? '?' : '&') + 'utm_source=' + src + '&utm_medium=social_share&utm_campaign=' + encodeURIComponent(sh.slug || 'campaign');
+	}
 	var canShare = !!navigator.share;
 	/* The pictures are fetched once, ahead of the tap where possible: a phone only opens its share sheet straight from a tap. */
 	var files = {};
@@ -92,20 +98,20 @@
 	/* Phone: one share with the picture, the message and the link (WhatsApp, Telegram and Facebook keep all three; Instagram
 	   keeps the picture, so the link is on the clipboard for its Link sticker). */
 	function shareAll(where) {
-		if (navigator.clipboard) navigator.clipboard.writeText(sh.url).catch(function () {});
+		if (navigator.clipboard) navigator.clipboard.writeText(tagged('copy')).catch(function () {});
 		getFile(picKind()).then(function (file) {
-			var data = canShareFile(file) ? { files: [file], title: sh.title, text: sh.text + ' ' + sh.url } : { title: sh.title, text: sh.text, url: sh.url };
+			var data = canShareFile(file) ? { files: [file], title: sh.title, text: sh.text + ' ' + tagged('native') } : { title: sh.title, text: sh.text, url: tagged('native') };
 			return navigator.share(data);
 		}).catch(function () {});
 	}
 	function shareImage(kind, where) {
 		/* The link travels with the picture: in the text (WhatsApp, Facebook, X keep it) and on the clipboard for
 		   Instagram, which drops text: the note says to paste it into the Link sticker. */
-		if (navigator.clipboard) navigator.clipboard.writeText(sh.url).catch(function () {});
+		if (navigator.clipboard) navigator.clipboard.writeText(tagged('copy')).catch(function () {});
 		shareNote(where, canShare ? 'Link copied. Paste it in a Link sticker.' : 'Image saved. The link is copied too: paste it with your post.');
 		getFile(kind).then(function (file) {
 			if (!file) return;
-			if (canShareFile(file)) return navigator.share({ files: [file], title: sh.title, text: sh.text + ' ' + sh.url }).catch(function () {});
+			if (canShareFile(file)) return navigator.share({ files: [file], title: sh.title, text: sh.text + ' ' + tagged('native') }).catch(function () {});
 			var a = document.createElement('a');
 			a.href = URL.createObjectURL(file);
 			a.download = file.name;
@@ -149,15 +155,15 @@
 			a.rel = 'noopener';
 			add(a, label, ico, network);
 		}
-		var u = encodeURIComponent(sh.url), t = encodeURIComponent(sh.text);
+		var t = encodeURIComponent(sh.text), u = function (src) { return encodeURIComponent(tagged(src)); };
 		if (canShare) btn('Share', 'share', 'native', function () { shareAll(where); }).classList.add('is-primary');
 		else {
-			link('WhatsApp', 'brand-whatsapp', 'whatsapp', 'https://wa.me/?text=' + t + '%20' + u);
-			link('X', 'x-brand', 'x', 'https://twitter.com/intent/tweet?text=' + t + '&url=' + u + (sh.hashtags ? '&hashtags=' + encodeURIComponent(sh.hashtags) : ''));
-			link('Facebook', 'facebook', 'facebook', 'https://www.facebook.com/sharer/sharer.php?u=' + u);
-			link('LinkedIn', 'linkedin', 'linkedin', 'https://www.linkedin.com/sharing/share-offsite/?url=' + u);
+			link('WhatsApp', 'brand-whatsapp', 'whatsapp', 'https://wa.me/?text=' + t + '%20' + u('whatsapp'));
+			link('X', 'x-brand', 'x', 'https://twitter.com/intent/tweet?text=' + t + '&url=' + u('x') + (sh.hashtags ? '&hashtags=' + encodeURIComponent(sh.hashtags) : ''));
+			link('Facebook', 'facebook', 'facebook', 'https://www.facebook.com/sharer/sharer.php?u=' + u('facebook'));
+			link('LinkedIn', 'linkedin', 'linkedin', 'https://www.linkedin.com/sharing/share-offsite/?url=' + u('linkedin'));
 			var c = btn('Copy link', 'link', 'copy_link', function () {
-				if (navigator.clipboard) navigator.clipboard.writeText(sh.url).catch(function () {});
+				if (navigator.clipboard) navigator.clipboard.writeText(tagged('copy')).catch(function () {});
 				c.lastChild.nodeValue = 'Link copied';
 			});
 		}
@@ -229,11 +235,11 @@
 		sayTimer = setTimeout(function () { done.textContent = ''; }, 6000);
 	}
 	function sharePicture(kind, done) {
-		if (navigator.clipboard) navigator.clipboard.writeText(sh.url).catch(function () {});
+		if (navigator.clipboard) navigator.clipboard.writeText(tagged('copy')).catch(function () {});
 		say(done, canShare ? 'Link copied. Paste it in a Link sticker.' : 'Image saved. The link is copied too: paste it with your post.');
 		getFile(kind).then(function (file) {
 			if (!file) return;
-			if (canShareFile(file)) return navigator.share({ files: [file], title: sh.title, text: sh.text + ' ' + sh.url }).catch(function () {});
+			if (canShareFile(file)) return navigator.share({ files: [file], title: sh.title, text: sh.text + ' ' + tagged('native') }).catch(function () {});
 			var a = document.createElement('a');
 			a.href = URL.createObjectURL(file);
 			a.download = file.name;
@@ -263,12 +269,12 @@
 		holder.insertBefore(wrap, holder.firstChild);
 		b.addEventListener('click', function () {
 			if (canShare) { shareAll(holder); return; }
-			if (navigator.clipboard) navigator.clipboard.writeText(sh.url).catch(function () {});
+			if (navigator.clipboard) navigator.clipboard.writeText(tagged('copy')).catch(function () {});
 			say(done, 'Link copied');
 		});
 		/* The share bar's links carry the campaign's share message with the short link (the server's bar has the title). */
-		var u = encodeURIComponent(sh.url), t = encodeURIComponent(sh.text || sh.title || '');
-		var nets = { x: 'https://x.com/intent/post?text=' + t + '&url=' + u + (sh.hashtags ? '&hashtags=' + encodeURIComponent(sh.hashtags) : ''), whatsapp: 'https://wa.me/?text=' + t + '%20' + u, email: 'mailto:?subject=' + encodeURIComponent(sh.title || '') + '&body=' + t + '%20' + u };
+		var t = encodeURIComponent(sh.text || sh.title || ''), u = function (src) { return encodeURIComponent(tagged(src)); };
+		var nets = { x: 'https://x.com/intent/post?text=' + t + '&url=' + u('x') + (sh.hashtags ? '&hashtags=' + encodeURIComponent(sh.hashtags) : ''), whatsapp: 'https://wa.me/?text=' + t + '%20' + u('whatsapp'), email: 'mailto:?subject=' + encodeURIComponent(sh.title || '') + '&body=' + t + '%20' + u('email') };
 		holder.querySelectorAll('.kit-share a[data-kit-share]').forEach(function (a) { if (nets[a.dataset.kitShare] && sh.text) a.href = nets[a.dataset.kitShare]; });
 		var pics = [['story', 'Instagram or Facebook story', 'Story, 9:16'], ['post', 'Instagram or Facebook post', 'Post, 4:5']].filter(function (k) { return sh[k[0]]; });
 		if (pics.length) {

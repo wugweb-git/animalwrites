@@ -36,6 +36,22 @@ function aw_si_url( string $tab = 'overview' ): string {
 }
 
 /**
+ * Where a form action (admin-post.php) goes back to: the tab, on the classic screen when the form was sent from it
+ * (its _wp_http_referer has &ui=classic), so the result notice shows where the action was taken (12 Nov 2026).
+ */
+function aw_si_return_url( string $tab = 'overview' ): string {
+	$url = aw_si_url( $tab );
+	$ref = (string) wp_get_referer();
+	if ( '' !== $ref ) {
+		wp_parse_str( (string) wp_parse_url( $ref, PHP_URL_QUERY ), $q );
+		if ( 'classic' === ( $q['ui'] ?? '' ) ) {
+			$url = add_query_arg( 'ui', 'classic', $url );
+		}
+	}
+	return $url;
+}
+
+/**
  * Nonce'd link for a priority row action.
  *
  * @param string $action override_p1 … override_clear.
@@ -211,7 +227,7 @@ function aw_si_handle_overrides(): void {
 	}
 	$ids = array_filter( array_map( 'intval', (array) wp_unslash( $_REQUEST['kw'] ?? array() ) ) );
 	if ( ! $ids ) {
-		wp_safe_redirect( add_query_arg( 'none', 1, aw_si_url( 'keywords' ) ) );
+		wp_safe_redirect( add_query_arg( 'none', 1, aw_si_return_url( 'keywords' ) ) );
 		exit;
 	}
 	$set = array(
@@ -667,7 +683,7 @@ function aw_si_box_referrers(): void {
 		/* translators: %s: first date with referral figures. */
 		echo '<p class="description">' . esc_html( sprintf( __( 'Figures from %s.', 'aw-seo-extras' ), wp_date( get_option( 'date_format' ), strtotime( $since ) ) ) ) . '</p>';
 	}
-	echo '<p class="description">' . esc_html__( 'Referral and social sessions by source (GA4 channels Referral, Organic Social and Paid Social, plus Instagram, Facebook, X, LinkedIn, Reddit, WhatsApp, Telegram and Linktree). 22 Oct 2026 is left out (GA4 test events). GA4 page views changed on 25 Oct 2026, when the site moved to one GA4 tag.', 'aw-seo-extras' ) . '</p>';
+	echo '<p class="description">' . esc_html__( 'Referral and social sessions by source (GA4 channels Referral, Organic Social and Paid Social, plus Instagram, Facebook, X, LinkedIn, Reddit, WhatsApp, Telegram and Linktree). 22 Oct 2026 (GA4 test events) and the test addresses /no-such-page/ and /no-such-page-xyz/ are left out. GA4 page views changed on 25 Oct 2026, when the site moved to one GA4 tag.', 'aw-seo-extras' ) . '</p>';
 }
 
 /**
@@ -786,7 +802,7 @@ function aw_si_box_campaigns(): void {
 	echo '<p class="description">' . esc_html( sprintf( __( '%1$s to %2$s. X: t.co, x.com and twitter.com. All social includes X.', 'aw-seo-extras' ), wp_date( get_option( 'date_format' ), strtotime( $from ) ), wp_date( get_option( 'date_format' ), strtotime( $end ) ) ) ) . '</p>';
 	echo '<p class="description">' . esc_html__( 'Sessions (landed) and key events: sessions that started on the campaign page or a short link to it, from referral and social sources (direct, search and email visits are not in these rows). Key events count every GA4 key event in those sessions, not only objections.', 'aw-seo-extras' ) . '</p>';
 	if ( $camp ) {
-		echo '<p class="description">' . esc_html__( 'Sessions (viewed), objections sent and confirmed: sessions with a campaign_view, and objection_sent and objection_confirmed events, on the campaign page, by the session\'s source, from every source. 22 Oct 2026 is left out (GA4 test events).', 'aw-seo-extras' ) . '</p>';
+		echo '<p class="description">' . esc_html__( 'Sessions (viewed), objections sent and confirmed: sessions with a campaign_view, and objection_sent and objection_confirmed events, on the campaign page, by the session\'s source, from every source. 22 Oct 2026 (GA4 test events) and the test addresses /no-such-page/ and /no-such-page-xyz/ are left out.', 'aw-seo-extras' ) . '</p>';
 	} else {
 		echo '<p class="description">' . esc_html__( 'Sessions (viewed), objections sent and confirmed arrive with the next GA4 run (daily at 07:20 IST).', 'aw-seo-extras' ) . '</p>';
 	}
@@ -814,7 +830,8 @@ function aw_si_box_nf(): void {
 	}
 	$o = aw_si_table( 'obs' );
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
-	$rows = (array) $wpdb->get_results( "SELECT txt, value, d FROM {$o} WHERE src = 'ga4' AND metric = 'nf' AND period = '28d' ORDER BY value DESC, txt LIMIT 20" );
+	$rows = (array) $wpdb->get_results( "SELECT txt, value, d FROM {$o} WHERE src = 'ga4' AND metric = 'nf' AND period = '28d' ORDER BY value DESC, txt LIMIT 22" );
+	$rows = array_slice( array_values( array_filter( $rows, fn( $r ) => ! aw_si_nf_is_test( (string) $r->txt ) ) ), 0, 20 ); // test addresses stored before 12 Nov
 	if ( ! $rows ) {
 		echo '<p>' . esc_html__( 'No 404s recorded yet (GA4 runs daily at 07:20 IST).', 'aw-seo-extras' ) . '</p>';
 		return;
@@ -834,9 +851,9 @@ function aw_si_box_nf(): void {
 	}
 	echo '</tbody></table>';
 	$info = aw_si_runs()['ga4']['info']['nf'] ?? array();
-	$dim  = 'pagePath' === ( $info['dim'] ?? '' ) ? __( 'page path (the custom dimension "path" is not registered in GA4 yet)', 'aw-seo-extras' ) : __( 'the event\'s path parameter', 'aw-seo-extras' );
+	$dim  = 'pagePath' === ( $info['dim'] ?? '' ) ? __( 'page path (some events in the window were sent before the "path" dimension was registered; on a 404 page it is the same address)', 'aw-seo-extras' ) : __( 'the event\'s path parameter', 'aw-seo-extras' );
 	/* translators: 1: last day of the window, 2: what the path comes from. */
-	echo '<p class="description">' . esc_html( sprintf( __( '404_view events in the 28 days to %1$s, by %2$s. 22 Oct 2026 is left out (GA4 test events). Status follows Rank Math redirects (exact and regex) and old slugs; "Loads now" means the address opens a published page today (the 404s came before it existed or during an update); "Still 404" means neither, not that the address was checked again.', 'aw-seo-extras' ), wp_date( get_option( 'date_format' ), strtotime( (string) $rows[0]->d ) ), $dim ) ) . '</p>';
+	echo '<p class="description">' . esc_html( sprintf( __( '404_view events in the 28 days to %1$s, by %2$s. 22 Oct 2026 (GA4 test events) and the test addresses /no-such-page/ and /no-such-page-xyz/ are left out. Status follows Rank Math redirects (exact and regex) and old slugs; "Loads now" means the address opens a published page today (the 404s came before it existed or during an update); "Still 404" means neither, not that the address was checked again.', 'aw-seo-extras' ), wp_date( get_option( 'date_format' ), strtotime( (string) $rows[0]->d ) ), $dim ) ) . '</p>';
 }
 
 /** Overview box: content gaps (the keyword map's demand gaps and every P2 keyword), with the suggested page type. */
@@ -1112,7 +1129,7 @@ add_action(
 		} else {
 			aw_si_daily( true );
 		}
-		wp_safe_redirect( add_query_arg( 'ran', 1, aw_si_url( 'settings' ) ) );
+		wp_safe_redirect( add_query_arg( 'ran', 1, aw_si_return_url( 'settings' ) ) );
 		exit;
 	}
 );
@@ -1135,7 +1152,7 @@ add_action(
 			);
 		}
 		aw_si_drop_all();
-		wp_safe_redirect( aw_si_url( 'settings' ) );
+		wp_safe_redirect( aw_si_return_url( 'settings' ) );
 		exit;
 	}
 );

@@ -61,7 +61,7 @@ function aw_block_term_share() {
 		return '';
 	}
 	$title = function_exists( 'aw_seo_plain' ) && function_exists( 'aw_seo_term_title' ) ? preg_replace( '/ – Animal Writes$/u', '', aw_seo_plain( aw_seo_term_title( $term ) ) ) : html_entity_decode( $term->name, ENT_QUOTES );
-	return '<div class="kit-share-inline aw-item-share">' . kits_share_html( (string) kits_term_url( $term ), $title ) . '</div>';
+	return '<div class="kit-share-inline aw-item-share">' . kits_share_html( (string) kits_term_url( $term ), $title, null, 'term' ) . '</div>';
 }
 
 /**

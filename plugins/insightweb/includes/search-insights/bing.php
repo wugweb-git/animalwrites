@@ -477,7 +477,7 @@ add_action(
 			aw_si_bing_run();
 		}
 		set_transient( 'aw_si_bing_kw_' . get_current_user_id(), $res, 10 * MINUTE_IN_SECONDS );
-		wp_safe_redirect( add_query_arg( 'bingkw', 1, aw_si_url( 'settings' ) ) );
+		wp_safe_redirect( add_query_arg( 'bingkw', 1, aw_si_return_url( 'settings' ) ) );
 		exit;
 	}
 );
