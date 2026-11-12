@@ -748,7 +748,9 @@ FAQ: all 167 topic FAQs and the 4 new ones (directory free, volunteer 18+, claim
 | C3 classic actions keep &ui=classic | live 12 Nov; result notices and the Seeds box on the new screens still open |
 | C10 confirm rate per source and per day | live 12 Nov; checked: Lab 22% overall (direct 23%, google 28%, ig 16%); per day from the next GA4 run |
 | C1, C4–C9, C11 | open |
-| D1, D2, D5 drafts | Claude outputs/drafts/2026-11-12-d1-d2-d5-emergency-pages.md, awaiting owner |
-| D3, D7 drafts | Claude outputs/drafts/2026-11-12-d3-d7-lab-and-rabies.md, awaiting owner |
+| D1, D2, D5 | live 12 Nov (owner's yes): #126 street-dog section, city links, free-help FAQ; #9031 1962 by state + cross-link; #13798 FAQ (What number is 1962?, Why 1962?) + state links; /about/ "What we do and don't do"; contact line. Titles, metas, keyphrases set. FAQ max 6: "What details will rescuers ask for?" (#126) and "What if 1962 does not answer?" (#13798) now not shown; both are page sections |
+| D3, D7 | live 12 Nov (owner's yes): "In plain words" box on #13854; #17307 dog-bite answer replaced, "How is rabies treated in humans?" added (heading now "eleven questions"); link line on #12409 and #12411; study keyphrases narrowed. Lab page dates (5 Nov) untouched: owner's word |
 | E1–E3 briefs | Claude outputs/drafts/2026-11-12-e1-e3-new-guides-briefs.md, awaiting owner; E3 proposed as an update of /resources/rabies-facts-who/ |
-| D4, D6, D8, E4–E7, F, G, H | open |
+| D4, D6 | drafts: Claude outputs/drafts/2026-11-12-d4-d6-alternatives-quick-wins.md, awaiting owner; D6 cpcsea email keyphrase live 12 Nov; Petit, DLSA, NGO Darpan, Library link were already in place; D6-3 district helplines = template change, waits for "yes D6-3" |
+| D8 | schema alternateName in a107f67a (shipping); Home title and meta done by another session: not touched here |
+| E4–E7, F, G, H | open |

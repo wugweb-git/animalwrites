@@ -212,8 +212,8 @@ Demand and figures: `docs/seo/keyword-demand-2026-10-21.md`; rank: `docs/seo/ran
 |---|---|---|---|---|---|---|
 | What to do after a dog bite in India (#17307, /resources/dog-bite-rabies-vaccine/) | dog bite | what to do after dog bite, rabies vaccine schedule, dog bite injection | I/T | "dog bite" T 430, "rabies vaccine" T 426; AC Y for schedule, injection price, category 1/2/3, "no blood" and food myths, with a full Hindi set; Bing confirms | page live 21 Oct: 62 impressions, position 6.4; "dog bite" page 1 has Wikipedia, MNT, WebMD, NIH, WHO and a hospital, not us | **P1** |
 | NGO Darpan registration (#17308, /resources/ngo-darpan-registration/) | ngo darpan registration | ngo darpan, darpan id search, ngo darpan certificate | I/T | T 87; AC Y (online, fees, documents, certificate, Hinglish "kaise kare"); Bing confirms | page 70 impressions, position 5.4 ("darpan id search" forms) | **P1** |
-| 1962 helpline (#13798, /resources/1962-helpline-mobile-veterinary-units/) | 1962 helpline number | mobile veterinary unit, animal ambulance number, 1962 helpline number {state} | T | AC Y (mp, up, rajasthan, gujarat, timing, "is free or not", "kya hai"); GSC about 200 impressions on 1962 queries | page 974 impressions, position 6.9; queries 8.8–11.6 | **P1** |
-| CPCSEA full form (#13868) | cpcsea full form | ccsea full form, cpcsea | I | GSC "cpcsea full form" 206, "cpcsea-mef@gov.in" 228, "ccsea" 498 | page 1,041 impressions, position 6.2; query 8.5 | **P1** |
+| 1962 helpline (#13798, /resources/1962-helpline-mobile-veterinary-units/) | 1962 helpline number | 1962 helpline number timing, mobile veterinary unit, 1962 veterinary ambulance, 1962 toll free number (12 Nov 2026: "animal ambulance number" moved to #9031) | T | AC Y (mp, up, rajasthan, gujarat, timing, "is free or not", "kya hai"); GSC about 200 impressions on 1962 queries | page 974 impressions, position 6.9; queries 8.8–11.6 | **P1** |
+| CPCSEA full form (#13868) | cpcsea full form | ccsea full form, cpcsea, cpcsea mef gov in email (12 Nov 2026) | I | GSC "cpcsea full form" 206, "cpcsea-mef@gov.in" 228, "ccsea" 498 | page 1,041 impressions, position 6.2; query 8.5 | **P1** |
 | AWBI explained (#13800) | animal welfare board of india | awbi, awbi circular | I/N | "awbi" 129 + "animal welfare board of india" 71 in GSC; AC Y (recruitment, chairman, email id, upsc) | page 408 impressions, position 6.6 | **P1** |
 | Draft lab animal rules (campaign + Library + 7 resources) | g.s.r. 864(e) (Library item) | draft lab animal rules 2026, animal experimentation rules 2026 | I/N | GSC cluster 3,795 impressions, 212 clicks | #1 for "lab animal rules 2026"; "gsr 864 e" position 4.3 | **P1** until the campaign closes |
 | World Animal Day (#13797, /resources/world-animal-day-4-october/) | world animal day | world animal day 2026, 4 october day | I | T 25 (peaks in October); GSC about 1,160 impressions on the cluster | the Library notice ranks instead (position 8–8.4); see the conflict table in section 7 | **P1** (seasonal: be ready by September 2027) |
@@ -232,3 +232,22 @@ Demand and figures: `docs/seo/keyword-demand-2026-10-21.md`; rank: `docs/seo/ran
 | Library: AWBI circulars (hub filter) | awbi circular | awbi circulars and advisories, awbi stray dog circular | I | AC Y (circulars, 2015, pet dog, stray dog, guidelines) | not checked | P3 (low volume) |
 
 **Organisation profiles at positions 8–12 (quick wins).** Blue Cross Pondicherry 10.1 (52 impressions), SANS Animal Welfare Trust 11.3 (49 + 29 "reviews"), Animotel Care Trust "reviews" 10.0 (45), Bezubaan Saathi 10.7 (36), Daya Animal Welfare 11.9 (23 + 23), Blue Cross Vizag 8.4 (28), People for Animals Goa 10.8 (19), Pyaar Foundation Chandrapur 9.2 (19), Saahas for Animals 7.7 (114, new). Combined they are well over 50 impressions: **P1** as a group.
+
+## 10. Keyphrase changes of 12 Nov 2026
+
+Set in Rank Math on live, 12 Nov 2026. The first phrase is the focus; the rest are secondaries.
+
+| Page | Focus | Secondaries | Why |
+|---|---|---|---|
+| Found an injured animal (#126) | injured animal | injured dog help, injured street dog, dog rescue free, injured animal helpline number | D1 page 1; "1962 helpline" stays with #13798 |
+| Who to call in an animal emergency (#9031) | animal emergency number | animal ambulance number, animal helpline number, animal rescue helpline | D1 page 2; "1962 mobile veterinary unit" left to #13798 ("mobile veterinary unit") |
+| 1962 helpline (#13798) | 1962 helpline number | 1962 helpline number timing, mobile veterinary unit, 1962 veterinary ambulance, 1962 toll free number | D2 |
+| Draft lab animal rules, rule by rule (#13854) | draft lab animal rules rule by rule | ccsea draft rules, lab animal rules 2026 explained | D3 |
+| Dog bites in Bangalore children study (#12409) | dog bite awareness study bengaluru | none | D7: research-item rule; stops it competing with #17307 for "does every dog bite cause rabies" |
+| Rabies treatment in North India study (#12411) | category iii bite prophylaxis study north india | none | D7: stops it competing with #17307 for "rabies treatment in humans" |
+| CPCSEA full form (#13868) | cpcsea full form | ccsea, ccsea full form, cpcsea new name, full form of cpcsea, cpcsea mef gov in email | D6 |
+
+Proposed, not live yet:
+- #13869 alternatives to animal testing: secondaries new approach methodologies, nams india, organ on a chip india, 3rs animal testing.
+- #13797 World Animal Day: "world animal day 2026" → "world animal day 2027" (the 2026 searches stay with Library #142).
+
