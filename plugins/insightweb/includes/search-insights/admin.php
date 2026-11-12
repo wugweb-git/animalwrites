@@ -544,11 +544,9 @@ function aw_si_run_detail( string $src, array $info ): array {
 	if ( 'inspect' === $src && isset( $info['indexed'] ) ) {
 		/* translators: %s: pages indexed. */
 		$det[] = sprintf( __( '%s indexed', 'aw-seo-extras' ), $n( 'indexed' ) );
-		if ( isset( $info['never_left'] ) && function_exists( 'aw_si_inspect_eta' ) ) {
-			$eta = aw_si_inspect_eta( (int) $info['never_left'], (int) ( $info['rows'] ?? 0 ), (string) ( $info['up_to'] ?? '' ) );
-			if ( '' !== $eta ) {
-				$det[] = $eta; // why pages were not reached is the first warning (aw_si_inspect_info())
-			}
+		$eta = function_exists( 'aw_si_inspect_info_eta' ) ? aw_si_inspect_info_eta( $info ) : '';
+		if ( '' !== $eta ) {
+			$det[] = $eta; // why pages were not reached is the first warning (aw_si_inspect_info())
 		}
 	}
 	if ( ! empty( $info['pasted'] ) ) {

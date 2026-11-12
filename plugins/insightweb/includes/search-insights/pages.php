@@ -114,15 +114,10 @@ function aw_si_pages_data(): array {
 		$set( $r->page, 'note_d', $r->d );
 	}
 	// phpcs:enable
-	// Rank Math SEO score of the item at that address (rankmath.php).
-	foreach ( aw_si_rankmath_scores() as $path => $score ) {
-		if ( isset( $out[ $path ] ) ) {
-			$out[ $path ]['rm_score'] = $score;
-		}
-	}
 	// Google's index state from URL Inspection (gsc-types.php), each page by its latest result. A page found not indexed
 	// is listed even without other figures, so the Not indexed view counts the same pages as the Overview's "pages we
-	// inspected" figure (12 Nov 2026: it counted only pages that had figures, 579 of 3,653).
+	// inspected" figure (12 Nov 2026: it counted only pages that had figures, 579 of 3,653). Before the Rank Math
+	// scores, so those pages get theirs too.
 	if ( function_exists( 'aw_si_index_states' ) ) {
 		foreach ( aw_si_index_states() as $path => $st ) {
 			if ( isset( $out[ $path ] ) || ( ! $st[0] && '' !== (string) $path ) ) {
@@ -130,6 +125,12 @@ function aw_si_pages_data(): array {
 				$out[ $path ]['index_t'] = $st[1];
 				$out[ $path ]['index_d'] = $st[2];
 			}
+		}
+	}
+	// Rank Math SEO score of the item at that address (rankmath.php).
+	foreach ( aw_si_rankmath_scores() as $path => $score ) {
+		if ( isset( $out[ $path ] ) ) {
+			$out[ $path ]['rm_score'] = $score;
 		}
 	}
 	foreach ( $out as $path => $f ) {

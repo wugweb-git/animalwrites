@@ -24,6 +24,7 @@ const AW_SI_INSPECT_MORE   = 'aw_si_inspect_more';
 const AW_SI_INSPECT_QUEUE  = 'aw_si_inspect_queue';
 const AW_SI_INSPECT_CAP    = 2000; // Google's daily URL Inspection limit per site. Filter aw_si_inspect_cap lowers it.
 const AW_SI_INSPECT_BUDGET = 15;   // Seconds per cron step (12 Nov 2026: 25 left too little room under the host's 30-second PHP limit; the 11 Nov run died mid-step).
+const AW_SI_INSPECT_GAP    = 300;  // Seconds between cron steps (WP-Cron runs them only when the site has visits).
 const AW_SI_INSPECT_D      = '2000-01-01'; // The one fixed date of the index-state rows.
 
 add_filter(
@@ -318,7 +319,7 @@ function aw_si_inspect_step(): array {
 		return is_array( $q ) ? $q : array();
 	}
 	if ( ! wp_next_scheduled( AW_SI_INSPECT_MORE ) ) {
-		wp_schedule_single_event( time() + 5 * MINUTE_IN_SECONDS, AW_SI_INSPECT_MORE ); // Booked first, as in psi.php.
+		wp_schedule_single_event( time() + AW_SI_INSPECT_GAP, AW_SI_INSPECT_MORE ); // Booked first, as in psi.php.
 	}
 	$res = aw_si_with_module(
 		'search-console',
@@ -342,6 +343,7 @@ function aw_si_inspect_step(): array {
 					if ( in_array( $code, array( 403, 429 ), true ) ) {
 						/* translators: %d: HTTP status. */
 						$q['refused'] = sprintf( __( 'Google refused URL Inspection (HTTP %d), so it stops for today.', 'aw-seo-extras' ), $code );
+						$q['quota']   = true; // only these two codes are Google's quota; other errors say so differently (aw_si_inspect_info())
 						break;
 					}
 					array_shift( $q['todo'] );
@@ -409,12 +411,18 @@ function aw_si_inspect_info( array $q ): array {
 	$refused = (string) ( $q['refused'] ?? '' );
 	$warn    = array_values( array_filter( array_merge( array( $refused ), (array) ( $q['errors'] ?? array() ) ) ) );
 	if ( $left ) {
-		$why = '' !== $refused
+		$pages = number_format_i18n( $left );
+		if ( '' !== $refused && ! empty( $q['quota'] ) ) {
 			/* translators: %s: pages. */
-			? __( '%s pages not reached that day: Google refused URL Inspection (its quota), so the queue stopped.', 'aw-seo-extras' )
+			$why = sprintf( __( '%s pages not reached that day: Google refused URL Inspection (HTTP 403 or 429, its quota), so the queue stopped.', 'aw-seo-extras' ), $pages );
+		} elseif ( '' !== $refused ) {
 			/* translators: %s: pages. */
-			: __( '%s pages not reached that day: the time budget ran out (15 s of calls per step, a step every 5 min when the site has visits), not Google\'s 2,000-a-day quota.', 'aw-seo-extras' );
-		array_unshift( $warn, sprintf( $why, number_format_i18n( $left ) ) );
+			$why = sprintf( __( '%s pages not reached that day: Search Console could not be reached (the reason follows), so the queue stopped.', 'aw-seo-extras' ), $pages );
+		} else {
+			/* translators: 1: pages, 2: seconds of calls per step, 3: minutes between steps, 4: Google's daily limit. */
+			$why = sprintf( __( '%1$s pages not reached that day: the time budget ran out (%2$s s of calls per step, a step every %3$s min when the site has visits), not Google\'s %4$s-a-day quota.', 'aw-seo-extras' ), $pages, number_format_i18n( AW_SI_INSPECT_BUDGET ), number_format_i18n( AW_SI_INSPECT_GAP / MINUTE_IN_SECONDS ), number_format_i18n( AW_SI_INSPECT_CAP ) );
+		}
+		array_unshift( $warn, $why );
 	}
 	$info = array(
 		'rows'     => $done,
@@ -666,13 +674,21 @@ function aw_si_inspect_queue_lines( array $info ): array {
 	if ( ! empty( $info['left'] ) ) {
 		$out[] = (string) ( (array) ( $info['warnings'] ?? array() ) )[0]; // aw_si_inspect_info() puts the not-reached line first
 	}
-	if ( isset( $info['never_left'] ) ) {
-		$eta = aw_si_inspect_eta( (int) $info['never_left'], (int) ( $info['rows'] ?? 0 ), (string) ( $info['up_to'] ?? '' ) );
-		if ( '' !== $eta ) {
-			$out[] = $eta;
-		}
-	}
+	$out[] = aw_si_inspect_info_eta( $info );
 	return array_values( array_filter( $out ) );
+}
+
+/**
+ * The estimate of aw_si_inspect_eta() from an inspect run's info, or '' when the run kept no count of pages never
+ * inspected (runs before 12 Nov 2026).
+ *
+ * @param array $info The inspect run's info (aw_si_inspect_info()).
+ */
+function aw_si_inspect_info_eta( array $info ): string {
+	if ( ! isset( $info['never_left'] ) ) {
+		return '';
+	}
+	return aw_si_inspect_eta( (int) $info['never_left'], (int) ( $info['rows'] ?? 0 ), (string) ( $info['up_to'] ?? '' ) );
 }
 
 /**
