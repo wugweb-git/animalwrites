@@ -698,6 +698,7 @@ function sourceweb_source_row( array $r, bool $si ): array {
 		'id'         => $r['host'],
 		'title'      => $r['host'],
 		'name'       => $r['name'],
+		'icon'       => aw_src_icon_url( $r['host'] ),
 		'pub'        => (bool) $r['pub'],
 		'kind'       => $r['kind'],
 		'short'      => $r['short'],

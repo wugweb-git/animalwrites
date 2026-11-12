@@ -2489,32 +2489,53 @@ function SourceList( { go, msg, setMsg } ) {
 						sortable: true,
 						primary: true,
 						render: ( r ) => (
-							<>
-								<a
-									href={ subHref( { edit: r.id } ) }
-									onClick={ inPlace( go, { edit: r.id } ) }
-								>
-									<strong>{ r.id }</strong>
-								</a>
-								{ r.name && (
-									<span className="kits-shell-field__help">
-										{ ' ' }
-										{ r.name }
+							<span className="kits-shell-withicon">
+								{ r.icon ? (
+									<img
+										className="kits-shell-service__icon"
+										src={ r.icon }
+										alt=""
+										width="32"
+										height="32"
+										loading="lazy"
+									/>
+								) : (
+									<span
+										className="kits-shell-service__icon is-blank"
+										aria-hidden="true"
+									>
+										{ r.id.charAt( 0 ).toUpperCase() }
 									</span>
 								) }
-								{ 'block' === r.status && (
-									<span className="kits-shell-field__help">
-										{ ' ' }
-										<Status
-											tone="error"
-											label={ __(
-												'Blocked: new items from it are refused. Items already on the site are unchanged.',
-												'aw-sourcing'
-											) }
-										/>
-									</span>
-								) }
-							</>
+								<span>
+									<a
+										href={ subHref( { edit: r.id } ) }
+										onClick={ inPlace( go, {
+											edit: r.id,
+										} ) }
+									>
+										<strong>{ r.id }</strong>
+									</a>
+									{ r.name && (
+										<span className="kits-shell-field__help">
+											{ ' ' }
+											{ r.name }
+										</span>
+									) }
+									{ 'block' === r.status && (
+										<span className="kits-shell-field__help">
+											{ ' ' }
+											<Status
+												tone="error"
+												label={ __(
+													'Blocked: new items from it are refused. Items already on the site are unchanged.',
+													'aw-sourcing'
+												) }
+											/>
+										</span>
+									) }
+								</span>
+							</span>
 						),
 					},
 					{

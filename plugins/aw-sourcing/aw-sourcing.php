@@ -47,6 +47,7 @@ require_once AW_SOURCING_DIR . 'includes/retire-model.php'; // phase 4: what sto
 // Order matters for the Sourcing screens (Sources, Keywords, then these in this order; reports and Settings go last, menu-model.php).
 require_once AW_SOURCING_DIR . 'includes/sourcing-policy.php';
 require_once AW_SOURCING_DIR . 'includes/source-sites.php';
+require_once AW_SOURCING_DIR . 'includes/source-icons.php';
 require_once AW_SOURCING_DIR . 'includes/sourcing-lists.php';
 require_once AW_SOURCING_DIR . 'includes/summary-rules-admin.php';
 require_once AW_SOURCING_DIR . 'includes/relevance.php';

@@ -196,6 +196,19 @@
 	font-weight: 400;
 }
 
+/* A list cell with a mark before it (a source's icon, or its first letter): the shell's 32px icon tile. */
+.kits-shell-withicon {
+	display: flex;
+	gap: var(--ks-s3);
+	align-items: flex-start;
+}
+
+.kits-shell-withicon > img.kits-shell-service__icon {
+	object-fit: contain;
+	background: var(--ks-white);
+	border: 1px solid var(--ks-g2);
+}
+
 /* Icon row actions (edit, delete, cancel, success, view, undo, external): ink, red or green; the label is the tooltip. */
 .kits-shell .kits-shell-iconaction.kits-shell-iconaction {
 	color: var(--ks-ink);

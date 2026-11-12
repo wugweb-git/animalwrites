@@ -192,10 +192,11 @@ add_action( AW_SOURCING_SITE_META_CRON, 'aw_sourcing_site_meta_run' );
 
 /**
  * Title and description from a page's HTML: <title> and <meta name="description">, og:title / og:description when
- * those are missing. Plain text, whitespace folded, title at most 200 and description 400 characters.
+ * those are missing. Plain text, whitespace folded, title at most 200 and description 400 characters. Also the
+ * address of the site's icon as the page gives it (icon), or ''.
  *
  * @param string $html Page HTML (the start of it is enough).
- * @return array{title: string, desc: string}
+ * @return array{title: string, desc: string, icon: string}
  */
 function aw_sourcing_parse_site_meta( $html ) {
 	$html = (string) $html;
@@ -222,11 +223,39 @@ function aw_sourcing_parse_site_meta( $html ) {
 			}
 		}
 	}
+	// The site's icon: a <link rel="icon"> (or "shortcut icon", "apple-touch-icon"), PNG or ICO before anything else;
+	// SVG is never taken (an SVG file can carry script). Kept as written; source-icons.php makes it absolute.
+	$icon = '';
+	$rank = -1;
+	if ( preg_match_all( '#<link\s[^>]*>#i', $head, $links ) ) {
+		foreach ( $links[0] as $tag ) {
+			preg_match_all( '#([a-zA-Z:_-]+)\s*=\s*(?:"([^"]*)"|\'([^\']*)\'|([^\s"\'>]+))#', $tag, $at, PREG_SET_ORDER );
+			$a = array();
+			foreach ( $at as $x ) {
+				$a[ strtolower( $x[1] ) ] = isset( $x[4] ) ? $x[4] : ( isset( $x[3] ) ? $x[3] : $x[2] );
+			}
+			$rel  = ' ' . strtolower( (string) ( $a['rel'] ?? '' ) ) . ' ';
+			$href = trim( html_entity_decode( (string) ( $a['href'] ?? '' ), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
+			if ( '' === $href || ( false === strpos( $rel, ' icon ' ) && false === strpos( $rel, ' apple-touch-icon ' ) ) ) {
+				continue;
+			}
+			$type = strtolower( (string) ( $a['type'] ?? '' ) );
+			if ( 'image/svg+xml' === $type || preg_match( '#\.svgz?(\?|$)#i', $href ) || 0 === stripos( $href, 'data:' ) ) {
+				continue;
+			}
+			$score = false !== strpos( $rel, ' apple-touch-icon ' ) ? 1 : ( preg_match( '#\.(png|ico)(\?|$)#i', $href ) || in_array( $type, array( 'image/png', 'image/x-icon', 'image/vnd.microsoft.icon' ), true ) ? 3 : 2 );
+			if ( $score > $rank ) {
+				$rank = $score;
+				$icon = mb_substr( $href, 0, 500 );
+			}
+		}
+	}
 	$title = preg_match( '#<title[^>]*>(.*?)</title>#is', $head, $m ) ? $clean( $m[1], 200 ) : '';
 	$desc  = $clean( $meta['description'] ?? '', 400 );
 	return array(
 		'title' => '' !== $title ? $title : $clean( $meta['og:title'] ?? '', 200 ),
 		'desc'  => '' !== $desc ? $desc : $clean( $meta['og:description'] ?? '', 400 ),
+		'icon'  => $icon,
 	);
 }
 
@@ -253,7 +282,7 @@ function aw_sourcing_site_meta_run( $limit = 15 ) {
 	$todo  = array_filter( array_keys( $want ), fn( $h ) => (string) ( $meta[ $h ]['at'] ?? '' ) < $fresh );
 	usort( $todo, fn( $a, $b ) => ( (int) $want[ $b ] <=> (int) $want[ $a ] ) ?: strcmp( (string) ( $meta[ $a ]['at'] ?? '' ), (string) ( $meta[ $b ]['at'] ?? '' ) ) ?: strcmp( $a, $b ) );
 	foreach ( array_slice( $todo, 0, max( 1, (int) $limit ) ) as $h ) {
-		$rec = array( 'title' => '', 'desc' => '', 'code' => '', 'at' => gmdate( 'Y-m-d H:i' ) );
+		$rec = array( 'title' => '', 'desc' => '', 'icon' => '', 'code' => '', 'at' => gmdate( 'Y-m-d H:i' ) );
 		if ( ! preg_match( '/^[a-z0-9.-]+$/', $h ) ) {
 			$rec['code'] = 'not a host';
 		} else {
