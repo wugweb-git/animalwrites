@@ -31,6 +31,7 @@ import { PageParts, BlockParts, Cell } from './parts';
 import { CalendarGrid } from './calendar';
 import { Select, SecretField, ConfirmButton } from './inputs';
 import { DetailPanel, MediaField, MediaThumbs, PairList } from './detail';
+import './dataviews.css';
 import './shell.css';
 import './more.css';
 

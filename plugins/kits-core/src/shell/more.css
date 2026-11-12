@@ -209,6 +209,35 @@
 	border: 1px solid var(--ks-g2);
 }
 
+/* DataList on DataViews: the primary cell keeps its row actions on a line of their own under the title. */
+.kits-shell-datalist .dataviews-title-field {
+	flex-wrap: wrap;
+	white-space: normal;
+}
+
+.kits-shell-datalist .dataviews-title-field > .kits-shell-rowactions {
+	flex-basis: 100%;
+}
+
+/* DataViews' filter popover opens at the end of the page, outside the shell and its ThemeProvider: the same ink and
+   grey there (literal values, as --ks-* is defined on .kits-shell only). */
+body.kits-shell-screen {
+	--wp-admin-theme-color: #141414;
+	--wp-admin-theme-color--rgb: 20, 20, 20;
+	--wp-components-color-accent: #141414;
+}
+
+.components-popover .dataviews-filters__search-widget-listitem:hover,
+.components-popover .dataviews-filters__search-widget-listitem[data-active-item],
+.components-popover .dataviews-filters__search-widget-listitem:focus {
+	background-color: #f4f4f4;
+}
+
+.components-popover .dataviews-filters__selection-indicator [role="radio"][data-checked] {
+	border-color: #141414;
+	background-color: #141414;
+}
+
 /* Icon row actions (edit, delete, cancel, success, view, undo, external): ink, red or green; the label is the tooltip. */
 .kits-shell .kits-shell-iconaction.kits-shell-iconaction {
 	color: var(--ks-ink);

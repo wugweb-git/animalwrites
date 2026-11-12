@@ -5,9 +5,11 @@
  * a sort, a page, a view, a bulk or row action). The screen fetches the rows from its own REST route; nothing is
  * filtered or sorted in the browser, so a list of 50,000 rows costs the same as one of 50.
  */
-import { Fragment, useEffect, useId, useState } from '@wordpress/element';
+import { useEffect, useId, useState } from '@wordpress/element';
+import { DataViews } from '@wordpress/dataviews';
+import { ThemeProvider } from '@wordpress/theme';
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { Button } from '@wordpress/components';
+import { Button, Modal, SearchControl } from '@wordpress/components';
 import {
 	check,
 	closeSmall,
@@ -17,7 +19,7 @@ import {
 	trash,
 	undo,
 } from '@wordpress/icons';
-import { EmptyState, LoadingState, ErrorState } from './states';
+import { EmptyState, ErrorState } from './states';
 
 const cx = ( ...names ) => names.filter( Boolean ).join( ' ' );
 
@@ -135,73 +137,55 @@ export function RowAction( { action } ) {
 	);
 }
 
-function FilterSelect( { filter, onFilter } ) {
-	const id = useId();
-	return (
-		<div className="kits-shell-filter">
-			<label htmlFor={ id }>{ filter.label }</label>
-			<select
-				id={ id }
-				value={ filter.value ?? '' }
-				onChange={ ( e ) => onFilter?.( filter.key, e.target.value ) }
-			>
-				{ ( filter.options || [] ).map( ( o ) => (
-					<option key={ o.value } value={ o.value }>
-						{ o.label }
-					</option>
-				) ) }
-			</select>
-		</div>
-	);
-}
-
 /**
- * The working list: saved views, search, filters, sortable columns, bulk and row actions, pagination, and the empty,
- * loading and error states. On phones each row stacks into a card, every cell with its column's name.
+ * The working list, on WordPress's DataViews (13 Nov 2026): saved views as pills above it, then DataViews' search,
+ * filters, table, tick boxes with the bulk actions, and pagination; the empty, loading and error states. The screen
+ * stays in charge: every search, filter, sort and page goes back to it (onSearch, onFilter, onSort, onPage) and it
+ * fetches the rows from its own REST route; nothing is filtered or sorted in the browser.
  *
  * @param {Object}   props
- * @param {string}   props.label       The list's name (table caption).
- * @param {Array}    props.columns     [ { key, label, sortable, primary, render( row ) } ]. The primary column carries the row actions.
- * @param {Array}    props.rows        The rows of this page.
- * @param {string}   props.rowKey      Key of a row's id (default 'id').
- * @param {string}   props.rowTitle    Key of a row's name, for the tick box's label (default 'title').
- * @param {number}   props.total       Rows in all pages.
- * @param {number}   props.page        This page (from 1).
- * @param {number}   props.pages       Number of pages.
- * @param {Function} props.onPage      Called with a page number.
- * @param {string}   props.search      The search words.
- * @param {Function} props.onSearch    Called with the words when the search is sent (Enter or the button).
- * @param {string}   props.searchLabel The search box's label.
- * @param {Array}    props.filters     [ { key, label, options: [ { value, label } ], value } ].
- * @param {Function} props.onFilter    Called with ( key, value ).
- * @param {Array}    props.views       [ { value, label, count } ]: saved views above the list ("Waiting 3").
- * @param {string}   props.view        The open view.
- * @param {Function} props.onView      Called with a view's value.
- * @param {Object}   props.sort        { key, dir: 'asc' | 'desc' }.
- * @param {Function} props.onSort      Called with ( key, dir ).
- * @param {Array}    props.bulkActions [ { value, label } ].
- * @param {Function} props.onBulk      Called with ( value, ids ).
- * @param {Function} props.rowActions  row => [ { label, href, onClick, disabled, why, tone } ].
- * @param {Function} props.rowView     row => what the row shows when opened (a DetailPanel …), or null for none.
- *                                     Opened rows show under their row, across every column; View and Hide toggle it.
- * @param {boolean}  props.loading     Rows are being fetched.
- * @param {string}   props.error       What failed, or ''.
- * @param {Function} props.onRetry     Try again after an error.
- * @param {string}   props.emptyTitle  Words when there are no rows.
- * @param {Element}  props.empty       More words or an action when there are no rows.
+ * @param {string}   props.label         The list's name (the table's region label).
+ * @param {Array}    props.columns       [ { key, label, sortable, primary, render( row ) } ]. The primary column carries the row actions.
+ * @param {Array}    props.rows          The rows of this page.
+ * @param {string}   props.rowKey        Key of a row's id (default 'id').
+ * @param {number}   props.total         Rows in all pages.
+ * @param {number}   props.page          This page (from 1).
+ * @param {number}   props.pages         Number of pages.
+ * @param {Function} props.onPage        Called with a page number.
+ * @param {string}   props.search        The search words.
+ * @param {Function} props.onSearch      Called with the words as they are typed (DataViews waits for a pause).
+ * @param {boolean}  props.searchOnEnter Send the words only on Enter: for a screen whose search loads a new page.
+ * @param {string}   props.searchLabel   The search box's label.
+ * @param {Array}    props.filters       [ { key, label, options: [ { value, label } ], value } ]; an option with value '' is "all".
+ * @param {Function} props.onFilter      Called with ( key, value ); '' when the filter is cleared.
+ * @param {Array}    props.views         [ { value, label, count } ]: saved views above the list ("Waiting 3").
+ * @param {string}   props.view          The open view.
+ * @param {Function} props.onView        Called with a view's value.
+ * @param {Object}   props.sort          { key, dir: 'asc' | 'desc' }.
+ * @param {Function} props.onSort        Called with ( key, dir ).
+ * @param {Array}    props.bulkActions   [ { value, label } ]: DataViews actions on the ticked rows (and in each row's menu).
+ * @param {Function} props.onBulk        Called with ( value, ids ).
+ * @param {Function} props.rowActions    row => [ { label, href, onClick, disabled, why, tone, icon } ] (RowAction).
+ * @param {Function} props.rowView       row => what the row shows when opened (a DetailPanel …), or null for none.
+ *                                       A View action opens it in a dialog.
+ * @param {boolean}  props.loading       Rows are being fetched.
+ * @param {string}   props.error         What failed, or ''.
+ * @param {Function} props.onRetry       Try again after an error.
+ * @param {string}   props.emptyTitle    Words when there are no rows.
+ * @param {Element}  props.empty         More words or an action when there are no rows.
  */
 export function DataList( {
 	label,
 	columns = [],
 	rows = [],
 	rowKey = 'id',
-	rowTitle = 'title',
 	total = 0,
 	page = 1,
 	pages = 1,
 	onPage,
 	search = '',
 	onSearch,
+	searchOnEnter,
 	searchLabel,
 	filters = [],
 	onFilter,
@@ -220,222 +204,147 @@ export function DataList( {
 	emptyTitle,
 	empty,
 } ) {
-	const [ words, setWords ] = useState( search );
 	const [ picked, setPicked ] = useState( [] );
-	const [ bulk, setBulk ] = useState( '' );
-	const [ open, setOpen ] = useState( [] );
-	const viewBase = useId();
-	const searchId = useId();
-	const bulkId = useId();
+	const [ open, setOpen ] = useState( null );
+	const [ words, setWords ] = useState( search );
 	useEffect( () => setWords( search ), [ search ] );
+	const idList = rows.map( ( r ) => String( r[ rowKey ] ) ).join( '\n' );
 	// A new page of rows starts with nothing ticked.
-	const ids = rows.map( ( r ) => r[ rowKey ] );
-	const idList = ids.join( '\n' );
 	useEffect( () => setPicked( ( p ) => ( p.length ? [] : p ) ), [ idList ] );
-	useEffect( () => setOpen( ( o ) => ( o.length ? [] : o ) ), [ idList ] );
+	const openRow =
+		null === open
+			? null
+			: rows.find( ( r ) => String( r[ rowKey ] ) === open );
+	const openView = openRow && rowView ? rowView( openRow ) : null;
 
-	const all = ids.length > 0 && ids.every( ( id ) => picked.includes( id ) );
-	const tick = ( id, on ) =>
-		setPicked( ( p ) =>
-			on ? [ ...p, id ] : p.filter( ( x ) => x !== id )
-		);
-	const hasBulk = bulkActions.length > 0 && !! onBulk;
+	const primary = columns.find( ( c ) => c.primary ) || columns[ 0 ];
+	const shown = new Set( columns.map( ( c ) => c.key ) );
+	const fields = [
+		...columns.map( ( c ) => {
+			const f = filters.find( ( x ) => x.key === c.key );
+			return {
+				id: c.key,
+				label: c.label,
+				enableSorting: !! ( c.sortable && onSort ),
+				enableHiding: false,
+				enableGlobalSearch: false,
+				getValue: ( { item } ) => item[ c.key ],
+				render: ( { item } ) => {
+					const cell = c.render ? c.render( item ) : item[ c.key ];
+					if ( c !== primary || ! ( rowActions || rowView ) ) {
+						return cell;
+					}
+					const acts = [
+						...( ( rowActions && rowActions( item ) ) || [] ),
+					];
+					if ( rowView && rowView( item ) ) {
+						acts.push( {
+							label: __( 'View', 'kits-core' ),
+							icon: 'view',
+							onClick: () => setOpen( String( item[ rowKey ] ) ),
+						} );
+					}
+					return (
+						<>
+							{ cell }
+							{ acts.length > 0 && (
+								<span className="kits-shell-rowactions">
+									{ acts.map( ( a ) => (
+										<RowAction
+											key={ a.label }
+											action={ a }
+										/>
+									) ) }
+								</span>
+							) }
+						</>
+					);
+				},
+				...( f ? filterOf( f ) : {} ),
+			};
+		} ),
+		// A filter with no column of its own: a field that is never a column.
+		...filters
+			.filter( ( f ) => ! shown.has( f.key ) )
+			.map( ( f ) => ( {
+				id: f.key,
+				label: f.label,
+				enableSorting: false,
+				enableHiding: false,
+				enableGlobalSearch: false,
+				getValue: ( { item } ) => item[ f.key ],
+				...filterOf( f ),
+			} ) ),
+	];
 
-	const ariaSort = ( c ) => {
-		if ( ! c.sortable || sort.key !== c.key ) {
-			return undefined;
-		}
-		return 'asc' === sort.dir ? 'ascending' : 'descending';
+	const dvView = {
+		type: 'table',
+		search,
+		page,
+		perPage: Math.max( rows.length, 1 ),
+		sort: sort.key
+			? {
+					field: sort.key,
+					direction: 'asc' === sort.dir ? 'asc' : 'desc',
+				}
+			: undefined,
+		filters: filters
+			.filter( ( f ) => '' !== String( f.value ?? '' ) )
+			.map( ( f ) => ( {
+				field: f.key,
+				operator: 'is',
+				value: f.value,
+			} ) ),
+		titleField: primary?.key,
+		fields: columns.filter( ( c ) => c !== primary ).map( ( c ) => c.key ),
+		layout: { density: 'balanced' },
 	};
-	const head = ( c ) => {
-		if ( ! c.sortable || ! onSort ) {
-			return c.label;
+
+	// DataViews hands back the whole view; each change goes to the screen as the call it already answers. One view can
+	// carry several (Reset clears the search and every filter); a new search, filter or sort starts again at page 1,
+	// so the page goes only when nothing else changed.
+	const onChangeView = ( next ) => {
+		let other = false;
+		const typed = ( next.search ?? '' ).trim();
+		if ( typed !== search.trim() ) {
+			other = true;
+			onSearch?.( typed );
 		}
-		const on = sort.key === c.key;
-		const next = on && 'asc' === sort.dir ? 'desc' : 'asc';
-		let mark = '';
-		if ( on ) {
-			mark = 'asc' === sort.dir ? '↑' : '↓';
-		}
-		return (
-			<button
-				type="button"
-				className="kits-shell-sort"
-				onClick={ () => onSort( c.key, next ) }
-			>
-				{ c.label }
-				<span className="kits-shell-sort__mark" aria-hidden="true">
-					{ mark }
-				</span>
-			</button>
+		const now = new Map(
+			( next.filters || [] )
+				.filter( ( x ) => undefined !== x.value && '' !== x.value )
+				.map( ( x ) => [ x.field, x.value ] )
 		);
+		for ( const f of filters ) {
+			const b = String( now.get( f.key ) ?? '' );
+			if ( String( f.value ?? '' ) !== b ) {
+				other = true;
+				onFilter?.( f.key, b );
+			}
+		}
+		const s = next.sort;
+		if ( s && ( s.field !== sort.key || s.direction !== sort.dir ) ) {
+			other = true;
+			onSort?.( s.field, s.direction );
+		}
+		if ( ! other && next.page && next.page !== page ) {
+			onPage?.( next.page );
+		}
 	};
 
-	let body;
-	if ( error ) {
-		body = <ErrorState message={ error } onRetry={ onRetry } />;
-	} else if ( ! loading && 0 === rows.length ) {
-		body = (
-			<EmptyState
-				title={ emptyTitle || __( 'Nothing here.', 'kits-core' ) }
-			>
-				{ empty }
-			</EmptyState>
-		);
-	} else if ( loading && 0 === rows.length ) {
-		body = <LoadingState />;
-	} else {
-		body = (
-			<table
-				className={ cx( 'kits-shell-list', loading && 'is-loading' ) }
-				aria-busy={ loading || undefined }
-			>
-				<caption className="screen-reader-text">{ label }</caption>
-				<thead>
-					<tr>
-						{ hasBulk && (
-							<td className="kits-shell-list__check">
-								<input
-									type="checkbox"
-									checked={ all }
-									aria-label={ __(
-										'Select all',
-										'kits-core'
-									) }
-									onChange={ ( e ) =>
-										setPicked( e.target.checked ? ids : [] )
-									}
-								/>
-							</td>
-						) }
-						{ columns.map( ( c ) => (
-							<th
-								key={ c.key }
-								scope="col"
-								aria-sort={ ariaSort( c ) }
-							>
-								{ head( c ) }
-							</th>
-						) ) }
-					</tr>
-				</thead>
-				<tbody>
-					{ rows.map( ( r ) => {
-						const id = r[ rowKey ];
-						const acts = rowActions ? [ ...rowActions( r ) ] : [];
-						const detail = rowView ? rowView( r ) : null;
-						const isOpen = !! detail && open.includes( id );
-						const viewId = `${ viewBase }-${ String( id ).replace(
-							/[^\w-]/g,
-							'_'
-						) }`;
-						if ( detail ) {
-							acts.push( {
-								label: isOpen
-									? __( 'Hide', 'kits-core' )
-									: __( 'View', 'kits-core' ),
-								onClick: () =>
-									setOpen( ( o ) =>
-										o.includes( id )
-											? o.filter( ( x ) => x !== id )
-											: [ ...o, id ]
-									),
-								expanded: isOpen,
-								controls: viewId,
-							} );
-						}
-						return (
-							<Fragment key={ id }>
-								<tr
-									className={ isOpen ? 'is-open' : undefined }
-								>
-									{ hasBulk && (
-										<td className="kits-shell-list__check">
-											<input
-												type="checkbox"
-												checked={ picked.includes(
-													id
-												) }
-												aria-label={ sprintf(
-													/* translators: %s: the row's name. */
-													__(
-														'Select %s',
-														'kits-core'
-													),
-													String(
-														r[ rowTitle ] || id
-													)
-												) }
-												onChange={ ( e ) =>
-													tick( id, e.target.checked )
-												}
-											/>
-										</td>
-									) }
-									{ columns.map( ( c ) => {
-										const cell = c.render
-											? c.render( r )
-											: r[ c.key ];
-										const Tag = c.primary ? 'th' : 'td';
-										return (
-											<Tag
-												key={ c.key }
-												scope={
-													c.primary
-														? 'row'
-														: undefined
-												}
-												data-label={ c.label }
-												className={
-													c.primary
-														? 'is-primary'
-														: undefined
-												}
-											>
-												{ cell }
-												{ c.primary &&
-													acts.length > 0 && (
-														<span className="kits-shell-rowactions">
-															{ acts.map(
-																( a ) => (
-																	<RowAction
-																		key={
-																			a.label
-																		}
-																		action={
-																			a
-																		}
-																	/>
-																)
-															) }
-														</span>
-													) }
-											</Tag>
-										);
-									} ) }
-								</tr>
-								{ isOpen && (
-									<tr
-										className="kits-shell-list__view"
-										id={ viewId }
-									>
-										<td
-											colSpan={
-												columns.length +
-												( hasBulk ? 1 : 0 )
-											}
-										>
-											{ detail }
-										</td>
-									</tr>
-								) }
-							</Fragment>
-						);
-					} ) }
-				</tbody>
-			</table>
-		);
-	}
+	const actions =
+		bulkActions.length > 0 && onBulk
+			? bulkActions.map( ( b ) => ( {
+					id: String( b.value ),
+					label: b.label,
+					supportsBulk: true,
+					callback: ( items ) =>
+						onBulk(
+							b.value,
+							items.map( ( i ) => i[ rowKey ] )
+						),
+				} ) )
+			: [];
 
 	return (
 		<div className="kits-shell-datalist">
@@ -466,148 +375,153 @@ export function DataList( {
 					) ) }
 				</ul>
 			) }
-			{ ( onSearch || filters.length > 0 || hasBulk ) && (
-				<div className="kits-shell-listbar">
-					{ onSearch && (
-						<form
-							className="kits-shell-search"
-							role="search"
-							onSubmit={ ( e ) => {
-								e.preventDefault();
-								onSearch( words.trim() );
-							} }
-						>
-							<label
-								className="screen-reader-text"
-								htmlFor={ searchId }
-							>
-								{ searchLabel || __( 'Search', 'kits-core' ) }
-							</label>
-							<input
-								id={ searchId }
-								type="search"
-								value={ words }
-								placeholder={
-									searchLabel || __( 'Search', 'kits-core' )
+			{ error ? (
+				<ErrorState message={ error } onRetry={ onRetry } />
+			) : (
+				// The Kits look: DataViews' brand colour is ink (#141414, --ks-ink), not admin blue.
+				<ThemeProvider color={ { primary: '#141414' } }>
+					<DataViews
+						data={ rows }
+						fields={ fields }
+						view={ dvView }
+						onChangeView={ onChangeView }
+						actions={ actions }
+						paginationInfo={ {
+							totalItems: total,
+							totalPages: pages,
+						} }
+						getItemId={ ( r ) => String( r[ rowKey ] ) }
+						isItemClickable={ () => false }
+						selection={ picked }
+						onChangeSelection={ setPicked }
+						isLoading={ !! loading }
+						search={ !! onSearch && ! searchOnEnter }
+						searchLabel={
+							searchLabel || __( 'Search', 'kits-core' )
+						}
+						defaultLayouts={ { table: {} } }
+						config={ { perPageSizes: [] } }
+						empty={
+							<EmptyState
+								title={
+									emptyTitle ||
+									__( 'Nothing here.', 'kits-core' )
 								}
-								onChange={ ( e ) => setWords( e.target.value ) }
-							/>
-							<button
-								type="submit"
-								className="kits-shell-button is-secondary"
 							>
-								{ __( 'Search', 'kits-core' ) }
-							</button>
-						</form>
-					) }
-					{ filters.map( ( f ) => (
-						<FilterSelect
-							key={ f.key }
-							filter={ f }
-							onFilter={ onFilter }
-						/>
-					) ) }
-					{ hasBulk && (
-						<div className="kits-shell-bulk">
-							<label
-								className="screen-reader-text"
-								htmlFor={ bulkId }
-							>
-								{ __( 'Bulk action', 'kits-core' ) }
-							</label>
-							<select
-								id={ bulkId }
-								value={ bulk }
-								onChange={ ( e ) => setBulk( e.target.value ) }
-							>
-								<option value="">
-									{ __( 'Bulk action', 'kits-core' ) }
-								</option>
-								{ bulkActions.map( ( b ) => (
-									<option key={ b.value } value={ b.value }>
-										{ b.label }
-									</option>
-								) ) }
-							</select>
-							<button
-								type="button"
-								className="kits-shell-button is-secondary"
-								disabled={ ! bulk || 0 === picked.length }
-								onClick={ () => onBulk( bulk, picked ) }
-							>
-								{ __( 'Apply', 'kits-core' ) }
-							</button>
-							{ picked.length > 0 && (
-								<span className="kits-shell-bulk__count">
-									{ sprintf(
-										/* translators: %d: number of rows ticked. */
-										_n(
-											'%d selected',
-											'%d selected',
-											picked.length,
-											'kits-core'
-										),
-										picked.length
-									) }
-								</span>
-							) }
-						</div>
-					) }
-				</div>
-			) }
-			{ body }
-			{ ! error && total > 0 && (
-				<nav
-					className="kits-shell-pager"
-					aria-label={ __( 'Pages', 'kits-core' ) }
-				>
-					<span className="kits-shell-pager__count">
-						{ pages > 1
-							? sprintf(
-									/* translators: 1: page, 2: pages, 3: rows. */
-									__(
-										'Page %1$d of %2$d · %3$d rows',
-										'kits-core'
-									),
-									page,
-									pages,
-									total
-								)
-							: sprintf(
-									/* translators: %d: rows. */
-									_n(
-										'%d row',
-										'%d rows',
-										total,
-										'kits-core'
-									),
-									total
+								{ empty }
+							</EmptyState>
+						}
+					>
+						{ ( onSearch || filters.length > 0 ) && (
+							<div className="kits-shell-listbar">
+								{ onSearch && searchOnEnter && (
+									<form
+										className="kits-shell-search"
+										role="search"
+										onSubmit={ ( e ) => {
+											e.preventDefault();
+											onSearch( words.trim() );
+										} }
+									>
+										<SearchControl
+											__nextHasNoMarginBottom
+											label={
+												searchLabel ||
+												__( 'Search', 'kits-core' )
+											}
+											placeholder={
+												searchLabel ||
+												__( 'Search', 'kits-core' )
+											}
+											value={ words }
+											onChange={ setWords }
+										/>
+									</form>
 								) }
-					</span>
-					{ pages > 1 && (
-						<>
-							<button
-								type="button"
-								className="kits-shell-button is-secondary"
-								disabled={ page <= 1 || loading }
-								onClick={ () => onPage?.( page - 1 ) }
-							>
-								{ __( 'Previous', 'kits-core' ) }
-							</button>
-							<button
-								type="button"
-								className="kits-shell-button is-secondary"
-								disabled={ page >= pages || loading }
-								onClick={ () => onPage?.( page + 1 ) }
-							>
-								{ __( 'Next', 'kits-core' ) }
-							</button>
-						</>
-					) }
-				</nav>
+								{ onSearch && ! searchOnEnter && (
+									<DataViews.Search
+										label={
+											searchLabel ||
+											__( 'Search', 'kits-core' )
+										}
+									/>
+								) }
+								{ filters.length > 0 && (
+									<DataViews.FiltersToggle />
+								) }
+							</div>
+						) }
+						{ filters.length > 0 && <DataViews.FiltersToggled /> }
+						<div
+							className="kits-shell-dvlayout"
+							aria-busy={ loading || undefined }
+							role="region"
+							aria-label={ label }
+						>
+							<DataViews.Layout />
+						</div>
+						{ total > 0 && (
+							<div className="kits-shell-pager">
+								<span className="kits-shell-pager__count">
+									{ pages > 1
+										? sprintf(
+												/* translators: 1: page, 2: pages, 3: rows. */
+												__(
+													'Page %1$d of %2$d · %3$d rows',
+													'kits-core'
+												),
+												page,
+												pages,
+												total
+											)
+										: sprintf(
+												/* translators: %d: rows. */
+												_n(
+													'%d row',
+													'%d rows',
+													total,
+													'kits-core'
+												),
+												total
+											) }
+								</span>
+								{ pages > 1 && <DataViews.Pagination /> }
+							</div>
+						) }
+					</DataViews>
+				</ThemeProvider>
+			) }
+			{ openView && (
+				<Modal
+					title={
+						'object' === typeof openRow[ primary?.key ]
+							? label
+							: String( openRow[ primary?.key ] ?? label )
+					}
+					onRequestClose={ () => setOpen( null ) }
+					size="medium"
+				>
+					{ openView }
+				</Modal>
 			) }
 		</div>
 	);
+}
+
+/**
+ * A DataList filter as a DataViews field's filter: its options (less the '' "all" one) as elements, one "is" choice,
+ * always shown.
+ *
+ * @param {Object} f { label, options: [ { value, label } ] }.
+ * @return {Object} elements and filterBy for the field.
+ */
+function filterOf( f ) {
+	return {
+		elements: ( f.options || [] )
+			.filter( ( o ) => '' !== String( o.value ) )
+			.map( ( o ) => ( { value: o.value, label: o.label } ) ),
+		filterBy: { operators: [ 'is' ], isPrimary: true },
+	};
 }
 
 /**

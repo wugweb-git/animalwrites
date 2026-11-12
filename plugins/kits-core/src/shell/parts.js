@@ -81,6 +81,9 @@ export function BlockParts( { blocks, title } ) {
 	} );
 }
 
+/** The address the next page load opens, while changes made in the same moment gather on it. */
+let goNext = null;
+
 /**
  * Open this page's address with some query arguments changed (a view, a search, a filter, a page).
  *
@@ -88,14 +91,22 @@ export function BlockParts( { blocks, title } ) {
  * @param {Array}  drop Arguments to remove.
  */
 function go( set, drop = [] ) {
-	const url = new URL( window.location.href );
+	// Several changes in one moment (a list's Reset clears the search and the filters) make one page load.
+	if ( ! goNext ) {
+		goNext = new URL( window.location.href );
+		window.setTimeout( () => {
+			const url = goNext;
+			goNext = null;
+			window.location.assign( url.toString() );
+		}, 0 );
+	}
+	const url = goNext;
 	drop.forEach( ( k ) => url.searchParams.delete( k ) );
 	Object.keys( set ).forEach( ( k ) =>
 		'' === set[ k ]
 			? url.searchParams.delete( k )
 			: url.searchParams.set( k, set[ k ] )
 	);
-	window.location.assign( url.toString() );
 }
 
 /**
@@ -170,6 +181,7 @@ function PageList( { part, title } ) {
 			onPage={ ( n ) => go( { paged: String( n ) } ) }
 			search={ part.search ? part.search.value : undefined }
 			searchLabel={ part.search ? part.search.label : undefined }
+			searchOnEnter
 			onSearch={
 				part.search
 					? ( words ) =>
