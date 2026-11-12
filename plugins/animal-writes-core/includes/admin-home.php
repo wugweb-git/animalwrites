@@ -242,7 +242,7 @@ function aw_core_settings_sections( $sections ) {
 		function () {
 			echo '<ul>';
 			echo '<li>' . aw_core_link( 'Keys', 'admin.php?page=aw-keys' ) . ': ' . esc_html( 'the service keys the plugins use (Clarity, Bing Webmaster, PageSpeed).' ) . '</li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_core_link() escapes.
-			echo '<li>' . aw_core_link( 'Modules', 'admin.php?page=aw-modules' ) . ': ' . esc_html( 'optional parts of the site: Social posts and the PlanWeb calendar.' ) . '</li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_core_link() escapes.
+			echo '<li>' . aw_core_link( 'Modules', 'admin.php?page=aw-modules' ) . ': ' . esc_html( 'optional parts of the site (Social posts, the PlanWeb calendar), emails from forms, sample listings, district helplines and issuer short names.' ) . '</li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_core_link() escapes.
 			echo '<li>' . aw_core_link( 'RankWeb → Settings', 'admin.php?page=aw-seo-settings' ) . ': ' . esc_html( 'connected services for search.' ) . '</li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_core_link() escapes.
 			echo '<li>' . aw_core_link( 'SourceWeb → Settings', 'admin.php?page=aw-sourcing&tab=settings' ) . ': ' . esc_html( 'Social posts, sourcing lists and Directory enrichment.' ) . '</li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_core_link() escapes.
 			echo '</ul>';

@@ -68,8 +68,8 @@ function aw_is_thin_directory_page() {
  * Owner, 24 Oct 2026: a Directory profile with no way to reach the organisation (no phone, WhatsApp, email, website or
  * social profile) is noindex (links followed) and out of the sitemap, so Google spends its crawl on profiles worth
  * indexing. It becomes indexable again by itself once a contact is added (enrichment, claim or edit). Profiles with
- * Search Console impressions stay indexed: their IDs are in the option aw_seo_keep_listings (set with WP-CLI from the
- * Search Console export of 24 Oct 2026, 901 profiles).
+ * Search Console impressions stay indexed: their IDs are in the option aw_seo_keep_listings (first set from the
+ * Search Console export of 24 Oct 2026, 901 profiles; changed on RankWeb → Settings → Indexing).
  */
 function aw_listing_unreachable( $id ) {
 	$id = (int) $id;

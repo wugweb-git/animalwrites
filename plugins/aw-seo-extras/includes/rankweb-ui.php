@@ -90,6 +90,9 @@ add_action(
 				'current' => 'settings' === $screen,
 			);
 		}
+		if ( 'settings' === $screen ) {
+			wp_enqueue_media(); // The default share image picker (MediaField).
+		}
 		$ok = kits_shell_app(
 			array(
 				'handle'      => 'rankweb-admin',

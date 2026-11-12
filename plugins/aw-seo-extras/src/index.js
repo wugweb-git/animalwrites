@@ -20,6 +20,7 @@ import {
 	ErrorState,
 	Field,
 	LoadingState,
+	MediaField,
 	Notice,
 	PageParts,
 	RefTable,
@@ -411,6 +412,43 @@ function faqOf( group ) {
 }
 
 /**
+ * "Listings kept indexed" as saved: one ID per line.
+ *
+ * @param {Object} group Group from the route.
+ * @return {string} The IDs.
+ */
+function keepOf( group ) {
+	return ( group.keepListings?.ids || [] ).join( '\n' );
+}
+
+/**
+ * The IDs in a text: whole numbers, in order, once each.
+ *
+ * @param {string} text Typed text.
+ * @return {number[]} IDs.
+ */
+function idsOf( text ) {
+	return [
+		...new Set(
+			text
+				.split( /[\s,]+/ )
+				.map( ( x ) => parseInt( x, 10 ) )
+				.filter( ( n ) => n > 0 )
+		),
+	];
+}
+
+/**
+ * The default share image as saved.
+ *
+ * @param {Object} group Group from the route.
+ * @return {Object} { id, url }.
+ */
+function shareOf( group ) {
+	return group.shareImage || { id: 0, url: '' };
+}
+
+/**
  * A group with its own Save: the fields of its modules (or the module switches), plus its extras.
  *
  * @param {Object}   props
@@ -423,9 +461,13 @@ function Group( { group, onSaved, onDirty } ) {
 	const [ msg, setMsg ] = useState( null );
 	const [ busy, setBusy ] = useState( false );
 	const [ faq, setFaq ] = useState( () => faqOf( group ) );
+	const [ keep, setKeep ] = useState( () => keepOf( group ) );
+	const [ share, setShare ] = useState( () => shareOf( group ) );
 	// Reset each part only when the route sent it anew, so saving the FAQ box keeps unsaved fields and the other way round.
 	useEffect( () => setState( startOf( group ) ), [ group.blocks ] ); // eslint-disable-line react-hooks/exhaustive-deps
 	useEffect( () => setFaq( faqOf( group ) ), [ group.faqTypes ] ); // eslint-disable-line react-hooks/exhaustive-deps
+	useEffect( () => setKeep( keepOf( group ) ), [ group.keepListings ] ); // eslint-disable-line react-hooks/exhaustive-deps
+	useEffect( () => setShare( shareOf( group ) ), [ group.shareImage ] ); // eslint-disable-line react-hooks/exhaustive-deps
 
 	const isModules = 'modules' === group.slug;
 	const fieldsDirty = group.blocks.some( ( b ) =>
@@ -437,24 +479,42 @@ function Group( { group, onSaved, onDirty } ) {
 	const faqDirty = ( group.faqTypes || [] ).some(
 		( x ) => faq[ x.slug ] !== x.on
 	);
+	const keepDirty =
+		!! group.keepListings &&
+		idsOf( keep ).join( ',' ) !== group.keepListings.ids.join( ',' );
+	const shareDirty = !! group.shareImage && share.id !== group.shareImage.id;
 	const anyChanged = group.blocks.some( ( b ) =>
 		b.fields.some( ( f ) => f.changed )
 	);
 	useEffect(
-		() => onDirty( group.slug, onDirty_ || faqDirty ),
-		[ group.slug, onDirty_, faqDirty, onDirty ]
+		() =>
+			onDirty(
+				group.slug,
+				onDirty_ || faqDirty || keepDirty || shareDirty
+			),
+		[ group.slug, onDirty_, faqDirty, keepDirty, shareDirty, onDirty ]
 	);
 
 	const save = ( body, route = `settings/${ group.slug }` ) => {
-		const faqOnly = 'settings/faq-types' === route;
+		// A group's extras save on their own routes: only that part of the group is taken from the answer.
+		const extra = {
+			'settings/faq-types': 'faqTypes',
+			'settings/keep-listings': 'keepListings',
+			'settings/share-image': 'shareImage',
+		}[ route ];
 		setBusy( true );
 		setMsg( null );
 		return apiFetch( { path: path( route ), method: 'POST', data: body } )
 			.then( ( r ) => {
 				onSaved(
-					faqOnly
-						? { ...group, faqTypes: r.group.faqTypes }
-						: { ...r.group, faqTypes: group.faqTypes }
+					extra
+						? { ...group, [ extra ]: r.group[ extra ] }
+						: {
+								...r.group,
+								faqTypes: group.faqTypes,
+								keepListings: group.keepListings,
+								shareImage: group.shareImage,
+							}
 				);
 				setMsg( { tone: 'success', text: r.message } );
 			} )
@@ -646,8 +706,8 @@ function Group( { group, onSaved, onDirty } ) {
 					description={ sprintf(
 						/* translators: %s: number of listings. */
 						_n(
-							'%s listing stays indexed though it has no contact (it had Search Console impressions). Read only: the list is set with WP-CLI.',
-							'%s listings stay indexed though they have no contact (they had Search Console impressions). Read only: the list is set with WP-CLI.',
+							'%s listing stays indexed though it has no contact (it had Search Console impressions).',
+							'%s listings stay indexed though they have no contact (they had Search Console impressions).',
 							group.keepListings.count,
 							'aw-seo-extras'
 						),
@@ -680,6 +740,72 @@ function Group( { group, onSaved, onDirty } ) {
 							) }
 						</ul>
 					) }
+					<Field
+						label={ __( 'Listing IDs', 'aw-seo-extras' ) }
+						help={ __(
+							'One ID per line (or comma separated). Only Directory listings are kept; other IDs are left out.',
+							'aw-seo-extras'
+						) }
+						render={ ( id, helpId ) => (
+							<textarea
+								id={ id }
+								className="large-text code"
+								rows={ 6 }
+								spellCheck="false"
+								value={ keep }
+								aria-describedby={ helpId }
+								onChange={ ( e ) => setKeep( e.target.value ) }
+							/>
+						) }
+					/>
+					<div>
+						<Button
+							busy={ busy }
+							disabled={ ! keepDirty }
+							onClick={ () =>
+								save(
+									{ ids: idsOf( keep ) },
+									'settings/keep-listings'
+								)
+							}
+						>
+							{ __(
+								'Save listings kept indexed',
+								'aw-seo-extras'
+							) }
+						</Button>
+					</div>
+				</SettingsBlock>
+			) }
+			{ group.shareImage && (
+				<SettingsBlock
+					title={ __( 'Default share image', 'aw-seo-extras' ) }
+					description={ __(
+						'Shown when a page shared on social media has no picture of its own. Best at 1200 × 630.',
+						'aw-seo-extras'
+					) }
+				>
+					<MediaField
+						label={ __( 'Image', 'aw-seo-extras' ) }
+						help={ __(
+							'An image from the media library. None: pages without a picture share no image.',
+							'aw-seo-extras'
+						) }
+						value={ share.id }
+						url={ share.url }
+						onChange={ ( id, url ) => setShare( { id, url } ) }
+					/>
+					<div>
+						<Button
+							busy={ busy }
+							disabled={ ! shareDirty }
+							onClick={ () =>
+								save( { id: share.id }, 'settings/share-image' )
+							}
+						>
+							{ __( 'Save share image', 'aw-seo-extras' ) }
+						</Button>
+					</div>
 				</SettingsBlock>
 			) }
 		</SettingsGroup>

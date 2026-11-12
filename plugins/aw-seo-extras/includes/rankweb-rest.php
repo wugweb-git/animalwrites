@@ -7,6 +7,8 @@
  *   GET  settings            manage_options     every group, module and field with today's values
  *   POST settings/<group>    manage_options     save one group (aw_seo_settings_save(), the same as the form)
  *   POST settings/faq-types  manage_options     "FAQ box on" (aw_faq_off_types, the same as RankWeb → FAQ)
+ *   POST settings/keep-listings manage_options  listings kept indexed with no contact (aw_seo_keep_listings)
+ *   POST settings/share-image manage_options    the site's default share image (aw_default_share_image)
  *   GET  services            manage_options     the connected services (Rank Math only)
  *
  * Every route checks the capability and, for a signed-in browser, the wp_rest nonce (X-WP-Nonce); an Application
@@ -91,6 +93,38 @@ add_action(
 					),
 				),
 				'callback'            => 'rankweb_rest_save_faq_types',
+			)
+		);
+		register_rest_route(
+			RANKWEB_REST,
+			'/settings/keep-listings',
+			array(
+				'methods'             => 'POST',
+				'permission_callback' => rankweb_rest_can( 'manage_options' ),
+				'args'                => array(
+					'ids' => array(
+						'type'     => 'array',
+						'items'    => array( 'type' => 'integer' ),
+						'required' => true,
+					),
+				),
+				'callback'            => 'rankweb_rest_save_keep_listings',
+			)
+		);
+		register_rest_route(
+			RANKWEB_REST,
+			'/settings/share-image',
+			array(
+				'methods'             => 'POST',
+				'permission_callback' => rankweb_rest_can( 'manage_options' ),
+				'args'                => array(
+					'id' => array(
+						'type'     => 'integer',
+						'minimum'  => 0,
+						'required' => true,
+					),
+				),
+				'callback'            => 'rankweb_rest_save_share_image',
 			)
 		);
 		register_rest_route(
@@ -442,6 +476,14 @@ function rankweb_settings_group( string $tab ): array {
 		$group['keepListings'] = array(
 			'count' => count( $keep ),
 			'first' => $names,
+			'ids'   => $keep,
+		);
+	}
+	if ( 'share' === $tab ) {
+		$id                  = (int) get_option( 'aw_default_share_image', 0 );
+		$group['shareImage'] = array(
+			'id'  => $id,
+			'url' => $id ? (string) wp_get_attachment_image_url( $id, 'thumbnail' ) : '',
 		);
 	}
 	return $group;
@@ -527,6 +569,62 @@ function rankweb_rest_save_faq_types( WP_REST_Request $request ) {
 	return rest_ensure_response(
 		array(
 			'group'   => rankweb_settings_group( 'schema' ),
+			'message' => __( 'Saved.', 'aw-seo-extras' ),
+		)
+	);
+}
+
+/**
+ * Listings kept indexed though they have no contact (robots.php): listing IDs, in the order given. A new ID must be a
+ * Directory listing; an ID already on the list stays as it is (a Save with no change writes nothing).
+ *
+ * @param WP_REST_Request $request Request.
+ */
+function rankweb_rest_save_keep_listings( WP_REST_Request $request ) {
+	$now     = array_map( 'intval', (array) get_option( 'aw_seo_keep_listings', array() ) );
+	$ids     = array();
+	$skipped = 0;
+	foreach ( (array) $request['ids'] as $id ) {
+		$id = absint( $id );
+		if ( ! $id || in_array( $id, $ids, true ) ) {
+			continue;
+		}
+		if ( in_array( $id, $now, true ) || 'aw_listing' === get_post_type( $id ) ) {
+			$ids[] = $id;
+		} else {
+			++$skipped;
+		}
+	}
+	if ( $now !== $ids ) {
+		update_option( 'aw_seo_keep_listings', $ids, false );
+	}
+	return rest_ensure_response(
+		array(
+			'group'   => rankweb_settings_group( 'indexing' ),
+			'message' => $skipped > 0
+				/* translators: %d: number of IDs left out. */
+				? sprintf( _n( 'Saved. %d ID is not a Directory listing and was left out.', 'Saved. %d IDs are not Directory listings and were left out.', $skipped, 'aw-seo-extras' ), $skipped )
+				: __( 'Saved.', 'aw-seo-extras' ),
+		)
+	);
+}
+
+/**
+ * The site's default share image (helpers.php aw_seo_default_image()): an image from the media library, or 0 for none.
+ *
+ * @param WP_REST_Request $request Request.
+ */
+function rankweb_rest_save_share_image( WP_REST_Request $request ) {
+	$id = absint( $request['id'] );
+	if ( $id && ! wp_attachment_is_image( $id ) ) {
+		return new WP_Error( 'rest_invalid_param', __( 'Choose an image from the media library.', 'aw-seo-extras' ), array( 'status' => 400 ) );
+	}
+	if ( (int) get_option( 'aw_default_share_image', 0 ) !== $id ) {
+		update_option( 'aw_default_share_image', $id );
+	}
+	return rest_ensure_response(
+		array(
+			'group'   => rankweb_settings_group( 'share' ),
 			'message' => __( 'Saved.', 'aw-seo-extras' ),
 		)
 	);

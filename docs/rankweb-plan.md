@@ -114,7 +114,7 @@ Save path today: `admin_post_aw_seo_settings` `:648-688` (`manage_options` + `ch
 | Name | Kind | Where | Lands |
 |---|---|---|---|
 | `aw_faq_off_types` | option, not autoloaded | `includes/faq.php:72-83`, saved `includes/faq-overview.php:198-213` (`manage_options`, nonce `aw_faq_types`) | **S** FAQ group, same option |
-| `aw_seo_keep_listings` | option (listings kept indexed with no contact) | `includes/robots.php:76` (read only; no screen today) | **S** Indexing group shows it read-only (count + list); editing stays where it is set today (WP-CLI / Directory) unless the owner asks |
+| `aw_seo_keep_listings` | option (listings kept indexed with no contact) | `includes/robots.php:76` (edited on Settings → Indexing since 12 Nov 2026) | **S** Indexing group shows it read-only (count + list); editing stays where it is set today (WP-CLI / Directory) unless the owner asks |
 | `aw_seo_endpoints_last`, transient `aw_seo_endpoints_mailed` | option, transient | `includes/health.php:68-79` | **D** Sitemap and llms.txt tile |
 | `aw_sitemap_filtered` | option | `includes/sitemap.php:69-78` | Same |
 | `aw_seo_cache_gen` | option | `includes/helpers.php:306-325` | Same |

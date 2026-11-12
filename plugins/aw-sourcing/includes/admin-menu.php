@@ -166,6 +166,58 @@ function aw_sourcing_own_settings_tab() {
 		aw_sources_live_switch();
 	}
 	echo '<p class="description">' . esc_html( 'Off: the workers use sources.yaml in the workers repository. On: they read the lists on these screens at the start of every run, and Sources sync copies them into sources.yaml.' ) . '</p>';
+	if ( current_user_can( 'manage_options' ) ) {
+		settings_errors(); // "Settings saved." or the date message, after options.php sends the browser back here
+		echo '<form method="post" action="' . esc_url( admin_url( 'options.php' ) ) . '">';
+		settings_fields( 'aw_src_backfill' );
+		do_settings_sections( 'aw-src-backfill' );
+		submit_button( 'Save backfill date' );
+		echo '</form>';
+	}
+}
+
+// Backfill floor (owner, 9 Oct 2026): the oldest source date a backfill item may have (ingest.php). It had no field before
+// 12 Nov 2026 (WP-CLI only); the option name and its Y-m-d value are unchanged.
+add_action(
+	'admin_init',
+	function () {
+		register_setting(
+			'aw_src_backfill',
+			'aw_backfill_floor',
+			array(
+				'type'              => 'string',
+				'default'           => '2025-11-01',
+				'sanitize_callback' => 'aw_src_backfill_floor_clean',
+				'show_in_rest'      => false,
+			)
+		);
+		add_settings_section( 'aw_src_backfill', 'Backfill', '__return_null', 'aw-src-backfill' );
+		add_settings_field( 'aw_backfill_floor', 'Oldest date', 'aw_src_backfill_floor_field', 'aw-src-backfill', 'aw_src_backfill', array( 'label_for' => 'aw_backfill_floor' ) );
+	}
+);
+
+/**
+ * A date as Y-m-d, or the saved one (with a message) when the posted value is not a date.
+ *
+ * @param mixed $value Posted value.
+ */
+function aw_src_backfill_floor_clean( $value ): string {
+	$value = trim( (string) $value );
+	$d     = DateTime::createFromFormat( '!Y-m-d', $value );
+	if ( $d && $d->format( 'Y-m-d' ) === $value ) {
+		return $value;
+	}
+	add_settings_error( 'aw_backfill_floor', 'aw_backfill_floor', 'Oldest date: not a date (YYYY-MM-DD); the saved date is kept.' );
+	return (string) get_option( 'aw_backfill_floor', '2025-11-01' );
+}
+
+/** The backfill date field. */
+function aw_src_backfill_floor_field(): void {
+	printf(
+		'<input type="date" id="aw_backfill_floor" name="aw_backfill_floor" value="%1$s"> <p class="description">%2$s</p>',
+		esc_attr( (string) get_option( 'aw_backfill_floor', '2025-11-01' ) ),
+		esc_html( 'Backfill items dated before this day are dropped. Backfill items are for review only: never published or merged on arrival.' )
+	);
 }
 
 /*

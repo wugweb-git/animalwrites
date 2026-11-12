@@ -6,6 +6,9 @@
  * - aw_ff_send_email: '1' sends the emails a Fluent Forms submission makes; '0' (default) drops them (forms-fluentforms.php).
  * - aw_nl_ff_form_full: the Fluent Forms form ID of the full newsletter form (newsletter-fluentforms.php, form-blocks.php).
  * - aw_sample_listing_ids: listing IDs only the owner sees (kits-config.php, kits_preview_only_ids).
+ * - aw_district_helplines: official district numbers (district-helplines.php): district code => list of
+ *   {name, number, line, source, url, checked}; edited as one line per number, fields split by "|".
+ * - aw_issuer_short: issuers' short names on card chips (issuers.php): slug => short; edited as "slug = short".
  *
  * @package animal-writes-core
  */
@@ -47,10 +50,33 @@ add_action(
 				'show_in_rest'      => false,
 			)
 		);
+		register_setting(
+			'aw_modules',
+			'aw_district_helplines',
+			array(
+				'type'              => 'array',
+				'default'           => array(),
+				'sanitize_callback' => 'aw_site_options_helplines_clean',
+				'show_in_rest'      => false,
+			)
+		);
+		register_setting(
+			'aw_modules',
+			'aw_issuer_short',
+			array(
+				'type'              => 'array',
+				'default'           => array(),
+				'sanitize_callback' => 'aw_site_options_short_clean',
+				'show_in_rest'      => false,
+			)
+		);
 		add_settings_section( 'aw_modules_forms', 'Forms and sample listings', 'aw_site_options_intro', 'aw-modules' );
 		add_settings_field( 'aw_ff_send_email', 'Emails from forms', 'aw_site_options_send_email', 'aw-modules', 'aw_modules_forms', array( 'label_for' => 'aw_ff_send_email' ) );
 		add_settings_field( 'aw_nl_ff_form_full', 'Full newsletter form', 'aw_site_options_form_full', 'aw-modules', 'aw_modules_forms', array( 'label_for' => 'aw_nl_ff_form_full' ) );
 		add_settings_field( 'aw_sample_listing_ids', 'Sample listings', 'aw_site_options_samples', 'aw-modules', 'aw_modules_forms', array( 'label_for' => 'aw_sample_listing_ids' ) );
+		add_settings_section( 'aw_modules_lists', 'Directory and Library lists', 'aw_site_options_lists_intro', 'aw-modules' );
+		add_settings_field( 'aw_district_helplines', 'District helplines', 'aw_site_options_helplines', 'aw-modules', 'aw_modules_lists', array( 'label_for' => 'aw_district_helplines' ) );
+		add_settings_field( 'aw_issuer_short', 'Issuer short names', 'aw_site_options_short', 'aw-modules', 'aw_modules_lists', array( 'label_for' => 'aw_issuer_short' ) );
 	}
 );
 
@@ -94,5 +120,130 @@ function aw_site_options_samples(): void {
 		'<input type="text" class="regular-text" id="aw_sample_listing_ids" name="aw_sample_listing_ids" value="%1$s"> <p class="description">%2$s</p>',
 		esc_attr( implode( ', ', array_map( 'intval', (array) get_option( 'aw_sample_listing_ids', array() ) ) ) ),
 		esc_html( 'Listing IDs, comma separated: only you see them (preview); everyone else gets "not found" and they appear in no list, sitemap or count. The Wugweb sample (9003) is always one.' )
+	);
+}
+
+/** The six fields of one official number, in their stored order. */
+const AW_HELPLINE_FIELDS = array( 'name', 'number', 'line', 'source', 'url', 'checked' );
+
+/**
+ * Official numbers in one shape: district code => list of the six fields as trimmed strings.
+ *
+ * @param mixed $value Stored value.
+ */
+function aw_site_options_helplines_norm( $value ): array {
+	$out = array();
+	foreach ( (array) $value as $code => $list ) {
+		foreach ( (array) $list as $o ) {
+			$row = array();
+			foreach ( AW_HELPLINE_FIELDS as $k ) {
+				$row[ $k ] = trim( (string) ( ( (array) $o )[ $k ] ?? '' ) );
+			}
+			$out[ (int) $code ][] = $row;
+		}
+	}
+	return $out;
+}
+
+/**
+ * The posted lines ("code | name | number | line | source | url | YYYY-MM-DD") as the option. A line that cannot be
+ * read keeps the whole saved list as it was, with a message naming the line: nothing is lost by a typing slip.
+ *
+ * @param mixed $value Posted text (or an array, from WP-CLI).
+ */
+function aw_site_options_helplines_clean( $value ): array {
+	$saved = get_option( 'aw_district_helplines', array() );
+	if ( is_array( $value ) ) {
+		return aw_site_options_helplines_norm( $value );
+	}
+	$out = array();
+	foreach ( preg_split( '/\R/', (string) $value ) as $n => $line ) {
+		if ( '' === trim( $line ) ) {
+			continue;
+		}
+		$parts = array_map( 'trim', explode( '|', $line ) );
+		$code  = absint( $parts[0] );
+		$row   = array_combine( AW_HELPLINE_FIELDS, array_pad( array_slice( $parts, 1, 6 ), 6, '' ) );
+		$date  = '' === $row['checked'] ? null : DateTime::createFromFormat( '!Y-m-d', $row['checked'] );
+		$bad   = count( $parts ) > 7 || ! $code || '' === $row['name'] || '' === $row['number']
+			|| ( '' !== $row['url'] && ! wp_http_validate_url( $row['url'] ) )
+			|| ( null !== $date && ( ! $date || $date->format( 'Y-m-d' ) !== $row['checked'] ) );
+		if ( $bad ) {
+			/* translators: %d: line number. */
+			add_settings_error( 'aw_district_helplines', 'aw_district_helplines', sprintf( 'District helplines, line %d: needs a district code, a name and a number; a link must be a web address and the date YYYY-MM-DD. Nothing in the list was changed.', $n + 1 ) );
+			return is_array( $saved ) ? $saved : array();
+		}
+		$row['name']   = sanitize_text_field( $row['name'] );
+		$row['number'] = sanitize_text_field( $row['number'] );
+		$row['line']   = sanitize_text_field( $row['line'] );
+		$row['source'] = sanitize_text_field( $row['source'] );
+		$row['url']    = esc_url_raw( $row['url'] );
+		$out[ $code ][] = $row;
+	}
+	if ( ! $out && ! empty( $saved ) ) {
+		add_settings_error( 'aw_district_helplines', 'aw_district_helplines', 'District helplines: the box was empty, so the saved numbers were kept. To take a number out, delete its line only.' );
+		return $saved;
+	}
+	// The same numbers as saved (perhaps with missing empty fields): keep the stored value, so nothing is rewritten.
+	return aw_site_options_helplines_norm( $saved ) === $out && is_array( $saved ) ? $saved : $out;
+}
+
+/**
+ * "slug = short" lines as slug => short.
+ *
+ * @param mixed $value Posted text (or an array, from WP-CLI).
+ */
+function aw_site_options_short_clean( $value ): array {
+	if ( is_array( $value ) ) {
+		$lines = array();
+		foreach ( $value as $k => $v ) {
+			$lines[] = $k . ' = ' . $v;
+		}
+		$value = implode( "\n", $lines );
+	}
+	$out = array();
+	foreach ( preg_split( '/\R/', (string) $value ) as $line ) {
+		$pair  = array_map( 'trim', explode( '=', $line, 2 ) );
+		$slug  = sanitize_key( $pair[0] );
+		$short = sanitize_text_field( $pair[1] ?? '' );
+		if ( '' !== $slug && '' !== $short ) {
+			$out[ $slug ] = $short;
+		}
+	}
+	return $out;
+}
+
+/** Section text. */
+function aw_site_options_lists_intro(): void {
+	echo '<p>' . esc_html( 'Lists the Directory district pages and the Library cards read. Before 12 Nov 2026 they could only be changed with WP-CLI.' ) . '</p>';
+}
+
+/** District helplines: one line per official number. */
+function aw_site_options_helplines(): void {
+	$lines = array();
+	foreach ( aw_site_options_helplines_norm( get_option( 'aw_district_helplines', array() ) ) as $code => $list ) {
+		foreach ( $list as $row ) {
+			$lines[] = $code . ' | ' . implode( ' | ', $row );
+		}
+	}
+	printf(
+		'<textarea class="large-text code" rows="12" wrap="off" spellcheck="false" id="aw_district_helplines" name="aw_district_helplines" aria-describedby="aw_district_helplines-help">%1$s</textarea><p class="description" id="aw_district_helplines-help">%2$s</p>',
+		esc_textarea( implode( "\n", $lines ) ),
+		/* translators: %d: number of lines. */
+		esc_html( sprintf( 'One official number per line: district code | name | number | what the line is for | source | source link | date checked (YYYY-MM-DD). Only numbers from an official page, with its link and the date. %d numbers now. They show in the helpline block on the district\'s Directory page, after 112 and 1962.', count( $lines ) ) )
+	);
+}
+
+/** Issuer short names: "slug = short". */
+function aw_site_options_short(): void {
+	$lines = array();
+	foreach ( (array) get_option( 'aw_issuer_short', array() ) as $slug => $short ) {
+		$lines[] = $slug . ' = ' . $short;
+	}
+	$slugs = function_exists( 'aw_issuers' ) ? implode( ', ', array_keys( aw_issuers() ) ) : '';
+	printf(
+		'<textarea class="large-text code" rows="4" spellcheck="false" id="aw_issuer_short" name="aw_issuer_short" aria-describedby="aw_issuer_short-help">%1$s</textarea><p class="description" id="aw_issuer_short-help">%2$s</p>',
+		esc_textarea( implode( "\n", $lines ) ),
+		esc_html( 'One per line: issuer slug = short name for the card chip (e.g. awbi = AWBI). Empty: the built-in short names. Issuers: ' . $slugs . '.' )
 	);
 }

@@ -86,7 +86,7 @@ on `@wordpress/components`): **merge** to one screen per product once the shell 
 `aw_category_card`, `aw_pinned`, `aw_short_name`, `aw_campaign_short`; post meta `aw_campaign_metrics`, `aw_legal_dated`.
 Proposal: **add** each to its owner's Settings section or edit box.
 
-**Done 12 Nov:** `aw_ff_send_email`, `aw_nl_ff_form_full`, `aw_sample_listing_ids` on Kits › Modules › Forms and sample listings (`site-options.php`). Next: RankWeb (`aw_default_share_image`, `aw_seo_keep_listings`), SourceWeb (`aw_backfill_floor`), the two Core lists (`aw_district_helplines`, `aw_issuer_short`), `kits_ga4_via_gtm` read-only, then the term and post meta.
+**Done 12 Nov:** `aw_ff_send_email`, `aw_nl_ff_form_full`, `aw_sample_listing_ids` on Kits › Modules › Forms and sample listings (`site-options.php`). Also done 12 Nov: RankWeb › Settings › Indexing (listings kept indexed, new IDs must be listings) and › Share images (default share image, media picker); SourceWeb › Settings › Backfill (oldest date); Kits › Modules › Directory and Library lists (district helplines, one line per number with source and date; issuer short names); Kits › Settings › Analytics shows `kits_ga4_via_gtm` read only. Next: the term and post meta.
 
 ## 7. Plugin list vs docs
 

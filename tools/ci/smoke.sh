@@ -131,6 +131,7 @@ grep -q 'page=kits-plugins' /tmp/admin.html && { echo "FAIL Home still links to 
 adm "admin.php?page=kits-settings&ui=classic" >/dev/null
 has "Settings: CDN cache times" /tmp/admin.html 'id="cdn"'
 has "Settings: preview access" /tmp/admin.html 'id="kits-preview-ips"'
+has "Settings: Analytics (read only)" /tmp/admin.html 'id="analytics"'
 # Keys and modules are set in RankWeb → Settings and SourceWeb → Settings now (0b010493, 12 Nov 2026).
 has "Settings: RankWeb Settings linked" /tmp/admin.html 'page=aw-seo-settings'
 has "Settings: SourceWeb Settings linked" /tmp/admin.html 'page=aw-sourcing&#038;tab=settings'
@@ -147,6 +148,11 @@ for l in content-types socials share; do has "Theme Options: $l shows today's fi
 has "Theme Options → Socials: Contact links" /tmp/admin.html 'name="aw_elsewhere[0][label]"'
 admok "Theme Options, older screen (&ui=classic)" "admin.php?page=kits-options&ui=classic"
 for s in aw-keys aw-modules aw-dates; do admok "$s keeps its address" "admin.php?page=$s"; done
+# Kits → Modules: the fields that were WP-CLI only (12 Nov 2026), one Settings API form.
+adm "admin.php?page=aw-modules" >/dev/null
+for f in aw_ff_send_email aw_nl_ff_form_full aw_sample_listing_ids aw_district_helplines aw_issuer_short; do has "Modules: field $f" /tmp/admin.html "name=\"$f\""; done
+adm "admin.php?page=aw-sourcing&tab=settings&ui=classic" >/dev/null
+has "SourceWeb Settings: backfill date field" /tmp/admin.html 'name="aw_backfill_floor"'
 # Old address => where it goes (a 302, the other query values kept).
 while read -r old want; do
   out=$(curl -s -b "$JAR" -o /dev/null -w '%{http_code} %{redirect_url}' "http://127.0.0.1:8080/wp-admin/admin.php?page=$old")
@@ -321,13 +327,14 @@ for r in dashboard settings services; do
 done
 want 200 "GET /rankweb/v1/dashboard editor" -b /tmp/cj-rw-ed -H "X-WP-Nonce: $NE" "$R/dashboard"
 want 403 "GET /rankweb/v1/settings editor (administrators only)" -b /tmp/cj-rw-ed -H "X-WP-Nonce: $NE" "$R/settings"
-for r in dashboard/count settings/titles settings/modules settings/faq-types; do
-  want 401 "POST /rankweb/v1/$r signed out" -X POST -H 'Content-Type: application/json' -d '{"on":[]}' "$R/$r"
-  want 403 "POST /rankweb/v1/$r subscriber" -X POST -b /tmp/cj-rw-sub -H "X-WP-Nonce: $NS" -H 'Content-Type: application/json' -d '{"on":[]}' "$R/$r"
+for r in dashboard/count settings/titles settings/modules settings/faq-types settings/keep-listings settings/share-image; do
+  want 401 "POST /rankweb/v1/$r signed out" -X POST -H 'Content-Type: application/json' -d '{"on":[],"ids":[],"id":0}' "$R/$r"
+  want 403 "POST /rankweb/v1/$r subscriber" -X POST -b /tmp/cj-rw-sub -H "X-WP-Nonce: $NS" -H 'Content-Type: application/json' -d '{"on":[],"ids":[],"id":0}' "$R/$r"
 done
 want 200 "POST /rankweb/v1/dashboard/count administrator" -X POST -b /tmp/cj-ci -H "X-WP-Nonce: $NA" "$R/dashboard/count"
-# No setting lost: Save every group as the screen shows it, and "FAQ box on" as it is; both options stay as they were.
-snap() { wp eval 'foreach ( array( "aw_seo_settings", "aw_faq_off_types", "aw_seo_keep_listings" ) as $o ) { echo $o, "=", md5( serialize( get_option( $o, "(absent)" ) ) ), " "; }'; }
+# No setting lost: Save every group as the screen shows it, and its extras ("FAQ box on", listings kept indexed, the
+# default share image) as they are; the options stay as they were.
+snap() { wp eval 'foreach ( array( "aw_seo_settings", "aw_faq_off_types", "aw_seo_keep_listings", "aw_default_share_image" ) as $o ) { echo $o, "=", md5( serialize( get_option( $o, "(absent)" ) ) ), " "; }'; }
 BEFORE=$(snap)
 curl -s -b /tmp/cj-ci -H "X-WP-Nonce: $NA" "$R/settings" > /tmp/rw-settings.json
 python3 - "$R" "$NA" <<'PY' || FAIL=1
@@ -343,6 +350,10 @@ for g in groups:
     calls = [('settings/' + g['slug'], body)]
     if 'faqTypes' in g:
         calls.append(('settings/faq-types', {'on': [x['slug'] for x in g['faqTypes'] if x['on']]}))
+    if 'keepListings' in g:
+        calls.append(('settings/keep-listings', {'ids': g['keepListings']['ids']}))
+    if 'shareImage' in g:
+        calls.append(('settings/share-image', {'id': g['shareImage']['id']}))
     for route, data in calls:
         out = subprocess.run(['curl', '-s', '-o', '/dev/null', '-w', '%{http_code}', '-X', 'POST', '-b', '/tmp/cj-ci', '-H', 'X-WP-Nonce: ' + nonce, '-H', 'Content-Type: application/json', '-d', json.dumps(data), r + '/' + route], capture_output=True, text=True).stdout
         print(('ok  ' if out == '200' else 'FAIL') + ' ' + out + ' unchanged Save ' + route)

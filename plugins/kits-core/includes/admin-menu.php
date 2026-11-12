@@ -178,6 +178,7 @@ function kits_screen_sections( string $screen ): array {
 			'performance'   => array( 'Performance', fn() => kits_core_settings_form( 'Speed', 'utility-performance', 'performance' ), 'manage_options', 10 ),
 			'compatibility' => array( 'Compatibility', fn() => kits_core_settings_form( 'Older content', '', 'compatibility' ), 'manage_options', 20 ),
 			'preview'       => array( 'Preview access', fn() => kits_admin_embed( 'kits_preview_page' ), 'manage_options', 30 ),
+			'analytics'     => array( 'Analytics', 'kits_settings_analytics', 'manage_options', 35 ),
 		);
 	} elseif ( 'kits-help' === $screen ) {
 		$filter = 'kits_help_sections';
@@ -297,4 +298,28 @@ function kits_help_extra(): void {
 		submit_button( 'Save extra settings' );
 	}
 	echo '</form>';
+}
+
+/**
+ * Settings → Analytics, read only: where the GA4 tag comes from (analytics.php). The kits_ga4_via_gtm switch is shown
+ * here and changed only with WP-CLI, on the owner's word (no GA4 or GTM change without it).
+ */
+function kits_settings_analytics(): void {
+	if ( ! function_exists( 'kits_ga4_in_gtm' ) ) {
+		echo '<p>' . esc_html( 'The analytics part of Kits Core is not loaded.' ) . '</p>';
+		return;
+	}
+	$on        = (bool) get_option( 'kits_ga4_via_gtm' );
+	$container = kits_gtm_container();
+	$rows      = array(
+		array( 'GA4 through Tag Manager only', $on ? 'On: Site Kit\'s own GA4 tag is held back while a container is placed.' : 'Off: Site Kit places its own GA4 tag.' ),
+		array( 'Tag Manager container', '' !== $container ? $container : 'None placed' ),
+		array( 'GA4 tag on pages now', kits_ga4_in_gtm() ? 'From the Tag Manager container' : 'From Site Kit' ),
+	);
+	echo '<table class="widefat striped"><tbody>';
+	foreach ( $rows as $r ) {
+		echo '<tr><th scope="row">' . esc_html( $r[0] ) . '</th><td>' . esc_html( $r[1] ) . '</td></tr>';
+	}
+	echo '</tbody></table>';
+	echo '<p class="description">' . esc_html( 'Read only. Signed-in staff are never counted. The switch is the option kits_ga4_via_gtm (wp option update kits_ga4_via_gtm 1 or 0); Site Kit\'s settings stay as they are either way.' ) . '</p>';
 }
