@@ -669,6 +669,9 @@ function Enrichment() {
 							onApply={ ( ids ) =>
 								decide( { do: 'approve', ids } )
 							}
+							onReject={ ( ids ) =>
+								decide( { do: 'reject', ids } )
+							}
 							onUndo={ ( id ) =>
 								decide( { do: 'undo', ids: [ id ] } )
 							}
