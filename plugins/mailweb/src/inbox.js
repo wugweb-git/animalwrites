@@ -150,6 +150,7 @@ function Folders( { data, st, go } ) {
  * @param {Function} props.onRetry Load again.
  * @param {Function} props.onBack  Back to the list (phones and tablets).
  * @param {Function} props.onAct   Run an action on this message.
+ * @param {Function} props.onMove  Move this message to a folder (its path).
  * @param {Function} props.onShow  Load again with pictures from the internet.
  * @param {string}   props.busy    The action running.
  */
@@ -160,6 +161,7 @@ function Reader( {
 	onRetry,
 	onBack,
 	onAct,
+	onMove,
 	onShow,
 	busy,
 } ) {
@@ -255,6 +257,33 @@ function Reader( {
 						{ a.label }
 					</Button>
 				) ) }
+				{ ( msg.moveTo || [] ).length > 0 && (
+					<span className="mailweb-mail__move">
+						<label
+							htmlFor="mailweb-move-to"
+							className="screen-reader-text"
+						>
+							{ __( 'Move to folder', 'mailweb' ) }
+						</label>
+						<select
+							id="mailweb-move-to"
+							value=""
+							disabled={ !! busy }
+							onChange={ ( e ) =>
+								e.target.value && onMove( e.target.value )
+							}
+						>
+							<option value="">
+								{ __( 'Move to folder…', 'mailweb' ) }
+							</option>
+							{ msg.moveTo.map( ( f ) => (
+								<option key={ f.value } value={ f.value }>
+									{ f.label }
+								</option>
+							) ) }
+						</select>
+					</span>
+				) }
 			</div>
 			{ 'form' === msg.kind ? (
 				<>
@@ -348,16 +377,6 @@ function Reader( {
 								) ) }
 							</ul>
 						</section>
-					) }
-					{ msg.oldUrl && (
-						<p className="mailweb-mail__muted">
-							<a href={ msg.oldUrl }>
-								{ __(
-									'Open on the current screen (move to another folder)',
-									'mailweb'
-								) }
-							</a>
-						</p>
 					) }
 				</>
 			) }
@@ -481,6 +500,28 @@ export default function Inbox() {
 				} );
 				if ( r.ok ) {
 					// Moved, or marked unread: back to the list, unless another message was opened meanwhile.
+					setOpen( ( o ) => ( ids.includes( o ) ? '' : o ) );
+				}
+				load();
+			} )
+			.catch( ( e ) => setNote( { tone: 'error', text: errText( e ) } ) )
+			.finally( () => setBusy( '' ) );
+	};
+
+	// Move to folder: the same move as Archive, to a folder of the message's own mailbox.
+	const move = ( ids, to ) => {
+		setBusy( 'move' );
+		return apiFetch( {
+			path: path( 'inbox/move' ),
+			method: 'POST',
+			data: { ids, to, folder: st.folder },
+		} )
+			.then( ( r ) => {
+				setNote( {
+					tone: r.ok ? 'success' : 'error',
+					text: r.message,
+				} );
+				if ( r.ok ) {
 					setOpen( ( o ) => ( ids.includes( o ) ? '' : o ) );
 				}
 				load();
@@ -727,6 +768,7 @@ export default function Inbox() {
 					onRetry={ loadMsg }
 					onBack={ () => setOpen( '' ) }
 					onAct={ ( a ) => run( a, [ open ] ) }
+					onMove={ ( to ) => move( [ open ], to ) }
 					onShow={ () => setImages( true ) }
 					busy={ busy }
 				/>

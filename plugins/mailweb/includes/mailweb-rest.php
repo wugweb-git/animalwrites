@@ -138,6 +138,33 @@ add_action(
 			)
 		);
 		$route(
+			'/inbox/move',
+			'POST',
+			$cap,
+			'mailweb_rest_move',
+			array(
+				'folder' => array(
+					'type'    => 'string',
+					'default' => 'inbox',
+				),
+				'to'     => array(
+					'type'     => 'string',
+					'required' => true,
+					'pattern'  => '^INBOX(\\.[\\w .-]+)?$',
+				),
+				'ids'    => array(
+					'type'     => 'array',
+					'required' => true,
+					'minItems' => 1,
+					'maxItems' => 100,
+					'items'    => array(
+						'type'    => 'string',
+						'pattern' => '^[a-z0-9_-]+\\|[0-9]+$',
+					),
+				),
+			)
+		);
+		$route(
 			'/inbox/bulk',
 			'POST',
 			$cap,
@@ -655,16 +682,7 @@ function mailweb_rest_message( WP_REST_Request $r ) {
 			'files'   => $files,
 			'compose' => $compose,
 			'actions' => $actions,
-			'oldUrl'  => add_query_arg(
-				array(
-					'page'   => 'mailweb',
-					'box'    => $box,
-					'folder' => $folder,
-					'uid'    => $uid,
-					'view'   => $box,
-				),
-				admin_url( 'admin.php' )
-			),
+			'moveTo'  => mailweb_move_choices( $box, $path ), // Move to folder: the mailbox's other folders
 		)
 	);
 }
@@ -686,6 +704,25 @@ function mailweb_rest_bulk( WP_REST_Request $r ) {
 		array(
 			'ok'      => $ok,
 			'message' => $ok ? __( 'Done.', 'mailweb' ) : __( 'That did not work: the mail server refused it. Nothing was changed.', 'mailweb' ),
+		)
+	);
+}
+
+/**
+ * Move to folder: today's single-message move, for one or more messages, to a folder of their own mailbox.
+ *
+ * @param WP_REST_Request $r Request.
+ */
+function mailweb_rest_move( WP_REST_Request $r ) {
+	$folder = sanitize_key( (string) $r['folder'] );
+	if ( ! isset( mailweb_roles()[ $folder ] ) ) {
+		return new WP_Error( 'rest_invalid_param', __( 'Messages from this folder cannot be moved.', 'mailweb' ), array( 'status' => 400 ) );
+	}
+	$ok = mailweb_move_to( array_map( 'strval', (array) $r['ids'] ), $folder, (string) $r['to'] );
+	return rest_ensure_response(
+		array(
+			'ok'      => $ok,
+			'message' => $ok ? __( 'Moved.', 'mailweb' ) : __( 'That did not work: the folder is not in that mailbox, or the mail server refused it. Nothing else was changed.', 'mailweb' ),
 		)
 	);
 }

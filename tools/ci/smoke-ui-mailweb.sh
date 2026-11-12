@@ -28,6 +28,13 @@ post mailweb/v1/dashboard/count '{}'
 post mailweb/v1/sending/resume '{}'
 post mailweb/v1/queue/retry '{}'
 post mailweb/v1/inbox/bulk '{"action":"read","folder":"inbox","ids":["support|1"]}'
+# Move to folder: refused signed out and for a subscriber; a folder role it cannot move from is 400; a message of
+# no known mailbox moves nowhere (no call to the mail server).
+post mailweb/v1/inbox/move '{"folder":"inbox","to":"INBOX.Archive","ids":["support|1"]}'
+want 400 "POST /mailweb/v1/inbox/move from Website forms" -X POST -b /tmp/cj-ci -H "X-WP-Nonce: $NA" -H 'Content-Type: application/json' -d '{"folder":"forms","to":"INBOX.Archive","ids":["support|1"]}' "$H/?rest_route=/mailweb/v1/inbox/move"
+want 400 "POST /mailweb/v1/inbox/move to a bad folder name" -X POST -b /tmp/cj-ci -H "X-WP-Nonce: $NA" -H 'Content-Type: application/json' -d '{"folder":"inbox","to":"../etc","ids":["support|1"]}' "$H/?rest_route=/mailweb/v1/inbox/move"
+want 200 "POST /mailweb/v1/inbox/move unknown mailbox" -X POST -b /tmp/cj-ci -H "X-WP-Nonce: $NA" -H 'Content-Type: application/json' -d '{"folder":"inbox","to":"INBOX.Archive","ids":["nosuchbox|1"]}' "$H/?rest_route=/mailweb/v1/inbox/move"
+grep -q '"ok":false' /tmp/rw.out && echo "ok   Move to folder: a message of no known mailbox is not moved" || { echo "FAIL Move to folder moved a message of no known mailbox"; FAIL=1; }
 for g in sending mailboxes profiles; do post "mailweb/v1/settings/$g" '{}'; done
 post mailweb/v1/services/mail-api '{"token":""}'
 post mailweb/v1/services/webhook/support '{"secret":""}'

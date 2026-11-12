@@ -881,6 +881,58 @@ function mailweb_prefix( $p, $subject ) {
 	return preg_match( '/^' . preg_quote( $p, '/' ) . '/i', $subject ) ? $subject : $p . ' ' . ( '' !== $subject ? $subject : __( '(no subject)', 'mailweb' ) );
 }
 
+/**
+ * The folders a message of a mailbox can be moved to: its own folders but the one it is in.
+ *
+ * @param string $key  Mailbox key.
+ * @param string $from The folder path it is in.
+ * @return array[] [ { value: path, label } ]
+ */
+function mailweb_move_choices( $key, $from ) {
+	$out = array();
+	foreach ( mailweb_folders( $key ) as $p => $f ) {
+		if ( $p !== $from ) {
+			$out[] = array(
+				'value' => (string) $p,
+				'label' => (string) $f[0],
+			);
+		}
+	}
+	return $out;
+}
+
+/**
+ * Move messages ("box|uid") from a folder role to a folder of their own mailbox (Move to folder). A message whose
+ * mailbox has no such folder, or that is in it already, is left where it is.
+ *
+ * @param array  $ids  Message ids.
+ * @param string $role The folder role they are in.
+ * @param string $to   The folder path to move them to.
+ * @return bool Every message moved.
+ */
+function mailweb_move_to( $ids, $role, $to ) {
+	$boxes = mailweb_all_boxes();
+	$from  = mailweb_role_path( $role );
+	$ok    = true;
+	$moved = 0;
+	foreach ( $ids as $id ) {
+		list( $key, $uid ) = array_pad( explode( '|', (string) $id, 2 ), 2, '' );
+		$uid               = absint( $uid );
+		if ( ! isset( $boxes[ $key ] ) || ! $uid || $to === $from || ! isset( mailweb_folders( $key )[ $to ] ) ) {
+			$ok = false;
+			continue;
+		}
+		list( $code ) = mailweb_call( 'POST', mailweb_fpath( $key, $from ) . '/messages/' . $uid . '/move', array( 'targetFolder' => $to ) );
+		$ok           = $ok && $code >= 200 && $code < 300;
+		++$moved;
+		delete_transient( 'mailweb_folders_' . $key );
+	}
+	if ( $moved && function_exists( 'mailweb_overview_flush' ) ) {
+		mailweb_overview_flush();
+	}
+	return $ok && $moved > 0;
+}
+
 /* ---------- Website forms ---------- */
 
 /** Unread website form messages (0 without a forms source). */
