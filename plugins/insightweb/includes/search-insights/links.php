@@ -5,7 +5,7 @@
  * social, directory, copy, spam). Spam is hidden, never deleted; it shows only in the Spam view.
  *
  * Rows come from the one-time seed (links-seed.php), the monthly Bing Webmaster run (bing.php) and
- * `wp aw-si links add` (the monthly Search Console Links read in a Claude Code session).
+ * `wp aw-si links add`, and the Search Console Links exports imported on the tab (links-import.php).
  *
  * @package aw-seo-extras
  */
@@ -13,6 +13,8 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+require_once __DIR__ . '/links-import.php'; // the Search Console Links import, DR and the last read per source (12 Nov 2026)
 
 /** Link types and their labels; '' is unsorted. Filter aw_si_link_types adds more. */
 function aw_si_link_types(): array {
@@ -71,7 +73,7 @@ function aw_si_link_put( array $l ): int {
 	$type   = isset( aw_si_link_types()[ $type ] ) ? $type : '';
 	// The key ignores a read date in the source ("…, read 26 Oct 2026", "… (read 1 Dec 2026)"): the same link from the
 	// next monthly read updates its dates instead of adding a row (Codex, PR #91). The date is last_seen.
-	$src_key = trim( (string) preg_replace( '/[\s,]*\(?read\b[^)]*\)?\s*$/i', '', $source ) );
+	$src_key = aw_si_link_source_key( $source );
 	$key     = md5( strtolower( '' !== $from ? $from : $domain ) . '|' . $to . '|' . $anchor . '|' . strtolower( $src_key ) );
 	$t      = aw_si_table( 'links' );
 	$n      = $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
@@ -100,7 +102,7 @@ function aw_si_link_put( array $l ): int {
 
 add_filter( 'aw_si_tabs', fn( $tabs ) => (array) $tabs + array( 'links' => __( 'Links', 'aw-seo-extras' ) ) );
 
-add_filter( 'removable_query_args', fn( $args ) => array_merge( (array) $args, array( 'linked' ) ) );
+add_filter( 'removable_query_args', fn( $args ) => array_merge( (array) $args, array( 'linked', 'links_imported' ) ) );
 
 add_filter(
 	'set_screen_option_aw_si_links_per_page',
@@ -185,7 +187,9 @@ function aw_si_links_tab(): void {
 		$n = absint( wp_unslash( $_GET['linked'] ) ); // phpcs:ignore WordPress.Security.NonceVerification -- message only.
 		echo '<div class="notice ' . ( $n ? 'notice-success' : 'notice-warning' ) . ' inline"><p>' . esc_html( $n ? __( 'Saved.', 'aw-seo-extras' ) : __( 'No link was selected, so nothing changed.', 'aw-seo-extras' ) ) . '</p></div>';
 	}
-	echo '<p>' . esc_html__( 'Sites that link to us: from Bing Webmaster (monthly, on the 2nd), the monthly Search Console Links read, and the 25–26 Oct lists. Spam is hidden and shows only in the Spam view; nothing here is deleted. Set a type with the bulk actions.', 'aw-seo-extras' ) . '</p>';
+	aw_si_links_import_notice();
+	echo '<p>' . esc_html__( 'Sites that link to us: from Bing Webmaster (monthly, on the 2nd), the Search Console Links exports imported below, Google Alerts, and the 25–26 Oct lists. Spam is hidden and shows only in the Spam view; nothing here is deleted. Set a type with the bulk actions.', 'aw-seo-extras' ) . '</p>';
+	aw_si_links_reads_section();
 	$table = new AW_SI_Links_Table();
 	$table->prepare_items();
 	$table->views();
@@ -197,5 +201,6 @@ function aw_si_links_tab(): void {
 	$table->search_box( __( 'Search links', 'aw-seo-extras' ), 'aw-si-links' );
 	$table->display();
 	echo '</form>';
+	aw_si_links_import_form();
 }
 add_action( 'aw_si_tab_links', 'aw_si_links_tab' );

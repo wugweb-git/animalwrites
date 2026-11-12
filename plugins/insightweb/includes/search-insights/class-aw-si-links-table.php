@@ -47,6 +47,7 @@ class AW_SI_Links_Table extends WP_List_Table {
 			'linked_url' => __( 'Linked page', 'aw-seo-extras' ),
 			'anchor'     => __( 'Anchor text', 'aw-seo-extras' ),
 			'links'      => __( 'Links', 'aw-seo-extras' ),
+			'dr'         => __( 'DR (Ahrefs)', 'aw-seo-extras' ),
 			'first_seen' => __( 'First seen', 'aw-seo-extras' ),
 			'last_seen'  => __( 'Last seen', 'aw-seo-extras' ),
 			'source'     => __( 'Source', 'aw-seo-extras' ),
@@ -222,6 +223,19 @@ class AW_SI_Links_Table extends WP_List_Table {
 	 */
 	protected function column_links( $item ) {
 		return esc_html( number_format_i18n( (int) $item->links ) );
+	}
+
+	/**
+	 * Domain Rating of the linking site, typed in an import, with the day read (links-import.php).
+	 *
+	 * @param object $item Row.
+	 */
+	protected function column_dr( $item ) {
+		$dr = function_exists( 'aw_si_link_dr' ) ? aw_si_link_dr( (string) $item->domain ) : null;
+		if ( ! $dr ) {
+			return '–';
+		}
+		return esc_html( number_format_i18n( (int) $dr[0] ) ) . '<br><span class="description">' . esc_html( mysql2date( 'j M Y', (string) ( $dr[1] ?? '' ) ) ) . '</span>';
 	}
 
 	/**

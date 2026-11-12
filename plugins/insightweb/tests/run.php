@@ -11,6 +11,10 @@
  * 4. The health shaper: the import tile and the jobs tile with their tones.
  * 5. The Overview boxes as plain parts: paragraphs, notes, lists with links, tables, notices; no markup or script
  *    goes out, and only http(s) or relative links are kept.
+ * 6. Index status: the URL Inspection queue's not-reached line and estimate, and the Search Console totals.
+ * 7. Rising: the terms a run dropped and the filter that dropped each.
+ * 8. Links import: Search Console's Links exports (top linking sites, top linked pages, latest links) and a list
+ *    with DR, validated row by row.
  *
  * Usage: php plugins/insightweb/tests/run.php
  *
@@ -286,6 +290,29 @@ $dc = aw_si_rising_drop_counts(
 iw_check( 20 === $dc['seen'] && 17 === $dc['worker_dropped'] && 1 === $dc['excluded'] && 2 === $dc['sent'] && 1 === $dc['stored'] && 2 === count( $dc['terms'] ), 'drop counts: seen, dropped by the worker, excluded, sent and stored' );
 iw_check( null === aw_si_rising_drop_counts( array( 'rising' => 0 ) )['seen'] && null === aw_si_rising_drop_counts( array() )['worker_dropped'], 'drop counts: unknown without the worker counts' );
 iw_check( false !== strpos( aw_si_rising_drop_label( 'not-english' ), 'not English' ) && 'worker filter: odd' === aw_si_rising_drop_label( 'worker:odd' ), 'drop labels in plain words' );
+
+// 8. Links import (12 Nov 2026): Search Console's Links exports and a pasted list with DR.
+/** Stub. */
+function wp_parse_url( $url, $component = -1 ) {
+	return parse_url( $url, $component );
+}
+require dirname( __DIR__ ) . '/includes/search-insights/imports.php';
+require dirname( __DIR__ ) . '/includes/search-insights/links-import.php';
+$home = 'https://animalwrites.in/';
+$src  = 'Search Console Links, read 12 Nov 2026';
+$ls   = aw_si_links_import_parse( "\xEF\xBB\xBFSite,Linking pages,Target pages\nexample.org,\"1,204\",3\nwww.News.example.in,2,1\nnot a domain,1,1\nanimalwrites.in,9,9\n", $home, $src, '2026-11-12', '2026-11-12' );
+iw_check( 'sites' === $ls['kind'] && 2 === count( $ls['rows'] ) && 2 === $ls['skipped'], 'top linking sites: two sites kept; a bad name and our own site skipped' );
+iw_check( 'example.org' === $ls['rows'][0]['domain'] && 1204 === $ls['rows'][0]['links'] && $home === $ls['rows'][0]['linked_url'] && false !== strpos( $ls['rows'][0]['note'], '3 of our pages' ) && 'news.example.in' === $ls['rows'][1]['domain'], 'top linking sites: domain without www, links, home page with a note' );
+iw_check( '2026-11-12' === $ls['rows'][0]['last_seen'] && $src === $ls['rows'][0]['source'], 'top linking sites: the day read and the source' );
+$lp = aw_si_links_import_parse( "Target page,Incoming links,Linking sites\nhttps://animalwrites.in/campaigns/x/,40,7\nhttps://other.example/,5,1\n", $home, $src, '2026-11-12', '2026-11-12' );
+iw_check( 'pages' === $lp['kind'] && array() === $lp['rows'] && array( array( 'https://animalwrites.in/campaigns/x/', 40, 7 ) ) === $lp['pages'] && 1 === $lp['skipped'], 'top linked pages: a summary of our pages, no link rows' );
+$ll = aw_si_links_import_parse( "Linking page,Last crawled\nhttps://blog.example.com/post/,2026-11-02\nhttps://blog.example.com/b/,2027-01-01\n", $home, $src, '2026-11-12', '2026-11-12' );
+iw_check( 'latest' === $ll['kind'] && '2026-11-02' === $ll['rows'][0]['last_seen'] && '2026-11-12' === $ll['rows'][1]['last_seen'] && 'https://blog.example.com/post/' === $ll['rows'][0]['from_url'], 'latest links: last crawled as last seen; a date in the future falls back to the day read' );
+$lx = aw_si_links_import_parse( "Linking page\tLinked page\tAnchor\tDR\nhttps://a.example.org/x\thttps://animalwrites.in/about/\tAnimal Writes\t54\nhttps://b.example.org/\thttps://evil.example/\tx\t20\nhttps://c.example.org/\t\t\t140\n", $home, 'Pasted list, read 12 Nov 2026', '2026-11-12', '2026-11-12' );
+iw_check( 'list' === $lx['kind'] && 2 === count( $lx['rows'] ) && 1 === $lx['skipped'] && 'https://animalwrites.in/about/' === $lx['rows'][0]['linked_url'] && 'Animal Writes' === $lx['rows'][0]['anchor'], 'list: tab separated; a linked page not ours is skipped' );
+iw_check( array( 'a.example.org' => 54 ) === $lx['dr'], 'list: DR kept per domain, only 0–100' );
+iw_check( '' !== aw_si_links_import_parse( "Keyword,Volume\ndog,10\n", $home, $src, '2026-11-12', '2026-11-12' )['error'] && '' !== aw_si_links_import_parse( 'just text', $home, $src, '2026-11-12', '2026-11-12' )['error'], 'unknown columns or no header: an error, nothing stored' );
+iw_check( 'Search Console Links' === aw_si_link_source_key( 'Search Console Links, read 2 Nov 2026' ) && 'Bing Webmaster' === aw_si_link_source_key( 'Bing Webmaster' ), 'reads group by source without the read date' );
 
 
 exit( $GLOBALS['iw_fail'] );
