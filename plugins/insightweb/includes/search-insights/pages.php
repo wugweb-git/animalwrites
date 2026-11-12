@@ -79,17 +79,19 @@ function aw_si_pages_data(): array {
 	}
 	$skip = aw_si_ga4_skip_sql(); // Without the GA4 test-event days.
 	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, metric, txt, SUM(value) v FROM {$o} WHERE src = 'ga4' AND metric IN ('organic', 'ai') AND period = 'day' AND d BETWEEN %s AND %s{$skip} GROUP BY page, metric, txt", $from, $to ) ) as $r ) {
+		$r->page = aw_si_ga4_page( (string) $r->page );
 		if ( 'organic' === $r->metric ) {
-			$set( $r->page, 'organic', (int) $r->v );
+			$set( $r->page, 'organic', (int) ( $out[ $r->page ]['organic'] ?? 0 ) + (int) $r->v );
 			continue;
 		}
 		$set( $r->page, 'ai', (int) ( $out[ $r->page ]['ai'] ?? 0 ) + (int) $r->v );
-		$out[ $r->page ]['ai_by'][ (string) $r->txt ] = (int) $r->v;
+		$out[ $r->page ]['ai_by'][ (string) $r->txt ] = (int) ( $out[ $r->page ]['ai_by'][ (string) $r->txt ] ?? 0 ) + (int) $r->v;
 	}
 	// Referral and social sessions (owner, 31 Oct 2026).
 	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, txt, SUM(value) v FROM {$o} WHERE src = 'ga4' AND metric = 'ref' AND period = 'day' AND d BETWEEN %s AND %s{$skip} GROUP BY page, txt", $from, $to ) ) as $r ) {
+		$r->page = aw_si_ga4_page( (string) $r->page );
 		$set( $r->page, 'ref', (int) ( $out[ $r->page ]['ref'] ?? 0 ) + (int) $r->v );
-		$out[ $r->page ]['ref_by'][ (string) $r->txt ] = (int) $r->v;
+		$out[ $r->page ]['ref_by'][ (string) $r->txt ] = (int) ( $out[ $r->page ]['ref_by'][ (string) $r->txt ] ?? 0 ) + (int) $r->v;
 	}
 	// A Clarity flag counts only on enough flagged days (filter aw_si_quality_min_days, as in aw_si_quality_pages()).
 	$c_min = max( 1, (int) apply_filters( 'aw_si_quality_min_days', 3 ) );
@@ -168,3 +170,17 @@ add_action(
 		echo '</form>';
 	}
 );
+
+/**
+ * A GA4 landing path as the Pages tab keys it (12 Nov 2026): GA4 reports landing pages without the trailing slash
+ * (/campaigns/lab-animals-rules-2026), the site's addresses have one, so only / matched and every other page showed
+ * no organic, AI or referral sessions. Paths with a file extension (.pdf, .xml) stay as they are.
+ *
+ * @param string $path Stored GA4 landing path.
+ */
+function aw_si_ga4_page( string $path ): string {
+	if ( '' === $path || '/' === substr( $path, -1 ) || preg_match( '/\.[a-z0-9]{2,5}$/i', $path ) ) {
+		return $path;
+	}
+	return user_trailingslashit( $path );
+}
