@@ -157,19 +157,13 @@
 }
 
 /* The box sits on the sender's line: the button's top padding (--ks-s3),
-   then half of what the line (14px x 1.5 = 21px, the shell's type) has over
-   the box. Two classes, so wp-admin's input[type=checkbox] margin (-.25rem)
-   does not win. WordPress draws the box 1rem, 1.5625rem up to 782px. */
+   then centred on that line (14px x 1.5 = 21px, the shell's type) whatever
+   size WordPress draws the box (translate % is the box's own height). Two
+   classes, so wp-admin's input[type=checkbox] margin (-.25rem) does not win. */
 .mailweb-mail__row .mailweb-mail__pick {
 	flex: none;
-	margin: calc(var(--ks-s3) + (21px - 1rem) / 2) 0 0;
-}
-
-@media screen and (max-width: 782px) {
-
-	.mailweb-mail__row .mailweb-mail__pick {
-		margin-top: calc(var(--ks-s3) + (21px - 1.5625rem) / 2);
-	}
+	margin: var(--ks-s3) 0 0;
+	transform: translateY(calc(10.5px - 50%));
 }
 
 .mailweb-mail__bar .mailweb-mail__pick {
