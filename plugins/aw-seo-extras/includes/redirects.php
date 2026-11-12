@@ -100,6 +100,25 @@ function aw_redirect_add( $old_url, $target ) {
 	}
 }
 
+// A link written as "https:/animalwrites.in/…" (one slash) or "animalwrites.in/…" without a scheme is read as a path on
+// this site: /https:/animalwrites.in/news/ (79 hits in the 404 Monitor, no referer; audit 12 Nov 2026). It goes to
+// the page it meant. The site's own templates and stored content have no such link; the hits come from outside.
+add_action(
+	'parse_request',
+	function () {
+		if ( ! in_array( $_SERVER['REQUEST_METHOD'] ?? 'GET', array( 'GET', 'HEAD' ), true ) ) {
+			return;
+		}
+		$uri = (string) wp_unslash( $_SERVER['REQUEST_URI'] ?? '/' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+		if ( ! preg_match( '#^/+(?:https?:/+)?(?:www\.)?animalwrites\.in(/[^?]*)?(\?.*)?$#i', $uri, $m ) ) {
+			return;
+		}
+		wp_safe_redirect( home_url( '' !== ( $m[1] ?? '' ) ? $m[1] : '/' ) . ( $m[2] ?? '' ), 301, 'Animal Writes' );
+		exit;
+	},
+	0
+);
+
 // Upper-case paths go to the lower-case one. Files (a dot in the last part), the admin, REST and login are left alone.
 add_action(
 	'parse_request',
