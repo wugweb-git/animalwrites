@@ -299,7 +299,10 @@ function aw_camp_record_box( $post ) {
 	}
 	echo '</select></p>';
 	echo '<p><label for="aw-camp-evidence">Impact evidence (item ID)</label><br><input type="number" id="aw-camp-evidence" name="aw_campaign_impact_evidence" value="' . esc_attr( (string) get_post_meta( $post->ID, 'aw_campaign_impact_evidence', true ) ) . '" style="width:100%"></p>';
-	echo '<p class="description">Verified change only with evidence that the intended change happened (policy, a court decision, practice or conditions); No change (verified) when the evidence shows it did not. Never results (letters, events, coverage). Metrics: aw_campaign_metrics (campaign-record.php).</p>';
+	echo '<p class="description">Verified change only with evidence that the intended change happened (policy, a court decision, practice or conditions); No change (verified) when the evidence shows it did not. Never results (letters, events, coverage).</p>';
+	if ( function_exists( 'aw_edit_fields_metrics_box' ) ) {
+		aw_edit_fields_metrics_box( $post ); // Metrics (edit-fields.php)
+	}
 }
 
 add_action(
