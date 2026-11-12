@@ -522,6 +522,38 @@ function sourceweb_enrich_text( string $field, $v ): string {
 }
 
 /**
+ * Picture URLs of a logo or photos value, for thumbnails (the classic table shows the first 6).
+ *
+ * @param mixed $v URL or URLs.
+ * @return string[]
+ */
+function sourceweb_enrich_pics( $v ): array {
+	$urls = array_values( array_filter( (array) $v, fn( $x ) => is_string( $x ) && preg_match( '#^https?://#', $x ) ) );
+	return array_map( 'esc_url_raw', array_slice( $urls, 0, 6 ) );
+}
+
+/**
+ * A row's sources as links: the exact page each value came from (http and https only).
+ *
+ * @param array $sources [ { key, name, url, date } ].
+ * @return array[] [ { name, url } ].
+ */
+function sourceweb_enrich_links( array $sources ): array {
+	$out = array();
+	foreach ( $sources as $src ) {
+		$url  = (string) ( $src['url'] ?? '' );
+		$name = (string) ( $src['name'] ?? '' );
+		if ( '' !== $name && preg_match( '#^https?://#', $url ) ) {
+			$out[] = array(
+				'name' => $name,
+				'url'  => esc_url_raw( $url ),
+			);
+		}
+	}
+	return $out;
+}
+
+/**
  * The value a row replaced (pending: the listing's value now), as today's screen works it out.
  *
  * @param array $r Decoded row.
@@ -643,7 +675,15 @@ function sourceweb_rest_enrichment( WP_REST_Request $request ) {
 			)
 		);
 		$f['listing'] = (int) $r['listing_id'];
-		$fields[]     = $f;
+		$f['links']   = sourceweb_enrich_links( (array) $r['sources'] );
+		if ( in_array( $r['field'], array( 'logo', 'photos' ), true ) ) {
+			$f['currentPics']  = sourceweb_enrich_pics( sourceweb_enrich_before( $r ) );
+			$f['proposedPics'] = sourceweb_enrich_pics( $r['value'] );
+		}
+		if ( 'merge_into' === $r['field'] && ! is_array( $r['value'] ) && (int) $r['value'] ) {
+			$f['mergeUrl'] = (string) get_edit_post_link( (int) $r['value'], 'raw' );
+		}
+		$fields[] = $f;
 	}
 	$out = array();
 	foreach ( sourceweb_enrich_group( $lids, $fields ) as $lid => $g ) {

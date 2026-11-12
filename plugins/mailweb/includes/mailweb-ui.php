@@ -82,7 +82,10 @@ add_action(
 			return;
 		}
 		$admin = current_user_can( 'manage_options' );
-		$tabs  = array(
+		if ( 'settings' === $screen ) {
+			wp_enqueue_media(); // the Profiles picture picker (MediaField)
+		}
+		$tabs = array(
 			array(
 				'slug'    => 'dashboard',
 				'label'   => __( 'Dashboard', 'mailweb' ),

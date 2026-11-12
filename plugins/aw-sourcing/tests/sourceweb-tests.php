@@ -276,3 +276,8 @@ $rel = file_get_contents( dirname( __DIR__ ) . '/includes/relevance.php' );
 $rly = file_get_contents( dirname( __DIR__ ) . '/includes/relay.php' );
 aw_t( false !== strpos( $rel, '$log = aw_relevance_rejected_rows();' ) && false !== strpos( $rly, 'foreach ( aw_relay_log_rows() as $r ) {' ) && false !== strpos( $pol, 'foreach ( aw_sourcing_change_rows() as $e ) {' ), 'reports: today\'s tabs read through the shared functions' );
 
+
+// Enrichment review: thumbnails and source links, http(s) only.
+$er = file_get_contents( dirname( __DIR__ ) . '/includes/sourceweb-rest.php' );
+aw_t( false !== strpos( $er, "\$f['currentPics']  = sourceweb_enrich_pics(" ) && false !== strpos( $er, "\$f['proposedPics'] = sourceweb_enrich_pics(" ), 'enrichment: logo and photos carry their pictures' );
+aw_t( 2 <= substr_count( $er, "preg_match( '#^https?://#'" ), 'enrichment: pictures and source links are http(s) only' );

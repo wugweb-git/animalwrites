@@ -22,6 +22,7 @@ import {
 	Field,
 	FieldReview,
 	LoadingState,
+	MediaThumbs,
 	Notice,
 	PageParts,
 	RefTable,
@@ -581,6 +582,53 @@ const firstListing = () =>
 const firstStatus = () =>
 	new URLSearchParams( window.location.search ).get( 'status' ) || 'pending';
 
+const hasValue = ( text, pics ) => !! text || !! pics?.length;
+
+/**
+ * One value in the Listing details review: its words (linked to the listing a merge goes into), the pictures of a
+ * logo or photos value, and the pages it came from.
+ *
+ * @param {Object} props
+ * @param {string} props.text  The value as words.
+ * @param {Array}  props.pics  Picture URLs (logo, photos).
+ * @param {string} props.href  Link for the words (a merge's listing), or ''.
+ * @param {Array}  props.links [ { name, url } ]: where the value came from.
+ * @param {string} props.label What the pictures are, for screen readers.
+ */
+function FieldValue( { text, pics, href, links, label } ) {
+	return (
+		<>
+			{ text && ( href ? <a href={ href }>{ text }</a> : text ) }
+			{ pics?.length > 0 && (
+				<>
+					{ text && <br /> }
+					<MediaThumbs urls={ pics } label={ label } />
+				</>
+			) }
+			{ links?.length > 0 && (
+				<>
+					{ hasValue( text, pics ) && <br /> }
+					<small>
+						{ __( 'From', 'aw-sourcing' ) }{ ' ' }
+						{ links.map( ( l, i ) => (
+							<span key={ l.url }>
+								{ i > 0 && ', ' }
+								<a
+									href={ l.url }
+									target="_blank"
+									rel="noopener noreferrer nofollow"
+								>
+									{ l.name }
+								</a>
+							</span>
+						) ) }
+					</small>
+				</>
+			) }
+		</>
+	);
+}
+
 function Enrichment() {
 	const [ q, setQ ] = useState( {
 		listing: firstListing(),
@@ -696,6 +744,36 @@ function Enrichment() {
 								label: `${ f.label } (${ f.confidence || '–' }${
 									f.source ? ', ' + f.source : ''
 								})`,
+								current: hasValue(
+									f.current,
+									f.currentPics
+								) && (
+									<FieldValue
+										text={ f.current }
+										pics={ f.currentPics }
+										label={ sprintf(
+											/* translators: %s: field name. */
+											__( '%s now', 'aw-sourcing' ),
+											f.label
+										) }
+									/>
+								),
+								proposed: hasValue(
+									f.proposed,
+									f.proposedPics
+								) && (
+									<FieldValue
+										text={ f.proposed }
+										pics={ f.proposedPics }
+										href={ f.mergeUrl }
+										links={ f.links }
+										label={ sprintf(
+											/* translators: %s: field name. */
+											__( '%s proposed', 'aw-sourcing' ),
+											f.label
+										) }
+									/>
+								),
 							} ) ) }
 							busy={ busy }
 							onApply={ ( ids ) =>

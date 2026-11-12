@@ -23,6 +23,7 @@ import {
 	ErrorState,
 	Field,
 	LoadingState,
+	MediaField,
 	MiniChart,
 	Notice,
 	PageParts,
@@ -910,7 +911,11 @@ function profileValues( group ) {
 function ProfilesGroup( { group, onSaved, onDirty } ) {
 	const start = profileValues( group );
 	const [ v, setV ] = useState( start );
-	useEffect( () => setV( profileValues( group ) ), [ group ] );
+	const [ pics, setPics ] = useState( {} ); // key => thumbnail of a newly picked picture
+	useEffect( () => {
+		setV( profileValues( group ) );
+		setPics( {} );
+	}, [ group ] );
 	const diff = changed( v, start );
 	const dirty = Object.keys( diff ).length > 0;
 	useEffect(
@@ -982,37 +987,24 @@ function ProfilesGroup( { group, onSaved, onDirty } ) {
 							/>
 						) }
 					/>
-					<Field
+					<MediaField
 						label={ __( 'Picture', 'mailweb' ) }
 						help={ __(
-							'The media library item’s ID (0 = none). The current screen has a media picker.',
+							'A picture from the media library, shown beside the address on the Mail page.',
 							'mailweb'
 						) }
-						render={ ( id, helpId ) => (
-							<input
-								id={ id }
-								type="number"
-								min="0"
-								value={ v[ p.key ]?.picture ?? 0 }
-								aria-describedby={ helpId }
-								onChange={ ( e ) =>
-									set(
-										p.key,
-										'picture',
-										parseInt( e.target.value, 10 ) || 0
-									)
-								}
-							/>
-						) }
+						value={ v[ p.key ]?.picture ?? 0 }
+						url={
+							pics[ p.key ] ??
+							( v[ p.key ]?.picture === p.picture
+								? p.pictureUrl
+								: '' )
+						}
+						onChange={ ( id, url ) => {
+							set( p.key, 'picture', id );
+							setPics( { ...pics, [ p.key ]: url } );
+						} }
 					/>
-					{ p.pictureUrl && (
-						<img
-							src={ p.pictureUrl }
-							alt=""
-							width="48"
-							height="48"
-						/>
-					) }
 				</SettingsBlock>
 			) ) }
 		</SettingsGroup>
