@@ -309,12 +309,15 @@ function kits_settings_analytics(): void {
 		echo '<p>' . esc_html( 'The analytics part of Kits Core is not loaded.' ) . '</p>';
 		return;
 	}
+	// What visitors get: kits_gtm_container() is '' on admin screens and for signed-in staff, so read the settings.
 	$on        = (bool) get_option( 'kits_ga4_via_gtm' );
-	$container = kits_gtm_container();
+	$sitekit   = (array) get_option( 'googlesitekit_tagmanager_settings', array() );
+	$own       = function_exists( 'aw_gtm_id' ) ? (string) aw_gtm_id() : '';
+	$container = ! empty( $sitekit['useSnippet'] ) && ! empty( $sitekit['containerID'] ) ? (string) $sitekit['containerID'] . ' (from Site Kit)' : ( '' !== $own ? $own . ' (the site\'s own)' : '' );
 	$rows      = array(
 		array( 'GA4 through Tag Manager only', $on ? 'On: Site Kit\'s own GA4 tag is held back while a container is placed.' : 'Off: Site Kit places its own GA4 tag.' ),
-		array( 'Tag Manager container', '' !== $container ? $container : 'None placed' ),
-		array( 'GA4 tag on pages now', kits_ga4_in_gtm() ? 'From the Tag Manager container' : 'From Site Kit' ),
+		array( 'Tag Manager container on visitors\' pages', '' !== $container ? $container : 'None' ),
+		array( 'GA4 tag on visitors\' pages', $on && '' !== $container ? 'From the Tag Manager container' : 'From Site Kit' ),
 	);
 	echo '<table class="widefat striped"><tbody>';
 	foreach ( $rows as $r ) {
