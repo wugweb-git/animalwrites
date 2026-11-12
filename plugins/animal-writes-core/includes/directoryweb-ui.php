@@ -86,27 +86,18 @@ function directoryweb_ui_url( string $screen ): string {
 	);
 }
 
-// The Dashboard and Settings: pages with no menu entry (the menu stays as it is during the trial).
+// Plugins → DirectoryWeb opens the Dashboard (owner, 12 Nov 2026: "Yes, add it", as the other Kits plugins); Settings
+// opens from the Dashboard and lights the same item (kits-core admin-fold.php). Directory → Claims stays where it is.
 add_action(
 	'admin_menu',
 	function () {
-		add_submenu_page( '', __( 'DirectoryWeb', 'directoryweb' ), __( 'DirectoryWeb', 'directoryweb' ), 'edit_aw_volunteers', DIRECTORYWEB_PAGE, 'directoryweb_dashboard_page' ); // phpcs:ignore WordPress.WP.Capabilities.Unknown -- the Directory's own capability (volunteers.php), as Directory → Claims
-		add_submenu_page( '', __( 'DirectoryWeb settings', 'directoryweb' ), __( 'DirectoryWeb settings', 'directoryweb' ), 'manage_options', DIRECTORYWEB_SETTINGS_PAGE, 'directoryweb_settings_page' );
-	}
-);
-
-// A page with no menu entry has no title of its own in the browser tab.
-add_filter(
-	'admin_title',
-	function ( $title ) {
-		$page = sanitize_key( wp_unslash( $_GET['page'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- the tab title only
-		if ( DIRECTORYWEB_PAGE === $page ) {
-			return __( 'DirectoryWeb', 'directoryweb' ) . ' ' . $title;
+		if ( function_exists( 'kits_admin_fold_menu' ) ) {
+			kits_admin_fold_menu( DIRECTORYWEB_PAGE, 'plugins.php', __( 'DirectoryWeb', 'directoryweb' ), 'edit_aw_volunteers', 'directoryweb' ); // phpcs:ignore WordPress.WP.Capabilities.Unknown -- the Directory's own capability (volunteers.php)
+		} else {
+			add_menu_page( __( 'DirectoryWeb', 'directoryweb' ), __( 'DirectoryWeb', 'directoryweb' ), 'edit_aw_volunteers', DIRECTORYWEB_PAGE, 'directoryweb_dashboard_page', 'dashicons-location-alt', 26 ); // phpcs:ignore WordPress.WP.Capabilities.Unknown -- as above
 		}
-		if ( DIRECTORYWEB_SETTINGS_PAGE === $page ) {
-			return __( 'DirectoryWeb settings', 'directoryweb' ) . ' ' . $title;
-		}
-		return $title;
+		add_submenu_page( DIRECTORYWEB_PAGE, __( 'DirectoryWeb', 'directoryweb' ), __( 'Dashboard', 'directoryweb' ), 'edit_aw_volunteers', DIRECTORYWEB_PAGE, 'directoryweb_dashboard_page' ); // phpcs:ignore WordPress.WP.Capabilities.Unknown -- as above, as Directory → Claims
+		add_submenu_page( DIRECTORYWEB_PAGE, __( 'DirectoryWeb settings', 'directoryweb' ), __( 'Settings', 'directoryweb' ), 'manage_options', DIRECTORYWEB_SETTINGS_PAGE, 'directoryweb_settings_page' );
 	}
 );
 
