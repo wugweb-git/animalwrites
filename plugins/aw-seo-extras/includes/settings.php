@@ -298,8 +298,8 @@ function aw_seo_modules(): array {
 		'analysis' => array(
 			'label'  => 'Content analysis',
 			'switch' => true,
-			'files'  => array( 'analysis' ),
-			'desc'   => 'Rank Math\'s analyzer reads the published page for Pages built from blocks.',
+			'files'  => array( 'analysis', 'content-advice' ),
+			'desc'   => 'Rank Math\'s analyzer reads the published page for Pages built from blocks; the RankWeb content panel in the editor.',
 			'fields' => array(
 				'AW_SEO_RENDERED_TYPES' => array( 'type' => 'list', 'label' => 'Types analysed as rendered', 'help' => 'One post type per line.', 'default' => array( 'aw_legal', 'post', 'aw_campaign', 'aw_news', 'aw_opportunity', 'aw_listing' ) ),
 				'AW_SEO_SUMMARY_SKIP_TESTS' => array( 'type' => 'list', 'label' => 'Rank Math tests skipped on summaries', 'help' => 'One test ID per line.', 'default' => array( 'lengthContent', 'keywordDensity', 'keywordInSubheadings', 'contentHasTOC' ) ),
