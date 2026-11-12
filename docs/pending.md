@@ -24,7 +24,7 @@ Theme and WordPress items are tracked by Animal Writes WordPress. Code requests 
 - **Search Insights (C13–C14):** "Request indexing (10 a day)" box (not indexed, no links in first, then impressions); the Index box is labelled a sample and takes hand-entered Search Console coverage totals (the form is on the classic Overview; the new Dashboard shows the table).
 - **HTML sitemap (A6):** the footer already linked /sitemap/, which answered 404. Built `[aw_html_sitemap]` and the /sitemap/ page (made once on the first admin visit after ship).
 - **Orphans (A1, A7):** live crawl running; before/after counts and 5 URLs per type to recheck follow.
-- **New visible labels, for the owner's yes:** "Districts in {State}", "More in {District}", "All in {District}", "Animal Writes editorial team" (author). "Acts and Rules" and "Sitemap" are the owner's words.
+- **New visible labels:** "Districts in {State}", "More in {District}", "All in {District}", "Animal Writes editorial team" (author): owner's yes, 12 Nov. "Acts and Rules" and "Sitemap" are the owner's words.
 
 ### Martech audit fixes and SEO work (owner, 12 Nov 2026). Order 1, 2, 4, 3, 8, 9, 5, 6, 10–14
 - **Hub lists with an array filter (item 1):** `/news/?state[]=kerala`, and on News, Resources, Library and Directory any `?x[]=…` whose list had more than one page, answered 500. Cause: the pagination links, the old `?query-N-page` redirect, the Directory sort link and the Directory place redirect ran `array_map( 'rawurlencode' )` over the query (a TypeError in PHP 8 on a list value). Fixed with `map_deep` (353f5899). Nothing was in the PHP log: the site writes no fatal errors there.
