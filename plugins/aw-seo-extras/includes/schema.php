@@ -1037,7 +1037,7 @@ function aw_categories_schema() {
 	$url   = get_permalink();
 	$items = array();
 	foreach ( get_terms( array( 'taxonomy' => aw_seo_category_tax(), 'hide_empty' => true, 'orderby' => 'name' ) ) as $i => $t ) {
-		$items[] = array( '@type' => 'ListItem', 'position' => $i + 1, 'url' => kits_term_url( $t ), 'name' => aw_seo_plain( $t->name ) );
+		$items[] = array( '@type' => 'ListItem', 'position' => $i + 1, 'url' => aw_seo_term_url( $t ), 'name' => aw_seo_plain( $t->name ) );
 	}
 	return array(
 		array(
@@ -1119,7 +1119,7 @@ function aw_schema_nodes() {
 function aw_category_schema_nodes() {
 	global $wp_query;
 	$term  = get_queried_object();
-	$url   = kits_term_url( $term );
+	$url   = aw_seo_term_url( $term );
 	$per   = max( 1, (int) get_query_var( 'posts_per_page' ) );
 	$start = ( max( 1, (int) get_query_var( 'paged' ) ) - 1 ) * $per;
 	$items = array();

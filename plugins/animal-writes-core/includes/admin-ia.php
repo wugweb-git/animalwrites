@@ -91,11 +91,6 @@ add_filter(
 			$args['labels']['name']      = 'Campaigns';
 			$args['labels']['menu_name'] = 'Campaigns';
 		}
-		if ( 'aw_press' === $type ) { // its own menu item, after Campaigns
-			$args['show_in_menu'] = true;
-			$args['menu_icon']    = 'dashicons-megaphone';
-			$args['labels']       = array_merge( (array) ( $args['labels'] ?? array() ), array( 'name' => 'Press coverage', 'menu_name' => 'Press coverage', 'all_items' => 'All coverage', 'add_new' => 'Add coverage', 'add_new_item' => 'Add coverage' ) );
-		}
 		if ( 'aw_message' === $type ) { // the contact form's messages
 			$args['labels'] = array_merge( (array) ( $args['labels'] ?? array() ), array( 'name' => 'Contact messages', 'menu_name' => 'Contact messages', 'all_items' => 'Contact messages' ) );
 		}

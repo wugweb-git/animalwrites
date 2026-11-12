@@ -143,7 +143,7 @@ add_action(
 				'publicly_queryable'  => false,
 				'exclude_from_search' => true,
 				'show_ui'             => true,
-				'show_in_menu'        => 'edit.php?post_type=aw_news', // under News, no new top-level menu
+				'show_in_menu'        => AW_CORE_MENU, // Animal Writes → Social posts (12 Nov 2026), after the site's screens
 				'show_in_nav_menus'   => false,
 				'show_in_admin_bar'   => false,
 				'show_in_rest'        => false, // classic edit screen; no public REST listing
@@ -158,6 +158,22 @@ add_action(
 		}
 	},
 	11 // after the campaign link taxonomy (5) and the content types (10)
+);
+
+// Animal Writes → Social posts last: WordPress adds the item before the plugin's own screens (admin_menu 10), and the
+// first item is where the menu opens, so it moves to the end.
+add_action(
+	'admin_menu',
+	function () {
+		global $submenu;
+		$items = (array) ( $submenu[ AW_CORE_MENU ] ?? array() );
+		$link  = 'edit.php?post_type=' . AW_SOCIAL_TYPE;
+		$mine  = array_filter( $items, fn( $i ) => is_array( $i ) && ( $i[2] ?? '' ) === $link );
+		if ( $mine ) {
+			$submenu[ AW_CORE_MENU ] = array_merge( array_values( array_diff_key( $items, $mine ) ), array_values( $mine ) ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- reorders our own menu.
+		}
+	},
+	999
 );
 
 /**

@@ -102,10 +102,11 @@ add_action(
 		register_post_type(
 			'aw_press',
 			array(
-				'labels'       => array( 'name' => 'Media & PR', 'singular_name' => 'Press item', 'add_new_item' => 'Add press item', 'edit_item' => 'Edit press item', 'menu_name' => 'Media & PR' ),
+				'labels'       => array( 'name' => 'Press coverage', 'singular_name' => 'Press item', 'all_items' => 'All coverage', 'add_new' => 'Add coverage', 'add_new_item' => 'Add coverage', 'edit_item' => 'Edit press item', 'menu_name' => 'Press coverage' ),
 				'public'       => false,
 				'show_ui'      => true,
-				'show_in_menu' => 'edit.php?post_type=page',
+				'show_in_menu' => true, // its own menu, after Campaigns (admin-ia.php menu order)
+				'menu_icon'    => 'dashicons-megaphone',
 				'supports'     => array( 'title', 'thumbnail' ),
 				'taxonomies'   => array( 'post_tag' ), // campaign tags (campaign-*): which campaign the coverage is about; the Media & PR Campaign filter
 			)

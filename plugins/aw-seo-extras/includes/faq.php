@@ -374,7 +374,7 @@ function aw_faq_context( $obj = null ) {
 			$ctx['entity'] = $hubs[ (int) $obj->ID ];
 		}
 	} elseif ( $obj instanceof WP_Term && in_array( $obj->taxonomy, aw_faq_taxonomies(), true ) ) {
-		$url  = (string) kits_term_url( $obj );
+		$url  = (string) aw_seo_term_url( $obj );
 		$name = aw_faq_plain( $obj->name );
 		$own  = aw_faq_term_subject( $obj );
 		$subj = '' !== $own ? $own : $name;

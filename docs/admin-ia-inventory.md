@@ -15,14 +15,14 @@ the same with or without Kits Core), then third-party plugins as their vendors s
 | Directory › Claims | Core `claims-review.php:296` | keep: claim review stays here; DirectoryWeb › Claims is read-only (owner, 11–12 Nov) |
 | News › News, Add News item | Core (CPT `aw_news`) | keep |
 | News › Linked campaigns | taxonomy `aw_campaign_link` | **done 12 Nov**: one entry under Classification |
-| News › Social posts | Core `social-posts.php:146` (CPT `aw_social`) | **move** to Animal Writes › Social posts |
+| News › Social posts | Core `social-posts.php:146` (CPT `aw_social`) | **done 12 Nov**: Animal Writes › Social posts (last item) |
 | Resources › All Resources, Add New Resource | core `post` | keep |
 | Resources › Linked campaigns | taxonomy | **done** (as above) |
 | Library › Library, Add Library item, Linked campaigns | Core (CPT `aw_legal`) | keep; Linked campaigns **done** |
 | Opportunities › …, Linked campaigns | Core (CPT `aw_opportunity`) | keep; Linked campaigns **done** |
 | Campaigns › Campaigns, Add Campaign, Linked campaigns | Core (CPT `aw_campaign`) | keep; Linked campaigns **done** |
 | Campaigns › Letter report | Core `campaign-letters.php:267` | keep (it belongs to Campaigns) |
-| Press coverage › All coverage, Add coverage, Linked campaigns | Core (CPT `aw_press`; menu set twice: `press.php:108`, `admin-ia.php:95`) | keep; define the menu once; Linked campaigns **merge** |
+| Press coverage › All coverage, Add coverage, Linked campaigns | Core (CPT `aw_press`; menu set twice: `press.php:108`, `admin-ia.php:95`) | **done 12 Nov**: menu defined once (`press.php`); Linked campaigns under Classification |
 | Pages | core | keep |
 | Media › Library, Add Media File | core | keep |
 | Media › Media groups | Core (taxonomy `aw_media_group`) | keep |
@@ -72,7 +72,7 @@ on `@wordpress/components`): **merge** to one screen per product once the shell 
 
 | Function | Where | Proposal |
 |---|---|---|
-| `kits_term_url` | Kits Core `primitives.php:11`, RankWeb `helpers.php:13` | **rename** RankWeb's |
+| `kits_term_url` | Kits Core `primitives.php:11`, RankWeb `helpers.php:13` | **done 12 Nov**: RankWeb has `aw_seo_term_url()` |
 | `*_simple_table` + class | Kits Core, Core, RankWeb, MailWeb, SourceWeb | keep one per plugin (independence), same pattern |
 | `*_rest_can` | PlanWeb, RankWeb, SourceWeb, DirectoryWeb | keep per plugin |
 | `aw_seo_api_allowed` / `aw_si_api_allowed` | RankWeb, InsightWeb | keep per plugin |
