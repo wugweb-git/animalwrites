@@ -22,7 +22,9 @@ function aw_si_sitekit_context() {
 	}
 	$plugin = \Google\Site_Kit\Plugin::instance();
 	$prop   = ( new ReflectionClass( $plugin ) )->getProperty( 'context' );
-	$prop->setAccessible( true );
+	if ( PHP_VERSION_ID < 80100 ) { // a no-op from PHP 8.1 and deprecated in 8.5
+		$prop->setAccessible( true );
+	}
 	return $prop->getValue( $plugin );
 }
 

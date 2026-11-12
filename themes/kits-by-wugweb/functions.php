@@ -529,7 +529,13 @@ function kits_joined_hash_save( string $key, string $sig, string $hash ): void {
 function kits_joined_write( string $path, string $css, string $fail = 'kits_joined_write_fail' ): bool {
 	$dir = dirname( $path );
 	$tmp = $path . '.' . wp_generate_password( 6, false ) . '.tmp';
-	if ( wp_mkdir_p( $dir ) && wp_is_writable( $dir ) && false !== @file_put_contents( $tmp, $css ) && @rename( $tmp, $path ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions, WordPress.PHP.NoSilencedErrors -- a failure is handled below.
+	global $wp_filesystem;
+	if ( ! function_exists( 'WP_Filesystem' ) ) {
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+	}
+	// The WordPress Filesystem API, direct method only: front-end pages never ask for FTP credentials.
+	if ( wp_mkdir_p( $dir ) && wp_is_writable( $dir ) && 'direct' === get_filesystem_method( array(), $dir ) && WP_Filesystem( false, $dir )
+		&& $wp_filesystem->put_contents( $tmp, $css, FS_CHMOD_FILE ) && $wp_filesystem->move( $tmp, $path, true ) ) {
 		return true;
 	}
 	wp_delete_file( $tmp );

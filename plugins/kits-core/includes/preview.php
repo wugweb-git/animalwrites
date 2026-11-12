@@ -171,10 +171,11 @@ add_action(
 	'wp_head',
 	function () {
 		$url = wp_json_encode( esc_url_raw( rest_url( 'kits/v1/preview' ) ) );
-		echo '<script>(function(d){var h=d.documentElement,k="kitsPreview",v=null;try{if(/[?&]kits-preview=1/.test(location.search)){sessionStorage.removeItem(k);}v=sessionStorage.getItem(k);}catch(e){}'
+		$js = '(function(d){var h=d.documentElement,k="kitsPreview",v=null;try{if(/[?&]kits-preview=1/.test(location.search)){sessionStorage.removeItem(k);}v=sessionStorage.getItem(k);}catch(e){}'
 			. 'if(v==="1"){h.classList.add("kits-preview");return;}if(v==="0"){return;}'
 			. 'function go(){if(!d.querySelector(".kits-preview-only")||(!/(^|; )kits_pv=1/.test(d.cookie)&&!/[?&]kits-preview=1/.test(location.search))){return;}fetch(' . $url . ',{credentials:"same-origin",cache:"no-store"}).then(function(r){return r.json();}).then(function(j){var p=!!(j&&j.preview);try{sessionStorage.setItem(k,p?"1":"0");}catch(e){}if(p){h.classList.add("kits-preview");}}).catch(function(){});}'
-			. 'if(d.readyState==="loading"){d.addEventListener("DOMContentLoaded",go);}else{go();}})(document);</script>' . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput
+			. 'if(d.readyState==="loading"){d.addEventListener("DOMContentLoaded",go);}else{go();}})(document);';
+		wp_print_inline_script_tag( $js ); // $url is wp_json_encode( esc_url_raw() ); the rest is a fixed string.
 	},
 	2
 );

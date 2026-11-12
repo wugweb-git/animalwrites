@@ -194,7 +194,9 @@ function aw_seo_score_values( $ids ) {
 	$tool            = \RankMath\Tools\Update_Score::get();
 	$tool->screen->localize();
 	$ref = new ReflectionProperty( get_class( rank_math()->json ), 'data' );
-	$ref->setAccessible( true );
+	if ( PHP_VERSION_ID < 80100 ) { // a no-op from PHP 8.1 and deprecated in 8.5
+		$ref->setAccessible( true );
+	}
 	$json = (array) $ref->getValue( rank_math()->json );
 	$rm   = array_intersect_key( (array) ( $json['rankMath'] ?? array() ), array_flip( array( 'assessor', 'links', 'localeFull', 'noFollowDomains', 'noFollowExcludeDomains', 'noFollowExternalLinks', 'parentDomain', 'objectType', 'postType' ) ) );
 	$only = function ( $q ) use ( $ids ) {
