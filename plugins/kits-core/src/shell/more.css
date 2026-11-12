@@ -996,3 +996,83 @@
 .kits-shell .kits-shell-prose a:not(.button) {
 	color: var(--ks-ink);
 }
+
+/* Calendar grid (calendar.js): Monday first, today marked with the ink edge,
+   past days greyed (as the PlanWeb Calendar). Phones get the list instead. */
+.kits-shell-cal__nav {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--ks-s2);
+	margin: 0 0 var(--ks-s3);
+}
+
+.kits-shell-cal__title {
+	min-width: 10em;
+	text-align: center;
+}
+
+.kits-shell-cal__grid {
+	width: 100%;
+	border-collapse: collapse;
+	table-layout: fixed;
+}
+
+.kits-shell-cal__grid th {
+	padding: var(--ks-s2);
+	color: var(--ks-g6);
+	font-weight: 600;
+	text-align: left;
+}
+
+.kits-shell-cal__grid td {
+	padding: var(--ks-s2);
+	border: 1px solid var(--ks-g2);
+	background: var(--ks-white);
+	vertical-align: top;
+	overflow-wrap: anywhere;
+}
+
+.kits-shell-cal__grid td.is-outside {
+	background: var(--ks-g1);
+}
+
+.kits-shell-cal__grid td.is-past,
+.kits-shell-cal__list li.is-past {
+	color: var(--ks-g6);
+	background: var(--ks-g1);
+}
+
+.kits-shell-cal__grid td.is-today,
+.kits-shell-cal__list li.is-today {
+	box-shadow: inset 0 0 0 2px var(--ks-ink);
+}
+
+.kits-shell-cal__day {
+	display: block;
+	margin: 0 0 var(--ks-s1);
+	font-weight: 600;
+}
+
+.kits-shell-cal__list {
+	display: none;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.kits-shell-cal__list li {
+	padding: var(--ks-s3);
+	border-bottom: 1px solid var(--ks-g2);
+}
+
+@media (max-width: 767px) {
+
+	.kits-shell-cal__grid {
+		display: none;
+	}
+
+	.kits-shell-cal__list {
+		display: block;
+	}
+}
