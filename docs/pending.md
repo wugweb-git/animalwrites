@@ -27,7 +27,7 @@ Theme and WordPress items are tracked by Animal Writes WordPress. Code requests 
   - 1962 guide (13798): new description (states, hours, free or not, no answer).
   - IAEC guide (13859): first line gives "Institutional Animal Ethics Committee" and the 1998 Rules wording; SEO title "IAEC full form, members and approvals – Animal Writes".
   - World Animal Day Library item (142): focus keyphrase now only "awbi world animal day circular" (date phrases go to the guide /resources/world-animal-day-4-october/, which the item already links). Modified date unchanged.
-  - Waiting for the owner: the approved titles for 9031 (62 characters) and 13798 (65) are over the 60 limit; short forms asked in chat. Titles unchanged until then.
+  - Titles (owner's yes, 12 Nov, written from 28 days of Search Console queries): 9031 "Animal ambulance and emergency numbers – Animal Writes", 13798 "1962 helpline number, timing and charges – Animal Writes". Live.
   - The other 75 follow in batches.
 - **Secondary keyphrases (item 10), dry run, no writes:** 556 "Add as secondary keyphrase" rows: 108 can be written, 76 need a check (83 pages already at Rank Math's 5, 12 phrases are another page's keyphrase, 6 Lab phrases held to the Post phase), 372 skipped (222 are Directory place pages with no keyphrase field, 143 already on the page, 7 no page). List to the owner.
 - **Focus keyphrase not in title (item 12):** the Analyzer's 322 are checked against the post title (323 today: 141 News, 101 Resources, 62 Library, 14 Pages, 3 Directory, 2 Campaigns). 197 already have the keyphrase in the SEO title search shows; 126 do not (78 Resources, 33 News, 14 Library, 1 Page). No title changes without the owner's yes.
