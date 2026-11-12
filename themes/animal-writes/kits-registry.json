@@ -1598,6 +1598,19 @@
    "block": "animal-writes/help-now"
   },
   {
+   "name": "Help call bar",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "aw-help-bar"
+   ],
+   "states": [
+    "phones (to 767): three links in one row, sticky at the foot of the screen above the gesture area (env(safe-area-inset-bottom)): Call 112 in the site yellow, Call 1962 and Find a vet outlined on ink; 44px tall; pressed state scales to 0.96 (none with reduced motion)",
+    "768 and up: hidden"
+   ],
+   "a11y": "a nav with its own aria-label; each link is text with a decorative icon"
+  },
+  {
    "name": "Homepage hero",
    "type": "pattern",
    "status": "live",
