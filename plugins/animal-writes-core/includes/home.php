@@ -113,10 +113,10 @@ function aw_block_home_hero() {
 
 	$data = ' data-campaign-slug="' . esc_attr( (string) get_post_field( 'post_name', $id ) ) . '" data-campaign-title="' . esc_attr( get_the_title( $id ) ) . '"'; // campaign_action promo_click (aw-analytics.js)
 	$out  = '<section class="alignfull aw-camp aw-camp-band aw-ed-hero aw-ed-hero--campaign' . ( $pic ? ' has-art' : '' ) . ( $theme ? ' aw-camp--' . $theme : '' ) . '" aria-labelledby="aw-hero-t"' . $data . '><div class="aw-camp-band-inner"><div class="aw-camp-band-text">';
-	$out .= '<p class="aw-camp-band-pill">Draft rules G.S.R. 864(E) · objections close 5 Nov 2026</p>';
+	$out .= '<p class="aw-camp-band-pill">Draft rules G.S.R. 864(E) · objections closed 5 Nov 2026</p>';
 	$out .= '<h1 id="aw-hero-t" class="aw-camp-band-title">Object to the draft lab animal rules</h1>';
-	$out .= '<p>Labs could approve most animal experiments themselves. Your objection counts until 5 November.</p>';
-	$out .= $day ? do_shortcode( '[aw_countdown date="' . $day . '" label="Last day"]' ) : ''; // $day is Y-m-d (checked above)
+	$out .= '<p>Labs could approve most animal experiments themselves. Objections closed on 5 Nov; the final rules are not out yet.</p>';
+	$out .= $day ? do_shortcode( '[aw_countdown date="' . $day . '" label="Last day" past_label="Last day was"]' ) : ''; // $day is Y-m-d (checked above)
 	if ( $open && $day ) {
 		$out .= '<p class="aw-camp-band-range kit-meta-row"><span class="kit-meta-item">Opened ' . aw_date( $open ) . '</span><span class="kit-meta-item">Last day ' . aw_date( $day ) . '</span></p>'; // aw_date() escapes
 	}

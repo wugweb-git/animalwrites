@@ -25,7 +25,7 @@
  *                                                                class aw-letter-grounds just before it
  *   [aw_campaign_count min="100"]                                "N letters sent" once N reaches min
  *   [aw_camp_status]                                             the hero's status: action window, and the outcome
- *   [aw_sticky_cta href="#send" label="..."]                     phone-only bar with the days left; days="0" leaves them out;
+ *   [aw_sticky_cta href="#send" label="..."]                     phone-only bar with the days left; days="0" leaves them out; after_label="..." shows after the close day;
  *                                                                pre_label="..." (pre_href, default #updates) shows it in Pre too
  *   [aw_campaign_band campaign="slug" theme="lab-rules"]       home band; shown only while the campaign is
  *                                                                published and open; label="…" a pill above the
@@ -556,7 +556,7 @@ add_shortcode(
 add_shortcode(
 	'aw_sticky_cta',
 	function ( $atts ) {
-		$a  = shortcode_atts( array( 'href' => '#send', 'label' => 'Send your objection', 'days' => '1', 'pre_href' => '#updates', 'pre_label' => '' ), $atts );
+		$a  = shortcode_atts( array( 'href' => '#send', 'label' => 'Send your objection', 'days' => '1', 'pre_href' => '#updates', 'pre_label' => '', 'after_label' => '' ), $atts );
 		$id = aw_camp_id();
 		if ( $id && '' !== $a['pre_label'] && 'pre' === aw_camp_shown_state( $id ) ) { // Pre: optional "get notified" bar, no day count (Content Standard E)
 			return '<div class="aw-sticky-cta" data-target="' . esc_attr( $a['pre_href'] ) . '"><a class="wp-element-button" href="' . esc_attr( $a['pre_href'] ) . '">' . esc_html( $a['pre_label'] ) . '</a></div>';
@@ -564,8 +564,14 @@ add_shortcode(
 		if ( ! $id || ! aw_camp_is_open( $id ) ) {
 			return '';
 		}
-		$d    = aw_camp_days_left( $id );
-		$days = '0' === (string) $a['days'] ? '' : '<span class="aw-sticky-cta-days">' . esc_html( $d ? sprintf( _n( '%d day to go', '%d days to go', $d, 'animal-writes-core' ), $d ) : 'Last day today' ) . '</span>';
+		$d     = aw_camp_days_left( $id );
+		$close = aw_camp_close_ts( $id );
+		if ( '' !== $a['after_label'] && $close && time() >= $close ) { // after the close day: the owner's wording, e.g. "Closed 5 Nov · decision awaited"
+			$note = $a['after_label'];
+		} else {
+			$note = $d ? sprintf( _n( '%d day to go', '%d days to go', $d, 'animal-writes-core' ), $d ) : 'Last day today';
+		}
+		$days = '0' === (string) $a['days'] ? '' : '<span class="aw-sticky-cta-days">' . esc_html( $note ) . '</span>';
 		return '<div class="aw-sticky-cta" data-target="' . esc_attr( $a['href'] ) . '"><a class="wp-element-button" href="' . esc_attr( $a['href'] ) . '">' . esc_html( $a['label'] ) . '</a>' . $days . '</div>';
 	}
 );

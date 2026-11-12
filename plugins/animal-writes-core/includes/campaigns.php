@@ -29,7 +29,7 @@ function aw_private_dir() {
 add_shortcode(
 	'aw_countdown',
 	function ( $atts ) {
-		$a = shortcode_atts( array( 'date' => '', 'label' => '' ), $atts );
+		$a = shortcode_atts( array( 'date' => '', 'label' => '', 'past_label' => '' ), $atts );
 		if ( '' === $a['date'] && function_exists( 'aw_camp_id' ) && aw_camp_id() ) { // no date: the campaign's own close date, the one source the sticky bar and home band also read
 			$a['date'] = (string) get_post_meta( aw_camp_id(), 'aw_campaign_close', true );
 		}
@@ -48,6 +48,8 @@ add_shortcode(
 			$text = '<span class="aw-cd-num">1</span> <span class="aw-cd-unit">day to go</span>';
 		} elseif ( 0 === $days ) {
 			$text = '<span class="aw-cd-num">Today</span>';
+		} elseif ( '' !== $a['past_label'] ) { // past date with its own wording, e.g. "Objections closed:" (no "Took place on")
+			return '<p class="aw-countdown" data-date="' . esc_attr( $date ) . '"><span class="aw-cd-when">' . esc_html( $a['past_label'] ) . ' ' . esc_html( $when ) . '</span></p>';
 		} else {
 			$text = '<span class="aw-cd-unit">Took place on</span>';
 		}
