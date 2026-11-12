@@ -348,6 +348,12 @@ add_action(
 			return;
 		}
 		$g = wp_unslash( $_GET ); // phpcs:ignore WordPress.Security.NonceVerification
+		// One value each: ?state[]=kerala stopped the page (sanitize_title() on a list; audit, 12 Nov 2026). The first one counts.
+		foreach ( array( 'state', 'district', 'q' ) as $k ) {
+			if ( isset( $g[ $k ] ) && ! is_string( $g[ $k ] ) ) {
+				$g[ $k ] = is_array( $g[ $k ] ) ? (string) current( array_filter( $g[ $k ], 'is_string' ) ?: array( '' ) ) : '';
+			}
+		}
 		// A 6-digit PIN code in the search box opens that PIN's district (or state) list; when India Post does not know
 		// the PIN, the district of the listings that store it (or the nearest PIN prefix) is used.
 		$pin = preg_replace( '/\s/', '', (string) ( $g['q'] ?? '' ) );
