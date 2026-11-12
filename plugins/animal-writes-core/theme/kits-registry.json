@@ -1726,7 +1726,7 @@
    "type": "pattern",
    "status": "live",
    "classes": ["aw-festive", "kit-photo-card"],
-   "states": ["default: the Diwali 2026 campaign card on Home: photo card (core Cover, dim 50) on the portrait campaign photo, H2, one line, one Brand button (What to do tonight) at the top; 500px tall at every width (--aw-pair-card-h)"],
+   "states": ["default: the Diwali 2026 campaign card on Home: photo card (core Cover, dim 50) on the portrait campaign photo, H2, one line, one Brand button (What to do on Diwali night) at the top; 500px tall at every width (--aw-pair-card-h)"],
    "tokens": ["--kit-btn-brand-bg", "--kit-color-on-ink", "--kit-radius-card"],
    "a11y": {
     "element": "pattern (Editor → Patterns, \"Animal Writes\"); card with H2, one line and one button",
