@@ -7,7 +7,7 @@ This section is the current state; where an older section below disagrees, this 
 - **Forms.** Two parallel chains. (a) kit.js pushes `form_submit_success` with `form` (the wrapper's `data-kit-form`). (b) The GTM tag "Fluent Forms - form_submit and Clarity form_ref (listener)" (Custom HTML, needs analytics_storage) pushes `form_submit` with `form`, `form_ref` (AW-… reference) and, since 31 Oct, `contact_reason` (the Contact form's `about` value, else the page's `?about=`).
 - **Sent-events are built on the listener's `form_submit`**, not on `form_submit_success`: `contact_sent` (form `^(contact|form-4)$` and `contact_reason` not `^(correction|remove)$`), `report_sent` (form contact, `contact_reason` = `correction`; Report a mistake; not a key event), `volunteer_signup` (`^(volunteer|form-5)$`), `claim_sent` (`^(claim|form-6)$`), `newsletter_signup` (`^(newsletter|form-3)$`). Remove my data (`about=remove`) has no sent-event.
 - **The listener's GA4 event is `aw_form_submit`** (was `form_submit` until 31 Oct), with `form`, `ref`, `contact_reason`. Renamed because GA4's enhanced measurement "Form interactions" (on) sends its own `form_submit`.
-- **Key events (14):** `contact_sent`, `claim_sent`, `volunteer_signup`, `newsletter_signup`, `newsletter_optin`, `objection_sent`, `objection_confirmed`, `call_click`, `whatsapp_click`, `email_click`, `pin_search`, plus GA4's defaults `purchase`, `qualify_lead`, `close_convert_lead`. `form_submit_success` was unmarked on 31 Oct (each send counted twice in the total).
+- **Key events (16):** `pdf_download` and `file_download` (marked 12 Nov 2026, owner: all downloads), `contact_sent`, `claim_sent`, `volunteer_signup`, `newsletter_signup`, `newsletter_optin`, `objection_sent`, `objection_confirmed`, `call_click`, `whatsapp_click`, `email_click`, `pin_search`, plus GA4's defaults `purchase`, `qualify_lead`, `close_convert_lead`. `form_submit_success` was unmarked on 31 Oct (each send counted twice in the total).
 - **Custom dimensions (event scope): 44 of 50.** 38 site ones (new 31 Oct: Contact reason, `contact_reason`; "Has FAQ" = `faq_group`), 6 created by Site Kit. "Search term" on `term`, "Ad slot" and "Ad status" are still registered (no new data; kept so older reports stay readable).
 - **Removed 31 Oct:** the GTM tags, triggers and variables for `ad_slot_status` / `ad_slot_view` (their code was removed 21 Oct).
 - **Web stream:** enhanced measurement Page views, Video engagement, Form interactions. Redaction: email, and the URL query parameter `t` (the /update/ token; GTM's page_location/page_referrer variables also strip it). User-provided data collection is off at the property. Google signals on.
@@ -63,6 +63,8 @@ trigger and variable names, plus `DLV - gtag` and the guard).
 | `call_click` | a visitor rings an organisation (or any number on the site; on a profile it carries `listing_id`) |
 | `whatsapp_click` | a visitor opens a WhatsApp chat with a number (17 Oct: share links and group invites no longer count) |
 | `email_click` | a visitor writes to an organisation |
+| `pdf_download` | a PDF link opened (kit.js; every .pdf link, ours and gov.in; marked 12 Nov 2026) |
+| `file_download` | older Enhanced measurement download event (off since the site sends `pdf_download`; marked 12 Nov 2026 so any return counts) |
 | `claim_step` | optional: only if claim funnel starts should count; otherwise leave as a normal event |
 
 GA4 marks a whole event, not one `form` value, and its "Create event" screen can no longer filter on a parameter, so
