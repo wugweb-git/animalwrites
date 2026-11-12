@@ -303,6 +303,7 @@ function aw_seo_modules(): array {
 			'fields' => array(
 				'AW_SEO_RENDERED_TYPES' => array( 'type' => 'list', 'label' => 'Types analysed as rendered', 'help' => 'One post type per line.', 'default' => array( 'aw_legal', 'post', 'aw_campaign', 'aw_news', 'aw_opportunity', 'aw_listing' ) ),
 				'AW_SEO_SUMMARY_SKIP_TESTS' => array( 'type' => 'list', 'label' => 'Rank Math tests skipped on summaries', 'help' => 'One test ID per line.', 'default' => array( 'lengthContent', 'keywordDensity', 'keywordInSubheadings', 'contentHasTOC' ) ),
+				'AW_SEO_COVERED_TESTS' => array( 'type' => 'list', 'label' => 'Rank Math tests RankWeb covers', 'help' => 'Skipped on every item: RankWeb does this work instead. One test ID per line.', 'default' => array( 'hasContentAI' ) ),
 			),
 		),
 	);

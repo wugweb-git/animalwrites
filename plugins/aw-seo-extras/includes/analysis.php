@@ -78,6 +78,9 @@ function aw_seo_rendered_main( $id, $fresh = false, $store = true ) {
 /** Rank Math tests that do not fit a summary page or a profile (the AW_SEO_RENDERED_TYPES). */
 // AW_SEO_SUMMARY_SKIP_TESTS: RankWeb → Settings (settings.php).
 
+/** Rank Math tests for features RankWeb does instead (Content AI), skipped on every item. */
+// AW_SEO_COVERED_TESTS: RankWeb → Settings (settings.php).
+
 /**
  * The content Rank Math should analyse: the rendered <main> of a built Page or an item of AW_SEO_RENDERED_TYPES, else ''.
  *
@@ -105,11 +108,16 @@ add_action(
 );
 
 // Tests that do not fit a summary page are not run on Library, Resources, campaign, News, Opportunity and Directory items.
+// Tests for Rank Math features this site does in RankWeb (Content AI: focus keywords, keyword map, FAQ, content analysis)
+// are not run on any item.
 add_filter(
 	'rank_math/researches/tests',
 	function ( $tests, $type ) {
 		if ( 'post' === $type && in_array( get_post_type(), AW_SEO_RENDERED_TYPES, true ) ) {
 			$tests = array_diff_key( $tests, array_flip( AW_SEO_SUMMARY_SKIP_TESTS ) );
+		}
+		if ( 'post' === $type ) {
+			$tests = array_diff_key( $tests, array_flip( AW_SEO_COVERED_TESTS ) );
 		}
 		return $tests;
 	},
