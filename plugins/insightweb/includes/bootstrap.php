@@ -47,14 +47,14 @@ if ( $aw_si_missing ) {
 }
 unset( $aw_si_missing );
 
-// The keyword table and its helpers are Animal Writes Core's (owner's decision 3, 25 Oct 2026): without Core, Search
-// Insights stays off.
+// The keyword table and its helpers are Kits Core's (Animal Writes Core's from 25 Oct, Kits Core's from 12 Nov 2026):
+// without them, Search Insights stays off.
 if ( ! function_exists( 'aw_kw_install' ) ) {
 	add_action(
 		'admin_notices',
 		function () {
 			if ( current_user_can( 'manage_options' ) ) {
-				wp_admin_notice( esc_html__( 'Search Insights needs Animal Writes Core (the keyword table lives there). It is off until Core is active.', 'insightweb' ), array( 'type' => 'warning' ) );
+				wp_admin_notice( esc_html__( 'Search Insights needs Kits Core (the keyword table lives there). It is off until Kits Core is active.', 'insightweb' ), array( 'type' => 'warning' ) );
 			}
 		}
 	);
