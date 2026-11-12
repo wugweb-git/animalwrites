@@ -35,7 +35,7 @@ The new screens cover only a few pages of each plugin. The other pages still dra
 | Rejected / Relay log / Change log | the tables (search, sort, paging) | (a) DataList; (b) three read routes (manage_options) |
 | Dashboard | keyword status, last change, relay count, links to Keywords, Rules, Press and Categories | (a) Tile + RefTable fed by the existing `GET dashboard` |
 | To review | "Add a social post from its link"; items per page | (a) SectionCard + Field + Button; (b) `POST review/social-add` (edit_others_posts); a `per` parameter on `GET review` |
-| Enrichment review | bulk Undo; thumbnails, source and duplicate links; `listing=` filter (Reject ticked done 12 Nov) | (a) bulk actions + a small change to the decide route; (c) media fields; extend `GET enrichment` |
+| Enrichment review | thumbnails, source and duplicate links (Reject ticked, bulk Undo and `listing=` done 12 Nov) | (c) media fields; extend `GET enrichment` |
 
 **Bug found:** `sourceweb-rest.php:598` uses `$words` before it is set (it is set only at :753). The view counts on Enrichment review ignore the search, and PHP logs a warning on each load. Fix: read the search into `$words` before line 598.
 
@@ -79,7 +79,7 @@ The new screens cover only a few pages of each plugin. The other pages still dra
 |---|---|---|
 | Menu | Dashboard and Settings have **no menu entry** (`directoryweb-ui.php:93-94`, empty parent) | PHP: put them under `edit.php?post_type=aw_listing` |
 | Claims list | done 12 Nov: Reference column, search by reference | — |
-| One claim | link to Enrichment review for Undo (current logo done 12 Nov) | extend `GET claims/<id>` (read only) |
+| One claim | current logo done 12 Nov. A link to Enrichment review for Undo is left out on purpose: Claims stay read only, and Undo is reached from Directory → Claims | — |
 | Dashboard | Places covered and Claimed tiles have no link | (b) `GET listings` (edit_posts) + (a) DataList on a Listings tab, or leave them without a link |
 | Settings | Types has no link to Tags | (a) LinkedSetting |
 
@@ -130,6 +130,8 @@ Home, Settings, Tools and Help show the same content in both looks; nothing was 
 - **Kits shell parts** (`plugins/kits-core/src/shell/calendar.js`, `inputs.js`): CalendarGrid (one month, Monday first, previous/next/Today, today marked, past greyed, a list on phones); every select and date, time, url, email, search and password input styled like the text inputs, with `Select`; `SecretField` (only whether a secret is set and its last 4 characters); `ConfirmButton` (asks in place with the count, and a word to type when it cannot be undone); FieldReview `onReject` (Reject ticked).
 - **PlanWeb Dashboard → Calendar**: the month grid from `GET planweb/v1/month?m=Y-m` (edit_planweb_entries), each entry with its Type and Status badges and opening its form on Entries; the month stays in the address (`&month=`).
 - **SourceWeb Enrichment review → Reject ticked**: rejects only the ticked values (`do=reject` with ids).
+- **SourceWeb Enrichment review → one listing, bulk Undo**: `&listing=ID` (and `&status=`) opens that listing; Undo every applied value of the ticked listings after a confirm with the count.
+- **Secret field and confirm-with-count in use**: MailWeb Settings' secret boxes (Mail API token, mailbox password) are SecretField; InsightWeb Settings' Restore defaults is a ConfirmButton with the number of changed numbers.
 
 ## Suggested order
 
