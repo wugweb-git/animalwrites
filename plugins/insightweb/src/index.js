@@ -437,6 +437,7 @@ const PLACEHOLDER = [
 /* ---------- Settings ---------- */
 
 const SERVICES = 'services';
+const MORE = 'more'; // Run now, imports, Delete data: the Settings tab's own rows
 
 /**
  * The open group from the address (#numbers), so a link opens the right group.
@@ -445,8 +446,22 @@ const SERVICES = 'services';
  */
 function hashGroup( groups ) {
 	const h = window.location.hash.replace( '#', '' );
-	if ( SERVICES === h || groups.some( ( g ) => g.slug === h ) ) {
+	if (
+		SERVICES === h ||
+		MORE === h ||
+		groups.some( ( g ) => g.slug === h )
+	) {
 		return h;
+	}
+	// Back from Run now, an import or a snapshot: open Runs and data, where its result shows.
+	const first = ( app.more || [] )[ 0 ];
+	if (
+		new URLSearchParams( window.location.search ).has( 'ran' ) ||
+		( first &&
+			'notice' === first.type &&
+			[ 'success', 'error' ].includes( first.tone ) )
+	) {
+		return MORE;
 	}
 	return SERVICES;
 }
@@ -774,6 +789,11 @@ function Settings() {
 			label: dirty[ g.slug ] ? `${ g.label } •` : g.label,
 			href: `#${ g.slug }`,
 		} ) ),
+		{
+			value: MORE,
+			label: __( 'Runs and data', 'aw-seo-extras' ),
+			href: `#${ MORE }`,
+		},
 	];
 	return (
 		<>
@@ -782,16 +802,23 @@ function Settings() {
 				chips={ chips }
 				value={ open }
 				onChange={ setOpen }
-				after={
-					<a href={ data.moreUrl }>
-						{ __(
-							'Run now, imports and Delete data: current Settings',
-							'aw-seo-extras'
-						) }
-					</a>
-				}
 			/>
 			{ SERVICES === open && <Services /> }
+			{ MORE === open && (
+				<SectionCard
+					id={ MORE }
+					title={ __( 'Runs and data', 'aw-seo-extras' ) }
+					description={ __(
+						'The schedule, keys, Run now, snapshots, imports and Delete data.',
+						'aw-seo-extras'
+					) }
+				>
+					<PageParts
+						parts={ app.more || [] }
+						title={ __( 'Runs and data', 'aw-seo-extras' ) }
+					/>
+				</SectionCard>
+			) }
 			{ data.groups.map( ( g ) => (
 				<div key={ g.slug } hidden={ g.slug !== open }>
 					<Group

@@ -424,7 +424,6 @@ function insightweb_settings_payload( bool $admin ): array {
 	$groups[] = insightweb_rising_group();
 	return array(
 		'groups'  => $groups,
-		'moreUrl' => add_query_arg( 'ui', 'classic', aw_si_url( 'settings' ) ), // Run now, imports and Delete data live on the classic Settings.
 	);
 }
 

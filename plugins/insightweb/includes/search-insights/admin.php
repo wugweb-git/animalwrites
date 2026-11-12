@@ -340,6 +340,11 @@ function aw_si_screen(): void {
 /** The notices above every tab: each source's state, then the result of the last action. */
 function aw_si_screen_notices(): void {
 	aw_si_source_notices();
+	aw_si_action_notices();
+}
+
+/** The result of the last action (a priority saved, a run finished). */
+function aw_si_action_notices(): void {
 	if ( isset( $_GET['updated'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- message only.
 		echo '<div class="notice notice-success inline"><p>' . esc_html__( 'Priority saved.', 'aw-seo-extras' ) . '</p></div>';
 	}
@@ -1020,8 +1025,13 @@ add_action(
 	}
 );
 
-/** Settings tab: schedule, seed, run now, delete data. */
-function aw_si_settings_tab(): void {
+/**
+ * Settings tab: schedule, keys, seed, numbers, run now, imports, delete data. The new Settings screen saves the
+ * numbers itself and draws the other rows from this output (insightweb-ui.php).
+ *
+ * @param bool $numbers With the Numbers row.
+ */
+function aw_si_settings_tab( bool $numbers = true ): void {
 	$seeded = (int) get_option( 'aw_si_seeded' );
 	do_action( 'aw_si_settings_notices' );
 	echo '<table class="form-table" role="presentation"><tbody>';
@@ -1042,7 +1052,7 @@ function aw_si_settings_tab(): void {
 		? esc_html( sprintf( __( 'Seeded once on %s from docs/seo/keyword-map.md and the 21 Oct rankings. The table here is the source of truth now.', 'aw-seo-extras' ), wp_date( 'j M Y, H:i', $seeded ) ) )
 		: esc_html__( 'Not seeded yet: the first run seeds it.', 'aw-seo-extras' );
 	echo '</p></td></tr>';
-	if ( current_user_can( 'manage_options' ) ) {
+	if ( $numbers && current_user_can( 'manage_options' ) ) {
 		echo '<tr><th scope="row">' . esc_html__( 'Numbers', 'aw-seo-extras' ) . '</th><td>';
 		if ( isset( $_GET['saved'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- a notice only.
 			echo '<div class="notice notice-success inline"><p>' . esc_html( 'reset' === $_GET['saved'] ? __( 'Defaults restored.', 'aw-seo-extras' ) : __( 'Settings saved.', 'aw-seo-extras' ) ) . '</p></div>'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended

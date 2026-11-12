@@ -90,6 +90,11 @@ function kits_shell_parts_blocks_walk( DOMNode $node, array &$out, bool $forms =
 				$out[] = kits_shell_parts_listtable_block( $c, null );
 				continue;
 			}
+			if ( 'table' === $tag && false !== strpos( $class, ' form-table ' ) ) {
+				$flush();
+				kits_shell_parts_form_table( $c, $out ); // a settings page: each row is a heading, then its content
+				continue;
+			}
 			if ( 'ul' === $tag && false !== strpos( $class, ' subsubsub ' ) ) {
 				$flush();
 				$out[] = kits_shell_parts_views_block( $c );
@@ -317,6 +322,34 @@ function kits_shell_parts_safe_href( string $href ): string {
  */
 function kits_shell_parts_squash( string $t ): string {
 	return trim( (string) preg_replace( '/\s+/u', ' ', $t ) );
+}
+
+/**
+ * A settings table (table.form-table) outside a form: each row's heading as a heading part, then the row's content
+ * (its forms among it) as parts.
+ *
+ * @param DOMElement $table The table.
+ * @param array      $out   Parts so far.
+ */
+function kits_shell_parts_form_table( DOMElement $table, array &$out ): void {
+	foreach ( kits_shell_parts_find( $table, 'tr' ) as $tr ) {
+		foreach ( $tr->childNodes as $cell ) {
+			if ( ! $cell instanceof DOMElement ) {
+				continue;
+			}
+			if ( 'th' === strtolower( $cell->nodeName ) ) {
+				$t = kits_shell_parts_squash( kits_shell_parts_text_no_sr( $cell ) );
+				if ( '' !== $t ) {
+					$out[] = array(
+						'type' => 'heading',
+						'text' => $t,
+					);
+				}
+			} elseif ( 'td' === strtolower( $cell->nodeName ) ) {
+				kits_shell_parts_blocks_walk( $cell, $out, true );
+			}
+		}
+	}
 }
 
 /**
@@ -608,6 +641,7 @@ function kits_shell_parts_form_block( DOMElement $form ): array {
 		'type'    => 'form',
 		'method'  => 'post' === strtolower( $form->getAttribute( 'method' ) ) ? 'post' : 'get',
 		'action'  => kits_shell_parts_safe_href( $form->getAttribute( 'action' ) ),
+		'enctype' => 'multipart/form-data' === strtolower( $form->getAttribute( 'enctype' ) ) ? 'multipart/form-data' : '',
 		'hidden'  => array(),
 		'fields'  => array(),
 		'buttons' => array(),
@@ -640,7 +674,7 @@ function kits_shell_parts_form_block( DOMElement $form ): array {
 			);
 			continue;
 		}
-		if ( '' === $name || in_array( $type, array( 'button', 'image', 'reset', 'file', 'password' ), true ) ) {
+		if ( '' === $name || in_array( $type, array( 'button', 'image', 'reset', 'password' ), true ) ) {
 			continue;
 		}
 		if ( 'hidden' === $type ) {
@@ -697,6 +731,8 @@ function kits_shell_parts_form_block( DOMElement $form ): array {
 		} elseif ( 'textarea' === $type ) {
 			$field['value'] = $el->textContent;
 			$field['rows']  = max( 2, (int) $el->getAttribute( 'rows' ) );
+		} elseif ( 'file' === $type ) {
+			$field['accept'] = $el->getAttribute( 'accept' ); // a file is picked in the browser; nothing is filled in
 		} elseif ( 'checkbox' === $type ) {
 			$field['value']   = $el->hasAttribute( 'value' ) ? $el->getAttribute( 'value' ) : 'on';
 			$field['checked'] = $el->hasAttribute( 'checked' );

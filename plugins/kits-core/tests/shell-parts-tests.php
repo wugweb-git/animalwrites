@@ -109,4 +109,13 @@ kits_parts_check( $by['off']['disabled'] && ! $by['on']['disabled'], 'a disabled
 kits_parts_check( 2 === count( $g['buttons'] ) && 'aw_si_cl' === $g['buttons'][0]['name'] && $g['buttons'][0]['primary'] && 'Save' === $g['buttons'][1]['label'], 'buttons' );
 kits_parts_check( array( 'Add a word.' ) === array_column( $g['blocks'], 'text' ), 'the form\'s own words, without its labels' );
 
+$st = kits_shell_html_parts(
+	'<table class="form-table" role="presentation"><tbody><tr><th scope="row">Schedule</th><td><p>Daily at 07:10.</p></td></tr>'
+	. '<tr><th scope="row">Import</th><td><form method="post" enctype="multipart/form-data" action="https://animalwrites.in/wp-admin/admin-post.php"><input type="hidden" name="action" value="aw_si_import"><p><label for="f">CSV file</label> <input type="file" id="f" name="file" accept=".csv"></p><input type="submit" class="button" value="Import"></form></td></tr>'
+	. '<tr><th scope="row"><label for="c">Delete data</label></th><td><form method="post" action="https://animalwrites.in/wp-admin/admin-post.php"><input type="text" id="c" name="confirm"><input type="submit" class="button delete" value="Delete data"></form></td></tr></tbody></table>'
+);
+kits_parts_check( array( 'heading', 'p', 'heading', 'form', 'heading', 'form' ) === array_column( $st, 'type' ), 'settings table: each row a heading, then its words and forms: ' . implode( ', ', array_column( $st, 'type' ) ) );
+kits_parts_check( 'multipart/form-data' === $st[3]['enctype'] && 'file' === $st[3]['fields'][0]['type'] && '.csv' === $st[3]['fields'][0]['accept'] && 'CSV file' === $st[3]['fields'][0]['label'], 'an upload form keeps its file field and encoding' );
+kits_parts_check( 'Delete data' === $st[5]['fields'][0]['label'] && '' === $st[5]['enctype'], 'a field labelled from the row heading' );
+
 exit( $GLOBALS['kits_parts_fail'] );

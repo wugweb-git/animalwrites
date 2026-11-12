@@ -289,6 +289,18 @@ function PageField( { f } ) {
 						</select>
 					);
 				}
+				if ( 'file' === f.type ) {
+					return (
+						<input
+							id={ id }
+							type="file"
+							name={ f.name }
+							accept={ f.accept || undefined }
+							disabled={ f.disabled }
+							aria-describedby={ helpId }
+						/>
+					);
+				}
 				if ( 'textarea' === f.type ) {
 					return (
 						<textarea
@@ -330,7 +342,11 @@ function PageField( { f } ) {
  */
 function PageForm( { part, title } ) {
 	return (
-		<form method={ part.method } action={ part.action || undefined }>
+		<form
+			method={ part.method }
+			action={ part.action || undefined }
+			encType={ part.enctype || undefined }
+		>
 			{ part.hidden.map( ( [ name, value ], i ) => (
 				<input key={ i } type="hidden" name={ name } value={ value } />
 			) ) }

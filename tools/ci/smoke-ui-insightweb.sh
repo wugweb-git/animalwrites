@@ -4,6 +4,10 @@
 # shellcheck shell=bash
 screen aw-search-insights insightweb-app insightweb-admin
 screen "aw-search-insights&tab=settings" insightweb-app insightweb-admin
+# Settings → Runs and data: the Settings tab's own rows (Run now, imports, Delete data) as parts, with their forms.
+want 200 "admin.php?page=aw-search-insights&tab=settings (Runs and data)" -b /tmp/cj-ci "$H/wp-admin/admin.php?page=aw-search-insights&tab=settings"
+if grep -o '"more":\[.*' /tmp/rw.out | grep -q 'aw_si_run' && grep -o '"more":\[.*' /tmp/rw.out | grep -q 'aw_si_delete'; then echo "ok   Settings: Run now and Delete data forms on the new screen"; else echo "FAIL Settings: Run now or Delete data missing from Runs and data"; FAIL=1; fi
+if grep -o '"more":\[.*' /tmp/rw.out | grep -q '"Numbers"'; then echo "FAIL Settings: the Numbers row is drawn twice"; FAIL=1; else echo "ok   Settings: Numbers only in its own group"; fi
 # Keywords and the other tabs on the new screen, each from its own output (insightweb-tabs.php): the screen is the tab's,
 # and its parts carry no markup or script.
 for t in keywords pages checklist rising clarity links server; do

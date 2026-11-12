@@ -46,3 +46,19 @@ function insightweb_tab_parts( string $tab ): array {
 	$html = (string) ob_get_clean();
 	return function_exists( 'kits_shell_html_parts' ) ? kits_shell_html_parts( $html ) : insightweb_html_blocks( $html );
 }
+
+/**
+ * The Settings tab's rows but Numbers (which the new Settings saves itself) as parts: the result notices, then
+ * Schedule, Keys, Keyword map seed, Run now, the snapshot and import rows and Delete data, each with its own form.
+ *
+ * @return array[]
+ */
+function insightweb_settings_more_parts(): array {
+	if ( ! function_exists( 'kits_shell_html_parts' ) ) {
+		return array();
+	}
+	ob_start();
+	aw_si_action_notices();
+	aw_si_settings_tab( false );
+	return kits_shell_html_parts( (string) ob_get_clean() );
+}

@@ -119,6 +119,8 @@ add_action(
 					'title'   => insightweb_tab_labels()[ $screen ] ?? '',
 					// The tab's own output as parts, drawn after its load hook has run (insightweb-tabs.php).
 					'parts'   => insightweb_tab_parts( $screen ),
+					// Settings: schedule, keys, seed, Run now, snapshots, imports and Delete data, from the Settings tab's own output.
+					'more'    => 'settings' === $screen ? insightweb_settings_more_parts() : array(),
 				),
 			)
 		);
