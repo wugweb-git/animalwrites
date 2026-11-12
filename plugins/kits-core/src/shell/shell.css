@@ -389,19 +389,27 @@ body.kits-shell-screen .wrap > .updated {
 
 /* ---------- Cards, settings groups, blocks ---------- */
 
-.kits-shell-card {
+/*
+ * SectionCard and SettingsGroup are WordPress's Card, CardHeader, CardBody and CardFooter, whose styles load after this
+ * file; each rule names its class twice so the Kits look wins over theirs (the PHP-built cards in
+ * admin-kits-frame.php use the same classes on plain elements).
+ */
+.kits-shell-card.kits-shell-card {
 	border: 1px solid var(--ks-g2);
 	border-radius: var(--ks-r-card);
 	background: var(--ks-white);
+	box-shadow: none;
 	scroll-margin-top: 48px;
 }
 
-.kits-shell-card__head {
+.kits-shell-card__head.kits-shell-card__head {
 	display: flex;
 	flex-wrap: wrap;
 	justify-content: space-between;
+	align-items: stretch;
 	gap: var(--ks-s3);
 	padding: var(--ks-s5) var(--ks-s5) 0;
+	min-height: 0;
 }
 
 .kits-shell-card__title {
@@ -423,14 +431,16 @@ body.kits-shell-screen .wrap > .updated {
 	align-items: center;
 }
 
-.kits-shell-card__body {
+.kits-shell-card__body.kits-shell-card__body {
 	display: grid;
 	gap: var(--ks-s5);
 	padding: var(--ks-s5);
 }
 
-.kits-shell-group__foot {
+.kits-shell-group__foot.kits-shell-group__foot {
 	display: flex;
+	justify-content: flex-start;
+	min-height: 0;
 	flex-wrap: wrap;
 	align-items: center;
 	gap: var(--ks-s3);
@@ -806,8 +816,8 @@ body.kits-shell-screen .wrap > .updated {
 	}
 
 	.kits-shell-tile,
-	.kits-shell-card__head,
-	.kits-shell-card__body {
+	.kits-shell-card__head.kits-shell-card__head,
+	.kits-shell-card__body.kits-shell-card__body {
 		padding-left: var(--ks-s5);
 		padding-right: var(--ks-s5);
 	}

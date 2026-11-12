@@ -1,14 +1,16 @@
 /**
- * Inputs the shell's screens share: a styled select, a secret field (a key or password: never shown back, only
+ * Inputs the shell's screens share: a select (WordPress's SelectControl), a secret field (a key or password: never shown back, only
  * whether one is set and its last 4 characters) and a button that asks before a change that touches many items
  * (with the count, and a word to type when it cannot be undone).
  */
 import { useId, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
+import { SelectControl } from '@wordpress/components';
 import { Button } from './index';
 
 /**
- * A select over a fixed list (styled with the shell's controls).
+ * A select over a fixed list: WordPress's SelectControl. The label and help come from the Field around it, which
+ * passes the id.
  *
  * @param {Object}   props
  * @param {string}   props.id       Control id (from Field's render).
@@ -26,24 +28,23 @@ export function Select( {
 	...rest
 } ) {
 	return (
-		<select
+		<SelectControl
+			__nextHasNoMarginBottom
+			__next40pxDefaultSize
 			id={ id }
 			className="kits-shell-select"
 			value={ value }
-			onChange={ ( e ) => onChange( e.target.value ) }
+			options={ [
+				...( none ? [ { value: '', label: none } ] : [] ),
+				...options.map( ( o ) => ( {
+					value: o.value,
+					label: o.label,
+					disabled: o.disabled,
+				} ) ),
+			] }
+			onChange={ ( v ) => onChange( v ) }
 			{ ...rest }
-		>
-			{ none && <option value="">{ none }</option> }
-			{ options.map( ( o ) => (
-				<option
-					key={ o.value }
-					value={ o.value }
-					disabled={ o.disabled }
-				>
-					{ o.label }
-				</option>
-			) ) }
-		</select>
+		/>
 	);
 }
 

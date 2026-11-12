@@ -3,8 +3,9 @@
  *
  * The pattern follows a site-tools dashboard: an app header with the plugin's icon, name and tabs; on a dashboard a
  * row of chips (time range), a grid of tiles (one big number, one sub-line, a link) and section cards under them; on
- * a settings screen groups as cards and connected services as rows with a status and an Edit button. The look is
- * Kits (black, white and greys, one yellow accent); WordPress packages are plumbing only.
+ * a settings screen groups as cards and connected services as rows with a status and an Edit button. The parts are
+ * WordPress's own components (Button, Notice, ToggleControl, Card, SelectControl, Spinner) in the Kits look (black,
+ * white and greys, one yellow accent).
  *
  * Built into build/shell/ as the script handle `kits-shell`, which sets window.kits.shell. A plugin's own build maps
  * the import `@kits/shell` to that global (see the plugin's webpack.config.js) and lists `kits-shell` as a dependency;
@@ -14,6 +15,10 @@ import { useEffect, useId, useRef, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import {
 	Button as WPButton,
+	Card,
+	CardBody,
+	CardFooter,
+	CardHeader,
 	Notice as WPNotice,
 	ToggleControl,
 } from '@wordpress/components';
@@ -318,8 +323,8 @@ export function Tile( {
  */
 export function SectionCard( { id, title, description, actions, children } ) {
 	return (
-		<section className="kits-shell-card" id={ id }>
-			<div className="kits-shell-card__head">
+		<Card className="kits-shell-card" id={ id }>
+			<CardHeader className="kits-shell-card__head" isBorderless>
 				<div>
 					<h2 className="kits-shell-card__title">{ title }</h2>
 					{ description && (
@@ -329,9 +334,9 @@ export function SectionCard( { id, title, description, actions, children } ) {
 				{ actions && (
 					<div className="kits-shell-card__actions">{ actions }</div>
 				) }
-			</div>
-			<div className="kits-shell-card__body">{ children }</div>
-		</section>
+			</CardHeader>
+			<CardBody className="kits-shell-card__body">{ children }</CardBody>
+		</Card>
 	);
 }
 
@@ -347,20 +352,22 @@ export function SectionCard( { id, title, description, actions, children } ) {
  */
 export function SettingsGroup( { id, title, description, footer, children } ) {
 	return (
-		<section className="kits-shell-card kits-shell-group" id={ id }>
-			<div className="kits-shell-card__head">
+		<Card className="kits-shell-card kits-shell-group" id={ id }>
+			<CardHeader className="kits-shell-card__head" isBorderless>
 				<div>
 					<h2 className="kits-shell-card__title">{ title }</h2>
 					{ description && (
 						<p className="kits-shell-card__desc">{ description }</p>
 					) }
 				</div>
-			</div>
-			<div className="kits-shell-card__body">{ children }</div>
+			</CardHeader>
+			<CardBody className="kits-shell-card__body">{ children }</CardBody>
 			{ footer && (
-				<div className="kits-shell-group__foot">{ footer }</div>
+				<CardFooter className="kits-shell-group__foot">
+					{ footer }
+				</CardFooter>
 			) }
-		</section>
+		</Card>
 	);
 }
 

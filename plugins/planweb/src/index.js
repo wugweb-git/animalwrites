@@ -26,6 +26,7 @@ import {
 	Notice,
 	RefTable,
 	SectionCard,
+	Select,
 	ServiceList,
 	ServiceRow,
 	SettingsBlock,
@@ -387,48 +388,6 @@ function FormField( { label, help, render } ) {
 }
 
 /**
- * A select over one of the fixed lists.
- *
- * @param {Object}   props
- * @param {string}   props.id       Element id.
- * @param {string}   props.helpId   Help id.
- * @param {Array}    props.options  [ { value, label } ].
- * @param {string}   props.value    Value.
- * @param {Function} props.onChange New value.
- * @param {string}   props.none     Label of the empty choice ('' for none).
- * @param {Array}    props.off      Values shown but not selectable.
- */
-function Select( {
-	id,
-	helpId,
-	options,
-	value,
-	onChange,
-	none = '',
-	off = [],
-} ) {
-	return (
-		<select
-			id={ id }
-			value={ value }
-			aria-describedby={ helpId }
-			onChange={ ( e ) => onChange( e.target.value ) }
-		>
-			{ none && <option value="">{ none }</option> }
-			{ options.map( ( o ) => (
-				<option
-					key={ o.value }
-					value={ o.value }
-					disabled={ off.includes( o.value ) && o.value !== value }
-				>
-					{ o.label }
-				</option>
-			) ) }
-		</select>
-	);
-}
-
-/**
  * Add or change one entry. Saved through the same function as the Calendar's form, with the same checks.
  *
  * @param {Object}   props
@@ -543,7 +502,7 @@ function EntryForm( { entry, onSaved, onClose } ) {
 					render={ ( id, helpId ) => (
 						<Select
 							id={ id }
-							helpId={ helpId }
+							aria-describedby={ helpId }
 							options={ lists.types || [] }
 							value={ f.type }
 							onChange={ set( 'type' ) }
@@ -555,7 +514,7 @@ function EntryForm( { entry, onSaved, onClose } ) {
 					render={ ( id, helpId ) => (
 						<Select
 							id={ id }
-							helpId={ helpId }
+							aria-describedby={ helpId }
 							options={ lists.channels || [] }
 							value={ f.channel }
 							onChange={ set( 'channel' ) }
@@ -568,7 +527,7 @@ function EntryForm( { entry, onSaved, onClose } ) {
 					render={ ( id, helpId ) => (
 						<Select
 							id={ id }
-							helpId={ helpId }
+							aria-describedby={ helpId }
 							options={ lists.owners || [] }
 							value={ f.owner }
 							onChange={ set( 'owner' ) }
@@ -592,11 +551,15 @@ function EntryForm( { entry, onSaved, onClose } ) {
 					render={ ( id, helpId ) => (
 						<Select
 							id={ id }
-							helpId={ helpId }
-							options={ lists.statuses || [] }
+							aria-describedby={ helpId }
+							options={ ( lists.statuses || [] ).map( ( o ) => ( {
+								...o,
+								disabled:
+									off.includes( o.value ) &&
+									o.value !== f.status,
+							} ) ) }
 							value={ f.status }
 							onChange={ set( 'status' ) }
-							off={ off }
 						/>
 					) }
 				/>
