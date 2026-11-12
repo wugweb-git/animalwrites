@@ -15,7 +15,7 @@
  * Version 3 (1 Nov 2026) adds quick_win: 1 when Search Insights' daily calculation finds the keyword at position 8–20
  * with enough impressions (aw_si_quick_win), so the Quick wins view, the weekly read and exports count the same rows.
  *
- * @package animal-writes-core
+ * @package kits-core
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

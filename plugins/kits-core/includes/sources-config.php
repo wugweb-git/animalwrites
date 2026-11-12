@@ -1,9 +1,9 @@
 <?php
 /**
- * The sourcing lists (option aw_sources, seeded once from data/sources-seed.json). Kept in core: the front end reads
- * the section categories and tags from them (tags.php). The Sourcing tabs that edit them are in aw-sourcing.
+ * The sourcing lists (option aw_sources, seeded once from data/sources-seed.json). In Kits Core because both the site
+ * (Animal Writes Core's tags.php reads the section categories and tags) and SourceWeb (whose tabs edit them) use them.
  *
- * @package animal-writes-core
+ * @package kits-core
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 function aw_sources_config() {
 	$c = get_option( 'aw_sources' );
 	if ( ! is_array( $c ) ) {
-		$c         = json_decode( (string) file_get_contents( AW_CORE_DIR . 'data/sources-seed.json' ), true ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+		$c         = json_decode( (string) file_get_contents( KITS_CORE_DIR . 'data/sources-seed.json' ), true ); // phpcs:ignore WordPress.WP.AlternativeFunctions
 		$c['live'] = false; // the owner switches the workers over after checking
 		update_option( 'aw_sources', $c, false );
 	}

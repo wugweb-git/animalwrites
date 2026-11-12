@@ -3,7 +3,7 @@
  * Sourcing tests that need no WordPress (owner rule: no local WordPress or MySQL): the shared keyword matcher against
  * tests/fixtures/match_cases.json (the same file as the workers' tests) and the phase 1 Sources model (sources-model.php)
  * against the live shapes of 25 Oct 2026 (tests/fixtures/phase1_live_sample.json), and the phase 2 keyword model
- * (animal-writes-core keyword-model.php, keywords-model.php) against the live lists and keyword records
+ * (kits-core keyword-model.php, keywords-model.php) against the live lists and keyword records
  * (tests/fixtures/phase2_live_sample.json), and the Sourcing menu's shape (menu-model.php, admin-menu.php). Run by the
  * Deploy check.
  *
@@ -24,7 +24,7 @@ define( 'ABSPATH', __DIR__ . '/' );
 function wp_strip_all_tags( $s ) {
 	return trim( strip_tags( (string) preg_replace( '@<(script|style)[^>]*?>.*?</\\1>@si', '', (string) $s ) ) );
 }
-require dirname( __DIR__, 2 ) . '/animal-writes-core/includes/keyword-model.php';
+require dirname( __DIR__, 2 ) . '/kits-core/includes/keyword-model.php';
 require dirname( __DIR__ ) . '/includes/sources-model.php';
 require dirname( __DIR__ ) . '/includes/keywords-model.php';
 require dirname( __DIR__ ) . '/includes/rules-model.php';

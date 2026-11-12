@@ -22,7 +22,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( defined( 'AW_SOURCING_LOADED' ) ) {
 	return;
 }
-// Everything here runs on Core's functions; without Core, load nothing and say so.
+// SourceWeb fills Animal Writes Core's content types (News, Library, Directory listings: content-types.php) with its
+// place, tag and listing helpers, so it needs Core; Core also loads Kits Core, which holds the shared keyword table and
+// sourcing lists (keyword-table.php, sources-config.php). Without Core, load nothing and say so.
 if ( ! defined( 'AW_CORE_DIR' ) ) {
 	add_action(
 		'admin_notices',
@@ -37,6 +39,7 @@ define( 'AW_SOURCING_DIR', __DIR__ . '/' );
 
 // The menu's shape and the Sources model (plain functions, tested without WordPress by tests/run.php) first.
 require_once AW_SOURCING_DIR . 'includes/sourcing-basics.php'; // own capability, option names and host helpers (also in Kits Core)
+require_once AW_SOURCING_DIR . 'includes/summary-rules.php'; // the summary rules (option aw_summary_rules); moved from Core 12 Nov 2026
 require_once AW_SOURCING_DIR . 'includes/menu-model.php'; // the Sourcing menu: slugs, screen id, order (admin-menu.php registers it)
 require_once AW_SOURCING_DIR . 'includes/sources-model.php';
 require_once AW_SOURCING_DIR . 'includes/keywords-model.php'; // phase 2: the lists in the keyword table (Core's)

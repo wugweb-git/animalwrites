@@ -9,7 +9,7 @@
  * Animal Writes Core, so sourcing never depends on aw-seo-extras (owner's decision 3). Search Insights (aw-seo-extras)
  * reads and writes the same records for its own roles.
  *
- * @package animal-writes-core
+ * @package kits-core
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

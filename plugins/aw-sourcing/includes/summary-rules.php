@@ -13,7 +13,7 @@
  *   and other coverage of the same story, and publish the best rule-following summary); the search description is the summary's lead (aw-seo-extras titles.php); an item's own page
  *   shows the whole summary; the entities a summary names are stored per item (aw_entities) for internal linking.
  *
- * @package animal-writes-core
+ * @package aw-sourcing
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -26,7 +26,7 @@ const AW_SUMMARY_RULES_OPTION = 'aw_summary_rules';
 function aw_summary_rules_defaults() {
 	static $d = null;
 	if ( null === $d ) {
-		$d = json_decode( (string) file_get_contents( AW_CORE_DIR . 'data/summary-rules-default.json' ), true ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+		$d = json_decode( (string) file_get_contents( AW_SOURCING_DIR . 'data/summary-rules-default.json' ), true ); // phpcs:ignore WordPress.WP.AlternativeFunctions
 		$d = is_array( $d ) ? $d : array( 'sections' => array() );
 	}
 	return $d;
@@ -234,19 +234,6 @@ add_action(
 	},
 	20,
 	2
-);
-
-/* ---------- The item's own page shows the whole summary ---------- */
-
-add_filter(
-	'render_block_data',
-	function ( $block ) {
-		// The post-excerpt block cuts at 55 words by default; on an item's own page (News, Library, research) the summary is shown whole.
-		if ( 'core/post-excerpt' === ( $block['blockName'] ?? '' ) && ! isset( $block['attrs']['excerptLength'] ) && is_singular( array( 'aw_news', 'aw_legal', 'post' ) ) ) {
-			$block['attrs']['excerptLength'] = 1000;
-		}
-		return $block;
-	}
 );
 
 /* ---------- Workers ---------- */
