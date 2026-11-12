@@ -134,9 +134,10 @@ function directoryweb_rest_listings( WP_REST_Request $r ) {
 
 	$rows = array_map( 'directoryweb_listing_row', $found->posts );
 
-	$counts = wp_count_posts( 'aw_listing' );
-	$badges = (array) ( ( get_transient( DIRECTORYWEB_STATS ) ?: array() )['badges'] ?? array() );
-	$n      = array(
+	$counts   = wp_count_posts( 'aw_listing' );
+	$stats    = get_transient( DIRECTORYWEB_STATS );
+	$badges   = is_array( $stats ) ? (array) ( $stats['badges'] ?? array() ) : array();
+	$n        = array(
 		'publish'  => (int) ( $counts->publish ?? 0 ),
 		'draft'    => (int) ( $counts->draft ?? 0 ) + (int) ( $counts->pending ?? 0 ) + (int) ( $counts->private ?? 0 ),
 		'claimed'  => $badges['claimed'] ?? null,
@@ -150,20 +151,30 @@ function directoryweb_rest_listings( WP_REST_Request $r ) {
 			'value' => $k,
 			'label' => $v[0],
 		);
-		if ( null !== $n[ $k ] ) { // badge counts come from the Dashboard's last count; none before the first
+		if ( null !== $n[ $k ] ) { // Badge counts come from the Dashboard's last count; none before the first.
 			$one['count'] = (int) $n[ $k ];
 		}
 		$out[] = $one;
 	}
 
-	$states = array( array( 'value' => '0', 'label' => __( 'Every state', 'directoryweb' ) ) );
+	$states = array(
+		array(
+			'value' => '0',
+			'label' => __( 'Every state', 'directoryweb' ),
+		),
+	);
 	foreach ( function_exists( 'aw_place_states' ) ? aw_place_states() : array() as $code => $s ) {
 		$states[] = array(
 			'value' => (string) $code,
 			'label' => (string) $s->name,
 		);
 	}
-	$types = array( array( 'value' => '', 'label' => __( 'Every type', 'directoryweb' ) ) );
+	$types = array(
+		array(
+			'value' => '',
+			'label' => __( 'Every type', 'directoryweb' ),
+		),
+	);
 	foreach ( aw_listing_type_slugs() as $slug ) {
 		$name    = function_exists( 'aw_listing_type_name' ) ? aw_listing_type_name( $slug ) : '';
 		$types[] = array(

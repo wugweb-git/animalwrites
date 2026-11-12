@@ -83,7 +83,7 @@ add_action(
 		}
 		$admin = current_user_can( 'manage_options' );
 		if ( 'settings' === $screen ) {
-			wp_enqueue_media(); // the Profiles picture picker (MediaField)
+			wp_enqueue_media(); // The Profiles picture picker (MediaField).
 		}
 		$tabs = array(
 			array(
