@@ -5,7 +5,7 @@ Code read at live `d9163bf7`. **Have** = on the new screen. **Classic only** = s
 How to add, by letter:
 - **(a)** an existing shell part (DataList, SettingsGroup, Field, Switch, Tile, RefTable, SectionCard, FieldReview, LinkedSetting, MiniChart …);
 - **(b)** a new REST route in the plugin's own namespace, with the capability shown;
-- **(c)** a shell part not built yet (pending list): detail panel, media fields, pair-list editor, row view in a list. Built 12 Nov: styled select and date inputs, calendar grid, FieldReview "Reject ticked", secret field, confirm-with-count.
+- **(c)** a shell part: all built 12 Nov — styled select and date inputs, calendar grid, FieldReview "Reject ticked", secret field, confirm-with-count, and (later the same day) DetailPanel, MediaField and MediaThumbs, PairList, and DataList `rowView` (a row's panel under it, View and Hide). Still not built: rich text and file fields.
 
 ## Main reason things look missing
 
@@ -35,7 +35,7 @@ The new screens cover only a few pages of each plugin. The other pages still dra
 | Rejected / Relay log / Change log | the tables (search, sort, paging) | (a) DataList; (b) three read routes (manage_options) |
 | Dashboard | keyword status, last change, relay count, links to Keywords, Rules, Press and Categories | (a) Tile + RefTable fed by the existing `GET dashboard` |
 | To review | "Add a social post from its link"; items per page | (a) SectionCard + Field + Button; (b) `POST review/social-add` (edit_others_posts); a `per` parameter on `GET review` |
-| Enrichment review | thumbnails, source and duplicate links (Reject ticked, bulk Undo and `listing=` done 12 Nov) | (c) media fields; extend `GET enrichment` |
+| Enrichment review | done 12 Nov: thumbnails of logo and photos values (MediaThumbs), proposed values link to their source pages, a merge links to the listing it goes into; Reject ticked, bulk Undo and `listing=` | — |
 
 **Bug found:** `sourceweb-rest.php:598` uses `$words` before it is set (it is set only at :753). The view counts on Enrichment review ignore the search, and PHP logs a warning on each load. Fix: read the search into `$words` before line 598.
 
@@ -59,7 +59,8 @@ The new screens cover only a few pages of each plugin. The other pages still dra
 
 | Page | Missing on new | How to add |
 |---|---|---|
-| Inbox | media picker (Move to folder and row actions done 12 Nov) | (c) media fields |
+| Inbox | done 12 Nov: Move to folder and row actions | — |
+| Settings → Profiles | done 12 Nov: the Picture is a media library picker (MediaField; `wp_enqueue_media()` on the Settings screen) | — |
 | Overview | done 12 Nov: the feature table is on the Dashboard | — |
 | **Broken links** | `mailweb_settings_url()` (`includes/mail-in.php:50`) has no `ui=classic`: Test email and Send queued now can't be reached, the paused notice has no Resume, and classic saves land on the new screen | PHP only: add `ui=classic` to that link and to the redirects that follow a save |
 | Notices | `mailweb_done` notices are lost after a save | PHP: carry `done` to the screen and show a Notice (a) |
@@ -80,7 +81,8 @@ The new screens cover only a few pages of each plugin. The other pages still dra
 | Menu | Dashboard and Settings have **no menu entry** (`directoryweb-ui.php:93-94`, empty parent) | PHP: put them under `edit.php?post_type=aw_listing` |
 | Claims list | done 12 Nov: Reference column, search by reference | — |
 | One claim | current logo done 12 Nov. A link to Enrichment review for Undo is left out on purpose: Claims stay read only, and Undo is reached from Directory → Claims | — |
-| Dashboard | Places covered and Claimed tiles have no link | (b) `GET listings` (edit_posts) + (a) DataList on a Listings tab, or leave them without a link |
+| Dashboard | done 12 Nov: Places covered opens Listings (Published), Claimed opens Listings (Claimed) | — |
+| Listings | done 12 Nov: a read-only Listings tab (`page=directoryweb-listings`, edit_posts) from `GET directoryweb/v1/listings`: views All, Published, Not published, Claimed, Verified, Needs re-check; search; state and type filters; sort; View opens the listing's details in its row (DetailPanel), Edit opens its own edit screen. No phone, e-mail or claim detail is sent; nothing is written | — |
 | Settings | Types has no link to Tags | (a) LinkedSetting |
 
 Claims stay read-only: approve, reject and apply stay on Directory → Claims. That is by design, not a gap.
