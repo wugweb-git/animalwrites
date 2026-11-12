@@ -119,6 +119,22 @@ add_action(
 	0
 );
 
+// Module imports by name ("@wordpress/interactivity") are resolved by the import map, which every page prints in its
+// head. Crawlers that ignore import maps read the name as a path beside the importing file (core's navigation
+// view.min.js, the theme's dropdown.js): 65 hits in the 404 Monitor (audit 12 Nov 2026). Browsers never ask for these
+// paths; they go to the module itself.
+add_action(
+	'parse_request',
+	function () {
+		$path = (string) wp_parse_url( (string) wp_unslash( $_SERVER['REQUEST_URI'] ?? '/' ), PHP_URL_PATH ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+		if ( preg_match( '#^/wp-(?:includes|content)/.*/@wordpress/interactivity(?:\.js)?$#', $path ) ) {
+			wp_safe_redirect( includes_url( 'js/dist/script-modules/interactivity/index.min.js' ), 301, 'Animal Writes' );
+			exit;
+		}
+	},
+	0
+);
+
 // Upper-case paths go to the lower-case one. Files (a dot in the last part), the admin, REST and login are left alone.
 add_action(
 	'parse_request',
