@@ -5,7 +5,7 @@ Code read at live `d9163bf7`. **Have** = on the new screen. **Classic only** = s
 How to add, by letter:
 - **(a)** an existing shell part (DataList, SettingsGroup, Field, Switch, Tile, RefTable, SectionCard, FieldReview, LinkedSetting, MiniChart …);
 - **(b)** a new REST route in the plugin's own namespace, with the capability shown;
-- **(c)** a shell part not built yet (pending list): styled select and date inputs, calendar grid, FieldReview "Reject ticked", secret field, confirm-with-count, detail panel, media fields, pair-list editor, row view in a list.
+- **(c)** a shell part not built yet (pending list): detail panel, media fields, pair-list editor, row view in a list. Built 12 Nov: styled select and date inputs, calendar grid, FieldReview "Reject ticked", secret field, confirm-with-count.
 
 ## Main reason things look missing
 
@@ -35,7 +35,7 @@ The new screens cover only a few pages of each plugin. The other pages still dra
 | Rejected / Relay log / Change log | the tables (search, sort, paging) | (a) DataList; (b) three read routes (manage_options) |
 | Dashboard | keyword status, last change, relay count, links to Keywords, Rules, Press and Categories | (a) Tile + RefTable fed by the existing `GET dashboard` |
 | To review | "Add a social post from its link"; items per page | (a) SectionCard + Field + Button; (b) `POST review/social-add` (edit_others_posts); a `per` parameter on `GET review` |
-| Enrichment review | reject one value; bulk Undo; thumbnails, source and duplicate links; `listing=` filter | (c) FieldReview "Reject ticked" (the route already takes `do=reject`); (a) bulk actions + a small change to the decide route; (c) media fields; extend `GET enrichment` |
+| Enrichment review | bulk Undo; thumbnails, source and duplicate links; `listing=` filter (Reject ticked done 12 Nov) | (a) bulk actions + a small change to the decide route; (c) media fields; extend `GET enrichment` |
 
 **Bug found:** `sourceweb-rest.php:598` uses `$words` before it is set (it is set only at :753). The view counts on Enrichment review ignore the search, and PHP logs a warning on each load. Fix: read the search into `$words` before line 598.
 
@@ -68,7 +68,7 @@ The new screens cover only a few pages of each plugin. The other pages still dra
 
 | Page | Missing on new | How to add |
 |---|---|---|
-| Calendar | month grid, previous/next/Today, today highlighted, entry in a cell opens its form | (c) calendar grid; (b) `GET planweb/v1/month?m=Y-m` (edit_planweb_entries); the cell opens the existing EntryForm |
+| Calendar | done 12 Nov: the month grid on the Dashboard | — |
 | Entries | done 12 Nov: `&edit=ID`, Type/Status badges, past dates greyed | — |
 | Settings | done 12 Nov: the mismatch table has 3 columns | — |
 | Links | System Status "Calendar" link points to a `#planweb-import` that doesn't exist; the Import check tile has no link | PHP: link to `planweb_ui_url('settings') . '#import'` |
@@ -127,6 +127,9 @@ Home, Settings, Tools and Help show the same content in both looks; nothing was 
 - **MailWeb Inbox row actions**: Archive, Mark read or unread and Trash on each row (those the folder offers), through `POST mailweb/v1/inbox/bulk`.
 - **PlanWeb Entries**: `&tab=entries&edit=ID` opens the entry's form (`GET planweb/v1/entries/<id>`, not from the Trash); Type and Status badges and greyed past dates as on the Calendar; the import mismatch table has Check, In Dates and In PlanWeb.
 - **DirectoryWeb Claims**: a Reference column (AW-C-<serial>) and search by reference; a claim with a new logo shows the listing's current logo beside it. Still read only.
+- **Kits shell parts** (`plugins/kits-core/src/shell/calendar.js`, `inputs.js`): CalendarGrid (one month, Monday first, previous/next/Today, today marked, past greyed, a list on phones); every select and date, time, url, email, search and password input styled like the text inputs, with `Select`; `SecretField` (only whether a secret is set and its last 4 characters); `ConfirmButton` (asks in place with the count, and a word to type when it cannot be undone); FieldReview `onReject` (Reject ticked).
+- **PlanWeb Dashboard → Calendar**: the month grid from `GET planweb/v1/month?m=Y-m` (edit_planweb_entries), each entry with its Type and Status badges and opening its form on Entries; the month stays in the address (`&month=`).
+- **SourceWeb Enrichment review → Reject ticked**: rejects only the ticked values (`do=reject` with ids).
 
 ## Suggested order
 
