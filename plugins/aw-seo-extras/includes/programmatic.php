@@ -528,11 +528,61 @@ function aw_seo_dir_facts() {
 	return '' !== $out ? '<p class="kit-note">' . $out . '</p>' : '';
 }
 
-// Under the list (owner, 21 Oct 2026: the toolbar's count is followed by the list itself).
+/**
+ * Crawlable links between Directory pages (indexing work, owner 12 Nov 2026). A state page lists every district only
+ * in the filter's <select>, so Google found 3 of Kerala's 14 districts; a district × type page with one or two
+ * listings linked up but not across. Chips, like the term pages' related list (term-page.php):
+ *
+ * - a state page (page 1, no type): every district with listings, A–Z, with its count;
+ * - a district × type page: the district's other types, each to its own page, and the whole district.
+ *
+ * @return string HTML ('' elsewhere).
+ */
+function aw_seo_dir_nav() {
+	$v = aw_seo_dir_view();
+	if ( ! $v || $v['other'] || ! $v['place'] || aw_seo_page_number() > 1 || ! function_exists( 'aw_term_section' ) ) {
+		return '';
+	}
+	$place = $v['place'];
+	$chips = array(); // [url, text]
+	if ( 'state' === $v['kind'] && '' === $v['type'] ) {
+		$kids = aw_seo_dir_children( $place );
+		usort( $kids, fn( $a, $b ) => strcmp( $a[0]->name, $b[0]->name ) );
+		foreach ( $kids as $r ) {
+			$chips[] = array( aw_directory_url( $r[0]->slug ), $r[0]->name . ' (' . number_format_i18n( $r[1] ) . ')' );
+		}
+		/* translators: %s: state. */
+		$head = sprintf( __( 'Districts in %s', 'aw-seo-extras' ), $place->name );
+		$slug = 'districts';
+	} elseif ( 'district' === $v['kind'] && '' !== $v['type'] ) {
+		foreach ( aw_seo_dir_breakdown( $place ) as $p ) {
+			if ( $p[0] !== $v['type'] ) {
+				$chips[] = array( aw_directory_url( $place->slug, $p[0] ), ucfirst( aw_seo_type_words( $p[0], $p[1] ) ) . ' (' . number_format_i18n( $p[1] ) . ')' );
+			}
+		}
+		/* translators: %s: district. */
+		$chips[] = array( aw_directory_url( $place->slug ), sprintf( __( 'All in %s', 'aw-seo-extras' ), $place->name ) . ' (' . number_format_i18n( aw_seo_dir_count( $place ) ) . ')' );
+		/* translators: %s: district. */
+		$head = sprintf( __( 'More in %s', 'aw-seo-extras' ), $place->name );
+		$slug = 'types';
+	} else {
+		return '';
+	}
+	if ( count( $chips ) < 2 ) {
+		return '';
+	}
+	$out = '<ul class="kit-tags aw-term-chips">';
+	foreach ( $chips as $c ) {
+		$out .= '<li><a class="kit-chip" href="' . esc_url( $c[0] ) . '">' . esc_html( $c[1] ) . '</a></li>';
+	}
+	return aw_term_section( 'dir-' . $slug, $head, $out . '</ul>' );
+}
+
+// Under the list (owner, 21 Oct 2026: the toolbar's count is followed by the list itself), then the links across.
 add_filter(
 	'render_block_core/query',
 	function ( $html ) {
-		return false === strpos( (string) $html, 'aw-toolbar' ) ? $html : $html . aw_seo_dir_facts();
+		return false === strpos( (string) $html, 'aw-toolbar' ) ? $html : $html . aw_seo_dir_facts() . aw_seo_dir_nav();
 	},
 	11
 );

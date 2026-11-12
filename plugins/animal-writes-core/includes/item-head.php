@@ -449,13 +449,15 @@ function aw_item_more_groups( $id ) {
 		case 'aw_legal':
 			$groups[] = array( $more ?: __( 'More from the Library', 'animal-writes-core' ), aw_related_pick( $id, 'aw_legal', 3, array(), $in ) );
 			$groups[] = array( __( 'News about this', 'animal-writes-core' ), aw_related_pick( $id, 'aw_news', 3, aw_related_back( $id, 'aw_rel_legal', 'aw_news' ) ) );
-			$groups[] = array( __( 'Guides on this', 'animal-writes-core' ), array_slice( aw_related_back( $id, 'aw_rel_resource', 'post' ), 0, 3 ) ); // only guides linked by hand (e.g. the World Animal Day notice → its guide, 22 Oct 2026)
+			$named    = function_exists( 'aw_law_guides_naming' ) ? aw_law_guides_naming( $id ) : array(); // an Act or Rule: guides that name it, after the hand-linked ones (law-links.php)
+			$groups[] = array( __( 'Guides on this', 'animal-writes-core' ), array_slice( array_values( array_unique( array_merge( aw_related_back( $id, 'aw_rel_resource', 'post' ), $named ) ) ), 0, 3 ) ); // guides linked by hand (e.g. the World Animal Day notice → its guide, 22 Oct 2026)
 			break;
 		case 'post':
 			$t        = aw_item_type_terms( $id );
 			$plural   = $t ? ( 'research' === $t[0]->slug ? __( 'More research', 'animal-writes-core' ) : sprintf( /* translators: %s: Resource type. */ __( 'More %s', 'animal-writes-core' ), mb_strtolower( $t[0]->name ) . 's' ) ) : __( 'More resources', 'animal-writes-core' );
 			$groups[] = array( $plural, aw_related_pick( $id, 'post', 3, array(), $t ? array( 'tag__in' => array( (int) $t[0]->term_id ) ) : array() ) );
-			$groups[] = array( __( 'From the Library', 'animal-writes-core' ), aw_related_pick( $id, 'aw_legal', 3, aw_related_set( $id, 'aw_rel_resource' ) ) );
+			$named    = function_exists( 'aw_law_named_in' ) ? aw_law_named_in( $id ) : array(); // the Acts and Rules the guide names, after the hand-linked ones (law-links.php)
+			$groups[] = array( __( 'From the Library', 'animal-writes-core' ), aw_related_pick( $id, 'aw_legal', 3, array_merge( aw_related_set( $id, 'aw_rel_resource' ), $named ) ) );
 			$groups[] = array( __( 'Guides on this', 'animal-writes-core' ), aw_item_guides( $id ) ); // only guides linked by hand (aw_rel_guide)
 			break;
 		case 'aw_opportunity':

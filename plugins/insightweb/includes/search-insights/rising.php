@@ -30,7 +30,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 const AW_SI_RISING_CRON      = 'aw_si_rising_spikes'; // The removed News spikes' event, kept only to clear it.
 const AW_SI_RISING_MAX_ROWS  = 500; // Per POST: rising terms.
 const AW_SI_RISING_MAX_OBS   = 3000; // Per POST: figures.
-const AW_SI_RISING_NEWS_SRCS = array( 'trends_rss', 'gdelt' ); // Sources that mean "in the news".
+const AW_SI_RISING_NEWS_SRCS = array( 'trends_rss', 'gdelt', 'paste_gnews' ); // Sources that mean "in the news".
 
 /**
  * The rising sources: key => label, schedule and whether the workers send it.
@@ -87,6 +87,38 @@ function aw_si_rising_sources(): array {
 			'every'  => 31 * DAY_IN_SECONDS,
 			'worker' => false,
 			'import' => true,
+		),
+		// Pasted by hand from what a person read (owner, 12 Nov 2026: "put it"): each its own source, never Trends data,
+		// never late. Each line carries the link it was read at; the day read is the paste form's date.
+		'paste_x'         => array(
+			'label'  => __( 'X (pasted)', 'aw-seo-extras' ),
+			'every'  => WEEK_IN_SECONDS,
+			'worker' => false,
+			'manual' => true,
+		),
+		'paste_gnews'     => array(
+			'label'  => __( 'Google News (pasted)', 'aw-seo-extras' ),
+			'every'  => WEEK_IN_SECONDS,
+			'worker' => false,
+			'manual' => true,
+		),
+		'paste_instagram' => array(
+			'label'  => __( 'Instagram (pasted)', 'aw-seo-extras' ),
+			'every'  => WEEK_IN_SECONDS,
+			'worker' => false,
+			'manual' => true,
+		),
+		'paste_facebook'  => array(
+			'label'  => __( 'Facebook (pasted)', 'aw-seo-extras' ),
+			'every'  => WEEK_IN_SECONDS,
+			'worker' => false,
+			'manual' => true,
+		),
+		'paste_other'     => array(
+			'label'  => __( 'Other source (pasted)', 'aw-seo-extras' ),
+			'every'  => WEEK_IN_SECONDS,
+			'worker' => false,
+			'manual' => true,
 		),
 		'sourcing'        => array( // Removed 3 Nov 2026: only its old rows show, as history.
 			'label'   => __( 'Our News counts (stopped 3 Nov 2026)', 'aw-seo-extras' ),
@@ -162,8 +194,8 @@ add_filter(
 			if ( empty( $runs[ 'rising_' . $key ] ) && time() - $since <= 2 * $s['every'] ) {
 				continue;
 			}
-			if ( ! empty( $s['history'] ) ) {
-				continue; // A removed source: never late or failing.
+			if ( ! empty( $s['history'] ) || ! empty( $s['manual'] ) ) {
+				continue; // A removed source, or one pasted by hand: never late or failing.
 			}
 			if ( ! empty( $s['import'] ) && empty( $runs[ 'rising_' . $key ] ) ) {
 				continue; // An import is listed once it has sent something, so it is never late before.
@@ -653,9 +685,9 @@ function aw_si_rising_tab(): void {
 }
 add_action( 'aw_si_tab_rising', 'aw_si_rising_tab' );
 
-/** The paste form: Trends figures when the worker was refused (plan §5.3 fallback). */
+/** The paste form: Trends figures when the worker was refused (plan §5.3 fallback), and topics read elsewhere. */
 function aw_si_rising_paste_form(): void {
-	echo '<h2>' . esc_html__( 'Paste Trends figures', 'aw-seo-extras' ) . '</h2>';
+	echo '<h2>' . esc_html__( 'Paste Trends figures or topics read elsewhere', 'aw-seo-extras' ) . '</h2>';
 	echo '<p>' . esc_html__( 'When Google Trends refuses the worker (the notice above says so), copy the figures from trends.google.com (India) and paste them here, one per line: the search, a comma, then the figure.', 'aw-seo-extras' ) . '</p>';
 	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_si_rising_paste">';
 	wp_nonce_field( 'aw_si_rising_paste' );
@@ -663,12 +695,48 @@ function aw_si_rising_paste_form(): void {
 	echo '<tr><th scope="row">' . esc_html__( 'What it is', 'aw-seo-extras' ) . '</th><td><fieldset>';
 	echo '<label><input type="radio" name="kind" value="related" checked> ' . esc_html__( 'Rising related searches: the search, then its rise (+250% or Breakout)', 'aw-seo-extras' ) . '</label><br>';
 	echo '<label><input type="radio" name="kind" value="interest"> ' . esc_html__( 'Interest over 12 months: the keyword, then its average with "animal welfare" in the same comparison scaled to 100', 'aw-seo-extras' ) . '</label>';
+	foreach ( aw_si_rising_paste_kinds() as $key => $label ) {
+		/* translators: %s: where it was read, such as X or Google News. */
+		echo '<br><label><input type="radio" name="kind" value="' . esc_attr( $key ) . '"> ' . esc_html( sprintf( __( 'Read on %s: the topic, then the link it was read at (never Trends figures)', 'aw-seo-extras' ), $label ) ) . '</label>';
+	}
 	echo '</fieldset></td></tr>';
-	echo '<tr><th scope="row"><label for="aw-si-paste">' . esc_html__( 'Lines', 'aw-seo-extras' ) . '</label></th><td><textarea id="aw-si-paste" name="lines" rows="8" class="large-text code" placeholder="stray dog bite, +140%"></textarea>';
+	echo '<tr><th scope="row"><label for="aw-si-paste-day">' . esc_html__( 'Day read', 'aw-seo-extras' ) . '</label></th><td><input type="date" id="aw-si-paste-day" name="day" value="' . esc_attr( ( new DateTimeImmutable( 'today', wp_timezone() ) )->format( 'Y-m-d' ) ) . '"> <span class="description">' . esc_html__( 'For the X, Google News, Instagram, Facebook and other lines.', 'aw-seo-extras' ) . '</span></td></tr>';
+	echo '<tr><th scope="row"><label for="aw-si-paste">' . esc_html__( 'Lines', 'aw-seo-extras' ) . '</label></th><td><textarea id="aw-si-paste" name="lines" rows="8" class="large-text code" placeholder="stray dog bite, +140%&#10;stray dog bite, https://x.com/…"></textarea>';
 	echo '<p class="description">' . esc_html__( 'Interest lines are stored only for searches that are keyword records already.', 'aw-seo-extras' ) . '</p></td></tr>';
 	echo '</tbody></table>';
 	submit_button( __( 'Store the figures', 'aw-seo-extras' ), 'secondary' );
 	echo '</form>';
+}
+
+/** The pasted kinds that are not Trends: form value => where it was read. Their source key is "paste_" + value. */
+function aw_si_rising_paste_kinds(): array {
+	return array(
+		'x'         => __( 'X', 'aw-seo-extras' ),
+		'gnews'     => __( 'Google News', 'aw-seo-extras' ),
+		'instagram' => __( 'Instagram', 'aw-seo-extras' ),
+		'facebook'  => __( 'Facebook', 'aw-seo-extras' ),
+		'other'     => __( 'another source', 'aw-seo-extras' ),
+	);
+}
+
+/**
+ * Parse pasted lines into [topic, link]: the topic, then a comma or tab, then an http(s) link at the end of the line.
+ * Lines without a link are skipped (every sighting keeps where it was read).
+ *
+ * @param string $text Pasted text.
+ * @return array<int, array{0: string, 1: string}>
+ */
+function aw_si_rising_paste_link_lines( string $text ): array {
+	$out = array();
+	foreach ( preg_split( '/\R/u', $text ) as $line ) {
+		if ( preg_match( '#^(.*?)(?:\t+|\s*,\s*)(https?://\S+)\s*$#iu', trim( $line ), $m ) && '' !== trim( $m[1] ) ) {
+			$url = esc_url_raw( $m[2], array( 'http', 'https' ) );
+			if ( '' !== $url ) {
+				$out[] = array( trim( $m[1] ), $url );
+			}
+		}
+	}
+	return array_slice( $out, 0, 500 );
 }
 
 /**
@@ -706,9 +774,46 @@ add_action(
 			);
 		}
 		aw_si_install();
-		$kind  = isset( $_POST['kind'] ) && 'interest' === $_POST['kind'] ? 'interest' : 'related';
-		$lines = aw_si_rising_paste_lines( isset( $_POST['lines'] ) ? sanitize_textarea_field( wp_unslash( $_POST['lines'] ) ) : '' );
+		$kind  = isset( $_POST['kind'] ) ? sanitize_key( wp_unslash( $_POST['kind'] ) ) : 'related';
 		$today = ( new DateTimeImmutable( 'today', wp_timezone() ) )->format( 'Y-m-d' );
+		$kinds = aw_si_rising_paste_kinds();
+		if ( isset( $kinds[ $kind ] ) ) { // read on X, Google News, Instagram, Facebook or elsewhere: its own source, no figure
+			$day  = isset( $_POST['day'] ) ? sanitize_text_field( wp_unslash( $_POST['day'] ) ) : '';
+			$day  = preg_match( '/^\d{4}-\d{2}-\d{2}$/', $day ) && $day <= $today ? $day : $today;
+			$done = 0;
+			$skip = 0;
+			$raw  = isset( $_POST['lines'] ) ? sanitize_textarea_field( wp_unslash( $_POST['lines'] ) ) : '';
+			$rows = aw_si_rising_paste_link_lines( $raw );
+			$skip = max( 0, count( array_filter( preg_split( '/\R/u', $raw ), fn( $l ) => '' !== trim( $l ) ) ) - count( $rows ) );
+			foreach ( $rows as list( $term, $url ) ) {
+				/* translators: 1: where it was read, 2: day read, 3: link. */
+				$note = sprintf( __( 'Read on %1$s, %2$s: %3$s', 'aw-seo-extras' ), $kinds[ $kind ], wp_date( 'j M Y', strtotime( $day . ' 12:00' ) ), $url );
+				$ok   = in_array( aw_si_rising_put( $term, 'paste_' . $kind, null, $day, $note ), array( 'created', 'updated' ), true );
+				$done += $ok ? 1 : 0;
+				$skip += $ok ? 0 : 1;
+			}
+			if ( $done ) {
+				aw_si_run_ok(
+					'rising_paste_' . $kind,
+					array(
+						'rows'   => $done,
+						'pasted' => true,
+					)
+				);
+			}
+			wp_safe_redirect(
+				add_query_arg(
+					array(
+						'pasted'  => $done,
+						'skipped' => $skip,
+					),
+					aw_si_url( 'rising' )
+				)
+			);
+			exit;
+		}
+		$kind  = 'interest' === $kind ? 'interest' : 'related';
+		$lines = aw_si_rising_paste_lines( isset( $_POST['lines'] ) ? sanitize_textarea_field( wp_unslash( $_POST['lines'] ) ) : '' );
 		$map   = aw_si_kw_map();
 		$done  = 0;
 		$skip  = 0;

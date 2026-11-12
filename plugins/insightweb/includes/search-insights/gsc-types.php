@@ -430,13 +430,155 @@ function aw_si_index_states(): array {
 	return $cache;
 }
 
-/** Overview box: pages not indexed, by Google's reason. */
+/* ---------- Search Console coverage totals (entered by hand) and the Request indexing list (owner, 12 Nov 2026) ---------- */
+
+const AW_SI_COVERAGE_OPTION = 'aw_si_gsc_coverage';
+
+/** The coverage rows Search Console's Page indexing report shows: key => label. */
+function aw_si_coverage_fields(): array {
+	return array(
+		'indexed'    => __( 'Indexed', 'aw-seo-extras' ),
+		'discovered' => __( 'Discovered, currently not indexed', 'aw-seo-extras' ),
+		'crawled'    => __( 'Crawled, currently not indexed', 'aw-seo-extras' ),
+		'noindex'    => __( 'Excluded by noindex', 'aw-seo-extras' ),
+		'canonical'  => __( 'Alternate page with proper canonical tag', 'aw-seo-extras' ),
+	);
+}
+
+/** The totals last entered: field => count, plus 'day' (Y-m-d, the report's date). */
+function aw_si_coverage(): array {
+	return (array) get_option( AW_SI_COVERAGE_OPTION, array() );
+}
+
+add_action(
+	'admin_post_aw_si_coverage',
+	function () {
+		if ( ! current_user_can( aw_si_cap() ) || ! check_admin_referer( 'aw_si_coverage' ) ) {
+			wp_die( esc_html__( 'Not allowed.', 'aw-seo-extras' ), 403 );
+		}
+		$out = array();
+		foreach ( array_keys( aw_si_coverage_fields() ) as $k ) {
+			$v = isset( $_POST[ $k ] ) ? str_replace( array( ',', ' ' ), '', sanitize_text_field( wp_unslash( $_POST[ $k ] ) ) ) : '';
+			if ( '' !== $v && ctype_digit( $v ) ) {
+				$out[ $k ] = (int) $v;
+			}
+		}
+		$day        = isset( $_POST['day'] ) ? sanitize_text_field( wp_unslash( $_POST['day'] ) ) : '';
+		$out['day'] = preg_match( '/^\d{4}-\d{2}-\d{2}$/', $day ) ? $day : wp_date( 'Y-m-d' );
+		update_option( AW_SI_COVERAGE_OPTION, $out, false );
+		wp_safe_redirect( wp_get_referer() ? wp_get_referer() : aw_si_url( '' ) );
+		exit;
+	}
+);
+
+/** The coverage totals as a table, with the form to enter them. */
+function aw_si_coverage_html(): string {
+	$c   = aw_si_coverage();
+	$out = '<h3>' . esc_html__( 'Search Console coverage (the whole site, entered by hand)', 'aw-seo-extras' ) . '</h3>';
+	$out .= '<p class="description">' . ( ! empty( $c['day'] ) ? esc_html( sprintf( /* translators: %s: date. */ __( 'From Search Console → Pages, %s.', 'aw-seo-extras' ), wp_date( 'j M Y', strtotime( $c['day'] . ' 12:00' ) ) ) ) : esc_html__( 'Not entered yet: copy the figures from Search Console → Pages.', 'aw-seo-extras' ) ) . '</p>';
+	$out .= '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_si_coverage">' . wp_nonce_field( 'aw_si_coverage', '_wpnonce', true, false );
+	$out .= '<table class="widefat striped"><tbody>';
+	foreach ( aw_si_coverage_fields() as $k => $label ) {
+		$out .= '<tr><th scope="row"><label for="aw-si-cov-' . esc_attr( $k ) . '">' . esc_html( $label ) . '</label></th><td><input type="text" inputmode="numeric" class="small-text" id="aw-si-cov-' . esc_attr( $k ) . '" name="' . esc_attr( $k ) . '" value="' . esc_attr( isset( $c[ $k ] ) ? (string) $c[ $k ] : '' ) . '"></td></tr>';
+	}
+	$out .= '<tr><th scope="row"><label for="aw-si-cov-day">' . esc_html__( 'Report date', 'aw-seo-extras' ) . '</label></th><td><input type="date" id="aw-si-cov-day" name="day" value="' . esc_attr( (string) ( $c['day'] ?? '' ) ) . '"></td></tr>';
+	$out .= '</tbody></table>' . get_submit_button( __( 'Save the totals', 'aw-seo-extras' ), 'secondary small', 'submit', false ) . '</form>';
+	return $out;
+}
+
+/** Type order for the Request indexing list: guides, Library, campaigns, then the rest, listings last. */
+function aw_si_request_type_rank( int $id ): int {
+	$rank = array( 'post' => 0, 'aw_legal' => 1, 'aw_campaign' => 2, 'page' => 3, 'aw_news' => 4, 'aw_opportunity' => 5, 'aw_listing' => 9 );
+	return $id ? ( $rank[ (string) get_post_type( $id ) ] ?? 6 ) : 7;
+}
+
+/**
+ * The highest-value pages URL Inspection found not indexed, for asking Google by hand (Search Console → URL
+ * Inspection → Request indexing): no internal link in first (Rank Math's link counter, links in the text of other
+ * items), then the most Search Console impressions in 28 days, then the type (aw_si_request_type_rank()). Read only.
+ *
+ * @param int $n How many.
+ * @return array<int, array{path: string, id: int, links_in: int|null, impr: int, reason: string}>
+ */
+function aw_si_request_list( int $n = 10 ): array {
+	$key    = 'aw_si_request_' . $n . '_' . gmdate( 'Ymd' ); // one list a day: each row looks up its page (url_to_postid)
+	$cached = get_transient( $key );
+	if ( is_array( $cached ) ) {
+		return $cached;
+	}
+	$list = aw_si_request_build( $n );
+	set_transient( $key, $list, DAY_IN_SECONDS );
+	return $list;
+}
+
+/**
+ * Works out the Request indexing list (aw_si_request_list(), which keeps it for the day).
+ *
+ * @param int $n How many.
+ * @return array[]
+ */
+function aw_si_request_build( int $n ): array {
+	global $wpdb;
+	$rows = array();
+	foreach ( aw_si_index_states() as $path => $st ) {
+		if ( ! $st[0] && '/' === substr( (string) $path, 0, 1 ) ) {
+			$rows[ $path ] = array( 'path' => (string) $path, 'id' => (int) url_to_postid( home_url( $path ) ), 'links_in' => null, 'impr' => 0, 'reason' => (string) $st[1] );
+		}
+	}
+	if ( ! $rows ) {
+		return array();
+	}
+	$ids = array_filter( wp_list_pluck( $rows, 'id' ) );
+	if ( $ids ) {
+		$t = $wpdb->prefix . 'rank_math_internal_meta';
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders -- table name only; one %d per ID.
+		$in = (array) $wpdb->get_results( $wpdb->prepare( "SELECT object_id, incoming_link_count FROM {$t} WHERE object_id IN (" . implode( ',', array_fill( 0, count( $ids ), '%d' ) ) . ')', array_values( $ids ) ) );
+		$by = array();
+		foreach ( $in as $r ) {
+			$by[ (int) $r->object_id ] = (int) $r->incoming_link_count;
+		}
+		foreach ( $rows as $p => $r ) {
+			$rows[ $p ]['links_in'] = $r['id'] ? ( $by[ $r['id'] ] ?? 0 ) : null;
+		}
+	}
+	foreach ( aw_si_page_metrics( array(), 28 ) as $page => $m ) {
+		if ( isset( $rows[ $page ] ) ) {
+			$rows[ $page ]['impr'] = (int) ( $m['impr'] ?? 0 );
+		}
+	}
+	$rows = array_values( $rows );
+	usort(
+		$rows,
+		fn( $a, $b ) => array( 0 === $a['links_in'] ? 0 : 1, -$a['impr'], aw_si_request_type_rank( $a['id'] ), $a['path'] ) <=> array( 0 === $b['links_in'] ? 0 : 1, -$b['impr'], aw_si_request_type_rank( $b['id'] ), $b['path'] )
+	);
+	return array_slice( $rows, 0, $n );
+}
+
+/** Overview box: today's Request indexing list. */
+function aw_si_box_request(): void {
+	$rows = aw_si_request_list( 10 );
+	if ( ! $rows ) {
+		echo '<p>' . esc_html__( 'Nothing to ask for: URL Inspection has found no page that is not indexed.', 'aw-seo-extras' ) . '</p>';
+		return;
+	}
+	echo '<p class="description">' . esc_html__( 'Ten pages a day to ask Google for by hand: Search Console → URL Inspection → Request indexing. Not indexed (URL Inspection); no link in from another item first, then the most impressions, then guides, Library and campaigns before listings.', 'aw-seo-extras' ) . '</p>';
+	echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Page', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Links in', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Impressions (28 days)', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Google\'s reason', 'aw-seo-extras' ) . '</th></tr></thead><tbody>';
+	foreach ( $rows as $r ) {
+		echo '<tr><td><a href="' . esc_url( home_url( $r['path'] ) ) . '">' . esc_html( $r['path'] ) . '</a></td><td>' . esc_html( null === $r['links_in'] ? '—' : number_format_i18n( $r['links_in'] ) ) . '</td><td>' . esc_html( number_format_i18n( $r['impr'] ) ) . '</td><td>' . esc_html( $r['reason'] ) . '</td></tr>';
+	}
+	echo '</tbody></table>';
+}
+
+/** Overview box: pages not indexed, by Google's reason (a sample: the pages URL Inspection has checked), next to the coverage totals. */
 function aw_si_box_index(): void {
 	$states = aw_si_index_states();
 	if ( ! $states ) {
 		echo '<p>' . esc_html__( 'No pages inspected yet (URL Inspection, daily from 07:40 IST, up to 2,000 pages a day).', 'aw-seo-extras' ) . '</p>';
+		echo aw_si_coverage_html(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in aw_si_coverage_html().
 		return;
 	}
+	echo '<h3>' . esc_html__( 'URL Inspection: a sample', 'aw-seo-extras' ) . '</h3>';
+	echo '<p class="description">' . esc_html__( 'Only the pages checked so far (up to 2,000 a day, never-checked and not-indexed pages first), so these figures lean to pages that are not indexed. They are not the whole site: the coverage totals are below.', 'aw-seo-extras' ) . '</p>';
 	$by  = array();
 	$yes = 0;
 	foreach ( $states as $s ) {
@@ -448,7 +590,7 @@ function aw_si_box_index(): void {
 	}
 	arsort( $by );
 	/* translators: 1: pages inspected, 2: indexed, 3: not indexed. */
-	echo '<p>' . esc_html( sprintf( __( '%1$s pages inspected: %2$s indexed, %3$s not indexed.', 'aw-seo-extras' ), number_format_i18n( count( $states ) ), number_format_i18n( $yes ), number_format_i18n( count( $states ) - $yes ) ) ) . '</p>';
+	echo '<p>' . esc_html( sprintf( __( 'Sample: %1$s pages inspected: %2$s indexed, %3$s not indexed.', 'aw-seo-extras' ), number_format_i18n( count( $states ) ), number_format_i18n( $yes ), number_format_i18n( count( $states ) - $yes ) ) ) . '</p>';
 	if ( $by ) {
 		echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Not indexed: Google\'s reason', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Pages', 'aw-seo-extras' ) . '</th></tr></thead><tbody>';
 		foreach ( $by as $reason => $n ) {
@@ -459,4 +601,5 @@ function aw_si_box_index(): void {
 	if ( isset( aw_si_extra_tabs()['pages'] ) ) {
 		echo '<p class="description">' . esc_html__( 'Each page\'s state is on the Pages tab (Index column).', 'aw-seo-extras' ) . '</p>';
 	}
+	echo aw_si_coverage_html(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in aw_si_coverage_html().
 }
