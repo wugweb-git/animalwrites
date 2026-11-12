@@ -964,7 +964,7 @@ function sourceweb_rest_feeds( WP_REST_Request $request ) {
 			'on'       => ! empty( $s['on'] ),
 			'filter'   => $rss ? ( ! empty( $s['filter'] ) ? 'On' : 'Off' ) : '—',
 			'filterOn' => ! empty( $s['filter'] ),
-			// The feed form stays on today's screen for now, at its own address.
+			// The feed form, at its own address (the new Sources screen draws it: sourceweb_feed_parts()).
 			'editUrl'  => aw_sourcing_url( 'sources', '' !== $host ? $args + array( 'host' => rawurlencode( $host ) ) : $args ),
 		);
 	}

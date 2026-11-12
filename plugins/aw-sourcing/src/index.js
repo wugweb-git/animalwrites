@@ -23,6 +23,7 @@ import {
 	FieldReview,
 	LoadingState,
 	Notice,
+	PageParts,
 	RefTable,
 	SectionCard,
 	ServiceList,
@@ -2191,12 +2192,44 @@ const SOURCE_ACTIONS = {
 };
 
 function Sources() {
-	const [ sub, go ] = useSub( [ 'edit', 'view' ] );
+	const [ sub, go ] = useSub( [ 'edit', 'view', 'feed', 'type', 'host' ] );
 	const [ msg, setMsg ] = useState( null );
 	const back = ( m ) => {
 		setMsg( m || null );
 		go( {} );
 	};
+	// The feed form (&feed=<id|new>): the classic form's own parts, drawn here; Add Feed and Update post to the same
+	// handler and come back to the list it was opened from.
+	if ( sub.feed && ( app.feed || [] ).length > 0 ) {
+		return (
+			<SectionCard
+				id="feed"
+				title={
+					'new' === sub.feed
+						? __( 'Add New Feed', 'aw-sourcing' )
+						: __( 'Edit Feed', 'aw-sourcing' )
+				}
+				actions={
+					<Button
+						onClick={ () =>
+							sub.host
+								? go( { edit: sub.host } )
+								: go( { view: 'feeds' } )
+						}
+					>
+						{ sub.host
+							? __( 'Back to the source', 'aw-sourcing' )
+							: __( 'Back to Feeds', 'aw-sourcing' ) }
+					</Button>
+				}
+			>
+				<PageParts
+					parts={ app.feed.filter( ( p ) => 'heading' !== p.type ) }
+					title={ __( 'Feed', 'aw-sourcing' ) }
+				/>
+			</SectionCard>
+		);
+	}
 	if ( sub.edit ) {
 		return (
 			<SourceForm

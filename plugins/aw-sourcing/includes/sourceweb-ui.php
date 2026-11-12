@@ -47,9 +47,6 @@ function sourceweb_ui_wanted(): string {
 	}
 	if ( AW_SRC_PAGE === $page ) {
 		$tab = '' === $tab ? 'sources' : $tab; // Sources is the page's first screen
-		if ( 'sources' === $tab && '' !== sanitize_key( wp_unslash( $_GET['feed'] ?? '' ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- which screen to show
-			return ''; // the feed form stays on today's screen for now, at its own address
-		}
 		if ( 'keywords' === $tab && ! ( function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ) ) {
 			return ''; // before the keyword table (phase 2), the word lists stay on today's screen
 		}
@@ -166,6 +163,7 @@ add_action(
 					'tabs'    => $tabs,
 					'rest'    => SOURCEWEB_REST,
 					'isAdmin' => current_user_can( AW_SRC_CAP ),
+					'feed'    => 'sources' === $screen ? sourceweb_feed_parts() : array(),
 				),
 			)
 		);
@@ -199,4 +197,25 @@ function sourceweb_ui_page( string $screen ): bool {
 	);
 	kits_shell_mount( 'sourceweb-app', $titles[ $screen ] );
 	return true;
+}
+
+/**
+ * The feed form (Sources &feed=<id|new>, with &type= and &host=) as Kits page parts: the classic form's own output
+ * (aw_sources_edit_form()), so Add Feed and Update post to the same admin-post handler (kits_sourcing_save_feeds),
+ * with its nonce, and come back to the screen the form was opened from. Empty without a feed in the address.
+ *
+ * @return array[]
+ */
+function sourceweb_feed_parts(): array {
+	// phpcs:disable WordPress.Security.NonceVerification.Recommended -- which feed to show; nothing is saved here
+	$feed = sanitize_key( wp_unslash( $_GET['feed'] ?? '' ) );
+	if ( '' === $feed || ! function_exists( 'aw_sources_edit_form' ) || ! function_exists( 'kits_shell_html_parts' ) || ! current_user_can( AW_SRC_CAP ) ) {
+		return array();
+	}
+	ob_start();
+	aw_sources_edit_form( $feed, sanitize_key( wp_unslash( $_GET['type'] ?? '' ) ), aw_sourcing_norm_host( sanitize_text_field( wp_unslash( $_GET['host'] ?? '' ) ) ) );
+	// phpcs:enable WordPress.Security.NonceVerification.Recommended
+	$html = (string) ob_get_clean();
+	$html = (string) preg_replace( '#\s*<a [^>]*class="button">Cancel</a>#', '', $html ); // the screen's own Back button does this
+	return kits_shell_html_parts( $html );
 }
