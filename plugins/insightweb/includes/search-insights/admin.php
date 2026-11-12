@@ -500,7 +500,11 @@ function aw_si_run_detail( string $src, array $info ): array {
 		$det[] = sprintf( __( '%1$s focus keyphrases on %2$s posts and %3$s terms; %4$s listing names; %5$s Sourcing keywords; %6$s brand searches', 'aw-seo-extras' ), $n( 'focus_kw' ), $n( 'focus_posts' ), $n( 'focus_terms' ), $n( 'entities' ), $n( 'sourcing' ), $n( 'brand' ) );
 		if ( ! empty( $info['prio'] ) ) {
 			/* translators: 1–4: keywords at P1, P2, P3, P4. */
-			$det[] = sprintf( __( 'priorities worked out: P1 %1$s, P2 %2$s, P3 %3$s, P4 %4$s', 'aw-seo-extras' ), number_format_i18n( (int) ( $info['prio']['P1'] ?? 0 ) ), number_format_i18n( (int) ( $info['prio']['P2'] ?? 0 ) ), number_format_i18n( (int) ( $info['prio']['P3'] ?? 0 ) ), number_format_i18n( (int) ( $info['prio']['P4'] ?? 0 ) ) );
+			$det[] = sprintf( __( 'priorities worked out over every record: P1 %1$s, P2 %2$s, P3 %3$s, P4 %4$s', 'aw-seo-extras' ), number_format_i18n( (int) ( $info['prio']['P1'] ?? 0 ) ), number_format_i18n( (int) ( $info['prio']['P2'] ?? 0 ) ), number_format_i18n( (int) ( $info['prio']['P3'] ?? 0 ) ), number_format_i18n( (int) ( $info['prio']['P4'] ?? 0 ) ) );
+			// The Keywords tab and the Priorities box fold listing names (12 Nov 2026: P1 224 here, 203 there).
+			$movers = aw_si_entity_movers();
+			/* translators: 1–3: keywords at P1, P2, P3 with listing names folded, 4: listing names counted one by one. */
+			$det[] = sprintf( __( 'with listing names folded as on the Keywords tab: P1 %1$s, P2 %2$s, P3 %3$s (only the %4$s listing names that moved most count one by one)', 'aw-seo-extras' ), number_format_i18n( aw_si_view_count( 'p1', $movers ) ), number_format_i18n( aw_si_view_count( 'p2', $movers ) ), number_format_i18n( aw_si_view_count( 'p3', $movers ) ), number_format_i18n( count( $movers ) ) );
 		}
 	}
 	if ( 'rollup' === $src && isset( $info['daily'] ) ) {
@@ -565,27 +569,42 @@ function aw_si_run_detail( string $src, array $info ): array {
 
 /** Overview box: counts per priority and view, linked to the Keywords tab. */
 function aw_si_box_priorities(): void {
-	global $wpdb;
 	if ( ! aw_si_ready() ) {
 		echo '<p>' . esc_html__( 'Nothing yet.', 'aw-seo-extras' ) . '</p>';
 		return;
 	}
-	$t   = aw_si_table( 'keywords' );
-	$sql = array(
-		'p1'        => array( 'P1', aw_si_view_sql( 'p1' ) ),
-		'p2'        => array( __( 'P2 (gaps)', 'aw-seo-extras' ), aw_si_view_sql( 'p2' ) ),
-		'conflict'  => array( __( 'Conflicts', 'aw-seo-extras' ), aw_si_view_sql( 'conflict' ) ),
-		'quick'     => array( __( 'Quick wins', 'aw-seo-extras' ), aw_si_view_sql( 'quick' ) ),
-		'notranked' => array( __( 'Tracked, not ranking', 'aw-seo-extras' ), aw_si_view_sql( 'notranked' ) ),
-		'all'       => array( __( 'All keywords', 'aw-seo-extras' ), aw_si_view_sql( 'all' ) ),
+	$labels = array(
+		'p1'        => 'P1',
+		'p2'        => __( 'P2 (gaps)', 'aw-seo-extras' ),
+		'conflict'  => __( 'Conflicts', 'aw-seo-extras' ),
+		'quick'     => __( 'Quick wins', 'aw-seo-extras' ),
+		'notranked' => __( 'Tracked, not ranking', 'aw-seo-extras' ),
+		'all'       => __( 'All keywords', 'aw-seo-extras' ),
 	);
-	$ent = aw_si_entity_sql(); // Listing names count as in the Keywords views: the 20 that moved most, not all.
+	$movers = aw_si_entity_movers(); // Listing names count as in the Keywords views: the ones that moved most, not all.
 	echo '<ul>';
-	foreach ( $sql as $view => $v ) {
-		$n = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$t} WHERE {$v[1]} AND {$ent}" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared -- fixed conditions.
-		echo '<li><a href="' . esc_url( add_query_arg( 'view', $view, aw_si_url( 'keywords' ) ) ) . '">' . esc_html( $v[0] ) . '</a>: ' . esc_html( number_format_i18n( $n ) ) . '</li>';
+	foreach ( $labels as $view => $label ) {
+		echo '<li><a href="' . esc_url( add_query_arg( 'view', $view, aw_si_url( 'keywords' ) ) ) . '">' . esc_html( $label ) . '</a>: ' . esc_html( number_format_i18n( aw_si_view_count( $view, $movers ) ) ) . '</li>';
 	}
 	echo '</ul>';
+	$all = aw_si_prio_all_line();
+	if ( '' !== $all ) {
+		echo '<p class="description">' . esc_html( $all ) . '</p>';
+	}
+}
+
+/**
+ * Why the Sources row's priority counts are higher than the Priorities box and the Keywords tab (12 Nov 2026: P1 224
+ * against 203): the daily calculation counts every keyword record, the views fold listing names into one row and
+ * count only the AW_SI_MOVERS that moved most. Empty when no calculation is logged.
+ */
+function aw_si_prio_all_line(): string {
+	$prio = (array) ( aw_si_runs()['roles']['info']['prio'] ?? array() );
+	if ( ! $prio ) {
+		return '';
+	}
+	/* translators: 1: listing names counted one by one, 2–4: P1, P2, P3 over every record. */
+	return sprintf( __( 'Listing names are folded here, as on the Keywords tab (only the %1$s that moved most count one by one). The daily calculation in the Sources box counts every record, listing names too: P1 %2$s, P2 %3$s, P3 %4$s.', 'aw-seo-extras' ), number_format_i18n( (int) AW_SI_MOVERS ), number_format_i18n( (int) ( $prio['P1'] ?? 0 ) ), number_format_i18n( (int) ( $prio['P2'] ?? 0 ) ), number_format_i18n( (int) ( $prio['P3'] ?? 0 ) ) );
 }
 
 /** Overview box: quick wins. */

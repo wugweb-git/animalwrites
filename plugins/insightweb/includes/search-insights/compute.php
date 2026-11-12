@@ -169,6 +169,23 @@ function aw_si_entity_sql( ?array $movers = null ): string {
 }
 
 /**
+ * How many keyword records a view counts, as the Keywords tab and the Priorities box count them: listing names folded
+ * (only the AW_SI_MOVERS that moved most count one by one; aw_si_entity_sql()).
+ *
+ * @param string     $view   A key of aw_si_view_sql().
+ * @param int[]|null $movers aw_si_entity_movers(), when the caller already has it.
+ */
+function aw_si_view_count( string $view, ?array $movers = null ): int {
+	global $wpdb;
+	if ( ! aw_si_ready() ) {
+		return 0;
+	}
+	$t   = aw_si_table( 'keywords' );
+	$sql = aw_si_view_sql( $view ) . ' AND ' . aw_si_entity_sql( $movers );
+	return (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$t} WHERE {$sql}" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared -- fixed conditions from this file.
+}
+
+/**
  * Whether position and impressions make a quick win.
  *
  * @param float|null $pos  Position.
