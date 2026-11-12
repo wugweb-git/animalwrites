@@ -196,7 +196,7 @@ function aw_seo_modules(): array {
 			'files'  => array( 'schema' ),
 			'desc'   => 'The site\'s own JSON-LD nodes in Rank Math\'s graph (organisations, Library documents, campaigns, opportunities, lists).',
 			'fields' => array(
-				'AW_SITE_ALT_NAMES' => array( 'type' => 'list', 'label' => 'Other names of the site', 'help' => 'The WebSite node\'s alternateName. One per line.', 'default' => array( 'AnimalWrites', 'animalwrites.in' ) ),
+				'AW_SITE_ALT_NAMES' => array( 'type' => 'list', 'label' => 'Other names of the site', 'help' => 'The WebSite node\'s alternateName. One per line.', 'default' => array( 'AnimalWrites', 'Animal Writes India', 'animalwrites.in' ) ), // "Animal Writes India": 12 Nov 2026, people search the brand under several names
 			),
 		),
 		'faq' => array(

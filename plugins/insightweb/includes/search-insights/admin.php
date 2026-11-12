@@ -186,7 +186,9 @@ function aw_si_load(): void {
  * @return array[]
  */
 function aw_si_overview_boxes(): array {
-	return array(
+	// A setup step first, only while it is not done (12 Nov 2026: the Google Alerts feeds were never set).
+	$setup = function_exists( 'aw_si_alerts_feeds' ) && ! aw_si_alerts_feeds() ? array( 'setup' => array( __( 'Setup step', 'aw-seo-extras' ), 'aw_si_box_setup' ) ) : array();
+	return $setup + array(
 		'sources'     => array( __( 'Sources', 'aw-seo-extras' ), 'aw_si_box_sources' ),
 		'priorities'  => array( __( 'Priorities', 'aw-seo-extras' ), 'aw_si_box_priorities' ),
 		/* translators: %d: minimum impressions. */
@@ -440,6 +442,14 @@ function aw_si_mini_table( array $rows, array $cols ): void {
 }
 
 /** Overview box: each source's last update and state. */
+/** Overview box: what is not set up yet (the Google Alerts feeds), and where to set it. */
+function aw_si_box_setup(): void {
+	echo '<p>' . esc_html__( 'Google Alerts feeds are not set, so mentions of Animal Writes on the web are not read. Create an alert at google.com/alerts, choose Deliver to: RSS feed, and paste the feed address under Animal Writes → Keys. This box goes once a feed is set.', 'aw-seo-extras' ) . '</p>';
+	if ( current_user_can( 'manage_options' ) ) {
+		echo '<p><a class="button" href="' . esc_url( admin_url( 'admin.php?page=aw-keys' ) ) . '">' . esc_html__( 'Animal Writes → Keys', 'aw-seo-extras' ) . '</a></p>';
+	}
+}
+
 function aw_si_box_sources(): void {
 	$runs = aw_si_runs();
 	echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Source', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Last updated', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'State', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Detail', 'aw-seo-extras' ) . '</th></tr></thead><tbody>';
@@ -452,6 +462,11 @@ function aw_si_box_sources(): void {
 		$det  = aw_si_run_detail( $src, (array) ( $r['info'] ?? array() ) );
 		if ( $err ) {
 			$det[] = $err;
+		}
+		$due = aw_si_next_due( $src );
+		if ( $due ) {
+			/* translators: %s: date the next run is due. */
+			$det[] = sprintf( $due < time() ? __( 'was due %s', 'aw-seo-extras' ) : __( 'next due %s', 'aw-seo-extras' ), wp_date( 'j M', $due ) );
 		}
 		echo '<tr><td>' . esc_html( $s['label'] ) . '</td><td>' . esc_html( $ok ? wp_date( 'j M Y, H:i', $ok ) : __( 'Never', 'aw-seo-extras' ) ) . '</td><td><span class="dashicons dashicons-' . esc_attr( $icon ) . '" aria-hidden="true"></span> ' . esc_html( $word ) . '</td><td>' . esc_html( implode( '; ', $det ) ) . '</td></tr>';
 	}
@@ -672,19 +687,28 @@ function aw_si_box_referrers(): void {
 	$rows = aw_si_ref_merge( $rows, array( 's28', 'e28', 'k28', 's90' ) );
 	usort( $rows, fn( $a, $b ) => array( (float) $b->s28, (float) $b->s90 ) <=> array( (float) $a->s28, (float) $a->s90 ) );
 	$rows = array_slice( $rows, 0, 20 );
+	// Objections sent and confirmed per site, from the 28-day campaign rows (every campaign), merged the same way.
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+	$obj = (array) $wpdb->get_results( "SELECT txt, SUM(IF(metric = 'camp_sent', value, 0)) sent, SUM(IF(metric = 'camp_conf', value, 0)) conf FROM {$o} WHERE src = 'ga4' AND period = '28d' AND metric IN ('camp_sent', 'camp_conf') GROUP BY txt" );
+	$objs = array();
+	foreach ( aw_si_ref_merge( $obj, array( 'sent', 'conf' ) ) as $m ) {
+		$objs[ strtolower( (string) $m->label ) ] = $m;
+	}
 	if ( ! $rows ) {
 		echo '<p>' . esc_html__( 'No referrals recorded yet (GA4 runs daily at 07:20 IST).', 'aw-seo-extras' ) . '</p>';
 	} else {
 		$since = min( wp_list_pluck( $rows, 'since' ) );
-		echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Source', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Sessions (28 days)', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Engaged', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Key events', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html( sprintf( /* translators: %d: days. */ __( 'Sessions (%d days)', 'aw-seo-extras' ), $keep ) ) . '</th></tr></thead><tbody>';
+		echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Source', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Sessions (28 days)', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Engaged', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'All key events', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Objections sent', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Confirmed', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html( sprintf( /* translators: %d: days. */ __( 'Sessions (%d days)', 'aw-seo-extras' ), $keep ) ) . '</th></tr></thead><tbody>';
 		foreach ( $rows as $r ) {
-			echo '<tr><td>' . aw_si_ref_html( (string) $r->txt ) . '</td><td>' . esc_html( number_format_i18n( (int) $r->s28 ) ) . '</td><td>' . esc_html( number_format_i18n( (int) $r->e28 ) ) . '</td><td>' . esc_html( number_format_i18n( (int) $r->k28 ) ) . '</td><td>' . esc_html( number_format_i18n( (int) $r->s90 ) ) . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_si_ref_html() escapes.
+			$m = $objs[ strtolower( aw_si_referrer_label( (string) $r->txt ) ) ] ?? null;
+			echo '<tr><td>' . aw_si_ref_html( (string) $r->txt ) . '</td><td>' . esc_html( number_format_i18n( (int) $r->s28 ) ) . '</td><td>' . esc_html( number_format_i18n( (int) $r->e28 ) ) . '</td><td>' . esc_html( number_format_i18n( (int) $r->k28 ) ) . '</td><td>' . esc_html( $m ? number_format_i18n( (int) $m->sent ) : '–' ) . '</td><td>' . esc_html( $m ? number_format_i18n( (int) $m->conf ) : '–' ) . '</td><td>' . esc_html( number_format_i18n( (int) $r->s90 ) ) . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_si_ref_html() escapes.
 		}
 		echo '</tbody></table>';
 		/* translators: %s: first date with referral figures. */
 		echo '<p class="description">' . esc_html( sprintf( __( 'Figures from %s.', 'aw-seo-extras' ), wp_date( get_option( 'date_format' ), strtotime( $since ) ) ) ) . '</p>';
 	}
 	echo '<p class="description">' . esc_html__( 'Referral and social sessions by source (GA4 channels Referral, Organic Social and Paid Social, plus Instagram, Facebook, X, LinkedIn, Reddit, WhatsApp, Telegram and Linktree). 22 Oct 2026 is left out (GA4 test events). GA4 page views changed on 25 Oct 2026, when the site moved to one GA4 tag.', 'aw-seo-extras' ) . '</p>';
+	echo '<p class="description">' . esc_html__( 'All key events counts every GA4 key event in those sessions, so one letter can count twice (objection_sent and newsletter_optin). Objections sent and confirmed are the campaign events on campaign pages, 28 days, every campaign: judge a source by these.', 'aw-seo-extras' ) . '</p>';
 }
 
 /**

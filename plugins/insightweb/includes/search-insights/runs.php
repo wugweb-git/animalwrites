@@ -160,7 +160,13 @@ function aw_si_stale( string $src ): bool {
 		return false; // A run in steps is working now (a step in the last hour): not late.
 	}
 	$since = $ok ? $ok : (int) get_option( 'aw_si_installed', time() );
-	return ( time() - $since ) > 2 * $every;
+	return ( time() - $since ) > $every + DAY_IN_SECONDS; // late once a day past its schedule (12 Nov 2026; was twice the schedule)
+}
+
+/** When a source's next run is due (its last good run plus its schedule), or 0 when it has never run. */
+function aw_si_next_due( string $src ): int {
+	$ok = (int) ( aw_si_runs()[ $src ]['ok'] ?? 0 );
+	return $ok ? $ok + (int) ( aw_si_sources()[ $src ]['every'] ?? DAY_IN_SECONDS ) : 0;
 }
 
 /**
