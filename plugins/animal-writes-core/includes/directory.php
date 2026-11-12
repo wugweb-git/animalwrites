@@ -102,7 +102,7 @@ add_filter(
 				$url = strtok( $url, '?' ) . 'page/' . $paged . '/' . ( strpos( $url, '?' ) ? '?' . substr( $url, strpos( $url, '?' ) + 1 ) : '' );
 			}
 			$keep = array_intersect_key( wp_unslash( $_GET ), array_flip( array( 'q', 'verified', 'gov', 'tag' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
-			wp_safe_redirect( add_query_arg( array_map( 'rawurlencode', $keep ), $url ), 301, 'Animal Writes' );
+			wp_safe_redirect( add_query_arg( map_deep( $keep, 'rawurlencode' ), $url ), 301, 'Animal Writes' );
 			exit;
 		};
 		$out = array( 'pagename' => 'directory' ); // the Directory Page; its list reads the place and type (hubs.php)

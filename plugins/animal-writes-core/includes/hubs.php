@@ -139,7 +139,7 @@ add_action(
 		if ( isset( $_GET[ $key ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 			$n    = max( 1, (int) $_GET[ $key ] ); // phpcs:ignore WordPress.Security.NonceVerification
 			$base = strtok( aw_hub_base_url(), '?' );
-			wp_safe_redirect( add_query_arg( array_map( 'rawurlencode', array_diff_key( wp_unslash( $_GET ), array( $key => 1 ) ) ), $n > 1 ? $base . 'page/' . $n . '/' : $base ), 301 ); // phpcs:ignore WordPress.Security.NonceVerification
+			wp_safe_redirect( add_query_arg( map_deep( array_diff_key( wp_unslash( $_GET ), array( $key => 1 ) ), 'rawurlencode' ), $n > 1 ? $base . 'page/' . $n . '/' : $base ), 301 ); // phpcs:ignore WordPress.Security.NonceVerification
 			exit;
 		}
 		// Core pagination blocks read the page from this parameter.
@@ -349,7 +349,7 @@ add_filter(
 				$n = max( 1, (int) ( $args[ $key ] ?? 1 ) );
 				unset( $args[ $key ], $args['cst'] ); // cst: added by core pagination, not ours
 				$to = $n > 1 ? $base . 'page/' . $n . '/' : $base;
-				return 'href="' . esc_url( add_query_arg( array_map( 'rawurlencode', $args ), $to ) ) . '"';
+				return 'href="' . esc_url( add_query_arg( map_deep( $args, 'rawurlencode' ), $to ) ) . '"';
 			},
 			$html
 		);
