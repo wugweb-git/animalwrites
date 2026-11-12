@@ -287,7 +287,7 @@ add_action(
 			/* translators: %s: number of seeds. */
 			echo '<div class="notice notice-success inline"><p>' . esc_html( sprintf( _n( 'Seeds saved: %s search.', 'Seeds saved: %s searches.', count( aw_si_tool_seeds() ), 'aw-seo-extras' ), number_format_i18n( count( aw_si_tool_seeds() ) ) ) ) . '</p></div>';
 		} elseif ( 'same' === $r ) {
-			echo '<div class="notice notice-info inline"><p>' . esc_html__( 'Seeds unchanged: nothing to save.', 'aw-seo-extras' ) . '</p></div>';
+			echo '<div class="notice notice-success inline"><p>' . esc_html__( 'Seeds unchanged: nothing to save.', 'aw-seo-extras' ) . '</p></div>';
 		}
 	}
 );
