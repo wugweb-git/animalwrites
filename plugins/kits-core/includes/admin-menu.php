@@ -264,7 +264,7 @@ function kits_sections_back( array $sections ): void {
 
 /** Kits → Home. */
 function kits_home_page() {
-	kits_sections_page( KITS_MENU, 'Home', 'Kits by Wugweb is the site\'s design system: the theme draws every page, Kits Core adds the features every Kits site shares. Where each part of the theme is changed.' );
+	kits_sections_page( KITS_MENU, 'Home', 'Kits by Wugweb is the site\'s design system: the theme draws every page, Kits Core adds the features every Kits site shares. This site\'s versions and checks, then where to change things.' );
 }
 
 /** Kits → Home → Edit the theme: the Site Editor screens that hold the theme's settings. */

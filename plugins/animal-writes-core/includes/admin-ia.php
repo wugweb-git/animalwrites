@@ -201,7 +201,6 @@ add_filter(
 			'aw-classification',
 			'separator-wugweb',
 			'kits',
-			'animal-writes',
 			'directoryweb',
 			'aw-sourcing-menu',
 			'aw-seo-plus',

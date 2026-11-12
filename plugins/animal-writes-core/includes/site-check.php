@@ -2,7 +2,7 @@
 /**
  * "Check site" (admin bar, administrators): loads one page of every kind, as the deploy check does, and lists each
  * with its status and time. A page fails on anything but 200, a PHP error or WordPress's "critical error" page.
- * Results show on Animal Writes → Check site → Page check, with the time of the check and
+ * Results show on Kits → Home → Page check (Check site, aw-site-check, without Kits), with the time of the check and
  * the commit it ran on. Nothing is changed.
  *
  * It also runs by itself after each deploy (owner, 11 Nov 2026): the request that first sees a new deployed commit
@@ -58,11 +58,13 @@ add_action(
 	80
 );
 
-// Animal Writes → Check site (admin-home.php).
+// Its own screen only without Kits; with Kits it is Kits → Home → Page check (admin-home.php).
 add_action(
 	'admin_menu',
 	function () {
-		add_submenu_page( AW_CORE_MENU, 'Check site', 'Check site', aw_core_screen_cap( 'aw-site-check' ), 'aw-site-check', 'aw_site_check_page' );
+		if ( AW_CORE_MENU === aw_core_menu_parent() ) {
+			add_submenu_page( AW_CORE_MENU, 'Check site', 'Check site', aw_core_screen_cap( 'aw-site-check' ), 'aw-site-check', 'aw_site_check_page' );
+		}
 	},
 	aw_core_menu_priority( 'aw-site-check' ) // order: aw_core_screens() (admin-home.php)
 );
@@ -100,7 +102,7 @@ add_action( 'aw_site_check_deploy', 'aw_site_check_run' );
 
 /**
  * One line on the last check: the result, when it ran and on which commit, and whether that is still the deployed
- * commit. For Animal Writes → Check site → Page check.
+ * commit. For Kits → Home → Page check.
  *
  * @return array{ok:bool,text:string} ok: a check on the deployed commit found no problem.
  */
@@ -143,12 +145,12 @@ add_action(
 	}
 );
 
-/** Where the check's results are: Animal Writes → Check site. */
+/** Where the check's results are: Kits → Home → Page check, or Check site without Kits. */
 function aw_site_check_url(): string {
-	return admin_url( 'admin.php?page=aw-site-check' );
+	return AW_CORE_MENU === aw_core_menu_parent() ? admin_url( 'admin.php?page=aw-site-check' ) : admin_url( 'admin.php?page=' . KITS_MENU ) . '#page-check';
 }
 
-/** Animal Writes → Check site: the results, then the other checks (backup, CDN, email, …) through aw_site_check_after. */
+/** Check site without Kits: the results, then the other checks (backup, CDN, email, …) through aw_site_check_after. */
 function aw_site_check_page() {
 	echo '<div class="wrap"><h1>Check site</h1>';
 	aw_core_screen_nav( 'aw-site-check' );
@@ -157,7 +159,7 @@ function aw_site_check_page() {
 	echo '</div>';
 }
 
-/** Check site → Page check: the Run button, the last check's time and commit, and each page's status. */
+/** Kits → Home → Page check: the Run button, the last check's time and commit, and each page's status. */
 function aw_site_check_results() {
 	$last = get_option( 'aw_site_check_last' );
 	$run  = wp_nonce_url( admin_url( 'admin-post.php?action=aw_site_check' ), 'aw_site_check' );
@@ -184,9 +186,9 @@ function aw_site_check_results() {
 
 /*
  * Joined component stylesheets against their cap (Kits functions.php): a warning near the cap, so pages do not fall
- * back to separate files unnoticed. Shown on Animal Writes → Check site → Joined files.
+ * back to separate files unnoticed. Shown on Kits → Home → Joined files.
  */
-/** Animal Writes → Check site → Joined files: joined component stylesheets against their cap. */
+/** Kits → Home → Joined files: joined component stylesheets against their cap. */
 function aw_site_check_joined() {
 	if ( ! function_exists( 'kits_parts_bundle_status' ) || ! aw_core_theme_parts_on() ) {
 		return;

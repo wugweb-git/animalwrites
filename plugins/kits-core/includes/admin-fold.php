@@ -46,7 +46,6 @@ function kits_admin_fold_menu( string $menu, string $into, string $title, string
 function kits_wugweb_menu_slots(): array {
 	return array(
 		'kits'               => array( 'dashicons-admin-appearance', '58.1' ),
-		'animal-writes'      => array( 'dashicons-pets', '58.15' ),
 		'directoryweb'       => array( 'dashicons-location-alt', '58.2' ),
 		'aw-sourcing-menu'   => array( 'dashicons-rss', '58.3' ),
 		'aw-seo-plus'        => array( 'dashicons-search', '58.4' ),

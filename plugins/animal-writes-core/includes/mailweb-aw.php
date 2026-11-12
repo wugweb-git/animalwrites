@@ -8,7 +8,7 @@
  *   messages (aw_message), through `mailweb_forms_source`; a notice in wp-admin while any of them is unread (no email).
  *   Inbox → Contact messages opens it.
  * - The old webhook address /wp-json/aw/v1/mail-in still answers (the hPanel webhooks point there).
- * - Animal Writes → Check site → Email sending: a line on email sending.
+ * - Kits → Home → Email sending: a line on email sending.
  * - One-time move (20 Oct 2026) from the aw-mail plugin: options aw_mail_* → mailweb_* (secrets encrypted), kits_mail →
  *   mailweb_smtp, table aw_mail_queue → mailweb_queue, old cron jobs cleared, and Animal Writes' choices set: replies go
  *   from support@ only (never vedanshu@ or noreply@), contact@ is vedanshu@'s alias, FluentCRM notes for vedanshu@ and
@@ -363,11 +363,11 @@ add_action(
 	}
 );
 
-/* ---------- Animal Writes → Check site → Email sending ---------- */
+/* ---------- Kits → Home → Email sending (Check site without Kits) ---------- */
 
 add_filter( 'mailweb_pause_notice_always', fn( $always, $id ) => $always || str_ends_with( (string) $id, '_page_aw-site-check' ) || 'toplevel_page_kits' === (string) $id, 10, 2 );
 
-/** Animal Writes → Check site → Email sending (until the MailWeb dashboard has it): paused or running, and the last error. */
+/** Kits → Home → Email sending (until the MailWeb dashboard has it): paused or running, and the last error. */
 function aw_mail_site_check() {
 	if ( ! function_exists( 'mailweb_paused' ) ) {
 		return;

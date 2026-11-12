@@ -1,6 +1,6 @@
 <?php
 /**
- * Animal Writes → Modules → Forms and sample listings: options that only WP-CLI could change before (12 Nov 2026).
+ * Kits → Modules → Forms and sample listings: options that only WP-CLI could change before (12 Nov 2026).
  * Core Settings API on the Modules screen (social-posts.php prints it); each value keeps its option name and stored shape.
  *
  * - aw_ff_send_email: '1' sends the emails a Fluent Forms submission makes; '0' (default) drops them (forms-fluentforms.php).

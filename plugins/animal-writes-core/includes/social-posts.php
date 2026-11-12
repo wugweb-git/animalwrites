@@ -1,7 +1,7 @@
 <?php
 /**
  * Social posts (owner's plan, 1 Nov 2026; go 2 Nov 2026): other people's public posts about a campaign or an item
- * (activists' posts, reels, videos), kept as records a person reviews. Type aw_social, listed under Animal Writes.
+ * (activists' posts, reels, videos), kept as records a person reviews. Type aw_social, listed under News.
  *
  * Switches (Kits → Modules, both off by default):
  * - aw_social_on: the type, its box, its intake (paste a link in Sourcing → To review, `wp aw social-import`, the
@@ -59,7 +59,7 @@ function aw_social_show(): bool {
 	return aw_social_on() && '1' === (string) get_option( 'aw_social_show', '' );
 }
 
-/* ---------- Animal Writes → Modules ---------- */
+/* ---------- Kits → Modules ---------- */
 
 add_action(
 	'admin_init',
@@ -68,7 +68,7 @@ add_action(
 		register_setting( 'aw_modules', 'aw_social_on', $flag );
 		register_setting( 'aw_modules', 'aw_social_show', $flag );
 		add_settings_section( 'aw_modules_social', 'Social posts', 'aw_social_settings_intro', 'aw-modules' );
-		add_settings_field( 'aw_social_on', 'Social posts type', 'aw_social_settings_field', 'aw-modules', 'aw_modules_social', array( 'label_for' => 'aw_social_on', 'note' => 'The Social posts list (Animal Writes → Social posts), its intake (paste a link in SourceWeb → To review, the CSV import, the workers\' routes) and the hashtag box on each campaign. Off: hidden; saved records are kept.' ) );
+		add_settings_field( 'aw_social_on', 'Social posts type', 'aw_social_settings_field', 'aw-modules', 'aw_modules_social', array( 'label_for' => 'aw_social_on', 'note' => 'The Social posts list under News, its intake (paste a link in SourceWeb → To review, the CSV import, the workers\' routes) and the hashtag box on each campaign. Off: hidden; saved records are kept.' ) );
 		add_settings_field( 'aw_social_show', 'Show on pages', 'aw_social_settings_field', 'aw-modules', 'aw_modules_social', array( 'label_for' => 'aw_social_show', 'note' => 'Approved social posts as "What people are saying" on the campaign, News, Library and Directory pages they are linked to. Needs the type on.' ) );
 	}
 );
@@ -143,7 +143,7 @@ add_action(
 				'publicly_queryable'  => false,
 				'exclude_from_search' => true,
 				'show_ui'             => true,
-				'show_in_menu'        => AW_CORE_MENU, // Animal Writes → Social posts (12 Nov 2026), after the site's screens
+				'show_in_menu'        => 'edit.php?post_type=aw_news', // under News, no new top-level menu
 				'show_in_nav_menus'   => false,
 				'show_in_admin_bar'   => false,
 				'show_in_rest'        => false, // classic edit screen; no public REST listing
@@ -158,22 +158,6 @@ add_action(
 		}
 	},
 	11 // after the campaign link taxonomy (5) and the content types (10)
-);
-
-// Animal Writes → Social posts last: WordPress adds the item before the plugin's own screens (admin_menu 10), and the
-// first item is where the menu opens, so it moves to the end.
-add_action(
-	'admin_menu',
-	function () {
-		global $submenu;
-		$items = (array) ( $submenu[ AW_CORE_MENU ] ?? array() );
-		$link  = 'edit.php?post_type=' . AW_SOCIAL_TYPE;
-		$mine  = array_filter( $items, fn( $i ) => is_array( $i ) && ( $i[2] ?? '' ) === $link );
-		if ( $mine ) {
-			$submenu[ AW_CORE_MENU ] = array_merge( array_values( array_diff_key( $items, $mine ) ), array_values( $mine ) ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- reorders our own menu.
-		}
-	},
-	999
 );
 
 /**

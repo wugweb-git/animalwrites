@@ -3,11 +3,16 @@
  * The site's own screens (owner, 25 Oct and 10 Nov 2026: our plugins work like any marketplace plugin: an overview of
  * every feature and where it lives, links from the Plugins screen).
  *
- * Animal Writes is its own top-level menu in the Wugweb block (owner, 12 Nov 2026: every plugin its own menu,
- * grouped), with or without Kits Core: Overview, Dates (until PlanWeb has it), Check site (page check, backup, deployed
- * commit, CDN cache times, joined files, email sending, thumbnails, pictures), Contact links, Keys, Modules and Edit
- * screens. With Kits Core, two parts that belong to the theme stay with Kits: Contact links (Theme Options → Socials)
- * and Theme parts (Help → Developer). Old addresses that answered 403 redirect (aw_core_kits_hooks()).
+ * With Kits Core (docs/admin-ui-spec.md §B, §C, §E3; owner, 11 Nov 2026) there is no "Animal Writes" tab or menu item:
+ * the site adds rows and sections to the six Kits screens through Kits' filters (kits_admin_hooks() below):
+ * - Home: Page check, Backup, Deployed commit, Joined files, and until the MailWeb and SourceWeb dashboards have them,
+ *   Email sending, Thumbnails and Pictures; Dates is linked from Home and keeps its address (aw-dates) until PlanWeb.
+ * - Settings: CDN cache times (Performance); Keys and Modules are linked from Settings and keep their addresses
+ *   (aw-keys, aw-modules) until the RankWeb and SourceWeb screens exist.
+ * - Theme Options → Socials: Contact links. Help: the Overview below (Docs) and Edit screens and Theme parts
+ *   (Developer).
+ * The old addresses (animal-writes, aw-site-check, aw-elsewhere, aw-edit-screens, aw-theme-parts) redirect there.
+ * Without Kits Core the screens are Plugins → Animal Writes (one item, the Overview), linked from each other.
  * Content menus (Directory, News, Resources, Library, Opportunities, Campaigns, Press coverage), Classification and
  * Sourcing stay where the content is. Core WordPress only.
  *
@@ -20,14 +25,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 const AW_CORE_MENU = 'animal-writes'; // the Overview's slug: admin.php?page=animal-writes, as before.
 
-/** The menu the site's screens join: the plugin's own top-level menu (12 Nov 2026; it was Kits' menu when present). */
+/** The menu the site's screens join: Kits when Kits Core is loaded, else the plugin's own menu. */
 function aw_core_menu_parent(): string {
-	return AW_CORE_MENU;
-}
-
-/** Kits Core is loaded: Contact links and Theme parts then sit on Kits' screens (theme parts). */
-function aw_core_kits_present(): bool {
-	return defined( 'KITS_MENU' ) && function_exists( 'kits_admin_tabs' );
+	return defined( 'KITS_MENU' ) && function_exists( 'kits_admin_tabs' ) ? KITS_MENU : AW_CORE_MENU;
 }
 
 /**
@@ -47,9 +47,6 @@ function aw_core_screens( bool $all = false ): array {
 	);
 	if ( ! $all && function_exists( 'aw_team_dates_moved' ) && aw_team_dates_moved() ) {
 		unset( $screens['aw-dates'] );
-	}
-	if ( ! $all && aw_core_kits_present() ) {
-		unset( $screens['aw-elsewhere'] ); // Kits → Theme Options → Socials
 	}
 	return $screens;
 }
@@ -73,27 +70,41 @@ function aw_core_screen_cap( string $slug ): string {
 	return aw_core_screens()[ $slug ][1] ?? 'manage_options';
 }
 
-// The plugin's top-level menu in the Wugweb block (kits_admin_fold_menu() places it; the same place without Kits Core).
-// Its screens keep their addresses and hook names (toplevel_page_animal-writes, animal-writes_page_…).
+// Only without Kits Core: Plugins → Animal Writes, opening the Overview (owner, 11 Nov 2026: "all plugins" under
+// Plugins). The other screens stay under the AW_CORE_MENU slug, which WordPress does not list, at their addresses
+// and with their hook names (toplevel_page_animal-writes, animal-writes_page_…); aw_core_screen_nav() links them.
 add_action(
 	'admin_menu',
 	function () {
-		if ( function_exists( 'kits_admin_fold_menu' ) ) {
-			kits_admin_fold_menu( AW_CORE_MENU, '', 'Animal Writes', aw_core_screen_cap( AW_CORE_MENU ), 'animal-writes' );
-		} else {
-			add_menu_page( 'Animal Writes', 'Animal Writes', aw_core_screen_cap( AW_CORE_MENU ), AW_CORE_MENU, '', 'dashicons-pets', '58.15' );
+		if ( AW_CORE_MENU === aw_core_menu_parent() ) {
+			$GLOBALS['admin_page_hooks'][ AW_CORE_MENU ] = 'animal-writes'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- the hook names the top-level menu gave.
+			add_submenu_page( 'plugins.php', 'Animal Writes', 'Animal Writes', aw_core_screen_cap( AW_CORE_MENU ), AW_CORE_MENU, 'aw_core_overview_page' );
 		}
-		add_submenu_page( AW_CORE_MENU, 'Animal Writes', 'Overview', aw_core_screen_cap( AW_CORE_MENU ), AW_CORE_MENU, 'aw_core_overview_page' );
 	},
 	aw_core_menu_priority( AW_CORE_MENU )
 );
+// Its item is lit on the Overview (WordPress lights an admin.php?page= item under Plugins only when told).
+add_filter(
+	'submenu_file',
+	function ( $file, $parent ) {
+		global $plugin_page;
+		return 'plugins.php' === $parent && AW_CORE_MENU === $plugin_page && AW_CORE_MENU === aw_core_menu_parent() ? AW_CORE_MENU : $file;
+	},
+	10,
+	2
+);
 
 /**
- * Under a screen's heading: the site's screens the user can open, as a core sub-list.
+ * Under a screen's heading: with Kits Core, the six Kits tabs (Dates lights Home; Keys and Modules light Settings);
+ * without it, the site's screens the user can open, as a core sub-list.
  *
  * @param string $current The screen's slug.
  */
 function aw_core_screen_nav( string $current ): void {
+	if ( AW_CORE_MENU !== aw_core_menu_parent() ) {
+		kits_admin_tabs( $current );
+		return;
+	}
 	$links = array();
 	foreach ( aw_core_screens() as $slug => $s ) {
 		if ( current_user_can( $s[1] ) ) {
@@ -121,28 +132,39 @@ add_filter(
 	}
 );
 
-/** With Kits Core: the two theme parts on Kits' screens, and old addresses that answered 403. */
+/** The Kits filters Animal Writes uses to add its parts to the six Kits screens (with Kits Core only). */
 function aw_core_kits_hooks(): void {
+	// Old addresses (docs/admin-ui-spec.md §E1). Dates, Keys and Modules keep theirs.
 	add_filter(
 		'kits_admin_redirects',
 		fn( $map ) => array_merge(
 			(array) $map,
 			array(
-				'aw-elsewhere'   => 'kits-options#socials',
-				'aw-theme-parts' => 'kits-help#developer/theme-parts',
-				'aw-core'        => AW_CORE_MENU, // 12 Nov 2026: these two answered 403
-				'aw-cron-health' => 'index.php', // the Scheduled tasks box is on the Dashboard
+				AW_CORE_MENU      => KITS_MENU,
+				'aw-site-check'   => KITS_MENU . '#page-check',
+				'aw-elsewhere'    => 'kits-options#socials',
+				'aw-edit-screens' => 'kits-help#developer/edit-screens',
+				'aw-theme-parts'  => 'kits-help#developer/theme-parts',
+				'aw-core'         => KITS_MENU, // 12 Nov 2026: these two answered 403
+				'aw-cron-health'  => 'index.php', // the Scheduled tasks box is on the Dashboard
 			)
 		)
 	);
+	// The screens that keep their addresses light the tab they are linked from.
 	add_filter(
-		'kits_help_sections',
-		function ( $sections ) {
-			$sections                          = (array) $sections;
-			$sections['developer/theme-parts'] = aw_core_section( 'Developer: theme parts', fn() => kits_admin_embed( 'aw_theme_parts_screen' ), 31 );
-			return $sections;
-		}
+		'kits_screen_tabs',
+		fn( $tabs ) => array_merge(
+			(array) $tabs,
+			array(
+				'aw-dates'   => KITS_MENU,
+				'aw-keys'    => 'kits-settings',
+				'aw-modules' => 'kits-settings',
+			)
+		)
 	);
+	add_filter( 'kits_home_sections', 'aw_core_home_sections' );
+	add_filter( 'kits_settings_sections', 'aw_core_settings_sections' );
+	add_filter( 'kits_help_sections', 'aw_core_help_sections' );
 	// Theme Options → Socials: the Contact page's "Elsewhere" links (its own list until the one socials list, §D1.10).
 	add_action(
 		'kits_options_legacy_section',
@@ -157,7 +179,7 @@ function aw_core_kits_hooks(): void {
 add_action(
 	'plugins_loaded',
 	function () {
-		if ( aw_core_kits_present() ) {
+		if ( AW_CORE_MENU !== aw_core_menu_parent() ) {
 			aw_core_kits_hooks();
 		}
 	},
@@ -181,22 +203,90 @@ function aw_core_section( string $title, callable $render, int $order, string $c
 	);
 }
 
-// Plugins screen: Overview under the plugin's name.
+/**
+ * Kits → Home: the site's checks (docs/admin-ui-spec.md §B1, §D6). Email, thumbnails and pictures stay here until the
+ * MailWeb and SourceWeb dashboards have them (owner, 11 Nov 2026). Nothing WordPress or another plugin already shows
+ * (owner, 11 Nov 2026): backups are UpdraftPlus's, the theme is Appearance → Themes, dates are PlanWeb's.
+ *
+ * @param array $sections Kits' sections.
+ */
+function aw_core_home_sections( $sections ) {
+	$sections                 = (array) $sections;
+	$sections['page-check']   = aw_core_section( 'Page check', 'aw_site_check_results', 20 );
+	$sections['deploy']       = aw_core_section(
+		'Deployed commit',
+		function () {
+			$st = aw_core_overview_status();
+			echo '<p>' . $st['deploy'] . ' ' . $st['cdn'] . ' ' . $st['stage'] . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_core_overview_status() escapes.
+		},
+		40
+	);
+	$sections['joined-files'] = aw_core_section( 'Joined files', 'aw_site_check_joined', 50 );
+	$sections['email']        = aw_core_section( 'Email sending', 'aw_mail_site_check', 70 );
+	$sections['thumbnails']   = aw_core_section( 'Thumbnails', 'aw_thumbs_site_check', 71 );
+	$sections['pictures']     = aw_core_section( 'Pictures', 'aw_cc0_site_check', 72 );
+	return $sections;
+}
+
+/**
+ * Kits → Settings: CDN cache times (Performance), and where the service keys and the optional parts are set now
+ * (RankWeb → Settings and SourceWeb → Settings).
+ *
+ * @param array $sections Kits' sections.
+ */
+function aw_core_settings_sections( $sections ) {
+	$sections                       = (array) $sections;
+	$sections['cdn']                = aw_core_section( 'CDN cache times', 'aw_cdn_settings_box', 15 );
+	$sections['connected-services'] = aw_core_section(
+		'Connected services and modules',
+		function () {
+			echo '<ul>';
+			echo '<li>' . aw_core_link( 'Keys', 'admin.php?page=aw-keys' ) . ': ' . esc_html( 'the service keys the plugins use (Clarity, Bing Webmaster, PageSpeed).' ) . '</li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_core_link() escapes.
+			echo '<li>' . aw_core_link( 'Modules', 'admin.php?page=aw-modules' ) . ': ' . esc_html( 'optional parts of the site: Social posts and the PlanWeb calendar.' ) . '</li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_core_link() escapes.
+			echo '<li>' . aw_core_link( 'RankWeb → Settings', 'admin.php?page=aw-seo-settings' ) . ': ' . esc_html( 'connected services for search.' ) . '</li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_core_link() escapes.
+			echo '<li>' . aw_core_link( 'SourceWeb → Settings', 'admin.php?page=aw-sourcing&tab=settings' ) . ': ' . esc_html( 'Social posts, sourcing lists and Directory enrichment.' ) . '</li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_core_link() escapes.
+			echo '</ul>';
+		},
+		40
+	);
+	return $sections;
+}
+
+/**
+ * Kits → Help: the site's Overview and commands (Docs), Edit screens and Theme parts (Developer).
+ *
+ * @param array $sections Kits' sections.
+ */
+function aw_core_help_sections( $sections ) {
+	$sections                           = (array) $sections;
+	$sections['docs/animal-writes']     = aw_core_section( 'Docs: Animal Writes', fn() => kits_admin_embed( 'aw_core_overview_page' ), 15 );
+	$sections['developer/edit-screens'] = aw_core_section( 'Developer: edit screens', fn() => kits_admin_embed( 'aw_edit_screens_page' ), 30 );
+	$sections['developer/theme-parts']  = aw_core_section( 'Developer: theme parts', fn() => kits_admin_embed( 'aw_theme_parts_screen' ), 31 );
+	return $sections;
+}
+
+// Plugins screen: Overview under the plugin's name (Kits → Help → Docs: Animal Writes, or its own screen without Kits).
 add_filter(
 	'plugin_action_links_' . plugin_basename( AW_CORE_DIR . 'animal-writes-core.php' ),
-	fn( $links ) => array_merge( array( '<a href="' . esc_url( admin_url( 'admin.php?page=' . AW_CORE_MENU ) ) . '">Overview</a>' ), (array) $links )
+	fn( $links ) => array_merge( array( '<a href="' . esc_url( admin_url( AW_CORE_MENU === aw_core_menu_parent() ? 'admin.php?page=' . AW_CORE_MENU : 'admin.php?page=kits-help#docs/animal-writes' ) ) . '">Overview</a>' ), (array) $links )
 );
 
 /**
- * Where a site screen is, relative to wp-admin.
+ * Where a site screen is now, relative to wp-admin: its own address without Kits, else its place in the six.
  *
  * @param string $slug aw-site-check, aw-elsewhere, aw-edit-screens or cdn.
  */
 function aw_core_screen_url( string $slug ): string {
-	if ( 'aw-elsewhere' === $slug && aw_core_kits_present() ) {
-		return 'admin.php?page=kits-options#socials';
+	if ( AW_CORE_MENU === aw_core_menu_parent() ) {
+		return 'admin.php?page=' . ( 'cdn' === $slug ? 'aw-site-check' : $slug );
 	}
-	return 'admin.php?page=' . ( 'cdn' === $slug ? 'aw-site-check' : $slug );
+	$map = array(
+		'aw-site-check'   => 'admin.php?page=' . KITS_MENU . '#page-check',
+		'aw-elsewhere'    => 'admin.php?page=kits-options#socials',
+		'aw-edit-screens' => 'admin.php?page=kits-help#developer/edit-screens',
+		'cdn'             => 'admin.php?page=kits-settings#cdn',
+	);
+	return $map[ $slug ] ?? 'admin.php?page=' . KITS_MENU;
 }
 
 /** A link for the Overview tables. */
@@ -212,7 +302,7 @@ function aw_core_status( bool $ok, string $text ): string {
 /**
  * Status lines from the checks that already run.
  *
- * @param bool $full False: only backup, check, cron and deploy.
+ * @param bool $full False: only backup, check, cron and deploy (Kits → Home).
  */
 function aw_core_overview_status( bool $full = true ): array {
 	$s = array();
@@ -251,7 +341,7 @@ function aw_core_overview_status( bool $full = true ): array {
 	return $s;
 }
 
-/** Animal Writes → Overview. */
+/** The Overview: Kits → Help → Docs: Animal Writes (its own screen without Kits). */
 function aw_core_overview_page() {
 	$st    = aw_core_overview_status();
 	$admin = current_user_can( 'manage_options' );
@@ -288,7 +378,7 @@ function aw_core_overview_page() {
 			function_exists( 'aw_team_dates_moved' ) && aw_team_dates_moved()
 				? array( 'Dates', 'Dates moved to PlanWeb: the team\'s calendar, plans and reminders, and the Next 7 days dashboard box.', aw_core_link( 'Plugins → PlanWeb → Calendar', 'admin.php?page=planweb' ), $st['dates'] )
 				: array( 'Dates', 'The team\'s calendar (observance days, deadlines) and the Dates dashboard widget.', aw_core_link( 'Dates', 'admin.php?page=aw-dates' ), $st['dates'] ),
-			array( 'Check site', 'Loads one page of every kind and reports any that do not open cleanly; also in the admin bar.', $admin ? aw_core_link( 'Animal Writes → Check site', aw_core_screen_url( 'aw-site-check' ) ) : 'Administrators', $st['check'] ),
+			array( 'Check site', 'Loads one page of every kind and reports any that do not open cleanly; also in the admin bar.', $admin ? aw_core_link( 'Appearance → Kits → Home → Page check', aw_core_screen_url( 'aw-site-check' ) ) : 'Administrators', $st['check'] ),
 			array( 'Contact links', 'The "Elsewhere" links on the Contact page.', aw_core_link( 'Contact links', aw_core_screen_url( 'aw-elsewhere' ) ), $auto ),
 			array( 'Keys', 'Service keys the plugins use (Clarity, Bing Webmaster, PageSpeed): paste once, never shown again; a wp-config.php constant wins.', $admin ? aw_core_link( 'Keys', 'admin.php?page=aw-keys' ) : 'Administrators', $auto ),
 			array( 'Edit screens', 'Every box on each edit screen (WordPress, plugins and ours), the keys it stores and where each key is used.', $admin ? aw_core_link( 'Edit screens', aw_core_screen_url( 'aw-edit-screens' ) ) : 'Administrators', $auto ),
@@ -376,7 +466,7 @@ function aw_core_overview_attention( array $groups ): void {
 	$items = array();
 	foreach ( $groups as $rows ) {
 		foreach ( $rows as $r ) {
-			// Check site has its own screen; not repeated here.
+			// Check site is on Kits → Home → Page check already; not repeated here.
 			if ( 'Check site' !== $r[0] && false !== strpos( (string) $r[3], 'dashicons-warning' ) ) {
 				$items[] = '<li><strong>' . esc_html( $r[0] ) . '</strong>: ' . esc_html( trim( wp_strip_all_tags( (string) $r[3] ) ) ) . ( '' !== $r[2] && '—' !== $r[2] ? ' (' . $r[2] . ')' : '' ) . '</li>';
 			}

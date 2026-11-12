@@ -15,7 +15,7 @@ the same with or without Kits Core), then third-party plugins as their vendors s
 | Directory › Claims | Core `claims-review.php:296` | keep: claim review stays here; DirectoryWeb › Claims is read-only (owner, 11–12 Nov) |
 | News › News, Add News item | Core (CPT `aw_news`) | keep |
 | News › Linked campaigns | taxonomy `aw_campaign_link` | **done 12 Nov**: one entry under Classification |
-| News › Social posts | Core `social-posts.php:146` (CPT `aw_social`) | **done 12 Nov**: Animal Writes › Social posts (last item) |
+| News › Social posts | Core `social-posts.php:146` (CPT `aw_social`) | keep under News (no Animal Writes menu: Animal Writes is the site layer and goes with the child theme (plan 4.3), so its screens stay in Kits (owner, 12 Nov)) |
 | Resources › All Resources, Add New Resource | core `post` | keep |
 | Resources › Linked campaigns | taxonomy | **done** (as above) |
 | Library › Library, Add Library item, Linked campaigns | Core (CPT `aw_legal`) | keep; Linked campaigns **done** |
@@ -31,7 +31,7 @@ the same with or without Kits Core), then third-party plugins as their vendors s
 | Appearance › Themes, Editor, Fonts | core | keep |
 | Kits | Kits Core `admin-home.php:22` | **done 12 Nov**: its own top-level menu, first in the Wugweb block |
 | Appearance › Theme Check | Theme Check | keep |
-| Kits, Animal Writes, DirectoryWeb, SourceWeb, RankWeb, InsightWeb, MailWeb, PlanWeb | Kits Core `admin-fold.php` (`kits_wugweb_menu_slots()`), each plugin's own call without Kits Core | **done 12 Nov**: each its own top-level menu, one block after a separator, the same order without Kits Core (`admin-ia.php` menu order) |
+| Kits, DirectoryWeb, SourceWeb, RankWeb, InsightWeb, MailWeb, PlanWeb | Kits Core `admin-fold.php` (`kits_wugweb_menu_slots()`), each plugin's own call without Kits Core | **done 12 Nov**: each its own top-level menu, one block after a separator, the same order without Kits Core (`admin-ia.php` menu order) |
 | Tools › Plugin Check, Plugin Check Namer, Plugin Check SVN | Plugin Check | keep (development tool) |
 | Settings › Performance, Plugin Check, Simple History | third party | keep |
 | Site Kit, LiteSpeed Cache, FluentCRM, Fluent Forms, UpdraftPlus | third party | keep |
@@ -42,17 +42,17 @@ the same with or without Kits Core), then third-party plugins as their vendors s
 
 | Address | Today | Proposal |
 |---|---|---|
-| `admin.php?page=aw-keys` (Keys) | hidden, linked from Kits › Help | **done 12 Nov**: Animal Writes › Keys |
-| `admin.php?page=aw-modules` (Modules) | hidden | **done 12 Nov**: Animal Writes › Modules |
+| `admin.php?page=aw-keys` (Keys) | Kits › Keys | keep in Kits (no Animal Writes menu: Animal Writes is the site layer and goes with the child theme (plan 4.3), so its screens stay in Kits (owner, 12 Nov)) |
+| `admin.php?page=aw-modules` (Modules) | Kits › Modules | keep in Kits (as above) |
 | `admin.php?page=aw-dates` | redirects to PlanWeb classic | keep the redirect, to PlanWeb's shell screen |
 | `aw-theme-parts`, `kits-docs` | redirect to Kits › Help | keep redirects |
-| `kits-fonts`, `kits-design-system`, `aw-cron-health`, `aw-core` | **403 "not allowed"** | **redirect**: fonts → Appearance › Editor › Styles › Typography; design system → Kits › Help › Design system; cron health → Animal Writes › Site checks; aw-core → Animal Writes |
+| `kits-fonts`, `kits-design-system`, `aw-cron-health`, `aw-core` | **403 "not allowed"** | **redirect**: fonts → Appearance › Editor › Styles › Typography; design system → Kits › Help › Design system; cron health → Dashboard; aw-core → Kits (**done 12 Nov**) |
 
 ## 3. Tabs inside our screens
 
 | Screen | Tabs today | Proposal |
 |---|---|---|
-| Kits | Home, Theme Options, Settings, Tools, Help | **done 12 Nov**: the site's checks (Page check, backup, deployed commit, CDN cache times, joined files, email, thumbnails, pictures) are Animal Writes › Check site; Keys, Modules, Edit screens are Animal Writes items; Kits Home is the theme's own (Edit the theme: Site Editor links). Contact links stay in Theme Options › Socials and Theme parts in Help › Developer (theme parts). Theme Options: **map** to the Site Editor where core can hold it (plan phase 4.7). |
+| Kits | Home, Theme Options, Settings, Tools, Help | Home: **added 12 Nov** Edit the theme (Site Editor links) above the site's checks; the site's checks stay on Home (no Animal Writes menu: Animal Writes is the site layer and goes with the child theme (plan 4.3), so its screens stay in Kits (owner, 12 Nov)). Theme Options: **map** to the Site Editor where core can hold it (plan phase 4.7). |
 | Kits › Settings | Performance, CDN cache times, Shared cache, Compatibility, Preview access/IPs/devices, Connected services and modules | keep; group as sections with one line each |
 | Kits › Help | Design system (tokens, states, components 160, menus, contrast), edit-screens map (mapping, schema, third-party boxes), docs | **rename** the developer parts to Help › Developer; keep design system |
 | RankWeb | Dashboard, FAQ, Settings | add **Tools** (re-score, rebuild FAQ index) and **Help**; Settings tabs stay |
@@ -86,7 +86,7 @@ on `@wordpress/components`): **merge** to one screen per product once the shell 
 `aw_category_card`, `aw_pinned`, `aw_short_name`, `aw_campaign_short`; post meta `aw_campaign_metrics`, `aw_legal_dated`.
 Proposal: **add** each to its owner's Settings section or edit box.
 
-**Done 12 Nov:** `aw_ff_send_email`, `aw_nl_ff_form_full`, `aw_sample_listing_ids` on Animal Writes › Modules › Forms and sample listings (`site-options.php`). Next: RankWeb (`aw_default_share_image`, `aw_seo_keep_listings`), SourceWeb (`aw_backfill_floor`), the two Core lists (`aw_district_helplines`, `aw_issuer_short`), `kits_ga4_via_gtm` read-only, then the term and post meta.
+**Done 12 Nov:** `aw_ff_send_email`, `aw_nl_ff_form_full`, `aw_sample_listing_ids` on Kits › Modules › Forms and sample listings (`site-options.php`). Next: RankWeb (`aw_default_share_image`, `aw_seo_keep_listings`), SourceWeb (`aw_backfill_floor`), the two Core lists (`aw_district_helplines`, `aw_issuer_short`), `kits_ga4_via_gtm` read-only, then the term and post meta.
 
 ## 7. Plugin list vs docs
 
