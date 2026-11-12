@@ -19,7 +19,7 @@
  *     No match: tried again after 7 days, at most 3 times (aw_cc0_status, aw_cc0_attempts).
  *
  * Openverse: no key, a descriptive User-Agent, one request per 2 s, at most AW_CC0_DAILY_REQUESTS a day; result
- * pages are cached for a week. Counts and the log: Kits → Home → Pictures.
+ * pages are cached for a week. Counts and the log: Animal Writes → Check site → Pictures.
  *
  * @package animal-writes-core
  */
@@ -921,7 +921,7 @@ function aw_cc0_sideload( $post_id, $x, $q, &$used ) {
 	return (int) $att;
 }
 
-/** Counts for Kits → Home → Pictures. */
+/** Counts for Animal Writes → Check site → Pictures. */
 function aw_cc0_counts() {
 	global $wpdb;
 	$from = aw_cc0_items_sql();
@@ -950,7 +950,7 @@ function aw_cc0_counts() {
 	return array_map( 'intval', (array) $row );
 }
 
-/** Kits → Home → Pictures (until the SourceWeb dashboard has it): publisher images and CC0 photos. */
+/** Animal Writes → Check site → Pictures (until the SourceWeb dashboard has it): publisher images and CC0 photos. */
 function aw_cc0_site_check() {
 	$c = aw_cc0_counts();
 	echo '<h2>Pictures on News, Library and research items</h2><table class="form-table" role="presentation"><tbody>';

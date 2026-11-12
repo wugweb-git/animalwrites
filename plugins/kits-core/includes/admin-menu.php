@@ -164,7 +164,11 @@ function kits_screen_sections( string $screen ): array {
 	$filter = '';
 	if ( KITS_MENU === $screen ) {
 		$filter = 'kits_home_sections';
-		$own    = array(); // Versions: Tools → Site Health; setup: done once (owner, 11 Nov 2026: no copies of what WordPress does).
+		// The theme's own dashboard (12 Nov 2026): where each part of the theme is edited. Versions are Tools → Site
+		// Health; setup is done once (owner, 11 Nov 2026: no copies of what WordPress does).
+		$own = array(
+			'theme' => array( 'Edit the theme', 'kits_home_theme', 'edit_theme_options', 10 ),
+		);
 	} elseif ( 'kits-settings' === $screen ) {
 		$filter = 'kits_settings_sections';
 		$own    = array(
@@ -260,7 +264,16 @@ function kits_sections_back( array $sections ): void {
 
 /** Kits → Home. */
 function kits_home_page() {
-	kits_sections_page( KITS_MENU, 'Home', 'Kits by Wugweb is the site\'s design system: the theme draws every page, Kits Core adds the features every Kits site shares. This site\'s versions and checks, then where to change things.' );
+	kits_sections_page( KITS_MENU, 'Home', 'Kits by Wugweb is the site\'s design system: the theme draws every page, Kits Core adds the features every Kits site shares. Where each part of the theme is changed.' );
+}
+
+/** Kits → Home → Edit the theme: the Site Editor screens that hold the theme's settings. */
+function kits_home_theme(): void {
+	echo '<p>' . esc_html( 'The theme is edited in the Site Editor. Each link opens the place that holds that part.' ) . '</p><ul>';
+	foreach ( kits_theme_screens() as $s ) {
+		echo '<li>' . kits_link( $s[0], $s[1] ) . '</li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- kits_link() escapes.
+	}
+	echo '</ul>';
 }
 
 /** Kits → Settings. */

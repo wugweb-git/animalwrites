@@ -394,7 +394,7 @@ add_shortcode(
 add_action(
 	'admin_menu',
 	function () {
-		if ( AW_CORE_MENU === aw_core_menu_parent() ) {
+		if ( ! aw_core_kits_present() ) {
 			add_submenu_page( AW_CORE_MENU, 'Contact links', 'Contact links', aw_core_screen_cap( 'aw-elsewhere' ), 'aw-elsewhere', 'aw_elsewhere_screen' );
 		}
 	},
@@ -419,7 +419,7 @@ function aw_elsewhere_screen() {
 	$rows = array_merge( aw_elsewhere_links(), array_fill( 0, 4, array() ) );
 	echo '<div class="wrap"><h1>Contact links</h1>';
 	aw_core_screen_nav( 'aw-elsewhere' );
-	echo '<p>Shown under "Elsewhere" on the <a href="' . esc_url( home_url( '/contact/' ) ) . '" target="_blank">Contact</a> page; the section stays hidden while this list is empty. Use the platform name as the label (for example Instagram).</p><form method="post" action="' . esc_url( admin_url( AW_CORE_MENU === aw_core_menu_parent() ? 'admin.php?page=aw-elsewhere' : 'admin.php?page=kits-options&kits_section=socials' ) ) . '">'; // Back to the same place after saving (Kits → Theme Options → Socials).
+	echo '<p>Shown under "Elsewhere" on the <a href="' . esc_url( home_url( '/contact/' ) ) . '" target="_blank">Contact</a> page; the section stays hidden while this list is empty. Use the platform name as the label (for example Instagram).</p><form method="post" action="' . esc_url( admin_url( ! aw_core_kits_present() ? 'admin.php?page=aw-elsewhere' : 'admin.php?page=kits-options&kits_section=socials' ) ) . '">'; // Back to the same place after saving (Kits → Theme Options → Socials).
 	wp_nonce_field( 'aw_elsewhere' );
 	$cells = array();
 	foreach ( $rows as $i => $r ) {

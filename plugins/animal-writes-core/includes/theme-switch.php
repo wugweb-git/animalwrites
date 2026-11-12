@@ -11,7 +11,7 @@
  * - theme mods: only the keys Kits does not already have; a positive custom_css_post_id is not copied (that
  *   Additional CSS post belongs to the child).
  * The child's records are never changed, so switching back to it finds them as they were. Each run is recorded in
- * option aw_theme_switch_log (last 10) and shown on Kits → Home → Theme switch.
+ * option aw_theme_switch_log (last 10) and shown on Animal Writes → Check site → Theme switch.
  *
  * @package animal-writes-core
  */
@@ -143,7 +143,7 @@ function aw_theme_switch_copy( $value, $old_value ) {
 }
 add_filter( 'pre_update_option_stylesheet', 'aw_theme_switch_copy', 10, 2 );
 
-/** Kits → Home → Theme switch: the last theme switch from the child to Kits, if there was one. */
+/** Animal Writes → Check site → Theme switch: the last theme switch from the child to Kits, if there was one. */
 function aw_theme_switch_site_check() {
 	if ( ! current_user_can( 'switch_themes' ) ) {
 		return;

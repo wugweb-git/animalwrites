@@ -113,13 +113,19 @@ admok() { # NAME PATH: 200, no PHP error, not refused
 }
 for s in kits kits-options kits-settings kits-tools kits-help; do admok "Kits → $s" "admin.php?page=$s"; done
 adm "admin.php?page=kits&ui=classic" >/dev/null # the earlier screens (the new look is the default; checked below)
-# Kits is one item under Appearance (owner, 11 Nov 2026); the five are its tabs, in order (Plugins is WordPress's).
+# Kits is its own menu in the Wugweb block (owner, 12 Nov 2026); the five are its tabs, in order.
 got=$(grep -oE '<a class="nav-tab[^"]*" href="[^"]*page=[^"&]+' /tmp/admin.html | sed 's/.*page=//' | tr '\n' ' ' | sed 's/ $//')
 if [ "$got" = "kits kits-options kits-settings kits-tools kits-help" ]; then echo "ok   Kits tabs are the five"; else echo "FAIL Kits tabs: $got"; FAIL=1; fi
 n=$(grep -o '<a class="nav-tab' /tmp/admin.html | wc -l | tr -d ' ')
 if [ "$n" = "5" ]; then echo "ok   five Kits tabs"; else echo "FAIL $n Kits tabs, want 5"; FAIL=1; fi
-has "Home: page check (Animal Writes)" /tmp/admin.html 'id="page-check"'
-has "Home: email, thumbnails and pictures stay" /tmp/admin.html 'id="pictures"'
+has "Home: edit the theme (Site Editor links)" /tmp/admin.html 'id="theme"'
+grep -qF 'id="page-check"' /tmp/admin.html && { echo "FAIL Home still has the site's page check (Animal Writes → Check site)"; FAIL=1; } || echo "ok   Home: the site's checks are Animal Writes'"
+# Animal Writes → Check site: page check, CDN cache times, email, thumbnails, pictures (12 Nov 2026).
+admok "Animal Writes → Check site" "admin.php?page=aw-site-check"
+has "Check site: page check" /tmp/admin.html 'action=aw_site_check'
+has "Check site: CDN cache times" /tmp/admin.html "name='option_page' value='aw_cdn'"
+has "Check site: thumbnails" /tmp/admin.html '<h2>Thumbnails</h2>'
+for s in animal-writes aw-edit-screens; do admok "Animal Writes → $s" "admin.php?page=$s"; done
 # Nothing WordPress or another plugin already shows (owner, 11 Nov 2026), and no row of section links.
 for id in versions backup dates theme-switch setup; do grep -qF "id=\"$id\"" /tmp/admin.html && { echo "FAIL Home still has $id"; FAIL=1; } || echo "ok   Home: no $id"; done
 grep -q 'class="subsubsub"' /tmp/admin.html && { echo "FAIL Home: section link row"; FAIL=1; } || echo "ok   Home: no section link row"
@@ -128,15 +134,10 @@ to=$(curl -s -b "$JAR" -o /dev/null -w '%{redirect_url}' "http://127.0.0.1:8080/
 case "$to" in */wp-admin/plugins.php) echo "ok   kits-plugins goes to Plugins";; *) echo "FAIL kits-plugins goes to: $to"; FAIL=1;; esac
 grep -q 'page=kits-plugins' /tmp/admin.html && { echo "FAIL Home still links to Kits → Plugins"; FAIL=1; } || echo "ok   no Kits → Plugins link"
 adm "admin.php?page=kits-settings&ui=classic" >/dev/null
-has "Settings: CDN cache times" /tmp/admin.html 'id="cdn"'
 has "Settings: preview access" /tmp/admin.html 'id="kits-preview-ips"'
-# Keys and modules are set in RankWeb → Settings and SourceWeb → Settings now (0b010493, 12 Nov 2026).
-has "Settings: RankWeb Settings linked" /tmp/admin.html 'page=aw-seo-settings'
-has "Settings: SourceWeb Settings linked" /tmp/admin.html 'page=aw-sourcing&#038;tab=settings'
 adm "admin.php?page=kits-help&ui=classic" >/dev/null
 has "Help: docs" /tmp/admin.html 'id="docs"'
 has "Help: design system" /tmp/admin.html 'id="design-system"'
-has "Help: edit screens" /tmp/admin.html 'id="developer/edit-screens"'
 has "Help: theme parts" /tmp/admin.html 'id="developer/theme-parts"'
 adm "admin.php?page=kits-help&tab=components&ui=classic" >/dev/null # Design system: the plugins here are links into the repo checkout
 if grep -qF -e "$REPO/" -e "$WP/" /tmp/admin.html; then echo "FAIL Help → Design system prints a server path:"; grep -oF -e "$REPO/" -e "$WP/" /tmp/admin.html | sort | uniq -c | head -3; FAIL=1; else echo "ok   Help → Design system: no server paths"; fi
@@ -156,10 +157,8 @@ kits-transfer admin.php?page=kits-tools
 kits-docs admin.php?page=kits-help#docs
 kits-system admin.php?page=kits-help#design-system
 kits-preview admin.php?page=kits-settings#preview
-animal-writes admin.php?page=kits
-aw-site-check admin.php?page=kits#page-check
 aw-elsewhere admin.php?page=kits-options#socials
-aw-edit-screens admin.php?page=kits-help#developer/edit-screens
+aw-core admin.php?page=animal-writes
 aw-theme-parts admin.php?page=kits-help#developer/theme-parts
 kits-system&tab=states admin.php?page=kits-help&tab=states#design-system
 MAP
@@ -177,11 +176,11 @@ opts >/tmp/opts-after.txt
 gone=$(comm -23 <(sort /tmp/opts-before.txt) <(sort /tmp/opts-after.txt))
 added=$(comm -13 <(cut -d' ' -f1 /tmp/opts-before.txt | sort) <(cut -d' ' -f1 /tmp/opts-after.txt | sort) | tr '\n' ' ')
 if [ -z "$gone" ]; then echo "ok   every setting kept with its value ($(wc -l </tmp/opts-before.txt | tr -d ' ') options)${added:+; new: $added}"; else echo "FAIL settings changed or gone:"; echo "$gone" | head -20; FAIL=1; fi
-# Kits under Appearance, our plugins under Plugins (owner, 11 Nov 2026). As an administrator and as an editor, each
-# screen's old address (admin.php?page=…) answers as before: 200 where the role may open it, 403 where it may not. On
-# each screen that opens, Appearance or Plugins is the open menu with the product's item lit, and no product has a
-# top-level menu; an editor sees Plugins with only the items they may open. PlanWeb is on for this part, off after.
-echo "-- menus under Appearance and Plugins"
+# Each product its own top-level menu, grouped in one Wugweb block (owner, 12 Nov 2026). As an administrator and as an
+# editor, each screen's address answers as before: 200 where the role may open it, 403 where it may not. On each screen
+# that opens, the product's own menu is the open one (and ITEM lit, unless -); nothing sits under Appearance or Plugins.
+# PlanWeb is on for this part, off after.
+echo "-- menus: the Wugweb block"
 wp plugin activate planweb --quiet
 wp user create ci-editor ci-editor@example.invalid --role=editor --user_pass=ci-editor-only --quiet
 EJAR=/tmp/ci-cookies-editor.txt; rm -f "$EJAR"
@@ -189,7 +188,7 @@ curl -s -o /dev/null -c "$EJAR" http://127.0.0.1:8080/wp-login.php
 curl -s -o /dev/null -b "$EJAR" -c "$EJAR" --data-urlencode log=ci-editor --data-urlencode pwd=ci-editor-only --data-urlencode testcookie=1 --data-urlencode redirect_to=http://127.0.0.1:8080/wp-admin/ http://127.0.0.1:8080/wp-login.php
 as_role() { if [ "$1" = "editor" ]; then echo "$EJAR"; else echo "$JAR"; fi; }
 menu_read() { python3 "$REPO/tools/ci/admin_menu_read.py" /tmp/admin.html "$1"; }
-# ROLE PAGE CODE MENU ITEM: the page's address answers CODE; when 200, MENU (its li id) is open with ITEM lit.
+# ROLE PAGE CODE MENU ITEM: the page's address answers CODE; when 200, toplevel_page_MENU is open with ITEM lit.
 while read -r role page want mid item; do
   [ -z "$role" ] && continue
   code=$(curl -s -b "$(as_role "$role")" -o /tmp/admin.html -w '%{http_code}' "http://127.0.0.1:8080/wp-admin/admin.php?page=$page")
@@ -198,39 +197,43 @@ while read -r role page want mid item; do
     continue
   fi
   if [ "$code" != "200" ] || grep -qiE 'critical error|Fatal error|Parse error|Sorry, you are not allowed' /tmp/admin.html; then echo "FAIL $code $role $page"; FAIL=1; continue; fi
-  m=$(menu_read "$mid")
-  if echo "$m" | grep -qx "open yes" && echo "$m" | grep -qx "current $item"; then echo "ok   200 $role $page: $mid open, $item lit"; else echo "FAIL $role $page: want $mid open with $item lit, got: $(echo "$m" | head -2 | tr '\n' ' ')"; FAIL=1; fi
-  top=$(echo "$m" | sed -n 's/^toplevel //p' | tr ' ' '\n' | grep -E '^toplevel_page_(kits|aw-seo-plus|aw-search-insights|aw-sourcing-menu|mailweb|planweb|animal-writes)$' || true)
-  if [ -n "$top" ]; then echo "FAIL $role $page: top-level menus left: $top"; FAIL=1; fi
+  m=$(menu_read "toplevel_page_$mid")
+  if echo "$m" | grep -qx "open yes" && { [ "$item" = "-" ] || echo "$m" | grep -qx "current $item"; }; then echo "ok   200 $role $page: $mid open${item:+, $item lit}"; else echo "FAIL $role $page: want $mid open with $item lit, got: $(echo "$m" | head -2 | tr '\n' ' ')"; FAIL=1; fi
+  for under in menu-appearance menu-plugins; do
+    left=$(menu_read "$under" | sed -n 's/^items //p' | tr ' ' '\n' | grep -E '^(kits|animal-writes|aw-seo-plus|aw-search-insights|aw-sourcing-menu|mailweb|planweb|directoryweb)$' || true)
+    if [ -n "$left" ]; then echo "FAIL $role $page: still under $under: $left"; FAIL=1; fi
+  done
 done <<'PAGES'
-administrator kits 200 menu-appearance kits
-administrator kits-options 200 menu-appearance kits
-administrator kits-settings 200 menu-appearance kits
-administrator kits-tools 200 menu-appearance kits
-administrator kits-help 200 menu-appearance kits
-administrator aw-keys 200 menu-appearance kits
-administrator aw-modules 200 menu-appearance kits
-administrator aw-seo-plus 200 menu-plugins aw-seo-plus
-administrator aw-faq 200 menu-plugins aw-seo-plus
-administrator aw-seo-settings 200 menu-plugins aw-seo-plus
-administrator aw-search-insights 200 menu-plugins aw-search-insights
-administrator aw-sourcing-menu 200 menu-plugins aw-sourcing-menu
-administrator aw-review 200 menu-plugins aw-sourcing-menu
-administrator aw-enrich-review 200 menu-plugins aw-sourcing-menu
-administrator aw-sourcing 200 menu-plugins aw-sourcing-menu
-administrator aw-sourcing&tab=keywords 200 menu-plugins aw-sourcing-menu
-administrator mailweb 200 menu-plugins mailweb
-administrator mailweb-overview 200 menu-plugins mailweb
-administrator mailweb-settings 200 menu-plugins mailweb
-administrator planweb 200 menu-plugins planweb
-editor aw-seo-plus 200 menu-plugins aw-seo-plus
-editor aw-faq 200 menu-plugins aw-seo-plus
-editor aw-sourcing-menu 200 menu-plugins aw-sourcing-menu
-editor aw-review 200 menu-plugins aw-sourcing-menu
-editor aw-enrich-review 200 menu-plugins aw-sourcing-menu
-editor mailweb 200 menu-plugins mailweb
-editor mailweb-overview 200 menu-plugins mailweb
-editor planweb 200 menu-plugins planweb
+administrator kits 200 kits kits
+administrator kits-options 200 kits kits-options
+administrator kits-settings 200 kits kits-settings
+administrator kits-tools 200 kits kits-tools
+administrator kits-help 200 kits kits-help
+administrator animal-writes 200 animal-writes animal-writes
+administrator aw-site-check 200 animal-writes aw-site-check
+administrator aw-keys 200 animal-writes aw-keys
+administrator aw-modules 200 animal-writes aw-modules
+administrator aw-seo-plus 200 aw-seo-plus aw-seo-plus
+administrator aw-faq 200 aw-seo-plus aw-faq
+administrator aw-seo-settings 200 aw-seo-plus aw-seo-settings
+administrator aw-search-insights 200 aw-search-insights -
+administrator aw-sourcing-menu 200 aw-sourcing-menu -
+administrator aw-review 200 aw-sourcing-menu -
+administrator aw-enrich-review 200 aw-sourcing-menu -
+administrator aw-sourcing 200 aw-sourcing-menu -
+administrator aw-sourcing&tab=keywords 200 aw-sourcing-menu -
+administrator mailweb 200 mailweb -
+administrator mailweb-overview 200 mailweb -
+administrator mailweb-settings 200 mailweb -
+administrator planweb 200 planweb -
+editor aw-seo-plus 200 aw-seo-plus aw-seo-plus
+editor aw-faq 200 aw-seo-plus aw-faq
+editor aw-sourcing-menu 200 aw-sourcing-menu -
+editor aw-review 200 aw-sourcing-menu -
+editor aw-enrich-review 200 aw-sourcing-menu -
+editor mailweb 200 mailweb -
+editor mailweb-overview 200 mailweb -
+editor planweb 200 planweb -
 editor aw-seo-settings 403
 editor aw-search-insights 403
 editor aw-sourcing 403
@@ -238,17 +241,15 @@ editor mailweb-settings 403
 editor kits 403
 editor kits-tools 403
 PAGES
-# The items each role sees under Plugins and Appearance (read on a screen where the menu is open).
+# The block, in order, after one separator: the menus each role sees (read on any screen).
 curl -s -b "$JAR" -o /tmp/admin.html "http://127.0.0.1:8080/wp-admin/admin.php?page=aw-seo-plus"
-got=$(menu_read menu-plugins | sed -n 's/^items //p')
-for i in aw-seo-plus aw-search-insights aw-sourcing-menu mailweb planweb; do case " $got " in *" $i "*) echo "ok   administrator: Plugins has $i" ;; *) echo "FAIL administrator: no $i under Plugins ($got)"; FAIL=1 ;; esac; done
-curl -s -b "$JAR" -o /tmp/admin.html "http://127.0.0.1:8080/wp-admin/admin.php?page=kits"
-got=$(menu_read menu-appearance | sed -n 's/^items //p')
-case " $got " in *" kits "*) echo "ok   administrator: Appearance has Kits" ;; *) echo "FAIL administrator: no Kits under Appearance ($got)"; FAIL=1 ;; esac
+got=$(menu_read menu-plugins | sed -n 's/^toplevel //p' | tr ' ' '\n' | grep -E '^toplevel_page_(kits|animal-writes|directoryweb|aw-sourcing-menu|aw-seo-plus|aw-search-insights|mailweb|planweb)$' | sed 's/^toplevel_page_//' | tr '\n' ' ' | sed 's/ $//')
+if [ "$got" = "kits animal-writes aw-sourcing-menu aw-seo-plus aw-search-insights mailweb planweb" ] || [ "$got" = "kits animal-writes directoryweb aw-sourcing-menu aw-seo-plus aw-search-insights mailweb planweb" ]; then echo "ok   administrator: the Wugweb block in order ($got)"; else echo "FAIL administrator: Wugweb block: $got"; FAIL=1; fi
+grep -q 'id="separator-wugweb"' /tmp/admin.html && echo "ok   a separator above the block" || { echo "FAIL no separator above the Wugweb block"; FAIL=1; }
 curl -s -b "$EJAR" -o /tmp/admin.html "http://127.0.0.1:8080/wp-admin/admin.php?page=aw-seo-plus"
-got=$(menu_read menu-plugins | sed -n 's/^items //p' | tr ' ' '\n' | sort | tr '\n' ' ' | sed 's/ $//')
-if [ "$got" = "aw-seo-plus aw-sourcing-menu mailweb planweb" ]; then echo "ok   editor: Plugins holds RankWeb, SourceWeb, MailWeb, PlanWeb only"; else echo "FAIL editor: Plugins holds: $got"; FAIL=1; fi
-if menu_read menu-appearance | grep -qx "items"; then echo "ok   editor: no Appearance (as before)"; else echo "FAIL editor: Appearance shown"; FAIL=1; fi
+got=" $(menu_read menu-plugins | sed -n 's/^toplevel //p') "
+for i in aw-seo-plus aw-sourcing-menu mailweb planweb; do case "$got" in *" toplevel_page_$i "*) echo "ok   editor: has $i" ;; *) echo "FAIL editor: no $i menu"; FAIL=1 ;; esac; done
+for i in kits aw-search-insights; do case "$got" in *" toplevel_page_$i "*) echo "FAIL editor: sees $i"; FAIL=1 ;; *) echo "ok   editor: no $i (as before)" ;; esac; done
 # A product's tabs reach its other screens; the tab shown is marked.
 curl -s -b "$JAR" -o /tmp/admin.html "http://127.0.0.1:8080/wp-admin/admin.php?page=aw-sourcing&tab=keywords"
 has "SourceWeb tabs: Keywords marked" /tmp/admin.html 'nav-tab nav-tab-active" href="http://127.0.0.1:8080/wp-admin/admin.php?page=aw-sourcing&#038;tab=keywords"'
@@ -397,7 +398,7 @@ while read -r page section; do
   if grep -q 'class="kits-shell-header"' /tmp/rw.out; then echo "FAIL $page&ui=classic: still the new look"; FAIL=1; else echo "ok   $page&ui=classic: the earlier screen"; fi
   want 403 "admin.php?page=$page&ui=next (subscriber)" -b /tmp/cj-rw-sub "$H/wp-admin/admin.php?page=$page&ui=next"
 done <<'FRAME'
-kits page-check
+kits theme
 kits-settings preview
 kits-tools export
 kits-help docs

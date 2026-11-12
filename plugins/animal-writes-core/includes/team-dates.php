@@ -205,12 +205,12 @@ add_action(
 		if ( aw_team_dates_moved() ) {
 			return; // PlanWeb opens admin.php?page=aw-dates as its Calendar.
 		}
-		add_submenu_page( aw_core_menu_parent(), 'Dates', 'Dates', aw_core_screen_cap( 'aw-dates' ), 'aw-dates', 'aw_team_dates_screen' ); // Kits → Dates
+		add_submenu_page( aw_core_menu_parent(), 'Dates', 'Dates', aw_core_screen_cap( 'aw-dates' ), 'aw-dates', 'aw_team_dates_screen' ); // Animal Writes → Dates
 	},
 	aw_core_menu_priority( 'aw-dates' ) // order: aw_core_screens() (admin-home.php)
 );
 
-/** Kits → Dates. */
+/** Animal Writes → Dates. */
 function aw_team_dates_screen() {
 	if ( ! current_user_can( AW_DATES_CAP ) ) {
 		wp_die( 'Not allowed.', 403 );

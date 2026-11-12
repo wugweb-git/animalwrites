@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_SHARED_TAXONOMIES = array( 'category', 'post_tag' ); // WordPress's own Categories and Tags, on every section // places are not a list any more (LGD file, places.php)
+const AW_SHARED_TAXONOMIES = array( 'category', 'post_tag', 'aw_campaign_link' ); // Categories, Tags and Linked campaigns: on every section, listed once under Classification (12 Nov 2026) // places are not a list any more (LGD file, places.php)
 
 /* ---------- Comments off ---------- */
 
@@ -186,8 +186,8 @@ add_filter(
 	}
 );
 
-// Menu order: the site's order, then WordPress's own screens. Kits is under Appearance and our plugins under Plugins
-// (owner, 11 Nov 2026), so they are not in this list.
+// Menu order: the site's content, then the Wugweb block (each product its own menu, owner 12 Nov 2026; Kits Core's
+// kits_wugweb_menu_slots() has the same order), then WordPress's own screens. Third-party menus follow.
 add_filter( 'custom_menu_order', '__return_true', PHP_INT_MAX );
 add_filter(
 	'menu_order',
@@ -204,6 +204,15 @@ add_filter(
 			'edit.php?post_type=page',
 			'upload.php',
 			'aw-classification',
+			'separator-wugweb',
+			'kits',
+			'animal-writes',
+			'directoryweb',
+			'aw-sourcing-menu',
+			'aw-seo-plus',
+			'aw-search-insights',
+			'mailweb',
+			'planweb',
 			'separator2',
 			'themes.php',
 			'plugins.php',

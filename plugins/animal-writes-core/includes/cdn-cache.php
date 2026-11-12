@@ -113,7 +113,7 @@ add_action(
 );
 
 /**
- * Kits → Settings → Performance (Check site without Kits): a "Shared cache (CDN)" section for both lifetimes (owner, 2 Nov 2026). Core Settings API
+ * Animal Writes → Check site: a "Shared cache (CDN)" section for both lifetimes (owner, 2 Nov 2026). Core Settings API
  * and core markup only. Whole seconds: 0 (off; for the long one, the same as the short one) or 60 to 3600; anything
  * else is clamped into that range. The header a public page gets now is shown under the fields.
  *
@@ -170,14 +170,12 @@ function aw_cdn_header_now( bool $long ): string {
 	return 'public, s-maxage=' . $ttl;
 }
 
-/** Kits → Settings → Performance: CDN cache times (and Check site without Kits). */
+/** Animal Writes → Check site: CDN cache times. */
 function aw_cdn_settings_box() {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		return;
 	}
-	if ( ! function_exists( 'kits_sections_page' ) ) {
-		settings_errors( 'general' ); // options.php's "Settings saved." (core prints it only under the Settings menu; Kits → Settings prints it itself)
-	}
+	settings_errors( 'general' ); // options.php's "Settings saved." (core prints it only under the Settings menu)
 	echo '<form method="post" action="' . esc_url( admin_url( 'options.php' ) ) . '">';
 	settings_fields( 'aw_cdn' );
 	do_settings_sections( 'aw-cdn' );

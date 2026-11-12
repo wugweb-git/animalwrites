@@ -12,26 +12,26 @@ the same with or without Kits Core), then third-party plugins as their vendors s
 | Dashboard › Home, Updates | core | keep |
 | Dashboard › Simple History | Simple History | keep |
 | Directory › Directory, Add Listing | Core (CPT `aw_listing`) | keep |
-| Directory › Claims | Core `claims-review.php:296` | **move** to DirectoryWeb only (the same screen is DirectoryWeb › Claims) |
+| Directory › Claims | Core `claims-review.php:296` | keep: claim review stays here; DirectoryWeb › Claims is read-only (owner, 11–12 Nov) |
 | News › News, Add News item | Core (CPT `aw_news`) | keep |
-| News › Linked campaigns | taxonomy `aw_campaign_link` | **merge**: one entry under Classification |
+| News › Linked campaigns | taxonomy `aw_campaign_link` | **done 12 Nov**: one entry under Classification |
 | News › Social posts | Core `social-posts.php:146` (CPT `aw_social`) | **move** to Animal Writes › Social posts |
 | Resources › All Resources, Add New Resource | core `post` | keep |
-| Resources › Linked campaigns | taxonomy | **merge** (as above) |
-| Library › Library, Add Library item, Linked campaigns | Core (CPT `aw_legal`) | keep; Linked campaigns **merge** |
-| Opportunities › …, Linked campaigns | Core (CPT `aw_opportunity`) | keep; Linked campaigns **merge** |
-| Campaigns › Campaigns, Add Campaign, Linked campaigns | Core (CPT `aw_campaign`) | keep; Linked campaigns **merge** |
+| Resources › Linked campaigns | taxonomy | **done** (as above) |
+| Library › Library, Add Library item, Linked campaigns | Core (CPT `aw_legal`) | keep; Linked campaigns **done** |
+| Opportunities › …, Linked campaigns | Core (CPT `aw_opportunity`) | keep; Linked campaigns **done** |
+| Campaigns › Campaigns, Add Campaign, Linked campaigns | Core (CPT `aw_campaign`) | keep; Linked campaigns **done** |
 | Campaigns › Letter report | Core `campaign-letters.php:267` | keep (it belongs to Campaigns) |
 | Press coverage › All coverage, Add coverage, Linked campaigns | Core (CPT `aw_press`; menu set twice: `press.php:108`, `admin-ia.php:95`) | keep; define the menu once; Linked campaigns **merge** |
 | Pages | core | keep |
 | Media › Library, Add Media File | core | keep |
 | Media › Media groups | Core (taxonomy `aw_media_group`) | keep |
 | Media › Make WebP, Duplicate files, Reuse pictures | Core `media-webp.php`, `media-merge.php`, `media-reuse.php` | keep (core convention: media tools under Media) |
-| Classification › Categories, Tags | Core `admin-ia.php:135` | keep; **add** Linked campaigns here |
+| Classification › Categories, Tags, Linked campaigns | Core `admin-ia.php:135` | keep (Linked campaigns added 12 Nov) |
 | Appearance › Themes, Editor, Fonts | core | keep |
-| Appearance › Kits | Kits Core `admin-home.php:24` | **move** to its own top-level "Kits" menu (Appearance keeps a link) |
+| Kits | Kits Core `admin-home.php:22` | **done 12 Nov**: its own top-level menu, first in the Wugweb block |
 | Appearance › Theme Check | Theme Check | keep |
-| Plugins › SourceWeb, RankWeb, DirectoryWeb, PlanWeb, MailWeb, InsightWeb | folded by Kits Core `admin-fold.php:56` | **move**: each its own top-level menu in the Wugweb block |
+| Kits, Animal Writes, DirectoryWeb, SourceWeb, RankWeb, InsightWeb, MailWeb, PlanWeb | Kits Core `admin-fold.php` (`kits_wugweb_menu_slots()`), each plugin's own call without Kits Core | **done 12 Nov**: each its own top-level menu, one block after a separator, the same order without Kits Core (`admin-ia.php` menu order) |
 | Tools › Plugin Check, Plugin Check Namer, Plugin Check SVN | Plugin Check | keep (development tool) |
 | Settings › Performance, Plugin Check, Simple History | third party | keep |
 | Site Kit, LiteSpeed Cache, FluentCRM, Fluent Forms, UpdraftPlus | third party | keep |
@@ -42,8 +42,8 @@ the same with or without Kits Core), then third-party plugins as their vendors s
 
 | Address | Today | Proposal |
 |---|---|---|
-| `admin.php?page=aw-keys` (Keys) | hidden, linked from Kits › Help | **move**: Animal Writes › Keys |
-| `admin.php?page=aw-modules` (Modules) | hidden | **move**: Animal Writes › Modules |
+| `admin.php?page=aw-keys` (Keys) | hidden, linked from Kits › Help | **done 12 Nov**: Animal Writes › Keys |
+| `admin.php?page=aw-modules` (Modules) | hidden | **done 12 Nov**: Animal Writes › Modules |
 | `admin.php?page=aw-dates` | redirects to PlanWeb classic | keep the redirect, to PlanWeb's shell screen |
 | `aw-theme-parts`, `kits-docs` | redirect to Kits › Help | keep redirects |
 | `kits-fonts`, `kits-design-system`, `aw-cron-health`, `aw-core` | **403 "not allowed"** | **redirect**: fonts → Appearance › Editor › Styles › Typography; design system → Kits › Help › Design system; cron health → Animal Writes › Site checks; aw-core → Animal Writes |
@@ -52,7 +52,7 @@ the same with or without Kits Core), then third-party plugins as their vendors s
 
 | Screen | Tabs today | Proposal |
 |---|---|---|
-| Kits | Home, Theme Options, Settings, Tools, Help | Home holds the **site's** checks (Page check, deployed commit, joined files, email sending, thumbnails, pictures): **move** them to Animal Writes › Site checks; Kits Home becomes the theme's own dashboard (version, style variation, Site Editor links, design system). Theme Options: **map** to the Site Editor where core can hold it (plan phase 4.7). |
+| Kits | Home, Theme Options, Settings, Tools, Help | **done 12 Nov**: the site's checks (Page check, backup, deployed commit, CDN cache times, joined files, email, thumbnails, pictures) are Animal Writes › Check site; Keys, Modules, Edit screens are Animal Writes items; Kits Home is the theme's own (Edit the theme: Site Editor links). Contact links stay in Theme Options › Socials and Theme parts in Help › Developer (theme parts). Theme Options: **map** to the Site Editor where core can hold it (plan phase 4.7). |
 | Kits › Settings | Performance, CDN cache times, Shared cache, Compatibility, Preview access/IPs/devices, Connected services and modules | keep; group as sections with one line each |
 | Kits › Help | Design system (tokens, states, components 160, menus, contrast), edit-screens map (mapping, schema, third-party boxes), docs | **rename** the developer parts to Help › Developer; keep design system |
 | RankWeb | Dashboard, FAQ, Settings | add **Tools** (re-score, rebuild FAQ index) and **Help**; Settings tabs stay |
