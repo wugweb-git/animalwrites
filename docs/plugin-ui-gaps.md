@@ -15,7 +15,7 @@ The new screens cover only a few pages of each plugin. The other pages still dra
 |---|---|---|
 | SourceWeb | Dashboard, To review, Enrichment review, Settings; since 12 Nov every Sourcing tab (see "Rebuilt on the shell") | The feed form (`&feed=<id>`) |
 | InsightWeb | Dashboard, Settings; since 12 Nov every tab (see "Rebuilt on the shell") | — |
-| RankWeb | Dashboard, FAQ (since 12 Nov), Settings | — (the Dashboard's Modules table is still to add) |
+| RankWeb | Dashboard (with Modules), FAQ, Settings (since 12 Nov) | — |
 | MailWeb | Inbox, Settings | Compose (stays classic: it sends email) |
 | PlanWeb | Dashboard, Entries, Settings | the month grid |
 | DirectoryWeb | Dashboard, Claims, Settings | Listings (WordPress's own list) |
@@ -120,6 +120,9 @@ Home, Settings, Tools and Help show the same content in both looks; nothing was 
 - **Kits page parts** (`plugins/kits-core/includes/admin-shell-parts.php`, the shell's `PageParts` in `src/shell/parts.js`): a classic screen's own output, drawn on the shell. `kits_shell_html_parts()` reads it into text, notices, tables, its list table (views, search, filters, sort, pages, row and bulk actions) and its forms (fields, buttons, hidden fields and nonce); `PageParts` draws them with DataList and Field and sends every change as the same link or form request the classic screen sends, so the classic handlers keep saving. No markup or script goes out, links only when http(s), relative or `*.php`, and never a password field. Tests: `plugins/kits-core/tests/shell-parts-tests.php`.
 - **InsightWeb Keywords and every other tab** (`&tab=keywords|pages|checklist|rising|clarity|links|server|sourcing`): each tab's own output after its load hook, through Kits page parts (`insightweb-tabs.php`). Bulk and row priority overrides, link types, Check list buttons, Rising and Pages forms go to the same handlers.
 - **RankWeb FAQ** (`admin.php?page=aw-faq`): FAQ box on (disabled for non-administrators, as today), Pages with an FAQ (views, search, Approve) and Counts with Recount, through Kits page parts (`rankweb_faq_parts()`).
+- **InsightWeb Settings → Runs and data** (`&tab=settings#more`): Schedule, Keys, Keyword map seed, Run now, the snapshot and import rows (CSV upload included) and Delete data (type DELETE), from the Settings tab's own rows through Kits page parts; the Numbers row stays in its own groups. The link to the classic Settings is gone.
+- **RankWeb Dashboard → Modules**: Needs attention, the Modules table (where each is set up, Off and Partly off), On edit screens and Commands, from the Overview's own body (`rankweb_overview_parts()`).
+- **MailWeb Inbox → Move to folder**: the open message has a Move to folder choice with its mailbox's other folders; `POST mailweb/v1/inbox/move` calls `mailweb_move_to()` (the same Mail API move as Archive). The link to the current screen for moving is gone.
 
 ## Suggested order
 
