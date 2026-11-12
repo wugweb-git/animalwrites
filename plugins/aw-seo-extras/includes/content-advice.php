@@ -82,13 +82,13 @@ function aw_seo_advice_shape( $html ) {
 }
 
 /**
- * Median words and subheadings of up to 40 recent published items of a type (cached for a day).
+ * Median words and subheadings of up to 12 recent published items, as visitors read them, of a type (cached for a day).
  *
  * @param string $type Post type.
  * @return array{words: int, h2: int, h3: int, n: int}
  */
 function aw_seo_advice_type_median( $type ) {
-	$key = 'aw_seo_advice_median_' . sanitize_key( $type );
+	$key = 'aw_seo_advice_median2_' . sanitize_key( $type );
 	$hit = get_transient( $key );
 	if ( is_array( $hit ) ) {
 		return $hit;
@@ -97,14 +97,14 @@ function aw_seo_advice_type_median( $type ) {
 		array(
 			'post_type'      => $type,
 			'post_status'    => 'publish',
-			'posts_per_page' => 40,
+			'posts_per_page' => 12,
 			'fields'         => 'ids',
 			'no_found_rows'  => true,
 		)
 	);
 	$rows = array();
 	foreach ( $ids as $id ) {
-		$rows[] = aw_seo_advice_shape( (string) get_post_field( 'post_content', $id ) );
+		$rows[] = aw_seo_advice_shape( aw_seo_advice_text( get_post( $id ) )['html'] ); // what visitors read, as for the item
 	}
 	$med = function ( $k ) use ( $rows ) {
 		$v = array_column( $rows, $k );
@@ -128,23 +128,31 @@ function aw_seo_advice_type_median( $type ) {
  * @return array
  */
 function aw_seo_advice_focus_index() {
-	$hit = get_transient( 'aw_seo_advice_focus_index' );
+	$hit = get_transient( 'aw_seo_advice_focus_index_v2' );
 	if ( is_array( $hit ) ) {
 		return $hit;
 	}
 	global $wpdb;
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- one read, cached below.
-	$rows = (array) $wpdb->get_results( "SELECT p.ID, LOWER( TRIM( SUBSTRING_INDEX( m.meta_value, ',', 1 ) ) ) AS kw FROM {$wpdb->postmeta} m JOIN {$wpdb->posts} p ON p.ID = m.post_id WHERE m.meta_key = 'rank_math_focus_keyword' AND m.meta_value <> '' AND p.post_status = 'publish' AND p.post_type NOT IN ('attachment', 'revision', 'nav_menu_item') LIMIT 5000" );
+	$rows = (array) $wpdb->get_results( "SELECT p.ID, p.post_type, LOWER( TRIM( SUBSTRING_INDEX( m.meta_value, ',', 1 ) ) ) AS kw FROM {$wpdb->postmeta} m JOIN {$wpdb->posts} p ON p.ID = m.post_id WHERE m.meta_key = 'rank_math_focus_keyword' AND m.meta_value <> '' AND p.post_status = 'publish' AND p.post_type NOT IN ('attachment', 'revision', 'nav_menu_item') LIMIT 5000" );
 	$out  = array();
 	foreach ( $rows as $r ) {
 		$kw = (string) $r->kw;
 		if ( mb_strlen( $kw ) < 8 || isset( $out[ $kw ] ) || substr_count( $kw, ' ' ) < 1 ) {
 			continue; // one-word slugs and very short phrases match too much to be link advice
 		}
-		$out[ $kw ] = array( (int) $r->ID, (string) get_permalink( (int) $r->ID ) );
+		// Link advice points at evergreen pages on this site only (guides, Library, campaigns, Pages), never News or press.
+		if ( function_exists( 'aw_seo_kp_evergreen' ) && ! aw_seo_kp_evergreen( (string) $r->post_type ) ) {
+			continue;
+		}
+		$url = (string) get_permalink( (int) $r->ID );
+		if ( wp_parse_url( $url, PHP_URL_HOST ) !== wp_parse_url( home_url(), PHP_URL_HOST ) ) {
+			continue;
+		}
+		$out[ $kw ] = array( (int) $r->ID, $url );
 	}
 	uksort( $out, fn( $a, $b ) => mb_strlen( $b ) <=> mb_strlen( $a ) );
-	set_transient( 'aw_seo_advice_focus_index', $out, 12 * HOUR_IN_SECONDS );
+	set_transient( 'aw_seo_advice_focus_index_v2', $out, 12 * HOUR_IN_SECONDS ); // v2: evergreen, same site
 	return $out;
 }
 
@@ -180,7 +188,7 @@ function aw_seo_content_advice( WP_Post $post ) {
 						'edit'  => (string) get_edit_term_link( $o['id'] ),
 					)
 					: array(
-						'title' => wp_strip_all_tags( get_the_title( $o['id'] ) ),
+						'title' => html_entity_decode( wp_strip_all_tags( get_the_title( $o['id'] ) ), ENT_QUOTES, 'UTF-8' ),
 						'edit'  => (string) get_edit_post_link( $o['id'], 'raw' ),
 					);
 			}
@@ -236,7 +244,7 @@ function aw_seo_content_advice( WP_Post $post ) {
 		}
 		$out['links'][] = array(
 			'phrase' => $kw,
-			'title'  => wp_strip_all_tags( get_the_title( $target[0] ) ),
+			'title'  => html_entity_decode( wp_strip_all_tags( get_the_title( $target[0] ) ), ENT_QUOTES, 'UTF-8' ),
 			'url'    => $target[1],
 		);
 	}

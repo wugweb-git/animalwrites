@@ -152,7 +152,7 @@
 								Row,
 								{ key: i },
 								'“' + l.phrase + '” → ',
-								el( C.ExternalLink, { href: l.url }, l.title )
+								el( 'a', { href: l.url, target: '_blank', rel: 'noopener' }, l.title ) // a page on this site, so no external arrow
 							);
 						} )
 				  )
