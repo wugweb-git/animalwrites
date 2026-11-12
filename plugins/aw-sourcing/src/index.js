@@ -510,7 +510,11 @@ function Review() {
 				] }
 				onBulk={ decide }
 				rowActions={ ( r ) => [
-					{ label: __( 'Edit', 'aw-sourcing' ), href: r.editUrl },
+					{
+						icon: 'edit',
+						label: __( 'Edit', 'aw-sourcing' ),
+						href: r.editUrl,
+					},
 					...( r.url
 						? [
 								{
@@ -520,6 +524,7 @@ function Review() {
 							]
 						: [] ),
 					{
+						icon: 'success',
 						label: __( 'Publish', 'aw-sourcing' ),
 						onClick: () => decide( 'publish', [ r.id ] ),
 						disabled: r.noPublish,
@@ -528,6 +533,7 @@ function Review() {
 							: '',
 					},
 					{
+						icon: 'cancel',
 						label: __( 'Reject', 'aw-sourcing' ),
 						tone: 'error',
 						onClick: () => decide( 'reject', [ r.id ] ),
@@ -977,8 +983,16 @@ function Enrichment() {
 								window.scrollTo( 0, 0 );
 							},
 						},
-						{ label: __( 'Edit', 'aw-sourcing' ), href: r.editUrl },
-						{ label: __( 'View', 'aw-sourcing' ), href: r.viewUrl },
+						{
+							icon: 'edit',
+							label: __( 'Edit', 'aw-sourcing' ),
+							href: r.editUrl,
+						},
+						{
+							icon: 'view',
+							label: __( 'View', 'aw-sourcing' ),
+							href: r.viewUrl,
+						},
 					] }
 					loading={ loading }
 					error={ error }
@@ -1709,6 +1723,7 @@ function WorkerList( { go, msg, setMsg } ) {
 					onSort={ ( orderby, order ) => set( { orderby, order } ) }
 					rowActions={ ( r ) => [
 						{
+							icon: 'edit',
 							label: __( 'Edit', 'aw-sourcing' ),
 							onClick: () => go( { edit: r.id } ),
 						},
@@ -1735,6 +1750,7 @@ function WorkerList( { go, msg, setMsg } ) {
 						...( r.planned
 							? [
 									{
+										icon: 'delete',
 										label: __( 'Delete', 'aw-sourcing' ),
 										tone: 'error',
 										onClick: () => remove( r ),
@@ -2706,6 +2722,7 @@ function SourceList( { go, msg, setMsg } ) {
 				onBulk={ decide }
 				rowActions={ ( r ) => [
 					{
+						icon: 'edit',
 						label: __( 'Edit', 'aw-sourcing' ),
 						onClick: () => go( { edit: r.id } ),
 					},
@@ -2757,6 +2774,7 @@ function SourceList( { go, msg, setMsg } ) {
 					...( r.canDelete
 						? [
 								{
+									icon: 'delete',
 									label: __( 'Delete', 'aw-sourcing' ),
 									tone: 'error',
 									onClick: () => remove( r ),
@@ -3154,7 +3172,11 @@ function Feeds( { host, go } ) {
 				] }
 				onBulk={ op }
 				rowActions={ ( r ) => [
-					{ label: __( 'Edit', 'aw-sourcing' ), href: r.editUrl },
+					{
+						icon: 'edit',
+						label: __( 'Edit', 'aw-sourcing' ),
+						href: r.editUrl,
+					},
 					{
 						label: r.on
 							? __( 'Turn off', 'aw-sourcing' )
@@ -3182,6 +3204,7 @@ function Feeds( { host, go } ) {
 										),
 								},
 								{
+									icon: 'delete',
 									label: __( 'Delete', 'aw-sourcing' ),
 									tone: 'error',
 									onClick: () => remove( r ),
@@ -3697,6 +3720,7 @@ function KeywordList( { go, msg, setMsg } ) {
 					}
 					rowActions={ ( r ) => [
 						{
+							icon: 'edit',
 							label: __( 'Edit', 'aw-sourcing' ),
 							onClick: () => go( { edit: r.id } ),
 						},
@@ -3741,6 +3765,7 @@ function KeywordList( { go, msg, setMsg } ) {
 											};
 										} ),
 									{
+										icon: 'delete',
 										label: __( 'Delete', 'aw-sourcing' ),
 										tone: 'error',
 										onClick: () =>
@@ -4368,6 +4393,7 @@ function SectionRules( { go } ) {
 					onPage={ empty }
 					rowActions={ ( r ) => [
 						{
+							icon: 'edit',
 							label: __( 'Edit', 'aw-sourcing' ),
 							onClick: () => go( { edit: r.id } ),
 						},
@@ -4458,10 +4484,12 @@ function SectionRules( { go } ) {
 					onPage={ empty }
 					rowActions={ ( r ) => [
 						{
+							icon: 'edit',
 							label: __( 'Edit', 'aw-sourcing' ),
 							onClick: () => go( { tagrule: r.id } ),
 						},
 						{
+							icon: 'delete',
 							label: __( 'Delete', 'aw-sourcing' ),
 							tone: 'error',
 							onClick: () => del( r ),
@@ -5148,6 +5176,7 @@ function EnrichRules( { go } ) {
 					onPage={ () => {} }
 					rowActions={ ( r ) => [
 						{
+							icon: 'edit',
 							label: __( 'Edit', 'aw-sourcing' ),
 							onClick: () =>
 								go( { part: 'enrich', field: r.id } ),
@@ -5697,6 +5726,7 @@ function AiKeyList( { go, msg, setMsg } ) {
 							? []
 							: [
 									{
+										icon: 'edit',
 										label: __( 'Edit', 'aw-sourcing' ),
 										onClick: () => go( { edit: r.id } ),
 									},
@@ -5733,6 +5763,7 @@ function AiKeyList( { go, msg, setMsg } ) {
 											decide( 'recheck', [ r.id ] ),
 									},
 									{
+										icon: 'delete',
 										label: __( 'Remove', 'aw-sourcing' ),
 										tone: 'error',
 										onClick: () =>

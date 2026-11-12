@@ -858,6 +858,7 @@ function Entries() {
 					rowActions={ ( r ) =>
 						[
 							r.canEdit && {
+								icon: 'edit',
 								label: __( 'Edit', 'planweb' ),
 								onClick: () => {
 									setEditing( r );
@@ -865,6 +866,7 @@ function Entries() {
 								},
 							},
 							r.canTrash && {
+								icon: 'delete',
 								label: __( 'Trash', 'planweb' ),
 								tone: 'error',
 								onClick: () => trash( r ),

@@ -29,6 +29,9 @@
 	--ks-g7: #4a4a4a;
 	--ks-ink: #141414;
 	--ks-accent: #ffc300;
+	/* Row action icons only: delete and cancel, success (docs/design-system.md, color-danger and color-success). */
+	--ks-danger: #c8102e;
+	--ks-success: #137a3b;
 	--ks-control: 40px;
 
 	/* WordPress's components (buttons, switches, notices, spinner) take the admin accent: ink, not admin blue. */
