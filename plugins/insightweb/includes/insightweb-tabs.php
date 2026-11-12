@@ -91,10 +91,10 @@ function insightweb_html_parts( string $html ): array {
  * Whether an element has a class.
  *
  * @param DOMNode $n     Node.
- * @param string  $class Class.
+ * @param string  $cls Class.
  */
-function insightweb_has_class( DOMNode $n, string $class ): bool {
-	return $n instanceof DOMElement && false !== strpos( ' ' . preg_replace( '/\s+/', ' ', $n->getAttribute( 'class' ) ) . ' ', ' ' . $class . ' ' );
+function insightweb_has_class( DOMNode $n, string $cls ): bool {
+	return $n instanceof DOMElement && false !== strpos( ' ' . preg_replace( '/\s+/', ' ', $n->getAttribute( 'class' ) ) . ' ', ' ' . $cls . ' ' );
 }
 
 /**
@@ -102,16 +102,16 @@ function insightweb_has_class( DOMNode $n, string $class ): bool {
  *
  * @param DOMNode $n     Node.
  * @param string  $tag   Tag name.
- * @param string  $class Class ('' for any).
+ * @param string  $cls   Class ('' for any).
  * @return DOMElement[]
  */
-function insightweb_find( DOMNode $n, string $tag, string $class = '' ): array {
+function insightweb_find( DOMNode $n, string $tag, string $cls = '' ): array {
 	$out = array();
 	if ( ! $n instanceof DOMElement ) {
 		return $out;
 	}
 	foreach ( $n->getElementsByTagName( $tag ) as $el ) {
-		if ( '' === $class || insightweb_has_class( $el, $class ) ) {
+		if ( '' === $cls || insightweb_has_class( $el, $cls ) ) {
 			$out[] = $el;
 		}
 	}
@@ -508,12 +508,12 @@ function insightweb_form_block( DOMElement $form ): array {
 					'value'   => '',
 				);
 			}
-			$f                                   = &$part['fields'][ $radios[ $name ] ];
-			$f['options'][]                      = array(
+			$f              = &$part['fields'][ $radios[ $name ] ];
+			$f['options'][] = array(
 				'value' => $el->getAttribute( 'value' ),
 				'label' => $label,
 			);
-			$f['value']                          = $el->hasAttribute( 'checked' ) ? $el->getAttribute( 'value' ) : $f['value'];
+			$f['value']     = $el->hasAttribute( 'checked' ) ? $el->getAttribute( 'value' ) : $f['value'];
 			unset( $f );
 			continue;
 		}
