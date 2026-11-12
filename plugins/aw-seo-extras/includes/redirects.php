@@ -72,7 +72,7 @@ const AW_SEED_REDIRECTS_VERSION = '1';
 add_action(
 	'init',
 	function () {
-		if ( AW_SEED_REDIRECTS_VERSION === get_option( 'aw_seed_redirects_version' ) || ! class_exists( '\RankMath\Redirections\Redirection' ) ) {
+		if ( AW_SEED_REDIRECTS_VERSION === get_option( 'aw_seed_redirects_version' ) || ! class_exists( '\RankMath\Redirections\Redirection' ) || ! \RankMath\Helper::is_module_active( 'redirections' ) || get_transient( 'aw_seed_redirects_wait' ) ) {
 			return;
 		}
 		$exact = array(
@@ -101,6 +101,8 @@ add_action(
 		}
 		if ( $ok ) {
 			update_option( 'aw_seed_redirects_version', AW_SEED_REDIRECTS_VERSION, false );
+		} else {
+			set_transient( 'aw_seed_redirects_wait', 1, HOUR_IN_SECONDS ); // a save failed: try again in an hour, not on every request
 		}
 	},
 	20
