@@ -683,7 +683,7 @@ function aw_si_box_referrers(): void {
 		/* translators: %s: first date with referral figures. */
 		echo '<p class="description">' . esc_html( sprintf( __( 'Figures from %s.', 'aw-seo-extras' ), wp_date( get_option( 'date_format' ), strtotime( $since ) ) ) ) . '</p>';
 	}
-	echo '<p class="description">' . esc_html__( 'Referral and social sessions by source (GA4 channels Referral, Organic Social and Paid Social, plus Instagram, Facebook, X, LinkedIn, Reddit, WhatsApp, Telegram and Linktree). 22 Oct 2026 (GA4 test events) and the test addresses /no-such-page/ and /no-such-page-xyz/ are left out. GA4 page views changed on 25 Oct 2026, when the site moved to one GA4 tag.', 'aw-seo-extras' ) . '</p>';
+	echo '<p class="description">' . esc_html__( 'Referral and social sessions by source (GA4 channels Referral, Organic Social and Paid Social, plus Instagram, Facebook, X, LinkedIn, Reddit, WhatsApp, Telegram and Linktree). 22 Oct 2026 is left out (GA4 test events). GA4 page views changed on 25 Oct 2026, when the site moved to one GA4 tag.', 'aw-seo-extras' ) . '</p>';
 }
 
 /**
@@ -705,6 +705,67 @@ function aw_si_campaign_of( string $path, array $slugs ): string {
 		}
 	}
 	return $seen[ $path ];
+}
+
+/**
+ * Confirm rate (confirmed ÷ sent) per source and per day, for each campaign with objections sent in the window
+ * (12 Nov 2026). "Sent" is objection_sent (the letter opened in Gmail or the mail app, or copied); "confirmed" is
+ * objection_confirmed (the person came back and said "Yes, I sent it"). Sources: the 10 with the most sent.
+ *
+ * @param array    $camp  The 28-day campaign rows (page, txt = source, metric, value).
+ * @param array    $slugs Campaign slug => title.
+ * @param callable $rate  fn( sent, conf ): string.
+ */
+function aw_si_box_campaigns_rates( array $camp, array $slugs, callable $rate ): void {
+	$by = array();
+	foreach ( $camp as $r ) {
+		$slug = aw_si_campaign_of( (string) $r->page, $slugs );
+		if ( '' !== $slug && in_array( $r->metric, array( 'camp_sent', 'camp_conf' ), true ) ) {
+			$by[ $slug ][ (string) $r->txt ][ $r->metric ] = ( $by[ $slug ][ (string) $r->txt ][ $r->metric ] ?? 0 ) + (float) $r->value;
+		}
+	}
+	$days = (array) ( aw_si_runs()['ga4']['info']['camp']['days'] ?? array() );
+	$num  = fn( $v ) => number_format_i18n( (int) round( (float) $v ) );
+	foreach ( $by as $slug => $srcs ) {
+		uasort( $srcs, fn( $a, $b ) => ( $b['camp_sent'] ?? 0 ) <=> ( $a['camp_sent'] ?? 0 ) );
+		$srcs = array_filter( $srcs, fn( $v ) => ( $v['camp_sent'] ?? 0 ) > 0 );
+		if ( ! $srcs ) {
+			continue;
+		}
+		/* translators: %s: campaign title. */
+		echo '<h3>' . esc_html( sprintf( __( 'Confirm rate by source: %s', 'aw-seo-extras' ), $slugs[ $slug ] ) ) . '</h3>';
+		echo '<table class="widefat fixed striped"><thead><tr><th scope="col">' . esc_html__( 'Source', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Objections sent', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Confirmed', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Confirm rate', 'aw-seo-extras' ) . '</th></tr></thead><tbody>';
+		foreach ( array_slice( $srcs, 0, 10, true ) as $src => $v ) {
+			echo '<tr><td>' . esc_html( $src ) . '</td><td>' . esc_html( $num( $v['camp_sent'] ?? 0 ) ) . '</td><td>' . esc_html( $num( $v['camp_conf'] ?? 0 ) ) . '</td><td>' . esc_html( $rate( (float) ( $v['camp_sent'] ?? 0 ), (float) ( $v['camp_conf'] ?? 0 ) ) ) . '</td></tr>';
+		}
+		echo '</tbody></table>';
+		$daily = array();
+		foreach ( $days as $path => $rows ) {
+			if ( aw_si_campaign_of( (string) $path, $slugs ) !== $slug ) {
+				continue;
+			}
+			foreach ( (array) $rows as $d => $m ) {
+				$daily[ $d ]['s'] = ( $daily[ $d ]['s'] ?? 0 ) + (int) ( $m['camp_sent'] ?? 0 );
+				$daily[ $d ]['c'] = ( $daily[ $d ]['c'] ?? 0 ) + (int) ( $m['camp_conf'] ?? 0 );
+			}
+		}
+		$daily = array_filter( $daily, fn( $v ) => $v['s'] > 0 );
+		if ( ! $daily ) {
+			continue; // Daily figures arrive with the next GA4 run.
+		}
+		krsort( $daily );
+		/* translators: %s: campaign title. */
+		echo '<h3>' . esc_html( sprintf( __( 'Confirm rate by day: %s', 'aw-seo-extras' ), $slugs[ $slug ] ) ) . '</h3>';
+		echo '<table class="widefat fixed striped"><thead><tr><th scope="col">' . esc_html__( 'Day', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Objections sent', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Confirmed', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Confirm rate', 'aw-seo-extras' ) . '</th></tr></thead><tbody>';
+		foreach ( $daily as $d => $v ) {
+			$ts = strtotime( (string) $d );
+			echo '<tr><td>' . esc_html( $ts ? wp_date( get_option( 'date_format' ), $ts ) : (string) $d ) . '</td><td>' . esc_html( $num( $v['s'] ) ) . '</td><td>' . esc_html( $num( $v['c'] ) ) . '</td><td>' . esc_html( $rate( (float) $v['s'], (float) $v['c'] ) ) . '</td></tr>';
+		}
+		echo '</tbody></table>';
+	}
+	if ( $by ) {
+		echo '<p class="description">' . esc_html__( 'Sent: the letter was opened in Gmail or the mail app, or copied (objection_sent). Confirmed: the person came back to the page and said "Yes, I sent it" (objection_confirmed). Someone who sends from the mail app and never comes back is sent but not confirmed, so the true number of letters lies between the two.', 'aw-seo-extras' ) . '</p>';
+	}
 }
 
 /**
@@ -785,24 +846,26 @@ function aw_si_box_campaigns(): void {
 		'all'    => __( 'All sources', 'aw-seo-extras' ),
 	);
 	$num  = fn( $v ) => null === $v ? '–' : number_format_i18n( (int) round( (float) $v ) );
-	echo '<table class="widefat fixed striped"><thead><tr><th scope="col">' . esc_html__( 'Campaign', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'From', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Sessions (landed)', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Key events', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Sessions (viewed)', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Objections sent', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Confirmed', 'aw-seo-extras' ) . '</th></tr></thead><tbody>';
+	echo '<table class="widefat fixed striped"><thead><tr><th scope="col">' . esc_html__( 'Campaign', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'From', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Sessions (landed)', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Key events', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Sessions (viewed)', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Objections sent', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Confirmed', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Confirm rate', 'aw-seo-extras' ) . '</th></tr></thead><tbody>';
+	$rate = fn( $sent, $conf ) => $sent > 0 ? number_format_i18n( 100 * $conf / $sent, 0 ) . '%' : '–';
 	foreach ( $t as $slug => $b ) {
 		$first = true;
 		foreach ( $rows as $key => $label ) {
 			$v    = $b[ $key ] ?? array();
 			$cell = $first ? '<a href="' . esc_url( home_url( '/campaigns/' . $slug . '/' ) ) . '" target="_blank" rel="noopener">' . esc_html( $slugs[ $slug ] ) . '</a>' : '';
 			$all  = 'all' === $key; // Landed sessions and key events are stored for referral and social sources only.
-			echo '<tr><td>' . $cell . '</td><td>' . esc_html( $label ) . '</td><td>' . esc_html( $all ? '–' : $num( $v['landed'] ?? 0 ) ) . '</td><td>' . esc_html( $all ? '–' : $num( $v['key'] ?? 0 ) ) . '</td><td>' . esc_html( $camp ? $num( $v['viewed'] ?? 0 ) : '–' ) . '</td><td>' . esc_html( $camp ? $num( $v['sent'] ?? 0 ) : '–' ) . '</td><td>' . esc_html( $camp ? $num( $v['conf'] ?? 0 ) : '–' ) . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $cell is escaped above.
+			echo '<tr><td>' . $cell . '</td><td>' . esc_html( $label ) . '</td><td>' . esc_html( $all ? '–' : $num( $v['landed'] ?? 0 ) ) . '</td><td>' . esc_html( $all ? '–' : $num( $v['key'] ?? 0 ) ) . '</td><td>' . esc_html( $camp ? $num( $v['viewed'] ?? 0 ) : '–' ) . '</td><td>' . esc_html( $camp ? $num( $v['sent'] ?? 0 ) : '–' ) . '</td><td>' . esc_html( $camp ? $num( $v['conf'] ?? 0 ) : '–' ) . '</td><td>' . esc_html( $camp ? $rate( (float) ( $v['sent'] ?? 0 ), (float) ( $v['conf'] ?? 0 ) ) : '–' ) . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $cell is escaped above.
 			$first = false;
 		}
 	}
 	echo '</tbody></table>';
+	aw_si_box_campaigns_rates( $camp, $slugs, $rate );
 	$from = $since && $since > $start ? $since : $start;
 	/* translators: 1: first day, 2: last day. */
 	echo '<p class="description">' . esc_html( sprintf( __( '%1$s to %2$s. X: t.co, x.com and twitter.com. All social includes X.', 'aw-seo-extras' ), wp_date( get_option( 'date_format' ), strtotime( $from ) ), wp_date( get_option( 'date_format' ), strtotime( $end ) ) ) ) . '</p>';
 	echo '<p class="description">' . esc_html__( 'Sessions (landed) and key events: sessions that started on the campaign page or a short link to it, from referral and social sources (direct, search and email visits are not in these rows). Key events count every GA4 key event in those sessions, not only objections.', 'aw-seo-extras' ) . '</p>';
 	if ( $camp ) {
-		echo '<p class="description">' . esc_html__( 'Sessions (viewed), objections sent and confirmed: sessions with a campaign_view, and objection_sent and objection_confirmed events, on the campaign page, by the session\'s source, from every source. 22 Oct 2026 (GA4 test events) and the test addresses /no-such-page/ and /no-such-page-xyz/ are left out.', 'aw-seo-extras' ) . '</p>';
+		echo '<p class="description">' . esc_html__( 'Sessions (viewed), objections sent and confirmed: sessions with a campaign_view, and objection_sent and objection_confirmed events, on the campaign page, by the session\'s source, from every source. 22 Oct 2026 is left out (GA4 test events).', 'aw-seo-extras' ) . '</p>';
 	} else {
 		echo '<p class="description">' . esc_html__( 'Sessions (viewed), objections sent and confirmed arrive with the next GA4 run (daily at 07:20 IST).', 'aw-seo-extras' ) . '</p>';
 	}

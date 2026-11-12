@@ -249,6 +249,26 @@ So from 6 Nov until the owner sets Post, the page and Home still ask people to s
 - Daily taps: highest 744 on 24 Oct; about 120 a day 30 Oct–2 Nov (111, 122, 118, 154); 652 on 3 Nov, the day of the campaign email.
 - Devices to 31 Oct: phone 2,770, desktop 254, tablet 27.
 
+## Sent vs confirmed: where the letters drop off (12 Nov 2026)
+- What the two numbers are. `objection_sent` fires when a person taps a send route: Send with Gmail, Email app or
+  Copy letter. The letter then goes from the person's own mailbox to the ministry; the site sends no email for it.
+  `objection_confirmed` fires when the person comes back to the page and taps "Yes, I sent it" (the counter on the page
+  counts these). There is no confirmation email, so delivery, opens and bounces in MailWeb or FluentCRM say nothing
+  about letters.
+- 28 days to 11 Nov: GA4 10,365 sent and 2,313 confirmed (22%); the form's own count 9,996 and 2,236.
+- Where it drops: between opening the mail app and coming back. 89% of taps are Send with Gmail and 90% of sends are on
+  phones (letter log, 3 Nov): on a phone the Gmail app opens, the person sends, and often never returns to the browser
+  tab, so they are counted as sent but not confirmed. The true number of letters sent lies between the two figures.
+- Measuring it now: InsightWeb → Overview → Campaigns by source shows the confirm rate per source and per day
+  (confirmed ÷ sent; per day from the next GA4 run).
+- What this means for the plan of 12 Nov: a resend button, a confirmation email and a reminder do not apply to this
+  flow (there is nothing to resend). What would help a future campaign is making the way back easy: a short "Did it
+  go?" message the person sees on their return (the page already brings the box back on reload), and counting sends
+  without waiting for the tap. Copy and any change to the Lab page are the owner's call; the Lab page is closed.
+- Grounds 1, 2 and 6 are in about 8,000 letters each and the others in 2,300–2,600: most likely ticked by default, so
+  the data does not show which argument people chose. Future campaign forms: no ground ticked by default, or record
+  "ticked by the person" separately (owner's call; nothing changed on the Lab form).
+
 ## Media & PR and sourcing
 - Press items published: the Hindustan Times explainer (13949) and four Supreme Court items (19497, 19500, 19503, 19506), with written titles for the last three. Pharmabiz (13959) is back in draft.
 - Repeats folded into the first story ("also reported by"): CNBC TV18 into 12972; Arogya Legal, Urban Acres and DrugsControl into 13639. Telangana Today's copy (14236) is private, merged into 13639, with a 301.

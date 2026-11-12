@@ -291,8 +291,8 @@ function aw_si_ga4_store_nf( string $end, array $rows ) {
  *
  * @param object $module Site Kit's analytics-4 module.
  * @param string $end    Last day (Y-m-d).
- * @return array|WP_Error array{rows: array<string, array{0: string, 1: string, 2: string, 3: float}>, truncated: bool}
- *                        Rows as [metric, path, source, value].
+ * @return array|WP_Error array{rows: array<string, array{0: string, 1: string, 2: string, 3: float}>, days: array, truncated: bool}
+ *                        Rows as [metric, path, source, value]; days as path => Ymd => [camp_sent, camp_conf].
  */
 function aw_si_ga4_fetch_camp( $module, string $end ) {
 	$res = aw_si_ga4_report(
@@ -317,6 +317,7 @@ function aw_si_ga4_fetch_camp( $module, string $end ) {
 	}
 	$skip = array_map( fn( $d ) => str_replace( '-', '', $d ), AW_SI_GA4_SKIP_DAYS );
 	$out  = array();
+	$days = array();
 	foreach ( $res as $r ) {
 		$metric = AW_SI_GA4_CAMP_EVENTS[ (string) ( $r[0][1] ?? '' ) ] ?? '';
 		$path   = mb_substr( aw_si_landing_path( (string) ( $r[0][2] ?? '' ) ), 0, 255 );
@@ -329,9 +330,15 @@ function aw_si_ga4_fetch_camp( $module, string $end ) {
 			$out[ $key ] = array( $metric, $path, $src, 0.0 );
 		}
 		$out[ $key ][3] += (float) ( $r[1][ 'camp_view' === $metric ? 1 : 0 ] ?? 0 ); // Views as sessions, the rest as events.
+		// Sent and confirmed per day, all sources (the confirm rate per day; kept in the run's info, not in obs).
+		if ( 'camp_view' !== $metric ) {
+			$day                           = (string) ( $r[0][3] ?? '' );
+			$days[ $path ][ $day ][ $metric ] = ( $days[ $path ][ $day ][ $metric ] ?? 0 ) + (int) ( $r[1][0] ?? 0 );
+		}
 	}
 	return array(
 		'rows'      => array_values( $out ),
+		'days'      => $days,
 		'truncated' => count( $res ) >= AW_SI_GA4_ROWS,
 	);
 }
@@ -476,6 +483,7 @@ function aw_si_ga4_run( array $args = array() ): array {
 				} else {
 					$rep['camp'] = array(
 						'rows'      => count( $camp['rows'] ),
+						'days'      => $camp['days'],
 						'truncated' => $camp['truncated'],
 					);
 					if ( $dry ) {
