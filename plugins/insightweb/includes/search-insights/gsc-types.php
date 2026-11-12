@@ -720,7 +720,8 @@ function aw_si_box_index(): void {
 	echo '<h3>' . esc_html__( 'URL Inspection: pages we inspected, latest result', 'aw-seo-extras' ) . '</h3>';
 	/* translators: 1: pages inspected, 2: indexed, 3: not indexed, 4: date of the latest check. */
 	echo '<p>' . esc_html( sprintf( __( 'Pages we inspected, latest result: %1$s pages, %2$s indexed, %3$s not indexed (latest check %4$s).', 'aw-seo-extras' ), number_format_i18n( $all ), number_format_i18n( $yes ), number_format_i18n( $not ), '' !== $latest ? mysql2date( 'j M Y', $latest ) : '–' ) ) . '</p>';
-	echo '<p class="description">' . esc_html__( 'Each page counts once, by its latest check (up to 2,000 a day, never-checked and not-indexed pages first), so these figures lean to pages that are not indexed and are not the whole site.', 'aw-seo-extras' ) . '</p>';
+	/* translators: %s: pages inspected a day at most. */
+	echo '<p class="description">' . esc_html( sprintf( __( 'Each page counts once, by its latest check (up to %s a day, never-checked and not-indexed pages first), so these figures lean to pages that are not indexed and are not the whole site.', 'aw-seo-extras' ), number_format_i18n( AW_SI_INSPECT_CAP ) ) ) . '</p>';
 	$queue = aw_si_inspect_queue_lines( (array) ( aw_si_runs()['inspect']['info'] ?? array() ) );
 	if ( $queue ) {
 		echo '<p class="description">' . esc_html( implode( ' ', array_map( fn( $l ) => rtrim( ucfirst( $l ), '.' ) . '.', $queue ) ) ) . '</p>';
