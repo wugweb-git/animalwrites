@@ -37,7 +37,11 @@ Theme and WordPress items are tracked by Animal Writes WordPress. Code requests 
     - News 16989 (rabies vaccine): links the dog-bite guide (17307) in "Guides on this"; title "Rabies vaccine missing at 126 govt hospitals – Animal Writes".
     - News 13460: title "Big Cat Alliance HQ opens in New Delhi – Animal Writes". News 19778: title "International Snow Leopard Day, 23 October – Animal Writes".
     - News items kept their modified dates. Left out: Directory hub (item 14, waiting) and the SPCA Ghaziabad listing (listing content).
-  - The rest follow in batches.
+  - Batch 3, live 12 Nov (owner's yes):
+    - World Animal Day guide (13797): opening adds the 2026 theme; title "World Animal Day 2026 theme, date, history – Animal Writes".
+    - New titles: ABC guide (128) "Animal Birth Control (ABC) Rules, explained", elephant rabies study (12571) "Rabies in an elephant, first case in Bihar", News 13678 "Mysuru Dasara elephants, history and Khedda", 13521 "India’s cheetah count reaches 53", 16864 "Corbett elephant Sonakali dies at 80", 13483 "Wild elephants crossing road in Bengal", 20862 "Jagriti Mishra’s Delhi shelter demolished" (each " – Animal Writes").
+    - Modified dates kept except 13797. No personal details added for Jagriti Mishra (biography/parents searches).
+  - The rest (smaller pages, under 17 searches each) follow in batches.
 - **Secondary keyphrases (item 10), dry run, no writes:** 556 "Add as secondary keyphrase" rows: 108 can be written, 76 need a check (83 pages already at Rank Math's 5, 12 phrases are another page's keyphrase, 6 Lab phrases held to the Post phase), 372 skipped (222 are Directory place pages with no keyphrase field, 143 already on the page, 7 no page). List to the owner.
 - **Focus keyphrase not in title (item 12):** the Analyzer's 322 are checked against the post title (323 today: 141 News, 101 Resources, 62 Library, 14 Pages, 3 Directory, 2 Campaigns). 197 already have the keyphrase in the SEO title search shows; 126 do not (78 Resources, 33 News, 14 Library, 1 Page). No title changes without the owner's yes.
 - **Conflicts (item 11):** six in Search Insights: animal testing rules, draft laboratory animals rules 2026, draft laboratory animals rules, animal testing, lab animal rules (all Lab: held to the Post phase), animal bite (0 impressions; page /resources/animal-bite-cases-eastern-india/). Kukur Tihar is not marked as a conflict: Search Insights has the News item as owner ("Update the page").
