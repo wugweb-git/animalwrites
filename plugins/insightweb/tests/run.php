@@ -329,6 +329,8 @@ iw_check( '' !== aw_si_links_import_parse( "Keyword,Volume\ndog,10\n", $home, $s
 iw_check( 'Search Console Links' === aw_si_link_source_key( 'Search Console Links, read 2 Nov 2026' ) && 'Bing Webmaster' === aw_si_link_source_key( 'Bing Webmaster' ), 'reads group by source without the read date' );
 $l1 = aw_si_links_import_parse( "Site\nexample.org\nwww.xn--p1ai.xn--p1ai\nanimalwrites.in\n", $home, $src, '2026-11-12', '2026-11-12' );
 iw_check( 'list' === $l1['kind'] && 2 === count( $l1['rows'] ) && 'xn--p1ai.xn--p1ai' === $l1['rows'][1]['domain'] && 1 === $l1['skipped'], 'one-column list; an IDN (punycode) domain is a domain' );
+$lr = aw_si_links_import_parse( "\"Linking page\",\"Last crawled\"\r\n\"https://blog.example.com/post/\",\"Nov 2, 2026\"\r\n\"https://blog.example.com/post/\",\"Nov 2, 2026\"\r\n\"https://www.animalwrites.in/x/\",\"Nov 3, 2026\"\r\n", $home, $src, '2026-11-12', '2026-11-12' );
+iw_check( 'latest' === $lr['kind'] && 2 === count( $lr['rows'] ) && '2026-11-02' === $lr['rows'][0]['last_seen'] && 1 === $lr['skipped'], 'a real Latest links export: quoted, CRLF, US dates; our own site with www skipped; a repeated row stays one link (same key in aw_si_link_put)' );
 iw_check( '2026-11-02' === aw_si_links_import_date( '2 Nov 2026', '2026-11-12' ) && '' === aw_si_links_import_date( '1999-12-31', '2026-11-12' ) && '' === aw_si_links_import_date( 'soon', '2026-11-12' ), 'import dates: read, too old, not a date' );
 iw_check( 'example.org' === aw_si_link_domain( 'https://WWW.Example.org/x' ) && '' === aw_si_links_import_host( 'not a domain' ), 'one domain rule for links and the import' );
 $GLOBALS['iw_options']['aw_si_link_dr'] = array( 'a.example.org' => array( 60, '2026-11-20' ) );
