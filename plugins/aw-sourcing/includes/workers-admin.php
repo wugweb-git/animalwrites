@@ -36,6 +36,43 @@ function aw_workers_late_words( array $w ) {
 	return 'Late after ' . ( $h >= 48 ? round( $h / 24 ) . ' days' : $h . ' h' );
 }
 
+/**
+ * Every worker with its last run, status (active, late, failing, planned), problem note and key counts, in the
+ * registry's order: the rows of the Workers list on both screens.
+ *
+ * @return array[]
+ */
+function aw_workers_status_rows() {
+	$kinds = array();
+	$notes = array();
+	foreach ( aw_workers_problems() as $k => $msg ) {
+		list( $file, $kind )              = explode( ':', $k, 2 );
+		$kinds[ aw_worker_id( $file ) ][] = $kind;
+		$notes[ aw_worker_id( $file ) ][] = $msg;
+	}
+	$out = array();
+	foreach ( aw_workers_all() as $id => $w ) {
+		$last = aw_workers_last( $w['file'] );
+		$k    = $kinds[ $id ] ?? array();
+		if ( $w['planned'] && ! $last ) {
+			$status = 'planned';
+		} elseif ( array_intersect( $k, array( 'late', 'stuck' ) ) ) {
+			$status = 'late';
+		} elseif ( $k ) {
+			$status = 'failing';
+		} else {
+			$status = 'active';
+		}
+		$out[] = $w + array(
+			'last'   => $last,
+			'status' => $status,
+			'note'   => implode( ' ', $notes[ $id ] ?? array() ),
+			'keys'   => aw_worker_key_count( $id ),
+		);
+	}
+	return $out;
+}
+
 /** Sourcing → Workers. */
 function aw_workers_tab() {
 	$edit = sanitize_key( $_GET['edit'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification -- which screen is shown
@@ -285,41 +322,51 @@ function aw_workers_apply_keys( $id, array $ticked ) {
 	return array( $did, $skip );
 }
 
-// Save a worker (Add New Worker, or the overrides of an existing one).
-add_action(
-	'admin_post_aw_worker_save',
-	function () {
-		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'aw_worker_save' ) ) {
-			wp_die( 'Not allowed.', 403 );
-		}
-		$edit  = sanitize_key( wp_unslash( $_POST['worker_edit'] ?? '' ) );
-		$new   = 'new' === $edit;
-		$all   = aw_workers_all();
-		$id    = $new ? sanitize_key( wp_unslash( $_POST['worker_id'] ?? '' ) ) : $edit;
-		$name  = mb_substr( sanitize_text_field( wp_unslash( $_POST['worker_name'] ?? '' ) ), 0, 120 );
-		$what  = mb_substr( sanitize_textarea_field( wp_unslash( $_POST['worker_what'] ?? '' ) ), 0, 500 );
-		$sched = mb_substr( sanitize_text_field( wp_unslash( $_POST['worker_schedule'] ?? '' ) ), 0, 200 );
-		$late  = trim( sanitize_text_field( wp_unslash( $_POST['worker_late'] ?? '' ) ) );
-		$late  = '' === $late ? null : max( 1, absint( $late ) );
-		$group = sanitize_key( wp_unslash( $_POST['worker_group'] ?? '' ) );
-		$label = mb_substr( sanitize_text_field( wp_unslash( $_POST['worker_group_new'] ?? '' ) ), 0, 40 );
-		if ( ! $new && ! isset( $all[ $id ] ) ) {
-			wp_die( 'No such worker.', 404 );
-		}
-		$w       = $all[ $id ] ?? null;
-		$planned = $new || $w['planned'];
-		$err     = '';
-		if ( $new && ( '' === $id || 'new' === $id ) ) {
-			$err = 'id';
-		} elseif ( $new && ( isset( $all[ $id ] ) || isset( aw_workers_meta()[ $id ] ) ) ) {
-			$err = 'clash';
-		} elseif ( $planned && '' === $name ) {
-			$err = 'name';
-		}
-		if ( $err ) {
-			set_transient(
-				'aw_worker_form_' . get_current_user_id(),
-				array(
+/**
+ * Save a worker (Add New Worker, or the overrides of an existing one), for the classic form and the new Workers screen.
+ * Values come in already sanitised; every change goes to the change log.
+ *
+ * @param array $in { edit: 'new' or an ID, id (new only), name, what, schedule, late ('' = never), group, group_new,
+ *                  keys: ticked key ids, or null when the keys were not shown }.
+ * @return array|WP_Error { done: added|saved|same, id, name, skip } or an error coded id, clash, name or missing.
+ */
+function aw_worker_save( array $in ) {
+	$edit  = sanitize_key( (string) ( $in['edit'] ?? '' ) );
+	$new   = 'new' === $edit;
+	$all   = aw_workers_all();
+	$id    = $new ? sanitize_key( (string) ( $in['id'] ?? '' ) ) : $edit;
+	$name  = mb_substr( sanitize_text_field( (string) ( $in['name'] ?? '' ) ), 0, 120 );
+	$what  = mb_substr( sanitize_textarea_field( (string) ( $in['what'] ?? '' ) ), 0, 500 );
+	$sched = mb_substr( sanitize_text_field( (string) ( $in['schedule'] ?? '' ) ), 0, 200 );
+	$late  = trim( sanitize_text_field( (string) ( $in['late'] ?? '' ) ) );
+	$late  = '' === $late ? null : max( 1, absint( $late ) );
+	$group = sanitize_key( (string) ( $in['group'] ?? '' ) );
+	$label = mb_substr( sanitize_text_field( (string) ( $in['group_new'] ?? '' ) ), 0, 40 );
+	if ( ! $new && ! isset( $all[ $id ] ) ) {
+		return new WP_Error( 'missing', 'No such worker.', array( 'status' => 404 ) );
+	}
+	$w       = $all[ $id ] ?? null;
+	$planned = $new || $w['planned'];
+	$errs    = array(
+		'id'    => 'Choose an ID: lowercase letters, digits and hyphens (the workflow file name without .yml).',
+		'clash' => 'That ID is taken by another worker. IDs never change, so choose another.',
+		'name'  => 'Give the worker a name.',
+	);
+	$err     = '';
+	if ( $new && ( '' === $id || 'new' === $id ) ) {
+		$err = 'id';
+	} elseif ( $new && ( isset( $all[ $id ] ) || isset( aw_workers_meta()[ $id ] ) ) ) {
+		$err = 'clash';
+	} elseif ( $planned && '' === $name ) {
+		$err = 'name';
+	}
+	if ( $err ) {
+		return new WP_Error(
+			$err,
+			$errs[ $err ],
+			array(
+				'status' => 400,
+				'typed'  => array(
 					'id'           => $id,
 					'name'         => $name,
 					'what'         => $what,
@@ -327,103 +374,155 @@ add_action(
 					'late_after_h' => $late,
 					'schedule'     => $sched,
 				),
-				5 * MINUTE_IN_SECONDS
-			);
-			wp_safe_redirect( aw_workers_url( array( 'edit' => $new ? 'new' : $id, 'worker_err' => $err ) ) );
-			exit;
+			)
+		);
+	}
+	$log = array();
+	// A new group: added to the list with a generic icon.
+	if ( '' !== $label ) {
+		$groups = aw_worker_groups();
+		$slug   = sanitize_title( $label );
+		if ( '' !== $slug && ! isset( $groups[ $slug ] ) ) {
+			$extra          = (array) get_option( 'aw_workers_groups', array() );
+			$extra[ $slug ] = array( $label, 'admin-generic' );
+			update_option( 'aw_workers_groups', $extra, false );
+			$log[] = 'new group "' . $label . '"';
 		}
-		$log = array();
-		// A new group: added to the list with a generic icon.
-		if ( '' !== $label ) {
-			$groups = aw_worker_groups();
-			$slug   = sanitize_title( $label );
-			if ( '' !== $slug && ! isset( $groups[ $slug ] ) ) {
-				$extra          = (array) get_option( 'aw_workers_groups', array() );
-				$extra[ $slug ] = array( $label, 'admin-generic' );
-				update_option( 'aw_workers_groups', $extra, false );
-				$log[] = 'new group "' . $label . '"';
+		$group = '' !== $slug ? $slug : $group;
+	}
+	$group = isset( aw_worker_groups()[ $group ] ) ? $group : ( $w['group'] ?? 'one-off' );
+	$meta  = aw_workers_meta();
+	$m     = (array) ( $meta[ $id ] ?? array() );
+	if ( $planned ) {
+		$m = array_merge(
+			$m,
+			array(
+				'name'         => $name,
+				'what'         => $what,
+				'group'        => $group,
+				'late_after_h' => $late,
+				'schedule'     => $sched,
+				'planned'      => true,
+			)
+		);
+		if ( $new ) {
+			$m['added']    = time();
+			$m['added_by'] = wp_get_current_user()->user_login;
+		}
+	} else {
+		$reg = $w['registry'];
+		// Only what differs from the registry is kept, so a later registry change shows through.
+		foreach ( array(
+			'name' => $name,
+			'what' => $what,
+		) as $k => $val ) {
+			if ( '' === $val || $val === $reg[ $k ] ) {
+				unset( $m[ $k ] );
+			} else {
+				$m[ $k ] = $val;
 			}
-			$group = '' !== $slug ? $slug : $group;
 		}
-		$group = isset( aw_worker_groups()[ $group ] ) ? $group : ( $w['group'] ?? 'one-off' );
-		$meta  = aw_workers_meta();
-		$m     = (array) ( $meta[ $id ] ?? array() );
-		if ( $planned ) {
-			$m = array_merge(
-				$m,
-				array(
-					'name'         => $name,
-					'what'         => $what,
-					'group'        => $group,
-					'late_after_h' => $late,
-					'schedule'     => $sched,
-					'planned'      => true,
+		if ( $late === $reg['late_after_h'] ) {
+			unset( $m['late_after_h'] );
+		} else {
+			$m['late_after_h'] = $late;
+		}
+		// The group it has with no override (aw_workers_all()): kept only when it differs.
+		$def = AW_WORKER_DEFAULT_GROUP[ $id ] ?? ( ! empty( $reg['crons'] ) || ! empty( $reg['after'] ) ? 'maintenance' : 'one-off' );
+		if ( $def === $group ) {
+			unset( $m['group'] );
+		} else {
+			$m['group'] = $group;
+		}
+	}
+	if ( $m ) {
+		$meta[ $id ] = $m;
+	} else {
+		unset( $meta[ $id ] );
+	}
+	update_option( 'aw_workers_meta', $meta, false );
+	$after = aw_workers_all()[ $id ];
+	if ( $new ) {
+		$log[] = 'added planned worker ' . $id . ' "' . $name . '" (' . ( aw_worker_groups()[ $group ][0] ?? $group ) . ( '' !== $sched ? ', wanted: ' . $sched : '' ) . ')';
+	} else {
+		$groups = aw_worker_groups();
+		foreach ( array( 'name', 'what', 'group', 'late_after_h', 'schedule' ) as $k ) {
+			$a = $w[ $k ];
+			$b = $after[ $k ];
+			if ( $a !== $b ) {
+				$show  = fn( $x ) => 'group' === $k ? ( $groups[ $x ][0] ?? $x ) : ( 'late_after_h' === $k ? ( null === $x ? 'never' : $x . ' h' ) : '"' . $x . '"' );
+				$log[] = str_replace( '_', ' ', 'late_after_h' === $k ? 'late after' : $k ) . ' ' . $show( $a ) . ' → ' . $show( $b );
+			}
+		}
+	}
+	$skip = 0;
+	$did  = array();
+	if ( null !== ( $in['keys'] ?? null ) ) {
+		list( $did, $skip ) = aw_workers_apply_keys( $id, array_map( 'sanitize_key', (array) $in['keys'] ) );
+		if ( $did ) {
+			kits_sourcing_log( 'ai', 'worker ' . $id . ': key ' . implode( ', ', $did ) );
+		}
+	}
+	if ( $log ) {
+		kits_sourcing_log( 'workers', 'Worker ' . $id . ': ' . implode( '; ', $log ) );
+	}
+	return array(
+		'done' => $new ? 'added' : ( $log || $did ? 'saved' : 'same' ),
+		'id'   => $id,
+		'name' => $after['name'],
+		'skip' => $skip,
+	);
+}
+
+/** After a classic save or delete: back to the screen the person came from (the classic one, or the new one). */
+function aw_workers_back( array $args ) {
+	$url = aw_workers_url( $args );
+	return false !== strpos( (string) wp_get_referer(), 'ui=classic' ) ? add_query_arg( 'ui', 'classic', $url ) : $url;
+}
+
+// Save a worker from the classic form.
+add_action(
+	'admin_post_aw_worker_save',
+	function () {
+		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'aw_worker_save' ) ) {
+			wp_die( 'Not allowed.', 403 );
+		}
+		$res = aw_worker_save(
+			array(
+				'edit'      => sanitize_key( wp_unslash( $_POST['worker_edit'] ?? '' ) ),
+				'id'        => sanitize_key( wp_unslash( $_POST['worker_id'] ?? '' ) ),
+				'name'      => sanitize_text_field( wp_unslash( $_POST['worker_name'] ?? '' ) ),
+				'what'      => sanitize_textarea_field( wp_unslash( $_POST['worker_what'] ?? '' ) ),
+				'schedule'  => sanitize_text_field( wp_unslash( $_POST['worker_schedule'] ?? '' ) ),
+				'late'      => sanitize_text_field( wp_unslash( $_POST['worker_late'] ?? '' ) ),
+				'group'     => sanitize_key( wp_unslash( $_POST['worker_group'] ?? '' ) ),
+				'group_new' => sanitize_text_field( wp_unslash( $_POST['worker_group_new'] ?? '' ) ),
+				'keys'      => empty( $_POST['worker_keys_shown'] ) ? null : array_map( 'sanitize_key', (array) wp_unslash( $_POST['worker_keys'] ?? array() ) ),
+			)
+		);
+		if ( is_wp_error( $res ) ) {
+			if ( 'missing' === $res->get_error_code() ) {
+				wp_die( 'No such worker.', 404 );
+			}
+			$data = (array) $res->get_error_data();
+			set_transient( 'aw_worker_form_' . get_current_user_id(), (array) ( $data['typed'] ?? array() ), 5 * MINUTE_IN_SECONDS );
+			$edit = sanitize_key( wp_unslash( $_POST['worker_edit'] ?? '' ) );
+			wp_safe_redirect(
+				aw_workers_back(
+					array(
+						'edit'       => 'new' === $edit ? 'new' : $edit,
+						'worker_err' => $res->get_error_code(),
+					)
 				)
 			);
-			if ( $new ) {
-				$m['added']    = time();
-				$m['added_by'] = wp_get_current_user()->user_login;
-			}
-		} else {
-			$reg = $w['registry'];
-			// Only what differs from the registry is kept, so a later registry change shows through.
-			foreach ( array(
-				'name' => $name,
-				'what' => $what,
-			) as $k => $val ) {
-				if ( '' === $val || $val === $reg[ $k ] ) {
-					unset( $m[ $k ] );
-				} else {
-					$m[ $k ] = $val;
-				}
-			}
-			if ( $late === $reg['late_after_h'] ) {
-				unset( $m['late_after_h'] );
-			} else {
-				$m['late_after_h'] = $late;
-			}
-			if ( ( AW_WORKER_DEFAULT_GROUP[ $id ] ?? '' ) === $group ) {
-				unset( $m['group'] );
-			} else {
-				$m['group'] = $group;
-			}
-		}
-		if ( $m ) {
-			$meta[ $id ] = $m;
-		} else {
-			unset( $meta[ $id ] );
-		}
-		update_option( 'aw_workers_meta', $meta, false );
-		$after = aw_workers_all()[ $id ];
-		if ( $new ) {
-			$log[] = 'added planned worker ' . $id . ' "' . $name . '" (' . ( aw_worker_groups()[ $group ][0] ?? $group ) . ( '' !== $sched ? ', wanted: ' . $sched : '' ) . ')';
-		} else {
-			$groups = aw_worker_groups();
-			foreach ( array( 'name', 'what', 'group', 'late_after_h', 'schedule' ) as $k ) {
-				$a = $w[ $k ];
-				$b = $after[ $k ];
-				if ( $a !== $b ) {
-					$show  = fn( $x ) => 'group' === $k ? ( $groups[ $x ][0] ?? $x ) : ( 'late_after_h' === $k ? ( null === $x ? 'never' : $x . ' h' ) : '"' . $x . '"' );
-					$log[] = str_replace( '_', ' ', 'late_after_h' === $k ? 'late after' : $k ) . ' ' . $show( $a ) . ' → ' . $show( $b );
-				}
-			}
-		}
-		$skip = 0;
-		if ( ! empty( $_POST['worker_keys_shown'] ) ) {
-			list( $did, $skip ) = aw_workers_apply_keys( $id, array_map( 'sanitize_key', (array) wp_unslash( $_POST['worker_keys'] ?? array() ) ) );
-			if ( $did ) {
-				kits_sourcing_log( 'ai', 'worker ' . $id . ': key ' . implode( ', ', $did ) );
-			}
-		}
-		if ( $log ) {
-			kits_sourcing_log( 'workers', 'Worker ' . $id . ': ' . implode( '; ', $log ) );
+			exit;
 		}
 		wp_safe_redirect(
-			aw_workers_url(
+			aw_workers_back(
 				array(
-					'worker_done' => $new ? 'added' : ( $log || ! empty( $did ) ? 'saved' : 'same' ),
-					'worker_name' => rawurlencode( $after['name'] ),
-					'worker_skip' => $skip,
+					'worker_done' => $res['done'],
+					'worker_name' => rawurlencode( $res['name'] ),
+					'worker_skip' => $res['skip'],
 				)
 			)
 		);
@@ -431,7 +530,45 @@ add_action(
 	}
 );
 
-// Delete a Planned worker. Its ID leaves the keys attached to it (a key left with no worker is for every worker again).
+/**
+ * Delete a Planned worker. Its ID leaves the keys attached to it (a key left with no worker is for every worker again).
+ *
+ * @param string $id Worker ID.
+ * @return array|WP_Error { name, freed: keys now for every worker (…abcd (Provider)) }.
+ */
+function aw_worker_delete( $id ) {
+	$w = aw_worker( $id );
+	if ( ! $w || ! $w['planned'] ) {
+		return new WP_Error( 'not_planned', 'Only a planned worker can be deleted.', array( 'status' => 400 ) );
+	}
+	$id   = $w['id'];
+	$meta = aw_workers_meta();
+	unset( $meta[ $id ] );
+	update_option( 'aw_workers_meta', $meta, false );
+	$rows  = aw_ai_rows_fresh();
+	$freed = array();
+	$moved = false;
+	foreach ( $rows as $i => $r ) {
+		$ws = aw_ai_row_workers( $r );
+		if ( in_array( $id, $ws, true ) ) {
+			$moved                 = true;
+			$rows[ $i ]['workers'] = array_values( array_diff( $ws, array( $id ) ) );
+			if ( ! $rows[ $i ]['workers'] ) {
+				$freed[] = aw_ai_key_short( $r );
+			}
+		}
+	}
+	if ( $moved ) {
+		update_option( 'aw_ai_models', $rows, false );
+	}
+	kits_sourcing_log( 'workers', 'deleted planned worker ' . $id . ' "' . $w['name'] . '"' . ( $freed ? '; key ' . implode( ', ', $freed ) . ' now for all workers' : '' ) );
+	return array(
+		'name'  => $w['name'],
+		'freed' => $freed,
+	);
+}
+
+// Delete a Planned worker from the classic list.
 add_action(
 	'admin_post_aw_worker_delete',
 	function () {
@@ -439,31 +576,15 @@ add_action(
 		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'aw_worker_delete_' . $id ) ) {
 			wp_die( 'Not allowed.', 403 );
 		}
-		$w = aw_worker( $id );
-		if ( ! $w || ! $w['planned'] ) {
-			wp_die( 'Only a planned worker can be deleted.', 400 );
+		$res = aw_worker_delete( $id );
+		if ( is_wp_error( $res ) ) {
+			wp_die( esc_html( $res->get_error_message() ), 400 );
 		}
-		$meta = aw_workers_meta();
-		unset( $meta[ $id ] );
-		update_option( 'aw_workers_meta', $meta, false );
-		$rows = aw_ai_rows_fresh();
-		$freed = array();
-		foreach ( $rows as $i => $r ) {
-			$ws = aw_ai_row_workers( $r );
-			if ( in_array( $id, $ws, true ) ) {
-				$rows[ $i ]['workers'] = array_values( array_diff( $ws, array( $id ) ) );
-				if ( ! $rows[ $i ]['workers'] ) {
-					$freed[] = aw_ai_key_short( $r );
-				}
-			}
-		}
-		update_option( 'aw_ai_models', $rows, false );
-		kits_sourcing_log( 'workers', 'deleted planned worker ' . $id . ' "' . $w['name'] . '"' . ( $freed ? '; key ' . implode( ', ', $freed ) . ' now for all workers' : '' ) );
 		wp_safe_redirect(
-			aw_workers_url(
+			aw_workers_back(
 				array(
 					'worker_done' => 'deleted',
-					'worker_name' => rawurlencode( $w['name'] ),
+					'worker_name' => rawurlencode( $res['name'] ),
 				)
 			)
 		);
@@ -485,7 +606,7 @@ add_action(
 		}
 		$res = aw_workers_run_now( $w['file'] );
 		wp_safe_redirect(
-			aw_workers_url(
+			aw_workers_back(
 				array(
 					'aw_ran' => $w['file'],
 					'aw_ok'  => true === $res ? 1 : 0,

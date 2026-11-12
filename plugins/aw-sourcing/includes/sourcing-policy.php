@@ -603,8 +603,8 @@ function aw_sourcing_page() {
 	if ( ! current_user_can( AW_SRC_CAP ) ) {
 		return;
 	}
-	if ( function_exists( 'sourceweb_ui_page' ) && sourceweb_ui_page( 'settings' ) ) {
-		return; // The new Settings (sourceweb-ui.php; &ui=classic shows this one).
+	if ( function_exists( 'sourceweb_ui_page' ) && sourceweb_ui_page( sourceweb_ui_wanted() ) ) {
+		return; // A rebuilt tab: Settings, Workers … (sourceweb-ui.php SOURCEWEB_UI_TABS; &ui=classic shows this one).
 	}
 	$base = admin_url( 'admin.php?page=aw-sourcing' );
 	// Each tab is an item of the Sourcing menu (admin-menu.php aw_sourcing_tabs: slug => [label, render callback, own form?]).

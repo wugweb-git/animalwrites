@@ -6,6 +6,7 @@
  *   admin.php?page=aw-sourcing-menu              Dashboard          (edit_others_posts)
  *   admin.php?page=aw-review                     To review          (edit_others_posts)
  *   admin.php?page=aw-enrich-review              Enrichment review  (edit_others_posts)
+ *   admin.php?page=aw-sourcing&tab=workers       Workers            (manage_options; &edit=<id|new>, &runs=<id>)
  *   admin.php?page=aw-sourcing&tab=settings      Settings           (manage_options)
  *
  * &ui=classic shows the earlier screens. The screens are one script (build/index.js, from src/), drawn with Kits
@@ -19,8 +20,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/** The Sourcing page's tabs drawn on the new screens (the others still draw today's screen). */
+const SOURCEWEB_UI_TABS = array( 'workers', 'settings' );
+
 /**
- * Which new screen this request asks for: 'dashboard', 'review', 'enrichment', 'settings' or ''.
+ * Which new screen this request asks for: 'dashboard', 'review', 'enrichment', a tab of SOURCEWEB_UI_TABS or ''.
  */
 function sourceweb_ui_wanted(): string {
 	// phpcs:disable WordPress.Security.NonceVerification.Recommended -- which screen to show; nothing is saved here
@@ -32,7 +36,7 @@ function sourceweb_ui_wanted(): string {
 		return '';
 	}
 	if ( AW_SRC_PAGE === $page ) {
-		return AW_SRC_SETTINGS_TAB === $tab ? 'settings' : '';
+		return in_array( $tab, SOURCEWEB_UI_TABS, true ) ? $tab : '';
 	}
 	return array(
 		AW_SRC_MENU        => 'dashboard',
@@ -47,6 +51,7 @@ function sourceweb_ui_caps(): array {
 		'dashboard'  => AW_REVIEW_CAP,
 		'review'     => AW_REVIEW_CAP,
 		'enrichment' => AW_ENRICH_CAP,
+		'workers'    => AW_SRC_CAP,
 		'settings'   => AW_SRC_CAP,
 	);
 }
@@ -74,11 +79,10 @@ function sourceweb_ui_url( string $screen ): string {
 		'dashboard'  => array( 'page' => AW_SRC_MENU ),
 		'review'     => array( 'page' => 'aw-review' ),
 		'enrichment' => array( 'page' => 'aw-enrich-review' ),
-		'settings'   => array(
-			'page' => AW_SRC_PAGE,
-			'tab'  => AW_SRC_SETTINGS_TAB,
-		),
-	)[ $screen ] ?? array( 'page' => AW_SRC_MENU );
+	)[ $screen ] ?? ( in_array( $screen, SOURCEWEB_UI_TABS, true ) ? array(
+		'page' => AW_SRC_PAGE,
+		'tab'  => $screen,
+	) : array( 'page' => AW_SRC_MENU ) );
 	return add_query_arg( $q + array( 'ui' => 'next' ), admin_url( 'admin.php' ) );
 }
 
@@ -90,40 +94,31 @@ add_action(
 			return;
 		}
 		$head   = get_file_data( AW_SOURCING_DIR . 'aw-sourcing.php', array( 'Version' => 'Version' ) );
-		$labels = array(
-			'dashboard'  => __( 'Dashboard', 'aw-sourcing' ),
-			'review'     => __( 'To review', 'aw-sourcing' ),
-			'enrichment' => __( 'Enrichment review', 'aw-sourcing' ),
-			'settings'   => __( 'Settings', 'aw-sourcing' ),
+		// The header's tabs in menu order. A tab not rebuilt yet opens today's screen at its own address (owner, 12 Nov 2026).
+		$order = array(
+			'dashboard'  => array( __( 'Dashboard', 'aw-sourcing' ), null ),
+			'review'     => array( __( 'To review', 'aw-sourcing' ), null ),
+			'enrichment' => array( __( 'Enrichment review', 'aw-sourcing' ), null ),
+			'sources'    => array( __( 'Sources', 'aw-sourcing' ), '' ),
+			'keywords'   => array( __( 'Keywords', 'aw-sourcing' ), 'keywords' ),
+			'rules'      => array( __( 'Rules', 'aw-sourcing' ), 'rules' ),
+			'ai'         => array( __( 'AI models', 'aw-sourcing' ), 'ai' ),
+			'workers'    => array( __( 'Workers', 'aw-sourcing' ), null ),
+			'settings'   => array( __( 'Settings', 'aw-sourcing' ), null ),
 		);
-		$tabs   = array();
-		foreach ( sourceweb_ui_caps() as $slug => $cap ) {
-			if ( current_user_can( $cap ) ) {
-				$tabs[] = array(
-					'slug'    => $slug,
-					'label'   => $labels[ $slug ],
-					'url'     => sourceweb_ui_url( $slug ),
-					'current' => $slug === $screen,
-				);
+		$caps  = sourceweb_ui_caps();
+		$tabs  = array();
+		foreach ( $order as $slug => $t ) {
+			$rebuilt = isset( $caps[ $slug ] );
+			if ( ! current_user_can( $rebuilt ? $caps[ $slug ] : AW_SRC_CAP ) ) {
+				continue;
 			}
-		}
-		// Screens not rebuilt yet: the tab opens today's screen at its own address (owner, 12 Nov 2026).
-		if ( current_user_can( AW_SRC_CAP ) ) {
-			$classic = array(
-				'sources'  => array( __( 'Sources', 'aw-sourcing' ), '' ),
-				'keywords' => array( __( 'Keywords', 'aw-sourcing' ), 'keywords' ),
-				'rules'    => array( __( 'Rules', 'aw-sourcing' ), 'rules' ),
-				'ai'       => array( __( 'AI models', 'aw-sourcing' ), 'ai' ),
-				'workers'  => array( __( 'Workers', 'aw-sourcing' ), 'workers' ),
+			$tabs[] = array(
+				'slug'    => $slug,
+				'label'   => $t[0],
+				'url'     => $rebuilt ? sourceweb_ui_url( $slug ) : aw_sourcing_url( (string) $t[1] ),
+				'current' => $slug === $screen,
 			);
-			foreach ( $classic as $slug => $t ) {
-				$tabs[] = array(
-					'slug'    => $slug,
-					'label'   => $t[0],
-					'url'     => aw_sourcing_url( $t[1] ),
-					'current' => false,
-				);
-			}
 		}
 		$ok = kits_shell_app(
 			array(
@@ -150,17 +145,18 @@ add_action(
 /**
  * Draw the new screen in place of the current one, when it is ready. The page callbacks call this first.
  *
- * @param string $screen 'dashboard', 'review', 'enrichment' or 'settings'.
+ * @param string $screen 'dashboard', 'review', 'enrichment' or a tab of SOURCEWEB_UI_TABS.
  * @return bool True when the new screen was drawn.
  */
 function sourceweb_ui_page( string $screen ): bool {
-	if ( sourceweb_ui_wanted() !== $screen || ! sourceweb_ui_ready() ) {
+	if ( '' === $screen || sourceweb_ui_wanted() !== $screen || ! sourceweb_ui_ready() ) {
 		return false;
 	}
 	$titles = array(
 		'dashboard'  => __( 'SourceWeb', 'aw-sourcing' ),
 		'review'     => __( 'To review', 'aw-sourcing' ),
 		'enrichment' => __( 'Enrichment review', 'aw-sourcing' ),
+		'workers'    => __( 'Workers', 'aw-sourcing' ),
 		'settings'   => __( 'SourceWeb settings', 'aw-sourcing' ),
 	);
 	kits_shell_mount( 'sourceweb-app', $titles[ $screen ] );

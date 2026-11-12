@@ -86,4 +86,5 @@ require_once AW_SOURCING_DIR . 'includes/kits-hub.php'; // a tab and a status ro
 require_once AW_SOURCING_DIR . 'includes/sourceweb-model.php';
 require_once AW_SOURCING_DIR . 'includes/sourceweb-dashboard.php';
 require_once AW_SOURCING_DIR . 'includes/sourceweb-rest.php';
+require_once AW_SOURCING_DIR . 'includes/sourceweb-rest-pages.php'; // the tabs rebuilt after 12 Nov 2026 (Workers …)
 require_once AW_SOURCING_DIR . 'includes/sourceweb-ui.php';

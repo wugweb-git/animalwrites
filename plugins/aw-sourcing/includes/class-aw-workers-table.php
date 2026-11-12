@@ -28,32 +28,7 @@ class AW_Workers_Table extends WP_List_Table {
 				'screen'   => AW_SRC_SCREEN,
 			)
 		);
-		$kinds = array();
-		$notes = array();
-		foreach ( aw_workers_problems() as $k => $msg ) {
-			list( $file, $kind )              = explode( ':', $k, 2 );
-			$kinds[ aw_worker_id( $file ) ][] = $kind;
-			$notes[ aw_worker_id( $file ) ][] = $msg;
-		}
-		foreach ( aw_workers_all() as $id => $w ) {
-			$last = aw_workers_last( $w['file'] );
-			$k    = $kinds[ $id ] ?? array();
-			if ( $w['planned'] && ! $last ) {
-				$status = 'planned';
-			} elseif ( array_intersect( $k, array( 'late', 'stuck' ) ) ) {
-				$status = 'late';
-			} elseif ( $k ) {
-				$status = 'failing';
-			} else {
-				$status = 'active';
-			}
-			$this->all[] = $w + array(
-				'last'   => $last,
-				'status' => $status,
-				'note'   => implode( ' ', $notes[ $id ] ?? array() ),
-				'keys'   => aw_worker_key_count( $id ),
-			);
-		}
+		$this->all = aw_workers_status_rows();
 	}
 
 	/** Status => [label, dashicon]. */

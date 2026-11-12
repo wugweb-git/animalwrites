@@ -5,7 +5,8 @@ screen aw-sourcing-menu sourceweb-app sourceweb-admin
 screen aw-review sourceweb-app sourceweb-admin
 screen aw-enrich-review sourceweb-app sourceweb-admin
 screen "aw-sourcing&tab=settings" sourceweb-app sourceweb-admin
-for r in dashboard review "review&type=aw_news" enrichment "enrichment&status=all" settings; do
+screen "aw-sourcing&tab=workers" sourceweb-app sourceweb-admin
+for r in dashboard review "review&type=aw_news" enrichment "enrichment&status=all" settings workers "workers&view=planned&search=x&orderby=status&order=desc" workers/new workers/sourcing workers/sourcing/runs; do
   route "sourceweb/v1/$r"
 done
 post sourceweb/v1/dashboard/count '{}'
@@ -16,6 +17,41 @@ post sourceweb/v1/settings/workers '{"values":{}}'
 post sourceweb/v1/settings/enrichment '{"values":{}}'
 post sourceweb/v1/settings/social '{"values":{}}'
 post sourceweb/v1/settings/google-key '{"key":""}'
+post sourceweb/v1/workers/save '{"edit":"sourcing"}'
+post sourceweb/v1/workers/delete '{"id":"sourcing"}'
+post sourceweb/v1/workers/run '{"id":"sourcing"}'
+# Workers: a registry worker can't be deleted; an unchanged Save of every worker writes nothing.
+want 400 "POST /sourceweb/v1/workers/delete a registry worker" -X POST -b /tmp/cj-ci -H "X-WP-Nonce: $NA" -H 'Content-Type: application/json' -d '{"id":"sourcing"}' "$H/?rest_route=/sourceweb/v1/workers/delete"
+W_OPTS="aw_workers_meta aw_workers_groups aw_ai_models kits_sourcing_log"
+# shellcheck disable=SC2086
+BEFORE=$(optmd5 $W_OPTS)
+curl -s -b /tmp/cj-ci -H "X-WP-Nonce: $NA" "$H/?rest_route=/sourceweb/v1/workers" > /tmp/sw-workers.json
+python3 - "$H/?rest_route=/sourceweb/v1" "$NA" <<'PY2' || FAIL=1
+import json, subprocess, sys
+r, nonce = sys.argv[1], sys.argv[2]
+def call(route, data=None):
+    args = ['curl', '-s', '-b', '/tmp/cj-ci', '-H', 'X-WP-Nonce: ' + nonce, '-w', '\n%{http_code}']
+    if data is not None:
+        args += ['-X', 'POST', '-H', 'Content-Type: application/json', '-d', json.dumps(data)]
+    body, code = subprocess.run(args + [r + '/' + route], capture_output=True, text=True).stdout.rsplit('\n', 1)
+    return code, json.loads(body)
+lst = json.load(open('/tmp/sw-workers.json'))
+bad = 0
+ids = [w['id'] for w in lst['rows']]
+print(('ok  ' if ids else 'FAIL') + ' workers list: %d workers, %d views' % (len(ids), len(lst['views'])))
+bad += not ids
+for wid in ids[:5]:
+    code, w = call('workers/' + wid)
+    data = {k: w[k] for k in ('name', 'what', 'group', 'late', 'schedule')}
+    data.update({'edit': wid, 'keys': [k['id'] for k in w['keys'] if k['on']], 'keysShown': bool(w['keys'])})
+    code, res = call('workers/save', data)
+    ok = code == '200' and res.get('done') == 'same'
+    print(('ok  ' if ok else 'FAIL') + ' ' + code + ' unchanged Save of worker ' + wid + ' (' + str(res.get('done')) + ')')
+    bad += not ok
+sys.exit(1 if bad else 0)
+PY2
+# shellcheck disable=SC2086
+same "SourceWeb Workers" "$BEFORE" "$(optmd5 $W_OPTS)"
 want 200 "POST /sourceweb/v1/dashboard/count administrator" -X POST -b /tmp/cj-ci -H "X-WP-Nonce: $NA" "$H/?rest_route=/sourceweb/v1/dashboard/count"
 # The Google key never goes out: Settings says only whether one is set.
 wp option update aw_enrich_google_key ci-secret-key-abcd --quiet

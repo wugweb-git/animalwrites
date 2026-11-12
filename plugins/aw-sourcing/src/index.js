@@ -27,6 +27,7 @@ import {
 	SectionCard,
 	ServiceList,
 	ServiceRow,
+	SettingsBlock,
 	SettingsGroup,
 	Switch,
 	Tile,
@@ -1215,11 +1216,890 @@ function Settings() {
 	);
 }
 
+/* ---------- Pages with sub-screens (Workers …): the sub-screen is in the address ---------- */
+
+/**
+ * The sub-screen from the address (?edit=<id>, ?runs=<id>) and a way to open another one; Back and Forward work.
+ *
+ * @param {Array} keys Query keys that open a sub-screen.
+ * @return {Array} [ { key: value }, go( { key: value } | {} ) ].
+ */
+function useSub( keys ) {
+	const read = () => {
+		const q = new URLSearchParams( window.location.search );
+		return keys.reduce(
+			( o, k ) => ( q.get( k ) ? { ...o, [ k ]: q.get( k ) } : o ),
+			{}
+		);
+	};
+	const [ sub, setSub ] = useState( read );
+	useEffect( () => {
+		const on = () => setSub( read() );
+		window.addEventListener( 'popstate', on );
+		return () => window.removeEventListener( 'popstate', on );
+	}, [] ); // eslint-disable-line react-hooks/exhaustive-deps -- read() only uses the keys given once
+	const go = ( next ) => {
+		const u = new URL( window.location.href );
+		keys.forEach( ( k ) => u.searchParams.delete( k ) );
+		Object.keys( next ).forEach( ( k ) =>
+			u.searchParams.set( k, next[ k ] )
+		);
+		window.history.pushState( null, '', u.toString() );
+		setSub( next );
+		window.scrollTo( 0, 0 );
+	};
+	return [ sub, go ];
+}
+
+/**
+ * The address of a sub-screen, for real links (open in a new tab works).
+ *
+ * @param {Object} next { edit: id } or { runs: id }.
+ */
+const subHref = ( next ) => {
+	const u = new URL( window.location.href );
+	[ 'edit', 'runs' ].forEach( ( k ) => u.searchParams.delete( k ) );
+	Object.keys( next ).forEach( ( k ) => u.searchParams.set( k, next[ k ] ) );
+	return u.toString();
+};
+
+/**
+ * A click on a sub-screen link opens it in place; a modified click (new tab) is left to the browser.
+ *
+ * @param {Function} go   From useSub().
+ * @param {Object}   next The sub-screen.
+ */
+const inPlace = ( go, next ) => ( e ) => {
+	if ( e.metaKey || e.ctrlKey || e.shiftKey || 0 !== e.button ) {
+		return;
+	}
+	e.preventDefault();
+	go( next );
+};
+
+const TONE = { success: 'ok', error: 'error', warn: 'warn', info: '' };
+
+/**
+ * A result in words with the shell's status mark.
+ *
+ * @param {Object} props
+ * @param {string} props.tone  success | error | warn | info.
+ * @param {string} props.label Words.
+ */
+function Status( { tone, label } ) {
+	return (
+		<span
+			className={ `kits-shell-status${
+				TONE[ tone ] ? ' is-' + TONE[ tone ] : ''
+			}` }
+		>
+			{ label }
+		</span>
+	);
+}
+
+/* ---------- Workers ---------- */
+
+function Workers() {
+	const [ sub, go ] = useSub( [ 'edit', 'runs' ] );
+	const [ msg, setMsg ] = useState( null );
+	const back = ( m ) => {
+		setMsg( m || null );
+		go( {} );
+	};
+	if ( sub.edit ) {
+		return <WorkerForm id={ sub.edit } onDone={ back } />;
+	}
+	if ( sub.runs ) {
+		return <WorkerRuns id={ sub.runs } onBack={ () => back() } />;
+	}
+	return <WorkerList go={ go } msg={ msg } setMsg={ setMsg } />;
+}
+
+function WorkerList( { go, msg, setMsg } ) {
+	const [ q, setQ ] = useState( {
+		view: '',
+		search: '',
+		orderby: '',
+		order: 'asc',
+		page: 1,
+	} );
+	const [ data, setData ] = useState( null );
+	const [ loading, setLoading ] = useState( true );
+	const [ error, setError ] = useState( '' );
+	const load = useCallback( () => {
+		setLoading( true );
+		setError( '' );
+		apiFetch( { path: path( 'workers', q ) } )
+			.then( setData )
+			.catch( ( e ) => setError( errText( e ) ) )
+			.finally( () => setLoading( false ) );
+	}, [ q ] );
+	useEffect( load, [ load ] );
+	const set = ( part ) => setQ( ( o ) => ( { ...o, page: 1, ...part } ) );
+	const send = ( route, id ) => {
+		setMsg( null );
+		return apiFetch( { path: path( route ), method: 'POST', data: { id } } )
+			.then( ( r ) => setMsg( { tone: 'success', text: r.message } ) )
+			.catch( ( e ) => setMsg( { tone: 'error', text: errText( e ) } ) )
+			.finally( load );
+	};
+	const remove = ( r ) => {
+		if (
+			// eslint-disable-next-line no-alert -- a plain browser confirm, as today's screen
+			window.confirm(
+				sprintf(
+					/* translators: %s: worker name. */
+					__( 'Delete the planned worker "%s"?', 'aw-sourcing' ),
+					r.title
+				)
+			)
+		) {
+			send( 'workers/delete', r.id );
+		}
+	};
+	return (
+		<>
+			<SectionCard
+				id="workers"
+				title={ __( 'Workers', 'aw-sourcing' ) }
+				description={ __(
+					'One worker per workflow of the workers repository, which reports its start and end here. Schedules are changed in the workflows; names, groups and late limits here. A problem is emailed to the owner once. Planned workers never raise an alert.',
+					'aw-sourcing'
+				) }
+				actions={
+					<a
+						className="kits-shell-button is-primary"
+						href={ subHref( { edit: 'new' } ) }
+						onClick={ inPlace( go, { edit: 'new' } ) }
+					>
+						{ __( 'Add New Worker', 'aw-sourcing' ) }
+					</a>
+				}
+			>
+				{ data?.runOff && (
+					<Notice tone="warning">
+						{ __(
+							'Run now is off: AW_GITHUB_DISPATCH_TOKEN is not set in wp-config.php (a fine-grained GitHub token for the workers repository only, Actions read and write).',
+							'aw-sourcing'
+						) }
+					</Notice>
+				) }
+				{ msg && (
+					<Notice
+						tone={ msg.tone }
+						onDismiss={ () => setMsg( null ) }
+					>
+						{ msg.text }
+					</Notice>
+				) }
+				<DataList
+					label={ __( 'Workers', 'aw-sourcing' ) }
+					columns={ [
+						{
+							key: 'title',
+							label: __( 'Worker', 'aw-sourcing' ),
+							sortable: true,
+							primary: true,
+							render: ( r ) => (
+								<>
+									<a
+										href={ subHref( { edit: r.id } ) }
+										onClick={ inPlace( go, {
+											edit: r.id,
+										} ) }
+									>
+										<strong>{ r.title }</strong>
+									</a>{ ' ' }
+									<code>{ r.id }</code>
+									{ r.what && (
+										<span className="kits-shell-field__help">
+											{ ' ' }
+											{ r.what }
+										</span>
+									) }
+									{ r.problem && (
+										<span className="kits-shell-field__help">
+											{ ' ' }
+											<Status
+												tone="error"
+												label={ r.problem }
+											/>
+										</span>
+									) }
+								</>
+							),
+						},
+						{
+							key: 'group',
+							label: __( 'Group', 'aw-sourcing' ),
+							sortable: true,
+							render: ( r ) => r.groupLabel,
+						},
+						{
+							key: 'file',
+							label: __( 'Workflow file', 'aw-sourcing' ),
+							render: ( r ) =>
+								r.fileUrl ? (
+									<a href={ r.fileUrl }>
+										<code>{ r.file }</code>
+									</a>
+								) : (
+									<>
+										<code>{ r.file }</code>{ ' ' }
+										<span className="kits-shell-field__help">
+											{ __(
+												'Not built yet',
+												'aw-sourcing'
+											) }
+										</span>
+									</>
+								),
+						},
+						{
+							key: 'schedule',
+							label: __( 'Schedule (IST)', 'aw-sourcing' ),
+							render: ( r ) => (
+								<>
+									{ r.schedule || '—' }
+									{ r.late && (
+										<span className="kits-shell-field__help">
+											{ ' ' }
+											{ r.late }
+										</span>
+									) }
+								</>
+							),
+						},
+						{
+							key: 'last_run',
+							label: __( 'Last run', 'aw-sourcing' ),
+							sortable: true,
+							render: ( r ) => {
+								if ( ! r.last ) {
+									return r.planned
+										? '—'
+										: __( 'No report yet', 'aw-sourcing' );
+								}
+								return (
+									<>
+										<Status
+											tone={ r.last.tone }
+											label={ r.last.label }
+										/>{ ' ' }
+										{ r.last.when }
+										{ r.last.took
+											? ` · ${ r.last.took }`
+											: '' }
+										{ r.last.counts && (
+											<span className="kits-shell-field__help">
+												{ ' ' }
+												{ r.last.counts }
+											</span>
+										) }
+									</>
+								);
+							},
+						},
+						{
+							key: 'status',
+							label: __( 'Status', 'aw-sourcing' ),
+							sortable: true,
+							render: ( r ) => (
+								<>
+									<Status
+										tone={
+											{
+												late: 'warn',
+												failing: 'error',
+												active: 'success',
+											}[ r.status ] || 'info'
+										}
+										label={ r.statusLabel }
+									/>
+									{ r.statusNote && (
+										<span className="kits-shell-field__help">
+											{ ' ' }
+											{ r.statusNote }
+										</span>
+									) }
+								</>
+							),
+						},
+						{
+							key: 'keys',
+							label: __( 'Keys', 'aw-sourcing' ),
+						},
+					] }
+					rows={ data?.rows || [] }
+					total={ data?.total || 0 }
+					page={ data?.page || 1 }
+					pages={ data?.pages || 1 }
+					onPage={ ( page ) => setQ( ( o ) => ( { ...o, page } ) ) }
+					search={ q.search }
+					onSearch={ ( search ) => set( { search } ) }
+					searchLabel={ __( 'Search workers', 'aw-sourcing' ) }
+					views={ data?.views || [] }
+					view={ q.view }
+					onView={ ( view ) => set( { view } ) }
+					sort={ { key: q.orderby, dir: q.order } }
+					onSort={ ( orderby, order ) => set( { orderby, order } ) }
+					rowActions={ ( r ) => [
+						{
+							label: __( 'Edit', 'aw-sourcing' ),
+							onClick: () => go( { edit: r.id } ),
+						},
+						...( r.planned
+							? []
+							: [
+									{
+										label: __( 'Run now', 'aw-sourcing' ),
+										onClick: () =>
+											send( 'workers/run', r.id ),
+										disabled: ! r.canRun,
+										why: r.canRun
+											? ''
+											: __(
+													'Needs input or the dispatch token',
+													'aw-sourcing'
+												),
+									},
+								] ),
+						{
+							label: __( 'View runs', 'aw-sourcing' ),
+							onClick: () => go( { runs: r.id } ),
+						},
+						...( r.planned
+							? [
+									{
+										label: __( 'Delete', 'aw-sourcing' ),
+										tone: 'error',
+										onClick: () => remove( r ),
+									},
+								]
+							: [] ),
+					] }
+					loading={ loading }
+					error={ error }
+					onRetry={ load }
+					emptyTitle={ __( 'No workers found.', 'aw-sourcing' ) }
+				/>
+			</SectionCard>
+			<SectionCard
+				id="run-now-log"
+				title={ __( 'Run now log', 'aw-sourcing' ) }
+				description={ __(
+					'The last 50 times Run now was used.',
+					'aw-sourcing'
+				) }
+			>
+				{ data && data.log.length ? (
+					<RefTable
+						caption={ __( 'Run now log', 'aw-sourcing' ) }
+						head={ [
+							__( 'When', 'aw-sourcing' ),
+							__( 'Who', 'aw-sourcing' ),
+							__( 'Worker', 'aw-sourcing' ),
+							__( 'Result', 'aw-sourcing' ),
+						] }
+						rows={ data.log }
+					/>
+				) : (
+					<p>{ __( 'None yet.', 'aw-sourcing' ) }</p>
+				) }
+			</SectionCard>
+		</>
+	);
+}
+
+/**
+ * A text input inside a Field.
+ *
+ * @param {Object}   props
+ * @param {string}   props.label    Label.
+ * @param {string}   props.help     Help line.
+ * @param {string}   props.value    Value.
+ * @param {Function} props.onChange New value.
+ * @param {Object}   props.input    More input attributes (type, min, placeholder, rows for a textarea).
+ */
+function TextField( { label, help, value, onChange, input = {} } ) {
+	const { rows, ...attrs } = input;
+	return (
+		<Field
+			label={ label }
+			help={ help }
+			render={ ( id, helpId ) =>
+				rows ? (
+					<textarea
+						id={ id }
+						rows={ rows }
+						value={ value }
+						aria-describedby={ helpId }
+						onChange={ ( e ) => onChange( e.target.value ) }
+					/>
+				) : (
+					<input
+						id={ id }
+						type="text"
+						value={ value }
+						aria-describedby={ helpId }
+						onChange={ ( e ) => onChange( e.target.value ) }
+						{ ...attrs }
+					/>
+				)
+			}
+		/>
+	);
+}
+
+/**
+ * A select inside a Field (the shell's styled select is not built yet: the browser's own).
+ *
+ * @param {Object}   props
+ * @param {string}   props.label    Label.
+ * @param {string}   props.help     Help line.
+ * @param {string}   props.value    Value.
+ * @param {Array}    props.options  [ { value, label } ].
+ * @param {Function} props.onChange New value.
+ */
+function SelectField( { label, help, value, options, onChange } ) {
+	return (
+		<Field
+			label={ label }
+			help={ help }
+			render={ ( id, helpId ) => (
+				<select
+					id={ id }
+					value={ value }
+					aria-describedby={ helpId }
+					onChange={ ( e ) => onChange( e.target.value ) }
+				>
+					{ options.map( ( o ) => (
+						<option key={ o.value } value={ o.value }>
+							{ o.label }
+						</option>
+					) ) }
+				</select>
+			) }
+		/>
+	);
+}
+
+/**
+ * Add New Worker or edit one: name, what it does, group (or a new one), late limit, schedule wanted (Planned) and the
+ * saved keys it may use.
+ *
+ * @param {Object}   props
+ * @param {string}   props.id     Worker ID or 'new'.
+ * @param {Function} props.onDone Back to the list, with a notice.
+ */
+function WorkerForm( { id, onDone } ) {
+	const [ w, setW ] = useState( null );
+	const [ v, setV ] = useState( null );
+	const [ error, setError ] = useState( '' );
+	const [ msg, setMsg ] = useState( null );
+	const [ busy, setBusy ] = useState( false );
+	const load = () => {
+		setError( '' );
+		apiFetch( { path: path( `workers/${ encodeURIComponent( id ) }` ) } )
+			.then( ( r ) => {
+				setW( r );
+				setV( {
+					id: '',
+					name: r.name,
+					what: r.what,
+					group: r.group,
+					group_new: '',
+					late: r.late,
+					schedule: r.schedule,
+					keys: r.keys.filter( ( k ) => k.on ).map( ( k ) => k.id ),
+				} );
+			} )
+			.catch( ( e ) => setError( errText( e ) ) );
+	};
+	useEffect( load, [ id ] );
+	if ( error ) {
+		return <ErrorState message={ error } onRetry={ load } />;
+	}
+	if ( ! w || ! v ) {
+		return (
+			<LoadingState
+				label={ __( 'Loading the worker…', 'aw-sourcing' ) }
+			/>
+		);
+	}
+	const put = ( k ) => ( val ) => setV( { ...v, [ k ]: val } );
+	const save = () => {
+		setBusy( true );
+		setMsg( null );
+		apiFetch( {
+			path: path( 'workers/save' ),
+			method: 'POST',
+			data: {
+				...v,
+				edit: w.new ? 'new' : w.id,
+				keysShown: w.keys.length > 0,
+			},
+		} )
+			.then( ( r ) =>
+				onDone( {
+					tone: 'same' === r.done ? 'info' : 'success',
+					text: r.message,
+				} )
+			)
+			.catch( ( e ) => {
+				setMsg( { tone: 'error', text: errText( e ) } );
+				setBusy( false );
+			} );
+	};
+	const tick = ( kid, on ) =>
+		setV( {
+			...v,
+			keys: on ? [ ...v.keys, kid ] : v.keys.filter( ( x ) => x !== kid ),
+		} );
+	const reg = w.registry;
+	return (
+		<SettingsGroup
+			id="worker-form"
+			title={
+				w.new
+					? __( 'Add New Worker', 'aw-sourcing' )
+					: sprintf(
+							/* translators: %s: worker name. */
+							__( 'Edit %s', 'aw-sourcing' ),
+							w.name
+						)
+			}
+			description={
+				w.new
+					? __(
+							'A planned worker: the ID is the file name its workflow will have, without .yml. It shows "Not built yet" until a workflow with that ID reports a run, and never raises an alert.',
+							'aw-sourcing'
+						)
+					: ''
+			}
+			footer={
+				<>
+					<Button variant="primary" busy={ busy } onClick={ save }>
+						{ w.new
+							? __( 'Add worker', 'aw-sourcing' )
+							: __( 'Save changes', 'aw-sourcing' ) }
+					</Button>{ ' ' }
+					<Button onClick={ () => onDone() }>
+						{ __( 'Cancel', 'aw-sourcing' ) }
+					</Button>
+				</>
+			}
+		>
+			{ msg && (
+				<Notice tone={ msg.tone } onDismiss={ () => setMsg( null ) }>
+					{ msg.text }
+				</Notice>
+			) }
+			{ w.new ? (
+				<TextField
+					label={ __( 'ID', 'aw-sourcing' ) }
+					help={ __(
+						'e.g. press-news for press-news.yml. Lowercase letters, digits and hyphens. It never changes.',
+						'aw-sourcing'
+					) }
+					value={ v.id }
+					onChange={ put( 'id' ) }
+					input={ { pattern: '[a-z0-9_-]+', className: 'code' } }
+				/>
+			) : (
+				<RefTable
+					caption={ __( 'The worker', 'aw-sourcing' ) }
+					head={ [
+						__( 'Item', 'aw-sourcing' ),
+						__( 'Value', 'aw-sourcing' ),
+					] }
+					rows={ [
+						[
+							__( 'ID', 'aw-sourcing' ),
+							<>
+								<code>{ w.id }</code>{ ' ' }
+								{ __( '(IDs never change)', 'aw-sourcing' ) }
+							</>,
+						],
+						...( reg
+							? [
+									[
+										__( 'Workflow', 'aw-sourcing' ),
+										<a key="f" href={ reg.fileUrl }>
+											<code>{ reg.file }</code>
+										</a>,
+									],
+									[
+										__( 'Schedule (IST)', 'aw-sourcing' ),
+										`${ reg.schedule } ${ __(
+											'(changed in the workflow)',
+											'aw-sourcing'
+										) }`,
+									],
+								]
+							: [] ),
+					] }
+				/>
+			) }
+			<TextField
+				label={ __( 'Name', 'aw-sourcing' ) }
+				help={
+					reg
+						? sprintf(
+								/* translators: %s: name in the workflow. */
+								__(
+									'In the workflow: %s. Leave empty for that name.',
+									'aw-sourcing'
+								),
+								reg.name
+							)
+						: ''
+				}
+				value={ v.name }
+				onChange={ put( 'name' ) }
+			/>
+			<TextField
+				label={ __( 'What it does', 'aw-sourcing' ) }
+				help={
+					reg
+						? __(
+								"Leave empty for the registry's description.",
+								'aw-sourcing'
+							)
+						: ''
+				}
+				value={ v.what }
+				onChange={ put( 'what' ) }
+				input={ { rows: 3 } }
+			/>
+			<SelectField
+				label={ __( 'Group', 'aw-sourcing' ) }
+				value={ v.group }
+				options={ w.groups }
+				onChange={ put( 'group' ) }
+			/>
+			<TextField
+				label={ __( 'Or a new group', 'aw-sourcing' ) }
+				help={ __(
+					'A new group is added to the list (with a generic icon).',
+					'aw-sourcing'
+				) }
+				value={ v.group_new }
+				onChange={ put( 'group_new' ) }
+			/>
+			<TextField
+				label={ __( 'Late after (hours)', 'aw-sourcing' ) }
+				help={
+					w.planned
+						? __(
+								'Blank: never late. Planned workers never raise an alert; this applies once the workflow is in the registry.',
+								'aw-sourcing'
+							)
+						: sprintf(
+								/* translators: %s: late limit in the registry. */
+								__(
+									'Blank: never late (no alert). In the registry: %s.',
+									'aw-sourcing'
+								),
+								reg?.late || ''
+							)
+				}
+				value={ v.late }
+				onChange={ put( 'late' ) }
+				input={ { type: 'number', min: '1', step: '1' } }
+			/>
+			{ w.planned && (
+				<TextField
+					label={ __( 'Schedule wanted', 'aw-sourcing' ) }
+					help={ __(
+						'In words, for whoever builds the workflow (e.g. daily at 06:00 IST).',
+						'aw-sourcing'
+					) }
+					value={ v.schedule }
+					onChange={ put( 'schedule' ) }
+				/>
+			) }
+			<SettingsBlock
+				title={ __( 'Keys', 'aw-sourcing' ) }
+				description={ __(
+					'Ticked: this worker may use the key. Unticking a key that is for all workers makes it for every other worker. Keys show only their last 4 characters.',
+					'aw-sourcing'
+				) }
+			>
+				{ w.keys.length ? (
+					<fieldset className="kits-shell-checks">
+						<legend className="screen-reader-text">
+							{ __( 'Keys', 'aw-sourcing' ) }
+						</legend>
+						{ w.keys.map( ( k ) => (
+							<label key={ k.id } htmlFor={ `sw-key-${ k.id }` }>
+								<input
+									id={ `sw-key-${ k.id }` }
+									type="checkbox"
+									checked={ v.keys.includes( k.id ) }
+									onChange={ ( e ) =>
+										tick( k.id, e.target.checked )
+									}
+								/>{ ' ' }
+								{ k.short }{ ' ' }
+								<span className="kits-shell-field__help">
+									({ k.scope })
+								</span>
+							</label>
+						) ) }
+					</fieldset>
+				) : (
+					<p>
+						{ __( 'No keys saved.', 'aw-sourcing' ) }{ ' ' }
+						<a href={ w.addKey }>
+							{ __( 'Add New Key', 'aw-sourcing' ) }
+						</a>
+					</p>
+				) }
+			</SettingsBlock>
+		</SettingsGroup>
+	);
+}
+
+/**
+ * A worker's reported runs, newest first, read-only.
+ *
+ * @param {Object}   props
+ * @param {string}   props.id     Worker ID.
+ * @param {Function} props.onBack Back to the list.
+ */
+function WorkerRuns( { id, onBack } ) {
+	const [ data, setData ] = useState( null );
+	const [ error, setError ] = useState( '' );
+	const load = () => {
+		setError( '' );
+		apiFetch( {
+			path: path( `workers/${ encodeURIComponent( id ) }/runs` ),
+		} )
+			.then( setData )
+			.catch( ( e ) => setError( errText( e ) ) );
+	};
+	useEffect( load, [ id ] );
+	if ( error ) {
+		return <ErrorState message={ error } onRetry={ load } />;
+	}
+	if ( ! data ) {
+		return (
+			<LoadingState label={ __( 'Loading the runs…', 'aw-sourcing' ) } />
+		);
+	}
+	return (
+		<SectionCard
+			id="worker-runs"
+			title={ sprintf(
+				/* translators: %s: worker name. */
+				__( 'Runs: %s', 'aw-sourcing' ),
+				data.name
+			) }
+			description={ sprintf(
+				/* translators: %d: number of runs kept. */
+				__(
+					'The last %d runs the workflow reported (start and end), newest first.',
+					'aw-sourcing'
+				),
+				data.keep
+			) }
+			actions={
+				<>
+					<Button onClick={ onBack }>
+						{ __( 'Back to the workers', 'aw-sourcing' ) }
+					</Button>
+					{ data.githubUrl && (
+						<a className="kits-shell-link" href={ data.githubUrl }>
+							{ __( 'Runs on GitHub', 'aw-sourcing' ) }
+						</a>
+					) }
+				</>
+			}
+		>
+			<DataList
+				label={ __( 'Runs', 'aw-sourcing' ) }
+				rowTitle="id"
+				columns={ [
+					{
+						key: 'id',
+						label: __( 'Run', 'aw-sourcing' ),
+						primary: true,
+						render: ( r ) => (
+							<>
+								{ r.link ? (
+									<a href={ r.link }>{ r.id }</a>
+								) : (
+									r.id
+								) }
+								{ r.attempt > 1
+									? ` ${ sprintf(
+											/* translators: %d: attempt number. */
+											__( '(attempt %d)', 'aw-sourcing' ),
+											r.attempt
+										) }`
+									: '' }
+							</>
+						),
+					},
+					{
+						key: 'when',
+						label: __( 'Started', 'aw-sourcing' ),
+						render: ( r ) => r.when || '—',
+					},
+					{
+						key: 'took',
+						label: __( 'Took', 'aw-sourcing' ),
+						render: ( r ) => r.took || '—',
+					},
+					{
+						key: 'label',
+						label: __( 'Result', 'aw-sourcing' ),
+						render: ( r ) => (
+							<Status tone={ r.tone } label={ r.label } />
+						),
+					},
+					{
+						key: 'event',
+						label: __( 'Started by', 'aw-sourcing' ),
+					},
+					{
+						key: 'counts',
+						label: __( 'Counts', 'aw-sourcing' ),
+						render: ( r ) => r.counts || '—',
+					},
+					{
+						key: 'commit',
+						label: __( 'Commit', 'aw-sourcing' ),
+						render: ( r ) =>
+							r.commit ? (
+								<a href={ r.commitUrl }>
+									<code>{ r.commit }</code>
+								</a>
+							) : (
+								'—'
+							),
+					},
+				] }
+				rows={ data.rows }
+				total={ data.rows.length }
+				emptyTitle={
+					data.planned
+						? __( 'Not built yet: no runs.', 'aw-sourcing' )
+						: __( 'No runs reported yet.', 'aw-sourcing' )
+				}
+			/>
+		</SectionCard>
+	);
+}
+
 const SCREENS = {
 	dashboard: Dashboard,
 	review: Review,
 	enrichment: Enrichment,
 	settings: Settings,
+	workers: Workers,
 };
 
 function App() {

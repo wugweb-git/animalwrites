@@ -191,3 +191,49 @@ aw_t( 1 === substr_count( $rest, "'permission_callback' => sourceweb_rest_can( \
 preg_match_all( "/^\t\t\t'\/[^']+'\s*=> array\(\s*'(GET|POST)',\s*(AW_REVIEW_CAP|AW_ENRICH_CAP|AW_SRC_CAP),/m", $rest, $m );
 aw_t( 10 === count( $m[0] ), 'routes: 10 routes, each with a capability (' . count( $m[0] ) . ')' );
 aw_t( false === strpos( $rest, "'key'     => (string) get_option( 'aw_enrich_google_key'" ) && false !== strpos( $rest, "'key'     => array( 'set' => \$key )" ), 'routes: the Google key goes out as set or not set only' );
+
+// ---- sourceweb_list(): views, search, sort, pages for the rebuilt tabs ----
+$rows = array();
+foreach ( array( array( 'a', 'x', 3 ), array( 'b', 'y', 1 ), array( 'c', 'x', 2 ), array( 'd', 'y', 2 ) ) as $r ) {
+	$rows[] = array(
+		'id'    => $r[0],
+		'title' => 'Worker ' . strtoupper( $r[0] ),
+		'group' => $r[1],
+		'n'     => $r[2],
+	);
+}
+$o = array(
+	'views' => array(
+		'x'    => array( 'X', fn( $r ) => 'x' === $r['group'] ),
+		'none' => array( 'None', fn( $r ) => false ),
+	),
+	'text'  => fn( $r ) => $r['title'],
+	'sort'  => array( 'n' => fn( $r ) => $r['n'] ),
+	'per'   => 3,
+);
+$l = sourceweb_list( $rows, array(), $o );
+aw_t( 4 === $l['total'] && 2 === $l['pages'] && 3 === count( $l['rows'] ) && 'a' === $l['rows'][0]['id'], 'list: all rows, paged, default order kept' );
+aw_t( array( '', 'x' ) === array_column( $l['views'], 'value' ) && 4 === $l['views'][0]['count'] && 2 === $l['views'][1]['count'], 'list: All first, an empty view is left out' );
+$l = sourceweb_list( $rows, array( 'view' => 'none' ), $o );
+aw_t( 'none' === $l['view'] && 0 === $l['total'] && in_array( 'none', array_column( $l['views'], 'value' ), true ), 'list: the open view shows even when empty' );
+$l = sourceweb_list( $rows, array( 'view' => 'nope' ), $o );
+aw_t( '' === $l['view'] && 4 === $l['total'], 'list: an unknown view is All' );
+$l = sourceweb_list( $rows, array( 'view' => 'x', 'search' => 'worker c' ), $o );
+aw_t( 1 === $l['total'] && 'c' === $l['rows'][0]['id'], 'list: view and search together, any case' );
+$l = sourceweb_list( $rows, array( 'orderby' => 'n' ), $o + array() );
+aw_t( array( 'b', 'c', 'd' ) === array_column( $l['rows'], 'id' ), 'list: sort ascending, equal keys keep their order' );
+$l = sourceweb_list( $rows, array( 'orderby' => 'n', 'order' => 'desc', 'page' => 2 ), $o );
+aw_t( array( 'b' ) === array_column( $l['rows'], 'id' ) && 2 === $l['page'], 'list: sort descending, page 2' );
+$l = sourceweb_list( $rows, array( 'page' => 99, 'orderby' => 'evil' ), $o );
+aw_t( 2 === $l['page'] && 'd' === $l['rows'][0]['id'], 'list: a page past the end is the last; an unknown sort is ignored' );
+
+// ---- the rebuilt tabs' routes: administrators only, through the one permission check, no key goes out ----
+$pages = file_get_contents( dirname( __DIR__ ) . '/includes/sourceweb-rest-pages.php' );
+aw_t( false === strpos( $pages, '__return_true' ), 'page routes: none is open to everyone' );
+aw_t( 1 === substr_count( $pages, "'permission_callback' => sourceweb_rest_can( \$r[1] )" ), 'page routes: every route registers through the one permission check' );
+preg_match_all( "/^\t\t\t'\/[^']+'\s*=> array\(\s*'(GET|POST)',\s*([A-Z_]+),/m", $pages, $m );
+aw_t( count( $m[0] ) >= 6 && array( 'AW_SRC_CAP' ) === array_values( array_unique( $m[2] ) ), 'page routes: ' . count( $m[0] ) . ' routes, every one manage_options (AW_SRC_CAP)' );
+aw_t( false === strpos( $pages, "\$r['key']," ) && false === strpos( $pages, "'key' =>" ) && false === strpos( $pages, 'aw/v1/ai-keys\'' ), 'page routes: no key field is sent, and the worker route is not reused' );
+aw_t( false !== strpos( $pages, 'aw_worker_save(' ) && false !== strpos( $pages, 'aw_worker_delete(' ) && false !== strpos( $pages, 'aw_workers_run_now(' ), 'workers routes: the same save, delete and Run now as the classic screen' );
+$wa = file_get_contents( dirname( __DIR__ ) . '/includes/workers-admin.php' );
+aw_t( 1 === substr_count( $wa, "update_option( 'aw_workers_meta', \$meta, false );\n\t\$after" ) && false !== strpos( $wa, "'admin_post_aw_worker_save'" ) && false !== strpos( $wa, 'aw_worker_save(' ), 'workers: the classic form saves through aw_worker_save()' );

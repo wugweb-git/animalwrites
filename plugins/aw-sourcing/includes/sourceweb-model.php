@@ -308,3 +308,65 @@ function sourceweb_log_add( array $log, string $date, array $row, int $days ): a
 	ksort( $log );
 	return array_slice( $log, -$days, null, true );
 }
+
+/**
+ * One page of a list for the rebuilt screens (Workers, Sources, Keywords, the logs): the view, the search, the sort and
+ * the page, done on the server as DataList expects. Rows are already shaped for the screen.
+ *
+ * @param array $rows All rows, in their default order.
+ * @param array $q    { view, search, orderby, order, page }.
+ * @param array $o    { views: [ key => [ label, fn( row ): bool ] ] ('' is All, always shown), text: fn( row ): string
+ *                    (what the search looks in), sort: [ key => fn( row ) ], per: rows per page (default 20) }.
+ * @return array { rows, total, page, pages, view, views: [ { value, label, count } ] }.
+ */
+function sourceweb_list( array $rows, array $q, array $o ): array {
+	$views = (array) ( $o['views'] ?? array() );
+	if ( ! isset( $views[''] ) ) {
+		$views = array( '' => array( 'All', fn( $r ) => true ) ) + $views;
+	}
+	$view = (string) ( $q['view'] ?? '' );
+	$view = isset( $views[ $view ] ) ? $view : '';
+	$out  = array();
+	foreach ( $views as $k => $v ) {
+		$n = count( array_filter( $rows, $v[1] ) );
+		if ( $n || '' === $k || $k === $view ) {
+			$out[] = array(
+				'value' => (string) $k,
+				'label' => (string) $v[0],
+				'count' => $n,
+			);
+		}
+	}
+	$rows  = array_values( array_filter( $rows, $views[ $view ][1] ) );
+	$words = mb_strtolower( trim( (string) ( $q['search'] ?? '' ) ) );
+	if ( '' !== $words && isset( $o['text'] ) ) {
+		$text = $o['text'];
+		$rows = array_values( array_filter( $rows, fn( $r ) => false !== mb_strpos( mb_strtolower( (string) $text( $r ) ), $words ) ) );
+	}
+	$sort = (array) ( $o['sort'] ?? array() );
+	$by   = (string) ( $q['orderby'] ?? '' );
+	if ( isset( $sort[ $by ] ) ) {
+		$key  = $sort[ $by ];
+		$sign = 'desc' === ( $q['order'] ?? 'asc' ) ? -1 : 1;
+		// Stable: equal keys keep the default order.
+		$i = 0;
+		foreach ( $rows as &$r ) {
+			$r = array( $key( $r ), $i++, $r );
+		}
+		unset( $r );
+		usort( $rows, fn( $a, $b ) => ( $sign * ( $a[0] <=> $b[0] ) ) ?: ( $a[1] <=> $b[1] ) );
+		$rows = array_column( $rows, 2 );
+	}
+	$per   = max( 1, (int) ( $o['per'] ?? 20 ) );
+	$total = count( $rows );
+	$pages = max( 1, (int) ceil( $total / $per ) );
+	$page  = min( $pages, max( 1, (int) ( $q['page'] ?? 1 ) ) );
+	return array(
+		'rows'  => array_slice( $rows, ( $page - 1 ) * $per, $per ),
+		'total' => $total,
+		'page'  => $page,
+		'pages' => $pages,
+		'view'  => $view,
+		'views' => $out,
+	);
+}
