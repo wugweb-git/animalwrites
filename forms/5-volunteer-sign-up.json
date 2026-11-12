@@ -565,6 +565,231 @@
                     }
                 },
                 {
+                    "index": 36,
+                    "element": "input_radio",
+                    "uniqElKey": "el_aw_vehicle",
+                    "attributes": {
+                        "name": "vehicle",
+                        "value": "",
+                        "type": "radio"
+                    },
+                    "settings": {
+                        "container_class": "kit-field kit-chips",
+                        "label": "Do you have a vehicle?",
+                        "label_placement": "",
+                        "admin_field_label": "Do you have a vehicle?",
+                        "help_message": "",
+                        "advanced_options": [
+                            {
+                                "label": "None",
+                                "value": "none",
+                                "calc_value": "",
+                                "image": ""
+                            },
+                            {
+                                "label": "Bike",
+                                "value": "bike",
+                                "calc_value": "",
+                                "image": ""
+                            },
+                            {
+                                "label": "Car",
+                                "value": "car",
+                                "calc_value": "",
+                                "image": ""
+                            },
+                            {
+                                "label": "Ambulance or van",
+                                "value": "van",
+                                "calc_value": "",
+                                "image": ""
+                            }
+                        ],
+                        "calc_value_status": false,
+                        "enable_image_input": false,
+                        "values_visible": false,
+                        "randomize_options": "no",
+                        "dynamic_default_value": "",
+                        "validation_rules": {
+                            "required": {
+                                "value": false,
+                                "message": "",
+                                "global_message": "",
+                                "global": false
+                            }
+                        },
+                        "conditional_logics": {
+                            "status": true,
+                            "type": "all",
+                            "conditions": [
+                                {
+                                    "field": "roles",
+                                    "operator": "contains",
+                                    "value": "rescue"
+                                }
+                            ]
+                        },
+                        "display_type": "",
+                        "enable_other_option": "no",
+                        "layout_class": ""
+                    },
+                    "editor_options": {
+                        "title": "Radio Field",
+                        "icon_class": "ff-edit-checkbox-1",
+                        "template": "inputCheckable"
+                    }
+                },
+                {
+                    "index": 37,
+                    "element": "input_checkbox",
+                    "uniqElKey": "el_aw_can_do",
+                    "attributes": {
+                        "name": "can_do",
+                        "value": [],
+                        "type": "checkbox"
+                    },
+                    "settings": {
+                        "container_class": "kit-field kit-check-group kit-chips",
+                        "label": "What else can you do?",
+                        "label_placement": "",
+                        "admin_field_label": "What else can you do?",
+                        "help_message": "",
+                        "advanced_options": [
+                            {
+                                "label": "Night emergency",
+                                "value": "night",
+                                "calc_value": "",
+                                "image": ""
+                            },
+                            {
+                                "label": "Temporary hold",
+                                "value": "hold",
+                                "calc_value": "",
+                                "image": ""
+                            },
+                            {
+                                "label": "Transport to a vet",
+                                "value": "vet",
+                                "calc_value": "",
+                                "image": ""
+                            }
+                        ],
+                        "calc_value_status": false,
+                        "enable_image_input": false,
+                        "values_visible": false,
+                        "randomize_options": "no",
+                        "dynamic_default_value": "",
+                        "validation_rules": {
+                            "required": {
+                                "value": false,
+                                "message": "",
+                                "global_message": "",
+                                "global": false
+                            }
+                        },
+                        "conditional_logics": {
+                            "status": true,
+                            "type": "all",
+                            "conditions": [
+                                {
+                                    "field": "roles",
+                                    "operator": "contains",
+                                    "value": "rescue"
+                                }
+                            ]
+                        },
+                        "display_type": "",
+                        "enable_other_option": "no",
+                        "layout_class": ""
+                    },
+                    "editor_options": {
+                        "title": "Checkbox",
+                        "icon_class": "ff-edit-checkbox-1",
+                        "template": "inputCheckable"
+                    }
+                },
+                {
+                    "index": 38,
+                    "element": "input_checkbox",
+                    "uniqElKey": "el_aw_animals_ok",
+                    "attributes": {
+                        "name": "animals_ok",
+                        "value": [],
+                        "type": "checkbox"
+                    },
+                    "settings": {
+                        "container_class": "kit-field kit-check-group kit-chips",
+                        "label": "Which animals are you comfortable with?",
+                        "label_placement": "",
+                        "admin_field_label": "Which animals are you comfortable with?",
+                        "help_message": "",
+                        "advanced_options": [
+                            {
+                                "label": "Dogs",
+                                "value": "dogs",
+                                "calc_value": "",
+                                "image": ""
+                            },
+                            {
+                                "label": "Cats",
+                                "value": "cats",
+                                "calc_value": "",
+                                "image": ""
+                            },
+                            {
+                                "label": "Birds",
+                                "value": "birds",
+                                "calc_value": "",
+                                "image": ""
+                            },
+                            {
+                                "label": "Large animals",
+                                "value": "large",
+                                "calc_value": "",
+                                "image": ""
+                            },
+                            {
+                                "label": "Any",
+                                "value": "any",
+                                "calc_value": "",
+                                "image": ""
+                            }
+                        ],
+                        "calc_value_status": false,
+                        "enable_image_input": false,
+                        "values_visible": false,
+                        "randomize_options": "no",
+                        "dynamic_default_value": "",
+                        "validation_rules": {
+                            "required": {
+                                "value": false,
+                                "message": "",
+                                "global_message": "",
+                                "global": false
+                            }
+                        },
+                        "conditional_logics": {
+                            "status": true,
+                            "type": "all",
+                            "conditions": [
+                                {
+                                    "field": "roles",
+                                    "operator": "contains",
+                                    "value": "rescue"
+                                }
+                            ]
+                        },
+                        "display_type": "",
+                        "enable_other_option": "no",
+                        "layout_class": ""
+                    },
+                    "editor_options": {
+                        "title": "Checkbox",
+                        "icon_class": "ff-edit-checkbox-1",
+                        "template": "inputCheckable"
+                    }
+                },
+                {
                     "index": 12,
                     "element": "input_text",
                     "uniqElKey": "el_aw_languages",
