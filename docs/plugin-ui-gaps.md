@@ -14,8 +14,8 @@ The new screens cover only a few pages of each plugin. The other pages still dra
 | Plugin | New screens | Classic-only pages |
 |---|---|---|
 | SourceWeb | Dashboard, To review, Enrichment review, Settings; since 12 Nov every Sourcing tab (see "Rebuilt on the shell") | The feed form (`&feed=<id>`) |
-| InsightWeb | Dashboard, Settings | Keywords, Rising, Pages, Clarity, Check list, Sourcing keywords, Links, Server |
-| RankWeb | Dashboard, Settings | FAQ |
+| InsightWeb | Dashboard, Settings; since 12 Nov every tab (see "Rebuilt on the shell") | — |
+| RankWeb | Dashboard, FAQ (since 12 Nov), Settings | — (the Dashboard's Modules table is still to add) |
 | MailWeb | Inbox, Settings | Compose (stays classic: it sends email) |
 | PlanWeb | Dashboard, Entries, Settings | the month grid |
 | DirectoryWeb | Dashboard, Claims, Settings | Listings (WordPress's own list) |
@@ -117,6 +117,9 @@ Home, Settings, Tools and Help show the same content in both looks; nothing was 
 - **SourceWeb AI models** (`&tab=ai`): At a glance, the workers and their keys, Daily caps, Keys by group; the keys list with the Working, Waiting, Broken and GitHub secrets views, search, sort, Move up / down (plain list only), Check again, Remove, Attach to / Detach from a worker; Add New Key (`&edit=new`), Edit key (`&edit=<key id>`), Keys overview (`&overview=1`). A key goes out only as its id and last 4 characters; the workers' route `aw/v1/ai-keys` is not used. Routes `sourceweb/v1/ai…` call `aw_ai_keys_add()`, `aw_ai_key_edit_save()`, `aw_ai_keys_list_op()` and `aw_ai_key_records()`.
 - **SourceWeb Rejected, Relay log, Change log** (`&tab=rejected`, `&tab=relay-log`, `&tab=log`): read-only lists with views, search, sort and pages. Routes `sourceweb/v1/rejected`, `relay-log` and `changes` read `aw_relevance_rejected_rows()`, `aw_relay_log_rows()` and `aw_sourcing_change_rows()`.
 - **InsightWeb Dashboard boxes** (`admin.php?page=aw-search-insights`): the 16 Overview boxes after Daily jobs (Priorities to Bing crawl), each read from `GET insightweb/v1/dashboard/box?key=` (`aw_si_cap()`), which runs the box's own function (`aw_si_overview_boxes()`, the same list the classic Overview draws) and hands it over as text, lists, tables and notices; no markup, form or script goes out.
+- **Kits page parts** (`plugins/kits-core/includes/admin-shell-parts.php`, the shell's `PageParts` in `src/shell/parts.js`): a classic screen's own output, drawn on the shell. `kits_shell_html_parts()` reads it into text, notices, tables, its list table (views, search, filters, sort, pages, row and bulk actions) and its forms (fields, buttons, hidden fields and nonce); `PageParts` draws them with DataList and Field and sends every change as the same link or form request the classic screen sends, so the classic handlers keep saving. No markup or script goes out, links only when http(s), relative or `*.php`, and never a password field. Tests: `plugins/kits-core/tests/shell-parts-tests.php`.
+- **InsightWeb Keywords and every other tab** (`&tab=keywords|pages|checklist|rising|clarity|links|server|sourcing`): each tab's own output after its load hook, through Kits page parts (`insightweb-tabs.php`). Bulk and row priority overrides, link types, Check list buttons, Rising and Pages forms go to the same handlers.
+- **RankWeb FAQ** (`admin.php?page=aw-faq`): FAQ box on (disabled for non-administrators, as today), Pages with an FAQ (views, search, Approve) and Counts with Recount, through Kits page parts (`rankweb_faq_parts()`).
 
 ## Suggested order
 
