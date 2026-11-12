@@ -701,6 +701,9 @@
 			if (g.ecommerce) { Object.assign(g, g.ecommerce); delete g.ecommerce; }
 			window.gtag('event', name, g);
 		}
+		// Downloads also go to Clarity as a custom event (owner, 12 Nov 2026), so recordings filter on our own pdf_download;
+		// the stub queues it until Clarity's script loads, and there is no stub where Clarity is off.
+		if (name === 'pdf_download' && typeof window.clarity === 'function') window.clarity('event', name);
 	}
 	window.kitsTrack = track;
 	function formName(form) {
