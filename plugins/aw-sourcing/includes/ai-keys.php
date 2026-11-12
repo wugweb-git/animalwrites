@@ -643,6 +643,204 @@ add_action(
 	}
 );
 
+/**
+ * Add New Key (owner, 24 Oct 2026): one key or several (spaces, commas or new lines between them), each with the same
+ * label and workers (none = every worker). Keys already saved are skipped. New keys are checked in the background,
+ * never during the save: one slow provider (NVIDIA, 18 s a call) times ten keys was enough for a 503 (owner, 22 Oct
+ * 2026). Keys removed while this save ran stay removed. Used by the Add New Key form and POST sourceweb/v1/ai/keys/add.
+ *
+ * @param string     $pasted  The keys as pasted.
+ * @param string     $label   Label (80 characters at most).
+ * @param array      $workers Worker IDs (known ones, from aw_workers_posted_ids()).
+ * @param array|null $rows    The rows to keep, in order (the older one-form list); null keeps the saved rows.
+ * @param bool       $recheck Also check every saved key again.
+ * @return array { added: string[] (each "…last4 (provider)"), dupes: int, saved: bool }
+ */
+function aw_ai_keys_add( string $pasted, string $label, array $workers, ?array $rows = null, bool $recheck = false ): array {
+	$saved = aw_ai_rows();
+	$keep  = null !== $rows;
+	$rows  = $keep ? $rows : $saved;
+	$have  = wp_list_pluck( $rows, 'key' );
+	$label = mb_substr( $label, 0, 80 );
+	$added = array();
+	$dupes = 0;
+	foreach ( preg_split( '/[\s,]+/', $pasted ) as $k ) {
+		if ( '' === $k ) {
+			continue;
+		}
+		if ( in_array( $k, $have, true ) ) {
+			++$dupes;
+			continue;
+		}
+		$row     = aw_ai_blank_row( $k ) + array(
+			'label'   => $label,
+			'workers' => $workers,
+		);
+		$rows[]  = $row;
+		$have[]  = $k;
+		$added[] = aw_ai_key_short( $row );
+	}
+	if ( ! $added && ! $keep && ! $recheck ) {
+		return array(
+			'added' => array(),
+			'dupes' => $dupes,
+			'saved' => false,
+		);
+	}
+	$now  = wp_list_pluck( aw_ai_rows_fresh(), 'key' );
+	$was  = wp_list_pluck( $saved, 'key' );
+	$rows = array_values( array_filter( $rows, fn( $r ) => in_array( $r['key'], $now, true ) || ! in_array( $r['key'], $was, true ) ) );
+	update_option( 'aw_ai_models', $rows, false );
+	if ( $added ) {
+		kits_sourcing_log( 'ai', 'added key ' . implode( ', ', $added ) . ' for ' . aw_ai_workers_words( $workers ) );
+	}
+	$hook = $recheck ? 'aw_ai_check_all_now' : 'aw_ai_check_new'; // every key, or the new ones
+	if ( ( 'aw_ai_check_all_now' === $hook || in_array( 'unchecked', wp_list_pluck( $rows, 'status' ), true ) ) && ! wp_next_scheduled( $hook ) ) {
+		wp_schedule_single_event( time(), $hook );
+		spawn_cron();
+	}
+	return array(
+		'added' => $added,
+		'dupes' => $dupes,
+		'saved' => true,
+	);
+}
+
+/**
+ * Edit a saved key: its label and the workers it is for (none = every worker). The key itself is never edited. Writes
+ * and logs only on a change. Used by the Edit key form and POST sourceweb/v1/ai/key/save.
+ *
+ * @param string $id      Key id (aw_ai_key_id()).
+ * @param string $label   Label.
+ * @param array  $workers Worker IDs (known ones).
+ * @return int|null 1 saved, 0 nothing changed, null no such key.
+ */
+function aw_ai_key_edit_save( string $id, string $label, array $workers ): ?int {
+	$rows  = aw_ai_rows_fresh();
+	$label = mb_substr( $label, 0, 80 );
+	foreach ( $rows as $i => $r ) {
+		if ( aw_ai_key_id( $r['key'] ) !== $id ) {
+			continue;
+		}
+		$was  = aw_ai_row_workers( $r );
+		$what = array();
+		if ( (string) ( $r['label'] ?? '' ) !== $label ) {
+			$what[] = 'label "' . ( $r['label'] ?? '' ) . '" → "' . $label . '"';
+		}
+		$a = $was;
+		$b = $workers;
+		sort( $a );
+		sort( $b );
+		if ( $a !== $b ) {
+			$what[] = 'used by ' . aw_ai_workers_words( $was ) . ' → ' . aw_ai_workers_words( $workers );
+		}
+		if ( ! $what ) {
+			return 0;
+		}
+		$rows[ $i ]['label']   = $label;
+		$rows[ $i ]['workers'] = $workers;
+		update_option( 'aw_ai_models', $rows, false );
+		kits_sourcing_log( 'ai', 'key ' . aw_ai_key_short( $r ) . ': ' . implode( '; ', $what ) );
+		return 1;
+	}
+	return null;
+}
+
+/**
+ * A list action on saved keys, straight away (owner, 24 Oct 2026): Move up / down (one key), Remove, Check again,
+ * Attach to / Detach from a worker. A key keeps at least one worker: detaching its last one is refused. Writes only on
+ * a change. Used by the keys list and POST sourceweb/v1/ai/keys/decide.
+ *
+ * @param string $op     up, down, remove, recheck, attach or detach.
+ * @param array  $ids    Key ids.
+ * @param string $worker Worker ID for attach / detach.
+ * @return array { op: the action, or 'noworker' when attach / detach has no known worker; n: keys done; skip: keys not detached }
+ */
+function aw_ai_keys_list_op( string $op, array $ids, string $worker = '' ): array {
+	$worker = '' !== $worker && function_exists( 'aw_worker' ) && aw_worker( $worker ) ? $worker : '';
+	if ( in_array( $op, array( 'attach', 'detach' ), true ) && '' === $worker ) {
+		$op = 'noworker';
+	}
+	$ids  = array_map( 'sanitize_key', $ids );
+	$rows = aw_ai_rows_fresh();
+	$orig = $rows;
+	$n    = 0;
+	$skip = 0;
+	$gone = array();
+	$did  = array();
+	foreach ( $rows as $i => $r ) {
+		if ( ! in_array( aw_ai_key_id( $r['key'] ), $ids, true ) ) {
+			continue;
+		}
+		if ( 'attach' === $op || 'detach' === $op ) {
+			// Attach: the key is for this worker (a key for every worker becomes this worker's only). Detach: no longer
+			// for this worker (a key for every worker becomes every other worker's).
+			$ws = aw_ai_row_workers( $r );
+			if ( 'attach' === $op ) {
+				if ( in_array( $worker, $ws, true ) ) {
+					continue;
+				}
+				$new = array_merge( $ws, array( $worker ) );
+			} else {
+				if ( $ws && ! in_array( $worker, $ws, true ) ) {
+					continue;
+				}
+				$new = array_values( array_diff( $ws ? $ws : array_keys( aw_workers_all() ), array( $worker ) ) );
+				if ( ! $new ) {
+					++$skip;
+					continue;
+				}
+			}
+			$rows[ $i ]['workers'] = $new;
+			$did[]                 = aw_ai_key_short( $r );
+		} elseif ( 'remove' === $op ) {
+			$gone[] = '…' . substr( $r['key'], -4 ) . ' (' . ( $r['provider'] ? ( AW_AI_PROVIDERS[ $r['provider'] ][0] ?? AW_AI_TOOLS[ $r['provider'] ][0] ?? $r['provider'] ) : 'unknown provider' ) . ')';
+			unset( $rows[ $i ] );
+		} elseif ( 'recheck' === $op ) {
+			$rows[ $i ]['recheck'] = 1; // checked in the background by aw_ai_check_new; the key keeps its status (and stays in use) meanwhile
+		} elseif ( ( 'up' === $op && $i > 0 ) || ( 'down' === $op && $i < count( $rows ) - 1 ) ) {
+			$j          = 'up' === $op ? $i - 1 : $i + 1;
+			$tmp        = $rows[ $j ];
+			$rows[ $j ] = $r;
+			$rows[ $i ] = $tmp;
+			$did[]      = aw_ai_key_short( $r );
+			++$n;
+			break;
+		} else {
+			continue;
+		}
+		++$n;
+	}
+	$rows = array_values( $rows );
+	if ( $rows !== $orig ) {
+		update_option( 'aw_ai_models', $rows, false );
+	}
+	if ( $gone && function_exists( 'kits_sourcing_log' ) ) {
+		kits_sourcing_log( 'AI models', 'removed key ' . implode( ', ', $gone ) );
+	}
+	if ( $did ) {
+		$words = array(
+			'attach' => 'attached to ' . aw_ai_workers_words( array( $worker ) ),
+			'detach' => 'detached from ' . aw_ai_workers_words( array( $worker ) ),
+			'up'     => 'moved up',
+			'down'   => 'moved down',
+		);
+		kits_sourcing_log( 'ai', 'key ' . implode( ', ', $did ) . ': ' . ( $words[ $op ] ?? $op ) );
+	}
+	if ( 'recheck' === $op && $n && ! wp_next_scheduled( 'aw_ai_check_new' ) ) {
+		wp_schedule_single_event( time(), 'aw_ai_check_new' );
+		spawn_cron();
+	}
+	if ( in_array( $op, array( 'attach', 'detach' ), true ) ) {
+		$n = count( $did );
+	}
+	return array(
+		'op'   => $op,
+		'n'    => $n,
+		'skip' => $skip,
+	);
+}
+
 add_action(
 	'admin_post_aw_ai_keys',
 	function () {
@@ -650,57 +848,28 @@ add_action(
 			wp_die( 'Not allowed.', 403 );
 		}
 		@set_time_limit( 300 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors -- several test calls per key.
-		$saved = aw_ai_rows();
-		$rows  = isset( $_POST['aw_ai_order'] ) ? array() : $saved; // the list's order and removals are saved straight away (aw_ai_keys_list)
-		foreach ( array_map( 'absint', (array) wp_unslash( $_POST['aw_ai_order'] ?? array() ) ) as $i ) { // Kept rows, in the order shown.
-			if ( isset( $saved[ (int) $i ] ) ) {
-				$rows[] = $saved[ (int) $i ];
+		$rows = null; // the saved rows as they are
+		if ( isset( $_POST['aw_ai_order'] ) ) { // the list's order and removals are saved straight away (aw_ai_keys_list)
+			$saved = aw_ai_rows();
+			$rows  = array();
+			foreach ( array_map( 'absint', (array) wp_unslash( $_POST['aw_ai_order'] ) ) as $i ) { // Kept rows, in the order shown.
+				if ( isset( $saved[ (int) $i ] ) ) {
+					$rows[] = $saved[ (int) $i ];
+				}
 			}
 		}
-		$have = wp_list_pluck( $rows, 'key' );
-		// Add New Key (owner, 24 Oct 2026): one key in the password field and / or several, one per line; the same label
-		// and workers (none ticked = every worker) for each.
-		$label   = mb_substr( sanitize_text_field( wp_unslash( $_POST['aw_ai_label'] ?? '' ) ), 0, 80 );
-		$workers = function_exists( 'aw_workers_posted_ids' ) ? aw_workers_posted_ids( array_map( 'sanitize_key', (array) wp_unslash( $_POST['aw_ai_workers'] ?? array() ) ) ) : array();
-		$pasted  = sanitize_textarea_field( wp_unslash( $_POST['aw_ai_new'] ?? '' ) ) . "\n" . sanitize_textarea_field( wp_unslash( $_POST['aw_ai_new_many'] ?? '' ) );
-		$added   = array();
-		$dupes   = 0;
-		foreach ( preg_split( '/[\s,]+/', $pasted ) as $k ) {
-			if ( '' === $k ) {
-				continue;
-			}
-			if ( in_array( $k, $have, true ) ) {
-				++$dupes;
-				continue;
-			}
-			$row     = aw_ai_blank_row( $k ) + array( 'label' => $label, 'workers' => $workers );
-			$rows[]  = $row;
-			$have[]  = $k;
-			$added[] = aw_ai_key_short( $row );
-		}
-		if ( ! $added && ! isset( $_POST['aw_ai_order'] ) && empty( $_POST['aw_ai_recheck'] ) ) {
-			wp_safe_redirect( aw_ai_keys_url( array( 'edit' => 'new', 'nokey' => $dupes ? 'dupe' : 'empty' ) ) );
+		$res = aw_ai_keys_add(
+			sanitize_textarea_field( wp_unslash( $_POST['aw_ai_new'] ?? '' ) ) . "\n" . sanitize_textarea_field( wp_unslash( $_POST['aw_ai_new_many'] ?? '' ) ),
+			sanitize_text_field( wp_unslash( $_POST['aw_ai_label'] ?? '' ) ),
+			function_exists( 'aw_workers_posted_ids' ) ? aw_workers_posted_ids( array_map( 'sanitize_key', (array) wp_unslash( $_POST['aw_ai_workers'] ?? array() ) ) ) : array(),
+			$rows,
+			! empty( $_POST['aw_ai_recheck'] )
+		);
+		if ( ! $res['saved'] ) {
+			wp_safe_redirect( aw_ai_keys_url( array( 'edit' => 'new', 'nokey' => $res['dupes'] ? 'dupe' : 'empty' ) ) );
 			exit;
 		}
-		// Only the keys just added are checked here, and only when their prefix names the provider: re-testing every key
-		// that is not working took minutes and the save ended in a 503 (owner, 22 Oct 2026). The rest are checked twice a
-		// day (aw_ai_check_all), or all at once with "Check again".
-		// New keys are checked in the background, never during the save: one slow provider (NVIDIA, 18 s a call) times ten
-		// keys was enough for a 503 (owner, 22 Oct 2026).
-		// Keys removed while this save was checking stay removed.
-		$now  = wp_list_pluck( aw_ai_rows_fresh(), 'key' );
-		$was  = wp_list_pluck( $saved, 'key' );
-		$rows = array_values( array_filter( $rows, fn( $r ) => in_array( $r['key'], $now, true ) || ! in_array( $r['key'], $was, true ) ) );
-		update_option( 'aw_ai_models', $rows, false );
-		if ( $added ) {
-			kits_sourcing_log( 'ai', 'added key ' . implode( ', ', $added ) . ' for ' . aw_ai_workers_words( $workers ) );
-		}
-		$hook = ! empty( $_POST['aw_ai_recheck'] ) ? 'aw_ai_check_all_now' : 'aw_ai_check_new'; // every key, or the new ones
-		if ( ( 'aw_ai_check_all_now' === $hook || in_array( 'unchecked', wp_list_pluck( $rows, 'status' ), true ) ) && ! wp_next_scheduled( $hook ) ) {
-			wp_schedule_single_event( time(), $hook );
-			spawn_cron();
-		}
-		wp_safe_redirect( aw_ai_keys_url( array( 'saved' => count( $added ), 'dupes' => $dupes ) ) );
+		wp_safe_redirect( aw_ai_keys_url( array( 'saved' => count( $res['added'] ), 'dupes' => $res['dupes'] ) ) );
 		exit;
 	}
 );
@@ -714,35 +883,11 @@ add_action(
 		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'aw_ai_key_edit_' . $id ) ) {
 			wp_die( 'Not allowed.', 403 );
 		}
-		$rows = aw_ai_rows_fresh();
-		$n    = 0;
-		foreach ( $rows as $i => $r ) {
-			if ( aw_ai_key_id( $r['key'] ) !== $id ) {
-				continue;
-			}
-			$label   = mb_substr( sanitize_text_field( wp_unslash( $_POST['aw_ai_label'] ?? '' ) ), 0, 80 );
-			$workers = aw_workers_posted_ids( array_map( 'sanitize_key', (array) wp_unslash( $_POST['aw_ai_workers'] ?? array() ) ) );
-			$was     = aw_ai_row_workers( $r );
-			$what    = array();
-			if ( (string) ( $r['label'] ?? '' ) !== $label ) {
-				$what[] = 'label "' . ( $r['label'] ?? '' ) . '" → "' . $label . '"';
-			}
-			$a = $was;
-			$b = $workers;
-			sort( $a );
-			sort( $b );
-			if ( $a !== $b ) {
-				$what[] = 'used by ' . aw_ai_workers_words( $was ) . ' → ' . aw_ai_workers_words( $workers );
-			}
-			$rows[ $i ]['label']   = $label;
-			$rows[ $i ]['workers'] = $workers;
-			if ( $what ) {
-				update_option( 'aw_ai_models', $rows, false );
-				kits_sourcing_log( 'ai', 'key ' . aw_ai_key_short( $r ) . ': ' . implode( '; ', $what ) );
-				$n = 1;
-			}
-			break;
-		}
+		$n = (int) aw_ai_key_edit_save(
+			$id,
+			sanitize_text_field( wp_unslash( $_POST['aw_ai_label'] ?? '' ) ),
+			aw_workers_posted_ids( array_map( 'sanitize_key', (array) wp_unslash( $_POST['aw_ai_workers'] ?? array() ) ) )
+		);
 		wp_safe_redirect( aw_ai_keys_url( array( 'listed' => 'edited', 'n' => $n ) ) );
 		exit;
 	}
@@ -765,78 +910,10 @@ add_action(
 			$worker = sanitize_key( wp_unslash( '' !== $top ? ( $_POST['ai_worker'] ?? '' ) : ( $_POST['ai_worker2'] ?? '' ) ) ); // Attach to / Detach from: the worker select beside the menu used
 			$ids    = array_map( 'sanitize_key', (array) wp_unslash( $_POST['ids'] ?? array() ) );
 		}
-		$worker = isset( $worker ) && function_exists( 'aw_worker' ) && aw_worker( $worker ) ? $worker : '';
-		if ( in_array( $op, array( 'attach', 'detach' ), true ) && '' === $worker ) {
-			$op = 'noworker';
-		}
-		$op   = sanitize_key( $op );
-		$ids  = array_map( 'sanitize_key', $ids );
-		$rows = aw_ai_rows_fresh();
-		$n    = 0;
-		$skip = 0;
-		$gone = array();
-		$did  = array();
-		foreach ( $rows as $i => $r ) {
-			if ( ! in_array( aw_ai_key_id( $r['key'] ), $ids, true ) ) {
-				continue;
-			}
-			if ( 'attach' === $op || 'detach' === $op ) {
-				// Attach: the key is for this worker (a key for every worker becomes this worker's only). Detach: no longer
-				// for this worker (a key for every worker becomes every other worker's). A key keeps at least one worker:
-				// detaching its last one is refused (remove the key instead).
-				$ws = aw_ai_row_workers( $r );
-				if ( 'attach' === $op ) {
-					if ( in_array( $worker, $ws, true ) ) {
-						continue;
-					}
-					$new = array_merge( $ws, array( $worker ) );
-				} else {
-					if ( $ws && ! in_array( $worker, $ws, true ) ) {
-						continue;
-					}
-					$new = array_values( array_diff( $ws ? $ws : array_keys( aw_workers_all() ), array( $worker ) ) );
-					if ( ! $new ) {
-						++$skip;
-						continue;
-					}
-				}
-				$rows[ $i ]['workers'] = $new;
-				$did[]                 = aw_ai_key_short( $r );
-			} elseif ( 'remove' === $op ) {
-				$gone[] = '…' . substr( $r['key'], -4 ) . ' (' . ( $r['provider'] ? ( AW_AI_PROVIDERS[ $r['provider'] ][0] ?? AW_AI_TOOLS[ $r['provider'] ][0] ?? $r['provider'] ) : 'unknown provider' ) . ')';
-				unset( $rows[ $i ] );
-			} elseif ( 'recheck' === $op ) {
-				$rows[ $i ]['recheck'] = 1; // checked in the background by aw_ai_check_new; the key keeps its status (and stays in use) meanwhile
-			} elseif ( ( 'up' === $op && $i > 0 ) || ( 'down' === $op && $i < count( $rows ) - 1 ) ) {
-				$j          = 'up' === $op ? $i - 1 : $i + 1;
-				$tmp        = $rows[ $j ];
-				$rows[ $j ] = $r;
-				$rows[ $i ] = $tmp;
-				$did[]      = aw_ai_key_short( $r );
-				++$n;
-				break;
-			} else {
-				continue;
-			}
-			++$n;
-		}
-		update_option( 'aw_ai_models', array_values( $rows ), false );
-		if ( $gone && function_exists( 'kits_sourcing_log' ) ) {
-			kits_sourcing_log( 'AI models', 'removed key ' . implode( ', ', $gone ) );
-		}
-		if ( $did ) {
-			$words = array(
-				'attach' => 'attached to ' . aw_ai_workers_words( array( $worker ) ),
-				'detach' => 'detached from ' . aw_ai_workers_words( array( $worker ) ),
-				'up'     => 'moved up',
-				'down'   => 'moved down',
-			);
-			kits_sourcing_log( 'ai', 'key ' . implode( ', ', $did ) . ': ' . ( $words[ $op ] ?? $op ) );
-		}
-		if ( 'recheck' === $op && $n && ! wp_next_scheduled( 'aw_ai_check_new' ) ) {
-			wp_schedule_single_event( time(), 'aw_ai_check_new' );
-			spawn_cron();
-		}
+		$res  = aw_ai_keys_list_op( sanitize_key( $op ), $ids, $worker ?? '' );
+		$op   = $res['op'];
+		$n    = $res['n'];
+		$skip = $res['skip'];
 		$back = remove_query_arg( array( 'listed', 'n', 'skip', 'saved', 'dupes', 'paged' ), wp_get_referer() ? wp_get_referer() : aw_ai_keys_url() );
 		$page = absint( wp_unslash( $_POST['paged'] ?? 0 ) ); // the page-number box of the list
 		$back = $page > 1 ? add_query_arg( 'paged', $page, $back ) : $back;
@@ -847,14 +924,104 @@ add_action(
 			wp_safe_redirect( $back );
 			exit;
 		}
-		if ( in_array( $op, array( 'attach', 'detach' ), true ) ) {
-			$n = count( $did );
-		}
 		wp_safe_redirect( add_query_arg( array( 'listed' => $known || 'noworker' === $op ? $op : 'none', 'n' => $n, 'skip' => $skip ), $back ) );
 		exit;
 	}
 );
 add_filter( 'removable_query_args', fn( $args ) => 'aw-sourcing' === sanitize_key( $_GET['page'] ?? '' ) && 'ai' === sanitize_key( $_GET['tab'] ?? '' ) ? array_merge( $args, array( 'listed', 'n', 'skip', 'saved', 'dupes', 'nokey' ) ) : $args ); // phpcs:ignore WordPress.Security.NonceVerification -- only on this screen
+
+/**
+ * Every key in one list (owner, 24 Oct 2026): the saved ones in the order the workers try them, then the ones in the
+ * workers' GitHub secrets (from their own reports; changed in GitHub). Never more of a key than its last 4 characters:
+ * a key is its id (aw_ai_key_id()). Used by the keys list table and GET sourceweb/v1/ai/keys.
+ *
+ * @return array[] { pos, id, last4, provider, model, label, workers, status, last_ok, limits, usage, checked, recheck, secret }
+ */
+function aw_ai_key_records(): array {
+	$out   = array();
+	$usage = aw_ai_usage();
+	$shown = array();
+	foreach ( aw_ai_rows() as $i => $r ) {
+		$uid     = aw_ai_key_id( $r['key'] );
+		$shown[] = $uid;
+		$out[]   = array(
+			'pos'      => $i,
+			'id'       => $uid,
+			'last4'    => substr( $r['key'], -4 ),
+			'provider' => (string) $r['provider'],
+			'model'    => (string) $r['model'],
+			'label'    => (string) ( $r['label'] ?? '' ),
+			'workers'  => aw_ai_row_workers( $r ),
+			'status'   => (string) $r['status'],
+			'last_ok'  => (int) ( $r['last_ok'] ?? 0 ),
+			'limits'   => ! empty( $r['cooldown'] ) && $r['cooldown'] > time() ? 'Cooldown until ' . wp_date( 'j M, H:i', $r['cooldown'] ) . ( ! empty( $r['limits'] ) ? ' · ' . $r['limits'] : '' ) : ( ! empty( $r['limits'] ) ? $r['limits'] : 'Not reported' ),
+			'usage'    => aw_ai_usage_line( (array) ( $usage[ $uid ] ?? array() ) ),
+			'checked'  => (int) $r['checked'],
+			'recheck'  => ! empty( $r['recheck'] ),
+			'secret'   => false,
+		);
+	}
+	// The workers' GitHub secrets: write-only in GitHub, so shown from the workers' reports.
+	$other = array_diff_key( $usage, array_flip( $shown ) );
+	uasort( $other, fn( $a, $b ) => (int) ( $b['last']['at'] ?? 0 ) <=> (int) ( $a['last']['at'] ?? 0 ) );
+	foreach ( $other as $uid => $u ) {
+		$prov  = (string) ( $u['provider'] ?? '' );
+		$last  = (array) ( $u['last'] ?? array() );
+		$out[] = array(
+			'pos'      => PHP_INT_MAX,
+			'id'       => (string) $uid,
+			'last4'    => (string) ( $u['last4'] ?? '' ),
+			'provider' => $prov,
+			'model'    => implode( ', ', array_keys( (array) ( $last['models'] ?? array() ) ) ),
+			'label'    => '',
+			'workers'  => array(),
+			'status'   => 'paid' === aw_ai_tier( $prov ) ? 'paid' : ( ! empty( $last['ok'] ) ? 'works' : ( ! empty( $last['limited'] ) ? 'limited' : 'failed' ) ),
+			'last_ok'  => 0,
+			'limits'   => '',
+			'usage'    => aw_ai_usage_line( $u ),
+			'checked'  => (int) ( $last['at'] ?? 0 ),
+			'recheck'  => false,
+			'secret'   => true,
+		);
+	}
+	return $out;
+}
+
+/**
+ * A key's state for the views and badges: ok (works, tool, paid secret), wait (rate-limited, not checked, needs a
+ * card) or bad.
+ *
+ * @param string $status Status.
+ */
+function aw_ai_key_tone( string $status ): string {
+	if ( in_array( $status, array( 'works', 'tool', 'paid' ), true ) ) {
+		return 'ok';
+	}
+	return in_array( $status, array( 'limited', 'unchecked', 'card' ), true ) ? 'wait' : 'bad';
+}
+
+/**
+ * The free-model accounts the workers reported, as plain text: provider, account (its last characters), daily limit,
+ * left today, the last run's share and use, its keys (last 4 each), when.
+ */
+function aw_ai_free_caps_rows(): array {
+	$out = array();
+	foreach ( (array) get_option( 'aw_ai_free_caps', array() ) as $acct => $c ) {
+		$fresh = gmdate( 'Y-m-d', (int) $c['at'] ) === gmdate( 'Y-m-d' );
+		$out[] = array(
+			'provider' => (string) ( AW_AI_PROVIDERS[ $c['provider'] ][0] ?? $c['provider'] ),
+			'account'  => (string) $acct,
+			'limit'    => (int) $c['limit'],
+			'left'     => $fresh ? (string) max( 0, $c['remaining'] - $c['used'] ) : 'Full again (reset since the last run)',
+			'share'    => (int) $c['share'],
+			'used'     => (int) $c['used'],
+			'keys'     => implode( ' ', array_map( fn( $k ) => '…' . $k, (array) $c['keys'] ) ),
+			'count'    => count( (array) $c['keys'] ),
+			'at'       => wp_date( 'j M, H:i', (int) $c['at'] ) . ( $c['workflow'] ? ' · ' . $c['workflow'] : '' ),
+		);
+	}
+	return $out;
+}
 
 /**
  * Free-model daily caps per account (owner, 22 Oct 2026). OpenRouter gives each account 50 free requests a day (1,000
@@ -869,24 +1036,28 @@ function aw_ai_free_caps_table() {
 		return;
 	}
 	$rows = array();
-	foreach ( $caps as $acct => $c ) {
-		$label  = AW_AI_PROVIDERS[ $c['provider'] ][0] ?? $c['provider'];
-		$fresh  = gmdate( 'Y-m-d', (int) $c['at'] ) === gmdate( 'Y-m-d' );
+	foreach ( aw_ai_free_caps_rows() as $c ) {
 		$rows[] = array(
-			'acct'  => esc_html( $label ) . ' <code>…' . esc_html( $acct ) . '</code>',
+			'acct'  => esc_html( $c['provider'] ) . ' <code>…' . esc_html( $c['account'] ) . '</code>',
 			'limit' => esc_html( (string) $c['limit'] ),
-			'left'  => esc_html( $fresh ? (string) max( 0, $c['remaining'] - $c['used'] ) : 'Full again (reset since the last run)' ),
+			'left'  => esc_html( $c['left'] ),
 			'share' => esc_html( (string) $c['share'] ),
 			'used'  => esc_html( (string) $c['used'] ),
-			'keys'  => '<code>' . esc_html( implode( ' ', array_map( fn( $k ) => '…' . $k, (array) $c['keys'] ) ) ) . '</code> (' . count( (array) $c['keys'] ) . ')',
-			'at'    => esc_html( wp_date( 'j M, H:i', (int) $c['at'] ) . ( $c['workflow'] ? ' · ' . $c['workflow'] : '' ) ),
+			'keys'  => '<code>' . esc_html( $c['keys'] ) . '</code> (' . (int) $c['count'] . ')',
+			'at'    => esc_html( $c['at'] ),
 		);
 	}
 	aw_sourcing_simple_table( 'caps', array( 'acct' => 'Account', 'limit' => 'Daily limit', 'left' => 'Left today', 'share' => 'Last run could use', 'used' => 'Last run used', 'keys' => 'Keys', 'at' => 'Last run' ), $rows );
 }
 
-/** Total keys, what they can do in a day, what was used, by which workers (owner, 22 Oct 2026: "keep it simple"). */
-function aw_ai_overview( array $rows ) {
+/**
+ * The At a glance numbers (owner, 22 Oct 2026: "keep it simple"): keys saved and working, the free daily supply, the
+ * last 24 h's demand, the workers that used AI, and per worker the keys it can use now.
+ *
+ * @param array $rows Saved rows.
+ * @return array { keys, working, daily, nocap, ok, miss, pct, used: worker id => true, workers: [ { id, name, planned, can, all, today } ] }
+ */
+function aw_ai_overview_data( array $rows ): array {
 	$workers = aw_workers_all();
 	$working = 0;
 	$daily   = 0;
@@ -926,7 +1097,42 @@ function aw_ai_overview( array $rows ) {
 			}
 		}
 	}
-	$pct = $daily ? min( 100, (int) round( 100 * $ok / $daily ) ) : 0;
+	$all_rows = count( aw_ai_served()['rows'] );
+	$list     = array();
+	foreach ( $workers as $id => $w ) {
+		$list[] = array(
+			'id'      => (string) $id,
+			'name'    => (string) $w['name'],
+			'planned' => ! empty( $w['planned'] ),
+			'can'     => count( aw_ai_served( $id )['rows'] ),
+			'all'     => $all_rows,
+			'today'   => isset( $wf[ $id ] ),
+		);
+	}
+	return array(
+		'keys'    => count( $rows ),
+		'working' => $working,
+		'daily'   => $daily,
+		'nocap'   => $nocap,
+		'ok'      => $ok,
+		'miss'    => $miss,
+		'pct'     => $daily ? min( 100, (int) round( 100 * $ok / $daily ) ) : 0,
+		'used'    => $wf,
+		'workers' => $list,
+	);
+}
+
+/** Total keys, what they can do in a day, what was used, by which workers (owner, 22 Oct 2026: "keep it simple"). */
+function aw_ai_overview( array $rows ) {
+	$workers = aw_workers_all();
+	$d       = aw_ai_overview_data( $rows );
+	$working = $d['working'];
+	$daily   = $d['daily'];
+	$nocap   = $d['nocap'];
+	$ok      = $d['ok'];
+	$miss    = $d['miss'];
+	$wf      = $d['used'];
+	$pct     = $d['pct'];
 	echo '<h2>At a glance</h2><table class="form-table" role="presentation"><tbody>'
 		. '<tr><th scope="row">Keys</th><td>' . esc_html( count( $rows ) . ' saved, ' . $working . ' working now' ) . '</td></tr>'
 		. '<tr><th scope="row">Supply</th><td>' . esc_html( 'About ' . number_format_i18n( $daily ) . ' free requests a day with a daily cap' . ( $nocap ? ', plus ' . $nocap . ' keys with no daily cap' : '' ) ) . '</td></tr>'
@@ -936,14 +1142,12 @@ function aw_ai_overview( array $rows ) {
 		. '<tr><th scope="row">AI workers</th><td>' . esc_html( count( $wf ) . ' of ' . count( $workers ) . ' workers' . ( $wf ? ' used AI in the last 24 h: ' . implode( ', ', array_map( fn( $id ) => $workers[ $id ]['name'] ?? $id, array_keys( $wf ) ) ) : ': none used AI in the last 24 h' ) ) . '</td></tr>'
 		. '</tbody></table>';
 	// The real workers (Sourcing → Workers), with how many of the keys served now each one may use.
-	$all_rows = count( aw_ai_served()['rows'] );
-	$list     = array();
-	foreach ( $workers as $id => $w ) {
-		$can    = count( aw_ai_served( $id )['rows'] );
+	$list = array();
+	foreach ( $d['workers'] as $w ) {
 		$list[] = array(
-			'worker' => aw_worker_label_html( $id ) . ' <code>' . esc_html( $id ) . '</code>' . ( $w['planned'] ? ' (planned)' : '' ),
-			'keys'   => esc_html( $can === $all_rows ? $can . ' (all working keys)' : $can . ' of ' . $all_rows . ' working keys' ),
-			'today'  => isset( $wf[ $id ] ) ? '<span class="dashicons dashicons-yes" aria-hidden="true"></span> Yes' : '—',
+			'worker' => aw_worker_label_html( $w['id'] ) . ' <code>' . esc_html( $w['id'] ) . '</code>' . ( $w['planned'] ? ' (planned)' : '' ),
+			'keys'   => esc_html( $w['can'] === $w['all'] ? $w['can'] . ' (all working keys)' : $w['can'] . ' of ' . $w['all'] . ' working keys' ),
+			'today'  => $w['today'] ? '<span class="dashicons dashicons-yes" aria-hidden="true"></span> Yes' : '—',
 		);
 	}
 	echo '<details><summary>' . esc_html( 'The ' . count( $workers ) . ' workers and the keys each can use' ) . '</summary>';
@@ -964,8 +1168,13 @@ function aw_ai_usage_worker( string $name ): string {
 	return $name;
 }
 
-/** Keys per group and provider, at a glance (owner, 22 Oct 2026). */
-function aw_ai_tier_summary( array $rows ) {
+/**
+ * Keys per group and provider (owner, 22 Oct 2026), as plain text.
+ *
+ * @param array $rows Saved rows.
+ * @return array [ { group, means, providers } ]
+ */
+function aw_ai_tier_groups( array $rows ): array {
 	$g = array();
 	foreach ( $rows as $r ) {
 		$t = aw_ai_tier( (string) $r['provider'] );
@@ -974,8 +1183,7 @@ function aw_ai_tier_summary( array $rows ) {
 		$g[ $t ][ $n ]['all']   = ( $g[ $t ][ $n ]['all'] ?? 0 ) + 1;
 		$g[ $t ][ $n ]['works'] = ( $g[ $t ][ $n ]['works'] ?? 0 ) + ( in_array( $r['status'], array( 'works', 'tool' ), true ) ? 1 : 0 );
 	}
-	echo '<h2>Keys by group</h2>';
-	$rows = array();
+	$out = array();
 	foreach ( array_merge( array_keys( AW_AI_TIERS ), array( 'unknown' ) ) as $t ) {
 		if ( empty( $g[ $t ] ) ) {
 			continue;
@@ -984,12 +1192,26 @@ function aw_ai_tier_summary( array $rows ) {
 		foreach ( $g[ $t ] as $n => $c ) {
 			$parts[] = $n . ' ' . $c['works'] . ' / ' . $c['all'];
 		}
-		$rows[] = array(
-			'group' => '<strong>' . esc_html( AW_AI_TIERS[ $t ][0] ?? 'Not recognised' ) . '</strong>',
-			'means' => esc_html( AW_AI_TIERS[ $t ][1] ?? 'Tell Claude where the key is from.' ),
-			'provs' => esc_html( implode( ' · ', $parts ) ),
+		$out[] = array(
+			'group'     => (string) ( AW_AI_TIERS[ $t ][0] ?? 'Not recognised' ),
+			'means'     => (string) ( AW_AI_TIERS[ $t ][1] ?? 'Tell Claude where the key is from.' ),
+			'providers' => implode( ' · ', $parts ),
 		);
 	}
+	return $out;
+}
+
+/** Keys per group and provider, at a glance (owner, 22 Oct 2026). */
+function aw_ai_tier_summary( array $rows ) {
+	echo '<h2>Keys by group</h2>';
+	$rows = array_map(
+		fn( $r ) => array(
+			'group' => '<strong>' . esc_html( $r['group'] ) . '</strong>',
+			'means' => esc_html( $r['means'] ),
+			'provs' => esc_html( $r['providers'] ),
+		),
+		aw_ai_tier_groups( $rows )
+	);
 	aw_sourcing_simple_table( 'groups', array( 'group' => 'Group', 'means' => 'What it means', 'provs' => 'Providers (working / saved)' ), $rows, array( 'empty' => 'No keys yet.' ) );
 }
 

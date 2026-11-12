@@ -12,6 +12,7 @@
  *                                                from phase 2, before it today's word lists)
  *   admin.php?page=aw-sourcing&tab=rules         Rules              (manage_options; &part=sections|summary|enrich, &edit=<type>,
  *                                                &tagrule=<tag|new>, &field=<key>; from phase 3)
+ *   admin.php?page=aw-sourcing&tab=ai            AI models          (manage_options; &edit=<key id|new>, &overview=1)
  *   admin.php?page=aw-sourcing&tab=workers       Workers            (manage_options; &edit=<id|new>, &runs=<id>)
  *   admin.php?page=aw-sourcing&tab=settings      Settings           (manage_options)
  *
@@ -27,7 +28,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** The Sourcing page's tabs drawn on the new screens (the others still draw today's screen). */
-const SOURCEWEB_UI_TABS = array( 'sources', 'keywords', 'rules', 'workers', 'settings' );
+const SOURCEWEB_UI_TABS = array( 'sources', 'keywords', 'rules', 'ai', 'workers', 'settings' );
 
 /**
  * Which new screen this request asks for: 'dashboard', 'review', 'enrichment', a tab of SOURCEWEB_UI_TABS or ''.
@@ -70,6 +71,7 @@ function sourceweb_ui_caps(): array {
 		'sources'    => AW_SRC_CAP,
 		'keywords'   => AW_SRC_CAP,
 		'rules'      => AW_SRC_CAP,
+		'ai'         => AW_SRC_CAP,
 		'workers'    => AW_SRC_CAP,
 		'settings'   => AW_SRC_CAP,
 	);
@@ -179,6 +181,7 @@ function sourceweb_ui_page( string $screen ): bool {
 		'sources'    => __( 'Sources', 'aw-sourcing' ),
 		'keywords'   => __( 'Keywords', 'aw-sourcing' ),
 		'rules'      => __( 'Rules', 'aw-sourcing' ),
+		'ai'         => __( 'AI models', 'aw-sourcing' ),
 		'workers'    => __( 'Workers', 'aw-sourcing' ),
 		'settings'   => __( 'SourceWeb settings', 'aw-sourcing' ),
 	);

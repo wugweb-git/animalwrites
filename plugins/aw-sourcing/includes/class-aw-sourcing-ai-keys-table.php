@@ -22,59 +22,12 @@ class AW_Sourcing_AI_Keys_Table extends WP_List_Table {
 
 	public function __construct() {
 		parent::__construct( array( 'singular' => 'key', 'plural' => 'keys', 'ajax' => false, 'screen' => AW_SRC_SCREEN ) );
-		$usage = aw_ai_usage();
-		$shown = array();
-		foreach ( aw_ai_rows() as $i => $r ) {
-			$uid         = aw_ai_key_id( $r['key'] );
-			$shown[]     = $uid;
-			$this->all[] = array(
-				'pos'      => $i,
-				'id'       => $uid,
-				'last4'    => substr( $r['key'], -4 ),
-				'provider' => (string) $r['provider'],
-				'model'    => (string) $r['model'],
-				'label'    => (string) ( $r['label'] ?? '' ),
-				'workers'  => aw_ai_row_workers( $r ),
-				'status'   => (string) $r['status'],
-				'last_ok'  => (int) ( $r['last_ok'] ?? 0 ),
-				'limits'   => ! empty( $r['cooldown'] ) && $r['cooldown'] > time() ? 'Cooldown until ' . wp_date( 'j M, H:i', $r['cooldown'] ) . ( ! empty( $r['limits'] ) ? ' · ' . $r['limits'] : '' ) : ( ! empty( $r['limits'] ) ? $r['limits'] : 'Not reported' ),
-				'usage'    => aw_ai_usage_line( (array) ( $usage[ $uid ] ?? array() ) ),
-				'checked'  => (int) $r['checked'],
-				'recheck'  => ! empty( $r['recheck'] ),
-				'secret'   => false,
-			);
-		}
-		// The workers' GitHub secrets: write-only in GitHub, so shown from the workers' reports.
-		$other = array_diff_key( $usage, array_flip( $shown ) );
-		uasort( $other, fn( $a, $b ) => (int) ( $b['last']['at'] ?? 0 ) <=> (int) ( $a['last']['at'] ?? 0 ) );
-		foreach ( $other as $uid => $u ) {
-			$prov        = (string) ( $u['provider'] ?? '' );
-			$last        = (array) ( $u['last'] ?? array() );
-			$this->all[] = array(
-				'pos'      => PHP_INT_MAX,
-				'id'       => (string) $uid,
-				'last4'    => (string) ( $u['last4'] ?? '' ),
-				'provider' => $prov,
-				'model'    => implode( ', ', array_keys( (array) ( $last['models'] ?? array() ) ) ),
-				'label'    => '',
-				'workers'  => array(),
-				'status'   => 'paid' === aw_ai_tier( $prov ) ? 'paid' : ( ! empty( $last['ok'] ) ? 'works' : ( ! empty( $last['limited'] ) ? 'limited' : 'failed' ) ),
-				'last_ok'  => 0,
-				'limits'   => '',
-				'usage'    => aw_ai_usage_line( $u ),
-				'checked'  => (int) ( $last['at'] ?? 0 ),
-				'recheck'  => false,
-				'secret'   => true,
-			);
-		}
+		$this->all = aw_ai_key_records();
 	}
 
 	/** ok, wait or bad, as the status badge has it. */
 	public static function tone( $status ) {
-		if ( in_array( $status, array( 'works', 'tool', 'paid' ), true ) ) {
-			return 'ok';
-		}
-		return in_array( $status, array( 'limited', 'unchecked', 'card' ), true ) ? 'wait' : 'bad';
+		return aw_ai_key_tone( (string) $status );
 	}
 
 	private function view() {

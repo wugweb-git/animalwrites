@@ -87,4 +87,5 @@ require_once AW_SOURCING_DIR . 'includes/sourceweb-model.php';
 require_once AW_SOURCING_DIR . 'includes/sourceweb-dashboard.php';
 require_once AW_SOURCING_DIR . 'includes/sourceweb-rest.php';
 require_once AW_SOURCING_DIR . 'includes/sourceweb-rest-pages.php'; // the tabs rebuilt after 12 Nov 2026 (Workers …)
+require_once AW_SOURCING_DIR . 'includes/sourceweb-rest-ai.php'; // AI models on the new screen (12 Nov 2026)
 require_once AW_SOURCING_DIR . 'includes/sourceweb-ui.php';

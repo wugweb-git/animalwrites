@@ -241,7 +241,7 @@ aw_t( false !== strpos( $pages, 'aw_sourcing_sources_apply(' ) && false !== strp
 $pol = file_get_contents( dirname( __DIR__ ) . '/includes/sourcing-policy.php' );
 aw_t( false !== strpos( $pol, 'list( $pubs, $press ) = aw_sourcing_sources_apply( $pubs, $status, $hosts );' ) && false !== strpos( $pol, '$pubs   = aw_sourcing_shorts_apply( $pubs,' ), 'sources: the classic list saves through the shared functions' );
 $ui = file_get_contents( dirname( __DIR__ ) . '/includes/sourceweb-ui.php' );
-aw_t( false !== strpos( $ui, "const SOURCEWEB_UI_TABS = array( 'sources', 'keywords', 'rules', 'workers', 'settings' );" ), 'ui: Sources, Keywords, Rules, Workers and Settings are drawn on the new screens' );
+aw_t( false !== strpos( $ui, "const SOURCEWEB_UI_TABS = array( 'sources', 'keywords', 'rules', 'ai', 'workers', 'settings' );" ), 'ui: Sources, Keywords, Rules, AI models, Workers and Settings are drawn on the new screens' );
 aw_t( false !== strpos( $ui, "if ( 'rules' === \$tab && ! ( function_exists( 'aw_rules_live' ) && aw_rules_live() ) ) {" ), 'ui: Rules before the phase 3 migration stays on today\'s screens' );
 aw_t( 12 === substr_count( $pages, '$ready = sourceweb_rules_ready();' ), 'rules routes: every route refuses before the phase 3 migration (409)' );
 aw_t( false !== strpos( $pages, 'aw_sourcing_section_save(' ) && false !== strpos( $pages, 'aw_rules_tag_save(' ) && false !== strpos( $pages, 'aw_rules_tag_delete(' ) && false !== strpos( $pages, 'aw_rules_priority_save(' ) && false !== strpos( $pages, 'aw_rules_field_save(' ) && false !== strpos( $pages, 'aw_summary_rules_sanitize(' ), 'rules routes: the same section, tag rule, trust order, field rule and summary saves as today\'s screen' );
@@ -254,3 +254,17 @@ $kwa = file_get_contents( dirname( __DIR__ ) . '/includes/keywords-admin.php' );
 $kwt = file_get_contents( dirname( __DIR__ ) . '/includes/class-aw-sourcing-keywords-table.php' );
 aw_t( false !== strpos( $kwa, 'list( $n, $errs ) = aw_sourcing_kw_bulk( $op, $ids );' ) && false !== strpos( $kwt, '$this->all = aw_sourcing_kw_records();' ) && false !== strpos( $kwt, 'aw_sourcing_kw_in_view( $r, $v )' ), 'keywords: the classic list and its actions use the shared functions' );
 aw_t( 7 === substr_count( $pages, '$ready = sourceweb_keywords_ready();' ), 'keywords routes: every save and list refuses before the keyword table (409)' );
+
+// ---- AI models: its own routes, no key goes out, the same saves as today's tab ----
+$air = file_get_contents( dirname( __DIR__ ) . '/includes/sourceweb-rest-ai.php' );
+$aik = file_get_contents( dirname( __DIR__ ) . '/includes/ai-keys.php' );
+$ait = file_get_contents( dirname( __DIR__ ) . '/includes/class-aw-sourcing-ai-keys-table.php' );
+aw_t( false === strpos( $air, '__return_true' ) && 1 === substr_count( $air, "'permission_callback' => sourceweb_rest_can( AW_SRC_CAP )" ), 'ai routes: every route through the one permission check, manage_options' );
+preg_match_all( "/^\t\t\t'\/ai[^']*'\s*=> array\(\s*'(GET|POST)'/m", $air, $m );
+aw_t( 7 === count( $m[0] ), 'ai routes: 7 routes under sourceweb/v1 (' . count( $m[0] ) . ')' );
+aw_t( false === strpos( $air, "'key' =>" ) && false === strpos( $air, "'aw/v1'" ) && false === strpos( $air, "'/ai-keys'" ), 'ai routes: no key field is sent, and the workers\' route aw/v1/ai-keys is not reused' );
+aw_t( substr_count( $air, "\$r['key']" ) === substr_count( $air, "aw_ai_key_id( \$r['key'] )" ) + substr_count( $air, "substr( \$r['key'], -4 )" ), 'ai routes: a key is read only for its id and its last 4 characters' );
+aw_t( false !== strpos( $air, 'aw_ai_keys_add(' ) && false !== strpos( $air, 'aw_ai_key_edit_save(' ) && false !== strpos( $air, 'aw_ai_keys_list_op(' ) && false !== strpos( $air, 'aw_ai_key_records()' ) && false !== strpos( $air, 'aw_ai_overview_data(' ), 'ai routes: the same add, edit, list actions, list and overview as today\'s tab' );
+aw_t( false !== strpos( $aik, '$res = aw_ai_keys_add(' ) && false !== strpos( $aik, '$n = (int) aw_ai_key_edit_save(' ) && false !== strpos( $aik, '$res  = aw_ai_keys_list_op(' ) && false !== strpos( $ait, '$this->all = aw_ai_key_records();' ), 'ai: today\'s forms and list use the shared functions' );
+aw_t( false !== strpos( $aik, "if ( \$rows !== \$orig ) {\n\t\tupdate_option( 'aw_ai_models', \$rows, false );" ) && false !== strpos( $aik, "if ( ! \$what ) {\n\t\t\treturn 0;" ), 'ai: a list action or edit with no change writes nothing' );
+

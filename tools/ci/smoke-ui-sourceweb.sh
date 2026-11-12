@@ -6,11 +6,12 @@ screen aw-review sourceweb-app sourceweb-admin
 screen aw-enrich-review sourceweb-app sourceweb-admin
 screen "aw-sourcing&tab=settings" sourceweb-app sourceweb-admin
 screen "aw-sourcing&tab=workers" sourceweb-app sourceweb-admin
+screen "aw-sourcing&tab=ai" sourceweb-app sourceweb-admin
 screen "aw-sourcing" sourceweb-app sourceweb-admin
 # The feed form stays on today's screen at its own address until it is rebuilt.
 want 200 "admin.php?page=aw-sourcing&feed=new (feed form)" -b /tmp/cj-ci "$H/wp-admin/admin.php?page=aw-sourcing&feed=new"
 if grep -q 'id="sourceweb-app"' /tmp/rw.out; then echo "FAIL feed form: drawn as the new screen"; FAIL=1; else echo "ok   feed form: today's screen"; fi
-for r in dashboard review "review&type=aw_news" enrichment "enrichment&status=all" settings workers "workers&view=planned&search=x&orderby=status&order=desc" workers/new workers/sourcing workers/sourcing/runs sources "sources&view=block&orderby=items&order=desc" sources/one sources/feeds "sources/feeds&state=on"; do
+for r in dashboard review "review&type=aw_news" enrichment "enrichment&status=all" settings workers "workers&view=planned&search=x&orderby=status&order=desc" workers/new workers/sourcing workers/sourcing/runs sources "sources&view=block&orderby=items&order=desc" sources/one sources/feeds "sources/feeds&state=on" ai ai/keys "ai/key&id=new" ai/overview; do
   route "sourceweb/v1/$r"
 done
 post sourceweb/v1/dashboard/count '{}'
@@ -28,6 +29,9 @@ post sourceweb/v1/sources/decide '{"action":"block","hosts":[]}'
 post sourceweb/v1/sources/short '{"short":{}}'
 post sourceweb/v1/sources/save '{"host":""}'
 post sourceweb/v1/sources/feeds/decide '{"op":"on","ids":[]}'
+post sourceweb/v1/ai/keys/add '{"keys":""}'
+post sourceweb/v1/ai/key/save '{"id":"x"}'
+post sourceweb/v1/ai/keys/decide '{"op":"recheck","ids":[]}'
 # Workers: a registry worker can't be deleted; an unchanged Save of every worker writes nothing.
 want 400 "POST /sourceweb/v1/workers/delete a registry worker" -X POST -b /tmp/cj-ci -H "X-WP-Nonce: $NA" -H 'Content-Type: application/json' -d '{"id":"sourcing"}' "$H/?rest_route=/sourceweb/v1/workers/delete"
 W_OPTS="aw_workers_meta aw_workers_groups aw_ai_models kits_sourcing_log"
@@ -60,6 +64,56 @@ sys.exit(1 if bad else 0)
 PY2
 # shellcheck disable=SC2086
 same "SourceWeb Workers" "$BEFORE" "$(optmd5 $W_OPTS)"
+# AI models: no response carries a saved key; empty actions, an empty Add, an unknown key and an unchanged Save of
+# the saved keys write nothing.
+A_OPTS="aw_ai_models kits_sourcing_log"
+wp eval 'echo wp_json_encode( array_values( wp_list_pluck( aw_ai_rows(), "key" ) ) );' > /tmp/sw-ai-keys.json
+# shellcheck disable=SC2086
+BEFORE=$(optmd5 $A_OPTS)
+python3 - "$H/?rest_route=/sourceweb/v1" "$NA" <<'PY2' || FAIL=1
+import json, subprocess, sys
+r, nonce = sys.argv[1], sys.argv[2]
+def call(route, data=None):
+    args = ['curl', '-s', '-b', '/tmp/cj-ci', '-H', 'X-WP-Nonce: ' + nonce, '-w', '\n%{http_code}']
+    if data is not None:
+        args += ['-X', 'POST', '-H', 'Content-Type: application/json', '-d', json.dumps(data)]
+    body, code = subprocess.run(args + [r + '/' + route], capture_output=True, text=True).stdout.rsplit('\n', 1)
+    return code, body
+secrets = [k for k in json.load(open('/tmp/sw-ai-keys.json')) if len(k) > 8]
+bad = 0
+bodies = {}
+for route in ['ai', 'ai/keys', 'ai/keys&view=bad&search=x&orderby=checked&order=desc', 'ai/key&id=new', 'ai/overview']:
+    code, body = call(route)
+    bodies[route] = body
+    leak = [k[-4:] for k in secrets if k in body]
+    ok = code == '200' and not leak
+    print(('ok  ' if ok else 'FAIL') + ' ' + code + ' GET ' + route + (' (key in the answer: ...' + ', ...'.join(leak) + ')' if leak else ''))
+    bad += not ok
+lst = json.loads(bodies['ai/keys'])
+print('ok   ai keys list: %d keys, %d views, plain: %s' % (lst['total'], len(lst['views']), lst['plain']))
+for route, data, want in [
+    ('ai/keys/add', {'keys': '', 'label': 'x'}, '400'),
+    ('ai/key/save', {'id': 'nosuchkey', 'label': 'x'}, '404'),
+    ('ai/keys/decide', {'op': 'attach', 'ids': [], 'worker': ''}, '400'),
+    ('ai/keys/decide', {'op': 'remove', 'ids': []}, '200'),
+    ('ai/keys/decide', {'op': 'up', 'ids': ['nosuchkey']}, '200'),
+]:
+    code, body = call(route, data)
+    ok = code == want and (want != '200' or json.loads(body).get('saved') is False)
+    print(('ok  ' if ok else 'FAIL') + ' ' + code + ' POST ' + route + ' ' + json.dumps(data) + ' (want ' + want + ', nothing saved)')
+    bad += not ok
+for row in [x for x in lst['rows'] if not x['secret']][:3]:
+    code, body = call('ai/key&id=' + row['id'])
+    k = json.loads(body)
+    leak = [s[-4:] for s in secrets if s in body]
+    code, body = call('ai/key/save', {'id': row['id'], 'label': k['label'], 'workers': k['workers']})
+    ok = code == '200' and json.loads(body).get('saved') is False and not leak
+    print(('ok  ' if ok else 'FAIL') + ' ' + code + ' unchanged Save of key ...' + row['last4'])
+    bad += not ok
+sys.exit(1 if bad else 0)
+PY2
+# shellcheck disable=SC2086
+same "SourceWeb AI models" "$BEFORE" "$(optmd5 $A_OPTS)"
 # Sources: an unchanged Save of the first sources, empty list actions and empty short names write nothing.
 S_OPTS="aw_publishers aw_sources kits_sourcing_log"
 # shellcheck disable=SC2086

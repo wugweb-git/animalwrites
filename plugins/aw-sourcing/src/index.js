@@ -1267,6 +1267,7 @@ const subHref = ( next ) => {
 		'part',
 		'tagrule',
 		'field',
+		'overview',
 	].forEach( ( k ) => u.searchParams.delete( k ) );
 	Object.keys( next ).forEach( ( k ) => u.searchParams.set( k, next[ k ] ) );
 	return u.toString();
@@ -5110,6 +5111,673 @@ function FieldRuleForm( { field, onDone } ) {
 	);
 }
 
+/* ---------- AI models ---------- */
+
+const KEY_TONE = { ok: 'success', wait: 'warn', bad: 'error' };
+
+/** AI models: the keys list, Add New Key, Edit key, Keys overview. */
+function AiModels() {
+	const [ sub, go ] = useSub( [ 'edit', 'overview' ] );
+	const [ msg, setMsg ] = useState( null );
+	const back = ( m ) => {
+		setMsg( m || null );
+		go( {} );
+	};
+	if ( sub.edit ) {
+		return <AiKeyForm id={ sub.edit } onDone={ back } />;
+	}
+	if ( sub.overview ) {
+		return <AiOverview onBack={ () => back() } />;
+	}
+	return <AiKeyList go={ go } msg={ msg } setMsg={ setMsg } />;
+}
+
+/** At a glance, the workers and their keys, the daily caps, keys by group. */
+function AiGlance() {
+	const { data, error, loading, load } = useRoute( 'ai' );
+	if ( error ) {
+		return <ErrorState message={ error } onRetry={ load } />;
+	}
+	if ( loading && ! data ) {
+		return <LoadingState label={ __( 'Loading…', 'aw-sourcing' ) } />;
+	}
+	return (
+		<>
+			<SectionCard
+				id="ai-glance"
+				title={ __( 'At a glance', 'aw-sourcing' ) }
+			>
+				<RefTable
+					caption={ __( 'At a glance', 'aw-sourcing' ) }
+					head={ [
+						__( 'What', 'aw-sourcing' ),
+						__( 'Now', 'aw-sourcing' ),
+					] }
+					rows={ data.glance }
+				/>
+				<details>
+					<summary>
+						{ sprintf(
+							/* translators: %d: number of workers. */
+							__(
+								'The %d workers and the keys each can use',
+								'aw-sourcing'
+							),
+							data.workers.length
+						) }
+					</summary>
+					<RefTable
+						caption={ __( 'Workers', 'aw-sourcing' ) }
+						head={ [
+							__( 'Worker', 'aw-sourcing' ),
+							__( 'Keys it can use', 'aw-sourcing' ),
+							__( 'Used AI in the last 24 h', 'aw-sourcing' ),
+						] }
+						rows={ data.workers }
+					/>
+				</details>
+			</SectionCard>
+			<SectionCard
+				id="ai-caps"
+				title={ __( 'Daily caps on free models', 'aw-sourcing' ) }
+				description={ __(
+					'Free models have a daily limit per account, not per key: OpenRouter allows 50 free requests a day per account (1,000 once the account has 10 credits), however many keys it has. The news workers share each account’s requests out over the day and stop calling an account once it reaches the limit. The limit resets at 05:30 IST (00:00 UTC).',
+					'aw-sourcing'
+				) }
+			>
+				{ data.caps.length ? (
+					<RefTable
+						caption={ __( 'Daily caps', 'aw-sourcing' ) }
+						head={ [
+							__( 'Account', 'aw-sourcing' ),
+							__( 'Daily limit', 'aw-sourcing' ),
+							__( 'Left today', 'aw-sourcing' ),
+							__( 'Last run could use', 'aw-sourcing' ),
+							__( 'Last run used', 'aw-sourcing' ),
+							__( 'Keys', 'aw-sourcing' ),
+							__( 'Last run', 'aw-sourcing' ),
+						] }
+						rows={ data.caps }
+					/>
+				) : (
+					<p>
+						{ __(
+							'No worker run has reported yet.',
+							'aw-sourcing'
+						) }
+					</p>
+				) }
+			</SectionCard>
+			<SectionCard
+				id="ai-groups"
+				title={ __( 'Keys by group', 'aw-sourcing' ) }
+			>
+				{ data.groups.length ? (
+					<RefTable
+						caption={ __( 'Keys by group', 'aw-sourcing' ) }
+						head={ [
+							__( 'Group', 'aw-sourcing' ),
+							__( 'What it means', 'aw-sourcing' ),
+							__( 'Providers (working / saved)', 'aw-sourcing' ),
+						] }
+						rows={ data.groups }
+					/>
+				) : (
+					<p>{ __( 'No keys yet.', 'aw-sourcing' ) }</p>
+				) }
+			</SectionCard>
+		</>
+	);
+}
+
+/**
+ * The keys list: saved keys in the workers' order, then the GitHub secrets.
+ *
+ * @param {Object}   props
+ * @param {Function} props.go     From useSub().
+ * @param {Object}   props.msg    Notice.
+ * @param {Function} props.setMsg Set the notice.
+ */
+function AiKeyList( { go, msg, setMsg } ) {
+	const [ q, setQ ] = useState( {
+		view: '',
+		search: '',
+		orderby: '',
+		order: 'asc',
+		page: 1,
+	} );
+	const [ worker, setWorker ] = useState( '' );
+	const { data, error, loading, load } = useRoute( 'ai/keys', q );
+	const set = ( part ) => setQ( ( o ) => ( { ...o, page: 1, ...part } ) );
+	const decide = ( op, ids ) => {
+		setMsg( null );
+		return apiFetch( {
+			path: path( 'ai/keys/decide' ),
+			method: 'POST',
+			data: { op, ids, worker },
+		} )
+			.then( ( r ) => setMsg( answerMsg( r ) ) )
+			.catch( ( e ) => setMsg( { tone: 'error', text: errText( e ) } ) )
+			.finally( load );
+	};
+	const remove = ( ids, last4 ) => {
+		if (
+			// eslint-disable-next-line no-alert -- a plain browser confirm, as today's screen
+			window.confirm(
+				last4
+					? sprintf(
+							/* translators: %s: last 4 characters of a key. */
+							__(
+								'Remove key …%s? This takes effect straight away.',
+								'aw-sourcing'
+							),
+							last4
+						)
+					: sprintf(
+							/* translators: %d: number of keys. */
+							_n(
+								'Remove %d key? This takes effect straight away.',
+								'Remove %d keys? This takes effect straight away.',
+								ids.length,
+								'aw-sourcing'
+							),
+							ids.length
+						)
+			)
+		) {
+			decide( 'remove', ids );
+		}
+	};
+	const onBulk = ( op, ids ) => {
+		const saved = ids.filter( ( id ) =>
+			( data?.rows || [] ).some( ( r ) => r.id === id && ! r.secret )
+		);
+		if ( 'remove' === op ) {
+			remove( saved );
+		} else {
+			decide( op, saved );
+		}
+	};
+	const newKey = { edit: 'new' };
+	return (
+		<>
+			<AiGlance />
+			<SectionCard
+				id="ai-keys"
+				title={ __( 'Keys', 'aw-sourcing' ) }
+				description={ __(
+					'All keys in one list: the ones saved here, in the order the workers try them (top first), then the ones in the workers’ GitHub secrets (changed in GitHub; they cannot be attached to workers). Each key is for every worker unless it is attached to some. Every key is tested again twice a day.',
+					'aw-sourcing'
+				) }
+				actions={
+					<>
+						<a
+							className="kits-shell-button is-primary"
+							href={ subHref( newKey ) }
+							onClick={ inPlace( go, newKey ) }
+						>
+							{ __( 'Add New Key', 'aw-sourcing' ) }
+						</a>{ ' ' }
+						<a
+							className="kits-shell-button is-secondary"
+							href={ subHref( { overview: 1 } ) }
+							onClick={ inPlace( go, { overview: 1 } ) }
+						>
+							{ __( 'Keys overview', 'aw-sourcing' ) }
+						</a>
+					</>
+				}
+			>
+				{ msg && (
+					<Notice
+						tone={ msg.tone }
+						onDismiss={ () => setMsg( null ) }
+					>
+						{ msg.text }
+					</Notice>
+				) }
+				<SelectField
+					label={ __(
+						'Worker for Attach and Detach',
+						'aw-sourcing'
+					) }
+					help={ __(
+						'Choose the worker first, then tick keys and use the bulk action Attach to worker or Detach from worker.',
+						'aw-sourcing'
+					) }
+					value={ worker }
+					options={ [
+						{
+							value: '',
+							label: __( '— Choose a worker —', 'aw-sourcing' ),
+						},
+						...( data?.workers || [] ).map( ( w ) => ( {
+							value: w.value,
+							label: `${ w.help }: ${ w.label }`,
+						} ) ),
+					] }
+					onChange={ setWorker }
+				/>
+				<DataList
+					label={ __( 'Keys', 'aw-sourcing' ) }
+					columns={ [
+						{
+							key: 'title',
+							label: __( 'Key', 'aw-sourcing' ),
+							primary: true,
+							render: ( r ) => (
+								<>
+									{ r.secret ? (
+										<code>{ r.title }</code>
+									) : (
+										<a
+											href={ subHref( { edit: r.id } ) }
+											onClick={ inPlace( go, {
+												edit: r.id,
+											} ) }
+										>
+											<code>{ r.title }</code>
+										</a>
+									) }
+									{ r.secret && (
+										<span className="kits-shell-field__help">
+											{ ' — ' }
+											{ __(
+												'GitHub secret: change it in GitHub',
+												'aw-sourcing'
+											) }
+										</span>
+									) }
+									{ r.problem && (
+										<Notice tone="error">
+											{ r.problem }
+										</Notice>
+									) }
+								</>
+							),
+						},
+						{
+							key: 'provider',
+							label: __( 'Provider', 'aw-sourcing' ),
+							sortable: true,
+							render: ( r ) => r.providerLabel,
+						},
+						{
+							key: 'model',
+							label: __( 'Model', 'aw-sourcing' ),
+							render: ( r ) => <code>{ r.model }</code>,
+						},
+						{
+							key: 'usedBy',
+							label: __( 'Used by', 'aw-sourcing' ),
+						},
+						{
+							key: 'label',
+							label: __( 'Label', 'aw-sourcing' ),
+							sortable: true,
+							render: ( r ) => r.label || '—',
+						},
+						{ key: 'group', label: __( 'Group', 'aw-sourcing' ) },
+						{
+							key: 'caps',
+							label: __( 'Good for', 'aw-sourcing' ),
+							render: ( r ) => (
+								<>
+									{ r.caps }
+									{ r.capsNote && (
+										<span className="kits-shell-field__help">
+											{ ' — ' }
+											{ r.capsNote }
+										</span>
+									) }
+								</>
+							),
+						},
+						{
+							key: 'status',
+							label: __( 'Status', 'aw-sourcing' ),
+							sortable: true,
+							render: ( r ) => (
+								<>
+									<Status
+										tone={ KEY_TONE[ r.tone ] }
+										label={ r.statusLabel }
+									/>
+									{ r.recheck && (
+										<span className="kits-shell-field__help">
+											{ ' — ' }
+											{ __(
+												'Being checked again',
+												'aw-sourcing'
+											) }
+										</span>
+									) }
+								</>
+							),
+						},
+						{
+							key: 'last_ok',
+							label: __( 'Last worked', 'aw-sourcing' ),
+							sortable: true,
+							render: ( r ) => r.lastOk,
+						},
+						{
+							key: 'limits',
+							label: __( 'Limit / cooldown', 'aw-sourcing' ),
+						},
+						{
+							key: 'usage',
+							label: __( 'Work in the last run', 'aw-sourcing' ),
+						},
+						{
+							key: 'checked',
+							label: __( 'Checked', 'aw-sourcing' ),
+							sortable: true,
+						},
+					] }
+					rows={ data?.rows || [] }
+					total={ data?.total || 0 }
+					page={ data?.page || 1 }
+					pages={ data?.pages || 1 }
+					onPage={ ( page ) => setQ( ( o ) => ( { ...o, page } ) ) }
+					search={ q.search }
+					onSearch={ ( search ) => set( { search } ) }
+					searchLabel={ __( 'Search keys', 'aw-sourcing' ) }
+					views={ data?.views || [] }
+					view={ q.view }
+					onView={ ( view ) => set( { view } ) }
+					sort={ { key: q.orderby, dir: q.order } }
+					onSort={ ( orderby, order ) => set( { orderby, order } ) }
+					bulkActions={ [
+						{
+							value: 'attach',
+							label: __( 'Attach to worker', 'aw-sourcing' ),
+						},
+						{
+							value: 'detach',
+							label: __( 'Detach from worker', 'aw-sourcing' ),
+						},
+						{
+							value: 'recheck',
+							label: __( 'Check again', 'aw-sourcing' ),
+						},
+						{
+							value: 'remove',
+							label: __( 'Remove', 'aw-sourcing' ),
+						},
+					] }
+					onBulk={ onBulk }
+					rowActions={ ( r ) =>
+						r.secret
+							? []
+							: [
+									{
+										label: __( 'Edit', 'aw-sourcing' ),
+										onClick: () => go( { edit: r.id } ),
+									},
+									...( data?.plain
+										? [
+												{
+													label: __(
+														'Move up',
+														'aw-sourcing'
+													),
+													onClick: () =>
+														decide( 'up', [
+															r.id,
+														] ),
+												},
+												{
+													label: __(
+														'Move down',
+														'aw-sourcing'
+													),
+													onClick: () =>
+														decide( 'down', [
+															r.id,
+														] ),
+												},
+											]
+										: [] ),
+									{
+										label: __(
+											'Check again',
+											'aw-sourcing'
+										),
+										onClick: () =>
+											decide( 'recheck', [ r.id ] ),
+									},
+									{
+										label: __( 'Remove', 'aw-sourcing' ),
+										tone: 'error',
+										onClick: () =>
+											remove( [ r.id ], r.last4 ),
+									},
+								]
+					}
+					loading={ loading }
+					error={ error }
+					onRetry={ load }
+					emptyTitle={ __( 'No keys yet.', 'aw-sourcing' ) }
+				/>
+			</SectionCard>
+		</>
+	);
+}
+
+/**
+ * Add New Key, or edit a saved key's label and workers (provider, model and status read-only). The key itself is never
+ * shown again: only its last 4 characters.
+ *
+ * @param {Object}   props
+ * @param {string}   props.id     Key id or 'new'.
+ * @param {Function} props.onDone Back to the list, with a notice.
+ */
+function AiKeyForm( { id, onDone } ) {
+	const { data, error, load, v, setV, msg, busy, send } = useForm(
+		'ai/key',
+		{ id },
+		( d ) => ( { keys: '', many: '', label: d.label, workers: d.workers } )
+	);
+	if ( error ) {
+		return <ErrorState message={ error } onRetry={ load } />;
+	}
+	if ( ! data || ! v ) {
+		return (
+			<LoadingState label={ __( 'Loading the key…', 'aw-sourcing' ) } />
+		);
+	}
+	const put = ( k ) => ( val ) => setV( { ...v, [ k ]: val } );
+	const save = () =>
+		data.new
+			? send(
+					'ai/keys/add',
+					{
+						keys: `${ v.keys }\n${ v.many }`,
+						label: v.label,
+						workers: v.workers,
+					},
+					onDone
+				)
+			: send(
+					'ai/key/save',
+					{ id, label: v.label, workers: v.workers },
+					onDone
+				);
+	return (
+		<SettingsGroup
+			id="ai-key-form"
+			title={
+				data.new
+					? __( 'Add New Key', 'aw-sourcing' )
+					: sprintf(
+							/* translators: %s: last 4 characters of a key. */
+							__( 'Edit key …%s', 'aw-sourcing' ),
+							data.last4
+						)
+			}
+			footer={
+				<FormButtons
+					label={
+						data.new
+							? __( 'Add key', 'aw-sourcing' )
+							: __( 'Save changes', 'aw-sourcing' )
+					}
+					busy={ busy }
+					onSave={ save }
+					onDone={ onDone }
+				/>
+			}
+		>
+			{ msg && <Notice tone={ msg.tone }>{ msg.text }</Notice> }
+			{ data.new ? (
+				<>
+					<TextField
+						label={ __( 'Key', 'aw-sourcing' ) }
+						help={ __(
+							'The provider and a model that answers are worked out in the background after you save. The key is never shown again: only its last 4 characters.',
+							'aw-sourcing'
+						) }
+						value={ v.keys }
+						onChange={ put( 'keys' ) }
+						input={ {
+							type: 'password',
+							autoComplete: 'new-password',
+							spellCheck: false,
+						} }
+					/>
+					<TextField
+						label={ __( 'Or several keys', 'aw-sourcing' ) }
+						help={ __(
+							'One per line. They get the same label and workers.',
+							'aw-sourcing'
+						) }
+						value={ v.many }
+						onChange={ put( 'many' ) }
+						input={ { rows: 3 } }
+					/>
+				</>
+			) : (
+				<RefTable
+					caption={ __( 'The key', 'aw-sourcing' ) }
+					head={ [
+						__( 'Field', 'aw-sourcing' ),
+						__( 'Value', 'aw-sourcing' ),
+					] }
+					rows={ [
+						[
+							__( 'Key', 'aw-sourcing' ),
+							<span key="k">
+								<code>…{ data.last4 }</code>{ ' ' }
+								{ __(
+									'To change the key itself, remove it and add the new one.',
+									'aw-sourcing'
+								) }
+							</span>,
+						],
+						[
+							__( 'Provider', 'aw-sourcing' ),
+							`${ data.providerLabel } (${ data.group })`,
+						],
+						[
+							__( 'Model', 'aw-sourcing' ),
+							<code key="m">{ data.model }</code>,
+						],
+						[
+							__( 'Status', 'aw-sourcing' ),
+							<Status
+								key="s"
+								tone={ KEY_TONE[ data.tone ] }
+								label={ data.statusLabel }
+							/>,
+						],
+						[ __( 'Last check', 'aw-sourcing' ), data.checked ],
+					] }
+				/>
+			) }
+			<TextField
+				label={ __( 'Label', 'aw-sourcing' ) }
+				help={ __(
+					'Optional: a note for you, e.g. which account the key is from.',
+					'aw-sourcing'
+				) }
+				value={ v.label }
+				onChange={ put( 'label' ) }
+				input={ { maxLength: 80 } }
+			/>
+			<SettingsBlock
+				title={ __( 'Used by', 'aw-sourcing' ) }
+				description={ __(
+					'None ticked: every worker, also workers added later.',
+					'aw-sourcing'
+				) }
+			>
+				<Checks
+					id="ai-key-workers"
+					legend={ __( 'Used by', 'aw-sourcing' ) }
+					options={ data.choices }
+					value={ v.workers }
+					onChange={ put( 'workers' ) }
+				/>
+			</SettingsBlock>
+		</SettingsGroup>
+	);
+}
+
+/**
+ * Keys overview, read-only: every saved key and what each worker gets.
+ *
+ * @param {Object}   props
+ * @param {Function} props.onBack Back to the list.
+ */
+function AiOverview( { onBack } ) {
+	const { data, error, loading, load } = useRoute( 'ai/overview' );
+	if ( error ) {
+		return <ErrorState message={ error } onRetry={ load } />;
+	}
+	if ( loading && ! data ) {
+		return <LoadingState label={ __( 'Loading…', 'aw-sourcing' ) } />;
+	}
+	return (
+		<SectionCard
+			id="ai-overview"
+			title={ __( 'Keys overview', 'aw-sourcing' ) }
+			description={ __(
+				'Read-only. Keys show only their last 4 characters. All workers means the key is attached to none, so every worker may use it, also workers added later. Usable keys: AI keys that work or are rate-limited for now, from free or free-tier providers (paid ones are never served), plus tool keys.',
+				'aw-sourcing'
+			) }
+			actions={
+				<Button onClick={ onBack }>
+					{ __( 'Back to the keys', 'aw-sourcing' ) }
+				</Button>
+			}
+		>
+			{ data.keys.length ? (
+				<RefTable
+					caption={ __( 'Keys', 'aw-sourcing' ) }
+					head={ [
+						__( 'Key', 'aw-sourcing' ),
+						__( 'Status', 'aw-sourcing' ),
+						__( 'Attached to', 'aw-sourcing' ),
+					] }
+					rows={ data.keys }
+				/>
+			) : (
+				<p>{ __( 'No keys saved yet.', 'aw-sourcing' ) }</p>
+			) }
+			<RefTable
+				caption={ __( 'Usable keys per worker', 'aw-sourcing' ) }
+				head={ [
+					__( 'Worker', 'aw-sourcing' ),
+					__( 'Usable AI keys', 'aw-sourcing' ),
+					__( 'Tool keys', 'aw-sourcing' ),
+				] }
+				rows={ data.workers }
+			/>
+		</SectionCard>
+	);
+}
+
 const SCREENS = {
 	dashboard: Dashboard,
 	review: Review,
@@ -5119,6 +5787,7 @@ const SCREENS = {
 	sources: Sources,
 	keywords: Keywords,
 	rules: Rules,
+	ai: AiModels,
 };
 
 function App() {
