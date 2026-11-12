@@ -200,7 +200,7 @@ function aw_si_overview_boxes(): array {
 		'referrers'   => array( __( 'Top referrers (GA4)', 'aw-seo-extras' ), 'aw_si_box_referrers' ),
 		'campaigns'   => array( __( 'Campaigns by source (GA4, 28 days)', 'aw-seo-extras' ), 'aw_si_box_campaigns' ),
 		'nf'          => array( __( 'Not found (404s, GA4, 28 days)', 'aw-seo-extras' ), 'aw_si_box_nf' ),
-		'index'       => array( __( 'Index status (URL Inspection sample and Search Console totals)', 'aw-seo-extras' ), 'aw_si_box_index' ),
+		'index'       => array( __( 'Index status (Search Console totals, and the pages we inspected)', 'aw-seo-extras' ), 'aw_si_box_index' ),
 		'request'     => array( __( 'Request indexing (10 a day)', 'aw-seo-extras' ), 'aw_si_box_request' ),
 		'gsc-types'   => array( __( 'Discover and Google News (Search Console, 28 days)', 'aw-seo-extras' ), 'aw_si_box_gsc_types' ),
 		'clarity'     => array( __( 'Clarity (28 days)', 'aw-seo-extras' ), 'aw_si_box_clarity' ),
@@ -540,6 +540,12 @@ function aw_si_run_detail( string $src, array $info ): array {
 	if ( 'inspect' === $src && isset( $info['indexed'] ) ) {
 		/* translators: %s: pages indexed. */
 		$det[] = sprintf( __( '%s indexed', 'aw-seo-extras' ), $n( 'indexed' ) );
+		if ( isset( $info['never_left'] ) && function_exists( 'aw_si_inspect_eta' ) ) {
+			$eta = aw_si_inspect_eta( (int) $info['never_left'], (int) ( $info['rows'] ?? 0 ), (string) ( $info['up_to'] ?? '' ) );
+			if ( '' !== $eta ) {
+				$det[] = $eta; // why pages were not reached is the first warning (aw_si_inspect_info())
+			}
+		}
 	}
 	if ( ! empty( $info['pasted'] ) ) {
 		$det[] = __( 'pasted on the Rising tab', 'aw-seo-extras' );
@@ -551,7 +557,7 @@ function aw_si_run_detail( string $src, array $info ): array {
 		$list = array_filter( array_map( 'strval', (array) ( $info[ $key ] ?? array() ) ) );
 		if ( $list ) {
 			/* translators: 1: number of problems, 2: the first one. */
-			$det[] = sprintf( _n( '%1$s problem: %2$s', '%1$s problems, the first: %2$s', count( $list ), 'aw-seo-extras' ), number_format_i18n( count( $list ) ), wp_html_excerpt( (string) reset( $list ), 140, '…' ) );
+			$det[] = sprintf( _n( '%1$s problem: %2$s', '%1$s problems, the first: %2$s', count( $list ), 'aw-seo-extras' ), number_format_i18n( count( $list ) ), wp_html_excerpt( (string) reset( $list ), 180, '…' ) );
 		}
 	}
 	return $det;

@@ -120,10 +120,12 @@ function aw_si_pages_data(): array {
 			$out[ $path ]['rm_score'] = $score;
 		}
 	}
-	// Google's index state from URL Inspection (gsc-types.php), for pages already in the list.
+	// Google's index state from URL Inspection (gsc-types.php), each page by its latest result. A page found not indexed
+	// is listed even without other figures, so the Not indexed view counts the same pages as the Overview's "pages we
+	// inspected" figure (12 Nov 2026: it counted only pages that had figures, 579 of 3,653).
 	if ( function_exists( 'aw_si_index_states' ) ) {
 		foreach ( aw_si_index_states() as $path => $st ) {
-			if ( isset( $out[ $path ] ) ) {
+			if ( isset( $out[ $path ] ) || ( ! $st[0] && '' !== (string) $path ) ) {
 				$out[ $path ]['index']   = $st[0] ? 1 : 0;
 				$out[ $path ]['index_t'] = $st[1];
 				$out[ $path ]['index_d'] = $st[2];
@@ -164,6 +166,9 @@ add_action(
 		$table = new AW_SI_Pages_Table();
 		$table->prepare_items();
 		$table->views();
+		if ( 'unindexed' === ( isset( $_GET['view'] ) ? sanitize_key( wp_unslash( $_GET['view'] ) ) : '' ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- navigation only.
+			echo '<p class="description">' . esc_html__( 'Pages whose latest URL Inspection result is not indexed: the same rule, and the same count, as the Overview\'s "pages we inspected, latest result" figure. Pages with no search figures in 28 days are listed too. Search Console\'s own Page indexing total counts the whole site, so it differs.', 'aw-seo-extras' ) . '</p>';
+		}
 		echo '<form method="get"><input type="hidden" name="page" value="' . esc_attr( AW_SI_SLUG ) . '"><input type="hidden" name="tab" value="pages">';
 		$table->search_box( __( 'Search pages', 'aw-seo-extras' ), 'aw-si-pages' );
 		$table->display();

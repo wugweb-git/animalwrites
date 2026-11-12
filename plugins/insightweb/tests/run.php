@@ -230,5 +230,37 @@ iw_check( 'warn' === $b[4]['tone'] && 'Careful' === $b[4]['text'], 'notice tone 
 iw_check( false === strpos( wp_json_encode_stub( $b ), 'alert' ) && false === strpos( wp_json_encode_stub( $b ), '<' ), 'no script, form or markup goes out' );
 iw_check( array() === insightweb_html_blocks( '   ' ), 'an empty box has no parts' );
 
+// 6. Index status (12 Nov 2026): the URL Inspection queue's info, the estimate, and the Search Console totals.
+require dirname( __DIR__ ) . '/includes/search-insights/gsc-types.php';
+$qi = aw_si_inspect_info(
+	array(
+		'd'       => '2026-11-11',
+		'todo'    => array( '/a/', '/b/', '/c/' ),
+		'never'   => 2500,
+		'done'    => 1000,
+		'indexed' => 300,
+		'errors'  => array(),
+		'refused' => '',
+	)
+);
+iw_check( 3 === $qi['left'] && 1500 === $qi['never_left'] && 1000 === $qi['rows'] && 300 === $qi['indexed'], 'inspect info: pages left, never-inspected left, done' );
+iw_check( 0 === strpos( $qi['warnings'][0], '3 pages not reached that day: the time budget' ), 'not reached: says the time budget when Google did not refuse' );
+$qr = aw_si_inspect_info(
+	array(
+		'd'       => '2026-11-11',
+		'todo'    => array( '/a/' ),
+		'done'    => 5,
+		'indexed' => 1,
+		'errors'  => array(),
+		'refused' => 'Google refused URL Inspection (HTTP 429), so it stops for today.',
+	)
+);
+iw_check( false !== strpos( $qr['warnings'][0], 'its quota' ) && 2 === count( $qr['warnings'] ) && ! isset( $qr['never_left'] ), 'not reached: says the quota when Google refused; no estimate without the never count' );
+iw_check( array() === aw_si_inspect_info( array( 'todo' => array(), 'done' => 4 ) )['warnings'], 'a finished queue has no not-reached line' );
+iw_check( false !== strpos( aw_si_inspect_eta( 1500, 1000, '2026-11-11' ), 'by about 13 Nov 2026' ), 'estimate: 1,500 pages at 1,000 a day end two days on' );
+iw_check( 0 === strpos( aw_si_inspect_eta( 0, 1000, '2026-11-11' ), 'every page has been inspected' ) && '' === aw_si_inspect_eta( 10, 0, '2026-11-11' ), 'estimate: done, or nothing without a rate' );
+iw_check( array( 4390, 4803, '2026-11-12', false ) === aw_si_coverage_totals( array( 'indexed' => 4390, 'not_indexed' => 4803, 'discovered' => 10, 'day' => '2026-11-12' ) ), 'Search Console totals: the typed Not indexed total wins' );
+iw_check( array( 10, 7, '', true ) === aw_si_coverage_totals( array( 'indexed' => 10, 'discovered' => 3, 'crawled' => 4 ) ) && null === aw_si_coverage_totals( array( 'crawled' => 4 ) ), 'Search Console totals: reasons added up when no total; none without Indexed' );
+
 
 exit( $GLOBALS['iw_fail'] );

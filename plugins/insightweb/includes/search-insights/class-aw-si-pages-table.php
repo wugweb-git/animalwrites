@@ -123,7 +123,7 @@ class AW_SI_Pages_Table extends WP_List_Table {
 			'noted'     => __( 'With Clarity notes', 'aw-seo-extras' ),
 			/* translators: %d: score limit, e.g. 50. */
 			'lowseo'    => sprintf( __( 'Rank Math score under %d', 'aw-seo-extras' ), AW_SI_RM_LOW ),
-			'unindexed' => __( 'Not indexed (Google)', 'aw-seo-extras' ),
+			'unindexed' => __( 'Not indexed (URL Inspection)', 'aw-seo-extras' ),
 		);
 		$current = $this->arg( 'view' ) ? $this->arg( 'view' ) : 'all';
 		$out     = array();

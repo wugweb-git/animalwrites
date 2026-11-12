@@ -229,10 +229,11 @@ function aw_si_inspect_cap(): int {
 /**
  * Today's pages to inspect: never checked first, then not indexed (oldest check first), then the oldest checks.
  *
- * @param int $cap How many.
+ * @param int      $cap   How many.
+ * @param int|null $never Set to the number of published pages never inspected (all of them, not only today's).
  * @return string[] Paths.
  */
-function aw_si_inspect_todo( int $cap ): array {
+function aw_si_inspect_todo( int $cap, ?int &$never = null ): array {
 	global $wpdb;
 	$types = array_values( array_diff( get_post_types( array( 'public' => true ) ), array( 'attachment' ) ) );
 	$ids   = get_posts(
@@ -260,14 +261,15 @@ function aw_si_inspect_todo( int $cap ): array {
 	foreach ( $seen as $r ) {
 		$known[ $r->page ] = $r;
 	}
-	$never = array_keys( array_diff_key( $paths, $known ) );
+	$fresh = array_keys( array_diff_key( $paths, $known ) );
+	$never = count( $fresh );
 	$again = array();
 	foreach ( $seen as $r ) {
 		if ( isset( $paths[ $r->page ] ) ) {
 			$again[] = $r->page; // Already ordered: not indexed first, then the oldest checks.
 		}
 	}
-	return array_slice( array_merge( $never, $again ), 0, $cap );
+	return array_slice( array_merge( $fresh, $again ), 0, $cap );
 }
 
 /** Start today's URL Inspection queue. */
@@ -283,22 +285,16 @@ function aw_si_inspect_start(): void {
 	if ( is_array( $q ) && ! empty( $q['todo'] ) && ! empty( $q['done'] ) && '' === ( $q['refused'] ?? '' ) ) {
 		// Yesterday's queue did not get through every page: log what it did, so the run is not left open for good.
 		// The pages left are still first in line (never checked, then not indexed).
-		aw_si_run_ok(
-			'inspect',
-			array(
-				'rows'     => (int) $q['done'],
-				'up_to'    => (string) $q['d'],
-				'indexed'  => (int) $q['indexed'],
-				/* translators: %d: pages. */
-				'warnings' => array( sprintf( __( '%d pages were not reached that day.', 'aw-seo-extras' ), count( $q['todo'] ) ) ),
-			)
-		);
+		aw_si_run_ok( 'inspect', aw_si_inspect_info( $q ) );
 	}
+	$never = 0;
+	$todo  = aw_si_inspect_todo( aw_si_inspect_cap(), $never );
 	update_option(
 		AW_SI_INSPECT_QUEUE,
 		array(
 			'd'       => wp_date( 'Y-m-d' ),
-			'todo'    => aw_si_inspect_todo( aw_si_inspect_cap() ),
+			'todo'    => $todo,
+			'never'   => $never, // published pages never inspected when the day's queue started
 			'done'    => 0,
 			'indexed' => 0,
 			'errors'  => array(),
@@ -390,15 +386,7 @@ function aw_si_inspect_step(): array {
 	}
 	wp_clear_scheduled_hook( AW_SI_INSPECT_MORE );
 	if ( $q['done'] ) {
-		aw_si_run_ok(
-			'inspect',
-			array(
-				'rows'     => $q['done'],
-				'up_to'    => $q['d'],
-				'indexed'  => $q['indexed'],
-				'warnings' => array_values( array_filter( array_merge( array( $q['refused'] ), (array) $q['errors'] ) ) ),
-			)
-		);
+		aw_si_run_ok( 'inspect', aw_si_inspect_info( $q ) );
 	} else {
 		/* translators: %s: the problem. */
 		aw_si_run_fail( 'inspect', sprintf( __( 'No URL Inspection call worked: %s', 'aw-seo-extras' ), '' !== $q['refused'] ? $q['refused'] : (string) ( $q['errors'][0] ?? '' ) ) );
@@ -406,6 +394,93 @@ function aw_si_inspect_step(): array {
 	return $q;
 }
 add_action( AW_SI_INSPECT_MORE, 'aw_si_inspect_step' );
+
+/**
+ * A day's URL Inspection queue as the run log's info: pages done and indexed and, when pages were left, why they were
+ * not reached (Google's refusal or quota, else the time budget of the day's steps) and how many pages were never
+ * inspected, for the estimate of when every page has been (aw_si_inspect_eta()). 12 Nov 2026: the bare "N pages were
+ * not reached" line gave no reason and no end date.
+ *
+ * @param array $q The queue (AW_SI_INSPECT_QUEUE).
+ */
+function aw_si_inspect_info( array $q ): array {
+	$done    = (int) ( $q['done'] ?? 0 );
+	$left    = count( (array) ( $q['todo'] ?? array() ) );
+	$refused = (string) ( $q['refused'] ?? '' );
+	$warn    = array_values( array_filter( array_merge( array( $refused ), (array) ( $q['errors'] ?? array() ) ) ) );
+	if ( $left ) {
+		$why = '' !== $refused
+			/* translators: %s: pages. */
+			? __( '%s pages not reached that day: Google refused URL Inspection (its quota), so the queue stopped.', 'aw-seo-extras' )
+			/* translators: %s: pages. */
+			: __( '%s pages not reached that day: the time budget ran out (15 s of calls per step, a step every 5 min when the site has visits), not Google\'s 2,000-a-day quota.', 'aw-seo-extras' );
+		array_unshift( $warn, sprintf( $why, number_format_i18n( $left ) ) );
+	}
+	$info = array(
+		'rows'     => $done,
+		'up_to'    => (string) ( $q['d'] ?? '' ),
+		'indexed'  => (int) ( $q['indexed'] ?? 0 ),
+		'left'     => $left,
+		'warnings' => $warn,
+	);
+	if ( isset( $q['never'] ) ) {
+		$info['never_left'] = max( 0, (int) $q['never'] - $done ); // never-checked pages go first in the queue
+	}
+	return $info;
+}
+
+/**
+ * When every published page will have been inspected once, at the pages a day the queue got through.
+ *
+ * @param int    $never_left Pages never inspected.
+ * @param int    $per_day    Pages inspected on the last day.
+ * @param string $day        That day (Y-m-d).
+ * @return string A short phrase, or '' when there is nothing to estimate.
+ */
+function aw_si_inspect_eta( int $never_left, int $per_day, string $day ): string {
+	if ( $never_left <= 0 ) {
+		return __( 'every page has been inspected at least once; the queue now checks not-indexed pages first, then the oldest checks', 'aw-seo-extras' );
+	}
+	if ( $per_day <= 0 || ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $day ) ) {
+		return '';
+	}
+	$days = (int) ceil( $never_left / $per_day );
+	$end  = (int) strtotime( $day . ' 12:00:00 +' . $days . ' days' );
+	/* translators: 1: pages, 2: pages a day, 3: date. */
+	return sprintf( __( '%1$s pages never inspected yet; at %2$s a day the queue reaches them all by about %3$s', 'aw-seo-extras' ), number_format_i18n( $never_left ), number_format_i18n( $per_day ), wp_date( 'j M Y', $end ) );
+}
+
+/**
+ * URL Inspection's figures over every page it has checked, each by its latest result: [inspected, indexed, not
+ * indexed, latest check (Y-m-d H:i:s or '')]. The Overview's "pages we inspected" line and the Pages tab's Not indexed
+ * view use this one rule (12 Nov 2026).
+ */
+function aw_si_inspect_summary(): array {
+	$states = aw_si_index_states();
+	$yes    = count( array_filter( $states, fn( $s ) => $s[0] ) );
+	$latest = $states ? (string) max( array_map( fn( $s ) => (string) $s[2], $states ) ) : '';
+	return array( count( $states ), $yes, count( $states ) - $yes, $latest );
+}
+
+/**
+ * Search Console's Page indexing totals as last entered: [indexed, not indexed, report day, whether "not indexed" is
+ * the sum of the reasons entered (no total typed)], or null when no indexed total is entered.
+ *
+ * @param array $c aw_si_coverage().
+ */
+function aw_si_coverage_totals( array $c ): ?array {
+	if ( ! isset( $c['indexed'] ) ) {
+		return null;
+	}
+	if ( isset( $c['not_indexed'] ) ) {
+		return array( (int) $c['indexed'], (int) $c['not_indexed'], (string) ( $c['day'] ?? '' ), false );
+	}
+	$sum = 0;
+	foreach ( array_keys( aw_si_coverage_fields() ) as $k ) {
+		$sum += in_array( $k, array( 'indexed', 'not_indexed' ), true ) ? 0 : (int) ( $c[ $k ] ?? 0 );
+	}
+	return array( (int) $c['indexed'], $sum, (string) ( $c['day'] ?? '' ), true );
+}
 
 /**
  * The stored index state of each page: path => [indexed (bool), Google's reason, when checked].
@@ -437,11 +512,12 @@ const AW_SI_COVERAGE_OPTION = 'aw_si_gsc_coverage';
 /** The coverage rows Search Console's Page indexing report shows: key => label. */
 function aw_si_coverage_fields(): array {
 	return array(
-		'indexed'    => __( 'Indexed', 'aw-seo-extras' ),
-		'discovered' => __( 'Discovered, currently not indexed', 'aw-seo-extras' ),
-		'crawled'    => __( 'Crawled, currently not indexed', 'aw-seo-extras' ),
-		'noindex'    => __( 'Excluded by noindex', 'aw-seo-extras' ),
-		'canonical'  => __( 'Alternate page with proper canonical tag', 'aw-seo-extras' ),
+		'indexed'     => __( 'Indexed', 'aw-seo-extras' ),
+		'not_indexed' => __( 'Not indexed (the total at the top of the report)', 'aw-seo-extras' ),
+		'discovered'  => __( 'Discovered, currently not indexed', 'aw-seo-extras' ),
+		'crawled'     => __( 'Crawled, currently not indexed', 'aw-seo-extras' ),
+		'noindex'     => __( 'Excluded by noindex', 'aw-seo-extras' ),
+		'canonical'   => __( 'Alternate page with proper canonical tag', 'aw-seo-extras' ),
 	);
 }
 
@@ -474,7 +550,7 @@ add_action(
 /** The coverage totals as a table, with the form to enter them. */
 function aw_si_coverage_html(): string {
 	$c   = aw_si_coverage();
-	$out = '<h3>' . esc_html__( 'Search Console coverage (the whole site, entered by hand)', 'aw-seo-extras' ) . '</h3>';
+	$out = '<h3>' . esc_html__( 'Search Console Page indexing (the whole site, entered by hand)', 'aw-seo-extras' ) . '</h3>';
 	$out .= '<p class="description">' . ( ! empty( $c['day'] ) ? esc_html( sprintf( /* translators: %s: date. */ __( 'From Search Console → Pages, %s.', 'aw-seo-extras' ), wp_date( 'j M Y', strtotime( $c['day'] . ' 12:00' ) ) ) ) : esc_html__( 'Not entered yet: copy the figures from Search Console → Pages.', 'aw-seo-extras' ) ) . '</p>';
 	$out .= '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_si_coverage">' . wp_nonce_field( 'aw_si_coverage', '_wpnonce', true, false );
 	$out .= '<table class="widefat striped"><tbody>';
@@ -485,6 +561,15 @@ function aw_si_coverage_html(): string {
 	$out .= '</tbody></table>' . '<p class="submit"><button type="submit" class="button button-small">' . esc_html__( 'Save the totals', 'aw-seo-extras' ) . '</button></p>' . '</form>';
 	return $out;
 }
+
+// The same form on the Settings tab (12 Nov 2026), where the new screen keeps forms; the new Dashboard's boxes show text only.
+add_action(
+	'aw_si_settings_rows',
+	function () {
+		echo '<tr><th scope="row">' . esc_html__( 'Search Console Page indexing', 'aw-seo-extras' ) . '</th><td>' . aw_si_coverage_html() . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in aw_si_coverage_html().
+	},
+	5
+);
 
 /** Type order for the Request indexing list: guides, Library, campaigns, then the rest, listings last. */
 function aw_si_request_type_rank( int $id ): int {
@@ -569,29 +654,69 @@ function aw_si_box_request(): void {
 	echo '</tbody></table>';
 }
 
-/** Overview box: pages not indexed, by Google's reason (a sample: the pages URL Inspection has checked), next to the coverage totals. */
+/**
+ * What the last URL Inspection run says about its queue: pages not reached and why (from its warnings), and when every
+ * page will have been inspected once.
+ *
+ * @param array $info The inspect run's info.
+ * @return string[]
+ */
+function aw_si_inspect_queue_lines( array $info ): array {
+	$out = array();
+	if ( ! empty( $info['left'] ) ) {
+		$out[] = (string) ( (array) ( $info['warnings'] ?? array() ) )[0]; // aw_si_inspect_info() puts the not-reached line first
+	}
+	if ( isset( $info['never_left'] ) ) {
+		$eta = aw_si_inspect_eta( (int) $info['never_left'], (int) ( $info['rows'] ?? 0 ), (string) ( $info['up_to'] ?? '' ) );
+		if ( '' !== $eta ) {
+			$out[] = $eta;
+		}
+	}
+	return array_values( array_filter( $out ) );
+}
+
+/**
+ * Overview box (12 Nov 2026: three different "not indexed" figures). The headline is Search Console's Page indexing
+ * totals with the day they were read; then URL Inspection's figures, labelled as the pages we inspected, each by its
+ * latest result (the Pages tab's Not indexed view counts the same pages); the queue's state; Google's reasons.
+ */
 function aw_si_box_index(): void {
+	$tot = aw_si_coverage_totals( aw_si_coverage() );
+	if ( $tot ) {
+		$day = '' !== $tot[2] ? wp_date( 'j M Y', (int) strtotime( $tot[2] . ' 12:00:00' ) ) : __( 'date not entered', 'aw-seo-extras' );
+		$msg = $tot[3]
+			/* translators: 1: date read, 2: indexed, 3: not indexed. */
+			? __( 'Search Console Page indexing, read %1$s: %2$s indexed, %3$s not indexed (the reasons entered below added up; enter the report\'s Not indexed total for the exact figure).', 'aw-seo-extras' )
+			/* translators: 1: date read, 2: indexed, 3: not indexed. */
+			: __( 'Search Console Page indexing, read %1$s: %2$s indexed, %3$s not indexed.', 'aw-seo-extras' );
+		echo '<p><strong>' . esc_html( sprintf( $msg, $day, number_format_i18n( $tot[0] ), number_format_i18n( $tot[1] ) ) ) . '</strong></p>';
+		echo '<p class="description">' . esc_html__( 'The whole site as Google counts it. Copied by hand from Search Console → Pages (Settings tab, or the form below).', 'aw-seo-extras' ) . '</p>';
+	} else {
+		echo '<p><strong>' . esc_html__( 'Search Console Page indexing totals are not entered yet, so there is no whole-site figure: copy them from Search Console → Pages (Settings tab, or the form below). The figures here are only the pages we inspected.', 'aw-seo-extras' ) . '</strong></p>';
+	}
 	$states = aw_si_index_states();
 	if ( ! $states ) {
 		echo '<p>' . esc_html__( 'No pages inspected yet (URL Inspection, daily from 07:40 IST, up to 2,000 pages a day).', 'aw-seo-extras' ) . '</p>';
 		echo aw_si_coverage_html(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in aw_si_coverage_html().
 		return;
 	}
-	echo '<h3>' . esc_html__( 'URL Inspection: a sample', 'aw-seo-extras' ) . '</h3>';
-	echo '<p class="description">' . esc_html__( 'Only the pages checked so far (up to 2,000 a day, never-checked and not-indexed pages first), so these figures lean to pages that are not indexed. They are not the whole site: the coverage totals are below.', 'aw-seo-extras' ) . '</p>';
-	$by  = array();
-	$yes = 0;
+	list( $all, $yes, $not, $latest ) = aw_si_inspect_summary();
+	echo '<h3>' . esc_html__( 'URL Inspection: pages we inspected, latest result', 'aw-seo-extras' ) . '</h3>';
+	/* translators: 1: pages inspected, 2: indexed, 3: not indexed, 4: date of the latest check. */
+	echo '<p>' . esc_html( sprintf( __( 'Pages we inspected, latest result: %1$s pages, %2$s indexed, %3$s not indexed (latest check %4$s).', 'aw-seo-extras' ), number_format_i18n( $all ), number_format_i18n( $yes ), number_format_i18n( $not ), '' !== $latest ? mysql2date( 'j M Y', $latest ) : '–' ) ) . '</p>';
+	echo '<p class="description">' . esc_html__( 'Each page counts once, by its latest check (up to 2,000 a day, never-checked and not-indexed pages first), so these figures lean to pages that are not indexed and are not the whole site.', 'aw-seo-extras' ) . '</p>';
+	$queue = aw_si_inspect_queue_lines( (array) ( aw_si_runs()['inspect']['info'] ?? array() ) );
+	if ( $queue ) {
+		echo '<p class="description">' . esc_html( implode( ' ', array_map( fn( $l ) => rtrim( ucfirst( $l ), '.' ) . '.', $queue ) ) ) . '</p>';
+	}
+	$by = array();
 	foreach ( $states as $s ) {
-		if ( $s[0] ) {
-			++$yes;
-		} else {
-			$by[ '' !== $s[1] ? $s[1] : __( 'No reason given', 'aw-seo-extras' ) ] = ( $by[ '' !== $s[1] ? $s[1] : __( 'No reason given', 'aw-seo-extras' ) ] ?? 0 ) + 1;
+		if ( ! $s[0] ) {
+			$reason        = '' !== $s[1] ? $s[1] : __( 'No reason given', 'aw-seo-extras' );
+			$by[ $reason ] = ( $by[ $reason ] ?? 0 ) + 1;
 		}
 	}
 	arsort( $by );
-	/* translators: 1: pages inspected, 2: indexed, 3: not indexed. */
-	/* translators: 1: pages inspected, 2: indexed, 3: not indexed. */
-	echo '<p>' . esc_html( sprintf( __( 'Sample: %1$s pages inspected: %2$s indexed, %3$s not indexed.', 'aw-seo-extras' ), number_format_i18n( count( $states ) ), number_format_i18n( $yes ), number_format_i18n( count( $states ) - $yes ) ) ) . '</p>';
 	if ( $by ) {
 		echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Not indexed: Google\'s reason', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Pages', 'aw-seo-extras' ) . '</th></tr></thead><tbody>';
 		foreach ( $by as $reason => $n ) {
@@ -600,7 +725,7 @@ function aw_si_box_index(): void {
 		echo '</tbody></table>';
 	}
 	if ( isset( aw_si_extra_tabs()['pages'] ) ) {
-		echo '<p class="description">' . esc_html__( 'Each page\'s state is on the Pages tab (Index column).', 'aw-seo-extras' ) . '</p>';
+		echo '<p class="description">' . esc_html__( 'Each page\'s state is on the Pages tab (Google index column); its "Not indexed (URL Inspection)" view counts the same pages as the not-indexed figure above.', 'aw-seo-extras' ) . '</p>';
 	}
 	echo aw_si_coverage_html(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in aw_si_coverage_html().
 }
