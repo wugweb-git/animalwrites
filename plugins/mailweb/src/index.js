@@ -27,6 +27,7 @@ import {
 	Notice,
 	PageParts,
 	RefTable,
+	SecretField,
 	SectionCard,
 	ServiceList,
 	ServiceRow,
@@ -1038,20 +1039,14 @@ function SecretForm( { s, onSaved } ) {
 				msg={ save.msg }
 				onDismiss={ () => save.setMsg( null ) }
 			/>
-			<Field
+			<SecretField
 				label={ s.field.label }
-				help={ `${ STATE()[ s.field.state ] } ${ s.field.help }` }
-				render={ ( id, helpId ) => (
-					<input
-						id={ id }
-						type="password"
-						autoComplete="new-password"
-						value={ value }
-						disabled={ fixed }
-						aria-describedby={ helpId }
-						onChange={ ( e ) => setValue( e.target.value ) }
-					/>
-				) }
+				help={ s.field.help }
+				isSet={ 'set' === s.field.state }
+				stateText={ fixed ? STATE().config : '' }
+				value={ value }
+				disabled={ fixed }
+				onChange={ setValue }
 			/>
 			{ s.rows && s.rows.length > 0 && (
 				<RefTable
@@ -1115,20 +1110,13 @@ function SmtpForm( { s, onSaved } ) {
 					) }
 				/>
 			) ) }
-			<Field
+			<SecretField
 				label={ __( 'Mailbox password', 'mailweb' ) }
-				help={ STATE()[ s.pass ] }
-				render={ ( id, helpId ) => (
-					<input
-						id={ id }
-						type="password"
-						autoComplete="new-password"
-						value={ pass }
-						disabled={ 'config' === s.pass }
-						aria-describedby={ helpId }
-						onChange={ ( e ) => setPass( e.target.value ) }
-					/>
-				) }
+				isSet={ 'set' === s.pass }
+				stateText={ 'config' === s.pass ? STATE().config : '' }
+				value={ pass }
+				disabled={ 'config' === s.pass }
+				onChange={ setPass }
 			/>
 			<Foot
 				busy={ save.busy }

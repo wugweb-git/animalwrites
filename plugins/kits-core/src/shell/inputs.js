@@ -52,13 +52,14 @@ export function Select( {
  * server gives them); typing a new one replaces it on Save, an empty box keeps the saved one.
  *
  * @param {Object}   props
- * @param {string}   props.label    Visible label.
- * @param {string}   props.help     Help line.
- * @param {boolean}  props.isSet    A secret is saved.
- * @param {string}   props.last4    Its last 4 characters, or ''.
- * @param {string}   props.value    What was typed (not the saved one).
- * @param {Function} props.onChange ( value ) => void.
- * @param {boolean}  props.disabled Read only.
+ * @param {string}   props.label     Visible label.
+ * @param {string}   props.help      Help line.
+ * @param {boolean}  props.isSet     A secret is saved.
+ * @param {string}   props.last4     Its last 4 characters, or ''.
+ * @param {string}   props.value     What was typed (not the saved one).
+ * @param {Function} props.onChange  ( value ) => void.
+ * @param {boolean}  props.disabled  Read only.
+ * @param {string}   props.stateText Words in place of the saved state (a secret fixed in wp-config.php).
  */
 export function SecretField( {
 	label,
@@ -68,6 +69,7 @@ export function SecretField( {
 	value,
 	onChange,
 	disabled,
+	stateText,
 } ) {
 	const id = useId();
 	const [ shown, setShown ] = useState( false );
@@ -83,6 +85,9 @@ export function SecretField( {
 					last4
 				)
 			: __( 'Saved. Type a new one to replace it.', 'kits-core' );
+	}
+	if ( stateText ) {
+		state = stateText;
 	}
 	return (
 		<div className="kits-shell-field">

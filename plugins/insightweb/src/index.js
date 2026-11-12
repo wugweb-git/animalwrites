@@ -10,13 +10,14 @@ import {
 	useState,
 } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
-import { __, sprintf } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import {
 	AppShell,
 	AppHeader,
 	BlockParts,
 	Button,
 	ChipRow,
+	ConfirmButton,
 	DataList,
 	EmptyState,
 	ErrorState,
@@ -517,9 +518,11 @@ function Group( { group, onSaved, onDirty } ) {
 		body.seeds = state.seeds;
 	}
 	const dirty = Object.keys( body ).length > 0;
-	const anyChanged = group.blocks.some( ( b ) =>
-		b.fields.some( ( f ) => f.changed )
+	const changedCount = group.blocks.reduce(
+		( n, b ) => n + b.fields.filter( ( f ) => f.changed ).length,
+		0
 	);
+	const anyChanged = changedCount > 0;
 	useEffect(
 		() => onDirty( group.slug, dirty ),
 		[ group.slug, dirty, onDirty ]
@@ -540,16 +543,6 @@ function Group( { group, onSaved, onDirty } ) {
 			.catch( ( e ) => setMsg( { tone: 'error', text: errText( e ) } ) )
 			.finally( () => setBusy( false ) );
 	};
-	const restore = () => {
-		if (
-			// eslint-disable-next-line no-alert -- a plain browser confirm before a reset, as core's list tables do
-			window.confirm(
-				__( 'Put every number back to its default?', 'aw-seo-extras' )
-			)
-		) {
-			save( { reset: true } );
-		}
-	};
 	const setText = ( k, v ) =>
 		setState( ( s ) => ( { ...s, t: { ...s.t, [ k ]: v } } ) );
 
@@ -564,9 +557,20 @@ function Group( { group, onSaved, onDirty } ) {
 				{ __( 'Save changes', 'aw-seo-extras' ) }
 			</Button>
 			{ anyChanged && (
-				<Button busy={ busy } onClick={ restore }>
-					{ __( 'Restore defaults', 'aw-seo-extras' ) }
-				</Button>
+				<ConfirmButton
+					label={ __( 'Restore defaults', 'aw-seo-extras' ) }
+					question={
+						/* translators: %d: number of changed numbers. */ _n(
+							'Put %d changed number back to its default?',
+							'Put %d changed numbers back to their defaults?',
+							changedCount,
+							'aw-seo-extras'
+						)
+					}
+					count={ changedCount }
+					busy={ busy }
+					onConfirm={ () => save( { reset: true } ) }
+				/>
 			) }
 			<span aria-live="polite">
 				{ msg && 'success' === msg.tone ? msg.text : '' }
