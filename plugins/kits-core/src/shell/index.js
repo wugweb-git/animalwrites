@@ -12,6 +12,11 @@
  */
 import { useEffect, useId, useRef, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
+import {
+	Button as WPButton,
+	Notice as WPNotice,
+	ToggleControl,
+} from '@wordpress/components';
 import { DataList, FieldReview, RowAction } from './list';
 import { SetupFlow } from './setup';
 import { EmptyState, LoadingState, ErrorState } from './states';
@@ -436,24 +441,17 @@ export function Field( { label, help, changed, onReset, render } ) {
  * @param {string}   props.help     A line under it.
  */
 export function Switch( { label, checked, onChange, disabled, help } ) {
-	const id = useId();
+	// WordPress's ToggleControl (label, help as its description, a switch the screen reader names), in the Kits look.
 	return (
 		<div className="kits-shell-switch">
-			<input
-				id={ id }
-				type="checkbox"
-				role="switch"
+			<ToggleControl
+				__nextHasNoMarginBottom
+				label={ label }
+				help={ help }
 				checked={ !! checked }
 				disabled={ disabled }
-				aria-describedby={ help ? `${ id }-help` : undefined }
-				onChange={ ( e ) => onChange?.( e.target.checked ) }
+				onChange={ ( v ) => onChange?.( v ) }
 			/>
-			<label htmlFor={ id }>{ label }</label>
-			{ help && (
-				<p className="kits-shell-switch__help" id={ `${ id }-help` }>
-					{ help }
-				</p>
-			) }
 		</div>
 	);
 }
@@ -567,22 +565,17 @@ export function ServiceList( { label, children } ) {
  * @param {Element}  props.children  The message.
  */
 export function Notice( { tone = 'info', onDismiss, children } ) {
+	// WordPress's Notice (it announces itself to screen readers; errors assertively), in the Kits look.
 	return (
-		<div
+		<WPNotice
 			className={ cx( 'kits-shell-notice', `is-${ tone }` ) }
-			role={ 'error' === tone ? 'alert' : 'status' }
+			status={ tone }
+			isDismissible={ !! onDismiss }
+			onRemove={ onDismiss }
+			politeness={ 'error' === tone ? 'assertive' : 'polite' }
 		>
 			<div className="kits-shell-notice__text">{ children }</div>
-			{ onDismiss && (
-				<button
-					type="button"
-					className="kits-shell-link"
-					onClick={ onDismiss }
-				>
-					{ __( 'Dismiss', 'kits-core' ) }
-				</button>
-			) }
-		</div>
+		</WPNotice>
 	);
 }
 
@@ -603,21 +596,28 @@ export function Button( {
 	children,
 	...rest
 } ) {
-	// `disabled` is taken out of rest, so disabled={ false } can never undo busy (a second click during a save).
+	// WordPress's Button, in the Kits look (the kits-shell-button classes). `disabled` is taken out of rest, so
+	// disabled={ false } can never undo busy (a second click during a save). A disabled button stays focusable
+	// (accessibleWhenDisabled), so keyboard users still reach it and hear why it is off.
+	const { className, ...other } = rest;
 	return (
-		<button
-			type="button"
-			className={
+		<WPButton
+			__next40pxDefaultSize
+			variant={ 'link' === variant ? 'link' : variant }
+			className={ cx(
 				'link' === variant
 					? 'kits-shell-link'
-					: cx( 'kits-shell-button', `is-${ variant }` )
-			}
-			{ ...rest }
+					: cx( 'kits-shell-button', `is-${ variant }` ),
+				className
+			) }
+			{ ...other }
+			isBusy={ !! busy }
 			aria-busy={ busy || undefined }
 			disabled={ !! ( busy || disabled ) }
+			accessibleWhenDisabled
 		>
 			{ children }
-		</button>
+		</WPButton>
 	);
 }
 

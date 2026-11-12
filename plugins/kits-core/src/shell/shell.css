@@ -31,6 +31,17 @@
 	--ks-accent: #ffc300;
 	--ks-control: 40px;
 
+	/* WordPress's components (buttons, switches, notices, spinner) take the admin accent: ink, not admin blue. */
+	--wp-admin-theme-color: var(--ks-ink);
+	--wp-admin-theme-color--rgb: 20, 20, 20;
+	--wp-admin-theme-color-darker-10: var(--ks-g7);
+	--wp-admin-theme-color-darker-10--rgb: 74, 74, 74;
+	--wp-admin-theme-color-darker-20: var(--ks-g7);
+	--wp-admin-theme-color-darker-20--rgb: 74, 74, 74;
+	--wp-components-color-accent: var(--ks-ink);
+	--wp-components-color-accent-darker-10: var(--ks-g7);
+	--wp-components-color-accent-darker-20: var(--ks-g7);
+
 	color: var(--ks-ink);
 	font-size: 14px;
 	line-height: 1.5;
@@ -190,7 +201,7 @@ body.kits-shell-screen .wrap > .updated {
 
 /* ---------- Buttons and links ---------- */
 
-.kits-shell-button {
+.kits-shell .kits-shell-button {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
@@ -204,26 +215,27 @@ body.kits-shell-screen .wrap > .updated {
 	white-space: nowrap;
 }
 
-.kits-shell-button.is-primary {
+.kits-shell .kits-shell-button.is-primary {
 	background: var(--ks-ink);
 	color: var(--ks-white);
 }
 
-.kits-shell-button.is-primary:hover {
+.kits-shell .kits-shell-button.is-primary:hover:not(:disabled) {
 	background: var(--ks-g7);
 	border-color: var(--ks-g7);
 }
 
-.kits-shell-button.is-secondary {
+.kits-shell .kits-shell-button.is-secondary {
 	background: var(--ks-white);
 	color: var(--ks-ink);
 }
 
-.kits-shell-button.is-secondary:hover {
+.kits-shell .kits-shell-button.is-secondary:hover:not(:disabled) {
 	background: var(--ks-g1);
 }
 
-.kits-shell-button:disabled {
+.kits-shell .kits-shell-button:disabled,
+.kits-shell .kits-shell-button[aria-disabled="true"] {
 	border-color: var(--ks-g3);
 	background: var(--ks-g1);
 	color: var(--ks-g6);
@@ -531,61 +543,11 @@ body.kits-shell-screen .wrap > .updated {
 	font-weight: 600;
 }
 
-.kits-shell-switch {
-	display: grid;
-	grid-template-columns: auto 1fr;
-	align-items: center;
-	gap: var(--ks-s1) var(--ks-s3);
-}
-
-.kits-shell-switch input[type="checkbox"] {
-	appearance: none;
-	position: relative;
-	width: 40px;
-	height: 24px;
-	margin: 0;
-	border: 1px solid var(--ks-g6);
-	border-radius: var(--ks-r-pill);
-	background: var(--ks-g2);
-	cursor: pointer;
-}
-
-.kits-shell-switch input[type="checkbox"]::before {
-	content: "";
-	position: absolute;
-	top: 3px;
-	left: 3px;
-	width: 16px;
-	height: 16px;
-	margin: 0;
-	border-radius: 50%;
-	background: var(--ks-white);
-	box-shadow: 0 0 0 1px var(--ks-g6);
-	transition: transform 0.15s ease;
-}
-
-.kits-shell-switch input[type="checkbox"]:checked {
-	border-color: var(--ks-ink);
-	background: var(--ks-ink);
-}
-
-.kits-shell-switch input[type="checkbox"]:checked::before {
-	transform: translateX(16px);
-	box-shadow: none;
-}
-
-.kits-shell-switch input[type="checkbox"]:disabled {
-	opacity: 0.5;
-	cursor: default;
-}
-
-.kits-shell-switch label {
+.kits-shell-switch .components-toggle-control__label {
 	font-weight: 600;
-	cursor: pointer;
 }
 
-.kits-shell-switch__help {
-	grid-column: 2;
+.kits-shell-switch .components-toggle-control__help {
 	color: var(--ks-g6);
 	font-size: 13px;
 }
@@ -672,8 +634,10 @@ body.kits-shell-screen .wrap > .updated {
 
 /* ---------- Notices and states ---------- */
 
-.kits-shell-notice {
+.kits-shell .kits-shell-notice {
 	display: flex;
+	margin: 0;
+	color: var(--ks-ink);
 	flex-wrap: wrap;
 	align-items: flex-start;
 	justify-content: space-between;
@@ -685,12 +649,21 @@ body.kits-shell-screen .wrap > .updated {
 	background: var(--ks-white);
 }
 
-.kits-shell-notice.is-success {
+.kits-shell .kits-shell-notice .components-notice__content {
+	margin: 0;
+}
+
+.kits-shell .kits-shell-notice .components-notice__dismiss {
+	align-self: flex-start;
+	color: var(--ks-ink);
+}
+
+.kits-shell .kits-shell-notice.is-success {
 	border-left-color: var(--ks-ink);
 }
 
-.kits-shell-notice.is-warning,
-.kits-shell-notice.is-error {
+.kits-shell .kits-shell-notice.is-warning,
+.kits-shell .kits-shell-notice.is-error {
 	border-color: var(--ks-ink);
 	border-left-width: 4px;
 }
@@ -724,32 +697,10 @@ body.kits-shell-screen .wrap > .updated {
 	font-weight: 600;
 }
 
-.kits-shell-spinner {
-	width: 20px;
-	height: 20px;
-	border: 2px solid var(--ks-g2);
-	border-top-color: var(--ks-ink);
-	border-radius: 50%;
-	animation: kits-shell-spin 0.8s linear infinite;
+.kits-shell .kits-shell-spinner {
+	margin: 0;
 }
 
-@keyframes kits-shell-spin {
-
-	to {
-		transform: rotate(360deg);
-	}
-}
-
-@media (prefers-reduced-motion: reduce) {
-
-	.kits-shell-spinner {
-		animation-duration: 2.4s;
-	}
-
-	.kits-shell-switch input[type="checkbox"]::before {
-		transition: none;
-	}
-}
 
 /* ---------- Lists and checkbox groups ---------- */
 

@@ -39,7 +39,7 @@ add_action(
 		}
 		$base = plugins_url( 'build/shell/', KITS_CORE_DIR . 'kits-core.php' );
 		wp_register_script( 'kits-shell', $base . 'index.js', $a['dependencies'] ?? array(), $a['version'] ?? false, true );
-		wp_register_style( 'kits-shell', $base . 'index.css', array(), $a['version'] ?? false );
+		wp_register_style( 'kits-shell', $base . 'index.css', array( 'wp-components' ), $a['version'] ?? false ); // after WordPress's component styles: the Kits look on top of them
 		wp_set_script_translations( 'kits-shell', 'kits-core' );
 	},
 	1

@@ -2,6 +2,7 @@
  * Kits admin shell: the empty, loading and error states (docs/kits-plugin-ui.md), shared by every part that loads.
  */
 import { __ } from '@wordpress/i18n';
+import { Spinner } from '@wordpress/components';
 
 /**
  * Nothing to show yet.
@@ -28,7 +29,7 @@ export function EmptyState( { title, children } ) {
 export function LoadingState( { label } ) {
 	return (
 		<div className="kits-shell-state is-loading" role="status">
-			<span className="kits-shell-spinner" aria-hidden="true" />
+			<Spinner className="kits-shell-spinner" />
 			<p className="kits-shell-state__title">
 				{ label || __( 'Loading…', 'kits-core' ) }
 			</p>
