@@ -286,7 +286,7 @@ add_filter(
 		}
 		$viewer = $head . sprintf(
 			'<div class="wp-block-file kit-file aw-pdf"><object class="wp-block-file__embed" data="%1$s#view=FitH" type="application/pdf" aria-label="%2$s"><p>%3$s</p></object>'
-			. '<p class="kit-file-actions aw-pdf-actions"><a class="wp-block-file__button wp-element-button" href="%1$s" download>Download PDF (%4$s)</a></p></div>', // the original is linked in the Sources block (item-head.php)
+			. '<p class="kit-file-actions aw-pdf-actions"><a class="wp-block-file__button wp-element-button" href="%1$s">Download PDF (%4$s)</a></p></div>', // the original is linked in the Sources block (item-head.php). No download attribute (12 Nov 2026): it saved the file with no visible response, so phone readers tapped again (Clarity dead clicks); the link now opens the PDF.
 			esc_url( $pdf ),
 			esc_attr( $title ),
 			esc_html__( 'Your browser cannot show this PDF here. Use the download link below.', 'animal-writes-core' ),
