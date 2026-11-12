@@ -115,6 +115,11 @@ add_action(
 					'flag'       => $text,
 					'state'      => $text,
 					'search'     => $text,
+					'listing'    => array(
+						'type'    => 'integer',
+						'minimum' => 0,
+						'default' => 0,
+					),
 					'page'       => array(
 						'type'    => 'integer',
 						'default' => 1,
@@ -553,6 +558,9 @@ function sourceweb_enrich_query( WP_REST_Request $request, string $status ): arr
 			$q[ $k ] = (string) $request[ $k ];
 		}
 	}
+	if ( (int) $request['listing'] > 0 ) {
+		$q['listing'] = (int) $request['listing']; // one listing (&listing=ID, as the classic screen)
+	}
 	return $q;
 }
 
@@ -780,6 +788,9 @@ function sourceweb_rest_enrichment_decide( WP_REST_Request $request ) {
 		$do                   = 'approve';
 	} elseif ( ! $ids && $listings && in_array( $do, array( 'approve', 'reject' ), true ) ) {
 		$ids = array_map( 'intval', $wpdb->get_col( $wpdb->prepare( "SELECT id FROM {$t} WHERE status = 'pending' AND field <> 'merge_into' AND listing_id IN ( " . implode( ', ', array_fill( 0, count( $listings ), '%d' ) ) . ' )', $listings ) ) );
+	} elseif ( ! $ids && $listings && 'undo' === $do ) {
+		// Bulk Undo of the ticked listings: every applied value, newest first (as the classic screen's bulk Undo).
+		$ids = array_map( 'intval', $wpdb->get_col( $wpdb->prepare( "SELECT id FROM {$t} WHERE status IN ( 'approved', 'auto-applied' ) AND listing_id IN ( " . implode( ', ', array_fill( 0, count( $listings ), '%d' ) ) . ' ) ORDER BY id DESC', $listings ) ) );
 	}
 	// phpcs:enable WordPress.DB
 	$fn   = array(

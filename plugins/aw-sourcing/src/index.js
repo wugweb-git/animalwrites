@@ -557,11 +557,33 @@ const FILTER_KEYS = [
 	'field',
 	'flag',
 	'state',
+	'listing',
 ];
+
+// Bulk Undo where applied values can be listed (as the classic screen: not on Waiting or Failed).
+const bulkUndo = ( status ) =>
+	[ 'pending', 'failed', 'rejected', 'undone' ].includes( status )
+		? []
+		: [
+				{
+					value: 'undo',
+					label: __( 'Undo every applied value', 'aw-sourcing' ),
+				},
+			];
+
+// One listing from the address (&listing=ID, as the classic screen and the DirectoryWeb claim link), and its view.
+const firstListing = () =>
+	parseInt(
+		new URLSearchParams( window.location.search ).get( 'listing' ),
+		10
+	) || 0;
+const firstStatus = () =>
+	new URLSearchParams( window.location.search ).get( 'status' ) || 'pending';
 
 function Enrichment() {
 	const [ q, setQ ] = useState( {
-		status: 'pending',
+		listing: firstListing(),
+		status: firstStatus(),
 		search: '',
 		source: '',
 		confidence: '',
@@ -623,6 +645,15 @@ function Enrichment() {
 	};
 
 	const rows = data?.rows || [];
+	// With one listing asked for, open it as soon as it is in the list.
+	useEffect( () => {
+		if (
+			q.listing &&
+			( data?.rows || [] ).some( ( r ) => r.id === q.listing )
+		) {
+			setOpen( q.listing );
+		}
+	}, [ q.listing, data ] );
 	const listing = rows.find( ( r ) => r.id === open );
 	const progress = data?.progress;
 	return (
@@ -749,6 +780,26 @@ function Enrichment() {
 					) : null
 				}
 			>
+				{ q.listing > 0 && (
+					<Notice tone="info">
+						{ __( 'One listing only.', 'aw-sourcing' ) }{ ' ' }
+						<Button
+							variant="link"
+							onClick={ () => {
+								const u = new URL( window.location.href );
+								u.searchParams.delete( 'listing' );
+								window.history.replaceState(
+									null,
+									'',
+									u.toString()
+								);
+								set( { listing: 0 } );
+							} }
+						>
+							{ __( 'Show every listing', 'aw-sourcing' ) }
+						</Button>
+					</Notice>
+				) }
 				<DataList
 					label={ __( 'Listings with proposals', 'aw-sourcing' ) }
 					columns={ [
@@ -813,9 +864,29 @@ function Enrichment() {
 										),
 									},
 								]
-							: []
+							: bulkUndo( q.status )
 					}
-					onBulk={ ( v, ids ) => decide( { do: v, listings: ids } ) }
+					onBulk={ ( v, ids ) => {
+						if (
+							'undo' === v &&
+							// eslint-disable-next-line no-alert -- a plain browser confirm before a bulk Undo, as for Approve all high
+							! window.confirm(
+								sprintf(
+									/* translators: %d: number of listings ticked. */
+									_n(
+										'Undo every applied value of %d listing? The values before them come back.',
+										'Undo every applied value of %d listings? The values before them come back.',
+										ids.length,
+										'aw-sourcing'
+									),
+									ids.length
+								)
+							)
+						) {
+							return;
+						}
+						decide( { do: v, listings: ids } );
+					} }
 					rowActions={ ( r ) => [
 						{
 							label:

@@ -14,13 +14,14 @@ screen "aw-sourcing" sourceweb-app sourceweb-admin
 # The feed form stays on today's screen at its own address until it is rebuilt.
 want 200 "admin.php?page=aw-sourcing&feed=new (feed form)" -b /tmp/cj-ci "$H/wp-admin/admin.php?page=aw-sourcing&feed=new"
 if grep -q 'id="sourceweb-app"' /tmp/rw.out; then echo "FAIL feed form: drawn as the new screen"; FAIL=1; else echo "ok   feed form: today's screen"; fi
-for r in dashboard review "review&type=aw_news" enrichment "enrichment&status=all" settings workers "workers&view=planned&search=x&orderby=status&order=desc" workers/new workers/sourcing workers/sourcing/runs sources "sources&view=block&orderby=items&order=desc" sources/one sources/feeds "sources/feeds&state=on" ai ai/keys "ai/key&id=new" ai/overview rejected "rejected&view=allowed&search=x&orderby=at&order=desc" relay-log "relay-log&view=failed&orderby=ms" changes "changes&search=key&orderby=user"; do
+for r in dashboard review "review&type=aw_news" enrichment "enrichment&status=all" "enrichment&status=applied&listing=1" settings workers "workers&view=planned&search=x&orderby=status&order=desc" workers/new workers/sourcing workers/sourcing/runs sources "sources&view=block&orderby=items&order=desc" sources/one sources/feeds "sources/feeds&state=on" ai ai/keys "ai/key&id=new" ai/overview rejected "rejected&view=allowed&search=x&orderby=at&order=desc" relay-log "relay-log&view=failed&orderby=ms" changes "changes&search=key&orderby=user"; do
   route "sourceweb/v1/$r"
 done
 post sourceweb/v1/dashboard/count '{}'
 post sourceweb/v1/review/decide '{"action":"publish","ids":[]}'
 post sourceweb/v1/review/publish-all '{"type":"","count":0}'
 post sourceweb/v1/enrichment/decide '{"do":"approve","ids":[]}'
+post sourceweb/v1/enrichment/decide '{"do":"undo","listings":[1]}'
 post sourceweb/v1/settings/workers '{"values":{}}'
 post sourceweb/v1/settings/enrichment '{"values":{}}'
 post sourceweb/v1/settings/social '{"values":{}}'
