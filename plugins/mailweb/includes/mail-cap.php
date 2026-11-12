@@ -290,7 +290,7 @@ add_filter(
 		$json   = wp_json_encode( $mail );
 		if ( ! $resend && ! mailweb_paused() && mailweb_room( $p ) > 0 && 0 === mailweb_queued( $p ) ) {
 			// Sent at once, but kept as "sending" with its content until the mail server accepts it.
-			$ok = $json ? $wpdb->insert(
+			$ok = $json ? $wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- MailWeb's own queue table; nothing to cache.
 				mailweb_table(),
 				array(
 					'priority'   => $p,
@@ -298,14 +298,14 @@ add_filter(
 					'mail'       => $json,
 					'created_at' => $now,
 				)
-			) : false; // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			) : false;
 			if ( $ok ) {
 				$GLOBALS['mailweb_direct_id'] = (int) $wpdb->insert_id;
 				mailweb_stat( 'sent_direct' );
 			}
 			return null; // wp_mail sends it now
 		}
-		$ok = $wpdb->insert(
+		$ok = $wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- MailWeb's own queue table; nothing to cache.
 			mailweb_table(),
 			array(
 				'priority'   => $p,
