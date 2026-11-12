@@ -120,7 +120,8 @@ function aw_block_home_hero() {
 	if ( $open && $day ) {
 		$out .= '<p class="aw-camp-band-range kit-meta-row"><span class="kit-meta-item">Opened ' . aw_date( $open ) . '</span><span class="kit-meta-item">Last day ' . aw_date( $day ) . '</span></p>'; // aw_date() escapes
 	}
-	$out .= '<p class="aw-camp-band-actions"><a class="wp-element-button" data-track="home_campaign_click" href="' . esc_url( $url . '#send' ) . '">Send your objection</a> <a class="wp-element-button aw-camp-band-ghost" data-track="home_campaign_click" href="' . esc_url( $url . '#rules' ) . '">Read what the rules say</a></p>';
+	$closed = $day && current_time( 'Y-m-d' ) > $day; // after the close day the main button follows the campaign (owner's wording, 13 Nov 2026)
+	$out   .= '<p class="aw-camp-band-actions"><a class="wp-element-button" data-track="home_campaign_click" href="' . esc_url( $closed ? $url : $url . '#send' ) . '">' . ( $closed ? 'See what happens next' : 'Send your objection' ) . '</a> <a class="wp-element-button aw-camp-band-ghost" data-track="home_campaign_click" href="' . esc_url( $url . '#rules' ) . '">Read what the rules say</a></p>';
 	$out .= '<p class="aw-ed-hero-help">Need help for an animal now? <a href="#need-help">Find help near you</a></p>';
 	// The artwork after the text, as in the band: placed first it moved down after the first paint (layout shift).
 	return $out . '</div></div>' . $pic . '</section>';
