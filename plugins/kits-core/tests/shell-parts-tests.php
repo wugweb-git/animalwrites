@@ -93,7 +93,7 @@ $f = kits_shell_html_parts(
 	'<h2>Notes</h2><form method="post" action="https://animalwrites.in/wp-admin/admin-post.php"><input type="hidden" name="action" value="aw_si_note"><input type="hidden" name="_wpnonce" value="n1">'
 	. '<p>Add a word.</p><table class="form-table"><tr><th><label for="w">Word</label></th><td><input type="text" id="w" name="word" value="cat" required><p class="description">One per line.</p></td></tr>'
 	. '<tr><th>Kind</th><td><label><input type="radio" name="kind" value="a" checked> A</label><label><input type="radio" name="kind" value="b"> B</label></td></tr></table>'
-	. '<textarea name="notes" rows="4">x</textarea><select name="src"><option value="1">One</option><option value="2" selected>Two</option></select><label><input type="checkbox" name="on" value="1" checked> Turn on</label>'
+	. '<textarea name="notes" rows="4">x</textarea><select name="src"><option value="1">One</option><option value="2" selected>Two</option></select><label><input type="checkbox" name="on" value="1" checked> Turn on</label><label><input type="checkbox" name="off" value="1" disabled> Locked</label>'
 	. '<input type="password" name="pw" value="secret"><button type="submit" name="aw_si_cl" value="start" class="button button-primary">Start live check</button>'
 	. '<input type="submit" class="button" value="Save"></form>'
 );
@@ -105,6 +105,7 @@ kits_parts_check( 'Word' === $by['word']['label'] && 'cat' === $by['word']['valu
 kits_parts_check( 'radio' === $by['kind']['type'] && 'Kind' === $by['kind']['label'] && 'a' === $by['kind']['value'] && 2 === count( $by['kind']['options'] ), 'radio group' );
 kits_parts_check( 'x' === $by['notes']['value'] && 4 === $by['notes']['rows'] && '2' === $by['src']['value'] && $by['on']['checked'] && 'Turn on' === $by['on']['label'], 'textarea, select and tick box' );
 kits_parts_check( ! isset( $by['pw'] ) && false === strpos( json_encode( $f ), 'secret' ), 'a password field never goes out' );
+kits_parts_check( $by['off']['disabled'] && ! $by['on']['disabled'], 'a disabled field stays disabled' );
 kits_parts_check( 2 === count( $g['buttons'] ) && 'aw_si_cl' === $g['buttons'][0]['name'] && $g['buttons'][0]['primary'] && 'Save' === $g['buttons'][1]['label'], 'buttons' );
 kits_parts_check( array( 'Add a word.' ) === array_column( $g['blocks'], 'text' ), 'the form\'s own words, without its labels' );
 

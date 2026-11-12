@@ -234,6 +234,7 @@ function PageField( { f } ) {
 					name={ f.name }
 					value={ f.value }
 					defaultChecked={ f.checked }
+					disabled={ f.disabled }
 				/>{ ' ' }
 				<label htmlFor={ fieldId( f.name, f.value ) }>
 					{ f.label }
@@ -276,6 +277,7 @@ function PageField( { f } ) {
 							id={ id }
 							name={ f.name }
 							multiple={ f.multiple }
+							disabled={ f.disabled }
 							defaultValue={ f.value }
 							aria-describedby={ helpId }
 						>
@@ -293,6 +295,7 @@ function PageField( { f } ) {
 							id={ id }
 							name={ f.name }
 							rows={ f.rows }
+							disabled={ f.disabled }
 							defaultValue={ f.value }
 							aria-describedby={ helpId }
 						/>
@@ -309,6 +312,7 @@ function PageField( { f } ) {
 						max={ f.max }
 						step={ f.step }
 						required={ f.required }
+						disabled={ f.disabled }
 						aria-describedby={ helpId }
 					/>
 				);

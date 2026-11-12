@@ -211,8 +211,19 @@ add_action(
 	}
 );
 
-/** RankWeb → FAQ. */
+/** RankWeb → FAQ: the new screen (rankweb-ui.php; &ui=classic shows this one), or this one. */
 function aw_faq_admin_page() {
+	if ( function_exists( 'rankweb_ui_page' ) && rankweb_ui_page( 'faq' ) ) {
+		return;
+	}
+	echo '<div class="wrap"><h1 class="wp-heading-inline">FAQ</h1><hr class="wp-header-end">';
+	aw_seo_screen_tabs();
+	aw_faq_admin_body();
+	echo '</div>';
+}
+
+/** The FAQ screen under its heading and tabs: notices, FAQ box on, the list, the counts. The new screen draws it too. */
+function aw_faq_admin_body() {
 	if ( ! class_exists( 'WP_List_Table' ) ) {
 		require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
 	}
@@ -220,8 +231,6 @@ function aw_faq_admin_page() {
 	$ix    = aw_faq_index();
 	$table = new AW_FAQ_List_Table( $ix['rows'] );
 	$table->prepare_items();
-	echo '<div class="wrap"><h1 class="wp-heading-inline">FAQ</h1><hr class="wp-header-end">';
-	aw_seo_screen_tabs();
 	if ( isset( $_GET['approved'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- a notice after the redirect
 		echo '<div class="notice notice-success is-dismissible"><p>' . esc_html( sprintf( '%d questions approved.', (int) $_GET['approved'] ) ) . '</p></div>'; // phpcs:ignore WordPress.Security.NonceVerification
 	}
@@ -258,5 +267,5 @@ function aw_faq_admin_page() {
 		);
 	}
 	aw_seo_extras_simple_table( 'faq-counts', array( 'type' => 'Type', 'published' => 'Published', 'faq' => 'Show an FAQ', 'below' => 'Questions, but fewer than the minimum (no FAQ)', 'drafts' => 'Draft questions waiting' ), $cells );
-	echo '<p>' . esc_html( sprintf( 'Counted %s.', wp_date( 'j M Y, H:i', (int) $ix['at'] ) ) ) . ' <a href="' . esc_url( wp_nonce_url( add_query_arg( array( 'page' => 'aw-faq', 'recount' => 1 ), admin_url( 'admin.php' ) ), 'aw_faq_recount' ) ) . '">Recount</a></p></div>';
+	echo '<p>' . esc_html( sprintf( 'Counted %s.', wp_date( 'j M Y, H:i', (int) $ix['at'] ) ) ) . ' <a href="' . esc_url( wp_nonce_url( add_query_arg( array( 'page' => 'aw-faq', 'recount' => 1 ), admin_url( 'admin.php' ) ), 'aw_faq_recount' ) ) . '">Recount</a></p>';
 }

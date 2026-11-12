@@ -674,10 +674,11 @@ function kits_shell_parts_form_block( DOMElement $form ): array {
 			continue;
 		}
 		$field = array(
-			'type'  => $type,
-			'name'  => $name,
-			'label' => $label,
-			'help'  => $help,
+			'type'     => $type,
+			'name'     => $name,
+			'label'    => $label,
+			'help'     => $help,
+			'disabled' => $el->hasAttribute( 'disabled' ), // shown, not sent (for example: only administrators can change it)
 		);
 		if ( 'select' === $type ) {
 			$field['options']  = array();

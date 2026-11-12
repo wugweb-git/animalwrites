@@ -1,7 +1,8 @@
 <?php
 /**
- * RankWeb's screens on the Kits admin shell, the default since 12 Nov 2026: admin.php?page=aw-seo-plus (Dashboard) and
- * admin.php?page=aw-seo-settings (Settings); &ui=classic shows the earlier screens. The screens are one script
+ * RankWeb's screens on the Kits admin shell, the default since 12 Nov 2026: admin.php?page=aw-seo-plus (Dashboard),
+ * admin.php?page=aw-faq (FAQ, from its own output through Kits Core's page parts) and admin.php?page=aw-seo-settings
+ * (Settings); &ui=classic shows the earlier screens. The screens are one script
  * (build/index.js, from src/), drawn with Kits Core's shell parts (kits-core/includes/admin-shell.php) and fed by the
  * rankweb/v1 routes (rankweb-rest.php).
  *
@@ -15,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Which new screen this request asks for: 'dashboard', 'settings' or ''.
+ * Which new screen this request asks for: 'dashboard', 'faq', 'settings' or ''.
  */
 function rankweb_ui_wanted(): string {
 	$page = sanitize_key( wp_unslash( $_GET['page'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- which screen to show; nothing is saved here
@@ -25,6 +26,7 @@ function rankweb_ui_wanted(): string {
 	}
 	return array(
 		AW_SEO_MENU       => 'dashboard',
+		'aw-faq'          => 'faq',
 		'aw-seo-settings' => 'settings',
 	)[ $page ] ?? '';
 }
@@ -76,7 +78,7 @@ add_action(
 				'slug'    => 'faq',
 				'label'   => __( 'FAQ', 'aw-seo-extras' ),
 				'url'     => add_query_arg( 'page', 'aw-faq', admin_url( 'admin.php' ) ),
-				'current' => false,
+				'current' => 'faq' === $screen,
 			),
 		);
 		// No Search Insights tab: it is InsightWeb's, with its own menu (owner, 11 Nov 2026).
@@ -103,6 +105,8 @@ add_action(
 					'tabs'    => $tabs,
 					'rest'    => RANKWEB_REST,
 					'faqUrl'  => add_query_arg( 'page', 'aw-faq', admin_url( 'admin.php' ) ),
+					// The FAQ screen's own output as parts, after its load hook ran (Kits Core's page parts).
+					'parts'   => 'faq' === $screen ? rankweb_faq_parts() : array(),
 				),
 			)
 		);
@@ -113,13 +117,27 @@ add_action(
 /**
  * Draw the new screen in place of the current one, when it is ready. The page callbacks call this first.
  *
- * @param string $screen 'dashboard' or 'settings'.
+ * @param string $screen 'dashboard', 'faq' or 'settings'.
  * @return bool True when the new screen was drawn.
  */
 function rankweb_ui_page( string $screen ): bool {
 	if ( rankweb_ui_wanted() !== $screen || ! rankweb_ui_ready() ) {
 		return false;
 	}
-	kits_shell_mount( 'rankweb-app', 'settings' === $screen ? __( 'RankWeb settings', 'aw-seo-extras' ) : __( 'RankWeb', 'aw-seo-extras' ) );
+	$title = array(
+		'settings' => __( 'RankWeb settings', 'aw-seo-extras' ),
+		'faq'      => __( 'FAQ', 'aw-seo-extras' ),
+	)[ $screen ] ?? __( 'RankWeb', 'aw-seo-extras' );
+	kits_shell_mount( 'rankweb-app', $title );
 	return true;
+}
+
+/** The FAQ screen's output (aw_faq_admin_body()) as page parts for the new screen. */
+function rankweb_faq_parts(): array {
+	if ( ! function_exists( 'aw_faq_admin_body' ) || ! function_exists( 'kits_shell_html_parts' ) ) {
+		return array();
+	}
+	ob_start();
+	aw_faq_admin_body();
+	return kits_shell_html_parts( (string) ob_get_clean() );
 }

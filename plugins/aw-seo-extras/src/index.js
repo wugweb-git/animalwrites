@@ -21,6 +21,7 @@ import {
 	Field,
 	LoadingState,
 	Notice,
+	PageParts,
 	RefTable,
 	SectionCard,
 	ServiceList,
@@ -834,10 +835,24 @@ function Settings() {
 	);
 }
 
+/** FAQ: the FAQ screen's own output (FAQ box on, the pages with an FAQ, the counts), drawn with Kits' page parts. */
+function Faq() {
+	return (
+		<SectionCard id="faq" title={ __( 'FAQ', 'aw-seo-extras' ) }>
+			<PageParts
+				parts={ app.parts || [] }
+				title={ __( 'FAQ', 'aw-seo-extras' ) }
+			/>
+		</SectionCard>
+	);
+}
+
 function App() {
 	return (
 		<AppShell header={ <Header /> }>
-			{ 'settings' === app.screen ? <Settings /> : <Dashboard /> }
+			{ 'settings' === app.screen && <Settings /> }
+			{ 'faq' === app.screen && <Faq /> }
+			{ 'dashboard' === app.screen && <Dashboard /> }
 		</AppShell>
 	);
 }
