@@ -482,7 +482,7 @@ function aw_si_coverage_html(): string {
 		$out .= '<tr><th scope="row"><label for="aw-si-cov-' . esc_attr( $k ) . '">' . esc_html( $label ) . '</label></th><td><input type="text" inputmode="numeric" class="small-text" id="aw-si-cov-' . esc_attr( $k ) . '" name="' . esc_attr( $k ) . '" value="' . esc_attr( isset( $c[ $k ] ) ? (string) $c[ $k ] : '' ) . '"></td></tr>';
 	}
 	$out .= '<tr><th scope="row"><label for="aw-si-cov-day">' . esc_html__( 'Report date', 'aw-seo-extras' ) . '</label></th><td><input type="date" id="aw-si-cov-day" name="day" value="' . esc_attr( (string) ( $c['day'] ?? '' ) ) . '"></td></tr>';
-	$out .= '</tbody></table>' . get_submit_button( __( 'Save the totals', 'aw-seo-extras' ), 'secondary small', 'submit', false ) . '</form>';
+	$out .= '</tbody></table>' . '<p class="submit"><button type="submit" class="button button-small">' . esc_html__( 'Save the totals', 'aw-seo-extras' ) . '</button></p>' . '</form>';
 	return $out;
 }
 
