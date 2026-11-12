@@ -3,7 +3,8 @@
 
 Fails on any width in an @media query (CSS, inline styles in PHP/HTML) or a matchMedia() call (JS) other than
 min-width 768/1200 or max-width 767/1199. A component that must change at another width uses a container query.
-Third-party files (assets/vendor, *.min.*, altcha) are skipped.
+Third-party files (assets/vendor, *.min.*, altcha) are skipped, and so is the built Kits shell (kits-core/build/shell): it is
+src/shell, which is checked here, plus WordPress's own DataViews package (its 600px phone layout), bundled in (13 Nov 2026).
 """
 import pathlib
 import re
@@ -15,7 +16,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 ALLOWED = {("min", "768"), ("max", "767"), ("min", "1200"), ("max", "1199")}
 WIDTH = re.compile(r"\b(min|max)-width\s*:\s*([0-9.]+)(px|em|rem)")
 QUERY = re.compile(r"@media[^{]*|matchMedia\(\s*['\"][^'\"]*")
-SKIP = re.compile(r"/vendor/|\.min\.|altcha|/node_modules/")
+SKIP = re.compile(r"/vendor/|\.min\.|altcha|/node_modules/|/kits-core/build/shell/")
 
 
 def main():
