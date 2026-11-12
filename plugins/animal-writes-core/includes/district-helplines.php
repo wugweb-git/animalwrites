@@ -16,6 +16,11 @@
  * Legal aid listings are left out. The block shows only when the district has at least one number of its own (3 or 4); 112 and 1962 alone are in the
  * footer already.
  *
+ * Helplines row (owner, 12 Nov 2026, D6-3: "animal helpline number {district}" searches sit at positions 7–11 with no
+ * clicks): the same district pages show a short row above the toolbar, so the numbers are in the first screen and the
+ * count still leads straight into the list: 1962 (when the state has it), then the first official number or listing
+ * numbers, three in all, as tap-to-call chips, and "All numbers" to the block under the list.
+ *
  * @package animal-writes-core
  */
 
@@ -40,6 +45,11 @@ function aw_helpline_tel( $num ) {
 
 /** Listings in a district with a phone, best first. */
 function aw_district_helpline_listings( $code, $max = 6 ) {
+	static $memo = array(); // the row and the block both ask for the same district in one request
+	$key = (int) $code;
+	if ( isset( $memo[ $key ] ) ) {
+		return array_slice( $memo[ $key ], 0, $max );
+	}
 	$ids = get_posts(
 		array(
 			'post_type'   => 'aw_listing',
@@ -75,7 +85,8 @@ function aw_district_helpline_listings( $code, $max = 6 ) {
 		$rows[] = array( 'id' => $id, 'num' => $num, 'rank' => $rank, 'type' => $type ? $type[0]->name : '' );
 	}
 	usort( $rows, fn( $a, $b ) => array( $a['rank'], get_the_title( $a['id'] ) ) <=> array( $b['rank'], get_the_title( $b['id'] ) ) );
-	return array_slice( $rows, 0, $max );
+	$memo[ $key ] = array_slice( $rows, 0, 6 );
+	return array_slice( $memo[ $key ], 0, $max );
 }
 
 /** One card. */
@@ -83,6 +94,55 @@ function aw_helpline_card( $head, $num, $line, $src, $href = '' ) {
 	$h = $href ? '<a href="' . esc_url( $href ) . '">' . esc_html( $head ) . '</a>' : esc_html( $head );
 	return '<div class="aw-helpline"><h3>' . $h . '</h3><a class="aw-helpline-num" href="' . esc_attr( aw_helpline_tel( $num ) ) . '">' . esc_html( $num ) . '</a>'
 		. ( $line ? '<p>' . esc_html( $line ) . '</p>' : '' ) . ( $src ? '<p class="aw-helpline-src">' . $src . '</p>' : '' ) . '</div>';
+}
+
+/** The state's published "1962 Mobile Veterinary Unit" listing for a district place, or null. */
+function aw_district_mvu( $d ) {
+	$state = aw_place_state( $d->state );
+	$mvu   = $state ? get_page_by_path( '1962-mobile-veterinary-unit-' . $state->slug, OBJECT, 'aw_listing' ) : null;
+	return $mvu && 'publish' === $mvu->post_status ? $mvu : null;
+}
+
+/** Whether this request is a district page that shows the helplines (page 1, no type filter). Returns the place or null. */
+function aw_district_helplines_place() {
+	if ( ! aw_is_directory_view() || get_query_var( 'aw_dir_type' ) || aw_request_type() || aw_hub_page() > 1 ) {
+		return null;
+	}
+	$d = aw_current_place();
+	return $d && 'district' === $d->kind ? $d : null;
+}
+
+/**
+ * The helplines row above the Directory toolbar on a district page, or ''. Three tap-to-call chips (1962 when the
+ * state runs it, then the district's own numbers) and a link to the full block under the list. Shown only when the
+ * block is (the district has a number of its own).
+ */
+function aw_district_helplines_row() {
+	$d = aw_district_helplines_place();
+	if ( ! $d ) {
+		return '';
+	}
+	$own = array();
+	foreach ( aw_district_official_numbers( $d->code ) as $o ) {
+		$own[] = array( (string) $o['name'], (string) $o['number'] );
+	}
+	foreach ( aw_district_helpline_listings( $d->code, 3 ) as $r ) {
+		$own[] = array( html_entity_decode( get_the_title( $r['id'] ) ), $r['num'] );
+	}
+	if ( ! $own ) {
+		return '';
+	}
+	$items = aw_district_mvu( $d ) ? array( array( __( 'Mobile Veterinary Units', 'animal-writes-core' ), '1962' ) ) : array();
+	$items = array_slice( array_merge( $items, $own ), 0, 3 );
+	$chips = '';
+	foreach ( $items as $it ) {
+		$chips .= '<a class="kit-chip" href="' . esc_attr( aw_helpline_tel( $it[1] ) ) . '"><span class="aw-dh-row-name">' . esc_html( $it[0] ) . '</span> <strong>' . esc_html( $it[1] ) . '</strong></a>';
+	}
+	aw_use_component_style( 'aw-directory' ); // aw-dh-row
+	/* translators: %s: district. */
+	$label = sprintf( __( 'Animal helpline numbers in %s', 'animal-writes-core' ), $d->name );
+	return '<nav class="kit-tags aw-dh-row" aria-label="' . esc_attr( $label ) . '"><span class="aw-dh-row-label">' . esc_html__( 'Helplines', 'animal-writes-core' ) . '</span>'
+		. $chips . '<a class="aw-dh-row-all" href="#helplines">' . esc_html__( 'All numbers', 'animal-writes-core' ) . '</a></nav>';
 }
 
 /** The block for a district place, or ''. */
@@ -102,14 +162,14 @@ function aw_district_helplines_html( $d ) {
 	}
 	$cards = aw_helpline_card( __( 'Emergency', 'animal-writes-core' ), '112', __( 'Police, fire and ambulance, anywhere in India.', 'animal-writes-core' ), esc_html__( 'Ministry of Home Affairs', 'animal-writes-core' ) );
 	$state = aw_place_state( $d->state );
-	$mvu   = $state ? get_page_by_path( '1962-mobile-veterinary-unit-' . $state->slug, OBJECT, 'aw_listing' ) : null;
-	if ( $mvu && 'publish' === $mvu->post_status ) {
+	$mvu   = aw_district_mvu( $d );
+	if ( $mvu ) {
 		$cards .= aw_helpline_card( __( 'Mobile Veterinary Units', 'animal-writes-core' ), '1962', __( 'A vet comes to the animal.', 'animal-writes-core' ), esc_html( sprintf( '%s animal husbandry department', $state->name ) ), get_permalink( $mvu ) );
 	}
 	aw_use_component_style( 'aw-directory' ); // aw-district-helplines, aw-helpline
 	$id = 'aw-dh-' . wp_unique_id();
 	/* translators: %s: district. */
-	return '<section class="aw-district-helplines" aria-labelledby="' . esc_attr( $id ) . '"><h2 id="' . esc_attr( $id ) . '">' . esc_html( sprintf( __( 'Animal helpline numbers in %s', 'animal-writes-core' ), $d->name ) ) . '</h2>'
+	return '<section class="aw-district-helplines" id="helplines" aria-labelledby="' . esc_attr( $id ) . '"><h2 id="' . esc_attr( $id ) . '">' . esc_html( sprintf( __( 'Animal helpline numbers in %s', 'animal-writes-core' ), $d->name ) ) . '</h2>'
 		. '<div class="aw-helplines">' . $cards . $own . '</div>'
 		. '<p class="aw-emergency">' . esc_html__( 'An animal in danger right now: call 112 first.', 'animal-writes-core' ) . '</p></section>';
 }
@@ -118,14 +178,11 @@ function aw_district_helplines_html( $d ) {
 add_filter(
 	'render_block_core/query',
 	function ( $html, $block ) {
-		if ( 'aw_listing' !== aw_hub_of_query( $block['attrs']['queryId'] ?? 0 ) || ! aw_is_directory_view() || get_query_var( 'aw_dir_type' ) || aw_request_type() || aw_hub_page() > 1 ) {
+		if ( 'aw_listing' !== aw_hub_of_query( $block['attrs']['queryId'] ?? 0 ) ) {
 			return $html;
 		}
-		$d = aw_current_place();
-		if ( ! $d || 'district' !== $d->kind ) {
-			return $html;
-		}
-		return $html . aw_district_helplines_html( $d );
+		$d = aw_district_helplines_place();
+		return $d ? $html . aw_district_helplines_html( $d ) : $html;
 	},
 	9,
 	2

@@ -16,6 +16,11 @@
 .aw-district-helplines { margin: 0 0 var(--kit-space-6); }
 .aw-district-helplines .aw-helplines { margin-bottom: var(--kit-space-3); }
 .aw-district-helplines .aw-helpline h3 a { color: inherit; }
+.aw-dh-row { margin: 0 0 var(--kit-space-5); }
+.aw-dh-row-label { font-size: var(--kit-type-xs); font-weight: var(--kit-weight-bold); color: var(--kit-color-muted); }
+.aw-dh-row .kit-chip { white-space: normal; }
+.aw-dh-row-name { overflow-wrap: anywhere; }
+.aw-dh-row-all { font-size: var(--kit-type-xs); }
 @media (prefers-reduced-motion: reduce) {
 	.aw-helpline:hover { transform: none; }
 }
