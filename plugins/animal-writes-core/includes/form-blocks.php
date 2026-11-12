@@ -276,9 +276,7 @@ add_filter(
 );
 
 // Take part cards (pattern take-part-cards): a page that is already one card's job leaves that card out. /volunteer/
-// drops Volunteer (the page is that card), an unclaimed listing drops Run an organisation? (it has its own claim box),
-// and a campaign page drops Get updates: the newsletter band with its form follows straight after (owner, 13 Nov 2026:
-// one sign-up, not two back to back).
+// drops Volunteer (the page is that card) and an unclaimed listing drops Run an organisation? (it has its own claim box).
 add_filter(
 	'render_block_core/cover',
 	function ( $html, $block ) {
@@ -290,9 +288,6 @@ add_filter(
 			return '';
 		}
 		if ( false !== strpos( $c, 'aw-take-part-card--claim' ) && is_singular( 'aw_listing' ) && ! get_post_meta( get_queried_object_id(), 'aw_verified', true ) ) {
-			return '';
-		}
-		if ( false !== strpos( $c, 'aw-take-part-card--news' ) && is_singular( 'aw_campaign' ) && false === strpos( (string) get_post_field( 'post_content', get_queried_object_id() ), 'aw-camp--community-dogs' ) ) { // Community dogs stays as it is (frozen)
 			return '';
 		}
 		aw_use_component_style( 'aw-single' ); // aw-take-part, aw-take-part-card

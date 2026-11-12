@@ -30,8 +30,6 @@
 .aw-camp .kit-card--stacked-sm { --kit-card-icon-color: var(--camp-mark, var(--kit-color-ink)); }
 .aw-camp-end .aw-take-part { --aw-tp-top: var(--camp-mark, var(--kit-color-ink)); --aw-tp-base: color-mix(in srgb, var(--camp-mark, var(--kit-color-ink)) 45%, var(--kit-color-ink)); --aw-tp-glow: var(--kit-color-on-ink); --aw-tp-ico: var(--kit-color-on-ink); }
 .aw-camp-end .wp-block-cover.aw-take-part-card::before { content: ""; position: absolute; z-index: 1; inset: 0 0 auto; height: var(--kit-border-accent); background: var(--camp-mark, var(--kit-color-accent)); pointer-events: none; }
-/* A campaign page leaves out the Get updates card (the newsletter band follows): the two cards share the row from 768 */
-@media (min-width: 768px) { .aw-camp-end .aw-take-part:not(:has(.aw-take-part-card--news)) { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .kit-hero .aw-festive-tips { list-style: none; margin: 0 0 var(--kit-space-6); padding: 0; display: grid; gap: var(--kit-space-3); }
 .kit-hero .aw-festive-tips li { display: flex; align-items: center; gap: var(--kit-space-3); max-width: none; margin: 0; color: var(--kit-color-on-ink); font-weight: 500; }
 .kit-hero .aw-festive-ico { flex: 0 0 auto; display: grid; place-items: center; color: var(--kit-color-on-ink); }
