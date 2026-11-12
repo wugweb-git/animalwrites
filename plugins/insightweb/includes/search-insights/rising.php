@@ -467,20 +467,20 @@ function aw_si_rising_receive( array $body ): array {
 	aw_si_install(); // The REST request may come before any admin visit has built the tables.
 	$key = 'rising_' . $source;
 	aw_si_run_start( $key );
-	$dropped = aw_si_rising_worker_dropped( $body['dropped'] ?? array() ); // terms the worker's own filters dropped, when it sends them
+	$refused = array(); // terms the site itself refused: listed before the worker's own drops, so the cap never hides them
 	foreach ( $rising as $r ) {
 		$term = is_scalar( $r['term'] ?? '' ) ? sanitize_text_field( (string) ( $r['term'] ?? '' ) ) : '';
 		$d    = is_scalar( $r['d'] ?? '' ) ? aw_si_rising_date( (string) ( $r['d'] ?? '' ) ) : '';
 		if ( ! $d || ! is_scalar( $r['term'] ?? '' ) || ! is_scalar( $r['note'] ?? '' ) ) {
 			++$out['skipped'];
-			$dropped[] = array( $term, 'bad-row' );
+			$refused[] = array( $term, 'bad-row' );
 			continue;
 		}
 		$g                        = isset( $r['growth'] ) && is_numeric( $r['growth'] ) ? (float) $r['growth'] : null;
 		$result                   = aw_si_rising_put( $term, $source, $g, $d, sanitize_text_field( (string) ( $r['note'] ?? '' ) ) );
 		$out['rising'][ $result ] = ( $out['rising'][ $result ] ?? 0 ) + 1;
 		if ( ! in_array( $result, array( 'created', 'updated' ), true ) ) {
-			$dropped[] = array( $term, $result ); // not-english, empty or db-error
+			$refused[] = array( $term, $result ); // not-english, empty or db-error
 		}
 	}
 	$map = aw_si_kw_map();
@@ -524,7 +524,7 @@ function aw_si_rising_receive( array $body ): array {
 		'rising'  => count( $rising ),
 		'figures' => $out['figures'],
 		'worker'  => array_map( 'sanitize_text_field', array_filter( (array) ( $body['info'] ?? array() ), 'is_scalar' ) ),
-		'dropped' => array_slice( $dropped, 0, AW_SI_RISING_MAX_DROPPED ), // shown on the Rising tab (12 Nov 2026)
+		'dropped' => array_slice( array_merge( $refused, aw_si_rising_worker_dropped( $body['dropped'] ?? array() ) ), 0, AW_SI_RISING_MAX_DROPPED ), // shown on the Rising tab (12 Nov 2026)
 	);
 	// What 0 rows means (1 Nov 2026): the source refused ("source failed"), the run only recorded the usual level of each
 	// term ("baseline"), or the source answered and nothing passed the filters ("no rows"). Never "no demand".
