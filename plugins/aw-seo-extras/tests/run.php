@@ -126,7 +126,7 @@ foreach ( aw_seo_modules() as $key => $mod ) {
 		rw_check( $back === $f['default'], "default round trip {$key}.{$const}" );
 	}
 }
-rw_check( 30 === $fields, "30 fields found ({$fields})" );
+rw_check( 31 === $fields, "31 fields found ({$fields})" );
 
 $tabs = array_keys( array_filter( aw_seo_setting_tabs(), fn( $t ) => empty( $t['hidden'] ) ) );
 rw_check( 7 === count( $tabs ), 'seven groups: ' . implode( ', ', $tabs ) );
