@@ -106,11 +106,11 @@ function aw_si_rising_drops_section(): void {
 		$why = array();
 		if ( null !== $c['worker_dropped'] ) {
 			/* translators: %s: terms. */
-			$why[] = sprintf( __( '%s name none of our species, topics or keywords, or are not English or too old', 'aw-seo-extras' ), number_format_i18n( $c['worker_dropped'] ) );
+			$why[] = sprintf( _n( '%s names none of our species, topics or keywords, or is not English or too old', '%s name none of our species, topics or keywords, or are not English or too old', (int) $c['worker_dropped'], 'aw-seo-extras' ), number_format_i18n( $c['worker_dropped'] ) );
 		}
 		if ( $c['excluded'] ) {
 			/* translators: %s: terms. */
-			$why[] = sprintf( __( '%s have an exclude word (film, song, cricket …)', 'aw-seo-extras' ), number_format_i18n( $c['excluded'] ) );
+			$why[] = sprintf( _n( '%s has an exclude word (film, song, cricket …)', '%s have an exclude word (film, song, cricket …)', (int) $c['excluded'], 'aw-seo-extras' ), number_format_i18n( $c['excluded'] ) );
 		}
 		/* translators: 1: terms sent, 2: terms stored. */
 		$sent = sprintf( __( '%1$s sent, %2$s stored', 'aw-seo-extras' ), number_format_i18n( $c['sent'] ), number_format_i18n( $c['stored'] ) );
