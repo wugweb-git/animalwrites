@@ -1076,3 +1076,32 @@
 		display: block;
 	}
 }
+
+/* Secret field (inputs.js): the box and its Show / Hide on one line. */
+.kits-shell-secret {
+	display: flex;
+	align-items: center;
+	gap: var(--ks-s2);
+}
+
+/* Confirm-with-count (inputs.js): asked in place, under the button's row. */
+.kits-shell-confirm {
+	padding: var(--ks-s3) var(--ks-s4);
+	border: 1px solid var(--ks-g3);
+	border-radius: var(--ks-r-control);
+	background: var(--ks-white);
+}
+
+.kits-shell-confirm.is-error {
+	border-color: var(--ks-ink);
+	box-shadow: inset var(--ks-s1) 0 0 var(--ks-ink);
+}
+
+.kits-shell-confirm p {
+	margin: 0 0 var(--ks-s2);
+}
+
+.kits-shell-confirm__foot {
+	display: flex;
+	gap: var(--ks-s2);
+}

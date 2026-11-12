@@ -468,8 +468,15 @@ body.kits-shell-screen .wrap > .updated {
 }
 
 .kits-shell textarea,
+.kits-shell select,
 .kits-shell input[type="number"],
-.kits-shell input[type="text"] {
+.kits-shell input[type="text"],
+.kits-shell input[type="url"],
+.kits-shell input[type="email"],
+.kits-shell input[type="search"],
+.kits-shell input[type="password"],
+.kits-shell input[type="date"],
+.kits-shell input[type="time"] {
 	width: 100%;
 	min-height: var(--ks-control);
 	padding: var(--ks-s2) var(--ks-s3);
@@ -480,8 +487,26 @@ body.kits-shell-screen .wrap > .updated {
 	font-size: 14px;
 }
 
-.kits-shell input[type="number"] {
+.kits-shell input[type="number"],
+.kits-shell input[type="date"],
+.kits-shell input[type="time"] {
 	max-width: 160px;
+}
+
+/* Selects: the same box as the text inputs, with the shell's ink chevron
+   (wp-admin's own arrow is drawn in its blue). */
+.kits-shell select {
+	max-width: 100%;
+	padding-right: var(--ks-s6);
+	background: var(--ks-white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' fill='none' stroke='%23141414' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right var(--ks-s3) center;
+	appearance: none;
+	line-height: 1.5;
+}
+
+.kits-shell select:focus {
+	border-color: var(--ks-ink);
+	box-shadow: none;
+	color: var(--ks-ink);
 }
 
 .kits-shell textarea {

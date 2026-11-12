@@ -474,6 +474,7 @@ export function DataList( {
  * @param {string}   props.title      Heading (H3).
  * @param {Array}    props.fields     [ { key, label, current, proposed, applied, undoOff } ]. undoOff: why Undo is off, or ''.
  * @param {Function} props.onApply    Called with the ticked keys.
+ * @param {Function} props.onReject   Called with the ticked keys ("Reject ticked"); leave out where nothing is rejected.
  * @param {Function} props.onUndo     Called with one key.
  * @param {boolean}  props.busy       Saving.
  * @param {string}   props.applyLabel The Apply button's words.
@@ -483,6 +484,7 @@ export function FieldReview( {
 	title,
 	fields = [],
 	onApply,
+	onReject,
 	onUndo,
 	busy,
 	applyLabel,
@@ -582,6 +584,26 @@ export function FieldReview( {
 			{ after }
 			{ onApply && open.length > 0 && (
 				<div className="kits-shell-review__foot">
+					{ onReject && (
+						<button
+							type="button"
+							className="kits-shell-button"
+							aria-busy={ busy || undefined }
+							disabled={ busy || 0 === picked.length }
+							onClick={ () => onReject( picked ) }
+						>
+							{ sprintf(
+								/* translators: %d: number of fields ticked. */
+								_n(
+									'Reject %d ticked',
+									'Reject %d ticked',
+									picked.length,
+									'kits-core'
+								),
+								picked.length
+							) }
+						</button>
+					) }
 					<button
 						type="button"
 						className="kits-shell-button is-primary"

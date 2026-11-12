@@ -19,6 +19,7 @@ import { Panel, PanelGroup, OnOff } from './panel';
 import { MiniChart, HashList, LinkedSetting, MetricPicker } from './extras';
 import { PageParts, BlockParts, Cell } from './parts';
 import { CalendarGrid } from './calendar';
+import { Select, SecretField, ConfirmButton } from './inputs';
 import './shell.css';
 import './more.css';
 
@@ -41,6 +42,9 @@ export {
 	BlockParts,
 	Cell,
 	CalendarGrid,
+	Select,
+	SecretField,
+	ConfirmButton,
 };
 
 const cx = ( ...names ) => names.filter( Boolean ).join( ' ' );
@@ -686,6 +690,9 @@ const shell = {
 	BlockParts,
 	Cell,
 	CalendarGrid,
+	Select,
+	SecretField,
+	ConfirmButton,
 };
 
 window.kits = window.kits || {};
