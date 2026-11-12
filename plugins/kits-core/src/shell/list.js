@@ -5,7 +5,7 @@
  * a sort, a page, a view, a bulk or row action). The screen fetches the rows from its own REST route; nothing is
  * filtered or sorted in the browser, so a list of 50,000 rows costs the same as one of 50.
  */
-import { useEffect, useId, useState } from '@wordpress/element';
+import { Fragment, useEffect, useId, useState } from '@wordpress/element';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { EmptyState, LoadingState, ErrorState } from './states';
 
@@ -15,7 +15,8 @@ const cx = ( ...names ) => names.filter( Boolean ).join( ' ' );
  * A row action: a link or a button. `disabled` with `why` shows the action off and says why ("Undo needs SourceWeb").
  *
  * @param {Object} props
- * @param {Object} props.action { label, href, onClick, disabled, why, tone }.
+ * @param {Object} props.action { label, href, onClick, disabled, why, tone, expanded, controls }. expanded and
+ *                              controls: a button that opens a part of the page (aria-expanded, aria-controls).
  */
 export function RowAction( { action } ) {
 	const id = useId();
@@ -47,7 +48,15 @@ export function RowAction( { action } ) {
 		);
 	}
 	return (
-		<button type="button" className={ cls } onClick={ action.onClick }>
+		<button
+			type="button"
+			className={ cls }
+			onClick={ action.onClick }
+			aria-expanded={
+				undefined === action.expanded ? undefined : action.expanded
+			}
+			aria-controls={ action.controls }
+		>
 			{ action.label }
 		</button>
 	);
@@ -100,6 +109,8 @@ function FilterSelect( { filter, onFilter } ) {
  * @param {Array}    props.bulkActions [ { value, label } ].
  * @param {Function} props.onBulk      Called with ( value, ids ).
  * @param {Function} props.rowActions  row => [ { label, href, onClick, disabled, why, tone } ].
+ * @param {Function} props.rowView     row => what the row shows when opened (a DetailPanel …), or null for none.
+ *                                     Opened rows show under their row, across every column; View and Hide toggle it.
  * @param {boolean}  props.loading     Rows are being fetched.
  * @param {string}   props.error       What failed, or ''.
  * @param {Function} props.onRetry     Try again after an error.
@@ -129,6 +140,7 @@ export function DataList( {
 	bulkActions = [],
 	onBulk,
 	rowActions,
+	rowView,
 	loading,
 	error,
 	onRetry,
@@ -138,6 +150,8 @@ export function DataList( {
 	const [ words, setWords ] = useState( search );
 	const [ picked, setPicked ] = useState( [] );
 	const [ bulk, setBulk ] = useState( '' );
+	const [ open, setOpen ] = useState( [] );
+	const viewBase = useId();
 	const searchId = useId();
 	const bulkId = useId();
 	useEffect( () => setWords( search ), [ search ] );
@@ -145,6 +159,7 @@ export function DataList( {
 	const ids = rows.map( ( r ) => r[ rowKey ] );
 	const idList = ids.join( '\n' );
 	useEffect( () => setPicked( ( p ) => ( p.length ? [] : p ) ), [ idList ] );
+	useEffect( () => setOpen( ( o ) => ( o.length ? [] : o ) ), [ idList ] );
 
 	const all = ids.length > 0 && ids.every( ( id ) => picked.includes( id ) );
 	const tick = ( id, on ) =>
@@ -234,58 +249,114 @@ export function DataList( {
 				<tbody>
 					{ rows.map( ( r ) => {
 						const id = r[ rowKey ];
-						const acts = rowActions ? rowActions( r ) : [];
+						const acts = rowActions ? [ ...rowActions( r ) ] : [];
+						const detail = rowView ? rowView( r ) : null;
+						const isOpen = !! detail && open.includes( id );
+						const viewId = `${ viewBase }-${ String( id ).replace(
+							/[^\w-]/g,
+							'_'
+						) }`;
+						if ( detail ) {
+							acts.push( {
+								label: isOpen
+									? __( 'Hide', 'kits-core' )
+									: __( 'View', 'kits-core' ),
+								onClick: () =>
+									setOpen( ( o ) =>
+										o.includes( id )
+											? o.filter( ( x ) => x !== id )
+											: [ ...o, id ]
+									),
+								expanded: isOpen,
+								controls: viewId,
+							} );
+						}
 						return (
-							<tr key={ id }>
-								{ hasBulk && (
-									<td className="kits-shell-list__check">
-										<input
-											type="checkbox"
-											checked={ picked.includes( id ) }
-											aria-label={ sprintf(
-												/* translators: %s: the row's name. */
-												__( 'Select %s', 'kits-core' ),
-												String( r[ rowTitle ] || id )
-											) }
-											onChange={ ( e ) =>
-												tick( id, e.target.checked )
-											}
-										/>
-									</td>
-								) }
-								{ columns.map( ( c ) => {
-									const cell = c.render
-										? c.render( r )
-										: r[ c.key ];
-									const Tag = c.primary ? 'th' : 'td';
-									return (
-										<Tag
-											key={ c.key }
-											scope={
-												c.primary ? 'row' : undefined
-											}
-											data-label={ c.label }
-											className={
-												c.primary
-													? 'is-primary'
-													: undefined
+							<Fragment key={ id }>
+								<tr
+									className={ isOpen ? 'is-open' : undefined }
+								>
+									{ hasBulk && (
+										<td className="kits-shell-list__check">
+											<input
+												type="checkbox"
+												checked={ picked.includes(
+													id
+												) }
+												aria-label={ sprintf(
+													/* translators: %s: the row's name. */
+													__(
+														'Select %s',
+														'kits-core'
+													),
+													String(
+														r[ rowTitle ] || id
+													)
+												) }
+												onChange={ ( e ) =>
+													tick( id, e.target.checked )
+												}
+											/>
+										</td>
+									) }
+									{ columns.map( ( c ) => {
+										const cell = c.render
+											? c.render( r )
+											: r[ c.key ];
+										const Tag = c.primary ? 'th' : 'td';
+										return (
+											<Tag
+												key={ c.key }
+												scope={
+													c.primary
+														? 'row'
+														: undefined
+												}
+												data-label={ c.label }
+												className={
+													c.primary
+														? 'is-primary'
+														: undefined
+												}
+											>
+												{ cell }
+												{ c.primary &&
+													acts.length > 0 && (
+														<span className="kits-shell-rowactions">
+															{ acts.map(
+																( a ) => (
+																	<RowAction
+																		key={
+																			a.label
+																		}
+																		action={
+																			a
+																		}
+																	/>
+																)
+															) }
+														</span>
+													) }
+											</Tag>
+										);
+									} ) }
+								</tr>
+								{ isOpen && (
+									<tr
+										className="kits-shell-list__view"
+										id={ viewId }
+									>
+										<td
+											colSpan={
+												columns.length +
+												( hasBulk ? 1 : 0 )
 											}
 										>
-											{ cell }
-											{ c.primary && acts.length > 0 && (
-												<span className="kits-shell-rowactions">
-													{ acts.map( ( a ) => (
-														<RowAction
-															key={ a.label }
-															action={ a }
-														/>
-													) ) }
-												</span>
-											) }
-										</Tag>
-									);
-								} ) }
-							</tr>
+											{ detail }
+										</td>
+									</tr>
+								) }
+							</Fragment>
 						);
 					} ) }
 				</tbody>

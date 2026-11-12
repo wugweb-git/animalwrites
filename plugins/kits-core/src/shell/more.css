@@ -1105,3 +1105,132 @@
 	display: flex;
 	gap: var(--ks-s2);
 }
+
+/* Detail panel (detail.js): a reading panel, label and value rows; labels beside values from 768px, stacked below. */
+.kits-shell-detail {
+	padding: var(--ks-s5);
+	border: 1px solid var(--ks-g2);
+	border-radius: var(--ks-r-card);
+	background: var(--ks-white);
+}
+
+.kits-shell-detail__head {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: var(--ks-s3);
+}
+
+.kits-shell-detail__head h3 {
+	margin: 0;
+	font-size: 16px;
+}
+
+.kits-shell-detail__sub {
+	margin: var(--ks-s1) 0 0;
+	color: var(--ks-g6);
+}
+
+.kits-shell-detail__rows {
+	margin: var(--ks-s4) 0 0;
+}
+
+.kits-shell-detail__row {
+	display: grid;
+	grid-template-columns: minmax(120px, 200px) 1fr;
+	gap: var(--ks-s3);
+	padding: var(--ks-s2) 0;
+	border-top: 1px solid var(--ks-g2);
+}
+
+.kits-shell-detail__row dt {
+	color: var(--ks-g6);
+}
+
+.kits-shell-detail__row dd {
+	margin: 0;
+	overflow-wrap: anywhere;
+}
+
+.kits-shell-detail__foot {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--ks-s2);
+	margin: var(--ks-s4) 0 0;
+}
+
+@media (max-width: 767px) {
+
+	.kits-shell-detail__row {
+		grid-template-columns: 1fr;
+		gap: var(--ks-s1);
+	}
+}
+
+/* Row view (list.js rowView): the opened row's panel, across every column. */
+.kits-shell-list tr.is-open > * {
+	border-bottom-color: transparent;
+}
+
+.kits-shell-list__view > td {
+	padding: 0 var(--ks-s3) var(--ks-s4);
+	background: var(--ks-g1);
+}
+
+/* Media (detail.js): thumbnails in a row; the picked picture beside Choose and Remove. */
+.kits-shell-thumbs {
+	display: inline-flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--ks-s1);
+	vertical-align: middle;
+}
+
+.kits-shell-thumbs img,
+.kits-shell-media__preview img {
+	display: block;
+	object-fit: cover;
+	border: 1px solid var(--ks-g2);
+	border-radius: var(--ks-s1);
+	background: var(--ks-g1);
+}
+
+.kits-shell-thumbs__more,
+.kits-shell-media__none {
+	color: var(--ks-g6);
+}
+
+.kits-shell-media__row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--ks-s3);
+}
+
+/* Pair list (detail.js): two boxes a row, Remove at the end. */
+.kits-shell-pairs {
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+.kits-shell-pairs__table {
+	width: 100%;
+	margin: 0 0 var(--ks-s2);
+	border-collapse: collapse;
+}
+
+.kits-shell-pairs__table th {
+	padding: 0 var(--ks-s2) var(--ks-s1) 0;
+	color: var(--ks-g6);
+	font-weight: 400;
+	text-align: left;
+}
+
+.kits-shell-pairs__table td {
+	padding: 0 var(--ks-s2) var(--ks-s2) 0;
+}
+
+.kits-shell-pairs__table input {
+	width: 100%;
+}

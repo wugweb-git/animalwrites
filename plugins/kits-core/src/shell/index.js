@@ -20,6 +20,7 @@ import { MiniChart, HashList, LinkedSetting, MetricPicker } from './extras';
 import { PageParts, BlockParts, Cell } from './parts';
 import { CalendarGrid } from './calendar';
 import { Select, SecretField, ConfirmButton } from './inputs';
+import { DetailPanel, MediaField, MediaThumbs, PairList } from './detail';
 import './shell.css';
 import './more.css';
 
@@ -45,6 +46,10 @@ export {
 	Select,
 	SecretField,
 	ConfirmButton,
+	DetailPanel,
+	MediaField,
+	MediaThumbs,
+	PairList,
 };
 
 const cx = ( ...names ) => names.filter( Boolean ).join( ' ' );
@@ -693,6 +698,10 @@ const shell = {
 	Select,
 	SecretField,
 	ConfirmButton,
+	DetailPanel,
+	MediaField,
+	MediaThumbs,
+	PairList,
 };
 
 window.kits = window.kits || {};
