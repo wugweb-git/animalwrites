@@ -3,7 +3,7 @@
  * whether one is set and its last 4 characters) and a button that asks before a change that touches many items
  * (with the count, and a word to type when it cannot be undone).
  */
-import { useId, useState } from '@wordpress/element';
+import { useEffect, useId, useRef, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { SelectControl } from '@wordpress/components';
 import { Button } from './index';
@@ -27,10 +27,25 @@ export function Select( {
 	onChange,
 	...rest
 } ) {
+	const { 'aria-describedby': describedBy, ...others } = rest;
+	// SelectControl sets aria-describedby from its own help prop only, after the props it is given; the Field's help
+	// line is outside it, so the reference is put back on the element.
+	const ref = useRef( null );
+	useEffect( () => {
+		if ( ! ref.current ) {
+			return;
+		}
+		if ( describedBy ) {
+			ref.current.setAttribute( 'aria-describedby', describedBy );
+		} else {
+			ref.current.removeAttribute( 'aria-describedby' );
+		}
+	} );
 	return (
 		<SelectControl
 			__nextHasNoMarginBottom
 			__next40pxDefaultSize
+			ref={ ref }
 			id={ id }
 			className="kits-shell-select"
 			value={ value }
@@ -43,7 +58,7 @@ export function Select( {
 				} ) ),
 			] }
 			onChange={ ( v ) => onChange( v ) }
-			{ ...rest }
+			{ ...others }
 		/>
 	);
 }
