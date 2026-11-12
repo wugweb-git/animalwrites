@@ -238,3 +238,32 @@ add_filter(
 	10,
 	3
 );
+
+/**
+ * A post type whose every item is left out by the rule above (all opportunities closed) has an empty sitemap, which
+ * Rank Math still listed in sitemap_index.xml and then answered 404 (audit, 12 Nov 2026). Such a type is left out of
+ * the index until one of its items is open again. Counted once a day and after each post change (aw_seo_cached).
+ */
+add_filter(
+	'rank_math/sitemap/exclude_post_type',
+	function ( $exclude, $type ) {
+		if ( $exclude || 'aw_opportunity' !== $type || ! function_exists( 'aw_retention_state' ) || ! function_exists( 'aw_seo_cached' ) ) {
+			return $exclude;
+		}
+		$open = aw_seo_cached(
+			'sitemap_open_opportunities|' . wp_date( 'Y-m-d' ), // closing is by date: counted again each day
+			function () {
+				$ids = get_posts( array( 'post_type' => 'aw_opportunity', 'post_status' => 'publish', 'numberposts' => -1, 'fields' => 'ids', 'no_found_rows' => true ) );
+				foreach ( $ids as $id ) {
+					if ( ! aw_retention_state( $id ) ) {
+						return 1;
+					}
+				}
+				return 0;
+			}
+		);
+		return ! $open;
+	},
+	10,
+	2
+);
