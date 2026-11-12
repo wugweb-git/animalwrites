@@ -29,10 +29,17 @@ Theme and WordPress items are tracked by Animal Writes WordPress. Code requests 
 - **Notion "8. Status & Pending" has not been updated** for the queue apply (2,207 values), the 66 conflicts, the CSV for the rest, the monetary pause and the RaraLove answers.
 - **Own worktrees to remove by exact path:** `aw-wt-enrichment-12nov`, `aw-wt-audit-12nov` (branch `audit-notes-12nov`).
 
+### Rapid Response review (12 Nov 2026; read-only; nothing changed)
+- Report: `Claude outputs/rapid-response-app-review-2026-11-12.md` (rapid-response.in: a free district-based app for helping animals; public pages, store listings and terms read; 25 ideas rated).
+- **Adopt, each needs the owner's yes on the wording first:** a short promises block (free, no ads, no selling data, who sees what) on the Volunteer and Contact forms and the privacy page; a "who sees what" table on the privacy page; two declaration ticks on the claim form (information is accurate; currently registered); one plain line on Contact that Animal Writes is a directory, not a rescue service.
+- **Consider:** a plainer "ways to help" list for volunteers (transport, short-term shelter or care); a "volunteers by district" count with a minimum before a district shows; retention periods in the privacy wording; vet council registration numbers as listing fields with a Verified-style check; a printable "how it works" page; a campaign poster with a QR code.
+- **Skip:** SOS broadcasts of phone and location, in-app chat, shop and vet fees (money items paused), language toggle on one URL, accounts.
+- Not read or measured by the review: the app demo screens, the Play permissions and install count, most of their laws page, contrast and tap targets.
+
 ### Enrichment review queue (12 Nov 2026)
 - **Done (owner: "update if the field is empty"):** 2,207 queued values applied through the approve route where the live field was empty and the sources gave one value; the queue now holds 3,073 approved, 18,185 auto-applied, 1,595 pending.
 - **Conflicts (12 Nov 2026):** of 209 groups where sources gave different values for an empty field, 66 were one value containing the other (or the same value twice): the fuller one was applied. 143 groups (312 rows: 71 address, 47 phone, 16 email, others) really differ and wait for the owner's pick in `Claude outputs/enrichment-conflicts-to-decide-2026-11-12.csv`. About 900 rows for fields that already have a value (267 "would replace"): keep both.
-- **Logos and photos (owner, 12 Nov 2026: "we need them"):** approved one at a time: 284 logos and photos applied in all, 131 failed because the source picture could not be fetched (they stay in the review queue), about 40 were still being processed when this was written.
+- **Logos and photos (owner, 12 Nov 2026: "we need them"):** done: 311 approved and applied, 145 failed because the source picture could not be fetched (they stay in the review queue), none pending.
 - The 762 rows labelled "From an imported list" are today's web-search runs sent for approval, not the Darpan CSV.
 
 ### Site audit and forms (owner, 12 Nov 2026). Read-only; nothing changed
