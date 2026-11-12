@@ -135,6 +135,26 @@ add_action(
 	0
 );
 
+// Addresses that are gone for good answer 410 (audit, 12 Nov 2026; checked the same day: no file of the build and none
+// of 20 live pages prints them): the removed kits-core ad slot script and Core's old visit counter, plugin files under
+// a server path (wp-content/plugins/home/…/aw_deploy/…, a plugins_url() address from before the plugin links of
+// 10–11 Nov), and sitemaps of types or taxonomies that no longer exist. Old kits-cache CSS files are left at 404:
+// their names come from each build, so a pattern could catch a file the next build writes.
+add_action(
+	'parse_request',
+	function () {
+		$path = (string) wp_parse_url( (string) wp_unslash( $_SERVER['REQUEST_URI'] ?? '/' ), PHP_URL_PATH ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+		if ( preg_match( '#^/(?:wp-content/plugins/home/u544169507/.+|wp-content/plugins/kits-core/assets/js/ad-slot\.js|wp-content/plugins/animal-writes-core/visit\.php|(?:aw_listing_type|aw_guide|news)-sitemap\d*\.xml)$#', $path ) ) {
+			status_header( 410 );
+			nocache_headers();
+			header( 'Content-Type: text/plain; charset=utf-8' );
+			echo 'Gone';
+			exit;
+		}
+	},
+	0
+);
+
 // Upper-case paths go to the lower-case one. Files (a dot in the last part), the admin, REST and login are left alone.
 add_action(
 	'parse_request',
