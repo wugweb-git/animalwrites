@@ -101,6 +101,17 @@ add_action(
 				)
 			);
 		}
+		// One entry, for its address (Entries &edit=ID opens its form).
+		register_rest_route(
+			PLANWEB_REST,
+			'/entries/(?P<id>\d+)',
+			array(
+				'methods'             => 'GET',
+				'permission_callback' => planweb_rest_can( 'edit_planweb_entries' ),
+				'callback'            => 'planweb_rest_entry',
+				'args'                => array(),
+			)
+		);
 		// Adding: the same fields, no id.
 		register_rest_route(
 			PLANWEB_REST,
@@ -226,6 +237,23 @@ function planweb_rest_row( array $e, string $today ): array {
 			)
 		) . '#planweb-form',
 	);
+}
+
+/**
+ * GET entries/<id>: one entry as the list shows it. Not one in the Trash, and only for someone who may edit it.
+ *
+ * @param WP_REST_Request $request Request.
+ */
+function planweb_rest_entry( WP_REST_Request $request ) {
+	$id = (int) ( $request->get_url_params()['id'] ?? 0 );
+	$e  = $id && 'publish' === get_post_status( $id ) ? planweb_entry( $id ) : null;
+	if ( ! $e ) {
+		return new WP_Error( 'rest_post_invalid_id', __( 'No such entry.', 'planweb' ), array( 'status' => 404 ) );
+	}
+	if ( ! current_user_can( 'edit_post', $id ) ) {
+		return new WP_Error( 'rest_forbidden', __( 'You are not allowed to do this.', 'planweb' ), array( 'status' => 403 ) );
+	}
+	return rest_ensure_response( array( 'entry' => planweb_rest_row( $e, wp_date( 'Y-m-d' ) ) ) );
 }
 
 /**

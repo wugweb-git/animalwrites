@@ -39,9 +39,15 @@ want 200 "GET /$PW/entries search, type and dates" -b /tmp/cj-ci -H "X-WP-Nonce:
 if python3 -c 'import json,sys; d=json.load(open("/tmp/rw.out")); sys.exit(0 if d["total"]==1 and d["rows"][0]["title"]=="MP model city" else 1)'; then echo "ok   entries: search and filter on the server"; else echo "FAIL entries filter"; FAIL=1; fi
 want 200 "GET /$PW/entries waiting view" -b /tmp/cj-ci -H "X-WP-Nonce: $NA" "$P/entries&view=waiting"
 if grep -q '"MP model city"' /tmp/rw.out; then echo "ok   entries: the draft is waiting for approval"; else echo "FAIL entries waiting view"; FAIL=1; fi
+# One entry by its address (Entries &edit=ID): signed out 401, subscriber 403, the entry 200; after the Trash, 404.
+want 401 "GET /$PW/entries/$ID signed out" "$P/entries/$ID"
+want 403 "GET /$PW/entries/$ID subscriber" -b /tmp/cj-rw-sub -H "X-WP-Nonce: $NS" "$P/entries/$ID"
+want 200 "GET /$PW/entries/$ID" -b /tmp/cj-ci -H "X-WP-Nonce: $NA" "$P/entries/$ID"
+grep -q '"title":"MP model city"' /tmp/rw.out && echo "ok   one entry by its id" || { echo "FAIL one entry by its id"; FAIL=1; }
 want 403 "POST /$PW/entries/$ID/trash subscriber" -X POST -b /tmp/cj-rw-sub -H "X-WP-Nonce: $NS" "$P/entries/$ID/trash"
 want 200 "POST /$PW/entries/$ID/trash" -X POST "${AJ[@]}" "$P/entries/$ID/trash"
 if [ "$(wp post get "$ID" --field=post_status)" = "trash" ]; then echo "ok   entry $ID in the Trash (not deleted)"; else echo "FAIL entry $ID not in the Trash"; FAIL=1; fi
+want 404 "GET /$PW/entries/$ID in the Trash" -b /tmp/cj-ci -H "X-WP-Nonce: $NA" "$P/entries/$ID"
 
 # Settings: an unchanged Save of the switch and a second import change nothing (Dates itself is never written).
 BEFORE=$(optmd5 planweb_on aw_team_dates)

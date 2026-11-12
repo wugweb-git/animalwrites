@@ -566,6 +566,30 @@ function Entries() {
 		load();
 	}, [ args, load ] );
 
+	// An entry's own address (&edit=ID, as the Calendar's) opens its form; the address follows the open form.
+	useEffect( () => {
+		const id = parseInt(
+			new URLSearchParams( window.location.search ).get( 'edit' ),
+			10
+		);
+		if ( id > 0 ) {
+			apiFetch( { path: path( `entries/${ id }` ) } )
+				.then( ( r ) => setEditing( r.entry ) )
+				.catch( ( e ) =>
+					setMsg( { tone: 'error', text: errText( e ) } )
+				);
+		}
+	}, [] );
+	useEffect( () => {
+		const u = new URL( window.location.href );
+		if ( editing && editing.id ) {
+			u.searchParams.set( 'edit', String( editing.id ) );
+		} else {
+			u.searchParams.delete( 'edit' );
+		}
+		window.history.replaceState( null, '', u.toString() );
+	}, [ editing ] );
+
 	const change = ( k, v ) =>
 		setArgs( ( a ) => ( { ...a, [ k ]: v, page: 'page' === k ? v : '' } ) );
 	const trash = ( row ) => {
@@ -596,14 +620,14 @@ function Entries() {
 			label: __( 'Date', 'planweb' ),
 			sortable: true,
 			render: ( r ) => (
-				<>
+				<span className={ r.past ? 'planweb-past' : undefined }>
 					{ r.dateText }
 					{ r.time ? `, ${ r.time }` : '' }
 					<br />
 					<span className="kits-shell-field__help">
 						{ r.whenText }
 					</span>
-				</>
+				</span>
 			),
 		},
 		{
@@ -631,7 +655,22 @@ function Entries() {
 				</>
 			),
 		},
-		{ key: 'typeText', label: __( 'Type', 'planweb' ) },
+		{
+			key: 'typeText',
+			label: __( 'Type', 'planweb' ),
+			// The Calendar's badges (assets/admin.css): each Type has its own mark shape as well as its colour.
+			render: ( r ) =>
+				r.typeText ? (
+					<span
+						className={ `planweb-type planweb-type--${ r.type }` }
+					>
+						<span className="planweb-mark" aria-hidden="true" />
+						{ r.typeText }
+					</span>
+				) : (
+					'—'
+				),
+		},
 		{
 			key: 'channelText',
 			label: __( 'Channel', 'planweb' ),
@@ -642,7 +681,17 @@ function Entries() {
 			label: __( 'Owner', 'planweb' ),
 			render: ( r ) => r.ownerText || '—',
 		},
-		{ key: 'statusText', label: __( 'Status', 'planweb' ) },
+		{
+			key: 'statusText',
+			label: __( 'Status', 'planweb' ),
+			render: ( r ) => (
+				<span
+					className={ `planweb-status planweb-status--${ r.status }` }
+				>
+					{ r.statusText }
+				</span>
+			),
+		},
 		{
 			key: 'link',
 			label: __( 'Link', 'planweb' ),
@@ -1073,11 +1122,13 @@ function ImportGroup( { group, onSaved } ) {
 				<RefTable
 					caption={ __( 'Dates that do not match', 'planweb' ) }
 					head={ [
+						__( 'Check', 'planweb' ),
 						__( 'In Dates', 'planweb' ),
 						__( 'In PlanWeb', 'planweb' ),
 					] }
 					rows={ group.odd.map( ( l ) => [
-						`${ l.state }: ${ side( l.dates ) }`,
+						l.state,
+						side( l.dates ),
 						side( l.entry ),
 					] ) }
 				/>
