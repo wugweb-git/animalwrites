@@ -379,6 +379,9 @@ add_action(
 			echo '<td>' . ( $only ? esc_html__( 'robots.txt name only, never visits', 'aw-seo-extras' ) : '' ) . '</td></tr>';
 		}
 		echo '</tbody></table>';
+		// 12 Nov 2026: Googlebot showed 2,099 requests in 30 days because cached hits never reach PHP. There is no access
+		// log on this host to read instead (only PHP error logs), so the table says what it leaves out.
+		echo '<p class="description">' . esc_html__( 'These are lower bounds. Most crawler hits are answered from a stored copy by the server\'s page cache (LiteSpeed) or the Hostinger CDN; those requests never reach PHP, so they are not counted here. hPanel shows the full traffic. Letting crawlers past the caches is step C of docs/cdn.md:', 'aw-seo-extras' ) . ' <a href="' . esc_url( 'https://github.com/wugweb-git/animalwrites/blob/wordpress/docs/cdn.md#c-let-ai-agents-and-crawlers-past-the-caches-3-nov-2026' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'docs/cdn.md, C. Let AI agents and crawlers past the caches', 'aw-seo-extras' ) . '</a>.</p>';
 		aw_si_srv_weeks_table( $days );
 
 		if ( function_exists( 'aw_si_vis_section' ) ) {
