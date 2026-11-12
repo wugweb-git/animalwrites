@@ -791,7 +791,7 @@
                         "label": "",
                         "label_placement": "",
                         "admin_field_label": "",
-                        "help_message": "",
+                        "help_message": "We never sell your details. Only Animal Writes administrators see them, unless you choose to show your name on an organisation’s page.",
                         "validation_rules": {
                             "required": {
                                 "value": true,

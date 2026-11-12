@@ -922,10 +922,10 @@
                     },
                     "settings": {
                         "container_class": "kit-field",
-                        "label": "Google Maps link <span class=\"kit-optional\">(optional)</span>",
+                        "label": "Map link <span class=\"kit-optional\">(optional)</span>",
                         "label_placement": "",
-                        "admin_field_label": "Google Maps link",
-                        "help_message": "",
+                        "admin_field_label": "Map link",
+                        "help_message": "Paste the link from the Share button of Google Maps, Bing Maps or OpenStreetMap.",
                         "validation_rules": {
                             "required": {
                                 "value": false,
@@ -2382,6 +2382,53 @@
                         "title": "Custom HTML",
                         "icon_class": "ff-edit-html",
                         "template": "customHTML"
+                    }
+                },
+                {
+                    "index": 69,
+                    "element": "input_checkbox",
+                    "uniqElKey": "el_aw_details_ok",
+                    "attributes": {
+                        "name": "details_ok",
+                        "value": [],
+                        "type": "checkbox"
+                    },
+                    "settings": {
+                        "container_class": "kit-field",
+                        "label": "",
+                        "label_placement": "",
+                        "admin_field_label": "Details are correct",
+                        "help_message": "",
+                        "advanced_options": [
+                            {
+                                "label": "The details and documents I have sent are correct.",
+                                "value": "1",
+                                "calc_value": "",
+                                "image": ""
+                            }
+                        ],
+                        "calc_value_status": false,
+                        "enable_image_input": false,
+                        "values_visible": false,
+                        "randomize_options": "no",
+                        "dynamic_default_value": "",
+                        "validation_rules": {
+                            "required": {
+                                "value": true,
+                                "message": "Tick this to send the request",
+                                "global_message": "Tick this to send the request",
+                                "global": false
+                            }
+                        },
+                        "conditional_logics": [],
+                        "display_type": "",
+                        "enable_other_option": "no",
+                        "layout_class": ""
+                    },
+                    "editor_options": {
+                        "title": "Checkbox",
+                        "icon_class": "ff-edit-checkbox-1",
+                        "template": "inputCheckable"
                     }
                 },
                 {
