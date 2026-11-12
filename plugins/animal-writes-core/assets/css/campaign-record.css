@@ -78,6 +78,10 @@
 .aw-camp.aw-camp--community-dogs .kit-ed-head h2 { margin: 0 0 var(--kit-space-5) !important; max-width: 20ch; text-wrap: balance; }
 .aw-camp.aw-camp--community-dogs .aw-camp-section h3:not(.wp-block-post-title) { font-weight: var(--kit-weight-bold) !important; letter-spacing: var(--kit-tracking-heading); line-height: var(--kit-leading-heading) !important; margin: var(--kit-space-5) 0 var(--kit-space-3) !important; }
 .aw-camp.aw-camp--community-dogs .aw-date { white-space: nowrap; }
+/* Dates inside sentences read as words: no calendar icon, and the "As of" date at its line's size (it was 13px in 15px
+   text, its icon wrapping away from "As of"). Meta rows, the timeline and the postmark keep their icons. */
+.aw-camp.aw-camp--community-dogs :is(.aw-camp-section > p, .aw-camp-metric-note) .aw-date > .kit-ico { display: none; }
+.aw-camp.aw-camp--community-dogs :is(.aw-camp-status, .aw-camp-metric-note) .aw-date { display: inline; padding: 0; font-size: inherit; }
 /* Headings and figures at 700 from the main Inter file, not campaign.css's 800 (owner, 10 Nov 2026): phones no longer
    fetch the 115 KB 800 file (campaign-tools.php skips its preload on this page) */
 .aw-camp.aw-camp--community-dogs :is(h1, h2, h3, .aw-camp-dates-when, .aw-cd-num, .aw-camp-tier h3, .aw-camp-count strong),
@@ -89,7 +93,7 @@
 .aw-camp.aw-camp--community-dogs .aw-camp-hero .aw-camp-metric-note { opacity: 1 !important; }
 .aw-camp.aw-camp--community-dogs .aw-camp-hero { column-gap: var(--kit-space-7); overflow: hidden; }
 .aw-camp.aw-camp--community-dogs .aw-camp-hero h1 { font-size: var(--kit-type-h1) !important; letter-spacing: var(--kit-tracking-display); line-height: var(--kit-leading-display) !important; margin: 0 0 var(--kit-space-4) !important; text-wrap: balance; }
-.aw-camp.aw-camp--community-dogs .aw-camp-hero .aw-camp-lede { max-width: 46ch; margin: 0 !important; font-size: var(--kit-type-lead); font-weight: var(--kit-weight-strong); }
+.aw-camp.aw-camp--community-dogs .aw-camp-hero .aw-camp-lede { max-width: 46ch; margin: 0 !important; font-size: var(--kit-type-lead); font-weight: var(--kit-weight-regular); } /* regular, so the heading, outcome and figure carry the weight (60% of the first phone screen was bold) */
 .aw-camp.aw-camp--community-dogs .aw-camp-hero .aw-camp-status { margin: var(--kit-space-4) 0 0 !important; }
 .aw-camp.aw-camp--community-dogs .aw-camp-hero-summary { max-width: 52ch !important; padding: 0 !important; margin: var(--kit-space-6) 0 0 !important; }
 .aw-camp.aw-camp--community-dogs .aw-camp-hero > .aw-camp-metric { margin-top: var(--kit-space-6) !important; padding-top: var(--kit-space-4); border-top: 2px solid var(--camp-primary-ink); max-width: 36rem; }
@@ -187,7 +191,7 @@
 .aw-camp.aw-camp--community-dogs .aw-camp-doclist li::before { content: ""; width: var(--kit-icon-md); height: var(--kit-icon-md); background: var(--camp-mark); -webkit-mask: var(--i) center / contain no-repeat; mask: var(--i) center / contain no-repeat; }
 .aw-camp.aw-camp--community-dogs .aw-camp-doclist a { color: var(--kit-color-text); font-weight: var(--kit-weight-strong); text-decoration: none; }
 .aw-camp.aw-camp--community-dogs .aw-camp-doclist a::after { content: ""; position: absolute; inset: 0; } /* the whole row is the link */
-.aw-camp.aw-camp--community-dogs .aw-camp-doclist a:hover { text-decoration: underline; text-underline-offset: 0.2em; }
+@media (hover: hover) { .aw-camp.aw-camp--community-dogs .aw-camp-doclist a:hover { text-decoration: underline; text-underline-offset: 0.2em; } } /* no sticky hover after a tap */
 .aw-camp.aw-camp--community-dogs .aw-camp-doclist li:has(a:focus-visible) { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); border-radius: var(--kit-radius-control); }
 .aw-camp.aw-camp--community-dogs #how-to-help .aw-camp-doclist { padding: var(--kit-space-3) var(--kit-space-5); border-radius: var(--kit-radius-card); background: var(--dg-raised); box-shadow: inset 0 0 0 1px var(--kit-color-line); }
 .aw-camp.aw-camp--community-dogs #how-to-help .aw-camp-doclist li + li { border-top: 1px solid var(--dg-line); }
@@ -254,7 +258,9 @@
 .aw-camp.aw-camp--community-dogs #next-steps > p { margin: 0 0 var(--kit-space-5) !important; max-width: 62ch; font-size: var(--kit-type-lead); line-height: var(--kit-leading-body); }
 .aw-camp.aw-camp--community-dogs #next-steps .aw-camp-doclist { gap: var(--kit-space-3); }
 .aw-camp.aw-camp--community-dogs #next-steps .aw-camp-doclist li { padding: var(--kit-space-4) var(--kit-space-5); border-radius: var(--kit-radius-card); background: var(--dg-raised); box-shadow: inset 0 0 0 1px var(--kit-color-line); transition: box-shadow var(--kit-motion-fast) var(--kit-motion-ease); }
-.aw-camp.aw-camp--community-dogs #next-steps .aw-camp-doclist li:hover { box-shadow: inset 0 0 0 2px var(--camp-mark); }
+@media (hover: hover) { .aw-camp.aw-camp--community-dogs #next-steps .aw-camp-doclist li:hover { box-shadow: inset 0 0 0 2px var(--camp-mark); } }
+.aw-camp.aw-camp--community-dogs #next-steps .aw-camp-doclist li:active { box-shadow: inset 0 0 0 2px var(--camp-mark); } /* tap feedback on phones */
+.aw-camp.aw-camp--community-dogs #how-to-help .aw-camp-doclist li:active { background: var(--camp-surface); }
 @media (min-width: 1200px) {
 	.aw-camp.aw-camp--community-dogs #next-steps { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); column-gap: var(--kit-space-7); align-items: start; }
 	.aw-camp.aw-camp--community-dogs #next-steps > h2 { grid-column: 1 / -1; }
@@ -272,7 +278,8 @@
 .aw-camp.aw-camp--community-dogs .aw-camp-partner-logos > figure { display: flex !important; flex-direction: column; width: auto !important; margin: 0 !important; }
 .aw-camp.aw-camp--community-dogs .aw-camp-partner-logos > figure a { display: block; border-radius: var(--kit-radius-card); }
 .aw-camp.aw-camp--community-dogs .aw-camp-partner-logos > figure img { display: block; width: 100%; height: auto !important; aspect-ratio: 1; padding: var(--kit-space-2); box-sizing: border-box; border-radius: var(--kit-radius-card); box-shadow: inset 0 0 0 1px var(--kit-color-line); transition: box-shadow var(--kit-motion-fast) var(--kit-motion-ease); }
-.aw-camp.aw-camp--community-dogs .aw-camp-partner-logos > figure a:hover img { box-shadow: inset 0 0 0 2px var(--camp-mark); }
+@media (hover: hover) { .aw-camp.aw-camp--community-dogs .aw-camp-partner-logos > figure a:hover img { box-shadow: inset 0 0 0 2px var(--camp-mark); } }
+.aw-camp.aw-camp--community-dogs .aw-camp-partner-logos > figure a:active img { box-shadow: inset 0 0 0 2px var(--camp-mark); } /* tap feedback on phones */
 .aw-camp.aw-camp--community-dogs .aw-camp-partner-logos > figure figcaption { position: static !important; max-height: none !important; margin: 0 !important; padding: var(--kit-space-2) 0 0 !important; background: none !important; color: var(--kit-color-text) !important; font-size: var(--kit-type-sm); line-height: var(--kit-leading-heading); text-align: center; text-shadow: none !important; overflow: visible !important; }
 
 /* ---------- Media coverage and News and guides: the Media & PR, News and Resources sections' own cards ---------- */
