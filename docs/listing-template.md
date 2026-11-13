@@ -1,6 +1,6 @@
 # Directory profile template
 
-`themes/animal-writes/templates/single-aw_listing.html` (post type `aw_listing`), owner 20 Oct 2026. It is built from the
+`plugins/animal-writes-core/theme/templates/single-aw_listing.html` (post type `aw_listing`), owner 20 Oct 2026. It is built from the
 item template's shared blocks (see `item-template.md`) and the listing groups in
 `plugins/animal-writes-core/includes/listing-template.php`. Every block prints nothing when it has nothing. Since 1 Nov 2026 Contact, Online profiles and Location come before the logo and description, so the phone and opening hours are above the fold (row numbers below are the blocks' original numbers). In the
 Site Editor they are listed as "Listing: …" (category Widgets). Fields: SCF group "Organisation details"

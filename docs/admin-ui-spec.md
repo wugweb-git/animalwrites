@@ -263,7 +263,7 @@ Code changes that come with this section (phase 1):
 - Remove `!important` from `.kit-card--stacked-lg` and its media rule; raise specificity instead.
 - Side-by-side cards: `align-items: start` so cards never stretch to the tallest.
 - Meta row: `flex-wrap: wrap`.
-- `aw.css` has two copies (theme and plugin): any card rule changed there is changed in both.
+- `aw.css` lives in `plugins/animal-writes-core/theme/assets/css/` (one copy; `aw.min.css` is made from it by `tools/ci/css_min.py`).
 
 #### D1.9 Content types
 
@@ -290,7 +290,7 @@ Each field shows "inherits: {value}" when empty, and "Reset to theme" clears it.
 Today the same profiles live in four places that are not kept in step:
 
 1. Contact links option `aw_elsewhere` (list of label + URL), shown by shortcode `[aw_elsewhere]` on Contact.
-2. Footer links hard-coded in `themes/animal-writes/parts/footer.html:10` and `plugins/animal-writes-core/theme/parts/footer.html:10`.
+2. Footer links hard-coded in `plugins/animal-writes-core/theme/parts/footer.html:10`.
 3. Schema `sameAs` from `aw_publisher_profiles`, which reads Rank Math and falls back to a hard-coded list.
 4. Rank Math social options, shown read-only in Theme Options → Socials.
 

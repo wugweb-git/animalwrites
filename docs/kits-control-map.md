@@ -6,7 +6,7 @@ Every Kits part, and the WordPress control that will hold its look.
 
 Today only the theme.json presets and the core block styles can be changed in **Appearance → Editor → Styles**. Everything else is fixed in CSS: `kit.css`, `kit-primitives.css` and `kit-tokens.css` in the Kits theme, `aw.css` in the Animal Writes child theme, and the campaign CSS in the Animal Writes plugin. So every change to a gap, a height or a colour is a code change.
 
-This map takes each part in the two registries (`themes/kits-by-wugweb/kits-registry.json` and `themes/animal-writes/kits-registry.json`, 53 + 99 = 152 parts) and names the WordPress control that will hold it, the settings it gets, and the CSS it replaces.
+This map takes each part in the two registries (`themes/kits-by-wugweb/kits-registry.json` and `plugins/animal-writes-core/theme/kits-registry.json`, 53 + 99 = 152 parts) and names the WordPress control that will hold it, the settings it gets, and the CSS it replaces.
 
 Kits will later be one theme for many sites, and the Animal Writes child theme goes away. Parts marked **AW-specific** must then move out of Kits into the site plugin.
 
@@ -151,7 +151,7 @@ From `themes/kits-by-wugweb/kits-registry.json`: 53 parts.
 
 ### 3b. Animal Writes parts
 
-From `themes/animal-writes/kits-registry.json`: 99 parts. All of them are AW-specific: for multi-tenant they move to the Animal Writes plugin, and their CSS with them.
+From `plugins/animal-writes-core/theme/kits-registry.json`: 99 parts. All of them are AW-specific: for multi-tenant they move to the Animal Writes plugin, and their CSS with them.
 
 | # | Part | Type | Control | Slug | Settings | Replaces (file:lines) | Uncode equivalent | Notes |
 |---|---|---|---|---|---|---|---|---|

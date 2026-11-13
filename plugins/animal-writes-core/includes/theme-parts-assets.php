@@ -175,8 +175,9 @@ function aw_theme_css_served( string $file ): string {
 }
 
 /**
- * The animal-writes child theme is active (the way back from serving the theme parts). Its aw.css is the same file as
- * this plugin's (tools/ci/theme_copies.py), so it has no component rules: the component files load from this plugin.
+ * An animal-writes child theme is active. The child theme was retired (Kits by Wugweb alone since 10 Nov 2026; its folder
+ * left the repository on 14 Nov 2026), so this is false unless such a theme is installed again; kept as a harmless
+ * fallback. Under it, the component files load from this plugin.
  */
 function aw_child_theme_on(): bool {
 	return 'animal-writes' === get_stylesheet() && 'kits-by-wugweb' === get_template();

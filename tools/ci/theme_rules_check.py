@@ -37,7 +37,7 @@ import pathlib
 import re
 import sys
 
-from theme_copies import is_copy  # the child theme's file is read, not the plugin's copy of it
+from theme_copies import is_copy  # generated .min files are skipped; their sources are read
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 BASELINE = ROOT / "tools/ci/theme_rules_baseline.txt"

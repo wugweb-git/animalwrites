@@ -4,7 +4,7 @@ import json, os, re, collections
 from theme_copies import is_copy, theme_file
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 items = []
-for r in ("themes/kits-by-wugweb/kits-registry.json", theme_file("kits-registry.json")):  # the child's, or the plugin's copy
+for r in ("themes/kits-by-wugweb/kits-registry.json", theme_file("kits-registry.json")):  # Kits master, then Animal Writes (animal-writes-core/theme)
     j = json.load(open(os.path.join(ROOT, r)))
     for it in j["items"]:
         it["owner"] = j["owner"]

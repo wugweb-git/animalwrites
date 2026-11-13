@@ -1,6 +1,6 @@
 # Card sizes (21 Oct 2026)
 
-Limits every list card keeps, set in `themes/animal-writes/assets/css/aw.css` (custom properties on `:root`):
+Limits every list card keeps, set in `plugins/animal-writes-core/theme/assets/css/aw.css` (custom properties on `:root`):
 
 | Limit | Value | Property |
 |---|---|---|

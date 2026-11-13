@@ -41,7 +41,7 @@ Third revision (10 Nov, owner's approved list):
 
 ## Destinations
 
-1. **Animal Writes tokens** (`themes/animal-writes/tokens/tokens.json` → `tokens.css`, plugin copy kept as today): brand values.
+1. **Animal Writes tokens** (`plugins/animal-writes-core/theme/tokens/tokens.json` → `tokens.css`; the child theme's copy was removed on 14 Nov 2026): brand values.
 2. **Kits** (`kit.css`, `kit-primitives.css`, `kit-tokens.css`), with **`kit-` selectors only**. A Kits rule that needs an Animal Writes value reads a token whose Kits default is today's value. Animal Writes sets its own value in `tokens.json`.
 3. **Animal Writes component files** in `plugins/animal-writes-core/theme/assets/css/`, each loaded only where its component is used.
 4. **aw.css** keeps what every page needs and has no Kits form (the newsletter's Fluent Forms skin, heading overrides) and the campaign rules, which stay put.

@@ -2,7 +2,7 @@
 
 One structure for every item page (owner, 20 Oct 2026): News (`aw_news`), Library (`aw_legal`, sourced and our own
 documents), Resources (`post`: research and guides) and Opportunities (`aw_opportunity`). They all use
-`themes/animal-writes/templates/single.html`; type differences come from the item's data, not from separate templates.
+`plugins/animal-writes-core/theme/templates/single.html`; type differences come from the item's data, not from separate templates.
 Directory listings (`aw_listing`, `single-aw_listing.html`) use the shared blocks too; see `listing-template.md`.
 Campaigns keep their own template (`campaign-page`).
 

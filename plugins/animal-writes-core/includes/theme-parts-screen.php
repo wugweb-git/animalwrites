@@ -34,7 +34,7 @@ function aw_theme_parts_link( string $label, string $path ): string {
  * @param bool   $on  Runs on this site.
  * @param string $off Text when it does not.
  */
-function aw_theme_parts_state( bool $on, string $off = 'Off: the child theme serves it' ): string {
+function aw_theme_parts_state( bool $on, string $off = 'Off: the active theme is not Kits by Wugweb alone' ): string {
 	return $on
 		? '<span class="dashicons dashicons-yes" aria-hidden="true"></span> Runs'
 		: '<span class="dashicons dashicons-minus" aria-hidden="true"></span> ' . esc_html( $off );
@@ -159,7 +159,7 @@ function aw_theme_parts_screen() {
 		echo '<div class="wrap"><h1>' . esc_html( 'Theme parts' ) . '</h1><p>' . esc_html( $intro ) . '</p>';
 	}
 	if ( ! aw_core_theme_parts_on() ) {
-		wp_admin_notice( esc_html( 'The Animal Writes child theme is active, so it serves these parts itself and the copies listed here are not used.' ), array( 'type' => 'warning', 'additional_classes' => array( 'inline' ) ) );
+		wp_admin_notice( esc_html( 'The active theme is not Kits by Wugweb alone, so Animal Writes Core does not serve these parts.' ), array( 'type' => 'warning', 'additional_classes' => array( 'inline' ) ) );
 	}
 	echo '<h2>' . esc_html( 'Functions' ) . '</h2>';
 	aw_core_simple_table(

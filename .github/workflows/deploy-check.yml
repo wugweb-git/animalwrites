@@ -77,7 +77,7 @@ jobs:
         run: python3 tools/ci/phpcs_delta.py "$BASE" "$HEAD"
       - name: Kits registry (every component, block and pattern has an entry)
         run: python3 tools/ci/registry_check.py
-      - name: Animal Writes theme copies in animal-writes-core are the same as the child theme's files
+      - name: Animal Writes theme files in animal-writes-core are all there, and fonts live only in Kits
         run: python3 tools/ci/theme_copies.py
       - name: aw.min.css and the Kits .min.css files are their sources minified (python3 tools/ci/css_min.py writes them; commit both)
         run: python3 tools/ci/css_min.py --check
@@ -117,7 +117,7 @@ jobs:
       - name: Settings parts (report) - no CSS for parts moved to Styles settings, no new admin page, menu or admin stylesheet
         continue-on-error: true
         run: python3 tools/ci/settings_parts_check.py
-      - name: Animal Writes style variation matches the Animal Writes theme.json
+      - name: Animal Writes style variation matches the Animal Writes theme.json (animal-writes-core/theme)
         run: python3 tools/aw-style-variation.py --check
       - name: Colour contrast (text 4.5:1, non-text 3:1; every campaign palette)
         run: python3 tools/ci/contrast_check.py

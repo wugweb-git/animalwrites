@@ -225,7 +225,7 @@ No FAQ, Rank Math, LiteSpeed (type not public). Supports `aw-section` (no box).
 
 ### aw_claim (Listing claims) — classic, not public, no posts on live
 
-Boxes for an unsaved post: Publish (side/core), **Review** `aw_claim_review` ours `core/claims.php:118` (cb :127) normal/high, Slug (normal/core). Capability type aw_volunteer; `create_posts` = do_not_allow.
+Boxes for an unsaved post: Publish (side/core), **Review** `aw_claim_review` ours `core/claims.php:118` (cb :127) normal/high, Slug (normal/core). Capabilities: all `manage_directoryweb` (`aw_claim_caps()`, 14 Nov 2026); `create_posts` = do_not_allow.
 
 ### aw_report (Reports) — classic, not public, no posts on live
 
