@@ -175,7 +175,7 @@ function kits_filter_bar( $groups, $active, $clear, $sort = '', $keep = array() 
 	if ( $active ) {
 		$html .= '<div class="kit-filter-active" aria-label="Active filters">';
 		foreach ( $active as $a ) {
-			$html .= '<span class="kit-removable">' . esc_html( $a[0] ) . '<a href="' . esc_url( $a[1] ) . '" aria-label="' . esc_attr( 'Remove ' . $a[0] ) . '">×</a></span>';
+			$html .= '<span class="kit-removable">' . esc_html( $a[0] ) . '<a href="' . esc_url( $a[1] ) . '" aria-label="' . esc_attr( 'Remove ' . $a[0] ) . '"><span class="kit-ico kit-ico--x" aria-hidden="true"></span></a></span>';
 		}
 		$html .= '<a class="kit-filter-clear" href="' . esc_url( $clear ) . '">Clear all</a></div>';
 	}
