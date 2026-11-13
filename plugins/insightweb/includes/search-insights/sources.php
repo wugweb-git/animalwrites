@@ -92,7 +92,7 @@ function aw_si_redirect_map(): array {
 	$map   = array();
 	$table = $wpdb->prefix . 'rank_math_redirections';
 	if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) === $table ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-		foreach ( (array) $wpdb->get_results( "SELECT sources, url_to FROM {$table} WHERE status = 'active' AND header_code IN (301, 302, 307, 308)" ) as $r ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+		foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT sources, url_to FROM %i WHERE status = 'active' AND header_code IN (301, 302, 307, 308)", $table ) ) as $r ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 			$to = aw_si_path( (string) $r->url_to );
 			foreach ( (array) maybe_unserialize( $r->sources ) as $s ) {
 				if ( 'exact' === ( $s['comparison'] ?? '' ) && '' !== (string) ( $s['pattern'] ?? '' ) && '' !== $to ) {
@@ -128,7 +128,7 @@ function aw_si_redirect_rules(): array {
 	$rules = array();
 	$table = $wpdb->prefix . 'rank_math_redirections';
 	if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) === $table ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-		foreach ( (array) $wpdb->get_results( "SELECT sources, url_to FROM {$table} WHERE status = 'active' AND header_code IN (301, 302, 307, 308) AND sources LIKE '%regex%' ORDER BY id" ) as $r ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+		foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT sources, url_to FROM %i WHERE status = 'active' AND header_code IN (301, 302, 307, 308) AND sources LIKE %s ORDER BY id", $table, '%' . $wpdb->esc_like( 'regex' ) . '%' ) ) as $r ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 			$to = aw_si_path( (string) $r->url_to );
 			foreach ( (array) maybe_unserialize( $r->sources ) as $s ) {
 				$pattern = (string) ( $s['pattern'] ?? '' );

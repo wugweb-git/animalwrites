@@ -98,7 +98,7 @@ class AW_SI_Rising_Table extends WP_List_Table {
 	protected function get_views() {
 		global $wpdb;
 		$t      = aw_si_table( 'rising' );
-		$counts = aw_si_ready() ? array_column( (array) $wpdb->get_results( "SELECT status, COUNT(*) n FROM {$t} GROUP BY status", ARRAY_A ), 'n', 'status' ) : array(); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+		$counts = aw_si_ready() ? array_column( (array) $wpdb->get_results( $wpdb->prepare( 'SELECT status, COUNT(*) n FROM %i GROUP BY status', $t ), ARRAY_A ), 'n', 'status' ) : array(); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		$out    = array();
 		$cur    = $this->view();
 		foreach ( array_merge( $this->statuses(), array( 'all' => __( 'All', 'insightweb' ) ) ) as $key => $label ) {
@@ -164,19 +164,21 @@ class AW_SI_Rising_Table extends WP_List_Table {
 		$orderby = $orders[ $this->arg( 'orderby' ) ] ?? '';
 		$desc    = 'asc' !== $this->arg( 'order' );
 		$dir     = $desc ? 'DESC' : 'ASC';
+		$by      = array(); // The sort column, passed to prepare() as an identifier.
 		if ( '' === $orderby ) {
 			$order = 'last_seen DESC, growth IS NULL, growth DESC, id DESC'; // Newest first, then the highest growth.
 		} elseif ( 'growth' === $this->arg( 'orderby' ) ) {
 			$order = "growth IS NULL, growth {$dir}, id DESC"; // Terms without a ratio always last.
 		} else {
-			$order = "{$orderby} {$dir}, id DESC";
+			$order = "%i {$dir}, id DESC";
+			$by[]  = $orderby;
 		}
 		$sql      = implode( ' AND ', $where );
 		$per_page = $this->get_items_per_page( 'aw_si_rising_per_page', 50 );
 		$paged    = $this->get_pagenum();
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- conditions and order built above from fixed parts; values are placeholders.
-		$total       = (int) ( $args ? $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$t} WHERE {$sql}", $args ) ) : $wpdb->get_var( "SELECT COUNT(*) FROM {$t} WHERE {$sql}" ) );
-		$this->items = (array) $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$t} WHERE {$sql} ORDER BY {$order} LIMIT %d OFFSET %d", array_merge( $args, array( $per_page, ( $paged - 1 ) * $per_page ) ) ) );
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber,PluginCheck.Security.DirectDB.UnescapedDBParameter -- conditions and order built above from fixed parts; the table and sort column are %i, values are placeholders.
+		$total       = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE {$sql}", array_merge( array( $t ), $args ) ) );
+		$this->items = (array) $wpdb->get_results( $wpdb->prepare( "SELECT * FROM %i WHERE {$sql} ORDER BY {$order} LIMIT %d OFFSET %d", array_merge( array( $t ), $args, $by, array( $per_page, ( $paged - 1 ) * $per_page ) ) ) );
 		// phpcs:enable
 		$this->set_pagination_args(
 			array(

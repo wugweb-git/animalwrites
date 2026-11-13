@@ -59,8 +59,8 @@ function aw_si_count_search( string $metric, string $term ): void {
 	}
 	global $wpdb;
 	$o = aw_si_table( 'obs' );
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
-	$wpdb->query( $wpdb->prepare( "INSERT INTO {$o} (kw_id, page, page_key, src, metric, period, d, value, txt, fetched) VALUES (0, '', %s, 'site-search', %s, 'day', %s, 1, %s, %s) ON DUPLICATE KEY UPDATE value = value + 1, fetched = VALUES(fetched)", md5( 'term:' . $term ), $metric, wp_date( 'Y-m-d' ), mb_substr( $term, 0, 255 ), aw_si_now() ) );
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$wpdb->query( $wpdb->prepare( "INSERT INTO %i (kw_id, page, page_key, src, metric, period, d, value, txt, fetched) VALUES (0, '', %s, 'site-search', %s, 'day', %s, 1, %s, %s) ON DUPLICATE KEY UPDATE value = value + 1, fetched = VALUES(fetched)", $o, md5( 'term:' . $term ), $metric, wp_date( 'Y-m-d' ), mb_substr( $term, 0, 255 ), aw_si_now() ) );
 }
 
 // WordPress search and the Directory search box: first results page only.
@@ -119,6 +119,6 @@ function aw_si_site_searches( int $days = 28, int $limit = 15 ): array {
 	$o     = aw_si_table( 'obs' );
 	$since = ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( '-' . max( 1, $days ) . ' days' )->format( 'Y-m-d' );
 	$skip  = aw_si_ga4_skip_sql();
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name and fixed dates only.
-	return (array) $wpdb->get_results( $wpdb->prepare( "SELECT txt, IF(metric = 'search', 'wp', metric) metric, GREATEST(SUM(IF(src = 'ga4', 0, value)), SUM(IF(src = 'ga4', value, 0))) n FROM {$o} WHERE ((src = 'site-search') OR (src = 'ga4' AND metric = 'search'{$skip})) AND period = 'day' AND d >= %s GROUP BY txt, IF(metric = 'search', 'wp', metric) ORDER BY n DESC LIMIT %d", $since, $limit ) );
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- $skip is the fixed date list of aw_si_ga4_skip_sql() (constants, esc_sql); the table is %i.
+	return (array) $wpdb->get_results( $wpdb->prepare( "SELECT txt, IF(metric = 'search', 'wp', metric) metric, GREATEST(SUM(IF(src = 'ga4', 0, value)), SUM(IF(src = 'ga4', value, 0))) n FROM %i WHERE ((src = 'site-search') OR (src = 'ga4' AND metric = 'search'{$skip})) AND period = 'day' AND d >= %s GROUP BY txt, IF(metric = 'search', 'wp', metric) ORDER BY n DESC LIMIT %d", $o, $since, $limit ) );
 }

@@ -140,18 +140,21 @@ function aw_si_ready(): bool {
 function aw_si_drop_all(): void {
 	global $wpdb;
 	foreach ( array( 'kw_pages', 'obs', 'rising', 'links' ) as $t ) {
-		$wpdb->query( 'DROP TABLE IF EXISTS ' . aw_si_table( $t ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.SchemaChange -- fixed table names.
+		$wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', aw_si_table( $t ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.DirectDatabaseQuery.SchemaChange -- fixed table names.
 	}
 	// The keyword table is Animal Writes Core's and holds the owner's Sourcing, Press and Tracked roles (sourcing phase 2):
 	// records with one of those (or a dismissed suggestion, or a migrated spelling) stay, with Search Insights' own roles and figures cleared; the others are deleted.
 	$k = aw_si_table( 'keywords' );
 	$m = aw_si_table( 'kw_map' );
-	$keep = aw_kw_ready() ? " AND dismissed = 0 AND (src_note IS NULL OR src_note = '')" : ''; // a dismissed suggestion or a migrated spelling is the owner's too
-	$wpdb->query( $wpdb->prepare( "DELETE FROM {$k} WHERE roles & %d = 0{$keep}", AW_KW_OWNER_ROLES ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+	if ( aw_kw_ready() ) { // a dismissed suggestion or a migrated spelling is the owner's too
+		$wpdb->query( $wpdb->prepare( "DELETE FROM %i WHERE roles & %d = 0 AND dismissed = 0 AND (src_note IS NULL OR src_note = '')", $k, AW_KW_OWNER_ROLES ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	} else {
+		$wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE roles & %d = 0', $k, AW_KW_OWNER_ROLES ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	}
 	$set = aw_si_reset_sql( AW_KW_OWNER_ROLES ); // every Search Insights column back to a new record's (Codex, PR #75)
-	$wpdb->query( "UPDATE {$k} SET {$set}" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name and fixed columns only.
+	$wpdb->query( $wpdb->prepare( "UPDATE %i SET {$set}", $k ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- $set is the fixed column list of aw_si_reset_sql() (constants and integers, no %); the table is %i.
 	if ( aw_kw_ready() ) {
-		$wpdb->query( "DELETE FROM {$m} WHERE kw_id NOT IN (SELECT id FROM {$k})" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table names only.
+		$wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE kw_id NOT IN (SELECT id FROM %i)', $m, $k ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	}
 	foreach ( array( AW_SI_DB_OPTION, 'aw_si_runs', 'aw_si_seeded', 'aw_si_backfill', 'aw_si_installed', 'aw_si_psi_queue', 'aw_si_clarity_calls', 'aw_si_crawl_inside', 'aw_si_crawl_outside', 'aw_si_crawl_mailed', 'aw_si_clarity_retried', 'aw_si_bing_cursor', 'aw_si_links_seeded', 'aw_si_links_seeded_20261102', 'aw_si_checklist', 'aw_si_live_token', 'aw_si_live_seed_run', 'aw_si_gdelt_on', 'aw_si_rising_since', 'aw_si_ref_icons', 'aw_si_inspect_queue', 'aw_si_link_dr', 'aw_si_links_gsc_pages', 'aw_si_links_imports' ) as $opt ) {
 		delete_option( $opt );

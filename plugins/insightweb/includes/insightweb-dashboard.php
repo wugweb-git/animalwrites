@@ -83,7 +83,7 @@ function insightweb_dash_build( $why = '' ) {
 function insightweb_dash_count( array $c ): array {
 	global $wpdb;
 	$o   = aw_si_table( 'obs' );
-	$end = (string) $wpdb->get_var( "SELECT MAX(d) FROM {$o} WHERE src = 'gsc' AND metric = 'total' AND period = 'day'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- background count; table name only.
+	$end = (string) $wpdb->get_var( $wpdb->prepare( "SELECT MAX(d) FROM %i WHERE src = 'gsc' AND metric = 'total' AND period = 'day'", $o ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- background count.
 	if ( '' === $end ) {
 		return $c;
 	}
@@ -93,8 +93,8 @@ function insightweb_dash_count( array $c ): array {
 	$first    = $e->modify( '-' . ( 2 * $longest - 1 ) . ' days' )->format( 'Y-m-d' );
 	// One row per day: the site totals (clicks, impressions, position weighted by impressions).
 	$days = array();
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- background count; table name only.
-	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT d, SUM(clicks) c, SUM(impr) i, SUM(pos * impr) pw FROM {$o} WHERE src = 'gsc' AND metric = 'total' AND period = 'day' AND d BETWEEN %s AND %s GROUP BY d ORDER BY d", $first, $end ) ) as $r ) {
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- background count.
+	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT d, SUM(clicks) c, SUM(impr) i, SUM(pos * impr) pw FROM %i WHERE src = 'gsc' AND metric = 'total' AND period = 'day' AND d BETWEEN %s AND %s GROUP BY d ORDER BY d", $o, $first, $end ) ) as $r ) {
 		$days[ (string) $r->d ] = array( (int) $r->c, (int) $r->i, (float) $r->pw );
 	}
 	$k = aw_si_table( 'keywords' );
@@ -105,7 +105,7 @@ function insightweb_dash_count( array $c ): array {
 		$now   = insightweb_dash_window( $days, $from, $end );
 		$prev  = insightweb_dash_window( $days, $pfrom, $pend );
 		$count = fn( string $metric, string $col, string $a, string $b ) => (int) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- background count
-			$wpdb->prepare( "SELECT COUNT(DISTINCT {$col}) FROM {$o} WHERE src = 'gsc' AND metric = %s AND period = 'day' AND d BETWEEN %s AND %s AND impr > 0", $metric, $a, $b ) // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table and column names from this file.
+			$wpdb->prepare( "SELECT COUNT(DISTINCT %i) FROM %i WHERE src = 'gsc' AND metric = %s AND period = 'day' AND d BETWEEN %s AND %s AND impr > 0", $col, $o, $metric, $a, $b )
 		);
 		$row   = array(
 			'days'       => $n,

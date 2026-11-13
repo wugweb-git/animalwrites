@@ -390,8 +390,8 @@ function aw_si_clarity_summary( int $days = 28 ): array {
 	$out['flagged'] = 0;
 	$out['devices'] = array();
 	// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
-	$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT d, page_key, txt, metric, value FROM {$o} WHERE src = 'clarity' AND period = 'day' AND kw_id = 0 AND page = '' AND d >= %s", $since ) );
-	$out['flagged'] = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM (SELECT page FROM {$o} WHERE src = 'clarity' AND metric = 'flag' AND period = 'day' AND value > 0 AND d >= %s AND page <> '' GROUP BY page HAVING COUNT(DISTINCT d) >= %d) f", $since, aw_si_clarity_min_days() ) );
+	$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT d, page_key, txt, metric, value FROM %i WHERE src = 'clarity' AND period = 'day' AND kw_id = 0 AND page = '' AND d >= %s", $o, $since ) );
+	$out['flagged'] = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM (SELECT page FROM %i WHERE src = 'clarity' AND metric = 'flag' AND period = 'day' AND value > 0 AND d >= %s AND page <> '' GROUP BY page HAVING COUNT(DISTINCT d) >= %d) f", $o, $since, aw_si_clarity_min_days() ) );
 	// phpcs:enable
 	// One device on one day => metric => value.
 	$cells = array();
@@ -450,13 +450,15 @@ function aw_si_clarity_pages( int $days = 28 ): array {
 	$rows = (array) $wpdb->get_results(
 		$wpdb->prepare(
 			"SELECT m.page, m.metric, SUM(m.value) v, SUM(m.value * COALESCE(s.value, 0)) wv, SUM(COALESCE(s.value, 0)) w, COUNT(*) n, SUM(m.value > 0) pos
-			FROM {$o} m LEFT JOIN {$o} s ON s.src = m.src AND s.metric = 'sessions' AND s.period = m.period AND s.d = m.d AND s.kw_id = m.kw_id AND s.page_key = m.page_key
+			FROM %i m LEFT JOIN %i s ON s.src = m.src AND s.metric = 'sessions' AND s.period = m.period AND s.d = m.d AND s.kw_id = m.kw_id AND s.page_key = m.page_key
 			WHERE m.src = 'clarity' AND m.period = 'day' AND m.kw_id = 0 AND m.page <> '' AND m.d >= %s
 			GROUP BY m.page, m.metric",
+			$o,
+			$o,
 			$since
 		)
 	);
-	$devs = (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, txt, SUM(value) v FROM {$o} WHERE src = 'clarity-dev' AND metric = 'sessions' AND period = 'day' AND kw_id = 0 AND d >= %s GROUP BY page, txt", $since ) );
+	$devs = (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, txt, SUM(value) v FROM %i WHERE src = 'clarity-dev' AND metric = 'sessions' AND period = 'day' AND kw_id = 0 AND d >= %s GROUP BY page, txt", $o, $since ) );
 	// phpcs:enable
 	$min = aw_si_clarity_min_days();
 	$out = array();

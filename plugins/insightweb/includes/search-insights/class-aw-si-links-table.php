@@ -102,7 +102,7 @@ class AW_SI_Links_Table extends WP_List_Table {
 		$out = array();
 		$cur = $this->view();
 		foreach ( $this->views_sql() as $key => $v ) {
-			$n           = aw_si_ready() ? (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$t} WHERE {$v[1]}" ) : 0; // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared -- fixed conditions.
+			$n           = aw_si_ready() ? (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE {$v[1]}", $t ) ) : 0; // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- fixed view conditions (views_sql()); the table is %i.
 			$out[ $key ] = '<a href="' . esc_url( add_query_arg( 'view', $key, aw_si_url( 'links' ) ) ) . '"' . ( $key === $cur ? ' class="current" aria-current="page"' : '' ) . '>' . esc_html( $v[0] ) . ' <span class="count">(' . esc_html( number_format_i18n( $n ) ) . ')</span></a>';
 		}
 		return $out;
@@ -128,13 +128,14 @@ class AW_SI_Links_Table extends WP_List_Table {
 		$cols    = array_keys( $this->get_sortable_columns() );
 		$orderby = in_array( $this->arg( 'orderby' ), $cols, true ) ? $this->arg( 'orderby' ) : '';
 		$dir     = 'asc' === $this->arg( 'order' ) ? 'ASC' : 'DESC';
-		$order   = '' === $orderby ? 'last_seen DESC, id DESC' : "{$orderby} {$dir}, id DESC";
+		$order   = '' === $orderby ? 'last_seen DESC, id DESC' : "%i {$dir}, id DESC";
+		$by      = '' === $orderby ? array() : array( $orderby ); // The sort column, passed to prepare() as an identifier.
 		$sql     = implode( ' AND ', $where );
 		$per     = $this->get_items_per_page( 'aw_si_links_per_page', 50 );
 		$paged   = $this->get_pagenum();
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- conditions and order built above from fixed parts; values are placeholders.
-		$total       = (int) ( $args ? $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$t} WHERE {$sql}", $args ) ) : $wpdb->get_var( "SELECT COUNT(*) FROM {$t} WHERE {$sql}" ) );
-		$this->items = (array) $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$t} WHERE {$sql} ORDER BY {$order} LIMIT %d OFFSET %d", array_merge( $args, array( $per, ( $paged - 1 ) * $per ) ) ) );
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber,PluginCheck.Security.DirectDB.UnescapedDBParameter -- conditions and order built above from fixed parts; the table and sort column are %i, values are placeholders.
+		$total       = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE {$sql}", array_merge( array( $t ), $args ) ) );
+		$this->items = (array) $wpdb->get_results( $wpdb->prepare( "SELECT * FROM %i WHERE {$sql} ORDER BY {$order} LIMIT %d OFFSET %d", array_merge( array( $t ), $args, $by, array( $per, ( $paged - 1 ) * $per ) ) ) );
 		// phpcs:enable
 		$this->set_pagination_args(
 			array(

@@ -198,8 +198,8 @@ function aw_si_handle_overrides(): void {
 	if ( $ids && isset( $set[ $action ] ) ) {
 		global $wpdb;
 		$t  = aw_si_table( 'keywords' );
-		$in = implode( ',', $ids );
-		$wpdb->query( $wpdb->prepare( "UPDATE {$t} SET priority_override = %s WHERE id IN ({$in})", $set[ $action ] ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers.
+		$in = implode( ',', array_map( 'intval', $ids ) );
+		$wpdb->query( $wpdb->prepare( "UPDATE %i SET priority_override = %s WHERE id IN ({$in})", $t, $set[ $action ] ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers.
 	}
 	$back = remove_query_arg( array( 'aw_si_kw', 'kw', '_wpnonce', '_wp_http_referer', 'action', 'action2' ), wp_get_referer() ? wp_get_referer() : aw_si_url( 'keywords' ) );
 	wp_safe_redirect( add_query_arg( 'updated', count( $ids ), $back ) );
@@ -332,7 +332,7 @@ function aw_si_rows( string $where, string $order, int $limit = 10 ): array {
 	if ( ! aw_si_ready() ) {
 		return array();
 	}
-	return (array) $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$t} WHERE {$where} ORDER BY {$order} LIMIT %d", $limit ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- fixed conditions from this file.
+	return (array) $wpdb->get_results( $wpdb->prepare( "SELECT * FROM %i WHERE {$where} ORDER BY {$order} LIMIT %d", $t, $limit ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- fixed conditions and order from this file.
 }
 
 /**
@@ -551,7 +551,7 @@ function aw_si_box_brand(): void {
 	global $wpdb;
 	$o     = aw_si_table( 'obs' );
 	$k     = aw_si_table( 'keywords' );
-	$links = aw_si_ready() ? (array) $wpdb->get_results( $wpdb->prepare( "SELECT k.label, o.value, o.d FROM {$o} o JOIN {$k} k ON k.id = o.kw_id WHERE o.src = 'live' AND o.metric = 'ours' AND o.value >= 2 AND k.roles & %d AND o.d = (SELECT MAX(d) FROM {$o} WHERE src = 'live' AND metric = 'ours' AND kw_id = o.kw_id) ORDER BY o.value DESC LIMIT 10", AW_SI_ROLE_BRAND ) ) : array(); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table names only.
+	$links = aw_si_ready() ? (array) $wpdb->get_results( $wpdb->prepare( "SELECT k.label, o.value, o.d FROM %i o JOIN %i k ON k.id = o.kw_id WHERE o.src = 'live' AND o.metric = 'ours' AND o.value >= 2 AND k.roles & %d AND o.d = (SELECT MAX(d) FROM %i WHERE src = 'live' AND metric = 'ours' AND kw_id = o.kw_id) ORDER BY o.value DESC LIMIT 10", $o, $k, AW_SI_ROLE_BRAND, $o ) ) : array(); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	if ( $links ) {
 		$parts = array();
 		foreach ( $links as $l ) {
@@ -574,9 +574,9 @@ function aw_si_box_ai(): void {
 	$o     = aw_si_table( 'obs' );
 	$since = ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( '-28 days' )->format( 'Y-m-d' );
 	$skip  = aw_si_ga4_skip_sql(); // The GA4 test day is left out here too, as in the other GA4 boxes.
-	// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name and fixed dates only.
-	$by_src  = (array) $wpdb->get_results( $wpdb->prepare( "SELECT txt, SUM(value) n FROM {$o} WHERE src = 'ga4' AND metric = 'ai' AND period = 'day' AND d >= %s{$skip} GROUP BY txt ORDER BY n DESC", $since ) );
-	$by_page = (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, SUM(value) n FROM {$o} WHERE src = 'ga4' AND metric = 'ai' AND period = 'day' AND d >= %s{$skip} GROUP BY page ORDER BY n DESC LIMIT 10", $since ) );
+	// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- fixed dates only ($skip: aw_si_ga4_skip_sql(), esc_sql'd constant dates).
+	$by_src  = (array) $wpdb->get_results( $wpdb->prepare( "SELECT txt, SUM(value) n FROM %i WHERE src = 'ga4' AND metric = 'ai' AND period = 'day' AND d >= %s{$skip} GROUP BY txt ORDER BY n DESC", $o, $since ) );
+	$by_page = (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, SUM(value) n FROM %i WHERE src = 'ga4' AND metric = 'ai' AND period = 'day' AND d >= %s{$skip} GROUP BY page ORDER BY n DESC LIMIT 10", $o, $since ) );
 	// phpcs:enable
 	if ( ! $by_src ) {
 		echo '<p>' . esc_html__( 'No AI referrals recorded yet (GA4 runs daily at 07:20 IST).', 'insightweb' ) . '</p>';
@@ -609,15 +609,15 @@ function aw_si_box_referrers(): void {
 	$keep  = aw_si_keep_days();
 	$d90   = $today->modify( "-{$keep} days" )->format( 'Y-m-d' ); // Daily rows are kept this long.
 	$skip  = aw_si_ga4_skip_sql();
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name and fixed dates only.
-	$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT txt, SUM(IF(metric = 'ref' AND d >= %s, value, 0)) s28, SUM(IF(metric = 'ref_eng' AND d >= %s, value, 0)) e28, SUM(IF(metric = 'ref_key' AND d >= %s, value, 0)) k28, SUM(IF(metric = 'ref', value, 0)) s90, MIN(d) since FROM {$o} WHERE src = 'ga4' AND metric IN ('ref', 'ref_eng', 'ref_key') AND period = 'day' AND d >= %s{$skip} GROUP BY txt", $d28, $d28, $d28, $d90 ) );
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- fixed dates only ($skip: aw_si_ga4_skip_sql(), esc_sql'd constant dates).
+	$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT txt, SUM(IF(metric = 'ref' AND d >= %s, value, 0)) s28, SUM(IF(metric = 'ref_eng' AND d >= %s, value, 0)) e28, SUM(IF(metric = 'ref_key' AND d >= %s, value, 0)) k28, SUM(IF(metric = 'ref', value, 0)) s90, MIN(d) since FROM %i WHERE src = 'ga4' AND metric IN ('ref', 'ref_eng', 'ref_key') AND period = 'day' AND d >= %s{$skip} GROUP BY txt", $d28, $d28, $d28, $o, $d90 ) );
 	// One row per site ("ig" and l.instagram.com are both Instagram), then the top 20.
 	$rows = aw_si_ref_merge( $rows, array( 's28', 'e28', 'k28', 's90' ) );
 	usort( $rows, fn( $a, $b ) => array( (float) $b->s28, (float) $b->s90 ) <=> array( (float) $a->s28, (float) $a->s90 ) );
 	$rows = array_slice( $rows, 0, 20 );
 	// Objections sent and confirmed per site, from the 28-day campaign rows (every campaign), merged the same way.
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
-	$obj = (array) $wpdb->get_results( "SELECT txt, SUM(IF(metric = 'camp_sent', value, 0)) sent, SUM(IF(metric = 'camp_conf', value, 0)) conf FROM {$o} WHERE src = 'ga4' AND period = '28d' AND metric IN ('camp_sent', 'camp_conf') GROUP BY txt" );
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$obj = (array) $wpdb->get_results( $wpdb->prepare( "SELECT txt, SUM(IF(metric = 'camp_sent', value, 0)) sent, SUM(IF(metric = 'camp_conf', value, 0)) conf FROM %i WHERE src = 'ga4' AND period = '28d' AND metric IN ('camp_sent', 'camp_conf') GROUP BY txt", $o ) );
 	$objs = array();
 	foreach ( aw_si_ref_merge( $obj, array( 'sent', 'conf' ) ) as $m ) {
 		$objs[ strtolower( (string) $m->label ) ] = $m;
@@ -750,12 +750,12 @@ function aw_si_box_campaigns(): void {
 	}
 	$o    = aw_si_table( 'obs' );
 	$skip = aw_si_ga4_skip_sql();
-	// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name and fixed conditions only.
-	$camp = (array) $wpdb->get_results( "SELECT page, txt, metric, value, d FROM {$o} WHERE src = 'ga4' AND period = '28d' AND metric IN ('camp_view', 'camp_sent', 'camp_conf')" );
+	// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- fixed conditions only ($skip: aw_si_ga4_skip_sql(), esc_sql'd constant dates).
+	$camp = (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, txt, metric, value, d FROM %i WHERE src = 'ga4' AND period = '28d' AND metric IN ('camp_view', 'camp_sent', 'camp_conf')", $o ) );
 	// The same 28 days as the campaign rows (to yesterday until they arrive).
 	$end   = $camp ? (string) $camp[0]->d : ( new DateTimeImmutable( 'yesterday', wp_timezone() ) )->format( 'Y-m-d' );
 	$start = ( new DateTimeImmutable( $end, wp_timezone() ) )->modify( '-27 days' )->format( 'Y-m-d' );
-	$ref   = (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, txt, metric, SUM(value) value, MIN(d) since FROM {$o} WHERE src = 'ga4' AND period = 'day' AND metric IN ('ref', 'ref_key') AND d >= %s AND d <= %s{$skip} GROUP BY page, txt, metric", $start, $end ) );
+	$ref   = (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, txt, metric, SUM(value) value, MIN(d) since FROM %i WHERE src = 'ga4' AND period = 'day' AND metric IN ('ref', 'ref_key') AND d >= %s AND d <= %s{$skip} GROUP BY page, txt, metric", $o, $start, $end ) );
 	// phpcs:enable
 	$x      = array_map( 'strtolower', aw_si_x_sources() );
 	$social = array_map( 'strtolower', aw_si_social_sources() );
@@ -845,8 +845,8 @@ function aw_si_box_nf(): void {
 		return;
 	}
 	$o = aw_si_table( 'obs' );
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
-	$rows = (array) $wpdb->get_results( "SELECT txt, value, d FROM {$o} WHERE src = 'ga4' AND metric = 'nf' AND period = '28d' ORDER BY value DESC, txt LIMIT 22" );
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT txt, value, d FROM %i WHERE src = 'ga4' AND metric = 'nf' AND period = '28d' ORDER BY value DESC, txt LIMIT 22", $o ) );
 	$rows = array_slice( array_values( array_filter( $rows, fn( $r ) => ! aw_si_nf_is_test( (string) $r->txt ) ) ), 0, 20 ); // test addresses stored before 12 Nov
 	if ( ! $rows ) {
 		echo '<p>' . esc_html__( 'No 404s recorded yet (GA4 runs daily at 07:20 IST).', 'insightweb' ) . '</p>';

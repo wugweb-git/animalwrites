@@ -366,8 +366,8 @@ function aw_si_page_metrics( array $paths = array(), int $days = 28 ): array {
 		$in   = ' AND page_key IN (' . implode( ',', array_fill( 0, count( $keys ), '%s' ) ) . ')';
 		$args = array_merge( $args, $keys );
 	}
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- one %s per path.
-	$rows = $wpdb->get_results( $wpdb->prepare( "SELECT page, SUM(clicks) c, SUM(impr) i, SUM(pos * impr) / NULLIF(SUM(impr), 0) p FROM {$o} WHERE src = 'gsc' AND metric = 'p' AND period = 'day' AND d BETWEEN %s AND %s{$in} GROUP BY page", $args ) );
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber,PluginCheck.Security.DirectDB.UnescapedDBParameter -- $in holds only one %s per path, built above; the table is %i.
+	$rows = $wpdb->get_results( $wpdb->prepare( "SELECT page, SUM(clicks) c, SUM(impr) i, SUM(pos * impr) / NULLIF(SUM(impr), 0) p FROM %i WHERE src = 'gsc' AND metric = 'p' AND period = 'day' AND d BETWEEN %s AND %s{$in} GROUP BY page", array_merge( array( $o ), $args ) ) );
 	$out  = array();
 	foreach ( (array) $rows as $r ) {
 		$out[ (string) $r->page ] = array(

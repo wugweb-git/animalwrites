@@ -29,7 +29,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 				}
 				if ( aw_si_ready() ) {
 					foreach ( array( 'keywords', 'kw_pages', 'obs', 'rising', 'links' ) as $t ) {
-						WP_CLI::log( sprintf( '%-10s %s rows', $t, number_format( (int) $wpdb->get_var( 'SELECT COUNT(*) FROM ' . aw_si_table( $t ) ) ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.NotPrepared
+						WP_CLI::log( sprintf( '%-10s %s rows', $t, number_format( (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM %i', aw_si_table( $t ) ) ) ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 					}
 				} else {
 					WP_CLI::log( 'Tables not created yet.' );
@@ -326,7 +326,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 				}
 				$k    = aw_si_table( 'keywords' );
 				$pg   = aw_si_table( 'kw_pages' );
-				$rows = (array) $wpdb->get_results( "SELECT k.id, k.label, k.impr28, l.obj_type, l.obj_id, p.post_type, p.post_date FROM {$k} k JOIN {$pg} l ON l.kw_id = k.id AND l.role = 'owner' AND l.obj_type IN ('post', 'term') AND l.obj_id > 0 LEFT JOIN {$wpdb->posts} p ON l.obj_type = 'post' AND p.ID = l.obj_id WHERE k.status = 'conflict' ORDER BY k.impr28 DESC, k.id" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table names only.
+				$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT k.id, k.label, k.impr28, l.obj_type, l.obj_id, p.post_type, p.post_date FROM %i k JOIN %i l ON l.kw_id = k.id AND l.role = 'owner' AND l.obj_type IN ('post', 'term') AND l.obj_id > 0 LEFT JOIN {$wpdb->posts} p ON l.obj_type = 'post' AND p.ID = l.obj_id WHERE k.status = 'conflict' ORDER BY k.impr28 DESC, k.id", $k, $pg ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table names only.
 				$by   = array();
 				foreach ( $rows as $r ) {
 					$by[ (int) $r->id ]['label']   = (string) $r->label;
@@ -337,7 +337,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 						'date' => 'term' === $r->obj_type ? '0000' : (string) $r->post_date,
 					);
 				}
-				$all       = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$k} WHERE status = 'conflict'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$all       = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE status = 'conflict'", $k ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 				$prevented = 0;
 				$refused   = 0;
 				$news      = 0;

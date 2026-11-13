@@ -60,8 +60,8 @@ function aw_si_rankmath_gsc_day( string $day ) {
 	if ( '' === $t ) {
 		return new WP_Error( 'aw_si_rm', __( 'Rank Math Analytics is not connected (no rank_math_analytics_gsc table).', 'insightweb' ) );
 	}
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
-	$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT query, page, SUM(clicks) c, SUM(impressions) i, SUM(position * impressions) / NULLIF(SUM(impressions), 0) p FROM {$t} WHERE created >= %s AND created < %s GROUP BY query, page", $day . ' 00:00:00', gmdate( 'Y-m-d', strtotime( $day . ' +1 day' ) ) . ' 00:00:00' ) );
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$rows = (array) $wpdb->get_results( $wpdb->prepare( 'SELECT query, page, SUM(clicks) c, SUM(impressions) i, SUM(position * impressions) / NULLIF(SUM(impressions), 0) p FROM %i WHERE created >= %s AND created < %s GROUP BY query, page', $t, $day . ' 00:00:00', gmdate( 'Y-m-d', strtotime( $day . ' +1 day' ) ) . ' 00:00:00' ) );
 	if ( ! $rows ) {
 		/* translators: %s: date. */
 		return new WP_Error( 'aw_si_rm', sprintf( __( 'Rank Math Analytics has no Search Console rows for %s.', 'insightweb' ), $day ) );

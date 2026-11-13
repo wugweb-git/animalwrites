@@ -24,15 +24,15 @@ function aw_seo_dash_gsc(): ?array {
 		return null;
 	}
 	$o   = aw_si_table( 'obs' );
-	$end = (string) $wpdb->get_var( "SELECT MAX(d) FROM {$o} WHERE src = 'gsc' AND metric = 'total' AND period = 'day'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+	$end = (string) $wpdb->get_var( $wpdb->prepare( "SELECT MAX(d) FROM %i WHERE src = 'gsc' AND metric = 'total' AND period = 'day'", $o ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	if ( '' === $end ) {
 		return null;
 	}
 	$e    = new DateTimeImmutable( $end, wp_timezone() );
 	$from = $e->modify( '-27 days' )->format( 'Y-m-d' );
 	$back = $e->modify( '-55 days' )->format( 'Y-m-d' );
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
-	$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT d, SUM(clicks) c, SUM(impr) i FROM {$o} WHERE src = 'gsc' AND metric = 'total' AND period = 'day' AND d BETWEEN %s AND %s GROUP BY d ORDER BY d", $back, $end ) );
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT d, SUM(clicks) c, SUM(impr) i FROM %i WHERE src = 'gsc' AND metric = 'total' AND period = 'day' AND d BETWEEN %s AND %s GROUP BY d ORDER BY d", $o, $back, $end ) );
 	$out  = array(
 		'clicks'      => 0,
 		'impr'        => 0,
@@ -73,8 +73,8 @@ function aw_seo_dash_nf_open(): array {
 	}
 	$o    = aw_si_table( 'obs' );
 	$open = array();
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
-	foreach ( (array) $wpdb->get_results( "SELECT txt, value FROM {$o} WHERE src = 'ga4' AND metric = 'nf' AND period = '28d' ORDER BY value DESC, txt" ) as $r ) {
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT txt, value FROM %i WHERE src = 'ga4' AND metric = 'nf' AND period = '28d' ORDER BY value DESC, txt", $o ) ) as $r ) {
 		$path = (string) $r->txt;
 		if ( ! aw_si_nf_is_test( $path ) && untrailingslashit( aw_si_final_path( $path ) ) === untrailingslashit( $path ) ) {
 			$open[] = array(

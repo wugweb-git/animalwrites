@@ -23,8 +23,8 @@ function aw_si_searches_gaps(): array {
 	$k = aw_si_table( 'keywords' );
 	// A keyword-map gap note stays on the record; the gap is shown only while no page carries the search and none of
 	// our pages ranks in the top 20 for it.
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
-	$rows   = $wpdb->get_results( "SELECT label, note, status, action, impr28, pos28 FROM {$k} WHERE status = 'gap' OR ( note LIKE 'Gap%' AND COALESCE(status, '') NOT IN ('has-page', 'conflict') AND NOT ( COALESCE(page, '') <> '' AND pos28 IS NOT NULL AND pos28 <= 20 ) ) ORDER BY impr28 DESC, label" );
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- read-only list.
+	$rows   = $wpdb->get_results( $wpdb->prepare( "SELECT label, note, status, action, impr28, pos28 FROM %i WHERE status = 'gap' OR ( note LIKE %s AND COALESCE(status, '') NOT IN ('has-page', 'conflict') AND NOT ( COALESCE(page, '') <> '' AND pos28 IS NOT NULL AND pos28 <= 20 ) ) ORDER BY impr28 DESC, label", $k, $wpdb->esc_like( 'Gap' ) . '%' ) );
 	$groups = array();
 	foreach ( (array) $rows as $r ) {
 		if ( aw_si_gap_variant_covered( (string) $r->label ) ) {
@@ -60,8 +60,8 @@ function aw_si_gap_variant_covered( string $label ): bool {
 	static $has = null; // Every has-page phrase, read once for all the gap rows.
 	if ( null === $has ) {
 		$k = aw_si_table( 'keywords' );
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
-		$has = array_flip( (array) $wpdb->get_col( "SELECT norm FROM {$k} WHERE status = 'has-page'" ) );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- read once per request.
+		$has = array_flip( (array) $wpdb->get_col( $wpdb->prepare( "SELECT norm FROM %i WHERE status = 'has-page'", $k ) ) );
 	}
 	foreach ( array( $m[1], $m[2] ) as $alt ) {
 		if ( isset( $has[ aw_si_norm( str_replace( $m[0], $alt, $label ) ) ] ) ) {

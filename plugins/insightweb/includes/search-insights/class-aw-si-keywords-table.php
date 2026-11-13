@@ -165,8 +165,8 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 	private function entity_row(): ?object {
 		global $wpdb;
 		$t = aw_si_table( 'keywords' );
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
-		$a = $wpdb->get_row( "SELECT COUNT(*) n, SUM(impr28) i, SUM(clicks28) c, SUM(pos28 * impr28) / NULLIF(SUM(IF(pos28 IS NULL, 0, impr28)), 0) p, SUM(IF(pos_prev IS NULL OR pos28 IS NULL, 0, (pos_prev - pos28) * impr28)) / NULLIF(SUM(IF(pos_prev IS NULL OR pos28 IS NULL, 0, impr28)), 0) d FROM {$t} WHERE entity = 1" );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$a = $wpdb->get_row( $wpdb->prepare( "SELECT COUNT(*) n, SUM(impr28) i, SUM(clicks28) c, SUM(pos28 * impr28) / NULLIF(SUM(IF(pos28 IS NULL, 0, impr28)), 0) p, SUM(IF(pos_prev IS NULL OR pos28 IS NULL, 0, (pos_prev - pos28) * impr28)) / NULLIF(SUM(IF(pos_prev IS NULL OR pos28 IS NULL, 0, impr28)), 0) d FROM %i WHERE entity = 1", $t ) );
 		if ( ! $a || ! (int) $a->n ) {
 			return null;
 		}
@@ -204,7 +204,7 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 		$out     = array();
 		foreach ( $this->view_sql() as $key => $sql ) {
 			$sql        .= ' AND ' . $this->entity_sql( $key );
-			$n           = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$t} WHERE {$sql}" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared -- fixed conditions.
+			$n           = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE {$sql}", $t ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- fixed conditions (no %).
 			$url         = add_query_arg( array( 'view' => $key ), aw_si_url( 'keywords' ) );
 			$out[ $key ] = '<a href="' . esc_url( $url ) . '"' . ( $key === $current ? ' class="current" aria-current="page"' : '' ) . '>' . esc_html( $this->view_labels()[ $key ] ) . ' <span class="count">(' . esc_html( number_format_i18n( $n ) ) . ')</span></a>';
 		}
@@ -223,7 +223,7 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 		echo '<div class="alignleft actions">';
 		$this->dropdown( 'role', __( 'All roles', 'insightweb' ), array_map( 'strval', aw_si_roles() ) );
 		global $wpdb;
-		$topics = (array) $wpdb->get_col( 'SELECT DISTINCT topic FROM ' . aw_si_table( 'keywords' ) . " WHERE topic <> '' ORDER BY topic" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.NotPrepared -- table name only.
+		$topics = (array) $wpdb->get_col( $wpdb->prepare( "SELECT DISTINCT topic FROM %i WHERE topic <> '' ORDER BY topic", aw_si_table( 'keywords' ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		$this->dropdown( 'topic', __( 'All topics', 'insightweb' ), array_combine( $topics, $topics ), true );
 		$this->dropdown(
 			'page_type',
@@ -324,18 +324,18 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 		$sql   = implode( ' AND ', $where );
 		$agg   = $this->plain_all() ? $this->entity_row() : null; // Counts as the first row of page 1.
 		$shift = $agg ? 1 : 0;
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- conditions built from fixed parts with placeholders.
-		$total       = (int) $wpdb->get_var( $args ? $wpdb->prepare( "SELECT COUNT(*) FROM {$t} WHERE {$sql}", $args ) : "SELECT COUNT(*) FROM {$t} WHERE {$sql}" );
-		$query       = "SELECT * FROM {$t} WHERE {$sql} ORDER BY {$by}, label ASC LIMIT %d OFFSET %d";
-		$this->items = $wpdb->get_results( $wpdb->prepare( $query, array_merge( $args, array( 1 === $paged ? $per - $shift : $per, max( 0, ( $paged - 1 ) * $per - $shift ) ) ) ) );
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber,PluginCheck.Security.DirectDB.UnescapedDBParameter -- conditions and order built from fixed parts with placeholders.
+		$total       = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE {$sql}", array_merge( array( $t ), $args ) ) );
+		$query       = "SELECT * FROM %i WHERE {$sql} ORDER BY {$by}, label ASC LIMIT %d OFFSET %d";
+		$this->items = $wpdb->get_results( $wpdb->prepare( $query, array_merge( array( $t ), $args, array( 1 === $paged ? $per - $shift : $per, max( 0, ( $paged - 1 ) * $per - $shift ) ) ) ) );
 		// phpcs:enable
 		// Monthly search volume from the latest Keyword Planner import, for the keywords on this page.
 		$page_ids = array_filter( array_map( 'intval', wp_list_pluck( (array) $this->items, 'id' ) ) );
 		if ( $page_ids ) {
 			$o  = aw_si_table( 'obs' );
-			$in = implode( ',', $page_ids );
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers and a table name.
-			$vols = (array) $wpdb->get_results( "SELECT kw_id, src, value, txt FROM {$o} WHERE src = 'kp' AND metric = 'volume' AND kw_id IN ({$in}) ORDER BY d" );
+			$in = implode( ',', array_map( 'intval', $page_ids ) );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers.
+			$vols = (array) $wpdb->get_results( $wpdb->prepare( "SELECT kw_id, src, value, txt FROM %i WHERE src = 'kp' AND metric = 'volume' AND kw_id IN ({$in}) ORDER BY d", $o ) );
 			$by   = array();
 			foreach ( $vols as $v ) {
 				$by[ (int) $v->kw_id ] = $v; // Ordered by date: the latest wins.
@@ -343,8 +343,8 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 			// Bing: our impressions by search (bing.php, Bing's weeks and older months) and Bing's own weekly search
 			// volume for the top keywords (bing-crawl.php, the last 12 weeks), kept apart from Search Console's figures.
 			$since = ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( '-90 days' )->format( 'Y-m-d' );
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers and a table name.
-			$bing = (array) $wpdb->get_results( $wpdb->prepare( "SELECT kw_id, SUM(IF(metric = 'q', impr, 0)) i, AVG(IF(metric = 'kw-volume', value, NULL)) v FROM {$o} WHERE src = 'bing' AND metric IN ('q', 'kw-volume') AND kw_id IN ({$in}) AND d >= %s GROUP BY kw_id", $since ), OBJECT_K );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers.
+			$bing = (array) $wpdb->get_results( $wpdb->prepare( "SELECT kw_id, SUM(IF(metric = 'q', impr, 0)) i, AVG(IF(metric = 'kw-volume', value, NULL)) v FROM %i WHERE src = 'bing' AND metric IN ('q', 'kw-volume') AND kw_id IN ({$in}) AND d >= %s GROUP BY kw_id", $o, $since ), OBJECT_K );
 			$tools = function_exists( 'aw_si_tool_figures' ) ? aw_si_tool_figures( $page_ids ) : array();
 			$oseo  = function_exists( 'aw_si_openseo_positions' ) ? aw_si_openseo_positions( $page_ids ) : array(); // Kept apart from the Live check.
 			foreach ( $this->items as $item ) {

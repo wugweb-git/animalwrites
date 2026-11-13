@@ -120,7 +120,7 @@ function aw_si_openseo_positions( array $ids ): array {
 	}
 	$o    = aw_si_table( 'obs' );
 	$in   = implode( ',', $ids );
-	$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT kw_id, value, txt, d FROM {$o} WHERE src = %s AND metric = 'position' AND kw_id IN ({$in}) ORDER BY d", AW_SI_OPENSEO_POS ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers and a table name.
+	$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT kw_id, value, txt, d FROM %i WHERE src = %s AND metric = 'position' AND kw_id IN ({$in}) ORDER BY d", $o, AW_SI_OPENSEO_POS ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers and a table name.
 	$out  = array();
 	foreach ( $rows as $r ) {
 		$out[ (int) $r->kw_id ] = $r; // Ordered by day: the latest wins.

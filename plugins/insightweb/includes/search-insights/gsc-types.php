@@ -202,8 +202,8 @@ function aw_si_gsc_types_pages( int $days = 28, int $limit = 10 ): array {
 	}
 	$o     = aw_si_table( 'obs' );
 	$since = ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( "-{$days} days" )->format( 'Y-m-d' );
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
-	return (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, SUM(IF(metric = 'discover', clicks, 0)) dc, SUM(IF(metric = 'discover', impr, 0)) di, SUM(IF(metric = 'gnews', clicks, 0)) nc, SUM(IF(metric = 'gnews', impr, 0)) ni FROM {$o} WHERE src = 'gsc-types' AND metric IN ('discover', 'gnews') AND period = 'day' AND d >= %s GROUP BY page ORDER BY SUM(impr) DESC LIMIT %d", $since, $limit ) );
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	return (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, SUM(IF(metric = 'discover', clicks, 0)) dc, SUM(IF(metric = 'discover', impr, 0)) di, SUM(IF(metric = 'gnews', clicks, 0)) nc, SUM(IF(metric = 'gnews', impr, 0)) ni FROM %i WHERE src = 'gsc-types' AND metric IN ('discover', 'gnews') AND period = 'day' AND d >= %s GROUP BY page ORDER BY SUM(impr) DESC LIMIT %d", $o, $since, $limit ) );
 }
 
 /** Overview box: Discover and Google News. */
@@ -256,8 +256,8 @@ function aw_si_inspect_todo( int $cap, ?int &$never = null ): array {
 		}
 	}
 	$o = aw_si_table( 'obs' );
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
-	$seen  = (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, value, fetched FROM {$o} WHERE src = 'inspect' AND metric = 'index' AND period = 'state' AND d = %s ORDER BY value ASC, fetched ASC", AW_SI_INSPECT_D ) );
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$seen  = (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, value, fetched FROM %i WHERE src = 'inspect' AND metric = 'index' AND period = 'state' AND d = %s ORDER BY value ASC, fetched ASC", $o, AW_SI_INSPECT_D ) );
 	$known = array();
 	foreach ( $seen as $r ) {
 		$known[ $r->page ] = $r;
@@ -507,8 +507,8 @@ function aw_si_index_states(): array {
 		return $cache;
 	}
 	$o = aw_si_table( 'obs' );
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
-	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, value, txt, fetched FROM {$o} WHERE src = 'inspect' AND metric = 'index' AND period = 'state' AND d = %s", AW_SI_INSPECT_D ) ) as $r ) {
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, value, txt, fetched FROM %i WHERE src = 'inspect' AND metric = 'index' AND period = 'state' AND d = %s", $o, AW_SI_INSPECT_D ) ) as $r ) {
 		$cache[ $r->page ] = array( (float) $r->value > 0, (string) $r->txt, (string) $r->fetched );
 	}
 	return $cache;
@@ -626,7 +626,7 @@ function aw_si_request_build( int $n ): array {
 	if ( $ids ) {
 		$t = $wpdb->prefix . 'rank_math_internal_meta';
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders -- table name only; one %d per ID.
-		$in = (array) $wpdb->get_results( $wpdb->prepare( "SELECT object_id, incoming_link_count FROM {$t} WHERE object_id IN (" . implode( ',', array_fill( 0, count( $ids ), '%d' ) ) . ')', array_values( $ids ) ) );
+		$in = (array) $wpdb->get_results( $wpdb->prepare( 'SELECT object_id, incoming_link_count FROM %i WHERE object_id IN (' . implode( ',', array_fill( 0, count( $ids ), '%d' ) ) . ')', array_merge( array( $t ), array_values( $ids ) ) ) );
 		$by = array();
 		foreach ( $in as $r ) {
 			$by[ (int) $r->object_id ] = (int) $r->incoming_link_count;
