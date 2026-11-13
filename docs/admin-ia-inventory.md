@@ -31,7 +31,7 @@ the same with or without Kits Core), then third-party plugins as their vendors s
 | Appearance › Themes, Editor, Fonts | core | keep |
 | Kits | Kits Core `admin-home.php:22` | **done 12 Nov**: its own top-level menu, first in the Wugweb block |
 | Appearance › Theme Check | Theme Check | keep |
-| Kits, DirectoryWeb, SourceWeb, RankWeb, InsightWeb, MailWeb, PlanWeb | Kits Core `admin-fold.php` (`kits_wugweb_menu_slots()`), each plugin's own call without Kits Core | **done 12 Nov**: each its own top-level menu, one block after a separator, the same order without Kits Core (`admin-ia.php` menu order) |
+| Kits, DirectoryWeb, SourceWeb, RankWeb, InsightWeb, MailWeb, PlanWeb | each plugin's own `add_menu_page()` (Kits 58.1, DirectoryWeb 58.2, SourceWeb 58.3, RankWeb 58.4, InsightWeb 58.5, MailWeb 58.6, PlanWeb 58.7; separator `separator-wugweb` at 58.05, added by whichever registers first) | **done 12 Nov**, no Kits Core helper or forced menu order since 13 Nov |
 | Tools › Plugin Check, Plugin Check Namer, Plugin Check SVN | Plugin Check | keep (development tool) |
 | Settings › Performance, Plugin Check, Simple History | third party | keep |
 | Site Kit, LiteSpeed Cache, FluentCRM, Fluent Forms, UpdraftPlus | third party | keep |

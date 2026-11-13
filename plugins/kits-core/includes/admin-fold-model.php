@@ -3,7 +3,7 @@
  * Folded menus as plain PHP (no WordPress calls), so tests/admin-menu-tests.php can run them without WordPress: the
  * address of a folded menu's item, which folded menu a screen belongs to, and a folded menu's tabs.
  *
- * The WordPress side (registering the item, lighting it, printing the tabs) is admin-fold.php.
+ * The WordPress side (printing the tabs) is kits_admin_fold_tabs() in admin-menu.php.
  *
  * @package kits-core
  */

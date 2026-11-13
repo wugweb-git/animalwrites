@@ -379,9 +379,9 @@ $menu  = (string) file_get_contents( $inc . 'admin-menu.php' );
 aw_t( 'aw-sourcing-menu' === AW_SRC_MENU, 'the menu has its own slug' );
 aw_t( ! in_array( AW_SRC_MENU, array( AW_SRC_PAGE, 'aw-review', 'aw-enrich-review', 'aw-inbox' ), true ), 'the menu slug is no screen\'s slug' );
 aw_t( 'sourcing_page_' . AW_SRC_PAGE === AW_SRC_SCREEN, 'the page\'s screen id follows the menu\'s hook prefix ("sourcing")' );
-aw_t( false !== strpos( $menu, "kits_admin_fold_menu( AW_SRC_MENU, 'plugins.php', 'SourceWeb' . \$count, AW_REVIEW_CAP, 'sourcing', dirname( __DIR__ ) . '/assets/menu-icon.svg' );" ), 'SourceWeb (its own menu), with the To review count, opens the Overview; the hook prefix stays "sourcing" (the screen id depends on it)' );
+aw_t( false !== strpos( $menu, "add_menu_page( 'SourceWeb', 'SourceWeb' . \$count, AW_REVIEW_CAP, AW_SRC_MENU, 'aw_sourcing_overview_page', \$icon, '58.3' );" ) && false !== strpos( $menu, "\$GLOBALS['admin_page_hooks'][ AW_SRC_MENU ] = 'sourcing';" ), 'SourceWeb: its own top-level menu (core add_menu_page, at 58.3 in the Wugweb block), with the To review count, opening the Overview; the hook prefix stays "sourcing" (the screen id depends on it)' );
+aw_t( false === strpos( $menu, 'kits_admin_fold_menu' ) && false !== strpos( $menu, "'separator-wugweb'" ), 'the menu needs no Kits Core: no fold helper, its own separator above the block' );
 aw_t( false === strpos( $menu, "'menu_order'" ), 'no top-level menu order of its own' );
-aw_t( false !== strpos( $menu, "add_menu_page( 'SourceWeb', 'SourceWeb', AW_REVIEW_CAP, AW_SRC_MENU, 'aw_sourcing_overview_page'" ) && false !== strpos( $menu, "\$GLOBALS['admin_page_hooks'][ AW_SRC_MENU ] = 'sourcing';" ), 'without Kits Core: its own menu, titled "SourceWeb", hook prefix "sourcing"' );
 foreach ( array( 'admin-menu.php', 'review-queue.php', 'enrichment-admin.php', 'sourcing-policy.php' ) as $f ) {
 	aw_t( false !== strpos( (string) file_get_contents( $inc . $f ), 'sourceweb_ui_page( ' ), "the screen in $f is drawn by sourceweb_ui_page()" );
 }
