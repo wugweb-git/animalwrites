@@ -388,9 +388,9 @@
 		holder.querySelectorAll('.kit-share a[data-kit-share]').forEach(function (a) { if (nets[a.dataset.kitShare] && sh.text) a.href = nets[a.dataset.kitShare]; });
 		/* After the close day the Share section also carries the follow line (owner, 13 Nov 2026: the letter tool's
 		   "Sent? Follow us for the decision." and the Share section are one place). */
-		if (sh.closed && holder.matches('[data-aw-share]') && !holder.querySelector('.aw-share-follow')) {
+		if (sh.closed && holder.matches('[data-aw-share]') && !holder.querySelector('.aw-camp-share-follow')) {
 			var f = document.createElement('p');
-			f.className = 'aw-share-follow';
+			f.className = 'aw-camp-share-follow';
 			f.innerHTML = '<strong>Follow us for the decision.</strong> ' + followLinks();
 			holder.appendChild(f);
 		}

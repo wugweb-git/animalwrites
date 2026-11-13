@@ -1025,5 +1025,5 @@
 
 @media (prefers-reduced-motion: reduce) { .aw-camp--lab-rules .aw-camp-wait-chip::before { animation: none; } }
 /* The follow line under the share bar in the Share section (after the close day). */
-.aw-camp.aw-camp #share .aw-share-follow { margin: 0; font-size: var(--kit-type-base); }
-.aw-camp.aw-camp #share .aw-share-follow a { color: var(--camp-on-mark); text-decoration: underline; text-underline-offset: 0.2em; }
+.aw-camp.aw-camp #share .aw-camp-share-follow { margin: 0; font-size: var(--kit-type-base); }
+.aw-camp.aw-camp #share .aw-camp-share-follow a { color: var(--camp-on-mark); text-decoration: underline; text-underline-offset: 0.2em; }
