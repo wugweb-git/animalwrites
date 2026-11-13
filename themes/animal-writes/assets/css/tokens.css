@@ -15,6 +15,8 @@
   --kit-thumb-max: 15rem;
   --kit-body-min: 10rem;
   --kit-card-min-width: min(100%, var(--kit-card-min));
+  --aw-stack-card-min: 350px; /* stacked list card, least width (owner, 13 Nov 2026; docs/card-sizes.md) */
+  --aw-stack-card-max: 600px; /* stacked list card, most width (owner, 13 Nov 2026) */
   --kit-card-stacked-gap: clamp(var(--kit-space-3), 5vw, var(--kit-space-5));
   --kit-card-stacked-media: clamp(var(--kit-thumb-min), 30%, var(--kit-thumb-max)); /* docs/card-sizes.md: picture 30%, 4.5 to 15rem */
   --kit-card-stacked-media-max: none;
