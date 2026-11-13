@@ -21,6 +21,7 @@
  *   aw_campaign_share_post     attachment ID: 1080x1350 (4:5) image for feed posts (older campaigns)
  *   aw_campaign_share_hashtags hashtags for the X link only: comma-separated, without # (owner, 2 Nov 2026)
  *   aw_campaign_short          the short link's slug: /lab redirects to the campaign (campaign-short.php)
+ *   aw_campaign_card_title     the side card's title, short (the campaign title when empty; owner, 13 Nov 2026)
  *
  * Shortcodes:
  *   [aw_rule_chip rule="11-3" label="Rule 11(3)" allows="..."]  a chip that opens the clause, word for word
@@ -861,6 +862,7 @@ function aw_camp_share_box( $post ) {
 	echo '<p><label for="aw-camp-share-text"><strong>Share line</strong> (sent with the link)</label><input type="text" id="aw-camp-share-text" name="aw_campaign_share_text" value="' . esc_attr( $m( 'aw_campaign_share_text' ) ) . '" class="widefat"><br><label for="aw-camp-share-hashtags">Hashtags for X</label><input type="text" id="aw-camp-share-hashtags" name="aw_campaign_share_hashtags" value="' . esc_attr( $m( 'aw_campaign_share_hashtags' ) ) . '" class="widefat"><br><label for="aw-camp-share-image"><strong>Share picture ID (1080×1080)</strong>, one picture for X, Facebook, Instagram, LinkedIn, WhatsApp and stories</label> <input type="number" id="aw-camp-share-image" name="aw_campaign_share_image" value="' . esc_attr( $m( 'aw_campaign_share_image' ) ) . '" class="small-text"><br><span class="description">When set, it replaces the story and post pictures below (older campaigns).</span><br><label for="aw-camp-share-story">Story image ID (1080×1920)</label> <input type="number" id="aw-camp-share-story" name="aw_campaign_share_story" value="' . esc_attr( $m( 'aw_campaign_share_story' ) ) . '" class="small-text"><br><label for="aw-camp-share-post">Post image ID (1080×1350)</label> <input type="number" id="aw-camp-share-post" name="aw_campaign_share_post" value="' . esc_attr( $m( 'aw_campaign_share_post' ) ) . '" class="small-text"></p>';
 	$short = aw_camp_short_url( $post->ID );
 	echo '<p><label for="aw-camp-short"><strong>Short link</strong></label><br><code>' . esc_html( trailingslashit( home_url() ) ) . '</code><input type="text" id="aw-camp-short" name="aw_campaign_short" value="' . esc_attr( $m( 'aw_campaign_short' ) ) . '" class="regular-text" maxlength="40"><br><span class="description">Letters, digits and hyphens. Redirects to this campaign while it is published; Share and Copy link use it.' . ( $short ? ' <a href="' . esc_url( $short ) . '">' . esc_html( $short ) . '</a>' : '' ) . '</span></p>';
+	echo '<p><label for="aw-camp-card-title"><strong>Side card title</strong></label><input type="text" id="aw-camp-card-title" name="aw_campaign_card_title" value="' . esc_attr( $m( 'aw_campaign_card_title' ) ) . '" class="widefat" maxlength="60"><br><span class="description">The Current campaign card on News, guides and Library pages. Empty: the campaign title.</span></p>';
 	echo '<p><strong>Letters sent:</strong> ' . esc_html( number_format_i18n( $sent ) ) . '<br><span class="description">"Yes, I sent it" clicks, at most one a minute per visitor. Shown on the page from 100.</span></p>';
 	echo '<details><summary>How this campaign works</summary><ul style="list-style:disc;margin-left:1.2em">'
 		. '<li><code>[aw_letter_tool]</code>: the letter builder; its grounds are the list with class <code>aw-letter-grounds</code> just before it.</li>'
@@ -898,6 +900,7 @@ add_action(
 		update_post_meta( $id, 'aw_campaign_share_image', (string) absint( $_POST['aw_campaign_share_image'] ?? 0 ) );
 		update_post_meta( $id, 'aw_campaign_share_story', (string) absint( $_POST['aw_campaign_share_story'] ?? 0 ) );
 		update_post_meta( $id, 'aw_campaign_share_post', (string) absint( $_POST['aw_campaign_share_post'] ?? 0 ) );
+		update_post_meta( $id, 'aw_campaign_card_title', mb_substr( sanitize_text_field( wp_unslash( $_POST['aw_campaign_card_title'] ?? '' ) ), 0, 60 ) );
 		update_post_meta( $id, 'aw_campaign_partners', implode( ',', array_filter( array_map( 'absint', explode( ',', sanitize_text_field( wp_unslash( $_POST['aw_campaign_partners'] ?? '' ) ) ) ) ) ) );
 		update_post_meta( $id, 'aw_campaign_supporters', implode( ',', array_filter( array_map( 'absint', explode( ',', sanitize_text_field( wp_unslash( $_POST['aw_campaign_supporters'] ?? '' ) ) ) ) ) ) );
 	},
@@ -940,7 +943,11 @@ function aw_current_campaign_id() {
 	return $best;
 }
 
-/** A card for the current campaign: its picture, title, one or two lines, days left and Take part. Nothing when none is open. */
+/**
+ * A card for the current campaign: its picture, title, one or two lines, days left and Take part. Nothing when none is open.
+ * After the close date (the campaign still open, waiting for a decision) it says "Decision awaited" and links to what
+ * happens next and to the updates sign-up on the page (owner, 13 Nov 2026).
+ */
 function aw_block_current_campaign( $a = array(), $id = 0 ) {
 	// sm, the campaign's small card (owner, 13 Nov 2026: every campaign in four sizes, lg, md, sm and share). The block's
 	// "campaign" attribute (a campaign's slug, e.g. diwali) shows that campaign; without it, the open campaign closing soonest.
@@ -956,18 +963,31 @@ function aw_block_current_campaign( $a = array(), $id = 0 ) {
 	if ( '' !== $theme ) {
 		wp_enqueue_style( 'aw-camp-tokens', plugins_url( 'assets/css/aw-camp-tokens.css', AW_CORE_DIR . 'animal-writes-core.php' ), array(), (string) filemtime( AW_CORE_DIR . 'assets/css/aw-camp-tokens.css' ) );
 	}
-	$url  = get_permalink( $c );
-	$days = aw_camp_days_left( $c );
-	$img  = get_the_post_thumbnail( $c, 'medium_large', array( 'alt' => '', 'loading' => 'lazy' ) );
-	$hid  = 'aw-side-camp-' . $c;
+	$url   = get_permalink( $c );
+	$days  = aw_camp_days_left( $c );
+	$close = aw_camp_close_ts( $c );
+	$wait  = $close && time() >= $close;
+	$img   = get_the_post_thumbnail( $c, 'medium_large', array( 'alt' => '', 'loading' => 'lazy' ) );
+	$hid   = 'aw-side-camp-' . $c;
+	$title = trim( (string) get_post_meta( $c, 'aw_campaign_card_title', true ) );
+	$title = '' !== $title ? $title : get_the_title( $c );
 	/* translators: %d: days. */
 	$left = $days ? sprintf( _n( '%d day left', '%d days left', $days, 'animal-writes-core' ), $days ) : ''; // the day count only, no "Last day" status (owner, 2 Nov 2026)
-	return '<section class="kit-card aw-side-camp' . ( '' !== $theme ? ' aw-camp aw-camp--' . $theme : '' ) . '" aria-labelledby="' . esc_attr( $hid ) . '">'
+	if ( $wait ) {
+		$meta = '<span class="kit-meta-item">' . esc_html__( 'Current campaign', 'animal-writes-core' ) . '</span><span class="aw-side-camp-chip">' . esc_html__( 'Decision awaited', 'animal-writes-core' ) . '</span>';
+		$btns = '<div class="aw-side-camp-btns"><a class="kit-btn aw-side-camp-btn" href="' . esc_url( $url . '#context' ) . '">' . esc_html__( 'What happens next', 'animal-writes-core' ) . '</a>'
+			. '<a class="kit-btn kit-btn--secondary aw-side-camp-btn" href="' . esc_url( $url . '#updates' ) . '">' . esc_html__( 'Get the decision first', 'animal-writes-core' ) . '</a></div>';
+	} else {
+		$meta = '<span class="kit-meta-item">' . esc_html__( 'Current campaign', 'animal-writes-core' ) . '</span>' . ( '' !== $left ? '<span class="kit-meta-item">' . aw_i( 'clock' ) . esc_html( $left ) . '</span>' : '' );
+		$btns = '<a class="kit-btn aw-side-camp-btn" href="' . esc_url( $url ) . '" aria-describedby="' . esc_attr( $hid ) . '">' . esc_html__( 'Take part', 'animal-writes-core' ) . '</a>';
+	}
+	$class = 'kit-card aw-side-camp' . ( '' !== $theme ? ' aw-camp aw-camp--' . $theme : '' ) . ( $wait ? ' aw-side-camp--wait' : '' );
+	return '<section class="' . esc_attr( $class ) . '" aria-labelledby="' . esc_attr( $hid ) . '">'
 		. ( $img ? '<div class="aw-side-camp-media">' . $img . '</div>' : '' )
-		. '<div class="aw-side-camp-body"><p class="aw-side-camp-meta kit-meta-row"><span class="kit-meta-item">' . esc_html__( 'Current campaign', 'animal-writes-core' ) . '</span>' . ( '' !== $left ? '<span class="kit-meta-item">' . aw_i( 'clock' ) . esc_html( $left ) . '</span>' : '' ) . '</p>'
-		. '<h2 class="aw-side-camp-title" id="' . esc_attr( $hid ) . '"><a href="' . esc_url( $url ) . '">' . esc_html( get_the_title( $c ) ) . '</a></h2>'
+		. '<div class="aw-side-camp-body"><p class="aw-side-camp-meta kit-meta-row">' . $meta . '</p>'
+		. '<h2 class="aw-side-camp-title" id="' . esc_attr( $hid ) . '"><a href="' . esc_url( $url ) . '">' . esc_html( $title ) . '</a></h2>'
 		. ( has_excerpt( $c ) ? '<p class="aw-side-camp-line">' . esc_html( wp_strip_all_tags( get_the_excerpt( $c ) ) ) . '</p>' : '' )
-		. '<a class="kit-btn aw-side-camp-btn" href="' . esc_url( $url ) . '" aria-describedby="' . esc_attr( $hid ) . '">' . esc_html__( 'Take part', 'animal-writes-core' ) . '</a></div></section>';
+		. $btns . '</div></section>';
 }
 
 /*

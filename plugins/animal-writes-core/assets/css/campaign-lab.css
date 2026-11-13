@@ -992,3 +992,38 @@
 .aw-camp--lab-rules .aw-camp-note:has(> a[href*="/resources/"]) + .aw-camp-note:has(> a[href*="/resources/"]) { margin-block-start: 0; }
 .aw-camp--lab-rules .aw-camp-note > a[href*="/resources/"] { display: flex; align-items: center; min-height: var(--kit-size-target); }
 .aw-camp--lab-rules .aw-camp-dark .aw-camp-note:has(> a[href*="/resources/"]) > :is(a, .kit-ico) { color: var(--kit-color-on-ink); }
+
+/* Lab rules in the wait for the decision (owner, 13 Nov 2026): a status chip and keyphrase line in the hero, a hero
+   picture in place of the document card, a dated four-step status band, and the updates sign-up after the letter tool. */
+.aw-camp--lab-rules .aw-camp-wait-chip { display: inline-flex; align-items: center; gap: var(--kit-space-2); margin: 0 0 var(--kit-space-4); padding: var(--kit-space-1) var(--kit-space-3); border-radius: var(--kit-radius-pill); background: rgb(255 255 255 / 0.14); box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.35); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-strong); line-height: 1.5; }
+.aw-camp--lab-rules .aw-camp-wait-chip::before { content: ""; flex: none; width: 0.5625rem; height: 0.5625rem; border-radius: 50%; background: currentColor; animation: aw-camp-wait-pulse 2.4s ease-out 3; }
+@keyframes aw-camp-wait-pulse { 0% { box-shadow: 0 0 0 0 rgb(255 255 255 / 0.7); } 70%, 100% { box-shadow: 0 0 0 0.5625rem rgb(255 255 255 / 0); } }
+.aw-camp--lab-rules .aw-camp-keyline { margin: 0 0 var(--kit-space-4); font-size: var(--kit-type-sm); opacity: 0.92; }
+.aw-camp--lab-rules .aw-camp-hero-pic { margin: 0; overflow: hidden; border-radius: var(--kit-radius-card); aspect-ratio: 4 / 3; background: var(--camp-accent); }
+.aw-camp--lab-rules .aw-camp-hero-pic img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 75%; }
+@media (min-width: 1200px) { .aw-camp--lab-rules .aw-camp-hero-pic { aspect-ratio: 4 / 5; } .aw-camp--lab-rules .aw-camp-hero-pic img { object-position: 60% 50%; } }
+
+.aw-camp--lab-rules ol.aw-camp-wait-steps { margin: var(--kit-space-6) 0 var(--kit-space-5); padding: 0; list-style: none; }
+.aw-camp--lab-rules .aw-camp-wait-steps > li { position: relative; margin: 0; padding: 0 0 var(--kit-space-5) var(--kit-space-7); font-size: var(--kit-type-base); }
+.aw-camp--lab-rules .aw-camp-wait-steps > li::before { content: ""; position: absolute; left: 0; top: 0.2em; box-sizing: border-box; width: 1.25rem; height: 1.25rem; border: 2px solid rgb(255 255 255 / 0.4); border-radius: 50%; background: var(--camp-dark); }
+.aw-camp--lab-rules .aw-camp-wait-steps > li::after { content: ""; position: absolute; left: calc(0.625rem - 1px); top: calc(0.2em + 1.25rem); bottom: 0; width: 2px; background: rgb(255 255 255 / 0.22); }
+.aw-camp--lab-rules .aw-camp-wait-steps > li:last-child { padding-bottom: 0; }
+.aw-camp--lab-rules .aw-camp-wait-steps > li:last-child::after { content: none; }
+.aw-camp--lab-rules .aw-camp-wait-steps > li:nth-child(-n + 2)::before { border-color: var(--camp-primary); background: var(--camp-primary); }
+.aw-camp--lab-rules .aw-camp-wait-steps > li:nth-child(3)::before { border-color: var(--kit-color-on-ink); background: var(--kit-color-on-ink); box-shadow: 0 0 0 0.3125rem rgb(163 18 47 / 0.7); }
+.aw-camp--lab-rules .aw-camp-wait-steps > li > strong { display: block; font-size: var(--kit-type-sm); font-weight: var(--kit-weight-strong); opacity: 0.8; }
+@media (min-width: 768px) {
+	.aw-camp--lab-rules ol.aw-camp-wait-steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--kit-space-5); }
+	.aw-camp--lab-rules .aw-camp-wait-steps > li { padding: var(--kit-space-7) var(--kit-space-3) 0 0; }
+	.aw-camp--lab-rules .aw-camp-wait-steps > li::before { top: 0; }
+	.aw-camp--lab-rules .aw-camp-wait-steps > li::after { top: calc(0.625rem - 1px); left: 1.25rem; right: calc(-1 * var(--kit-space-5)); bottom: auto; width: auto; height: 2px; }
+}
+.aw-camp--lab-rules .aw-camp-wait-stamp { font-size: var(--kit-type-sm); opacity: 0.8; }
+.aw-camp--lab-rules .aw-camp-wait-stamp a { color: inherit; }
+
+/* The updates sign-up band (id="updates"): the form sits on a white panel inside the dark band. */
+.aw-camp--lab-rules .aw-camp-wait-updates .aw-newsletter-form { max-width: 560px; margin-top: var(--kit-space-5); padding: var(--kit-space-5); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); color: var(--kit-color-text); }
+.aw-camp--lab-rules .aw-camp-wait-updates .aw-newsletter-form :is(p, li, label, strong, span) { color: var(--kit-color-text); }
+.aw-camp--lab-rules .aw-camp-wait-updates .aw-newsletter-form a { color: var(--kit-color-ink); }
+
+@media (prefers-reduced-motion: reduce) { .aw-camp--lab-rules .aw-camp-wait-chip::before { animation: none; } }

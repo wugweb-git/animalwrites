@@ -71,6 +71,12 @@
 .aw-side-camp.aw-camp :is(.aw-side-camp-meta, .aw-side-camp-meta .kit-meta-item, .aw-side-camp-line) { color: var(--camp-on-mark); }
 .aw-side-camp.aw-camp .aw-side-camp-btn { border-color: var(--camp-on-mark); background: var(--camp-on-mark); color: var(--camp-mark); }
 .aw-side-camp.aw-camp :is(.aw-side-camp-title a, .aw-side-camp-btn):focus-visible { outline: var(--kit-focus-width) solid var(--camp-on-mark); outline-offset: var(--kit-focus-offset); }
+/* Side card after the close date: "Decision awaited" and two links (owner, 13 Nov 2026). */
+.aw-side-camp-chip { display: inline-flex; align-items: center; gap: var(--kit-space-1); padding: 0 var(--kit-space-2); border-radius: var(--kit-radius-pill); background: var(--kit-color-ink); color: var(--kit-color-bg); font-size: var(--kit-type-xs, 0.75rem); font-weight: var(--kit-weight-strong); line-height: 1.6; }
+.aw-side-camp-btns { display: grid; gap: var(--kit-space-2); }
+.aw-side-camp-btns .kit-btn { width: 100%; justify-content: center; }
+.aw-side-camp.aw-camp .aw-side-camp-chip { background: transparent; color: var(--camp-on-mark); box-shadow: inset 0 0 0 1px var(--camp-on-mark); }
+.aw-side-camp.aw-camp .aw-side-camp-btn.kit-btn--secondary { border-color: var(--camp-on-mark); background: transparent; color: var(--camp-on-mark); }
 .kit-main .aw-more-list { grid-template-columns: minmax(0, 1fr); }
 @media (min-width: 768px) {
 	.kit-main .aw-more-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }

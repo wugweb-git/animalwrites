@@ -107,6 +107,7 @@ function aw_meta_schema() {
 		'aw_campaign_share_post' => array( 'string', array( 'aw_campaign' ), 'Post image (attachment ID, 1080x1350)' ),
 		'aw_campaign_metric_stale' => array( 'string', array( 'aw_campaign' ), 'Days without a new letter before the count shows an as-of date' ),
 		'aw_campaign_short'  => array( 'string', array( 'aw_campaign' ), 'Short link slug: /{slug} redirects to the campaign while published (letters, digits, hyphens)' ),
+		'aw_campaign_card_title' => array( 'string', array( 'aw_campaign' ), 'Side card title (short; the campaign title when empty)' ),
 
 		// Resources: the date a guide was last checked (schema lastReviewed).
 		'kits_last_reviewed' => array( 'string', array( 'post' ), 'Last reviewed (Y-m-d)' ),
