@@ -165,6 +165,13 @@
 @media (min-width: 768px) { .aw-camp.aw-camp--community-dogs > .aw-camp-jump ul { flex-wrap: wrap; overflow: visible; } }
 .aw-camp.aw-camp--community-dogs > .aw-camp-jump + .aw-camp-section { border-top: 0 !important; }
 
+/* ---------- Share this story (owner, 13 Nov 2026): the site's one share bar on the shared #share band (campaign.css).
+   That band sets white on the campaign mark; here the mark is #ffa500, where white is about 2:1, so the band's text,
+   icons, rings and focus ring take the palette's ink (9.4:1 on #ffa500, as in the hero). ---------- */
+.aw-camp.aw-camp--community-dogs #share { --camp-on-mark: var(--camp-primary-ink); }
+.aw-camp.aw-camp.aw-camp--community-dogs #share .aw-camp-share-kit.aw-share-block { margin-top: 0; gap: 0; }
+.aw-camp.aw-camp.aw-camp--community-dogs #share > h2 { margin-bottom: 0 !important; } /* no lede here: the bar's own 24px top padding is the gap under the heading */
+
 /* ---------- Campaign goal: the heading beside two statements, the outcome under them ---------- */
 .aw-camp.aw-camp--community-dogs #campaign-goal > p:not(.aw-camp-status) { max-width: 40ch; margin: 0 !important; font-size: var(--kit-type-h3); font-weight: var(--kit-weight-medium); line-height: var(--kit-leading-heading); letter-spacing: var(--kit-tracking-heading); }
 .aw-camp.aw-camp--community-dogs #campaign-goal > p strong { display: block; margin-bottom: var(--kit-space-1); color: var(--camp-dark); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-bold); letter-spacing: 0; }

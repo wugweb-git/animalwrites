@@ -230,7 +230,7 @@ add_filter(
  * word, so no new words; the nav's name is the site's existing word "Contents" (item-head.php). Sections without an H2
  * are left out. Front end only; the stored content is not changed.
  */
-const AW_CAMP_JUMP_SECTIONS = array( 'campaign-goal', 'why-it-matters', 'how-to-help', 'context', 'impact', 'next-steps', 'partners', 'press', 'library', 'news', 'updates' );
+const AW_CAMP_JUMP_SECTIONS = array( 'campaign-goal', 'why-it-matters', 'how-to-help', 'context', 'impact', 'next-steps', 'partners', 'press', 'library', 'news', 'share', 'updates' );
 
 add_filter(
 	'render_block_core/post-content',
