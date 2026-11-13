@@ -970,12 +970,17 @@ function aw_social_for_item( int $id ): array {
 }
 
 /**
- * One card: the Kits card (kit-card--block-md, no picture) in the More list: date first, then platform and handle on
- * one line (a long handle ends in "…"); the person as the title (a link to the post); our summary. YouTube posts show
- * open under it (no folds sitewide), the player loading when the card comes near the screen. Every other platform
- * gets a 44px "View on {platform}" button to the post in a new tab, never an embed (owner, 13 Nov 2026): X's
- * widgets.js drew nothing for logged-out or tracking-protected readers and left the bare link running out of the card.
- * "Other" posts get no button (owner, 13 Nov 2026); the title link still opens the post.
+ * One card, drawn like a post on its platform (owner, 14 Nov 2026: "it should look like x and insta"), from our own
+ * markup only: nothing loads from X, Instagram or Facebook. Words: only what the post record already has (the person,
+ * the handle, our one-line summary, the date) and "View on {platform}"; the imported post text stays staff-only.
+ * - Instagram and Facebook with a saved poster image (aw_social_poster, our own copy; never the platform's poster_src):
+ *   a header (initial in a ringed circle, the handle, the logo), the picture (4:5, a reel 9:16 with a play mark), the
+ *   caption (the handle in bold, then the summary), the date.
+ * - Every other post, and Instagram or Facebook with no poster: a text post (initial, name and handle, the logo; the
+ *   summary; the picture under it when there is one; the date).
+ * The avatar is the person's initial on grey, never the platform's picture. YouTube keeps the privacy-enhanced player
+ * (loaded near the screen). Every platform but YouTube and Other ends with a 44px "View on {platform}" link-out in a new
+ * tab (owner, 13 Nov 2026); where there is none, the name links to the post.
  *
  * @param WP_Post $p Social post.
  */
@@ -987,25 +992,46 @@ function aw_social_card( WP_Post $p ): string {
 	$handle   = (string) get_post_meta( $p->ID, 'aw_social_handle', true );
 	$summary  = (string) get_post_meta( $p->ID, 'aw_social_summary', true );
 	$date     = (string) get_post_meta( $p->ID, 'aw_social_date', true );
-	$name     = '' !== $person ? $person : ( '' !== $handle ? $handle : ( AW_SOCIAL_PLATFORMS[ $platform ] ?? '' ) );
-	$meta     = ( $date && function_exists( 'aw_date' ) ? aw_date( $date . ' 12:00:00' ) : '' ) // the date always first in a meta row (owner)
-		. '<span class="kit-meta-item">' . esc_html( 'on ' . ( AW_SOCIAL_PLATFORMS[ $platform ] ?? 'Other' ) ) . '</span>'
-		. ( '' !== $handle && $handle !== $name ? '<span class="kit-meta-item aw-social-handle" title="' . esc_attr( $handle ) . '">' . esc_html( $handle ) . '</span>' : '' );
-	$embed    = '';
-	$out_on   = isset( AW_SOCIAL_PLATFORMS[ $platform ] ) && 'other' !== $platform ? $platform : $link['platform']; // the saved platform, else the one the link shows
+	$format   = (string) get_post_meta( $p->ID, 'aw_social_format', true );
+	$poster   = (int) get_post_meta( $p->ID, 'aw_social_poster', true );
+	$on       = isset( AW_SOCIAL_PLATFORMS[ $platform ] ) && 'other' !== $platform ? $platform : $link['platform']; // the saved platform, else the one the link shows
+	$label    = AW_SOCIAL_PLATFORMS[ $on ] ?? '';
+	$name     = '' !== $person ? $person : ( '' !== $handle ? $handle : $label );
+	$pic      = $poster ? wp_get_attachment_image( $poster, 'medium_large', false, array( 'class' => 'aw-social-img', 'loading' => 'lazy', 'decoding' => 'async' ) ) : '';
+	$insta    = '' !== $pic && in_array( $on, array( 'instagram', 'facebook' ), true );
+	$reel     = 'video' === $format;
+	$logos    = array( 'x' => 'x-brand', 'instagram' => 'instagram', 'facebook' => 'facebook', 'linkedin' => 'linkedin', 'youtube' => 'youtube', 'bluesky' => 'bluesky', 'mastodon' => 'mastodon' );
+	$logo     = isset( $logos[ $on ] ) ? '<span class="kit-ico kit-ico--' . $logos[ $on ] . ' aw-social-logo" role="img" aria-label="' . esc_attr( $label ) . '"></span>' : '';
+	$initial  = function_exists( 'mb_substr' ) ? mb_substr( ltrim( $name, '@' ), 0, 1 ) : substr( ltrim( $name, '@' ), 0, 1 );
+	$avatar   = '<span class="aw-social-avatar" aria-hidden="true">' . esc_html( strtoupper( $initial ) ) . '</span>';
+	$out      = '';
+	$media    = '';
 	if ( 'youtube' === $link['platform'] && '' !== $link['video'] ) {
 		$box   = 'aw-social-embed-' . (int) $p->ID;
-		$embed = '<div class="aw-opp-actions"><div id="' . esc_attr( $box ) . '" style="flex-basis:100%" data-aw-social-embed="youtube" data-id="' . esc_attr( $link['video'] ) . '" data-title="' . esc_attr( $name ) . '"></div></div>'; // above the card's link (kit.css .aw-opp-actions), so the post stays usable
+		$media = '<div id="' . esc_attr( $box ) . '" class="aw-social-media" data-aw-social-embed="youtube" data-id="' . esc_attr( $link['video'] ) . '" data-title="' . esc_attr( $name ) . '"></div>';
 		aw_social_embed_script();
-	} elseif ( '' !== $link['url'] && 'other' !== $out_on ) {
-		$embed = '<div class="aw-opp-actions"><a class="kit-btn kit-btn--secondary kit-btn--sm aw-social-out" href="' . esc_url( $link['url'] ) . '" target="_blank" rel="nofollow ugc noopener">'
-			. esc_html( 'View on ' . AW_SOCIAL_PLATFORMS[ $out_on ] ) . '<span class="kit-ico kit-ico--arrow-up-right" aria-hidden="true"></span><span class="screen-reader-text">' . esc_html( ( '' !== $name ? ': ' . $name : '' ) . ' (opens in a new tab)' ) . '</span></a></div>';
+	} elseif ( '' !== $link['url'] && '' !== $label ) {
+		$out = '<a class="kit-btn kit-btn--secondary kit-btn--sm aw-social-out" href="' . esc_url( $link['url'] ) . '" target="_blank" rel="nofollow ugc noopener">'
+			. esc_html( 'View on ' . $label ) . '<span class="kit-ico kit-ico--arrow-up-right" aria-hidden="true"></span><span class="screen-reader-text">' . esc_html( ( '' !== $name ? ': ' . $name : '' ) . ' (opens in a new tab)' ) . '</span></a>';
 	}
-	return '<li><article class="kit-card kit-card--block-md aw-social-card"><div class="kit-card-body">'
-		. '<p class="kit-card-meta kit-meta-row">' . $meta . '</p>'
-		. '<h3 class="kit-card-title"><a href="' . esc_url( $url ) . '" rel="nofollow ugc noopener">' . esc_html( $name ) . '</a></h3>'
-		. ( '' !== $summary ? '<p class="kit-card-sum">' . esc_html( $summary ) . '</p>' : '' )
-		. $embed . '</div></article></li>';
+	// The name links to the post only where no button does.
+	$who_link = function ( string $text, string $cls ) use ( $out, $url ) {
+		return '' === $out && '' !== $url ? '<a class="' . $cls . '" href="' . esc_url( $url ) . '" rel="nofollow ugc noopener">' . esc_html( $text ) . '</a>' : '<span class="' . $cls . '">' . esc_html( $text ) . '</span>';
+	};
+	$when = $date && function_exists( 'aw_date' ) ? '<p class="kit-meta-row aw-social-date">' . aw_date( $date . ' 12:00:00' ) . '</p>' : '';
+	if ( $insta ) {
+		$tag  = '' !== $handle ? $handle : $name;
+		$body = '<div class="aw-social-head">' . $avatar . '<p class="aw-social-who">' . $who_link( $tag, 'aw-social-name' ) . '</p>' . $logo . '</div>'
+			. '<figure class="aw-social-pic' . ( $reel ? ' aw-social-pic--reel' : '' ) . '">' . $pic . ( $reel ? '<span class="kit-ico kit-ico--play aw-social-play" aria-hidden="true"></span>' : '' ) . '</figure>'
+			. ( '' !== $summary ? '<p class="aw-social-text"><strong>' . esc_html( $tag ) . '</strong> ' . esc_html( $summary ) . '</p>' : '' );
+	} else {
+		$body = '<div class="aw-social-head">' . $avatar . '<p class="aw-social-who">' . $who_link( $name, 'aw-social-name' )
+			. ( '' !== $handle && $handle !== $name ? '<span class="aw-social-handle" title="' . esc_attr( $handle ) . '">' . esc_html( $handle ) . '</span>' : '' ) . '</p>' . $logo . '</div>'
+			. ( '' !== $summary ? '<p class="aw-social-text">' . esc_html( $summary ) . '</p>' : '' )
+			. ( '' !== $pic ? '<figure class="aw-social-pic">' . $pic . '</figure>' : '' );
+	}
+	return '<li><article class="aw-social-card aw-social-card--' . ( $insta ? 'insta' : 'text' ) . '">' . $body . $media . $when
+		. ( '' !== $out ? '<div class="aw-social-actions">' . $out . '</div>' : '' ) . '</article></li>';
 }
 
 /**
