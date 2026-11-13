@@ -1072,6 +1072,13 @@
    lists (.aw-camp-cards, a post template list) use the same cards. */
 .aw-camp.aw-camp :is(#latest .aw-camp-row, .aw-camp-cards .wp-block-post-template) { display: grid; gap: var(--kit-space-4); grid-template-columns: minmax(0, 1fr); }
 @media (min-width: 768px) { .aw-camp.aw-camp :is(#latest .aw-camp-row, .aw-camp-cards .wp-block-post-template) { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+/* Media coverage on campaign pages (owner, 13 Nov 2026): one card a row at every width, the picture left and the source,
+   date and title right. The picture has its own size, --kit-thumb-lg wide at the standard 4:3 (--kit-media-ratio-standard),
+   the same on every card and shorter than the words, so the words set the card's height and a short title never makes a
+   tall card. The list's 3:4 stacked picture and its two columns stay for News, Library and Resources. */
+.aw-camp #press .wp-block-post-template.aw-stack-list.aw-stack-list { grid-template-columns: minmax(0, 1fr) !important; }
+.aw-camp #press .aw-stack-list.aw-stack-list > li { max-width: none !important; }
+.aw-camp #press .aw-stack-list.aw-stack-list .kit-card.kit-card--stacked-md > .kit-card-media { align-self: flex-start; width: var(--kit-thumb-lg) !important; margin: var(--kit-space-4) 0 var(--kit-space-4) var(--kit-space-4) !important; border-radius: var(--kit-radius-control); aspect-ratio: var(--kit-media-ratio-standard) !important; }
 /* the row holds whole stacked lists (aw-stack-list), which make their own columns (aw.css): one column here, so the top
    four are not squeezed into half the row (2 x 164px at 768) */
 .aw-camp.aw-camp #latest .aw-camp-row:has(.aw-stack-list) { grid-template-columns: minmax(0, 1fr); }
