@@ -66,6 +66,7 @@ require_once AW_SOURCING_DIR . 'includes/same-story.php';
 require_once AW_SOURCING_DIR . 'includes/summary-rewrite.php';
 require_once AW_SOURCING_DIR . 'includes/news-titles.php';
 require_once AW_SOURCING_DIR . 'includes/enrichment.php';
+require_once AW_SOURCING_DIR . 'includes/autoresolve.php'; // the review-queue rules applied when a value is queued (14 Nov 2026)
 require_once AW_SOURCING_DIR . 'includes/enrichment-cleanup.php';
 require_once AW_SOURCING_DIR . 'includes/enrichment-admin.php';
 require_once AW_SOURCING_DIR . 'includes/rules-model.php'; // sourcing restructure phase 3: Rules

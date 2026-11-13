@@ -565,6 +565,7 @@ function aw_enrich_sideload( $url, $lid, $alt, $referer = '' ) {
 function aw_enrich_after_change( $lid ) {
 	clean_post_cache( $lid );
 	do_action( 'litespeed_purge_post', $lid );
+	do_action( 'aw_enrich_changed', $lid ); // autoresolve.php: a PIN in the address fills an empty PIN field
 }
 
 /** Values compared loosely: phones by the last 10 digits, links without scheme / www / slash, text lower-case. */
@@ -1292,7 +1293,8 @@ function aw_enrich_rest_results( WP_REST_Request $req ) {
 		}
 		$note = 'merge_into' === $field ? 'Same name and district, shared contact: approve to merge (the other listing becomes a draft with a 301)' : ( 'place' === $field && ! $protected ? ( 'low' === $conf ? 'Check first: the PIN code points to another state or district, or only the name gives the district' : 'The listing has a different state or already a district' ) : null );
 		$note = null !== $note ? $note : ( ! empty( $b['force_review'] ) ? 'From an imported list: approve to apply' : ( $protected ? 'Claimed or verified listing: never changed automatically' : ( 'low' === $conf ? 'Sources disagree' : 'Would replace a value already on the listing' ) ) );
-		aw_enrich_add_row( $lid, $field, $value, aw_enrich_snapshot( $lid, $field ), $srcs, $conf, 'pending', $run, trim( ( '' !== $svc_note ? $svc_note . '. ' : '' ) . $note, '. ' ) );
+		$rid = aw_enrich_add_row( $lid, $field, $value, aw_enrich_snapshot( $lid, $field ), $srcs, $conf, 'pending', $run, trim( ( '' !== $svc_note ? $svc_note . '. ' : '' ) . $note, '. ' ) );
+		do_action( 'aw_enrich_queued', (int) $rid, $lid, $field ); // autoresolve.php decides the obvious ones at once
 		$out['queued'][] = $field;
 	}
 
