@@ -292,22 +292,45 @@ function aw_si_srv_weeks_table( array $days ): void {
 	arsort( $tot );
 	$top = array_slice( array_keys( $tot ), 0, 5 );
 	echo '<h2>' . esc_html__( 'Crawler requests by week (12 weeks)', 'insightweb' ) . '</h2>';
-	echo '<table class="widefat fixed striped"><thead><tr><th scope="col">' . esc_html__( 'Week from', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'All crawlers', 'insightweb' ) . '</th>';
-	foreach ( $top as $b ) {
-		echo '<th scope="col">' . esc_html( $b ) . '</th>';
+	// Columns: the week, all crawlers, the top five crawlers (bot0 … bot4: crawler names are not column keys), others.
+	$cols = array(
+		'week' => esc_html__( 'Week from', 'insightweb' ),
+		'all'  => esc_html__( 'All crawlers', 'insightweb' ),
+	);
+	foreach ( $top as $i => $b ) {
+		$cols[ 'bot' . $i ] = esc_html( $b );
 	}
-	echo '<th scope="col">' . esc_html__( 'Others', 'insightweb' ) . '</th></tr></thead><tbody>';
+	$cols['others'] = esc_html__( 'Others', 'insightweb' );
+	$cells          = array();
 	foreach ( $weeks as $wk => $by ) {
 		$all  = array_sum( $by );
 		$rest = $all;
-		echo '<tr><td>' . esc_html( wp_date( 'j M', ( new DateTimeImmutable( (string) $wk, wp_timezone() ) )->getTimestamp() ) ) . '</td><td>' . esc_html( number_format_i18n( $all ) ) . '</td>';
-		foreach ( $top as $b ) {
-			$rest -= (int) ( $by[ $b ] ?? 0 );
-			echo '<td>' . esc_html( number_format_i18n( (int) ( $by[ $b ] ?? 0 ) ) ) . '</td>';
+		$row  = array(
+			'week'  => esc_html( wp_date( 'j M', ( new DateTimeImmutable( (string) $wk, wp_timezone() ) )->getTimestamp() ) ),
+			'all'   => esc_html( number_format_i18n( $all ) ),
+			'_sort' => array(
+				'week' => (string) $wk,
+				'all'  => $all,
+			),
+		);
+		foreach ( $top as $i => $b ) {
+			$rest                      -= (int) ( $by[ $b ] ?? 0 );
+			$row[ 'bot' . $i ]          = esc_html( number_format_i18n( (int) ( $by[ $b ] ?? 0 ) ) );
+			$row['_sort'][ 'bot' . $i ] = (int) ( $by[ $b ] ?? 0 );
 		}
-		echo '<td>' . esc_html( number_format_i18n( $rest ) ) . '</td></tr>';
+		$row['others']          = esc_html( number_format_i18n( $rest ) );
+		$row['_sort']['others'] = $rest;
+		$cells[]                = $row;
 	}
-	echo '</tbody></table>';
+	aw_si_simple_table(
+		'crawler-weeks',
+		$cols,
+		$cells,
+		array(
+			'fixed'    => true,
+			'sortable' => array_fill_keys( array_keys( $cols ), true ),
+		)
+	);
 	echo '<p class="description">' . esc_html__( 'Weeks before counting started (3 Nov 2026) show 0.', 'insightweb' ) . '</p>';
 }
 
@@ -359,26 +382,37 @@ add_action(
 			}
 		}
 		echo '<h2>' . esc_html__( 'Crawler requests', 'insightweb' ) . '</h2>';
-		echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Crawler', 'insightweb' ) . '</th>';
-		foreach ( $periods as $per ) {
-			echo '<th scope="col">' . esc_html( $per[0] ) . '</th>';
+		$cols = array( 'crawler' => esc_html__( 'Crawler', 'insightweb' ) );
+		foreach ( $periods as $pk => $per ) {
+			$cols[ $pk ] = esc_html( $per[0] );
 		}
-		echo '<th scope="col">' . esc_html__( 'Note', 'insightweb' ) . '</th></tr></thead><tbody>';
-		$names = array_keys( aw_si_srv_bots() );
+		$cols['note'] = esc_html__( 'Note', 'insightweb' );
+		$names        = array_keys( aw_si_srv_bots() );
 		foreach ( array_keys( $sums ) as $b ) {
 			if ( ! in_array( $b, $names, true ) ) {
 				$names[] = $b; // a crawler counted under a name since taken off the list.
 			}
 		}
+		$cells = array();
 		foreach ( $names as $b ) {
 			$only = '' === (string) ( aw_si_srv_bots()[ $b ] ?? 'x' );
-			echo '<tr><td>' . esc_html( $b ) . '</td>';
+			$row  = array(
+				'crawler' => esc_html( $b ),
+				'_sort'   => array(),
+			);
 			foreach ( array_keys( $periods ) as $pk ) {
-				echo '<td>' . esc_html( number_format_i18n( (int) ( $sums[ $b ][ $pk ] ?? 0 ) ) ) . '</td>';
+				$row[ $pk ]          = esc_html( number_format_i18n( (int) ( $sums[ $b ][ $pk ] ?? 0 ) ) );
+				$row['_sort'][ $pk ] = (int) ( $sums[ $b ][ $pk ] ?? 0 );
 			}
-			echo '<td>' . ( $only ? esc_html__( 'robots.txt name only, never visits', 'insightweb' ) : '' ) . '</td></tr>';
+			$row['note'] = $only ? esc_html__( 'robots.txt name only, never visits', 'insightweb' ) : '';
+			$cells[]     = $row;
 		}
-		echo '</tbody></table>';
+		aw_si_simple_table(
+			'crawlers',
+			$cols,
+			$cells,
+			array( 'sortable' => array( 'crawler' => false ) + array_fill_keys( array_keys( $periods ), true ) )
+		);
 		// 12 Nov 2026: Googlebot showed 2,099 requests in 30 days because cached hits never reach PHP. There is no access
 		// log on this host to read instead (only PHP error logs), so the table says what it leaves out.
 		echo '<p class="description">' . esc_html__( 'These are lower bounds. Most crawler hits are answered from a stored copy by the server\'s page cache (LiteSpeed) or the Hostinger CDN; those requests never reach PHP, so they are not counted here. hPanel shows the full traffic. Letting crawlers past the caches is step C of docs/cdn.md:', 'insightweb' ) . ' <a href="' . esc_url( 'https://github.com/wugweb-git/animalwrites/blob/wordpress/docs/cdn.md#c-let-ai-agents-and-crawlers-past-the-caches-3-nov-2026' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'docs/cdn.md, C. Let AI agents and crawlers past the caches', 'insightweb' ) . '</a>.</p>';

@@ -248,9 +248,9 @@ function aw_si_vis_section(): void {
 	/* translators: %s: date the country file was downloaded, or "not yet". */
 	echo esc_html( sprintf( __( 'Countries: the CDN\'s country header when sent, else IP Geolocation by DB-IP (db-ip.com, CC BY 4.0), file of %s.', 'insightweb' ), '' !== $geo ? $geo : __( 'not yet', 'insightweb' ) ) ) . '</p>';
 
-	echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Day', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'Requests', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'Top countries', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'Top shortened addresses', 'insightweb' ) . '</th></tr></thead><tbody>';
 	global $wpdb;
-	$t = aw_si_vis_table();
+	$t     = aw_si_vis_table();
+	$cells = array();
 	for ( $i = 0; $i < 7; $i++ ) {
 		$day = wp_date( 'Y-m-d', time() - $i * DAY_IN_SECONDS );
 		$c   = $wpdb->get_results( $wpdb->prepare( "SELECT k, n FROM {$t} WHERE day = %s AND kind = 'c' ORDER BY n DESC", $day ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- our own counter table
@@ -263,25 +263,69 @@ function aw_si_vis_section(): void {
 		foreach ( (array) $ips as $r ) {
 			$im[ (string) $r->k ] = (int) $r->n;
 		}
-		echo '<tr><td>' . esc_html( wp_date( 'j M Y', strtotime( $day . ' 12:00:00' ) ) ) . '</td><td>' . esc_html( number_format_i18n( array_sum( $cm ) ) ) . '</td><td>' . esc_html( aw_si_srv_list( $cm, 5 ) ) . '</td><td>' . esc_html( aw_si_srv_list( $im, 5 ) ) . '</td></tr>';
+		$cells[] = array(
+			'day'       => esc_html( wp_date( 'j M Y', strtotime( $day . ' 12:00:00' ) ) ),
+			'requests'  => esc_html( number_format_i18n( array_sum( $cm ) ) ),
+			'countries' => esc_html( aw_si_srv_list( $cm, 5 ) ),
+			'addresses' => esc_html( aw_si_srv_list( $im, 5 ) ),
+			'_sort'     => array(
+				'day'      => $day,
+				'requests' => array_sum( $cm ),
+			),
+		);
 	}
-	echo '</tbody></table>';
+	aw_si_simple_table(
+		'visitor-days',
+		array(
+			'day'       => esc_html__( 'Day', 'insightweb' ),
+			'requests'  => esc_html__( 'Requests', 'insightweb' ),
+			'countries' => esc_html__( 'Top countries', 'insightweb' ),
+			'addresses' => esc_html__( 'Top shortened addresses', 'insightweb' ),
+		),
+		$cells,
+		array(
+			'sortable' => array(
+				'day'      => true,
+				'requests' => true,
+			),
+		)
+	);
 
 	foreach (
 		array(
-			array( __( 'Top countries, all days', 'insightweb' ), __( 'Country', 'insightweb' ), aw_si_vis_top( 'c', 0, 10 ) ),
-			array( __( 'Top shortened addresses, 30 days', 'insightweb' ), __( 'Shortened address', 'insightweb' ), aw_si_vis_top( 'i', AW_SI_VIS_IP_DAYS, 10 ) ),
-		) as $sec
+			'visitor-countries' => array( __( 'Top countries, all days', 'insightweb' ), __( 'Country', 'insightweb' ), aw_si_vis_top( 'c', 0, 10 ) ),
+			'visitor-addresses' => array( __( 'Top shortened addresses, 30 days', 'insightweb' ), __( 'Shortened address', 'insightweb' ), aw_si_vis_top( 'i', AW_SI_VIS_IP_DAYS, 10 ) ),
+		) as $name => $sec
 	) {
 		echo '<h3>' . esc_html( $sec[0] ) . '</h3>';
 		if ( ! $sec[2] ) {
 			echo '<p>' . esc_html__( 'None counted yet.', 'insightweb' ) . '</p>';
 			continue;
 		}
-		echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html( $sec[1] ) . '</th><th scope="col">' . esc_html__( 'Requests', 'insightweb' ) . '</th></tr></thead><tbody>';
+		$cells = array();
 		foreach ( $sec[2] as $k => $n ) {
-			echo '<tr><td>' . esc_html( $k ) . '</td><td>' . esc_html( number_format_i18n( $n ) ) . '</td></tr>';
+			$cells[] = array(
+				'key'      => esc_html( $k ),
+				'requests' => esc_html( number_format_i18n( $n ) ),
+				'_sort'    => array(
+					'key'      => (string) $k,
+					'requests' => $n,
+				),
+			);
 		}
-		echo '</tbody></table>';
+		aw_si_simple_table(
+			$name,
+			array(
+				'key'      => esc_html( $sec[1] ),
+				'requests' => esc_html__( 'Requests', 'insightweb' ),
+			),
+			$cells,
+			array(
+				'sortable' => array(
+					'key'      => false,
+					'requests' => true,
+				),
+			)
+		);
 	}
 }
