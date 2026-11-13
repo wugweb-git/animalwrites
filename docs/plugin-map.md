@@ -14,7 +14,7 @@ The Deploy check runs Plugin Check (`wp plugin check`) on each of our seven plug
 - `PluginCheck.CodeAnalysis.Offloading.OffloadedContent`: the Leaflet and MapLibre map libraries load from a CDN (`map-picker.php`, `directory-map.php`); bundling them in the plugin waits for the owner.
 - `WordPress.WP.I18n.TextDomainMismatch`: DirectoryWeb's strings inside Animal Writes Core use the `directoryweb` domain, for the day DirectoryWeb is its own plugin.
 
-Still open as warnings: the `aw_` prefix is 3 characters (Plugin Check asks for 4 or more; about 2,850 warnings), and database calls with the plugin's own table names (`UnescapedDBParameter`).
+Still open as warnings: the `aw_` prefix is 3 characters (Plugin Check asks for 4 or more; about 2,850 warnings). Database calls with the plugins' own table names (`UnescapedDBParameter`) pass table and sort-column names through `$wpdb->prepare()` with `%i` (WordPress 6.2 or later); where a query joins a fixed SQL fragment that cannot be an identifier (a view condition, `aw_cc0_items_sql()`, `aw_enrich_where()`), the line carries `phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter` with the reason (14 Nov 2026).
 
 ## Capabilities (13 Nov 2026)
 
