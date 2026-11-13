@@ -5,64 +5,66 @@ plugins/animal-writes-core/assets/css/campaign-lab.css | css Hero | .aw-camp--co
 plugins/animal-writes-core/assets/css/campaign-lab.css | css Hero | .aw-camp.aw-camp--sc-stray-dogs .aw-camp-hero.aw-camp-section.alignfull | min-height: var(--kit-hero-min)
 plugins/animal-writes-core/assets/css/campaign-lab.css | css Hero | :is(.aw-camp--lab-rules, .aw-camp--community-dogs) .aw-camp-hero | min-height: 1020px
 plugins/animal-writes-core/assets/css/campaign-lab.css | css Hero | :is(.aw-camp--lab-rules, .aw-camp--community-dogs) .aw-camp-hero | min-height: 800px
+plugins/animal-writes-core/assets/css/campaign.css | css Hero | .aw-camp--community-dogs .aw-camp-hero | min-height: var(--kit-hero-h)
+plugins/animal-writes-core/assets/css/campaign.css | css Hero | .aw-camp--community-dogs.aw-camp-hero | min-height: var(--kit-hero-h)
 plugins/animal-writes-core/assets/css/campaign.css | css Hero | .aw-camp--diwali .wp-block-cover.kit-hero | min-height: var(--kit-hero-h) !important
 plugins/animal-writes-core/assets/css/campaign.css | css Hero | .aw-camp--lab-rules .aw-camp-hero | min-height: var(--kit-hero-h)
 plugins/animal-writes-core/assets/css/campaign.css | css Hero | .aw-camp.aw-camp--sc-stray-dogs .aw-camp-hero.aw-camp-section.alignfull | min-height: var(--kit-hero-h)
-plugins/animal-writes-core/includes/social-posts.php | admin page | add_submenu_page( aw_core_menu_parent(), 'Modules', 'Modules', aw_core_screen_cap( 'aw-modules' ), 'aw-modules', 'aw_modules_screen' ),
+plugins/animal-writes-core/includes/admin-home.php | admin page | add_submenu_page( 'plugins.php', 'Animal Writes', 'Animal Writes', aw_core_screen_cap( AW_CORE_MENU ), AW_CORE_MENU, 'aw_core_overview_page' );
 plugins/animal-writes-core/includes/admin-ia.php | admin page | add_menu_page( 'Classification', 'Classification', 'manage_categories', 'aw-classification', '__return_null', 'dashicons-tag', 25 );
 plugins/animal-writes-core/includes/admin-ia.php | admin page | add_submenu_page( 'aw-classification', $t->labels->name, $t->labels->name, 'manage_categories', 'edit-tags.php?taxonomy=' . $tax );
 plugins/animal-writes-core/includes/campaign-letters.php | admin page | add_submenu_page( 'edit.php?post_type=aw_campaign', 'Letter report', 'Letter report', 'edit_posts', 'aw-letter-report', 'aw_cl_report_page' )
 plugins/animal-writes-core/includes/claims-review.php | admin page | add_submenu_page( 'edit.php?post_type=aw_listing', 'Claims', 'Claims', 'edit_aw_volunteers', 'aw-claims', 'aw_claims_screen' );
+plugins/animal-writes-core/includes/directoryweb-ui.php | admin page | add_menu_page( __( 'DirectoryWeb', 'directoryweb' ), __( 'DirectoryWeb', 'directoryweb' ), 'edit_aw_volunteers', DIRECTORYWEB_PAGE, 'directoryweb_dashboard_page
+plugins/animal-writes-core/includes/directoryweb-ui.php | admin page | add_submenu_page( DIRECTORYWEB_PAGE, __( 'Directory listings', 'directoryweb' ), __( 'Listings', 'directoryweb' ), DIRECTORYWEB_LISTINGS_CAP, DIRECTORYWEB_LISTI
+plugins/animal-writes-core/includes/directoryweb-ui.php | admin page | add_submenu_page( DIRECTORYWEB_PAGE, __( 'DirectoryWeb settings', 'directoryweb' ), __( 'Settings', 'directoryweb' ), 'manage_options', DIRECTORYWEB_SETTINGS_PA
+plugins/animal-writes-core/includes/directoryweb-ui.php | admin page | add_submenu_page( DIRECTORYWEB_PAGE, __( 'DirectoryWeb', 'directoryweb' ), __( 'Dashboard', 'directoryweb' ), 'edit_aw_volunteers', DIRECTORYWEB_PAGE, 'director
+plugins/animal-writes-core/includes/edit-screens.php | admin page | add_submenu_page( AW_CORE_MENU, 'Edit screens', 'Edit screens', aw_core_screen_cap( 'aw-edit-screens' ), 'aw-edit-screens', 'aw_edit_screens_page' );
+plugins/animal-writes-core/includes/keys.php | admin page | add_submenu_page( aw_core_menu_parent(), 'Keys', 'Keys', aw_core_screen_cap( 'aw-keys' ), 'aw-keys', 'aw_keys_screen' ); // Kits → Keys
 plugins/animal-writes-core/includes/map-picker.php | admin style | wp_enqueue_style( 'aw-leaflet'
 plugins/animal-writes-core/includes/media-merge.php | admin page | add_submenu_page( 'upload.php', 'Duplicate files', 'Duplicate files', 'manage_options', 'aw-media-duplicates', 'aw_media_merge_screen' );
 plugins/animal-writes-core/includes/media-reuse.php | admin page | add_submenu_page( 'upload.php', 'Reuse pictures', 'Reuse pictures', 'manage_options', 'aw-media-reuse', 'aw_media_reuse_screen' );
 plugins/animal-writes-core/includes/media-webp.php | admin page | add_submenu_page( 'upload.php', 'Make WebP', 'Make WebP', 'manage_options', 'aw-media-webp', 'aw_media_webp_screen' );
+plugins/animal-writes-core/includes/pages.php | admin page | add_submenu_page( AW_CORE_MENU, 'Contact links', 'Contact links', aw_core_screen_cap( 'aw-elsewhere' ), 'aw-elsewhere', 'aw_elsewhere_screen' );
 plugins/animal-writes-core/includes/pages.php | admin style | <style> block
+plugins/animal-writes-core/includes/place-intros.php | admin page | add_submenu_page( DIRECTORYWEB_PAGE, __( 'Place intros', 'directoryweb' ), __( 'Place intros', 'directoryweb' ), 'manage_options', AW_PLACE_INTROS_PAGE, 'aw_pla
+plugins/animal-writes-core/includes/site-check.php | admin page | add_submenu_page( AW_CORE_MENU, 'Check site', 'Check site', aw_core_screen_cap( 'aw-site-check' ), 'aw-site-check', 'aw_site_check_page' );
+plugins/animal-writes-core/includes/social-posts.php | admin page | add_submenu_page( aw_core_menu_parent(), 'Modules', 'Modules', aw_core_screen_cap( 'aw-modules' ), 'aw-modules', 'aw_modules_screen' ),
+plugins/animal-writes-core/includes/team-dates.php | admin page | add_submenu_page( aw_core_menu_parent(), 'Dates', 'Dates', aw_core_screen_cap( 'aw-dates' ), 'aw-dates', 'aw_team_dates_screen' ); // Kits → Dates
+plugins/animal-writes-core/includes/team-dates.php | admin style | <style> block
+plugins/animal-writes-core/theme/assets/css/aw-camp-band-aw.css | css Hero | section.aw-camp-band.aw-ed-hero--campaign | min-height: var(--kit-hero-h)
 plugins/aw-seo-extras/includes/faq-overview.php | admin page | add_submenu_page( AW_SEO_MENU, 'FAQ', 'FAQ', 'manage_categories', 'aw-faq', 'aw_faq_admin_page' ); // RankWeb → FAQ (overview.php has the menu)
+plugins/aw-seo-extras/includes/overview.php | admin page | add_menu_page( 'RankWeb', 'RankWeb', 'manage_categories', AW_SEO_MENU, 'aw_seo_overview_page', 'dashicons-search', '58.4' );
 plugins/aw-seo-extras/includes/overview.php | admin page | add_submenu_page( AW_SEO_MENU, 'RankWeb', 'Overview', 'manage_categories', AW_SEO_MENU, 'aw_seo_overview_page' );
 plugins/aw-seo-extras/includes/settings.php | admin page | add_submenu_page( AW_SEO_MENU, 'RankWeb settings', 'Settings', 'manage_options', 'aw-seo-settings', 'aw_seo_settings_page' );
-plugins/insightweb/includes/search-insights/admin.php | admin page | add_submenu_page( AW_SI_SLUG, __( 'Search Insights', 'aw-seo-extras' ), __( 'Search Insights', 'aw-seo-extras' ), aw_si_cap(), AW_SI_SLUG, 'aw_si_screen' );
+plugins/aw-sourcing/includes/admin-menu.php | admin page | add_menu_page( 'SourceWeb', 'SourceWeb', AW_REVIEW_CAP, AW_SRC_MENU, 'aw_sourcing_overview_page', 'dashicons-rss', '58.3' );
 plugins/aw-sourcing/includes/admin-menu.php | admin page | add_submenu_page( AW_SRC_MENU, 'SourceWeb', 'Overview', AW_REVIEW_CAP, AW_SRC_MENU, 'aw_sourcing_overview_page' );
 plugins/aw-sourcing/includes/admin-menu.php | admin page | add_submenu_page( AW_SRC_MENU, (string) $t[0], (string) $t[0], AW_SRC_CAP, AW_SRC_PAGE, 'aw_sourcing_page' );
 plugins/aw-sourcing/includes/admin-menu.php | admin page | add_submenu_page( AW_SRC_MENU, (string) $t[0], (string) $t[0], AW_SRC_CAP, aw_src_tab_menu_slug( $tab ) );
 plugins/aw-sourcing/includes/enrichment-admin.php | admin page | add_submenu_page( AW_SRC_MENU, 'Enrichment review', 'Enrichment review' . ( $n && function_exists( 'aw_menu_count' ) ? aw_menu_count( $n ) : '' ), AW_ENRICH_CAP
 plugins/aw-sourcing/includes/enrichment-admin.php | admin style | <style> block
 plugins/aw-sourcing/includes/review-queue.php | admin page | add_submenu_page( AW_SRC_MENU, 'To review', 'To review' . ( function_exists( 'aw_menu_count' ) ? aw_menu_count( aw_review_count() ) : '' ), AW_REVIEW_CAP, 'aw-r
-plugins/mailweb/includes/overview.php | admin page | add_submenu_page( 'mailweb', __( 'MailWeb overview', 'mailweb' ), __( 'Overview', 'mailweb' ), MAILWEB_CAP, 'mailweb-overview', 'mailweb_home_page' ); // home.p
-plugins/mailweb/includes/overview.php | admin page | add_submenu_page( 'mailweb', __( 'MailWeb settings', 'mailweb' ), __( 'Settings', 'mailweb' ), 'manage_options', 'mailweb-settings', 'mailweb_settings_page' );
-plugins/mailweb/includes/overview.php | admin page | add_submenu_page( 'mailweb', __( 'MailWeb', 'mailweb' ), __( 'Inbox', 'mailweb' ), MAILWEB_CAP, 'mailweb', 'mailweb_inbox_page' );
-plugins/animal-writes-core/theme/assets/css/aw-camp-band-aw.css | css Hero | section.aw-camp-band.aw-ed-hero--campaign | min-height: var(--kit-hero-h)
-themes/kits-by-wugweb/assets/css/kit.css | css Hero | .wp-block-cover.kit-hero | min-height: var(--kit-hero-h) !important
-plugins/animal-writes-core/assets/css/campaign.css | css Hero | .aw-camp--community-dogs .aw-camp-hero | min-height: var(--kit-hero-h)
-plugins/animal-writes-core/assets/css/campaign.css | css Hero | .aw-camp--community-dogs.aw-camp-hero | min-height: var(--kit-hero-h)
-plugins/animal-writes-core/includes/team-dates.php | admin style | <style> block
-# 11 Nov 2026, owner-approved admin UI spec (docs/admin-ui-spec.md): core's own component styles for the new Kits screens.
+plugins/insightweb/includes/search-insights/admin.php | admin page | add_menu_page( __( 'Search Insights', 'insightweb' ), 'InsightWeb', aw_si_cap(), AW_SI_SLUG, 'aw_si_screen', 'dashicons-chart-area', '58.5' );
+plugins/insightweb/includes/search-insights/admin.php | admin page | add_submenu_page( AW_SI_SLUG, __( 'Search Insights', 'insightweb' ), __( 'Search Insights', 'insightweb' ), aw_si_cap(), AW_SI_SLUG, 'aw_si_screen' );
 plugins/kits-core/includes/admin-app.php | admin style | wp_enqueue_style( 'wp-components'
-plugins/kits-core/includes/admin-shell.php | admin style | wp_enqueue_style( 'kits-shell'
-plugins/kits-core/includes/admin-shell.php | admin style | wp_register_style( 'kits-shell'
-# PlanWeb (owner, 11 Nov 2026): its own menu and the interim Calendar screen until the Kits Core shell (docs/calendar-plugin-plan.md).
-plugins/planweb/assets/admin.css | admin style | stylesheet file
-plugins/planweb/includes/admin.php | admin page | add_submenu_page( '', __( 'Dates', 'planweb' ), '', 'edit_planweb_entries', 'aw-dates', '__return_empty_string' );
-plugins/planweb/includes/admin.php | admin page | add_submenu_page( PLANWEB_MENU, __( 'Calendar', 'planweb' ), __( 'Calendar', 'planweb' ), 'edit_planweb_entries', PLANWEB_MENU, 'planweb_screen' );
-plugins/planweb/includes/admin.php | admin style | wp_enqueue_style( 'planweb-admin'
-# 11 Nov 2026, Kits menu of six items (docs/admin-ui-spec.md §B, §C, §E1): Home, Theme Options, Settings, Plugins, Tools, Help; other
-# Kits screens are hidden at their old address; Check site, Contact links and Edit screens are own screens only without Kits.
-plugins/animal-writes-core/includes/edit-screens.php | admin page | add_submenu_page( AW_CORE_MENU, 'Edit screens', 'Edit screens', aw_core_screen_cap( 'aw-edit-screens' ), 'aw-edit-screens', 'aw_edit_screens_page' );
-plugins/animal-writes-core/includes/pages.php | admin page | add_submenu_page( AW_CORE_MENU, 'Contact links', 'Contact links', aw_core_screen_cap( 'aw-elsewhere' ), 'aw-elsewhere', 'aw_elsewhere_screen' );
-plugins/animal-writes-core/includes/site-check.php | admin page | add_submenu_page( AW_CORE_MENU, 'Check site', 'Check site', aw_core_screen_cap( 'aw-site-check' ), 'aw-site-check', 'aw_site_check_page' );
+plugins/kits-core/includes/admin-fold.php | admin page | add_menu_page( wp_strip_all_tags( $title ), $title, $cap, $menu, '', $icon, $slot[1] );
 plugins/kits-core/includes/admin-home.php | admin page | add_submenu_page( KITS_MENU, 'Home', 'Home', 'manage_options', KITS_MENU, 'kits_home_page' );
+plugins/kits-core/includes/admin-kits-frame.php | admin style | wp_enqueue_style( 'kits-shell'
 plugins/kits-core/includes/admin-menu.php | admin page | add_submenu_page( '', (string) ( $item[3] ?? $item[0] ), '', (string) $item[1], $slug, fn() => do_action( $hook ) ); // phpcs:ignore WordPress.NamingConventions
 plugins/kits-core/includes/admin-menu.php | admin page | add_submenu_page( KITS_MENU, 'Help', 'Help', 'manage_options', 'kits-help', 'kits_help_page' );
 plugins/kits-core/includes/admin-menu.php | admin page | add_submenu_page( KITS_MENU, 'Settings', 'Settings', 'manage_options', 'kits-settings', 'kits_settings_page' );
 plugins/kits-core/includes/admin-menu.php | admin page | add_submenu_page( KITS_MENU, 'Theme Options', 'Theme Options', 'manage_options', 'kits-options', 'kits_options_page' );
 plugins/kits-core/includes/admin-menu.php | admin page | add_submenu_page( KITS_MENU, 'Tools', 'Tools', 'edit_theme_options', 'kits-tools', 'kits_transfer_page' );
-plugins/animal-writes-core/includes/directoryweb-ui.php | admin page | add_menu_page( __( 'DirectoryWeb', 'directoryweb' ), __( 'DirectoryWeb', 'directoryweb' ), 'edit_aw_volunteers', DIRECTORYWEB_PAGE, 'directoryweb_dashboard_page  # 12 Nov 2026: owner, every Wugweb plugin its own top-level menu, grouped
-plugins/aw-seo-extras/includes/overview.php | admin page | add_menu_page( 'RankWeb', 'RankWeb', 'manage_categories', AW_SEO_MENU, 'aw_seo_overview_page', 'dashicons-search', '58.4' );  # 12 Nov 2026: owner, every Wugweb plugin its own top-level menu, grouped
-plugins/aw-sourcing/includes/admin-menu.php | admin page | add_menu_page( 'SourceWeb', 'SourceWeb', AW_REVIEW_CAP, AW_SRC_MENU, 'aw_sourcing_overview_page', 'dashicons-rss', '58.3' );  # 12 Nov 2026: owner, every Wugweb plugin its own top-level menu, grouped
-plugins/insightweb/includes/search-insights/admin.php | admin page | add_menu_page( __( 'Search Insights', 'aw-seo-extras' ), 'InsightWeb', aw_si_cap(), AW_SI_SLUG, 'aw_si_screen', 'dashicons-chart-area', '58.5' );  # 12 Nov 2026: owner, every Wugweb plugin its own top-level menu, grouped
-plugins/kits-core/includes/admin-fold.php | admin page | add_menu_page( wp_strip_all_tags( $title ), $title, $cap, $menu, '', $slot[0], $slot[1] );  # 12 Nov 2026: owner, every Wugweb plugin its own top-level menu, grouped
-plugins/mailweb/includes/overview.php | admin page | add_menu_page( __( 'MailWeb', 'mailweb' ), __( 'MailWeb', 'mailweb' ) . $badge, MAILWEB_CAP, 'mailweb', 'mailweb_inbox_page', 'dashicons-email', '58.6' ); // th  # 12 Nov 2026: owner, every Wugweb plugin its own top-level menu, grouped
-plugins/planweb/includes/admin.php | admin page | add_menu_page( __( 'Calendar', 'planweb' ), __( 'PlanWeb', 'planweb' ), 'edit_planweb_entries', PLANWEB_MENU, 'planweb_screen', 'dashicons-calendar-alt', '58.7'  # 12 Nov 2026: owner, every Wugweb plugin its own top-level menu, grouped
-plugins/animal-writes-core/includes/admin-home.php | admin page | add_submenu_page( 'plugins.php', 'Animal Writes', 'Animal Writes', aw_core_screen_cap( AW_CORE_MENU ), AW_CORE_MENU, 'aw_core_overview_page' );  # 11 Nov 2026: Animal Writes under Plugins (without Kits Core)
-plugins/animal-writes-core/includes/keys.php | admin page | add_submenu_page( aw_core_menu_parent(), 'Keys', 'Keys', aw_core_screen_cap( 'aw-keys' ), 'aw-keys', 'aw_keys_screen' ); // Kits → Keys
-plugins/animal-writes-core/includes/team-dates.php | admin page | add_submenu_page( aw_core_menu_parent(), 'Dates', 'Dates', aw_core_screen_cap( 'aw-dates' ), 'aw-dates', 'aw_team_dates_screen' ); // Kits → Dates
+plugins/kits-core/includes/admin-shell.php | admin style | wp_enqueue_style( 'kits-shell'
+plugins/kits-core/includes/admin-shell.php | admin style | wp_register_style( 'kits-shell'
+plugins/mailweb/includes/mailweb-ui.php | admin style | wp_enqueue_style( 'mailweb-admin'
+plugins/mailweb/includes/overview.php | admin page | add_menu_page( __( 'MailWeb', 'mailweb' ), __( 'MailWeb', 'mailweb' ) . $badge, MAILWEB_CAP, 'mailweb', 'mailweb_inbox_page', 'dashicons-email', '58.6' ); // th
+plugins/mailweb/includes/overview.php | admin page | add_submenu_page( 'mailweb', __( 'MailWeb overview', 'mailweb' ), __( 'Overview', 'mailweb' ), MAILWEB_CAP, 'mailweb-overview', 'mailweb_home_page' ); // home.p
+plugins/mailweb/includes/overview.php | admin page | add_submenu_page( 'mailweb', __( 'MailWeb settings', 'mailweb' ), __( 'Settings', 'mailweb' ), 'manage_options', 'mailweb-settings', 'mailweb_settings_page' );
+plugins/mailweb/includes/overview.php | admin page | add_submenu_page( 'mailweb', __( 'MailWeb', 'mailweb' ), __( 'Inbox', 'mailweb' ), MAILWEB_CAP, 'mailweb', 'mailweb_inbox_page' );
+plugins/planweb/assets/admin.css | admin style | stylesheet file
+plugins/planweb/includes/admin.php | admin page | add_menu_page( __( 'Calendar', 'planweb' ), __( 'PlanWeb', 'planweb' ), 'edit_planweb_entries', PLANWEB_MENU, 'planweb_screen', 'dashicons-calendar-alt', '58.7'
+plugins/planweb/includes/admin.php | admin page | add_submenu_page( '', __( 'Dates', 'planweb' ), '', 'edit_planweb_entries', 'aw-dates', '__return_empty_string' );
+plugins/planweb/includes/admin.php | admin page | add_submenu_page( PLANWEB_MENU, __( 'Calendar', 'planweb' ), __( 'Calendar', 'planweb' ), 'edit_planweb_entries', PLANWEB_MENU, 'planweb_screen' );
+plugins/planweb/includes/admin.php | admin style | wp_enqueue_style( 'planweb-admin'
+themes/kits-by-wugweb/assets/css/kit.css | css Hero | .wp-block-cover.kit-hero | min-height: var(--kit-hero-h) !important
