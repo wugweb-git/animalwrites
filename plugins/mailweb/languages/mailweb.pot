@@ -9,15 +9,16 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-12T21:11:03+00:00\n"
+"POT-Creation-Date: 2026-11-13T04:28:24+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: mailweb\n"
 
 #. Plugin Name of the plugin
 #: mailweb.php
+#: includes/home.php:45
 #: includes/kits-hub.php:37
-#: includes/mailweb-ui.php:159
+#: includes/mailweb-ui.php:149
 #: includes/overview.php:204
 #: includes/overview.php:206
 #: includes/overview.php:208
@@ -52,11 +53,9 @@ msgid "Sent to"
 msgstr ""
 
 #: includes/crm-sync.php:158
-#: includes/inbox.php:555
-#: includes/list-table.php:39
-#: includes/mailboxes.php:98
 #: includes/overview.php:164
-#: build/index.js:1
+#: src/inbox.js:91
+#: src/inbox.js:328
 msgid "Mailbox"
 msgstr ""
 
@@ -68,8 +67,8 @@ msgid "Sent"
 msgstr ""
 
 #: includes/crm-sync.php:160
-#: includes/inbox.php:623
-#: includes/inbox.php:738
+#: includes/inbox.php:506
+#: includes/inbox.php:621
 msgid "Attachments"
 msgstr ""
 
@@ -80,10 +79,9 @@ msgid "Email: %s"
 msgstr ""
 
 #: includes/crm-sync.php:175
-#: includes/inbox.php:608
-#: includes/inbox.php:881
-#: includes/inbox.php:1050
-#: includes/list-table.php:95
+#: includes/inbox.php:491
+#: includes/inbox.php:764
+#: includes/inbox.php:933
 #: includes/mailweb-rest.php:366
 #: includes/mailweb-rest.php:494
 #: includes/mailweb-rest.php:605
@@ -123,261 +121,223 @@ msgstr ""
 msgid "Reply sent: %s"
 msgstr ""
 
-#: includes/crm-sync.php:334
-#: build/index.js:19
-msgid "FluentCRM"
-msgstr ""
-
-#: includes/crm-sync.php:336
-#: includes/mail-cap.php:427
-#: includes/mail-in.php:245
-#: includes/mailboxes.php:74
-#: includes/mailweb-rest.php:878
-#: includes/mailweb-rest.php:1036
-#: includes/mailweb-rest.php:1066
-#: includes/mailweb-rest.php:1093
-#: includes/smtp.php:71
-msgid "Saved."
-msgstr ""
-
-#: includes/crm-sync.php:341
-msgid "Notes"
-msgstr ""
-
-#: includes/crm-sync.php:341
-msgid "Note each incoming email, and each reply sent from Mail, on the person's FluentCRM contact"
-msgstr ""
-
-#: includes/crm-sync.php:341
-msgid "New contacts are made as \"transactional\": never added to a list or sent marketing."
-msgstr ""
-
-#: includes/crm-sync.php:342
-#: build/index.js:19
-msgid "Tag"
-msgstr ""
-
-#: includes/crm-sync.php:342
-#: build/index.js:19
-msgid "Added to people who email you (empty = no tag)."
-msgstr ""
-
-#: includes/crm-sync.php:343
-#: includes/home.php:84
-#: build/index.js:12
-#: build/index.js:19
-msgid "Mailboxes"
-msgstr ""
-
-#: includes/crm-sync.php:348
-msgid "Save FluentCRM settings"
-msgstr ""
-
-#: includes/crm-sync.php:358
-#: includes/home.php:40
-#: includes/inbox.php:454
-#: includes/inbox.php:504
-#: includes/inbox.php:949
-#: includes/mail-cap.php:507
-#: includes/mailboxes.php:112
-#: includes/profiles.php:191
-#: includes/settings-tab.php:19
-#: includes/smtp.php:112
-msgid "Not allowed."
-msgstr ""
-
+#: includes/help-tab.php:33
 #: includes/home.php:22
-#: includes/home.php:78
+#: includes/home.php:66
 #: includes/inbox.php:117
 #: includes/inbox.php:156
-#: includes/inbox.php:595
-#: includes/mailweb-ui.php:97
+#: includes/inbox.php:478
+#: includes/mailweb-ui.php:87
 #: includes/overview.php:208
 msgid "Inbox"
 msgstr ""
 
+#: includes/help-tab.php:33
+msgid "every mailbox and folder, with reply, forward and bulk actions"
+msgstr ""
+
+#: includes/help-tab.php:34
 #: includes/home.php:23
 #: includes/kits-hub.php:37
 #: includes/overview.php:209
 msgid "Overview"
 msgstr ""
 
+#: includes/help-tab.php:34
+msgid "sending today, the queue and the mailboxes"
+msgstr ""
+
+#: includes/help-tab.php:35
 #: includes/home.php:26
-#: includes/mailweb-ui.php:105
+#: includes/mailweb-ui.php:95
 #: includes/overview.php:210
 msgid "Settings"
 msgstr ""
 
-#: includes/home.php:45
-#: includes/inbox.php:553
-#: includes/overview.php:219
-msgid "Mail"
+#: includes/help-tab.php:35
+msgid "mailboxes, profiles and signatures, SMTP, the daily limit and FluentCRM"
 msgstr ""
 
-#: includes/home.php:47
-msgid "Hostinger Mail inside WordPress, and the site's own sending. Secrets are encrypted; nothing is deleted on uninstall."
+#. translators: %s: plugin name.
+#: includes/help-tab.php:45
+#, php-format
+msgid "About %s"
 msgstr ""
 
-#: includes/home.php:49
-msgid "Command (WP-CLI on the server)"
+#: includes/help-tab.php:46
+msgid "Read, reply and send from the site's Hostinger mailboxes inside WordPress, and send the site's own email through its SMTP mailbox with a daily limit and a queue. Mail stays in the mailboxes; nothing is copied into WordPress."
 msgstr ""
 
-#: includes/home.php:50
-msgid "Run the FluentCRM feed for every mailbox."
+#: includes/help-tab.php:53
+msgid "Plugins"
 msgstr ""
 
-#: includes/home.php:63
+#: includes/help-tab.php:54
+msgid "(opens in a new tab)"
+msgstr ""
+
+#: includes/home.php:40
+#: includes/inbox.php:424
+#: includes/inbox.php:832
+#: includes/mail-cap.php:507
+#: includes/settings-tab.php:18
+#: includes/smtp.php:112
+msgid "Not allowed."
+msgstr ""
+
+#: includes/home.php:51
 msgid "Administrators"
 msgstr ""
 
-#: includes/home.php:79
+#: includes/home.php:67
 msgid "Read, reply, reply all, forward and write from every mailbox; folders, search, archive, spam, trash, attachments. Website forms appear as their own folder."
 msgstr ""
 
-#: includes/home.php:80
+#: includes/home.php:68
 msgid "Plugins → MailWeb → Inbox"
 msgstr ""
 
 #. translators: 1: unread emails, 2: unread form messages
-#: includes/home.php:81
+#: includes/home.php:69
 #, php-format
 msgid "%1$d unread emails, %2$d unread form messages."
 msgstr ""
 
-#: includes/home.php:85
+#: includes/home.php:72
+#: src/index.js:361
+#: src/index.js:1183
+msgid "Mailboxes"
+msgstr ""
+
+#: includes/home.php:73
 msgid "Mailboxes found from the Mail API token; per mailbox \"send from it\", the default From, aliases."
 msgstr ""
 
-#: includes/home.php:86
-#: includes/home.php:92
+#: includes/home.php:74
+#: includes/home.php:80
 msgid "Settings → Incoming"
 msgstr ""
 
 #. translators: 1: mailboxes, 2: aliases
-#: includes/home.php:87
+#: includes/home.php:75
 #, php-format
 msgid "%1$d mailboxes, %2$d aliases."
 msgstr ""
 
 #. translators: 1: mailboxes, 2: aliases
-#: includes/home.php:87
+#: includes/home.php:75
 msgid "No Mail API token."
 msgstr ""
 
-#: includes/home.php:90
+#: includes/home.php:78
 msgid "Incoming mail (webhook)"
 msgstr ""
 
-#: includes/home.php:91
+#: includes/home.php:79
 msgid "Hostinger calls the site when mail arrives; per-mailbox secrets; counts refresh at once."
 msgstr ""
 
-#: includes/home.php:96
+#: includes/home.php:84
 msgid "Profiles and signatures"
 msgstr ""
 
-#: includes/home.php:97
+#: includes/home.php:85
 msgid "Per-mailbox display name, signature and picture; site emails laid out with the signature."
 msgstr ""
 
-#: includes/home.php:98
+#: includes/home.php:86
 msgid "Settings → Incoming → Profiles"
 msgstr ""
 
-#: includes/home.php:99
-#: includes/home.php:123
+#: includes/home.php:87
+#: includes/home.php:111
 msgid "Automatic"
 msgstr ""
 
-#: includes/home.php:102
+#: includes/home.php:90
 #: includes/mailweb-rest.php:963
 msgid "Site sending (SMTP)"
 msgstr ""
 
-#: includes/home.php:103
+#: includes/home.php:91
 msgid "Every email the site sends goes through one Hostinger mailbox; test email."
 msgstr ""
 
-#: includes/home.php:104
+#: includes/home.php:92
 msgid "Settings → Sending"
 msgstr ""
 
-#: includes/home.php:105
+#: includes/home.php:93
 msgid "no password set"
 msgstr ""
 
-#: includes/home.php:108
+#: includes/home.php:96
 msgid "Daily limit and queue"
 msgstr ""
 
-#: includes/home.php:109
+#: includes/home.php:97
 msgid "A daily sending budget with priorities (replies first, newsletters last), retries, and a pause when Hostinger refuses."
 msgstr ""
 
-#: includes/home.php:110
+#: includes/home.php:98
 msgid "Settings → Sending → Daily limit"
 msgstr ""
 
 #. translators: 1: sent, 2: budget, 3: queued
-#: includes/home.php:111
+#: includes/home.php:99
 #, php-format
 msgid "%1$d of %2$d sent in 24 h, %3$d queued."
 msgstr ""
 
 #. translators: 1: sent, 2: budget, 3: queued
-#: includes/home.php:111
+#: includes/home.php:99
 #: includes/mail-cap.php:440
 msgid "Sending is paused."
 msgstr ""
 
-#: includes/home.php:114
+#: includes/home.php:102
 #: includes/mailweb-rest.php:990
 msgid "FluentCRM feed"
 msgstr ""
 
-#: includes/home.php:115
+#: includes/home.php:103
 msgid "Incoming email and replies noted on the sender's contact (transactional), every 5 minutes and on each webhook."
 msgstr ""
 
-#: includes/home.php:116
+#: includes/home.php:104
 msgid "Settings → Incoming → FluentCRM"
 msgstr ""
 
-#: includes/home.php:117
+#: includes/home.php:105
 msgid "On."
 msgstr ""
 
-#: includes/home.php:117
+#: includes/home.php:105
 msgid "Off."
 msgstr ""
 
-#: includes/home.php:120
+#: includes/home.php:108
 msgid "Dashboard widget"
 msgstr ""
 
-#: includes/home.php:121
+#: includes/home.php:109
 msgid "Unread counts and the last 5 messages per mailbox."
 msgstr ""
 
-#: includes/home.php:122
-#: includes/mailweb-ui.php:91
+#: includes/home.php:110
+#: includes/mailweb-ui.php:81
 msgid "Dashboard"
 msgstr ""
 
-#: includes/home.php:139
-#: build/index.js:12
-msgid "Needs attention"
-msgstr ""
-
-#: includes/home.php:145
+#: includes/home.php:126
 msgid "Feature"
 msgstr ""
 
-#: includes/home.php:145
+#: includes/home.php:126
 msgid "What it does"
 msgstr ""
 
-#: includes/home.php:145
+#: includes/home.php:126
 msgid "On this site"
 msgstr ""
 
@@ -389,289 +349,254 @@ msgstr ""
 #: includes/inbox.php:117
 #: includes/inbox.php:118
 #: includes/inbox.php:158
-#: includes/inbox.php:242
-#: includes/inbox.php:636
-#: includes/list-table.php:110
+#: includes/inbox.php:236
+#: includes/inbox.php:519
 msgid "Archive"
 msgstr ""
 
 #: includes/inbox.php:117
 #: includes/inbox.php:118
 #: includes/inbox.php:159
-#: includes/inbox.php:248
-#: includes/inbox.php:642
+#: includes/inbox.php:242
+#: includes/inbox.php:525
 msgid "Spam"
 msgstr ""
 
 #: includes/inbox.php:117
 #: includes/inbox.php:118
 #: includes/inbox.php:160
-#: includes/list-table.php:105
-#: includes/list-table.php:114
-#: build/index.js:2
+#: src/inbox.js:562
 msgid "Trash"
 msgstr ""
 
+#: includes/inbox.php:226
 #: includes/inbox.php:232
-#: includes/inbox.php:238
-#: includes/list-table.php:104
-#: includes/list-table.php:112
 msgid "Mark read"
 msgstr ""
 
+#: includes/inbox.php:227
 #: includes/inbox.php:233
-#: includes/inbox.php:239
-#: includes/inbox.php:644
-#: includes/inbox.php:777
-#: includes/list-table.php:104
-#: includes/list-table.php:112
+#: includes/inbox.php:527
+#: includes/inbox.php:660
 msgid "Mark unread"
 msgstr ""
 
-#: includes/inbox.php:234
-#: includes/inbox.php:251
-#: includes/inbox.php:657
-#: includes/inbox.php:778
+#: includes/inbox.php:228
+#: includes/inbox.php:245
+#: includes/inbox.php:540
+#: includes/inbox.php:661
 msgid "Move to Trash"
 msgstr ""
 
-#: includes/inbox.php:245
-#: includes/inbox.php:639
+#: includes/inbox.php:239
+#: includes/inbox.php:522
 msgid "Not spam"
 msgstr ""
 
-#: includes/inbox.php:245
-#: includes/inbox.php:639
+#: includes/inbox.php:239
+#: includes/inbox.php:522
 msgid "Move to Inbox"
 msgstr ""
 
-#: includes/inbox.php:528
+#: includes/inbox.php:432
+#: includes/mailweb-ui.php:150
+msgid "MailWeb inbox"
+msgstr ""
+
+#: includes/inbox.php:451
 msgid "Message sent. A copy is in Sent."
 msgstr ""
 
-#: includes/inbox.php:529
+#: includes/inbox.php:452
 msgid "Message moved."
 msgstr ""
 
-#: includes/inbox.php:530
+#: includes/inbox.php:453
 msgid "Moved to Trash."
 msgstr ""
 
-#: includes/inbox.php:531
+#: includes/inbox.php:454
 #: includes/mailweb-rest.php:706
 msgid "Done."
 msgstr ""
 
-#: includes/inbox.php:532
+#: includes/inbox.php:455
 #: includes/mailweb-rest.php:706
 msgid "That did not work: the mail server refused it. Nothing was changed."
 msgstr ""
 
 #. translators: %d: number of messages that may be sent per hour.
-#: includes/inbox.php:534
+#: includes/inbox.php:457
 #, php-format
 msgid "Sending paused: %d messages were sent in the last hour. Try again later."
 msgstr ""
 
-#: includes/inbox.php:535
+#: includes/inbox.php:458
 msgid "Add a recipient and a subject or message."
 msgstr ""
 
-#: includes/inbox.php:536
+#: includes/inbox.php:459
 msgid "Attachments are limited to 10 MB in total."
 msgstr ""
 
-#: includes/inbox.php:553
-#: includes/inbox.php:709
-#: build/index.js:1
-msgid "New message"
-msgstr ""
-
-#: includes/inbox.php:555
-#: includes/mailweb-rest.php:521
-msgid "All mailboxes"
-msgstr ""
-
-#: includes/inbox.php:560
-msgid "Show"
-msgstr ""
-
-#: includes/inbox.php:579
-#: build/index.js:4
-msgid "Search mail"
-msgstr ""
-
-#. translators: %s: "Hostinger webmail" link.
-#: includes/inbox.php:584
-#, php-format
-msgid "Read in step with %s: what you read, move or send here shows there too."
-msgstr ""
-
-#: includes/inbox.php:585
-#: build/index.js:12
-msgid "Hostinger webmail"
-msgstr ""
-
-#: includes/inbox.php:595
-#: includes/inbox.php:755
+#: includes/inbox.php:478
+#: includes/inbox.php:638
 msgid "Back to the list"
 msgstr ""
 
-#: includes/inbox.php:598
+#: includes/inbox.php:481
 #: includes/mailweb-rest.php:581
 msgid "This message could not be opened (moved or deleted in webmail?)."
 msgstr ""
 
-#: includes/inbox.php:610
-#: includes/inbox.php:729
-#: includes/list-table.php:32
-#: includes/list-table.php:34
+#: includes/inbox.php:493
+#: includes/inbox.php:612
 #: includes/mailweb-rest.php:553
 #: includes/overview.php:131
-#: build/index.js:1
-#: build/index.js:16
+#: src/inbox.js:308
+#: src/index.js:415
 msgid "From"
 msgstr ""
 
-#: includes/inbox.php:611
-#: includes/inbox.php:717
-#: includes/list-table.php:34
+#: includes/inbox.php:494
+#: includes/inbox.php:600
 #: includes/mailweb-rest.php:553
-#: build/index.js:1
+#: src/inbox.js:314
 msgid "To"
 msgstr ""
 
-#: includes/inbox.php:613
-#: includes/inbox.php:720
-#: build/index.js:1
+#: includes/inbox.php:496
+#: includes/inbox.php:603
+#: src/inbox.js:319
 msgid "Cc"
 msgstr ""
 
-#: includes/inbox.php:615
-#: includes/inbox.php:771
-#: includes/list-table.php:32
-#: includes/list-table.php:41
+#: includes/inbox.php:498
+#: includes/inbox.php:654
 #: includes/overview.php:131
-#: build/index.js:1
-#: build/index.js:16
+#: src/inbox.js:298
+#: src/inbox.js:324
+#: src/index.js:417
 msgid "Date"
 msgstr ""
 
-#: includes/inbox.php:618
-#: build/index.js:1
+#: includes/inbox.php:501
+#: src/inbox.js:334
 msgid "Pictures from the internet are hidden: they can tell the sender you opened the message."
 msgstr ""
 
-#: includes/inbox.php:618
-#: build/index.js:1
+#: includes/inbox.php:501
+#: src/inbox.js:343
 msgid "Show pictures"
 msgstr ""
 
-#: includes/inbox.php:620
-#: includes/inbox.php:634
-#: build/index.js:1
+#: includes/inbox.php:503
+#: includes/inbox.php:517
+#: src/inbox.js:349
 msgid "Message"
 msgstr ""
 
-#: includes/inbox.php:625
+#: includes/inbox.php:508
 #: includes/mailweb-rest.php:649
 msgid "attachment"
 msgstr ""
 
-#: includes/inbox.php:630
-#: includes/inbox.php:631
-#: includes/inbox.php:709
-#: includes/inbox.php:773
-#: includes/inbox.php:775
-#: includes/list-table.php:102
-#: includes/list-table.php:108
-#: build/index.js:1
+#: includes/inbox.php:513
+#: includes/inbox.php:514
+#: includes/inbox.php:592
+#: includes/inbox.php:656
+#: includes/inbox.php:658
+#: src/inbox.js:230
 msgid "Reply"
 msgstr ""
 
-#: includes/inbox.php:631
-#: includes/inbox.php:709
-#: build/index.js:1
+#: includes/inbox.php:514
+#: includes/inbox.php:592
+#: src/inbox.js:238
 msgid "Reply all"
 msgstr ""
 
-#: includes/inbox.php:631
-#: includes/inbox.php:709
-#: build/index.js:1
+#: includes/inbox.php:514
+#: includes/inbox.php:592
+#: src/inbox.js:246
 msgid "Forward"
 msgstr ""
 
 #. translators: %s: mailbox address.
-#: includes/inbox.php:633
+#: includes/inbox.php:516
 #, php-format
 msgid "Sent from %s."
 msgstr ""
 
-#: includes/inbox.php:650
-#: build/index.js:1
+#: includes/inbox.php:533
+#: src/inbox.js:266
 msgid "Move to folder"
 msgstr ""
 
-#: includes/inbox.php:654
+#: includes/inbox.php:537
 msgid "Move"
 msgstr ""
 
-#: includes/inbox.php:698
+#: includes/inbox.php:581
 msgid "---------- Forwarded message ----------"
 msgstr ""
 
 #. translators: 1: date and time of the original message, 2: its sender.
-#: includes/inbox.php:700
+#: includes/inbox.php:583
 #, php-format
 msgid "On %1$s, %2$s wrote:"
 msgstr ""
 
-#: includes/inbox.php:717
+#: includes/inbox.php:592
+#: src/inbox.js:86
+msgid "New message"
+msgstr ""
+
+#: includes/inbox.php:600
 msgid "name@example.com, …"
 msgstr ""
 
-#: includes/inbox.php:719
+#: includes/inbox.php:602
 msgid "Add Cc / Bcc"
 msgstr ""
 
-#: includes/inbox.php:720
+#: includes/inbox.php:603
 msgid "Bcc"
 msgstr ""
 
-#: includes/inbox.php:721
-#: includes/list-table.php:34
+#: includes/inbox.php:604
 #: includes/mailweb-rest.php:554
 #: includes/overview.php:131
-#: build/index.js:16
+#: src/index.js:416
 msgid "Subject"
 msgstr ""
 
-#: includes/inbox.php:726
+#: includes/inbox.php:609
 msgid "Added under your signature when sent:"
 msgstr ""
 
-#: includes/inbox.php:729
-#: includes/inbox.php:736
+#: includes/inbox.php:612
+#: includes/inbox.php:619
 msgid "Send"
 msgstr ""
 
-#: includes/inbox.php:735
+#: includes/inbox.php:618
 msgid "Sent from a different mailbox than the one the message is in, the reply carries no thread link (most mail apps still group it by subject)."
 msgstr ""
 
-#: includes/inbox.php:736
+#: includes/inbox.php:619
 msgid "Discard"
 msgstr ""
 
-#: includes/inbox.php:738
+#: includes/inbox.php:621
 msgid "Up to 10 MB in total."
 msgstr ""
 
-#: includes/inbox.php:738
+#: includes/inbox.php:621
 msgid "The forwarded message's attachments are included."
 msgstr ""
 
-#: includes/inbox.php:759
+#: includes/inbox.php:642
 msgid "Not found."
 msgstr ""
 
@@ -681,68 +606,17 @@ msgstr ""
 msgid "Active, %s"
 msgstr ""
 
-#: includes/list-table.php:32
-#: includes/mailweb-rest.php:554
-msgid "About"
-msgstr ""
-
-#: includes/list-table.php:32
-#: includes/list-table.php:36
-#: includes/overview.php:164
-msgid "Status"
-msgstr ""
-
-#: includes/list-table.php:51
-#: build/index.js:2
-msgid "The mailbox could not be read just now. Try again in a minute."
-msgstr ""
-
-#: includes/list-table.php:53
-#: build/index.js:2
-msgid "Nothing matches your search."
-msgstr ""
-
-#: includes/list-table.php:53
-#: build/index.js:2
-msgid "No messages."
-msgstr ""
-
-#: includes/list-table.php:85
-msgid "Select"
-msgstr ""
-
-#: includes/list-table.php:89
-#: includes/mailweb-rest.php:492
-msgid "(unknown)"
-msgstr ""
-
-#: includes/list-table.php:90
-msgid "Unread:"
-msgstr ""
-
-#: includes/list-table.php:97
-#: build/index.js:3
-msgid "Has attachments"
-msgstr ""
-
-#: includes/list-table.php:124
-msgid "New"
-msgstr ""
-
-#: includes/list-table.php:125
-msgid "Read"
-msgstr ""
-
-#: includes/list-table.php:126
-msgid "Replied"
-msgstr ""
-
-#: includes/list-table.php:127
-msgid "Forwarded"
-msgstr ""
-
 #: includes/mail-cap.php:425
 msgid "Daily sending limit"
+msgstr ""
+
+#: includes/mail-cap.php:427
+#: includes/mailweb-rest.php:878
+#: includes/mailweb-rest.php:1036
+#: includes/mailweb-rest.php:1066
+#: includes/mailweb-rest.php:1093
+#: includes/smtp.php:71
+msgid "Saved."
 msgstr ""
 
 #: includes/mail-cap.php:429
@@ -772,7 +646,7 @@ msgid "The mail server refused an email on %1$s: %2$s. Nothing is being sent and
 msgstr ""
 
 #: includes/mail-cap.php:450
-#: build/index.js:18
+#: src/index.js:619
 msgid "Resume sending"
 msgstr ""
 
@@ -819,12 +693,12 @@ msgid "Failed, will be retried"
 msgstr ""
 
 #: includes/mail-cap.php:468
-#: build/index.js:18
+#: src/index.js:572
 msgid "Held after 4 failed tries"
 msgstr ""
 
 #: includes/mail-cap.php:469
-#: build/index.js:17
+#: src/index.js:558
 msgid "Sent today"
 msgstr ""
 
@@ -865,17 +739,17 @@ msgid "Send queued emails now (within the limit)"
 msgstr ""
 
 #: includes/mail-cap.php:482
-#: build/index.js:16
+#: src/index.js:525
 msgid "Retry held emails"
 msgstr ""
 
 #: includes/mail-cap.php:482
-#: build/index.js:16
+#: src/index.js:539
 msgid "Clear held emails"
 msgstr ""
 
 #: includes/mail-cap.php:570
-#: build/index.js:11
+#: src/index.js:244
 msgid "Email sending is paused."
 msgstr ""
 
@@ -893,119 +767,6 @@ msgstr ""
 
 #: includes/mail-cap.php:579
 msgid "Open Plugins → MailWeb → Settings → Site sending"
-msgstr ""
-
-#: includes/mail-in.php:249
-msgid "Incoming mail"
-msgstr ""
-
-#: includes/mail-in.php:250
-msgid "Mail reads your Hostinger mailboxes live through the Mail API with the token below; nothing from the mailboxes is copied into WordPress. When mail arrives, Hostinger calls the webhook below, which refreshes the unread counts."
-msgstr ""
-
-#: includes/mail-in.php:251
-msgid "Webhook URL (hPanel → Emails → each mailbox → Agentic mail → Webhooks, event \"message.received\"):"
-msgstr ""
-
-#: includes/mail-in.php:252
-msgid "none yet"
-msgstr ""
-
-#. translators: %s: date and mailbox of the last webhook delivery, or "none yet".
-#: includes/mail-in.php:254
-#, php-format
-msgid "Last webhook delivery: %s"
-msgstr ""
-
-#: includes/mail-in.php:263
-#: includes/smtp.php:98
-msgid "Set in wp-config or the server environment."
-msgstr ""
-
-#: includes/mail-in.php:265
-#: includes/smtp.php:101
-msgid "Saved. Leave empty to keep it."
-msgstr ""
-
-#: includes/mail-in.php:269
-#: includes/mailweb-rest.php:909
-msgid "Mail API token"
-msgstr ""
-
-#: includes/mail-in.php:269
-msgid "hPanel → Emails → Agentic mail → API. Its scope decides which mailboxes Mail can read. Or set MAILWEB_API_TOKEN in wp-config."
-msgstr ""
-
-#. translators: %s: mailbox address.
-#: includes/mail-in.php:272
-#, php-format
-msgid "Webhook secret — %s"
-msgstr ""
-
-#. translators: %s: wp-config constant name.
-#: includes/mail-in.php:274
-#, php-format
-msgid "Shown once when the webhook is created on this mailbox. Or set %s in wp-config."
-msgstr ""
-
-#. translators: %s: mailbox address.
-#: includes/mail-in.php:279
-#, php-format
-msgid "Mailbox ID — %s"
-msgstr ""
-
-#. translators: %s: mailbox address.
-#: includes/mail-in.php:279
-msgid "Read from the token (read only)."
-msgstr ""
-
-#: includes/mail-in.php:283
-msgid "Save the token first: the mailboxes it can see, and a secret field for each, then appear here."
-msgstr ""
-
-#: includes/mailboxes.php:72
-#: includes/mailweb-rest.php:798
-msgid "Mailboxes and aliases"
-msgstr ""
-
-#: includes/mailboxes.php:77
-msgid "No mailboxes yet: save the Mail API token above."
-msgstr ""
-
-#. translators: %s: mailbox address.
-#: includes/mailboxes.php:93
-#, php-format
-msgid "Send from %s"
-msgstr ""
-
-#. translators: %s: mailbox address.
-#: includes/mailboxes.php:95
-#, php-format
-msgid "Default From: %s"
-msgstr ""
-
-#: includes/mailboxes.php:98
-#: includes/mailboxes.php:99
-#: build/index.js:21
-msgid "Aliases"
-msgstr ""
-
-#: includes/mailboxes.php:98
-#: build/index.js:20
-msgid "Send from it"
-msgstr ""
-
-#: includes/mailboxes.php:98
-#: build/index.js:20
-msgid "Default From"
-msgstr ""
-
-#: includes/mailboxes.php:101
-msgid "One per line: alias = mailbox (as in hPanel → Emails → Email Alias). The Mail API does not list aliases, so keep this in step when one is added or removed there."
-msgstr ""
-
-#: includes/mailboxes.php:102
-msgid "Save mailboxes and aliases"
 msgstr ""
 
 #. translators: %s: mailbox, as "support@".
@@ -1094,7 +855,7 @@ msgid "Since %1$s: %2$s"
 msgstr ""
 
 #: includes/mailweb-dashboard.php:315
-#: build/index.js:19
+#: src/index.js:637
 msgid "Running"
 msgstr ""
 
@@ -1110,7 +871,7 @@ msgstr ""
 
 #: includes/mailweb-dashboard.php:324
 #: includes/mailweb-rest.php:762
-#: build/index.js:18
+#: src/index.js:629
 msgid "Sending"
 msgstr ""
 
@@ -1191,6 +952,18 @@ msgstr ""
 msgid "FluentCRM sends at most one email a second, and waits while the campaign share is used up."
 msgstr ""
 
+#: includes/mailweb-rest.php:492
+msgid "(unknown)"
+msgstr ""
+
+#: includes/mailweb-rest.php:521
+msgid "All mailboxes"
+msgstr ""
+
+#: includes/mailweb-rest.php:554
+msgid "About"
+msgstr ""
+
 #: includes/mailweb-rest.php:700
 msgid "That action is not offered in this folder."
 msgstr ""
@@ -1211,8 +984,11 @@ msgstr ""
 msgid "Order: replies typed in FluentCRM, then notices, then sign-up confirmations, then campaigns. An email may set its own with the header X-Mailweb-Priority: 0 to 3."
 msgstr ""
 
+#: includes/mailweb-rest.php:798
+msgid "Mailboxes and aliases"
+msgstr ""
+
 #: includes/mailweb-rest.php:818
-#: includes/profiles.php:164
 msgid "Profiles"
 msgstr ""
 
@@ -1230,7 +1006,7 @@ msgid "Not set up"
 msgstr ""
 
 #: includes/mailweb-rest.php:893
-#: build/index.js:18
+#: src/index.js:584
 msgid "Error"
 msgstr ""
 
@@ -1248,6 +1024,10 @@ msgstr ""
 
 #: includes/mailweb-rest.php:905
 msgid "Reads and files your mail. Its scope decides which mailboxes MailWeb can see."
+msgstr ""
+
+#: includes/mailweb-rest.php:909
+msgid "Mail API token"
 msgstr ""
 
 #: includes/mailweb-rest.php:911
@@ -1285,7 +1065,7 @@ msgid "Shown once when the webhook is made on this mailbox. Or set %s in wp-conf
 msgstr ""
 
 #: includes/mailweb-rest.php:944
-#: build/index.js:12
+#: src/index.js:329
 msgid "Webhook address"
 msgstr ""
 
@@ -1335,13 +1115,14 @@ msgstr ""
 msgid "This is set in wp-config.php: change it there."
 msgstr ""
 
-#: includes/mailweb-ui.php:160
-msgid "MailWeb inbox"
+#: includes/mailweb-ui.php:151
+#: includes/overview.php:210
+#: includes/settings-tab.php:24
+msgid "MailWeb settings"
 msgstr ""
 
-#: includes/mailweb-ui.php:161
-#: includes/overview.php:210
-msgid "MailWeb settings"
+#: includes/mailweb-ui.php:168
+msgid "MailWeb needs Kits Core (active, with its build) to show this screen."
 msgstr ""
 
 #: includes/overview.php:108
@@ -1387,8 +1168,8 @@ msgstr ""
 
 #: includes/overview.php:141
 #: includes/overview.php:183
-#: build/index.js:3
-#: build/index.js:16
+#: src/inbox.js:638
+#: src/index.js:424
 msgid "(unread)"
 msgstr ""
 
@@ -1396,59 +1177,28 @@ msgstr ""
 msgid "Unread"
 msgstr ""
 
+#: includes/overview.php:164
+msgid "Status"
+msgstr ""
+
 #: includes/overview.php:209
 msgid "MailWeb overview"
+msgstr ""
+
+#: includes/overview.php:219
+msgid "Mail"
 msgstr ""
 
 #: includes/overview.php:230
 msgid "MailWeb screens"
 msgstr ""
 
-#: includes/profiles.php:166
-msgid "Profiles saved."
-msgstr ""
-
-#: includes/profiles.php:168
-msgid "Each mailbox's display name, signature and picture, as set in Hostinger webmail (Settings → Identities / Signature). The Mail page shows them; an email the site sends from that address uses the name and ends with the signature (FluentCRM emails excepted)."
-msgstr ""
-
-#: includes/profiles.php:175
-#: build/index.js:21
-msgid "Display name"
-msgstr ""
-
-#: includes/profiles.php:176
-#: build/index.js:21
-msgid "Signature (HTML)"
-msgstr ""
-
-#: includes/profiles.php:177
-#: build/index.js:21
-msgid "Picture"
-msgstr ""
-
-#: includes/profiles.php:177
-msgid "Choose from Media"
-msgstr ""
-
-#: includes/profiles.php:177
-msgid "Media library item (0 = none)."
-msgstr ""
-
-#: includes/profiles.php:180
-msgid "Save profiles"
-msgstr ""
-
-#: includes/settings-tab.php:25
+#: includes/settings-tab.php:27
 msgid "Mail settings"
 msgstr ""
 
-#: includes/settings-tab.php:29
-msgid "Incoming mail, mailboxes, profiles"
-msgstr ""
-
-#: includes/settings-tab.php:31
-msgid "Site sending (SMTP, daily limit)"
+#: includes/settings-tab.php:27
+msgid "All settings"
 msgstr ""
 
 #. translators: %s: the administration email address.
@@ -1490,28 +1240,36 @@ msgid "Status: %s"
 msgstr ""
 
 #: includes/smtp.php:89
-#: build/index.js:19
+#: src/index.js:1077
 msgid "Mailbox (email address)"
 msgstr ""
 
 #: includes/smtp.php:90
-#: build/index.js:19
+#: src/index.js:1106
 msgid "Mailbox password"
 msgstr ""
 
 #: includes/smtp.php:91
-#: build/index.js:19
+#: src/index.js:1078
 msgid "Sender name"
 msgstr ""
 
 #: includes/smtp.php:92
-#: build/index.js:19
+#: src/index.js:1079
 msgid "SMTP server"
 msgstr ""
 
 #: includes/smtp.php:93
-#: build/index.js:19
+#: src/index.js:1080
 msgid "Port"
+msgstr ""
+
+#: includes/smtp.php:98
+msgid "Set in wp-config or the server environment."
+msgstr ""
+
+#: includes/smtp.php:101
+msgid "Saved. Leave empty to keep it."
 msgstr ""
 
 #: includes/smtp.php:104
@@ -1542,459 +1300,528 @@ msgstr ""
 msgid "Every 5 minutes"
 msgstr ""
 
-#: build/index.js:1
+#: src/inbox.js:80
 msgid "Folders"
 msgstr ""
 
-#: build/index.js:1
+#: src/inbox.js:125
 msgid "unread"
 msgstr ""
 
-#: build/index.js:1
+#: src/inbox.js:134
 msgid "In step with Hostinger webmail: what you read, move or send here shows there too."
 msgstr ""
 
-#: build/index.js:1
+#: src/inbox.js:185
 msgid "← Back to the list"
 msgstr ""
 
-#: build/index.js:1
+#: src/inbox.js:193
 msgid "Opening the message…"
 msgstr ""
 
-#: build/index.js:1
+#: src/inbox.js:209
 msgid "Choose a message to read it."
 msgstr ""
 
-#: build/index.js:1
+#: src/inbox.js:223
 msgid "Message actions"
 msgstr ""
 
-#: build/index.js:1
+#: src/inbox.js:277
 msgid "Move to folder…"
 msgstr ""
 
 #. translators: %d: number of attachments.
-#: build/index.js:2
+#: src/inbox.js:359
 #, js-format
 msgid "%d attachment"
 msgid_plural "%d attachments"
 msgstr[0] ""
 msgstr[1] ""
 
-#: build/index.js:2
+#: src/inbox.js:543
+msgid "No messages."
+msgstr ""
+
+#: src/inbox.js:545
+msgid "The mailbox could not be read just now. Try again in a minute."
+msgstr ""
+
+#: src/inbox.js:550
+msgid "Nothing matches your search."
+msgstr ""
+
+#: src/inbox.js:567
 msgid "Loading messages…"
 msgstr ""
 
-#: build/index.js:2
+#: src/inbox.js:576
 msgid "Messages"
 msgstr ""
 
 #. translators: %s: message subject.
-#: build/index.js:3
+#: src/inbox.js:595
 #, js-format
 msgid "Select “%s”"
 msgstr ""
 
+#: src/inbox.js:621
+msgid "Has attachments"
+msgstr ""
+
 #. translators: 1: action, 2: message subject.
-#: build/index.js:4
+#: src/inbox.js:655
 #, js-format
 msgid "%1$s: “%2$s”"
 msgstr ""
 
-#: build/index.js:4
+#: src/inbox.js:676
 msgid "Message list"
 msgstr ""
 
-#: build/index.js:4
+#: src/inbox.js:691
+#: src/inbox.js:697
+msgid "Search mail"
+msgstr ""
+
+#: src/inbox.js:713
 msgid "Select all on this page"
 msgstr ""
 
 #. translators: %d: number of messages.
-#: build/index.js:5
+#: src/inbox.js:734
 #, js-format
 msgid "%d message"
 msgid_plural "%d messages"
 msgstr[0] ""
 msgstr[1] ""
 
-#: build/index.js:5
+#: src/inbox.js:749
 msgid "Refresh"
 msgstr ""
 
-#: build/index.js:5
+#: src/inbox.js:764
 msgid "Pages"
 msgstr ""
 
-#: build/index.js:5
+#: src/inbox.js:773
 msgid "Newer"
 msgstr ""
 
 #. translators: 1: page number, 2: number of pages.
-#: build/index.js:6
+#: src/inbox.js:778
 #, js-format
 msgid "Page %1$d of %2$d"
 msgstr ""
 
-#: build/index.js:6
+#: src/inbox.js:790
 msgid "Older"
 msgstr ""
 
-#: build/index.js:6
+#: src/inbox.js:797
 msgid "Open message"
 msgstr ""
 
-#: build/index.js:6
+#: src/index.js:153
 msgid "A count is running in the background. The numbers change when it is done (about a minute)."
 msgstr ""
 
-#: build/index.js:6
+#: src/index.js:170
 msgid "Loading the counts…"
 msgstr ""
 
 #. translators: 1: change (+3 or -2), 2: number of days.
-#: build/index.js:7
+#: src/index.js:186
 #, js-format
 msgid "%1$s in %2$d days"
 msgstr ""
 
 #. translators: %s: date and time.
-#: build/index.js:8
+#: src/index.js:194
 #, js-format
 msgid "Counted %s."
 msgstr ""
 
-#: build/index.js:8
+#: src/index.js:197
 msgid "Counting for the first time…"
 msgstr ""
 
 #. translators: %d: number of days.
-#: build/index.js:9
+#: src/index.js:203
 #, js-format
 msgid "No count from %d days ago yet, so no change is shown."
 msgstr ""
 
-#: build/index.js:9
+#: src/index.js:215
 msgid "Compare with"
 msgstr ""
 
 #. translators: %d: number of days.
-#: build/index.js:11
+#: src/index.js:221
 #, js-format
 msgid "Last %d days"
 msgstr ""
 
-#: build/index.js:11
+#: src/index.js:231
 msgid "Count now"
 msgstr ""
 
 #. translators: 1: date and time, 2: the mail server's refusal.
-#: build/index.js:12
+#: src/index.js:248
 #, js-format
 msgid "The mail server refused an email on %1$s (%2$s). Emails wait in the queue, not lost."
 msgstr ""
 
-#: build/index.js:12
+#: src/index.js:259
+msgid "Needs attention"
+msgstr ""
+
+#: src/index.js:269
 msgid "MailWeb at a glance"
 msgstr ""
 
-#: build/index.js:12
+#: src/index.js:301
+#: src/index.js:309
 msgid "Features"
 msgstr ""
 
-#: build/index.js:12
+#: src/index.js:302
 msgid "Each feature, what it does, where it is set up and its state on this site."
 msgstr ""
 
-#: build/index.js:12
+#: src/index.js:315
+#: src/index.js:322
 msgid "Help"
 msgstr ""
 
-#: build/index.js:12
+#: src/index.js:316
 msgid "What MailWeb reads and where it is set up."
 msgstr ""
 
-#: build/index.js:12
-#: build/index.js:17
-#: build/index.js:18
-#: build/index.js:19
+#: src/index.js:324
+#: src/index.js:556
+#: src/index.js:626
+#: src/index.js:1047
 msgid "What"
 msgstr ""
 
-#: build/index.js:12
+#: src/index.js:325
 msgid "Where"
 msgstr ""
 
-#: build/index.js:12
+#: src/index.js:333
 msgid "Note all Inbox and Archive mail in FluentCRM (WP-CLI on the server)"
 msgstr ""
 
-#: build/index.js:12
+#: src/index.js:340
 msgid "Read in step with"
 msgstr ""
 
+#: src/index.js:347
+msgid "Hostinger webmail"
+msgstr ""
+
 #. translators: %s: date, time and mailbox of the last webhook delivery.
-#: build/index.js:13
+#: src/index.js:366
 #, js-format
 msgid "Last mail in: %s."
 msgstr ""
 
-#: build/index.js:13
+#: src/index.js:369
 msgid "No mail has come in through the webhook yet."
 msgstr ""
 
-#: build/index.js:13
+#: src/index.js:377
 msgid "No mailboxes yet. An administrator adds the Mail API token in Settings."
 msgstr ""
 
 #. translators: %s: alias addresses.
-#: build/index.js:14
+#: src/index.js:391
 #, js-format
 msgid "Also %s."
 msgstr ""
 
 #. translators: %s: number of unread emails.
-#: build/index.js:15
+#: src/index.js:399
 #, js-format
 msgid "%s unread."
 msgstr ""
 
 #. translators: %s: OK, Empty, Not reachable or "Shown from 4:12 pm".
-#: build/index.js:16
+#: src/index.js:404
 #, js-format
 msgid "Status: %s."
 msgstr ""
 
-#: build/index.js:16
+#: src/index.js:437
 msgid "Open in Inbox"
 msgstr ""
 
-#: build/index.js:16
+#: src/index.js:445
 msgid "Open webmail"
 msgstr ""
 
-#: build/index.js:16
+#: src/index.js:460
 msgid "Queue"
 msgstr ""
 
-#: build/index.js:16
+#: src/index.js:461
 msgid "Emails over the daily limit wait here and go out as the limit frees, every 5 minutes."
 msgstr ""
 
-#: build/index.js:16
+#: src/index.js:467
 msgid "Waiting by kind"
 msgstr ""
 
-#: build/index.js:16
+#: src/index.js:469
 msgid "Waiting"
 msgstr ""
 
-#: build/index.js:16
-#: build/index.js:17
+#: src/index.js:470
+#: src/index.js:556
 msgid "Emails"
 msgstr ""
 
-#: build/index.js:16
+#: src/index.js:475
 msgid "Oldest waiting since"
 msgstr ""
 
-#: build/index.js:16
+#: src/index.js:479
 msgid "Room left today for notices"
 msgstr ""
 
-#: build/index.js:16
+#: src/index.js:483
 msgid "Room left today for campaigns"
 msgstr ""
 
-#: build/index.js:16
+#: src/index.js:490
 msgid "To send the queue now, use the current Site sending screen."
 msgstr ""
 
-#: build/index.js:16
-#: build/index.js:19
+#: src/index.js:495
+#: src/index.js:1128
 msgid "Open Site sending"
 msgstr ""
 
-#: build/index.js:16
-#: build/index.js:17
+#: src/index.js:508
+#: src/index.js:555
 msgid "Sent and failed"
 msgstr ""
 
-#: build/index.js:16
+#: src/index.js:518
 msgid "Put the held emails back in line? They are sent on the next runs, within the daily limit."
 msgstr ""
 
-#: build/index.js:16
+#: src/index.js:532
 msgid "Clear the held emails? They are not sent. The log keeps a line for each for 30 days."
 msgstr ""
 
 #. translators: %d: number of days.
-#: build/index.js:17
+#: src/index.js:548
 #, js-format
 msgid "Emails sent per day, last %d days"
 msgstr ""
 
-#: build/index.js:17
+#: src/index.js:552
 msgid "emails"
 msgstr ""
 
-#: build/index.js:17
+#: src/index.js:560
 msgid "Failed, will be tried again"
 msgstr ""
 
 #. translators: %s: date and time.
-#: build/index.js:18
+#: src/index.js:566
 #, js-format
 msgid "next try %s"
 msgstr ""
 
-#: build/index.js:18
+#: src/index.js:579
 msgid "Held emails"
 msgstr ""
 
-#: build/index.js:18
+#: src/index.js:581
 msgid "Queued"
 msgstr ""
 
-#: build/index.js:18
+#: src/index.js:582
 msgid "Kind"
 msgstr ""
 
-#: build/index.js:18
+#: src/index.js:583
 msgid "Tries"
 msgstr ""
 
-#: build/index.js:18
+#: src/index.js:596
 msgid "set"
 msgstr ""
 
-#: build/index.js:18
+#: src/index.js:597
 msgid "not set"
 msgstr ""
 
-#: build/index.js:18
+#: src/index.js:598
 msgid "set in wp-config.php"
 msgstr ""
 
-#: build/index.js:18
+#: src/index.js:603
+#: src/index.js:625
 msgid "Sending status"
 msgstr ""
 
-#: build/index.js:18
+#: src/index.js:612
 msgid "Resume sending? Only do this once the mailbox works again: waiting emails then go out within the daily limit."
 msgstr ""
 
-#: build/index.js:18
+#: src/index.js:626
 msgid "Now"
 msgstr ""
 
 #. translators: 1: date and time, 2: the mail server's refusal.
-#: build/index.js:19
+#: src/index.js:633
 #, js-format
 msgid "Paused since %1$s: %2$s"
 msgstr ""
 
-#: build/index.js:19
+#: src/index.js:639
 msgid "Site mailbox"
 msgstr ""
 
-#: build/index.js:19
+#: src/index.js:641
 msgid "Server"
 msgstr ""
 
-#: build/index.js:19
+#: src/index.js:645
 msgid "Password"
 msgstr ""
 
-#: build/index.js:19
+#: src/index.js:648
 msgid "Order"
 msgstr ""
 
-#: build/index.js:19
+#: src/index.js:649
+msgid "FluentCRM"
+msgstr ""
+
+#: src/index.js:660
 msgid "Set. Leave empty to keep it."
 msgstr ""
 
-#: build/index.js:19
+#: src/index.js:661
 msgid "Not set."
 msgstr ""
 
-#: build/index.js:19
+#: src/index.js:662
 msgid "Set in wp-config.php: change it there."
 msgstr ""
 
-#: build/index.js:19
+#: src/index.js:711
 msgid "Save changes"
 msgstr ""
 
-#: build/index.js:19
-msgid "Value"
-msgstr ""
-
-#: build/index.js:19
-msgid "A test email is sent from the current Site sending screen."
-msgstr ""
-
-#: build/index.js:19
-msgid "Note emails on FluentCRM contacts"
-msgstr ""
-
-#: build/index.js:19
-msgid "New contacts are made as “transactional”: never added to a list or sent marketing."
-msgstr ""
-
-#: build/index.js:19
-#: build/index.js:21
-msgid "Connected services"
-msgstr ""
-
-#: build/index.js:19
-msgid "What MailWeb works with. Keys and passwords are never shown again once saved."
-msgstr ""
-
-#: build/index.js:19
+#: src/index.js:813
 msgid "The mailboxes come from the Mail API token. Replies and new messages go only from mailboxes ticked “Send from it”."
 msgstr ""
 
-#: build/index.js:19
+#: src/index.js:829
 msgid "No mailboxes yet: add the Mail API token under Connected services."
 msgstr ""
 
 #. translators: %s: alias addresses.
-#: build/index.js:20
+#: src/index.js:843
 #, js-format
 msgid "Aliases: %s"
 msgstr ""
 
+#: src/index.js:850
+msgid "Send from it"
+msgstr ""
+
+#: src/index.js:866
+msgid "Default From"
+msgstr ""
+
 #. translators: %s: mailbox address.
-#: build/index.js:21
+#: src/index.js:874
 #, js-format
 msgid "Replies go from %s."
 msgstr ""
 
-#: build/index.js:21
+#: src/index.js:880
+msgid "Aliases"
+msgstr ""
+
+#: src/index.js:881
 msgid "One a line: alias = mailbox (as in hPanel → Emails → Email Alias). The Mail API does not list aliases, so keep this in step with hPanel."
 msgstr ""
 
-#: build/index.js:21
+#: src/index.js:934
 msgid "Each address’s display name, signature and picture, as set in Hostinger webmail. Site emails sent from that address use the name and end with the signature (FluentCRM emails excepted)."
 msgstr ""
 
-#: build/index.js:21
+#: src/index.js:950
 msgid "No addresses yet: add the Mail API token under Connected services."
 msgstr ""
 
-#: build/index.js:21
+#: src/index.js:959
+msgid "Display name"
+msgstr ""
+
+#: src/index.js:972
+msgid "Signature (HTML)"
+msgstr ""
+
+#: src/index.js:973
 msgid "Links, bold and line breaks are kept; scripts are taken out when it is saved."
 msgstr ""
 
-#: build/index.js:21
+#: src/index.js:991
+msgid "Picture"
+msgstr ""
+
+#: src/index.js:992
 msgid "A picture from the media library, shown beside the address on the Mail page."
 msgstr ""
 
-#: build/index.js:21
+#: src/index.js:1048
+msgid "Value"
+msgstr ""
+
+#: src/index.js:1123
+msgid "A test email is sent from the current Site sending screen."
+msgstr ""
+
+#: src/index.js:1155
+msgid "Note emails on FluentCRM contacts"
+msgstr ""
+
+#: src/index.js:1156
+msgid "New contacts are made as “transactional”: never added to a list or sent marketing."
+msgstr ""
+
+#: src/index.js:1164
+msgid "Tag"
+msgstr ""
+
+#: src/index.js:1165
+msgid "Added to people who email you (empty = no tag)."
+msgstr ""
+
+#: src/index.js:1240
+#: src/index.js:1246
+#: src/index.js:1331
+msgid "Connected services"
+msgstr ""
+
+#: src/index.js:1241
+msgid "What MailWeb works with. Keys and passwords are never shown again once saved."
+msgstr ""
+
+#: src/index.js:1325
 msgid "Loading the settings…"
 msgstr ""
 
-#: build/index.js:21
+#: src/index.js:1343
 msgid "Settings groups"
 msgstr ""

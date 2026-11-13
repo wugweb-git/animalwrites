@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-12T21:11:23+00:00\n"
+"POT-Creation-Date: 2026-11-13T04:28:31+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: kits-core\n"
@@ -122,43 +122,49 @@ msgstr ""
 msgid "phones up to 767 px, tablets 768 to 1199 px, wide screens from 1200 px (fixed in the theme)"
 msgstr ""
 
-#: includes/admin-app.php:257
-#: includes/admin-app.php:266
+#: includes/admin-app.php:258
+#: includes/admin-app.php:264
+#: includes/admin-app.php:267
+#: includes/help-tab.php:34
 msgid "Theme Options"
 msgstr ""
 
-#: includes/admin-app.php:261
-msgid "This screen could not load."
+#: includes/admin-app.php:259
+msgid "Kits Core needs its build (build/theme-options/ and build/shell/) to show this screen."
 msgstr ""
 
-#: includes/admin-app.php:266
+#: includes/admin-app.php:267
 #: includes/admin-shell.php:127
 msgid "This screen needs JavaScript."
 msgstr ""
 
-#: includes/admin-app.php:266
+#: includes/admin-app.php:267
 msgid "Export the settings"
 msgstr ""
 
-#: includes/admin-kits-frame.php:78
-#: build/theme-options/index.js:4
+#: includes/admin-kits-frame.php:44
+msgid "Kits Core needs its build (build/shell/) to show this screen."
+msgstr ""
+
+#: includes/admin-kits-frame.php:90
+#: src/theme-options/index.js:450
 msgid "Kits"
 msgstr ""
 
-#: includes/admin-kits-frame.php:118
-#: build/shell/index.js:4
+#: includes/admin-kits-frame.php:130
+#: src/shell/index.js:114
 msgid "Screens"
 msgstr ""
 
-#: includes/admin-shell.php:150
+#: includes/admin-shell.php:149
 msgid "Sign in to use this."
 msgstr ""
 
-#: includes/admin-shell.php:156
+#: includes/admin-shell.php:155
 msgid "The page has expired. Reload it and try again."
 msgstr ""
 
-#: includes/admin-shell.php:160
+#: includes/admin-shell.php:159
 msgid "You are not allowed to do this."
 msgstr ""
 
@@ -171,6 +177,60 @@ msgstr ""
 #: includes/attribution.php:103
 #, php-format
 msgid "%s ago"
+msgstr ""
+
+#: includes/help-tab.php:33
+msgid "Home"
+msgstr ""
+
+#: includes/help-tab.php:33
+msgid "site status and the Kits plugins"
+msgstr ""
+
+#: includes/help-tab.php:34
+msgid "header, socials, contact links and the share bar"
+msgstr ""
+
+#: includes/help-tab.php:35
+msgid "Settings"
+msgstr ""
+
+#: includes/help-tab.php:35
+msgid "forms, analytics and the other shared features"
+msgstr ""
+
+#: includes/help-tab.php:36
+msgid "Tools"
+msgstr ""
+
+#: includes/help-tab.php:36
+msgid "export and import of the Kits settings"
+msgstr ""
+
+#: includes/help-tab.php:37
+msgid "Help"
+msgstr ""
+
+#: includes/help-tab.php:37
+msgid "the design system, the component registry and the docs"
+msgstr ""
+
+#. translators: %s: plugin name.
+#: includes/help-tab.php:47
+#, php-format
+msgid "About %s"
+msgstr ""
+
+#: includes/help-tab.php:48
+msgid "The features every Kits site shares (forms and their spam guard, the share bar, Google Tag Manager with consent mode, the visit counter) and the Kits admin screens that the other Kits plugins are built on."
+msgstr ""
+
+#: includes/help-tab.php:55
+msgid "Plugins"
+msgstr ""
+
+#: includes/help-tab.php:56
+msgid "(opens in a new tab)"
 msgstr ""
 
 #: includes/landmarks.php:75
@@ -212,138 +272,286 @@ msgstr ""
 msgid "One line that says what the page is for."
 msgstr ""
 
-#: build/shell/index.js:1
-msgid "This could not be loaded."
+#: src/shell/calendar.js:102
+msgid "Today"
 msgstr ""
 
-#: build/shell/index.js:1
-msgid "Try again"
+#: src/shell/calendar.js:180
+msgid "Nothing this month."
+msgstr ""
+
+#: src/shell/detail.js:39
+#: src/shell/index.js:536
+msgid "Close"
+msgstr ""
+
+#. translators: 1: what the pictures are, 2: its number.
+#: src/shell/detail.js:101
+#, js-format
+msgid "%1$s, picture %2$d"
+msgstr ""
+
+#: src/shell/detail.js:102
+msgid "Picture"
+msgstr ""
+
+#. translators: %d: pictures not shown.
+#: src/shell/detail.js:112
+#, js-format
+msgid "+%d more"
+msgstr ""
+
+#. translators: %d: media library item ID.
+#: src/shell/detail.js:189
+#, js-format
+msgid "Item %d"
+msgstr ""
+
+#: src/shell/detail.js:192
+msgid "None"
+msgstr ""
+
+#: src/shell/detail.js:203
+msgid "Change"
+msgstr ""
+
+#: src/shell/detail.js:204
+msgid "Choose from Media"
+msgstr ""
+
+#: src/shell/detail.js:224
+#: src/shell/detail.js:334
+#: src/shell/extras.js:170
+msgid "Remove"
+msgstr ""
+
+#. translators: 1: column name, 2: row number.
+#: src/shell/detail.js:298
+#: src/shell/detail.js:314
+#, js-format
+msgid "%1$s, row %2$d"
+msgstr ""
+
+#. translators: %d: row number.
+#: src/shell/detail.js:330
+#, js-format
+msgid "Remove row %d"
+msgstr ""
+
+#: src/shell/detail.js:346
+msgid "Add row"
+msgstr ""
+
+#. translators: 1: first label, 2: last label.
+#: src/shell/extras.js:54
+#, js-format
+msgid "(%1$s to %2$s)"
+msgstr ""
+
+#: src/shell/extras.js:100
+msgid "This could not be added."
+msgstr ""
+
+#: src/shell/extras.js:124
+msgid "Add"
+msgstr ""
+
+#: src/shell/extras.js:129
+msgid "Kept only as a fingerprint: once added, it is never shown again."
+msgstr ""
+
+#. translators: %d: number of entries.
+#: src/shell/extras.js:142
+#, js-format
+msgid "%d kept"
+msgstr ""
+
+#. translators: %d: entry number.
+#: src/shell/extras.js:153
+#, js-format
+msgid "Entry %d"
+msgstr ""
+
+#. translators: %s: plugin name.
+#: src/shell/extras.js:200
+#, js-format
+msgid "Kept in %s: change it there"
+msgstr ""
+
+#. translators: %s: plugin name.
+#: src/shell/extras.js:207
+#, js-format
+msgid "Kept in %s, which is not active."
+msgstr ""
+
+#: src/shell/extras.js:242
+msgid "Select metrics"
+msgstr ""
+
+#: src/shell/extras.js:251
+msgid "Tiles to show"
+msgstr ""
+
+#: src/shell/extras.js:286
+#: src/theme-options/index.js:470
+msgid "Save"
+msgstr ""
+
+#: src/shell/extras.js:293
+#: src/shell/inputs.js:226
+msgid "Cancel"
+msgstr ""
+
+#: src/shell/index.js:235
+msgid "Needs attention"
+msgstr ""
+
+#: src/shell/index.js:236
+msgid "Not working"
+msgstr ""
+
+#. translators: %s: plugin name.
+#: src/shell/index.js:275
+#, js-format
+msgid "%s not active"
+msgstr ""
+
+#: src/shell/index.js:286
+msgid "Counting…"
+msgstr ""
+
+#: src/shell/index.js:412
+msgid "Changed from the default."
+msgstr ""
+
+#: src/shell/index.js:423
+msgid "Reset to default"
+msgstr ""
+
+#: src/shell/index.js:537
+msgid "Edit"
+msgstr ""
+
+#: src/shell/inputs.js:92
+msgid "None saved."
+msgstr ""
+
+#. translators: %s: last 4 characters of the saved secret.
+#: src/shell/inputs.js:97
+#, js-format
+msgid "Saved, ends in …%s. Type a new one to replace it."
+msgstr ""
+
+#: src/shell/inputs.js:103
+msgid "Saved. Type a new one to replace it."
+msgstr ""
+
+#: src/shell/inputs.js:131
+msgid "Hide"
+msgstr ""
+
+#: src/shell/inputs.js:132
+msgid "Show"
+msgstr ""
+
+#. translators: %s: the word to type.
+#: src/shell/inputs.js:200
+#, js-format
+msgid "Type %s to confirm."
+msgstr ""
+
+#: src/shell/inputs.js:223
+msgid "Confirm"
 msgstr ""
 
 #. translators: %s: action label.
-#: build/shell/index.js:2
+#: src/shell/list.js:57
 #, js-format
 msgid "%s (opens in a new tab)"
 msgstr ""
 
-#: build/shell/index.js:2
+#: src/shell/list.js:242
 msgid "View"
 msgstr ""
 
-#: build/shell/index.js:2
+#: src/shell/list.js:354
 msgid "Views"
 msgstr ""
 
-#: build/shell/index.js:2
+#: src/shell/list.js:400
+#: src/shell/list.js:430
+#: src/shell/list.js:434
+#: src/shell/list.js:445
 msgid "Search"
 msgstr ""
 
-#: build/shell/index.js:2
-#: build/shell/index.js:4
+#: src/shell/list.js:408
+#: src/shell/parts.js:229
 msgid "Nothing here."
 msgstr ""
 
 #. translators: 1: page, 2: pages, 3: rows.
-#: build/shell/index.js:3
+#: src/shell/list.js:469
 #, js-format
 msgid "Page %1$d of %2$d · %3$d rows"
 msgstr ""
 
 #. translators: %d: rows.
-#: build/shell/index.js:4
+#: src/shell/list.js:479
 #, js-format
 msgid "%d row"
 msgid_plural "%d rows"
 msgstr[0] ""
 msgstr[1] ""
 
-#: build/shell/index.js:4
-msgid "Changed from the default."
-msgstr ""
-
-#: build/shell/index.js:4
-msgid "Reset to default"
-msgstr ""
-
-#. translators: %s: plugin name.
-#: build/shell/index.js:5
-#, js-format
-msgid "%s not active"
-msgstr ""
-
-#: build/shell/index.js:5
-msgid "Needs attention"
-msgstr ""
-
-#: build/shell/index.js:5
-msgid "Not working"
-msgstr ""
-
-#: build/shell/index.js:5
-msgid "Counting…"
-msgstr ""
-
-#: build/shell/index.js:5
-#: build/shell/index.js:16
-msgid "Close"
-msgstr ""
-
-#: build/shell/index.js:5
-msgid "Edit"
-msgstr ""
-
-#: build/shell/index.js:5
-msgid "Loading…"
-msgstr ""
-
-#: build/shell/index.js:5
+#: src/shell/list.js:559
 msgid "(empty)"
 msgstr ""
 
-#: build/shell/index.js:5
+#: src/shell/list.js:567
 msgid "Proposed changes"
 msgstr ""
 
-#: build/shell/index.js:5
-#: build/shell/index.js:6
+#: src/shell/list.js:572
+#: src/shell/list.js:603
 msgid "Field"
 msgstr ""
 
-#: build/shell/index.js:5
-#: build/shell/index.js:6
+#: src/shell/list.js:573
+#: src/shell/list.js:607
 msgid "Now"
 msgstr ""
 
-#: build/shell/index.js:5
-#: build/shell/index.js:6
+#: src/shell/list.js:574
+#: src/shell/list.js:610
 msgid "Proposed"
 msgstr ""
 
-#: build/shell/index.js:5
-#: build/shell/index.js:6
+#: src/shell/list.js:575
+#: src/shell/list.js:613
 msgid "State"
 msgstr ""
 
 #. translators: %s: field name.
-#: build/shell/index.js:6
+#: src/shell/list.js:591
 #, js-format
 msgid "Apply %s"
 msgstr ""
 
-#: build/shell/index.js:6
+#: src/shell/list.js:617
 msgid "Applied"
 msgstr ""
 
-#: build/shell/index.js:6
+#: src/shell/list.js:622
 msgid "Undo"
 msgstr ""
 
-#: build/shell/index.js:6
+#: src/shell/list.js:635
 msgid "Waiting"
 msgstr ""
 
 #. translators: %d: number of fields ticked.
-#: build/shell/index.js:7
+#: src/shell/list.js:655
 #, js-format
 msgid "Reject %d ticked"
 msgid_plural "Reject %d ticked"
@@ -351,7 +559,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of fields ticked.
-#: build/shell/index.js:8
+#: src/shell/list.js:675
 #, js-format
 msgid "Apply %d field"
 msgid_plural "Apply %d fields"
@@ -359,296 +567,152 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: 1: steps done, 2: all steps.
-#: build/shell/index.js:9
+#: src/shell/setup.js:54
 #, js-format
 msgid "%1$d of %2$d done"
 msgstr ""
 
-#: build/shell/index.js:9
+#: src/shell/setup.js:92
 msgid "(done)"
 msgstr ""
 
-#: build/shell/index.js:9
+#: src/shell/setup.js:112
 msgid "Back"
 msgstr ""
 
-#: build/shell/index.js:9
+#: src/shell/setup.js:125
 msgid "Finish"
 msgstr ""
 
-#: build/shell/index.js:9
+#: src/shell/setup.js:126
 msgid "Continue"
 msgstr ""
 
-#. translators: 1: first label, 2: last label.
-#: build/shell/index.js:10
-#, js-format
-msgid "(%1$s to %2$s)"
+#: src/shell/states.js:34
+msgid "Loading…"
 msgstr ""
 
-#: build/shell/index.js:10
-msgid "This could not be added."
+#: src/shell/states.js:51
+msgid "This could not be loaded."
 msgstr ""
 
-#: build/shell/index.js:10
-msgid "Add"
+#: src/shell/states.js:60
+msgid "Try again"
 msgstr ""
 
-#: build/shell/index.js:10
-msgid "Kept only as a fingerprint: once added, it is never shown again."
-msgstr ""
-
-#. translators: %d: number of entries.
-#: build/shell/index.js:11
-#, js-format
-msgid "%d kept"
-msgstr ""
-
-#. translators: %d: entry number.
-#: build/shell/index.js:12
-#, js-format
-msgid "Entry %d"
-msgstr ""
-
-#: build/shell/index.js:12
-#: build/shell/index.js:17
-#: build/shell/index.js:22
-msgid "Remove"
-msgstr ""
-
-#. translators: %s: plugin name.
-#: build/shell/index.js:13
-#, js-format
-msgid "Kept in %s: change it there"
-msgstr ""
-
-#. translators: %s: plugin name.
-#: build/shell/index.js:14
-#, js-format
-msgid "Kept in %s, which is not active."
-msgstr ""
-
-#: build/shell/index.js:14
-msgid "Select metrics"
-msgstr ""
-
-#: build/shell/index.js:14
-msgid "Tiles to show"
-msgstr ""
-
-#: build/shell/index.js:14
-#: build/theme-options/index.js:5
-msgid "Save"
-msgstr ""
-
-#: build/shell/index.js:14
-#: build/shell/index.js:16
-msgid "Cancel"
-msgstr ""
-
-#: build/shell/index.js:14
-msgid "Today"
-msgstr ""
-
-#: build/shell/index.js:14
-msgid "Nothing this month."
-msgstr ""
-
-#: build/shell/index.js:14
-msgid "None saved."
-msgstr ""
-
-#. translators: %s: last 4 characters of the saved secret.
-#: build/shell/index.js:15
-#, js-format
-msgid "Saved, ends in …%s. Type a new one to replace it."
-msgstr ""
-
-#: build/shell/index.js:15
-msgid "Saved. Type a new one to replace it."
-msgstr ""
-
-#: build/shell/index.js:15
-msgid "Hide"
-msgstr ""
-
-#: build/shell/index.js:15
-msgid "Show"
-msgstr ""
-
-#. translators: %s: the word to type.
-#: build/shell/index.js:16
-#, js-format
-msgid "Type %s to confirm."
-msgstr ""
-
-#: build/shell/index.js:16
-msgid "Confirm"
-msgstr ""
-
-#. translators: %d: media library item ID.
-#: build/shell/index.js:17
-#, js-format
-msgid "Item %d"
-msgstr ""
-
-#: build/shell/index.js:17
-msgid "None"
-msgstr ""
-
-#: build/shell/index.js:17
-msgid "Change"
-msgstr ""
-
-#: build/shell/index.js:17
-msgid "Choose from Media"
-msgstr ""
-
-#. translators: 1: what the pictures are, 2: its number.
-#: build/shell/index.js:18
-#, js-format
-msgid "%1$s, picture %2$d"
-msgstr ""
-
-#: build/shell/index.js:18
-msgid "Picture"
-msgstr ""
-
-#. translators: %d: pictures not shown.
-#: build/shell/index.js:19
-#, js-format
-msgid "+%d more"
-msgstr ""
-
-#. translators: 1: column name, 2: row number.
-#: build/shell/index.js:20
-#: build/shell/index.js:21
-#, js-format
-msgid "%1$s, row %2$d"
-msgstr ""
-
-#. translators: %d: row number.
-#: build/shell/index.js:22
-#, js-format
-msgid "Remove row %d"
-msgstr ""
-
-#: build/shell/index.js:22
-msgid "Add row"
-msgstr ""
-
-#: build/theme-options/index.js:1
-msgid "Theme value"
-msgstr ""
-
-#. translators: %s: the theme's value.
-#: build/theme-options/index.js:2
-#, js-format
-msgid "Theme value: %s"
-msgstr ""
-
-#: build/theme-options/index.js:2
-msgid "empty"
-msgstr ""
-
-#. translators: %s: field label.
-#: build/theme-options/index.js:3
-#, js-format
-msgid "Reset %s to theme"
-msgstr ""
-
-#: build/theme-options/index.js:3
-msgid "Reset to theme"
-msgstr ""
-
-#. translators: %s: the theme's value.
-#: build/theme-options/index.js:4
-#, js-format
-msgid "Theme (%s)"
-msgstr ""
-
-#: build/theme-options/index.js:4
-msgid "Cards"
-msgstr ""
-
-#: build/theme-options/index.js:4
-msgid "Sizes are the theme’s spacing tokens. The site keeps the theme’s values until you pick one."
-msgstr ""
-
-#: build/theme-options/index.js:4
-msgid "See the tokens"
-msgstr ""
-
-#: build/theme-options/index.js:4
-msgid "Card values are kept in Styles, which your account cannot change."
-msgstr ""
-
-#: build/theme-options/index.js:4
-msgid "These fields save with their own button below."
-msgstr ""
-
-#: build/theme-options/index.js:4
-msgid "Theme"
-msgstr ""
-
-#: build/theme-options/index.js:4
-msgid "the theme’s own"
-msgstr ""
-
-#: build/theme-options/index.js:4
+#: src/theme-options/index.js:60
 msgid "Header"
 msgstr ""
 
-#: build/theme-options/index.js:4
+#: src/theme-options/index.js:67
 msgid "Edit what the header holds (logo, menu, buttons)"
 msgstr ""
 
-#: build/theme-options/index.js:4
+#: src/theme-options/index.js:73
+#: src/theme-options/index.js:89
 msgid "Edit menus"
 msgstr ""
 
-#: build/theme-options/index.js:4
+#: src/theme-options/index.js:78
 msgid "Footer"
 msgstr ""
 
-#: build/theme-options/index.js:4
+#: src/theme-options/index.js:86
 msgid "Edit what the footer holds"
 msgstr ""
 
-#: build/theme-options/index.js:4
+#: src/theme-options/index.js:94
 msgid "Layout and spacing"
 msgstr ""
 
-#: build/theme-options/index.js:4
+#: src/theme-options/index.js:103
 msgid "Widths and spacing in Styles"
 msgstr ""
 
-#: build/theme-options/index.js:4
-msgid "Changes not saved"
+#: src/theme-options/index.js:185
+msgid "These fields save with their own button below."
 msgstr ""
 
-#: build/theme-options/index.js:4
+#: src/theme-options/index.js:269
+msgid "Theme"
+msgstr ""
+
+#: src/theme-options/index.js:279
+msgid "the theme’s own"
+msgstr ""
+
+#: src/theme-options/index.js:390
 msgid "Saved."
 msgstr ""
 
-#: build/theme-options/index.js:4
+#: src/theme-options/index.js:396
 msgid "Not saved. Try again."
 msgstr ""
 
 #. translators: %s: error message.
-#: build/theme-options/index.js:5
+#: src/theme-options/index.js:405
 #, js-format
 msgid "Partly saved. The rest was not saved: %s"
 msgstr ""
 
+#: src/theme-options/index.js:461
+msgid "Changes not saved"
+msgstr ""
+
 #. translators: 1: site name, 2: theme name and version, 3: Kits Core version.
-#: build/theme-options/index.js:6
+#: src/theme-options/index.js:480
 #, js-format
 msgid "%1$s · %2$s · Kits Core %3$s"
 msgstr ""
 
-#: build/theme-options/index.js:6
+#: src/theme-options/index.js:487
 msgid "Sections"
+msgstr ""
+
+#. translators: %s: the theme's value.
+#: src/theme-options/sections/cards.js:40
+#, js-format
+msgid "Theme (%s)"
+msgstr ""
+
+#: src/theme-options/sections/cards.js:66
+msgid "Card values are kept in Styles, which your account cannot change."
+msgstr ""
+
+#: src/theme-options/sections/cards.js:76
+msgid "Sizes are the theme’s spacing tokens. The site keeps the theme’s values until you pick one."
+msgstr ""
+
+#: src/theme-options/sections/cards.js:82
+msgid "See the tokens"
+msgstr ""
+
+#: src/theme-options/sections/cards.js:100
+msgid "Cards"
+msgstr ""
+
+#: src/theme-options/theme-note.js:11
+msgid "Theme value"
+msgstr ""
+
+#. translators: %s: the theme's value.
+#: src/theme-options/theme-note.js:14
+#, js-format
+msgid "Theme value: %s"
+msgstr ""
+
+#: src/theme-options/theme-note.js:15
+msgid "empty"
+msgstr ""
+
+#. translators: %s: field label.
+#: src/theme-options/theme-note.js:23
+#, js-format
+msgid "Reset %s to theme"
+msgstr ""
+
+#: src/theme-options/theme-note.js:27
+msgid "Reset to theme"
 msgstr ""
 
 #: blocks/hero/block.json

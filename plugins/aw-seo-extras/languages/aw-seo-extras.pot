@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-12T21:10:59+00:00\n"
+"POT-Creation-Date: 2026-11-13T04:28:30+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: aw-seo-extras\n"
@@ -18,7 +18,7 @@ msgstr ""
 #: aw-seo-extras.php
 #: includes/kits-hub.php:37
 #: includes/kits-hub.php:41
-#: includes/rankweb-ui.php:135
+#: includes/rankweb-ui.php:122
 msgid "RankWeb"
 msgstr ""
 
@@ -43,8 +43,8 @@ msgid "https://wugweb.com/"
 msgstr ""
 
 #. translators: 1: features on, 2: features RankWeb relies on.
-#: aw-seo-extras.php:40
-#: includes/rankweb-rest.php:655
+#: aw-seo-extras.php:41
+#: includes/rankweb-rest.php:649
 msgid "RankWeb does nothing until Rank Math SEO is active."
 msgstr ""
 
@@ -56,10 +56,59 @@ msgstr ""
 msgid "Sitemap or llms.txt is not answering."
 msgstr ""
 
+#: includes/help-tab.php:33
+#: includes/kits-hub.php:40
+msgid "Overview"
+msgstr ""
+
+#: includes/help-tab.php:33
+msgid "every module, where it is set up and its status"
+msgstr ""
+
+#: includes/help-tab.php:34
+#: includes/rankweb-ui.php:69
+#: includes/rankweb-ui.php:121
+#: src/index.js:982
+#: src/index.js:985
+msgid "FAQ"
+msgstr ""
+
+#: includes/help-tab.php:34
+msgid "which content has the FAQ box, and questions waiting for approval"
+msgstr ""
+
+#: includes/help-tab.php:35
+#: includes/rankweb-ui.php:78
+msgid "Settings"
+msgstr ""
+
+#: includes/help-tab.php:35
+msgid "every rule, by module, with its default"
+msgstr ""
+
+#. translators: %s: plugin name.
+#: includes/help-tab.php:45
+#, php-format
+msgid "About %s"
+msgstr ""
+
+#: includes/help-tab.php:46
+msgid "Everything Rank Math does not do, or keeps for Premium: the FAQ system, canonical rules, breadcrumbs, content analysis on what visitors see, focus keywords and the content panel in the editor. It works only while Rank Math is active."
+msgstr ""
+
+#: includes/help-tab.php:53
+#: includes/rankweb-rest.php:676
+msgid "Plugins"
+msgstr ""
+
+#: includes/help-tab.php:54
+msgid "(opens in a new tab)"
+msgstr ""
+
 #. translators: %s: plugin version.
 #. translators: %s: version.
 #: includes/kits-hub.php:34
-#: includes/rankweb-rest.php:652
+#: includes/rankweb-rest.php:646
 #, php-format
 msgid "Active, %s"
 msgstr ""
@@ -68,47 +117,45 @@ msgstr ""
 msgid "Does nothing until Rank Math SEO is active."
 msgstr ""
 
-#: includes/kits-hub.php:40
-msgid "Overview"
-msgstr ""
-
-#: includes/overview.php:75
+#: includes/overview.php:66
 msgid "Not checked yet (hourly check)."
 msgstr ""
 
-#: includes/overview.php:132
+#: includes/overview.php:117
 msgid "Automatic"
 msgstr ""
 
-#: includes/overview.php:229
+#: includes/overview.php:214
 msgid "Off (switch it on in Settings)."
 msgstr ""
 
-#: includes/overview.php:251
+#: includes/overview.php:236
 msgid "What the plugin adds to Rank Math (free) for animalwrites.in. Rank Math holds everything else; where a module’s settings live in Rank Math, the link goes there."
 msgstr ""
 
-#: includes/overview.php:253
-#: build/index.js:6
+#: includes/overview.php:238
+#: src/index.js:218
 msgid "Needs attention"
 msgstr ""
 
-#: includes/overview.php:255
-#: build/index.js:6
+#: includes/overview.php:240
+#: src/index.js:306
+#: src/index.js:314
 msgid "Modules"
 msgstr ""
 
-#: includes/overview.php:270
-#: build/index.js:6
+#: includes/overview.php:255
+#: src/index.js:268
+#: src/index.js:270
 msgid "On edit screens"
 msgstr ""
 
-#: includes/overview.php:298
-#: build/index.js:6
+#: includes/overview.php:283
+#: src/index.js:278
 msgid "Commands (WP-CLI on the server)"
 msgstr ""
 
-#: includes/overview.php:328
+#: includes/overview.php:313
 msgid "Each command lists its options with --help."
 msgstr ""
 
@@ -142,73 +189,73 @@ msgstr ""
 msgid "You are not allowed to do this."
 msgstr ""
 
-#: includes/rankweb-rest.php:211
+#: includes/rankweb-rest.php:205
 msgid "Search titles missing"
 msgstr ""
 
 #. translators: 1: number of items, 2: post type with the most missing.
-#: includes/rankweb-rest.php:215
+#: includes/rankweb-rest.php:209
 #, php-format
 msgid "of %1$s items; most in %2$s"
 msgstr ""
 
 #. translators: 1: number of items, 2: post type with the most missing.
-#: includes/rankweb-rest.php:215
+#: includes/rankweb-rest.php:209
 #, php-format
 msgid "of %s items"
 msgstr ""
 
-#: includes/rankweb-rest.php:223
+#: includes/rankweb-rest.php:217
 msgid "Descriptions missing"
 msgstr ""
 
 #. translators: %s: number of items.
-#: includes/rankweb-rest.php:227
+#: includes/rankweb-rest.php:221
 #, php-format
 msgid "%s filled by the daily job"
 msgstr ""
 
-#: includes/rankweb-rest.php:234
-#: includes/rankweb-rest.php:272
-#: includes/rankweb-rest.php:303
-#: build/index.js:8
+#: includes/rankweb-rest.php:228
+#: includes/rankweb-rest.php:266
+#: includes/rankweb-rest.php:297
+#: src/index.js:863
 msgid "Off"
 msgstr ""
 
-#: includes/rankweb-rest.php:235
+#: includes/rankweb-rest.php:229
 msgid "Rank Math schema entries is switched off"
 msgstr ""
 
 #. translators: %s: number of items checked so far.
-#: includes/rankweb-rest.php:239
+#: includes/rankweb-rest.php:233
 #, php-format
 msgid "First pass under way: %s items checked"
 msgstr ""
 
 #. translators: %s: number of items.
-#: includes/rankweb-rest.php:243
+#: includes/rankweb-rest.php:237
 #, php-format
 msgid "%s items the schema command would write"
 msgstr ""
 
-#: includes/rankweb-rest.php:247
+#: includes/rankweb-rest.php:241
 msgid "Schema entries to write"
 msgstr ""
 
-#: includes/rankweb-rest.php:259
+#: includes/rankweb-rest.php:253
 msgid "Focus keywords missing"
 msgstr ""
 
-#: includes/rankweb-rest.php:262
+#: includes/rankweb-rest.php:256
 msgid "Filled by the workers’ focus-keyword job"
 msgstr ""
 
-#: includes/rankweb-rest.php:271
+#: includes/rankweb-rest.php:265
 msgid "Pages with an FAQ"
 msgstr ""
 
 #. translators: %s: number of questions.
-#: includes/rankweb-rest.php:275
+#: includes/rankweb-rest.php:269
 #, php-format
 msgid "%s draft question waiting"
 msgid_plural "%s draft questions waiting"
@@ -216,255 +263,245 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %s: number of questions.
-#: includes/rankweb-rest.php:275
+#: includes/rankweb-rest.php:269
 msgid "No drafts waiting"
 msgstr ""
 
-#: includes/rankweb-rest.php:283
-#: build/index.js:6
+#: includes/rankweb-rest.php:277
+#: src/index.js:246
 msgid "Kept out of search"
 msgstr ""
 
 #. translators: %s: number of pages.
-#: includes/rankweb-rest.php:287
+#: includes/rankweb-rest.php:281
 #, php-format
 msgid "%s kept indexed on purpose"
 msgstr ""
 
 #. translators: %s: number.
-#: includes/rankweb-rest.php:293
+#: includes/rankweb-rest.php:287
 #, php-format
 msgid "%s listings with no way to reach them"
 msgstr ""
 
 #. translators: %s: number.
-#: includes/rankweb-rest.php:295
+#: includes/rankweb-rest.php:289
 #, php-format
 msgid "%s thin Directory pages"
 msgstr ""
 
 #. translators: %s: number.
-#: includes/rankweb-rest.php:297
+#: includes/rankweb-rest.php:291
 #, php-format
 msgid "%s category lists below the minimum"
 msgstr ""
 
-#: includes/rankweb-rest.php:304
+#: includes/rankweb-rest.php:298
 msgid "The hourly check is switched off"
 msgstr ""
 
-#: includes/rankweb-rest.php:307
+#: includes/rankweb-rest.php:301
 msgid "Not checked"
 msgstr ""
 
-#: includes/rankweb-rest.php:308
+#: includes/rankweb-rest.php:302
 msgid "The hourly check has not run yet"
 msgstr ""
 
-#: includes/rankweb-rest.php:311
+#: includes/rankweb-rest.php:305
 msgid "Not answering"
 msgstr ""
 
-#: includes/rankweb-rest.php:315
+#: includes/rankweb-rest.php:309
 msgid "Answering"
 msgstr ""
 
 #. translators: %s: date and time.
-#: includes/rankweb-rest.php:317
+#: includes/rankweb-rest.php:311
 #, php-format
 msgid "Both checked %s"
 msgstr ""
 
-#: includes/rankweb-rest.php:322
+#: includes/rankweb-rest.php:316
 msgid "Sitemap and llms.txt"
 msgstr ""
 
-#: includes/rankweb-rest.php:331
+#: includes/rankweb-rest.php:325
 msgid "Rank Math"
 msgstr ""
 
-#: includes/rankweb-rest.php:332
+#: includes/rankweb-rest.php:326
 msgid "Active"
 msgstr ""
 
 #. translators: %s: version.
-#: includes/rankweb-rest.php:332
-#: includes/rankweb-rest.php:652
+#: includes/rankweb-rest.php:326
+#: includes/rankweb-rest.php:646
 msgid "Not active"
 msgstr ""
 
 #. translators: 1: Rank Math version, 2: number of modules.
-#: includes/rankweb-rest.php:334
+#: includes/rankweb-rest.php:328
 #, php-format
 msgid "Version %1$s; %2$s RankWeb module off"
 msgid_plural "Version %1$s; %2$s RankWeb modules off"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/rankweb-rest.php:358
+#: includes/rankweb-rest.php:352
 msgid "Posts and Pages (Resources guides, hub Pages)"
 msgstr ""
 
-#: includes/rankweb-rest.php:358
+#: includes/rankweb-rest.php:352
 msgid "FAQ box: the page’s own questions (draft or approved)."
 msgstr ""
 
-#: includes/rankweb-rest.php:359
+#: includes/rankweb-rest.php:353
 msgid "Library documents"
 msgstr ""
 
-#: includes/rankweb-rest.php:359
+#: includes/rankweb-rest.php:353
 msgid "FAQ box: the questions. Library item box: Short name, Issued under, Key sections (document fields the questions use)."
 msgstr ""
 
-#: includes/rankweb-rest.php:360
+#: includes/rankweb-rest.php:354
 msgid "Tags, categories, organisation types, services"
 msgstr ""
 
-#: includes/rankweb-rest.php:360
+#: includes/rankweb-rest.php:354
 msgid "FAQ box on the term screen: automatic questions (tags) and the term’s own questions."
 msgstr ""
 
-#: includes/rankweb-rest.php:363
+#: includes/rankweb-rest.php:357
 msgid "report, check, import, convert-guides, undo-guide"
 msgstr ""
 
-#: includes/rankweb-rest.php:364
+#: includes/rankweb-rest.php:358
 msgid "Write Rank Math’s schema entries for published items (--dry-run, --type)"
 msgstr ""
 
-#: includes/rankweb-rest.php:365
+#: includes/rankweb-rest.php:359
 msgid "Make JPEG copies of pictures for share images"
 msgstr ""
 
-#: includes/rankweb-rest.php:366
+#: includes/rankweb-rest.php:360
 msgid "List the active redirects in Rank Math’s Redirections"
 msgstr ""
 
-#: includes/rankweb-rest.php:369
+#: includes/rankweb-rest.php:363
 msgid "Titles & Meta"
 msgstr ""
 
-#: includes/rankweb-rest.php:369
+#: includes/rankweb-rest.php:363
 msgid "Title and description templates for single items"
 msgstr ""
 
-#: includes/rankweb-rest.php:370
+#: includes/rankweb-rest.php:364
 msgid "Sitemap Settings"
 msgstr ""
 
-#: includes/rankweb-rest.php:370
+#: includes/rankweb-rest.php:364
 msgid "Which types are in the sitemap"
 msgstr ""
 
-#: includes/rankweb-rest.php:371
+#: includes/rankweb-rest.php:365
 msgid "General Settings"
 msgstr ""
 
-#: includes/rankweb-rest.php:371
+#: includes/rankweb-rest.php:365
 msgid "Breadcrumbs, and Edit llms.txt"
 msgstr ""
 
-#: includes/rankweb-rest.php:372
-#: includes/rankweb-rest.php:642
+#: includes/rankweb-rest.php:366
+#: includes/rankweb-rest.php:636
 msgid "Redirections"
 msgstr ""
 
-#: includes/rankweb-rest.php:372
+#: includes/rankweb-rest.php:366
 msgid "The one list of redirects (forms, merges and imports add to it)"
 msgstr ""
 
-#: includes/rankweb-rest.php:511
-#: build/index.js:8
+#: includes/rankweb-rest.php:505
+#: src/index.js:973
 msgid "No such group."
 msgstr ""
 
-#: includes/rankweb-rest.php:541
+#: includes/rankweb-rest.php:535
 msgid "Saved. A module switched on or off takes effect on the next page load."
 msgstr ""
 
-#: includes/rankweb-rest.php:541
+#: includes/rankweb-rest.php:535
 msgid "Defaults restored."
 msgstr ""
 
-#: includes/rankweb-rest.php:541
-#: includes/rankweb-rest.php:572
-#: includes/rankweb-rest.php:607
-#: includes/rankweb-rest.php:628
+#: includes/rankweb-rest.php:535
+#: includes/rankweb-rest.php:566
+#: includes/rankweb-rest.php:601
+#: includes/rankweb-rest.php:622
 msgid "Saved."
 msgstr ""
 
-#: includes/rankweb-rest.php:554
+#: includes/rankweb-rest.php:548
 msgid "The FAQ module is switched off."
 msgstr ""
 
 #. translators: %d: number of IDs left out.
-#: includes/rankweb-rest.php:606
+#: includes/rankweb-rest.php:600
 #, php-format
 msgid "Saved. %d ID is not a Directory listing and was left out."
 msgid_plural "Saved. %d IDs are not Directory listings and were left out."
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/rankweb-rest.php:620
+#: includes/rankweb-rest.php:614
 msgid "Choose an image from the media library."
 msgstr ""
 
-#: includes/rankweb-rest.php:641
+#: includes/rankweb-rest.php:635
 #: includes/sitemap.php:415
 msgid "Sitemap"
 msgstr ""
 
-#: includes/rankweb-rest.php:643
+#: includes/rankweb-rest.php:637
 msgid "llms.txt"
 msgstr ""
 
-#: includes/rankweb-rest.php:644
+#: includes/rankweb-rest.php:638
 msgid "Breadcrumbs"
 msgstr ""
 
-#: includes/rankweb-rest.php:650
+#: includes/rankweb-rest.php:644
 msgid "Rank Math SEO"
 msgstr ""
 
 #. translators: 1: features on, 2: features RankWeb relies on.
-#: includes/rankweb-rest.php:655
+#: includes/rankweb-rest.php:649
 #, php-format
 msgid "%1$d of the %2$d Rank Math features RankWeb relies on are on."
 msgstr ""
 
-#: includes/rankweb-rest.php:666
+#: includes/rankweb-rest.php:660
 msgid "Rank Math modules"
 msgstr ""
 
-#: includes/rankweb-rest.php:676
+#: includes/rankweb-rest.php:670
 msgid "General Settings (breadcrumbs, llms.txt)"
 msgstr ""
 
-#: includes/rankweb-rest.php:682
-msgid "Plugins"
-msgstr ""
-
-#: includes/rankweb-rest.php:686
+#: includes/rankweb-rest.php:680
 msgid "Read only: RankWeb changes nothing in Rank Math from here. No key is stored."
 msgstr ""
 
-#: includes/rankweb-ui.php:73
+#: includes/rankweb-ui.php:63
 msgid "Dashboard"
 msgstr ""
 
-#: includes/rankweb-ui.php:79
-#: includes/rankweb-ui.php:134
-#: build/index.js:8
-msgid "FAQ"
-msgstr ""
-
-#: includes/rankweb-ui.php:88
-msgid "Settings"
-msgstr ""
-
-#: includes/rankweb-ui.php:133
+#: includes/rankweb-ui.php:120
 msgid "RankWeb settings"
+msgstr ""
+
+#: includes/rankweb-ui.php:128
+msgid "RankWeb needs Kits Core (active, with its build) to show this screen."
 msgstr ""
 
 #: assets/content-panel.js:36
@@ -550,144 +587,145 @@ msgstr ""
 msgid "RankWeb content"
 msgstr ""
 
-#: build/index.js:1
+#: src/index.js:119
+msgid "A count is running in the background. The numbers change when it is done (about a minute)."
+msgstr ""
+
+#: src/index.js:135
 msgid "Loading the counts…"
 msgstr ""
 
 #. translators: 1: change (+3 or -2), 2: number of days.
-#: build/index.js:2
+#: src/index.js:152
 #, js-format
 msgid "%1$s in %2$d days"
 msgstr ""
 
 #. translators: %s: date and time.
-#: build/index.js:3
+#: src/index.js:160
 #, js-format
 msgid "Counted %s."
 msgstr ""
 
-#: build/index.js:3
+#: src/index.js:163
 msgid "Counting for the first time…"
 msgstr ""
 
 #. translators: %d: number of days.
-#: build/index.js:4
+#: src/index.js:169
 #, js-format
 msgid "No count from %d days ago yet, so no change is shown."
 msgstr ""
 
-#: build/index.js:4
+#: src/index.js:179
 msgid "The count is taking longer than usual; reload this page later."
 msgstr ""
 
-#: build/index.js:4
+#: src/index.js:189
 msgid "Compare with"
 msgstr ""
 
 #. translators: %d: number of days.
-#: build/index.js:6
+#: src/index.js:195
 #, js-format
 msgid "Last %d days"
 msgstr ""
 
-#: build/index.js:6
-msgid "A count is running in the background. The numbers change when it is done (about a minute)."
-msgstr ""
-
-#: build/index.js:6
+#: src/index.js:205
 msgid "Count now"
 msgstr ""
 
-#: build/index.js:6
+#: src/index.js:229
 msgid "RankWeb at a glance"
 msgstr ""
 
-#: build/index.js:6
+#: src/index.js:247
 msgid "Pages RankWeb’s own rules mark noindex. They come back by themselves when they qualify (a contact added, more listings)."
 msgstr ""
 
-#: build/index.js:6
+#: src/index.js:261
 msgid "Where things are"
 msgstr ""
 
-#: build/index.js:6
+#: src/index.js:262
 msgid "Everything Rank Math doesn’t do or keeps for Premium, for this site. Rank Math holds everything else; where a setting lives in Rank Math, the link goes there."
 msgstr ""
 
-#: build/index.js:6
+#: src/index.js:271
 msgid "What you edit there"
 msgstr ""
 
-#: build/index.js:6
+#: src/index.js:276
 msgid "Commands"
 msgstr ""
 
-#: build/index.js:6
+#: src/index.js:282
 msgid "What it does"
 msgstr ""
 
-#: build/index.js:6
+#: src/index.js:290
+#: src/index.js:292
 msgid "In Rank Math"
 msgstr ""
 
-#: build/index.js:6
+#: src/index.js:293
 msgid "What is set there"
 msgstr ""
 
-#: build/index.js:6
+#: src/index.js:307
 msgid "What each module adds, where it is set up, and whether it is on."
 msgstr ""
 
-#: build/index.js:6
-msgid "Save changes"
-msgstr ""
-
-#: build/index.js:6
+#: src/index.js:542
 msgid "Put every field of this group back to its default?"
 msgstr ""
 
-#: build/index.js:6
+#: src/index.js:562
+msgid "Save changes"
+msgstr ""
+
+#: src/index.js:566
 msgid "Restore defaults"
 msgstr ""
 
-#: build/index.js:6
+#: src/index.js:582
 msgid "A module switched off is not loaded: its screens, checks and output are gone until it is switched on again."
 msgstr ""
 
-#: build/index.js:6
+#: src/index.js:605
 msgid "Always on: other modules use it."
 msgstr ""
 
-#: build/index.js:6
+#: src/index.js:627
 msgid "Off: switch it on under Modules."
 msgstr ""
 
-#: build/index.js:6
+#: src/index.js:645
 msgid "FAQ box on"
 msgstr ""
 
-#: build/index.js:6
+#: src/index.js:646
 msgid "Ticked types have the FAQ box on their edit screens. A type registered later has it too."
 msgstr ""
 
-#: build/index.js:6
+#: src/index.js:652
 msgid "Post types"
 msgstr ""
 
-#: build/index.js:6
+#: src/index.js:653
 msgid "Taxonomies"
 msgstr ""
 
-#: build/index.js:6
+#: src/index.js:698
 msgid "Save FAQ box types"
 msgstr ""
 
-#: build/index.js:6
+#: src/index.js:705
 msgid "Listings kept indexed"
 msgstr ""
 
 #. translators: %s: number of listings.
-#: build/index.js:7
+#: src/index.js:708
 #, js-format
 msgid "%s listing stays indexed though it has no contact (it had Search Console impressions)."
 msgid_plural "%s listings stay indexed though they have no contact (they had Search Console impressions)."
@@ -695,63 +733,65 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %s: number of listings.
-#: build/index.js:8
+#: src/index.js:733
 #, js-format
 msgid "and %s more"
 msgstr ""
 
-#: build/index.js:8
+#: src/index.js:744
 msgid "Listing IDs"
 msgstr ""
 
-#: build/index.js:8
+#: src/index.js:745
 msgid "One ID per line (or comma separated). Only Directory listings are kept; other IDs are left out."
 msgstr ""
 
-#: build/index.js:8
+#: src/index.js:772
 msgid "Save listings kept indexed"
 msgstr ""
 
-#: build/index.js:8
+#: src/index.js:782
 msgid "Default share image"
 msgstr ""
 
-#: build/index.js:8
+#: src/index.js:783
 msgid "Shown when a page shared on social media has no picture of its own. Best at 1200 × 630."
 msgstr ""
 
-#: build/index.js:8
+#: src/index.js:789
 msgid "Image"
 msgstr ""
 
-#: build/index.js:8
+#: src/index.js:790
 msgid "An image from the media library. None: pages without a picture share no image."
 msgstr ""
 
-#: build/index.js:8
+#: src/index.js:806
 msgid "Save share image"
 msgstr ""
 
-#: build/index.js:8
-msgid "Connected services"
-msgstr ""
-
-#: build/index.js:8
-msgid "What RankWeb works with. Keys stay in Kits → Keys."
-msgstr ""
-
-#: build/index.js:8
-msgid "On"
-msgstr ""
-
-#: build/index.js:8
+#: src/index.js:834
 msgid "No connected services."
 msgstr ""
 
-#: build/index.js:8
+#: src/index.js:841
+#: src/index.js:847
+#: src/index.js:945
+msgid "Connected services"
+msgstr ""
+
+#: src/index.js:842
+msgid "What RankWeb works with. Keys stay in Kits → Keys."
+msgstr ""
+
+#: src/index.js:862
+msgid "On"
+msgstr ""
+
+#: src/index.js:937
 msgid "Loading the settings…"
 msgstr ""
 
-#: build/index.js:8
+#: src/index.js:957
 msgid "Settings groups"
 msgstr ""

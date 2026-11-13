@@ -9,14 +9,14 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-12T21:11:00+00:00\n"
+"POT-Creation-Date: 2026-11-13T04:28:27+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: aw-sourcing\n"
 
 #. Plugin Name of the plugin
 #: aw-sourcing.php
-#: includes/sourceweb-ui.php:185
+#: includes/sourceweb-ui.php:170
 msgid "SourceWeb"
 msgstr ""
 
@@ -33,6 +33,60 @@ msgstr ""
 #. Author URI of the plugin
 #: aw-sourcing.php
 msgid "https://wugweb.com"
+msgstr ""
+
+#: includes/help-tab.php:33
+msgid "Overview"
+msgstr ""
+
+#: includes/help-tab.php:33
+msgid "what came in, what waits and what the workers did"
+msgstr ""
+
+#: includes/help-tab.php:34
+msgid "To review, Enrichment review"
+msgstr ""
+
+#: includes/help-tab.php:34
+msgid "approve or reject what the workers found"
+msgstr ""
+
+#: includes/help-tab.php:35
+msgid "Sources, Keywords, Rules"
+msgstr ""
+
+#: includes/help-tab.php:35
+msgid "what is fetched and what is kept"
+msgstr ""
+
+#: includes/help-tab.php:36
+#: includes/sourceweb-rest.php:942
+#: includes/sourceweb-rest.php:1035
+#: includes/sourceweb-ui.php:118
+#: includes/sourceweb-ui.php:176
+msgid "AI models"
+msgstr ""
+
+#: includes/help-tab.php:36
+msgid "which free models do which job, with daily caps"
+msgstr ""
+
+#. translators: %s: plugin name.
+#: includes/help-tab.php:46
+#, php-format
+msgid "About %s"
+msgstr ""
+
+#: includes/help-tab.php:47
+msgid "What the news workers fetch and how it arrives: sources and feeds, keywords, rules, the review queues and the worker endpoints."
+msgstr ""
+
+#: includes/help-tab.php:54
+msgid "Plugins"
+msgstr ""
+
+#: includes/help-tab.php:55
+msgid "(opens in a new tab)"
 msgstr ""
 
 #. translators: %d: number of keys.
@@ -373,9 +427,9 @@ msgstr ""
 
 #: includes/sourceweb-rest-pages.php:1943
 #: includes/sourceweb-rest.php:1034
-#: includes/sourceweb-ui.php:129
-#: includes/sourceweb-ui.php:190
-#: build/index.js:49
+#: includes/sourceweb-ui.php:117
+#: includes/sourceweb-ui.php:175
+#: src/index.js:4315
 msgid "Rules"
 msgstr ""
 
@@ -469,7 +523,7 @@ msgstr ""
 
 #: includes/sourceweb-rest.php:246
 #: includes/sourceweb-rest.php:353
-#: build/index.js:6
+#: src/index.js:1698
 msgid "No report yet"
 msgstr ""
 
@@ -492,8 +546,8 @@ msgid "Last run %1$s: %2$s new, %3$s published, %4$s sources failed"
 msgstr ""
 
 #: includes/sourceweb-rest.php:255
-#: build/index.js:6
-#: build/index.js:39
+#: src/index.js:1692
+#: src/index.js:5472
 msgid "Last run"
 msgstr ""
 
@@ -582,9 +636,9 @@ msgid "By hand"
 msgstr ""
 
 #: includes/sourceweb-rest.php:364
-#: includes/sourceweb-ui.php:132
-#: includes/sourceweb-ui.php:193
-#: build/index.js:49
+#: includes/sourceweb-ui.php:120
+#: includes/sourceweb-ui.php:178
+#: src/index.js:6118
 msgid "Rejected"
 msgstr ""
 
@@ -594,9 +648,9 @@ msgstr ""
 
 #: includes/sourceweb-rest.php:365
 #: includes/sourceweb-rest.php:964
-#: includes/sourceweb-ui.php:133
-#: includes/sourceweb-ui.php:194
-#: build/index.js:49
+#: includes/sourceweb-ui.php:121
+#: includes/sourceweb-ui.php:179
+#: src/index.js:6174
 msgid "Relay log"
 msgstr ""
 
@@ -605,9 +659,9 @@ msgid "Requests the workers made through this site (the last 200)."
 msgstr ""
 
 #: includes/sourceweb-rest.php:366
-#: includes/sourceweb-ui.php:134
-#: includes/sourceweb-ui.php:195
-#: build/index.js:49
+#: includes/sourceweb-ui.php:122
+#: includes/sourceweb-ui.php:180
+#: src/index.js:6228
 msgid "Change log"
 msgstr ""
 
@@ -667,8 +721,10 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: includes/sourceweb-rest.php:746
-#: build/index.js:44
-#: build/index.js:48
+#: src/index.js:492
+#: src/index.js:514
+#: src/index.js:551
+#: src/index.js:947
 msgid "Source"
 msgstr ""
 
@@ -677,7 +733,7 @@ msgid "All sources"
 msgstr ""
 
 #: includes/sourceweb-rest.php:749
-#: build/index.js:48
+#: src/index.js:942
 msgid "Confidence"
 msgstr ""
 
@@ -698,9 +754,9 @@ msgid "Any confidence"
 msgstr ""
 
 #: includes/sourceweb-rest.php:759
-#: build/index.js:37
-#: build/index.js:42
-#: build/index.js:47
+#: src/index.js:862
+#: src/index.js:5181
+#: src/index.js:5940
 msgid "Field"
 msgstr ""
 
@@ -713,8 +769,8 @@ msgid "Flag"
 msgstr ""
 
 #: includes/sourceweb-rest.php:765
-#: build/index.js:37
-#: build/index.js:38
+#: src/index.js:5228
+#: src/index.js:5357
 msgid "Invite to claim"
 msgstr ""
 
@@ -775,10 +831,11 @@ msgstr ""
 #: includes/sourceweb-rest.php:897
 #: includes/sourceweb-rest.php:978
 #: includes/sourceweb-rest.php:1036
-#: includes/sourceweb-ui.php:131
-#: includes/sourceweb-ui.php:192
-#: build/index.js:6
-#: build/index.js:39
+#: includes/sourceweb-ui.php:119
+#: includes/sourceweb-ui.php:177
+#: src/index.js:1581
+#: src/index.js:1613
+#: src/index.js:5444
 msgid "Workers"
 msgstr ""
 
@@ -796,16 +853,17 @@ msgstr ""
 
 #: includes/sourceweb-rest.php:907
 #: includes/sourceweb-rest.php:924
-#: build/index.js:6
-#: build/index.js:14
-#: build/index.js:18
-#: build/index.js:37
+#: src/index.js:1195
+#: src/index.js:2700
+#: src/index.js:3191
+#: src/index.js:3196
+#: src/index.js:5212
 msgid "On"
 msgstr ""
 
 #: includes/sourceweb-rest.php:907
 #: includes/sourceweb-rest.php:924
-#: build/index.js:18
+#: src/index.js:3201
 msgid "Off"
 msgstr ""
 
@@ -840,15 +898,8 @@ msgstr ""
 msgid "Free models only. Keys are set on the AI models screen."
 msgstr ""
 
-#: includes/sourceweb-rest.php:942
-#: includes/sourceweb-rest.php:1035
-#: includes/sourceweb-ui.php:130
-#: includes/sourceweb-ui.php:191
-msgid "AI models"
-msgstr ""
-
 #: includes/sourceweb-rest.php:956
-#: build/index.js:14
+#: src/index.js:2693
 msgid "Relay"
 msgstr ""
 
@@ -875,7 +926,7 @@ msgid "Off: the workers use sources.yaml in the workers repository. On: they rea
 msgstr ""
 
 #: includes/sourceweb-rest.php:992
-#: build/index.js:31
+#: src/index.js:4276
 msgid "Directory enrichment"
 msgstr ""
 
@@ -916,17 +967,18 @@ msgid "Approved social posts on the pages they are linked to. Needs the type on.
 msgstr ""
 
 #: includes/sourceweb-rest.php:1032
-#: includes/sourceweb-ui.php:127
-#: includes/sourceweb-ui.php:188
-#: build/index.js:13
+#: includes/sourceweb-ui.php:115
+#: includes/sourceweb-ui.php:173
+#: src/index.js:2483
+#: src/index.js:2523
 msgid "Sources"
 msgstr ""
 
 #: includes/sourceweb-rest.php:1033
-#: includes/sourceweb-ui.php:128
-#: includes/sourceweb-ui.php:189
-#: build/index.js:24
-#: build/index.js:25
+#: includes/sourceweb-ui.php:116
+#: includes/sourceweb-ui.php:174
+#: src/index.js:3651
+#: src/index.js:3687
 msgid "Keywords"
 msgstr ""
 
@@ -942,830 +994,1085 @@ msgstr ""
 msgid "Nothing changed: the saved key is kept."
 msgstr ""
 
-#: includes/sourceweb-ui.php:124
+#: includes/sourceweb-ui.php:112
 msgid "Dashboard"
 msgstr ""
 
-#: includes/sourceweb-ui.php:125
-#: includes/sourceweb-ui.php:186
-#: build/index.js:42
+#: includes/sourceweb-ui.php:113
+#: includes/sourceweb-ui.php:171
+#: src/index.js:431
 msgid "To review"
 msgstr ""
 
-#: includes/sourceweb-ui.php:126
-#: includes/sourceweb-ui.php:187
+#: includes/sourceweb-ui.php:114
+#: includes/sourceweb-ui.php:172
 msgid "Enrichment review"
 msgstr ""
 
-#: includes/sourceweb-ui.php:135
+#: includes/sourceweb-ui.php:123
 msgid "Settings"
 msgstr ""
 
-#: includes/sourceweb-ui.php:196
+#: includes/sourceweb-ui.php:181
 msgid "SourceWeb settings"
 msgstr ""
 
-#: build/index.js:1
+#: includes/sourceweb-ui.php:189
+msgid "SourceWeb needs Kits Core (active, with its build) to show this screen."
+msgstr ""
+
+#: src/index.js:134
+msgid "A count is running in the background. The numbers change when it is done (about a minute)."
+msgstr ""
+
+#: src/index.js:150
 msgid "Loading the counts…"
 msgstr ""
 
 #. translators: 1: change (+3 or -2), 2: number of days.
-#: build/index.js:2
+#: src/index.js:167
 #, js-format
 msgid "%1$s in %2$d days"
 msgstr ""
 
 #. translators: %s: date and time.
-#: build/index.js:3
+#: src/index.js:175
 #, js-format
 msgid "Counted %s."
 msgstr ""
 
-#: build/index.js:3
+#: src/index.js:178
 msgid "Counting for the first time…"
 msgstr ""
 
 #. translators: %d: number of days.
-#: build/index.js:4
+#: src/index.js:184
 #, js-format
 msgid "No count from %d days ago yet, so no change is shown."
 msgstr ""
 
-#: build/index.js:4
+#: src/index.js:194
 msgid "The count is taking longer than usual; reload this page later."
 msgstr ""
 
-#: build/index.js:4
+#: src/index.js:203
 msgid "Compare with"
 msgstr ""
 
 #. translators: %d: number of days.
-#: build/index.js:6
+#: src/index.js:209
 #, js-format
 msgid "Last %d days"
 msgstr ""
 
-#: build/index.js:6
-msgid "A count is running in the background. The numbers change when it is done (about a minute)."
-msgstr ""
-
-#: build/index.js:6
+#: src/index.js:219
 msgid "Count now"
 msgstr ""
 
-#: build/index.js:6
+#: src/index.js:231
 msgid "Needs attention"
 msgstr ""
 
-#: build/index.js:6
+#: src/index.js:241
 msgid "SourceWeb at a glance"
 msgstr ""
 
-#: build/index.js:6
+#: src/index.js:258
+#: src/index.js:265
 msgid "Worker runs"
 msgstr ""
 
-#: build/index.js:6
+#: src/index.js:259
 msgid "Each workflow’s last report and when it runs next."
 msgstr ""
 
-#: build/index.js:6
-#: build/index.js:7
-#: build/index.js:39
-#: build/index.js:42
+#: src/index.js:269
+#: src/index.js:1617
+#: src/index.js:1820
+#: src/index.js:5446
+#: src/index.js:6047
 msgid "Worker"
 msgstr ""
 
-#: build/index.js:6
+#: src/index.js:274
 msgid "Last report"
 msgstr ""
 
-#: build/index.js:6
-#: build/index.js:7
-#: build/index.js:13
-#: build/index.js:49
+#: src/index.js:278
+#: src/index.js:1821
+#: src/index.js:2276
+#: src/index.js:6197
 msgid "Result"
 msgstr ""
 
-#: build/index.js:6
+#: src/index.js:282
 msgid "Next due"
 msgstr ""
 
-#: build/index.js:6
+#: src/index.js:293
+#: src/index.js:300
 msgid "Reports"
 msgstr ""
 
-#: build/index.js:6
+#: src/index.js:294
 msgid "Read-only logs, on the current screens for now."
 msgstr ""
 
-#: build/index.js:6
+#: src/index.js:302
 msgid "Report"
 msgstr ""
 
-#: build/index.js:6
+#: src/index.js:303
 msgid "What it lists"
 msgstr ""
 
-#: build/index.js:6
+#: src/index.js:316
+#: src/index.js:323
 msgid "Commands"
 msgstr ""
 
-#: build/index.js:6
+#: src/index.js:317
 msgid "WP-CLI on the server. Each lists its options with --help."
 msgstr ""
 
-#: build/index.js:6
+#: src/index.js:325
 msgid "Command"
 msgstr ""
 
-#: build/index.js:6
-#: build/index.js:9
+#: src/index.js:326
+#: src/index.js:2081
 msgid "What it does"
 msgstr ""
 
-#: build/index.js:6
-msgid "From"
+#. translators: %d: number of items.
+#: src/index.js:404
+#, js-format
+msgid "Publish %d item in this view?"
+msgid_plural "Publish all %d items in this view?"
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/index.js:432
+msgid "Items that came in automatically and need a person, with why each was held. Publish puts it live; Reject moves it to Drafts (nothing is deleted)."
 msgstr ""
 
-#: build/index.js:6
-#: build/index.js:8
-#: build/index.js:19
-#: build/index.js:42
-msgid "Save changes"
+#. translators: %d: number of items.
+#: src/index.js:441
+#, js-format
+msgid "Publish all %d"
 msgstr ""
 
-#: build/index.js:6
-msgid "Google Places key"
+#: src/index.js:457
+msgid "Items waiting for review"
 msgstr ""
 
-#: build/index.js:6
-msgid "A key is set. Type a new one to replace it; leave it empty to keep it. The key is never shown."
+#: src/index.js:461
+msgid "Received"
 msgstr ""
 
-#: build/index.js:6
-msgid "Not set: the live Google block is hidden. Restrict the key to the Places API."
+#: src/index.js:467
+#: src/index.js:2032
+#: src/index.js:3984
+#: src/index.js:6128
+msgid "Item"
 msgstr ""
 
-#: build/index.js:6
-msgid "Save"
+#: src/index.js:486
+#: src/index.js:3149
+#: src/index.js:6151
+msgid "Type"
 msgstr ""
 
-#: build/index.js:6
-msgid "Save key"
+#: src/index.js:497
+msgid "Why it is waiting"
 msgstr ""
 
-#: build/index.js:6
-#: build/index.js:49
-msgid "Connected services"
+#: src/index.js:507
+msgid "Search items"
 msgstr ""
 
-#: build/index.js:6
-msgid "Each source and service SourceWeb works with. Keys are never sent to this page: a row says only whether one is set."
+#: src/index.js:520
+msgid "Why"
 msgstr ""
 
-#: build/index.js:6
-msgid "Details"
+#: src/index.js:531
+#: src/index.js:558
+msgid "Publish"
 msgstr ""
 
-#: build/index.js:6
-msgid "No connected services."
+#: src/index.js:535
+msgid "Reject (move to Drafts)"
 msgstr ""
 
-#: build/index.js:6
-msgid "One worker per workflow of the workers repository, which reports its start and end here. Schedules are changed in the workflows; names, groups and late limits here. A problem is emailed to the owner once. Planned workers never raise an alert."
-msgstr ""
-
-#: build/index.js:6
-#: build/index.js:7
-msgid "Add New Worker"
-msgstr ""
-
-#: build/index.js:6
-msgid "Run now is off: AW_GITHUB_DISPATCH_TOKEN is not set in wp-config.php (a fine-grained GitHub token for the workers repository only, Actions read and write)."
-msgstr ""
-
-#: build/index.js:6
-#: build/index.js:9
-#: build/index.js:37
-#: build/index.js:39
-#: build/index.js:41
-msgid "Group"
-msgstr ""
-
-#: build/index.js:6
-msgid "Workflow file"
-msgstr ""
-
-#: build/index.js:6
-msgid "Not built yet"
-msgstr ""
-
-#: build/index.js:6
-#: build/index.js:8
-msgid "Schedule (IST)"
-msgstr ""
-
-#: build/index.js:6
-#: build/index.js:14
-#: build/index.js:17
-#: build/index.js:41
-#: build/index.js:42
-msgid "Status"
-msgstr ""
-
-#: build/index.js:6
-#: build/index.js:10
-#: build/index.js:39
-#: build/index.js:41
-#: build/index.js:42
-msgid "Keys"
-msgstr ""
-
-#: build/index.js:6
-msgid "Search workers"
-msgstr ""
-
-#: build/index.js:6
-#: build/index.js:15
-#: build/index.js:18
-#: build/index.js:25
-#: build/index.js:31
-#: build/index.js:37
-#: build/index.js:41
-#: build/index.js:44
-#: build/index.js:49
+#: src/index.js:545
+#: src/index.js:1023
+#: src/index.js:1766
+#: src/index.js:2786
+#: src/index.js:3237
+#: src/index.js:3784
+#: src/index.js:4457
+#: src/index.js:4548
+#: src/index.js:5240
+#: src/index.js:5790
 msgid "Edit"
 msgstr ""
 
-#: build/index.js:6
-msgid "Run now"
+#: src/index.js:562
+msgid "Needs its summary first"
 msgstr ""
 
-#: build/index.js:6
-msgid "Needs input or the dispatch token"
+#: src/index.js:567
+msgid "Reject"
 msgstr ""
 
-#: build/index.js:6
-msgid "View runs"
+#: src/index.js:575
+msgid "Nothing is waiting."
 msgstr ""
 
-#: build/index.js:6
-#: build/index.js:15
-#: build/index.js:18
-#: build/index.js:27
-#: build/index.js:28
-#: build/index.js:31
-msgid "Delete"
+#: src/index.js:578
+msgid "New items that pass the checks go live on their own."
+msgstr ""
+
+#: src/index.js:588
+msgid "Add by link"
+msgstr ""
+
+#: src/index.js:613
+msgid "Undo every applied value"
+msgstr ""
+
+#: src/index.js:653
+msgid "From"
+msgstr ""
+
+#: src/index.js:727
+msgid "Approve every waiting high-confidence value in this filter? Merges are left for one by one."
+msgstr ""
+
+#. translators: %s: source names.
+#: src/index.js:765
+#, js-format
+msgid "From %s"
+msgstr ""
+
+#: src/index.js:773
+#: src/index.js:1014
+msgid "Close"
+msgstr ""
+
+#: src/index.js:782
+msgid "Proposed details"
+msgstr ""
+
+#. translators: %s: field name.
+#: src/index.js:797
+#, js-format
+msgid "%s now"
+msgstr ""
+
+#. translators: %s: field name.
+#: src/index.js:813
+#, js-format
+msgid "%s proposed"
+msgstr ""
+
+#: src/index.js:841
+#: src/index.js:981
+msgid "Reject every waiting value"
+msgstr ""
+
+#: src/index.js:852
+msgid "Nothing waiting or applied in this view."
+msgstr ""
+
+#: src/index.js:860
+msgid "Other decisions"
+msgstr ""
+
+#: src/index.js:863
+msgid "What happened"
+msgstr ""
+
+#: src/index.js:877
+msgid "Listing details"
+msgstr ""
+
+#. translators: 1: listings checked, 2: listings, 3: proposals waiting.
+#: src/index.js:882
+#, js-format
+msgid "%1$d of %2$d listings checked · %3$d proposals waiting. High-confidence values for empty fields of unclaimed listings are applied on their own and listed under Applied, with Undo."
+msgstr ""
+
+#: src/index.js:895
+msgid "Approve all high (this filter)"
+msgstr ""
+
+#: src/index.js:905
+msgid "One listing only."
+msgstr ""
+
+#: src/index.js:919
+msgid "Show every listing"
+msgstr ""
+
+#: src/index.js:924
+msgid "Listings with proposals"
+msgstr ""
+
+#: src/index.js:928
+msgid "Listing"
+msgstr ""
+
+#: src/index.js:934
+msgid "Waiting"
+msgstr ""
+
+#: src/index.js:938
+msgid "Applied"
+msgstr ""
+
+#: src/index.js:952
+msgid "Flags"
+msgstr ""
+
+#: src/index.js:963
+msgid "Search listings"
+msgstr ""
+
+#: src/index.js:974
+msgid "Approve every waiting value"
+msgstr ""
+
+#. translators: %d: number of listings ticked.
+#: src/index.js:996
+#, js-format
+msgid "Undo every applied value of %d listing? The values before them come back."
+msgid_plural "Undo every applied value of %d listings? The values before them come back."
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/index.js:1015
+msgid "Review"
+msgstr ""
+
+#: src/index.js:1028
+msgid "View"
+msgstr ""
+
+#: src/index.js:1035
+msgid "Nothing here."
+msgstr ""
+
+#: src/index.js:1110
+#: src/index.js:2004
+#: src/index.js:3403
+#: src/index.js:5900
+msgid "Save changes"
+msgstr ""
+
+#: src/index.js:1202
+msgid "Google Places key"
+msgstr ""
+
+#: src/index.js:1205
+msgid "A key is set. Type a new one to replace it; leave it empty to keep it. The key is never shown."
+msgstr ""
+
+#: src/index.js:1209
+msgid "Not set: the live Google block is hidden. Restrict the key to the Places API."
+msgstr ""
+
+#: src/index.js:1236
+msgid "Save"
+msgstr ""
+
+#: src/index.js:1246
+msgid "Save key"
+msgstr ""
+
+#: src/index.js:1273
+msgid "No connected services."
+msgstr ""
+
+#: src/index.js:1280
+#: src/index.js:1286
+#: src/index.js:1371
+msgid "Connected services"
+msgstr ""
+
+#: src/index.js:1281
+msgid "Each source and service SourceWeb works with. Keys are never sent to this page: a row says only whether one is set."
+msgstr ""
+
+#: src/index.js:1297
+msgid "Details"
+msgstr ""
+
+#: src/index.js:1364
+msgid "Loading the settings…"
+msgstr ""
+
+#: src/index.js:1383
+msgid "Settings groups"
+msgstr ""
+
+#: src/index.js:1402
+msgid "Backfill"
+msgstr ""
+
+#: src/index.js:1406
+msgid "On the current screens"
+msgstr ""
+
+#: src/index.js:1407
+msgid "These lists keep their own screens for now."
 msgstr ""
 
 #. translators: %s: worker name.
-#: build/index.js:7
+#: src/index.js:1569
 #, js-format
 msgid "Delete the planned worker \"%s\"?"
 msgstr ""
 
-#: build/index.js:7
+#: src/index.js:1582
+msgid "One worker per workflow of the workers repository, which reports its start and end here. Schedules are changed in the workflows; names, groups and late limits here. A problem is emailed to the owner once. Planned workers never raise an alert."
+msgstr ""
+
+#: src/index.js:1592
+#: src/index.js:1984
+msgid "Add New Worker"
+msgstr ""
+
+#: src/index.js:1598
+msgid "Run now is off: AW_GITHUB_DISPATCH_TOKEN is not set in wp-config.php (a fine-grained GitHub token for the workers repository only, Actions read and write)."
+msgstr ""
+
+#: src/index.js:1651
+#: src/index.js:2095
+#: src/index.js:5207
+#: src/index.js:5493
+#: src/index.js:5694
+msgid "Group"
+msgstr ""
+
+#: src/index.js:1657
+msgid "Workflow file"
+msgstr ""
+
+#: src/index.js:1667
+msgid "Not built yet"
+msgstr ""
+
+#: src/index.js:1677
+#: src/index.js:2052
+msgid "Schedule (IST)"
+msgstr ""
+
+#: src/index.js:1722
+#: src/index.js:2611
+#: src/index.js:2988
+#: src/index.js:5712
+#: src/index.js:5963
+#: src/index.js:6036
+msgid "Status"
+msgstr ""
+
+#: src/index.js:1747
+#: src/index.js:2142
+#: src/index.js:2151
+#: src/index.js:5471
+#: src/index.js:5581
+#: src/index.js:5636
+#: src/index.js:6033
+msgid "Keys"
+msgstr ""
+
+#: src/index.js:1757
+msgid "Search workers"
+msgstr ""
+
+#: src/index.js:1773
+msgid "Run now"
+msgstr ""
+
+#: src/index.js:1779
+msgid "Needs input or the dispatch token"
+msgstr ""
+
+#: src/index.js:1786
+msgid "View runs"
+msgstr ""
+
+#: src/index.js:1793
+#: src/index.js:2838
+#: src/index.js:3268
+#: src/index.js:3829
+#: src/index.js:3965
+#: src/index.js:4553
+msgid "Delete"
+msgstr ""
+
+#: src/index.js:1803
 msgid "No workers found."
 msgstr ""
 
-#: build/index.js:7
+#: src/index.js:1808
+#: src/index.js:1816
 msgid "Run now log"
 msgstr ""
 
-#: build/index.js:7
+#: src/index.js:1809
 msgid "The last 50 times Run now was used."
 msgstr ""
 
-#: build/index.js:7
-#: build/index.js:49
+#: src/index.js:1818
+#: src/index.js:6238
 msgid "When"
 msgstr ""
 
-#: build/index.js:7
-#: build/index.js:49
+#: src/index.js:1819
+#: src/index.js:6244
 msgid "Who"
 msgstr ""
 
-#: build/index.js:7
-#: build/index.js:49
+#: src/index.js:1826
+#: src/index.js:6180
 msgid "None yet."
 msgstr ""
 
-#: build/index.js:7
+#: src/index.js:1945
 msgid "Loading the worker…"
 msgstr ""
 
 #. translators: %s: worker name.
-#: build/index.js:8
+#: src/index.js:1987
 #, js-format
 msgid "Edit %s"
 msgstr ""
 
-#: build/index.js:8
+#: src/index.js:1993
 msgid "A planned worker: the ID is the file name its workflow will have, without .yml. It shows \"Not built yet\" until a workflow with that ID reports a run, and never raises an alert."
 msgstr ""
 
-#: build/index.js:8
+#: src/index.js:2003
 msgid "Add worker"
 msgstr ""
 
-#: build/index.js:8
-#: build/index.js:17
-#: build/index.js:28
-#: build/index.js:32
+#: src/index.js:2007
+#: src/index.js:2936
+#: src/index.js:3970
+#: src/index.js:4584
 msgid "Cancel"
 msgstr ""
 
-#: build/index.js:8
+#: src/index.js:2019
+#: src/index.js:2037
 msgid "ID"
 msgstr ""
 
-#: build/index.js:8
+#: src/index.js:2020
 msgid "e.g. press-news for press-news.yml. Lowercase letters, digits and hyphens. It never changes."
 msgstr ""
 
-#: build/index.js:8
+#: src/index.js:2030
 msgid "The worker"
 msgstr ""
 
-#: build/index.js:8
-#: build/index.js:28
-#: build/index.js:44
-#: build/index.js:49
-msgid "Item"
-msgstr ""
-
-#: build/index.js:8
-#: build/index.js:28
-#: build/index.js:42
+#: src/index.js:2033
+#: src/index.js:3985
+#: src/index.js:5941
 msgid "Value"
 msgstr ""
 
-#: build/index.js:8
+#: src/index.js:2040
 msgid "(IDs never change)"
 msgstr ""
 
-#: build/index.js:8
+#: src/index.js:2046
 msgid "Workflow"
 msgstr ""
 
-#: build/index.js:8
+#: src/index.js:2053
 msgid "(changed in the workflow)"
 msgstr ""
 
-#: build/index.js:8
-#: build/index.js:17
-#: build/index.js:18
+#: src/index.js:2064
+#: src/index.js:2969
+#: src/index.js:3139
 msgid "Name"
 msgstr ""
 
 #. translators: %s: name in the workflow.
-#: build/index.js:9
+#: src/index.js:2069
 #, js-format
 msgid "In the workflow: %s. Leave empty for that name."
 msgstr ""
 
-#: build/index.js:9
+#: src/index.js:2084
 msgid "Leave empty for the registry's description."
 msgstr ""
 
-#: build/index.js:9
+#: src/index.js:2101
 msgid "Or a new group"
 msgstr ""
 
-#: build/index.js:9
+#: src/index.js:2102
 msgid "A new group is added to the list (with a generic icon)."
 msgstr ""
 
-#: build/index.js:9
+#: src/index.js:2110
 msgid "Late after (hours)"
 msgstr ""
 
-#: build/index.js:9
+#: src/index.js:2113
 msgid "Blank: never late. Planned workers never raise an alert; this applies once the workflow is in the registry."
 msgstr ""
 
 #. translators: %s: late limit in the registry.
-#: build/index.js:10
+#: src/index.js:2119
 #, js-format
 msgid "Blank: never late (no alert). In the registry: %s."
 msgstr ""
 
-#: build/index.js:10
+#: src/index.js:2132
 msgid "Schedule wanted"
 msgstr ""
 
-#: build/index.js:10
+#: src/index.js:2133
 msgid "In words, for whoever builds the workflow (e.g. daily at 06:00 IST)."
 msgstr ""
 
-#: build/index.js:10
+#: src/index.js:2143
 msgid "Ticked: this worker may use the key. Unticking a key that is for all workers makes it for every other worker. Keys show only their last 4 characters."
 msgstr ""
 
-#: build/index.js:10
+#: src/index.js:2172
 msgid "No keys saved."
 msgstr ""
 
-#: build/index.js:10
-#: build/index.js:41
+#: src/index.js:2174
+#: src/index.js:5593
+#: src/index.js:5888
 msgid "Add New Key"
 msgstr ""
 
+#: src/index.js:2207
+msgid "Loading the runs…"
+msgstr ""
+
 #. translators: %s: worker name.
-#: build/index.js:11
+#: src/index.js:2215
 #, js-format
 msgid "Runs: %s"
 msgstr ""
 
 #. translators: %d: number of runs kept.
-#: build/index.js:12
+#: src/index.js:2220
 #, js-format
 msgid "The last %d runs the workflow reported (start and end), newest first."
 msgstr ""
 
-#: build/index.js:12
+#: src/index.js:2229
 msgid "Back to the workers"
 msgstr ""
 
-#: build/index.js:12
+#: src/index.js:2233
 msgid "Runs on GitHub"
 msgstr ""
 
-#: build/index.js:12
+#: src/index.js:2240
 msgid "Runs"
 msgstr ""
 
-#: build/index.js:12
+#: src/index.js:2245
 msgid "Run"
 msgstr ""
 
 #. translators: %d: attempt number.
-#: build/index.js:13
+#: src/index.js:2257
 #, js-format
 msgid "(attempt %d)"
 msgstr ""
 
-#: build/index.js:13
+#: src/index.js:2266
 msgid "Started"
 msgstr ""
 
-#: build/index.js:13
+#: src/index.js:2271
 msgid "Took"
 msgstr ""
 
-#: build/index.js:13
+#: src/index.js:2283
 msgid "Started by"
 msgstr ""
 
-#: build/index.js:13
+#: src/index.js:2287
 msgid "Counts"
 msgstr ""
 
-#: build/index.js:13
+#: src/index.js:2292
 msgid "Commit"
 msgstr ""
 
-#: build/index.js:13
+#: src/index.js:2307
 msgid "Not built yet: no runs."
 msgstr ""
 
-#: build/index.js:13
+#: src/index.js:2308
 msgid "No runs reported yet."
 msgstr ""
 
-#: build/index.js:13
-msgid "Loading the runs…"
-msgstr ""
-
-#: build/index.js:13
+#: src/index.js:2318
 msgid "Change to Allowed"
 msgstr ""
 
-#: build/index.js:13
+#: src/index.js:2319
 msgid "Change to Neutral"
 msgstr ""
 
-#: build/index.js:13
+#: src/index.js:2320
 msgid "Change to Blocked"
 msgstr ""
 
-#: build/index.js:13
-#: build/index.js:17
+#: src/index.js:2321
+#: src/index.js:2999
 msgid "Search here for coverage"
 msgstr ""
 
-#: build/index.js:13
+#: src/index.js:2322
 msgid "Stop searching here"
 msgstr ""
 
-#: build/index.js:13
+#: src/index.js:2323
 msgid "Relay on (fetch through this site)"
 msgstr ""
 
-#: build/index.js:13
-#: build/index.js:15
+#: src/index.js:2324
+#: src/index.js:2822
 msgid "Relay off"
 msgstr ""
 
-#: build/index.js:13
-#: build/index.js:14
-#: build/index.js:18
-#: build/index.js:49
+#: src/index.js:2342
+#: src/index.js:3130
+msgid "Add New Feed"
+msgstr ""
+
+#: src/index.js:2343
+msgid "Edit Feed"
+msgstr ""
+
+#: src/index.js:2354
+msgid "Back to the source"
+msgstr ""
+
+#: src/index.js:2355
+msgid "Back to Feeds"
+msgstr ""
+
+#: src/index.js:2361
+msgid "Feed"
+msgstr ""
+
+#: src/index.js:2379
+#: src/index.js:2474
+#: src/index.js:2677
+#: src/index.js:3042
+#: src/index.js:3135
 msgid "Feeds"
 msgstr ""
 
-#: build/index.js:13
-msgid "Every host the workers have sent, and every site a feed or a source read by code comes from. Blocked publishers are refused; Neutral is the default for new hosts; Allowed publishers skip the keyword check. Short name: what cards show on the source chip."
+#: src/index.js:2380
+msgid "Every feed and source read by code (News, Library and Opportunity), with the site each belongs to."
 msgstr ""
 
-#: build/index.js:13
-msgid "Save short names"
-msgstr ""
-
-#: build/index.js:13
-#: build/index.js:16
-msgid "Add New Source"
-msgstr ""
-
-#: build/index.js:13
-msgid "Search value: Search Console has not run within 28 days, so there are no figures for this window."
-msgstr ""
-
-#: build/index.js:13
-msgid "Site"
-msgstr ""
-
-#: build/index.js:13
-msgid "Blocked: new items from it are refused. Items already on the site are unchanged."
-msgstr ""
-
-#: build/index.js:13
-#: build/index.js:17
-msgid "Short name"
+#: src/index.js:2386
+msgid "Back to Sources"
 msgstr ""
 
 #. translators: %s: host.
-#: build/index.js:14
-#, js-format
-msgid "Short name for %s"
-msgstr ""
-
-#: build/index.js:14
-msgid "Searched for coverage"
-msgstr ""
-
-#: build/index.js:14
-msgid "Rating"
-msgstr ""
-
-#: build/index.js:14
-msgid "Domain Rating"
-msgstr ""
-
-#. translators: %s: last result.
-#: build/index.js:15
-#, js-format
-msgid "Last: %s"
-msgstr ""
-
-#: build/index.js:15
-msgid "Not used yet"
-msgstr ""
-
-#: build/index.js:15
-msgid "Items (30 days / published)"
-msgstr ""
-
-#: build/index.js:15
-msgid "Search value"
-msgstr ""
-
-#: build/index.js:15
-msgid "SEO"
-msgstr ""
-
-#: build/index.js:15
-msgid "Not checked yet"
-msgstr ""
-
-#: build/index.js:15
-msgid "Last seen"
-msgstr ""
-
-#: build/index.js:15
-msgid "Search sources"
-msgstr ""
-
-#: build/index.js:15
-msgid "Allow"
-msgstr ""
-
-#: build/index.js:15
-msgid "Neutral"
-msgstr ""
-
-#: build/index.js:15
-msgid "Block"
-msgstr ""
-
-#: build/index.js:15
-msgid "Relay on"
-msgstr ""
-
-#. translators: %s: host.
-#: build/index.js:16
+#: src/index.js:2448
 #, js-format
 msgid "Delete the source %s? This cannot be undone."
 msgstr ""
 
-#: build/index.js:16
+#: src/index.js:2484
+msgid "Every host the workers have sent, and every site a feed or a source read by code comes from. Blocked publishers are refused; Neutral is the default for new hosts; Allowed publishers skip the keyword check. Short name: what cards show on the source chip."
+msgstr ""
+
+#: src/index.js:2497
+msgid "Save short names"
+msgstr ""
+
+#: src/index.js:2504
+#: src/index.js:2917
+msgid "Add New Source"
+msgstr ""
+
+#: src/index.js:2516
+msgid "Search value: Search Console has not run within 28 days, so there are no figures for this window."
+msgstr ""
+
+#: src/index.js:2527
+msgid "Site"
+msgstr ""
+
+#: src/index.js:2569
+msgid "Blocked: new items from it are refused. Items already on the site are unchanged."
+msgstr ""
+
+#: src/index.js:2582
+#: src/index.js:2978
+msgid "Short name"
+msgstr ""
+
+#. translators: %s: host.
+#: src/index.js:2591
+#, js-format
+msgid "Short name for %s"
+msgstr ""
+
+#: src/index.js:2633
+msgid "Searched for coverage"
+msgstr ""
+
+#: src/index.js:2644
+msgid "Rating"
+msgstr ""
+
+#: src/index.js:2658
+msgid "Domain Rating"
+msgstr ""
+
+#. translators: %s: last result.
+#: src/index.js:2706
+#, js-format
+msgid "Last: %s"
+msgstr ""
+
+#: src/index.js:2712
+msgid "Not used yet"
+msgstr ""
+
+#: src/index.js:2723
+msgid "Items (30 days / published)"
+msgstr ""
+
+#: src/index.js:2731
+msgid "Search value"
+msgstr ""
+
+#: src/index.js:2737
+msgid "SEO"
+msgstr ""
+
+#: src/index.js:2754
+msgid "Not checked yet"
+msgstr ""
+
+#: src/index.js:2759
+msgid "Last seen"
+msgstr ""
+
+#: src/index.js:2771
+msgid "Search sources"
+msgstr ""
+
+#: src/index.js:2794
+msgid "Allow"
+msgstr ""
+
+#: src/index.js:2795
+msgid "Neutral"
+msgstr ""
+
+#: src/index.js:2796
+msgid "Block"
+msgstr ""
+
+#: src/index.js:2823
+msgid "Relay on"
+msgstr ""
+
+#: src/index.js:2848
 msgid "No sources."
 msgstr ""
 
-#: build/index.js:16
+#: src/index.js:2891
 msgid "Loading the source…"
 msgstr ""
 
 #. translators: %s: host.
-#: build/index.js:17
+#: src/index.js:2920
 #, js-format
 msgid "Edit Source: %s"
 msgstr ""
 
-#: build/index.js:17
+#: src/index.js:2932
 msgid "Add Source"
 msgstr ""
 
-#: build/index.js:17
-#: build/index.js:28
-#: build/index.js:36
-#: build/index.js:38
+#: src/index.js:2933
+#: src/index.js:3959
+#: src/index.js:4772
+#: src/index.js:5288
 msgid "Update"
 msgstr ""
 
-#: build/index.js:17
-#: build/index.js:49
+#: src/index.js:2951
+#: src/index.js:6191
 msgid "Host"
 msgstr ""
 
-#: build/index.js:17
+#: src/index.js:2952
 msgid "The site's host or any address on it (https://www.example.com/news/ becomes example.com)."
 msgstr ""
 
-#: build/index.js:17
+#: src/index.js:2964
 msgid "Visit site"
 msgstr ""
 
-#: build/index.js:17
+#: src/index.js:2970
 msgid "The publisher's name, shown on item pages. Kept on publisher records only."
 msgstr ""
 
-#: build/index.js:17
+#: src/index.js:2979
 msgid "What cards show on the source chip (e.g. TOI, PIB, Sentinel)."
 msgstr ""
 
-#: build/index.js:17
+#: src/index.js:2989
 msgid "Blocked publishers are refused when the workers send their items. Neutral is the default for new hosts the workers find. Allowed publishers skip the keyword check."
 msgstr ""
 
-#: build/index.js:17
+#: src/index.js:3003
 msgid "The press queries also run on this site."
 msgstr ""
 
-#: build/index.js:17
+#: src/index.js:3013
 msgid "Fetch through this site (relay)"
 msgstr ""
 
-#: build/index.js:17
+#: src/index.js:3018
 msgid "When this site refuses the workers (GitHub's servers) with 403, they ask this site to fetch the feed or page. Its subdomains are included."
 msgstr ""
 
 #. translators: %s: last result.
-#: build/index.js:18
+#: src/index.js:3026
 #, js-format
 msgid "Last relay result: %s."
 msgstr ""
 
-#: build/index.js:18
+#: src/index.js:3043
 msgid "This site's feeds and sources read by code."
 msgstr ""
 
-#: build/index.js:18
-#: build/index.js:49
-msgid "Add New Feed"
-msgstr ""
-
-#: build/index.js:18
-#: build/index.js:44
-#: build/index.js:49
-msgid "Type"
-msgstr ""
-
-#: build/index.js:18
-msgid "Address"
-msgstr ""
-
-#: build/index.js:18
-msgid "Publisher"
-msgstr ""
-
-#: build/index.js:18
-#: build/index.js:19
-msgid "Keyword check"
-msgstr ""
-
-#: build/index.js:18
-msgid "Search feeds"
-msgstr ""
-
-#: build/index.js:18
-msgid "Turn on"
-msgstr ""
-
-#: build/index.js:18
-msgid "Turn off"
-msgstr ""
-
-#: build/index.js:18
-msgid "Keyword check on"
-msgstr ""
-
-#: build/index.js:18
-msgid "Keyword check off"
-msgstr ""
-
 #. translators: %s: feed name.
-#: build/index.js:19
+#: src/index.js:3109
 #, js-format
 msgid "Delete the feed \"%s\"? This cannot be undone."
 msgstr ""
 
-#: build/index.js:19
+#: src/index.js:3153
+msgid "Address"
+msgstr ""
+
+#: src/index.js:3171
+msgid "Publisher"
+msgstr ""
+
+#: src/index.js:3207
+#: src/index.js:3395
+msgid "Keyword check"
+msgstr ""
+
+#: src/index.js:3217
+msgid "Search feeds"
+msgstr ""
+
+#: src/index.js:3222
+#: src/index.js:3243
+msgid "Turn on"
+msgstr ""
+
+#: src/index.js:3223
+#: src/index.js:3242
+msgid "Turn off"
+msgstr ""
+
+#: src/index.js:3226
+#: src/index.js:3254
+msgid "Keyword check on"
+msgstr ""
+
+#: src/index.js:3230
+#: src/index.js:3250
+msgid "Keyword check off"
+msgstr ""
+
+#: src/index.js:3278
 msgid "No feeds."
 msgstr ""
 
-#: build/index.js:19
+#: src/index.js:3413
 msgid "Relevance filter"
 msgstr ""
 
-#: build/index.js:19
+#: src/index.js:3414
 msgid "Off: every item from a non-blocked publisher is kept."
 msgstr ""
 
-#: build/index.js:19
+#: src/index.js:3422
 msgid "Aggregator feeds: only allowed publishers"
 msgstr ""
 
-#: build/index.js:19
+#: src/index.js:3426
 msgid "Google News, Apple News and similar: items from Neutral publishers are refused. Keep off unless the allow list is complete."
 msgstr ""
 
-#: build/index.js:19
+#: src/index.js:3435
+#: src/index.js:3442
 msgid "Press discovery"
 msgstr ""
 
-#: build/index.js:19
+#: src/index.js:3436
 msgid "The queries are the Press keywords below: Google News and Google Search for coverage of Animal Writes."
 msgstr ""
 
-#: build/index.js:19
+#: src/index.js:3449
 msgid "Every (days)"
 msgstr ""
 
-#: build/index.js:19
+#: src/index.js:3485
 msgid "Test a headline"
 msgstr ""
 
-#: build/index.js:19
+#: src/index.js:3492
 msgid "Test"
 msgstr ""
 
-#: build/index.js:19
+#: src/index.js:3497
 msgid "Headline"
 msgstr ""
 
-#: build/index.js:19
+#: src/index.js:3501
 msgid "Paste a headline"
 msgstr ""
 
-#: build/index.js:19
+#: src/index.js:3513
 msgid "Kept"
 msgstr ""
 
-#: build/index.js:19
+#: src/index.js:3514
 msgid "Dropped"
 msgstr ""
 
 #. translators: %s: keyword.
-#: build/index.js:20
+#: src/index.js:3573
 #, js-format
 msgid "Remove \"%s\" from sourcing? Its Sourcing and Press roles go; Search Insights keeps the record."
 msgstr ""
 
 #. translators: %d: number of keywords.
-#: build/index.js:21
+#: src/index.js:3581
 #, js-format
 msgid "Remove %d keyword from sourcing? Its Sourcing and Press roles go; Search Insights keeps the record."
 msgid_plural "Remove %d keywords from sourcing? Their Sourcing and Press roles go; Search Insights keeps the records."
@@ -1773,1190 +2080,985 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %s: role.
-#: build/index.js:22
+#: src/index.js:3600
 #, js-format
 msgid "Add role: %s"
 msgstr ""
 
 #. translators: %s: role.
-#: build/index.js:23
+#: src/index.js:3608
 #, js-format
 msgid "Remove role: %s"
 msgstr ""
 
 #. translators: %s: category.
-#: build/index.js:24
+#: src/index.js:3616
 #, js-format
 msgid "Map to category: %s"
 msgstr ""
 
-#: build/index.js:24
+#: src/index.js:3620
 msgid "Delete from sourcing"
 msgstr ""
 
-#: build/index.js:24
-#: build/index.js:31
+#: src/index.js:3628
+#: src/index.js:4181
 msgid "Suggestions from Search Insights"
 msgstr ""
 
-#: build/index.js:24
+#: src/index.js:3652
 msgid "Every keyword with a Sourcing or Press role. English only for Sourcing and Press. Plurals and dots do not matter: \"dogs\" adds to \"dog\". Include and Exclude cannot go together."
 msgstr ""
 
-#: build/index.js:24
-#: build/index.js:28
+#: src/index.js:3662
+#: src/index.js:3949
+#: src/index.js:3960
 msgid "Add New Keyword"
 msgstr ""
 
 #. translators: %s: category.
-#: build/index.js:25
+#: src/index.js:3678
 #, js-format
 msgid "Category: %s."
 msgstr ""
 
-#: build/index.js:25
+#: src/index.js:3682
 msgid "Show every category"
 msgstr ""
 
-#: build/index.js:25
-#: build/index.js:28
-#: build/index.js:29
+#: src/index.js:3691
+#: src/index.js:3989
+#: src/index.js:4013
 msgid "Keyword"
 msgstr ""
 
-#: build/index.js:25
-#: build/index.js:29
+#: src/index.js:3715
+#: src/index.js:4024
 msgid "Other spellings"
 msgstr ""
 
-#: build/index.js:25
-#: build/index.js:29
+#: src/index.js:3719
+#: src/index.js:4044
+#: src/index.js:4052
 msgid "Roles"
 msgstr ""
 
-#: build/index.js:25
-#: build/index.js:29
+#: src/index.js:3724
+#: src/index.js:4059
+#: src/index.js:4067
 msgid "Categories"
 msgstr ""
 
-#: build/index.js:25
-#: build/index.js:29
+#: src/index.js:3747
+#: src/index.js:4091
 msgid "Google News search"
 msgstr ""
 
-#: build/index.js:25
+#: src/index.js:3751
 msgid "Items (30 days)"
 msgstr ""
 
-#: build/index.js:25
-#: build/index.js:31
+#: src/index.js:3756
+#: src/index.js:4227
 msgid "Impressions (28 days)"
 msgstr ""
 
-#: build/index.js:25
+#: src/index.js:3767
 msgid "Search keywords"
 msgstr ""
 
 #. translators: %s: role.
-#: build/index.js:26
+#: src/index.js:3802
 #, js-format
 msgid "Remove %s"
 msgstr ""
 
 #. translators: %s: role.
-#: build/index.js:27
+#: src/index.js:3810
 #, js-format
 msgid "Add %s"
 msgstr ""
 
-#: build/index.js:27
+#: src/index.js:3840
 msgid "No keywords."
 msgstr ""
 
-#: build/index.js:27
+#: src/index.js:3894
 msgid "Loading the keyword…"
 msgstr ""
 
-#: build/index.js:27
+#: src/index.js:3925
+msgid "Remove this keyword from sourcing? Its Sourcing and Press roles go; Search Insights keeps the record."
+msgstr ""
+
+#: src/index.js:3935
 msgid "English"
 msgstr ""
 
-#: build/index.js:27
+#: src/index.js:3936
 msgid "Hinglish"
 msgstr ""
 
-#: build/index.js:27
+#: src/index.js:3937
 msgid "Hindi"
 msgstr ""
 
 #. translators: %s: keyword.
-#: build/index.js:28
+#: src/index.js:3946
 #, js-format
 msgid "Edit keyword: %s"
 msgstr ""
 
-#: build/index.js:28
-msgid "Remove this keyword from sourcing? Its Sourcing and Press roles go; Search Insights keeps the record."
-msgstr ""
-
-#: build/index.js:28
+#: src/index.js:3982
 msgid "The keyword"
 msgstr ""
 
-#: build/index.js:28
+#: src/index.js:3994
 msgid "Fixed once saved: it is the record Search Insights keeps its figures on. Add other spellings below."
 msgstr ""
 
-#: build/index.js:28
+#: src/index.js:4002
 msgid "Search Insights roles"
 msgstr ""
 
 #. translators: %s: roles.
-#: build/index.js:29
+#: src/index.js:4005
 #, js-format
 msgid "%s (not changed here)"
 msgstr ""
 
-#: build/index.js:29
+#: src/index.js:4014
 msgid "English only for Sourcing and Press. Plurals and dots do not matter: \"dogs\" adds to \"dog\"."
 msgstr ""
 
-#: build/index.js:29
+#: src/index.js:4025
 msgid "One per line. Every spelling counts for every role. A trailing * matches the start of a word (steriliz* matches sterilized and sterilization)."
 msgstr ""
 
-#: build/index.js:29
+#: src/index.js:4034
 msgid "Language"
 msgstr ""
 
-#: build/index.js:29
+#: src/index.js:4035
 msgid "Detected automatically; correct it when an English phrase was taken for Hinglish. Sourcing and Press roles are for English keywords only."
 msgstr ""
 
-#: build/index.js:29
+#: src/index.js:4045
 msgid "Include and Exclude cannot go together."
 msgstr ""
 
-#: build/index.js:29
+#: src/index.js:4060
 msgid "With the Category word role, an item that has this keyword gets these categories (the section's rule still limits them). An item a search of this keyword found gets them too."
 msgstr ""
 
-#: build/index.js:29
-#: build/index.js:31
+#: src/index.js:4074
+#: src/index.js:4082
+#: src/index.js:4403
 msgid "Sections"
 msgstr ""
 
-#: build/index.js:29
+#: src/index.js:4075
 msgid "Where items its search finds go (News for a keyword search; Media & PR files them as press)."
 msgstr ""
 
 #. translators: %s: feed ids.
-#: build/index.js:30
+#: src/index.js:4094
 #, js-format
 msgid "An English Include or Search keyword is searched every run. Searches: %s."
 msgstr ""
 
-#: build/index.js:30
+#: src/index.js:4104
 msgid "Search query"
 msgstr ""
 
 #. translators: %s: feed id.
-#: build/index.js:31
+#: src/index.js:4107
 #, js-format
 msgid "For the Search role: the words searched (the keyword itself when empty), or a whole Google News search address. Feed id: %s (fixed, so the items it found stay counted)."
 msgstr ""
 
-#: build/index.js:31
+#: src/index.js:4168
 msgid "Add as Include"
 msgstr ""
 
-#: build/index.js:31
+#: src/index.js:4169
 msgid "Add as Exclude"
 msgstr ""
 
-#: build/index.js:31
+#: src/index.js:4170
 msgid "Add as Search"
 msgstr ""
 
-#: build/index.js:31
+#: src/index.js:4171
 msgid "Dismiss"
 msgstr ""
 
-#: build/index.js:31
+#: src/index.js:4172
 msgid "Show again"
 msgstr ""
 
-#: build/index.js:31
+#: src/index.js:4182
 msgid "Searches people made (20 impressions or more in 28 days) that no keyword covers yet. Add one as a keyword, or dismiss it."
 msgstr ""
 
-#: build/index.js:31
+#: src/index.js:4188
 msgid "Back to Keywords"
 msgstr ""
 
-#: build/index.js:31
+#: src/index.js:4199
 msgid "Search Insights has no search data yet."
 msgstr ""
 
-#: build/index.js:31
+#: src/index.js:4206
 msgid "Suggestions"
 msgstr ""
 
-#: build/index.js:31
+#: src/index.js:4210
 msgid "Search"
 msgstr ""
 
-#: build/index.js:31
+#: src/index.js:4219
 msgid "Rising"
 msgstr ""
 
-#: build/index.js:31
+#: src/index.js:4232
 msgid "Clicks"
 msgstr ""
 
-#: build/index.js:31
+#: src/index.js:4237
 msgid "Position"
 msgstr ""
 
-#: build/index.js:31
+#: src/index.js:4248
 msgid "Search suggestions"
 msgstr ""
 
-#: build/index.js:31
+#: src/index.js:4265
 msgid "No suggestions."
 msgstr ""
 
-#: build/index.js:31
+#: src/index.js:4274
+#: src/index.js:4396
 msgid "Section rules"
 msgstr ""
 
-#: build/index.js:31
-#: build/index.js:36
+#: src/index.js:4275
+#: src/index.js:4923
 msgid "Summary rules"
 msgstr ""
 
-#: build/index.js:31
-msgid "Which categories and tags each section uses. The workers pick only from these, and each section's filters show only these. A section with no category ticked uses every category."
-msgstr ""
-
-#: build/index.js:31
-#: build/index.js:36
-msgid "Section"
-msgstr ""
-
-#: build/index.js:31
-msgid "No rule saved yet: every category, no tags."
-msgstr ""
-
-#: build/index.js:31
-#: build/index.js:35
-msgid "Allowed categories"
-msgstr ""
-
-#: build/index.js:31
-#: build/index.js:35
-msgid "Allowed tags"
-msgstr ""
-
-#: build/index.js:31
-msgid "Workers file"
-msgstr ""
-
-#: build/index.js:31
-msgid "Summary rule"
-msgstr ""
-
-#: build/index.js:31
-msgid "No sections."
-msgstr ""
-
-#: build/index.js:31
-msgid "Tag rules"
-msgstr ""
-
-#: build/index.js:31
-msgid "An item gets the tag when its title or text has one of the phrases, in a section that allows the tag. An item that also matches a \"Hold when\" pattern, and has none of the \"Unless\" words, waits for a person with the hold reason."
-msgstr ""
-
-#: build/index.js:31
-#: build/index.js:36
-msgid "Add New Rule"
-msgstr ""
-
-#: build/index.js:31
-#: build/index.js:36
-msgid "Tag"
-msgstr ""
-
-#: build/index.js:31
-#: build/index.js:36
-msgid "Phrases"
-msgstr ""
-
-#: build/index.js:31
-#: build/index.js:36
-msgid "Hold when"
-msgstr ""
-
-#: build/index.js:31
-#: build/index.js:36
-msgid "Unless"
-msgstr ""
-
-#: build/index.js:31
-#: build/index.js:36
-msgid "Hold reason"
-msgstr ""
-
-#: build/index.js:31
-msgid "Sections that may give it"
-msgstr ""
-
 #. translators: %s: tag.
-#: build/index.js:32
+#: src/index.js:4372
 #, js-format
 msgid "Delete the tag rule for %s? The tag itself stays; items keep the tags they have."
 msgstr ""
 
-#: build/index.js:32
+#: src/index.js:4397
+msgid "Which categories and tags each section uses. The workers pick only from these, and each section's filters show only these. A section with no category ticked uses every category."
+msgstr ""
+
+#: src/index.js:4407
+#: src/index.js:4949
+msgid "Section"
+msgstr ""
+
+#: src/index.js:4423
+msgid "No rule saved yet: every category, no tags."
+msgstr ""
+
+#: src/index.js:4434
+#: src/index.js:4696
+#: src/index.js:4704
+msgid "Allowed categories"
+msgstr ""
+
+#: src/index.js:4438
+#: src/index.js:4714
+#: src/index.js:4722
+msgid "Allowed tags"
+msgstr ""
+
+#: src/index.js:4442
+msgid "Workers file"
+msgstr ""
+
+#: src/index.js:4446
+msgid "Summary rule"
+msgstr ""
+
+#: src/index.js:4464
+msgid "No sections."
+msgstr ""
+
+#: src/index.js:4469
+#: src/index.js:4493
+msgid "Tag rules"
+msgstr ""
+
+#: src/index.js:4470
+msgid "An item gets the tag when its title or text has one of the phrases, in a section that allows the tag. An item that also matches a \"Hold when\" pattern, and has none of the \"Unless\" words, waits for a person with the hold reason."
+msgstr ""
+
+#: src/index.js:4480
+#: src/index.js:4766
+#: src/index.js:4773
+msgid "Add New Rule"
+msgstr ""
+
+#: src/index.js:4497
+#: src/index.js:4789
+msgid "Tag"
+msgstr ""
+
+#: src/index.js:4513
+#: src/index.js:4809
+msgid "Phrases"
+msgstr ""
+
+#: src/index.js:4516
+#: src/index.js:4819
+msgid "Hold when"
+msgstr ""
+
+#: src/index.js:4527
+#: src/index.js:4829
+msgid "Unless"
+msgstr ""
+
+#: src/index.js:4530
+#: src/index.js:4839
+msgid "Hold reason"
+msgstr ""
+
+#: src/index.js:4534
+msgid "Sections that may give it"
+msgstr ""
+
+#: src/index.js:4561
 msgid "No tag rules yet."
 msgstr ""
 
-#: build/index.js:32
+#: src/index.js:4639
 msgid "Loading the section…"
 msgstr ""
 
 #. translators: %s: slug.
-#: build/index.js:33
+#: src/index.js:4651
 #, js-format
 msgid "%s (no such category)"
 msgstr ""
 
 #. translators: %s: slug.
-#: build/index.js:34
+#: src/index.js:4656
 #, js-format
 msgid "%s (no such tag)"
 msgstr ""
 
 #. translators: %s: section.
-#: build/index.js:35
+#: src/index.js:4680
 #, js-format
 msgid "Edit section: %s"
 msgstr ""
 
-#: build/index.js:35
+#: src/index.js:4685
 msgid "Save section"
 msgstr ""
 
-#: build/index.js:35
+#: src/index.js:4697
 msgid "None ticked: every category."
 msgstr ""
 
-#: build/index.js:35
+#: src/index.js:4715
 msgid "The tags the workers may give this section's items, and its filters show."
 msgstr ""
 
-#: build/index.js:35
+#: src/index.js:4752
 msgid "Loading the rule…"
 msgstr ""
 
 #. translators: %s: tag.
-#: build/index.js:36
+#: src/index.js:4763
 #, js-format
 msgid "Edit tag rule: %s"
 msgstr ""
 
-#: build/index.js:36
+#: src/index.js:4790
 msgid "The tag an item gets when its title or text has one of the phrases (only in a section that allows the tag)."
 msgstr ""
 
-#: build/index.js:36
+#: src/index.js:4801
 msgid "Choose a tag"
 msgstr ""
 
-#: build/index.js:36
+#: src/index.js:4810
 msgid "One per line. An item with any of them gets the tag."
 msgstr ""
 
-#: build/index.js:36
+#: src/index.js:4820
 msgid "One regular expression per line (case does not matter). An item that also matches one waits for a person."
 msgstr ""
 
-#: build/index.js:36
+#: src/index.js:4830
 msgid "One per line. An item with any of these words is not held."
 msgstr ""
 
-#: build/index.js:36
+#: src/index.js:4840
 msgid "What the person checking a held item should look at."
 msgstr ""
 
-#: build/index.js:36
+#: src/index.js:4877
 msgid "Loading the summary rules…"
 msgstr ""
 
-#: build/index.js:36
-msgid "One rule set for every summary on the site: the workers write and check new summaries and same-story rewrites from these rules, and the site holds a News, Library or research item whose summary is over the maximum or not plain text in To review. A short summary is never held. A summary is never shorter than the search description, which is its lead sentence."
-msgstr ""
-
-#: build/index.js:36
+#: src/index.js:4896
 msgid "Go back to the default summary rules? Every rule on this form is replaced."
 msgstr ""
 
-#: build/index.js:36
+#: src/index.js:4924
+msgid "One rule set for every summary on the site: the workers write and check new summaries and same-story rewrites from these rules, and the site holds a News, Library or research item whose summary is over the maximum or not plain text in To review. A short summary is never held. A summary is never shorter than the search description, which is its lead sentence."
+msgstr ""
+
+#: src/index.js:4930
 msgid "Save summary rules"
 msgstr ""
 
-#: build/index.js:36
+#: src/index.js:4945
+#: src/index.js:4947
 msgid "Length per section"
 msgstr ""
 
-#: build/index.js:36
+#: src/index.js:4950
 msgid "Minimum words"
 msgstr ""
 
-#: build/index.js:36
+#: src/index.js:4951
 msgid "Maximum words"
 msgstr ""
 
-#: build/index.js:36
+#: src/index.js:4952
 msgid "Rule"
 msgstr ""
 
-#: build/index.js:36
+#: src/index.js:4953
 msgid "Published summaries below the minimum"
 msgstr ""
 
-#: build/index.js:36
+#: src/index.js:4967
 msgid "minimum words"
 msgstr ""
 
-#: build/index.js:36
+#: src/index.js:4975
 msgid "maximum words"
 msgstr ""
 
-#: build/index.js:36
+#: src/index.js:4981
 msgid "Its own"
 msgstr ""
 
-#: build/index.js:36
+#: src/index.js:4995
 msgid "Inherits News"
 msgstr ""
 
-#: build/index.js:36
+#: src/index.js:5003
 msgid "Quotes and the lead"
 msgstr ""
 
 #. translators: %s: section.
-#: build/index.js:37
+#: src/index.js:5026
 #, js-format
 msgid "%s (inherits News: these fields apply once it has its own rule)"
 msgstr ""
 
-#: build/index.js:37
+#: src/index.js:5036
 msgid "Structure"
 msgstr ""
 
-#: build/index.js:37
+#: src/index.js:5042
 msgid "Attribution"
 msgstr ""
 
-#: build/index.js:37
+#: src/index.js:5049
 msgid "Every summary"
 msgstr ""
 
-#: build/index.js:37
+#: src/index.js:5071
 msgid "Go back to the default rules"
 msgstr ""
 
-#: build/index.js:37
+#: src/index.js:5072
 msgid "On Save, every rule on this form goes back to its default."
 msgstr ""
 
-#: build/index.js:37
+#: src/index.js:5120
 msgid "The sources, the Google key and the monthly cap are on Settings, under Connected services."
 msgstr ""
 
-#: build/index.js:37
+#: src/index.js:5125
 msgid "Open Settings"
 msgstr ""
 
-#: build/index.js:37
+#: src/index.js:5131
 msgid "Trust order"
 msgstr ""
 
-#: build/index.js:37
+#: src/index.js:5132
 msgid "When sources give different values for a field, the organisation's own claim wins first, then the value most sources agree on, then the source higher in this order. 1 is trusted most. Leave a source empty to rank it after every numbered one."
 msgstr ""
 
-#: build/index.js:37
+#: src/index.js:5138
 msgid "Save trust order"
 msgstr ""
 
-#: build/index.js:37
+#: src/index.js:5152
 msgid "Loading the rules…"
 msgstr ""
 
-#: build/index.js:37
+#: src/index.js:5170
+#: src/index.js:5177
 msgid "Field rules"
 msgstr ""
 
-#: build/index.js:37
+#: src/index.js:5171
 msgid "Every listing field: the enrichment fields and the fields of the listing field group. A claimed or verified listing is never changed, and a low-confidence value always waits for review; otherwise each field follows its Apply rule."
 msgstr ""
 
-#: build/index.js:37
+#: src/index.js:5210
 msgid "Stored in"
 msgstr ""
 
-#: build/index.js:37
-#: build/index.js:38
+#: src/index.js:5215
+#: src/index.js:5313
+#: src/index.js:5318
 msgid "May be filled by"
 msgstr ""
 
-#: build/index.js:37
-#: build/index.js:38
+#: src/index.js:5217
+#: src/index.js:5325
 msgid "Values"
 msgstr ""
 
-#: build/index.js:37
-#: build/index.js:38
+#: src/index.js:5220
+#: src/index.js:5335
 msgid "Official source"
 msgstr ""
 
-#: build/index.js:37
-#: build/index.js:38
+#: src/index.js:5224
+#: src/index.js:5348
 msgid "Read by the AI"
 msgstr ""
 
-#: build/index.js:37
-#: build/index.js:38
+#: src/index.js:5230
+#: src/index.js:5375
 msgid "Apply"
 msgstr ""
 
-#: build/index.js:37
+#: src/index.js:5248
 msgid "No fields."
 msgstr ""
 
-#: build/index.js:37
+#: src/index.js:5272
 msgid "Loading the field…"
 msgstr ""
 
 #. translators: %s: field.
-#: build/index.js:38
+#: src/index.js:5282
 #, js-format
 msgid "Edit field rule: %s"
 msgstr ""
 
-#: build/index.js:38
+#: src/index.js:5303
 msgid "The worker may propose values for this field"
 msgstr ""
 
-#: build/index.js:38
+#: src/index.js:5314
 msgid "None ticked: any source."
 msgstr ""
 
-#: build/index.js:38
+#: src/index.js:5326
 msgid "0: one value, and sources that disagree make it low confidence. A number: up to that many different values, never low for disagreeing (phone numbers)."
 msgstr ""
 
-#: build/index.js:38
+#: src/index.js:5336
 msgid "Its value alone is high confidence (the AWBI list for the address and PIN code)."
 msgstr ""
 
-#: build/index.js:38
+#: src/index.js:5342
 msgid "None"
 msgstr ""
 
-#: build/index.js:38
+#: src/index.js:5349
 msgid "Values the AI reads from pages: at most medium confidence unless the organisation said so."
 msgstr ""
 
-#: build/index.js:38
+#: src/index.js:5358
 msgid "When only Google has it, the listing is flagged \"Invite to claim\"."
 msgstr ""
 
-#: build/index.js:38
+#: src/index.js:5366
 msgid "Profile link"
 msgstr ""
 
-#: build/index.js:38
+#: src/index.js:5367
 msgid "A social profile: the website linking to it and the page preview count as one source."
 msgstr ""
 
-#: build/index.js:38
+#: src/index.js:5376
 msgid "Claimed and verified listings, and low-confidence values, always wait for review."
 msgstr ""
 
-#: build/index.js:38
-#: build/index.js:42
+#: src/index.js:5416
+#: src/index.js:6015
 msgid "Loading…"
 msgstr ""
 
-#: build/index.js:38
+#: src/index.js:5422
+#: src/index.js:5425
 msgid "At a glance"
 msgstr ""
 
-#: build/index.js:38
+#: src/index.js:5427
 msgid "What"
 msgstr ""
 
-#: build/index.js:38
+#: src/index.js:5428
 msgid "Now"
 msgstr ""
 
 #. translators: %d: number of workers.
-#: build/index.js:39
+#: src/index.js:5436
 #, js-format
 msgid "The %d workers and the keys each can use"
 msgstr ""
 
-#: build/index.js:39
+#: src/index.js:5447
 msgid "Keys it can use"
 msgstr ""
 
-#: build/index.js:39
+#: src/index.js:5448
 msgid "Used AI in the last 24 h"
 msgstr ""
 
-#: build/index.js:39
+#: src/index.js:5456
 msgid "Daily caps on free models"
 msgstr ""
 
-#: build/index.js:39
+#: src/index.js:5457
 msgid "Free models have a daily limit per account, not per key: OpenRouter allows 50 free requests a day per account (1,000 once the account has 10 credits), however many keys it has. The news workers share each account’s requests out over the day and stop calling an account once it reaches the limit. The limit resets at 05:30 IST (00:00 UTC)."
 msgstr ""
 
-#: build/index.js:39
+#: src/index.js:5464
 msgid "Daily caps"
 msgstr ""
 
-#: build/index.js:39
+#: src/index.js:5466
 msgid "Account"
 msgstr ""
 
-#: build/index.js:39
+#: src/index.js:5467
 msgid "Daily limit"
 msgstr ""
 
-#: build/index.js:39
+#: src/index.js:5468
 msgid "Left today"
 msgstr ""
 
-#: build/index.js:39
+#: src/index.js:5469
 msgid "Last run could use"
 msgstr ""
 
-#: build/index.js:39
+#: src/index.js:5470
 msgid "Last run used"
 msgstr ""
 
-#: build/index.js:39
+#: src/index.js:5478
 msgid "No worker run has reported yet."
 msgstr ""
 
-#: build/index.js:39
+#: src/index.js:5487
+#: src/index.js:5491
 msgid "Keys by group"
 msgstr ""
 
-#: build/index.js:39
+#: src/index.js:5494
 msgid "What it means"
 msgstr ""
 
-#: build/index.js:39
+#: src/index.js:5495
 msgid "Providers (working / saved)"
 msgstr ""
 
-#: build/index.js:39
-#: build/index.js:41
+#: src/index.js:5500
+#: src/index.js:5837
 msgid "No keys yet."
 msgstr ""
 
 #. translators: %s: last 4 characters of a key.
-#: build/index.js:40
+#: src/index.js:5544
 #, js-format
 msgid "Remove key …%s? This takes effect straight away."
 msgstr ""
 
 #. translators: %d: number of keys.
-#: build/index.js:41
+#: src/index.js:5552
 #, js-format
 msgid "Remove %d key? This takes effect straight away."
 msgid_plural "Remove %d keys? This takes effect straight away."
 msgstr[0] ""
 msgstr[1] ""
 
-#: build/index.js:41
+#: src/index.js:5582
 msgid "All keys in one list: the ones saved here, in the order the workers try them (top first), then the ones in the workers’ GitHub secrets (changed in GitHub; they cannot be attached to workers). Each key is for every worker unless it is attached to some. Every key is tested again twice a day."
 msgstr ""
 
-#: build/index.js:41
-#: build/index.js:42
+#: src/index.js:5600
+#: src/index.js:6020
 msgid "Keys overview"
 msgstr ""
 
-#: build/index.js:41
+#: src/index.js:5614
 msgid "Worker for Attach and Detach"
 msgstr ""
 
-#: build/index.js:41
+#: src/index.js:5618
 msgid "Choose the worker first, then tick keys and use the bulk action Attach to worker or Detach from worker."
 msgstr ""
 
-#: build/index.js:41
+#: src/index.js:5626
 msgid "— Choose a worker —"
 msgstr ""
 
-#: build/index.js:41
-#: build/index.js:42
+#: src/index.js:5640
+#: src/index.js:5912
+#: src/index.js:5945
+#: src/index.js:6035
 msgid "Key"
 msgstr ""
 
-#: build/index.js:41
+#: src/index.js:5659
 msgid "GitHub secret: change it in GitHub"
 msgstr ""
 
-#: build/index.js:41
-#: build/index.js:42
+#: src/index.js:5675
+#: src/index.js:5955
 msgid "Provider"
 msgstr ""
 
-#: build/index.js:41
-#: build/index.js:42
+#: src/index.js:5681
+#: src/index.js:5959
 msgid "Model"
 msgstr ""
 
-#: build/index.js:41
-#: build/index.js:42
+#: src/index.js:5686
+#: src/index.js:5985
+#: src/index.js:5993
 msgid "Used by"
 msgstr ""
 
-#: build/index.js:41
-#: build/index.js:42
+#: src/index.js:5690
+#: src/index.js:5975
 msgid "Label"
 msgstr ""
 
-#: build/index.js:41
+#: src/index.js:5697
 msgid "Good for"
 msgstr ""
 
-#: build/index.js:41
+#: src/index.js:5723
 msgid "Being checked again"
 msgstr ""
 
-#: build/index.js:41
+#: src/index.js:5734
 msgid "Last worked"
 msgstr ""
 
-#: build/index.js:41
+#: src/index.js:5740
 msgid "Limit / cooldown"
 msgstr ""
 
-#: build/index.js:41
+#: src/index.js:5744
 msgid "Work in the last run"
 msgstr ""
 
-#: build/index.js:41
+#: src/index.js:5748
 msgid "Checked"
 msgstr ""
 
-#: build/index.js:41
+#: src/index.js:5759
 msgid "Search keys"
 msgstr ""
 
-#: build/index.js:41
+#: src/index.js:5768
 msgid "Attach to worker"
 msgstr ""
 
-#: build/index.js:41
+#: src/index.js:5772
 msgid "Detach from worker"
 msgstr ""
 
-#: build/index.js:41
+#: src/index.js:5776
+#: src/index.js:5818
 msgid "Check again"
 msgstr ""
 
-#: build/index.js:41
+#: src/index.js:5780
+#: src/index.js:5827
 msgid "Remove"
 msgstr ""
 
-#: build/index.js:41
+#: src/index.js:5796
 msgid "Move up"
 msgstr ""
 
-#: build/index.js:41
+#: src/index.js:5806
 msgid "Move down"
 msgstr ""
 
-#: build/index.js:41
+#: src/index.js:5863
 msgid "Loading the key…"
 msgstr ""
 
 #. translators: %s: last 4 characters of a key.
-#: build/index.js:42
+#: src/index.js:5891
 #, js-format
 msgid "Edit key …%s"
 msgstr ""
 
-#: build/index.js:42
+#: src/index.js:5899
 msgid "Add key"
 msgstr ""
 
-#: build/index.js:42
+#: src/index.js:5913
 msgid "The provider and a model that answers are worked out in the background after you save. The key is never shown again: only its last 4 characters."
 msgstr ""
 
-#: build/index.js:42
+#: src/index.js:5926
 msgid "Or several keys"
 msgstr ""
 
-#: build/index.js:42
+#: src/index.js:5927
 msgid "One per line. They get the same label and workers."
 msgstr ""
 
-#: build/index.js:42
+#: src/index.js:5938
 msgid "The key"
 msgstr ""
 
-#: build/index.js:42
+#: src/index.js:5948
 msgid "To change the key itself, remove it and add the new one."
 msgstr ""
 
-#: build/index.js:42
+#: src/index.js:5970
 msgid "Last check"
 msgstr ""
 
-#: build/index.js:42
+#: src/index.js:5976
 msgid "Optional: a note for you, e.g. which account the key is from."
 msgstr ""
 
-#: build/index.js:42
+#: src/index.js:5986
 msgid "None ticked: every worker, also workers added later."
 msgstr ""
 
-#: build/index.js:42
+#: src/index.js:6021
 msgid "Read-only. Keys show only their last 4 characters. All workers means the key is attached to none, so every worker may use it, also workers added later. Usable keys: AI keys that work or are rate-limited for now, from free or free-tier providers (paid ones are never served), plus tool keys."
 msgstr ""
 
-#: build/index.js:42
+#: src/index.js:6027
 msgid "Back to the keys"
 msgstr ""
 
-#: build/index.js:42
+#: src/index.js:6037
 msgid "Attached to"
 msgstr ""
 
-#: build/index.js:42
+#: src/index.js:6042
 msgid "No keys saved yet."
 msgstr ""
 
-#: build/index.js:42
+#: src/index.js:6045
 msgid "Usable keys per worker"
 msgstr ""
 
-#: build/index.js:42
+#: src/index.js:6048
 msgid "Usable AI keys"
 msgstr ""
 
-#: build/index.js:42
+#: src/index.js:6049
 msgid "Tool keys"
 msgstr ""
 
-#: build/index.js:42
-msgid "Items that came in automatically and need a person, with why each was held. Publish puts it live; Reject moves it to Drafts (nothing is deleted)."
-msgstr ""
-
-#. translators: %d: number of items.
-#: build/index.js:43
-#, js-format
-msgid "Publish %d item in this view?"
-msgid_plural "Publish all %d items in this view?"
-msgstr[0] ""
-msgstr[1] ""
-
-#. translators: %d: number of items.
-#: build/index.js:44
-#, js-format
-msgid "Publish all %d"
-msgstr ""
-
-#: build/index.js:44
-msgid "Items waiting for review"
-msgstr ""
-
-#: build/index.js:44
-msgid "Received"
-msgstr ""
-
-#: build/index.js:44
-msgid "Why it is waiting"
-msgstr ""
-
-#: build/index.js:44
-msgid "Search items"
-msgstr ""
-
-#: build/index.js:44
-msgid "Why"
-msgstr ""
-
-#: build/index.js:44
-msgid "Publish"
-msgstr ""
-
-#: build/index.js:44
-msgid "Reject (move to Drafts)"
-msgstr ""
-
-#: build/index.js:44
-msgid "Needs its summary first"
-msgstr ""
-
-#: build/index.js:44
-msgid "Reject"
-msgstr ""
-
-#: build/index.js:44
-msgid "Nothing is waiting."
-msgstr ""
-
-#: build/index.js:44
-msgid "New items that pass the checks go live on their own."
-msgstr ""
-
-#. translators: %s: source names.
-#: build/index.js:45
-#, js-format
-msgid "From %s"
-msgstr ""
-
-#: build/index.js:45
-#: build/index.js:49
-msgid "Close"
-msgstr ""
-
-#: build/index.js:45
-msgid "Proposed details"
-msgstr ""
-
-#. translators: %s: field name.
-#: build/index.js:46
-#, js-format
-msgid "%s now"
-msgstr ""
-
-#. translators: %s: field name.
-#: build/index.js:47
-#, js-format
-msgid "%s proposed"
-msgstr ""
-
-#: build/index.js:47
-#: build/index.js:48
-msgid "Reject every waiting value"
-msgstr ""
-
-#: build/index.js:47
-msgid "Nothing waiting or applied in this view."
-msgstr ""
-
-#: build/index.js:47
-msgid "Other decisions"
-msgstr ""
-
-#: build/index.js:47
-msgid "What happened"
-msgstr ""
-
-#: build/index.js:47
-msgid "Listing details"
-msgstr ""
-
-#. translators: 1: listings checked, 2: listings, 3: proposals waiting.
-#: build/index.js:48
-#, js-format
-msgid "%1$d of %2$d listings checked · %3$d proposals waiting. High-confidence values for empty fields of unclaimed listings are applied on their own and listed under Applied, with Undo."
-msgstr ""
-
-#: build/index.js:48
-msgid "Approve every waiting high-confidence value in this filter? Merges are left for one by one."
-msgstr ""
-
-#: build/index.js:48
-msgid "Approve all high (this filter)"
-msgstr ""
-
-#: build/index.js:48
-msgid "One listing only."
-msgstr ""
-
-#: build/index.js:48
-msgid "Show every listing"
-msgstr ""
-
-#: build/index.js:48
-msgid "Listings with proposals"
-msgstr ""
-
-#: build/index.js:48
-msgid "Listing"
-msgstr ""
-
-#: build/index.js:48
-msgid "Waiting"
-msgstr ""
-
-#: build/index.js:48
-msgid "Applied"
-msgstr ""
-
-#: build/index.js:48
-msgid "Flags"
-msgstr ""
-
-#: build/index.js:48
-msgid "Search listings"
-msgstr ""
-
-#: build/index.js:48
-msgid "Approve every waiting value"
-msgstr ""
-
-#: build/index.js:48
-msgid "Undo every applied value"
-msgstr ""
-
-#. translators: %d: number of listings ticked.
-#: build/index.js:49
-#, js-format
-msgid "Undo every applied value of %d listing? The values before them come back."
-msgid_plural "Undo every applied value of %d listings? The values before them come back."
-msgstr[0] ""
-msgstr[1] ""
-
-#: build/index.js:49
-msgid "Review"
-msgstr ""
-
-#: build/index.js:49
-msgid "View"
-msgstr ""
-
-#: build/index.js:49
-msgid "Nothing here."
-msgstr ""
-
-#: build/index.js:49
-msgid "Loading the settings…"
-msgstr ""
-
-#: build/index.js:49
-msgid "Settings groups"
-msgstr ""
-
-#: build/index.js:49
-msgid "On the current screens"
-msgstr ""
-
-#: build/index.js:49
-msgid "These lists keep their own screens for now."
-msgstr ""
-
-#: build/index.js:49
-msgid "Edit Feed"
-msgstr ""
-
-#: build/index.js:49
-msgid "Back to the source"
-msgstr ""
-
-#: build/index.js:49
-msgid "Back to Feeds"
-msgstr ""
-
-#: build/index.js:49
-msgid "Feed"
-msgstr ""
-
-#: build/index.js:49
-msgid "Every feed and source read by code (News, Library and Opportunity), with the site each belongs to."
-msgstr ""
-
-#: build/index.js:49
-msgid "Back to Sources"
-msgstr ""
-
-#: build/index.js:49
+#: src/index.js:6119
 msgid "Items the relevance check refused, with the reason. They were never created. An item from an allowed publisher is rarely refused: worth a look."
 msgstr ""
 
-#: build/index.js:49
+#: src/index.js:6123
 msgid "Search rejected items"
 msgstr ""
 
-#: build/index.js:49
+#: src/index.js:6124
 msgid "Nothing rejected."
 msgstr ""
 
-#: build/index.js:49
+#: src/index.js:6156
 msgid "Found by"
 msgstr ""
 
-#: build/index.js:49
+#: src/index.js:6159
 msgid "Reason"
 msgstr ""
 
-#: build/index.js:49
+#: src/index.js:6162
 msgid "Date"
 msgstr ""
 
-#: build/index.js:49
+#: src/index.js:6175
 msgid "Every request the workers made through this site for a publisher that refuses GitHub (the last 200). Each source has its relay switch on Sources."
 msgstr ""
 
-#: build/index.js:49
+#: src/index.js:6179
 msgid "Search requests"
 msgstr ""
 
-#: build/index.js:49
+#: src/index.js:6184
 msgid "Time"
 msgstr ""
 
-#: build/index.js:49
+#: src/index.js:6194
 msgid "Path"
 msgstr ""
 
-#: build/index.js:49
+#: src/index.js:6208
 msgid "Size"
 msgstr ""
 
-#: build/index.js:49
+#: src/index.js:6214
 msgid "Time taken"
 msgstr ""
 
-#: build/index.js:49
+#: src/index.js:6218
 msgid "Note"
 msgstr ""
 
-#: build/index.js:49
+#: src/index.js:6229
 msgid "Who changed what on these screens and when, with the value before and after (newest first, the last 1,000)."
 msgstr ""
 
-#: build/index.js:49
+#: src/index.js:6233
 msgid "Search changes"
 msgstr ""
 
-#: build/index.js:49
+#: src/index.js:6234
 msgid "No changes yet."
 msgstr ""
 
-#: build/index.js:49
+#: src/index.js:6249
 msgid "Tab"
 msgstr ""
 
-#: build/index.js:49
+#: src/index.js:6252
 msgid "What changed"
 msgstr ""
 
-#: build/index.js:49
+#: src/index.js:6255
 msgid "Old → new"
 msgstr ""

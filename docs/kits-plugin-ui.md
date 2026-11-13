@@ -48,7 +48,7 @@ A data-file service (a bundled file with its date and counts, nothing to connect
 it has no Edit button.
 
 PHP helpers in `includes/admin-shell.php`:
-- `kits_shell_ui_next()`: the new screen is wanted (any request without `&ui=classic`).
+- `kits_shell_ui_next()`: always true (13 Nov 2026: the classic screens are removed); kept for older callers.
 - `kits_shell_rest_can( $cap )`: the `permission_callback` every shell route uses (401 signed out; 403 without a valid
   `wp_rest` nonce in a browser request; 403 without the capability).
 
@@ -114,19 +114,20 @@ tabs, then cards (owner, 12 Nov 2026: "the ui used for plugins – use it for Ki
   spacing inside a card. The tabs keep `&ui=next` between these four screens (`kits_frame_tabs()`).
 - **Theme Options** (the default screen, `includes/admin-app.php`): its app runs on the shell (`kits_shell_app()`):
   `AppHeader` with Save, the sections as `ChipRow` links (`#slug`), the open section in a `SectionCard`. The fields
-  are still WordPress components. If the shell or the app cannot load, the screen links to `&ui=classic`.
+  are still WordPress components. If the shell or the app cannot load, the screen shows one notice that it needs its build.
 - The options panel parts (`Panel`, `PanelGroup`, `OnOff`) were removed on 13 Nov 2026: no screen used them. The
   earlier Settings panel (`kits/v1/settings-panel`, `src/settings-next/`) is removed: it held 3 of Settings' sections.
 - `smoke.sh` checks each of the four with `&ui=next` (200, the frame, five tabs, a known section, no PHP error), that
   the current screen is still the default, that a subscriber is refused, and that Theme Options loads on the shell.
 
-## The new screens are the default; `&ui=classic` shows the earlier one
+## The classic screens are removed (13 Nov 2026)
 
-Owner, 12 Nov 2026: "Yes, switch". Every plugin's new screen (and Kits Home, Settings, Tools and Help) shows on its
-plain address. `&ui=classic` on the same address shows the earlier screen; nothing links to it (owner, 12 Nov: remove
-the links). `&ui=next` still works (it is simply the default). Both screens save through the same function, so neither can
-drift from the other. DirectoryWeb → Claims: reviewing a claim (approve, reject, undo) stays on the earlier screen; each
-claim links to it with `&ui=classic`.
+Owner, 13 Nov 2026: "Delete classic code". Every plugin screen is its shell screen; `&ui=classic` is gone (`&ui=next` is
+ignored). Without Kits Core or a plugin's build, a screen shows one notice that it needs Kits Core. Views that have no
+shell version stay server-drawn on their own addresses: PlanWeb's Calendar (`&m=`, `&edit=`, import), MailWeb's
+message, form item and compose views and Settings → Site sending (`&sub=sending`), and one claim's review on
+Directory → Claims (`&entry=`, `&done=`). SourceWeb's To review shows other plugins' intake forms (`aw_review_intake`)
+and its Settings the backfill date, both as page parts (`sourceweb_extra_parts()`).
 
 ## RankWeb (the first plugin on the shell)
 

@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-12T21:11:02+00:00\n"
+"POT-Creation-Date: 2026-11-13T04:28:25+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: planweb\n"
@@ -18,11 +18,13 @@ msgstr ""
 #: planweb.php
 #: includes/admin.php:25
 #: includes/admin.php:27
+#: includes/admin.php:129
 #: includes/kits-hub.php:54
 #: includes/kits-hub.php:64
-#: includes/planweb-ui.php:148
+#: includes/planweb-ui.php:144
 #: includes/switch.php:68
-#: build/index.js:5
+#: src/index.js:890
+#: src/index.js:982
 msgid "PlanWeb"
 msgstr ""
 
@@ -43,28 +45,29 @@ msgstr ""
 
 #: includes/admin.php:27
 #: includes/admin.php:29
-#: includes/admin.php:134
+#: includes/admin.php:142
+#: includes/help-tab.php:33
+#: includes/help-tab.php:62
 #: includes/kits-hub.php:63
-#: build/index.js:5
+#: src/index.js:299
 msgid "Calendar"
 msgstr ""
 
 #: includes/admin.php:31
-#: includes/class-planweb-list-table.php:123
-#: build/index.js:5
+#: src/index.js:825
 msgid "Dates"
 msgstr ""
 
-#: includes/admin.php:90
+#: includes/admin.php:88
 msgid "today"
 msgstr ""
 
-#: includes/admin.php:93
+#: includes/admin.php:91
 msgid "tomorrow"
 msgstr ""
 
 #. translators: %d: number of days.
-#: includes/admin.php:96
+#: includes/admin.php:94
 #, php-format
 msgid "in %d day"
 msgid_plural "in %d days"
@@ -72,313 +75,260 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of days.
-#: includes/admin.php:96
+#: includes/admin.php:94
 #, php-format
 msgid "%d day ago"
 msgid_plural "%d days ago"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/admin.php:121
+#: includes/admin.php:119
+#: includes/admin.php:127
 msgid "Sorry, you are not allowed to access this page."
 msgstr ""
 
-#: includes/admin.php:134
-#: includes/admin.php:283
-#: build/index.js:5
+#: includes/admin.php:130
+msgid "PlanWeb needs Kits Core (active, with its build) to show this screen."
+msgstr ""
+
+#: includes/admin.php:142
+#: includes/admin.php:284
+#: src/index.js:578
 msgid "Add entry"
 msgstr ""
 
-#: includes/admin.php:136
+#: includes/admin.php:144
 #: includes/planweb-rest.php:458
 msgid "Entry saved."
 msgstr ""
 
-#: includes/admin.php:137
-#: includes/planweb-rest.php:485
-msgid "Entry moved to the Trash."
-msgstr ""
-
-#: includes/admin.php:138
+#: includes/admin.php:145
 #: includes/planweb-rest.php:592
 msgid "Import run."
 msgstr ""
 
-#: includes/admin.php:146
+#: includes/admin.php:153
 msgid "Nothing on this calendar is posted or sent: it is the team's plan. Approved and Sent are set by an administrator."
 msgstr ""
 
-#: includes/admin.php:150
+#: includes/admin.php:157
 #: includes/ui-model.php:241
 msgid "All entries"
 msgstr ""
 
-#: includes/admin.php:188
+#: includes/admin.php:189
 #: includes/ui-model.php:233
 msgid "Today"
 msgstr ""
 
-#: includes/admin.php:190
+#: includes/admin.php:191
 msgid "Mon"
 msgstr ""
 
-#: includes/admin.php:190
+#: includes/admin.php:191
 msgid "Tue"
 msgstr ""
 
-#: includes/admin.php:190
+#: includes/admin.php:191
 msgid "Wed"
 msgstr ""
 
-#: includes/admin.php:190
+#: includes/admin.php:191
 msgid "Thu"
 msgstr ""
 
-#: includes/admin.php:190
+#: includes/admin.php:191
 msgid "Fri"
 msgstr ""
 
-#: includes/admin.php:190
+#: includes/admin.php:191
 msgid "Sat"
 msgstr ""
 
-#: includes/admin.php:190
+#: includes/admin.php:191
 msgid "Sun"
 msgstr ""
 
-#: includes/admin.php:265
-#: build/index.js:5
+#: includes/admin.php:266
+#: src/index.js:447
 msgid "Edit entry"
 msgstr ""
 
-#: includes/admin.php:265
-#: build/index.js:5
+#: includes/admin.php:266
+#: src/index.js:448
+#: src/index.js:778
 msgid "Add an entry"
 msgstr ""
 
-#: includes/admin.php:270
-#: includes/class-planweb-list-table.php:57
-#: build/index.js:5
+#: includes/admin.php:271
+#: src/index.js:467
+#: src/index.js:673
 msgid "Date"
 msgstr ""
 
-#: includes/admin.php:270
-#: build/index.js:5
+#: includes/admin.php:271
+#: src/index.js:471
 msgid "Time"
 msgstr ""
 
-#: includes/admin.php:270
+#: includes/admin.php:271
 msgid "Time is optional (IST)."
 msgstr ""
 
-#: includes/admin.php:271
-#: build/index.js:5
+#: includes/admin.php:272
+#: src/index.js:476
 msgid "Title"
 msgstr ""
 
-#: includes/admin.php:272
-#: build/index.js:5
+#: includes/admin.php:273
+#: src/index.js:483
 msgid "Note"
 msgstr ""
 
-#: includes/admin.php:272
-#: build/index.js:5
+#: includes/admin.php:273
+#: src/index.js:484
 msgid "No email addresses, names or phone numbers."
 msgstr ""
 
-#: includes/admin.php:273
-#: includes/class-planweb-list-table.php:59
-#: build/index.js:5
+#: includes/admin.php:274
+#: src/index.js:183
+#: src/index.js:501
+#: src/index.js:713
+#: src/index.js:807
 msgid "Type"
 msgstr ""
 
-#: includes/admin.php:274
-#: includes/class-planweb-list-table.php:60
-#: build/index.js:5
+#: includes/admin.php:275
+#: src/index.js:513
+#: src/index.js:729
+#: src/index.js:831
 msgid "Channel"
 msgstr ""
 
-#: includes/admin.php:274
 #: includes/admin.php:275
+#: includes/admin.php:276
 msgid "—"
 msgstr ""
 
-#: includes/admin.php:275
-#: includes/class-planweb-list-table.php:61
-#: build/index.js:5
+#: includes/admin.php:276
+#: src/index.js:526
+#: src/index.js:734
+#: src/index.js:840
 msgid "Owner"
 msgstr ""
 
-#: includes/admin.php:276
-#: includes/class-planweb-list-table.php:62
-#: build/index.js:5
+#: includes/admin.php:277
+#: src/index.js:205
+#: src/index.js:539
+#: src/index.js:739
+#: src/index.js:816
 msgid "Status"
 msgstr ""
 
-#: includes/admin.php:277
-#: includes/class-planweb-list-table.php:63
-#: build/index.js:5
+#: includes/admin.php:278
+#: src/index.js:567
+#: src/index.js:750
 msgid "Link"
 msgstr ""
 
-#: includes/admin.php:277
-#: build/index.js:5
+#: includes/admin.php:278
+#: src/index.js:568
 msgid "A page on this site, or an X, LinkedIn, Instagram, Facebook, Threads, Reddit or WhatsApp channel address."
 msgstr ""
 
-#: includes/admin.php:283
-#: build/index.js:5
+#: includes/admin.php:284
+#: src/index.js:577
 msgid "Save entry"
 msgstr ""
 
-#: includes/admin.php:285
-#: build/index.js:5
+#: includes/admin.php:286
+#: src/index.js:581
 msgid "Cancel"
 msgstr ""
 
-#: includes/admin.php:311
+#: includes/admin.php:312
 #: includes/admin.php:349
-#: includes/admin.php:361
 #: includes/store.php:200
 msgid "Sorry, you are not allowed to do that."
 msgstr ""
 
-#: includes/admin.php:373
-#: build/index.js:5
+#: includes/admin.php:361
+#: src/index.js:892
+#: src/index.js:1086
 msgid "Import from Dates"
 msgstr ""
 
-#: includes/admin.php:375
-#: build/index.js:6
+#: includes/admin.php:363
+#: src/index.js:1123
 msgid "Not run yet: it runs on the first admin page after PlanWeb is switched on."
 msgstr ""
 
 #. translators: 1: date and time, 2: elements in Dates, 3: entries made, 4: already there.
 #. translators: 1: date and time, 2: dates in Dates, 3: entries made, 4: already there.
-#: includes/admin.php:378
-#: build/index.js:6
+#: includes/admin.php:366
+#: src/index.js:1114
 #, php-format,js-format
 msgid "Last run %1$s: %2$d dates in Dates, %3$d entries made, %4$d already there."
 msgstr ""
 
 #. translators: 1: position in the Dates list, 2: error.
-#: includes/admin.php:381
-#: build/index.js:7
+#: includes/admin.php:369
+#: src/index.js:1132
 #, php-format,js-format
 msgid "Date %1$d was not imported: %2$s"
 msgstr ""
 
 #. translators: %s: entry IDs.
-#: includes/admin.php:385
-#: build/index.js:8
+#: includes/admin.php:373
+#: src/index.js:1142
 #, php-format,js-format
 msgid "These imported entries look as if they hold an email address or a phone number; check them: %s"
 msgstr ""
 
 #. translators: 1: same, 2: differs, 3: missing, 4: extra.
-#: includes/admin.php:390
-#: build/index.js:9
+#: includes/admin.php:378
+#: src/index.js:1153
 #, php-format,js-format
 msgid "Check now: %1$d the same, %2$d different, %3$d missing, %4$d extra."
 msgstr ""
 
-#: includes/admin.php:391
+#: includes/admin.php:379
 msgid "An entry changed or moved to the Trash since the import shows as different or missing."
 msgstr ""
 
 #. translators: 1: position in the Dates list, 2: the stored value.
-#: includes/admin.php:394
-#: build/index.js:10
+#: includes/admin.php:382
+#: src/index.js:1167
 #, php-format,js-format
 msgid "Dates element %1$d is not a date and was not imported: %2$s"
 msgstr ""
 
-#: includes/admin.php:398
-#: build/index.js:10
+#: includes/admin.php:386
+#: src/index.js:1180
 msgid "Check"
 msgstr ""
 
-#: includes/admin.php:398
-#: build/index.js:10
+#: includes/admin.php:386
+#: src/index.js:1181
 msgid "In Dates"
 msgstr ""
 
-#: includes/admin.php:398
-#: build/index.js:10
+#: includes/admin.php:386
+#: src/index.js:1182
 msgid "In PlanWeb"
 msgstr ""
 
-#: includes/admin.php:407
-#: build/index.js:5
+#: includes/admin.php:395
+#: src/index.js:1094
 msgid "Run the import again"
 msgstr ""
 
-#: includes/admin.php:407
+#: includes/admin.php:395
 msgid "Adds only dates not imported yet; changes nothing in Dates."
 msgstr ""
 
-#: includes/class-planweb-list-table.php:58
-#: build/index.js:5
-msgid "What"
-msgstr ""
-
-#: includes/class-planweb-list-table.php:110
-#: build/index.js:5
-msgid "All types"
-msgstr ""
-
-#: includes/class-planweb-list-table.php:111
-#: build/index.js:5
-msgid "All channels"
-msgstr ""
-
-#: includes/class-planweb-list-table.php:112
-#: build/index.js:5
-msgid "All owners"
-msgstr ""
-
-#: includes/class-planweb-list-table.php:113
-#: build/index.js:5
-msgid "All statuses"
-msgstr ""
-
-#: includes/class-planweb-list-table.php:123
-#: build/index.js:5
-msgid "From 30 days ago"
-msgstr ""
-
-#: includes/class-planweb-list-table.php:123
-#: build/index.js:5
-msgid "All dates"
-msgstr ""
-
-#: includes/class-planweb-list-table.php:124
-msgid "Filter"
-msgstr ""
-
-#: includes/class-planweb-list-table.php:130
-msgid "No entries."
-msgstr ""
-
-#: includes/class-planweb-list-table.php:158
-#: build/index.js:5
-msgid "Edit"
-msgstr ""
-
-#: includes/class-planweb-list-table.php:161
-#: build/index.js:5
-msgid "Trash"
-msgstr ""
-
-#: includes/class-planweb-list-table.php:163
-#: includes/planweb-rest.php:408
-#: includes/ui-model.php:195
-#: build/index.js:5
-msgid "Overdue"
-msgstr ""
-
 #: includes/dashboard.php:19
-#: build/index.js:5
+#: src/index.js:591
 msgid "Next 7 days"
 msgstr ""
 
@@ -394,6 +344,51 @@ msgstr ""
 
 #: includes/dashboard.php:43
 msgid "Open the calendar"
+msgstr ""
+
+#: includes/help-tab.php:33
+msgid "the month grid"
+msgstr ""
+
+#: includes/help-tab.php:34
+#: includes/planweb-ui.php:82
+#: src/index.js:184
+#: src/index.js:206
+#: src/index.js:784
+#: src/index.js:791
+msgid "Entries"
+msgstr ""
+
+#: includes/help-tab.php:34
+msgid "add or edit an entry; only administrators set Approved or Sent"
+msgstr ""
+
+#: includes/help-tab.php:35
+#: includes/help-tab.php:64
+#: includes/planweb-ui.php:83
+msgid "Settings"
+msgstr ""
+
+#: includes/help-tab.php:35
+msgid "PlanWeb on or off and its defaults"
+msgstr ""
+
+#. translators: %s: plugin name.
+#: includes/help-tab.php:45
+#, php-format
+msgid "About %s"
+msgstr ""
+
+#: includes/help-tab.php:46
+msgid "The team's calendar: content, social, email, campaign and reminder entries, each with a channel, an owner and a status. Nothing in it posts or sends anything."
+msgstr ""
+
+#: includes/help-tab.php:53
+msgid "Plugins"
+msgstr ""
+
+#: includes/help-tab.php:54
+msgid "(opens in a new tab)"
 msgstr ""
 
 #: includes/kits-hub.php:41
@@ -452,6 +447,12 @@ msgstr ""
 msgid "All"
 msgstr ""
 
+#: includes/planweb-rest.php:408
+#: includes/ui-model.php:195
+#: src/index.js:697
+msgid "Overdue"
+msgstr ""
+
 #: includes/planweb-rest.php:413
 #: includes/ui-model.php:204
 msgid "Waiting for approval"
@@ -463,6 +464,10 @@ msgstr ""
 
 #: includes/planweb-rest.php:480
 msgid "The entry could not be moved to the Trash."
+msgstr ""
+
+#: includes/planweb-rest.php:485
+msgid "Entry moved to the Trash."
 msgstr ""
 
 #: includes/planweb-rest.php:528
@@ -535,24 +540,15 @@ msgstr ""
 msgid "Not chosen yet. Nothing is posted from PlanWeb."
 msgstr ""
 
-#: includes/planweb-ui.php:85
+#: includes/planweb-ui.php:81
 msgid "Dashboard"
 msgstr ""
 
-#: includes/planweb-ui.php:86
-#: build/index.js:5
-msgid "Entries"
-msgstr ""
-
-#: includes/planweb-ui.php:87
-msgid "Settings"
-msgstr ""
-
-#: includes/planweb-ui.php:149
+#: includes/planweb-ui.php:145
 msgid "PlanWeb entries"
 msgstr ""
 
-#: includes/planweb-ui.php:150
+#: includes/planweb-ui.php:146
 msgid "PlanWeb settings"
 msgstr ""
 
@@ -601,7 +597,7 @@ msgid "The team's calendar as its own plugin. Nothing is posted or sent from it.
 msgstr ""
 
 #: includes/switch.php:76
-#: build/index.js:5
+#: src/index.js:1009
 msgid "Calendar in PlanWeb"
 msgstr ""
 
@@ -682,176 +678,216 @@ msgstr[1] ""
 msgid "%s dates the same as in Dates"
 msgstr ""
 
-#: build/index.js:1
+#: src/index.js:92
+msgid "A count is running in the background. The numbers change when it is done."
+msgstr ""
+
+#: src/index.js:108
 msgid "Loading the counts…"
 msgstr ""
 
 #. translators: %s: date and time.
-#: build/index.js:2
+#: src/index.js:116
 #, js-format
 msgid "Counted %s."
 msgstr ""
 
-#: build/index.js:2
+#: src/index.js:119
 msgid "Counting for the first time…"
 msgstr ""
 
-#: build/index.js:2
+#: src/index.js:121
 msgid "A new count for today is running."
 msgstr ""
 
-#: build/index.js:2
+#: src/index.js:126
 msgid "Time range"
 msgstr ""
 
 #. translators: %d: number of days.
-#: build/index.js:4
+#: src/index.js:132
 #, js-format
 msgid "Next %d days"
 msgstr ""
 
-#: build/index.js:4
-msgid "A count is running in the background. The numbers change when it is done."
-msgstr ""
-
-#: build/index.js:4
+#: src/index.js:142
 msgid "Count now"
 msgstr ""
 
-#: build/index.js:4
+#: src/index.js:152
 msgid "PlanWeb at a glance"
 msgstr ""
 
 #. translators: %d: number of days.
-#: build/index.js:5
+#: src/index.js:172
 #, js-format
 msgid "By type, next %d days"
 msgstr ""
 
-#: build/index.js:5
+#: src/index.js:175
 msgid "Entries from today on, by type. Each number opens the list."
 msgstr ""
 
-#: build/index.js:5
+#: src/index.js:181
 msgid "By type"
 msgstr ""
 
-#: build/index.js:5
+#: src/index.js:196
+#: src/index.js:203
 msgid "By status"
 msgstr ""
 
-#: build/index.js:5
+#: src/index.js:197
 msgid "Every entry, past and future. Approved and Sent are set by an administrator."
 msgstr ""
 
-#: build/index.js:5
+#: src/index.js:262
 msgid "Loading the month…"
 msgstr ""
 
-#: build/index.js:5
+#: src/index.js:300
 msgid "The month’s entries by day. An entry opens its form on Entries."
 msgstr ""
 
-#: build/index.js:5
+#: src/index.js:450
 msgid "Nothing on this calendar is posted or sent: it is the team’s plan."
 msgstr ""
 
-#: build/index.js:5
+#: src/index.js:472
 msgid "Optional (IST)."
 msgstr ""
 
-#: build/index.js:5
+#: src/index.js:542
 msgid "Due is set on the day by the scheduler."
 msgstr ""
 
-#: build/index.js:5
+#: src/index.js:546
 msgid "Approved and Sent are set by an administrator."
 msgstr ""
 
-#: build/index.js:5
-msgid "The team’s plan. From 30 days ago by default; pick All dates for older ones."
+#: src/index.js:590
+msgid "From 30 days ago"
 msgstr ""
 
-#: build/index.js:5
-msgid "Search titles and notes"
-msgstr ""
-
-#: build/index.js:5
+#: src/index.js:592
 msgid "Next 30 days"
 msgstr ""
 
-#: build/index.js:5
+#: src/index.js:593
 msgid "Next 90 days"
 msgstr ""
 
-#: build/index.js:5
+#: src/index.js:594
 msgid "Before today"
 msgstr ""
 
-#: build/index.js:5
+#: src/index.js:595
+msgid "All dates"
+msgstr ""
+
+#: src/index.js:651
 msgid "Move this entry to the Trash?"
 msgstr ""
 
-#: build/index.js:5
+#: src/index.js:688
+msgid "What"
+msgstr ""
+
+#: src/index.js:785
+msgid "The team’s plan. From 30 days ago by default; pick All dates for older ones."
+msgstr ""
+
+#: src/index.js:800
+msgid "Search titles and notes"
+msgstr ""
+
+#: src/index.js:810
+msgid "All types"
+msgstr ""
+
+#: src/index.js:819
+msgid "All statuses"
+msgstr ""
+
+#: src/index.js:834
+msgid "All channels"
+msgstr ""
+
+#: src/index.js:843
+msgid "All owners"
+msgstr ""
+
+#: src/index.js:862
+msgid "Edit"
+msgstr ""
+
+#: src/index.js:870
+msgid "Trash"
+msgstr ""
+
+#: src/index.js:879
 msgid "No entries match."
 msgstr ""
 
-#: build/index.js:5
+#: src/index.js:889
+#: src/index.js:919
+#: src/index.js:925
 msgid "Connected services"
 msgstr ""
 
-#: build/index.js:5
+#: src/index.js:891
+#: src/index.js:1031
 msgid "Lists"
 msgstr ""
 
-#: build/index.js:5
+#: src/index.js:920
 msgid "What PlanWeb will read or work with. Nothing is posted or sent from PlanWeb."
 msgstr ""
 
-#: build/index.js:5
-msgid "The same switch as Kits → Modules → PlanWeb."
-msgstr ""
-
-#: build/index.js:5
+#: src/index.js:957
 msgid "Switch PlanWeb off? Kits → Dates comes back and these screens go; the entries are kept."
 msgstr ""
 
-#: build/index.js:5
+#: src/index.js:983
+msgid "The same switch as Kits → Modules → PlanWeb."
+msgstr ""
+
+#: src/index.js:995
 msgid "Save changes"
 msgstr ""
 
-#: build/index.js:5
+#: src/index.js:1012
 msgid "On: Kits → Dates moves to PlanWeb, and every date in Dates is copied here once (Dates itself is kept unchanged). Off: Kits → Dates as before; entries are kept."
 msgstr ""
 
-#: build/index.js:5
+#: src/index.js:1032
 msgid "The values entries can take. They are fixed for now; renaming and adding come later."
 msgstr ""
 
-#: build/index.js:5
+#: src/index.js:1043
 msgid "Entries using it"
 msgstr ""
 
-#: build/index.js:5
+#: src/index.js:1087
 msgid "Every date in Dates copied here once. Dates itself is never changed."
 msgstr ""
 
-#: build/index.js:5
+#: src/index.js:1097
 msgid "Adds only dates not imported yet."
 msgstr ""
 
-#: build/index.js:10
+#: src/index.js:1178
 msgid "Dates that do not match"
 msgstr ""
 
-#: build/index.js:10
+#: src/index.js:1216
 msgid "Loading the settings…"
 msgstr ""
 
-#: build/index.js:10
+#: src/index.js:1223
 msgid "Settings groups"
 msgstr ""
 
-#: build/index.js:10
+#: src/index.js:1246
 msgid "No such group."
 msgstr ""
