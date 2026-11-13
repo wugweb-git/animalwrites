@@ -152,9 +152,10 @@ sys.exit(1 if bad else 0)
 PY2
 # shellcheck disable=SC2086
 same "SourceWeb Sources" "$BEFORE" "$(optmd5 $S_OPTS)"
-# Keywords: today's word lists before the keyword table (phase 0 here), the new screen from phase 2.
+# Keywords before the keyword table (phase 0 here): the shell screen (the classic screens are removed, 13 Nov 2026);
+# its routes answer 409 until phase 2.
 want 200 "admin.php?page=aw-sourcing&tab=keywords before phase 2" -b /tmp/cj-ci "$H/wp-admin/admin.php?page=aw-sourcing&tab=keywords"
-if grep -q 'id="sourceweb-app"' /tmp/rw.out; then echo "FAIL Keywords before phase 2 draws the new screen"; FAIL=1; else echo "ok   Keywords before phase 2 stays on today's screen"; fi
+if grep -q 'id="sourceweb-app"' /tmp/rw.out; then echo "ok   Keywords before phase 2: the shell screen"; else echo "FAIL Keywords before phase 2: shell screen not drawn"; FAIL=1; fi
 want 409 "GET /sourceweb/v1/keywords before phase 2" -b /tmp/cj-ci -H "X-WP-Nonce: $NA" "$H/?rest_route=/sourceweb/v1/keywords"
 post sourceweb/v1/keywords/save '{"id":0}'
 post sourceweb/v1/keywords/decide '{"op":"delete","ids":[]}'
