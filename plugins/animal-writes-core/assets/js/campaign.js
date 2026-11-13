@@ -86,16 +86,6 @@
 		return files[kind];
 	}
 	function canShareFile(file) { return !!(file && navigator.canShare && navigator.canShare({ files: [file] })); }
-	/* Share pictures as templates, not shown (owner, 2 Nov 2026; every campaign on this file but Community dogs, which
-	   stays as it was): the Share button sends the story on a phone, the post elsewhere (the other one, then the link
-	   preview image, if unset), with the message and link; the link alone where files can't go. */
-	var cdFrozen = !!document.querySelector('.aw-camp--community-dogs');
-	/* One share picture, 1080x1080, for every network (owner, 13 Nov 2026: one size, so it is made once and reused);
-	   campaigns made before it keep their story and post pictures. */
-	function picList() {
-		if (sh.image) return [['image', 'X, Facebook, Instagram or LinkedIn', 'Picture, 1:1']];
-		return [['story', 'Instagram or Facebook story', 'Story, 9:16'], ['post', 'Instagram or Facebook post', 'Post, 4:5']].filter(function (k) { return sh[k[0]]; });
-	}
 	/* The page's Share shares the page: its link with the campaign's hero picture, the link preview image (owner, 13 Nov
 	   2026: "share function on the page is only about sharing page (campaign hero)"). The ready-made social pictures
 	   are for the social accounts, not offered on the page. */
@@ -110,32 +100,6 @@
 			var data = canShareFile(file) ? { files: [file], title: sh.title, text: sh.text + ' ' + tagged('native') } : { title: sh.title, text: sh.text, url: tagged('native') };
 			return navigator.share(data);
 		}).catch(function () {});
-	}
-	function shareImage(kind, where) {
-		/* The link travels with the picture: in the text (WhatsApp, Facebook, X keep it) and on the clipboard for
-		   Instagram, which drops text: the note says to paste it into the Link sticker. */
-		if (navigator.clipboard) navigator.clipboard.writeText(tagged('copy')).catch(function () {});
-		shareNote(where, canShare ? 'Link copied. Paste it in a Link sticker.' : 'Image saved. The link is copied too: paste it with your post.');
-		getFile(kind).then(function (file) {
-			if (!file) return;
-			if (canShareFile(file)) return navigator.share({ files: [file], title: sh.title, text: sh.text + ' ' + tagged('native') }).catch(function () {});
-			var a = document.createElement('a');
-			a.href = URL.createObjectURL(file);
-			a.download = file.name;
-			document.body.appendChild(a);
-			a.click();
-			a.remove();
-		});
-	}
-	function shareNote(where, msg) {
-		var n = where.nextElementSibling;
-		if (!n || !n.classList.contains('aw-camp-share-note')) {
-			n = document.createElement('p');
-			n.className = 'aw-camp-share-note';
-			n.setAttribute('role', 'status');
-			where.parentNode.insertBefore(n, where.nextSibling);
-		}
-		n.textContent = msg;
 	}
 	/* The share row in the letter tool (owner, 19 Oct 2026; not the page's own share row): on a phone the share sheet
 	   with picture, message and link, plus the story and post images; on a computer WhatsApp, X, Facebook, LinkedIn,
@@ -178,7 +142,7 @@
 			var io = new IntersectionObserver(function (en) {
 				if (!en[0].isIntersecting) return;
 				io.disconnect();
-				if (cdFrozen) ['og', 'story', 'post'].forEach(getFile); else getFile(picKind());
+				getFile(picKind());
 			}, { rootMargin: '400px' });
 			io.observe(where);
 		}
@@ -198,39 +162,6 @@
 		a.addEventListener('click', function () { track(a.dataset.track, { link_text: a.textContent.trim() }); });
 	});
 
-	/* The story (9:16) and post (4:5) pictures, shown as they are: a tap shares the picture (phone) or saves it (computer).
-	   In the letter tool's share box, and under the page's own share row on campaigns without a letter tool (2 Nov 2026). */
-	function sharePics(box, row) {
-		var pics = picList();
-		if (!pics.length) return;
-		var wrap = document.createElement('div');
-		wrap.className = 'aw-letter-share-pics';
-		wrap.innerHTML = '<p class="aw-letter-share-pics-head"><strong>Or share a picture</strong> ' + (canShare ? 'Tap one to share it. The link is copied for the Link sticker.' : 'Click one to save it. The link is copied too.') + '</p>';
-		var list = document.createElement('div');
-		list.className = 'aw-letter-share-pics-list';
-		pics.forEach(function (k) {
-			var b = document.createElement('button');
-			b.type = 'button';
-			b.className = 'aw-letter-share-pic aw-letter-share-pic--' + k[0];
-			b.dataset.kitShare = k[0] + '_image';
-			var img = document.createElement('img');
-			img.src = sh[k[0]];
-			img.alt = '';
-			img.loading = 'lazy';
-			img.decoding = 'async';
-			b.appendChild(img);
-			b.insertAdjacentHTML('beforeend', '<span><span class="kit-ico kit-ico--' + (canShare ? 'share' : 'download') + '" aria-hidden="true"></span>' + k[2] + '</span>');
-			b.setAttribute('aria-label', k[2] + ': ' + (canShare ? 'share the ' : 'save the ') + k[1] + ' picture'); // the name starts with the visible text (WCAG 2.5.3)
-			b.addEventListener('click', function () { shareImage(k[0], row); });
-			list.appendChild(b);
-		});
-		wrap.appendChild(list);
-		box.appendChild(wrap);
-	}
-	if (!document.querySelector('.aw-letter') && cdFrozen) {
-		var pageKit = document.querySelector('.aw-camp-share-kit');
-		if (pageKit) sharePics(pageKit, pageKit);
-	}
 	/* The Share section uses the site's one share bar, as on every other page (owner, 13 Nov 2026: the share section
 	   behaves differently on a phone and on a computer, and is the same on all pages and content). Phones: the bar's Share
 	   button (the phone's own share sheet) and Copy link; tablets: Share, then the networks; computers: the networks. The
@@ -244,7 +175,7 @@
 		var nets = { x: 'https://x.com/intent/post?text=' + t + '&url=' + u('x') + (sh.hashtags ? '&hashtags=' + encodeURIComponent(sh.hashtags) : ''), whatsapp: 'https://wa.me/?text=' + t + '%20' + u('whatsapp'), email: 'mailto:?subject=' + encodeURIComponent(sh.title || '') + '&body=' + t + '%20' + u('email') };
 		holder.querySelectorAll('.kit-share a[data-kit-share]').forEach(function (a) { if (nets[a.dataset.kitShare] && sh.text) a.href = nets[a.dataset.kitShare]; });
 	}
-	if (!document.querySelector('.aw-letter') && !cdFrozen && sh.url) {
+	if (!document.querySelector('.aw-letter') && sh.url) {
 		var pageKit = document.querySelector('.aw-camp-share-kit');
 		if (pageKit && pageKit.querySelector('.kit-share')) shareBlock(pageKit);
 	}
@@ -520,11 +451,9 @@
 	   buttons and a preview of the link as Facebook, WhatsApp and X show it (Rank Math's social title, text and image).
 	   After a send its heading turns to asking for three more letters. */
 	var sendShare = null, shareHead = null;
-	function esc(x) { var d = document.createElement('div'); d.textContent = x || ''; return d.innerHTML; }
 	function showSendShare(sent) {
 		if (!sh.url) return;
 		if (!sendShare) {
-			var og = sh.og || {};
 			/* The page's own Share section (owner, 21 Oct 2026) holds the heading and message; else the box carries them. */
 			var holder = document.querySelector('[data-aw-share]');
 			sendShare = document.createElement(holder ? 'div' : 'section');
@@ -533,18 +462,12 @@
 			sendShare.innerHTML = '<div class="aw-letter-share-copy">'
 				+ (holder ? '' : '<h3 class="aw-letter-share-head" id="aw-letter-share-title"></h3>'
 				+ '<p class="aw-letter-share-lede">One letter is one voice. Send this page to three people who care about animals, so each of them can send their own objection' + (sh.close ? ' before ' + sh.close : '') + '.</p>')
-				+ '<p class="aw-letter-share"></p></div>'
-				+ (cdFrozen && og.image ? '<figure class="aw-letter-share-preview" aria-label="What people will see">'
-					+ '<img src="' + esc(og.image) + '" alt="" width="1200" height="630" loading="lazy" decoding="async">'
-					+ '<figcaption><span class="aw-letter-share-host">' + esc(og.host) + '</span>'
-					+ '<strong>' + esc(og.title) + '</strong>'
-					+ '<span class="aw-letter-share-desc">' + esc(og.desc) + '</span></figcaption></figure>' : '');
+				+ '<p class="aw-letter-share"></p></div>';
 			shareHead = sendShare.querySelector('.aw-letter-share-head');
 			if (holder) holder.appendChild(sendShare);
 			else confirmBox.parentNode.insertBefore(sendShare, confirmBox);
 			var row = sendShare.querySelector('.aw-letter-share');
 			shareKit(row);
-			if (cdFrozen) sharePics(sendShare, row); // the pictures are templates for a share elsewhere (2 Nov 2026)
 		}
 		if (shareHead) shareHead.textContent = sent ? 'Sent? Now get three more letters in.' : 'Get three more letters in.';
 		if (sent && sendShare.classList.contains('is-in-section') && !form.querySelector('.aw-letter-next')) { // a pointer from the letter tool to the Share section
