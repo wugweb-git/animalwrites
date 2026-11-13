@@ -576,8 +576,7 @@
 /* What the draft does (owner, 2 Nov 2026: "a bento layout, not a grid", like Home section 2): the Home "Need help now"
    bento (aw.css .aw-bento) for the six change cards, in the Lab colours. The main change (card 1) is the lead tile: a
    solid --camp-mark tile like Home's emergency tile, two rows tall as on Home, fully open. The other five are solid
-   surface tiles with the Home icon tile; their text folds (campaign-lab.js puts it in a details whose summary is the
-   card's own H3), so a tile shows icon, heading and rule chips. Without JavaScript every text stays open.
+   surface tiles with the Home icon tile; every tile shows its text open (owner, 13 Nov 2026: no "+" folds anywhere).
    Areas as Home: phones one column. From 768 two columns: the lead two rows tall beside two tiles, then a pair, the
    last tile the full row. From 1200 four columns in two rows: the lead two rows tall, three tiles beside it in the first
    row, two in the second with the last two columns wide. Gaps as Home: --kit-space-5, --kit-space-4 in four columns.
@@ -612,15 +611,6 @@
 .aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card:first-child h3 { font-size: var(--kit-type-h2); }
 .aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card:first-child p:not(.aw-camp-card-ico, .aw-camp-card-chips) { font-size: var(--kit-type-base); line-height: var(--kit-leading-body); max-width: none; }
 .aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card:not(:first-child) p:not(.aw-camp-card-ico, .aw-camp-card-chips) { font-size: var(--kit-type-sm); line-height: var(--kit-leading-body); }
-/* The fold on the five smaller tiles (campaign-lab.js): the summary holds the H3, a 44px target with the theme's details
-   marker (kit.css .wp-block-details: a "+" that turns to a cross when open) and the theme focus ring. */
-.aw-camp--lab-rules .aw-camp-card-fold > summary { display: flex; align-items: center; justify-content: space-between; gap: var(--kit-space-3); min-height: var(--kit-size-target); cursor: pointer; list-style: none; border-radius: var(--kit-radius-control); }
-.aw-camp--lab-rules .aw-camp-card-fold > summary::-webkit-details-marker { display: none; }
-.aw-camp--lab-rules .aw-camp-card-fold > summary::after { content: "+"; flex: none; font-size: 1.4em; line-height: 1; transition: transform var(--kit-motion-base) var(--kit-motion-ease); }
-.aw-camp--lab-rules .aw-camp-card-fold[open] > summary::after { transform: rotate(45deg); }
-.aw-camp--lab-rules .aw-camp-card-fold > summary:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
-.aw-camp--lab-rules .aw-camp-card-fold > :not(summary) { margin: var(--kit-space-2) 0 0; }
-@media (prefers-reduced-motion: reduce) { .aw-camp--lab-rules .aw-camp-card-fold > summary::after { transition: none; } }
 
 /* The bento's tiles at Home's tile sizes (owner, 2 Nov 2026: "same as Home"), so the section stays under 720px from
    1200: the small tiles' headings at Home's tile-heading size (--kit-type-h4, 18px; aw.css lets these headings off its
@@ -663,7 +653,6 @@
 	.aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card:first-child:hover { box-shadow: var(--kit-elevation-3); }
 }
 .aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card:active { transform: none; }
-.aw-camp--lab-rules .aw-camp-card-fold > summary:active { background: color-mix(in srgb, currentColor 8%, transparent); }
 /* On first view the tiles fade in and rise --kit-space-2, 40ms apart (campaign-lab.js sets is-reveal, then is-in once
    the grid is on screen). Without JavaScript, or with reduced motion, they are simply there. */
 .aw-camp--lab-rules .aw-camp-grid.is-reveal > .aw-camp-card { opacity: 0; transform: translateY(var(--kit-space-2)); }
@@ -1029,10 +1018,12 @@
    second colour, not one dark tile among white). Phone order: scales picture, white, ash, white, ash, book picture band.
    Overlays keep white text at AA over the lightest part of each picture; chips on pictures sit on a dark fill. */
 .aw-camp.aw-camp--lab-rules #why-it-matters .aw-camp-grid > .aw-camp-card:is(:nth-child(1), :nth-child(3), :nth-child(5), :nth-child(6)) { --kit-color-focus: var(--kit-color-on-ink); --camp-tile: var(--camp-dark); color: var(--kit-color-on-ink); box-shadow: var(--kit-elevation-2); }
-.aw-camp.aw-camp--lab-rules #why-it-matters .aw-camp-grid > .aw-camp-card:is(:nth-child(1), :nth-child(3), :nth-child(5), :nth-child(6)) :is(h3, p, summary, .aw-camp-card-ico) { color: var(--kit-color-on-ink); }
+.aw-camp.aw-camp--lab-rules #why-it-matters .aw-camp-grid > .aw-camp-card:is(:nth-child(1), :nth-child(3), :nth-child(5), :nth-child(6)) :is(h3, p, .aw-camp-card-ico) { color: var(--kit-color-on-ink); }
 .aw-camp.aw-camp--lab-rules #why-it-matters .aw-camp-grid > .aw-camp-card:is(:nth-child(1), :nth-child(3), :nth-child(5), :nth-child(6)) .aw-rule-chip { --kit-chip-border: rgb(255 255 255 / 0.6); --kit-chip-border-strong: var(--kit-color-on-ink); --kit-chip-hover: rgb(255 255 255 / 0.14); color: var(--kit-color-on-ink); }
 .aw-camp.aw-camp--lab-rules #why-it-matters .aw-camp-grid > .aw-camp-card:is(:nth-child(1), :nth-child(6)) .aw-rule-chip { --kit-chip-bg: rgb(29 20 24 / 0.85); background: rgb(29 20 24 / 0.85); }
 .aw-camp.aw-camp--lab-rules #why-it-matters .aw-camp-grid > .aw-camp-card:is(:nth-child(1), :nth-child(6)) .aw-camp-card-ico { background: rgb(29 20 24 / 0.85); }
+/* The lead tile's icon is the campaign's motif (the flask, aw-camp-marks.css) */
+.aw-camp.aw-camp--lab-rules #why-it-matters .aw-camp-grid > .aw-camp-card:nth-child(1) .aw-camp-card-ico .kit-ico { --i: var(--camp-motif); }
 /* Ash black tiles: strays, and a lab without walls */
 .aw-camp.aw-camp--lab-rules #why-it-matters .aw-camp-grid > .aw-camp-card:is(:nth-child(3), :nth-child(5)) { background: var(--camp-dark); }
 /* Lead: the scales (flask against papers) under maroon to near black */
