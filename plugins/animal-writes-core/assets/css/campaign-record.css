@@ -375,6 +375,27 @@ body.home .aw-ed-story.aw-camp--community-dogs .aw-ed-story-stamp img { display:
 .aw-ed-story.aw-camp--community-dogs .aw-ed-story-text p .aw-date > .kit-ico { display: none; }
 .aw-ed-story.aw-camp--community-dogs .aw-ed-story-text p .aw-date { display: inline; padding: 0; font-size: inherit; }
 @media (max-width: 767px) { body.home .aw-ed-story.aw-camp--community-dogs .aw-ed-story-photos { display: none; } }
+/* Home band, below 1200 (owner, 14 Nov 2026: "the c1 banner on home page should be analysed and updated"). The words and
+   figures cross the whole band there, so the side gradient's light end (55% ink) put the 13px labels at the right on the
+   bright crowd photo, about 3.5:1 at worst. One even overlay at the gradient's own 55%-stop strength (82% ink) keeps every
+   label at 4.5:1 or better over the brightest pixel. From 1200 the words sit left of the stamp, on the dark end. */
+@media (max-width: 1199px) { body.home .aw-ed-story.aw-camp--community-dogs > .wp-block-cover__background { background: rgb(20 20 20 / 0.82) !important; } }
+/* The timeline on Home: the band is full width below 1200, so from 768 the four dates make one row, as at 1200 (the
+   shared 2 x 2 left a broken rail between the pairs); on phones a 2 x 2 with each date card above its words, instead of
+   four stacked rows. Layout only: the words are fixed. */
+@media (min-width: 768px) and (max-width: 1199px) {
+	body.home .aw-ed-story.aw-camp--community-dogs .kit-dateline { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); }
+	body.home .aw-ed-story.aw-camp--community-dogs .kit-dateline > :not(:last-child)::before { content: ""; }
+}
+@media (max-width: 767px) {
+	body.home .aw-ed-story.aw-camp--community-dogs .kit-dateline { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--dl-gap); row-gap: var(--kit-space-6); }
+	body.home .aw-ed-story.aw-camp--community-dogs .kit-dateline > * { grid-template-columns: minmax(0, 1fr); padding: 0; }
+	body.home .aw-ed-story.aw-camp--community-dogs .kit-dateline.kit-dateline > * > :first-child { grid-row: auto; }
+	body.home .aw-ed-story.aw-camp--community-dogs .kit-dateline.kit-dateline > * > :not(:first-child) { grid-column: 1; }
+	body.home .aw-ed-story.aw-camp--community-dogs .kit-dateline.kit-dateline > * > :nth-child(2) { margin-top: var(--kit-space-3); }
+	body.home .aw-ed-story.aw-camp--community-dogs .kit-dateline > *::before { content: none; left: calc(var(--dl-w) + var(--kit-space-2) + var(--kit-space-1)); right: calc(var(--kit-space-2) - var(--dl-gap)); top: calc(var(--kit-space-2) + var(--dl-h) / 2 - var(--dl-t) / 2); bottom: auto; width: auto; height: 0; border-left: 0; border-top: var(--dl-t) var(--dl-style) var(--dl-c); }
+	body.home .aw-ed-story.aw-camp--community-dogs .kit-dateline > :nth-child(odd):not(:last-child)::before { content: ""; }
+}
 @media (min-width: 1200px) { .aw-ed-story.aw-camp--community-dogs .aw-ed-story-cols { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: var(--kit-space-7); align-items: center; } }
 
 /* Figures: a 2 x 2 ledger, each with its icon (letters, citizens, cities, coordinators) */
