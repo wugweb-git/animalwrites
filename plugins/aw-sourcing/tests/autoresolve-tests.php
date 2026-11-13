@@ -72,3 +72,20 @@ aw_t( 'reject' === aw_ar_act( 'email', 'Info@A.org', 'info@a.org' ), 'email: the
 
 // ---- fields without a rule ----
 aw_t( 'leave' === aw_ar_act( 'founded', '1998', '1999' ), 'a field without a rule is left' );
+
+// ---- the rules as rows (add, edit, delete, reorder, switch off) ----
+$ar_rows = aw_ar_default_rules();
+aw_t( 25 === count( $ar_rows ) && 'address-pin_differs' === $ar_rows[1]['id'], 'rules: the built-in list has 25 rows with stable ids' );
+$ar_cond = aw_ar_conditions();
+$ar_bad  = array_filter( $ar_rows, fn( $r ) => ! isset( $ar_cond[ $r['cond'] ] ) || ! in_array( $r['field'], $ar_cond[ $r['cond'] ]['fields'], true ) || ! isset( AW_AR_ACTIONS[ $r['action'] ] ) );
+aw_t( ! $ar_bad, 'rules: every built-in row uses a condition that fits its field and a known action' );
+$ar_off = array_map( fn( $r ) => 'address-fuller' === $r['id'] ? array_merge( $r, array( 'on' => false ) ) : $r, $ar_rows );
+aw_t( 'leave' === aw_ar_decide( 'address', '305 Nandini Garden, Fort', 'No.305, Nandhini Garden, Fort, Thiruvananthapuram', 'medium', array(), $ar_off )['act'], 'rules: switching a rule off lets the value fall through to a person' );
+$ar_edit = array_map( fn( $r ) => 'phone-any' === $r['id'] ? array_merge( $r, array( 'action' => 'leave' ) ) : $r, $ar_rows );
+aw_t( 'leave' === aw_ar_decide( 'phone', '9880194757', '+91 90350 40694', 'low', array(), $ar_edit )['act'], 'rules: an edited rule changes the action' );
+$ar_none = array_values( array_filter( $ar_rows, fn( $r ) => 'phone' !== $r['field'] ) );
+aw_t( 'leave' === aw_ar_decide( 'phone', '9880194757', '+91 90350 40694', 'low', array(), $ar_none )['act'], 'rules: a deleted rule no longer applies' );
+$ar_new = array_merge( array( array( 'id' => 'email-any', 'field' => 'email', 'cond' => 'any', 'action' => 'reject', 'on' => true ) ), $ar_rows );
+aw_t( 'reject' === aw_ar_decide( 'email', 'info@a.org', 'office@b.org', 'medium', array(), $ar_new )['act'], 'rules: an added rule that comes first decides' );
+aw_t( 'leave' === aw_ar_decide( 'email', 'info@a.org', 'office@b.org', 'medium', array(), array_merge( $ar_rows, array( array( 'id' => 'x', 'field' => 'email', 'cond' => 'nonsense', 'action' => 'reject', 'on' => true ) ) ) )['act'], 'rules: a row with an unknown condition is ignored' );
+aw_t( 'approve' === aw_ar_decide( 'instagram', 'https://www.instagram.com/p', 'https://www.instagram.com/realpage', 'medium', array(), $ar_rows )['act'], 'rules: the social rules cover Instagram too' );

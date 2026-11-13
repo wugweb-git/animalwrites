@@ -4318,6 +4318,10 @@ const RULE_PARTS = [
 	{ value: 'sections', label: __( 'Section rules', 'aw-sourcing' ) },
 	{ value: 'summary', label: __( 'Summary rules', 'aw-sourcing' ) },
 	{ value: 'enrich', label: __( 'Directory enrichment', 'aw-sourcing' ) },
+	{
+		value: 'autoresolve',
+		label: __( 'Review-queue rules', 'aw-sourcing' ),
+	},
 ];
 
 /**
@@ -4331,7 +4335,13 @@ const answerMsg = ( r ) => ( {
 } );
 
 function Rules() {
-	const [ sub, go ] = useSub( [ 'part', 'edit', 'tagrule', 'field' ] );
+	const [ sub, go ] = useSub( [
+		'part',
+		'edit',
+		'tagrule',
+		'field',
+		'autorule',
+	] );
 	const [ msg, setMsg ] = useState( null );
 	const part = RULE_PARTS.some( ( p ) => p.value === sub.part )
 		? sub.part
@@ -4353,6 +4363,14 @@ function Rules() {
 	}
 	if ( sub.field ) {
 		return <FieldRuleForm field={ sub.field } onDone={ back } />;
+	}
+	if ( sub.autorule ) {
+		return (
+			<AutoRuleForm
+				id={ 'new' === sub.autorule ? '' : sub.autorule }
+				onDone={ back }
+			/>
+		);
 	}
 	const parts = (
 		<ChipRow
@@ -4377,6 +4395,7 @@ function Rules() {
 			{ 'sections' === part && <SectionRules go={ go } /> }
 			{ 'summary' === part && <SummaryRules /> }
 			{ 'enrich' === part && <EnrichRules go={ go } /> }
+			{ 'autoresolve' === part && <AutoRules go={ go } /> }
 		</>
 	);
 }
@@ -4888,6 +4907,334 @@ function TagRuleForm( { tag, onDone } ) {
 				value={ f.v.hold_reason }
 				onChange={ put( 'hold_reason' ) }
 				input={ { rows: 2 } }
+			/>
+		</SettingsGroup>
+	);
+}
+
+/**
+ * Review-queue rules: what happens to a waiting value for a field that already holds one (autoresolve.php). Add, edit,
+ * delete and reorder them; try them on the waiting values; switch them off.
+ *
+ * @param {Object}   props
+ * @param {Function} props.go Navigate in place.
+ */
+function AutoRules( { go } ) {
+	const { data, error, loading, load } = useRoute( 'rules/autoresolve' );
+	const [ msg, setMsg ] = useState( null );
+	const [ busy, setBusy ] = useState( false );
+	const post = ( to, body = {} ) => {
+		setBusy( true );
+		apiFetch( { path: path( to ), method: 'POST', data: body } )
+			.then( ( r ) => setMsg( answerMsg( r ) ) )
+			.catch( ( e ) => setMsg( { tone: 'error', text: errText( e ) } ) )
+			.finally( () => {
+				setBusy( false );
+				load();
+			} );
+	};
+	const del = ( r ) => {
+		if (
+			// eslint-disable-next-line no-alert -- a plain browser confirm, as today's screen
+			! window.confirm(
+				sprintf(
+					/* translators: 1: field, 2: condition. */
+					__(
+						'Delete the rule for %1$s: when %2$s? Waiting values it decided will wait for a person.',
+						'aw-sourcing'
+					),
+					r.field_label,
+					r.cond_label
+				)
+			)
+		) {
+			return;
+		}
+		post( 'rules/autoresolve/delete', { id: r.id } );
+	};
+	const reset = () => {
+		if (
+			// eslint-disable-next-line no-alert -- a plain browser confirm, as today's screen
+			! window.confirm(
+				__(
+					'Put the built-in rules back? Your added and edited rules are dropped (the Change log keeps them).',
+					'aw-sourcing'
+				)
+			)
+		) {
+			return;
+		}
+		post( 'rules/autoresolve/reset' );
+	};
+	const tryRules = () => {
+		setBusy( true );
+		apiFetch( {
+			path: path( 'enrichment/autoresolve' ),
+			method: 'POST',
+			data: { dry: true, limit: 1000 },
+		} )
+			.then( ( r ) =>
+				setMsg( {
+					tone: 'info',
+					text: sprintf(
+						/* translators: 1: rows looked at, 2: applied, 3: rejected, 4: left. */
+						__(
+							'Dry run on %1$d waiting values: %2$d would be applied, %3$d rejected, %4$d left for a person. Nothing was changed.',
+							'aw-sourcing'
+						),
+						r.rows,
+						r.approve,
+						r.reject,
+						r.leave
+					),
+				} )
+			)
+			.catch( ( e ) => setMsg( { tone: 'error', text: errText( e ) } ) )
+			.finally( () => setBusy( false ) );
+	};
+	const empty = () => {};
+	return (
+		<SectionCard
+			id="review-queue-rules"
+			title={ __( 'Review-queue rules', 'aw-sourcing' ) }
+			description={ __(
+				'What happens to a waiting value for a field that already holds one. A rule says: for this field, when this holds, do this. The rules are tried in order and the first one that holds decides; a value no rule decides waits for a person. Never on a claimed or verified listing, and an imported list always waits for a person.',
+				'aw-sourcing'
+			) }
+			actions={
+				<>
+					<a
+						className="kits-shell-button is-primary"
+						href={ subHref( {
+							part: 'autoresolve',
+							autorule: 'new',
+						} ) }
+						onClick={ inPlace( go, {
+							part: 'autoresolve',
+							autorule: 'new',
+						} ) }
+					>
+						{ __( 'Add New Rule', 'aw-sourcing' ) }
+					</a>{ ' ' }
+					<Button onClick={ tryRules } disabled={ busy }>
+						{ __( 'Try on waiting values', 'aw-sourcing' ) }
+					</Button>{ ' ' }
+					<Button onClick={ reset } disabled={ busy }>
+						{ __( 'Back to the built-in rules', 'aw-sourcing' ) }
+					</Button>
+				</>
+			}
+		>
+			{ msg && (
+				<Notice tone={ msg.tone } onDismiss={ () => setMsg( null ) }>
+					{ msg.text }
+				</Notice>
+			) }
+			{ data && (
+				<Switch
+					label={ __(
+						'The rules decide waiting values',
+						'aw-sourcing'
+					) }
+					help={ __(
+						'Off: every value waits for a person, as before the rules.',
+						'aw-sourcing'
+					) }
+					checked={ !! data.on }
+					onChange={ ( on ) =>
+						post( 'rules/autoresolve/switch', { on } )
+					}
+				/>
+			) }
+			<DataList
+				label={ __( 'Review-queue rules', 'aw-sourcing' ) }
+				columns={ [
+					{
+						key: 'field_label',
+						label: __( 'Field', 'aw-sourcing' ),
+						primary: true,
+						render: ( r ) => (
+							<a
+								href={ subHref( {
+									part: 'autoresolve',
+									autorule: r.id,
+								} ) }
+								onClick={ inPlace( go, {
+									part: 'autoresolve',
+									autorule: r.id,
+								} ) }
+							>
+								<strong>{ r.field_label }</strong>
+							</a>
+						),
+					},
+					{ key: 'cond_label', label: __( 'When', 'aw-sourcing' ) },
+					{
+						key: 'action_label',
+						label: __( 'Then', 'aw-sourcing' ),
+					},
+					{
+						key: 'on',
+						label: __( 'On', 'aw-sourcing' ),
+						render: ( r ) =>
+							r.on
+								? __( 'Yes', 'aw-sourcing' )
+								: __( 'No', 'aw-sourcing' ),
+					},
+				] }
+				rows={ data?.rows || [] }
+				total={ data?.rows?.length || 0 }
+				page={ 1 }
+				pages={ 1 }
+				onPage={ empty }
+				rowActions={ ( r ) => [
+					{
+						icon: 'edit',
+						label: __( 'Edit', 'aw-sourcing' ),
+						onClick: () =>
+							go( { part: 'autoresolve', autorule: r.id } ),
+					},
+					{
+						label: __( 'Move earlier', 'aw-sourcing' ),
+						onClick: () =>
+							post( 'rules/autoresolve/move', {
+								id: r.id,
+								dir: 'up',
+							} ),
+					},
+					{
+						label: __( 'Move later', 'aw-sourcing' ),
+						onClick: () =>
+							post( 'rules/autoresolve/move', {
+								id: r.id,
+								dir: 'down',
+							} ),
+					},
+					{
+						icon: 'delete',
+						label: __( 'Delete', 'aw-sourcing' ),
+						tone: 'error',
+						onClick: () => del( r ),
+					},
+				] }
+				loading={ loading }
+				error={ error }
+				onRetry={ load }
+				emptyTitle={ __(
+					'No rules: every waiting value waits for a person.',
+					'aw-sourcing'
+				) }
+			/>
+		</SectionCard>
+	);
+}
+
+/**
+ * Add a review-queue rule or edit one.
+ *
+ * @param {Object}   props
+ * @param {string}   props.id     Rule id, '' to add.
+ * @param {Function} props.onDone Back with a notice.
+ */
+function AutoRuleForm( { id, onDone } ) {
+	const f = useForm( 'rules/autoresolve', { id }, ( d ) =>
+		d.one
+			? {
+					field: d.one.field,
+					cond: d.one.cond,
+					action: d.one.action,
+					on: d.one.on,
+				}
+			: {
+					field: 'address',
+					cond: 'adds_nothing',
+					action: 'reject',
+					on: true,
+				}
+	);
+	if ( f.error ) {
+		return <ErrorState message={ f.error } onRetry={ f.load } />;
+	}
+	if ( ! f.data || ! f.v ) {
+		return (
+			<LoadingState label={ __( 'Loading the rule…', 'aw-sourcing' ) } />
+		);
+	}
+	const put = ( k ) => ( val ) => f.setV( { ...f.v, [ k ]: val } );
+	const conds = f.data.conditions.filter( ( c ) =>
+		c.fields.includes( f.v.field )
+	);
+	const setField = ( field ) => {
+		const ok = f.data.conditions.some(
+			( c ) => c.value === f.v.cond && c.fields.includes( field )
+		);
+		const first = f.data.conditions.find( ( c ) =>
+			c.fields.includes( field )
+		);
+		f.setV( {
+			...f.v,
+			field,
+			cond: ok ? f.v.cond : first?.value || '',
+		} );
+	};
+	return (
+		<SettingsGroup
+			id="auto-rule-form"
+			title={
+				id
+					? __( 'Edit review-queue rule', 'aw-sourcing' )
+					: __( 'Add New Rule', 'aw-sourcing' )
+			}
+			footer={
+				<FormButtons
+					label={
+						id
+							? __( 'Update', 'aw-sourcing' )
+							: __( 'Add New Rule', 'aw-sourcing' )
+					}
+					busy={ f.busy }
+					onSave={ () =>
+						f.send(
+							'rules/autoresolve/save',
+							{ ...f.v, original: id },
+							onDone
+						)
+					}
+					onDone={ onDone }
+				/>
+			}
+		>
+			{ f.msg && <Notice tone={ f.msg.tone }>{ f.msg.text }</Notice> }
+			<SelectField
+				label={ __( 'Field', 'aw-sourcing' ) }
+				help={ __(
+					'The field the waiting value is for. The social group covers Facebook, Instagram, X, LinkedIn and YouTube.',
+					'aw-sourcing'
+				) }
+				value={ f.v.field }
+				options={ f.data.fields }
+				onChange={ setField }
+			/>
+			<SelectField
+				label={ __( 'When', 'aw-sourcing' ) }
+				help={ __(
+					'Rules of a field are tried in order; the first one that holds decides.',
+					'aw-sourcing'
+				) }
+				value={ f.v.cond }
+				options={ conds }
+				onChange={ put( 'cond' ) }
+			/>
+			<SelectField
+				label={ __( 'Then', 'aw-sourcing' ) }
+				value={ f.v.action }
+				options={ f.data.actions }
+				onChange={ put( 'action' ) }
+			/>
+			<Switch
+				label={ __( 'On', 'aw-sourcing' ) }
+				checked={ !! f.v.on }
+				onChange={ put( 'on' ) }
 			/>
 		</SettingsGroup>
 	);
