@@ -365,6 +365,28 @@ Newsletter band above it on every page (`.aw-nl-band`, `#newsletter`): spaced as
 ### Other components
 PDF viewer (inline document + download + official source), helplines grid, data table, countdown and live counts, steps, ad placements (Advanced Ads block), details/FAQ (+ rotates to ×), pagination, search, print button. All use the same tokens and states.
 
+## Theme Options and the Site Editor
+Audit plan Phase 4.7 (14 Nov 2026). Kits Theme Options (`kits_theme_options`, Kits Core `includes/theme-options.php`, the app in `src/theme-options/`) keeps only what WordPress core cannot hold today. Nothing below moved: every stored value and the front end are as they were. The two screens now link to each other:
+- **Theme Options → Site Editor:** Header opens the header part itself (`site-editor.php?postType=wp_template_part&postId={theme}//header&canvas=edit`), Footer the footer part, Layout and spacing Styles and Templates; Socials links the footer part (its profile icons), Share bar the Templates list, each Content types box its own template (`single-{type}`, `single`, `page`, `404`). `kits_site_editor_path()` (admin-screens.php) builds the address, and falls back to the list when the theme has no such template or part.
+- **Site Editor → Theme Options:** while the header or footer part, or any template, is open, the document sidebar shows a "Kits Theme Options" panel (core `PluginDocumentSettingPanel`, no build step, `assets/js/site-editor-links.js`) linking to Theme Options → Header, Footer or Content types. Administrators only.
+
+| Option | Where it lives now | Can core hold it today? | Plan |
+|---|---|---|---|
+| Announcement bar (`announce`, on/off) | Theme Options → Header; the bar itself is the `.kit-announce` Group in the header part, which the switch leaves out | Yes: removing or adding the Group in the header part does the same | Keep the switch (one click, no part edit); retire it only on the owner's word |
+| Header stays at the top (`sticky_header`) | Theme Options → Header (body class `kits-header-static`) | Partly: core Group has Position → Sticky, but the header's sticky behaviour is the theme's CSS on the part | Keep |
+| Phone bar (`sticky_bar`, `sticky_href`, `sticky_label`) | Theme Options → Footer; printed in `wp_footer` (site-parts.php) | No: core has no bar fixed to the bottom and no phones-only display | Keep |
+| Share bar networks (`share_networks`, per post type) | Theme Options → Share bar; read by `aw_share_html()` | No: core has no share block (Social Icons links to profiles, it does not share a page) | Keep |
+| Site-wide sidebar, title, breadcrumbs (`kits_page_defaults._site`) | Theme Options → Layout and spacing | Partly: a template can hold the sidebar part and the Post Title block; there is no core Breadcrumbs block in the versions Kits supports | Keep; the layout of each template stays in the Site Editor |
+| Per type: sidebar, title, breadcrumbs (`kits_page_defaults[type]`) | Theme Options → Content types; Page Options per item (post meta) | Partly, as above, one template per type (`single-{type}`) | Keep |
+| Card padding and gap | Global Styles (user origin, `settings.custom.kits.card`), edited in Theme Options → Cards | Stored in core already; the Site Editor's Styles panel has no field for custom values | Keep: nothing to move |
+| Colours, fonts, type, buttons, widths, spacing | Styles (Site Editor) | Yes, already there | Linked from Theme Options |
+| Header and footer content, logo, menus | Header and footer parts, Navigation (Site Editor) | Yes, already there | Linked from Theme Options |
+| Socials (profile list) | Rank Math → Titles & Meta → Social Meta, shown read-only in Theme Options → Socials | No for the list (Rank Math's, read by schema); the footer's profile icons are hand-written HTML in the footer part, which the core Social Icons block could hold | Keep; Social Icons in the footer would change its markup, so only with the owner's word |
+| Contact links (Animal Writes "Elsewhere", option `aw_elsewhere`) | Theme Options → Socials → Contact links (Animal Writes Core) | Partly: a list on the Contact page could be core blocks, but the list is printed by code with its own marks | Keep |
+| Font preload (`font_preload`) | Kits → Settings | No: speed, not design | Keep |
+| Speed switches (`css_bundle`, `css_parts_cap`, `defer_scripts`, `jquery_footer`, `no_emoji`, `form_css_lazy`, `inter_dedupe`, `lcp_fix`) | Kits → Settings | No: speed, not design | Keep |
+| Old section classes (`legacy_group_styles`) | Kits → Settings | No: a content fix | Keep |
+
 ## Share pictures: one size
 
 Owner, 13 Nov 2026: every shareable picture is one size, so it is made once and reused on every network.

@@ -65,10 +65,10 @@ function sectionsOf() {
 			links: [
 				[
 					__(
-						'Edit what the header holds (logo, menu, buttons)',
+						'Edit the header in the Site Editor (logo, menu, buttons, announcement text)',
 						'kits-core'
 					),
-					data.links?.parts,
+					data.links?.header || data.links?.parts,
 				],
 				[ __( 'Edit menus', 'kits-core' ), data.links?.menus ],
 			],
@@ -83,8 +83,11 @@ function sectionsOf() {
 			],
 			links: [
 				[
-					__( 'Edit what the footer holds', 'kits-core' ),
-					data.links?.parts,
+					__(
+						'Edit the footer in the Site Editor (links, profile icons)',
+						'kits-core'
+					),
+					data.links?.footer || data.links?.parts,
 				],
 				[ __( 'Edit menus', 'kits-core' ), data.links?.menus ],
 			],
@@ -102,6 +105,10 @@ function sectionsOf() {
 				[
 					__( 'Widths and spacing in Styles', 'kits-core' ),
 					data.links?.styles,
+				],
+				[
+					__( 'Each kind of page’s layout in Templates', 'kits-core' ),
+					data.links?.templates,
 				],
 			],
 		},

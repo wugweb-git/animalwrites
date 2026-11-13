@@ -209,10 +209,13 @@ add_action(
 			'layoutInfo'   => array(
 				array( __( 'Breakpoints', 'kits-core' ), __( 'phones up to 767 px, tablets 768 to 1199 px, wide screens from 1200 px (fixed in the theme)', 'kits-core' ) ),
 			),
-			'links'        => array(
-				'parts'  => admin_url( 'site-editor.php?postType=wp_template_part' ),
-				'menus'  => admin_url( 'site-editor.php?postType=wp_navigation' ),
-				'styles' => admin_url( 'site-editor.php?path=/wp_global_styles' ),
+			'links'        => array( // The exact Site Editor place for each section (kits_site_editor_path(), admin-screens.php).
+				'parts'     => admin_url( 'site-editor.php?postType=wp_template_part' ),
+				'header'    => admin_url( kits_site_editor_path( 'wp_template_part', 'header' ) ),
+				'footer'    => admin_url( kits_site_editor_path( 'wp_template_part', 'footer' ) ),
+				'templates' => admin_url( 'site-editor.php?postType=wp_template' ),
+				'menus'     => admin_url( 'site-editor.php?postType=wp_navigation' ),
+				'styles'    => admin_url( 'site-editor.php?path=/wp_global_styles' ),
 			),
 			'legacy'       => $legacy,
 			'legacyInto'   => array(), // a built section can show today's fields of another below its own
@@ -275,3 +278,47 @@ function kits_admin_app_page(): void {
 	}
 	echo '</div></div>';
 }
+
+// The way back: in the Site Editor, the header and footer parts and the page templates link to their Theme Options
+// section (assets/js/site-editor-links.js: a document sidebar panel, core components, no build step).
+add_action(
+	'enqueue_block_editor_assets',
+	function () {
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		if ( ! $screen || 'site-editor' !== $screen->base || ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+		$to = fn( string $section ) => admin_url( 'admin.php?page=kits-options#' . $section );
+		wp_enqueue_script(
+			'kits-site-editor-links',
+			plugins_url( 'assets/js/site-editor-links.js', KITS_CORE_DIR . 'kits-core.php' ),
+			array( 'wp-plugins', 'wp-editor', 'wp-element', 'wp-data' ),
+			(string) filemtime( KITS_CORE_DIR . 'assets/js/site-editor-links.js' ),
+			true
+		);
+		wp_localize_script(
+			'kits-site-editor-links',
+			'kitsSiteEditorLinks',
+			array(
+				'title' => __( 'Kits Theme Options', 'kits-core' ),
+				'links' => array(
+					'header'    => array(
+						'text'  => __( 'The header’s switches (announcement bar, header stays at the top) are in', 'kits-core' ),
+						'label' => __( 'Kits → Theme Options → Header', 'kits-core' ),
+						'url'   => $to( 'header' ),
+					),
+					'footer'    => array(
+						'text'  => __( 'The phone bar at the foot of phone screens is set in', 'kits-core' ),
+						'label' => __( 'Kits → Theme Options → Footer', 'kits-core' ),
+						'url'   => $to( 'footer' ),
+					),
+					'templates' => array(
+						'text'  => __( 'Sidebar, title and breadcrumbs for each kind of page, and the share bar, are set in', 'kits-core' ),
+						'label' => __( 'Kits → Theme Options → Content types', 'kits-core' ),
+						'url'   => $to( 'content-types' ),
+					),
+				),
+			)
+		);
+	}
+);
