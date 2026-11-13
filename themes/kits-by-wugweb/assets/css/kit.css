@@ -548,22 +548,25 @@ ins.adsbygoogle:not([data-ad-status="filled"]) { height: 0 !important; min-heigh
 .rank-math-answer[hidden] { display: none; }
 @media (prefers-reduced-motion: reduce) { .rank-math-question > button::after { transition: none; } }
 
-/* FAQ accordion (kit-faq): the section head (kit-sec-head: H2 "Questions about <subject>", an optional per-page subtitle, a ghost "Animal welfare FAQ" link),
-   then each question an H3 holding a button (aria-expanded) that opens its answer. Answers are in the HTML; kit.js
-   closes them after load, so without JavaScript every answer shows. Rows like Details. .kit-faq-head: the older head. */
+/* FAQ (kit-faq), on nearly every page: the section head (kit-sec-head: H2 "Questions about <subject>", an optional
+   per-page subtitle, a ghost "Animal welfare FAQ" link), then each question and its answer in its own card, every answer
+   shown (no folds sitewide; kit.js unwraps the server's question button, which the FAQ schema reads). Cards: flat raised
+   white with the line border (reads on the white and the grey sections), card radius, 24px padding, 8px from question to
+   answer; no numbers (the questions are not steps) and no shadow or hover (the card is not a link). Answers at body size.
+   Phone first: one column with the grid gap; from 768 two columns, so the section stays within the 720px section height
+   (design-system.md, Layout rules 5). .kit-faq-head: the older head. */
 .kit-faq-head { font-size: var(--kit-type-h4); font-weight: var(--kit-weight-strong); line-height: var(--kit-leading-heading); margin: 0 0 var(--kit-space-3); }
-.kit-faq > .kit-sec-head { row-gap: var(--kit-space-4); margin-bottom: var(--kit-space-head); }
-.kit-faq > .kit-sec-head p { margin-top: var(--kit-space-4); }
-.kit-faq-item { border-bottom: var(--kit-border-width) solid var(--kit-color-line); }
-.kit-faq-q { margin: 0; font-size: var(--kit-type-h3); line-height: var(--kit-leading-heading); } /* the theme H3 (Layout rules 9) */
-.kit-faq-btn { all: unset; box-sizing: border-box; width: 100%; display: flex; justify-content: space-between; align-items: center; gap: var(--kit-space-4); min-height: var(--kit-size-target); padding-block: var(--kit-space-3); cursor: pointer; font-weight: var(--kit-weight-strong); }
-.kit-faq-btn::after { content: "+"; flex: none; font-size: 1.4em; line-height: 1; transition: transform var(--kit-motion-base) var(--kit-motion-ease); }
-.kit-faq-btn[aria-expanded="true"]::after { transform: rotate(45deg); }
+.kit-faq { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-grid); }
+.kit-faq > .kit-sec-head { grid-column: 1 / -1; row-gap: var(--kit-space-4); margin-bottom: 0; } /* the grid gap (16 / 24 / 32) is the head space */
+.kit-faq-item { display: flex; flex-direction: column; gap: var(--kit-space-2); padding: var(--kit-space-5); background: var(--kit-color-raised); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); }
+.kit-faq-q { margin: 0; font-size: var(--kit-type-h4); font-weight: var(--kit-weight-strong); line-height: var(--kit-leading-heading); color: var(--kit-color-ink); }
+.kit-faq-btn { all: unset; box-sizing: border-box; width: 100%; display: flex; justify-content: space-between; align-items: center; gap: var(--kit-space-4); cursor: default; font-weight: var(--kit-weight-strong); } /* before kit.js unwraps it */
 .kit-faq-btn:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
-.kit-faq-a { padding-bottom: var(--kit-space-4); }
-.kit-faq-a > p { margin: 0; }
-.kit-faq-a[hidden] { display: none; }
-@media (prefers-reduced-motion: reduce) { .kit-faq-btn::after { transition: none; } }
+.kit-faq-a > p { margin: 0; max-width: var(--kit-measure); line-height: var(--kit-leading-body); color: var(--kit-color-text); }
+.kit-faq-a > p + p { margin-top: var(--kit-space-3); }
+@media (min-width: 768px) {
+	.kit-faq { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
 
 /* Note (block style "Note" on core/paragraph): a small, muted line set apart above it, e.g. "general information, not advice". */
 .is-style-kits-note { margin-top: var(--kit-space-6); padding-top: var(--kit-space-4); border-top: var(--kit-border-width) solid var(--kit-color-line); font-size: var(--kit-type-sm); color: var(--kit-color-muted); }

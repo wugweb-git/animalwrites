@@ -237,3 +237,9 @@
 	.aw-ed-law .aw-news-list.aw-news-mosaic { grid-template-rows: 1fr 1fr; }
 	.aw-ed-law .aw-news-mosaic .kit-card--stacked-md > .kit-card-media { width: 10rem !important; max-width: 40%; }
 }
+/* Home FAQ (aw-ed-faq): the full 1200 column, so from 1200 the open questions sit in three columns with the 16px grid gap
+   and the section keeps within the 720px section height (design-system.md, Layout rules 5); kit.css gives one column on
+   phones, two from 768. */
+@media (min-width: 1200px) {
+	.aw-ed-faq .kit-faq { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--kit-space-4); }
+}
