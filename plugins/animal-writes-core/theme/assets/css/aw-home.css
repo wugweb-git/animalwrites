@@ -99,16 +99,19 @@
 /* The Animal Writes card when it fills its own row (three cards, from 768; owner, 14 Nov 2026: "pending. use all skills to
    make it"). Not the medium card stretched across the row: the words take the left column on brand ink and the
    photograph the right column, each lined up with the card above it (the grid's own columns and --kit-space-grid gap);
-   the title at the top, the button at the foot as in the cards above, padded --kit-space-5 like them. The photograph's
-   duotone shadow is the ink, so the two halves meet without a seam. Phones and the two-card row keep the medium card. */
+   padded --kit-space-5 like them. The words and the button are one group in the middle of the panel, the title at the
+   hero size (--kit-type-h1, display weight) and the line at the lead size, so the panel has no empty middle (owner,
+   14 Nov 2026: "pending"). The photograph's duotone shadow is the ink, so the two halves meet without a seam. Phones and the two-card row keep the medium card. */
 @media (min-width: 768px) {
 	.aw-pair-grid > .wp-block-cover.aw-default-card:last-child:nth-child(odd):not(:only-child) { background-color: var(--kit-color-ink); }
 	.aw-pair-grid > .wp-block-cover.aw-default-card:last-child:nth-child(odd):not(:only-child) > .wp-block-cover__image-background { inset: 0 0 0 auto; width: calc(50% - var(--kit-space-grid) / 2) !important; }
 	.aw-pair-grid > .wp-block-cover.aw-default-card:last-child:nth-child(odd):not(:only-child).has-custom-content-position.is-position-top-left > .wp-block-cover__inner-container {
 		display: flex; flex-direction: column; align-self: stretch; width: calc(50% + var(--kit-space-5) - var(--kit-space-grid) / 2);
-		margin: calc(-1 * var(--kit-space-5)) 0 calc(-1 * var(--kit-space-5)) calc(-1 * var(--kit-space-5)); padding: var(--kit-space-5); background: none;
+		margin: calc(-1 * var(--kit-space-5)) 0 calc(-1 * var(--kit-space-5)) calc(-1 * var(--kit-space-5)); padding: var(--kit-space-5); background: none; justify-content: center;
 	}
-	.aw-pair-grid > .wp-block-cover.aw-default-card:last-child:nth-child(odd):not(:only-child) .wp-block-buttons { margin-top: auto !important; }
+	.aw-pair-grid > .wp-block-cover.aw-default-card:last-child:nth-child(odd):not(:only-child) h2 { font-size: var(--kit-type-h1); font-weight: var(--kit-weight-display); line-height: var(--kit-leading-display); letter-spacing: var(--kit-tracking-display); }
+	.aw-pair-grid > .wp-block-cover.aw-default-card:last-child:nth-child(odd):not(:only-child) p { font-size: var(--kit-type-lead); }
+	.aw-pair-grid > .wp-block-cover.aw-default-card:last-child:nth-child(odd):not(:only-child) .wp-block-buttons { margin-top: var(--kit-space-5) !important; }
 }
 .home .kit-sec-head { row-gap: var(--kit-space-4); margin-bottom: var(--kit-space-head); }
 .home .kit-sec-head p { margin-top: var(--kit-space-4); }
