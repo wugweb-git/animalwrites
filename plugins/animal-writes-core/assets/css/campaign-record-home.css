@@ -41,17 +41,11 @@ body.home .aw-ed-story.aw-camp--community-dogs .aw-ed-story-stamp img { display:
 .aw-ed-story.aw-camp--community-dogs .aw-ed-story-num { font-weight: 800; letter-spacing: -0.04em; line-height: 1.1; white-space: nowrap; font-size: clamp(1.625rem, 1.3rem + 0.9vw, 2rem) !important; }
 .aw-ed-story.aw-camp--community-dogs .aw-ed-story-figures .has-small-font-size { margin-top: var(--kit-space-1) !important; color: rgba(255, 255, 255, 0.8); }
 @media (min-width: 768px) { .aw-ed-story.aw-camp--community-dogs .aw-ed-story-figures { grid-template-columns: repeat(4, minmax(0px, 1fr)); } }
-.aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates:not(.kit-dateline) { display: grid; grid-template-columns: repeat(2, minmax(0px, 1fr)); row-gap: var(--kit-space-4); }
-.aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates:not(.kit-dateline) > * { position: relative; margin: 0 !important; padding: var(--kit-space-3) var(--kit-space-3) 0 0; border-top: var(--kit-border-width) solid var(--dg-line); }
-.aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates:not(.kit-dateline) > *::before { content: ""; position: absolute; left: 0; top: calc(var(--kit-space-3) / -2); width: var(--kit-space-3); height: var(--kit-space-3); box-sizing: border-box; border-radius: 50%; border: var(--kit-border-mark) solid var(--camp-primary); background: var(--kit-color-ink); }
-.aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates:not(.kit-dateline) > .is-key::before { background: var(--camp-primary); }
-.aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates:not(.kit-dateline) > :has(> .aw-ed-story-when > .kit-datecard)::before { content: none; } /* the date card (home.php) marks the step, so no dot on the line */
 .aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates p { margin: 0px !important; }
 .aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates p:first-child { white-space: nowrap; }
 .aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates .has-small-font-size { margin-top: var(--kit-space-1) !important; color: rgba(255, 255, 255, 0.8); }
 .aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates .is-key p:first-child { color: var(--camp-primary); }
 @media (max-width: 767px) { .aw-ed-story.aw-camp--community-dogs .aw-ed-story-cols { gap: var(--kit-space-5); } }
-@media (min-width: 768px) { .aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates:not(.kit-dateline) { grid-template-columns: repeat(4, minmax(0px, 1fr)); } }
 .aw-ed-story.aw-camp--community-dogs .aw-ed-story-photos { display: grid; grid-template-columns: repeat(4, minmax(0px, 1fr)); gap: var(--kit-space-2); }
 .aw-ed-story.aw-camp--community-dogs .aw-ed-story-photo { aspect-ratio: 1 / 1; overflow: hidden; border-radius: var(--kit-radius-media); margin: 0px !important; }
 .aw-ed-story.aw-camp--community-dogs .aw-ed-story-photo img { display: block; width: 100%; object-fit: cover; height: 100% !important; }

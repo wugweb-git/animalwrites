@@ -1156,130 +1156,121 @@ add_filter(
 );
 
 /**
- * The "What's happening" timeline (ol.aw-camp-dates) knows which dates have passed (owner, 13 Nov 2026): each item whose
- * date ("30 Sep 2026") is before today gets is-done, the first one still to come gets is-next; aw-camp-marks.css draws
- * the nodes from them. Items whose date can't be read keep their classes. No text changes.
+ * A list item's own settings for the timeline (kits_timeline): its classes minus the old state classes, an editorial
+ * state (data-state="past|present|ongoing|future", or the li's is-now / aria-current for the current step), a range's
+ * last day (data-end="Y-m-d") and its other attributes, kept as they are.
  *
- * @param string $html The rendered content.
- * @return string
+ * @param string $attrs The li's attributes as HTML.
+ * @return array Milestone fields: class, key, state, current, end, attrs.
  */
-function aw_camp_dates_state( $html ) {
-	if ( false === strpos( $html, 'aw-camp-dates' ) ) {
-		return $html;
-	}
-	$today = current_time( 'Y-m-d' );
-	return (string) preg_replace_callback(
-		'#(<ol\b[^>]*class="[^"]*\baw-camp-dates\b[^"]*"[^>]*>)(.*?)(</ol>)#s',
-		function ( $list ) use ( $today ) {
-			$next = false;
-			$body = preg_replace_callback(
-				'#<li\b([^>]*)>(.*?)</li>#s',
-				function ( $li ) use ( $today, &$next ) {
-					// The date: the <time datetime> inside the item's date (aw_date), else the date's own words.
-					if ( preg_match( '#<time\b[^>]*\bdatetime="([0-9]{4}-[0-9]{2}-[0-9]{2})#', $li[2], $when ) ) {
-						$time = strtotime( $when[1] );
-					} elseif ( preg_match( '#class="[^"]*\baw-camp-dates-when\b[^"]*"[^>]*>(.*?)</span>\s*<span[^>]*\baw-camp-dates-what\b#s', $li[2], $when ) ) {
-						$time = strtotime( trim( wp_strip_all_tags( html_entity_decode( $when[1], ENT_QUOTES ) ) ) );
-					} else {
-						return $li[0];
-					}
-					if ( false === $time ) {
-						return $li[0];
-					}
-					$add = gmdate( 'Y-m-d', $time ) < $today ? 'is-done' : '';
-					if ( '' === $add && ! $next ) {
-						$add  = 'is-next';
-						$next = true;
-					}
-					if ( '' === $add ) {
-						$add = 'is-upcoming'; // after the next one: still to come (the date card draws it as a blank page)
-					}
-					$attrs = preg_match( '#\bclass="#', $li[1] ) ? preg_replace( '#\bclass="#', 'class="' . $add . ' ', $li[1], 1 ) : $li[1] . ' class="' . $add . '"';
-					return '<li' . $attrs . '>' . $li[2] . '</li>';
-				},
-				$list[2]
-			);
-			return $list[1] . $body . $list[3];
-		},
-		$html
+function aw_timeline_li_fields( $attrs ) {
+	$attrs = (string) $attrs;
+	$class = preg_match( '#\bclass="([^"]*)"#', $attrs, $c ) ? $c[1] : '';
+	$names = preg_split( '/\s+/', trim( $class ) );
+	$m     = array(
+		'key'     => in_array( 'is-key', $names, true ),
+		'current' => in_array( 'is-now', $names, true ) || false !== strpos( $attrs, 'aria-current=' ),
+		'state'   => preg_match( '#\bdata-state="([a-z]+)"#', $attrs, $s ) ? $s[1] : '',
+		'end'     => preg_match( '#\bdata-end="(\d{4}-\d{2}-\d{2})"#', $attrs, $e ) ? $e[1] : '',
+		'class'   => implode( ' ', array_diff( array_filter( $names ), array( 'is-key', 'is-now', 'is-done', 'is-next', 'is-upcoming' ) ) ),
 	);
+	$m['attrs'] = trim( (string) preg_replace( '#\s*\b(?:class|data-state|data-end|aria-current)="[^"]*"#', '', $attrs ) );
+	return $m;
 }
-add_filter( 'the_content', fn( $html ) => is_singular( 'aw_campaign' ) ? aw_camp_dates_state( $html ) : $html, 98 );
 
 /**
- * Timeline dates as date cards (owner, 13 Nov 2026: highlighted dates get the calendar date card, sitewide). Every
- * span.aw-camp-dates-when that holds one dated aw-date (with <time datetime="Y-m-d">) gets kits_datecard() in its place,
- * on any page; the li states (is-done, is-key, is-next) are set first (priority 98). The words of the item stay.
+ * The "What's happening" timelines (ol.aw-camp-dates, any page: the Supreme Court page, Community dogs) as the one
+ * timeline calendar (owner, 13 Nov 2026): each item's date (<time datetime> inside its .aw-camp-dates-when, else the
+ * date's own words) becomes its calendar page, its state comes from the date (kits_milestone_state, Asia/Kolkata) or
+ * the item's data-state, and its words (.aw-camp-dates-what) stay as written. An item whose date can't be read is a
+ * "No date set" step with its own words. Replaces aw_camp_dates_state() and aw_datecards().
  *
  * @param string $html The rendered content.
  * @return string
  */
-function aw_datecards( $html ) {
-	if ( ! function_exists( 'kits_datecard' ) || false === strpos( (string) $html, 'aw-camp-dates-when' ) ) {
-		return $html;
+function aw_camp_dates_timeline( $html ) {
+	if ( ! function_exists( 'kits_timeline' ) || false === strpos( (string) $html, 'aw-camp-dates' ) ) {
+		return (string) $html;
 	}
 	$html = (string) preg_replace_callback(
-		'#(<span class="aw-camp-dates-when">)\s*<span class="(?:kit-date )?aw-date">\s*(?:<span class="kit-ico[^"]*" aria-hidden="true"></span>)?\s*<time datetime="(\d{4}-\d{2}-\d{2})"[^>]*>[^<]*</time>\s*</span>#',
-		function ( $m ) {
-			$card = kits_datecard( $m[2] );
-			return $card ? $m[1] . $card : $m[0];
+		'#<ol\b[^>]*\bclass="([^"]*\baw-camp-dates\b[^"]*)"[^>]*>(.*?)</ol>#s',
+		function ( $ol ) {
+			if ( ! preg_match_all( '#<li\b([^>]*)>(.*?)</li>#s', $ol[2], $lis, PREG_SET_ORDER ) ) {
+				return $ol[0];
+			}
+			$items = array();
+			foreach ( $lis as $li ) {
+				$m    = aw_timeline_li_fields( $li[1] );
+				$when = preg_match( '#<span class="aw-camp-dates-when">(.*?)</span>\s*(?=<span class="aw-camp-dates-what")#s', $li[2], $w ) ? $w[1] : '';
+				$what = preg_match( '#<span class="aw-camp-dates-what">(.*)</span>\s*$#s', $li[2], $t ) ? $t[1] : trim( (string) preg_replace( '#<span class="aw-camp-dates-when">.*?</span>\s*(?=<span class="aw-camp-dates-what")#s', '', $li[2] ) );
+				if ( preg_match( '#\bdatetime="(\d{4}-\d{2}(?:-\d{2})?)#', $when, $d ) ) {
+					$m['date'] = $d[1];
+				} else {
+					$words = trim( wp_strip_all_tags( html_entity_decode( $when, ENT_QUOTES ) ) );
+					$ts    = '' !== $words ? strtotime( $words . ' 12:00' ) : false;
+					if ( $ts ) {
+						$m['date'] = gmdate( 'Y-m-d', $ts );
+					} else {
+						$m['word'] = $words;
+					}
+				}
+				$m['html'] = $what;
+				$items[]   = $m;
+			}
+			$cls = trim( (string) preg_replace( '#\s*\bkit-dateline(?:--\w+)?\b#', '', $ol[1] ) );
+			return kits_timeline( $items, array( 'class' => $cls, 'when_class' => 'aw-camp-dates-when', 'what_class' => 'aw-camp-dates-what' ) );
 		},
 		(string) $html
 	);
-	// A list whose dates are cards is a date line (kit-primitives.css): the card is each step's one mark.
+	// A date on its own (outside a list: the Diwali hero's festival date) gets the calendar page too, in its state.
 	return (string) preg_replace_callback(
-		'#<ol\b([^>]*\bclass=")([^"]*\baw-camp-dates\b[^"]*)"([^>]*>)(.*?</ol>)#s',
-		fn( $m ) => false === strpos( $m[4], 'kit-datecard' ) || false !== strpos( $m[2], 'kit-dateline' ) ? $m[0] : '<ol' . $m[1] . $m[2] . ' kit-dateline"' . $m[3] . $m[4],
+		'#(<span class="aw-camp-dates-when">)\s*<span class="(?:kit-date )?aw-date">\s*(?:<span class="kit-ico[^"]*" aria-hidden="true"></span>)?\s*<time datetime="(\d{4}-\d{2}-\d{2})"[^>]*>[^<]*</time>\s*</span>#',
+		function ( $m ) {
+			$card = kits_datecard( $m[2], '', kits_milestone_state( array( 'date' => $m[2] ) ) );
+			return $card ? $m[1] . $card : $m[0];
+		},
 		$html
 	);
 }
-add_filter( 'the_content', 'aw_datecards', 99 );
+add_filter( 'the_content', 'aw_camp_dates_timeline', 99 );
 
 /**
- * A step list written as <li><strong>date or word</strong> words</li> (the Lab page's "where things stand", the Home
- * hero's steps) as a date line (owner, 13 Nov 2026: "if we use calendar illustration let us use it across and in correct
- * size and states"): each step's date becomes the date card, a step with no date ("Now", "No date set") the same card
- * with its word, and each step its state: is-done (the date has passed), is-next (the current step: aria-current or
- * is-now, else the first still to come), is-upcoming (the rest). The words of each step stay as written.
+ * A step list written as <li><strong>date or word</strong> words</li> (the Lab page's "where things stand") as the one
+ * timeline calendar (owner, 13 Nov 2026): a dated step gets its calendar page, a step with no date ("Now", "No date
+ * set") the blank page with its word above its words; the current step (aria-current or is-now) is present. The words
+ * of each step stay as written.
  *
  * @param string $html    HTML holding the list.
- * @param string $list    The list's class (aw-camp-wait-steps, aw-ed-hero-steps).
- * @param string $variant '' (64px cards, campaign pages) or 'sm' (48px, Home bands).
+ * @param string $list    The list's class (aw-camp-wait-steps).
+ * @param string $variant Kept for older callers (one size everywhere).
  * @return string
  */
 function aw_steps_dateline( $html, $list, $variant = '' ) {
-	if ( ! function_exists( 'kits_datecard_word' ) || false === strpos( (string) $html, $list ) ) {
+	unset( $variant );
+	if ( ! function_exists( 'kits_timeline' ) || false === strpos( (string) $html, $list ) ) {
 		return (string) $html;
 	}
-	$today = current_time( 'Y-m-d' );
 	return (string) preg_replace_callback(
 		'#<ol class="(' . preg_quote( $list, '#' ) . ')">(.*?)</ol>#s',
-		function ( $ol ) use ( $today, $variant ) {
-			$next = false;
-			$body = preg_replace_callback(
-				'#<li\b([^>]*)>\s*<strong>(.*?)</strong>\s*(.*?)</li>#s',
-				function ( $li ) use ( $today, $variant, &$next ) {
-					$word = trim( wp_strip_all_tags( $li[2] ) );
-					$iso  = preg_match( '#datetime="(\d{4}-\d{2}-\d{2})#', $li[2], $d ) ? $d[1] : '';
-					if ( '' === $iso && preg_match( '#^\d{1,2} [A-Z][a-z]{2,8} \d{4}$#', $word ) ) {
-						$iso = (string) wp_date( 'Y-m-d', (int) strtotime( $word . ' 12:00' ) );
-					}
-					$now = (bool) preg_match( '#aria-current=|\bis-now\b#', $li[1] );
-					if ( '' !== $iso && $iso < $today ) {
-						$state = 'is-done';
-					} elseif ( ( $now || '' !== $iso ) && ! $next ) {
-						$state = 'is-next';
-						$next  = true;
-					} else {
-						$state = 'is-upcoming';
-					}
-					$card  = '' !== $iso ? kits_datecard( $iso, $variant ) : kits_datecard_word( $word, $variant );
-					$attrs = trim( (string) preg_replace( '#\s*class="[^"]*"#', '', $li[1] ) );
-					return '<li class="' . $state . '"' . ( '' !== $attrs ? ' ' . $attrs : '' ) . '><span class="kit-dateline-when">' . $card . '</span> <span class="kit-dateline-what">' . trim( $li[3] ) . '</span></li>';
-				},
-				$ol[2]
-			);
-			return '<ol class="' . $ol[1] . ' kit-dateline' . ( $variant ? ' kit-dateline--' . $variant : '' ) . '">' . $body . '</ol>';
+		function ( $ol ) {
+			if ( ! preg_match_all( '#<li\b([^>]*)>\s*<strong>(.*?)</strong>\s*(.*?)</li>#s', $ol[2], $lis, PREG_SET_ORDER ) ) {
+				return $ol[0];
+			}
+			$items = array();
+			foreach ( $lis as $li ) {
+				$m    = aw_timeline_li_fields( $li[1] );
+				$word = trim( wp_strip_all_tags( $li[2] ) );
+				if ( preg_match( '#datetime="(\d{4}-\d{2}-\d{2})#', $li[2], $d ) ) {
+					$m['date'] = $d[1];
+				} elseif ( preg_match( '#^\d{1,2} [A-Z][a-z]{2,8} \d{4}$#', $word ) && strtotime( $word . ' 12:00' ) ) {
+					$m['date'] = gmdate( 'Y-m-d', (int) strtotime( $word . ' 12:00' ) );
+				} else {
+					$m['word'] = $word;
+				}
+				$m['html'] = trim( $li[3] );
+				$items[]   = $m;
+			}
+			return kits_timeline( $items, array( 'class' => $ol[1] ) );
 		},
 		(string) $html
 	);

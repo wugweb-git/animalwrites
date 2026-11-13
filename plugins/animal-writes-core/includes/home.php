@@ -120,13 +120,14 @@ function aw_block_home_hero() {
 		$out .= '<p class="aw-camp-band-pill aw-ed-hero-chip">Decision awaited · letters still going in</p>';
 		$out .= '<h1 id="aw-hero-t" class="aw-camp-band-title">Labs could soon approve their own animal experiments.</h1>';
 		$out .= '<p class="aw-ed-hero-keyline">Draft lab animal rules 2026, G.S.R. 864(E), often called the animal testing bill</p>';
-		$out .= '<ol class="aw-ed-hero-steps">'
-			. '<li class="is-done"><strong>6 Oct 2026</strong> Draft published in the Gazette</li>'
-			. '<li class="is-done"><strong>5 Nov 2026</strong> Objection window closed</li>'
-			. '<li class="is-now" aria-current="step"><strong>Now</strong> The Centre considers the objections</li>'
-			. '<li><strong>No date set</strong> Final rules in the Gazette</li>'
-			. '</ol>';
-		$out  = function_exists( 'aw_steps_dateline' ) ? aw_steps_dateline( $out, 'aw-ed-hero-steps', 'sm' ) : $out; // the steps as a date line, small cards (campaign-tools.php)
+		// The steps as milestones on the one timeline calendar (kits_timeline, kits-core): states from the dates.
+		$steps = array(
+			array( 'date' => '2026-10-06', 'html' => 'Draft published in the Gazette' ),
+			array( 'date' => '2026-11-05', 'html' => 'Objection window closed' ),
+			array( 'current' => true, 'word' => 'Now', 'html' => 'The Centre considers the objections' ),
+			array( 'word' => 'No date set', 'html' => 'Final rules in the Gazette' ),
+		);
+		$out  .= function_exists( 'kits_timeline' ) ? kits_timeline( $steps, array( 'class' => 'aw-ed-hero-steps' ) ) : '';
 	} else {
 		$out .= '<p class="aw-camp-band-pill">Draft rules G.S.R. 864(E) · objections closed 5 Nov 2026</p>';
 		$out .= '<h1 id="aw-hero-t" class="aw-camp-band-title">Object to the draft lab animal rules</h1>';
@@ -414,34 +415,28 @@ add_filter(
 	2
 );
 
-// The story band's timeline (aw-ed-story-dates): each dated step shows its date as the calendar date card (kits_datecard,
-// small), like the campaign page timelines (owner, 13 Nov 2026: highlighted dates get the date card, sitewide), and the
-// steps are a date line (kit-dateline): a passed date is-done, the first still to come is-next, the rest is-upcoming;
-// is-key stays from the pattern. The words of each step stay.
+// The story band's timeline (aw-ed-story-dates): the one timeline calendar (owner, 13 Nov 2026). Each dated step
+// (its first paragraph, <strong>1 Nov 2025</strong>) shows its calendar page in its state (kits_milestone_state,
+// Asia/Kolkata, or the step's data-state); is-key stays from the pattern. The words of each step stay.
 add_filter(
 	'render_block_core/group',
 	function ( $html, $block ) {
 		if ( ! function_exists( 'kits_datecard' ) || ! in_array( 'aw-ed-story-dates', preg_split( '/\s+/', (string) ( $block['attrs']['className'] ?? '' ) ), true ) ) {
 			return $html;
 		}
-		$today = current_time( 'Y-m-d' );
-		$next  = false;
-		$html  = (string) preg_replace( '#class="wp-block-group aw-ed-story-dates\b#', 'class="wp-block-group aw-ed-story-dates kit-dateline kit-dateline--sm', (string) $html, 1 ); // a date line (kit-primitives.css), small cards
+		$today = kits_timeline_today();
+		$html  = (string) preg_replace( '#class="wp-block-group aw-ed-story-dates\b#', 'class="wp-block-group aw-ed-story-dates kit-dateline', (string) $html, 1 ); // a timeline (kit-primitives.css)
 		return (string) preg_replace_callback(
-			'#<div class="wp-block-group((?: [^"]*)?)">(\s*)<p(?: class="[^"]*")?>\s*<strong>(.*?)</strong>\s*</p>#s',
-			function ( $m ) use ( $today, &$next ) {
-				$ts = strtotime( trim( wp_strip_all_tags( $m[3] ) ) . ' 12:00' );
+			'#<div class="wp-block-group((?: [^"]*)?)"([^>]*)>(\s*)<p(?: class="[^"]*")?>\s*<strong>(.*?)</strong>\s*</p>#s',
+			function ( $m ) use ( $today ) {
+				$ts = strtotime( trim( wp_strip_all_tags( $m[4] ) ) . ' 12:00' );
 				if ( ! $ts ) {
 					return $m[0];
 				}
-				$iso  = gmdate( 'Y-m-d', $ts );
-				$card = kits_datecard( $iso, 'sm' );
-				if ( ! $card ) {
-					return $m[0];
-				}
-				$cls = $m[1] . ( $iso < $today ? ' is-done' : ( $next ? ' is-upcoming' : ' is-next' ) );
-				$next = $next || $iso >= $today;
-				return '<div class="wp-block-group' . $cls . '">' . $m[2] . '<p class="aw-ed-story-when">' . $card . '</p>';
+				$ms    = array_merge( aw_timeline_li_fields( 'class="' . trim( $m[1] ) . '"' . $m[2] ), array( 'date' => gmdate( 'Y-m-d', $ts ) ) );
+				$state = kits_milestone_state( $ms, $today );
+				$card  = kits_datecard( $ms, '', $state );
+				return $card ? '<div class="wp-block-group' . $m[1] . '" data-state="' . esc_attr( $state ) . '"' . ( in_array( $state, array( 'present', 'ongoing' ), true ) ? ' aria-current="step"' : '' ) . (string) preg_replace( '#\s*\bdata-state="[^"]*"#', '', $m[2] ) . '>' . $m[3] . '<p class="aw-ed-story-when">' . $card . '</p>' : $m[0];
 			},
 			(string) $html
 		);

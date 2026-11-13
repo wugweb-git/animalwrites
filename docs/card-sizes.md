@@ -7,6 +7,7 @@ Limits every list card keeps, set in `themes/animal-writes/assets/css/aw.css` (c
 | Card, minimum width | 18rem (288px, fits a 320px screen) | `--kit-card-min` |
 | Card width | none: a card fills its grid cell; the grid (columns, gap) sets the width | n/a |
 | Stacked picture | 4.5rem to 15rem (72 to 240px); wide stacked cards 30% of the card inside those limits | `--kit-thumb-min`, `--kit-thumb-max` |
+| Media coverage picture (campaign pages, one card a row) | 4:3; a share of the card held between 105 and 120px on phones, 180 and 200px from 768, 220 and 240px from 1200 (owner, 13 Nov 2026) | `--aw-press-media` (campaign.css), `--kit-media-ratio-standard` |
 | Block card picture (picture above text), maximum height | 22.5rem (360px) | `--kit-card-media-max` |
 | Text column in a stacked card, minimum width | 10rem (160px) | `--kit-body-min` |
 

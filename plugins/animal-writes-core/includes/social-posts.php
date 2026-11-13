@@ -968,9 +968,12 @@ function aw_social_for_item( int $id ): array {
 }
 
 /**
- * One card: the Kits card (kit-card--block-md, no picture) in the More list: date first, then platform and handle;
- * the person as the title (a link to the post); our summary. X and YouTube posts show open under it (no folds
- * sitewide): the post loads when the card comes near the screen, nothing from the platform before that.
+ * One card: the Kits card (kit-card--block-md, no picture) in the More list: date first, then platform and handle on
+ * one line (a long handle ends in "…"); the person as the title (a link to the post); our summary. YouTube posts show
+ * open under it (no folds sitewide), the player loading when the card comes near the screen. Every other platform
+ * gets a 44px "View on {platform}" button to the post in a new tab, never an embed (owner, 13 Nov 2026): X's
+ * widgets.js drew nothing for logged-out or tracking-protected readers and left the bare link running out of the card.
+ * "Other" posts get no button (owner, 13 Nov 2026); the title link still opens the post.
  *
  * @param WP_Post $p Social post.
  */
@@ -985,12 +988,16 @@ function aw_social_card( WP_Post $p ): string {
 	$name     = '' !== $person ? $person : ( '' !== $handle ? $handle : ( AW_SOCIAL_PLATFORMS[ $platform ] ?? '' ) );
 	$meta     = ( $date && function_exists( 'aw_date' ) ? aw_date( $date . ' 12:00:00' ) : '' ) // the date always first in a meta row (owner)
 		. '<span class="kit-meta-item">' . esc_html( 'on ' . ( AW_SOCIAL_PLATFORMS[ $platform ] ?? 'Other' ) ) . '</span>'
-		. ( '' !== $handle && $handle !== $name ? '<span class="kit-meta-item">' . esc_html( $handle ) . '</span>' : '' );
+		. ( '' !== $handle && $handle !== $name ? '<span class="kit-meta-item aw-social-handle" title="' . esc_attr( $handle ) . '">' . esc_html( $handle ) . '</span>' : '' );
 	$embed    = '';
-	if ( in_array( $link['platform'], array( 'x', 'youtube' ), true ) ) {
+	$out_on   = isset( AW_SOCIAL_PLATFORMS[ $platform ] ) && 'other' !== $platform ? $platform : $link['platform']; // the saved platform, else the one the link shows
+	if ( 'youtube' === $link['platform'] && '' !== $link['video'] ) {
 		$box   = 'aw-social-embed-' . (int) $p->ID;
-		$embed = '<div class="aw-opp-actions"><div id="' . esc_attr( $box ) . '" style="flex-basis:100%" data-aw-social-embed="' . esc_attr( $link['platform'] ) . '" data-url="' . esc_url( $link['url'] ) . '" data-id="' . esc_attr( $link['video'] ) . '" data-title="' . esc_attr( $name ) . '"></div></div>'; // above the card's link (kit.css .aw-opp-actions), so the post stays usable
+		$embed = '<div class="aw-opp-actions"><div id="' . esc_attr( $box ) . '" style="flex-basis:100%" data-aw-social-embed="youtube" data-id="' . esc_attr( $link['video'] ) . '" data-title="' . esc_attr( $name ) . '"></div></div>'; // above the card's link (kit.css .aw-opp-actions), so the post stays usable
 		aw_social_embed_script();
+	} elseif ( '' !== $link['url'] && 'other' !== $out_on ) {
+		$embed = '<div class="aw-opp-actions"><a class="kit-btn kit-btn--secondary kit-btn--sm aw-social-out" href="' . esc_url( $link['url'] ) . '" target="_blank" rel="nofollow ugc noopener">'
+			. esc_html( 'View on ' . AW_SOCIAL_PLATFORMS[ $out_on ] ) . '<span class="kit-ico kit-ico--arrow-up-right" aria-hidden="true"></span><span class="screen-reader-text">' . esc_html( ( '' !== $name ? ': ' . $name : '' ) . ' (opens in a new tab)' ) . '</span></a></div>';
 	}
 	return '<li><article class="kit-card kit-card--block-md aw-social-card"><div class="kit-card-body">'
 		. '<p class="kit-card-meta kit-meta-row">' . $meta . '</p>'
@@ -1040,9 +1047,9 @@ add_filter(
 );
 
 /**
- * The load-near-the-screen script, once per page, only when a card has an X or YouTube post. Each post is built when
- * its card comes within 400px of the screen (all at once where IntersectionObserver is missing). X: the widgets script
- * is fetched with the first post. YouTube: the privacy-enhanced player (youtube-nocookie.com) in core's 16:9 embed frame.
+ * The load-near-the-screen script, once per page, only when a card has a YouTube post. Each player is built when its
+ * card comes within 400px of the screen (all at once where IntersectionObserver is missing): the privacy-enhanced
+ * player (youtube-nocookie.com) in core's 16:9 embed frame. X posts load nothing from X (aw_social_card).
  */
 function aw_social_embed_script() {
 	static $on = false;
@@ -1055,9 +1062,7 @@ function aw_social_embed_script() {
 	wp_enqueue_script( 'aw-social-embed' );
 	wp_add_inline_script(
 		'aw-social-embed',
-		"(function(){var xs=false;function x(box){if(window.twttr&&window.twttr.widgets){window.twttr.widgets.load(box);return;}if(xs){return;}xs=true;var s=document.createElement('script');s.src='https://platform.twitter.com/widgets.js';s.async=true;s.charset='utf-8';document.head.appendChild(s);}"
-		. "function build(box){if(box.firstChild){return;}var k=box.getAttribute('data-aw-social-embed');if(k==='x'){var q=document.createElement('blockquote');q.className='twitter-tweet';q.setAttribute('data-dnt','true');var a=document.createElement('a');a.href=box.getAttribute('data-url');a.textContent=a.href;q.appendChild(a);box.appendChild(q);x(box);}"
-		. "else if(k==='youtube'){var f=document.createElement('figure');f.className='wp-block-embed is-type-video is-provider-youtube wp-block-embed-youtube wp-embed-aspect-16-9 wp-has-aspect-ratio';var w=document.createElement('div');w.className='wp-block-embed__wrapper';var i=document.createElement('iframe');i.src='https://www.youtube-nocookie.com/embed/'+encodeURIComponent(box.getAttribute('data-id'));i.title=box.getAttribute('data-title')||'YouTube';i.width='560';i.height='315';i.setAttribute('allow','encrypted-media; picture-in-picture');i.setAttribute('allowfullscreen','');w.appendChild(i);f.appendChild(w);box.appendChild(f);}}"
+		"(function(){function build(box){if(box.firstChild){return;}if(box.getAttribute('data-aw-social-embed')==='youtube'){var f=document.createElement('figure');f.className='wp-block-embed is-type-video is-provider-youtube wp-block-embed-youtube wp-embed-aspect-16-9 wp-has-aspect-ratio';var w=document.createElement('div');w.className='wp-block-embed__wrapper';var i=document.createElement('iframe');i.src='https://www.youtube-nocookie.com/embed/'+encodeURIComponent(box.getAttribute('data-id'));i.title=box.getAttribute('data-title')||'YouTube';i.width='560';i.height='315';i.setAttribute('allow','encrypted-media; picture-in-picture');i.setAttribute('allowfullscreen','');w.appendChild(i);f.appendChild(w);box.appendChild(f);}}"
 		. "var boxes=document.querySelectorAll('div[data-aw-social-embed]');if(!('IntersectionObserver' in window)){Array.prototype.forEach.call(boxes,build);return;}"
 		. "var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){io.unobserve(e.target);build(e.target);}});},{rootMargin:'400px 0px'});Array.prototype.forEach.call(boxes,function(b){io.observe(b);});})();"
 	);

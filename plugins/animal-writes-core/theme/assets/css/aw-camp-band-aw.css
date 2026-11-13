@@ -47,18 +47,12 @@ section.aw-camp-band.aw-ed-hero--campaign { box-sizing: border-box; min-height: 
 .aw-ed-hero--wait .aw-ed-hero-chip::before { content: ""; flex: none; width: var(--kit-space-2); height: var(--kit-space-2); border-radius: 50%; background: var(--camp-on-mark); animation: aw-ed-hero-pulse 1.6s var(--kit-motion-ease) 3; }
 @keyframes aw-ed-hero-pulse { 50% { opacity: 0.35; } }
 .aw-camp-band.aw-ed-hero--wait p.aw-ed-hero-keyline { margin: 0 0 var(--kit-space-5); max-width: 36rem; font-size: var(--kit-type-sm); color: rgb(255 255 255 / 0.8); }
-.aw-ed-hero-steps:not(.kit-dateline) { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--kit-space-4) var(--kit-space-3); margin: 0; padding: var(--kit-space-4) 0 0; list-style: none; border-top: var(--kit-border-width) solid rgb(255 255 255 / 0.2); }
-.aw-ed-hero-steps:not(.kit-dateline) li { position: relative; padding-left: calc(var(--kit-space-3) + var(--kit-space-2)); font-size: var(--kit-type-sm); line-height: var(--kit-leading-body); color: rgb(255 255 255 / 0.8); }
 .aw-ed-hero-steps strong { display: block; color: var(--camp-on-mark); font-weight: var(--kit-weight-bold); }
-.aw-ed-hero-steps:not(.kit-dateline) li::before { content: ""; position: absolute; left: 0; top: 0.4em; box-sizing: border-box; width: var(--kit-space-3); height: var(--kit-space-3); border-radius: 50%; border: 2px solid rgb(255 255 255 / 0.6); }
-.aw-ed-hero-steps:not(.kit-dateline) li.is-done::before { border-color: var(--camp-on-mark); background: var(--camp-on-mark); }
-.aw-ed-hero-steps:not(.kit-dateline) li.is-now::before { border-color: var(--camp-on-mark); background: var(--camp-mark); box-shadow: 0 0 0 var(--kit-space-1) rgb(163 18 47 / 0.45); }
 .aw-ed-hero-steps.kit-dateline { margin: 0; padding: var(--kit-space-4) 0 0; border-top: var(--kit-border-width) solid rgb(255 255 255 / 0.2); font-size: var(--kit-type-sm); line-height: var(--kit-leading-body); color: rgb(255 255 255 / 0.8); } /* the steps as a date line, small cards (aw_steps_dateline) */
 .aw-ed-hero--wait .aw-camp-band-actions .wp-element-button:not(.aw-camp-band-ghost) { background: var(--camp-mark); color: var(--camp-on-mark); }
 .aw-ed-hero--wait .aw-camp-band-actions .wp-element-button:not(.aw-camp-band-ghost):hover { background: var(--camp-accent); }
 .aw-ed-hero--wait .aw-camp .aw-camp-band-ghost:hover, .aw-ed-hero--wait .aw-camp-band-ghost:hover { color: var(--camp-dark); }
 @media (min-width: 768px) {
-	.aw-ed-hero-steps:not(.kit-dateline) { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 	/* the scene sits beside the text: it fades into the band on its left, top and bottom edges */
 	.aw-ed-hero--wait .aw-camp-band-art::after { background: linear-gradient(90deg, var(--camp-dark) 0%, rgb(29 20 24 / 0.7) 18%, rgb(29 20 24 / 0) 50%), linear-gradient(180deg, var(--camp-dark) 0%, rgb(29 20 24 / 0) 20%, rgb(29 20 24 / 0) 80%, var(--camp-dark) 100%); }
 }

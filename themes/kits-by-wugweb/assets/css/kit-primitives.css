@@ -545,54 +545,64 @@ form, .kit-form, .fluentform { --kit-btn-height: var(--kit-size-control); --kit-
 	.kit-toolbar .kit-segment :is(a, button) { min-height: var(--kit-toolbar-h); }
 }
 
-/* Date card (owner, 13 Nov 2026: "when highlighting dates use a calendar icon, artistic, to make a date card; should be
-   universal"). A page torn from a desk calendar: two binder rings, the month on a strip in the campaign colour (--camp-mark;
-   the brand ink off campaign pages) with a perforation under it, the day large, the year small, and the next page showing
-   under it. Inter like the whole site (owner, 13 Nov: "font has to be Inter"), lining tabular figures. Markup: kits_datecard()
-   (kits-core primitives.php); timeline dates get it from the server (aw_datecards). For dates that are the point of a
-   block; dates in sentences and meta rows stay .kit-date. Sizes: 64px wide (--kit-space-8), small 48px (--kit-space-7). */
-.kit-datecard { --dc-w: var(--kit-space-8); --dc-mark: var(--camp-mark, var(--kit-color-ink)); --dc-on-mark: var(--camp-on-mark, var(--kit-color-on-ink)); --dc-page: var(--kit-color-bg); position: relative; display: inline-flex; flex-direction: column; flex: none; box-sizing: border-box; width: var(--dc-w); margin: var(--kit-space-2) 0 var(--kit-space-1); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-control); background: var(--dc-page); color: var(--kit-color-ink); font-family: var(--wp--preset--font-family--base, Inter, sans-serif); font-style: normal; font-variant-numeric: lining-nums tabular-nums; line-height: 1; letter-spacing: normal; text-align: center; text-decoration: none; white-space: nowrap; vertical-align: top; box-shadow: 0 var(--kit-space-1) 0 calc(-1 * var(--kit-border-width)) var(--dc-page), 0 var(--kit-space-1) 0 0 var(--kit-color-line); }
-.kit-datecard::before { content: ""; position: absolute; z-index: 1; top: calc(-1 * var(--kit-space-2)); left: calc(var(--dc-w) * 0.3 - var(--kit-space-1) / 2); width: var(--kit-space-1); height: var(--kit-space-3); border-radius: var(--kit-radius-pill); background: var(--kit-color-ink); box-shadow: 0 0 0 calc(var(--kit-border-width) * 2) var(--dc-page), calc(var(--dc-w) * 0.4) 0 0 0 var(--kit-color-ink), calc(var(--dc-w) * 0.4) 0 0 calc(var(--kit-border-width) * 2) var(--dc-page); } /* the binder rings */
-.kit-datecard > span { display: block; font-family: inherit; letter-spacing: normal; }
-.kit-datecard-month { padding: var(--kit-space-2) 0 var(--kit-space-1); border-radius: calc(var(--kit-radius-control) - var(--kit-border-width)) calc(var(--kit-radius-control) - var(--kit-border-width)) 0 0; border-bottom: var(--kit-border-width) dashed color-mix(in srgb, var(--dc-on-mark) 45%, var(--dc-mark)); background: var(--dc-mark); color: var(--dc-on-mark); font-size: var(--kit-type-xs); font-weight: var(--kit-weight-bold); }
-.kit-datecard-day { padding: var(--kit-space-2) 0 0; color: var(--kit-color-ink); font-size: var(--kit-type-h2); font-weight: var(--kit-weight-bold); letter-spacing: -0.03em !important; }
-.kit-datecard-year { padding: var(--kit-space-1) 0 var(--kit-space-2); color: var(--kit-color-muted); font-size: var(--kit-type-xs); font-weight: var(--kit-weight-medium); }
-.kit-datecard--sm { --dc-w: var(--kit-space-7); }
-.kit-datecard--sm .kit-datecard-day { font-size: var(--kit-type-h3); padding-top: var(--kit-space-1); }
-/* One shape, the campaign's colours (owner, 13 Nov 2026: "lock the aspect ratio and let it change as per campaign branding").
-   The card is a picture-like mark, not a text box, so its shape is fixed at 4:5 (64 x 80, small 48 x 60): the month strip on
-   top, the day centred in the page, the year at the foot. Colours come from the campaign: strip in --camp-mark, the rings and
-   the day in --camp-dark, the edge a tint of the mark; the brand ink and grey off campaigns. */
-.kit-datecard { --dc-ink: var(--camp-dark, var(--kit-color-ink)); aspect-ratio: 4 / 5; justify-content: space-between; border-color: color-mix(in srgb, var(--dc-mark) 28%, var(--kit-color-line)); box-shadow: 0 var(--kit-space-1) 0 calc(-1 * var(--kit-border-width)) var(--dc-page), 0 var(--kit-space-1) 0 0 color-mix(in srgb, var(--dc-mark) 28%, var(--kit-color-line)); }
-.kit-datecard::before { background: var(--dc-ink); box-shadow: 0 0 0 calc(var(--kit-border-width) * 2) var(--dc-page), calc(var(--dc-w) * 0.4) 0 0 0 var(--dc-ink), calc(var(--dc-w) * 0.4) 0 0 calc(var(--kit-border-width) * 2) var(--dc-page); }
-.kit-datecard-day { display: flex !important; flex: 1 1 auto; align-items: center; justify-content: center; padding: 0; color: var(--dc-ink); }
-.kit-datecard-year { padding: 0 0 var(--kit-space-2); }
-.kit-datecard--sm .kit-datecard-year { padding-bottom: var(--kit-space-1); }
-/* States (owner, 13 Nov 2026: "done, on and upcoming all visible, the correct visual way"). Set on the card or on an
-   ancestor (timeline li: aw_camp_dates_state). Each state has its own shape, not only a colour:
-   - done (.is-done): a torn-off page: the strip and the day in a quiet tone, the page under it, a check stamp in the
-     corner;
-   - next (.is-next): the live page: lifted, edged in the mark, the strip solid, a ring stamp in the corner that pulses
-     a few times (not with reduced motion);
-   - upcoming (.is-upcoming): a blank page still on the pad: dashed edge, the strip outlined (mark on white), no page
-     under it, no stamp;
-   - key (.is-key): the page edged in the mark and the campaign motif (--camp-motif) as its stamp. */
-.kit-datecard { --dc-check: url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20stroke=%22%23fff%22%20stroke-width=%223%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%3E%3Cpath%20d=%22M20%206%209%2017l-5-5%22/%3E%3C/svg%3E"); }
-.kit-datecard::after { content: none; position: absolute; z-index: 2; top: calc(-1 * var(--kit-space-2)); right: calc(-1 * var(--kit-space-2)); box-sizing: border-box; width: var(--kit-space-5); height: var(--kit-space-5); border-radius: 50%; border: calc(var(--kit-border-width) * 2) solid var(--dc-page); }
-:is(.is-done .kit-datecard, .kit-datecard.is-done) .kit-datecard-month { background: color-mix(in srgb, var(--dc-mark) 72%, var(--kit-color-muted)); }
-:is(.is-done .kit-datecard, .kit-datecard.is-done) .kit-datecard-day { color: var(--kit-color-muted); }
-:is(.is-done .kit-datecard, .kit-datecard.is-done)::after { content: ""; background: var(--dc-check) center / 58% no-repeat, var(--dc-mark); }
-:is(.is-next .kit-datecard, .kit-datecard.is-next) { border-color: var(--dc-mark); translate: 0 calc(-1 * var(--kit-space-1)); box-shadow: 0 0 0 var(--kit-border-width) var(--dc-mark), 0 var(--kit-space-2) var(--kit-space-4) calc(-1 * var(--kit-space-1)) color-mix(in srgb, var(--dc-mark) 45%, transparent); }
-:is(.is-next .kit-datecard, .kit-datecard.is-next)::after { content: ""; background: radial-gradient(circle, var(--dc-on-mark) 0 22%, var(--dc-mark) 24%); box-shadow: 0 0 0 0 color-mix(in srgb, var(--dc-mark) 40%, transparent); }
-:is(.is-upcoming .kit-datecard, .kit-datecard.is-upcoming) { border-style: dashed; box-shadow: none; }
-:is(.is-upcoming .kit-datecard, .kit-datecard.is-upcoming) .kit-datecard-month { border: var(--kit-border-width) solid var(--dc-mark); border-bottom-style: dashed; margin: calc(-1 * var(--kit-border-width)) calc(-1 * var(--kit-border-width)) 0; background: var(--dc-page); color: var(--dc-mark); }
-:is(.is-upcoming .kit-datecard, .kit-datecard.is-upcoming)::before { background: var(--kit-color-muted); box-shadow: 0 0 0 calc(var(--kit-border-width) * 2) var(--dc-page), calc(var(--dc-w) * 0.4) 0 0 0 var(--kit-color-muted), calc(var(--dc-w) * 0.4) 0 0 calc(var(--kit-border-width) * 2) var(--dc-page); }
-:is(.is-key .kit-datecard, .kit-datecard.is-key) { border-style: solid; border-color: var(--dc-mark); }
-:is(.is-key:not(.is-next) .kit-datecard, .kit-datecard.is-key:not(.is-next)) { box-shadow: 0 0 0 var(--kit-border-width) var(--dc-mark), 0 var(--kit-space-1) 0 calc(-1 * var(--kit-border-width)) var(--dc-page), 0 var(--kit-space-1) 0 0 var(--dc-mark); }
-:is(.is-key .kit-datecard, .kit-datecard.is-key)::after { content: ""; background: var(--camp-motif, var(--dc-check)) center / 60% no-repeat, var(--dc-mark); }
-:is(.is-upcoming.is-key .kit-datecard) .kit-datecard-month { background: var(--dc-mark); color: var(--dc-on-mark); }
+/* Timeline calendar (owner, 13 Nov 2026: "rebuild the timeline calendar system": one calendar, one geometry, four
+   states, campaign colours, four connectors, three layouts). Markup: kits_datecard(), kits_datecard_word(),
+   kits_timeline() (kits-core primitives.php); the campaign and Home timelines come from the server (aw_camp_dates_timeline,
+   aw_steps_dateline, home.php). For dates that are the point of a block; dates in sentences and meta rows stay .kit-date.
+
+   The page: a sheet torn from a desk calendar. Two binder rings above, the month on a strip with a perforation under
+   it, the day large, the year small, the next sheet showing under it. Inter (owner, 13 Nov), lining tabular figures.
+   Geometry, fixed everywhere (owner: "never resize width or height separately"): 64 wide (--kit-space-8) at the
+   existing 4:5, so 64 x 80; strip 30% of the height, year 25%, the day the rest; type in proportion to the width, so
+   1 to 9 and 10 to 31 sit in the same box. Badges 24px (--kit-space-5) in every state. Nothing in a state changes a size.
+   Colours come from the campaign (--camp-mark strip, --camp-on-mark on it, --camp-dark rings and day); off campaign
+   pages the Animal Writes yellow (--kit-color-accent) with ink. A new campaign only sets its tokens.
+
+   States (data-state on the card or on its step; the words a screen reader hears are in the card):
+   - past: the strip in the mark, a quiet page, the day muted, a round tick badge;
+   - present: the strip in the mark, the day strong, the edge ringed in the mark with a soft glow, a round badge with
+     a dot (not a tick) that pings three times (not with reduced motion);
+   - ongoing: like present, with the ongoing badge (two turning arrows) whose halo breathes slowly (not with reduced
+     motion); for an activity under way (a date range) or a step set ongoing;
+   - future: a blank sheet still on the pad: a light strip, the day muted, a dashed edge, no sheet under it, no badge;
+   - undated ("No date set"): the future sheet with no month and a dash for the day: never a made-up date;
+   - key (.is-key, a future key date): edged solid in the mark, the campaign motif as its badge. */
+.kit-datecard { --dc-w: var(--kit-space-8); --dc-h: calc(var(--dc-w) * 1.25); --dc-mark: var(--camp-mark, var(--kit-color-accent)); --dc-on-mark: var(--camp-on-mark, var(--kit-color-ink)); --dc-ink: var(--camp-dark, var(--kit-color-ink)); --dc-page: var(--kit-color-bg); --dc-edge: color-mix(in srgb, var(--dc-mark) 28%, var(--kit-color-line)); --dc-icon: none; position: relative; display: inline-grid; grid-template-rows: calc(var(--dc-h) * 0.3) minmax(0, 1fr) calc(var(--dc-h) * 0.25); flex: none; box-sizing: border-box; width: var(--dc-w); height: var(--dc-h); margin: var(--kit-space-2) 0 var(--kit-space-1); border: var(--kit-border-width) solid var(--dc-edge); border-radius: var(--kit-radius-control); background: var(--dc-page); color: var(--dc-ink); font-family: var(--wp--preset--font-family--base, Inter, sans-serif); font-style: normal; font-variant-numeric: lining-nums tabular-nums; line-height: 1; letter-spacing: normal; text-align: center; text-decoration: none; white-space: nowrap; vertical-align: top; box-shadow: 0 var(--kit-space-1) 0 calc(-1 * var(--kit-border-width)) var(--dc-page), 0 var(--kit-space-1) 0 0 var(--dc-edge); }
+.kit-datecard > span:not(.screen-reader-text) { display: flex; align-items: center; justify-content: center; min-width: 0; font-family: inherit; letter-spacing: normal; }
+.kit-datecard-month { border-radius: calc(var(--kit-radius-control) - var(--kit-border-width)) calc(var(--kit-radius-control) - var(--kit-border-width)) 0 0; border-bottom: var(--kit-border-width) dashed color-mix(in srgb, var(--dc-on-mark) 45%, var(--dc-mark)); background: var(--dc-mark); color: var(--dc-on-mark); font-size: calc(var(--dc-w) * 0.1875); font-weight: var(--kit-weight-bold); }
+.kit-datecard-month::before { content: ""; position: absolute; z-index: 1; top: calc(-1 * var(--kit-space-2)); left: calc(var(--dc-w) * 0.3 - var(--kit-space-1) / 2); width: var(--kit-space-1); height: var(--kit-space-3); border-radius: var(--kit-radius-pill); background: var(--dc-ink); box-shadow: 0 0 0 calc(var(--kit-border-width) * 2) var(--dc-page), calc(var(--dc-w) * 0.4) 0 0 0 var(--dc-ink), calc(var(--dc-w) * 0.4) 0 0 calc(var(--kit-border-width) * 2) var(--dc-page); } /* the binder rings */
+.kit-datecard-day { color: var(--dc-ink); font-size: calc(var(--dc-w) * 0.4375); font-weight: var(--kit-weight-bold); letter-spacing: -0.03em !important; }
+.kit-datecard > .kit-datecard-year { align-items: flex-start; color: var(--kit-color-muted); font-size: calc(var(--dc-w) * 0.1875); font-weight: var(--kit-weight-medium); }
+:is(.kit-datecard--nodate, .kit-datecard--undated) .kit-datecard-day { color: var(--kit-color-muted); font-weight: var(--kit-weight-medium); }
+/* The badge: a round stamp on the top right corner (::before the disc in the mark, ::after its icon in --camp-on-mark). */
+.kit-datecard::before, .kit-datecard::after { content: none; position: absolute; top: calc(-1 * var(--kit-space-2)); right: calc(-1 * var(--kit-space-2)); box-sizing: border-box; width: var(--kit-space-5); height: var(--kit-space-5); border-radius: 50%; }
+.kit-datecard::before { z-index: 2; border: calc(var(--kit-border-width) * 2) solid var(--dc-page); background: var(--dc-mark); }
+.kit-datecard::after { z-index: 3; background: var(--dc-on-mark); -webkit-mask: var(--dc-icon) center / 50% no-repeat; mask: var(--dc-icon) center / 50% no-repeat; }
+:is([data-state] .kit-datecard, .kit-datecard[data-state]) { --dc-tick: url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20stroke=%22%23000%22%20stroke-width=%223%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%3E%3Cpath%20d=%22M20%206%209%2017l-5-5%22/%3E%3C/svg%3E"); --dc-dot: radial-gradient(circle closest-side, #000 0 42%, transparent 46%); --dc-turn: url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20stroke=%22%23000%22%20stroke-width=%222.75%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%3E%3Cpath%20d=%22M3%2012a9%209%200%200%201%209-9%209.75%209.75%200%200%201%206.74%202.74L21%208%22/%3E%3Cpath%20d=%22M21%203v5h-5%22/%3E%3Cpath%20d=%22M21%2012a9%209%200%200%201-9%209%209.75%209.75%200%200%201-6.74-2.74L3%2016%22/%3E%3Cpath%20d=%22M8%2016H3v5%22/%3E%3C/svg%3E"); }
+/* past */
+:is([data-state=past] .kit-datecard, .kit-datecard[data-state=past]) .kit-datecard-day { color: var(--kit-color-muted); }
+:is([data-state=past] .kit-datecard, .kit-datecard[data-state=past]) { --dc-icon: var(--dc-tick); }
+:is([data-state=past] .kit-datecard, .kit-datecard[data-state=past])::before, :is([data-state=past] .kit-datecard, .kit-datecard[data-state=past])::after { content: ""; }
+/* present and ongoing */
+:is([data-state=present] .kit-datecard, .kit-datecard[data-state=present], [data-state=ongoing] .kit-datecard, .kit-datecard[data-state=ongoing]) { --dc-edge: var(--dc-mark); box-shadow: 0 0 0 var(--kit-border-width) var(--dc-mark), 0 var(--kit-space-1) 0 0 var(--dc-page), 0 var(--kit-space-1) 0 var(--kit-border-width) var(--dc-mark), 0 var(--kit-space-2) var(--kit-space-4) calc(-1 * var(--kit-space-1)) color-mix(in srgb, var(--dc-mark) 45%, transparent); }
+:is([data-state=present] .kit-datecard, .kit-datecard[data-state=present], [data-state=ongoing] .kit-datecard, .kit-datecard[data-state=ongoing]) .kit-datecard-month { font-weight: var(--kit-weight-display); }
+:is([data-state=present] .kit-datecard, .kit-datecard[data-state=present], [data-state=ongoing] .kit-datecard, .kit-datecard[data-state=ongoing])::before, :is([data-state=present] .kit-datecard, .kit-datecard[data-state=present], [data-state=ongoing] .kit-datecard, .kit-datecard[data-state=ongoing])::after { content: ""; }
+:is([data-state=present] .kit-datecard, .kit-datecard[data-state=present]) { --dc-icon: var(--dc-dot); }
+:is([data-state=present] .kit-datecard, .kit-datecard[data-state=present])::after { -webkit-mask-size: 100%; mask-size: 100%; }
+:is([data-state=ongoing] .kit-datecard, .kit-datecard[data-state=ongoing]) { --dc-icon: var(--dc-turn); }
+/* future and undated */
+:is([data-state=future] .kit-datecard, .kit-datecard[data-state=future], [data-state=undated] .kit-datecard, .kit-datecard[data-state=undated]) { --dc-edge: color-mix(in srgb, var(--dc-mark) 45%, var(--kit-color-line)); border-style: dashed; box-shadow: none; }
+:is([data-state=future] .kit-datecard, .kit-datecard[data-state=future], [data-state=undated] .kit-datecard, .kit-datecard[data-state=undated]) .kit-datecard-month { background: color-mix(in srgb, var(--dc-mark) 14%, var(--dc-page)); color: var(--dc-ink); border-bottom-color: var(--dc-edge); }
+:is([data-state=future] .kit-datecard, .kit-datecard[data-state=future], [data-state=undated] .kit-datecard, .kit-datecard[data-state=undated]) .kit-datecard-day { color: var(--kit-color-muted); }
+:is([data-state=future] .kit-datecard, .kit-datecard[data-state=future], [data-state=undated] .kit-datecard, .kit-datecard[data-state=undated]) .kit-datecard-month::before { background: var(--kit-color-muted); box-shadow: 0 0 0 calc(var(--kit-border-width) * 2) var(--dc-page), calc(var(--dc-w) * 0.4) 0 0 0 var(--kit-color-muted), calc(var(--dc-w) * 0.4) 0 0 calc(var(--kit-border-width) * 2) var(--dc-page); }
+:is([data-state=undated] .kit-datecard, .kit-datecard[data-state=undated]) .kit-datecard-month { background: repeating-linear-gradient(135deg, transparent 0 var(--kit-space-1), color-mix(in srgb, var(--dc-mark) 18%, transparent) var(--kit-space-1) var(--kit-space-2)), var(--dc-page); }
+/* the key date still to come: edged solid in the mark, the campaign motif as its badge */
+:is([data-state=future].is-key .kit-datecard) { --dc-edge: var(--dc-mark); --dc-icon: var(--camp-motif, var(--dc-tick)); border-style: solid; }
+:is([data-state=future].is-key .kit-datecard) .kit-datecard-month { background: var(--dc-mark); color: var(--dc-on-mark); }
+:is([data-state=future].is-key .kit-datecard)::before, :is([data-state=future].is-key .kit-datecard)::after { content: ""; }
 @media (prefers-reduced-motion: no-preference) {
-	:is(.is-next .kit-datecard, .kit-datecard.is-next)::after { animation: kit-datecard-ping 1.6s var(--kit-motion-ease, ease-out) 3; }
+	:is([data-state=present] .kit-datecard, .kit-datecard[data-state=present])::before { animation: kit-datecard-ping 1.6s var(--kit-motion-ease, ease-out) 3; }
+	:is([data-state=ongoing] .kit-datecard, .kit-datecard[data-state=ongoing])::before { animation: kit-datecard-ping 3.2s var(--kit-motion-ease, ease-out) infinite; }
 }
 @keyframes kit-datecard-ping {
 	0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--dc-mark) 45%, transparent); }
@@ -600,39 +610,47 @@ form, .kit-form, .fluentform { --kit-btn-height: var(--kit-size-control); --kit-
 }
 @media (forced-colors: active) {
 	.kit-datecard-month { forced-color-adjust: none; background: CanvasText; color: Canvas; }
-	.kit-datecard::before { forced-color-adjust: none; background: CanvasText; }
-	.kit-datecard::after { forced-color-adjust: none; background-color: CanvasText; }
+	.kit-datecard-month::before, .kit-datecard::before { forced-color-adjust: none; background: CanvasText; }
+	.kit-datecard::after { forced-color-adjust: none; background: Canvas; }
 }
 
-/* Word card: a step with no date yet ("Now", "No date set", kits_datecard_word): the same page and size, the step's word in
-   place of the day. */
-.kit-datecard--word .kit-datecard-day { padding-inline: var(--kit-space-1); font-size: var(--kit-type-xs); line-height: var(--kit-leading-heading); letter-spacing: normal !important; white-space: normal; }
-
-/* Date line: a timeline whose steps are date cards, one design on every campaign and Home (owner, 13 Nov 2026: "i seek
-   consistency; if we use calendar illustration let us use it across and in correct size and states as per campaign").
-   - The card is each step's one mark and shows its state (the step's is-done, is-next, is-upcoming, is-key); no dot.
-   - The line runs through the cards: solid in the mark after a done step, dashed (a tint of the text) after the rest.
-   - The list under 23rem (phones): a vertical line, each card beside its words. Wider: rows of steps at least 2.5 card widths wide,
-     each card above its words, the line across the cards' middles.
-   - Sizes: 64px cards (--kit-space-8) on campaign pages, small 48px (--sm, --kit-space-7) in the Home bands.
-   Markup: ol or div.kit-dateline > a step > its card holder first (kit-dateline-when, aw-camp-dates-when, aw-ed-story-when),
-   then its words (aw_datecards, aw_steps_dateline, home.php). */
-.kit-dateline { --dl-w: var(--kit-space-8); --dl-h: calc(var(--dl-w) * 1.25); --dl-top: var(--kit-space-2); --dl-gap: var(--kit-space-4); --dl-row: var(--kit-space-5); --dl-line: calc(var(--kit-border-width) * 2); --dl-mark: var(--camp-mark, var(--kit-color-ink)); --dl-rest: color-mix(in srgb, currentColor 32%, transparent); --dl-min: calc(var(--dl-w) * 2.5); container: kit-dateline / inline-size; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--dl-min)), 1fr)); gap: var(--dl-row) var(--dl-gap); padding: 0; list-style: none; overflow-x: clip; }
-.kit-dateline--sm { --dl-w: var(--kit-space-7); }
-.kit-dateline > * { position: relative; display: grid; grid-template-columns: var(--dl-w) minmax(0, 1fr); column-gap: var(--kit-space-4); align-content: start; margin: 0; padding: 0; border: 0; list-style: none; }
-.kit-dateline > * > :first-child { grid-column: 1; grid-row: 1 / span 4; margin: 0; line-height: 0; }
-.kit-dateline > * > :not(:first-child) { grid-column: 2; margin-block: 0; }
-.kit-dateline > * > :nth-child(2) { margin-top: var(--dl-top); }
+/* Timeline (kit-dateline): each step its calendar page and its words, the line from each page to the next.
+   - Connectors take the state of the step they leave: past solid in the mark; present a highlighted solid (twice as
+     thick); ongoing the same thick line with a soft band either side (the period under way); future dashed in a tint
+     of the text; undated dotted. Centred on the page; they stop a --kit-space-1 short of a page (below its sheet) and clear of its rings and badge.
+   - Phones (to 767): one column, the page beside its words, one vertical line down the pages' centre.
+   - 768 to 1199: two steps a row, each page above its words; the line joins the two steps of a row only.
+   - From 1200: one row, the pages aligned, the line across their middles, the words under them.
+   The step's word when it has no date ("Now", "No date set") is printed above its words (.kit-dateline-word).
+   Markup: ol or div.kit-dateline > a step (data-state) > its page holder first (kit-dateline-when, aw-ed-story-when),
+   then its words. */
+.kit-dateline { --dl-w: var(--kit-space-8); --dl-h: calc(var(--dl-w) * 1.25); --dl-gap: var(--kit-space-4); --dl-row: var(--kit-space-6); --dl-mark: var(--camp-mark, var(--kit-color-accent)); --dl-rest: color-mix(in srgb, currentColor 34%, transparent); display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; padding: 0; list-style: none; }
+.kit-dateline > * { --dl-t: calc(var(--kit-border-width) * 2); --dl-style: dashed; --dl-c: var(--dl-rest); --dl-band: transparent; position: relative; display: grid; grid-template-columns: var(--dl-w) minmax(0, 1fr); column-gap: var(--kit-space-4); align-content: start; margin: 0; padding: 0 0 var(--dl-row); border: 0; list-style: none; }
+.kit-dateline > :last-child { padding-bottom: 0; }
+.kit-dateline > [data-state=past] { --dl-style: solid; --dl-c: var(--dl-mark); }
+.kit-dateline > [data-state=present] { --dl-t: calc(var(--kit-border-width) * 4); --dl-style: solid; --dl-c: var(--dl-mark); }
+.kit-dateline > [data-state=ongoing] { --dl-t: calc(var(--kit-border-width) * 4); --dl-style: solid; --dl-c: var(--dl-mark); --dl-band: color-mix(in srgb, var(--dl-mark) 28%, transparent); }
+.kit-dateline > [data-state=undated] { --dl-style: dotted; }
+.kit-dateline.kit-dateline > * > :first-child { grid-column: 1; grid-row: 1 / span 6; margin: 0; line-height: 0; }
+.kit-dateline.kit-dateline > * > :not(:first-child) { grid-column: 2; margin-block: 0; }
+.kit-dateline.kit-dateline > * > :nth-child(2) { margin-top: var(--kit-space-2); }
+.kit-dateline-word { display: block; margin-bottom: var(--kit-space-1); font-weight: var(--kit-weight-bold); }
+.kit-dateline-title, .kit-dateline-desc { display: block; }
+.kit-dateline-media img { display: block; width: var(--kit-space-8); height: auto; margin-top: var(--kit-space-2); border-radius: var(--kit-radius-control); }
 .kit-dateline > *::after { content: none; }
-.kit-dateline > *::before { content: ""; display: block; position: absolute; left: calc(var(--dl-w) / 2 - var(--dl-line) / 2); top: calc(var(--dl-top) * 2 + var(--dl-h)); bottom: calc(var(--kit-space-3) - var(--dl-row)); width: 0; border-left: var(--dl-line) dashed var(--dl-rest); }
-.kit-dateline > .is-done::before { border-left-style: solid; border-left-color: var(--dl-mark); }
+.kit-dateline > *::before { content: ""; display: block; position: absolute; left: calc(var(--dl-w) / 2 - var(--dl-t) / 2); top: calc(var(--kit-space-2) + var(--dl-h) + var(--kit-space-1) * 2); bottom: var(--kit-space-1); width: 0; border-left: var(--dl-t) var(--dl-style) var(--dl-c); box-shadow: 0 0 0 var(--kit-border-width) var(--dl-band); }
 .kit-dateline > :last-child::before { content: none; }
-@container kit-dateline (min-width: 23rem) {
-	.kit-dateline > * { grid-template-columns: minmax(0, 1fr); }
-	.kit-dateline > * > :first-child { grid-row: auto; }
-	.kit-dateline > * > :not(:first-child) { grid-column: 1; }
-	.kit-dateline > * > :nth-child(2) { margin-top: var(--kit-space-3); }
-	.kit-dateline > *::before { left: calc(var(--dl-w) + var(--kit-space-3)); right: calc(var(--kit-space-3) - var(--dl-gap)); top: calc(var(--dl-top) + var(--dl-h) / 2 - var(--dl-line) / 2); bottom: auto; width: auto; height: 0; border-left: 0; border-top: var(--dl-line) dashed var(--dl-rest); }
-	.kit-dateline > .is-done::before { border-top-style: solid; border-top-color: var(--dl-mark); }
+@media (min-width: 768px) {
+	.kit-dateline { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--dl-gap); row-gap: var(--kit-space-6); }
+	.kit-dateline > * { grid-template-columns: minmax(0, 1fr); padding: 0; }
+	.kit-dateline.kit-dateline > * > :first-child { grid-row: auto; }
+	.kit-dateline.kit-dateline > * > :not(:first-child) { grid-column: 1; }
+	.kit-dateline.kit-dateline > * > :nth-child(2) { margin-top: var(--kit-space-3); }
+	.kit-dateline > *::before { content: none; left: calc(var(--dl-w) + var(--kit-space-2) + var(--kit-space-1)); right: calc(var(--kit-space-2) - var(--dl-gap)); top: calc(var(--kit-space-2) + var(--dl-h) / 2 - var(--dl-t) / 2); bottom: auto; width: auto; height: 0; border-left: 0; border-top: var(--dl-t) var(--dl-style) var(--dl-c); }
+	.kit-dateline > :nth-child(odd):not(:last-child)::before { content: ""; }
 }
-@media (forced-colors: active) { .kit-dateline > *::before { border-color: CanvasText; } }
+@media (min-width: 1200px) {
+	.kit-dateline { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); }
+	.kit-dateline > :not(:last-child)::before { content: ""; }
+}
+@media (forced-colors: active) { .kit-dateline > *::before { border-color: CanvasText; box-shadow: none; } }
