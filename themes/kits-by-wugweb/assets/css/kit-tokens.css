@@ -122,6 +122,7 @@
   --kit-icon-xl: 28px;
   --kit-icon-gap: 6px;
   --kit-meta-size: 12px;
+  --kit-type-card-title: 1.25rem;
   --kit-meta-weight: var(--kit-weight-medium);
   --kit-meta-icon: var(--kit-icon-sm);
   --kit-meta-icon-gap: var(--kit-icon-gap);
@@ -142,10 +143,6 @@
   --kit-card-stacked-media-min: auto; /* least picture width in a stacked card */
   --kit-card-stacked-body-flex: 1 1 auto; /* flex of the text column in a stacked card */
   --kit-card-stacked-body-min: 0; /* least text column width in a stacked card */
-  --kit-card-stacked-min: 340px; /* least width of a card in a stacked list (owner 13 Nov 2026: "Min 340px, two"; was 350) */
-  --kit-card-stacked-max: 600px; /* most width of a card in a stacked list (owner 13 Nov 2026) */
-  --kit-card-stacked-ratio: 2; /* a stacked list card is never flatter than 2:1, width to height (owner 13 Nov 2026) */
-  --kit-card-stacked-media-ratio: 0.6; /* stacked list card picture 3:5, at the card's full height (owner 13 Nov 2026) */
   --kit-card-block-media-max: none; /* picture max height in a block card */
   --kit-lead-title-size: var(--kit-type-h3); /* title size of the lead story in kit-ed-lead */
   --kit-lead-title-weight: var(--kit-weight-strong); /* title weight of the lead story in kit-ed-lead */
@@ -265,6 +262,7 @@
     --kit-space-grid: 24px;
     --kit-offset: 14px;
     --kit-meta-size: 13px;
+    --kit-type-card-title: 1.4rem;
     --kit-card-columns: 2;
     --kit-placard-ratio: 16/9;
     --kit-carousel-item: auto;
@@ -283,6 +281,7 @@
     --kit-space-gutter: 48px;
     --kit-space-grid: 32px;
     --kit-meta-size: 14px;
+    --kit-type-card-title: 1.5rem;
     --kit-card-columns: 3;
     --kit-grid-gap: 32px;
     --kit-grid-columns: 12;
