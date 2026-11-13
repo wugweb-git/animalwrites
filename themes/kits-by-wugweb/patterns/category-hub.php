@@ -3,6 +3,8 @@
  * Title: Category hub — category list
  * Slug: kits-by-wugweb/category-hub
  * Categories: kits-lists
+ * Keywords: category, hub, posts, list
+ * Viewport Width: 1280
  */
 ?>
 <!-- wp:group {"align":"wide","layout":{"type":"constrained"}} -->

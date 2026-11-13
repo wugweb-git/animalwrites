@@ -5,6 +5,8 @@
  * Categories: animal-writes
  * Description: One Home row with two campaign cards, each its own design: the Supreme Court stray dogs case (photograph overlay, pattern aw-sc) and AW_Festive for Diwali (pictures on top, pattern festive). The AW Content card (pattern aw-content) is kept but not on Home. The Diwali card shows until 20 Nov 2026 (owner, 13 Nov); then the Supreme Court card fills the row. Then the Animal Writes card (pattern aw-default-card: the default banner in medium; owner, 13 Nov 2026: the Lab campaign keeps the Home hero, the default banner goes to this row, the fourth Home block). With three cards the last fills its own row; with two, two columns. Stacked on phones, two equal columns of equal height from 768.
  * Inserter: yes
+ * Keywords: campaign, cards, row, home
+ * Viewport Width: 1280
  *
  * @package animal-writes
  */

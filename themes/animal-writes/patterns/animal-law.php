@@ -5,6 +5,8 @@
  * Categories: animal-writes
  * Description: Three Library items as a mosaic of News cards (the newest Act, rule, order or judgment large on the left with its summary, two more beside it, an official release last; home.php; from 768 to 1199 the lead runs full width above the two), then four Kits tiles into the Library by type (four across from 1200, two by two below, a sideways row on phones).
  * Inserter: yes
+ * Keywords: law, library, acts, rules
+ * Viewport Width: 1280
  *
  * @package animal-writes
  */

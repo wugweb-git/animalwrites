@@ -639,6 +639,11 @@
 			"name": "sidebar",
 			"title": "Sidebar",
 			"area": "sidebar"
+		},
+		{
+			"name": "newsletter",
+			"title": "Above the footer (newsletter)",
+			"area": "uncategorized"
 		}
 	],
 	"customTemplates": [

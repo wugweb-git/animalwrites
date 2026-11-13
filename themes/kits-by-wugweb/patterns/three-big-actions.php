@@ -4,6 +4,8 @@
  * Slug: kits-by-wugweb/three-big-actions
  * Categories: kits-components
  * Description: A dark band with a section head (kit-sec-head, as on every section) and three large, linked actions; the first is filled with the accent colour.
+ * Keywords: actions, links, dark band
+ * Viewport Width: 1280
  */
 ?>
 <!-- wp:group {"align":"full","className":"kit-ed-help","layout":{"type":"constrained","contentSize":"1200px"}} -->

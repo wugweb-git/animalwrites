@@ -6,6 +6,7 @@
  * Description: The end of a guide that belongs to a campaign: one line on what can be done and by when, and a button to the campaign's send form. Built on the Kits Card group style and a Primary (ink) button.
  * Keywords: campaign, call to action, objection, send
  * Inserter: yes
+ * Viewport Width: 1280
  *
  * @package animal-writes
  */

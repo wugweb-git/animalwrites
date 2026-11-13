@@ -5,6 +5,8 @@
  * Categories: animal-writes
  * Description: Section head with the live organisation and state counts, the Directory search bar (name, every state, Search, Use my location), the six organisation types with the most listings as Quick filters, then Browse all states and Claim or update your listing.
  * Inserter: yes
+ * Keywords: directory, search, location, help
+ * Viewport Width: 1280
  *
  * @package animal-writes
  */

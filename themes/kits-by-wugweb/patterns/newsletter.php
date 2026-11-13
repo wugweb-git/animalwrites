@@ -3,6 +3,8 @@
  * Title: Newsletter signup
  * Slug: kits-by-wugweb/newsletter
  * Categories: kits-components
+ * Keywords: newsletter, email, sign up, subscribe
+ * Viewport Width: 1280
  */
 ?>
 <!-- wp:group {"className":"is-style-kits-card","layout":{"type":"constrained","contentSize":"560px"}} -->

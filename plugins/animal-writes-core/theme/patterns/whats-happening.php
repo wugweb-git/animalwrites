@@ -5,6 +5,8 @@
  * Categories: animal-writes
  * Description: The three newest news stories as a mosaic of News cards: one large card on the left with its summary, two rows beside it (phones: three rows with their thumbnails), with a link to all news.
  * Inserter: yes
+ * Keywords: news, latest, stories
+ * Viewport Width: 1280
  *
  * @package animal-writes
  */

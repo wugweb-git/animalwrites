@@ -3,6 +3,8 @@
  * Title: Call to action
  * Slug: kits-by-wugweb/cta
  * Categories: kits-components
+ * Keywords: call to action, button, band
+ * Viewport Width: 1280
  */
 ?>
 <!-- wp:group {"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|70","bottom":"var:preset|spacing|70"}}},"backgroundColor":"secondary","textColor":"background","layout":{"type":"constrained"}} -->

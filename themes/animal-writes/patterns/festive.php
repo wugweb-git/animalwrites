@@ -5,6 +5,8 @@
  * Categories: animal-writes
  * Description: The Diwali 2026 campaign card on Home: the theme photo card (core Cover, kit-photo-card) on the campaign's portrait photo (Media 23398, as on the campaign hero), the campaign hero's H2, line and one Kits button (owner, 2 Nov 2026: one button per card) in the night sky at the top, in the campaign colours (aw-camp--diwali). A card in the Home campaign row (aw-pair), not a section.
  * Inserter: yes
+ * Keywords: diwali, festival, campaign, card
+ * Viewport Width: 600
  *
  * @package animal-writes
  */

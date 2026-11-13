@@ -4,6 +4,8 @@
  * Slug: kits-by-wugweb/section
  * Categories: kits-components
  * Description: A full-width section (Group style Section): its padding, background and gap are set in Styles > Blocks > Group > Section.
+ * Keywords: section, band, group
+ * Viewport Width: 1280
  */
 ?>
 <!-- wp:group {"tagName":"section","align":"full","className":"is-style-kits-section","layout":{"type":"constrained"}} -->

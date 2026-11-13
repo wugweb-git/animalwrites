@@ -4,6 +4,8 @@
  * Slug: kits-by-wugweb/hero
  * Categories: kits-components
  * Description: Page hero (Kits Hero block): label, H1, one line and two actions. Its height, colours and padding are set in Styles > Blocks > Hero.
+ * Keywords: hero, intro, title, buttons
+ * Viewport Width: 1280
  */
 ?>
 <!-- wp:kits/hero {"align":"full","layout":{"type":"constrained"}} -->
