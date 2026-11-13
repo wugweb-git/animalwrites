@@ -296,7 +296,7 @@
 @media (min-width: 768px) { .aw-camp-ladder { grid-template-columns: repeat(2, 1fr); } }
 @media (min-width: 1200px) { .aw-camp-ladder { grid-template-columns: repeat(4, 1fr); } } /* side by side, the four bars read as one gauge; the bar stays thin on desktop (owner, 3 Nov 2026: the 6rem block read as a missing picture) */
 /* Tiers are H3 under the section H2 (owner, 25 Oct) with the look they had as H4: aw.css gives content H3s line-height 1.25 !important */
-.aw-camp .aw-camp-ladder .aw-camp-tier h3 { font-size: var(--kit-type-h3) !important; line-height: 1.3 !important; }
+.aw-camp .aw-camp-ladder .aw-camp-tier h3 { font-size: var(--kit-type-card-title) !important; line-height: 1.3 !important; }
 .aw-camp-tier h3 { margin: 0 0 var(--kit-space-2); font-size: var(--kit-type-h3); font-weight: 800; }
 .aw-camp-tier p { margin: 0 0 var(--kit-space-2); }
 .aw-camp-tier { --fill: 100%; position: relative; }
@@ -463,10 +463,9 @@
 .aw-letter-meta strong { color: inherit; }
 .aw-letter-to { display: flex; align-items: center; gap: var(--kit-space-2); font-size: clamp(1.25rem, 1rem + 1vw, 1.75rem); font-weight: 800; letter-spacing: -0.02em; overflow-wrap: anywhere; }
 .aw-letter-preview {
-	white-space: pre-wrap; max-height: 24rem; overflow: auto; padding: var(--kit-space-4);
+	white-space: pre-wrap; padding: var(--kit-space-4);
 	background: var(--kit-color-bg); border: 1px solid var(--kit-color-line); border-radius: var(--kit-radius-card); font-size: var(--kit-type-sm, 0.9375rem);
 }
-@media (max-width: 767px) { .aw-letter-preview { max-height: 14rem; } }
 .aw-letter-confirm { align-items: center; padding: var(--kit-space-4); border-radius: var(--kit-radius-card); background: var(--kit-color-bg); }
 .aw-letter-thanks p { margin: 0; }
 .aw-letter-thanks p + p { margin-top: var(--kit-space-2); }
@@ -548,7 +547,6 @@
    page"). The theme sheets changed after that; these put back their old values inside .aw-camp--lab-rules. */
 .aw-camp--lab-rules .kit-card[class*="kit-card--block"] > .kit-card-body { padding: var(--kit-space-4); }
 .aw-camp--lab-rules .kit-card[class*="kit-card--stacked"] { padding: var(--kit-space-4); }
-.aw-camp--lab-rules .kit-card .kit-card-title { --kit-type-h3: var(--kit-type-base); --kit-leading-heading: 1.3; } /* the card title at the body size again (kit.css sets it from these tokens) */
 .aw-camp--lab-rules .wp-block-cover.kit-photo-card { padding: 1em; } /* core Cover's own padding */
 .aw-camp--lab-rules .kit-stack > .wp-block-cover.kit-photo-card { min-height: 420px; } /* the Take action pattern's photo cards */
 .aw-camp--lab-rules .rank-math-question { font-size: inherit; }
@@ -599,17 +597,16 @@
 .aw-camp.aw-camp--lab-rules .aw-camp-grid .aw-camp-card-ico { width: calc(var(--kit-size-target) + var(--kit-space-1)); height: calc(var(--kit-size-target) + var(--kit-space-1)); border-radius: var(--kit-radius-control); background: color-mix(in srgb, currentColor 14%, transparent); }
 .aw-camp.aw-camp--lab-rules .aw-camp-grid .aw-camp-card-ico .kit-ico { --kit-ico-size: var(--kit-icon-xl); }
 .aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card:first-child .aw-camp-card-ico { background: color-mix(in srgb, var(--camp-on-mark) 15%, transparent); }
-/* Headings at the Home tile's level (--kit-type-h3, bold); the lead's at --kit-type-h2 and its text at --kit-type-base,
+/* Headings bold at the one H3 size (--kit-type-card-title, see the end of this file); the lead's text at --kit-type-base,
    so the two-row lead stays within 600px (Layout rules); the small tiles' text at Home's --kit-type-sm */
-.aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card h3 { margin: 0; font-size: var(--kit-type-h3); font-weight: var(--kit-weight-bold); line-height: var(--kit-leading-heading); letter-spacing: normal; }
-.aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card:first-child h3 { font-size: var(--kit-type-h2); }
+.aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card h3 { margin: 0; font-size: var(--kit-type-card-title); font-weight: var(--kit-weight-bold); line-height: var(--kit-leading-heading); letter-spacing: normal; }
+.aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card:first-child h3 { font-size: var(--kit-type-card-title); }
 .aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card:first-child p:not(.aw-camp-card-ico, .aw-camp-card-chips) { font-size: var(--kit-type-base); line-height: var(--kit-leading-body); max-width: none; }
 .aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card:not(:first-child) p:not(.aw-camp-card-ico, .aw-camp-card-chips) { font-size: var(--kit-type-sm); line-height: var(--kit-leading-body); }
 
 /* The bento's tiles at Home's tile sizes (owner, 2 Nov 2026: "same as Home"), so the section stays under 720px from
-   1200: the small tiles' headings at Home's tile-heading size (--kit-type-h4, 18px; aw.css lets these headings off its
-   page-level H3 rule, as it does Home's bento), their icon box at the 44px target, the lead's text at --kit-type-sm */
-.aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card:not(:first-child) h3 { font-size: var(--kit-type-h4); line-height: var(--kit-leading-heading); }
+   1200: the small tiles' headings at the one H3 size (--kit-type-card-title), their icon box at the 44px target, the lead's text at --kit-type-sm */
+.aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card:not(:first-child) h3 { font-size: var(--kit-type-card-title); line-height: var(--kit-leading-heading); }
 .aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card:not(:first-child) .aw-camp-card-ico { width: var(--kit-size-target); height: var(--kit-size-target); }
 .aw-camp.aw-camp--lab-rules #why-it-matters .aw-camp-grid > .aw-camp-card:first-child p:not(.aw-camp-card-ico):not(.aw-camp-card-chips) { font-size: var(--kit-type-sm); }
 
@@ -636,10 +633,10 @@
 .aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card { background: var(--kit-color-bg); box-shadow: inset 0 0 0 1px var(--kit-color-line), var(--kit-elevation-1); transition: transform var(--kit-motion-base) var(--kit-motion-ease), box-shadow var(--kit-motion-base) var(--kit-motion-ease); }
 .aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card:first-child { background: linear-gradient(160deg, var(--camp-mark), color-mix(in srgb, var(--camp-mark) 75%, #000)); box-shadow: var(--kit-elevation-2); }
 .aw-camp.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card:first-child .aw-camp-card-ico { width: calc(var(--kit-size-target) + var(--kit-space-2)); height: calc(var(--kit-size-target) + var(--kit-space-2)); }
-/* Headings: the page-level H3 rule in aw.css sets every H3 with !important, so these carry it too: the lead at
-   --kit-type-h2, the other tiles at Home's tile heading --kit-type-h4 */
-.aw-camp.aw-camp--lab-rules #why-it-matters .aw-camp-grid > .aw-camp-card:first-child h3 { font-size: var(--kit-type-h2) !important; }
-.aw-camp.aw-camp--lab-rules #why-it-matters .aw-camp-grid > .aw-camp-card:not(:first-child) h3 { font-size: var(--kit-type-h4) !important; }
+/* Headings: the page-level H3 rule in aw.css sets every H3 with !important, so these carry it too: every tile at
+   the one H3 size, --kit-type-card-title */
+.aw-camp.aw-camp--lab-rules #why-it-matters .aw-camp-grid > .aw-camp-card:first-child h3 { font-size: var(--kit-type-card-title) !important; }
+.aw-camp.aw-camp--lab-rules #why-it-matters .aw-camp-grid > .aw-camp-card:not(:first-child) h3 { font-size: var(--kit-type-card-title) !important; }
 /* Hover on a pointer: the tile lifts by --kit-motion-lift with a deeper shadow; the lead deeper still. Pressed: the
    tile settles back. */
 @media (hover: hover) {
@@ -762,13 +759,13 @@
    white) with a 1px soft line, --kit-elevation-1, --kit-radius-card and --kit-space-5 padding. */
 
 /* Bento (the section's card grid, .aw-camp-grid): the first card leads in the campaign colour, deepening to 25% darker,
-   --kit-elevation-2, its heading at --kit-type-h2; the others white with headings at --kit-type-h4. aw.css sets every
+   --kit-elevation-2; the others white; every heading at the one H3 size (--kit-type-card-title). aw.css sets every
    H3 with !important, so these carry it too. From 768: three cards = the lead two thirds beside one, then the third the full row;
    five cards = the lead two thirds beside one, then two halves, then the last the full row. Phones: one column in markup order. */
 .aw-camp.aw-camp .aw-camp-grid > .aw-camp-card { min-width: 0; margin: 0; padding: var(--kit-space-5); border-radius: var(--kit-radius-card); background: var(--kit-color-surface-soft); box-shadow: inset 0 0 0 1px var(--kit-color-line), var(--kit-elevation-1); transition: transform var(--kit-motion-base) var(--kit-motion-ease), box-shadow var(--kit-motion-base) var(--kit-motion-ease); }
 .aw-camp.aw-camp .aw-camp-grid > .aw-camp-card:first-child { background: linear-gradient(160deg, var(--camp-mark), color-mix(in srgb, var(--camp-mark) 75%, #000)); color: var(--camp-on-mark); box-shadow: var(--kit-elevation-2); }
-.aw-camp.aw-camp .aw-camp-section .aw-camp-grid > .aw-camp-card:first-child h3 { font-size: var(--kit-type-h2) !important; line-height: var(--kit-leading-heading); }
-.aw-camp.aw-camp .aw-camp-section .aw-camp-grid > .aw-camp-card:not(:first-child) h3 { font-size: var(--kit-type-h4) !important; line-height: var(--kit-leading-heading); }
+.aw-camp.aw-camp .aw-camp-section .aw-camp-grid > .aw-camp-card:first-child h3 { font-size: var(--kit-type-card-title) !important; line-height: var(--kit-leading-heading); }
+.aw-camp.aw-camp .aw-camp-section .aw-camp-grid > .aw-camp-card:not(:first-child) h3 { font-size: var(--kit-type-card-title) !important; line-height: var(--kit-leading-heading); }
 .aw-camp.aw-camp .aw-camp-grid:has(> :nth-child(3):last-child) > :nth-child(1), .aw-camp.aw-camp .aw-camp-grid:has(> :nth-child(5):last-child) > :nth-child(1) { grid-area: c1; }
 .aw-camp.aw-camp .aw-camp-grid:has(> :nth-child(3):last-child) > :nth-child(2), .aw-camp.aw-camp .aw-camp-grid:has(> :nth-child(5):last-child) > :nth-child(2) { grid-area: c2; }
 .aw-camp.aw-camp .aw-camp-grid:has(> :nth-child(3):last-child) > :nth-child(3), .aw-camp.aw-camp .aw-camp-grid:has(> :nth-child(5):last-child) > :nth-child(3) { grid-area: c3; }
@@ -792,40 +789,16 @@
 .aw-camp.aw-camp #read .aw-camp-docs-q li:hover { box-shadow: none; }
 .aw-camp.aw-camp #read .aw-camp-docs-q li > .kit-card { height: 100%; box-sizing: border-box; padding: var(--kit-space-5); background: var(--kit-color-surface-soft); }
 
-/* In the news (#latest): stacked cards like the theme's kit-card--stacked-md (the picture --kit-thumb-lg wide, at most
-   40%, beside the title), white. Phones one column, from 768 two. */
-.aw-camp.aw-camp #latest .aw-camp-row { display: grid; gap: var(--kit-space-4); grid-template-columns: minmax(0, 1fr); }
-@media (min-width: 768px) { .aw-camp.aw-camp #latest .aw-camp-row { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-.aw-camp.aw-camp #latest .aw-camp-row:has(.aw-stack-list) { grid-template-columns: minmax(0, 1fr); } /* the stacked lists make their own columns (aw.css) */
+/* In the news (#latest): news and guides are two stacked lists (aw.css .aw-stack-list, kit-card--stacked-md at 2:1, the
+   picture 3:5). Below 1200 they run one under the other, one column each; from 1200 side by side, each list one column and
+   its own height (align-items: start), so a card never stretches to the other list's row (docs/design-system.md line 8:
+   breakpoints 768 and 1200; aw.css: never more than two columns). Cards white on the grey band. */
+.aw-camp.aw-camp #latest .aw-camp-row { display: grid; gap: var(--kit-space-4); grid-template-columns: minmax(0, 1fr); align-items: start; }
+@media (min-width: 1200px) { .aw-camp.aw-camp #latest .aw-camp-row { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.aw-camp.aw-camp #latest .wp-block-post-template.aw-stack-list { grid-template-columns: minmax(0, 1fr) !important; }
 .aw-camp.aw-camp :is(#latest, .aw-camp-cards) .kit-card .kit-card-title a { display: inline; -webkit-line-clamp: unset; line-clamp: unset; overflow: visible; } /* the whole title: the stacked card grows taller instead of cutting it (the kit clamps card titles at 3 lines) */
 .aw-camp.aw-camp #latest .aw-camp-row .wp-block-post-template > li { flex: none; width: auto; min-width: 0; margin: 0; }
-.aw-camp.aw-camp #latest .kit-card { flex-direction: row; align-items: center; gap: var(--kit-space-4); height: 100%; box-sizing: border-box; padding: var(--kit-space-5); background: var(--kit-color-surface-soft); }
-.aw-camp.aw-camp #latest .kit-card > .kit-card-media { flex: none; width: var(--kit-thumb-lg); max-width: 40%; margin: 0; border-radius: var(--kit-radius-media); overflow: hidden; }
-.aw-camp.aw-camp #latest .kit-card > .kit-card-body { flex: 1; min-width: 0; padding: 0; }
-/* Below 1200 the picture beside the whole body left the text 165px wide: the meta row broke in two and Kits cut titles
-   to three lines with "…". Here the meta row runs the card's width on top, a square picture (--kit-thumb-sm on phones,
-   --kit-thumb-md on tablets) sits beside the title, and the title shows in full.
-   Not a Kits variant: kit-card--stacked-sm/-md (kit.css) put the picture beside the whole body, meta row included. Tested
-   on live at 375 (3 Nov 2026): stacked-sm gives a 209px text column, all 14 meta rows on two lines and 5 titles cut;
-   stacked-md 165px, 14 on two lines, 7 titles and 9 meta rows cut. No variant puts the meta row above the picture. */
-@media (max-width: 1199px) {
-	.aw-camp.aw-camp #latest .kit-card { display: grid; grid-template-columns: var(--kit-thumb-md) minmax(0, 1fr); grid-template-areas: "meta meta" "media title"; align-items: start; gap: var(--kit-space-3) var(--kit-space-4); }
-	.aw-camp.aw-camp #latest .kit-card > .kit-card-body { display: contents; }
-	/* One row when the date, place and first chip fit; on a narrower card the chip goes under the date whole, never cut.
-	   Only the first chip sets the chips' minimum width (later chips wrap their words, and Kits hides them off the row).
-	   Kits' own metarow rule (chips flex 1 1 8rem, meta may shrink) cuts the last meta item here: at 375 "2 min read" on
-	   the 8 guides and "New Delhi", so the meta keeps its width (as Home's guide rows, aw.css .aw-ed-learn). */
-	.aw-camp.aw-camp #latest .kit-card-metarow { grid-area: meta; }
-	.aw-camp.aw-camp #latest .kit-card-metarow > .kit-card-meta { flex: none; }
-	.aw-camp.aw-camp #latest .kit-card-metarow > .kit-card-chips { flex: 1 1 0; min-width: min-content; }
-	.aw-camp.aw-camp #latest .kit-card-metarow > .kit-card-chips > :first-child { flex: none; }
-	.aw-camp.aw-camp #latest .kit-card-metarow > .kit-card-chips > :not(:first-child) .kit-tag-text { white-space: normal; }
-	.aw-camp.aw-camp #latest .kit-card > .kit-card-media { grid-area: media; width: 100%; max-width: none; aspect-ratio: 1; }
-	.aw-camp.aw-camp #latest .kit-card > .kit-card-media img { width: 100%; height: 100%; object-fit: cover; }
-	.aw-camp.aw-camp #latest .kit-card-title { grid-area: title; margin: 0; }
-	.aw-camp.aw-camp #latest .kit-card-title a { display: block; -webkit-line-clamp: none; overflow: visible; }
-}
-@media (max-width: 767px) { .aw-camp.aw-camp #latest .kit-card { grid-template-columns: var(--kit-thumb-sm) minmax(0, 1fr); } }
+.aw-camp.aw-camp #latest .kit-card { background: var(--kit-color-surface-soft); }
 
 /* What happens next: the row of four from 768 (not only from 1200), the cards white */
 .aw-camp.aw-camp :is(#next, #next-closed) .aw-camp-steps > li:not(:first-child) { background: var(--kit-color-surface-soft); }
@@ -891,15 +864,6 @@
    "Read the full draft" link (24px). */
 @media (max-width: 767px) {
 	.aw-camp--lab-rules :is(.aw-rule-chip, .aw-camp-more) { min-height: var(--kit-size-target); }
-}
-/* The letter on phones (campaign-lab.js): folded, its first 14rem (the box's phone height before) fading out over
-   --kit-space-8, with the button under it; open, the whole letter in the page, no scroll box inside the page. From 768
-   the button is hidden and the box scrolls as before. */
-.aw-letter-whole { margin-top: var(--kit-space-3); }
-@media (min-width: 768px) { .aw-letter-whole { display: none; } }
-@media (max-width: 767px) {
-	.aw-letter .aw-letter-preview { max-height: none; overflow: visible; }
-	.aw-letter .aw-letter-preview.is-folded { max-height: 14rem; overflow: hidden; -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - var(--kit-space-8)), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - var(--kit-space-8)), transparent); }
 }
 /* Guides under the sections they explain (owner, 3 Nov 2026): each link a 44px target (--kit-size-target) in body type,
    the lines of one section kept together; on the dark pain-scale section the link and its icon take the on-ink colour
@@ -975,8 +939,7 @@
 }
 
 /* Stacked cards at 1:3, picture to text (owner rule, 13 Nov 2026: resource, news and library thumbnails carry little,
-   so they sit beside the text at a quarter of the card): In the news and guides (#latest), Read the law and the record
-   (#read), and the social posts under What people are saying (#people, two columns from 768). Kits sets the stacked
+   so they sit beside the text at a quarter of the card): Read the law and the record (#read), and the social posts under What people are saying (#people, two columns from 768). Kits sets the stacked
    picture to a fixed thumb with !important, so this width needs it too. */
 .aw-camp.aw-camp #people .aw-camp-row-q { display: grid; gap: var(--kit-space-4); grid-template-columns: minmax(0, 1fr); }
 @media (min-width: 768px) { .aw-camp.aw-camp #people .aw-camp-row-q { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
@@ -984,8 +947,6 @@
 .aw-camp.aw-camp :is(#read, #people) .kit-card[class*="kit-card--stacked"] > .kit-card-media { flex: none; width: 25% !important; max-width: none; min-width: 0; margin: 0; aspect-ratio: 1; overflow: hidden; }
 .aw-camp.aw-camp :is(#read, #people) .kit-card[class*="kit-card--stacked"] > .kit-card-media img { width: 100%; height: 100%; object-fit: cover; }
 .aw-camp.aw-camp :is(#read, #people) .kit-card[class*="kit-card--stacked"] > .kit-card-body { flex: 1; min-width: 0; }
-@media (min-width: 1200px) { .aw-camp.aw-camp #latest .kit-card > .kit-card-media { width: 25%; max-width: none; } }
-@media (max-width: 1199px) { .aw-camp.aw-camp #latest .kit-card { grid-template-columns: minmax(0, 1fr) minmax(0, 3fr); } }
 
 /* Campaign FAQ (owner, 13 Nov 2026: "check spacing font size and behavior across mobile UX"). Rank Math's FAQ block
    (Diwali, Lab) takes the kit FAQ card (kit.css .kit-faq-item), so all four campaign FAQs read the same on a phone:
@@ -999,3 +960,12 @@
 .aw-camp .rank-math-list-item > .rank-math-answer { padding: 0; }
 .aw-camp .rank-math-answer > p { margin: 0; max-width: var(--kit-measure); line-height: var(--kit-leading-body); }
 .aw-camp .rank-math-answer > p + p { margin-top: var(--kit-space-3); }
+
+/* One H3 size per breakpoint (owner, 13 Nov 2026): every H3 on the page, card titles, tiles, tiers, the ways to help and
+   the FAQ questions, at --kit-type-card-title (docs/design-system.md line 78: 20px, 22.4px from 768, 24px from 1200) with
+   the H3 line height. aw.css gives entry-content H3s --kit-type-h3 (fluid) with !important, so this needs it too. */
+.aw-camp.aw-camp--lab-rules h3 { font-size: var(--kit-type-card-title) !important; line-height: var(--kit-h3-leading) !important; }
+
+/* What people are saying: a long handle (@doghomefoundation) wraps inside its card instead of running past it */
+.aw-camp--lab-rules .aw-social-card .kit-meta-row { min-width: 0; }
+.aw-camp--lab-rules .aw-social-card .kit-meta-row > * { flex-shrink: 1; min-width: 0; overflow-wrap: anywhere; }

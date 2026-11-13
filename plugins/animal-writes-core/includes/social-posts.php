@@ -969,8 +969,8 @@ function aw_social_for_item( int $id ): array {
 
 /**
  * One card: the Kits card (kit-card--block-md, no picture) in the More list: date first, then platform and handle;
- * the person as the title (a link to the post); our summary. X and YouTube posts get a button that loads the post
- * here; nothing from the platform loads before that click.
+ * the person as the title (a link to the post); our summary. X and YouTube posts show open under it (no folds
+ * sitewide): the post loads when the card comes near the screen, nothing from the platform before that.
  *
  * @param WP_Post $p Social post.
  */
@@ -989,8 +989,7 @@ function aw_social_card( WP_Post $p ): string {
 	$embed    = '';
 	if ( in_array( $link['platform'], array( 'x', 'youtube' ), true ) ) {
 		$box   = 'aw-social-embed-' . (int) $p->ID;
-		$embed = '<div class="aw-opp-actions"><button type="button" class="kit-btn kit-btn--secondary kit-btn--sm kit-btn--label" data-aw-social-embed="' . esc_attr( $link['platform'] ) . '" data-url="' . esc_url( $link['url'] ) . '" data-id="' . esc_attr( $link['video'] ) . '" data-title="' . esc_attr( $name ) . '" aria-expanded="false" aria-controls="' . esc_attr( $box ) . '"' . ( '' !== $name ? ' aria-label="' . esc_attr( 'Show the post by ' . $name ) . '"' : '' ) . '>' . esc_html( 'Show the post' ) . '</button>'
-			. '<div id="' . esc_attr( $box ) . '" style="flex-basis:100%" hidden></div></div>'; // the embed takes the row under the button
+		$embed = '<div class="aw-opp-actions"><div id="' . esc_attr( $box ) . '" style="flex-basis:100%" data-aw-social-embed="' . esc_attr( $link['platform'] ) . '" data-url="' . esc_url( $link['url'] ) . '" data-id="' . esc_attr( $link['video'] ) . '" data-title="' . esc_attr( $name ) . '"></div></div>'; // above the card's link (kit.css .aw-opp-actions), so the post stays usable
 		aw_social_embed_script();
 	}
 	return '<li><article class="kit-card kit-card--block-md aw-social-card"><div class="kit-card-body">'
@@ -1041,8 +1040,9 @@ add_filter(
 );
 
 /**
- * The click-to-load script, once per page, only when a card has an X or YouTube post. X: the widgets script is
- * fetched on the first click. YouTube: the privacy-enhanced player (youtube-nocookie.com) in core's 16:9 embed frame.
+ * The load-near-the-screen script, once per page, only when a card has an X or YouTube post. Each post is built when
+ * its card comes within 400px of the screen (all at once where IntersectionObserver is missing). X: the widgets script
+ * is fetched with the first post. YouTube: the privacy-enhanced player (youtube-nocookie.com) in core's 16:9 embed frame.
  */
 function aw_social_embed_script() {
 	static $on = false;
@@ -1056,10 +1056,10 @@ function aw_social_embed_script() {
 	wp_add_inline_script(
 		'aw-social-embed',
 		"(function(){var xs=false;function x(box){if(window.twttr&&window.twttr.widgets){window.twttr.widgets.load(box);return;}if(xs){return;}xs=true;var s=document.createElement('script');s.src='https://platform.twitter.com/widgets.js';s.async=true;s.charset='utf-8';document.head.appendChild(s);}"
-		. "document.addEventListener('click',function(e){var b=e.target&&e.target.closest?e.target.closest('button[data-aw-social-embed]'):null;if(!b){return;}var box=document.getElementById(b.getAttribute('aria-controls'));if(!box){return;}"
-		. "if(!box.firstChild){var k=b.getAttribute('data-aw-social-embed');if(k==='x'){var q=document.createElement('blockquote');q.className='twitter-tweet';q.setAttribute('data-dnt','true');var a=document.createElement('a');a.href=b.getAttribute('data-url');a.textContent=a.href;q.appendChild(a);box.appendChild(q);box.hidden=false;x(box);}"
-		. "else if(k==='youtube'){var f=document.createElement('figure');f.className='wp-block-embed is-type-video is-provider-youtube wp-block-embed-youtube wp-embed-aspect-16-9 wp-has-aspect-ratio';var w=document.createElement('div');w.className='wp-block-embed__wrapper';var i=document.createElement('iframe');i.src='https://www.youtube-nocookie.com/embed/'+encodeURIComponent(b.getAttribute('data-id'));i.title=b.getAttribute('data-title')||'YouTube';i.width='560';i.height='315';i.setAttribute('allow','encrypted-media; picture-in-picture');i.setAttribute('allowfullscreen','');w.appendChild(i);f.appendChild(w);box.appendChild(f);}}"
-		. "var open=b.getAttribute('aria-expanded')==='true';b.setAttribute('aria-expanded',open?'false':'true');box.hidden=open;});})();"
+		. "function build(box){if(box.firstChild){return;}var k=box.getAttribute('data-aw-social-embed');if(k==='x'){var q=document.createElement('blockquote');q.className='twitter-tweet';q.setAttribute('data-dnt','true');var a=document.createElement('a');a.href=box.getAttribute('data-url');a.textContent=a.href;q.appendChild(a);box.appendChild(q);x(box);}"
+		. "else if(k==='youtube'){var f=document.createElement('figure');f.className='wp-block-embed is-type-video is-provider-youtube wp-block-embed-youtube wp-embed-aspect-16-9 wp-has-aspect-ratio';var w=document.createElement('div');w.className='wp-block-embed__wrapper';var i=document.createElement('iframe');i.src='https://www.youtube-nocookie.com/embed/'+encodeURIComponent(box.getAttribute('data-id'));i.title=box.getAttribute('data-title')||'YouTube';i.width='560';i.height='315';i.setAttribute('allow','encrypted-media; picture-in-picture');i.setAttribute('allowfullscreen','');w.appendChild(i);f.appendChild(w);box.appendChild(f);}}"
+		. "var boxes=document.querySelectorAll('div[data-aw-social-embed]');if(!('IntersectionObserver' in window)){Array.prototype.forEach.call(boxes,build);return;}"
+		. "var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){io.unobserve(e.target);build(e.target);}});},{rootMargin:'400px 0px'});Array.prototype.forEach.call(boxes,function(b){io.observe(b);});})();"
 	);
 }
 
