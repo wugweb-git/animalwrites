@@ -113,6 +113,7 @@ require_once AW_CORE_DIR . 'includes/newsletter.php';
 require_once AW_CORE_DIR . 'includes/model.php';
 require_once AW_CORE_DIR . 'includes/featured.php';
 require_once AW_CORE_DIR . 'includes/org-people.php';
+require_once AW_CORE_DIR . 'includes/helpers-public.php'; // [aw_helpers] on the Volunteer page: approved helpers (owner, 13 Nov 2026)
 require_once AW_CORE_DIR . 'includes/breadcrumbs.php';
 require_once AW_CORE_DIR . 'includes/item-head.php';
 require_once AW_CORE_DIR . 'includes/research-citation.php';

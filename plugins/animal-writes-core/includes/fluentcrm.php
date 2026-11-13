@@ -128,6 +128,8 @@ const AW_CRM_TAG_TITLES = array(
 	'topic-campaigns'     => 'Topic: campaigns',
 	'topic-laws'          => 'Topic: laws and court orders',
 	'topic-opportunities' => 'Topic: opportunities',
+	'helper-pending'      => 'Helper: waiting for approval',
+	'helper-approved'     => 'Helper: approved to show',
 );
 
 /** Tag IDs for slugs (created if missing). */
@@ -376,6 +378,12 @@ const AW_CRM_VOL_FIELDS = array(
 	'vol_org_show'        => array( 'Volunteer: show my name on the organisation\'s page (1 = yes, empty = no)', 'text' ),
 	'vol_org_listing'     => array( 'Volunteer: organisation\'s listing ID (set by the owner when the name does not match)', 'text' ),
 	'vol_org_role'        => array( 'Organisation: role (from an approved claim)', 'text' ),
+	// Volunteer form B and the helper profile (owner, 13 Nov 2026; helpers-public.php).
+	'vol_vehicle'         => array( 'Volunteer: vehicle (none, bike, car, van)', 'text' ),
+	'vol_can_do'          => array( 'Volunteer: what else they can do', 'text' ),
+	'vol_animals_ok'      => array( 'Volunteer: animals they are comfortable with', 'text' ),
+	'vol_helper_public'   => array( 'Volunteer: show me as a helper (1 = yes, empty = no)', 'text' ),
+	'vol_verify_ok'       => array( 'Volunteer: OK to contact me to verify (1 = yes, empty = no)', 'text' ),
 );
 
 /** Custom fields (group "Forms"): the newsletter box on the last form a contact sent (owner, 21 Oct 2026). */

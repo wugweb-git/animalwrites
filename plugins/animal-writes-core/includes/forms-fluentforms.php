@@ -718,9 +718,27 @@ add_action(
 			// and the ticks as 1/0: an unticked box sends nothing, so the link leaves the field blank
 			$c->syncCustomFieldValues(
 				array_filter( array( 'vol_state' => $st ? $st->name : '', 'vol_district' => $di ? $di->name : '', 'vol_pincode' => preg_replace( '/\D/', '', (string) ( $data['pincode'] ?? '' ) ) ) )
-				+ array( 'vol_wa_optin' => aw_ff_ticked( $data, 'wa_optin' ) ? '1' : '0', 'vol_org_show' => aw_ff_ticked( $data, 'org_show' ) ? '1' : '0' ),
+				+ array(
+					'vol_wa_optin'      => aw_ff_ticked( $data, 'wa_optin' ) ? '1' : '0',
+					'vol_org_show'      => aw_ff_ticked( $data, 'org_show' ) ? '1' : '0',
+					// helper profile (owner, 13 Nov 2026; helpers-public.php): both ticks, as 1/0, and the form-B answers
+					'vol_helper_public' => aw_ff_ticked( $data, 'helper_public' ) ? '1' : '0',
+					'vol_verify_ok'     => aw_ff_ticked( $data, 'verify_ok' ) ? '1' : '0',
+					'vol_vehicle'       => sanitize_text_field( implode( ', ', (array) ( $data['vehicle'] ?? array() ) ) ),
+					'vol_can_do'        => sanitize_text_field( implode( ', ', (array) ( $data['can_do'] ?? array() ) ) ),
+					'vol_animals_ok'    => sanitize_text_field( implode( ', ', (array) ( $data['animals_ok'] ?? array() ) ) ),
+				),
 				false
 			);
+			if ( aw_ff_ticked( $data, 'helper_public' ) && aw_ff_ticked( $data, 'verify_ok' ) ) { // waits in FluentCRM until the owner swaps helper-pending for helper-approved
+				try {
+					if ( ! $c->tags()->where( 'slug', 'helper-approved' )->exists() ) {
+						$c->attachTags( aw_crm_tag_ids( array( 'helper-pending' ) ) );
+					}
+				} catch ( \Throwable $e ) { // never let a tag problem stop the sign-up
+					error_log( 'aw helpers: ' . $e->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+				}
+			}
 		}
 		if ( 'contact' === $key ) {
 			aw_crm_entry_note( $c, $entry_id, $data, (int) $form->id, aw_ff_ref( $key, $entry_id ) );
