@@ -51,9 +51,9 @@
       "lg": "var(--color-yellow)"
     },
     "color-accent-ink": {
-      "sm": "var(--color-blue)",
-      "md": "var(--color-blue)",
-      "lg": "var(--color-blue)"
+      "sm": "#0062b8",
+      "md": "#0062b8",
+      "lg": "#0062b8"
     },
     "color-on-accent": {
       "sm": "var(--color-ash)",
@@ -66,9 +66,9 @@
       "lg": "var(--neutral-0)"
     },
     "color-danger": {
-      "sm": "var(--color-peach)",
-      "md": "var(--color-peach)",
-      "lg": "var(--color-peach)"
+      "sm": "#c8102e",
+      "md": "#c8102e",
+      "lg": "#c8102e"
     },
     "color-danger-soft": {
       "sm": "#fef2f2",
@@ -86,9 +86,9 @@
       "lg": "#f0fdf4"
     },
     "color-focus": {
-      "sm": "var(--color-blue)",
-      "md": "var(--color-blue)",
-      "lg": "var(--color-blue)"
+      "sm": "#0062b8",
+      "md": "#0062b8",
+      "lg": "#0062b8"
     },
     "color-whatsapp": {
       "sm": "#15803d",
@@ -761,9 +761,9 @@
       "lg": "#fff6e0"
     },
     "color-info": {
-      "sm": "var(--color-blue)",
-      "md": "var(--color-blue)",
-      "lg": "var(--color-blue)"
+      "sm": "#0062b8",
+      "md": "#0062b8",
+      "lg": "#0062b8"
     },
     "color-info-soft": {
       "sm": "#eaf1fc",
@@ -771,9 +771,14 @@
       "lg": "#eaf1fc"
     },
     "color-link": {
-      "sm": "var(--color-blue)",
-      "md": "var(--color-blue)",
-      "lg": "var(--color-blue)"
+      "sm": "#0062b8",
+      "md": "#0062b8",
+      "lg": "#0062b8"
+    },
+    "color-link-external": {
+      "sm": "currentColor",
+      "md": "currentColor",
+      "lg": "currentColor"
     },
     "grid-gap": {
       "sm": "16px",

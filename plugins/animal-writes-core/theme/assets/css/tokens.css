@@ -2,9 +2,6 @@
 :root {
   --kit-color-surface-soft: var(--neutral-0);
   --kit-color-on-accent: #141414;
-  --kit-color-danger-soft: #fff2f4;
-  --kit-color-success-soft: #eef8f1;
-  --kit-color-whatsapp: #1f7a44;
   --kit-surface-page: var(--kit-color-canvas);
   --kit-field-text-size: 1rem; /* 16px below 768 so iOS does not zoom into a field */
   --kit-type-sm: var(--fluid-body-sm);
