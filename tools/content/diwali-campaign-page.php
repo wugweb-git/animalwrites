@@ -208,7 +208,7 @@ $what = dwsec(
 	'what',
 	dwsplit(
 		dwh( 'What\'s happening' )
-		. dwp( 'Diwali falls on Sunday 8 Nov 2026, with Govardhan Puja on 9 Nov 2026 and Bhai Dooj on 10 Nov 2026. For most animals it is the loudest week of the year. Dogs, cats, cattle and birds hear bangs more sharply than we do, and they cannot know the noise will stop. Frightened animals bolt into traffic, hide under cars, stop eating, or get burnt by crackers thrown near them. This page is what to do before, on the night and after.' )
+		. dwp( 'Crackers go off for several nights around Diwali, through Govardhan Puja and Bhai Dooj. For most animals it is the loudest week of the year. Dogs, cats, cattle and birds hear bangs more sharply than we do, and they cannot know the noise will stop. Frightened animals bolt into traffic, hide under cars, stop eating, or get burnt by crackers thrown near them. This page is what to do before, on the night and after.' )
 		. dwhtml(
 			'<ol class="aw-camp-dates">'
 			. '<li class="is-key"><span class="aw-camp-dates-when">8 Nov 2026</span><span class="aw-camp-dates-what">Diwali (Lakshmi Puja)</span></li>'
@@ -400,7 +400,7 @@ $next_closed = dwsec(
 /* updates: sharing and the newsletter line. */
 $share = dwsec(
 	'share',
-	dwh( 'Send this to three people before Sunday' )
+	dwh( 'Share this with your street' )
 	. dwp( 'Your RWA group, the person who feeds the dogs on your street, a friend with a pet. One forward is one animal that gets a quiet room, a bowl of water or a vet in time.', 'aw-camp-lede' )
 	. dwhtml( '<div class="aw-camp-share-kit" data-aw-share></div>' )
 	. dwp( dwi( 'mail' ) . 'Sign up with the newsletter form at the end of this page and we\'ll tell you when the court orders on crackers change.', 'aw-camp-note' ),
@@ -443,11 +443,11 @@ $content  = '<!-- wp:group {"align":"full","className":"aw-camp aw-camp--diwali"
 	. "</div>\n<!-- /wp:group -->";
 
 $title   = 'Keep animals safe this Diwali';
-$excerpt = 'Firecrackers frighten and hurt pets, street animals and birds. Before 8 Nov 2026: a safe room for your pet, a quiet corner and water for the dogs outside, and the numbers to call if an animal is hurt.';
+$excerpt = 'Firecrackers frighten and hurt pets, street animals and birds. Every Diwali, they need a safe room, a quiet corner and water outside, and you need the numbers to call if an animal is hurt.';
 $meta    = array(
 	'aw_campaign_open'          => gmdate( 'Y-m-d', time() + 19800 ), // the day it is built (IST); the window opens on publishing
 	'aw_campaign_close'         => DW_DIWALI, // last day: Diwali; Post from 00:00 IST on 9 Nov
-	'aw_campaign_share_text'    => 'Before 8 Nov: a safe room and ID tag for your pet, water and a quiet corner for the street dogs, and the numbers to call if an animal is hurt.',
+	'aw_campaign_share_text'    => 'On Diwali night: a safe room and ID tag for your pet, water and a quiet corner for street dogs, and the numbers to call if an animal is hurt.',
 	'aw_campaign_impact_state'  => 'na',
 	'aw_campaign_outcome'       => 'pending',
 );
