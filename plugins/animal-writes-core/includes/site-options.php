@@ -12,6 +12,7 @@
  * - aw_follow_reddit, aw_follow_discord: our Reddit and Discord addresses for "Follow us" on the page Share sections
  *   (campaign-tools.php, aw_follow_accounts). Empty: no icon (never a dead link). Only an https address on the
  *   network's own host is kept.
+ * - aw_delete_data_on_uninstall: true lets uninstall.php delete the plugin's own options and tables (default false).
  *
  * @package animal-writes-core
  */
@@ -96,8 +97,37 @@ add_action(
 		foreach ( AW_FOLLOW_EXTRA as $aw_opt => $aw_row ) {
 			add_settings_field( $aw_opt, $aw_row[0], 'aw_site_options_follow_url', 'aw-modules', 'aw_modules_follow', array( 'label_for' => $aw_opt ) );
 		}
+		add_settings_section( 'aw_modules_uninstall', 'Animal Writes Core data', '__return_null', 'aw-modules' );
+		add_settings_field( 'aw_delete_data_on_uninstall', 'Delete this plugin\'s data when it is deleted', 'aw_site_options_uninstall', 'aw-modules', 'aw_modules_uninstall', array( 'label_for' => 'aw_delete_data_on_uninstall' ) );
 	}
 );
+
+// Whether deleting the plugin also deletes its own settings and tables (uninstall.php). Off by default. On init, so
+// the REST API has it too; its box is in the Kits → Modules form above.
+add_action(
+	'init',
+	function () {
+		register_setting(
+			'aw_modules',
+			'aw_delete_data_on_uninstall',
+			array(
+				'type'              => 'boolean',
+				'default'           => false,
+				'sanitize_callback' => 'rest_sanitize_boolean',
+				'show_in_rest'      => true,
+			)
+		);
+	}
+);
+
+/** Delete the data on uninstall: on/off. */
+function aw_site_options_uninstall(): void {
+	printf(
+		'<input type="checkbox" id="aw_delete_data_on_uninstall" name="aw_delete_data_on_uninstall" value="1"%1$s> <p class="description">%2$s</p>',
+		checked( (bool) get_option( 'aw_delete_data_on_uninstall', false ), true, false ),
+		esc_html( 'Off: everything stays in the database if the plugin is deleted.' )
+	);
+}
 
 /**
  * A list of positive IDs from "12, 34" or an array.
