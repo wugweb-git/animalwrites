@@ -21,7 +21,7 @@
 				{
 					"slug": "primary-dark",
 					"name": "Accent ink",
-					"color": "#2368D7"
+					"color": "#0062b8"
 				},
 				{
 					"slug": "secondary",
@@ -66,12 +66,12 @@
 				{
 					"slug": "focus",
 					"name": "Focus",
-					"color": "#2368D7"
+					"color": "#0062b8"
 				},
 				{
 					"slug": "error",
 					"name": "Danger",
-					"color": "#E54F30"
+					"color": "#c8102e"
 				},
 				{
 					"slug": "success",
@@ -82,6 +82,31 @@
 					"slug": "warning",
 					"name": "Warning",
 					"color": "#8a5a00"
+				},
+				{
+					"slug": "error-soft",
+					"name": "Danger tint",
+					"color": "#fef2f2"
+				},
+				{
+					"slug": "success-soft",
+					"name": "Success tint",
+					"color": "#f0fdf4"
+				},
+				{
+					"slug": "warning-soft",
+					"name": "Warning tint",
+					"color": "#fff6e0"
+				},
+				{
+					"slug": "info-soft",
+					"name": "Info tint",
+					"color": "#eaf1fc"
+				},
+				{
+					"slug": "whatsapp",
+					"name": "WhatsApp",
+					"color": "#15803d"
 				}
 			]
 		},
