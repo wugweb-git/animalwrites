@@ -569,7 +569,7 @@
 	:is(.aw-camp--diwali, .aw-camp--sc-stray-dogs) .aw-camp-dates:not(.kit-dateline) li:nth-child(3n)::before { right: calc(-1 * var(--kit-space-4)); }
 	:is(.aw-camp--diwali, .aw-camp--sc-stray-dogs) .aw-camp-dates:not(.kit-dateline) li:last-child::before { right: 0; }
 }
-.aw-camp-more { display: inline-flex; align-items: center; gap: var(--kit-space-1); font-weight: var(--kit-weight-strong); }
+.aw-camp-more { display: inline-flex; align-items: center; gap: var(--kit-space-1); min-height: var(--kit-size-target); font-weight: var(--kit-weight-strong); } /* a link on its own line ("What 1962 is…", "How to report animal cruelty"): a 44px target */
 
 /* What the draft does: icon grid; the main change leads in red */
 .aw-camp-grid { display: grid; gap: var(--kit-space-4); grid-template-columns: 1fr; }
@@ -875,7 +875,6 @@
 	.aw-camp.aw-camp--lab-rules .aw-letter-ground-list { gap: var(--kit-space-3); }
 	.aw-camp.aw-camp--lab-rules .aw-letter-ground-list > * { flex-basis: max(var(--kit-row-item), calc(100% - var(--kit-space-6))); }
 }
-.aw-camp--lab-rules .aw-camp-more { min-height: var(--kit-size-target); } /* "Read the full draft" and the like: a 44px target */
 
 /* Campaign pages on phones: no sideways rows (owner, 2 Nov 2026: "no side scroll in campaign page on mobile"). Below 768
    the card rows, the grounds, the news and Library lists stack one card under another at the full width, and the two
@@ -911,7 +910,7 @@
      (--kit-space-2, --kit-space-4). */
 .aw-camp--diwali :is(#law, #what-to-do) .aw-camp-grid { display: block; margin-block: var(--kit-space-5); border-top: var(--kit-border-width) solid var(--kit-color-line); }
 .aw-camp--diwali .aw-camp-acc { margin: 0; padding: 0; border-bottom: var(--kit-border-width) solid var(--kit-color-line); background: none; box-shadow: none; color: var(--kit-color-text); }
-.aw-camp--diwali .aw-camp-acc > summary { display: flex; align-items: center; gap: var(--kit-space-3); box-sizing: border-box; min-height: var(--kit-size-target); padding-block: var(--kit-space-2); font-size: var(--kit-type-h3); font-weight: var(--kit-weight-bold); line-height: var(--kit-leading-heading); color: var(--kit-color-ink); cursor: pointer; list-style: none; }
+.aw-camp--diwali .aw-camp-acc > summary { display: flex; align-items: center; gap: var(--kit-space-3); box-sizing: border-box; min-height: var(--kit-size-target); padding-block: var(--kit-space-2); font-size: var(--kit-type-h3); font-weight: var(--kit-weight-bold); line-height: var(--kit-leading-heading); color: var(--kit-color-ink); cursor: default; list-style: none; } /* every card stays open (no folds sitewide): no hand cursor */
 .aw-camp--diwali .aw-camp-acc > summary::-webkit-details-marker { display: none; }
 .aw-camp--diwali .aw-camp-acc > summary::after { content: ""; flex: 0 0 auto; margin-left: auto; width: var(--kit-space-2); height: var(--kit-space-2); border-right: calc(2 * var(--kit-border-width)) solid currentColor; border-bottom: calc(2 * var(--kit-border-width)) solid currentColor; transform: rotate(45deg); } /* the open/closed chevron */
 .aw-camp--diwali .aw-camp-acc[open] > summary::after { transform: rotate(-135deg); }
@@ -984,7 +983,7 @@
 .aw-camp--diwali .aw-camp-hero h1 + p { margin-bottom: var(--kit-space-5); font-size: var(--kit-type-lead); }
 .aw-camp--diwali .aw-camp-hero .aw-festive-ico { width: var(--kit-size-control); height: var(--kit-size-control); border-radius: 50%; background: var(--camp-mark); color: var(--camp-on-mark); }
 .aw-camp--diwali #latest .aw-camp-more-fold { grid-column: 1 / -1; margin: 0; border-top: var(--kit-border-width) solid var(--kit-color-line); }
-.aw-camp--diwali #latest .aw-camp-more-fold > summary { display: flex; align-items: center; box-sizing: border-box; min-height: var(--kit-size-target); padding-block: var(--kit-space-2); font-weight: var(--kit-weight-bold); cursor: pointer; }
+.aw-camp--diwali #latest .aw-camp-more-fold > summary { display: flex; align-items: center; box-sizing: border-box; min-height: var(--kit-size-target); padding-block: var(--kit-space-2); font-weight: var(--kit-weight-bold); cursor: default; } /* always open: no hand cursor */
 .aw-camp--diwali #latest .aw-camp-more-fold > summary:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
 .aw-camp--diwali #latest .aw-camp-more-fold .wp-block-post-template { display: grid; gap: var(--kit-space-4); margin: 0 0 var(--kit-space-4); padding: 0; list-style: none; }
 @media (min-width: 768px) {
@@ -1071,6 +1070,10 @@
    lists (.aw-camp-cards, a post template list) use the same cards. */
 .aw-camp.aw-camp :is(#latest .aw-camp-row, .aw-camp-cards .wp-block-post-template) { display: grid; gap: var(--kit-space-4); grid-template-columns: minmax(0, 1fr); }
 @media (min-width: 768px) { .aw-camp.aw-camp :is(#latest .aw-camp-row, .aw-camp-cards .wp-block-post-template) { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+/* the row holds whole stacked lists (aw-stack-list), which make their own columns (aw.css): one column here, so the top
+   four are not squeezed into half the row (2 x 164px at 768) */
+.aw-camp.aw-camp #latest .aw-camp-row:has(.aw-stack-list) { grid-template-columns: minmax(0, 1fr); }
+.aw-camp.aw-camp :is(#latest, .aw-camp-cards) .kit-card .kit-card-title a { display: inline; -webkit-line-clamp: unset; line-clamp: unset; overflow: visible; } /* the whole title: the stacked card grows taller instead of cutting it (the kit clamps card titles at 3 lines) */
 .aw-camp.aw-camp :is(#latest .aw-camp-row, .aw-camp-cards) .wp-block-post-template > li { flex: none; width: auto; min-width: 0; margin: 0; }
 .aw-camp.aw-camp :is(#latest, .aw-camp-cards) .kit-card { flex-direction: row; align-items: center; gap: var(--kit-space-4); height: 100%; box-sizing: border-box; padding: var(--kit-space-5); background: var(--kit-color-surface-soft); }
 .aw-camp.aw-camp :is(#latest, .aw-camp-cards) .kit-card > .kit-card-media { flex: none; width: var(--kit-thumb-lg); max-width: 40%; margin: 0; border-radius: var(--kit-radius-media); overflow: hidden; }

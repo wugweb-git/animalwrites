@@ -99,6 +99,9 @@
 .aw-newsletter-form .ff-el-input--label { margin: 0 0 var(--kit-space-2); }
 .aw-newsletter-form .ff-el-input--label label { display: block; margin: 0; font-weight: var(--kit-weight-regular); color: inherit; }
 .aw-newsletter-form .ff-el-input--label.ff-el-is-required label::after { content: none; }
+/* the tick boxes ("On WhatsApp"): the label is the target, a 44px row, the box --kit-size-check */
+.aw-newsletter-form .ff-el-form-check-label { display: flex; align-items: center; gap: var(--kit-space-2); min-height: var(--kit-size-target); margin: 0; cursor: pointer; }
+.aw-newsletter-form .ff-el-form-check-input { flex: none; width: var(--kit-size-check); height: var(--kit-size-check); margin: 0; }
 .aw-newsletter-form .ff-el-form-control {
 	width: 100%; box-sizing: border-box; height: var(--kit-field-height); min-height: var(--kit-field-height); padding: 0 var(--s-3);
 	font: inherit; font-size: max(1rem, var(--kit-type-base)); color: var(--neutral-10); background-color: var(--neutral-0);

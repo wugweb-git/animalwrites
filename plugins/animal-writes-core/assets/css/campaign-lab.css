@@ -267,7 +267,7 @@
 .aw-camp-dates-what { color: var(--camp-meta); }
 .aw-camp-dates:not(.kit-dateline) .is-key { border-top-width: 6px; }
 .aw-camp-dates:not(.kit-dateline) .is-key .aw-camp-dates-when { color: var(--camp-mark); }
-.aw-camp-more { display: inline-flex; align-items: center; gap: var(--kit-space-1); font-weight: var(--kit-weight-strong); }
+.aw-camp-more { display: inline-flex; align-items: center; gap: var(--kit-space-1); min-height: var(--kit-size-target); font-weight: var(--kit-weight-strong); } /* a link on its own line ("What 1962 is…", "How to report animal cruelty"): a 44px target */
 
 /* What the draft does: icon grid; the main change leads in red */
 .aw-camp-grid { display: grid; gap: var(--kit-space-4); grid-template-columns: 1fr; }
@@ -796,6 +796,8 @@
    40%, beside the title), white. Phones one column, from 768 two. */
 .aw-camp.aw-camp #latest .aw-camp-row { display: grid; gap: var(--kit-space-4); grid-template-columns: minmax(0, 1fr); }
 @media (min-width: 768px) { .aw-camp.aw-camp #latest .aw-camp-row { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.aw-camp.aw-camp #latest .aw-camp-row:has(.aw-stack-list) { grid-template-columns: minmax(0, 1fr); } /* the stacked lists make their own columns (aw.css) */
+.aw-camp.aw-camp :is(#latest, .aw-camp-cards) .kit-card .kit-card-title a { display: inline; -webkit-line-clamp: unset; line-clamp: unset; overflow: visible; } /* the whole title: the stacked card grows taller instead of cutting it (the kit clamps card titles at 3 lines) */
 .aw-camp.aw-camp #latest .aw-camp-row .wp-block-post-template > li { flex: none; width: auto; min-width: 0; margin: 0; }
 .aw-camp.aw-camp #latest .kit-card { flex-direction: row; align-items: center; gap: var(--kit-space-4); height: 100%; box-sizing: border-box; padding: var(--kit-space-5); background: var(--kit-color-surface-soft); }
 .aw-camp.aw-camp #latest .kit-card > .kit-card-media { flex: none; width: var(--kit-thumb-lg); max-width: 40%; margin: 0; border-radius: var(--kit-radius-media); overflow: hidden; }
