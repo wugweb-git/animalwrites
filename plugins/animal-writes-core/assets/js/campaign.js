@@ -231,110 +231,18 @@
 		var pageKit = document.querySelector('.aw-camp-share-kit');
 		if (pageKit) sharePics(pageKit, pageKit);
 	}
-	/* Share block template (owner, 2 Nov 2026; the same on every campaign): in the Share section's card, one main
-	   "Share this page" button (the phone's share sheet with the picture, the message and the short link; where a browser
-	   has no share sheet it copies the link and says so), the site's share bar as icons, and the campaign's ready-made
-	   story and post pictures: a tap shares that picture with the message and link, or saves it and copies the link. */
-	var sayTimer;
-	function say(done, msg) { // one status line under the button, cleared after a while
-		done.textContent = msg;
-		clearTimeout(sayTimer);
-		sayTimer = setTimeout(function () { done.textContent = ''; }, 6000);
-	}
-	function sharePicture(kind, done) {
-		if (navigator.clipboard) navigator.clipboard.writeText(tagged('copy')).catch(function () {});
-		say(done, canShare ? 'Link copied. Paste it in a Link sticker.' : 'Image saved. The link is copied too: paste it with your post.');
-		getFile(kind).then(function (file) {
-			if (!file) return;
-			if (canShareFile(file)) return navigator.share({ files: [file], title: sh.title, text: sh.text + ' ' + tagged('native') }).catch(function () {});
-			var a = document.createElement('a');
-			a.href = URL.createObjectURL(file);
-			a.download = file.name;
-			document.body.appendChild(a);
-			a.click();
-			a.remove();
-		});
-	}
+	/* The Share section uses the site's one share bar, as on every other page (owner, 13 Nov 2026: the share section
+	   behaves differently on a phone and on a computer, and is the same on all pages and content). Phones: the bar's Share
+	   button (the phone's own share sheet) and Copy link; tablets: Share, then the networks; computers: the networks. The
+	   page shares itself; its picture is the link preview's, the campaign hero. */
 	function shareBlock(holder) {
 		if (!holder || holder.dataset.awShareBlock) return;
 		holder.dataset.awShareBlock = '1';
 		holder.classList.add('aw-share-block');
-		var wrap = document.createElement('p');
-		wrap.className = 'aw-share-cta';
-		var b = document.createElement('button');
-		b.type = 'button';
-		b.className = 'wp-element-button kit-btn kit-btn--brand aw-share-cta-btn';
-		b.dataset.kitShare = canShare ? 'native' : 'copy_link';
-		b.innerHTML = '<span class="kit-ico kit-ico--' + (canShare ? 'share' : 'link') + '" aria-hidden="true"></span>';
-		b.appendChild(document.createTextNode('Share this page'));
-		var done = document.createElement('span');
-		done.className = 'aw-share-cta-done';
-		done.setAttribute('role', 'status');
-		done.setAttribute('aria-live', 'polite');
-		wrap.appendChild(b);
-		wrap.appendChild(done);
-		holder.insertBefore(wrap, holder.firstChild);
-		b.addEventListener('click', function () {
-			if (canShare) { shareAll(holder); return; }
-			if (navigator.clipboard) navigator.clipboard.writeText(tagged('copy')).catch(function () {});
-			say(done, 'Link copied');
-		});
 		/* The share bar's links carry the campaign's share message with the short link (the server's bar has the title). */
 		var t = encodeURIComponent(sh.text || sh.title || ''), u = function (src) { return encodeURIComponent(tagged(src)); };
 		var nets = { x: 'https://x.com/intent/post?text=' + t + '&url=' + u('x') + (sh.hashtags ? '&hashtags=' + encodeURIComponent(sh.hashtags) : ''), whatsapp: 'https://wa.me/?text=' + t + '%20' + u('whatsapp'), email: 'mailto:?subject=' + encodeURIComponent(sh.title || '') + '&body=' + t + '%20' + u('email') };
 		holder.querySelectorAll('.kit-share a[data-kit-share]').forEach(function (a) { if (nets[a.dataset.kitShare] && sh.text) a.href = nets[a.dataset.kitShare]; });
-		var pics = cdFrozen ? picList() : []; // the page shares itself with its hero picture (owner, 13 Nov 2026)
-		if (pics.length) {
-			/* The theme's fold (kit.css .wp-block-details): closed when the pictures sit under the bar (phones, a narrow
-			   column), open and fixed when they sit beside the button (the band at least 44rem wide). */
-			var box = document.createElement('details');
-			box.className = 'wp-block-details aw-share-pics';
-			var head = document.createElement('summary');
-			head.className = 'aw-share-pics-head';
-			head.textContent = 'Or share a ready-made picture'; // owner's yes, 2 Nov 2026
-			box.appendChild(head);
-			var list = document.createElement('div');
-			list.className = 'aw-share-pics-list';
-			pics.forEach(function (k) {
-				var p = document.createElement('button');
-				p.type = 'button';
-				p.className = 'aw-share-pic aw-share-pic--' + k[0];
-				p.dataset.kitShare = k[0] + '_image';
-				var img = document.createElement('img');
-				img.src = sh[k[0]];
-				img.alt = '';
-				img.loading = 'lazy';
-				img.decoding = 'async';
-				p.appendChild(img);
-				p.setAttribute('aria-label', (canShare ? 'Share the ' : 'Save the ') + k[1] + ' picture');
-				p.title = p.getAttribute('aria-label');
-				p.addEventListener('click', function () { sharePicture(k[0], done); });
-				list.appendChild(p);
-			});
-			box.appendChild(list);
-			holder.appendChild(box);
-			var beside = null;
-			var place = function () {
-				var now = box.getBoundingClientRect().left >= wrap.getBoundingClientRect().right;
-				if (now === beside) return;
-				beside = now;
-				box.classList.toggle('is-beside', now);
-				box.open = now;
-				if (now) head.setAttribute('tabindex', '-1'); else head.removeAttribute('tabindex');
-			};
-			box.addEventListener('toggle', function () { if (beside && !box.open) box.open = true; });
-			place();
-			if ('ResizeObserver' in window) new ResizeObserver(place).observe(holder);
-		}
-		if (canShare && 'IntersectionObserver' in window) { // fetch the pictures once the block is near, so a tap opens the sheet at once
-			var io = new IntersectionObserver(function (en) {
-				if (!en[0].isIntersecting) return;
-				io.disconnect();
-				getFile(picKind());
-				pics.forEach(function (k) { getFile(k[0]); });
-			}, { rootMargin: '400px' });
-			io.observe(holder);
-		}
 	}
 	if (!document.querySelector('.aw-letter') && !cdFrozen && sh.url) {
 		var pageKit = document.querySelector('.aw-camp-share-kit');

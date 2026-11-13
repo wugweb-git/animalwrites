@@ -1050,9 +1050,9 @@
 .aw-camp.aw-camp #share .kit-share { border-top: 0; }
 .aw-camp.aw-camp #share .kit-share :is(.kit-share-label, .kit-share-name) { color: var(--camp-on-mark); }
 .aw-camp.aw-camp #share .aw-share-block .kit-share { flex-wrap: nowrap; gap: var(--kit-space-2); }
-.aw-camp.aw-camp #share .aw-share-block .kit-share :is(.kit-share-label, .kit-share-name) { display: none !important; }
+.aw-camp.aw-camp #share .aw-share-block .kit-share :is(.kit-share-label, .kit-share-btn:not(.kit-share-native) .kit-share-name) { display: none !important; }
 .aw-camp.aw-camp #share .kit-share .kit-share-btn { border-color: var(--camp-on-mark); background: transparent; color: var(--camp-on-mark); }
-.aw-camp.aw-camp #share .aw-share-block .kit-share .kit-share-btn { width: var(--kit-size-target); padding: 0; } /* round at every width (kit.js labels the bar at lg, the names stay hidden here) */
+.aw-camp.aw-camp #share .aw-share-block .kit-share .kit-share-btn:not(.kit-share-native) { width: var(--kit-size-target); padding: 0; } /* round at every width (kit.js labels the bar at lg, the names stay hidden here) */
 .aw-camp.aw-camp #share .kit-share .kit-share-btn:focus-visible { background: var(--camp-on-mark); color: var(--camp-mark); outline: var(--kit-focus-width) solid var(--camp-on-mark); outline-offset: var(--kit-focus-offset); } /* the focus ring white on the band */
 .aw-camp.aw-camp #share .kit-share .kit-share-copy:has(.kit-ico--check) { background: var(--camp-on-mark); color: var(--camp-mark); } /* done: the link is copied */
 @media (hover: hover) {
@@ -1090,5 +1090,5 @@
 	html:has(.aw-camp--sc-stray-dogs .aw-sticky-cta) { scroll-padding-bottom: calc(var(--kit-btn-height) + 2 * var(--kit-space-2) + env(safe-area-inset-bottom)); }
 }
 
-/* Campaign pages have their own Share this page button above the share bar (campaign.js): the bar's Share button stays hidden there. */
-.aw-camp-share-kit .kit-share .kit-share-native { display: none !important; }
+/* The bar's Share button (the phone's share sheet, kit.js) on the band: filled white with its name, as the bar's main button. */
+.aw-camp.aw-camp #share .kit-share .kit-share-btn.kit-share-native { background: var(--camp-on-mark); border-color: var(--camp-on-mark); color: var(--camp-mark); }
