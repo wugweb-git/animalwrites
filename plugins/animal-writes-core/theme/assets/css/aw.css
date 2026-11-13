@@ -347,14 +347,14 @@ a.aw-social-name { min-height: var(--kit-size-target); text-decoration: none; }
 .wp-block-post-template.aw-stack-list.aw-stack-list { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; grid-template-rows: none !important; gap: var(--kit-space-4) !important; }
 @media (min-width: 1200px) { .wp-block-post-template.aw-stack-list.aw-stack-list { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } }
 .aw-stack-list.aw-stack-list > li { grid-column: auto !important; grid-row: auto !important; min-width: 0; max-width: var(--kit-card-stacked-max) !important; }
-/* The picture is --kit-card-stacked-media-width of the card (30%) at --kit-card-stacked-media-ratio (3:4, Theme Options →
-   Cards), flush to the card's top and left edge, cover crop; picture and text sit at the top and the card is as tall as
-   the taller of the two: the words set its height, the picture never stretches it (owner, 13 Nov 2026). Text padded
-   --kit-space-4. */
-.aw-stack-list.aw-stack-list .kit-card.kit-card--stacked-md { flex-direction: row !important; align-items: flex-start !important; gap: 0 !important; height: auto !important; min-height: 0 !important; overflow: hidden; padding: 0 !important; }
-.aw-stack-list.aw-stack-list .kit-card.kit-card--stacked-md > .kit-card-media { position: relative; overflow: hidden; flex: none !important; align-self: flex-start; box-sizing: border-box; width: var(--kit-card-stacked-media-width) !important; height: auto !important; max-width: none !important; min-width: 0 !important; margin: 0 !important; aspect-ratio: var(--kit-card-stacked-media-ratio) !important; }
+/* The picture is a thumbnail, --kit-card-stacked-media-width (112px) at --kit-card-stacked-media-ratio (4:3, so 84px
+   tall; Theme Options → Cards), cover crop, inside the card's own padding (kit.css stacked card). Picture and text sit at the top; the
+   text sets the card's height and the picture never stretches it (owner, 14 Nov 2026: "the image must not determine the
+   card height"). */
+.aw-stack-list.aw-stack-list .kit-card.kit-card--stacked-md { flex-direction: row !important; align-items: flex-start !important; gap: var(--kit-space-4) !important; height: auto !important; min-height: 0 !important; overflow: hidden; }
+.aw-stack-list.aw-stack-list .kit-card.kit-card--stacked-md > .kit-card-media { position: relative; overflow: hidden; flex: none !important; align-self: flex-start; box-sizing: border-box; width: var(--kit-card-stacked-media-width) !important; height: auto !important; max-width: none !important; min-width: 0 !important; margin: 0 !important; aspect-ratio: var(--kit-card-stacked-media-ratio) !important; border-radius: var(--kit-radius-media); }
 .aw-stack-list.aw-stack-list .kit-card.kit-card--stacked-md > .kit-card-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.aw-stack-list.aw-stack-list .kit-card.kit-card--stacked-md > .kit-card-body { flex: 1 1 0 !important; min-width: 0 !important; align-self: flex-start; padding: var(--kit-space-4) !important; }
+.aw-stack-list.aw-stack-list .kit-card.kit-card--stacked-md > .kit-card-body { flex: 1 1 0 !important; min-width: 0 !important; align-self: flex-start; }
 .aw-stack-list.aw-stack-list .kit-card.kit-card--stacked-md .kit-card-sum { display: none; }
 /* Card type in steps (owner, 13 Nov 2026: "h3 one size per breakpoint", "metarow - one font size per breakpoint"): every card's
    H3 title is --kit-type-card-title (20px, 22px from 1200; owner, 13 Nov 2026: "20-22px desktop, 18-20px mobile") with the H3

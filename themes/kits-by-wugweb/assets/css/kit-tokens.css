@@ -145,8 +145,8 @@
   --kit-card-stacked-body-min: 0; /* least text column width in a stacked card */
   --kit-card-stacked-min: 340px; /* least width of a card in a stacked list (owner 13 Nov 2026: "Min 340px, two"; was 350) */
   --kit-card-stacked-max: 600px; /* most width of a card in a stacked list (owner 13 Nov 2026) */
-  --kit-card-stacked-media-width: 30%; /* picture width in a stacked list card; the text takes the rest (owner 13 Nov 2026) */
-  --kit-card-stacked-media-ratio: var(--wp--custom--kits--card--ratio--stacked, var(--kit-media-ratio-portrait)); /* stacked card picture, 3:4 (owner 13 Nov 2026); Theme Options → Cards can change it */
+  --kit-card-stacked-media-width: var(--kit-thumb-lg); /* picture in a stacked list card: a 112px thumbnail, the text takes the rest (owner 14 Nov 2026: 112x84 at 4:3; was 30% at 3:4) */
+  --kit-card-stacked-media-ratio: var(--wp--custom--kits--card--ratio--stacked, var(--kit-media-ratio-standard)); /* stacked card picture, 4:3 (owner 14 Nov 2026; was 3:4); Theme Options → Cards can change it */
   --kit-card-featured-media-ratio: var(--wp--custom--kits--card--ratio--featured, var(--kit-media-ratio-featured)); /* lead and featured story pictures, 3:2 (owner 13 Nov 2026); Theme Options → Cards can change it */
   --kit-card-square-media-ratio: var(--wp--custom--kits--card--ratio--square, var(--kit-media-ratio-square)); /* compact square thumbnails, 1:1 (owner 13 Nov 2026); Theme Options → Cards can change it */
   --kit-card-block-media-max: none; /* picture max height in a block card */

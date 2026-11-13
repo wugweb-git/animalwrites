@@ -25,8 +25,8 @@ To check: load a list page in an iframe at 320, 375, 480, 600, 768, 900, 1024, 1
 
 | Ratio | Token | Used for |
 |---|---|---|
-| 4:3 standard | `--kit-card-media-ratio` (`--kit-media-ratio-standard`) | cards with the picture above the text (archives, search, categories, story cards, Home Learn row, mini cards, Kits news list), Directory organisation photo, volunteer side photo |
-| 3:4 portrait | `--kit-card-stacked-media-ratio` (`--kit-media-ratio-portrait`) | stacked cards: News, Library and Resources lists, Home news and Library rows, the Home lead on phones |
+| 4:3 standard | `--kit-card-media-ratio` (`--kit-media-ratio-standard`); stacked cards through `--kit-card-stacked-media-ratio` | stacked cards (News, Library and Resources lists, Home news and Library rows: a 112x84 thumbnail, owner 14 Nov 2026), cards with the picture above the text (archives, search, categories, story cards, Home Learn row, mini cards, Kits news list), Directory organisation photo, volunteer side photo |
+| 3:4 portrait | `--kit-media-ratio-portrait` | none since 14 Nov 2026 (stacked cards were 3:4 until then) |
 | 3:2 featured | `--kit-card-featured-media-ratio` (`--kit-media-ratio-featured`) | lead stories: Kits news lead, Home Library lead from 768 to 1199 |
 | 1:1 square | `--kit-card-square-media-ratio` (`--kit-media-ratio-square`) | compact square thumbnails (none yet) |
 
