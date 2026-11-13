@@ -387,6 +387,7 @@
 .aw-camp h3 { letter-spacing: -0.01em; text-wrap: balance; }
 .aw-camp-lede { max-width: 62ch; font-size: var(--kit-type-lead); }
 .aw-camp-section > * { max-width: 1120px; }
+.aw-camp .aw-camp-slot > .aw-camp-faq { box-sizing: border-box; margin: 0; padding-block: var(--kit-space-section); padding-inline: max(var(--kit-space-gutter), (100% - 1120px) / 2); } /* the FAQ block straight in a slot (no band around it) sits on the same gutter and 1120px column as the bands (audit 13 Nov 2026: it ran edge to edge) */
 .aw-nl-band--camp .kit-nl-band-inner { max-width: 1120px; } /* the newsletter card on a campaign page: the bands' 1120px column (owner, 13 Nov 2026) */
 
 /* Lab rules (owner, 19 Oct 2026): section titles are plain theme H2s, cards and the letter tool stand off their band */
@@ -1042,6 +1043,7 @@
 .aw-camp.aw-camp .aw-camp-grid > .aw-camp-card:first-child { background: linear-gradient(160deg, var(--camp-mark), color-mix(in srgb, var(--camp-mark) 75%, #000)); color: var(--camp-on-mark); box-shadow: var(--kit-elevation-2); }
 .aw-camp.aw-camp .aw-camp-section .aw-camp-grid > .aw-camp-card:first-child h3 { font-size: var(--kit-type-h2) !important; line-height: var(--kit-leading-heading); }
 .aw-camp.aw-camp .aw-camp-section .aw-camp-grid > .aw-camp-card:not(:first-child) h3 { font-size: var(--kit-type-h4) !important; line-height: var(--kit-leading-heading); }
+.aw-camp.aw-camp.aw-camp--sc-stray-dogs .aw-camp-section .aw-camp-grid > .aw-camp-card h3 { font-size: var(--kit-type-h3) !important; } /* Supreme Court: every bento tile title one size, the H3 and card-title token (owner, 13 Nov 2026: H1-H3 one size per breakpoint) */
 .aw-camp.aw-camp .aw-camp-grid:has(> :nth-child(3):last-child) > :nth-child(1), .aw-camp.aw-camp .aw-camp-grid:has(> :nth-child(5):last-child) > :nth-child(1) { grid-area: c1; }
 .aw-camp.aw-camp .aw-camp-grid:has(> :nth-child(3):last-child) > :nth-child(2), .aw-camp.aw-camp .aw-camp-grid:has(> :nth-child(5):last-child) > :nth-child(2) { grid-area: c2; }
 .aw-camp.aw-camp .aw-camp-grid:has(> :nth-child(3):last-child) > :nth-child(3), .aw-camp.aw-camp .aw-camp-grid:has(> :nth-child(5):last-child) > :nth-child(3) { grid-area: c3; }
