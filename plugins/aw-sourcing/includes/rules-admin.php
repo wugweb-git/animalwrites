@@ -146,6 +146,28 @@ function aw_rules_enrich_option() {
 }
 
 /**
+ * Put one field's rule back to the built-in one (the saved rule is dropped; the Change log keeps it).
+ *
+ * @param string $field Field key.
+ * @return array{0: string, 1: string} field_reset, none or nosuch, and the field.
+ */
+function aw_rules_field_reset( $field ) {
+	$rows = aw_rules_field_rows();
+	if ( ! isset( $rows[ $field ] ) ) {
+		return array( 'nosuch', $field );
+	}
+	$opt = aw_rules_enrich_option();
+	if ( ! isset( $opt['fields'][ $field ] ) ) {
+		return array( 'none', $rows[ $field ]['label'] );
+	}
+	$old = $opt['fields'][ $field ];
+	unset( $opt['fields'][ $field ] );
+	update_option( AW_ENRICH_RULES_OPTION, $opt, false );
+	aw_src_log( 'enrich', 'Field rule ' . $rows[ $field ]['label'] . ' (' . $field . ') put back to the built-in rule', $old, '' );
+	return array( 'field_reset', $rows[ $field ]['label'] );
+}
+
+/**
  * Save the trust order from positions (source => 1…99, or '' for after every numbered one).
  *
  * @param array $pos Source key => position.

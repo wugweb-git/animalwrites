@@ -431,6 +431,24 @@ add_action(
 		);
 		register_rest_route( 'sourceweb/v1', '/rules/autoresolve/delete', array( 'methods' => 'POST', 'permission_callback' => $cap, 'callback' => fn( WP_REST_Request $q ) => aw_ar_answer( aw_ar_rule_delete( (string) $q['id'] ) ), 'args' => array( 'id' => $id ) ) );
 		register_rest_route( 'sourceweb/v1', '/rules/autoresolve/move', array( 'methods' => 'POST', 'permission_callback' => $cap, 'callback' => fn( WP_REST_Request $q ) => aw_ar_answer( aw_ar_rule_move( (string) $q['id'], 'up' === $q['dir'] ? 'up' : 'down' ) ), 'args' => array( 'id' => $id, 'dir' => array( 'type' => 'string', 'default' => 'down' ) ) ) );
+		register_rest_route(
+			'sourceweb/v1',
+			'/rules/field/reset',
+			array(
+				'methods'             => 'POST',
+				'permission_callback' => $cap,
+				'callback'            => function ( WP_REST_Request $q ) {
+					$res = aw_rules_field_reset( sanitize_key( (string) $q['field'] ) );
+					$txt = array(
+						'field_reset' => __( 'Field rule %s is the built-in rule again.', 'aw-sourcing' ),
+						'none'        => __( 'Nothing to put back for %s: it already uses the built-in rule.', 'aw-sourcing' ),
+						'nosuch'      => __( 'No such field: %s.', 'aw-sourcing' ),
+					);
+					return aw_ar_answer( array( 'nosuch' === $res[0] ? 'error' : $res[0], sprintf( $txt[ $res[0] ], $res[1] ) ) );
+				},
+				'args'                => array( 'field' => $id ),
+			)
+		);
 		register_rest_route( 'sourceweb/v1', '/rules/autoresolve/reset', array( 'methods' => 'POST', 'permission_callback' => $cap, 'callback' => fn() => aw_ar_answer( aw_ar_rules_reset() ) ) );
 		register_rest_route(
 			'sourceweb/v1',
@@ -446,5 +464,72 @@ add_action(
 				},
 			)
 		);
+	}
+);
+
+/* ---------- Enrichment review: edit a waiting value, or delete it ---------- */
+
+/** Fields whose waiting value is not plain text, so it is not edited by hand here. */
+const AW_AR_NOT_EDITABLE = array( 'logo', 'photos', 'hours', 'services', 'place', 'merge_into', 'closed', 'animals', 'areas_served' );
+
+/**
+ * Change what a waiting value says (the person checking it corrects a typo, then applies it).
+ *
+ * @param int    $id    Row ID.
+ * @param string $value New text.
+ * @return array{0: string, 1: string} edited, none or error, and a message.
+ */
+function aw_ar_value_edit( $id, $value ) {
+	global $wpdb;
+	$r = aw_enrich_row( (int) $id );
+	if ( ! $r || 'pending' !== $r['status'] || ! is_string( $r['value'] ) || in_array( $r['field'], AW_AR_NOT_EDITABLE, true ) ) {
+		return array( 'error', __( 'Only a waiting text value can be edited.', 'aw-sourcing' ) );
+	}
+	$f   = (string) $r['field'];
+	$new = trim( (string) $value );
+	if ( in_array( $f, array( 'website', 'facebook', 'instagram', 'x', 'linkedin', 'youtube', 'donate_url', 'adopt_url' ), true ) ) {
+		$new = esc_url_raw( $new );
+	} elseif ( 'email' === $f ) {
+		$new = sanitize_email( $new );
+	} elseif ( in_array( $f, array( 'about', 'description' ), true ) ) {
+		$new = sanitize_textarea_field( $new );
+	} else {
+		$new = sanitize_text_field( $new );
+	}
+	if ( '' === $new ) {
+		return array( 'error', __( 'The value is empty or not valid for this field.', 'aw-sourcing' ) );
+	}
+	if ( $new === $r['value'] ) {
+		return array( 'none', __( 'Nothing changed.', 'aw-sourcing' ) );
+	}
+	$wpdb->update( aw_enrich_table(), array( 'value' => wp_json_encode( $new ), 'note' => substr( trim( (string) $r['note'] . ' Edited by a person.' ), 0, 190 ) ), array( 'id' => (int) $id, 'status' => 'pending' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	aw_src_log( 'enrich', 'Waiting value ' . (int) $id . ' (' . $f . ', listing ' . (int) $r['listing_id'] . ') edited', $r['value'], $new );
+	return array( 'edited', __( 'Value saved. Apply it when it is right.', 'aw-sourcing' ) );
+}
+
+/**
+ * Delete a waiting value (it is gone from the queue; nothing was applied, so nothing on the listing changes).
+ *
+ * @param int $id Row ID.
+ * @return array{0: string, 1: string} deleted or error, and a message.
+ */
+function aw_ar_value_delete( $id ) {
+	global $wpdb;
+	$r = aw_enrich_row( (int) $id );
+	if ( ! $r || 'pending' !== $r['status'] ) {
+		return array( 'error', __( 'Only a waiting value can be deleted.', 'aw-sourcing' ) );
+	}
+	$wpdb->delete( aw_enrich_table(), array( 'id' => (int) $id, 'status' => 'pending' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	aw_src_log( 'enrich', 'Waiting value ' . (int) $id . ' (' . $r['field'] . ', listing ' . (int) $r['listing_id'] . ') deleted', $r['value'], '' );
+	return array( 'deleted', __( 'Value deleted.', 'aw-sourcing' ) );
+}
+
+add_action(
+	'rest_api_init',
+	function () {
+		$cap = fn() => current_user_can( defined( 'AW_ENRICH_CAP' ) ? AW_ENRICH_CAP : 'edit_others_posts' );
+		$id  = array( 'type' => 'integer', 'required' => true );
+		register_rest_route( 'sourceweb/v1', '/enrichment/edit', array( 'methods' => 'POST', 'permission_callback' => $cap, 'callback' => fn( WP_REST_Request $q ) => aw_ar_answer( aw_ar_value_edit( (int) $q['id'], (string) $q->get_param( 'value' ) ) ), 'args' => array( 'id' => $id ) ) );
+		register_rest_route( 'sourceweb/v1', '/enrichment/delete', array( 'methods' => 'POST', 'permission_callback' => $cap, 'callback' => fn( WP_REST_Request $q ) => aw_ar_answer( aw_ar_value_delete( (int) $q['id'] ) ), 'args' => array( 'id' => $id ) ) );
 	}
 );

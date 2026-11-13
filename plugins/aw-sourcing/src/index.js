@@ -686,6 +686,95 @@ function FieldValue( { text, pics, href, links, label } ) {
 	);
 }
 
+/**
+ * Edit or delete the waiting text values of one listing (the person checking corrects a typo, then applies it).
+ *
+ * @param {Object}   props
+ * @param {Object[]} props.fields    The listing's field rows.
+ * @param {Function} props.onChanged Called with the notice after a save or delete.
+ */
+const NOT_EDITABLE = [
+	'logo',
+	'photos',
+	'hours',
+	'services',
+	'place',
+	'merge_into',
+	'closed',
+	'animals',
+	'areas_served',
+];
+function WaitingEdit( { fields, onChanged } ) {
+	const [ text, setText ] = useState( {} );
+	const [ busy, setBusy ] = useState( false );
+	const rows = fields.filter(
+		( f ) => f.waiting && ! NOT_EDITABLE.includes( f.field )
+	);
+	if ( ! rows.length ) {
+		return null;
+	}
+	const send = ( to, body ) => {
+		setBusy( true );
+		apiFetch( { path: path( to ), method: 'POST', data: body } )
+			.then( ( r ) => onChanged( answerMsg( r ) ) )
+			.catch( ( e ) =>
+				onChanged( { tone: 'error', text: errText( e ) } )
+			)
+			.finally( () => setBusy( false ) );
+	};
+	return (
+		<details>
+			<summary>
+				{ __( 'Edit or delete a waiting value', 'aw-sourcing' ) }
+			</summary>
+			{ rows.map( ( f ) => (
+				<div key={ f.key }>
+					<TextField
+						label={ f.label }
+						value={ text[ f.key ] ?? f.proposed }
+						onChange={ ( v ) =>
+							setText( { ...text, [ f.key ]: v } )
+						}
+						input={ { rows: 2 } }
+					/>
+					<p>
+						<Button
+							busy={ busy }
+							onClick={ () =>
+								send( 'enrichment/edit', {
+									id: f.key,
+									value: text[ f.key ] ?? f.proposed,
+								} )
+							}
+						>
+							{ __( 'Save value', 'aw-sourcing' ) }
+						</Button>{ ' ' }
+						<Button
+							busy={ busy }
+							onClick={ () => {
+								if (
+									// eslint-disable-next-line no-alert -- a plain browser confirm, as today's screen
+									! window.confirm(
+										__(
+											'Delete this waiting value? Nothing on the listing changes.',
+											'aw-sourcing'
+										)
+									)
+								) {
+									return;
+								}
+								send( 'enrichment/delete', { id: f.key } );
+							} }
+						>
+							{ __( 'Delete', 'aw-sourcing' ) }
+						</Button>
+					</p>
+				</div>
+			) ) }
+		</details>
+	);
+}
+
 function Enrichment() {
 	const [ q, setQ ] = useState( {
 		listing: firstListing(),
@@ -844,22 +933,33 @@ function Enrichment() {
 							}
 							after={
 								listing.waiting > 0 && (
-									<p>
-										<Button
-											busy={ busy }
-											onClick={ () =>
-												decide( {
-													do: 'reject',
-													listings: [ listing.id ],
-												} )
-											}
-										>
-											{ __(
-												'Reject every waiting value',
-												'aw-sourcing'
-											) }
-										</Button>
-									</p>
+									<>
+										<WaitingEdit
+											fields={ listing.fields }
+											onChanged={ ( m ) => {
+												setMsg( m );
+												load();
+											} }
+										/>
+										<p>
+											<Button
+												busy={ busy }
+												onClick={ () =>
+													decide( {
+														do: 'reject',
+														listings: [
+															listing.id,
+														],
+													} )
+												}
+											>
+												{ __(
+													'Reject every waiting value',
+													'aw-sourcing'
+												) }
+											</Button>
+										</p>
+									</>
 								)
 							}
 						/>
@@ -5632,6 +5732,52 @@ function EnrichRules( { go } ) {
 							onClick: () =>
 								go( { part: 'enrich', field: r.id } ),
 						},
+						...( r.set
+							? [
+									{
+										icon: 'delete',
+										label: __(
+											'Back to the built-in rule',
+											'aw-sourcing'
+										),
+										tone: 'error',
+										onClick: () => {
+											if (
+												// eslint-disable-next-line no-alert -- a plain browser confirm, as today's screen
+												! window.confirm(
+													sprintf(
+														/* translators: %s: field. */
+														__(
+															'Put the rule for %s back to the built-in one? Your saved rule is dropped (the Change log keeps it).',
+															'aw-sourcing'
+														),
+														r.title
+													)
+												)
+											) {
+												return;
+											}
+											apiFetch( {
+												path: path(
+													'rules/field/reset'
+												),
+												method: 'POST',
+												data: { field: r.id },
+											} )
+												.then( ( res ) =>
+													setMsg( answerMsg( res ) )
+												)
+												.catch( ( e ) =>
+													setMsg( {
+														tone: 'error',
+														text: errText( e ),
+													} )
+												)
+												.finally( load );
+										},
+									},
+								]
+							: [] ),
 					] }
 					loading={ loading }
 					error={ error }

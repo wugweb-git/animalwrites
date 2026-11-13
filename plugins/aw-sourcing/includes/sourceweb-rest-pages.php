@@ -1805,6 +1805,7 @@ function sourceweb_rest_rules_enrich() {
 		$why      = (string) ( $row['why'] ?? '' );
 		$fields[] = array(
 			'id'       => $k,
+			'set'      => ! empty( $row['set'] ),
 			'title'    => $row['label'],
 			'note'     => $row['set'] || isset( aw_enrich_fields()[ $k ] ) ? '' : __( 'Added in the listing field group: off until its rule is set.', 'aw-sourcing' ),
 			'group'    => $row['group'],
