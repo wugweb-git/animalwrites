@@ -145,8 +145,10 @@
   --kit-card-stacked-body-min: 0; /* least text column width in a stacked card */
   --kit-card-stacked-min: 340px; /* least width of a card in a stacked list (owner 13 Nov 2026: "Min 340px, two"; was 350) */
   --kit-card-stacked-max: 600px; /* most width of a card in a stacked list (owner 13 Nov 2026) */
-  --kit-card-stacked-ratio: 2; /* a stacked list card is never flatter than 2:1, width to height (owner 13 Nov 2026) */
-  --kit-card-stacked-media-ratio: 0.6; /* stacked list card picture 3:5, at the card's full height (owner 13 Nov 2026) */
+  --kit-card-stacked-media-width: 30%; /* picture width in a stacked list card; the text takes the rest (owner 13 Nov 2026) */
+  --kit-card-stacked-media-ratio: var(--wp--custom--kits--card--ratio--stacked, var(--kit-media-ratio-portrait)); /* stacked card picture, 3:4 (owner 13 Nov 2026); Theme Options → Cards can change it */
+  --kit-card-featured-media-ratio: var(--wp--custom--kits--card--ratio--featured, var(--kit-media-ratio-featured)); /* lead and featured story pictures, 3:2 (owner 13 Nov 2026); Theme Options → Cards can change it */
+  --kit-card-square-media-ratio: var(--wp--custom--kits--card--ratio--square, var(--kit-media-ratio-square)); /* compact square thumbnails, 1:1 (owner 13 Nov 2026); Theme Options → Cards can change it */
   --kit-card-block-media-max: none; /* picture max height in a block card */
   --kit-lead-title-size: var(--kit-type-h3); /* title size of the lead story in kit-ed-lead */
   --kit-lead-title-weight: var(--kit-weight-strong); /* title weight of the lead story in kit-ed-lead */
@@ -163,7 +165,11 @@
   --kit-table-min: 34rem;
   --kit-border-control: 1px;
   --kit-card-columns: 1;
-  --kit-card-media-ratio: 4/3;
+  --kit-media-ratio-standard: 4 / 3; /* the standard picture ratio (owner 13 Nov 2026) */
+  --kit-media-ratio-portrait: 3 / 4; /* portrait pictures beside text (owner 13 Nov 2026) */
+  --kit-media-ratio-featured: 3 / 2; /* featured editorial pictures (owner 13 Nov 2026) */
+  --kit-media-ratio-square: 1 / 1; /* square thumbnails (owner 13 Nov 2026) */
+  --kit-card-media-ratio: var(--wp--custom--kits--card--ratio--standard, var(--kit-media-ratio-standard)); /* every card picture unless a layout names another ratio, 4:3; Theme Options → Cards can change it */
   --kit-placard-ratio: 16/7;
   --kit-carousel-item: 82%;
   --kit-weight-medium: 500;
@@ -266,7 +272,6 @@
     --kit-space-grid: 24px;
     --kit-offset: 14px;
     --kit-meta-size: 13px;
-    --kit-type-card-title: 1.4rem;
     --kit-card-columns: 2;
     --kit-placard-ratio: 16/9;
     --kit-carousel-item: auto;
@@ -285,7 +290,7 @@
     --kit-space-gutter: 48px;
     --kit-space-grid: 32px;
     --kit-meta-size: 14px;
-    --kit-type-card-title: 1.5rem;
+    --kit-type-card-title: 1.375rem;
     --kit-card-columns: 3;
     --kit-grid-gap: 32px;
     --kit-grid-columns: 12;

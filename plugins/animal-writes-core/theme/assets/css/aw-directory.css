@@ -86,7 +86,7 @@
 	.aw-org-gallery { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 .aw-org-gallery figure { margin: 0; }
-.aw-org-photo { aspect-ratio: 4 / 3; overflow: hidden; border-radius: var(--kit-radius-media); background: var(--kit-color-surface); }
+.aw-org-photo { aspect-ratio: var(--kit-card-media-ratio); overflow: hidden; border-radius: var(--kit-radius-media); background: var(--kit-color-surface); }
 .aw-org-gallery figcaption { margin-top: var(--kit-space-1); font-size: var(--kit-type-xs); color: var(--kit-color-muted); line-height: 1.4; }
 .aw-org-gallery img { display: block; width: 100%; height: 100% !important; object-fit: cover; }
 .aw-org-host { position: relative; }
