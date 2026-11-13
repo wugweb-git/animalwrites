@@ -991,8 +991,18 @@
 @keyframes aw-camp-wait-pulse { 0% { box-shadow: 0 0 0 0 rgb(255 255 255 / 0.7); } 70%, 100% { box-shadow: 0 0 0 0.5625rem rgb(255 255 255 / 0); } }
 .aw-camp--lab-rules .aw-camp-keyline { margin: 0 0 var(--kit-space-4); font-size: var(--kit-type-sm); opacity: 0.92; }
 .aw-camp--lab-rules .aw-camp-hero-pic { margin: 0; overflow: hidden; border-radius: var(--kit-radius-card); aspect-ratio: 4 / 3; background: var(--camp-accent); }
-.aw-camp--lab-rules .aw-camp-hero-pic img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 75%; }
-@media (min-width: 1200px) { .aw-camp--lab-rules .aw-camp-hero-pic { aspect-ratio: 4 / 5; } .aw-camp--lab-rules .aw-camp-hero-pic img { object-position: 60% 50%; } }
+.aw-camp--lab-rules .aw-camp-hero-pic img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 100%; } /* the tall stamp picture: the papers sit at its foot */
+@media (min-width: 1200px) { .aw-camp--lab-rules .aw-camp-hero-pic { aspect-ratio: 4 / 5; } }
+/* Below 1200 the hero stacks and keeps its fixed height (1020px, owner 19 Oct 2026): the picture fills the ground
+   under the text and buttons, so the band never ends in an empty block of crimson. */
+@media (max-width: 1199px) {
+	.aw-camp--lab-rules .aw-camp-hero:has(.aw-camp-hero-pic) { display: flex; flex-direction: column; }
+	.aw-camp--lab-rules .aw-camp-hero:has(.aw-camp-hero-pic) > .aw-camp-hero-cols { flex: 1 1 auto; flex-direction: column; flex-wrap: nowrap; }
+	.aw-camp--lab-rules .aw-camp-hero-cols > .wp-block-column:not(:has(> .aw-camp-hero-pic)) { flex: 0 0 auto; }
+	.aw-camp--lab-rules .aw-camp-hero-cols > .wp-block-column:has(> .aw-camp-hero-pic) { flex: 1 1 auto; display: flex; flex-direction: column; }
+	.aw-camp--lab-rules .aw-camp-hero-pic { position: relative; flex: 1 1 auto; aspect-ratio: auto; min-height: calc(var(--kit-space-7) * 4); }
+	.aw-camp--lab-rules .aw-camp-hero-pic img { position: absolute; inset: 0; }
+}
 
 .aw-camp--lab-rules ol.aw-camp-wait-steps { margin: var(--kit-space-6) 0 var(--kit-space-5); padding: 0; list-style: none; }
 .aw-camp--lab-rules .aw-camp-wait-steps > li { position: relative; margin: 0; padding: 0 0 var(--kit-space-5) var(--kit-space-7); font-size: var(--kit-type-base); }
