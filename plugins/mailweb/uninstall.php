@@ -19,6 +19,10 @@
  * Scheduled events:
  *   mailweb_flush, mailweb_crm_sync, mailweb_dashboard_build — every event of these hooks, whatever its arguments
  *
+ * Before deleting, writes a backup to wp-content/uploads/wugweb-backups/mailweb-uninstall-<YYYYmmdd-His>.jsonl.gz
+ * (includes/uninstall-backup.php): a header line, then every option below with its value as stored, then every row of
+ * every table below (transients are caches and are not kept). If the backup cannot be written, nothing is deleted.
+ *
  * Never deleted: anything in the mailboxes (Hostinger keeps the mail), FluentCRM contacts and notes, posts, users,
  * media (profile pictures stay in the media library), and any other plugin's options.
  *
@@ -35,6 +39,13 @@ if ( ! get_option( 'mailweb_delete_data', 0 ) ) {
 
 global $wpdb;
 
+$mailweb_options = array( 'mailweb_cap', 'mailweb_mailboxes', 'mailweb_default_from', 'mailweb_aliases', 'mailweb_profiles', 'mailweb_crm', 'mailweb_smtp', 'mailweb_api_token', 'mailweb_box_addresses', 'mailweb_box_ids', 'mailweb_stats', 'mailweb_send_log', 'mailweb_dashboard_log', 'mailweb_last', 'mailweb_last_error', 'mailweb_crm_done', 'mailweb_queue_db', 'mailweb_pause', 'mailweb_delete_data' );
+
+require_once __DIR__ . '/includes/uninstall-backup.php';
+if ( ! mailweb_uninstall_backup( 'mailweb', __DIR__ . '/mailweb.php', $mailweb_options, array( 'mailweb_secret_', 'mailweb_overview_last_' ), array( $wpdb->prefix . 'mailweb_queue' ) ) ) {
+	return; // No backup, no delete (the reason is in the error log).
+}
+
 $wpdb->query( 'DROP TABLE IF EXISTS ' . $wpdb->prefix . 'mailweb_queue' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.SchemaChange -- fixed table name.
 
 foreach ( array( 'mailweb_flush', 'mailweb_crm_sync', 'mailweb_dashboard_build' ) as $mailweb_hook ) {
@@ -43,10 +54,10 @@ foreach ( array( 'mailweb_flush', 'mailweb_crm_sync', 'mailweb_dashboard_build' 
 unset( $mailweb_hook );
 
 $mailweb_secrets = array_map( fn( $k ) => 'mailweb_secret_' . sanitize_key( (string) $k ), array_keys( (array) get_option( 'mailweb_box_addresses', array() ) ) );
-foreach ( array_merge( array( 'mailweb_cap', 'mailweb_mailboxes', 'mailweb_default_from', 'mailweb_aliases', 'mailweb_profiles', 'mailweb_crm', 'mailweb_smtp', 'mailweb_api_token', 'mailweb_box_addresses', 'mailweb_box_ids', 'mailweb_stats', 'mailweb_send_log', 'mailweb_dashboard_log', 'mailweb_last', 'mailweb_last_error', 'mailweb_crm_done', 'mailweb_queue_db', 'mailweb_pause', 'mailweb_delete_data' ), $mailweb_secrets ) as $mailweb_option ) {
+foreach ( array_merge( $mailweb_options, $mailweb_secrets ) as $mailweb_option ) {
 	delete_option( $mailweb_option );
 }
-unset( $mailweb_secrets, $mailweb_option );
+unset( $mailweb_secrets, $mailweb_option, $mailweb_options );
 
 foreach ( array( 'mailweb_dashboard', 'mailweb_box_ids_wait', 'mailweb_flush_lock', 'mailweb_pause_seen', 'mailweb_smtp_error' ) as $mailweb_transient ) {
 	delete_transient( $mailweb_transient );

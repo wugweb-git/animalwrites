@@ -22,6 +22,11 @@
  *   (with and without its 'now' argument)
  * Custom tables: none (RankWeb has none; Rank Math's tables are Rank Math's).
  *
+ * Before deleting, writes a backup to wp-content/uploads/wugweb-backups/aw-seo-extras-uninstall-<YYYYmmdd-His>.jsonl.gz
+ * (includes/uninstall-backup.php): a header line, then every option below with its value as stored, then every row of
+ * every table below (transients are caches and are not kept).
+ * aw_seo_settings is kept whole in the backup. If the backup cannot be written, nothing is deleted.
+ *
  * Never deleted: posts, pages, terms, users, post or term meta (FAQ records, focus keywords, scores), Rank Math's data,
  * and any other plugin's options.
  *
@@ -36,6 +41,13 @@ if ( ! get_option( 'aw_seo_delete_data', 0 ) ) {
 	return; // The default: keep everything.
 }
 
+$aw_seo_options = array( 'aw_faq_off_types', 'aw_seo_keep_listings', 'aw_default_share_image', 'aw_seo_endpoints_last', 'aw_seo_cache_gen', 'aw_seo_press_kw_1103', 'aw_seed_redirects_version', 'aw_sitemap_filtered', 'aw_html_sitemap_page', 'aw_faq_experiment', 'rankweb_health_log', 'rankweb_health_schema', 'aw_seo_delete_data' );
+
+require_once __DIR__ . '/includes/uninstall-backup.php';
+if ( ! aw_seo_uninstall_backup( 'aw-seo-extras', __DIR__ . '/aw-seo-extras.php', array_merge( array( 'aw_seo_settings' ), $aw_seo_options ), array(), array() ) ) {
+	return; // No backup, no delete (the reason is in the error log).
+}
+
 $aw_seo_settings = get_option( 'aw_seo_settings', array() );
 if ( is_array( $aw_seo_settings ) && ! empty( $aw_seo_settings['search-insights'] ) ) {
 	update_option( 'aw_seo_settings', array( 'search-insights' => $aw_seo_settings['search-insights'] ), true ); // InsightWeb's numbers stay
@@ -44,7 +56,7 @@ if ( is_array( $aw_seo_settings ) && ! empty( $aw_seo_settings['search-insights'
 }
 unset( $aw_seo_settings );
 
-foreach ( array( 'aw_faq_off_types', 'aw_seo_keep_listings', 'aw_default_share_image', 'aw_seo_endpoints_last', 'aw_seo_cache_gen', 'aw_seo_press_kw_1103', 'aw_seed_redirects_version', 'aw_sitemap_filtered', 'aw_html_sitemap_page', 'aw_faq_experiment', 'rankweb_health_log', 'rankweb_health_schema', 'aw_seo_delete_data' ) as $aw_seo_option ) {
+foreach ( $aw_seo_options as $aw_seo_option ) {
 	delete_option( $aw_seo_option );
 }
 

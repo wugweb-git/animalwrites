@@ -24,6 +24,11 @@
  *   aw_si_geo_refresh, aw_si_rising_spikes, aw_si_srv_ai, aw_si_srv_speed, insightweb_dash_build — every event of
  *   these hooks, whatever its arguments
  *
+ * Before deleting, writes a backup to wp-content/uploads/wugweb-backups/insightweb-uninstall-<YYYYmmdd-His>.jsonl.gz
+ * (includes/uninstall-backup.php): a header line, then every option below with its value as stored, then every row of
+ * every table below (transients are caches and are not kept).
+ * RankWeb's aw_seo_settings is kept whole in the backup. If the backup cannot be written, nothing is deleted.
+ *
  * Never deleted: the keyword tables {prefix}aw_si_keywords and {prefix}aw_si_kw_map (Kits Core's, they hold the
  * owner's Sourcing, Press and Tracked keywords), posts, users, Site Kit's and Rank Math's data, and any other plugin's
  * options.
@@ -41,8 +46,15 @@ if ( ! get_option( 'insightweb_delete_data', 0 ) ) {
 
 global $wpdb;
 
-foreach ( array( 'kw_pages', 'obs', 'rising', 'links', 'visits' ) as $insightweb_table ) {
-	$wpdb->query( 'DROP TABLE IF EXISTS ' . $wpdb->prefix . 'aw_si_' . $insightweb_table ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.SchemaChange -- fixed table names.
+$insightweb_tables = array_map( fn( $t ) => $wpdb->prefix . 'aw_si_' . $t, array( 'kw_pages', 'obs', 'rising', 'links', 'visits' ) );
+
+require_once __DIR__ . '/includes/uninstall-backup.php';
+if ( ! insightweb_uninstall_backup( 'insightweb', __DIR__ . '/insightweb.php', array( 'aw_seo_settings' ), array( 'aw_si_', 'insightweb_' ), $insightweb_tables ) ) {
+	return; // No backup, no delete (the reason is in the error log).
+}
+
+foreach ( $insightweb_tables as $insightweb_table ) {
+	$wpdb->query( 'DROP TABLE IF EXISTS ' . $insightweb_table ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.SchemaChange -- fixed table names.
 }
 
 // The seven numbers: InsightWeb's key in RankWeb's option.

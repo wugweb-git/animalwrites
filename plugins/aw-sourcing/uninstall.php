@@ -34,6 +34,10 @@
  *   ({prefix}aw_si_keywords, {prefix}aw_si_kw_map) and aw_kw_db; Animal Writes Core's aw_social_on and aw_social_show
  *   (SourceWeb's Settings also saves them); the aw_research_citation event (its work is Animal Writes Core's).
  *
+ * Before deleting, writes a backup to wp-content/uploads/wugweb-backups/aw-sourcing-uninstall-<YYYYmmdd-His>.jsonl.gz
+ * (includes/uninstall-backup.php): a header line, then every option below with its value as stored, then every row of
+ * every table below (transients are caches and are not kept). If the backup cannot be written, nothing is deleted.
+ *
  * Runs for the current site only.
  *
  * @package aw-sourcing
@@ -47,7 +51,7 @@ if ( true !== (bool) get_option( 'aw_src_delete_data_on_uninstall', false ) ) {
 	return; // The default: keep everything.
 }
 
-foreach ( array(
+$aw_src_options = array(
 	'aw_backfill_floor',
 	'aw_enrich_sources',
 	'aw_enrich_google_key',
@@ -91,11 +95,18 @@ foreach ( array(
 	'aw_backup_latest_2',
 	'aw_backup_latest_3',
 	'aw_backup_latest_4',
-) as $aw_src_option ) {
+);
+
+global $wpdb;
+require_once __DIR__ . '/includes/uninstall-backup.php';
+if ( ! aw_src_uninstall_backup( 'aw-sourcing', __DIR__ . '/aw-sourcing.php', array_merge( $aw_src_options, array( 'aw_src_delete_data_on_uninstall' ) ), array( 'aw_worker_runs_', 'aw_backup_1_', 'aw_backup_2_', 'aw_backup_3_', 'aw_backup_4_' ), array( $wpdb->prefix . 'aw_enrich' ) ) ) {
+	return; // No backup, no delete (the reason is in the error log).
+}
+
+foreach ( $aw_src_options as $aw_src_option ) {
 	delete_option( $aw_src_option );
 }
 
-global $wpdb;
 $aw_src_like = static function ( string $start ) use ( $wpdb ): void {
 	$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s", $wpdb->esc_like( $start ) . '%' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- uninstall: options by prefix, once.
 };

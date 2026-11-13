@@ -41,6 +41,10 @@
  *   rate-limit transients aw_rl_* (Kits Core's forms use the same prefix; they expire within the hour).
  * - Files: backups on disk and the drop-ins.
  *
+ * Before deleting, writes a backup to wp-content/uploads/wugweb-backups/animal-writes-core-uninstall-<YYYYmmdd-His>.jsonl.gz
+ * (includes/uninstall-backup.php): a header line, then every option below with its value as stored, then every row of
+ * every table below (transients are caches and are not kept). If the backup cannot be written, nothing is deleted.
+ *
  * Runs for the current site only.
  *
  * @package animal-writes-core
@@ -54,7 +58,7 @@ if ( true !== (bool) get_option( 'aw_delete_data_on_uninstall', false ) ) {
 	return; // The default: keep everything.
 }
 
-foreach ( array(
+$aw_options = array(
 	'aw_cdn_ttl',
 	'aw_cdn_ttl_long',
 	'aw_social_on',
@@ -112,7 +116,14 @@ foreach ( array(
 	'aw_team_dates_links_read',
 	'aw_theme_switch_log',
 	'aw_thumb_map',
-) as $aw_option ) {
+);
+
+require_once __DIR__ . '/includes/uninstall-backup.php';
+if ( ! aw_core_uninstall_backup( 'animal-writes-core', __DIR__ . '/animal-writes-core.php', array_merge( $aw_options, array( 'aw_delete_data_on_uninstall' ) ), array( 'aw_media_merge_data_', 'aw_lf_gen_' ), array() ) ) {
+	return; // No backup, no delete (the reason is in the error log).
+}
+
+foreach ( $aw_options as $aw_option ) {
 	delete_option( $aw_option );
 }
 
