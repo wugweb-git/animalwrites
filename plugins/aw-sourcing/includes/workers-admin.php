@@ -243,11 +243,11 @@ function aw_worker_save( array $in ) {
 	if ( null !== ( $in['keys'] ?? null ) ) {
 		list( $did, $skip ) = aw_workers_apply_keys( $id, array_map( 'sanitize_key', (array) $in['keys'] ) );
 		if ( $did ) {
-			kits_sourcing_log( 'ai', 'worker ' . $id . ': key ' . implode( ', ', $did ) );
+			aw_src_log( 'ai', 'worker ' . $id . ': key ' . implode( ', ', $did ) );
 		}
 	}
 	if ( $log ) {
-		kits_sourcing_log( 'workers', 'Worker ' . $id . ': ' . implode( '; ', $log ) );
+		aw_src_log( 'workers', 'Worker ' . $id . ': ' . implode( '; ', $log ) );
 	}
 	return array(
 		'done' => $new ? 'added' : ( $log || $did ? 'saved' : 'same' ),
@@ -288,7 +288,7 @@ function aw_worker_delete( $id ) {
 	if ( $moved ) {
 		update_option( 'aw_ai_models', $rows, false );
 	}
-	kits_sourcing_log( 'workers', 'deleted planned worker ' . $id . ' "' . $w['name'] . '"' . ( $freed ? '; key ' . implode( ', ', $freed ) . ' now for all workers' : '' ) );
+	aw_src_log( 'workers', 'deleted planned worker ' . $id . ' "' . $w['name'] . '"' . ( $freed ? '; key ' . implode( ', ', $freed ) . ' now for all workers' : '' ) );
 	return array(
 		'name'  => $w['name'],
 		'freed' => $freed,

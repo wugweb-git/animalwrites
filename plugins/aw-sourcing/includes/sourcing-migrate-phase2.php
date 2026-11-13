@@ -461,7 +461,7 @@ function aw_sourcing_cli_p2_migrate( $dry ) {
 		$log[] = array( 'keywords', sprintf( 'Phase 2 migrated (WP-CLI): %s, %d words → %d keyword records (%d already there)', $k, $l['items'], $l['distinct'], $l['existing'] ) );
 	}
 	$log[] = array( 'keywords', sprintf( 'Phase 2 migrated (WP-CLI): %d records created, %d updated; * added to %d category words; %d words not English kept without a Sourcing role; press sites and Brave budgets removed (in backup %s)', $created, count( $undo ) - $created, count( $plan['starred'] ), count( $plan['hindi'] ), $bk ), 'phase 1', 'phase 2' );
-	kits_sourcing_log_many( $log );
+	aw_src_log_many( $log );
 	WP_CLI::success( "Phase 2 migrated: $created records created, " . ( count( $undo ) - $created ) . ' updated. Next: wp aw-sourcing verify --phase=2' );
 }
 
@@ -701,6 +701,6 @@ function aw_sourcing_cli_p2_rollback( $bk, array $old, array $assoc ) {
 	delete_option( 'aw_sourcing_migrating' );
 	delete_option( 'aw_backup_latest_2' );
 	$what = "$del records deleted, $back restored; lists, keyword checks and press settings from $bk";
-	kits_sourcing_log( 'keywords', "Phase 2 rolled back (WP-CLI): $what", 'phase 2', 'phase ' . aw_sourcing_phase() );
+	aw_src_log( 'keywords', "Phase 2 rolled back (WP-CLI): $what", 'phase 2', 'phase ' . aw_sourcing_phase() );
 	WP_CLI::success( "Rolled back: $what. The backup stays ($bk); the table keeps its version 2 columns (unused in phase 1)." );
 }

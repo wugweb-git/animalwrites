@@ -89,7 +89,7 @@ function aw_relay_ca_bundle() {
 	}
 	$path = trailingslashit( get_temp_dir() ) . 'aw-relay-ca-' . substr( md5( $text ), 0, 12 ) . '.pem';
 	if ( ! file_exists( $path ) ) {
-		file_put_contents( $path, $text ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+		file_put_contents( $path, $text ); // phpcs:ignore WordPress.WP.AlternativeFunctions, PluginCheck.CodeAnalysis.WriteFile.PluginDirectoryWrite -- the temp folder, not the plugin's
 	}
 	return $path;
 }
@@ -301,7 +301,7 @@ function aw_relay_switch( array $pubs, array $hosts, $on ) {
 			}
 		}
 	}
-	kits_sourcing_log_many( $log );
+	aw_src_log_many( $log );
 	if ( $log && function_exists( 'aw_sources_sync_soon' ) ) {
 		aw_sources_sync_soon(); // the relay allow list and sources_v2 are copied into the workers' sources.yaml (aw_publishers is not hooked: ingest writes it all the time)
 	}

@@ -1076,14 +1076,14 @@ function sourceweb_rest_save_group( WP_REST_Request $request ) {
 		if ( null !== $cap ) {
 			$cap = (string) max( 0, (int) $cap );
 			update_option( 'aw_enrich_live_cap', $cap );
-			kits_sourcing_log( 'enrich', 'Live block monthly cap: $' . $cap );
+			aw_src_log( 'enrich', 'Live block monthly cap: $' . $cap );
 			$changed['live_cap'] = $cap;
 		}
 	}
 	if ( 'social' === $group ) {
 		foreach ( $changed as $k => $v ) {
 			update_option( $k, $v ? '1' : '' ); // As the Kits → Modules setting's own clean-up stores it.
-			kits_sourcing_log( 'settings', ( 'aw_social_on' === $k ? 'Social posts type' : 'Social posts shown on pages' ) . ': ' . ( $v ? 'on' : 'off' ) );
+			aw_src_log( 'settings', ( 'aw_social_on' === $k ? 'Social posts type' : 'Social posts shown on pages' ) . ': ' . ( $v ? 'on' : 'off' ) );
 		}
 	}
 	return rest_ensure_response(
@@ -1104,7 +1104,7 @@ function sourceweb_rest_google_key( WP_REST_Request $request ) {
 	$key = trim( sanitize_text_field( (string) $request['key'] ) );
 	if ( '' !== $key && (string) get_option( 'aw_enrich_google_key', '' ) !== $key ) {
 		update_option( 'aw_enrich_google_key', aw_enrich_google_key_sanitize( $key ) );
-		kits_sourcing_log( 'enrich', 'Directory enrichment saved (new Google key)' );
+		aw_src_log( 'enrich', 'Directory enrichment saved (new Google key)' );
 		$saved = true;
 	}
 	return rest_ensure_response(

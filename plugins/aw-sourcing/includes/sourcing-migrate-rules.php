@@ -183,7 +183,7 @@ add_action(
 			false
 		);
 		update_option( 'aw_sourcing_phase', 3, false );
-		kits_sourcing_log_many(
+		aw_src_log_many(
 			array(
 				array( 'sections', sprintf( 'Phase 3 migrated (WP-CLI): section rules %d → %d (added %s, empty: every category); tag rules %d unchanged', count( $before ), count( $now['sources']['sections'] ), $now['added'] ? implode( ', ', $now['added'] ) : 'none', count( $tags ) ), array_keys( $before ), array_keys( $now['sources']['sections'] ) ),
 				array( 'summary', 'Phase 3 migrated (WP-CLI): summary rules keyed by post type, every value kept', array_keys( $now['rekeyed'] ), array_values( $now['rekeyed'] ) ),
@@ -306,7 +306,7 @@ add_action(
 		}
 		delete_option( 'aw_sourcing_phase3_record' );
 		delete_option( 'aw_backup_latest_3' ); // a new migration starts from a new backup (the backups themselves stay)
-		kits_sourcing_log( 'sections', "Phase 3 rolled back (WP-CLI): $what", 'phase 3', 'phase ' . aw_sourcing_phase() );
+		aw_src_log( 'sections', "Phase 3 rolled back (WP-CLI): $what", 'phase 3', 'phase ' . aw_sourcing_phase() );
 		WP_CLI::success( "Rolled back: $what. The backup stays ($bk)." );
 	}
 );

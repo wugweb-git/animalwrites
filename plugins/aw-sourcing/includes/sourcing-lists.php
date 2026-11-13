@@ -102,7 +102,7 @@ function aw_sources_live_save( $on ) {
 	$c         = aw_sources_config();
 	$c['live'] = (bool) $on;
 	update_option( 'aw_sources', $c, false );
-	kits_sourcing_log( 'log', 'workers use these lists: ' . ( $c['live'] ? 'on' : 'off' ) );
+	aw_src_log( 'log', 'workers use these lists: ' . ( $c['live'] ? 'on' : 'off' ) );
 }
 
 /*
@@ -242,7 +242,7 @@ function aw_sources_feed_op( $op, array $ids ) {
 			$log[] = array( AW_SOURCE_TYPES[ $t ][1] ?? 'feeds', $e[0], $e[1], $e[2] );
 		}
 	}
-	kits_sourcing_log_many( $log );
+	aw_src_log_many( $log );
 	return (bool) $what;
 }
 
@@ -335,7 +335,7 @@ add_action(
 				$log[] = array( AW_SOURCE_TYPES[ $t ][1] ?? 'feeds', $e[0], $e[1], $e[2] );
 			}
 		}
-		kits_sourcing_log_many( $log );
+		aw_src_log_many( $log );
 	}
 );
 
@@ -389,7 +389,7 @@ add_filter(
 		if ( preg_match( '/^\d{4}-\d{2}-\d{2}$/', $d ) ) {
 			$c['press']['date_floor'] = $d;
 		}
-		kits_sourcing_log( 'press', implode( ' · ', array_filter( array( kits_sourcing_diff( 'Queries', $old['queries'], $c['press']['queries'] ), kits_sourcing_diff( 'Sites', $old['sites'] ?? array(), $c['press']['sites'] ?? array() ), $old['date_floor'] !== $c['press']['date_floor'] ? 'from ' . $c['press']['date_floor'] : '' ) ) ) );
+		aw_src_log( 'press', implode( ' · ', array_filter( array( aw_src_diff( 'Queries', $old['queries'], $c['press']['queries'] ), aw_src_diff( 'Sites', $old['sites'] ?? array(), $c['press']['sites'] ?? array() ), $old['date_floor'] !== $c['press']['date_floor'] ? 'from ' . $c['press']['date_floor'] : '' ) ) ) );
 		return $c;
 	},
 	10,

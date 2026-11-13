@@ -85,7 +85,7 @@ function aw_summary_rules_sanitize( $in ) {
 	delete_transient( 'aw_summary_below' );
 	aw_sourcing_settings_saved();
 	if ( ! empty( $in['_reset'] ) ) {
-		kits_sourcing_log( 'summary', 'summary rules back to the defaults' );
+		aw_src_log( 'summary', 'summary rules back to the defaults' );
 		return array(); // no saved rules: the defaults apply (aw_summary_rules)
 	}
 	$new     = array( 'sections' => array() );
@@ -181,7 +181,7 @@ function aw_summary_rules_sanitize( $in ) {
 		}
 	}
 	foreach ( array( 'general', 'stock_phrases', 'ai_markers', 'searched_terms', 'entities' ) as $f ) {
-		$d = kits_sourcing_diff( str_replace( '_', ' ', ucfirst( $f ) ), (array) $old[ $f ], (array) $now[ $f ] );
+		$d = aw_src_diff( str_replace( '_', ' ', ucfirst( $f ) ), (array) $old[ $f ], (array) $now[ $f ] );
 		if ( $d ) {
 			$what[] = $d;
 			$log[]  = array( 'summary', $d, array_values( array_diff( (array) $old[ $f ], (array) $now[ $f ] ) ), array_values( array_diff( (array) $now[ $f ], (array) $old[ $f ] ) ) );
@@ -194,9 +194,9 @@ function aw_summary_rules_sanitize( $in ) {
 		}
 	}
 	if ( $by_type && $log ) {
-		kits_sourcing_log_many( $log ); // phase 3: each change with its value before and after
+		aw_src_log_many( $log ); // phase 3: each change with its value before and after
 	} elseif ( $what ) { // a save with no change writes nothing, not even a log entry (round-trip rule)
-		kits_sourcing_log( 'summary', implode( ' · ', $what ) );
+		aw_src_log( 'summary', implode( ' · ', $what ) );
 	}
 	return $what ? $new : get_option( AW_SUMMARY_RULES_OPTION ); // no change: the stored rules stay exactly as they are
 }

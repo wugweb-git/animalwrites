@@ -497,6 +497,25 @@ function aw_seo_listing_name( $id ) {
 /** Descriptions of the content types' own archives (post type => description). */
 // AW_ARCHIVE_DESCRIPTIONS: RankWeb → Settings (settings.php).
 
+/**
+ * A listing type's name from Animal Writes Core, or the slug in words when Core is not active.
+ *
+ * @param string $slug The listing type's slug.
+ */
+function aw_seo_listing_type_name( $slug ) {
+	return function_exists( 'aw_listing_type_name' ) ? (string) aw_listing_type_name( $slug ) : ucfirst( str_replace( '-', ' ', (string) $slug ) );
+}
+
+/**
+ * An item's state and district names from Animal Writes Core, or two empty names when Core is not active.
+ *
+ * @param int $id The item.
+ * @return array{0: string, 1: string}
+ */
+function aw_seo_item_place_names( $id ) {
+	return function_exists( 'aw_item_place_names' ) ? aw_item_place_names( $id ) : array( '', '' );
+}
+
 /** Plural of a listing type for a sentence: "Gaushalas" (always capitalised, owner 15 Oct 2026), "ABC centres", "veterinary dispensaries". */
 function aw_seo_type_plural( $slug ) {
 	$fixed = array(
@@ -510,7 +529,7 @@ function aw_seo_type_plural( $slug ) {
 	if ( isset( $fixed[ $slug ] ) ) {
 		return $fixed[ $slug ];
 	}
-	$name  = trim( preg_replace( '/\s*\(.*?\)\s*/', ' ', aw_listing_type_name( $slug ) ) );
+	$name  = trim( preg_replace( '/\s*\(.*?\)\s*/', ' ', aw_seo_listing_type_name( $slug ) ) );
 	$words = array_map( fn( $w ) => preg_match( '/^[A-Z]{2,}$/', $w ) || 0 === stripos( $w, 'gaushala' ) ? ucfirst( $w ) : mb_strtolower( $w ), explode( ' ', $name ) );
 	$last  = (string) array_pop( $words );
 	if ( preg_match( '/[^aeiou]y$/', $last ) ) {
@@ -573,7 +592,7 @@ function aw_seo_awbi_description( $id, $desc ) {
 		usort( $types, fn( $a, $b ) => (int) ( 'animal-welfare-organisation' === $a->slug ) - (int) ( 'animal-welfare-organisation' === $b->slug ) );
 	}
 	$type  = $types ? implode( ' ', array_map( fn( $w ) => preg_match( '/^[A-Z]{2,}$/', $w ) || 0 === stripos( $w, 'gaushala' ) ? ucfirst( $w ) : mb_strtolower( $w ), explode( ' ', trim( preg_replace( '/\s*\(.*?\)/', '', $types[0]->name ) ) ) ) ) : 'organisation';
-	list( $state, $district ) = aw_item_place_names( $id );
+	list( $state, $district ) = aw_seo_item_place_names( $id );
 	$where = implode( ', ', array_unique( array_filter( array( $district, $state ) ) ) ); // Chandigarh, Delhi: the district and state share a name
 	$name  = preg_replace( '/[\s,;:]+$/u', '', aw_seo_plain( get_post_field( 'post_title', $id ) ) );
 	$line  = sprintf( '%1$s is an AWBI-recognised %2$s%3$s (AWBI code %4$s).', $name, $type, $where ? ' in ' . $where : '', $code );

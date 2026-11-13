@@ -342,7 +342,7 @@ function aw_workers_run_now( $file ) {
 		)
 	);
 	update_option( 'aw_worker_dispatch_log', array_slice( $log, 0, 50 ), false );
-	kits_sourcing_log( 'workers', 'Run now: ' . $file . ( true === $res ? '' : ' (not started: ' . $res->get_error_message() . ')' ) );
+	aw_src_log( 'workers', 'Run now: ' . $file . ( true === $res ? '' : ' (not started: ' . $res->get_error_message() . ')' ) );
 	return $res;
 }
 
