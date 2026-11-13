@@ -1,30 +1,36 @@
 #!/usr/bin/env python3
-"""Deploy check: the Animal Writes theme files that animal-writes-core carries (plugins/animal-writes-core/theme/, used
-when Kits by Wugweb runs with no child theme) are the same as the child theme's (themes/animal-writes/).
+"""Deploy check: the Animal Writes theme files that animal-writes-core carries (plugins/animal-writes-core/theme/, served
+while Kits by Wugweb is the active theme) are all there, and fonts live only in Kits.
 
-While both exist, the child theme is the source: change a file there, then copy it to the plugin's theme/ folder. This
-check fails when a copy differs from the child's file, or when a child asset, template, part, pattern, theme.json or
-registry has no copy. Fonts are not copied: Kits by Wugweb declares Inter in its theme.json and ships the one file
-(assets/fonts/inter/inter-latin.woff2); the child has no font folder (checked here too).
-The other checks read the child's file and skip its copy (is_copy), so a rule is not counted twice. Once the child
-theme is gone, the plugin's files are read in its place (theme_file).
-The .min.css files tools/ci/css_min.py writes (aw.min.css in the plugin's folder, kit-tokens/kit/kit-primitives.min.css
-in Kits; MIN_FILES) have no child file and need none. is_copy() counts them as copies of their sources, so the other
-checks read the sources.
+Kits by Wugweb runs with no child theme, and the plugin's theme/ folder is the one source of the Animal Writes theme
+files (assets, templates, parts, patterns, theme.json, kits-registry.json, tokens/). This check fails when one of those
+is missing, or when a font folder appears there: Kits by Wugweb declares Inter in its theme.json and ships the one file
+(assets/fonts/inter/inter-latin.woff2).
 
-    python3 tools/ci/theme_copies.py        # exit 1 when a copy differs or is missing
+The other checks import is_copy() and theme_file() from here:
+- is_copy() is true for the generated .min.css files (tools/ci/css_min.py writes aw*.min.css in the plugin's folder and
+  kit-tokens/kit/kit-primitives.min.css in Kits; MIN_FILES), so the checks read their sources instead;
+- theme_file(rel) is the plugin's file.
+
+    python3 tools/ci/theme_copies.py        # exit 1 when a required file is missing or a font folder is there
 """
-import filecmp
 import pathlib
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
-CHILD = ROOT / "themes/animal-writes"
 COPY = ROOT / "plugins/animal-writes-core/theme"
-# Each of these child files must have a copy (the plugin serves them; a missing one would be missing on the site).
-REQUIRED = ("assets", "templates", "parts", "patterns", "theme.json", "kits-registry.json")
-# Fonts live in Kits only (its theme.json declares them); neither the child nor the copy carries a font folder.
-NOT_COPIED = ("assets/fonts",)
+# Each of these must be in the plugin's theme/ folder (the plugin serves them; a missing one would be missing on the site).
+REQUIRED = (
+    "assets/css/aw.css",
+    "assets/css/tokens.css",
+    "assets/js/aw.js",
+    "templates",
+    "parts",
+    "patterns",
+    "theme.json",
+    "kits-registry.json",
+    "tokens/tokens.json",
+)
 KITS_FONT = "themes/kits-by-wugweb/assets/fonts/inter/inter-latin.woff2"
 
 
@@ -36,56 +42,31 @@ MIN_FILES = {dst.resolve() for _, dst in _min_pairs()}
 
 
 def is_copy(path):
-    """True for a file under the plugin's theme/ folder whose child theme file exists (that file is read instead), and
-    for a generated .min.css next to its source (tools/ci/css_min.py; the source is read instead, child theme or not)."""
-    p = pathlib.Path(path).resolve()
-    if p in MIN_FILES:
-        return True  # aw.min.css and the Kits kit*.min.css
-    try:
-        rel = p.relative_to(COPY)
-    except ValueError:
-        return False
-    return (CHILD / rel).is_file()
+    """True for a generated .min.css next to its source (tools/ci/css_min.py; the source is read instead)."""
+    return pathlib.Path(path).resolve() in MIN_FILES
 
 
 def theme_file(rel):
-    """The child theme's file, or the plugin's copy when the child theme is gone."""
-    child = CHILD / rel
-    return child if child.exists() or not (COPY / rel).exists() else COPY / rel
+    """The Animal Writes theme file (path relative to the theme root) in the plugin's theme/ folder."""
+    return COPY / rel
 
 
 def main():
-    if not CHILD.is_dir():
-        print("theme copies: no child theme, the plugin's theme/ folder is the source")
-        return 0
-    bad, n = [], 0
-    for f in sorted(COPY.rglob("*")):
-        if not f.is_file() or f.name == ".DS_Store":
-            continue
-        rel = f.relative_to(COPY)
-        child = CHILD / rel
-        if child.is_file():
-            n += 1
-            if not filecmp.cmp(f, child, shallow=False):
-                bad.append(f"DIFFERS {rel} (copy themes/animal-writes/{rel} over it)")
-    for top in REQUIRED:
-        src = CHILD / top
-        for f in sorted([src] if src.is_file() else src.rglob("*") if src.is_dir() else []):
-            rel = f.relative_to(CHILD)
-            if any(rel.as_posix() == x or rel.as_posix().startswith(x + "/") for x in NOT_COPIED):
-                continue
-            if f.is_file() and f.name != ".DS_Store" and not (COPY / rel).is_file():
-                bad.append(f"MISSING {rel} (copy it to plugins/animal-writes-core/theme/)")
+    bad = []
+    for rel in REQUIRED:
+        p = COPY / rel
+        if not p.exists() or (p.is_dir() and not any(f.is_file() for f in p.rglob("*"))):
+            bad.append(f"MISSING plugins/animal-writes-core/theme/{rel}")
     if not (ROOT / KITS_FONT).is_file():
         bad.append(f"FONT {KITS_FONT} is missing (Kits' theme.json declares it)")
-    for folder in (CHILD / "assets/fonts", COPY / "assets/fonts"):
-        if folder.is_dir() and any(f.is_file() and f.name != ".DS_Store" for f in folder.rglob("*")):
-            bad.append(f"FONT {folder.relative_to(ROOT)} has font files; Inter is declared once, in Kits")
+    folder = COPY / "assets/fonts"
+    if folder.is_dir() and any(f.is_file() and f.name != ".DS_Store" for f in folder.rglob("*")):
+        bad.append(f"FONT {folder.relative_to(ROOT)} has font files; Inter is declared once, in Kits")
     if bad:
-        print("Animal Writes theme copies out of step with the child theme:")
+        print("Animal Writes theme files in animal-writes-core:")
         print("\n".join("  " + b for b in bad))
         return 1
-    print(f"theme copies check passed ({n} files the same as the child theme's)")
+    print(f"theme files check passed ({len(REQUIRED)} required paths in plugins/animal-writes-core/theme/, fonts only in Kits)")
     return 0
 
 

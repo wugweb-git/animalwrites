@@ -1,11 +1,12 @@
 <?php
 /**
- * Animal Writes parts that the child theme holds today, brought by this plugin so the site can run Kits by Wugweb
- * with no child theme (as Uncode sites run Uncode with Uncode Core).
+ * Animal Writes theme parts (once the animal-writes child theme's), brought by this plugin so the site runs Kits by
+ * Wugweb with no child theme (as Uncode sites run Uncode with Uncode Core). The plugin's theme/ folder is their one
+ * source; the child theme was retired (its folder left the repository on 14 Nov 2026).
  *
- * While the animal-writes child theme is active it keeps serving its own files and nothing here runs, so the site is
- * unchanged. With Kits as the active theme, theme-parts-assets.php (styles, scripts, files, fonts) and
- * theme-parts-templates.php (templates, template parts, patterns) take over.
+ * With Kits as the active theme, theme-parts-assets.php (styles, scripts, files, fonts) and theme-parts-templates.php
+ * (templates, template parts, patterns) serve them. Were an animal-writes child theme active again, nothing here would
+ * run and it would serve its own files.
  *
  * @package animal-writes-core
  */

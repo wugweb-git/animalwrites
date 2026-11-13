@@ -9,7 +9,7 @@
  * - Every 404 fills the search field with the words of the missing address (/news/stray-dog-protest/ → "stray dog
  *   protest") and, under /news/, /library/ or /opportunities/, lists that section's three newest items.
  *
- * [aw_not_found] in the theme's 404 template (themes/animal-writes/templates/404.html) prints the page.
+ * [aw_not_found] in the 404 template (animal-writes-core theme/templates/404.html) prints the page.
  *
  * @package animal-writes-core
  */

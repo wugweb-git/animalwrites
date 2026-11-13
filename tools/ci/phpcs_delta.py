@@ -96,7 +96,7 @@ def main():
         new_path = parts[-1]
         if not new_path.endswith('.php'):
             continue
-        if is_copy(os.path.join(REPO, new_path)):  # a copy of a child theme file (tools/ci/theme_copies.py)
+        if is_copy(os.path.join(REPO, new_path)):  # a generated file (tools/ci/theme_copies.py)
             continue
         old_path = parts[1] if status.startswith('R') else (None if status == 'A' else new_path)
         if old_path is not None and not old_path.endswith('.php'):

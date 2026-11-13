@@ -86,7 +86,7 @@ Only Newsletter #3 sends people to /thank-you/ (Fluent Forms confirmation "redir
 | Claim this listing (#6) | `[aw_claim_page]` (`/claim/?listing=<ID>`, with the listing's own head band; without a listing, the organisation finder) | `form-blocks.php`, `claims.php`, `claims-review.php` |
 | Report a mistake, Remove my data | Contact (#4), `?about=general&item=<ID>` (hidden `report_item`, `report_path`; since 12 Nov 2026 not a reason), `?about=remove`. `/report/` and `/remove-my-data/` are Rank Math 301s to them (the query string is kept, so `?item=` and `?listing=` still name the item); the pages are in the trash and forms #7 and #8 inactive (entries kept and exported on 31 Oct). | `pages.php`, `reports.php`, `form-blocks.php` |
 
-Where they appear: the volunteer banner is the theme pattern `themes/animal-writes/patterns/volunteer-banner.php` (block `animal-writes/volunteer`); the listing card is the block `animal-writes/listing-help` in `themes/animal-writes/templates/single-aw_listing.html`; the newsletter strip is in the footer (reusable block 12752, `[aw_newsletter]`).
+Where they appear: the volunteer banner is the theme pattern `plugins/animal-writes-core/theme/patterns/volunteer-banner.php` (block `animal-writes/volunteer`); the listing card is the block `animal-writes/listing-help` in `plugins/animal-writes-core/theme/templates/single-aw_listing.html`; the newsletter strip is in the footer (reusable block 12752, `[aw_newsletter]`).
 
 ## The site's look and the custom fields
 

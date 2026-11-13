@@ -13,11 +13,11 @@ import sys
 from theme_copies import theme_file
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
-# Same order as the site loads them: Kits primitives, Kits tokens, then the child theme's brand values.
+# Same order as the site loads them: Kits primitives, Kits tokens, then the Animal Writes brand values.
 TOKEN_FILES = [
     ROOT / "themes/kits-by-wugweb/assets/css/kits-v42.css",
     ROOT / "themes/kits-by-wugweb/assets/css/kit-tokens.css",
-    theme_file("assets/css/tokens.css"),  # the child theme's, or the plugin's copy once it is gone
+    theme_file("assets/css/tokens.css"),  # animal-writes-core/theme
 ]
 REGISTRIES = sorted(set((ROOT / "themes").glob("*/kits-registry.json")) | {theme_file("kits-registry.json")})
 CAMPAIGN_CSS = ROOT / "plugins/animal-writes-core/assets/css/campaign.css"

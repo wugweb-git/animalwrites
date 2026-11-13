@@ -3,7 +3,7 @@
 the Kits kit.css, kit-primitives.css, kit-tokens.css → .min.css: comments and whitespace out, nothing else.
 
 The site serves the .min.css files; the sources stay the readable files in git (the editors load the sources).
-Edit a source (aw.css also in its child theme copy; kit-tokens.css comes from tools/build-tokens.py), then run this and
+Edit a source (kit-tokens.css comes from tools/build-tokens.py), then run this and
 commit both files. The Deploy check runs it with --check and fails when a .min.css is not what this writes from its
 source.
 

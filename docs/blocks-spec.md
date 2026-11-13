@@ -33,7 +33,7 @@ Everything else becomes a native WordPress feature (section 3). PlanWeb, Insight
 
 Found with `grep` for `add_shortcode`, `register_block_type`, `registerBlockType`, `block.json`, `render_callback` and `render_block` across `plugins/` and `themes/` on `claude/blocks-spec-1111-135dba` (from `637e9e64`).
 
-"Live use" is a read-only database search on 11 Nov 2026 (published, draft, private and scheduled items; revisions left out) plus the theme files. "Theme files" means both copies: `themes/animal-writes/` and `plugins/animal-writes-core/theme/`. No template or template part is saved in the database on live, so the files are what live shows.
+"Live use" is a read-only database search on 11 Nov 2026 (published, draft, private and scheduled items; revisions left out) plus the theme files. "Theme files" means `plugins/animal-writes-core/theme/` (until 14 Nov 2026 also its identical copy, the child theme `themes/animal-writes/`). No template or template part is saved in the database on live, so the files are what live shows.
 
 ### 1a. Shortcodes (37)
 
@@ -518,7 +518,7 @@ Old shortcodes and blocks are removed only after a later check finds no use left
 - **Breadcrumbs.** Rank Math's Breadcrumbs block gets the class `kit-crumbs` in the templates, so `aw-analytics.js` (lines 104 and 183) and the GA4 `breadcrumb` event stay unchanged; only the markup inside the trail changes. Each page type's trail is checked once before it ships (item, listing, hub, category, tag, page). The `render_block_core/post-title` and `post-terms` filters in `breadcrumbs.php` that place today's trail go in the same change.
 - **Lists as text.** A list field returned as text loses its list markup; the binding source returns it in one fixed format so it reads the same on every listing.
 - **Block Bindings on Social Icons** may not be allowed in WordPress 7.1; the fallback filter is in 3.5.
-- **Two theme copies.** Templates and patterns live in `themes/animal-writes/` and `plugins/animal-writes-core/theme/`; every file change goes to both, and `aw.css` stays the same in both.
+- **One theme copy.** Templates, parts, patterns and `aw.css` live in `plugins/animal-writes-core/theme/` only (the child theme folder was removed on 14 Nov 2026); "both copies" below means that one file.
 - **Many render filters** shape core blocks (about 90). A template that swaps an old block for core blocks must be checked against them (titles, dates, terms, featured images).
 
 ### Decisions and answers of 11 Nov 2026

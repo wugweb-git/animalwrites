@@ -3,8 +3,7 @@
 Live at https://animalwrites.in. How changes are made, reviewed and shipped: [CLAUDE.md](CLAUDE.md).
 
 - `themes/kits-by-wugweb/` — the Kits by Wugweb parent theme (in this repo).
-- `themes/animal-writes/` — the Animal Writes child theme (brand palette, templates).
-- `plugins/animal-writes-core/` — content types, templates, directory, campaigns, forms glue, deploy purge, branded error pages.
+- `plugins/animal-writes-core/` — content types, the Animal Writes theme files Kits by Wugweb serves (`theme/`: brand palette, templates, parts, patterns, `aw.css`), directory, campaigns, forms glue, deploy purge, branded error pages.
 - `plugins/aw-sourcing/` — SourceWeb: feeds, keywords, publishers, relay, AI keys, To review, enrichment, the Workers tab, the ingest API.
 - `plugins/aw-seo-extras/` — RankWeb: all SEO code (with Rank Math), the FAQ system, Search Insights.
 - `plugins/kits-core/` — reusable design-system parts (no site-specific code).

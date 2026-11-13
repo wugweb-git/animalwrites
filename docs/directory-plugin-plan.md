@@ -83,7 +83,7 @@ These files stay in Core; only their Directory parts move.
 | `acf-json/group_aw_campaign_orgs.json` | Campaign screen box, not a listing group | Stays in Core |
 | `data/lgd.json` | Read only by `aw_lgd()` (`places.php:58`); built by `tools/lgd/build_lgd.py`, checked by `tools/lgd/check.php`, read by `tools/directory/places.py:36`, `tools/awbi/match.py:6` | DW `data/lgd.json` (same file name). Tool paths updated in the same commit |
 | `data/district-centroids.json` | `related.php:136-139` | DW `data/` |
-| `theme/templates/single-aw_listing.html` | Identical copy in `themes/animal-writes/templates/` (the child theme, whose removal is on hold) | DW registers it as a plugin template (§3.3) |
+| `theme/templates/single-aw_listing.html` | The only copy (the child theme's twin was removed with the child theme folder, 14 Nov 2026) | DW registers it as a plugin template (§3.3) |
 | `theme/patterns/find-help.php` | `[aw_find_help compact="1"]`; identical copy in the child theme; on the front page `front-page.html:8` | DW registers the pattern |
 | `theme/assets/css/aw-directory.css`, `aw-listing.css` (+ `.min.css`) | Only in the plugin's theme folder | DW `assets/css/` |
 | `assets/css/dir-map.css`, `assets/js/dir-map.js`, `assets/js/map-picker.js` | Map, Near me, admin map picker | DW `assets/` |
@@ -330,7 +330,7 @@ The plan:
 - **The template:** `single-aw_listing.html` is registered with `register_block_template( 'directoryweb//single-aw_listing', … )` (WordPress 6.7+).
   - Live runs `kits-by-wugweb` with the child theme **inactive** (11 Nov 2026). The page is served today from Core's `theme/templates/single-aw_listing.html`, through `theme-parts-templates.php`, which ranks its files above Kits' files and above plugin-registered templates of the same slug.
   - So Core's copy is deleted in the same commit as the plugin registers its own; otherwise Core's file keeps winning and the plugin's is never used. Kits has no `single-aw_listing.html`, so nothing else competes.
-  - The child theme's copy (`themes/animal-writes/templates/single-aw_listing.html`) matters only if the child is turned on again; it stays identical until the child theme is retired (on hold).
+  - The child theme's copy is gone: the child theme folder was removed on 14 Nov 2026.
   - The 0-difference check runs on staging (refreshed from live) before and after this commit.
 - **Before phase 1, check whether the live database holds an edited copy of this template.** An edited copy (a `wp_template` post) would win over both files.
 - **The pattern:** `find-help` is registered by DirectoryWeb on `init` 9 under the **same slug** `animal-writes/find-help`, because `front-page.html:8` references it. Core and the child stop registering it in the same commit.
