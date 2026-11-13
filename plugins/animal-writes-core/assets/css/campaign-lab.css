@@ -996,7 +996,7 @@
 .aw-camp--lab-rules .aw-camp-dark .aw-camp-note:has(> a[href*="/resources/"]) > :is(a, .kit-ico) { color: var(--kit-color-on-ink); }
 
 /* Lab rules in the wait for the decision (owner, 13 Nov 2026): a status chip and keyphrase line in the hero, a hero
-   picture in place of the document card, a dated four-step status band, and the updates sign-up after the letter tool. */
+   picture in place of the document card, and a dated four-step status band. */
 .aw-camp--lab-rules .aw-camp-wait-chip { display: inline-flex; align-items: center; gap: var(--kit-space-2); margin: 0 0 var(--kit-space-4); padding: var(--kit-space-1) var(--kit-space-3); border-radius: var(--kit-radius-pill); background: rgb(255 255 255 / 0.14); box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.35); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-strong); line-height: 1.5; }
 .aw-camp--lab-rules .aw-camp-wait-chip::before { content: ""; flex: none; width: 0.5625rem; height: 0.5625rem; border-radius: 50%; background: currentColor; animation: aw-camp-wait-pulse 2.4s ease-out 3; }
 @keyframes aw-camp-wait-pulse { 0% { box-shadow: 0 0 0 0 rgb(255 255 255 / 0.7); } 70%, 100% { box-shadow: 0 0 0 0.5625rem rgb(255 255 255 / 0); } }
@@ -1022,10 +1022,5 @@
 }
 .aw-camp--lab-rules .aw-camp-wait-stamp { font-size: var(--kit-type-sm); opacity: 0.8; }
 .aw-camp--lab-rules .aw-camp-wait-stamp a { color: inherit; }
-
-/* The updates sign-up band (id="updates"): the form sits on a white panel inside the dark band. */
-.aw-camp--lab-rules .aw-camp-wait-updates .aw-newsletter-form { max-width: 560px; margin-top: var(--kit-space-5); padding: var(--kit-space-5); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); color: var(--kit-color-text); }
-.aw-camp--lab-rules .aw-camp-wait-updates .aw-newsletter-form :is(p, li, label, strong, span) { color: var(--kit-color-text); }
-.aw-camp--lab-rules .aw-camp-wait-updates .aw-newsletter-form a { color: var(--kit-color-ink); }
 
 @media (prefers-reduced-motion: reduce) { .aw-camp--lab-rules .aw-camp-wait-chip::before { animation: none; } }

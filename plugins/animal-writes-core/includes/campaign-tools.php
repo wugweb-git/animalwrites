@@ -946,7 +946,7 @@ function aw_current_campaign_id() {
 /**
  * A card for the current campaign: its picture, title, one or two lines, days left and Take part. Nothing when none is open.
  * After the close date (the campaign still open, waiting for a decision) it says "Decision awaited" and links to what
- * happens next and to the updates sign-up on the page (owner, 13 Nov 2026).
+ * happens next and to the newsletter sign-up on the page (owner, 13 Nov 2026).
  */
 function aw_block_current_campaign( $a = array(), $id = 0 ) {
 	// sm, the campaign's small card (owner, 13 Nov 2026: every campaign in four sizes, lg, md, sm and share). The block's
@@ -976,7 +976,7 @@ function aw_block_current_campaign( $a = array(), $id = 0 ) {
 	if ( $wait ) {
 		$meta = '<span class="kit-meta-item">' . esc_html__( 'Current campaign', 'animal-writes-core' ) . '</span><span class="aw-side-camp-chip">' . esc_html__( 'Decision awaited', 'animal-writes-core' ) . '</span>';
 		$btns = '<div class="aw-side-camp-btns"><a class="kit-btn aw-side-camp-btn" href="' . esc_url( $url . '#context' ) . '">' . esc_html__( 'What happens next', 'animal-writes-core' ) . '</a>'
-			. '<a class="kit-btn kit-btn--secondary aw-side-camp-btn" href="' . esc_url( $url . '#updates' ) . '">' . esc_html__( 'Get the decision first', 'animal-writes-core' ) . '</a></div>';
+			. '<a class="kit-btn kit-btn--secondary aw-side-camp-btn" href="' . esc_url( $url . '#newsletter' ) . '">' . esc_html__( 'Get the decision first', 'animal-writes-core' ) . '</a></div>';
 	} else {
 		$meta = '<span class="kit-meta-item">' . esc_html__( 'Current campaign', 'animal-writes-core' ) . '</span>' . ( '' !== $left ? '<span class="kit-meta-item">' . aw_i( 'clock' ) . esc_html( $left ) . '</span>' : '' );
 		$btns = '<a class="kit-btn aw-side-camp-btn" href="' . esc_url( $url ) . '" aria-describedby="' . esc_attr( $hid ) . '">' . esc_html__( 'Take part', 'animal-writes-core' ) . '</a>';
