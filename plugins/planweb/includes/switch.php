@@ -120,6 +120,47 @@ add_action(
 	}
 );
 
+/** Whether PlanWeb's data goes when the plugin is deleted. */
+function planweb_delete_data_on(): bool {
+	return (bool) get_option( 'planweb_delete_data_on_uninstall', false );
+}
+
+/**
+ * Save "Delete this plugin's data when it is deleted". Nothing is written when it is already so.
+ *
+ * @param bool $on On.
+ * @return bool Whether the option was written.
+ */
+function planweb_delete_data_save( bool $on ): bool {
+	if ( planweb_delete_data_on() === $on ) {
+		return false;
+	}
+	update_option( 'planweb_delete_data_on_uninstall', $on );
+	return true;
+}
+
+/**
+ * "Reset this section" (PlanWeb → Settings → PlanWeb, and Kits → Modules → PlanWeb): "Delete this plugin's data" back
+ * to its registered default (off). The switch (planweb_on) is left as it is: it says whether PlanWeb is in use (on when
+ * the plugin is activated), and its default, off, would take these screens away and move the calendar back.
+ *
+ * @return bool Whether anything was written.
+ */
+function planweb_settings_reset(): bool {
+	$default = (bool) ( get_registered_settings()['planweb_delete_data_on_uninstall']['default'] ?? false );
+	return planweb_delete_data_save( $default );
+}
+
+// Kits → Modules → PlanWeb gets "Reset this section" (Animal Writes Core's aw_core_reset_sections()).
+add_filter(
+	'aw_core_reset_sections',
+	function ( $sections ) {
+		$sections                   = (array) $sections;
+		$sections['planweb_module'] = 'planweb_settings_reset';
+		return $sections;
+	}
+);
+
 // Once PlanWeb is on: capabilities and list values (again when PLANWEB_SETUP changes). On init, so the taxonomies exist.
 add_action(
 	'init',

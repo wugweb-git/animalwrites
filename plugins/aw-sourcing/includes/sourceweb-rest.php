@@ -10,7 +10,8 @@
  *   GET  enrichment             manage_sourceweb   one page of Listing details, one row per listing
  *   POST enrichment/decide      manage_sourceweb   approve, reject or undo rows (aw_enrich_approve/reject/undo())
  *   GET  settings               manage_options     the connected services and the groups, with today's values
- *   POST settings/<group>       manage_options     save one group: only the values that changed are written
+ *   POST settings/<group>       manage_options     save one group: only the values that changed are written;
+ *                                                  reset: true restores the group's defaults (enrichment, social)
  *   POST settings/google-key    manage_options     a new Google Places key (write-only: never sent back)
  *
  * Every route checks the capability and, for a signed-in browser, the wp_rest nonce (kits_shell_rest_can() from Kits
@@ -163,6 +164,10 @@ add_action(
 					'values' => array(
 						'type'    => 'object',
 						'default' => array(),
+					),
+					'reset'  => array(
+						'type'    => 'boolean',
+						'default' => false,
 					),
 				),
 			),
@@ -989,6 +994,7 @@ function sourceweb_settings_payload(): array {
 		),
 		array(
 			'slug'        => 'enrichment',
+			'reset'       => true,
 			'label'       => __( 'Directory enrichment', 'aw-sourcing' ),
 			'description' => __( 'The live Google block on listing pages. Each source is switched on or off on its row under Connected services.', 'aw-sourcing' ),
 			'fields'      => array(
@@ -1006,6 +1012,7 @@ function sourceweb_settings_payload(): array {
 	if ( isset( $now['social'] ) ) {
 		$groups[] = array(
 			'slug'        => 'social',
+			'reset'       => true,
 			'label'       => __( 'Social posts', 'aw-sourcing' ),
 			'description' => __( 'Other people’s public posts about a campaign or an item. Every one waits in To review; nothing is published on its own. The block on pages needs the owner’s yes to its design first.', 'aw-sourcing' ),
 			'fields'      => array(
@@ -1049,6 +1056,24 @@ function sourceweb_settings_payload(): array {
 }
 
 /**
+ * "Reset this section": each group's defaults, as the screen edits them. Directory enrichment: the live block's
+ * monthly cap back to 20 (the sources are switched on their rows under Connected services). Social posts: both
+ * switches off, their registered default. Workers has none: "Workers use these lists" is kept inside aw_sources with
+ * the owner's source lists, not a setting with a default.
+ *
+ * @return array group => key => default.
+ */
+function sourceweb_settings_defaults(): array {
+	return array(
+		'enrichment' => array( 'live_cap' => 20 ),
+		'social'     => array(
+			'aw_social_on'   => false,
+			'aw_social_show' => false,
+		),
+	);
+}
+
+/**
  * POST settings/<group>: only the values that changed are written, each through its own save path.
  *
  * @param WP_REST_Request $request Request.
@@ -1058,6 +1083,13 @@ function sourceweb_rest_save_group( WP_REST_Request $request ) {
 	$now   = sourceweb_settings_now();
 	if ( ! isset( $now[ $group ] ) ) {
 		return new WP_Error( 'rest_invalid_param', __( 'No such group.', 'aw-sourcing' ), array( 'status' => 400 ) );
+	}
+	if ( $request['reset'] ) {
+		$defaults = sourceweb_settings_defaults();
+		if ( ! isset( $defaults[ $group ] ) ) {
+			return new WP_Error( 'rest_invalid_param', __( 'This section has no reset.', 'aw-sourcing' ), array( 'status' => 400 ) );
+		}
+		$request['values'] = $defaults[ $group ]; // "Reset this section": the defaults, saved as any other change
 	}
 	$changed = sourceweb_changed( $now[ $group ], (array) $request['values'] );
 	if ( 'workers' === $group && isset( $changed['live'] ) ) {
@@ -1086,10 +1118,15 @@ function sourceweb_rest_save_group( WP_REST_Request $request ) {
 			aw_src_log( 'settings', ( 'aw_social_on' === $k ? 'Social posts type' : 'Social posts shown on pages' ) . ': ' . ( $v ? 'on' : 'off' ) );
 		}
 	}
+	if ( $request['reset'] ) {
+		$message = __( 'Defaults restored.', 'aw-sourcing' );
+	} else {
+		$message = $changed ? __( 'Saved. The workers use this from their next run.', 'aw-sourcing' ) : __( 'Nothing changed.', 'aw-sourcing' );
+	}
 	return rest_ensure_response(
 		array(
 			'saved'    => (bool) $changed,
-			'message'  => $changed ? __( 'Saved. The workers use this from their next run.', 'aw-sourcing' ) : __( 'Nothing changed.', 'aw-sourcing' ),
+			'message'  => $message,
 			'settings' => sourceweb_settings_payload(),
 		)
 	);
