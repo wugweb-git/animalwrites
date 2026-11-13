@@ -1294,8 +1294,14 @@ function aw_enrich_rest_results( WP_REST_Request $req ) {
 		$note = 'merge_into' === $field ? 'Same name and district, shared contact: approve to merge (the other listing becomes a draft with a 301)' : ( 'place' === $field && ! $protected ? ( 'low' === $conf ? 'Check first: the PIN code points to another state or district, or only the name gives the district' : 'The listing has a different state or already a district' ) : null );
 		$note = null !== $note ? $note : ( ! empty( $b['force_review'] ) ? 'From an imported list: approve to apply' : ( $protected ? 'Claimed or verified listing: never changed automatically' : ( 'low' === $conf ? 'Sources disagree' : 'Would replace a value already on the listing' ) ) );
 		$rid = aw_enrich_add_row( $lid, $field, $value, aw_enrich_snapshot( $lid, $field ), $srcs, $conf, 'pending', $run, trim( ( '' !== $svc_note ? $svc_note . '. ' : '' ) . $note, '. ' ) );
-		do_action( 'aw_enrich_queued', (int) $rid, $lid, $field ); // autoresolve.php decides the obvious ones at once
-		$out['queued'][] = $field;
+		$dec = apply_filters( 'aw_enrich_queued_decision', '', (int) $rid, $lid, $field ); // autoresolve.php decides the obvious ones at once: approve | reject | ''
+		if ( 'approve' === $dec ) {
+			$out['applied'][] = $field;
+		} elseif ( 'reject' === $dec ) {
+			$out['skipped'][] = $field;
+		} else {
+			$out['queued'][] = $field;
+		}
 	}
 
 	if ( ! empty( $b['import'] ) ) { // an import neither marks the listing checked nor changes its flags

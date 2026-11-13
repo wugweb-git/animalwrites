@@ -45,6 +45,24 @@ function aw_ar_context( $lid, $sources ) {
 }
 
 /**
+ * Whether another listing already holds this phone number (compared by its last 10 digits).
+ *
+ * @param int    $lid    Listing.
+ * @param string $number Number.
+ * @return bool
+ */
+function aw_ar_phone_elsewhere( $lid, $number ) {
+	global $wpdb;
+	$last = substr( preg_replace( '/\D+/', '', (string) $number ), -10 );
+	if ( strlen( $last ) < 10 ) {
+		return false;
+	}
+	return (bool) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$wpdb->prepare( "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = 'aw_phones' AND post_id <> %d AND REGEXP_REPLACE( meta_value, '[^0-9]', '' ) LIKE %s LIMIT 1", (int) $lid, '%' . $wpdb->esc_like( $last ) . '%' ) // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	);
+}
+
+/**
  * Decide one waiting row, and apply the decision unless $apply is false.
  *
  * @param int  $id    Row ID.
@@ -63,6 +81,9 @@ function aw_ar_row( $id, $apply = true ) {
 	if ( aw_enrich_is_protected( $lid ) ) {
 		return array( 'act' => 'leave', 'why' => 'a claimed or verified listing is never changed automatically' );
 	}
+	if ( 'phone' === $r['field'] && aw_ar_phone_elsewhere( $lid, $r['value'] ) ) {
+		return array( 'act' => 'leave', 'why' => 'the number is on another listing (a name clash?)' );
+	}
 	$d = aw_ar_decide( $r['field'], (string) aw_enrich_current( $lid, $r['field'] ), $r['value'], (string) $r['confidence'], aw_ar_context( $lid, $r['sources'] ) );
 	if ( ! $apply || 'leave' === $d['act'] ) {
 		return $d;
@@ -77,14 +98,18 @@ function aw_ar_row( $id, $apply = true ) {
 	return $d;
 }
 
-// A value queued for review is decided at once.
-add_action(
-	'aw_enrich_queued',
-	function ( $id ) {
+// A value queued for review is decided at once; the results reply says what became of it.
+add_filter(
+	'aw_enrich_queued_decision',
+	function ( $act, $id ) {
 		if ( $id && aw_ar_on() ) {
-			aw_ar_row( (int) $id );
+			$d = aw_ar_row( (int) $id );
+			return $d ? $d['act'] : '';
 		}
-	}
+		return $act;
+	},
+	10,
+	2
 );
 
 /**
