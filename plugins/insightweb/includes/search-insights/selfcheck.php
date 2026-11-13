@@ -218,13 +218,42 @@ function aw_si_chk_section(): void {
 		echo '<p>' . esc_html__( 'The first check runs tomorrow morning.', 'insightweb' ) . '</p>';
 		return;
 	}
-	echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Day', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'Speed, mobile', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'Speed, desktop', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'AI visibility', 'insightweb' ) . '</th></tr></thead><tbody>';
-	$cell = fn( $v ) => null === $v || '' === $v ? '—' : number_format_i18n( (int) $v );
+	$cell  = fn( $v ) => null === $v || '' === $v ? '—' : number_format_i18n( (int) $v );
+	$raw   = fn( $v ) => null === $v || '' === $v ? -1 : (int) $v;
+	$cells = array();
 	foreach ( array_slice( $all, 0, 7, true ) as $ymd => $d ) {
-		$t = strtotime( (string) $ymd );
-		echo '<tr><td>' . esc_html( $t ? wp_date( 'j M Y', $t ) : (string) $ymd ) . '</td><td>' . esc_html( $cell( $d['speed']['mobile'] ?? null ) ) . '</td><td>' . esc_html( $cell( $d['speed']['desktop'] ?? null ) ) . '</td><td>' . esc_html( $cell( $d['ai']['score'] ?? null ) ) . '</td></tr>';
+		$t       = strtotime( (string) $ymd );
+		$cells[] = array(
+			'day'     => esc_html( $t ? wp_date( 'j M Y', $t ) : (string) $ymd ),
+			'mobile'  => esc_html( $cell( $d['speed']['mobile'] ?? null ) ),
+			'desktop' => esc_html( $cell( $d['speed']['desktop'] ?? null ) ),
+			'ai'      => esc_html( $cell( $d['ai']['score'] ?? null ) ),
+			'_sort'   => array(
+				'day'     => (string) $ymd,
+				'mobile'  => $raw( $d['speed']['mobile'] ?? null ),
+				'desktop' => $raw( $d['speed']['desktop'] ?? null ),
+				'ai'      => $raw( $d['ai']['score'] ?? null ),
+			),
+		);
 	}
-	echo '</tbody></table>';
+	aw_si_simple_table(
+		'speed-checks',
+		array(
+			'day'     => esc_html__( 'Day', 'insightweb' ),
+			'mobile'  => esc_html__( 'Speed, mobile', 'insightweb' ),
+			'desktop' => esc_html__( 'Speed, desktop', 'insightweb' ),
+			'ai'      => esc_html__( 'AI visibility', 'insightweb' ),
+		),
+		$cells,
+		array(
+			'sortable' => array(
+				'day'     => true,
+				'mobile'  => true,
+				'desktop' => true,
+				'ai'      => true,
+			),
+		)
+	);
 	$last = null;
 	foreach ( $all as $d ) {
 		if ( isset( $d['ai']['items'] ) ) {

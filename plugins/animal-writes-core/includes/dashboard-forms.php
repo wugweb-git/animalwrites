@@ -57,13 +57,28 @@ add_action(
 						)
 					);
 				}
-				echo '<table class="widefat striped"><thead><tr><th scope="col">Form</th><th scope="col">Unread</th><th scope="col">Last 7 days</th><th scope="col">Total</th></tr></thead><tbody>';
+				$cells = array();
 				foreach ( $rows as $r ) {
-					$url = admin_url( 'admin.php?page=fluent_forms&route=entries&form_id=' . (int) $r->id );
-					$u   = (int) $r->unread;
-					echo '<tr><td><a href="' . esc_url( $url ) . '">' . esc_html( (string) $r->title ) . '</a></td><td>' . ( $u ? '<strong>' . esc_html( number_format_i18n( $u ) ) . '</strong>' : '0' ) . '</td><td>' . esc_html( number_format_i18n( (int) $r->week ) ) . '</td><td>' . esc_html( number_format_i18n( (int) $r->total ) ) . '</td></tr>';
+					$url     = admin_url( 'admin.php?page=fluent_forms&route=entries&form_id=' . (int) $r->id );
+					$u       = (int) $r->unread;
+					$cells[] = array(
+						'form'   => '<a href="' . esc_url( $url ) . '">' . esc_html( (string) $r->title ) . '</a>',
+						'unread' => $u ? '<strong>' . esc_html( number_format_i18n( $u ) ) . '</strong>' : '0',
+						'week'   => esc_html( number_format_i18n( (int) $r->week ) ),
+						'total'  => esc_html( number_format_i18n( (int) $r->total ) ),
+					);
 				}
-				echo '</tbody></table>';
+				aw_core_simple_table(
+					'aw-form-entries',
+					array(
+						'form'   => 'Form',
+						'unread' => 'Unread',
+						'week'   => 'Last 7 days',
+						'total'  => 'Total',
+					),
+					$cells,
+					array( 'foot' => false ) // a short table in a Dashboard widget: no repeated header row
+				);
 				echo '<p><a href="' . esc_url( admin_url( 'admin.php?page=fluent_forms_all_entries' ) ) . '">All entries</a></p>';
 			}
 		);

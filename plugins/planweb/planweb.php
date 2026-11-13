@@ -45,6 +45,7 @@ require_once PLANWEB_DIR . 'includes/ui-model.php';
 require_once PLANWEB_DIR . 'includes/switch.php';
 require_once PLANWEB_DIR . 'includes/store.php';
 require_once PLANWEB_DIR . 'includes/import.php';
+require_once PLANWEB_DIR . 'includes/admin-table.php';
 require_once PLANWEB_DIR . 'includes/admin.php';
 require_once PLANWEB_DIR . 'includes/help-tab.php';
 require_once PLANWEB_DIR . 'includes/plugin-info.php';

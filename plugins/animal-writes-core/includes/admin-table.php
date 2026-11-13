@@ -1,6 +1,6 @@
 <?php
 /**
- * aw_core_simple_table(): the plugin's plain admin tables as a core list table (owner, 24 Oct 2026: admin UI is
+ * aw_core_simple_table(): the plugin's plain admin tables as a core list table (admin UI is
  * core WordPress only). The class loads only when a screen draws one.
  *
  * @package animal-writes-core
@@ -13,10 +13,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Print a read-only core list table.
  *
- * @param string $plural Table name (CSS class).
+ * @param string $plural Table name (CSS class; prefix of its sort and header ids).
  * @param array  $cols   Column => label ('cb' => '<input type="checkbox">' for a checkbox column).
- * @param array  $rows   Rows of escaped HTML cells, column => HTML.
- * @param array  $opts   per_page, total (rows are already that page), primary, fixed, empty.
+ * @param array  $rows   Rows of escaped HTML cells, column => HTML (_sort: column => raw value; _after: a row printed under it).
+ * @param array  $opts   per_page, total (rows are already that page), primary, fixed, empty, foot, sortable, caption.
  */
 function aw_core_simple_table( $plural, array $cols, array $rows, array $opts = array() ) {
 	if ( ! class_exists( 'WP_List_Table' ) ) {

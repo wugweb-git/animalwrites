@@ -911,28 +911,15 @@ function aw_edit_screen_notes_list( array $notes ): string {
 }
 
 /**
- * Prints a plain core table (widefat striped). Cells arrive as escaped HTML.
+ * Prints a core list table (aw_core_simple_table()). Cells arrive as escaped HTML. No sorting or pages: the page also
+ * sits in a section of Kits → Help (an address with #developer/edit-screens), where a sort link would leave the section.
  *
- * @param array $cols Column => label.
- * @param array $rows Rows of column => HTML.
+ * @param string $name Table name (CSS class and id prefix).
+ * @param array  $cols Column => label.
+ * @param array  $rows Rows of column => HTML.
  */
-function aw_edit_screens_grid( array $cols, array $rows ): void {
-	echo '<table class="widefat striped"><thead><tr>';
-	foreach ( $cols as $label ) {
-		echo '<th scope="col">' . esc_html( $label ) . '</th>';
-	}
-	echo '</tr></thead><tbody>';
-	if ( ! $rows ) {
-		echo '<tr><td colspan="' . (int) count( $cols ) . '">None.</td></tr>';
-	}
-	foreach ( $rows as $r ) {
-		echo '<tr>';
-		foreach ( array_keys( $cols ) as $c ) {
-			echo '<td>' . (string) ( $r[ $c ] ?? '' ) . '</td>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- cells arrive escaped.
-		}
-		echo '</tr>';
-	}
-	echo '</tbody></table>';
+function aw_edit_screens_grid( string $name, array $cols, array $rows ): void {
+	aw_core_simple_table( $name, array_map( 'esc_html', $cols ), $rows, array( 'empty' => 'None.' ) );
 }
 
 /** Kits → Help → Developer → Edit screens (its own screen without Kits). */
@@ -1059,6 +1046,7 @@ function aw_edit_screens_mapping_tab( array $display, array $screens, callable $
 	}
 	echo '<details><summary>' . esc_html( sprintf( 1 === count( $widgets ) ? 'Admin pages: %d widget' : 'Admin pages: %d widgets', count( $widgets ) ) ) . '</summary>';
 	aw_edit_screens_grid(
+		'es-widgets',
 		array(
 			'page'    => 'Page',
 			'widget'  => 'Widget',
@@ -1101,6 +1089,7 @@ function aw_edit_screens_schema_tab( array $all, callable $label ): void {
 		);
 	}
 	aw_edit_screens_grid(
+		'es-schema',
 		array(
 			'field'  => 'Field',
 			'mods'   => 'Modules',
@@ -1156,6 +1145,7 @@ function aw_edit_screens_third_party_tab( array $display, callable $label ): voi
 		);
 	}
 	aw_edit_screens_grid(
+		'es-third-party',
 		array(
 			'box'     => 'Box',
 			'plugin'  => 'Plugin',
@@ -1188,7 +1178,7 @@ function aw_edit_screens_unmapped_section( array $all, array $screens ): void {
 		}
 	}
 	echo '<h2 id="aw-es-unmapped">Not mapped yet</h2>';
-	aw_edit_screens_grid( array( 'type' => 'Type', 'box' => 'Box', 'field' => 'Field' ), $cells );
+	aw_edit_screens_grid( 'es-unmapped', array( 'type' => 'Type', 'box' => 'Box', 'field' => 'Field' ), $cells );
 }
 
 /**
@@ -1211,7 +1201,7 @@ function aw_edit_screens_twice_section( array $rows ): void {
 			'boxes' => esc_html( implode( ', ', $t['boxes'] ) ),
 		);
 	}
-	aw_edit_screens_grid( array( 'type' => 'Type', 'key' => 'Key', 'boxes' => 'Boxes' ), $cells );
+	aw_edit_screens_grid( 'es-twice', array( 'type' => 'Type', 'key' => 'Key', 'boxes' => 'Boxes' ), $cells );
 }
 
 if ( defined( 'WP_CLI' ) && WP_CLI ) {

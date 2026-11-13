@@ -66,7 +66,7 @@ if ( ! function_exists( 'insightweb_caps_grant' ) ) { // Loaded by insightweb.ph
 }
 require_once INSIGHTWEB_DIR . 'includes/settings.php'; // the seven numbers (constants) and the API rule, first
 
-foreach ( array( 'schema', 'runs', 'sitekit', 'keywords', 'gsc', 'compute', 'rollup', 'cron', 'health', 'searches', 'dryrun', 'rising', 'admin', 'cli' ) as $aw_si_file ) {
+foreach ( array( 'schema', 'runs', 'sitekit', 'keywords', 'gsc', 'compute', 'rollup', 'cron', 'health', 'searches', 'dryrun', 'admin-table', 'rising', 'admin', 'cli' ) as $aw_si_file ) {
 	require_once __DIR__ . '/search-insights/' . $aw_si_file . '.php';
 }
 // Phase 2: GA4, PageSpeed, Clarity, searches on the site, the Pages tab, redirects counted as their target.

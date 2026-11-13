@@ -161,7 +161,7 @@ function mailweb_overview_widget( $max ) {
 	// One table (owner, 3 Nov 2026: "some columns, some rows, status and dropdown"): a row per mailbox with its unread
 	// count and status; the mailbox opens to its latest messages.
 	$inbox = admin_url( 'admin.php?page=mailweb' );
-	echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Mailbox', 'mailweb' ) . '</th><th scope="col">' . esc_html__( 'Unread', 'mailweb' ) . '</th><th scope="col">' . esc_html__( 'Status', 'mailweb' ) . '</th></tr></thead><tbody>';
+	$rows  = array();
 	foreach ( mailweb_all_boxes() as $key => $addr ) {
 		$box  = mailweb_overview_box( $key );
 		$msgs = $box ? array_slice( (array) $box['messages'], 0, $max ) : array();
@@ -184,9 +184,22 @@ function mailweb_overview_widget( $max ) {
 		}
 		$who  = ( function_exists( 'mailweb_profile_picture' ) ? wp_kses_post( mailweb_profile_picture( $addr, 20 ) ) : '' ) . esc_html( $addr );
 		$cell = $list ? '<details><summary>' . $who . '</summary><ul>' . $list . '</ul></details>' : $who;
-		echo '<tr><td style="overflow-wrap:anywhere">' . $cell . '</td><td>' . ( $box ? esc_html( number_format_i18n( (int) ( $box['unread'] ?? 0 ) ) ) : '–' ) . '</td><td><span class="dashicons dashicons-' . esc_attr( $status[0] ) . '" style="color:' . esc_attr( $status[1] ) . '" aria-hidden="true"></span> ' . esc_html( $status[2] ) . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput -- built from escaped parts
+		$rows[] = array(
+			'mailbox' => '<div style="overflow-wrap:anywhere">' . $cell . '</div>',
+			'unread'  => $box ? esc_html( number_format_i18n( (int) ( $box['unread'] ?? 0 ) ) ) : '–',
+			'status'  => '<span class="dashicons dashicons-' . esc_attr( $status[0] ) . '" style="color:' . esc_attr( $status[1] ) . '" aria-hidden="true"></span> ' . esc_html( $status[2] ),
+		);
 	}
-	echo '</tbody></table>';
+	mailweb_simple_table(
+		'mailboxes',
+		array(
+			'mailbox' => esc_html__( 'Mailbox', 'mailweb' ),
+			'unread'  => esc_html__( 'Unread', 'mailweb' ),
+			'status'  => esc_html__( 'Status', 'mailweb' ),
+		),
+		$rows,
+		array( 'foot' => false ) // a short table in the dashboard box: no repeated header row
+	);
 	echo '<p><a href="' . esc_url( $inbox ) . '">' . esc_html__( 'Open Mail', 'mailweb' ) . '</a></p>';
 }
 

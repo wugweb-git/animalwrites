@@ -388,12 +388,36 @@ function planweb_import_panel() {
 	}
 	$odd = array_filter( $v['lines'], fn( $l ) => 'same' !== $l['state'] );
 	if ( $odd ) {
-		echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Check', 'planweb' ) . '</th><th scope="col">' . esc_html__( 'In Dates', 'planweb' ) . '</th><th scope="col">' . esc_html__( 'In PlanWeb', 'planweb' ) . '</th></tr></thead><tbody>';
+		$side  = fn( $x ) => $x ? esc_html( $x['date'] . ' · ' . $x['title'] ) . ( '' !== $x['note'] ? '<br><span class="description">' . esc_html( $x['note'] ) . '</span>' : '' ) : '—';
+		$cells = array();
 		foreach ( $odd as $l ) {
-			$side = fn( $x ) => $x ? esc_html( $x['date'] . ' · ' . $x['title'] ) . ( '' !== $x['note'] ? '<br><span class="description">' . esc_html( $x['note'] ) . '</span>' : '' ) : '—';
-			echo '<tr><td>' . esc_html( $l['state'] ) . '</td><td>' . $side( $l['dates'] ) . '</td><td>' . $side( $l['entry'] ) . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $side escapes.
+			$cells[] = array(
+				'check' => esc_html( $l['state'] ),
+				'dates' => $side( $l['dates'] ),
+				'entry' => $side( $l['entry'] ),
+				'_sort' => array(
+					'dates' => $l['dates'] ? $l['dates']['date'] . ' ' . $l['dates']['title'] : '',
+					'entry' => $l['entry'] ? $l['entry']['date'] . ' ' . $l['entry']['title'] : '',
+				),
+			);
 		}
-		echo '</tbody></table>';
+		planweb_simple_table(
+			'planweb-check',
+			array(
+				'check' => esc_html__( 'Check', 'planweb' ),
+				'dates' => esc_html__( 'In Dates', 'planweb' ),
+				'entry' => esc_html__( 'In PlanWeb', 'planweb' ),
+			),
+			$cells,
+			array(
+				'per_page' => 20,
+				'sortable' => array(
+					'check' => false,
+					'dates' => false,
+					'entry' => false,
+				),
+			)
+		);
 	}
 	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="planweb_import">';
 	wp_nonce_field( 'planweb_import' );
