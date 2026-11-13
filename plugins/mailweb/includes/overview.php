@@ -200,10 +200,15 @@ add_action(
 		}
 		$n     = mailweb_overview_unread() + ( function_exists( 'mailweb_forms_unread' ) ? mailweb_forms_unread() : 0 );
 		$badge = $n ? ' <span class="awaiting-mod count-' . (int) $n . '"><span class="pending-count">' . (int) $n . '</span></span>' : '';
-		if ( function_exists( 'kits_admin_fold_menu' ) ) {
-			kits_admin_fold_menu( 'mailweb', 'plugins.php', __( 'MailWeb', 'mailweb' ) . $badge, MAILWEB_CAP, 'mailweb', dirname( __DIR__ ) . '/assets/menu-icon.svg' ); // the screens: toplevel_page_mailweb, mailweb_page_…
-		} else {
-			add_menu_page( __( 'MailWeb', 'mailweb' ), __( 'MailWeb', 'mailweb' ) . $badge, MAILWEB_CAP, 'mailweb', 'mailweb_inbox_page', 'dashicons-email', '58.6' ); // the inbox (inbox.php)
+		// The Wugweb block (owner, 12 Nov 2026): Kits, DirectoryWeb, SourceWeb, RankWeb, InsightWeb, MailWeb, PlanWeb at 58.1-58.7,
+		// after one separator (58.05), before WordPress's second separator (59); the same with or without Kits Core.
+		// The icon is the plugin's one-colour SVG as a data URI, which WordPress paints in the admin colour scheme.
+		$icon = dirname( __DIR__ ) . '/assets/menu-icon.svg';
+		$icon = is_readable( $icon ) ? 'data:image/svg+xml;base64,' . base64_encode( (string) file_get_contents( $icon ) ) : 'dashicons-email'; // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode, WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- the plugin's own small SVG file.
+		add_menu_page( __( 'MailWeb', 'mailweb' ), __( 'MailWeb', 'mailweb' ) . $badge, MAILWEB_CAP, 'mailweb', 'mailweb_inbox_page', $icon, '58.6' ); // the inbox (inbox.php); screens toplevel_page_mailweb, mailweb_page_…
+		$GLOBALS['admin_page_hooks'][ 'mailweb' ] = 'mailweb'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- the screens' hook prefix (mailweb_page_…), whatever the title.
+		if ( ! isset( $GLOBALS['menu']['58.05'] ) ) {
+			$GLOBALS['menu']['58.05'] = array( '', 'read', 'separator-wugweb', '', 'wp-menu-separator', 'separator-wugweb' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- one separator above the block, as core adds its own.
 		}
 		add_submenu_page( 'mailweb', __( 'MailWeb', 'mailweb' ), __( 'Inbox', 'mailweb' ), MAILWEB_CAP, 'mailweb', 'mailweb_inbox_page' );
 		add_submenu_page( 'mailweb', __( 'MailWeb overview', 'mailweb' ), __( 'Overview', 'mailweb' ), MAILWEB_CAP, 'mailweb-overview', 'mailweb_home_page' ); // home.php

@@ -34,20 +34,20 @@ plugins/animal-writes-core/includes/team-dates.php | admin page | add_submenu_pa
 plugins/animal-writes-core/includes/team-dates.php | admin style | <style> block
 plugins/animal-writes-core/theme/assets/css/aw-camp-band-aw.css | css Hero | section.aw-camp-band.aw-ed-hero--campaign | min-height: var(--kit-hero-h)
 plugins/aw-seo-extras/includes/faq-overview.php | admin page | add_submenu_page( AW_SEO_MENU, 'FAQ', 'FAQ', 'manage_categories', 'aw-faq', 'aw_faq_admin_page' ); // RankWeb → FAQ (overview.php has the menu)
-plugins/aw-seo-extras/includes/overview.php | admin page | add_menu_page( 'RankWeb', 'RankWeb', 'manage_categories', AW_SEO_MENU, 'aw_seo_overview_page', 'dashicons-search', '58.4' );
+plugins/aw-seo-extras/includes/overview.php | admin page | add_menu_page( 'RankWeb', 'RankWeb', 'manage_categories', AW_SEO_MENU, 'aw_seo_overview_page', $icon, '58.4' );
 plugins/aw-seo-extras/includes/overview.php | admin page | add_submenu_page( AW_SEO_MENU, 'RankWeb', 'Overview', 'manage_categories', AW_SEO_MENU, 'aw_seo_overview_page' );
 plugins/aw-seo-extras/includes/settings.php | admin page | add_submenu_page( AW_SEO_MENU, 'RankWeb settings', 'Settings', 'manage_options', 'aw-seo-settings', 'aw_seo_settings_page' );
-plugins/aw-sourcing/includes/admin-menu.php | admin page | add_menu_page( 'SourceWeb', 'SourceWeb', AW_REVIEW_CAP, AW_SRC_MENU, 'aw_sourcing_overview_page', 'dashicons-rss', '58.3' );
+plugins/aw-sourcing/includes/admin-menu.php | admin page | add_menu_page( 'SourceWeb', 'SourceWeb' . $count, AW_REVIEW_CAP, AW_SRC_MENU, 'aw_sourcing_overview_page', $icon, '58.3' );
 plugins/aw-sourcing/includes/admin-menu.php | admin page | add_submenu_page( AW_SRC_MENU, 'SourceWeb', 'Overview', AW_REVIEW_CAP, AW_SRC_MENU, 'aw_sourcing_overview_page' );
 plugins/aw-sourcing/includes/admin-menu.php | admin page | add_submenu_page( AW_SRC_MENU, (string) $t[0], (string) $t[0], AW_SRC_CAP, AW_SRC_PAGE, 'aw_sourcing_page' );
 plugins/aw-sourcing/includes/admin-menu.php | admin page | add_submenu_page( AW_SRC_MENU, (string) $t[0], (string) $t[0], AW_SRC_CAP, aw_src_tab_menu_slug( $tab ) );
 plugins/aw-sourcing/includes/enrichment-admin.php | admin page | add_submenu_page( AW_SRC_MENU, 'Enrichment review', 'Enrichment review' . ( $n && function_exists( 'aw_menu_count' ) ? aw_menu_count( $n ) : '' ), AW_ENRICH_CAP
 plugins/aw-sourcing/includes/enrichment-admin.php | admin style | <style> block
 plugins/aw-sourcing/includes/review-queue.php | admin page | add_submenu_page( AW_SRC_MENU, 'To review', 'To review' . ( function_exists( 'aw_menu_count' ) ? aw_menu_count( aw_review_count() ) : '' ), AW_REVIEW_CAP, 'aw-r
-plugins/insightweb/includes/search-insights/admin.php | admin page | add_menu_page( __( 'Search Insights', 'insightweb' ), 'InsightWeb', aw_si_cap(), AW_SI_SLUG, 'aw_si_screen', 'dashicons-chart-area', '58.5' );
+plugins/insightweb/includes/search-insights/admin.php | admin page | add_menu_page( __( 'Search Insights', 'insightweb' ), 'InsightWeb', aw_si_cap(), AW_SI_SLUG, 'aw_si_screen', $icon, '58.5' );
 plugins/insightweb/includes/search-insights/admin.php | admin page | add_submenu_page( AW_SI_SLUG, __( 'Search Insights', 'insightweb' ), __( 'Search Insights', 'insightweb' ), aw_si_cap(), AW_SI_SLUG, 'aw_si_screen' );
 plugins/kits-core/includes/admin-app.php | admin style | wp_enqueue_style( 'wp-components'
-plugins/kits-core/includes/admin-fold.php | admin page | add_menu_page( wp_strip_all_tags( $title ), $title, $cap, $menu, '', $icon, $slot[1] );
+plugins/kits-core/includes/admin-home.php | admin page | add_menu_page( 'Kits', 'Kits', 'manage_options', KITS_MENU, 'kits_home_page', $icon, '58.1' );
 plugins/kits-core/includes/admin-home.php | admin page | add_submenu_page( KITS_MENU, 'Home', 'Home', 'manage_options', KITS_MENU, 'kits_home_page' );
 plugins/kits-core/includes/admin-kits-frame.php | admin style | wp_enqueue_style( 'kits-shell'
 plugins/kits-core/includes/admin-menu.php | admin page | add_submenu_page( '', (string) ( $item[3] ?? $item[0] ), '', (string) $item[1], $slug, fn() => do_action( $hook ) ); // phpcs:ignore WordPress.NamingConventions
@@ -58,12 +58,12 @@ plugins/kits-core/includes/admin-menu.php | admin page | add_submenu_page( KITS_
 plugins/kits-core/includes/admin-shell.php | admin style | wp_enqueue_style( 'kits-shell'
 plugins/kits-core/includes/admin-shell.php | admin style | wp_register_style( 'kits-shell'
 plugins/mailweb/includes/mailweb-ui.php | admin style | wp_enqueue_style( 'mailweb-admin'
-plugins/mailweb/includes/overview.php | admin page | add_menu_page( __( 'MailWeb', 'mailweb' ), __( 'MailWeb', 'mailweb' ) . $badge, MAILWEB_CAP, 'mailweb', 'mailweb_inbox_page', 'dashicons-email', '58.6' ); // th
+plugins/mailweb/includes/overview.php | admin page | add_menu_page( __( 'MailWeb', 'mailweb' ), __( 'MailWeb', 'mailweb' ) . $badge, MAILWEB_CAP, 'mailweb', 'mailweb_inbox_page', $icon, '58.6' ); // the inbox (inb
 plugins/mailweb/includes/overview.php | admin page | add_submenu_page( 'mailweb', __( 'MailWeb overview', 'mailweb' ), __( 'Overview', 'mailweb' ), MAILWEB_CAP, 'mailweb-overview', 'mailweb_home_page' ); // home.p
 plugins/mailweb/includes/overview.php | admin page | add_submenu_page( 'mailweb', __( 'MailWeb settings', 'mailweb' ), __( 'Settings', 'mailweb' ), 'manage_options', 'mailweb-settings', 'mailweb_settings_page' );
 plugins/mailweb/includes/overview.php | admin page | add_submenu_page( 'mailweb', __( 'MailWeb', 'mailweb' ), __( 'Inbox', 'mailweb' ), MAILWEB_CAP, 'mailweb', 'mailweb_inbox_page' );
 plugins/planweb/assets/admin.css | admin style | stylesheet file
-plugins/planweb/includes/admin.php | admin page | add_menu_page( __( 'Calendar', 'planweb' ), __( 'PlanWeb', 'planweb' ), 'edit_planweb_entries', PLANWEB_MENU, 'planweb_screen', 'dashicons-calendar-alt', '58.7'
+plugins/planweb/includes/admin.php | admin page | add_menu_page( __( 'Calendar', 'planweb' ), __( 'PlanWeb', 'planweb' ), 'edit_planweb_entries', PLANWEB_MENU, 'planweb_screen', $icon, '58.7' );
 plugins/planweb/includes/admin.php | admin page | add_submenu_page( '', __( 'Dates', 'planweb' ), '', 'edit_planweb_entries', 'aw-dates', '__return_empty_string' );
 plugins/planweb/includes/admin.php | admin page | add_submenu_page( PLANWEB_MENU, __( 'Calendar', 'planweb' ), __( 'Calendar', 'planweb' ), 'edit_planweb_entries', PLANWEB_MENU, 'planweb_screen' );
 plugins/planweb/includes/admin.php | admin style | wp_enqueue_style( 'planweb-admin'
