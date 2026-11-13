@@ -62,8 +62,9 @@
 		var b = e.target.closest && e.target.closest('button[data-kit-share]');
 		if (b) trackLater('share_click', { network: b.dataset.kitShare });
 	});
-	/* Share: the phone's own share sheet (Instagram, WhatsApp, Telegram, Snapchat...) plus the story and post images,
-	   which go straight to Instagram or Facebook stories through the same sheet; on a computer the images download. */
+	/* Share: the site's one share bar (kits_share_html, kit.js), as on every page (owner, 13 Nov 2026: the share card is
+	   the same across the product). Phones: Share (the phone's own sheet) and Copy link; tablets: Share, then the
+	   networks; computers: the networks. The page shares itself; its picture is the link preview's. */
 	var sh = window.awCampShare || {};
 	/* Animal Writes' own accounts, as in the site footer (parts/footer.html). */
 	function followLinks() {
@@ -71,82 +72,6 @@
 			.map(function (l) { return '<a href="' + l[0] + '" rel="noopener">' + l[1] + '</a>'; }).join(', ') + '.';
 	}
 	if (sh.short) sh.url = sh.short; /* the campaign's short link (/lab): what Share and Copy link hand out; the page's canonical stays the full address */
-	var canShare = !!navigator.share;
-	/* The pictures are fetched once, ahead of the tap where possible: a phone only opens its share sheet straight from a tap. */
-	var files = {};
-	function getFile(kind) {
-		var url = kind === 'og' ? (sh.og && sh.og.image) : sh[kind];
-		if (!url) return Promise.resolve(null);
-		if (!files[kind]) files[kind] = fetch(url).then(function (r) { return r.blob(); }).then(function (blob) {
-			var ext = url.slice(url.lastIndexOf('.') + 1).toLowerCase();
-			var type = /^image\//.test(blob.type) ? blob.type : ({ png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', webp: 'image/webp' })[ext] || 'image/jpeg';
-			ext = ({ 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp', 'image/avif': 'avif' })[type] || ext; // the image service may send WebP for a .jpg: the name follows the real type, or apps refuse the file
-			return new File([blob], (sh.slug || 'campaign') + '-' + kind + '.' + ext, { type: type }); // apps only take an image they can recognise
-		}).catch(function () { return null; });
-		return files[kind];
-	}
-	function canShareFile(file) { return !!(file && navigator.canShare && navigator.canShare({ files: [file] })); }
-	/* The story and post pictures are not shown on the page (owner, 2 Nov 2026: they are templates for a share). The
-	   picture for a share: the story on a phone, the post elsewhere; the other one, then the link preview image, if unset. */
-	function picKind() {
-		var phone = window.matchMedia && window.matchMedia('(max-width: 767px)').matches;
-		return [phone ? 'story' : 'post', phone ? 'post' : 'story', 'og'].filter(function (k) { return k === 'og' ? sh.og && sh.og.image : sh[k]; })[0] || '';
-	}
-	/* One share with the picture, the message and the link (WhatsApp, Telegram and Facebook keep all three; Instagram
-	   keeps the picture, so the link is on the clipboard for its Link sticker); the link alone where files can't go. */
-	function shareAll() {
-		if (navigator.clipboard) navigator.clipboard.writeText(sh.url).catch(function () {});
-		getFile(picKind()).then(function (file) {
-			var data = canShareFile(file) ? { files: [file], title: sh.title, text: sh.text + ' ' + sh.url } : { title: sh.title, text: sh.text, url: sh.url };
-			return navigator.share(data);
-		}).catch(function () {});
-	}
-	/* The share row in the letter tool (owner, 19 Oct 2026; not the page's own share row): on a phone the share sheet
-	   with picture, message and link, plus the story and post images; on a computer WhatsApp, X, Facebook, LinkedIn,
-	   Copy link and the images to download. */
-	function shareKit(where) {
-		function add(el, label, ico, network) {
-			el.className = 'aw-camp-share-btn';
-			el.dataset.kitShare = network;
-			el.innerHTML = '<span class="kit-ico kit-ico--' + ico + '" aria-hidden="true"></span>';
-			el.appendChild(document.createTextNode(label));
-			where.appendChild(el);
-			return el;
-		}
-		function btn(label, ico, network, fn) {
-			var b = document.createElement('button');
-			b.type = 'button';
-			add(b, label, ico, network).addEventListener('click', fn);
-			return b;
-		}
-		function link(label, ico, network, href) {
-			var a = document.createElement('a');
-			a.href = href;
-			a.target = '_blank';
-			a.rel = 'noopener';
-			add(a, label, ico, network);
-		}
-		var u = encodeURIComponent(sh.url), t = encodeURIComponent(sh.text);
-		if (canShare) btn('Share', 'share', 'native', shareAll).classList.add('is-primary');
-		else {
-			link('WhatsApp', 'brand-whatsapp', 'whatsapp', 'https://wa.me/?text=' + t + '%20' + u);
-			link('X', 'x-brand', 'x', 'https://twitter.com/intent/tweet?text=' + t + '&url=' + u + (sh.hashtags ? '&hashtags=' + encodeURIComponent(sh.hashtags) : ''));
-			link('Facebook', 'facebook', 'facebook', 'https://www.facebook.com/sharer/sharer.php?u=' + u);
-			link('LinkedIn', 'linkedin', 'linkedin', 'https://www.linkedin.com/sharing/share-offsite/?url=' + u);
-			var c = btn('Copy link', 'link', 'copy_link', function () {
-				if (navigator.clipboard) navigator.clipboard.writeText(sh.url).catch(function () {});
-				c.lastChild.nodeValue = 'Link copied';
-			});
-		}
-		if (canShare && 'IntersectionObserver' in window) { // fetch the picture once the row is near, so the tap opens the sheet at once
-			var io = new IntersectionObserver(function (en) {
-				if (!en[0].isIntersecting) return;
-				io.disconnect();
-				getFile(picKind());
-			}, { rootMargin: '400px' });
-			io.observe(where);
-		}
-	}
 
 	document.addEventListener('fluentform_submission_success', function (e) {
 		var f = e.detail && e.detail.form;
@@ -451,99 +376,16 @@
 		copied.appendChild(b);
 	}
 
-	/* The share box sits under the send buttons all the time (owner, 21 Oct 2026: sharing matters): a message, the share
-	   buttons (no link preview or pictures shown: 2 Nov 2026). After a send its heading turns to asking for three more letters. */
-	/* Share block template (owner, 2 Nov 2026; the same on every campaign): in the Share section's card, one main
-	   "Share this page" button (the phone's share sheet with the picture, the message and the short link; where a browser
-	   has no share sheet it copies the link and says so), the site's share bar as icons, and the campaign's ready-made
-	   story and post pictures: a tap shares that picture with the message and link, or saves it and copies the link. */
-	var sayTimer;
-	function say(done, msg) { // one status line under the button, cleared after a while
-		done.textContent = msg;
-		clearTimeout(sayTimer);
-		sayTimer = setTimeout(function () { done.textContent = ''; }, 6000);
-	}
-	function sharePicture(kind, done) {
-		if (navigator.clipboard) navigator.clipboard.writeText(sh.url).catch(function () {});
-		say(done, canShare ? 'Link copied. Paste it in a Link sticker.' : 'Image saved. The link is copied too: paste it with your post.');
-		getFile(kind).then(function (file) {
-			if (!file) return;
-			if (canShareFile(file)) return navigator.share({ files: [file], title: sh.title, text: sh.text + ' ' + sh.url }).catch(function () {});
-			var a = document.createElement('a');
-			a.href = URL.createObjectURL(file);
-			a.download = file.name;
-			document.body.appendChild(a);
-			a.click();
-			a.remove();
-		});
-	}
+	/* The share box sits under the send buttons all the time (owner, 21 Oct 2026: sharing matters): a message and the
+	   site's share bar. After a send its heading turns to asking for three more letters. */
 	function shareBlock(holder) {
 		if (!holder || holder.dataset.awShareBlock) return;
 		holder.dataset.awShareBlock = '1';
 		holder.classList.add('aw-share-block');
-		var wrap = document.createElement('p');
-		wrap.className = 'aw-share-cta';
-		var b = document.createElement('button');
-		b.type = 'button';
-		b.className = 'wp-element-button kit-btn kit-btn--brand aw-share-cta-btn';
-		b.dataset.kitShare = canShare ? 'native' : 'copy_link';
-		b.innerHTML = '<span class="kit-ico kit-ico--' + (canShare ? 'share' : 'link') + '" aria-hidden="true"></span>';
-		b.appendChild(document.createTextNode('Share this page'));
-		var done = document.createElement('span');
-		done.className = 'aw-share-cta-done';
-		done.setAttribute('role', 'status');
-		done.setAttribute('aria-live', 'polite');
-		wrap.appendChild(b);
-		var note = document.createElement('span');
-		note.className = 'aw-share-cta-note';
-		note.textContent = 'It takes under a minute.'; // owner's line, 3 Nov 2026
-		wrap.appendChild(note);
-		wrap.appendChild(done);
-		holder.insertBefore(wrap, holder.firstChild);
-		b.addEventListener('click', function () {
-			if (canShare) { shareAll(holder); return; }
-			if (navigator.clipboard) navigator.clipboard.writeText(sh.url).catch(function () {});
-			say(done, 'Link copied');
-		});
 		/* The share bar's links carry the campaign's share message with the short link (the server's bar has the title). */
 		var u = encodeURIComponent(sh.url), t = encodeURIComponent(sh.text || sh.title || '');
 		var nets = { x: 'https://x.com/intent/post?text=' + t + '&url=' + u + (sh.hashtags ? '&hashtags=' + encodeURIComponent(sh.hashtags) : ''), whatsapp: 'https://wa.me/?text=' + t + '%20' + u, email: 'mailto:?subject=' + encodeURIComponent(sh.title || '') + '&body=' + t + '%20' + u };
 		holder.querySelectorAll('.kit-share a[data-kit-share]').forEach(function (a) { if (nets[a.dataset.kitShare] && sh.text) a.href = nets[a.dataset.kitShare]; });
-		var pics = [['story', 'Instagram or Facebook story', 'Story, 9:16'], ['post', 'Instagram or Facebook post', 'Post, 4:5']].filter(function (k) { return sh[k[0]]; });
-		if (pics.length) {
-			var box = document.createElement('div');
-			box.className = 'aw-share-pics';
-			box.innerHTML = '<p class="aw-share-pics-head">Or share a ready-made picture</p>'; // owner's yes, 2 Nov 2026
-			var list = document.createElement('div');
-			list.className = 'aw-share-pics-list';
-			pics.forEach(function (k) {
-				var p = document.createElement('button');
-				p.type = 'button';
-				p.className = 'aw-share-pic aw-share-pic--' + k[0];
-				p.dataset.kitShare = k[0] + '_image';
-				var img = document.createElement('img');
-				img.src = sh[k[0]];
-				img.alt = '';
-				img.loading = 'lazy';
-				img.decoding = 'async';
-				p.appendChild(img);
-				p.setAttribute('aria-label', (canShare ? 'Share the ' : 'Save the ') + k[1] + ' picture');
-				p.title = p.getAttribute('aria-label');
-				p.addEventListener('click', function () { sharePicture(k[0], done); });
-				list.appendChild(p);
-			});
-			box.appendChild(list);
-			holder.appendChild(box);
-		}
-		if (canShare && 'IntersectionObserver' in window) { // fetch the pictures once the block is near, so a tap opens the sheet at once
-			var io = new IntersectionObserver(function (en) {
-				if (!en[0].isIntersecting) return;
-				io.disconnect();
-				getFile(picKind());
-				pics.forEach(function (k) { getFile(k[0]); });
-			}, { rootMargin: '400px' });
-			io.observe(holder);
-		}
 	}
 	var sendShare = null, shareHead = null;
 	function showSendShare(sent) {
@@ -571,7 +413,8 @@
 			if (holder) holder.appendChild(sendShare);
 			else confirmBox.parentNode.insertBefore(sendShare, confirmBox);
 			var row = sendShare.querySelector('.aw-letter-share');
-			shareKit(row);
+			var bar = document.querySelector('.kit-share');
+			if (bar) { row.appendChild(bar.cloneNode(true)); shareBlock(row); } else row.remove();
 		}
 		if (shareHead) shareHead.textContent = sh.closed ? 'Follow us for the decision.' : (sent ? 'Sent? Now get three more letters in.' : 'Get three more letters in.');
 		if (sent && sendShare.classList.contains('is-in-section') && !form.querySelector('.aw-letter-next')) { // a pointer from the letter tool to the Share section
