@@ -8,6 +8,8 @@
  * Foundation modules (General, Titles, Canonicals, Robots, Filtered lists, Schema) are always on: the others call them.
  * A module switched off is not loaded (aw-seo-extras.php). The Settings screen is on the Kits shell (rankweb-ui.php);
  * it reads and saves through the rankweb/v1 settings routes (rankweb-rest.php), which call aw_seo_settings_save().
+ * Every option that screen saves is registered with register_setting() (aw_seo_registered_settings()), so each
+ * update_option() runs its sanitize callback, whoever writes it, and /wp/v2/settings shows it to administrators.
  *
  * @package aw-seo-extras
  */
@@ -461,7 +463,7 @@ add_action(
 	'admin_init',
 	function () {
 		// The settings are read on every request: autoload them (a save sets it too; this covers the option as it is).
-		if ( function_exists( 'wp_set_option_autoload' ) && false !== get_option( AW_SEO_SETTINGS ) && ! array_key_exists( AW_SEO_SETTINGS, wp_load_alloptions() ) ) {
+		if ( function_exists( 'wp_set_option_autoload' ) && false !== get_option( AW_SEO_SETTINGS, false ) && ! array_key_exists( AW_SEO_SETTINGS, wp_load_alloptions() ) ) { // false passed: the registered default (array()) would hide a missing option
 			wp_set_option_autoload( AW_SEO_SETTINGS, true );
 		}
 		// An old link to Search Insights' module tab: its numbers are on Search Insights → Settings (InsightWeb).
@@ -562,4 +564,180 @@ function aw_seo_settings_sorted( $value ) {
 	}
 	ksort( $value );
 	return array_map( 'aw_seo_settings_sorted', $value );
+}
+
+/* ---------- The options, registered with the Settings API ---------- */
+
+const AW_SEO_DELETE_DATA = 'aw_seo_delete_data'; // 1: uninstall.php deletes RankWeb's own data. Default 0: it keeps everything.
+
+/**
+ * One stored setting value, cleaned by its field type. Values the screen stored come back unchanged (the same clean-up
+ * as aw_seo_field_value()), so a save that changes nothing still writes nothing.
+ *
+ * @param string $type int, list, map, maplist, or '' (a key no field knows: kept, its texts cleaned).
+ * @param mixed  $v    Value.
+ * @return mixed
+ */
+function aw_seo_setting_clean( string $type, $v ) {
+	switch ( $type ) {
+		case 'int':
+			return max( 0, (int) $v );
+		case 'list':
+			return array_values( array_map( fn( $x ) => sanitize_text_field( (string) $x ), (array) $v ) );
+		case 'map':
+		case 'maplist':
+			$out = array();
+			foreach ( (array) $v as $k => $x ) {
+				$k = sanitize_text_field( (string) $k );
+				if ( '' === $k ) {
+					continue;
+				}
+				$out[ $k ] = 'map' === $type ? sanitize_text_field( (string) ( is_array( $x ) ? implode( ' | ', $x ) : $x ) ) : array_values( array_map( fn( $y ) => sanitize_text_field( (string) $y ), (array) $x ) );
+			}
+			return $out;
+	}
+	if ( is_array( $v ) ) {
+		return array_map( fn( $x ) => aw_seo_setting_clean( '', $x ), $v );
+	}
+	return is_string( $v ) ? sanitize_text_field( $v ) : ( is_scalar( $v ) || null === $v ? $v : '' );
+}
+
+/**
+ * Sanitize callback of aw_seo_settings ({module: {CONST: value, on: bool}}). Runs on every write of the option: this
+ * plugin's Settings route, InsightWeb's numbers (key 'search-insights', AW_SI_* whole numbers), Kits → Tools import
+ * and /wp/v2/settings. Every module key is kept, a known field is cleaned by its type, 'on' is a boolean.
+ *
+ * @param mixed $value Value to store.
+ */
+function aw_seo_settings_sanitize( $value ): array {
+	$mods = aw_seo_modules();
+	$out  = array();
+	foreach ( (array) $value as $key => $part ) {
+		if ( ! is_array( $part ) ) {
+			continue;
+		}
+		$key = sanitize_key( (string) $key );
+		foreach ( $part as $name => $v ) {
+			$name = (string) $name;
+			if ( 'on' === $name ) {
+				$out[ $key ]['on'] = in_array( $v, array( true, false, 0, 1 ), true ) ? $v : (bool) $v; // stored as it was (an older save left 1)
+				continue;
+			}
+			$type               = $mods[ $key ]['fields'][ $name ]['type'] ?? ( 0 === strpos( $name, 'AW_SI_' ) ? 'int' : '' );
+			$out[ $key ][ $name ] = aw_seo_setting_clean( $type, $v );
+		}
+	}
+	return $out;
+}
+
+/**
+ * Every option the RankWeb Settings screen saves, as register_setting() arguments. The names and stored shapes are the
+ * ones used before (no migration); the default is what the code reads when the option is missing.
+ */
+function aw_seo_registered_settings(): array {
+	return array(
+		AW_SEO_SETTINGS          => array(
+			'type'              => 'object',
+			'description'       => 'RankWeb settings by module: the values that differ from the defaults, and the module switches.',
+			'default'           => array(),
+			'sanitize_callback' => 'aw_seo_settings_sanitize',
+			'show_in_rest'      => array(
+				'schema' => array(
+					'type'                 => 'object',
+					'additionalProperties' => array(
+						'type'                 => 'object',
+						'additionalProperties' => true,
+					),
+				),
+			),
+		),
+		'aw_faq_off_types'       => array(
+			'type'              => 'array',
+			'description'       => 'Post types and taxonomies without the FAQ box.',
+			'default'           => array(),
+			'sanitize_callback' => fn( $v ) => array_values( array_unique( array_filter( array_map( 'sanitize_key', (array) $v ) ) ) ),
+			'show_in_rest'      => array(
+				'schema' => array(
+					'type'  => 'array',
+					'items' => array( 'type' => 'string' ),
+				),
+			),
+		),
+		'aw_seo_keep_listings'   => array(
+			'type'              => 'array',
+			'description'       => 'Directory listings kept indexed though they have no contact.',
+			'default'           => array(),
+			'sanitize_callback' => fn( $v ) => array_values( array_unique( array_filter( array_map( 'absint', (array) $v ) ) ) ),
+			'show_in_rest'      => array(
+				'schema' => array(
+					'type'  => 'array',
+					'items' => array( 'type' => 'integer' ),
+				),
+			),
+		),
+		'aw_default_share_image' => array(
+			'type'              => 'integer',
+			'description'       => 'The site\'s default share image (attachment ID, 0 for none).',
+			'default'           => 0,
+			'sanitize_callback' => 'absint',
+			'show_in_rest'      => array( 'schema' => array( 'type' => 'integer' ) ),
+		),
+		AW_SEO_DELETE_DATA       => array(
+			'type'              => 'boolean',
+			'description'       => 'Delete RankWeb\'s own data when the plugin is deleted.',
+			'default'           => false,
+			'sanitize_callback' => fn( $v ) => rest_sanitize_boolean( $v ) ? 1 : 0,
+			'show_in_rest'      => array( 'schema' => array( 'type' => 'boolean' ) ),
+		),
+	);
+}
+
+add_action(
+	'init',
+	function () {
+		foreach ( aw_seo_registered_settings() as $name => $args ) {
+			register_setting( 'rankweb', $name, $args );
+		}
+	}
+);
+
+/** Whether RankWeb's data goes when the plugin is deleted (Modules group). */
+function aw_seo_delete_data_on(): bool {
+	return (bool) get_option( AW_SEO_DELETE_DATA, 0 );
+}
+
+/**
+ * Save "Delete this plugin's data when it is deleted". Nothing is written when it is already so.
+ *
+ * @param bool $on On.
+ */
+function aw_seo_delete_data_save( bool $on ): bool {
+	if ( aw_seo_delete_data_on() === $on ) {
+		return false;
+	}
+	update_option( AW_SEO_DELETE_DATA, $on ? 1 : 0, false );
+	return true;
+}
+
+/**
+ * "Reset this section": every registered setting the group shows goes back to its registered default. The listings
+ * kept indexed are a hand-made list of listing IDs, not a setting with a default, so they stay.
+ *
+ * @param string $tab Tab key.
+ */
+function aw_seo_settings_reset( string $tab ): void {
+	$defaults = aw_seo_registered_settings();
+	if ( 'modules' === $tab ) {
+		aw_seo_settings_save( 'modules', array(), false, array_fill_keys( array_keys( aw_seo_modules() ), true ) ); // every module on
+		aw_seo_delete_data_save( (bool) $defaults[ AW_SEO_DELETE_DATA ]['default'] );
+		return;
+	}
+	aw_seo_settings_save( $tab, array(), true );
+	if ( 'schema' === $tab && function_exists( 'aw_faq_type_choices' ) && array() !== aw_faq_off_types() ) {
+		update_option( 'aw_faq_off_types', $defaults['aw_faq_off_types']['default'], false ); // stored (not deleted), so the one-time move from the old list does not run again
+		delete_transient( 'aw_faq_index' );
+	}
+	if ( 'share' === $tab && (int) get_option( 'aw_default_share_image', 0 ) !== $defaults['aw_default_share_image']['default'] ) {
+		update_option( 'aw_default_share_image', $defaults['aw_default_share_image']['default'] );
+	}
 }

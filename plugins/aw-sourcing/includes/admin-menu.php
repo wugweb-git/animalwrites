@@ -60,19 +60,15 @@ add_action(
 		// WordPress names the screens under a menu after its hook prefix, which stays "sourcing" (AW_SRC_SCREEN,
 		// sourcing_page_…): saved screen options and columns stay.
 		$count = current_user_can( AW_REVIEW_CAP ) && function_exists( 'aw_review_count' ) && function_exists( 'aw_menu_count' ) ? aw_menu_count( aw_review_count() ) : '';
-		if ( function_exists( 'kits_admin_fold_menu' ) ) {
-			kits_admin_fold_menu( AW_SRC_MENU, 'plugins.php', 'SourceWeb' . $count, AW_REVIEW_CAP, 'sourcing', dirname( __DIR__ ) . '/assets/menu-icon.svg' );
-		} else {
-			add_menu_page( 'SourceWeb', 'SourceWeb', AW_REVIEW_CAP, AW_SRC_MENU, 'aw_sourcing_overview_page', 'dashicons-rss', '58.3' );
-			$GLOBALS['admin_page_hooks'][ AW_SRC_MENU ] = 'sourcing'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- the menu's hook prefix, as before the rename.
-			if ( '' !== $count ) {
-				global $menu;
-				foreach ( (array) $menu as $i => $item ) {
-					if ( AW_SRC_MENU === ( $item[2] ?? '' ) ) {
-						$menu[ $i ][0] .= $count; // phpcs:ignore WordPress.WP.GlobalVariablesOverride -- the count bubble, as WordPress adds its own
-					}
-				}
-			}
+		// The Wugweb block (owner, 12 Nov 2026): Kits, DirectoryWeb, SourceWeb, RankWeb, InsightWeb, MailWeb, PlanWeb at 58.1-58.7,
+		// after one separator (58.05), before WordPress's second separator (59); the same with or without Kits Core.
+		// The icon is the plugin's one-colour SVG as a data URI, which WordPress paints in the admin colour scheme.
+		$icon = dirname( __DIR__ ) . '/assets/menu-icon.svg';
+		$icon = is_readable( $icon ) ? 'data:image/svg+xml;base64,' . base64_encode( (string) file_get_contents( $icon ) ) : 'dashicons-rss'; // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode, WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- the plugin's own small SVG file.
+		add_menu_page( 'SourceWeb', 'SourceWeb' . $count, AW_REVIEW_CAP, AW_SRC_MENU, 'aw_sourcing_overview_page', $icon, '58.3' );
+		$GLOBALS['admin_page_hooks'][ AW_SRC_MENU ] = 'sourcing'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- the screens' hook prefix (sourcing_page_…), whatever the title.
+		if ( ! isset( $GLOBALS['menu']['58.05'] ) ) {
+			$GLOBALS['menu']['58.05'] = array( '', 'read', 'separator-wugweb', '', 'wp-menu-separator', 'separator-wugweb' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- one separator above the block, as core adds its own.
 		}
 		add_submenu_page( AW_SRC_MENU, 'SourceWeb', 'Overview', AW_REVIEW_CAP, AW_SRC_MENU, 'aw_sourcing_overview_page' );
 	},

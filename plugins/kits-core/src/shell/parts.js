@@ -292,6 +292,7 @@ function PageField( { f } ) {
 		<Field
 			label={ f.label }
 			help={ f.help }
+			changeIn={ f.changeIn }
 			render={ ( id, helpId ) => {
 				if ( 'select' === f.type ) {
 					return (

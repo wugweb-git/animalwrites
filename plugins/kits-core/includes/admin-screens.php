@@ -983,3 +983,62 @@ function kits_docs_page() {
 	kits_overview_tables();
 	echo '</div>';
 }
+
+/* ---------- Uninstall ---------- */
+
+// Kits → Settings → Uninstall: whether deleting Kits Core also deletes its own data (uninstall.php). Off by default.
+add_action(
+	'init',
+	function () {
+		register_setting(
+			'kits_uninstall',
+			'kits_delete_data_on_uninstall',
+			array(
+				'type'              => 'boolean',
+				'default'           => false,
+				'sanitize_callback' => 'rest_sanitize_boolean',
+				'show_in_rest'      => true,
+			)
+		);
+	}
+);
+add_action(
+	'admin_init',
+	function () {
+		add_settings_section( 'kits_uninstall', '', '__return_null', 'kits-uninstall' );
+		add_settings_field( 'kits_delete_data_on_uninstall', 'Delete this plugin\'s data when it is deleted', 'kits_uninstall_field', 'kits-uninstall', 'kits_uninstall', array( 'label_for' => 'kits_delete_data_on_uninstall' ) );
+	}
+);
+add_filter(
+	'kits_settings_sections',
+	function ( $sections ) {
+		$sections              = (array) $sections;
+		$sections['uninstall'] = array(
+			'title'  => 'Uninstall',
+			'render' => 'kits_uninstall_form',
+			'cap'    => 'manage_options',
+			'order'  => 90,
+		);
+		return $sections;
+	}
+);
+
+/** The uninstall box. */
+function kits_uninstall_field(): void {
+	printf(
+		'<input type="checkbox" id="kits_delete_data_on_uninstall" name="kits_delete_data_on_uninstall" value="1"%1$s> <p class="description">%2$s</p>',
+		checked( (bool) get_option( 'kits_delete_data_on_uninstall', false ), true, false ),
+		esc_html( 'Off: everything stays in the database if the plugin is deleted.' )
+	);
+}
+
+/** Kits → Settings → Uninstall: its own form, coming back to its section after the save. */
+function kits_uninstall_form(): void {
+	echo '<form method="post" action="options.php">';
+	echo '<input type="hidden" name="option_page" value="kits_uninstall"><input type="hidden" name="action" value="update">';
+	wp_nonce_field( 'kits_uninstall-options', '_wpnonce', false );
+	echo '<input type="hidden" name="_wp_http_referer" value="' . esc_attr( wp_make_link_relative( admin_url( 'admin.php?page=kits-settings&kits_section=uninstall' ) ) ) . '">';
+	do_settings_sections( 'kits-uninstall' );
+	submit_button( 'Save uninstall setting' );
+	echo '</form>';
+}

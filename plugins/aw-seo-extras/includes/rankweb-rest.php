@@ -5,7 +5,9 @@
  *   GET  dashboard           manage_categories  the tiles, from the background counts (rankweb-dashboard.php)
  *   POST dashboard/count     manage_categories  ask for a count now (one background event)
  *   GET  settings            manage_options     every group, module and field with today's values
- *   POST settings/<group>    manage_options     save one group (aw_seo_settings_save(), the same as the form)
+ *   POST settings/<group>    manage_options     save one group (aw_seo_settings_save(), the same as the form); reset: true
+ *                                               puts the group's registered settings back to their defaults
+ *                                               (aw_seo_settings_reset()); Modules also takes delete_data
  *   POST settings/faq-types  manage_options     "FAQ box on" (aw_faq_off_types, the same as RankWeb → FAQ)
  *   POST settings/keep-listings manage_options  listings kept indexed with no contact (aw_seo_keep_listings)
  *   POST settings/share-image manage_options    the site's default share image (aw_default_share_image)
@@ -134,23 +136,26 @@ add_action(
 				'methods'             => 'POST',
 				'permission_callback' => rankweb_rest_can( 'manage_options' ),
 				'args'                => array(
-					'group'  => array(
+					'group'       => array(
 						'type' => 'string',
 						'enum' => array_keys( aw_seo_setting_tabs() ),
 					),
-					'fields' => array(
+					'fields'      => array(
 						'type'                 => 'object',
 						'additionalProperties' => array( 'type' => 'string' ),
 						'default'              => array(),
 					),
-					'on'     => array(
+					'on'          => array(
 						'type'                 => 'object',
 						'additionalProperties' => array( 'type' => 'boolean' ),
 						'default'              => array(),
 					),
-					'reset'  => array(
+					'reset'       => array(
 						'type'    => 'boolean',
 						'default' => false,
+					),
+					'delete_data' => array(
+						'type' => 'boolean',
 					),
 				),
 				'callback'            => 'rankweb_rest_save_group',
@@ -407,13 +412,26 @@ function rankweb_settings_group( string $tab ): array {
 		'label'  => $tabs[ $tab ]['label'],
 		'blocks' => array(),
 	);
+	// Modules whose other half is a Rank Math screen (the Overview's "where to set it up"): "Change in …" links.
+	$rm     = fn( string $label, string $page ) => array(
+		'label' => $label,
+		'url'   => add_query_arg( 'page', $page, admin_url( 'admin.php' ) ),
+	);
+	$elses  = array(
+		'titles'      => $rm( __( 'Rank Math → Titles & Meta', 'aw-seo-extras' ), 'rank-math-options-titles' ),
+		'breadcrumbs' => $rm( __( 'Rank Math → General Settings', 'aw-seo-extras' ), 'rank-math-options-general' ),
+		'sitemap'     => $rm( __( 'Rank Math → Sitemap Settings', 'aw-seo-extras' ), 'rank-math-options-sitemap' ),
+		'redirects'   => $rm( __( 'Rank Math → Redirections', 'aw-seo-extras' ), 'rank-math-redirections' ),
+		'llms'        => $rm( __( 'Rank Math → General Settings', 'aw-seo-extras' ), 'rank-math-options-general' ),
+	);
 	$module = fn( string $key, bool $own ) => array(
-		'key'    => $key,
-		'label'  => $mods[ $key ]['label'],
-		'desc'   => $own ? $mods[ $key ]['desc'] : '',
-		'switch' => ! empty( $mods[ $key ]['switch'] ),
-		'on'     => aw_seo_module_on( $key ),
-		'fields' => array(),
+		'key'      => $key,
+		'label'    => $mods[ $key ]['label'],
+		'desc'     => $own ? $mods[ $key ]['desc'] : '',
+		'switch'   => ! empty( $mods[ $key ]['switch'] ),
+		'on'       => aw_seo_module_on( $key ),
+		'fields'   => array(),
+		'changeIn' => $own && aw_seo_extras_rank_math() ? ( $elses[ $key ] ?? null ) : null,
 	);
 	if ( 'modules' === $tab ) {
 		foreach ( $mods as $key => $mod ) {
@@ -421,6 +439,7 @@ function rankweb_settings_group( string $tab ): array {
 			$b['settings']     = aw_seo_module_tab( $key );
 			$group['blocks'][] = $b;
 		}
+		$group['deleteData'] = aw_seo_delete_data_on();
 		return $group;
 	}
 	$fields = aw_seo_tab_fields( $tab );
@@ -505,7 +524,12 @@ function rankweb_rest_save_group( WP_REST_Request $request ) {
 		return new WP_Error( 'rest_invalid_param', __( 'No such group.', 'aw-seo-extras' ), array( 'status' => 400 ) );
 	}
 	$reset = (bool) $request['reset'];
-	if ( 'modules' === $tab ) {
+	if ( $reset ) {
+		aw_seo_settings_reset( $tab ); // "Reset this section": the group's registered defaults
+	} elseif ( 'modules' === $tab ) {
+		if ( null !== $request['delete_data'] ) {
+			aw_seo_delete_data_save( (bool) $request['delete_data'] );
+		}
 		$on = array();
 		foreach ( aw_seo_modules() as $key => $mod ) {
 			if ( ! empty( $mod['switch'] ) ) {
@@ -527,12 +551,12 @@ function rankweb_rest_save_group( WP_REST_Request $request ) {
 				}
 			}
 		}
-		aw_seo_settings_save( $tab, $posted, $reset );
+		aw_seo_settings_save( $tab, $posted );
 	}
 	return rest_ensure_response(
 		array(
 			'group'   => rankweb_settings_group( $tab ),
-			'message' => 'modules' === $tab ? __( 'Saved. A module switched on or off takes effect on the next page load.', 'aw-seo-extras' ) : ( $reset ? __( 'Defaults restored.', 'aw-seo-extras' ) : __( 'Saved.', 'aw-seo-extras' ) ),
+			'message' => $reset ? __( 'Defaults restored.', 'aw-seo-extras' ) : ( 'modules' === $tab ? __( 'Saved. A module switched on or off takes effect on the next page load.', 'aw-seo-extras' ) : __( 'Saved.', 'aw-seo-extras' ) ),
 		)
 	);
 }

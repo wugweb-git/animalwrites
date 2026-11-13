@@ -22,15 +22,19 @@ const AW_SEO_MENU = 'aw-seo-plus';
 add_action(
 	'admin_menu',
 	function () {
-		// RankWeb's own top-level menu in the Wugweb block (Kits Core's kits_wugweb_menu_slots()), opening the Dashboard; FAQ and
+		// RankWeb's own top-level menu in the Wugweb block, opening the Dashboard; FAQ and
 		// Settings are its tabs. Without Kits Core, a menu of its own (its screens then say they need Kits Core).
 		// Screen ids of the screens under this menu start with its hook prefix; keep the old one (aw-seo-plus_page_…),
 		// so saved screen options, box order and hidden columns stay with them.
-		if ( function_exists( 'kits_admin_fold_menu' ) ) {
-			kits_admin_fold_menu( AW_SEO_MENU, 'plugins.php', 'RankWeb', 'manage_categories', 'aw-seo-plus', dirname( __DIR__ ) . '/assets/menu-icon.svg' );
-		} else {
-			add_menu_page( 'RankWeb', 'RankWeb', 'manage_categories', AW_SEO_MENU, 'aw_seo_overview_page', 'dashicons-search', '58.4' );
-			$GLOBALS['admin_page_hooks'][ AW_SEO_MENU ] = 'aw-seo-plus'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- the menu's hook prefix, as before the rename.
+		// The Wugweb block (owner, 12 Nov 2026): Kits, DirectoryWeb, SourceWeb, RankWeb, InsightWeb, MailWeb, PlanWeb at 58.1-58.7,
+		// after one separator (58.05), before WordPress's second separator (59); the same with or without Kits Core.
+		// The icon is the plugin's one-colour SVG as a data URI, which WordPress paints in the admin colour scheme.
+		$icon = dirname( __DIR__ ) . '/assets/menu-icon.svg';
+		$icon = is_readable( $icon ) ? 'data:image/svg+xml;base64,' . base64_encode( (string) file_get_contents( $icon ) ) : 'dashicons-search'; // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode, WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- the plugin's own small SVG file.
+		add_menu_page( 'RankWeb', 'RankWeb', 'manage_categories', AW_SEO_MENU, 'aw_seo_overview_page', $icon, '58.4' );
+		$GLOBALS['admin_page_hooks'][ AW_SEO_MENU ] = 'aw-seo-plus'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- the screens' hook prefix (aw-seo-plus_page_…), whatever the title.
+		if ( ! isset( $GLOBALS['menu']['58.05'] ) ) {
+			$GLOBALS['menu']['58.05'] = array( '', 'read', 'separator-wugweb', '', 'wp-menu-separator', 'separator-wugweb' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- one separator above the block, as core adds its own.
 		}
 		add_submenu_page( AW_SEO_MENU, 'RankWeb', 'Overview', 'manage_categories', AW_SEO_MENU, 'aw_seo_overview_page' );
 	},
