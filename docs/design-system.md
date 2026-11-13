@@ -75,7 +75,7 @@ Display is a size style, not a heading level (as in Material's type scale): a he
 | Display | Hero titles: the page's `<h1>` set large (`.kit-hero-title`, `.kit-display`, `.aw-camp-band-title`) | `--kit-type-display`: 1.5 × H1 on a 375px screen to 2 × H1 at 1200px, fluid (`clamp(3rem, 1.6364rem + 5.8182vw, 6rem)`; owner, 13 Nov 2026) | `--kit-weight-display` 800 | `--kit-leading-display` 1.06 | `--kit-tracking-display` −0.035em |
 | H1 | Page and archive titles | `--kit-h1-size` (preset 4-x-large) | `--kit-h1-weight` 700 | `--kit-h1-leading` 1.06 | `--kit-h1-tracking` −0.035em |
 | H2 | Section titles | `--kit-h2-size` (3-x-large) | `--kit-h2-weight` 700 | `--kit-h2-leading` 1.2 | `--kit-h2-tracking` −0.02em |
-| H3 | Card titles, sub-sections | `--kit-h3-size` (2-x-large) | `--kit-h3-weight` 600 | `--kit-h3-leading` 1.2 | `--kit-h3-tracking` −0.02em |
+| H3 | Card titles (`--kit-type-card-title`: 20px, 22.4px from 768, 24px from 1200, one size per breakpoint; owner, 13 Nov 2026), sub-sections | `--kit-h3-size` (2-x-large) | `--kit-h3-weight` 600 | `--kit-h3-leading` 1.2 | `--kit-h3-tracking` −0.02em |
 | H4 | Tile titles, small headings, form legends | `--kit-h4-size` (x-large) | `--kit-h4-weight` 600 | `--kit-h4-leading` 1.2 | `--kit-h4-tracking` −0.01em |
 | H5 | Small headings in the main column | `--kit-h5-size` (x-large) | `--kit-h5-weight` 600 | `--kit-h5-leading` 1.35 | `--kit-h5-tracking` −0.01em |
 | H6 | Smallest heading | `--kit-h6-size` (x-large) | `--kit-h6-weight` 600 | `--kit-h6-leading` 1.2 | `--kit-h6-tracking` −0.01em |

@@ -17,3 +17,5 @@ One look (10 Nov 2026): the theme templates' Query Loops (archive, tag, search, 
 Campaign cards (`aw-story--card`) and Directory rows (`aw-org`) are separate components: Directory rows are capped at 720px (by their list container); campaign cards follow the card grid.
 
 To check: load a list page in an iframe at 320, 375, 480, 600, 768, 900, 1024, 1200 and 1440px wide and read each card's width, picture size and text-column width; none should be outside the limits above and no page should scroll sideways.
+
+**Card type in steps (owner, 13 Nov 2026: "h3 one size per breakpoint", "metarow - one font size per breakpoint"):** every card's H3 title is `--kit-type-card-title` (20px, 22.4px from 768, 24px from 1200: the H3 steps in docs/design-system.md) with the H3 line height (`--kit-h3-leading`); everything in a card's meta row (date, read time, chips) is `--kit-meta-size` (12px, 13px from 768). Neither is fluid, so they change only at a breakpoint (aw.css, Card type in steps).
