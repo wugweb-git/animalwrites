@@ -173,6 +173,7 @@ button.kit-dd-btn { font: inherit; font-size: var(--fluid-body-sm); }
 	min-width: var(--kit-size-target); min-height: var(--kit-size-target);
 	border-radius: var(--radius-full); color: var(--kit-color-ink); text-decoration: none; font-size: var(--fluid-body-lg); line-height: 1;
 }
+.kit-filter-active .kit-removable .kit-ico { --kit-ico-size: var(--kit-icon-sm); } /* the remove mark: kit-ico--x, not a typed "×" */
 @media (hover: hover) { .kit-filter-active .kit-removable a:hover { background: var(--kit-color-surface); } }
 .kit-filter-active .kit-removable a:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: calc(-1 * var(--kit-focus-width)); }
 .kit-filter-clear { font-size: var(--fluid-body-sm); color: var(--kit-color-link); min-height: var(--kit-size-target); display: inline-flex; align-items: center; }

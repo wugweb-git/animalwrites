@@ -385,7 +385,7 @@ add_shortcode(
 		$html = '<section class="aw-elsewhere"><h2>Elsewhere</h2><ul>';
 		foreach ( $links as $l ) {
 			$icon  = aw_social_icon( $l['url'] );
-			$html .= '<li><a href="' . esc_url( $l['url'] ) . '" target="_blank" rel="noopener noreferrer">' . ( $icon ? aw_i( $icon ) : '' ) . esc_html( $l['label'] ) . ' ' . aw_i( 'arrow-up-right' ) . '<span class="screen-reader-text"> (opens in a new tab)</span></a></li>';
+			$html .= '<li><a class="kit-link-ext" href="' . esc_url( $l['url'] ) . '" target="_blank" rel="noopener noreferrer">' . ( $icon ? aw_i( $icon ) : '' ) . esc_html( $l['label'] ) . '<span class="screen-reader-text"> (opens in a new tab)</span></a></li>';
 		}
 		return $html . '</ul></section>';
 	}

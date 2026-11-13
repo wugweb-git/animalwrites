@@ -345,7 +345,13 @@ H2 + one-line lead on the left; one CTA on the right (`.aw-link-cta`: pill, ink 
 ### Tile (`.aw-tile` in `.aw-tiles`)
 Icon in a kraft square (turns marigold on hover) + H4 title + one-line description + arrow. Raised surface, border, `elevation-1`; hover lifts to `elevation-2`. Grid: 1 / 2 / 3 columns. Used for the section index; reusable for any set of links.
 
-### Icons (`.aw-ico .aw-ico--name`)
+### Icons (`.kit-ico .kit-ico--name`, printed by `aw_i( 'name' )`)
+One icon system: `kit-ico` in Kits' kit.css, each icon a CSS mask on one `<span>` that takes the text colour; `aw_i()` (animal-writes-core systems.php) prints it. Size with `--kit-ico-size` (default 1.25em) or the `--kit-icon-*` tokens, never a width in a component.
+- **External links:** the arrow comes only from `.kit-link-ext` (kit.js marks every off-site text link and adds the screen-reader note; markup may set the class itself, as the Elsewhere links do). No hand-added arrow after a link. One exception: an off-site card title (press items) prints `kit-ico--arrow-up-right`, because a card title's link carries the whole-card layer and `.kit-link-ext` draws no arrow there.
+- **Close and remove:** `kit-ico--x`, never a typed "×" (active filter chips). `kit-ico--x-brand` is the X (Twitter) logo.
+- **Dates:** the `aw_date` calendar icon always stays.
+- **Listing and Library types:** `aw-type-ico--{slug}` (aw-type-ico.css) is still its own mask set. Moving it onto `kit-ico` waits for a staging check: about 40 contextual `.kit-ico` rules (sizes, colours, `display: none`) would reach type icons.
+
 Lucide line icons (ISC licence) as CSS masks, so each is one `<span>` that takes the text colour: arrow-right, arrow-up-right, directory, legal, news, knowledge, research, opportunities, campaign, resources, helpline, mail, phone, search, instagram, facebook, x. Always `aria-hidden="true"` next to visible text or an `aria-label`.
 
 ### Footer
