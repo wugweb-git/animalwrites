@@ -8,7 +8,8 @@
  *   question template, the fields it needs, an answer builder, a priority in Search Insights demand order).
  * - aw_faq_context: the entity name (a Library document's short name), the schema node the FAQ is about
  *   (#organization, #legislation …), the list pages' CollectionPage node (#page).
- * - aw_faq_show_here: a Directory place or type view shows no page FAQ.
+ * - aw_faq_show_here: a Directory place or type view shows no page FAQ; a campaign page keeps its FAQ whatever
+ *   parameters its address carries (only a later Query Loop page drops it).
  *
  * The answer builders use the plugin's sentence helpers (aw_faq_a, aw_faq_plain, aw_faq_and, aw_faq_lc), which exist
  * whenever the plugin calls them. docs/faq.md describes the questions.
@@ -138,6 +139,25 @@ add_filter(
 
 // A Directory place or type view (/directory/<state>/, /directory/type/…) is a list of its own: no page FAQ.
 add_filter( 'aw_faq_show_here', fn( $show ) => $show && ! get_query_var( 'aw_place' ) && ! get_query_var( 'aw_dir_type' ) );
+
+// A campaign page is one page, not a list: a parameter in its address (a share tag such as ?x=1 or ?s_src=wa) does
+// not filter it, so its FAQ stays. Only a later page of one of its Query Loops (query-N-page above 1) leaves it out,
+// as on every other page. Runs before the Directory rule (priority 5).
+add_filter(
+	'aw_faq_show_here',
+	function ( $show ) {
+		if ( $show || ! is_singular( 'aw_campaign' ) || is_paged() ) {
+			return $show;
+		}
+		foreach ( array_keys( $_GET ) as $k ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- reading which parameters are present only
+			if ( preg_match( '/^query-\d+-page$/', (string) $k ) && (int) sanitize_text_field( wp_unslash( $_GET[ $k ] ) ) > 1 ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotValidated -- a page number, read only
+				return false;
+			}
+		}
+		return true;
+	},
+	5
+);
 
 /* ---------- Document names ---------- */
 
