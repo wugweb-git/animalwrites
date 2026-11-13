@@ -64,9 +64,11 @@ Contrast (WCAG 2.1 AA, checked): text `#1e1e1e` on white 16.7:1, on kraft 13.2:1
 ### Type
 One family: **Inter** (variable 400–700, self-hosted woff2). Hierarchy comes from size, weight and tracking, never from a second typeface.
 
+Display is a size style, not a heading level (as in Material's type scale): a hero's title is the page's `<h1>` in the Display style; the page then has no second `<h1>`. Below it come H2 and H3.
+
 | Style | Used for | Size token | Weight | Line height | Tracking |
 |---|---|---|---|---|---|
-| Display | Homepage hero (`.aw-hero-title`, `.aw-display`) | `type-display` | 700 | 1.06 | −0.035em |
+| Display | Hero titles: the page's `<h1>` set large (Home band `.aw-camp-band-title`, `.kit-hero-title`, `.kit-display`) | `type-display` | 700 | 1.06 | −0.035em |
 | H1 | Page and archive titles | `type-h1` | 700 | 1.06 | −0.035em |
 | H2 | Section titles (`.aw-sec-head h2`) | `type-h2` | 700 | 1.2 | −0.02em |
 | H3 | Card titles, sub-sections | `type-h3` | 600 | 1.3 | −0.015em |
