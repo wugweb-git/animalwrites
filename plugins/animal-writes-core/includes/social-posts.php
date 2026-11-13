@@ -972,15 +972,17 @@ function aw_social_for_item( int $id ): array {
 /**
  * One card, drawn like a post on its platform (owner, 14 Nov 2026: "it should look like x and insta"), from our own
  * markup only: nothing loads from X, Instagram or Facebook. Words: only what the post record already has (the person,
- * the handle, our one-line summary, the date) and "View on {platform}"; the imported post text stays staff-only.
+ * the handle, our one-line summary, the date, the platform's name); the imported post text stays staff-only.
  * - Instagram and Facebook with a saved poster image (aw_social_poster, our own copy; never the platform's poster_src):
  *   a header (initial in a ringed circle, the handle, the logo), the picture (4:5, a reel 9:16 with a play mark), the
- *   caption (the handle in bold, then the summary), the date.
+ *   caption (the handle in bold, then the summary), the date and platform.
  * - Every other post, and Instagram or Facebook with no poster: a text post (initial, name and handle, the logo; the
- *   summary; the picture under it when there is one; the date).
- * The avatar is the person's initial on grey, never the platform's picture. YouTube keeps the privacy-enhanced player
- * (loaded near the screen). Every platform but YouTube and Other ends with a 44px "View on {platform}" link-out in a new
- * tab (owner, 13 Nov 2026); where there is none, the name links to the post.
+ *   summary; the picture under it when there is one; the date and platform).
+ * The avatar is the person's initial on grey, never the platform's picture; the platform logo (top right) is decorative,
+ * its name is in the date row ("14 Nov 2026 · on Instagram"). YouTube keeps the privacy-enhanced player (loaded near the
+ * screen). The one link to the post is the name with the external arrow, as News titles (owner, 14 Nov 2026: "button not
+ * needed, an arrow will do"), in a new tab, a 44px target; no whole-card link. A reel's picture links to the same post
+ * for pointers only (aria-hidden, out of the tab order), so each card has one link for keyboard and screen readers.
  *
  * @param WP_Post $p Social post.
  */
@@ -1001,37 +1003,36 @@ function aw_social_card( WP_Post $p ): string {
 	$insta    = '' !== $pic && in_array( $on, array( 'instagram', 'facebook' ), true );
 	$reel     = 'video' === $format;
 	$logos    = array( 'x' => 'x-brand', 'instagram' => 'instagram', 'facebook' => 'facebook', 'linkedin' => 'linkedin', 'youtube' => 'youtube', 'bluesky' => 'bluesky', 'mastodon' => 'mastodon' );
-	$logo     = isset( $logos[ $on ] ) ? '<span class="kit-ico kit-ico--' . $logos[ $on ] . ' aw-social-logo" role="img" aria-label="' . esc_attr( $label ) . '"></span>' : '';
+	$logo     = isset( $logos[ $on ] ) ? aw_i( $logos[ $on ], 'aw-social-logo' ) : '';
 	$initial  = function_exists( 'mb_substr' ) ? mb_substr( ltrim( $name, '@' ), 0, 1 ) : substr( ltrim( $name, '@' ), 0, 1 );
 	$avatar   = '<span class="aw-social-avatar" aria-hidden="true">' . esc_html( strtoupper( $initial ) ) . '</span>';
-	$out      = '';
 	$media    = '';
 	if ( 'youtube' === $link['platform'] && '' !== $link['video'] ) {
 		$box   = 'aw-social-embed-' . (int) $p->ID;
 		$media = '<div id="' . esc_attr( $box ) . '" class="aw-social-media" data-aw-social-embed="youtube" data-id="' . esc_attr( $link['video'] ) . '" data-title="' . esc_attr( $name ) . '"></div>';
 		aw_social_embed_script();
-	} elseif ( '' !== $link['url'] && '' !== $label ) {
-		$out = '<a class="kit-btn kit-btn--secondary kit-btn--sm aw-social-out" href="' . esc_url( $link['url'] ) . '" target="_blank" rel="nofollow ugc noopener">'
-			. esc_html( 'View on ' . $label ) . '<span class="kit-ico kit-ico--arrow-up-right" aria-hidden="true"></span><span class="screen-reader-text">' . esc_html( ( '' !== $name ? ': ' . $name : '' ) . ' (opens in a new tab)' ) . '</span></a>';
 	}
-	// The name links to the post only where no button does.
-	$who_link = function ( string $text, string $cls ) use ( $out, $url ) {
-		return '' === $out && '' !== $url ? '<a class="' . $cls . '" href="' . esc_url( $url ) . '" rel="nofollow ugc noopener">' . esc_html( $text ) . '</a>' : '<span class="' . $cls . '">' . esc_html( $text ) . '</span>';
+	$href = '' !== $link['url'] ? $link['url'] : $url;
+	// The one link: the name with the external arrow (as hub-blocks.php's press titles), a new tab, a 44px target.
+	$who_link = function ( string $text ) use ( $href ) {
+		$t = '<span class="aw-social-name-text">' . esc_html( $text ) . '</span>';
+		return '' !== $href ? '<a class="aw-social-name" href="' . esc_url( $href ) . '" target="_blank" rel="nofollow ugc noopener">' . $t . aw_i( 'arrow-up-right' ) . '<span class="screen-reader-text">' . esc_html( ' (opens in a new tab)' ) . '</span></a>' : '<span class="aw-social-name">' . $t . '</span>';
 	};
-	$when = $date && function_exists( 'aw_date' ) ? '<p class="kit-meta-row aw-social-date">' . aw_date( $date . ' 12:00:00' ) . '</p>' : '';
+	$when = '<p class="kit-meta-row aw-social-date">' . ( $date && function_exists( 'aw_date' ) ? aw_date( $date . ' 12:00:00' ) : '' ) // the date always first in a meta row (owner)
+		. '<span class="kit-meta-item">' . esc_html( 'on ' . ( AW_SOCIAL_PLATFORMS[ $on ] ?? 'Other' ) ) . '</span></p>';
 	if ( $insta ) {
 		$tag  = '' !== $handle ? $handle : $name;
-		$body = '<div class="aw-social-head">' . $avatar . '<p class="aw-social-who">' . $who_link( $tag, 'aw-social-name' ) . '</p>' . $logo . '</div>'
-			. '<figure class="aw-social-pic' . ( $reel ? ' aw-social-pic--reel' : '' ) . '">' . $pic . ( $reel ? '<span class="kit-ico kit-ico--play aw-social-play" aria-hidden="true"></span>' : '' ) . '</figure>'
+		$img  = $reel && '' !== $href ? '<a class="aw-social-pic-link" href="' . esc_url( $href ) . '" target="_blank" rel="nofollow ugc noopener" tabindex="-1" aria-hidden="true">' . $pic . '</a>' : $pic;
+		$body = '<div class="aw-social-head">' . $avatar . '<p class="aw-social-who">' . $who_link( $tag ) . '</p>' . $logo . '</div>'
+			. '<figure class="aw-social-pic' . ( $reel ? ' aw-social-pic--reel' : '' ) . '">' . $img . ( $reel ? aw_i( 'play', 'aw-social-play' ) : '' ) . '</figure>'
 			. ( '' !== $summary ? '<p class="aw-social-text"><strong>' . esc_html( $tag ) . '</strong> ' . esc_html( $summary ) . '</p>' : '' );
 	} else {
-		$body = '<div class="aw-social-head">' . $avatar . '<p class="aw-social-who">' . $who_link( $name, 'aw-social-name' )
+		$body = '<div class="aw-social-head">' . $avatar . '<p class="aw-social-who">' . $who_link( $name )
 			. ( '' !== $handle && $handle !== $name ? '<span class="aw-social-handle" title="' . esc_attr( $handle ) . '">' . esc_html( $handle ) . '</span>' : '' ) . '</p>' . $logo . '</div>'
 			. ( '' !== $summary ? '<p class="aw-social-text">' . esc_html( $summary ) . '</p>' : '' )
 			. ( '' !== $pic ? '<figure class="aw-social-pic">' . $pic . '</figure>' : '' );
 	}
-	return '<li><article class="aw-social-card aw-social-card--' . ( $insta ? 'insta' : 'text' ) . '">' . $body . $media . $when
-		. ( '' !== $out ? '<div class="aw-social-actions">' . $out . '</div>' : '' ) . '</article></li>';
+	return '<li><article class="aw-social-card aw-social-card--' . ( $insta ? 'insta' : 'text' ) . '">' . $body . $media . $when . '</article></li>';
 }
 
 /**

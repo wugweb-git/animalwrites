@@ -2521,15 +2521,15 @@
     "aw-social-play",
     "aw-social-media",
     "aw-social-date",
-    "aw-social-actions",
-    "aw-social-out"
+    "aw-social-name-text",
+    "aw-social-pic-link"
    ],
    "states": [
     "off (Kits → Modules → Show on pages; prints nothing)",
     "no approved posts (prints nothing)",
     "text post (X, Bluesky, Mastodon, LinkedIn, YouTube; Instagram or Facebook with no poster): initial, name and handle, platform logo; summary; picture when there is one; date",
     "Instagram style (Instagram, Facebook with a poster image): ringed initial, handle, logo; picture 4:5 (reel 9:16 with a play mark); caption led by the handle; date",
-    "every platform but YouTube and Other: 44px View on {platform} link-out (new tab); Other and YouTube: the name links to the post; YouTube: the player under the summary",
+    "one link per card: the name with the external arrow, new tab, 44px tall; a reel picture links too (aria-hidden, tabindex -1); the date row ends with on {platform}; YouTube: the player under the summary",
     "editor preview (one-line note)"
    ],
    "tokens": [
@@ -2549,12 +2549,12 @@
    ],
    "a11y": {
     "element": "server-rendered block: section with H2, list of article cards in the More list (aw-more-list)",
-    "aria": "section aria-labelledby its H2; platform logo role=img with the platform name; avatar initial aria-hidden",
-    "keyboard": "Tab to each View on {platform} link (or the name link where there is none)",
+    "aria": "section aria-labelledby its H2; platform logo, avatar initial, arrow and play mark aria-hidden; the platform name is text in the date row",
+    "keyboard": "Tab to each card's one link, the name",
     "focus": "3px ring in --kit-color-focus (:focus-visible)",
-    "target": "44px (aw-social-out, --kit-size-target)",
+    "target": "44px (the name link, --kit-size-target)",
     "motion": "none",
-    "sr": "H2, list of posts: name, handle, summary, date, link that says it opens a new tab"
+    "sr": "H2, list of posts: name link (opens in a new tab), handle, summary, date and platform"
    },
    "seo": {
     "heading": "H2 for the section; no heading per card (H3 stays one size)",

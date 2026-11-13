@@ -294,9 +294,11 @@
    look like x and insta"), our own markup only. Text post (X, Bluesky, Mastodon, LinkedIn, YouTube, and Instagram or
    Facebook with no poster): a white card, 1px line, card radius; a head row (the initial in a grey circle at the 44px
    target size, the bold name and the grey handle, the platform logo at the right); the summary at body size; a picture
-   under it with the media radius; the date in grey on one line; the 44px "View on {platform}" button. Instagram style
+   under it with the media radius; the date and platform in grey on one line. Instagram style
    (Instagram, Facebook with a poster): the same head with a ringed circle, the picture across the card at 4:5 (a reel
    9:16, with a play mark; ratios as the owner gave them, 14 Nov 2026), the caption led by the handle in bold. No counts.
+   The one link is the name with the external arrow (as News titles; owner, 14 Nov 2026: "an arrow will do"), at least
+   the 44px target tall; the logo is decorative (aria-hidden), the platform's name is in the date row.
    Padding --kit-space-5 (every block at least 24px), gaps --kit-space-3, sizes from kit tokens. */
 .aw-more-list:has(> li > .aw-social-card) { align-items: start; }
 .aw-social-card { display: flex; flex-direction: column; gap: var(--kit-space-3); box-sizing: border-box; min-width: 0; margin: 0; padding: var(--kit-space-5); border: var(--kit-border-width, 1px) solid var(--kit-color-line); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); color: var(--kit-color-text); overflow: hidden; }
@@ -305,11 +307,14 @@
 .aw-social-avatar { display: grid; place-items: center; flex: none; width: var(--kit-size-target); height: var(--kit-size-target); border-radius: 50%; background: color-mix(in srgb, var(--kit-color-ink) 10%, var(--kit-color-raised)); color: var(--kit-color-ink); font-size: var(--kit-type-base); font-weight: var(--kit-weight-bold); line-height: 1; }
 .aw-social-card--insta .aw-social-avatar { box-shadow: 0 0 0 2px var(--kit-color-raised), 0 0 0 3px var(--kit-color-ink); }
 .aw-social-who { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: var(--kit-space-2); flex: 1 1 auto; min-width: 0; margin: 0; line-height: var(--kit-leading-heading, 1.25); }
-.aw-social-name { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--kit-type-base); font-weight: var(--kit-weight-bold); color: var(--kit-color-text); }
-a.aw-social-name { text-decoration: none; }
-a.aw-social-name:hover { text-decoration: underline; }
+.aw-social-name { display: inline-flex; align-items: center; gap: var(--kit-space-1); max-width: 100%; min-width: 0; font-size: var(--kit-type-base); font-weight: var(--kit-weight-bold); color: var(--kit-color-text); }
+a.aw-social-name { min-height: var(--kit-size-target); text-decoration: none; }
+a.aw-social-name:hover .aw-social-name-text { text-decoration: underline; }
+.aw-social-name-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.aw-social-name > .kit-ico { flex: none; --kit-ico-size: var(--kit-icon-sm); }
+.aw-social-pic-link { display: block; height: 100%; }
 .aw-social-handle { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
-.aw-social-logo { flex: none; align-self: flex-start; --kit-ico-size: var(--kit-icon-md); color: var(--kit-color-ink); }
+.aw-social-logo { flex: none; align-self: center; --kit-ico-size: var(--kit-icon-md); color: var(--kit-color-ink); }
 .aw-social-text { max-width: none; font-size: var(--kit-type-base); line-height: var(--kit-leading-body); overflow-wrap: anywhere; }
 .aw-social-text > strong { font-weight: var(--kit-weight-bold); }
 .aw-social-pic { position: relative; overflow: hidden; border-radius: var(--kit-radius-media); background: var(--kit-color-surface-soft); }
@@ -317,11 +322,11 @@ a.aw-social-name:hover { text-decoration: underline; }
 .aw-social-card--insta .aw-social-pic { margin-inline: calc(-1 * var(--kit-space-5)); border-radius: 0; aspect-ratio: 4 / 5; }
 .aw-social-card--insta .aw-social-pic--reel { aspect-ratio: 9 / 16; }
 .aw-social-card--insta .aw-social-pic .aw-social-img { height: 100%; object-fit: cover; }
-.aw-social-play { position: absolute; top: var(--kit-space-3); right: var(--kit-space-3); --kit-ico-size: var(--kit-icon-lg); color: var(--kit-color-on-ink); filter: drop-shadow(0 0 2px rgb(0 0 0 / 0.7)); }
+.aw-social-pic--reel::before { content: ""; position: absolute; top: var(--kit-space-3); right: var(--kit-space-3); width: var(--kit-size-target); height: var(--kit-size-target); border-radius: 50%; background: color-mix(in srgb, var(--kit-color-ink) 65%, transparent); pointer-events: none; } /* the reel mark's backdrop: white on any picture */
+.aw-social-play { position: absolute; top: calc(var(--kit-space-3) + (var(--kit-size-target) - var(--kit-icon-lg)) / 2); right: calc(var(--kit-space-3) + (var(--kit-size-target) - var(--kit-icon-lg)) / 2); --kit-ico-size: var(--kit-icon-lg); color: var(--kit-color-on-ink); pointer-events: none; }
 .aw-social-media :is(figure, .wp-block-embed) { margin: 0; overflow: hidden; border-radius: var(--kit-radius-media); }
-.aw-social-date { flex-wrap: nowrap; white-space: nowrap; min-width: 0; font-size: var(--kit-meta-size); color: var(--kit-color-muted); }
-.aw-social-actions { display: flex; }
-.aw-social-card .aw-social-out { min-height: var(--kit-size-target); }
+.aw-social-date { flex-wrap: nowrap; gap: var(--kit-space-2); white-space: nowrap; min-width: 0; font-size: var(--kit-meta-size); color: var(--kit-color-muted); }
+.aw-social-date > .aw-date + .kit-meta-item::before { content: "·" / ""; margin-inline-end: var(--kit-space-2); } /* "14 Nov 2026 · on Instagram" */
 /* Help an animal now (/help/): on phones a call bar stays at the foot of the screen, in thumb reach, above the gesture area; hidden from 768 (the call tiles sit in view). */
 .aw-help-bar { display: none; }
 @media (max-width: 767px) {
