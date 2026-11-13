@@ -40,7 +40,7 @@ Where they may show and the pages with none are the display conditions of the pl
 
 One component for every chip (kit-primitives.css 1–2): outlined, white fill, 1px border at 60% of the text colour,
 text colour; hover overlay and full border, focus ring, selected (an active filter) a stronger overlay. Only the
-leading icon differs (`aw-type-ico--*`, Library `lib-*`, place pin, favicon). Campaign pages may tint it through the
+leading icon differs (`kit-ico--type-*`, Library `kit-ico--type-lib-*`, place pin, favicon). Campaign pages may tint it through the
 `--kit-chip-*` tokens (campaign.css). Status tags (success, warning, danger, closed) keep their colours.
 
 ## Schema

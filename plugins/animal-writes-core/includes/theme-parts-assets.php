@@ -52,13 +52,13 @@ function aw_theme_parts_path( string $file ): string {
  * The order here is the order in the joined file, after aw.css. Editors load every file (below). For example:
  *
  *     'aw-home'     => array( 'file' => 'assets/css/aw-home.css', 'when' => 'is_front_page' ),
- *     'aw-type-ico' => array( 'file' => 'assets/css/aw-type-ico.css' ),
+ *     'aw-type-icons' => array( 'file' => 'assets/css/aw-type-icons.css' ),
  *
  * tools/ci/css_min.py writes and checks the .min.css of every theme/assets/css/aw*.css.
  *
  * In every joined file (11 Nov 2026): the small files (under about 1 KB gzipped each, 6.9 KB together) and aw-hubs,
  * which most list pages print, are in every page's joined file ('when' => '__return_true'). Keyed by what each page
- * printed, they made 37 joined files in one day; the larger page-type files (aw-home, aw-type-ico, aw-single, aw-lists,
+ * printed, they made 37 joined files in one day; the larger page-type files (aw-home, aw-type-icons, aw-single, aw-lists,
  * aw-directory, aw-listing, aw-forms) still decide which file a page gets. All their rules are scoped to their own
  * component classes, and they were all in aw.css on every page before phase 2.
  *
@@ -117,8 +117,8 @@ function aw_component_style_files(): array {
 			'when'   => 'is_front_page',
 			'blocks' => array( 'core/group' => array( 'aw-ed-', 'aw-pair' ) ), // help-now, find-help, animal-law, learn, whats-happening, aw-pair.
 		),
-		'aw-type-ico' => array( // Type icons: wherever aw_type_icon() or the Directory map prints one.
-			'file' => 'assets/css/aw-type-ico.css',
+		'aw-type-icons' => array( // Type icons (kit-ico--type-{slug}): wherever aw_type_icon() prints one, the Directory map's too.
+			'file' => 'assets/css/aw-type-icons.css',
 		),
 		'aw-single' => array( // Single items, plus a flag from the code that prints More, Sources, share, take-part, find-help and the rest elsewhere.
 			'file' => 'assets/css/aw-single.css',

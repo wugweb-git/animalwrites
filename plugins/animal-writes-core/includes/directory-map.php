@@ -290,10 +290,9 @@ function aw_dir_tools_html() {
 
 /** The panels the toolbar opens, under it: Near me and the map (hidden until asked for). */
 function aw_dir_panels_html() {
-	aw_use_component_style( 'aw-type-ico' ); // the Near me panel: one icon per type, cloned by aw.js
-	$icons = '';
+	$icons = ''; // one icon per type; dir-map.js reads each one's picture (--i) for the map's markers
 	foreach ( aw_listing_type_slugs() as $slug ) {
-		$icons .= '<span class="aw-type-ico aw-type-ico--' . esc_attr( $slug ) . '" data-type="' . esc_attr( $slug ) . '"></span>';
+		$icons .= aw_type_icon( $slug );
 	}
 	return '<section id="aw-near" class="aw-near" hidden aria-label="Near me">'
 		. '<form class="aw-near-form"><button type="button" class="kit-btn aw-near-locate">Use my location</button>'
