@@ -95,6 +95,8 @@ jobs:
         run: php plugins/animal-writes-core/tests/org-people-tests.php
       - name: DirectoryWeb screens, pure parts (plugins/animal-writes-core/tests/directoryweb-tests.php)
         run: php plugins/animal-writes-core/tests/directoryweb-tests.php
+      - name: Daily PHP error count by kind (plugins/animal-writes-core/tests/error-count-tests.php)
+        run: php plugins/animal-writes-core/tests/error-count-tests.php
       - name: PlanWeb tests without WordPress (field checks, Dates import mapping; plugins/planweb/tests)
         run: php plugins/planweb/tests/run.php
       - name: Kits menu, six items and old addresses (plugins/kits-core/tests/admin-menu-tests.php)
