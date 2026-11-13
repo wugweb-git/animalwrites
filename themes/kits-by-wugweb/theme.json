@@ -371,48 +371,57 @@
 				},
 				"typography": {
 					"fontFamily": "var(--wp--preset--font-family--display)",
-					"fontWeight": "700",
-					"lineHeight": "1.2",
-					"letterSpacing": "-0.02em"
+					"fontWeight": "var(--kit-h2-weight, 700)",
+					"lineHeight": "var(--kit-h2-leading, 1.2)",
+					"letterSpacing": "var(--kit-h2-tracking, -0.02em)"
 				}
 			},
 			"h1": {
 				"typography": {
 					"fontSize": "var(--wp--preset--font-size--4-x-large)",
-					"lineHeight": "1.06",
-					"letterSpacing": "-0.035em"
+					"lineHeight": "var(--kit-h1-leading, 1.06)",
+					"letterSpacing": "var(--kit-h1-tracking, -0.035em)",
+					"fontWeight": "var(--kit-h1-weight, 700)"
 				}
 			},
 			"h2": {
 				"typography": {
-					"fontSize": "var(--wp--preset--font-size--3-x-large)"
+					"fontSize": "var(--wp--preset--font-size--3-x-large)",
+					"fontWeight": "var(--kit-h2-weight, 700)",
+					"lineHeight": "var(--kit-h2-leading, 1.2)",
+					"letterSpacing": "var(--kit-h2-tracking, -0.02em)"
 				}
 			},
 			"h3": {
 				"typography": {
 					"fontSize": "var(--wp--preset--font-size--2-x-large)",
-					"fontWeight": "600"
+					"fontWeight": "var(--kit-h3-weight, 600)",
+					"lineHeight": "var(--kit-h3-leading, 1.2)",
+					"letterSpacing": "var(--kit-h3-tracking, -0.02em)"
 				}
 			},
 			"h4": {
 				"typography": {
 					"fontSize": "var(--wp--preset--font-size--x-large)",
-					"fontWeight": "600",
-					"letterSpacing": "-0.01em"
+					"fontWeight": "var(--kit-h4-weight, 600)",
+					"letterSpacing": "var(--kit-h4-tracking, -0.01em)",
+					"lineHeight": "var(--kit-h4-leading, 1.2)"
 				}
 			},
 			"h5": {
 				"typography": {
 					"fontSize": "var(--wp--preset--font-size--x-large)",
-					"fontWeight": "600",
-					"letterSpacing": "-0.01em"
+					"fontWeight": "var(--kit-h5-weight, 600)",
+					"letterSpacing": "var(--kit-h5-tracking, -0.01em)",
+					"lineHeight": "var(--kit-h5-leading, 1.35)"
 				}
 			},
 			"h6": {
 				"typography": {
 					"fontSize": "var(--wp--preset--font-size--x-large)",
-					"fontWeight": "600",
-					"letterSpacing": "-0.01em"
+					"fontWeight": "var(--kit-h6-weight, 600)",
+					"letterSpacing": "var(--kit-h6-tracking, -0.01em)",
+					"lineHeight": "var(--kit-h6-leading, 1.2)"
 				}
 			},
 			"button": {
@@ -545,12 +554,6 @@
 							}
 						}
 					}
-				}
-			},
-			"core/heading": {
-				"typography": {
-					"lineHeight": "1.2",
-					"letterSpacing": "-0.02em"
 				}
 			},
 			"core/image": {

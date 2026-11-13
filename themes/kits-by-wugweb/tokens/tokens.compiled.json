@@ -720,6 +720,136 @@
       "md": "-0.035em",
       "lg": "-0.035em"
     },
+    "weight-display": {
+      "sm": "800",
+      "md": "800",
+      "lg": "800"
+    },
+    "tracking-subheading": {
+      "sm": "-0.01em",
+      "md": "-0.01em",
+      "lg": "-0.01em"
+    },
+    "h1-size": {
+      "sm": "var(--wp--preset--font-size--4-x-large)",
+      "md": "var(--wp--preset--font-size--4-x-large)",
+      "lg": "var(--wp--preset--font-size--4-x-large)"
+    },
+    "h1-weight": {
+      "sm": "var(--kit-weight-bold)",
+      "md": "var(--kit-weight-bold)",
+      "lg": "var(--kit-weight-bold)"
+    },
+    "h1-leading": {
+      "sm": "var(--kit-leading-display)",
+      "md": "var(--kit-leading-display)",
+      "lg": "var(--kit-leading-display)"
+    },
+    "h1-tracking": {
+      "sm": "var(--kit-tracking-display)",
+      "md": "var(--kit-tracking-display)",
+      "lg": "var(--kit-tracking-display)"
+    },
+    "h2-size": {
+      "sm": "var(--wp--preset--font-size--3-x-large)",
+      "md": "var(--wp--preset--font-size--3-x-large)",
+      "lg": "var(--wp--preset--font-size--3-x-large)"
+    },
+    "h2-weight": {
+      "sm": "var(--kit-weight-bold)",
+      "md": "var(--kit-weight-bold)",
+      "lg": "var(--kit-weight-bold)"
+    },
+    "h2-leading": {
+      "sm": "var(--kit-leading-heading)",
+      "md": "var(--kit-leading-heading)",
+      "lg": "var(--kit-leading-heading)"
+    },
+    "h2-tracking": {
+      "sm": "var(--kit-tracking-heading)",
+      "md": "var(--kit-tracking-heading)",
+      "lg": "var(--kit-tracking-heading)"
+    },
+    "h3-size": {
+      "sm": "var(--wp--preset--font-size--2-x-large)",
+      "md": "var(--wp--preset--font-size--2-x-large)",
+      "lg": "var(--wp--preset--font-size--2-x-large)"
+    },
+    "h3-weight": {
+      "sm": "var(--kit-weight-strong)",
+      "md": "var(--kit-weight-strong)",
+      "lg": "var(--kit-weight-strong)"
+    },
+    "h3-leading": {
+      "sm": "var(--kit-leading-heading)",
+      "md": "var(--kit-leading-heading)",
+      "lg": "var(--kit-leading-heading)"
+    },
+    "h3-tracking": {
+      "sm": "var(--kit-tracking-heading)",
+      "md": "var(--kit-tracking-heading)",
+      "lg": "var(--kit-tracking-heading)"
+    },
+    "h4-size": {
+      "sm": "var(--wp--preset--font-size--x-large)",
+      "md": "var(--wp--preset--font-size--x-large)",
+      "lg": "var(--wp--preset--font-size--x-large)"
+    },
+    "h4-weight": {
+      "sm": "var(--kit-weight-strong)",
+      "md": "var(--kit-weight-strong)",
+      "lg": "var(--kit-weight-strong)"
+    },
+    "h4-leading": {
+      "sm": "var(--kit-leading-heading)",
+      "md": "var(--kit-leading-heading)",
+      "lg": "var(--kit-leading-heading)"
+    },
+    "h4-tracking": {
+      "sm": "var(--kit-tracking-subheading)",
+      "md": "var(--kit-tracking-subheading)",
+      "lg": "var(--kit-tracking-subheading)"
+    },
+    "h5-size": {
+      "sm": "var(--wp--preset--font-size--x-large)",
+      "md": "var(--wp--preset--font-size--x-large)",
+      "lg": "var(--wp--preset--font-size--x-large)"
+    },
+    "h5-weight": {
+      "sm": "var(--kit-weight-strong)",
+      "md": "var(--kit-weight-strong)",
+      "lg": "var(--kit-weight-strong)"
+    },
+    "h5-leading": {
+      "sm": "1.35",
+      "md": "1.35",
+      "lg": "1.35"
+    },
+    "h5-tracking": {
+      "sm": "var(--kit-tracking-subheading)",
+      "md": "var(--kit-tracking-subheading)",
+      "lg": "var(--kit-tracking-subheading)"
+    },
+    "h6-size": {
+      "sm": "var(--wp--preset--font-size--x-large)",
+      "md": "var(--wp--preset--font-size--x-large)",
+      "lg": "var(--wp--preset--font-size--x-large)"
+    },
+    "h6-weight": {
+      "sm": "var(--kit-weight-strong)",
+      "md": "var(--kit-weight-strong)",
+      "lg": "var(--kit-weight-strong)"
+    },
+    "h6-leading": {
+      "sm": "var(--kit-leading-heading)",
+      "md": "var(--kit-leading-heading)",
+      "lg": "var(--kit-leading-heading)"
+    },
+    "h6-tracking": {
+      "sm": "var(--kit-tracking-subheading)",
+      "md": "var(--kit-tracking-subheading)",
+      "lg": "var(--kit-tracking-subheading)"
+    },
     "tracking-heading": {
       "sm": "-0.02em",
       "md": "-0.02em",

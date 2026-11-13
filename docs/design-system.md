@@ -62,21 +62,27 @@ Directory order: verified, then A–Z. No featured listings (owner, 24 Oct 2026)
 Contrast (WCAG 2.1 AA, checked): text `#1e1e1e` on white 16.7:1, on kraft 13.2:1; muted `#5f5f5f` on white 6.4:1, on kraft 5.1:1; accent-ink `#9a5b00` on white 5.4:1 but on kraft only 4.3:1, so it is used on white only (on kraft use ink). Marigold `#ffa500` is never used for text on light backgrounds; it is a fill (buttons with ink text, 9.3:1) and the focus ring.
 
 ### Type
-One family: **Inter** (variable 400–700, self-hosted woff2). Hierarchy comes from size, weight and tracking, never from a second typeface.
+One family: **Inter** (variable, self-hosted woff2, declared once in Kits by Wugweb's theme.json). Hierarchy comes from size, weight and tracking, never from a second typeface. Display sizes are meant to set in Inter Display (Inter's optical size for large text, `font-optical-sizing: auto`): that needs the Inter file with the opsz axis; the file shipped today has the weight axis only (13 Nov 2026).
 
 Display is a size style, not a heading level (as in Material's type scale): a hero's title is the page's `<h1>` in the Display style; the page then has no second `<h1>`. Below it come H2 and H3.
 
-| Style | Used for | Size token | Weight | Line height | Tracking |
+**One display weight:** `--kit-weight-display` (800) is the weight of every display size: hero titles (`.kit-hero-title`, `.kit-display`), campaign titles and the big numbers (countdowns, tallies, bento numbers). The Lab rules and Community dogs pages keep their own frozen copies.
+
+**Headings h1–h6 read one set of tokens each**, the same in theme.json (`styles.elements.h1`…`h6`: size preset, then `var(--kit-hN-weight)`, `var(--kit-hN-leading)`, `var(--kit-hN-tracking)`), in kit.css/aw.css and in the blocks (the Heading block takes the element styles of its level). Change a level in `themes/kits-by-wugweb/tokens/tokens.json` and run `python3 tools/build-tokens.py`; sizes change in Styles > Typography (the presets).
+
+| Style | Used for | Size | Weight | Line height | Tracking |
 |---|---|---|---|---|---|
-| Display | Hero titles: the page's `<h1>` set large (Home band `.aw-camp-band-title`, `.kit-hero-title`, `.kit-display`) | `type-display` | 700 | 1.06 | −0.035em |
-| H1 | Page and archive titles | `type-h1` | 700 | 1.06 | −0.035em |
-| H2 | Section titles (`.aw-sec-head h2`) | `type-h2` | 700 | 1.2 | −0.02em |
-| H3 | Card titles, sub-sections | `type-h3` | 600 | 1.3 | −0.015em |
-| H4 | Tile titles, small headings, form legends | `type-h4` | 600 | 1.2 | −0.01em |
-| Lead | Section descriptions, intros (`.aw-lead`, large paragraphs) | `type-lead` | 400, muted | 1.5 | — |
-| Body | Paragraphs, lists | `type-base` | 400 | 1.6 | −0.006em |
-| Small | Excerpts, meta, footer links | `type-sm` | 400–500 | 1.55 | — |
-| Caption | Dates, counts, chips, footer headings | `type-xs` | 500–600 | — | — |
+| Display | Hero titles: the page's `<h1>` set large (`.kit-hero-title`, `.kit-display`, `.aw-camp-band-title`) | `--kit-type-display` | `--kit-weight-display` 800 | `--kit-leading-display` 1.06 | `--kit-tracking-display` −0.035em |
+| H1 | Page and archive titles | `--kit-h1-size` (preset 4-x-large) | `--kit-h1-weight` 700 | `--kit-h1-leading` 1.06 | `--kit-h1-tracking` −0.035em |
+| H2 | Section titles | `--kit-h2-size` (3-x-large) | `--kit-h2-weight` 700 | `--kit-h2-leading` 1.2 | `--kit-h2-tracking` −0.02em |
+| H3 | Card titles, sub-sections | `--kit-h3-size` (2-x-large) | `--kit-h3-weight` 600 | `--kit-h3-leading` 1.2 | `--kit-h3-tracking` −0.02em |
+| H4 | Tile titles, small headings, form legends | `--kit-h4-size` (x-large) | `--kit-h4-weight` 600 | `--kit-h4-leading` 1.2 | `--kit-h4-tracking` −0.01em |
+| H5 | Small headings in the main column | `--kit-h5-size` (x-large) | `--kit-h5-weight` 600 | `--kit-h5-leading` 1.35 | `--kit-h5-tracking` −0.01em |
+| H6 | Smallest heading | `--kit-h6-size` (x-large) | `--kit-h6-weight` 600 | `--kit-h6-leading` 1.2 | `--kit-h6-tracking` −0.01em |
+| Lead | Section descriptions, intros (`.aw-lead`, large paragraphs) | `--kit-type-lead` | 400, muted | 1.5 | — |
+| Body | Paragraphs, lists | `--kit-type-base` | 400 | `--kit-leading-body` 1.6 | `--kit-tracking-body` −0.006em |
+| Small | Excerpts, meta, footer links | `--kit-type-sm` | 400–500 | 1.55 | — |
+| Caption | Dates, counts, chips, footer headings | `--kit-type-xs` | 500–600 | — | — |
 
 | Token | sm (0) | md (768) | lg (1200) |
 |---|---|---|---|
