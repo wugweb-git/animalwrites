@@ -643,6 +643,16 @@ add_shortcode(
 );
 
 /* ---------- Assets, ads ---------- */
+// The one Share section's styles (aw-share.css), on every campaign and Home, after the page's own files.
+add_action(
+	'wp_enqueue_scripts',
+	function () {
+		if ( is_singular( 'aw_campaign' ) || is_front_page() ) {
+			wp_enqueue_style( 'aw-share', plugins_url( 'assets/css/aw-share.css', AW_CORE_DIR . 'animal-writes-core.php' ), array(), (string) filemtime( AW_CORE_DIR . 'assets/css/aw-share.css' ) );
+		}
+	},
+	20
+);
 add_action(
 	'wp_enqueue_scripts',
 	function () {
@@ -1245,44 +1255,47 @@ add_filter(
 );
 
 /**
- * Our own social accounts for "Follow us" on page Share sections (owner, 13 Nov 2026), the same as the footer's. Never
- * the old @animalwrites_india or /AnimalWritesIndia (not ours). Filter aw_follow_accounts.
+ * Our own social accounts for "Follow us" on page Share sections (owner, 13 Nov 2026), the same as the footer's, then
+ * Reddit and Discord once their addresses are set (Kits → Modules → Follow us accounts, site-options.php); an empty
+ * one shows no icon. Never the old @animalwrites_india or /AnimalWritesIndia (not ours). Filter aw_follow_accounts.
  *
  * @return array<int,array{0:string,1:string,2:string}> [label, url, icon]
  */
 function aw_follow_accounts() {
-	return (array) apply_filters(
-		'aw_follow_accounts',
-		array(
-			array( 'Instagram', 'https://www.instagram.com/animal_writes_/', 'instagram' ),
-			array( 'Threads', 'https://www.threads.com/@animal_writes_', 'threads' ),
-			array( 'X', 'https://x.com/animal_writes_', 'x-brand' ),
-			array( 'Facebook', 'https://www.facebook.com/profile.php?id=61596537146561', 'facebook' ),
-			array( 'LinkedIn', 'https://www.linkedin.com/company/animalwrites/', 'linkedin' ),
-		)
+	$rows = array(
+		array( 'Instagram', 'https://www.instagram.com/animal_writes_/', 'instagram' ),
+		array( 'Threads', 'https://www.threads.com/@animal_writes_', 'threads' ),
+		array( 'X', 'https://x.com/animal_writes_', 'x-brand' ),
+		array( 'Facebook', 'https://www.facebook.com/profile.php?id=61596537146561', 'facebook' ),
+		array( 'LinkedIn', 'https://www.linkedin.com/company/animalwrites/', 'linkedin' ),
 	);
+	foreach ( defined( 'AW_FOLLOW_EXTRA' ) ? AW_FOLLOW_EXTRA : array() as $opt => $row ) {
+		$url = (string) get_option( $opt, '' );
+		if ( '' !== $url ) {
+			$rows[] = array( $row[0], $url, $row[1] );
+		}
+	}
+	return (array) apply_filters( 'aw_follow_accounts', $rows );
 }
 
 /**
- * A page's Share section (campaign pages and Home): one share kit (owner, 13 Nov 2026), filled into the section's empty
- * holder (div.aw-camp-share-kit[data-aw-share]). The Share card holds one button, "Share this page" (the phone's share
- * sheet; where there is none, it copies the link), and on computers one row of icons under it, in this order: WhatsApp,
- * X, Facebook, LinkedIn, Email, Copy link. Follow us (our own accounts) on the card beside it. The page shares itself;
- * its picture is the link preview's.
+ * The page's share kit (owner, 13 Nov 2026): the Share card holds one button, "Share this page" (the phone's share
+ * sheet, Safari's included; where there is none, it copies the link), and on computers one row of icons under it, in
+ * this order: WhatsApp, X, Facebook, LinkedIn, Email, Copy link. Follow us (our own accounts) on the card beside it.
+ * The page shares itself; the link preview carries its share picture (aw_camp_share_meta).
  *
- * @param string $html Rendered HTML that may hold the empty holder.
  * @return string
  */
-function aw_page_share_fill( $html ) {
-	if ( ! function_exists( 'kits_share_html' ) || false === strpos( (string) $html, 'data-aw-share' ) ) {
-		return $html;
+function aw_page_share_kit() {
+	if ( ! function_exists( 'kits_share_html' ) ) {
+		return '';
 	}
 	$home  = is_front_page();
 	$id    = get_queried_object_id();
 	$short = $home ? '' : aw_camp_short_url( $id ); // the short link, when the campaign has one (campaign-short.php)
 	$url   = $short ? $short : ( $home ? home_url( '/' ) : (string) get_permalink( $id ) );
 	$title = $home ? get_bloginfo( 'name' ) : get_the_title( $id );
-	$bar   = kits_share_html(
+	return kits_share_html(
 		$url,
 		html_entity_decode( $title, ENT_QUOTES ),
 		array( 'whatsapp', 'x', 'facebook', 'linkedin', 'email' ),
@@ -1293,19 +1306,60 @@ function aw_page_share_fill( $html ) {
 			'order'  => true,
 		)
 	);
+}
+
+/**
+ * The Share section, one version on every campaign and Home (owner, 13 Nov 2026: "one version one size one content"):
+ * the same markup, sizes and order everywhere; only the words and the branding change (the campaign's colours and
+ * share picture, aw-share.css). A heading, one line, and the share kit. Every page places it with the block
+ * animal-writes/share: campaign pages right under the page's form (or its nearest equivalent), Home in the
+ * animal-writes/home-share pattern.
+ *
+ * @param string $heading The heading.
+ * @param string $line    The line under it ('' for none).
+ * @return string
+ */
+function aw_share_section( $heading, $line ) {
+	$home = is_front_page();
+	$slug = $home ? 'home' : sanitize_html_class( (string) get_post_field( 'post_name', get_queried_object_id() ) );
+	$out  = '<section id="share" class="alignfull aw-share-sec aw-share-sec--' . esc_attr( $slug ) . '" aria-labelledby="aw-share-t">';
+	$out .= '<h2 id="aw-share-t" class="wp-block-heading aw-share-title">' . esc_html( wptexturize( $heading ) ) . '</h2>'; // curly quotes and dashes, as in page text
+	if ( '' !== $line ) {
+		$out .= '<p class="aw-share-line">' . esc_html( wptexturize( $line ) ) . '</p>';
+	}
+	return $out . '<div class="aw-camp-share-kit aw-share-block" data-aw-share>' . aw_page_share_kit() . '</div></section>';
+}
+/**
+ * The block animal-writes/share (registered in aw_hub_blocks, hub-blocks.php): nothing without a heading.
+ *
+ * @param array $a Attributes: heading, line.
+ * @return string
+ */
+function aw_block_share( $a ) {
+	$heading = trim( (string) ( $a['heading'] ?? '' ) );
+	return '' === $heading ? '' : aw_share_section( $heading, trim( (string) ( $a['line'] ?? '' ) ) );
+}
+
+/**
+ * Older Share sections written into the page (before the animal-writes/share block): their empty holder (div.aw-camp-share-kit
+ * [data-aw-share]) gets the same kit.
+ *
+ * @param string $html Rendered HTML that may hold the empty holder.
+ * @return string
+ */
+function aw_page_share_fill( $html ) {
+	if ( false === strpos( (string) $html, 'data-aw-share' ) ) {
+		return $html;
+	}
 	return (string) preg_replace_callback(
 		'#(<div class="aw-camp-share-kit"[^>]*\sdata-aw-share[^>]*>)\s*(</div>)#',
-		function ( $m ) use ( $bar ) {
-			return $m[1] . $bar . $m[2];
-		},
+		fn( $m ) => $m[1] . aw_page_share_kit() . $m[2],
 		(string) $html,
 		1
 	);
 }
-// Campaign pages: the section is in the page's content.
+// Campaign pages whose Share section is still written into the content.
 add_filter( 'the_content', fn( $html ) => is_singular( 'aw_campaign' ) ? aw_page_share_fill( $html ) : $html, 99 );
-// Home: the section is a pattern in the Home template (animal-writes/home-share), outside the content.
-add_filter( 'render_block_core/html', fn( $html ) => is_front_page() ? aw_page_share_fill( $html ) : $html, 10 );
 
 /**
  * The Supreme Court stray dogs campaign page: the state tracker's cells marked (aw_sc_tracker_marks); the court orders and state
@@ -1402,3 +1456,36 @@ add_filter(
 	},
 	100
 );
+
+/**
+ * Share meta, every campaign (owner, 13 Nov 2026: one size for every share picture): when the campaign has its share
+ * picture (aw_campaign_share_image, 1080x1080), the link preview uses it, so og:image and twitter:image are that one
+ * square picture whatever Rank Math's Social tab holds. og:title and og:description stay Rank Math's, per campaign.
+ * Front end only (not the admin or the REST API), so the editor still shows and saves what is stored.
+ *
+ * @param mixed  $value    Null, or a value another filter set.
+ * @param int    $id       Post ID.
+ * @param string $key      Meta key.
+ * @param bool   $single   Single value.
+ * @return mixed
+ */
+function aw_camp_share_meta( $value, $id, $key, $single ) {
+	static $keys = array( 'rank_math_facebook_image_id', 'rank_math_facebook_image', 'rank_math_twitter_use_facebook' );
+	if ( null !== $value || is_admin() || wp_is_serving_rest_request() || ! in_array( $key, $keys, true ) || 'aw_campaign' !== get_post_type( $id ) ) {
+		return $value;
+	}
+	remove_filter( 'get_post_metadata', 'aw_camp_share_meta', 10 );
+	$pic = (int) get_post_meta( $id, 'aw_campaign_share_image', true );
+	$url = $pic ? (string) wp_get_attachment_url( $pic ) : '';
+	add_filter( 'get_post_metadata', 'aw_camp_share_meta', 10, 4 );
+	if ( '' === $url ) {
+		return $value;
+	}
+	$out = array(
+		'rank_math_facebook_image_id'    => (string) $pic,
+		'rank_math_facebook_image'       => $url,
+		'rank_math_twitter_use_facebook' => 'on',
+	)[ $key ];
+	return $single ? $out : array( $out );
+}
+add_filter( 'get_post_metadata', 'aw_camp_share_meta', 10, 4 );

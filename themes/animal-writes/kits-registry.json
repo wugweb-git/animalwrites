@@ -1739,25 +1739,49 @@
    "block": "animal-writes/take-part-cards"
   },
   {
+   "name": "Share section",
+   "type": "block",
+   "status": "live",
+   "classes": ["aw-share-sec", "aw-share-title", "aw-share-line", "aw-share-block", "aw-camp-share-kit", "kit-share", "kit-follow", "kit-share-main"],
+   "states": ["one version on every campaign and Home (owner, 13 Nov 2026: one version, one size, one content): only the words and the branding (colours, picture) change", "phones (to 767): heading, line, the Share card with one full-width 48px Share this page button (the icons hidden where the phone has a share sheet), Follow us under it", "from 768: the two cards side by side (21rem to 23rem), the Follow us label on the button's 48px row so both icon rows start on one line", "from 1200: the wash opens to the right so the picture shows past the text", "no share sheet (most computers): the button copies the link and reads Link copied for 2 s", "Follow us: Instagram, Threads, X, Facebook, LinkedIn, then Reddit and Discord only once their addresses are set (Kits, Modules)"],
+   "tokens": ["--kit-size-control", "--kit-size-target", "--kit-space-1", "--kit-space-2", "--kit-space-4", "--kit-space-5", "--kit-space-section", "--kit-space-gutter", "--kit-width-wide", "--kit-radius-card", "--kit-elevation-2", "--kit-color-ink", "--kit-color-on-ink", "--kit-color-surface-soft", "--neutral-2", "--kit-type-base", "--kit-type-h1"],
+   "a11y": {
+    "element": "section#share with an H2 (aria-labelledby), the share kit's two role=group cards",
+    "aria": "Share this page button; icon links named Share on X, Share by email...; Follow us on Instagram...; a polite status for Link copied",
+    "keyboard": "Tab to the button, the six share icons, then the Follow us links",
+    "focus": "ring in the campaign's dark shade on the cards (--kit-color-focus)",
+    "target": "48px button, 44px icons",
+    "motion": "none",
+    "sr": "white text on a dark wash of 0.72 or more over the picture (AA)"
+   },
+   "seo": {
+    "heading": "H2, the page's own words",
+    "link": "share links carry utm_source and utm_campaign (the campaign slug, or home); Follow us to our own accounts",
+    "alt": "none (the picture is a CSS background)",
+    "schema": "none"
+   },
+   "block": "animal-writes/share"
+  },
+  {
    "name": "Home share",
    "type": "pattern",
    "status": "live",
-   "classes": ["aw-home-share", "aw-camp-share-kit", "kit-share", "kit-follow", "kit-share-main"],
-   "states": ["phones (to 767): heading, line, the Share card with one full-width 48px Share this page button (the icons hidden where the phone has a share sheet), Follow us under it", "from 768: the two cards side by side (21rem to 23rem)", "from 1200: the wash opens to the right so the picture shows past the text", "no share sheet (most computers): the button copies the link and reads Link copied for 2 s"],
-   "tokens": ["--kit-size-control", "--kit-size-target", "--kit-space-4", "--kit-space-5", "--kit-radius-card", "--kit-elevation-2", "--kit-color-ink", "--kit-color-on-ink", "--kit-color-surface-soft", "--neutral-2", "--neutral-5", "--kit-type-base"],
+   "classes": ["aw-share-sec"],
+   "states": ["the Share section block (animal-writes/share) with Home's words, after the FAQ"],
+   "tokens": [],
    "a11y": {
-    "element": "section with an H2 (aria-labelledby), the share kit's two role=group cards",
-    "aria": "Share this page button; icon links named Share on X, Share by email...; Follow us on Instagram...; a polite status for Link copied",
-    "keyboard": "Tab to the button, the six share icons, then the five Follow us links",
-    "focus": "ring in ink on the cards (--kit-color-focus)",
-    "target": "48px button, 44px icons",
+    "element": "see Share section",
+    "aria": "see Share section",
+    "keyboard": "see Share section",
+    "focus": "see Share section",
+    "target": "see Share section",
     "motion": "none",
-    "sr": "white text on an ink wash of 0.72 or more over the picture (AA)"
+    "sr": "see Share section"
    },
    "seo": {
     "heading": "H2 Share Animal Writes",
-    "link": "share links carry utm_source and utm_campaign=home; Follow us to our own accounts",
-    "alt": "none (the picture is a CSS background)",
+    "link": "see Share section",
+    "alt": "none",
     "schema": "none"
    },
    "block": "animal-writes/home-share"

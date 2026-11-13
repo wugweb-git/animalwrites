@@ -62,6 +62,7 @@ function aw_hub_blocks() {
 		'listing-opportunities' => array( 'Listing: opportunities', 'aw_block_listing_opportunities', array() ),
 		'listing-campaigns'     => array( 'Listing: campaigns', 'aw_block_listing_campaigns', array() ),
 		'claim-cta'             => array( 'Claim your listing', 'aw_block_claim_cta', array() ), // the sidebar's claim box
+		'share'                 => array( 'Share section', 'aw_block_share', array( 'heading' => array( 'type' => 'string', 'default' => '' ), 'line' => array( 'type' => 'string', 'default' => '' ) ) ), // campaign-tools.php: one Share section on every campaign and Home
 	) );
 }
 

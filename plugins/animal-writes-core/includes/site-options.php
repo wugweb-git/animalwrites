@@ -9,6 +9,9 @@
  * - aw_district_helplines: official district numbers (district-helplines.php): district code => list of
  *   {name, number, line, source, url, checked}; edited as one line per number, fields split by "|".
  * - aw_issuer_short: issuers' short names on card chips (issuers.php): slug => short; edited as "slug = short".
+ * - aw_follow_reddit, aw_follow_discord: our Reddit and Discord addresses for "Follow us" on the page Share sections
+ *   (campaign-tools.php, aw_follow_accounts). Empty: no icon (never a dead link). Only an https address on the
+ *   network's own host is kept.
  *
  * @package animal-writes-core
  */
@@ -60,6 +63,18 @@ add_action(
 				'show_in_rest'      => false,
 			)
 		);
+		foreach ( array_keys( AW_FOLLOW_EXTRA ) as $aw_opt ) {
+			register_setting(
+				'aw_modules',
+				$aw_opt,
+				array(
+					'type'              => 'string',
+					'default'           => '',
+					'sanitize_callback' => fn( $v ) => aw_follow_url_clean( $v, AW_FOLLOW_EXTRA[ $aw_opt ][2] ),
+					'show_in_rest'      => false,
+				)
+			);
+		}
 		register_setting(
 			'aw_modules',
 			'aw_issuer_short',
@@ -77,6 +92,10 @@ add_action(
 		add_settings_section( 'aw_modules_lists', 'Directory and Library lists', 'aw_site_options_lists_intro', 'aw-modules' );
 		add_settings_field( 'aw_district_helplines', 'District helplines', 'aw_site_options_helplines', 'aw-modules', 'aw_modules_lists', array( 'label_for' => 'aw_district_helplines' ) );
 		add_settings_field( 'aw_issuer_short', 'Issuer short names', 'aw_site_options_short', 'aw-modules', 'aw_modules_lists', array( 'label_for' => 'aw_issuer_short' ) );
+		add_settings_section( 'aw_modules_follow', 'Follow us accounts', 'aw_site_options_follow_intro', 'aw-modules' );
+		foreach ( AW_FOLLOW_EXTRA as $aw_opt => $aw_row ) {
+			add_settings_field( $aw_opt, $aw_row[0], 'aw_site_options_follow_url', 'aw-modules', 'aw_modules_follow', array( 'label_for' => $aw_opt ) );
+		}
 	}
 );
 
@@ -245,5 +264,46 @@ function aw_site_options_short(): void {
 		'<textarea class="large-text code" rows="4" spellcheck="false" id="aw_issuer_short" name="aw_issuer_short" aria-describedby="aw_issuer_short-help">%1$s</textarea><p class="description" id="aw_issuer_short-help">%2$s</p>',
 		esc_textarea( implode( "\n", $lines ) ),
 		esc_html( 'One per line: issuer slug = short name for the card chip (e.g. awbi = AWBI). Empty: the built-in short names. Issuers: ' . $slugs . '.' )
+	);
+}
+
+/** Follow us accounts the owner sets here (owner, 13 Nov 2026): option => [label, icon, allowed hosts]. */
+const AW_FOLLOW_EXTRA = array(
+	'aw_follow_reddit'  => array( 'Reddit', 'reddit', array( 'reddit.com', 'www.reddit.com' ) ),
+	'aw_follow_discord' => array( 'Discord', 'discord', array( 'discord.gg', 'discord.com', 'www.discord.com' ) ),
+);
+
+/**
+ * An https address on one of the allowed hosts, else ''.
+ *
+ * @param mixed    $value Posted value.
+ * @param string[] $hosts Allowed hosts.
+ */
+function aw_follow_url_clean( $value, array $hosts ): string {
+	$url  = esc_url_raw( trim( (string) $value ), array( 'https' ) );
+	$host = strtolower( (string) wp_parse_url( $url, PHP_URL_HOST ) );
+	return ( '' !== $url && in_array( $host, $hosts, true ) ) ? $url : '';
+}
+
+/** Section text. */
+function aw_site_options_follow_intro(): void {
+	echo '<p>' . esc_html( 'Our accounts shown under "Follow us" on the campaign and Home Share sections, after Instagram, Threads, X, Facebook and LinkedIn. Leave empty to show no icon.' ) . '</p>';
+}
+
+/**
+ * One account address.
+ *
+ * @param array $args label_for: the option name.
+ */
+function aw_site_options_follow_url( array $args ): void {
+	$opt = (string) ( $args['label_for'] ?? '' );
+	if ( ! isset( AW_FOLLOW_EXTRA[ $opt ] ) ) {
+		return;
+	}
+	printf(
+		'<input type="url" class="regular-text" id="%1$s" name="%1$s" value="%2$s" placeholder="https://"> <p class="description">%3$s</p>',
+		esc_attr( $opt ),
+		esc_attr( (string) get_option( $opt, '' ) ),
+		esc_html( 'An https address on ' . implode( ' or ', AW_FOLLOW_EXTRA[ $opt ][2] ) . '. Anything else is not saved.' )
 	);
 }
