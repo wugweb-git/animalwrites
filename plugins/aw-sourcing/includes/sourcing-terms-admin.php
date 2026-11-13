@@ -50,7 +50,7 @@ function aw_sourcing_section_apply( array $c, $type, array $ticked, array $gone 
 			$c['sections'][ $type ] = array( 'categories' => array(), 'tags' => array() );
 		}
 		$c['sections'][ $type ][ $k ] = $new;
-		$what[]                       = kits_sourcing_diff( $type . ' ' . $k, $old, $new );
+		$what[]                       = aw_src_diff( $type . ' ' . $k, $old, $new );
 	}
 	return array( $c, array_values( array_filter( $what ) ) );
 }
@@ -70,7 +70,7 @@ function aw_sourcing_section_save( $type, array $ticked, array $gone ) {
 		return 'none';
 	}
 	update_option( 'aw_sources', $c, false );
-	kits_sourcing_log( 'sections', implode( ' · ', $what ), $was, $c['sections'][ $type ] ); // old → new (phase 3: Rules → Section rules)
+	aw_src_log( 'sections', implode( ' · ', $what ), $was, $c['sections'][ $type ] ); // old → new (phase 3: Rules → Section rules)
 	return 'saved';
 }
 

@@ -274,7 +274,7 @@ WP_CLI::add_command(
 		update_option( 'aw_sources', $c, false );
 		update_option( 'aw_sourcing_phase1_record', array( 'at' => current_time( 'mysql' ), 'backup' => $bk, 'flagged' => $plan['flagged'], 'added' => $plan['added'], 'hosted' => $hostplan['hosted'], 'mapped' => $plan['mapped'], 'relay_before' => $plan['relay_before'] ), false );
 		update_option( 'aw_sourcing_phase', 1, false );
-		kits_sourcing_log(
+		aw_src_log(
 			'sources',
 			sprintf( 'Phase 1 migrated (WP-CLI): %d sources got their publisher; relay on for %d sources, %d relay-only record(s) added; relay hosts %d → %d', count( $c['sources'] ), count( $plan['flagged'] ), count( $plan['added'] ), count( $plan['relay_before'] ), count( aw_relay_hosts() ) ),
 			$plan['relay_before'],
@@ -430,7 +430,7 @@ WP_CLI::add_command(
 		}
 		delete_option( 'aw_sourcing_phase1_record' );
 		delete_option( 'aw_backup_latest_' . $phase ); // a new migration starts from a new backup (the backups themselves stay)
-		kits_sourcing_log( 'sources', "Phase $phase rolled back (WP-CLI): $what; relay list back to " . implode( ', ', aw_relay_hosts() ), 'phase ' . $phase, 'phase ' . aw_sourcing_phase() );
+		aw_src_log( 'sources', "Phase $phase rolled back (WP-CLI): $what; relay list back to " . implode( ', ', aw_relay_hosts() ), 'phase ' . $phase, 'phase ' . aw_sourcing_phase() );
 		WP_CLI::success( "Rolled back: $what. Relay hosts: " . implode( ', ', aw_relay_hosts() ) . '. The backup stays (' . $bk . ').' );
 	},
 	array( 'shortdesc' => 'Roll a sourcing restructure phase back.' )

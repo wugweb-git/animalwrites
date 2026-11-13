@@ -115,7 +115,7 @@ function aw_rules_tag_save( $tag, $original, array $in ) {
 	}
 	$c['topic_tags'] = $out;
 	update_option( 'aw_sources', $c, false );
-	kits_sourcing_log( 'sections', null === $old ? "Tag rule $tag added" : ( $tag === $original ? "Tag rule $tag edited" : "Tag rule $original moved to the tag $tag and edited" . ( $moved ? ' (allowed tag changed with it in ' . implode( ', ', $moved ) . ')' : '' ) ), null === $old ? '' : array( $original => $old ), array( $tag => $rule ) );
+	aw_src_log( 'sections', null === $old ? "Tag rule $tag added" : ( $tag === $original ? "Tag rule $tag edited" : "Tag rule $original moved to the tag $tag and edited" . ( $moved ? ' (allowed tag changed with it in ' . implode( ', ', $moved ) . ')' : '' ) ), null === $old ? '' : array( $original => $old ), array( $tag => $rule ) );
 	return array( null === $old ? 'tag_added' : 'tag_saved', $tag );
 }
 
@@ -133,7 +133,7 @@ function aw_rules_tag_delete( $tag ) {
 	$old = $c['topic_tags'][ $tag ];
 	unset( $c['topic_tags'][ $tag ] );
 	update_option( 'aw_sources', $c, false );
-	kits_sourcing_log( 'sections', "Tag rule $tag deleted", array( $tag => $old ), '' );
+	aw_src_log( 'sections', "Tag rule $tag deleted", array( $tag => $old ), '' );
 	return array( 'tag_deleted', $tag );
 }
 
@@ -160,7 +160,7 @@ function aw_rules_priority_save( array $pos ) {
 	}
 	$opt['priority'] = $new;
 	update_option( AW_ENRICH_RULES_OPTION, $opt, false );
-	kits_sourcing_log( 'enrich', 'Trust order changed', $old, $new );
+	aw_src_log( 'enrich', 'Trust order changed', $old, $new );
 	return array( 'order_saved', implode( ', ', $new ) );
 }
 
@@ -192,7 +192,7 @@ function aw_rules_field_save( $field, array $in ) {
 	$opt                     = aw_rules_enrich_option();
 	$opt['fields'][ $field ] = $new;
 	update_option( AW_ENRICH_RULES_OPTION, $opt, false );
-	kits_sourcing_log( 'enrich', 'Field rule ' . $rows[ $field ]['label'] . ' (' . $field . ')' . ( $rows[ $field ]['set'] ? ' edited' : ' set' ), $old, $new );
+	aw_src_log( 'enrich', 'Field rule ' . $rows[ $field ]['label'] . ' (' . $field . ')' . ( $rows[ $field ]['set'] ? ' edited' : ' set' ), $old, $new );
 	return array( 'field_saved', $rows[ $field ]['label'] );
 }
 

@@ -670,7 +670,7 @@ function aw_ai_keys_add( string $pasted, string $label, array $workers, ?array $
 	$rows = array_values( array_filter( $rows, fn( $r ) => in_array( $r['key'], $now, true ) || ! in_array( $r['key'], $was, true ) ) );
 	update_option( 'aw_ai_models', $rows, false );
 	if ( $added ) {
-		kits_sourcing_log( 'ai', 'added key ' . implode( ', ', $added ) . ' for ' . aw_ai_workers_words( $workers ) );
+		aw_src_log( 'ai', 'added key ' . implode( ', ', $added ) . ' for ' . aw_ai_workers_words( $workers ) );
 	}
 	$hook = $recheck ? 'aw_ai_check_all_now' : 'aw_ai_check_new'; // every key, or the new ones
 	if ( ( 'aw_ai_check_all_now' === $hook || in_array( 'unchecked', wp_list_pluck( $rows, 'status' ), true ) ) && ! wp_next_scheduled( $hook ) ) {
@@ -718,7 +718,7 @@ function aw_ai_key_edit_save( string $id, string $label, array $workers ): ?int 
 		$rows[ $i ]['label']   = $label;
 		$rows[ $i ]['workers'] = $workers;
 		update_option( 'aw_ai_models', $rows, false );
-		kits_sourcing_log( 'ai', 'key ' . aw_ai_key_short( $r ) . ': ' . implode( '; ', $what ) );
+		aw_src_log( 'ai', 'key ' . aw_ai_key_short( $r ) . ': ' . implode( '; ', $what ) );
 		return 1;
 	}
 	return null;
@@ -793,8 +793,8 @@ function aw_ai_keys_list_op( string $op, array $ids, string $worker = '' ): arra
 	if ( $rows !== $orig ) {
 		update_option( 'aw_ai_models', $rows, false );
 	}
-	if ( $gone && function_exists( 'kits_sourcing_log' ) ) {
-		kits_sourcing_log( 'AI models', 'removed key ' . implode( ', ', $gone ) );
+	if ( $gone && function_exists( 'aw_src_log' ) ) {
+		aw_src_log( 'AI models', 'removed key ' . implode( ', ', $gone ) );
 	}
 	if ( $did ) {
 		$words = array(
@@ -803,7 +803,7 @@ function aw_ai_keys_list_op( string $op, array $ids, string $worker = '' ): arra
 			'up'     => 'moved up',
 			'down'   => 'moved down',
 		);
-		kits_sourcing_log( 'ai', 'key ' . implode( ', ', $did ) . ': ' . ( $words[ $op ] ?? $op ) );
+		aw_src_log( 'ai', 'key ' . implode( ', ', $did ) . ': ' . ( $words[ $op ] ?? $op ) );
 	}
 	if ( 'recheck' === $op && $n && ! wp_next_scheduled( 'aw_ai_check_new' ) ) {
 		wp_schedule_single_event( time(), 'aw_ai_check_new' );

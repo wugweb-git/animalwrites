@@ -87,7 +87,7 @@ function aw_seo_breadcrumb_trail() {
 		$trail = array_merge( array( $dir ), $place( $city ) );
 		$tslug = (string) get_query_var( 'aw_type_slug' );
 		if ( $tslug && $city && $city->parent ) { // district × type; a state's ?type= list is the state page
-			$trail[] = array( aw_listing_type_name( $tslug ), aw_directory_url( $city->slug, $tslug ) );
+			$trail[] = array( aw_seo_listing_type_name( $tslug ), aw_directory_url( $city->slug, $tslug ) );
 		}
 	} elseif ( aw_seo_is_category_page() ) {
 		$all   = aw_seo_categories_url();

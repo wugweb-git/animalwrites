@@ -107,7 +107,7 @@ function aw_sourcing_press_change( array $add, array $remove ) {
 	}
 	$c['press']['sites'] = $sites;
 	update_option( 'aw_sources', $c, false ); // no _aw_tab: aw_sources_sanitize() lets it through as it is
-	kits_sourcing_log( 'press', kits_sourcing_diff( 'Sites', $old, $sites ) );
+	aw_src_log( 'press', aw_src_diff( 'Sites', $old, $sites ) );
 	return true;
 }
 
@@ -375,7 +375,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 					}
 				}
 				update_option( AW_PUB_OPTION, $pubs, false );
-				kits_sourcing_log( 'publishers', 'Domain Rating imported for ' . count( $set ) . ' publishers (WP-CLI)' );
+				aw_src_log( 'publishers', 'Domain Rating imported for ' . count( $set ) . ' publishers (WP-CLI)' );
 			}
 			foreach ( $unknown as $h ) {
 				WP_CLI::log( 'skip ' . $h . ': not a publisher' );
@@ -552,20 +552,20 @@ function aw_sourcing_source_save( array $in ) {
 		$rec = null === $before ? array( 'name' => '', 'count' => 0, 'first' => current_time( 'Y-m-d' ), 'last' => '', 'status' => $status ) : array_merge( $before, array( 'status' => $status ) );
 		if ( 'relay' === ( $rec['kind'] ?? '' ) ) { // a relay-only site becomes a publisher
 			unset( $rec['kind'] );
-			kits_sourcing_log( 'publishers', 'added ' . $host . ' as ' . $status . ' (was relay only)', 'relay only', $status );
+			aw_src_log( 'publishers', 'added ' . $host . ' as ' . $status . ' (was relay only)', 'relay only', $status );
 		} elseif ( null === $before ) {
-			kits_sourcing_log( 'publishers', 'added ' . $host . ' as ' . $status, '', $status );
+			aw_src_log( 'publishers', 'added ' . $host . ' as ' . $status, '', $status );
 		} elseif ( (string) ( $before['status'] ?? 'neutral' ) !== $status ) {
-			kits_sourcing_log( 'publishers', $host . ' → ' . $status, (string) ( $before['status'] ?? 'neutral' ), $status );
+			aw_src_log( 'publishers', $host . ' → ' . $status, (string) ( $before['status'] ?? 'neutral' ), $status );
 		}
 		if ( (string) $rec['name'] !== $name ) {
 			if ( null !== $before ) {
-				kits_sourcing_log( 'publishers', $host . ' name → ' . ( '' === $name ? '(none)' : $name ), (string) $rec['name'], $name );
+				aw_src_log( 'publishers', $host . ' name → ' . ( '' === $name ? '(none)' : $name ), (string) $rec['name'], $name );
 			}
 			$rec['name'] = $name;
 		}
 		if ( (string) ( $rec['short'] ?? '' ) !== $short && ( '' !== $short || isset( $rec['short'] ) ) ) {
-			kits_sourcing_log( 'publishers', $host . ' short name → ' . ( '' === $short ? '(none)' : $short ), (string) ( $rec['short'] ?? '' ), $short );
+			aw_src_log( 'publishers', $host . ' short name → ' . ( '' === $short ? '(none)' : $short ), (string) ( $rec['short'] ?? '' ), $short );
 			$rec['short'] = $short;
 		}
 		if ( $shown && $relay !== ! empty( $rec['relay'] ) ) {
@@ -574,7 +574,7 @@ function aw_sourcing_source_save( array $in ) {
 			} else {
 				unset( $rec['relay'] ); // no relay key rather than false: an unchanged record keeps its shape
 			}
-			kits_sourcing_log( 'relay', $host . ': fetch through this site', $relay ? 'off' : 'on', $relay ? 'on' : 'off' );
+			aw_src_log( 'relay', $host . ': fetch through this site', $relay ? 'off' : 'on', $relay ? 'on' : 'off' );
 		}
 		if ( $rec !== $before ) {
 			$pubs[ $host ] = $rec;
@@ -595,7 +595,7 @@ function aw_sourcing_source_save( array $in ) {
 			$changed = true;
 		}
 		if ( $existed && isset( $pubs[ $host ] ) && (string) ( $pubs[ $host ]['name'] ?? '' ) !== $name ) { // its name, as the form showed it
-			kits_sourcing_log( 'relay', $host . ' name → ' . ( '' === $name ? '(none)' : $name ), (string) ( $pubs[ $host ]['name'] ?? '' ), $name );
+			aw_src_log( 'relay', $host . ' name → ' . ( '' === $name ? '(none)' : $name ), (string) ( $pubs[ $host ]['name'] ?? '' ), $name );
 			$pubs[ $host ]['name'] = $name;
 			update_option( AW_PUB_OPTION, $pubs, false );
 			$changed = true;
@@ -625,6 +625,6 @@ function aw_sourcing_source_delete( array $pubs, $host ) {
 		return $pubs; // only a source with nothing attached is deleted
 	}
 	unset( $pubs[ $host ] );
-	kits_sourcing_log( 'publishers', 'deleted ' . $host, $rec, '' );
+	aw_src_log( 'publishers', 'deleted ' . $host, $rec, '' );
 	return $pubs;
 }

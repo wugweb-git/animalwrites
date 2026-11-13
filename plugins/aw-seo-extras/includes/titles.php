@@ -522,7 +522,7 @@ function aw_seo_list_description() {
 		if ( ! $place ) {
 			$desc = ( aw_current_type_name() || ! empty( $_GET['q'] ) ) ? $desc : sprintf( AW_HUB_DESCRIPTIONS['aw_listing'], $n ); // phpcs:ignore WordPress.Security.NonceVerification
 		} elseif ( $place->parent && '' !== $slug && '0' !== $n ) {
-			$what = '1' === $n ? 'One ' . preg_replace( '/\bgaushala\b/u', 'Gaushala', mb_strtolower( trim( preg_replace( '/\s*\(.*?\)\s*/', ' ', aw_listing_type_name( $slug ) ) ) ) ) : $n . ' ' . aw_seo_type_plural( $slug );
+			$what = '1' === $n ? 'One ' . preg_replace( '/\bgaushala\b/u', 'Gaushala', mb_strtolower( trim( preg_replace( '/\s*\(.*?\)\s*/', ' ', aw_seo_listing_type_name( $slug ) ) ) ) ) : $n . ' ' . aw_seo_type_plural( $slug );
 			$desc = sprintf( '1' === $n ? '%1$s in %2$s, %3$s: address, phone number and services.' : '%1$s in %2$s, %3$s: addresses, phone numbers and services.', $what, $place->name, $state->name );
 			$more = ' From the Animal Writes Directory of animal welfare organisations in India.';
 			$desc = mb_strlen( $desc . $more ) <= AW_SEO_DESC_MAX ? $desc . $more : ( mb_strlen( $desc . ' From the Animal Writes Directory.' ) <= AW_SEO_DESC_MAX ? $desc . ' From the Animal Writes Directory.' : $desc );

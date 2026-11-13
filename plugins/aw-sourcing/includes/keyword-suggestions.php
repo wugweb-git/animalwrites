@@ -92,7 +92,7 @@ function aw_sourcing_suggest_apply( $op, array $qs ) {
 				$r   = aw_sourcing_kw_add( $q, array( 'roles' => $bit, 'sections' => AW_KW_ROLE_EXCLUDE === $bit ? array() : array( 'aw_news' ) ) );
 				if ( ! is_wp_error( $r ) && ! ( $was & $bit ) ) {
 					++$n;
-					kits_sourcing_log( 'keywords', $q . ': ' . ucfirst( $op ) . ' (suggested by Search Insights)', '', ucfirst( $op ) );
+					aw_src_log( 'keywords', $q . ': ' . ucfirst( $op ) . ' (suggested by Search Insights)', '', ucfirst( $op ) );
 				}
 				continue;
 			}
@@ -101,7 +101,7 @@ function aw_sourcing_suggest_apply( $op, array $qs ) {
 			$on = 'dismiss' === $op ? 1 : 0;
 			if ( $id && true === aw_kw_update( $id, array( 'dismissed' => $on ) ) ) {
 				++$n;
-				kits_sourcing_log( 'keywords', $q . ': suggestion ' . ( $on ? 'dismissed' : 'shown again' ), (bool) ! $on, (bool) $on );
+				aw_src_log( 'keywords', $q . ': suggestion ' . ( $on ? 'dismissed' : 'shown again' ), (bool) ! $on, (bool) $on );
 			}
 		}
 		return $n;
@@ -114,7 +114,7 @@ function aw_sourcing_suggest_apply( $op, array $qs ) {
 		if ( $added ) {
 			$rel[ $list ] = array_merge( (array) ( $rel[ $list ] ?? array() ), $added );
 			update_option( AW_REL_OPTION, $rel, false );
-			kits_sourcing_log( 'keywords', ( 'include' === $op ? 'Include' : 'Exclude' ) . ': added ' . implode( ', ', $added ) . ' (suggested by Search Insights)' );
+			aw_src_log( 'keywords', ( 'include' === $op ? 'Include' : 'Exclude' ) . ': added ' . implode( ', ', $added ) . ' (suggested by Search Insights)' );
 			delete_transient( 'aw_sourcing_kw_stats_30' );
 		}
 		return count( $added );

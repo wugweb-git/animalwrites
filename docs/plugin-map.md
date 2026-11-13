@@ -6,6 +6,16 @@ Plugin names and update source (owner, 10 Nov 2026): `aw-seo-extras` is RankWeb,
 
 Edit screens (every box, its fields, stored keys and where they are used): see `edit-screens-map.md`.
 
+## Plugin Check (13 Nov 2026)
+
+The Deploy check runs Plugin Check (`wp plugin check`) on each of our seven plugins that changed in a push; an error fails it, warnings are printed (`tools/ci/smoke.sh`). Three codes are accepted and passed to `--ignore-codes`:
+
+- `plugin_updater_detected`: the `Update URI` header stays on our plugins (owner, 12 Nov 2026).
+- `PluginCheck.CodeAnalysis.Offloading.OffloadedContent`: the Leaflet and MapLibre map libraries load from a CDN (`map-picker.php`, `directory-map.php`); bundling them in the plugin waits for the owner.
+- `WordPress.WP.I18n.TextDomainMismatch`: DirectoryWeb's strings inside Animal Writes Core use the `directoryweb` domain, for the day DirectoryWeb is its own plugin.
+
+Still open as warnings: the `aw_` prefix is 3 characters (Plugin Check asks for 4 or more; about 2,850 warnings), and database calls with the plugin's own table names (`UnescapedDBParameter`).
+
 ## Three areas, three owners (owner, 31 Oct 2026)
 
 Search Insights, Sourcing and Classification are separate areas. A change belongs to the area that owns the screen and the logic, not to the area whose data it reads.

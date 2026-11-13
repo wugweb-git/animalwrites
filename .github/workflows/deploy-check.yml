@@ -128,12 +128,14 @@ jobs:
           HEAD: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
           KITS_SNAPSHOT: ${{ github.event_name == 'pull_request' && '/tmp/kits-screens' || '' }}
         run: |
-          # Plugin Check (report) only when plugins/planweb changed, or when the base cannot be read (new branch).
-          if git cat-file -e "$BASE" 2>/dev/null && git diff --quiet "$BASE" "$HEAD" -- plugins/planweb; then
-            export PLUGIN_CHECK=0
-          else
-            export PLUGIN_CHECK=1
-          fi
+          # Plugin Check on each of our plugins that changed (all of them when the base cannot be read: a new branch).
+          PLUGIN_CHECK=""
+          for p in animal-writes-core kits-core aw-seo-extras mailweb aw-sourcing insightweb planweb; do
+            if ! git cat-file -e "$BASE" 2>/dev/null || ! git diff --quiet "$BASE" "$HEAD" -- "plugins/$p"; then
+              PLUGIN_CHECK="$PLUGIN_CHECK $p"
+            fi
+          done
+          export PLUGIN_CHECK
           bash tools/ci/smoke.sh
       - name: Kits screens as offline pages (pull requests; for the PR's screenshots)
         if: always() && github.event_name == 'pull_request'

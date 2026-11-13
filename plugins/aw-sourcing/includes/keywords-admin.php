@@ -220,7 +220,7 @@ function aw_sourcing_kw_apply( $id, array $set ) {
 	$name = $old['label'];
 	$log  = array();
 	$fail = function ( $err ) use ( &$log ) { // what was written before the refusal is still logged
-		kits_sourcing_log_many( $log );
+		aw_src_log_many( $log );
 		return $err;
 	};
 	if ( isset( $set['lang'] ) && $set['lang'] !== $old['lang'] && 'en' === $set['lang'] ) { // to English first, so roles can follow
@@ -279,7 +279,7 @@ function aw_sourcing_kw_apply( $id, array $set ) {
 			$log[] = array( 'keywords', "$name: $key", $old[ $key ], array_values( (array) $set[ $key ] ) );
 		}
 	}
-	kits_sourcing_log_many( $log );
+	aw_src_log_many( $log );
 	return (bool) $log;
 }
 
@@ -304,7 +304,7 @@ function aw_sourcing_kw_add( $label, array $set ) {
 	}
 	$cur = aw_kw_get( $id );
 	if ( ! $was ) {
-		kits_sourcing_log( 'keywords', 'added keyword ' . $label, '', $label );
+		aw_src_log( 'keywords', 'added keyword ' . $label, '', $label );
 	}
 	$set['roles'] = ( (int) ( $set['roles'] ?? 0 ) | ( $cur['roles'] & AW_KW_WORKER_ROLES ) );
 	foreach ( array( 'categories', 'sections' ) as $k ) {
@@ -552,7 +552,7 @@ function aw_sourcing_kw_save_press( $c, $in ) {
 	if ( ! $log ) {
 		return $c;
 	}
-	kits_sourcing_log_many( $log );
+	aw_src_log_many( $log );
 	$c['press'] = $new;
 	return $c;
 }

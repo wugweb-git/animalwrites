@@ -270,7 +270,7 @@ function aw_enrich_sources_sanitize( $value ) {
 		}
 	}
 	$key = trim( sanitize_text_field( wp_unslash( $_POST['aw_enrich_google_key'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification -- options.php checked the group's nonce
-	kits_sourcing_log( 'enrich', $changed ? implode( ', ', $changed ) : 'Directory enrichment saved' . ( '' !== $key ? ' (new Google key)' : '' ) );
+	aw_src_log( 'enrich', $changed ? implode( ', ', $changed ) : 'Directory enrichment saved' . ( '' !== $key ? ' (new Google key)' : '' ) );
 	aw_sourcing_settings_saved();
 	return $changed ? $new : get_option( 'aw_enrich_sources' ); // no change: stored as it is
 }

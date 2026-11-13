@@ -185,7 +185,7 @@ function aw_seo_type_words( $key, $n = 2, $short = false ) {
 	if ( isset( $words[ $key ] ) ) {
 		return 1 === (int) $n ? $words[ $key ][0] : $words[ $key ][ $short ? 2 : 1 ];
 	}
-	$name = trim( preg_replace( '/\s*\(.*?\)\s*/', ' ', aw_listing_type_name( $key ) ) );
+	$name = trim( preg_replace( '/\s*\(.*?\)\s*/', ' ', aw_seo_listing_type_name( $key ) ) );
 	$name = implode( ' ', array_map( fn( $w ) => preg_match( '/^[A-Z]{2,}$/', $w ) || 0 === stripos( $w, 'gaushala' ) ? ucfirst( $w ) : mb_strtolower( $w ), explode( ' ', $name ) ) );
 	return 1 === (int) $n ? $name : aw_seo_type_plural( $key );
 }

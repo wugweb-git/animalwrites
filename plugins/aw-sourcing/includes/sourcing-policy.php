@@ -49,7 +49,7 @@ function aw_publisher_status_html( $st ) {
  * @param mixed  $old  Value before (null: not given; for an add, '' or an empty list).
  * @param mixed  $new  Value after (null: not given; for a delete, '' or an empty list).
  */
-function kits_sourcing_log( $tab, $what, $old = null, $new = null ) {
+function aw_src_log( $tab, $what, $old = null, $new = null ) {
 	if ( '' === trim( $what ) ) {
 		return;
 	}
@@ -63,7 +63,7 @@ function kits_sourcing_log( $tab, $what, $old = null, $new = null ) {
  *
  * @param array[] $entries Entries, in the order they happened.
  */
-function kits_sourcing_log_many( array $entries ) {
+function aw_src_log_many( array $entries ) {
 	$entries = array_filter( $entries, fn( $e ) => '' !== trim( (string) ( $e[1] ?? '' ) ) );
 	if ( ! $entries ) {
 		return;
@@ -77,7 +77,7 @@ function kits_sourcing_log_many( array $entries ) {
 }
 
 /** What changed between two lists, in words ("added: a, b; removed: c"). */
-function kits_sourcing_diff( $label, $old, $new ) {
+function aw_src_diff( $label, $old, $new ) {
 	$add = array_diff( (array) $new, (array) $old );
 	$del = array_diff( (array) $old, (array) $new );
 	$out = array();
@@ -88,6 +88,45 @@ function kits_sourcing_diff( $label, $old, $new ) {
 		$out[] = 'removed ' . implode( ', ', $del );
 	}
 	return $out ? $label . ': ' . implode( '; ', $out ) : '';
+}
+
+/**
+ * The older names of the three change log functions, kept for existing callers (Kits Core and older SourceWeb code).
+ */
+if ( ! function_exists( 'kits_sourcing_log' ) ) {
+	/**
+	 * Older name of aw_src_log().
+	 *
+	 * @param string $tab  Tab.
+	 * @param string $what What changed, in words.
+	 * @param mixed  $old  Value before.
+	 * @param mixed  $new  Value after.
+	 */
+	function kits_sourcing_log( $tab, $what, $old = null, $new = null ) {
+		aw_src_log( $tab, $what, $old, $new );
+	}
+}
+if ( ! function_exists( 'kits_sourcing_log_many' ) ) {
+	/**
+	 * Older name of aw_src_log_many().
+	 *
+	 * @param array[] $entries Entries.
+	 */
+	function kits_sourcing_log_many( array $entries ) {
+		aw_src_log_many( $entries );
+	}
+}
+if ( ! function_exists( 'kits_sourcing_diff' ) ) {
+	/**
+	 * Older name of aw_src_diff().
+	 *
+	 * @param string $label The list's name.
+	 * @param array  $old   Before.
+	 * @param array  $new   After.
+	 */
+	function kits_sourcing_diff( $label, $old, $new ) {
+		return aw_src_diff( $label, $old, $new );
+	}
 }
 
 /** Relevance settings. */
@@ -327,7 +366,7 @@ function aw_sourcing_sources_apply( array $pubs, $status, array $hosts ) {
 			}
 		}
 		if ( $was ) {
-			kits_sourcing_log( 'publishers', implode( ', ', array_keys( $was ) ) . ' → ' . $status, $was, $status );
+			aw_src_log( 'publishers', implode( ', ', array_keys( $was ) ) . ' → ' . $status, $was, $status );
 		}
 	}
 	return array( $pubs, $press );
@@ -344,7 +383,7 @@ function aw_sourcing_shorts_apply( array $pubs, array $shorts ) {
 	foreach ( $shorts as $h => $v ) {
 		$v = mb_substr( (string) $v, 0, 24 );
 		if ( isset( $pubs[ $h ] ) && empty( $pubs[ $h ]['kind'] ) && (string) ( $pubs[ $h ]['short'] ?? '' ) !== $v ) {
-			kits_sourcing_log( 'publishers', $h . ' short name → ' . ( '' === $v ? '(none)' : $v ), (string) ( $pubs[ $h ]['short'] ?? '' ), $v );
+			aw_src_log( 'publishers', $h . ' short name → ' . ( '' === $v ? '(none)' : $v ), (string) ( $pubs[ $h ]['short'] ?? '' ), $v );
 			$pubs[ $h ]['short'] = $v;
 		}
 	}
@@ -387,7 +426,7 @@ add_action(
 			unset( $pubs[ $host ]['kind'] );
 		}
 		update_option( AW_PUB_OPTION, $pubs, false );
-		kits_sourcing_log( 'publishers', $host . ' → block (from the item list)', null === $prev ? '' : (string) ( $prev['status'] ?? 'neutral' ), 'block' );
+		aw_src_log( 'publishers', $host . ' → block (from the item list)', null === $prev ? '' : (string) ( $prev['status'] ?? 'neutral' ), 'block' );
 		wp_safe_redirect( add_query_arg( 'aw_blocked', rawurlencode( $host ), wp_get_referer() ? wp_get_referer() : admin_url() ) );
 		exit;
 	}
@@ -554,6 +593,6 @@ function aw_relevance_switches_sanitize( $value ) {
 	if ( ! $what ) {
 		return get_option( AW_REL_OPTION ); // Save with no change writes nothing
 	}
-	kits_sourcing_log( 'keywords', implode( ' · ', $what ) );
+	aw_src_log( 'keywords', implode( ' · ', $what ) );
 	return $rel;
 }

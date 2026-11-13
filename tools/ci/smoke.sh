@@ -253,15 +253,24 @@ for i in aw-seo-plus aw-sourcing-menu mailweb planweb; do case "$got" in *" topl
 for i in kits aw-search-insights; do case "$got" in *" toplevel_page_$i "*) echo "FAIL editor: sees $i"; FAIL=1 ;; *) echo "ok   editor: no $i (as before)" ;; esac; done
 # A product's tabs reach its other screens; the tab shown is marked.
 wp plugin deactivate planweb --quiet
-# Plugin Check on PlanWeb (report only, printed, never fails the run): only when plugins/planweb changed (PLUGIN_CHECK=1
-# from the workflow), so wordpress.org is not asked on every Deploy check.
-if [ "${PLUGIN_CHECK:-0}" != "1" ]; then
-  echo "-- Plugin Check skipped (plugins/planweb unchanged)"
+# Plugin Check on each of our plugins that changed (PLUGIN_CHECK from the workflow: their folder names), so
+# wordpress.org is not asked on every Deploy check. Warnings are printed; an error fails the run. Three codes are
+# accepted for now and listed in docs/plugin-map.md: the Update URI header (kept on our plugins), the map libraries
+# from a CDN, and DirectoryWeb's own text domain inside Animal Writes Core.
+PC_ACCEPTED="plugin_updater_detected,PluginCheck.CodeAnalysis.Offloading.OffloadedContent,WordPress.WP.I18n.TextDomainMismatch"
+if [ -z "${PLUGIN_CHECK// /}" ]; then
+  echo "-- Plugin Check skipped (none of our plugins changed)"
 elif wp plugin install plugin-check --activate --quiet 2>/dev/null; then
-  echo "-- Plugin Check: planweb (report)"; wp plugin check planweb --exclude-directories=tests --format=table 2>&1 | tail -40 || true
+  for p in $PLUGIN_CHECK; do
+    wp plugin activate "$p" --quiet 2>/dev/null || true
+    echo "-- Plugin Check: $p"
+    wp plugin check "$p" --exclude-directories=tests,node_modules,src --ignore-codes="$PC_ACCEPTED" --format=csv > "/tmp/pc-$p.csv" 2>&1 || true
+    tail -60 "/tmp/pc-$p.csv"
+    if grep -q ',ERROR,' "/tmp/pc-$p.csv"; then echo "FAIL Plugin Check errors in $p"; FAIL=1; fi
+  done
   wp plugin deactivate plugin-check --quiet || true
 else
-  echo "-- Plugin Check could not be installed (report skipped)"
+  echo "-- Plugin Check could not be installed (skipped)"
 fi
 # RankWeb's new screens (trial, &ui=next; includes/rankweb-ui.php) and the rankweb/v1 routes (includes/rankweb-rest.php):
 # both screens 200 for an administrator, the current screens still the default, every route 401 signed out, 401 with a
@@ -516,7 +525,7 @@ wp plugin deactivate insightweb --quiet
 wp eval '$s = (array) get_option( "aw_seo_settings", array() ); $s["search-insights"]["on"] = 0; update_option( "aw_seo_settings", $s );'
 iw bridge
 wp eval '$s = (array) get_option( "aw_seo_settings", array() ); unset( $s["search-insights"]["on"] ); update_option( "aw_seo_settings", $s );'
-if [ -f /tmp/wp-debug.log ] && tail -n +"$((LOG_START + 1))" /tmp/wp-debug.log | grep -E 'PHP (Fatal|Parse) error|PHP Warning'; then FAIL=1; fi
+if [ -f /tmp/wp-debug.log ] && tail -n +"$((LOG_START + 1))" /tmp/wp-debug.log | grep -E 'PHP (Fatal|Parse) error|PHP Warning|PHP Deprecated:.*/(plugins|themes)/(animal-writes|kits|aw-|mailweb|insightweb|planweb)'; then FAIL=1; fi
 wp theme activate animal-writes --quiet
 wp cache flush --quiet
 # Menu pages for the PR's before and after screenshots (pull requests only; the Deploy check keeps them with the Kits

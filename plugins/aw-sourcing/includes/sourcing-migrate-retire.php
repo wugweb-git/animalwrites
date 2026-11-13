@@ -190,7 +190,7 @@ add_action(
 			$entries[] = array( 'keywords', sprintf( 'Phase 4 migrated (WP-CLI): %s archived and no longer used (%d; the keyword table holds them; the option is unchanged)', $where, $n ), 'in use', 'archived' );
 		}
 		$entries[] = array( 'keywords', 'Phase 4 migrated (WP-CLI): the sourcing policy sends no v1 keys; the old Press queries, Categories and Sections tabs are hidden', 'phase 3', 'phase 4' );
-		kits_sourcing_log_many( $entries );
+		aw_src_log_many( $entries );
 		WP_CLI::success( 'Phase 4 migrated. Next: wp aw-sourcing verify --phase=4' );
 	},
 	10,
@@ -308,7 +308,7 @@ add_action(
 		delete_option( 'aw_sourcing_phase4_record' );
 		delete_option( 'aw_backup_latest_4' ); // a new migration starts from a new backup (the backups themselves stay)
 		delete_option( 'aw_sourcing_migrating' );
-		kits_sourcing_log( 'keywords', "Phase 4 rolled back (WP-CLI): $what. The archive aw_sourcing_v1_archive stays.", 'phase 4', 'phase ' . aw_sourcing_phase() );
+		aw_src_log( 'keywords', "Phase 4 rolled back (WP-CLI): $what. The archive aw_sourcing_v1_archive stays.", 'phase 4', 'phase ' . aw_sourcing_phase() );
 		WP_CLI::success( "Rolled back: $what. The backup ($bk) and the archive stay." );
 	}
 );
