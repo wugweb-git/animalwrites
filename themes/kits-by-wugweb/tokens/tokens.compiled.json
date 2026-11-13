@@ -615,6 +615,26 @@
       "md": "0",
       "lg": "0"
     },
+    "card-stacked-min": {
+      "sm": "340px",
+      "md": "340px",
+      "lg": "340px"
+    },
+    "card-stacked-max": {
+      "sm": "600px",
+      "md": "600px",
+      "lg": "600px"
+    },
+    "card-stacked-ratio": {
+      "sm": "2",
+      "md": "2",
+      "lg": "2"
+    },
+    "card-stacked-media-ratio": {
+      "sm": "0.6",
+      "md": "0.6",
+      "lg": "0.6"
+    },
     "card-block-media-max": {
       "sm": "none",
       "md": "none",
