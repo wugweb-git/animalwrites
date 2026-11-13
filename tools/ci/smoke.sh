@@ -266,6 +266,8 @@ elif wp plugin install plugin-check --activate --quiet 2>/dev/null; then
     echo "-- Plugin Check: $p"
     wp plugin check "$p" --exclude-directories=tests,node_modules,src --ignore-codes="$PC_ACCEPTED" --format=csv > "/tmp/pc-$p.csv" 2>&1 || true
     tail -60 "/tmp/pc-$p.csv"
+    # The errors themselves, each under its file (the last 60 lines above can miss them).
+    awk '/^FILE: /{f=$0} /,ERROR,/{print "ERROR ROW " f " | " $0}' "/tmp/pc-$p.csv"
     if grep -q ',ERROR,' "/tmp/pc-$p.csv"; then echo "FAIL Plugin Check errors in $p"; FAIL=1; fi
   done
   wp plugin deactivate plugin-check --quiet || true
