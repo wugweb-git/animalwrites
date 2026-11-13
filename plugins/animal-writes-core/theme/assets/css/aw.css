@@ -309,7 +309,6 @@
 .aw-social-who { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: var(--kit-space-2); flex: 1 1 auto; min-width: 0; margin: 0; line-height: var(--kit-leading-heading, 1.25); }
 .aw-social-name { display: inline-flex; align-items: center; gap: var(--kit-space-1); max-width: 100%; min-width: 0; font-size: var(--kit-type-base); font-weight: var(--kit-weight-bold); color: var(--kit-color-text); }
 a.aw-social-name { min-height: var(--kit-size-target); text-decoration: none; }
-a.aw-social-name:hover .aw-social-name-text { text-decoration: underline; }
 .aw-social-name-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .aw-social-name > .kit-ico { flex: none; --kit-ico-size: var(--kit-icon-sm); }
 .aw-social-pic-link { display: block; height: 100%; }
