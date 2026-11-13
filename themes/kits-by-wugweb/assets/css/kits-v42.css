@@ -70,5 +70,5 @@
   --weight-label: 500;
   --fluid-caption: clamp(0.625rem, 0.5682rem + 0.2424vw, 0.75rem);
   --weight-caption: 400;
-  --font-family: "Inter Tight", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-family: "Inter", "Inter Fallback", system-ui, -apple-system, "Segoe UI", sans-serif;
 }

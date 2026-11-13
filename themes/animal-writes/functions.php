@@ -57,82 +57,9 @@ add_action(
 );
 
 /*
- * Inter without the jump (Core Web Vitals, layout shift). Until Inter arrives, text shows in "Inter Fallback": the
- * device's Arial resized to Inter's width and line height (measured from inter-latin.woff2: 107.48% wide, ascent 90.14%,
- * descent 22.44%), only for the characters Inter has. A line no longer rewraps when Inter swaps in (the Opportunities
- * intro moved the list 29px). Wide screens (1200px and up) also preload Inter so it is there for the first paint;
- * phones do not, so it never competes with their main picture. Theme Options → Font preload: "all" preloads it on every
- * screen, "off" not at all; the file is the body font's first file in Styles.
+ * Inter comes from Kits by Wugweb (its theme.json declares the font once). The preload, the "Inter Fallback" face and
+ * the one-copy-of-Inter filter come from Kits Core (includes/fonts.php).
  */
-add_action(
-	'wp_head',
-	function () {
-		$mode = function_exists( 'kits_option' ) ? kits_option( 'font_preload' ) : 'wide';
-		$font = function_exists( 'kits_body_font_file' ) ? kits_body_font_file() : '';
-		$font = '' !== $font ? $font : get_theme_file_uri( 'assets/fonts/inter/inter-latin.woff2' );
-		if ( 'off' !== $mode ) {
-			echo '<link rel="preload" href="' . esc_url( $font ) . '" as="font" type="font/woff2" crossorigin' . ( 'all' === $mode ? '' : ' media="(min-width: 1200px)"' ) . '>' . "\n";
-		}
-		echo '<style id="aw-inter-fallback">@font-face{font-family:"Inter Fallback";src:local("Arial"),local("ArialMT");size-adjust:107.48%;ascent-override:90.14%;descent-override:22.44%;line-gap-override:0%;unicode-range:U+0000,U+0020-007E,U+00A0-00AC,U+00AE-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+2002,U+2009,U+200B,U+2013-2014,U+2018-201A,U+201C-201E,U+2022,U+2026,U+2032-2033,U+2039-203A,U+2044,U+20AC,U+2122,U+2191,U+2193,U+2212,U+FEFF}</style>' . "\n";
-	},
-	2
-);
-
-/*
- * Inter is served once. The theme's own variable file (assets/fonts/inter/inter-latin.woff2, weights 100 to 900,
- * font-display: swap) covers every weight the site uses. The Font Library copy of Inter (wp-content/uploads/fonts) also
- * declares each weight as a separate static file without swap, and as the later rules they won: extra 118 KB files
- * per page, with text hidden while they load (the campaign headings at 800 waited for one). The upright library faces
- * the theme's file covers are left out (the variable file draws 800 at the same width as the static file); the range is
- * read as resolved, so a narrower range saved in Global Styles keeps the library file for the weights outside it. The
- * library's italics stay. Phones do not preload the file: on a slow phone a preload would compete with the page's main picture (wide screens do, above).
- */
-add_action(
-	'init',
-	function () {
-		if ( 'off' === ( function_exists( 'kits_option' ) ? kits_option( 'inter_dedupe' ) : 'on' ) ) { // Theme Options: One copy of Inter.
-			return;
-		}
-		if ( ! class_exists( 'WP_Font_Face_Resolver' ) || false === has_action( 'wp_head', 'wp_print_font_faces' ) ) {
-			return;
-		}
-		remove_action( 'wp_head', 'wp_print_font_faces', 50 );
-		add_action(
-			'wp_head',
-			function () {
-				$fonts  = WP_Font_Face_Resolver::get_fonts_from_theme_json();
-				$is_lib = fn( $f ) => false !== strpos( implode( ' ', (array) ( $f['src'] ?? array() ) ), '/uploads/fonts/' );
-				$inter  = fn( $f ) => 'inter' === strtolower( trim( (string) ( $f['font-family'] ?? '' ), '"\' ' ) ) && 'normal' === ( $f['font-style'] ?? 'normal' );
-				// The weights the theme's own file is declared for, as resolved (the site's saved Global Styles can narrow
-				// theme.json's range): only those library faces are left out, so no weight is ever left without a file.
-				$lo = 1000;
-				$hi = 0;
-				foreach ( $fonts as $faces ) {
-					foreach ( $faces as $f ) {
-						if ( $inter( $f ) && ! $is_lib( $f ) ) {
-							$w  = array_map( 'intval', preg_split( '/\s+/', trim( (string) ( $f['font-weight'] ?? '400' ) ) ) );
-							$lo = min( $lo, min( $w ) );
-							$hi = max( $hi, max( $w ) );
-						}
-					}
-				}
-				foreach ( $fonts as $family => $faces ) {
-					$fonts[ $family ] = array_values(
-						array_filter(
-							$faces,
-							function ( $f ) use ( $is_lib, $inter, $lo, $hi ) {
-								$weight = (int) ( $f['font-weight'] ?? 0 );
-								return ! ( $inter( $f ) && $is_lib( $f ) && $weight >= $lo && $weight <= $hi );
-							}
-						)
-					);
-				}
-				wp_print_font_faces( array_filter( $fonts ) );
-			},
-			50
-		);
-	}
-);
 
 /**
  * Home page: WordPress's navigation and cover block stylesheets no longer block the first paint (owner, 24 Oct 2026).

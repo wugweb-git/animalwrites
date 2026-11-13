@@ -64,50 +64,14 @@ function kits_setup() {
 	add_editor_style( 'assets/css/kits.css' );
 	add_editor_style( 'assets/css/kit.css' ); // components and primitives: the editor shows content as the site does
 	add_editor_style( 'assets/css/kit-primitives.css' );
-	if ( kits_uses_inter_tight() ) {
-		add_editor_style( kits_font_url() );
-	}
 }
 add_action( 'after_setup_theme', 'kits_setup' );
 
-/**
- * Inter Tight from Google Fonts (400–800). A child theme that sets its own base font does not load it.
+/*
+ * Fonts: Inter, declared once in theme.json (settings.typography.fontFamilies, with its fontFace in
+ * assets/fonts/inter/inter-latin.woff2). WordPress prints the @font-face on the site and in the editor, and the Font
+ * Library and Styles manage it; nothing loads from another server.
  */
-function kits_font_url() {
-	return 'https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=swap';
-}
-
-/** Whether the active base font family is Inter Tight. */
-function kits_uses_inter_tight() {
-	foreach ( (array) wp_get_global_settings( array( 'typography', 'fontFamilies', 'theme' ) ) as $family ) {
-		if ( 'base' === ( $family['slug'] ?? '' ) ) {
-			return false !== stripos( (string) ( $family['fontFamily'] ?? '' ), 'Inter Tight' );
-		}
-	}
-	return true;
-}
-
-add_action(
-	'wp_enqueue_scripts',
-	function () {
-		if ( kits_uses_inter_tight() ) {
-			wp_enqueue_style( 'kits-font', kits_font_url(), array(), null ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
-		}
-	},
-	5
-);
-add_filter(
-	'wp_resource_hints',
-	function ( $urls, $type ) {
-		if ( 'preconnect' === $type && kits_uses_inter_tight() ) {
-			$urls[] = 'https://fonts.googleapis.com';
-			$urls[] = array( 'href' => 'https://fonts.gstatic.com', 'crossorigin' );
-		}
-		return $urls;
-	},
-	10,
-	2
-);
 
 if ( ! function_exists( 'kits_css_file' ) ) {
 	/**

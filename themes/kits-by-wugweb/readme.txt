@@ -24,6 +24,7 @@ tokens/tokens.json is the source. tools/build-tokens.py (and, for a child theme,
 * Kits Hero block: height, colours, padding, border and shadow are block supports, set in Styles > Blocks > Hero.
 * Styles values for the hero height and section padding also reach parts that are not blocks yet.
 * Animal Writes style variation (styles/animal-writes.json), with the Inter font.
+* Inter is the theme font, declared once in theme.json and served from the theme (no Google Fonts request).
 * Needs WordPress 6.6 or later (Group styles in theme.json).
 * Updates can come from wugweb.com (Update URI, checked by Kits Core) once the update file is published there: Appearance > Themes then shows new versions with their details, and auto-updates can be turned on. Until then the check is off.
 * Colour sets: block styles for Group and Post content (styles/colours/), first one Colours: Ink; a page picks one in Page Options.
@@ -39,11 +40,7 @@ Kits by Wugweb is distributed under the terms of the GNU GPL v2 or later.
 
 This theme bundles the following third-party resources:
 
-Inter Tight Font
-Copyright 2022 The Inter Project Authors (https://github.com/rsms/inter-tight)
-License: SIL Open Font License, 1.1, https://openfontlicense.org
-
-Inter Font (assets/fonts/inter, used by the Animal Writes style variation)
+Inter Font (assets/fonts/inter/inter-latin.woff2, the theme's body and heading font)
 Copyright 2016 The Inter Project Authors (https://github.com/rsms/inter)
 License: SIL Open Font License, 1.1, https://openfontlicense.org
 

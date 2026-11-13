@@ -14,9 +14,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * The Animal Writes theme.json (this plugin's copy of the child's), merged over Kits' theme data the way core merges
  * a child theme's theme.json over its parent's (WP_Theme_JSON_Resolver::get_theme_data(): the parent's data, merged
- * with the child's): settings, styles, custom templates and template parts. Font files given as file:./ are resolved
- * by core against the active theme, Kits, whose assets/fonts/inter/inter-latin.woff2 is the same file as the child's
- * (tools/ci/theme_copies.py checks it).
+ * with the child's): settings, styles, custom templates and template parts. Fonts are Kits' own (its theme.json
+ * declares Inter once), so this copy declares none.
  *
  * @param WP_Theme_JSON_Data $theme_json Kits' theme.json data.
  */
