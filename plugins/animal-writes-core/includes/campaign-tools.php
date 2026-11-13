@@ -942,18 +942,27 @@ function aw_current_campaign_id() {
 
 /** A card for the current campaign: its picture, title, one or two lines, days left and Take part. Nothing when none is open. */
 function aw_block_current_campaign( $a = array(), $id = 0 ) {
-	$c = aw_current_campaign_id();
+	// sm, the campaign's small card (owner, 13 Nov 2026: every campaign in four sizes, lg, md, sm and share). The block's
+	// "campaign" attribute (a campaign's slug, e.g. diwali) shows that campaign; without it, the open campaign closing soonest.
+	$slug = sanitize_title( (string) ( $a['campaign'] ?? '' ) );
+	$pick = '' !== $slug ? get_page_by_path( $slug, OBJECT, 'aw_campaign' ) : null;
+	$c    = '' !== $slug ? ( $pick && 'publish' === $pick->post_status ? (int) $pick->ID : 0 ) : aw_current_campaign_id();
 	if ( ! $c || ( is_singular( 'aw_campaign' ) && get_queried_object_id() === $c ) ) {
 		return defined( 'REST_REQUEST' ) && REST_REQUEST ? '<p class="aw-block-preview">' . esc_html__( 'Current campaign (shows while a campaign is open)', 'animal-writes-core' ) . '</p>' : '';
 	}
 	aw_use_component_style( 'aw-single' ); // aw-side-camp
+	// The card in the campaign's own colours: its aw-camp--{name} tokens (aw-camp-tokens.css), read from the page's wrapper.
+	$theme = preg_match( '/\baw-camp--([a-z0-9-]+)/', (string) get_post_field( 'post_content', $c ), $tm ) ? sanitize_html_class( $tm[1] ) : '';
+	if ( '' !== $theme ) {
+		wp_enqueue_style( 'aw-camp-tokens', plugins_url( 'assets/css/aw-camp-tokens.css', AW_CORE_DIR . 'animal-writes-core.php' ), array(), (string) filemtime( AW_CORE_DIR . 'assets/css/aw-camp-tokens.css' ) );
+	}
 	$url  = get_permalink( $c );
 	$days = aw_camp_days_left( $c );
 	$img  = get_the_post_thumbnail( $c, 'medium_large', array( 'alt' => '', 'loading' => 'lazy' ) );
 	$hid  = 'aw-side-camp-' . $c;
 	/* translators: %d: days. */
 	$left = $days ? sprintf( _n( '%d day left', '%d days left', $days, 'animal-writes-core' ), $days ) : ''; // the day count only, no "Last day" status (owner, 2 Nov 2026)
-	return '<section class="kit-card aw-side-camp" aria-labelledby="' . esc_attr( $hid ) . '">'
+	return '<section class="kit-card aw-side-camp' . ( '' !== $theme ? ' aw-camp aw-camp--' . $theme : '' ) . '" aria-labelledby="' . esc_attr( $hid ) . '">'
 		. ( $img ? '<div class="aw-side-camp-media">' . $img . '</div>' : '' )
 		. '<div class="aw-side-camp-body"><p class="aw-side-camp-meta kit-meta-row"><span class="kit-meta-item">' . esc_html__( 'Current campaign', 'animal-writes-core' ) . '</span>' . ( '' !== $left ? '<span class="kit-meta-item">' . aw_i( 'clock' ) . esc_html( $left ) . '</span>' : '' ) . '</p>'
 		. '<h2 class="aw-side-camp-title" id="' . esc_attr( $hid ) . '"><a href="' . esc_url( $url ) . '">' . esc_html( get_the_title( $c ) ) . '</a></h2>'
