@@ -229,14 +229,10 @@
 .aw-camp.aw-camp--sc-stray-dogs #act .aw-camp-grid > .aw-camp-card:nth-child(3) { background: repeating-linear-gradient(180deg, transparent 0 calc(var(--kit-space-6) - 1px), rgb(58 23 48 / 0.08) calc(var(--kit-space-6) - 1px) var(--kit-space-6)), var(--kit-color-surface-soft); }
 .aw-camp.aw-camp--sc-stray-dogs #act .aw-camp-grid > .aw-camp-card:nth-child(5) { background: linear-gradient(90deg, rgb(32 13 26 / 0.94) 0%, rgb(32 13 26 / 0.88) 55%, rgb(32 13 26 / 0.7) 100%), url("/wp-content/plugins/animal-writes-core/theme/assets/img/campaigns/supreme-court-stray-dog-share.jpg") 42% 30% / 260% auto no-repeat, rgb(32 13 26); }
 @media (min-width: 768px) { .aw-camp.aw-camp--sc-stray-dogs #act .aw-camp-grid > .aw-camp-card:nth-child(5) { background-position: 0 0, 45% 40%; background-size: auto, 200% auto; } }
-/* Lead: the picture (1200x630, so 52.5% of the tile's width tall) on top under a plum wash; the text starts where the plum
-   turns solid: 42cqw on phones (the tile is the grid's width), 21cqw from 768 (half the grid). cqw, not %, as vertical
-   padding in percent is not allowed (docs/design-system.md, Section heights).
-   Solid plum from 80% of the picture down, so its yellow corner stays hidden. */
-.aw-camp.aw-camp--sc-stray-dogs #act .aw-camp-grid > .aw-camp-card:nth-child(1) { padding-top: calc(42cqw + var(--kit-space-3)); background: linear-gradient(180deg, rgb(58 23 48 / 0.15) 0, rgb(58 23 48 / 0.35) 24cqw, var(--camp-mark) 42cqw), url("/wp-content/plugins/animal-writes-core/theme/assets/img/campaigns/supreme-court-stray-dog-share.jpg") 50% 0 / 100% auto no-repeat, var(--camp-mark); }
-@media (min-width: 768px) {
-	.aw-camp.aw-camp--sc-stray-dogs #act .aw-camp-grid > .aw-camp-card:nth-child(1) { padding-top: calc(21cqw + var(--kit-space-3)); background: linear-gradient(180deg, rgb(58 23 48 / 0.15) 0, rgb(58 23 48 / 0.35) 12cqw, var(--camp-mark) 21cqw), url("/wp-content/plugins/animal-writes-core/theme/assets/img/campaigns/supreme-court-stray-dog-share.jpg") 50% 0 / 100% auto no-repeat, var(--camp-mark); }
-}
+/* Lead: the text on the picture (owner, 13 Nov 2026: picture tiles put their text on the picture, never a picture band
+   with the text below). The dog and court picture covers the whole tile under a plum overlay of 0.76 to 0.9: white text
+   on it is at least 6:1 over the picture's lightest pixels (WCAG AA 4.5:1). */
+.aw-camp.aw-camp--sc-stray-dogs #act .aw-camp-grid > .aw-camp-card:nth-child(1) { background: linear-gradient(180deg, rgb(58 23 48 / 0.76) 0%, rgb(58 23 48 / 0.9) 100%), url("/wp-content/plugins/animal-writes-core/theme/assets/img/campaigns/supreme-court-stray-dog-share.jpg") 50% 40% / cover no-repeat, var(--camp-mark); }
 /* The share bar under the share message */
 .aw-camp--sc-stray-dogs .aw-camp-share-kit { margin: var(--kit-space-4) 0; }
 /* Share: from 768 the note sits as close to the share block as the block to the text above */
