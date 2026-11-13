@@ -3,13 +3,13 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Animal Writes Core 1.0.0\n"
-"Report-Msgid-Bugs-To: https://wugweb.com/\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/animal-writes-core\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-12T21:10:50+00:00\n"
+"POT-Creation-Date: 2026-11-13T05:42:07+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: animal-writes-core\n"
@@ -108,6 +108,7 @@ msgstr ""
 msgid "We will contact you when there is work in your area. You can ask us to delete your details at any time."
 msgstr ""
 
+#. translators: %s: number of letters.
 #: includes/campaign-letters.php:297
 #, php-format
 msgid "%s letter sent"
@@ -115,30 +116,43 @@ msgid_plural "%s letters sent"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/campaign-tools.php:572
+#: includes/campaign-tools.php:576
 #, php-format
 msgid "%d day to go"
 msgid_plural "%d days to go"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/campaign-tools.php:943
+#: includes/campaign-tools.php:958
 msgid "Current campaign (shows while a campaign is open)"
 msgstr ""
 
 #. translators: %d: days.
-#: includes/campaign-tools.php:951
+#: includes/campaign-tools.php:975
 #, php-format
 msgid "%d day left"
 msgid_plural "%d days left"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/campaign-tools.php:954
+#: includes/campaign-tools.php:977
+#: includes/campaign-tools.php:981
 msgid "Current campaign"
 msgstr ""
 
-#: includes/campaign-tools.php:957
+#: includes/campaign-tools.php:977
+msgid "Decision awaited"
+msgstr ""
+
+#: includes/campaign-tools.php:978
+msgid "What happens next"
+msgstr ""
+
+#: includes/campaign-tools.php:979
+msgid "Get the decision first"
+msgstr ""
+
+#: includes/campaign-tools.php:982
 msgid "Take part"
 msgstr ""
 
@@ -245,13 +259,90 @@ msgstr ""
 msgid "Not on the current AWBI list"
 msgstr ""
 
+#: includes/help-tab.php:33
+#: includes/theme-parts-assets.php:295
+msgid "Animal Writes"
+msgstr ""
+
+#: includes/help-tab.php:33
+msgid "the site overview"
+msgstr ""
+
+#: includes/help-tab.php:34
+msgid "Check site"
+msgstr ""
+
+#: includes/help-tab.php:34
+msgid "the latest checks of every page type"
+msgstr ""
+
+#: includes/help-tab.php:35
+msgid "Keys"
+msgstr ""
+
+#: includes/help-tab.php:35
+msgid "service keys the site uses"
+msgstr ""
+
+#: includes/help-tab.php:36
+msgid "Modules"
+msgstr ""
+
+#: includes/help-tab.php:36
+msgid "which parts of the site are on"
+msgstr ""
+
+#: includes/help-tab.php:37
+msgid "Contact links, Edit screens"
+msgstr ""
+
+#: includes/help-tab.php:37
+msgid "the site's contact links, and every box on every edit screen"
+msgstr ""
+
+#. translators: %s: plugin name.
+#: includes/help-tab.php:47
+#, php-format
+msgid "About %s"
+msgstr ""
+
+#: includes/help-tab.php:48
+msgid "The Animal Writes site: content types and fields, the Directory, campaigns and letters, forms and people, card pictures and the jobs that keep the site running."
+msgstr ""
+
+#: includes/help-tab.php:55
+msgid "Plugins"
+msgstr ""
+
+#: includes/help-tab.php:56
+#: includes/item-head.php:323
+#: includes/listing-template.php:180
+msgid "(opens in a new tab)"
+msgstr ""
+
+#. translators: 1: number of results, 2: what was searched for.
+#: includes/hub-blocks.php:413
+#, php-format
+msgid "%1$s result for %2$s"
+msgid_plural "%1$s results for %2$s"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %s: number of organisations.
+#: includes/hub-blocks.php:413
+#, php-format
+msgid "%s organisation"
+msgid_plural "%s organisations"
+msgstr[0] ""
+msgstr[1] ""
+
 #. translators: %s: time difference, e.g. 3 hours.
-#: includes/hub-blocks.php:562
+#: includes/hub-blocks.php:565
 msgid "Just now"
 msgstr ""
 
 #. translators: %s: time difference, e.g. 3 hours.
-#: includes/hub-blocks.php:562
+#: includes/hub-blocks.php:565
 #, php-format
 msgid "%s ago"
 msgstr ""
@@ -281,11 +372,6 @@ msgstr ""
 
 #: includes/item-head.php:323
 msgid "Read the original"
-msgstr ""
-
-#: includes/item-head.php:323
-#: includes/listing-template.php:180
-msgid "(opens in a new tab)"
 msgstr ""
 
 #: includes/item-head.php:326
@@ -671,6 +757,14 @@ msgstr ""
 msgid "Sign it, then post it by Speed Post."
 msgstr ""
 
+#. translators: %s: number of results.
+#: includes/pages.php:219
+#, php-format
+msgid "%s result"
+msgid_plural "%s results"
+msgstr[0] ""
+msgstr[1] ""
+
 #: includes/scf.php:52
 msgid "Secure Custom Fields stays on while Animal Writes core is on: the edit screens use it. Deactivate Animal Writes core first."
 msgstr ""
@@ -702,10 +796,6 @@ msgstr ""
 
 #: includes/term-page.php:90
 msgid "Related tags"
-msgstr ""
-
-#: includes/theme-parts-assets.php:295
-msgid "Animal Writes"
 msgstr ""
 
 #. translators: %s: file name.
