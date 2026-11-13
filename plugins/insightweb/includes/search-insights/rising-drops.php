@@ -100,8 +100,8 @@ function aw_si_rising_drops_section(): void {
 		echo '<p>' . esc_html__( 'No source has sent terms yet.', 'insightweb' ) . '</p>';
 		return;
 	}
-	echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Source', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'Run', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'Terms the source showed', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'Dropped by the worker', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'Sent and stored', 'insightweb' ) . '</th></tr></thead><tbody>';
 	$terms = array();
+	$cells = array();
 	foreach ( $rows as $key => list( $label, $at, $c ) ) {
 		$why = array();
 		if ( null !== $c['worker_dropped'] ) {
@@ -114,18 +114,66 @@ function aw_si_rising_drops_section(): void {
 		}
 		/* translators: 1: terms sent, 2: terms stored. */
 		$sent = sprintf( __( '%1$s sent, %2$s stored', 'insightweb' ), number_format_i18n( $c['sent'] ), number_format_i18n( $c['stored'] ) );
-		echo '<tr><td>' . esc_html( $label ) . '</td><td>' . esc_html( wp_date( 'j M, H:i', $at ) ) . '</td><td>' . esc_html( null === $c['seen'] ? '–' : number_format_i18n( $c['seen'] ) ) . '</td><td>' . esc_html( $why ? implode( '; ', $why ) : '–' ) . '</td><td>' . esc_html( $sent ) . '</td></tr>';
+		$cells[] = array(
+			'source'  => esc_html( $label ),
+			'run'     => esc_html( wp_date( 'j M, H:i', $at ) ),
+			'seen'    => esc_html( null === $c['seen'] ? '–' : number_format_i18n( $c['seen'] ) ),
+			'dropped' => esc_html( $why ? implode( '; ', $why ) : '–' ),
+			'sent'    => esc_html( $sent ),
+			'_sort'   => array(
+				'run'  => $at,
+				'seen' => null === $c['seen'] ? -1 : (int) $c['seen'],
+				'sent' => (int) $c['sent'],
+			),
+		);
 		foreach ( $c['terms'] as $t ) {
 			$terms[] = array( $label, (string) ( $t[0] ?? '' ), aw_si_rising_drop_label( (string) ( $t[1] ?? '' ) ) );
 		}
 	}
-	echo '</tbody></table>';
+	aw_si_simple_table(
+		'rising-runs',
+		array(
+			'source'  => esc_html__( 'Source', 'insightweb' ),
+			'run'     => esc_html__( 'Run', 'insightweb' ),
+			'seen'    => esc_html__( 'Terms the source showed', 'insightweb' ),
+			'dropped' => esc_html__( 'Dropped by the worker', 'insightweb' ),
+			'sent'    => esc_html__( 'Sent and stored', 'insightweb' ),
+		),
+		$cells,
+		array(
+			'sortable' => array(
+				'source' => false,
+				'run'    => true,
+				'seen'   => true,
+				'sent'   => true,
+			),
+		)
+	);
 	if ( $terms ) {
-		echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Source', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'Dropped term', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'Filter that dropped it', 'insightweb' ) . '</th></tr></thead><tbody>';
+		$cells = array();
 		foreach ( $terms as $t ) {
-			echo '<tr><td>' . esc_html( $t[0] ) . '</td><td>' . esc_html( '' !== $t[1] ? $t[1] : '–' ) . '</td><td>' . esc_html( $t[2] ) . '</td></tr>';
+			$cells[] = array(
+				'source' => esc_html( $t[0] ),
+				'term'   => esc_html( '' !== $t[1] ? $t[1] : '–' ),
+				'filter' => esc_html( $t[2] ),
+			);
 		}
-		echo '</tbody></table>';
+		aw_si_simple_table(
+			'rising-dropped',
+			array(
+				'source' => esc_html__( 'Source', 'insightweb' ),
+				'term'   => esc_html__( 'Dropped term', 'insightweb' ),
+				'filter' => esc_html__( 'Filter that dropped it', 'insightweb' ),
+			),
+			$cells,
+			array(
+				'sortable' => array(
+					'source' => false,
+					'term'   => false,
+					'filter' => false,
+				),
+			)
+		);
 	}
 	echo '<p class="description">' . esc_html__( 'The worker sends counts for its own filters; the terms it dropped are listed one by one only once it sends them. Terms the site itself refused are always listed. A term you saw elsewhere can be added by hand below.', 'insightweb' ) . '</p>';
 }

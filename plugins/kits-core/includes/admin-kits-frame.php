@@ -21,10 +21,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 /** The screens drawn in the frame: slug => capability (the menu's). */
 function kits_frame_screens(): array {
 	return array(
-		KITS_MENU       => 'manage_options',
+		KITS_MENU       => KITS_CAP,
 		'kits-settings' => 'manage_options',
 		'kits-tools'    => 'edit_theme_options',
-		'kits-help'     => 'manage_options',
+		'kits-help'     => KITS_CAP,
 	);
 }
 

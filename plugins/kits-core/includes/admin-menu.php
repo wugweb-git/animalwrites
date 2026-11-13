@@ -32,7 +32,7 @@ add_action(
 		add_submenu_page( KITS_MENU, 'Theme Options', 'Theme Options', 'manage_options', 'kits-options', 'kits_options_page' );
 		add_submenu_page( KITS_MENU, 'Settings', 'Settings', 'manage_options', 'kits-settings', 'kits_settings_page' );
 		add_submenu_page( KITS_MENU, 'Tools', 'Tools', 'edit_theme_options', 'kits-tools', 'kits_transfer_page' );
-		add_submenu_page( KITS_MENU, 'Help', 'Help', 'manage_options', 'kits-help', 'kits_help_page' );
+		add_submenu_page( KITS_MENU, 'Help', 'Help', KITS_CAP, 'kits-help', 'kits_help_page' );
 	},
 	9 // After Home (admin-home.php, 8).
 );

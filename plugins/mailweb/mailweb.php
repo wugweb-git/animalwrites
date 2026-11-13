@@ -51,6 +51,7 @@ add_action(
 	}
 );
 
+require_once MAILWEB_DIR . 'includes/mailweb-caps.php'; // MailWeb's own capability, MAILWEB_CAP = manage_mailweb (granted from edit_others_posts).
 require_once MAILWEB_DIR . 'includes/admin-table.php';
 require_once MAILWEB_DIR . 'includes/help-tab.php';
 require_once MAILWEB_DIR . 'includes/plugin-info.php';

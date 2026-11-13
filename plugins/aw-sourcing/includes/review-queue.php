@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Who reviews: the To review screen and its Publish and Reject. */
-const AW_REVIEW_CAP = 'edit_others_posts';
+const AW_REVIEW_CAP = SOURCEWEB_CAP; // manage_sourceweb (sourceweb-caps.php); was edit_others_posts, which still opens it
 
 /** Types in the queue: post type => label. */
 const AW_REVIEW_TYPES = array(

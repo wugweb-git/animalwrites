@@ -3,9 +3,9 @@
  * SourceWeb's screens on the Kits admin shell.
  *
  * Addresses:
- *   admin.php?page=aw-sourcing-menu              Dashboard          (edit_others_posts)
- *   admin.php?page=aw-review                     To review          (edit_others_posts)
- *   admin.php?page=aw-enrich-review              Enrichment review  (edit_others_posts)
+ *   admin.php?page=aw-sourcing-menu              Dashboard          (manage_sourceweb)
+ *   admin.php?page=aw-review                     To review          (manage_sourceweb)
+ *   admin.php?page=aw-enrich-review              Enrichment review  (manage_sourceweb)
  *   admin.php?page=aw-sourcing                   Sources            (manage_options; &edit=<host|new>, &view=feeds,
  *                                                &feed=<id|new>: the feed form, sourceweb_feed_parts())
  *   admin.php?page=aw-sourcing&tab=keywords      Keywords           (manage_options; &edit=<id|new>, &kw=suggestions)
@@ -206,16 +206,19 @@ function sourceweb_extra_parts( string $screen ): array {
 		do_action( 'aw_review_intake' );
 	} elseif ( 'settings' === $screen && current_user_can( 'manage_options' ) ) {
 		settings_errors( 'aw_backfill_floor' );
+		settings_errors( 'aw_src_reset' ); // "Defaults restored." after a reset below
 		echo '<form method="post" action="' . esc_url( admin_url( 'options.php' ) ) . '">';
 		settings_fields( 'aw_src_backfill' );
 		do_settings_sections( 'aw-src-backfill' );
 		submit_button( 'Save backfill date' );
 		echo '</form>';
+		sourceweb_reset_form( 'backfill' );
 		echo '<form method="post" action="' . esc_url( admin_url( 'options.php' ) ) . '">';
 		settings_fields( 'aw_src_uninstall' );
 		do_settings_sections( 'aw-src-uninstall' );
 		submit_button( 'Save uninstall setting' );
 		echo '</form>';
+		sourceweb_reset_form( 'uninstall' );
 	}
 	$html = trim( (string) ob_get_clean() );
 	return '' === $html ? array() : kits_shell_html_parts( $html );
@@ -274,3 +277,64 @@ function sourceweb_uninstall_field(): void {
 		esc_html( 'Off: everything stays in the database if the plugin is deleted.' )
 	);
 }
+
+/* ---------- Reset this section (Backfill, Uninstall) ---------- */
+
+/**
+ * "Reset this section" for SourceWeb → Settings' server-drawn sections: section => option names, put back to their
+ * registered defaults. Backfill: the oldest date, 2025-11-01. Uninstall: "Delete this plugin's data" off. The groups
+ * drawn by the screen itself reset through POST settings/<group> (sourceweb_settings_defaults()).
+ */
+function sourceweb_reset_sections(): array {
+	return array(
+		'backfill'  => array( 'aw_backfill_floor' ),
+		'uninstall' => array( 'aw_src_delete_data_on_uninstall' ),
+	);
+}
+
+/**
+ * The "Reset this section" button, in a form of its own under the section's form. The screen asks before it is sent
+ * (ExtraParts in src/index.js: the page parts drop a button's own script).
+ *
+ * @param string $section A key of sourceweb_reset_sections().
+ */
+function sourceweb_reset_form( string $section ): void {
+	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
+	echo '<input type="hidden" name="action" value="sourceweb_reset_section"><input type="hidden" name="section" value="' . esc_attr( $section ) . '">';
+	wp_nonce_field( 'sourceweb_reset_section_' . $section, '_wpnonce', false );
+	printf(
+		'<p><button type="submit" class="button" onclick="return window.confirm(%1$s);">%2$s</button></p>',
+		esc_attr( (string) wp_json_encode( 'Reset this section to its defaults?' ) ),
+		esc_html( 'Reset this section' )
+	);
+	echo '</form>';
+}
+
+// "Reset this section": nonce and capability checked, the registered defaults written, back to Settings.
+add_action(
+	'admin_post_sourceweb_reset_section',
+	function () {
+		$section = isset( $_POST['section'] ) ? sanitize_key( wp_unslash( $_POST['section'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- the nonce's action names the section; checked on the next line.
+		check_admin_referer( 'sourceweb_reset_section_' . $section );
+		$sections = sourceweb_reset_sections();
+		if ( ! current_user_can( 'manage_options' ) || ! isset( $sections[ $section ] ) ) {
+			wp_die( esc_html( 'Sorry, you are not allowed to do that.' ), 403 );
+		}
+		$registered = get_registered_settings();
+		foreach ( $sections[ $section ] as $name ) {
+			if ( ! isset( $registered[ $name ] ) || ! array_key_exists( 'default', $registered[ $name ] ) ) {
+				continue;
+			}
+			$default = $registered[ $name ]['default'];
+			$now     = get_option( $name, $default );
+			if ( is_bool( $default ) ? (bool) $now !== $default : (string) $now !== (string) $default ) {
+				update_option( $name, $default );
+				aw_src_log( 'settings', $name . ': default restored' );
+			}
+		}
+		add_settings_error( 'aw_src_reset', 'aw_src_reset', 'Defaults restored.', 'success' );
+		set_transient( 'settings_errors', get_settings_errors(), 30 ); // as options.php does, for settings_errors() on the screen
+		wp_safe_redirect( add_query_arg( 'settings-updated', 'true', admin_url( aw_src_tab_path( AW_SRC_SETTINGS_TAB ) ) ) . '#backfill' );
+		exit;
+	}
+);

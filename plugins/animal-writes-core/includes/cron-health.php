@@ -147,17 +147,27 @@ add_action(
 						)
 					);
 				}
-				echo '<table class="widefat striped"><thead><tr><th scope="col">Trigger</th><th scope="col">Last run</th><th scope="col">Runs, 24 h</th><th scope="col">Status</th></tr></thead><tbody>';
+				$cells = array();
 				foreach ( $rows as $r ) {
-					$m = $marks[ $r['state'] ];
-					echo '<tr><td>' . esc_html( $r['name'] );
-					if ( '' !== $r['gap'] ) {
-						echo '<br><span class="description">' . esc_html( 'Longest gap, 24 h: ' . $r['gap'] ) . '</span>';
-					}
-					echo '</td><td>' . esc_html( $r['last'] ) . '</td><td>' . esc_html( number_format_i18n( $r['runs'] ) ) . '</td>';
-					echo '<td><span class="dashicons ' . esc_attr( $m[0] ) . '" aria-hidden="true" style="color:' . esc_attr( $m[1] ) . '"></span> ' . esc_html( $m[2] ) . '</td></tr>';
+					$m       = $marks[ $r['state'] ];
+					$cells[] = array(
+						'trigger' => esc_html( $r['name'] ) . ( '' !== $r['gap'] ? '<br><span class="description">' . esc_html( 'Longest gap, 24 h: ' . $r['gap'] ) . '</span>' : '' ),
+						'last'    => esc_html( $r['last'] ),
+						'runs'    => esc_html( number_format_i18n( $r['runs'] ) ),
+						'status'  => '<span class="dashicons ' . esc_attr( $m[0] ) . '" aria-hidden="true" style="color:' . esc_attr( $m[1] ) . '"></span> ' . esc_html( $m[2] ),
+					);
 				}
-				echo '</tbody></table>';
+				aw_core_simple_table(
+					'aw-cron-triggers',
+					array(
+						'trigger' => 'Trigger',
+						'last'    => 'Last run',
+						'runs'    => 'Runs, 24 h',
+						'status'  => 'Status',
+					),
+					$cells,
+					array( 'foot' => false ) // a short table in a Dashboard widget: no repeated header row
+				);
 				do_action( 'aw_cron_health_after' );
 				if ( ! $running ) {
 					echo '<p><strong>No run for 30 minutes or more.</strong> The owner is emailed.</p>';

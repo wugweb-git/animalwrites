@@ -39,9 +39,9 @@ function aw_activity_items( array $types, string $status ): array {
 	return (array) $wpdb->get_results( $wpdb->prepare( "SELECT ID, post_title, post_type, post_date_gmt FROM {$wpdb->posts} WHERE post_type IN ({$in}) AND post_status = %s ORDER BY post_date {$order}, ID {$order} LIMIT 5", array_merge( $types, array( 'future' === $status ? 'future' : 'publish' ) ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- placeholders and a fixed ASC/DESC only.
 }
 
-/** A table of items: Item (linked to its edit screen when allowed), Type, Date. */
+/** A table of items: Item (linked to its edit screen when allowed), Type, Date; a core list table. */
 function aw_activity_table( array $items, string $caption ): string {
-	$out = '<table class="widefat striped"><caption class="screen-reader-text">' . esc_html( $caption ) . '</caption><thead><tr><th scope="col">Item</th><th scope="col">Type</th><th scope="col">Date</th></tr></thead><tbody>';
+	$cells = array();
 	foreach ( $items as $p ) {
 		$id    = (int) $p->ID;
 		$title = '' !== trim( (string) $p->post_title ) ? (string) $p->post_title : '(no title)';
@@ -49,9 +49,27 @@ function aw_activity_table( array $items, string $caption ): string {
 		$obj   = get_post_type_object( (string) $p->post_type );
 		$type  = $obj ? (string) $obj->labels->singular_name : (string) $p->post_type;
 		$ts    = strtotime( (string) $p->post_date_gmt . ' UTC' );
-		$out  .= '<tr><td>' . ( $link ? '<a href="' . esc_url( $link ) . '">' . esc_html( $title ) . '</a>' : esc_html( $title ) ) . '</td><td>' . esc_html( $type ) . '</td><td>' . esc_html( $ts ? (string) wp_date( 'j M', $ts ) : '' ) . '</td></tr>';
+		$cells[] = array(
+			'item' => $link ? '<a href="' . esc_url( $link ) . '">' . esc_html( $title ) . '</a>' : esc_html( $title ),
+			'type' => esc_html( $type ),
+			'date' => esc_html( $ts ? (string) wp_date( 'j M', $ts ) : '' ),
+		);
 	}
-	return $out . '</tbody></table>';
+	ob_start();
+	aw_core_simple_table(
+		'aw-activity-' . sanitize_key( $caption ),
+		array(
+			'item' => 'Item',
+			'type' => 'Type',
+			'date' => 'Date',
+		),
+		$cells,
+		array(
+			'foot'    => false, // a short table in a Dashboard widget: no repeated header row
+			'caption' => $caption,
+		)
+	);
+	return (string) ob_get_clean();
 }
 
 add_action(

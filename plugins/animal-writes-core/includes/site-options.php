@@ -14,6 +14,8 @@
  *   network's own host is kept.
  * - aw_delete_data_on_uninstall: true lets uninstall.php delete the plugin's own options and tables (default false).
  *
+ * "Reset this section" (aw_core_reset_sections()): the section's registered settings back to their defaults.
+ *
  * @package animal-writes-core
  */
 
@@ -337,3 +339,144 @@ function aw_site_options_follow_url( array $args ): void {
 		esc_html( 'An https address on ' . implode( ' or ', AW_FOLLOW_EXTRA[ $opt ][2] ) . '. Anything else is not saved.' )
 	);
 }
+
+/* ---------- Reset this section ---------- */
+
+/**
+ * "Reset this section" on Kits → Modules and Kits → Settings → CDN cache times: section id => the options it restores
+ * to their registered defaults. Left out, as the owner's own data or with no clear default: the full newsletter form
+ * and the sample listings (IDs), District helplines and Issuer short names (hand-made lists), and the Follow us
+ * accounts (our own addresses). Another plugin adds its own section with the aw_core_reset_sections filter (PlanWeb).
+ *
+ * @return array<string,string[]|callable> Section id => option names, or a callable that resets the section.
+ */
+function aw_core_reset_sections(): array {
+	$own = array(
+		'aw_cdn'               => array( 'aw_cdn_ttl', 'aw_cdn_ttl_long' ),
+		'aw_modules_social'    => array( 'aw_social_on', 'aw_social_show' ),
+		'aw_modules_forms'     => array( 'aw_ff_send_email' ),
+		'aw_modules_uninstall' => array( 'aw_delete_data_on_uninstall' ),
+	);
+	/**
+	 * Filters the sections that have "Reset this section".
+	 *
+	 * @param array $sections Section id => option names, or a callable that resets the section and returns whether
+	 *                        it wrote anything.
+	 */
+	return (array) apply_filters( 'aw_core_reset_sections', $own );
+}
+
+/**
+ * Put registered settings back to their registered defaults. Nothing is written where they already are.
+ *
+ * @param string[] $names Option names (registered with register_setting()).
+ * @return bool Whether anything was written.
+ */
+function aw_core_reset_options( array $names ): bool {
+	$registered = get_registered_settings();
+	$saved      = false;
+	foreach ( $names as $name ) {
+		if ( ! isset( $registered[ $name ] ) || ! array_key_exists( 'default', $registered[ $name ] ) ) {
+			continue; // no registered default: left as it is
+		}
+		$default = $registered[ $name ]['default'];
+		$now     = get_option( $name, $default );
+		if ( is_bool( $default ) ? (bool) $now === $default : (string) $now === (string) $default ) {
+			continue;
+		}
+		update_option( $name, $default );
+		$saved = true;
+	}
+	return $saved;
+}
+
+/**
+ * The form a section's "Reset this section" button sends (outside the settings form; the button names it with form=).
+ *
+ * @param string $section Section id of aw_core_reset_sections().
+ */
+function aw_core_reset_form( string $section ): void {
+	echo '<form id="' . esc_attr( 'aw-reset-' . $section ) . '" method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
+	echo '<input type="hidden" name="action" value="aw_reset_section"><input type="hidden" name="section" value="' . esc_attr( $section ) . '">';
+	wp_nonce_field( 'aw_reset_section_' . $section );
+	echo '</form>';
+}
+
+/**
+ * The "Reset this section" button, for the form aw_core_reset_form() prints.
+ *
+ * @param string $section Section id of aw_core_reset_sections().
+ */
+function aw_core_reset_button( string $section ): void {
+	printf(
+		'<p><button type="submit" form="%1$s" class="button" onclick="return window.confirm(%2$s);">%3$s</button></p>',
+		esc_attr( 'aw-reset-' . $section ),
+		esc_attr( (string) wp_json_encode( 'Reset this section to its defaults?' ) ),
+		esc_html( 'Reset this section' )
+	);
+}
+
+/**
+ * Kits → Modules: the sections as do_settings_sections() prints them, each with its "Reset this section" button when
+ * it has one (the reset forms go after the settings form: aw_modules_reset_forms()).
+ */
+function aw_modules_sections(): void {
+	global $wp_settings_sections, $wp_settings_fields;
+	$resets = aw_core_reset_sections();
+	foreach ( (array) ( $wp_settings_sections['aw-modules'] ?? array() ) as $section ) {
+		if ( '' !== (string) $section['title'] ) {
+			echo '<h2>' . esc_html( (string) $section['title'] ) . "</h2>\n";
+		}
+		if ( $section['callback'] ) {
+			call_user_func( $section['callback'], $section );
+		}
+		if ( empty( $wp_settings_fields['aw-modules'][ $section['id'] ] ) ) {
+			continue;
+		}
+		echo '<table class="form-table" role="presentation">';
+		do_settings_fields( 'aw-modules', $section['id'] );
+		echo '</table>';
+		if ( isset( $resets[ $section['id'] ] ) ) {
+			aw_core_reset_button( (string) $section['id'] );
+		}
+	}
+}
+
+/** Kits → Modules: the reset forms of the sections shown (after the settings form: forms cannot nest). */
+function aw_modules_reset_forms(): void {
+	global $wp_settings_sections;
+	foreach ( array_keys( aw_core_reset_sections() ) as $id ) {
+		if ( isset( $wp_settings_sections['aw-modules'][ $id ] ) ) {
+			aw_core_reset_form( (string) $id );
+		}
+	}
+}
+
+// "Reset this section": nonce and capability checked, then back to the screen with core's notice.
+add_action(
+	'admin_post_aw_reset_section',
+	function () {
+		$section = isset( $_POST['section'] ) ? sanitize_key( wp_unslash( $_POST['section'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- the nonce's action names the section; checked on the next line.
+		check_admin_referer( 'aw_reset_section_' . $section );
+		$sections = aw_core_reset_sections();
+		if ( ! current_user_can( 'manage_options' ) || ! isset( $sections[ $section ] ) ) {
+			wp_die( esc_html( 'Sorry, you are not allowed to do that.' ), 403 );
+		}
+		$reset = $sections[ $section ];
+		if ( is_callable( $reset ) ) {
+			call_user_func( $reset );
+		} else {
+			aw_core_reset_options( array_map( 'strval', (array) $reset ) );
+		}
+		add_settings_error( 'general', 'settings_updated', 'Defaults restored.', 'success' );
+		set_transient( 'settings_errors', get_settings_errors(), 30 ); // as options.php does, for settings_errors() on the screen
+		$back = wp_get_referer();
+		$back = $back ? $back : admin_url( 'admin.php?page=aw-modules' );
+		$args = array( 'settings-updated' => 'true' );
+		if ( false !== strpos( $back, 'page=kits-settings' ) ) {
+			$args['kits_section'] = 'cdn'; // Kits → Settings opens the section again
+		}
+		wp_safe_redirect( add_query_arg( $args, $back ) );
+		exit;
+	}
+);

@@ -406,39 +406,86 @@ function aw_si_links_reads_section(): void {
 		if ( defined( 'AW_SI_BING_SOURCE' ) && AW_SI_BING_SOURCE === $k && ! empty( $runs['bing']['ok'] ) ) {
 			$read = wp_date( 'j M Y', (int) $runs['bing']['ok'] ); // the monthly run itself, even when it found nothing new
 		}
-		$rows[] = array( $k, number_format_i18n( $v[0] ), $read );
+		$rows[] = array( $k, number_format_i18n( $v[0] ), $read, $v[0], $day );
 	}
 	foreach ( $reads as $src => $r ) {
 		if ( ! isset( $by[ $src ] ) && is_array( $r ) ) {
-			$rows[] = array( (string) $src, '–', mysql2date( 'j M Y', (string) ( $r[2] ?? '' ) ) ); // a read with no link rows (Top linked pages only)
+			$rows[] = array( (string) $src, '–', mysql2date( 'j M Y', (string) ( $r[2] ?? '' ) ), -1, (string) ( $r[2] ?? '' ) ); // a read with no link rows (Top linked pages only)
 		}
 	}
 	$pages = (array) get_option( AW_SI_LINK_PAGES_OPTION, array() );
 	if ( ! empty( $pages['day'] ) ) {
-		$rows[] = array( __( 'Search Console Links: top linked pages', 'insightweb' ), number_format_i18n( count( (array) ( $pages['rows'] ?? array() ) ) ), mysql2date( 'j M Y', (string) $pages['day'] ) );
+		$rows[] = array( __( 'Search Console Links: top linked pages', 'insightweb' ), number_format_i18n( count( (array) ( $pages['rows'] ?? array() ) ) ), mysql2date( 'j M Y', (string) $pages['day'] ), count( (array) ( $pages['rows'] ?? array() ) ), (string) $pages['day'] );
 	}
 	$dr = (array) get_option( AW_SI_LINK_DR_OPTION, array() );
 	if ( $dr ) {
-		$rows[] = array( __( 'DR (Ahrefs, typed by hand)', 'insightweb' ), number_format_i18n( count( $dr ) ), mysql2date( 'j M Y', (string) max( array_map( fn( $x ) => (string) ( $x[1] ?? '' ), $dr ) ) ) );
+		$dr_day = (string) max( array_map( fn( $x ) => (string) ( $x[1] ?? '' ), $dr ) );
+		$rows[] = array( __( 'DR (Ahrefs, typed by hand)', 'insightweb' ), number_format_i18n( count( $dr ) ), mysql2date( 'j M Y', $dr_day ), count( $dr ), $dr_day );
 	}
 	echo '<h2>' . esc_html__( 'Last read per source', 'insightweb' ) . '</h2>';
 	if ( ! $rows ) {
 		echo '<p>' . esc_html__( 'Nothing read yet.', 'insightweb' ) . '</p>';
 		return;
 	}
-	echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Source', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'Rows', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'Last read', 'insightweb' ) . '</th></tr></thead><tbody>';
+	$cells = array();
 	foreach ( $rows as $r ) {
-		echo '<tr><td>' . esc_html( $r[0] ) . '</td><td>' . esc_html( $r[1] ) . '</td><td>' . esc_html( $r[2] ) . '</td></tr>';
+		$cells[] = array(
+			'source' => esc_html( $r[0] ),
+			'rows'   => esc_html( $r[1] ),
+			'read'   => esc_html( $r[2] ),
+			'_sort'  => array(
+				'rows' => $r[3],
+				'read' => $r[4],
+			),
+		);
 	}
-	echo '</tbody></table>';
+	aw_si_simple_table(
+		'link-reads',
+		array(
+			'source' => esc_html__( 'Source', 'insightweb' ),
+			'rows'   => esc_html__( 'Rows', 'insightweb' ),
+			'read'   => esc_html__( 'Last read', 'insightweb' ),
+		),
+		$cells,
+		array(
+			'sortable' => array(
+				'source' => false,
+				'rows'   => true,
+				'read'   => true,
+			),
+		)
+	);
 	if ( ! empty( $pages['rows'] ) ) {
 		/* translators: %s: date read. */
 		echo '<h2>' . esc_html( sprintf( __( 'Top linked pages (Search Console, read %s)', 'insightweb' ), mysql2date( 'j M Y', (string) $pages['day'] ) ) ) . '</h2>';
-		echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Our page', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'Incoming links', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'Linking sites', 'insightweb' ) . '</th></tr></thead><tbody>';
+		$cells = array();
 		foreach ( array_slice( (array) $pages['rows'], 0, 10 ) as $p ) {
-			$path = aw_si_path( (string) $p[0] );
-			echo '<tr><td><a href="' . esc_url( (string) $p[0] ) . '" target="_blank" rel="noopener">' . esc_html( '' !== $path ? $path : (string) $p[0] ) . '</a></td><td>' . esc_html( number_format_i18n( (int) $p[1] ) ) . '</td><td>' . esc_html( number_format_i18n( (int) $p[2] ) ) . '</td></tr>';
+			$path    = aw_si_path( (string) $p[0] );
+			$cells[] = array(
+				'page'  => '<a href="' . esc_url( (string) $p[0] ) . '" target="_blank" rel="noopener">' . esc_html( '' !== $path ? $path : (string) $p[0] ) . '</a>',
+				'links' => esc_html( number_format_i18n( (int) $p[1] ) ),
+				'sites' => esc_html( number_format_i18n( (int) $p[2] ) ),
+				'_sort' => array(
+					'links' => (int) $p[1],
+					'sites' => (int) $p[2],
+				),
+			);
 		}
-		echo '</tbody></table>';
+		aw_si_simple_table(
+			'linked-pages',
+			array(
+				'page'  => esc_html__( 'Our page', 'insightweb' ),
+				'links' => esc_html__( 'Incoming links', 'insightweb' ),
+				'sites' => esc_html__( 'Linking sites', 'insightweb' ),
+			),
+			$cells,
+			array(
+				'sortable' => array(
+					'page'  => false,
+					'links' => true,
+					'sites' => true,
+				),
+			)
+		);
 	}
 }

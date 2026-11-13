@@ -46,7 +46,8 @@ $six = kits_menu_six( 'kits' );
 kits_t( array( 'kits', 'kits-options', 'kits-settings', 'kits-tools', 'kits-help' ) === array_keys( $six ), 'five items in the spec order (Plugins is WordPress\'s own)' );
 kits_t( array( 'Home', 'Theme Options', 'Settings', 'Tools', 'Help' ) === array_column( $six, 0 ), 'five labels' );
 kits_t( 'edit_theme_options' === $six['kits-tools'][2], 'Tools: edit_theme_options' );
-kits_t( 'manage_options' === $six['kits'][2] && 'manage_options' === $six['kits-help'][2], 'Home and Help: manage_options' );
+kits_t( 'manage_kits' === $six['kits'][2] && 'manage_kits' === $six['kits-help'][2], 'Home and Help: manage_kits (kits-caps.php)' );
+kits_t( 'manage_options' === $six['kits-options'][2] && 'manage_options' === $six['kits-settings'][2], 'Theme Options and Settings: manage_options' );
 foreach ( $six as $slug => $t ) {
 	kits_t( 'admin.php?page=' . $slug === $t[1], "address of $slug" );
 }

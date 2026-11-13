@@ -191,21 +191,46 @@ add_action(
 				/* translators: 1: number of sources, 2: how many have a problem. */
 				$summary = sprintf( __( 'Sources (%1$s, %2$s with a problem)', 'insightweb' ), number_format_i18n( count( $sources ) ), number_format_i18n( $need ) );
 				echo '<details' . ( $need ? ' open' : '' ) . '><summary>' . esc_html( $summary ) . '</summary>';
-				echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Source', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'Last update', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'Status', 'insightweb' ) . '</th></tr></thead><tbody>';
+				$cells = array();
 				foreach ( $sources as $r ) {
-					$s = $status[ $r['status'] ];
-					echo '<tr><td style="overflow-wrap:anywhere">' . esc_html( $r['name'] ) . '</td><td>' . esc_html( $r['last'] ? wp_date( 'j M, g:i a', $r['last'] ) : __( 'never', 'insightweb' ) ) . '</td><td><span class="dashicons dashicons-' . esc_attr( $s[0] ) . '" style="color:' . esc_attr( $s[1] ) . '" aria-hidden="true"></span> ' . esc_html( $s[2] ) . '</td></tr>';
+					$s       = $status[ $r['status'] ];
+					$cells[] = array(
+						'source' => '<div style="overflow-wrap:anywhere">' . esc_html( $r['name'] ) . '</div>',
+						'last'   => esc_html( $r['last'] ? wp_date( 'j M, g:i a', $r['last'] ) : __( 'never', 'insightweb' ) ),
+						'status' => '<span class="dashicons dashicons-' . esc_attr( $s[0] ) . '" style="color:' . esc_attr( $s[1] ) . '" aria-hidden="true"></span> ' . esc_html( $s[2] ),
+					);
 				}
-				echo '</tbody></table></details>';
+				aw_si_simple_table(
+					'seo-sources',
+					array(
+						'source' => esc_html__( 'Source', 'insightweb' ),
+						'last'   => esc_html__( 'Last update', 'insightweb' ),
+						'status' => esc_html__( 'Status', 'insightweb' ),
+					),
+					$cells,
+					array( 'foot' => false ) // a short table in a Dashboard widget: no repeated header row
+				);
+				echo '</details>';
 
 				/* translators: %s: number of paths. */
 				echo '<details><summary>' . esc_html( sprintf( __( '404s still open (%s)', 'insightweb' ), number_format_i18n( count( $nf ) ) ) ) . '</summary>';
 				if ( $nf ) {
-					echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Path', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'Views', 'insightweb' ) . '</th></tr></thead><tbody>';
+					$cells = array();
 					foreach ( array_slice( $nf, 0, 10 ) as $r ) {
-						echo '<tr><td style="overflow-wrap:anywhere">' . esc_html( $r['path'] ) . '</td><td>' . esc_html( number_format_i18n( $r['views'] ) ) . '</td></tr>';
+						$cells[] = array(
+							'path'  => '<div style="overflow-wrap:anywhere">' . esc_html( $r['path'] ) . '</div>',
+							'views' => esc_html( number_format_i18n( $r['views'] ) ),
+						);
 					}
-					echo '</tbody></table>';
+					aw_si_simple_table(
+						'seo-404s',
+						array(
+							'path'  => esc_html__( 'Path', 'insightweb' ),
+							'views' => esc_html__( 'Views', 'insightweb' ),
+						),
+						$cells,
+						array( 'foot' => false )
+					);
 				} else {
 					echo '<p>' . esc_html__( 'None.', 'insightweb' ) . '</p>';
 				}

@@ -2,9 +2,9 @@
 /**
  * DirectoryWeb's routes for its new screens (docs/directory-plugin-plan.md §2), under directoryweb/v1:
  *
- *   GET  dashboard                 edit_aw_volunteers  the tiles, from the background counts (directoryweb-dashboard.php)
- *   POST dashboard/count           edit_aw_volunteers  ask for a count now (one background event)
- *   GET  stats/<tile>              edit_aw_volunteers  one tile (published, status, places, indexing, search, claims,
+ *   GET  dashboard                 manage_directoryweb the tiles, from the background counts (directoryweb-dashboard.php)
+ *   POST dashboard/count           manage_directoryweb ask for a count now (one background event)
+ *   GET  stats/<tile>              manage_directoryweb one tile (published, status, places, indexing, search, claims,
  *                                                      badges, enrichment), from the same stored counts
  *   GET  claims                    edit_aw_volunteers  the Claims list: views, search, filters, sort, pages
  *   GET  claims/<id>               edit_aw_volunteers  one claim, field by field, with the proposed changes
@@ -43,14 +43,15 @@ function directoryweb_rest_can( string $cap ): callable {
 add_action(
 	'rest_api_init',
 	function () {
-		$claims = directoryweb_rest_can( 'edit_aw_volunteers' );
+		$dash   = directoryweb_rest_can( DIRECTORYWEB_CAP ); // directoryweb-caps.php
+		$claims = directoryweb_rest_can( 'edit_aw_volunteers' ); // claim data: as on Directory → Claims
 		$admin  = directoryweb_rest_can( 'manage_options' );
 		register_rest_route(
 			DIRECTORYWEB_REST,
 			'/dashboard',
 			array(
 				'methods'             => 'GET',
-				'permission_callback' => $claims,
+				'permission_callback' => $dash,
 				'callback'            => fn() => rest_ensure_response( directoryweb_dashboard_payload() ),
 			)
 		);
@@ -59,7 +60,7 @@ add_action(
 			'/dashboard/count',
 			array(
 				'methods'             => 'POST',
-				'permission_callback' => $claims,
+				'permission_callback' => $dash,
 				'callback'            => fn() => rest_ensure_response( array( 'waiting' => directoryweb_stats_request() ) ),
 			)
 		);
@@ -68,7 +69,7 @@ add_action(
 			'/stats/(?P<key>[a-z]+)',
 			array(
 				'methods'             => 'GET',
-				'permission_callback' => $claims,
+				'permission_callback' => $dash,
 				'callback'            => 'directoryweb_rest_stat',
 			)
 		);

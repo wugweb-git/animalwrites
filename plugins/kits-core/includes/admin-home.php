@@ -23,11 +23,11 @@ add_action(
 		// The icon is the plugin's one-colour SVG as a data URI, which WordPress paints in the admin colour scheme.
 		$icon = dirname( __DIR__ ) . '/assets/menu-icon.svg';
 		$icon = is_readable( $icon ) ? 'data:image/svg+xml;base64,' . base64_encode( (string) file_get_contents( $icon ) ) : 'dashicons-admin-appearance'; // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode, WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- the plugin's own small SVG file.
-		add_menu_page( 'Kits', 'Kits', 'manage_options', KITS_MENU, 'kits_home_page', $icon, '58.1' );
+		add_menu_page( 'Kits', 'Kits', KITS_CAP, KITS_MENU, 'kits_home_page', $icon, '58.1' );
 		if ( ! isset( $GLOBALS['menu']['58.05'] ) ) {
 			$GLOBALS['menu']['58.05'] = array( '', 'read', 'separator-wugweb', '', 'wp-menu-separator', 'separator-wugweb' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- one separator above the block, as core adds its own.
 		}
-		add_submenu_page( KITS_MENU, 'Home', 'Home', 'manage_options', KITS_MENU, 'kits_home_page' );
+		add_submenu_page( KITS_MENU, 'Home', 'Home', KITS_CAP, KITS_MENU, 'kits_home_page' );
 	},
 	8 // before the other Kits screens join the menu
 );
