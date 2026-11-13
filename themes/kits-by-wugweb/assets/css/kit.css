@@ -799,12 +799,12 @@ html.has-modal-open .kit-sticky-help { display: none !important; }
 
 /* ---------- Newsletter band (kit-nl-band) ----------
    A light band just above the footer with one card: an icon, a heading (h2) and a line, an optional art slot (top right
-   from 768, drawn by the site) and the sign-up form, which the site styles. The card's mark colour is --kit-nl-mark. */
+   from 768, drawn by the site) and the sign-up form, which the site styles. The card's mark colour is --kit-nl-mark.
+   The band is spaced as every other section (owner, 13 Nov 2026): the section padding top and bottom, the gutter at the
+   sides, the card as wide as a section's content (--kit-width-wide) and the heading at the theme H2 at every width. */
 .wp-site-blocks > :has(> .kit-nl-band) + * { margin-block-start: 0; }
-.kit-nl-band { background: var(--kit-color-raised); border-top: var(--kit-border-width) solid var(--kit-color-line); padding: var(--kit-space-6) var(--kit-space-4); }
-@media (min-width: 768px) { .kit-nl-band { padding-inline: var(--kit-space-6); } }
-@media (min-width: 1200px) { .kit-nl-band { padding: var(--kit-space-7) var(--kit-space-gutter); } }
-.kit-nl-band-inner { box-sizing: border-box; position: relative; overflow: hidden; display: grid; gap: var(--kit-space-5); max-width: var(--kit-width-content); margin: 0 auto; padding: var(--kit-space-5); background: color-mix(in srgb, var(--kit-nl-mark, var(--kit-color-ink)) 6%, var(--kit-color-raised)); border: var(--kit-border-width) solid color-mix(in srgb, var(--kit-nl-mark, var(--kit-color-ink)) 14%, var(--kit-color-line)); border-top: var(--kit-border-mark) solid var(--kit-nl-mark, var(--kit-color-ink)); border-radius: var(--kit-radius-card); box-shadow: var(--kit-elevation-1); }
+.kit-nl-band { background: var(--kit-color-raised); border-top: var(--kit-border-width) solid var(--kit-color-line); padding: var(--kit-space-section) var(--kit-space-gutter) var(--kit-space-section-end); }
+.kit-nl-band-inner { box-sizing: border-box; position: relative; overflow: hidden; display: grid; gap: var(--kit-space-5); max-width: var(--kit-width-wide); margin: 0 auto; padding: var(--kit-space-5); background: color-mix(in srgb, var(--kit-nl-mark, var(--kit-color-ink)) 6%, var(--kit-color-raised)); border: var(--kit-border-width) solid color-mix(in srgb, var(--kit-nl-mark, var(--kit-color-ink)) 14%, var(--kit-color-line)); border-top: var(--kit-border-mark) solid var(--kit-nl-mark, var(--kit-color-ink)); border-radius: var(--kit-radius-card); box-shadow: var(--kit-elevation-1); }
 @media (min-width: 768px) { .kit-nl-band-inner { padding: var(--kit-space-6); } }
 .kit-nl-band-text { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: var(--kit-space-4); align-items: center; }
 .kit-nl-band-text > :is(.kit-nl-band-head, .kit-nl-band-line) { padding-inline-start: var(--kit-space-4); border-inline-start: var(--kit-border-width) solid color-mix(in srgb, var(--kit-color-ink) 35%, transparent); }
@@ -817,7 +817,6 @@ html.has-modal-open .kit-sticky-help { display: none !important; }
 .kit-nl-band .kit-nl-band-head { margin: 0; max-width: none; font-size: var(--kit-type-h2); font-weight: var(--kit-weight-bold); line-height: var(--kit-leading-heading); color: var(--kit-color-ink); letter-spacing: inherit; text-wrap: pretty; }
 .kit-nl-band .kit-nl-band-line { margin: 0; padding-top: var(--kit-space-1); max-width: 46ch; font-size: var(--kit-type-base); color: var(--kit-color-muted); }
 @media (max-width: 767px) {
-	.kit-nl-band .kit-nl-band-head { font-size: var(--kit-type-h3); }
 	.kit-nl-band .kit-nl-band-line { font-size: var(--kit-type-sm); }
 	.kit-nl-band-ico { width: var(--kit-size-target); height: var(--kit-size-target); --kit-ico-size: 1.25rem; }
 }

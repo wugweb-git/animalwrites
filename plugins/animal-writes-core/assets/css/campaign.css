@@ -392,6 +392,7 @@
 .aw-camp h3 { letter-spacing: -0.01em; text-wrap: balance; }
 .aw-camp-lede { max-width: 62ch; font-size: var(--kit-type-lead); }
 .aw-camp-section > * { max-width: 1120px; }
+.aw-nl-band--camp .kit-nl-band-inner { max-width: 1120px; } /* the newsletter card on a campaign page: the bands' 1120px column (owner, 13 Nov 2026) */
 
 /* Lab rules (owner, 19 Oct 2026): section titles are plain theme H2s, cards and the letter tool stand off their band */
 .aw-camp--lab-rules h2 { font-weight: var(--kit-weight-bold); letter-spacing: normal; line-height: 1.2; }
