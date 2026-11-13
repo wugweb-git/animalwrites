@@ -972,6 +972,7 @@
 	.aw-camp.aw-camp--diwali #what-to-do #night > .aw-camp-card-ico { right: auto; left: calc(48% - var(--kit-size-control)); }
 }
 @media (min-width: 1200px) { .aw-camp.aw-camp--diwali #what-to-do #after > p:not(.aw-camp-card-ico) { max-width: 72ch; } }
+@media (min-width: 768px) { .aw-camp.aw-camp--diwali #what-to-do #street { --tile-top: var(--kit-space-5); background: linear-gradient(rgb(27 22 54 / 0.86), rgb(27 22 54 / 0.92)), url("/wp-content/uploads/2026/11/woman-giving-water-to-street-dog-diwali-night-tall.avif") center 35% / cover, var(--camp-dark); } } /* from 768 the row is as tall as its text: the picture sits under the whole tile, no band above */
 .aw-camp--diwali #latest .aw-camp-more-fold { grid-column: 1 / -1; margin: 0; border-top: var(--kit-border-width) solid var(--kit-color-line); }
 .aw-camp--diwali #latest .aw-camp-more-fold > summary { display: flex; align-items: center; box-sizing: border-box; min-height: var(--kit-size-target); padding-block: var(--kit-space-2); font-weight: var(--kit-weight-bold); cursor: pointer; }
 .aw-camp--diwali #latest .aw-camp-more-fold > summary:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
