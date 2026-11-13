@@ -691,23 +691,9 @@ add_action(
 			wp_enqueue_style( 'aw-campaign', $url( $css ), $deps, $v( 'assets/css/' . $css ) );
 		}
 		wp_enqueue_script( 'aw-campaign', plugins_url( 'assets/js/' . $js, AW_CORE_DIR . 'animal-writes-core.php' ), array(), $v( 'assets/js/' . $js ), array( 'in_footer' => true, 'strategy' => 'defer' ) );
-		if ( is_singular( 'aw_campaign' ) ) { // the Share button and the story/post images (campaign.js)
-			$img = fn( $k ) => ( $a = (int) get_post_meta( $id, $k, true ) ) ? (string) wp_get_attachment_url( $a ) : '';
-			$txt = (string) get_post_meta( $id, 'aw_campaign_share_text', true );
-			// The link preview in the letter share box shows what Facebook, WhatsApp and X show: Rank Math's social title, description and image
-			$rm   = function ( $k ) use ( $id ) {
-				$v = (string) get_post_meta( $id, $k, true );
-				if ( $v && class_exists( '\RankMath\Helper' ) ) {
-					$v = \RankMath\Helper::replace_vars( $v, get_post( $id ) );
-				}
-				return trim( wp_strip_all_tags( $v ) );
-			};
-			$og_t = $rm( 'rank_math_facebook_title' );
-			$og_t = $og_t ? $og_t : ( $rm( 'rank_math_title' ) ? $rm( 'rank_math_title' ) : get_the_title( $id ) );
-			$og_d = $rm( 'rank_math_facebook_description' );
-			$og_d = $og_d ? $og_d : ( $rm( 'rank_math_description' ) ? $rm( 'rank_math_description' ) : wp_strip_all_tags( get_the_excerpt( $id ) ) );
-			$og_i = $img( 'rank_math_facebook_image_id' );
-			wp_add_inline_script( 'aw-campaign', 'window.awCampShare=' . wp_json_encode( array( 'url' => get_permalink( $id ), 'short' => aw_camp_short_url( $id ), 'title' => get_the_title( $id ), 'text' => $txt ? $txt : get_the_title( $id ), 'hashtags' => aw_camp_x_hashtags( get_post_meta( $id, 'aw_campaign_share_hashtags', true ) ), 'image' => $img( 'aw_campaign_share_image' ), 'story' => $img( 'aw_campaign_share_story' ), 'post' => $img( 'aw_campaign_share_post' ), 'slug' => get_post_field( 'post_name', $id ), 'og' => array( 'title' => $og_t, 'desc' => $og_d, 'image' => $og_i ? $og_i : (string) get_the_post_thumbnail_url( $id, 'full' ), 'host' => wp_parse_url( home_url(), PHP_URL_HOST ) ), 'close' => aw_date( get_post_meta( $id, 'aw_campaign_close', true ) ), 'closed' => aw_camp_close_ts( $id ) && time() >= aw_camp_close_ts( $id ) ) ) . ';', 'before' );
+		if ( is_singular( 'aw_campaign' ) && function_exists( 'kits_share_payload' ) ) { // the letter tool's share row (campaign.js): the page's one share payload, as the share bar's
+			$p = kits_share_payload( (string) get_permalink( $id ), html_entity_decode( get_the_title( $id ), ENT_QUOTES ), (string) get_post_field( 'post_name', $id ), array( 'post_id' => $id ) );
+			wp_add_inline_script( 'aw-campaign', 'window.awCampShare=' . wp_json_encode( array( 'url' => $p['url'], 'short' => $p['url'], 'title' => $p['title'], 'text' => $p['text'], 'hashtags' => implode( ',', $p['hashtags'] ), 'hash' => $p['hash'], 'image' => $p['image'], 'slug' => get_post_field( 'post_name', $id ), 'close' => aw_date( get_post_meta( $id, 'aw_campaign_close', true ) ), 'closed' => aw_camp_close_ts( $id ) && time() >= aw_camp_close_ts( $id ) ) ) . ';', 'before' );
 		}
 	}
 );
@@ -1142,24 +1128,31 @@ function aw_camp_x_hashtags( $raw ) {
 	return implode( ',', array_values( array_unique( $tags ) ) );
 }
 
-// One share kit per page (owner, 13 Nov 2026): every share carries #AnimalWrites first (brand hashtag first, 4 Nov);
-// a campaign page adds its own share line and hashtags. The page shares itself; its picture is the link preview's (owner,
-// 13 Nov 2026: "share function on the page is only about sharing page (campaign hero)").
+// One share payload per page (owner, 13 Nov 2026; kits_share_payload): every share carries #AnimalWrites first (brand
+// hashtag first, 4 Nov); a campaign adds its own share line, its hashtags (CamelCase, as stored) and hands out its short
+// link. The page shares itself; its picture is the link preview's square (aw-seo-extras opengraph.php).
 add_filter(
 	'kits_share_args',
-	function ( $args ) {
+	function ( $args, $url = '' ) {
 		$tags = array( 'AnimalWrites' );
-		if ( is_singular( 'aw_campaign' ) ) {
-			$id   = get_queried_object_id();
+		$id   = (int) ( $args['post_id'] ?? 0 );
+		$id   = $id ? $id : ( is_singular() ? get_queried_object_id() : 0 );
+		if ( $id && 'aw_campaign' === get_post_type( $id ) ) {
 			$line = (string) get_post_meta( $id, 'aw_campaign_share_text', true );
 			$tags = array_merge( $tags, explode( ',', aw_camp_x_hashtags( get_post_meta( $id, 'aw_campaign_share_hashtags', true ) ) ) );
 			if ( '' === (string) $args['text'] && '' !== $line ) {
 				$args['text'] = $line;
 			}
+			$short = aw_camp_short_url( $id ); // the short link (/lab), when the campaign has one (campaign-short.php)
+			if ( '' === (string) ( $args['url'] ?? '' ) && '' !== $short && untrailingslashit( (string) $url ) === untrailingslashit( (string) get_permalink( $id ) ) ) {
+				$args['url'] = $short;
+			}
 		}
 		$args['hashtags'] = array_merge( $tags, (array) $args['hashtags'] );
 		return $args;
-	}
+	},
+	10,
+	2
 );
 
 /**
@@ -1339,7 +1332,8 @@ function aw_follow_accounts() {
 /**
  * The page's share kit (owner, 13 Nov 2026: one simple section): one button, "Share this page" (the phone's share
  * sheet, Safari's included; where there is none, it copies the link), and no row of network icons. Then "Follow us"
- * and our own accounts. The page shares itself; the link preview carries its share picture (aw_camp_share_meta).
+ * and our own accounts. The page shares itself: its one share payload (kits_share_payload: line, hashtags, short link
+ * and the 1080x1080 share picture, which the link preview shows too).
  * kits_share_html always adds its Copy link button; aw-share.css hides it here, since the one button copies the link.
  *
  * @return string
@@ -1350,11 +1344,9 @@ function aw_page_share_kit() {
 	}
 	$home  = is_front_page();
 	$id    = get_queried_object_id();
-	$short = $home ? '' : aw_camp_short_url( $id ); // the short link, when the campaign has one (campaign-short.php)
-	$url   = $short ? $short : ( $home ? home_url( '/' ) : (string) get_permalink( $id ) );
 	$title = $home ? get_bloginfo( 'name' ) : get_the_title( $id );
 	return kits_share_html(
-		$url,
+		$home ? home_url( '/' ) : (string) get_permalink( $id ), // a campaign's short link replaces it (kits_share_args)
 		html_entity_decode( $title, ENT_QUOTES ),
 		array(),
 		$home ? 'home' : (string) get_post_field( 'post_name', $id ),
@@ -1516,9 +1508,10 @@ add_filter(
 );
 
 /**
- * Share meta, every campaign (owner, 13 Nov 2026: one size for every share picture): when the campaign has its share
- * picture (aw_campaign_share_image, 1080x1080), the link preview uses it, so og:image and twitter:image are that one
- * square picture whatever Rank Math's Social tab holds. og:title and og:description stay Rank Math's, per campaign.
+ * Share meta, every campaign (owner, 13 Nov 2026: one size for every share picture): the link preview uses the
+ * campaign's share picture (aw_campaign_share_image, 1080x1080), else its featured (hero) picture, whatever Rank Math's
+ * Social tab holds; aw-seo-extras turns it into the 1080x1080 share square (opengraph.php), so og:image and
+ * twitter:image are one square picture on every campaign. og:title and og:description stay Rank Math's, per campaign.
  * Front end only (not the admin or the REST API), so the editor still shows and saves what is stored.
  *
  * @param mixed  $value    Null, or a value another filter set.
@@ -1534,6 +1527,7 @@ function aw_camp_share_meta( $value, $id, $key, $single ) {
 	}
 	remove_filter( 'get_post_metadata', 'aw_camp_share_meta', 10 );
 	$pic = (int) get_post_meta( $id, 'aw_campaign_share_image', true );
+	$pic = $pic ? $pic : (int) get_post_thumbnail_id( $id ); // no share picture: the campaign's featured (hero) picture, made square for sharing
 	$url = $pic ? (string) wp_get_attachment_url( $pic ) : '';
 	add_filter( 'get_post_metadata', 'aw_camp_share_meta', 10, 4 );
 	if ( '' === $url ) {

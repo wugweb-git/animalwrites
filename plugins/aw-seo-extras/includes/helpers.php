@@ -641,7 +641,9 @@ function aw_seo_attachment( $att, $size = 'large' ) {
  * WebP, site-wide). Uploads are turned into AVIF or WebP (resized copies), which Facebook, WhatsApp and LinkedIn don't
  * reliably show, so an AVIF or WebP picture from our uploads goes out as its original upload (the JPEG or PNG kept
  * beside it); without one, a 1200x630 JPEG is made once and kept beside it ({name}-og.jpg). Anything that is not an AVIF
- * or WebP upload passes through.
+ * or WebP upload passes through. Since 13 Nov 2026 og:image and twitter:image are the 1080x1080 share square
+ * (aw_seo_share_square); this keeps a picture's own shape and is used for the pictures in structured data (schema.php),
+ * and as the square's fallback when the square cannot be made.
  *
  * @param string $url Picture address.
  * @return array [url, width, height, mime]; width, height 0 and mime '' when unchanged.
@@ -768,9 +770,103 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	);
 }
 
+/* ---------- The share picture: one size, 1080x1080 (owner, 13 Nov 2026) ---------- */
+
+/**
+ * The upload a picture file was made from: the original JPEG or PNG kept beside an AVIF or WebP copy, else the
+ * full-size file (never a resized copy, a "-scaled" copy when the original is there, or a share file made from it).
+ * '' when nothing is on disk.
+ *
+ * @param string $path A picture file in the uploads folder (the full upload, one of its sizes, or a share file).
+ * @return string
+ */
+function aw_seo_share_source( $path ) {
+	$path = (string) $path;
+	if ( '' === $path ) {
+		return '';
+	}
+	$stem = dirname( $path ) . '/' . aw_seo_share_stem( basename( $path ) );
+	foreach ( array( '', '-scaled' ) as $scaled ) {
+		foreach ( array( 'jpg', 'jpeg', 'png', 'JPG', 'JPEG', 'PNG', 'webp', 'avif', 'gif' ) as $ext ) {
+			if ( file_exists( $stem . $scaled . '.' . $ext ) ) {
+				return $stem . $scaled . '.' . $ext;
+			}
+		}
+	}
+	return file_exists( $path ) ? $path : '';
+}
+
+/**
+ * A picture file's name without its extension, size ("-1024x683"), "-scaled", or share-file ending ("-og",
+ * "-share-1080"): "dog-scaled-1024x683.avif" and "dog-og.jpg" are both "dog".
+ *
+ * @param string $name File name.
+ * @return string
+ */
+function aw_seo_share_stem( $name ) {
+	return (string) preg_replace( '/(?:-scaled)?(?:-\d+x\d+)?(?:-og|-share-1080)?\.[A-Za-z0-9]+$/', '', (string) $name );
+}
+
+/**
+ * The share picture (owner, 13 Nov 2026: "the image size keep it same"): every og:image, twitter:image and share-sheet
+ * picture is 1080x1080, centre-cropped from the original upload (never from an AVIF or WebP copy when the original is
+ * kept). Made once and kept beside the upload as {name}-share-1080.jpg (a PNG stays PNG, {name}-share-1080.png, so a
+ * logo's transparency is not turned black); made again only when the upload is newer. A picture that already is a
+ * 1080x1080 JPEG or PNG is used as it is. Portrait pictures are cropped the same way, so none is skipped any more.
+ * A picture that is not one of our uploads (a publisher's own image, linked) passes through unchanged.
+ *
+ * @param int|string $src Attachment ID or picture address.
+ * @return array [url, width, height, mime]; width, height 0 and mime '' when unchanged.
+ */
+function aw_seo_share_square( $src ) {
+	static $done = array();
+	$key = (string) $src;
+	if ( isset( $done[ $key ] ) ) {
+		return $done[ $key ];
+	}
+	$att  = is_numeric( $src ) ? (int) $src : 0;
+	$url  = $att ? (string) wp_get_attachment_url( $att ) : (string) $src;
+	$path = $att ? (string) wp_get_original_image_path( $att ) : aw_seo_upload_path( $url );
+	$from = aw_seo_share_source( '' !== $path ? $path : ( $att ? (string) get_attached_file( $att ) : '' ) );
+	if ( '' === $from || ! preg_match( '/\.(jpe?g|png|webp|avif|gif)$/i', $from ) ) {
+		$done[ $key ] = array( $url, 0, 0, '' ); // not one of our uploads
+		return $done[ $key ];
+	}
+	$up     = wp_get_upload_dir();
+	$to_url = fn( $p ) => set_url_scheme( $up['baseurl'], 'https' ) . str_replace( '\\', '/', substr( $p, strlen( $up['basedir'] ) ) );
+	$size   = wp_getimagesize( $from );
+	$mime   = (string) ( $size['mime'] ?? '' );
+	$png    = 'image/png' === $mime;
+	if ( $size && 1080 === (int) $size[0] && 1080 === (int) $size[1] && ( $png || 'image/jpeg' === $mime ) ) {
+		$done[ $key ] = array( $to_url( $from ), 1080, 1080, $mime );
+		return $done[ $key ];
+	}
+	$out = dirname( $from ) . '/' . aw_seo_share_stem( basename( $from ) ) . '-share-1080.' . ( $png ? 'png' : 'jpg' );
+	if ( ! file_exists( $out ) || filemtime( $out ) < filemtime( $from ) ) {
+		$ed = wp_get_image_editor( $from );
+		if ( is_wp_error( $ed ) ) {
+			$done[ $key ] = aw_seo_share_safe_url( $url ); // never AVIF or WebP, even when the square cannot be made
+			return $done[ $key ];
+		}
+		$dim  = $ed->get_size();
+		$side = min( (int) $dim['width'], (int) $dim['height'] );
+		$ed->crop( intdiv( (int) $dim['width'] - $side, 2 ), intdiv( (int) $dim['height'] - $side, 2 ), $side, $side, 1080, 1080 ); // the centre square, scaled to 1080
+		$ed->set_quality( 85 );
+		add_filter( 'image_editor_output_format', '__return_empty_array', PHP_INT_MAX ); // or WebP / AVIF conversion saves it in another format
+		$saved = $ed->save( $out, $png ? 'image/png' : 'image/jpeg' );
+		remove_filter( 'image_editor_output_format', '__return_empty_array', PHP_INT_MAX );
+		if ( is_wp_error( $saved ) || ! file_exists( $out ) ) {
+			$done[ $key ] = aw_seo_share_safe_url( $url );
+			return $done[ $key ];
+		}
+	}
+	$done[ $key ] = array( $to_url( $out ), 1080, 1080, $png ? 'image/png' : 'image/jpeg' );
+	return $done[ $key ];
+}
+
 /** The site's default share image (Settings), as aw_seo_attachment(). */
 function aw_seo_default_image() {
-	return aw_seo_attachment( (int) get_option( 'aw_default_share_image' ), 'full' ); // made at share size (1200×630)
+	return aw_seo_attachment( (int) get_option( 'aw_default_share_image' ), 'full' ); // shared as its 1080x1080 square (aw_seo_share_square)
 }
 
 /** Share image of a listing without a logo of its own (owner, 15 Oct 2026): banner-aw_listing-wide.webp, the Directory band picture. */
@@ -832,10 +928,12 @@ function aw_seo_term_image() {
 }
 
 /**
- * The share image of the current view (og:image and article schema): the item's own image when it is landscape (or of
- * unknown shape), a category page's category photo, for a listing the Directory band picture, else the site share image,
+ * The share image of the current view (og:image and article schema): the item's own image (portrait too: the share
+ * card is a centre-cropped square now, aw_seo_share_square(), so a portrait photo no longer gives way to the site
+ * image), a category page's category photo, for a listing the Directory band picture, else the site share image,
  * else the site icon. Other tags keep the site share image; Directory type tags have their own, set in Rank Math's
- * Social tab (20 Oct 2026), which Rank Math prints (opengraph.php).
+ * Social tab (20 Oct 2026), which Rank Math prints (opengraph.php). The picture keeps its own shape here (the article
+ * schema uses it); og:image and twitter:image turn it into the 1080x1080 share square (opengraph.php).
  *
  * @return array|null
  */
@@ -845,9 +943,6 @@ function aw_seo_image() {
 		return $img;
 	}
 	$img = is_singular() ? aw_seo_item_image( get_queried_object_id() ) : aw_seo_term_image();
-	if ( $img && $img['height'] > $img['width'] && ! ( is_singular() && get_post_meta( get_queried_object_id(), 'rank_math_facebook_image_id', true ) ) ) {
-		$img = null; // portrait: share cards are landscape, so the site image is shared instead (the page keeps its photo)
-	}
 	if ( ! $img && is_singular( 'aw_listing' ) ) {
 		$img = aw_seo_attachment( AW_SEO_LISTING_SHARE_IMAGE, 'full' ); // a listing without its own logo: the Directory's wide band picture
 	}

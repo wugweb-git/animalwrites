@@ -61,8 +61,8 @@
 		var b = e.target.closest && e.target.closest('button[data-kit-share]');
 		if (b) trackLater('share_click', { network: b.dataset.kitShare });
 	});
-	/* Share: the phone's own share sheet (Instagram, WhatsApp, Telegram, Snapchat...) plus the story and post images,
-	   which go straight to Instagram or Facebook stories through the same sheet; on a computer the images download. */
+	/* Share: the page's one share payload (kits_share_payload, campaign-tools.php), the same the share bar sends: the line,
+	   its hashtags (#AnimalWrites first), the short link and the page's 1080x1080 share picture. */
 	var sh = window.awCampShare || {};
 	if (sh.short) sh.url = sh.short; /* the campaign's short link (/lab): what Share and Copy link hand out; the page's canonical stays the full address */
 	/* The shared address carries utm tags so the visit it brings back counts under its network, not Direct (12 Nov 2026);
@@ -72,38 +72,34 @@
 		return sh.url + (sh.url.indexOf('?') < 0 ? '?' : '&') + 'utm_source=' + src + '&utm_medium=social_share&utm_campaign=' + encodeURIComponent(sh.slug || 'campaign');
 	}
 	var canShare = !!navigator.share;
-	/* The pictures are fetched once, ahead of the tap where possible: a phone only opens its share sheet straight from a tap. */
-	var files = {};
-	function getFile(kind) {
-		var url = kind === 'og' ? (sh.og && sh.og.image) : sh[kind];
+	/* The share picture is fetched once, ahead of the tap where possible: a phone only opens its share sheet straight from a tap. */
+	var picFile = null;
+	function getFile() {
+		var url = sh.image;
 		if (!url) return Promise.resolve(null);
-		if (!files[kind]) files[kind] = fetch(url).then(function (r) { return r.blob(); }).then(function (blob) {
+		if (!picFile) picFile = fetch(url).then(function (r) { return r.blob(); }).then(function (blob) {
 			var ext = url.slice(url.lastIndexOf('.') + 1).toLowerCase();
 			var type = /^image\//.test(blob.type) ? blob.type : ({ png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', webp: 'image/webp' })[ext] || 'image/jpeg';
 			ext = ({ 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp', 'image/avif': 'avif' })[type] || ext; // the image service may send WebP for a .jpg: the name follows the real type, or apps refuse the file
-			return new File([blob], (sh.slug || 'campaign') + '-' + kind + '.' + ext, { type: type }); // apps only take an image they can recognise
+			return new File([blob], (sh.slug || 'campaign') + '-share.' + ext, { type: type }); // apps only take an image they can recognise
 		}).catch(function () { return null; });
-		return files[kind];
+		return picFile;
 	}
 	function canShareFile(file) { return !!(file && navigator.canShare && navigator.canShare({ files: [file] })); }
-	/* The page's Share shares the page: its link with the campaign's hero picture, the link preview image (owner, 13 Nov
-	   2026: "share function on the page is only about sharing page (campaign hero)"). The ready-made social pictures
-	   are for the social accounts, not offered on the page. */
-	function picKind() {
-		return sh.og && sh.og.image ? 'og' : '';
-	}
+	var message = (sh.text || sh.title || '') + (sh.hash || ''); /* the line with its hashtags, as the share bar's */
 	/* Phone: one share with the picture, the message and the link (WhatsApp, Telegram and Facebook keep all three; Instagram
 	   keeps the picture, so the link is on the clipboard for its Link sticker). */
 	function shareAll(where) {
 		if (navigator.clipboard) navigator.clipboard.writeText(tagged('copy')).catch(function () {});
-		getFile(picKind()).then(function (file) {
-			var data = canShareFile(file) ? { files: [file], title: sh.title, text: sh.text + ' ' + tagged('native') } : { title: sh.title, text: sh.text, url: tagged('native') };
-			return navigator.share(data);
+		getFile().then(function (file) {
+			var data = canShareFile(file) ? { files: [file], title: sh.title, text: message + '\n' + tagged('native') } : { title: sh.title, text: message, url: tagged('native') };
+			return navigator.share(data).catch(function (err) {
+				if (data.files && err && err.name !== 'AbortError') return navigator.share({ title: sh.title, text: message, url: tagged('native') }); // the app refused the picture: the link alone
+			});
 		}).catch(function () {});
 	}
 	/* The share row in the letter tool (owner, 19 Oct 2026; not the page's own share row): on a phone the share sheet
-	   with picture, message and link, plus the story and post images; on a computer WhatsApp, X, Facebook, LinkedIn,
-	   Copy link and the images to download. */
+	   with picture, message and link; on a computer WhatsApp, X, Facebook, LinkedIn and Copy link. */
 	function shareKit(where) {
 		function add(el, label, ico, network) {
 			el.className = 'aw-camp-share-btn';
@@ -129,20 +125,22 @@
 		var t = encodeURIComponent(sh.text), u = function (src) { return encodeURIComponent(tagged(src)); };
 		if (canShare) btn('Share', 'share', 'native', function () { shareAll(where); }).classList.add('is-primary');
 		else {
-			link('WhatsApp', 'brand-whatsapp', 'whatsapp', 'https://wa.me/?text=' + t + '%20' + u('whatsapp'));
+			link('WhatsApp', 'brand-whatsapp', 'whatsapp', 'https://wa.me/?text=' + t + '%20' + u('whatsapp') + encodeURIComponent(sh.hash || ''));
 			link('X', 'x-brand', 'x', 'https://twitter.com/intent/tweet?text=' + t + '&url=' + u('x') + (sh.hashtags ? '&hashtags=' + encodeURIComponent(sh.hashtags) : ''));
 			link('Facebook', 'facebook', 'facebook', 'https://www.facebook.com/sharer/sharer.php?u=' + u('facebook'));
 			link('LinkedIn', 'linkedin', 'linkedin', 'https://www.linkedin.com/sharing/share-offsite/?url=' + u('linkedin'));
 			var c = btn('Copy link', 'link', 'copy_link', function () {
-				if (navigator.clipboard) navigator.clipboard.writeText(tagged('copy')).catch(function () {});
-				c.lastChild.nodeValue = 'Link copied';
+				/* kit.js's one copy (clipboard, else the browser's copy command, else the link shown selected); never silent */
+				var done = function () { c.lastChild.nodeValue = 'Link copied'; };
+				if (window.kitShareCopy) window.kitShareCopy(tagged('copy'), c).then(function (ok) { if (ok) done(); });
+				else if (navigator.clipboard) navigator.clipboard.writeText(tagged('copy')).then(done, function () {});
 			});
 		}
 		if (canShare && 'IntersectionObserver' in window) { // fetch the pictures once the row is near, so the tap opens the sheet at once
 			var io = new IntersectionObserver(function (en) {
 				if (!en[0].isIntersecting) return;
 				io.disconnect();
-				getFile(picKind());
+				getFile();
 			}, { rootMargin: '400px' });
 			io.observe(where);
 		}
@@ -161,24 +159,6 @@
 	document.querySelectorAll('[data-track]').forEach(function (a) {
 		a.addEventListener('click', function () { track(a.dataset.track, { link_text: a.textContent.trim() }); });
 	});
-
-	/* The Share section uses the site's one share bar, as on every other page (owner, 13 Nov 2026: the share section
-	   behaves differently on a phone and on a computer, and is the same on all pages and content). Phones: the bar's Share
-	   button (the phone's own share sheet) and Copy link; tablets: Share, then the networks; computers: the networks. The
-	   page shares itself; its picture is the link preview's, the campaign hero. */
-	function shareBlock(holder) {
-		if (!holder || holder.dataset.awShareBlock) return;
-		holder.dataset.awShareBlock = '1';
-		holder.classList.add('aw-share-block');
-		/* The share bar's links carry the campaign's share message with the short link (the server's bar has the title). */
-		var t = encodeURIComponent(sh.text || sh.title || ''), u = function (src) { return encodeURIComponent(tagged(src)); };
-		var nets = { x: 'https://x.com/intent/post?text=' + t + '&url=' + u('x') + (sh.hashtags ? '&hashtags=' + encodeURIComponent(sh.hashtags) : ''), whatsapp: 'https://wa.me/?text=' + t + '%20' + u('whatsapp'), email: 'mailto:?subject=' + encodeURIComponent(sh.title || '') + '&body=' + t + '%20' + u('email') };
-		holder.querySelectorAll('.kit-share a[data-kit-share]').forEach(function (a) { if (nets[a.dataset.kitShare] && sh.text) a.href = nets[a.dataset.kitShare]; });
-	}
-	if (!document.querySelector('.aw-letter') && sh.url) {
-		var pageKit = document.querySelector('.aw-camp-share-kit');
-		if (pageKit && pageKit.querySelector('.kit-share')) shareBlock(pageKit);
-	}
 
 	/* Letter tool. */
 	var form = document.querySelector('.aw-letter');

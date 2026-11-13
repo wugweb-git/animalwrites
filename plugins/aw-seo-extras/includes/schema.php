@@ -20,7 +20,8 @@
  *   replacing Rank Math's defaults (same @id); the WebSite has no SearchAction. The BreadcrumbList is Rank Math's
  *   own (breadcrumbs.php gives it the trail people see).
  *   Every node's inLanguage is en-IN (Rank Math writes the WordPress locale, en-US, on its WebPage).
- * - Every picture in these nodes is a share-safe address (aw_seo_share_safe_url(): never AVIF or WebP), as og:image.
+ * - Every picture in these nodes is a share-safe address (aw_seo_share_safe_url(): never AVIF or WebP, like og:image),
+ *   in its own shape (og:image is the 1080x1080 share square).
  *
  * @package aw-seo-extras
  */

@@ -3,16 +3,21 @@
  * Share cards (Open Graph and Twitter tags): what Rank Math prints, adjusted where its settings cannot say it. Rank
  * Math prints every tag; a share image chosen in Rank Math always wins.
  *
- * - The share image when none is chosen: aw_seo_image() (helpers.php) picks it: the item's own landscape image (for
- *   News, Library, research and Opportunities the publisher's image, linked), else the featured image (a listing's
- *   logo), a Library item's hosted PDF cover, a Page's own band photo; else the site share image. It is added with its
- *   size, type and alt text: the picture's own alt text, else the page's title (never the focus keyword).
+ * - The share image when none is chosen: aw_seo_image() (helpers.php) picks it: the item's own image (for News,
+ *   Library, research and Opportunities the publisher's image, linked), else the featured image (a listing's logo), a
+ *   Library item's hosted PDF cover, a Page's own band photo; else the site share image. It is added with its type and
+ *   alt text: the picture's own alt text, else the page's title (never the focus keyword).
  * - Category pages: the category photo, stored in Rank Math's own share-image fields (programmatic.php), which Rank
  *   Math prints. A Directory type's tag page: the share card typed as a URL in Rank Math (which Rank Math does not
- *   print for a term), with its size and the alt text "<focus keyphrase> in India – Animal Writes".
- * - og:image, og:image:secure_url and twitter:image are never AVIF or WebP: such an upload goes out as its original
- *   JPEG or PNG, or a 1200x630 JPEG (aw_seo_share_safe_url), and og:image:type, :width and :height follow that file.
- *   The swap is worked out for each image on its own, so one image's file never changes the next image's tags.
+ *   print for a term), with the alt text "<focus keyphrase> in India – Animal Writes".
+ * - One share picture size on every page (owner, 13 Nov 2026: "the image size keep it same"): og:image,
+ *   og:image:secure_url and twitter:image, whichever picture they come from (chosen in Rank Math, a campaign's share
+ *   picture, a category photo, or picked here), are its 1080x1080 square (aw_seo_share_square: centre-cropped from the
+ *   original upload, a JPEG, never AVIF or WebP), and og:image:type, :width and :height follow that file. The swap is
+ *   worked out for each image on its own, so one image's file never changes the next image's tags. A publisher's own
+ *   picture (linked, not on our server) keeps its own size.
+ * - The share kit (kits-core share.php) shares the same: the page's line (og:description) and the same square picture
+ *   (kits_share_args, below).
  * - og:type "article" only for the types in AW_SEO_ARTICLE_TYPES (News, Library, Resources, campaigns); "website"
  *   elsewhere. og:locale en_IN.
  * - A missing page (404) shares no image, not even the site default.
@@ -62,13 +67,13 @@ foreach ( array( 'facebook', 'twitter' ) as $aw_seo_net ) {
 }
 unset( $aw_seo_net );
 
-/* og:image and twitter:image are never AVIF (owner, 21 Oct 2026, site-wide): the original upload or a 1200x630 JPEG, with
-   its own type and size (aw_seo_share_safe_url). */
+/* og:image and twitter:image are the 1080x1080 share square of whatever picture Rank Math prints (owner, 13 Nov 2026),
+   never AVIF or WebP (owner, 21 Oct 2026), with that file's own type and size (aw_seo_share_square). */
 foreach ( array( 'facebook/og_image', 'facebook/og_image_secure_url', 'twitter/twitter_image' ) as $aw_seo_tag ) {
 	add_filter(
 		"rank_math/opengraph/{$aw_seo_tag}",
 		function ( $url ) {
-			$safe = aw_seo_share_safe_url( (string) $url );
+			$safe = aw_seo_share_square( (string) $url );
 			// Set for every image (og:image comes first of each image's tags), so a swap never carries over to the next one.
 			$GLOBALS['aw_seo_og_swap'] = $safe[0] !== $url ? $safe : null;
 			return $safe[0];
@@ -89,3 +94,63 @@ function aw_term_share_alt( $term ) {
 	$kw = trim( explode( ',', (string) get_term_meta( $term->term_id, 'rank_math_focus_keyword', true ) )[0] );
 	return ( '' !== $kw ? $kw : aw_seo_plain( $term->name ) ) . ' in India – Animal Writes';
 }
+
+/**
+ * The page's share line, as og:description gives it (the share kit's line when nothing more specific is set, owner,
+ * 13 Nov 2026): the Social description typed in Rank Math, else the description (typed, or the one built here), else
+ * the item's excerpt or intro. Plain text.
+ *
+ * @param int $post_id A post that is not the current view (0: the current view).
+ * @return string
+ */
+function aw_seo_share_line( $post_id = 0 ) {
+	$post_id = (int) $post_id;
+	$current = ! $post_id || ( is_singular() && get_queried_object_id() === $post_id );
+	if ( $current ) {
+		$obj  = get_queried_object();
+		$line = aw_seo_typed( 'facebook_description' );
+		$line = '' !== $line ? $line : ( function_exists( 'aw_seo_description' ) ? aw_seo_description() : aw_seo_typed( 'description' ) );
+	} else {
+		$obj  = get_post( $post_id );
+		$line = trim( (string) get_post_meta( $post_id, 'rank_math_facebook_description', true ) );
+		$line = '' !== $line ? $line : trim( (string) get_post_meta( $post_id, 'rank_math_description', true ) );
+		$line = '' !== $line || ! function_exists( 'aw_seo_item_description' ) ? $line : aw_seo_item_description( $post_id );
+	}
+	if ( false !== strpos( $line, '%' ) && class_exists( '\RankMath\Helper' ) ) {
+		$line = \RankMath\Helper::replace_vars( $line, $obj ); // Rank Math variables (%title%, %sep%...), as it prints them
+	}
+	return trim( (string) preg_replace( '/\s+/u', ' ', html_entity_decode( wp_strip_all_tags( (string) $line ), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ) );
+}
+
+/*
+ * One share kit for every page (owner, 13 Nov 2026: "page should share image and content and link and hashtag"): the
+ * share bar and the phone's share sheet send what the link preview shows, the page's line (og:description) and its
+ * 1080x1080 share square, unless the page set its own (a campaign's share line, campaign-tools.php). Only a picture on
+ * our own server is handed to the share sheet (a publisher's picture is not ours to send as a file).
+ */
+add_filter(
+	'kits_share_args',
+	function ( $args ) {
+		$id = (int) ( $args['post_id'] ?? 0 );
+		if ( '' === (string) ( $args['text'] ?? '' ) ) {
+			$args['text'] = aw_seo_share_line( $id );
+		}
+		if ( '' === (string) ( $args['image'] ?? '' ) && ! is_404() ) {
+			$current = ! $id || ( is_singular() && get_queried_object_id() === $id );
+			if ( $current ) { // the picture og:image shows: one chosen in Rank Math (a campaign's share picture, a category photo, a type's card), else ours
+				$src = aw_seo_typed( 'facebook_image_id' ) ? (int) aw_seo_typed( 'facebook_image_id' ) : aw_seo_typed( 'facebook_image' );
+				$img = $src ? null : aw_seo_image();
+			} else { // another post's bar: its own picture (the one chosen in Rank Math first), else the site's
+				$src = '';
+				$img = aw_seo_item_image( $id ) ? aw_seo_item_image( $id ) : aw_seo_default_image();
+			}
+			$src    = $src ? $src : ( $img ? (string) $img['url'] : '' );
+			$square = $src ? aw_seo_share_square( $src ) : array( '', 0 );
+			if ( $square[1] && '' !== aw_seo_upload_path( $square[0] ) ) {
+				$args['image'] = $square[0];
+			}
+		}
+		return $args;
+	},
+	20
+);

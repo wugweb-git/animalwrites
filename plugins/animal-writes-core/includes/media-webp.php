@@ -5,9 +5,10 @@
  * never converted, and nothing is deleted.
  *
  * Left alone on purpose: AVIF, GIF (animated GIFs stay GIFs), WebP and every other type. Share pictures stay JPEG
- * (og:image and twitter:image are never AVIF or WebP): the share JPEG that aw-seo-extras makes ({name}-og.jpg, see
- * aw_seo_share_jpeg_build()) is not a registered image size, so it is only recognised by its file name, and no
- * mapping is added when the file being read or written is named -og.jpg or -og.jpeg.
+ * (og:image and twitter:image are never AVIF or WebP): the share files that aw-seo-extras makes ({name}-og.jpg, see
+ * aw_seo_share_jpeg_build(), and the 1080x1080 share square {name}-share-1080.jpg or .png, see aw_seo_share_square())
+ * are not registered image sizes, so they are only recognised by their file names, and no mapping is added when the
+ * file being read or written is one of them.
  *
  * Only the resized copies change. Core also asks the format filter about the full-size file and would repoint the
  * attachment to a WebP full-size image, so a late wp_generate_attachment_metadata filter (aw_media_webp_keep_full())
@@ -25,9 +26,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/** True for the share JPEG file name ({name}-og.jpg), which must stay a JPEG. */
+/** True for a share file name ({name}-og.jpg, {name}-share-1080.jpg or .png), which must keep its format. */
 function aw_media_webp_is_share_file( $file ) {
-	return (bool) preg_match( '/-og\.jpe?g$/i', (string) $file );
+	return (bool) preg_match( '/(-og\.jpe?g|-share-1080\.(jpe?g|png))$/i', (string) $file );
 }
 
 /**
