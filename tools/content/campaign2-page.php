@@ -115,16 +115,28 @@ function c2q( $markup, $tq ) {
 function c2i( $n ) {
 	return '<span class="kit-ico kit-ico--' . $n . '" aria-hidden="true"></span>';
 }
-/** Campaign guides (Resources) as one link line each, under the section they explain (owner, 3 Nov 2026; were in In the news). */
+/**
+ * Campaign guides (Resources) under the section they explain (owner, 3 Nov 2026; were in In the news), as one labelled
+ * block of stacked cards (owner, 14 Nov 2026: "Read the full guide"; Resources cards are stacked, 1:3 picture to text).
+ * The heading is an H3 under the section's H2, so each card title is an H4.
+ */
 function c2guides( array $slugs ) {
-	$out = '';
+	$items = '';
 	foreach ( $slugs as $slug ) {
 		$g = get_page_by_path( $slug, OBJECT, 'post' );
-		if ( $g ) {
-			$out .= c2p( c2i( 'knowledge' ) . '<a href="' . esc_url( get_permalink( $g ) ) . '">' . esc_html( get_the_title( $g ) ) . '</a>', 'aw-camp-note' );
+		if ( ! $g ) {
+			continue;
 		}
+		$img    = get_the_post_thumbnail( $g, 'medium', array( 'class' => 'kit-card-img', 'alt' => '', 'loading' => 'lazy', 'decoding' => 'async' ) ); // the title says what it is
+		$date   = function_exists( 'aw_date' ) ? aw_date( get_post_field( 'post_date', $g ) ) : '';
+		$items .= '<li><article class="kit-card kit-card--stacked-md">'
+			. ( $img ? '<figure class="kit-card-media">' . $img . '</figure>' : '' )
+			. '<div class="kit-card-body">'
+			. ( $date ? '<p class="kit-card-meta kit-meta-row">' . $date . '</p>' : '' )
+			. '<h4 class="kit-card-title"><a href="' . esc_url( get_permalink( $g ) ) . '">' . esc_html( get_the_title( $g ) ) . '</a></h4>'
+			. '</div></article></li>';
 	}
-	return $out;
+	return $items ? c2html( '<div class="aw-camp-guides"><h3 class="aw-camp-guides-head">Read the full guide</h3><ul class="aw-stack-list aw-camp-guides-list">' . $items . '</ul></div>' ) : '';
 }
 /** A section opening in two columns: the heading and lede beside a piece of the campaign artwork (owner, 19 Oct 2026). */
 function c2split( $text, $img_id, $pos = 'right center' ) {

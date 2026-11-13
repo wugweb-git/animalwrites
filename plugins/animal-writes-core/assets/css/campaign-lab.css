@@ -836,13 +836,16 @@
 @media (max-width: 767px) {
 	.aw-camp--lab-rules :is(.aw-rule-chip, .aw-camp-more) { min-height: var(--kit-size-target); }
 }
-/* Guides under the sections they explain (owner, 3 Nov 2026): each link a 44px target (--kit-size-target) in body type,
-   the lines of one section kept together; on the dark pain-scale section the link and its icon take the on-ink colour
-   (the site blue is about 2.9:1 there, WCAG 1.4.3 needs 4.5:1). */
-.aw-camp--lab-rules .aw-camp-note:has(> a[href*="/resources/"]) { font-size: var(--kit-type-base); }
-.aw-camp--lab-rules .aw-camp-note:has(> a[href*="/resources/"]) + .aw-camp-note:has(> a[href*="/resources/"]) { margin-block-start: 0; }
-.aw-camp--lab-rules .aw-camp-note > a[href*="/resources/"] { display: flex; align-items: center; min-height: var(--kit-size-target); }
-.aw-camp--lab-rules .aw-camp-dark .aw-camp-note:has(> a[href*="/resources/"]) > :is(a, .kit-ico) { color: var(--kit-color-on-ink); }
+/* Guides under the sections they explain (owner, 14 Nov 2026: one labelled block, "Read the full guide"): the
+   Resources stacked cards (aw.css .aw-stack-list, kit-card--stacked-md), one column below 1200 and two from 1200 like
+   every stacked list (docs/card-sizes.md, Stacked list); --kit-space-6 above it ties it to the section it closes. On the
+   dark pain-scale section the heading takes the on-ink colour; the cards keep their own white surface. */
+.aw-camp--lab-rules .aw-camp-guides { margin-block-start: var(--kit-space-6); }
+.aw-camp--lab-rules .aw-camp-guides-head { margin: 0 0 var(--kit-space-4); font-size: var(--kit-type-h3); line-height: var(--kit-leading-heading); }
+.aw-camp--lab-rules .aw-camp-dark .aw-camp-guides-head { color: var(--kit-color-on-ink); }
+.aw-camp--lab-rules .aw-camp-guides-list { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-4); margin: 0; padding: 0; list-style: none; }
+.aw-camp--lab-rules .aw-camp-guides-list > li { margin: 0; }
+@media (min-width: 1200px) { .aw-camp--lab-rules .aw-camp-guides-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
 /* Lab rules in the wait for the decision (owner, 13 Nov 2026): a status chip and keyphrase line in the hero, a hero
    picture in place of the document card, and a dated four-step status band. */
