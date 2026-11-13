@@ -181,5 +181,45 @@ add_filter(
 	}
 );
 
+// Menu order: the site's content, then the Wugweb block (each product its own menu, owner 12 Nov 2026; each plugin
+// registers itself at 58.1–58.7 in the same order), then WordPress's own screens. Third-party menus follow. Without
+// Animal Writes Core the Wugweb block still sits together by those positions.
+add_filter( 'custom_menu_order', '__return_true', PHP_INT_MAX );
+add_filter(
+	'menu_order',
+	function () {
+		return array(
+			'index.php',
+			'edit.php?post_type=aw_listing',
+			'edit.php?post_type=aw_news',
+			'edit.php',
+			'edit.php?post_type=aw_legal',
+			'edit.php?post_type=aw_opportunity',
+			'edit.php?post_type=aw_campaign',
+			'edit.php?post_type=aw_press',
+			'edit.php?post_type=page',
+			'upload.php',
+			'aw-classification',
+			'separator-wugweb',
+			'kits',
+			'directoryweb',
+			'aw-sourcing-menu',
+			'aw-seo-plus',
+			'aw-search-insights',
+			'mailweb',
+			'planweb',
+			'separator2',
+			'themes.php',
+			'plugins.php',
+			'users.php',
+			'tools.php',
+			'options-general.php',
+			'googlesitekit-dashboard',
+			'litespeed',
+		);
+	},
+	PHP_INT_MAX
+);
+
 // The one-time data steps (comments closed by default, Hello world to draft, news court terms kept as meta, testimonials
 // exported) ran and were removed (audit item 16, flag confirmed on live 25 Oct 2026; see git history).
