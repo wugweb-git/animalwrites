@@ -105,16 +105,16 @@ add_filter(
 			wp_safe_redirect( add_query_arg( map_deep( $keep, 'rawurlencode' ), $url ), 301, 'Animal Writes' );
 			exit;
 		};
-		$out = array( 'pagename' => 'directory' ); // the Directory Page; its list reads the place and type (hubs.php)
-		$a   = isset( $seg[0] ) ? aw_dir_place( $seg[0] ) : null;
-		$b   = $seg[1] ?? '';
-		$c   = $seg[2] ?? '';
+		$out     = array( 'pagename' => 'directory' ); // the Directory Page; its list reads the place and type (hubs.php)
+		$a       = isset( $seg[0] ) ? aw_dir_place( $seg[0] ) : null;
+		$b       = $seg[1] ?? '';
+		$c       = $seg[2] ?? '';
 		if ( 1 === count( $seg ) && $a ) {
 			if ( $a->parent ) {
 				$go( aw_directory_url( $a->slug ) ); // old /directory/{district}/
 			}
 			$out['aw_place'] = $a->slug;
-			$type           = aw_request_type();
+			$type            = aw_request_type();
 			if ( $type ) {
 				$out['aw_dir_type'] = aw_listing_type_query( $type ); // filtered state list
 			}
@@ -132,9 +132,9 @@ add_filter(
 			if ( ! $bp || (int) $bp->parent !== (int) $a->term_id || ! $type_ok( $c ) ) {
 				return array( 'error' => '404' );
 			}
-			$out['aw_place']        = $bp->slug;
-			$out['aw_dir_type']     = aw_listing_type_query( $c );
-			$out['aw_type_slug']    = $c;
+			$out['aw_place']     = $bp->slug;
+			$out['aw_dir_type']  = aw_listing_type_query( $c );
+			$out['aw_type_slug'] = $c;
 		} else {
 			return array( 'error' => '404' );
 		}
@@ -161,7 +161,7 @@ add_filter(
  * @return array
  */
 function aw_directory_query_vars( $v ) {
-	$mq = (array) ( $v['meta_query'] ?? array() );
+	$mq                  = (array) ( $v['meta_query'] ?? array() );
 	$v['aw_digits_last'] = 1; // A–Z means letters first: names that start with a number (e.g. "1962 …") come after Z
 
 	$order = array( 'title' => 'ASC' );
@@ -173,7 +173,7 @@ function aw_directory_query_vars( $v ) {
 			'ver_yes'  => array( 'key' => 'aw_verified', 'type' => 'NUMERIC', 'compare' => 'EXISTS' ),
 			array( 'key' => 'aw_verified', 'compare' => 'NOT EXISTS' ),
 		);
-		$order = array( 'ver_yes' => 'DESC', 'title' => 'ASC' );
+		$order     = array( 'ver_yes' => 'DESC', 'title' => 'ASC' );
 	}
 	if ( 'details' === sanitize_key( wp_unslash( $_GET['sort'] ?? '' ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		$mq['score'] = array( 'key' => 'aw_contact_score', 'type' => 'NUMERIC' );
@@ -367,9 +367,9 @@ add_action(
 				}
 			}
 			if ( is_array( $r ) ) {
-				$g['state']    = $r['state_slug'];
-				$g['district'] = $r['district_slug'];
-				$g['q']        = '';
+				$g['state']     = $r['state_slug'];
+				$g['district']  = $r['district_slug'];
+				$g['q']         = '';
 				$g['aw_filter'] = 1;
 			}
 		} elseif ( '' === sanitize_title( $g['state'] ?? '' ) && '' === sanitize_title( $g['district'] ?? '' ) ) {
@@ -391,11 +391,11 @@ add_action(
 		if ( ! isset( $g['aw_filter'] ) ) {
 			return;
 		}
-		$city  = sanitize_title( $g['district'] ?? '' ) ? sanitize_title( $g['district'] ) : sanitize_title( $g['state'] ?? '' );
-		$tags  = array_values( array_filter( array_map( 'sanitize_title', (array) ( $g['tag'] ?? array() ) ) ) );
-		$type  = (string) current( array_filter( $tags, 'aw_listing_type_ok' ) ?: array( '' ) );
-		$more  = array_values( array_diff( $tags, array( $type ) ) ); // services
-		$base  = $city ? aw_directory_url( $city, $type ) : ( $type ? add_query_arg( 'tag', $type, aw_hub_url( 'aw_listing' ) ) : aw_hub_url( 'aw_listing' ) );
+		$city = sanitize_title( $g['district'] ?? '' ) ? sanitize_title( $g['district'] ) : sanitize_title( $g['state'] ?? '' );
+		$tags = array_values( array_filter( array_map( 'sanitize_title', (array) ( $g['tag'] ?? array() ) ) ) );
+		$type = (string) current( array_filter( $tags, 'aw_listing_type_ok' ) ?: array( '' ) );
+		$more = array_values( array_diff( $tags, array( $type ) ) ); // services
+		$base = $city ? aw_directory_url( $city, $type ) : ( $type ? add_query_arg( 'tag', $type, aw_hub_url( 'aw_listing' ) ) : aw_hub_url( 'aw_listing' ) );
 		if ( $more ) {
 			$have = (string) wp_parse_url( $base, PHP_URL_QUERY );
 			parse_str( $have, $hq );
@@ -483,7 +483,7 @@ function aw_pin_nearest_district( $pin ) {
 				$like
 			)
 		);
-		$d = $code ? aw_place_district( (int) $code ) : null;
+		$d    = $code ? aw_place_district( (int) $code ) : null;
 		if ( $d ) {
 			return $d;
 		}
@@ -544,7 +544,7 @@ function aw_directory_service_field( $field ) {
  * @return array{q: string, state: string} The two fields' HTML.
  */
 function aw_dir_search_controls( $args ) {
-	$a      = wp_parse_args(
+	$a     = wp_parse_args(
 		$args,
 		array(
 			'prefix'      => 'aw-dir',
@@ -557,9 +557,9 @@ function aw_dir_search_controls( $args ) {
 			'state'       => '',
 		)
 	);
-	$label  = fn( $id, $text ) => '<label' . ( $a['show_labels'] ? '' : ' class="screen-reader-text"' ) . ' for="' . esc_attr( $id ) . '">' . esc_html( $text ) . '</label>';
-	$field  = fn( $cls, $id, $text, $control ) => '<div class="kit-field ' . esc_attr( $a['cls'] . $cls ) . '">' . $label( $id, $text ) . '<div class="kit-field-control">' . $control . '</div></div>';
-	$opts   = '<option value="">All states and UTs</option>';
+	$label = fn( $id, $text ) => '<label' . ( $a['show_labels'] ? '' : ' class="screen-reader-text"' ) . ' for="' . esc_attr( $id ) . '">' . esc_html( $text ) . '</label>';
+	$field = fn( $cls, $id, $text, $control ) => '<div class="kit-field ' . esc_attr( $a['cls'] . $cls ) . '">' . $label( $id, $text ) . '<div class="kit-field-control">' . $control . '</div></div>';
+	$opts  = '<option value="">All states and UTs</option>';
 	foreach ( (array) aw_place_states() as $st ) {
 		if ( aw_place_count( $st ) ) { // states and UTs with no listings are left out, so the list and the counts match
 			$opts .= '<option value="' . esc_attr( $st->slug ) . '"' . selected( $a['state'], $st->slug, false ) . '>' . esc_html( $st->name ) . '</option>';
@@ -598,7 +598,7 @@ function aw_directory_filter( $type = '' ) {
 	}
 	$d_opts = '<option value="" data-none="Choose a state first" data-all="All districts">' . ( $state ? 'All districts' : 'Choose a state first' ) . '</option>';
 	foreach ( $states as $st ) {
-		$kids    = $all[ $st->term_id ] ?? array();
+		$kids = $all[ $st->term_id ] ?? array();
 		if ( $kids ) {
 			$d_opts .= '<optgroup label="' . esc_attr( $st->name ) . '" data-state="' . esc_attr( $st->slug ) . '"' . ( $state && $state->term_id === $st->term_id ? '' : ' hidden disabled' ) . '>';
 			foreach ( $kids as $k ) {
@@ -610,7 +610,7 @@ function aw_directory_filter( $type = '' ) {
 	// Types that have listings, with counts; the veterinary types are one "Veterinary" choice.
 	$opts = array();
 	foreach ( get_terms( array( 'taxonomy' => 'post_tag', 'slug' => aw_listing_type_slugs(), 'hide_empty' => true, 'orderby' => 'name' ) ) as $t ) {
-		$key            = in_array( $t->slug, AW_VET_TYPES, true ) ? 'veterinary' : $t->slug;
+		$key             = in_array( $t->slug, AW_VET_TYPES, true ) ? 'veterinary' : $t->slug;
 		$opts[ $key ][0] = 'veterinary' === $key ? 'Veterinary' : $t->name;
 		$opts[ $key ][1] = ( $opts[ $key ][1] ?? 0 ) + (int) $t->count;
 	}
