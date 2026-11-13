@@ -970,9 +970,10 @@ function aw_social_for_item( int $id ): array {
 /**
  * One card: the Kits card (kit-card--block-md, no picture) in the More list: date first, then platform and handle on
  * one line (a long handle ends in "…"); the person as the title (a link to the post); our summary. YouTube posts show
- * open under it (no folds sitewide), the player loading when the card comes near the screen. X posts get a 44px
- * "View on X" button to the post in a new tab, never X's embed (owner, 13 Nov 2026): widgets.js drew nothing for
- * logged-out or tracking-protected readers and left the bare link running out of the card.
+ * open under it (no folds sitewide), the player loading when the card comes near the screen. Every other platform
+ * gets a 44px "View on {platform}" button to the post in a new tab, never an embed (owner, 13 Nov 2026): X's
+ * widgets.js drew nothing for logged-out or tracking-protected readers and left the bare link running out of the card.
+ * "Other" posts get no button until the owner approves its wording; the title link still opens the post.
  *
  * @param WP_Post $p Social post.
  */
@@ -989,13 +990,14 @@ function aw_social_card( WP_Post $p ): string {
 		. '<span class="kit-meta-item">' . esc_html( 'on ' . ( AW_SOCIAL_PLATFORMS[ $platform ] ?? 'Other' ) ) . '</span>'
 		. ( '' !== $handle && $handle !== $name ? '<span class="kit-meta-item aw-social-handle" title="' . esc_attr( $handle ) . '">' . esc_html( $handle ) . '</span>' : '' );
 	$embed    = '';
-	if ( 'x' === $link['platform'] ) {
-		$embed = '<div class="aw-opp-actions"><a class="kit-btn kit-btn--secondary kit-btn--sm aw-social-out" href="' . esc_url( $link['url'] ) . '" target="_blank" rel="nofollow ugc noopener">'
-			. esc_html( 'View on X' ) . '<span class="kit-ico kit-ico--arrow-up-right" aria-hidden="true"></span><span class="screen-reader-text">' . esc_html( ( '' !== $name ? ': ' . $name : '' ) . ' (opens in a new tab)' ) . '</span></a></div>';
-	} elseif ( 'youtube' === $link['platform'] ) {
+	$out_on   = isset( AW_SOCIAL_PLATFORMS[ $platform ] ) && 'other' !== $platform ? $platform : $link['platform']; // the saved platform, else the one the link shows
+	if ( 'youtube' === $link['platform'] && '' !== $link['video'] ) {
 		$box   = 'aw-social-embed-' . (int) $p->ID;
-		$embed = '<div class="aw-opp-actions"><div id="' . esc_attr( $box ) . '" style="flex-basis:100%" data-aw-social-embed="' . esc_attr( $link['platform'] ) . '" data-url="' . esc_url( $link['url'] ) . '" data-id="' . esc_attr( $link['video'] ) . '" data-title="' . esc_attr( $name ) . '"></div></div>'; // above the card's link (kit.css .aw-opp-actions), so the post stays usable
+		$embed = '<div class="aw-opp-actions"><div id="' . esc_attr( $box ) . '" style="flex-basis:100%" data-aw-social-embed="youtube" data-id="' . esc_attr( $link['video'] ) . '" data-title="' . esc_attr( $name ) . '"></div></div>'; // above the card's link (kit.css .aw-opp-actions), so the post stays usable
 		aw_social_embed_script();
+	} elseif ( '' !== $link['url'] && 'other' !== $out_on ) {
+		$embed = '<div class="aw-opp-actions"><a class="kit-btn kit-btn--secondary kit-btn--sm aw-social-out" href="' . esc_url( $link['url'] ) . '" target="_blank" rel="nofollow ugc noopener">'
+			. esc_html( 'View on ' . AW_SOCIAL_PLATFORMS[ $out_on ] ) . '<span class="kit-ico kit-ico--arrow-up-right" aria-hidden="true"></span><span class="screen-reader-text">' . esc_html( ( '' !== $name ? ': ' . $name : '' ) . ' (opens in a new tab)' ) . '</span></a></div>';
 	}
 	return '<li><article class="kit-card kit-card--block-md aw-social-card"><div class="kit-card-body">'
 		. '<p class="kit-card-meta kit-meta-row">' . $meta . '</p>'

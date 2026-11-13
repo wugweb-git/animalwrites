@@ -2513,7 +2513,7 @@
     "off (Kits → Modules → Show on pages; prints nothing)",
     "no approved posts (prints nothing)",
     "cards: date, on platform, handle; person; summary",
-    "X post: our own card with a 44px View on X link-out (new tab), no embed; YouTube post: Show the post button, embed after the click",
+    "every platform but YouTube: our own card with a 44px View on {platform} link-out (new tab), no embed; Other: no button yet; YouTube post: the player under the card",
     "editor preview (one-line note)"
    ],
    "tokens": [],
