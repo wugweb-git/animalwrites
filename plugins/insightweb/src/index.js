@@ -10,7 +10,7 @@ import {
 	useState,
 } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
-import { __, _n, sprintf } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import {
 	AppShell,
 	AppHeader,
@@ -199,9 +199,7 @@ function Dashboard() {
 			) }
 			{ attention.length > 0 && (
 				<Notice tone="warning">
-					<strong>
-						{ __( 'Needs attention', 'insightweb' ) }
-					</strong>
+					<strong>{ __( 'Needs attention', 'insightweb' ) }</strong>
 					<ul>
 						{ attention.map( ( t ) => (
 							<li key={ t.key }>
@@ -251,10 +249,7 @@ function Dashboard() {
 					<MiniChart
 						label={ sprintf(
 							/* translators: %d: number of days. */
-							__(
-								'Clicks per day, last %d days',
-								'insightweb'
-							),
+							__( 'Clicks per day, last %d days', 'insightweb' ),
 							days
 						) }
 						points={ range.chart }
@@ -471,7 +466,7 @@ function hashGroup( groups ) {
  * A group's state as saved.
  *
  * @param {Object} group Group from the route.
- * @return {Object} { t: { CONST: text }, gdelt, seeds }.
+ * @return {Object} { t: { CONST: text }, gdelt, seeds, deleteData }.
  */
 function startOf( group ) {
 	const t = {};
@@ -482,6 +477,7 @@ function startOf( group ) {
 		t,
 		gdelt: group.gdelt ? !! group.gdelt.on : null,
 		seeds: group.seeds ? group.seeds.text : null,
+		deleteData: !! group.deleteData,
 	};
 }
 
@@ -517,12 +513,13 @@ function Group( { group, onSaved, onDirty } ) {
 	if ( group.seeds && state.seeds !== group.seeds.text ) {
 		body.seeds = state.seeds;
 	}
+	if (
+		undefined !== group.deleteData &&
+		state.deleteData !== !! group.deleteData
+	) {
+		body.delete_data = state.deleteData;
+	}
 	const dirty = Object.keys( body ).length > 0;
-	const changedCount = group.blocks.reduce(
-		( n, b ) => n + b.fields.filter( ( f ) => f.changed ).length,
-		0
-	);
-	const anyChanged = changedCount > 0;
 	useEffect(
 		() => onDirty( group.slug, dirty ),
 		[ group.slug, dirty, onDirty ]
@@ -556,22 +553,16 @@ function Group( { group, onSaved, onDirty } ) {
 			>
 				{ __( 'Save changes', 'insightweb' ) }
 			</Button>
-			{ anyChanged && (
-				<ConfirmButton
-					label={ __( 'Restore defaults', 'insightweb' ) }
-					question={
-						/* translators: %d: number of changed numbers. */ _n(
-							'Put %d changed number back to its default?',
-							'Put %d changed numbers back to their defaults?',
-							changedCount,
-							'insightweb'
-						)
-					}
-					count={ changedCount }
-					busy={ busy }
-					onConfirm={ () => save( { reset: true } ) }
-				/>
-			) }
+			<ConfirmButton
+				label={ __( 'Reset this section', 'insightweb' ) }
+				question={ __(
+					'Reset this section to its defaults?',
+					'insightweb'
+				) }
+				count={ 1 }
+				busy={ busy }
+				onConfirm={ () => save( { reset: true } ) }
+			/>
 			<span aria-live="polite">
 				{ msg && 'success' === msg.tone ? msg.text : '' }
 			</span>
@@ -616,6 +607,26 @@ function Group( { group, onSaved, onDirty } ) {
 							) }
 						/>
 					) ) }
+					{ 'keep' === b.key && undefined !== group.deleteData && (
+						<label htmlFor="insightweb-delete-data">
+							<input
+								id="insightweb-delete-data"
+								type="checkbox"
+								checked={ state.deleteData }
+								onChange={ ( e ) => {
+									const v = e.target.checked;
+									setState( ( s ) => ( {
+										...s,
+										deleteData: v,
+									} ) );
+								} }
+							/>{ ' ' }
+							{ __(
+								"Delete this plugin's data when it is deleted",
+								'insightweb'
+							) }
+						</label>
+					) }
 				</SettingsBlock>
 			) ) }
 			{ group.gdelt && (
@@ -843,10 +854,7 @@ function TabScreen() {
 		<SectionCard id={ app.screen } title={ app.title }>
 			{ 0 === parts.length && (
 				<p>
-					{ __(
-						'Nothing to show on this tab yet.',
-						'insightweb'
-					) }
+					{ __( 'Nothing to show on this tab yet.', 'insightweb' ) }
 				</p>
 			) }
 			<PageParts parts={ parts } title={ app.title } />

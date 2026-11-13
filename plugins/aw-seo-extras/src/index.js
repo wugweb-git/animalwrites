@@ -386,7 +386,7 @@ function SettingField( { f, value, onChange } ) {
  * A group's texts and switches as saved.
  *
  * @param {Object} group Group from the route.
- * @return {Object} { t: { CONST: text }, on: { module: bool } }.
+ * @return {Object} { t: { CONST: text }, on: { module: bool }, deleteData }.
  */
 function startOf( group ) {
 	const t = {};
@@ -395,7 +395,7 @@ function startOf( group ) {
 		b.fields.forEach( ( f ) => ( t[ f.const ] = f.text ) );
 		on[ b.key ] = b.on;
 	} );
-	return { t, on };
+	return { t, on, deleteData: !! group.deleteData };
 }
 
 /**
@@ -474,7 +474,9 @@ function Group( { group, onSaved, onDirty } ) {
 		b.fields.some( ( f ) => state.t[ f.const ] !== f.text )
 	);
 	const onDirty_ = isModules
-		? group.blocks.some( ( b ) => b.switch && state.on[ b.key ] !== b.on )
+		? group.blocks.some(
+				( b ) => b.switch && state.on[ b.key ] !== b.on
+			) || state.deleteData !== !! group.deleteData
 		: fieldsDirty;
 	const faqDirty = ( group.faqTypes || [] ).some(
 		( x ) => faq[ x.slug ] !== x.on
@@ -483,9 +485,6 @@ function Group( { group, onSaved, onDirty } ) {
 		!! group.keepListings &&
 		idsOf( keep ).join( ',' ) !== group.keepListings.ids.join( ',' );
 	const shareDirty = !! group.shareImage && share.id !== group.shareImage.id;
-	const anyChanged = group.blocks.some( ( b ) =>
-		b.fields.some( ( f ) => f.changed )
-	);
 	useEffect(
 		() =>
 			onDirty(
@@ -532,6 +531,7 @@ function Group( { group, onSaved, onDirty } ) {
 								.filter( ( b ) => b.switch )
 								.map( ( b ) => [ b.key, !! state.on[ b.key ] ] )
 						),
+						delete_data: state.deleteData,
 					}
 				: { fields: state.t }
 		);
@@ -539,10 +539,7 @@ function Group( { group, onSaved, onDirty } ) {
 		if (
 			// eslint-disable-next-line no-alert -- a plain browser confirm before a reset, as core's list tables do
 			window.confirm(
-				__(
-					'Put every field of this group back to its default?',
-					'aw-seo-extras'
-				)
+				__( 'Reset this section to its defaults?', 'aw-seo-extras' )
 			)
 		) {
 			save( { reset: true } );
@@ -561,11 +558,9 @@ function Group( { group, onSaved, onDirty } ) {
 			>
 				{ __( 'Save changes', 'aw-seo-extras' ) }
 			</Button>
-			{ ! isModules && anyChanged && (
-				<Button busy={ busy } onClick={ restore }>
-					{ __( 'Restore defaults', 'aw-seo-extras' ) }
-				</Button>
-			) }
+			<Button busy={ busy } onClick={ restore }>
+				{ __( 'Reset this section', 'aw-seo-extras' ) }
+			</Button>
 			<span aria-live="polite">
 				{ msg && 'success' === msg.tone ? msg.text : '' }
 			</span>
@@ -615,6 +610,23 @@ function Group( { group, onSaved, onDirty } ) {
 						}
 					/>
 				) ) }
+			{ isModules && (
+				<label htmlFor="rankweb-delete-data">
+					<input
+						id="rankweb-delete-data"
+						type="checkbox"
+						checked={ state.deleteData }
+						onChange={ ( e ) => {
+							const v = e.target.checked;
+							setState( ( s ) => ( { ...s, deleteData: v } ) );
+						} }
+					/>{ ' ' }
+					{ __(
+						"Delete this plugin's data when it is deleted",
+						'aw-seo-extras'
+					) }
+				</label>
+			) }
 			{ ! isModules &&
 				group.blocks.map( ( b ) => (
 					<SettingsBlock

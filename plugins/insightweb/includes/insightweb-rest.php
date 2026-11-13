@@ -5,8 +5,10 @@
  *   GET  dashboard           aw_si_cap()       the tiles and lists, from the stored counts (insightweb-dashboard.php)
  *   POST dashboard/count     aw_si_cap()       ask for a count now (one background event)
  *   GET  settings            aw_si_cap()       the groups with today's values
- *   POST settings/numbers    manage_options    the seven numbers (aw_si_settings_save(), the same as the form)
- *   POST settings/rising     aw_si_cap()       News (GDELT) and Seeds for keyword tools (the same saves as the forms)
+ *   POST settings/numbers    manage_options    the seven numbers (aw_si_settings_save(), the same as the form) and
+ *                                              delete_data; reset: true puts the group back to its registered defaults
+ *   POST settings/rising     aw_si_cap()       News (GDELT) and Seeds for keyword tools (the same saves as the forms);
+ *                                              reset: true switches GDELT back to its default (off)
  *   GET  services            aw_si_cap()       the connected services and their last runs
  *
  * Every route checks the capability and, for a signed-in browser, the wp_rest nonce (kits_shell_rest_can()). The
@@ -62,14 +64,17 @@ add_action(
 				'methods'             => 'POST',
 				'permission_callback' => kits_shell_rest_can( 'manage_options' ),
 				'args'                => array(
-					'fields' => array(
+					'fields'      => array(
 						'type'                 => 'object',
 						'additionalProperties' => array( 'type' => array( 'string', 'integer' ) ),
 						'default'              => array(),
 					),
-					'reset'  => array(
+					'reset'       => array(
 						'type'    => 'boolean',
 						'default' => false,
+					),
+					'delete_data' => array(
+						'type' => 'boolean',
 					),
 				),
 				'callback'            => 'insightweb_rest_save_numbers',
@@ -84,6 +89,10 @@ add_action(
 				'args'                => array(
 					'gdelt' => array( 'type' => 'boolean' ),
 					'seeds' => array( 'type' => 'string' ),
+					'reset' => array(
+						'type'    => 'boolean',
+						'default' => false,
+					),
 				),
 				'callback'            => 'insightweb_rest_save_rising',
 			)
@@ -388,9 +397,10 @@ function insightweb_numbers_group( array $saved ): array {
 		);
 	}
 	return array(
-		'slug'   => 'numbers',
-		'label'  => __( 'Numbers', 'insightweb' ),
-		'blocks' => $out,
+		'slug'       => 'numbers',
+		'label'      => __( 'Numbers', 'insightweb' ),
+		'blocks'     => $out,
+		'deleteData' => insightweb_delete_data_on(), // shown under Keeping data
 	);
 }
 
@@ -442,6 +452,11 @@ function insightweb_rest_save_numbers( WP_REST_Request $request ) {
 		}
 	}
 	$saved = aw_si_settings_save( $known, $reset );
+	if ( $reset ) {
+		$saved = insightweb_delete_data_save( (bool) insightweb_registered_settings()[ INSIGHTWEB_DELETE_DATA ]['default'] ) || $saved; // "Reset this section"
+	} elseif ( null !== $request['delete_data'] ) {
+		$saved = insightweb_delete_data_save( (bool) $request['delete_data'] ) || $saved;
+	}
 	return rest_ensure_response(
 		array(
 			'group'   => insightweb_numbers_group( aw_si_settings_saved() ),
@@ -458,6 +473,17 @@ function insightweb_rest_save_numbers( WP_REST_Request $request ) {
  */
 function insightweb_rest_save_rising( WP_REST_Request $request ) {
 	$saved = false;
+	if ( $request['reset'] ) {
+		// "Reset this section": GDELT back to its registered default (off). The seeds are a hand-made list, not a setting with a default: they stay.
+		$saved = aw_si_gdelt_save( (bool) insightweb_registered_settings()['aw_si_gdelt_on']['default'] );
+		return rest_ensure_response(
+			array(
+				'group'   => insightweb_rising_group(),
+				'saved'   => $saved,
+				'message' => __( 'Defaults restored.', 'insightweb' ),
+			)
+		);
+	}
 	if ( null !== $request['gdelt'] ) {
 		$saved = aw_si_gdelt_save( (bool) $request['gdelt'] ) || $saved;
 	}
