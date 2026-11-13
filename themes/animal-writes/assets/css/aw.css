@@ -300,21 +300,22 @@
 }
 @media (prefers-reduced-motion: reduce) { .aw-help-bar a { transition: none; } .aw-help-bar a:active { transform: none; } }
 
-/* News, Library and Resources lists: stacked cards, dense (owner, 13 Nov 2026: "the image to text ratio be 1:3 or less.
-   image is just a seo need. and i like stacked version and lesser padding, so that we can have more of them per row or
-   fill"). hubs.php makes every card in those lists kit-card--stacked-md and gives the list aw-stack-list (hubs, Home
-   sections, campaign sections, archives). The list fills each row with as many cards as fit at --kit-card-min (one on
-   phones, two in the 720 column, three across the 1200 column); every card is one surface. The picture is a quarter of
-   the card (picture to text 1:3), within --kit-thumb-min/--kit-thumb-max, and runs the card's full height (cover crop),
-   so there is no empty space under it; the card padding and the picture gap are --kit-space-3 (docs/card-sizes.md). */
-.wp-block-post-template.aw-stack-list.aw-stack-list { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--aw-stack-card-min)), 1fr)) !important; grid-template-rows: none !important; gap: var(--kit-space-grid) !important; }
-.aw-stack-list.aw-stack-list > li { grid-column: auto !important; grid-row: auto !important; max-width: var(--aw-stack-card-max); }
-/* The card is 3:1 (owner, 13 Nov: "when i said 1:3 it included the aspect ratio too"): the picture below is a quarter of the width at 3:4, which makes the row a third of the width tall; words that cannot fit make the row taller instead of being cut */
+/* News, Library and Resources lists: stacked cards (owner, 13 Nov 2026: "i like stacked version and lesser padding";
+   "max 2:1 and 3:5"; "stacked card minimum width will be 350px, max is 600"; gap 16px). hubs.php makes every card in
+   those lists kit-card--stacked-md and gives the list aw-stack-list (hubs, Home sections, campaign sections, archives).
+   Columns follow the site breakpoints (docs/design-system.md, line 8: md 768, lg 1200): one below 768, two from 768,
+   three from 1200 only where the list is wide enough for three cards of --kit-card-stacked-min (the hub and campaign
+   lists, 1120-1184px); a list in the 720px main column keeps two. Cards --kit-card-stacked-min to
+   --kit-card-stacked-max wide, gap --kit-space-4 (docs/card-sizes.md, Stacked list). One surface. */
+.wp-block-post-template.aw-stack-list.aw-stack-list { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; grid-template-rows: none !important; gap: var(--kit-space-4) !important; }
+@media (min-width: 768px) { .wp-block-post-template.aw-stack-list.aw-stack-list { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } }
+@media (min-width: 1200px) { .wp-block-post-template.aw-stack-list.aw-stack-list { grid-template-columns: repeat(auto-fill, minmax(max(var(--kit-card-stacked-min), (100% - 2 * var(--kit-space-4)) / 3), 1fr)) !important; } }
+.aw-stack-list.aw-stack-list > li { grid-column: auto !important; grid-row: auto !important; min-width: 0; max-width: var(--kit-card-stacked-max); }
+/* The card is never flatter than 2:1 (--kit-card-stacked-ratio): the picture is 3:5 (--kit-card-stacked-media-ratio) at the
+   card's full height, so at 2:1 it is 30% of the width; words that need more room make the card taller and the picture
+   stretches with it (cover crop), so nothing is cut. */
 .aw-stack-list.aw-stack-list .kit-card.kit-card--stacked-md { flex-direction: row !important; align-items: stretch !important; gap: 0 !important; height: auto; overflow: hidden; padding: 0 !important; }
-/* The picture: a quarter of the card, 3:4, flush to the card edge; stretches to the row if the words make it taller */
-.aw-stack-list.aw-stack-list .kit-card.kit-card--stacked-md > .kit-card-media { position: relative; overflow: hidden; flex: none !important; align-self: stretch; box-sizing: border-box; width: 25% !important; max-width: 25% !important; min-width: 0 !important; margin: 0 !important; aspect-ratio: 3 / 4 !important; }
+.aw-stack-list.aw-stack-list .kit-card.kit-card--stacked-md > .kit-card-media { position: relative; overflow: hidden; flex: none !important; align-self: stretch; box-sizing: border-box; width: calc(100% / var(--kit-card-stacked-ratio) * var(--kit-card-stacked-media-ratio)) !important; max-width: none !important; min-width: 0 !important; margin: 0 !important; aspect-ratio: var(--kit-card-stacked-media-ratio) !important; }
 .aw-stack-list.aw-stack-list .kit-card.kit-card--stacked-md > .kit-card-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .aw-stack-list.aw-stack-list .kit-card.kit-card--stacked-md > .kit-card-body { flex: 1 1 0 !important; min-width: 0 !important; padding: var(--kit-space-3) !important; }
-/* Text in the other three quarters: title two lines at most; the meta row is never cut */
-.aw-stack-list.aw-stack-list .kit-card.kit-card--stacked-md .kit-card-title a { display: -webkit-box !important; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; }
 .aw-stack-list.aw-stack-list .kit-card.kit-card--stacked-md .kit-card-sum { display: none; }

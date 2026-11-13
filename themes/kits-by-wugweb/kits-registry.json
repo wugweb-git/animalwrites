@@ -1831,7 +1831,7 @@
     "author (person)",
     "time (clock)",
     "place (pin)",
-    "meta row (several items, wraps)",
+    "meta row (several items, one line: never wraps, owner 13 Nov 2026; the date never cut)",
     "single meta item",
     "inside a sentence (keeps the sentence text)"
    ],

@@ -14,7 +14,7 @@
 	.aw-ed-learn .aw-tasks.is-three .kit-card > .kit-card-media { width: var(--kit-thumb-lg); max-width: 40%; border-radius: var(--kit-radius-media); }
 	.aw-ed-learn .aw-tasks.is-three .kit-card > .kit-card-body { flex: 1 1 0; padding: 0; }
 	.aw-ed-learn .aw-tasks.is-three .kit-card-sum { display: none; }
-	.aw-ed-learn .aw-tasks.is-three .kit-card-meta { flex-wrap: wrap !important; }
+	.aw-ed-learn .aw-tasks.is-three .kit-card-meta { flex-wrap: nowrap !important; } /* one line (owner, 13 Nov 2026) */
 }
 @media (max-width: 767px) {
 	.aw-ed-learn .aw-tasks.is-three .kit-card > .kit-card-media { width: var(--kit-thumb-md); }

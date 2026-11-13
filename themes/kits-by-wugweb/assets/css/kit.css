@@ -1240,8 +1240,8 @@ header.wp-block-template-part.kit-header-hidden { transform: translateY(calc(-10
 /* Card states (owner, 20 Oct 2026): one card for every list, kit-card kit-card--{state}. Any state at any width; the
    list picks it. block-lg · block-md · block-sm: picture on top. stacked-lg · stacked-md · stacked-sm: picture left (or
    none); stacked-sm is the reference list (icon + title + type). Anatomy: .kit-card-media (4:3; .is-logo whole; label
-   top-left) › .kit-card-meta (date, read time, place; wraps) and .kit-card-chips on one row, .kit-card-metarow (one chip high: a chip that
-   does not fit wraps out of sight, so the last goes first and the first, the source, stays) › .kit-card-title (3 lines,
+   top-left) › .kit-card-meta (date, read time, place) and .kit-card-chips on one line, .kit-card-metarow (never wraps: the last item ends
+   in an ellipsis, the date never does) › .kit-card-title (3 lines,
    cut at a word by kit.js) › .kit-card-sum (block-lg/md, stacked-lg; plain text) › action. The whole card is the link. */
 .wp-block-post-template > li:has(> .kit-card[class*="kit-card--"]) { padding: 0 !important; background: none !important; border: 0 !important; box-shadow: none !important; transform: none !important; overflow: visible !important; outline: 0 !important; } /* the card draws the focus ring */
 .kit-card[class*="kit-card--"] .wp-block-post-date { min-height: 0; padding-right: 0; } /* no arrow circle in a card */
@@ -1264,19 +1264,24 @@ header.wp-block-template-part.kit-header-hidden { transform: translateY(calc(-10
 .kit-card-label--icon .kit-ico { --kit-ico-size: 0.95rem; }
 .kit-card[class*="kit-card--"] > .kit-card-body { display: flex; flex-direction: column; gap: var(--kit-space-2); flex: 1 1 auto; min-width: 0; margin: 0 !important; padding: var(--wp--custom--kits--card--padding, var(--kit-space-4)); }
 .kit-card-body > * { margin: 0 !important; max-width: none; }
-/* The meta row wraps (owner, 11 Nov 2026): date first, and an item that does not fit goes whole to the next line. */
-.kit-card-meta { flex-wrap: wrap; }
+/* The meta row: date first, one line (owner, 13 Nov 2026; was wrapping, 11 Nov 2026). */
+.kit-card-meta { flex-wrap: nowrap; } /* one line (owner, 13 Nov 2026), see .kit-card-metarow */
 .kit-card-meta > .kit-meta-item { flex: none; max-width: 100%; }
 .kit-card-meta .kit-date > .kit-ico { margin-right: 0; }
 .kit-card-chips { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-4) var(--s-1, 4px); height: 1.75rem; overflow: hidden; }
 .kit-card-chips > * { flex: 0 1 auto; min-width: 0; max-width: 100%; }
 .kit-card-chips .kit-tag-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
 .kit-card-chips .kit-src-icon { width: var(--kit-icon-sm, 16px); height: var(--kit-icon-sm, 16px); flex: none; border-radius: var(--kit-radius-mark); object-fit: contain; }
-/* Meta and chips on one row (owner, 21 Oct 2026): .kit-card-metarow holds the meta row, then the chips, which take the
-   space left; a chip that does not fit still wraps out of sight. */
-.kit-card-metarow { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); min-width: 0; }
-.kit-card-metarow > .kit-card-meta { flex: 0 1 auto; min-width: 0; }
-.kit-card-metarow > .kit-card-chips { flex: 1 1 8rem; min-width: 0; margin: 0; } /* under the date only when the source chip would not fit (narrow cards) */
+/* Meta and chips on one row (owner, 21 Oct 2026; 13 Nov 2026: "metarow - it is a single row - will always be a row"):
+   .kit-card-metarow is one line at every width, date first; it never wraps or stacks, and the date is never cut. The
+   meta items keep their size; the chips take the room left: a chip that does not fit drops out of sight whole (no
+   slivers), and a chip alone on the line ends in an ellipsis; with no chips, the last meta item ends in an ellipsis. */
+.kit-card-metarow { display: flex; flex-wrap: nowrap; align-items: center; gap: var(--kit-space-2); min-width: 0; overflow: hidden; white-space: nowrap; }
+.kit-card-metarow > .kit-card-meta { flex: none; min-width: 0; margin: 0; flex-wrap: nowrap !important; }
+.kit-card-metarow > .kit-card-meta:last-child { flex: 0 1 auto; overflow: hidden; }
+.kit-card-metarow > .kit-card-chips { flex: 1 1 0; min-width: 0; margin: 0; }
+.kit-card-metarow .kit-meta-item { flex: none; white-space: nowrap; }
+.kit-card-metarow > .kit-card-meta:last-child > :last-child:not(.kit-date) { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .kit-card-chips-lead { display: inline-flex; flex-wrap: nowrap; gap: var(--s-1, 4px); min-width: 0; max-width: 100%; }
 .kit-card-chips-lead > * { min-width: 0; }
 .kit-card-chips-lead > .kit-card-label { flex: none; }
