@@ -149,7 +149,7 @@
 .aw-bento-ico .kit-ico { --kit-ico-size: var(--kit-icon-xl); }
 .aw-bento-ico--accent { color: var(--kit-color-accent); }
 .aw-bento-head { display: flex; align-items: center; gap: var(--kit-space-3); }
-.aw-bento-tile .aw-bento-num { font-size: min(var(--kit-type-h2), 12cqi); font-weight: 800; letter-spacing: -0.03em; line-height: var(--kit-leading-display); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.aw-bento-tile .aw-bento-num { font-size: min(var(--kit-type-h2), 12cqi); font-weight: var(--kit-weight-display); letter-spacing: -0.03em; line-height: var(--kit-leading-display); white-space: nowrap; font-variant-numeric: tabular-nums; }
 .aw-bento-tile .aw-bento-num a { display: inline-flex; align-items: center; min-height: var(--kit-size-target); margin-block: calc((1lh - var(--kit-size-target)) / 2); }
 .aw-bento-tile > :first-child { margin-bottom: auto; }
 .aw-bento-tile.aw-bento--sos { border-color: transparent; background: linear-gradient(180deg, color-mix(in srgb, var(--kit-color-accent) 82%, var(--kit-color-on-ink)), color-mix(in srgb, var(--kit-color-accent) 90%, var(--color-peach))); box-shadow: inset 0 1px 0 color-mix(in srgb, var(--kit-color-on-ink) 45%, transparent), 0 10px 30px -8px color-mix(in srgb, var(--kit-color-accent) 45%, transparent); color: var(--kit-color-on-accent); }
@@ -159,7 +159,7 @@
 .aw-bento--sos .aw-bento-eyebrow .kit-ico { --kit-ico-size: calc(var(--kit-icon-xl) + var(--kit-space-1)); }
 .aw-bento--sos p, .aw-bento-tile.aw-bento--sos .aw-bento-eyebrow { color: var(--kit-color-on-accent); }
 .aw-bento--sos p:not(.aw-bento-eyebrow) { font-size: var(--kit-type-base); max-width: 34ch; }
-.aw-bento-tile.aw-bento--sos .aw-bento-num { font-size: var(--kit-type-display); font-weight: 900; }
+.aw-bento-tile.aw-bento--sos .aw-bento-num { font-size: var(--kit-type-display); font-weight: var(--kit-weight-display); }
 .aw-bento--sos:has(a:focus-visible) { outline-color: var(--kit-color-on-ink); }
 .aw-bento-cta { display: inline-flex; align-self: flex-start; align-items: center; gap: var(--kit-space-2); min-height: var(--kit-size-target); padding: 0 var(--kit-space-5); border-radius: var(--kit-radius-pill); background: var(--kit-color-on-accent); color: var(--kit-color-accent); font-weight: var(--kit-weight-strong); box-shadow: var(--kit-elevation-1); transition: transform var(--kit-motion-base) var(--kit-motion-ease), background-color var(--kit-motion-base) var(--kit-motion-ease), box-shadow var(--kit-motion-base) var(--kit-motion-ease); }
 .aw-bento--sos:hover .aw-bento-cta { transform: scale(1.04); background: color-mix(in srgb, var(--kit-color-on-accent) 60%, black); box-shadow: 0 6px 16px -4px rgb(20 20 20 / 45%); }

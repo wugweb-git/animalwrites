@@ -19,7 +19,7 @@ This check fails on a NEW rule in our CSS (themes/, plugins/*/assets/, not vendo
           A child reset to 0 inside a padded box (.kit-card-body in a padded stacked card) is listed in the baseline.
   motion  sets scroll-behavior: smooth outside @media (prefers-reduced-motion: no-preference), unless the same file sets
           that selector back to auto under (prefers-reduced-motion: reduce) (WCAG 2.2, owner 2 Nov 2026).
-  type    sets font-size on an h1, h2 or h3 to anything but the theme's own sizes (var(--kit-type-*), inherit), so
+  type    sets font-size on an h1, h2 or h3 to anything but the theme's own sizes (var(--kit-type-*), var(--kit-h1-size) to var(--kit-h6-size), inherit), so
           headings keep the theme H1/H2/H3 sizes (owner, 2 Nov 2026).
 
 Rules that existed on 2 Nov 2026 are listed in tools/ci/theme_rules_baseline.txt and still pass; remove a line there
@@ -226,7 +226,7 @@ def pad_min(sel):
 
 
 HEADING = re.compile(r"(^|[\s>+~,(])h[1-3](?![\w-])")
-TYPE_OK = re.compile(r"^\s*(var\(--kit-type-[\w-]+(,[^()]*)?\)|inherit)\s*(!important)?\s*$")
+TYPE_OK = re.compile(r"^\s*(var\(--kit-(type-[\w-]+|h[1-6]-size)(,[^()]*)?\)|inherit)\s*(!important)?\s*$")
 
 
 def findings():

@@ -43,7 +43,7 @@ a:hover { color: var(--kit-color-link); text-decoration-thickness: var(--kit-und
 body { font-feature-settings: "cv11", "ss01"; }
 /* Heading family, weight, size, leading, tracking and colour: theme.json styles.elements (h1-h6) */
 h1, h2, h3, h4, h5, h6, .wp-block-heading, .wp-block-post-title, .wp-block-query-title { text-wrap: balance; }
-.kit-display ,.kit-hero-title { font-size: var(--kit-type-display) !important; line-height: var(--kit-leading-display); letter-spacing: var(--kit-tracking-display); font-weight: var(--kit-weight-bold); }
+.kit-display ,.kit-hero-title { font-size: var(--kit-type-display) !important; line-height: var(--kit-leading-display); letter-spacing: var(--kit-tracking-display); font-weight: var(--kit-weight-display); }
 p, li { max-width: var(--kit-measure); text-wrap: pretty; }
 .has-text-align-center { margin-inline: auto; }
 .has-large-font-size ,.kit-lead { font-size: var(--kit-type-lead) !important; line-height: 1.5; color: var(--kit-color-muted); }
@@ -1442,7 +1442,7 @@ header.wp-block-template-part.kit-header-hidden { transform: translateY(calc(-10
 	background: linear-gradient(0deg, color-mix(in srgb, var(--kit-color-ink) var(--kit-action-scrim-mix), transparent) calc(100% - var(--kit-space-7)), transparent);
 }
 .wp-block-cover.kit-action-card .wp-block-cover__inner-container > :last-child { margin-bottom: 0; }
-.kit-action-card h2 { font-size: var(--kit-type-h2); font-weight: var(--kit-weight-bold); line-height: var(--kit-leading-heading); }
+.kit-action-card h2 { font-size: var(--kit-h2-size); font-weight: var(--kit-h2-weight); line-height: var(--kit-h2-leading); }
 .kit-action-card .wp-block-button__link { font-size: var(--kit-action-btn-size); --_bg-h: color-mix(in srgb, var(--kit-btn-brand-bg) var(--kit-btn-hover-mix), var(--kit-color-on-ink)); --_line-h: var(--_bg-h); transition: background-color var(--kit-motion-base) var(--kit-motion-ease), transform var(--kit-motion-base) var(--kit-motion-ease); }
 @media (min-width: 768px) and (max-width: 1199px) {
 	.kit-action-card .wp-block-button__link { padding-inline: var(--kit-space-4); }

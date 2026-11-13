@@ -865,7 +865,10 @@
    "tokens": [
     "kit-type-display",
     "kit-type-lead",
-    "kit-type-xs"
+    "kit-type-xs",
+    "kit-weight-display",
+    "kit-leading-display",
+    "kit-tracking-display"
    ],
    "a11y": {
     "element": "text elements",
@@ -882,6 +885,67 @@
    },
    "seo": {
     "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Headings h1–h6",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "wp-block-heading"
+   ],
+   "states": [
+    "h1",
+    "h2",
+    "h3",
+    "h4",
+    "h5",
+    "h6"
+   ],
+   "tokens": [
+    "kit-h1-size",
+    "kit-h1-weight",
+    "kit-h1-leading",
+    "kit-h1-tracking",
+    "kit-h2-size",
+    "kit-h2-weight",
+    "kit-h2-leading",
+    "kit-h2-tracking",
+    "kit-h3-size",
+    "kit-h3-weight",
+    "kit-h3-leading",
+    "kit-h3-tracking",
+    "kit-h4-size",
+    "kit-h4-weight",
+    "kit-h4-leading",
+    "kit-h4-tracking",
+    "kit-h5-size",
+    "kit-h5-weight",
+    "kit-h5-leading",
+    "kit-h5-tracking",
+    "kit-h6-size",
+    "kit-h6-weight",
+    "kit-h6-leading",
+    "kit-h6-tracking"
+   ],
+   "a11y": {
+    "element": "h1–h6",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "heading level",
+    "contrast": [
+     "kit-color-muted",
+     "kit-color-bg"
+    ]
+   },
+   "seo": {
+    "heading": "one h1 per page, levels in order",
     "link": "n/a",
     "alt": "n/a",
     "schema": "none"
