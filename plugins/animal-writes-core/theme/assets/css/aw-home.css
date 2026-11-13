@@ -150,6 +150,23 @@
 .aw-bento--sos:hover .aw-bento-cta { transform: scale(1.04); background: color-mix(in srgb, var(--kit-color-on-accent) 60%, black); box-shadow: 0 6px 16px -4px rgb(20 20 20 / 45%); }
 .aw-bento--sos:active .aw-bento-cta { transform: scale(.96); box-shadow: none; }
 .aw-bento-cta .kit-ico { --kit-ico-size: var(--kit-icon-sm); }
+/* Bento surfaces (owner, 13 Nov 2026): a mix, never one dark tile with the rest white. 112 is the yellow lead; Injured
+   animal and Find a vet are picture tiles; 1962 is ink; AWBI is ash (ink mixed with muted grey); Report cruelty and Find
+   an organisation are white. Stacked on phones the order alternates (no two white tiles meet). Picture tiles: the photo
+   (720x480 WebP, assets/img/tiles) under ink at --kit-action-scrim-mix, the same scrim as the Actions photo cards, so
+   white text keeps AA on the photo's lightest pixel; plain ink until the grid nears the screen (.is-near, aw.js), so the
+   photos never load with the hero. Focus ring: the yellow accent, on the ink section around every tile (112 keeps white). */
+.aw-bento-tile:not(.aw-bento--sos):has(a:focus-visible) { outline-color: var(--kit-color-accent); }
+.aw-bento-tile:is(.aw-bento--injured, .aw-bento--vets), .aw-bento-tile:is(.aw-bento--injured, .aw-bento--vets):hover { background: var(--kit-color-ink) center / cover no-repeat; }
+.aw-bento.is-near .aw-bento--injured, .aw-bento.is-near .aw-bento--injured:hover { background-image: linear-gradient(color-mix(in srgb, var(--kit-color-ink) var(--kit-action-scrim-mix), transparent), color-mix(in srgb, var(--kit-color-ink) var(--kit-action-scrim-mix), transparent)), url(../img/tiles/help-injured-dog-water-bowls.webp); }
+.aw-bento.is-near .aw-bento--vets, .aw-bento.is-near .aw-bento--vets:hover { background-image: linear-gradient(color-mix(in srgb, var(--kit-color-ink) var(--kit-action-scrim-mix), transparent), color-mix(in srgb, var(--kit-color-ink) var(--kit-action-scrim-mix), transparent)), url(../img/tiles/help-vets-cow-quiet-road.webp); }
+.aw-bento-tile.aw-bento--vet1962, .aw-bento-tile.aw-bento--vet1962:hover { background: var(--kit-color-ink); }
+.aw-bento-tile.aw-bento--vet1962 { border-color: color-mix(in srgb, var(--kit-color-on-ink) 16%, transparent); }
+.aw-bento-tile.aw-bento--awbi, .aw-bento-tile.aw-bento--awbi:hover { background: color-mix(in srgb, var(--kit-color-ink), var(--kit-color-muted)); }
+.aw-bento-tile:is(.aw-bento--cruelty, .aw-bento--orgs), .aw-bento-tile:is(.aw-bento--cruelty, .aw-bento--orgs):hover { border-color: transparent; background: var(--kit-color-raised); color: var(--kit-color-ink); }
+.aw-bento-tile:is(.aw-bento--cruelty, .aw-bento--orgs) p { color: var(--kit-color-muted); }
+.aw-bento-tile:is(.aw-bento--cruelty, .aw-bento--orgs) .aw-bento-ico { background: var(--kit-surface-section-alt); color: var(--kit-color-ink); }
+.aw-bento-tile:is(.aw-bento--cruelty, .aw-bento--orgs) .aw-bento-ico--accent { background: var(--kit-color-accent); }
 @media (prefers-reduced-motion: reduce) {
 	.aw-bento-tile, .aw-bento-cta { transition: none; }
 	.aw-bento-tile:hover, .aw-bento-tile:active, .aw-bento-tile.aw-bento--sos:hover, .aw-bento-tile.aw-bento--sos:active, .aw-bento--sos:hover .aw-bento-cta, .aw-bento--sos:active .aw-bento-cta { transform: none; }
@@ -188,6 +205,16 @@
 	.aw-ed-law > .kit-stack > .kit-tile::before { justify-self: start; margin-bottom: var(--kit-space-3); }
 	.aw-ed-law > .kit-stack > .kit-tile::after { align-self: start; margin-top: 0.625rem; }
 }
+/* The law, in plain words: four tiles in a mix (owner, 13 Nov 2026). Acts and Rules ink (the lead), Court orders ash,
+   Circulars a picture tile (old books on a library shelf, under the same ink scrim as the help bento; plain ink until the
+   row nears the screen), Letters white. The focus ring stays the blue focus colour: it sits outside the tile, on the
+   white section. */
+.aw-ed-law > .kit-stack > .kit-tile:is(.kit-ico--legal, .kit-ico--research, .kit-ico--file) { border-color: transparent; background: var(--kit-color-ink) center / cover no-repeat; }
+.aw-ed-law > .kit-stack > .kit-tile.kit-ico--research { background: color-mix(in srgb, var(--kit-color-ink), var(--kit-color-muted)); }
+.aw-ed-law > .kit-stack.is-near > .kit-tile.kit-ico--file { background-image: linear-gradient(color-mix(in srgb, var(--kit-color-ink) var(--kit-action-scrim-mix), transparent), color-mix(in srgb, var(--kit-color-ink) var(--kit-action-scrim-mix), transparent)), url(../img/tiles/law-circulars-old-books-shelf.webp); }
+.aw-ed-law > .kit-stack > .kit-tile:is(.kit-ico--legal, .kit-ico--research, .kit-ico--file) > h3.wp-block-heading a { color: var(--kit-color-on-ink) !important; }
+.aw-ed-law > .kit-stack > .kit-tile:is(.kit-ico--legal, .kit-ico--research, .kit-ico--file) > p { color: color-mix(in srgb, var(--kit-color-on-ink) 82%, transparent); }
+.aw-ed-law > .kit-stack > .kit-tile:is(.kit-ico--legal, .kit-ico--research, .kit-ico--file)::after, .aw-ed-law > .kit-stack > .kit-tile:is(.kit-ico--legal, .kit-ico--research, .kit-ico--file):hover::after { background: var(--kit-color-on-ink); }
 .aw-ed-law .aw-news-mosaic :is(.kit-meta-row .kit-meta-item:not(.aw-date), .kit-tag:not(.kit-tag--source)) { display: none; }
 .aw-ed-law .aw-news-mosaic .kit-card--stacked-md .kit-card-title { font-size: var(--kit-type-h3) !important; }
 .aw-ed-law .aw-news-mosaic .kit-card--stacked-md > .kit-card-media { aspect-ratio: 4 / 3; }

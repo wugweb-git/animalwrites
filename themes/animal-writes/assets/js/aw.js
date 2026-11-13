@@ -293,6 +293,19 @@
 	});
 })();
 
+/* Picture tiles (Need help now bento, The law in plain words): the CSS shows a tile's photo only under .is-near, set here
+   when the grid comes within 600px of the screen, so the photos load late and never compete with the hero. Without
+   IntersectionObserver the class is set at once; without script the tiles stay plain ink. */
+(function () {
+	var grids = document.querySelectorAll('.aw-bento, .aw-ed-law > .kit-stack');
+	if (!grids.length) return;
+	if (!('IntersectionObserver' in window)) { Array.prototype.forEach.call(grids, function (g) { g.classList.add('is-near'); }); return; }
+	var io = new IntersectionObserver(function (es) {
+		es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('is-near'); io.unobserve(e.target); } });
+	}, { rootMargin: '600px 0px' });
+	Array.prototype.forEach.call(grids, function (g) { io.observe(g); });
+})();
+
 /* WebMCP (owner, 3 Nov 2026): where the browser offers navigator.modelContext, an AI agent in the visitor's browser
    gets two read-only tools: the site search and the Directory search. Both call the site's own public REST answers
    (WordPress search; Directory listings), send nothing anywhere else and change nothing. No visible change. */
