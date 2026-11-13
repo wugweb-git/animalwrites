@@ -5,6 +5,8 @@
  * Categories: animal-writes
  * Description: The past handwritten-letter campaign as a full-bleed photograph band (core Cover): the story, the campaign's figures (each with its Kits icon), its timeline as a rail, a Kits Brand button, and beside them four of the campaign's own photographs.
  * Inserter: yes
+ * Keywords: story, community dogs, campaign
+ * Viewport Width: 1280
  *
  * @package animal-writes
  */

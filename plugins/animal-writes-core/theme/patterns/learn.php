@@ -5,6 +5,8 @@
  * Categories: animal-writes
  * Description: The three newest guides from Resources (at most one state cruelty-complaint guide; home.php) as three equal Resources cards, with a link to all guides.
  * Inserter: yes
+ * Keywords: guides, resources, how to
+ * Viewport Width: 1280
  *
  * @package animal-writes
  */

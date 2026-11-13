@@ -5,6 +5,8 @@
  * Categories: animal-writes
  * Description: The Animal Writes default banner as a Home card (medium size; the large is the Hero pattern, the small the sidebar card, plus a 1080x1080 share picture): the theme photo card (core Cover, kit-photo-card) on the street dog at dusk (Media 23313) in brand greys (duotone), the hero's words as H2 and line, and one Kits button (one button per card). The photo is clear (no dim); the words sit on the Kits action-card ink band (--kit-action-scrim-mix) that fades out --kit-space-7 below them, and the whole card is the button's link (kit-action-card). A card in the Home campaign row (aw-pair), not a section.
  * Inserter: yes
+ * Keywords: animal writes, card, banner
+ * Viewport Width: 600
  *
  * @package animal-writes
  */

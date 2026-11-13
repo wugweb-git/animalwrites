@@ -5,6 +5,8 @@
  * Categories: animal-writes
  * Description: The three Take part cards (core Cover, kit-photo-card): Volunteer, Run an organisation? and Get updates, each with its own H2, one line and one Brand button. Three across from 768, one under the other on phones and in the sidebar. Used by the Take part band (Home, campaign pages) and by the sidebar.
  * Inserter: no
+ * Keywords: volunteer, claim, updates, cards
+ * Viewport Width: 1280
  *
  * @package animal-writes
  */

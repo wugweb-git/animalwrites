@@ -3,6 +3,8 @@
  * Title: Empty state
  * Slug: kits-by-wugweb/empty-state
  * Categories: kits-components
+ * Keywords: empty, no results, nothing found
+ * Viewport Width: 800
  */
 ?>
 <!-- wp:group {"style":{"spacing":{"padding":{"top":"var:preset|spacing|60","bottom":"var:preset|spacing|60"}}},"layout":{"type":"constrained","contentSize":"480px"}} -->

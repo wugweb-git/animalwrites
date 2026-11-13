@@ -5,6 +5,8 @@
  * Categories: animal-writes, system
  * Description: Dark band: section head, then a bento grid of seven tiles, each one link with an H3 and an icon square (amber for the urgent tiles): a large 112 emergency tile, injured animal, the 1962 and AWBI helplines, report cruelty, find a vet and find an organisation. Phone numbers are tap to call. One column on phones, two from 768, four from 1200.
  * Inserter: yes
+ * Keywords: emergency, helpline, help, injured animal
+ * Viewport Width: 1280
  *
  * @package animal-writes
  */

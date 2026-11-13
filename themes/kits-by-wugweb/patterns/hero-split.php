@@ -3,6 +3,8 @@
  * Title: Hero — split
  * Slug: kits-by-wugweb/hero-split
  * Categories: kits-components
+ * Keywords: hero, image, split, intro
+ * Viewport Width: 1280
  */
 ?>
 <!-- wp:columns {"verticalAlignment":"center","align":"wide","style":{"spacing":{"padding":{"top":"var:preset|spacing|70","bottom":"var:preset|spacing|70"},"blockGap":{"left":"var:preset|spacing|60"}}}} -->

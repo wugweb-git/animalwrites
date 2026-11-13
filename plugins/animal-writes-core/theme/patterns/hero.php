@@ -5,6 +5,8 @@
  * Categories: animal-writes
  * Description: Home hero (Animal Writes default, shown when no campaign holds the Home hero): a core Cover with a street dog at dusk in brand greys (duotone), the page H1 in the Display style (kit-hero-title), one line and two Kits buttons, text at the top so the dog stays in view on phones.
  * Inserter: yes
+ * Keywords: hero, home, intro
+ * Viewport Width: 1280
  *
  * @package animal-writes
  */

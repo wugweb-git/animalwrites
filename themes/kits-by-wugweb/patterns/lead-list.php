@@ -4,6 +4,8 @@
  * Slug: kits-by-wugweb/lead-list
  * Categories: kits-lists
  * Description: Section head (kit-sec-head: H2 and a ghost "See all" button, the same head as every Home section) with a link, one lead post (large image and headline) and the next four as a ruled list.
+ * Keywords: news, posts, lead story, list
+ * Viewport Width: 1280
  */
 ?>
 <!-- wp:group {"align":"full","className":"kit-ed-news","layout":{"type":"constrained","contentSize":"1200px"}} -->

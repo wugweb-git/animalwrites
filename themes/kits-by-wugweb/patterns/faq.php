@@ -3,6 +3,8 @@
  * Title: FAQ
  * Slug: kits-by-wugweb/faq
  * Categories: kits-components
+ * Keywords: faq, questions, answers
+ * Viewport Width: 1280
  */
 ?>
 <!-- wp:group {"layout":{"type":"constrained"}} -->

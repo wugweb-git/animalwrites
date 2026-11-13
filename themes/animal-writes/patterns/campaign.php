@@ -5,6 +5,8 @@
  * Categories: featured
  * Post Types: aw_campaign, page
  * Description: Full campaign layout. Replace the campaign slug "my-campaign" and the date in the shortcodes.
+ * Keywords: campaign, layout, page
+ * Viewport Width: 1280
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
