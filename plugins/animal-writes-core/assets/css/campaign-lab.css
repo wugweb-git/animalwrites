@@ -1024,3 +1024,26 @@
 .aw-camp--lab-rules .aw-camp-wait-stamp a { color: inherit; }
 
 @media (prefers-reduced-motion: reduce) { .aw-camp--lab-rules .aw-camp-wait-chip::before { animation: none; } }
+
+/* What the draft does: bento in two dark grounds (owner, 13 Nov 2026: pictures under a dark overlay, ash black as the
+   second colour, not one dark tile among white). Phone order: scales picture, white, ash, white, ash, book picture band.
+   Overlays keep white text at AA over the lightest part of each picture; chips on pictures sit on a dark fill. */
+.aw-camp.aw-camp--lab-rules #why-it-matters .aw-camp-grid > .aw-camp-card:is(:nth-child(1), :nth-child(3), :nth-child(5), :nth-child(6)) { --kit-color-focus: var(--kit-color-on-ink); --camp-tile: var(--camp-dark); color: var(--kit-color-on-ink); box-shadow: var(--kit-elevation-2); }
+.aw-camp.aw-camp--lab-rules #why-it-matters .aw-camp-grid > .aw-camp-card:is(:nth-child(1), :nth-child(3), :nth-child(5), :nth-child(6)) :is(h3, p, summary, .aw-camp-card-ico) { color: var(--kit-color-on-ink); }
+.aw-camp.aw-camp--lab-rules #why-it-matters .aw-camp-grid > .aw-camp-card:is(:nth-child(1), :nth-child(3), :nth-child(5), :nth-child(6)) .aw-rule-chip { --kit-chip-border: rgb(255 255 255 / 0.6); --kit-chip-border-strong: var(--kit-color-on-ink); --kit-chip-hover: rgb(255 255 255 / 0.14); color: var(--kit-color-on-ink); }
+.aw-camp.aw-camp--lab-rules #why-it-matters .aw-camp-grid > .aw-camp-card:is(:nth-child(1), :nth-child(6)) .aw-rule-chip { --kit-chip-bg: rgb(29 20 24 / 0.85); background: rgb(29 20 24 / 0.85); }
+.aw-camp.aw-camp--lab-rules #why-it-matters .aw-camp-grid > .aw-camp-card:is(:nth-child(1), :nth-child(6)) .aw-camp-card-ico { background: rgb(29 20 24 / 0.85); }
+/* Ash black tiles: strays, and a lab without walls */
+.aw-camp.aw-camp--lab-rules #why-it-matters .aw-camp-grid > .aw-camp-card:is(:nth-child(3), :nth-child(5)) { background: var(--camp-dark); }
+/* Lead: the scales (flask against papers) under maroon to near black */
+.aw-camp.aw-camp--lab-rules #why-it-matters .aw-camp-grid > .aw-camp-card:nth-child(1) { aspect-ratio: 4 / 5; background: linear-gradient(180deg, rgb(29 20 24 / 0.2) 0%, rgb(107 15 34 / 0.55) 32%, rgb(29 20 24 / 0.9) 55%, var(--camp-dark) 72%), url("/wp-content/plugins/animal-writes-core/theme/assets/img/campaigns/lab-rules-scales-flask-papers.webp") 50% 0 / cover no-repeat, var(--camp-dark); }
+/* Training: the tied red book beside the text, near black over it */
+.aw-camp.aw-camp--lab-rules #why-it-matters .aw-camp-grid > .aw-camp-card:nth-child(6) { padding-top: clamp(11rem, 48vw, 16rem); background: linear-gradient(180deg, rgb(29 20 24 / 0.1) 0%, rgb(29 20 24 / 0.75) 45%, var(--camp-dark) 62%), url("/wp-content/plugins/animal-writes-core/theme/assets/img/campaigns/lab-rules-red-book-papers-pencil.webp") 50% 0 / 100% auto no-repeat, var(--camp-dark); }
+@media (min-width: 768px) {
+	.aw-camp.aw-camp--lab-rules #why-it-matters .aw-camp-grid > .aw-camp-card:nth-child(1) { aspect-ratio: auto; padding-right: 42%; background: linear-gradient(90deg, var(--camp-dark) 0%, var(--camp-dark) 50%, rgb(107 15 34 / 0.55) 72%, rgb(29 20 24 / 0.2) 100%), url("/wp-content/plugins/animal-writes-core/theme/assets/img/campaigns/lab-rules-scales-flask-papers.webp") 100% 30% / 50% auto no-repeat, var(--camp-dark); }
+	.aw-camp.aw-camp--lab-rules #why-it-matters .aw-camp-grid > .aw-camp-card:nth-child(6) { padding-top: var(--kit-space-5); padding-right: 42%; background: linear-gradient(90deg, var(--camp-dark) 0%, var(--camp-dark) 52%, rgb(29 20 24 / 0.55) 72%, rgb(29 20 24 / 0.2) 100%), url("/wp-content/plugins/animal-writes-core/theme/assets/img/campaigns/lab-rules-red-book-papers-pencil.webp") 100% 50% / 48% auto no-repeat, var(--camp-dark); }
+}
+@media (min-width: 1200px) {
+	.aw-camp.aw-camp--lab-rules #why-it-matters .aw-camp-grid > .aw-camp-card:nth-child(1) { padding-right: 34%; background: linear-gradient(90deg, var(--camp-dark) 0%, var(--camp-dark) 62%, rgb(107 15 34 / 0.5) 80%, rgb(29 20 24 / 0.15) 100%), url("/wp-content/plugins/animal-writes-core/theme/assets/img/campaigns/lab-rules-scales-flask-papers.webp") 100% 30% / 38% auto no-repeat, var(--camp-dark); }
+	.aw-camp.aw-camp--lab-rules #why-it-matters .aw-camp-grid > .aw-camp-card:nth-child(6) { padding-right: 34%; background: linear-gradient(90deg, var(--camp-dark) 0%, var(--camp-dark) 64%, rgb(29 20 24 / 0.5) 80%, rgb(29 20 24 / 0.15) 100%), url("/wp-content/plugins/animal-writes-core/theme/assets/img/campaigns/lab-rules-red-book-papers-pencil.webp") 100% 50% / 36% auto no-repeat, var(--camp-dark); }
+}
