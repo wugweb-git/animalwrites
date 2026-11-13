@@ -192,5 +192,20 @@ check( ! preg_match( '/\b(update_post_meta|delete_post_meta|add_post_meta|wp_upd
 check( ! preg_match( "/'aw_(phone|whatsapp|emergency|email)'/", $lst ), 'Listings: no phone or e-mail is read' );
 check( false !== strpos( $lst, "current_user_can( 'edit_post', \$id )" ), 'Listings: Edit link only for who may edit the listing' );
 
+// Claims: DirectoryWeb's capability on every check (owner, 13 Nov 2026); the new screen's routes only read.
+$inc = dirname( __DIR__ ) . '/includes/';
+$cl  = '';
+foreach ( array( 'claims.php', 'claims-review.php', 'directoryweb-rest.php', 'directoryweb-ui.php' ) as $f ) {
+	$cl .= (string) file_get_contents( $inc . $f ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- a local file read by the test
+}
+check( false === strpos( $cl, "'edit_aw_volunteers'" ), 'Claims: no check on edit_aw_volunteers' );
+check( 3 === substr_count( $cl, 'current_user_can( DIRECTORYWEB_CAP ) ||' ), 'Claims: the two decide handlers and the logo on DIRECTORYWEB_CAP' );
+check( 1 === substr_count( $cl, 'current_user_can( DIRECTORYWEB_CAP ) || ! check_admin_referer( \'aw_claim_ff_decide_' ), 'Claims: Directory → Claims review on DIRECTORYWEB_CAP' );
+check( false !== strpos( $cl, "'aw-claims'                => array( 'claims', DIRECTORYWEB_CAP )" ), 'Claims: new screen on DIRECTORYWEB_CAP' );
+check( false !== strpos( $cl, '$claims = directoryweb_rest_can( DIRECTORYWEB_CAP );' ), 'Claims: routes on DIRECTORYWEB_CAP' );
+$rest = (string) file_get_contents( $inc . 'directoryweb-rest.php' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- a local file read by the test
+check( 2 === substr_count( $rest, "'permission_callback' => \$claims," ), 'Claims: both claims routes use the claims check' );
+check( ! preg_match( '/aw_claim_apply_field|aw_claim_ff_decide|update_post_meta|wp_update_post/', $rest ), 'Claims: the new screen\'s routes approve, reject or apply nothing' );
+
 echo "{$count} checks, {$fails} failed\n";
 exit( $fails ? 1 : 0 );

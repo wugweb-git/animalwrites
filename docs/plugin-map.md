@@ -23,7 +23,7 @@ Each Wugweb plugin has its own capability. Each plugin grants it on activation a
 | Plugin | Capability | Granted to (old capability) |
 |---|---|---|
 | Kits Core | `manage_kits` (`KITS_CAP`): Kits menu, Home, Help | administrator; roles with `manage_options` |
-| DirectoryWeb (in Animal Writes Core) | `manage_directoryweb` (`DIRECTORYWEB_CAP`): menu, Dashboard, its counts | administrator; roles with `edit_aw_volunteers`. Claims keep `edit_aw_volunteers` (read-only on the new screen) |
+| DirectoryWeb (in Animal Writes Core) | `manage_directoryweb` (`DIRECTORYWEB_CAP`): menu, Dashboard, its counts; Claims (Directory → Claims with its review, the new Claims screen read-only, the claims routes; owner, 13 Nov 2026) | administrator; roles with `edit_aw_volunteers`. Volunteers, reports, forms and MailWeb-AW keep `edit_aw_volunteers` |
 | SourceWeb | `manage_sourceweb` (`SOURCEWEB_CAP`, `AW_REVIEW_CAP`, `AW_ENRICH_CAP`): Overview, To review, Enrichment review | administrator; roles with `edit_others_posts`. The other screens keep `AW_SRC_CAP` (`manage_options`) |
 | RankWeb | `manage_rankweb` (`RANKWEB_CAP`): Overview, FAQ, Dashboard routes | administrator; roles with `manage_categories` |
 | InsightWeb | `manage_insightweb` (`INSIGHTWEB_CAP`, `aw_si_cap()`) | administrator; roles with `manage_options` (or `AW_SRC_CAP`) |

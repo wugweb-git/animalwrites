@@ -40,7 +40,7 @@
 | `core/places.php` | LGD places: reader `aw_lgd()` `:53` (`data/lgd.json` `:58`), place helpers `:85-518`, option `aw_place_counts`, `save_post`/`set_object_terms` count resets `:320-331`, PIN lookup `aw_pin` `:494`, old place redirects `:382`, WP-CLI `aw redirects-import` `:408` | DW. Also used by News, Library, Campaigns and Opportunities (`AW_PLACE_TYPES` `:28`): DirectoryWeb owns places, and the other types use them because Core requires DirectoryWeb |
 | `core/places-admin.php` | Place box on the edit screen (`acf/render_field` `:73`, save `:84`, `wp_ajax_aw_pin_lookup` `:127`) | DW |
 | `core/claims.php` | Legacy `aw_claim` type (`:42-60`, kept so pre–Fluent Forms claims stay readable), logo checks, `admin_post_aw_claim_decide` `:182` (fires `aw_claim_before_apply` `:191`) | DW |
-| `core/claims-review.php` | Claim form #6: pre-fill `fluentform/rendering_field_data_*` `:124-172`, `AW_CLAIM_L` `:27`, Directory → Claims (`add_submenu_page` `:296`, cap `edit_aw_volunteers`), per-field approve `aw_claim_apply_field` `:494`, `admin_post_aw_claim_ff_decide` `:578` | DW |
+| `core/claims-review.php` | Claim form #6: pre-fill `fluentform/rendering_field_data_*` `:124-172`, `AW_CLAIM_L` `:27`, Directory → Claims (`add_submenu_page` `:296`, cap `manage_directoryweb` since 13 Nov 2026), per-field approve `aw_claim_apply_field` `:494`, `admin_post_aw_claim_ff_decide` `:578` | DW |
 | `core/find-help.php` | "Find help near you": place detection in text `:122-256` (`save_post` 30 `:266`), links on `item-more` `:354` and the campaign band `:370`, WP-CLI `aw-places` `:419`, `:507` | DW |
 | `core/featured.php` | "Featured in" matcher (see §0.4): scan, cron `aw_featured_rescan` `:322`, meta `aw_rel_org*`, schema helpers `:442-455`, WP-CLI `:497` | DW. Delete dead `aw_featured_html` `:415` |
 | `core/gov-verified.php` | Verified (government records): `aw_gov_verification` `:57`, sync on meta change `:112-128` (only while option `aw_gov_verified_live`), title mark `:167`, edit-screen box `:222`, WP-CLI `aw gov-verify` `:236` | DW |
@@ -254,7 +254,7 @@ Each tile has a number, a sub-line, the source it names and a cached REST route 
 - Keys never reach the browser.
 
 **Technical (per the standard):**
-- Capability and nonce per screen: `edit_aw_volunteers` for Claims, `manage_options` for Settings.
+- Capability and nonce per screen: `manage_directoryweb` for Claims (was `edit_aw_volunteers` until 13 Nov 2026), `manage_options` for Settings.
 - JS translations through `wp_set_script_translations( …, 'directoryweb' )`.
 - One script per screen, which only registers DirectoryWeb's parts with the shell. Its dependencies are the shell's script and the plumbing packages (`@wordpress/data`, `api-fetch`, `i18n`, `icons`), built through `@wordpress/scripts` (with `.asset.php`). It has no styles of its own.
 - Performance budget per screen as the shell sets it.
@@ -291,7 +291,7 @@ The plan:
    - **Icon** (from `docs/brand/plugin-icons/`: a map pin with a yellow dot): `assets/icon.svg`, `assets/icon-256x256.png`, `assets/icon-128x128.png` in the plugin. It is registered with the shell for the Kits → Plugins row and the shell's app header; DirectoryWeb draws neither.
    - **No custom tables** (database): the claim decision stays in submission meta, the change log in SourceWeb's `{prefix}aw_enrich`, so there is no `dbDelta` and no schema version. Its own new options are only `directoryweb_rewrite_ver` and the Settings values (existing option names, §2.3); new ones are saved with autoload off.
    - **Deactivation and uninstall never remove data** (never delete user data): deactivation only flushes rewrites; there is no `uninstall.php` that deletes listings, meta, options or claims.
-   - **Audit points for the PR** (plugin audit): every `directoryweb/v1` write has a `permission_callback` with the capability (`edit_aw_volunteers` or `manage_options`), not only the REST nonce; every public `wp_ajax_nopriv_` route (Find help, PIN and organisation lookups) stays read-only and rate-limited as today; output escaped late; `$wpdb` only through `prepare()`; strings use the `directoryweb` text domain, with translator comments on placeholders.
+   - **Audit points for the PR** (plugin audit): every `directoryweb/v1` write has a `permission_callback` with the capability (`manage_directoryweb` or `manage_options`), not only the REST nonce; every public `wp_ajax_nopriv_` route (Find help, PIN and organisation lookups) stays read-only and rate-limited as today; output escaped late; `$wpdb` only through `prepare()`; strings use the `directoryweb` text domain, with translator comments on placeholders.
 2. **Core loads DirectoryWeb exactly like SourceWeb.** At the place where the Directory files are required today (`animal-writes-core.php:58-64`), it does `if ( ! defined( 'DIRECTORYWEB_LOADED' ) && file_exists( dirname( AW_CORE_DIR ) . '/directoryweb/directoryweb.php' ) ) require_once …`.
    - On the first deploy the post type, fields and routes are therefore there before anyone activates the plugin. Plugins on the server are links into the deploy checkout, and a new folder has no link until it is made (hPanel), so this matters.
    - Once DirectoryWeb is active on its own and loads after Core (`a` < `d`), its own load returns at the constant.
