@@ -84,6 +84,13 @@
 .aw-pair-grid { display: grid; gap: var(--kit-space-grid); }
 .aw-pair-grid > * { box-sizing: border-box; min-height: var(--aw-pair-card-h); }
 .aw-pair-grid > .wp-block-cover { margin: 0; }
+/* The Animal Writes card (aw-default-card): a Kits action card with its words at the top, so the band runs down from the top edge and the dog stays clear */
+.aw-pair-grid > .wp-block-cover.aw-default-card { min-height: var(--aw-pair-card-h); }
+.wp-block-cover.aw-default-card.has-custom-content-position.is-position-top-left > .wp-block-cover__inner-container {
+	position: static; box-sizing: border-box; width: calc(100% + 2 * var(--kit-space-5)); max-width: none; margin: calc(-1 * var(--kit-space-5)) calc(-1 * var(--kit-space-5)) 0;
+	padding: var(--kit-space-5) var(--kit-space-5) var(--kit-space-7);
+	background: linear-gradient(180deg, color-mix(in srgb, var(--kit-color-ink) var(--kit-action-scrim-mix), transparent) calc(100% - var(--kit-space-7)), transparent);
+}
 @media (min-width: 768px) {
 	.aw-pair-grid { grid-template-columns: 1fr 1fr; }
 	.aw-pair-grid:has(> :only-child) { grid-template-columns: 1fr; } /* one card left (the Diwali card goes after 20 Nov 2026): it fills the row */

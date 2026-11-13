@@ -1790,9 +1790,9 @@
    "name": "Animal Writes card",
    "type": "pattern",
    "status": "live",
-   "classes": ["kit-photo-card"],
-   "states": ["default: the Animal Writes default banner as a Home card (medium; large = Hero pattern, small = the sidebar card when no campaign is open, plus a 1080x1080 share picture): photo card (core Cover, dim 50, duotone brand greys) on Media 23313, H2, one line, one Brand button (Find help, /help/); 500px tall at every width (--aw-pair-card-h)"],
-   "tokens": ["--kit-btn-brand-bg", "--kit-color-on-ink", "--kit-radius-card"],
+   "classes": ["kit-photo-card", "kit-action-card", "aw-default-card"],
+   "states": ["default: the Animal Writes default banner as a Home card (medium; large = Hero pattern, small = the sidebar card when no campaign is open, plus a 1080x1080 share picture): photo card (core Cover, no dim, duotone brand greys) on Media 23313; the words at the top on the action-card ink band (--kit-action-scrim-mix, fading out --kit-space-7 below them); the whole card is the button link, lifts on hover, H2, one line, one Brand button (Find help, /help/); 500px tall at every width (--aw-pair-card-h)"],
+   "tokens": ["--kit-btn-brand-bg", "--kit-color-on-ink", "--kit-radius-card", "--kit-action-scrim-mix", "--kit-space-7", "--aw-pair-card-h"],
    "a11y": {
     "element": "pattern (Editor → Patterns, \"Animal Writes\"); card with H2, one line and one button",
     "aria": "photo decorative (alt empty)",
