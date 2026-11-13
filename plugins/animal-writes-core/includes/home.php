@@ -50,12 +50,15 @@ add_filter(
 const AW_HOME_CAMPAIGN = 13848;
 
 /**
- * Whether the home hero is the campaign's. Off (owner, 13 Nov 2026): Home shows the default Animal Writes banner (the
- * Hero pattern, animal-writes/hero); the lab rules campaign keeps its page and its Home card (aw_block_home_lab). The
- * campaign hero code below stays, for the next campaign that takes the Home hero.
+ * Whether the home hero is the campaign's: whenever it is published, open or closed (no automatic
+ * switch when it closes). Its own state is read, never changed.
  */
 function aw_home_hero_is_campaign() {
-	return false;
+	static $on = null;
+	if ( null === $on ) {
+		$on = function_exists( 'aw_camp_open_ts' ) && 'publish' === get_post_status( AW_HOME_CAMPAIGN );
+	}
+	return $on;
 }
 
 /**
