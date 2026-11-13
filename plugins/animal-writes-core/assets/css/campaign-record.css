@@ -349,6 +349,28 @@
 .aw-ed-story.aw-camp--community-dogs .aw-ed-story-text > * + * { margin-top: var(--kit-space-5) !important; }
 .aw-ed-story.aw-camp--community-dogs .aw-ed-story-text h2 { max-width: 18ch; font-weight: 800 !important; letter-spacing: -0.035em; line-height: 1.02 !important; text-wrap: balance; }
 .aw-ed-story.aw-camp--community-dogs .aw-ed-story-text h2 + p { max-width: 54ch; }
+/* Home: the band is the Community dogs campaign's Home hero (lg, owner 13 Nov 2026). The campaign's orange and black: the
+   Cover photo under its dark overlay, white words, orange icons, key date and button, as before; the title at the theme H1
+   size (Display style; the page's h1 stays the hero block's) and the hero's one height, --kit-hero-h (design-system.md
+   Layout rules 4). Beside the words, the campaign page's stamp: its own photograph whole on white stamp paper with
+   perforated edges, slightly turned (home.php puts it in place of the four photographs on Home). Phones: the words fit
+   the screen and the stamp is left out; the words are all kept. */
+body.home .aw-camp--community-dogs.aw-ed-story { min-height: var(--kit-hero-h) !important; }
+body.home .aw-ed-story.aw-camp--community-dogs .aw-ed-story-text h2 { font-size: var(--kit-type-h1) !important; font-weight: var(--kit-weight-bold) !important; letter-spacing: var(--kit-tracking-display); line-height: var(--kit-leading-display) !important; }
+body.home .aw-ed-story.aw-camp--community-dogs .aw-ed-story-num { font-weight: var(--kit-weight-bold); }
+body.home .aw-ed-story.aw-camp--community-dogs .aw-ed-story-photos { display: block; }
+body.home .aw-ed-story.aw-camp--community-dogs .aw-ed-story-stamp {
+	width: min(100%, 19rem); margin: 0 auto !important; padding: 0.875rem; background: var(--kit-color-raised); transform: rotate(2.5deg);
+	-webkit-mask: radial-gradient(circle at center, #0000 0.34rem, #000 0.38rem) -0.5rem -0.5rem / 1rem 1rem round, linear-gradient(#000 0 0) content-box;
+	mask: radial-gradient(circle at center, #0000 0.34rem, #000 0.38rem) -0.5rem -0.5rem / 1rem 1rem round, linear-gradient(#000 0 0) content-box;
+}
+body.home .aw-ed-story.aw-camp--community-dogs .aw-ed-story-stamp img { display: block; width: 100%; height: auto; border-radius: 0; }
+@media (min-width: 768px) and (max-width: 1199px) { body.home .aw-ed-story.aw-camp--community-dogs .aw-ed-story-stamp { width: 12.5rem; } } /* the campaign page's tablet stamp */
+@media (max-width: 767px) { body.home .aw-ed-story.aw-camp--community-dogs .aw-ed-story-media { display: none; } }
+/* Dates inside the line read as words, as on the campaign page: no calendar icon */
+.aw-ed-story.aw-camp--community-dogs .aw-ed-story-text p .aw-date > .kit-ico { display: none; }
+.aw-ed-story.aw-camp--community-dogs .aw-ed-story-text p .aw-date { display: inline; padding: 0; font-size: inherit; }
+@media (max-width: 767px) { body.home .aw-ed-story.aw-camp--community-dogs .aw-ed-story-photos { display: none; } }
 @media (min-width: 1200px) { .aw-ed-story.aw-camp--community-dogs .aw-ed-story-cols { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: var(--kit-space-7); align-items: center; } }
 
 /* Figures: a 2 x 2 ledger, each with its icon (letters, citizens, cities, coordinators) */

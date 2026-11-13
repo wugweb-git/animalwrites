@@ -391,6 +391,28 @@ add_filter(
 	}
 );
 
+// Home: the story band is the Community dogs campaign's Home hero (owner, 13 Nov 2026), drawn as the campaign page's hero
+// (campaign-record.css: ink on the campaign orange, the photo a perforated stamp). Its four photographs are replaced, on
+// Home only, by the campaign's own photograph (its featured image, the campaign page's stamp), with its srcset and alt.
+// The stored pattern is not changed; the Campaigns page keeps the four.
+add_filter(
+	'render_block_core/group',
+	function ( $html, $block ) {
+		if ( ! is_front_page() || ! in_array( 'aw-ed-story-photos', preg_split( '/\s+/', (string) ( $block['attrs']['className'] ?? '' ) ), true ) ) {
+			return $html;
+		}
+		$camp = get_page_by_path( 'india-writes-for-its-community-dogs', OBJECT, 'aw_campaign' );
+		$pic  = $camp ? (int) get_post_thumbnail_id( $camp ) : 0;
+		if ( ! $pic || ! wp_attachment_is_image( $pic ) ) {
+			return $html;
+		}
+		$img = wp_get_attachment_image( $pic, 'medium_large', false, array( 'sizes' => '(min-width: 1200px) 320px, (min-width: 768px) 280px, 1px', 'loading' => 'lazy', 'decoding' => 'async' ) );
+		return '<div class="wp-block-group aw-ed-story-photos"><figure class="wp-block-image aw-ed-story-stamp">' . $img . '</figure></div>';
+	},
+	10,
+	2
+);
+
 // The story band's photograph (pattern aw1-story, a core Cover) is printed with one 1536px file and no srcset, so phones
 // downloaded 376 KB where the 768px copy is 116 KB. Give its img the attachment's srcset (the browser picks the size; the
 // band is full width, so the default 100vw applies). Front end only; the stored pattern is not changed.
