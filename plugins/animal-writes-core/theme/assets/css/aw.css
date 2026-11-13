@@ -303,26 +303,25 @@
 }
 @media (prefers-reduced-motion: reduce) { .aw-help-bar a { transition: none; } .aw-help-bar a:active { transform: none; } }
 
-/* News, Library and Resources lists: stacked cards (owner, 13 Nov 2026: "i like stacked version and lesser padding";
-   "max 2:1 and 3:5"; "stacked card minimum width will be 350px, max is 600", then "Min 340px, two"; gap 16px). hubs.php makes every card in
-   those lists kit-card--stacked-md and gives the list aw-stack-list (hubs, Home sections, campaign sections, archives).
-   Columns follow the site breakpoints (docs/design-system.md, line 8: md 768): one below 768, two from 768
-   (owner, 13 Nov 2026: "Min 340px, two"; 2 x 340 + 16 = 696, inside the 704px list at 768), never more than two
-   (owner, 13 Nov 2026: "never 3 column, max 2"). Cards --kit-card-stacked-min to
-   --kit-card-stacked-max wide, gap --kit-space-4 (docs/card-sizes.md, Stacked list). One surface. */
+/* News, Library and Resources lists: stacked cards (owner, 13 Nov 2026). hubs.php makes every card in those lists
+   kit-card--stacked-md and gives the list aw-stack-list (hubs, Home sections, campaign sections, archives).
+   Columns (owner, 13 Nov 2026: "keep the news feed single-column at tablet widths", "never 3 column, max 2"): one column
+   below 1200, two from 1200 (docs/design-system.md, line 8: lg 1200). Cards --kit-card-stacked-min to --kit-card-stacked-max
+   wide, gap --kit-space-4 (docs/card-sizes.md, Stacked list). One surface. */
 .wp-block-post-template.aw-stack-list.aw-stack-list { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; grid-template-rows: none !important; gap: var(--kit-space-4) !important; }
-@media (min-width: 768px) { .wp-block-post-template.aw-stack-list.aw-stack-list { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } }
+@media (min-width: 1200px) { .wp-block-post-template.aw-stack-list.aw-stack-list { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } }
 .aw-stack-list.aw-stack-list > li { grid-column: auto !important; grid-row: auto !important; min-width: 0; max-width: var(--kit-card-stacked-max) !important; }
-/* The card is never flatter than 2:1 (--kit-card-stacked-ratio): the picture is 3:5 (--kit-card-stacked-media-ratio) at the
-   card's full height, so at 2:1 it is 30% of the width; words that need more room make the card taller and the picture
-   stretches with it (cover crop), so nothing is cut. */
-.aw-stack-list.aw-stack-list .kit-card.kit-card--stacked-md { flex-direction: row !important; align-items: stretch !important; gap: 0 !important; height: auto; overflow: hidden; padding: 0 !important; }
-.aw-stack-list.aw-stack-list .kit-card.kit-card--stacked-md > .kit-card-media { position: relative; overflow: hidden; flex: none !important; align-self: stretch; box-sizing: border-box; width: calc(100% / var(--kit-card-stacked-ratio) * var(--kit-card-stacked-media-ratio)) !important; max-width: none !important; min-width: 0 !important; margin: 0 !important; aspect-ratio: var(--kit-card-stacked-media-ratio) !important; }
+/* The picture is --kit-card-stacked-media-width of the card (30%) at --kit-card-stacked-media-ratio (3:4, Theme Options →
+   Cards), flush to the card's top and left edge, cover crop; picture and text sit at the top and the card is as tall as
+   the taller of the two: the words set its height, the picture never stretches it (owner, 13 Nov 2026). Text padded
+   --kit-space-4. */
+.aw-stack-list.aw-stack-list .kit-card.kit-card--stacked-md { flex-direction: row !important; align-items: flex-start !important; gap: 0 !important; height: auto !important; min-height: 0 !important; overflow: hidden; padding: 0 !important; }
+.aw-stack-list.aw-stack-list .kit-card.kit-card--stacked-md > .kit-card-media { position: relative; overflow: hidden; flex: none !important; align-self: flex-start; box-sizing: border-box; width: var(--kit-card-stacked-media-width) !important; height: auto !important; max-width: none !important; min-width: 0 !important; margin: 0 !important; aspect-ratio: var(--kit-card-stacked-media-ratio) !important; }
 .aw-stack-list.aw-stack-list .kit-card.kit-card--stacked-md > .kit-card-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.aw-stack-list.aw-stack-list .kit-card.kit-card--stacked-md > .kit-card-body { flex: 1 1 0 !important; min-width: 0 !important; padding: var(--kit-space-3) !important; }
+.aw-stack-list.aw-stack-list .kit-card.kit-card--stacked-md > .kit-card-body { flex: 1 1 0 !important; min-width: 0 !important; align-self: flex-start; padding: var(--kit-space-4) !important; }
 .aw-stack-list.aw-stack-list .kit-card.kit-card--stacked-md .kit-card-sum { display: none; }
 /* Card type in steps (owner, 13 Nov 2026: "h3 one size per breakpoint", "metarow - one font size per breakpoint"): every card's
-   H3 title is --kit-type-card-title (the H3 steps in docs/design-system.md: 20px, 22.4px from 768, 24px from 1200) with the H3
+   H3 title is --kit-type-card-title (20px, 22px from 1200; owner, 13 Nov 2026: "20-22px desktop, 18-20px mobile") with the H3
    line height, and everything in the meta row (date, read time, chips) is --kit-meta-size (12px, 13px from 768).
    No fluid sizes, so the size changes only at a breakpoint. */
 .kit-card h3.kit-card-title.kit-card-title, .kit-card h3.kit-card-title.kit-card-title a { font-size: var(--kit-type-card-title) !important; line-height: var(--kit-h3-leading) !important; }

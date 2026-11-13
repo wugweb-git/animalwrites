@@ -25,7 +25,7 @@
 .aw-ed-learn .kit-tag--category { display: none; }
 .aw-ed-learn .aw-tasks.is-three .kit-card .kit-card-title { font-size: var(--kit-type-h3) !important; }
 .aw-ed-learn .aw-tasks.is-three .kit-card[class*="kit-card--"] .kit-card-sum .wp-block-post-excerpt__excerpt { -webkit-line-clamp: 1; }
-.aw-ed-learn .aw-tasks.is-three .kit-card > .kit-card-media { aspect-ratio: 4 / 3; }
+.aw-ed-learn .aw-tasks.is-three .kit-card > .kit-card-media { aspect-ratio: var(--kit-card-media-ratio); }
 .aw-ed-learn .aw-tasks.is-three .kit-card > .kit-card-media img { height: 100%; object-fit: cover; }
 @container aw-guides (min-width: 912px) {
 	.aw-ed-learn .aw-tasks.is-three .kit-card > .kit-card-media { aspect-ratio: var(--kit-placard-ratio); }
@@ -47,7 +47,7 @@
 }
 .aw-ed-news .kit-meta-row .kit-meta-item:not(.aw-date), .aw-ed-news .kit-tag--category { display: none; }
 .aw-ed-news .aw-news-mosaic .kit-card--stacked-md .kit-card-title { font-size: var(--kit-type-h3) !important; }
-.aw-ed-news .aw-news-mosaic .kit-card--stacked-md > .kit-card-media { aspect-ratio: 4 / 3; }
+.aw-ed-news .aw-news-mosaic .kit-card--stacked-md > .kit-card-media { aspect-ratio: var(--kit-card-stacked-media-ratio); }
 .aw-ed-news .aw-news-mosaic .kit-card--stacked-md > .kit-card-media img { height: 100%; object-fit: cover; }
 @media (min-width: 768px) and (max-width: 1199px) {
 	.aw-ed-news .aw-news-list.aw-news-mosaic { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
@@ -60,7 +60,7 @@
 	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li > .kit-card { gap: var(--kit-space-5); }
 	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li:first-child > .kit-card { flex-direction: row; align-items: flex-start; }
 	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li:first-child > .kit-card[class*="kit-card--block"] { gap: 0; }
-	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li:first-child > .kit-card > .kit-card-media { flex: none; width: var(--kit-thumb-lg); max-width: 40%; aspect-ratio: 4 / 3; border-radius: var(--kit-radius-media); }
+	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li:first-child > .kit-card > .kit-card-media { flex: none; width: var(--kit-thumb-lg); max-width: 40%; aspect-ratio: var(--kit-card-stacked-media-ratio); border-radius: var(--kit-radius-media); }
 	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li:first-child > .kit-card[class*="kit-card--block"] > .kit-card-media { margin: var(--kit-space-4) 0 var(--kit-space-4) var(--kit-space-4) !important; }
 	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li:first-child > .kit-card > .kit-card-media img { height: 100%; object-fit: cover; }
 	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li:first-child > .kit-card > .kit-card-body { flex: 1 1 0; padding-left: var(--kit-space-5); }
@@ -222,7 +222,7 @@
 }
 .aw-ed-law .aw-news-mosaic :is(.kit-meta-row .kit-meta-item:not(.aw-date), .kit-tag:not(.kit-tag--source)) { display: none; }
 .aw-ed-law .aw-news-mosaic .kit-card--stacked-md .kit-card-title { font-size: var(--kit-type-h3) !important; }
-.aw-ed-law .aw-news-mosaic .kit-card--stacked-md > .kit-card-media { aspect-ratio: 4 / 3; }
+.aw-ed-law .aw-news-mosaic .kit-card--stacked-md > .kit-card-media { aspect-ratio: var(--kit-card-stacked-media-ratio); }
 .aw-ed-law .aw-news-mosaic .kit-card--stacked-md > .kit-card-media img { height: 100%; object-fit: cover; }
 @media (min-width: 768px) {
 	.aw-ed-law .aw-news-mosaic > li:nth-child(n+2) { align-self: stretch; display: flex; }
@@ -234,7 +234,7 @@
 	.aw-ed-law .aw-news-mosaic > li:nth-child(2) { grid-column: 1; grid-row: 2; }
 	.aw-ed-law .aw-news-mosaic > li:nth-child(3) { grid-column: 2; grid-row: 2; }
 	.aw-ed-law .aw-news-mosaic > li:first-child > .kit-card { flex-direction: row; }
-	.aw-ed-law .aw-news-mosaic > li:first-child .kit-card-media { position: static; flex: 0 0 45%; aspect-ratio: 4 / 3; min-height: 0; }
+	.aw-ed-law .aw-news-mosaic > li:first-child .kit-card-media { position: static; flex: 0 0 45%; aspect-ratio: var(--kit-card-featured-media-ratio); min-height: 0; }
 	.aw-ed-law .aw-news-mosaic > li:first-child .kit-card-media img { position: static; height: 100%; object-fit: cover; }
 	.aw-ed-law .aw-news-mosaic > li:first-child > .kit-card > .kit-card-body { flex: 1 1 0; align-self: center; }
 }

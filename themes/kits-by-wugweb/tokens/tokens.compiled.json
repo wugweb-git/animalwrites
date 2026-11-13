@@ -512,8 +512,8 @@
     },
     "type-card-title": {
       "sm": "1.25rem",
-      "md": "1.4rem",
-      "lg": "1.5rem"
+      "md": "1.25rem",
+      "lg": "1.375rem"
     },
     "meta-weight": {
       "sm": "var(--kit-weight-medium)",
@@ -625,15 +625,25 @@
       "md": "600px",
       "lg": "600px"
     },
-    "card-stacked-ratio": {
-      "sm": "2",
-      "md": "2",
-      "lg": "2"
+    "card-stacked-media-width": {
+      "sm": "30%",
+      "md": "30%",
+      "lg": "30%"
     },
     "card-stacked-media-ratio": {
-      "sm": "0.6",
-      "md": "0.6",
-      "lg": "0.6"
+      "sm": "var(--wp--custom--kits--card--ratio--stacked, var(--kit-media-ratio-portrait))",
+      "md": "var(--wp--custom--kits--card--ratio--stacked, var(--kit-media-ratio-portrait))",
+      "lg": "var(--wp--custom--kits--card--ratio--stacked, var(--kit-media-ratio-portrait))"
+    },
+    "card-featured-media-ratio": {
+      "sm": "var(--wp--custom--kits--card--ratio--featured, var(--kit-media-ratio-featured))",
+      "md": "var(--wp--custom--kits--card--ratio--featured, var(--kit-media-ratio-featured))",
+      "lg": "var(--wp--custom--kits--card--ratio--featured, var(--kit-media-ratio-featured))"
+    },
+    "card-square-media-ratio": {
+      "sm": "var(--wp--custom--kits--card--ratio--square, var(--kit-media-ratio-square))",
+      "md": "var(--wp--custom--kits--card--ratio--square, var(--kit-media-ratio-square))",
+      "lg": "var(--wp--custom--kits--card--ratio--square, var(--kit-media-ratio-square))"
     },
     "card-block-media-max": {
       "sm": "none",
@@ -715,10 +725,30 @@
       "md": "2",
       "lg": "3"
     },
+    "media-ratio-standard": {
+      "sm": "4 / 3",
+      "md": "4 / 3",
+      "lg": "4 / 3"
+    },
+    "media-ratio-portrait": {
+      "sm": "3 / 4",
+      "md": "3 / 4",
+      "lg": "3 / 4"
+    },
+    "media-ratio-featured": {
+      "sm": "3 / 2",
+      "md": "3 / 2",
+      "lg": "3 / 2"
+    },
+    "media-ratio-square": {
+      "sm": "1 / 1",
+      "md": "1 / 1",
+      "lg": "1 / 1"
+    },
     "card-media-ratio": {
-      "sm": "4/3",
-      "md": "4/3",
-      "lg": "4/3"
+      "sm": "var(--wp--custom--kits--card--ratio--standard, var(--kit-media-ratio-standard))",
+      "md": "var(--wp--custom--kits--card--ratio--standard, var(--kit-media-ratio-standard))",
+      "lg": "var(--wp--custom--kits--card--ratio--standard, var(--kit-media-ratio-standard))"
     },
     "placard-ratio": {
       "sm": "16/7",
