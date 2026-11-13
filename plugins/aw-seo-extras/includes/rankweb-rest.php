@@ -59,7 +59,7 @@ add_action(
 			'/dashboard',
 			array(
 				'methods'             => 'GET',
-				'permission_callback' => rankweb_rest_can( 'manage_categories' ),
+				'permission_callback' => rankweb_rest_can( RANKWEB_CAP ),
 				'callback'            => fn() => rest_ensure_response( rankweb_dashboard_payload() ),
 			)
 		);
@@ -68,7 +68,7 @@ add_action(
 			'/dashboard/count',
 			array(
 				'methods'             => 'POST',
-				'permission_callback' => rankweb_rest_can( 'manage_categories' ),
+				'permission_callback' => rankweb_rest_can( RANKWEB_CAP ),
 				'callback'            => fn() => rest_ensure_response( array( 'waiting' => rankweb_health_request() ) ),
 			)
 		);

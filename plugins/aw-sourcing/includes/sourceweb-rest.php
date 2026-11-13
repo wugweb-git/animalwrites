@@ -2,13 +2,13 @@
 /**
  * SourceWeb's routes for the Dashboard, To review and Enrichment review screens, under sourceweb/v1:
  *
- *   GET  dashboard              edit_others_posts  the tiles, from the background counts (sourceweb-dashboard.php)
- *   POST dashboard/count        edit_others_posts  ask for a count now (one background event)
- *   GET  review                 edit_others_posts  one page of To review (type, search, source, why, orderby, order, page)
- *   POST review/decide          edit_others_posts  publish or reject items (aw_review_apply())
- *   POST review/publish-all     edit_others_posts  publish every item of a view; the count sent must match
- *   GET  enrichment             edit_others_posts  one page of Listing details, one row per listing
- *   POST enrichment/decide      edit_others_posts  approve, reject or undo rows (aw_enrich_approve/reject/undo())
+ *   GET  dashboard              manage_sourceweb   the tiles, from the background counts (sourceweb-dashboard.php)
+ *   POST dashboard/count        manage_sourceweb   ask for a count now (one background event)
+ *   GET  review                 manage_sourceweb   one page of To review (type, search, source, why, orderby, order, page)
+ *   POST review/decide          manage_sourceweb   publish or reject items (aw_review_apply())
+ *   POST review/publish-all     manage_sourceweb   publish every item of a view; the count sent must match
+ *   GET  enrichment             manage_sourceweb   one page of Listing details, one row per listing
+ *   POST enrichment/decide      manage_sourceweb   approve, reject or undo rows (aw_enrich_approve/reject/undo())
  *   GET  settings               manage_options     the connected services and the groups, with today's values
  *   POST settings/<group>       manage_options     save one group: only the values that changed are written
  *   POST settings/google-key    manage_options     a new Google Places key (write-only: never sent back)

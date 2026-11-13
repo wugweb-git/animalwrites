@@ -22,6 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 define( 'AW_SEO_EXTRAS_DIR', plugin_dir_path( __FILE__ ) );
 
+require_once AW_SEO_EXTRAS_DIR . 'includes/rankweb-caps.php'; // RankWeb's own capability, manage_rankweb (granted from manage_categories).
 require_once AW_SEO_EXTRAS_DIR . 'includes/plugin-info.php'; // icon, banner and View details on the Plugins screen, with or without Rank Math.
 require_once AW_SEO_EXTRAS_DIR . 'includes/kits-hub.php'; // a tab and a status row in the Kits admin, when Kits Core is loaded.
 

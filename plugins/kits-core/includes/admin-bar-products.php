@@ -18,15 +18,15 @@ add_action( 'admin_bar_menu', 'kits_admin_bar_products', 80 );
  * @return array<int, array{0: string, 1: string, 2: string, 3: string}>
  */
 function kits_admin_bar_product_list(): array {
-	$list = array( array( 'kits', 'Kits', 'kits', 'manage_options' ) );
+	$list = array( array( 'kits', 'Kits', 'kits', KITS_CAP ) );
 	if ( defined( 'DIRECTORYWEB_PAGE' ) ) {
-		$list[] = array( 'directoryweb', 'DirectoryWeb', DIRECTORYWEB_PAGE, 'edit_aw_volunteers' );
+		$list[] = array( 'directoryweb', 'DirectoryWeb', DIRECTORYWEB_PAGE, defined( 'DIRECTORYWEB_CAP' ) ? DIRECTORYWEB_CAP : 'edit_aw_volunteers' );
 	}
 	if ( defined( 'AW_SRC_MENU' ) ) {
 		$list[] = array( 'sourceweb', 'SourceWeb', AW_SRC_MENU, defined( 'AW_REVIEW_CAP' ) ? AW_REVIEW_CAP : 'edit_others_posts' );
 	}
 	if ( defined( 'AW_SEO_MENU' ) ) {
-		$list[] = array( 'rankweb', 'RankWeb', AW_SEO_MENU, 'manage_categories' );
+		$list[] = array( 'rankweb', 'RankWeb', AW_SEO_MENU, defined( 'RANKWEB_CAP' ) ? RANKWEB_CAP : 'manage_categories' );
 	}
 	if ( defined( 'AW_SI_SLUG' ) ) {
 		$list[] = array( 'insightweb', 'InsightWeb', AW_SI_SLUG, function_exists( 'aw_si_cap' ) ? aw_si_cap() : 'manage_options' );

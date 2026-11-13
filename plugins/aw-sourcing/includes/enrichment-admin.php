@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_ENRICH_CAP = 'edit_others_posts';
+const AW_ENRICH_CAP = SOURCEWEB_CAP; // manage_sourceweb (sourceweb-caps.php); was edit_others_posts, which still opens it
 
 /* ---------- Source icons ---------- */
 

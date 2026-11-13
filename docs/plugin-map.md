@@ -16,6 +16,20 @@ The Deploy check runs Plugin Check (`wp plugin check`) on each of our seven plug
 
 Still open as warnings: the `aw_` prefix is 3 characters (Plugin Check asks for 4 or more; about 2,850 warnings), and database calls with the plugin's own table names (`UnescapedDBParameter`).
 
+## Capabilities (13 Nov 2026)
+
+Each Wugweb plugin has its own capability. Each plugin grants it on activation and once after an upgrade (option `<plugin>_caps`), to administrator and to every role that holds the old capability. Until that has run, a `user_has_cap` filter gives the new capability to anyone who holds the old one, so nobody loses access. No capability is taken off any role. Settings screens keep `manage_options`.
+
+| Plugin | Capability | Granted to (old capability) |
+|---|---|---|
+| Kits Core | `manage_kits` (`KITS_CAP`): Kits menu, Home, Help | administrator; roles with `manage_options` |
+| DirectoryWeb (in Animal Writes Core) | `manage_directoryweb` (`DIRECTORYWEB_CAP`): menu, Dashboard, its counts | administrator; roles with `edit_aw_volunteers`. Claims keep `edit_aw_volunteers` (read-only on the new screen) |
+| SourceWeb | `manage_sourceweb` (`SOURCEWEB_CAP`, `AW_REVIEW_CAP`, `AW_ENRICH_CAP`): Overview, To review, Enrichment review | administrator; roles with `edit_others_posts`. The other screens keep `AW_SRC_CAP` (`manage_options`) |
+| RankWeb | `manage_rankweb` (`RANKWEB_CAP`): Overview, FAQ, Dashboard routes | administrator; roles with `manage_categories` |
+| InsightWeb | `manage_insightweb` (`INSIGHTWEB_CAP`, `aw_si_cap()`) | administrator; roles with `manage_options` (or `AW_SRC_CAP`) |
+| MailWeb | `manage_mailweb` (`MAILWEB_CAP`): Inbox, Overview | administrator; roles with `edit_others_posts` |
+| PlanWeb | `edit_planweb_entries` (unchanged), `planweb_approve` | editor and administrator; `planweb_approve` administrator only |
+
 ## Three areas, three owners (owner, 31 Oct 2026)
 
 Search Insights, Sourcing and Classification are separate areas. A change belongs to the area that owns the screen and the logic, not to the area whose data it reads.

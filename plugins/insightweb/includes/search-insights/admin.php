@@ -14,9 +14,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 const AW_SI_SLUG = 'aw-search-insights';
 
-/** Same people as Sourcing and Search demand. */
+/** InsightWeb's own capability, manage_insightweb (insightweb-caps.php); whoever had manage_options (or AW_SRC_CAP) still has it. */
 function aw_si_cap(): string {
-	return defined( 'AW_SRC_CAP' ) ? AW_SRC_CAP : 'manage_options'; // The same people as the Sourcing screens.
+	return INSIGHTWEB_CAP;
 }
 
 /**

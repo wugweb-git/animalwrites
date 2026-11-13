@@ -3,7 +3,7 @@
  * DirectoryWeb's screens on the Kits admin shell (docs/directory-plugin-plan.md §2), the default since 12 Nov 2026.
  *
  * Addresses:
- *   admin.php?page=directoryweb                              Dashboard   edit_aw_volunteers
+ *   admin.php?page=directoryweb                              Dashboard   manage_directoryweb (directoryweb-caps.php)
  *   edit.php?post_type=aw_listing&page=aw-claims              Claims      edit_aw_volunteers (menu: Fluent Forms → Claims)
  *   admin.php?page=directoryweb-settings                      Settings    manage_options
  *
@@ -25,7 +25,7 @@ const DIRECTORYWEB_SETTINGS_PAGE = 'directoryweb-settings';
 /** Which screen each page is, with its capability. */
 function directoryweb_ui_screens(): array {
 	return array(
-		DIRECTORYWEB_PAGE          => array( 'dashboard', 'edit_aw_volunteers' ),
+		DIRECTORYWEB_PAGE          => array( 'dashboard', DIRECTORYWEB_CAP ),
 		'aw-claims'                => array( 'claims', 'edit_aw_volunteers' ),
 		DIRECTORYWEB_SETTINGS_PAGE => array( 'settings', 'manage_options' ),
 		DIRECTORYWEB_LISTINGS_PAGE => array( 'listings', DIRECTORYWEB_LISTINGS_CAP ),
@@ -89,12 +89,12 @@ add_action(
 		// The icon is the plugin's one-colour SVG as a data URI, which WordPress paints in the admin colour scheme.
 		$icon = dirname( __DIR__ ) . '/directoryweb/menu-icon.svg';
 		$icon = is_readable( $icon ) ? 'data:image/svg+xml;base64,' . base64_encode( (string) file_get_contents( $icon ) ) : 'dashicons-location-alt'; // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode, WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- the plugin's own small SVG file.
-		add_menu_page( __( 'DirectoryWeb', 'directoryweb' ), __( 'DirectoryWeb', 'directoryweb' ), 'edit_aw_volunteers', DIRECTORYWEB_PAGE, 'directoryweb_dashboard_page', $icon, '58.2' ); // phpcs:ignore WordPress.WP.Capabilities.Unknown -- the Directory's own capability (volunteers.php)
+		add_menu_page( __( 'DirectoryWeb', 'directoryweb' ), __( 'DirectoryWeb', 'directoryweb' ), DIRECTORYWEB_CAP, DIRECTORYWEB_PAGE, 'directoryweb_dashboard_page', $icon, '58.2' ); // phpcs:ignore WordPress.WP.Capabilities.Unknown -- DirectoryWeb's own capability (directoryweb-caps.php)
 		$GLOBALS['admin_page_hooks'][ DIRECTORYWEB_PAGE ] = 'directoryweb'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- the screens' hook prefix (directoryweb_page_…), whatever the title.
 		if ( ! isset( $GLOBALS['menu']['58.05'] ) ) {
 			$GLOBALS['menu']['58.05'] = array( '', 'read', 'separator-wugweb', '', 'wp-menu-separator', 'separator-wugweb' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- one separator above the block, as core adds its own.
 		}
-		add_submenu_page( DIRECTORYWEB_PAGE, __( 'DirectoryWeb', 'directoryweb' ), __( 'Dashboard', 'directoryweb' ), 'edit_aw_volunteers', DIRECTORYWEB_PAGE, 'directoryweb_dashboard_page' ); // phpcs:ignore WordPress.WP.Capabilities.Unknown -- as above, as Directory → Claims
+		add_submenu_page( DIRECTORYWEB_PAGE, __( 'DirectoryWeb', 'directoryweb' ), __( 'Dashboard', 'directoryweb' ), DIRECTORYWEB_CAP, DIRECTORYWEB_PAGE, 'directoryweb_dashboard_page' ); // phpcs:ignore WordPress.WP.Capabilities.Unknown -- as above
 		add_submenu_page( DIRECTORYWEB_PAGE, __( 'Directory listings', 'directoryweb' ), __( 'Listings', 'directoryweb' ), DIRECTORYWEB_LISTINGS_CAP, DIRECTORYWEB_LISTINGS_PAGE, 'directoryweb_listings_page' );
 		add_submenu_page( DIRECTORYWEB_PAGE, __( 'DirectoryWeb settings', 'directoryweb' ), __( 'Settings', 'directoryweb' ), 'manage_options', DIRECTORYWEB_SETTINGS_PAGE, 'directoryweb_settings_page' );
 	}
