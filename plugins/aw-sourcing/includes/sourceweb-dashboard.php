@@ -113,8 +113,8 @@ function sourceweb_count_enrich(): array {
 	}
 	$t               = aw_enrich_table();
 	$since           = wp_date( 'Y-m-d H:i:s', time() - 7 * DAY_IN_SECONDS );
-	$out['listings'] = (int) $wpdb->get_var( "SELECT COUNT( DISTINCT listing_id ) FROM {$t} WHERE status = 'pending'" ); // phpcs:ignore WordPress.DB -- hourly count in the background; the table name is the plugin's own
-	$rows            = $wpdb->get_results( $wpdb->prepare( "SELECT status, COUNT(*) AS n FROM {$t} WHERE status IN ( 'approved', 'auto-applied' ) AND ( decided_at >= %s OR created >= %s ) GROUP BY status", $since, $since ) ); // phpcs:ignore WordPress.DB -- same
+	$out['listings'] = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT( DISTINCT listing_id ) FROM %i WHERE status = 'pending'", $t ) ); // phpcs:ignore WordPress.DB -- hourly count in the background; the table name is the plugin's own
+	$rows            = $wpdb->get_results( $wpdb->prepare( "SELECT status, COUNT(*) AS n FROM %i WHERE status IN ( 'approved', 'auto-applied' ) AND ( decided_at >= %s OR created >= %s ) GROUP BY status", $t, $since, $since ) ); // phpcs:ignore WordPress.DB -- same
 	foreach ( (array) $rows as $r ) {
 		$out['applied7'] += (int) $r->n;
 		if ( 'auto-applied' === $r->status ) {

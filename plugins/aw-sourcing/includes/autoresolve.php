@@ -159,7 +159,7 @@ function aw_ar_rest_sweep( WP_REST_Request $req ) {
 	$dry   = ! ( false === $req->get_param( 'dry' ) || 'false' === $req->get_param( 'dry' ) || '0' === (string) $req->get_param( 'dry' ) );
 	$limit = max( 1, min( 1000, (int) ( $req->get_param( 'limit' ) ? $req->get_param( 'limit' ) : 300 ) ) );
 	$t     = aw_enrich_table();
-	$ids   = array_map( 'intval', $wpdb->get_col( $wpdb->prepare( "SELECT id FROM {$t} WHERE status = 'pending' AND field NOT IN ( 'closed', 'merge_into', 'place' ) ORDER BY id ASC LIMIT %d", $limit ) ) ); // phpcs:ignore WordPress.DB
+	$ids   = array_map( 'intval', $wpdb->get_col( $wpdb->prepare( "SELECT id FROM %i WHERE status = 'pending' AND field NOT IN ( 'closed', 'merge_into', 'place' ) ORDER BY id ASC LIMIT %d", $t, $limit ) ) ); // phpcs:ignore WordPress.DB
 	$count = array();
 	$seen  = array();
 	foreach ( $ids as $id ) {

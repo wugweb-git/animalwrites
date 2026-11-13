@@ -737,7 +737,7 @@ function aw_enrich_fail_note( $field, $auto ) {
 /** One row, decoded. */
 function aw_enrich_row( $id ) {
 	global $wpdb;
-	$r = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . aw_enrich_table() . ' WHERE id = %d', $id ), ARRAY_A ); // phpcs:ignore WordPress.DB
+	$r = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM %i WHERE id = %d', aw_enrich_table(), $id ), ARRAY_A ); // phpcs:ignore WordPress.DB
 	return $r ? aw_enrich_decode( $r ) : null;
 }
 
@@ -836,7 +836,7 @@ function aw_enrich_undo( $id ) {
 /** Older pending rows for the same field are settled by a newer decision. */
 function aw_enrich_supersede( $lid, $field, $except ) {
 	global $wpdb;
-	$wpdb->query( $wpdb->prepare( 'UPDATE ' . aw_enrich_table() . " SET status = 'superseded' WHERE listing_id = %d AND field = %s AND status = 'pending' AND id <> %d", $lid, $field, $except ) ); // phpcs:ignore WordPress.DB
+	$wpdb->query( $wpdb->prepare( "UPDATE %i SET status = 'superseded' WHERE listing_id = %d AND field = %s AND status = 'pending' AND id <> %d", aw_enrich_table(), $lid, $field, $except ) ); // phpcs:ignore WordPress.DB
 }
 
 /**
@@ -850,7 +850,7 @@ function aw_enrich_provenance( $lid, $field ) {
 		global $wpdb;
 		$cache[ $lid ] = array();
 		if ( get_option( 'aw_enrich_db' ) ) {
-			$rows = $wpdb->get_results( $wpdb->prepare( 'SELECT field, sources, confidence, status, created FROM ' . aw_enrich_table() . " WHERE listing_id = %d AND status IN ('auto-applied','approved') ORDER BY id ASC", $lid ), ARRAY_A ); // phpcs:ignore WordPress.DB
+			$rows = $wpdb->get_results( $wpdb->prepare( "SELECT field, sources, confidence, status, created FROM %i WHERE listing_id = %d AND status IN ('auto-applied','approved') ORDER BY id ASC", aw_enrich_table(), $lid ), ARRAY_A ); // phpcs:ignore WordPress.DB
 			foreach ( $rows as $r ) {
 				$cache[ $lid ][ $r['field'] ] = array( 'sources' => (array) json_decode( $r['sources'], true ), 'confidence' => $r['confidence'], 'at' => $r['created'], 'status' => $r['status'] );
 			}
@@ -866,7 +866,7 @@ function aw_enrich_listing_source_keys( $lid ) {
 		return array();
 	}
 	$keys = array();
-	foreach ( $wpdb->get_col( $wpdb->prepare( 'SELECT sources FROM ' . aw_enrich_table() . " WHERE listing_id = %d AND status IN ('auto-applied','approved')", $lid ) ) as $s ) { // phpcs:ignore WordPress.DB
+	foreach ( $wpdb->get_col( $wpdb->prepare( "SELECT sources FROM %i WHERE listing_id = %d AND status IN ('auto-applied','approved')", aw_enrich_table(), $lid ) ) as $s ) { // phpcs:ignore WordPress.DB
 		foreach ( (array) json_decode( $s, true ) as $src ) {
 			$k = (string) ( $src['key'] ?? '' );
 			if ( $k && ! isset( $keys[ $k ] ) ) {
@@ -1070,7 +1070,7 @@ function aw_enrich_progress() {
 	global $wpdb;
 	$total   = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'aw_listing' AND post_status = 'publish'" ); // phpcs:ignore WordPress.DB
 	$checked = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'aw_enrich_checked' WHERE p.post_type = 'aw_listing' AND p.post_status = 'publish'" ); // phpcs:ignore WordPress.DB
-	$pending = get_option( 'aw_enrich_db' ) ? (int) $wpdb->get_var( 'SELECT COUNT(*) FROM ' . aw_enrich_table() . " WHERE status = 'pending'" ) : 0; // phpcs:ignore WordPress.DB
+	$pending = get_option( 'aw_enrich_db' ) ? (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE status = 'pending'", aw_enrich_table() ) ) : 0; // phpcs:ignore WordPress.DB
 	return array( 'total' => $total, 'checked' => $checked, 'pending' => $pending );
 }
 
@@ -1146,7 +1146,7 @@ function aw_enrich_rest_queue( WP_REST_Request $req ) {
 				break;
 			}
 			$not  = $ids ? ' AND p.ID NOT IN (' . implode( ',', $ids ) . ')' : '';
-			$ids  = array_merge( $ids, array_map( 'intval', $wpdb->get_col( "SELECT p.ID {$base} AND {$where}{$not} ORDER BY p.ID ASC LIMIT " . ( $limit - count( $ids ) ) ) ) ); // phpcs:ignore WordPress.DB
+			$ids  = array_merge( $ids, array_map( 'intval', $wpdb->get_col( "SELECT p.ID {$base} AND {$where}{$not} ORDER BY p.ID ASC LIMIT " . ( $limit - count( $ids ) ) ) ) ); // phpcs:ignore WordPress.DB, PluginCheck.Security.DirectDB.UnescapedDBParameter -- $base and $where are fixed fragments built above (core table names, dates from wp_date); the ids are integers
 		}
 	}
 	$items = array();
@@ -1268,7 +1268,7 @@ function aw_enrich_rest_results( WP_REST_Request $req ) {
 		global $wpdb;
 		// Already waiting, or a person said no. A failed write is not a no (status 'failed'; rows from before 25 Oct 2026
 		// were 'rejected' with a "Could not be applied" / "could not be copied" note), so that value may come back.
-		$same = $wpdb->get_var( $wpdb->prepare( 'SELECT id FROM ' . aw_enrich_table() . " WHERE listing_id = %d AND field = %s AND value = %s AND ( status = 'pending' OR ( status = 'rejected' AND note NOT LIKE %s AND note NOT LIKE %s ) ) LIMIT 1", $lid, $field, wp_json_encode( $value ), $wpdb->esc_like( 'Could not be applied' ) . '%', '%' . $wpdb->esc_like( 'could not be copied' ) . '%' ) ); // phpcs:ignore WordPress.DB
+		$same = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM %i WHERE listing_id = %d AND field = %s AND value = %s AND ( status = 'pending' OR ( status = 'rejected' AND note NOT LIKE %s AND note NOT LIKE %s ) ) LIMIT 1", aw_enrich_table(), $lid, $field, wp_json_encode( $value ), $wpdb->esc_like( 'Could not be applied' ) . '%', '%' . $wpdb->esc_like( 'could not be copied' ) . '%' ) ); // phpcs:ignore WordPress.DB
 		if ( $same ) {
 			$out['skipped'][] = $field;
 			continue;
@@ -1282,7 +1282,7 @@ function aw_enrich_rest_results( WP_REST_Request $req ) {
 				$out['applied'][] = $field;
 				continue;
 			}
-			$prev = $wpdb->get_var( $wpdb->prepare( 'SELECT id FROM ' . aw_enrich_table() . " WHERE listing_id = %d AND field = %s AND status = 'failed' AND value = %s ORDER BY id DESC LIMIT 1", $lid, $field, wp_json_encode( $value ) ) ); // phpcs:ignore WordPress.DB
+			$prev = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM %i WHERE listing_id = %d AND field = %s AND status = 'failed' AND value = %s ORDER BY id DESC LIMIT 1", aw_enrich_table(), $lid, $field, wp_json_encode( $value ) ) ); // phpcs:ignore WordPress.DB
 			if ( $prev ) { // the same value failed before: one row, dated by its latest attempt
 				$wpdb->update( aw_enrich_table(), array( 'run' => substr( $run, 0, 40 ), 'decided_at' => current_time( 'mysql' ) ), array( 'id' => (int) $prev ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 			} else {
@@ -1315,7 +1315,7 @@ function aw_enrich_rest_results( WP_REST_Request $req ) {
 		update_post_meta( $lid, 'aw_reported_closed', wp_date( 'Y-m-d' ) ); // the listing stays in search and shows the "Reported closed" note (owner, 21 Oct 2026)
 		aw_enrich_flag( $lid, 'reported_closed', wp_date( 'Y-m-d' ) );
 		global $wpdb;
-		if ( ! $wpdb->get_var( $wpdb->prepare( 'SELECT id FROM ' . aw_enrich_table() . " WHERE listing_id = %d AND field = 'closed' AND status IN ('auto-applied','approved')", $lid ) ) ) { // phpcs:ignore WordPress.DB
+		if ( ! $wpdb->get_var( $wpdb->prepare( "SELECT id FROM %i WHERE listing_id = %d AND field = 'closed' AND status IN ('auto-applied','approved')", aw_enrich_table(), $lid ) ) ) { // phpcs:ignore WordPress.DB
 			aw_enrich_add_row( $lid, 'closed', 'Google Maps shows this place as permanently closed', '', $src, 'medium', 'auto-applied', $run, 'Shown on the listing as "Reported closed"; nothing to review' );
 			$out['applied'][] = 'closed';
 		}
@@ -1346,7 +1346,7 @@ function aw_enrich_last_applied( $lid ) {
 		return '';
 	}
 	global $wpdb;
-	return (string) $wpdb->get_var( $wpdb->prepare( 'SELECT MAX( COALESCE( decided_at, created ) ) FROM ' . aw_enrich_table() . " WHERE listing_id = %d AND status IN ('auto-applied','approved')", $lid ) ); // phpcs:ignore WordPress.DB
+	return (string) $wpdb->get_var( $wpdb->prepare( "SELECT MAX( COALESCE( decided_at, created ) ) FROM %i WHERE listing_id = %d AND status IN ('auto-applied','approved')", aw_enrich_table(), $lid ) ); // phpcs:ignore WordPress.DB
 }
 
 /** Another listing with the same place ID or Darpan ID (stored or waiting in the queue): flag both, never merge. */
@@ -1355,13 +1355,13 @@ function aw_enrich_duplicates( $lid ) {
 	$dups = array();
 	foreach ( array( 'place_id' => 'aw_place_id', 'darpan_id' => 'aw_darpan_id' ) as $field => $key ) {
 		$vals = array_filter( array( (string) get_post_meta( $lid, $key, true ) ) );
-		foreach ( $wpdb->get_col( $wpdb->prepare( 'SELECT value FROM ' . aw_enrich_table() . " WHERE listing_id = %d AND field = %s AND status = 'pending'", $lid, $field ) ) as $v ) { // phpcs:ignore WordPress.DB
+		foreach ( $wpdb->get_col( $wpdb->prepare( "SELECT value FROM %i WHERE listing_id = %d AND field = %s AND status = 'pending'", aw_enrich_table(), $lid, $field ) ) as $v ) { // phpcs:ignore WordPress.DB
 			$vals[] = (string) json_decode( $v, true );
 		}
 		foreach ( array_unique( array_filter( $vals ) ) as $v ) {
 			$other = array_merge(
 				$wpdb->get_col( $wpdb->prepare( "SELECT m.post_id FROM {$wpdb->postmeta} m JOIN {$wpdb->posts} p ON p.ID = m.post_id AND p.post_type = 'aw_listing' AND p.post_status <> 'trash' WHERE m.meta_key = %s AND m.meta_value = %s AND m.post_id <> %d", $key, $v, $lid ) ), // phpcs:ignore WordPress.DB
-				$wpdb->get_col( $wpdb->prepare( 'SELECT listing_id FROM ' . aw_enrich_table() . " WHERE field = %s AND value = %s AND status = 'pending' AND listing_id <> %d", $field, wp_json_encode( $v ), $lid ) ) // phpcs:ignore WordPress.DB
+				$wpdb->get_col( $wpdb->prepare( "SELECT listing_id FROM %i WHERE field = %s AND value = %s AND status = 'pending' AND listing_id <> %d", aw_enrich_table(), $field, wp_json_encode( $v ), $lid ) ) // phpcs:ignore WordPress.DB
 			);
 			foreach ( array_unique( array_map( 'intval', $other ) ) as $o ) {
 				$dups[ $o ] = $field;
@@ -1388,7 +1388,7 @@ function aw_enrich_policy_pass() {
 	global $wpdb;
 	$t = aw_enrich_table();
 	$n = array( 'apply' => 0, 'both' => 0, 'queue' => 0, 'skip' => 0 );
-	foreach ( $wpdb->get_results( "SELECT id FROM {$t} WHERE status = 'pending' AND field <> 'closed' ORDER BY id ASC", ARRAY_A ) as $x ) { // phpcs:ignore WordPress.DB
+	foreach ( $wpdb->get_results( $wpdb->prepare( "SELECT id FROM %i WHERE status = 'pending' AND field <> 'closed' ORDER BY id ASC", $t ), ARRAY_A ) as $x ) { // phpcs:ignore WordPress.DB
 		$r = aw_enrich_row( (int) $x['id'] );
 		if ( ! $r || 'pending' !== $r['status'] ) {
 			continue;

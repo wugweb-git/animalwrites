@@ -31,7 +31,7 @@ function aw_sourcing_dismissed() {
 	if ( function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ) {
 		global $wpdb;
 		$k = aw_si_table( 'keywords' );
-		return array_map( 'aw_sourcing_suggest_norm', (array) $wpdb->get_col( "SELECT label FROM {$k} WHERE dismissed = 1" ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+		return array_map( 'aw_sourcing_suggest_norm', (array) $wpdb->get_col( $wpdb->prepare( 'SELECT label FROM %i WHERE dismissed = 1', $k ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	}
 	return array_values( array_filter( (array) get_option( AW_SOURCING_DISMISSED, array() ), 'is_string' ) );
 }

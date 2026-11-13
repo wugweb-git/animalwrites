@@ -150,11 +150,7 @@ function aw_summary_rw_list( WP_REST_Request $req ) {
 	}
 	$skip = max( 0, (int) $req->get_param( 'skip' ) );
 	$only = array_map( 'intval', (array) $req->get_param( 'ids' ) );
-	$sql  = "SELECT ID, post_type, post_title, post_excerpt, post_date FROM {$wpdb->posts} WHERE post_status = 'publish' AND post_type IN ('aw_news','aw_legal','post')";
-	if ( $only ) {
-		$sql .= ' AND ID IN (' . implode( ',', $only ) . ')';
-	}
-	$rows = $wpdb->get_results( $sql . ' ORDER BY post_date DESC, ID DESC' ); // phpcs:ignore WordPress.DB
+	$rows = $wpdb->get_results( "SELECT ID, post_type, post_title, post_excerpt, post_date FROM {$wpdb->posts} WHERE post_status = 'publish' AND post_type IN ('aw_news','aw_legal','post')" . ( $only ? ' AND ID IN (' . implode( ',', array_map( 'intval', $only ) ) . ')' : '' ) . ' ORDER BY post_date DESC, ID DESC' ); // phpcs:ignore WordPress.DB
 	$out  = array();
 	$at   = $skip;
 	$n    = count( $rows );

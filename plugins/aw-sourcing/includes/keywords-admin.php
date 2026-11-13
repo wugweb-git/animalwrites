@@ -359,9 +359,9 @@ function aw_sourcing_kw_in_view( array $r, $v ) {
 function aw_sourcing_kw_records() {
 	global $wpdb;
 	$k         = aw_si_table( 'keywords' );
-	$hindi_ids = (array) $wpdb->get_col( "SELECT id FROM {$k} WHERE lang <> 'en' AND src_note IS NOT NULL AND src_note <> ''" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only; the Hindi words the lists had
+	$hindi_ids = (array) $wpdb->get_col( $wpdb->prepare( "SELECT id FROM %i WHERE lang <> 'en' AND src_note IS NOT NULL AND src_note <> ''", $k ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- the Hindi words the lists had
 	$all       = aw_kw_rows( AW_KW_WORKER_ROLES );
-	foreach ( aw_kw_attach_maps( $hindi_ids ? (array) $wpdb->get_results( 'SELECT id, norm, label, lang, roles, variants, query, feed_id, search_on, dismissed, src_note, impr28 FROM ' . $k . ' WHERE id IN (' . implode( ',', array_map( 'intval', $hindi_ids ) ) . ')', ARRAY_A ) : array() ) as $id => $r ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.NotPrepared -- table name and integers only.
+	foreach ( aw_kw_attach_maps( $hindi_ids ? (array) $wpdb->get_results( $wpdb->prepare( 'SELECT id, norm, label, lang, roles, variants, query, feed_id, search_on, dismissed, src_note, impr28 FROM %i WHERE id IN (' . implode( ',', array_map( 'intval', $hindi_ids ) ) . ')', $k ), ARRAY_A ) : array() ) as $id => $r ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.NotPrepared -- table name and integers only.
 		$all[ $id ] = $r;
 	}
 	$stats = array();
