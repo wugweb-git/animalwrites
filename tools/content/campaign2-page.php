@@ -295,8 +295,7 @@ $send = c2sec(
 	. c2p( 'Choose your grounds, sign it, and send it from your own email. Letters with a name, a city and a line in your own words count as individual responses.', 'aw-camp-lede' )
 	. c2list( $grounds, true, 'aw-letter-grounds' )
 	. c2sc( $letter_sc )
-	. c2p( c2i( 'check' ) . 'Your letter goes from your own email account.', 'aw-camp-note' )
-	. c2guides( array( 'how-to-object-to-a-draft-rule-india' ) ),
+	. c2p( c2i( 'check' ) . 'Your letter goes from your own email account.', 'aw-camp-note' ), // the guide line is gone: it shows as a card in In the news and guides (owner, 13 Nov 2026)
 	'aw-camp-grey aw-camp-open'
 );
 

@@ -861,8 +861,8 @@
 .aw-letter-share-box.is-in-section .aw-letter-share { margin-top: 0; }
 .aw-letter-share-box.is-in-section .aw-letter-share-pics { padding-top: var(--kit-space-5); }
 .aw-letter-next { margin: var(--kit-space-3) 0 0; padding: var(--kit-space-3) var(--kit-space-4); border-radius: var(--kit-radius-card); background: color-mix(in srgb, var(--camp-primary) 7%, #fff); }
-.aw-letter .aw-letter-next a { display: inline-flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); color: var(--camp-primary); text-decoration: none; }
-.aw-letter .aw-letter-next a:hover strong { text-decoration: underline; }
+.aw-camp .aw-letter .aw-letter-next a { display: inline-flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); color: var(--camp-primary); text-decoration: none; }
+.aw-camp .aw-letter .aw-letter-next a:hover strong { text-decoration: underline; }
 
 /* Lab Rules on phones (mobile UX audit, 2 Nov 2026) */
 @media (max-width: 767px) {
