@@ -375,6 +375,11 @@ body.home .aw-ed-story.aw-camp--community-dogs .aw-ed-story-stamp img { display:
 .aw-ed-story.aw-camp--community-dogs .aw-ed-story-text p .aw-date > .kit-ico { display: none; }
 .aw-ed-story.aw-camp--community-dogs .aw-ed-story-text p .aw-date { display: inline; padding: 0; font-size: inherit; }
 @media (max-width: 767px) { body.home .aw-ed-story.aw-camp--community-dogs .aw-ed-story-photos { display: none; } }
+/* Home band, below 1200 (owner, 14 Nov 2026: "the c1 banner on home page should be analysed and updated"). The words and
+   figures cross the whole band there, so the side gradient's light end (55% ink) put the 13px labels at the right on the
+   bright crowd photo, about 3.5:1 at worst. One even overlay at the gradient's own 55%-stop strength (82% ink) keeps every
+   label at 4.5:1 or better over the brightest pixel. From 1200 the words sit left of the stamp, on the dark end. */
+@media (max-width: 1199px) { body.home .aw-ed-story.aw-camp--community-dogs > .wp-block-cover__background { background: rgb(20 20 20 / 0.82) !important; } }
 @media (min-width: 1200px) { .aw-ed-story.aw-camp--community-dogs .aw-ed-story-cols { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: var(--kit-space-7); align-items: center; } }
 
 /* Figures: a 2 x 2 ledger, each with its icon (letters, citizens, cities, coordinators) */
