@@ -37,3 +37,30 @@ section.aw-camp-band.aw-ed-hero--campaign { box-sizing: border-box; min-height: 
 .aw-lab-card-chip::before { content: ""; width: 0.5625rem; height: 0.5625rem; border-radius: 50%; background: currentColor; }
 .aw-lab-card-line { max-width: 40ch; margin: 0; }
 .aw-lab-card .kit-btn--secondary { border-color: rgb(255 255 255 / 0.7); background: transparent; color: #fff; }
+
+/* The Home hero in the Lab wait (owner, 13 Nov 2026: pictures under a dark overlay, ash black as the second colour):
+   an ash-black band, the papers scene fading into it, a crimson status chip, the keyphrase line and where things stand
+   in four dated steps. White on --camp-dark is 17:1; on the crimson chip and button 7:1. */
+.aw-camp-band.aw-ed-hero--wait { background: var(--camp-dark); }
+.aw-ed-hero--wait .aw-camp-band-art::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, var(--camp-dark) 0%, rgb(29 20 24 / 0.55) 22%, rgb(29 20 24 / 0) 55%); pointer-events: none; }
+.aw-ed-hero--wait .aw-ed-hero-chip { display: inline-flex; align-items: center; gap: var(--kit-space-2); border-color: var(--camp-mark); background: var(--camp-mark); color: var(--camp-on-mark); }
+.aw-ed-hero--wait .aw-ed-hero-chip::before { content: ""; flex: none; width: var(--kit-space-2); height: var(--kit-space-2); border-radius: 50%; background: var(--camp-on-mark); animation: aw-ed-hero-pulse 1.6s var(--kit-motion-ease) 3; }
+@keyframes aw-ed-hero-pulse { 50% { opacity: 0.35; } }
+.aw-camp-band.aw-ed-hero--wait p.aw-ed-hero-keyline { margin: 0 0 var(--kit-space-5); max-width: 36rem; font-size: var(--kit-type-sm); color: rgb(255 255 255 / 0.8); }
+.aw-ed-hero-steps { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--kit-space-4) var(--kit-space-3); margin: 0; padding: var(--kit-space-4) 0 0; list-style: none; border-top: var(--kit-border-width) solid rgb(255 255 255 / 0.2); }
+.aw-ed-hero-steps li { position: relative; padding-left: calc(var(--kit-space-3) + var(--kit-space-2)); font-size: var(--kit-type-sm); line-height: var(--kit-leading-body); color: rgb(255 255 255 / 0.8); }
+.aw-ed-hero-steps strong { display: block; color: var(--camp-on-mark); font-weight: var(--kit-weight-bold); }
+.aw-ed-hero-steps li::before { content: ""; position: absolute; left: 0; top: 0.4em; box-sizing: border-box; width: var(--kit-space-3); height: var(--kit-space-3); border-radius: 50%; border: 2px solid rgb(255 255 255 / 0.6); }
+.aw-ed-hero-steps li.is-done::before { border-color: var(--camp-on-mark); background: var(--camp-on-mark); }
+.aw-ed-hero-steps li.is-now::before { border-color: var(--camp-on-mark); background: var(--camp-mark); box-shadow: 0 0 0 var(--kit-space-1) rgb(163 18 47 / 0.45); }
+.aw-ed-hero--wait .aw-camp-band-actions .wp-element-button:not(.aw-camp-band-ghost) { background: var(--camp-mark); color: var(--camp-on-mark); }
+.aw-ed-hero--wait .aw-camp-band-actions .wp-element-button:not(.aw-camp-band-ghost):hover { background: var(--camp-accent); }
+.aw-ed-hero--wait .aw-camp .aw-camp-band-ghost:hover, .aw-ed-hero--wait .aw-camp-band-ghost:hover { color: var(--camp-dark); }
+@media (min-width: 768px) {
+	.aw-ed-hero-steps { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+	/* the scene sits beside the text: it fades into the band on its left, top and bottom edges */
+	.aw-ed-hero--wait .aw-camp-band-art::after { background: linear-gradient(90deg, var(--camp-dark) 0%, rgb(29 20 24 / 0.7) 18%, rgb(29 20 24 / 0) 50%), linear-gradient(180deg, var(--camp-dark) 0%, rgb(29 20 24 / 0) 20%, rgb(29 20 24 / 0) 80%, var(--camp-dark) 100%); }
+}
+@media (prefers-reduced-motion: reduce) {
+	.aw-ed-hero--wait .aw-ed-hero-chip::before { animation: none; }
+}

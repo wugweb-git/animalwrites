@@ -109,14 +109,28 @@ function aw_block_home_hero() {
 	}
 
 	$data = ' data-campaign-slug="' . esc_attr( (string) get_post_field( 'post_name', $id ) ) . '" data-campaign-title="' . esc_attr( get_the_title( $id ) ) . '"'; // campaign_action promo_click (aw-analytics.js)
-	$out  = '<section class="alignfull aw-camp aw-camp-band aw-ed-hero aw-ed-hero--campaign' . ( $pic ? ' has-art' : '' ) . ( $theme ? ' aw-camp--' . $theme : '' ) . '" aria-labelledby="aw-hero-t"' . $data . '><div class="aw-camp-band-inner"><div class="aw-camp-band-text">';
 	$wait = $day && current_time( 'Y-m-d' ) > $day; // after the close day: the campaign page's wait wording (owner's yes, 13 Nov 2026)
-	$out .= '<p class="aw-camp-band-pill">' . ( $wait ? 'Decision awaited · letters still going in' : 'Draft rules G.S.R. 864(E) · objections closed 5 Nov 2026' ) . '</p>';
-	$out .= '<h1 id="aw-hero-t" class="aw-camp-band-title">' . ( $wait ? 'Labs could soon approve their own animal experiments.' : 'Object to the draft lab animal rules' ) . '</h1>';
-	$out .= '<p>Labs could approve most animal experiments themselves. Objections closed on 5 Nov; the final rules are not out yet.</p>';
-	$out .= $day ? do_shortcode( '[aw_countdown date="' . $day . '" label="Last day" past_label="Last day was"]' ) : ''; // $day is Y-m-d (checked above)
-	if ( $open && $day ) {
-		$out .= '<p class="aw-camp-band-range kit-meta-row"><span class="kit-meta-item">Opened ' . aw_date( $open ) . '</span><span class="kit-meta-item">Last day ' . aw_date( $day ) . '</span></p>'; // aw_date() escapes
+	$out  = '<section class="alignfull aw-camp aw-camp-band aw-ed-hero aw-ed-hero--campaign' . ( $wait ? ' aw-ed-hero--wait' : '' ) . ( $pic ? ' has-art' : '' ) . ( $theme ? ' aw-camp--' . $theme : '' ) . '" aria-labelledby="aw-hero-t"' . $data . '><div class="aw-camp-band-inner"><div class="aw-camp-band-text">';
+	if ( $wait ) {
+		// The wait (owner, 13 Nov 2026: the approved Lab page mockup): status chip, the title, the keyphrase line and where
+		// things stand in four dated steps, in place of the countdown and the opened / last day dates.
+		$out .= '<p class="aw-camp-band-pill aw-ed-hero-chip">Decision awaited · letters still going in</p>';
+		$out .= '<h1 id="aw-hero-t" class="aw-camp-band-title">Labs could soon approve their own animal experiments.</h1>';
+		$out .= '<p class="aw-ed-hero-keyline">Draft lab animal rules 2026, G.S.R. 864(E), often called the animal testing bill</p>';
+		$out .= '<ol class="aw-ed-hero-steps">'
+			. '<li class="is-done"><strong>6 Oct 2026</strong> Draft published in the Gazette</li>'
+			. '<li class="is-done"><strong>5 Nov 2026</strong> Objection window closed</li>'
+			. '<li class="is-now" aria-current="step"><strong>Now</strong> The Centre considers the objections</li>'
+			. '<li><strong>No date set</strong> Final rules in the Gazette</li>'
+			. '</ol>';
+	} else {
+		$out .= '<p class="aw-camp-band-pill">Draft rules G.S.R. 864(E) · objections closed 5 Nov 2026</p>';
+		$out .= '<h1 id="aw-hero-t" class="aw-camp-band-title">Object to the draft lab animal rules</h1>';
+		$out .= '<p>Labs could approve most animal experiments themselves. Objections closed on 5 Nov; the final rules are not out yet.</p>';
+		$out .= $day ? do_shortcode( '[aw_countdown date="' . $day . '" label="Last day" past_label="Last day was"]' ) : ''; // $day is Y-m-d (checked above)
+		if ( $open && $day ) {
+			$out .= '<p class="aw-camp-band-range kit-meta-row"><span class="kit-meta-item">Opened ' . aw_date( $open ) . '</span><span class="kit-meta-item">Last day ' . aw_date( $day ) . '</span></p>'; // aw_date() escapes
+		}
 	}
 	$closed = $day && current_time( 'Y-m-d' ) > $day; // after the close day the main button follows the campaign (owner's wording, 13 Nov 2026)
 	$out   .= '<p class="aw-camp-band-actions"><a class="wp-element-button" data-track="home_campaign_click" href="' . esc_url( $closed ? $url : $url . '#send' ) . '">' . ( $closed ? 'See what happens next' : 'Send your objection' ) . '</a> <a class="wp-element-button aw-camp-band-ghost" data-track="home_campaign_click" href="' . esc_url( $url . '#rules' ) . '">Read what the rules say</a></p>';
