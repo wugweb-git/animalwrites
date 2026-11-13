@@ -103,6 +103,20 @@
 	.aw-pair-grid:has(> :only-child) { grid-template-columns: 1fr; } /* one card left (the Diwali card goes after 20 Nov 2026): it fills the row */
 	.aw-pair-grid > :last-child:nth-child(odd):not(:only-child) { grid-column: 1 / -1; } /* three cards (Supreme Court, Diwali, Animal Writes until 20 Nov 2026): the last fills its own row */
 }
+/* The Animal Writes card when it fills its own row (three cards, from 768; owner, 14 Nov 2026: "pending. use all skills to
+   make it"). Not the medium card stretched across the row: the words take the left column on brand ink and the
+   photograph the right column, each lined up with the card above it (the grid's own columns and --kit-space-grid gap);
+   the title at the top, the button at the foot as in the cards above, padded --kit-space-5 like them. The photograph's
+   duotone shadow is the ink, so the two halves meet without a seam. Phones and the two-card row keep the medium card. */
+@media (min-width: 768px) {
+	.aw-pair-grid > .wp-block-cover.aw-default-card:last-child:nth-child(odd):not(:only-child) { background-color: var(--kit-color-ink); }
+	.aw-pair-grid > .wp-block-cover.aw-default-card:last-child:nth-child(odd):not(:only-child) > .wp-block-cover__image-background { inset: 0 0 0 auto; width: calc(50% - var(--kit-space-grid) / 2) !important; }
+	.aw-pair-grid > .wp-block-cover.aw-default-card:last-child:nth-child(odd):not(:only-child).has-custom-content-position.is-position-top-left > .wp-block-cover__inner-container {
+		display: flex; flex-direction: column; align-self: stretch; width: calc(50% + var(--kit-space-5) - var(--kit-space-grid) / 2);
+		margin: calc(-1 * var(--kit-space-5)) 0 calc(-1 * var(--kit-space-5)) calc(-1 * var(--kit-space-5)); padding: var(--kit-space-5); background: none;
+	}
+	.aw-pair-grid > .wp-block-cover.aw-default-card:last-child:nth-child(odd):not(:only-child) .wp-block-buttons { margin-top: auto !important; }
+}
 .home .kit-sec-head { row-gap: var(--kit-space-4); margin-bottom: var(--kit-space-head); }
 .home .kit-sec-head p { margin-top: var(--kit-space-4); }
 .home .kit-sec-head > .wp-block-buttons { margin: 0; }
