@@ -3,7 +3,7 @@
  * Title: Campaign cards row
  * Slug: animal-writes/aw-pair
  * Categories: animal-writes
- * Description: One Home row with two campaign cards, each its own design: the Supreme Court stray dogs case (photograph overlay, pattern aw-sc) and AW_Festive for Diwali (pictures on top, pattern festive). The AW Content card (pattern aw-content) is kept but not on Home. The Diwali card shows until 20 Nov 2026 (owner, 13 Nov); then the Supreme Court card fills the row. Stacked on phones, two equal columns of equal height from 768.
+ * Description: One Home row with two campaign cards, each its own design: the Supreme Court stray dogs case (photograph overlay, pattern aw-sc) and AW_Festive for Diwali (pictures on top, pattern festive). The AW Content card (pattern aw-content) is kept but not on Home. The Diwali card shows until 20 Nov 2026 (owner, 13 Nov); then the Supreme Court card fills the row. Then the Animal Writes card (pattern aw-default-card: the default banner in medium; owner, 13 Nov 2026: the Lab campaign keeps the Home hero, the default banner goes to this row, the fourth Home block). With three cards the last fills its own row; with two, two columns. Stacked on phones, two equal columns of equal height from 768.
  * Inserter: yes
  *
  * @package animal-writes
@@ -15,6 +15,7 @@
 
 <?php if ( current_time( 'Y-m-d' ) <= '2026-11-20' ) : // the Diwali card stays on Home until 20 Nov 2026 (owner, 13 Nov) ?>
 <!-- wp:pattern {"slug":"animal-writes/festive"} /-->
-<?php endif; ?></div>
+<?php endif; ?>
+<!-- wp:pattern {"slug":"animal-writes/aw-default-card"} /--></div>
 <!-- /wp:group --></section>
 <!-- /wp:group -->
