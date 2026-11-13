@@ -68,7 +68,8 @@
 .aw-side-camp.aw-camp { border-color: var(--camp-mark); background: var(--camp-mark); color: var(--camp-on-mark); }
 .aw-side-camp.aw-camp .aw-side-camp-media { border-bottom: 0; background: var(--camp-mark); }
 .aw-side-camp.aw-camp .aw-side-camp-media img { object-fit: cover; }
-.aw-side-camp.aw-camp :is(.aw-side-camp-meta, .aw-side-camp-meta .kit-meta-item, .aw-side-camp-line) { color: var(--camp-on-mark); }
+.aw-side-camp.aw-camp :is(.aw-side-camp-title, .aw-side-camp-meta, .aw-side-camp-meta .kit-meta-item, .aw-side-camp-line) { color: var(--camp-on-mark); }
+.aw-side-camp.aw-camp .aw-side-camp-title a { color: var(--camp-on-mark) !important; } /* main h2 a sets ink with !important (aw.css); ink on the campaign colour fails contrast */
 .aw-side-camp.aw-camp .aw-side-camp-btn { border-color: var(--camp-on-mark); background: var(--camp-on-mark); color: var(--camp-mark); }
 .aw-side-camp.aw-camp :is(.aw-side-camp-title a, .aw-side-camp-btn):focus-visible { outline: var(--kit-focus-width) solid var(--camp-on-mark); outline-offset: var(--kit-focus-offset); }
 /* Side card after the close date: "Decision awaited" and two links (owner, 13 Nov 2026). */
