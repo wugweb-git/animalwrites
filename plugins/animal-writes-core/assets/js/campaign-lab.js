@@ -386,6 +386,14 @@
 		var u = encodeURIComponent(sh.url), t = encodeURIComponent(sh.text || sh.title || '');
 		var nets = { x: 'https://x.com/intent/post?text=' + t + '&url=' + u + (sh.hashtags ? '&hashtags=' + encodeURIComponent(sh.hashtags) : ''), whatsapp: 'https://wa.me/?text=' + t + '%20' + u, email: 'mailto:?subject=' + encodeURIComponent(sh.title || '') + '&body=' + t + '%20' + u };
 		holder.querySelectorAll('.kit-share a[data-kit-share]').forEach(function (a) { if (nets[a.dataset.kitShare] && sh.text) a.href = nets[a.dataset.kitShare]; });
+		/* After the close day the Share section also carries the follow line (owner, 13 Nov 2026: the letter tool's
+		   "Sent? Follow us for the decision." and the Share section are one place). */
+		if (sh.closed && holder.matches('[data-aw-share]') && !holder.querySelector('.aw-share-follow')) {
+			var f = document.createElement('p');
+			f.className = 'aw-share-follow';
+			f.innerHTML = '<strong>Follow us for the decision.</strong> ' + followLinks();
+			holder.appendChild(f);
+		}
 	}
 	var sendShare = null, shareHead = null;
 	function showSendShare(sent) {
@@ -420,8 +428,8 @@
 		if (sent && sendShare.classList.contains('is-in-section') && !form.querySelector('.aw-letter-next')) { // a pointer from the letter tool to the Share section
 			var nx = document.createElement('p');
 			nx.className = 'aw-letter-next';
-			nx.innerHTML = sh.closed // after the close day: follow us for the decision (owner, 13 Nov 2026); the Share section is already on the page
-				? '<strong>Sent? Follow us for the decision.</strong> ' + followLinks()
+			nx.innerHTML = sh.closed // after the close day: a pointer to the Share section, which holds the follow links (owner, 13 Nov 2026)
+				? '<a href="#share"><strong>Sent? Follow us for the decision.</strong> <span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span></a>'
 				: '<a href="#share"><strong>Sent? Now get three more letters in.</strong> Share this page ' + '<span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span></a>';
 			thanks.parentNode.insertBefore(nx, thanks.nextSibling); // under the thank-you
 		}
