@@ -1280,10 +1280,10 @@ function aw_follow_accounts() {
 }
 
 /**
- * The page's share kit (owner, 13 Nov 2026): the Share card holds one button, "Share this page" (the phone's share
- * sheet, Safari's included; where there is none, it copies the link), and on computers one row of icons under it, in
- * this order: WhatsApp, X, Facebook, LinkedIn, Email, Copy link. Follow us (our own accounts) on the card beside it.
- * The page shares itself; the link preview carries its share picture (aw_camp_share_meta).
+ * The page's share kit (owner, 13 Nov 2026: one simple section): one button, "Share this page" (the phone's share
+ * sheet, Safari's included; where there is none, it copies the link), and no row of network icons. Then "Follow us"
+ * and our own accounts. The page shares itself; the link preview carries its share picture (aw_camp_share_meta).
+ * kits_share_html always adds its Copy link button; aw-share.css hides it here, since the one button copies the link.
  *
  * @return string
  */
@@ -1299,7 +1299,7 @@ function aw_page_share_kit() {
 	return kits_share_html(
 		$url,
 		html_entity_decode( $title, ENT_QUOTES ),
-		array( 'whatsapp', 'x', 'facebook', 'linkedin', 'email' ),
+		array(),
 		$home ? 'home' : (string) get_post_field( 'post_name', $id ),
 		array(
 			'follow' => aw_follow_accounts(),
@@ -1312,7 +1312,7 @@ function aw_page_share_kit() {
 /**
  * The Share section, one version on every campaign and Home (owner, 13 Nov 2026: "one version one size one content"):
  * the same markup, sizes and order everywhere; only the words and the branding change (the campaign's colours and
- * share picture, aw-share.css). A heading, one line, and the share kit. Every page places it with the block
+ * share picture, aw-share.css). One band: a heading, one line, the "Share this page" button and Follow us. Every page places it with the block
  * animal-writes/share: campaign pages right under the page's form (or its nearest equivalent), Home in the
  * animal-writes/home-share pattern.
  *

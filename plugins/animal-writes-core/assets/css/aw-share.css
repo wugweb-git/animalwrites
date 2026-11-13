@@ -1,38 +1,32 @@
-/* Share section: one version on every campaign and Home (owner, 13 Nov 2026: "one version one size one content").
-   One markup (block animal-writes/share, campaign-tools.php), one size, one order; only the words and the branding change:
-   the colours (the campaign's --camp-dark, --camp-light, --camp-mark, --camp-on-mark; Home: ink, grey and white) and the
-   picture under the wash (--camp-share-pic, wash colour --camp-share-rgb, its position --camp-share-pos / -pos-sm).
-   - The section: the picture under the dark wash, heading and line in white on it. Every wash keeps white text at least
-     5:1 over the picture's lightest pixels (WCAG AA): 0.72 or more where text can sit; from 1200 it opens to 0.35 on the
-     right, past the text, so the picture shows.
-   - The text column: 1120px on campaign pages (the campaign bands' column, .aw-camp-section > *, campaign.css) and
-     --kit-width-wide on Home (its sections' column), inside the gutter. The line keeps to 60ch.
-   - Two cards under the text: Share on the light shade (dot texture in the dark shade) and Follow us on white, icons and
-     text in the dark shade (the bento's three shades). 21rem to 23rem each, side by side when there is room: six 44px
-     icons, five 4px gaps and the 24px padding make 21rem.
-   - The Share card: one "Share this page" button, 48px tall (--kit-size-control), across the card (the phone's share
-     sheet, kit.js; where there is none it copies the link), then one row of icons: WhatsApp, X, Facebook, LinkedIn, Email,
-     Copy link. The button names the card, so the card has no label. Phones (to 767) with a share sheet (.has-native):
-     the button alone.
-   - Follow us: its label, then Instagram, Threads, X, Facebook, LinkedIn (and Reddit, Discord once set). From 768 the
-     label takes the button's 48px row, so both cards' icons start on one line.
-   - Icons only on the cards (each keeps its aria-label and title), 44px (--kit-size-target).
+/* Share section: one simple section on every campaign and Home (owner, 13 Nov 2026: "one version one size one
+   content"; one surface, no cards). One markup (block animal-writes/share, campaign-tools.php), one size, one order;
+   only the words and the branding change: the campaign's share picture under its dark wash (--camp-share-pic, wash
+   colour --camp-share-rgb, position --camp-share-pos / -pos-sm) and the button's colour (--aw-share-btn, its text
+   --aw-share-btn-ink, its edge --aw-share-btn-edge).
+   - One surface: the picture under the dark wash, everything on it in white. No cards and no second surface inside
+     the band (mixed surfaces are for bentos only). Every wash keeps white text at least 5:1 over the picture's lightest
+     pixels (WCAG AA): 0.72 or more where text can sit; from 1200 it opens to 0.35 on the right, past the text.
+   - Heading, the one line (60ch at most), then one row: the "Share this page" button, 48px (--kit-size-control), in the
+     campaign colour (the phone's share sheet, kit.js; where there is none it copies the link). No row of network
+     icons: kits_share_html's own Copy link button is hidden, the one button copies.
+   - Follow us on the same band: the label, then our own account icons (Instagram, Threads, X, Facebook, LinkedIn, and
+     Reddit, Discord once set), white, 44px (--kit-size-target), each with its aria-label and title.
+   - Phones (to 767): the button across the column; Follow us under it, the label on its own line. From 768: the
+     button and Follow us on one row.
+   - The column: 1120px on campaign pages (the campaign bands' column, campaign.css) and --kit-width-wide on Home.
    Older Share sections still written into a page's content (.aw-camp-section, its line .aw-camp-lede) take the same
    rules until the page uses the block. */
 
 /* Branding */
 .aw-camp { --aw-share-col: 1120px; }
-.aw-camp--sc-stray-dogs { --camp-share-pic: url("/wp-content/plugins/animal-writes-core/theme/assets/img/campaigns/supreme-court-stray-dog-share.jpg"); --camp-share-rgb: 58 23 48; --camp-share-pos: 60% 40%; --camp-share-pos-sm: 80% 50%; }
-.aw-camp--lab-rules { --camp-share-pic: url("/wp-content/uploads/2026/10/lab-rules-2026-illustration.avif"); --camp-share-rgb: 107 15 34; --camp-share-pos: 100% 50%; --camp-share-pos-sm: 85% 50%; }
-.aw-camp--diwali { --camp-share-pic: url("/wp-content/uploads/2026/11/diwali-share-woman-giving-water-to-street-dog.jpg"); --camp-share-rgb: 27 22 54; --camp-share-pos: 100% 50%; --camp-share-pos-sm: 78% 50%; }
-.aw-camp--community-dogs { --camp-share-pic: url("/wp-content/uploads/2026/10/animal-writes-1-hero-1024x1536.jpg"); --camp-share-rgb: 22 19 14; --camp-share-pos: 50% 72%; --camp-share-pos-sm: 40% 72%; }
-#share.aw-share-sec--home { --aw-share-col: var(--kit-width-wide); --camp-share-pic: url("/wp-content/uploads/2026/11/supreme-court-steps-sleeping-street-dog.avif"); --camp-share-rgb: 25 25 25; --camp-share-pos: 62% 70%; --camp-share-pos-sm: 70% 70%; --camp-mark: var(--kit-color-ink); --camp-on-mark: var(--kit-color-on-ink); --camp-dark: var(--kit-color-ink); --camp-light: var(--neutral-2); }
-.aw-camp--lab-rules #share:is(.aw-share-sec, .aw-camp-section) { --camp-light: #f8d9df; }
-.aw-camp--diwali #share:is(.aw-share-sec, .aw-camp-section) { --camp-light: #ffb547; }
-.aw-camp--community-dogs #share:is(.aw-share-sec, .aw-camp-section) { --camp-light: var(--camp-primary); --camp-on-mark: #ffffff; }
+.aw-camp--sc-stray-dogs { --camp-share-pic: url("/wp-content/plugins/animal-writes-core/theme/assets/img/campaigns/supreme-court-stray-dog-share.jpg"); --camp-share-rgb: 58 23 48; --camp-share-pos: 60% 40%; --camp-share-pos-sm: 80% 50%; --aw-share-btn: var(--kit-color-accent); --aw-share-btn-ink: #3a1730; } /* the site yellow on plum (owner, 1 Nov 2026), 9.4:1 */
+.aw-camp--lab-rules { --camp-share-pic: url("/wp-content/uploads/2026/10/lab-rules-2026-illustration.avif"); --camp-share-rgb: 107 15 34; --camp-share-pos: 100% 50%; --camp-share-pos-sm: 85% 50%; --aw-share-btn: #a3122f; --aw-share-btn-ink: #ffffff; --aw-share-btn-edge: #ffffff; } /* crimson, white text 7.8:1; crimson on its own dark wash is 1.6:1, so a white edge */
+.aw-camp--diwali { --camp-share-pic: url("/wp-content/uploads/2026/11/diwali-share-woman-giving-water-to-street-dog.jpg"); --camp-share-rgb: 27 22 54; --camp-share-pos: 100% 50%; --camp-share-pos-sm: 78% 50%; --aw-share-btn: #ffb547; --aw-share-btn-ink: #1b1636; } /* marigold on night sky, 9.8:1 */
+.aw-camp--community-dogs { --camp-share-pic: url("/wp-content/uploads/2026/10/animal-writes-1-hero-1024x1536.jpg"); --camp-share-rgb: 22 19 14; --camp-share-pos: 50% 72%; --camp-share-pos-sm: 40% 72%; --aw-share-btn: #ffa500; --aw-share-btn-ink: #16130e; } /* the campaign orange, 9.4:1 */
+#share.aw-share-sec--home { --aw-share-col: var(--kit-width-wide); --camp-share-pic: url("/wp-content/uploads/2026/11/supreme-court-steps-sleeping-street-dog.avif"); --camp-share-rgb: 25 25 25; --camp-share-pos: 62% 70%; --camp-share-pos-sm: 70% 70%; --aw-share-btn: var(--kit-color-on-ink); --aw-share-btn-ink: var(--kit-color-ink); } /* black, white and grey */
 
-/* The section */
-#share:is(.aw-share-sec, .aw-camp-section) { box-sizing: border-box; padding: var(--kit-space-section) var(--kit-space-gutter) var(--kit-space-section-end); background: linear-gradient(160deg, rgb(var(--camp-share-rgb, 0 0 0) / 0.88) 0%, rgb(var(--camp-share-rgb, 0 0 0) / 0.78) 50%, rgb(var(--camp-share-rgb, 0 0 0) / 0.74) 100%), var(--camp-share-pic, none) var(--camp-share-pos-sm, 50% 50%) / cover no-repeat, var(--camp-mark); color: var(--camp-on-mark); }
+/* The band */
+#share:is(.aw-share-sec, .aw-camp-section) { box-sizing: border-box; padding: var(--kit-space-section) var(--kit-space-gutter) var(--kit-space-section-end); background: linear-gradient(160deg, rgb(var(--camp-share-rgb, 0 0 0) / 0.88) 0%, rgb(var(--camp-share-rgb, 0 0 0) / 0.78) 50%, rgb(var(--camp-share-rgb, 0 0 0) / 0.74) 100%), var(--camp-share-pic, none) var(--camp-share-pos-sm, 50% 50%) / cover no-repeat, rgb(var(--camp-share-rgb, 0 0 0)); color: var(--kit-color-on-ink); --kit-color-focus: var(--kit-color-on-ink); }
 @media (min-width: 768px) { #share:is(.aw-share-sec, .aw-camp-section) { background-position: 0 0, var(--camp-share-pos, 50% 50%); } }
 @media (min-width: 1200px) { #share:is(.aw-share-sec, .aw-camp-section) { background-image: linear-gradient(90deg, rgb(var(--camp-share-rgb, 0 0 0) / 0.9) 0%, rgb(var(--camp-share-rgb, 0 0 0) / 0.8) 45%, rgb(var(--camp-share-rgb, 0 0 0) / 0.74) 65%, rgb(var(--camp-share-rgb, 0 0 0) / 0.35) 100%), var(--camp-share-pic, none); } }
 #share.aw-share-sec--home { background-blend-mode: normal, luminosity, normal; } /* Home in black, white and grey: the picture greyed on the ink */
@@ -44,8 +38,8 @@
 
 /* The text */
 #share:is(.aw-share-sec, .aw-camp-section) > * { box-sizing: border-box; max-width: var(--aw-share-col, 1120px); margin-inline: auto; }
-#share:is(.aw-share-sec, .aw-camp-section) :is(h2, p) { color: var(--camp-on-mark); }
-#share:is(.aw-share-sec, .aw-camp-section) h2 { display: block; margin-block: 0; font-size: var(--kit-type-h1) !important; line-height: var(--kit-leading-heading); }
+#share:is(.aw-share-sec, .aw-camp-section) :is(h2, p) { color: var(--kit-color-on-ink); }
+#share:is(.aw-share-sec, .aw-camp-section) h2 { display: block; margin-block: 0 !important; font-size: var(--kit-type-h1) !important; line-height: var(--kit-leading-heading); }
 #share:is(.aw-share-sec, .aw-camp-section) h2::before { content: none; }
 #share:is(.aw-share-sec, .aw-camp-section) :is(.aw-share-line, .aw-camp-lede) { margin-block: var(--kit-space-4) 0; padding-right: max(0px, min(100%, var(--aw-share-col, 1120px)) - 60ch); font-size: var(--kit-type-lead); }
 #share:is(.aw-share-sec, .aw-camp-section) .aw-camp-note { display: none; }
@@ -53,29 +47,32 @@
 #share.aw-camp-section .aw-camp-split > .wp-block-column:has(> .aw-camp-art) { display: none; }
 #share.aw-camp-section .aw-camp-split > .wp-block-column:not(:has(> .aw-camp-art)) { flex: 1 1 100%; }
 
-/* The cards */
-#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit { display: flex; flex-wrap: wrap; align-items: stretch; gap: var(--kit-space-4); margin: var(--kit-space-5) auto 0; }
-#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit > .kit-share { box-sizing: border-box; flex: 1 1 21rem; max-width: 23rem; align-self: stretch; display: grid; grid-template-columns: repeat(auto-fill, var(--kit-size-target)); justify-content: space-between; align-content: start; gap: var(--kit-space-2) var(--kit-space-1); margin: 0; padding: var(--kit-space-5); border: 0; border-radius: var(--kit-radius-card); box-shadow: var(--kit-elevation-2); --kit-color-focus: var(--camp-dark); }
-#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit > .kit-share > :is(.kit-share-label, .kit-share-native) { grid-column: 1 / -1; }
-#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit > .kit-share:not(.kit-follow) { background: radial-gradient(color-mix(in srgb, var(--camp-dark) 12%, transparent) 1px, transparent 1.5px) 0 0 / var(--kit-space-4) var(--kit-space-4), var(--camp-light); }
-#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit > .kit-share.kit-follow { background: var(--kit-color-surface-soft); }
-#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit > .kit-share:not(.kit-follow) > .kit-share-label { display: none !important; }
-#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit > .kit-share.kit-follow > .kit-share-label { display: block !important; margin: 0 0 var(--kit-space-2); font-size: var(--kit-type-base); font-weight: var(--kit-weight-bold); }
-#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit > .kit-share :is(.kit-share-label, .kit-share-name) { color: var(--camp-dark); }
-#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit > .kit-share .kit-share-btn { border-color: var(--camp-dark); background: transparent; color: var(--camp-dark); }
-#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit > .kit-share .kit-share-btn:not(.kit-share-native) { width: var(--kit-size-target); padding: 0; justify-content: center; }
-#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit > .kit-share .kit-share-btn:not(.kit-share-native) .kit-share-name { display: none !important; }
-#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit > .kit-share .kit-share-btn:focus-visible { background: var(--camp-dark); color: var(--kit-color-on-ink); outline-color: var(--camp-dark); }
-#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit > .kit-share :is(.kit-share-btn.kit-share-native, .kit-share-copy:has(.kit-ico--check)) { background: var(--camp-dark); border-color: var(--camp-dark); color: var(--kit-color-on-ink); }
-#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit > .kit-share > .kit-share-native .kit-share-name { color: inherit; font-weight: var(--kit-weight-bold); }
-#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit > .kit-share > .kit-share-main { width: 100%; min-height: var(--kit-size-control); justify-content: center; font-size: var(--kit-type-base); gap: var(--kit-space-2); margin-bottom: var(--kit-space-2); padding-inline: var(--kit-space-4); }
+/* The row: the button, then Follow us */
+#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-5) var(--kit-space-6); margin: var(--kit-space-6) auto 0; }
+#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit > .kit-share { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-1); margin: 0; padding-top: unset; border: 0; background: none; box-shadow: none; } /* not a card: the kit bar's top rule and its space above it out */
+#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit > .kit-share:not(.kit-follow) > :is(.kit-share-label, .kit-share-copy, .kit-share-btn:not(.kit-share-native)) { display: none !important; }
+
+/* The button */
+#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit .kit-share-main { width: auto; height: auto; min-height: var(--kit-size-control); padding-inline: var(--kit-space-5); gap: var(--kit-space-2); border: 2px solid var(--aw-share-btn-edge, var(--aw-share-btn)); background: var(--aw-share-btn); color: var(--aw-share-btn-ink); font-size: var(--kit-type-base); font-weight: var(--kit-weight-bold); }
+#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit .kit-share-main .kit-share-name { display: inline; color: inherit; }
+#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit .kit-share-main:focus-visible { background: var(--aw-share-btn); color: var(--aw-share-btn-ink); outline: var(--kit-focus-width) solid var(--kit-color-on-ink); outline-offset: var(--kit-focus-offset); }
+#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit .kit-share-main:active { background: var(--aw-share-btn); color: var(--aw-share-btn-ink); opacity: .8; }
 @media (hover: hover) {
-	#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit > .kit-share .kit-share-btn:hover { background: var(--camp-dark); color: var(--kit-color-on-ink); }
+	#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit .kit-share-main:hover { background: var(--aw-share-btn); color: var(--aw-share-btn-ink); box-shadow: var(--kit-elevation-2); }
 }
+
+/* Follow us: white on the wash */
+#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit > .kit-follow > .kit-share-label { display: block !important; margin: 0 var(--kit-space-2) 0 0; color: var(--kit-color-on-ink); font-size: var(--kit-type-base); font-weight: var(--kit-weight-bold); }
+#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit > .kit-follow .kit-share-btn { width: var(--kit-size-target); height: var(--kit-size-target); padding: 0; border-color: transparent; background: transparent; color: var(--kit-color-on-ink); }
+#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit > .kit-follow .kit-share-btn .kit-share-name { display: none !important; }
+#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit > .kit-follow .kit-share-btn:focus-visible { background: rgb(255 255 255 / 0.16); border-color: transparent; outline-color: var(--kit-color-on-ink); }
+#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit > .kit-follow .kit-share-btn:active { background: rgb(255 255 255 / 0.24); }
+@media (hover: hover) {
+	#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit > .kit-follow .kit-share-btn:hover { background: rgb(255 255 255 / 0.16); }
+}
+
 @media (max-width: 767px) {
-	#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit > .kit-share.has-native > .kit-share-btn:not(.kit-share-native) { display: none !important; }
-	#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit > .kit-share.has-native > .kit-share-main { margin-bottom: 0; }
-}
-@media (min-width: 768px) {
-	#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit > .kit-share.kit-follow > .kit-share-label { display: flex !important; align-items: center; min-height: var(--kit-size-control); }
+	#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit > .kit-share { flex: 1 1 100%; }
+	#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit .kit-share-main { flex: 1 1 100%; justify-content: center; }
+	#share:is(.aw-share-sec, .aw-camp-section) .aw-camp-share-kit > .kit-follow > .kit-share-label { flex: 1 1 100%; margin: 0 0 var(--kit-space-1); }
 }
