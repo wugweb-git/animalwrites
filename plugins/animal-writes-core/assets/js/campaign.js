@@ -775,3 +775,14 @@ function awScPicker(fig, id, opts, start) {
 
 /* Supreme Court: the card fold and the "More news" folds are gone (owner, 13 Nov 2026: no expand and collapse on any
    page); every card and its text shows. */
+
+/* Diwali, What to do, and when: the five tiles always show their text (owner, 13 Nov 2026: no expand and collapse);
+   the summary is the tile's heading, so a click or key on it does not close the tile. */
+(function () {
+	document.querySelectorAll('.aw-camp--diwali #what-to-do details').forEach(function (d) {
+		var s = d.querySelector(':scope > summary');
+		d.open = true;
+		if (s) { s.setAttribute('tabindex', '-1'); s.addEventListener('click', function (e) { e.preventDefault(); }); }
+		d.addEventListener('toggle', function () { if (!d.open) d.open = true; });
+	});
+})();
