@@ -23,7 +23,7 @@
 .aw-camp-band-inner { position: relative; z-index: 1; max-width: var(--kit-width-wide); margin-inline: auto; }
 .aw-camp-band-text { max-width: 36rem; }
 .aw-camp-band-pill { display: inline-block; margin: 0 0 var(--kit-space-5); padding: var(--kit-space-1) var(--kit-space-4); border: 2px solid var(--camp-on-mark); border-radius: var(--kit-radius-pill); font-weight: var(--kit-weight-bold); font-size: var(--kit-type-sm); }
-.aw-camp-band .aw-camp-band-title { margin: 0 0 var(--kit-space-4); font-size: var(--kit-type-display); font-weight: var(--kit-weight-bold); letter-spacing: var(--kit-tracking-display); line-height: var(--kit-leading-display); max-width: 14ch; } /* the band's headline in the Display style (design-system.md, Type), whether it is the page's h1 (Home hero) or an h2 (a campaign page's band); exempt from the site H2 size, aw.css */
+.aw-camp-band .aw-camp-band-title { margin: 0 0 var(--kit-space-4); font-size: var(--kit-type-display); font-weight: var(--kit-weight-display); letter-spacing: var(--kit-tracking-display); line-height: var(--kit-leading-display); max-width: 14ch; } /* the band's headline in the Display style (design-system.md, Type), whether it is the page's h1 (Home hero) or an h2 (a campaign page's band); exempt from the site H2 size, aw.css */
 .aw-camp-band-text > p:not(.aw-camp-band-pill, .aw-camp-band-actions, .aw-camp-band-range, .aw-countdown) { font-size: var(--kit-type-lead); max-width: 30rem; margin: 0; }
 .aw-camp-band .aw-countdown { margin: var(--kit-space-6) 0 var(--kit-space-3); align-items: baseline; }
 .aw-camp-band .aw-cd-num { font-size: clamp(3rem, 2rem + 3vw, 4.5rem); font-weight: var(--kit-weight-display); letter-spacing: -0.05em; line-height: 0.85; font-variant-numeric: tabular-nums; }
