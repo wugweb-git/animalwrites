@@ -91,13 +91,35 @@
 			"fontFamilies": [
 				{
 					"slug": "base",
-					"name": "Inter Tight",
-					"fontFamily": "\"Inter Tight\", system-ui, -apple-system, \"Segoe UI\", sans-serif"
+					"name": "Inter",
+					"fontFamily": "\"Inter\", \"Inter Fallback\", system-ui, -apple-system, \"Segoe UI\", sans-serif",
+					"fontFace": [
+						{
+							"fontFamily": "Inter",
+							"fontStyle": "normal",
+							"fontWeight": "100 900",
+							"fontDisplay": "swap",
+							"src": [
+								"file:./assets/fonts/inter/inter-latin.woff2"
+							]
+						}
+					]
 				},
 				{
 					"slug": "display",
-					"name": "Inter Tight (headings)",
-					"fontFamily": "\"Inter Tight\", system-ui, -apple-system, \"Segoe UI\", sans-serif"
+					"name": "Inter (headings)",
+					"fontFamily": "\"Inter\", \"Inter Fallback\", system-ui, -apple-system, \"Segoe UI\", sans-serif",
+					"fontFace": [
+						{
+							"fontFamily": "Inter",
+							"fontStyle": "normal",
+							"fontWeight": "100 900",
+							"fontDisplay": "swap",
+							"src": [
+								"file:./assets/fonts/inter/inter-latin.woff2"
+							]
+						}
+					]
 				}
 			],
 			"fontSizes": [

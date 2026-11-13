@@ -76,6 +76,6 @@
     "weight-label": { "sm": "500" },
     "fluid-caption": { "sm": "clamp(0.625rem, 0.5682rem + 0.2424vw, 0.75rem)" },
     "weight-caption": { "sm": "400" },
-    "font-family": { "sm": "\"Inter Tight\", system-ui, -apple-system, \"Segoe UI\", sans-serif" }
+    "font-family": { "sm": "\"Inter\", \"Inter Fallback\", system-ui, -apple-system, \"Segoe UI\", sans-serif" }
   }
 }
