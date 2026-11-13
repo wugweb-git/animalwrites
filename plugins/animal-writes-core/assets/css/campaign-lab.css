@@ -875,7 +875,7 @@
 @media (prefers-reduced-motion: reduce) { .aw-camp--lab-rules #share .aw-share-cta-btn { transition: none; } .aw-camp--lab-rules #share .aw-share-cta-btn:active { transform: none; } }
 /* the button above already says Share, so the bar's own small "Share" label is left out here and the six 44px icons fit
    one row inside the card on a 375px phone (the bar keeps its aria-label) */
-.aw-camp--lab-rules #share .aw-camp-share-kit .kit-share-label { display: none; }
+.aw-camp--lab-rules #share .aw-camp-share-kit .kit-share:not(.kit-follow) .kit-share-label { display: none; } /* the Follow us row keeps its label */
 
 /* Share block template (owner, 2 Nov 2026: "heavily branded", one action, ready-made pictures, icons only; the same on
    every campaign). The Share section is a band in the campaign colour, deepening to 25% darker; everything sits on the
@@ -907,7 +907,7 @@
 @container aw-share (min-width: 44rem) { .aw-camp.aw-camp #share .aw-share-cta-btn { width: auto; } }
 /* the share bar: white 44px icons, no names, no small label, one row */
 .aw-camp.aw-camp #share .aw-share-block .kit-share { flex-wrap: nowrap; gap: var(--kit-space-2); border-top: 0; }
-.aw-camp.aw-camp #share .aw-share-block .kit-share :is(.kit-share-label, .kit-share-btn:not(.kit-share-native) .kit-share-name) { display: none !important; }
+.aw-camp.aw-camp #share .aw-share-block .kit-share:not(.kit-follow) :is(.kit-share-label, .kit-share-btn:not(.kit-share-native) .kit-share-name) { display: none !important; }
 .aw-camp.aw-camp #share .aw-share-block .kit-share .kit-share-btn { border-color: var(--camp-on-mark); background: transparent; color: var(--camp-on-mark); }
 /* The bar's Share button (the phone's share sheet, kit.js) on the band: filled white with its name, as on the other campaigns (owner, 13 Nov 2026: one share bar across the site). */
 .aw-camp.aw-camp #share .aw-share-block .kit-share .kit-share-btn.kit-share-native { background: var(--camp-on-mark); border-color: var(--camp-on-mark); color: var(--camp-mark); }
@@ -1024,6 +1024,3 @@
 .aw-camp--lab-rules .aw-camp-wait-stamp a { color: inherit; }
 
 @media (prefers-reduced-motion: reduce) { .aw-camp--lab-rules .aw-camp-wait-chip::before { animation: none; } }
-/* The follow line under the share bar in the Share section (after the close day). */
-.aw-camp.aw-camp #share .aw-camp-share-follow { margin: 0; font-size: var(--kit-type-base); }
-.aw-camp.aw-camp #share .aw-camp-share-follow a { color: var(--camp-on-mark); text-decoration: underline; text-underline-offset: 0.2em; }
