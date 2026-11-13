@@ -10,6 +10,49 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * The theme's one database option, kits_by_wugweb: an array of the theme's own state (the pattern files' signature,
+ * the joined CSS files' hashes and versions, the page kinds' component lists and the release sweep). WordPress.org's
+ * theme rules allow one option, named after the theme.
+ *
+ * @param string $key     Entry.
+ * @param mixed  $default What to return when the entry is not set.
+ * @return mixed
+ */
+function kits_theme_store( string $key, $default = null ) {
+	$all = get_option( 'kits_by_wugweb', array() );
+	return is_array( $all ) && array_key_exists( $key, $all ) ? $all[ $key ] : $default;
+}
+
+/**
+ * Sets one entry of the theme's option (written only when it changes).
+ *
+ * @param string $key   Entry.
+ * @param mixed  $value Value.
+ */
+function kits_theme_store_set( string $key, $value ): void {
+	$all = get_option( 'kits_by_wugweb', array() );
+	$all = is_array( $all ) ? $all : array();
+	if ( array_key_exists( $key, $all ) && $all[ $key ] === $value ) {
+		return;
+	}
+	$all[ $key ] = $value;
+	update_option( 'kits_by_wugweb', $all, true );
+}
+
+/**
+ * Removes one entry of the theme's option.
+ *
+ * @param string $key Entry.
+ */
+function kits_theme_store_delete( string $key ): void {
+	$all = get_option( 'kits_by_wugweb', array() );
+	if ( is_array( $all ) && array_key_exists( $key, $all ) ) {
+		unset( $all[ $key ] );
+		update_option( 'kits_by_wugweb', $all, true );
+	}
+}
+
+/**
  * Theme supports. Block themes get most supports automatically; these are the extras.
  */
 function kits_setup() {
@@ -296,9 +339,9 @@ add_action(
 	function () {
 		$files = array_merge( (array) glob( get_template_directory() . '/patterns/*.php' ), (array) glob( get_stylesheet_directory() . '/patterns/*.php' ) );
 		$sig   = md5( implode( ',', array_map( fn( $f ) => $f . ':' . filemtime( $f ), array_unique( $files ) ) ) );
-		if ( get_option( 'kits_pattern_sig' ) !== $sig ) {
+		if ( kits_theme_store( 'kits_pattern_sig' ) !== $sig ) {
 			wp_get_theme()->delete_pattern_cache();
-			update_option( 'kits_pattern_sig', $sig, false );
+			kits_theme_store_set( 'kits_pattern_sig', $sig );
 		}
 	},
 	1
@@ -500,7 +543,7 @@ function kits_bundle_css_switch(): bool {
  * @return string Hash, or '' when the parts changed or nothing is stored.
  */
 function kits_joined_hash( string $key, string $sig ): string {
-	$memo = get_option( $key );
+	$memo = kits_theme_store( $key );
 	return is_array( $memo ) && isset( $memo['sig'], $memo['hash'] ) && $memo['sig'] === $sig ? (string) $memo['hash'] : '';
 }
 
@@ -513,7 +556,7 @@ function kits_joined_hash( string $key, string $sig ): string {
  */
 function kits_joined_hash_save( string $key, string $sig, string $hash ): void {
 	if ( kits_joined_hash( $key, $sig ) !== $hash ) {
-		update_option( $key, compact( 'sig', 'hash' ), true );
+		kits_theme_store_set( $key, compact( 'sig', 'hash' ) );
 	}
 }
 
@@ -658,7 +701,7 @@ function kits_parts_bundle_sets( string $dir ): array {
  * @return array The other sets, keyed as given.
  */
 function kits_parts_bundle_other_sets( array $sets ): array {
-	$kinds = get_option( 'kits_parts_kinds', array() );
+	$kinds = kits_theme_store( 'kits_parts_kinds', array() );
 	foreach ( array_keys( is_array( $kinds ) ? $kinds : array() ) as $kind ) {
 		unset( $sets[ substr( md5( 'kind:' . $kind ), 0, 10 ) ] );
 	}
@@ -686,7 +729,7 @@ function kits_parts_bundle_clean( string $dir ): void {
 			}
 		}
 		if ( ! $left ) {
-			delete_option( 'kits_parts_ver_' . $set );
+			kits_theme_store_delete( 'kits_parts_ver_' . $set );
 		}
 	}
 	foreach ( (array) glob( $dir . '/*.tmp' ) as $t ) {
@@ -705,14 +748,13 @@ function kits_parts_bundle_clean( string $dir ): void {
  * @param int $delay Seconds before the sweep runs.
  */
 function kits_parts_bundle_sweep_start( int $delay ): void {
-	delete_option( 'kits_parts_kinds' ); // Each kind's list starts again from what the release's pages print.
-	update_option(
+	kits_theme_store_delete( 'kits_parts_kinds' ); // Each kind's list starts again from what the release's pages print.
+	kits_theme_store_set(
 		'kits_parts_sweep',
 		array(
 			'at'  => time(),
 			'run' => time() + max( 0, $delay ),
-		),
-		true
+		)
 	);
 }
 
@@ -723,11 +765,11 @@ function kits_parts_bundle_sweep_start( int $delay ): void {
  * @param string $dir Folder.
  */
 function kits_parts_bundle_sweep( string $dir ): void {
-	$sweep = get_option( 'kits_parts_sweep' );
+	$sweep = kits_theme_store( 'kits_parts_sweep' );
 	if ( ! is_array( $sweep ) || time() < (int) ( $sweep['run'] ?? 0 ) ) {
 		return;
 	}
-	delete_option( 'kits_parts_sweep' );
+	kits_theme_store_delete( 'kits_parts_sweep' );
 	clearstatcache();
 	foreach ( kits_parts_bundle_sets( $dir ) as $set => $list ) {
 		$left = count( $list );
@@ -738,7 +780,7 @@ function kits_parts_bundle_sweep( string $dir ): void {
 			}
 		}
 		if ( ! $left ) {
-			delete_option( 'kits_parts_ver_' . $set );
+			kits_theme_store_delete( 'kits_parts_ver_' . $set );
 		}
 	}
 }
@@ -806,13 +848,13 @@ function kits_parts_bundle_members( string $kind, array $members, array $registr
 	if ( '' === $kind ) {
 		return $members;
 	}
-	$kinds = get_option( 'kits_parts_kinds', array() );
+	$kinds = kits_theme_store( 'kits_parts_kinds', array() );
 	$kinds = is_array( $kinds ) ? $kinds : array();
 	$known = array_values( array_filter( (array) ( $kinds[ $kind ] ?? array() ), fn( $h ) => is_string( $h ) && isset( $registry[ $h ] ) ) );
 	$all   = array_values( array_filter( array_keys( $registry ), fn( $h ) => in_array( $h, $known, true ) || in_array( $h, $members, true ) ) );
 	if ( $all !== $known ) {
 		$kinds[ $kind ] = $all;
-		update_option( 'kits_parts_kinds', $kinds, true );
+		kits_theme_store_set( 'kits_parts_kinds', $kinds );
 	}
 	return $all;
 }
@@ -1000,7 +1042,7 @@ function kits_bundle_component_css() {
 	if ( ! $mtime ) {
 		return; // Removed since the check above: separate files for this view.
 	}
-	$sweep = get_option( 'kits_parts_sweep' );
+	$sweep = kits_theme_store( 'kits_parts_sweep' );
 	$since = is_array( $sweep ) ? (int) ( $sweep['at'] ?? 0 ) : 0;
 	if ( ( $mtime < time() - HOUR_IN_SECONDS || $mtime < $since ) && wp_is_writable( $path ) ) {
 		touch( $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- in use: the unused-age clean-up and the release sweep keep it.
