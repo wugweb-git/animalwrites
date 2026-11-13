@@ -246,6 +246,19 @@ function planweb_select( string $name, array $values, string $value, string $non
 }
 
 /**
+ * The Channels boxes: one per channel, several may be ticked.
+ *
+ * @param string[] $checked Ticked slugs.
+ */
+function planweb_channel_boxes( array $checked ): string {
+	$h = '<fieldset id="planweb-channel"><legend class="screen-reader-text">' . esc_html__( 'Channels', 'planweb' ) . '</legend>';
+	foreach ( PLANWEB_CHANNELS as $slug => $label ) {
+		$h .= '<label class="planweb-channel-box"><input type="checkbox" name="channels[]" value="' . esc_attr( $slug ) . '"' . checked( in_array( $slug, $checked, true ), true, false ) . '> ' . esc_html( $label ) . '</label> ';
+	}
+	return $h . '<input type="hidden" name="channels[]" value=""></fieldset>';
+}
+
+/**
  * The add or edit form.
  *
  * @param array|null $e     Entry being edited.
@@ -253,16 +266,17 @@ function planweb_select( string $name, array $values, string $value, string $non
  */
 function planweb_form( $e, string $month ) {
 	$e   = $e ? $e : array(
-		'id'      => 0,
-		'date'    => '',
-		'time'    => '',
-		'title'   => '',
-		'note'    => '',
-		'type'    => 'reminder',
-		'channel' => '',
-		'owner'   => '',
-		'status'  => 'idea',
-		'link'    => '',
+		'id'       => 0,
+		'date'     => '',
+		'time'     => '',
+		'title'    => '',
+		'note'     => '',
+		'type'     => 'reminder',
+		'channel'  => '',
+		'channels' => array(),
+		'owner'    => '',
+		'status'   => 'idea',
+		'link'     => '',
 	);
 	$off = array( 'due' );
 	if ( ! current_user_can( 'planweb_approve' ) ) {
@@ -277,12 +291,16 @@ function planweb_form( $e, string $month ) {
 		'title'   => array( __( 'Title', 'planweb' ), '<input type="text" name="title" id="planweb-title" class="regular-text" required maxlength="120" value="' . esc_attr( $e['title'] ) . '">' ),
 		'note'    => array( __( 'Note', 'planweb' ), '<textarea name="note" id="planweb-note" rows="3" class="large-text">' . esc_textarea( $e['note'] ) . '</textarea><p class="description">' . esc_html__( 'No email addresses, names or phone numbers.', 'planweb' ) . '</p>' ),
 		'type'    => array( __( 'Type', 'planweb' ), planweb_select( 'type', PLANWEB_TYPES, $e['type'] ) ),
-		'channel' => array( __( 'Channel', 'planweb' ), planweb_select( 'channel', PLANWEB_CHANNELS, $e['channel'], __( '—', 'planweb' ) ) ),
+		'channel' => array( __( 'Channels', 'planweb' ), planweb_channel_boxes( (array) ( $e['channels'] ?? array( $e['channel'] ) ) ) ),
 		'owner'   => array( __( 'Owner', 'planweb' ), planweb_select( 'owner', PLANWEB_OWNERS, $e['owner'], __( '—', 'planweb' ) ) ),
 		'status'  => array( __( 'Status', 'planweb' ), planweb_select( 'status', PLANWEB_STATUSES, $e['status'], '', $off ) ),
-		'link'    => array( __( 'Link', 'planweb' ), '<input type="url" name="link" id="planweb-link" class="regular-text" value="' . esc_attr( $e['link'] ) . '"><p class="description">' . esc_html__( 'A page on this site, or an X, LinkedIn, Instagram, Facebook, Threads, Reddit or WhatsApp channel address.', 'planweb' ) . '</p>' ),
+		'link'    => array( __( 'Link', 'planweb' ), '<input type="url" name="link" id="planweb-link" class="regular-text" value="' . esc_attr( $e['link'] ) . '"><p class="description">' . esc_html__( 'A page on this site, or an X, LinkedIn, Instagram, Facebook, Threads, Bluesky, Reddit or WhatsApp channel address.', 'planweb' ) . '</p>' ),
 	);
 	foreach ( $rows as $k => $r ) {
+		if ( 'channel' === $k ) { // A group of boxes: its own legend, no single label.
+			echo '<tr><th scope="row">' . esc_html( $r[0] ) . '</th><td>' . $r[1] . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from escaped parts.
+			continue;
+		}
 		echo '<tr><th scope="row"><label for="planweb-' . esc_attr( $k ) . '">' . esc_html( $r[0] ) . '</label></th><td>' . $r[1] . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from escaped parts above.
 	}
 	echo '</tbody></table>';
@@ -296,7 +314,7 @@ function planweb_form( $e, string $month ) {
 /**
  * The entry's fields from a form or a request, cleaned (the Calendar's form and the planweb/v1 routes).
  *
- * @param array $raw Unslashed values: date, time, title, note, type, channel, owner, status, link.
+ * @param array $raw Unslashed values: date, time, title, note, type, channels (list) or channel, owner, status, link.
  * @return array The same keys, as planweb_save_entry() takes them.
  */
 function planweb_clean_form( array $raw ): array {
@@ -304,8 +322,11 @@ function planweb_clean_form( array $raw ): array {
 	foreach ( array( 'date', 'time', 'title', 'type', 'channel', 'owner', 'status', 'link' ) as $k ) {
 		$f[ $k ] = sanitize_text_field( is_scalar( $raw[ $k ] ?? '' ) ? (string) ( $raw[ $k ] ?? '' ) : '' );
 	}
-	$f['link'] = esc_url_raw( is_scalar( $raw['link'] ?? '' ) ? (string) ( $raw['link'] ?? '' ) : '' );
-	$f['note'] = sanitize_textarea_field( is_scalar( $raw['note'] ?? '' ) ? (string) ( $raw['note'] ?? '' ) : '' );
+	// Channels: a list (several allowed); a request that sends only channel keeps working.
+	$f['channels'] = array_map( 'sanitize_key', planweb_channel_list( array_key_exists( 'channels', $raw ) ? $raw['channels'] : ( $raw['channel'] ?? '' ) ) );
+	$f['channel']  = $f['channels'][0] ?? '';
+	$f['link']     = esc_url_raw( is_scalar( $raw['link'] ?? '' ) ? (string) ( $raw['link'] ?? '' ) : '' );
+	$f['note']     = sanitize_textarea_field( is_scalar( $raw['note'] ?? '' ) ? (string) ( $raw['note'] ?? '' ) : '' );
 	return $f;
 }
 

@@ -26,6 +26,8 @@ const PLANWEB_CHANNELS = array(
 	'linkedin'   => 'LinkedIn',
 	'instagram'  => 'Instagram',
 	'facebook'   => 'Facebook',
+	'threads'    => 'Threads',
+	'bluesky'    => 'Bluesky',
 	'newsletter' => 'Newsletter',
 	'whatsapp'   => 'WhatsApp',
 	'reddit'     => 'Reddit',
@@ -41,20 +43,24 @@ const PLANWEB_OWNERS = array(
 	'team'      => 'Team',
 );
 
-/** Statuses people pick. "due" is set only by the scheduler (phase 3). */
+/**
+ * Statuses people pick. "due" is set only by the scheduler (phase 3). "done" closes an entry that is finished but was
+ * never sent (a reminder): not overdue, not counted as sent (14 Nov 2026).
+ */
 const PLANWEB_STATUSES = array(
 	'idea'     => 'Idea',
 	'draft'    => 'Draft',
 	'approved' => 'Approved',
 	'due'      => 'Due',
 	'sent'     => 'Sent',
+	'done'     => 'Done',
 );
 
 /** Statuses only administrators may set (capability planweb_approve): the owner's yes. */
 const PLANWEB_APPROVE_STATUSES = array( 'approved', 'sent' );
 
 /** Hosts a Link may point to besides the site's own (subdomains included). */
-const PLANWEB_SOCIAL_HOSTS = array( 'x.com', 'twitter.com', 'linkedin.com', 'instagram.com', 'facebook.com', 'threads.net', 'threads.com', 'reddit.com', 'whatsapp.com' );
+const PLANWEB_SOCIAL_HOSTS = array( 'x.com', 'twitter.com', 'linkedin.com', 'instagram.com', 'facebook.com', 'threads.net', 'threads.com', 'bsky.app', 'reddit.com', 'whatsapp.com' );
 
 /**
  * Whether a date is a real Y-m-d date.
@@ -106,7 +112,7 @@ function planweb_link_problem( string $url, string $site_host ): string {
 			return '';
 		}
 	}
-	return 'The link must go to this site or to X, LinkedIn, Instagram, Facebook, Threads, Reddit or a WhatsApp channel.';
+	return 'The link must go to this site or to X, LinkedIn, Instagram, Facebook, Threads, Bluesky, Reddit or a WhatsApp channel.';
 }
 
 /**
@@ -222,6 +228,48 @@ function planweb_compare( array $rows, array $entries ): array {
 				'dates' => null,
 				'entry' => $e,
 			);
+		}
+	}
+	return $out;
+}
+
+/**
+ * The channels a title names in brackets at its start, such as "[X + LinkedIn] …": each part matched to a channel
+ * label (any case). Empty when there is no such bracket or a part is not a channel, so nothing is guessed.
+ *
+ * @param string $title Title.
+ * @return string[] Channel slugs, in the title's order.
+ */
+function planweb_title_channels( string $title ): array {
+	if ( ! preg_match( '/^\s*\[([^\]]+\+[^\]]+)\]/', $title, $m ) ) {
+		return array();
+	}
+	$by_label = array_change_key_case( array_flip( PLANWEB_CHANNELS ), CASE_LOWER );
+	$out      = array();
+	foreach ( explode( '+', $m[1] ) as $part ) {
+		$slug = $by_label[ strtolower( trim( $part ) ) ] ?? '';
+		if ( '' === $slug ) {
+			return array();
+		}
+		$out[] = $slug;
+	}
+	return array_values( array_unique( $out ) );
+}
+
+/**
+ * Channel slugs from a form or request: an array, or one slug, or slugs joined by commas. Unknown slugs are kept so
+ * the save can refuse them; empty parts and repeats go.
+ *
+ * @param mixed $v Value.
+ * @return string[]
+ */
+function planweb_channel_list( $v ): array {
+	$parts = is_array( $v ) ? $v : explode( ',', is_scalar( $v ) ? (string) $v : '' );
+	$out   = array();
+	foreach ( $parts as $p ) {
+		$p = is_scalar( $p ) ? strtolower( trim( (string) $p ) ) : '';
+		if ( '' !== $p && ! in_array( $p, $out, true ) ) {
+			$out[] = $p;
 		}
 	}
 	return $out;

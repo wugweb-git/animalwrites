@@ -62,6 +62,7 @@ function Dashboard() {
 	const [ note, setNote ] = useState( '' );
 	const [ busy, setBusy ] = useState( false );
 	const [ tries, setTries ] = useState( 0 );
+	const [ asked, setAsked ] = useState( false );
 
 	const load = () => {
 		setError( '' );
@@ -70,8 +71,9 @@ function Dashboard() {
 			.catch( ( e ) => setError( errText( e ) ) );
 	};
 	useEffect( load, [] );
-	// While a count runs in the background, look again every 20 seconds (a read; nothing is counted).
-	const waiting = !! data && ( data.counting || data.stale );
+	// Opening the Dashboard writes nothing. After "Count now", look again every 20 seconds while the counts are old (a
+	// read; nothing is counted here).
+	const waiting = asked && !! data && ( data.counting || data.stale );
 	useEffect( () => {
 		if ( ! waiting || tries >= 15 ) {
 			return;
@@ -88,6 +90,7 @@ function Dashboard() {
 		apiFetch( { path: path( 'dashboard/count' ), method: 'POST' } )
 			.then( () => {
 				setTries( 0 );
+				setAsked( true );
 				setNote(
 					__(
 						'A count is running in the background. The numbers change when it is done.',
@@ -116,9 +119,17 @@ function Dashboard() {
 				__( 'Counted %s.', 'planweb' ),
 				data.atText
 			)
-		: __( 'Counting for the first time…', 'planweb' );
+		: __(
+				'Not counted yet: the hourly count makes them, or press Count now.',
+				'planweb'
+			);
 	if ( data.stale ) {
-		after += ' ' + __( 'A new count for today is running.', 'planweb' );
+		after +=
+			' ' +
+			__(
+				'These are from an earlier day: the hourly count brings them up to date, or press Count now.',
+				'planweb'
+			);
 	}
 	return (
 		<>
@@ -370,6 +381,7 @@ const BLANK = {
 	note: '',
 	type: 'reminder',
 	channel: '',
+	channels: [],
 	owner: '',
 	status: 'idea',
 	link: '',
@@ -418,7 +430,7 @@ function EntryForm( { entry, onSaved, onClose } ) {
 	const save = () => {
 		setBusy( true );
 		setError( '' );
-		const { date, time, title, note, type, channel, owner, status, link } =
+		const { date, time, title, note, type, channels, owner, status, link } =
 			f;
 		apiFetch( {
 			path: path( f.id ? `entries/${ f.id }` : 'entries' ),
@@ -429,7 +441,7 @@ function EntryForm( { entry, onSaved, onClose } ) {
 				title,
 				note,
 				type,
-				channel,
+				channels,
 				owner,
 				status,
 				link,
@@ -509,19 +521,43 @@ function EntryForm( { entry, onSaved, onClose } ) {
 						/>
 					) }
 				/>
-				<FormField
-					label={ __( 'Channel', 'planweb' ) }
-					render={ ( id, helpId ) => (
-						<Select
-							id={ id }
-							aria-describedby={ helpId }
-							options={ lists.channels || [] }
-							value={ f.channel }
-							onChange={ set( 'channel' ) }
-							none="—"
-						/>
-					) }
-				/>
+				<fieldset className="kits-shell-field planweb-channels">
+					<legend>{ __( 'Channels', 'planweb' ) }</legend>
+					{ ( lists.channels || [] ).map( ( o ) => (
+						<label
+							key={ o.value }
+							className="planweb-channel-box"
+							htmlFor={ `planweb-channel-${ o.value }` }
+						>
+							<input
+								id={ `planweb-channel-${ o.value }` }
+								type="checkbox"
+								checked={ ( f.channels || [] ).includes(
+									o.value
+								) }
+								onChange={ ( e ) =>
+									set( 'channels' )(
+										e.target.checked
+											? [
+													...( f.channels || [] ),
+													o.value,
+												]
+											: ( f.channels || [] ).filter(
+													( c ) => c !== o.value
+												)
+									)
+								}
+							/>{ ' ' }
+							{ o.label }
+						</label>
+					) ) }
+					<p className="kits-shell-field__help">
+						{ __(
+							'Tick every channel the entry goes out on.',
+							'planweb'
+						) }
+					</p>
+				</fieldset>
 				<FormField
 					label={ __( 'Owner', 'planweb' ) }
 					render={ ( id, helpId ) => (
@@ -566,7 +602,7 @@ function EntryForm( { entry, onSaved, onClose } ) {
 				<FormField
 					label={ __( 'Link', 'planweb' ) }
 					help={ __(
-						'A page on this site, or an X, LinkedIn, Instagram, Facebook, Threads, Reddit or WhatsApp channel address.',
+						'A page on this site, or an X, LinkedIn, Instagram, Facebook, Threads, Bluesky, Reddit or WhatsApp channel address.',
 						'planweb'
 					) }
 					render={ text( 'link', 'url' ) }
@@ -726,7 +762,7 @@ function Entries() {
 		},
 		{
 			key: 'channelText',
-			label: __( 'Channel', 'planweb' ),
+			label: __( 'Channels', 'planweb' ),
 			render: ( r ) => r.channelText || '—',
 		},
 		{
@@ -890,6 +926,7 @@ const GROUPS = () => [
 	{ value: 'switch', label: __( 'PlanWeb', 'planweb' ) },
 	{ value: 'lists', label: __( 'Lists', 'planweb' ) },
 	{ value: 'import', label: __( 'Import from Dates', 'planweb' ) },
+	{ value: 'feed', label: __( 'Calendar feed', 'planweb' ) },
 ];
 
 function hashGroup() {
@@ -918,7 +955,7 @@ function Services() {
 			id="planweb-group-services"
 			title={ __( 'Connected services', 'planweb' ) }
 			description={ __(
-				'What PlanWeb will read or work with. Nothing is posted or sent from PlanWeb.',
+				'What PlanWeb will read or work with, and the tools used by hand outside it. Nothing is posted or sent from PlanWeb.',
 				'planweb'
 			) }
 		>
@@ -1240,6 +1277,131 @@ function ImportGroup( { group, onSaved } ) {
 	);
 }
 
+/**
+ * The calendar feed: its addresses (each with the key), "Make a new key" and "Turn the feed off".
+ *
+ * @param {Object}   props
+ * @param {Object}   props.group   { on, urls: [ { label, url } ] }.
+ * @param {Function} props.onSaved New payload.
+ */
+function FeedGroup( { group, onSaved } ) {
+	const [ busy, setBusy ] = useState( false );
+	const [ msg, setMsg ] = useState( null );
+	const send = ( action, ask ) => {
+		// eslint-disable-next-line no-alert -- a plain browser confirm before the old address stops working
+		if ( ask && ! window.confirm( ask ) ) {
+			return;
+		}
+		setBusy( true );
+		setMsg( null );
+		apiFetch( {
+			path: path( 'settings/feed' ),
+			method: 'POST',
+			data: { action },
+		} )
+			.then( ( r ) => {
+				onSaved( r.feed );
+				setMsg( { tone: 'success', text: r.message } );
+			} )
+			.catch( ( e ) => setMsg( { tone: 'error', text: errText( e ) } ) )
+			.finally( () => setBusy( false ) );
+	};
+	const again = __(
+		'Make a new key? The current address stops working, and calendars subscribed to it stop updating until they subscribe again.',
+		'planweb'
+	);
+	return (
+		<SettingsGroup
+			id="planweb-group-feed"
+			title={ __( 'Calendar feed', 'planweb' ) }
+			description={ __(
+				'A read-only feed for Google Calendar, Apple Calendar or Outlook: date, time, title, type, channels, status and link of entries from 90 days ago on. Never the note. Nothing comes back from the calendar app, and nothing is posted.',
+				'planweb'
+			) }
+			footer={
+				<>
+					<Button
+						variant={ group.on ? 'secondary' : 'primary' }
+						busy={ busy }
+						onClick={ () => send( 'new', group.on ? again : '' ) }
+					>
+						{ group.on
+							? __( 'Make a new key', 'planweb' )
+							: __(
+									'Make a key and turn the feed on',
+									'planweb'
+								) }
+					</Button>
+					{ group.on && (
+						<Button
+							busy={ busy }
+							onClick={ () =>
+								send(
+									'off',
+									__(
+										'Turn the feed off? Calendars subscribed to it stop updating.',
+										'planweb'
+									)
+								)
+							}
+						>
+							{ __( 'Turn the feed off', 'planweb' ) }
+						</Button>
+					) }
+					<span aria-live="polite">
+						{ msg && 'success' === msg.tone ? msg.text : '' }
+					</span>
+				</>
+			}
+		>
+			{ msg && 'error' === msg.tone && (
+				<Notice tone="error" onDismiss={ () => setMsg( null ) }>
+					{ msg.text }
+				</Notice>
+			) }
+			{ ! group.on && (
+				<p>
+					{ __(
+						'The feed is off: there is no key, so there is no address.',
+						'planweb'
+					) }
+				</p>
+			) }
+			{ group.on && (
+				<>
+					<Notice tone="warning">
+						{ __(
+							'Each address holds the secret key: anyone with it can read these entries. Share it only with the calendar you subscribe.',
+							'planweb'
+						) }
+					</Notice>
+					{ group.urls.map( ( u, i ) => (
+						<div className="kits-shell-field" key={ u.url }>
+							<label htmlFor={ `planweb-feed-${ i }` }>
+								{ u.label }
+							</label>
+							<input
+								id={ `planweb-feed-${ i }` }
+								type="text"
+								className="large-text code"
+								readOnly
+								value={ u.url }
+								onFocus={ ( e ) => e.target.select() }
+							/>
+						</div>
+					) ) }
+					<p className="kits-shell-field__help">
+						{ __(
+							'Google Calendar: Other calendars → + → From URL. Apple Calendar: File → New Calendar Subscription. Outlook: Add calendar → Subscribe from web. Calendar apps fetch the feed on their own schedule (Google: every few hours).',
+							'planweb'
+						) }
+					</p>
+				</>
+			) }
+		</SettingsGroup>
+	);
+}
+
 function Settings() {
 	const [ data, setData ] = useState( null );
 	const [ error, setError ] = useState( '' );
@@ -1289,6 +1451,9 @@ function Settings() {
 					group={ data.import }
 					onSaved={ put( 'import' ) }
 				/>
+			) }
+			{ 'feed' === open && (
+				<FeedGroup group={ data.feed } onSaved={ put( 'feed' ) } />
 			) }
 			{ ! GROUPS().some( ( g ) => g.value === open ) && (
 				<EmptyState title={ __( 'No such group.', 'planweb' ) } />

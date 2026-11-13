@@ -44,7 +44,7 @@ add_action(
 );
 
 /** Bump when the capabilities or the list values change, so planweb_setup() runs again. */
-const PLANWEB_SETUP = '1';
+const PLANWEB_SETUP = '2'; // 2: Threads and Bluesky channels (14 Nov 2026).
 
 // Kits → Modules (Animal Writes Core's Settings API screen), when it is there.
 add_action(

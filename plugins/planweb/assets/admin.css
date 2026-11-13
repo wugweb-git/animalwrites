@@ -16,7 +16,7 @@
 
 .planweb-status { display: inline-block; padding: 0 6px; border: 1px solid #c3c4c7; border-radius: 3px; color: #1d2327; background: #f6f7f7; font-size: 12px; line-height: 18px; white-space: nowrap; }
 .planweb-status--approved, .planweb-status--due { border-color: #2271b1; }
-.planweb-status--sent { background: #fff; color: #50575e; }
+.planweb-status--sent, .planweb-status--done { background: #fff; color: #50575e; }
 
 .planweb-month td { vertical-align: top; height: 84px; }
 .planweb-month .planweb-item { margin: 4px 0; overflow-wrap: anywhere; }
@@ -32,3 +32,8 @@
 .planweb-tile-row--today .planweb-tile { border-color: #2271b1; box-shadow: 0 0 0 1px #2271b1; }
 .planweb-tile-text { min-width: 0; overflow-wrap: anywhere; }
 .planweb-tile-meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; color: #50575e; margin-top: 2px; }
+
+/* The Calendar form's Channels boxes (several may be ticked). */
+.planweb-channel-box { display: inline-block; margin-inline-end: 1em; white-space: nowrap; }
+.planweb-channels { border: 0; padding: 0; margin: 0 0 16px; min-inline-size: 0; }
+.planweb-channels legend { font-weight: 600; margin-block-end: 4px; padding: 0; }
