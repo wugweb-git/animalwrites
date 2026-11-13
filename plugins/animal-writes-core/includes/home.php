@@ -299,8 +299,9 @@ function aw_home_is_state_guide( $id ) {
 }
 
 /**
- * Guides on Home: the three newest guides, with at most one state "report cruelty" guide, so one kind does not fill
- * the row. When the first candidates do not give three, more are read (up to 48 in all).
+ * Guides on Home: the newest guides, as many as the Query Loop asks for (four: two rows of two from 1200; three show
+ * below 1200), with at most one state "report cruelty" guide, so one kind does not fill the row. When the first
+ * candidates do not give enough, more are read (up to 48 in all).
  *
  * @param array $q The Query Loop's query vars.
  * @return int[]
@@ -308,7 +309,8 @@ function aw_home_is_state_guide( $id ) {
 function aw_home_guide_ids( $q ) {
 	$out   = array();
 	$state = false;
-	for ( $page = 1; $page <= 4 && count( $out ) < 3; $page++ ) {
+	$want  = max( 1, (int) ( $q['posts_per_page'] ?? 3 ) );
+	for ( $page = 1; $page <= 4 && count( $out ) < $want; $page++ ) {
 		$ids = array_map( 'intval', get_posts( array_merge( $q, array( 'posts_per_page' => 12, 'paged' => 1, 'offset' => ( $page - 1 ) * 12, 'fields' => 'ids', 'no_found_rows' => true ) ) ) );
 		if ( ! $ids ) {
 			break;
@@ -321,7 +323,7 @@ function aw_home_guide_ids( $q ) {
 			}
 			$state = $state || $is_state;
 			$out[] = $id;
-			if ( 3 === count( $out ) ) {
+			if ( $want === count( $out ) ) {
 				break;
 			}
 		}
