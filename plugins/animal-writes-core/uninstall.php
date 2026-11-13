@@ -29,7 +29,8 @@
  * Scheduled events (all of each hook, whatever its arguments): aw_daily, aw_daily_backup, aw_cc0_run, aw_raw_prune,
  *   aw_error_count_daily, directoryweb_stats_build, aw_nl_ff_phone_sync, aw_site_check_deploy, aw_featured_rescan,
  *   aw_geocode_one, aw_thumb_rebuild.
- * Tables: {prefix}aw_form_raw (raw campaign form records) and {prefix}aw_camp_letters (campaign letters).
+ * Tables: none. {prefix}aw_form_raw (raw campaign form records) and {prefix}aw_camp_letters (campaign letters) are
+ *   supporters' own records and are always kept.
  *
  * Never deleted, even when ticked:
  * - Posts of any type (listings, News, Library, campaigns, places, social posts, resources), terms, users,
@@ -166,8 +167,7 @@ foreach ( array(
 	wp_unschedule_hook( $aw_hook );
 }
 
-foreach ( array( 'aw_form_raw', 'aw_camp_letters' ) as $aw_table ) {
-	$wpdb->query( 'DROP TABLE IF EXISTS `' . esc_sql( $wpdb->prefix . $aw_table ) . '`' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.SchemaChange -- uninstall: the plugin's own tables, names fixed above.
-}
+// The tables {prefix}aw_form_raw and {prefix}aw_camp_letters are supporters' own records: never dropped, even here (owner rule: never delete user data).
+
 
 delete_option( 'aw_delete_data_on_uninstall' ); // Last, so a run that stops half-way can be repeated.
