@@ -24,7 +24,9 @@ if ( ! function_exists( 'kits_term_url' ) ) { // aw-seo-extras carries a copy fo
  *  kits_eyebrow()        small label that carries information                   span.kit-eyebrow
  *  kits_count()          number beside a label                                  span.kit-count
  *  kits_datecard()       a highlighted date as a calendar page (timelines, deadlines) time.kit-datecard
- *  kits_datecard_word()  a timeline step with no date yet, on the same calendar page   span.kit-datecard--word
+ *  kits_datecard_word()  a timeline step with no date yet, on the same calendar page   span.kit-datecard--undated
+ *  kits_timeline()       milestones as a timeline: calendar pages, states, connectors   ol.kit-dateline
+ *  kits_milestone_state() a milestone's state (past, present, ongoing, future, undated), Asia/Kolkata
  *  kits_filter_dropdown() one filter as a dropdown: a button with a checkbox list (several choices, counts)
  *  kits_sort_dropdown()  "Sort" as a dropdown of links (one choice)
  *  kits_filter_bar()     the filters in one row (dropdowns, Sort on the right), a "Filters" sheet on phones, and the
@@ -54,40 +56,225 @@ function kits_eyebrow( $text ) {
 }
 
 /**
- * The date card (owner, 13 Nov 2026: "when highlighting dates use a calendar icon, artistic, to make a date card; should
- * be universal"): a calendar page with the month on a strip, the day large and the year small. Use it wherever a date
- * is the point of the block (timelines, deadlines, event days); dates inside sentences and meta rows stay kit-date.
- * Styles: kit-primitives.css (.kit-datecard). The strip takes --camp-mark on campaign pages, the brand ink elsewhere.
+ * Timeline calendar (owner, 13 Nov 2026: one calendar system for every campaign and editorial timeline). One calendar
+ * page, one geometry everywhere; the campaign changes only its colours (--camp-mark, --camp-on-mark, --camp-dark). Styles:
+ * kit-primitives.css (.kit-datecard, .kit-dateline).
  *
- * @param string|int $when    A date strtotime() reads (Y-m-d) or a Unix time.
- * @param string     $variant '' (64px) or 'sm' (48px).
- * @return string A time element, or '' when the date cannot be read.
+ * A milestone is an array with these fields (all optional except one of date / word / title):
+ *   date        'Y-m-d', 'Y-m' (no day) or 'Y' (year only); or year / month / day as separate fields
+ *   end         'Y-m-d': the last day of an ongoing activity (a date range)
+ *   state       an editorial override: past, present, ongoing, future (empty: worked out from the date)
+ *   current     true: the step that is happening now, though it has no date ("Now")
+ *   key         true: the campaign's key date (its motif as the stamp)
+ *   word        the step's word when it has no date ("Now", "No date set"), shown above its words, never on the calendar
+ *   title       short heading (HTML allowed)
+ *   description the words under it (HTML allowed)
+ *   html        the step's words as rendered HTML, for lists migrated from content (used as they are)
+ *   icon        a kit-ico name, shown before the title
+ *   link        URL, with link_text
+ *   media       attachment ID: an image shows small, any other file as a link with its title
+ *   class       extra li classes kept from the content (is-shown, ...); attrs: extra li attributes as HTML
+ *
+ * States: past, present, ongoing, future, and undated (no date set: never a made-up date or an empty calendar).
+ * The state comes from the date, compared in Asia/Kolkata, unless the milestone sets one.
  */
-function kits_datecard( $when, $variant = '' ) {
-	$ts = is_numeric( $when ) ? (int) $when : strtotime( (string) $when );
-	if ( ! $ts ) {
-		return '';
-	}
-	$tz = wp_timezone();
-	return '<time class="kit-datecard' . ( $variant ? ' kit-datecard--' . esc_attr( $variant ) : '' ) . '" datetime="' . esc_attr( wp_date( 'Y-m-d', $ts, $tz ) ) . '">'
-		. '<span class="kit-datecard-month">' . esc_html( wp_date( 'M', $ts, $tz ) ) . '</span> '
-		. '<span class="kit-datecard-day">' . esc_html( wp_date( 'j', $ts, $tz ) ) . '</span> '
-		. '<span class="kit-datecard-year">' . esc_html( wp_date( 'Y', $ts, $tz ) ) . '</span></time>';
+
+/**
+ * Today in Asia/Kolkata, as Y-m-d (filterable for tests: kits_timeline_today).
+ *
+ * @return string
+ */
+function kits_timeline_today() {
+	$today = ( new DateTimeImmutable( 'now', new DateTimeZone( 'Asia/Kolkata' ) ) )->format( 'Y-m-d' );
+	return (string) apply_filters( 'kits_timeline_today', $today );
 }
 
 /**
- * A date card for a step that has no date yet ("Now", "No date set"): the same calendar page, with the step's word on it
- * in place of the day, so a timeline keeps one mark for every step (kit-dateline). Same sizes as kits_datecard().
+ * A milestone's date as a range: array( first day, last day, precision ), each Y-m-d; empty strings when it has no date.
  *
- * @param string $word    The step's word, as the page writes it.
- * @param string $variant '' (64px) or 'sm' (48px).
+ * @param array $m Milestone.
+ * @return array{0:string,1:string,2:string} Start, end, precision (day, month, year or '').
+ */
+function kits_milestone_range( array $m ) {
+	$date = trim( (string) ( $m['date'] ?? '' ) );
+	if ( '' === $date && ! empty( $m['year'] ) ) {
+		$date = sprintf( '%04d', (int) $m['year'] ) . ( ! empty( $m['month'] ) ? sprintf( '-%02d', (int) $m['month'] ) . ( ! empty( $m['day'] ) ? sprintf( '-%02d', (int) $m['day'] ) : '' ) : '' );
+	}
+	if ( preg_match( '/^(\d{4})-(\d{2})-(\d{2})$/', $date, $d ) && checkdate( (int) $d[2], (int) $d[3], (int) $d[1] ) ) {
+		$start = $date;
+		$prec  = 'day';
+		$last  = $date;
+	} elseif ( preg_match( '/^(\d{4})-(\d{2})$/', $date, $d ) && (int) $d[2] >= 1 && (int) $d[2] <= 12 ) {
+		$start = $date . '-01';
+		$prec  = 'month';
+		$last  = $date . '-' . gmdate( 't', (int) gmmktime( 12, 0, 0, (int) $d[2], 1, (int) $d[1] ) );
+	} elseif ( preg_match( '/^\d{4}$/', $date ) ) {
+		$start = $date . '-01-01';
+		$prec  = 'year';
+		$last  = $date . '-12-31';
+	} else {
+		return array( '', '', '' );
+	}
+	$end = (string) ( $m['end'] ?? '' );
+	if ( preg_match( '/^\d{4}-\d{2}-\d{2}$/', $end ) && $end >= $start ) {
+		$last = $end;
+	}
+	return array( $start, $last, $prec );
+}
+
+/**
+ * A milestone's state: past, present, ongoing, future or undated. An editorial override (state) wins; otherwise the
+ * date decides, in Asia/Kolkata: a range (end) that holds today is ongoing, a day (or month, year) that is today is
+ * present, before today past, after today future. With no date: present when it is the current step, else undated.
+ *
+ * @param array  $m     Milestone.
+ * @param string $today Y-m-d (default: today in Asia/Kolkata).
  * @return string
  */
-function kits_datecard_word( $word, $variant = '' ) {
-	return '<span class="kit-datecard kit-datecard--word' . ( $variant ? ' kit-datecard--' . esc_attr( $variant ) : '' ) . '">'
-		. '<span class="kit-datecard-month" aria-hidden="true">&nbsp;</span>'
-		. '<span class="kit-datecard-day">' . esc_html( $word ) . '</span>'
-		. '<span class="kit-datecard-year" aria-hidden="true">&nbsp;</span></span>';
+function kits_milestone_state( array $m, $today = '' ) {
+	$set = strtolower( trim( (string) ( $m['state'] ?? '' ) ) );
+	if ( in_array( $set, array( 'past', 'present', 'ongoing', 'future' ), true ) ) {
+		return $set;
+	}
+	$today = '' !== $today ? (string) $today : kits_timeline_today();
+	list( $start, $last ) = kits_milestone_range( $m );
+	if ( '' === $start ) {
+		return ! empty( $m['current'] ) ? 'present' : 'undated';
+	}
+	if ( $today >= $start && $today <= $last ) {
+		return ! empty( $m['end'] ) && $last > $start ? 'ongoing' : 'present';
+	}
+	if ( ! empty( $m['current'] ) ) {
+		return 'present';
+	}
+	return $start > $today ? 'future' : 'past';
+}
+
+/**
+ * The words a screen reader hears for a state (the status is never colour alone: each state also has its own badge and
+ * edge, kit-primitives.css).
+ *
+ * @param string $state State.
+ * @return string
+ */
+function kits_milestone_state_label( $state ) {
+	$labels = array(
+		'past'    => __( 'Completed', 'kits-core' ),
+		'present' => __( 'Current', 'kits-core' ),
+		'ongoing' => __( 'Ongoing', 'kits-core' ),
+		'future'  => __( 'Upcoming', 'kits-core' ),
+		'undated' => __( 'Date not set', 'kits-core' ),
+	);
+	return $labels[ $state ] ?? '';
+}
+
+/**
+ * The calendar page (owner, 13 Nov 2026: "when highlighting dates use a calendar icon, artistic, to make a date card;
+ * should be universal"): two binder rings, the month on a strip, a perforation, the day large, the year small, the next
+ * page under it. One fixed geometry (64 x 80) for every date, 1 to 31; the campaign changes only the colours.
+ *
+ * @param string|int|array $when    A date strtotime() reads (Y-m-d), Y-m, a Unix time, or a milestone array.
+ * @param string           $variant Kept for older callers ('sm'); the size is one everywhere.
+ * @param string           $state   past, present, ongoing, future (empty: no state on the card itself).
+ * @return string A time element, or '' when the date cannot be read.
+ */
+function kits_datecard( $when, $variant = '', $state = '' ) {
+	unset( $variant ); // one size everywhere (owner, 13 Nov 2026: "same geometry everywhere")
+	$m = is_array( $when ) ? $when : array( 'date' => is_numeric( $when ) ? wp_date( 'Y-m-d', (int) $when, new DateTimeZone( 'Asia/Kolkata' ) ) : (string) $when );
+	list( $start, , $prec ) = kits_milestone_range( $m );
+	if ( '' === $start && ! is_array( $when ) && ! is_numeric( $when ) ) {
+		$ts = strtotime( (string) $when . ' 12:00' );
+		if ( $ts ) {
+			$start = gmdate( 'Y-m-d', $ts );
+			$prec  = 'day';
+		}
+	}
+	if ( '' === $start ) {
+		return '';
+	}
+	$ts    = (int) gmmktime( 12, 0, 0, (int) substr( $start, 5, 2 ), (int) substr( $start, 8, 2 ), (int) substr( $start, 0, 4 ) );
+	$month = 'year' === $prec ? '' : gmdate( 'M', $ts );
+	$day   = 'day' === $prec ? gmdate( 'j', $ts ) : '';
+	$iso   = 'day' === $prec ? $start : ( 'month' === $prec ? substr( $start, 0, 7 ) : substr( $start, 0, 4 ) );
+	$label = $state ? kits_milestone_state_label( $state ) : '';
+	return '<time class="kit-datecard' . ( 'day' !== $prec ? ' kit-datecard--nodate' : '' ) . '"' . ( $state ? ' data-state="' . esc_attr( $state ) . '"' : '' ) . ' datetime="' . esc_attr( $iso ) . '">'
+		. '<span class="kit-datecard-month">' . esc_html( $month ) . '</span> '
+		. '<span class="kit-datecard-day"' . ( '' === $day ? ' aria-hidden="true">&ndash;' : '>' . esc_html( $day ) ) . '</span> '
+		. '<span class="kit-datecard-year">' . esc_html( substr( $start, 0, 4 ) ) . '</span>'
+		. ( $label ? '<span class="screen-reader-text">, ' . esc_html( $label ) . '</span>' : '' ) . '</time>';
+}
+
+/**
+ * The calendar page for a step with no date ("Now", "No date set"): the same page and size, its strip and day left
+ * blank (a dash), never a made-up date. The step's word is printed with its words (kits_timeline), so here only a
+ * screen reader hears it.
+ *
+ * @param string $word    The step's word.
+ * @param string $variant Kept for older callers.
+ * @param string $state   undated (default) or present (the current step).
+ * @return string
+ */
+function kits_datecard_word( $word, $variant = '', $state = 'undated' ) {
+	unset( $variant );
+	$label = kits_milestone_state_label( $state );
+	return '<span class="kit-datecard kit-datecard--undated" data-state="' . esc_attr( $state ) . '">'
+		. '<span class="kit-datecard-month" aria-hidden="true"></span>'
+		. '<span class="kit-datecard-day" aria-hidden="true">&ndash;</span>'
+		. '<span class="kit-datecard-year" aria-hidden="true"></span>'
+		. '<span class="screen-reader-text">' . esc_html( trim( $word . ( $label && $label !== $word ? ', ' . $label : '' ), ', ' ) ) . '</span></span>';
+}
+
+/**
+ * A timeline of milestones (kit-dateline): each step its calendar page, its state, and the line to the next step in
+ * that state's style. Phones: one column, the page beside the words, a vertical line. 768 to 1199: two steps a row,
+ * the line only inside a row. From 1200: one row, the line across the pages' middles. kit-primitives.css.
+ *
+ * @param array $items Milestones (see above).
+ * @param array $args  class (the list's own classes), when_class, what_class (kept from migrated markup), tag (ol/div).
+ * @return string
+ */
+function kits_timeline( array $items, array $args = array() ) {
+	$today = kits_timeline_today();
+	$tag   = 'div' === ( $args['tag'] ?? 'ol' ) ? 'div' : 'ol';
+	$child = 'ol' === $tag ? 'li' : 'div';
+	$out   = '';
+	foreach ( $items as $m ) {
+		$state = kits_milestone_state( (array) $m, $today );
+		$card  = 'undated' === $state || ( 'present' === $state && '' === kits_milestone_range( (array) $m )[0] )
+			? kits_datecard_word( (string) ( $m['word'] ?? '' ), '', $state )
+			: kits_datecard( (array) $m, '', $state );
+		$what = '';
+		if ( ! empty( $m['word'] ) ) {
+			$what .= '<span class="kit-dateline-word">' . esc_html( (string) $m['word'] ) . '</span> ';
+		}
+		if ( ! empty( $m['title'] ) ) {
+			$what .= '<strong class="kit-dateline-title">' . ( ! empty( $m['icon'] ) ? '<span class="kit-ico kit-ico--' . esc_attr( (string) $m['icon'] ) . '" aria-hidden="true"></span> ' : '' ) . wp_kses_post( (string) $m['title'] ) . '</strong> ';
+		}
+		if ( ! empty( $m['description'] ) ) {
+			$what .= '<span class="kit-dateline-desc">' . wp_kses_post( (string) $m['description'] ) . '</span> ';
+		}
+		if ( ! empty( $m['html'] ) ) {
+			$what .= (string) $m['html']; // already rendered post content (the_content), kept as it is
+		}
+		if ( ! empty( $m['media'] ) ) {
+			$id    = (int) $m['media'];
+			$what .= wp_attachment_is_image( $id )
+				? ' <span class="kit-dateline-media">' . wp_get_attachment_image( $id, 'thumbnail', false, array( 'loading' => 'lazy' ) ) . '</span>'
+				: ' <a class="kit-dateline-doc" href="' . esc_url( (string) wp_get_attachment_url( $id ) ) . '">' . esc_html( get_the_title( $id ) ) . '</a>';
+		}
+		if ( ! empty( $m['link'] ) ) {
+			$what .= ' <a class="kit-dateline-link" href="' . esc_url( (string) $m['link'] ) . '">' . esc_html( (string) ( $m['link_text'] ?? '' ) ) . '</a>';
+		}
+		$cls  = trim( (string) ( $m['class'] ?? '' ) . ( ! empty( $m['key'] ) ? ' is-key' : '' ) );
+		$out .= '<' . $child . ( '' !== $cls ? ' class="' . esc_attr( $cls ) . '"' : '' ) . ' data-state="' . esc_attr( $state ) . '"'
+			. ( in_array( $state, array( 'present', 'ongoing' ), true ) ? ' aria-current="step"' : '' )
+			. ( ! empty( $m['attrs'] ) ? ' ' . trim( (string) $m['attrs'] ) : '' ) . '>'
+			. '<span class="kit-dateline-when' . ( ! empty( $args['when_class'] ) ? ' ' . esc_attr( (string) $args['when_class'] ) : '' ) . '">' . $card . '</span>'
+			. '<span class="kit-dateline-what' . ( ! empty( $args['what_class'] ) ? ' ' . esc_attr( (string) $args['what_class'] ) : '' ) . '">' . trim( $what ) . '</span>'
+			. '</' . $child . '>';
+	}
+	$cls = trim( (string) ( $args['class'] ?? '' ) . ' kit-dateline' );
+	return '<' . $tag . ' class="' . esc_attr( $cls ) . '" style="--dl-n:' . count( $items ) . '">' . $out . '</' . $tag . '>';
 }
 
 function kits_count( $n ) {

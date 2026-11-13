@@ -1788,18 +1788,21 @@
    "status": "live",
    "classes": [
     "kit-datecard",
-    "kit-datecard--sm",
     "kit-datecard-month",
     "kit-datecard-day",
     "kit-datecard-year",
-    "kit-datecard--word"
+    "kit-datecard--nodate",
+    "kit-datecard--undated"
    ],
    "states": [
-    "default: a calendar page (64px): binder rings, month on a strip in --camp-mark (brand ink off campaigns), day large, year small, the next page under it",
-    "small (kit-datecard--sm, 48px)",
-    "key date (inside li.is-key, or .kit-datecard.is-key): the page edged in the mark",
-    "timeline: every span.aw-camp-dates-when with a dated aw-date becomes a card (aw_datecards, animal-writes-core)",
-    "word (kit-datecard--word, kits_datecard_word): a step with no date yet (\"Now\", \"No date set\"), its word in place of the day"
+    "one size everywhere: a calendar page 64px wide, 80px tall (width x 1.25): binder rings, month strip in --camp-mark (brand yellow off campaigns), day large, year small, the next page under it; 1-9 and 10-31 share the same day area (tabular figures)",
+    "past (data-state=past): muted day, round tick badge",
+    "present (data-state=present): ring and soft glow, round dot badge (pings 3 times, only without reduced motion)",
+    "ongoing (data-state=ongoing): ring and glow, round arrows badge (slow pulse, only without reduced motion)",
+    "future (data-state=future): dashed edge, tinted strip, no badge; a key future date (is-key) keeps a solid edge and the campaign motif badge",
+    "undated (kit-datecard--undated, data-state=undated, kits_datecard_word): hatched strip, a dash for the day, the word (\"No date set\") read with it; never an invented date",
+    "no day (kit-datecard--nodate): a month or year only date shows a dash for the day",
+    "every state has a screen-reader label (Completed, Current, Ongoing, Upcoming, Date not set); status is never by colour alone"
    ],
    "tokens": [
     "kit-space-7",
@@ -1811,7 +1814,7 @@
     "kit-type-h2",
     "kit-type-xs"
    ],
-   "source": "plugins/kits-core/includes/primitives.php kits_datecard(); themes/kits-by-wugweb/assets/css/kit-primitives.css",
+   "source": "plugins/kits-core/includes/primitives.php kits_datecard(), kits_datecard_word(), kits_milestone_state(); themes/kits-by-wugweb/assets/css/kit-primitives.css",
    "rules": {
     "font": "Inter (the site font), lining tabular figures",
     "use": "a date that is the point of a block (timelines, deadlines, event days); dates in sentences and meta rows stay kit-date",
@@ -1824,15 +1827,22 @@
    "status": "live",
    "classes": [
     "kit-dateline",
-    "kit-dateline--sm",
     "kit-dateline-when",
-    "kit-dateline-what"
+    "kit-dateline-what",
+    "kit-dateline-word",
+    "kit-dateline-title",
+    "kit-dateline-desc",
+    "kit-dateline-media",
+    "kit-dateline-link"
    ],
    "states": [
-    "default: a timeline whose steps are date cards (64px); the card is each step's one mark and shows its state (is-done, is-next, is-upcoming, is-key on the step); the line runs through the cards, solid in --camp-mark after a done step, dashed after the rest",
-    "list under 23rem (phones): vertical, each card beside its words; wider: rows of steps at least 11rem wide, the card above its words",
-    "small (kit-dateline--sm, 48px cards): the Home bands",
-    "set by the server: ol.aw-camp-dates with date cards (aw_datecards), step lists written as <li><strong>date or word</strong> words</li> (aw_steps_dateline), the Home story band (home.php)"
+    "the one timeline (kits_timeline): steps are li[data-state] with a date card each; present and ongoing steps carry aria-current=step",
+    "state by date in Asia/Kolkata (kits_timeline_today), with an editorial override (state field, or data-state / data-end on the li); a date range holding today is ongoing",
+    "connectors: past solid 2px in the mark; present solid 4px; ongoing 4px with a band; future dashed; undated dotted; centred on the card, never over cards or badges",
+    "phone (under 768): one column, card beside its words, a continuous vertical connector",
+    "tablet (768-1199): two per row, a connector only between the two steps of a row",
+    "desktop (1200+): one row, a connector between every step",
+    "set by the server: ol.aw-camp-dates (aw_camp_dates_timeline), step lists written as <li><strong>date or word</strong> words</li> (aw_steps_dateline), the Home hero steps and story band (home.php)"
    ],
    "tokens": [
     "kit-space-7",
@@ -1844,7 +1854,7 @@
     "kit-type-h2",
     "kit-type-xs"
    ],
-   "source": "plugins/kits-core/includes/primitives.php kits_datecard(); themes/kits-by-wugweb/assets/css/kit-primitives.css",
+   "source": "plugins/kits-core/includes/primitives.php kits_timeline(); plugins/animal-writes-core/includes/campaign-tools.php; themes/kits-by-wugweb/assets/css/kit-primitives.css",
    "rules": {
     "font": "Inter (the site font), lining tabular figures",
     "use": "a date that is the point of a block (timelines, deadlines, event days); dates in sentences and meta rows stay kit-date",
