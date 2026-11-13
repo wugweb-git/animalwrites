@@ -1792,7 +1792,8 @@
     "kit-datecard-day",
     "kit-datecard-year",
     "kit-datecard--nodate",
-    "kit-datecard--undated"
+    "kit-datecard--undated",
+    "kit-datecard-wait"
    ],
    "states": [
     "one size everywhere: a calendar page 64px wide, 80px tall (width x 1.25): binder rings, month strip in --camp-mark (brand yellow off campaigns), day large, year small, the next page under it; 1-9 and 10-31 share the same day area (tabular figures)",
@@ -1800,7 +1801,7 @@
     "present (data-state=present): ring and soft glow, round dot badge (pings 3 times, only without reduced motion)",
     "ongoing (data-state=ongoing): ring and glow, round arrows badge (slow pulse, only without reduced motion)",
     "future (data-state=future): dashed edge, tinted strip, no badge; a key future date (is-key) keeps a solid edge and the campaign motif badge",
-    "undated (kit-datecard--undated, data-state=undated, kits_datecard_word): hatched strip, a dash for the day, the word (\"No date set\") read with it; never an invented date",
+    "no date (kit-datecard--undated, kits_datecard_word): an undated step (\"No date set\") or a current step with no date (\"Now\"): the page's 64x80 footprint and its state's edge, no calendar parts, an hourglass (kit-datecard-wait); never an invented date, never an empty calendar (owner, 14 Nov 2026)",
     "no day (kit-datecard--nodate): a month or year only date shows a dash for the day",
     "every state has a screen-reader label (Completed, Current, Ongoing, Upcoming, Date not set); status is never by colour alone"
    ],

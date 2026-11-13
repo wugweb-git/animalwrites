@@ -24,7 +24,7 @@ if ( ! function_exists( 'kits_term_url' ) ) { // aw-seo-extras carries a copy fo
  *  kits_eyebrow()        small label that carries information                   span.kit-eyebrow
  *  kits_count()          number beside a label                                  span.kit-count
  *  kits_datecard()       a highlighted date as a calendar page (timelines, deadlines) time.kit-datecard
- *  kits_datecard_word()  a timeline step with no date yet, on the same calendar page   span.kit-datecard--undated
+ *  kits_datecard_word()  a timeline step with no date yet: the page's footprint, no calendar span.kit-datecard--undated
  *  kits_timeline()       milestones as a timeline: calendar pages, states, connectors   ol.kit-dateline
  *  kits_milestone_state() a milestone's state (past, present, ongoing, future, undated), Asia/Kolkata
  *  kits_filter_dropdown() one filter as a dropdown: a button with a checkbox list (several choices, counts)
@@ -205,9 +205,10 @@ function kits_datecard( $when, $variant = '', $state = '' ) {
 }
 
 /**
- * The calendar page for a step with no date ("Now", "No date set"): the same page and size, its strip and day left
- * blank (a dash), never a made-up date. The step's word is printed with its words (kits_timeline), so here only a
- * screen reader hears it.
+ * The mark for a step with no date ("Now", "No date set"): the calendar page's footprint and edge (64 x 80, so the
+ * timeline keeps one geometry) but no calendar in it: no rings, no month, no day, only a waiting mark (an hourglass).
+ * Never a made-up date and never an empty calendar (owner, 14 Nov 2026). The step's word is printed with its words
+ * (kits_timeline); here a screen reader hears the state only.
  *
  * @param string $word    The step's word.
  * @param string $variant Kept for older callers.
@@ -218,10 +219,8 @@ function kits_datecard_word( $word, $variant = '', $state = 'undated' ) {
 	unset( $variant );
 	$label = kits_milestone_state_label( $state );
 	return '<span class="kit-datecard kit-datecard--undated" data-state="' . esc_attr( $state ) . '">'
-		. '<span class="kit-datecard-month" aria-hidden="true"></span>'
-		. '<span class="kit-datecard-day" aria-hidden="true">&ndash;</span>'
-		. '<span class="kit-datecard-year" aria-hidden="true"></span>'
-		. '<span class="screen-reader-text">' . esc_html( trim( $word . ( $label && $label !== $word ? ', ' . $label : '' ), ', ' ) ) . '</span></span>';
+		. '<span class="kit-datecard-wait" aria-hidden="true"></span>'
+		. '<span class="screen-reader-text">' . esc_html( '' !== $label ? $label : $word ) . '</span></span>';
 }
 
 /**
