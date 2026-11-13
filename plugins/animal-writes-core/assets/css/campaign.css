@@ -920,14 +920,21 @@
 .aw-camp--diwali .aw-camp-acc > .aw-camp-card-ico { display: none; } /* the card icon: decorative, the row is the heading */
 .aw-camp--diwali .aw-camp-grid > .aw-camp-acc :is(h3, p) { color: var(--kit-color-text); }
 .aw-camp--diwali .aw-camp-grid > .aw-camp-acc a:not(.wp-element-button) { color: var(--kit-color-link); }
-/* What to do, and when (#what-to-do), owner 13 Nov 2026: a bento of five tiles in the bento mix (picture under a dark
-   overlay, the campaign colour, white, ash-black). On Diwali night leads, full width, over its picture under a night-sky
-   (--camp-dark) overlay; Before Diwali in marigold (--camp-mark); Community dogs, cats and cows over its picture under the
-   same overlay; Birds and owls white; After Diwali ash-black (--kit-color-ink). A faint rangoli dot texture (inline SVG)
-   sits on the four coloured tiles. Every tile holds its whole text: no folds, so the summary is the tile's heading, not a
-   toggle (campaign.js keeps the tiles open). Phones one column, the night first; from 768 two columns. Text is unchanged. */
+/* What to do, and when (#what-to-do), owner 13 Nov 2026 ("needs designing a lot"): a lit bento of five tiles in the bento
+   mix (picture under a dark overlay, the campaign colour, white, ash-black).
+   - A marigold garland (a row of small marigold flowers, inline SVG) under the section heading.
+   - On Diwali night leads: its text on the night sky (--camp-dark), its picture glowing up from the bottom with a warm
+     diya light; from 768 it runs the full width, its text on the left half and its picture lit on the right; from 1200 the next three sit in one row and After Diwali runs the full width.
+   - Before Diwali in marigold (--camp-mark) with a large faint marigold flower in the corner; Community dogs, cats and
+     cows over its picture under the night overlay; Birds and owls white with a marigold top edge; After Diwali ash-black
+     (--kit-color-ink) with a marigold top edge. A faint rangoli dot texture on the coloured tiles.
+   - The guide links are 44px pill buttons (--kit-size-target, --kit-radius-pill).
+   - Every tile holds its whole text: no folds, so the summary is the tile's heading (campaign.js keeps the tiles open).
+   Phones one column, the night first; 768 two columns; 1200 three. Text is unchanged. */
+.aw-camp.aw-camp--diwali #what-to-do > h2::after { content: ""; display: block; height: var(--kit-space-4); margin-top: var(--kit-space-3); background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='16'%3E%3Ccircle cx='12' cy='8' r='6' fill='%23e8890c'/%3E%3Ccircle cx='12' cy='8' r='3' fill='%23a14a05'/%3E%3C/svg%3E") left center / var(--kit-space-5) var(--kit-space-4) repeat-x; max-width: calc(8 * var(--kit-space-5)); }
 .aw-camp.aw-camp--diwali #what-to-do .aw-camp-grid { display: grid; gap: var(--kit-space-4); grid-template-columns: minmax(0, 1fr); grid-template-areas: "n" "b" "s" "w" "a"; border-top: 0; }
 @media (min-width: 768px) { .aw-camp.aw-camp--diwali #what-to-do .aw-camp-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-areas: "n n" "b s" "w a"; } }
+@media (min-width: 1200px) { .aw-camp.aw-camp--diwali #what-to-do .aw-camp-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-areas: "n n n" "b s w" "a a a"; } }
 .aw-camp.aw-camp--diwali #what-to-do #night { grid-area: n; }
 .aw-camp.aw-camp--diwali #what-to-do #before { grid-area: b; }
 .aw-camp.aw-camp--diwali #what-to-do #street { grid-area: s; }
@@ -939,17 +946,32 @@
 .aw-camp.aw-camp--diwali #what-to-do .aw-camp-acc > .aw-camp-card-ico { display: inline-grid; position: absolute; top: var(--tile-top); right: var(--kit-space-5); margin: 0; }
 .aw-camp.aw-camp--diwali #what-to-do .aw-camp-acc > :not(summary) { max-width: none; }
 .aw-camp.aw-camp--diwali #what-to-do .aw-camp-acc > :last-child { margin-bottom: 0; }
+.aw-camp.aw-camp--diwali #what-to-do .aw-camp-acc a.aw-camp-more { display: inline-flex; align-items: center; gap: var(--kit-space-2); box-sizing: border-box; min-height: var(--kit-size-target); padding: 0 var(--kit-space-4); border: var(--kit-border-width) solid currentColor; border-radius: var(--kit-radius-pill); font-weight: var(--kit-weight-bold); text-decoration: none; }
+.aw-camp.aw-camp--diwali #what-to-do .aw-camp-acc p:has(> a.aw-camp-more) { margin-bottom: var(--kit-space-2); }
 .aw-camp.aw-camp--diwali #what-to-do :is(#night, #before, #street, #after) { color: var(--kit-color-on-ink); box-shadow: none; }
 .aw-camp.aw-camp--diwali #what-to-do :is(#night, #before, #street, #after) :is(p, strong, a:not(.wp-element-button)) { color: var(--kit-color-on-ink); }
-.aw-camp.aw-camp--diwali #what-to-do :is(#night, #before, #street, #after) a:not(.wp-element-button) { text-decoration: underline; }
+.aw-camp.aw-camp--diwali #what-to-do :is(#night, #before, #street, #after) a:not(.wp-element-button, .aw-camp-more) { text-decoration: underline; }
 .aw-camp.aw-camp--diwali #what-to-do :is(#night, #before, #street, #after) a:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-on-ink); outline-offset: var(--kit-focus-offset); }
 .aw-camp.aw-camp--diwali #what-to-do :is(#night, #before, #street, #after) .aw-camp-card-ico { background: rgb(255 255 255 / 0.15); color: var(--kit-color-on-ink); }
 .aw-camp.aw-camp--diwali #what-to-do :is(#night, #before, #street, #after)::before { content: ""; position: absolute; inset: 0; z-index: -1; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28'%3E%3Cg fill='%23fff' fill-opacity='.08'%3E%3Ccircle cx='14' cy='14' r='2'/%3E%3Ccircle cx='14' cy='5' r='1'/%3E%3Ccircle cx='14' cy='23' r='1'/%3E%3Ccircle cx='5' cy='14' r='1'/%3E%3Ccircle cx='23' cy='14' r='1'/%3E%3C/g%3E%3C/svg%3E"); pointer-events: none; }
-.aw-camp.aw-camp--diwali #what-to-do #night { --tile-top: calc(2 * var(--kit-space-8)); background: linear-gradient(rgb(27 22 54 / 0.1), rgb(27 22 54 / 0.92) var(--tile-top)), url("/wp-content/uploads/2026/11/diwali-evening-dog-calm-room-clay-lamps.avif") center 30% / cover, var(--camp-dark); }
+.aw-camp.aw-camp--diwali #what-to-do #night { padding-bottom: calc(3 * var(--kit-space-8)); background: radial-gradient(ellipse at 25% 100%, rgb(255 166 64 / 0.35), transparent 60%), linear-gradient(rgb(27 22 54 / 0.96), rgb(27 22 54 / 0.9) calc(100% - 3 * var(--kit-space-8)), rgb(27 22 54 / 0.1)), url("/wp-content/uploads/2026/11/diwali-evening-dog-calm-room-clay-lamps.avif") center bottom / cover, var(--camp-dark); }
 .aw-camp.aw-camp--diwali #what-to-do #night > summary { font-size: var(--kit-type-h3); }
+.aw-camp.aw-camp--diwali #what-to-do #night > p:not(.aw-camp-card-ico) { font-size: var(--kit-type-lead); max-width: 52ch; }
 .aw-camp.aw-camp--diwali #what-to-do #before { background: var(--camp-mark); }
+.aw-camp.aw-camp--diwali #what-to-do #before::after { content: ""; position: absolute; right: calc(-1 * var(--kit-space-8)); bottom: calc(-1 * var(--kit-space-8)); z-index: -1; width: calc(3 * var(--kit-space-8)); height: calc(3 * var(--kit-space-8)); background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='%23fff' fill-opacity='.1'%3E%3Ccircle cx='50' cy='50' r='12'/%3E%3Cg id='p'%3E%3Cellipse cx='50' cy='18' rx='9' ry='16'/%3E%3Cellipse cx='50' cy='82' rx='9' ry='16'/%3E%3Cellipse cx='18' cy='50' rx='16' ry='9'/%3E%3Cellipse cx='82' cy='50' rx='16' ry='9'/%3E%3C/g%3E%3Cuse href='%23p' transform='rotate(45 50 50)'/%3E%3C/g%3E%3C/svg%3E") center / contain no-repeat; pointer-events: none; }
 .aw-camp.aw-camp--diwali #what-to-do #street { --tile-top: calc(2 * var(--kit-space-8)); background: linear-gradient(rgb(27 22 54 / 0.1), rgb(27 22 54 / 0.92) var(--tile-top)), url("/wp-content/uploads/2026/11/woman-giving-water-to-street-dog-diwali-night-tall.avif") center 35% / cover, var(--camp-dark); }
-.aw-camp.aw-camp--diwali #what-to-do #after { background: var(--kit-color-ink); }
+.aw-camp.aw-camp--diwali #what-to-do :is(#birds, #after) { box-shadow: inset 0 var(--kit-space-1) 0 var(--camp-mark), inset 0 0 0 1px var(--kit-color-line); }
+.aw-camp.aw-camp--diwali #what-to-do #birds .aw-camp-card-ico { background: var(--camp-mark); color: var(--camp-on-mark); }
+.aw-camp.aw-camp--diwali #what-to-do #birds a.aw-camp-more { color: var(--camp-accent); }
+.aw-camp.aw-camp--diwali #what-to-do #after { background: var(--kit-color-ink); box-shadow: inset 0 var(--kit-space-1) 0 var(--camp-mark); }
+.aw-camp.aw-camp--diwali #what-to-do #after .aw-camp-card-ico { background: var(--camp-mark); }
+@media (min-width: 768px) {
+	.aw-camp.aw-camp--diwali #what-to-do #night { padding-bottom: var(--kit-space-5); background: radial-gradient(ellipse at 85% 100%, rgb(255 166 64 / 0.35), transparent 55%), linear-gradient(to right, rgb(27 22 54 / 0.96), rgb(27 22 54 / 0.9) 48%, rgb(27 22 54 / 0.1) 85%), url("/wp-content/uploads/2026/11/diwali-evening-dog-calm-room-clay-lamps.avif") right center / cover, var(--camp-dark); }
+	.aw-camp.aw-camp--diwali #what-to-do #night > :not(.aw-camp-card-ico) { max-width: 48%; }
+	.aw-camp.aw-camp--diwali #what-to-do #night > summary { padding-right: 0; }
+	.aw-camp.aw-camp--diwali #what-to-do #night > .aw-camp-card-ico { right: auto; left: calc(48% - var(--kit-size-control)); }
+}
+@media (min-width: 1200px) { .aw-camp.aw-camp--diwali #what-to-do #after > p:not(.aw-camp-card-ico) { max-width: 72ch; } }
 .aw-camp--diwali #latest .aw-camp-more-fold { grid-column: 1 / -1; margin: 0; border-top: var(--kit-border-width) solid var(--kit-color-line); }
 .aw-camp--diwali #latest .aw-camp-more-fold > summary { display: flex; align-items: center; box-sizing: border-box; min-height: var(--kit-size-target); padding-block: var(--kit-space-2); font-weight: var(--kit-weight-bold); cursor: pointer; }
 .aw-camp--diwali #latest .aw-camp-more-fold > summary:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
