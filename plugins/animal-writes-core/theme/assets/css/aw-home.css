@@ -65,11 +65,11 @@
 	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li:first-child > .kit-card > .kit-card-media img { height: 100%; object-fit: cover; }
 	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li:first-child > .kit-card > .kit-card-body { flex: 1 1 0; padding-left: var(--kit-space-5); }
 	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li:first-child .kit-card-sum { display: none; }
-	/* No empty space beside the words (owner, 13 Nov 2026): the picture runs the card's full height (cover crop, never
-	   shorter than --kit-thumb-lg), a 16px gap, and the date and the source chip share one line. */
-	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li > .kit-card { align-items: stretch !important; }
+	/* The picture is the stacked card's thumbnail, 112x84 at 4:3 at the top; the words set the card's height, the picture
+	   never does (owner, 14 Nov 2026; was full card height). A 16px gap; the date and the source chip share one line. */
+	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li > .kit-card { align-items: flex-start !important; }
 	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li > .kit-card:not([class*="kit-card--block"]) { gap: var(--kit-space-4) !important; }
-	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li > .kit-card > .kit-card-media { position: relative; overflow: hidden; align-self: stretch; aspect-ratio: auto; min-height: var(--kit-thumb-lg); }
+	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li > .kit-card > .kit-card-media { position: relative; overflow: hidden; align-self: flex-start; aspect-ratio: var(--kit-card-stacked-media-ratio); min-height: 0; }
 	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li > .kit-card > .kit-card-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic .kit-card .kit-card-chips { flex: 0 1 auto; width: auto; }
 }

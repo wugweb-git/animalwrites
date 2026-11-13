@@ -50,3 +50,4 @@ body.home .aw-ed-story.aw-camp--community-dogs .aw-ed-story-stamp img { display:
 .aw-ed-story.aw-camp--community-dogs .aw-ed-story-photo { aspect-ratio: 1 / 1; overflow: hidden; border-radius: var(--kit-radius-media); margin: 0px !important; }
 .aw-ed-story.aw-camp--community-dogs .aw-ed-story-photo img { display: block; width: 100%; object-fit: cover; height: 100% !important; }
 @media (min-width: 1200px) { .aw-ed-story.aw-camp--community-dogs .aw-ed-story-photos { grid-template-columns: repeat(2, minmax(0px, 1fr)); gap: var(--kit-space-3); } }
+@media (max-width: 1199px) { body.home .aw-ed-story.aw-camp--community-dogs > .wp-block-cover__background { background: rgb(20 20 20 / 0.82) !important; } }
