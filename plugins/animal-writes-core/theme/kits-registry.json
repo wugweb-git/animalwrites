@@ -1839,7 +1839,7 @@
    "type": "component",
    "status": "live",
    "classes": ["aw-stack-list"],
-   "states": ["default (added at render to core/post-template lists of aw_news, aw_legal and post, hubs.php): every card kit-card--stacked-md, H3 title, 340px to 600px wide (--kit-card-stacked-min, --kit-card-stacked-max), gap 16px (--kit-space-4), columns 1, 2 from 768, from 1200 as many as fit (at most 3); never flatter than 2:1 (--kit-card-stacked-ratio), picture 3:5 (--kit-card-stacked-media-ratio) at full height flush to the edge, text padded 12px (--kit-space-3), no summary, meta row one line; grows only if the words need more room; one surface (owner, 13 Nov 2026)"],
+   "states": ["default (added at render to core/post-template lists of aw_news, aw_legal and post, hubs.php): every card kit-card--stacked-md, H3 title, 340px to 600px wide (--kit-card-stacked-min, --kit-card-stacked-max), gap 16px (--kit-space-4), columns 1, 2 from 768, never more than 2; never flatter than 2:1 (--kit-card-stacked-ratio), picture 3:5 (--kit-card-stacked-media-ratio) at full height flush to the edge, text padded 12px (--kit-space-3), no summary, meta row one line; grows only if the words need more room; one surface (owner, 13 Nov 2026)"],
    "tokens": ["--kit-card-stacked-min", "--kit-card-stacked-max", "--kit-card-stacked-ratio", "--kit-card-stacked-media-ratio", "--kit-space-4", "--kit-space-3"],
    "a11y": {
     "element": "list (ul) of cards, one link per card title",
