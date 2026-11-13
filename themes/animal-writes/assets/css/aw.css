@@ -310,7 +310,7 @@
 .wp-block-post-template.aw-stack-list.aw-stack-list { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; grid-template-rows: none !important; gap: var(--kit-space-4) !important; }
 @media (min-width: 768px) { .wp-block-post-template.aw-stack-list.aw-stack-list { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } }
 @media (min-width: 1200px) { .wp-block-post-template.aw-stack-list.aw-stack-list { grid-template-columns: repeat(auto-fill, minmax(max(var(--kit-card-stacked-min), (100% - 2 * var(--kit-space-4)) / 3), 1fr)) !important; } }
-.aw-stack-list.aw-stack-list > li { grid-column: auto !important; grid-row: auto !important; min-width: 0; max-width: var(--kit-card-stacked-max); }
+.aw-stack-list.aw-stack-list > li { grid-column: auto !important; grid-row: auto !important; min-width: 0; max-width: var(--kit-card-stacked-max) !important; }
 /* The card is never flatter than 2:1 (--kit-card-stacked-ratio): the picture is 3:5 (--kit-card-stacked-media-ratio) at the
    card's full height, so at 2:1 it is 30% of the width; words that need more room make the card taller and the picture
    stretches with it (cover crop), so nothing is cut. */
