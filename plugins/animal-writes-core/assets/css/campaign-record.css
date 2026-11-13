@@ -232,11 +232,11 @@
 
 /* ---------- Timeline: a rail with a stop per date; the day of posting is the filled stop ---------- */
 .aw-camp.aw-camp--community-dogs #context > p { margin: calc(-1 * var(--kit-space-4)) 0 0 !important; color: var(--camp-meta); }
-.aw-camp.aw-camp--community-dogs .aw-camp-timeline { grid-template-columns: 1fr; gap: 0; margin: var(--kit-space-6) 0 0; }
-.aw-camp.aw-camp--community-dogs .aw-camp-timeline li { position: relative; margin: 0; padding: 0 0 var(--kit-space-5) var(--kit-space-6); border: 0; border-left: 2px solid var(--dg-line); }
-.aw-camp.aw-camp--community-dogs .aw-camp-timeline li:last-child { padding-bottom: 0; border-left-color: transparent; }
-.aw-camp.aw-camp--community-dogs .aw-camp-timeline li::before { content: ""; position: absolute; left: -0.5625rem; top: 0.3rem; width: 1rem; height: 1rem; box-sizing: border-box; border-radius: 50%; background: var(--dg-raised); box-shadow: inset 0 0 0 3px var(--camp-mark); }
-.aw-camp.aw-camp--community-dogs .aw-camp-timeline li.is-key::before { left: -0.8125rem; top: 0.1rem; width: 1.5rem; height: 1.5rem; background: var(--camp-mark); box-shadow: 0 0 0 4px var(--dg-raised); }
+.aw-camp.aw-camp--community-dogs .aw-camp-timeline:not(.kit-dateline) { grid-template-columns: 1fr; gap: 0; margin: var(--kit-space-6) 0 0; }
+.aw-camp.aw-camp--community-dogs .aw-camp-timeline:not(.kit-dateline) li { position: relative; margin: 0; padding: 0 0 var(--kit-space-5) var(--kit-space-6); border: 0; border-left: 2px solid var(--dg-line); }
+.aw-camp.aw-camp--community-dogs .aw-camp-timeline:not(.kit-dateline) li:last-child { padding-bottom: 0; border-left-color: transparent; }
+.aw-camp.aw-camp--community-dogs .aw-camp-timeline:not(.kit-dateline) li::before { content: ""; position: absolute; left: -0.5625rem; top: 0.3rem; width: 1rem; height: 1rem; box-sizing: border-box; border-radius: 50%; background: var(--dg-raised); box-shadow: inset 0 0 0 3px var(--camp-mark); }
+.aw-camp.aw-camp--community-dogs .aw-camp-timeline:not(.kit-dateline) li.is-key::before { left: -0.8125rem; top: 0.1rem; width: 1.5rem; height: 1.5rem; background: var(--camp-mark); box-shadow: 0 0 0 4px var(--dg-raised); }
 .aw-camp.aw-camp--community-dogs .aw-camp-timeline .aw-camp-dates-when { font-size: var(--kit-type-h3); line-height: var(--kit-leading-heading); white-space: nowrap; }
 .aw-camp.aw-camp--community-dogs .aw-camp-timeline .aw-camp-dates-when .kit-ico { --kit-ico-size: 0.75em; }
 .aw-camp.aw-camp--community-dogs .aw-camp-timeline .aw-camp-dates-what { display: block; margin-top: var(--kit-space-1); max-width: 34ch; }
@@ -246,12 +246,12 @@
 .aw-camp.aw-camp--community-dogs .aw-camp-timeline-more { margin-top: var(--kit-space-5); }
 .aw-camp.aw-camp--community-dogs .aw-camp-timeline-more[open] > summary { margin-bottom: 0; }
 @media (min-width: 768px) {
-	.aw-camp.aw-camp--community-dogs .aw-camp-timeline { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: var(--kit-space-6); column-gap: var(--kit-space-5); }
-	.aw-camp.aw-camp--community-dogs .aw-camp-timeline li, .aw-camp.aw-camp--community-dogs .aw-camp-timeline li:last-child { padding: var(--kit-space-5) var(--kit-space-3) 0 0; border-left: 0; border-top: 2px solid var(--dg-line); }
-	.aw-camp.aw-camp--community-dogs .aw-camp-timeline li::before { left: 0; top: -0.5625rem; }
-	.aw-camp.aw-camp--community-dogs .aw-camp-timeline li.is-key::before { left: 0; top: -0.8125rem; }
+	.aw-camp.aw-camp--community-dogs .aw-camp-timeline:not(.kit-dateline) { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: var(--kit-space-6); column-gap: var(--kit-space-5); }
+	.aw-camp.aw-camp--community-dogs .aw-camp-timeline:not(.kit-dateline) li, .aw-camp.aw-camp--community-dogs .aw-camp-timeline:not(.kit-dateline) li:last-child { padding: var(--kit-space-5) var(--kit-space-3) 0 0; border-left: 0; border-top: 2px solid var(--dg-line); }
+	.aw-camp.aw-camp--community-dogs .aw-camp-timeline:not(.kit-dateline) li::before { left: 0; top: -0.5625rem; }
+	.aw-camp.aw-camp--community-dogs .aw-camp-timeline:not(.kit-dateline) li.is-key::before { left: 0; top: -0.8125rem; }
 }
-@media (min-width: 1200px) { .aw-camp.aw-camp--community-dogs .aw-camp-timeline { grid-template-columns: repeat(5, minmax(0, 1fr)); column-gap: 0; } }
+@media (min-width: 1200px) { .aw-camp.aw-camp--community-dogs .aw-camp-timeline:not(.kit-dateline) { grid-template-columns: repeat(5, minmax(0, 1fr)); column-gap: 0; } }
 
 /* ---------- Impact: the results and the real-world outcome as one bento (owner, 13 Nov 2026); press reports below ---------- */
 /* Text sits on the tiles, the picture tile included: 2.5 lakh on the campaign's photograph under the theme overlay,
@@ -383,17 +383,17 @@ body.home .aw-ed-story.aw-camp--community-dogs .aw-ed-story-stamp img { display:
 
 /* Timeline: a rail with a small orange stop per date; the day of posting is the filled stop. A 2 x 2 on phones, a row of
    four from 768 (one screen on a phone, layout only: the words are fixed). */
-.aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: var(--kit-space-4); }
-.aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates > * { position: relative; margin: 0 !important; padding: var(--kit-space-3) var(--kit-space-3) 0 0; border-top: var(--kit-border-width) solid var(--dg-line); }
-.aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates > *::before { content: ""; position: absolute; left: 0; top: calc(var(--kit-space-3) / -2); width: var(--kit-space-3); height: var(--kit-space-3); box-sizing: border-box; border-radius: 50%; border: var(--kit-border-mark) solid var(--camp-primary); background: var(--kit-color-ink); }
-.aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates > .is-key::before { background: var(--camp-primary); }
-.aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates > :has(> .aw-ed-story-when > .kit-datecard)::before { content: none; } /* the date card (home.php) marks the step, so no dot on the line */
+.aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates:not(.kit-dateline) { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: var(--kit-space-4); }
+.aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates:not(.kit-dateline) > * { position: relative; margin: 0 !important; padding: var(--kit-space-3) var(--kit-space-3) 0 0; border-top: var(--kit-border-width) solid var(--dg-line); }
+.aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates:not(.kit-dateline) > *::before { content: ""; position: absolute; left: 0; top: calc(var(--kit-space-3) / -2); width: var(--kit-space-3); height: var(--kit-space-3); box-sizing: border-box; border-radius: 50%; border: var(--kit-border-mark) solid var(--camp-primary); background: var(--kit-color-ink); }
+.aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates:not(.kit-dateline) > .is-key::before { background: var(--camp-primary); }
+.aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates:not(.kit-dateline) > :has(> .aw-ed-story-when > .kit-datecard)::before { content: none; } /* the date card (home.php) marks the step, so no dot on the line */
 .aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates p { margin: 0 !important; }
 .aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates p:first-child { white-space: nowrap; }
 .aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates .has-small-font-size { margin-top: var(--kit-space-1) !important; color: rgb(255 255 255 / 0.8); }
 .aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates .is-key p:first-child { color: var(--camp-primary); }
 @media (max-width: 767px) { .aw-ed-story.aw-camp--community-dogs .aw-ed-story-cols { gap: var(--kit-space-5); } }
-@media (min-width: 768px) { .aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (min-width: 768px) { .aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates:not(.kit-dateline) { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 
 /* Photographs: four of the campaign's own pictures as even squares, a 2 x 2 beside the words (a row of four below 1200) */
 .aw-ed-story.aw-camp--community-dogs .aw-ed-story-photos { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--kit-space-2); }

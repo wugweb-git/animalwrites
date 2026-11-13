@@ -1791,13 +1791,48 @@
     "kit-datecard--sm",
     "kit-datecard-month",
     "kit-datecard-day",
-    "kit-datecard-year"
+    "kit-datecard-year",
+    "kit-datecard--word"
    ],
    "states": [
     "default: a calendar page (64px): binder rings, month on a strip in --camp-mark (brand ink off campaigns), day large, year small, the next page under it",
     "small (kit-datecard--sm, 48px)",
     "key date (inside li.is-key, or .kit-datecard.is-key): the page edged in the mark",
-    "timeline: every span.aw-camp-dates-when with a dated aw-date becomes a card (aw_datecards, animal-writes-core)"
+    "timeline: every span.aw-camp-dates-when with a dated aw-date becomes a card (aw_datecards, animal-writes-core)",
+    "word (kit-datecard--word, kits_datecard_word): a step with no date yet (\"Now\", \"No date set\"), its word in place of the day"
+   ],
+   "tokens": [
+    "kit-space-7",
+    "kit-space-8",
+    "kit-radius-control",
+    "kit-color-line",
+    "kit-color-ink",
+    "kit-color-muted",
+    "kit-type-h2",
+    "kit-type-xs"
+   ],
+   "source": "plugins/kits-core/includes/primitives.php kits_datecard(); themes/kits-by-wugweb/assets/css/kit-primitives.css",
+   "rules": {
+    "font": "Inter (the site font), lining tabular figures",
+    "use": "a date that is the point of a block (timelines, deadlines, event days); dates in sentences and meta rows stay kit-date",
+    "a11y": "one time element with datetime; reads as month, day, year"
+   }
+  },
+  {
+   "name": "Date line",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-dateline",
+    "kit-dateline--sm",
+    "kit-dateline-when",
+    "kit-dateline-what"
+   ],
+   "states": [
+    "default: a timeline whose steps are date cards (64px); the card is each step's one mark and shows its state (is-done, is-next, is-upcoming, is-key on the step); the line runs through the cards, solid in --camp-mark after a done step, dashed after the rest",
+    "list under 23rem (phones): vertical, each card beside its words; wider: rows of steps at least 11rem wide, the card above its words",
+    "small (kit-dateline--sm, 48px cards): the Home bands",
+    "set by the server: ol.aw-camp-dates with date cards (aw_datecards), step lists written as <li><strong>date or word</strong> words</li> (aw_steps_dateline), the Home story band (home.php)"
    ],
    "tokens": [
     "kit-space-7",

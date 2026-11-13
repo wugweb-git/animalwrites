@@ -24,6 +24,7 @@ if ( ! function_exists( 'kits_term_url' ) ) { // aw-seo-extras carries a copy fo
  *  kits_eyebrow()        small label that carries information                   span.kit-eyebrow
  *  kits_count()          number beside a label                                  span.kit-count
  *  kits_datecard()       a highlighted date as a calendar page (timelines, deadlines) time.kit-datecard
+ *  kits_datecard_word()  a timeline step with no date yet, on the same calendar page   span.kit-datecard--word
  *  kits_filter_dropdown() one filter as a dropdown: a button with a checkbox list (several choices, counts)
  *  kits_sort_dropdown()  "Sort" as a dropdown of links (one choice)
  *  kits_filter_bar()     the filters in one row (dropdowns, Sort on the right), a "Filters" sheet on phones, and the
@@ -72,6 +73,21 @@ function kits_datecard( $when, $variant = '' ) {
 		. '<span class="kit-datecard-month">' . esc_html( wp_date( 'M', $ts, $tz ) ) . '</span> '
 		. '<span class="kit-datecard-day">' . esc_html( wp_date( 'j', $ts, $tz ) ) . '</span> '
 		. '<span class="kit-datecard-year">' . esc_html( wp_date( 'Y', $ts, $tz ) ) . '</span></time>';
+}
+
+/**
+ * A date card for a step that has no date yet ("Now", "No date set"): the same calendar page, with the step's word on it
+ * in place of the day, so a timeline keeps one mark for every step (kit-dateline). Same sizes as kits_datecard().
+ *
+ * @param string $word    The step's word, as the page writes it.
+ * @param string $variant '' (64px) or 'sm' (48px).
+ * @return string
+ */
+function kits_datecard_word( $word, $variant = '' ) {
+	return '<span class="kit-datecard kit-datecard--word' . ( $variant ? ' kit-datecard--' . esc_attr( $variant ) : '' ) . '">'
+		. '<span class="kit-datecard-month" aria-hidden="true">&nbsp;</span>'
+		. '<span class="kit-datecard-day">' . esc_html( $word ) . '</span>'
+		. '<span class="kit-datecard-year" aria-hidden="true">&nbsp;</span></span>';
 }
 
 function kits_count( $n ) {

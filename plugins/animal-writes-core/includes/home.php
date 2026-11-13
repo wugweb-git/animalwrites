@@ -126,6 +126,7 @@ function aw_block_home_hero() {
 			. '<li class="is-now" aria-current="step"><strong>Now</strong> The Centre considers the objections</li>'
 			. '<li><strong>No date set</strong> Final rules in the Gazette</li>'
 			. '</ol>';
+		$out  = function_exists( 'aw_steps_dateline' ) ? aw_steps_dateline( $out, 'aw-ed-hero-steps', 'sm' ) : $out; // the steps as a date line, small cards (campaign-tools.php)
 	} else {
 		$out .= '<p class="aw-camp-band-pill">Draft rules G.S.R. 864(E) · objections closed 5 Nov 2026</p>';
 		$out .= '<h1 id="aw-hero-t" class="aw-camp-band-title">Object to the draft lab animal rules</h1>';
@@ -414,8 +415,9 @@ add_filter(
 );
 
 // The story band's timeline (aw-ed-story-dates): each dated step shows its date as the calendar date card (kits_datecard,
-// small), like the campaign page timelines (owner, 13 Nov 2026: highlighted dates get the date card, sitewide). A step whose
-// date has passed takes is-done (the torn-off page); is-key stays from the pattern. The words of each step stay.
+// small), like the campaign page timelines (owner, 13 Nov 2026: highlighted dates get the date card, sitewide), and the
+// steps are a date line (kit-dateline): a passed date is-done, the first still to come is-next, the rest is-upcoming;
+// is-key stays from the pattern. The words of each step stay.
 add_filter(
 	'render_block_core/group',
 	function ( $html, $block ) {
@@ -423,9 +425,11 @@ add_filter(
 			return $html;
 		}
 		$today = current_time( 'Y-m-d' );
+		$next  = false;
+		$html  = (string) preg_replace( '#class="wp-block-group aw-ed-story-dates\b#', 'class="wp-block-group aw-ed-story-dates kit-dateline kit-dateline--sm', (string) $html, 1 ); // a date line (kit-primitives.css), small cards
 		return (string) preg_replace_callback(
 			'#<div class="wp-block-group((?: [^"]*)?)">(\s*)<p(?: class="[^"]*")?>\s*<strong>(.*?)</strong>\s*</p>#s',
-			function ( $m ) use ( $today ) {
+			function ( $m ) use ( $today, &$next ) {
 				$ts = strtotime( trim( wp_strip_all_tags( $m[3] ) ) . ' 12:00' );
 				if ( ! $ts ) {
 					return $m[0];
@@ -435,7 +439,8 @@ add_filter(
 				if ( ! $card ) {
 					return $m[0];
 				}
-				$cls = $m[1] . ( $iso < $today ? ' is-done' : '' );
+				$cls = $m[1] . ( $iso < $today ? ' is-done' : ( $next ? ' is-upcoming' : ' is-next' ) );
+				$next = $next || $iso >= $today;
 				return '<div class="wp-block-group' . $cls . '">' . $m[2] . '<p class="aw-ed-story-when">' . $card . '</p>';
 			},
 			(string) $html

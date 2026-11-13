@@ -1226,7 +1226,7 @@ function aw_datecards( $html ) {
 	if ( ! function_exists( 'kits_datecard' ) || false === strpos( (string) $html, 'aw-camp-dates-when' ) ) {
 		return $html;
 	}
-	return (string) preg_replace_callback(
+	$html = (string) preg_replace_callback(
 		'#(<span class="aw-camp-dates-when">)\s*<span class="(?:kit-date )?aw-date">\s*(?:<span class="kit-ico[^"]*" aria-hidden="true"></span>)?\s*<time datetime="(\d{4}-\d{2}-\d{2})"[^>]*>[^<]*</time>\s*</span>#',
 		function ( $m ) {
 			$card = kits_datecard( $m[2] );
@@ -1234,8 +1234,66 @@ function aw_datecards( $html ) {
 		},
 		(string) $html
 	);
+	// A list whose dates are cards is a date line (kit-primitives.css): the card is each step's one mark.
+	return (string) preg_replace_callback(
+		'#<ol\b([^>]*\bclass=")([^"]*\baw-camp-dates\b[^"]*)"([^>]*>)(.*?</ol>)#s',
+		fn( $m ) => false === strpos( $m[4], 'kit-datecard' ) || false !== strpos( $m[2], 'kit-dateline' ) ? $m[0] : '<ol' . $m[1] . $m[2] . ' kit-dateline"' . $m[3] . $m[4],
+		$html
+	);
 }
 add_filter( 'the_content', 'aw_datecards', 99 );
+
+/**
+ * A step list written as <li><strong>date or word</strong> words</li> (the Lab page's "where things stand", the Home
+ * hero's steps) as a date line (owner, 13 Nov 2026: "if we use calendar illustration let us use it across and in correct
+ * size and states"): each step's date becomes the date card, a step with no date ("Now", "No date set") the same card
+ * with its word, and each step its state: is-done (the date has passed), is-next (the current step: aria-current or
+ * is-now, else the first still to come), is-upcoming (the rest). The words of each step stay as written.
+ *
+ * @param string $html    HTML holding the list.
+ * @param string $list    The list's class (aw-camp-wait-steps, aw-ed-hero-steps).
+ * @param string $variant '' (64px cards, campaign pages) or 'sm' (48px, Home bands).
+ * @return string
+ */
+function aw_steps_dateline( $html, $list, $variant = '' ) {
+	if ( ! function_exists( 'kits_datecard_word' ) || false === strpos( (string) $html, $list ) ) {
+		return (string) $html;
+	}
+	$today = current_time( 'Y-m-d' );
+	return (string) preg_replace_callback(
+		'#<ol class="(' . preg_quote( $list, '#' ) . ')">(.*?)</ol>#s',
+		function ( $ol ) use ( $today, $variant ) {
+			$next = false;
+			$body = preg_replace_callback(
+				'#<li\b([^>]*)>\s*<strong>(.*?)</strong>\s*(.*?)</li>#s',
+				function ( $li ) use ( $today, $variant, &$next ) {
+					$word = trim( wp_strip_all_tags( $li[2] ) );
+					$iso  = preg_match( '#datetime="(\d{4}-\d{2}-\d{2})#', $li[2], $d ) ? $d[1] : '';
+					if ( '' === $iso && preg_match( '#^\d{1,2} [A-Z][a-z]{2,8} \d{4}$#', $word ) ) {
+						$iso = (string) wp_date( 'Y-m-d', (int) strtotime( $word . ' 12:00' ) );
+					}
+					$now = (bool) preg_match( '#aria-current=|\bis-now\b#', $li[1] );
+					if ( '' !== $iso && $iso < $today ) {
+						$state = 'is-done';
+					} elseif ( ( $now || '' !== $iso ) && ! $next ) {
+						$state = 'is-next';
+						$next  = true;
+					} else {
+						$state = 'is-upcoming';
+					}
+					$card  = '' !== $iso ? kits_datecard( $iso, $variant ) : kits_datecard_word( $word, $variant );
+					$attrs = trim( (string) preg_replace( '#\s*class="[^"]*"#', '', $li[1] ) );
+					return '<li class="' . $state . '"' . ( '' !== $attrs ? ' ' . $attrs : '' ) . '><span class="kit-dateline-when">' . $card . '</span> <span class="kit-dateline-what">' . trim( $li[3] ) . '</span></li>';
+				},
+				$ol[2]
+			);
+			return '<ol class="' . $ol[1] . ' kit-dateline' . ( $variant ? ' kit-dateline--' . $variant : '' ) . '">' . $body . '</ol>';
+		},
+		(string) $html
+	);
+}
+// The Lab page's "where things stand" (in its content).
+add_filter( 'the_content', fn( $html ) => is_singular( 'aw_campaign' ) ? aw_steps_dateline( $html, 'aw-camp-wait-steps' ) : $html, 99 );
 
 // The newsletter band on a campaign page takes the campaign's colours (owner, 13 Nov 2026): the campaign's own class
 // (aw-camp--<slug>, the first one in the page's content) on the band, so its --camp-* tokens apply there; aw.css maps

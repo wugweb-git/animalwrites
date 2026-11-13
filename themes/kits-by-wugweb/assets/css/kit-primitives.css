@@ -603,3 +603,36 @@ form, .kit-form, .fluentform { --kit-btn-height: var(--kit-size-control); --kit-
 	.kit-datecard::before { forced-color-adjust: none; background: CanvasText; }
 	.kit-datecard::after { forced-color-adjust: none; background-color: CanvasText; }
 }
+
+/* Word card: a step with no date yet ("Now", "No date set", kits_datecard_word): the same page and size, the step's word in
+   place of the day. */
+.kit-datecard--word .kit-datecard-day { padding-inline: var(--kit-space-1); font-size: var(--kit-type-xs); line-height: var(--kit-leading-heading); letter-spacing: normal !important; white-space: normal; }
+
+/* Date line: a timeline whose steps are date cards, one design on every campaign and Home (owner, 13 Nov 2026: "i seek
+   consistency; if we use calendar illustration let us use it across and in correct size and states as per campaign").
+   - The card is each step's one mark and shows its state (the step's is-done, is-next, is-upcoming, is-key); no dot.
+   - The line runs through the cards: solid in the mark after a done step, dashed (a tint of the text) after the rest.
+   - The list under 23rem (phones): a vertical line, each card beside its words. Wider: rows of steps at least 2.5 card widths wide,
+     each card above its words, the line across the cards' middles.
+   - Sizes: 64px cards (--kit-space-8) on campaign pages, small 48px (--sm, --kit-space-7) in the Home bands.
+   Markup: ol or div.kit-dateline > a step > its card holder first (kit-dateline-when, aw-camp-dates-when, aw-ed-story-when),
+   then its words (aw_datecards, aw_steps_dateline, home.php). */
+.kit-dateline { --dl-w: var(--kit-space-8); --dl-h: calc(var(--dl-w) * 1.25); --dl-top: var(--kit-space-2); --dl-gap: var(--kit-space-4); --dl-row: var(--kit-space-5); --dl-line: calc(var(--kit-border-width) * 2); --dl-mark: var(--camp-mark, var(--kit-color-ink)); --dl-rest: color-mix(in srgb, currentColor 32%, transparent); --dl-min: calc(var(--dl-w) * 2.5); container: kit-dateline / inline-size; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--dl-min)), 1fr)); gap: var(--dl-row) var(--dl-gap); padding: 0; list-style: none; overflow-x: clip; }
+.kit-dateline--sm { --dl-w: var(--kit-space-7); }
+.kit-dateline > * { position: relative; display: grid; grid-template-columns: var(--dl-w) minmax(0, 1fr); column-gap: var(--kit-space-4); align-content: start; margin: 0; padding: 0; border: 0; list-style: none; }
+.kit-dateline > * > :first-child { grid-column: 1; grid-row: 1 / span 4; margin: 0; line-height: 0; }
+.kit-dateline > * > :not(:first-child) { grid-column: 2; margin-block: 0; }
+.kit-dateline > * > :nth-child(2) { margin-top: var(--dl-top); }
+.kit-dateline > *::after { content: none; }
+.kit-dateline > *::before { content: ""; display: block; position: absolute; left: calc(var(--dl-w) / 2 - var(--dl-line) / 2); top: calc(var(--dl-top) * 2 + var(--dl-h)); bottom: calc(var(--kit-space-3) - var(--dl-row)); width: 0; border-left: var(--dl-line) dashed var(--dl-rest); }
+.kit-dateline > .is-done::before { border-left-style: solid; border-left-color: var(--dl-mark); }
+.kit-dateline > :last-child::before { content: none; }
+@container kit-dateline (min-width: 23rem) {
+	.kit-dateline > * { grid-template-columns: minmax(0, 1fr); }
+	.kit-dateline > * > :first-child { grid-row: auto; }
+	.kit-dateline > * > :not(:first-child) { grid-column: 1; }
+	.kit-dateline > * > :nth-child(2) { margin-top: var(--kit-space-3); }
+	.kit-dateline > *::before { left: calc(var(--dl-w) + var(--kit-space-3)); right: calc(var(--kit-space-3) - var(--dl-gap)); top: calc(var(--dl-top) + var(--dl-h) / 2 - var(--dl-line) / 2); bottom: auto; width: auto; height: 0; border-left: 0; border-top: var(--dl-line) dashed var(--dl-rest); }
+	.kit-dateline > .is-done::before { border-top-style: solid; border-top-color: var(--dl-mark); }
+}
+@media (forced-colors: active) { .kit-dateline > *::before { border-color: CanvasText; } }
