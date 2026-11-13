@@ -169,7 +169,7 @@
    That band sets white on the campaign mark; here the mark is #ffa500, where white is about 2:1, so the band's text,
    icons, rings and focus ring take the palette's ink (9.4:1 on #ffa500, as in the hero). ---------- */
 .aw-camp.aw-camp--community-dogs #share { --camp-on-mark: var(--camp-primary-ink); }
-.aw-camp.aw-camp.aw-camp--community-dogs #share .aw-camp-share-kit.aw-share-block { margin-top: 0; gap: 0; }
+.aw-camp.aw-camp.aw-camp--community-dogs #share .aw-camp-share-kit.aw-share-block { margin-top: 0; grid-template-areas: "bar" "follow"; } /* no letter tool here, so no button or picture rows: the gap stays between the bar and Follow us only */
 .aw-camp.aw-camp.aw-camp--community-dogs #share > h2 { margin-bottom: 0 !important; } /* no lede here: the bar's own 24px top padding is the gap under the heading */
 
 /* ---------- Campaign goal: the heading beside two statements, the outcome under them ---------- */
