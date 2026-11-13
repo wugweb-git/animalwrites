@@ -64,10 +64,10 @@
 		b.addEventListener( 'click', function () { setView( b.getAttribute( 'data-view' ) ); } );
 	} );
 
-	/** A type icon (the theme's CSS mask SVG) drawn in a white disc, as a map image. */
+	/** A type icon (its kit-ico--type-{slug} CSS mask SVG, aw-type-icons.css) drawn in a white disc, as a map image. */
 	function iconImage( slug ) {
-		var span = document.querySelector( '.aw-dir-icons [data-type="' + slug + '"]' );
-		var css = span ? getComputedStyle( span ).getPropertyValue( '--t' ).trim() : '';
+		var span = document.querySelector( '.aw-dir-icons .kit-ico--type-' + ( window.CSS && CSS.escape ? CSS.escape( slug ) : slug ) );
+		var css = span ? getComputedStyle( span ).getPropertyValue( '--i' ).trim() : '';
 		var m = css.match( /^url\(\s*"(.*)"\s*\)$/ ) || css.match( /^url\(\s*'(.*)'\s*\)$/ ) || css.match( /^url\((.*)\)$/ );
 		return new Promise( function ( ok ) {
 			var size = 64;
