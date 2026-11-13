@@ -1092,3 +1092,4 @@
 
 /* The bar's Share button (the phone's share sheet, kit.js) on the band: filled white with its name, as the bar's main button. */
 .aw-camp.aw-camp #share .kit-share .kit-share-btn.kit-share-native { background: var(--camp-on-mark); border-color: var(--camp-on-mark); color: var(--camp-mark); }
+.aw-camp.aw-camp #share .kit-share .kit-share-native .kit-share-name { color: inherit; } /* the word Share in the button colour, not white on white */
