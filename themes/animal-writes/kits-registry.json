@@ -1511,6 +1511,34 @@
    "block": "animal-writes/aw-sc"
   },
   {
+   "name": "Lab rules campaign card",
+   "type": "pattern",
+   "status": "live",
+   "classes": [
+    "aw-lab-card"
+   ],
+   "states": [
+    "default (block animal-writes/home-lab): the lab rules campaign in small (md), in its own colours: maroon card, the stamp-and-papers photograph behind a maroon fade, the Decision awaited chip, the card title (aw_campaign_card_title) as H2, the summary, What happens next and Get the decision first; same height as the other Home campaign cards (--aw-pair-card-h); empty when the campaign is not published; not on Home while the campaign is the Home hero"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "pattern (Editor → Patterns, \"Animal Writes\")",
+    "aria": "section aria-labelledby its H2; photograph alt=\"\"",
+    "keyboard": "Tab to the two buttons",
+    "focus": "3px ring in white, 2px offset (:focus-visible)",
+    "target": "44px buttons",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "H2 (H1 only in the hero)",
+    "link": "the campaign page (#context, #newsletter)",
+    "alt": "empty (decorative photograph)",
+    "schema": "none"
+   },
+   "block": "animal-writes/aw-lab"
+  },
+  {
    "name": "Campaign cards row",
    "type": "pattern",
    "status": "live",

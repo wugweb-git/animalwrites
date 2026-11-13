@@ -29,3 +29,11 @@ section.aw-camp-band.aw-ed-hero--campaign { box-sizing: border-box; min-height: 
 	.aw-camp-band.aw-ed-hero--campaign.has-art .aw-camp-band-text { max-width: calc(50% - var(--kit-space-grid)); }
 	.aw-ed-hero--campaign .aw-camp-band-art { width: 50%; }
 }
+/* The lab rules campaign card (md; block animal-writes/home-lab): maroon with white type over the stamp photograph (owner, 13 Nov 2026). */
+.aw-lab-card { min-height: var(--aw-pair-card-h, 500px); background: #a3122f; color: #fff; --kit-color-focus: #fff; --kit-btn-brand-bg: #fff; --kit-btn-brand-fg: #6b0f22; }
+.aw-lab-card::before { background: linear-gradient(180deg, rgb(163 18 47 / 0) 0%, rgb(163 18 47 / 0.85) 45%, #a3122f 70%); }
+.aw-lab-card .aw-content-bg { object-position: 20% 50%; }
+.aw-lab-card-chip { display: inline-flex; align-items: center; gap: var(--kit-space-2); align-self: flex-start; margin: 0 0 var(--kit-space-3); padding: var(--kit-space-1) var(--kit-space-3); border-radius: var(--kit-radius-pill); background: rgb(255 255 255 / 0.16); box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.4); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-strong); }
+.aw-lab-card-chip::before { content: ""; width: 0.5625rem; height: 0.5625rem; border-radius: 50%; background: currentColor; }
+.aw-lab-card-line { max-width: 40ch; margin: 0; }
+.aw-lab-card .kit-btn--secondary { border-color: rgb(255 255 255 / 0.7); background: transparent; color: #fff; }

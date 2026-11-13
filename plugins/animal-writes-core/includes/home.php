@@ -113,8 +113,9 @@ function aw_block_home_hero() {
 
 	$data = ' data-campaign-slug="' . esc_attr( (string) get_post_field( 'post_name', $id ) ) . '" data-campaign-title="' . esc_attr( get_the_title( $id ) ) . '"'; // campaign_action promo_click (aw-analytics.js)
 	$out  = '<section class="alignfull aw-camp aw-camp-band aw-ed-hero aw-ed-hero--campaign' . ( $pic ? ' has-art' : '' ) . ( $theme ? ' aw-camp--' . $theme : '' ) . '" aria-labelledby="aw-hero-t"' . $data . '><div class="aw-camp-band-inner"><div class="aw-camp-band-text">';
-	$out .= '<p class="aw-camp-band-pill">Draft rules G.S.R. 864(E) · objections closed 5 Nov 2026</p>';
-	$out .= '<h1 id="aw-hero-t" class="aw-camp-band-title">Object to the draft lab animal rules</h1>';
+	$wait = $day && current_time( 'Y-m-d' ) > $day; // after the close day: the campaign page's wait wording (owner's yes, 13 Nov 2026)
+	$out .= '<p class="aw-camp-band-pill">' . ( $wait ? 'Decision awaited · letters still going in' : 'Draft rules G.S.R. 864(E) · objections closed 5 Nov 2026' ) . '</p>';
+	$out .= '<h1 id="aw-hero-t" class="aw-camp-band-title">' . ( $wait ? 'Labs could soon approve their own animal experiments.' : 'Object to the draft lab animal rules' ) . '</h1>';
 	$out .= '<p>Labs could approve most animal experiments themselves. Objections closed on 5 Nov; the final rules are not out yet.</p>';
 	$out .= $day ? do_shortcode( '[aw_countdown date="' . $day . '" label="Last day" past_label="Last day was"]' ) : ''; // $day is Y-m-d (checked above)
 	if ( $open && $day ) {
@@ -131,6 +132,40 @@ add_filter(
 	'aw_hub_blocks',
 	function ( $blocks ) {
 		$blocks['home-hero'] = array( 'Home: hero', 'aw_block_home_hero', array() );
+		return $blocks;
+	}
+);
+
+/**
+ * Home: the lab rules campaign card (md), for a Home row when another campaign takes the hero. The campaign's own
+ * colours (maroon, white type), its stamp-and-papers photograph, "Decision awaited", the short card title, the summary,
+ * What happens next and Get the decision first (owner, 13 Nov 2026: every campaign in four sizes). Empty when the
+ * campaign is not published.
+ *
+ * @return string
+ */
+function aw_block_home_lab() {
+	$id = AW_HOME_CAMPAIGN;
+	if ( 'publish' !== get_post_status( $id ) ) {
+		return '';
+	}
+	aw_use_component_style( 'aw-camp-band-aw' ); // aw-lab-card
+	$url   = (string) get_permalink( $id );
+	$title = trim( (string) get_post_meta( $id, 'aw_campaign_card_title', true ) );
+	$title = '' !== $title ? $title : get_the_title( $id );
+	$img   = wp_get_attachment_image( 24153, 'large', false, array( 'class' => 'aw-content-bg', 'alt' => '', 'loading' => 'lazy', 'decoding' => 'async' ) ); // stamp and circled papers
+	$out   = '<section class="aw-content aw-lab-card" aria-labelledby="aw-lab-t">' . $img . '<div class="aw-content-body">';
+	$out  .= '<p class="aw-lab-card-chip">Decision awaited</p>';
+	$out  .= '<h2 id="aw-lab-t">' . esc_html( $title ) . '</h2>';
+	$out  .= has_excerpt( $id ) ? '<p class="aw-lab-card-line">' . esc_html( wp_strip_all_tags( get_the_excerpt( $id ) ) ) . '</p>' : '';
+	$out  .= '<p class="aw-content-actions"><a class="kit-btn kit-btn--brand" href="' . esc_url( $url . '#context' ) . '">What happens next</a><a class="kit-btn kit-btn--secondary" href="' . esc_url( $url . '#newsletter' ) . '">Get the decision first</a></p>';
+	return $out . '</div></section>';
+}
+
+add_filter(
+	'aw_hub_blocks',
+	function ( $blocks ) {
+		$blocks['home-lab'] = array( 'Home: lab rules campaign card', 'aw_block_home_lab', array() );
 		return $blocks;
 	}
 );
