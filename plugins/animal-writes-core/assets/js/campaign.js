@@ -548,14 +548,14 @@
 	});
 })();
 
-/* Phone bar: shows once the hero has scrolled away; hidden while the letter tool, the newsletter band or the footer is
+/* Phone bar: shows once the hero has scrolled away; hidden while the letter tool, the Share section, the newsletter band or the footer is
    on screen, and for the rest of the session after a letter is confirmed. */
 (function () {
 	var bar = document.querySelector('.aw-sticky-cta');
 	if (!bar) return;
 	var target = document.querySelector(bar.dataset.target);
 	var hero = document.querySelector('.aw-camp-hero');
-	var feet = document.querySelectorAll('.aw-nl-band, .wp-site-blocks > footer, footer.wp-block-template-part'); // the band is its own part just above the footer
+	var feet = document.querySelectorAll('#share, .aw-nl-band, .wp-site-blocks > footer, footer.wp-block-template-part'); // the Share section (its button and Follow us stay clear of the bar), and the band, its own part just above the footer
 	var sent = false, onSend = false, onHero = !!hero, onFoot = false;
 	try { sent = sessionStorage.getItem('aw-letter-sent') === '1'; } catch (e) { /* private mode */ }
 	function update() {
