@@ -18,7 +18,6 @@
 .kit-story-media { position: relative; overflow: hidden; border-radius: var(--kit-radius-media); background: var(--kit-color-surface); aspect-ratio: var(--kit-card-media-ratio, 4/3); }
 .kit-story-media img { width: 100%; height: 100%; object-fit: cover; transition: transform var(--kit-motion-slow) var(--kit-motion-ease); }
 .aw-story:hover .kit-story-media img { transform: scale(1.03); }
-.aw-story:hover .aw-story-title a { text-decoration: underline; text-underline-offset: var(--kit-underline-offset); }
 .aw-story-meta { font-size: var(--kit-meta-size); font-weight: var(--kit-meta-weight); color: var(--kit-color-muted); margin: 0; }
 .aw-news-grid { display: grid; gap: var(--kit-space-7) var(--kit-space-grid); grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--kit-card-min)), 1fr)); }
 @media (min-width: 768px) {

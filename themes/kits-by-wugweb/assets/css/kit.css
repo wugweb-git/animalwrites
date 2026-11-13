@@ -695,7 +695,6 @@ body.single main .wp-block-post-featured-image:not(.kit-logo) img ,body.single m
 :is(.kit-ed-lead, .kit-ed-list, .kit-ed-rows, .kit-ed-titles) .wp-block-post-template > li::after { display: none; }
 :is(.kit-ed-lead, .kit-ed-list, .kit-ed-rows, .kit-ed-titles) .wp-block-post-template > li > * { margin-inline: 0 !important; }
 :is(.kit-ed-lead, .kit-ed-list, .kit-ed-rows, .kit-ed-titles) .wp-block-post-template { list-style: none; margin: 0; padding: 0; }
-:is(.kit-ed-lead, .kit-ed-list, .kit-ed-rows, .kit-ed-titles) .wp-block-post-title a:hover { text-decoration: underline; text-decoration-thickness: var(--kit-underline-thickness-strong); text-underline-offset: var(--kit-underline-offset); }
 
 /* 03 What's happening: one lead + three secondary */
 .kit-ed-news-grid { display: grid; gap: var(--kit-space-6); }
@@ -1230,7 +1229,6 @@ header.wp-block-template-part.kit-header-hidden { transform: translateY(calc(-10
    is the link, the title underlines on hover, keyboard focus outlines the card, and the arrow (where shown) nudges. */
 .kit-card { position: relative; min-width: var(--kit-card-min-width); }
 .kit-card :is(.wp-block-post-title, h2, h3) a { text-decoration: none; }
-.kit-card:hover :is(.wp-block-post-title, h2, h3) a { text-decoration: underline; text-underline-offset: var(--kit-underline-offset); text-decoration-thickness: var(--kit-underline-thickness); }
 .kit-card:has(a:focus-visible) { outline: var(--kit-focus-width, 2px) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset-xl); border-radius: var(--kit-radius-card, 12px); }
 .kit-card :is(.wp-block-post-title, h2, h3) a:focus-visible { outline: 0; }
 .kit-card > .kit-ico--arrow-right { transition: transform var(--kit-duration-spring) var(--kit-ease-spring); }
