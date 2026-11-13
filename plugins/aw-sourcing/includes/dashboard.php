@@ -100,7 +100,7 @@ add_action(
 					);
 				}
 				/* translators: 1: number of items, 2: link to To review. */
-				echo '<p>' . sprintf( esc_html( _n( '%1$d item waiting in %2$s.', '%1$d items waiting in %2$s.', $review ) ), (int) $review, $to_rev ) . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- the link is escaped by aw_sourcing_overview_link().
+				echo '<p>' . sprintf( esc_html( _n( '%1$d item waiting in %2$s.', '%1$d items waiting in %2$s.', $review, 'aw-sourcing' ) ), (int) $review, $to_rev ) . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- the link is escaped by aw_sourcing_overview_link().
 
 				$status = array(
 					'failed'  => array( 'dismiss', '#b32d2e', 'Failed' ),

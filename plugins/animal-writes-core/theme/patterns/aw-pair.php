@@ -8,6 +8,10 @@
  *
  * @package animal-writes
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 ?>
 <!-- wp:group {"tagName":"section","metadata":{"name":"Campaign cards"},"align":"full","className":"is-style-kits-section kit-section aw-pair","layout":{"type":"constrained","contentSize":"1200px"}} -->
 <section class="wp-block-group alignfull is-style-kits-section kit-section aw-pair"><!-- wp:group {"className":"aw-pair-grid","layout":{"type":"default"}} -->

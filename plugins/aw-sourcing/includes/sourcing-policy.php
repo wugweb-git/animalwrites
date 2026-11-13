@@ -113,7 +113,7 @@ add_action(
 		}
 		// Hosts already in the content, with their counts.
 		global $wpdb;
-		$rows = $wpdb->get_results( "SELECT m.meta_value url, n.meta_value name, p.post_date d FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'aw_source_url' LEFT JOIN {$wpdb->postmeta} n ON n.post_id = p.ID AND n.meta_key = 'aw_source_name' WHERE p.post_type IN ('" . implode( "','", array_map( 'esc_sql', kits_sourced_types() ) ) . "')" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$rows = $wpdb->get_results( "SELECT m.meta_value url, n.meta_value name, p.post_date d FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'aw_source_url' LEFT JOIN {$wpdb->postmeta} n ON n.post_id = p.ID AND n.meta_key = 'aw_source_name' WHERE p.post_type IN ('" . implode( "','", array_map( 'esc_sql', kits_sourced_types() ) ) . "')" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared -- fixed SQL; the post types are the plugin's own list, escaped
 		foreach ( $rows as $r ) {
 			$h = aw_host( $r->url );
 			if ( ! $h ) {

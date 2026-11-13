@@ -45,17 +45,17 @@ function aw_si_now(): string {
 /** Role bits with their labels (Search Insights' filters and AW Sourcing's Keywords screen). */
 function aw_si_roles(): array {
 	return array(
-		AW_SI_ROLE_TRACKED  => __( 'Tracked', 'animal-writes-core' ),
-		AW_SI_ROLE_FOCUS    => __( 'Focus keyphrase', 'animal-writes-core' ),
-		AW_SI_ROLE_SOURCING => __( 'Include', 'animal-writes-core' ),
-		AW_KW_ROLE_ANIMAL   => __( 'Animal', 'animal-writes-core' ),
-		AW_KW_ROLE_CONTEXT  => __( 'Context', 'animal-writes-core' ),
-		AW_KW_ROLE_EXCLUDE  => __( 'Exclude', 'animal-writes-core' ),
-		AW_KW_ROLE_SEARCH   => __( 'Search', 'animal-writes-core' ),
-		AW_KW_ROLE_PRESS    => __( 'Press', 'animal-writes-core' ),
-		AW_KW_ROLE_CATEGORY => __( 'Category word', 'animal-writes-core' ),
-		AW_SI_ROLE_BRAND    => __( 'Brand', 'animal-writes-core' ),
-		AW_SI_ROLE_SEARCHED => __( 'Searched', 'animal-writes-core' ),
+		AW_SI_ROLE_TRACKED  => __( 'Tracked', 'kits-core' ),
+		AW_SI_ROLE_FOCUS    => __( 'Focus keyphrase', 'kits-core' ),
+		AW_SI_ROLE_SOURCING => __( 'Include', 'kits-core' ),
+		AW_KW_ROLE_ANIMAL   => __( 'Animal', 'kits-core' ),
+		AW_KW_ROLE_CONTEXT  => __( 'Context', 'kits-core' ),
+		AW_KW_ROLE_EXCLUDE  => __( 'Exclude', 'kits-core' ),
+		AW_KW_ROLE_SEARCH   => __( 'Search', 'kits-core' ),
+		AW_KW_ROLE_PRESS    => __( 'Press', 'kits-core' ),
+		AW_KW_ROLE_CATEGORY => __( 'Category word', 'kits-core' ),
+		AW_SI_ROLE_BRAND    => __( 'Brand', 'kits-core' ),
+		AW_SI_ROLE_SEARCHED => __( 'Searched', 'kits-core' ),
 	);
 }
 

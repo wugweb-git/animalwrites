@@ -83,12 +83,12 @@ function aw_press_sideload( $image, $id ) {
 	$type = (string) wp_get_image_mime( $tmp );
 	$ext  = array( 'image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp', 'image/avif' => 'avif' )[ $type ] ?? '';
 	if ( ! $ext ) {
-		@unlink( $tmp ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+		wp_delete_file( $tmp );
 		return 0;
 	}
 	$att = media_handle_sideload( array( 'name' => sanitize_file_name( $name . '.' . $ext ), 'tmp_name' => $tmp ), $id, get_the_title( $id ) );
 	if ( is_wp_error( $att ) ) {
-		@unlink( $tmp ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+		wp_delete_file( $tmp );
 		return 0;
 	}
 	$who = trim( (string) ( get_post_meta( $id, 'aw_press_publisher', true ) ?: get_post_meta( $id, 'aw_press_account', true ) ) );
@@ -326,7 +326,7 @@ function aw_press_site_logo( $url ) {
 		$id  = media_handle_sideload( array( 'name' => sanitize_title( $host ) . '-logo.' . $ext, 'tmp_name' => $tmp ), 0, $host . ' logo' );
 		$id  = is_wp_error( $id ) ? 0 : (int) $id;
 		if ( ! $id ) {
-			@unlink( $tmp ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+			wp_delete_file( $tmp );
 		}
 	}
 	$cache[ $host ] = $id;

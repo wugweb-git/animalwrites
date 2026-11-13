@@ -375,9 +375,9 @@ function aw_core_theme_register_patterns() {
 		}
 		$pattern['filePath'] = $path;
 		// The child theme's text domain, as core translates a theme's pattern headers.
-		$pattern['title'] = translate_with_gettext_context( $pattern['title'], 'Pattern title', 'animal-writes' ); // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText,WordPress.WP.I18n.LowLevelTranslationFunction
+		$pattern['title'] = translate_with_gettext_context( $pattern['title'], 'Pattern title', 'animal-writes' ); // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText,WordPress.WP.I18n.LowLevelTranslationFunction,WordPress.WP.I18n.TextDomainMismatch -- the child theme's own pattern titles, in its domain
 		if ( ! empty( $pattern['description'] ) ) {
-			$pattern['description'] = translate_with_gettext_context( $pattern['description'], 'Pattern description', 'animal-writes' ); // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText,WordPress.WP.I18n.LowLevelTranslationFunction
+			$pattern['description'] = translate_with_gettext_context( $pattern['description'], 'Pattern description', 'animal-writes' ); // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText,WordPress.WP.I18n.LowLevelTranslationFunction,WordPress.WP.I18n.TextDomainMismatch -- the child theme's own pattern descriptions, in its domain
 		}
 		register_block_pattern( $pattern['slug'], $pattern );
 	}

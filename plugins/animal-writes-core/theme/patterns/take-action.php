@@ -8,6 +8,10 @@
  *
  * @package animal-writes
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 ?>
 <!-- wp:group {"tagName":"section","metadata":{"name":"Take action"},"align":"full","className":"is-style-kits-section kit-section","layout":{"type":"constrained","contentSize":"1200px"}} -->
 <section class="wp-block-group alignfull is-style-kits-section kit-section"><!-- wp:group {"className":"kit-stack","layout":{"type":"grid","columnCount":2,"minimumColumnWidth":"18rem"}} -->

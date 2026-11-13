@@ -8,6 +8,10 @@
  *
  * @package animal-writes
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 ?>
 <!-- wp:group {"tagName":"section","metadata":{"name":"Need help now"},"anchor":"need-help","align":"full","className":"is-style-kits-section kit-section aw-ed-help","backgroundColor":"secondary","textColor":"background","layout":{"type":"constrained","contentSize":"1200px"}} -->
 <section id="need-help" class="wp-block-group alignfull is-style-kits-section kit-section aw-ed-help has-background-color has-secondary-background-color has-text-color has-background"><!-- wp:group {"className":"kit-sec-head","layout":{"type":"default"}} -->

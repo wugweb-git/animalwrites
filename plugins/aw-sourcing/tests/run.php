@@ -12,6 +12,10 @@
  * @package aw-sourcing
  */
 
+if ( ! defined( 'ABSPATH' ) && 'cli' !== PHP_SAPI ) { // web requests stop here; the Deploy check runs this from the command line
+	exit;
+}
+
 // phpcs:disable WordPress.WP.AlternativeFunctions, WordPress.Security.EscapeOutput -- a command-line test runner.
 
 define( 'ABSPATH', __DIR__ . '/' );

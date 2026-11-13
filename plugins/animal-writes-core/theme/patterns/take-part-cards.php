@@ -8,6 +8,10 @@
  *
  * @package animal-writes
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 ?>
 <!-- wp:group {"metadata":{"name":"Take part"},"className":"kit-actions aw-take-part","layout":{"type":"default"}} -->
 <div class="wp-block-group kit-actions aw-take-part"><!-- wp:cover {"url":"/wp-content/uploads/2026/10/1RImcR7ANgsFhxxmo6L668UpLTAy7ilH8tCTBI8lI4TAqWC8o6wc3KC94gtP7F39J9gazutuZVu2X85PFN3e_ho4V9_9MW7MRqeeXL0aJipFLOyN7neSMd_zr0ETXicWYYgFS094x0bzQnLW34ecPsAnqfPgudL6Dd3VlwnzGO7LyUzgnNtYx_zzMX0Yof7M.avif","id":15529,"alt":"A woman smiles as she pets two community dogs on a street.","dimRatio":0,"overlayColor":"foreground","isUserOverlayColor":true,"focalPoint":{"x":0.55,"y":0.3},"contentPosition":"bottom left","isDark":true,"className":"kit-photo-card kit-action-card aw-take-part-card aw-take-part-card--vol","layout":{"type":"default"}} -->

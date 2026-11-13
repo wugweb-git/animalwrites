@@ -6,6 +6,10 @@
  * Post Types: aw_campaign, page
  * Description: Full campaign layout. Replace the campaign slug "my-campaign" and the date in the shortcodes.
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 ?>
 <!-- wp:group {"align":"full","className":"aw-camp-hero","style":{"spacing":{"padding":{"top":"var:preset|spacing|60","bottom":"var:preset|spacing|60"}}},"backgroundColor":"surface","layout":{"type":"constrained","contentSize":"900px"}} -->
 <div class="wp-block-group alignfull aw-camp-hero has-surface-background-color has-background" style="padding-top:var(--wp--preset--spacing--60);padding-bottom:var(--wp--preset--spacing--60)"><!-- wp:shortcode -->

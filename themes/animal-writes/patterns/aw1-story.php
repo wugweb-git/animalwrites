@@ -9,6 +9,10 @@
  * @package animal-writes
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 $aw1_photo = function ( $id, $cls ) {
 	return '<!-- wp:image {"id":' . $id . ',"sizeSlug":"medium_large","linkDestination":"none","className":"' . $cls . '"} -->' . "\n"
 		. '<figure class="wp-block-image size-medium_large ' . $cls . '"><img src="' . esc_url( (string) wp_get_attachment_image_url( $id, 'medium_large' ) ) . '" alt="' . esc_attr( (string) get_post_meta( $id, '_wp_attachment_image_alt', true ) ) . '" class="wp-image-' . $id . '"/></figure>' . "\n"

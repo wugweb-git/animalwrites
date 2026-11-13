@@ -54,7 +54,7 @@ add_action(
 				'name'          => 'High Court judgments (open dataset, CC BY 4.0)',
 				'kind'          => 'judgments-hc',
 				'type'          => 'legal',
-				'url'           => 'https://indian-high-court-judgments.s3.ap-south-1.amazonaws.com/',
+				'url'           => 'https://indian-high-court-judgments.s3.ap-south-1.amazonaws.com/', // phpcs:ignore PluginCheck.CodeAnalysis.Offloading.OffloadedContent -- a source's address to read, not a file the page loads
 				'lookback_days' => 60,
 				'on'            => false,
 				'filter'        => false,

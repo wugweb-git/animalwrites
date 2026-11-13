@@ -7,6 +7,10 @@
  * @package aw-sourcing
  */
 
+if ( ! defined( 'ABSPATH' ) && 'cli' !== PHP_SAPI ) { // web requests stop here; the Deploy check runs this from the command line
+	exit;
+}
+
 // phpcs:disable WordPress.WP.AlternativeFunctions, WordPress.Security.EscapeOutput -- a command-line test runner.
 
 $p3     = json_decode( file_get_contents( __DIR__ . '/fixtures/phase3_live_sample.json' ), true );

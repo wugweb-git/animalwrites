@@ -8,6 +8,10 @@
  *
  * @package animal-writes
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 ?>
 <!-- wp:group {"tagName":"section","metadata":{"name":"Take part"},"align":"full","className":"is-style-kits-section kit-section aw-take-part-band","layout":{"type":"constrained","contentSize":"1200px"}} -->
 <section class="wp-block-group alignfull is-style-kits-section kit-section aw-take-part-band"><!-- wp:pattern {"slug":"animal-writes/take-part-cards"} /--></section>

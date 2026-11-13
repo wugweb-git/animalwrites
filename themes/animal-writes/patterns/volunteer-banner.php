@@ -9,6 +9,10 @@
  *
  * @package animal-writes
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 ?>
 <!-- wp:group {"align":"wide","className":"aw-vol-banner","layout":{"type":"default"}} -->
 <div class="wp-block-group alignwide aw-vol-banner"><!-- wp:image {"id":14273,"width":"800px","height":"600px","sizeSlug":"full","linkDestination":"none","className":"aw-vol-banner-photo"} -->

@@ -8,6 +8,10 @@
  *
  * @package animal-writes
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 ?>
 <!-- wp:group {"tagName":"section","metadata":{"name":"What's happening"},"align":"full","className":"is-style-kits-section kit-section aw-ed-news","layout":{"type":"constrained","contentSize":"1200px"}} -->
 <section class="wp-block-group alignfull is-style-kits-section kit-section aw-ed-news"><!-- wp:group {"className":"kit-sec-head","layout":{"type":"default"}} -->
@@ -30,7 +34,7 @@
 
 <!-- wp:query {"queryId":41,"query":{"perPage":3,"pages":0,"offset":0,"postType":"aw_news","order":"desc","orderBy":"date","inherit":false},"className":"aw-hub-list","layout":{"type":"default"}} -->
 <div class="wp-block-query aw-hub-list"><!-- wp:post-template {"className":"aw-news-list aw-news-mosaic","layout":{"type":"default"}} -->
-<?php echo function_exists( 'aw_hub_item' ) ? str_replace( '"level":2', '"level":3', aw_hub_item( 'aw_news' ) ) : ''; // the News list's card, one level below this section's H2 ?>
+<?php echo function_exists( 'aw_hub_item' ) ? str_replace( '"level":2', '"level":3', aw_hub_item( 'aw_news' ) ) : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- the News list's card, one level below this section's H2: block markup from the plugin's own template, not user text ?>
 <!-- /wp:post-template --></div>
 <!-- /wp:query --></section>
 <!-- /wp:group -->

@@ -129,7 +129,7 @@ function aw_cl_record_letter( $id, $req ) {
 	$send   = aw_cl_send_id( $req['send_id'] );
 	$wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		$wpdb->prepare(
-			'INSERT IGNORE INTO ' . aw_cl_table() . ' (campaign_id, city, grounds, route, device, sent_on, nl_optin, wa_optin, send_id) VALUES (%d, %s, %s, %s, %s, %s, %d, %d, ' . ( $send ? '%s' : 'NULL' ) . ')',
+			'INSERT IGNORE INTO ' . aw_cl_table() . ' (campaign_id, city, grounds, route, device, sent_on, nl_optin, wa_optin, send_id) VALUES (%d, %s, %s, %s, %s, %s, %d, %d, ' . ( $send ? '%s' : 'NULL' ) . ')', // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- the table name is the plugin's own; every value is a placeholder
 			array_merge(
 				array(
 					$id,
@@ -292,9 +292,9 @@ function aw_cl_report_page() {
 	foreach ( $all as $id => $title ) {
 		echo '<option value="' . (int) $id . '"' . selected( $cid, $id, false ) . '>' . esc_html( $title ) . '</option>';
 	}
-	echo '</select> ' . get_submit_button( 'Show', 'secondary', '', false ) . ' <a class="button" href="' . esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=aw_cl_csv&campaign=' . $cid ), 'aw_cl_csv' ) ) . '">Export CSV</a></form>';
+	echo '</select> ' . get_submit_button( 'Show', 'secondary', '', false ) . ' <a class="button" href="' . esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=aw_cl_csv&campaign=' . $cid ), 'aw_cl_csv' ) ) . '">Export CSV</a></form>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_submit_button() is core's escaped button
 	$total = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$t} WHERE campaign_id = %d", $cid ) ); // phpcs:ignore
-	echo '<h2>' . esc_html( sprintf( _n( '%s letter sent', '%s letters sent', $total, 'animal-writes-core' ), number_format_i18n( $total ) ) ) . '</h2>';
+	echo '<h2>' . esc_html( sprintf( /* translators: %s: number of letters. */ _n( '%s letter sent', '%s letters sent', $total, 'animal-writes-core' ), number_format_i18n( $total ) ) ) . '</h2>';
 	$table = function ( $title, $rows, $head ) {
 		echo '<h2>' . esc_html( $title ) . '</h2>';
 		$cells = array();

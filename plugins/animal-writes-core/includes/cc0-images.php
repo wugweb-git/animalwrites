@@ -106,12 +106,14 @@ function aw_cc0_run() {
 
 	// 1. Publisher images: unchecked first, then failures older than a week.
 	$week = gmdate( 'Y-m-d H:i:s', time() - WEEK_IN_SECONDS );
+	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery -- fixed SQL and the plugin's own clauses; values go in as placeholders
 	$ids  = $wpdb->get_col( $wpdb->prepare( "SELECT p.ID " . aw_cc0_items_sql() . " AND EXISTS (SELECT 1 FROM {$wpdb->postmeta} si WHERE si.post_id = p.ID AND si.meta_key = 'aw_source_image' AND si.meta_value <> '')
 		AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} sf WHERE sf.post_id = p.ID AND sf.meta_key = 'aw_source_image_off' AND sf.meta_value = '1')
 		AND ( NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} c WHERE c.post_id = p.ID AND c.meta_key = 'aw_source_image_checked')
 		   OR EXISTS (SELECT 1 FROM {$wpdb->postmeta} o JOIN {$wpdb->postmeta} c2 ON c2.post_id = o.post_id AND c2.meta_key = 'aw_source_image_checked'
 		              WHERE o.post_id = p.ID AND o.meta_key = 'aw_source_image_ok' AND o.meta_value = '0' AND c2.meta_value < %s) )
 		ORDER BY p.post_date DESC LIMIT %d", $week, 60 ) ); // phpcs:ignore WordPress.DB
+	// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery
 	$checked = 0;
 	foreach ( $ids as $id ) {
 		if ( time() - $start > 60 ) {
@@ -125,6 +127,7 @@ function aw_cc0_run() {
 	}
 
 	// 2. Items with no usable picture of their own.
+	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery -- fixed SQL and the plugin's own clauses; values go in as placeholders
 	$ids  = $wpdb->get_col( $wpdb->prepare( "SELECT p.ID " . aw_cc0_items_sql() . "
 		AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} t WHERE t.post_id = p.ID AND t.meta_key = '_thumbnail_id' AND t.meta_value <> '' AND t.meta_value <> '0')
 		AND ( NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} si WHERE si.post_id = p.ID AND si.meta_key = 'aw_source_image' AND si.meta_value LIKE 'https://%%')
@@ -132,6 +135,7 @@ function aw_cc0_run() {
 		AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} a WHERE a.post_id = p.ID AND a.meta_key = 'aw_cc0_attempts' AND a.meta_value >= %d)
 		AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} tr WHERE tr.post_id = p.ID AND tr.meta_key = 'aw_cc0_tried' AND tr.meta_value > %s)
 		ORDER BY p.post_date DESC LIMIT %d", AW_CC0_MAX_ATTEMPTS, $week, AW_CC0_BATCH ) ); // phpcs:ignore WordPress.DB
+	// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery
 	$done = 0;
 	$none = 0;
 	foreach ( $ids as $id ) {
@@ -147,6 +151,7 @@ function aw_cc0_run() {
 	}
 	// 2b. Our own guides with no picture (owner, 18 Oct 2026): a CC0 photo of their own, used once site-wide. A guide
 	// linked to a campaign (campaign-links.php) is left to the campaign's own pictures (its motif), never a stock photo.
+	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery -- fixed SQL and the plugin's own clauses; values go in as placeholders
 	$own = $wpdb->get_col( $wpdb->prepare( "SELECT p.ID FROM {$wpdb->posts} p
 		WHERE p.post_status = 'publish' AND p.post_type = 'post'
 		AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} su WHERE su.post_id = p.ID AND su.meta_key = 'aw_source_url' AND su.meta_value <> '')
@@ -155,6 +160,7 @@ function aw_cc0_run() {
 		AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} a WHERE a.post_id = p.ID AND a.meta_key = 'aw_cc0_attempts' AND a.meta_value >= %d)
 		AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} tr2 WHERE tr2.post_id = p.ID AND tr2.meta_key = 'aw_cc0_tried' AND tr2.meta_value > %s)
 		ORDER BY p.post_date DESC LIMIT 5", AW_CC0_MAX_ATTEMPTS, $week ) ); // phpcs:ignore WordPress.DB
+	// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery
 	foreach ( $own as $id ) {
 		if ( time() - $start > AW_CC0_BUDGET || get_transient( 'aw_ov_pause' ) || ! aw_ov_quota_left() ) {
 			break;
@@ -302,6 +308,7 @@ function aw_source_og_image_as( $page, $ua ) {
  */
 function aw_source_og_run( $limit = 40 ) {
 	global $wpdb;
+	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery -- fixed SQL and the plugin's own clauses; values go in as placeholders
 	$ids = $wpdb->get_col( // phpcs:ignore WordPress.DB
 		$wpdb->prepare(
 			"SELECT p.ID FROM {$wpdb->posts} p
@@ -316,6 +323,7 @@ function aw_source_og_run( $limit = 40 ) {
 			$limit
 		)
 	);
+	// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery
 	$stored = 0;
 	$start  = time();
 	foreach ( $ids as $id ) {
@@ -374,7 +382,7 @@ function aw_source_pdf_cover( $post_id ) {
 	}
 	$pdf = aw_source_download( $src );
 	if ( is_wp_error( $pdf ) || '%PDF' !== (string) file_get_contents( $pdf, false, null, 0, 4 ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions
-		is_string( $pdf ) && @unlink( $pdf ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+		is_string( $pdf ) && wp_delete_file( $pdf );
 		return 0;
 	}
 	try {
@@ -392,15 +400,15 @@ function aw_source_pdf_cover( $post_id ) {
 		$im->writeImage( $jpg );
 		$im->clear();
 	} catch ( Exception $e ) {
-		@unlink( $pdf ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+		wp_delete_file( $pdf );
 		return 0;
 	}
-	@unlink( $pdf ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+	wp_delete_file( $pdf );
 	require_once ABSPATH . 'wp-admin/includes/media.php';
 	require_once ABSPATH . 'wp-admin/includes/image.php';
 	$att = media_handle_sideload( array( 'name' => substr( sanitize_title( get_post_field( 'post_name', $post_id ) ?: 'document-' . $post_id ), 0, 80 ) . '-page-1.jpg', 'tmp_name' => $jpg ), $post_id, get_the_title( $post_id ) . ', page 1' );
 	if ( is_wp_error( $att ) ) {
-		@unlink( $jpg ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+		wp_delete_file( $jpg );
 		return 0;
 	}
 	update_post_meta( $att, '_wp_attachment_image_alt', 'Page 1 of ' . wp_strip_all_tags( get_the_title( $post_id ) ) );
@@ -472,14 +480,14 @@ function aw_source_localise( $post_id ) {
 	$type = (string) wp_get_image_mime( $tmp );
 	$ext  = array( 'image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp', 'image/avif' => 'avif', 'image/gif' => 'gif' )[ $type ] ?? '';
 	if ( '' === $ext ) {
-		@unlink( $tmp ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+		wp_delete_file( $tmp );
 		update_post_meta( $post_id, 'aw_source_localise', 'not an image' );
 		return 0;
 	}
 	$name = sanitize_title( get_post_field( 'post_name', $post_id ) ?: 'item-' . $post_id );
 	$att  = media_handle_sideload( array( 'name' => substr( $name, 0, 80 ) . '-source.' . $ext, 'tmp_name' => $tmp ), $post_id, get_the_title( $post_id ) );
 	if ( is_wp_error( $att ) ) {
-		@unlink( $tmp ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+		wp_delete_file( $tmp );
 		update_post_meta( $post_id, 'aw_source_localise', 'sideload failed: ' . $att->get_error_message() );
 		return 0;
 	}
@@ -502,6 +510,7 @@ function aw_source_localise( $post_id ) {
 function aw_source_localise_run( $limit = 25, $budget = 60 ) {
 	global $wpdb;
 	$host = (string) wp_parse_url( home_url(), PHP_URL_HOST );
+	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery -- fixed SQL and the plugin's own clauses; values go in as placeholders
 	$ids  = $wpdb->get_col( // phpcs:ignore WordPress.DB
 		$wpdb->prepare(
 			"SELECT p.ID FROM {$wpdb->posts} p
@@ -516,6 +525,7 @@ function aw_source_localise_run( $limit = 25, $budget = 60 ) {
 			$limit
 		)
 	);
+	// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery
 	$stored = 0;
 	$start  = time();
 	foreach ( $ids as $id ) {
@@ -883,18 +893,18 @@ function aw_cc0_sideload( $post_id, $x, $q, &$used ) {
 	$size = @getimagesize( $tmp ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
 	$md5  = (string) md5_file( $tmp );
 	if ( ! $size || ! in_array( $size[2], array( IMAGETYPE_JPEG, IMAGETYPE_WEBP ), true ) || $size[0] < 1000 || filesize( $tmp ) > 25 * MB_IN_BYTES || isset( $used['md5'][ $md5 ] ) ) {
-		@unlink( $tmp ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+		wp_delete_file( $tmp );
 		return 0;
 	}
 	$ed = wp_get_image_editor( $tmp );
 	if ( is_wp_error( $ed ) ) {
-		@unlink( $tmp ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+		wp_delete_file( $tmp );
 		return 0;
 	}
 	$ed->resize( 1600, null, false );
 	$ed->set_quality( 82 );
 	$saved = $ed->save( $tmp . '-1600.jpg', 'image/jpeg' );
-	@unlink( $tmp ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+	wp_delete_file( $tmp );
 	if ( is_wp_error( $saved ) ) {
 		return 0;
 	}
@@ -902,7 +912,7 @@ function aw_cc0_sideload( $post_id, $x, $q, &$used ) {
 	$name  = substr( sanitize_title( $title ), 0, 80 ) . '.jpg';
 	$att   = media_handle_sideload( array( 'name' => $name, 'tmp_name' => $saved['path'] ), $post_id, $title, array( 'post_excerpt' => '', 'post_content' => '' ) );
 	if ( is_wp_error( $att ) ) {
-		@unlink( $saved['path'] ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+		wp_delete_file( $saved['path'] );
 		aw_cc0_log( '#' . $post_id . ' could not be added to the Media Library: ' . $att->get_error_message() );
 		return 0;
 	}
@@ -925,6 +935,7 @@ function aw_cc0_sideload( $post_id, $x, $q, &$used ) {
 function aw_cc0_counts() {
 	global $wpdb;
 	$from = aw_cc0_items_sql();
+	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery -- fixed SQL and the plugin's own clauses; values go in as placeholders
 	$row  = $wpdb->get_row( // phpcs:ignore WordPress.DB
 		"SELECT COUNT(*) total,
 			SUM( si.meta_value LIKE 'https://%' AND COALESCE(ok.meta_value,'') = '1' ) pub_ok,
@@ -947,6 +958,7 @@ function aw_cc0_counts() {
 		),
 		ARRAY_A
 	);
+	// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery
 	return array_map( 'intval', (array) $row );
 }
 

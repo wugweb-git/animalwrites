@@ -467,7 +467,7 @@ function aw_mirror_gov_pdf( $post_id, $url ) {
 	$title = get_the_title( $post_id );
 	$fid   = media_handle_sideload( array( 'name' => sanitize_title( $title ) . '.pdf', 'tmp_name' => $tmp ), $post_id, $title );
 	if ( is_wp_error( $fid ) ) {
-		@unlink( $tmp ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+		wp_delete_file( $tmp );
 		return 0;
 	}
 	update_post_meta( $post_id, 'aw_file_id', (int) $fid );

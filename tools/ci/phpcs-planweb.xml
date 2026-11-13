@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <ruleset name="PlanWeb">
-	<description>WordPress-Extra for PlanWeb, with its own capabilities, prefix and text domain.</description>
-	<file>.</file>
+	<description>WordPress-Extra for PlanWeb (kept here, out of the plugin folder: Plugin Check rejects application files in a plugin; run: phpcs --standard=tools/ci/phpcs-planweb.xml), with its own capabilities, prefix and text domain.</description>
+	<file>../../plugins/planweb</file>
 	<arg name="extensions" value="php"/>
 	<exclude-pattern>build/*</exclude-pattern>
 	<exclude-pattern>node_modules/*</exclude-pattern>

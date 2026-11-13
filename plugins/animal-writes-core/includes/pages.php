@@ -216,7 +216,7 @@ add_shortcode(
 			}
 			$out .= '</section>';
 		}
-		$html .= '<p class="aw-search-count" role="status">' . esc_html( sprintf( _n( '%s result', '%s results', $total ), number_format_i18n( $total ) ) ) . '</p>' . $out;
+		$html .= '<p class="aw-search-count" role="status">' . esc_html( sprintf( /* translators: %s: number of results. */ _n( '%s result', '%s results', $total, 'animal-writes-core' ), number_format_i18n( $total ) ) ) . '</p>' . $out;
 		if ( ! $total ) { // empty result: what to do next
 			$html .= '<div class="kit-empty"><p>Nothing matched “' . esc_html( $q ) . '”. Try fewer or different words, or go to a section.</p><nav class="kit-error-links" aria-label="Sections"><ul><li><a href="/directory/">Directory</a></li><li><a href="/news/">News</a></li><li><a href="/resources/">Resources</a></li><li><a href="/library/">Library</a></li><li><a href="/opportunities/">Opportunities</a></li></ul></nav></div>';
 		}
@@ -633,7 +633,7 @@ function aw_plain_letters( $s ) {
 function aw_plain_letters_fallback( $s ) {
 	$out = '';
 	foreach ( preg_split( '//u', $s, -1, PREG_SPLIT_NO_EMPTY ) as $ch ) {
-		$cp = mb_ord( $ch, 'UTF-8' );
+		$cp = unpack( 'N', mb_convert_encoding( $ch, 'UTF-32BE', 'UTF-8' ) )[1]; // the code point (mb_ord needs WordPress 7.1's polyfill)
 		if ( $cp >= 0xFF01 && $cp <= 0xFF5E ) {
 			$out .= chr( $cp - 0xFEE0 ); // full-width ASCII
 		} elseif ( $cp >= 0x1D400 && $cp <= 0x1D6A3 ) {

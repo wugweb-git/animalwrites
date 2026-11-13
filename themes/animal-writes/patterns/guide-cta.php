@@ -9,6 +9,10 @@
  *
  * @package animal-writes
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 ?>
 <!-- wp:group {"metadata":{"name":"Guide call to action"},"className":"is-style-kits-card aw-guide-cta","layout":{"type":"constrained"}} -->
 <div class="wp-block-group is-style-kits-card aw-guide-cta"><!-- wp:paragraph -->

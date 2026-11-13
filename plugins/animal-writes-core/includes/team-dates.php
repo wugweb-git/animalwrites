@@ -268,7 +268,7 @@ function aw_team_dates_screen() {
 	}
 	aw_core_simple_table( 'dates', array( 'date' => 'Date', 'when' => 'When', 'what' => 'What', 'remove' => '<span class="screen-reader-text">Remove</span>' ), $cells, array( 'empty' => 'No dates yet.' ) );
 
-	echo '<h2>Add a date</h2><form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_dates_add">' . wp_nonce_field( 'aw_dates_add', '_wpnonce', true, false );
+	echo '<h2>Add a date</h2><form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_dates_add">' . wp_nonce_field( 'aw_dates_add', '_wpnonce', true, false ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_nonce_field() is core's escaped field
 	echo '<p><label>Date <input type="date" name="date" required></label> <label>What <input type="text" name="title" class="regular-text" required></label></p><p><label>Note<br><textarea name="note" rows="3" class="large-text"></textarea></label></p><p><button class="button button-primary">Add</button></p></form></div>';
 }
 

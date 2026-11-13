@@ -8,6 +8,10 @@
  *
  * @package animal-writes
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 ?>
 <!-- wp:cover {"url":"/wp-content/uploads/2026/11/supreme-court-steps-sleeping-street-dog.avif","id":23313,"alt":"","dimRatio":0,"overlayColor":"foreground","isUserOverlayColor":true,"focalPoint":{"x":0.62,"y":0.75},"contentPosition":"top left","isDark":true,"metadata":{"name":"Animal Writes card"},"className":"kit-photo-card kit-action-card aw-default-card","style":{"color":{"duotone":["#141414","#f2f2f2"]}},"layout":{"type":"default"}} -->
 <div class="wp-block-cover is-dark has-custom-content-position is-position-top-left kit-photo-card kit-action-card aw-default-card"><span aria-hidden="true" class="wp-block-cover__background has-foreground-background-color has-background-dim-0 has-background-dim"></span><img class="wp-block-cover__image-background wp-image-23313" alt="" src="/wp-content/uploads/2026/11/supreme-court-steps-sleeping-street-dog.avif" style="object-position:62% 75%" data-object-fit="cover" data-object-position="62% 75%"/><div class="wp-block-cover__inner-container"><!-- wp:heading {"anchor":"aw-default-card-h"} -->
