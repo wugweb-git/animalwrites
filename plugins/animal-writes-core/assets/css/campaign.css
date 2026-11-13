@@ -1238,6 +1238,10 @@
 	.aw-camp.aw-camp.aw-camp #share .aw-share-block > .kit-share.has-native > .kit-share-btn:not(.kit-share-native) { display: none !important; }
 	.aw-camp.aw-camp.aw-camp #share .aw-share-block > .kit-share.has-native > .kit-share-main { margin-bottom: 0; }
 }
+/* from 768 the Follow us label takes the Share button's 48px row, so both cards' icons share one line */
+@media (min-width: 768px) {
+	.aw-camp.aw-camp.aw-camp #share .aw-share-block > .kit-share.kit-follow > .kit-share-label { display: flex !important; align-items: center; min-height: var(--kit-size-control); margin: 0 0 var(--kit-space-2); }
+}
 .aw-camp.aw-camp.aw-camp #share :is(.aw-camp-lede, .aw-camp-note) { box-sizing: border-box; max-width: 60ch; }
 .aw-camp.aw-camp.aw-camp #share .aw-camp-note { max-width: 80ch; }
 .aw-camp.aw-camp.aw-camp #share .aw-camp-share-kit + .aw-camp-note { margin-top: var(--kit-space-5); }

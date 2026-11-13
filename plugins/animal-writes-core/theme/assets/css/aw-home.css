@@ -251,18 +251,19 @@
 
 /* Share Animal Writes (#share, owner, 13 Nov 2026: one share section everywhere; off-campaign pages in the brand's black,
    white and grey). The campaign pages' Share band in the brand's three shades: the Home hero picture in grey (luminosity
-   over grey) under an ink wash, the heading and line on it in white (the wash is 0.72 or more where text sits: white
+   over ink, so the section is ink before or without the picture) under an ink wash, the heading and line on it in white (the wash is 0.72 or more where text sits: white
    text at least 5:1 over the picture's lightest pixels, WCAG AA); the Share card in light grey with an ink dot texture,
    Follow us on a white card, icons and text in ink. The Share card holds one button, "Share this page" (48px, across
    the card; the phone's share sheet, else it copies the link), and one row of icons under it (WhatsApp, X, Facebook,
    LinkedIn, Email, Copy link); phones with a share sheet show the button alone. Cards side by side when there is room
-   (21rem to 23rem, six 44px icons a row). The text keeps to 60ch. */
-#share.aw-home-share { --aw-share-dark: var(--kit-color-ink); --aw-share-light: var(--neutral-2); background: linear-gradient(160deg, rgb(25 25 25 / 0.88) 0%, rgb(25 25 25 / 0.78) 50%, rgb(25 25 25 / 0.74) 100%), url("/wp-content/uploads/2026/11/supreme-court-steps-sleeping-street-dog.avif") 70% 70% / cover no-repeat, var(--neutral-5); background-blend-mode: normal, luminosity, normal; color: var(--kit-color-on-ink); padding: var(--kit-space-section) var(--kit-space-gutter); }
+   (21rem to 23rem, six 44px icons a row). The text keeps to 60ch; the column is the other Home sections' (--kit-width-wide
+   inside the gutter). From 768 the Follow us label takes the button's 48px row, so both cards' icons share one line. */
+#share.aw-home-share { --aw-share-dark: var(--kit-color-ink); --aw-share-light: var(--neutral-2); background: linear-gradient(160deg, rgb(25 25 25 / 0.88) 0%, rgb(25 25 25 / 0.78) 50%, rgb(25 25 25 / 0.74) 100%), url("/wp-content/uploads/2026/11/supreme-court-steps-sleeping-street-dog.avif") 70% 70% / cover no-repeat, var(--kit-color-ink); background-blend-mode: normal, luminosity, normal; color: var(--kit-color-on-ink); padding: var(--kit-space-section) var(--kit-space-gutter); }
 @media (min-width: 1200px) { #share.aw-home-share { background-image: linear-gradient(90deg, rgb(25 25 25 / 0.9) 0%, rgb(25 25 25 / 0.8) 45%, rgb(25 25 25 / 0.74) 65%, rgb(25 25 25 / 0.35) 100%), url("/wp-content/uploads/2026/11/supreme-court-steps-sleeping-street-dog.avif"); background-position: 0 0, 62% 70%; } }
 #share.aw-home-share :is(h2, p) { color: var(--kit-color-on-ink); }
-#share.aw-home-share > :is(h2, p) { margin-inline: auto; max-width: 1120px; }
-#share.aw-home-share > p { box-sizing: border-box; padding-right: max(0px, min(100%, 1120px) - 60ch); }
-#share.aw-home-share .aw-camp-share-kit { display: flex; flex-wrap: wrap; align-items: stretch; gap: var(--kit-space-4); max-width: 1120px; margin: var(--kit-space-5) auto 0; }
+#share.aw-home-share > :is(h2, p) { margin-inline: auto; max-width: var(--kit-width-wide); }
+#share.aw-home-share > p { box-sizing: border-box; padding-right: max(0px, min(100%, var(--kit-width-wide)) - 60ch); }
+#share.aw-home-share .aw-camp-share-kit { display: flex; flex-wrap: wrap; align-items: stretch; gap: var(--kit-space-4); max-width: var(--kit-width-wide); margin: var(--kit-space-5) auto 0; }
 #share.aw-home-share .aw-camp-share-kit > .kit-share { box-sizing: border-box; flex: 1 1 21rem; max-width: 23rem; align-self: stretch; display: grid; grid-template-columns: repeat(auto-fill, var(--kit-size-target)); justify-content: space-between; align-content: start; gap: var(--kit-space-2) var(--kit-space-1); margin: 0; padding: var(--kit-space-5); border: 0; border-radius: var(--kit-radius-card); box-shadow: var(--kit-elevation-2); --kit-color-focus: var(--aw-share-dark); }
 #share.aw-home-share .aw-camp-share-kit > .kit-share > :is(.kit-share-label, .kit-share-native) { grid-column: 1 / -1; }
 #share.aw-home-share .aw-camp-share-kit > .kit-share.kit-follow > .kit-share-label { display: block !important; margin: 0 0 var(--kit-space-2); font-size: var(--kit-type-base); font-weight: var(--kit-weight-bold); }
@@ -283,4 +284,7 @@
 @media (max-width: 767px) {
 	#share.aw-home-share .aw-camp-share-kit > .kit-share.has-native > .kit-share-btn:not(.kit-share-native) { display: none !important; }
 	#share.aw-home-share .aw-camp-share-kit > .kit-share.has-native > .kit-share-main { margin-bottom: 0; }
+}
+@media (min-width: 768px) {
+	#share.aw-home-share .aw-camp-share-kit > .kit-share.kit-follow > .kit-share-label { display: flex !important; align-items: center; min-height: var(--kit-size-control); margin: 0 0 var(--kit-space-2); }
 }
