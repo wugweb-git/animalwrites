@@ -36,6 +36,7 @@ if ( ! defined( 'INSIGHTWEB_DIR' ) ) { // already set by the bootstrap on the re
 	define( 'INSIGHTWEB_DIR', plugin_dir_path( __FILE__ ) );
 }
 
+require_once INSIGHTWEB_DIR . 'includes/insightweb-caps.php'; // InsightWeb's own capability, manage_insightweb (granted from manage_options).
 require_once INSIGHTWEB_DIR . 'includes/plugin-info.php'; // icon, banner and View details on the Plugins screen.
 require_once INSIGHTWEB_DIR . 'includes/kits-hub.php'; // a row in Kits System Status, when Kits Core is loaded.
 

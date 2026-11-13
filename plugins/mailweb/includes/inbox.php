@@ -25,7 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const MAILWEB_CAP       = 'edit_others_posts'; // administrators and editors
+defined( 'MAILWEB_CAP' ) || define( 'MAILWEB_CAP', 'manage_mailweb' ); // mailweb-caps.php: administrators and editors (from edit_others_posts)
 const MAILWEB_PER_PAGE  = 25;
 const MAILWEB_SEND_HOUR = 30;
 const MAILWEB_FORMS     = 'forms'; // the "Website forms" folder (mailweb_forms())

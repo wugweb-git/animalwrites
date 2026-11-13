@@ -16,17 +16,17 @@ if ( ! defined( 'ABSPATH' ) ) {
  * The five Kits screens, in menu and tab order (docs/admin-ui-spec.md §B): slug => [label, address relative to
  * wp-admin, capability]. Home has the menu's own slug.
  *
- * Theme Options keeps manage_options for now: it saves through /wp/v2/settings and options.php, which both need it.
+ * Home and Help need manage_kits (kits-caps.php; whoever had manage_options has it). Theme Options keeps manage_options for now: it saves through /wp/v2/settings and options.php, which both need it.
  *
  * @param string $home The menu's slug (KITS_MENU).
  */
 function kits_menu_six( string $home = 'kits' ): array {
 	return array(
-		$home           => array( 'Home', 'admin.php?page=' . $home, 'manage_options' ),
+		$home           => array( 'Home', 'admin.php?page=' . $home, 'manage_kits' ),
 		'kits-options'  => array( 'Theme Options', 'admin.php?page=kits-options', 'manage_options' ),
 		'kits-settings' => array( 'Settings', 'admin.php?page=kits-settings', 'manage_options' ),
 		'kits-tools'    => array( 'Tools', 'admin.php?page=kits-tools', 'edit_theme_options' ),
-		'kits-help'     => array( 'Help', 'admin.php?page=kits-help', 'manage_options' ),
+		'kits-help'     => array( 'Help', 'admin.php?page=kits-help', 'manage_kits' ),
 	);
 }
 

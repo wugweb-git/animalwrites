@@ -53,7 +53,7 @@ add_action(
 	'admin_enqueue_scripts',
 	function () {
 		$screen = rankweb_ui_wanted();
-		if ( '' === $screen || ! function_exists( 'kits_shell_app' ) || ! is_readable( AW_SEO_EXTRAS_DIR . 'build/index.js' ) || ! current_user_can( 'settings' === $screen ? 'manage_options' : 'manage_categories' ) ) {
+		if ( '' === $screen || ! function_exists( 'kits_shell_app' ) || ! is_readable( AW_SEO_EXTRAS_DIR . 'build/index.js' ) || ! current_user_can( 'settings' === $screen ? 'manage_options' : RANKWEB_CAP ) ) {
 			return;
 		}
 		$head = get_file_data( AW_SEO_EXTRAS_DIR . 'aw-seo-extras.php', array( 'Version' => 'Version' ) );

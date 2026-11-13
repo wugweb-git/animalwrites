@@ -3,9 +3,9 @@
  * SourceWeb's screens on the Kits admin shell.
  *
  * Addresses:
- *   admin.php?page=aw-sourcing-menu              Dashboard          (edit_others_posts)
- *   admin.php?page=aw-review                     To review          (edit_others_posts)
- *   admin.php?page=aw-enrich-review              Enrichment review  (edit_others_posts)
+ *   admin.php?page=aw-sourcing-menu              Dashboard          (manage_sourceweb)
+ *   admin.php?page=aw-review                     To review          (manage_sourceweb)
+ *   admin.php?page=aw-enrich-review              Enrichment review  (manage_sourceweb)
  *   admin.php?page=aw-sourcing                   Sources            (manage_options; &edit=<host|new>, &view=feeds,
  *                                                &feed=<id|new>: the feed form, sourceweb_feed_parts())
  *   admin.php?page=aw-sourcing&tab=keywords      Keywords           (manage_options; &edit=<id|new>, &kw=suggestions)

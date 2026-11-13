@@ -113,7 +113,7 @@ function aw_faq_can_edit( $store, $id ) {
 add_action(
 	'admin_menu',
 	function () {
-		$hook = add_submenu_page( AW_SEO_MENU, 'FAQ', 'FAQ', 'manage_categories', 'aw-faq', 'aw_faq_admin_page' ); // RankWeb → FAQ (overview.php has the menu)
+		$hook = add_submenu_page( AW_SEO_MENU, 'FAQ', 'FAQ', RANKWEB_CAP, 'aw-faq', 'aw_faq_admin_page' ); // RankWeb → FAQ (overview.php has the menu)
 		if ( $hook ) {
 			add_action( 'load-' . $hook, 'aw_faq_admin_load' );
 		}

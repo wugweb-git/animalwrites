@@ -38,6 +38,7 @@ if ( defined( 'WP_PLUGIN_DIR' ) && function_exists( 'wp_register_plugin_realpath
 	unset( $kits_core_link );
 }
 
+require_once KITS_CORE_DIR . 'includes/kits-caps.php'; // Kits' own capability, manage_kits (granted from manage_options).
 require_once KITS_CORE_DIR . 'includes/admin-table.php';
 require_once KITS_CORE_DIR . 'includes/dashboard-cards.php';
 require_once KITS_CORE_DIR . 'includes/admin-home.php';
