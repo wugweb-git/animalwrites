@@ -133,7 +133,7 @@ function c2guides( array $slugs ) {
 			. ( $img ? '<figure class="kit-card-media">' . $img . '</figure>' : '' )
 			. '<div class="kit-card-body">'
 			. ( $date ? '<p class="kit-card-meta kit-meta-row">' . $date . '</p>' : '' )
-			. '<h4 class="kit-card-title"><a href="' . esc_url( get_permalink( $g ) ) . '">' . esc_html( get_the_title( $g ) ) . '</a></h4>'
+			. '<h3 class="kit-card-title"><a href="' . esc_url( get_permalink( $g ) ) . '">' . esc_html( get_the_title( $g ) ) . '</a></h3>'
 			. '</div></article></li>';
 	}
 	return $items ? c2html( '<div class="aw-camp-guides"><h3 class="aw-camp-guides-head">Read the full guide</h3><ul class="aw-stack-list aw-camp-guides-list">' . $items . '</ul></div>' ) : '';

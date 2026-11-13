@@ -1028,6 +1028,60 @@ add_filter(
 );
 
 /*
+ * The lab rules page's What people are saying: the social posts kept as Media & PR items are drawn as the social post
+ * cards above them (owner, 14 Nov 2026: "not the right way to show reels"), a reel upright with its play mark, an
+ * Instagram post at 4:5, X as X; a post the Social posts block already shows on the page is not shown twice.
+ */
+add_filter(
+	'render_block_core/query',
+	function ( $html, $block ) {
+		$a = $block['attrs'] ?? array();
+		if ( ! is_singular( 'aw_campaign' ) || 'aw_press' !== ( $a['query']['postType'] ?? '' ) || false === strpos( (string) ( $a['className'] ?? '' ), 'aw-camp-row-q' )
+			|| 'lab-animals-rules-2026' !== get_post_field( 'post_name', get_queried_object_id() ) || ! function_exists( 'aw_social_press_card' ) ) {
+			return $html;
+		}
+		$tax = array();
+		foreach ( (array) ( $a['query']['taxQuery'] ?? array() ) as $taxonomy => $terms ) {
+			$tax[] = array( 'taxonomy' => $taxonomy, 'terms' => array_map( 'intval', (array) $terms ) );
+		}
+		$posts = get_posts(
+			array(
+				'post_type'        => 'aw_press',
+				'post_status'      => 'publish',
+				'numberposts'      => max( 1, (int) ( $a['query']['perPage'] ?? 4 ) ) * 2, // room for the ones shown as Social posts
+				'orderby'          => 'date',
+				'order'            => 'DESC',
+				'tax_query'        => $tax, // phpcs:ignore WordPress.DB.SlowDBQuery
+				'meta_query'       => array( array( 'key' => 'aw_press_group', 'value' => array( 'social', 'videos' ), 'compare' => 'IN' ) ), // phpcs:ignore WordPress.DB.SlowDBQuery
+				'suppress_filters' => false,
+			)
+		);
+		$shown = array(); // the posts the Social posts block already shows on this page (at most six, one per person)
+		foreach ( function_exists( 'aw_social_for_item' ) ? aw_social_for_item( get_queried_object_id() ) : array() as $sp ) {
+			$shown[ (string) get_post_meta( $sp->ID, 'aw_social_key', true ) ] = true;
+		}
+		$cards = array();
+		foreach ( $posts as $p ) {
+			$link = aw_social_parse_url( (string) get_post_meta( $p->ID, 'aw_press_url', true ) );
+			if ( '' !== $link['key'] && isset( $shown[ $link['key'] ] ) ) {
+				continue;
+			}
+			$cards[] = aw_social_press_card( $p );
+			if ( count( $cards ) >= max( 1, (int) ( $a['query']['perPage'] ?? 4 ) ) ) {
+				break;
+			}
+		}
+		if ( ! $cards ) {
+			return '';
+		}
+		aw_use_component_style( 'aw-single' ); // aw-more-list and the social card
+		return '<ul class="kit-minicard-list aw-more-list aw-camp-social-more">' . implode( '', $cards ) . '</ul>';
+	},
+	10,
+	2
+);
+
+/*
  * Campaign pages' "In the news" lists the campaign's News and its Media & PR news articles together (owner, 24 Oct
  * 2026), newest first; social posts and videos stay in "What's happening". After systems.php (10) has applied the
  * Campaign link filter.

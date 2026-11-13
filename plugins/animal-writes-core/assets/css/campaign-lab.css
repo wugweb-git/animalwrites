@@ -899,15 +899,10 @@
 	.aw-camp.aw-camp--lab-rules #why-it-matters .aw-camp-grid > .aw-camp-card:nth-child(6) { padding-right: 34%; background: linear-gradient(90deg, var(--camp-dark) 0%, var(--camp-dark) 64%, rgb(29 20 24 / 0.5) 80%, rgb(29 20 24 / 0.15) 100%), url("/wp-content/plugins/animal-writes-core/theme/assets/img/campaigns/lab-rules-red-book-papers-pencil.webp") 100% 50% / 36% auto no-repeat, var(--camp-dark); }
 }
 
-/* Stacked cards at 1:3, picture to text (owner rule, 13 Nov 2026: resource, news and library thumbnails carry little,
-   so they sit beside the text at a quarter of the card): the social posts under What people are saying (#people, two
-   columns from 768). Kits sets the stacked picture to a fixed thumb with !important, so this width needs it too. */
-.aw-camp.aw-camp #people .aw-camp-row-q { display: grid; gap: var(--kit-space-4); grid-template-columns: minmax(0, 1fr); }
-@media (min-width: 768px) { .aw-camp.aw-camp #people .aw-camp-row-q { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-.aw-camp.aw-camp #people .aw-camp-row-q .kit-card { flex-direction: row; align-items: center; gap: var(--kit-space-4); height: 100%; box-sizing: border-box; padding: var(--kit-space-5); }
-.aw-camp.aw-camp #people .kit-card[class*="kit-card--stacked"] > .kit-card-media { flex: none; width: 25% !important; max-width: none; min-width: 0; margin: 0; aspect-ratio: 1; overflow: hidden; }
-.aw-camp.aw-camp #people .kit-card[class*="kit-card--stacked"] > .kit-card-media img { width: 100%; height: 100%; object-fit: cover; }
-.aw-camp.aw-camp #people .kit-card[class*="kit-card--stacked"] > .kit-card-body { flex: 1; min-width: 0; }
+/* What people are saying (#people): the social posts kept as Media & PR items are drawn as social post cards
+   (campaign-tools.php, owner 14 Nov 2026), in a second list under the Social posts block, at the list's own gap. */
+.aw-camp.aw-camp #people .aw-camp-social-more { margin-top: var(--kit-space-4); }
+@media (min-width: 768px) { .aw-camp.aw-camp #people .aw-camp-social-more { margin-top: var(--kit-space-grid); } }
 /* Read the law and the record (#read) uses the theme's stacked card (owner, 14 Nov 2026: "map to theme"): the picture
    is --kit-card-stacked-media-width at --kit-card-stacked-media-ratio (112x84, 4:3) at the top, and the words set the
    card's height. */

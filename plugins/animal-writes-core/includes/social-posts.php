@@ -987,15 +987,62 @@ function aw_social_for_item( int $id ): array {
  * @param WP_Post $p Social post.
  */
 function aw_social_card( WP_Post $p ): string {
-	$url      = (string) get_post_meta( $p->ID, 'aw_social_url', true );
+	return aw_social_card_html(
+		array(
+			'id'       => $p->ID,
+			'url'      => (string) get_post_meta( $p->ID, 'aw_social_url', true ),
+			'platform' => (string) get_post_meta( $p->ID, 'aw_social_platform', true ),
+			'person'   => (string) get_post_meta( $p->ID, 'aw_social_person', true ),
+			'handle'   => (string) get_post_meta( $p->ID, 'aw_social_handle', true ),
+			'summary'  => (string) get_post_meta( $p->ID, 'aw_social_summary', true ),
+			'date'     => (string) get_post_meta( $p->ID, 'aw_social_date', true ),
+			'format'   => (string) get_post_meta( $p->ID, 'aw_social_format', true ),
+			'poster'   => (int) get_post_meta( $p->ID, 'aw_social_poster', true ),
+		)
+	);
+}
+
+/**
+ * A social post kept as a Media & PR item (aw_press, group social or videos), drawn as the same card: the publisher
+ * as the name, the account as the handle, the item's title as the summary, its own saved picture as the poster (never
+ * the platform's thumbnail URL); an Instagram or Facebook reel or video is upright (9:16) with a play mark.
+ *
+ * @param WP_Post $p Media & PR item.
+ */
+function aw_social_press_card( WP_Post $p ): string {
+	$fmt  = (string) get_post_meta( $p->ID, 'aw_press_format', true );
+	$date = (string) get_post_meta( $p->ID, 'aw_press_date', true );
+	$date = preg_match( '/^\d{8}$/', $date ) ? substr( $date, 0, 4 ) . '-' . substr( $date, 4, 2 ) . '-' . substr( $date, 6, 2 ) : $date;
+	return aw_social_card_html(
+		array(
+			'id'       => $p->ID,
+			'url'      => (string) get_post_meta( $p->ID, 'aw_press_url', true ),
+			'platform' => (string) get_post_meta( $p->ID, 'aw_press_platform', true ),
+			'person'   => (string) get_post_meta( $p->ID, 'aw_press_publisher', true ),
+			'handle'   => (string) get_post_meta( $p->ID, 'aw_press_account', true ),
+			'summary'  => html_entity_decode( get_the_title( $p ), ENT_QUOTES, 'UTF-8' ),
+			'date'     => preg_match( '/^\d{4}-\d{2}-\d{2}/', $date ) ? substr( $date, 0, 10 ) : get_the_date( 'Y-m-d', $p ),
+			'format'   => in_array( $fmt, array( 'instagram-reel', 'facebook-video' ), true ) ? 'video' : '',
+			'poster'   => 'youtube' === aw_social_parse_url( (string) get_post_meta( $p->ID, 'aw_press_url', true ) )['platform'] ? 0 : (int) get_post_thumbnail_id( $p ), // YouTube shows its player instead
+		)
+	);
+}
+
+/**
+ * The card's markup from its fields (id, url, platform, person, handle, summary, date Y-m-d, format, poster).
+ *
+ * @param array $d Fields.
+ */
+function aw_social_card_html( array $d ): string {
+	$url      = (string) $d['url'];
 	$link     = aw_social_parse_url( $url );
-	$platform = (string) get_post_meta( $p->ID, 'aw_social_platform', true );
-	$person   = (string) get_post_meta( $p->ID, 'aw_social_person', true );
-	$handle   = (string) get_post_meta( $p->ID, 'aw_social_handle', true );
-	$summary  = (string) get_post_meta( $p->ID, 'aw_social_summary', true );
-	$date     = (string) get_post_meta( $p->ID, 'aw_social_date', true );
-	$format   = (string) get_post_meta( $p->ID, 'aw_social_format', true );
-	$poster   = (int) get_post_meta( $p->ID, 'aw_social_poster', true );
+	$platform = (string) $d['platform'];
+	$person   = (string) $d['person'];
+	$handle   = (string) $d['handle'];
+	$summary  = (string) $d['summary'];
+	$date     = (string) $d['date'];
+	$format   = (string) $d['format'];
+	$poster   = (int) $d['poster'];
 	$on       = isset( AW_SOCIAL_PLATFORMS[ $platform ] ) && 'other' !== $platform ? $platform : $link['platform']; // the saved platform, else the one the link shows
 	$label    = AW_SOCIAL_PLATFORMS[ $on ] ?? '';
 	$name     = '' !== $person ? $person : ( '' !== $handle ? $handle : $label );
@@ -1008,7 +1055,7 @@ function aw_social_card( WP_Post $p ): string {
 	$avatar   = '<span class="aw-social-avatar" aria-hidden="true">' . esc_html( strtoupper( $initial ) ) . '</span>';
 	$media    = '';
 	if ( 'youtube' === $link['platform'] && '' !== $link['video'] ) {
-		$box   = 'aw-social-embed-' . (int) $p->ID;
+		$box   = 'aw-social-embed-' . (int) $d['id'];
 		$media = '<div id="' . esc_attr( $box ) . '" class="aw-social-media" data-aw-social-embed="youtube" data-id="' . esc_attr( $link['video'] ) . '" data-title="' . esc_attr( $name ) . '"></div>';
 		aw_social_embed_script();
 	}
