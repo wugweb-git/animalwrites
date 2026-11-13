@@ -66,3 +66,10 @@
 
 /* Timeline dates as date cards: the date line (.kit-dateline, kit-primitives.css) lays them out on every campaign and Home. */
 .aw-camp ol.aw-camp-dates.kit-dateline { margin: var(--kit-space-5) 0; }
+
+/* Checkboxes and radios on a campaign page take the campaign's colour, and so does a choice card's hover and chosen edge
+   (owner, 14 Nov 2026: "checkbox in campaign to be campaign brand color, same goes for hover accent"). The chosen card
+   keeps its 2px edge and the tick, so the state never rests on colour alone. */
+:is(.aw-camp, .aw-camp-end, .aw-nl-band--camp) :is(input[type=checkbox], input[type=radio]) { accent-color: var(--camp-mark, var(--kit-color-ink)); }
+@media (hover: hover) { :is(.aw-camp, .aw-camp-end) .aw-letter-ground.kit-checkbox:hover { border-color: var(--camp-mark, var(--kit-color-ink)); } }
+:is(.aw-camp, .aw-camp-end) .aw-letter-ground.kit-checkbox:has(input:checked) { border-color: var(--camp-mark, var(--kit-color-ink)); box-shadow: inset 0 0 0 1px var(--camp-mark, var(--kit-color-ink)); }
