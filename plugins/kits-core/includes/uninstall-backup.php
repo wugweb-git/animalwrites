@@ -241,8 +241,7 @@ function kits_uninstall_backup( string $plugin, string $main, array $names, arra
 			continue;
 		}
 		$keys           = $wpdb->get_results( 'SHOW KEYS FROM `' . esc_sql( $table ) . "` WHERE Key_name = 'PRIMARY'", ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared -- uninstall backup: the plugin's own table name
-		$cols           = is_array( $keys ) ? array_map( static fn( $k ) => '`' . esc_sql( (string) $k['Column_name'] ) . '`', $keys ) : array();
-		$have[ $table ] = $cols ? ' ORDER BY ' . implode( ', ', $cols ) : '';
+		$have[ $table ] = is_array( $keys ) ? array_map( static fn( $k ) => (string) $k['Column_name'], $keys ) : array();
 	}
 
 	$time = time();
@@ -276,9 +275,14 @@ function kits_uninstall_backup( string $plugin, string $main, array $names, arra
 			return $abort( 'write failed' );
 		}
 	}
-	foreach ( $have as $table => $order ) {
-		$fetch = static function ( int $offset, int $limit ) use ( $wpdb, $table, $order ) {
-			$rows = $wpdb->get_results( $wpdb->prepare( 'SELECT * FROM `' . esc_sql( $table ) . '`' . $order . ' LIMIT %d OFFSET %d', $limit, $offset ), ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared -- uninstall backup: the plugin's own table, in batches
+	foreach ( $have as $table => $cols ) {
+		$fetch = static function ( int $offset, int $limit ) use ( $wpdb, $table, $cols ) {
+			// Uninstall backup: the plugin's own table, in batches, in primary-key order when it has one.
+			if ( $cols ) {
+				$rows = $wpdb->get_results( $wpdb->prepare( 'SELECT * FROM %i ORDER BY ' . implode( ', ', array_fill( 0, count( $cols ), '%i' ) ) . ' LIMIT %d OFFSET %d', array_merge( array( $table ), $cols, array( $limit, $offset ) ) ), ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- one %i per key column
+			} else {
+				$rows = $wpdb->get_results( $wpdb->prepare( 'SELECT * FROM %i LIMIT %d OFFSET %d', $table, $limit, $offset ), ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			}
 			return '' === $wpdb->last_error && is_array( $rows ) ? $rows : null;
 		};
 		$write = static fn( array $row ): bool => $put( kits_backup_row_line( $table, $row ) );
