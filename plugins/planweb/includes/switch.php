@@ -85,6 +85,38 @@ add_action(
 			'planweb_module',
 			array( 'label_for' => 'planweb_on' )
 		);
+		add_settings_field(
+			'planweb_delete_data_on_uninstall',
+			__( 'Delete this plugin\'s data when it is deleted', 'planweb' ),
+			function () {
+				printf(
+					'<input type="checkbox" id="planweb_delete_data_on_uninstall" name="planweb_delete_data_on_uninstall" value="1"%1$s> <p class="description">%2$s</p>',
+					checked( (bool) get_option( 'planweb_delete_data_on_uninstall', false ), true, false ),
+					esc_html__( 'Off: everything stays in the database if the plugin is deleted.', 'planweb' )
+				);
+			},
+			'aw-modules',
+			'planweb_module',
+			array( 'label_for' => 'planweb_delete_data_on_uninstall' )
+		);
+	}
+);
+
+// Whether deleting PlanWeb also deletes its own settings (uninstall.php). Off by default. On init, so the REST API has
+// it too; its box is in the Kits → Modules form above, under the switch.
+add_action(
+	'init',
+	function () {
+		register_setting(
+			'aw_modules',
+			'planweb_delete_data_on_uninstall',
+			array(
+				'type'              => 'boolean',
+				'default'           => false,
+				'sanitize_callback' => 'rest_sanitize_boolean',
+				'show_in_rest'      => true,
+			)
+		);
 	}
 );
 

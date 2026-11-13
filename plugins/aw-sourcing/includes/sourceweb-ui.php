@@ -193,7 +193,7 @@ function sourceweb_ui_page( string $screen ): void {
 /**
  * Server-drawn forms a screen shows under its own content, as Kits page parts: on To review, other plugins' intake
  * forms (aw_review_intake; core's social-posts.php adds a social post from its link); on Settings, the backfill date
- * (a Settings API form, administrators only).
+ * and the uninstall box (Settings API forms, administrators only).
  *
  * @param string $screen The screen.
  */
@@ -210,6 +210,11 @@ function sourceweb_extra_parts( string $screen ): array {
 		settings_fields( 'aw_src_backfill' );
 		do_settings_sections( 'aw-src-backfill' );
 		submit_button( 'Save backfill date' );
+		echo '</form>';
+		echo '<form method="post" action="' . esc_url( admin_url( 'options.php' ) ) . '">';
+		settings_fields( 'aw_src_uninstall' );
+		do_settings_sections( 'aw-src-uninstall' );
+		submit_button( 'Save uninstall setting' );
 		echo '</form>';
 	}
 	$html = trim( (string) ob_get_clean() );
@@ -234,4 +239,38 @@ function sourceweb_feed_parts(): array {
 	$html = (string) ob_get_clean();
 	$html = (string) preg_replace( '#\s*<a [^>]*class="button">Cancel</a>#', '', $html ); // the screen's own Back button does this
 	return kits_shell_html_parts( $html );
+}
+
+// SourceWeb → Settings → Uninstall: whether deleting SourceWeb also deletes its own data (uninstall.php). Off by
+// default. Registered on init, so the REST API has it too; the box is a Settings API form (sourceweb_extra_parts()).
+add_action(
+	'init',
+	function () {
+		register_setting(
+			'aw_src_uninstall',
+			'aw_src_delete_data_on_uninstall',
+			array(
+				'type'              => 'boolean',
+				'default'           => false,
+				'sanitize_callback' => 'rest_sanitize_boolean',
+				'show_in_rest'      => true,
+			)
+		);
+	}
+);
+add_action(
+	'admin_init',
+	function () {
+		add_settings_section( 'aw_src_uninstall', 'Uninstall', '__return_null', 'aw-src-uninstall' );
+		add_settings_field( 'aw_src_delete_data_on_uninstall', 'Delete this plugin\'s data when it is deleted', 'sourceweb_uninstall_field', 'aw-src-uninstall', 'aw_src_uninstall', array( 'label_for' => 'aw_src_delete_data_on_uninstall' ) );
+	}
+);
+
+/** The uninstall box. */
+function sourceweb_uninstall_field(): void {
+	printf(
+		'<input type="checkbox" id="aw_src_delete_data_on_uninstall" name="aw_src_delete_data_on_uninstall" value="1"%1$s> <p class="description">%2$s</p>',
+		checked( (bool) get_option( 'aw_src_delete_data_on_uninstall', false ), true, false ),
+		esc_html( 'Off: everything stays in the database if the plugin is deleted.' )
+	);
 }
