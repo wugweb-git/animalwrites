@@ -1305,17 +1305,37 @@ header.wp-block-template-part.kit-header-hidden { transform: translateY(calc(-10
 .kit-card[class*="kit-card--stacked"] { flex-direction: row; align-items: flex-start; gap: var(--kit-space-4); padding: var(--wp--custom--kits--card--padding, var(--kit-space-4)); }
 .kit-card[class*="kit-card--stacked"] > .kit-card-body { padding: 0; flex: var(--kit-card-stacked-body-flex); min-width: var(--kit-card-stacked-body-min); }
 .kit-card[class*="kit-card--stacked"] > .kit-card-media { border-radius: var(--kit-radius-media); flex: var(--kit-card-stacked-media-flex); min-width: var(--kit-card-stacked-media-min); }
-/* The wide stacked card wins over every list's own card gap, padding and picture width (campaign and Home rules reach
-   the card through an id): the two :is(…, #kits-card-weight) add two ids' weight, so no !important is needed and a
-   value from Theme Options → Cards (or an inline style) can still change it. */
-.kit-card.kit-card--stacked-lg:is(.kit-card, #kits-card-weight):is(.kit-card, #kits-card-weight) { gap: var(--wp--custom--kits--card--stacked--gap, var(--kit-card-stacked-gap)); padding: var(--wp--custom--kits--card--stacked--padding, var(--wp--custom--kits--card--padding, var(--kit-space-4))); }
-.kit-card.kit-card--stacked-lg:is(.kit-card, #kits-card-weight):is(.kit-card, #kits-card-weight) > .kit-card-media { width: var(--kit-card-stacked-media); max-width: var(--kit-card-stacked-media-max); }
-.kit-card--stacked-lg .kit-card-title { font-size: var(--kit-type-h3) !important; }
-.kit-card--stacked-md > .kit-card-media { width: var(--kit-thumb-lg) !important; max-width: 40%; }
+/* The stacked card with a picture, one card across the theme and the product, every size (lg, md, sm) and every list
+   (owner's spec, 14 Nov 2026, "Fix Kits Stacked Card Component"; owner: "the stacked layout card will be same across
+   theme and product"). The card has no padding and no gap, a 16px radius, and clips the picture; the picture is flush
+   to the card's left, top and bottom edges and runs its full height (never shorter than --kit-card-stacked-media-ratio
+   of its width, cover crop), 88px on phones up to 390px and --kit-card-stacked-media-width (112px) by 475px; the words
+   carry their own padding, 12px 16px, below 768 8px 10px, and set the height. The text column's basis is 238px: 88 +
+   238 = 326px, the inside of a card on a 360px phone, so from 360 the picture sits beside the words, and below 360 (or
+   in any card too narrow for it) it goes on top, full width. Title through --kit-type-card-title, 18px below 768, 22px
+   from 768, 24px from 1200, line-height 1.25, never clamped or cut. The meta row and tags wrap when they have no room,
+   never overflowing. The :is(…, #kits-card-weight) adds an id's weight, so list and page rules never stack on top of
+   the card (fix the source, not another override layer), while Theme Options or an inline style can still change it. */
+.kit-card[class*="kit-card--stacked"]:has(> .kit-card-media):is(.kit-card, #kits-card-weight) { --kit-type-card-title: 1.125rem; flex-direction: row; flex-wrap: wrap; align-items: stretch; gap: 0; height: auto; min-height: 0; overflow: hidden; padding: 0; border-radius: 16px; }
+.kit-card[class*="kit-card--stacked"]:has(> .kit-card-media):is(.kit-card, #kits-card-weight) > .kit-card-media { position: relative; overflow: hidden; flex: 1 1 clamp(88px, calc(28vw - 21px), var(--kit-card-stacked-media-width)); align-self: stretch; box-sizing: border-box; width: auto; height: auto; max-width: none; min-width: 0; margin: 0; aspect-ratio: var(--kit-card-stacked-media-ratio); border-radius: 0; }
+.kit-card[class*="kit-card--stacked"]:has(> .kit-card-media):is(.kit-card, #kits-card-weight) > .kit-card-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 0; }
+.kit-card[class*="kit-card--stacked"]:has(> .kit-card-media):is(.kit-card, #kits-card-weight) > .kit-card-body { flex: 999 1 238px; min-width: 0; box-sizing: border-box; align-self: center; padding: var(--kit-space-3) var(--kit-space-4); }
+.kit-card[class*="kit-card--stacked"]:has(> .kit-card-media):is(.kit-card, #kits-card-weight) :is(h3, h4).kit-card-title.kit-card-title { font-size: var(--kit-type-card-title) !important; line-height: 1.25 !important; }
+.kit-card[class*="kit-card--stacked"]:has(> .kit-card-media):is(.kit-card, #kits-card-weight) :is(h3, h4).kit-card-title.kit-card-title a { display: inline; -webkit-line-clamp: unset; line-clamp: unset; overflow: visible; font-size: inherit !important; line-height: inherit !important; }
+.kit-card[class*="kit-card--stacked"]:has(> .kit-card-media):is(.kit-card, #kits-card-weight) :is(.kit-card-metarow, .kit-card-meta, .kit-card-chips) { flex-wrap: wrap; height: auto; overflow: visible; row-gap: var(--kit-space-1); }
+.kit-card[class*="kit-card--stacked"]:has(> .kit-card-media):is(.kit-card, #kits-card-weight) .kit-card-metarow > :is(.kit-card-meta, .kit-card-chips) { flex: 0 1 auto; max-width: 100%; }
+.kit-card[class*="kit-card--stacked"]:has(> .kit-card-media):is(.kit-card, #kits-card-weight) .kit-card-chips > * { max-width: 100%; }
+.kit-card[class*="kit-card--stacked"]:has(> .kit-card-media):is(.kit-card, #kits-card-weight) .kit-tag { height: auto; white-space: normal; }
+.kit-card[class*="kit-card--stacked"]:has(> .kit-card-media):is(.kit-card, #kits-card-weight) .kit-tag-text { white-space: normal; overflow: visible; text-overflow: clip; }
+@media (max-width: 767px) {
+	.kit-card[class*="kit-card--stacked"]:has(> .kit-card-media):is(.kit-card, #kits-card-weight) > .kit-card-body { padding: var(--kit-space-2) 10px; }
+	.kit-card[class*="kit-card--stacked"]:has(> .kit-card-media):is(.kit-card, #kits-card-weight) :is(.kit-card-metarow, .kit-card-meta, .kit-card-chips) { font-size: 13px; }
+}
+@media (min-width: 768px) { .kit-card[class*="kit-card--stacked"]:has(> .kit-card-media):is(.kit-card, #kits-card-weight) { --kit-type-card-title: 1.375rem; } }
+@media (min-width: 1200px) { .kit-card[class*="kit-card--stacked"]:has(> .kit-card-media):is(.kit-card, #kits-card-weight) { --kit-type-card-title: 1.5rem; } }
 .kit-card:is(.kit-card--stacked-md, .kit-card--stacked-sm, .kit-card--block-sm) .kit-card-sum { display: none; }
-.kit-card--stacked-sm { align-items: center !important; gap: var(--kit-space-3) !important; }
-.kit-card--stacked-sm > .kit-card-media { width: var(--kit-thumb-sm) !important; }
-.kit-card--stacked-sm .kit-card-title { font-size: var(--kit-type-sm) !important; }
+.kit-card--stacked-sm:not(:has(> .kit-card-media)) { align-items: center !important; gap: var(--kit-space-3) !important; }
+.kit-card--stacked-sm:not(:has(> .kit-card-media)) .kit-card-title { font-size: var(--kit-type-sm) !important; }
 .kit-card--stacked-sm > .kit-card-body { gap: var(--kit-space-1); }
 .kit-card--stacked-sm::before { content: ""; flex: none; width: 1.5rem; height: 1.5rem; background: var(--kit-card-icon-color, var(--kit-color-ink)); -webkit-mask: var(--kit-card-icon, var(--kit-ico-file, none)) center / contain no-repeat; mask: var(--kit-card-icon, var(--kit-ico-file, none)) center / contain no-repeat; }
 .kit-card--stacked-sm:has(> .kit-card-media)::before { content: none; }
