@@ -1170,7 +1170,7 @@ function aw_camp_dates_state( $html ) {
 						$next = true;
 					}
 					if ( '' === $add ) {
-						return $li[0];
+						$add = 'is-upcoming'; // after the next one: still to come (the date card draws it as a blank page)
 					}
 					$attrs = preg_match( '#\bclass="#', $li[1] ) ? preg_replace( '#\bclass="#', 'class="' . $add . ' ', $li[1], 1 ) : $li[1] . ' class="' . $add . '"';
 					return '<li' . $attrs . '>' . $li[2] . '</li>';

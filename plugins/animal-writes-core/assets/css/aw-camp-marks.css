@@ -66,7 +66,7 @@
 
 /* Timeline dates as date cards (.kit-datecard, owner 13 Nov 2026). Phones: the card beside its words; from 24rem (row of
    three) the card above them. */
-.aw-camp .aw-camp-dates li:has(> .aw-camp-dates-when > .kit-datecard) { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: var(--kit-space-4); align-items: start; }
+.aw-camp .aw-camp-dates li:has(> .aw-camp-dates-when > .kit-datecard) { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto; column-gap: var(--kit-space-4); align-items: start; align-content: start; } /* align-content: rows keep their own height in a stretched li (the words sat at different heights, 13 Nov) */
 .aw-camp .aw-camp-dates .aw-camp-dates-when:has(> .kit-datecard) { display: block; min-height: 0; font-size: inherit; white-space: normal; }
 .aw-camp .aw-camp-dates li:has(> .aw-camp-dates-when > .kit-datecard) > .aw-camp-dates-what { margin-top: var(--kit-space-2); }
 @container aw-happening (min-width: 24rem) {
