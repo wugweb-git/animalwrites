@@ -674,3 +674,12 @@ add_filter(
 	21,
 	2
 );
+
+// No folds (owner, 13 Nov 2026: "remove all + sign to expand collapse from all campaigns and all pages"): every Details
+// block on the site is drawn open, so nothing moves when the page loads; kit.js keeps it open and kit.css drops the "+".
+add_filter(
+	'render_block_core/details',
+	function ( $html ) {
+		return is_admin() ? $html : (string) preg_replace( '/<details\b(?![^>]*\sopen\b)/', '<details open', $html, 1 );
+	}
+);

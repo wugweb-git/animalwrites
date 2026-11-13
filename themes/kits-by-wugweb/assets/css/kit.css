@@ -583,6 +583,14 @@ ins.adsbygoogle:not([data-ad-status="filled"]) { height: 0 !important; min-heigh
 .wp-block-details summary::after { content: "+"; font-size: 1.4em; line-height: 1; transition: transform var(--kit-motion-base) var(--kit-motion-ease); }
 .wp-block-details[open] summary::after { transform: rotate(45deg); }
 
+/* No folds (owner, 13 Nov 2026: "remove all + sign to expand collapse from all campaigns and all pages"): the Details
+   block, claim folds, card folds and both FAQs show open with no "+"; the summary stays as the item's heading, not a
+   button (kit.js keeps it open). "Show more" folds lose their summary: everything they held shows. */
+:is(.wp-block-details, .kit-claim details, details.aw-camp-card-fold) > summary { cursor: default; }
+:is(.wp-block-details, .kit-claim details, details.aw-camp-card-fold) > summary::after,
+.rank-math-question > button::after, .kit-faq-btn::after { content: none !important; }
+.wp-block-details.aw-more > summary { display: none; }
+
 /* Pagination */
 .wp-block-query-pagination a, .wp-block-query-pagination .page-numbers, .wp-block-post-navigation-link a {
 	display: inline-flex; align-items: center; justify-content: center; min-height: var(--kit-size-target); min-width: var(--kit-size-target);

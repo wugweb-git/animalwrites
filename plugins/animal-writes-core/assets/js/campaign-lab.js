@@ -654,24 +654,7 @@
 	});
 })();
 
-/* What the draft does (campaign-lab.css, bento): the four supporting tiles fold (the lead and the full-width last tile stay open). Each tile's own H3 moves into a summary and
-   its text into the same details, so the tile shows icon, heading and rule chips and the text opens on tap. No words are
-   added; the rule chips stay outside the fold. Without JavaScript nothing changes and every text stays open. */
-(function () {
-	if (!('open' in document.createElement('details'))) return;
-	document.querySelectorAll('.aw-camp--lab-rules .aw-camp-grid > .aw-camp-card:not(:first-child):not(:last-child)').forEach(function (card) {
-		var h = card.querySelector(':scope > h3');
-		var text = card.querySelectorAll(':scope > p:not(.aw-camp-card-ico):not(.aw-camp-card-chips)');
-		if (!h || !text.length) return;
-		var fold = document.createElement('details');
-		fold.className = 'aw-camp-card-fold';
-		var sum = document.createElement('summary');
-		card.insertBefore(fold, h);
-		sum.appendChild(h);
-		fold.appendChild(sum);
-		text.forEach(function (p) { fold.appendChild(p); });
-	});
-})();
+/* What the draft does: no tile folds (owner, 13 Nov 2026: no expand and collapse on any page); every tile shows its text. */
 
 /* What the draft does: the tiles fade in once, when the grid first comes on screen (campaign-lab.css is-reveal / is-in).
    Skipped with reduced motion or without IntersectionObserver; a timer shows them anyway if the observer never fires. */

@@ -764,54 +764,5 @@ function awScPicker(fig, id, opts, start) {
 	awScPicker(fig, 'aw-sc-pick-order', opts, opts.length ? opts[opts.length - 1].row : 0);
 })();
 
-/* Supreme Court, What you can do before 17 Nov (owner, 3 Nov 2026: "fix all four"): the Lab page's card fold
-   (campaign-lab.js), drawn as the theme's details block (kit.css .wp-block-details: a 44px summary and the "+" marker).
-   The lead card stays open; in the others the card's own H3 moves into a summary and its text into
-   the same details, so the card shows icon and heading and the text opens on tap. No words are added. The section fits
-   Layout rules 5 (824 to 659 at 768). Without JavaScript nothing changes and every text stays open. */
-(function () {
-	if (!('open' in document.createElement('details'))) return;
-	document.querySelectorAll('.aw-camp--sc-stray-dogs #act .aw-camp-grid > .aw-camp-card:not(:first-child)').forEach(function (card) {
-		var h = card.querySelector(':scope > h3');
-		var text = card.querySelectorAll(':scope > p:not(.aw-camp-card-ico):not(.aw-camp-card-chips)');
-		if (!h || !text.length) return;
-		var fold = document.createElement('details');
-		fold.className = 'wp-block-details aw-camp-card-fold';
-		var sum = document.createElement('summary');
-		card.insertBefore(fold, h);
-		sum.appendChild(h);
-		fold.appendChild(sum);
-		text.forEach(function (p) { fold.appendChild(p); });
-	});
-})();
-
-/* Supreme Court, In the news and Read the law and the record (owner, 3 Nov 2026: "fix all four"): the first row of
-   cards shows, the rest open in one fold under it (Layout rules 5: folds, or the first row plus See all). The fold is the
-   theme's details block (kit.css .wp-block-details) and its summary is the site's own label for that list ("More news",
-   "More from the Library", as in item-head.php's related lists), so no words are added. The cards move into a list
-   with the same classes, so they keep their look. Without JavaScript every card shows, as before. */
-function awScMore(sec, keep, label) {
-	var lists = sec ? sec.querySelectorAll('.wp-block-query .wp-block-post-template') : [];
-	if (!lists.length) return;
-	var items = [];
-	Array.prototype.forEach.call(lists, function (ul) { Array.prototype.push.apply(items, ul.children); });
-	var rest = items.slice(keep);
-	if (!rest.length) return;
-	var fold = document.createElement('details');
-	fold.className = 'wp-block-details aw-sc-more';
-	var sum = document.createElement('summary');
-	sum.textContent = label;
-	var ul = document.createElement('ul');
-	ul.className = lists[0].className;
-	rest.forEach(function (li) { ul.appendChild(li); });
-	fold.appendChild(sum);
-	fold.appendChild(ul);
-	var last = lists[lists.length - 1];
-	last.parentNode.insertBefore(fold, last.nextSibling); // inside the query, so the list keeps its own card rules
-}
-(function () {
-	var camp = document.querySelector('.aw-camp--sc-stray-dogs');
-	if (!camp || !('open' in document.createElement('details'))) return;
-	awScMore(camp.querySelector('#latest'), 2, 'More news');
-	awScMore(camp.querySelector('#read'), 2, 'More from the Library');
-})();
+/* Supreme Court: the card fold and the "More news" folds are gone (owner, 13 Nov 2026: no expand and collapse on any
+   page); every card and its text shows. */

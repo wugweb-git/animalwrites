@@ -167,7 +167,7 @@ function aw_camp_record_fold( $html ) {
 	$ul_tag = substr( $html, $ul, strpos( $html, '>', $ul ) - $ul + 1 );
 	$q_tag  = substr( $html, $q, strpos( $html, '>', $q ) - $q + 1 );
 	aw_use_component_style( 'aw-single' ); // aw-more
-	$open   = '</ul></div><details class="wp-block-details aw-more aw-camp-record-more"><summary><span class="aw-more-show">Show more</span><span class="aw-more-less">Show less</span></summary>' . $q_tag . $ul_tag;
+	$open   = '</ul></div><details open class="wp-block-details aw-more aw-camp-record-more"><summary><span class="aw-more-show">Show more</span><span class="aw-more-less">Show less</span></summary>' . $q_tag . $ul_tag;
 	return substr( $html, 0, $at ) . $open . substr( $html, $at, $end - $at ) . '</details>' . substr( $html, $end );
 }
 
@@ -217,7 +217,7 @@ add_filter(
 			return $html; // nothing to fold
 		}
 		aw_use_component_style( 'aw-single' ); // aw-more
-		$fold = '<details class="wp-block-details aw-more aw-camp-record-more aw-camp-timeline-more"><summary><span class="aw-more-show">Show more</span><span class="aw-more-less">Show less</span></summary></details>';
+		$fold = '<details open class="wp-block-details aw-more aw-camp-record-more aw-camp-timeline-more"><summary><span class="aw-more-show">Show more</span><span class="aw-more-less">Show less</span></summary></details>';
 		return substr_replace( $html, $list . $fold, $ol[0][1], strlen( $ol[0][0] ) );
 	},
 	20,

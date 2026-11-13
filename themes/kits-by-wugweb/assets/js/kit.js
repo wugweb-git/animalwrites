@@ -377,6 +377,7 @@
 			} else if (node.nodeType === 1 && node.classList.contains('kit-fold-break') && step) {
 				fold = document.createElement('details');
 				fold.className = 'wp-block-details kit-fold-group';
+				fold.open = true; // no folds (owner, 13 Nov 2026): the group shows open
 				var sm = document.createElement('summary'); sm.textContent = text(node, '.ff-el-section-title'); fold.appendChild(sm);
 				var fd = text(node, '.ff-section_break_desk');
 				if (fd) { var fp = document.createElement('p'); fp.className = 'kit-field-hint'; fp.textContent = fd; fold.appendChild(fp); }
@@ -883,37 +884,31 @@
 	if (window.ResizeObserver) new ResizeObserver(check).observe(side);
 })();
 
-/* Rank Math FAQ: each question opens and closes its answer, like the Details FAQ. The question stays a heading (the
-   button sits inside it), the FAQ schema is untouched, and without JavaScript every answer is shown. */
-(function () {
-	document.querySelectorAll('.rank-math-list-item').forEach(function (item, i) {
-		var q = item.querySelector('.rank-math-question'), a = item.querySelector('.rank-math-answer');
-		if (!q || !a || q.querySelector('button')) return;
-		a.id = a.id || 'kit-faq-a-' + i;
-		var b = document.createElement('button');
-		b.type = 'button';
-		b.setAttribute('aria-expanded', 'false');
-		b.setAttribute('aria-controls', a.id);
-		while (q.firstChild) b.appendChild(q.firstChild);
-		q.appendChild(b);
-		a.hidden = true;
-		b.addEventListener('click', function () {
-			var open = b.getAttribute('aria-expanded') !== 'true';
-			b.setAttribute('aria-expanded', open ? 'true' : 'false');
-			a.hidden = !open;
-		});
-	});
-})();
+/* Rank Math FAQ: every answer shows, with no "+" to open or close it (owner, 13 Nov 2026: no expand and collapse on any
+   page). The question stays a heading and the FAQ schema is untouched. */
 
-/* FAQ accordion (kit-faq): every answer is in the HTML and shown without JavaScript; here each closes, and its
-   question's button opens and closes it (aria-expanded). A link to #faq or to an answer opens what it points to. */
+/* FAQ (kit-faq): every answer shows, with no "+" (owner, 13 Nov 2026: no expand and collapse on any page). The server
+   draws each question as a button (its FAQ schema reads it); here the button gives way to its words, so the question is
+   a plain heading over its answer. */
 (function () {
 	document.querySelectorAll('.kit-faq-btn').forEach(function (b) {
 		var a = document.getElementById(b.getAttribute('aria-controls'));
-		if (!a) return;
-		var set = function (open) { b.setAttribute('aria-expanded', open ? 'true' : 'false'); a.hidden = !open; };
-		set(location.hash && location.hash === '#' + a.id);
-		b.addEventListener('click', function () { set(b.getAttribute('aria-expanded') !== 'true'); });
+		if (a) a.hidden = false;
+		var q = b.parentNode;
+		while (b.firstChild) q.insertBefore(b.firstChild, b);
+		q.removeChild(b);
+	});
+})();
+
+/* No folds (owner, 13 Nov 2026: "remove all + sign to expand collapse from all campaigns and all pages"): every fold that
+   drew a "+" (the Details block, claim and card folds) stays open and its summary no longer closes it. Folds marked with
+   a chevron (footer menus, filters) keep working. */
+(function () {
+	var SEL = 'details.wp-block-details, .kit-claim details, details.aw-camp-card-fold';
+	document.querySelectorAll(SEL).forEach(function (d) { d.open = true; });
+	document.addEventListener('click', function (e) {
+		var s = e.target.closest && e.target.closest('summary');
+		if (s && s.parentNode && s.parentNode.matches && s.parentNode.matches(SEL)) { e.preventDefault(); s.parentNode.open = true; }
 	});
 })();
 
