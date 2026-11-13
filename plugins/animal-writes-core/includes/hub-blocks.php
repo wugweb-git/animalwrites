@@ -554,18 +554,17 @@ add_filter(
 	2
 );
 
-/** Meta row: date (calendar icon; "3 hours ago" within 7 days), read time (Resources), place. One row, plain text. */
+/**
+ * Meta row: date (calendar icon; "3 hours ago" within 7 days), then place on Library and Opportunity cards. One row,
+ * plain text. News cards carry no place and no card carries a reading time (owner, 13 Nov 2026).
+ */
 function aw_card_meta( $id ) {
 	$ts   = aw_card_ts( $id );
 	$diff = time() - $ts;
 	/* translators: %s: time difference, e.g. 3 hours. */
-	$when = ( $diff >= 0 && $diff < 7 * DAY_IN_SECONDS ) ? ( $diff < 2 * MINUTE_IN_SECONDS ? __( 'Just now', 'animal-writes-core' ) : sprintf( __( '%s ago', 'animal-writes-core' ), human_time_diff( $ts, time() ) ) ) : wp_date( AW_DATE_FORMAT, $ts );
-	$out  = '<span class="kit-meta-item kit-date aw-date">' . aw_i( 'calendar' ) . '<time datetime="' . esc_attr( wp_date( 'Y-m-d', $ts ) ) . '" title="' . esc_attr( wp_date( AW_DATE_FORMAT, $ts ) ) . '">' . esc_html( $when ) . '</time></span>';
-	if ( 'post' === get_post_type( $id ) && ! aw_is_ingested( $id ) ) {
-		$mins = max( 1, (int) round( str_word_count( wp_strip_all_tags( (string) get_post_field( 'post_content', $id ) ) ) / 200 ) );
-		$out .= '<span class="kit-meta-item">' . aw_i( 'clock' ) . (int) $mins . ' min read</span>';
-	}
-	$place = in_array( get_post_type( $id ), array( 'aw_news', 'aw_legal', 'aw_opportunity' ), true ) && function_exists( 'aw_item_place' ) ? aw_item_place( $id ) : null;
+	$when  = ( $diff >= 0 && $diff < 7 * DAY_IN_SECONDS ) ? ( $diff < 2 * MINUTE_IN_SECONDS ? __( 'Just now', 'animal-writes-core' ) : sprintf( __( '%s ago', 'animal-writes-core' ), human_time_diff( $ts, time() ) ) ) : wp_date( AW_DATE_FORMAT, $ts );
+	$out   = '<span class="kit-meta-item kit-date aw-date">' . aw_i( 'calendar' ) . '<time datetime="' . esc_attr( wp_date( 'Y-m-d', $ts ) ) . '" title="' . esc_attr( wp_date( AW_DATE_FORMAT, $ts ) ) . '">' . esc_html( $when ) . '</time></span>';
+	$place = in_array( get_post_type( $id ), array( 'aw_legal', 'aw_opportunity' ), true ) && function_exists( 'aw_item_place' ) ? aw_item_place( $id ) : null;
 	if ( 'aw_opportunity' === get_post_type( $id ) && function_exists( 'aw_opp_line_place' ) ) {
 		$out .= str_replace( aw_i( 'directory' ), aw_i( 'map-pin' ), aw_opp_line_place( $id ) );
 	} elseif ( $place ) {
