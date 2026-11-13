@@ -1003,6 +1003,110 @@
                     }
                 },
                 {
+                    "index": 39,
+                    "element": "input_checkbox",
+                    "uniqElKey": "el_aw_helper_public",
+                    "attributes": {
+                        "type": "checkbox",
+                        "name": "helper_public",
+                        "value": []
+                    },
+                    "settings": {
+                        "container_class": "kit-field",
+                        "label": "",
+                        "label_placement": "",
+                        "admin_field_label": "Show me as a helper",
+                        "help_message": "Only your first name, district and what you can do show, and only after we check your details. Never your phone or email.",
+                        "validation_rules": {
+                            "required": {
+                                "value": false,
+                                "global": false,
+                                "message": "",
+                                "global_message": ""
+                            }
+                        },
+                        "conditional_logics": [],
+                        "advanced_options": [
+                            {
+                                "label": "Show me as a helper on Animal Writes",
+                                "value": "1",
+                                "calc_value": "",
+                                "image": ""
+                            }
+                        ],
+                        "calc_value_status": false,
+                        "enable_image_input": false,
+                        "values_visible": false,
+                        "randomize_options": "no",
+                        "enable_select_2": "no",
+                        "enable_option_groups": "no",
+                        "enable_other_option": "no",
+                        "dynamic_default_value": ""
+                    },
+                    "editor_options": {
+                        "title": "Check Box",
+                        "icon_class": "ff-edit-text",
+                        "template": "inputCheckable"
+                    }
+                },
+                {
+                    "index": 40,
+                    "element": "input_checkbox",
+                    "uniqElKey": "el_aw_verify_ok",
+                    "attributes": {
+                        "type": "checkbox",
+                        "name": "verify_ok",
+                        "value": []
+                    },
+                    "settings": {
+                        "container_class": "kit-field",
+                        "label": "",
+                        "label_placement": "",
+                        "admin_field_label": "OK to verify my details",
+                        "help_message": "",
+                        "validation_rules": {
+                            "required": {
+                                "value": true,
+                                "global": false,
+                                "message": "Tick this to be shown as a helper",
+                                "global_message": "Tick this to be shown as a helper"
+                            }
+                        },
+                        "conditional_logics": {
+                            "status": true,
+                            "type": "all",
+                            "conditions": [
+                                {
+                                    "field": "helper_public",
+                                    "operator": "=",
+                                    "value": "1"
+                                }
+                            ]
+                        },
+                        "advanced_options": [
+                            {
+                                "label": "OK to contact me to verify my details",
+                                "value": "1",
+                                "calc_value": "",
+                                "image": ""
+                            }
+                        ],
+                        "calc_value_status": false,
+                        "enable_image_input": false,
+                        "values_visible": false,
+                        "randomize_options": "no",
+                        "enable_select_2": "no",
+                        "enable_option_groups": "no",
+                        "enable_other_option": "no",
+                        "dynamic_default_value": ""
+                    },
+                    "editor_options": {
+                        "title": "Check Box",
+                        "icon_class": "ff-edit-text",
+                        "template": "inputCheckable"
+                    }
+                },
+                {
                     "index": 18,
                     "element": "input_checkbox",
                     "uniqElKey": "el_aw_consent",
