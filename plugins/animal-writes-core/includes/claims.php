@@ -39,6 +39,21 @@ const AW_CLAIM_FIELDS = array(
 
 const AW_CLAIM_LOGO_BYTES = 2 * MB_IN_BYTES;
 
+/**
+ * The aw_claim post type's primitive capabilities: all DIRECTORYWEB_CAP (manage_directoryweb, directoryweb-caps.php),
+ * except create_posts (claims come from the claim form only).
+ *
+ * @return array<string, string>
+ */
+function aw_claim_caps(): array {
+	$cap  = defined( 'DIRECTORYWEB_CAP' ) ? DIRECTORYWEB_CAP : 'manage_directoryweb';
+	$caps = array( 'create_posts' => 'do_not_allow' );
+	foreach ( array( 'edit_posts', 'edit_others_posts', 'edit_private_posts', 'edit_published_posts', 'publish_posts', 'read_private_posts', 'delete_posts', 'delete_others_posts', 'delete_private_posts', 'delete_published_posts' ) as $key ) {
+		$caps[ $key ] = $cap;
+	}
+	return $caps;
+}
+
 add_action(
 	'init',
 	function () {
@@ -51,9 +66,10 @@ add_action(
 				'show_in_rest'    => false,
 				'menu_icon'       => 'dashicons-yes-alt',
 				'supports'        => array( 'title' ),
-				'capability_type' => array( 'aw_volunteer', 'aw_volunteers' ), // Same admin-only capabilities as volunteers.
 				'map_meta_cap'    => true,
-				'capabilities'    => array( 'create_posts' => 'do_not_allow' ),
+				// Every claim capability is DirectoryWeb's own (owner, 14 Nov 2026), like the Claims screens; claims are never
+				// added by hand. map_meta_cap turns edit_post, delete_post and read_post into these.
+				'capabilities'    => aw_claim_caps(),
 			)
 		);
 	}

@@ -207,5 +207,15 @@ $rest = (string) file_get_contents( $inc . 'directoryweb-rest.php' ); // phpcs:i
 check( 2 === substr_count( $rest, "'permission_callback' => \$claims," ), 'Claims: both claims routes use the claims check' );
 check( ! preg_match( '/aw_claim_apply_field|aw_claim_ff_decide|update_post_meta|wp_update_post/', $rest ), 'Claims: the new screen\'s routes approve, reject or apply nothing' );
 
+// The aw_claim post type itself is on DIRECTORYWEB_CAP too (owner, 14 Nov 2026).
+check( false === strpos( $cl, "'capability_type' => array( 'aw_volunteer'" ), 'Claims: the post type no longer uses the volunteer capabilities' );
+check( false !== strpos( $cl, "'capabilities'    => aw_claim_caps()," ), 'Claims: the post type takes aw_claim_caps()' );
+if ( ! function_exists( 'aw_claim_caps' ) ) {
+	preg_match( '/function aw_claim_caps\(\): array \{.*?\n\}/s', (string) file_get_contents( $inc . 'claims.php' ), $m ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- a local file read by the test
+	eval( $m[0] ); // phpcs:ignore Squiz.PHP.Eval.Discouraged -- the test loads one pure function from the plugin file
+}
+$cc = aw_claim_caps();
+check( 'do_not_allow' === $cc['create_posts'] && 10 === count( array_filter( $cc, fn( $v ) => 'manage_directoryweb' === $v ) ), 'Claims: every claim capability is manage_directoryweb, none can be created by hand' );
+
 echo "{$count} checks, {$fails} failed\n";
 exit( $fails ? 1 : 0 );
