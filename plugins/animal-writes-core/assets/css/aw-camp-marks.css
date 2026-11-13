@@ -73,3 +73,5 @@
 :is(.aw-camp, .aw-camp-end, .aw-nl-band--camp) :is(input[type=checkbox], input[type=radio]) { accent-color: var(--camp-mark, var(--kit-color-ink)); }
 @media (hover: hover) { :is(.aw-camp, .aw-camp-end) .aw-letter-ground.kit-checkbox:hover { border-color: var(--camp-mark, var(--kit-color-ink)); } }
 :is(.aw-camp, .aw-camp-end) .aw-letter-ground.kit-checkbox:has(input:checked) { border-color: var(--camp-mark, var(--kit-color-ink)); box-shadow: inset 0 0 0 1px var(--camp-mark, var(--kit-color-ink)); }
+/* Community dogs: its --camp-mark is the light orange #ffa500 on the page (under 3:1 on white), so its boxes take the darker #9a5b00 (owner, 14 Nov 2026). */
+.aw-camp--community-dogs :is(input[type=checkbox], input[type=radio]) { accent-color: var(--camp-accent, var(--kit-color-ink)); }
