@@ -966,6 +966,3 @@
    the H3 line height. aw.css gives entry-content H3s --kit-type-h3 (fluid) with !important, so this needs it too. */
 .aw-camp.aw-camp--lab-rules h3 { font-size: var(--kit-type-card-title) !important; line-height: var(--kit-h3-leading) !important; }
 
-/* What people are saying: a long handle (@doghomefoundation) wraps inside its card instead of running past it */
-.aw-camp--lab-rules .aw-social-card .kit-meta-row { min-width: 0; }
-.aw-camp--lab-rules .aw-social-card .kit-meta-row > * { flex-shrink: 1; min-width: 0; overflow-wrap: anywhere; }

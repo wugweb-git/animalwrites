@@ -2505,13 +2505,15 @@
    "type": "block",
    "status": "live on the Lab campaign page",
    "classes": [
-    "aw-social-card"
+    "aw-social-card",
+    "aw-social-handle",
+    "aw-social-out"
    ],
    "states": [
     "off (Kits → Modules → Show on pages; prints nothing)",
     "no approved posts (prints nothing)",
     "cards: date, on platform, handle; person; summary",
-    "X or YouTube post: Show the post button, embed after the click",
+    "X post: our own card with a 44px View on X link-out (new tab), no embed; YouTube post: Show the post button, embed after the click",
     "editor preview (one-line note)"
    ],
    "tokens": [],
