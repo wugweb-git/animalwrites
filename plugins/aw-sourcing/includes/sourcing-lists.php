@@ -251,7 +251,7 @@ add_action(
 	'kits_sourcing_save_feeds',
 	function () {
 		$c    = aw_sources_config();
-		$rows = (array) wp_unslash( $_POST['src'] ?? array() ); // phpcs:ignore WordPress.Security.NonceVerification -- checked by the Kits save handler
+		$rows = (array) wp_unslash( $_POST['src'] ?? array() ); // phpcs:ignore WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- checked by the Kits save handler; each field is sanitized below
 		$what = array();
 		foreach ( $rows as $r ) {
 			$id   = sanitize_key( $r['id'] ?? '' );

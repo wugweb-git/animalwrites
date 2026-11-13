@@ -24,7 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 function aw_form_state( $form ) {
 	static $cache = null;
 	if ( null === $cache ) {
-		$token = isset( $_GET['aw_err'] ) ? preg_replace( '/[^A-Za-z0-9]/', '', (string) wp_unslash( $_GET['aw_err'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification
+		$token = isset( $_GET['aw_err'] ) ? preg_replace( '/[^A-Za-z0-9]/', '', (string) wp_unslash( $_GET['aw_err'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- preg_replace() keeps letters and digits only
 		$cache = $token ? get_transient( 'aw_form_' . $token ) : false;
 	}
 	if ( is_array( $cache ) && ( $cache['form'] ?? '' ) === $form ) {
@@ -128,14 +128,14 @@ function kits_thanks_form() {
 
 /** The message saved for this thank-you page (?t=): array{title: string, text: string}, or null. */
 function kits_thanks_message() {
-	$token = preg_replace( '/[^A-Za-z0-9]/', '', (string) wp_unslash( $_GET['t'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
+	$token = preg_replace( '/[^A-Za-z0-9]/', '', (string) wp_unslash( $_GET['t'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- preg_replace() keeps letters and digits only
 	$msg   = $token ? get_transient( 'kits_thanks_' . $token ) : false;
 	return is_array( $msg ) && ( $msg['form'] ?? '' ) === kits_thanks_form() ? $msg : null;
 }
 
 /** The page the person came from (?from=), as a URL on this site, or ''. */
 function kits_thanks_from() {
-	$path = (string) wp_unslash( $_GET['from'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
+	$path = (string) wp_unslash( $_GET['from'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- checked below: a path on this site, or nothing
 	if ( '' === $path || '/' !== $path[0] || str_starts_with( $path, '//' ) ) {
 		return '';
 	}
@@ -325,13 +325,13 @@ function aw_form_guard( $form, $back, $anchor, $done, $per_hour = 5 ) {
 		}
 		aw_form_fail( $form, array(), aw_form_kept_values(), $back, $anchor, 'This page has been open a while. Reload it and send again.' );
 	}
-	if ( ! empty( $_POST['kits_hp'] ) || ( time() - (int) ( $_POST['aw_t'] ?? 0 ) ) < 3 ) {
+	if ( ! empty( $_POST['kits_hp'] ) || ( time() - absint( $_POST['aw_t'] ?? 0 ) ) < 3 ) {
 		aw_form_success( $done, '' ); // bots see a success
 	}
 	if ( ! kits_altcha_verify( wp_unslash( $_POST['altcha'] ?? '' ) ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 		aw_form_fail( $form, array(), aw_form_kept_values(), $back, $anchor, 'Couldn\'t verify you\'re not a bot. Try again.' );
 	}
-	$key = 'aw_rl_' . $form . '_' . md5( (string) ( $_SERVER['REMOTE_ADDR'] ?? '' ) );
+	$key = 'aw_rl_' . $form . '_' . md5( sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ?? '' ) ) );
 	if ( (int) get_transient( $key ) >= $per_hour ) {
 		aw_form_fail( $form, array(), aw_form_kept_values(), $back, $anchor, 'Too many tries. Wait a minute, then try again.' );
 	}

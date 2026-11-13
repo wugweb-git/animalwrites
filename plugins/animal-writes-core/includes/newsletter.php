@@ -52,7 +52,7 @@ add_action(
 		if ( ! in_array( $do, array( 'confirm', 'unsubscribe' ), true ) ) {
 			return;
 		}
-		$token = preg_replace( '/[^a-f0-9]/', '', (string) wp_unslash( $_GET['t'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
+		$token = preg_replace( '/[^a-f0-9]/', '', (string) wp_unslash( $_GET['t'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- preg_replace() keeps letters and digits only
 		$row   = 32 === strlen( $token ) ? aw_nl_get( 'token', $token ) : null;
 		$note  = 'nl_badlink';
 		global $wpdb;

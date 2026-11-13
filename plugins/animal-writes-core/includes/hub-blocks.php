@@ -411,7 +411,7 @@ function aw_block_result_head() {
 	$q     = sanitize_text_field( wp_unslash( $_GET['q'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
 	$where = array_filter( array( $q ? '“' . $q . '”' : '', aw_current_place() ? aw_current_place()->name : '', aw_current_type_name() ) );
 	$line  = $where ? sprintf( /* translators: 1: number of results, 2: what was searched for. */ _n( '%1$s result for %2$s', '%1$s results for %2$s', $n, 'animal-writes-core' ), number_format_i18n( $n ), implode( ', ', $where ) ) : sprintf( /* translators: %s: number of organisations. */ _n( '%s organisation', '%s organisations', $n, 'animal-writes-core' ), number_format_i18n( $n ) );
-	$sort  = 'details' === ( $_GET['sort'] ?? '' ) ? 'details' : ''; // phpcs:ignore WordPress.Security.NonceVerification
+	$sort  = 'details' === sanitize_key( wp_unslash( $_GET['sort'] ?? '' ) ) ? 'details' : ''; // phpcs:ignore WordPress.Security.NonceVerification
 	$here  = add_query_arg( map_deep( array_diff_key( wp_unslash( $_GET ), array( 'sort' => 1, 'paged' => 1, 'query-106-page' => 1 ) ), 'rawurlencode' ), strtok( aw_hub_base_url(), '?' ) ); // phpcs:ignore WordPress.Security.NonceVerification
 	$sortnav = '<nav class="kit-segment" aria-label="Sort"><a href="' . esc_url( $here ) . '"' . ( $sort ? '' : ' aria-current="true"' ) . '>A–Z</a><a href="' . esc_url( add_query_arg( 'sort', 'details', $here ) ) . '"' . ( $sort ? ' aria-current="true"' : '' ) . '>Most details first</a></nav>';
 	return ( function_exists( 'aw_district_helplines_row' ) ? aw_district_helplines_row() : '' ) // a district's helplines row, above the toolbar (district-helplines.php)
@@ -427,7 +427,7 @@ function aw_block_browse_states() {
 add_action(
 	'enqueue_block_assets',
 	function () {
-		$id = is_admin() ? (int) ( $_GET['post'] ?? 0 ) : 0; // phpcs:ignore WordPress.Security.NonceVerification
+		$id = is_admin() ? absint( $_GET['post'] ?? 0 ) : 0; // phpcs:ignore WordPress.Security.NonceVerification
 		if ( $id && 'page-hub' === get_page_template_slug( $id ) ) {
 			wp_register_style( 'aw-hub-editor', false, array(), AW_CORE_VERSION );
 			wp_enqueue_style( 'aw-hub-editor' );

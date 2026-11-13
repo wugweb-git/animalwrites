@@ -40,7 +40,7 @@ function aw_listing_type_ok( $slug ) {
 
 /** The ?tag= values on this request (tag=a,b or tag[]=a&tag[]=b). */
 function aw_request_tags() {
-	$raw = wp_unslash( $_GET['tag'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
+	$raw = wp_unslash( $_GET['tag'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitized below, per tag
 	return array_values( array_unique( array_filter( array_map( 'sanitize_title', is_array( $raw ) ? $raw : explode( ',', (string) $raw ) ) ) ) );
 }
 
@@ -175,7 +175,7 @@ function aw_directory_query_vars( $v ) {
 		);
 		$order = array( 'ver_yes' => 'DESC', 'title' => 'ASC' );
 	}
-	if ( 'details' === ( $_GET['sort'] ?? '' ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+	if ( 'details' === sanitize_key( wp_unslash( $_GET['sort'] ?? '' ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		$mq['score'] = array( 'key' => 'aw_contact_score', 'type' => 'NUMERIC' );
 		$order       = array( 'score' => 'DESC', 'title' => 'ASC' );
 	}

@@ -161,7 +161,7 @@ add_action(
 add_action(
 	'admin_post_aw_report_status',
 	function () {
-		$id = (int) ( $_GET['report'] ?? 0 );
+		$id = absint( $_GET['report'] ?? 0 );
 		$to = sanitize_key( wp_unslash( $_GET['to'] ?? '' ) );
 		if ( ! current_user_can( 'edit_aw_volunteers' ) || ! check_admin_referer( 'aw_report_status_' . $id ) || 'aw_report' !== get_post_type( $id ) || ! isset( AW_REPORT_STATUSES[ $to ] ) ) {
 			wp_die( 'Not allowed.', 403 );
