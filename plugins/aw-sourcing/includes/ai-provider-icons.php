@@ -1,12 +1,8 @@
 <?php
 /**
- * Sourcing → AI models: each provider's own site icon (owner, 24 Oct 2026).
- *
- * Shown with the site's favicon helper (aw_favicon_url() in Kits Core, attribution.php) when the provider's host is a
- * known publisher; otherwise from option aw_ai_provider_icons (host => attachment ID, 0 = tried and none found), which
- * fills the same way Kits Core fills the publishers' icons: on its hourly aw_fetch_favicons event, a few hosts a run,
- * Google's favicon service then the host's /favicon.ico, saved once into the media library. Until then, and when
- * none is found, a core dashicon. Nothing is fetched while a page is drawn.
+ * Each AI provider's own site icon, kept in option aw_ai_provider_icons (host => attachment ID, 0 = tried and none
+ * found). It fills the way Kits Core fills the publishers' icons: on its hourly aw_fetch_favicons event, a few hosts a
+ * run, Google's favicon service then the host's /favicon.ico, saved once into the media library.
  *
  * @package aw-sourcing
  */
@@ -39,29 +35,6 @@ const AW_AI_HOSTS = array(
 	'firecrawl'   => 'firecrawl.dev',
 	'tinyfish'    => 'tinyfish.ai',
 );
-
-/** The provider's icon (16 px) as HTML: its site icon, or a core dashicon. */
-function aw_ai_provider_icon( $provider ) {
-	$host = AW_AI_HOSTS[ $provider ] ?? '';
-	if ( '' === $host ) {
-		return '<span class="dashicons dashicons-editor-help" aria-hidden="true"></span>';
-	}
-	$url = function_exists( 'aw_favicon_url' ) ? aw_favicon_url( $host ) : '';
-	if ( '' === $url ) {
-		$id  = (int) ( ( (array) get_option( 'aw_ai_provider_icons', array() ) )[ $host ] ?? 0 );
-		$url = $id ? (string) wp_get_attachment_image_url( $id, 'thumbnail' ) : '';
-	}
-	if ( '' === $url ) {
-		return '<span class="dashicons dashicons-admin-network" aria-hidden="true"></span>';
-	}
-	return '<img src="' . esc_url( $url ) . '" alt="" width="16" height="16" loading="lazy" decoding="async">';
-}
-
-/** Icon and name of a provider, as HTML. */
-function aw_ai_provider_html( $provider ) {
-	$label = $provider ? ( AW_AI_PROVIDERS[ $provider ][0] ?? AW_AI_TOOLS[ $provider ][0] ?? $provider ) : '—';
-	return ( $provider ? aw_ai_provider_icon( $provider ) . ' ' : '' ) . esc_html( $label );
-}
 
 // Kits Core's hourly favicon run: also fetch the icons of the providers that have a saved key (five a run at most).
 add_action(

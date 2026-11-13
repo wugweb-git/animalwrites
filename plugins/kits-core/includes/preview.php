@@ -247,9 +247,6 @@ function kits_preview_page() {
 	echo '<div class="wrap"><h1>Preview</h1>';
 	kits_admin_tabs( 'kits-preview' );
 	$back = admin_url( 'admin.php?page=kits-settings&kits_section=preview' );
-	if ( function_exists( 'kits_shell_ui_next' ) && ! kits_shell_ui_next() ) {
-		$back = add_query_arg( 'ui', 'classic', $back ); // Saved from the earlier screen: come back to it.
-	}
 	echo '<form method="post" action="' . esc_url( $back ) . '">'; // Back to Settings → Preview access after saving.
 	wp_nonce_field( 'kits_preview_ips', 'kits_preview_nonce' );
 	echo '<h2 class="title"><label for="kits-preview-ips">Preview IP addresses</label></h2><p class="description" id="kits-preview-ips-note">One per line. IPv4: exact address. IPv6: the whole /64 network (e.g. 2401:db8:1:2::/64). Requests from these addresses see preview-only items. Your address now: <code>' . esc_html( kits_client_ip() ) . '</code></p>';

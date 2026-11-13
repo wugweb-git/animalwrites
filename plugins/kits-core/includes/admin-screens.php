@@ -322,23 +322,17 @@ function kits_home_status(): void {
 function kits_transfer_page() {
 	$intro = 'One JSON file with this site\'s Styles, Theme Options, Page Options defaults and synced patterns.';
 	$parts = kits_transfer_parts();
-	if ( function_exists( 'kits_frame_ready' ) && kits_frame_ready() ) {
-		// The default (not &ui=classic): each part as a card in the plugin screens' frame (includes/admin-kits-frame.php).
-		kits_frame_open( 'kits-tools', 'Tools', $intro );
-		kits_transfer_result();
-		foreach ( $parts as $id => $part ) {
-			kits_frame_card( $id, $part[0], $part[1] );
-		}
-		kits_frame_close();
+	if ( ! kits_frame_ready() ) {
+		kits_frame_missing( 'Tools' );
 		return;
 	}
-	kits_admin_head( 'kits-tools', 'Tools', $intro );
+	// Each part as a card in the plugin screens' frame (includes/admin-kits-frame.php).
+	kits_frame_open( 'kits-tools', 'Tools', $intro );
 	kits_transfer_result();
-	foreach ( $parts as $part ) {
-		echo '<h2>' . esc_html( $part[0] ) . '</h2>';
-		call_user_func( $part[1] );
+	foreach ( $parts as $id => $part ) {
+		kits_frame_card( $id, $part[0], $part[1] );
 	}
-	echo '</div>';
+	kits_frame_close();
 }
 
 /** The parts of Kits → Tools the user may use, in order: id => [ heading, prints the part ]. */
@@ -489,13 +483,7 @@ function kits_transfer_lines( array $s ): array {
  */
 function kits_transfer_back( array $result ): void {
 	set_transient( 'kits_transfer_result_' . get_current_user_id(), $result, 5 * MINUTE_IN_SECONDS );
-	$back = admin_url( 'admin.php?page=kits-tools' );
-	$from = (string) wp_parse_url( (string) wp_get_referer(), PHP_URL_QUERY );
-	parse_str( $from, $q );
-	if ( 'classic' === ( $q['ui'] ?? '' ) ) {
-		$back = add_query_arg( 'ui', 'classic', $back ); // Sent from the earlier screen: come back to it.
-	}
-	wp_safe_redirect( $back );
+	wp_safe_redirect( admin_url( 'admin.php?page=kits-tools' ) );
 	exit;
 }
 
@@ -784,9 +772,6 @@ function kits_core_settings_form( string $group, string $also = '', string $back
  * @param string $back Address relative to wp-admin (options.php adds settings-updated=true to it).
  */
 function kits_options_form_fields( string $back ): void {
-	if ( function_exists( 'kits_shell_ui_next' ) && ! kits_shell_ui_next() ) {
-		$back = add_query_arg( 'ui', 'classic', $back ); // Saved from the earlier screen: come back to it.
-	}
 	echo '<input type="hidden" name="option_page" value="kits_options"><input type="hidden" name="action" value="update">';
 	wp_nonce_field( 'kits_options-options', '_wpnonce', false );
 	echo '<input type="hidden" name="_wp_http_referer" value="' . esc_attr( wp_make_link_relative( admin_url( $back ) ) ) . '">';
@@ -863,42 +848,9 @@ function kits_options_link( string $label, string $path ): string {
 	return '<a href="' . esc_url( admin_url( $path ) ) . '">' . esc_html( $label ) . '</a>';
 }
 
-/** Kits → Theme Options. */
+/** Kits → Theme Options: the app (admin-app.php). */
 function kits_options_page() {
-	if ( kits_admin_app_wanted() ) {
-		kits_admin_app_page(); // The new screen (trial), admin-app.php.
-		return;
-	}
-	$sections = kits_options_sections();
-	$all      = array_merge( ...array_values( $sections ) );
-	$current  = isset( $_GET['section'] ) ? sanitize_key( wp_unslash( $_GET['section'] ) ) : 'general-header'; // phpcs:ignore WordPress.Security.NonceVerification -- which section to show.
-	if ( ! isset( $all[ $current ] ) ) {
-		$current = 'general-header';
-	}
-	kits_admin_head( 'kits-options', 'Theme Options', 'Site-wide choices, in sections. Colours, fonts and sizes live in Styles; one page can still differ in its Page Options.' );
-	echo '<div id="col-container" class="wp-clearfix"><div id="col-left"><div class="col-wrap"><nav class="postbox" aria-label="' . esc_attr( 'Theme Options sections' ) . '"><div class="inside">';
-	foreach ( $sections as $group => $items ) {
-		echo '<h3>' . esc_html( $group ) . '</h3><ul>';
-		foreach ( $items as $slug => $label ) {
-			echo '<li><a href="' . esc_url( admin_url( 'admin.php?page=kits-options&section=' . $slug ) ) . '"' . ( $slug === $current ? ' aria-current="page"' : '' ) . '>' . esc_html( $label ) . '</a></li>';
-		}
-		echo '</ul>';
-	}
-	echo '</div></nav></div></div><div id="col-right"><div class="col-wrap">';
-	$group = '';
-	foreach ( $sections as $g => $items ) {
-		if ( isset( $items[ $current ] ) ) {
-			$group = $g;
-		}
-	}
-	echo '<h2>' . esc_html( $group . ': ' . $all[ $current ] ) . '</h2>';
-	echo '<form method="post" action="options.php">';
-	settings_fields( 'kits_options' );
-	$saveable = kits_options_section_body( $current, $all[ $current ] );
-	if ( $saveable ) {
-		submit_button( 'Save ' . $all[ $current ] );
-	}
-	echo '</form></div></div></div></div>';
+	kits_admin_app_page();
 }
 
 /**
@@ -915,29 +867,16 @@ function kits_theme_option_rows_of( string $section ): void {
 }
 
 /**
- * The body of one section. Returns false when it holds nothing to save (links and values from Styles only).
+ * The body of one Theme Options section that the app still shows as today's fields (kits_admin_app_legacy()), or
+ * Help → Developer → Extra. Returns false when it holds nothing to save (links and values only).
  *
  * @param string $section Section slug.
  * @param string $label   Section label.
  */
 function kits_options_section_body( string $section, string $label ): bool {
-	$styles = 'site-editor.php?path=/wp_global_styles';
 	switch ( $section ) {
-		case 'general-header':
-			// The header part and its menu are WordPress's (Editor → Patterns, Navigation): no pickers here (owner, 11 Nov 2026).
-			kits_options_box( 'Header settings', fn() => kits_theme_option_rows_of( 'general-header' ), 'What the header holds: ' . kits_options_link( 'Editor → Patterns → Header', 'site-editor.php?postType=wp_template_part' ) . '. Menus: ' . kits_options_link( 'Editor → Navigation', 'site-editor.php?postType=wp_navigation' ) . '.' );
-			return true;
-		case 'general-layout':
-			kits_options_box( 'Layout', fn() => kits_page_default_rows( '_site', array( 'sidebar', 'title', 'crumbs' ) ), 'Site-wide defaults; each kind of page can differ under Single and Archives. Widths and spacing: ' . kits_options_link( 'Styles → Layout', $styles ) . '.' );
-			return true;
-		case 'general-footer':
-			kits_options_box( 'Footer settings', fn() => kits_theme_option_rows_of( 'general-footer' ), 'What the footer holds: ' . kits_options_link( 'Editor → Patterns → Footer', 'site-editor.php?postType=wp_template_part' ) . '.' );
-			return true;
 		case 'utility-share':
 			kits_options_box( 'Share bar', fn() => kits_theme_option_rows_of( 'utility-share' ) );
-			return true;
-		case 'utility-performance':
-			kits_options_box( 'Performance', fn() => kits_theme_option_rows_of( 'utility-performance' ), 'More speed switches: ' . kits_options_link( 'Appearance → Kits → Settings → Performance', 'admin.php?page=kits-settings#performance' ) . '.' );
 			return true;
 		case 'utility-extra':
 			$has = (bool) array_filter( array_keys( kits_theme_option_fields() ), fn( $k ) => 'utility-extra' === kits_theme_option_section( $k, kits_theme_option_fields()[ $k ] ) );
@@ -954,9 +893,6 @@ function kits_options_section_body( string $section, string $label ): bool {
 			return $has;
 		case 'utility-socials':
 			kits_options_socials();
-			return false;
-		case 'visual-cards':
-			kits_options_cards();
 			return false;
 	}
 	if ( 'single-404' === $section ) {
@@ -994,42 +930,6 @@ function kits_options_links_box( string $title, array $links ): void {
 		echo '<tr><th scope="row">' . ( '' !== $l[1] ? kits_options_link( $l[0], $l[1] ) : esc_html( $l[0] ) ) . '</th><td>' . esc_html( $l[2] ) . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- kits_options_link escapes.
 	}
 	echo '</tbody></table></div></div>';
-}
-
-/**
- * The card: its block style in Styles and the theme's card tokens (names without the leading dashes).
- *
- * @return array block, variation, tokens.
- */
-function kits_card_parts(): array {
-	return (array) apply_filters(
-		'kits_card_parts',
-		array(
-			'block'     => 'core/group',
-			'variation' => 'kits-card',
-			'tokens'    => array( 'kit-radius-card', 'kit-surface-card', 'kit-card-min', 'kit-card-columns', 'kit-card-media-ratio' ),
-		)
-	) + array(
-		'block'     => '',
-		'variation' => '',
-		'tokens'    => array(),
-	);
-}
-
-/** Visual → Cards: the Card style's values in Styles (padding step, corners, colours) and the card tokens. */
-function kits_options_cards(): void {
-	$card = kits_card_parts();
-	$rows = array();
-	foreach ( kits_block_style_values( (string) $card['block'], (string) $card['variation'] ) as $label => $v ) {
-		$rows[] = array( esc_html( $label ), '<code>' . esc_html( $v[0] ) . '</code> ' . esc_html( $v[1] ) );
-	}
-	$vals = kits_token_values();
-	foreach ( (array) $card['tokens'] as $t ) {
-		if ( isset( $vals[ $t ] ) ) {
-			$rows[] = array( '<code>--' . esc_html( $t ) . '</code>', '<code>' . esc_html( $vals[ $t ] ) . '</code> ' . esc_html( kits_token_resolve( $t, $vals ) ) );
-		}
-	}
-	kits_options_values_box( 'Cards', $rows ? $rows : array( array( esc_html( 'None yet' ), '' ) ), 'The padding, corners and colours are the ' . kits_block_style_where( (string) $card['block'], (string) $card['variation'] ) . '; the Site Editor\'s Styles doesn\'t list them. The tokens are the theme\'s base values (phones): ' . kits_options_link( 'Help → Design system → Tokens', 'admin.php?page=kits-help&tab=tokens#design-system' ) . '.' );
 }
 
 /** Utility → Socials: the profiles Rank Math holds, which the footer and schema use. */

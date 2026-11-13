@@ -1,9 +1,9 @@
 <?php
 /**
- * Mail → Overview and the Plugins screen links (owner, 25 Oct 2026: our plugins work like any marketplace plugin).
+ * MailWeb → Overview (the shell Dashboard, mailweb-ui.php) and the Plugins screen links.
  *
- * Mail menu: Inbox (inbox.php), Overview (this file), Settings (settings-tab.php). Overview lists every feature with
- * where to find it and its state from the plugin's own options; it makes no API call. Core WordPress only.
+ * The Dashboard's feature table lists every feature with where to find it and its state from the plugin's own options;
+ * it makes no API call.
  *
  * @package mailweb
  */
@@ -34,31 +34,19 @@ function mailweb_home_status( $ok, $text ) {
 	return '<span class="dashicons dashicons-' . ( $ok ? 'yes' : 'warning' ) . '" aria-hidden="true"></span> ' . esc_html( $text );
 }
 
-/** Mail → Overview. */
+/** MailWeb → Overview: the shell Dashboard. */
 function mailweb_home_page() {
 	if ( ! current_user_can( MAILWEB_CAP ) ) {
 		wp_die( esc_html__( 'Not allowed.', 'mailweb' ), 403 );
 	}
 	if ( mailweb_ui_page( 'dashboard' ) ) {
-		return; // the new screen (mailweb-ui.php; &ui=classic shows this one).
+		return;
 	}
-	echo '<div class="wrap"><h1>' . esc_html__( 'Mail', 'mailweb' ) . '</h1>';
-	mailweb_screen_tabs();
-	echo '<p>' . esc_html__( 'Hostinger Mail inside WordPress, and the site\'s own sending. Secrets are encrypted; nothing is deleted on uninstall.', 'mailweb' ) . '</p>';
-	mailweb_home_body();
-	echo '<details><summary><strong>' . esc_html__( 'Command (WP-CLI on the server)', 'mailweb' ) . '</strong></summary>';
-	echo '<p><code>wp mailweb crm-sync --all</code> ' . esc_html__( 'Run the FluentCRM feed for every mailbox.', 'mailweb' ) . '</p></details>';
-	echo '</div>';
+	mailweb_ui_missing( __( 'MailWeb', 'mailweb' ) );
 }
 
-/**
- * The Overview's feature table: each feature, what it does, where it is set up and its state on this site. The
- * classic Overview shows it with a "Needs attention" list first; the new Dashboard (mailweb-ui.php) shows the table
- * only, since its own tiles carry the warnings.
- *
- * @param bool $attn Also print the rows whose state is a warning, first and together.
- */
-function mailweb_home_body( bool $attn = true ) {
+/** The Dashboard's feature table: each feature, what it does, where it is set up and its state on this site. */
+function mailweb_home_body() {
 	$admin   = current_user_can( 'manage_options' );
 	$set     = fn( $label, $sub = 'incoming', $anchor = '' ) => $admin ? '<a href="' . esc_url( mailweb_settings_url( $sub, array(), $anchor ) ) . '">' . esc_html( $label ) . '</a>' : esc_html__( 'Administrators', 'mailweb' );
 	$boxes   = array_filter( (array) get_option( 'mailweb_box_addresses', array() ), 'is_email' );
@@ -124,19 +112,12 @@ function mailweb_home_body( bool $attn = true ) {
 		),
 	);
 	$cells = array();
-	$warn  = array();
 	foreach ( $rows as $r ) {
 		$cells[] = array(
 			'feature' => '<strong>' . esc_html( $r[0] ) . '</strong><div class="row-actions visible">' . $r[2] . '</div>',
 			'what'    => esc_html( $r[1] ),
 			'status'  => $r[3],
 		);
-		if ( false !== strpos( (string) $r[3], 'dashicons-warning' ) ) {
-			$warn[] = '<li><strong>' . esc_html( $r[0] ) . '</strong>: ' . esc_html( trim( wp_strip_all_tags( (string) $r[3] ) ) ) . ' (' . $r[2] . ')</li>';
-		}
-	}
-	if ( $attn && $warn ) { // Rows whose status is a warning, first and together.
-		wp_admin_notice( '<p><strong>' . esc_html__( 'Needs attention', 'mailweb' ) . '</strong></p><ul class="ul-disc">' . implode( '', $warn ) . '</ul>', array( 'type' => 'warning', 'additional_classes' => array( 'inline' ), 'paragraph_wrap' => false ) );
 	}
 	$opts = array(
 		'primary' => 'feature',
@@ -145,12 +126,12 @@ function mailweb_home_body( bool $attn = true ) {
 	mailweb_simple_table( 'mailweb-overview', array( 'feature' => __( 'Feature', 'mailweb' ), 'what' => __( 'What it does', 'mailweb' ), 'status' => __( 'On this site', 'mailweb' ) ), $cells, $opts );
 }
 
-/** The feature table as Kits page parts (admin-shell-parts.php), for the new Dashboard. */
+/** The feature table as Kits page parts (admin-shell-parts.php), for the Dashboard. */
 function mailweb_home_parts(): array {
 	if ( ! function_exists( 'kits_shell_html_parts' ) ) {
 		return array();
 	}
 	ob_start();
-	mailweb_home_body( false );
+	mailweb_home_body();
 	return kits_shell_html_parts( (string) ob_get_clean() );
 }

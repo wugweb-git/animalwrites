@@ -2,10 +2,11 @@
 /**
  * RankWeb menu and its Overview screen (owner, 25 Oct 2026: one menu, organised like any other plugin).
  *
- * Plugins → RankWeb (one item since 11 Nov 2026) opens the Overview (this file); its tabs are Overview, FAQ (faq.php) and
- * Settings (settings.php: every module's rules and switches), each at its own admin.php?page= address as before.
- * Overview lists every module of the plugin: what it does, where it is set up (here or in Rank Math), its status from
- * the checks that already run, the boxes it adds to edit screens, and its WP-CLI commands. Core WordPress only.
+ * RankWeb opens the Dashboard (this file's page; drawn on the Kits shell, rankweb-ui.php); its tabs are Dashboard, FAQ
+ * (faq.php) and Settings (settings.php: every module's rules and switches), each at its own admin.php?page= address.
+ * aw_seo_overview_body() lists every module of the plugin: what it does, where it is set up (here or in Rank Math), its
+ * status from the checks that already run, the boxes it adds to edit screens, and its WP-CLI commands; the Dashboard
+ * shows it through Kits Core's page parts.
  *
  * @package aw-seo-extras
  */
@@ -21,8 +22,8 @@ const AW_SEO_MENU = 'aw-seo-plus';
 add_action(
 	'admin_menu',
 	function () {
-		// RankWeb's own top-level menu in the Wugweb block (owner, 12 Nov 2026; Kits Core's kits_wugweb_menu_slots()), opening the Overview; FAQ and Settings are
-		// its tabs (aw_seo_screen_tabs()). Without Kits Core, a menu of its own as before.
+		// RankWeb's own top-level menu in the Wugweb block (Kits Core's kits_wugweb_menu_slots()), opening the Dashboard; FAQ and
+		// Settings are its tabs. Without Kits Core, a menu of its own (its screens then say they need Kits Core).
 		// Screen ids of the screens under this menu start with its hook prefix; keep the old one (aw-seo-plus_page_…),
 		// so saved screen options, box order and hidden columns stay with them.
 		if ( function_exists( 'kits_admin_fold_menu' ) ) {
@@ -35,16 +36,6 @@ add_action(
 	},
 	9 // Before FAQ (10), so Overview is the first item.
 );
-
-/**
- * RankWeb's screens as tabs under a screen's heading (Overview, FAQ, Settings; those the user may open). Printed only
- * while RankWeb is one item under Plugins.
- */
-function aw_seo_screen_tabs(): void {
-	if ( function_exists( 'kits_admin_fold_tabs' ) ) {
-		kits_admin_fold_tabs( AW_SEO_MENU, 'RankWeb screens' );
-	}
-}
 
 // Plugins screen: Overview and FAQ under the plugin's name (Search Insights is under InsightWeb's).
 add_filter(
@@ -105,20 +96,14 @@ function aw_seo_overview_faq_status(): string {
 	return esc_html( sprintf( '%s pages show an FAQ. %s', number_format_i18n( $faq ), $drafts ? sprintf( '%d draft questions waiting.', $drafts ) : 'No drafts waiting.' ) );
 }
 
-/** RankWeb → Overview. */
+/** RankWeb → Dashboard (rankweb-ui.php). */
 function aw_seo_overview_page() {
-	if ( function_exists( 'rankweb_ui_page' ) && rankweb_ui_page( 'dashboard' ) ) {
-		return; // the new Dashboard (rankweb-ui.php; &ui=classic shows this one)
-	}
-	echo '<div class="wrap"><h1>RankWeb</h1>';
-	aw_seo_screen_tabs();
-	aw_seo_overview_body();
-	echo '</div>';
+	rankweb_ui_page( 'dashboard' );
 }
 
 /**
- * The Overview under its heading and tabs: what RankWeb adds, Needs attention, the Modules table (where each is set
- * up, Off state), On edit screens and Commands. The new Dashboard draws it too, through Kits' page parts.
+ * The Overview: what RankWeb adds, Needs attention, the Modules table (where each is set up, Off state), On edit
+ * screens and Commands. The Dashboard draws it through Kits' page parts (rankweb_overview_parts()).
  */
 function aw_seo_overview_body() {
 	$faq = add_query_arg( 'page', 'aw-faq', admin_url( 'admin.php' ) );

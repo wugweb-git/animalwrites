@@ -28,21 +28,6 @@ function aw_is_aggregator_feed( $feed ) {
 	return (bool) preg_match( '/^(gnews|applenews|agg)-/', (string) $feed );
 }
 
-/**
- * A publisher's outside credibility rating (Media Bias/Fact Check: factual reporting · credibility), when recorded.
- * Stored on the publisher record as rating, credibility and rating_url. Shown for information; it does not change the status.
- *
- * @param array $p Publisher record.
- * @return string
- */
-function aw_publisher_rating_html( $p ) {
-	if ( empty( $p['rating'] ) ) {
-		return '<span aria-label="Not rated">–</span>';
-	}
-	$txt = $p['rating'] . ( ! empty( $p['credibility'] ) ? ' · ' . $p['credibility'] . ' credibility' : '' );
-	return ! empty( $p['rating_url'] ) ? '<a href="' . esc_url( $p['rating_url'] ) . '" target="_blank" rel="noopener">' . esc_html( $txt ) . '</a>' : esc_html( $txt );
-}
-
 /** A publisher's status in words with a core dashicon (no custom CSS). */
 function aw_publisher_status_html( $st ) {
 	$map = array(
@@ -308,27 +293,10 @@ function aw_sourcing_policy_payload() {
 	return aw_retire_policy( $data );
 }
 
-/* ---------- WP Admin: News → Sourcing ---------- */
-
-// The page is on the Sourcing menu (admin-menu.php).
-
-// Screen options: sources per page on the Sources tab (the publishers' option, as before).
-add_action(
-	'load-' . AW_SRC_SCREEN,
-	function () {
-		$tab = sanitize_key( $_GET['tab'] ?? 'sources' ); // phpcs:ignore WordPress.Security.NonceVerification
-		if ( in_array( $tab, array( '', 'sources' ), true ) && empty( $_GET['edit'] ) && empty( $_GET['feed'] ) && 'feeds' !== sanitize_key( $_GET['view'] ?? '' ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- the Feeds view has its own
-			add_screen_option( 'per_page', array( 'label' => 'Sources per page', 'default' => 50, 'option' => 'aw_publishers_per_page' ) );
-		} elseif ( 'keywords' === $tab && 'suggestions' !== sanitize_key( $_GET['kw'] ?? '' ) && ! ( function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- which view is shown; the Suggestions view and phase 2 (keywords-admin.php) have their own
-			add_screen_option( 'per_page', array( 'label' => 'Words per page', 'default' => 100, 'option' => 'aw_keywords_per_page' ) );
-		}
-	}
-);
-add_filter( 'set_screen_option_aw_publishers_per_page', fn( $keep, $option, $value ) => max( 1, min( 500, (int) $value ) ), 10, 3 );
-add_filter( 'set_screen_option_aw_keywords_per_page', fn( $keep, $option, $value ) => max( 1, min( 500, (int) $value ) ), 10, 3 );
+/* ---------- WP Admin: the Sourcing page (admin-menu.php); its screens are the Kits shell's (sourceweb-ui.php) ---------- */
 
 /**
- * A Sources list action on some hosts, for today's list and the new Sources screen: allow, neutral or block (publishers
+ * A Sources list action on some hosts (the Sources screen, sourceweb-rest-pages.php): allow, neutral or block (publishers
  * and relay-only sites), press_add / press_remove (before phase 2), relay_on / relay_off (from phase 1), delete (a
  * source with nothing attached). Logged as each was before. The caller writes the records.
  *
@@ -383,172 +351,26 @@ function aw_sourcing_shorts_apply( array $pubs, array $shorts ) {
 	return $pubs;
 }
 
-/** Save handlers. */
+/**
+ * The feed form (Sources &feed=<id|new>, sourceweb_feed_parts()) posts here with tab feeds; the tab's own save hook
+ * (kits_sourcing_save_feeds, sourcing-lists.php) saves and logs it, then the browser goes back to the screen it came from.
+ */
 add_action(
 	'admin_post_aw_sourcing',
 	function () {
 		if ( ! current_user_can( AW_SRC_CAP ) || ! check_admin_referer( 'aw_sourcing' ) ) {
 			wp_die( 'Not allowed.', 403 );
 		}
-		$tab = sanitize_key( $_POST['tab'] ?? 'sources' );
-		$err = '';
-		if ( 'sources' !== $tab && ! has_action( 'kits_sourcing_save_' . $tab ) ) { // a form from a screen that no longer exists: say so, never "Saved"
+		$tab = sanitize_key( $_POST['tab'] ?? '' );
+		if ( ! has_action( 'kits_sourcing_save_' . $tab ) ) { // a form from a screen that no longer exists: say so, never "Saved"
 			wp_die( 'Nothing saved: this form is from an older version of the Sourcing screens. Open the screen again and make the change there.', 'Sourcing', array( 'response' => 409, 'back_link' => true ) );
 		}
-		if ( 'sources' !== $tab ) {
-			do_action( 'kits_sourcing_save_' . $tab ); // a site's own tabs save themselves (and log)
-		} elseif ( ! empty( $_POST['src_edit'] ) ) { // the Add New / Edit Source form (source-sites.php)
-			list( $changed, $err ) = aw_sourcing_source_save();
-		} else {
-			$pubs   = aw_publishers();
-			$before = $pubs;
-			$row    = sanitize_text_field( wp_unslash( $_POST['row_status'] ?? '' ) ); // a row action: "status:host"
-			$prow   = sanitize_text_field( wp_unslash( $_POST['row_press'] ?? '' ) ); // a row action: "add|remove:host"
-			$rrow   = sanitize_text_field( wp_unslash( $_POST['row_relay'] ?? '' ) ); // a row action: "on|off:host"
-			$drow   = sanitize_text_field( wp_unslash( $_POST['row_delete'] ?? '' ) ); // a row action: host
-			if ( false !== strpos( $row, ':' ) ) {
-				list( $status, $one ) = explode( ':', $row, 2 );
-				$status               = sanitize_key( $status );
-				$hosts                = array( $one );
-			} elseif ( false !== strpos( $prow, ':' ) ) {
-				list( $status, $one ) = explode( ':', $prow, 2 );
-				$status               = 'press_' . sanitize_key( $status );
-				$hosts                = array( $one );
-			} elseif ( false !== strpos( $rrow, ':' ) ) {
-				list( $status, $one ) = explode( ':', $rrow, 2 );
-				$status               = 'relay_' . sanitize_key( $status );
-				$hosts                = array( $one );
-			} elseif ( '' !== $drow ) {
-				$status = 'delete';
-				$hosts  = array( $drow );
-			} else { // bulk action, from the top or the bottom of the list
-				$status = sanitize_key( $_POST['bulk_status'] ?? '' );
-				$status = '' !== $status ? $status : sanitize_key( $_POST['bulk_status2'] ?? '' );
-				$hosts  = array_map( 'sanitize_text_field', (array) wp_unslash( $_POST['hosts'] ?? array() ) );
-			}
-			list( $pubs, $press ) = aw_sourcing_sources_apply( $pubs, $status, $hosts );
-			$new = aw_host( 'https://' . preg_replace( '#^https?://#', '', sanitize_text_field( wp_unslash( $_POST['new_host'] ?? '' ) ) ) );
-			$ns  = sanitize_key( $_POST['new_status'] ?? 'block' );
-			if ( $new && in_array( $ns, array( 'allow', 'neutral', 'block' ), true ) ) {
-				$prev         = $pubs[ $new ] ?? null;
-				$pubs[ $new ] = array_merge( array( 'name' => '', 'count' => 0, 'first' => current_time( 'Y-m-d' ), 'last' => '' ), $pubs[ $new ] ?? array(), array( 'status' => $ns ) );
-				if ( 'relay' === ( $pubs[ $new ]['kind'] ?? '' ) ) { // a relay-only site given a status is a publisher
-					unset( $pubs[ $new ]['kind'] );
-				}
-				kits_sourcing_log( 'publishers', 'added ' . $new . ' as ' . $ns, null === $prev ? '' : (string) ( $prev['status'] ?? 'neutral' ), $ns );
-			}
-			$pubs   = aw_sourcing_shorts_apply( $pubs, array_map( 'sanitize_text_field', (array) wp_unslash( $_POST['short'] ?? array() ) ) ); // short names for card chips
-			update_option( AW_PUB_OPTION, $pubs, false );
-			$changed = $pubs !== $before || $press; // a page change alone saves nothing
-		}
-		$back = add_query_arg( array( 'page' => 'aw-sourcing', 'tab' => $tab, 'updated' => 1 ), admin_url( 'admin.php' ) );
-		if ( 'feeds' === $tab ) { // the feed form (Feeds moved into Sources, 25 Oct 2026): back to the screen it was opened from
-			$from = wp_validate_redirect( esc_url_raw( wp_unslash( $_POST['src_back'] ?? '' ) ), '' );
-			$back = add_query_arg( 'updated', 1, '' !== $from ? $from : admin_url( 'admin.php?page=aw-sourcing&tab=sources&view=feeds' ) );
-		}
-		if ( 'sources' === $tab && ! empty( $_POST['src_edit'] ) ) { // the edit form: back to the list, or to the form with what was wrong
-			$back = add_query_arg( array( 'page' => 'aw-sourcing', 'tab' => 'sources' ), admin_url( 'admin.php' ) );
-			$back = $err ? add_query_arg( 'src_err', $err, wp_get_referer() ? wp_get_referer() : $back ) : ( $changed ? add_query_arg( 'updated', 1, $back ) : $back );
-		} elseif ( 'sources' === $tab ) { // back to the same view, sort and page of the list, with its search
-			$back = remove_query_arg( array( 'updated', 'paged', 'src_err' ), wp_get_referer() ? wp_get_referer() : $back );
-			$page = absint( wp_unslash( $_POST['paged'] ?? 0 ) ); // the page-number box of the list
-			$back = $page > 1 ? add_query_arg( 'paged', $page, $back ) : $back;
-			$back = empty( $changed ) ? $back : add_query_arg( 'updated', 1, $back );
-		}
-		if ( false !== strpos( (string) wp_get_referer(), 'ui=classic' ) ) { // a save on today's screen goes back to it
-			$back = add_query_arg( 'ui', 'classic', $back );
-		}
-		wp_safe_redirect( $back );
+		do_action( 'kits_sourcing_save_' . $tab );
+		$from = wp_validate_redirect( esc_url_raw( wp_unslash( $_POST['src_back'] ?? '' ) ), '' );
+		wp_safe_redirect( add_query_arg( 'updated', 1, '' !== $from ? $from : admin_url( 'admin.php?page=aw-sourcing&tab=sources&view=feeds' ) ) );
 		exit;
 	}
 );
-
-/**
- * The Keywords tab's word lists: add words (the form above the list) and the list table's row and bulk actions
- * (remove, move to another list). Logged in the Change log like every Sourcing change.
- */
-add_action(
-	'admin_post_aw_sourcing_keywords',
-	function () {
-		$adding = isset( $_POST['kw_add'] ); // phpcs:ignore WordPress.Security.NonceVerification -- picks which nonce is checked next
-		if ( ! current_user_can( AW_SRC_CAP ) || ! check_admin_referer( $adding ? 'aw_sourcing_keywords_add' : 'bulk-keywords' ) ) {
-			wp_die( 'Not allowed.', 403 );
-		}
-		if ( aw_sourcing_phase() >= 2 ) { // phase 2: the lists are the keyword table's now; these screens are copies until the new ones arrive
-			wp_die( 'The keyword lists moved into the keyword table (sourcing phase 2). They are edited on the new Keywords screen; this old form is read-only.', 'Sourcing', array( 'response' => 409, 'back_link' => true ) );
-		}
-		$lists = array( 'strong' => 'Include', 'animal' => 'Animal words', 'context' => 'Context words', 'exclude' => 'Exclude' );
-		$rel   = aw_relevance();
-		$old   = $rel;
-		$n     = 0;
-		$op    = 'add';
-		$has   = function ( $k, $t ) use ( &$rel ) {
-			return in_array( mb_strtolower( $t ), array_map( 'mb_strtolower', (array) ( $rel[ $k ] ?? array() ) ), true );
-		};
-		if ( $adding ) {
-			$to = sanitize_key( $_POST['kw_list'] ?? '' );
-			$to = isset( $lists[ $to ] ) ? $to : 'strong';
-			foreach ( explode( "\n", sanitize_textarea_field( wp_unslash( $_POST['kw_new'] ?? '' ) ) ) as $t ) {
-				$t = trim( $t );
-				if ( '' !== $t && ! $has( $to, $t ) ) {
-					$rel[ $to ][] = $t;
-					++$n;
-				}
-			}
-		} else {
-			$row = sanitize_text_field( wp_unslash( $_POST['kw_row'] ?? '' ) ); // a row action: "op:list|word"
-			if ( false !== strpos( $row, ':' ) ) {
-				list( $op, $one ) = explode( ':', $row, 2 );
-				$ids              = array( $one );
-			} else { // bulk action, from the top or the bottom of the list
-				$op  = sanitize_key( $_POST['kw_bulk'] ?? '' );
-				$op  = '' !== $op ? $op : sanitize_key( $_POST['kw_bulk2'] ?? '' );
-				$ids = array_map( 'sanitize_text_field', (array) wp_unslash( $_POST['kw'] ?? array() ) );
-			}
-			$op = sanitize_key( $op );
-			$to = 0 === strpos( $op, 'to_' ) ? substr( $op, 3 ) : '';
-			if ( 'remove' === $op || isset( $lists[ $to ] ) ) {
-				foreach ( $ids as $id ) {
-					list( $from, $t ) = array_pad( explode( '|', (string) $id, 2 ), 2, '' );
-					if ( ! isset( $lists[ $from ] ) || $from === $to ) {
-						continue;
-					}
-					$at = array_search( $t, (array) ( $rel[ $from ] ?? array() ), true );
-					if ( false === $at ) {
-						continue;
-					}
-					unset( $rel[ $from ][ $at ] );
-					$rel[ $from ] = array_values( $rel[ $from ] );
-					if ( $to && ! $has( $to, $t ) ) {
-						$rel[ $to ][] = $t;
-					}
-					++$n;
-				}
-			}
-		}
-		if ( $n ) {
-			update_option( AW_REL_OPTION, $rel, false );
-			delete_transient( 'aw_sourcing_kw_stats_30' ); // Search Insights' per-keyword rows follow the new lists at once
-			$what = array();
-			foreach ( $lists as $k => $l ) {
-				$what[] = kits_sourcing_diff( $l, $old[ $k ] ?? array(), $rel[ $k ] ?? array() );
-			}
-			kits_sourcing_log( 'keywords', implode( ' · ', array_filter( $what ) ) );
-		}
-		$ref  = wp_get_referer();
-		$back = remove_query_arg( array( 'updated', 'kw_done', 'kw_n', 'paged' ), $ref ? $ref : admin_url( 'admin.php?page=aw-sourcing&tab=keywords' ) );
-		$page = absint( wp_unslash( $_POST['paged'] ?? 0 ) ); // the page-number box of the list
-		$back = $page > 1 ? add_query_arg( 'paged', $page, $back ) : $back;
-		parse_str( (string) wp_parse_url( (string) $ref, PHP_URL_QUERY ), $was );
-		if ( ! $n && ! $adding && '' === $op && $page && absint( $was['paged'] ?? 1 ) !== $page ) { // the page box alone: navigation
-			wp_safe_redirect( $back );
-			exit;
-		}
-		wp_safe_redirect( add_query_arg( array( 'kw_done' => $n ? ( $adding ? 'add' : ( 'remove' === $op ? 'remove' : 'move' ) ) : 'none', 'kw_n' => $n ), $back ) );
-		exit;
-	}
-);
-add_filter( 'removable_query_args', fn( $args ) => 'aw-sourcing' === sanitize_key( $_GET['page'] ?? '' ) ? array_merge( $args, array( 'kw_done', 'kw_n' ) ) : $args ); // phpcs:ignore WordPress.Security.NonceVerification -- only on this screen
 
 /** One-click block from the News / Legal Watch lists. */
 add_action(
@@ -667,219 +489,20 @@ function aw_sourcing_change_rows(): array {
 	return $rows;
 }
 
-/** Admin page. */
+/** The Sourcing page: each tab is a shell screen (sourceweb-ui.php). */
 function aw_sourcing_page() {
 	if ( ! current_user_can( AW_SRC_CAP ) ) {
 		return;
 	}
-	if ( function_exists( 'sourceweb_ui_page' ) && sourceweb_ui_page( sourceweb_ui_wanted() ) ) {
-		return; // A rebuilt tab: Settings, Workers … (sourceweb-ui.php SOURCEWEB_UI_TABS; &ui=classic shows this one).
-	}
-	$base = admin_url( 'admin.php?page=aw-sourcing' );
-	// Each tab is an item of the Sourcing menu (admin-menu.php aw_sourcing_tabs: slug => [label, render callback, own form?]).
-	// A tab whose third value is true is drawn outside the shared aw_sourcing form (a Settings API form, its own forms, or nothing to save).
-	$extra = aw_sourcing_tabs();
-	$tabs  = array_map( fn( $t ) => $t[0], $extra );
-	$tab   = aw_sourcing_current_tab();
-	// Core's "Add New" button beside the heading, on the lists that have one (kits_sourcing_title_action: tab => [label, url]).
-	$add = (array) apply_filters( 'kits_sourcing_title_action', array( 'sources' => array( 'Add New Source', $base . '&tab=sources&edit=new' ) ) );
-	echo '<div class="wrap"><h1 class="wp-heading-inline">' . esc_html( $tabs[ $tab ] ) . '</h1>';
-	if ( isset( $add[ $tab ] ) && empty( $_GET['edit'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-		echo ' <a href="' . esc_url( $add[ $tab ][1] ) . '" class="page-title-action">' . esc_html( $add[ $tab ][0] ) . '</a>';
-	}
-	echo '<hr class="wp-header-end">';
-	aw_sourcing_screen_tabs();
-	settings_errors(); // the Settings API forms' notices: WordPress prints them by itself only on Settings screens
-	if ( ! empty( $_GET['updated'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-		wp_admin_notice( 'Saved. The workers use this from their next run.', array( 'type' => 'success', 'dismissible' => true ) );
-	}
-	do_action( 'kits_sourcing_page_top' );
-	if ( 'log' === $tab ) {
-		$rows = array();
-		foreach ( aw_sourcing_change_rows() as $e ) {
-			$rows[] = array(
-				'at'     => esc_html( $e['at'] ),
-				'user'   => esc_html( $e['user'] ),
-				'tab'    => esc_html( $e['tab'] ),
-				'what'   => esc_html( $e['what'] ),
-				'change' => '' !== $e['change'] ? esc_html( $e['change'] ) : '—',
-				'_find'  => $e['user'] . ' ' . $e['tab'] . ' ' . $e['what'] . ' ' . $e['change'],
-			);
-		}
-		aw_sourcing_simple_table(
-			'changes',
-			array( 'at' => 'When', 'user' => 'Who', 'tab' => 'Tab', 'what' => 'What changed', 'change' => 'Old → new' ),
-			$rows,
-			array( 'per_page' => 50, 'sortable' => array( 'at', 'user', 'tab' ), 'empty' => 'No changes yet.', 'search' => 'Search changes', 'hidden' => array( 'page' => 'aw-sourcing', 'tab' => 'log' ) )
-		);
-		echo '</div>';
-		return;
-	}
-	if ( 'sources' === $tab ) { // its own forms: the search (GET), the list or the edit form (source-sites.php)
-		aw_sourcing_sources_tab();
-		echo '</div>';
-		return;
-	}
-	if ( 'keywords' === $tab ) { // its own forms: the switches, add words, the word list
-		aw_sourcing_keywords_tab();
-		echo '</div>';
-		return;
-	}
-	if ( ! empty( $extra[ $tab ][2] ) ) { // a tab with its own forms (a Settings API form to options.php, or a list)
-		call_user_func( $extra[ $tab ][1] );
-		echo '</div>';
-		return;
-	}
-	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_sourcing"><input type="hidden" name="tab" value="' . esc_attr( $tab ) . '">';
-	wp_nonce_field( 'aw_sourcing' );
-	if ( isset( $extra[ $tab ] ) ) {
-		call_user_func( $extra[ $tab ][1] );
-	}
-	echo '</form></div>';
+	sourceweb_ui_page( sourceweb_ui_wanted() );
 }
 
-/**
- * The Keywords tab, two views so each list table has its own paging, sorting, search and screen option: Words (the two
- * switches, add words, the word lists, the headline test) and Suggestions from Search Insights (&kw=suggestions).
- */
-function aw_sourcing_keywords_tab() {
-	$base = admin_url( 'admin.php?page=aw-sourcing&tab=keywords' );
-	$sugg = 'suggestions' === sanitize_key( $_GET['kw'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
-	if ( ! $sugg && function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ) { // phase 2: the keyword table (keywords-admin.php)
-		aw_sourcing_kw_tab();
-		return;
-	}
-	echo '<ul class="subsubsub"><li><a href="' . esc_url( $base ) . '"' . ( $sugg ? '' : ' class="current" aria-current="page"' ) . '>' . ( function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ? 'Keywords' : 'Words' ) . '</a> | </li>'
-		. '<li><a href="' . esc_url( $base . '&kw=suggestions' ) . '"' . ( $sugg ? ' class="current" aria-current="page"' : '' ) . '>Suggestions from Search Insights</a></li></ul><br class="clear">';
-	if ( $sugg ) {
-		if ( ! has_action( 'aw_sourcing_keywords_tab_end' ) || ( function_exists( 'aw_sourcing_si_available' ) && ! aw_sourcing_si_available() ) ) {
-			wp_admin_notice( 'Suggestions need Search Insights (aw-seo-extras), which is off.', array( 'type' => 'info', 'additional_classes' => array( 'inline' ) ) );
-		}
-		do_action( 'aw_sourcing_keywords_tab_end' ); // suggestions from Search Insights (keyword-suggestions.php)
-		return;
-	}
-	$post = admin_url( 'admin-post.php' );
-	$done = sanitize_key( $_GET['kw_done'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
-	if ( 'none' === $done ) {
-		wp_admin_notice( 'Nothing changed: choose an action and at least one word (a word already in a list is not added to it again).', array( 'type' => 'warning', 'dismissible' => true ) );
-	} elseif ( $done ) {
-		$n   = absint( wp_unslash( $_GET['kw_n'] ?? 0 ) ); // phpcs:ignore WordPress.Security.NonceVerification
-		$msg = array(
-			/* translators: %d: number of words. */
-			'add'    => _n( '%d word added.', '%d words added.', $n ),
-			/* translators: %d: number of words. */
-			'remove' => _n( '%d word removed.', '%d words removed.', $n ),
-			/* translators: %d: number of words. */
-			'move'   => _n( '%d word moved.', '%d words moved.', $n ),
-		);
-		if ( isset( $msg[ $done ] ) ) {
-			wp_admin_notice( esc_html( sprintf( $msg[ $done ], $n ) . ' The workers use the lists from their next run.' ), array( 'type' => 'success', 'dismissible' => true ) );
-		}
-	}
-	echo '<p>An item from an <strong>allowed</strong> publisher goes live when it has an <strong>include</strong> word (or an animal word with a context word) and no <strong>exclude</strong> word; otherwise it waits in review. Blocked publishers are refused. Hindi works.</p>';
-
-	aw_sourcing_settings_form( 'aw_sourcing_switches', 'aw-sourcing-switches' );
-
-	if ( ! class_exists( 'WP_List_Table' ) ) {
-		require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
-	}
-	require_once __DIR__ . '/class-aw-sourcing-keywords-table.php';
-	$table = new AW_Sourcing_Keywords_Table();
-	$table->prepare_items();
-
-	// As on Posts → Tags: the search above, the add form on the left, the list on the right.
-	$list = sanitize_key( $_GET['list'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
-	echo '<form class="search-form wp-clearfix" method="get"><input type="hidden" name="page" value="aw-sourcing"><input type="hidden" name="tab" value="keywords">' . ( isset( AW_Sourcing_Keywords_Table::LISTS[ $list ] ) ? '<input type="hidden" name="list" value="' . esc_attr( $list ) . '">' : '' );
-	$table->search_box( 'Search words', 'aw-kw' );
-	echo '</form>';
-
-	echo '<div id="col-container" class="wp-clearfix"><div id="col-left"><div class="col-wrap"><div class="form-wrap">';
-	echo '<h2>Add words</h2><form method="post" action="' . esc_url( $post ) . '"><input type="hidden" name="action" value="aw_sourcing_keywords"><input type="hidden" name="kw_add" value="1">';
-	wp_nonce_field( 'aw_sourcing_keywords_add' );
-	echo '<div class="form-field form-required"><label for="aw-kw-new">Words</label><textarea id="aw-kw-new" name="kw_new" rows="5" cols="40" aria-describedby="aw-kw-new-description"></textarea><p id="aw-kw-new-description">One per line. Hindi works. A word already in the list is not added again.</p></div>';
-	echo '<div class="form-field"><label for="aw-kw-list">Add to</label><select id="aw-kw-list" name="kw_list" aria-describedby="aw-kw-list-description">';
-	foreach ( array( 'strong' => 'Include (one is enough)', 'animal' => 'Animal words', 'context' => 'Context words (an animal word with one of these also counts)', 'exclude' => 'Exclude (always drop)' ) as $k => $l ) {
-		echo '<option value="' . esc_attr( $k ) . '">' . esc_html( $l ) . '</option>';
-	}
-	echo '</select><p id="aw-kw-list-description">Include: keeps an item on its own (an English one is also a Google News search). Animal and Context: keep an item together. Exclude: always drops it.</p></div>';
-	submit_button( 'Add words', 'primary' );
-	echo '</form></div></div></div>';
-
-	echo '<div id="col-right"><div class="col-wrap"><h2 class="screen-reader-text">Words</h2>';
-	$table->views();
-	echo '<form method="post" action="' . esc_url( $post ) . '"><input type="hidden" name="action" value="aw_sourcing_keywords">';
-	$table->display();
-	echo '</form></div></div></div>';
-
-	$try = sanitize_text_field( wp_unslash( $_GET['try'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
-	echo '<h2>Test a headline</h2><form method="get"><input type="hidden" name="page" value="aw-sourcing"><input type="hidden" name="tab" value="keywords"><input type="text" name="try" class="large-text" value="' . esc_attr( $try ) . '" placeholder="Paste a headline" aria-label="Headline">';
-	submit_button( 'Test', 'secondary', '', false );
-	if ( $try ) {
-		$v = aw_relevance_verdict( $try );
-		echo '<p><strong>' . ( $v[0] ? 'Kept' : 'Dropped' ) . '</strong> (' . esc_html( $v[1] ) . ')</p>';
-	}
-	echo '</form>';
-}
+/* ---------- Saves of the Sourcing options (their sanitize callbacks) ---------- */
 
 /**
- * Show plain rows as a core list table.
- *
- * @param string $plural Table name.
- * @param array  $cols   Column => label.
- * @param array  $rows   Rows (cells as escaped HTML).
- * @param array  $opts   AW_Sourcing_Simple_Table options; search: the search button's text; hidden: query args the search keeps.
- */
-function aw_sourcing_simple_table( $plural, array $cols, array $rows, array $opts = array() ) {
-	if ( ! class_exists( 'WP_List_Table' ) ) {
-		require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
-	}
-	require_once __DIR__ . '/class-aw-sourcing-simple-table.php';
-	$t = new AW_Sourcing_Simple_Table( $plural, $cols, $rows, $opts );
-	$t->prepare_items();
-	if ( ! empty( $opts['search'] ) ) { // a GET form with the screen's own query args (opts hidden)
-		echo '<form method="get">';
-		foreach ( (array) ( $opts['hidden'] ?? array() ) as $k => $v ) {
-			echo '<input type="hidden" name="' . esc_attr( $k ) . '" value="' . esc_attr( $v ) . '">';
-		}
-		$t->search_box( (string) $opts['search'], 'aw-' . sanitize_key( $plural ) );
-		echo '</form>';
-	}
-	$t->display();
-}
-
-/**
- * The plugins list's problem row (core notice classes) under a list-table row: a blocked publisher, a source that is
- * off, a rejected item from an allowed publisher. As on the plugins list for a plugin with a problem.
- *
- * @param WP_List_Table $table The table (for the column count).
- * @param string        $msg   Plain text.
- * @param string        $tone  error, warning or info.
- */
-function aw_sourcing_problem_row( $table, $msg, $tone = 'warning' ) {
-	echo '<tr class="plugin-update-tr"><td colspan="' . (int) $table->get_column_count() . '" class="plugin-update colspanchange"><div class="update-message notice inline notice-' . esc_attr( $tone ) . ' notice-alt"><p>' . esc_html( $msg ) . '</p></div></td></tr>';
-}
-
-/* ---------- Settings API (owner, 24 Oct 2026): the Sourcing settings forms post to options.php ---------- */
-
-/**
- * A Settings API form: the group's hidden fields and nonce, its sections and fields, Save.
- *
- * @param string $group  Option group (register_setting).
- * @param string $page   Settings page slug the sections are added to.
- * @param string $button Button text.
- */
-function aw_sourcing_settings_form( $group, $page, $button = 'Save' ) {
-	echo '<form method="post" action="' . esc_url( admin_url( 'options.php' ) ) . '">';
-	settings_fields( $group );
-	do_settings_sections( $page );
-	submit_button( $button );
-	echo '</form>';
-}
-
-/**
- * Was this value posted by one of the Sourcing forms? Each form sends a hidden _aw_tab with its option. A sanitize
- * callback runs on every update_option() of its option, also the site's own saves (list tables, suggestions, the
- * workers' seed), so those pass through unchanged.
+ * Was this value saved by a Sourcing screen? Each screen's save (sourceweb/v1) sends _aw_tab with its option. A
+ * sanitize callback runs on every update_option() of its option, also the site's own saves (suggestions, the workers'
+ * seed), so those pass through unchanged.
  *
  * @param mixed  $value Value being saved.
  * @param string $tab   Tab that posts it ('' for any).
@@ -888,11 +511,6 @@ function aw_sourcing_settings_form( $group, $page, $button = 'Save' ) {
 function aw_sourcing_settings_tab( $value, $tab = '' ) {
 	$t = is_array( $value ) ? sanitize_key( $value['_aw_tab'] ?? '' ) : '';
 	return ( '' === $tab || $t === $tab ) ? $t : '';
-}
-
-/** The marker field of a Sourcing form (see aw_sourcing_settings_tab). */
-function aw_sourcing_settings_marker( $option, $tab ) {
-	echo '<input type="hidden" name="' . esc_attr( $option ) . '[_aw_tab]" value="' . esc_attr( $tab ) . '">';
 }
 
 /** After a Sourcing form saved: one notice in place of core's "Settings saved." */
@@ -905,55 +523,18 @@ function aw_sourcing_lines( $text ) {
 	return array_values( array_unique( array_filter( array_map( 'trim', explode( "\n", sanitize_textarea_field( (string) $text ) ) ) ) ) );
 }
 
-/** A field's textarea (Settings API callback): args name, value (list or text), rows, help, class. */
-function aw_sourcing_textarea_field( $args ) {
-	$v = is_array( $args['value'] ) ? implode( "\n", $args['value'] ) : (string) $args['value'];
-	echo '<textarea id="' . esc_attr( $args['label_for'] ) . '" name="' . esc_attr( $args['name'] ) . '" rows="' . (int) ( $args['rows'] ?? 6 ) . '" class="' . esc_attr( $args['class_attr'] ?? 'large-text code' ) . '">' . esc_textarea( $v ) . '</textarea>';
-	if ( ! empty( $args['help'] ) ) {
-		echo '<p class="description">' . esc_html( $args['help'] ) . '</p>';
-	}
-}
-
 // Options.php checks the group's capability: the Sourcing screen's own.
 foreach ( array( 'aw_sourcing_switches', 'aw_sourcing_sources', 'aw_sourcing_summary', 'aw_sourcing_enrich' ) as $aw_group ) {
 	add_filter( 'option_page_capability_' . $aw_group, fn() => AW_SRC_CAP );
 }
 
-// Keywords tab: the two switches (option aw_relevance; the word lists save from their list table).
+// Keywords: the two switches (option aw_relevance).
 add_action(
 	'admin_init',
-	function () {
-		register_setting( 'aw_sourcing_switches', AW_REL_OPTION, array( 'type' => 'array', 'sanitize_callback' => 'aw_relevance_switches_sanitize', 'show_in_rest' => false ) );
-		add_settings_section(
-			'aw_switches',
-			'',
-			fn() => aw_sourcing_settings_marker( AW_REL_OPTION, 'keywords' ),
-			'aw-sourcing-switches'
-		);
-		add_settings_field(
-			'aw_rel_enabled',
-			'Relevance filter',
-			function () {
-				$r = aw_relevance();
-				echo '<label><input type="checkbox" id="aw-rel-enabled" name="' . esc_attr( AW_REL_OPTION ) . '[enabled]" value="1"' . checked( ! empty( $r['enabled'] ), true, false ) . '> On</label><p class="description">Off: every item from a non-blocked publisher is kept.</p>';
-			},
-			'aw-sourcing-switches',
-			'aw_switches'
-		);
-		add_settings_field(
-			'aw_rel_gnews',
-			'Aggregator feeds',
-			function () {
-				$r = aw_relevance();
-				echo '<label><input type="checkbox" id="aw-rel-gnews" name="' . esc_attr( AW_REL_OPTION ) . '[gnews_allow_only]" value="1"' . checked( ! empty( $r['gnews_allow_only'] ), true, false ) . '> Only allowed publishers</label><p class="description">Google News, Apple News and similar: items from Neutral publishers are refused. Keep off unless the allow list is complete.</p>';
-			},
-			'aw-sourcing-switches',
-			'aw_switches'
-		);
-	}
+	fn() => register_setting( 'aw_sourcing_switches', AW_REL_OPTION, array( 'type' => 'array', 'sanitize_callback' => 'aw_relevance_switches_sanitize', 'show_in_rest' => false ) )
 );
 
-/** The two switches from the Keywords tab; any other save of aw_relevance passes through. */
+/** The two switches from the Keywords screen; any other save of aw_relevance passes through. */
 function aw_relevance_switches_sanitize( $value ) {
 	if ( ! aw_sourcing_settings_tab( $value, 'keywords' ) ) {
 		return $value;

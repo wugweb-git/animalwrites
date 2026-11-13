@@ -1,14 +1,14 @@
 <?php
 /**
- * InsightWeb's screens on the Kits admin shell, the default since 12 Nov 2026:
+ * InsightWeb's screens on the Kits admin shell:
  * - admin.php?page=aw-search-insights: the Dashboard;
  * - admin.php?page=aw-search-insights&tab=settings: Settings;
  * - admin.php?page=aw-search-insights&tab=<keywords|pages|checklist|rising|clarity|links|server|sourcing|…>: the other
  *   tabs, each from its own output (insightweb-tabs.php), since 12 Nov 2026.
  *
- * &ui=classic shows the earlier tabs. The screens are one script (build/index.js, from src/), drawn with Kits Core's
- * shell parts (kits-core/includes/admin-shell.php) and fed by the insightweb/v1 routes (insightweb-rest.php). When Kits
- * Core or a build file is missing, the earlier tab shows.
+ * The screens are one script (build/index.js, from src/), drawn with Kits Core's shell parts
+ * (kits-core/includes/admin-shell.php) and fed by the insightweb/v1 routes (insightweb-rest.php). When Kits Core or a
+ * build file is missing, aw_si_screen() shows a notice instead.
  *
  * @package insightweb
  */
@@ -29,11 +29,11 @@ function insightweb_kits_export( $names ) {
 add_filter( 'kits_settings_transfer_options', 'insightweb_kits_export' );
 
 /**
- * Which new screen this request asks for: 'dashboard', 'settings', a tab of insightweb_tab_keys() or ''.
+ * Which screen this request asks for: 'dashboard', 'settings', a tab of insightweb_tab_keys() or ''.
  */
 function insightweb_ui_wanted(): string {
 	$page = sanitize_key( wp_unslash( $_GET['page'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- which screen to show; nothing is saved here
-	if ( AW_SI_SLUG !== $page || ! function_exists( 'kits_shell_ui_next' ) || ! kits_shell_ui_next() ) {
+	if ( AW_SI_SLUG !== $page || ! function_exists( 'kits_shell_app' ) ) {
 		return '';
 	}
 	$tab = aw_si_tab();
@@ -47,7 +47,7 @@ function insightweb_ui_wanted(): string {
 }
 
 /**
- * The new screen is on this request (its script enqueued). Set on admin_enqueue_scripts.
+ * The shell screen is on this request (its script enqueued). Set on admin_enqueue_scripts.
  *
  * @param bool|null $set Set the flag.
  */
@@ -60,12 +60,12 @@ function insightweb_ui_ready( ?bool $set = null ): bool {
 }
 
 /**
- * The address of a new screen.
+ * The address of a shell screen.
  *
  * @param string $screen 'dashboard' or 'settings'.
  */
 function insightweb_ui_url( string $screen ): string {
-	return add_query_arg( 'ui', 'next', aw_si_url( 'settings' === $screen ? 'settings' : 'overview' ) );
+	return aw_si_url( 'settings' === $screen ? 'settings' : 'overview' );
 }
 
 add_action(
@@ -129,10 +129,10 @@ add_action(
 );
 
 /**
- * Draw the new screen in place of the current tab, when it is ready. aw_si_screen() calls this first.
+ * Draw the shell screen for the current tab, when it is ready. aw_si_screen() calls this first.
  *
  * @param string $tab The current tab.
- * @return bool True when the new screen was drawn.
+ * @return bool True when the shell screen was drawn.
  */
 function insightweb_ui_page( string $tab ): bool {
 	$screen = insightweb_ui_wanted();
@@ -140,7 +140,7 @@ function insightweb_ui_page( string $tab ): bool {
 		'overview' => 'dashboard',
 		'settings' => 'settings',
 	)[ $tab ] ?? $tab;
-	if ( '' === $screen || ! insightweb_ui_ready() || $want !== $screen ) {
+	if ( '' === $screen || ! insightweb_ui_ready() || $want !== $screen || ! function_exists( 'kits_shell_mount' ) ) {
 		return false;
 	}
 	$title = array(

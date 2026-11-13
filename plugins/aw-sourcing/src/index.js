@@ -337,6 +337,26 @@ function Dashboard() {
 
 /* ---------- To review ---------- */
 
+/**
+ * Server-drawn forms under a screen (app.extra, sourceweb_extra_parts()): To review's intake forms, Settings' backfill
+ * date. Nothing when the server sent none.
+ *
+ * @param {Object} props
+ * @param {string} props.id    Card id.
+ * @param {string} props.title Card title.
+ */
+function ExtraParts( { id, title } ) {
+	const parts = ( app.extra || [] ).filter( ( p ) => 'heading' !== p.type );
+	if ( ! parts.length ) {
+		return null;
+	}
+	return (
+		<SectionCard id={ id } title={ title }>
+			<PageParts parts={ parts } title={ title } />
+		</SectionCard>
+	);
+}
+
 function Review() {
 	const [ q, setQ ] = useState( {
 		type: '',
@@ -405,154 +425,169 @@ function Review() {
 
 	const rows = data?.rows || [];
 	return (
-		<SectionCard
-			id="review"
-			title={ __( 'To review', 'aw-sourcing' ) }
-			description={ __(
-				'Items that came in automatically and need a person, with why each was held. Publish puts it live; Reject moves it to Drafts (nothing is deleted).',
-				'aw-sourcing'
-			) }
-			actions={
-				data && data.count > 0 ? (
-					<Button onClick={ publishAll }>
-						{ sprintf(
-							/* translators: %d: number of items. */
-							__( 'Publish all %d', 'aw-sourcing' ),
-							data.count
-						) }
-					</Button>
-				) : null
-			}
-		>
-			{ msg && (
-				<Notice tone={ msg.tone } onDismiss={ () => setMsg( null ) }>
-					{ msg.text }
-				</Notice>
-			) }
-			<DataList
-				label={ __( 'Items waiting for review', 'aw-sourcing' ) }
-				columns={ [
-					{
-						key: 'date',
-						label: __( 'Received', 'aw-sourcing' ),
-						sortable: true,
-						render: ( r ) => r.dateText,
-					},
-					{
-						key: 'title',
-						label: __( 'Item', 'aw-sourcing' ),
-						sortable: true,
-						primary: true,
-						render: ( r ) => (
-							<>
-								<a href={ r.editUrl }>
-									<strong>{ r.title }</strong>
-								</a>
-								{ r.excerpt && (
-									<span className="kits-shell-field__help">
-										{ ' ' }
-										{ r.excerpt }
-									</span>
-								) }
-							</>
-						),
-					},
-					{
-						key: 'type',
-						label: __( 'Type', 'aw-sourcing' ),
-						sortable: true,
-						render: ( r ) => r.typeLabel,
-					},
-					{
-						key: 'host',
-						label: __( 'Source', 'aw-sourcing' ),
-						render: ( r ) => r.host || '—',
-					},
-					{
-						key: 'why',
-						label: __( 'Why it is waiting', 'aw-sourcing' ),
-					},
-				] }
-				rows={ rows }
-				total={ data?.total || 0 }
-				page={ data?.page || 1 }
-				pages={ data?.pages || 1 }
-				onPage={ ( page ) => setQ( ( o ) => ( { ...o, page } ) ) }
-				search={ q.search }
-				onSearch={ ( search ) => set( { search } ) }
-				searchLabel={ __( 'Search items', 'aw-sourcing' ) }
-				views={ data?.views || [] }
-				view={ q.type }
-				onView={ ( type ) => set( { type, source: '', why: '' } ) }
-				filters={ [
-					{
-						key: 'source',
-						label: __( 'Source', 'aw-sourcing' ),
-						options: data?.filters?.source || [],
-						value: q.source,
-					},
-					{
-						key: 'why',
-						label: __( 'Why', 'aw-sourcing' ),
-						options: data?.filters?.why || [],
-						value: q.why,
-					},
-				] }
-				onFilter={ ( key, value ) => set( { [ key ]: value } ) }
-				sort={ { key: q.orderby, dir: q.order } }
-				onSort={ ( orderby, order ) => set( { orderby, order } ) }
-				bulkActions={ [
-					{ value: 'publish', label: __( 'Publish', 'aw-sourcing' ) },
-					{
-						value: 'reject',
-						label: __( 'Reject (move to Drafts)', 'aw-sourcing' ),
-					},
-				] }
-				onBulk={ decide }
-				rowActions={ ( r ) => [
-					{
-						icon: 'edit',
-						label: __( 'Edit', 'aw-sourcing' ),
-						href: r.editUrl,
-					},
-					...( r.url
-						? [
-								{
-									label: __( 'Source', 'aw-sourcing' ),
-									href: r.url,
-								},
-							]
-						: [] ),
-					{
-						icon: 'success',
-						label: __( 'Publish', 'aw-sourcing' ),
-						onClick: () => decide( 'publish', [ r.id ] ),
-						disabled: r.noPublish,
-						why: r.noPublish
-							? __( 'Needs its summary first', 'aw-sourcing' )
-							: '',
-					},
-					{
-						icon: 'cancel',
-						label: __( 'Reject', 'aw-sourcing' ),
-						tone: 'error',
-						onClick: () => decide( 'reject', [ r.id ] ),
-					},
-				] }
-				loading={ loading }
-				error={ error }
-				onRetry={ load }
-				emptyTitle={ __( 'Nothing is waiting.', 'aw-sourcing' ) }
-				empty={
-					<p>
-						{ __(
-							'New items that pass the checks go live on their own.',
-							'aw-sourcing'
-						) }
-					</p>
+		<>
+			<SectionCard
+				id="review"
+				title={ __( 'To review', 'aw-sourcing' ) }
+				description={ __(
+					'Items that came in automatically and need a person, with why each was held. Publish puts it live; Reject moves it to Drafts (nothing is deleted).',
+					'aw-sourcing'
+				) }
+				actions={
+					data && data.count > 0 ? (
+						<Button onClick={ publishAll }>
+							{ sprintf(
+								/* translators: %d: number of items. */
+								__( 'Publish all %d', 'aw-sourcing' ),
+								data.count
+							) }
+						</Button>
+					) : null
 				}
+			>
+				{ msg && (
+					<Notice
+						tone={ msg.tone }
+						onDismiss={ () => setMsg( null ) }
+					>
+						{ msg.text }
+					</Notice>
+				) }
+				<DataList
+					label={ __( 'Items waiting for review', 'aw-sourcing' ) }
+					columns={ [
+						{
+							key: 'date',
+							label: __( 'Received', 'aw-sourcing' ),
+							sortable: true,
+							render: ( r ) => r.dateText,
+						},
+						{
+							key: 'title',
+							label: __( 'Item', 'aw-sourcing' ),
+							sortable: true,
+							primary: true,
+							render: ( r ) => (
+								<>
+									<a href={ r.editUrl }>
+										<strong>{ r.title }</strong>
+									</a>
+									{ r.excerpt && (
+										<span className="kits-shell-field__help">
+											{ ' ' }
+											{ r.excerpt }
+										</span>
+									) }
+								</>
+							),
+						},
+						{
+							key: 'type',
+							label: __( 'Type', 'aw-sourcing' ),
+							sortable: true,
+							render: ( r ) => r.typeLabel,
+						},
+						{
+							key: 'host',
+							label: __( 'Source', 'aw-sourcing' ),
+							render: ( r ) => r.host || '—',
+						},
+						{
+							key: 'why',
+							label: __( 'Why it is waiting', 'aw-sourcing' ),
+						},
+					] }
+					rows={ rows }
+					total={ data?.total || 0 }
+					page={ data?.page || 1 }
+					pages={ data?.pages || 1 }
+					onPage={ ( page ) => setQ( ( o ) => ( { ...o, page } ) ) }
+					search={ q.search }
+					onSearch={ ( search ) => set( { search } ) }
+					searchLabel={ __( 'Search items', 'aw-sourcing' ) }
+					views={ data?.views || [] }
+					view={ q.type }
+					onView={ ( type ) => set( { type, source: '', why: '' } ) }
+					filters={ [
+						{
+							key: 'source',
+							label: __( 'Source', 'aw-sourcing' ),
+							options: data?.filters?.source || [],
+							value: q.source,
+						},
+						{
+							key: 'why',
+							label: __( 'Why', 'aw-sourcing' ),
+							options: data?.filters?.why || [],
+							value: q.why,
+						},
+					] }
+					onFilter={ ( key, value ) => set( { [ key ]: value } ) }
+					sort={ { key: q.orderby, dir: q.order } }
+					onSort={ ( orderby, order ) => set( { orderby, order } ) }
+					bulkActions={ [
+						{
+							value: 'publish',
+							label: __( 'Publish', 'aw-sourcing' ),
+						},
+						{
+							value: 'reject',
+							label: __(
+								'Reject (move to Drafts)',
+								'aw-sourcing'
+							),
+						},
+					] }
+					onBulk={ decide }
+					rowActions={ ( r ) => [
+						{
+							icon: 'edit',
+							label: __( 'Edit', 'aw-sourcing' ),
+							href: r.editUrl,
+						},
+						...( r.url
+							? [
+									{
+										label: __( 'Source', 'aw-sourcing' ),
+										href: r.url,
+									},
+								]
+							: [] ),
+						{
+							icon: 'success',
+							label: __( 'Publish', 'aw-sourcing' ),
+							onClick: () => decide( 'publish', [ r.id ] ),
+							disabled: r.noPublish,
+							why: r.noPublish
+								? __( 'Needs its summary first', 'aw-sourcing' )
+								: '',
+						},
+						{
+							icon: 'cancel',
+							label: __( 'Reject', 'aw-sourcing' ),
+							tone: 'error',
+							onClick: () => decide( 'reject', [ r.id ] ),
+						},
+					] }
+					loading={ loading }
+					error={ error }
+					onRetry={ load }
+					emptyTitle={ __( 'Nothing is waiting.', 'aw-sourcing' ) }
+					empty={
+						<p>
+							{ __(
+								'New items that pass the checks go live on their own.',
+								'aw-sourcing'
+							) }
+						</p>
+					}
+				/>
+			</SectionCard>
+			<ExtraParts
+				id="review-intake"
+				title={ __( 'Add by link', 'aw-sourcing' ) }
 			/>
-		</SectionCard>
+		</>
 	);
 }
 
@@ -1362,6 +1397,10 @@ function Settings() {
 					/>
 				</div>
 			) ) }
+			<ExtraParts
+				id="backfill"
+				title={ __( 'Backfill', 'aw-sourcing' ) }
+			/>
 			<SectionCard
 				id="elsewhere"
 				title={ __( 'On the current screens', 'aw-sourcing' ) }

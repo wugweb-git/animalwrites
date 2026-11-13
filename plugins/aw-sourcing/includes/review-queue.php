@@ -101,10 +101,7 @@ unset( $aw_review_hook );
 add_action(
 	'admin_menu',
 	function () {
-		$hook = add_submenu_page( AW_SRC_MENU, 'To review', 'To review' . ( function_exists( 'aw_menu_count' ) ? aw_menu_count( aw_review_count() ) : '' ), AW_REVIEW_CAP, 'aw-review', 'aw_review_page' );
-		if ( $hook ) { // Screen options: items per page.
-			add_action( 'load-' . $hook, fn() => add_screen_option( 'per_page', array( 'label' => 'Items per page', 'default' => 50, 'option' => 'aw_review_per_page' ) ) );
-		}
+		add_submenu_page( AW_SRC_MENU, 'To review', 'To review' . ( function_exists( 'aw_menu_count' ) ? aw_menu_count( aw_review_count() ) : '' ), AW_REVIEW_CAP, 'aw-review', 'aw_review_page' );
 	},
 	10 // after the menu and its Overview (admin-menu.php, 9)
 );
@@ -146,71 +143,13 @@ function aw_review_apply( $ids, $action ) {
 	return $n;
 }
 
-add_action(
-	'admin_post_aw_review',
-	function () {
-		if ( ! current_user_can( AW_REVIEW_CAP ) || ! check_admin_referer( 'aw_review' ) ) {
-			wp_die( 'Not allowed.', 403 );
-		}
-		// Two action menus (above and below the list): whichever one was set wins.
-		$do     = '' !== (string) ( $_REQUEST['do'] ?? '' ) ? $_REQUEST['do'] : ( $_REQUEST['do2'] ?? '' ); // phpcs:ignore WordPress.Security
-		$action = in_array( $do, array( 'publish', 'reject' ), true ) ? sanitize_key( $do ) : '';
-		$ids    = array_map( 'intval', (array) ( $_REQUEST['ids'] ?? array() ) );
-		if ( ! empty( $_REQUEST['all'] ) ) { // "Publish all N": every item in this view, not only the ticked ones
-			$ids = wp_list_pluck( aw_review_items( sanitize_key( $_REQUEST['type'] ?? '' ) ), 'ID' );
-		}
-		$n      = $action ? aw_review_apply( $ids, $action ) : 0;
-		$back   = admin_url( 'admin.php?page=aw-review' . ( ! empty( $_REQUEST['type'] ) ? '&type=' . sanitize_key( $_REQUEST['type'] ) : '' ) );
-		// Back to the same view, search, sort and page (the page-number box posts paged).
-		$back = remove_query_arg( array( 'done', 'n', 'paged' ), wp_get_referer() && false !== strpos( wp_get_referer(), 'page=aw-review' ) ? wp_get_referer() : $back );
-		parse_str( (string) wp_parse_url( (string) wp_get_referer(), PHP_URL_QUERY ), $ref );
-		$page = absint( wp_unslash( $_REQUEST['paged'] ?? 0 ) );
-		$to   = $page ? $page : absint( $ref['paged'] ?? 1 ); // a row action's link has no page: keep the one it was clicked on
-		$back = $to > 1 ? add_query_arg( 'paged', $to, $back ) : $back;
-		// A different page number is the page box (navigation); the same page with no action is an empty Apply.
-		$moved = $page && absint( $ref['paged'] ?? 1 ) !== $page;
-		wp_safe_redirect( $action || ! $moved ? add_query_arg( array( 'done' => $action ? $action : 'none', 'n' => $n ), $back ) : $back );
-		exit;
-	}
-);
-
+/** Sourcing → To review: the shell screen (sourceweb-ui.php). */
 function aw_review_page() {
-	if ( function_exists( 'sourceweb_ui_page' ) && sourceweb_ui_page( 'review' ) ) {
-		return; // The new To review (sourceweb-ui.php; &ui=classic shows this one).
+	if ( ! current_user_can( AW_REVIEW_CAP ) ) {
+		return;
 	}
-	if ( ! class_exists( 'WP_List_Table' ) ) {
-		require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
-	}
-	require_once __DIR__ . '/class-aw-sourcing-review-table.php';
-	$table = new AW_Sourcing_Review_Table();
-	$table->prepare_items();
-	$type = sanitize_key( $_GET['type'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
-	echo '<div class="wrap"><h1 class="wp-heading-inline">To review</h1><hr class="wp-header-end">';
-	aw_sourcing_screen_tabs();
-	echo '<p>Items that came in automatically and need a person: why each was held is shown beside it. Publish puts it live; Reject moves it to Drafts (nothing is deleted).</p>';
-	if ( isset( $_GET['done'], $_GET['n'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-		$n = (int) $_GET['n']; // phpcs:ignore WordPress.Security.NonceVerification
-		if ( in_array( $_GET['done'], array( 'publish', 'reject' ), true ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-			wp_admin_notice( esc_html( sprintf( 'publish' === $_GET['done'] ? _n( '%d item published.', '%d items published.', $n ) : _n( '%d item moved to Drafts.', '%d items moved to Drafts.', $n ), $n ) ), array( 'type' => 'success', 'dismissible' => true ) ); // phpcs:ignore WordPress.Security.NonceVerification
-		} else {
-			wp_admin_notice( 'Nothing changed: choose Publish or Reject and tick at least one item.', array( 'type' => 'warning', 'dismissible' => true ) );
-		}
-	}
-	do_action( 'aw_review_intake' ); // other plugins' intake forms (core social-posts.php: add a social post from its link)
-	$table->views();
-	echo '<form method="get"><input type="hidden" name="page" value="aw-review">' . ( $type ? '<input type="hidden" name="type" value="' . esc_attr( $type ) . '">' : '' );
-	$table->search_box( 'Search items', 'aw-review' );
-	echo '</form>';
-	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
-	wp_nonce_field( 'aw_review' );
-	echo '<input type="hidden" name="action" value="aw_review"><input type="hidden" name="type" value="' . esc_attr( $type ) . '">';
-	$table->display();
-	echo '</form></div>';
+	sourceweb_ui_page( 'review' );
 }
-
-// The result notice stays off the list's own links; only on this screen (other screens use done and n too).
-add_filter( 'removable_query_args', fn( $args ) => 'aw-review' === sanitize_key( $_GET['page'] ?? '' ) ? array_merge( $args, array( 'done', 'n' ) ) : $args ); // phpcs:ignore WordPress.Security.NonceVerification
-add_filter( 'set_screen_option_aw_review_per_page', fn( $keep, $option, $value ) => max( 1, min( 300, (int) $value ) ), 10, 3 );
 
 /* ---------- News and Library lists (edit.php): bulk Publish / Approve on every ticked item, and "Publish all" ---------- */
 

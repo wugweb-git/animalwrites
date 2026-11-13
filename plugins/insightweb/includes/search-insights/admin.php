@@ -1,10 +1,9 @@
 <?php
 /**
- * Plugins → InsightWeb, opening Search Insights (owner addendum, 24 Oct: core WordPress only, no custom CSS). Tabs: Overview (postboxes),
- * Keywords (list table), tabs added by other files (Pages, Check list, Rising, Sourcing keywords) and Settings
- * (form-table: keys, run now, imports, snapshot, delete data). The old Search demand screen was removed on 25 Oct 2026;
- * its content gaps are an Overview box.
- * Each tab starts with a notice per source: last updated, or the error with the date of the data still shown.
+ * Plugins → InsightWeb, opening Search Insights. The screen is drawn by the Kits admin shell (insightweb-ui.php): the
+ * Dashboard (the Overview boxes, through REST), Keywords, the tabs added by other files (Pages, Check list, Rising,
+ * Sourcing keywords and more) and Settings. This file holds the menu, the tab addresses, the source notices, each
+ * tab's output the shell draws, the Overview boxes and the admin-post handlers.
  *
  * @package insightweb
  */
@@ -36,19 +35,12 @@ function aw_si_url( string $tab = 'overview' ): string {
 }
 
 /**
- * Where a form action (admin-post.php) goes back to: the tab, on the classic screen when the form was sent from it
- * (its _wp_http_referer has &ui=classic), so the result notice shows where the action was taken (12 Nov 2026).
+ * Where a form action (admin-post.php) goes back to: the tab's screen.
+ *
+ * @param string $tab The tab.
  */
 function aw_si_return_url( string $tab = 'overview' ): string {
-	$url = aw_si_url( $tab );
-	$ref = (string) wp_get_referer();
-	if ( '' !== $ref ) {
-		wp_parse_str( (string) wp_parse_url( $ref, PHP_URL_QUERY ), $q );
-		if ( 'classic' === ( $q['ui'] ?? '' ) ) {
-			$url = add_query_arg( 'ui', 'classic', $url );
-		}
-	}
-	return $url;
+	return aw_si_url( $tab );
 }
 
 /**
@@ -119,32 +111,7 @@ add_filter(
 	3
 );
 
-/** Before output: screen options, meta boxes, and priority overrides (then redirect). */
-/** One line per term of the Keywords screen (its Help tab). The numbers are the current settings. */
-function aw_si_terms_html(): string {
-	$terms = array(
-		'P1'                   => __( 'high demand, and we have a page or rank 4–20. Improve that page first.', 'insightweb' ),
-		'P2'                   => __( 'high demand and no page of ours. Write one.', 'insightweb' ),
-		'P3'                   => __( 'low demand, or already in the top 3.', 'insightweb' ),
-		/* translators: 1: Trends index, 2: impressions. */
-		__( 'High demand', 'insightweb' ) => sprintf( __( 'Google Trends %1$d or more, or %2$d or more Search Console impressions in 28 days.', 'insightweb' ), AW_SI_HIGH_TRENDS, AW_SI_HIGH_IMPR ),
-		/* translators: %d: impressions. */
-		__( 'Quick win', 'insightweb' ) => sprintf( __( 'we rank 8 to 20 with at least %d impressions in 28 days. A small update can reach page one.', 'insightweb' ), AW_SI_QUICK_MIN ),
-		__( 'Gap', 'insightweb' ) => __( 'high demand, and no page of ours.', 'insightweb' ),
-		__( 'Conflict', 'insightweb' ) => __( 'two of our pages compete for one search, or Google shows a different page from the one meant for it.', 'insightweb' ),
-		__( 'Has page', 'insightweb' ) => __( 'one of our pages owns the keyword.', 'insightweb' ),
-		__( 'Tracked, not ranking', 'insightweb' ) => __( 'on our list, with no impressions in 28 days.', 'insightweb' ),
-		__( 'Entity', 'insightweb' ) => __( 'a listing\'s name, shown as one combined row.', 'insightweb' ),
-		__( 'Position', 'insightweb' ) => __( 'average place in Google over 28 days (1 is the top).', 'insightweb' ),
-		__( 'Impressions', 'insightweb' ) => __( 'how often we showed in Google for this search in 28 days.', 'insightweb' ),
-	);
-	$out = '<ul>';
-	foreach ( $terms as $term => $line ) {
-		$out .= '<li><strong>' . esc_html( $term ) . ':</strong> ' . esc_html( $line ) . '</li>';
-	}
-	return $out . '</ul>';
-}
-
+/** Before output: screen options, the tab's load hook and priority overrides (then redirect). */
 function aw_si_load(): void {
 	aw_si_install();
 	$tab = aw_si_tab();
@@ -161,27 +128,12 @@ function aw_si_load(): void {
 			)
 		);
 		aw_si_handle_overrides();
-		get_current_screen()->add_help_tab(
-			array(
-				'id'      => 'aw-si-terms',
-				'title'   => __( 'Terms', 'insightweb' ),
-				'content' => aw_si_terms_html(),
-			)
-		);
-	}
-	if ( 'overview' === $tab ) {
-		$screen = get_current_screen();
-		foreach ( aw_si_overview_boxes() as $key => $box ) {
-			add_meta_box( 'aw-si-' . $key, $box[0], $box[1], $screen, 'normal' );
-		}
-		wp_enqueue_script( 'postbox' );
-		wp_add_inline_script( 'postbox', 'jQuery( function () { postboxes.add_postbox_toggles( pagenow ); } );' );
 	}
 }
 
 /**
- * The Overview boxes in order: key => [ title, callback ]. The key is the meta box id without "aw-si-". The classic
- * Overview draws them as meta boxes; the new Dashboard reads each through GET insightweb/v1/dashboard/box.
+ * The Overview boxes in order: key => [ title, callback ]. The Dashboard reads each through GET
+ * insightweb/v1/dashboard/box (insightweb-boxes.php); it draws the sources itself.
  *
  * @return array[]
  */
@@ -189,7 +141,6 @@ function aw_si_overview_boxes(): array {
 	// A setup step first, only while it is not done (12 Nov 2026: the Google Alerts feeds were never set).
 	$setup = function_exists( 'aw_si_alerts_feeds' ) && ! aw_si_alerts_feeds() ? array( 'setup' => array( __( 'Setup step', 'insightweb' ), 'aw_si_box_setup' ) ) : array();
 	return $setup + array(
-		'sources'     => array( __( 'Sources', 'insightweb' ), 'aw_si_box_sources' ),
 		'priorities'  => array( __( 'Priorities', 'insightweb' ), 'aw_si_box_priorities' ),
 		/* translators: %d: minimum impressions. */
 		'quick'       => array( sprintf( __( 'Quick wins (position 8–20, at least %d impressions)', 'insightweb' ), AW_SI_QUICK_MIN ), 'aw_si_box_quick' ),
@@ -316,43 +267,16 @@ function aw_si_source_notices(): void {
 	wp_admin_notice( esc_html__( 'Last updated', 'insightweb' ) . ' — ' . esc_html( implode( ' · ', $parts ) ), array( 'type' => 'info', 'additional_classes' => array( 'inline' ) ) );
 }
 
-/** The Search Insights screen: tabs, source notices, then the tab. */
+/** The Search Insights screen, drawn by the Kits admin shell; without Kits Core or the build, a notice. */
 function aw_si_screen(): void {
 	if ( ! current_user_can( aw_si_cap() ) ) {
 		return;
 	}
-	$tab = aw_si_tab();
-	if ( function_exists( 'insightweb_ui_page' ) && insightweb_ui_page( $tab ) ) {
-		return; // The new screen (insightweb-ui.php; &ui=classic shows this one).
+	if ( function_exists( 'insightweb_ui_page' ) && insightweb_ui_page( aw_si_tab() ) ) {
+		return;
 	}
-	echo '<div class="wrap"><h1 class="wp-heading-inline">' . esc_html__( 'Search Insights', 'insightweb' ) . '</h1><hr class="wp-header-end">';
-	echo '<nav class="nav-tab-wrapper" aria-label="' . esc_attr__( 'Search Insights sections', 'insightweb' ) . '">';
-	$tabs = array_merge(
-		array(
-			'overview' => __( 'Overview', 'insightweb' ),
-			'keywords' => __( 'Keywords', 'insightweb' ),
-		),
-		aw_si_extra_tabs(),
-		array( 'settings' => __( 'Settings', 'insightweb' ) )
-	);
-	foreach ( $tabs as $key => $label ) {
-		echo '<a class="nav-tab' . ( $key === $tab ? ' nav-tab-active' : '' ) . '" href="' . esc_url( aw_si_url( $key ) ) . '"' . ( $key === $tab ? ' aria-current="page"' : '' ) . '>' . esc_html( $label ) . '</a>';
-	}
-	echo '</nav>';
-	aw_si_screen_notices();
-	if ( 'keywords' === $tab ) {
-		aw_si_keywords_tab();
-	} elseif ( 'settings' === $tab ) {
-		aw_si_settings_tab();
-	} elseif ( isset( aw_si_extra_tabs()[ $tab ] ) ) {
-		do_action( 'aw_si_tab_' . $tab );
-	} else {
-		wp_nonce_field( 'closedpostboxes', 'closedpostboxesnonce', false );
-		wp_nonce_field( 'meta-box-order', 'meta-box-order-nonce', false );
-		echo '<div id="dashboard-widgets-wrap"><div id="dashboard-widgets" class="metabox-holder columns-1"><div class="postbox-container">';
-		do_meta_boxes( get_current_screen(), 'normal', null );
-		echo '</div></div></div>';
-	}
+	echo '<div class="wrap"><h1>' . esc_html__( 'Search Insights', 'insightweb' ) . '</h1>';
+	wp_admin_notice( esc_html__( 'InsightWeb needs Kits Core (active, with its build) to show this screen.', 'insightweb' ), array( 'type' => 'error' ) );
 	echo '</div>';
 }
 
@@ -441,7 +365,6 @@ function aw_si_mini_table( array $rows, array $cols ): void {
 	echo '</tbody></table>';
 }
 
-/** Overview box: each source's last update and state. */
 /** Overview box: what is not set up yet (the Google Alerts feeds), and where to set it. */
 function aw_si_box_setup(): void {
 	echo '<p>' . esc_html__( 'Google Alerts feeds are not set, so mentions of Animal Writes on the web are not read. Create an alert at google.com/alerts, choose Deliver to: RSS feed, and paste the feed address under Animal Writes → Keys. This box goes once a feed is set.', 'insightweb' ) . '</p>';
@@ -450,31 +373,8 @@ function aw_si_box_setup(): void {
 	}
 }
 
-function aw_si_box_sources(): void {
-	$runs = aw_si_runs();
-	echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Source', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'Last updated', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'State', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'Detail', 'insightweb' ) . '</th></tr></thead><tbody>';
-	foreach ( aw_si_sources() as $src => $s ) {
-		$r    = $runs[ $src ] ?? array();
-		$ok   = (int) ( $r['ok'] ?? 0 );
-		$err  = aw_si_run_problem( $src );
-		$icon = $err ? 'dismiss' : ( ! $ok ? 'minus' : ( aw_si_stale( $src ) ? 'clock' : 'yes-alt' ) );
-		$word = $err ? __( 'Failed', 'insightweb' ) : ( ! $ok ? __( 'Not run yet', 'insightweb' ) : ( aw_si_stale( $src ) ? __( 'Late', 'insightweb' ) : __( 'OK', 'insightweb' ) ) );
-		$det  = aw_si_run_detail( $src, (array) ( $r['info'] ?? array() ) );
-		if ( $err ) {
-			$det[] = $err;
-		}
-		$due = aw_si_next_due( $src );
-		if ( $due ) {
-			/* translators: %s: date the next run is due. */
-			$det[] = sprintf( $due < time() ? __( 'was due %s', 'insightweb' ) : __( 'next due %s', 'insightweb' ), wp_date( 'j M', $due ) );
-		}
-		echo '<tr><td>' . esc_html( $s['label'] ) . '</td><td>' . esc_html( $ok ? wp_date( 'j M Y, H:i', $ok ) : __( 'Never', 'insightweb' ) ) . '</td><td><span class="dashicons dashicons-' . esc_attr( $icon ) . '" aria-hidden="true"></span> ' . esc_html( $word ) . '</td><td>' . esc_html( implode( '; ', $det ) ) . '</td></tr>';
-	}
-	echo '</tbody></table>';
-}
-
 /**
- * What a source's last run recorded, as short phrases for the Sources box: the date of the figures and the rows, plus
+ * What a source's last run recorded, as short phrases for the Dashboard's sources (insightweb_run_state()): the date of the figures and the rows, plus
  * each source's own counts (keyword roles, the rollup, crawler checks, PageSpeed pages not measured, GA4 warnings).
  *
  * @param string $src  Source key.
@@ -1154,12 +1054,10 @@ add_action(
 );
 
 /**
- * Settings tab: schedule, keys, seed, numbers, run now, imports, delete data. The new Settings screen saves the
- * numbers itself and draws the other rows from this output (insightweb-ui.php).
- *
- * @param bool $numbers With the Numbers row.
+ * Settings tab rows: schedule, keys, seed, run now, imports, delete data. The Settings screen saves the numbers
+ * itself and draws these rows from this output (insightweb_settings_more_parts()).
  */
-function aw_si_settings_tab( bool $numbers = true ): void {
+function aw_si_settings_tab(): void {
 	$seeded = (int) get_option( 'aw_si_seeded' );
 	do_action( 'aw_si_settings_notices' );
 	echo '<table class="form-table" role="presentation"><tbody>';
@@ -1180,14 +1078,6 @@ function aw_si_settings_tab( bool $numbers = true ): void {
 		? esc_html( sprintf( __( 'Seeded once on %s from docs/seo/keyword-map.md and the 21 Oct rankings. The table here is the source of truth now.', 'insightweb' ), wp_date( 'j M Y, H:i', $seeded ) ) )
 		: esc_html__( 'Not seeded yet: the first run seeds it.', 'insightweb' );
 	echo '</p></td></tr>';
-	if ( $numbers && current_user_can( 'manage_options' ) ) {
-		echo '<tr><th scope="row">' . esc_html__( 'Numbers', 'insightweb' ) . '</th><td>';
-		if ( isset( $_GET['saved'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- a notice only.
-			wp_admin_notice( esc_html( 'reset' === $_GET['saved'] ? __( 'Defaults restored.', 'insightweb' ) : __( 'Settings saved.', 'insightweb' ) ), array( 'type' => 'success', 'additional_classes' => array( 'inline' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		}
-		aw_si_settings_form();
-		echo '</td></tr>';
-	}
 	echo '<tr><th scope="row">' . esc_html__( 'Run now', 'insightweb' ) . '</th><td>';
 	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_si_run">';
 	wp_nonce_field( 'aw_si_run' );

@@ -1,15 +1,15 @@
 <?php
 /**
- * PlanWeb's screens on the Kits admin shell, the default since 12 Nov 2026, on the Calendar's own address.
+ * PlanWeb's screens on the Kits admin shell, on the Calendar's own address.
  *
  * Address, screen and capability:
  *   admin.php?page=planweb               Dashboard  edit_planweb_entries
  *   admin.php?page=planweb&tab=entries   Entries    edit_planweb_entries
  *   admin.php?page=planweb&tab=settings  Settings   manage_options
  *
- * &ui=classic (or a month, edit form or saved notice) shows the Calendar, the earlier screen. One script
+ * A month (m), an edit form (edit) or a notice after a save (done, error) shows the Calendar (admin.php). One script
  * (build/index.js, from src/) draws the three screens with Kits Core's shell parts, fed by the planweb/v1 routes
- * (planweb-rest.php). When Kits Core or the build file is missing, the Calendar shows.
+ * (planweb-rest.php). When Kits Core or the build file is missing, the page shows a notice instead.
  *
  * @package planweb
  */
@@ -23,12 +23,11 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function planweb_ui_wanted(): string {
 	$page = sanitize_key( wp_unslash( $_GET['page'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- which screen to show; nothing is saved here.
-	$ui   = sanitize_key( wp_unslash( $_GET['ui'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- same.
 	$tab  = sanitize_key( wp_unslash( $_GET['tab'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- same.
-	if ( 'classic' === $ui || PLANWEB_MENU !== $page ) {
+	if ( PLANWEB_MENU !== $page ) {
 		return '';
 	}
-	// The month calendar, its edit form and the notice after a save are only on the earlier screen.
+	// The month calendar, its edit form and the notice after a save are on the Calendar.
 	foreach ( array( 'm', 'edit', 'done', 'error' ) as $k ) {
 		if ( isset( $_GET[ $k ] ) && '' === $tab ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- which screen to show.
 			return '';
@@ -66,10 +65,7 @@ function planweb_ui_ready( ?bool $set = null ): bool {
  * @param array  $args   More query arguments (the list's filters).
  */
 function planweb_ui_url( string $screen, array $args = array() ): string {
-	$base = array( 'ui' => 'next' );
-	if ( 'dashboard' !== $screen ) {
-		$base['tab'] = $screen;
-	}
+	$base = 'dashboard' !== $screen ? array( 'tab' => $screen ) : array();
 	return planweb_url( array_merge( $base, $args ) );
 }
 
@@ -135,7 +131,7 @@ add_action(
 );
 
 /**
- * Draw the new screen in place of the Calendar, when it is ready. planweb_screen() calls this first.
+ * Draw the new screen, when it is ready. planweb_screen() calls this first.
  *
  * @return bool True when the new screen was drawn.
  */

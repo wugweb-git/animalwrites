@@ -6,7 +6,8 @@
  * Each setting is one of the plugin's former constants; its default is the value the code had, so nothing changes
  * until a setting is saved. The constants are defined here from option aw_seo_settings ({module: {CONST: value, on}}).
  * Foundation modules (General, Titles, Canonicals, Robots, Filtered lists, Schema) are always on: the others call them.
- * A module switched off is not loaded (aw-seo-extras.php). Core WordPress only (Settings API, form-table, nav tabs).
+ * A module switched off is not loaded (aw-seo-extras.php). The Settings screen is on the Kits shell (rankweb-ui.php);
+ * it reads and saves through the rankweb/v1 settings routes (rankweb-rest.php), which call aw_seo_settings_save().
  *
  * @package aw-seo-extras
  */
@@ -480,7 +481,7 @@ add_action(
 );
 
 /**
- * Settings address: a tab, or the tab a module's settings are on (old links named the module).
+ * Settings address at a group (#tab), or at the group a module's settings are in.
  *
  * @param string $key Tab or module key.
  */
@@ -489,155 +490,25 @@ function aw_seo_settings_url( string $key = 'modules' ): string {
 	if ( ! isset( $tabs[ $key ] ) && isset( aw_seo_modules()[ $key ] ) ) {
 		$key = aw_seo_module_tab( $key );
 	}
-	if ( ! empty( $tabs[ $key ]['hidden'] ) && function_exists( 'aw_si_url' ) ) {
-		return aw_si_url( 'settings' );
-	}
-	return add_query_arg( array( 'page' => 'aw-seo-settings', 'tab' => isset( $tabs[ $key ] ) ? $key : 'modules' ), admin_url( 'admin.php' ) );
+	return add_query_arg( 'page', 'aw-seo-settings', admin_url( 'admin.php' ) ) . '#' . ( isset( $tabs[ $key ] ) ? $key : 'modules' );
 }
 
-/** The current tab. */
-function aw_seo_settings_tab(): string {
-	$tab  = sanitize_key( wp_unslash( $_GET['tab'] ?? 'modules' ) ); // phpcs:ignore WordPress.Security.NonceVerification -- navigation only
-	$tabs = aw_seo_setting_tabs();
-	if ( ! isset( $tabs[ $tab ] ) && isset( aw_seo_modules()[ $tab ] ) ) {
-		$tab = aw_seo_module_tab( $tab ); // An old link to a module's tab.
-	}
-	return isset( $tabs[ $tab ] ) && empty( $tabs[ $tab ]['hidden'] ) ? $tab : 'modules';
-}
-
+/** RankWeb → Settings on the Kits shell (rankweb-ui.php). */
 function aw_seo_settings_page() {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		wp_die( 'Not allowed.', 403 );
 	}
-	if ( function_exists( 'rankweb_ui_page' ) && rankweb_ui_page( 'settings' ) ) {
-		return; // the new Settings (rankweb-ui.php; &ui=classic shows this one)
-	}
-	$tab = aw_seo_settings_tab();
-	echo '<div class="wrap"><h1>RankWeb settings</h1>';
-	aw_seo_screen_tabs();
-	if ( isset( $_GET['saved'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-		wp_admin_notice( ( 'reset' === $_GET['saved'] ? 'Defaults restored.' : 'Settings saved.' ) . ' A module switched on or off takes effect on the next page load.', array( 'type' => 'success', 'dismissible' => true ) ); // phpcs:ignore WordPress.Security.NonceVerification
-	}
-	echo '<nav class="nav-tab-wrapper" aria-label="Settings">';
-	foreach ( aw_seo_setting_tabs() as $k => $t ) {
-		if ( empty( $t['hidden'] ) ) {
-			echo '<a class="nav-tab' . ( $k === $tab ? ' nav-tab-active' : '' ) . '" href="' . esc_url( aw_seo_settings_url( $k ) ) . '"' . ( $k === $tab ? ' aria-current="page"' : '' ) . '>' . esc_html( $t['label'] ) . '</a>';
-		}
-	}
-	echo '</nav>';
-	if ( 'modules' === $tab ) {
-		aw_seo_settings_modules_form();
-	} else {
-		aw_seo_settings_fields_form( $tab );
-	}
-	echo '</div>';
-}
-
-/** Modules tab: every module, its on/off box (foundation modules are always on). */
-function aw_seo_settings_modules_form(): void {
-	echo '<p>A module switched off is not loaded: its screens, checks and output are gone until it is switched on again.</p>';
-	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
-	echo '<input type="hidden" name="action" value="aw_seo_settings"><input type="hidden" name="tab" value="modules">';
-	wp_nonce_field( 'aw_seo_settings_modules' );
-	echo '<table class="form-table" role="presentation"><tbody>';
-	foreach ( aw_seo_modules() as $key => $mod ) {
-		echo '<tr><th scope="row">' . esc_html( $mod['label'] ) . '</th><td>';
-		if ( ! empty( $mod['switch'] ) ) {
-			echo '<label><input type="checkbox" name="on[' . esc_attr( $key ) . ']" value="1"' . checked( aw_seo_module_on( $key ), true, false ) . '> On</label>';
-		} else {
-			echo 'Always on: other modules use it.';
-		}
-		echo '<p class="description">' . esc_html( $mod['desc'] ) . '</p></td></tr>';
-	}
-	echo '</tbody></table>';
-	submit_button( 'Save changes' );
-	echo '</form>';
+	rankweb_ui_page( 'settings' );
 }
 
 /**
- * A tab's settings as one form, a section per module.
- *
- * @param string $tab Tab key.
- */
-function aw_seo_settings_fields_form( string $tab ): void {
-	$mods   = aw_seo_modules();
-	$saved  = aw_seo_saved();
-	$fields = aw_seo_tab_fields( $tab );
-	$any    = false;
-	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
-	echo '<input type="hidden" name="action" value="aw_seo_settings"><input type="hidden" name="tab" value="' . esc_attr( $tab ) . '">';
-	wp_nonce_field( 'aw_seo_settings_' . $tab );
-	foreach ( aw_seo_setting_tabs()[ $tab ]['modules'] as $key ) {
-		$mod = $mods[ $key ];
-		if ( empty( aw_seo_setting_tabs()[ $tab ]['hidden'] ) ) { // A screen of its own has its own heading.
-			echo '<h2>' . esc_html( $mod['label'] ) . '</h2>';
-			echo '<p>' . esc_html( $mod['desc'] ) . ( aw_seo_module_on( $key ) ? '' : ' Off: switch it on under Modules.' ) . '</p>';
-		}
-		if ( empty( $fields[ $key ] ) ) {
-			continue;
-		}
-		echo '<table class="form-table" role="presentation"><tbody>';
-		foreach ( $fields[ $key ] as $const => $f ) {
-			$has   = array_key_exists( $const, $saved[ $key ] ?? array() );
-			$value = $has ? $saved[ $key ][ $const ] : $f['default'];
-			$any   = $any || $has;
-			aw_seo_settings_field_row( $key, $const, $f, $value, $has && $value !== $f['default'] );
-		}
-		echo '</tbody></table>';
-	}
-	// Fields of another module shown on this tab (the share images under General).
-	foreach ( $fields as $key => $list ) {
-		if ( in_array( $key, aw_seo_setting_tabs()[ $tab ]['modules'], true ) ) {
-			continue;
-		}
-		echo '<h2>' . esc_html( $mods[ $key ]['label'] ) . '</h2><table class="form-table" role="presentation"><tbody>';
-		foreach ( $list as $const => $f ) {
-			$has   = array_key_exists( $const, $saved[ $key ] ?? array() );
-			$value = $has ? $saved[ $key ][ $const ] : $f['default'];
-			$any   = $any || $has;
-			aw_seo_settings_field_row( $key, $const, $f, $value, $has && $value !== $f['default'] );
-		}
-		echo '</tbody></table>';
-	}
-	if ( $fields ) {
-		submit_button( 'Save changes', 'primary', 'submit', false );
-		if ( $any ) {
-			echo ' ';
-			submit_button( 'Restore defaults', 'secondary', 'reset', false );
-		}
-	}
-	echo '</form>';
-}
-
-/**
- * One setting as a form-table row.
- *
- * @param string $module  Module key.
- * @param string $const   Constant.
- * @param array  $f       Field.
- * @param mixed  $value   Current value.
- * @param bool   $changed Saved and not the default.
- */
-function aw_seo_settings_field_row( string $module, string $const, array $f, $value, bool $changed ): void {
-	$id = 'aw-seo-' . strtolower( str_replace( '_', '-', $const ) );
-	echo '<tr><th scope="row"><label for="' . esc_attr( $id ) . '">' . esc_html( $f['label'] ) . '</label></th><td>';
-	if ( 'int' === $f['type'] ) {
-		echo '<input type="number" min="0" class="small-text" id="' . esc_attr( $id ) . '" name="f[' . esc_attr( $const ) . ']" value="' . esc_attr( aw_seo_field_text( 'int', $value ) ) . '">';
-	} else {
-		$rows = min( 16, max( 3, count( (array) $value ) + 1 ) );
-		echo '<textarea class="large-text code" rows="' . (int) $rows . '" id="' . esc_attr( $id ) . '" name="f[' . esc_attr( $const ) . ']">' . esc_textarea( aw_seo_field_text( $f['type'], $value ) ) . '</textarea>';
-	}
-	echo '<p class="description">' . esc_html( trim( $f['help'] . ( $changed ? ' Changed from the default.' : '' ) ) ) . '</p></td></tr>';
-}
-
-/**
- * Save one Settings tab: the form on this screen and the RankWeb settings route (rankweb-rest.php) both call this, so
- * the two cannot drift. Only values that differ from the default are stored, the rest of the option (other tabs, and
- * InsightWeb's 'search-insights' numbers) is kept as it is, and nothing is written when nothing changed (a Save
- * with no change leaves the option byte for byte as it was, or absent when it was absent).
+ * Save one Settings tab (the RankWeb settings route, rankweb-rest.php, calls this). Only values that differ from the
+ * default are stored, the rest of the option (other tabs, and InsightWeb's 'search-insights' numbers) is kept as it
+ * is, and nothing is written when nothing changed (a Save with no change leaves the option byte for byte as it was,
+ * or absent when it was absent).
  *
  * @param string $tab    Tab key.
- * @param array  $posted Field texts by constant (a field not posted goes back to its default, as the form does).
+ * @param array  $posted Field texts by constant (a field not posted goes back to its default).
  * @param bool   $reset  Restore the tab's defaults.
  * @param array  $on     Modules tab: switchable module keys that are on (key => truthy).
  * @return array The stored settings after the save.
@@ -691,37 +562,4 @@ function aw_seo_settings_sorted( $value ) {
 	}
 	ksort( $value );
 	return array_map( 'aw_seo_settings_sorted', $value );
-}
-
-add_action(
-	'admin_post_aw_seo_settings',
-	function () {
-		$tab  = sanitize_key( wp_unslash( $_POST['tab'] ?? '' ) );
-		$tabs = aw_seo_setting_tabs();
-		if ( ! isset( $tabs[ $tab ] ) || ! current_user_can( 'manage_options' ) ) {
-			wp_die( 'Not allowed.', 403 );
-		}
-		check_admin_referer( 'aw_seo_settings_' . $tab );
-		$reset = isset( $_POST['reset'] );
-		aw_seo_settings_save(
-			$tab,
-			(array) wp_unslash( $_POST['f'] ?? array() ), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- each field is sanitised by its type in aw_seo_settings_save()
-			$reset,
-			(array) wp_unslash( $_POST['on'] ?? array() ) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- only the keys of known modules are read
-		);
-		$done = 'modules' !== $tab && $reset ? 'reset' : 'saved';
-		wp_safe_redirect( add_query_arg( 'saved', $done, aw_seo_settings_url( $tab ) ) );
-		exit;
-	}
-);
-
-/**
- * The settings of a module's tab as a form, for a screen of its own (Search Insights → Settings shows its numbers).
- *
- * @param string $tab Tab key.
- */
-function aw_seo_settings_embed( string $tab ): void {
-	if ( current_user_can( 'manage_options' ) && isset( aw_seo_setting_tabs()[ $tab ] ) ) {
-		aw_seo_settings_fields_form( $tab );
-	}
 }

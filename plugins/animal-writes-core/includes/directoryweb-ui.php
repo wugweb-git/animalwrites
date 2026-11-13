@@ -7,11 +7,10 @@
  *   edit.php?post_type=aw_listing&page=aw-claims              Claims      edit_aw_volunteers (menu: Fluent Forms → Claims)
  *   admin.php?page=directoryweb-settings                      Settings    manage_options
  *
- * &ui=classic (or one claim, or the notice after a review) shows the earlier Claims screen. The Dashboard and Settings
- * addresses are new and not in the menu; on &ui=classic they show a short page with the way in. The screens are one
- * script (directoryweb/build/index.js, from directoryweb/src/), drawn with Kits Core's shell parts and fed by the
- * directoryweb/v1 routes (directoryweb-rest.php). When Kits Core's shell or the build file is missing, the earlier
- * screen shows.
+ * One claim (&entry=) and the notice after a review (&done=) are server-rendered on the Claims address
+ * (claims-review.php). The screens are one script (directoryweb/build/index.js, from directoryweb/src/), drawn with
+ * Kits Core's shell parts and fed by the directoryweb/v1 routes (directoryweb-rest.php). When Kits Core's shell or the
+ * build file is missing, each screen shows one notice saying so.
  *
  * @package animal-writes-core
  */
@@ -38,11 +37,7 @@ function directoryweb_ui_screens(): array {
  */
 function directoryweb_ui_wanted(): string {
 	$page = sanitize_key( wp_unslash( $_GET['page'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- which screen to show; nothing is saved here
-	$ui   = sanitize_key( wp_unslash( $_GET['ui'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- same
-	if ( 'classic' === $ui ) {
-		return '';
-	}
-	// One claim to review, and the notice after a review, are only on the earlier Claims screen.
+	// One claim to review, and the notice after a review, are server-rendered (claims-review.php).
 	if ( 'aw-claims' === $page && ( isset( $_GET['entry'] ) || isset( $_GET['done'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- same
 		return '';
 	}
@@ -77,18 +72,11 @@ function directoryweb_ui_url( string $screen ): string {
 			array(
 				'post_type' => 'aw_listing',
 				'page'      => 'aw-claims',
-				'ui'        => 'next',
 			),
 			admin_url( 'edit.php' )
 		);
 	}
-	return add_query_arg(
-		array(
-			'page' => $pages[ $screen ] ?? DIRECTORYWEB_PAGE,
-			'ui'   => 'next',
-		),
-		admin_url( 'admin.php' )
-	);
+	return add_query_arg( 'page', $pages[ $screen ] ?? DIRECTORYWEB_PAGE, admin_url( 'admin.php' ) );
 }
 
 // Plugins → DirectoryWeb opens the Dashboard (owner, 12 Nov 2026: "Yes, add it", as the other Kits plugins); Settings
@@ -181,7 +169,7 @@ add_action(
  * @return bool True when the new screen was drawn.
  */
 function directoryweb_ui_page( string $screen ): bool {
-	if ( directoryweb_ui_wanted() !== $screen || ! directoryweb_ui_ready() ) {
+	if ( directoryweb_ui_wanted() !== $screen || ! directoryweb_ui_ready() || ! function_exists( 'kits_shell_mount' ) ) {
 		return false;
 	}
 	$titles = array(
@@ -195,19 +183,14 @@ function directoryweb_ui_page( string $screen ): bool {
 }
 
 /**
- * The page for a new address on &ui=classic (or without the shell): its name and the way in.
+ * The page when the screen cannot be drawn (Kits Core or the build missing): its name and one notice.
  *
- * @param string $title  Heading.
- * @param string $screen 'dashboard', 'listings' or 'settings'.
+ * @param string $title Heading.
  */
-function directoryweb_plain_page( string $title, string $screen ): void {
+function directoryweb_missing_page( string $title ): void {
 	echo '<div class="wrap"><h1>' . esc_html( $title ) . '</h1>';
-	if ( function_exists( 'kits_shell_app' ) ) {
-		echo '<p><a class="button button-primary" href="' . esc_url( directoryweb_ui_url( $screen ) ) . '">' . esc_html__( 'Open the new screen', 'directoryweb' ) . '</a></p>';
-	} else {
-		wp_admin_notice( esc_html__( 'This screen needs Kits Core.', 'directoryweb' ), array( 'type' => 'warning', 'additional_classes' => array( 'inline' ) ) );
-	}
-	echo '<p><a href="' . esc_url( add_query_arg( 'post_type', 'aw_listing', admin_url( 'edit.php' ) ) ) . '">' . esc_html__( 'Directory listings', 'directoryweb' ) . '</a></p></div>';
+	wp_admin_notice( esc_html__( 'DirectoryWeb needs Kits Core (active, with its build) to show this screen.', 'directoryweb' ), array( 'type' => 'error' ) );
+	echo '</div>';
 }
 
 // Kits → Tools export: only the claim form's ID from the site's form map (owner, 12 Nov 2026), the one value the new
@@ -256,7 +239,7 @@ function directoryweb_dashboard_page(): void {
 	if ( directoryweb_ui_page( 'dashboard' ) ) {
 		return;
 	}
-	directoryweb_plain_page( __( 'DirectoryWeb', 'directoryweb' ), 'dashboard' );
+	directoryweb_missing_page( __( 'DirectoryWeb', 'directoryweb' ) );
 }
 
 /** Settings page callback. */
@@ -267,5 +250,5 @@ function directoryweb_settings_page(): void {
 	if ( directoryweb_ui_page( 'settings' ) ) {
 		return;
 	}
-	directoryweb_plain_page( __( 'DirectoryWeb settings', 'directoryweb' ), 'settings' );
+	directoryweb_missing_page( __( 'DirectoryWeb settings', 'directoryweb' ) );
 }

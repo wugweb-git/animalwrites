@@ -391,7 +391,7 @@ add_filter(
 	'kits_sourcing_tabs',
 	function ( $tabs ) {
 		if ( current_user_can( 'manage_options' ) ) {
-			$tabs['rejected'] = array( 'Rejected', 'aw_relevance_rejected_tab', true ); // nothing to save: not in the screen's form (its search is a GET form)
+			$tabs['rejected'] = array( 'Rejected' );
 		}
 		return $tabs;
 	},
@@ -400,8 +400,7 @@ add_filter(
 
 /**
  * The Rejected log as plain text: the item (title, or its host), where it was found (keyword or feed), the reason, the
- * date, and a note when it came from an allowed publisher (rarely refused: worth a look). Used by the Rejected tab and
- * GET sourceweb/v1/rejected.
+ * date, and a note when it came from an allowed publisher (rarely refused: worth a look). Used by GET sourceweb/v1/rejected.
  *
  * @return array[] { url, host, title, type, found, reason, at, problem }
  */
@@ -424,33 +423,6 @@ function aw_relevance_rejected_rows(): array {
 		);
 	}
 	return $rows;
-}
-
-/** The Rejected tab. */
-function aw_relevance_rejected_tab() {
-	if ( ! current_user_can( 'manage_options' ) ) {
-		return;
-	}
-	$log = aw_relevance_rejected_rows();
-	echo '<p>' . esc_html( sprintf( 'Rejected: %d', count( $log ) ) ) . '</p>';
-	$rows = array();
-	foreach ( $log as $e ) {
-		$rows[] = array(
-			'item'     => '<a href="' . esc_url( $e['url'] ) . '" target="_blank" rel="noopener">' . esc_html( $e['title'] ) . '</a><br><span class="description">' . esc_html( $e['host'] ) . '</span>',
-			'type'     => esc_html( $e['type'] ),
-			'found'    => esc_html( $e['found'] ),
-			'reason'   => esc_html( $e['reason'] ),
-			'at'       => esc_html( $e['at'] ),
-			'_find'    => $e['title'] . ' ' . $e['host'] . ' ' . $e['found'] . ' ' . $e['reason'],
-			'_problem' => $e['problem'],
-		);
-	}
-	aw_sourcing_simple_table(
-		'rejected',
-		array( 'item' => 'Item', 'type' => 'Type', 'found' => 'Found by', 'reason' => 'Reason', 'at' => 'Date' ),
-		$rows,
-		array( 'per_page' => 50, 'sortable' => array( 'type', 'found', 'at' ), 'empty' => 'Nothing rejected.', 'search' => 'Search rejected items', 'hidden' => array( 'page' => 'aw-sourcing', 'tab' => 'rejected' ) )
-	);
 }
 
 // Dashboard: the same alert while items are held (owner, 12 Oct 2026); it clears after a run where the check works.

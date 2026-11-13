@@ -1,6 +1,6 @@
 <?php
 /**
- * InsightWeb tests that need no WordPress, for the new Dashboard and Settings:
+ * InsightWeb tests that need no WordPress, for the Dashboard and Settings:
  *
  * 1. The numbers: an unchanged Save writes nothing (option absent, or holding values in any order, beside RankWeb's
  *    own keys); a changed number is stored; a number back at its default is taken out; Restore defaults; a field not

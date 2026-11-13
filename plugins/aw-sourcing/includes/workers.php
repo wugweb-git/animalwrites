@@ -2,12 +2,12 @@
 /**
  * Sourcing → Workers (owner, 24 Oct 2026): every workflow of the workers repository, its last run, counts,
  * problems and Run now. Schedules are changed in the workflows, never here; names, groups, descriptions and late limits
- * can be overridden, and Planned workers added (workers-meta.php; the screens are in workers-admin.php).
+ * can be overridden, and Planned workers added (workers-meta.php; the Workers screen is the Kits shell's, sourceweb-ui.php).
  *
  * Data: each workflow reports its start and end (POST aw/v1/worker-run, the workers' application password) from
  * .github/actions/report in wugweb-git/animal-writes-workers. Nothing polls GitHub.
  * Alerts: a workflow with no report for its late limit (late_after_h), a run that failed, was cancelled or skipped its
- * main step, or a run with no end after its timeout. Shown on this tab, in the dashboard box "Scheduled tasks", in
+ * main step, or a run with no end after its timeout. Shown on the Workers screen, in the dashboard box "Scheduled tasks", in
  * Tools → Site Health, and emailed to the owner once per new set of problems (the ingestion watchdog's pattern).
  *
  * @package aw-sourcing
@@ -314,73 +314,10 @@ add_action(
 	}
 );
 
-/** Result of a run as a core notice badge with a dashicon. */
-function aw_workers_badge( $last, $problem, $note = '' ) {
-	if ( ! $last ) {
-		return '<span class="dashicons dashicons-clock" aria-hidden="true"></span> No report yet';
-	}
-	$map                         = array(
-		'success'   => array( 'success', 'yes-alt', 'Success' ),
-		'running'   => array( 'info', 'clock', 'Running' ),
-		'failed'    => array( 'error', 'dismiss', 'Failed' ),
-		'cancelled' => array( 'error', 'dismiss', 'Cancelled' ),
-		'skipped'   => array( 'warning', 'warning', 'Skipped' ),
-	);
-	list( $kind, $icon, $label ) = $map[ $last['result'] ] ?? $map['failed'];
-	if ( $problem ) {
-		$kind = 'error'; // a problem row's badge is always the error one
-	}
-	$step = '';
-	if ( ! empty( $last['failed_step'] ) ) {
-		$step = ': step "' . $last['failed_step'] . '"';
-	} elseif ( 'skipped' === $last['result'] ) {
-		$step = ': step "' . ( $last['main_step'] ?? 'main' ) . '" did not run';
-	}
-	return wp_get_admin_notice(
-		'<span class="dashicons dashicons-' . esc_attr( $icon ) . '" aria-hidden="true"></span> '
-		. esc_html( $label . $step ) . ( ! empty( $last['dry_run'] ) ? ' (dry run)' : '' ) . ( $note ? '<br>' . esc_html( $note ) : '' ),
-		array( 'type' => $kind, 'additional_classes' => array( 'inline', 'notice-alt' ) )
-	);
-}
-
-/** Column slug => label (also the Screen Options checkboxes). */
-function aw_workers_columns() {
-	return array(
-		'icon'     => '<span class="screen-reader-text">Icon</span>',
-		'name'     => 'Worker',
-		'group'    => 'Group',
-		'file'     => 'Workflow file',
-		'schedule' => 'Schedule (IST)',
-		'last_run' => 'Last run',
-		'status'   => 'Status',
-		'keys'     => 'Keys',
-	);
-}
-
-// Screen Options (columns, rows per page) on the Workers list only (not a worker's form or runs).
-add_action(
-	'load-' . AW_SRC_SCREEN,
-	function () {
-		if ( 'workers' !== sanitize_key( $_GET['tab'] ?? '' ) || isset( $_GET['edit'] ) || isset( $_GET['runs'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-			return;
-		}
-		add_filter( 'manage_' . AW_SRC_SCREEN . '_columns', 'aw_workers_columns' );
-		add_screen_option(
-			'per_page',
-			array(
-				'label'   => 'Workers per page',
-				'default' => 20,
-				'option'  => 'aw_workers_per_page',
-			)
-		);
-	}
-);
-add_filter( 'set_screen_option_aw_workers_per_page', fn( $keep, $option, $value ) => max( 1, min( 100, (int) $value ) ), 10, 3 );
-
 add_filter(
 	'kits_sourcing_tabs',
 	function ( $tabs ) {
-		$tabs['workers'] = array( 'Workers', 'aw_workers_tab', true ); // its own forms (workers-admin.php)
+		$tabs['workers'] = array( 'Workers' );
 		return $tabs;
 	}
 );

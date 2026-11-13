@@ -1,6 +1,6 @@
 <?php
 /**
- * RankWeb's routes for its new screens (docs/rankweb-plan.md §2–§4), under rankweb/v1:
+ * RankWeb's routes for its screens (docs/rankweb-plan.md §2–§4), under rankweb/v1:
  *
  *   GET  dashboard           manage_categories  the tiles, from the background counts (rankweb-dashboard.php)
  *   POST dashboard/count     manage_categories  ask for a count now (one background event)
@@ -192,13 +192,7 @@ function rankweb_dashboard_payload(): array {
 		$c = array();
 	}
 	$admin    = current_user_can( 'manage_options' );
-	$settings = fn( string $group ) => $admin ? add_query_arg(
-		array(
-			'page' => 'aw-seo-settings',
-			'ui'   => 'next',
-		),
-		admin_url( 'admin.php' )
-	) . '#' . $group : '';
+	$settings = fn( string $group ) => $admin ? add_query_arg( 'page', 'aw-seo-settings', admin_url( 'admin.php' ) ) . '#' . $group : '';
 	$num      = fn( $n ) => number_format_i18n( (int) $n );
 	$items    = array_sum( (array) ( $c['items'] ?? array() ) );
 	$most     = fn( array $by ) => $by ? rankweb_type_label( (string) array_key_first( $by ) ) : '';
@@ -400,7 +394,7 @@ function rankweb_settings_field( string $module, string $const, array $f, array 
 
 /**
  * A group as the screen shows it: one block per module of the tab, then fields of other modules shown on the tab
- * (the share images under General), in the order of today's form (aw_seo_settings_fields_form()).
+ * (the share images under General), in the order of the module list (aw_seo_tab_fields()).
  *
  * @param string $tab Tab key.
  */

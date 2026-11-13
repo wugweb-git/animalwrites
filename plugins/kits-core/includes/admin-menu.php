@@ -225,8 +225,8 @@ function kits_screen_sections( string $screen ): array {
 }
 
 /**
- * A screen made of sections: heading, the five tabs, then a box per section, one under the other (no row of section
- * links: owner, 11 Nov 2026).
+ * A screen made of sections: the frame's header and the five tabs, then a card per section, one under the other (no row
+ * of section links). Without the shell's build, one notice.
  *
  * @param string $screen The screen's slug.
  * @param string $title  Heading.
@@ -234,24 +234,17 @@ function kits_screen_sections( string $screen ): array {
  */
 function kits_sections_page( string $screen, string $title, string $intro ): void {
 	$sections = kits_screen_sections( $screen );
-	if ( function_exists( 'kits_frame_ready' ) && kits_frame_ready() ) {
-		// The default (not &ui=classic): the same sections as cards in the plugin screens' frame (includes/admin-kits-frame.php).
-		kits_frame_open( $screen, $title, $intro );
-		foreach ( $sections as $id => $s ) {
-			kits_frame_card( (string) $id, $s['title'], $s['render'] );
-		}
-		kits_sections_back( $sections );
-		kits_frame_close();
+	if ( ! kits_frame_ready() ) {
+		kits_frame_missing( $title );
 		return;
 	}
-	kits_admin_head( $screen, $title, $intro );
+	// The sections as cards in the plugin screens' frame (includes/admin-kits-frame.php).
+	kits_frame_open( $screen, $title, $intro );
 	foreach ( $sections as $id => $s ) {
-		echo '<div class="postbox" id="' . esc_attr( $id ) . '"><div class="postbox-header"><h2 class="hndle">' . esc_html( $s['title'] ) . '</h2></div><div class="inside">';
-		call_user_func( $s['render'] );
-		echo '</div></div>';
+		kits_frame_card( (string) $id, $s['title'], $s['render'] );
 	}
 	kits_sections_back( $sections );
-	echo '</div>';
+	kits_frame_close();
 }
 
 /**

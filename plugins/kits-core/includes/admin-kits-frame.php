@@ -1,14 +1,15 @@
 <?php
 /**
- * Kits → Home, Settings, Tools and Help on the plugin screens' look, the default since 12 Nov 2026: admin.php?page=kits,
- * admin.php?page=kits-settings, admin.php?page=kits-tools, admin.php?page=kits-help (&ui=classic: the earlier screens).
- * Theme Options' own screen (includes/admin-app.php) uses the same header, chips and cards.
+ * Kits → Home, Settings, Tools and Help on the plugin screens' look: admin.php?page=kits, admin.php?page=kits-settings,
+ * admin.php?page=kits-tools, admin.php?page=kits-help. Theme Options' own screen (includes/admin-app.php) uses the same
+ * header, chips and cards.
  *
  * The same frame as the Kits plugins (docs/kits-plugin-ui.md): the app header with the Kits icon, name and version and
- * the five Kits tabs (yellow bar on the open one), then each section as a card. The cards hold today's sections, printed
- * by the same functions, so every form, button and link works as on the earlier screens.
+ * the five Kits tabs (yellow bar on the open one), then each section as a card, printed by the section's own function,
+ * so every form, button and link works as it is.
  *
  * The frame is printed by PHP with the shell's classes (only the kits-shell stylesheet is loaded; no script is needed).
+ * Without the shell's build (build/shell/) the screen shows one notice instead (kits_frame_missing()).
  *
  * @package kits-core
  */
@@ -30,7 +31,18 @@ function kits_frame_screens(): array {
 /** This request asks for a Kits screen in the frame. */
 function kits_frame_wanted(): bool {
 	$page = sanitize_key( wp_unslash( $_GET['page'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- which screen to show; nothing is saved here.
-	return isset( kits_frame_screens()[ $page ] ) && kits_shell_ui_next();
+	return isset( kits_frame_screens()[ $page ] );
+}
+
+/**
+ * The screen when the shell's build is missing: its heading and one notice.
+ *
+ * @param string $title The screen's name.
+ */
+function kits_frame_missing( string $title ): void {
+	echo '<div class="wrap"><h1>' . esc_html( $title ) . '</h1>';
+	wp_admin_notice( esc_html__( 'Kits Core needs its build (build/shell/) to show this screen.', 'kits-core' ), array( 'type' => 'error' ) );
+	echo '</div>';
 }
 
 /**
@@ -88,7 +100,7 @@ add_action(
 		}
 		$page = sanitize_key( wp_unslash( $_GET['page'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- which screen to show; nothing is saved here.
 		if ( ! current_user_can( kits_frame_screens()[ $page ] ) || ! wp_style_is( 'kits-shell', 'registered' ) ) {
-			return; // No shell: the current screen shows.
+			return; // No shell: the screen shows kits_frame_missing().
 		}
 		wp_enqueue_style( 'kits-shell' );
 		add_filter( 'admin_body_class', 'kits_shell_body_class' );

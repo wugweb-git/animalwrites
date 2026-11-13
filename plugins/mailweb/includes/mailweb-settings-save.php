@@ -1,8 +1,8 @@
 <?php
 /**
- * How each MailWeb setting is cleaned before it is stored, shared by the current settings forms (admin-post handlers
- * in mail-cap.php, smtp.php, mailboxes.php, profiles.php, crm-sync.php) and the new Settings screen's routes
- * (mailweb-rest.php), so the two can never store a value differently.
+ * How each MailWeb setting is cleaned before it is stored, shared by the Site sending forms (admin-post handlers in
+ * mail-cap.php, smtp.php) and the Settings screen's routes (mailweb-rest.php), so the two can never store a value
+ * differently.
  *
  * The routes save only what changed: the fields sent are put over today's values, both are cleaned, and the option is
  * written only when the two differ. An unchanged Save writes nothing, even when the option was never stored.

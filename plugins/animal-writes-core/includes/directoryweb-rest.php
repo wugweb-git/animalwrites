@@ -612,7 +612,6 @@ function directoryweb_claim_detail( int $id ): ?array {
 				'post_type' => 'aw_listing',
 				'page'      => 'aw-claims',
 				'entry'     => (int) $c['id'],
-				'ui'        => 'classic',
 			),
 			admin_url( 'edit.php' )
 		),

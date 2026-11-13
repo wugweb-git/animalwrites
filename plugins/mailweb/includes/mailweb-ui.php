@@ -6,9 +6,9 @@
  * - admin.php?page=mailweb            Inbox, the working list (MAILWEB_CAP)
  * - admin.php?page=mailweb-settings   Settings (manage_options)
  *
- * &ui=classic shows the earlier screens. The screens are one script (build/index.js, from src/), drawn with Kits
- * Core's shell parts and fed by the mailweb/v1 routes (mailweb-rest.php). When Kits Core or a build file is missing,
- * the earlier screen shows.
+ * The screens are one script (build/index.js, from src/), drawn with Kits Core's shell parts and fed by the mailweb/v1
+ * routes (mailweb-rest.php). When Kits Core or a build file is missing, the page shows a notice instead. The Inbox's
+ * message, form item and compose views and Settings → Site sending are server-drawn (inbox.php, settings-tab.php).
  *
  * @package mailweb
  */
@@ -19,15 +19,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 const MAILWEB_REST = 'mailweb/v1';
 
-/** Which new screen this request asks for: 'dashboard', 'inbox', 'settings' or ''. */
+/** Which shell screen this request asks for: 'dashboard', 'inbox', 'settings' or ''. */
 function mailweb_ui_wanted(): string {
 	$page = sanitize_key( wp_unslash( $_GET['page'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- which screen to show; nothing is saved here
-	$ui   = sanitize_key( wp_unslash( $_GET['ui'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- same
-	if ( 'classic' === $ui ) {
+	// The Inbox's message, form item and compose views, and Settings → Site sending, are drawn by the page itself.
+	if ( 'mailweb' === $page && '' !== mailweb_inbox_view( mailweb_state() ) ) {
 		return '';
 	}
-	// Today's Inbox handles its message, form item and compose views itself.
-	if ( 'mailweb' === $page && ( isset( $_GET['uid'] ) || isset( $_GET['item'] ) || isset( $_GET['compose'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- same
+	if ( 'mailweb-settings' === $page && 'sending' === sanitize_key( wp_unslash( $_GET['sub'] ?? '' ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- same
 		return '';
 	}
 	return array(
@@ -38,7 +37,7 @@ function mailweb_ui_wanted(): string {
 }
 
 /**
- * The new screen is on this request (its script enqueued). Set on admin_enqueue_scripts.
+ * The shell screen is on this request (its script enqueued). Set on admin_enqueue_scripts.
  *
  * @param bool|null $set Set the flag.
  */
@@ -51,7 +50,7 @@ function mailweb_ui_ready( ?bool $set = null ): bool {
 }
 
 /**
- * The address of a new screen.
+ * The address of a shell screen.
  *
  * @param string $screen 'dashboard', 'inbox' or 'settings'.
  * @param array  $args   More query arguments.
@@ -62,16 +61,7 @@ function mailweb_ui_url( string $screen, array $args = array() ): string {
 		'inbox'     => 'mailweb',
 		'settings'  => 'mailweb-settings',
 	)[ $screen ] ?? 'mailweb-overview';
-	return add_query_arg(
-		array_merge(
-			array(
-				'page' => $page,
-				'ui'   => 'next',
-			),
-			$args
-		),
-		admin_url( 'admin.php' )
-	);
+	return add_query_arg( array_merge( array( 'page' => $page ), $args ), admin_url( 'admin.php' ) );
 }
 
 add_action(
@@ -146,13 +136,13 @@ add_action(
 );
 
 /**
- * Draw the new screen in place of today's, when it is ready. The page callbacks call this first.
+ * Draw the shell screen, when it is ready. The page callbacks call this first.
  *
  * @param string $screen 'dashboard', 'inbox' or 'settings'.
- * @return bool True when the new screen was drawn.
+ * @return bool True when the shell screen was drawn.
  */
 function mailweb_ui_page( string $screen ): bool {
-	if ( mailweb_ui_wanted() !== $screen || ! mailweb_ui_ready() ) {
+	if ( mailweb_ui_wanted() !== $screen || ! mailweb_ui_ready() || ! function_exists( 'kits_shell_mount' ) ) {
 		return false;
 	}
 	$titles = array(
@@ -161,8 +151,20 @@ function mailweb_ui_page( string $screen ): bool {
 		'settings'  => __( 'MailWeb settings', 'mailweb' ),
 	);
 	if ( 'inbox' === $screen && function_exists( 'mailweb_notice' ) ) {
-		mailweb_notice(); // the result of a send, move or flag from the classic message screens
+		mailweb_notice(); // the result of a send, move or flag from the message and compose views
 	}
 	kits_shell_mount( 'mailweb-app', $titles[ $screen ] );
 	return true;
+}
+
+/**
+ * The page in place of a shell screen that could not be drawn (Kits Core inactive, or its build or this plugin's
+ * build missing): the title and one error notice.
+ *
+ * @param string $title Screen title.
+ */
+function mailweb_ui_missing( string $title ) {
+	echo '<div class="wrap"><h1>' . esc_html( $title ) . '</h1>';
+	wp_admin_notice( esc_html__( 'MailWeb needs Kits Core (active, with its build) to show this screen.', 'mailweb' ), array( 'type' => 'error' ) );
+	echo '</div>';
 }

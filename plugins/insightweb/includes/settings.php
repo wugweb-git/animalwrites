@@ -3,8 +3,8 @@
  * Search Insights' seven numbers and its API rule, as they were in RankWeb (moved 11 Nov 2026, docs/insightweb-plan.md).
  *
  * The numbers stay where RankWeb stored them: option aw_seo_settings, key 'search-insights', only values that differ
- * from the default. The constants are defined here from that key, with the same defaults. The form on Search Insights →
- * Settings prints the same fields and writes only that key.
+ * from the default. The constants are defined here from that key, with the same defaults. The Settings screen writes
+ * only that key (aw_si_settings_save()).
  *
  * @package insightweb
  */
@@ -74,38 +74,8 @@ function aw_si_api_allowed() {
 	return current_user_can( 'manage_options' ) || current_user_can( 'aw_worker' );
 }
 
-/** The numbers as a form on Search Insights → Settings, as RankWeb's embedded form printed them. */
-function aw_si_settings_form(): void {
-	if ( ! current_user_can( 'manage_options' ) ) {
-		return;
-	}
-	$saved = aw_si_settings_saved();
-	$any   = false;
-	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
-	echo '<input type="hidden" name="action" value="aw_si_settings">';
-	wp_nonce_field( 'aw_si_settings' );
-	echo '<table class="form-table" role="presentation"><tbody>';
-	foreach ( aw_si_setting_fields() as $const => $f ) {
-		$has     = array_key_exists( $const, $saved );
-		$value   = $has ? (int) $saved[ $const ] : $f['default'];
-		$any     = $any || $has;
-		$changed = $has && $value !== $f['default'];
-		$id      = 'aw-seo-' . strtolower( str_replace( '_', '-', $const ) );
-		echo '<tr><th scope="row"><label for="' . esc_attr( $id ) . '">' . esc_html( $f['label'] ) . '</label></th><td>';
-		echo '<input type="number" min="0" class="small-text" id="' . esc_attr( $id ) . '" name="f[' . esc_attr( $const ) . ']" value="' . esc_attr( (string) $value ) . '">';
-		echo '<p class="description">' . esc_html( trim( $f['help'] . ( $changed ? ' Changed from the default.' : '' ) ) ) . '</p></td></tr>';
-	}
-	echo '</tbody></table>';
-	submit_button( 'Save changes', 'primary', 'submit', false );
-	if ( $any ) {
-		echo ' ';
-		submit_button( 'Restore defaults', 'secondary', 'reset', false );
-	}
-	echo '</form>';
-}
-
 /**
- * Save the numbers. The form on Search Insights → Settings and the Settings screen's route both come here.
+ * Save the numbers. The Settings screen's route and the admin-post action aw_si_settings both come here.
  * - Only values that differ from the default are stored, so a later default change reaches unchanged fields.
  * - A field not sent keeps its stored value.
  * - Nothing is written when nothing changed (the stored values compared, whatever their order).

@@ -920,7 +920,7 @@ add_action(
 						'pasted'  => $done,
 						'skipped' => $skip,
 					),
-					aw_si_return_url( 'rising' ) // back to the screen it was sent from (classic or new)
+					aw_si_return_url( 'rising' )
 				)
 			);
 			exit;

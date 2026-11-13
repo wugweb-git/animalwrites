@@ -220,14 +220,11 @@ add_filter(
 	}
 );
 
-/*
- * The Relay tab moved into Sources (25 Oct 2026): each source has its relay switch. The request log is a report of its
- * own, Sourcing → Relay log (owner, 25 Oct 2026: reports apart from settings).
- */
+// Sourcing → Relay log. Each source's relay switch is on Sources.
 add_filter(
 	'kits_sourcing_tabs',
 	function ( $tabs ) {
-		$tabs['relay-log'] = array( 'Relay log', 'aw_relay_log_view', true ); // nothing to save: its search is a GET form
+		$tabs['relay-log'] = array( 'Relay log' );
 		return $tabs;
 	}
 );
@@ -240,7 +237,7 @@ add_filter(
 add_filter( 'aw_sources_save_relay', fn( $c ) => $c );
 
 /**
- * The relay requests, newest first (last 200), as plain text. Used by the Relay log tab and GET sourceweb/v1/relay-log.
+ * The relay requests, newest first (last 200), as plain text. Used by GET sourceweb/v1/relay-log.
  *
  * @return array[] { at, when, host, path, status, ok, bytes, size, ms, note }
  */
@@ -261,42 +258,6 @@ function aw_relay_log_rows(): array {
 		);
 	}
 	return $rows;
-}
-
-/** Sourcing → Relay log: every request the workers made through the site (last 200). */
-function aw_relay_log_view() {
-	$rows = array();
-	foreach ( aw_relay_log_rows() as $r ) {
-		$rows[] = array(
-			'at'     => esc_html( $r['when'] ),
-			'host'   => esc_html( $r['host'] ),
-			'path'   => esc_html( $r['path'] ),
-			'status' => esc_html( $r['status'] ),
-			'bytes'  => esc_html( $r['size'] ),
-			'ms'     => $r['ms'] . ' ms',
-			'note'   => esc_html( $r['note'] ),
-			'_sort'  => array( 'at' => $r['at'], 'bytes' => $r['bytes'], 'ms' => $r['ms'] ),
-			'_find'  => $r['host'] . ' ' . $r['path'] . ' ' . $r['status'] . ' ' . $r['note'],
-		);
-	}
-	aw_sourcing_simple_table(
-		'requests',
-		array( 'at' => 'Time', 'host' => 'Host', 'path' => 'Path', 'status' => 'Result', 'bytes' => 'Size', 'ms' => 'Time taken', 'note' => 'Note' ),
-		$rows,
-		array( 'per_page' => 50, 'sortable' => array( 'at', 'host', 'status', 'bytes', 'ms' ), 'empty' => 'None yet.', 'search' => 'Search requests', 'hidden' => array( 'page' => 'aw-sourcing', 'tab' => 'relay-log' ) )
-	);
-}
-
-/** The last relay result of a host in words ("200 · 25 Oct 2026, 10:15 am"), or ''. */
-function aw_relay_last_html( $host ) {
-	$r = aw_src_relay_last( (array) get_option( 'aw_relay_log', array() ), (string) $host );
-	return $r ? aw_relay_result_html( $r ) : '';
-}
-
-/** One relay log row's result in words, with a core dashicon. */
-function aw_relay_result_html( array $r ) {
-	$ok = is_int( $r['status'] ?? null ) && $r['status'] < 400;
-	return '<span class="dashicons dashicons-' . ( $ok ? 'yes' : 'warning' ) . '" aria-hidden="true"></span> ' . esc_html( (string) $r['status'] . ' · ' . wp_date( 'j M Y, g:i a', (int) $r['at'] ) );
 }
 
 /**

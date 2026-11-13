@@ -94,11 +94,11 @@ require_once AW_SOURCING_DIR . 'includes/ai-provider-icons.php';
 require_once AW_SOURCING_DIR . 'includes/admin-menu.php';
 require_once AW_SOURCING_DIR . 'includes/dashboard.php'; // the Dashboard box "Sourcing" (owner, 3 Nov 2026)
 require_once AW_SOURCING_DIR . 'includes/kits-hub.php'; // a tab and a status row in the Kits admin, when Kits Core is loaded.
-// The new screens on the Kits admin shell, the default (Dashboard, To review, Enrichment review, Settings).
+// The screens, on the Kits admin shell (sourceweb-ui.php), and their sourceweb/v1 routes.
 require_once AW_SOURCING_DIR . 'includes/sourceweb-model.php';
 require_once AW_SOURCING_DIR . 'includes/sourceweb-dashboard.php';
 require_once AW_SOURCING_DIR . 'includes/sourceweb-rest.php';
-require_once AW_SOURCING_DIR . 'includes/sourceweb-rest-pages.php'; // the tabs rebuilt after 12 Nov 2026 (Workers …)
-require_once AW_SOURCING_DIR . 'includes/sourceweb-rest-ai.php'; // AI models on the new screen (12 Nov 2026)
-require_once AW_SOURCING_DIR . 'includes/sourceweb-rest-logs.php'; // Rejected, Relay log, Change log on the new screen (12 Nov 2026)
+require_once AW_SOURCING_DIR . 'includes/sourceweb-rest-pages.php'; // Sources, Keywords, Rules, Workers, Settings
+require_once AW_SOURCING_DIR . 'includes/sourceweb-rest-ai.php'; // AI models
+require_once AW_SOURCING_DIR . 'includes/sourceweb-rest-logs.php'; // Rejected, Relay log, Change log
 require_once AW_SOURCING_DIR . 'includes/sourceweb-ui.php';

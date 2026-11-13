@@ -112,12 +112,7 @@ admok() { # NAME PATH: 200, no PHP error, not refused
   if [ "$code" = "200" ] && ! grep -qiE 'critical error|Fatal error|Parse error|Sorry, you are not allowed' /tmp/admin.html; then echo "ok   $code $1"; else echo "FAIL $code $1"; FAIL=1; fi
 }
 for s in kits kits-options kits-settings kits-tools kits-help; do admok "Kits → $s" "admin.php?page=$s"; done
-adm "admin.php?page=kits&ui=classic" >/dev/null # the earlier screens (the new look is the default; checked below)
-# Kits is its own menu in the Wugweb block (owner, 12 Nov 2026); the five are its tabs, in order.
-got=$(grep -oE '<a class="nav-tab[^"]*" href="[^"]*page=[^"&]+' /tmp/admin.html | sed 's/.*page=//' | tr '\n' ' ' | sed 's/ $//')
-if [ "$got" = "kits kits-options kits-settings kits-tools kits-help" ]; then echo "ok   Kits tabs are the five"; else echo "FAIL Kits tabs: $got"; FAIL=1; fi
-n=$(grep -o '<a class="nav-tab' /tmp/admin.html | wc -l | tr -d ' ')
-if [ "$n" = "5" ]; then echo "ok   five Kits tabs"; else echo "FAIL $n Kits tabs, want 5"; FAIL=1; fi
+adm "admin.php?page=kits" >/dev/null # the five tabs are checked with the frame below
 has "Home: edit the theme (Site Editor links)" /tmp/admin.html 'id="theme"'
 has "Home: page check (Animal Writes)" /tmp/admin.html 'id="page-check"'
 has "Home: email, thumbnails and pictures stay" /tmp/admin.html 'id="pictures"'
@@ -128,31 +123,30 @@ grep -q 'class="subsubsub"' /tmp/admin.html && { echo "FAIL Home: section link r
 to=$(curl -s -b "$JAR" -o /dev/null -w '%{redirect_url}' "http://127.0.0.1:8080/wp-admin/admin.php?page=kits-plugins")
 case "$to" in */wp-admin/plugins.php) echo "ok   kits-plugins goes to Plugins";; *) echo "FAIL kits-plugins goes to: $to"; FAIL=1;; esac
 grep -q 'page=kits-plugins' /tmp/admin.html && { echo "FAIL Home still links to Kits → Plugins"; FAIL=1; } || echo "ok   no Kits → Plugins link"
-adm "admin.php?page=kits-settings&ui=classic" >/dev/null
+adm "admin.php?page=kits-settings" >/dev/null
 has "Settings: CDN cache times" /tmp/admin.html 'id="cdn"'
 has "Settings: preview access" /tmp/admin.html 'id="kits-preview-ips"'
 has "Settings: Analytics (read only)" /tmp/admin.html 'id="analytics"'
 # Keys and modules are set in RankWeb → Settings and SourceWeb → Settings now (0b010493, 12 Nov 2026).
 has "Settings: RankWeb Settings linked" /tmp/admin.html 'page=aw-seo-settings'
 has "Settings: SourceWeb Settings linked" /tmp/admin.html 'page=aw-sourcing&#038;tab=settings'
-adm "admin.php?page=kits-help&ui=classic" >/dev/null
+adm "admin.php?page=kits-help" >/dev/null
 has "Help: docs" /tmp/admin.html 'id="docs"'
 has "Help: design system" /tmp/admin.html 'id="design-system"'
 has "Help: edit screens" /tmp/admin.html 'id="developer/edit-screens"'
 has "Help: theme parts" /tmp/admin.html 'id="developer/theme-parts"'
-adm "admin.php?page=kits-help&tab=components&ui=classic" >/dev/null # Design system: the plugins here are links into the repo checkout
+adm "admin.php?page=kits-help&tab=components" >/dev/null # Design system: the plugins here are links into the repo checkout
 if grep -qF -e "$REPO/" -e "$WP/" /tmp/admin.html; then echo "FAIL Help → Design system prints a server path:"; grep -oF -e "$REPO/" -e "$WP/" /tmp/admin.html | sort | uniq -c | head -3; FAIL=1; else echo "ok   Help → Design system: no server paths"; fi
 adm "admin.php?page=kits-options" >/dev/null
 has "Theme Options: the app is the default" /tmp/admin.html 'kits-admin-theme-options-js'
 for l in content-types socials share; do has "Theme Options: $l shows today's fields" /tmp/admin.html "data-kits-legacy=\"$l\""; done
 has "Theme Options → Socials: Contact links" /tmp/admin.html 'name="aw_elsewhere[0][label]"'
-admok "Theme Options, older screen (&ui=classic)" "admin.php?page=kits-options&ui=classic"
 for s in aw-keys aw-modules aw-dates; do admok "$s keeps its address" "admin.php?page=$s"; done
 # Kits → Modules: the fields that were WP-CLI only (12 Nov 2026), one Settings API form.
 adm "admin.php?page=aw-modules" >/dev/null
 for f in aw_ff_send_email aw_nl_ff_form_full aw_sample_listing_ids aw_district_helplines aw_issuer_short; do has "Modules: field $f" /tmp/admin.html "name=\"$f\""; done
-adm "admin.php?page=aw-sourcing&tab=settings&ui=classic" >/dev/null
-has "SourceWeb Settings: backfill date field" /tmp/admin.html 'name="aw_backfill_floor"'
+adm "admin.php?page=aw-sourcing&tab=settings" >/dev/null
+has "SourceWeb Settings: backfill date field" /tmp/admin.html 'aw_backfill_floor'
 # Old address => where it goes (a 302, the other query values kept).
 while read -r old want; do
   out=$(curl -s -b "$JAR" -o /dev/null -w '%{http_code} %{redirect_url}' "http://127.0.0.1:8080/wp-admin/admin.php?page=$old")
@@ -258,14 +252,6 @@ got=" $(menu_read menu-plugins | sed -n 's/^toplevel //p') "
 for i in aw-seo-plus aw-sourcing-menu mailweb planweb; do case "$got" in *" toplevel_page_$i "*) echo "ok   editor: has $i" ;; *) echo "FAIL editor: no $i menu"; FAIL=1 ;; esac; done
 for i in kits aw-search-insights; do case "$got" in *" toplevel_page_$i "*) echo "FAIL editor: sees $i"; FAIL=1 ;; *) echo "ok   editor: no $i (as before)" ;; esac; done
 # A product's tabs reach its other screens; the tab shown is marked.
-curl -s -b "$JAR" -o /tmp/admin.html "http://127.0.0.1:8080/wp-admin/admin.php?page=aw-sourcing&tab=keywords"
-has "SourceWeb tabs: Keywords marked" /tmp/admin.html 'nav-tab nav-tab-active" href="http://127.0.0.1:8080/wp-admin/admin.php?page=aw-sourcing&#038;tab=keywords"'
-curl -s -b "$JAR" -o /tmp/admin.html "http://127.0.0.1:8080/wp-admin/admin.php?page=mailweb-overview&ui=classic"
-has "MailWeb tabs: Overview marked" /tmp/admin.html 'nav-tab nav-tab-active" href="http://127.0.0.1:8080/wp-admin/admin.php?page=mailweb-overview"'
-has "MailWeb tabs: Settings linked" /tmp/admin.html 'class="nav-tab" href="http://127.0.0.1:8080/wp-admin/admin.php?page=mailweb-settings"'
-curl -s -b "$EJAR" -o /tmp/admin.html "http://127.0.0.1:8080/wp-admin/admin.php?page=aw-seo-plus&ui=classic"
-has "RankWeb tabs (editor): FAQ linked" /tmp/admin.html 'class="nav-tab" href="http://127.0.0.1:8080/wp-admin/admin.php?page=aw-faq"'
-if grep -qF 'class="nav-tab" href="http://127.0.0.1:8080/wp-admin/admin.php?page=aw-seo-settings"' /tmp/admin.html; then echo "FAIL RankWeb tabs (editor): Settings tab shown"; FAIL=1; else echo "ok   RankWeb tabs (editor): no Settings tab"; fi
 wp plugin deactivate planweb --quiet
 # Plugin Check on PlanWeb (report only, printed, never fails the run): only when plugins/planweb changed (PLUGIN_CHECK=1
 # from the workflow), so wordpress.org is not asked on every Deploy check.
@@ -313,10 +299,6 @@ for p in "aw-seo-plus&ui=next" "aw-seo-settings&ui=next"; do
 done
 want 200 "admin.php?page=aw-seo-plus (default)" -b /tmp/cj-ci "$H/wp-admin/admin.php?page=aw-seo-plus"
 if grep -q 'id="rankweb-app"' /tmp/rw.out; then echo "ok   the new Dashboard is the default"; else echo "FAIL the new Dashboard is not the default"; FAIL=1; fi
-want 200 "admin.php?page=aw-seo-plus&ui=classic (earlier Overview)" -b /tmp/cj-ci "$H/wp-admin/admin.php?page=aw-seo-plus&ui=classic"
-if grep -q 'id="rankweb-app"' /tmp/rw.out; then echo "FAIL aw-seo-plus&ui=classic: still the new screen"; FAIL=1; else echo "ok   the earlier Overview on &ui=classic"; fi
-want 200 "admin.php?page=aw-seo-settings&ui=classic (earlier Settings)" -b /tmp/cj-ci "$H/wp-admin/admin.php?page=aw-seo-settings&ui=classic"
-if grep -q 'nav-tab-wrapper' /tmp/rw.out && ! grep -q 'id="rankweb-app"' /tmp/rw.out; then echo "ok   the earlier Settings on &ui=classic"; else echo "FAIL aw-seo-settings&ui=classic: not the earlier Settings"; FAIL=1; fi
 want 200 "admin.php?page=aw-seo-plus&ui=next (editor)" -b /tmp/cj-rw-ed "$H/wp-admin/admin.php?page=aw-seo-plus&ui=next"
 R="$H/?rest_route=/rankweb/v1"
 for r in dashboard settings services; do
@@ -374,8 +356,6 @@ screen() {
   jsok "$1&ui=next" "$3" /tmp/rw.out
   want 200 "admin.php?page=$1 (default)" -b /tmp/cj-ci "$H/wp-admin/admin.php?page=$1"
   if grep -q "id=\"$2\"" /tmp/rw.out; then echo "ok   $1: the new screen is the default"; else echo "FAIL $1: the new screen is not the default"; FAIL=1; fi
-  want 200 "admin.php?page=$1&ui=classic (earlier screen)" -b /tmp/cj-ci "$H/wp-admin/admin.php?page=$1&ui=classic"
-  if grep -q "id=\"$2\"" /tmp/rw.out; then echo "FAIL $1&ui=classic: still the new screen"; FAIL=1; else echo "ok   $1&ui=classic: the earlier screen"; fi
   want 403 "admin.php?page=$1&ui=next (subscriber)" -b /tmp/cj-rw-sub "$H/wp-admin/admin.php?page=$1&ui=next"
 }
 # route NAMESPACE/PATH: GET checks.
@@ -397,7 +377,7 @@ same() { if [ "$2" = "$3" ]; then echo "ok   $1: every option identical after an
 
 echo "-- kits screens on the plugin look (the default; includes/admin-kits-frame.php)"
 # Home, Settings, Tools and Help: 200 and drawn in the frame (shell stylesheet, header, five tabs) with the same
-# sections as the earlier screen, on &ui=next and the plain address; &ui=classic is the earlier screen; a subscriber is refused.
+# sections as before, on &ui=next and the plain address; a subscriber is refused.
 while read -r page section; do
   want 200 "admin.php?page=$page&ui=next (administrator)" -b /tmp/cj-ci "$H/wp-admin/admin.php?page=$page&ui=next"
   if grep -q 'class="kits-shell-header"' /tmp/rw.out && grep -q "kits-shell-css" /tmp/rw.out && grep -q "id=\"$section\"" /tmp/rw.out; then echo "ok   $page&ui=next draws the frame with $section"; else echo "FAIL $page&ui=next: frame or $section missing"; FAIL=1; fi
@@ -406,8 +386,6 @@ while read -r page section; do
   if grep -qiE 'critical error|Fatal error|Parse error' /tmp/rw.out; then echo "FAIL $page&ui=next: PHP error"; FAIL=1; fi
   want 200 "admin.php?page=$page (default)" -b /tmp/cj-ci "$H/wp-admin/admin.php?page=$page"
   if grep -q 'class="kits-shell-header"' /tmp/rw.out; then echo "ok   $page: the new look is the default"; else echo "FAIL $page: the new look is not the default"; FAIL=1; fi
-  want 200 "admin.php?page=$page&ui=classic (earlier screen)" -b /tmp/cj-ci "$H/wp-admin/admin.php?page=$page&ui=classic"
-  if grep -q 'class="kits-shell-header"' /tmp/rw.out; then echo "FAIL $page&ui=classic: still the new look"; FAIL=1; else echo "ok   $page&ui=classic: the earlier screen"; fi
   want 403 "admin.php?page=$page&ui=next (subscriber)" -b /tmp/cj-rw-sub "$H/wp-admin/admin.php?page=$page&ui=next"
 done <<'FRAME'
 kits theme
@@ -415,11 +393,9 @@ kits-settings preview
 kits-tools export
 kits-help docs
 FRAME
-# A save comes back to the screen it was made on: the plain address from the new look, &ui=classic from the earlier one.
+# A save comes back to the screen it was made on.
 want 200 "admin.php?page=kits-settings (save address)" -b /tmp/cj-ci "$H/wp-admin/admin.php?page=kits-settings"
 if grep -q 'name="_wp_http_referer" value="[^"]*page=kits-settings' /tmp/rw.out && ! grep -q 'name="_wp_http_referer" value="[^"]*ui=classic' /tmp/rw.out; then echo "ok   Settings forms come back to the new look"; else echo "FAIL Settings forms do not come back to the new look"; FAIL=1; fi
-want 200 "admin.php?page=kits-settings&ui=classic (save address)" -b /tmp/cj-ci "$H/wp-admin/admin.php?page=kits-settings&ui=classic"
-if grep -q 'name="_wp_http_referer" value="[^"]*page=kits-settings[^"]*ui=classic' /tmp/rw.out; then echo "ok   Settings forms come back to &ui=classic"; else echo "FAIL Settings forms do not come back to &ui=classic"; FAIL=1; fi
 # Theme Options is drawn by its app on the shell; its tabs are the plain addresses (the new look is the default).
 
 want 200 "admin.php?page=kits-options (administrator)" -b /tmp/cj-ci "$H/wp-admin/admin.php?page=kits-options"

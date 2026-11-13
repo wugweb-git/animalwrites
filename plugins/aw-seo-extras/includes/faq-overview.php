@@ -211,18 +211,12 @@ add_action(
 	}
 );
 
-/** RankWeb → FAQ: the new screen (rankweb-ui.php; &ui=classic shows this one), or this one. */
+/** RankWeb → FAQ on the Kits shell (rankweb-ui.php). */
 function aw_faq_admin_page() {
-	if ( function_exists( 'rankweb_ui_page' ) && rankweb_ui_page( 'faq' ) ) {
-		return;
-	}
-	echo '<div class="wrap"><h1 class="wp-heading-inline">FAQ</h1><hr class="wp-header-end">';
-	aw_seo_screen_tabs();
-	aw_faq_admin_body();
-	echo '</div>';
+	rankweb_ui_page( 'faq' );
 }
 
-/** The FAQ screen under its heading and tabs: notices, FAQ box on, the list, the counts. The new screen draws it too. */
+/** The FAQ screen's body: notices, FAQ box on, the list, the counts. The shell draws it through page parts (rankweb_faq_parts()). */
 function aw_faq_admin_body() {
 	if ( ! class_exists( 'WP_List_Table' ) ) {
 		require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';

@@ -1,10 +1,9 @@
 <?php
 /**
- * Sourcing, the one place for what the workers fetch (S3, 8 Oct 2026). Kits Core gives the screen with
- * Sources (publishers and press sites), Keywords (the one word list) and the Change log; this adds Feeds (one list of the
- * News feeds: RSS and Google News queries, Library sources: AWBI, PIB, Gazette, courts, and Opportunity sources),
- * Press-discovery queries (Settings API), and registers the Categories and Sections tabs, whose core list-table screens
- * live in sourcing-terms-admin.php.
+ * Sourcing, the one place for what the workers fetch (S3, 8 Oct 2026): the feeds (News feeds: RSS and Google News
+ * queries, Library sources: AWBI, PIB, Gazette, courts, and Opportunity sources), their form and saves, the Press
+ * settings' save, "Workers use these lists" and the workers' copy of the lists. The screens are the Kits shell's
+ * (sourceweb-ui.php).
  *
  * The lists live in the option aw_sources, in the same shape as the workers' sources.yaml (defaults, keywords,
  * sources, categories, press), seeded once from it (data/sources-seed.json). The workers read them at the start of every
@@ -85,7 +84,7 @@ function aw_gnews_query( $url ) {
 }
 
 /**
- * Source types on the Feeds tab: type => [label, the tab their changes are logged under]. The log keeps the tab names
+ * Source types of the feeds: type => [label, the tab their changes are logged under]. The log keeps the tab names
  * of before 24 Oct 2026 (feeds, library, opportunities), when each type had its own tab.
  */
 const AW_SOURCE_TYPES = array(
@@ -94,47 +93,8 @@ const AW_SOURCE_TYPES = array(
 	'opportunity' => array( 'Opportunity', 'opportunities' ),
 );
 
-add_filter(
-	'kits_sourcing_tabs',
-	function ( $tabs ) {
-		// Feeds moved into Sources (25 Oct 2026): Sources → Feeds and each source's edit screen; the old address redirects.
-		if ( aw_sourcing_phase() >= 4 ) { // phase 4: hidden (Keywords → Press, Posts → Categories, Rules); a rollback shows them again
-			return $tabs;
-		}
-		$tabs['press']      = array( 'Press queries', 'aw_sources_press_tab', true ); // Settings API forms (options.php)
-		$tabs['categories'] = array( 'Categories', 'aw_sources_categories_tab', true );
-		$tabs['sections']   = array( 'Sections', 'aw_sources_sections_tab', true );
-		return $tabs;
-	}
-);
-add_filter(
-	'kits_sourcing_title_action',
-	function ( $add ) {
-		if ( function_exists( 'aw_sourcing_sources_screen' ) && 'feeds' === aw_sourcing_sources_screen() ) { // Sources → Feeds
-			$add['sources'] = array( 'Add New Feed', admin_url( 'admin.php?page=aw-sourcing&tab=sources&feed=new' ) );
-		}
-		return $add;
-	}
-);
-
-/** "Workers use these lists" switch, on Sourcing → Settings (admin-menu.php; it was on top of every tab until 25 Oct 2026). */
-function aw_sources_live_switch() {
-	$c = aw_sources_config();
-	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
-	wp_nonce_field( 'aw_sourcing' );
-	echo '<input type="hidden" name="action" value="aw_sourcing"><input type="hidden" name="tab" value="settings">'
-		. '<p><strong>Workers use these lists:</strong> ' . ( empty( $c['live'] ) ? 'off (they use sources.yaml in the workers repository)' : 'on (read at the start of every run)' ) . ' '
-		. '<button class="button" name="live" value="' . ( empty( $c['live'] ) ? '1' : '0' ) . '">' . ( empty( $c['live'] ) ? 'Turn on' : 'Turn off' ) . '</button></p></form>';
-}
-add_action(
-	'kits_sourcing_save_settings',
-	function () {
-		aw_sources_live_save( ! empty( $_POST['live'] ) ); // phpcs:ignore WordPress.Security.NonceVerification -- checked by the Kits save handler
-	}
-);
-
 /**
- * Save "Workers use these lists" (the form above and SourceWeb → Settings) and log it.
+ * Save "Workers use these lists" (SourceWeb → Settings) and log it.
  *
  * @param bool $on On or off.
  */
@@ -174,39 +134,9 @@ add_action(
 );
 
 /**
- * Sources → Feeds: every source (News, Library, Opportunity) in one list with the publisher each belongs to; on a
- * source's edit screen, only that site's feeds. The list posts as the old Feeds tab did (tab feeds).
- *
- * @param string $host Only this site's feeds ('' for all).
- */
-function aw_sources_tab( $host = '' ) {
-	if ( ! class_exists( 'WP_List_Table' ) ) {
-		require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
-	}
-	require_once __DIR__ . '/class-aw-sourcing-sources-table.php';
-	$table = new AW_Sourcing_Sources_Table( $host );
-	$table->prepare_items();
-	if ( '' === $host ) {
-		$table->views();
-		echo '<form method="get"><input type="hidden" name="page" value="aw-sourcing"><input type="hidden" name="tab" value="sources"><input type="hidden" name="view" value="feeds">';
-		foreach ( array( 'type' => array_keys( AW_SOURCE_TYPES ), 'state' => array( 'on', 'off' ) ) as $k => $ok ) {
-			$v = sanitize_key( $_GET[ $k ] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
-			if ( in_array( $v, $ok, true ) ) {
-				echo '<input type="hidden" name="' . esc_attr( $k ) . '" value="' . esc_attr( $v ) . '">';
-			}
-		}
-		$table->search_box( 'Search feeds', 'aw-src' );
-		echo '</form>';
-	}
-	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_sourcing"><input type="hidden" name="tab" value="feeds">';
-	wp_nonce_field( 'aw_sourcing' );
-	$table->display();
-	echo '</form>';
-}
-
-/**
- * Edit one source, or add a feed (feed=new; the type is chosen on the form), in the core form-table layout. Saves
- * through the old Feeds tab's save hook (tab feeds), then goes back to the screen it was opened from.
+ * Edit one source, or add a feed (feed=new; the type is chosen on the form), in the core form-table layout, drawn on
+ * the Sources screen (sourceweb_feed_parts()). Saves through the feeds save hook (tab feeds), then goes back to the
+ * screen it was opened from.
  *
  * @param string $id   Source id, or 'new'.
  * @param string $type Source type from the address ('' for the first source with that id).
@@ -268,46 +198,8 @@ function aw_sources_edit_form( $id, $type, $host = '' ) {
 	echo ' <a href="' . esc_url( $back ) . '" class="button">Cancel</a></form>';
 }
 
-// Screen options: sources per page (Sources → Feeds).
-add_action(
-	'load-' . AW_SRC_SCREEN,
-	function () {
-		if ( 'sources' === sanitize_key( $_GET['tab'] ?? '' ) && 'feeds' === sanitize_key( $_GET['view'] ?? '' ) && empty( $_GET['feed'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-			add_screen_option( 'per_page', array( 'label' => 'Sources per page', 'default' => 50, 'option' => 'aw_sources_per_page' ) );
-		}
-	}
-);
-add_filter( 'set_screen_option_aw_sources_per_page', fn( $keep, $option, $value ) => max( 1, min( 200, (int) $value ) ), 10, 3 );
-
 /**
- * Row and bulk actions of the Feeds list: on / off, keyword check on / off, and delete (a feed; a source read by code
- * needs code, so it is only turned off). A row is "type|id" (an id alone, from a form of before the merge, matches any
- * type). Logged per type under the tab of before (feeds, library, opportunities), with old → new. Returns true when it
- * handled the request (the edit form's rows are then not read).
- */
-function aw_sources_list_action() {
-	$row = sanitize_text_field( wp_unslash( $_POST['src_row'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification -- checked by the Kits save handler
-	if ( false !== strpos( $row, ':' ) ) {
-		list( $op, $one ) = explode( ':', $row, 2 );
-		$ids              = array( $one );
-	} else {
-		$op  = sanitize_key( $_POST['src_bulk'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
-		$op  = '' !== $op ? $op : sanitize_key( $_POST['src_bulk2'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
-		$ids = array_map( 'sanitize_text_field', (array) wp_unslash( $_POST['ids'] ?? array() ) ); // phpcs:ignore WordPress.Security.NonceVerification
-	}
-	$op = sanitize_key( $op );
-	if ( ! in_array( $op, array( 'on', 'off', 'filter_on', 'filter_off', 'delete' ), true ) ) {
-		if ( isset( $_POST['src_bulk'] ) && ! isset( $_POST['src'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- the list without a chosen action (or the page box): nothing saved
-			aw_sources_list_back( false );
-		}
-		return false;
-	}
-	aw_sources_list_back( aw_sources_feed_op( $op, $ids ) );
-	return true;
-}
-
-/**
- * A feeds list action, for today's list and the new Sources screen: on, off, filter_on, filter_off (the keyword check)
+ * A feeds list action of the Sources screen (sourceweb-rest-pages.php): on, off, filter_on, filter_off (the keyword check)
  * or delete (feeds only; sources read by code are kept). Logged per feed.
  *
  * @param string $op  The action.
@@ -354,22 +246,10 @@ function aw_sources_feed_op( $op, array $ids ) {
 	return (bool) $what;
 }
 
-/** After a list action: back to the same view, search and page; "Saved" only when something changed. */
-function aw_sources_list_back( $changed ) {
-	$back = remove_query_arg( array( 'updated', 'paged' ), wp_get_referer() ? wp_get_referer() : admin_url( 'admin.php?page=aw-sourcing' ) );
-	$page = absint( wp_unslash( $_POST['paged'] ?? 0 ) ); // phpcs:ignore WordPress.Security.NonceVerification -- checked by the Kits save handler
-	$back = $page > 1 ? add_query_arg( 'paged', $page, $back ) : $back;
-	wp_safe_redirect( $changed ? add_query_arg( 'updated', 1, $back ) : $back );
-	exit;
-}
-
-// Sources → Feeds (the old Feeds tab's saves): the list's row and bulk actions, or the Add New / Edit Feed form.
+// The Add New / Edit Feed form's save (admin_post_aw_sourcing, tab feeds).
 add_action(
 	'kits_sourcing_save_feeds',
 	function () {
-		if ( aw_sources_list_action() ) {
-			return; // a row or bulk action of the list
-		}
 		$c    = aw_sources_config();
 		$rows = (array) wp_unslash( $_POST['src'] ?? array() ); // phpcs:ignore WordPress.Security.NonceVerification -- checked by the Kits save handler
 		$what = array();
@@ -460,45 +340,16 @@ add_action(
 );
 
 /*
- * Press queries, Categories and Sections (and Relay, relay.php) save through the Settings API: one option, aw_sources,
- * in the group aw_sourcing_sources. Each form sends its tab in aw_sources[_aw_tab]; aw_sources_sanitize() hands the
- * posted part to that tab's filter (aw_sources_save_<tab>) and keeps the rest of the option as it is. The list tables'
- * own saves (sources on / off, edit, "Workers use these lists") pass through unchanged.
+ * The Press settings save through aw_sources_sanitize() (the Keywords screen's Press view, sourceweb-rest-pages.php):
+ * the posted part carries its tab in _aw_tab, and the tab's filter (aw_sources_save_<tab>) merges it into the option,
+ * keeping the rest as it is. Every other save of aw_sources (feeds, sources on / off, "Workers use these lists") passes
+ * through unchanged. Forms of tabs that no longer exist (Categories, Sections, Relay) change nothing.
  */
 
 add_action(
 	'admin_init',
 	function () {
 		register_setting( 'aw_sourcing_sources', 'aw_sources', array( 'type' => 'array', 'sanitize_callback' => 'aw_sources_sanitize', 'show_in_rest' => false ) );
-
-		// Press queries.
-		add_settings_section(
-			'aw_press',
-			'',
-			function () {
-				aw_sourcing_settings_marker( 'aw_sources', 'press' );
-				if ( function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ) { // phase 2: the queries are the Press keywords below
-					echo '<p>Weekly searches for coverage of Animal Writes through Google News and Google Search: each keyword in this view (the Press role) is a query. Results wait in Plugins → SourceWeb → To review.</p>';
-					return;
-				}
-				echo '<p>Searches for coverage of Animal Writes (Brave Search, weekly). Each query runs on each press site and on the open web. Results wait in Plugins → SourceWeb → To review. The press sites are chosen on the <a href="' . esc_url( admin_url( 'admin.php?page=aw-sourcing&tab=sources&status=press' ) ) . '">Sources</a> tab ("Search here for coverage").</p>';
-			},
-			'aw-sourcing-press'
-		);
-		$press = fn( $k ) => (array) ( aw_sources_config()['press'][ $k ] ?? array() );
-		if ( ! function_exists( 'aw_sourcing_kw_on' ) || ! aw_sourcing_kw_on() ) { // phase 2: Press keywords
-			add_settings_field( 'aw_press_queries', 'Queries', fn( $a ) => aw_sourcing_textarea_field( $a + array( 'value' => $press( 'queries' ) ) ), 'aw-sourcing-press', 'aw_press', array( 'label_for' => 'aw-pq', 'name' => 'aw_sources[queries]', 'rows' => 10, 'help' => 'One per line.' ) );
-		}
-		add_settings_field(
-			'aw_press_floor',
-			'Coverage from',
-			function () {
-				echo '<input type="date" id="aw-pf" name="aw_sources[date_floor]" value="' . esc_attr( (string) ( aw_sources_config()['press']['date_floor'] ?? '' ) ) . '">';
-			},
-			'aw-sourcing-press',
-			'aw_press',
-			array( 'label_for' => 'aw-pf' )
-		);
 	}
 );
 
@@ -522,10 +373,7 @@ function aw_sources_sanitize( $value ) {
 	return $c === $was ? get_option( 'aw_sources' ) : $c; // Save with no change writes nothing (same keys, values and types)
 }
 
-/** Press-discovery queries (Media & PR). */
-function aw_sources_press_tab() {
-	aw_sourcing_settings_form( 'aw_sourcing_sources', 'aw-sourcing-press' );
-}
+// Press-discovery settings (Media & PR).
 add_filter(
 	'aw_sources_save_press',
 	function ( $c, $in ) {

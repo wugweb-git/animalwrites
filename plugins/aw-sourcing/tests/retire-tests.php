@@ -107,6 +107,6 @@ aw_t( substr_count( $p4_mig, '$save();' ) >= 3 && false !== strpos( $p4_mig, "'a
 $p4_lists = (string) file_get_contents( dirname( __DIR__ ) . '/includes/sourcing-lists.php' );
 $p4_kwa   = (string) file_get_contents( dirname( __DIR__ ) . '/includes/keywords-admin.php' );
 $p4_pol   = (string) file_get_contents( dirname( __DIR__ ) . '/includes/sourcing-policy.php' );
-aw_t( false !== strpos( $p4_lists, "\$tabs['categories'] = array( 'Categories', 'aw_sources_categories_tab', true );" ) && false !== strpos( $p4_lists, 'aw_sourcing_phase() >= 4 ) { // phase 4: hidden' ), 'the old tabs stay in the code, hidden from phase 4 (a rollback shows them)' );
+aw_t( false === strpos( $p4_lists, "\$tabs['categories']" ) && false !== strpos( $p4_lists, "'aw_sources_save_press'," ), 'the old Categories tab is gone; the Press settings still save through aw_sources_sanitize()' );
 aw_t( false !== strpos( $p4_kwa, '$old  = aw_sourcing_phase() < 4;' ), 'the old lists are no longer rebuilt from phase 4 (at phase 3, after a rollback, the next keyword save rebuilds them)' );
 aw_t( false !== strpos( $p4_pol, "if ( aw_sourcing_phase() < 4 || ! function_exists( 'aw_retire_policy' ) ) {" ) && false !== strpos( $p4_lists, "if ( aw_sourcing_phase() >= 4 && function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ) { // phase 4: no v1 keys" ), 'the policy drops the v1 keys only from phase 4; the v1 code stays' );

@@ -1,6 +1,7 @@
 <?php
 /**
- * Summary rules for the workers and the owner: GET aw/v1/summary-rules and the Sourcing → Summary rules tab.
+ * Summary rules for the workers: GET aw/v1/summary-rules, and the option's save check (the Rules screen saves them
+ * through sourceweb/v1).
  * The rules themselves (option aw_summary_rules) and the site's own use of them stay in core (summary-rules.php).
  *
  * @package aw-sourcing
@@ -9,7 +10,6 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
-
 
 add_action(
 	'rest_api_init',
@@ -40,16 +40,6 @@ function aw_summary_rules_payload() {
 	return $out;
 }
 
-/* ---------- Sourcing → Summary rules (from phase 3: Rules → Summary rules) ---------- */
-
-add_filter(
-	'kits_sourcing_tabs',
-	function ( $tabs ) {
-		$tabs['summary'] = array( 'Summary rules', 'aw_summary_rules_tab', true ); // Settings API form (options.php)
-		return $tabs;
-	}
-);
-
 /** Published summaries below their section's minimum (counted once an hour): section => [below, total]. */
 function aw_summary_below_counts() {
 	$c = get_transient( 'aw_summary_below' );
@@ -76,167 +66,10 @@ function aw_summary_below_counts() {
 	return $c;
 }
 
-/** One textarea of the rules (Settings API field): a list (one entry per line) or a text. */
-function aw_summary_rules_field( $args ) {
-	$r = aw_summary_rules();
-	if ( ! empty( $args['by_type'] ) ) {
-		$val = aw_rules_summary_by_type()[ $args['section'] ][ $args['key'] ] ?? '';
-	} else {
-		$val = isset( $args['section'] ) ? $r['sections'][ $args['section'] ][ $args['key'] ] : $r[ $args['key'] ];
-	}
-	aw_sourcing_textarea_field( $args + array( 'value' => $val, 'class_attr' => 'large-text' ) );
-}
-
-/**
- * The sections of the form: post type => rule from phase 3 (Rules → Summary rules), else news, library, research.
- *
- * @return array{0: array, 1: bool} The sections, and whether they are keyed by post type.
- */
-function aw_summary_rules_form_sections() {
-	if ( function_exists( 'aw_rules_live' ) && aw_rules_live() ) {
-		return array( aw_rules_summary_by_type(), true );
-	}
-	return array( aw_summary_rules_defaults()['sections'], false );
-}
-
 add_action(
 	'admin_init',
-	function () {
-		register_setting( 'aw_sourcing_summary', AW_SUMMARY_RULES_OPTION, array( 'type' => 'array', 'sanitize_callback' => 'aw_summary_rules_sanitize', 'show_in_rest' => false ) );
-		if ( 'aw-sourcing' !== sanitize_key( $_GET['page'] ?? '' ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- the form is drawn only on Sourcing
-			return;
-		}
-		$page = 'aw-sourcing-summary';
-		$opt  = AW_SUMMARY_RULES_OPTION;
-		list( $form_secs, $by_type ) = aw_summary_rules_form_sections(); // the sections and fields only; values are read when shown
-		add_settings_section(
-			'aw_sr_intro',
-			'',
-			function () {
-				aw_sourcing_settings_marker( AW_SUMMARY_RULES_OPTION, 'summary' );
-				if ( ! ( function_exists( 'aw_rules_live' ) && aw_rules_live() ) ) { // from phase 3 the text is in the screen's Help tab
-					echo '<p>One rule set for every summary on the site: the workers write and check new summaries and same-story rewrites from these rules (GET aw/v1/summary-rules), and the site holds an item whose summary is over the maximum or not plain text in Plugins → SourceWeb → To review. A short summary is never held: the workers read the source again, then other coverage of the same story, and publish the best summary that follows the rules. A summary is never shorter than the search description, which is its lead sentence (at most ' . (int) aw_summary_rules()['description_max_chars'] . ' characters).</p>';
-				}
-			},
-			$page
-		);
-		add_settings_section( 'aw_sr_length', 'Length per section', $by_type ? 'aw_summary_rules_length_table_by_type' : 'aw_summary_rules_length_table', $page );
-		add_settings_section( 'aw_sr_quotes', 'Quotes and the lead', '__return_false', $page );
-		foreach ( array(
-			'lead_max_words'        => 'Lead sentence, about this many words or fewer',
-			'max_quotes'            => 'Direct quotes per summary, at most',
-			'max_quote_words'       => 'Words in a quote, at most',
-			'max_copied_run'        => 'Words copied in a row outside a quote, at most',
-			'description_max_chars' => 'Search description, characters',
-		) as $f => $label ) {
-			add_settings_field(
-				'aw_sr_' . $f,
-				$label,
-				function () use ( $f, $opt ) {
-					echo '<input type="number" min="1" max="400" class="small-text" id="aw-sr-' . esc_attr( $f ) . '" name="' . esc_attr( $opt . '[' . $f . ']' ) . '" value="' . (int) aw_summary_rules()[ $f ] . '">';
-				},
-				$page,
-				'aw_sr_quotes',
-				array( 'label_for' => 'aw-sr-' . $f )
-			);
-		}
-		foreach ( $form_secs as $name => $sec ) {
-			$inherits = $by_type && '' !== (string) ( $sec['inherit'] ?? '' );
-			add_settings_section( 'aw_sr_sec_' . $name, $sec['label'] . ( $inherits ? ' (inherits News: these fields apply once it has its own rule)' : '' ), '__return_false', $page );
-			foreach ( array( 'structure' => array( 'Structure', 4 ), 'attribution' => array( 'Attribution', 3 ) ) as $f => $d ) {
-				add_settings_field( 'aw_sr_' . $name . '_' . $f, $d[0], 'aw_summary_rules_field', $page, 'aw_sr_sec_' . $name, array( 'label_for' => 'aw-sr-' . $name . '-' . $f, 'name' => $opt . '[sections][' . $name . '][' . $f . ']', 'section' => $name, 'key' => $f, 'rows' => $d[1], 'by_type' => $by_type ) );
-			}
-		}
-		$groups = array(
-			'aw_sr_every'    => array(
-				'Every summary',
-				array(
-					'general'        => array( 'Rules', 12, 'One rule per line. The facts-only, date, length, plain-text, no-AI-marker, English-only and searched-words rules are here.' ),
-					'stock_phrases'  => array( 'Banned stock and praise wording', 6, 'One per line. A summary using any of them is written again.' ),
-					'ai_markers'     => array( 'AI markers', 4, 'One per line. A summary containing any of them is written again.' ),
-					'searched_terms' => array( 'Searched words', 5, 'One group per line, words separated by |. When the source names one, the summary keeps one of the group.' ),
-					'description'    => array( 'Search description and summary', 3, '' ),
-					'card'           => array( 'Card excerpt', 2, '' ),
-					'merge'          => array( 'Same-story merges', 3, '' ),
-					'fallback'       => array( 'Short fallback', 3, '' ),
-				),
-			),
-			'aw_sr_entities' => array(
-				'Linkable entities',
-				array(
-					'entities_note' => array( 'How summaries name things', 4, '' ),
-					'entities'      => array( 'Names', 12, 'One entity per line: the site\'s name first, then other spellings, separated by |. A summary using another spelling is written again. The names each summary uses are stored on the item (aw_entities: laws and organisations with their page, places with their LGD codes) for internal linking.' ),
-				),
-			),
-		);
-		foreach ( $groups as $sid => $g ) {
-			add_settings_section( $sid, $g[0], '__return_false', $page );
-			foreach ( $g[1] as $f => $d ) {
-				add_settings_field( 'aw_sr_' . $f, $d[0], 'aw_summary_rules_field', $page, $sid, array( 'label_for' => 'aw-sr-' . str_replace( '_', '-', $f ), 'name' => $opt . '[' . $f . ']', 'key' => $f, 'rows' => $d[1], 'help' => $d[2] ) );
-			}
-		}
-		add_settings_section( 'aw_sr_reset', 'Defaults', '__return_false', $page );
-		add_settings_field(
-			'aw_sr_reset',
-			'Reset',
-			function () use ( $opt ) {
-				echo '<label><input type="checkbox" id="aw-sr-reset" name="' . esc_attr( $opt ) . '[_reset]" value="1"> Go back to the default rules</label>';
-			},
-			$page,
-			'aw_sr_reset'
-		);
-	}
+	fn() => register_setting( 'aw_sourcing_summary', AW_SUMMARY_RULES_OPTION, array( 'type' => 'array', 'sanitize_callback' => 'aw_summary_rules_sanitize', 'show_in_rest' => false ) )
 );
-
-/** Length per section: the word limits per section (no sentence count, owner 25 Oct 2026) and the published summaries below the minimum. */
-function aw_summary_rules_length_table() {
-	$r     = aw_summary_rules();
-	$below = aw_summary_below_counts();
-	$cols  = array( 'label' => 'Section', 'min_words' => 'Minimum words', 'max_words' => 'Maximum words', 'below' => 'Published summaries below the minimum' );
-	$rows  = array();
-	foreach ( $r['sections'] as $name => $sec ) {
-		$row = array( 'label' => esc_html( $sec['label'] ) );
-		foreach ( array( 'min_words', 'max_words' ) as $f ) {
-			$row[ $f ] = '<input type="number" min="1" max="400" class="small-text" name="' . esc_attr( AW_SUMMARY_RULES_OPTION . '[sections][' . $name . '][' . $f . ']' ) . '" value="' . (int) $sec[ $f ] . '" aria-label="' . esc_attr( $sec['label'] . ' ' . str_replace( '_', ' ', $f ) ) . '">';
-		}
-		$b            = $below[ $name ] ?? array( 0, 0 );
-		$row['below'] = (int) $b[0] . ' of ' . (int) $b[1];
-		$rows[]       = $row;
-	}
-	aw_sourcing_simple_table( 'lengths', $cols, $rows ); // inside the settings form: the table prints no nonce of its own
-}
-
-/**
- * Length per section, one row per section (phase 3): the word limits, whether the section has its own rule or inherits
- * News, and the published summaries below the minimum (the old sections only).
- */
-function aw_summary_rules_length_table_by_type() {
-	$below = aw_summary_below_counts();
-	$cols  = array( 'label' => 'Section', 'min_words' => 'Minimum words', 'max_words' => 'Maximum words', 'rule' => 'Rule', 'below' => 'Published summaries below the minimum' );
-	$rows  = array();
-	$opt   = AW_SUMMARY_RULES_OPTION;
-	foreach ( aw_rules_summary_by_type() as $pt => $sec ) {
-		$row = array( 'label' => esc_html( $sec['label'] ) . ' <code>' . esc_html( $pt ) . '</code>' );
-		foreach ( array( 'min_words', 'max_words' ) as $f ) {
-			$row[ $f ] = '<input type="number" min="1" max="400" class="small-text" name="' . esc_attr( $opt . '[sections][' . $pt . '][' . $f . ']' ) . '" value="' . (int) $sec[ $f ] . '" aria-label="' . esc_attr( $sec['label'] . ' ' . str_replace( '_', ' ', $f ) ) . '">';
-		}
-		if ( isset( $sec['alias'] ) ) {
-			$row['rule'] = 'Its own';
-			$b           = $below[ $sec['alias'] ] ?? array( 0, 0 );
-			$row['below'] = (int) $b[0] . ' of ' . (int) $b[1];
-		} else {
-			$row['rule']  = '<input type="hidden" name="' . esc_attr( $opt . '[sections][' . $pt . '][shown]' ) . '" value="1"><label><input type="checkbox" name="' . esc_attr( $opt . '[sections][' . $pt . '][inherit]' ) . '" value="1"' . checked( '' !== (string) ( $sec['inherit'] ?? '' ), true, false ) . '> Inherits News</label>';
-			$row['below'] = '<span aria-label="Not counted">—</span>';
-		}
-		$rows[] = $row;
-	}
-	aw_sourcing_simple_table( 'lengths', $cols, $rows ); // inside the settings form: the table prints no nonce of its own
-}
-
-/** The tab. */
-function aw_summary_rules_tab() {
-	aw_sourcing_settings_form( 'aw_sourcing_summary', 'aw-sourcing-summary', 'Save summary rules' );
-}
 
 /**
  * Sanitize the rules posted by the tab (logged); any other save of the option passes through.

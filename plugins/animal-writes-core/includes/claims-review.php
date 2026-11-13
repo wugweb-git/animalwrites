@@ -5,10 +5,10 @@
  *
  * - Pre-fill: one fluentform/rendering_field_data_* filter fills every l_* field from the listing (public data only)
  *   and names the listing in "{Listing}" labels.
- * - Directory → Claims: the claim entries (Fluent Forms); a claim's screen shows now → proposed for the fields that
- *   differ, each with its own tick. Approve writes the ticked values to the listing, each logged in the enrichment
- *   change log (source "Claimed by organisation", today) with Undo there, and marks the listing claimed (aw_verified,
- *   aw_verified_on). Opening hours are shown, not written: they are entered in the listing's Opening hours list.
+ * - Directory → Claims: the claim entries (Fluent Forms), listed on DirectoryWeb's Claims screen; one claim's screen
+ *   (&entry=) shows now → proposed for the fields that differ, each with its own tick. Approve writes the ticked values
+ *   to the listing, each logged in the enrichment change log (source "Claimed by organisation", today) with Undo there,
+ *   and marks the listing claimed (aw_verified, aw_verified_on). Opening hours are shown, not written: they are entered in the listing's Opening hours list.
  * - "Show my name on this listing" = Yes and approved: the claimant's FluentCRM contact gets org-approved and the
  *   listing (vol_org_listing, vol_org_show, vol_org_role), so [aw_org_people] shows their name and role.
  *
@@ -353,15 +353,27 @@ add_filter(
 	PHP_INT_MAX - 1
 );
 
-/** Directory → Claims: the list, or one claim (&entry=). */
+/** Directory → Claims: the list (DirectoryWeb's shell screen), one claim (&entry=), or the notice after a review (&done=). */
 function aw_claims_screen() {
 	if ( ! current_user_can( 'edit_aw_volunteers' ) ) {
 		wp_die( 'Not allowed.', 403 );
 	}
 	if ( function_exists( 'directoryweb_ui_page' ) && directoryweb_ui_page( 'claims' ) ) {
-		return; // The new Claims screen (directoryweb-ui.php; &ui=classic shows this one)
+		return; // The Claims list (directoryweb-ui.php).
 	}
 	$entry = absint( wp_unslash( $_GET['entry'] ?? 0 ) ); // phpcs:ignore WordPress.Security.NonceVerification -- read only
+	$done  = sanitize_key( wp_unslash( $_GET['done'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
+	if ( ! $entry && '' === $done ) {
+		// The list is only on the shell screen, which could not be drawn.
+		if ( function_exists( 'directoryweb_missing_page' ) ) {
+			directoryweb_missing_page( __( 'Claims', 'directoryweb' ) );
+		} else {
+			echo '<div class="wrap"><h1>' . esc_html__( 'Claims', 'directoryweb' ) . '</h1>';
+			wp_admin_notice( esc_html__( 'DirectoryWeb needs Kits Core (active, with its build) to show this screen.', 'directoryweb' ), array( 'type' => 'error' ) );
+			echo '</div>';
+		}
+		return;
+	}
 	echo '<div class="wrap">';
 	if ( ! aw_claim_ff_id() ) {
 		echo '<h1>Claims</h1>';
@@ -375,33 +387,8 @@ function aw_claims_screen() {
 		return;
 	}
 	echo '<h1>Claims</h1>';
-	$done = sanitize_key( wp_unslash( $_GET['done'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
-	if ( '' !== $done ) {
-		wp_admin_notice( esc_html( 'approved' === $done ? 'Claim approved: the ticked fields are on the listing (Undo in Plugins → SourceWeb → Enrichment review).' : 'Claim rejected.' ), array( 'type' => 'success', 'dismissible' => true ) );
-	}
-	global $wpdb;
-	$per   = 20;
-	$paged = max( 1, absint( wp_unslash( $_GET['paged'] ?? 1 ) ) ); // phpcs:ignore WordPress.Security.NonceVerification -- read only
-	$total = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}fluentform_submissions WHERE form_id = %d AND status <> 'trashed'", aw_claim_ff_id() ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-	$ids   = $wpdb->get_col( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}fluentform_submissions WHERE form_id = %d AND status <> 'trashed' ORDER BY id DESC LIMIT %d OFFSET %d", aw_claim_ff_id(), $per, ( $paged - 1 ) * $per ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-	$rows  = array();
-	foreach ( $ids as $id ) {
-		$c = aw_claim_entry( (int) $id );
-		if ( ! $c ) {
-			continue;
-		}
-		$st     = (string) ( $c['review']['status'] ?? 'pending' );
-		$url    = add_query_arg( array( 'post_type' => 'aw_listing', 'page' => 'aw-claims', 'entry' => $c['id'] ), admin_url( 'edit.php' ) );
-		$rows[] = array(
-			'listing' => '<strong><a href="' . esc_url( $url ) . '">' . esc_html( $c['listing'] ? get_the_title( $c['listing'] ) : '(no listing)' ) . '</a></strong>',
-			'from'    => esc_html( $c['name'] . ( '' !== $c['role'] ? ', ' . $c['role'] : '' ) ),
-			'changes' => esc_html( (string) count( aw_claim_changes( $c ) ) ),
-			'status'  => esc_html( ucfirst( $st ) ),
-			'ref'     => esc_html( $c['ref'] ),
-			'sent'    => esc_html( mysql2date( 'j M Y', $c['sent'] ) ),
-		);
-	}
-	aw_core_simple_table( 'aw-claims', array( 'listing' => 'Listing', 'from' => 'From', 'changes' => 'Changes', 'status' => 'Status', 'ref' => 'Reference', 'sent' => 'Sent' ), $rows, array( 'per_page' => $per, 'total' => $total, 'empty' => 'No claims yet.' ) );
+	wp_admin_notice( esc_html( 'approved' === $done ? 'Claim approved: the ticked fields are on the listing (Undo in Plugins → SourceWeb → Enrichment review).' : 'Claim rejected.' ), array( 'type' => 'success', 'dismissible' => true ) );
+	echo '<p><a href="' . esc_url( add_query_arg( array( 'post_type' => 'aw_listing', 'page' => 'aw-claims' ), admin_url( 'edit.php' ) ) ) . '">All claims</a></p>';
 	echo '</div>';
 }
 

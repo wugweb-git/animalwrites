@@ -571,7 +571,7 @@ function aw_si_coverage_html(): string {
 	return $out;
 }
 
-// The same form on the Settings tab (12 Nov 2026), where the new screen keeps forms; the new Dashboard's boxes show text only.
+// The same form on the Settings tab (12 Nov 2026), where the shell keeps forms; the Dashboard's boxes show text only.
 add_action(
 	'aw_si_settings_rows',
 	function () {

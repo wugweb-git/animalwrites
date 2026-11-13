@@ -1,5 +1,5 @@
-/* PlanWeb admin (Calendar screen and the Dashboard box). Core admin colours only; each Type has its own mark shape
-   as well as its colour, so colour is never the only signal (WCAG 2.2, 1.4.1). Interim until the Kits Core shell. */
+/* PlanWeb admin (the shell screens' badges, the Calendar and the Dashboard box). Core admin colours only; each Type
+   has its own mark shape as well as its colour, so colour is never the only signal (WCAG 2.2, 1.4.1). */
 
 .planweb-type { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
 .planweb-mark { display: inline-block; width: 8px; height: 8px; flex: 0 0 auto; background: currentColor; }
@@ -17,7 +17,6 @@
 .planweb-status { display: inline-block; padding: 0 6px; border: 1px solid #c3c4c7; border-radius: 3px; color: #1d2327; background: #f6f7f7; font-size: 12px; line-height: 18px; white-space: nowrap; }
 .planweb-status--approved, .planweb-status--due { border-color: #2271b1; }
 .planweb-status--sent { background: #fff; color: #50575e; }
-.planweb-flag { color: #b32d2e; font-weight: 600; }
 
 .planweb-month td { vertical-align: top; height: 84px; }
 .planweb-month .planweb-item { margin: 4px 0; overflow-wrap: anywhere; }

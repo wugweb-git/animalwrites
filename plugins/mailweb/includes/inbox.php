@@ -194,12 +194,6 @@ function mailweb_state() {
 	);
 }
 
-/** Mail screen URL. */
-function mailweb_url( $args = array() ) {
-	$s = mailweb_state();
-	return add_query_arg( array_filter( array_merge( array( 'page' => 'mailweb', 'box' => $s['box'], 'folder' => $s['folder'] ), $args ), fn( $v ) => null !== $v && '' !== $v && 0 !== $v ), admin_url( 'admin.php' ) );
-}
-
 /** URL of a single action (admin-post, nonced). */
 function mailweb_act_url( $act, $args = array() ) {
 	return wp_nonce_url( add_query_arg( array_merge( array( 'action' => 'mailweb_act', 'do' => $act ), $args ), admin_url( 'admin-post.php' ) ), 'mailweb_act' );
@@ -221,7 +215,7 @@ function mailweb_role_unread( $role, $box ) {
 }
 
 /**
- * The bulk actions a folder offers (the list's Bulk actions menu and the Inbox route's check).
+ * The bulk actions a folder offers (the Inbox screen's menu and its route's check).
  *
  * @param string $folder Folder role, or MAILWEB_FORMS.
  * @return array action => label
@@ -367,98 +361,7 @@ function mailweb_list_rows( $s ) {
 	);
 }
 
-/**
- * When each address was last written to from any mailbox: lower-case address => newest Sent time (Unix). Read from the
- * newest 200 messages in each mailbox's Sent, cached for five minutes and cleared when Mail sends. A message counts as
- * replied when its sender was written to after it arrived, so replies sent from webmail or another tool count too.
- *
- * @return array
- */
-function mailweb_sent_times() {
-	$c = get_transient( 'mailweb_sent_times' );
-	if ( is_array( $c ) ) {
-		return $c;
-	}
-	$out  = array();
-	$ok   = false;
-	$path = mailweb_role_path( 'sent' );
-	foreach ( array_keys( mailweb_all_boxes() ) as $key ) {
-		if ( ! isset( mailweb_folders( $key )[ $path ] ) ) {
-			continue;
-		}
-		for ( $p = 1; $p <= 2; $p++ ) {
-			list( $code, $j ) = mailweb_call(
-				'GET',
-				mailweb_fpath( $key, $path ) . '/messages?' . http_build_query(
-					array(
-						'page'    => $p,
-						'perPage' => 100,
-						'sort'    => '-date',
-					)
-				)
-			);
-			if ( 200 !== $code ) {
-				break;
-			}
-			$ok   = true;
-			$data = (array) ( $j['data'] ?? array() );
-			foreach ( $data as $m ) {
-				$t = (int) strtotime( (string) ( $m['date'] ?? '' ) );
-				foreach ( mailweb_addresses( array_merge( (array) ( $m['to'] ?? array() ), (array) ( $m['cc'] ?? array() ) ) ) as $a ) {
-					$out[ $a ] = max( $out[ $a ] ?? 0, $t );
-				}
-			}
-			if ( count( $data ) < 100 ) {
-				break;
-			}
-		}
-	}
-	if ( $ok ) {
-		set_transient( 'mailweb_sent_times', $out, 5 * MINUTE_IN_SECONDS );
-	}
-	return $out;
-}
-
-/**
- * A list row's status: forwarded, replied, new or read.
- *
- * @param array $row A row from mailweb_list_rows().
- * @return string
- */
-function mailweb_row_status( $row ) {
-	if ( ! empty( $row['forwarded'] ) ) {
-		return 'forwarded';
-	}
-	$email = strtolower( trim( (string) ( $row['email'] ?? '' ) ) );
-	$last  = '' !== $email ? (int) ( mailweb_sent_times()[ $email ] ?? 0 ) : 0;
-	if ( ! empty( $row['answered'] ) || ( $last && $last >= (int) ( $row['ts'] ?? 0 ) ) ) {
-		return 'replied';
-	}
-	return ! empty( $row['unseen'] ) ? 'new' : 'read';
-}
-
-/* ---------- The screen ---------- */
-
-// Bulk actions from the list (WordPress list table form, GET to this page): done before any output, then back.
-add_action(
-	'load-toplevel_page_mailweb',
-	function () {
-		$act = sanitize_key( wp_unslash( $_REQUEST['action'] ?? '-1' ) ); // phpcs:ignore WordPress.Security.NonceVerification
-		$act = '-1' === $act || '' === $act ? sanitize_key( wp_unslash( $_REQUEST['action2'] ?? '-1' ) ) : $act; // phpcs:ignore WordPress.Security.NonceVerification
-		$ids = array_map( 'sanitize_text_field', (array) wp_unslash( $_REQUEST['message'] ?? array() ) ); // phpcs:ignore WordPress.Security.NonceVerification
-		if ( '-1' === $act || '' === $act || ! $ids ) {
-			return;
-		}
-		check_admin_referer( 'bulk-messages' );
-		if ( ! current_user_can( MAILWEB_CAP ) ) {
-			wp_die( esc_html__( 'Not allowed.', 'mailweb' ), 403 );
-		}
-		$s    = mailweb_state();
-		$done = mailweb_bulk( $act, $ids, $s['folder'] ) ? 'flagged' : 'fail';
-		wp_safe_redirect( add_query_arg( array( 'page' => 'mailweb', 'box' => $s['box'], 'folder' => $s['folder'], 's' => $s['q'] ? $s['q'] : null, 'mailweb_done' => $done ), admin_url( 'admin.php' ) ) );
-		exit;
-	}
-);
+/* ---------- Bulk actions and the page ---------- */
 
 /**
  * Apply one action to several messages ("box|uid") or website form items ("form|id").
@@ -499,24 +402,44 @@ function mailweb_bulk( $act, $ids, $role ) {
 	return $ok;
 }
 
+/**
+ * The Inbox view this request asks for that the page draws itself: 'compose', 'item' (a website form message),
+ * 'message' (one mailbox message), or '' for the list (the shell screen).
+ *
+ * @param array $s State (mailweb_state()).
+ * @return string
+ */
+function mailweb_inbox_view( $s ) {
+	if ( isset( $_GET['compose'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+		return 'compose';
+	}
+	if ( MAILWEB_FORMS === $s['folder'] && $s['item'] ) {
+		return 'item';
+	}
+	return $s['uid'] && 'all' !== $s['box'] ? 'message' : '';
+}
+
 function mailweb_inbox_page() {
 	if ( ! current_user_can( MAILWEB_CAP ) ) {
 		wp_die( esc_html__( 'Not allowed.', 'mailweb' ), 403 );
 	}
 	if ( mailweb_ui_page( 'inbox' ) ) {
-		return; // the new screen (mailweb-ui.php; &ui=classic shows this one).
+		return; // the list (mailweb-ui.php).
 	}
-	$s   = mailweb_state();
-	echo '<style>#mailweb tr.unread td,#mailweb tr.unread th{background-color:#fcf9e8}#mailweb tr.unread .check-column{box-shadow:inset 4px 0 0 #2271b1}#mailweb tr.unread .column-from,#mailweb tr.unread .column-subject>a{font-weight:600}#mailweb .column-date{width:9em}#mailweb .column-status{width:7em}#mailweb .column-mailbox{width:12em}#mailweb .column-from{width:22%}#mailweb .awm-box{float:right;margin-top:9px}#mailweb .awm-frame{width:100%;height:65vh;border:1px solid #c3c4c7;background:#fff;display:block}#mailweb .awm-actions .button{width:100%;text-align:center;margin:0 0 6px}#mailweb #titlewrap #title{padding:3px 8px;font-size:1.7em;height:1.7em;width:100%}#mailweb .awm-field{display:flex;gap:8px;align-items:center;margin:0 0 8px}#mailweb .awm-field label{flex:0 0 3.5em;color:#50575e}#mailweb .awm-field input{flex:1}@media (max-width:767px){#mailweb .awm-box{float:none;margin:8px 0}}</style>';
+	$s    = mailweb_state();
+	$view = mailweb_inbox_view( $s );
+	if ( '' === $view ) {
+		mailweb_ui_missing( __( 'MailWeb inbox', 'mailweb' ) );
+		return;
+	}
+	echo '<style>#mailweb .awm-frame{width:100%;height:65vh;border:1px solid #c3c4c7;background:#fff;display:block}#mailweb .awm-actions .button{width:100%;text-align:center;margin:0 0 6px}#mailweb #titlewrap #title{padding:3px 8px;font-size:1.7em;height:1.7em;width:100%}#mailweb .awm-field{display:flex;gap:8px;align-items:center;margin:0 0 8px}#mailweb .awm-field label{flex:0 0 3.5em;color:#50575e}#mailweb .awm-field input{flex:1}</style>';
 	echo '<div class="wrap" id="mailweb">';
-	if ( isset( $_GET['compose'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-		mailweb_compose_screen( $s, sanitize_key( $_GET['compose'] ) ); // phpcs:ignore WordPress.Security.NonceVerification
-	} elseif ( MAILWEB_FORMS === $s['folder'] && $s['item'] ) {
+	if ( 'compose' === $view ) {
+		mailweb_compose_screen( $s, sanitize_key( wp_unslash( $_GET['compose'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification -- which view to show; mailweb_inbox_view() set compose
+	} elseif ( 'item' === $view ) {
 		mailweb_form_item_screen( $s );
-	} elseif ( $s['uid'] && 'all' !== $s['box'] ) {
-		mailweb_message_screen( $s );
 	} else {
-		mailweb_list_screen( $s );
+		mailweb_message_screen( $s );
 	}
 	echo '</div>';
 }
@@ -544,46 +467,6 @@ function mailweb_notice() {
 function mailweb_day( $date ) {
 	$t = $date ? strtotime( (string) $date ) : false;
 	return $t ? '<span class="dashicons dashicons-calendar-alt" aria-hidden="true" style="font-size:16px;width:16px;height:16px;vertical-align:text-bottom"></span> ' . esc_html( wp_date( 'j M Y', $t ) ) : '–';
-}
-
-/** The list: title, mailbox picker, folder links, the WordPress list table. */
-function mailweb_list_screen( $s ) {
-	require_once MAILWEB_DIR . 'includes/list-table.php';
-	$boxes = mailweb_all_boxes();
-	echo '<h1 class="wp-heading-inline">' . esc_html__( 'Mail', 'mailweb' ) . '</h1> <a class="page-title-action" href="' . esc_url( mailweb_url( array( 'compose' => 'new', 'paged' => null, 's' => null ) ) ) . '">' . esc_html__( 'New message', 'mailweb' ) . '</a>';
-	// Mailbox picker (right).
-	echo '<form class="awm-box" method="get"><input type="hidden" name="page" value="mailweb"><input type="hidden" name="folder" value="' . esc_attr( MAILWEB_FORMS === $s['folder'] ? 'inbox' : $s['folder'] ) . '"><label for="awm-box" class="screen-reader-text">' . esc_html__( 'Mailbox', 'mailweb' ) . '</label><select id="awm-box" name="box" onchange="this.form.submit()"><option value="all"' . selected( 'all', $s['box'], false ) . '>' . esc_html__( 'All mailboxes', 'mailweb' ) . '</option>';
-	foreach ( $boxes as $k => $a ) {
-		$al = mailweb_aliases_of( $a );
-		echo '<option value="' . esc_attr( $k ) . '"' . selected( $k, $s['box'], false ) . '>' . esc_html( $a . ( $al ? ' (+ ' . implode( ', ', $al ) . ')' : '' ) ) . '</option>';
-	}
-	echo '</select> <noscript><button class="button">' . esc_html__( 'Show', 'mailweb' ) . '</button></noscript></form>';
-	echo '<hr class="wp-header-end">';
-	mailweb_screen_tabs();
-	mailweb_notice();
-	// Folder links, as WordPress lists have them.
-	$links = array();
-	foreach ( mailweb_roles() as $r => $v ) {
-		$n       = 'sent' === $r ? 0 : mailweb_role_unread( $r, $s['box'] );
-		$links[] = '<a href="' . esc_url( add_query_arg( array( 'page' => 'mailweb', 'box' => $s['box'], 'folder' => $r ), admin_url( 'admin.php' ) ) ) . '"' . ( $r === $s['folder'] ? ' class="current" aria-current="page"' : '' ) . '>' . esc_html( $v[0] ) . ( $n ? ' <span class="count">(' . (int) $n . ')</span>' : '' ) . '</a>';
-	}
-	if ( mailweb_forms() ) {
-		$fn      = mailweb_forms_unread();
-		$links[] = '<a href="' . esc_url( add_query_arg( array( 'page' => 'mailweb', 'box' => $s['box'], 'folder' => MAILWEB_FORMS ), admin_url( 'admin.php' ) ) ) . '"' . ( MAILWEB_FORMS === $s['folder'] ? ' class="current" aria-current="page"' : '' ) . '>' . esc_html( mailweb_forms()['label'] ) . ( $fn ? ' <span class="count">(' . (int) $fn . ')</span>' : '' ) . '</a>';
-	}
-	echo '<ul class="subsubsub"><li>' . implode( ' |</li><li>', $links ) . '</li></ul>'; // phpcs:ignore WordPress.Security.EscapeOutput -- built from escaped parts
-	$table = new Mailweb_List_Table( $s );
-	$table->prepare_items();
-	echo '<form method="get"><input type="hidden" name="page" value="mailweb"><input type="hidden" name="box" value="' . esc_attr( $s['box'] ) . '"><input type="hidden" name="folder" value="' . esc_attr( $s['folder'] ) . '">';
-	if ( MAILWEB_FORMS !== $s['folder'] ) {
-		$table->search_box( __( 'Search mail', 'mailweb' ), 'awm-search' );
-	}
-	$table->display();
-	echo '</form><p class="description" style="clear:both">' . sprintf(
-		/* translators: %s: "Hostinger webmail" link. */
-		esc_html__( 'Read in step with %s: what you read, move or send here shows there too.', 'mailweb' ),
-		'<a href="' . esc_url( MAILWEB_WEBMAIL ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Hostinger webmail', 'mailweb' ) . '</a>'
-	) . '</p>';
 }
 
 /** One mailbox message: edit-screen layout, message left, actions right. */
@@ -1136,7 +1019,6 @@ function mailweb_send_from_form( $in, $refbox ) {
 		call_user_func( mailweb_forms()['replied'], $item );
 	}
 	delete_transient( 'mailweb_folders_' . $from );
-	delete_transient( 'mailweb_sent_times' );
 	$dest = add_query_arg( array( 'page' => 'mailweb', 'box' => 'all', 'folder' => $orig ? mailweb_role_of( $orig[1] ) : 'sent' ), admin_url( 'admin.php' ) );
 	wp_safe_redirect( add_query_arg( 'mailweb_done', 'sent', $dest ) );
 	exit;

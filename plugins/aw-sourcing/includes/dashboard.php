@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * AI keys refused or out of credit: the same rule as the Sourcing overview's AI line (aw_sourcing_overview_ai()).
+ * AI keys refused or out of credit: the same rule as the Dashboard's AI tile (aw_sourcing_ai_counts()).
  * Null when the keys are not saved on the AI models screen yet. Counts only; never reads a key's value.
  */
 function aw_sourcing_dash_ai_refused(): ?int {

@@ -33,7 +33,7 @@ add_action(
 	'rest_api_init',
 	function () {
 		if ( ! function_exists( 'kits_shell_rest_can' ) ) {
-			return; // the screens need Kits Core's shell; without it today's screens are the only ones.
+			return; // the screens need Kits Core's shell; without it they show a notice.
 		}
 		$cap   = kits_shell_rest_can( MAILWEB_CAP );
 		$admin = kits_shell_rest_can( 'manage_options' );
@@ -429,7 +429,7 @@ function mailweb_dashboard_payload(): array {
 /* ---------- Inbox ---------- */
 
 /**
- * The list's state from a request, checked as today's screen checks it (mailweb_state()).
+ * The list's state from a request, checked as the message views check it (mailweb_state()).
  *
  * @param WP_REST_Request $r Request.
  */
@@ -446,7 +446,7 @@ function mailweb_rest_state( WP_REST_Request $r ): array {
 }
 
 /**
- * Where today's Inbox opens a row (it marks a message read when it opens, as it always has).
+ * Where a row opens: the message or form item view (it marks a message read when it opens).
  *
  * @param array $item Row from mailweb_list_rows().
  * @param array $s    State.
@@ -561,7 +561,7 @@ function mailweb_inbox_payload( array $s ): array {
 /**
  * One message for the reading pane, as today's message screen shows it (mailweb_message_screen()): the header, the
  * text as a safe document for a sandboxed frame, attachments, the compose links and the actions the folder offers.
- * Opening marks it read, as webmail and today's screen do. A form message (folder "forms") comes from the forms source.
+ * Opening marks it read, as webmail and the message view do. A form message (folder "forms") comes from the forms source.
  *
  * @param WP_REST_Request $r Request.
  */

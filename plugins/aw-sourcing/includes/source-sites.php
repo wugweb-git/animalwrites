@@ -1,7 +1,8 @@
 <?php
 /**
- * Sourcing → Sources (owner, 24 Oct 2026): one row per host, publishers and press sites together. This
- * file has the tab's screen (list and the Add New / Edit form), the figures it shows and how they are gathered:
+ * Sourcing → Sources (owner, 24 Oct 2026): one row per host, publishers and press sites together. The screen is the
+ * Kits shell's (sourceweb-ui.php, sourceweb/v1 routes); this file has its rows, saves, help tabs, the figures it
+ * shows and how they are gathered:
  *
  * - Items: fetched in 30 days and published (all time), from one query over the sourced types' aw_source_url meta,
  *   kept for an hour in a transient.
@@ -13,8 +14,8 @@
  * - Domain Rating: publisher record keys dr and dr_at, set by `wp aw-sourcing import-dr <file.json>` (values from
  *   Ahrefs' free Domain Rating lookup, run by Claude).
  *
- * Status changes, short names and press sites save through the screen's admin-post handler (sourcing-policy.php),
- * logged in the Change log as before (tab publishers; press-site changes as tab press).
+ * Status changes, short names and press sites save through the shared functions (aw_sourcing_sources_apply(),
+ * aw_sourcing_source_save()), logged in the Change log as before (tab publishers; press-site changes as tab press).
  *
  * @package aw-sourcing
  */
@@ -455,7 +456,7 @@ add_action(
 
 /**
  * Every source of the Sources list (publishers, relay-only sites, press sites and the sites feeds come from), host =>
- * row, with the numbers of the list's columns: for today's list table and the new Sources screen.
+ * row, with the numbers of the list's columns, for the Sources screen.
  *
  * @return array{rows: array, si: bool, stale: bool}
  */
@@ -522,143 +523,14 @@ function aw_sourcing_source_rows() {
 	);
 }
 
-/** The Sources list table (built once per request: the views of every Sources screen come from it). */
-function aw_sourcing_publishers_table() {
-	static $table = null;
-	if ( null === $table ) {
-		if ( ! class_exists( 'WP_List_Table' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
-		}
-		require_once __DIR__ . '/class-aw-sourcing-publishers-table.php';
-		$table = new AW_Sourcing_Publishers_Table();
-	}
-	return $table;
-}
-
-/** The Sources tab: the list, the Feeds view, or one source or feed to add or edit. */
-function aw_sourcing_sources_tab() {
-	$screen = aw_sourcing_sources_screen();
-	if ( 'edit' === $screen ) {
-		$edit = sanitize_text_field( wp_unslash( $_GET['edit'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
-		aw_sourcing_source_form( 'new' === $edit ? '' : aw_sourcing_norm_host( $edit ) );
-		return;
-	}
-	if ( 'feed' === $screen ) {
-		// phpcs:disable WordPress.Security.NonceVerification -- which feed to show.
-		aw_sources_edit_form( sanitize_key( $_GET['feed'] ?? '' ), sanitize_key( $_GET['type'] ?? '' ), aw_sourcing_norm_host( sanitize_text_field( wp_unslash( $_GET['host'] ?? '' ) ) ) );
-		// phpcs:enable WordPress.Security.NonceVerification
-		return;
-	}
-	$table = aw_sourcing_publishers_table();
-	if ( aw_sourcing_phase() < 1 ) {
-		wp_admin_notice( 'Relay switches take over once the phase 1 migration has run (<code>wp aw-sourcing migrate --phase=1</code>). Until then the workers may fetch these sites through this one: ' . esc_html( implode( ', ', aw_relay_hosts_legacy() ) ) . '.', array( 'type' => 'info', 'additional_classes' => array( 'inline' ) ) );
-	}
-	if ( 'feeds' === $screen ) {
-		$table->views();
-		echo '<br class="clear">';
-		aw_sources_tab();
-		return;
-	}
-	$table->prepare_items();
-	if ( $table->search_stale() ) {
-		wp_admin_notice( 'Search value: Search Console has not run within 28 days, so there are no figures for this window.', array( 'type' => 'info', 'additional_classes' => array( 'inline' ) ) );
-	}
-	$table->views();
-	$st = sanitize_key( $_GET['status'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
-	echo '<form method="get"><input type="hidden" name="page" value="aw-sourcing"><input type="hidden" name="tab" value="sources">'
-		. ( in_array( $st, AW_Sourcing_Publishers_Table::VIEWS, true ) ? '<input type="hidden" name="status" value="' . esc_attr( $st ) . '">' : '' );
-	$table->search_box( 'Search sources', 'aw-source' );
-	echo '</form>';
-	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_sourcing"><input type="hidden" name="tab" value="sources">';
-	wp_nonce_field( 'aw_sourcing' );
-	$table->display();
-	echo '</form>';
-}
-
 /**
- * Add a source or edit one (core form-table edit screen), then its feeds (the feeds list filtered to this site, with
- * Add New Feed). Saved by aw_sourcing_source_save() through admin-post.
+ * Save the Add New / Edit Source form of the Sources screen (POST sourceweb/v1/sources/save). Logged with old → new:
+ * status, name and short name as tab publishers, press sites as tab press, the relay switch as tab relay.
  *
- * @param string $host Host to edit, '' to add.
- */
-function aw_sourcing_source_form( $host ) {
-	$all   = aw_publishers();
-	$new   = '' === $host;
-	$rec   = $new ? null : ( $all[ $host ] ?? null );
-	$press = in_array( $host, aw_sourcing_press_hosts(), true );
-	$feeds = $new ? array() : ( aw_sourcing_feeds_by_host()[ $host ] ?? array() );
-	$back  = admin_url( 'admin.php?page=aw-sourcing&tab=sources' );
-	if ( ! $new && null === $rec && ! $press && ! $feeds ) {
-		wp_admin_notice( 'No such source.', array( 'type' => 'error', 'additional_classes' => array( 'inline' ) ) );
-		echo '<p><a href="' . esc_url( $back ) . '">Back to Sources</a></p>';
-		return;
-	}
-	$pub    = null !== $rec && empty( $rec['kind'] ); // a host kept only for its icon (kind) or for the relay is not a publisher
-	$status = $pub ? (string) ( $rec['status'] ?? 'neutral' ) : ( $new ? 'block' : 'none' );
-	echo '<h2>' . esc_html( $new ? 'Add New Source' : 'Edit Source' ) . '</h2>';
-	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_sourcing"><input type="hidden" name="tab" value="sources"><input type="hidden" name="src_edit" value="1">';
-	wp_nonce_field( 'aw_sourcing' );
-	echo '<table class="form-table" role="presentation"><tbody>';
-	echo '<tr><th scope="row"><label for="aw-src-host">Host</label></th><td>';
-	if ( $new ) {
-		echo '<input type="text" id="aw-src-host" name="src_host" class="regular-text" placeholder="example.com" required><p class="description">The site\'s host or any address on it (https://www.example.com/news/ becomes example.com).</p>';
-	} else {
-		echo '<input type="hidden" name="src_host" value="' . esc_attr( $host ) . '"><strong>' . esc_html( $host ) . '</strong> <a href="' . esc_url( 'https://' . $host . '/' ) . '" target="_blank" rel="noopener noreferrer">Visit site</a>';
-	}
-	echo '</td></tr>';
-	echo '<tr><th scope="row"><label for="aw-src-name">Name</label></th><td><input type="text" id="aw-src-name" name="src_name" class="regular-text" value="' . esc_attr( (string) ( $rec['name'] ?? '' ) ) . '"><p class="description">The publisher\'s name, shown on item pages. Kept on publisher records only.</p></td></tr>';
-	echo '<tr><th scope="row"><label for="aw-src-short">Short name</label></th><td><input type="text" id="aw-src-short" name="src_short" maxlength="24" class="regular-text" value="' . esc_attr( (string) ( $rec['short'] ?? '' ) ) . '"><p class="description">What cards show on the source chip (e.g. TOI, PIB, Sentinel).</p></td></tr>';
-	echo '<tr><th scope="row"><label for="aw-src-status">Status</label></th><td><select id="aw-src-status" name="src_status">';
-	$opts = array( 'block' => 'Blocked', 'allow' => 'Allowed', 'neutral' => 'Neutral' );
-	if ( ! $pub ) {
-		$opts['none'] = 'Not a publisher (press site, relay or feeds only)';
-	}
-	foreach ( $opts as $k => $l ) {
-		echo '<option value="' . esc_attr( $k ) . '"' . selected( $status, $k, false ) . '>' . esc_html( $l ) . '</option>';
-	}
-	echo '</select><p class="description">Blocked publishers are refused when the workers send their items. Neutral is the default for new hosts the workers find. Allowed publishers skip the keyword check.</p></td></tr>';
-	echo '<tr><th scope="row">Press coverage</th><td><label><input type="checkbox" name="src_press" value="1"' . checked( $press, true, false ) . '> Search here for coverage</label><p class="description">The press queries also run on this site.</p></td></tr>';
-	echo '<tr><th scope="row">Relay</th><td>';
-	if ( aw_sourcing_phase() >= 1 ) {
-		echo '<input type="hidden" name="src_relay_shown" value="1"><label><input type="checkbox" name="src_relay" value="1"' . checked( ! empty( $rec['relay'] ), true, false ) . '> Fetch through this site (relay)</label>';
-	} else {
-		echo esc_html( ( ! $new && aw_src_host_in( $host, aw_relay_hosts() ) ) ? 'On' : 'Off' ) . ' <span class="description">(the list of before, until the phase 1 migration)</span>';
-	}
-	$last = $new ? '' : aw_relay_last_html( $host );
-	echo '<p class="description">When this site refuses the workers (GitHub\'s servers) with 403, they ask this site to fetch the feed or page. Its subdomains are included.' . ( '' !== $last ? '</p><p>Last relay result: ' . $last : '' ) . '</p></td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in aw_relay_last_html
-	echo '</tbody></table>';
-	submit_button( $new ? 'Add Source' : 'Update', 'primary', 'submit', false );
-	echo ' <a href="' . esc_url( $back ) . '" class="button">Cancel</a></form>';
-	if ( $new ) {
-		return;
-	}
-	echo '<h2 class="wp-heading-inline">Feeds</h2> <a href="' . esc_url( add_query_arg( array( 'page' => 'aw-sourcing', 'tab' => 'sources', 'feed' => 'new', 'host' => $host ), admin_url( 'admin.php' ) ) ) . '" class="page-title-action">Add New Feed</a><hr class="wp-header-end">';
-	aw_sources_tab( $host );
-}
-
-/**
- * Save the Add New / Edit Source form (called by the aw_sourcing handler, nonce checked there). Logged as the list's
- * own changes are, with old → new: status, name and short name as tab publishers, press sites as tab press, the
- * relay switch as tab relay.
- *
- * @param array|null $in { host, status, name, short, press, relay_shown, relay } from the new Sources screen; null reads
- *                       the classic form's fields.
+ * @param array $in { host, status, name, short, press, relay_shown, relay }.
  * @return array{0: bool, 1: string} changed, error code ('' when none).
  */
-function aw_sourcing_source_save( $in = null ) {
-	if ( null === $in ) {
-		// phpcs:disable WordPress.Security.NonceVerification -- checked by the aw_sourcing handler.
-		$in = array(
-			'host'        => sanitize_text_field( wp_unslash( $_POST['src_host'] ?? '' ) ),
-			'status'      => sanitize_key( $_POST['src_status'] ?? '' ),
-			'name'        => sanitize_text_field( wp_unslash( $_POST['src_name'] ?? '' ) ),
-			'short'       => sanitize_text_field( wp_unslash( $_POST['src_short'] ?? '' ) ),
-			'press'       => ! empty( $_POST['src_press'] ),
-			'relay_shown' => ! empty( $_POST['src_relay_shown'] ),
-			'relay'       => ! empty( $_POST['src_relay'] ),
-		);
-		// phpcs:enable WordPress.Security.NonceVerification
-	}
+function aw_sourcing_source_save( array $in ) {
 	$host   = aw_sourcing_norm_host( sanitize_text_field( (string) ( $in['host'] ?? '' ) ) );
 	$status = sanitize_key( (string) ( $in['status'] ?? '' ) );
 	$name   = sanitize_text_field( (string) ( $in['name'] ?? '' ) );
@@ -756,20 +628,3 @@ function aw_sourcing_source_delete( array $pubs, $host ) {
 	kits_sourcing_log( 'publishers', 'deleted ' . $host, $rec, '' );
 	return $pubs;
 }
-
-/** Notices of the Sources edit form (src_err=host|status|nothing). */
-add_action(
-	'kits_sourcing_page_top',
-	function () {
-		$err = sanitize_key( $_GET['src_err'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
-		$msg = array(
-			'host'    => 'Nothing saved: that is not a host (example.com).',
-			'status'  => 'Nothing saved: choose Allowed, Neutral or Blocked.',
-			'nothing' => 'Nothing saved: a source that is not a publisher must be searched for coverage, relayed or have feeds.',
-		);
-		if ( isset( $msg[ $err ] ) ) {
-			wp_admin_notice( esc_html( $msg[ $err ] ), array( 'type' => 'error', 'dismissible' => true ) );
-		}
-	}
-);
-add_filter( 'removable_query_args', fn( $args ) => array_merge( $args, array( 'src_err' ) ) );

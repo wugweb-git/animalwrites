@@ -1,7 +1,7 @@
 <?php
 /**
- * The Overview boxes on the new Dashboard (12 Nov 2026): GET insightweb/v1/dashboard/box (aw_si_cap()) runs the box's
- * own function (aw_si_overview_boxes(), the same as the classic Overview) and hands its output over as plain parts
+ * The Overview boxes on the Dashboard: GET insightweb/v1/dashboard/box (aw_si_cap()) runs the box's
+ * own function (aw_si_overview_boxes()) and hands its output over as plain parts
  * the shell draws: paragraphs, notes, lists, tables and notices. Text and links only: no markup goes out, and a link
  * is kept only when it is http(s) or a relative address.
  *
@@ -36,16 +36,14 @@ add_action(
 	}
 );
 
-/** The boxes the new Dashboard shows below its tiles (Sources is drawn there already): [ { key, title } ]. */
+/** The boxes the Dashboard shows below its tiles: [ { key, title } ]. */
 function insightweb_box_list(): array {
 	$out = array();
 	foreach ( aw_si_overview_boxes() as $key => $box ) {
-		if ( 'sources' !== $key ) {
-			$out[] = array(
-				'key'   => $key,
-				'title' => $box[0],
-			);
-		}
+		$out[] = array(
+			'key'   => $key,
+			'title' => $box[0],
+		);
 	}
 	return $out;
 }

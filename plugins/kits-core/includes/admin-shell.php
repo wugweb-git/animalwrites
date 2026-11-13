@@ -89,7 +89,7 @@ function kits_shell_app( array $args ): bool {
 }
 
 /**
- * A shell screen has no Screen Options or Help tab: they belong to the earlier screen's list tables and do nothing here.
+ * A shell screen has no Screen Options or Help tab: they belong to list tables and do nothing here.
  * Core's own switches: the screen_options_show_screen filter and WP_Screen::remove_help_tabs().
  */
 function kits_shell_screen_plain(): void {
@@ -129,11 +129,10 @@ function kits_shell_mount( string $id, string $title ): void {
 }
 
 /**
- * Every Kits plugin screen shows its new look by default (owner, 12 Nov 2026: "Yes, switch"); &ui=classic on the
- * same address shows the earlier screen (nothing links to it: owner, 12 Nov 2026).
+ * Always true: every Kits plugin screen is a shell screen (the earlier screens are gone). Kept for older callers.
  */
 function kits_shell_ui_next(): bool {
-	return 'classic' !== sanitize_key( wp_unslash( $_GET['ui'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- which screen to show; nothing is saved here.
+	return true;
 }
 
 /**

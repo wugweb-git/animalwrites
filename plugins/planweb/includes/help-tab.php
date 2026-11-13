@@ -1,7 +1,7 @@
 <?php
 /**
  * PlanWeb: an "About PlanWeb" Help tab and a sidebar on PlanWeb's own screens (WP_Screen::add_help_tab), on every screen,
- * classic or shell. Screens that have their own help keep it; this tab sits beside it.
+ * the shell screens and the Calendar. Screens that have their own help keep it; this tab sits beside it.
  *
  * @package planweb
  */
@@ -30,7 +30,7 @@ function planweb_help_tab( $screen ) {
 		return;
 	}
 	$screens = array(
-		__( 'Calendar', 'planweb' ) => __( 'the month grid and the list of entries with filters', 'planweb' ),
+		__( 'Calendar', 'planweb' ) => __( 'the month grid', 'planweb' ),
 		__( 'Entries', 'planweb' ) => __( 'add or edit an entry; only administrators set Approved or Sent', 'planweb' ),
 		__( 'Settings', 'planweb' ) => __( 'PlanWeb on or off and its defaults', 'planweb' ),
 	);

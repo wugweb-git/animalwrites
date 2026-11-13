@@ -1,7 +1,7 @@
 <?php
 /**
- * DirectoryWeb: an "About DirectoryWeb" Help tab and a sidebar on DirectoryWeb's own screens (WP_Screen::add_help_tab), on every screen,
- * classic or shell. Screens that have their own help keep it; this tab sits beside it.
+ * DirectoryWeb: an "About DirectoryWeb" Help tab and a sidebar on DirectoryWeb's own screens (WP_Screen::add_help_tab),
+ * on every screen. Screens that have their own help keep it; this tab sits beside it.
  *
  * @package animal-writes-core
  */

@@ -1,17 +1,16 @@
 <?php
 /**
- * SourceWeb's screens on the Kits admin shell, the default since 12 Nov 2026, on each earlier screen's own address.
+ * SourceWeb's screens on the Kits admin shell.
  *
  * Addresses:
  *   admin.php?page=aw-sourcing-menu              Dashboard          (edit_others_posts)
  *   admin.php?page=aw-review                     To review          (edit_others_posts)
  *   admin.php?page=aw-enrich-review              Enrichment review  (edit_others_posts)
- *   admin.php?page=aw-sourcing                   Sources            (manage_options; &edit=<host|new>, &view=feeds;
- *                                                &feed=<id> is still today's feed form)
- *   admin.php?page=aw-sourcing&tab=keywords      Keywords           (manage_options; &edit=<id|new>, &kw=suggestions;
- *                                                from phase 2, before it today's word lists)
+ *   admin.php?page=aw-sourcing                   Sources            (manage_options; &edit=<host|new>, &view=feeds,
+ *                                                &feed=<id|new>: the feed form, sourceweb_feed_parts())
+ *   admin.php?page=aw-sourcing&tab=keywords      Keywords           (manage_options; &edit=<id|new>, &kw=suggestions)
  *   admin.php?page=aw-sourcing&tab=rules         Rules              (manage_options; &part=sections|summary|enrich, &edit=<type>,
- *                                                &tagrule=<tag|new>, &field=<key>; from phase 3)
+ *                                                &tagrule=<tag|new>, &field=<key>)
  *   admin.php?page=aw-sourcing&tab=ai            AI models          (manage_options; &edit=<key id|new>, &overview=1)
  *   admin.php?page=aw-sourcing&tab=workers       Workers            (manage_options; &edit=<id|new>, &runs=<id>)
  *   admin.php?page=aw-sourcing&tab=rejected      Rejected           (manage_options; read-only)
@@ -19,9 +18,8 @@
  *   admin.php?page=aw-sourcing&tab=log           Change log         (manage_options; read-only)
  *   admin.php?page=aw-sourcing&tab=settings      Settings           (manage_options)
  *
- * &ui=classic shows the earlier screens. The screens are one script (build/index.js, from src/), drawn with Kits
- * Core's shell parts and fed by the sourceweb/v1 routes (sourceweb-rest.php). When Kits Core or a build file is
- * missing, the earlier screen shows.
+ * The screens are one script (build/index.js, from src/), drawn with Kits Core's shell parts and fed by the
+ * sourceweb/v1 routes (sourceweb-rest.php). When Kits Core or the build is missing, each screen says so (one notice).
  *
  * @package aw-sourcing
  */
@@ -30,30 +28,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/** The Sourcing page's tabs drawn on the new screens (the others still draw today's screen). */
+/** The Sourcing page's tabs. */
 const SOURCEWEB_UI_TABS = array( 'sources', 'keywords', 'rules', 'ai', 'workers', 'rejected', 'relay-log', 'log', 'settings' );
 
 /**
- * Which new screen this request asks for: 'dashboard', 'review', 'enrichment', a tab of SOURCEWEB_UI_TABS or ''.
+ * Which screen this request asks for: 'dashboard', 'review', 'enrichment', a tab of SOURCEWEB_UI_TABS or ''. An
+ * unknown tab of the Sourcing page is Sources, its first screen.
  */
 function sourceweb_ui_wanted(): string {
 	// phpcs:disable WordPress.Security.NonceVerification.Recommended -- which screen to show; nothing is saved here
 	$page = sanitize_key( wp_unslash( $_GET['page'] ?? '' ) );
-	$ui   = sanitize_key( wp_unslash( $_GET['ui'] ?? '' ) );
 	$tab  = sanitize_key( wp_unslash( $_GET['tab'] ?? '' ) );
 	// phpcs:enable WordPress.Security.NonceVerification.Recommended
-	if ( 'classic' === $ui ) {
-		return '';
-	}
 	if ( AW_SRC_PAGE === $page ) {
-		$tab = '' === $tab ? 'sources' : $tab; // Sources is the page's first screen
-		if ( 'keywords' === $tab && ! ( function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ) ) {
-			return ''; // before the keyword table (phase 2), the word lists stay on today's screen
-		}
-		if ( 'rules' === $tab && ! ( function_exists( 'aw_rules_live' ) && aw_rules_live() ) ) {
-			return ''; // before the phase 3 migration there is no Rules tab
-		}
-		return in_array( $tab, SOURCEWEB_UI_TABS, true ) ? $tab : '';
+		return in_array( $tab, SOURCEWEB_UI_TABS, true ) ? $tab : 'sources';
 	}
 	return array(
 		AW_SRC_MENU        => 'dashboard',
@@ -62,7 +50,7 @@ function sourceweb_ui_wanted(): string {
 	)[ $page ] ?? '';
 }
 
-/** The capability each new screen needs. */
+/** The capability each screen needs. */
 function sourceweb_ui_caps(): array {
 	return array(
 		'dashboard'  => AW_REVIEW_CAP,
@@ -81,7 +69,7 @@ function sourceweb_ui_caps(): array {
 }
 
 /**
- * The new screen is on this request (its script enqueued). Set on admin_enqueue_scripts.
+ * The screen is on this request (its script enqueued). Set on admin_enqueue_scripts.
  *
  * @param bool|null $set Set the flag.
  */
@@ -94,9 +82,9 @@ function sourceweb_ui_ready( ?bool $set = null ): bool {
 }
 
 /**
- * The address of a new screen.
+ * The address of a screen.
  *
- * @param string $screen 'dashboard', 'review', 'enrichment' or 'settings'.
+ * @param string $screen 'dashboard', 'review', 'enrichment' or a tab of SOURCEWEB_UI_TABS.
  */
 function sourceweb_ui_url( string $screen ): string {
 	$q = array(
@@ -108,7 +96,7 @@ function sourceweb_ui_url( string $screen ): string {
 		'page' => AW_SRC_PAGE,
 		'tab'  => $screen,
 	) : array( 'page' => AW_SRC_MENU ) );
-	return add_query_arg( $q + array( 'ui' => 'next' ), admin_url( 'admin.php' ) );
+	return add_query_arg( $q, admin_url( 'admin.php' ) );
 }
 
 add_action(
@@ -119,32 +107,31 @@ add_action(
 			return;
 		}
 		$head   = get_file_data( AW_SOURCING_DIR . 'aw-sourcing.php', array( 'Version' => 'Version' ) );
-		// The header's tabs in menu order. A tab not rebuilt yet opens today's screen at its own address (owner, 12 Nov 2026).
+		// The header's tabs in menu order.
 		$order = array(
-			'dashboard'  => array( __( 'Dashboard', 'aw-sourcing' ), null ),
-			'review'     => array( __( 'To review', 'aw-sourcing' ), null ),
-			'enrichment' => array( __( 'Enrichment review', 'aw-sourcing' ), null ),
-			'sources'    => array( __( 'Sources', 'aw-sourcing' ), null ),
-			'keywords'   => array( __( 'Keywords', 'aw-sourcing' ), 'keywords' ),
-			'rules'      => array( __( 'Rules', 'aw-sourcing' ), 'rules' ),
-			'ai'         => array( __( 'AI models', 'aw-sourcing' ), 'ai' ),
-			'workers'    => array( __( 'Workers', 'aw-sourcing' ), null ),
-			'rejected'   => array( __( 'Rejected', 'aw-sourcing' ), null ),
-			'relay-log'  => array( __( 'Relay log', 'aw-sourcing' ), null ),
-			'log'        => array( __( 'Change log', 'aw-sourcing' ), null ),
-			'settings'   => array( __( 'Settings', 'aw-sourcing' ), null ),
+			'dashboard'  => __( 'Dashboard', 'aw-sourcing' ),
+			'review'     => __( 'To review', 'aw-sourcing' ),
+			'enrichment' => __( 'Enrichment review', 'aw-sourcing' ),
+			'sources'    => __( 'Sources', 'aw-sourcing' ),
+			'keywords'   => __( 'Keywords', 'aw-sourcing' ),
+			'rules'      => __( 'Rules', 'aw-sourcing' ),
+			'ai'         => __( 'AI models', 'aw-sourcing' ),
+			'workers'    => __( 'Workers', 'aw-sourcing' ),
+			'rejected'   => __( 'Rejected', 'aw-sourcing' ),
+			'relay-log'  => __( 'Relay log', 'aw-sourcing' ),
+			'log'        => __( 'Change log', 'aw-sourcing' ),
+			'settings'   => __( 'Settings', 'aw-sourcing' ),
 		);
 		$caps  = sourceweb_ui_caps();
 		$tabs  = array();
-		foreach ( $order as $slug => $t ) {
-			$rebuilt = isset( $caps[ $slug ] );
-			if ( ! current_user_can( $rebuilt ? $caps[ $slug ] : AW_SRC_CAP ) ) {
+		foreach ( $order as $slug => $label ) {
+			if ( ! current_user_can( $caps[ $slug ] ) ) {
 				continue;
 			}
 			$tabs[] = array(
 				'slug'    => $slug,
-				'label'   => $t[0],
-				'url'     => $rebuilt ? sourceweb_ui_url( $slug ) : aw_sourcing_url( (string) $t[1] ),
+				'label'   => $label,
+				'url'     => sourceweb_ui_url( $slug ),
 				'current' => $slug === $screen,
 			);
 		}
@@ -164,6 +151,7 @@ add_action(
 					'rest'    => SOURCEWEB_REST,
 					'isAdmin' => current_user_can( AW_SRC_CAP ),
 					'feed'    => 'sources' === $screen ? sourceweb_feed_parts() : array(),
+					'extra'   => sourceweb_extra_parts( $screen ),
 				),
 			)
 		);
@@ -172,15 +160,12 @@ add_action(
 );
 
 /**
- * Draw the new screen in place of the current one, when it is ready. The page callbacks call this first.
+ * Draw a screen. The page callbacks call this after their capability check. Without Kits Core or the build, one
+ * notice says so in place of the screen.
  *
  * @param string $screen 'dashboard', 'review', 'enrichment' or a tab of SOURCEWEB_UI_TABS.
- * @return bool True when the new screen was drawn.
  */
-function sourceweb_ui_page( string $screen ): bool {
-	if ( '' === $screen || sourceweb_ui_wanted() !== $screen || ! sourceweb_ui_ready() ) {
-		return false;
-	}
+function sourceweb_ui_page( string $screen ): void {
 	$titles = array(
 		'dashboard'  => __( 'SourceWeb', 'aw-sourcing' ),
 		'review'     => __( 'To review', 'aw-sourcing' ),
@@ -195,16 +180,44 @@ function sourceweb_ui_page( string $screen ): bool {
 		'log'        => __( 'Change log', 'aw-sourcing' ),
 		'settings'   => __( 'SourceWeb settings', 'aw-sourcing' ),
 	);
-	if ( ! function_exists( 'kits_shell_mount' ) ) {
-		return false;
+	$title = $titles[ $screen ] ?? $titles['dashboard'];
+	if ( sourceweb_ui_wanted() === $screen && sourceweb_ui_ready() && function_exists( 'kits_shell_mount' ) ) {
+		kits_shell_mount( 'sourceweb-app', $title );
+		return;
 	}
-	kits_shell_mount( 'sourceweb-app', $titles[ $screen ] );
-	return true;
+	echo '<div class="wrap"><h1>' . esc_html( $title ) . '</h1>';
+	wp_admin_notice( esc_html__( 'SourceWeb needs Kits Core (active, with its build) to show this screen.', 'aw-sourcing' ), array( 'type' => 'error' ) );
+	echo '</div>';
 }
 
 /**
- * The feed form (Sources &feed=<id|new>, with &type= and &host=) as Kits page parts: the classic form's own output
- * (aw_sources_edit_form()), so Add Feed and Update post to the same admin-post handler (kits_sourcing_save_feeds),
+ * Server-drawn forms a screen shows under its own content, as Kits page parts: on To review, other plugins' intake
+ * forms (aw_review_intake; core's social-posts.php adds a social post from its link); on Settings, the backfill date
+ * (a Settings API form, administrators only).
+ *
+ * @param string $screen The screen.
+ */
+function sourceweb_extra_parts( string $screen ): array {
+	if ( ! function_exists( 'kits_shell_html_parts' ) ) {
+		return array();
+	}
+	ob_start();
+	if ( 'review' === $screen ) {
+		do_action( 'aw_review_intake' );
+	} elseif ( 'settings' === $screen && current_user_can( 'manage_options' ) ) {
+		settings_errors( 'aw_backfill_floor' );
+		echo '<form method="post" action="' . esc_url( admin_url( 'options.php' ) ) . '">';
+		settings_fields( 'aw_src_backfill' );
+		do_settings_sections( 'aw-src-backfill' );
+		submit_button( 'Save backfill date' );
+		echo '</form>';
+	}
+	$html = trim( (string) ob_get_clean() );
+	return '' === $html ? array() : kits_shell_html_parts( $html );
+}
+
+/**
+ * The feed form (Sources &feed=<id|new>, with &type= and &host=) as Kits page parts: aw_sources_edit_form()'s output, so Add Feed and Update post to the same admin-post handler (kits_sourcing_save_feeds),
  * with its nonce, and come back to the screen the form was opened from. Empty without a feed in the address.
  *
  * @return array[]

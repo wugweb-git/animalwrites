@@ -6,9 +6,9 @@
  * Plugins → SourceWeb (one item since 11 Nov 2026) opens the Overview (this file). Its screens, at the same addresses
  * as before and shown as tabs on each: Overview, To review (review-queue.php), Enrichment review (enrichment-admin.php),
  * then one per screen of the Sourcing page (admin.php?page=aw-sourcing&tab=…, sourcing-policy.php aw_sourcing_page): the
- * settings screens (Sources, Keywords, Rules or their parts, Press queries, Categories, AI models), the reports and
- * jobs (Workers, Rejected, Relay log, Change log), and Settings (the plugin's own switch). The order and the addresses
- * are in menu-model.php. Until 25 Oct 2026 the screens were Settings → Sourcing (tabs), Inbox → To review and
+ * settings screens (Sources, Keywords, Rules, AI models), the reports and jobs (Workers, Rejected, Relay log, Change
+ * log), and Settings. Every screen is drawn on the Kits shell (sourceweb-ui.php). The order and the addresses are in
+ * menu-model.php. Until 25 Oct 2026 the screens were Settings → Sourcing (tabs), Inbox → To review and
  * Directory → Enrichment review.
  *
  * @package aw-sourcing
@@ -19,8 +19,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * The Sourcing page's tabs in menu order: slug => [label, render callback, own form?]. Sources, Keywords and the Change
- * log are drawn by aw_sourcing_page() itself; every other tab comes from the kits_sourcing_tabs filter.
+ * The Sourcing page's tabs in menu order: slug => [label]. Sources, Keywords and the Change log are here; every other
+ * tab comes from the kits_sourcing_tabs filter. Each is a shell screen (sourceweb-ui.php).
  *
  * @return array
  */
@@ -30,14 +30,9 @@ function aw_sourcing_tabs() {
 		return $memo;
 	}
 	$all = array(
-		'sources'  => array( 'Sources', '', true ),
-		'keywords' => array( 'Keywords', '', true ),
-	) + (array) apply_filters( 'kits_sourcing_tabs', array() ) + array( 'log' => array( 'Change log', '', true ) );
-	// From phase 2 the Press queries and Categories tabs only send you on (keywords-admin.php: Keywords → Press, Posts →
-	// Categories), so they get no menu item of their own; their addresses still go there.
-	if ( function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ) {
-		unset( $all['press'], $all['categories'] );
-	}
+		'sources'  => array( 'Sources' ),
+		'keywords' => array( 'Keywords' ),
+	) + (array) apply_filters( 'kits_sourcing_tabs', array() ) + array( 'log' => array( 'Change log' ) );
 	$out = array();
 	foreach ( array_keys( aw_src_menu_order( array_map( fn( $t ) => (string) $t[0], $all ) ) ) as $k ) {
 		$out[ $k ] = $all[ $k ];
@@ -61,7 +56,7 @@ add_action(
 	'admin_menu',
 	function () {
 		// Plugins → SourceWeb (owner, 11 Nov 2026: "all plugins" under Plugins), opening the Overview, with the To review
-		// count; the other screens are its tabs (aw_sourcing_screen_tabs()). Without Kits Core, a menu of its own as before.
+		// count; the other screens are its tabs (the shell header). Without Kits Core, a menu of its own as before.
 		// WordPress names the screens under a menu after its hook prefix, which stays "sourcing" (AW_SRC_SCREEN,
 		// sourcing_page_…): saved screen options and columns stay.
 		$count = current_user_can( AW_REVIEW_CAP ) && function_exists( 'aw_review_count' ) && function_exists( 'aw_menu_count' ) ? aw_menu_count( aw_review_count() ) : '';
@@ -126,18 +121,6 @@ add_filter(
 	2
 );
 
-/**
- * SourceWeb's screens as tabs under a screen's heading: Overview, To review, Enrichment review, then one per screen of
- * the Sourcing page, as the menu lists them (those the user may open). Printed only while SourceWeb is one item under
- * Plugins.
- */
-function aw_sourcing_screen_tabs() {
-	if ( function_exists( 'kits_admin_fold_tabs' ) ) {
-		$on_page = AW_SRC_PAGE === sanitize_key( $_GET['page'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification -- which tab to mark
-		kits_admin_fold_tabs( AW_SRC_MENU, 'SourceWeb screens', $on_page ? aw_src_tab_menu_slug( aw_sourcing_current_tab() ) : '' );
-	}
-}
-
 // Plugins screen: Overview and Settings under the plugin's name (when SourceWeb is listed there as its own plugin).
 add_filter(
 	'plugin_action_links_' . plugin_basename( AW_SOURCING_DIR . 'aw-sourcing.php' ),
@@ -154,30 +137,13 @@ add_filter(
 add_filter(
 	'kits_sourcing_tabs',
 	function ( $tabs ) {
-		$tabs[ AW_SRC_SETTINGS_TAB ] = array( 'Settings', 'aw_sourcing_own_settings_tab', true ); // its own form (admin-post, as before)
+		$tabs[ AW_SRC_SETTINGS_TAB ] = array( 'Settings' );
 		return $tabs;
 	}
 );
 
-/** Sourcing → Settings (aw_sourcing_settings_tab() is another function: the Settings API forms' marker, sourcing-policy.php). */
-function aw_sourcing_own_settings_tab() {
-	echo '<p>' . esc_html( 'Switches for the whole of Sourcing. What the workers fetch is set on Sources, Keywords and the screens after them.' ) . '</p>';
-	if ( function_exists( 'aw_sources_live_switch' ) ) {
-		aw_sources_live_switch();
-	}
-	echo '<p class="description">' . esc_html( 'Off: the workers use sources.yaml in the workers repository. On: they read the lists on these screens at the start of every run, and Sources sync copies them into sources.yaml.' ) . '</p>';
-	if ( current_user_can( 'manage_options' ) ) {
-		settings_errors(); // "Settings saved." or the date message, after options.php sends the browser back here
-		echo '<form method="post" action="' . esc_url( admin_url( 'options.php' ) ) . '">';
-		settings_fields( 'aw_src_backfill' );
-		do_settings_sections( 'aw-src-backfill' );
-		submit_button( 'Save backfill date' );
-		echo '</form>';
-	}
-}
-
-// Backfill floor (owner, 9 Oct 2026): the oldest source date a backfill item may have (ingest.php). It had no field before
-// 12 Nov 2026 (WP-CLI only); the option name and its Y-m-d value are unchanged.
+// Backfill floor (owner, 9 Oct 2026): the oldest source date a backfill item may have (ingest.php); its field is on
+// SourceWeb → Settings (sourceweb_extra_parts()), every save of it is checked.
 add_action(
 	'admin_init',
 	function () {
@@ -196,6 +162,15 @@ add_action(
 	}
 );
 
+/** The backfill date field. */
+function aw_src_backfill_floor_field(): void {
+	printf(
+		'<input type="date" id="aw_backfill_floor" name="aw_backfill_floor" value="%1$s"> <p class="description">%2$s</p>',
+		esc_attr( (string) get_option( 'aw_backfill_floor', '2025-11-01' ) ),
+		esc_html( 'Backfill items dated before this day are dropped. Backfill items are for review only: never published or merged on arrival.' )
+	);
+}
+
 /**
  * A date as Y-m-d, or the saved one (with a message) when the posted value is not a date.
  *
@@ -209,15 +184,6 @@ function aw_src_backfill_floor_clean( $value ): string {
 	}
 	add_settings_error( 'aw_backfill_floor', 'aw_backfill_floor', 'Oldest date: not a date (YYYY-MM-DD); the saved date is kept.' );
 	return (string) get_option( 'aw_backfill_floor', '2025-11-01' );
-}
-
-/** The backfill date field. */
-function aw_src_backfill_floor_field(): void {
-	printf(
-		'<input type="date" id="aw_backfill_floor" name="aw_backfill_floor" value="%1$s"> <p class="description">%2$s</p>',
-		esc_attr( (string) get_option( 'aw_backfill_floor', '2025-11-01' ) ),
-		esc_html( 'Backfill items dated before this day are dropped. Backfill items are for review only: never published or merged on arrival.' )
-	);
 }
 
 /*
@@ -251,54 +217,13 @@ add_action( 'admin_page_access_denied', 'aw_sourcing_moved_redirect' );
 
 /* ---------- Sourcing → Overview ---------- */
 
-/** One status cell: a core dashicon (yes / warning) and a short text. */
-function aw_sourcing_overview_status( $ok, $text ) {
-	return '<span class="dashicons dashicons-' . ( $ok ? 'yes' : 'warning' ) . '" aria-hidden="true"></span> ' . esc_html( $text );
-}
-
 /** A link to a Sourcing screen, or the screen's name alone for someone who cannot open it. */
 function aw_sourcing_overview_link( $label, $url, $cap = AW_SRC_CAP ) {
 	return current_user_can( $cap ) ? '<a href="' . esc_url( $url ) . '">' . esc_html( $label ) . '</a>' : esc_html( $label . ' (administrators)' );
 }
 
-/** The workers' ingest heartbeat, from the Site Health test (site-health.php) and the last report. */
-function aw_sourcing_overview_ingest() {
-	if ( ! function_exists( 'aw_sourcing_health_test' ) ) {
-		return '';
-	}
-	$t   = aw_sourcing_health_test();
-	$hb  = (array) get_option( 'aw_ingest_heartbeat', array() );
-	$run = ! empty( $hb['last_run'] ) ? sprintf( ' Last run %1$s: %2$d new, %3$d published, %4$d of %5$d sources failed.', wp_date( 'j M Y, g:i a', (int) $hb['last_run'] ), (int) ( $hb['new'] ?? 0 ), (int) ( $hb['published'] ?? 0 ), (int) ( $hb['sources_failed'] ?? 0 ), (int) ( $hb['sources'] ?? 0 ) ) : '';
-	return aw_sourcing_overview_status( 'good' === $t['status'], $t['label'] . '.' . $run );
-}
-
-/** Workers on time (workers.php), for administrators. */
-function aw_sourcing_overview_workers() {
-	if ( ! function_exists( 'aw_workers_problems' ) ) {
-		return '';
-	}
-	$p = aw_workers_problems();
-	return aw_sourcing_overview_status( ! $p, $p ? sprintf( _n( '%d problem: ', '%d problems: ', count( $p ) ), count( $p ) ) . implode( ' ', $p ) : 'Every workflow that reports is on time.' );
-}
-
 /**
- * The AI keys at a glance: how many model keys are saved and how many work (the AI models screen's own groups,
- * aw_ai_status_badge: works / waiting / broken), the providers that work, and the tool keys apart. Read only: the saved
- * rows as they are (never written, so not aw_ai_rows(), which converts the older option on first read), and no part of
- * any key.
- */
-function aw_sourcing_overview_ai() {
-	$n = aw_sourcing_ai_counts();
-	if ( ! $n['saved'] ) {
-		return esc_html( $n['old'] ? 'Keys saved the old way: opening the AI models screen converts them.' : 'No keys saved on the AI models screen yet.' );
-	}
-	$provs = $n['providers'];
-	$text  = sprintf( '%1$d AI keys: %2$d work, %3$d waiting or not checked, %4$d refused or out of credit; %5$d tool keys.', $n['works'] + $n['wait'] + $n['bad'], $n['works'], $n['wait'], $n['bad'], $n['tool'] ) . ( $provs ? ' Working: ' . implode( ', ', $provs ) . '.' : '' );
-	return aw_sourcing_overview_status( $n['works'] > 0, $text );
-}
-
-/**
- * The AI keys' status counts, for the Overview and the Dashboard tile: keys that work, wait, are refused, tool keys, and
+ * The AI keys' status counts, for the Dashboard tile: keys that work, wait, are refused, tool keys, and
  * the providers that work. Read only, from the saved rows as they are; no part of any key.
  *
  * @return array { saved: bool, old: bool, works, wait, bad, tool, providers: string[] }.
@@ -341,139 +266,10 @@ function aw_sourcing_ai_counts() {
 	return $n;
 }
 
-/** The last entry of the Change log. */
-function aw_sourcing_overview_last_change() {
-	$log = (array) get_option( 'kits_sourcing_log', array() );
-	$e   = reset( $log );
-	return is_array( $e ) ? esc_html( sprintf( 'Last change %1$s by %2$s.', (string) ( $e['at'] ?? '' ), (string) ( $e['user'] ?? '' ) ) ) : esc_html( 'No changes yet.' );
-}
-
-/** Sourcing → Overview: every feature, what it does, where it lives and its status from the checks that already run. */
+/** Sourcing → Overview: the shell Dashboard (sourceweb-ui.php). */
 function aw_sourcing_overview_page() {
 	if ( ! current_user_can( AW_REVIEW_CAP ) ) {
 		return;
 	}
-	if ( function_exists( 'sourceweb_ui_page' ) && sourceweb_ui_page( 'dashboard' ) ) {
-		return; // The new Dashboard (sourceweb-ui.php; &ui=classic shows this one).
-	}
-	$tabs  = current_user_can( AW_SRC_CAP ) ? aw_sourcing_tabs() : array();
-	$auto  = esc_html( 'Automatic' );
-	$admin = current_user_can( 'manage_options' );
-	$names = array( 'sources' => 'Sources', 'keywords' => 'Keywords', 'rules' => 'Rules', 'sections' => 'Sections', 'summary' => 'Summary rules', 'enrich' => 'Directory enrichment', 'ai' => 'AI models', 'workers' => 'Workers', 'rejected' => 'Rejected', 'relay-log' => 'Relay log', 'log' => 'Change log', AW_SRC_SETTINGS_TAB => 'Settings' );
-	$tab   = fn( $k ) => isset( $tabs[ $k ] ) ? aw_sourcing_overview_link( 'Plugins → SourceWeb → ' . $tabs[ $k ][0], aw_sourcing_url( $k ) ) : esc_html( 'Plugins → SourceWeb → ' . ( $names[ $k ] ?? $k ) . ' (administrators)' );
-	$pubs  = function_exists( 'aw_publishers' ) ? aw_publishers() : array();
-	$by    = array_count_values( array_map( fn( $p ) => (string) ( $p['status'] ?? 'neutral' ), array_filter( $pubs, fn( $p ) => empty( $p['kind'] ) ) ) );
-	$cfg   = function_exists( 'aw_sources_config' ) ? aw_sources_config() : array();
-	$rel   = function_exists( 'aw_relevance' ) ? aw_relevance() : array();
-	$prog  = function_exists( 'aw_enrich_progress' ) ? aw_enrich_progress() : array( 'checked' => 0, 'total' => 0, 'pending' => 0 );
-	$rules = function_exists( 'aw_rules_live' ) && aw_rules_live();
-
-	$groups = array(
-		'Waiting for a person' => array(
-			array( 'To review', 'Items that came in automatically (News, Library, Opportunities, Press, research papers) and wait for a person, with why each was held. Publish or reject one by one or together.', aw_sourcing_overview_link( 'Plugins → SourceWeb → To review', admin_url( 'admin.php?page=aw-review' ), AW_REVIEW_CAP ), esc_html( sprintf( _n( '%d item waiting.', '%d items waiting.', aw_review_count() ), aw_review_count() ) ) ),
-			array( 'Enrichment review', 'Proposed details for Directory listings from the enrichment worker: approve, reject or undo; high-confidence values for empty fields are applied automatically.', aw_sourcing_overview_link( 'Plugins → SourceWeb → Enrichment review', admin_url( 'admin.php?page=aw-enrich-review' ), AW_ENRICH_CAP ), esc_html( sprintf( '%1$d of %2$d listings checked; %3$d proposals waiting.', (int) $prog['checked'], (int) $prog['total'], (int) $prog['pending'] ) ) ),
-		),
-		'What the workers fetch' => array(
-			array( 'Sources', 'Every publisher and site the workers read: Allowed, Neutral or Blocked, short names, feeds, press sites and the relay switch.', $tab( 'sources' ), esc_html( sprintf( '%1$d allowed, %2$d neutral, %3$d blocked publishers.', (int) ( $by['allow'] ?? 0 ), (int) ( $by['neutral'] ?? 0 ), (int) ( $by['block'] ?? 0 ) ) ) ),
-			array( 'Keywords', 'The words that decide what is kept (include, animal, context, exclude), the searches they make, suggestions from Search Insights and a headline test.', $tab( 'keywords' ), esc_html( 'Relevance filter ' . ( ! empty( $rel['enabled'] ) ? 'on' : 'off' ) . '; aggregator feeds ' . ( ! empty( $rel['gnews_allow_only'] ) ? 'allowed publishers only' : 'any publisher that is not blocked' ) . '.' ) ),
-		),
-		'Rules for what arrives' => $rules ? array(
-			array( 'Rules', 'Section rules (categories and tags each section uses), summary rules, and Directory enrichment (its sources and the rule for each field).', $tab( 'rules' ), $auto ),
-		) : array(
-			array( 'Sections', 'The categories and tags each section uses.', $tab( 'sections' ), $auto ),
-			array( 'Summary rules', 'One rule set for every summary on the site; the workers write and check summaries from it.', $tab( 'summary' ), $auto ),
-			array( 'Directory enrichment', 'Which sources the enrichment worker may use, the live Google block\'s key and monthly cap.', $tab( 'enrich' ), $auto ),
-		),
-		'AI and workers' => array(
-			array( 'AI models', 'Free AI keys the workers use for summaries and checks, which worker each is for, and their status. Paid keys are never served.', $tab( 'ai' ), $admin ? aw_sourcing_overview_ai() : '' ),
-			array( 'Workers', 'Every workflow of the workers repository: schedule, last run, problems and Run now.', $tab( 'workers' ), $admin ? aw_sourcing_overview_workers() : '' ),
-			array( 'Ingest', 'The worker endpoints that receive items (the publisher, keyword and relevance gate on arrival, same story, summaries, enrichment), the hourly watchdog and its e-mail.', esc_html( 'Automatic; Tools → Site Health' ), aw_sourcing_overview_ingest() ),
-			array( 'Auto-review', 'Publishes an arriving item that passes every check; holds the others in To review with the reason.', '—', $auto ),
-		),
-		'Reports' => array(
-			array( 'Rejected', 'Items the relevance check refused (never created), with the reason.', $tab( 'rejected' ), $admin ? esc_html( sprintf( '%d in the log.', count( (array) get_option( AW_RELEVANCE_LOG, array() ) ) ) ) : '' ),
-			array( 'Relay log', 'Every request the workers made through this site for a publisher that refuses GitHub (the last 200).', $tab( 'relay-log' ), esc_html( sprintf( '%d requests logged.', count( (array) get_option( 'aw_relay_log', array() ) ) ) ) ),
-			array( 'Change log', 'Who changed what on these screens and when, with the value before and after.', $tab( 'log' ), aw_sourcing_overview_last_change() ),
-		),
-		'Settings' => array(
-			array( 'Settings', 'Workers use these lists: whether the workers read these screens or sources.yaml.', $tab( AW_SRC_SETTINGS_TAB ), aw_sourcing_overview_status( ! empty( $cfg['live'] ), 'Workers use these lists: ' . ( ! empty( $cfg['live'] ) ? 'on.' : 'off.' ) ) ),
-		),
-		'Elsewhere' => array(
-			array( 'Sourcing keywords', 'Per Google News search: items brought in over 30 days and their pages\' Search Console figures.', function_exists( 'aw_si_url' ) && function_exists( 'aw_si_cap' ) && current_user_can( aw_si_cap() ) ? '<a href="' . esc_url( aw_si_url( 'sourcing' ) ) . '">' . esc_html( 'Plugins → InsightWeb → Search Insights → Sourcing keywords' ) . '</a>' : esc_html( 'Plugins → InsightWeb → Search Insights' ), $auto ),
-			array( 'Site Health', 'Two tests: "Sourcing ran on time" (the ingest heartbeat) and "Workers report on time".', current_user_can( 'view_site_health_checks' ) ? '<a href="' . esc_url( admin_url( 'site-health.php' ) ) . '">' . esc_html( 'Tools → Site Health' ) . '</a>' : esc_html( 'Tools → Site Health' ), $auto ),
-		),
-	);
-	// Press queries and Categories: their own screens before phase 2; from phase 2 a Keywords view and WordPress's own
-	// categories (with a Keywords column); from phase 4 the old screens are gone.
-	$kw_on = function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on();
-	if ( isset( $tabs['press'] ) || $kw_on ) {
-		$groups['What the workers fetch'][] = array( 'Press queries', 'Weekly searches for coverage of Animal Writes; results wait in To review.', $kw_on ? aw_sourcing_overview_link( 'Plugins → SourceWeb → Keywords → Press', aw_sourcing_url( 'keywords', array( 'view' => 'press' ) ) ) : $tab( 'press' ), $auto );
-	}
-	if ( isset( $tabs['categories'] ) || $kw_on ) {
-		$groups['What the workers fetch'][] = array( 'Categories', 'The words that put an item in each category.', $kw_on ? aw_sourcing_overview_link( 'Posts → Categories (Keywords column)', admin_url( 'edit-tags.php?taxonomy=category' ), 'manage_categories' ) : $tab( 'categories' ), $auto );
-	}
-
-	echo '<div class="wrap"><h1>' . esc_html( 'Sourcing' ) . '</h1>';
-	aw_sourcing_screen_tabs();
-	echo '<p>' . esc_html( sprintf( 'What the workers fetch, how it arrives and what waits for a person. Each row says where the feature lives in this menu. Sourcing restructure phase %d is in place.', function_exists( 'aw_sourcing_phase' ) ? aw_sourcing_phase() : 0 ) ) . '</p>';
-	// Rows whose status is a warning, first and together (core notice); nothing when every check is fine.
-	$attn = array();
-	foreach ( $groups as $rows ) {
-		foreach ( $rows as $r ) {
-			if ( false !== strpos( (string) $r[3], 'dashicons-warning' ) ) {
-				$attn[] = '<li><strong>' . esc_html( $r[0] ) . '</strong>: ' . esc_html( trim( wp_strip_all_tags( (string) $r[3] ) ) ) . ( '' !== $r[2] && '—' !== $r[2] ? ' (' . $r[2] . ')' : '' ) . '</li>';
-			}
-		}
-	}
-	if ( $attn ) {
-		wp_admin_notice( '<p><strong>' . esc_html( 'Needs attention' ) . '</strong></p><ul class="ul-disc">' . implode( '', $attn ) . '</ul>', array( 'type' => 'warning', 'additional_classes' => array( 'inline' ), 'paragraph_wrap' => false ) );
-	}
-	foreach ( $groups as $title => $rows ) {
-		echo '<h2>' . esc_html( $title ) . '</h2>';
-		$cells = array();
-		foreach ( $rows as $r ) {
-			$cells[] = array(
-				'feature' => '<strong>' . esc_html( $r[0] ) . '</strong>' . ( '' !== $r[2] && '—' !== $r[2] ? '<div class="row-actions visible">' . $r[2] . '</div>' : '' ),
-				'what'    => esc_html( $r[1] ),
-				'status'  => $r[3],
-			);
-		}
-		aw_sourcing_simple_table( 'aw-sourcing-overview', array( 'feature' => 'Feature', 'what' => 'What it does', 'status' => 'Status' ), $cells, array( 'primary' => 'feature', 'foot' => false ) );
-	}
-
-	if ( $admin && function_exists( 'aw_workers_runs' ) && defined( 'AW_WORKERS' ) ) {
-		$cells = array();
-		$good  = 0;
-		$now   = time();
-		foreach ( aw_workers_runs() as $file => $runs ) {
-			$w = function_exists( 'aw_worker_def' ) ? aw_worker_def( $file, AW_WORKERS[ $file ] ) : AW_WORKERS[ $file ];
-			krsort( $runs, SORT_NUMERIC );
-			$last    = $runs ? reset( $runs ) : null;
-			$seen    = $last ? max( (int) ( $last['ended'] ?? 0 ), (int) ( $last['started'] ?? 0 ) ) : 0;
-			$next    = ! empty( $w['crons'] ) ? aw_workers_next( (array) $w['crons'], $now ) : 0;
-			$good   += $last && 'success' === ( $last['result'] ?? '' ) ? 1 : 0;
-			$cells[] = array(
-				'worker' => '<strong>' . esc_html( (string) $w['name'] ) . '</strong>',
-				'last'   => esc_html( $seen ? wp_date( 'j M Y, g:i a', $seen ) : '—' ),
-				'result' => aw_workers_badge( $last, false ),
-				'next'   => esc_html( $next ? wp_date( 'j M, g:i a', $next ) : ( ! empty( $w['after'] ) ? 'After "' . $w['after'] . '"' : 'By hand' ) ),
-			);
-		}
-		echo '<details><summary><strong>' . esc_html( 'Last runs' ) . '</strong> ' . esc_html( sprintf( '(%1$d of %2$d successful)', $good, count( $cells ) ) ) . '</summary>';
-		aw_sourcing_simple_table( 'aw-sourcing-runs', array( 'worker' => 'Worker', 'last' => 'Last report', 'result' => 'Result', 'next' => 'Next due' ), $cells, array( 'primary' => 'worker', 'empty' => 'No worker has reported yet.', 'foot' => false ) );
-		echo '<p>' . aw_sourcing_overview_link( 'Plugins → SourceWeb → Workers', aw_sourcing_url( 'workers' ) ) . '</p></details>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in the helper
-	}
-
-	echo '<details><summary><strong>' . esc_html( 'Commands (WP-CLI on the server)' ) . '</strong> (3)</summary>';
-	aw_sourcing_simple_table(
-		'aw-sourcing-commands',
-		array( 'cmd' => 'Command', 'what' => 'What it does' ),
-		array(
-			array( 'cmd' => '<code>wp aw-sourcing backup</code>, <code>migrate</code>, <code>verify</code>, <code>rollback</code>', 'what' => esc_html( 'The sourcing restructure phases (--phase=n): back up, migrate (with --dry-run), check and undo.' ) ),
-			array( 'cmd' => '<code>wp aw-sourcing import-dr</code>', 'what' => esc_html( 'Domain Rating values for the Sources list.' ) ),
-			array( 'cmd' => '<code>wp aw news-titles</code>', 'what' => esc_html( 'Apply corrected News or Press titles from a CSV file (apply <file.csv>, --dry-run).' ) ),
-		),
-		array( 'primary' => 'cmd', 'foot' => false )
-	);
-	echo '<p>' . esc_html( 'Each command lists its options with --help.' ) . '</p></details></div>';
+	sourceweb_ui_page( 'dashboard' );
 }

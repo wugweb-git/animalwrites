@@ -243,5 +243,5 @@ function directoryweb_listings_page(): void {
 	if ( directoryweb_ui_page( 'listings' ) ) {
 		return;
 	}
-	directoryweb_plain_page( __( 'Directory listings', 'directoryweb' ), 'listings' );
+	directoryweb_missing_page( __( 'Directory listings', 'directoryweb' ) );
 }

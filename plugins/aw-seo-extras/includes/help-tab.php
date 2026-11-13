@@ -1,7 +1,7 @@
 <?php
 /**
  * RankWeb: an "About RankWeb" Help tab and a sidebar on RankWeb's own screens (WP_Screen::add_help_tab), on every screen,
- * classic or shell. Screens that have their own help keep it; this tab sits beside it.
+ * on the Kits shell or not. Screens that have their own help keep it; this tab sits beside it.
  *
  * @package aw-seo-extras
  */

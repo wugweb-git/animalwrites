@@ -3,10 +3,10 @@
  * Kits admin app: the Theme Options screen (docs/admin-ui-spec.md, phase 1), built with WordPress packages from
  * src/theme-options/ into build/theme-options/ (npm run build in this plugin's folder; build/ is committed).
  *
- * Kits → Theme Options opens it (since 11 Nov 2026; the older screen stays at &ui=classic until it is retired). It
- * edits the fields of kits_theme_options (theme-options.php), Identity (site title, tagline, logo, site icon:
- * WordPress's own options) and the site-wide header, footer and layout choices (kits_page_defaults._site), and saves
- * them through /wp/v2/settings, which runs the same clean-up as the older screen (kits_theme_options_clean).
+ * Kits → Theme Options opens it. It edits the fields of kits_theme_options (theme-options.php), Identity (site title,
+ * tagline, logo, site icon: WordPress's own options) and the site-wide header, footer and layout choices
+ * (kits_page_defaults._site), and saves them through /wp/v2/settings, which runs the same clean-up as options.php
+ * (kits_theme_options_clean). Without the build, the screen shows one notice.
  *
  * Sections not built in the app yet (Colours, Typography, Buttons, Cards, Content types, Socials, Share bar) show
  * today's fields under their names: kits_admin_app_legacy() prints them on the page, the app moves each into its
@@ -20,9 +20,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/** True on Kits → Theme Options, unless the older screen is asked for (&ui=classic). */
+/** True on Kits → Theme Options. */
 function kits_admin_app_wanted(): bool {
-	return isset( $_GET['page'] ) && 'kits-options' === $_GET['page'] && 'classic' !== sanitize_key( wp_unslash( $_GET['ui'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification -- which screen to show; nothing is saved here.
+	return isset( $_GET['page'] ) && 'kits-options' === $_GET['page']; // phpcs:ignore WordPress.Security.NonceVerification -- which screen to show; nothing is saved here.
 }
 
 /**
@@ -70,7 +70,7 @@ function kits_admin_app_legacy(): array {
 		),
 		'share'         => array( __( 'Share bar', 'kits-core' ), $form( 'utility-share', 'Share bar', 'share' ) ),
 	);
-	// Sections a plugin added to the older screen and that have no place above.
+	// Sections a plugin added (kits_options_sections) that have no place above.
 	$placed = array( 'General', 'Single', 'Archives', 'Visual', 'Utility' );
 	$more   = array();
 	foreach ( $old as $group => $items ) {
@@ -253,15 +253,16 @@ function kits_admin_app_ready( ?bool $set = null ): bool {
 
 /** The screen's mount point (kits_options_page() calls this), and today's fields of the sections not built yet. */
 function kits_admin_app_page(): void {
-	// Notices from other plugins go after .wp-header-end, so they stay out of the app and its pinned header.
-	echo '<div class="wrap"><h1 class="screen-reader-text">' . esc_html__( 'Theme Options', 'kits-core' ) . '</h1><hr class="wp-header-end">';
-	settings_errors(); // "Settings saved." after a section that saves through options.php.
 	if ( ! kits_admin_app_ready() ) {
-		// The screen's script or the shell could not load.
-		wp_admin_notice( esc_html__( 'This screen could not load.', 'kits-core' ), array( 'type' => 'warning' ) );
+		// The screen's script or the shell is not built (or a script it needs is missing).
+		echo '<div class="wrap"><h1>' . esc_html__( 'Theme Options', 'kits-core' ) . '</h1>';
+		wp_admin_notice( esc_html__( 'Kits Core needs its build (build/theme-options/ and build/shell/) to show this screen.', 'kits-core' ), array( 'type' => 'error' ) );
 		echo '</div>';
 		return;
 	}
+	// Notices from other plugins go after .wp-header-end, so they stay out of the app and its pinned header.
+	echo '<div class="wrap"><h1 class="screen-reader-text">' . esc_html__( 'Theme Options', 'kits-core' ) . '</h1><hr class="wp-header-end">';
+	settings_errors(); // "Settings saved." after a section that saves through options.php.
 	echo '<div id="kits-admin-app">';
 	echo '<noscript><h1>' . esc_html__( 'Theme Options', 'kits-core' ) . '</h1><p>' . esc_html__( 'This screen needs JavaScript.', 'kits-core' ) . ' <a href="' . esc_url( admin_url( 'admin.php?page=kits-tools' ) ) . '">' . esc_html__( 'Export the settings', 'kits-core' ) . '</a></p></noscript>';
 	echo '</div>';

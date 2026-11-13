@@ -1,12 +1,11 @@
 <?php
 /**
  * Sourcing → Keywords on the keyword table (sourcing restructure phase 2, owner 25 Oct 2026). Active once
- * phase 2 is migrated (aw_sourcing_phase() >= 2); before that the old word lists show as they were.
+ * phase 2 is migrated (aw_sourcing_phase() >= 2).
  *
- * - The screen: the edit-tags layout. "Add New Keyword" on the left, the records with a Sourcing or Press role on
- *   the right (AW_Sourcing_Keywords_Table), views by role, a Press view with its settings (Settings API), Category
- *   words, Hindi (no Sourcing role), and Suggestions from Search Insights. Each keyword has its edit screen
- *   (form-table: other spellings, roles, categories with core's category checklist, sections, language, search).
+ * - The screen is the Kits shell's (sourceweb-ui.php; its routes in sourceweb-rest-pages.php): the records with a
+ *   Sourcing or Press role, views by role, the Press view with its settings, Category words, Hindi (no Sourcing role),
+ *   Suggestions from Search Insights, and each keyword's edit form. This file has their saves and help tabs.
  * - Every add, edit and delete goes through Core's one role setter (aw_kw_set_roles: English only, never Include with
  *   Exclude) and is logged in the Change log with old → new.
  * - The mirrors: after any keyword change the old lists (aw_relevance strong / animal / context / exclude,
@@ -167,23 +166,6 @@ function aw_sourcing_kw_write_mirrors() {
 }
 
 /* ---------- Saving ---------- */
-
-/**
- * Category slugs from core's category checklist (term ids).
- *
- * @param array $ids Term ids.
- * @return string[]
- */
-function aw_sourcing_kw_cat_slugs( array $ids ) {
-	$out = array();
-	foreach ( array_map( 'absint', $ids ) as $id ) {
-		$t = $id ? get_term( $id, 'category' ) : null;
-		if ( $t instanceof WP_Term ) {
-			$out[] = $t->slug;
-		}
-	}
-	return $out;
-}
 
 /** The sections a keyword can file into: the sections' post types plus Press. */
 function aw_sourcing_kw_sections() {
@@ -440,229 +422,7 @@ function aw_sourcing_kw_bulk( $op, array $ids ) {
 	return array( $n, $errs );
 }
 
-/** The keyword screen's forms: add, edit, delete, row and bulk actions. */
-add_action(
-	'admin_post_aw_sourcing_kw',
-	function () {
-		$op = sanitize_key( $_POST['kw_op'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification -- picks which nonce is checked next
-		$id = absint( $_POST['kw_id'] ?? 0 ); // phpcs:ignore WordPress.Security.NonceVerification
-		$nonce = 'add' === $op ? 'aw_sourcing_kw_add' : ( 'edit' === $op ? 'aw_sourcing_kw_edit_' . $id : 'bulk-keywords' );
-		if ( ! current_user_can( AW_SRC_CAP ) || ! check_admin_referer( $nonce ) ) {
-			wp_die( 'Not allowed.', 403 );
-		}
-		$base = admin_url( 'admin.php?page=aw-sourcing&tab=keywords' );
-		$base = false !== strpos( (string) wp_get_referer(), 'ui=classic' ) ? add_query_arg( 'ui', 'classic', $base ) : $base; // a save on today's screen goes back to it
-		$back = wp_get_referer() ? remove_query_arg( array( 'kw_done', 'kw_n', 'kw_err' ), wp_get_referer() ) : $base;
-		if ( ! aw_sourcing_kw_on() ) {
-			wp_safe_redirect( $base );
-			exit;
-		}
-		$err = '';
-		$n   = 0;
-		if ( 'add' === $op || 'edit' === $op ) {
-			$set = array(
-				'roles'      => aw_sourcing_kw_bits( array_map( 'absint', (array) wp_unslash( $_POST['kw_roles'] ?? array() ) ) ),
-				'variants'   => sanitize_textarea_field( wp_unslash( $_POST['kw_variants'] ?? '' ) ),
-				'categories' => aw_sourcing_kw_cat_slugs( array_map( 'absint', (array) wp_unslash( $_POST['post_category'] ?? array() ) ) ),
-				'sections'   => array_values( array_intersect( array_map( 'sanitize_key', (array) wp_unslash( $_POST['kw_sections'] ?? array() ) ), array_keys( aw_sourcing_kw_sections() ) ) ),
-			);
-			if ( 'edit' === $op ) {
-				$set['search_on'] = empty( $_POST['kw_search_on'] ) ? 0 : 1; // the add form has no switch: a new record's search is on, an existing one's stays
-			}
-			if ( 'edit' === $op ) {
-				$lang         = sanitize_key( wp_unslash( $_POST['kw_lang'] ?? 'en' ) );
-				$set['lang']  = in_array( $lang, array( 'en', 'hi', 'hinglish' ), true ) ? $lang : 'en';
-				$q            = trim( (string) wp_unslash( $_POST['kw_query'] ?? '' ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitized next, as an address or as words
-				$q            = (string) preg_replace_callback( '#^(https?)://#i', fn( $m ) => strtolower( $m[1] ) . '://', $q ); // HTTPS:// is stored as https:// (Codex)
-				$set['query'] = preg_match( '#^https?://#i', $q ) ? esc_url_raw( $q ) : sanitize_text_field( $q ); // an address keeps its %XX
-				if ( ! empty( $_POST['kw_delete'] ) ) { // the edit screen's Delete: the Sourcing and Press roles go; the record stays for Search Insights
-					$set = array( 'roles' => 0 );
-				}
-				$r = aw_sourcing_kw_apply( $id, $set );
-				if ( is_wp_error( $r ) ) {
-					wp_safe_redirect( add_query_arg( 'kw_err', rawurlencode( $r->get_error_message() ), $back ) );
-					exit;
-				}
-				wp_safe_redirect( add_query_arg( array( 'kw_done' => ! $r ? 'none' : ( empty( $_POST['kw_delete'] ) ? 'saved' : 'deleted' ), 'kw_n' => (int) $r ), $base ) ); // a Save with no change writes nothing
-				exit;
-			}
-			if ( ! $set['roles'] ) {
-				$err = 'Choose at least one role.';
-			} else {
-				$set['lang'] = sanitize_key( wp_unslash( $_POST['kw_lang'] ?? 'en' ) );
-				$label       = sanitize_text_field( wp_unslash( $_POST['kw_label'] ?? '' ) );
-				$r           = aw_sourcing_kw_add( $label, $set );
-				$err         = is_wp_error( $r ) ? $r->get_error_message() : '';
-				$n           = $err ? 0 : 1;
-				$there       = $err ? aw_kw_id_by_norm( aw_si_norm( $label ) ) : 0;
-				if ( $there ) { // refused on a record that exists (its language, say): open it, where it can be corrected
-					wp_safe_redirect( add_query_arg( array( 'edit' => $there, 'kw_err' => rawurlencode( $err ) ), $base ) );
-					exit;
-				}
-			}
-			wp_safe_redirect( add_query_arg( $err ? array( 'kw_err' => rawurlencode( $err ) ) : array( 'kw_done' => 'added', 'kw_n' => $n ), $back ) );
-			exit;
-		}
-		// Row and bulk actions of the list (the table's own nonce): kw_row = "op:id", or kw_bulk with ids[].
-		$row = sanitize_text_field( wp_unslash( $_POST['kw_row'] ?? '' ) );
-		if ( false !== strpos( $row, ':' ) ) {
-			list( $op, $one ) = explode( ':', $row, 2 );
-			$ids              = array( absint( $one ) );
-		} else {
-			$op  = sanitize_text_field( wp_unslash( $_POST['kw_bulk'] ?? '' ) );
-			$op  = '' !== $op ? $op : sanitize_text_field( wp_unslash( $_POST['kw_bulk2'] ?? '' ) );
-			$ids = array_map( 'absint', (array) wp_unslash( $_POST['kw'] ?? array() ) );
-		}
-		list( $n, $errs ) = aw_sourcing_kw_bulk( $op, $ids );
-		$args = array( 'kw_done' => $n ? 'changed' : 'none', 'kw_n' => $n );
-		if ( $errs ) {
-			$args['kw_err'] = rawurlencode( implode( ' ', $errs ) );
-		}
-		wp_safe_redirect( add_query_arg( $args, $back ) );
-		exit;
-	}
-);
-add_filter( 'removable_query_args', fn( $args ) => array_merge( $args, array( 'kw_err' ) ) );
-
-/* ---------- The screen ---------- */
-
-/** The Keywords tab on the table: a keyword's edit screen, or the list with the add form. */
-function aw_sourcing_kw_tab() {
-	$base = admin_url( 'admin.php?page=aw-sourcing&tab=keywords' );
-	$edit = absint( $_GET['edit'] ?? 0 ); // phpcs:ignore WordPress.Security.NonceVerification
-	$err  = sanitize_text_field( wp_unslash( $_GET['kw_err'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
-	if ( '' !== $err ) {
-		wp_admin_notice( esc_html( $err ), array( 'type' => 'error', 'dismissible' => true ) );
-	}
-	$done = sanitize_key( $_GET['kw_done'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
-	$msg  = array(
-		'added'   => 'Keyword saved. The workers use it from their next run.',
-		'saved'   => 'Keyword updated. The workers use it from their next run.',
-		'deleted' => 'Keyword deleted from sourcing (its Sourcing and Press roles were removed; Search Insights keeps the record).',
-		'changed' => 'Keywords changed. The workers use them from their next run.',
-		'none'    => 'Nothing changed.',
-	);
-	if ( isset( $msg[ $done ] ) ) {
-		wp_admin_notice( esc_html( $msg[ $done ] ), array( 'type' => ( 'none' === $done ? 'warning' : 'success' ), 'dismissible' => true ) );
-	}
-	if ( $edit ) {
-		aw_sourcing_kw_edit_form( $edit );
-		return;
-	}
-	if ( ! class_exists( 'WP_List_Table' ) ) {
-		require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
-	}
-	require_once __DIR__ . '/class-aw-sourcing-keywords-table.php';
-	$table = new AW_Sourcing_Keywords_Table();
-	$table->prepare_items();
-	$view = $table->view();
-
-	aw_sourcing_settings_form( 'aw_sourcing_switches', 'aw-sourcing-switches' );
-	if ( 'press' === $view ) {
-		aw_sourcing_settings_form( 'aw_sourcing_sources', 'aw-sourcing-press' ); // Press: enabled, coverage from, every n days
-	}
-
-	echo '<form class="search-form wp-clearfix" method="get"><input type="hidden" name="page" value="aw-sourcing"><input type="hidden" name="tab" value="keywords">' . ( '' !== $view ? '<input type="hidden" name="view" value="' . esc_attr( $view ) . '">' : '' );
-	$cat = sanitize_title( wp_unslash( $_GET['cat'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification -- a list filter
-	if ( '' !== $cat ) { // a category-filtered view keeps its category when searching (Codex)
-		echo '<input type="hidden" name="cat" value="' . esc_attr( $cat ) . '">';
-	}
-	$table->search_box( 'Search keywords', 'aw-kw' );
-	echo '</form>';
-
-	echo '<div id="col-container" class="wp-clearfix"><div id="col-left"><div class="col-wrap"><div class="form-wrap">';
-	echo '<h2>Add New Keyword</h2><form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_sourcing_kw"><input type="hidden" name="kw_op" value="add">';
-	wp_nonce_field( 'aw_sourcing_kw_add' );
-	echo '<div class="form-field form-required"><label for="aw-kw-label">Keyword</label><input type="text" id="aw-kw-label" name="kw_label" required aria-required="true" aria-describedby="aw-kw-label-description"><p id="aw-kw-label-description">English only for Sourcing and Press. Plurals and dots do not matter: "dogs" adds to "dog".</p></div>';
-	echo '<div class="form-field"><label for="aw-kw-variants">Other spellings</label><textarea id="aw-kw-variants" name="kw_variants" rows="3" aria-describedby="aw-kw-variants-description"></textarea><p id="aw-kw-variants-description">One per line. A trailing * matches the start of a word (steriliz* matches sterilized and sterilization).</p></div>';
-	echo '<div class="form-field"><label for="aw-kw-lang">Language</label><select id="aw-kw-lang" name="kw_lang"><option value="en">English</option><option value="hinglish">Hinglish</option><option value="hi">Hindi</option></select><p>Sourcing and Press roles are for English keywords only.</p></div>';
-	echo '<fieldset class="form-field"><legend>Roles</legend>';
-	$pre = array( 'include' => AW_KW_ROLE_INCLUDE, 'animal' => AW_KW_ROLE_ANIMAL, 'context' => AW_KW_ROLE_CONTEXT, 'exclude' => AW_KW_ROLE_EXCLUDE, 'search' => AW_KW_ROLE_SEARCH, 'press' => AW_KW_ROLE_PRESS, 'category' => AW_KW_ROLE_CATEGORY )[ $view ] ?? 0;
-	foreach ( aw_sourcing_kw_roles() as $bit => $l ) {
-		echo '<label><input type="checkbox" name="kw_roles[]" value="' . (int) $bit . '"' . checked( $pre, $bit, false ) . '> ' . esc_html( $l ) . '</label><br>';
-	}
-	echo '<p>Include and Exclude cannot go together.</p></fieldset>';
-	echo '<fieldset class="form-field"><legend>Categories (for Category words)</legend><ul class="categorychecklist">';
-	$cat = sanitize_title( wp_unslash( $_GET['cat'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
-	$t   = '' !== $cat ? get_term_by( 'slug', $cat, 'category' ) : null;
-	wp_terms_checklist( 0, array( 'taxonomy' => 'category', 'selected_cats' => $t ? array( (int) $t->term_id ) : array(), 'checked_ontop' => false ) );
-	echo '</ul></fieldset>';
-	submit_button( 'Add New Keyword', 'primary' );
-	echo '</form></div></div></div>';
-
-	echo '<div id="col-right"><div class="col-wrap"><h2 class="screen-reader-text">Keywords</h2>';
-	$table->views();
-	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_sourcing_kw">';
-	$table->display();
-	echo '</form></div></div></div>';
-
-	$try = sanitize_text_field( wp_unslash( $_GET['try'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
-	echo '<h2>Test a headline</h2><form method="get"><input type="hidden" name="page" value="aw-sourcing"><input type="hidden" name="tab" value="keywords"><input type="text" name="try" class="large-text" value="' . esc_attr( $try ) . '" placeholder="Paste a headline" aria-label="Headline">';
-	submit_button( 'Test', 'secondary', '', false );
-	if ( $try ) {
-		$v = aw_relevance_verdict( $try );
-		echo '<p><strong>' . ( $v[0] ? 'Kept' : 'Dropped' ) . '</strong> (' . esc_html( $v[1] ) . ')</p>';
-	}
-	echo '</form>';
-}
-
-/**
- * One keyword's edit screen (form-table).
- *
- * @param int $id Record id.
- */
-function aw_sourcing_kw_edit_form( $id ) {
-	$back = admin_url( 'admin.php?page=aw-sourcing&tab=keywords' );
-	$r    = aw_kw_get( $id );
-	if ( ! $r ) {
-		wp_admin_notice( 'No such keyword. <a href="' . esc_url( $back ) . '">Back to Keywords</a>', array( 'type' => 'error', 'additional_classes' => array( 'inline' ) ) );
-		return;
-	}
-	echo '<h2>' . esc_html( 'Edit keyword: ' . $r['label'] ) . '</h2>';
-	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_sourcing_kw"><input type="hidden" name="kw_op" value="edit"><input type="hidden" name="kw_id" value="' . (int) $id . '">';
-	wp_nonce_field( 'aw_sourcing_kw_edit_' . $id );
-	echo '<table class="form-table" role="presentation"><tbody>';
-	echo '<tr><th scope="row">Keyword</th><td><strong>' . esc_html( $r['label'] ) . '</strong> <code>' . esc_html( $r['norm'] ) . '</code><p class="description">Fixed once saved: it is the record Search Insights keeps its figures on. Add other spellings below.</p></td></tr>';
-	echo '<tr><th scope="row"><label for="aw-kw-variants">Other spellings</label></th><td><textarea id="aw-kw-variants" name="kw_variants" rows="5" class="large-text code" aria-describedby="aw-kw-variants-d">' . esc_textarea( implode( "\n", $r['variants'] ) ) . '</textarea><p class="description" id="aw-kw-variants-d">One per line. Every spelling counts for every role. A trailing * matches the start of a word.</p></td></tr>';
-	echo '<tr><th scope="row">Roles</th><td><fieldset><legend class="screen-reader-text">Roles</legend>';
-	foreach ( aw_sourcing_kw_roles() as $bit => $l ) {
-		echo '<label><input type="checkbox" name="kw_roles[]" value="' . (int) $bit . '"' . checked( (bool) ( $r['roles'] & $bit ), true, false ) . '> <strong>' . esc_html( $l ) . '</strong> — ' . esc_html( aw_sourcing_kw_role_help()[ $bit ] ) . '</label><br>';
-	}
-	$other = array_values( array_filter( array_map( fn( $b, $l ) => ( $r['roles'] & $b ) && ! isset( aw_sourcing_kw_roles()[ $b ] ) ? $l : '', array_keys( aw_si_roles() ), aw_si_roles() ) ) );
-	echo '<p class="description">Search Insights roles (not changed here): ' . esc_html( $other ? implode( ', ', $other ) : 'none' ) . '.</p></fieldset></td></tr>';
-	echo '<tr><th scope="row">Categories</th><td><fieldset><legend class="screen-reader-text">Categories</legend><ul class="categorychecklist">';
-	$sel = array();
-	foreach ( $r['categories'] as $slug ) {
-		$t = get_term_by( 'slug', $slug, 'category' );
-		if ( $t ) {
-			$sel[] = (int) $t->term_id;
-		}
-	}
-	wp_terms_checklist( 0, array( 'taxonomy' => 'category', 'selected_cats' => $sel, 'checked_ontop' => false ) );
-	echo '</ul><p class="description">With the Category word role, an item that has this keyword gets these categories (the section\'s rule still limits them). An item a search of this keyword found gets them too.</p></fieldset></td></tr>';
-	echo '<tr><th scope="row">Sections</th><td><fieldset><legend class="screen-reader-text">Sections</legend>';
-	foreach ( aw_sourcing_kw_sections() as $t => $l ) {
-		echo '<label><input type="checkbox" name="kw_sections[]" value="' . esc_attr( $t ) . '"' . checked( in_array( $t, $r['sections'], true ), true, false ) . '> ' . esc_html( $l ) . '</label><br>';
-	}
-	echo '<p class="description">Where items its search finds go (News for a keyword search; Media &amp; PR files them as press).</p></fieldset></td></tr>';
-	echo '<tr><th scope="row"><label for="aw-kw-lang">Language</label></th><td><select id="aw-kw-lang" name="kw_lang">';
-	foreach ( array( 'en' => 'English', 'hi' => 'Hindi', 'hinglish' => 'Hinglish' ) as $k => $l ) {
-		echo '<option value="' . esc_attr( $k ) . '"' . selected( $r['lang'], $k, false ) . '>' . esc_html( $l ) . '</option>';
-	}
-	echo '</select><p class="description">Detected automatically; correct it when an English phrase was taken for Hinglish. Sourcing and Press roles are for English keywords only.</p></td></tr>';
-	echo '<tr><th scope="row">Google News search</th><td><label><input type="checkbox" name="kw_search_on" value="1"' . checked( (bool) $r['search_on'], true, false ) . '> On</label><p class="description">An English Include or Search keyword is searched every run. Searches: ';
-	$s = aw_kw_searches( $r, array_column( array_filter( (array) aw_sources_config()['sources'], 'is_array' ), null, 'id' ) );
-	echo $s ? esc_html( implode( ', ', array_map( fn( $x ) => $x['feed'], $s ) ) ) : 'none';
-	echo '.</p></td></tr>';
-	echo '<tr><th scope="row"><label for="aw-kw-query">Search query</label></th><td><input type="text" id="aw-kw-query" name="kw_query" class="large-text code" value="' . esc_attr( $r['query'] ) . '"><p class="description">For the Search role: the words searched (the keyword itself when empty), or a whole Google News search address. Feed id: <code>' . esc_html( '' !== $r['feed_id'] ? $r['feed_id'] : '(made from the query)' ) . '</code> (fixed, so the items it found stay counted).</p></td></tr>';
-	echo '</tbody></table>';
-	submit_button( 'Update', 'primary', 'submit', false );
-	echo ' ';
-	submit_button( 'Delete', 'delete', 'kw_delete', false, array( 'onclick' => "return confirm('Remove this keyword from sourcing? Its Sourcing and Press roles go; Search Insights keeps the record.');" ) );
-	echo ' <a href="' . esc_url( $back ) . '" class="button">Cancel</a></form>';
-}
-
-/* ---------- Screen options, help tabs, old addresses ---------- */
+/* ---------- Help tabs, old addresses ---------- */
 
 add_action(
 	'load-' . AW_SRC_SCREEN,
@@ -721,7 +481,6 @@ add_action(
 				'content' => '<p>A Category word files an item into the categories it is mapped to when it is in the item\'s title or summary; an item a keyword\'s search found also gets that keyword\'s categories. The AI relevance check confirms the category, and each section\'s rule limits it. Categories themselves are edited in Posts → Categories, whose Keywords column opens the words of each.</p>',
 			)
 		);
-		add_screen_option( 'per_page', array( 'label' => 'Keywords per page', 'default' => 100, 'option' => 'aw_keywords_per_page' ) );
 	},
 	5
 );
@@ -764,40 +523,9 @@ add_filter(
 	3
 );
 
-/* ---------- The Press view's settings (Settings API, option aw_sources) ---------- */
-
-add_action(
-	'admin_init',
-	function () {
-		if ( ! aw_sourcing_kw_on() ) {
-			return;
-		}
-		add_settings_field(
-			'aw_press_enabled',
-			'Press discovery',
-			function () {
-				echo '<label><input type="checkbox" id="aw-pe" name="aw_sources[enabled]" value="1"' . checked( ! empty( aw_sources_config()['press']['enabled'] ), true, false ) . '> On</label>';
-			},
-			'aw-sourcing-press',
-			'aw_press',
-			array( 'label_for' => 'aw-pe' )
-		);
-		add_settings_field(
-			'aw_press_every',
-			'Every',
-			function () {
-				echo '<input type="number" min="1" max="60" step="1" class="small-text" id="aw-pd" name="aw_sources[every_days]" value="' . (int) ( aw_sources_config()['press']['every_days'] ?? 7 ) . '"> days';
-			},
-			'aw-sourcing-press',
-			'aw_press',
-			array( 'label_for' => 'aw-pd' )
-		);
-	},
-	20
-);
-
 /**
- * The Press view's settings: on/off, coverage from, every n days (the queries are the Press keywords).
+ * The Press view's settings (aw_sources_save_press, sourcing-lists.php): on/off, coverage from, every n days (the
+ * queries are the Press keywords).
  *
  * @param array $c  aw_sources.
  * @param array $in Posted part.

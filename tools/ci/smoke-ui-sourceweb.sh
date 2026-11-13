@@ -12,11 +12,9 @@ screen "aw-sourcing&tab=relay-log" sourceweb-app sourceweb-admin
 screen "aw-sourcing&tab=log" sourceweb-app sourceweb-admin
 screen "aw-sourcing" sourceweb-app sourceweb-admin
 # The feed form on the new Sources screen (12 Nov 2026): the classic form's own parts, posting to admin-post with the
-# aw_sourcing action and its nonce; ui=classic still shows today's screen.
+# aw_sourcing action and its nonce.
 want 200 "admin.php?page=aw-sourcing&feed=new (feed form)" -b /tmp/cj-ci "$H/wp-admin/admin.php?page=aw-sourcing&feed=new"
 if grep -q 'id="sourceweb-app"' /tmp/rw.out && grep -q '"feed":\[' /tmp/rw.out && grep -q 'src\[0\]\[name\]' /tmp/rw.out && grep -q '"action","aw_sourcing"' /tmp/rw.out; then echo "ok   feed form: the new screen, with the form's fields and action"; else echo "FAIL feed form: not on the new screen with its fields"; FAIL=1; fi
-want 200 "admin.php?page=aw-sourcing&feed=new&ui=classic (feed form, classic)" -b /tmp/cj-ci "$H/wp-admin/admin.php?page=aw-sourcing&feed=new&ui=classic"
-if grep -q 'id="sourceweb-app"' /tmp/rw.out; then echo "FAIL feed form ui=classic: drawn as the new screen"; FAIL=1; else echo "ok   feed form ui=classic: today's screen"; fi
 for r in dashboard review "review&type=aw_news" enrichment "enrichment&status=all" "enrichment&status=applied&listing=1" settings workers "workers&view=planned&search=x&orderby=status&order=desc" workers/new workers/sourcing workers/sourcing/runs sources "sources&view=block&orderby=items&order=desc" sources/one sources/feeds "sources/feeds&state=on" ai ai/keys "ai/key&id=new" ai/overview rejected "rejected&view=allowed&search=x&orderby=at&order=desc" relay-log "relay-log&view=failed&orderby=ms" changes "changes&search=key&orderby=user"; do
   route "sourceweb/v1/$r"
 done

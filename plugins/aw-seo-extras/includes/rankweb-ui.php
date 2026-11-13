@@ -1,12 +1,12 @@
 <?php
 /**
- * RankWeb's screens on the Kits admin shell, the default since 12 Nov 2026: admin.php?page=aw-seo-plus (Dashboard),
- * admin.php?page=aw-faq (FAQ, from its own output through Kits Core's page parts) and admin.php?page=aw-seo-settings
- * (Settings); &ui=classic shows the earlier screens. The screens are one script
- * (build/index.js, from src/), drawn with Kits Core's shell parts (kits-core/includes/admin-shell.php) and fed by the
- * rankweb/v1 routes (rankweb-rest.php).
+ * RankWeb's screens on the Kits admin shell: admin.php?page=aw-seo-plus (Dashboard), admin.php?page=aw-faq (FAQ, from
+ * its own output through Kits Core's page parts) and admin.php?page=aw-seo-settings (Settings). The screens are one
+ * script (build/index.js, from src/), drawn with Kits Core's shell parts (kits-core/includes/admin-shell.php) and fed
+ * by the rankweb/v1 routes (rankweb-rest.php).
  *
- * When Kits Core or a build file is missing, the earlier screen shows.
+ * When Kits Core or a build file is missing, the screen shows a notice that it needs Kits Core. The front end (titles,
+ * schema, sitemap and the rest) never needs Kits Core.
  *
  * @package aw-seo-extras
  */
@@ -16,14 +16,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Which new screen this request asks for: 'dashboard', 'faq', 'settings' or ''.
+ * Which screen this request asks for: 'dashboard', 'faq', 'settings' or ''.
  */
 function rankweb_ui_wanted(): string {
 	$page = sanitize_key( wp_unslash( $_GET['page'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- which screen to show; nothing is saved here
-	$ui   = sanitize_key( wp_unslash( $_GET['ui'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- same
-	if ( 'classic' === $ui ) {
-		return '';
-	}
 	return array(
 		AW_SEO_MENU       => 'dashboard',
 		'aw-faq'          => 'faq',
@@ -32,7 +28,7 @@ function rankweb_ui_wanted(): string {
 }
 
 /**
- * The new screen is on this request (its script enqueued). Set on admin_enqueue_scripts.
+ * The screen is on this request (its script enqueued). Set on admin_enqueue_scripts.
  *
  * @param bool|null $set Set the flag.
  */
@@ -45,25 +41,19 @@ function rankweb_ui_ready( ?bool $set = null ): bool {
 }
 
 /**
- * The address of a new screen.
+ * The address of a screen.
  *
  * @param string $screen 'dashboard' or 'settings'.
  */
 function rankweb_ui_url( string $screen ): string {
-	return add_query_arg(
-		array(
-			'page' => 'settings' === $screen ? 'aw-seo-settings' : AW_SEO_MENU,
-			'ui'   => 'next',
-		),
-		admin_url( 'admin.php' )
-	);
+	return add_query_arg( 'page', 'settings' === $screen ? 'aw-seo-settings' : AW_SEO_MENU, admin_url( 'admin.php' ) );
 }
 
 add_action(
 	'admin_enqueue_scripts',
 	function () {
 		$screen = rankweb_ui_wanted();
-		if ( '' === $screen || ! function_exists( 'kits_shell_app' ) || ! current_user_can( 'settings' === $screen ? 'manage_options' : 'manage_categories' ) ) {
+		if ( '' === $screen || ! function_exists( 'kits_shell_app' ) || ! is_readable( AW_SEO_EXTRAS_DIR . 'build/index.js' ) || ! current_user_can( 'settings' === $screen ? 'manage_options' : 'manage_categories' ) ) {
 			return;
 		}
 		$head = get_file_data( AW_SEO_EXTRAS_DIR . 'aw-seo-extras.php', array( 'Version' => 'Version' ) );
@@ -120,24 +110,26 @@ add_action(
 );
 
 /**
- * Draw the new screen in place of the current one, when it is ready. The page callbacks call this first.
+ * Draw a screen: the shell when its script is enqueued, else a notice that it needs Kits Core. The page callbacks
+ * call this.
  *
  * @param string $screen 'dashboard', 'faq' or 'settings'.
- * @return bool True when the new screen was drawn.
  */
-function rankweb_ui_page( string $screen ): bool {
-	if ( rankweb_ui_wanted() !== $screen || ! rankweb_ui_ready() ) {
-		return false;
-	}
+function rankweb_ui_page( string $screen ): void {
 	$title = array(
 		'settings' => __( 'RankWeb settings', 'aw-seo-extras' ),
 		'faq'      => __( 'FAQ', 'aw-seo-extras' ),
 	)[ $screen ] ?? __( 'RankWeb', 'aw-seo-extras' );
-	kits_shell_mount( 'rankweb-app', $title );
-	return true;
+	if ( rankweb_ui_ready() && function_exists( 'kits_shell_mount' ) ) {
+		kits_shell_mount( 'rankweb-app', $title );
+		return;
+	}
+	echo '<div class="wrap"><h1>' . esc_html( $title ) . '</h1>';
+	wp_admin_notice( esc_html__( 'RankWeb needs Kits Core (active, with its build) to show this screen.', 'aw-seo-extras' ), array( 'type' => 'error' ) );
+	echo '</div>';
 }
 
-/** The FAQ screen's output (aw_faq_admin_body()) as page parts for the new screen. */
+/** The FAQ screen's output (aw_faq_admin_body()) as page parts for the shell screen. */
 function rankweb_faq_parts(): array {
 	if ( ! function_exists( 'aw_faq_admin_body' ) || ! function_exists( 'kits_shell_html_parts' ) ) {
 		return array();

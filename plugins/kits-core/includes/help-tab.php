@@ -1,7 +1,7 @@
 <?php
 /**
- * Kits Core: an "About Kits Core" Help tab and a sidebar on Kits Core's own screens (WP_Screen::add_help_tab), on every screen,
- * classic or shell. Screens that have their own help keep it; this tab sits beside it.
+ * Kits Core: an "About Kits Core" Help tab and a sidebar on Kits Core's own screens (WP_Screen::add_help_tab), on every screen.
+ * Screens that have their own help keep it; this tab sits beside it.
  *
  * @package kits-core
  */

@@ -278,7 +278,7 @@ add_action(
 	}
 );
 
-// The result of Save seeds, on the classic and the new Settings (12 Nov 2026: the save had no notice).
+// The result of Save seeds, on Settings (12 Nov 2026: the save had no notice).
 add_action(
 	'aw_si_settings_notices',
 	function () {

@@ -1,7 +1,7 @@
 <?php
 /**
- * InsightWeb: an "About InsightWeb" Help tab and a sidebar on InsightWeb's own screens (WP_Screen::add_help_tab), on every screen,
- * classic or shell. Screens that have their own help keep it; this tab sits beside it.
+ * InsightWeb: an "About InsightWeb" Help tab and a sidebar on InsightWeb's own screens (WP_Screen::add_help_tab).
+ * Screens that have their own help keep it; this tab sits beside it.
  *
  * @package insightweb
  */

@@ -1,11 +1,10 @@
 <?php
 /**
  * Directory enrichment in WP Admin:
- * - Sourcing → Enrichment review (Directory → Enrichment review until 25 Oct 2026): current | proposed | source | confidence, approve / reject one by one or in bulk,
- *   filters (source, confidence, state, field, Invite to claim, Reported closed, Possible duplicate), and the change
- *   log of applied values with Undo.
- * - Sourcing → Rules → Directory enrichment (Sourcing → Directory enrichment before phase 3): each source on or off, the live Google block's key and monthly cap,
- *   progress.
+ * - Sourcing → Enrichment review (Directory → Enrichment review until 25 Oct 2026): its menu item and the filter its
+ *   lists use (aw_enrich_where()); the screen is the Kits shell's (sourceweb-ui.php, sourceweb/v1 routes).
+ * - The Directory enrichment settings (each source on or off, the live Google block's key and monthly cap): their
+ *   options and checks; they are set on SourceWeb → Settings.
  * - On each listing: the source icon and name beside every field the worker set (hover: the page and the date).
  *
  * @package aw-sourcing
@@ -82,7 +81,7 @@ function aw_enrich_sources_html( $sources, $lid = 0 ) {
 add_action(
 	'admin_head',
 	function () {
-		echo '<style>.aw-enrich-src{display:inline-flex;align-items:center;gap:4px;margin-right:8px;text-decoration:none;white-space:nowrap}.aw-enrich-src img,.aw-enrich-src .aw-src-icon--letter{width:16px;height:16px;border-radius:3px}.aw-src-icon--letter{display:inline-grid;place-items:center;background:#dcdcde;font-size:10px;font-weight:600}.aw-enrich-conf{display:inline-block;padding:1px 6px;border-radius:3px;font-size:11px}.aw-enrich-conf--high{background:#d1f0d9}.aw-enrich-conf--medium{background:#fff2c6}.aw-enrich-conf--low{background:#fbd5d5}.aw-enrich-val{max-width:280px;overflow-wrap:anywhere}.aw-enrich-prov{margin:4px 0 0;font-size:12px;color:#50575e}</style>';
+		echo '<style>.aw-enrich-src{display:inline-flex;align-items:center;gap:4px;margin-right:8px;text-decoration:none;white-space:nowrap}.aw-enrich-src img,.aw-enrich-src .aw-src-icon--letter{width:16px;height:16px;border-radius:3px}.aw-src-icon--letter{display:inline-grid;place-items:center;background:#dcdcde;font-size:10px;font-weight:600}.aw-enrich-prov{margin:4px 0 0;font-size:12px;color:#50575e}</style>';
 	}
 );
 
@@ -189,32 +188,6 @@ add_action(
 	11 // after To review (review-queue.php, 10)
 );
 
-/** Approve, reject, undo (one, or the ticked rows, or every high one in the current filter). */
-add_action(
-	'admin_post_aw_enrich_decide',
-	function () {
-		if ( ! current_user_can( AW_ENRICH_CAP ) || ! check_admin_referer( 'aw_enrich_decide' ) ) {
-			wp_die( 'Not allowed.', 403 );
-		}
-		$do  = sanitize_key( $_REQUEST['do'] ?? ( $_REQUEST['bulk'] ?? '' ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-		$ids = array_filter( array_map( 'absint', (array) ( $_REQUEST['row'] ?? array() ) ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-		if ( 'approve_high' === $do ) {
-			global $wpdb;
-			list( $where, $args ) = aw_enrich_where( array_merge( wp_unslash( $_REQUEST ), array( 'status' => 'pending', 'confidence' => 'high' ) ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-			$ids = array_map( 'intval', $wpdb->get_col( $wpdb->prepare( 'SELECT e.id FROM ' . aw_enrich_table() . " e WHERE {$where} AND e.field <> 'merge_into'", $args ) ) ); // phpcs:ignore WordPress.DB -- merges are approved one by one
-			$do  = 'approve';
-		}
-		$done = 0;
-		foreach ( $ids as $id ) {
-			$fn    = array( 'approve' => 'aw_enrich_approve', 'reject' => 'aw_enrich_reject', 'undo' => 'aw_enrich_undo' )[ $do ] ?? '';
-			$done += $fn && $fn( $id ) ? 1 : 0;
-		}
-		$back = wp_get_referer() ? wp_get_referer() : admin_url( 'admin.php?page=aw-enrich-review' );
-		wp_safe_redirect( add_query_arg( 'done', $done, remove_query_arg( 'done', $back ) ) );
-		exit;
-	}
-);
-
 /**
  * SQL filter from the request: status, source, confidence, state, field, flag, listing.
  *
@@ -261,143 +234,15 @@ function aw_enrich_where( $q ) {
 	return array( implode( ' AND ', $w ), $args );
 }
 
-/** A value for the table. */
-function aw_enrich_show( $field, $v ) {
-	if ( 'place' === $field ) {
-		return esc_html( '' !== $v && array() !== $v ? aw_enrich_place_label( $v ) : '' );
-	}
-	if ( 'merge_into' === $field ) {
-		if ( is_array( $v ) ) { // an applied merge's undo record: nothing was there before
-			return '';
-		}
-		return (int) $v ? '<a href="' . esc_url( (string) get_edit_post_link( (int) $v ) ) . '">#' . (int) $v . ' ' . esc_html( html_entity_decode( get_the_title( (int) $v ), ENT_QUOTES ) ) . '</a>' : '';
-	}
-	if ( 'hours' === $field && is_array( $v ) ) {
-		return esc_html( implode( '; ', array_map( fn( $r ) => ( $r['day'] ?? '' ) . ' ' . ( ! empty( $r['closed'] ) ? 'closed' : ( $r['open'] ?? '' ) . '–' . ( $r['close'] ?? '' ) ), $v ) ) );
-	}
-	if ( in_array( $field, array( 'logo', 'photos' ), true ) ) {
-		$out = '';
-		foreach ( array_slice( array_filter( (array) $v, 'is_string' ), 0, 6 ) as $u ) {
-			$out .= '<img src="' . esc_url( $u ) . '" alt="" width="48" height="48" style="object-fit:cover;margin:0 4px 4px 0" loading="lazy" referrerpolicy="no-referrer">';
-		}
-		return $out;
-	}
-	if ( is_array( $v ) ) {
-		$v = implode( ', ', array_map( fn( $x ) => is_scalar( $x ) ? (string) $x : wp_json_encode( $x ), $v ) );
-	}
-	$v = (string) $v;
-	return preg_match( '#^https?://#', $v ) ? '<a href="' . esc_url( $v ) . '" target="_blank" rel="noopener nofollow">' . esc_html( $v ) . '</a>' : esc_html( $v );
-}
-
+/** Sourcing → Enrichment review: the shell screen (sourceweb-ui.php). */
 function aw_enrich_review_page() {
-	global $wpdb;
-	if ( function_exists( 'sourceweb_ui_page' ) && sourceweb_ui_page( 'enrichment' ) ) {
-		return; // The new Enrichment review (sourceweb-ui.php; &ui=classic shows this one).
+	if ( ! current_user_can( AW_ENRICH_CAP ) ) {
+		return;
 	}
-	if ( ! get_option( 'aw_enrich_db' ) ) {
-		aw_enrich_install();
-	}
-	$q    = wp_unslash( $_GET ); // phpcs:ignore WordPress.Security.NonceVerification
-	$st   = sanitize_key( $q['status'] ?? 'pending' );
-	$page = max( 1, (int) ( $q['paged'] ?? 1 ) );
-	$per  = 50;
-	list( $where, $args ) = aw_enrich_where( $q );
-	$t     = aw_enrich_table();
-	$total = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$t} e WHERE {$where}", $args ) ); // phpcs:ignore WordPress.DB
-	$rows  = $wpdb->get_results( $wpdb->prepare( "SELECT e.* FROM {$t} e WHERE {$where} ORDER BY FIELD(e.confidence,'high','medium','low'), e.listing_id, e.id DESC LIMIT %d OFFSET %d", array_merge( $args, array( $per, ( $page - 1 ) * $per ) ) ), ARRAY_A ); // phpcs:ignore WordPress.DB
-	$base  = admin_url( 'admin.php?page=aw-enrich-review' );
-	$prog  = aw_enrich_progress();
-
-	echo '<div class="wrap"><h1>Enrichment review</h1>';
-	aw_sourcing_screen_tabs();
-	if ( isset( $q['done'] ) ) {
-		wp_admin_notice( (int) $q['done'] . ' updated.', array( 'type' => 'success', 'dismissible' => true ) );
-	}
-	echo '<p>' . (int) $prog['checked'] . ' of ' . (int) $prog['total'] . ' listings checked · ' . (int) $prog['pending'] . ' proposals waiting. High-confidence values for empty fields of unclaimed listings are applied automatically and listed under Applied (with Undo).</p>';
-	echo '<ul class="subsubsub">';
-	foreach ( array( 'pending' => 'Waiting', 'applied' => 'Applied', 'rejected' => 'Rejected', 'failed' => 'Failed', 'undone' => 'Undone', 'all' => 'All' ) as $k => $l ) {
-		echo '<li><a href="' . esc_url( add_query_arg( 'status', $k, $base ) ) . '"' . ( $st === $k ? ' class="current"' : '' ) . '>' . esc_html( $l ) . '</a> | </li>';
-	}
-	echo '</ul><br class="clear">';
-
-	// Filters.
-	echo '<form method="get" style="margin:8px 0"><input type="hidden" name="page" value="aw-enrich-review"><input type="hidden" name="status" value="' . esc_attr( $st ) . '">';
-	$sel = function ( $name, $opts, $label ) use ( $q ) {
-		echo '<select name="' . esc_attr( $name ) . '"><option value="">' . esc_html( $label ) . '</option>';
-		foreach ( $opts as $k => $l ) {
-			echo '<option value="' . esc_attr( $k ) . '"' . selected( (string) ( $q[ $name ] ?? '' ), (string) $k, false ) . '>' . esc_html( $l ) . '</option>';
-		}
-		echo '</select> ';
-	};
-	$sel( 'source', array_map( fn( $s ) => $s[0], aw_enrich_sources() ), 'All sources' );
-	$sel( 'confidence', array( 'high' => 'High', 'medium' => 'Medium', 'low' => 'Low' ), 'Any confidence' );
-	$states = array();
-	foreach ( function_exists( 'aw_place_states' ) ? aw_place_states() : array() as $s ) {
-		$states[ $s->code ] = $s->name;
-	}
-	if ( $states ) {
-		$sel( 'state', $states, 'All states' );
-	}
-	$sel( 'field', array_map( fn( $f ) => $f[0], aw_enrich_fields_all() ), 'All fields' );
-	$sel( 'flag', array( 'invite_claim' => 'Invite to claim', 'reported_closed' => 'Reported closed', 'duplicate' => 'Possible duplicate', 'identity' => 'Identity unresolved' ), 'Any flag' );
-	submit_button( 'Filter', 'secondary', '', false );
-	echo '</form>';
-
-	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_enrich_decide">';
-	wp_nonce_field( 'aw_enrich_decide' );
-	foreach ( array( 'source', 'confidence', 'state', 'field', 'flag', 'listing' ) as $k ) {
-		if ( ! empty( $q[ $k ] ) ) {
-			echo '<input type="hidden" name="' . esc_attr( $k ) . '" value="' . esc_attr( $q[ $k ] ) . '">';
-		}
-	}
-	$bulk   = 'pending' === $st ? array( 'approve' => 'Approve', 'reject' => 'Reject', 'approve_high' => 'Approve all high (this filter)' ) : ( 'failed' === $st ? array() : array( 'undo' => 'Undo' ) ); // a failed row has nothing to undo
-	$cells  = array();
-	$labels = aw_enrich_fields_all() + ( function_exists( 'aw_enrich_claim_fields' ) ? aw_enrich_claim_fields() : array() ); // with the fields only a claim writes
-	foreach ( $rows as $r ) {
-		$r     = aw_enrich_decode( $r );
-		$lid   = (int) $r['listing_id'];
-		$flags = aw_enrich_flags( $lid );
-		$fl    = $flags ? '<br><small>' . esc_html( implode( ' · ', array_map( 'aw_enrich_flag_label', array_keys( $flags ) ) ) ) . '</small>' : '';
-		if ( ! empty( $flags['duplicate'] ) ) {
-			$fl .= '<br><small>Same ' . esc_html( implode( ', ', array_unique( (array) $flags['duplicate'] ) ) ) . ' as ' . implode( ', ', array_map( fn( $o ) => '<a href="' . esc_url( get_edit_post_link( (int) $o ) ) . '">' . esc_html( get_the_title( (int) $o ) ) . '</a>', array_keys( (array) $flags['duplicate'] ) ) ) . '</small>';
-		}
-		$cur = 'pending' === $r['status'] ? aw_enrich_current( $lid, $r['field'] ) : $r['old_value'];
-		if ( 'pending' !== $r['status'] && in_array( $r['field'], array( 'logo', 'photos', 'phone', 'whatsapp', 'emergency', 'hours' ), true ) ) {
-			$cur = 'logo' === $r['field'] ? ( $cur ? (string) wp_get_attachment_url( (int) $cur ) : '' ) : ( 'photos' === $r['field'] ? array_map( fn( $p ) => (string) wp_get_attachment_url( (int) $p ), array_filter( explode( ',', (string) $cur ) ) ) : ( is_array( $cur ) && isset( $cur[0]['number'] ) ? wp_list_pluck( $cur, 'number' ) : $cur ) );
-		}
-		$act = array();
-		foreach ( 'pending' === $r['status'] ? array( 'approve' => 'Approve', 'reject' => 'Reject' ) : ( in_array( $r['status'], array( 'auto-applied', 'approved' ), true ) ? array( 'undo' => 'Undo' ) : array() ) as $do => $l ) {
-			$act[] = '<a class="button button-small' . ( 'approve' === $do ? ' button-primary' : '' ) . '" href="' . esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=aw_enrich_decide&do=' . $do . '&row[]=' . (int) $r['id'] ), 'aw_enrich_decide' ) ) . '">' . esc_html( $l ) . '</a>';
-		}
-		$cells[] = array(
-			'cb'         => '<input class="aw-er" type="checkbox" name="row[]" value="' . (int) $r['id'] . '">',
-			'listing'    => '<a href="' . esc_url( (string) get_edit_post_link( $lid ) ) . '"><strong>' . esc_html( get_the_title( $lid ) ) . '</strong></a> <a href="' . esc_url( (string) get_permalink( $lid ) ) . '" target="_blank" aria-label="View">↗</a>' . wp_kses_post( $fl ),
-			'field'      => esc_html( $labels[ $r['field'] ][0] ?? $r['field'] ),
-			'current'    => '<div class="aw-enrich-val">' . aw_enrich_show( $r['field'], $cur ) . '</div>',
-			'proposed'   => '<div class="aw-enrich-val"><strong>' . aw_enrich_show( $r['field'], $r['value'] ) . '</strong>' . ( $r['note'] ? '<br><small>' . esc_html( $r['note'] ) . '</small>' : '' ) . '</div>',
-			'source'     => aw_enrich_sources_html( $r['sources'], $lid ),
-			'confidence' => '<span class="aw-enrich-conf aw-enrich-conf--' . esc_attr( $r['confidence'] ) . '">' . esc_html( ucfirst( $r['confidence'] ) ) . '</span>',
-			'status'     => esc_html( ucfirst( $r['status'] ) ) . '<br><small>' . esc_html( wp_date( 'j M Y', strtotime( $r['created'] ) ) ) . '</small>',
-			'act'        => implode( ' ', $act ),
-		);
-	}
-	if ( ! class_exists( 'WP_List_Table' ) ) {
-		require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
-	}
-	require_once __DIR__ . '/class-aw-sourcing-enrichment-table.php';
-	( new AW_Sourcing_Enrichment_Table( $cells, $total, $per, $bulk ) )->display();
-	echo '</form></div>';
+	sourceweb_ui_page( 'enrichment' );
 }
 
-/* ---------- Sourcing → Directory enrichment (Settings API; from phase 3 a part of Rules) ---------- */
-
-add_filter(
-	'kits_sourcing_tabs',
-	function ( $tabs ) {
-		$tabs['enrich'] = array( 'Directory enrichment', 'aw_enrich_settings_tab', true );
-		return $tabs;
-	}
-);
+/* ---------- Directory enrichment settings: their options and checks (set on SourceWeb → Settings) ---------- */
 
 add_action(
 	'admin_init',
@@ -405,57 +250,10 @@ add_action(
 		register_setting( 'aw_sourcing_enrich', 'aw_enrich_sources', array( 'type' => 'array', 'sanitize_callback' => 'aw_enrich_sources_sanitize', 'show_in_rest' => false ) );
 		register_setting( 'aw_sourcing_enrich', 'aw_enrich_google_key', array( 'type' => 'string', 'sanitize_callback' => 'aw_enrich_google_key_sanitize', 'show_in_rest' => false ) );
 		register_setting( 'aw_sourcing_enrich', 'aw_enrich_live_cap', array( 'type' => 'string', 'sanitize_callback' => fn( $v ) => (string) max( 0, (int) $v ) === (string) get_option( 'aw_enrich_live_cap', '20' ) ? get_option( 'aw_enrich_live_cap', '20' ) : (string) max( 0, (int) $v ), 'show_in_rest' => false ) );
-		add_settings_section(
-			'aw_enrich',
-			'',
-			function () {
-				$prog = aw_enrich_progress();
-				aw_sourcing_settings_marker( 'aw_enrich_sources', 'enrich' );
-				echo '<p>The enrichment worker (GitHub, after the SEO scores at 05:15 IST) fills empty listing details from these sources. ' . (int) $prog['checked'] . ' of ' . (int) $prog['total'] . ' listings checked; ' . (int) $prog['pending'] . ' proposals in <a href="' . esc_url( admin_url( 'admin.php?page=aw-enrich-review' ) ) . '">Enrichment review</a>.</p>';
-			},
-			'aw-sourcing-enrich'
-		);
-		foreach ( aw_enrich_sources() as $k => $src ) {
-			add_settings_field(
-				'aw_enrich_src_' . $k,
-				$src[0],
-				function () use ( $k, $src ) {
-					echo '<label><input type="checkbox" id="aw-es-' . esc_attr( $k ) . '" name="aw_enrich_sources[' . esc_attr( $k ) . ']" value="1"' . checked( aw_enrich_sources_on()[ $k ], true, false ) . '> On</label><p class="description">' . esc_html( $src[3] ) . '</p>';
-				},
-				'aw-sourcing-enrich',
-				'aw_enrich'
-			);
-		}
-		add_settings_field(
-			'aw_enrich_google_key',
-			'Google Places key (live block)',
-			function () {
-				$key = (string) get_option( 'aw_enrich_google_key', '' );
-				echo '<input type="password" class="regular-text" id="aw-eg-key" name="aw_enrich_google_key" value="" placeholder="' . esc_attr( $key ? 'Saved (' . substr( $key, -4 ) . '). Type a new one to replace it' : 'Not set: the live Google block is hidden' ) . '" autocomplete="off"><p class="description">For the live Google rating, hours and open or closed on listing pages (cached 24 hours, never stored on the listing). Restrict the key to the Places API.</p>';
-			},
-			'aw-sourcing-enrich',
-			'aw_enrich',
-			array( 'label_for' => 'aw-eg-key' )
-		);
-		add_settings_field(
-			'aw_enrich_live_cap',
-			'Live block: monthly cap (USD)',
-			function () {
-				echo '<input type="number" min="0" step="1" class="small-text" id="aw-eg-cap" name="aw_enrich_live_cap" value="' . esc_attr( (string) get_option( 'aw_enrich_live_cap', '20' ) ) . '"> <span class="description">Spent this month: $' . esc_html( number_format( aw_enrich_spent( 'live' ), 2 ) ) . ' live, $' . esc_html( number_format( aw_enrich_spent( 'worker' ), 2 ) ) . ' by the worker (its cap is the GitHub variable GOOGLE_PLACES_MONTHLY_BUDGET_USD).</span>';
-			},
-			'aw-sourcing-enrich',
-			'aw_enrich',
-			array( 'label_for' => 'aw-eg-cap' )
-		);
 	}
 );
 
-function aw_enrich_settings_tab() {
-	echo '<h2>Directory enrichment</h2>';
-	aw_sourcing_settings_form( 'aw_sourcing_enrich', 'aw-sourcing-enrich' );
-}
-
-/** The sources' switches from the Directory enrichment tab (logged); any other save passes through. */
+/** The sources' switches (posted with _aw_tab enrich; logged); any other save passes through. */
 function aw_enrich_sources_sanitize( $value ) {
 	if ( ! aw_sourcing_settings_tab( $value, 'enrich' ) ) {
 		return $value;

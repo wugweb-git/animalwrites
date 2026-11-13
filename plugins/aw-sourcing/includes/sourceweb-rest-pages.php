@@ -1,8 +1,8 @@
 <?php
 /**
- * SourceWeb's routes for the screens rebuilt on the Kits shell after 12 Nov 2026, under sourceweb/v1. Each calls the
- * functions today's screens use, so both screens save the same way and log to the same change log. Administrators
- * only (manage_options):
+ * SourceWeb's routes for the Sources, Keywords, Rules, AI models, Workers, report and Settings screens, under
+ * sourceweb/v1. Each calls the plugin's own save functions, so every save is checked and logged the same way.
+ * Administrators only (manage_options):
  *
  *   GET  workers                 the Workers list (view, search, orderby, order, page), the Run now log
  *   GET  workers/<id>            one worker for its form ('new' for Add New Worker), with the keys it may use

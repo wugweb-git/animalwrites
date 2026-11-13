@@ -1,7 +1,7 @@
 <?php
 /**
- * MailWeb: an "About MailWeb" Help tab and a sidebar on MailWeb's own screens (WP_Screen::add_help_tab), on every screen,
- * classic or shell. Screens that have their own help keep it; this tab sits beside it.
+ * MailWeb: an "About MailWeb" Help tab and a sidebar on each of MailWeb's own screens (WP_Screen::add_help_tab).
+ * Screens that have their own help keep it; this tab sits beside it.
  *
  * @package mailweb
  */

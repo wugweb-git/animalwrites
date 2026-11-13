@@ -1,13 +1,12 @@
 <?php
 /**
- * Search Insights' other tabs on the new screen (12 Nov 2026): Keywords, Pages, Check list, Rising, Clarity, Links,
+ * Search Insights' other tabs on the shell screen: Keywords, Pages, Check list, Rising, Clarity, Links,
  * Server, Sourcing keywords and any tab added later through the aw_si_tabs filter.
  *
  * On the tab's own address, after its load hook (which still handles every bulk and row action, then redirects back),
  * the tab draws its usual output into a buffer, and Kits Core's page parts (kits_shell_html_parts(),
- * kits-core/includes/admin-shell-parts.php) hand it to the new screen: text, notices, its list table and its forms.
- * The shell's PageParts sends every change as the same link or form request the current tab sends, so nothing is
- * saved in a new way.
+ * kits-core/includes/admin-shell-parts.php) hand it to the shell: text, notices, its list table and its forms.
+ * The shell's PageParts sends every change as the tab's own link or form request.
  *
  * @package insightweb
  */
@@ -44,11 +43,11 @@ function insightweb_tab_parts( string $tab ): array {
 		do_action( 'aw_si_tab_' . $tab );
 	}
 	$html = (string) ob_get_clean();
-	return function_exists( 'kits_shell_html_parts' ) ? kits_shell_html_parts( $html ) : insightweb_html_blocks( $html );
+	return function_exists( 'kits_shell_html_parts' ) ? kits_shell_html_parts( $html ) : array();
 }
 
 /**
- * The Settings tab's rows but Numbers (which the new Settings saves itself) as parts: the result notices, then
+ * The Settings tab's rows (Settings saves the numbers itself, through REST) as parts: the result notices, then
  * Schedule, Keys, Keyword map seed, Run now, the snapshot and import rows and Delete data, each with its own form.
  *
  * @return array[]
@@ -59,6 +58,6 @@ function insightweb_settings_more_parts(): array {
 	}
 	ob_start();
 	aw_si_action_notices();
-	aw_si_settings_tab( false );
+	aw_si_settings_tab();
 	return kits_shell_html_parts( (string) ob_get_clean() );
 }

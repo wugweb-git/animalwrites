@@ -379,7 +379,7 @@ aw_t( false !== strpos( $menu, "kits_admin_fold_menu( AW_SRC_MENU, 'plugins.php'
 aw_t( false === strpos( $menu, "'menu_order'" ), 'no top-level menu order of its own' );
 aw_t( false !== strpos( $menu, "add_menu_page( 'SourceWeb', 'SourceWeb', AW_REVIEW_CAP, AW_SRC_MENU, 'aw_sourcing_overview_page'" ) && false !== strpos( $menu, "\$GLOBALS['admin_page_hooks'][ AW_SRC_MENU ] = 'sourcing';" ), 'without Kits Core: its own menu, titled "SourceWeb", hook prefix "sourcing"' );
 foreach ( array( 'admin-menu.php', 'review-queue.php', 'enrichment-admin.php', 'sourcing-policy.php' ) as $f ) {
-	aw_t( false !== strpos( (string) file_get_contents( $inc . $f ), 'aw_sourcing_screen_tabs();' ), "the screen in $f shows the SourceWeb tabs" );
+	aw_t( false !== strpos( (string) file_get_contents( $inc . $f ), 'sourceweb_ui_page( ' ), "the screen in $f is drawn by sourceweb_ui_page()" );
 }
 aw_t( false !== strpos( $menu, "add_submenu_page( AW_SRC_MENU, 'SourceWeb', 'Overview', AW_REVIEW_CAP, AW_SRC_MENU, 'aw_sourcing_overview_page' )" ), 'Overview is the first item, at the menu\'s slug' );
 aw_t( false !== strpos( (string) file_get_contents( $inc . 'review-queue.php' ), "add_submenu_page( AW_SRC_MENU, 'To review'" ), 'To review is a SourceWeb screen' );
@@ -404,7 +404,12 @@ aw_t( false === strpos( $all_inc, 'settings_page_aw-sourcing' ), 'no code uses t
 preg_match_all( '/^function\s+([a-z0-9_]+)\s*\(/mi', $all_inc, $fn_m );
 $fn_dup = array_keys( array_filter( array_count_values( array_map( 'strtolower', $fn_m[1] ) ), fn( $c ) => $c > 1 ) );
 aw_t( array() === $fn_dup, 'every function is declared once (' . implode( ', ', $fn_dup ) . ')' );
-aw_t( false !== strpos( $menu, "'aw_sourcing_own_settings_tab'" ) && false !== strpos( $menu, 'function aw_sourcing_own_settings_tab()' ), 'Sourcing → Settings draws with its own function' );
+aw_t( false !== strpos( $menu, "\$tabs[ AW_SRC_SETTINGS_TAB ] = array( 'Settings' );" ) && false === strpos( $menu, 'aw_sourcing_own_settings_tab' ), 'Sourcing → Settings is a shell screen (no classic callback)' );
+// One way to draw each screen: no tab registers a classic callback, no ui=classic switch, no screen options.
+aw_t( ! preg_match( '/\$tabs\[[^\]]+\] = array\( \'[^\']+\', /', $all_inc ) && false !== strpos( (string) file_get_contents( $inc . 'rules-admin.php' ), "array( 'rules' => array( 'Rules' ) )" ), 'no tab registers a classic callback' );
+aw_t( false === strpos( $all_inc, "'classic'" ) && false === strpos( $all_inc, 'ui=classic' ) && false === strpos( $all_inc, "'ui' => 'next'" ), 'no ui=classic or ui=next switch' );
+aw_t( false === strpos( $all_inc, 'add_screen_option(' ) && false === strpos( $all_inc, 'set_screen_option_' ), 'no screen options (the shell has its own)' );
+aw_t( array() === array_filter( array( 'review', 'enrichment', 'sources', 'publishers', 'keywords', 'suggestions', 'sections', 'categories', 'ai-keys', 'simple' ), fn( $t ) => file_exists( $inc . 'class-aw-sourcing-' . $t . '-table.php' ) ) && ! file_exists( $inc . 'class-aw-workers-table.php' ), 'the classic list tables are gone' );
 aw_t( false === strpos( $all_inc, "options-general.php?page=aw-sourcing" ) && false === strpos( $all_inc, 'add_options_page' ), 'no link or page under Settings' );
 aw_t( false === strpos( $all_inc, "add_submenu_page( 'aw-inbox'" ) && false === strpos( $all_inc, 'edit.php?post_type=aw_listing&page=aw-enrich-review' ), 'nothing under Inbox or Directory' );
 // Retired addresses (owner, 25 Oct 2026): the old tab redirects and the old POST tab names are gone; the phase switch stays.

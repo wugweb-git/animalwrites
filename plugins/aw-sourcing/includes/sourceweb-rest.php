@@ -1,11 +1,11 @@
 <?php
 /**
- * SourceWeb's routes for its new screens, under sourceweb/v1:
+ * SourceWeb's routes for the Dashboard, To review and Enrichment review screens, under sourceweb/v1:
  *
  *   GET  dashboard              edit_others_posts  the tiles, from the background counts (sourceweb-dashboard.php)
  *   POST dashboard/count        edit_others_posts  ask for a count now (one background event)
  *   GET  review                 edit_others_posts  one page of To review (type, search, source, why, orderby, order, page)
- *   POST review/decide          edit_others_posts  publish or reject items (aw_review_apply(), as today's screen)
+ *   POST review/decide          edit_others_posts  publish or reject items (aw_review_apply())
  *   POST review/publish-all     edit_others_posts  publish every item of a view; the count sent must match
  *   GET  enrichment             edit_others_posts  one page of Listing details, one row per listing
  *   POST enrichment/decide      edit_others_posts  approve, reject or undo rows (aw_enrich_approve/reject/undo())
@@ -522,7 +522,7 @@ function sourceweb_enrich_text( string $field, $v ): string {
 }
 
 /**
- * Picture URLs of a logo or photos value, for thumbnails (the classic table shows the first 6).
+ * Picture URLs of a logo or photos value, for thumbnails.
  *
  * @param mixed $v URL or URLs.
  * @return string[]
@@ -554,7 +554,7 @@ function sourceweb_enrich_links( array $sources ): array {
 }
 
 /**
- * The value a row replaced (pending: the listing's value now), as today's screen works it out.
+ * The value a row replaced (pending: the listing's value now).
  *
  * @param array $r Decoded row.
  * @return mixed
@@ -591,7 +591,7 @@ function sourceweb_enrich_query( WP_REST_Request $request, string $status ): arr
 		}
 	}
 	if ( (int) $request['listing'] > 0 ) {
-		$q['listing'] = (int) $request['listing']; // one listing (&listing=ID, as the classic screen)
+		$q['listing'] = (int) $request['listing']; // one listing (&listing=ID)
 	}
 	return $q;
 }
@@ -805,7 +805,7 @@ function sourceweb_enrich_search( string $where, array $args, WP_REST_Request $r
 
 /**
  * POST enrichment/decide: rows by id, every waiting row of the ticked listings (merges left out: they are approved one
- * by one, as today), or every high one in the filter. The same functions as today's screen.
+ * by one), or every high one in the filter.
  *
  * @param WP_REST_Request $request Request.
  */
@@ -829,7 +829,7 @@ function sourceweb_rest_enrichment_decide( WP_REST_Request $request ) {
 	} elseif ( ! $ids && $listings && in_array( $do, array( 'approve', 'reject' ), true ) ) {
 		$ids = array_map( 'intval', $wpdb->get_col( $wpdb->prepare( "SELECT id FROM {$t} WHERE status = 'pending' AND field <> 'merge_into' AND listing_id IN ( " . implode( ', ', array_fill( 0, count( $listings ), '%d' ) ) . ' )', $listings ) ) );
 	} elseif ( ! $ids && $listings && 'undo' === $do ) {
-		// Bulk Undo of the ticked listings: every applied value, newest first (as the classic screen's bulk Undo).
+		// Bulk Undo of the ticked listings: every applied value, newest first.
 		$ids = array_map( 'intval', $wpdb->get_col( $wpdb->prepare( "SELECT id FROM {$t} WHERE status IN ( 'approved', 'auto-applied' ) AND listing_id IN ( " . implode( ', ', array_fill( 0, count( $listings ), '%d' ) ) . ' ) ORDER BY id DESC', $listings ) ) );
 	}
 	// phpcs:enable WordPress.DB

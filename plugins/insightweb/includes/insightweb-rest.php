@@ -1,6 +1,6 @@
 <?php
 /**
- * InsightWeb's routes for its new screens, under insightweb/v1:
+ * InsightWeb's routes for its shell screens, under insightweb/v1:
  *
  *   GET  dashboard           aw_si_cap()       the tiles and lists, from the stored counts (insightweb-dashboard.php)
  *   POST dashboard/count     aw_si_cap()       ask for a count now (one background event)
@@ -507,7 +507,7 @@ function insightweb_services(): array {
 	$sitekit = class_exists( '\Google\Site_Kit\Plugin' );
 	$sk_url  = add_query_arg( 'page', 'googlesitekit-settings', admin_url( 'admin.php' ) );
 	$keys    = current_user_can( 'manage_options' ) ? admin_url( 'admin.php?page=aw-keys' ) : '';
-	$run     = add_query_arg( 'ui', 'classic', aw_si_url( 'settings' ) );
+	$run     = aw_si_url( 'settings' );
 	$out     = array();
 	$module  = function ( string $slug, string $src, string $name, string $prop ) use ( $sitekit, $sk_url, $run ) {
 		$s                             = get_option( 'googlesitekit_' . $slug . '_settings' );

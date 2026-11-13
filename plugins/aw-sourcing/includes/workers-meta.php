@@ -65,12 +65,6 @@ function aw_worker_groups() {
 	return AW_WORKER_GROUPS + $extra;
 }
 
-/** The group's core dashicon. */
-function aw_worker_group_icon( $group ) {
-	$g = aw_worker_groups()[ $group ] ?? array( '', 'admin-generic' );
-	return '<span class="dashicons dashicons-' . esc_attr( $g[1] ) . '" aria-hidden="true"></span>';
-}
-
 /** Saved overrides and Planned workers. */
 function aw_workers_meta() {
 	return (array) get_option( 'aw_workers_meta', array() );
@@ -168,15 +162,6 @@ function aw_worker_def( $file, array $w ) {
 	);
 }
 
-/** Icon and name of a worker (or the bare ID of one that no longer exists), as HTML. */
-function aw_worker_label_html( $id, $with_id = false ) {
-	$w = aw_worker( $id );
-	if ( ! $w ) {
-		return '<code>' . esc_html( $id ) . '</code> (no longer exists)';
-	}
-	return aw_worker_group_icon( $w['group'] ) . ' ' . esc_html( $w['name'] ) . ( $with_id ? ' <code>' . esc_html( $w['id'] ) . '</code>' : '' );
-}
-
 /**
  * Saved keys attached to this worker specifically, and those for every worker.
  *
@@ -195,33 +180,6 @@ function aw_worker_key_count( $id ) {
 		}
 	}
 	return array( $own, $all );
-}
-
-/**
- * The workers as a checkbox list (core fieldset), grouped as on the Workers tab.
- *
- * @param string   $name    Field name (without []).
- * @param string[] $checked Ticked worker IDs.
- * @param string   $legend  Screen-reader legend.
- */
-function aw_workers_checkboxes( $name, array $checked, $legend ) {
-	echo '<fieldset><legend class="screen-reader-text"><span>' . esc_html( $legend ) . '</span></legend>';
-	$groups = aw_worker_groups();
-	$by     = array();
-	foreach ( aw_workers_all() as $id => $w ) {
-		$by[ $w['group'] ][ $id ] = $w;
-	}
-	foreach ( $groups as $slug => $g ) {
-		if ( empty( $by[ $slug ] ) ) {
-			continue;
-		}
-		echo '<p><strong>' . aw_worker_group_icon( $slug ) . ' ' . esc_html( $g[0] ) . '</strong></p>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in aw_worker_group_icon
-		foreach ( $by[ $slug ] as $id => $w ) {
-			echo '<label><input type="checkbox" name="' . esc_attr( $name ) . '[]" value="' . esc_attr( $id ) . '"' . checked( in_array( $id, $checked, true ), true, false ) . '> '
-				. esc_html( $w['name'] ) . ' <code>' . esc_html( $id ) . '</code>' . ( $w['planned'] ? ' (planned)' : '' ) . '</label><br>';
-		}
-	}
-	echo '</fieldset>';
 }
 
 /**

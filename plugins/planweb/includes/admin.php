@@ -1,8 +1,8 @@
 <?php
 /**
- * PlanWeb → Calendar, the interim screen until the Kits Core shell ships (plan, section 5): the month grid from Dates,
- * a list of entries (WP_List_Table), the add and edit form, and the import check. Server-rendered with core markup.
- * The old address admin.php?page=aw-dates opens this screen.
+ * PlanWeb's menu and the Calendar: the month grid from Dates, the add and edit form, and the import check, reached
+ * with m, edit, done or error (the plain page is the shell, planweb-ui.php). Server-rendered with core markup.
+ * The old address admin.php?page=aw-dates opens the Calendar on its month.
  *
  * @package planweb
  */
@@ -32,10 +32,8 @@ add_action(
 		add_action(
 			'load-' . $hook,
 			function () {
-				$m    = planweb_month_arg( $_GET['m'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification,WordPress.Security.ValidatedSanitizedInput -- a redirect; planweb_month_arg() sanitizes.
-				$args = '' !== $m ? array( 'm' => $m ) : array();
-				$args['ui'] = 'classic'; // The old Dates address opens the Calendar, which is on the earlier screen.
-				wp_safe_redirect( planweb_url( $args ) );
+				$m = planweb_month_arg( $_GET['m'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification,WordPress.Security.ValidatedSanitizedInput -- a redirect; planweb_month_arg() sanitizes.
+				wp_safe_redirect( planweb_url( array( 'm' => '' !== $m ? $m : wp_date( 'Y-m' ) ) ) ); // A month opens the Calendar.
 				exit;
 			}
 		);
@@ -115,13 +113,23 @@ function planweb_status_badge( string $status ): string {
 	return '<span class="planweb-status planweb-status--' . esc_attr( $status ) . '">' . esc_html( PLANWEB_STATUSES[ $status ] ?? $status ) . '</span>';
 }
 
-/** PlanWeb → Calendar. */
+/** PlanWeb: the shell screens (planweb-ui.php), or the Calendar for a month, an edit form or a notice. */
 function planweb_screen() {
 	if ( ! current_user_can( 'edit_planweb_entries' ) ) {
 		wp_die( esc_html__( 'Sorry, you are not allowed to access this page.', 'planweb' ), 403 );
 	}
 	if ( planweb_ui_page() ) {
-		return; // The new screens, includes/planweb-ui.php (&ui=classic shows this one).
+		return; // The shell screens, includes/planweb-ui.php.
+	}
+	$screen = planweb_ui_wanted();
+	if ( '' !== $screen ) {
+		if ( ! current_user_can( planweb_ui_cap( $screen ) ) ) {
+			wp_die( esc_html__( 'Sorry, you are not allowed to access this page.', 'planweb' ), 403 );
+		}
+		echo '<div class="wrap"><h1>' . esc_html__( 'PlanWeb', 'planweb' ) . '</h1>';
+		wp_admin_notice( esc_html__( 'PlanWeb needs Kits Core (active, with its build) to show this screen.', 'planweb' ), array( 'type' => 'error' ) );
+		echo '</div>';
+		return;
 	}
 	// phpcs:disable WordPress.Security.NonceVerification.Recommended -- filters and messages only; every change is a nonce-checked admin-post.
 	$month = planweb_month_arg( $_GET['m'] ?? '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- planweb_month_arg() sanitizes.
@@ -133,9 +141,8 @@ function planweb_screen() {
 
 	echo '<div class="wrap planweb"><h1 class="wp-heading-inline">' . esc_html__( 'Calendar', 'planweb' ) . '</h1> <a class="page-title-action" href="' . esc_url( planweb_url( array( 'm' => $month ) ) . '#planweb-form' ) . '">' . esc_html__( 'Add entry', 'planweb' ) . '</a><hr class="wp-header-end">';
 	$messages = array(
-		'saved'   => __( 'Entry saved.', 'planweb' ),
-		'trashed' => __( 'Entry moved to the Trash.', 'planweb' ),
-		'import'  => __( 'Import run.', 'planweb' ),
+		'saved'  => __( 'Entry saved.', 'planweb' ),
+		'import' => __( 'Import run.', 'planweb' ),
 	);
 	if ( isset( $messages[ $done ] ) ) {
 		wp_admin_notice( esc_html( $messages[ $done ] ), array( 'type' => 'success', 'dismissible' => true ) );
@@ -147,13 +154,7 @@ function planweb_screen() {
 
 	planweb_month_grid( $month );
 
-	echo '<h2>' . esc_html__( 'All entries', 'planweb' ) . '</h2>';
-	require_once PLANWEB_DIR . 'includes/class-planweb-list-table.php';
-	$table = new PlanWeb_List_Table();
-	$table->prepare_items();
-	echo '<form method="get"><input type="hidden" name="page" value="' . esc_attr( PLANWEB_MENU ) . '"><input type="hidden" name="m" value="' . esc_attr( $month ) . '">';
-	$table->display();
-	echo '</form>';
+	echo '<p><a href="' . esc_url( planweb_ui_url( 'entries' ) ) . '">' . esc_html__( 'All entries', 'planweb' ) . '</a></p>';
 
 	if ( '' !== $error ) {
 		$draft = get_transient( 'planweb_draft_' . get_current_user_id() );
@@ -185,7 +186,7 @@ function planweb_month_grid( string $month ) {
 	foreach ( planweb_entries( $month . '-01', sprintf( '%s-%02d', $month, $days ) ) as $e ) {
 		$by[ $e['date'] ][] = $e;
 	}
-	echo '<p class="planweb-nav"><a class="button" href="' . esc_url( planweb_url( array( 'm' => $prev ) ) ) . '">‹ ' . esc_html( wp_date( 'F', strtotime( $prev . '-01 12:00:00' ) ) ) . '</a> <strong>' . esc_html( wp_date( 'F Y', $first ) ) . '</strong> <a class="button" href="' . esc_url( planweb_url( array( 'm' => $next ) ) ) . '">' . esc_html( wp_date( 'F', strtotime( $next . '-01 12:00:00' ) ) ) . ' ›</a> <a class="button" href="' . esc_url( planweb_url() ) . '">' . esc_html__( 'Today', 'planweb' ) . '</a></p>';
+	echo '<p class="planweb-nav"><a class="button" href="' . esc_url( planweb_url( array( 'm' => $prev ) ) ) . '">‹ ' . esc_html( wp_date( 'F', strtotime( $prev . '-01 12:00:00' ) ) ) . '</a> <strong>' . esc_html( wp_date( 'F Y', $first ) ) . '</strong> <a class="button" href="' . esc_url( planweb_url( array( 'm' => $next ) ) ) . '">' . esc_html( wp_date( 'F', strtotime( $next . '-01 12:00:00' ) ) ) . ' ›</a> <a class="button" href="' . esc_url( planweb_url( array( 'm' => wp_date( 'Y-m' ) ) ) ) . '">' . esc_html__( 'Today', 'planweb' ) . '</a></p>';
 	echo '<table class="widefat fixed planweb-month"><caption class="screen-reader-text">' . esc_html( wp_date( 'F Y', $first ) ) . '</caption><thead><tr>';
 	foreach ( array( __( 'Mon', 'planweb' ), __( 'Tue', 'planweb' ), __( 'Wed', 'planweb' ), __( 'Thu', 'planweb' ), __( 'Fri', 'planweb' ), __( 'Sat', 'planweb' ), __( 'Sun', 'planweb' ) ) as $h ) {
 		echo '<th scope="col">' . esc_html( $h ) . '</th>';
@@ -337,19 +338,6 @@ add_action(
 				)
 			)
 		);
-		exit;
-	}
-);
-
-add_action(
-	'admin_post_planweb_trash',
-	function () {
-		$id = absint( $_GET['id'] ?? 0 );
-		if ( ! check_admin_referer( 'planweb_trash_' . $id ) || ! planweb_entry( $id ) || ! current_user_can( 'delete_post', $id ) ) {
-			wp_die( esc_html__( 'Sorry, you are not allowed to do that.', 'planweb' ), 403 );
-		}
-		wp_trash_post( $id );
-		wp_safe_redirect( planweb_url( array( 'done' => 'trashed' ) ) );
 		exit;
 	}
 );
