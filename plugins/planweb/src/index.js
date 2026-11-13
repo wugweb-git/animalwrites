@@ -938,20 +938,43 @@ function Services() {
 }
 
 /**
- * The PlanWeb switch, as Kits → Modules has it. Saved only when it changed.
+ * The PlanWeb group, as Kits → Modules → PlanWeb has it: the switch and "Delete this plugin's data when it is
+ * deleted". Each saved only when it changed; "Reset this section" restores the group's defaults.
  *
  * @param {Object}   props
- * @param {Object}   props.group   { on }.
+ * @param {Object}   props.group   { on, deleteData }.
  * @param {Function} props.onSaved New state.
  */
 function SwitchGroup( { group, onSaved } ) {
 	const [ on, setOn ] = useState( group.on );
+	const [ deleteData, setDeleteData ] = useState( !! group.deleteData );
 	const [ busy, setBusy ] = useState( false );
 	const [ msg, setMsg ] = useState( null );
 	useEffect( () => setOn( group.on ), [ group.on ] );
+	useEffect(
+		() => setDeleteData( !! group.deleteData ),
+		[ group.deleteData ]
+	);
+	const dirty = on !== group.on || deleteData !== !! group.deleteData;
+	const send = ( data ) => {
+		setBusy( true );
+		setMsg( null );
+		apiFetch( {
+			path: path( 'settings/switch' ),
+			method: 'POST',
+			data,
+		} )
+			.then( ( r ) => {
+				onSaved( { on: r.on, deleteData: r.deleteData } );
+				setMsg( { tone: 'success', text: r.message } );
+			} )
+			.catch( ( e ) => setMsg( { tone: 'error', text: errText( e ) } ) )
+			.finally( () => setBusy( false ) );
+	};
 	const save = () => {
 		if (
 			! on &&
+			group.on &&
 			// eslint-disable-next-line no-alert -- a plain browser confirm before switching the plugin off
 			! window.confirm(
 				__(
@@ -962,26 +985,24 @@ function SwitchGroup( { group, onSaved } ) {
 		) {
 			return;
 		}
-		setBusy( true );
-		setMsg( null );
-		apiFetch( {
-			path: path( 'settings/switch' ),
-			method: 'POST',
-			data: { on },
-		} )
-			.then( ( r ) => {
-				onSaved( { on: r.on } );
-				setMsg( { tone: 'success', text: r.message } );
-			} )
-			.catch( ( e ) => setMsg( { tone: 'error', text: errText( e ) } ) )
-			.finally( () => setBusy( false ) );
+		send( { on, delete_data: deleteData } );
+	};
+	const restore = () => {
+		if (
+			// eslint-disable-next-line no-alert -- a plain browser confirm before a reset, as core's list tables do
+			window.confirm(
+				__( 'Reset this section to its defaults?', 'planweb' )
+			)
+		) {
+			send( { reset: true } );
+		}
 	};
 	return (
 		<SettingsGroup
 			id="planweb-group-switch"
 			title={ __( 'PlanWeb', 'planweb' ) }
 			description={ __(
-				'The same switch as Kits → Modules → PlanWeb.',
+				'The same settings as Kits → Modules → PlanWeb.',
 				'planweb'
 			) }
 			footer={
@@ -989,10 +1010,13 @@ function SwitchGroup( { group, onSaved } ) {
 					<Button
 						variant="primary"
 						busy={ busy }
-						disabled={ on === group.on }
+						disabled={ ! dirty }
 						onClick={ save }
 					>
 						{ __( 'Save changes', 'planweb' ) }
+					</Button>
+					<Button busy={ busy } onClick={ restore }>
+						{ __( 'Reset this section', 'planweb' ) }
 					</Button>
 					<span aria-live="polite">
 						{ msg && 'success' === msg.tone ? msg.text : '' }
@@ -1014,6 +1038,30 @@ function SwitchGroup( { group, onSaved } ) {
 					'planweb'
 				) }
 			/>
+			<div className="kits-shell-field">
+				<label htmlFor="planweb-delete-data">
+					<input
+						id="planweb-delete-data"
+						type="checkbox"
+						checked={ deleteData }
+						aria-describedby="planweb-delete-data-help"
+						onChange={ ( e ) => setDeleteData( e.target.checked ) }
+					/>{ ' ' }
+					{ __(
+						"Delete this plugin's data when it is deleted",
+						'planweb'
+					) }
+				</label>
+				<p
+					id="planweb-delete-data-help"
+					className="kits-shell-field__help"
+				>
+					{ __(
+						'Off: everything stays in the database if the plugin is deleted.',
+						'planweb'
+					) }
+				</p>
+			</div>
 		</SettingsGroup>
 	);
 }

@@ -9,7 +9,9 @@
  *   POST entries/<id>              edit_post             change an entry (the same)
  *   POST entries/<id>/trash        delete_post           move an entry to the Trash (as the Calendar's Trash link)
  *   GET  settings                  manage_options        the switch, the lists and the Dates import check
- *   POST settings/switch           manage_options        the PlanWeb switch (planweb_on), written only when it changes
+ *   POST settings/switch           manage_options        the PlanWeb group: the switch (planweb_on) and "Delete this
+ *                                                        plugin's data" (delete_data), each written only when it
+ *                                                        changes; reset: true restores the group's defaults
  *   POST import                    manage_options        run the Dates import again (planweb_import())
  *   GET  services                  manage_options        the services the plan names, with their state
  *
@@ -80,9 +82,11 @@ add_action(
 				'manage_options',
 				'planweb_rest_switch',
 				array(
-					'on' => array(
-						'type'     => 'boolean',
-						'required' => true,
+					'on'          => array( 'type' => 'boolean' ),
+					'delete_data' => array( 'type' => 'boolean' ),
+					'reset'       => array(
+						'type'    => 'boolean',
+						'default' => false,
 					),
 				),
 			),
@@ -556,7 +560,8 @@ function planweb_settings_payload(): array {
 	}
 	return array(
 		'switch' => array(
-			'on' => planweb_on(),
+			'on'         => planweb_on(),
+			'deleteData' => planweb_delete_data_on(),
 		),
 		'lists'  => $lists,
 		'import' => planweb_import_payload(),
@@ -564,20 +569,40 @@ function planweb_settings_payload(): array {
 }
 
 /**
- * The PlanWeb switch: written only when it changes, through the same clean-up as Kits → Modules.
+ * The PlanWeb group: the switch, written only when it changes, through the same clean-up as Kits → Modules, and
+ * "Delete this plugin's data when it is deleted". Each only when sent. reset: true is "Reset this section"
+ * (planweb_settings_reset(): the switch is left as it is).
  *
  * @param WP_REST_Request $request Request.
  */
 function planweb_rest_switch( WP_REST_Request $request ) {
-	$new = planweb_switch_change( (bool) $request['on'], (string) get_option( 'planweb_on', '' ) );
+	if ( $request['reset'] ) {
+		$saved = planweb_settings_reset();
+		return rest_ensure_response(
+			array(
+				'saved'      => $saved,
+				'on'         => planweb_on(),
+				'deleteData' => planweb_delete_data_on(),
+				'message'    => __( 'Defaults restored.', 'planweb' ),
+			)
+		);
+	}
+	$new = null === $request['on'] ? null : planweb_switch_change( (bool) $request['on'], (string) get_option( 'planweb_on', '' ) );
 	if ( null !== $new ) {
 		update_option( 'planweb_on', $new, true );
 	}
+	$data = null !== $request['delete_data'] && planweb_delete_data_save( (bool) $request['delete_data'] );
+	if ( null !== $new ) {
+		$message = planweb_on() ? __( 'Saved. PlanWeb is on.', 'planweb' ) : __( 'Saved. PlanWeb is off: Kits → Dates is back, and the entries are kept.', 'planweb' );
+	} else {
+		$message = $data ? __( 'Saved.', 'planweb' ) : __( 'Nothing changed.', 'planweb' );
+	}
 	return rest_ensure_response(
 		array(
-			'saved'   => null !== $new,
-			'on'      => planweb_on(),
-			'message' => null === $new ? __( 'Nothing changed.', 'planweb' ) : ( planweb_on() ? __( 'Saved. PlanWeb is on.', 'planweb' ) : __( 'Saved. PlanWeb is off: Kits → Dates is back, and the entries are kept.', 'planweb' ) ),
+			'saved'      => null !== $new || $data,
+			'on'         => planweb_on(),
+			'deleteData' => planweb_delete_data_on(),
+			'message'    => $message,
 		)
 	);
 }
