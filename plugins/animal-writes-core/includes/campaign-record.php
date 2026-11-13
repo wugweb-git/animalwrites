@@ -225,45 +225,6 @@ add_filter(
 );
 
 /*
- * Community dogs: a row of section links under the hero, so a phone reader can jump to any part of a long record page
- * (thumb-sized chips that scroll sideways on phones and wrap from 768). Each label is the section's own H2, word for
- * word, so no new words; the nav's name is the site's existing word "Contents" (item-head.php). Sections without an H2
- * are left out. Front end only; the stored content is not changed.
- */
-const AW_CAMP_JUMP_SECTIONS = array( 'campaign-goal', 'why-it-matters', 'how-to-help', 'context', 'impact', 'next-steps', 'partners', 'press', 'library', 'news', 'share', 'updates' );
-
-add_filter(
-	'render_block_core/post-content',
-	function ( $html ) {
-		if ( is_admin() || ! is_singular( 'aw_campaign' ) || false === strpos( $html, 'aw-camp--community-dogs' ) || false !== strpos( $html, 'aw-camp-jump' )
-			|| ! preg_match( '/<section\b[^>]*\bid="campaign-goal"[^>]*>/', $html, $first, PREG_OFFSET_CAPTURE ) ) {
-			return $html;
-		}
-		$items = '';
-		foreach ( AW_CAMP_JUMP_SECTIONS as $anchor ) {
-			if ( ! preg_match( '/<section\b[^>]*\bid="' . $anchor . '"[^>]*>/', $html, $s, PREG_OFFSET_CAPTURE )
-				|| ! preg_match( '/<h2\b[^>]*>(.*?)<\/h2>/s', $html, $h, PREG_OFFSET_CAPTURE, $s[0][1] ) ) {
-				continue;
-			}
-			$next = strpos( $html, 'aw-camp-section ', $s[0][1] + strlen( $s[0][0] ) );
-			if ( false !== $next && $h[0][1] > $next ) {
-				continue; // the H2 found belongs to a later section
-			}
-			$label = trim( wp_strip_all_tags( $h[1][0] ) );
-			if ( '' !== $label ) {
-				$items .= '<li><a class="kit-chip" href="#' . esc_attr( $anchor ) . '">' . esc_html( $label ) . '</a></li>';
-			}
-		}
-		if ( '' === $items ) {
-			return $html;
-		}
-		$nav = '<nav class="aw-camp-jump" aria-label="' . esc_attr__( 'Contents', 'animal-writes-core' ) . '"><ul>' . $items . '</ul></nav>';
-		return substr_replace( $html, $nav, $first[0][1], 0 );
-	},
-	20
-);
-
-/*
  * The Community dogs hero photo (the stamp) is stored with no width, height or srcset, so phones downloaded the 683px
  * JPEG (70 KB) for a stamp about 150px wide and its box could shift on load. Give the img the attachment's width,
  * height and srcset, sized to the stamp (campaign-record.css: 112px below 768, 200px to 1199, 320px from 1200). Front end

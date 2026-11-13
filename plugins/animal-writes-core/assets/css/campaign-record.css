@@ -154,17 +154,6 @@
 }
 @media (prefers-reduced-motion: reduce) { .aw-camp.aw-camp--community-dogs .aw-camp-hero > .wp-block-image { animation: none; } .aw-camp.aw-camp--community-dogs :is(#next-steps .aw-camp-doclist li, .aw-camp-partner-logos > figure img, .aw-camp-follow a) { transition: none; } .aw-camp.aw-camp--community-dogs .aw-camp-follow a:active { transform: none; } }
 
-/* ---------- Contents: the section chips under the hero (campaign-record.php). The shared .kit-chip as it is (its 44px
-   tap and focus states) at the full 44px; on phones one row that scrolls sideways, the cut-off chip at the edge showing
-   there is more; from 768 the chips wrap. The block padding keeps the focus ring inside the scroll box. ---------- */
-.aw-camp.aw-camp--community-dogs > .aw-camp-jump { margin: 0; padding: var(--kit-space-2) 0; background: var(--dg-raised); border-bottom: 1px solid var(--kit-color-line); }
-.aw-camp.aw-camp--community-dogs > .aw-camp-jump ul { display: flex; gap: var(--kit-space-2); margin: 0; padding: var(--kit-space-2) var(--dg-inline); list-style: none; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x proximity; scroll-padding-inline: var(--dg-inline); scrollbar-width: none; }
-.aw-camp.aw-camp--community-dogs > .aw-camp-jump ul::-webkit-scrollbar { display: none; }
-.aw-camp.aw-camp--community-dogs > .aw-camp-jump li { flex: none; margin: 0; scroll-snap-align: start; }
-.aw-camp.aw-camp--community-dogs > .aw-camp-jump .kit-chip { min-height: var(--kit-size-target); padding-inline: var(--kit-space-4); } /* a thumb target you can see: the whole 44px is the chip; type stays the shared chip label (kit.css) */
-@media (min-width: 768px) { .aw-camp.aw-camp--community-dogs > .aw-camp-jump ul { flex-wrap: wrap; overflow: visible; } }
-.aw-camp.aw-camp--community-dogs > .aw-camp-jump + .aw-camp-section { border-top: 0 !important; }
-
 /* ---------- Share this story (owner, 13 Nov 2026): the site's one share bar on the shared #share band (campaign.css).
    That band sets white on the campaign mark; here the mark is #ffa500, where white is about 2:1, so the band's text,
    icons, rings and focus ring take the palette's ink (9.4:1 on #ffa500, as in the hero). ---------- */
