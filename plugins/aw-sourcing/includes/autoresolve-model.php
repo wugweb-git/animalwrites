@@ -50,7 +50,7 @@ function aw_ar_pin( $s ) {
  * @return string[]
  */
 function aw_ar_tokens( $s ) {
-	$s   = strtolower( html_entity_decode( strip_tags( (string) $s ) ) );
+	$s   = strtolower( html_entity_decode( wp_strip_all_tags( (string) $s ) ) );
 	$s   = preg_replace( '/\b\d{3}\s?\d{3}\b/', ' ', $s );
 	$s   = preg_replace( '/[^a-z0-9\/ ]+/', ' ', $s );
 	$out = array();
