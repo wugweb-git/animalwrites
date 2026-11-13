@@ -248,4 +248,6 @@
 @media (min-width: 1200px) {
 	.aw-ed-faq .kit-faq { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--kit-space-4); }
 }
-
+/* Home News, Learn and Library (owner, 13 Nov 2026: "Fix the lone card"): each Query Loop gives four items, two full rows
+   of two from 1200; below 1200 (one column) the fourth is hidden, so phones and tablets keep three. */
+@media (max-width: 1199px) { :is(.aw-ed-news, .aw-ed-learn, .aw-ed-law) .wp-block-post-template > li:nth-child(n+4) { display: none; } }

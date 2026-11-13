@@ -34,7 +34,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <!-- /wp:buttons --></div>
 <!-- /wp:group -->
 
-<!-- wp:query {"queryId":44,"query":{"perPage":3,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","inherit":false,"taxQuery":{"post_tag":[1042]}},"className":"aw-hub-list","layout":{"type":"default"}} -->
+<!-- wp:query {"queryId":44,"query":{"perPage":4,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","inherit":false,"taxQuery":{"post_tag":[1042]}},"className":"aw-hub-list","layout":{"type":"default"}} -->
 <div class="wp-block-query aw-hub-list"><!-- wp:post-template {"className":"kit-tasks aw-tasks is-three","layout":{"type":"default"}} -->
 <?php echo function_exists( 'aw_card_item' ) ? aw_card_item( 'post', 'block-md', 3 ) : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- the Resources card: block markup from the plugin's own template, not user text ?>
 <!-- /wp:post-template --></div>
