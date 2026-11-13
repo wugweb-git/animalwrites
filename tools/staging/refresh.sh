@@ -32,7 +32,9 @@ $W config set DISABLE_WP_CRON true --raw --quiet
 for p in animal-writes-core aw-seo-extras kits-core mailweb; do
   ln -sfn "../../aw_deploy/plugins/$p" "$STAGING_ROOT/wp-content/plugins/$p"
 done
-for t in animal-writes kits-by-wugweb; do
+# The animal-writes child theme was retired on 14 Nov 2026: drop an old link to it, as live has none in use.
+if [ -L "$STAGING_ROOT/wp-content/themes/animal-writes" ]; then rm -f "$STAGING_ROOT/wp-content/themes/animal-writes"; fi
+for t in kits-by-wugweb; do
   ln -sfn "../../aw_deploy/themes/$t" "$STAGING_ROOT/wp-content/themes/$t"
 done
 for d in "$LIVE_ROOT"/wp-content/plugins/*/; do
