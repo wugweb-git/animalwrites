@@ -940,10 +940,29 @@ function aw_current_campaign_id() {
 	return $best;
 }
 
-/** A card for the current campaign: its picture, title, one or two lines, days left and Take part. Nothing when none is open. */
+/**
+ * The Animal Writes default banner, small size (the sidebar card when no campaign is open): the street dog at dusk in
+ * brand greys, the default hero's words and Find help. Large: pattern animal-writes/hero; medium: animal-writes/aw-default-card.
+ */
+function aw_default_side_card() {
+	aw_use_component_style( 'aw-single' ); // aw-side-camp
+	$hid = 'aw-side-camp-default';
+	$img = '<img src="' . esc_url( aw_theme_file_uri( 'assets/img/campaigns/animal-writes-default-wide.webp' ) ) . '" width="1200" height="675" alt="" loading="lazy" decoding="async">';
+	return '<section class="kit-card aw-side-camp" aria-labelledby="' . $hid . '">'
+		. '<div class="aw-side-camp-media">' . $img . '</div>'
+		. '<div class="aw-side-camp-body"><p class="aw-side-camp-meta kit-meta-row"><span class="kit-meta-item">Animal Writes</span></p>'
+		. '<h2 class="aw-side-camp-title" id="' . $hid . '"><a href="' . esc_url( home_url( '/help/' ) ) . '">Help for India’s animals, in one place.</a></h2>'
+		. '<p class="aw-side-camp-line">Helplines, vets and rescue groups near you, and the law in plain words.</p>'
+		. '<a class="kit-btn aw-side-camp-btn" href="' . esc_url( home_url( '/help/' ) ) . '" aria-describedby="' . $hid . '">Find help</a></div></section>';
+}
+
+/** A card for the current campaign: its picture, title, one or two lines, days left and Take part. The Animal Writes card when none is open. */
 function aw_block_current_campaign( $a = array(), $id = 0 ) {
 	$c = aw_current_campaign_id();
-	if ( ! $c || ( is_singular( 'aw_campaign' ) && get_queried_object_id() === $c ) ) {
+	if ( ! $c ) {
+		return aw_default_side_card();
+	}
+	if ( is_singular( 'aw_campaign' ) && get_queried_object_id() === $c ) {
 		return defined( 'REST_REQUEST' ) && REST_REQUEST ? '<p class="aw-block-preview">' . esc_html__( 'Current campaign (shows while a campaign is open)', 'animal-writes-core' ) . '</p>' : '';
 	}
 	aw_use_component_style( 'aw-single' ); // aw-side-camp
