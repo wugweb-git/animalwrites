@@ -730,8 +730,7 @@ add_action(
 			echo '<link rel="preload" href="' . esc_url( $font ) . '" as="font" type="font/woff2" crossorigin media="(max-width: 1199px)">' . "\n";
 		}
 		$heavy = aw_camp_inter_file( 800 ); // the heading's own file when the theme's Inter does not cover 800 (Global Styles keep it at 400 to 700)
-		$light = false !== strpos( (string) get_post_field( 'post_content', get_queried_object_id() ), 'aw-camp--community-dogs' ); // its headings are 700 (campaign-record.css)
-		if ( $heavy && $heavy !== $font && ! $light ) {
+		if ( $heavy && $heavy !== $font ) { // every campaign's hero heading is 800, Community dogs too (owner, 13 Nov 2026)
 			echo '<link rel="preload" href="' . esc_url( $heavy ) . '" as="font" type="font/woff2" crossorigin media="(max-width: 1199px)">' . "\n";
 		}
 	},

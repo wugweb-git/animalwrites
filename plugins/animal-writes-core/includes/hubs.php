@@ -663,7 +663,8 @@ add_filter(
  * less. image is just a seo need. and i like stacked version and lesser padding, so that we can have more of them per
  * row or fill"). Every card in a Query Loop of those types (hubs, Home sections, campaign sections, archives, related
  * lists) becomes kit-card--stacked-md, and the list takes aw-stack-list, the dense grid in aw.css. Runs after the News
- * first-page states (priority 10). Opportunities, press and campaign lists keep their own cards.
+ * first-page states (priority 10). Opportunities and campaign lists keep their own cards; press keeps its own on the
+ * press hub, and is stacked on campaign pages like the News beside it (owner, 13 Nov 2026).
  */
 const AW_STACK_TYPES = array( 'aw_news', 'aw_legal', 'post' );
 add_filter(
@@ -677,7 +678,7 @@ add_filter(
 		if ( ! empty( $q['inherit'] ) ) {
 			$type = is_post_type_archive() ? (string) get_query_var( 'post_type' ) : ( is_archive() || is_home() || is_search() ? 'post' : '' );
 		}
-		if ( ! in_array( $type, AW_STACK_TYPES, true ) ) {
+		if ( ! in_array( $type, AW_STACK_TYPES, true ) && ! ( 'aw_press' === $type && is_singular( 'aw_campaign' ) ) ) {
 			return $html;
 		}
 		$html = (string) preg_replace( '/\bkit-card kit-card--(?:block-lg|block-md|block-sm|stacked-lg)\b/', 'kit-card kit-card--stacked-md', $html );
@@ -686,6 +687,20 @@ add_filter(
 		return (string) preg_replace( '/(<ul\b[^>]*?\bclass="[^"]*?)\bwp-block-post-template\b(?!-)/', '$1wp-block-post-template aw-stack-list', $html, 1 );
 	},
 	20,
+	3
+);
+
+/*
+ * Press cards on campaign pages show the source line and the title only (owner, 13 Nov 2026). A press item has no
+ * summary of its own, so its excerpt fell back to the site description and every card read the same.
+ */
+add_filter(
+	'render_block_core/post-excerpt',
+	function ( $html, $block, $instance = null ) {
+		$id = ( $instance instanceof WP_Block ) ? (int) ( $instance->context['postId'] ?? 0 ) : 0;
+		return ( $id && 'aw_press' === get_post_type( $id ) && is_singular( 'aw_campaign' ) ) ? '' : $html;
+	},
+	10,
 	3
 );
 

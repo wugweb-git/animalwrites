@@ -60,6 +60,9 @@
    rings, the outcome label) are the campaign orange #ffa500, not the darker #9a5b00; text stays ink. Plain bands are
    white (owner: "you can also use white bg"), paper bands stay the campaign surface. */
 .aw-camp.aw-camp--community-dogs { --camp-mark: var(--camp-primary); --dg-band: var(--dg-raised); }
+/* Date cards on the orange: the month and the check stamp in the campaign ink, not white (white on #ffa500 is 2:1; ink
+   is 9.6:1 on the strip and 6.9:1 on the done strip). */
+.aw-camp.aw-camp--community-dogs .kit-datecard { --dc-on-mark: var(--camp-primary-ink); --dc-check: url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20stroke=%22%2316130e%22%20stroke-width=%223%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%3E%3Cpath%20d=%22M20%206%209%2017l-5-5%22/%3E%3C/svg%3E"); }
 .aw-camp.aw-camp--community-dogs > .aw-camp-section:not(.aw-camp-paper, .aw-camp-dark, .aw-camp-hero) { background: var(--dg-band); }
 .aw-camp.aw-camp--community-dogs .aw-camp-dates .is-key .aw-camp-dates-when { color: var(--camp-dark); }
 
@@ -82,10 +85,12 @@
    text, its icon wrapping away from "As of"). Meta rows, the timeline and the postmark keep their icons. */
 .aw-camp.aw-camp--community-dogs :is(.aw-camp-section > p, .aw-camp-metric-note) .aw-date > .kit-ico { display: none; }
 .aw-camp.aw-camp--community-dogs :is(.aw-camp-status, .aw-camp-metric-note) .aw-date { display: inline; padding: 0; font-size: inherit; }
-/* Headings and figures at 700 from the main Inter file, not campaign.css's 800 (owner, 10 Nov 2026): phones no longer
-   fetch the 115 KB 800 file (campaign-tools.php skips its preload on this page) */
+/* Headings and figures at 700 (owner, 10 Nov 2026); the hero heading at the display weight 800 like every campaign
+   (owner, 13 Nov 2026; campaign-tools.php preloads its file). FAQ questions are headings too, so 700, not 600. */
 .aw-camp.aw-camp--community-dogs :is(h1, h2, h3, .aw-camp-dates-when, .aw-cd-num, .aw-camp-tier h3, .aw-camp-count strong),
 .aw-camp.aw-camp--community-dogs .aw-camp-steps li::before { font-weight: var(--kit-weight-bold); }
+.aw-camp.aw-camp--community-dogs .aw-hub-faq .kit-faq-q { font-weight: var(--kit-weight-bold) !important; } /* over aw.css's content-H3 600 */
+.aw-camp.aw-camp--community-dogs .aw-camp-hero h1 { font-weight: var(--kit-weight-display); }
 
 /* ---------- Hero: words left, the stamp and its postmark right (below on phones and tablets) ---------- */
 /* The hero's text is the palette's ink on #ffa500 (9.4:1, WCAG AA; owner, 10 Nov 2026). The white text of 18 Oct
@@ -179,7 +184,7 @@
 .aw-camp.aw-camp--community-dogs #why-it-matters .aw-card:nth-child(4) :is(h3, p, li, strong) { color: var(--kit-color-on-ink); }
 .aw-camp.aw-camp--community-dogs #why-it-matters .aw-card:nth-child(4)::before { background: var(--camp-primary); }
 .aw-camp.aw-camp--community-dogs #why-it-matters .aw-card:nth-child(4) > p:first-child { margin-bottom: var(--kit-space-1) !important; color: var(--camp-primary); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-bold); }
-.aw-camp.aw-camp--community-dogs #why-it-matters .aw-card:nth-child(4) h3 { font-size: var(--kit-type-h2) !important; font-weight: var(--kit-weight-bold) !important; letter-spacing: var(--kit-tracking-display); } /* the shared bento lead card size (campaign.css) */
+.aw-camp.aw-camp--community-dogs #why-it-matters .aw-card:nth-child(4) h3 { font-size: var(--kit-type-h3) !important; font-weight: var(--kit-weight-bold) !important; } /* an H3 at the H3 size, like every H3 on the page (owner, 13 Nov 2026) */
 .aw-camp.aw-camp--community-dogs #why-it-matters .aw-card:nth-child(4) ul { padding-left: var(--kit-space-5); }
 .aw-camp.aw-camp--community-dogs #why-it-matters .aw-card:nth-child(4) li::marker { color: var(--camp-primary); }
 .aw-camp.aw-camp--community-dogs #why-it-matters .aw-card:nth-child(4) > p:last-child { padding: var(--kit-space-4); border-radius: var(--kit-radius-control); background: color-mix(in srgb, var(--kit-color-on-ink) 8%, transparent); }
@@ -192,7 +197,8 @@
 	.aw-camp.aw-camp--community-dogs #why-it-matters .aw-card:nth-child(-n+3) > h3 { margin: 0 0 var(--kit-space-1) !important; }
 }
 @media (min-width: 1200px) {
-	.aw-camp.aw-camp--community-dogs #why-it-matters .is-layout-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+	.aw-camp.aw-camp--community-dogs #why-it-matters .is-layout-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } /* two columns at most (owner, 13 Nov 2026) */
+	.aw-camp.aw-camp--community-dogs #why-it-matters .aw-card:nth-child(3) { grid-column: 1 / -1; } /* the third point across, so no gap beside it */
 	.aw-camp.aw-camp--community-dogs #why-it-matters .aw-card:nth-child(4) { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); column-gap: var(--kit-space-7); align-content: start; padding: var(--kit-space-7); }
 	.aw-camp.aw-camp--community-dogs #why-it-matters .aw-card:nth-child(4) > *, .aw-camp.aw-camp--community-dogs #why-it-matters .aw-card:nth-child(4)::before { grid-column: 1; }
 	.aw-camp.aw-camp--community-dogs #why-it-matters .aw-card:nth-child(4) > ul { grid-column: 2; grid-row: 2 / span 3; align-self: center; font-size: var(--kit-type-lead); }
