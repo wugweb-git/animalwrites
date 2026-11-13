@@ -790,12 +790,12 @@
 .aw-camp.aw-camp #read .aw-camp-docs-q li > .kit-card { height: 100%; box-sizing: border-box; padding: var(--kit-space-5); background: var(--kit-color-surface-soft); }
 
 /* In the news (#latest): news and guides are two stacked lists (aw.css .aw-stack-list, kit-card--stacked-md at 2:1, the
-   picture 3:5). Below 1200 they run one under the other, one column each; from 1200 side by side, each list one column and
+   picture 3:5). Below 1200 they run one under the other (each list one column below 768, two from 768); from 1200 side by side, each list one column and
    its own height (align-items: start), so a card never stretches to the other list's row (docs/design-system.md line 8:
    breakpoints 768 and 1200; aw.css: never more than two columns). Cards white on the grey band. */
 .aw-camp.aw-camp #latest .aw-camp-row { display: grid; gap: var(--kit-space-4); grid-template-columns: minmax(0, 1fr); align-items: start; }
 @media (min-width: 1200px) { .aw-camp.aw-camp #latest .aw-camp-row { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-.aw-camp.aw-camp #latest .wp-block-post-template.aw-stack-list { grid-template-columns: minmax(0, 1fr) !important; }
+@media (min-width: 1200px) { .aw-camp.aw-camp #latest .wp-block-post-template.aw-stack-list { grid-template-columns: minmax(0, 1fr) !important; } } /* 768-1199: each list two columns (owner: one column below 768, two from 768) */
 .aw-camp.aw-camp :is(#latest, .aw-camp-cards) .kit-card .kit-card-title a { display: inline; -webkit-line-clamp: unset; line-clamp: unset; overflow: visible; } /* the whole title: the stacked card grows taller instead of cutting it (the kit clamps card titles at 3 lines) */
 .aw-camp.aw-camp #latest .aw-camp-row .wp-block-post-template > li { flex: none; width: auto; min-width: 0; margin: 0; }
 .aw-camp.aw-camp #latest .kit-card { background: var(--kit-color-surface-soft); }
