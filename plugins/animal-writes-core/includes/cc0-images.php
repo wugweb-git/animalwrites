@@ -106,14 +106,14 @@ function aw_cc0_run() {
 
 	// 1. Publisher images: unchecked first, then failures older than a week.
 	$week = gmdate( 'Y-m-d H:i:s', time() - WEEK_IN_SECONDS );
-	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery -- fixed SQL and the plugin's own clauses; values go in as placeholders
+	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter -- fixed SQL and the plugin's own clauses (aw_cc0_items_sql() is a constant fragment); values go in as placeholders
 	$ids  = $wpdb->get_col( $wpdb->prepare( "SELECT p.ID " . aw_cc0_items_sql() . " AND EXISTS (SELECT 1 FROM {$wpdb->postmeta} si WHERE si.post_id = p.ID AND si.meta_key = 'aw_source_image' AND si.meta_value <> '')
 		AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} sf WHERE sf.post_id = p.ID AND sf.meta_key = 'aw_source_image_off' AND sf.meta_value = '1')
 		AND ( NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} c WHERE c.post_id = p.ID AND c.meta_key = 'aw_source_image_checked')
 		   OR EXISTS (SELECT 1 FROM {$wpdb->postmeta} o JOIN {$wpdb->postmeta} c2 ON c2.post_id = o.post_id AND c2.meta_key = 'aw_source_image_checked'
 		              WHERE o.post_id = p.ID AND o.meta_key = 'aw_source_image_ok' AND o.meta_value = '0' AND c2.meta_value < %s) )
 		ORDER BY p.post_date DESC LIMIT %d", $week, 60 ) ); // phpcs:ignore WordPress.DB
-	// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery
+	// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter
 	$checked = 0;
 	foreach ( $ids as $id ) {
 		if ( time() - $start > 60 ) {
@@ -127,7 +127,7 @@ function aw_cc0_run() {
 	}
 
 	// 2. Items with no usable picture of their own.
-	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery -- fixed SQL and the plugin's own clauses; values go in as placeholders
+	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter -- fixed SQL and the plugin's own clauses (aw_cc0_items_sql() is a constant fragment); values go in as placeholders
 	$ids  = $wpdb->get_col( $wpdb->prepare( "SELECT p.ID " . aw_cc0_items_sql() . "
 		AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} t WHERE t.post_id = p.ID AND t.meta_key = '_thumbnail_id' AND t.meta_value <> '' AND t.meta_value <> '0')
 		AND ( NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} si WHERE si.post_id = p.ID AND si.meta_key = 'aw_source_image' AND si.meta_value LIKE 'https://%%')
@@ -135,7 +135,7 @@ function aw_cc0_run() {
 		AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} a WHERE a.post_id = p.ID AND a.meta_key = 'aw_cc0_attempts' AND a.meta_value >= %d)
 		AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} tr WHERE tr.post_id = p.ID AND tr.meta_key = 'aw_cc0_tried' AND tr.meta_value > %s)
 		ORDER BY p.post_date DESC LIMIT %d", AW_CC0_MAX_ATTEMPTS, $week, AW_CC0_BATCH ) ); // phpcs:ignore WordPress.DB
-	// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery
+	// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter
 	$done = 0;
 	$none = 0;
 	foreach ( $ids as $id ) {

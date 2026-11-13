@@ -445,9 +445,8 @@ function aw_faq_type_counts() {
 		global $wpdb;
 		$state = array();
 		$slugs = function_exists( 'aw_listing_type_slugs' ) ? (array) aw_listing_type_slugs() : array();
-		$skip  = function_exists( 'kits_preview_only_ids' ) && kits_preview_only_ids() ? ' AND p.ID NOT IN (' . implode( ',', array_map( 'intval', kits_preview_only_ids() ) ) . ')' : ''; // preview-only items
-		$types = "'" . implode( "','", array_map( 'esc_sql', $slugs ) ) . "'";
-		$rows  = $slugs ? $wpdb->get_results( "SELECT sm.meta_value code, t.slug type, COUNT(DISTINCT p.ID) n FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} sm ON sm.post_id = p.ID AND sm.meta_key = 'aw_state_code' JOIN {$wpdb->term_relationships} rt ON rt.object_id = p.ID JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = rt.term_taxonomy_id AND tt.taxonomy = 'post_tag' JOIN {$wpdb->terms} t ON t.term_id = tt.term_id AND t.slug IN ({$types}) WHERE p.post_type = 'aw_listing' AND p.post_status = 'publish'{$skip} GROUP BY sm.meta_value, t.slug", ARRAY_A ) : array(); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$pids  = function_exists( 'kits_preview_only_ids' ) ? kits_preview_only_ids() : array(); // preview-only items
+		$rows  = $slugs ? $wpdb->get_results( "SELECT sm.meta_value code, t.slug type, COUNT(DISTINCT p.ID) n FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} sm ON sm.post_id = p.ID AND sm.meta_key = 'aw_state_code' JOIN {$wpdb->term_relationships} rt ON rt.object_id = p.ID JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = rt.term_taxonomy_id AND tt.taxonomy = 'post_tag' JOIN {$wpdb->terms} t ON t.term_id = tt.term_id AND t.slug IN ('" . implode( "','", array_map( 'esc_sql', $slugs ) ) . "') WHERE p.post_type = 'aw_listing' AND p.post_status = 'publish'" . ( $pids ? ' AND p.ID NOT IN (' . implode( ',', array_map( 'intval', $pids ) ) . ')' : '' ) . ' GROUP BY sm.meta_value, t.slug', ARRAY_A ) : array(); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared
 		foreach ( (array) $rows as $r ) {
 			$state[ (int) $r['code'] ][ $r['type'] ] = (int) $r['n'];
 		}

@@ -207,7 +207,7 @@ function directoryweb_count_enrichment(): ?array {
 	}
 	global $wpdb;
 	$p    = aw_enrich_progress();
-	$last = get_option( 'aw_enrich_db' ) ? (string) $wpdb->get_var( 'SELECT MAX( created ) FROM ' . aw_enrich_table() ) : ''; // phpcs:ignore WordPress.DB -- hourly count in the background; the table name is SourceWeb's
+	$last = get_option( 'aw_enrich_db' ) ? (string) $wpdb->get_var( $wpdb->prepare( 'SELECT MAX( created ) FROM %i', aw_enrich_table() ) ) : ''; // phpcs:ignore WordPress.DB -- hourly count in the background; the table name is SourceWeb's
 	return array(
 		'pending' => (int) $p['pending'],
 		'checked' => (int) $p['checked'],

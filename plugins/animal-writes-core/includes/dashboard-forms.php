@@ -26,7 +26,7 @@ function aw_forms_widget_rows(): array {
 	$s    = $wpdb->prefix . 'fluentform_submissions';
 	$f    = $wpdb->prefix . 'fluentform_forms';
 	$since = gmdate( 'Y-m-d H:i:s', time() - 7 * DAY_IN_SECONDS );
-	return (array) $wpdb->get_results( $wpdb->prepare( "SELECT f.id, f.title, COUNT(s.id) AS total, COALESCE(SUM(s.status = 'unread'), 0) AS unread, COALESCE(SUM(s.created_at >= %s), 0) AS week FROM {$f} f LEFT JOIN {$s} s ON s.form_id = f.id AND s.status <> 'trashed' GROUP BY f.id, f.title ORDER BY total DESC, f.title", $since ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table names only.
+	return (array) $wpdb->get_results( $wpdb->prepare( "SELECT f.id, f.title, COUNT(s.id) AS total, COALESCE(SUM(s.status = 'unread'), 0) AS unread, COALESCE(SUM(s.created_at >= %s), 0) AS week FROM %i f LEFT JOIN %i s ON s.form_id = f.id AND s.status <> 'trashed' GROUP BY f.id, f.title ORDER BY total DESC, f.title", $since, $f, $s ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 }
 
 add_action(
