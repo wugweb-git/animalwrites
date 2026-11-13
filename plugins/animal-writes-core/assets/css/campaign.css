@@ -973,6 +973,17 @@
 }
 @media (min-width: 1200px) { .aw-camp.aw-camp--diwali #what-to-do #after > p:not(.aw-camp-card-ico) { max-width: 72ch; } }
 @media (min-width: 768px) { .aw-camp.aw-camp--diwali #what-to-do #street { --tile-top: var(--kit-space-5); background: linear-gradient(rgb(27 22 54 / 0.86), rgb(27 22 54 / 0.92)), url("/wp-content/uploads/2026/11/woman-giving-water-to-street-dog-diwali-night-tall.avif") center 35% / cover, var(--camp-dark); } } /* from 768 the row is as tall as its text: the picture sits under the whole tile, no band above */
+/* Diwali hero (owner, 13 Nov 2026: "hero banner, fix it"): the cover's flat 50% dim is hidden and in its place is a night-sky (--camp-dark)
+   overlay that is dark where the words sit and clear over the dog and the diyas: phones and tablets top to bottom (words
+   above, the dog and the bowl below), from 1200 left to right (words on the left, the woman, dog and lamps on the right). The
+   lead line at --kit-type-lead with a --kit-space-5 gap before the tips; each tip's icon on a marigold (--camp-mark)
+   round chip (--kit-size-control); the title balanced. Height stays --kit-hero-h. */
+.aw-camp--diwali .wp-block-cover.aw-camp-hero > .wp-block-cover__background.has-background-dim { opacity: 0; }
+.aw-camp--diwali .aw-camp-hero::before { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(rgb(27 22 54 / 0.85), rgb(27 22 54 / 0.7) 60%, rgb(27 22 54 / 0.05) 92%); }
+@media (min-width: 1200px) { .aw-camp--diwali .aw-camp-hero::before { background: linear-gradient(90deg, rgb(27 22 54 / 0.92), rgb(27 22 54 / 0.82) 45%, rgb(27 22 54 / 0.15) 68%, rgb(27 22 54 / 0) 80%); } }
+.aw-camp--diwali .aw-camp-hero h1 { text-wrap: balance; }
+.aw-camp--diwali .aw-camp-hero h1 + p { margin-bottom: var(--kit-space-5); font-size: var(--kit-type-lead); }
+.aw-camp--diwali .aw-camp-hero .aw-festive-ico { width: var(--kit-size-control); height: var(--kit-size-control); border-radius: 50%; background: var(--camp-mark); color: var(--camp-on-mark); }
 .aw-camp--diwali #latest .aw-camp-more-fold { grid-column: 1 / -1; margin: 0; border-top: var(--kit-border-width) solid var(--kit-color-line); }
 .aw-camp--diwali #latest .aw-camp-more-fold > summary { display: flex; align-items: center; box-sizing: border-box; min-height: var(--kit-size-target); padding-block: var(--kit-space-2); font-weight: var(--kit-weight-bold); cursor: pointer; }
 .aw-camp--diwali #latest .aw-camp-more-fold > summary:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
