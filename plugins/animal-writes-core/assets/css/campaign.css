@@ -1040,11 +1040,12 @@
 .aw-camp.aw-camp :is(#read, #library) .aw-camp-docs-q li { display: block; padding: 0; background: none; box-shadow: none; border-radius: 0; }
 .aw-camp.aw-camp :is(#read, #library) .aw-camp-docs-q li::before { content: none; }
 .aw-camp.aw-camp :is(#read, #library) .aw-camp-docs-q li:hover { box-shadow: none; }
-.aw-camp.aw-camp :is(#read, #library) .aw-camp-docs-q li > .kit-card { height: 100%; box-sizing: border-box; padding: var(--kit-space-5); background: var(--kit-color-surface-soft); }
+.aw-camp.aw-camp :is(#read, #library) .aw-camp-docs-q li > .kit-card:not([class*="kit-card--stacked"]) { height: 100%; box-sizing: border-box; padding: var(--kit-space-5); background: var(--kit-color-surface-soft); }
 
 /* In the news (#latest): stacked cards like the theme's kit-card--stacked-md (the picture --kit-thumb-lg wide, at most
    40%, beside the title), white. Phones one column, from 768 two. Community dogs' Media coverage and News and guides
-   lists (.aw-camp-cards, a post template list) use the same cards. */
+   lists (.aw-camp-cards, a post template list) use the same cards. A stacked card (kit-card--stacked-*) takes the
+   theme's own stacked card rules (aw.css, owner 14 Nov 2026), so these card rules leave it alone. */
 .aw-camp.aw-camp :is(#latest .aw-camp-row, .aw-camp-cards .wp-block-post-template) { display: grid; gap: var(--kit-space-4); grid-template-columns: minmax(0, 1fr); }
 @media (min-width: 768px) { .aw-camp.aw-camp :is(#latest .aw-camp-row, .aw-camp-cards .wp-block-post-template) { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 /* the row holds whole stacked lists (aw-stack-list), which make their own columns (aw.css): one column here, so the top
@@ -1052,9 +1053,9 @@
 .aw-camp.aw-camp #latest .aw-camp-row:has(.aw-stack-list) { grid-template-columns: minmax(0, 1fr); }
 .aw-camp.aw-camp :is(#latest, .aw-camp-cards) .kit-card .kit-card-title a { display: inline; -webkit-line-clamp: unset; line-clamp: unset; overflow: visible; } /* the whole title: the stacked card grows taller instead of cutting it (the kit clamps card titles at 3 lines) */
 .aw-camp.aw-camp :is(#latest .aw-camp-row, .aw-camp-cards) .wp-block-post-template > li { flex: none; width: auto; min-width: 0; margin: 0; }
-.aw-camp.aw-camp :is(#latest, .aw-camp-cards) .kit-card { flex-direction: row; align-items: center; gap: var(--kit-space-4); height: 100%; box-sizing: border-box; padding: var(--kit-space-5); background: var(--kit-color-surface-soft); }
-.aw-camp.aw-camp :is(#latest, .aw-camp-cards) .kit-card > .kit-card-media { flex: none; width: var(--kit-thumb-lg); max-width: 40%; margin: 0; border-radius: var(--kit-radius-media); overflow: hidden; }
-.aw-camp.aw-camp :is(#latest, .aw-camp-cards) .kit-card > .kit-card-body { flex: 1; min-width: 0; padding: 0; }
+.aw-camp.aw-camp :is(#latest, .aw-camp-cards) .kit-card:not([class*="kit-card--stacked"]) { flex-direction: row; align-items: center; gap: var(--kit-space-4); height: 100%; box-sizing: border-box; padding: var(--kit-space-5); background: var(--kit-color-surface-soft); }
+.aw-camp.aw-camp :is(#latest, .aw-camp-cards) .kit-card:not([class*="kit-card--stacked"]) > .kit-card-media { flex: none; width: var(--kit-thumb-lg); max-width: 40%; margin: 0; border-radius: var(--kit-radius-media); overflow: hidden; }
+.aw-camp.aw-camp :is(#latest, .aw-camp-cards) .kit-card:not([class*="kit-card--stacked"]) > .kit-card-body { flex: 1; min-width: 0; padding: 0; }
 
 /* A closed campaign's record lists (campaign-record.php, aw_camp_record_fold): the first four items, then the rest in
    a closed Show more fold (the theme's .aw-more summary, a --kit-size-target row) on a soft line, at every width. */

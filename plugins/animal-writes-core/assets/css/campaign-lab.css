@@ -538,7 +538,6 @@
 /* The theme as it was on the morning of 2 Nov 2026, on the Lab rules page only (owner: "undo to previous version - lab
    page"). The theme sheets changed after that; these put back their old values inside .aw-camp--lab-rules. */
 .aw-camp--lab-rules .kit-card[class*="kit-card--block"] > .kit-card-body { padding: var(--kit-space-4); }
-.aw-camp--lab-rules .kit-card[class*="kit-card--stacked"] { padding: var(--kit-space-4); }
 .aw-camp--lab-rules .wp-block-cover.kit-photo-card { padding: 1em; } /* core Cover's own padding */
 .aw-camp--lab-rules .kit-stack > .wp-block-cover.kit-photo-card { min-height: 420px; } /* the Take action pattern's photo cards */
 .aw-camp--lab-rules .rank-math-question { font-size: inherit; }
@@ -607,7 +606,7 @@
 .aw-camp--lab-rules #read .aw-camp-docs-q li { display: block; padding: 0; background: none; box-shadow: none; border-radius: 0; }
 .aw-camp--lab-rules #read .aw-camp-docs-q li::before { content: none; }
 .aw-camp--lab-rules #read .aw-camp-docs-q li:hover { box-shadow: none; }
-.aw-camp.aw-camp--lab-rules #read .aw-camp-docs-q li > .kit-card { height: 100%; box-sizing: border-box; padding: var(--kit-space-5); }
+.aw-camp.aw-camp--lab-rules #read .aw-camp-docs-q li > .kit-card:not([class*="kit-card--stacked"]) { height: 100%; box-sizing: border-box; padding: var(--kit-space-5); }
 
 /* What the draft does, the owner's bento brief (2 Nov 2026): one dominant tile, four supporting tiles, one full-width
    tile at the bottom. Phones: one column in markup order (the lead first). From 768: the lead the full row, then two
@@ -758,7 +757,7 @@
 .aw-camp.aw-camp #read .aw-camp-docs-q li { display: block; padding: 0; background: none; box-shadow: none; border-radius: 0; }
 .aw-camp.aw-camp #read .aw-camp-docs-q li::before { content: none; }
 .aw-camp.aw-camp #read .aw-camp-docs-q li:hover { box-shadow: none; }
-.aw-camp.aw-camp #read .aw-camp-docs-q li > .kit-card { height: 100%; box-sizing: border-box; padding: var(--kit-space-5); background: var(--kit-color-surface-soft); }
+.aw-camp.aw-camp #read .aw-camp-docs-q li > .kit-card:not([class*="kit-card--stacked"]) { height: 100%; box-sizing: border-box; padding: var(--kit-space-5); background: var(--kit-color-surface-soft); }
 
 /* In the news (#latest): news and guides are two stacked lists (aw.css .aw-stack-list, kit-card--stacked-md at 2:1, the
    picture 3:5). Below 1200 they run one under the other (each list one column below 768, two from 768); from 1200 side by side, each list one column and
@@ -823,7 +822,6 @@
    full (the rule after this block). */
 @media (max-width: 767px) {
 	.aw-camp--lab-rules #read .wp-block-post-template { grid-template-columns: minmax(0, 1fr); }
-	.aw-camp--lab-rules #read .kit-card[class*="kit-card--stacked"] > .kit-card-body { min-width: 0; }
 	.aw-camp--lab-rules #read .kit-card .kit-card-chips { height: auto; overflow: visible; }
 	.aw-camp--lab-rules #read .kit-card .kit-tag { height: auto; padding-block: var(--kit-space-1); border-radius: var(--kit-radius-control); white-space: normal; }
 	.aw-camp--lab-rules #read .kit-card .kit-tag-text { white-space: normal; overflow: visible; text-overflow: clip; }
@@ -903,13 +901,6 @@
    (campaign-tools.php, owner 14 Nov 2026), in a second list under the Social posts block, at the list's own gap. */
 .aw-camp.aw-camp #people .aw-camp-social-more { margin-top: var(--kit-space-4); }
 @media (min-width: 768px) { .aw-camp.aw-camp #people .aw-camp-social-more { margin-top: var(--kit-space-grid); } }
-/* Read the law and the record (#read) uses the theme's stacked card (owner, 14 Nov 2026: "map to theme"): the picture
-   is --kit-card-stacked-media-width at --kit-card-stacked-media-ratio (112x84, 4:3) at the top, and the words set the
-   card's height. */
-.aw-camp.aw-camp #read .kit-card[class*="kit-card--stacked"] { align-items: flex-start; }
-.aw-camp.aw-camp #read .kit-card[class*="kit-card--stacked"] > .kit-card-media { flex: none; align-self: flex-start; width: var(--kit-card-stacked-media-width) !important; max-width: none; min-width: 0; margin: 0; aspect-ratio: var(--kit-card-stacked-media-ratio); overflow: hidden; border-radius: var(--kit-radius-media); }
-.aw-camp.aw-camp #read .kit-card[class*="kit-card--stacked"] > .kit-card-media img { width: 100%; height: 100%; object-fit: cover; }
-.aw-camp.aw-camp #read .kit-card[class*="kit-card--stacked"] > .kit-card-body { flex: 1; min-width: 0; }
 
 /* Campaign FAQ (owner, 13 Nov 2026: "check spacing font size and behavior across mobile UX"). Rank Math's FAQ block
    (Diwali, Lab) takes the kit FAQ card (kit.css .kit-faq-item), so all four campaign FAQs read the same on a phone:
