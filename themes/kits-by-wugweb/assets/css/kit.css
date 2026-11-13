@@ -482,6 +482,23 @@ html { overflow-x: clip; }
 .kit-share .kit-share-btn:active { background: var(--kit-chip-selected); }
 .kit-share-inline { margin: var(--kit-space-6) 0 0; } /* the share row inside the text column (item and term pages): space above, no rule above the row */
 .kit-share-inline .kit-share { border-top: 0; padding-top: 0; }
+/* The phone's share sheet (one share kit per page, 13 Nov 2026). kit.js shows the Share button only where the browser has
+   navigator.share and marks the row .has-native. Phones: the one Share button (it opens WhatsApp, Instagram, Facebook and
+   the rest) and Copy link; the network buttons step back. Tablets: Share first, then the networks. Desktops (1200 up):
+   the network row, no share sheet. */
+.kit-share .kit-share-native[hidden] { display: none; }
+.kit-share .kit-share-native { width: auto; padding: 0 var(--kit-space-5); background: var(--kit-color-text); border-color: var(--kit-color-text); color: var(--kit-color-bg); font-weight: var(--kit-weight-strong); }
+.kit-share .kit-share-native .kit-share-name { display: inline; }
+@media (hover: hover) { .kit-share .kit-share-btn.kit-share-native:hover { background: var(--kit-color-text); border-color: var(--kit-color-text); color: var(--kit-color-bg); opacity: .88; } }
+.kit-share .kit-share-btn.kit-share-native:active { background: var(--kit-color-text); color: var(--kit-color-bg); opacity: .8; }
+@media (max-width: 767px) {
+	.kit-share.has-native .kit-share-btn:not(.kit-share-native, .kit-share-copy) { display: none; }
+	.kit-share.has-native .kit-share-native { flex: 1 1 auto; max-width: 20rem; }
+	.kit-share.has-native .kit-share-label { display: none; } /* the button says Share */
+}
+@media (min-width: 1200px) {
+	.kit-share .kit-share-native { display: none; }
+}
 
 /* Preview only (kits-core preview.php): preview-only items take no space unless the page previews (html.kits-preview
    from the preview script, body.kits-preview for administrators). The page HTML is the same for everyone, so the public

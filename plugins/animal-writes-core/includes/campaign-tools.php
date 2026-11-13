@@ -1084,6 +1084,26 @@ function aw_camp_x_hashtags( $raw ) {
 	return implode( ',', array_values( array_unique( $tags ) ) );
 }
 
+// One share kit per page (owner, 13 Nov 2026): every share carries #AnimalWrites first (brand hashtag first, 4 Nov);
+// a campaign page adds its own share line and hashtags. The page shares itself; its picture is the link preview's (owner,
+// 13 Nov 2026: "share function on the page is only about sharing page (campaign hero)").
+add_filter(
+	'kits_share_args',
+	function ( $args ) {
+		$tags = array( 'AnimalWrites' );
+		if ( is_singular( 'aw_campaign' ) ) {
+			$id   = get_queried_object_id();
+			$line = (string) get_post_meta( $id, 'aw_campaign_share_text', true );
+			$tags = array_merge( $tags, explode( ',', aw_camp_x_hashtags( get_post_meta( $id, 'aw_campaign_share_hashtags', true ) ) ) );
+			if ( '' === (string) $args['text'] && '' !== $line ) {
+				$args['text'] = $line;
+			}
+		}
+		$args['hashtags'] = array_merge( $tags, (array) $args['hashtags'] );
+		return $args;
+	}
+);
+
 // A campaign's Share section: the site's one share bar from the server, the one on listings and posts (owner, 2 Nov
 // 2026), on every campaign, with or without a letter tool.
 add_filter(
@@ -1094,10 +1114,6 @@ add_filter(
 		}
 		$short = aw_camp_short_url( get_the_ID() ); // the short link, when the campaign has one (campaign-short.php)
 		$bar   = $short && function_exists( 'kits_share_html' ) ? kits_share_html( $short, html_entity_decode( get_the_title(), ENT_QUOTES ), null, (string) get_post_field( 'post_name', get_the_ID() ) ) : aw_share_html( get_the_ID() );
-		$tags  = aw_camp_x_hashtags( get_post_meta( get_the_ID(), 'aw_campaign_share_hashtags', true ) );
-		if ( '' !== $tags ) { // the campaign's hashtags on the X link only (owner, 2 Nov 2026)
-			$bar = (string) preg_replace( '#(class="kit-share-btn kit-share-x" href="[^"]+)"#', '$1&#038;hashtags=' . rawurlencode( $tags ) . '"', $bar, 1 );
-		}
 		return preg_replace_callback(
 			'#(<div class="aw-camp-share-kit"[^>]*\sdata-aw-share[^>]*>)\s*(</div>)#',
 			function ( $m ) use ( $bar ) {

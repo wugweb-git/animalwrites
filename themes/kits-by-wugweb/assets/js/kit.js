@@ -51,6 +51,40 @@
 		});
 	});
 
+	/* The phone's own share sheet (one share kit per page, 13 Nov 2026): the Share button shows only where the browser has
+	   navigator.share. It hands over the line with its hashtags, the link and, when the page has one, its share picture.
+	   The picture is fetched once when the row nears the screen, because a phone opens the sheet only straight from a tap. */
+	var natives = navigator.share ? document.querySelectorAll('.kit-share-native') : [];
+	var sharePics = {};
+	function sharePic(u) {
+		if (!u || sharePics[u] !== undefined || !window.File || !navigator.canShare) return;
+		sharePics[u] = null;
+		fetch(u, { credentials: 'omit' }).then(function (r) { return r.ok ? r.blob() : null; }).then(function (bl) {
+			if (!bl) return;
+			var f = new File([bl], (u.split('/').pop() || 'share').split('?')[0], { type: bl.type || 'image/jpeg' });
+			if (navigator.canShare({ files: [f] })) sharePics[u] = f;
+		}).catch(function () {});
+	}
+	Array.prototype.forEach.call(natives, function (b) {
+		b.hidden = false;
+		b.closest('.kit-share').classList.add('has-native');
+		if (!b.dataset.image) return;
+		if ('IntersectionObserver' in window) {
+			var io = new IntersectionObserver(function (es) { if (es[0].isIntersecting) { sharePic(b.dataset.image); io.disconnect(); } }, { rootMargin: '600px 0px' });
+			io.observe(b);
+		} else sharePic(b.dataset.image);
+	});
+	document.addEventListener('click', function (e) {
+		var b = e.target.closest('.kit-share-native');
+		if (!b || !navigator.share) return;
+		var f = b.dataset.image && sharePics[b.dataset.image];
+		// With a picture most apps drop a separate link, so the link also goes in the text.
+		var data = f ? { files: [f], title: b.dataset.title, text: b.dataset.text + '\n' + b.dataset.url } : { title: b.dataset.title, text: b.dataset.text, url: b.dataset.url };
+		navigator.share(data).catch(function (err) {
+			if (f && err && err.name !== 'AbortError') navigator.share({ title: b.dataset.title, text: b.dataset.text, url: b.dataset.url }).catch(function () {}); // the app refused the picture: the link alone
+		});
+	});
+
 	/* Share bar names: only at lg, and only when the whole row still fits on one line (never two rows). */
 	var shares = document.querySelectorAll('.kit-share');
 	if (shares.length) {
@@ -786,6 +820,7 @@
 
 	// Clicks
 	document.addEventListener('click', function (e) {
+		if (e.target.closest && e.target.closest('.kit-share-native')) { track('share_click', { network: 'native' }); return; } // the phone's share sheet
 		var a = e.target.closest && e.target.closest('a[href]');
 		if (!a) return;
 		var href = a.getAttribute('href') || '';

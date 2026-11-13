@@ -87,22 +87,35 @@ function kits_share_types() {
  * @param string        $title Plain-text title.
  * @param string[]|null $only     Network keys to show, in the usual order; null for every network. Copy link always shows.
  * @param string        $campaign utm_campaign of the shared address (campaign slug, post type or 'term').
+ * @param array         $args     One share kit per page (owner, 13 Nov 2026): 'text' (the share line; default the title),
+ *                                'hashtags' (words without #, in order), 'image' (address of the page's own picture for the
+ *                                phone's share sheet; never a third-party picture; most pages leave it empty and the
+ *                                link preview carries the picture).
+ *                                Filter kits_share_args fills them in.
  * @return string
  */
-function kits_share_html( $url, $title, $only = null, $campaign = '' ) {
+function kits_share_html( $url, $title, $only = null, $campaign = '', $args = array() ) {
+	$args  = (array) apply_filters( 'kits_share_args', array_merge( array( 'text' => '', 'hashtags' => array(), 'image' => '' ), (array) $args ), $url, $campaign );
+	$text  = '' !== (string) $args['text'] ? (string) $args['text'] : $title;
+	$tags  = array_values( array_unique( array_filter( array_map( fn( $t ) => preg_replace( '/[^A-Za-z0-9_]/', '', (string) $t ), (array) $args['hashtags'] ), 'strlen' ) ) );
+	$hash  = $tags ? ' ' . implode( ' ', array_map( fn( $t ) => '#' . $t, $tags ) ) : ''; // "#AnimalWrites #Tag" after the line
 	$tag   = fn( $source ) => kits_share_tagged_url( $url, $source, $campaign );
 	$site  = html_entity_decode( get_bloginfo( 'name' ), ENT_QUOTES );
 	$nets  = array( // key => [name, icon, link]
-		'x'        => array( 'X', 'x-brand', 'https://x.com/intent/post?text=' . rawurlencode( $title ) . '&url=' . rawurlencode( $tag( 'x' ) ) ),
-		'facebook' => array( 'Facebook', 'facebook', 'https://www.facebook.com/sharer/sharer.php?u=' . rawurlencode( $tag( 'facebook' ) ) ),
+		'x'        => array( 'X', 'x-brand', 'https://x.com/intent/post?text=' . rawurlencode( $text ) . '&url=' . rawurlencode( $tag( 'x' ) ) . ( $tags ? '&hashtags=' . rawurlencode( implode( ',', $tags ) ) : '' ) ),
+		'facebook' => array( 'Facebook', 'facebook', 'https://www.facebook.com/sharer/sharer.php?u=' . rawurlencode( $tag( 'facebook' ) ) ), // Facebook takes the link only; its card comes from the page's link preview
 		'linkedin' => array( 'LinkedIn', 'linkedin', 'https://www.linkedin.com/sharing/share-offsite/?url=' . rawurlencode( $tag( 'linkedin' ) ) ),
-		'whatsapp' => array( 'WhatsApp', 'brand-whatsapp', 'https://wa.me/?text=' . rawurlencode( $title . ' ' . $tag( 'whatsapp' ) ) ),
+		'whatsapp' => array( 'WhatsApp', 'brand-whatsapp', 'https://wa.me/?text=' . rawurlencode( $text . ' ' . $tag( 'whatsapp' ) . $hash ) ),
 		'email'    => array( 'Email', 'mail', 'mailto:?subject=' . rawurlencode( sprintf( 'From %s: %s', $site, $title ) ) . '&body=' . rawurlencode( $tag( 'email' ) ) ),
 	);
 	if ( null !== $only ) {
 		$nets = array_intersect_key( $nets, array_flip( (array) $only ) );
 	}
 	$out = '<div class="kit-share" role="group" aria-label="' . esc_attr__( 'Share', 'kits-core' ) . '"><span class="kit-share-label" aria-hidden="true">' . esc_html__( 'Share', 'kits-core' ) . '</span>';
+	// The phone's own share sheet (Web Share): hidden until kit.js finds navigator.share. It hands over the line, the
+	// hashtags, the link and, when the page has one, its share picture; each app keeps what it accepts.
+	$share = __( 'Share', 'kits-core' );
+	$out  .= '<button type="button" class="kit-share-btn kit-share-native" hidden data-kit-share="native" data-url="' . esc_attr( $tag( 'native' ) ) . '" data-title="' . esc_attr( $title ) . '" data-text="' . esc_attr( $text . $hash ) . '"' . ( '' !== (string) $args['image'] ? ' data-image="' . esc_url( (string) $args['image'] ) . '"' : '' ) . ' aria-label="' . esc_attr( $share ) . '"><span class="kit-ico kit-ico--share" aria-hidden="true"></span><span class="kit-share-name">' . esc_html( $share ) . '</span></button>';
 	foreach ( $nets as $key => list( $name, $icon, $href ) ) {
 		/* translators: %s: network name. */
 		$label = 'email' === $key ? __( 'Share by email', 'kits-core' ) : sprintf( __( 'Share on %s', 'kits-core' ), $name );
