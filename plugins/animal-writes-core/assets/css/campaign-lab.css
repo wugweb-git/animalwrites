@@ -896,7 +896,7 @@
 @container aw-share (min-width: 44rem) { .aw-camp.aw-camp #share .aw-share-cta-btn { width: auto; } }
 /* the share bar: white 44px icons, no names, no small label, one row */
 .aw-camp.aw-camp #share .aw-share-block .kit-share { flex-wrap: nowrap; gap: var(--kit-space-2); border-top: 0; }
-.aw-camp.aw-camp #share .aw-share-block .kit-share:not(.kit-follow) :is(.kit-share-label, .kit-share-btn:not(.kit-share-native) .kit-share-name) { display: none !important; }
+.aw-camp.aw-camp #share .aw-share-block .kit-share:not(.kit-follow) .kit-share-btn:not(.kit-share-native) .kit-share-name { display: none !important; }
 .aw-camp.aw-camp #share .aw-share-block .kit-share .kit-share-btn { border-color: var(--camp-on-mark); background: transparent; color: var(--camp-on-mark); }
 /* The bar's Share button (the phone's share sheet, kit.js) on the band: filled white with its name, as on the other campaigns (owner, 13 Nov 2026: one share bar across the site). */
 .aw-camp.aw-camp #share .aw-share-block .kit-share .kit-share-btn.kit-share-native { background: var(--camp-on-mark); border-color: var(--camp-on-mark); color: var(--camp-mark); }
@@ -1048,3 +1048,51 @@
 	.aw-camp.aw-camp--lab-rules #why-it-matters .aw-camp-grid > .aw-camp-card:nth-child(1) { padding-right: 34%; background: linear-gradient(90deg, var(--camp-dark) 0%, var(--camp-dark) 62%, rgb(107 15 34 / 0.5) 80%, rgb(29 20 24 / 0.15) 100%), url("/wp-content/plugins/animal-writes-core/theme/assets/img/campaigns/lab-rules-scales-flask-papers.webp") 100% 30% / 38% auto no-repeat, var(--camp-dark); }
 	.aw-camp.aw-camp--lab-rules #why-it-matters .aw-camp-grid > .aw-camp-card:nth-child(6) { padding-right: 34%; background: linear-gradient(90deg, var(--camp-dark) 0%, var(--camp-dark) 64%, rgb(29 20 24 / 0.5) 80%, rgb(29 20 24 / 0.15) 100%), url("/wp-content/plugins/animal-writes-core/theme/assets/img/campaigns/lab-rules-red-book-papers-pencil.webp") 100% 50% / 36% auto no-repeat, var(--camp-dark); }
 }
+
+/* The share band, all four campaigns (owner, 13 Nov 2026: "fix this section", "for all campaigns", "redesign", "all 4
+   campaigns need this section sorted"; picture tiles carry their text on the picture). One design:
+   - The band is the campaign's picture under the campaign's dark wash (--camp-share-pic, wash colour --camp-share-rgb); the heading,
+     text and note sit on it in white. Every wash keeps white text at least 5:1 over the picture's lightest pixels (WCAG AA):
+     0.72 or more where text can sit; from 1200 the wash opens to 0.35 on the right, past the text, so the picture shows.
+   - The share bar on a card in the campaign's light shade (--camp-light, with a dot texture in --camp-dark) and Follow us on
+     a white card, each labelled, icons and text in --camp-dark: the bento's three shades (campaign light, dark, white).
+   - The icons sit in an even grid (44px each, at least 4px apart), so six fit one row (21rem: six 44px icons, five 4px
+     gaps and the 24px padding); the cards side by side when there is room (21rem to 23rem each), under the text at every
+     width, so the picture stays open on the right.
+   - Phones (to 767): where the phone has a share sheet (kit.js shows the bar's Share button), that one full-width button
+     replaces the six icons and the card's label (owner: no share icons on mobile); without a share sheet the icons stay.
+   - The text keeps to 60ch, the note to 80ch.
+   The same block as campaign.css (the Lab page loads only this file). */
+.aw-camp.aw-camp.aw-camp--lab-rules #share { --camp-share-pic: url("/wp-content/uploads/2026/10/lab-rules-2026-illustration.avif"); --camp-share-rgb: 107 15 34; --camp-share-pos: 100% 50%; --camp-share-pos-sm: 85% 50%; --camp-light: #f8d9df; }
+.aw-camp.aw-camp.aw-camp #share { background: linear-gradient(160deg, rgb(var(--camp-share-rgb, 0 0 0) / 0.88) 0%, rgb(var(--camp-share-rgb, 0 0 0) / 0.78) 50%, rgb(var(--camp-share-rgb, 0 0 0) / 0.74) 100%), var(--camp-share-pic, none) var(--camp-share-pos-sm, 50% 50%) / cover no-repeat, var(--camp-mark); color: var(--camp-on-mark); }
+@media (min-width: 768px) { .aw-camp.aw-camp.aw-camp #share { background-position: 0 0, var(--camp-share-pos, 50% 50%); } }
+@media (min-width: 1200px) { .aw-camp.aw-camp.aw-camp #share { background-image: linear-gradient(90deg, rgb(var(--camp-share-rgb, 0 0 0) / 0.9) 0%, rgb(var(--camp-share-rgb, 0 0 0) / 0.8) 45%, rgb(var(--camp-share-rgb, 0 0 0) / 0.74) 65%, rgb(var(--camp-share-rgb, 0 0 0) / 0.35) 100%), var(--camp-share-pic, none); } }
+.aw-camp.aw-camp.aw-camp #share :is(h2, h3, p, a:not(.kit-share-btn):not(.wp-element-button), .aw-date, .aw-date .kit-ico) { color: var(--camp-on-mark); }
+.aw-camp.aw-camp.aw-camp #share .aw-camp-share-kit.aw-share-block { display: flex; flex-wrap: wrap; align-items: stretch; gap: var(--kit-space-4); margin-block: var(--kit-space-5) 0; }
+.aw-camp.aw-camp.aw-camp #share .aw-share-block > .kit-share { box-sizing: border-box; flex: 1 1 21rem; max-width: 23rem; display: grid; grid-template-columns: repeat(auto-fill, var(--kit-size-target)); justify-content: space-between; align-content: start; gap: var(--kit-space-2) var(--kit-space-1); margin: 0; padding: var(--kit-space-5); border: 0; border-radius: var(--kit-radius-card); box-shadow: var(--kit-elevation-2); --kit-color-focus: var(--camp-dark); }
+.aw-camp.aw-camp.aw-camp #share .aw-share-block > .kit-share > :is(.kit-share-label, .kit-share-native) { grid-column: 1 / -1; }
+.aw-camp.aw-camp.aw-camp #share .aw-share-block > .kit-share > .kit-share-label { display: block !important; margin: 0 0 var(--kit-space-2); font-size: var(--kit-type-base); font-weight: var(--kit-weight-bold); }
+.aw-camp.aw-camp.aw-camp #share .aw-share-block > .kit-share:not(.kit-follow) { background: radial-gradient(color-mix(in srgb, var(--camp-dark) 12%, transparent) 1px, transparent 1.5px) 0 0 / var(--kit-space-4) var(--kit-space-4), var(--camp-light); }
+.aw-camp.aw-camp.aw-camp #share .aw-share-block > .kit-share.kit-follow { background: var(--kit-color-surface-soft); }
+.aw-camp.aw-camp.aw-camp #share .aw-share-block > .kit-share :is(.kit-share-label, .kit-share-name) { color: var(--camp-dark); }
+.aw-camp.aw-camp.aw-camp #share .aw-share-block > .kit-share .kit-share-btn { border-color: var(--camp-dark); background: transparent; color: var(--camp-dark); }
+.aw-camp.aw-camp.aw-camp #share .aw-share-block > .kit-share .kit-share-btn:focus-visible { background: var(--camp-dark); color: var(--kit-color-on-ink); outline-color: var(--camp-dark); }
+.aw-camp.aw-camp.aw-camp #share .aw-share-block > .kit-share :is(.kit-share-btn.kit-share-native, .kit-share-copy:has(.kit-ico--check)) { background: var(--camp-dark); border-color: var(--camp-dark); color: var(--kit-color-on-ink); }
+.aw-camp.aw-camp.aw-camp #share .aw-share-block > .kit-share > .kit-share-native .kit-share-name { color: inherit; font-weight: var(--kit-weight-bold); }
+@media (hover: hover) {
+	.aw-camp.aw-camp.aw-camp #share .aw-share-block > .kit-share .kit-share-btn:hover { background: var(--camp-dark); color: var(--kit-color-on-ink); }
+}
+@media (max-width: 767px) {
+	.aw-camp.aw-camp.aw-camp #share .aw-share-block > .kit-share:has(> .kit-share-native:not([hidden])) > :is(.kit-share-btn:not(.kit-share-native), .kit-share-label) { display: none !important; }
+	.aw-camp.aw-camp.aw-camp #share .aw-share-block > .kit-share > .kit-share-native:not([hidden]) { width: 100%; min-height: var(--kit-size-control); justify-content: center; }
+}
+.aw-camp.aw-camp.aw-camp #share :is(.aw-camp-lede, .aw-camp-note) { box-sizing: border-box; max-width: 60ch; }
+.aw-camp.aw-camp.aw-camp #share .aw-camp-note { max-width: 80ch; }
+.aw-camp.aw-camp.aw-camp #share .aw-camp-share-kit + .aw-camp-note { margin-top: var(--kit-space-5); }
+/* the section's own children (Supreme Court, Lab, Community dogs) keep the bands' 1120px column (.aw-camp-section > *),
+   so the text lines up with its heading; the text inside keeps to 60ch, the note to 80ch */
+.aw-camp.aw-camp.aw-camp #share > :is(.aw-camp-lede, .aw-camp-note) { max-width: 1120px; padding-right: max(0px, min(100%, 1120px) - 60ch); }
+.aw-camp.aw-camp.aw-camp #share > .aw-camp-note { padding-right: max(0px, min(100%, 1120px) - 80ch); }
+/* icons only on the cards (each button keeps its aria-label: "Share on X", "Follow us on Instagram") */
+.aw-camp.aw-camp.aw-camp #share .aw-share-block > .kit-share .kit-share-btn:not(.kit-share-native) { width: var(--kit-size-target); padding: 0; justify-content: center; }
+.aw-camp.aw-camp.aw-camp #share .aw-share-block > .kit-share .kit-share-btn:not(.kit-share-native) .kit-share-name { display: none !important; }
