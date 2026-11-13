@@ -215,7 +215,8 @@ function aw_team_dates_screen() {
 	if ( ! current_user_can( AW_DATES_CAP ) ) {
 		wp_die( 'Not allowed.', 403 );
 	}
-	$month = isset( $_GET['m'] ) && preg_match( '/^\d{4}-\d{2}$/', (string) $_GET['m'] ) ? (string) $_GET['m'] : wp_date( 'Y-m' ); // phpcs:ignore WordPress.Security.NonceVerification
+	$m     = sanitize_text_field( wp_unslash( $_GET['m'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
+	$month = preg_match( '/^\d{4}-\d{2}$/', $m ) ? $m : wp_date( 'Y-m' );
 	$first = strtotime( $month . '-01 12:00:00' );
 	$prev  = wp_date( 'Y-m', strtotime( '-1 month', $first ) );
 	$next  = wp_date( 'Y-m', strtotime( '+1 month', $first ) );
@@ -299,7 +300,7 @@ add_action(
 		if ( aw_team_dates_moved() ) {
 			wp_die( 'Dates moved to Plugins → PlanWeb → Calendar; the Dates list is kept unchanged as a backup.', 403 );
 		}
-		$i = (int) ( $_GET['i'] ?? -1 );
+		$i = intval( $_GET['i'] ?? -1 );
 		if ( ! current_user_can( AW_DATES_CAP ) || ! check_admin_referer( 'aw_dates_delete_' . $i ) ) {
 			wp_die( 'Not allowed.', 403 );
 		}

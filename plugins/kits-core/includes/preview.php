@@ -28,7 +28,7 @@ const KITS_PREVIEW_MARK = 'kits_pv';
 
 /** Mark this browser as one that previews (readable by the page script; the device token stays HttpOnly). */
 function kits_preview_mark() {
-	if ( headers_sent() || '1' === ( $_COOKIE[ KITS_PREVIEW_MARK ] ?? '' ) ) {
+	if ( headers_sent() || '1' === sanitize_key( wp_unslash( $_COOKIE[ KITS_PREVIEW_MARK ] ?? '' ) ) ) {
 		return;
 	}
 	setcookie( KITS_PREVIEW_MARK, '1', array( 'expires' => time() + 400 * DAY_IN_SECONDS, 'path' => '/', 'secure' => true, 'httponly' => false, 'samesite' => 'Lax' ) );

@@ -164,7 +164,7 @@ function aw_claim_review_box( $post ) {
 add_action(
 	'admin_post_aw_claim_logo',
 	function () {
-		$id = (int) ( $_GET['claim'] ?? 0 );
+		$id = absint( $_GET['claim'] ?? 0 );
 		if ( ! current_user_can( 'edit_aw_volunteers' ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ?? '' ) ), 'aw_claim_logo' ) ) {
 			wp_die( 'Not allowed.', 403 );
 		}
@@ -182,12 +182,12 @@ add_action(
 add_action(
 	'admin_post_aw_claim_decide',
 	function () {
-		$id = (int) ( $_GET['claim'] ?? 0 );
+		$id = absint( $_GET['claim'] ?? 0 );
 		if ( ! current_user_can( 'edit_aw_volunteers' ) || ! check_admin_referer( 'aw_claim_decide_' . $id ) || 'aw_claim' !== get_post_type( $id ) ) {
 			wp_die( 'Not allowed.', 403 );
 		}
 		$lid = (int) get_post_meta( $id, 'aw_c_listing', true );
-		if ( 'approve' === ( $_GET['do'] ?? '' ) && 'aw_listing' === get_post_type( $lid ) ) {
+		if ( 'approve' === sanitize_key( wp_unslash( $_GET['do'] ?? '' ) ) && 'aw_listing' === get_post_type( $lid ) ) {
 			do_action( 'aw_claim_before_apply', $lid, (array) get_post_meta( $id, 'aw_c_proposed', true ), $id ); // enrichment.php logs the organisation as the source
 			foreach ( (array) get_post_meta( $id, 'aw_c_proposed', true ) as $key => $val ) {
 				if ( isset( AW_CLAIM_FIELDS[ $key ] ) ) {

@@ -407,7 +407,7 @@ function aw_elsewhere_screen() {
 	}
 	if ( isset( $_POST['aw_elsewhere'] ) && check_admin_referer( 'aw_elsewhere' ) ) {
 		$rows = array();
-		foreach ( (array) wp_unslash( $_POST['aw_elsewhere'] ) as $r ) {
+		foreach ( (array) wp_unslash( $_POST['aw_elsewhere'] ) as $r ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- each field is sanitized below
 			$row = array( 'label' => sanitize_text_field( $r['label'] ?? '' ), 'url' => esc_url_raw( $r['url'] ?? '' ) );
 			if ( $row['label'] && $row['url'] ) {
 				$rows[] = $row;

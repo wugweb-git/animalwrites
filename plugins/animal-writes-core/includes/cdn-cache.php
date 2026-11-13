@@ -45,13 +45,13 @@ function aw_cdn_ttl() {
 	}
 	$ttl = max( 60, min( 3600, $ttl ) );
 
-	if ( 'GET' !== ( $_SERVER['REQUEST_METHOD'] ?? '' ) || is_admin() || is_user_logged_in() || is_404() || is_search() || is_feed() || is_preview() || is_embed() || is_customize_preview() || is_robots() || post_password_required() || wp_doing_ajax() || wp_is_json_request() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) ) {
+	if ( 'GET' !== sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ?? '' ) ) || is_admin() || is_user_logged_in() || is_404() || is_search() || is_feed() || is_preview() || is_embed() || is_customize_preview() || is_robots() || post_password_required() || wp_doing_ajax() || wp_is_json_request() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) ) {
 		return 0;
 	}
 	// Any query string (filters, ?q=, ?s=, tracking, previews) stays out; only the test flag is allowed.
 	// The raw query string, not $_GET: blocks add their own keys to $_GET (query-N-page) while rendering.
 	$qs = array();
-	parse_str( (string) ( $_SERVER['QUERY_STRING'] ?? '' ), $qs );
+	parse_str( (string) wp_unslash( $_SERVER['QUERY_STRING'] ?? '' ), $qs ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- only read for its parameter names; a sanitizer would break the percent-encoding
 	unset( $qs['cdnprobe'] );
 	if ( $qs || ! empty( $_SERVER['HTTP_AUTHORIZATION'] ) ) {
 		return 0;

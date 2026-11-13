@@ -117,7 +117,7 @@ function aw_menu_count( $n ) {
 add_action(
 	'load-post.php',
 	function () {
-		$id = (int) ( $_GET['post'] ?? 0 ); // phpcs:ignore WordPress.Security.NonceVerification
+		$id = absint( $_GET['post'] ?? 0 ); // phpcs:ignore WordPress.Security.NonceVerification
 		if ( $id && 'aw_message' === get_post_type( $id ) ) {
 			update_post_meta( $id, 'aw_read', current_time( 'mysql' ) );
 		}
