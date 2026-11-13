@@ -658,6 +658,35 @@ add_filter(
 	2
 );
 
+/*
+ * News, Library and Resources cards are stacked everywhere (owner, 13 Nov 2026: "the image to text ratio be 1:3 or
+ * less. image is just a seo need. and i like stacked version and lesser padding, so that we can have more of them per
+ * row or fill"). Every card in a Query Loop of those types (hubs, Home sections, campaign sections, archives, related
+ * lists) becomes kit-card--stacked-md, and the list takes aw-stack-list, the dense grid in aw.css. Runs after the News
+ * first-page states (priority 10). Opportunities, press and campaign lists keep their own cards.
+ */
+const AW_STACK_TYPES = array( 'aw_news', 'aw_legal', 'post' );
+add_filter(
+	'render_block_core/post-template',
+	function ( $html, $block, $instance = null ) {
+		if ( false === strpos( (string) $html, 'kit-card kit-card--' ) ) {
+			return $html;
+		}
+		$q    = ( $instance instanceof WP_Block ) ? ( $instance->context['query'] ?? array() ) : array();
+		$type = (string) ( $q['postType'] ?? '' );
+		if ( ! empty( $q['inherit'] ) ) {
+			$type = is_post_type_archive() ? (string) get_query_var( 'post_type' ) : ( is_archive() || is_home() || is_search() ? 'post' : '' );
+		}
+		if ( ! in_array( $type, AW_STACK_TYPES, true ) ) {
+			return $html;
+		}
+		$html = (string) preg_replace( '/\bkit-card kit-card--(?:block-lg|block-md|block-sm|stacked-lg)\b/', 'kit-card kit-card--stacked-md', $html );
+		return (string) preg_replace( '/\bclass="wp-block-post-template\b/', 'class="wp-block-post-template aw-stack-list', $html, 1 );
+	},
+	20,
+	3
+);
+
 // Kits → Theme Options → Archives: each hub Page is its post type's list page, so the list page's defaults apply to it
 // (after the Page's own Page Options).
 add_filter(
