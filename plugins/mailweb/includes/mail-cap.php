@@ -339,7 +339,8 @@ function mailweb_flush( $max = 40 ) {
 	// starts; direct sends have only created_at). Status and next_try read tries before it is raised.
 	$wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		$wpdb->prepare(
-			"UPDATE {$t} SET status = IF( tries + 1 >= %d, 'held', 'failed' ), next_try = IF( tries + 1 >= %d, NULL, %s ), tries = tries + 1, sent_at = NULL, error = 'No confirmation from the mail server' WHERE status = 'sending' AND COALESCE( sent_at, created_at ) < %s AND mail IS NOT NULL", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- the plugin's own table name
+			"UPDATE %i SET status = IF( tries + 1 >= %d, 'held', 'failed' ), next_try = IF( tries + 1 >= %d, NULL, %s ), tries = tries + 1, sent_at = NULL, error = 'No confirmation from the mail server' WHERE status = 'sending' AND COALESCE( sent_at, created_at ) < %s AND mail IS NOT NULL",
+			$t,
 			MAILWEB_TRIES,
 			MAILWEB_TRIES,
 			gmdate( 'Y-m-d H:i:s', time() + 15 * MINUTE_IN_SECONDS ),

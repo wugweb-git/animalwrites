@@ -46,10 +46,9 @@ function aw_sourcing_cli_p2_tables() {
 	aw_kw_install();
 	$k    = aw_si_table( 'keywords' );
 	$m    = aw_si_table( 'kw_map' );
-	$cols = AW_SOURCING_P2_COLUMNS;
 	return array(
-		'table:keywords' => (array) $wpdb->get_results( "SELECT {$cols} FROM {$k} ORDER BY id", ARRAY_A ), // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table and column names only.
-		'table:kw_map'   => (array) $wpdb->get_results( "SELECT kw_id, kind, value FROM {$m} ORDER BY id", ARRAY_A ), // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+		'table:keywords' => (array) $wpdb->get_results( $wpdb->prepare( 'SELECT ' . AW_SOURCING_P2_COLUMNS . ' FROM %i ORDER BY id', $k ), ARRAY_A ), // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.NotPrepared -- fixed column list.
+		'table:kw_map'   => (array) $wpdb->get_results( $wpdb->prepare( 'SELECT kw_id, kind, value FROM %i ORDER BY id', $m ), ARRAY_A ), // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	);
 }
 
@@ -62,11 +61,9 @@ function aw_sourcing_cli_p2_tables() {
 function aw_sourcing_cli_p2_rows( array $norms ) {
 	global $wpdb;
 	$k    = aw_si_table( 'keywords' );
-	$cols = AW_SOURCING_P2_COLUMNS;
 	$out  = array();
 	foreach ( array_chunk( array_values( array_unique( $norms ) ), 200 ) as $chunk ) {
-		$in   = implode( ',', array_fill( 0, count( $chunk ), '%s' ) );
-		$out  = array_merge( $out, (array) $wpdb->get_results( $wpdb->prepare( "SELECT {$cols} FROM {$k} WHERE norm IN ({$in})", $chunk ), ARRAY_A ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- one %s per norm.
+		$out = array_merge( $out, (array) $wpdb->get_results( $wpdb->prepare( 'SELECT ' . AW_SOURCING_P2_COLUMNS . ' FROM %i WHERE norm IN (' . implode( ',', array_fill( 0, count( $chunk ), '%s' ) ) . ')', array_merge( array( $k ), $chunk ) ), ARRAY_A ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- one %s per norm.
 	}
 	return aw_kw_attach_maps( $out );
 }
@@ -82,7 +79,7 @@ function aw_sourcing_cli_p2_stray( array $plan ) {
 	global $wpdb;
 	$k    = aw_si_table( 'keywords' );
 	$ids  = array_flip( array_filter( array_map( fn( $r ) => (int) $r['id'], $plan['records'] ) ) );
-	$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT id, label, roles FROM {$k} WHERE roles & %d", AW_KW_WORKER_ROLES ), ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+	$rows = (array) $wpdb->get_results( $wpdb->prepare( 'SELECT id, label, roles FROM %i WHERE roles & %d', $k, AW_KW_WORKER_ROLES ), ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	$out  = array();
 	foreach ( $rows as $r ) {
 		if ( ! isset( $ids[ (int) $r['id'] ] ) ) {
@@ -305,7 +302,7 @@ function aw_sourcing_cli_p2_migrate( $dry ) {
 		WP_CLI::log( "Backup: $bk" );
 	}
 	aw_kw_install(); // version 2 columns and the map table (adds columns; nothing is dropped)
-	$total                     = (int) $wpdb->get_var( 'SELECT COUNT(*) FROM ' . aw_si_table( 'keywords' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.NotPrepared -- table name only.
+	$total                     = (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM %i', aw_si_table( 'keywords' ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	list( $plan, $report, $n ) = aw_sourcing_cli_p2_plan();
 	$cmp                       = aw_sourcing_cli_p2_print( $plan, $report, $n, $total );
 	if ( $plan['conflicts'] ) {

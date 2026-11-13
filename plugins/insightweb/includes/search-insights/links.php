@@ -68,7 +68,8 @@ function aw_si_link_put( array $l ): int {
 	$t      = aw_si_table( 'links' );
 	$n      = $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		$wpdb->prepare(
-			"INSERT INTO {$t} (link_key, domain, from_url, linked_url, anchor, links, first_seen, last_seen, source, type, hidden, note) VALUES (%s, %s, %s, %s, %s, %d, %s, %s, %s, %s, %d, %s) ON DUPLICATE KEY UPDATE first_seen = LEAST(COALESCE(first_seen, VALUES(first_seen)), VALUES(first_seen)), last_seen = GREATEST(COALESCE(last_seen, VALUES(last_seen)), VALUES(last_seen)), links = GREATEST(links, VALUES(links))", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+			"INSERT INTO %i (link_key, domain, from_url, linked_url, anchor, links, first_seen, last_seen, source, type, hidden, note) VALUES (%s, %s, %s, %s, %s, %d, %s, %s, %s, %s, %d, %s) ON DUPLICATE KEY UPDATE first_seen = LEAST(COALESCE(first_seen, VALUES(first_seen)), VALUES(first_seen)), last_seen = GREATEST(COALESCE(last_seen, VALUES(last_seen)), VALUES(last_seen)), links = GREATEST(links, VALUES(links))",
+			$t,
 			$key,
 			mb_substr( $domain, 0, 191 ),
 			mb_substr( $from, 0, 500 ),
@@ -152,12 +153,12 @@ function aw_si_links_load(): void {
 		$in = implode( ',', $ids );
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name and integers.
 		if ( 'link_hide' === $action || 'link_unhide' === $action ) {
-			$wpdb->query( $wpdb->prepare( "UPDATE {$t} SET hidden = %d WHERE id IN ({$in})", 'link_hide' === $action ? 1 : 0 ) );
+			$wpdb->query( $wpdb->prepare( "UPDATE %i SET hidden = %d WHERE id IN ({$in})", $t, 'link_hide' === $action ? 1 : 0 ) );
 		} else {
 			$type = substr( $action, strlen( 'link_type_' ) );
 			$type = 'unsorted' === $type ? '' : $type;
 			// Spam is hidden; a row moved out of spam shows again.
-			$wpdb->query( $wpdb->prepare( "UPDATE {$t} SET hidden = IF(%s = 'spam', 1, IF(type = 'spam', 0, hidden)), type = %s WHERE id IN ({$in})", $type, $type ) );
+			$wpdb->query( $wpdb->prepare( "UPDATE %i SET hidden = IF(%s = 'spam', 1, IF(type = 'spam', 0, hidden)), type = %s WHERE id IN ({$in})", $t, $type, $type ) );
 		}
 		// phpcs:enable
 	}

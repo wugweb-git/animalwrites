@@ -502,7 +502,8 @@ function directoryweb_claim_log_row( array $c, string $key ): ?array {
 	global $wpdb;
 	$row = $wpdb->get_row( // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- one row of SourceWeb's change log
 		$wpdb->prepare(
-			'SELECT id, status FROM ' . aw_enrich_table() . ' WHERE listing_id = %d AND run = %s AND field = %s ORDER BY id DESC LIMIT 1', // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- SourceWeb's table name
+			'SELECT id, status FROM %i WHERE listing_id = %d AND run = %s AND field = %s ORDER BY id DESC LIMIT 1',
+			aw_enrich_table(),
 			(int) $c['listing'],
 			'claim-' . (int) $c['id'],
 			directoryweb_enrich_field( $key, AW_CLAIM_L )

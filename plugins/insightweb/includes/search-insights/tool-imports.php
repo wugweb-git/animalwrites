@@ -202,9 +202,10 @@ function aw_si_tool_figures( array $ids ): array {
 	}
 	$o    = aw_si_table( 'obs' );
 	$in   = implode( ',', $ids );
-	$srcs = "'" . implode( "', '", array_map( 'esc_sql', array_keys( aw_si_tools() ) ) ) . "'";
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers, fixed source names and a table name.
-	$rows = (array) $wpdb->get_results( "SELECT kw_id, src, value, txt, d FROM {$o} WHERE src IN ({$srcs}) AND period = 'month' AND kw_id IN ({$in}) ORDER BY d" );
+	$tools = array_keys( aw_si_tools() );
+	$srcs  = implode( ', ', array_fill( 0, count( $tools ), '%s' ) );
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers and placeholders built above.
+	$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT kw_id, src, value, txt, d FROM %i WHERE src IN ({$srcs}) AND period = 'month' AND kw_id IN ({$in}) ORDER BY d", array_merge( array( $o ), $tools ) ) );
 	$out  = array();
 	foreach ( $rows as $r ) {
 		$out[ (int) $r->kw_id ][ (string) $r->src ] = $r; // Ordered by month: the latest wins.

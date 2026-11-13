@@ -204,8 +204,8 @@ add_action(
 	'aw_seo_fill_daily',
 	function () {
 		global $wpdb;
-		$types = implode( ',', array_map( fn( $t ) => "'" . esc_sql( $t ) . "'", AW_SEO_ITEM_TYPES ) );
-		$ids   = $wpdb->get_col( "SELECT p.ID FROM {$wpdb->posts} p LEFT JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'rank_math_title' WHERE p.post_type IN ({$types}) AND p.post_status = 'publish' AND m.meta_id IS NULL LIMIT 500" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL
+		$types = array_values( (array) AW_SEO_ITEM_TYPES );
+		$ids   = $wpdb->get_col( $wpdb->prepare( "SELECT p.ID FROM {$wpdb->posts} p LEFT JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'rank_math_title' WHERE p.post_type IN (" . implode( ',', array_fill( 0, count( $types ), '%s' ) ) . ") AND p.post_status = 'publish' AND m.meta_id IS NULL LIMIT 500", $types ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- one %s per item type
 		foreach ( $ids as $id ) {
 			aw_seo_fill_post( $id );
 		}

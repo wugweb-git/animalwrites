@@ -54,7 +54,7 @@ if ( ! insightweb_uninstall_backup( 'insightweb', __DIR__ . '/insightweb.php', a
 }
 
 foreach ( $insightweb_tables as $insightweb_table ) {
-	$wpdb->query( 'DROP TABLE IF EXISTS ' . $insightweb_table ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.SchemaChange -- fixed table names.
+	$wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', $insightweb_table ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.DirectDatabaseQuery.SchemaChange -- fixed table names.
 }
 
 // The seven numbers: InsightWeb's key in RankWeb's option.

@@ -135,9 +135,9 @@ function aw_si_vis_count(): void {
 	global $wpdb;
 	$t = aw_si_vis_table();
 	if ( '' !== $sip ) {
-		$wpdb->query( $wpdb->prepare( "INSERT INTO {$t} (day, kind, k, n) VALUES (%s, 'c', %s, 1), (%s, 'i', %s, 1) ON DUPLICATE KEY UPDATE n = n + 1", $day, aw_si_vis_country(), $day, $sip ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- our own counter table
+		$wpdb->query( $wpdb->prepare( "INSERT INTO %i (day, kind, k, n) VALUES (%s, 'c', %s, 1), (%s, 'i', %s, 1) ON DUPLICATE KEY UPDATE n = n + 1", $t, $day, aw_si_vis_country(), $day, $sip ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- our own counter table
 	} else {
-		$wpdb->query( $wpdb->prepare( "INSERT INTO {$t} (day, kind, k, n) VALUES (%s, 'c', %s, 1) ON DUPLICATE KEY UPDATE n = n + 1", $day, aw_si_vis_country() ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- our own counter table
+		$wpdb->query( $wpdb->prepare( "INSERT INTO %i (day, kind, k, n) VALUES (%s, 'c', %s, 1) ON DUPLICATE KEY UPDATE n = n + 1", $t, $day, aw_si_vis_country() ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- our own counter table
 	}
 }
 add_action( 'shutdown', 'aw_si_vis_count', 0 );
@@ -147,7 +147,7 @@ function aw_si_vis_daily(): void {
 	aw_si_vis_install();
 	global $wpdb;
 	$t = aw_si_vis_table();
-	$wpdb->query( $wpdb->prepare( "DELETE FROM {$t} WHERE kind = 'i' AND day < %s", wp_date( 'Y-m-d', time() - AW_SI_VIS_IP_DAYS * DAY_IN_SECONDS ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- shortened addresses older than 30 days
+	$wpdb->query( $wpdb->prepare( "DELETE FROM %i WHERE kind = 'i' AND day < %s", $t, wp_date( 'Y-m-d', time() - AW_SI_VIS_IP_DAYS * DAY_IN_SECONDS ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- shortened addresses older than 30 days
 	$v4 = aw_si_geo_dir() . 'v4.bin';
 	if ( ( ! is_readable( $v4 ) || filemtime( $v4 ) < time() - 30 * DAY_IN_SECONDS ) && ! wp_next_scheduled( AW_SI_GEO_CRON ) ) {
 		wp_schedule_single_event( time() + 120, AW_SI_GEO_CRON ); // its own run: the download and conversion take a while.
@@ -228,7 +228,7 @@ add_filter( 'aw_si_cron_hooks', fn( $h ) => array_merge( (array) $h, array( AW_S
 function aw_si_vis_top( string $kind, int $days, int $limit ): array {
 	global $wpdb;
 	$t    = aw_si_vis_table();
-	$rows = $wpdb->get_results( $wpdb->prepare( "SELECT k, SUM(n) AS n FROM {$t} WHERE kind = %s AND day >= %s GROUP BY k ORDER BY n DESC LIMIT %d", $kind, $days > 0 ? wp_date( 'Y-m-d', time() - ( $days - 1 ) * DAY_IN_SECONDS ) : '1970-01-01', $limit ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- our own counter table
+	$rows = $wpdb->get_results( $wpdb->prepare( "SELECT k, SUM(n) AS n FROM %i WHERE kind = %s AND day >= %s GROUP BY k ORDER BY n DESC LIMIT %d", $t, $kind, $days > 0 ? wp_date( 'Y-m-d', time() - ( $days - 1 ) * DAY_IN_SECONDS ) : '1970-01-01', $limit ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- our own counter table
 	$out  = array();
 	foreach ( (array) $rows as $r ) {
 		$out[ (string) $r->k ] = (int) $r->n;
@@ -253,8 +253,8 @@ function aw_si_vis_section(): void {
 	$cells = array();
 	for ( $i = 0; $i < 7; $i++ ) {
 		$day = wp_date( 'Y-m-d', time() - $i * DAY_IN_SECONDS );
-		$c   = $wpdb->get_results( $wpdb->prepare( "SELECT k, n FROM {$t} WHERE day = %s AND kind = 'c' ORDER BY n DESC", $day ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- our own counter table
-		$ips = $wpdb->get_results( $wpdb->prepare( "SELECT k, n FROM {$t} WHERE day = %s AND kind = 'i' ORDER BY n DESC LIMIT 5", $day ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- our own counter table
+		$c   = $wpdb->get_results( $wpdb->prepare( "SELECT k, n FROM %i WHERE day = %s AND kind = 'c' ORDER BY n DESC", $t, $day ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- our own counter table
+		$ips = $wpdb->get_results( $wpdb->prepare( "SELECT k, n FROM %i WHERE day = %s AND kind = 'i' ORDER BY n DESC LIMIT 5", $t, $day ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- our own counter table
 		$cm  = array();
 		foreach ( (array) $c as $r ) {
 			$cm[ (string) $r->k ] = (int) $r->n;

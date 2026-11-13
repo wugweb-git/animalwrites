@@ -628,13 +628,13 @@ function sourceweb_rest_enrichment( WP_REST_Request $request ) {
 	list( $where, $args ) = aw_enrich_where( $q );
 	list( $where, $args ) = sourceweb_enrich_search( $where, $args, $request );
 
-	// phpcs:disable WordPress.DB -- the plugin's own table; every value is a placeholder
-	$total = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT( DISTINCT e.listing_id ) FROM {$t} e WHERE {$where}", $args ) );
+	// phpcs:disable WordPress.DB, PluginCheck.Security.DirectDB.UnescapedDBParameter -- the plugin's own table (%i); $where/$vwhere are aw_enrich_where() clauses whose every value is a placeholder
+	$total = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT( DISTINCT e.listing_id ) FROM %i e WHERE {$where}", array_merge( array( $t ), $args ) ) );
 	$per   = SOURCEWEB_ENRICH_PER_PAGE;
 	$pages = max( 1, (int) ceil( $total / $per ) );
 	$page  = min( $pages, max( 1, (int) $request['page'] ) );
-	$lids  = array_map( 'intval', $wpdb->get_col( $wpdb->prepare( "SELECT e.listing_id FROM {$t} e WHERE {$where} GROUP BY e.listing_id ORDER BY MIN( FIELD( e.confidence, 'high', 'medium', 'low' ) ), e.listing_id LIMIT %d OFFSET %d", array_merge( $args, array( $per, ( $page - 1 ) * $per ) ) ) ) );
-	$rows  = $lids ? $wpdb->get_results( $wpdb->prepare( "SELECT e.* FROM {$t} e WHERE {$where} AND e.listing_id IN ( " . implode( ', ', array_fill( 0, count( $lids ), '%d' ) ) . ' ) ORDER BY e.id DESC LIMIT 400', array_merge( $args, $lids ) ), ARRAY_A ) : array();
+	$lids  = array_map( 'intval', $wpdb->get_col( $wpdb->prepare( "SELECT e.listing_id FROM %i e WHERE {$where} GROUP BY e.listing_id ORDER BY MIN( FIELD( e.confidence, 'high', 'medium', 'low' ) ), e.listing_id LIMIT %d OFFSET %d", array_merge( array( $t ), $args, array( $per, ( $page - 1 ) * $per ) ) ) ) );
+	$rows  = $lids ? $wpdb->get_results( $wpdb->prepare( "SELECT e.* FROM %i e WHERE {$where} AND e.listing_id IN ( " . implode( ', ', array_fill( 0, count( $lids ), '%d' ) ) . ' ) ORDER BY e.id DESC LIMIT 400', array_merge( array( $t ), $args, $lids ) ), ARRAY_A ) : array();
 	$views = array();
 	$vq    = $q;
 	unset( $vq['status'] );
@@ -642,10 +642,10 @@ function sourceweb_rest_enrichment( WP_REST_Request $request ) {
 	list( $vwhere, $vargs ) = aw_enrich_where( $vq );
 	list( $vwhere, $vargs ) = sourceweb_enrich_search( $vwhere, $vargs, $request ); // view counts follow the search box
 	$by = array();
-	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT e.status, COUNT(*) AS n FROM {$t} e WHERE {$vwhere} GROUP BY e.status", $vargs ) ) as $v ) {
+	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT e.status, COUNT(*) AS n FROM %i e WHERE {$vwhere} GROUP BY e.status", array_merge( array( $t ), $vargs ) ) ) as $v ) {
 		$by[ (string) $v->status ] = (int) $v->n;
 	}
-	// phpcs:enable WordPress.DB
+	// phpcs:enable WordPress.DB, PluginCheck.Security.DirectDB.UnescapedDBParameter
 	foreach ( SOURCEWEB_ENRICH_VIEWS as $k => $label ) {
 		if ( 'applied' === $k ) {
 			$n = ( $by['approved'] ?? 0 ) + ( $by['auto-applied'] ?? 0 );
@@ -823,21 +823,21 @@ function sourceweb_rest_enrichment_decide( WP_REST_Request $request ) {
 	$ids      = array_filter( array_map( 'absint', (array) $request['ids'] ) );
 	$listings = array_filter( array_map( 'absint', (array) $request['listings'] ) );
 	$t        = aw_enrich_table();
-	// phpcs:disable WordPress.DB -- the plugin's own table; every value is a placeholder
+	// phpcs:disable WordPress.DB, PluginCheck.Security.DirectDB.UnescapedDBParameter -- the plugin's own table (%i); $where is an aw_enrich_where() clause whose every value is a placeholder
 	if ( 'approve_high' === $do ) {
 		$q                    = sourceweb_enrich_query( $request, 'pending' );
 		$q['confidence']      = 'high';
 		list( $where, $args ) = aw_enrich_where( $q );
 		list( $where, $args ) = sourceweb_enrich_search( $where, $args, $request );
-		$ids                  = array_map( 'intval', $wpdb->get_col( $wpdb->prepare( "SELECT e.id FROM {$t} e WHERE {$where} AND e.field <> 'merge_into'", $args ) ) );
+		$ids                  = array_map( 'intval', $wpdb->get_col( $wpdb->prepare( "SELECT e.id FROM %i e WHERE {$where} AND e.field <> 'merge_into'", array_merge( array( $t ), $args ) ) ) );
 		$do                   = 'approve';
 	} elseif ( ! $ids && $listings && in_array( $do, array( 'approve', 'reject' ), true ) ) {
-		$ids = array_map( 'intval', $wpdb->get_col( $wpdb->prepare( "SELECT id FROM {$t} WHERE status = 'pending' AND field <> 'merge_into' AND listing_id IN ( " . implode( ', ', array_fill( 0, count( $listings ), '%d' ) ) . ' )', $listings ) ) );
+		$ids = array_map( 'intval', $wpdb->get_col( $wpdb->prepare( "SELECT id FROM %i WHERE status = 'pending' AND field <> 'merge_into' AND listing_id IN ( " . implode( ', ', array_fill( 0, count( $listings ), '%d' ) ) . ' )', array_merge( array( $t ), $listings ) ) ) );
 	} elseif ( ! $ids && $listings && 'undo' === $do ) {
 		// Bulk Undo of the ticked listings: every applied value, newest first.
-		$ids = array_map( 'intval', $wpdb->get_col( $wpdb->prepare( "SELECT id FROM {$t} WHERE status IN ( 'approved', 'auto-applied' ) AND listing_id IN ( " . implode( ', ', array_fill( 0, count( $listings ), '%d' ) ) . ' ) ORDER BY id DESC', $listings ) ) );
+		$ids = array_map( 'intval', $wpdb->get_col( $wpdb->prepare( "SELECT id FROM %i WHERE status IN ( 'approved', 'auto-applied' ) AND listing_id IN ( " . implode( ', ', array_fill( 0, count( $listings ), '%d' ) ) . ' ) ORDER BY id DESC', array_merge( array( $t ), $listings ) ) ) );
 	}
-	// phpcs:enable WordPress.DB
+	// phpcs:enable WordPress.DB, PluginCheck.Security.DirectDB.UnescapedDBParameter
 	$fn   = array(
 		'approve' => 'aw_enrich_approve',
 		'reject'  => 'aw_enrich_reject',

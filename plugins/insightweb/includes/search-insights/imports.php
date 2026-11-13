@@ -135,7 +135,7 @@ function aw_si_import( string $kind, string $raw ): array {
 				}
 				$id = (int) current( aw_si_kw_ids( array( sanitize_text_field( $cells[0] ) ), 0 ) );
 				if ( $id ) { // A new paste replaces the keyword's earlier pasted figure (the workers' rows stay).
-					$wpdb->query( $wpdb->prepare( "DELETE FROM {$o} WHERE src = 'trends' AND metric = 'index' AND period = '12m' AND kw_id = %d AND txt = 'import'", $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+					$wpdb->query( $wpdb->prepare( "DELETE FROM %i WHERE src = 'trends' AND metric = 'index' AND period = '12m' AND kw_id = %d AND txt = 'import'", $o, $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 				}
 				$put(
 					$id && aw_si_obs_put(
@@ -233,7 +233,7 @@ function aw_si_import_rows(): void {
 	global $wpdb;
 	if ( aw_si_ready() ) {
 		$o    = aw_si_table( 'obs' );
-		$last = (array) $wpdb->get_results( "SELECT src, MAX(fetched) f, COUNT(*) n FROM {$o} WHERE src IN ('kp', 'gov', 'openseo_serp') OR (src = 'trends' AND txt = 'import') GROUP BY src" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+		$last = (array) $wpdb->get_results( $wpdb->prepare( "SELECT src, MAX(fetched) f, COUNT(*) n FROM %i WHERE src IN ('kp', 'gov', 'openseo_serp') OR (src = 'trends' AND txt = 'import') GROUP BY src", $o ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		if ( $last ) {
 			echo '<ul>';
 			foreach ( $last as $l ) {
@@ -350,7 +350,7 @@ add_action(
 		}
 		global $wpdb;
 		$o   = aw_si_table( 'obs' );
-		$row = $wpdb->get_row( "SELECT MAX(d) d, COUNT(*) n FROM {$o} WHERE src = 'live' AND metric = 'position'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+		$row = $wpdb->get_row( $wpdb->prepare( "SELECT MAX(d) d, COUNT(*) n FROM %i WHERE src = 'live' AND metric = 'position'", $o ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		if ( $row && $row->d && (int) $row->n > 0 ) {
 			$r         = aw_si_runs();
 			$r['live'] = array(

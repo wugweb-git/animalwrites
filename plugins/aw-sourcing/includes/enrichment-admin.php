@@ -181,7 +181,7 @@ add_action(
 		$n = 0;
 		if ( get_option( 'aw_enrich_db' ) ) {
 			global $wpdb;
-			$n = (int) $wpdb->get_var( 'SELECT COUNT(*) FROM ' . aw_enrich_table() . " WHERE status = 'pending'" ); // phpcs:ignore WordPress.DB
+			$n = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE status = 'pending'", aw_enrich_table() ) ); // phpcs:ignore WordPress.DB
 		}
 		add_submenu_page( AW_SRC_MENU, 'Enrichment review', 'Enrichment review' . ( $n && function_exists( 'aw_menu_count' ) ? aw_menu_count( $n ) : '' ), AW_ENRICH_CAP, 'aw-enrich-review', 'aw_enrich_review_page' );
 	},

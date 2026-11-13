@@ -173,8 +173,8 @@ function aw_si_ref_icons_wanted(): array {
 	}
 	$o     = aw_si_table( 'obs' );
 	$since = ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( '-90 days' )->format( 'Y-m-d' );
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
-	$srcs = (array) $wpdb->get_col( $wpdb->prepare( "SELECT txt FROM {$o} WHERE src = 'ga4' AND metric IN ('ref', 'ai') AND period = 'day' AND d >= %s GROUP BY txt ORDER BY SUM(value) DESC LIMIT 60", $since ) );
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$srcs = (array) $wpdb->get_col( $wpdb->prepare( "SELECT txt FROM %i WHERE src = 'ga4' AND metric IN ('ref', 'ai') AND period = 'day' AND d >= %s GROUP BY txt ORDER BY SUM(value) DESC LIMIT 60", $o, $since ) );
 	$have = (array) get_option( AW_SI_REF_ICONS, array() );
 	$want = array();
 	foreach ( $srcs as $src ) {

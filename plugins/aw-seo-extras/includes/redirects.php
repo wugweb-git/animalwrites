@@ -95,7 +95,7 @@ add_action(
 		// Any other /campaign/{slug}/ goes to /campaigns/{slug}/. Bare /campaign/ keeps its own exact rule.
 		global $wpdb;
 		$table = $wpdb->prefix . 'rank_math_redirections';
-		$have  = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE sources LIKE %s", '%' . $wpdb->esc_like( '^campaign/(.+?)/?$' ) . '%' ) ); // phpcs:ignore WordPress.DB
+		$have  = (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM %i WHERE sources LIKE %s', $table, '%' . $wpdb->esc_like( '^campaign/(.+?)/?$' ) . '%' ) ); // phpcs:ignore WordPress.DB
 		if ( ! $have ) {
 			$ok = aw_rank_math_redirect( '^campaign/(.+?)/?$', home_url( '/campaigns/$1/' ), 'regex' ) && $ok;
 		}
@@ -118,7 +118,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 		function () {
 			global $wpdb;
 			$table = $wpdb->prefix . 'rank_math_redirections';
-			$rows  = $wpdb->get_results( "SELECT sources, url_to, header_code FROM {$table} WHERE status = 'active' ORDER BY id", ARRAY_A ); // phpcs:ignore WordPress.DB
+			$rows  = $wpdb->get_results( $wpdb->prepare( "SELECT sources, url_to, header_code FROM %i WHERE status = 'active' ORDER BY id", $table ), ARRAY_A ); // phpcs:ignore WordPress.DB
 			$out   = fopen( 'php://output', 'w' );
 			fputcsv( $out, array( 'path', 'target', 'code', 'comparison' ) );
 			foreach ( (array) $rows as $r ) {
@@ -274,7 +274,7 @@ add_action(
 			return;
 		}
 		$table = $wpdb->prefix . 'rank_math_redirections';
-		$ids   = array_map( 'intval', $wpdb->get_col( $wpdb->prepare( "SELECT id FROM {$table} WHERE status = 'active' AND url_to IN ( %s, %s )", $url, untrailingslashit( $url ) ) ) ); // phpcs:ignore WordPress.DB
+		$ids   = array_map( 'intval', $wpdb->get_col( $wpdb->prepare( "SELECT id FROM %i WHERE status = 'active' AND url_to IN ( %s, %s )", $table, $url, untrailingslashit( $url ) ) ) ); // phpcs:ignore WordPress.DB
 		if ( $ids ) {
 			\RankMath\Redirections\DB::change_status( $ids, 'inactive' );
 			update_post_meta( $post_id, '_aw_redirects_paused', $ids );

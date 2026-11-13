@@ -280,7 +280,7 @@ function aw_si_ga4_store_nf( string $end, array $rows ) {
 	$n = aw_si_obs_replace_day( 'ga4', $end, $obs, '28d', array( 'nf' ) );
 	if ( ! is_wp_error( $n ) ) {
 		$o = aw_si_table( 'obs' );
-		$wpdb->query( $wpdb->prepare( "DELETE FROM {$o} WHERE src = 'ga4' AND metric = 'nf' AND period = '28d' AND d <> %s", $end ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+		$wpdb->query( $wpdb->prepare( "DELETE FROM %i WHERE src = 'ga4' AND metric = 'nf' AND period = '28d' AND d <> %s", $o, $end ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	}
 	return $n;
 }
@@ -362,7 +362,7 @@ function aw_si_ga4_store_camp( string $end, array $rows ) {
 		$o = aw_si_table( 'obs' );
 		$in = implode( ', ', array_fill( 0, count( $metrics ), '%s' ) );
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- table name and one %s per metric, built above.
-		$wpdb->query( $wpdb->prepare( "DELETE FROM {$o} WHERE src = 'ga4' AND metric IN ({$in}) AND period = '28d' AND d <> %s", array_merge( array_values( $metrics ), array( $end ) ) ) );
+		$wpdb->query( $wpdb->prepare( "DELETE FROM %i WHERE src = 'ga4' AND metric IN ({$in}) AND period = '28d' AND d <> %s", array_merge( array( $o ), array_values( $metrics ), array( $end ) ) ) );
 	}
 	return $n;
 }
@@ -378,8 +378,8 @@ function aw_si_ga4_keep_ref( string $day, array $rows ): array {
 	global $wpdb;
 	$o    = aw_si_table( 'obs' );
 	$rows = array_values( array_filter( $rows, fn( $r ) => ! in_array( $r[3], array( 'ref', 'ref_eng', 'ref_key' ), true ) ) );
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
-	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT kw_id, page, page_key, metric, value, txt FROM {$o} WHERE src = 'ga4' AND period = 'day' AND d = %s AND metric IN ('ref', 'ref_eng', 'ref_key')", $day ) ) as $r ) {
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT kw_id, page, page_key, metric, value, txt FROM %i WHERE src = 'ga4' AND period = 'day' AND d = %s AND metric IN ('ref', 'ref_eng', 'ref_key')", $o, $day ) ) as $r ) {
 		$rows[] = array( (int) $r->kw_id, (string) $r->page, (string) $r->page_key, (string) $r->metric, (float) $r->value, (string) $r->txt );
 	}
 	return $rows;

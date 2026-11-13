@@ -53,11 +53,11 @@ function aw_run_backup() {
 	if ( $gz ) {
 		gzwrite( $gz, "-- Animal Writes database backup {$report['at']}\nSET NAMES utf8mb4;\nSET FOREIGN_KEY_CHECKS=0;\n" );
 		foreach ( $wpdb->get_col( 'SHOW TABLES' ) as $table ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-			$create = $wpdb->get_row( "SHOW CREATE TABLE `{$table}`", ARRAY_N ); // phpcs:ignore WordPress.DB
+			$create = $wpdb->get_row( $wpdb->prepare( 'SHOW CREATE TABLE %i', $table ), ARRAY_N ); // phpcs:ignore WordPress.DB
 			gzwrite( $gz, "\nDROP TABLE IF EXISTS `{$table}`;\n" . $create[1] . ";\n" );
 			$off = 0;
 			do {
-				$rows = $wpdb->get_results( "SELECT * FROM `{$table}` LIMIT 500 OFFSET {$off}", ARRAY_A ); // phpcs:ignore WordPress.DB
+				$rows = $wpdb->get_results( $wpdb->prepare( 'SELECT * FROM %i LIMIT 500 OFFSET %d', $table, $off ), ARRAY_A ); // phpcs:ignore WordPress.DB
 				foreach ( $rows as $row ) {
 					$vals = array_map( fn( $v ) => null === $v ? 'NULL' : "'" . $wpdb->_real_escape( (string) $v ) . "'", array_values( $row ) );
 					gzwrite( $gz, "INSERT INTO `{$table}` VALUES (" . implode( ',', $vals ) . ");\n" );

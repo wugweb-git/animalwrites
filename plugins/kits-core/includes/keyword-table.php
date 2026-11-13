@@ -165,18 +165,9 @@ function aw_kw_decode( $r ) {
 function aw_kw_rows( $mask = AW_KW_OWNER_ROLES, $en_only = false ) {
 	global $wpdb;
 	$k    = aw_si_table( 'keywords' );
-	$sql  = "SELECT id, norm, label, lang, roles, variants, query, feed_id, search_on, dismissed, src_note, impr28 FROM {$k} WHERE 1=1";
-	$args = array();
-	if ( $mask ) {
-		$sql   .= ' AND roles & %d';
-		$args[] = (int) $mask;
-	}
-	if ( $en_only ) {
-		$sql .= " AND lang = 'en'";
-	}
-	$sql .= ' ORDER BY id';
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.NotPrepared -- table name only; placeholders built above.
-	$rows = (array) $wpdb->get_results( $args ? $wpdb->prepare( $sql, $args ) : $sql, ARRAY_A );
+	$args = $mask ? array( $k, (int) $mask ) : array( $k );
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- fixed SQL; placeholders match $args.
+	$rows = (array) $wpdb->get_results( $wpdb->prepare( 'SELECT id, norm, label, lang, roles, variants, query, feed_id, search_on, dismissed, src_note, impr28 FROM %i WHERE 1=1' . ( $mask ? ' AND roles & %d' : '' ) . ( $en_only ? " AND lang = 'en'" : '' ) . ' ORDER BY id', $args ), ARRAY_A );
 	return aw_kw_attach_maps( $rows );
 }
 
@@ -211,7 +202,7 @@ function aw_kw_attach_maps( array $rows ) {
 function aw_kw_get( $id ) {
 	global $wpdb;
 	$k = aw_si_table( 'keywords' );
-	$r = $wpdb->get_row( $wpdb->prepare( "SELECT id, norm, label, lang, roles, variants, query, feed_id, search_on, dismissed, src_note, impr28 FROM {$k} WHERE id = %d", (int) $id ), ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+	$r = $wpdb->get_row( $wpdb->prepare( 'SELECT id, norm, label, lang, roles, variants, query, feed_id, search_on, dismissed, src_note, impr28 FROM %i WHERE id = %d', $k, (int) $id ), ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	if ( ! $r ) {
 		return null;
 	}
@@ -228,7 +219,7 @@ function aw_kw_get( $id ) {
 function aw_kw_id_by_norm( $norm ) {
 	global $wpdb;
 	$k = aw_si_table( 'keywords' );
-	return (int) $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$k} WHERE norm = %s", (string) $norm ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+	return (int) $wpdb->get_var( $wpdb->prepare( 'SELECT id FROM %i WHERE norm = %s', $k, (string) $norm ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 }
 
 /**
@@ -246,8 +237,8 @@ function aw_kw_maps( array $ids ) {
 	$m   = aw_si_table( 'kw_map' );
 	$out = array();
 	foreach ( array_chunk( $ids, 500 ) as $chunk ) {
-		$in  = implode( ',', $chunk );
-		$out = array_merge( $out, (array) $wpdb->get_results( "SELECT kw_id, kind, value FROM {$m} WHERE kw_id IN ({$in}) ORDER BY id", ARRAY_A ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- one %d per id.
+		$out = array_merge( $out, (array) $wpdb->get_results( $wpdb->prepare( 'SELECT kw_id, kind, value FROM %i WHERE kw_id IN (' . implode( ',', array_fill( 0, count( $chunk ), '%d' ) ) . ') ORDER BY id', array_merge( array( $m ), $chunk ) ), ARRAY_A ) );
 	}
 	foreach ( $out as $i => $r ) {
 		$out[ $i ]['kw_id'] = (int) $r['kw_id'];
@@ -315,7 +306,7 @@ function aw_kw_create( $label, array $fields = array() ) {
 function aw_kw_set_roles( $id, $add, $remove = 0 ) {
 	global $wpdb;
 	$k   = aw_si_table( 'keywords' );
-	$row = $wpdb->get_row( $wpdb->prepare( "SELECT roles, lang FROM {$k} WHERE id = %d", (int) $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+	$row = $wpdb->get_row( $wpdb->prepare( 'SELECT roles, lang FROM %i WHERE id = %d', $k, (int) $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	if ( ! $row ) {
 		return new WP_Error( 'aw_kw_missing', 'No such keyword.' );
 	}
@@ -401,7 +392,7 @@ function aw_kw_map_set( $id, $kind, array $values ) {
 		$wpdb->delete( $m, array( 'kw_id' => (int) $id, 'kind' => $kind, 'value' => $v ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	}
 	foreach ( $add as $v ) {
-		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$m} (kw_id, kind, value) VALUES (%d, %s, %s)", (int) $id, $kind, $v ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+		$wpdb->query( $wpdb->prepare( 'INSERT IGNORE INTO %i (kw_id, kind, value) VALUES (%d, %s, %s)', $m, (int) $id, $kind, $v ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	}
 	if ( $add || $del ) {
 		do_action( 'aw_kw_saved', (int) $id );

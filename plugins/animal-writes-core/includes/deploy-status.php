@@ -23,7 +23,7 @@ function aw_campaign_sending() {
 		return false; // FluentCRM not installed: nothing can be sending
 	}
 	// Same rule as the old SSH check in tools/aw-ship.sh.
-	return (bool) $wpdb->get_var( "SELECT 1 FROM {$c} c JOIN {$e} e ON e.campaign_id = c.id WHERE c.status IN ('working','scheduled') AND e.status IN ('pending','scheduled','processing') LIMIT 1" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table names only
+	return (bool) $wpdb->get_var( $wpdb->prepare( "SELECT 1 FROM %i c JOIN %i e ON e.campaign_id = c.id WHERE c.status IN ('working','scheduled') AND e.status IN ('pending','scheduled','processing') LIMIT 1", $c, $e ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 }
 
 add_action(

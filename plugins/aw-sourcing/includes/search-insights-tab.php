@@ -58,8 +58,8 @@ function aw_sourcing_si_terms( $terms ) {
 	global $wpdb;
 	$k     = aw_si_table( 'keywords' );
 	$brand = defined( 'AW_SI_ROLE_BRAND' ) ? (int) AW_SI_ROLE_BRAND : 8;
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- the table name comes from Search Insights.
-	$rows = $wpdb->get_results( "SELECT norm, label, impr28, clicks28, pos28, roles FROM {$k} WHERE lang = 'en' AND impr28 >= 20 ORDER BY impr28 DESC LIMIT 5000" ); // the suggestions' own floor (keyword-suggestions.php)
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- the table name comes from Search Insights.
+	$rows = $wpdb->get_results( $wpdb->prepare( "SELECT norm, label, impr28, clicks28, pos28, roles FROM %i WHERE lang = 'en' AND impr28 >= 20 ORDER BY impr28 DESC LIMIT 5000", $k ) ); // the suggestions' own floor (keyword-suggestions.php)
 	$out  = array();
 	foreach ( (array) $rows as $r ) {
 		$out[] = array(

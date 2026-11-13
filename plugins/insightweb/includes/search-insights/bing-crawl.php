@@ -135,8 +135,8 @@ function aw_si_bing_kw_run( bool $dry = false ): array {
 	$o     = aw_si_table( 'obs' );
 	$quick = aw_si_view_sql( 'quick' );
 	$p1    = aw_si_view_sql( 'p1' );
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared -- table name and fixed conditions.
-	$kws  = (array) $wpdb->get_results( $wpdb->prepare( "SELECT id, label FROM {$k} WHERE ( {$p1} OR {$quick} ) AND COALESCE(lang, 'en') = 'en' AND label NOT LIKE %s ORDER BY impr28 DESC LIMIT %d", '%' . $wpdb->esc_like( '{' ) . '%', AW_SI_BING_KW ) );
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- $p1 and $quick are the fixed view conditions of aw_si_view_sql(); the table is %i.
+	$kws  = (array) $wpdb->get_results( $wpdb->prepare( "SELECT id, label FROM %i WHERE ( {$p1} OR {$quick} ) AND COALESCE(lang, 'en') = 'en' AND label NOT LIKE %s ORDER BY impr28 DESC LIMIT %d", $k, '%' . $wpdb->esc_like( '{' ) . '%', AW_SI_BING_KW ) );
 	$rows = 0;
 	$fail = array();
 	$cut  = ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( '-84 days' )->format( 'Y-m-d' );
@@ -186,7 +186,7 @@ function aw_si_bing_kw_run( bool $dry = false ): array {
 		);
 	}
 	// Only the last 12 weeks of volumes are kept.
-	$wpdb->query( $wpdb->prepare( "DELETE FROM {$o} WHERE src = 'bing' AND metric = 'kw-volume' AND period = 'week' AND d < %s", $cut ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+	$wpdb->query( $wpdb->prepare( "DELETE FROM %i WHERE src = 'bing' AND metric = 'kw-volume' AND period = 'week' AND d < %s", $o, $cut ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	if ( ! $rows && $fail ) {
 		aw_si_run_fail( 'bing_kw', (string) $fail[0] );
 	} else {
@@ -212,8 +212,8 @@ function aw_si_box_bing_crawl(): void {
 	}
 	$o    = aw_si_table( 'obs' );
 	$from = ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( '-84 days' )->format( 'Y-m-d' );
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
-	$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT YEARWEEK(d, 3) wk, MIN(d) since, MAX(d) last, SUM(IF(metric = 'crawl-pages', value, 0)) pages, SUM(IF(metric = 'crawl-errors', value, 0)) errors, SUM(IF(metric = 'code-4xx', value, 0)) c4, SUM(IF(metric = 'code-5xx', value, 0)) c5, SUM(IF(metric = 'robots-blocked', value, 0)) robots, MAX(IF(metric = 'in-index', value, 0)) idx FROM {$o} WHERE src = 'bing' AND period = 'day' AND metric IN ('crawl-pages', 'crawl-errors', 'code-4xx', 'code-5xx', 'robots-blocked', 'in-index') AND d >= %s GROUP BY wk ORDER BY wk DESC LIMIT 12", $from ) );
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT YEARWEEK(d, 3) wk, MIN(d) since, MAX(d) last, SUM(IF(metric = 'crawl-pages', value, 0)) pages, SUM(IF(metric = 'crawl-errors', value, 0)) errors, SUM(IF(metric = 'code-4xx', value, 0)) c4, SUM(IF(metric = 'code-5xx', value, 0)) c5, SUM(IF(metric = 'robots-blocked', value, 0)) robots, MAX(IF(metric = 'in-index', value, 0)) idx FROM %i WHERE src = 'bing' AND period = 'day' AND metric IN ('crawl-pages', 'crawl-errors', 'code-4xx', 'code-5xx', 'robots-blocked', 'in-index') AND d >= %s GROUP BY wk ORDER BY wk DESC LIMIT 12", $o, $from ) );
 	if ( ! $rows ) {
 		echo '<p>' . esc_html__( 'No Bing crawl figures yet (weekly, Monday 06:45 IST).', 'insightweb' ) . '</p>';
 		return;

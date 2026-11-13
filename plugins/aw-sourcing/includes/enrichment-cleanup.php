@@ -209,7 +209,7 @@ function aw_enrich_merge( $from, $into, $rid ) {
 	$to    = (string) get_permalink( $into );
 	$table = $wpdb->prefix . 'rank_math_redirections';
 	if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-		$ids = array_map( 'intval', $wpdb->get_col( $wpdb->prepare( "SELECT id FROM {$table} WHERE url_to IN ( %s, %s )", $undo['old_url'], untrailingslashit( $undo['old_url'] ) ) ) ); // phpcs:ignore WordPress.DB
+		$ids = array_map( 'intval', $wpdb->get_col( $wpdb->prepare( 'SELECT id FROM %i WHERE url_to IN ( %s, %s )', $table, $undo['old_url'], untrailingslashit( $undo['old_url'] ) ) ) ); // phpcs:ignore WordPress.DB
 		foreach ( $ids as $id ) {
 			$wpdb->update( $table, array( 'url_to' => $to ), array( 'id' => $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		}

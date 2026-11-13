@@ -144,9 +144,9 @@ function aw_media_merge_check( $keep, array $extras ) {
 	$in      = implode( ',', array_fill( 0, count( $ids ), '%s' ) );
 	$allowed = aw_media_merge_meta_keys();
 	$known   = array_values( array_unique( array_merge( function_exists( 'aw_media_post_meta_uses' ) ? array_keys( aw_media_post_meta_uses() ) : array(), $allowed ) ) );
-	$kin     = $known ? implode( ',', array_fill( 0, count( $known ), '%s' ) ) : "''";
+
 	// phpcs:disable WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- the lists are only %s placeholders joined with implode or array_fill; every value is bound through prepare()
-	$rows = $wpdb->get_results( $wpdb->prepare( "SELECT meta_id, post_id, meta_key, meta_value FROM {$wpdb->postmeta} WHERE meta_value IN ($in) AND ( meta_key REGEXP 'image|img|logo|thumb|icon|photo|file|preview|_att|banner|picture|attachment|hero|cover|poster|avatar|_id$|_og' OR meta_key IN ($kin) )", array_merge( $ids, $known ) ) );
+	$rows = $wpdb->get_results( $wpdb->prepare( "SELECT meta_id, post_id, meta_key, meta_value FROM {$wpdb->postmeta} WHERE meta_value IN (" . implode( ',', array_fill( 0, count( $ids ), '%s' ) ) . ") AND ( meta_key REGEXP 'image|img|logo|thumb|icon|photo|file|preview|_att|banner|picture|attachment|hero|cover|poster|avatar|_id$|_og' OR meta_key IN (" . ( $known ? implode( ',', array_fill( 0, count( $known ), '%s' ) ) : "''" ) . ') )', array_merge( $ids, $known ) ) );
 	$meta = array();
 	foreach ( (array) $rows as $r ) {
 		if ( '_wp_attachment_context' === $r->meta_key ) {
@@ -191,29 +191,25 @@ function aw_media_merge_check( $keep, array $extras ) {
 	if ( (int) $trows ) {
 		return $fail( 'used as a category or tag photo' );
 	}
-	$terms = array();
-	$args  = array();
+	$args = array();
 	foreach ( $extras as $id ) {
-		$terms[] = 'option_value = %s OR option_value LIKE %s OR option_value LIKE %s OR option_value LIKE %s OR option_value LIKE %s OR option_value LIKE %s OR option_value LIKE %s';
 		array_push( $args, (string) $id, '%i:' . $id . ';%', '%"' . $id . '"%', '%:' . $id . ',%', '%:' . $id . '}%', '%[' . $id . ',%', '%,' . $id . ']%' );
 	}
-	$hit = $wpdb->get_var( $wpdb->prepare( 'SELECT option_name FROM ' . $wpdb->options . " WHERE option_name NOT LIKE %s AND option_name NOT LIKE %s AND option_name NOT LIKE %s AND ( " . implode( ' OR ', $terms ) . ' ) LIMIT 1', array_merge( array( $wpdb->esc_like( 'aw_media_merge_' ) . '%', $wpdb->esc_like( '_transient_' ) . '%', $wpdb->esc_like( '_site_transient_' ) . '%' ), $args ) ) );
+	$hit = $wpdb->get_var( $wpdb->prepare( 'SELECT option_name FROM ' . $wpdb->options . " WHERE option_name NOT LIKE %s AND option_name NOT LIKE %s AND option_name NOT LIKE %s AND ( " . implode( ' OR ', array_fill( 0, count( $extras ), 'option_value = %s OR option_value LIKE %s OR option_value LIKE %s OR option_value LIKE %s OR option_value LIKE %s OR option_value LIKE %s OR option_value LIKE %s' ) ) . ' ) LIMIT 1', array_merge( array( $wpdb->esc_like( 'aw_media_merge_' ) . '%', $wpdb->esc_like( '_transient_' ) . '%', $wpdb->esc_like( '_site_transient_' ) . '%' ), $args ) ) );
 	if ( $hit ) {
 		return $fail( 'named in the option ' . $hit );
 	}
 	// Posts that write one of the old addresses or block image IDs (exact addresses only).
-	$likes  = array();
-	$largs  = array();
+	$largs = array();
 	foreach ( $extras as $id ) {
 		foreach ( array_unique( aw_media_merge_urls( $id ) ) as $url ) {
-			$likes[] = 'post_content LIKE %s';
 			$largs[] = '%' . $wpdb->esc_like( $url ) . '%';
 		}
 	}
 	$rx      = '"(id|mediaId)":(' . implode( '|', $ids ) . ')([^0-9]|$)|data-id="(' . implode( '|', $ids ) . ')"|wp-image-(' . implode( '|', $ids ) . ')([^0-9]|$)';
-	$likes[] = 'post_content REGEXP %s';
+	$nlike   = count( $largs ); // one "post_content LIKE %s" per address, then the REGEXP
 	$largs[] = $rx;
-	$found   = $wpdb->get_col( $wpdb->prepare( 'SELECT ID FROM ' . $wpdb->posts . " WHERE post_type NOT IN ( 'attachment', 'revision' ) AND ( " . implode( ' OR ', $likes ) . ' ) LIMIT 300', $largs ) );
+	$found   = $wpdb->get_col( $wpdb->prepare( 'SELECT ID FROM ' . $wpdb->posts . " WHERE post_type NOT IN ( 'attachment', 'revision' ) AND ( " . ( $nlike ? implode( ' OR ', array_fill( 0, $nlike, 'post_content LIKE %s' ) ) . ' OR ' : '' ) . 'post_content REGEXP %s ) LIMIT 300', $largs ) );
 	if ( count( $found ) >= 300 ) {
 		return $fail( 'too many pages (300 or more) write one of the addresses' );
 	}

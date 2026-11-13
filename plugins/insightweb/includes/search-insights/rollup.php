@@ -44,7 +44,7 @@ function aw_si_rollup( bool $dry = false, int $limit = 50000 ): array {
 	$c_keep = max( aw_si_keep_days(), defined( 'AW_SI_CLARITY_KEEP' ) ? (int) AW_SI_CLARITY_KEEP : 35 );
 	$c_cut  = $today->modify( '-' . $c_keep . ' days' )->format( 'Y-m-d' );
 	// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
-	$rows = $wpdb->get_results( $wpdb->prepare( "SELECT id, kw_id, page, page_key, src, metric, d, clicks, impr, pos, value, txt FROM {$o} WHERE ( period = 'day' OR ( period = 'week' AND src = 'bing' AND metric <> 'kw-volume' ) ) AND d < %s AND ( src NOT IN ('clarity', 'clarity-dev') OR d < %s ) ORDER BY d LIMIT %d", $cutoff, $c_cut, $limit ) );
+	$rows = $wpdb->get_results( $wpdb->prepare( "SELECT id, kw_id, page, page_key, src, metric, d, clicks, impr, pos, value, txt FROM %i WHERE ( period = 'day' OR ( period = 'week' AND src = 'bing' AND metric <> 'kw-volume' ) ) AND d < %s AND ( src NOT IN ('clarity', 'clarity-dev') OR d < %s ) ORDER BY d LIMIT %d", $o, $cutoff, $c_cut, $limit ) );
 	if ( ! $dry ) {
 		aw_si_trends_prune(); // every run, also when no daily rows are due
 	}
@@ -103,7 +103,7 @@ function aw_si_rollup( bool $dry = false, int $limit = 50000 ): array {
 			break;
 		}
 		// Merge with a monthly row written by an earlier run for the same month.
-		$old    = $wpdb->get_row( $wpdb->prepare( "SELECT clicks, impr, pos, value FROM {$o} WHERE src = %s AND metric = %s AND period = 'month' AND d = %s AND kw_id = %d AND page_key = %s", $g['src'], $g['metric'], $g['d'], $g['kw_id'], $g['page_key'] ) );
+		$old    = $wpdb->get_row( $wpdb->prepare( "SELECT clicks, impr, pos, value FROM %i WHERE src = %s AND metric = %s AND period = 'month' AND d = %s AND kw_id = %d AND page_key = %s", $o, $g['src'], $g['metric'], $g['d'], $g['kw_id'], $g['page_key'] ) );
 		$impr   = $g['impr'];
 		$clicks = $g['clicks'];
 		$posw   = $g['posw'];
@@ -139,7 +139,7 @@ function aw_si_rollup( bool $dry = false, int $limit = 50000 ): array {
 		++$written;
 	}
 	foreach ( array_chunk( array_map( 'intval', wp_list_pluck( $rows, 'id' ) ), 1000 ) as $chunk ) {
-		$ok = $ok && false !== $wpdb->query( "DELETE FROM {$o} WHERE id IN (" . implode( ',', $chunk ) . ')' ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- integers.
+		$ok = $ok && false !== $wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE id IN (' . implode( ',', array_map( 'intval', $chunk ) ) . ')', $o ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- integers.
 	}
 	if ( ! $ok ) {
 		$error = $wpdb->last_error;
@@ -164,6 +164,6 @@ function aw_si_trends_prune(): int {
 	global $wpdb;
 	$o   = aw_si_table( 'obs' );
 	$cut = ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( '-13 months' )->format( 'Y-m-d' );
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
-	return (int) $wpdb->query( $wpdb->prepare( "DELETE o FROM {$o} o JOIN (SELECT kw_id, MAX(d) d FROM {$o} WHERE src = 'trends' AND metric = 'index' AND period = '12m' GROUP BY kw_id) l ON l.kw_id = o.kw_id WHERE o.src = 'trends' AND o.metric = 'index' AND o.period = '12m' AND o.d < l.d AND o.d < %s", $cut ) );
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	return (int) $wpdb->query( $wpdb->prepare( "DELETE o FROM %i o JOIN (SELECT kw_id, MAX(d) d FROM %i WHERE src = 'trends' AND metric = 'index' AND period = '12m' GROUP BY kw_id) l ON l.kw_id = o.kw_id WHERE o.src = 'trends' AND o.metric = 'index' AND o.period = '12m' AND o.d < l.d AND o.d < %s", $o, $o, $cut ) );
 }

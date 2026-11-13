@@ -291,7 +291,7 @@ function aw_si_crawl_store( string $side, array $run ): void {
 		);
 	}
 	$keep = ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( '-' . AW_SI_CRAWL_WEEKS . ' weeks' )->format( 'Y-m-d' );
-	$wpdb->query( $wpdb->prepare( "DELETE FROM {$o} WHERE src = 'crawl' AND d < %s", $keep ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+	$wpdb->query( $wpdb->prepare( "DELETE FROM %i WHERE src = 'crawl' AND d < %s", $o, $keep ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	$problems = aw_si_crawl_problems( $run );
 	aw_si_run_ok(
 		'inside' === $side ? 'crawl-in' : 'crawl-out',

@@ -235,10 +235,11 @@ function aw_si_rising_lists(): array {
 		$k     = aw_si_table( 'keywords' );
 		$roles = (int) ( AW_SI_ROLE_TRACKED | AW_SI_ROLE_SOURCING | AW_SI_ROLE_FOCUS );
 		$eff   = aw_si_eff_sql();
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name and integers only.
-		$keywords = $wpdb->get_col( $wpdb->prepare( "SELECT label FROM {$k} WHERE lang = 'en' AND entity = 0 AND roles & %d AND label NOT LIKE %s ORDER BY impr28 DESC, id LIMIT 3000", $roles, '%{%' ) );
-		$topics   = $wpdb->get_col( "SELECT DISTINCT topic FROM {$k} WHERE topic <> '' AND lang = 'en' ORDER BY topic" );
-		$interest = $wpdb->get_col( $wpdb->prepare( "SELECT label FROM {$k} WHERE lang = 'en' AND entity = 0 AND roles & %d AND {$eff} IN ('P1', 'P2') AND label NOT LIKE %s ORDER BY {$eff}, impr28 DESC, id LIMIT 40", AW_SI_ROLE_TRACKED, '%{%' ) );
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers and aw_si_eff_sql() (a fixed expression) only.
+		$keywords = $wpdb->get_col( $wpdb->prepare( "SELECT label FROM %i WHERE lang = 'en' AND entity = 0 AND roles & %d AND label NOT LIKE %s ORDER BY impr28 DESC, id LIMIT 3000", $k, $roles, '%{%' ) );
+		$topics   = $wpdb->get_col( $wpdb->prepare( "SELECT DISTINCT topic FROM %i WHERE topic <> '' AND lang = 'en' ORDER BY topic", $k ) );
+		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- $eff is aw_si_eff_sql(), a fixed column expression.
+		$interest = $wpdb->get_col( $wpdb->prepare( "SELECT label FROM %i WHERE lang = 'en' AND entity = 0 AND roles & %d AND {$eff} IN ('P1', 'P2') AND label NOT LIKE %s ORDER BY {$eff}, impr28 DESC, id LIMIT 40", $k, AW_SI_ROLE_TRACKED, '%{%' ) );
 		// phpcs:enable
 	}
 	$lists = array(
@@ -274,8 +275,8 @@ function aw_si_rising_match( string $norm, string $term, bool $look_up_posts = t
 	$k         = aw_si_table( 'keywords' );
 	if ( null === $kw ) {
 		$kw = array();
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
-		foreach ( (array) $wpdb->get_results( "SELECT id, norm, page, action FROM {$k} WHERE entity = 0 AND lang = 'en'" ) as $r ) {
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT id, norm, page, action FROM %i WHERE entity = 0 AND lang = 'en'", $k ) ) as $r ) {
 			$kw[ (string) $r->norm ] = array( (int) $r->id, (string) $r->page, (string) $r->action );
 		}
 		uksort( $kw, fn( $a, $b ) => strlen( $b ) <=> strlen( $a ) ); // Longest first: the most specific match wins.
@@ -342,7 +343,7 @@ function aw_si_rising_put( string $term, string $source, ?float $growth, string 
 		return 'not-english'; // Hindi and Hinglish wait for phase 5 (owner, 24 Oct 2026).
 	}
 	$t   = aw_si_table( 'rising' );
-	$old = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$t} WHERE norm = %s", $norm ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+	$old = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM %i WHERE norm = %s', $t, $norm ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	if ( null !== $growth && ( ! is_finite( $growth ) || $growth <= 0 ) ) {
 		$growth = null;
 	}
@@ -743,8 +744,8 @@ function aw_si_rising_load(): void {
 	if ( $ids ) {
 		global $wpdb;
 		$t  = aw_si_table( 'rising' );
-		$in = implode( ',', $ids );
-		$wpdb->query( $wpdb->prepare( "UPDATE {$t} SET status = %s WHERE id IN ({$in})", $action ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers.
+		$in = implode( ',', array_map( 'intval', $ids ) );
+		$wpdb->query( $wpdb->prepare( "UPDATE %i SET status = %s WHERE id IN ({$in})", $t, $action ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers.
 	}
 	$back = remove_query_arg( array( 'aw_si_rising', 'rising_id', '_wpnonce', '_wp_http_referer', 'action', 'action2', 'marked', 'pasted' ), wp_get_referer() ? wp_get_referer() : aw_si_url( 'rising' ) );
 	wp_safe_redirect( add_query_arg( 'marked', $ids ? count( $ids ) : 0, $back ) );
@@ -999,8 +1000,8 @@ function aw_si_rising_top( int $limit = 10, string $since = '' ): array {
 	}
 	$t     = aw_si_table( 'rising' );
 	$since = $since ? $since : ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( '-7 days' )->format( 'Y-m-d' );
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
-	return (array) $wpdb->get_results( $wpdb->prepare( "SELECT term, sources, growth, first_seen, last_seen, page, action, status FROM {$t} WHERE last_seen >= %s AND status <> 'dismissed' ORDER BY growth IS NULL, growth DESC, last_seen DESC LIMIT %d", $since, $limit ), ARRAY_A );
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	return (array) $wpdb->get_results( $wpdb->prepare( "SELECT term, sources, growth, first_seen, last_seen, page, action, status FROM %i WHERE last_seen >= %s AND status <> 'dismissed' ORDER BY growth IS NULL, growth DESC, last_seen DESC LIMIT %d", $t, $since, $limit ), ARRAY_A );
 }
 
 /** Overview box: the ten fastest-rising terms seen in the last 7 days (not dismissed), with what to do. */

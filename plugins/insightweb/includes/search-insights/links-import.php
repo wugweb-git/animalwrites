@@ -387,7 +387,7 @@ function aw_si_links_reads_section(): void {
 	$by = array();
 	if ( aw_si_ready() ) {
 		$t = aw_si_table( 'links' );
-		foreach ( (array) $wpdb->get_results( "SELECT source, COUNT(*) n, MAX(last_seen) d FROM {$t} GROUP BY source" ) as $r ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+		foreach ( (array) $wpdb->get_results( $wpdb->prepare( 'SELECT source, COUNT(*) n, MAX(last_seen) d FROM %i GROUP BY source', $t ) ) as $r ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 			$k        = aw_si_link_source_key( (string) $r->source );
 			$k        = '' !== $k ? $k : __( 'No source', 'insightweb' );
 			$by[ $k ] = array(

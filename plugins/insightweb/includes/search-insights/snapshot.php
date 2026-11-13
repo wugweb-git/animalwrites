@@ -25,8 +25,8 @@ function aw_si_snapshot_keywords(): array {
 	$ids = function_exists( 'aw_si_checklist' ) ? aw_si_checklist() : array();
 	$in  = $ids ? ' OR id IN (' . implode( ',', array_map( 'intval', $ids ) ) . ')' : '';
 	$eff = aw_si_eff_sql();
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared -- table name, constants and integers.
-	return (array) $wpdb->get_results( $wpdb->prepare( "SELECT *, {$eff} eff FROM {$k} WHERE entity = 0 AND label NOT LIKE %s AND ((roles & %d AND {$eff} IN ('P1', 'P2')){$in}) ORDER BY {$eff} = '', {$eff}, label", '%' . $wpdb->esc_like( '{' ) . '%', AW_SI_ROLE_TRACKED ) );
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- $eff is the fixed SQL expression of aw_si_eff_sql() and $in integers; the table is %i.
+	return (array) $wpdb->get_results( $wpdb->prepare( "SELECT *, {$eff} eff FROM %i WHERE entity = 0 AND label NOT LIKE %s AND ((roles & %d AND {$eff} IN ('P1', 'P2')){$in}) ORDER BY {$eff} = '', {$eff}, label", $k, '%' . $wpdb->esc_like( '{' ) . '%', AW_SI_ROLE_TRACKED ) );
 }
 
 /**
@@ -44,10 +44,10 @@ function aw_si_snapshot_latest( array $ids, string $src, array $metrics ): array
 	}
 	$o    = aw_si_table( 'obs' );
 	$in   = implode( ',', array_map( 'intval', $ids ) );
-	$list = implode( ',', array_map( fn( $m ) => "'" . esc_sql( $m ) . "'", $metrics ) );
+	$list = implode( ',', array_fill( 0, count( $metrics ), '%s' ) );
 	$out  = array();
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared -- integers, escaped names and a table name.
-	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT kw_id, metric, value, txt, d FROM {$o} WHERE src = %s AND metric IN ({$list}) AND kw_id IN ({$in}) ORDER BY d", $src ) ) as $r ) {
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- one %s per metric and integers, built above.
+	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT kw_id, metric, value, txt, d FROM %i WHERE src = %s AND metric IN ({$list}) AND kw_id IN ({$in}) ORDER BY d", array_merge( array( $o, $src ), array_values( $metrics ) ) ) ) as $r ) {
 		$out[ (int) $r->kw_id ][ $r->metric ] = $r; // Ordered by date: the latest wins.
 	}
 	return $out;
@@ -140,8 +140,8 @@ function aw_si_keyword_map_md(): string {
 	$k   = aw_si_table( 'keywords' );
 	$p   = aw_si_table( 'kw_pages' );
 	$eff = aw_si_eff_sql( 'k.' );
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared -- table names and constants.
-	$links = (array) $wpdb->get_results( $wpdb->prepare( "SELECT k.id, k.label, k.page_type, k.intent, k.trends, k.impr28, k.pos28, k.live_txt, k.status, k.action, {$eff} eff, l.path, l.obj_type, l.obj_id, l.role FROM {$p} l JOIN {$k} k ON k.id = l.kw_id WHERE l.src = 'seed' AND l.role IN ('owner', 'secondary') AND k.roles & %d ORDER BY l.role = 'secondary', k.label", AW_SI_ROLE_TRACKED ) );
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- $eff is the fixed SQL expression of aw_si_eff_sql(); the tables are %i.
+	$links = (array) $wpdb->get_results( $wpdb->prepare( "SELECT k.id, k.label, k.page_type, k.intent, k.trends, k.impr28, k.pos28, k.live_txt, k.status, k.action, {$eff} eff, l.path, l.obj_type, l.obj_id, l.role FROM %i l JOIN %i k ON k.id = l.kw_id WHERE l.src = 'seed' AND l.role IN ('owner', 'secondary') AND k.roles & %d ORDER BY l.role = 'secondary', k.label", $p, $k, AW_SI_ROLE_TRACKED ) );
 	$pages = array(); // section => page => [primary rows, secondary labels].
 	foreach ( $links as $l ) {
 		$section = '' !== $l->page_type ? $l->page_type : 'other';

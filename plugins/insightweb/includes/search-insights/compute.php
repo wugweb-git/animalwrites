@@ -134,10 +134,10 @@ function aw_si_quality_pages(): array {
 	$o     = aw_si_table( 'obs' );
 	$since = ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( '-28 days' )->format( 'Y-m-d' );
 	$days  = max( 1, (int) apply_filters( 'aw_si_quality_min_days', 3 ) );
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
-	$clarity = (array) $wpdb->get_col( $wpdb->prepare( "SELECT page FROM {$o} WHERE src = 'clarity' AND metric = 'flag' AND value > 0 AND d >= %s AND page <> '' GROUP BY page HAVING COUNT(DISTINCT d) >= %d", $since, $days ) );
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
-	$psi   = (array) $wpdb->get_col( $wpdb->prepare( "SELECT DISTINCT page FROM {$o} WHERE src = 'psi' AND metric = 'flag' AND value > 0 AND d >= %s AND page <> ''", $since ) );
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$clarity = (array) $wpdb->get_col( $wpdb->prepare( "SELECT page FROM %i WHERE src = 'clarity' AND metric = 'flag' AND value > 0 AND d >= %s AND page <> '' GROUP BY page HAVING COUNT(DISTINCT d) >= %d", $o, $since, $days ) );
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$psi   = (array) $wpdb->get_col( $wpdb->prepare( "SELECT DISTINCT page FROM %i WHERE src = 'psi' AND metric = 'flag' AND value > 0 AND d >= %s AND page <> ''", $o, $since ) );
 	$paths = array_values( array_unique( array_merge( $clarity, $psi ) ) );
 	$paths = (array) apply_filters( 'aw_si_quality_pages', $paths );
 	return array_fill_keys( array_map( 'strval', $paths ), true );
@@ -154,8 +154,8 @@ function aw_si_entity_movers(): array {
 		return array();
 	}
 	$k = aw_si_table( 'keywords' );
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
-	return array_map( 'intval', (array) $wpdb->get_col( $wpdb->prepare( "SELECT id FROM {$k} WHERE entity = 1 AND pos28 IS NOT NULL AND pos_prev IS NOT NULL ORDER BY ABS(pos_prev - pos28) DESC, impr28 DESC, id LIMIT %d", AW_SI_MOVERS ) ) );
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	return array_map( 'intval', (array) $wpdb->get_col( $wpdb->prepare( 'SELECT id FROM %i WHERE entity = 1 AND pos28 IS NOT NULL AND pos_prev IS NOT NULL ORDER BY ABS(pos_prev - pos28) DESC, impr28 DESC, id LIMIT %d', $k, AW_SI_MOVERS ) ) );
 }
 
 /**
@@ -182,7 +182,7 @@ function aw_si_view_count( string $view, ?array $movers = null ): int {
 	}
 	$t   = aw_si_table( 'keywords' );
 	$sql = aw_si_view_sql( $view ) . ' AND ' . aw_si_entity_sql( $movers );
-	return (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$t} WHERE {$sql}" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared -- fixed conditions from this file.
+	return (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE {$sql}", $t ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- fixed conditions from this file (no %).
 }
 
 /**
@@ -371,15 +371,15 @@ function aw_si_compute(): array {
 	$e28 = $end->format( 'Y-m-d' );
 
 	// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table names only.
-	$now28 = $wpdb->get_results( $wpdb->prepare( "SELECT kw_id, SUM(clicks) c, SUM(impr) i, SUM(pos * impr) / NULLIF(SUM(impr), 0) p FROM {$o} WHERE src = 'gsc' AND metric = 'q' AND period = 'day' AND d BETWEEN %s AND %s GROUP BY kw_id", $s28, $e28 ), OBJECT_K );
-	$prev  = $wpdb->get_results( $wpdb->prepare( "SELECT kw_id, SUM(impr) i, SUM(pos * impr) / NULLIF(SUM(impr), 0) p FROM {$o} WHERE src = 'gsc' AND metric = 'q' AND period = 'day' AND d BETWEEN %s AND %s GROUP BY kw_id", $s56, $e56 ), OBJECT_K );
+	$now28 = $wpdb->get_results( $wpdb->prepare( "SELECT kw_id, SUM(clicks) c, SUM(impr) i, SUM(pos * impr) / NULLIF(SUM(impr), 0) p FROM %i WHERE src = 'gsc' AND metric = 'q' AND period = 'day' AND d BETWEEN %s AND %s GROUP BY kw_id", $o, $s28, $e28 ), OBJECT_K );
+	$prev  = $wpdb->get_results( $wpdb->prepare( "SELECT kw_id, SUM(impr) i, SUM(pos * impr) / NULLIF(SUM(impr), 0) p FROM %i WHERE src = 'gsc' AND metric = 'q' AND period = 'day' AND d BETWEEN %s AND %s GROUP BY kw_id", $o, $s56, $e56 ), OBJECT_K );
 	// The page Google showed most for each query over 28 days.
-	$top   = $wpdb->get_results( $wpdb->prepare( "SELECT kw_id, page, SUM(impr) i FROM {$o} WHERE src = 'gsc' AND metric = 'qp' AND period = 'day' AND d BETWEEN %s AND %s GROUP BY kw_id, page ORDER BY kw_id, i DESC", $s28, $e28 ) );
-	$live  = $wpdb->get_results( "SELECT o.kw_id, o.value, o.txt, o.d FROM {$o} o JOIN (SELECT kw_id, MAX(d) d FROM {$o} WHERE src = 'live' AND metric = 'position' GROUP BY kw_id) l ON l.kw_id = o.kw_id AND l.d = o.d WHERE o.src = 'live' AND o.metric = 'position'", OBJECT_K );
-	$trend = $wpdb->get_results( "SELECT o.kw_id, o.value FROM {$o} o JOIN (SELECT kw_id, MAX(d) d FROM {$o} WHERE src = 'trends' AND metric = 'index' GROUP BY kw_id) l ON l.kw_id = o.kw_id AND l.d = o.d WHERE o.src = 'trends' AND o.metric = 'index'", OBJECT_K );
-	$links = $wpdb->get_results( "SELECT kw_id, obj_type, path, role, src FROM {$p}" );
+	$top   = $wpdb->get_results( $wpdb->prepare( "SELECT kw_id, page, SUM(impr) i FROM %i WHERE src = 'gsc' AND metric = 'qp' AND period = 'day' AND d BETWEEN %s AND %s GROUP BY kw_id, page ORDER BY kw_id, i DESC", $o, $s28, $e28 ) );
+	$live  = $wpdb->get_results( $wpdb->prepare( "SELECT o.kw_id, o.value, o.txt, o.d FROM %i o JOIN (SELECT kw_id, MAX(d) d FROM %i WHERE src = 'live' AND metric = 'position' GROUP BY kw_id) l ON l.kw_id = o.kw_id AND l.d = o.d WHERE o.src = 'live' AND o.metric = 'position'", $o, $o ), OBJECT_K );
+	$trend = $wpdb->get_results( $wpdb->prepare( "SELECT o.kw_id, o.value FROM %i o JOIN (SELECT kw_id, MAX(d) d FROM %i WHERE src = 'trends' AND metric = 'index' GROUP BY kw_id) l ON l.kw_id = o.kw_id AND l.d = o.d WHERE o.src = 'trends' AND o.metric = 'index'", $o, $o ), OBJECT_K );
+	$links = $wpdb->get_results( $wpdb->prepare( 'SELECT kw_id, obj_type, path, role, src FROM %i', $p ) );
 	$qw    = function_exists( 'aw_kw_ready' ) && aw_kw_ready(); // the quick_win column (keyword table version 3)
-	$rows  = $wpdb->get_results( "SELECT id, label, lang, roles, priority, priority_override, status, action, page, impr28, clicks28, pos28, pos_prev, live_pos, live_txt, live_date, trends" . ( $qw ? ', quick_win' : '' ) . " FROM {$k}" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- a fixed column name, no input
+	$rows  = $wpdb->get_results( $wpdb->prepare( 'SELECT id, label, lang, roles, priority, priority_override, status, action, page, impr28, clicks28, pos28, pos_prev, live_pos, live_txt, live_date, trends' . ( $qw ? ', quick_win' : '' ) . ' FROM %i', $k ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- a fixed column name, no input
 	// phpcs:enable
 
 	// An old address counts as the page it redirects to (plan §12, phase 2), so a redirected URL is no conflict.

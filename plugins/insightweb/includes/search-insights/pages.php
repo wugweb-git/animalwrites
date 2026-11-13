@@ -65,7 +65,7 @@ function aw_si_pages_data(): array {
 		}
 		$out[ $path ][ $field ] = $value;
 	};
-	// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table names only.
+	// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- $skip only (aw_si_ga4_skip_sql(), esc_sql'd constant dates).
 	foreach ( aw_si_page_metrics( array(), 28 ) as $page => $m ) { // the same figures as the Overview's pages
 		foreach ( $m as $field => $v ) {
 			$set( (string) $page, $field, $v );
@@ -73,12 +73,12 @@ function aw_si_pages_data(): array {
 	}
 	// Keywords the page owns (keyword map or Rank Math focus), and how many of them are in conflict.
 	$p = aw_si_table( 'kw_pages' );
-	foreach ( (array) $wpdb->get_results( "SELECT l.path page, COUNT(DISTINCT l.kw_id) n, COUNT(DISTINCT IF(k.status = 'conflict', k.id, NULL)) c FROM {$p} l JOIN {$k} k ON k.id = l.kw_id WHERE l.role = 'owner' AND l.path LIKE '/%' GROUP BY l.path" ) as $r ) {
+	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT l.path page, COUNT(DISTINCT l.kw_id) n, COUNT(DISTINCT IF(k.status = 'conflict', k.id, NULL)) c FROM %i l JOIN %i k ON k.id = l.kw_id WHERE l.role = 'owner' AND l.path LIKE %s GROUP BY l.path", $p, $k, '/%' ) ) as $r ) {
 		$set( $r->page, 'keywords', (int) $r->n );
 		$set( $r->page, 'conflicts', (int) $r->c );
 	}
 	$skip = aw_si_ga4_skip_sql(); // Without the GA4 test-event days.
-	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, metric, txt, SUM(value) v FROM {$o} WHERE src = 'ga4' AND metric IN ('organic', 'ai') AND period = 'day' AND d BETWEEN %s AND %s{$skip} GROUP BY page, metric, txt", $from, $to ) ) as $r ) {
+	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, metric, txt, SUM(value) v FROM %i WHERE src = 'ga4' AND metric IN ('organic', 'ai') AND period = 'day' AND d BETWEEN %s AND %s{$skip} GROUP BY page, metric, txt", $o, $from, $to ) ) as $r ) {
 		$r->page = aw_si_ga4_page( (string) $r->page );
 		if ( 'organic' === $r->metric ) {
 			$set( $r->page, 'organic', (int) ( $out[ $r->page ]['organic'] ?? 0 ) + (int) $r->v );
@@ -88,28 +88,28 @@ function aw_si_pages_data(): array {
 		$out[ $r->page ]['ai_by'][ (string) $r->txt ] = (int) ( $out[ $r->page ]['ai_by'][ (string) $r->txt ] ?? 0 ) + (int) $r->v;
 	}
 	// Referral and social sessions (owner, 31 Oct 2026).
-	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, txt, SUM(value) v FROM {$o} WHERE src = 'ga4' AND metric = 'ref' AND period = 'day' AND d BETWEEN %s AND %s{$skip} GROUP BY page, txt", $from, $to ) ) as $r ) {
+	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, txt, SUM(value) v FROM %i WHERE src = 'ga4' AND metric = 'ref' AND period = 'day' AND d BETWEEN %s AND %s{$skip} GROUP BY page, txt", $o, $from, $to ) ) as $r ) {
 		$r->page = aw_si_ga4_page( (string) $r->page );
 		$set( $r->page, 'ref', (int) ( $out[ $r->page ]['ref'] ?? 0 ) + (int) $r->v );
 		$out[ $r->page ]['ref_by'][ (string) $r->txt ] = (int) ( $out[ $r->page ]['ref_by'][ (string) $r->txt ] ?? 0 ) + (int) $r->v;
 	}
 	// A Clarity flag counts only on enough flagged days (filter aw_si_quality_min_days, as in aw_si_quality_pages()).
 	$c_min = max( 1, (int) apply_filters( 'aw_si_quality_min_days', 3 ) );
-	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, metric, SUM(value) s, AVG(value) a, SUM(value > 0) n FROM {$o} WHERE src = 'clarity' AND page <> '' AND period = 'day' AND d BETWEEN %s AND %s GROUP BY page, metric", $from, $to ) ) as $r ) {
+	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, metric, SUM(value) s, AVG(value) a, SUM(value > 0) n FROM %i WHERE src = 'clarity' AND page <> '' AND period = 'day' AND d BETWEEN %s AND %s GROUP BY page, metric", $o, $from, $to ) ) as $r ) {
 		$set( $r->page, 'c_' . $r->metric, 'sessions' === $r->metric ? (int) $r->s : ( 'flag' === $r->metric ? (int) ( (int) $r->n >= $c_min ) : round( (float) $r->a, 1 ) ) );
 	}
 	// Latest PageSpeed run, latest Clarity note.
-	foreach ( (array) $wpdb->get_results( "SELECT o.page, o.metric, o.value, o.d FROM {$o} o JOIN (SELECT page_key, metric, MAX(d) d FROM {$o} WHERE src = 'psi' AND metric IN ('score-mobile', 'score-desktop', 'flag', 'lcp-mobile', 'cls-mobile', 'field-lcp-mobile', 'field-inp-mobile', 'field-cls-mobile') GROUP BY page_key, metric) l ON l.page_key = o.page_key AND l.metric = o.metric AND l.d = o.d WHERE o.src = 'psi'" ) as $r ) {
+	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT o.page, o.metric, o.value, o.d FROM %i o JOIN (SELECT page_key, metric, MAX(d) d FROM %i WHERE src = 'psi' AND metric IN ('score-mobile', 'score-desktop', 'flag', 'lcp-mobile', 'cls-mobile', 'field-lcp-mobile', 'field-inp-mobile', 'field-cls-mobile') GROUP BY page_key, metric) l ON l.page_key = o.page_key AND l.metric = o.metric AND l.d = o.d WHERE o.src = 'psi'", $o, $o ) ) as $r ) {
 		$set( $r->page, 'psi_' . $r->metric, (float) $r->value );
 		$set( $r->page, 'psi_d', $r->d );
 	}
 	// Bing Webmaster per page (bing.php stores Bing's weekly rows): the last 90 days.
 	$b_from = ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( '-90 days' )->format( 'Y-m-d' );
-	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, SUM(impr) i, SUM(clicks) c FROM {$o} WHERE src = 'bing' AND metric = 'p' AND page <> '' AND d >= %s GROUP BY page", $b_from ) ) as $r ) {
+	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, SUM(impr) i, SUM(clicks) c FROM %i WHERE src = 'bing' AND metric = 'p' AND page <> '' AND d >= %s GROUP BY page", $o, $b_from ) ) as $r ) {
 		$set( $r->page, 'bing_impr', (int) $r->i );
 		$set( $r->page, 'bing_clicks', (int) $r->c );
 	}
-	foreach ( (array) $wpdb->get_results( "SELECT o.page, o.txt, o.d FROM {$o} o JOIN (SELECT page_key, MAX(d) d FROM {$o} WHERE src = 'clarity-note' GROUP BY page_key) l ON l.page_key = o.page_key AND l.d = o.d WHERE o.src = 'clarity-note'" ) as $r ) {
+	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT o.page, o.txt, o.d FROM %i o JOIN (SELECT page_key, MAX(d) d FROM %i WHERE src = 'clarity-note' GROUP BY page_key) l ON l.page_key = o.page_key AND l.d = o.d WHERE o.src = 'clarity-note'", $o, $o ) ) as $r ) {
 		$set( $r->page, 'note', (string) $r->txt );
 		$set( $r->page, 'note_d', $r->d );
 	}

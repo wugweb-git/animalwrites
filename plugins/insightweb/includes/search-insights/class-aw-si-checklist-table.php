@@ -98,11 +98,11 @@ class AW_SI_Checklist_Table extends WP_List_Table {
 		$dir     = isset( $_REQUEST['order'] ) && 'desc' === strtolower( sanitize_key( wp_unslash( $_REQUEST['order'] ) ) ) ? 'DESC' : 'ASC'; // phpcs:ignore WordPress.Security.NonceVerification -- read-only sort.
 		$by      = ( $cols[ $orderby ] ?? 'label' ) . ' ' . $dir;
 		$paged   = max( 1, $this->get_pagenum() );
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- integers and fixed parts with placeholders.
-		$total = (int) $wpdb->get_var( $args ? $wpdb->prepare( "SELECT COUNT(*) FROM {$k} WHERE {$where}", $args ) : "SELECT COUNT(*) FROM {$k} WHERE {$where}" );
-		$rows  = (array) $wpdb->get_results( $wpdb->prepare( "SELECT id, label, pos28, impr28 FROM {$k} WHERE {$where} ORDER BY {$by}, label LIMIT %d OFFSET %d", array_merge( $args, array( $per, ( $paged - 1 ) * $per ) ) ) );
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber,PluginCheck.Security.DirectDB.UnescapedDBParameter -- integers and fixed parts with placeholders; the tables are %i.
+		$total = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE {$where}", array_merge( array( $k ), $args ) ) );
+		$rows  = (array) $wpdb->get_results( $wpdb->prepare( "SELECT id, label, pos28, impr28 FROM %i WHERE {$where} ORDER BY {$by}, label LIMIT %d OFFSET %d", array_merge( array( $k ), $args, array( $per, ( $paged - 1 ) * $per ) ) ) );
 		$page  = implode( ',', array_map( 'intval', wp_list_pluck( $rows, 'id' ) ) );
-		$live  = $page ? (array) $wpdb->get_results( "SELECT kw_id, metric, d, value, txt FROM {$o} WHERE src = 'live' AND kw_id IN ({$page}) AND metric IN ('position', 'top3', 'paa') ORDER BY d" ) : array();
+		$live  = $page ? (array) $wpdb->get_results( $wpdb->prepare( "SELECT kw_id, metric, d, value, txt FROM %i WHERE src = 'live' AND kw_id IN ({$page}) AND metric IN ('position', 'top3', 'paa') ORDER BY d", $o ) ) : array();
 		// phpcs:enable
 		$month = aw_si_live_month();
 		$by_kw = array();

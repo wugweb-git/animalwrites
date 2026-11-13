@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 function aw_si_kw_map(): array {
 	global $wpdb;
 	$t    = aw_si_table( 'keywords' );
-	$rows = (array) $wpdb->get_results( "SELECT norm, id FROM {$t}", ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+	$rows = (array) $wpdb->get_results( $wpdb->prepare( 'SELECT norm, id FROM %i', $t ), ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	return array_map( 'intval', array_column( $rows, 'id', 'norm' ) );
 }
 
@@ -49,25 +49,23 @@ function aw_si_kw_ids( array $labels, int $role, array $extra = array() ): array
 		}
 	}
 	foreach ( array_chunk( $new, 200, true ) as $chunk ) {
-		$rows = array();
 		$args = array();
 		foreach ( $chunk as $norm => $label ) {
-			$rows[] = '(%s, %s, %s, %d, %s, %s, %d, %s, %s)';
 			array_push( $args, (string) $norm, mb_substr( $label, 0, 255 ), aw_si_lang( $label ), $role | ( aw_si_is_brand( $label ) ? AW_SI_ROLE_BRAND : 0 ), (string) ( $extra['page_type'] ?? '' ), (string) ( $extra['intent'] ?? '' ), (int) ( $extra['entity'] ?? 0 ), $now, $now );
 		}
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- one placeholder group per row, built above.
-		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$t} (norm, label, lang, roles, page_type, intent, entity, created, updated) VALUES " . implode( ', ', $rows ), $args ) );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- one placeholder group per row.
+		$wpdb->query( $wpdb->prepare( 'INSERT IGNORE INTO %i (norm, label, lang, roles, page_type, intent, entity, created, updated) VALUES ' . implode( ', ', array_fill( 0, count( $chunk ), '(%s, %s, %s, %d, %s, %s, %d, %s, %s)' ) ), array_merge( array( $t ), $args ) ) );
 	}
 	if ( $new ) {
 		$map = aw_si_kw_map();
 		// Variants and plural forms share one record already (same norm); group_id points a new record at itself until
 		// the owner groups Hindi / Hinglish forms under an English parent.
-		$wpdb->query( "UPDATE {$t} SET group_id = id WHERE group_id = 0" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$wpdb->query( $wpdb->prepare( 'UPDATE %i SET group_id = id WHERE group_id = 0', $t ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	}
 	$ids = array_intersect_key( $map, $want );
 	foreach ( array_chunk( array_values( $ids ), 500 ) as $chunk ) {
 		$in = implode( ',', array_map( 'intval', $chunk ) );
-		$wpdb->query( $wpdb->prepare( "UPDATE {$t} SET roles = roles | %d WHERE id IN ({$in}) AND roles & %d = 0", $role, $role ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers.
+		$wpdb->query( $wpdb->prepare( "UPDATE %i SET roles = roles | %d WHERE id IN ({$in}) AND roles & %d = 0", $t, $role, $role ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers.
 	}
 	return $ids;
 }
@@ -114,17 +112,14 @@ function aw_si_link_pages( array $links, bool $keep = false ): bool {
 	$t   = aw_si_table( 'kw_pages' );
 	$now = aw_si_now();
 	$ok  = true;
-	$verb = $keep ? 'INSERT' : 'REPLACE';
-	$tail = $keep ? ' ON DUPLICATE KEY UPDATE id = id' : ''; // keep the existing link; other errors still fail
 	foreach ( array_chunk( $links, 300 ) as $chunk ) {
-		$place = array();
-		$args  = array();
+		$args = array();
 		foreach ( $chunk as $l ) {
-			$place[] = '(%d, %s, %d, %s, %s, %s, %s, %s)';
 			array_push( $args, (int) $l[0], (string) $l[1], (int) $l[2], mb_substr( (string) $l[3], 0, 255 ), md5( $l[1] . ':' . $l[2] . ':' . $l[3] ), (string) $l[4], (string) $l[5], $now );
 		}
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- one placeholder group per row, built above.
-		$ok = $ok && false !== $wpdb->query( $wpdb->prepare( "{$verb} INTO {$t} (kw_id, obj_type, obj_id, path, path_key, role, src, updated) VALUES " . implode( ', ', $place ) . $tail, $args ) );
+		// $keep: INSERT … ON DUPLICATE KEY UPDATE id = id keeps the existing link; other errors still fail. Otherwise REPLACE.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- one placeholder group per row.
+		$ok = $ok && false !== $wpdb->query( $wpdb->prepare( ( $keep ? 'INSERT' : 'REPLACE' ) . ' INTO %i (kw_id, obj_type, obj_id, path, path_key, role, src, updated) VALUES ' . implode( ', ', array_fill( 0, count( $chunk ), '(%d, %s, %d, %s, %s, %s, %s, %s)' ) ) . ( $keep ? ' ON DUPLICATE KEY UPDATE id = id' : '' ), array_merge( array( $t ), $args ) ) );
 	}
 	return $ok;
 }
@@ -391,10 +386,9 @@ function aw_si_obs_replace_day( string $src, string $day, array $rows, string $p
 	$now  = aw_si_now();
 	$gsc  = 'gsc' === $shape;
 	$cols = $gsc ? 'clicks, impr, pos' : 'value, txt';
-	$only = $metrics ? ' AND metric IN (' . implode( ', ', array_fill( 0, count( $metrics ), '%s' ) ) . ')' : '';
 	$wpdb->query( 'START TRANSACTION' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- table name and one %s per metric, built above.
-	$ok = false !== $wpdb->query( $wpdb->prepare( "DELETE FROM {$o} WHERE src = %s AND period = %s AND d = %s{$only}", array_merge( array( $src, $period, $day ), array_values( $metrics ) ) ) );
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- one %s per metric.
+	$ok = false !== $wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE src = %s AND period = %s AND d = %s' . ( $metrics ? ' AND metric IN (' . implode( ', ', array_fill( 0, count( $metrics ), '%s' ) ) . ')' : '' ), array_merge( array( $o, $src, $period, $day ), array_values( $metrics ) ) ) );
 	foreach ( array_chunk( array_values( $rows ), 300 ) as $chunk ) {
 		$place = array();
 		$args  = array();
@@ -413,8 +407,8 @@ function aw_si_obs_replace_day( string $src, string $day, array $rows, string $p
 				array_push( $args, (float) $v[4], mb_substr( (string) $v[5], 0, 255 ), $now );
 			}
 		}
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- one placeholder group per row, built above.
-		$ok = $ok && false !== $wpdb->query( $wpdb->prepare( "INSERT INTO {$o} (kw_id, page, page_key, src, metric, period, d, {$cols}, fetched) VALUES " . implode( ', ', $place ), $args ) );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,PluginCheck.Security.DirectDB.UnescapedDBParameter -- one placeholder group per row and the fixed column list, built above from constant strings.
+		$ok = $ok && false !== $wpdb->query( $wpdb->prepare( "INSERT INTO %i (kw_id, page, page_key, src, metric, period, d, {$cols}, fetched) VALUES " . implode( ', ', $place ), array_merge( array( $o ), $args ) ) );
 		if ( ! $ok ) {
 			break;
 		}
@@ -477,7 +471,7 @@ function aw_si_sync_roles(): array {
 		}
 	}
 	// The focus role is rebuilt from scratch each day so a keyphrase the owner removed loses it.
-	$wpdb->query( $wpdb->prepare( "UPDATE {$k} SET roles = roles & ~%d", AW_SI_ROLE_FOCUS ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	$wpdb->query( $wpdb->prepare( 'UPDATE %i SET roles = roles & ~%d', $k, AW_SI_ROLE_FOCUS ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	$ids = aw_si_kw_ids( $labels, AW_SI_ROLE_FOCUS );
 	// Load every linked post and term in a few queries before building their links.
 	_prime_post_caches( array_map( 'intval', wp_list_pluck( (array) $rows, 'ID' ) ), false, false );
@@ -492,7 +486,7 @@ function aw_si_sync_roles(): array {
 	// The focus links are swapped in one transaction: a failed write keeps yesterday's links (and is logged).
 	$errors = array();
 	$wpdb->query( 'START TRANSACTION' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-	$ok = false !== $wpdb->query( "DELETE FROM {$p} WHERE src = 'focus'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	$ok = false !== $wpdb->query( $wpdb->prepare( "DELETE FROM %i WHERE src = 'focus'", $p ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	$ok = $ok && aw_si_link_pages( $rows_out, true );
 	if ( $ok ) {
 		$wpdb->query( 'COMMIT' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
@@ -516,10 +510,10 @@ function aw_si_sync_roles(): array {
 	// "{organisation name}" placeholder records keep their flag.
 	if ( $read ) {
 		$wpdb->query( 'START TRANSACTION' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-		$ok = false !== $wpdb->query( $wpdb->prepare( "UPDATE {$k} SET entity = 0 WHERE entity = 1 AND label NOT LIKE %s", '%' . $wpdb->esc_like( '{' ) . '%' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+		$ok = false !== $wpdb->query( $wpdb->prepare( 'UPDATE %i SET entity = 0 WHERE entity = 1 AND label NOT LIKE %s', $k, '%' . $wpdb->esc_like( '{' ) . '%' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		foreach ( array_chunk( array_unique( $ent ), 500 ) as $chunk ) {
 			$in = implode( ',', array_map( 'intval', $chunk ) );
-			$ok = $ok && false !== $wpdb->query( "UPDATE {$k} SET entity = 1 WHERE id IN ({$in})" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers.
+			$ok = $ok && false !== $wpdb->query( $wpdb->prepare( "UPDATE %i SET entity = 1 WHERE id IN ({$in})", $k ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers.
 		}
 		if ( $ok ) {
 			$wpdb->query( 'COMMIT' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
@@ -534,27 +528,27 @@ function aw_si_sync_roles(): array {
 	$sourcing = array();
 	$p2_busy = get_option( 'aw_sourcing_migrating' ) || get_option( 'aw_sourcing_phase2_record' ); // a phase 2 migration running or unfinished: leave the roles alone (Codex)
 	if ( $p2_busy ) {
-		$sourcing = (array) $wpdb->get_col( $wpdb->prepare( "SELECT id FROM {$k} WHERE roles & %d", AW_SI_ROLE_SOURCING ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- counted for the run log only
+		$sourcing = (array) $wpdb->get_col( $wpdb->prepare( 'SELECT id FROM %i WHERE roles & %d', $k, AW_SI_ROLE_SOURCING ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- counted for the run log only
 	} elseif ( (int) get_option( 'aw_sourcing_phase', 0 ) < 2 ) { // the option itself: SourceWeb may be off while this runs
-		$wpdb->query( $wpdb->prepare( "UPDATE {$k} SET roles = roles & ~%d", AW_SI_ROLE_SOURCING ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$wpdb->query( $wpdb->prepare( 'UPDATE %i SET roles = roles & ~%d', $k, AW_SI_ROLE_SOURCING ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		$sourcing = function_exists( 'aw_relevance' ) ? (array) ( aw_relevance()['strong'] ?? array() ) : array();
 		if ( $sourcing ) {
 			aw_si_kw_ids( $sourcing, AW_SI_ROLE_SOURCING );
 		}
 	} else {
-		$sourcing = (array) $wpdb->get_col( $wpdb->prepare( "SELECT id FROM {$k} WHERE roles & %d", AW_SI_ROLE_SOURCING ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- counted for the run log only
+		$sourcing = (array) $wpdb->get_col( $wpdb->prepare( 'SELECT id FROM %i WHERE roles & %d', $k, AW_SI_ROLE_SOURCING ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- counted for the run log only
 	}
 
 	// Brand: every record whose label matches.
 	$brand = array();
-	foreach ( (array) $wpdb->get_results( "SELECT id, label FROM {$k}" ) as $r ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	foreach ( (array) $wpdb->get_results( $wpdb->prepare( 'SELECT id, label FROM %i', $k ) ) as $r ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		if ( aw_si_is_brand( (string) $r->label ) ) {
 			$brand[] = (int) $r->id;
 		}
 	}
 	foreach ( array_chunk( $brand, 500 ) as $chunk ) {
 		$in = implode( ',', array_map( 'intval', $chunk ) );
-		$wpdb->query( $wpdb->prepare( "UPDATE {$k} SET roles = roles | %d WHERE id IN ({$in})", AW_SI_ROLE_BRAND ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers.
+		$wpdb->query( $wpdb->prepare( "UPDATE %i SET roles = roles | %d WHERE id IN ({$in})", $k, AW_SI_ROLE_BRAND ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers.
 	}
 
 	return array(
@@ -606,8 +600,8 @@ function aw_si_sync_topics(): array {
 	$k     = aw_si_table( 'keywords' );
 	$p     = aw_si_table( 'kw_pages' );
 	$topic = array(); // kw_id => [rank, name]; the lowest rank wins.
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
-	$links = (array) $wpdb->get_results( "SELECT kw_id, obj_type, obj_id, role FROM {$p} WHERE role IN ('owner', 'secondary') AND obj_type IN ('post', 'term') AND obj_id > 0" );
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$links = (array) $wpdb->get_results( $wpdb->prepare( "SELECT kw_id, obj_type, obj_id, role FROM %i WHERE role IN ('owner', 'secondary') AND obj_type IN ('post', 'term') AND obj_id > 0", $p ) );
 	$posts = array_unique( array_map( 'intval', wp_list_pluck( wp_list_filter( $links, array( 'obj_type' => 'post' ) ), 'obj_id' ) ) );
 	_prime_post_caches( $posts, true, true );
 	$names = array();
@@ -628,8 +622,8 @@ function aw_si_sync_topics(): array {
 	$linked = count( $topic );
 
 	// Keywords with no linked category: the post Google shows most (the page column the daily calculation fills).
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
-	$shown = (array) $wpdb->get_results( "SELECT id, page FROM {$k} WHERE topic = '' AND page LIKE '/%' AND page NOT LIKE '%{%'" );
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$shown = (array) $wpdb->get_results( $wpdb->prepare( "SELECT id, page FROM %i WHERE topic = '' AND page LIKE %s AND page NOT LIKE %s", $k, '/%', '%{%' ) );
 	$paths = array();
 	foreach ( $shown as $r ) {
 		if ( ! isset( $topic[ (int) $r->id ] ) ) {
@@ -656,11 +650,11 @@ function aw_si_sync_topics(): array {
 		$by_name[ mb_substr( $t[1], 0, 100 ) ][] = (int) $id;
 	}
 	// A path stored as a topic by the first seed (the /categories/ hub) is not a topic.
-	$set = (int) $wpdb->query( "UPDATE {$k} SET topic = '' WHERE topic LIKE '/%'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+	$set = (int) $wpdb->query( $wpdb->prepare( "UPDATE %i SET topic = '' WHERE topic LIKE %s", $k, '/%' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	foreach ( $by_name as $name => $ids ) {
 		foreach ( array_chunk( $ids, 500 ) as $chunk ) {
 			$in   = implode( ',', array_map( 'intval', $chunk ) );
-			$set += (int) $wpdb->query( $wpdb->prepare( "UPDATE {$k} SET topic = %s WHERE id IN ({$in}) AND topic <> %s", $name, $name ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers.
+			$set += (int) $wpdb->query( $wpdb->prepare( "UPDATE %i SET topic = %s WHERE id IN ({$in}) AND topic <> %s", $k, $name, $name ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers.
 		}
 	}
 	return array(

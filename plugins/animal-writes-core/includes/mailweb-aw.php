@@ -77,12 +77,6 @@ function aw_mail_ff_forms() {
 	return $out;
 }
 
-/** "form_id IN (…)" for these forms, prepared. */
-function aw_mail_ff_in( $forms ) {
-	global $wpdb;
-	$ids = array_map( 'intval', array_keys( $forms ) );
-	return $wpdb->prepare( 'form_id IN (' . implode( ', ', array_fill( 0, count( $ids ), '%d' ) ) . ')', $ids ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- one %d per form
-}
 
 /** One of those forms' entries (not trashed), or null. */
 function aw_mail_ff_entry( $id ) {
@@ -91,8 +85,8 @@ function aw_mail_ff_entry( $id ) {
 	if ( ! $forms || $id <= AW_MAIL_FF_ID ) {
 		return null;
 	}
-	$sql = $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}fluentform_submissions WHERE id = %d AND status <> 'trashed' AND ", $id - AW_MAIL_FF_ID ) . aw_mail_ff_in( $forms );
-	return $wpdb->get_row( $sql ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared -- both parts prepared
+	$ids = array_map( 'intval', array_keys( $forms ) );
+	return $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}fluentform_submissions WHERE id = %d AND status <> 'trashed' AND form_id IN (" . implode( ', ', array_fill( 0, count( $ids ), '%d' ) ) . ')', array_merge( array( $id - AW_MAIL_FF_ID ), $ids ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- one %d per form
 }
 
 /** An entry's form key (contact, volunteer, claim, report). */
@@ -171,8 +165,8 @@ add_filter(
 			}
 			$forms = aw_mail_ff_forms();
 			if ( $forms ) {
-				$sql = "SELECT id, created_at FROM {$wpdb->prefix}fluentform_submissions WHERE status <> 'trashed' AND " . aw_mail_ff_in( $forms );
-				foreach ( (array) $wpdb->get_results( $sql ) as $e ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared -- aw_mail_ff_in() is prepared
+				$ids = array_map( 'intval', array_keys( $forms ) );
+				foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT id, created_at FROM {$wpdb->prefix}fluentform_submissions WHERE status <> 'trashed' AND form_id IN (" . implode( ', ', array_fill( 0, count( $ids ), '%d' ) ) . ')', $ids ) ) as $e ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- one %d per form
 					$rows[] = array( (string) $e->created_at, AW_MAIL_FF_ID + (int) $e->id );
 				}
 			}

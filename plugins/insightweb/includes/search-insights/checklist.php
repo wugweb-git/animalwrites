@@ -67,12 +67,12 @@ function aw_si_checklist_defaults(): array {
 	}
 	$k   = aw_si_table( 'keywords' );
 	$o   = aw_si_table( 'obs' );
-	// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared -- table names, constants and aw_si_view_sql() (fixed SQL from a map).
+	// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- constants and aw_si_view_sql() (fixed SQL from a map, no %).
 	$ids = array_merge(
-		(array) $wpdb->get_col( $wpdb->prepare( "SELECT id FROM {$k} WHERE roles & %d AND ( " . aw_si_view_sql( 'p1' ) . ' OR ' . aw_si_view_sql( 'p2' ) . ' ) AND entity = 0', AW_SI_ROLE_TRACKED ) ),
-		(array) $wpdb->get_col( $wpdb->prepare( "SELECT id FROM {$k} WHERE roles & %d", AW_SI_ROLE_BRAND ) ),
-		(array) $wpdb->get_col( "SELECT id FROM {$k} WHERE " . aw_si_view_sql( 'quick' ) . ' AND entity = 0 ORDER BY impr28 DESC LIMIT 100' ),
-		(array) $wpdb->get_col( "SELECT DISTINCT kw_id FROM {$o} WHERE src = 'live' AND metric = 'position' AND kw_id > 0" )
+		(array) $wpdb->get_col( $wpdb->prepare( 'SELECT id FROM %i WHERE roles & %d AND ( ' . aw_si_view_sql( 'p1' ) . ' OR ' . aw_si_view_sql( 'p2' ) . ' ) AND entity = 0', $k, AW_SI_ROLE_TRACKED ) ),
+		(array) $wpdb->get_col( $wpdb->prepare( 'SELECT id FROM %i WHERE roles & %d', $k, AW_SI_ROLE_BRAND ) ),
+		(array) $wpdb->get_col( $wpdb->prepare( 'SELECT id FROM %i WHERE ' . aw_si_view_sql( 'quick' ) . ' AND entity = 0 ORDER BY impr28 DESC LIMIT 100', $k ) ),
+		(array) $wpdb->get_col( $wpdb->prepare( "SELECT DISTINCT kw_id FROM %i WHERE src = 'live' AND metric = 'position' AND kw_id > 0", $o ) )
 	);
 	// phpcs:enable
 	return array_slice( array_values( array_unique( array_map( 'intval', $ids ) ) ), 0, 300 );
@@ -91,10 +91,10 @@ function aw_si_live_pending(): array {
 	}
 	$k    = aw_si_table( 'keywords' );
 	$o    = aw_si_table( 'obs' );
-	$in   = implode( ',', $ids );
-	$done = array_flip( array_map( 'intval', (array) $wpdb->get_col( $wpdb->prepare( "SELECT kw_id FROM {$o} WHERE src = 'live' AND metric = 'position' AND period = 'month' AND d >= %s AND kw_id IN ({$in})", aw_si_live_month() ) ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers.
+	$in   = implode( ',', array_map( 'intval', $ids ) );
+	$done = array_flip( array_map( 'intval', (array) $wpdb->get_col( $wpdb->prepare( "SELECT kw_id FROM %i WHERE src = 'live' AND metric = 'position' AND period = 'month' AND d >= %s AND kw_id IN ({$in})", $o, aw_si_live_month() ) ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers.
 	$out  = array();
-	foreach ( (array) $wpdb->get_results( "SELECT id, label FROM {$k} WHERE id IN ({$in}) ORDER BY id" ) as $r ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers.
+	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT id, label FROM %i WHERE id IN ({$in}) ORDER BY id", $k ) ) as $r ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers.
 		if ( ! isset( $done[ (int) $r->id ] ) && false === strpos( $r->label, '{' ) ) { // Directory patterns such as {district} are not searchable.
 			$out[] = array(
 				'id' => (int) $r->id,
@@ -362,7 +362,7 @@ add_action(
 		global $wpdb;
 		$pending  = count( aw_si_live_pending() );
 		$ids      = aw_si_checklist();
-		$patterns = $ids && aw_si_ready() ? (int) $wpdb->get_var( 'SELECT COUNT(*) FROM ' . aw_si_table( 'keywords' ) . " WHERE label LIKE '%{%' AND id IN (" . implode( ',', $ids ) . ')' ) : 0; // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.NotPrepared -- integers and a table name.
+		$patterns = $ids && aw_si_ready() ? (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM %i WHERE label LIKE %s AND id IN (' . implode( ',', array_map( 'intval', $ids ) ) . ')', aw_si_table( 'keywords' ), '%{%' ) ) : 0; // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.NotPrepared -- integers.
 		$total    = count( $ids ) - $patterns;
 		echo '<h2>' . esc_html__( 'Monthly live check', 'insightweb' ) . '</h2>';
 		/* translators: 1: keywords checked this month, 2: searchable keywords on the list. */

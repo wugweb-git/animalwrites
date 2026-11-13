@@ -152,7 +152,7 @@ function aw_seo_keyphrase_owners( $kw, $id ) {
 	if ( function_exists( 'aw_si_ready' ) && aw_si_ready() && function_exists( 'aw_si_norm' ) ) {
 		$k    = aw_si_table( 'keywords' );
 		$pg   = aw_si_table( 'kw_pages' );
-		$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT l.obj_type, l.obj_id FROM {$pg} l JOIN {$k} k ON k.id = l.kw_id WHERE k.norm = %s AND l.role = 'owner' AND l.obj_type IN ('post', 'term') AND l.obj_id > 0 AND NOT ( l.obj_type = 'post' AND l.obj_id = %d ) LIMIT 5", aw_si_norm( $kw ), (int) $id ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table names only.
+		$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT l.obj_type, l.obj_id FROM %i l JOIN %i k ON k.id = l.kw_id WHERE k.norm = %s AND l.role = 'owner' AND l.obj_type IN ('post', 'term') AND l.obj_id > 0 AND NOT ( l.obj_type = 'post' AND l.obj_id = %d ) LIMIT 5", $pg, $k, aw_si_norm( $kw ), (int) $id ) );
 		foreach ( $rows as $r ) {
 			if ( 'post' === $r->obj_type ) {
 				if ( 'publish' === get_post_status( (int) $r->obj_id ) ) {

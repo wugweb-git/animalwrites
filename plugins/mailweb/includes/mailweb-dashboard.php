@@ -108,14 +108,14 @@ function mailweb_dashboard_queue(): array {
 	global $wpdb;
 	$t   = mailweb_table();
 	$now = time();
-	// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- background counts on the plugin's own table
-	$by     = wp_list_pluck( (array) $wpdb->get_results( "SELECT status, COUNT(*) n FROM {$t} GROUP BY status", ARRAY_A ), 'n', 'status' );
-	$queued = wp_list_pluck( (array) $wpdb->get_results( "SELECT priority, COUNT(*) n FROM {$t} WHERE status = 'queued' GROUP BY priority", ARRAY_A ), 'n', 'priority' );
-	$oldest = (string) $wpdb->get_var( "SELECT MIN(created_at) FROM {$t} WHERE status = 'queued'" );
-	$next   = (string) $wpdb->get_var( "SELECT MIN(next_try) FROM {$t} WHERE status = 'failed'" );
-	$prev   = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$t} WHERE status = 'sent' AND sent_at > %s AND sent_at <= %s", gmdate( 'Y-m-d H:i:s', $now - 2 * DAY_IN_SECONDS ), gmdate( 'Y-m-d H:i:s', $now - DAY_IN_SECONDS ) ) );
-	$times  = (array) $wpdb->get_col( $wpdb->prepare( "SELECT sent_at FROM {$t} WHERE status = 'sent' AND sent_at > %s", gmdate( 'Y-m-d H:i:s', $now - 30 * DAY_IN_SECONDS ) ) );
-	$held   = (array) $wpdb->get_results( "SELECT created_at, priority, tries, error FROM {$t} WHERE status = 'held' ORDER BY id DESC LIMIT 20", ARRAY_A );
+	// phpcs:disable WordPress.DB.DirectDatabaseQuery -- background counts on the plugin's own table
+	$by     = wp_list_pluck( (array) $wpdb->get_results( $wpdb->prepare( 'SELECT status, COUNT(*) n FROM %i GROUP BY status', $t ), ARRAY_A ), 'n', 'status' );
+	$queued = wp_list_pluck( (array) $wpdb->get_results( $wpdb->prepare( "SELECT priority, COUNT(*) n FROM %i WHERE status = 'queued' GROUP BY priority", $t ), ARRAY_A ), 'n', 'priority' );
+	$oldest = (string) $wpdb->get_var( $wpdb->prepare( "SELECT MIN(created_at) FROM %i WHERE status = 'queued'", $t ) );
+	$next   = (string) $wpdb->get_var( $wpdb->prepare( "SELECT MIN(next_try) FROM %i WHERE status = 'failed'", $t ) );
+	$prev   = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE status = 'sent' AND sent_at > %s AND sent_at <= %s", $t, gmdate( 'Y-m-d H:i:s', $now - 2 * DAY_IN_SECONDS ), gmdate( 'Y-m-d H:i:s', $now - DAY_IN_SECONDS ) ) );
+	$times  = (array) $wpdb->get_col( $wpdb->prepare( "SELECT sent_at FROM %i WHERE status = 'sent' AND sent_at > %s", $t, gmdate( 'Y-m-d H:i:s', $now - 30 * DAY_IN_SECONDS ) ) );
+	$held   = (array) $wpdb->get_results( $wpdb->prepare( "SELECT created_at, priority, tries, error FROM %i WHERE status = 'held' ORDER BY id DESC LIMIT 20", $t ), ARRAY_A );
 	// phpcs:enable
 	$days = array();
 	foreach ( $times as $gmt ) {
