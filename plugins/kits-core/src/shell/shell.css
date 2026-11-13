@@ -203,6 +203,38 @@ body.kits-shell-screen .wrap > .updated {
 	font-size: 13px;
 }
 
+/* Breadcrumb trail (crumbs.js): its own row above the brand; the crumbs are core link buttons. */
+.kits-shell-crumbs {
+	order: -1;
+	flex: 1 0 100%;
+	color: var(--ks-g6);
+	font-size: 13px;
+}
+
+.kits-shell-crumbs ol {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--ks-s1) var(--ks-s2);
+	margin: 0;
+	list-style: none;
+}
+
+.kits-shell-crumbs li {
+	margin: 0;
+}
+
+.kits-shell-crumbs li + li::before {
+	content: "›";
+	margin-right: var(--ks-s2);
+	color: var(--ks-g3);
+}
+
+/* "Change in …": a setting kept on another screen (crumbs.js). */
+.kits-shell-changein {
+	margin: var(--ks-s1) 0 0;
+	font-size: 13px;
+}
+
 /* ---------- Buttons and links ---------- */
 
 .kits-shell .kits-shell-button {

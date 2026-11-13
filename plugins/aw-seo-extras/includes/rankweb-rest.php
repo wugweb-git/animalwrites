@@ -407,13 +407,26 @@ function rankweb_settings_group( string $tab ): array {
 		'label'  => $tabs[ $tab ]['label'],
 		'blocks' => array(),
 	);
+	// Modules whose other half is a Rank Math screen (the Overview's "where to set it up"): "Change in …" links.
+	$rm     = fn( string $label, string $page ) => array(
+		'label' => $label,
+		'url'   => add_query_arg( 'page', $page, admin_url( 'admin.php' ) ),
+	);
+	$elses  = array(
+		'titles'      => $rm( __( 'Rank Math → Titles & Meta', 'aw-seo-extras' ), 'rank-math-options-titles' ),
+		'breadcrumbs' => $rm( __( 'Rank Math → General Settings', 'aw-seo-extras' ), 'rank-math-options-general' ),
+		'sitemap'     => $rm( __( 'Rank Math → Sitemap Settings', 'aw-seo-extras' ), 'rank-math-options-sitemap' ),
+		'redirects'   => $rm( __( 'Rank Math → Redirections', 'aw-seo-extras' ), 'rank-math-redirections' ),
+		'llms'        => $rm( __( 'Rank Math → General Settings', 'aw-seo-extras' ), 'rank-math-options-general' ),
+	);
 	$module = fn( string $key, bool $own ) => array(
-		'key'    => $key,
-		'label'  => $mods[ $key ]['label'],
-		'desc'   => $own ? $mods[ $key ]['desc'] : '',
-		'switch' => ! empty( $mods[ $key ]['switch'] ),
-		'on'     => aw_seo_module_on( $key ),
-		'fields' => array(),
+		'key'      => $key,
+		'label'    => $mods[ $key ]['label'],
+		'desc'     => $own ? $mods[ $key ]['desc'] : '',
+		'switch'   => ! empty( $mods[ $key ]['switch'] ),
+		'on'       => aw_seo_module_on( $key ),
+		'fields'   => array(),
+		'changeIn' => $own && aw_seo_extras_rank_math() ? ( $elses[ $key ] ?? null ) : null,
 	);
 	if ( 'modules' === $tab ) {
 		foreach ( $mods as $key => $mod ) {

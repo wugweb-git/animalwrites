@@ -621,6 +621,7 @@ function Group( { group, onSaved, onDirty } ) {
 						key={ b.key }
 						title={ b.label }
 						description={ b.desc }
+						changeIn={ b.changeIn }
 						note={
 							b.on
 								? ''
