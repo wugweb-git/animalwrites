@@ -681,7 +681,9 @@ add_filter(
 			return $html;
 		}
 		$html = (string) preg_replace( '/\bkit-card kit-card--(?:block-lg|block-md|block-sm|stacked-lg)\b/', 'kit-card kit-card--stacked-md', $html );
-		return (string) preg_replace( '/\bclass="wp-block-post-template\b/', 'class="wp-block-post-template aw-stack-list', $html, 1 );
+		// The list class may come after the list's own class (aw-news-list, aw-cases, aw-tasks), so match it anywhere in the
+		// first list's class attribute.
+		return (string) preg_replace( '/(<ul\b[^>]*?\bclass="[^"]*?)\bwp-block-post-template\b(?!-)/', '$1wp-block-post-template aw-stack-list', $html, 1 );
 	},
 	20,
 	3
