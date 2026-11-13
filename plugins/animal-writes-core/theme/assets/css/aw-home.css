@@ -87,6 +87,7 @@
 @media (min-width: 768px) {
 	.aw-pair-grid { grid-template-columns: 1fr 1fr; }
 	.aw-pair-grid:has(> :only-child) { grid-template-columns: 1fr; } /* one card left (the Diwali card goes after 20 Nov 2026): it fills the row */
+	.aw-pair-grid > :last-child:nth-child(odd):not(:only-child) { grid-column: 1 / -1; } /* three cards (Supreme Court, Diwali, lab rules until 20 Nov 2026): the last fills its own row */
 }
 .home .kit-sec-head { row-gap: var(--kit-space-4); margin-bottom: var(--kit-space-head); }
 .home .kit-sec-head p { margin-top: var(--kit-space-4); }
