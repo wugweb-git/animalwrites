@@ -62,6 +62,15 @@
 .aw-side-camp-title a { color: inherit; text-decoration: none; }
 .aw-side-camp-title a:hover { text-decoration: underline; }
 .aw-side-camp-line { margin: 0 0 var(--kit-space-4); font-size: var(--kit-type-sm); color: var(--kit-color-text); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+/* sm, the campaign's small card in its own colours (owner, 13 Nov 2026: lg, md, sm, share): the hero picture, then the
+   campaign's mark colour with its on-mark text (aw-camp-tokens.css; white on Diwali marigold and on Supreme Court plum
+   passes 4.5:1), the button reversed. */
+.aw-side-camp.aw-camp { border-color: var(--camp-mark); background: var(--camp-mark); color: var(--camp-on-mark); }
+.aw-side-camp.aw-camp .aw-side-camp-media { border-bottom: 0; background: var(--camp-mark); }
+.aw-side-camp.aw-camp .aw-side-camp-media img { object-fit: cover; }
+.aw-side-camp.aw-camp :is(.aw-side-camp-meta, .aw-side-camp-meta .kit-meta-item, .aw-side-camp-line) { color: var(--camp-on-mark); }
+.aw-side-camp.aw-camp .aw-side-camp-btn { border-color: var(--camp-on-mark); background: var(--camp-on-mark); color: var(--camp-mark); }
+.aw-side-camp.aw-camp :is(.aw-side-camp-title a, .aw-side-camp-btn):focus-visible { outline: var(--kit-focus-width) solid var(--camp-on-mark); outline-offset: var(--kit-focus-offset); }
 .kit-main .aw-more-list { grid-template-columns: minmax(0, 1fr); }
 @media (min-width: 768px) {
 	.kit-main .aw-more-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
