@@ -357,8 +357,8 @@ a.aw-social-name { min-height: var(--kit-size-target); text-decoration: none; }
 .aw-stack-list.aw-stack-list .kit-card.kit-card--stacked-md > .kit-card-body { flex: 1 1 0 !important; min-width: 0 !important; align-self: flex-start; }
 .aw-stack-list.aw-stack-list .kit-card.kit-card--stacked-md .kit-card-sum { display: none; }
 /* Card type in steps (owner, 13 Nov 2026: "h3 one size per breakpoint", "metarow - one font size per breakpoint"): every card's
-   H3 title is --kit-type-card-title (20px, 22px from 1200; owner, 13 Nov 2026: "20-22px desktop, 18-20px mobile") with the H3
+   H3 title is --kit-type-card-title (20px, 22px from 1200; an H4 card title takes the same size, owner 14 Nov 2026: "use correct h3"; owner, 13 Nov 2026: "20-22px desktop, 18-20px mobile") with the H3
    line height, and everything in the meta row (date, read time, chips) is --kit-meta-size (12px, 13px from 768).
    No fluid sizes, so the size changes only at a breakpoint. */
-.kit-card h3.kit-card-title.kit-card-title, .kit-card h3.kit-card-title.kit-card-title a { font-size: var(--kit-type-card-title) !important; line-height: var(--kit-h3-leading) !important; }
+.kit-card :is(h3, h4).kit-card-title.kit-card-title, .kit-card :is(h3, h4).kit-card-title.kit-card-title a { font-size: var(--kit-type-card-title) !important; line-height: var(--kit-h3-leading) !important; }
 .kit-card .kit-card-metarow.kit-card-metarow, .kit-card .kit-card-metarow.kit-card-metarow * { font-size: var(--kit-meta-size) !important; }
