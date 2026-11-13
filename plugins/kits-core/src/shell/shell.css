@@ -225,6 +225,7 @@ body.kits-shell-screen .wrap > .updated {
 
 .kits-shell-crumbs li + li::before {
 	content: "›";
+	content: "›" / ""; /* silent for screen readers; the line above for browsers without alt text */
 	margin-right: var(--ks-s2);
 	color: var(--ks-g3);
 }
