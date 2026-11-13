@@ -69,4 +69,37 @@ PW_M=$(wp post list --post_type=planweb_entry --post_status=any --format=count)
 same "PlanWeb Settings" "$BEFORE" "$(optmd5 planweb_on aw_team_dates)"
 if wp eval 'exit( in_array( "planweb_on", kits_settings_transfer_options(), true ) ? 0 : 1 );'; then echo "ok   planweb_on is in the Kits export"; else echo "FAIL planweb_on missing from the Kits export"; FAIL=1; fi
 
+# Several channels and Done (14 Nov 2026): an entry saved with two channels keeps both; an administrator closes it as Done.
+want 200 "POST /$PW/entries with two channels" -X POST "${AJ[@]}" -d '{"date":"2026-11-30","title":"[X + LinkedIn] Two channels","type":"social","channels":["x","linkedin"],"status":"idea"}' "$P/entries"
+if python3 -c 'import json,sys; e=json.load(open("/tmp/rw.out"))["entry"]; sys.exit(0 if e["channels"]==["x","linkedin"] and e["channelText"]=="X, LinkedIn" else 1)'; then echo "ok   entry with X and LinkedIn"; else echo "FAIL two channels not kept"; FAIL=1; fi
+CH=$(python3 -c 'import json; print(json.load(open("/tmp/rw.out"))["entry"]["id"])' 2>/dev/null)
+want 200 "POST /$PW/entries/$CH Done" -X POST "${AJ[@]}" -d '{"status":"done","channels":["linkedin"]}' "$P/entries/$CH"
+if [ "$(wp post meta get "$CH" planweb_status)" = "done" ] && [ "$(wp post term list "$CH" planweb_channel --field=slug)" = "linkedin" ]; then echo "ok   entry $CH Done, channels changed to LinkedIn only"; else echo "FAIL entry $CH status or channels"; FAIL=1; fi
+if wp eval 'exit( planweb_is_overdue( array( "date" => "2020-01-01", "status" => "done" ), "2026-11-14" ) ? 1 : 0 );'; then echo "ok   a past Done entry is not overdue"; else echo "FAIL Done counted overdue"; FAIL=1; fi
+
+# The calendar feed: no key, no feed; a key from Settings; the right key gives text/calendar without sign-in; a wrong
+# key looks like no route; an unknown filter is refused; a new key retires the old address.
+F="$H/?rest_route=/$PW/calendar.ics"
+want 404 "GET calendar.ics, feed off" "$F&key=none"
+post "$PW/settings/feed" '{"action":"new"}'
+want 403 "POST /$PW/settings/feed editor" -X POST -b /tmp/cj-rw-ed -H "X-WP-Nonce: $NE" -H 'Content-Type: application/json' -d '{"action":"new"}' "$P/settings/feed"
+want 200 "POST /$PW/settings/feed new key" -X POST "${AJ[@]}" -d '{"action":"new"}' "$P/settings/feed"
+KEY=$(wp option get planweb_feed_key)
+want 404 "GET calendar.ics wrong key" "$F&key=wrong$KEY"
+want 404 "GET calendar.ics no key" "$F"
+want 400 "GET calendar.ics unknown type" "$F&key=$KEY&type=spam"
+CT=$(curl -s -o /tmp/rw.out -w '%{http_code} %{content_type}' "$F&key=$KEY&type=marketing")
+if [ "$CT" = "200 text/calendar; charset=utf-8" ] && head -c 15 /tmp/rw.out | grep -q 'BEGIN:VCALENDAR' && grep -q 'END:VCALENDAR' /tmp/rw.out; then echo "ok   calendar.ics: $CT"; else echo "FAIL calendar.ics: $CT"; head -c 300 /tmp/rw.out; echo; FAIL=1; fi
+if grep -q 'Two channels' /tmp/rw.out && ! grep -qi 'reminder' /tmp/rw.out; then echo "ok   calendar.ics marketing only: the social entry, no reminders"; else echo "FAIL calendar.ics marketing filter"; FAIL=1; fi
+want 200 "GET calendar.ics status=open" "$F&key=$KEY&status=open"
+if ! grep -q 'Two channels' /tmp/rw.out; then echo "ok   calendar.ics open: the Done entry left out"; else echo "FAIL calendar.ics status filter"; FAIL=1; fi
+want 200 "POST /$PW/settings/feed another key" -X POST "${AJ[@]}" -d '{"action":"new"}' "$P/settings/feed"
+want 404 "GET calendar.ics old key" "$F&key=$KEY"
+want 200 "POST /$PW/settings/feed off" -X POST "${AJ[@]}" -d '{"action":"off"}' "$P/settings/feed"
+[ -z "$(wp option get planweb_feed_key 2>/dev/null)" ] && echo "ok   feed off: no key" || { echo "FAIL feed key left"; FAIL=1; }
+
+# The one-time moves of 14 Nov: a bracket title gets every channel it names; a second run changes nothing.
+MG=$(wp eval '$id = planweb_save_entry( array( "title" => "[Instagram + Facebook + Threads] Moves", "date" => "2026-11-29", "type" => "social", "channel" => "instagram", "status" => "idea" ) ); delete_option( PLANWEB_MIGRATE ); $r = planweb_migrate_1114(); $e = planweb_entry( $id ); $again = planweb_migrate_1114(); echo in_array( $id, $r["channels"], true ) && array( "instagram", "facebook", "threads" ) === $e["channels"] && array() === $again["channels"] ? "ok" : "bad";')
+[ "$MG" = "ok" ] && echo "ok   bracket titles moved to every channel they name" || { echo "FAIL channel move: $MG"; FAIL=1; }
+
 wp plugin deactivate planweb --quiet

@@ -14,6 +14,9 @@
  *                                                        changes; reset: true restores the group's defaults
  *   POST import                    manage_options        run the Dates import again (planweb_import())
  *   GET  services                  manage_options        the services the plan names, with their state
+ *   POST settings/feed             manage_options        the calendar feed's key: action new (make a new key; the old
+ *                                                        address stops working) or off (no key: no feed)
+ *   GET  calendar.ics?key=…        the feed key          the read-only calendar feed (feed.php); no sign-in
  *
  * Every route checks the capability and, for a signed-in browser, the wp_rest nonce (kits_shell_rest_can()). The core
  * routes (/wp/v2/planweb-entries) stay as they are.
@@ -41,9 +44,13 @@ function planweb_rest_can( string $cap ): callable {
 		if ( ! is_user_logged_in() ) {
 			return new WP_Error( 'rest_not_logged_in', __( 'Sign in to use this.', 'planweb' ), array( 'status' => 401 ) );
 		}
+		// The same steps as kits_shell_rest_can(): the nonce from the header or the _wpnonce parameter.
 		$app = function_exists( 'rest_get_authenticated_app_password' ) && null !== rest_get_authenticated_app_password();
-		if ( ! $app && ! wp_verify_nonce( (string) ( $request->get_header( 'X-WP-Nonce' ) ?? '' ), 'wp_rest' ) ) {
-			return new WP_Error( 'rest_cookie_invalid_nonce', __( 'The page has expired. Reload it and try again.', 'planweb' ), array( 'status' => 403 ) );
+		if ( ! $app ) {
+			$nonce = (string) ( $request->get_header( 'X-WP-Nonce' ) ?? $request->get_param( '_wpnonce' ) ?? '' );
+			if ( ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
+				return new WP_Error( 'rest_cookie_invalid_nonce', __( 'The page has expired. Reload it and try again.', 'planweb' ), array( 'status' => 403 ) );
+			}
 		}
 		return current_user_can( $cap ) ? true : new WP_Error( 'rest_forbidden', __( 'You are not allowed to do this.', 'planweb' ), array( 'status' => 403 ) );
 	};
@@ -60,15 +67,19 @@ add_action(
 			'required' => $required,
 		);
 		$fields = array(
-			'date'    => $text( true ),
-			'time'    => $text(),
-			'title'   => $text( true ),
-			'note'    => $text(),
-			'type'    => $text( true ),
-			'channel' => $text(),
-			'owner'   => $text(),
-			'status'  => $text(),
-			'link'    => $text(),
+			'date'     => $text( true ),
+			'time'     => $text(),
+			'title'    => $text( true ),
+			'note'     => $text(),
+			'type'     => $text( true ),
+			'channel'  => $text(),
+			'channels' => array(
+				'type'  => 'array',
+				'items' => array( 'type' => 'string' ),
+			),
+			'owner'    => $text(),
+			'status'   => $text(),
+			'link'     => $text(),
 		);
 		$routes = array(
 			'/dashboard'                 => array( 'GET', 'edit_planweb_entries', 'planweb_rest_dashboard', array() ),
@@ -92,6 +103,18 @@ add_action(
 			),
 			'/import'                    => array( 'POST', 'manage_options', 'planweb_rest_import', array() ),
 			'/services'                  => array( 'GET', 'manage_options', fn() => rest_ensure_response( array( 'services' => planweb_services() ) ), array() ),
+			'/settings/feed'             => array(
+				'POST',
+				'manage_options',
+				'planweb_rest_feed_key',
+				array(
+					'action' => array(
+						'type'     => 'string',
+						'enum'     => array( 'new', 'off' ),
+						'required' => true,
+					),
+				),
+			),
 		);
 		foreach ( $routes as $route => $r ) {
 			register_rest_route(
@@ -175,18 +198,19 @@ function planweb_rest_list_params(): array {
 
 /* ---------- Dashboard ---------- */
 
-/** The Dashboard: the tiles for each range from the stored counts (formatting only, nothing is counted here). */
+/**
+ * The Dashboard: the tiles for each range from the stored counts (formatting only, nothing is counted here). Read
+ * only: opening it writes nothing. Old or missing counts are made by the hourly job, or at once by "Count now" (POST
+ * dashboard/count).
+ */
 function planweb_rest_dashboard() {
 	$c        = get_transient( PLANWEB_COUNTS );
 	$counting = ! is_array( $c ) || empty( $c['at'] );
 	$today    = wp_date( 'Y-m-d' );
 	$stale    = ! $counting && $c['day'] !== $today;
-	if ( $counting || $stale ) {
-		planweb_counts_request(); // The first view, or a new day: count in the background.
-	}
-	$c   = $counting ? planweb_count_entries( array(), $today ) : $c;
-	$url = fn( array $args ) => planweb_ui_url( 'entries', $args );
-	$out = array(
+	$c        = $counting ? planweb_count_entries( array(), $today ) : $c;
+	$url      = fn( array $args ) => planweb_ui_url( 'entries', $args );
+	$out      = array(
 		'counting' => $counting,
 		'stale'    => $stale,
 		'at'       => $counting ? 0 : (int) $c['at'],
@@ -244,7 +268,7 @@ function planweb_rest_row( array $e, string $today ): array {
 		'past'        => $e['date'] < $today,
 		'overdue'     => planweb_is_overdue( $e, $today ),
 		'typeText'    => PLANWEB_TYPES[ $e['type'] ] ?? '',
-		'channelText' => PLANWEB_CHANNELS[ $e['channel'] ] ?? '',
+		'channelText' => implode( ', ', array_map( fn( $s ) => PLANWEB_CHANNELS[ $s ] ?? $s, $e['channels'] ?? array() ) ),
 		'ownerText'   => PLANWEB_OWNERS[ $e['owner'] ] ?? '',
 		'statusText'  => PLANWEB_STATUSES[ $e['status'] ] ?? $e['status'],
 		'linkHost'    => '' !== $e['link'] ? (string) wp_parse_url( $e['link'], PHP_URL_HOST ) : '',
@@ -446,6 +470,9 @@ function planweb_rest_save( WP_REST_Request $request ) {
 	$stored = $id ? planweb_entry( $id ) : array();
 	$params = $request->get_params();
 	unset( $params['id'] );
+	if ( array_key_exists( 'channel', $params ) && ! array_key_exists( 'channels', $params ) ) {
+		unset( $stored['channels'] ); // A request that sends one channel (the older form) sets that one.
+	}
 	// A change keeps the stored value of every field the request leaves out.
 	$f = planweb_clean_form( array_merge( $stored, $params ) );
 	if ( '' === $f['status'] ) {
@@ -565,6 +592,7 @@ function planweb_settings_payload(): array {
 		),
 		'lists'  => $lists,
 		'import' => planweb_import_payload(),
+		'feed'   => planweb_feed_payload(),
 	);
 }
 
@@ -621,7 +649,10 @@ function planweb_rest_import() {
 
 /* ---------- Connected services ---------- */
 
-/** The services the plan names (4.4). None is connected; nothing is posted or sent from PlanWeb. */
+/**
+ * The services the plan names (4.4), and the posting tools used by hand outside PlanWeb (14 Nov 2026). None is
+ * connected; nothing is posted or sent from PlanWeb (D6).
+ */
 function planweb_services(): array {
 	$fluent = defined( 'FLUENTCRM' ) || class_exists( '\FluentCrm\App\Models\Campaign' );
 	$social = function_exists( 'aw_social_on' ) ? aw_social_on() : null;
@@ -642,18 +673,53 @@ function planweb_services(): array {
 			'summary' => $social ? $later : __( 'Social posts is off, so there are no social drafts to show.', 'planweb' ),
 		),
 		array(
+			'slug'    => 'meta-business-suite',
+			'name'    => 'Meta Business Suite',
+			'status'  => __( 'Used outside PlanWeb', 'planweb' ),
+			'tone'    => '',
+			'summary' => __( 'Facebook, Instagram and Threads posts are scheduled there by hand. Nothing is posted from here.', 'planweb' ),
+		),
+		array(
+			'slug'    => 'buffer',
+			'name'    => __( 'Buffer (free plan)', 'planweb' ),
+			'status'  => __( 'Used outside PlanWeb', 'planweb' ),
+			'tone'    => '',
+			'summary' => __( 'LinkedIn and X posts are scheduled there by hand. Nothing is posted from here.', 'planweb' ),
+		),
+		array(
 			'slug'    => 'metricool',
 			'name'    => 'Metricool',
-			'status'  => __( 'Not connected', 'planweb' ),
+			'status'  => __( 'Rejected', 'planweb' ),
 			'tone'    => 'warn',
-			'summary' => __( 'Not chosen yet. Nothing is posted from PlanWeb.', 'planweb' ),
+			'summary' => __( 'Rejected on 13 Nov 2026. Not used.', 'planweb' ),
 		),
 		array(
 			'slug'    => 'postiz',
 			'name'    => 'Postiz',
-			'status'  => __( 'Not connected', 'planweb' ),
+			'status'  => __( 'Rejected', 'planweb' ),
 			'tone'    => 'warn',
-			'summary' => __( 'Not chosen yet. Nothing is posted from PlanWeb.', 'planweb' ),
+			'summary' => __( 'Rejected on 13 Nov 2026. Not used.', 'planweb' ),
 		),
+	);
+}
+
+/**
+ * POST settings/feed: make a new feed key (the old address stops working at once) or turn the feed off.
+ *
+ * @param WP_REST_Request $request Request.
+ */
+function planweb_rest_feed_key( WP_REST_Request $request ) {
+	if ( 'off' === $request['action'] ) {
+		delete_option( PLANWEB_FEED_KEY );
+		$message = __( 'The calendar feed is off. Calendars subscribed to it stop updating.', 'planweb' );
+	} else {
+		planweb_feed_new_key();
+		$message = __( 'New key made. The old feed address no longer works: subscribe again with the new one.', 'planweb' );
+	}
+	return rest_ensure_response(
+		array(
+			'feed'    => planweb_feed_payload(),
+			'message' => $message,
+		)
 	);
 }

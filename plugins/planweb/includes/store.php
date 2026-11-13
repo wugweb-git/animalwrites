@@ -308,30 +308,36 @@ add_filter(
  *
  * @param WP_Post|int $post Entry.
  * @return array{id: int, date: string, time: string, title: string, note: string, type: string, channel: string,
- *               owner: string, status: string, link: string, flag: string}|null
+ *               channels: string[], owner: string, status: string, link: string, flag: string}|null channel is the
+ *               first of channels (an entry may have several, 14 Nov 2026).
  */
 function planweb_entry( $post ) {
 	$post = get_post( $post );
 	if ( ! $post || PLANWEB_TYPE !== $post->post_type ) {
 		return null;
 	}
-	$term   = function ( $tax ) use ( $post ) {
+	$term     = function ( $tax ) use ( $post ) {
 		$t = get_the_terms( $post, $tax );
 		return is_array( $t ) && $t ? (string) $t[0]->slug : '';
 	};
-	$status = (string) get_post_meta( $post->ID, 'planweb_status', true );
+	$status   = (string) get_post_meta( $post->ID, 'planweb_status', true );
+	$channels = get_the_terms( $post, 'planweb_channel' );
+	$channels = is_array( $channels ) ? array_values( array_map( fn( $t ) => (string) $t->slug, $channels ) ) : array();
+	// The list's order, not the database's, so "X, LinkedIn" reads the same everywhere.
+	$channels = array_merge( array_values( array_intersect( array_keys( PLANWEB_CHANNELS ), $channels ) ), array_values( array_diff( $channels, array_keys( PLANWEB_CHANNELS ) ) ) );
 	return array(
-		'id'      => (int) $post->ID,
-		'date'    => (string) get_post_meta( $post->ID, 'planweb_date', true ),
-		'time'    => (string) get_post_meta( $post->ID, 'planweb_time', true ),
-		'title'   => (string) $post->post_title,
-		'note'    => (string) $post->post_content,
-		'type'    => $term( 'planweb_type' ),
-		'channel' => $term( 'planweb_channel' ),
-		'owner'   => $term( 'planweb_owner' ),
-		'status'  => '' === $status ? 'idea' : $status,
-		'link'    => (string) get_post_meta( $post->ID, 'planweb_link', true ),
-		'flag'    => (string) get_post_meta( $post->ID, 'planweb_flag', true ),
+		'id'       => (int) $post->ID,
+		'date'     => (string) get_post_meta( $post->ID, 'planweb_date', true ),
+		'time'     => (string) get_post_meta( $post->ID, 'planweb_time', true ),
+		'title'    => (string) $post->post_title,
+		'note'     => (string) $post->post_content,
+		'type'     => $term( 'planweb_type' ),
+		'channel'  => $channels[0] ?? '',
+		'channels' => $channels,
+		'owner'    => $term( 'planweb_owner' ),
+		'status'   => '' === $status ? 'idea' : $status,
+		'link'     => (string) get_post_meta( $post->ID, 'planweb_link', true ),
+		'flag'     => (string) get_post_meta( $post->ID, 'planweb_flag', true ),
 	);
 }
 
@@ -402,7 +408,8 @@ function planweb_next() {
 /**
  * Save an entry from the screen's form (the REST API saves through core). Checks first.
  *
- * @param array $f      Fields: title, note, date, time, type, channel, owner, status, link.
+ * @param array $f      Fields: title, note, date, time, type, channels (or channel), owner, status, link. channels is
+ *                      a list of slugs (several allowed); without it, channel is one slug.
  * @param int   $id     Entry to update (0 for new).
  * @param bool  $people Run the personal-data check.
  * @return int|WP_Error Entry ID.
@@ -412,13 +419,14 @@ function planweb_save_entry( array $f, int $id = 0, bool $people = true ) {
 	if ( $err ) {
 		return $err;
 	}
-	foreach ( array(
-		'channel' => PLANWEB_CHANNELS,
-		'owner'   => PLANWEB_OWNERS,
-	) as $k => $list ) {
-		if ( '' !== (string) ( $f[ $k ] ?? '' ) && ! isset( $list[ (string) $f[ $k ] ] ) ) {
-			return new WP_Error( 'planweb_' . $k, __( 'Pick a value from the list.', 'planweb' ) );
+	$channels = planweb_channel_list( array_key_exists( 'channels', $f ) ? $f['channels'] : ( $f['channel'] ?? '' ) );
+	foreach ( $channels as $slug ) {
+		if ( ! isset( PLANWEB_CHANNELS[ $slug ] ) ) {
+			return new WP_Error( 'planweb_channel', __( 'Pick a value from the list.', 'planweb' ) );
 		}
+	}
+	if ( '' !== (string) ( $f['owner'] ?? '' ) && ! isset( PLANWEB_OWNERS[ (string) $f['owner'] ] ) ) {
+		return new WP_Error( 'planweb_owner', __( 'Pick a value from the list.', 'planweb' ) );
 	}
 	$post = array(
 		'post_type'    => PLANWEB_TYPE,
@@ -438,12 +446,12 @@ function planweb_save_entry( array $f, int $id = 0, bool $people = true ) {
 	update_post_meta( $id, 'planweb_status', (string) ( $f['status'] ?? 'idea' ) );
 	update_post_meta( $id, 'planweb_link', esc_url_raw( (string) ( $f['link'] ?? '' ) ) );
 	foreach ( array(
-		'planweb_type'    => 'type',
-		'planweb_channel' => 'channel',
-		'planweb_owner'   => 'owner',
+		'planweb_type'  => 'type',
+		'planweb_owner' => 'owner',
 	) as $tax => $k ) {
 		$slug = (string) ( $f[ $k ] ?? '' );
 		wp_set_object_terms( $id, '' === $slug ? array() : array( $slug ), $tax );
 	}
+	wp_set_object_terms( $id, $channels, 'planweb_channel' );
 	return (int) $id;
 }

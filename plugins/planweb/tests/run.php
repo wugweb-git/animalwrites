@@ -17,6 +17,7 @@ if ( ! defined( 'ABSPATH' ) && 'cli' !== PHP_SAPI ) { // web requests stop here;
 
 define( 'ABSPATH', __DIR__ . '/' );
 require dirname( __DIR__ ) . '/includes/model.php';
+require dirname( __DIR__ ) . '/includes/feed-model.php';
 
 $fails = 0;
 $count = 0;
@@ -369,6 +370,88 @@ $ub_dir = sys_get_temp_dir() . '/planweb-ub-ro-' . getmypid();
 @mkdir( $ub_dir, 0555 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions -- a read-only folder for the test
 $ub_t( 0 === getmyuid() || ! @planweb_backup_protect( $ub_dir ), 'backup: a folder that cannot be written is refused' ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- the warning is the expected failure
 rmdir( $ub_dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- the test's own folder
+
+// Several channels (14 Nov 2026).
+check( array( 'x', 'linkedin' ) === planweb_title_channels( '[X + LinkedIn] Lab rules in plain words (set 4)' ), 'title channels: X + LinkedIn' );
+check( array( 'instagram', 'facebook', 'threads' ) === planweb_title_channels( '[Instagram + Facebook + Threads] Lab rules wait period' ), 'title channels: three, any case' );
+check( array() === planweb_title_channels( '[X] One channel' ), 'title channels: one channel is not a bracket list' );
+check( array() === planweb_title_channels( '[X + Mastodon] Not a channel' ), 'title channels: an unknown part leaves it alone' );
+check( array() === planweb_title_channels( 'Plain title [X + LinkedIn]' ), 'title channels: only at the start' );
+check( array( 'x', 'linkedin' ) === planweb_channel_list( 'x, LinkedIn,,x' ), 'channel list from text' );
+check( array( 'x' ) === planweb_channel_list( array( 'x', '', 'x' ) ), 'channel list from an array' );
+check( array() === planweb_channel_list( array( '' ) ), 'channel list: the form\'s empty box clears' );
+check( isset( PLANWEB_CHANNELS['threads'], PLANWEB_CHANNELS['bluesky'], PLANWEB_STATUSES['done'] ), 'Threads, Bluesky and Done are on the lists' );
+check( '' === planweb_link_problem( 'https://bsky.app/profile/x', 'animalwrites.in' ), 'Bluesky link allowed' );
+
+// The calendar feed.
+check( array( 'social', 'email', 'campaign', 'content' ) === planweb_feed_list( 'marketing', PLANWEB_TYPES, PLANWEB_FEED_TYPE_GROUPS ), 'feed: marketing types' );
+check( array( 'approved', 'due' ) === planweb_feed_list( 'approved,due', PLANWEB_STATUSES, PLANWEB_FEED_STATUS_GROUPS ), 'feed: statuses' );
+check( array() === planweb_feed_list( '', PLANWEB_TYPES, PLANWEB_FEED_TYPE_GROUPS ), 'feed: no filter' );
+check( null === planweb_feed_list( 'social,spam', PLANWEB_TYPES, PLANWEB_FEED_TYPE_GROUPS ), 'feed: unknown value refused' );
+$fe = array(
+	array(
+		'id'       => 1,
+		'date'     => '2026-11-20',
+		'time'     => '09:30',
+		'title'    => 'Post; with, commas',
+		'type'     => 'social',
+		'channels' => array( 'x', 'linkedin' ),
+		'status'   => 'approved',
+		'link'     => 'https://x.com/a',
+		'note'     => 'SECRET NOTE',
+	),
+	array(
+		'id'       => 2,
+		'date'     => '2026-11-21',
+		'time'     => '',
+		'title'    => 'Call 98765 43210 about it',
+		'type'     => 'reminder',
+		'channels' => array(),
+		'status'   => 'done',
+		'link'     => 'https://evil.example/x',
+		'note'     => '',
+	),
+	array(
+		'id'       => 3,
+		'date'     => '2026-11-22',
+		'time'     => '',
+		'title'    => str_repeat( 'Gaushālā ', 20 ),
+		'type'     => 'content',
+		'channels' => array( 'site' ),
+		'status'   => 'idea',
+		'link'     => '',
+		'note'     => '',
+	),
+);
+check( array( 1, 3 ) === array_column( planweb_feed_pick( $fe, PLANWEB_FEED_TYPE_GROUPS['marketing'], array() ), 'id' ), 'feed: marketing only' );
+check( array( 1, 3 ) === array_column( planweb_feed_pick( $fe, array(), PLANWEB_FEED_STATUS_GROUPS['open'] ), 'id' ), 'feed: open statuses only (not done)' );
+$ics       = planweb_ics(
+	$fe,
+	array(
+		'name'     => 'Animal Writes: PlanWeb',
+		'version'  => '0.2.0',
+		'host'     => 'animalwrites.in',
+		'stamp'    => '20261114T120000Z',
+		'types'    => PLANWEB_TYPES,
+		'channels' => PLANWEB_CHANNELS,
+		'statuses' => PLANWEB_STATUSES,
+	)
+);
+$ics_lines = explode( "\r\n", $ics );
+check( '' === end( $ics_lines ) && false === strpos( str_replace( "\r\n", '', $ics ), "\n" ), 'ics: CRLF line ends only' );
+check( 0 === count( array_filter( $ics_lines, fn( $l ) => strlen( $l ) > 75 ) ), 'ics: no line over 75 octets' );
+check( (bool) mb_check_encoding( $ics, 'UTF-8' ), 'ics: folding keeps UTF-8 whole' );
+$ics_un = preg_replace( "/\r\n /", '', $ics );
+check( 3 === substr_count( $ics_un, 'BEGIN:VEVENT' ) && 3 === substr_count( $ics_un, 'END:VEVENT' ) && str_starts_with( $ics_un, "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:" ) && str_ends_with( $ics_un, "END:VCALENDAR\r\n" ), 'ics: calendar and events open and close' );
+check( str_contains( $ics_un, "DTSTART:20261120T040000Z\r\nDTEND:20261120T043000Z" ), 'ics: 09:30 IST is 04:00 UTC' );
+check( str_contains( $ics_un, "DTSTART;VALUE=DATE:20261121\r\nDTEND;VALUE=DATE:20261122" ), 'ics: all-day entry' );
+check( str_contains( $ics_un, 'SUMMARY:Post\; with\, commas' ), 'ics: text escaped' );
+check( str_contains( $ics_un, 'DESCRIPTION:Type: Social\nChannels: X\, LinkedIn\nStatus: Approved\nLink: https://x.com/a' ), 'ics: type, channels, status, link' );
+check( false === strpos( $ics_un, 'SECRET NOTE' ), 'ics: never the note' );
+check( false === strpos( $ics_un, '98765' ) && str_contains( $ics_un, 'SUMMARY:Entry 2 (title not shown' ), 'ics: a title with a phone number is not shown' );
+check( false === strpos( $ics_un, 'evil.example' ), 'ics: a link to another site is left out' );
+check( str_contains( $ics_un, 'UID:planweb-1@animalwrites.in' ) && str_contains( $ics_un, 'DTSTAMP:20261114T120000Z' ), 'ics: UID and DTSTAMP' );
+check( str_contains( $ics_un, 'Status: Done' ), 'ics: Done status' );
 
 echo $fails ? "$fails of $count checks failed.\n" : "All $count checks passed.\n";
 exit( $fails ? 1 : 0 );
