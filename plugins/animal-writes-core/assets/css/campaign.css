@@ -211,6 +211,32 @@
 .aw-camp--sc-stray-dogs .aw-camp-note:not(:has(> .kit-ico)) { display: block; }
 /* Links on the plum card read in white */
 .aw-camp--sc-stray-dogs .aw-camp-grid > :first-child a:not(.wp-element-button) { color: var(--camp-on-mark); }
+/* What you can do before 17 Nov (#act): five-tile bento in the campaign's two colours, plum and the site yellow
+   (owner, 13 Nov 2026: "not balanced", "use the 2nd colour", "use images or texture"). From 768 two equal columns:
+   the picture lead runs two rows on the left beside 2 and 3, then 4 and 5 side by side; phones one column in markup order.
+   Surfaces: 1 the dog and court picture over plum, 2 and 4 yellow with a plum dot texture (diagonal), 3 white with ruled
+   lines (a complaint page), 5 deep plum over the court dome (the picture at 2.6 times the tile width on phones, twice from 768, so the dog and the yellow corner stay out). Plum on yellow 10:1; white text sits on 0.7 or darker plum. */
+.aw-camp.aw-camp--sc-stray-dogs #act .aw-camp-grid { container-type: inline-size; }
+@media (min-width: 768px) {
+	.aw-camp.aw-camp--sc-stray-dogs #act .aw-camp-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-areas: "c1 c2" "c1 c3" "c4 c5"; }
+}
+.aw-camp.aw-camp--sc-stray-dogs #act .aw-camp-grid > .aw-camp-card:is(:nth-child(1), :nth-child(5)) { --kit-color-focus: var(--camp-on-mark); color: var(--camp-on-mark); box-shadow: var(--kit-elevation-2); }
+.aw-camp.aw-camp--sc-stray-dogs #act .aw-camp-grid > .aw-camp-card:is(:nth-child(1), :nth-child(5)) :is(h3, p, a:not(.wp-element-button), .aw-camp-card-ico) { color: var(--camp-on-mark); }
+.aw-camp.aw-camp--sc-stray-dogs #act .aw-camp-grid > .aw-camp-card:is(:nth-child(1), :nth-child(5)) .aw-camp-card-ico { background: rgb(255 255 255 / 0.15); }
+.aw-camp.aw-camp--sc-stray-dogs #act .aw-camp-grid > .aw-camp-card:is(:nth-child(2), :nth-child(4)) { --kit-color-focus: var(--camp-primary); color: var(--camp-primary); box-shadow: none; background: radial-gradient(rgb(58 23 48 / 0.12) 1px, transparent 1.5px) 0 0 / var(--kit-space-4) var(--kit-space-4), var(--kit-color-accent); }
+.aw-camp.aw-camp--sc-stray-dogs #act .aw-camp-grid > .aw-camp-card:is(:nth-child(2), :nth-child(4)) :is(h3, p, a:not(.wp-element-button), .aw-camp-card-ico) { color: var(--camp-primary); }
+.aw-camp.aw-camp--sc-stray-dogs #act .aw-camp-grid > .aw-camp-card:is(:nth-child(2), :nth-child(4)) .aw-camp-card-ico { background: rgb(58 23 48 / 0.1); }
+.aw-camp.aw-camp--sc-stray-dogs #act .aw-camp-grid > .aw-camp-card:nth-child(3) { background: repeating-linear-gradient(180deg, transparent 0 calc(var(--kit-space-6) - 1px), rgb(58 23 48 / 0.08) calc(var(--kit-space-6) - 1px) var(--kit-space-6)), var(--kit-color-surface-soft); }
+.aw-camp.aw-camp--sc-stray-dogs #act .aw-camp-grid > .aw-camp-card:nth-child(5) { background: linear-gradient(90deg, rgb(32 13 26 / 0.94) 0%, rgb(32 13 26 / 0.88) 55%, rgb(32 13 26 / 0.7) 100%), url("/wp-content/plugins/animal-writes-core/theme/assets/img/campaigns/supreme-court-stray-dog-share.jpg") 42% 30% / 260% auto no-repeat, rgb(32 13 26); }
+@media (min-width: 768px) { .aw-camp.aw-camp--sc-stray-dogs #act .aw-camp-grid > .aw-camp-card:nth-child(5) { background-position: 0 0, 45% 40%; background-size: auto, 200% auto; } }
+/* Lead: the picture (1200x630, so 52.5% of the tile's width tall) on top under a plum wash; the text starts where the plum
+   turns solid: 42cqw on phones (the tile is the grid's width), 21cqw from 768 (half the grid). cqw, not %, as vertical
+   padding in percent is not allowed (docs/design-system.md, Section heights).
+   Solid plum from 80% of the picture down, so its yellow corner stays hidden. */
+.aw-camp.aw-camp--sc-stray-dogs #act .aw-camp-grid > .aw-camp-card:nth-child(1) { padding-top: calc(42cqw + var(--kit-space-3)); background: linear-gradient(180deg, rgb(58 23 48 / 0.15) 0, rgb(58 23 48 / 0.35) 24cqw, var(--camp-mark) 42cqw), url("/wp-content/plugins/animal-writes-core/theme/assets/img/campaigns/supreme-court-stray-dog-share.jpg") 50% 0 / 100% auto no-repeat, var(--camp-mark); }
+@media (min-width: 768px) {
+	.aw-camp.aw-camp--sc-stray-dogs #act .aw-camp-grid > .aw-camp-card:nth-child(1) { padding-top: calc(21cqw + var(--kit-space-3)); background: linear-gradient(180deg, rgb(58 23 48 / 0.15) 0, rgb(58 23 48 / 0.35) 12cqw, var(--camp-mark) 21cqw), url("/wp-content/plugins/animal-writes-core/theme/assets/img/campaigns/supreme-court-stray-dog-share.jpg") 50% 0 / 100% auto no-repeat, var(--camp-mark); }
+}
 /* The share bar under the share message */
 .aw-camp--sc-stray-dogs .aw-camp-share-kit { margin: var(--kit-space-4) 0; }
 /* Share: from 768 the note sits as close to the share block as the block to the text above */
