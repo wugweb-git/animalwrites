@@ -20,7 +20,7 @@ To check: load a list page in an iframe at 320, 375, 480, 600, 768, 900, 1024, 1
 
 **Card type in steps (owner, 13 Nov 2026: "h3 one size per breakpoint", "metarow - one font size per breakpoint"):** every card's H3 title is `--kit-type-card-title` (20px, 22px from 1200; owner, 13 Nov 2026: "20-22px desktop, 18-20px mobile") with the H3 line height (`--kit-h3-leading`); everything in a card's meta row (date, read time, chips) is `--kit-meta-size` (12px, 13px from 768). Neither is fluid, so they change only at a breakpoint (aw.css, Card type in steps).
 
-**Picture ratios (owner, 13 Nov 2026):** four display ratios, set by tokens and changed in Kits → Theme Options → Cards (Global Styles `settings.custom.kits.card.ratio.*`); the source image is never cropped, only shown with `object-fit: cover`.
+**Picture ratios (owner, 13 Nov 2026):** four display ratios, set by tokens and changed in Kits → Theme Options → Cards (Global Styles `settings.custom.kits.card.ratio.*`); the source image is never cropped, only shown with `object-fit: cover`. The Site Editor's aspect-ratio menus (Image, Featured Image) offer the same set, Standard 4:3, Portrait 3:4, Featured 3:2, Square 1:1 and Wide 16:9 (Kits theme.json `settings.dimensions.aspectRatios`, WordPress's own list off). Card templates and the Kits card markup (`kits_card_markup()`, archive, home, index, search and tag templates, the lead-list pattern, the item page's More cards) print no ratio of their own, so the token (and Theme Options) sets it; item lead pictures keep 16:9.
 
 | Ratio | Token | Used for |
 |---|---|---|

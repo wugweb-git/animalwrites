@@ -1092,7 +1092,7 @@ add_action(
  * @return string Block markup.
  */
 function kits_card_markup( $state = 'block-md' ) {
-	$media   = 'stacked-sm' === $state ? '' : '<!-- wp:post-featured-image {"isLink":true,"aspectRatio":"4/3","className":"kit-card-media"} /-->
+	$media   = 'stacked-sm' === $state ? '' : '<!-- wp:post-featured-image {"isLink":true,"className":"kit-card-media"} /-->
 
 ';
 	$summary = in_array( $state, array( 'block-lg', 'block-md', 'stacked-lg' ), true ) ? '

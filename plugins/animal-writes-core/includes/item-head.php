@@ -487,7 +487,7 @@ add_action( 'save_post', fn( $id ) => delete_transient( 'aw_more_' . (int) $id )
 function aw_item_card_media( $pid ) {
 	aw_use_component_style( 'aw-lists' ); // kit-story-media
 	$b = new WP_Block(
-		array( 'blockName' => 'core/post-featured-image', 'attrs' => array( 'aspectRatio' => '4/3', 'scale' => 'cover', 'sizeSlug' => 'medium_large', 'className' => 'kit-story-media kit-minicard-media aw-more-media' . ( 'aw_opportunity' === get_post_type( $pid ) ? ' kit-minicard-media--logo aw-more-media--logo' : '' ) ), 'innerBlocks' => array(), 'innerHTML' => '', 'innerContent' => array() ),
+		array( 'blockName' => 'core/post-featured-image', 'attrs' => array( 'scale' => 'cover', 'sizeSlug' => 'medium_large', 'className' => 'kit-story-media kit-minicard-media aw-more-media' . ( 'aw_opportunity' === get_post_type( $pid ) ? ' kit-minicard-media--logo aw-more-media--logo' : '' ) ), 'innerBlocks' => array(), 'innerHTML' => '', 'innerContent' => array() ),
 		array( 'postId' => (int) $pid, 'postType' => get_post_type( $pid ) )
 	);
 	return (string) $b->render();
