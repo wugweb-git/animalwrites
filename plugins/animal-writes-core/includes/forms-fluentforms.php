@@ -545,7 +545,7 @@ function aw_ff_keep_upload( $token ) {
 		return '';
 	}
 	$final = wp_generate_password( 20, false ) . '.png';
-	return rename( aw_private_dir() . '/' . $file, aw_private_dir() . '/' . $final ) ? $final : '';
+	return rename( aw_private_dir() . '/' . $file, aw_private_dir() . '/' . $final ) ? $final : ''; // phpcs:ignore WordPress.WP.AlternativeFunctions.rename_rename -- a rename inside our own private folder; WP_Filesystem::move() may need FTP credentials here.
 }
 
 /** A submission's reference: the form's prefix and Fluent Forms' serial number for the entry (AW-12, AW-C-3 …). */

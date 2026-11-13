@@ -126,7 +126,7 @@ add_action(
 	'aw_raw_prune',
 	function () {
 		global $wpdb;
-		$wpdb->query( $wpdb->prepare( 'DELETE FROM ' . aw_raw_table() . ' WHERE received_at < %s', gmdate( 'Y-m-d H:i:s', time() - AW_RAW_DAYS * DAY_IN_SECONDS ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$wpdb->query( $wpdb->prepare( 'DELETE FROM ' . aw_raw_table() . ' WHERE received_at < %s', gmdate( 'Y-m-d H:i:s', time() - AW_RAW_DAYS * DAY_IN_SECONDS ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared -- the table name is our own constant (aw_raw_table), the value is prepared.
 	}
 );
 

@@ -75,13 +75,13 @@ function aw_run_backup() {
 	$tar = $dir . '/auto-code-' . $day . '.tar';
 	try {
 		if ( is_dir( $src ) && class_exists( 'PharData' ) ) {
-			@unlink( $tar ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
-			@unlink( $tar . '.gz' ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+			wp_delete_file( $tar );
+			wp_delete_file( $tar . '.gz' );
 			$p = new PharData( $tar );
 			$p->buildFromDirectory( $src, '#^(?!.*/\.git/).*$#' );
 			$p->compress( Phar::GZ );
 			unset( $p );
-			@unlink( $tar ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+			wp_delete_file( $tar );
 			$report['code'] = array( basename( $tar ) . '.gz', (int) filesize( $tar . '.gz' ) );
 		}
 	} catch ( Exception $e ) {
@@ -92,7 +92,7 @@ function aw_run_backup() {
 	$removed = array();
 	foreach ( (array) glob( $dir . '/auto-*' ) as $f ) {
 		if ( filemtime( $f ) < time() - AW_BACKUP_KEEP_DAYS * DAY_IN_SECONDS ) {
-			unlink( $f );
+			wp_delete_file( $f );
 			$removed[] = basename( $f );
 		}
 	}

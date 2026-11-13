@@ -573,6 +573,7 @@ add_shortcode(
 		if ( '' !== $a['after_label'] && $close && time() >= $close ) { // after the close day: the owner's wording, e.g. "Closed 5 Nov · decision awaited"
 			$note = $a['after_label'];
 		} else {
+			/* translators: %d: the number of days left before the campaign closes. */
 			$note = $d ? sprintf( _n( '%d day to go', '%d days to go', $d, 'animal-writes-core' ), $d ) : 'Last day today';
 		}
 		$days = '0' === (string) $a['days'] ? '' : '<span class="aw-sticky-cta-days">' . esc_html( $note ) . '</span>';
