@@ -3,15 +3,18 @@
  * Daily server-error count. A 500 or 503 page never loads the analytics tag, so analytics cannot see it; the server's
  * own logs can.
  *
- * - Once a day (event aw_error_count_daily) the site counts, for the last 24 hours, the "PHP Fatal error" /
- *   "PHP Parse error" lines in the PHP error log. (The host gives PHP no access log, so 5xx responses are not counted.)
- * - The result (time, counts, files read, up to 5 samples each) is kept in the option aw_error_count (not autoloaded)
- *   and shown in the "Scheduled tasks" dashboard box. A log that cannot be found or read shows "Not found", never 0.
- * - When the count is above zero, the admin email gets one plain-text message for that run.
+ * - Once a day (event aw_error_count_daily) the site counts, for the last 24 hours, the PHP error log lines by kind:
+ *   fatal ("PHP Fatal error" / "PHP Parse error"), "PHP Warning", "PHP Notice" and "PHP Deprecated", each counted
+ *   apart. (The host gives PHP no access log, so 5xx responses are not counted.)
+ * - The result (time, counts per kind, files read, up to 5 samples per kind) is kept in the option aw_error_count (not
+ *   autoloaded) and shown in the "Scheduled tasks" dashboard box. A log that cannot be found or read shows
+ *   "Not found", never 0.
+ * - When the fatal count is above zero, the admin email gets one plain-text message for that run (with the other
+ *   kinds' counts). Warnings, notices and deprecations alone send nothing.
  * - Log paths are found at run time. Override them with the constant AW_PHP_ERROR_LOG (a file or a folder) in
  *   wp-config.php, or the filter aw_error_count_php_paths.
- * - `wp aw error-count [--paths]` prints the counts and the files read (with --paths, every path tried), without
- *   saving or emailing.
+ * - `wp aw error-count [--paths]` prints one line per kind, the files read and the most frequent messages (with
+ *   --paths, every path tried), without saving or emailing.
  * Large files are read from the end (last 32 MB by default, filter aw_error_count_tail_bytes), line by line; gzipped
  * logs are streamed.
  *
@@ -23,7 +26,46 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 const AW_ERROR_COUNT_SAMPLES = 5;
-const AW_ERROR_COUNT_KEYS    = 500; // distinct samples tracked while counting (memory bound)
+const AW_ERROR_COUNT_KEYS    = 500; // distinct samples tracked while counting, per kind (memory bound)
+
+/**
+ * The kinds counted, key => label. "fatal" covers fatal and parse errors.
+ *
+ * @return array<string,string>
+ */
+function aw_error_count_kinds() {
+	return array(
+		'fatal'      => 'PHP fatal errors',
+		'warning'    => 'PHP warnings',
+		'notice'     => 'PHP notices',
+		'deprecated' => 'PHP deprecated',
+	);
+}
+
+/**
+ * Read one log line: its time, kind and message, or null for a line that is not a dated PHP error line (a
+ * continuation line, a stack-trace line or a plain error_log() message from a plugin).
+ *
+ * @param string $line Line from the log.
+ * @return array{t:int,kind:string,msg:string}|null
+ */
+function aw_error_count_parse_line( $line ) {
+	if ( '[' !== substr( (string) $line, 0, 1 ) || ! preg_match( '/^\[([^\]]+)\] (?:PHP (Fatal error|Parse error|Warning|Notice|Deprecated):)?\s*(.*)$/', (string) $line, $m ) ) {
+		return null;
+	}
+	$map = array(
+		'Fatal error' => 'fatal',
+		'Parse error' => 'fatal',
+		'Warning'     => 'warning',
+		'Notice'      => 'notice',
+		'Deprecated'  => 'deprecated',
+	);
+	return array(
+		't'    => (int) strtotime( $m[1] ),
+		'kind' => $map[ $m[2] ] ?? '',
+		'msg'  => ( 'Parse error' === $m[2] ? 'Parse error: ' : '' ) . $m[3],
+	);
+}
 
 /** The site root's parents: the domain folder (…/domains/example.com) and the account's home folder. */
 function aw_error_count_dirs() {
@@ -216,20 +258,23 @@ function aw_error_count_clean_message( $msg ) {
 }
 
 /**
- * Count "PHP Fatal error" and "PHP Parse error" lines since $since in the PHP error logs.
+ * Count PHP error lines since $since in the PHP error logs, by kind.
  *
  * @param int $since Unix time.
- * @return array Result: status ok|not_found|unreadable, count, files (path => lines), partial, samples, tried.
+ * @return array Result: status ok|not_found|unreadable, count (fatal), samples (fatal), kinds (kind => count and
+ *               samples), files (path => lines), partial, tried.
  */
 function aw_error_count_php( $since ) {
-	$res = aw_error_count_resolve( aw_error_count_php_candidates() );
-	$out = array( 'status' => 'not_found', 'count' => 0, 'files' => array(), 'partial' => false, 'samples' => array(), 'tried' => $res['tried'] );
+	$res   = aw_error_count_resolve( aw_error_count_php_candidates() );
+	$kinds = array();
+	foreach ( array_keys( aw_error_count_kinds() ) as $k ) {
+		$kinds[ $k ] = array( 'count' => 0, 'samples' => array() );
+	}
+	$out = array( 'status' => 'not_found', 'count' => 0, 'files' => array(), 'partial' => false, 'samples' => array(), 'kinds' => $kinds, 'tried' => $res['tried'] );
 	if ( ! $res['files'] ) {
 		$out['status'] = $res['unreadable'] ? 'unreadable' : 'not_found';
 		return $out;
 	}
-	$count   = 0;
-	$samples = array();
 	foreach ( $res['files'] as $f ) {
 		if ( (int) filemtime( $f ) < $since ) {
 			$out['files'][ $f ] = 0; // nothing logged in the window
@@ -238,19 +283,19 @@ function aw_error_count_php( $since ) {
 		$first              = null;
 		$read               = aw_error_count_each_line(
 			$f,
-			function ( $line ) use ( $since, &$count, &$samples, &$first ) {
-				if ( '[' !== substr( $line, 0, 1 ) || ! preg_match( '/^\[([^\]]+)\] (?:PHP (Fatal|Parse) error:)?\s*(.*)$/', $line, $m ) ) {
+			function ( $line ) use ( $since, &$kinds, &$first ) {
+				$p = aw_error_count_parse_line( $line );
+				if ( null === $p ) {
 					return;
 				}
-				$t = (int) strtotime( $m[1] );
 				if ( null === $first ) {
-					$first = $t;
+					$first = $p['t'];
 				}
-				if ( '' === $m[2] || $t < $since ) {
+				if ( '' === $p['kind'] || $p['t'] < $since ) {
 					return;
 				}
-				++$count;
-				aw_error_count_tally( $samples, aw_error_count_clean_message( ( 'Parse' === $m[2] ? 'Parse error: ' : '' ) . $m[3] ) );
+				++$kinds[ $p['kind'] ]['count'];
+				aw_error_count_tally( $kinds[ $p['kind'] ]['samples'], aw_error_count_clean_message( $p['msg'] ) );
 			}
 		);
 		$out['files'][ $f ] = $read['lines'];
@@ -258,9 +303,13 @@ function aw_error_count_php( $since ) {
 			$out['partial'] = true;
 		}
 	}
+	foreach ( $kinds as $k => $v ) {
+		$kinds[ $k ]['samples'] = aw_error_count_top( $v['samples'] );
+	}
 	$out['status']  = 'ok';
-	$out['count']   = $count;
-	$out['samples'] = aw_error_count_top( $samples );
+	$out['kinds']   = $kinds;
+	$out['count']   = $kinds['fatal']['count'];
+	$out['samples'] = $kinds['fatal']['samples'];
 	return $out;
 }
 
@@ -282,13 +331,14 @@ function aw_error_count_collect() {
 /**
  * "3", "at least 3", or "Not found" / "Not readable".
  *
- * @param array $r One log's result.
+ * @param array  $r    One log's result.
+ * @param string $kind fatal, warning, notice or deprecated.
  * @return string
  */
-function aw_error_count_label( array $r ) {
+function aw_error_count_label( array $r, $kind = 'fatal' ) {
 	switch ( $r['status'] ?? '' ) {
 		case 'ok':
-			return ( empty( $r['partial'] ) ? '' : 'at least ' ) . (int) $r['count'];
+			return ( empty( $r['partial'] ) ? '' : 'at least ' ) . aw_error_count_kind( $r, $kind )['count'];
 		case 'unreadable':
 			return 'Not readable';
 		default:
@@ -297,7 +347,25 @@ function aw_error_count_label( array $r ) {
 }
 
 /**
- * Errors found (when the log could be read).
+ * One kind's count and samples. A result saved before kinds were counted has only the fatal count.
+ *
+ * @param array  $r    One log's result.
+ * @param string $kind fatal, warning, notice or deprecated.
+ * @return array{count:int,samples:array}
+ */
+function aw_error_count_kind( array $r, $kind ) {
+	if ( isset( $r['kinds'][ $kind ] ) && is_array( $r['kinds'][ $kind ] ) ) {
+		$k = $r['kinds'][ $kind ];
+		return array( 'count' => (int) ( $k['count'] ?? 0 ), 'samples' => (array) ( $k['samples'] ?? array() ) );
+	}
+	if ( 'fatal' === $kind ) {
+		return array( 'count' => (int) ( $r['count'] ?? 0 ), 'samples' => (array) ( $r['samples'] ?? array() ) );
+	}
+	return array( 'count' => 0, 'samples' => array() );
+}
+
+/**
+ * Fatal errors found (when the log could be read).
  *
  * @param array $run Result of aw_error_count_collect().
  * @return int
@@ -318,8 +386,10 @@ function aw_error_count_daily() {
 	$lines = array(
 		sprintf( 'Server errors on %s in the 24 hours to %s:', wp_parse_url( home_url(), PHP_URL_HOST ), wp_date( 'j M Y, g:i a', $run['at'] ) ),
 		'',
-		'- PHP fatal errors: ' . aw_error_count_label( $run['php'] ),
 	);
+	foreach ( aw_error_count_kinds() as $k => $name ) {
+		$lines[] = '- ' . $name . ': ' . aw_error_count_label( $run['php'], $k );
+	}
 	if ( $run['php']['samples'] ) {
 		$lines[] = '';
 		$lines[] = 'Most frequent PHP fatal errors:';
@@ -361,19 +431,20 @@ add_action(
 					return;
 				}
 				echo '<p><strong>Server errors, last 24 hours</strong> (counted ' . esc_html( wp_date( 'j M Y, g:i a', (int) $run['at'] ) ) . ')</p>';
-				$rows = array();
-				foreach ( array( 'php' => 'PHP fatal errors' ) as $k => $name ) {
-					$r     = (array) ( $run[ $k ] ?? array() );
-					$label = aw_error_count_label( $r );
-					$ok    = 'ok' === ( $r['status'] ?? '' );
-					$files = array_map( 'wp_basename', array_keys( (array) ( $r['files'] ?? array() ) ) );
+				$rows  = array();
+				$r     = (array) ( $run['php'] ?? array() );
+				$ok    = 'ok' === ( $r['status'] ?? '' );
+				$files = array_map( 'wp_basename', array_keys( (array) ( $r['files'] ?? array() ) ) );
+				foreach ( aw_error_count_kinds() as $k => $name ) {
+					$kind  = aw_error_count_kind( $r, $k );
+					$label = aw_error_count_label( $r, $k );
 					$top   = array();
-					foreach ( (array) ( $r['samples'] ?? array() ) as $s => $n ) {
+					foreach ( $kind['samples'] as $s => $n ) {
 						$top[] = esc_html( $s ) . ' (' . (int) $n . ')';
 					}
 					$rows[] = array(
 						'check' => esc_html( $name ),
-						'count' => $ok && ! $r['count'] ? esc_html( $label ) : '<strong>' . esc_html( $label ) . '</strong>',
+						'count' => $ok && ! $kind['count'] ? esc_html( $label ) : '<strong>' . esc_html( $label ) . '</strong>',
 						'from'  => $files ? esc_html( implode( ', ', $files ) ) : '—',
 						'top'   => $top ? implode( '<br>', $top ) : '—',
 					);
@@ -390,26 +461,27 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	WP_CLI::add_command(
 		'aw error-count',
 		/**
-		 * Count PHP fatal errors in the last 24 hours and show the files read. Saves and emails nothing.
+		 * Count PHP fatal errors, warnings, notices and deprecations in the last 24 hours and show the files read.
+		 * Saves and emails nothing.
 		 *
 		 * [--paths]
 		 * : Also list every path tried and what was found there.
 		 */
 		function ( $args, $assoc ) {
-			$run = aw_error_count_collect();
-			foreach ( array( 'php' => 'PHP fatal errors' ) as $k => $name ) {
-				$r = $run[ $k ];
-				WP_CLI::log( $name . ': ' . aw_error_count_label( $r ) );
-				foreach ( $r['files'] as $f => $n ) {
-					WP_CLI::log( '  read ' . $f . ' (' . (int) $n . ' lines)' );
-				}
-				foreach ( $r['samples'] as $s => $n ) {
+			$r = aw_error_count_collect()['php'];
+			foreach ( aw_error_count_kinds() as $k => $name ) {
+				$kind = aw_error_count_kind( $r, $k );
+				WP_CLI::log( $name . ': ' . aw_error_count_label( $r, $k ) );
+				foreach ( $kind['samples'] as $s => $n ) {
 					WP_CLI::log( '  ' . $s . ' (' . (int) $n . ')' );
 				}
-				if ( ! empty( $assoc['paths'] ) ) {
-					foreach ( $r['tried'] as $p => $st ) {
-						WP_CLI::log( '  tried ' . $p . ': ' . $st );
-					}
+			}
+			foreach ( $r['files'] as $f => $n ) {
+				WP_CLI::log( 'read ' . $f . ' (' . (int) $n . ' lines)' );
+			}
+			if ( ! empty( $assoc['paths'] ) ) {
+				foreach ( $r['tried'] as $p => $st ) {
+					WP_CLI::log( 'tried ' . $p . ': ' . $st );
 				}
 			}
 		}
