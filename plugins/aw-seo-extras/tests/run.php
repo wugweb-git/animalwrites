@@ -10,6 +10,8 @@
  * 3. A changed field is stored, and Restore defaults takes it out again without touching other groups.
  * 4. Modules: an unchanged Save writes nothing; switching one off stores only { on: false }.
  * 5. An 'on' => true from an older save is kept: an unchanged modules Save writes nothing.
+ * 6. The register_setting() sanitize callback returns stored values unchanged.
+ * 7. Reset this section: Modules and a field group go back to their registered defaults.
  *
  * Usage: php plugins/aw-seo-extras/tests/run.php
  *
@@ -206,6 +208,39 @@ $GLOBALS['rw_options'] = array( AW_SEO_SETTINGS => array( 'faq' => array( 'on' =
 $GLOBALS['rw_writes']  = 0;
 aw_seo_settings_save( 'modules', array(), false, rw_on() );
 rw_check( 0 === $GLOBALS['rw_writes'], "older 'on' => true: no write after an unchanged modules Save" );
+
+// 6. The registered sanitize callback (register_setting(), runs on every update_option()) returns a stored value
+//    unchanged: every field at its default, module switches, InsightWeb's numbers and a key no field knows.
+$full = array(
+	'search-insights' => array(
+		'AW_SI_HIGH_TRENDS' => 25,
+		'on'                => true,
+	),
+	'llms'            => array( 'on' => false ),
+	'faq'             => array( 'AW_FAQ_OFF_TYPES' => array( 'aw_listing' ) ),
+);
+foreach ( aw_seo_modules() as $key => $mod ) {
+	foreach ( $mod['fields'] as $const => $f ) {
+		$full[ $key ][ $const ] = $f['default'];
+	}
+}
+rw_check( serialize( aw_seo_settings_sanitize( $full ) ) === serialize( $full ), 'sanitize callback: a stored value comes back byte for byte' );
+rw_check( serialize( aw_seo_settings_sanitize( $stored ) ) === serialize( $stored ), 'sanitize callback: the test option comes back byte for byte' );
+rw_check( array( 'titles' => array( 'AW_SEO_ITEM_TYPES' => array( 'a', 'b' ) ) ) === aw_seo_settings_sanitize( array( 'titles' => array( 'AW_SEO_ITEM_TYPES' => array( '<b>a</b>', 'b' ) ) ) ), 'sanitize callback: list texts cleaned' );
+
+// 7. Reset this section on Modules: every module on again, "Delete this plugin's data" off; other groups kept.
+$GLOBALS['rw_options'] = array(
+	AW_SEO_SETTINGS    => array(
+		'llms'    => array( 'on' => false ),
+		'general' => array( 'AW_SEO_DESC_MAX' => 150 ),
+	),
+	AW_SEO_DELETE_DATA => 1,
+);
+aw_seo_settings_reset( 'modules' );
+rw_check( array( 'general' => array( 'AW_SEO_DESC_MAX' => 150 ) ) === get_option( AW_SEO_SETTINGS ), 'Reset Modules: switches back on, fields kept' );
+rw_check( 0 === get_option( AW_SEO_DELETE_DATA ), 'Reset Modules: delete data back to off' );
+aw_seo_settings_reset( 'titles' );
+rw_check( array() === get_option( AW_SEO_SETTINGS ), 'Reset a field group: its fields back to defaults' );
 
 echo $fails ? "{$fails} of {$count} checks failed\n" : "all {$count} RankWeb settings checks passed\n";
 exit( $fails ? 1 : 0 );
