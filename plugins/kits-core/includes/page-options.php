@@ -200,7 +200,7 @@ add_action(
 						'default'           => '',
 						'show_in_rest'      => true,
 						'sanitize_callback' => fn( $value ) => kits_page_option_clean( $key, $value ), // Allowed values only; anything else is Inherit.
-						'revisions_enabled' => true, // Preview and revisions carry the options too.
+						'revisions_enabled' => post_type_supports( $type, 'revisions' ), // Preview and revisions carry the options too; a type without revisions would make core drop the key.
 						'auth_callback'     => fn( $allowed, $meta_key, $post_id ) => current_user_can( 'edit_post', $post_id ),
 					)
 				);
@@ -210,7 +210,7 @@ add_action(
 			'kits_options', // Kits → Theme Options and Core Settings save both options through one group.
 			'kits_page_defaults',
 			array(
-				'type'              => 'array',
+				'type'              => 'object', // Matches the REST schema below; 'array' would need list items.
 				'default'           => array(),
 				'sanitize_callback' => 'kits_page_defaults_clean',
 				'show_in_rest'      => array( // Kits → Theme Options (new screen) saves through /wp/v2/settings.

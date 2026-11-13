@@ -100,26 +100,20 @@ add_action(
 			),
 		);
 		foreach ( $meta as $key => $schema ) {
-			$default = $schema['default'] ?? '';
-			unset( $schema['default'] );
-			register_post_meta(
-				PLANWEB_TYPE,
-				$key,
-				array(
-					'type'              => 'string',
-					'single'            => true,
-					'default'           => $default,
-					'revisions_enabled' => true,
-					'sanitize_callback' => 'planweb_link' === $key ? 'esc_url_raw' : 'sanitize_text_field',
-					'auth_callback'     => fn( $allowed, $meta_key, $post_id ) => current_user_can( 'edit_post', $post_id ),
-					'show_in_rest'      => array(
-						'schema' => array(
-							'type'    => 'string',
-							'default' => $default,
-						) + $schema,
-					),
-				)
+			// A default only where one is declared: core refuses a key whose default fails its own pattern (an empty
+			// planweb_date). A single string key with no default still reads as ''.
+			$args = array(
+				'type'              => 'string',
+				'single'            => true,
+				'revisions_enabled' => true,
+				'sanitize_callback' => 'planweb_link' === $key ? 'esc_url_raw' : 'sanitize_text_field',
+				'auth_callback'     => fn( $allowed, $meta_key, $post_id ) => current_user_can( 'edit_post', $post_id ),
+				'show_in_rest'      => array( 'schema' => array( 'type' => 'string' ) + $schema ),
 			);
+			if ( array_key_exists( 'default', $schema ) ) {
+				$args['default'] = $schema['default'];
+			}
+			register_post_meta( PLANWEB_TYPE, $key, $args );
 		}
 		// Set by the scheduler (phase 3) and the import only: readable over REST, never writable there.
 		foreach ( array( 'planweb_flag', 'planweb_source', 'planweb_source_key' ) as $key ) {
