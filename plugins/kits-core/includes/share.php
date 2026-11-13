@@ -90,12 +90,13 @@ function kits_share_types() {
  * @param array         $args     One share kit per page (owner, 13 Nov 2026): 'text' (the share line; default the title),
  *                                'hashtags' (words without #, in order), 'image' (address of the page's own picture for the
  *                                phone's share sheet; never a third-party picture; most pages leave it empty and the
- *                                link preview carries the picture).
+ *                                link preview carries the picture), 'follow' (our own accounts as [label, url, icon]
+ *                                rows: a "Follow us" row under the bar; pages only, never post types (owner, 13 Nov 2026)).
  *                                Filter kits_share_args fills them in.
  * @return string
  */
 function kits_share_html( $url, $title, $only = null, $campaign = '', $args = array() ) {
-	$args  = (array) apply_filters( 'kits_share_args', array_merge( array( 'text' => '', 'hashtags' => array(), 'image' => '' ), (array) $args ), $url, $campaign );
+	$args  = (array) apply_filters( 'kits_share_args', array_merge( array( 'text' => '', 'hashtags' => array(), 'image' => '', 'follow' => array() ), (array) $args ), $url, $campaign );
 	$text  = '' !== (string) $args['text'] ? (string) $args['text'] : $title;
 	$tags  = array_values( array_unique( array_filter( array_map( fn( $t ) => preg_replace( '/[^A-Za-z0-9_]/', '', (string) $t ), (array) $args['hashtags'] ), 'strlen' ) ) );
 	$hash  = $tags ? ' ' . implode( ' ', array_map( fn( $t ) => '#' . $t, $tags ) ) : ''; // "#AnimalWrites #Tag" after the line
@@ -123,7 +124,30 @@ function kits_share_html( $url, $title, $only = null, $campaign = '', $args = ar
 	}
 	$copy = __( 'Copy link', 'kits-core' );
 	$out .= '<button type="button" class="kit-share-btn kit-share-copy" data-url="' . esc_attr( $tag( 'copy' ) ) . '" data-done="' . esc_attr__( 'Link copied', 'kits-core' ) . '" aria-label="' . esc_attr( $copy ) . '" title="' . esc_attr( $copy ) . '"><span class="kit-ico kit-ico--link" aria-hidden="true"></span><span class="kit-share-name" aria-hidden="true">' . esc_html( $copy ) . '</span></button>';
-	return $out . '<span class="screen-reader-text" role="status" aria-live="polite"></span></div>';
+	return $out . '<span class="screen-reader-text" role="status" aria-live="polite"></span></div>' . kits_follow_html( (array) $args['follow'] );
+}
+
+/**
+ * "Follow us": the site's own social accounts as the share bar's buttons, one row under it (owner, 13 Nov 2026). Only
+ * where a page asks for it (kits_share_html 'follow'); the share bar at the end of posts never carries it.
+ *
+ * @param array $rows [label, url, icon] rows.
+ * @return string
+ */
+function kits_follow_html( $rows ) {
+	$rows = array_filter( $rows, fn( $r ) => is_array( $r ) && ! empty( $r[0] ) && ! empty( $r[1] ) );
+	if ( ! $rows ) {
+		return '';
+	}
+	$out = '<div class="kit-share kit-follow" role="group" aria-label="' . esc_attr__( 'Follow us', 'kits-core' ) . '"><span class="kit-share-label" aria-hidden="true">' . esc_html__( 'Follow us', 'kits-core' ) . '</span>';
+	foreach ( $rows as $r ) {
+		list( $name, $href ) = $r;
+		$icon = isset( $r[2] ) ? (string) $r[2] : 'link';
+		/* translators: %s: network name. */
+		$label = sprintf( __( 'Follow us on %s', 'kits-core' ), $name );
+		$out  .= '<a class="kit-share-btn kit-follow-btn" href="' . esc_url( $href ) . '" target="_blank" rel="noopener" aria-label="' . esc_attr( $label ) . '" title="' . esc_attr( $label ) . '"><span class="kit-ico kit-ico--' . esc_attr( sanitize_html_class( $icon ) ) . '" aria-hidden="true"></span><span class="kit-share-name" aria-hidden="true">' . esc_html( $name ) . '</span></a>';
+	}
+	return $out . '</div>';
 }
 
 // At the end of <main> on single items, after the content and any call to action.

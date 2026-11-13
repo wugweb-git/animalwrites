@@ -1104,6 +1104,43 @@ add_filter(
 	}
 );
 
+// The newsletter band on a campaign page takes the campaign's colours (owner, 13 Nov 2026): the campaign's own class
+// (aw-camp--<slug>, the first one in the page's content) on the band, so its --camp-* tokens apply there; aw.css maps
+// them. Everywhere else the band keeps the brand colours.
+add_filter(
+	'render_block_core/template-part',
+	function ( $html, $block ) {
+		if ( 'newsletter' !== ( $block['attrs']['slug'] ?? '' ) || ! is_singular( 'aw_campaign' ) ) {
+			return $html;
+		}
+		if ( ! preg_match( '/\baw-camp--([a-z0-9-]+)/', (string) get_post_field( 'post_content', get_queried_object_id() ), $m ) ) {
+			return $html;
+		}
+		return (string) preg_replace( '/\baw-nl-band\b/', 'aw-nl-band aw-nl-band--camp aw-camp--' . sanitize_html_class( $m[1] ), $html, 1 );
+	},
+	10,
+	2
+);
+
+/**
+ * Our own social accounts for "Follow us" on page Share sections (owner, 13 Nov 2026), the same as the footer's. Never
+ * the old @animalwrites_india or /AnimalWritesIndia (not ours). Filter aw_follow_accounts.
+ *
+ * @return array<int,array{0:string,1:string,2:string}> [label, url, icon]
+ */
+function aw_follow_accounts() {
+	return (array) apply_filters(
+		'aw_follow_accounts',
+		array(
+			array( 'Instagram', 'https://www.instagram.com/animal_writes_/', 'instagram' ),
+			array( 'Facebook', 'https://www.facebook.com/profile.php?id=61596537146561', 'facebook' ),
+			array( 'X', 'https://x.com/animal_writes_', 'x-brand' ),
+			array( 'Threads', 'https://www.threads.com/@animal_writes_', 'threads' ),
+			array( 'LinkedIn', 'https://www.linkedin.com/company/animalwrites/', 'linkedin' ),
+		)
+	);
+}
+
 // A campaign's Share section: the site's one share bar from the server, the one on listings and posts (owner, 2 Nov
 // 2026), on every campaign, with or without a letter tool.
 add_filter(
@@ -1113,7 +1150,10 @@ add_filter(
 			return $html;
 		}
 		$short = aw_camp_short_url( get_the_ID() ); // the short link, when the campaign has one (campaign-short.php)
-		$bar   = $short && function_exists( 'kits_share_html' ) ? kits_share_html( $short, html_entity_decode( get_the_title(), ENT_QUOTES ), null, (string) get_post_field( 'post_name', get_the_ID() ) ) : aw_share_html( get_the_ID() );
+		$bar   = $short && function_exists( 'kits_share_html' ) ? kits_share_html( $short, html_entity_decode( get_the_title(), ENT_QUOTES ), null, (string) get_post_field( 'post_name', get_the_ID() ), array( 'follow' => aw_follow_accounts() ) ) : aw_share_html( get_the_ID() );
+		if ( ! $short && function_exists( 'kits_follow_html' ) ) {
+			$bar .= kits_follow_html( aw_follow_accounts() ); // Follow us under the bar (owner, 13 Nov 2026)
+		}
 		return preg_replace_callback(
 			'#(<div class="aw-camp-share-kit"[^>]*\sdata-aw-share[^>]*>)\s*(</div>)#',
 			function ( $m ) use ( $bar ) {

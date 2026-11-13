@@ -1159,12 +1159,14 @@
    "classes": [
     "kit-share",
     "kit-share-inline",
-    "kit-sh"
+    "kit-sh",
+    "kit-follow"
    ],
    "states": [
     "default",
     "copied",
-    "inline (in the text column, no rule above)"
+    "inline (in the text column, no rule above)",
+    "follow (Follow us under a page's share bar: our own accounts; pages only, never posts; owner 13 Nov 2026)"
    ],
    "tokens": [],
    "a11y": {

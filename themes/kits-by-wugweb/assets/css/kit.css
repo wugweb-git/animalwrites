@@ -499,6 +499,11 @@ html { overflow-x: clip; }
 @media (min-width: 1200px) {
 	.kit-share .kit-share-native { display: none; }
 }
+/* Follow us (owner, 13 Nov 2026): our own accounts as the bar's own buttons, one row under a page's share bar (never on
+   posts). No rule above it; on phones the label takes its own line so the five 44px buttons fit at 320. */
+.kit-share + .kit-follow { border-top: 0; padding-top: var(--kit-space-3); }
+.kit-follow { flex-wrap: wrap; }
+@media (max-width: 767px) { .kit-follow .kit-share-label { flex-basis: 100%; margin: 0 0 var(--kit-space-1); } }
 
 /* Preview only (kits-core preview.php): preview-only items take no space unless the page previews (html.kits-preview
    from the preview script, body.kits-preview for administrators). The page HTML is the same for everyone, so the public

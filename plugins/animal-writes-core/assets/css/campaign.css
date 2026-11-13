@@ -1028,12 +1028,13 @@
 .aw-camp.aw-camp #share :is(h2, h3, p, a:not(.kit-share-btn):not(.wp-element-button), .aw-date, .aw-date .kit-ico) { color: var(--camp-on-mark); }
 .aw-camp.aw-camp #share.aw-camp-section h2 { font-size: var(--kit-type-h1) !important; line-height: var(--kit-leading-heading); }
 .aw-camp.aw-camp #share:has(> .aw-share-block), .aw-camp.aw-camp #share :has(> .aw-share-block) { container: aw-share / inline-size; }
-.aw-camp.aw-camp #share .aw-camp-share-kit.aw-share-block { display: grid; gap: var(--kit-space-5); margin-top: var(--kit-space-6); padding: 0; border-radius: 0; background: none; box-shadow: none; grid-template-areas: "cta" "bar" "pics"; }
+.aw-camp.aw-camp #share .aw-camp-share-kit.aw-share-block { display: grid; gap: var(--kit-space-5); margin-top: var(--kit-space-6); padding: 0; border-radius: 0; background: none; box-shadow: none; grid-template-areas: "cta" "bar" "follow" "pics"; }
 .aw-camp.aw-camp #share .aw-share-block > .aw-share-cta { grid-area: cta; }
 .aw-camp.aw-camp #share .aw-share-block > .kit-share { grid-area: bar; }
+.aw-camp.aw-camp #share .aw-share-block > .kit-follow { grid-area: follow; padding-top: 0; } /* Follow us under the bar (owner, 13 Nov 2026) */
 .aw-camp.aw-camp #share .aw-share-block > .aw-share-pics { grid-area: pics; }
 @container aw-share (min-width: 44rem) {
-	.aw-camp.aw-camp #share .aw-share-block:has(> .aw-share-pics) { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "cta pics" "bar pics"; column-gap: var(--kit-space-7); align-content: center; align-items: center; }
+	.aw-camp.aw-camp #share .aw-share-block:has(> .aw-share-pics) { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "cta pics" "bar pics" "follow pics"; column-gap: var(--kit-space-7); align-content: center; align-items: center; }
 	.aw-camp.aw-camp #share .aw-share-block > .aw-share-cta { align-self: end; }
 	.aw-camp.aw-camp #share .aw-share-block > .kit-share { align-self: start; }
 }
@@ -1049,8 +1050,8 @@
 /* the share bar: white 44px icons, no names, no small label, one row; no Kits rule above it on the band (its 24px stays) */
 .aw-camp.aw-camp #share .kit-share { border-top: 0; }
 .aw-camp.aw-camp #share .kit-share :is(.kit-share-label, .kit-share-name) { color: var(--camp-on-mark); }
-.aw-camp.aw-camp #share .aw-share-block .kit-share { flex-wrap: nowrap; gap: var(--kit-space-2); }
-.aw-camp.aw-camp #share .aw-share-block .kit-share :is(.kit-share-label, .kit-share-btn:not(.kit-share-native) .kit-share-name) { display: none !important; }
+.aw-camp.aw-camp #share .aw-share-block .kit-share:not(.kit-follow) { flex-wrap: nowrap; gap: var(--kit-space-2); }
+.aw-camp.aw-camp #share .aw-share-block .kit-share:not(.kit-follow) .kit-share-label, .aw-camp.aw-camp #share .aw-share-block .kit-share .kit-share-btn:not(.kit-share-native) .kit-share-name { display: none !important; }
 .aw-camp.aw-camp #share .kit-share .kit-share-btn { border-color: var(--camp-on-mark); background: transparent; color: var(--camp-on-mark); }
 .aw-camp.aw-camp #share .aw-share-block .kit-share .kit-share-btn:not(.kit-share-native) { width: var(--kit-size-target); padding: 0; } /* round at every width (kit.js labels the bar at lg, the names stay hidden here) */
 .aw-camp.aw-camp #share .kit-share .kit-share-btn:focus-visible { background: var(--camp-on-mark); color: var(--camp-mark); outline: var(--kit-focus-width) solid var(--camp-on-mark); outline-offset: var(--kit-focus-offset); } /* the focus ring white on the band */

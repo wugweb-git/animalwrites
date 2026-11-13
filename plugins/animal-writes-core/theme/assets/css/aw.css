@@ -113,7 +113,11 @@
 .aw-newsletter-form .ff-message-success { margin: 0; padding: var(--kit-space-5); border: 0; border-left: var(--kit-border-accent) solid var(--kit-color-accent); border-radius: var(--kit-radius-card); background: transparent; color: inherit; box-shadow: none; }
 .aw-newsletter-form .ff-message-success p { margin: 0; }
 .aw-newsletter-form .ff-errors-in-stack { color: var(--kit-color-accent); }
-.aw-nl-band { --nl-mark: color-mix(in srgb, var(--kit-color-danger) 82%, var(--kit-color-ink)); --nl-mark-deep: color-mix(in srgb, var(--kit-color-danger) 62%, var(--kit-color-ink)); --kit-nl-mark: var(--nl-mark); }
+/* The newsletter band's colours (owner, 13 Nov 2026): brand black by default, Home included; on a campaign page the
+   campaign's own (campaign-tools.php adds its aw-camp--<slug> class and aw-nl-band--camp, so its --camp-* tokens apply). */
+.aw-nl-band { --nl-mark: var(--kit-color-ink); --nl-mark-deep: color-mix(in srgb, var(--kit-color-ink) 82%, var(--kit-color-bg)); --nl-on-mark: var(--kit-color-on-ink); --kit-nl-mark: var(--nl-mark); }
+.aw-nl-band.aw-nl-band--camp { --nl-mark: var(--camp-mark, var(--kit-color-ink)); --nl-mark-deep: var(--camp-deep, var(--nl-mark)); --nl-on-mark: var(--camp-on-mark, var(--kit-color-on-ink)); }
+.aw-nl-band--camp .kit-nl-band-ico { color: var(--nl-on-mark); }
 .aw-nl-art-halo { fill: color-mix(in srgb, var(--nl-mark) 12%, transparent); }
 .aw-nl-art-sheet { fill: var(--kit-color-surface); stroke: color-mix(in srgb, var(--nl-mark) 20%, var(--kit-color-line)); stroke-width: 1; }
 .aw-nl-art-rule { stroke: color-mix(in srgb, var(--kit-color-ink) 22%, transparent); stroke-width: 1.5; stroke-linecap: round; }
@@ -128,7 +132,7 @@
 .aw-nl-band .aw-newsletter-form .ff-el-form-control { height: var(--kit-btn-height); min-height: var(--kit-btn-height); background-color: var(--kit-color-raised); transition-duration: var(--kit-motion-base); }
 .aw-nl-band .aw-newsletter-form .ff-el-form-control:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
 .aw-nl-band .aw-newsletter-form .ff-btn-submit.kit-btn {
-	--kit-btn-primary-bg: var(--nl-mark); --kit-btn-primary-bg-hover: var(--nl-mark-deep); --kit-btn-primary-fg: var(--kit-color-on-ink); --kit-btn-primary-fg-hover: var(--kit-color-on-ink);
+	--kit-btn-primary-bg: var(--nl-mark); --kit-btn-primary-bg-hover: var(--nl-mark-deep); --kit-btn-primary-fg: var(--nl-on-mark); --kit-btn-primary-fg-hover: var(--nl-on-mark);
 	min-height: var(--kit-btn-height); font-weight: var(--kit-weight-strong);
 	transition: background-color var(--kit-motion-base) var(--kit-motion-ease), transform var(--kit-motion-base) var(--kit-motion-ease), box-shadow var(--kit-motion-base) var(--kit-motion-ease);
 }
