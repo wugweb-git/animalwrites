@@ -12,5 +12,6 @@ Plugins that exist today carry their own copy in `assets/`, named the way WordPr
 | RankWeb | `plugins/aw-seo-extras/assets/` | same |
 | SourceWeb | `plugins/aw-sourcing/assets/` | same |
 | MailWeb | `plugins/mailweb/assets/` | same |
+| Animal Writes Core | `plugins/animal-writes-core/assets/` | same, plus `menu-icon.svg`, `banner-772x250.png` and `banner-1544x500.png`; from the Animal Writes mark (quill and paw) in the wordmark, black, white and greys only |
 
 InsightWeb, DirectoryWeb and PlanWeb copy theirs from here into their own `assets/` when they are built. The Kits Core admin shell shows each plugin's icon on the Kits → Plugins row and in the app header.

@@ -40,6 +40,7 @@ if ( ! defined( 'AW_REVERIFY_DAYS' ) ) {
 if ( ! defined( 'KITS_CORE_LOADED' ) && file_exists( dirname( AW_CORE_DIR ) . '/kits-core/kits-core.php' ) ) {
 	require_once dirname( AW_CORE_DIR ) . '/kits-core/kits-core.php';
 }
+require_once AW_CORE_DIR . 'includes/plugin-info.php'; // icon, banner and View details on the Plugins screen
 require_once AW_CORE_DIR . 'includes/kits-config.php';
 require_once AW_CORE_DIR . 'includes/admin-table.php';
 require_once AW_CORE_DIR . 'includes/admin-home.php';
