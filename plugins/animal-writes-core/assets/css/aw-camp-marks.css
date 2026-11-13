@@ -1,0 +1,65 @@
+/* aw-camp-marks.css: the campaign marks (owner, 13 Nov 2026: "find good interesting designed icons or shapes and recycle
+   for each campaign and sitewide"). Loaded on every campaign page after its own stylesheets (campaign-record.php).
+
+   1. The motif: one line icon per campaign (--camp-motif), white strokes, used as a picture on a filled mark or as a mask
+      in currentColor (.aw-camp-motif). Brand default: the feather (Animal Writes). Lab rules: the flask. Diwali: the flame.
+      Supreme Court stray dogs: the scales. Community dogs: the paw. A new campaign sets --camp-motif next to its tokens.
+      Icons: Lucide (ISC licence).
+   2. The "What's happening" timeline (ol.aw-camp-dates on Lab, Diwali and the Supreme Court page; Community dogs keeps its
+      own .aw-camp-timeline): every date a node on one line.
+      - past (li.is-done, set by the server from the date): a filled mark with a check; the line after it solid in the mark;
+      - the key date (li.is-key): larger, the campaign's motif on the mark, a soft halo;
+      - still to come: an open ring on a dashed line; the next one (li.is-next) ringed in the mark, and when it is also
+        the key date its halo breathes once every few seconds (not with reduced motion).
+      Phones: a vertical line; from 24rem of width a row of three; from 60rem one row. Sizes: nodes --kit-space-5 (24px),
+      the key --kit-space-6 (32px). */
+
+.aw-camp { --camp-motif: url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20stroke=%22%23fff%22%20stroke-width=%222.25%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%3E%3Cpath%20d=%22M12.67%2019a2%202%200%200%200%201.416-.588l6.154-6.172a6%206%200%200%200-8.49-8.49L5.586%209.914A2%202%200%200%200%205%2011.328V18a1%201%200%200%200%201%201z%22/%3E%3Cpath%20d=%22M16%208%202%2022%22/%3E%3Cpath%20d=%22M17.5%2015H9%22/%3E%3C/svg%3E"); --camp-check: url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20stroke=%22%23fff%22%20stroke-width=%222.25%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%3E%3Cpath%20d=%22M20%206%209%2017l-5-5%22/%3E%3C/svg%3E"); }
+.aw-camp--lab-rules { --camp-motif: url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20stroke=%22%23fff%22%20stroke-width=%222.25%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%3E%3Cpath%20d=%22M10%202v7.527a2%202%200%200%201-.211.896L4.72%2020.55a1%201%200%200%200%20.9%201.45h12.76a1%201%200%200%200%20.9-1.45l-5.069-10.127A2%202%200%200%201%2014%209.527V2%22/%3E%3Cpath%20d=%22M8.5%202h7%22/%3E%3Cpath%20d=%22M7%2016h10%22/%3E%3C/svg%3E"); }
+.aw-camp--diwali { --camp-motif: url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20stroke=%22%23fff%22%20stroke-width=%222.25%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%3E%3Cpath%20d=%22M8.5%2014.5A2.5%202.5%200%200%200%2011%2012c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054%202-6%20.5%202.5%202%204.9%204%206.5%202%201.6%203%203.5%203%205.5a7%207%200%201%201-14%200c0-1.153.433-2.294%201-3a2.5%202.5%200%200%200%202.5%202.5z%22/%3E%3C/svg%3E"); }
+.aw-camp--sc-stray-dogs { --camp-motif: url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20stroke=%22%23fff%22%20stroke-width=%222.25%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%3E%3Cpath%20d=%22m16%2016%203-8%203%208c-.87.65-1.92%201-3%201s-2.13-.35-3-1Z%22/%3E%3Cpath%20d=%22m2%2016%203-8%203%208c-.87.65-1.92%201-3%201s-2.13-.35-3-1Z%22/%3E%3Cpath%20d=%22M7%2021h10%22/%3E%3Cpath%20d=%22M12%203v18%22/%3E%3Cpath%20d=%22M3%207h2c2%200%205-1%207-2%202%201%205%202%207%202h2%22/%3E%3C/svg%3E"); }
+.aw-camp--community-dogs { --camp-motif: url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20stroke=%22%23fff%22%20stroke-width=%222.25%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%3E%3Ccircle%20cx=%2211%22%20cy=%224%22%20r=%222%22/%3E%3Ccircle%20cx=%2218%22%20cy=%228%22%20r=%222%22/%3E%3Ccircle%20cx=%2220%22%20cy=%2216%22%20r=%222%22/%3E%3Cpath%20d=%22M9%2010a5%205%200%200%201%205%205v3.5a3.5%203.5%200%200%201-6.84%201.045Q6.52%2017.48%204.46%2016.84A3.5%203.5%200%200%201%205.5%2010Z%22/%3E%3C/svg%3E"); }
+
+/* The motif as an icon in text colour, for headings, chips and cards (aria-hidden span). */
+.aw-camp-motif { display: inline-block; flex: none; width: 1em; height: 1em; vertical-align: -0.125em; background-color: currentColor; -webkit-mask: var(--camp-motif) center / contain no-repeat; mask: var(--camp-motif) center / contain no-repeat; }
+
+/* The timeline */
+.aw-camp .aw-camp-dates:not(.aw-camp-timeline) { --node: var(--kit-space-5); --node-key: var(--kit-space-6); --node-line: calc(var(--kit-border-width) * 2); }
+.aw-camp .aw-camp-dates:not(.aw-camp-timeline) li { --n: var(--node); position: relative; padding: 0 0 var(--kit-space-5) calc(var(--node-key) + var(--kit-space-3)); }
+.aw-camp .aw-camp-dates:not(.aw-camp-timeline) li:last-child { padding-bottom: 0; }
+.aw-camp .aw-camp-dates:not(.aw-camp-timeline) li.is-key { --n: var(--node-key); }
+/* the line from this node to the next */
+.aw-camp .aw-camp-dates:not(.aw-camp-timeline) li::before { content: ""; display: block; position: absolute; left: calc(var(--node-key) / 2 - var(--node-line) / 2); right: auto; top: var(--node-key); bottom: 0; border: 0; border-left: var(--node-line) dashed var(--kit-color-line); }
+.aw-camp .aw-camp-dates:not(.aw-camp-timeline) li.is-done::before { border-left-style: solid; border-left-color: var(--camp-mark); }
+.aw-camp .aw-camp-dates:not(.aw-camp-timeline) li:last-child::before { display: none; }
+/* the node */
+.aw-camp .aw-camp-dates:not(.aw-camp-timeline) li::after { content: ""; position: absolute; box-sizing: border-box; left: calc((var(--node-key) - var(--n)) / 2); top: calc((var(--node-key) - var(--n)) / 2); width: var(--n); height: var(--n); border-radius: 50%; border: var(--node-line) solid var(--kit-color-line); background: var(--kit-color-bg); box-shadow: none; }
+.aw-camp .aw-camp-dates:not(.aw-camp-timeline) li.is-next::after { border-color: var(--camp-mark); box-shadow: 0 0 0 var(--kit-space-1) color-mix(in srgb, var(--camp-mark) 14%, transparent); }
+.aw-camp .aw-camp-dates:not(.aw-camp-timeline) li.is-done::after { border-color: var(--camp-mark); background: var(--camp-check) center / 62% no-repeat, var(--camp-mark); }
+.aw-camp .aw-camp-dates:not(.aw-camp-timeline) li.is-key::after { border-color: var(--camp-mark); background: var(--camp-motif) center / 56% no-repeat, var(--camp-mark); box-shadow: 0 0 0 var(--kit-space-1) color-mix(in srgb, var(--camp-mark) 22%, transparent); }
+.aw-camp .aw-camp-dates:not(.aw-camp-timeline) .aw-camp-dates-when { min-height: var(--node-key); display: flex; align-items: center; }
+.aw-camp .aw-camp-dates:not(.aw-camp-timeline) li:not(.is-done):not(.is-key) .aw-camp-dates-when { color: var(--kit-color-ink); }
+@container aw-happening (min-width: 24rem) {
+	.aw-camp .aw-camp-dates:not(.aw-camp-timeline) li { padding: calc(var(--node-key) + var(--kit-space-3)) 0 0; }
+	.aw-camp .aw-camp-dates:not(.aw-camp-timeline) li::before { left: var(--node-key); right: calc(-1 * var(--kit-space-4)); top: calc(var(--node-key) / 2 - var(--node-line) / 2); bottom: auto; border-left: 0; border-top: var(--node-line) dashed var(--kit-color-line); }
+	.aw-camp .aw-camp-dates:not(.aw-camp-timeline) li.is-done::before { border-top-style: solid; border-top-color: var(--camp-mark); }
+	.aw-camp .aw-camp-dates:not(.aw-camp-timeline) li:nth-child(3n)::before { display: none; }
+	.aw-camp .aw-camp-dates:not(.aw-camp-timeline) li:last-child::before { display: none; }
+	.aw-camp .aw-camp-dates:not(.aw-camp-timeline) li::after { left: calc((var(--node-key) - var(--n)) / 2); }
+	.aw-camp .aw-camp-dates:not(.aw-camp-timeline) .aw-camp-dates-when { min-height: 0; display: block; }
+}
+@container aw-happening (min-width: 60rem) {
+	.aw-camp .aw-camp-dates:not(.aw-camp-timeline) li:nth-child(3n)::before { display: block; }
+	.aw-camp .aw-camp-dates:not(.aw-camp-timeline) li:last-child::before { display: none; }
+}
+@media (prefers-reduced-motion: no-preference) {
+	.aw-camp .aw-camp-dates:not(.aw-camp-timeline) li.is-key.is-next::after { animation: aw-camp-node-halo 3.2s var(--kit-motion-ease) infinite; }
+}
+@keyframes aw-camp-node-halo {
+	0%, 55%, 100% { box-shadow: 0 0 0 var(--kit-space-1) color-mix(in srgb, var(--camp-mark) 22%, transparent); }
+	75% { box-shadow: 0 0 0 var(--kit-space-3) color-mix(in srgb, var(--camp-mark) 0%, transparent); }
+}
+@media (forced-colors: active) {
+	.aw-camp .aw-camp-dates:not(.aw-camp-timeline) li::after { border-color: CanvasText; }
+	.aw-camp .aw-camp-dates:not(.aw-camp-timeline) li:is(.is-done, .is-key)::after { forced-color-adjust: none; }
+}

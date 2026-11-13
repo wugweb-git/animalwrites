@@ -1104,6 +1104,57 @@ add_filter(
 	}
 );
 
+/**
+ * The "What's happening" timeline (ol.aw-camp-dates) knows which dates have passed (owner, 13 Nov 2026): each item whose
+ * date ("30 Sep 2026") is before today gets is-done, the first one still to come gets is-next; aw-camp-marks.css draws
+ * the nodes from them. Items whose date can't be read keep their classes. No text changes.
+ *
+ * @param string $html The rendered content.
+ * @return string
+ */
+function aw_camp_dates_state( $html ) {
+	if ( false === strpos( $html, 'aw-camp-dates' ) ) {
+		return $html;
+	}
+	$today = current_time( 'Y-m-d' );
+	return (string) preg_replace_callback(
+		'#(<ol\b[^>]*class="[^"]*\baw-camp-dates\b[^"]*"[^>]*>)(.*?)(</ol>)#s',
+		function ( $list ) use ( $today ) {
+			$next = false;
+			$body = preg_replace_callback(
+				'#<li\b([^>]*)>(.*?)</li>#s',
+				function ( $li ) use ( $today, &$next ) {
+					// The date: the <time datetime> inside the item's date (aw_date), else the date's own words.
+					if ( preg_match( '#<time\b[^>]*\bdatetime="([0-9]{4}-[0-9]{2}-[0-9]{2})#', $li[2], $when ) ) {
+						$time = strtotime( $when[1] );
+					} elseif ( preg_match( '#class="[^"]*\baw-camp-dates-when\b[^"]*"[^>]*>(.*?)</span>\s*<span[^>]*\baw-camp-dates-what\b#s', $li[2], $when ) ) {
+						$time = strtotime( trim( wp_strip_all_tags( html_entity_decode( $when[1], ENT_QUOTES ) ) ) );
+					} else {
+						return $li[0];
+					}
+					if ( false === $time ) {
+						return $li[0];
+					}
+					$add = gmdate( 'Y-m-d', $time ) < $today ? 'is-done' : '';
+					if ( '' === $add && ! $next ) {
+						$add  = 'is-next';
+						$next = true;
+					}
+					if ( '' === $add ) {
+						return $li[0];
+					}
+					$attrs = preg_match( '#\bclass="#', $li[1] ) ? preg_replace( '#\bclass="#', 'class="' . $add . ' ', $li[1], 1 ) : $li[1] . ' class="' . $add . '"';
+					return '<li' . $attrs . '>' . $li[2] . '</li>';
+				},
+				$list[2]
+			);
+			return $list[1] . $body . $list[3];
+		},
+		$html
+	);
+}
+add_filter( 'the_content', fn( $html ) => is_singular( 'aw_campaign' ) ? aw_camp_dates_state( $html ) : $html, 98 );
+
 // The newsletter band on a campaign page takes the campaign's colours (owner, 13 Nov 2026): the campaign's own class
 // (aw-camp--<slug>, the first one in the page's content) on the band, so its --camp-* tokens apply there; aw.css maps
 // them. Everywhere else the band keeps the brand colours.

@@ -365,6 +365,9 @@ add_action(
 			return;
 		}
 		wp_enqueue_style( 'aw-campaign-record', plugins_url( 'assets/css/campaign-record.css', AW_CORE_DIR . 'animal-writes-core.php' ), $deps, (string) filemtime( AW_CORE_DIR . 'assets/css/campaign-record.css' ) );
+		if ( is_singular( 'aw_campaign' ) ) { // the campaign marks: motif icons and the timeline's nodes, after every campaign stylesheet (aw-camp-marks.css)
+			wp_enqueue_style( 'aw-camp-marks', plugins_url( 'assets/css/aw-camp-marks.css', AW_CORE_DIR . 'animal-writes-core.php' ), array( 'aw-campaign-record' ), (string) filemtime( AW_CORE_DIR . 'assets/css/aw-camp-marks.css' ) );
+		}
 	},
 	30
 );
