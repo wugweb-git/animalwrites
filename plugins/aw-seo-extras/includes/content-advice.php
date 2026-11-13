@@ -210,7 +210,9 @@ function aw_seo_content_advice( WP_Post $post ) {
 			$k    = aw_si_table( 'keywords' );
 			$rows = (array) $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- Search Insights' own tables; editor only.
 				$wpdb->prepare(
-					"SELECT k.label, SUM( o.clicks ) AS clicks, SUM( o.impr ) AS impr, SUM( o.pos * o.impr ) / NULLIF( SUM( o.impr ), 0 ) AS pos FROM {$o} o JOIN {$k} k ON k.id = o.kw_id WHERE o.src = 'gsc' AND o.metric = 'qp' AND o.page_key = %s AND o.d >= %s GROUP BY o.kw_id ORDER BY impr DESC LIMIT 15", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table names only.
+					"SELECT k.label, SUM( o.clicks ) AS clicks, SUM( o.impr ) AS impr, SUM( o.pos * o.impr ) / NULLIF( SUM( o.impr ), 0 ) AS pos FROM %i o JOIN %i k ON k.id = o.kw_id WHERE o.src = 'gsc' AND o.metric = 'qp' AND o.page_key = %s AND o.d >= %s GROUP BY o.kw_id ORDER BY impr DESC LIMIT 15",
+					$o,
+					$k,
 					md5( $path ),
 					gmdate( 'Y-m-d', time() - 28 * DAY_IN_SECONDS )
 				)
