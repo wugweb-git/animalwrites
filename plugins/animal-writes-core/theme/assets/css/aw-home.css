@@ -23,13 +23,15 @@
 	.aw-ed-learn .aw-tasks.is-three { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--kit-space-grid); }
 }
 .aw-ed-learn .kit-tag--category { display: none; }
-.aw-ed-learn .aw-tasks.is-three .kit-card .kit-card-title { font-size: var(--kit-type-h3) !important; }
 .aw-ed-learn .aw-tasks.is-three .kit-card[class*="kit-card--"] .kit-card-sum .wp-block-post-excerpt__excerpt { -webkit-line-clamp: 1; }
 .aw-ed-learn .aw-tasks.is-three .kit-card > .kit-card-media { aspect-ratio: var(--kit-card-media-ratio); }
 .aw-ed-learn .aw-tasks.is-three .kit-card > .kit-card-media img { height: 100%; object-fit: cover; }
 @container aw-guides (min-width: 912px) {
 	.aw-ed-learn .aw-tasks.is-three .kit-card > .kit-card-media { aspect-ratio: var(--kit-placard-ratio); }
 }
+/* Home News, Library and Guides cards are the stacked list cards (aw.css): every card the same, the first too (no taller
+   lead picture), and the title --kit-type-card-title, one size per breakpoint (owner, 14 Nov 2026: the first picture was
+   taller and the titles were the fluid --kit-type-h3, so they changed size between breakpoints). */
 .aw-news-mosaic > li { margin: 0 !important; min-width: 0; }
 .aw-news-mosaic .kit-card--stacked-md { height: auto; }
 @media (min-width: 768px) {
@@ -39,14 +41,11 @@
 	.aw-news-mosaic > li:nth-child(n+2) { grid-column: 2; align-self: start; }
 	.aw-news-mosaic > li:first-child > .kit-card { flex: 1 1 auto; height: auto; }
 	.aw-news-mosaic > li:first-child > .kit-card > .kit-card-body { flex: none; }
-	.aw-news-mosaic > li:first-child .kit-card-media { position: relative; flex: 1 1 0; min-height: 8rem; aspect-ratio: auto; margin: 0; }
-	.aw-news-mosaic > li:first-child .kit-card-media img { position: absolute; inset: 0; }
 }
 @media (min-width: 1200px) {
 	.aw-news-mosaic > li:first-child .kit-card.kit-card--block-lg .kit-card-sum .wp-block-post-excerpt__excerpt { -webkit-line-clamp: 2; }
 }
 .aw-ed-news .kit-meta-row .kit-meta-item:not(.aw-date), .aw-ed-news .kit-tag--category { display: none; }
-.aw-ed-news .aw-news-mosaic .kit-card--stacked-md .kit-card-title { font-size: var(--kit-type-h3) !important; }
 .aw-ed-news .aw-news-mosaic .kit-card--stacked-md > .kit-card-media { aspect-ratio: var(--kit-card-stacked-media-ratio); }
 .aw-ed-news .aw-news-mosaic .kit-card--stacked-md > .kit-card-media img { height: 100%; object-fit: cover; }
 @media (min-width: 768px) and (max-width: 1199px) {
@@ -242,7 +241,6 @@
 	.aw-ed-law > .kit-stack > .kit-tile::after { align-self: start; margin-top: 0.625rem; }
 }
 .aw-ed-law .aw-news-mosaic :is(.kit-meta-row .kit-meta-item:not(.aw-date), .kit-tag:not(.kit-tag--source)) { display: none; }
-.aw-ed-law .aw-news-mosaic .kit-card--stacked-md .kit-card-title { font-size: var(--kit-type-h3) !important; }
 .aw-ed-law .aw-news-mosaic .kit-card--stacked-md > .kit-card-media { aspect-ratio: var(--kit-card-stacked-media-ratio); }
 .aw-ed-law .aw-news-mosaic .kit-card--stacked-md > .kit-card-media img { height: 100%; object-fit: cover; }
 @media (min-width: 768px) {
