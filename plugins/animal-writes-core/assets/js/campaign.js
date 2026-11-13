@@ -700,7 +700,8 @@
    other rows are hidden, the chosen one shows. Choosing changes only the row below; focus stays on the picker. Without
    JavaScript every row shows, as before.
    - Where your state stands: label "State / UT", the states A to Z, each state of the several-states row on its own and
-     pointing at that row; the first row to start, as the server sent it.
+     pointing at that row. It starts on "Choose your state or UT" with no row and the table hidden (owner, 13 Nov 2026:
+     the first row, Kerala, looked like a guess from the visitor's location; the page does not use location).
    - What the court ordered: label "Date", the dates in the table's own order (oldest first); the last row to start (the
      17 Nov 2026 hearing, the date the page is about). The dates line in What's happening shows them all together. */
 function awScPicker(fig, id, opts, start) {
@@ -719,6 +720,12 @@ function awScPicker(fig, id, opts, start) {
 	var sel = document.createElement('select');
 	sel.id = id;
 	sel.setAttribute('aria-controls', table.id);
+	if (start < 0) {
+		var ph = document.createElement('option');
+		ph.value = '';
+		ph.textContent = 'Choose your state or UT';
+		sel.appendChild(ph);
+	}
 	opts.forEach(function (o) {
 		var op = document.createElement('option');
 		op.value = String(o.row);
@@ -729,13 +736,15 @@ function awScPicker(fig, id, opts, start) {
 	field.appendChild(label);
 	field.appendChild(wrap);
 	fig.parentNode.insertBefore(field, fig);
-	function show(i) {
+	function show(v) {
+		var i = '' === v ? -1 : Number(v);
 		Array.prototype.forEach.call(rows, function (tr, j) { tr.hidden = j !== i; });
+		table.hidden = i < 0;
 	}
-	sel.selectedIndex = Math.max(0, opts.findIndex(function (o) { return o.row === start; }));
-	show(Number(sel.value));
+	sel.selectedIndex = start < 0 ? 0 : Math.max(0, opts.findIndex(function (o) { return o.row === start; }));
+	show(sel.value);
 	fig.classList.add('is-picked');
-	sel.addEventListener('change', function () { show(Number(sel.value)); });
+	sel.addEventListener('change', function () { show(sel.value); });
 }
 (function () {
 	var fig = document.querySelector('.aw-camp--sc-stray-dogs .aw-camp-tracker');
@@ -751,7 +760,7 @@ function awScPicker(fig, id, opts, start) {
 		});
 	});
 	opts.sort(function (a, b) { return a.last - b.last || a.name.localeCompare(b.name, 'en'); });
-	awScPicker(fig, 'aw-sc-pick', opts, 0);
+	awScPicker(fig, 'aw-sc-pick', opts, -1);
 })();
 (function () {
 	var fig = document.querySelector('.aw-camp--sc-stray-dogs #orders .aw-camp-timeline');
