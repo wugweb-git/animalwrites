@@ -293,11 +293,11 @@
 	});
 })();
 
-/* Picture tiles (Need help now bento, The law in plain words): the CSS shows a tile's photo only under .is-near, set here
+/* Picture tiles (Need help now bento): the CSS shows a tile's photo only under .is-near, set here
    when the grid comes within 600px of the screen, so the photos load late and never compete with the hero. Without
    IntersectionObserver the class is set at once; without script the tiles stay plain ink. */
 (function () {
-	var grids = document.querySelectorAll('.aw-bento, .aw-ed-law > .kit-stack');
+	var grids = document.querySelectorAll('.aw-bento');
 	if (!grids.length) return;
 	if (!('IntersectionObserver' in window)) { Array.prototype.forEach.call(grids, function (g) { g.classList.add('is-near'); }); return; }
 	var io = new IntersectionObserver(function (es) {

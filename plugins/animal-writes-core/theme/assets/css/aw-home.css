@@ -220,16 +220,6 @@
 	.aw-ed-law > .kit-stack > .kit-tile::before { justify-self: start; margin-bottom: var(--kit-space-3); }
 	.aw-ed-law > .kit-stack > .kit-tile::after { align-self: start; margin-top: 0.625rem; }
 }
-/* The law, in plain words: four tiles in a mix (owner, 13 Nov 2026). Acts and Rules ink (the lead), Court orders ash,
-   Circulars a picture tile (old books on a library shelf, under the same ink scrim as the help bento; plain ink until the
-   row nears the screen), Letters white. The focus ring stays the blue focus colour: it sits outside the tile, on the
-   white section. */
-.aw-ed-law > .kit-stack > .kit-tile:is(.kit-ico--legal, .kit-ico--research, .kit-ico--file) { border-color: transparent; background: var(--kit-color-ink) center / cover no-repeat; }
-.aw-ed-law > .kit-stack > .kit-tile.kit-ico--research { background: color-mix(in srgb, var(--kit-color-ink), var(--kit-color-muted)); }
-.aw-ed-law > .kit-stack.is-near > .kit-tile.kit-ico--file { background-image: linear-gradient(color-mix(in srgb, var(--kit-color-ink) var(--kit-action-scrim-mix), transparent), color-mix(in srgb, var(--kit-color-ink) var(--kit-action-scrim-mix), transparent)), url(../img/tiles/law-circulars-old-books-shelf.webp); }
-.aw-ed-law > .kit-stack > .kit-tile:is(.kit-ico--legal, .kit-ico--research, .kit-ico--file) > h3.wp-block-heading a { color: var(--kit-color-on-ink) !important; }
-.aw-ed-law > .kit-stack > .kit-tile:is(.kit-ico--legal, .kit-ico--research, .kit-ico--file) > p { color: color-mix(in srgb, var(--kit-color-on-ink) 82%, transparent); }
-.aw-ed-law > .kit-stack > .kit-tile:is(.kit-ico--legal, .kit-ico--research, .kit-ico--file)::after, .aw-ed-law > .kit-stack > .kit-tile:is(.kit-ico--legal, .kit-ico--research, .kit-ico--file):hover::after { background: var(--kit-color-on-ink); }
 .aw-ed-law .aw-news-mosaic :is(.kit-meta-row .kit-meta-item:not(.aw-date), .kit-tag:not(.kit-tag--source)) { display: none; }
 .aw-ed-law .aw-news-mosaic .kit-card--stacked-md .kit-card-title { font-size: var(--kit-type-h3) !important; }
 .aw-ed-law .aw-news-mosaic .kit-card--stacked-md > .kit-card-media { aspect-ratio: 4 / 3; }
