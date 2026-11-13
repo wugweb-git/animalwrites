@@ -574,7 +574,7 @@ add_shortcode(
 			$note = $a['after_label'];
 		} else {
 			/* translators: %d: the number of days left before the campaign closes. */
-			$note = $d ? sprintf( _n( '%d day to go', '%d days to go', $d, 'animal-writes-core' ), $d ) : 'Last day today';
+			$note = $d ? sprintf( _n( '%d day to go', '%d days to go', $d, 'animal-writes-core' ), $d ) : __( 'Last day today', 'animal-writes-core' );
 		}
 		$days = '0' === (string) $a['days'] ? '' : '<span class="aw-sticky-cta-days">' . esc_html( $note ) . '</span>';
 		return '<div class="aw-sticky-cta" data-target="' . esc_attr( $a['href'] ) . '"><a class="wp-element-button" href="' . esc_attr( $a['href'] ) . '">' . esc_html( $a['label'] ) . '</a>' . $days . '</div>';
