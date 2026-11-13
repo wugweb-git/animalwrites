@@ -46,30 +46,24 @@
 	.aw-news-mosaic > li:first-child .kit-card.kit-card--block-lg .kit-card-sum .wp-block-post-excerpt__excerpt { -webkit-line-clamp: 2; }
 }
 .aw-ed-news .kit-meta-row .kit-meta-item:not(.aw-date), .aw-ed-news .kit-tag--category { display: none; }
-.aw-ed-news .aw-news-mosaic .kit-card--stacked-md > .kit-card-media { aspect-ratio: var(--kit-card-stacked-media-ratio); }
-.aw-ed-news .aw-news-mosaic .kit-card--stacked-md > .kit-card-media img { height: 100%; object-fit: cover; }
 @media (min-width: 768px) and (max-width: 1199px) {
 	.aw-ed-news .aw-news-list.aw-news-mosaic { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
-	.aw-ed-news .aw-news-mosaic .kit-card--stacked-md > .kit-card-media { width: var(--kit-thumb-md) !important; }
-}
-@media (min-width: 1200px) {
-	.aw-ed-news .aw-news-mosaic .kit-card--stacked-md > .kit-card-media { width: 10rem !important; }
 }
 @media (max-width: 767px) {
-	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li > .kit-card { gap: var(--kit-space-5); }
-	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li:first-child > .kit-card { flex-direction: row; align-items: flex-start; }
+	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li > .kit-card:not([class*="kit-card--stacked"]) { gap: var(--kit-space-5); }
+	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li:first-child > .kit-card:not([class*="kit-card--stacked"]) { flex-direction: row; align-items: flex-start; }
 	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li:first-child > .kit-card[class*="kit-card--block"] { gap: 0; }
-	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li:first-child > .kit-card > .kit-card-media { flex: none; width: var(--kit-thumb-lg); max-width: 40%; aspect-ratio: var(--kit-card-stacked-media-ratio); border-radius: var(--kit-radius-media); }
+	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li:first-child > .kit-card:not([class*="kit-card--stacked"]) > .kit-card-media { flex: none; width: var(--kit-thumb-lg); max-width: 40%; aspect-ratio: var(--kit-card-stacked-media-ratio); border-radius: var(--kit-radius-media); }
 	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li:first-child > .kit-card[class*="kit-card--block"] > .kit-card-media { margin: var(--kit-space-4) 0 var(--kit-space-4) var(--kit-space-4) !important; }
-	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li:first-child > .kit-card > .kit-card-media img { height: 100%; object-fit: cover; }
-	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li:first-child > .kit-card > .kit-card-body { flex: 1 1 0; padding-left: var(--kit-space-5); }
+	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li:first-child > .kit-card:not([class*="kit-card--stacked"]) > .kit-card-media img { height: 100%; object-fit: cover; }
+	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li:first-child > .kit-card:not([class*="kit-card--stacked"]) > .kit-card-body { flex: 1 1 0; padding-left: var(--kit-space-5); }
 	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li:first-child .kit-card-sum { display: none; }
-	/* The picture is the stacked card's thumbnail, 112x84 at 4:3 at the top; the words set the card's height, the picture
-	   never does (owner, 14 Nov 2026; was full card height). A 16px gap; the date and the source chip share one line. */
-	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li > .kit-card { align-items: flex-start !important; }
-	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li > .kit-card:not([class*="kit-card--block"]) { gap: var(--kit-space-4) !important; }
-	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li > .kit-card > .kit-card-media { position: relative; overflow: hidden; align-self: flex-start; aspect-ratio: var(--kit-card-stacked-media-ratio); min-height: 0; }
-	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li > .kit-card > .kit-card-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+	/* Stacked cards take the theme's stacked card (aw.css, owner's spec 14 Nov 2026: no card padding, the picture flush
+	   and at full height, the words padded); these rules shape only the other cards here. */
+	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li > .kit-card:not([class*="kit-card--stacked"]) { align-items: flex-start !important; }
+	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li > .kit-card:not([class*="kit-card--block"]):not([class*="kit-card--stacked"]) { gap: var(--kit-space-4) !important; }
+	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li > .kit-card:not([class*="kit-card--stacked"]) > .kit-card-media { position: relative; overflow: hidden; align-self: flex-start; aspect-ratio: var(--kit-card-stacked-media-ratio); min-height: 0; }
+	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic > li > .kit-card:not([class*="kit-card--stacked"]) > .kit-card-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 	:is(.aw-ed-news, .aw-ed-law) .aw-news-mosaic .kit-card .kit-card-chips { flex: 0 1 auto; width: auto; }
 }
 .aw-ed-hero-help a { display: inline-flex; align-items: center; min-height: var(--kit-size-target); color: inherit; font-weight: var(--kit-weight-strong); text-decoration: underline; text-underline-offset: var(--kit-underline-offset); }
@@ -241,25 +235,23 @@
 	.aw-ed-law > .kit-stack > .kit-tile::after { align-self: start; margin-top: 0.625rem; }
 }
 .aw-ed-law .aw-news-mosaic :is(.kit-meta-row .kit-meta-item:not(.aw-date), .kit-tag:not(.kit-tag--source)) { display: none; }
-.aw-ed-law .aw-news-mosaic .kit-card--stacked-md > .kit-card-media { aspect-ratio: var(--kit-card-stacked-media-ratio); }
-.aw-ed-law .aw-news-mosaic .kit-card--stacked-md > .kit-card-media img { height: 100%; object-fit: cover; }
 @media (min-width: 768px) {
 	.aw-ed-law .aw-news-mosaic > li:nth-child(n+2) { align-self: stretch; display: flex; }
-	.aw-ed-law .aw-news-mosaic > li:nth-child(n+2) > .kit-card { flex: 1 1 auto; align-items: center; }
+	.aw-ed-law .aw-news-mosaic > li:nth-child(n+2) > .kit-card { flex: 1 1 auto; }
+	.aw-ed-law .aw-news-mosaic > li:nth-child(n+2) > .kit-card:not([class*="kit-card--stacked"]) { align-items: center; }
 }
 @media (min-width: 768px) and (max-width: 1199px) {
 	.aw-ed-law .aw-news-list.aw-news-mosaic { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 	.aw-ed-law .aw-news-mosaic > li:first-child { grid-column: 1 / -1 !important; grid-row: 1 !important; }
 	.aw-ed-law .aw-news-mosaic > li:nth-child(2) { grid-column: 1; grid-row: 2; }
 	.aw-ed-law .aw-news-mosaic > li:nth-child(3) { grid-column: 2; grid-row: 2; }
-	.aw-ed-law .aw-news-mosaic > li:first-child > .kit-card { flex-direction: row; }
-	.aw-ed-law .aw-news-mosaic > li:first-child .kit-card-media { position: static; flex: 0 0 45%; aspect-ratio: var(--kit-card-featured-media-ratio); min-height: 0; }
-	.aw-ed-law .aw-news-mosaic > li:first-child .kit-card-media img { position: static; height: 100%; object-fit: cover; }
-	.aw-ed-law .aw-news-mosaic > li:first-child > .kit-card > .kit-card-body { flex: 1 1 0; align-self: center; }
+	.aw-ed-law .aw-news-mosaic > li:first-child > .kit-card:not([class*="kit-card--stacked"]) { flex-direction: row; }
+	.aw-ed-law .aw-news-mosaic > li:first-child .kit-card:not([class*="kit-card--stacked"]) > .kit-card-media { position: static; flex: 0 0 45%; aspect-ratio: var(--kit-card-featured-media-ratio); min-height: 0; }
+	.aw-ed-law .aw-news-mosaic > li:first-child .kit-card:not([class*="kit-card--stacked"]) > .kit-card-media img { position: static; height: 100%; object-fit: cover; }
+	.aw-ed-law .aw-news-mosaic > li:first-child > .kit-card:not([class*="kit-card--stacked"]) > .kit-card-body { flex: 1 1 0; align-self: center; }
 }
 @media (min-width: 1200px) {
 	.aw-ed-law .aw-news-list.aw-news-mosaic { grid-template-rows: 1fr 1fr; }
-	.aw-ed-law .aw-news-mosaic .kit-card--stacked-md > .kit-card-media { width: 10rem !important; max-width: 40%; }
 }
 /* Home FAQ (aw-ed-faq): the full 1200 column, so from 1200 the open questions sit in three columns with the 16px grid gap
    and the section keeps within the 720px section height (design-system.md, Layout rules 5); kit.css gives one column on
