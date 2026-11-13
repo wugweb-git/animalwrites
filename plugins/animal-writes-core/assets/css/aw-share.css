@@ -39,7 +39,7 @@
 /* The text */
 #share:is(.aw-share-sec, .aw-camp-section) > * { box-sizing: border-box; max-width: var(--aw-share-col, 1120px); margin-inline: auto; }
 #share:is(.aw-share-sec, .aw-camp-section) :is(h2, p) { color: var(--kit-color-on-ink); }
-#share:is(.aw-share-sec, .aw-camp-section) h2 { display: block; margin-block: 0 !important; font-size: var(--kit-type-h1) !important; line-height: var(--kit-leading-heading); }
+#share:is(.aw-share-sec, .aw-camp-section) h2 { display: block; margin-block: 0 !important; font-size: var(--kit-type-h2) !important; line-height: var(--kit-leading-heading); }
 #share:is(.aw-share-sec, .aw-camp-section) h2::before { content: none; }
 #share:is(.aw-share-sec, .aw-camp-section) :is(.aw-share-line, .aw-camp-lede) { margin-block: var(--kit-space-4) 0; padding-right: max(0px, min(100%, var(--aw-share-col, 1120px)) - 60ch); font-size: var(--kit-type-lead); }
 #share:is(.aw-share-sec, .aw-camp-section) .aw-camp-note { display: none; }
