@@ -273,15 +273,22 @@
 	var a = document.querySelector('.aw-findhelp-near');
 	if (!a) return;
 	var status = document.querySelector('.aw-findhelp-status');
+	var going = false;
 	function say(t) { if (status) status.textContent = t; }
+	function reset() { going = false; a.removeAttribute('aria-busy'); say(''); }
 	function go(flag) {
-		try { sessionStorage.setItem('aw_near', JSON.stringify(flag)); } catch (e) {}
-		window.location.assign(a.href);
+		var kept = true;
+		try { sessionStorage.setItem('aw_near', JSON.stringify(flag)); } catch (e) { kept = false; }
+		if (kept || !flag.lat) { window.location.assign(a.href); return; }
+		say('Opening Near me. Tap Use my location there.'); // storage blocked: the location cannot travel with the page
+		setTimeout(function () { window.location.assign(a.href); }, 1500);
 	}
+	window.addEventListener('pageshow', function (e) { if (e.persisted) reset(); }); // back from the Directory
 	a.addEventListener('click', function (e) {
 		if (!navigator.geolocation) return; // the link opens Near me as it is
 		e.preventDefault();
-		if (a.getAttribute('aria-busy') === 'true') return;
+		if (going) return;
+		going = true;
 		a.setAttribute('aria-busy', 'true');
 		say('Detecting location…');
 		navigator.geolocation.getCurrentPosition(function (pos) {

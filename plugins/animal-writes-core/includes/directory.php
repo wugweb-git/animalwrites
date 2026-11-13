@@ -628,7 +628,7 @@ function aw_directory_filter( $type = '' ) {
 		)
 	);
 	$service  = aw_directory_service_field( $field );
-	$n_active = count( array_filter( array( $state, $district, $cur_type, $service && aw_request_services(), $verified, $gov ) ) );
+	$n_active = count( array_filter( array( $district ? $district : $state, $cur_type, $service && aw_request_services(), $verified, $gov ) ) );
 	$checks   = ( aw_verified_count() ? '<label class="kit-checkbox aw-dir-check"><input type="checkbox" name="verified" value="1"' . checked( $verified, true, false ) . '> Claimed only</label>' : '' )
 		. ( function_exists( 'aw_gov_verified_count' ) && aw_gov_verified_count() ? '<label class="kit-checkbox aw-dir-check"><input type="checkbox" name="gov" value="1"' . checked( $gov, true, false ) . '> Verified only</label>' : '' );
 	aw_use_component_style( 'aw-directory' ); // the search form (tag pages, the List filters block, the shortcode)
