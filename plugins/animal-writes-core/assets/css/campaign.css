@@ -135,8 +135,6 @@
 @media (max-width: 767px) {
 	.aw-camp--diwali .wp-block-cover.kit-hero { align-items: flex-start; }
 }
-/* FAQ: the question rows --kit-space-2 apart (8px between targets) */
-.aw-camp--diwali .rank-math-list-item + .rank-math-list-item { margin-top: var(--kit-space-2); }
 /* Hero: cream with plum ink and a community dog before the Supreme Court (owner's reference design, 1 Nov 2026) */
 .aw-camp.aw-camp--sc-stray-dogs .aw-camp-hero { --camp-mark: var(--camp-cream); --camp-on-mark: var(--camp-primary); --camp-line: rgb(58 23 48 / 0.18); }
 @media (min-width: 768px) { /* hero text and poster side by side from 768 (core Columns stack them until 781): the hero is 613 at 768, within 720 (Layout rules 5); the columns' own 58/42 widths */
@@ -1257,3 +1255,16 @@
    left side runs into the campaign's ash black, under the same wash */
 @media (min-width: 768px) { .aw-camp.aw-camp.aw-camp.aw-camp--community-dogs #share { background: linear-gradient(160deg, rgb(22 19 14 / 0.88) 0%, rgb(22 19 14 / 0.78) 50%, rgb(22 19 14 / 0.74) 100%), linear-gradient(90deg, rgb(22 19 14) 56%, rgb(22 19 14 / 0) 66%), var(--camp-share-pic) 100% 82% / 46% auto no-repeat, rgb(22 19 14); } }
 @media (min-width: 1200px) { .aw-camp.aw-camp.aw-camp.aw-camp--community-dogs #share { background-image: linear-gradient(90deg, rgb(22 19 14 / 0.9) 0%, rgb(22 19 14 / 0.8) 45%, rgb(22 19 14 / 0.74) 60%, rgb(22 19 14 / 0.3) 100%), linear-gradient(90deg, rgb(22 19 14) 56%, rgb(22 19 14 / 0) 66%), var(--camp-share-pic); } }
+
+/* Campaign FAQ (owner, 13 Nov 2026: "check spacing font size and behavior across mobile UX"). Rank Math's FAQ block
+   (Diwali, Lab) takes the kit FAQ card (kit.css .kit-faq-item), so all four campaign FAQs read the same on a phone:
+   one flat raised card per question (line border, card radius, 24px padding), 8px from question to answer, 16px
+   between cards (--kit-space-grid), every answer open (no folds). The question stays the theme H3 (Layout rules 9),
+   the answer body size; the section padding is the theme's. The markup and its FAQ schema are unchanged.
+   Same block in campaign.css and campaign-lab.css (the Lab page loads only campaign-lab.css). */
+.aw-camp .rank-math-block { margin-block: 0; }
+.aw-camp .rank-math-list { display: flex; flex-direction: column; gap: var(--kit-space-grid); }
+.aw-camp .rank-math-list > .rank-math-list-item { display: flex; flex-direction: column; gap: var(--kit-space-2); margin: 0; padding: var(--kit-space-5); background: var(--kit-color-raised); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); }
+.aw-camp .rank-math-list-item > .rank-math-answer { padding: 0; }
+.aw-camp .rank-math-answer > p { margin: 0; max-width: var(--kit-measure); line-height: var(--kit-leading-body); }
+.aw-camp .rank-math-answer > p + p { margin-top: var(--kit-space-3); }

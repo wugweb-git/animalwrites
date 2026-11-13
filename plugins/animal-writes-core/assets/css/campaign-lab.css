@@ -1117,3 +1117,16 @@
 .aw-camp.aw-camp :is(#read, #people) .kit-card[class*="kit-card--stacked"] > .kit-card-body { flex: 1; min-width: 0; }
 @media (min-width: 1200px) { .aw-camp.aw-camp #latest .kit-card > .kit-card-media { width: 25%; max-width: none; } }
 @media (max-width: 1199px) { .aw-camp.aw-camp #latest .kit-card { grid-template-columns: minmax(0, 1fr) minmax(0, 3fr); } }
+
+/* Campaign FAQ (owner, 13 Nov 2026: "check spacing font size and behavior across mobile UX"). Rank Math's FAQ block
+   (Diwali, Lab) takes the kit FAQ card (kit.css .kit-faq-item), so all four campaign FAQs read the same on a phone:
+   one flat raised card per question (line border, card radius, 24px padding), 8px from question to answer, 16px
+   between cards (--kit-space-grid), every answer open (no folds). The question stays the theme H3 (Layout rules 9),
+   the answer body size; the section padding is the theme's. The markup and its FAQ schema are unchanged.
+   Same block in campaign.css and campaign-lab.css (the Lab page loads only campaign-lab.css). */
+.aw-camp .rank-math-block { margin-block: 0; }
+.aw-camp .rank-math-list { display: flex; flex-direction: column; gap: var(--kit-space-grid); }
+.aw-camp .rank-math-list > .rank-math-list-item { display: flex; flex-direction: column; gap: var(--kit-space-2); margin: 0; padding: var(--kit-space-5); background: var(--kit-color-raised); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); }
+.aw-camp .rank-math-list-item > .rank-math-answer { padding: 0; }
+.aw-camp .rank-math-answer > p { margin: 0; max-width: var(--kit-measure); line-height: var(--kit-leading-body); }
+.aw-camp .rank-math-answer > p + p { margin-top: var(--kit-space-3); }
