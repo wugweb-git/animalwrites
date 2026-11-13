@@ -73,7 +73,7 @@ if wp eval 'exit( in_array( "planweb_on", kits_settings_transfer_options(), true
 want 200 "POST /$PW/entries with two channels" -X POST "${AJ[@]}" -d '{"date":"2026-11-30","title":"[X + LinkedIn] Two channels","type":"social","channels":["x","linkedin"],"status":"idea"}' "$P/entries"
 if python3 -c 'import json,sys; e=json.load(open("/tmp/rw.out"))["entry"]; sys.exit(0 if e["channels"]==["x","linkedin"] and e["channelText"]=="X, LinkedIn" else 1)'; then echo "ok   entry with X and LinkedIn"; else echo "FAIL two channels not kept"; FAIL=1; fi
 CH=$(python3 -c 'import json; print(json.load(open("/tmp/rw.out"))["entry"]["id"])' 2>/dev/null)
-want 200 "POST /$PW/entries/$CH Done" -X POST "${AJ[@]}" -d '{"status":"done","channels":["linkedin"]}' "$P/entries/$CH"
+want 200 "POST /$PW/entries/$CH Done" -X POST "${AJ[@]}" -d '{"date":"2026-11-30","title":"[X + LinkedIn] Two channels","type":"social","status":"done","channels":["linkedin"]}' "$P/entries/$CH"
 if [ "$(wp post meta get "$CH" planweb_status)" = "done" ] && [ "$(wp post term list "$CH" planweb_channel --field=slug)" = "linkedin" ]; then echo "ok   entry $CH Done, channels changed to LinkedIn only"; else echo "FAIL entry $CH status or channels"; FAIL=1; fi
 if wp eval 'exit( planweb_is_overdue( array( "date" => "2020-01-01", "status" => "done" ), "2026-11-14" ) ? 1 : 0 );'; then echo "ok   a past Done entry is not overdue"; else echo "FAIL Done counted overdue"; FAIL=1; fi
 

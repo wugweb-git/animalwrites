@@ -308,7 +308,8 @@ add_filter(
  *
  * @param WP_Post|int $post Entry.
  * @return array{id: int, date: string, time: string, title: string, note: string, type: string, channel: string,
- *               channels: string[], owner: string, status: string, link: string, flag: string}|null channel is the
+ *               channels: string[], owner: string, status: string, link: string, flag: string, modified: string}|null
+ *               modified is post_modified_gmt (Y-m-d H:i:s). channel is the
  *               first of channels (an entry may have several, 14 Nov 2026).
  */
 function planweb_entry( $post ) {
@@ -338,6 +339,7 @@ function planweb_entry( $post ) {
 		'status'   => '' === $status ? 'idea' : $status,
 		'link'     => (string) get_post_meta( $post->ID, 'planweb_link', true ),
 		'flag'     => (string) get_post_meta( $post->ID, 'planweb_flag', true ),
+		'modified' => (string) $post->post_modified_gmt,
 	);
 }
 

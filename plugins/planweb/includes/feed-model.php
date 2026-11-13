@@ -133,13 +133,17 @@ function planweb_ics_event( array $e, array $ctx ): array {
 	if ( '' !== $link && '' !== planweb_link_problem( $link, (string) $ctx['host'] ) ) {
 		$link = '';
 	}
-	$lines = array(
+	$lines   = array(
 		'BEGIN:VEVENT',
 		'UID:planweb-' . (int) $e['id'] . '@' . $ctx['host'],
 		'DTSTAMP:' . $ctx['stamp'],
 	);
-	$day   = str_replace( '-', '', (string) $e['date'] );
-	$time  = (string) ( $e['time'] ?? '' );
+	$changed = (string) ( $e['modified'] ?? '' );
+	if ( preg_match( '/^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})$/', $changed, $m ) && '0000' !== $m[1] ) {
+		$lines[] = 'LAST-MODIFIED:' . $m[1] . $m[2] . $m[3] . 'T' . $m[4] . $m[5] . $m[6] . 'Z'; // Lets calendar apps see a changed entry.
+	}
+	$day  = str_replace( '-', '', (string) $e['date'] );
+	$time = (string) ( $e['time'] ?? '' );
 	if ( '' !== $time && planweb_is_time( $time ) ) {
 		$start   = new DateTimeImmutable( $e['date'] . ' ' . $time . ':00', new DateTimeZone( PLANWEB_FEED_TZ ) );
 		$start   = $start->setTimezone( new DateTimeZone( 'UTC' ) );

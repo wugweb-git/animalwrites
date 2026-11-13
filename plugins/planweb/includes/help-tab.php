@@ -43,7 +43,7 @@ function planweb_help_tab( $screen ) {
 			'id'       => 'planweb-about',
 			/* translators: %s: plugin name. */
 			'title'    => sprintf( __( 'About %s', 'planweb' ), 'PlanWeb' ),
-			'content'  => '<p>' . esc_html__( 'The team\'s calendar: content, social, email, campaign and reminder entries, each with a channel, an owner and a status. Nothing in it posts or sends anything.', 'planweb' ) . '</p><ul>' . $list . '</ul>',
+			'content'  => '<p>' . esc_html__( 'The team\'s calendar: content, social, email, campaign and reminder entries, each with one or more channels, an owner and a status. Nothing in it posts or sends anything.', 'planweb' ) . '</p><ul>' . $list . '</ul>',
 			'priority' => 5,
 		)
 	);

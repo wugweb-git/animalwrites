@@ -399,6 +399,7 @@ $fe = array(
 		'status'   => 'approved',
 		'link'     => 'https://x.com/a',
 		'note'     => 'SECRET NOTE',
+		'modified' => '2026-11-14 06:30:00',
 	),
 	array(
 		'id'       => 2,
@@ -452,6 +453,7 @@ check( false === strpos( $ics_un, '98765' ) && str_contains( $ics_un, 'SUMMARY:E
 check( false === strpos( $ics_un, 'evil.example' ), 'ics: a link to another site is left out' );
 check( str_contains( $ics_un, 'UID:planweb-1@animalwrites.in' ) && str_contains( $ics_un, 'DTSTAMP:20261114T120000Z' ), 'ics: UID and DTSTAMP' );
 check( str_contains( $ics_un, 'Status: Done' ), 'ics: Done status' );
+check( str_contains( $ics_un, 'LAST-MODIFIED:20261114T063000Z' ) && 1 === substr_count( $ics_un, 'LAST-MODIFIED' ), 'ics: LAST-MODIFIED when the entry has one' );
 
 echo $fails ? "$fails of $count checks failed.\n" : "All $count checks passed.\n";
 exit( $fails ? 1 : 0 );
