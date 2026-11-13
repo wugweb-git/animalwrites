@@ -1173,3 +1173,40 @@
 /* The bar's Share button (the phone's share sheet, kit.js) on the band: filled white with its name, as the bar's main button. */
 .aw-camp.aw-camp #share .kit-share .kit-share-btn.kit-share-native { background: var(--camp-on-mark); border-color: var(--camp-on-mark); color: var(--camp-mark); }
 .aw-camp.aw-camp #share .kit-share .kit-share-native .kit-share-name { color: inherit; } /* the word Share in the button colour, not white on white */
+
+/* The share band in three shades, every campaign (owner, 13 Nov 2026: "fix this section", "for all campaigns"; Community
+   dogs is frozen, the Lab page has its own frozen file). The band stays the campaign colour; the share bar sits on a card
+   in the campaign's light shade (--camp-light, with the bento's dot texture) and Follow us on a white card, each with its
+   label on top, icons and text in --camp-dark. The icons sit in an even grid (44px each, at least 4px apart), so six fit
+   one row (21rem: six 44px icons, five 4px gaps and the 24px padding); the cards side by side when there is room (21rem to 23rem each).
+   Phones (to 767): where the phone has a share sheet (kit.js shows the bar's Share button), that one full-width button
+   replaces the six icons and the card's label (owner: no share icons on mobile); without a share sheet the icons stay.
+   Where the band is the section itself (Supreme Court), the text keeps to 60ch (the note 80ch), and from 1200 the heading
+   runs across, the text and note on the left and the cards stacked in a 23rem column on the right. */
+.aw-camp.aw-camp:not(.aw-camp--community-dogs) #share .aw-camp-share-kit.aw-share-block { display: flex; flex-wrap: wrap; align-items: stretch; gap: var(--kit-space-4); margin-block: var(--kit-space-5) 0; }
+.aw-camp.aw-camp:not(.aw-camp--community-dogs) #share .aw-share-block > .kit-share { box-sizing: border-box; flex: 1 1 21rem; max-width: 23rem; display: grid; grid-template-columns: repeat(auto-fill, var(--kit-size-target)); justify-content: space-between; align-content: start; gap: var(--kit-space-2) var(--kit-space-1); margin: 0; padding: var(--kit-space-5); border: 0; border-radius: var(--kit-radius-card); --kit-color-focus: var(--camp-dark); }
+.aw-camp.aw-camp:not(.aw-camp--community-dogs) #share .aw-share-block > .kit-share > :is(.kit-share-label, .kit-share-native) { grid-column: 1 / -1; }
+.aw-camp.aw-camp:not(.aw-camp--community-dogs) #share .aw-share-block > .kit-share > .kit-share-label { display: block !important; margin: 0 0 var(--kit-space-2); font-size: var(--kit-type-base); font-weight: var(--kit-weight-bold); }
+.aw-camp.aw-camp:not(.aw-camp--community-dogs) #share .aw-share-block > .kit-share:not(.kit-follow) { background: radial-gradient(color-mix(in srgb, var(--camp-dark) 12%, transparent) 1px, transparent 1.5px) 0 0 / var(--kit-space-4) var(--kit-space-4), var(--camp-light); }
+.aw-camp.aw-camp:not(.aw-camp--community-dogs) #share .aw-share-block > .kit-share.kit-follow { background: var(--kit-color-surface-soft); }
+.aw-camp.aw-camp:not(.aw-camp--community-dogs) #share .aw-share-block > .kit-share :is(.kit-share-label, .kit-share-name) { color: var(--camp-dark); }
+.aw-camp.aw-camp:not(.aw-camp--community-dogs) #share .aw-share-block > .kit-share .kit-share-btn { border-color: var(--camp-dark); background: transparent; color: var(--camp-dark); }
+.aw-camp.aw-camp:not(.aw-camp--community-dogs) #share .aw-share-block > .kit-share .kit-share-btn:focus-visible { background: var(--camp-dark); color: var(--kit-color-on-ink); outline-color: var(--camp-dark); }
+.aw-camp.aw-camp:not(.aw-camp--community-dogs) #share .aw-share-block > .kit-share :is(.kit-share-btn.kit-share-native, .kit-share-copy:has(.kit-ico--check)) { background: var(--camp-dark); border-color: var(--camp-dark); color: var(--kit-color-on-ink); }
+.aw-camp.aw-camp:not(.aw-camp--community-dogs) #share .aw-share-block > .kit-share > .kit-share-native .kit-share-name { color: inherit; font-weight: var(--kit-weight-bold); }
+@media (hover: hover) {
+	.aw-camp.aw-camp:not(.aw-camp--community-dogs) #share .aw-share-block > .kit-share .kit-share-btn:hover { background: var(--camp-dark); color: var(--kit-color-on-ink); }
+}
+@media (max-width: 767px) {
+	.aw-camp.aw-camp:not(.aw-camp--community-dogs) #share .aw-share-block > .kit-share:has(> .kit-share-native:not([hidden])) > :is(.kit-share-btn:not(.kit-share-native), .kit-share-label) { display: none !important; }
+	.aw-camp.aw-camp:not(.aw-camp--community-dogs) #share .aw-share-block > .kit-share > .kit-share-native:not([hidden]) { width: 100%; min-height: var(--kit-size-control); justify-content: center; }
+}
+.aw-camp.aw-camp:not(.aw-camp--community-dogs) #share:has(> .aw-camp-share-kit) > :is(.aw-camp-lede, .aw-camp-note) { box-sizing: border-box; padding-right: max(0px, min(100%, var(--wp--style--global--content-size)) - 60ch); }
+.aw-camp.aw-camp:not(.aw-camp--community-dogs) #share:has(> .aw-camp-share-kit) > .aw-camp-note { margin-top: var(--kit-space-5); padding-right: max(0px, min(100%, var(--wp--style--global--content-size)) - 80ch); }
+@media (min-width: 1200px) {
+	.aw-camp.aw-camp:not(.aw-camp--community-dogs) #share:has(> .aw-camp-share-kit) { display: grid; column-gap: var(--kit-space-7); grid-template-columns: minmax(0, 1fr) minmax(0, calc(min(var(--wp--style--global--content-size), 100% - 2 * var(--kit-space-7)) - 23rem - var(--kit-space-7))) 23rem minmax(0, 1fr); grid-template-rows: auto auto 1fr; align-items: start; }
+	.aw-camp.aw-camp:not(.aw-camp--community-dogs) #share:has(> .aw-camp-share-kit) > * { max-width: none; margin-inline: 0 !important; margin-block-start: 0; }
+	.aw-camp.aw-camp:not(.aw-camp--community-dogs) #share:has(> .aw-camp-share-kit) > h2 { grid-column: 2 / 4; margin-bottom: var(--kit-space-5); }
+	.aw-camp.aw-camp:not(.aw-camp--community-dogs) #share:has(> .aw-camp-share-kit) > :is(.aw-camp-lede, .aw-camp-note) { grid-column: 2; padding-right: 0; }
+	.aw-camp.aw-camp:not(.aw-camp--community-dogs) #share:has(> .aw-camp-share-kit) > .aw-camp-share-kit { grid-column: 3; grid-row: 2 / 4; flex-direction: column; margin: 0; }
+}

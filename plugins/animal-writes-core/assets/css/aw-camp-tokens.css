@@ -16,6 +16,7 @@
 	--camp-deep: var(--kit-color-ink);
 	--camp-dark: var(--kit-color-ink);
 	--camp-meta: var(--kit-color-muted);
+	--camp-light: var(--kit-color-accent); /* the light shade of the three (owner, 13 Nov 2026: bentos in campaign light, campaign dark and white): the site yellow unless a campaign sets its own; text on it in --camp-dark */
 }
 /* Campaign 2.0 (draft lab animal rules 2026). */
 .aw-camp--lab-rules {
