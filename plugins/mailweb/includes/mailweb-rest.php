@@ -11,7 +11,8 @@
  *   GET  inbox/message              MAILWEB_CAP     one message (or form message) for the reading pane; opening marks it read
  *   POST inbox/bulk                 MAILWEB_CAP     read, unread, archive, inbox, spam, trash (mailweb_bulk())
  *   GET  settings                   manage_options  the Sending, Mailboxes and aliases, and Profiles groups
- *   POST settings/<group>           manage_options  save the fields sent, only when they change a value
+ *   POST settings/<group>           manage_options  save the fields sent, only when they change a value; reset: true
+ *                                                   puts Sending or Mailboxes back to the registered defaults
  *   GET  services                   manage_options  Mail API, incoming mail per mailbox, site sending, FluentCRM
  *   POST services/mail-api          manage_options  a new Mail API token (empty keeps the saved one)
  *   POST services/webhook/<key>     manage_options  a new webhook secret for one mailbox (empty keeps it)
@@ -209,6 +210,11 @@ add_action(
 				'profiles'     => array(
 					'type'                 => 'object',
 					'additionalProperties' => array( 'type' => 'object' ),
+				),
+				'delete_data'  => array( 'type' => 'boolean' ),
+				'reset'        => array(
+					'type'    => 'boolean',
+					'default' => false,
 				),
 			)
 		);
@@ -758,10 +764,10 @@ function mailweb_settings_group( string $group ): array {
 	if ( 'sending' === $group ) {
 		$v = mailweb_cap_current();
 		return array(
-			'slug'   => 'sending',
-			'label'  => __( 'Sending', 'mailweb' ),
-			'values' => $v,
-			'fields' => array(
+			'slug'       => 'sending',
+			'label'      => __( 'Sending', 'mailweb' ),
+			'values'     => $v,
+			'fields'     => array(
 				array(
 					'key'     => 'budget',
 					'label'   => __( 'Emails per 24 hours', 'mailweb' ),
@@ -779,7 +785,9 @@ function mailweb_settings_group( string $group ): array {
 					'default' => 10,
 				),
 			),
-			'note'   => __( 'Order: replies typed in FluentCRM, then notices, then sign-up confirmations, then campaigns. An email may set its own with the header X-Mailweb-Priority: 0 to 3.', 'mailweb' ),
+			'note'       => __( 'Order: replies typed in FluentCRM, then notices, then sign-up confirmations, then campaigns. An email may set its own with the header X-Mailweb-Priority: 0 to 3.', 'mailweb' ),
+			'deleteData' => mailweb_delete_data_on(),
+			'reset'      => true,
 		);
 	}
 	if ( 'mailboxes' === $group ) {
@@ -799,6 +807,7 @@ function mailweb_settings_group( string $group ): array {
 			'boxes'       => $boxes,
 			'defaultFrom' => mailweb_default_from(),
 			'aliases'     => mailweb_aliases_text( mailweb_aliases() ),
+			'reset'       => true,
 		);
 	}
 	$profiles = array();
@@ -835,8 +844,24 @@ function mailweb_settings_payload(): array {
 function mailweb_rest_save_group( WP_REST_Request $r ) {
 	$group = (string) $r['group'];
 	$saved = false;
+	if ( $r['reset'] ) {
+		if ( 'profiles' === $group ) {
+			return new WP_Error( 'rest_invalid_param', __( 'This section has no reset.', 'mailweb' ), array( 'status' => 400 ) );
+		}
+		$saved = mailweb_settings_reset( $group );
+		return rest_ensure_response(
+			array(
+				'saved'   => $saved,
+				'group'   => mailweb_settings_group( $group ),
+				'message' => $saved ? __( 'Defaults restored.', 'mailweb' ) : __( 'Nothing changed, so nothing was saved.', 'mailweb' ),
+			)
+		);
+	}
 	if ( 'sending' === $group ) {
 		$saved = mailweb_save_changed( 'mailweb_cap', mailweb_cap_current(), mailweb_rest_sent( $r, array( 'budget', 'reserve' ) ), 'mailweb_cap_clean' );
+		if ( isset( mailweb_rest_sent( $r, array( 'delete_data' ) )['delete_data'] ) ) {
+			$saved = mailweb_delete_data_save( (bool) $r['delete_data'] ) || $saved;
+		}
 	} elseif ( 'mailboxes' === $group ) {
 		$keys = array_keys( mailweb_all_boxes() );
 		$sent = mailweb_rest_sent( $r, array( 'send', 'default_from', 'aliases' ) );

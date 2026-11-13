@@ -173,8 +173,9 @@ function mailweb_option_box_keys( array $given ): array {
 }
 
 /**
- * The value of a MailWeb option as it may be stored, whoever writes it. Runs on sanitize_option_{name}, so a settings
- * file is cleaned the same way as the screens clean their fields. Values already cleaned come back unchanged.
+ * The value of a MailWeb option as it may be stored, whoever writes it. It is the option's register_setting() sanitize
+ * callback (mailweb_registered_settings()), so it runs on every update_option(): the screens' routes, the Site sending
+ * forms, a Kits → Tools import and /wp/v2/settings all store the same shape. Values already cleaned come back unchanged.
  *
  * @param mixed  $value  The value.
  * @param string $option Option name.
@@ -220,4 +221,205 @@ function mailweb_option_clean( $value, $option ) {
 			return $out;
 	}
 	return $value;
+}
+
+/* ---------- The options, registered with the Settings API ---------- */
+
+const MAILWEB_DELETE_DATA = 'mailweb_delete_data'; // 1: uninstall.php deletes MailWeb's own data. Default 0: it keeps everything.
+
+/**
+ * A sanitize callback for one option: mailweb_option_clean() with the option's name (register_setting() passes the
+ * value only).
+ *
+ * @param string $option Option name.
+ */
+function mailweb_option_cleaner( string $option ): callable {
+	return fn( $value ) => mailweb_option_clean( $value, $option );
+}
+
+/**
+ * Every option the MailWeb Settings screen saves, as register_setting() arguments. The names and stored shapes are the
+ * ones used before (no migration); the default is what the code reads when the option is missing. The options that
+ * hold a password, token or webhook secret (stored encrypted) are registered without show_in_rest: /wp/v2/settings
+ * never shows them, as the screen never shows them.
+ */
+function mailweb_registered_settings(): array {
+	$secret = array(
+		'type'              => 'string',
+		'default'           => '',
+		'sanitize_callback' => fn( $v ) => is_scalar( $v ) ? (string) $v : '', // already encrypted by mailweb_save_setting()
+		'show_in_rest'      => false,
+	);
+	$set    = array(
+		'mailweb_cap'          => array(
+			'type'              => 'object',
+			'description'       => 'Emails per 24 hours, and how many are kept back from campaigns.',
+			'default'           => array(
+				'budget'  => 90,
+				'reserve' => 10,
+			),
+			'sanitize_callback' => mailweb_option_cleaner( 'mailweb_cap' ),
+			'show_in_rest'      => array(
+				'schema' => array(
+					'type'       => 'object',
+					'properties' => array(
+						'budget'  => array( 'type' => 'integer' ),
+						'reserve' => array( 'type' => 'integer' ),
+					),
+				),
+			),
+		),
+		'mailweb_mailboxes'    => array(
+			'type'              => 'object',
+			'description'       => 'Send from it, per mailbox key.',
+			'default'           => array(),
+			'sanitize_callback' => mailweb_option_cleaner( 'mailweb_mailboxes' ),
+			'show_in_rest'      => array(
+				'schema' => array(
+					'type'                 => 'object',
+					'additionalProperties' => array(
+						'type'       => 'object',
+						'properties' => array( 'send' => array( 'type' => 'boolean' ) ),
+					),
+				),
+			),
+		),
+		'mailweb_default_from' => array(
+			'type'              => 'string',
+			'description'       => 'The default From mailbox key.',
+			'default'           => '',
+			'sanitize_callback' => mailweb_option_cleaner( 'mailweb_default_from' ),
+			'show_in_rest'      => array( 'schema' => array( 'type' => 'string' ) ),
+		),
+		'mailweb_aliases'      => array(
+			'type'              => 'object',
+			'description'       => 'Alias address => mailbox address.',
+			'default'           => array(),
+			'sanitize_callback' => mailweb_option_cleaner( 'mailweb_aliases' ),
+			'show_in_rest'      => array(
+				'schema' => array(
+					'type'                 => 'object',
+					'additionalProperties' => array( 'type' => 'string' ),
+				),
+			),
+		),
+		'mailweb_profiles'     => array(
+			'type'              => 'object',
+			'description'       => 'Display name, signature and picture per address.',
+			'default'           => array(),
+			'sanitize_callback' => mailweb_option_cleaner( 'mailweb_profiles' ),
+			'show_in_rest'      => array(
+				'schema' => array(
+					'type'                 => 'object',
+					'additionalProperties' => array(
+						'type'       => 'object',
+						'properties' => array(
+							'name'      => array( 'type' => 'string' ),
+							'signature' => array( 'type' => 'string' ),
+							'picture'   => array( 'type' => 'integer' ),
+						),
+					),
+				),
+			),
+		),
+		'mailweb_crm'          => array(
+			'type'              => 'object',
+			'description'       => 'The FluentCRM feed: on, tag, mailbox keys (empty: all).',
+			'default'           => array(),
+			'sanitize_callback' => mailweb_option_cleaner( 'mailweb_crm' ),
+			'show_in_rest'      => array(
+				'schema' => array(
+					'type'       => 'object',
+					'properties' => array(
+						'on'    => array( 'type' => 'boolean' ),
+						'tag'   => array( 'type' => 'string' ),
+						'boxes' => array(
+							'type'  => 'array',
+							'items' => array( 'type' => 'string' ),
+						),
+					),
+				),
+			),
+		),
+		'mailweb_smtp'         => array(
+			'type'              => 'object',
+			'description'       => 'Site sending (SMTP): user, name, host, port and the encrypted password.',
+			'default'           => array(),
+			'sanitize_callback' => fn( $v ) => mailweb_smtp_clean( (array) $v ) + array( 'pass' => is_scalar( ( (array) $v )['pass'] ?? '' ) ? (string) ( ( (array) $v )['pass'] ?? '' ) : '' ),
+			'show_in_rest'      => false,
+		),
+		'mailweb_api_token'    => $secret,
+		MAILWEB_DELETE_DATA    => array(
+			'type'              => 'boolean',
+			'description'       => 'Delete MailWeb\'s own data when the plugin is deleted.',
+			'default'           => false,
+			'sanitize_callback' => fn( $v ) => rest_sanitize_boolean( $v ) ? 1 : 0,
+			'show_in_rest'      => array( 'schema' => array( 'type' => 'boolean' ) ),
+		),
+	);
+	// One webhook secret per mailbox known so far (the stored list: no Mail API call here).
+	foreach ( array_keys( (array) get_option( 'mailweb_box_addresses', array() ) ) as $key ) {
+		$key = sanitize_key( (string) $key );
+		if ( '' !== $key ) {
+			$set[ 'mailweb_secret_' . $key ] = $secret;
+		}
+	}
+	return $set;
+}
+
+add_action(
+	'init',
+	function () {
+		foreach ( mailweb_registered_settings() as $name => $args ) {
+			register_setting( 'mailweb', $name, $args );
+		}
+	}
+);
+
+/** Whether MailWeb's data goes when the plugin is deleted (Settings → Sending). */
+function mailweb_delete_data_on(): bool {
+	return (bool) get_option( MAILWEB_DELETE_DATA, 0 );
+}
+
+/**
+ * Save "Delete this plugin's data when it is deleted". Nothing is written when it is already so.
+ *
+ * @param bool $on On.
+ * @return bool Whether the option was written.
+ */
+function mailweb_delete_data_save( bool $on ): bool {
+	if ( mailweb_delete_data_on() === $on ) {
+		return false;
+	}
+	update_option( MAILWEB_DELETE_DATA, $on ? 1 : 0, false );
+	return true;
+}
+
+/**
+ * "Reset this section": the group's registered settings back to their defaults; nothing is written where they already
+ * are. Sending: the daily limit and "Delete this plugin's data". Mailboxes: "Send from it" on for every mailbox and no
+ * chosen default From; the alias lines are a hand-made copy of hPanel, not a setting with a default, so they stay.
+ * Profiles have no reset (the names and signatures are the owner's own text).
+ *
+ * @param string $group sending or mailboxes.
+ * @return bool Whether anything was written.
+ */
+function mailweb_settings_reset( string $group ): bool {
+	$d     = mailweb_registered_settings();
+	$saved = false;
+	if ( 'sending' === $group ) {
+		if ( mailweb_cap_current() !== $d['mailweb_cap']['default'] ) {
+			update_option( 'mailweb_cap', $d['mailweb_cap']['default'], false );
+			$saved = true;
+		}
+		$saved = mailweb_delete_data_save( (bool) $d[ MAILWEB_DELETE_DATA ]['default'] ) || $saved;
+	} elseif ( 'mailboxes' === $group ) {
+		foreach ( array( 'mailweb_mailboxes', 'mailweb_default_from' ) as $option ) {
+			if ( get_option( $option, $d[ $option ]['default'] ) !== $d[ $option ]['default'] ) {
+				update_option( $option, $d[ $option ]['default'], false );
+				$saved = true;
+			}
+		}
+	}
+	return $saved;
 }

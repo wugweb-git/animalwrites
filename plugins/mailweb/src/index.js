@@ -19,6 +19,7 @@ import {
 	AppHeader,
 	Button,
 	ChipRow,
+	ConfirmButton,
 	EmptyState,
 	ErrorState,
 	Field,
@@ -699,7 +700,7 @@ function useSave( route, onSaved ) {
 	return { busy, msg, setMsg, save };
 }
 
-function Foot( { busy, dirty, onSave, msg } ) {
+function Foot( { busy, dirty, onSave, onReset, msg } ) {
 	return (
 		<>
 			<Button
@@ -710,6 +711,18 @@ function Foot( { busy, dirty, onSave, msg } ) {
 			>
 				{ __( 'Save changes', 'mailweb' ) }
 			</Button>
+			{ onReset && (
+				<ConfirmButton
+					label={ __( 'Reset this section', 'mailweb' ) }
+					question={ __(
+						'Reset this section to its defaults?',
+						'mailweb'
+					) }
+					count={ 1 }
+					busy={ busy }
+					onConfirm={ onReset }
+				/>
+			) }
 			<span aria-live="polite">
 				{ msg && 'success' === msg.tone ? msg.text : '' }
 			</span>
@@ -727,8 +740,13 @@ function ErrorLine( { msg, onDismiss } ) {
 
 function SendingGroup( { group, onSaved, onDirty } ) {
 	const [ v, setV ] = useState( group.values );
+	const [ del, setDel ] = useState( !! group.deleteData );
 	useEffect( () => setV( group.values ), [ group.values ] );
+	useEffect( () => setDel( !! group.deleteData ), [ group ] );
 	const diff = changed( v, group.values );
+	if ( del !== !! group.deleteData ) {
+		diff.delete_data = del;
+	}
 	const dirty = Object.keys( diff ).length > 0;
 	useEffect(
 		() => onDirty( group.slug, dirty ),
@@ -748,6 +766,9 @@ function SendingGroup( { group, onSaved, onDirty } ) {
 					dirty={ dirty }
 					msg={ s.msg }
 					onSave={ () => s.save( diff ) }
+					onReset={
+						group.reset ? () => s.save( { reset: true } ) : null
+					}
 				/>
 			}
 		>
@@ -778,6 +799,18 @@ function SendingGroup( { group, onSaved, onDirty } ) {
 					) }
 				/>
 			) ) }
+			<label htmlFor="mailweb-delete-data">
+				<input
+					id="mailweb-delete-data"
+					type="checkbox"
+					checked={ del }
+					onChange={ ( e ) => setDel( e.target.checked ) }
+				/>{ ' ' }
+				{ __(
+					"Delete this plugin's data when it is deleted",
+					'mailweb'
+				) }
+			</label>
 		</SettingsGroup>
 	);
 }
@@ -820,6 +853,9 @@ function MailboxesGroup( { group, onSaved, onDirty } ) {
 					dirty={ dirty }
 					msg={ s.msg }
 					onSave={ () => s.save( diff ) }
+					onReset={
+						group.reset ? () => s.save( { reset: true } ) : null
+					}
 				/>
 			}
 		>

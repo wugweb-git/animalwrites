@@ -19,9 +19,7 @@ add_action(
 		}
 		add_filter( 'kits_status_rows', 'mailweb_kits_status_row' );
 		add_filter( 'kits_settings_transfer_options', 'mailweb_kits_export' );
-		foreach ( mailweb_kits_export( array() ) as $name ) {
-			add_filter( 'sanitize_option_' . $name, 'mailweb_option_clean', 10, 2 );
-		}
+		// The options' clean-up on import is their register_setting() sanitize callback (mailweb-settings-save.php).
 	},
 	20
 );
