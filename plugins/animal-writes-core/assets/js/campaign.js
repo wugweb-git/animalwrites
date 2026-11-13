@@ -96,11 +96,11 @@
 		if (sh.image) return [['image', 'X, Facebook, Instagram or LinkedIn', 'Picture, 1:1']];
 		return [['story', 'Instagram or Facebook story', 'Story, 9:16'], ['post', 'Instagram or Facebook post', 'Post, 4:5']].filter(function (k) { return sh[k[0]]; });
 	}
+	/* The page's Share shares the page: its link with the campaign's hero picture, the link preview image (owner, 13 Nov
+	   2026: "share function on the page is only about sharing page (campaign hero)"). The ready-made social pictures
+	   are for the social accounts, not offered on the page. */
 	function picKind() {
-		if (cdFrozen) return 'og';
-		if (sh.image) return 'image';
-		var phone = window.matchMedia && window.matchMedia('(max-width: 767px)').matches;
-		return [phone ? 'story' : 'post', phone ? 'post' : 'story', 'og'].filter(function (k) { return k === 'og' ? sh.og && sh.og.image : sh[k]; })[0] || '';
+		return sh.og && sh.og.image ? 'og' : '';
 	}
 	/* Phone: one share with the picture, the message and the link (WhatsApp, Telegram and Facebook keep all three; Instagram
 	   keeps the picture, so the link is on the clipboard for its Link sticker). */
@@ -283,7 +283,7 @@
 		var t = encodeURIComponent(sh.text || sh.title || ''), u = function (src) { return encodeURIComponent(tagged(src)); };
 		var nets = { x: 'https://x.com/intent/post?text=' + t + '&url=' + u('x') + (sh.hashtags ? '&hashtags=' + encodeURIComponent(sh.hashtags) : ''), whatsapp: 'https://wa.me/?text=' + t + '%20' + u('whatsapp'), email: 'mailto:?subject=' + encodeURIComponent(sh.title || '') + '&body=' + t + '%20' + u('email') };
 		holder.querySelectorAll('.kit-share a[data-kit-share]').forEach(function (a) { if (nets[a.dataset.kitShare] && sh.text) a.href = nets[a.dataset.kitShare]; });
-		var pics = picList();
+		var pics = cdFrozen ? picList() : []; // the page shares itself with its hero picture (owner, 13 Nov 2026)
 		if (pics.length) {
 			/* The theme's fold (kit.css .wp-block-details): closed when the pictures sit under the bar (phones, a narrow
 			   column), open and fixed when they sit beside the button (the band at least 44rem wide). */
