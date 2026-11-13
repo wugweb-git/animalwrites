@@ -74,6 +74,31 @@
 					"slug": "warning",
 					"name": "Warning",
 					"color": "#8a5a00"
+				},
+				{
+					"slug": "error-soft",
+					"name": "Danger tint",
+					"color": "#fff2f4"
+				},
+				{
+					"slug": "success-soft",
+					"name": "Success tint",
+					"color": "#eef8f1"
+				},
+				{
+					"slug": "warning-soft",
+					"name": "Warning tint",
+					"color": "#fff6e0"
+				},
+				{
+					"slug": "info-soft",
+					"name": "Info tint",
+					"color": "#eaf1fc"
+				},
+				{
+					"slug": "whatsapp",
+					"name": "WhatsApp",
+					"color": "#1f7a44"
 				}
 			]
 		}
