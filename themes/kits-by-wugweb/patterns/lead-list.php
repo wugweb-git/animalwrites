@@ -3,13 +3,23 @@
  * Title: Lead + list
  * Slug: kits-by-wugweb/lead-list
  * Categories: kits-lists
- * Description: Section head with a link, one lead post (large image and headline) and the next four as a ruled list.
+ * Description: Section head (kit-sec-head: H2 and a ghost "See all" button, the same head as every Home section) with a link, one lead post (large image and headline) and the next four as a ruled list.
  */
 ?>
 <!-- wp:group {"align":"full","className":"kit-ed-news","layout":{"type":"constrained","contentSize":"1200px"}} -->
-<div class="wp-block-group alignfull kit-ed-news"><!-- wp:html -->
-<header class="kit-ed-head"><div><h2>[Section heading]</h2></div><a class="kit-ed-more" href="#">[See all] <span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span></a></header>
-<!-- /wp:html -->
+<div class="wp-block-group alignfull kit-ed-news"><!-- wp:group {"className":"kit-sec-head","layout":{"type":"default"}} -->
+<div class="wp-block-group kit-sec-head"><!-- wp:group {"layout":{"type":"default"}} -->
+<div class="wp-block-group"><!-- wp:heading -->
+<h2 class="wp-block-heading">[Section heading]</h2>
+<!-- /wp:heading --></div>
+<!-- /wp:group -->
+
+<!-- wp:buttons -->
+<div class="wp-block-buttons"><!-- wp:button {"className":"is-style-kits-ghost kit-btn--sm"} -->
+<div class="wp-block-button is-style-kits-ghost kit-btn--sm"><a class="wp-block-button__link wp-element-button" href="#">[See all]</a></div>
+<!-- /wp:button --></div>
+<!-- /wp:buttons --></div>
+<!-- /wp:group -->
 
 <!-- wp:group {"className":"kit-ed-news-grid","layout":{"type":"default"}} -->
 <div class="wp-block-group kit-ed-news-grid"><!-- wp:query {"queryId":61,"query":{"perPage":1,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","inherit":false},"className":"kit-ed-lead"} -->
