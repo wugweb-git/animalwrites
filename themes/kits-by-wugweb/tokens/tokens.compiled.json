@@ -626,14 +626,14 @@
       "lg": "600px"
     },
     "card-stacked-media-width": {
-      "sm": "30%",
-      "md": "30%",
-      "lg": "30%"
+      "sm": "var(--kit-thumb-lg)",
+      "md": "var(--kit-thumb-lg)",
+      "lg": "var(--kit-thumb-lg)"
     },
     "card-stacked-media-ratio": {
-      "sm": "var(--wp--custom--kits--card--ratio--stacked, var(--kit-media-ratio-portrait))",
-      "md": "var(--wp--custom--kits--card--ratio--stacked, var(--kit-media-ratio-portrait))",
-      "lg": "var(--wp--custom--kits--card--ratio--stacked, var(--kit-media-ratio-portrait))"
+      "sm": "var(--wp--custom--kits--card--ratio--stacked, var(--kit-media-ratio-standard))",
+      "md": "var(--wp--custom--kits--card--ratio--stacked, var(--kit-media-ratio-standard))",
+      "lg": "var(--wp--custom--kits--card--ratio--stacked, var(--kit-media-ratio-standard))"
     },
     "card-featured-media-ratio": {
       "sm": "var(--wp--custom--kits--card--ratio--featured, var(--kit-media-ratio-featured))",
