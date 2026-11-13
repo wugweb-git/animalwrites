@@ -2,11 +2,11 @@
  * Animal Writes: Home sections (front page only, is_front_page()). Rules moved verbatim from aw.css, in their aw.css order.
  * Loads after aw.css (deps aw-components). Editors load it too.
  */
-.aw-ed-search { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); padding: var(--kit-space-2) var(--kit-space-2) var(--kit-space-2) var(--kit-space-4); background: var(--kit-color-raised); border-radius: var(--kit-radius-card); box-shadow: var(--kit-elevation-2); margin-bottom: var(--kit-space-7); }
-.aw-ed-search > .kit-ico { color: var(--kit-color-muted); }
-.aw-ed-search input[type=search] { flex: 1 1 14rem; min-width: 0; min-height: var(--kit-size-control); border: 0; background: transparent; font: inherit; font-size: var(--kit-type-lead); color: var(--kit-color-ink); }
-.aw-ed-search input[type=search]:focus-visible, .aw-ed-search select:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); border-radius: var(--kit-radius-control); }
-.aw-ed-search select { flex: 1 1 15rem; min-width: 0; max-width: 100%; height: var(--kit-size-control); min-height: var(--kit-size-control); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-control); background-color: var(--kit-color-canvas); font: inherit; padding: 0 calc(var(--kit-space-3) + 1.25rem) 0 var(--kit-space-3); color: var(--kit-color-ink); }
+.aw-ed-search:not(.aw-findhelp-form) { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); padding: var(--kit-space-2) var(--kit-space-2) var(--kit-space-2) var(--kit-space-4); background: var(--kit-color-raised); border-radius: var(--kit-radius-card); box-shadow: var(--kit-elevation-2); margin-bottom: var(--kit-space-7); }
+.aw-ed-search:not(.aw-findhelp-form) > .kit-ico { color: var(--kit-color-muted); }
+.aw-ed-search:not(.aw-findhelp-form) input[type=search] { flex: 1 1 14rem; min-width: 0; min-height: var(--kit-size-control); border: 0; background: transparent; font: inherit; font-size: var(--kit-type-lead); color: var(--kit-color-ink); }
+.aw-ed-search:not(.aw-findhelp-form) input[type=search]:focus-visible, .aw-ed-search:not(.aw-findhelp-form) select:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); border-radius: var(--kit-radius-control); }
+.aw-ed-search:not(.aw-findhelp-form) select { flex: 1 1 15rem; min-width: 0; max-width: 100%; height: var(--kit-size-control); min-height: var(--kit-size-control); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-control); background-color: var(--kit-color-canvas); font: inherit; padding: 0 calc(var(--kit-space-3) + 1.25rem) 0 var(--kit-space-3); color: var(--kit-color-ink); }
 .aw-ed-learn .aw-hub-list { container: aw-guides / inline-size; }
 .aw-ed-learn .aw-tasks.is-three { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-3); }
 @container aw-guides (max-width: 911px) {
@@ -188,28 +188,35 @@
 }
 .aw-ed-find .kit-sec-head { margin-bottom: var(--kit-space-5); }
 .aw-ed-find .kit-sec-head p strong { color: var(--kit-color-ink); font-weight: var(--kit-weight-bold); }
-.aw-findhelp-bar { container-type: inline-size; margin-bottom: var(--kit-space-6); }
-.aw-findhelp-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "q q" "state go" "near near"; align-items: center; gap: var(--kit-space-2); margin: 0; padding: 0; background: none; border-radius: 0; box-shadow: none; }
-.aw-findhelp-form .kit-field { margin: 0; --kit-field-height: var(--kit-size-control); }
+.aw-findhelp-bar { margin-bottom: var(--kit-space-6); }
+/* One system with the Directory search (aw-directory.css): fields and Search/location buttons at --kit-size-control,
+   field radius --kit-radius-control, the same search icon. Phones: one column, each control full width. 768-1199: the
+   field, then State | Search | Use my location. 1200 and up: one row. Pills: --kit-size-target (a step tighter). */
+.aw-findhelp-form { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-areas: "q" "state" "go" "near"; align-items: center; gap: var(--kit-space-3); margin: 0; }
+.aw-findhelp-form .kit-field { margin: 0; min-width: 0; --kit-field-height: var(--kit-size-control); }
+.aw-findhelp-form .kit-field :is(input, select) { min-height: var(--kit-size-control); }
 .aw-findhelp-q { grid-area: q; }
 .aw-findhelp-state { grid-area: state; }
 .aw-findhelp-go { grid-area: go; }
-.aw-findhelp-near { grid-area: near; justify-self: start; }
-.aw-findhelp-form .kit-btn { min-height: var(--kit-size-control); }
-@container (min-width: 36rem) {
-	.aw-findhelp-form { grid-template-columns: minmax(0, 1fr) auto auto; grid-template-areas: "q q q" "state go near"; padding: var(--kit-space-2); background: var(--kit-color-raised); border-radius: var(--kit-radius-card); box-shadow: var(--kit-elevation-2); }
-}
-@container (min-width: 56rem) {
-	.aw-findhelp-form { grid-template-columns: minmax(0, 1fr) minmax(12rem, 16rem) auto auto; grid-template-areas: "q state go near"; }
-}
-.aw-findhelp-filters { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2) var(--kit-space-3); margin-bottom: var(--kit-space-6); }
-.aw-findhelp-label { margin: 0; font-size: var(--kit-type-sm); font-weight: var(--kit-weight-strong); color: var(--kit-color-muted); }
+.aw-findhelp-near { grid-area: near; }
+.aw-findhelp-form .kit-btn { min-height: var(--kit-size-control); justify-content: center; }
+.aw-findhelp-status:empty { display: none; }
+.aw-findhelp-status { margin: var(--kit-space-2) 0 0; font-size: var(--kit-type-sm); color: var(--kit-color-ink); }
+.aw-findhelp-filters { margin-bottom: var(--kit-space-6); }
+.aw-findhelp-label { margin: 0 0 var(--kit-space-2); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-strong); color: var(--kit-color-muted); }
 .aw-findhelp-types { display: flex; flex-wrap: wrap; gap: var(--kit-space-2); list-style: none; margin: 0; padding: 0; }
-.aw-findhelp-actions { display: flex; flex-wrap: wrap; gap: var(--kit-space-3); }
-@media (max-width: 767px) {
-	.aw-findhelp-filters { display: block; }
-	.aw-findhelp-label { margin-bottom: var(--kit-space-2); }
-	.aw-findhelp-actions .kit-btn { flex: 1 1 100%; justify-content: center; }
+.aw-findhelp-actions { display: flex; flex-direction: column; gap: var(--kit-space-3); }
+.aw-findhelp-actions .kit-btn { justify-content: center; }
+@media (min-width: 768px) {
+	.aw-findhelp-form { grid-template-columns: minmax(0, 1fr) auto auto; grid-template-areas: "q q q" "state go near"; padding: var(--kit-space-3); background: var(--kit-color-raised); border-radius: var(--kit-radius-card); box-shadow: var(--kit-elevation-1); }
+	.aw-findhelp-filters { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2) var(--kit-space-3); }
+	.aw-findhelp-label { margin: 0; }
+	.aw-findhelp-actions { flex-direction: row; flex-wrap: wrap; justify-content: flex-start; }
+	.aw-findhelp-browse { order: 1; }
+	.aw-findhelp-claim { order: 2; }
+}
+@media (min-width: 1200px) {
+	.aw-findhelp-form { grid-template-columns: minmax(0, 1fr) minmax(12rem, 16rem) auto auto; grid-template-areas: "q state go near"; }
 }
 @media (min-width: 768px) {
 	.aw-ed-law > .kit-stack { gap: var(--kit-space-grid); grid-auto-rows: 1fr; }

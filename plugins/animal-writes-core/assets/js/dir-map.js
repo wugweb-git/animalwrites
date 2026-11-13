@@ -251,12 +251,28 @@
 		} ).catch( function () { out.textContent = 'That did not work. Try again in a moment.'; } );
 	}
 
+	// From the Home "Find help near you" block (aw.js): the location it was given, kept in this tab only, lists the
+	// nearest at once; { pin: 1 } (location refused there) puts the cursor in the PIN code field. Read once, then cleared.
+	var handed = null;
+	try {
+		handed = JSON.parse( sessionStorage.getItem( 'aw_near' ) || 'null' );
+		sessionStorage.removeItem( 'aw_near' );
+	} catch ( e ) {}
+	if ( handed && '#near-me' === window.location.hash && ! near.hidden ) {
+		if ( handed.lat && handed.lng ) {
+			ask( { lat: String( handed.lat ), lng: String( handed.lng ) } );
+		} else {
+			out.textContent = 'Location not shared. Enter a PIN code instead.';
+			pin.focus();
+		}
+	}
+
 	near.querySelector( '.aw-near-locate' ).addEventListener( 'click', function () {
 		if ( ! navigator.geolocation ) {
 			out.textContent = 'Your browser cannot share your location. Enter a PIN code instead.';
 			return;
 		}
-		out.textContent = 'Asking your browser for your location…';
+		out.textContent = 'Detecting location…';
 		navigator.geolocation.getCurrentPosition( function ( pos ) {
 			ask( { lat: pos.coords.latitude.toFixed( 4 ), lng: pos.coords.longitude.toFixed( 4 ) } );
 		}, function () {

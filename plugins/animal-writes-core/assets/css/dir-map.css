@@ -4,7 +4,7 @@
 .aw-near-form { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2, .5rem); }
 .aw-near-or { color: var(--kit-color-muted); }
 .aw-near-pin { width: 8.5em; }
-.aw-near-pin, .aw-near-km { min-height: 44px; padding: 0 .75em; border: 1px solid var(--kit-color-line); border-radius: var(--radius-sm, 6px); background: var(--kit-color-raised); color: var(--kit-color-text); font: inherit; }
+.aw-near-pin, .aw-near-km { min-height: var(--kit-toolbar-h); padding: 0 .75em; border: var(--kit-border-control) solid var(--kit-color-line); border-radius: var(--kit-radius-control); background: var(--kit-color-raised); color: var(--kit-color-text); font: inherit; }
 .aw-near-note { margin: var(--s-2, .5rem) 0 0; font-size: .875em; color: var(--kit-color-muted); }
 .aw-near-results:not(:empty) { margin-top: var(--s-3, .75rem); }
 .aw-near-head { margin: 0 0 var(--s-2, .5rem); font-weight: var(--kit-weight-strong, 600); color: var(--kit-color-ink); }

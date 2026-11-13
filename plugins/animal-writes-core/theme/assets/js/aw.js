@@ -252,16 +252,46 @@
 		.catch(function () {});
 })();
 
-/* Directory search on phones: the filter icon inside the search bar opens and closes the filters (21 Oct 2026). */
+/* Directory search on phones: the close button at the top of the Filters sheet closes it without applying (the sheet
+   itself, focus and Esc are kit.js's). */
 (function () {
-	var f = document.querySelector('form.aw-dir-search');
-	if (!f) return;
-	var b = f.querySelector('.aw-dir-filter-toggle'), d = f.querySelector('details.aw-dir-more');
-	if (!b || !d) return;
-	function sync() { b.setAttribute('aria-expanded', d.open ? 'true' : 'false'); }
-	b.addEventListener('click', function () { d.open = !d.open; });
-	d.addEventListener('toggle', sync);
-	sync();
+	document.querySelectorAll('[data-aw-sheet-close]').forEach(function (b) {
+		b.addEventListener('click', function () {
+			var d = b.closest('details');
+			if (!d) return;
+			d.open = false;
+			var s = d.querySelector('summary');
+			if (s) s.focus();
+		});
+	});
+})();
+
+/* Home "Find help near you": Use my location asks for the location here (the tap is the permission prompt's reason),
+   keeps it in this tab only (sessionStorage, never the address) and opens the Directory's Near me, which lists the
+   nearest at once (dir-map.js). Refused or unavailable: Near me opens at its PIN code field. Same words as Near me. */
+(function () {
+	var a = document.querySelector('.aw-findhelp-near');
+	if (!a) return;
+	var status = document.querySelector('.aw-findhelp-status');
+	function say(t) { if (status) status.textContent = t; }
+	function go(flag) {
+		try { sessionStorage.setItem('aw_near', JSON.stringify(flag)); } catch (e) {}
+		window.location.assign(a.href);
+	}
+	a.addEventListener('click', function (e) {
+		if (!navigator.geolocation) return; // the link opens Near me as it is
+		e.preventDefault();
+		if (a.getAttribute('aria-busy') === 'true') return;
+		a.setAttribute('aria-busy', 'true');
+		say('Detecting location…');
+		navigator.geolocation.getCurrentPosition(function (pos) {
+			go({ lat: pos.coords.latitude.toFixed(4), lng: pos.coords.longitude.toFixed(4) });
+		}, function () {
+			a.removeAttribute('aria-busy');
+			say('Location not shared. Opening the Directory to search by PIN code.');
+			setTimeout(function () { go({ pin: 1 }); }, 1500);
+		}, { enableHighAccuracy: false, timeout: 10000, maximumAge: 600000 });
+	});
 })();
 
 /* Need help now and Take part: the bento tiles and the Take part cards fade up one after another (112 first) when their

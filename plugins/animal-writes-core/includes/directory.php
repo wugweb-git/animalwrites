@@ -527,6 +527,52 @@ function aw_directory_service_field( $field ) {
 	return $opts ? $field( 'aw-dir-service', 'Service', '<select id="aw-dir-service" name="tag[]"><option value="">All services</option>' . $opts . '</select>', 'service' ) : '';
 }
 
+/**
+ * The search field and the State choice that the Home "Find help near you" block and the Directory search share (one
+ * markup, one look: kit-field at --kit-size-control, the search icon, the same state list with listings only).
+ *
+ * @param array $args {
+ *     @type string $prefix      Id prefix ('aw-ed' on Home, 'aw-dir' on the Directory).
+ *     @type string $cls         Class prefix for the field wrappers ('aw-findhelp-' or 'aw-dir-').
+ *     @type bool   $show_labels Visible labels (Directory) or screen-reader labels (Home).
+ *     @type string $q_label     The search field's label.
+ *     @type string $placeholder The search field's placeholder.
+ *     @type string $state_label The State choice's label.
+ *     @type string $q           The current search text.
+ *     @type string $state       The current state's slug.
+ * }
+ * @return array{q: string, state: string} The two fields' HTML.
+ */
+function aw_dir_search_controls( $args ) {
+	$a      = wp_parse_args(
+		$args,
+		array(
+			'prefix'      => 'aw-dir',
+			'cls'         => 'aw-dir-',
+			'show_labels' => true,
+			'q_label'     => 'Name or PIN code',
+			'placeholder' => 'Blue Cross',
+			'state_label' => 'State',
+			'q'           => '',
+			'state'       => '',
+		)
+	);
+	$label  = fn( $id, $text ) => '<label' . ( $a['show_labels'] ? '' : ' class="screen-reader-text"' ) . ' for="' . esc_attr( $id ) . '">' . esc_html( $text ) . '</label>';
+	$field  = fn( $cls, $id, $text, $control ) => '<div class="kit-field ' . esc_attr( $a['cls'] . $cls ) . '">' . $label( $id, $text ) . '<div class="kit-field-control">' . $control . '</div></div>';
+	$opts   = '<option value="">All states and UTs</option>';
+	foreach ( (array) aw_place_states() as $st ) {
+		if ( aw_place_count( $st ) ) { // states and UTs with no listings are left out, so the list and the counts match
+			$opts .= '<option value="' . esc_attr( $st->slug ) . '"' . selected( $a['state'], $st->slug, false ) . '>' . esc_html( $st->name ) . '</option>';
+		}
+	}
+	$q_id = $a['prefix'] . '-q';
+	$s_id = $a['prefix'] . '-state';
+	return array(
+		'q'     => $field( 'q', $q_id, $a['q_label'], '<span class="kit-ico kit-ico--search kit-field-icon" aria-hidden="true"></span><input type="search" id="' . esc_attr( $q_id ) . '" name="q" value="' . esc_attr( $a['q'] ) . '" placeholder="' . esc_attr( $a['placeholder'] ) . '" autocomplete="off">' ),
+		'state' => $field( 'state', $s_id, $a['state_label'], '<select id="' . esc_attr( $s_id ) . '" name="state">' . $opts . '</select>' ),
+	);
+}
+
 function aw_directory_filter( $type = '' ) {
 	$cur_city = aw_current_place();
 	$cur_type = '' !== $type ? (string) $type : (string) get_query_var( 'aw_dir_type' ); // $type: an organisation type's tag page (sections.php)
@@ -550,10 +596,8 @@ function aw_directory_filter( $type = '' ) {
 			}
 		}
 	}
-	$s_opts = '<option value="">All states</option>';
 	$d_opts = '<option value="" data-none="Choose a state first" data-all="All districts">' . ( $state ? 'All districts' : 'Choose a state first' ) . '</option>';
 	foreach ( $states as $st ) {
-		$s_opts .= '<option value="' . esc_attr( $st->slug ) . '"' . selected( $state && $state->term_id === $st->term_id, true, false ) . '>' . esc_html( $st->name ) . '</option>';
 		$kids    = $all[ $st->term_id ] ?? array();
 		if ( $kids ) {
 			$d_opts .= '<optgroup label="' . esc_attr( $st->name ) . '" data-state="' . esc_attr( $st->slug ) . '"' . ( $state && $state->term_id === $st->term_id ? '' : ' hidden disabled' ) . '>';
@@ -576,19 +620,34 @@ function aw_directory_filter( $type = '' ) {
 	foreach ( $opts as $slug => $o ) {
 		$t_opts .= '<option value="' . esc_attr( $slug ) . '"' . selected( $cur_type, $slug, false ) . '>' . esc_html( $o[0] . ' (' . number_format_i18n( $o[1] ) . ')' ) . '</option>';
 	}
-	$field = fn( $id, $label, $control, $cls = '' ) => '<div class="kit-field aw-dir-' . $cls . '"><label for="' . $id . '">' . $label . '</label><div class="kit-field-control">' . $control . '</div></div>';
+	$field    = fn( $id, $label, $control, $cls = '' ) => '<div class="kit-field aw-dir-' . $cls . '"><label for="' . $id . '">' . $label . '</label><div class="kit-field-control">' . $control . '</div></div>';
+	$shared   = aw_dir_search_controls(
+		array(
+			'q'     => $text,
+			'state' => $state ? $state->slug : '',
+		)
+	);
+	$service  = aw_directory_service_field( $field );
+	$n_active = count( array_filter( array( $state, $district, $cur_type, $service && aw_request_services(), $verified, $gov ) ) );
+	$checks   = ( aw_verified_count() ? '<label class="kit-checkbox aw-dir-check"><input type="checkbox" name="verified" value="1"' . checked( $verified, true, false ) . '> Claimed only</label>' : '' )
+		. ( function_exists( 'aw_gov_verified_count' ) && aw_gov_verified_count() ? '<label class="kit-checkbox aw-dir-check"><input type="checkbox" name="gov" value="1"' . checked( $gov, true, false ) . '> Verified only</label>' : '' );
 	aw_use_component_style( 'aw-directory' ); // the search form (tag pages, the List filters block, the shortcode)
+	// Row 1: search and Search. Then the filters: inline rows from 768, a "Filters" bottom sheet on phones (the Kits
+	// sheet, kit.js), applied only with "Show results". Without JavaScript the filters stay inline at every width.
 	return '<form class="aw-dir-search kit-section-search" role="search" method="get" action="' . esc_url( aw_hub_url( 'aw_listing' ) ) . '">'
-		. $field( 'aw-dir-q', 'Name or PIN code', '<span class="kit-ico kit-ico--search kit-field-icon" aria-hidden="true"></span><input type="search" id="aw-dir-q" name="q" value="' . esc_attr( $text ) . '" placeholder="Blue Cross" autocomplete="off"><button type="button" class="aw-dir-filter-toggle' . ( $state || $cur_type || $verified || $gov ? ' has-filters' : '' ) . '" aria-label="Filters" aria-controls="aw-dir-more" aria-expanded="' . ( $state || $cur_type || $verified || $gov ? 'true' : 'false' ) . '"><span class="kit-ico kit-ico--sliders" aria-hidden="true"></span></button>', 'q' )
-		. '<details class="aw-dir-more" id="aw-dir-more" data-kit-fold="767"' . ( $state || $cur_type || $verified || $gov ? ' data-kit-keep-open' : '' ) . ' open><summary class="screen-reader-text">Filters</summary><div class="aw-dir-more-body">' // phones: one field and "Filters"
-		. $field( 'aw-dir-state', 'State', '<select id="aw-dir-state" name="state">' . $s_opts . '</select>', 'state' )
+		. '<div class="aw-dir-row">' . $shared['q']
+		. '<div class="aw-dir-submit"><button type="submit" class="kit-btn kit-btn--ico-search">Search</button></div></div>'
+		. '<details class="kit-filter-sheet aw-dir-sheet" open><summary class="aw-dir-sheet-open"><span class="kit-ico kit-ico--sliders" aria-hidden="true"></span>Filters' . ( $n_active ? ' (' . (int) $n_active . ')' : '' ) . '</summary>'
+		. '<div class="kit-filters aw-dir-filters" role="group" aria-labelledby="aw-dir-sheet-h">'
+		. '<div class="aw-dir-sheet-head"><p class="aw-dir-sheet-title" id="aw-dir-sheet-h">Filter organisations</p><button type="button" class="aw-dir-sheet-x" data-aw-sheet-close aria-label="Close filters"><span class="kit-ico kit-ico--x" aria-hidden="true"></span></button></div>'
+		. '<div class="aw-dir-selects">' . $shared['state']
 		. $field( 'aw-dir-district', 'District', '<select id="aw-dir-district" name="district"' . ( $state ? '' : ' disabled' ) . '>' . $d_opts . '</select>', 'district' )
 		. $field( 'aw-dir-type', 'Type', '<select id="aw-dir-type" name="tag[]">' . $t_opts . '</select>', 'type' )
-		. aw_directory_service_field( $field )
-		. ( aw_verified_count() ? '<label class="kit-checkbox aw-dir-check"><input type="checkbox" name="verified" value="1"' . checked( $verified, true, false ) . '> Claimed only</label>' : '' )
-		. ( function_exists( 'aw_gov_verified_count' ) && aw_gov_verified_count() ? '<label class="kit-checkbox aw-dir-check"><input type="checkbox" name="gov" value="1"' . checked( $gov, true, false ) . '> Verified only</label>' : '' )
-		. '</div></details>' . ( function_exists( 'kits_fold_now' ) ? kits_fold_now( 'fold' ) : '' ) // folded before the first paint on phones (no layout shift)
-		. '<div class="aw-dir-submit"><input type="hidden" name="aw_filter" value="1"><button type="submit" class="kit-btn kit-btn--brand">Search</button></div>'
+		. $service . '</div>'
+		. ( $checks ? '<fieldset class="aw-dir-checks"><legend class="screen-reader-text">Show only</legend>' . $checks . '</fieldset>' : '' )
+		. '<div class="kit-filter-sheet-actions"><a class="kit-btn kit-btn--secondary" href="' . esc_url( aw_hub_url( 'aw_listing' ) ) . '">Reset</a><button type="submit" class="kit-btn">Show results</button></div>'
+		. '</div></details>' . ( function_exists( 'kits_fold_now' ) ? kits_fold_now( 'sheet' ) : '' ) // a sheet before the first paint on phones (no layout shift)
+		. '<input type="hidden" name="aw_filter" value="1">'
 		. '</form>';
 }
 add_shortcode( 'aw_directory_filter', 'aw_directory_filter' );
