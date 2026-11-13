@@ -1184,6 +1184,29 @@ function aw_camp_dates_state( $html ) {
 }
 add_filter( 'the_content', fn( $html ) => is_singular( 'aw_campaign' ) ? aw_camp_dates_state( $html ) : $html, 98 );
 
+/**
+ * Timeline dates as date cards (owner, 13 Nov 2026: highlighted dates get the calendar date card, sitewide). Every
+ * span.aw-camp-dates-when that holds one dated aw-date (with <time datetime="Y-m-d">) gets kits_datecard() in its place,
+ * on any page; the li states (is-done, is-key, is-next) are set first (priority 98). The words of the item stay.
+ *
+ * @param string $html The rendered content.
+ * @return string
+ */
+function aw_datecards( $html ) {
+	if ( ! function_exists( 'kits_datecard' ) || false === strpos( (string) $html, 'aw-camp-dates-when' ) ) {
+		return $html;
+	}
+	return (string) preg_replace_callback(
+		'#(<span class="aw-camp-dates-when">)\s*<span class="(?:kit-date )?aw-date">\s*(?:<span class="kit-ico[^"]*" aria-hidden="true"></span>)?\s*<time datetime="(\d{4}-\d{2}-\d{2})"[^>]*>[^<]*</time>\s*</span>#',
+		function ( $m ) {
+			$card = kits_datecard( $m[2] );
+			return $card ? $m[1] . $card : $m[0];
+		},
+		(string) $html
+	);
+}
+add_filter( 'the_content', 'aw_datecards', 99 );
+
 // The newsletter band on a campaign page takes the campaign's colours (owner, 13 Nov 2026): the campaign's own class
 // (aw-camp--<slug>, the first one in the page's content) on the band, so its --camp-* tokens apply there; aw.css maps
 // them. Everywhere else the band keeps the brand colours.

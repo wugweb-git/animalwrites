@@ -23,6 +23,7 @@ if ( ! function_exists( 'kits_term_url' ) ) { // aw-seo-extras carries a copy fo
  *  kits_badge()          state: verified, unconfirmed, featured, sponsored, ad, closed, new
  *  kits_eyebrow()        small label that carries information                   span.kit-eyebrow
  *  kits_count()          number beside a label                                  span.kit-count
+ *  kits_datecard()       a highlighted date as a calendar page (timelines, deadlines) time.kit-datecard
  *  kits_filter_dropdown() one filter as a dropdown: a button with a checkbox list (several choices, counts)
  *  kits_sort_dropdown()  "Sort" as a dropdown of links (one choice)
  *  kits_filter_bar()     the filters in one row (dropdowns, Sort on the right), a "Filters" sheet on phones, and the
@@ -49,6 +50,28 @@ function kits_badge( $text, $variant ) {
 
 function kits_eyebrow( $text ) {
 	return '<span class="kit-eyebrow">' . esc_html( $text ) . '</span>';
+}
+
+/**
+ * The date card (owner, 13 Nov 2026: "when highlighting dates use a calendar icon, artistic, to make a date card; should
+ * be universal"): a calendar page with the month on a strip, the day large and the year small. Use it wherever a date
+ * is the point of the block (timelines, deadlines, event days); dates inside sentences and meta rows stay kit-date.
+ * Styles: kit-primitives.css (.kit-datecard). The strip takes --camp-mark on campaign pages, the brand ink elsewhere.
+ *
+ * @param string|int $when    A date strtotime() reads (Y-m-d) or a Unix time.
+ * @param string     $variant '' (64px) or 'sm' (48px).
+ * @return string A time element, or '' when the date cannot be read.
+ */
+function kits_datecard( $when, $variant = '' ) {
+	$ts = is_numeric( $when ) ? (int) $when : strtotime( (string) $when );
+	if ( ! $ts ) {
+		return '';
+	}
+	$tz = wp_timezone();
+	return '<time class="kit-datecard' . ( $variant ? ' kit-datecard--' . esc_attr( $variant ) : '' ) . '" datetime="' . esc_attr( wp_date( 'Y-m-d', $ts, $tz ) ) . '">'
+		. '<span class="kit-datecard-month">' . esc_html( wp_date( 'M', $ts, $tz ) ) . '</span> '
+		. '<span class="kit-datecard-day">' . esc_html( wp_date( 'j', $ts, $tz ) ) . '</span> '
+		. '<span class="kit-datecard-year">' . esc_html( wp_date( 'Y', $ts, $tz ) ) . '</span></time>';
 }
 
 function kits_count( $n ) {

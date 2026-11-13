@@ -1719,6 +1719,40 @@
    }
   },
   {
+   "name": "Date card",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-datecard",
+    "kit-datecard--sm",
+    "kit-datecard-month",
+    "kit-datecard-day",
+    "kit-datecard-year"
+   ],
+   "states": [
+    "default: a calendar page (64px): binder rings, month on a strip in --camp-mark (brand ink off campaigns), day large, year small, the next page under it",
+    "small (kit-datecard--sm, 48px)",
+    "key date (inside li.is-key, or .kit-datecard.is-key): the page edged in the mark",
+    "timeline: every span.aw-camp-dates-when with a dated aw-date becomes a card (aw_datecards, animal-writes-core)"
+   ],
+   "tokens": [
+    "kit-space-7",
+    "kit-space-8",
+    "kit-radius-control",
+    "kit-color-line",
+    "kit-color-ink",
+    "kit-color-muted",
+    "kit-type-h2",
+    "kit-type-xs"
+   ],
+   "source": "plugins/kits-core/includes/primitives.php kits_datecard(); themes/kits-by-wugweb/assets/css/kit-primitives.css",
+   "rules": {
+    "font": "Inter (the site font), lining tabular figures",
+    "use": "a date that is the point of a block (timelines, deadlines, event days); dates in sentences and meta rows stay kit-date",
+    "a11y": "one time element with datetime; reads as month, day, year"
+   }
+  },
+  {
    "name": "Meta line (date, author, reading time, place)",
    "type": "primitive",
    "status": "live",
