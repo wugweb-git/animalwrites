@@ -45,6 +45,7 @@ body.home .aw-ed-story.aw-camp--community-dogs .aw-ed-story-stamp img { display:
 .aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates > * { position: relative; margin: 0 !important; padding: var(--kit-space-3) var(--kit-space-3) 0 0; border-top: var(--kit-border-width) solid var(--dg-line); }
 .aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates > *::before { content: ""; position: absolute; left: 0; top: calc(var(--kit-space-3) / -2); width: var(--kit-space-3); height: var(--kit-space-3); box-sizing: border-box; border-radius: 50%; border: var(--kit-border-mark) solid var(--camp-primary); background: var(--kit-color-ink); }
 .aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates > .is-key::before { background: var(--camp-primary); }
+.aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates > :has(> .aw-ed-story-when > .kit-datecard)::before { content: none; } /* the date card (home.php) marks the step, so no dot on the line */
 .aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates p { margin: 0px !important; }
 .aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates p:first-child { white-space: nowrap; }
 .aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates .has-small-font-size { margin-top: var(--kit-space-1) !important; color: rgba(255, 255, 255, 0.8); }

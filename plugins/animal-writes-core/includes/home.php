@@ -413,6 +413,38 @@ add_filter(
 	2
 );
 
+// The story band's timeline (aw-ed-story-dates): each dated step shows its date as the calendar date card (kits_datecard,
+// small), like the campaign page timelines (owner, 13 Nov 2026: highlighted dates get the date card, sitewide). A step whose
+// date has passed takes is-done (the torn-off page); is-key stays from the pattern. The words of each step stay.
+add_filter(
+	'render_block_core/group',
+	function ( $html, $block ) {
+		if ( ! function_exists( 'kits_datecard' ) || ! in_array( 'aw-ed-story-dates', preg_split( '/\s+/', (string) ( $block['attrs']['className'] ?? '' ) ), true ) ) {
+			return $html;
+		}
+		$today = current_time( 'Y-m-d' );
+		return (string) preg_replace_callback(
+			'#<div class="wp-block-group((?: [^"]*)?)">(\s*)<p>\s*<strong>(.*?)</strong>\s*</p>#s',
+			function ( $m ) use ( $today ) {
+				$ts = strtotime( trim( wp_strip_all_tags( $m[3] ) ) . ' 12:00' );
+				if ( ! $ts ) {
+					return $m[0];
+				}
+				$iso  = gmdate( 'Y-m-d', $ts );
+				$card = kits_datecard( $iso, 'sm' );
+				if ( ! $card ) {
+					return $m[0];
+				}
+				$cls = $m[1] . ( $iso < $today ? ' is-done' : '' );
+				return '<div class="wp-block-group' . $cls . '">' . $m[2] . '<p class="aw-ed-story-when">' . $card . '</p>';
+			},
+			(string) $html
+		);
+	},
+	20,
+	2
+);
+
 // The story band's photograph (pattern aw1-story, a core Cover) is printed with one 1536px file and no srcset, so phones
 // downloaded 376 KB where the 768px copy is 116 KB. Give its img the attachment's srcset (the browser picks the size; the
 // band is full width, so the default 100vw applies). Front end only; the stored pattern is not changed.
