@@ -424,7 +424,7 @@ add_filter(
 		}
 		$today = current_time( 'Y-m-d' );
 		return (string) preg_replace_callback(
-			'#<div class="wp-block-group((?: [^"]*)?)">(\s*)<p>\s*<strong>(.*?)</strong>\s*</p>#s',
+			'#<div class="wp-block-group((?: [^"]*)?)">(\s*)<p(?: class="[^"]*")?>\s*<strong>(.*?)</strong>\s*</p>#s',
 			function ( $m ) use ( $today ) {
 				$ts = strtotime( trim( wp_strip_all_tags( $m[3] ) ) . ' 12:00' );
 				if ( ! $ts ) {
