@@ -973,7 +973,7 @@ function aw_social_for_item( int $id ): array {
  * open under it (no folds sitewide), the player loading when the card comes near the screen. Every other platform
  * gets a 44px "View on {platform}" button to the post in a new tab, never an embed (owner, 13 Nov 2026): X's
  * widgets.js drew nothing for logged-out or tracking-protected readers and left the bare link running out of the card.
- * "Other" posts get no button until the owner approves its wording; the title link still opens the post.
+ * "Other" posts get no button (owner, 13 Nov 2026); the title link still opens the post.
  *
  * @param WP_Post $p Social post.
  */
