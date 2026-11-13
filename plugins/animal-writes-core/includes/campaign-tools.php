@@ -954,6 +954,9 @@ function aw_block_current_campaign( $a = array(), $id = 0 ) {
 	$slug = sanitize_title( (string) ( $a['campaign'] ?? '' ) );
 	$pick = '' !== $slug ? get_page_by_path( $slug, OBJECT, 'aw_campaign' ) : null;
 	$c    = '' !== $slug ? ( $pick && 'publish' === $pick->post_status ? (int) $pick->ID : 0 ) : aw_current_campaign_id();
+	if ( ! $c && '' === $slug ) {
+		return aw_side_default_card();
+	}
 	if ( ! $c || ( is_singular( 'aw_campaign' ) && get_queried_object_id() === $c ) ) {
 		return defined( 'REST_REQUEST' ) && REST_REQUEST ? '<p class="aw-block-preview">' . esc_html__( 'Current campaign (shows while a campaign is open)', 'animal-writes-core' ) . '</p>' : '';
 	}
@@ -988,6 +991,22 @@ function aw_block_current_campaign( $a = array(), $id = 0 ) {
 		. '<h2 class="aw-side-camp-title" id="' . esc_attr( $hid ) . '"><a href="' . esc_url( $url ) . '">' . esc_html( $title ) . '</a></h2>'
 		. ( has_excerpt( $c ) ? '<p class="aw-side-camp-line">' . esc_html( wp_strip_all_tags( get_the_excerpt( $c ) ) ) . '</p>' : '' )
 		. $btns . '</div></section>';
+}
+
+/**
+ * The default banner's small card (sm), shown in the sidebar when no campaign is open (owner, 13 Nov 2026: the default
+ * banner in lg, md, sm and share). The words and picture are the Animal Writes card's (pattern aw-default-card).
+ */
+function aw_side_default_card() {
+	aw_use_component_style( 'aw-single' );
+	wp_enqueue_style( 'aw-camp-tokens', plugins_url( 'assets/css/aw-camp-tokens.css', AW_CORE_DIR . 'animal-writes-core.php' ), array(), (string) filemtime( AW_CORE_DIR . 'assets/css/aw-camp-tokens.css' ) );
+	$img = wp_get_attachment_image( 23313, 'medium_large', false, array( 'alt' => '', 'loading' => 'lazy' ) );
+	$url = home_url( '/help/' );
+	return '<section class="kit-card aw-side-camp aw-camp aw-side-camp--default" aria-labelledby="aw-side-camp-default">'
+		. ( $img ? '<div class="aw-side-camp-media">' . $img . '</div>' : '' )
+		. '<div class="aw-side-camp-body"><h2 class="aw-side-camp-title" id="aw-side-camp-default"><a href="' . esc_url( $url ) . '">' . esc_html__( 'Help for India’s animals, in one place.', 'animal-writes-core' ) . '</a></h2>'
+		. '<p class="aw-side-camp-line">' . esc_html__( 'Helplines, vets and rescue groups near you, and the law in plain words.', 'animal-writes-core' ) . '</p>'
+		. '<a class="kit-btn aw-side-camp-btn" href="' . esc_url( $url ) . '">' . esc_html__( 'Find help', 'animal-writes-core' ) . '</a></div></section>';
 }
 
 /*

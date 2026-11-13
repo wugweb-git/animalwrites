@@ -66,12 +66,20 @@
 .aw-side-camp-chip { display: inline-flex; align-items: center; gap: var(--kit-space-1); padding: 0 var(--kit-space-2); border-radius: var(--kit-radius-pill); background: var(--kit-color-ink); color: var(--kit-color-bg); font-size: var(--kit-type-xs, 0.75rem); font-weight: var(--kit-weight-strong); line-height: 1.6; }
 .aw-side-camp-btns { display: grid; gap: var(--kit-space-2); }
 .aw-side-camp-btns .kit-btn { width: 100%; justify-content: center; }
-/* Campaign side card (sm): the picture on top fades into the campaign's ash (--camp-dark), where the words sit in white
-   (17:1). The chip and the main button carry the campaign colour; the second action is a white text link. */
-.aw-side-camp.aw-camp { position: relative; isolation: isolate; border: 0; background: var(--camp-dark); color: var(--kit-color-on-ink); }
+/* Campaign side card (sm, owner 13 Nov 2026: every campaign and the default banner in lg, md, sm and share): the picture
+   on top fades into the campaign's dark (--camp-dark), where the words sit in white. The chip and the main button carry
+   the campaign colour (--aw-side-fill); the second action is a white text link. Where the campaign colour is its dark
+   (Supreme Court plum) the fill is its light shade; the default banner (no campaign open) is brand ink with a white
+   button and the picture in greys. */
+.aw-side-camp.aw-camp { --aw-side-fill: var(--camp-mark); --aw-side-on-fill: var(--camp-on-mark); position: relative; isolation: isolate; border: 0; background: var(--camp-dark); color: var(--kit-color-on-ink); }
+.aw-side-camp.aw-camp--sc-stray-dogs { --aw-side-fill: var(--camp-light); --aw-side-on-fill: var(--camp-dark); }
+.aw-side-camp.aw-camp--community-dogs { --camp-mark: #9a5b00; --camp-on-mark: #ffffff; --camp-dark: #16130e; } /* campaign-record.css loads on its own page only */
+.aw-side-camp.aw-side-camp--default { --aw-side-fill: var(--kit-color-on-ink); --aw-side-on-fill: var(--kit-color-ink); }
+.aw-side-camp--default .aw-side-camp-media img { filter: grayscale(1); }
 .aw-side-camp.aw-camp .aw-side-camp-media { position: relative; z-index: -1; aspect-ratio: 4 / 3; border: 0; background: var(--camp-dark); }
-.aw-side-camp.aw-camp .aw-side-camp-media img { object-fit: cover; object-position: 22% 70%; }
-.aw-side-camp.aw-camp .aw-side-camp-media::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgb(29 20 24 / 0) 45%, rgb(29 20 24 / 0.7) 75%, var(--camp-dark) 100%); }
+.aw-side-camp.aw-camp .aw-side-camp-media img { object-fit: cover; object-position: 50% 50%; }
+.aw-side-camp.aw-camp--lab-rules .aw-side-camp-media img { object-position: 22% 70%; } /* the stamp and the circled papers */
+.aw-side-camp.aw-camp .aw-side-camp-media::after { content: ""; position: absolute; inset: 0 0 -1px; background: linear-gradient(180deg, transparent 40%, color-mix(in srgb, var(--camp-dark) 70%, transparent) 68%, var(--camp-dark) 90%); }
 .aw-side-camp.aw-camp .aw-side-camp-body { margin-top: calc(-1 * var(--kit-space-7)); }
 .aw-side-camp.aw-camp :is(.aw-side-camp-title, .aw-side-camp-line) { color: var(--kit-color-on-ink); }
 .aw-side-camp.aw-camp .aw-side-camp-title { margin: 0 0 var(--kit-space-3); font-size: var(--kit-type-h3); font-weight: var(--kit-weight-bold); line-height: 1.15; letter-spacing: -0.01em; }
@@ -79,13 +87,13 @@
 .aw-side-camp.aw-camp .aw-side-camp-line { display: block; overflow: visible; -webkit-line-clamp: none; margin: 0 0 var(--kit-space-5); color: rgb(255 255 255 / 0.8); } /* the whole line, never cut */
 .aw-side-camp.aw-camp .aw-side-camp-meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2) var(--kit-space-3); margin: 0 0 var(--kit-space-3); }
 .aw-side-camp.aw-camp :is(.aw-side-camp-meta, .aw-side-camp-meta .kit-meta-item) { color: rgb(255 255 255 / 0.8); }
-.aw-side-camp.aw-camp .aw-side-camp-chip { gap: var(--kit-space-2); padding: var(--kit-space-1) var(--kit-space-3); background: var(--camp-mark); color: var(--camp-on-mark); box-shadow: none; font-weight: var(--kit-weight-bold); }
-.aw-side-camp.aw-camp .aw-side-camp-chip::before { content: ""; flex: none; width: var(--kit-space-2); height: var(--kit-space-2); border-radius: 50%; background: var(--camp-on-mark); animation: aw-side-camp-pulse 1.6s var(--kit-motion-ease) 3; }
+.aw-side-camp.aw-camp .aw-side-camp-chip { gap: var(--kit-space-2); padding: var(--kit-space-1) var(--kit-space-3); background: var(--aw-side-fill); color: var(--aw-side-on-fill); box-shadow: none; font-weight: var(--kit-weight-bold); }
+.aw-side-camp.aw-camp .aw-side-camp-chip::before { content: ""; flex: none; width: var(--kit-space-2); height: var(--kit-space-2); border-radius: 50%; background: var(--aw-side-on-fill); animation: aw-side-camp-pulse 1.6s var(--kit-motion-ease) 3; }
 @keyframes aw-side-camp-pulse { 50% { opacity: 0.35; } }
 .aw-side-camp.aw-camp .aw-side-camp-btns { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-3) var(--kit-space-5); }
 .aw-side-camp.aw-camp .aw-side-camp-btns .kit-btn { width: auto; }
-.aw-side-camp.aw-camp .aw-side-camp-btn { border-color: var(--camp-mark); background: var(--camp-mark); color: var(--camp-on-mark); }
-.aw-side-camp.aw-camp .aw-side-camp-btn:hover { border-color: var(--camp-accent); background: var(--camp-accent); }
+.aw-side-camp.aw-camp .aw-side-camp-btn { border-color: var(--aw-side-fill); background: var(--aw-side-fill); color: var(--aw-side-on-fill); }
+.aw-side-camp.aw-camp .aw-side-camp-btn:hover { --aw-side-hover: color-mix(in srgb, var(--aw-side-fill) 82%, var(--camp-dark)); border-color: var(--aw-side-hover); background: var(--aw-side-hover); }
 .aw-side-camp.aw-camp .aw-side-camp-btn.kit-btn--secondary { min-height: 0; padding: 0; border: 0; background: none; color: var(--kit-color-on-ink); text-decoration: underline; text-underline-offset: 0.2em; }
 .aw-side-camp.aw-camp .aw-side-camp-btn.kit-btn--secondary:hover { background: none; text-decoration-thickness: 2px; }
 .aw-side-camp.aw-camp :is(.aw-side-camp-title a, .aw-side-camp-btn):focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-on-ink); outline-offset: var(--kit-focus-offset); }
