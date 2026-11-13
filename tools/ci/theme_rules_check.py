@@ -58,8 +58,8 @@ BLOCK_PARTS = re.compile(
 PAD_PROPS = ("padding", "padding-top", "padding-right", "padding-bottom", "padding-left", "padding-block", "padding-inline",
              "padding-block-start", "padding-block-end", "padding-inline-start", "padding-inline-end")
 PAD_MIN = 24
-# List cards (kit-card states and their body): 16px, --kit-space-4 (owner, 11 Nov 2026).
-CARD_PAD_MIN = 16
+# List cards (kit-card states and their body): 12px, --kit-space-3 (owner, 13 Nov 2026: "lesser padding"; was 16px, 11 Nov).
+CARD_PAD_MIN = 12
 CARDS = re.compile(r"\.(kit-card(-body)?(--[\w-]+)?|is-style-kits-card)(?![\w-])")
 # --kit-space-N and --s-N under 24px (kit-tokens.css, kits-v42.css).
 SPACE_PX = {"kit-space": {0: 0, 1: 4, 2: 8, 3: 12, 4: 16}, "s": {0: 0, 1: 4, 2: 8, 3: 12, 4: 16}}
