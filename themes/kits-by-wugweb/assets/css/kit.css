@@ -1274,8 +1274,9 @@ header.wp-block-template-part.kit-header-hidden { transform: translateY(calc(-10
 .kit-card-chips .kit-src-icon { width: var(--kit-icon-sm, 16px); height: var(--kit-icon-sm, 16px); flex: none; border-radius: var(--kit-radius-mark); object-fit: contain; }
 /* Meta and chips on one row (owner, 21 Oct 2026; 13 Nov 2026: "metarow - it is a single row - will always be a row"):
    .kit-card-metarow is one line at every width, date first; it never wraps or stacks, and the date is never cut. The
-   meta items keep their size; the chips take the room left: a chip that does not fit drops out of sight whole (no
-   slivers), and a chip alone on the line ends in an ellipsis; with no chips, the last meta item ends in an ellipsis. */
+   meta items keep their size; the chips take the room left: the first chip ends in an ellipsis when it is too long,
+   and a chip with no room left drops out of sight whole (no empty slivers); with no chips, the last meta item ends in
+   an ellipsis. */
 .kit-card-metarow { display: flex; flex-wrap: nowrap; align-items: center; gap: var(--kit-space-2); min-width: 0; overflow: hidden; white-space: nowrap; }
 .kit-card-metarow > .kit-card-meta { flex: none; min-width: 0; margin: 0; flex-wrap: nowrap !important; }
 .kit-card-metarow > .kit-card-meta:last-child { flex: 0 1 auto; overflow: hidden; }

@@ -1831,7 +1831,7 @@
     "author (person)",
     "time (clock)",
     "place (pin)",
-    "meta row (several items, one line: never wraps, owner 13 Nov 2026; the date never cut)",
+    "meta row (several items, one line: never wraps, owner 13 Nov 2026; the date never cut, the first chip ends in an ellipsis, a chip with no room drops out whole)",
     "single meta item",
     "inside a sentence (keeps the sentence text)"
    ],

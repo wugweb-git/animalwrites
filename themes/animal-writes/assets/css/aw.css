@@ -301,11 +301,11 @@
 @media (prefers-reduced-motion: reduce) { .aw-help-bar a { transition: none; } .aw-help-bar a:active { transform: none; } }
 
 /* News, Library and Resources lists: stacked cards (owner, 13 Nov 2026: "i like stacked version and lesser padding";
-   "max 2:1 and 3:5"; "stacked card minimum width will be 350px, max is 600"; gap 16px). hubs.php makes every card in
+   "max 2:1 and 3:5"; "stacked card minimum width will be 350px, max is 600", then "Min 340px, two"; gap 16px). hubs.php makes every card in
    those lists kit-card--stacked-md and gives the list aw-stack-list (hubs, Home sections, campaign sections, archives).
-   Columns follow the site breakpoints (docs/design-system.md, line 8: md 768, lg 1200): one below 768, two from 768,
-   three from 1200 only where the list is wide enough for three cards of --kit-card-stacked-min (the hub and campaign
-   lists, 1120-1184px); a list in the 720px main column keeps two. Cards --kit-card-stacked-min to
+   Columns follow the site breakpoints (docs/design-system.md, line 8: md 768, lg 1200): one below 768, two from 768
+   (owner, 13 Nov 2026: "Min 340px, two"; 2 x 340 + 16 = 696, inside the 704px list at 768), from 1200 as many as fit,
+   at most three (three in the hub and campaign lists, 1120-1184px; two in the 720px main column). Cards --kit-card-stacked-min to
    --kit-card-stacked-max wide, gap --kit-space-4 (docs/card-sizes.md, Stacked list). One surface. */
 .wp-block-post-template.aw-stack-list.aw-stack-list { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; grid-template-rows: none !important; gap: var(--kit-space-4) !important; }
 @media (min-width: 768px) { .wp-block-post-template.aw-stack-list.aw-stack-list { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } }
