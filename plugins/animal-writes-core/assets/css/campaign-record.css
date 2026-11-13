@@ -133,6 +133,15 @@
 	.aw-camp.aw-camp--community-dogs .aw-camp-hero > .wp-block-image { width: 9.5rem; margin-top: var(--kit-space-4) !important; }
 	.aw-camp.aw-camp--community-dogs .aw-camp-hero > .aw-camp-postmark { width: 7rem; height: 7rem; padding: 0.75rem; font-size: 0.6875rem; }
 }
+/* Phones: the figure and the stamp share the hero's last row, so heading, outcome and "2.5 lakh" fit the first screen
+   and the stamp no longer adds its own 300px below. The stamp at --kit-thumb-lg; the postmark struck across its foot. */
+@media (max-width: 767px) {
+	.aw-camp.aw-camp--community-dogs .aw-camp-hero { grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--kit-space-4); }
+	.aw-camp.aw-camp--community-dogs .aw-camp-hero > * { grid-column: 1 / -1; }
+	.aw-camp.aw-camp--community-dogs .aw-camp-hero > .aw-camp-metric { grid-column: 1; grid-row: 20; align-self: start; }
+	.aw-camp.aw-camp--community-dogs .aw-camp-hero > .wp-block-image { grid-column: 2; grid-row: 20; align-self: start; justify-self: end; width: var(--kit-thumb-lg); margin: var(--kit-space-3) var(--kit-space-1) var(--kit-space-7) 0 !important; padding: var(--kit-space-3); }
+	.aw-camp.aw-camp--community-dogs .aw-camp-hero > .aw-camp-postmark { grid-column: 2; grid-row: 20; align-self: end; justify-self: center; margin: 0 !important; transform: translate(-1.5rem, var(--kit-space-4)) rotate(-12deg); }
+}
 @media (min-width: 768px) {
 	.aw-camp.aw-camp--community-dogs .aw-camp-hero > .wp-block-image { width: 12.5rem; justify-self: center; }
 	.aw-camp.aw-camp--community-dogs .aw-camp-hero > .aw-camp-postmark { justify-self: center; transform: translateX(-7.5rem) rotate(-12deg); }
@@ -144,6 +153,17 @@
 	.aw-camp.aw-camp--community-dogs .aw-camp-hero > .aw-camp-postmark { grid-column: 2; grid-row: 1 / span 8; justify-self: start; margin: 0 !important; transform: translate(-3.5rem, -1rem) rotate(-12deg); }
 }
 @media (prefers-reduced-motion: reduce) { .aw-camp.aw-camp--community-dogs .aw-camp-hero > .wp-block-image { animation: none; } .aw-camp.aw-camp--community-dogs :is(#next-steps .aw-camp-doclist li, .aw-camp-partner-logos > figure img, .aw-camp-follow a) { transition: none; } .aw-camp.aw-camp--community-dogs .aw-camp-follow a:active { transform: none; } }
+
+/* ---------- Contents: the section chips under the hero (campaign-record.php). The shared .kit-chip as it is (its 44px
+   tap and focus states) at the full 44px; on phones one row that scrolls sideways, the cut-off chip at the edge showing
+   there is more; from 768 the chips wrap. The block padding keeps the focus ring inside the scroll box. ---------- */
+.aw-camp.aw-camp--community-dogs > .aw-camp-jump { margin: 0; padding: var(--kit-space-2) 0; background: var(--dg-raised); border-bottom: 1px solid var(--kit-color-line); }
+.aw-camp.aw-camp--community-dogs > .aw-camp-jump ul { display: flex; gap: var(--kit-space-2); margin: 0; padding: var(--kit-space-2) var(--dg-inline); list-style: none; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x proximity; scroll-padding-inline: var(--dg-inline); scrollbar-width: none; }
+.aw-camp.aw-camp--community-dogs > .aw-camp-jump ul::-webkit-scrollbar { display: none; }
+.aw-camp.aw-camp--community-dogs > .aw-camp-jump li { flex: none; margin: 0; scroll-snap-align: start; }
+.aw-camp.aw-camp--community-dogs > .aw-camp-jump .kit-chip { min-height: var(--kit-size-target); padding-inline: var(--kit-space-4); } /* a thumb target you can see: the whole 44px is the chip; type stays the shared chip label (kit.css) */
+@media (min-width: 768px) { .aw-camp.aw-camp--community-dogs > .aw-camp-jump ul { flex-wrap: wrap; overflow: visible; } }
+.aw-camp.aw-camp--community-dogs > .aw-camp-jump + .aw-camp-section { border-top: 0 !important; }
 
 /* ---------- Campaign goal: the heading beside two statements, the outcome under them ---------- */
 .aw-camp.aw-camp--community-dogs #campaign-goal > p:not(.aw-camp-status) { max-width: 40ch; margin: 0 !important; font-size: var(--kit-type-h3); font-weight: var(--kit-weight-medium); line-height: var(--kit-leading-heading); letter-spacing: var(--kit-tracking-heading); }
@@ -174,6 +194,14 @@
 .aw-camp.aw-camp--community-dogs #why-it-matters .aw-card:nth-child(4) ul { padding-left: var(--kit-space-5); }
 .aw-camp.aw-camp--community-dogs #why-it-matters .aw-card:nth-child(4) li::marker { color: var(--camp-primary); }
 .aw-camp.aw-camp--community-dogs #why-it-matters .aw-card:nth-child(4) > p:last-child { padding: var(--kit-space-4); border-radius: var(--kit-radius-control); background: color-mix(in srgb, var(--kit-color-on-ink) 8%, transparent); }
+/* Phones: the three short points as compact rows, the icon beside the title and its line (204px a card -> about 120),
+   so the dark lead card comes into view sooner. Same words; the lead card is unchanged. */
+@media (max-width: 767px) {
+	.aw-camp.aw-camp--community-dogs #why-it-matters .aw-card:nth-child(-n+3) { display: grid; grid-template-columns: var(--kit-space-6) minmax(0, 1fr); column-gap: var(--kit-space-4); align-items: start; padding: var(--kit-space-4) var(--kit-space-5); }
+	.aw-camp.aw-camp--community-dogs #why-it-matters .aw-card:nth-child(-n+3)::before { grid-row: 1 / span 2; margin: 0; }
+	.aw-camp.aw-camp--community-dogs #why-it-matters .aw-card:nth-child(-n+3) > * { grid-column: 2; }
+	.aw-camp.aw-camp--community-dogs #why-it-matters .aw-card:nth-child(-n+3) > h3 { margin: 0 0 var(--kit-space-1) !important; }
+}
 @media (min-width: 1200px) {
 	.aw-camp.aw-camp--community-dogs #why-it-matters .is-layout-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 	.aw-camp.aw-camp--community-dogs #why-it-matters .aw-card:nth-child(4) { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); column-gap: var(--kit-space-7); align-content: start; padding: var(--kit-space-7); }
@@ -224,6 +252,10 @@
 .aw-camp.aw-camp--community-dogs .aw-camp-timeline .aw-camp-dates-when .kit-ico { --kit-ico-size: 0.75em; }
 .aw-camp.aw-camp--community-dogs .aw-camp-timeline .aw-camp-dates-what { display: block; margin-top: var(--kit-space-1); max-width: 34ch; }
 .aw-camp.aw-camp--community-dogs .aw-camp-timeline .aw-camp-dates-what strong { color: var(--kit-color-text); }
+/* The fold (campaign-record.php): while closed, only the five dates marked .is-shown; the summary under the list */
+.aw-camp.aw-camp--community-dogs .aw-camp-timeline:has(+ .aw-camp-timeline-more:not([open])) > li:not(.is-shown) { display: none; }
+.aw-camp.aw-camp--community-dogs .aw-camp-timeline-more { margin-top: var(--kit-space-5); }
+.aw-camp.aw-camp--community-dogs .aw-camp-timeline-more[open] > summary { margin-bottom: 0; }
 @media (min-width: 768px) {
 	.aw-camp.aw-camp--community-dogs .aw-camp-timeline { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: var(--kit-space-6); column-gap: var(--kit-space-5); }
 	.aw-camp.aw-camp--community-dogs .aw-camp-timeline li, .aw-camp.aw-camp--community-dogs .aw-camp-timeline li:last-child { padding: var(--kit-space-5) var(--kit-space-3) 0 0; border-left: 0; border-top: 2px solid var(--dg-line); }
@@ -270,6 +302,7 @@
 /* The FAQ after next-steps (faq.php): a plain band in the page's 1120 column, like the sections around it */
 .aw-camp.aw-camp--community-dogs > .aw-camp-faq { margin: 0; padding-block: var(--kit-space-section); padding-inline: var(--dg-inline); background: var(--dg-band); }
 .aw-camp.aw-camp--community-dogs > .aw-camp-faq + .aw-camp-section:not(.aw-camp-paper, .aw-camp-dark) { border-top: 1px solid var(--kit-color-line); }
+.aw-camp.aw-camp--community-dogs > .aw-camp-faq .kit-faq-btn:active { background: var(--kit-chip-hover); } /* a tap shows at once (the shared chip's light overlay); kit.css has focus only */
 
 /* ---------- Supported by: logo tiles, whole logos, names under them ---------- */
 .aw-camp.aw-camp--community-dogs .aw-camp-partner-logos { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(var(--kit-thumb-md), 1fr)); gap: var(--kit-space-5) var(--kit-space-3); } /* phones: as many --kit-thumb-md logos as fit (375: four; 767: eight) */

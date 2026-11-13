@@ -185,15 +185,95 @@ add_filter(
 );
 
 /*
+ * Community dogs timeline (section context): ten dates made a 1,100px column on phones. Five dates that carry the story
+ * stay in view, in date order: the launch, the removal order, the day of posting, the delivery and the final judgment.
+ * The other five wait behind the same Show more fold as the record lists (a closed Details after the list; while it is
+ * closed, CSS hides the li without .is-shown). Browsers without :has() show all ten. Nothing is removed from the page.
+ */
+const AW_CAMP_TIMELINE_SHOWN = array( '2025-11-01', '2025-11-07', '2025-11-29', '2025-12-02', '2026-05-19' );
+
+add_filter(
+	'render_block_core/group',
+	function ( $html, $block ) {
+		$id = aw_camp_id();
+		if ( ! $id || 'context' !== ( $block['attrs']['anchor'] ?? '' ) || 'closed' !== aw_camp_window( $id ) || 'india-writes-for-its-community-dogs' !== get_post_field( 'post_name', $id )
+			|| false !== strpos( $html, 'aw-camp-timeline-more' ) || ! preg_match( '/<ol\b[^>]*\baw-camp-timeline\b[^>]*>(.*?)<\/ol>/s', $html, $ol, PREG_OFFSET_CAPTURE ) ) {
+			return $html;
+		}
+		$shown = 0;
+		$list  = preg_replace_callback(
+			'/<li\b([^>]*)>(.*?)<\/li>/s',
+			function ( $li ) use ( &$shown ) {
+				if ( ! preg_match( '/<time datetime="([^"]+)"/', $li[2], $t ) || ! in_array( $t[1], AW_CAMP_TIMELINE_SHOWN, true ) ) {
+					return $li[0];
+				}
+				++$shown;
+				$attrs = preg_match( '/\bclass="/', $li[1] ) ? preg_replace( '/\bclass="/', 'class="is-shown ', $li[1], 1 ) : $li[1] . ' class="is-shown"';
+				return '<li' . $attrs . '>' . $li[2] . '</li>';
+			},
+			$ol[0][0]
+		);
+		if ( $shown < 1 || substr_count( $list, '<li' ) <= $shown ) {
+			return $html; // nothing to fold
+		}
+		aw_use_component_style( 'aw-single' ); // aw-more
+		$fold = '<details class="wp-block-details aw-more aw-camp-record-more aw-camp-timeline-more"><summary><span class="aw-more-show">Show more</span><span class="aw-more-less">Show less</span></summary></details>';
+		return substr_replace( $html, $list . $fold, $ol[0][1], strlen( $ol[0][0] ) );
+	},
+	20,
+	2
+);
+
+/*
+ * Community dogs: a row of section links under the hero, so a phone reader can jump to any part of a long record page
+ * (thumb-sized chips that scroll sideways on phones and wrap from 768). Each label is the section's own H2, word for
+ * word, so no new words; the nav's name is the site's existing word "Contents" (item-head.php). Sections without an H2
+ * are left out. Front end only; the stored content is not changed.
+ */
+const AW_CAMP_JUMP_SECTIONS = array( 'campaign-goal', 'why-it-matters', 'how-to-help', 'context', 'impact', 'next-steps', 'partners', 'press', 'library', 'news', 'updates' );
+
+add_filter(
+	'render_block_core/post-content',
+	function ( $html ) {
+		if ( is_admin() || ! is_singular( 'aw_campaign' ) || false === strpos( $html, 'aw-camp--community-dogs' ) || false !== strpos( $html, 'aw-camp-jump' )
+			|| ! preg_match( '/<section\b[^>]*\bid="campaign-goal"[^>]*>/', $html, $first, PREG_OFFSET_CAPTURE ) ) {
+			return $html;
+		}
+		$items = '';
+		foreach ( AW_CAMP_JUMP_SECTIONS as $anchor ) {
+			if ( ! preg_match( '/<section\b[^>]*\bid="' . $anchor . '"[^>]*>/', $html, $s, PREG_OFFSET_CAPTURE )
+				|| ! preg_match( '/<h2\b[^>]*>(.*?)<\/h2>/s', $html, $h, PREG_OFFSET_CAPTURE, $s[0][1] ) ) {
+				continue;
+			}
+			$next = strpos( $html, 'aw-camp-section ', $s[0][1] + strlen( $s[0][0] ) );
+			if ( false !== $next && $h[0][1] > $next ) {
+				continue; // the H2 found belongs to a later section
+			}
+			$label = trim( wp_strip_all_tags( $h[1][0] ) );
+			if ( '' !== $label ) {
+				$items .= '<li><a class="kit-chip" href="#' . esc_attr( $anchor ) . '">' . esc_html( $label ) . '</a></li>';
+			}
+		}
+		if ( '' === $items ) {
+			return $html;
+		}
+		$nav = '<nav class="aw-camp-jump" aria-label="' . esc_attr__( 'Contents', 'animal-writes-core' ) . '"><ul>' . $items . '</ul></nav>';
+		return substr_replace( $html, $nav, $first[0][1], 0 );
+	},
+	20
+);
+
+/*
  * The Community dogs hero photo (the stamp) is stored with no width, height or srcset, so phones downloaded the 683px
  * JPEG (70 KB) for a stamp about 150px wide and its box could shift on load. Give the img the attachment's width,
- * height and srcset, sized to the stamp (campaign-record.css: 152px below 768, 200px to 1199, 320px from 1200). Front end
- * only; the stored block is not changed.
+ * height and srcset, sized to the stamp (campaign-record.css: 112px below 768, 200px to 1199, 320px from 1200). Front end
+ * only; the stored block is not changed. The stored block has no id attribute, so the id is read from its wp-image-N class
+ * (without it the filter never ran and core gave phones "100vw", a 768px-plus file for the stamp).
  */
 add_filter(
 	'render_block_core/image',
 	function ( $html, $block ) {
-		$att = (int) ( $block['attrs']['id'] ?? 0 );
+		$att = (int) ( $block['attrs']['id'] ?? ( preg_match( '/\bwp-image-(\d+)\b/', $html, $c ) ? $c[1] : 0 ) );
 		if ( ! $att || is_admin() || ! is_singular( 'aw_campaign' ) || 'india-writes-for-its-community-dogs' !== get_post_field( 'post_name', get_queried_object_id() ) || false !== strpos( $html, ' srcset=' ) || ! preg_match( '/<img\b[^>]*\bwp-image-' . $att . '\b[^>]*>/', $html, $m ) ) {
 			return $html;
 		}
@@ -207,7 +287,7 @@ add_filter(
 			return $html;
 		}
 		$img = preg_replace( '/\s(sizes|width|height)="[^"]*"/', '', $m[0] );
-		$img = str_replace( '<img ', '<img width="' . (int) $src[1] . '" height="' . (int) $src[2] . '" srcset="' . esc_attr( $srcset ) . '" sizes="(min-width: 1200px) 320px, (min-width: 768px) 200px, 152px" ', $img );
+		$img = str_replace( '<img ', '<img width="' . (int) $src[1] . '" height="' . (int) $src[2] . '" srcset="' . esc_attr( $srcset ) . '" sizes="(min-width: 1200px) 320px, (min-width: 768px) 200px, 112px" ', $img );
 		return str_replace( $m[0], $img, $html );
 	},
 	10,

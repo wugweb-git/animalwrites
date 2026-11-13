@@ -993,6 +993,7 @@
 .aw-camp .aw-camp-record-more > summary { display: flex; align-items: center; box-sizing: border-box; min-height: var(--kit-size-target); font-weight: var(--kit-weight-bold); cursor: pointer; }
 .aw-camp .aw-camp-record-more > summary:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
 .aw-camp .aw-camp-record-more[open] > summary { margin-bottom: var(--kit-space-4); }
+.aw-camp .aw-camp-record-more:not([open]) > summary .aw-more-less, .aw-camp .aw-camp-record-more[open] > summary .aw-more-show { display: none; } /* one word at a time: the shared rule left with the Home folds (ad8254aa, 5 Nov 2026) and both showed */
 
 /* What happens next: the row of four from 768 (not only from 1200), the cards white */
 .aw-camp.aw-camp :is(#next, #next-closed) .aw-camp-steps > li:not(:first-child) { background: var(--kit-color-surface-soft); }
