@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_DIR_MAP_LIB = 'https://unpkg.com/maplibre-gl@4.7.1/dist/';
+const AW_DIR_MAP_LIB = 'assets/vendor/maplibre-gl-4.7.1/'; // MapLibre GL, served from this plugin (npm package files; see its README)
 const AW_DIR_STYLE   = 'https://tiles.openfreemap.org/styles/liberty';
 
 /**
@@ -290,10 +290,9 @@ function aw_dir_tools_html() {
 
 /** The panels the toolbar opens, under it: Near me and the map (hidden until asked for). */
 function aw_dir_panels_html() {
-	aw_use_component_style( 'aw-type-ico' ); // the Near me panel: one icon per type, cloned by aw.js
-	$icons = '';
+	$icons = ''; // one icon per type; dir-map.js reads each one's picture (--i) for the map's markers
 	foreach ( aw_listing_type_slugs() as $slug ) {
-		$icons .= '<span class="aw-type-ico aw-type-ico--' . esc_attr( $slug ) . '" data-type="' . esc_attr( $slug ) . '"></span>';
+		$icons .= aw_type_icon( $slug );
 	}
 	return '<section id="aw-near" class="aw-near" hidden aria-label="Near me">'
 		. '<form class="aw-near-form"><button type="button" class="kit-btn aw-near-locate">Use my location</button>'
@@ -319,7 +318,7 @@ add_action(
 			array(
 				'points' => rest_url( 'aw/v1/dir-points' ),
 				'near'   => rest_url( 'aw/v1/dir-near' ),
-				'lib'    => AW_DIR_MAP_LIB,
+				'lib'    => plugin_dir_url( __DIR__ ) . AW_DIR_MAP_LIB, // loaded by dir-map.js only when the map opens
 				'style'  => AW_DIR_STYLE,
 			)
 		);

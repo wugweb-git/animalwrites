@@ -1,8 +1,9 @@
 <?php
 /**
  * DirectoryWeb's own capability, manage_directoryweb. It opens DirectoryWeb's screens and routes
- * (the menu, Dashboard and its counts). Claims, on Directory → Claims and on the new screen, keep edit_aw_volunteers
- * (the right to read claim data; the new screen stays read-only); Settings keeps manage_options.
+ * (the menu, Dashboard and its counts) and Claims: Directory → Claims with its review, the new Claims screen (read only:
+ * no approve, reject or apply there) and its routes (owner, 13 Nov 2026). Settings keeps manage_options. Volunteers,
+ * reports, forms and MailWeb-AW keep edit_aw_volunteers.
  *
  * Nobody loses access:
  * - Granted to administrator and to every role that holds edit_aw_volunteers, on activation and once on the first admin

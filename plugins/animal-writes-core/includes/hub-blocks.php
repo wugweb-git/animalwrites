@@ -351,15 +351,15 @@ function aw_block_badges( $a, $id ) {
 }
 
 /**
- * A listing type's icon (aw-type-ico): it goes before the type's name wherever that label appears, and never stands in
+ * A listing or Library type's icon (kit-ico--type-{slug}, aw-type-icons.css, on the one kit-ico system): it goes before the type's name wherever that label appears, and never stands in
  * for a logo (owner, 15 Oct 2026: a logo slot shows the organisation's own logo or its initials only).
  *
  * @param string $slug Listing type slug.
  * @return string
  */
 function aw_type_icon( $slug ) {
-	aw_use_component_style( 'aw-type-ico' );
-	return '<span class="aw-type-ico aw-type-ico--' . esc_attr( $slug ) . '" aria-hidden="true"></span>';
+	aw_use_component_style( 'aw-type-icons' );
+	return aw_i( 'type-' . $slug, 'kit-ico--type' ); // kit-ico--type keeps its 1em size, spacing and the text colour
 }
 
 // Tag labels carry their icon wherever WordPress prints them (tags.php, term_links-post_tag).

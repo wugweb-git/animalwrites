@@ -6,8 +6,8 @@
  *   POST dashboard/count           manage_directoryweb ask for a count now (one background event)
  *   GET  stats/<tile>              manage_directoryweb one tile (published, status, places, indexing, search, claims,
  *                                                      badges, enrichment), from the same stored counts
- *   GET  claims                    edit_aw_volunteers  the Claims list: views, search, filters, sort, pages
- *   GET  claims/<id>               edit_aw_volunteers  one claim, field by field, with the proposed changes
+ *   GET  claims                    manage_directoryweb the Claims list: views, search, filters, sort, pages
+ *   GET  claims/<id>               manage_directoryweb one claim, field by field, with the proposed changes
  *   GET  settings                  manage_options      the services and the groups, with today's values
  *   POST settings/claim-form       manage_options      which Fluent Forms form is the claim form (option aw_ff_forms)
  *   GET  listings                  edit_posts          the Listings tab, read only (directoryweb-listings.php)
@@ -44,7 +44,7 @@ add_action(
 	'rest_api_init',
 	function () {
 		$dash   = directoryweb_rest_can( DIRECTORYWEB_CAP ); // directoryweb-caps.php
-		$claims = directoryweb_rest_can( 'edit_aw_volunteers' ); // claim data: as on Directory → Claims
+		$claims = directoryweb_rest_can( DIRECTORYWEB_CAP ); // claim data: as on Directory → Claims (read only here)
 		$admin  = directoryweb_rest_can( 'manage_options' );
 		register_rest_route(
 			DIRECTORYWEB_REST,

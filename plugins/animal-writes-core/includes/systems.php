@@ -17,11 +17,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Icon span.
  *
- * @param string $name Icon name (see aw.css 4.7).
+ * @param string $name  Icon name (see aw.css 4.7), or type-{slug} for a listing or Library type (aw-type-icons.css).
+ * @param string $class Optional extra classes, e.g. 'kit-ico--type' (aw_type_icon()).
  * @return string
  */
-function aw_i( $name ) {
-	return '<span class="kit-ico kit-ico--' . esc_attr( $name ) . '" aria-hidden="true"></span>';
+function aw_i( $name, $class = '' ) {
+	return '<span class="kit-ico kit-ico--' . esc_attr( $name ) . ( '' !== $class ? ' ' . esc_attr( $class ) : '' ) . '" aria-hidden="true"></span>';
 }
 
 /**

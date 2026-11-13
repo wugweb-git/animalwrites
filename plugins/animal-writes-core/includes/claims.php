@@ -165,7 +165,7 @@ add_action(
 	'admin_post_aw_claim_logo',
 	function () {
 		$id = absint( $_GET['claim'] ?? 0 );
-		if ( ! current_user_can( 'edit_aw_volunteers' ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ?? '' ) ), 'aw_claim_logo' ) ) {
+		if ( ! current_user_can( DIRECTORYWEB_CAP ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ?? '' ) ), 'aw_claim_logo' ) ) { // phpcs:ignore WordPress.WP.Capabilities.Unknown -- DirectoryWeb's own capability (directoryweb-caps.php)
 			wp_die( 'Not allowed.', 403 );
 		}
 		$path = aw_private_dir() . '/' . basename( (string) get_post_meta( $id, 'aw_c_logo', true ) );
@@ -183,7 +183,7 @@ add_action(
 	'admin_post_aw_claim_decide',
 	function () {
 		$id = absint( $_GET['claim'] ?? 0 );
-		if ( ! current_user_can( 'edit_aw_volunteers' ) || ! check_admin_referer( 'aw_claim_decide_' . $id ) || 'aw_claim' !== get_post_type( $id ) ) {
+		if ( ! current_user_can( DIRECTORYWEB_CAP ) || ! check_admin_referer( 'aw_claim_decide_' . $id ) || 'aw_claim' !== get_post_type( $id ) ) { // phpcs:ignore WordPress.WP.Capabilities.Unknown -- DirectoryWeb's own capability (directoryweb-caps.php)
 			wp_die( 'Not allowed.', 403 );
 		}
 		$lid = (int) get_post_meta( $id, 'aw_c_listing', true );

@@ -253,7 +253,7 @@ add_action(
 			'kits_options', // Kits → Theme Options and Core Settings save both options through one group.
 			'kits_theme_options',
 			array(
-				'type'              => 'array',
+				'type'              => 'object', // Matches the REST schema; 'array' would need list items.
 				'default'           => array(),
 				'sanitize_callback' => 'kits_theme_options_clean',
 				'show_in_rest'      => array( 'schema' => kits_theme_options_schema() ), // Kits → Theme Options (new screen) saves through /wp/v2/settings.

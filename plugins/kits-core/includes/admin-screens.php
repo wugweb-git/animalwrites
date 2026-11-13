@@ -851,6 +851,21 @@ function kits_options_link( string $label, string $path ): string {
 	return '<a href="' . esc_url( admin_url( $path ) ) . '">' . esc_html( $label ) . '</a>';
 }
 
+/**
+ * The exact place in the Site Editor for a template or template part of the active theme (header, footer, single-post …),
+ * relative to wp-admin; the list of that kind when the theme has no such template or part.
+ *
+ * @param string $type wp_template or wp_template_part.
+ * @param string $slug Template or part slug.
+ */
+function kits_site_editor_path( string $type, string $slug ): string {
+	$list = 'site-editor.php?postType=' . $type;
+	if ( ! function_exists( 'get_block_template' ) || ! get_block_template( get_stylesheet() . '//' . $slug, $type ) ) {
+		return $list;
+	}
+	return $list . '&postId=' . get_stylesheet() . '//' . $slug . '&canvas=edit';
+}
+
 /** Kits → Theme Options: the app (admin-app.php). */
 function kits_options_page() {
 	kits_admin_app_page();
@@ -879,7 +894,7 @@ function kits_theme_option_rows_of( string $section ): void {
 function kits_options_section_body( string $section, string $label ): bool {
 	switch ( $section ) {
 		case 'utility-share':
-			kits_options_box( 'Share bar', fn() => kits_theme_option_rows_of( 'utility-share' ) );
+			kits_options_box( 'Share bar', fn() => kits_theme_option_rows_of( 'utility-share' ), 'Where the bar sits on each kind of page: ' . kits_options_link( 'Editor → Templates', 'site-editor.php?postType=wp_template' ) . '.' );
 			return true;
 		case 'utility-extra':
 			$has = (bool) array_filter( array_keys( kits_theme_option_fields() ), fn( $k ) => 'utility-extra' === kits_theme_option_section( $k, kits_theme_option_fields()[ $k ] ) );
@@ -899,12 +914,12 @@ function kits_options_section_body( string $section, string $label ): bool {
 			return false;
 	}
 	if ( 'single-404' === $section ) {
-		kits_options_box( '404 page', fn() => kits_page_default_rows( '_404' ), 'The "page not found" page. Its words: ' . kits_options_link( 'Editor → Templates → 404', 'site-editor.php?postType=wp_template' ) . '.' );
+		kits_options_box( '404 page', fn() => kits_page_default_rows( '_404' ), 'The "page not found" page. Its words: ' . kits_options_link( 'Editor → Templates → 404', kits_site_editor_path( 'wp_template', '404' ) ) . '.' );
 		return true;
 	}
 	if ( 0 === strpos( $section, 'single-' ) ) {
 		$type = substr( $section, 7 );
-		kits_options_box( $label . ': each item', fn() => kits_page_default_rows( $type ), 'Every ' . $label . ' item uses these unless it picks its own in the editor (Page Options panel). Its layout: ' . kits_options_link( 'Editor → Templates', 'site-editor.php?postType=wp_template' ) . '.' );
+		kits_options_box( $label . ': each item', fn() => kits_page_default_rows( $type ), 'Every ' . $label . ' item uses these unless it picks its own in the editor (Page Options panel). Its layout: ' . kits_options_link( 'Editor → Templates', kits_site_editor_path( 'wp_template', 'page' === $type ? 'page' : ( 'post' === $type ? 'single' : 'single-' . $type ) ) ) . '.' );
 		return true; // The share bar's networks for every type are set once, in Share bar.
 	}
 	if ( 'archive-search' === $section || 'archive-author' === $section ) {
@@ -954,7 +969,7 @@ function kits_options_socials(): void {
 		}
 	}
 	$where = defined( 'RANK_MATH_VERSION' ) ? kits_options_link( 'Rank Math → Titles & Meta → Social Meta', 'admin.php?page=rank-math-options-titles#setting-panel-social' ) : esc_html( 'Rank Math SEO (not active: see Plugins)' );
-	kits_options_values_box( 'Socials', $rows ? $rows : array( array( esc_html( 'None yet' ), '' ) ), 'The site\'s profiles, read from ' . $where . '. Change them there; search engines read them too.' );
+	kits_options_values_box( 'Socials', $rows ? $rows : array( array( esc_html( 'None yet' ), '' ) ), 'The site\'s profiles, read from ' . $where . '. Change them there; search engines read them too. The footer\'s profile icons are in the footer part: ' . kits_options_link( 'Editor → Footer', kits_site_editor_path( 'wp_template_part', 'footer' ) ) . '.' );
 }
 
 /**

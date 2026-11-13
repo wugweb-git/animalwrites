@@ -450,5 +450,68 @@ require __DIR__ . '/rules-tests.php'; // phase 3 (Rules)
 require __DIR__ . '/retire-tests.php'; // phase 4 (Retire)
 require __DIR__ . '/sourceweb-tests.php'; // The new screens on the Kits shell .
 
+// Backup before uninstall deletes (includes/uninstall-backup.php): the lines, the 500-row batches, the folder guard.
+require_once dirname( __DIR__ ) . '/includes/uninstall-backup.php';
+$ub_t = static function ( bool $ok, string $what ): void {
+	aw_t( $ok, $what );
+};
+$ub_h = json_decode( aw_src_backup_header( 'aw-sourcing', '1.2.3', 'https://example.org/', 1763000000, array( 'a_opt', 'b_opt' ), array( 'wp_x' ) ), true );
+$ub_t( 'header' === $ub_h['type'] && 'aw-sourcing' === $ub_h['plugin'] && '1.2.3' === $ub_h['version'] && 'https://example.org/' === $ub_h['site'], 'backup: header names the plugin, version and site' );
+$ub_t( '2025-11-13T02:13:20Z' === $ub_h['time'] && array( 'a_opt', 'b_opt' ) === $ub_h['options'] && array( 'wp_x' ) === $ub_h['tables'], 'backup: header has the time, the options and the tables' );
+$ub_l = aw_src_backup_option_line( 'a_opt', 'a:1:{s:1:"k";s:3:"é/";}', 'yes' );
+$ub_o = json_decode( $ub_l, true );
+$ub_t( "\n" === substr( $ub_l, -1 ) && 1 === substr_count( $ub_l, "\n" ), 'backup: one line per option' );
+$ub_t( 'option' === $ub_o['type'] && 'a:1:{s:1:"k";s:3:"é/";}' === $ub_o['value'] && 'yes' === $ub_o['autoload'] && ! isset( $ub_o['b64'] ), 'backup: option value kept exactly as stored' );
+$ub_o = json_decode( aw_src_backup_option_line( 'bin', "\xff\x00\xfe", 'no' ), true );
+$ub_t( array( 'value' ) === $ub_o['b64'] && "\xff\x00\xfe" === base64_decode( $ub_o['value'] ), 'backup: a value that is not UTF-8 is kept base64-encoded' ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode -- the test reads the value back
+$ub_r = json_decode( aw_src_backup_row_line( 'wp_x', array( 'id' => '7', 'note' => null, 'blob' => "\x80" ) ), true );
+$ub_t( 'row' === $ub_r['type'] && 'wp_x' === $ub_r['table'] && '7' === $ub_r['row']['id'] && null === $ub_r['row']['note'] && array( 'blob' ) === $ub_r['b64'], 'backup: row line keeps every column, null and binary' );
+$ub_t( '{}' === substr( trim( aw_src_backup_row_line( 'wp_x', array() ) ), -3, 2 ), 'backup: an empty row is an object' );
+$ub_t( 500 === AW_SRC_BACKUP_BATCH, 'backup: tables are read 500 rows at a time' );
+$ub_calls = array();
+$ub_seen  = 0;
+$ub_fetch = static function ( int $offset, int $limit ) use ( &$ub_calls ) {
+	$ub_calls[] = array( $offset, $limit );
+	return array_fill( 0, max( 0, min( $limit, 1203 - $offset ) ), array( 'id' => '1' ) );
+};
+$ub_n     = aw_src_backup_rows(
+	$ub_fetch,
+	static function ( array $row ) use ( &$ub_seen ): bool {
+		++$ub_seen;
+		return true;
+	}
+);
+$ub_t( 1203 === $ub_n && 1203 === $ub_seen && array( array( 0, 500 ), array( 500, 500 ), array( 1000, 500 ) ) === $ub_calls, 'backup: 1203 rows in batches of 500' );
+$ub_calls = array();
+$ub_n     = aw_src_backup_rows( static fn( int $o, int $l ) => $o < 1000 ? array_fill( 0, $l, array() ) : array(), static fn( array $r ): bool => true );
+$ub_t( 1000 === $ub_n, 'backup: an exact multiple of 500 ends on the empty batch' );
+$ub_t( false === aw_src_backup_rows( static fn( int $o, int $l ) => null, static fn( array $r ): bool => true ), 'backup: a read error stops the backup' );
+$ub_w = 0;
+$ub_n = aw_src_backup_rows(
+	static fn( int $o, int $l ) => array_fill( 0, $l, array() ),
+	static function ( array $r ) use ( &$ub_w ): bool {
+		return ++$ub_w < 3;
+	}
+);
+$ub_t( false === $ub_n && 3 === $ub_w, 'backup: a write error stops the backup at once' );
+$ub_t( 1 === preg_match( '/^aw-sourcing-uninstall-\d{8}-\d{6}\.jsonl\.gz$/', aw_src_backup_name( 'aw-sourcing', 1763000000 ) ) && 'aw-sourcing-uninstall-20251113-021320.jsonl.gz' === aw_src_backup_name( 'aw-sourcing', 1763000000 ), 'backup: file name' );
+$ub_dir = sys_get_temp_dir() . '/aw-sourcing-ub-' . getmypid();
+@mkdir( $ub_dir ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions -- a temporary folder for the test
+file_put_contents( $ub_dir . '/index.php', 'kept' ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- the test's own file
+$ub_t( aw_src_backup_protect( $ub_dir ) && false !== strpos( (string) file_get_contents( $ub_dir . '/.htaccess' ), 'Require all denied' ) && 'kept' === file_get_contents( $ub_dir . '/index.php' ), 'backup: folder guarded by .htaccess and index.php, an existing file kept' ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- the test's own files
+$ub_gz = gzopen( $ub_dir . '/t.jsonl.gz', 'wb6' ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- the test's own file
+gzwrite( $ub_gz, aw_src_backup_header( 'aw-sourcing', '1', 's', 0, array( 'a' ), array() ) . aw_src_backup_option_line( 'a', 'v', 'yes' ) );
+gzclose( $ub_gz );
+$ub_lines = gzfile( $ub_dir . '/t.jsonl.gz' );
+$ub_t( 2 === count( $ub_lines ) && 'header' === json_decode( $ub_lines[0], true )['type'] && 'v' === json_decode( $ub_lines[1], true )['value'], 'backup: gzip JSON lines read back' );
+foreach ( array( 'index.php', '.htaccess', 't.jsonl.gz' ) as $ub_f ) {
+	unlink( $ub_dir . '/' . $ub_f ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- the test's own files
+}
+rmdir( $ub_dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- the test's own folder
+$ub_dir = sys_get_temp_dir() . '/aw-sourcing-ub-ro-' . getmypid();
+@mkdir( $ub_dir, 0555 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions -- a read-only folder for the test
+$ub_t( 0 === getmyuid() || ! @aw_src_backup_protect( $ub_dir ), 'backup: a folder that cannot be written is refused' ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- the warning is the expected failure
+rmdir( $ub_dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- the test's own folder
+
 echo ( $fails ? "FAILED: $fails of $count\n" : "OK: $count checks\n" );
 exit( $fails ? 1 : 0 );

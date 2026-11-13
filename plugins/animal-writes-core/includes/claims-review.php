@@ -296,7 +296,7 @@ const AW_CLAIMS_LINK = 'edit.php?post_type=aw_listing&page=aw-claims';
 add_action(
 	'admin_menu',
 	function () {
-		add_submenu_page( 'edit.php?post_type=aw_listing', 'Claims', 'Claims', 'edit_aw_volunteers', 'aw-claims', 'aw_claims_screen' );
+		add_submenu_page( 'edit.php?post_type=aw_listing', 'Claims', 'Claims', DIRECTORYWEB_CAP, 'aw-claims', 'aw_claims_screen' ); // phpcs:ignore WordPress.WP.Capabilities.Unknown -- DirectoryWeb's own capability (directoryweb-caps.php)
 	}
 );
 
@@ -309,7 +309,7 @@ function aw_claims_in_forms(): bool {
 	global $menu;
 	foreach ( (array) $menu as $item ) {
 		if ( is_array( $item ) && 'fluent_forms' === ( $item[2] ?? '' ) ) {
-			return current_user_can( (string) $item[1] ) && current_user_can( 'edit_aw_volunteers' ); // phpcs:ignore WordPress.WP.Capabilities.Unknown -- the Directory's own capability (volunteers.php)
+			return current_user_can( (string) $item[1] ) && current_user_can( DIRECTORYWEB_CAP ); // phpcs:ignore WordPress.WP.Capabilities.Unknown -- DirectoryWeb's own capability (directoryweb-caps.php)
 		}
 	}
 	return false;
@@ -330,7 +330,7 @@ add_action(
 				break;
 			}
 		}
-		array_splice( $items, $at, 0, array( array( 'Claims', 'edit_aw_volunteers', AW_CLAIMS_LINK, 'Claims' ) ) );
+		array_splice( $items, $at, 0, array( array( 'Claims', DIRECTORYWEB_CAP, AW_CLAIMS_LINK, 'Claims' ) ) );
 		$submenu['fluent_forms'] = $items; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- one item added to Fluent Forms' menu.
 	},
 	999
@@ -355,7 +355,7 @@ add_filter(
 
 /** Directory → Claims: the list (DirectoryWeb's shell screen), one claim (&entry=), or the notice after a review (&done=). */
 function aw_claims_screen() {
-	if ( ! current_user_can( 'edit_aw_volunteers' ) ) {
+	if ( ! current_user_can( DIRECTORYWEB_CAP ) ) { // phpcs:ignore WordPress.WP.Capabilities.Unknown -- DirectoryWeb's own capability (directoryweb-caps.php)
 		wp_die( 'Not allowed.', 403 );
 	}
 	if ( function_exists( 'directoryweb_ui_page' ) && directoryweb_ui_page( 'claims' ) ) {
@@ -627,7 +627,7 @@ add_action(
 	'admin_post_aw_claim_ff_decide',
 	function () {
 		$id = absint( wp_unslash( $_POST['entry'] ?? 0 ) );
-		if ( ! current_user_can( 'edit_aw_volunteers' ) || ! check_admin_referer( 'aw_claim_ff_decide_' . $id ) ) {
+		if ( ! current_user_can( DIRECTORYWEB_CAP ) || ! check_admin_referer( 'aw_claim_ff_decide_' . $id ) ) { // phpcs:ignore WordPress.WP.Capabilities.Unknown -- DirectoryWeb's own capability (directoryweb-caps.php)
 			wp_die( 'Not allowed.', 403 );
 		}
 		$c = aw_claim_entry( $id );

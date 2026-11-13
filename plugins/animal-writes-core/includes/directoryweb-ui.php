@@ -4,7 +4,7 @@
  *
  * Addresses:
  *   admin.php?page=directoryweb                              Dashboard   manage_directoryweb (directoryweb-caps.php)
- *   edit.php?post_type=aw_listing&page=aw-claims              Claims      edit_aw_volunteers (menu: Fluent Forms → Claims)
+ *   edit.php?post_type=aw_listing&page=aw-claims              Claims      manage_directoryweb (menu: Fluent Forms → Claims)
  *   admin.php?page=directoryweb-settings                      Settings    manage_options
  *
  * One claim (&entry=) and the notice after a review (&done=) are server-rendered on the Claims address
@@ -26,7 +26,7 @@ const DIRECTORYWEB_SETTINGS_PAGE = 'directoryweb-settings';
 function directoryweb_ui_screens(): array {
 	return array(
 		DIRECTORYWEB_PAGE          => array( 'dashboard', DIRECTORYWEB_CAP ),
-		'aw-claims'                => array( 'claims', 'edit_aw_volunteers' ),
+		'aw-claims'                => array( 'claims', DIRECTORYWEB_CAP ),
 		DIRECTORYWEB_SETTINGS_PAGE => array( 'settings', 'manage_options' ),
 		DIRECTORYWEB_LISTINGS_PAGE => array( 'listings', DIRECTORYWEB_LISTINGS_CAP ),
 	);

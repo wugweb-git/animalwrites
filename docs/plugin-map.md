@@ -23,12 +23,16 @@ Each Wugweb plugin has its own capability. Each plugin grants it on activation a
 | Plugin | Capability | Granted to (old capability) |
 |---|---|---|
 | Kits Core | `manage_kits` (`KITS_CAP`): Kits menu, Home, Help | administrator; roles with `manage_options` |
-| DirectoryWeb (in Animal Writes Core) | `manage_directoryweb` (`DIRECTORYWEB_CAP`): menu, Dashboard, its counts | administrator; roles with `edit_aw_volunteers`. Claims keep `edit_aw_volunteers` (read-only on the new screen) |
+| DirectoryWeb (in Animal Writes Core) | `manage_directoryweb` (`DIRECTORYWEB_CAP`): menu, Dashboard, its counts; Claims (Directory → Claims with its review, the new Claims screen read-only, the claims routes; owner, 13 Nov 2026) | administrator; roles with `edit_aw_volunteers`. Volunteers, reports, forms and MailWeb-AW keep `edit_aw_volunteers` |
 | SourceWeb | `manage_sourceweb` (`SOURCEWEB_CAP`, `AW_REVIEW_CAP`, `AW_ENRICH_CAP`): Overview, To review, Enrichment review | administrator; roles with `edit_others_posts`. The other screens keep `AW_SRC_CAP` (`manage_options`) |
 | RankWeb | `manage_rankweb` (`RANKWEB_CAP`): Overview, FAQ, Dashboard routes | administrator; roles with `manage_categories` |
 | InsightWeb | `manage_insightweb` (`INSIGHTWEB_CAP`, `aw_si_cap()`) | administrator; roles with `manage_options` (or `AW_SRC_CAP`) |
 | MailWeb | `manage_mailweb` (`MAILWEB_CAP`): Inbox, Overview | administrator; roles with `edit_others_posts` |
 | PlanWeb | `edit_planweb_entries` (unchanged), `planweb_approve` | editor and administrator; `planweb_approve` administrator only |
+
+## Backup before uninstall deletes (13 Nov 2026)
+
+When "Delete this plugin's data when it is deleted" is ticked, each of the seven plugins' `uninstall.php` first writes `wp-content/uploads/wugweb-backups/<plugin-slug>-uninstall-<YYYYmmdd-His>.jsonl.gz` (UTC) with its own `includes/uninstall-backup.php` (identical in each plugin apart from the function prefix): a header line (plugin, version, site, time, the options and tables in the file), one line per option to be deleted (`option_value` exactly as stored, with `autoload`), then one line per row of each table to be dropped, read 500 rows at a time. Values that are not valid UTF-8 are base64-encoded and named in `b64`. Transients are not kept. The folder gets `index.php` and an `.htaccess` "Require all denied". The file is written as `.part` and renamed when complete; if the folder, `gzopen`, a read or a write fails, one line goes to the PHP error log and nothing is deleted.
 
 ## Three areas, three owners (owner, 31 Oct 2026)
 
@@ -252,7 +256,7 @@ A standalone product since 20 Oct 2026 (was `aw-mail`): nothing Animal Writes-on
 | `includes/settings-tab.php` | Mail → Settings (its own submenu page `mailweb-settings`, `mailweb_settings_page()`; manage_options), tabs: Incoming mail (token, secrets, mailboxes, aliases, profiles, FluentCRM) and Site sending (SMTP, daily limit). |
 | `includes/overview.php` | Unread badge, cached counts, the Mail dashboard widget; hides FluentCRM's FluentSMTP card. |
 | `languages/`, `composer.json` | Translation template (`mailweb.pot`), coding-standard and make-pot scripts. |
-| `uninstall.php` | Deletes nothing. |
+| `uninstall.php`, `includes/uninstall-backup.php` | Deletes nothing unless "Delete this plugin's data when it is deleted" is ticked; then first writes a backup (below), and deletes nothing if it cannot. |
 
 Animal Writes' side (`animal-writes-core/includes/mailweb-aw.php`, with `mail-campaign-strip.php`): `MAILWEB_API_TOKEN` from wp-config `AW_HOSTINGER_MAIL_TOKEN`; no strip under signatures since 12 Nov 2026 (each signature carries one thin banner of its own; `mail-campaign-strip.php` is kept but not loaded); Website forms = Contact, Volunteer, Claim and Report entries (Fluent Forms) and the older Contact messages (`aw_message`), with a wp-admin notice while any is unread (no email); Inbox → Contact messages redirects there; the old webhook address; the Check site line. The one-time move from aw-mail (20 Oct 2026: options copied, secrets encrypted, table renamed, old options kept; send from support@ only, contact@ → vedanshu@, FluentCRM for vedanshu@ and support@, tag "Emailed us") ran and was removed (audit 16, 25 Oct 2026).
 
