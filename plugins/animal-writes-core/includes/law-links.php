@@ -66,7 +66,7 @@ function aw_law_items() {
 			'tag_slug__in'     => array( 'act', 'rule' ),
 			'orderby'          => 'title',
 			'order'            => 'ASC',
-			'suppress_filters' => true, // the Library's own sorting (aw-news-query-resort and the hubs) does not apply here
+			'suppress_filters' => true, // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.SuppressFilters_suppress_filters -- the Library's own sorting (aw-news-query-resort and the hubs) does not apply here
 		)
 	);
 	$key = fn( $p ) => mb_strtolower( preg_replace( '/^the\s+/i', '', html_entity_decode( $p->post_title, ENT_QUOTES ) ) );
@@ -97,7 +97,7 @@ function aw_law_mentions( $fresh = false ) {
 	}
 	$map = array();
 	if ( $laws ) {
-		$guides = get_posts( array( 'post_type' => 'post', 'post_status' => 'publish', 'numberposts' => -1, 'suppress_filters' => true ) );
+		$guides = get_posts( array( 'post_type' => 'post', 'post_status' => 'publish', 'numberposts' => -1, 'suppress_filters' => true ) ); // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.SuppressFilters_suppress_filters -- our own fixed list: no query filter may reorder or add to it.
 		foreach ( $guides as $g ) {
 			$text = html_entity_decode( wp_strip_all_tags( $g->post_title . ' ' . $g->post_excerpt . ' ' . $g->post_content ), ENT_QUOTES );
 			$text = str_replace( "\u{00a0}", ' ', $text );
@@ -164,7 +164,7 @@ function aw_law_guides_naming( $id ) {
 	if ( ! $ids ) {
 		return array();
 	}
-	return array_map( 'intval', get_posts( array( 'post_type' => 'post', 'post_status' => 'publish', 'post__in' => $ids, 'orderby' => 'date', 'order' => 'DESC', 'numberposts' => count( $ids ), 'fields' => 'ids', 'suppress_filters' => true ) ) );
+	return array_map( 'intval', get_posts( array( 'post_type' => 'post', 'post_status' => 'publish', 'post__in' => $ids, 'orderby' => 'date', 'order' => 'DESC', 'numberposts' => count( $ids ), 'fields' => 'ids', 'suppress_filters' => true ) ) ); // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.SuppressFilters_suppress_filters -- our own fixed list: no query filter may reorder or add to it.
 }
 
 /**
