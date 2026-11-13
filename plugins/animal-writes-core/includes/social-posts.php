@@ -378,7 +378,7 @@ function aw_social_find( string $key, int $exclude = 0 ): int {
 			'fields'           => 'ids',
 			'numberposts'      => 2,
 			'post__not_in'     => $exclude ? array( $exclude ) : array(), // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams
-			'suppress_filters' => true,
+			'suppress_filters' => true, // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.SuppressFilters_suppress_filters -- our own fixed list: no query filter may reorder or add to it.
 		)
 	);
 	return $ids ? (int) $ids[0] : 0;

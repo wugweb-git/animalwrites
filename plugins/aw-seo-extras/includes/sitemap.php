@@ -303,7 +303,7 @@ function aw_html_sitemap() {
 		return is_array( $r ) && in_array( 'noindex', $r, true );
 	};
 	$items = function ( $type ) use ( $title, $noidx ) {
-		$ids = get_posts( array( 'post_type' => $type, 'post_status' => 'publish', 'numberposts' => -1, 'fields' => 'ids', 'orderby' => 'title', 'order' => 'ASC', 'suppress_filters' => true ) );
+		$ids = get_posts( array( 'post_type' => $type, 'post_status' => 'publish', 'numberposts' => -1, 'fields' => 'ids', 'orderby' => 'title', 'order' => 'ASC', 'suppress_filters' => true ) ); // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.SuppressFilters_suppress_filters -- our own fixed list: no query filter may reorder or add to it.
 		$ids = array_values( array_diff( array_map( 'intval', $ids ), function_exists( 'aw_seo_preview_ids' ) ? array_map( 'intval', (array) aw_seo_preview_ids() ) : array() ) );
 		$out = array();
 		foreach ( $ids as $id ) {

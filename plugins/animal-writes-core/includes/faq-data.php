@@ -1168,7 +1168,7 @@ function aw_faq_tag_items( $term_id ) {
 	if ( ! is_array( $out ) ) {
 		$out = array();
 		foreach ( array( 'aw_news', 'aw_legal', 'post', 'aw_listing' ) as $pt ) {
-			$ids = get_posts( array( 'post_type' => $pt, 'post_status' => 'publish', 'tag_id' => $term_id, 'numberposts' => -1, 'fields' => 'ids', 'no_found_rows' => true, 'suppress_filters' => true ) );
+			$ids = get_posts( array( 'post_type' => $pt, 'post_status' => 'publish', 'tag_id' => $term_id, 'numberposts' => -1, 'fields' => 'ids', 'no_found_rows' => true, 'suppress_filters' => true ) ); // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.SuppressFilters_suppress_filters -- our own fixed list: no query filter may reorder or add to it.
 			if ( $ids && 'aw_listing' !== $pt ) {
 				update_meta_cache( 'post', $ids );
 				usort( $ids, fn( $a, $b ) => aw_item_date_ts( $b ) <=> aw_item_date_ts( $a ) );

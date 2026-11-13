@@ -1067,7 +1067,7 @@ add_filter(
  * "In the news" so a story is listed once, as News.
  */
 function aw_camp_press_dupes( $tax_query ) {
-	$base  = array( 'post_status' => 'publish', 'numberposts' => 300, 'fields' => 'ids', 'tax_query' => $tax_query, 'suppress_filters' => true ); // phpcs:ignore WordPress.DB.SlowDBQuery
+	$base  = array( 'post_status' => 'publish', 'numberposts' => 300, 'fields' => 'ids', 'tax_query' => $tax_query, 'suppress_filters' => true ); // phpcs:ignore WordPress.DB.SlowDBQuery, WordPressVIPMinimum.Performance.WPQueryParams.SuppressFilters_suppress_filters
 	$norm  = fn( $t ) => trim( preg_replace( '/[^a-z0-9]+/', ' ', strtolower( html_entity_decode( (string) $t, ENT_QUOTES ) ) ) );
 	$news  = get_posts( array( 'post_type' => 'aw_news' ) + $base );
 	$urls  = array();
