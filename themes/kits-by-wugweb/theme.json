@@ -206,7 +206,7 @@
 				{
 					"slug": "display",
 					"name": "Display",
-					"size": "clamp(2.5rem, 1.3636rem + 4.8485vw, 5rem)"
+					"size": "clamp(3rem, 1.6364rem + 5.8182vw, 6rem)"
 				}
 			]
 		},

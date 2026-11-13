@@ -66,13 +66,13 @@ One family: **Inter** (variable, self-hosted woff2, declared once in Kits by Wug
 
 Display is a size style, not a heading level (as in Material's type scale): a hero's title is the page's `<h1>` in the Display style; the page then has no second `<h1>`. Below it come H2 and H3.
 
-**One display weight:** `--kit-weight-display` (800) is the weight of every display size: hero titles (`.kit-hero-title`, `.kit-display`), campaign titles and the big numbers (countdowns, tallies, bento numbers). The Lab rules and Community dogs pages keep their own frozen copies.
+**One display weight:** `--kit-weight-display` (800) is the weight of every display size: hero titles (`.kit-hero-title`, `.kit-display`), campaign titles and the big numbers (countdowns, tallies, bento numbers, the error page's code). The Lab rules and Community dogs pages keep their own frozen copies.
 
 **Headings h1–h6 read one set of tokens each**, the same in theme.json (`styles.elements.h1`…`h6`: size preset, then `var(--kit-hN-weight)`, `var(--kit-hN-leading)`, `var(--kit-hN-tracking)`), in kit.css/aw.css and in the blocks (the Heading block takes the element styles of its level). Change a level in `themes/kits-by-wugweb/tokens/tokens.json` and run `python3 tools/build-tokens.py`; sizes change in Styles > Typography (the presets).
 
 | Style | Used for | Size | Weight | Line height | Tracking |
 |---|---|---|---|---|---|
-| Display | Hero titles: the page's `<h1>` set large (`.kit-hero-title`, `.kit-display`, `.aw-camp-band-title`) | `--kit-type-display` | `--kit-weight-display` 800 | `--kit-leading-display` 1.06 | `--kit-tracking-display` −0.035em |
+| Display | Hero titles: the page's `<h1>` set large (`.kit-hero-title`, `.kit-display`, `.aw-camp-band-title`) | `--kit-type-display`: 1.5 × H1 on a 375px screen to 2 × H1 at 1200px, fluid (`clamp(3rem, 1.6364rem + 5.8182vw, 6rem)`; owner, 13 Nov 2026) | `--kit-weight-display` 800 | `--kit-leading-display` 1.06 | `--kit-tracking-display` −0.035em |
 | H1 | Page and archive titles | `--kit-h1-size` (preset 4-x-large) | `--kit-h1-weight` 700 | `--kit-h1-leading` 1.06 | `--kit-h1-tracking` −0.035em |
 | H2 | Section titles | `--kit-h2-size` (3-x-large) | `--kit-h2-weight` 700 | `--kit-h2-leading` 1.2 | `--kit-h2-tracking` −0.02em |
 | H3 | Card titles, sub-sections | `--kit-h3-size` (2-x-large) | `--kit-h3-weight` 600 | `--kit-h3-leading` 1.2 | `--kit-h3-tracking` −0.02em |

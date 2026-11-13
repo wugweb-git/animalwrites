@@ -1159,7 +1159,7 @@ body { background: var(--kit-surface-page); }
 .kit-list-count { text-align: center; margin: var(--kit-space-6) 0 var(--kit-space-3); font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
 /* Error and empty pages (404, no results) */
 .kit-error-page > * { max-width: 40rem; }
-.kit-error-code { margin: 0; font-size: var(--kit-type-display) !important; font-weight: var(--kit-weight-bold); line-height: 1; color: var(--kit-color-ink); }
+.kit-error-code { margin: 0; font-size: var(--kit-type-display) !important; font-weight: var(--kit-weight-display); line-height: 1; color: var(--kit-color-ink); }
 .kit-error-lead { font-size: var(--kit-type-lead); color: var(--kit-color-text); }
 .kit-error-search { display: flex; gap: var(--kit-space-2); margin: var(--kit-space-5) 0; max-width: 100%; }
 .kit-error-search .kit-btn { flex: 0 0 auto; }
