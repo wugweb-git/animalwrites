@@ -76,7 +76,19 @@
 	});
 	document.addEventListener('click', function (e) {
 		var b = e.target.closest('.kit-share-native');
-		if (!b || !navigator.share) return;
+		if (!b) return;
+		/* A page Share section's one button (data-fallback="copy") where the browser has no share sheet: it copies the link,
+		   and its words turn to "Link copied" for 2 s; screen readers hear it. */
+		if (!navigator.share) {
+			if (b.dataset.fallback !== 'copy' || !navigator.clipboard) return;
+			navigator.clipboard.writeText(b.dataset.url).then(function () {
+				var name = b.querySelector('.kit-share-name'), text = name ? name.textContent : '', live = b.parentNode.querySelector('[role=status]');
+				if (name) name.textContent = b.dataset.done;
+				if (live) live.textContent = b.dataset.done;
+				setTimeout(function () { if (name) name.textContent = text; if (live) live.textContent = ''; }, 2000);
+			});
+			return;
+		}
 		var f = b.dataset.image && sharePics[b.dataset.image];
 		// With a picture most apps drop a separate link, so the link also goes in the text.
 		var data = f ? { files: [f], title: b.dataset.title, text: b.dataset.text + '\n' + b.dataset.url } : { title: b.dataset.title, text: b.dataset.text, url: b.dataset.url };

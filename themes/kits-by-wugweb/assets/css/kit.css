@@ -497,7 +497,7 @@ html { overflow-x: clip; }
 	.kit-share.has-native .kit-share-label { display: none; } /* the button says Share */
 }
 @media (min-width: 1200px) {
-	.kit-share .kit-share-native { display: none; }
+	.kit-share .kit-share-native:not(.kit-share-main) { display: none; } /* a page Share section's one button stays at every width (owner, 13 Nov 2026) */
 }
 /* Follow us (owner, 13 Nov 2026): our own accounts as the bar's own buttons, one row under a page's share bar (never on
    posts). No rule above it; on phones the label takes its own line so the five 44px buttons fit at 320. */

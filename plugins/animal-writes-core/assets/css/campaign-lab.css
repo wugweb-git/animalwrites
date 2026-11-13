@@ -1059,8 +1059,11 @@
    - The icons sit in an even grid (44px each, at least 4px apart), so six fit one row (21rem: six 44px icons, five 4px
      gaps and the 24px padding); the cards side by side when there is room (21rem to 23rem each), under the text at every
      width, so the picture stays open on the right.
-   - Phones (to 767): where the phone has a share sheet (kit.js shows the bar's Share button), that one full-width button
-     replaces the six icons and the card's label (owner: no share icons on mobile); without a share sheet the icons stay.
+   - The Share card (owner, 13 Nov 2026, one share section everywhere): one button, "Share this page", 48px tall, across
+     the card (the phone's share sheet; where the browser has none it copies the link, kit.js), and under it one row of
+     icons: WhatsApp, X, Facebook, LinkedIn, Email, Copy link. The button names the card, so the card has no label.
+   - Phones (to 767): where the phone has a share sheet (kit.js adds .has-native), the button alone (owner: no share
+     icons on mobile); without a share sheet the icons stay under it.
    - The text keeps to 60ch, the note to 80ch.
    The same block as campaign.css (the Lab page loads only this file). */
 .aw-camp.aw-camp.aw-camp--lab-rules #share { --camp-share-pic: url("/wp-content/uploads/2026/10/lab-rules-2026-illustration.avif"); --camp-share-rgb: 107 15 34; --camp-share-pos: 100% 50%; --camp-share-pos-sm: 85% 50%; --camp-light: #f8d9df; }
@@ -1069,9 +1072,11 @@
 @media (min-width: 1200px) { .aw-camp.aw-camp.aw-camp #share { background-image: linear-gradient(90deg, rgb(var(--camp-share-rgb, 0 0 0) / 0.9) 0%, rgb(var(--camp-share-rgb, 0 0 0) / 0.8) 45%, rgb(var(--camp-share-rgb, 0 0 0) / 0.74) 65%, rgb(var(--camp-share-rgb, 0 0 0) / 0.35) 100%), var(--camp-share-pic, none); } }
 .aw-camp.aw-camp.aw-camp #share :is(h2, h3, p, a:not(.kit-share-btn):not(.wp-element-button), .aw-date, .aw-date .kit-ico) { color: var(--camp-on-mark); }
 .aw-camp.aw-camp.aw-camp #share .aw-camp-share-kit.aw-share-block { display: flex; flex-wrap: wrap; align-items: stretch; gap: var(--kit-space-4); margin-block: var(--kit-space-5) 0; }
-.aw-camp.aw-camp.aw-camp #share .aw-share-block > .kit-share { box-sizing: border-box; flex: 1 1 21rem; max-width: 23rem; display: grid; grid-template-columns: repeat(auto-fill, var(--kit-size-target)); justify-content: space-between; align-content: start; gap: var(--kit-space-2) var(--kit-space-1); margin: 0; padding: var(--kit-space-5); border: 0; border-radius: var(--kit-radius-card); box-shadow: var(--kit-elevation-2); --kit-color-focus: var(--camp-dark); }
+.aw-camp.aw-camp.aw-camp #share .aw-share-block > .kit-share { box-sizing: border-box; flex: 1 1 21rem; max-width: 23rem; align-self: stretch; display: grid; grid-template-columns: repeat(auto-fill, var(--kit-size-target)); justify-content: space-between; align-content: start; gap: var(--kit-space-2) var(--kit-space-1); margin: 0; padding: var(--kit-space-5); border: 0; border-radius: var(--kit-radius-card); box-shadow: var(--kit-elevation-2); --kit-color-focus: var(--camp-dark); }
 .aw-camp.aw-camp.aw-camp #share .aw-share-block > .kit-share > :is(.kit-share-label, .kit-share-native) { grid-column: 1 / -1; }
-.aw-camp.aw-camp.aw-camp #share .aw-share-block > .kit-share > .kit-share-label { display: block !important; margin: 0 0 var(--kit-space-2); font-size: var(--kit-type-base); font-weight: var(--kit-weight-bold); }
+.aw-camp.aw-camp.aw-camp #share .aw-share-block > .kit-share.kit-follow > .kit-share-label { display: block !important; margin: 0 0 var(--kit-space-2); font-size: var(--kit-type-base); font-weight: var(--kit-weight-bold); }
+.aw-camp.aw-camp.aw-camp #share .aw-share-block > .kit-share:not(.kit-follow) > .kit-share-label { display: none !important; }
+.aw-camp.aw-camp.aw-camp #share .aw-share-block > .kit-share > .kit-share-main { width: 100%; min-height: var(--kit-size-control); justify-content: center; font-size: var(--kit-type-base); gap: var(--kit-space-2); margin-bottom: var(--kit-space-2); padding-inline: var(--kit-space-4); }
 .aw-camp.aw-camp.aw-camp #share .aw-share-block > .kit-share:not(.kit-follow) { background: radial-gradient(color-mix(in srgb, var(--camp-dark) 12%, transparent) 1px, transparent 1.5px) 0 0 / var(--kit-space-4) var(--kit-space-4), var(--camp-light); }
 .aw-camp.aw-camp.aw-camp #share .aw-share-block > .kit-share.kit-follow { background: var(--kit-color-surface-soft); }
 .aw-camp.aw-camp.aw-camp #share .aw-share-block > .kit-share :is(.kit-share-label, .kit-share-name) { color: var(--camp-dark); }
@@ -1083,8 +1088,8 @@
 	.aw-camp.aw-camp.aw-camp #share .aw-share-block > .kit-share .kit-share-btn:hover { background: var(--camp-dark); color: var(--kit-color-on-ink); }
 }
 @media (max-width: 767px) {
-	.aw-camp.aw-camp.aw-camp #share .aw-share-block > .kit-share:has(> .kit-share-native:not([hidden])) > :is(.kit-share-btn:not(.kit-share-native), .kit-share-label) { display: none !important; }
-	.aw-camp.aw-camp.aw-camp #share .aw-share-block > .kit-share > .kit-share-native:not([hidden]) { width: 100%; min-height: var(--kit-size-control); justify-content: center; }
+	.aw-camp.aw-camp.aw-camp #share .aw-share-block > .kit-share.has-native > .kit-share-btn:not(.kit-share-native) { display: none !important; }
+	.aw-camp.aw-camp.aw-camp #share .aw-share-block > .kit-share.has-native > .kit-share-main { margin-bottom: 0; }
 }
 .aw-camp.aw-camp.aw-camp #share :is(.aw-camp-lede, .aw-camp-note) { box-sizing: border-box; max-width: 60ch; }
 .aw-camp.aw-camp.aw-camp #share .aw-camp-note { max-width: 80ch; }

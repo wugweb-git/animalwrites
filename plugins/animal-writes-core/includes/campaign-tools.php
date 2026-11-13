@@ -1236,38 +1236,57 @@ function aw_follow_accounts() {
 		'aw_follow_accounts',
 		array(
 			array( 'Instagram', 'https://www.instagram.com/animal_writes_/', 'instagram' ),
-			array( 'Facebook', 'https://www.facebook.com/profile.php?id=61596537146561', 'facebook' ),
-			array( 'X', 'https://x.com/animal_writes_', 'x-brand' ),
 			array( 'Threads', 'https://www.threads.com/@animal_writes_', 'threads' ),
+			array( 'X', 'https://x.com/animal_writes_', 'x-brand' ),
+			array( 'Facebook', 'https://www.facebook.com/profile.php?id=61596537146561', 'facebook' ),
 			array( 'LinkedIn', 'https://www.linkedin.com/company/animalwrites/', 'linkedin' ),
 		)
 	);
 }
 
-// A campaign's Share section: the site's one share bar from the server, the one on listings and posts (owner, 2 Nov
-// 2026), on every campaign, with or without a letter tool.
-add_filter(
-	'the_content',
-	function ( $html ) {
-		if ( ! is_singular( 'aw_campaign' ) || ! function_exists( 'aw_share_html' ) || false === strpos( $html, 'data-aw-share' ) ) {
-			return $html;
-		}
-		$short = aw_camp_short_url( get_the_ID() ); // the short link, when the campaign has one (campaign-short.php)
-		$bar   = $short && function_exists( 'kits_share_html' ) ? kits_share_html( $short, html_entity_decode( get_the_title(), ENT_QUOTES ), null, (string) get_post_field( 'post_name', get_the_ID() ), array( 'follow' => aw_follow_accounts() ) ) : aw_share_html( get_the_ID() );
-		if ( ! $short && function_exists( 'kits_follow_html' ) ) {
-			$bar .= kits_follow_html( aw_follow_accounts() ); // Follow us under the bar (owner, 13 Nov 2026)
-		}
-		return preg_replace_callback(
-			'#(<div class="aw-camp-share-kit"[^>]*\sdata-aw-share[^>]*>)\s*(</div>)#',
-			function ( $m ) use ( $bar ) {
-				return $m[1] . $bar . $m[2];
-			},
-			$html,
-			1
-		);
-	},
-	99
-);
+/**
+ * A page's Share section (campaign pages and Home): one share kit (owner, 13 Nov 2026), filled into the section's empty
+ * holder (div.aw-camp-share-kit[data-aw-share]). The Share card holds one button, "Share this page" (the phone's share
+ * sheet; where there is none, it copies the link), and on computers one row of icons under it, in this order: WhatsApp,
+ * X, Facebook, LinkedIn, Email, Copy link. Follow us (our own accounts) on the card beside it. The page shares itself;
+ * its picture is the link preview's.
+ *
+ * @param string $html Rendered HTML that may hold the empty holder.
+ * @return string
+ */
+function aw_page_share_fill( $html ) {
+	if ( ! function_exists( 'kits_share_html' ) || false === strpos( (string) $html, 'data-aw-share' ) ) {
+		return $html;
+	}
+	$home  = is_front_page();
+	$id    = get_queried_object_id();
+	$short = $home ? '' : aw_camp_short_url( $id ); // the short link, when the campaign has one (campaign-short.php)
+	$url   = $short ? $short : ( $home ? home_url( '/' ) : (string) get_permalink( $id ) );
+	$title = $home ? get_bloginfo( 'name' ) : get_the_title( $id );
+	$bar   = kits_share_html(
+		$url,
+		html_entity_decode( $title, ENT_QUOTES ),
+		array( 'whatsapp', 'x', 'facebook', 'linkedin', 'email' ),
+		$home ? 'home' : (string) get_post_field( 'post_name', $id ),
+		array(
+			'follow' => aw_follow_accounts(),
+			'button' => __( 'Share this page', 'animal-writes-core' ),
+			'order'  => true,
+		)
+	);
+	return (string) preg_replace_callback(
+		'#(<div class="aw-camp-share-kit"[^>]*\sdata-aw-share[^>]*>)\s*(</div>)#',
+		function ( $m ) use ( $bar ) {
+			return $m[1] . $bar . $m[2];
+		},
+		(string) $html,
+		1
+	);
+}
+// Campaign pages: the section is in the page's content.
+add_filter( 'the_content', fn( $html ) => is_singular( 'aw_campaign' ) ? aw_page_share_fill( $html ) : $html, 99 );
+// Home: the section is a pattern in the Home template (animal-writes/home-share), outside the content.
+add_filter( 'render_block_core/html', fn( $html ) => is_front_page() ? aw_page_share_fill( $html ) : $html, 10 );
 
 /**
  * The Supreme Court stray dogs campaign page: the state tracker's cells marked (aw_sc_tracker_marks); the court orders and state

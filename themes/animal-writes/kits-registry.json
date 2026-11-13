@@ -1739,6 +1739,30 @@
    "block": "animal-writes/take-part-cards"
   },
   {
+   "name": "Home share",
+   "type": "pattern",
+   "status": "live",
+   "classes": ["aw-home-share", "aw-camp-share-kit", "kit-share", "kit-follow", "kit-share-main"],
+   "states": ["phones (to 767): heading, line, the Share card with one full-width 48px Share this page button (the icons hidden where the phone has a share sheet), Follow us under it", "from 768: the two cards side by side (21rem to 23rem)", "from 1200: the wash opens to the right so the picture shows past the text", "no share sheet (most computers): the button copies the link and reads Link copied for 2 s"],
+   "tokens": ["--kit-size-control", "--kit-size-target", "--kit-space-4", "--kit-space-5", "--kit-radius-card", "--kit-elevation-2", "--kit-color-ink", "--kit-color-on-ink", "--kit-color-surface-soft", "--neutral-2", "--neutral-5", "--kit-type-base"],
+   "a11y": {
+    "element": "section with an H2 (aria-labelledby), the share kit's two role=group cards",
+    "aria": "Share this page button; icon links named Share on X, Share by email...; Follow us on Instagram...; a polite status for Link copied",
+    "keyboard": "Tab to the button, the six share icons, then the five Follow us links",
+    "focus": "ring in ink on the cards (--kit-color-focus)",
+    "target": "48px button, 44px icons",
+    "motion": "none",
+    "sr": "white text on an ink wash of 0.72 or more over the picture (AA)"
+   },
+   "seo": {
+    "heading": "H2 Share Animal Writes",
+    "link": "share links carry utm_source and utm_campaign=home; Follow us to our own accounts",
+    "alt": "none (the picture is a CSS background)",
+    "schema": "none"
+   },
+   "block": "animal-writes/home-share"
+  },
+  {
    "name": "Take action",
    "type": "pattern",
    "status": "replaced",
