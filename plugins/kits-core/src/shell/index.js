@@ -31,6 +31,7 @@ import { PageParts, BlockParts, Cell } from './parts';
 import { CalendarGrid } from './calendar';
 import { Select, SecretField, ConfirmButton } from './inputs';
 import { DetailPanel, MediaField, MediaThumbs, PairList } from './detail';
+import { Breadcrumbs, ChangeIn, setCrumb, useCrumb } from './crumbs';
 import './dataviews.css';
 import './shell.css';
 import './more.css';
@@ -58,6 +59,10 @@ export {
 	MediaField,
 	MediaThumbs,
 	PairList,
+	Breadcrumbs,
+	ChangeIn,
+	setCrumb,
+	useCrumb,
 };
 
 const cx = ( ...names ) => names.filter( Boolean ).join( ' ' );
@@ -87,10 +92,13 @@ export function AppShell( { header, children } ) {
  * @param {string}  props.version Version shown beside the name.
  * @param {Array}   props.tabs    [ { slug, label, url, current } ].
  * @param {Element} props.aside   Right-hand slot (a link back to the current screens, a Save button).
+ * @param {Array}   props.crumbs  Optional trail after the plugin name ([ { label, href } ]); by default the open tab and
+ *                                the section or item the screen names (crumbs.js).
  */
-export function AppHeader( { icon, name, version, tabs = [], aside } ) {
+export function AppHeader( { icon, name, version, tabs = [], aside, crumbs } ) {
 	return (
 		<header className="kits-shell-header">
+			<Breadcrumbs name={ name } tabs={ tabs } crumbs={ crumbs } />
 			<div className="kits-shell-header__brand">
 				{ icon && (
 					<img
@@ -171,6 +179,12 @@ export function ChipRow( { label, chips = [], value, onChange, after } ) {
 			ul.scrollLeft = Math.max( 0, left - 16 );
 		}
 	}, [ value ] );
+	// Chips that are links are the screen's sections: the open one is the last breadcrumb.
+	const open = chips.find( ( c ) => c.href && c.value === value );
+	useCrumb(
+		open ? String( open.label ).replace( /\s*•$/, '' ) : '',
+		open?.href
+	);
 	return (
 		<div className="kits-shell-chips">
 			<ul aria-label={ label } ref={ list }>
@@ -317,9 +331,17 @@ export function Tile( {
  * @param {string}  props.title       Heading (H2).
  * @param {string}  props.description One line under the heading.
  * @param {Element} props.actions     Buttons or links on the right of the heading.
+ * @param {Object}  props.changeIn    { label, url }: the section's settings live on another screen ("Change in …").
  * @param {Element} props.children    Content.
  */
-export function SectionCard( { id, title, description, actions, children } ) {
+export function SectionCard( {
+	id,
+	title,
+	description,
+	actions,
+	changeIn,
+	children,
+} ) {
 	return (
 		<Card className="kits-shell-card" id={ id }>
 			<CardHeader className="kits-shell-card__head" isBorderless>
@@ -328,6 +350,7 @@ export function SectionCard( { id, title, description, actions, children } ) {
 					{ description && (
 						<p className="kits-shell-card__desc">{ description }</p>
 					) }
+					<ChangeIn to={ changeIn } />
 				</div>
 				{ actions && (
 					<div className="kits-shell-card__actions">{ actions }</div>
@@ -346,9 +369,17 @@ export function SectionCard( { id, title, description, actions, children } ) {
  * @param {string}  props.title       Heading (H2).
  * @param {string}  props.description One line under the heading.
  * @param {Element} props.footer      Buttons and the save message.
+ * @param {Object}  props.changeIn    { label, url }: the group's settings live on another screen ("Change in …").
  * @param {Element} props.children    Blocks and fields.
  */
-export function SettingsGroup( { id, title, description, footer, children } ) {
+export function SettingsGroup( {
+	id,
+	title,
+	description,
+	footer,
+	changeIn,
+	children,
+} ) {
 	return (
 		<Card className="kits-shell-card kits-shell-group" id={ id }>
 			<CardHeader className="kits-shell-card__head" isBorderless>
@@ -357,6 +388,7 @@ export function SettingsGroup( { id, title, description, footer, children } ) {
 					{ description && (
 						<p className="kits-shell-card__desc">{ description }</p>
 					) }
+					<ChangeIn to={ changeIn } />
 				</div>
 			</CardHeader>
 			<CardBody className="kits-shell-card__body">{ children }</CardBody>
@@ -376,9 +408,16 @@ export function SettingsGroup( { id, title, description, footer, children } ) {
  * @param {string}  props.title       Heading.
  * @param {string}  props.description Line.
  * @param {string}  props.note        A second line in a quieter tone ("Off: switch it on under Modules.").
+ * @param {Object}  props.changeIn    { label, url }: the block's settings live on another screen ("Change in …").
  * @param {Element} props.children    Fields.
  */
-export function SettingsBlock( { title, description, note, children } ) {
+export function SettingsBlock( {
+	title,
+	description,
+	note,
+	changeIn,
+	children,
+} ) {
 	return (
 		<div className="kits-shell-block">
 			<h3 className="kits-shell-block__title">{ title }</h3>
@@ -386,6 +425,7 @@ export function SettingsBlock( { title, description, note, children } ) {
 				<p className="kits-shell-block__desc">{ description }</p>
 			) }
 			{ note && <p className="kits-shell-block__note">{ note }</p> }
+			<ChangeIn to={ changeIn } />
 			{ children }
 		</div>
 	);
@@ -395,13 +435,14 @@ export function SettingsBlock( { title, description, note, children } ) {
  * A labelled field with its help line, "Changed from the default" and a Reset link.
  *
  * @param {Object}   props
- * @param {string}   props.label   Visible label.
- * @param {string}   props.help    Help line.
- * @param {boolean}  props.changed Differs from the default.
- * @param {Function} props.onReset Puts the default back (shown only when changed).
- * @param {Function} props.render  ( id, describedBy ) => the control.
+ * @param {string}   props.label    Visible label.
+ * @param {string}   props.help     Help line.
+ * @param {boolean}  props.changed  Differs from the default.
+ * @param {Function} props.onReset  Puts the default back (shown only when changed).
+ * @param {Object}   props.changeIn { label, url }: the setting lives on another screen ("Change in …").
+ * @param {Function} props.render   ( id, describedBy ) => the control.
  */
-export function Field( { label, help, changed, onReset, render } ) {
+export function Field( { label, help, changed, onReset, changeIn, render } ) {
 	const id = useId();
 	const note = ( help || changed ) && (
 		<>
@@ -436,6 +477,7 @@ export function Field( { label, help, changed, onReset, render } ) {
 			className="kits-shell-field"
 		>
 			{ render( id, note ? `${ id }__help` : undefined ) }
+			<ChangeIn to={ changeIn } />
 		</BaseControl>
 	);
 }
@@ -449,8 +491,16 @@ export function Field( { label, help, changed, onReset, render } ) {
  * @param {Function} props.onChange Called with the new state.
  * @param {boolean}  props.disabled Read only.
  * @param {string}   props.help     A line under it.
+ * @param {Object}   props.changeIn { label, url }: the setting lives on another screen ("Change in …").
  */
-export function Switch( { label, checked, onChange, disabled, help } ) {
+export function Switch( {
+	label,
+	checked,
+	onChange,
+	disabled,
+	help,
+	changeIn,
+} ) {
 	// WordPress's ToggleControl (label, help as its description, a switch the screen reader names), in the Kits look.
 	return (
 		<div className="kits-shell-switch">
@@ -462,6 +512,7 @@ export function Switch( { label, checked, onChange, disabled, help } ) {
 				disabled={ disabled }
 				onChange={ ( v ) => onChange?.( v ) }
 			/>
+			<ChangeIn to={ changeIn } />
 		</div>
 	);
 }
@@ -709,6 +760,10 @@ const shell = {
 	MediaField,
 	MediaThumbs,
 	PairList,
+	Breadcrumbs,
+	ChangeIn,
+	setCrumb,
+	useCrumb,
 };
 
 window.kits = window.kits || {};
