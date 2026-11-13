@@ -90,7 +90,8 @@ function aw_run_backup() {
 
 	// Keep 14 days of automatic backups (hand-made backups are never touched).
 	$removed = array();
-	foreach ( (array) glob( $dir . '/auto-*' ) as $f ) {
+	$old_files = glob( $dir . '/auto-*' );
+	foreach ( is_array( $old_files ) ? $old_files : array() as $f ) { // glob() gives false on failure
 		if ( filemtime( $f ) < time() - AW_BACKUP_KEEP_DAYS * DAY_IN_SECONDS ) {
 			wp_delete_file( $f );
 			$removed[] = basename( $f );
