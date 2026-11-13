@@ -181,8 +181,9 @@ add_filter(
 	}
 );
 
-// Menu order: the site's content, then the Wugweb block (each product its own menu, owner 12 Nov 2026; Kits Core's
-// kits_wugweb_menu_slots() has the same order), then WordPress's own screens. Third-party menus follow.
+// Menu order: the site's content, then the Wugweb block (each product its own menu, owner 12 Nov 2026; each plugin
+// registers itself at 58.1–58.7 in the same order), then WordPress's own screens. Third-party menus follow. Without
+// Animal Writes Core the Wugweb block still sits together by those positions.
 add_filter( 'custom_menu_order', '__return_true', PHP_INT_MAX );
 add_filter(
 	'menu_order',

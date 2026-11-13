@@ -89,10 +89,15 @@ add_action(
 		// InsightWeb's own item, opening Search Insights (owner, 11 Nov 2026: Search Insights is InsightWeb's, not RankWeb's;
 		// our plugins sit under Plugins). Same address as before (admin.php?page=aw-search-insights) and the same hook name.
 		// Without Kits Core it is a menu of its own.
-		if ( function_exists( 'kits_admin_fold_menu' ) ) {
-			kits_admin_fold_menu( AW_SI_SLUG, 'plugins.php', 'InsightWeb', aw_si_cap(), 'insightweb', dirname( __DIR__, 2 ) . '/assets/menu-icon.svg' );
-		} else {
-			add_menu_page( __( 'Search Insights', 'insightweb' ), 'InsightWeb', aw_si_cap(), AW_SI_SLUG, 'aw_si_screen', 'dashicons-chart-area', '58.5' );
+		// The Wugweb block (owner, 12 Nov 2026): Kits, DirectoryWeb, SourceWeb, RankWeb, InsightWeb, MailWeb, PlanWeb at 58.1-58.7,
+		// after one separator (58.05), before WordPress's second separator (59); the same with or without Kits Core.
+		// The icon is the plugin's one-colour SVG as a data URI, which WordPress paints in the admin colour scheme.
+		$icon = dirname( __DIR__, 2 ) . '/assets/menu-icon.svg';
+		$icon = is_readable( $icon ) ? 'data:image/svg+xml;base64,' . base64_encode( (string) file_get_contents( $icon ) ) : 'dashicons-chart-area'; // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode, WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- the plugin's own small SVG file.
+		add_menu_page( __( 'Search Insights', 'insightweb' ), 'InsightWeb', aw_si_cap(), AW_SI_SLUG, 'aw_si_screen', $icon, '58.5' );
+		$GLOBALS['admin_page_hooks'][ AW_SI_SLUG ] = 'insightweb'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- the screens' hook prefix (insightweb_page_…), whatever the title.
+		if ( ! isset( $GLOBALS['menu']['58.05'] ) ) {
+			$GLOBALS['menu']['58.05'] = array( '', 'read', 'separator-wugweb', '', 'wp-menu-separator', 'separator-wugweb' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- one separator above the block, as core adds its own.
 		}
 		$hook = add_submenu_page( AW_SI_SLUG, __( 'Search Insights', 'insightweb' ), __( 'Search Insights', 'insightweb' ), aw_si_cap(), AW_SI_SLUG, 'aw_si_screen' );
 		if ( $hook ) {

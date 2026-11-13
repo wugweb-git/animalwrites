@@ -2,7 +2,7 @@
 /**
  * The Kits screens: five, which are the tabs on every Kits screen (docs/admin-ui-spec.md §B, approved by the owner on
  * 11 Nov 2026). Home, Theme Options, Settings, Tools, Help; plugins are on WordPress's own Plugins screen. In the
- * WordPress menu they are one item, Appearance → Kits, which opens Home (admin-home.php, admin-fold.php); the five stay
+ * WordPress menu they are one item, Kits (its own top-level menu), which opens Home (admin-home.php); the five stay
  * registered under the Kits menu slug, so their addresses and hook names are as before.
  *
  * - The rules (the five, the old addresses, which entries stay) are plain PHP in admin-menu-model.php, tested by
@@ -24,6 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 require_once __DIR__ . '/admin-menu-model.php';
+require_once __DIR__ . '/admin-fold-model.php'; // kits_fold_tabs() for kits_admin_fold_tabs() below
 
 add_action(
 	'admin_menu',
@@ -78,7 +79,7 @@ function kits_screen_tab( string $slug ): string {
 	return isset( kits_menu_six( KITS_MENU )[ $tab ] ) ? $tab : '';
 }
 
-// A hidden screen linked from one of the six belongs to Kits: Appearance → Kits is lit on it (admin-fold.php).
+// A hidden screen linked from one of the six belongs to Kits: Kits is lit on it.
 add_filter(
 	'parent_file',
 	function ( $parent_file ) {
@@ -318,4 +319,31 @@ function kits_settings_analytics(): void {
 	}
 	echo '</tbody></table>';
 	echo '<p class="description">' . esc_html( 'Read only. Signed-in staff are never counted. The switch is the option kits_ga4_via_gtm (wp option update kits_ga4_via_gtm 1 or 0); Site Kit\'s settings stay as they are either way.' ) . '</p>';
+}
+
+/**
+ * A Wugweb product's screens as core tabs, under the screen's heading: every screen of its menu the user may open, in
+ * menu order (Dashboard first). Nothing for a menu outside the Wugweb block, inside a Kits frame, or with one screen.
+ * (Each product registers its own top-level menu; this only prints the tabs.)
+ *
+ * @param string $menu    The menu's slug.
+ * @param string $label   The tab row's accessible name, e.g. "MailWeb screens".
+ * @param string $current The current item's slug, when it is not the page= value (an item that opens a tab).
+ */
+function kits_admin_fold_tabs( string $menu, string $label, string $current = '' ): void {
+	global $submenu, $plugin_page;
+	$block = array( 'kits', 'directoryweb', 'aw-sourcing-menu', 'aw-seo-plus', 'aw-search-insights', 'mailweb', 'planweb' );
+	if ( ! in_array( $menu, $block, true ) || ( function_exists( 'kits_admin_embedding' ) && kits_admin_embedding() ) ) {
+		return;
+	}
+	$items = array_filter( (array) ( $submenu[ $menu ] ?? array() ), fn( $i ) => is_array( $i ) && isset( $i[1] ) && current_user_can( (string) $i[1] ) );
+	$tabs  = kits_fold_tabs( $items, '' !== $current ? $current : ( is_string( $plugin_page ) ? $plugin_page : '' ) );
+	if ( count( $tabs ) < 2 ) {
+		return;
+	}
+	echo '<nav class="nav-tab-wrapper wp-clearfix" aria-label="' . esc_attr( $label ) . '">';
+	foreach ( $tabs as $t ) {
+		echo '<a class="nav-tab' . ( $t[2] ? ' nav-tab-active' : '' ) . '" href="' . esc_url( admin_url( $t[1] ) ) . '"' . ( $t[2] ? ' aria-current="page"' : '' ) . '>' . esc_html( $t[0] ) . '</a>';
+	}
+	echo '</nav>';
 }
