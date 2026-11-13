@@ -1839,8 +1839,8 @@
    "type": "component",
    "status": "live",
    "classes": ["aw-stack-list"],
-   "states": ["default (added at render to core/post-template lists of aw_news, aw_legal and post, hubs.php): every card kit-card--stacked-md, picture a quarter of the card (1:3, --kit-thumb-min to --kit-thumb-max) at full card height, 12px padding and gap (--kit-space-3), grid fills each row at --kit-card-min-width (1 across on phones, 2 in the 720 column, 3 across 1200); one surface; meta row date first (owner, 13 Nov 2026)"],
-   "tokens": ["--kit-card-min-width", "--kit-space-grid", "--kit-space-3", "--kit-thumb-min", "--kit-thumb-max", "--kit-radius-media"],
+   "states": ["default (added at render to core/post-template lists of aw_news, aw_legal and post, hubs.php): every card kit-card--stacked-md, 3:1 (the picture is a quarter of the width at aspect-ratio 3 / 4, flush to the edge, so the row is a third of the width; the row grows only if the words cannot fit), text padded 12px (--kit-space-3), title clamped to two lines, no summary, grid fills each row, cards 350px to 600px wide (--aw-stack-card-min, --aw-stack-card-max; full width on phones; 1 across on phones, 2 in the 720 column, 3 across 1200); one surface; meta row date first (owner, 13 Nov 2026)"],
+   "tokens": ["--aw-stack-card-min", "--aw-stack-card-max", "--kit-space-grid", "--kit-space-3"],
    "a11y": {
     "element": "list (ul) of cards, one link per card title",
     "aria": "thumbnail decorative or alt from the media library",
