@@ -46,7 +46,7 @@
 | `core/gov-verified.php` | Verified (government records): `aw_gov_verification` `:57`, sync on meta change `:112-128` (only while option `aw_gov_verified_live`), title mark `:167`, edit-screen box `:222`, WP-CLI `aw gov-verify` `:236` | DW |
 | `core/unverified.php` | Unverified values (meta `aw_unverified`) and their mark | DW |
 | `core/geocode.php` | Coordinates from Nominatim (one request a second, cron `aw_geocode_one` `:205`), `aw_listing_sources` filter `:255`, WP-CLI `aw geocode` `:279` | DW |
-| `core/map-picker.php` | Admin map beside lat/lng (Leaflet from cdnjs with SRI, `:20-46`) | DW |
+| `core/map-picker.php` | Admin map beside lat/lng (Leaflet 1.9.4 from `assets/vendor/`, `:20-37`) | DW |
 | `core/local-cards.php` | "Few … listings" card on small districts (`render_block_core/query` `:25`) | DW |
 | `core/district-helplines.php` | District helpline block (option `aw_district_helplines`, `render_block_core/query` prio 9 `:118`) | DW |
 
@@ -172,7 +172,7 @@ Phase 1 moves these with **the same names** (`animal-writes/*`, the same shortco
 In phase 1 these become settings or data. Each starts with today's value, supplied by Core through one filter, `directoryweb_site_config`, until phase 3's Settings store them:
 - **Place sources:** the LGD file and India Post (`api.postalpincode.in`, `places.php:469`); the PIN pattern `^[1-9]\d{5}$`.
 - **Geocoder:** Nominatim with `countrycodes=in`, and the User-Agent and contact `AW_GEO_UA` (`geocode.php:32`, `:43`, `:83`); the India bounding box (`directory-map.php:205`).
-- **Map and assets:** the tile style URL (`directory-map.php:27`) becomes a setting (§2.3). The map library (`:26`) is **not** a setting: it stays a fixed URL with a pinned version, plus `integrity` and `crossorigin`. Today maplibre loads from unpkg with no integrity check; phase 1 adds it as part of the move, as Leaflet already has (`map-picker.php:18-30`).
+- **Map and assets:** the tile style URL (`directory-map.php:27`) becomes a setting (§2.3). The map library (`:26`) is **not** a setting: MapLibre 4.7.1 and Leaflet 1.9.4 are served from the plugin's `assets/vendor/` (npm package files, sha256 in each folder's README; 13 Nov 2026), so no CDN, integrity or crossorigin applies; they move with the plugin.
 - **Registrations:** AWBI, 12A, 80G, FCRA, NGO Darpan, MHA, with issuer slugs and labels (`listing-template.php:113`, `:147-153`; `gov-verified.php:25-28`), and the government source list.
 - **Helplines:** 112 and 1962 (`district-helplines.php:103-107`).
 - **Copy:** "Animal Helpline Numbers in …" / "Help in …" (`directory.php:226-248`), "Animal welfare directory: %s" (`:307`), the intro (`:644-650`), the "Blue Cross" alias and placeholder (`:414`, `:575`), redirect-by "Animal Writes" (`:105`), "Claimed only" / "Verified only" (`:581-582`).

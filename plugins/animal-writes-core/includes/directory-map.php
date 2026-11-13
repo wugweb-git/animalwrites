@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_DIR_MAP_LIB = 'https://unpkg.com/maplibre-gl@4.7.1/dist/';
+const AW_DIR_MAP_LIB = 'assets/vendor/maplibre-gl-4.7.1/'; // MapLibre GL, served from this plugin (npm package files; see its README)
 const AW_DIR_STYLE   = 'https://tiles.openfreemap.org/styles/liberty';
 
 /**
@@ -319,7 +319,7 @@ add_action(
 			array(
 				'points' => rest_url( 'aw/v1/dir-points' ),
 				'near'   => rest_url( 'aw/v1/dir-near' ),
-				'lib'    => AW_DIR_MAP_LIB,
+				'lib'    => plugin_dir_url( __DIR__ ) . AW_DIR_MAP_LIB, // loaded by dir-map.js only when the map opens
 				'style'  => AW_DIR_STYLE,
 			)
 		);
