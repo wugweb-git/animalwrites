@@ -645,7 +645,7 @@ function aw_directory_filter( $type = '' ) {
 		. $field( 'aw-dir-type', 'Type', '<select id="aw-dir-type" name="tag[]">' . $t_opts . '</select>', 'type' )
 		. $service . '</div>'
 		. ( $checks ? '<fieldset class="aw-dir-checks"><legend class="screen-reader-text">Show only</legend>' . $checks . '</fieldset>' : '' )
-		. '<div class="kit-filter-sheet-actions"><a class="kit-btn kit-btn--secondary" href="' . esc_url( aw_hub_url( 'aw_listing' ) ) . '">Reset</a><button type="submit" class="kit-btn">Show results</button></div>'
+		. '<div class="kit-filter-sheet-actions"><a class="kit-btn kit-btn--secondary kit-btn--label" href="' . esc_url( aw_hub_url( 'aw_listing' ) ) . '">Reset</a><button type="submit" class="kit-btn kit-btn--ico-search">Show results</button></div>'
 		. '</div></details>' . ( function_exists( 'kits_fold_now' ) ? kits_fold_now( 'sheet' ) : '' ) // a sheet before the first paint on phones (no layout shift)
 		. '<input type="hidden" name="aw_filter" value="1">'
 		. '</form>';

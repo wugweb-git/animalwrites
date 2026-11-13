@@ -70,7 +70,7 @@
    the Kits bottom sheet (kit-primitives.css section 4) with the same fields and Reset / Show results.
    Sizes: fields and buttons --kit-size-control, radius --kit-radius-control; spacing --kit-space-*. */
 .aw-dir-search {
-	display: grid; gap: var(--kit-space-4); margin: 0; max-width: var(--kit-width-wide);
+	display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-4); margin: 0; max-width: var(--kit-width-wide);
 	padding: var(--kit-space-5); background: var(--kit-color-raised); border-radius: var(--kit-radius-card); box-shadow: var(--kit-elevation-1);
 }
 .aw-dir-search .kit-field { margin: 0; min-width: 0; --kit-field-height: var(--kit-size-control); }

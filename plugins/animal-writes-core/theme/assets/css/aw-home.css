@@ -206,7 +206,7 @@
 .aw-findhelp-label { margin: 0 0 var(--kit-space-2); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-strong); color: var(--kit-color-muted); }
 .aw-findhelp-types { display: flex; flex-wrap: wrap; gap: var(--kit-space-2); list-style: none; margin: 0; padding: 0; }
 .aw-findhelp-actions { display: flex; flex-direction: column; gap: var(--kit-space-3); }
-.aw-findhelp-actions .kit-btn { justify-content: center; }
+.aw-findhelp-actions .kit-btn { min-height: var(--kit-size-control); justify-content: center; }
 @media (min-width: 768px) {
 	.aw-findhelp-form { grid-template-columns: minmax(0, 1fr) auto auto; grid-template-areas: "q q q" "state go near"; padding: var(--kit-space-3); background: var(--kit-color-raised); border-radius: var(--kit-radius-card); box-shadow: var(--kit-elevation-1); }
 	.aw-findhelp-filters { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2) var(--kit-space-3); }
