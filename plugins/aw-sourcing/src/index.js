@@ -350,9 +350,25 @@ function ExtraParts( { id, title } ) {
 	if ( ! parts.length ) {
 		return null;
 	}
+	// "Reset this section" forms (sourceweb_reset_form()): the page parts drop the button's own confirm, so ask here.
+	const confirmReset = ( e ) => {
+		if (
+			e.target.querySelector(
+				'input[name="action"][value="sourceweb_reset_section"]'
+			) &&
+			// eslint-disable-next-line no-alert -- a plain browser confirm before a reset, as core's list tables do
+			! window.confirm(
+				__( 'Reset this section to its defaults?', 'aw-sourcing' )
+			)
+		) {
+			e.preventDefault();
+		}
+	};
 	return (
 		<SectionCard id={ id } title={ title }>
-			<PageParts parts={ parts } title={ title } />
+			<div onSubmitCapture={ confirmReset }>
+				<PageParts parts={ parts } title={ title } />
+			</div>
 		</SectionCard>
 	);
 }
@@ -1094,6 +1110,29 @@ function Group( { group, onSaved, onDirty } ) {
 			.catch( ( e ) => setMsg( { tone: 'error', text: errText( e ) } ) )
 			.finally( () => setBusy( false ) );
 	};
+	const restore = () => {
+		if (
+			// eslint-disable-next-line no-alert -- a plain browser confirm before a reset, as core's list tables do
+			! window.confirm(
+				__( 'Reset this section to its defaults?', 'aw-sourcing' )
+			)
+		) {
+			return;
+		}
+		setBusy( true );
+		setMsg( null );
+		apiFetch( {
+			path: path( `settings/${ group.slug }` ),
+			method: 'POST',
+			data: { reset: true },
+		} )
+			.then( ( r ) => {
+				onSaved( r.settings );
+				setMsg( { tone: 'success', text: r.message } );
+			} )
+			.catch( ( e ) => setMsg( { tone: 'error', text: errText( e ) } ) )
+			.finally( () => setBusy( false ) );
+	};
 	return (
 		<SettingsGroup
 			id={ `sourceweb-group-${ group.slug }` }
@@ -1109,6 +1148,11 @@ function Group( { group, onSaved, onDirty } ) {
 					>
 						{ __( 'Save changes', 'aw-sourcing' ) }
 					</Button>
+					{ group.reset && (
+						<Button busy={ busy } onClick={ restore }>
+							{ __( 'Reset this section', 'aw-sourcing' ) }
+						</Button>
+					) }
 					<span aria-live="polite">
 						{ msg && 'success' === msg.tone ? msg.text : '' }
 					</span>

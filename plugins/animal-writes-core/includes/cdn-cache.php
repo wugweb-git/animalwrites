@@ -188,6 +188,8 @@ function aw_cdn_settings_box() {
 	echo '<li>' . esc_html( 'Listings, Library items and Resources: ' ) . ( $long ? '<code>Cache-Control: ' . esc_html( $long ) . '</code>' : esc_html( 'none (CDN caching off)' ) ) . '</li>';
 	echo '</ul>';
 	submit_button();
+	aw_core_reset_button( 'aw_cdn' ); // "Reset this section" (site-options.php)
 	echo '</form>';
+	aw_core_reset_form( 'aw_cdn' );
 }
 add_action( 'aw_site_check_after', 'aw_cdn_settings_box', 20 );

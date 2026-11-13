@@ -109,9 +109,11 @@ function aw_modules_screen() {
 	settings_errors( 'general' ); // options.php's "Settings saved." (core prints it only under the Settings menu)
 	echo '<form method="post" action="' . esc_url( admin_url( 'options.php' ) ) . '">';
 	settings_fields( 'aw_modules' );
-	do_settings_sections( 'aw-modules' );
+	aw_modules_sections(); // do_settings_sections( 'aw-modules' ), with "Reset this section" (site-options.php)
 	submit_button();
-	echo '</form></div>';
+	echo '</form>';
+	aw_modules_reset_forms();
+	echo '</div>';
 }
 
 /* ---------- Type, campaign links, meta ---------- */

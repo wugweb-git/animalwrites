@@ -763,6 +763,9 @@ function kits_core_settings_form( string $group, string $also = '', string $back
 	echo '</tbody></table>';
 	submit_button( 'Save ' . $group );
 	echo '</form>';
+	if ( isset( kits_reset_sections()[ $back ] ) ) {
+		kits_reset_section_form( $back );
+	}
 }
 
 /**
@@ -1041,4 +1044,100 @@ function kits_uninstall_form(): void {
 	do_settings_sections( 'kits-uninstall' );
 	submit_button( 'Save uninstall setting' );
 	echo '</form>';
+	kits_reset_section_form( 'uninstall' );
 }
+
+/* ---------- Reset this section ---------- */
+
+/**
+ * "Reset this section" on Kits → Settings: section => what it restores. Performance and Compatibility: their fields
+ * back to the default (the stored value is dropped; only values that differ from the default are stored). Uninstall:
+ * "Delete this plugin's data" back to its registered default (off). No reset: Preview access (the owner's own lists
+ * of addresses, devices and links), Analytics (read only), and Theme Options (the site's branding).
+ */
+function kits_reset_sections(): array {
+	return array(
+		'performance'   => array( 'Speed', 'utility-performance' ),
+		'compatibility' => array( 'Older content', '' ),
+		'uninstall'     => array(),
+	);
+}
+
+/**
+ * The Theme Options keys a Core Settings form shows (as kits_core_settings_form() lists them).
+ *
+ * @param string $group A group of kits_core_settings_groups().
+ * @param string $also  A Theme Options section shown in the same form, or ''.
+ * @return string[]
+ */
+function kits_core_settings_keys( string $group, string $also ): array {
+	$keys = array();
+	foreach ( kits_theme_option_fields() as $key => $f ) {
+		$where = kits_theme_option_section( $key, $f );
+		if ( ( $group === $f['group'] && 'core' === $where ) || ( '' !== $also && $also === $where ) ) {
+			$keys[] = (string) $key;
+		}
+	}
+	return $keys;
+}
+
+/**
+ * Restore one section's defaults. Nothing is written where they already are.
+ *
+ * @param string $section A key of kits_reset_sections().
+ * @return bool Whether anything was written.
+ */
+function kits_settings_reset( string $section ): bool {
+	$sections = kits_reset_sections();
+	if ( ! isset( $sections[ $section ] ) ) {
+		return false;
+	}
+	if ( 'uninstall' === $section ) {
+		$default = (bool) ( get_registered_settings()['kits_delete_data_on_uninstall']['default'] ?? false );
+		if ( (bool) get_option( 'kits_delete_data_on_uninstall', false ) === $default ) {
+			return false;
+		}
+		update_option( 'kits_delete_data_on_uninstall', $default );
+		return true;
+	}
+	$keys = kits_core_settings_keys( $sections[ $section ][0], $sections[ $section ][1] );
+	if ( ! array_intersect_key( kits_theme_options_saved(), array_flip( $keys ) ) ) {
+		return false;
+	}
+	update_option( 'kits_theme_options', array_fill_keys( $keys, '' ) ); // the clean-up drops each key sent empty: the default again; other keys stay
+	return true;
+}
+
+/**
+ * The "Reset this section" button: a form of its own, under the section's form.
+ *
+ * @param string $section A key of kits_reset_sections().
+ */
+function kits_reset_section_form( string $section ): void {
+	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
+	echo '<input type="hidden" name="action" value="kits_reset_section"><input type="hidden" name="section" value="' . esc_attr( $section ) . '">';
+	wp_nonce_field( 'kits_reset_section_' . $section, '_wpnonce', false );
+	printf(
+		'<p><button type="submit" class="button" onclick="return window.confirm(%1$s);">%2$s</button></p>',
+		esc_attr( (string) wp_json_encode( 'Reset this section to its defaults?' ) ),
+		esc_html( 'Reset this section' )
+	);
+	echo '</form>';
+}
+
+// "Reset this section" (Kits → Settings): nonce and capability checked, then back to the section with core's notice.
+add_action(
+	'admin_post_kits_reset_section',
+	function () {
+		$section = isset( $_POST['section'] ) ? sanitize_key( wp_unslash( $_POST['section'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- the nonce's action names the section; checked on the next line.
+		check_admin_referer( 'kits_reset_section_' . $section );
+		if ( ! current_user_can( 'manage_options' ) || ! isset( kits_reset_sections()[ $section ] ) ) {
+			wp_die( esc_html( 'Sorry, you are not allowed to do that.' ), 403 );
+		}
+		kits_settings_reset( $section );
+		add_settings_error( 'general', 'settings_updated', 'Defaults restored.', 'success' );
+		set_transient( 'settings_errors', get_settings_errors(), 30 ); // as options.php does, for settings_errors() on the screen
+		wp_safe_redirect( admin_url( 'admin.php?page=kits-settings&kits_section=' . rawurlencode( $section ) . '&settings-updated=true' ) );
+		exit;
+	}
+);
