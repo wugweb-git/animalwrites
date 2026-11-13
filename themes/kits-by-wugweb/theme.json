@@ -295,6 +295,36 @@
 				}
 			]
 		},
+		"dimensions": {
+			"defaultAspectRatios": false,
+			"aspectRatios": [
+				{
+					"name": "Standard 4:3",
+					"slug": "standard",
+					"ratio": "4/3"
+				},
+				{
+					"name": "Portrait 3:4",
+					"slug": "portrait",
+					"ratio": "3/4"
+				},
+				{
+					"name": "Featured 3:2",
+					"slug": "featured",
+					"ratio": "3/2"
+				},
+				{
+					"name": "Square 1:1",
+					"slug": "square",
+					"ratio": "1/1"
+				},
+				{
+					"name": "Wide 16:9",
+					"slug": "wide",
+					"ratio": "16/9"
+				}
+			]
+		},
 		"shadow": {
 			"defaultPresets": false,
 			"presets": [

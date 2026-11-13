@@ -2045,7 +2045,11 @@
     "kit-surface-card",
     "kit-card-min",
     "kit-card-columns",
-    "kit-card-media-ratio"
+    "kit-card-media-ratio",
+    "kit-card-stacked-media-ratio",
+    "kit-card-featured-media-ratio",
+    "kit-card-square-media-ratio",
+    "kit-card-stacked-media-width"
    ],
    "style": {
     "block": "core/group",
@@ -2068,7 +2072,7 @@
     "schema": "part of the list's ItemList"
    },
    "note": "Several card styles share these classes; one kit-card with variants is the next step.",
-   "anatomy": "media 4:3 (logo whole; label top-left) > meta row (date, read time, place) > chips (source, type, category; lg 3, md 2, sm 1; one row) > title (3 lines, word-safe) > summary (block-lg/md, stacked-lg) > action",
+   "anatomy": "media 4:3; stacked 3:4, featured 3:2, square 1:1 (Theme Options → Cards, Editor aspect ratios) (logo whole; label top-left) > meta row (date, read time, place) > chips (source, type, category; lg 3, md 2, sm 1; one row) > title (3 lines, word-safe) > summary (block-lg/md, stacked-lg) > action",
    "patterns": [
     "kits-by-wugweb/card-block-lg",
     "kits-by-wugweb/card-block-md",
