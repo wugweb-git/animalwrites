@@ -1,7 +1,29 @@
 <?php
 /**
- * Uninstall RankWeb: deletes nothing. Settings, FAQ records, focus keywords and the scores it has stored stay, so reinstalling finds everything as it was.
- * Removing data is a separate, deliberate step, never a side effect of deleting the plugin.
+ * Uninstall RankWeb. By default it deletes nothing: settings, FAQ records, focus keywords and the scores it has stored
+ * stay, so reinstalling finds everything as it was.
+ *
+ * Only when "Delete this plugin's data when it is deleted" is ticked (RankWeb → Settings → Modules, option
+ * aw_seo_delete_data = 1) it deletes RankWeb's own data, and exactly this:
+ *
+ * Options:
+ *   aw_seo_settings          (but when it holds InsightWeb's numbers, key 'search-insights', that key stays)
+ *   aw_faq_off_types, aw_seo_keep_listings, aw_default_share_image, aw_seo_delete_data,
+ *   aw_seo_endpoints_last, aw_seo_cache_gen, aw_seo_press_kw_1103, aw_seed_redirects_version, aw_sitemap_filtered,
+ *   aw_html_sitemap_page (the option only; the page itself stays), aw_faq_experiment,
+ *   rankweb_health_log, rankweb_health_schema
+ * Transients (and their timeouts):
+ *   rankweb_health, aw_faq_counts, aw_faq_index, aw_html_sitemap, aw_seed_redirects_wait, aw_sitemap_dir_pairs,
+ *   and every transient named aw_seo_… (aw_seo_dir_data, aw_seo_category_counts, aw_seo_endpoints_mailed,
+ *   aw_seo_advice_focus_index_v2, aw_seo_advice_median2_<type>, aw_seo_rendered_<id>, aw_seo_c_<hash>,
+ *   aw_seo_categories_<type>)
+ * Scheduled events:
+ *   aw_seo_fill_daily, aw_seo_endpoints_watchdog, aw_seo_sitemap_daily, aw_faq_index_build, rankweb_health_build
+ *   (with and without its 'now' argument)
+ * Custom tables: none (RankWeb has none; Rank Math's tables are Rank Math's).
+ *
+ * Never deleted: posts, pages, terms, users, post or term meta (FAQ records, focus keywords, scores), Rank Math's data,
+ * and any other plugin's options.
  *
  * @package aw-seo-extras
  */
@@ -9,3 +31,31 @@
 if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
+
+if ( ! get_option( 'aw_seo_delete_data', 0 ) ) {
+	return; // The default: keep everything.
+}
+
+$aw_seo_settings = get_option( 'aw_seo_settings', array() );
+if ( is_array( $aw_seo_settings ) && ! empty( $aw_seo_settings['search-insights'] ) ) {
+	update_option( 'aw_seo_settings', array( 'search-insights' => $aw_seo_settings['search-insights'] ), true ); // InsightWeb's numbers stay
+} else {
+	delete_option( 'aw_seo_settings' );
+}
+unset( $aw_seo_settings );
+
+foreach ( array( 'aw_faq_off_types', 'aw_seo_keep_listings', 'aw_default_share_image', 'aw_seo_endpoints_last', 'aw_seo_cache_gen', 'aw_seo_press_kw_1103', 'aw_seed_redirects_version', 'aw_sitemap_filtered', 'aw_html_sitemap_page', 'aw_faq_experiment', 'rankweb_health_log', 'rankweb_health_schema', 'aw_seo_delete_data' ) as $aw_seo_option ) {
+	delete_option( $aw_seo_option );
+}
+
+foreach ( array( 'rankweb_health', 'aw_faq_counts', 'aw_faq_index', 'aw_html_sitemap', 'aw_seed_redirects_wait', 'aw_sitemap_dir_pairs' ) as $aw_seo_transient ) {
+	delete_transient( $aw_seo_transient );
+}
+global $wpdb;
+// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- no API deletes transients by prefix.
+$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s", $wpdb->esc_like( '_transient_aw_seo_' ) . '%', $wpdb->esc_like( '_transient_timeout_aw_seo_' ) . '%' ) );
+
+foreach ( array( 'aw_seo_fill_daily', 'aw_seo_endpoints_watchdog', 'aw_seo_sitemap_daily', 'aw_faq_index_build', 'rankweb_health_build' ) as $aw_seo_hook ) {
+	wp_clear_scheduled_hook( $aw_seo_hook );
+}
+wp_clear_scheduled_hook( 'rankweb_health_build', array( 'now' ) );

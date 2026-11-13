@@ -141,3 +141,136 @@ add_action(
 		exit;
 	}
 );
+
+/* ---------- The options, registered with the Settings API ---------- */
+
+const INSIGHTWEB_DELETE_DATA = 'insightweb_delete_data'; // 1: uninstall.php deletes InsightWeb's own data. Default 0: it keeps everything.
+
+/**
+ * The numbers' part of aw_seo_settings (key 'search-insights') as stored: AW_SI_* whole numbers, 'on' a boolean, any
+ * other key kept.
+ * Values the screen stored come back unchanged.
+ *
+ * @param mixed $part The key's value.
+ */
+function aw_si_settings_part_clean( $part ): array {
+	$out = array();
+	foreach ( (array) $part as $name => $v ) {
+		$name = (string) $name;
+		if ( 'on' === $name ) {
+			$out['on'] = in_array( $v, array( true, false, 0, 1 ), true ) ? $v : (bool) $v; // stored as it was (an older save left 1)
+		} elseif ( 0 === strpos( $name, 'AW_SI_' ) ) {
+			$out[ $name ] = max( 0, (int) $v );
+		} else {
+			$out[ $name ] = is_string( $v ) ? sanitize_text_field( $v ) : $v; // a key no field knows: kept
+		}
+	}
+	return $out;
+}
+
+/**
+ * Sanitize callback of aw_seo_settings when RankWeb is not loaded to register it (RankWeb's own callback cleans the
+ * same key the same way). Only the 'search-insights' key is InsightWeb's: the other keys are RankWeb's and stay as
+ * they are.
+ *
+ * @param mixed $value Value to store.
+ */
+function aw_si_settings_sanitize( $value ): array {
+	$value = (array) $value;
+	if ( isset( $value['search-insights'] ) ) {
+		$value['search-insights'] = aw_si_settings_part_clean( $value['search-insights'] );
+		if ( ! $value['search-insights'] ) {
+			unset( $value['search-insights'] );
+		}
+	}
+	return $value;
+}
+
+/**
+ * Every option the InsightWeb Settings screen saves, as register_setting() arguments. The names and stored shapes are
+ * the ones used before (no migration); the default is what the code reads when the option is missing.
+ */
+function insightweb_registered_settings(): array {
+	return array(
+		'aw_si_gdelt_on'       => array(
+			'type'              => 'boolean',
+			'description'       => 'Use GDELT for Rising.',
+			'default'           => false,
+			'sanitize_callback' => fn( $v ) => rest_sanitize_boolean( $v ) ? 1 : 0,
+			'show_in_rest'      => array( 'schema' => array( 'type' => 'boolean' ) ),
+		),
+		'aw_si_tool_seeds'     => array(
+			'type'              => 'string',
+			'description'       => 'Seeds for keyword tools, one search per line.',
+			'default'           => '',
+			'sanitize_callback' => fn( $v ) => function_exists( 'aw_si_tool_seeds_clean' ) ? aw_si_tool_seeds_clean( sanitize_textarea_field( (string) $v ) ) : sanitize_textarea_field( (string) $v ),
+			'show_in_rest'      => array( 'schema' => array( 'type' => 'string' ) ),
+		),
+		INSIGHTWEB_DELETE_DATA => array(
+			'type'              => 'boolean',
+			'description'       => 'Delete InsightWeb\'s own data when the plugin is deleted.',
+			'default'           => false,
+			'sanitize_callback' => fn( $v ) => rest_sanitize_boolean( $v ) ? 1 : 0,
+			'show_in_rest'      => array( 'schema' => array( 'type' => 'boolean' ) ),
+		),
+	);
+}
+
+add_action(
+	'init',
+	function () {
+		foreach ( insightweb_registered_settings() as $name => $args ) {
+			register_setting( 'insightweb', $name, $args );
+		}
+	}
+);
+
+// The seven numbers live in RankWeb's option. RankWeb registers it (its callback cleans this key too); without RankWeb,
+// InsightWeb registers it, cleaning only its own key.
+add_action(
+	'init',
+	function () {
+		if ( isset( get_registered_settings()['aw_seo_settings'] ) ) {
+			return;
+		}
+		register_setting(
+			'insightweb',
+			'aw_seo_settings',
+			array(
+				'type'              => 'object',
+				'description'       => 'RankWeb settings by module; key search-insights holds InsightWeb\'s numbers.',
+				'default'           => array(),
+				'sanitize_callback' => 'aw_si_settings_sanitize',
+				'show_in_rest'      => array(
+					'schema' => array(
+						'type'                 => 'object',
+						'additionalProperties' => array(
+							'type'                 => 'object',
+							'additionalProperties' => true,
+						),
+					),
+				),
+			)
+		);
+	},
+	20
+);
+
+/** Whether InsightWeb's data goes when the plugin is deleted (Settings → Numbers → Keeping data). */
+function insightweb_delete_data_on(): bool {
+	return (bool) get_option( INSIGHTWEB_DELETE_DATA, 0 );
+}
+
+/**
+ * Save "Delete this plugin's data when it is deleted". Nothing is written when it is already so.
+ *
+ * @param bool $on On.
+ * @return bool Whether the option was written.
+ */
+function insightweb_delete_data_save( bool $on ): bool {
+	if ( insightweb_delete_data_on() === $on ) {
+		return false;
+	}
+	update_option( INSIGHTWEB_DELETE_DATA, $on ? 1 : 0, false );
+	return true;
+}
