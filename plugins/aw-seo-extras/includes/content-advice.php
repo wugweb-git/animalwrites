@@ -9,7 +9,7 @@
  * - published pages whose primary focus keyphrase appears in this text but which it does not link to yet;
  * - its length and subheadings next to the median of published items of the same type;
  * - the automatic FAQ questions it has (faq.php).
- * Read only: nothing here writes to the item. Route: GET /wp-json/aw/v1/content-advice?id=N (edit_post on N).
+ * Read only: nothing here writes to the item (the panel's Link keywords save through internal-links.php). Route: GET /wp-json/aw/v1/content-advice?id=N (edit_post on N).
  *
  * @package aw-seo-extras
  */
@@ -174,6 +174,7 @@ function aw_seo_content_advice( WP_Post $post ) {
 		'typical'   => aw_seo_advice_type_median( $post->post_type ),
 		'questions' => array(),
 		'insights'  => function_exists( 'aw_si_ready' ) && aw_si_ready(),
+		'link_kws'  => function_exists( 'aw_link_panel_data' ) ? aw_link_panel_data( $post ) : null, // internal-links.php
 	);
 
 	// 1. Focus keyphrases and who else has them.
@@ -237,11 +238,35 @@ function aw_seo_content_advice( WP_Post $post ) {
 			$linked[ untrailingslashit( strtok( $href, '?#' ) ) ] = true;
 		}
 	}
-	foreach ( aw_seo_advice_focus_index() as $kw => $target ) {
+	// With the Internal links module's keyword index built, the advice reads that one index (link keywords of the
+	// linked types, longest first); without it, the pages' primary focus keyphrases (aw_seo_advice_focus_index()).
+	$index = function_exists( 'aw_link_index' ) ? aw_link_index() : array();
+	if ( $index ) {
+		$words = ' ' . AW_Linker::normalize( $body['text'] ) . ' ';
+		uksort( $index, fn( $a, $b ) => mb_strlen( (string) $b ) <=> mb_strlen( (string) $a ) );
+		$focus_index = array();
+		foreach ( $index as $kw => $cands ) {
+			if ( false === mb_strpos( $words, ' ' . $kw . ' ' ) ) {
+				continue; // whole words only, as the auto-linker
+			}
+			foreach ( $cands as $c ) {
+				if ( (int) $c[0] !== $id ) {
+					$focus_index[ (string) $kw ] = array( (int) $c[0], (string) get_permalink( (int) $c[0] ) );
+					break;
+				}
+			}
+			if ( count( $focus_index ) >= 20 ) {
+				break;
+			}
+		}
+	} else {
+		$focus_index = aw_seo_advice_focus_index();
+	}
+	foreach ( $focus_index as $kw => $target ) {
 		if ( count( $out['links'] ) >= 10 ) {
 			break;
 		}
-		if ( $target[0] === $id || isset( $linked[ untrailingslashit( $target[1] ) ] ) || false === mb_strpos( $lower, $kw ) ) {
+		if ( $target[0] === $id || isset( $linked[ untrailingslashit( $target[1] ) ] ) || ( ! $index && false === mb_strpos( $lower, $kw ) ) ) {
 			continue;
 		}
 		$out['links'][] = array(

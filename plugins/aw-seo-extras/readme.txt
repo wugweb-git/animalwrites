@@ -19,7 +19,8 @@ RankWeb works next to Rank Math (free) and does nothing unless Rank Math is acti
 * One breadcrumb trail per page, given to search engines as one BreadcrumbList.
 * Rank Math's content analysis run on the page visitors see, with stored scores.
 * Focus keywords with a one-page-per-keyphrase guard.
-* The RankWeb content panel in the block editor: keyphrases, the searches a page showed for, and internal links to add. It writes nothing on its own.
+* The RankWeb content panel in the block editor: keyphrases, the searches a page showed for, internal links to add, and the item's link keywords (the only thing it saves, with its own button).
+* Internal links: an auto-linker that links items to each other from their link keywords (off until a post type is chosen in Settings → Internal links), and a table of every link in each item.
 * llms.txt, Open Graph details, share images and a watchdog for the sitemap.
 * Settings for every rule, grouped by module, with their defaults.
 

@@ -132,10 +132,10 @@ foreach ( aw_seo_modules() as $key => $mod ) {
 		rw_check( $back === $f['default'], "default round trip {$key}.{$const}" );
 	}
 }
-rw_check( 31 === $fields, "31 fields found ({$fields})" );
+rw_check( 38 === $fields, "38 fields found ({$fields})" ); // 31, and 7 for Internal links (14 Nov 2026)
 
 $tabs = array_keys( array_filter( aw_seo_setting_tabs(), fn( $t ) => empty( $t['hidden'] ) ) );
-rw_check( 7 === count( $tabs ), 'seven groups: ' . implode( ', ', $tabs ) );
+rw_check( 8 === count( $tabs ), 'eight groups (Internal links added 14 Nov 2026): ' . implode( ', ', $tabs ) );
 
 // 2a. Option absent (live, 11 Nov 2026): every group saved unchanged writes nothing.
 $GLOBALS['rw_options'] = array();

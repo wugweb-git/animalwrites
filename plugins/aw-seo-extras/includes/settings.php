@@ -309,6 +309,21 @@ function aw_seo_modules(): array {
 				'AW_SEO_COVERED_TESTS' => array( 'type' => 'list', 'label' => 'Rank Math tests RankWeb covers', 'help' => 'Skipped on every item: RankWeb does this work instead. One test ID per line.', 'default' => array( 'hasContentAI' ) ),
 			),
 		),
+		'internal-links' => array(
+			'label'  => 'Internal links',
+			'switch' => true,
+			'files'  => array( 'internal-links' ),
+			'desc'   => 'Links items to each other from their link keywords, and records every link in each item. Adds no link until a post type is listed.',
+			'fields' => array(
+				'AW_LINK_TYPES' => array( 'type' => 'list', 'label' => 'Post types linked', 'help' => 'Items of these types get links and can be linked to. One post type per line. Empty: no links are added.', 'default' => array() ),
+				'AW_LINK_MAX' => array( 'type' => 'int', 'label' => 'Most links added to one item', 'help' => '', 'default' => 5 ),
+				'AW_LINK_MAX_PER_TARGET' => array( 'type' => 'int', 'label' => 'Most links to the same page in one item', 'help' => '', 'default' => 1 ),
+				'AW_LINK_FIRST_ONLY' => array( 'type' => 'int', 'label' => 'Link only the first time a keyword appears (1 on, 0 off)', 'help' => '', 'default' => 1 ),
+				'AW_LINK_NO_SELF' => array( 'type' => 'int', 'label' => 'Never link an item to itself (1 on, 0 off)', 'help' => '', 'default' => 1 ),
+				'AW_LINK_SKIP_LINKED' => array( 'type' => 'int', 'label' => 'Skip a page the item already links to by hand (1 on, 0 off)', 'help' => '', 'default' => 1 ),
+				'AW_LINK_EXCLUDE' => array( 'type' => 'list', 'label' => 'Items left out', 'help' => 'Never linked from or to. One item ID per line.', 'default' => array() ),
+			),
+		),
 	);
 	return $m;
 }
@@ -428,6 +443,10 @@ function aw_seo_setting_tabs(): array {
 		'ai'              => array(
 			'label'   => 'AI agents',
 			'modules' => array( 'llms', 'markdown' ),
+		),
+		'links'           => array(
+			'label'   => 'Internal links',
+			'modules' => array( 'internal-links' ),
 		),
 	);
 }

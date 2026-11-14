@@ -105,6 +105,8 @@ jobs:
         run: php plugins/kits-core/tests/shell-parts-tests.php
       - name: RankWeb settings tests without WordPress (defaults round trip, unchanged saves write nothing; plugins/aw-seo-extras/tests)
         run: php plugins/aw-seo-extras/tests/run.php
+      - name: RankWeb auto-linker tests (sample HTML in, expected HTML out; PHPUnit classes run without PHPUnit, plugins/aw-seo-extras/tests)
+        run: php plugins/aw-seo-extras/tests/phpunit-lite.php
       - name: InsightWeb tests without WordPress (unchanged saves write nothing, Dashboard tiles; plugins/insightweb/tests)
         run: php plugins/insightweb/tests/run.php
       - name: Footer height follows its content (no max-height, vh height or overflow hidden)

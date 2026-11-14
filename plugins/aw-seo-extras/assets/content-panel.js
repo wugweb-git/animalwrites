@@ -1,5 +1,6 @@
 /**
- * RankWeb content panel (block editor sidebar). Read only: data from GET /aw/v1/content-advice (includes/content-advice.php).
+ * RankWeb content panel (block editor sidebar). Data from GET /aw/v1/content-advice (includes/content-advice.php); the only
+ * thing it saves is the item's link keywords, with their own button (POST /rankweb/v1/links/keywords, internal-links.php).
  * Plain script on WordPress's own packages, so no build step.
  */
 ( function ( wp ) {
@@ -108,6 +109,8 @@
 				: el( 'p', null, __( 'No focus keyphrase yet. Set one in Rank Math.', 'aw-seo-extras' ) )
 		);
 
+		var linkKws = d.link_kws ? el( LinkKeywords, { postId: postId, data: d.link_kws } ) : null;
+
 		var queries = el(
 			C.PanelBody,
 			{ title: __( 'Searches it shows for (28 days)', 'aw-seo-extras' ), initialOpen: true },
@@ -201,7 +204,56 @@
 				: el( 'p', null, __( 'No automatic questions for this item.', 'aw-seo-extras' ) )
 		);
 
-		return el( wp.element.Fragment, null, focus, queries, links, shape, questions );
+		return el( wp.element.Fragment, null, focus, linkKws, queries, links, shape, questions );
+	}
+
+	// Link keywords (includes/internal-links.php): one per line, saved with its own button through rankweb/v1.
+	function LinkKeywords( props ) {
+		var t = useState( props.data.list.join( '\n' ) );
+		var text = t[ 0 ];
+		var setText = t[ 1 ];
+		var st = useState( { saved: props.data.saved, busy: false, msg: '', error: '' } );
+		var s = st[ 0 ];
+		var setS = st[ 1 ];
+
+		function save() {
+			setS( { saved: s.saved, busy: true, msg: '', error: '' } );
+			wp.apiFetch( {
+				path: '/rankweb/v1/links/keywords',
+				method: 'POST',
+				data: {
+					id: props.postId,
+					keywords: text.split( /\r?\n/ ).map( function ( l ) {
+						return l.trim();
+					} ).filter( Boolean ),
+				},
+			} )
+				.then( function ( r ) {
+					setText( r.list.join( '\n' ) );
+					setS( { saved: true, busy: false, msg: __( 'Link keywords saved.', 'aw-seo-extras' ), error: '' } );
+				} )
+				.catch( function ( err ) {
+					setS( { saved: s.saved, busy: false, msg: '', error: ( err && err.message ) || __( 'Could not save the link keywords.', 'aw-seo-extras' ) } );
+				} );
+		}
+
+		return el(
+			C.PanelBody,
+			{ title: __( 'Link keywords', 'aw-seo-extras' ), initialOpen: true },
+			el( C.TextareaControl, {
+				label: __( 'Other items link to this one where these words appear. One per line.', 'aw-seo-extras' ),
+				value: text,
+				rows: 4,
+				onChange: setText,
+				help: s.saved ? '' : __( 'From the focus keywords until you save them here.', 'aw-seo-extras' ),
+			} ),
+			props.data.on
+				? null
+				: el( 'p', { style: { color: '#757575', fontSize: 12 } }, __( 'The auto-linker is off for this post type (RankWeb → Settings → Internal links).', 'aw-seo-extras' ) ),
+			el( C.Button, { variant: 'secondary', onClick: save, isBusy: s.busy, disabled: s.busy }, __( 'Save link keywords', 'aw-seo-extras' ) ),
+			s.msg ? el( 'p', { role: 'status', style: { color: '#008a20', marginTop: 8 } }, s.msg ) : null,
+			s.error ? el( C.Notice, { status: 'error', isDismissible: false }, s.error ) : null
+		);
 	}
 
 	wp.plugins.registerPlugin( 'rankweb-content', {
