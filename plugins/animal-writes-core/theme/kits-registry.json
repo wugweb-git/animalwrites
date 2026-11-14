@@ -4,6 +4,33 @@
  "extends": "kits-by-wugweb",
  "items": [
   {
+   "name": "RankWeb: added internal link",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "aw-auto-link"
+   ],
+   "states": [
+    "a link RankWeb's auto-linker adds inside item text (plugins/aw-seo-extras/includes/class-aw-linker.php); no styles of its own, it looks like any text link"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<a href> around the keyword as written",
+    "aria": "none",
+    "keyboard": "Tab, like any link",
+    "focus": "the theme's link focus ring",
+    "target": "inline text link",
+    "motion": "none",
+    "sr": "the keyword text"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "an internal link to the item that owns the keyword",
+    "alt": "none",
+    "schema": "none"
+   }
+  },
+  {
    "name": "News card",
    "type": "component",
    "status": "live",
