@@ -691,6 +691,22 @@ add_filter(
 );
 
 /*
+ * A stacked card's picture fills the card's full height (kit.css, owner 14 Nov 2026), so it is cropped from a file far
+ * wider than its 88–112px box. "auto" sizes picks the file by that box width and loaded the 300px copy, which the crop
+ * then blew up. Stacked lists say the width the crop needs instead: about 280px on phones and 320px wider up.
+ */
+add_filter(
+	'render_block_core/post-template',
+	function ( $html ) {
+		if ( false === strpos( (string) $html, 'kit-card--stacked' ) || false === strpos( (string) $html, ' sizes="' ) ) {
+			return $html;
+		}
+		return (string) preg_replace( '/ sizes="[^"]*"/', ' sizes="(max-width: 767px) 280px, 320px"', $html );
+	},
+	25
+);
+
+/*
  * Press cards on campaign pages show the source line and the title only (owner, 13 Nov 2026). A press item has no
  * summary of its own, so its excerpt fell back to the site description and every card read the same.
  */
