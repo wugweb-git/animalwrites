@@ -35,7 +35,7 @@ if ( true !== (bool) get_option( 'planweb_delete_data_on_uninstall', false ) ) {
 	return; // The default: keep everything.
 }
 
-$planweb_options = array( 'planweb_on', 'planweb_setup', 'planweb_import_done', 'planweb_import_lock', 'planweb_import_result', 'planweb_import_tried', 'planweb_feed_key', 'planweb_migrate_1114', 'planweb_migrate_1114_lock' );
+$planweb_options = array( 'planweb_on', 'planweb_setup', 'planweb_import_done', 'planweb_import_lock', 'planweb_import_result', 'planweb_import_tried', 'planweb_feed_key', 'planweb_site_types', 'planweb_migrate_1114', 'planweb_migrate_1114_lock' );
 
 require_once __DIR__ . '/includes/uninstall-backup.php';
 if ( ! planweb_uninstall_backup( 'planweb', __DIR__ . '/planweb.php', array_merge( $planweb_options, array( 'planweb_delete_data_on_uninstall' ) ), array(), array() ) ) {

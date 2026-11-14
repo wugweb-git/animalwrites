@@ -53,6 +53,7 @@ require_once PLANWEB_DIR . 'includes/dashboard.php';
 require_once PLANWEB_DIR . 'includes/kits-hub.php';
 require_once PLANWEB_DIR . 'includes/planweb-dashboard.php';
 require_once PLANWEB_DIR . 'includes/planweb-rest.php';
+require_once PLANWEB_DIR . 'includes/site-schedule.php';
 require_once PLANWEB_DIR . 'includes/feed-model.php';
 require_once PLANWEB_DIR . 'includes/feed.php';
 require_once PLANWEB_DIR . 'includes/migrate.php';

@@ -174,6 +174,7 @@ function Dashboard() {
 				) ) }
 			</TileGrid>
 			<Month />
+			<SiteSchedule items={ data.site || [] } />
 			{ ! data.counting && (
 				<>
 					<SectionCard
@@ -227,6 +228,81 @@ function Dashboard() {
 				</>
 			) }
 		</>
+	);
+}
+
+/* ---------- The site's own schedule ---------- */
+
+/**
+ * One site item (a post or a newsletter) as a line: its kind, time, title (opening it in its own editor) and status.
+ * Dates are changed there, never here: PlanWeb runs no second scheduler.
+ *
+ * @param {Object} props
+ * @param {Object} props.i planweb_site_items() row.
+ */
+function SiteItem( { i } ) {
+	return (
+		<>
+			<span className="planweb-type planweb-type--site">
+				<span className="planweb-mark" aria-hidden="true" />
+				{ i.typeText }
+			</span>{ ' ' }
+			{ i.editUrl ? (
+				<a href={ i.editUrl }>
+					{ i.time ? `${ i.time } ` : '' }
+					{ i.title }
+				</a>
+			) : (
+				<span>
+					{ i.time ? `${ i.time } ` : '' }
+					{ i.title }
+				</span>
+			) }{ ' ' }
+			<span className={ `planweb-status planweb-status--${ i.status }` }>
+				{ i.statusText }
+			</span>
+		</>
+	);
+}
+
+/**
+ * The site's own schedule on the Dashboard: posts that missed their publish time, and what is scheduled in the next 30
+ * days (posts and newsletters). Read live from WordPress and FluentCRM.
+ *
+ * @param {Object} props
+ * @param {Array}  props.items Site items.
+ */
+function SiteSchedule( { items } ) {
+	return (
+		<SectionCard
+			id="site-schedule"
+			title={ __( 'Site schedule', 'planweb' ) }
+			description={ __(
+				'Scheduled posts and newsletters in the next 30 days, and posts that missed their publish time, straight from WordPress and FluentCRM. Change a date in the post or the newsletter itself.',
+				'planweb'
+			) }
+		>
+			{ items.length ? (
+				<RefTable
+					caption={ __( 'Site schedule', 'planweb' ) }
+					head={ [
+						__( 'Date', 'planweb' ),
+						__( 'Item', 'planweb' ),
+					] }
+					rows={ items.map( ( i ) => [
+						i.date,
+						<SiteItem key={ i.uid } i={ i } />,
+					] ) }
+				/>
+			) : (
+				<p>
+					{ __(
+						'Nothing scheduled on the site in the next 30 days, and nothing missed.',
+						'planweb'
+					) }
+				</p>
+			) }
+		</SectionCard>
 	);
 }
 
@@ -294,6 +370,14 @@ function Month() {
 				</p>
 			);
 		} );
+		// The site's own schedule in the same days: posts (published, scheduled, missed) and newsletters.
+		( data.site || [] ).forEach( ( i ) => {
+			( days[ i.date ] = days[ i.date ] || [] ).push(
+				<p key={ i.uid } className="planweb-item planweb-item--site">
+					<SiteItem i={ i } />
+				</p>
+			);
+		} );
 		body = (
 			<CalendarGrid
 				month={ data.month }
@@ -309,7 +393,7 @@ function Month() {
 			id="calendar"
 			title={ __( 'Calendar', 'planweb' ) }
 			description={ __(
-				'The month’s entries by day. An entry opens its form on Entries.',
+				'The month’s entries by day, with the site’s own posts and newsletters (outlined mark). An entry opens its form on Entries; a post or newsletter opens in its own editor.',
 				'planweb'
 			) }
 		>
@@ -927,6 +1011,7 @@ const GROUPS = () => [
 	{ value: 'lists', label: __( 'Lists', 'planweb' ) },
 	{ value: 'import', label: __( 'Import from Dates', 'planweb' ) },
 	{ value: 'feed', label: __( 'Calendar feed', 'planweb' ) },
+	{ value: 'site', label: __( 'Site schedule', 'planweb' ) },
 ];
 
 function hashGroup() {
@@ -1315,7 +1400,7 @@ function FeedGroup( { group, onSaved } ) {
 			id="planweb-group-feed"
 			title={ __( 'Calendar feed', 'planweb' ) }
 			description={ __(
-				'A read-only feed for Google Calendar, Apple Calendar or Outlook: date, time, title, type, channels, status and link of entries from 90 days ago on. Never the note. Nothing comes back from the calendar app, and nothing is posted.',
+				'A read-only feed for Google Calendar, Apple Calendar or Outlook: the whole schedule (entries, and the site’s posts and newsletters chosen under Site schedule) from 90 days ago on, with date, time, title, type, channels, status and link. Never the note. Nothing comes back from the calendar app, and nothing is posted.',
 				'planweb'
 			) }
 			footer={
@@ -1402,6 +1487,95 @@ function FeedGroup( { group, onSaved } ) {
 	);
 }
 
+/**
+ * Which parts of the site's own schedule show beside the entries (post types and FluentCRM newsletters).
+ *
+ * @param {Object}   props
+ * @param {Object}   props.group   { sources: [ { slug, label, on, bulk } ] }.
+ * @param {Function} props.onSaved New payload.
+ */
+function SiteGroup( { group, onSaved } ) {
+	const [ on, setOn ] = useState( () =>
+		group.sources.filter( ( s ) => s.on ).map( ( s ) => s.slug )
+	);
+	const [ busy, setBusy ] = useState( false );
+	const [ msg, setMsg ] = useState( null );
+	const save = () => {
+		setBusy( true );
+		setMsg( null );
+		apiFetch( {
+			path: path( 'settings/site' ),
+			method: 'POST',
+			data: { types: on },
+		} )
+			.then( ( r ) => {
+				onSaved( r.site );
+				setMsg( { tone: 'success', text: r.message } );
+			} )
+			.catch( ( e ) => setMsg( { tone: 'error', text: errText( e ) } ) )
+			.finally( () => setBusy( false ) );
+	};
+	return (
+		<SettingsGroup
+			id="planweb-group-site"
+			title={ __( 'Site schedule', 'planweb' ) }
+			description={ __(
+				'What WordPress and FluentCRM already schedule, shown beside the entries on the Dashboard, in the calendar, in the WordPress Dashboard box and in the calendar feed. Read only: dates are set in the post or the newsletter.',
+				'planweb'
+			) }
+			footer={
+				<>
+					<Button variant="primary" busy={ busy } onClick={ save }>
+						{ __( 'Save changes', 'planweb' ) }
+					</Button>
+					<span aria-live="polite">
+						{ msg && 'success' === msg.tone ? msg.text : '' }
+					</span>
+				</>
+			}
+		>
+			{ msg && 'error' === msg.tone && (
+				<Notice tone="error" onDismiss={ () => setMsg( null ) }>
+					{ msg.text }
+				</Notice>
+			) }
+			<fieldset className="kits-shell-field planweb-channels">
+				<legend>{ __( 'Show', 'planweb' ) }</legend>
+				{ group.sources.map( ( s ) => (
+					<label
+						key={ s.slug }
+						className="planweb-channel-box"
+						htmlFor={ `planweb-site-${ s.slug }` }
+					>
+						<input
+							id={ `planweb-site-${ s.slug }` }
+							type="checkbox"
+							checked={ on.includes( s.slug ) }
+							onChange={ ( e ) =>
+								setOn(
+									e.target.checked
+										? [ ...on, s.slug ]
+										: on.filter( ( x ) => x !== s.slug )
+								)
+							}
+						/>{ ' ' }
+						{ s.label }
+						{ s.bulk
+							? ` (${ __( 'imported in bulk', 'planweb' ) })`
+							: '' }
+					</label>
+				) ) }
+				<p className="kits-shell-field__help">
+					{ __(
+						'News and Directory are imported in bulk (hundreds a month), so they are off unless ticked.',
+						'planweb'
+					) }
+				</p>
+			</fieldset>
+		</SettingsGroup>
+	);
+}
+
 function Settings() {
 	const [ data, setData ] = useState( null );
 	const [ error, setError ] = useState( '' );
@@ -1451,6 +1625,9 @@ function Settings() {
 					group={ data.import }
 					onSaved={ put( 'import' ) }
 				/>
+			) }
+			{ 'site' === open && (
+				<SiteGroup group={ data.site } onSaved={ put( 'site' ) } />
 			) }
 			{ 'feed' === open && (
 				<FeedGroup group={ data.feed } onSaved={ put( 'feed' ) } />

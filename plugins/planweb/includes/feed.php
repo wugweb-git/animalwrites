@@ -4,8 +4,9 @@
  * Calendar and Outlook to subscribe to. One way: nothing is read back, nothing is posted (D6). Access is by the secret
  * key made in PlanWeb → Settings → Calendar feed, never by sign-in cookies; no key, no feed.
  *
- * Optional filters: type (slugs joined by commas, or "marketing" = social, email, campaign, content) and status
- * (slugs, or "open" = idea, draft, approved, due). The feed holds entries from 90 days ago on; each event has the date,
+ * The feed is the whole schedule: PlanWeb's entries and the site's own (published and scheduled posts, newsletters;
+ * site-schedule.php). Optional filters: type (slugs joined by commas, "site" for the site's posts, or "marketing" =
+ * social, email, campaign, content, site) and status (slugs, or "open" = still to happen). The feed holds entries from 90 days ago on; each event has the date,
  * time, title, type, channels, status and link, never the note (feed-model.php).
  *
  * @package planweb
@@ -59,7 +60,7 @@ function planweb_feed_payload(): array {
 				'url'   => planweb_feed_url(),
 			),
 			array(
-				'label' => __( 'Marketing only (social, email, campaign, content)', 'planweb' ),
+				'label' => __( 'Marketing only (social, email, campaign, content, site posts)', 'planweb' ),
 				'url'   => planweb_feed_url( array( 'type' => 'marketing' ) ),
 			),
 			array(
@@ -128,13 +129,15 @@ add_action(
  * @param WP_REST_Request $request Request.
  */
 function planweb_feed_serve( WP_REST_Request $request ) {
-	$types    = planweb_feed_list( $request['type'], PLANWEB_TYPES, PLANWEB_FEED_TYPE_GROUPS );
-	$statuses = planweb_feed_list( $request['status'], PLANWEB_STATUSES, PLANWEB_FEED_STATUS_GROUPS );
+	$types    = planweb_feed_list( $request['type'], PLANWEB_TYPES + PLANWEB_FEED_EXTRA_TYPES, PLANWEB_FEED_TYPE_GROUPS );
+	$statuses = planweb_feed_list( $request['status'], PLANWEB_STATUSES + PLANWEB_SITE_STATUSES, PLANWEB_FEED_STATUS_GROUPS );
 	if ( null === $types || null === $statuses ) {
 		return new WP_Error( 'planweb_feed_filter', __( 'Unknown type or status in the feed address.', 'planweb' ), array( 'status' => 400 ) );
 	}
-	$from    = wp_date( 'Y-m-d', time() - PLANWEB_FEED_PAST_DAYS * DAY_IN_SECONDS );
-	$entries = planweb_feed_pick( planweb_entries( $from, '', array( 'posts_per_page' => -1 ) ), $types, $statuses );
+	$from = wp_date( 'Y-m-d', time() - PLANWEB_FEED_PAST_DAYS * DAY_IN_SECONDS );
+	// One schedule: PlanWeb's entries and the site's own (posts, newsletters), up to a year ahead.
+	$all     = array_merge( planweb_entries( $from, '', array( 'posts_per_page' => -1 ) ), planweb_site_items( $from, wp_date( 'Y-m-d', time() + YEAR_IN_SECONDS ) ) );
+	$entries = planweb_feed_pick( $all, $types, $statuses );
 	$ics     = planweb_ics(
 		$entries,
 		array(

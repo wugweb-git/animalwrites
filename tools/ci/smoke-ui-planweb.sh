@@ -25,7 +25,7 @@ want 403 "GET /$PW/settings editor" -b /tmp/cj-rw-ed -H "X-WP-Nonce: $NE" "$P/se
 
 # The Dashboard reads the stored counts: not counting, eight tiles for each range (the import ran in smoke.sh).
 want 200 "GET /$PW/dashboard (counts stored)" -b /tmp/cj-ci -H "X-WP-Nonce: $NA" "$P/dashboard"
-if python3 -c 'import json,sys; d=json.load(open("/tmp/rw.out")); sys.exit(0 if not d["counting"] and all(len(d["tiles"][str(r)])==8 for r in (7,30,90)) else 1)'; then echo "ok   dashboard: counts read, 8 tiles per range"; else echo "FAIL dashboard payload"; FAIL=1; fi
+if python3 -c 'import json,sys; d=json.load(open("/tmp/rw.out")); sys.exit(0 if not d["counting"] and all(len(d["tiles"][str(r)])==9 for r in (7,30,90)) else 1)'; then echo "ok   dashboard: counts read, 9 tiles per range (site schedule included)"; else echo "FAIL dashboard payload"; FAIL=1; fi
 
 # Entries: add, change, refuse a phone link and an editor's Approved, Trash; the list pages and filters on the server.
 want 200 "POST /$PW/entries add (administrator)" -X POST "${AJ[@]}" -d '{"date":"2026-11-30","title":"MP model city","type":"campaign","channel":"x","status":"idea","link":"https://x.com/animal_writes_"}' "$P/entries"
@@ -97,6 +97,21 @@ want 200 "POST /$PW/settings/feed another key" -X POST "${AJ[@]}" -d '{"action":
 want 404 "GET calendar.ics old key" "$F&key=$KEY"
 want 200 "POST /$PW/settings/feed off" -X POST "${AJ[@]}" -d '{"action":"off"}' "$P/settings/feed"
 [ -z "$(wp option get planweb_feed_key 2>/dev/null)" ] && echo "ok   feed off: no key" || { echo "FAIL feed key left"; FAIL=1; }
+
+# The site's own schedule (one schedule, 14 Nov 2026): a scheduled post shows in the month grid, the Dashboard and the
+# feed, read live; a future post past its time is "Missed schedule"; nothing is copied into PlanWeb.
+SP=$(wp post create --post_type=post --post_status=future --post_date="$(date -d '+3 days' '+%Y-%m-%d') 10:00:00" --post_title='Scheduled resource' --porcelain)
+SPM=$(date -d '+3 days' '+%Y-%m')
+PW_E=$(wp post list --post_type=planweb_entry --post_status=any --format=count)
+want 200 "GET /$PW/month with the site schedule" -b /tmp/cj-ci -H "X-WP-Nonce: $NA" "$P/month&m=$SPM"
+if python3 -c 'import json,sys; d=json.load(open("/tmp/rw.out")); sys.exit(0 if any(i["title"]=="Scheduled resource" and i["status"]=="scheduled" and i["source"]=="post" for i in d["site"]) else 1)'; then echo "ok   month: the scheduled post beside the entries"; else echo "FAIL month: scheduled post missing"; FAIL=1; fi
+want 200 "GET /$PW/dashboard site schedule" -b /tmp/cj-ci -H "X-WP-Nonce: $NA" "$P/dashboard"
+grep -q '"Scheduled resource"' /tmp/rw.out && echo "ok   dashboard: site schedule lists the scheduled post" || { echo "FAIL dashboard site schedule"; FAIL=1; }
+wp eval "global \$wpdb; \$wpdb->update( \$wpdb->posts, array( 'post_date' => '$(date -d '-2 days' '+%Y-%m-%d') 09:00:00', 'post_date_gmt' => '$(date -u -d '-2 days' '+%Y-%m-%d') 03:30:00' ), array( 'ID' => $SP ) ); clean_post_cache( $SP );"
+MS=$(wp eval 'echo planweb_site_counts( wp_date( "Y-m-d" ) )["missed"];')
+[ "${MS:-0}" -ge 1 ] && echo "ok   a future post past its time counts as missed ($MS)" || { echo "FAIL missed schedule not counted"; FAIL=1; }
+[ "$(wp post list --post_type=planweb_entry --post_status=any --format=count)" = "$PW_E" ] && echo "ok   nothing copied into PlanWeb" || { echo "FAIL site schedule wrote entries"; FAIL=1; }
+wp post delete "$SP" --force --quiet
 
 # The one-time moves of 14 Nov: a bracket title gets every channel it names; a second run changes nothing.
 MG=$(wp eval '$id = planweb_save_entry( array( "title" => "[Instagram + Facebook + Threads] Moves", "date" => "2026-11-29", "type" => "social", "channel" => "instagram", "status" => "idea" ) ); delete_option( PLANWEB_MIGRATE ); $r = planweb_migrate_1114(); $e = planweb_entry( $id ); $again = planweb_migrate_1114(); echo in_array( $id, $r["channels"], true ) && array( "instagram", "facebook", "threads" ) === $e["channels"] && array() === $again["channels"] ? "ok" : "bad";')

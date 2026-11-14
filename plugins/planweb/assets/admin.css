@@ -37,3 +37,10 @@
 .planweb-channel-box { display: inline-block; margin-inline-end: 1em; white-space: nowrap; }
 .planweb-channels { border: 0; padding: 0; margin: 0 0 16px; min-inline-size: 0; }
 .planweb-channels legend { font-weight: 600; margin-block-end: 4px; padding: 0; }
+
+/* The site's own schedule (posts, newsletters) beside entries: an outlined square, so it never looks like an entry. */
+.planweb-type--site { color: #3c434a; }
+.planweb-type--site .planweb-mark { background: transparent; border: 2px solid currentColor; width: 8px; height: 8px; box-sizing: border-box; }
+.planweb-status--missed { border-color: #d63638; color: #8a2424; background: #fcf0f1; }
+.planweb-status--scheduled, .planweb-status--sending, .planweb-status--paused { border-color: #2271b1; }
+.planweb-status--published { background: #fff; color: #50575e; }
