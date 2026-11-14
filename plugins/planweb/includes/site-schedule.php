@@ -158,7 +158,7 @@ function planweb_site_items( string $from, string $to ): array {
 				'order'                  => 'ASC',
 				'no_found_rows'          => true,
 				'ignore_sticky_posts'    => true,
-				'suppress_filters'       => true, // The schedule as stored: no front-end re-sorting (aw_news).
+				'suppress_filters'       => true, // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.SuppressFilters_suppress_filters -- the schedule as stored: no front-end re-sorting (aw_news, display.php).
 				'update_post_meta_cache' => false,
 				'update_post_term_cache' => false,
 			)
@@ -198,7 +198,7 @@ function planweb_site_items( string $from, string $to ): array {
 		);
 		$rows = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- FluentCRM's own table, read only; a month at most.
 			$wpdb->prepare(
-				'SELECT id, title, status, scheduled_at, updated_at FROM %i WHERE type = %s AND scheduled_at BETWEEN %s AND %s AND status IN (' . implode( ',', array_fill( 0, count( $map ), '%s' ) ) . ') ORDER BY scheduled_at ASC LIMIT %d', // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- placeholders only.
+				'SELECT id, title, status, scheduled_at, updated_at FROM %i WHERE type = %s AND scheduled_at BETWEEN %s AND %s AND status IN (' . implode( ',', array_fill( 0, count( $map ), '%s' ) ) . ') ORDER BY scheduled_at ASC LIMIT %d', // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- placeholders only (%i, %s, %d built here).
 				array_merge( array( $table, 'campaign', $from . ' 00:00:00', $to . ' 23:59:59' ), array_keys( $map ), array( PLANWEB_SITE_MAX ) )
 			),
 			ARRAY_A
