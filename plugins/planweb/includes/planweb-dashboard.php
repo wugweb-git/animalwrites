@@ -69,7 +69,9 @@ function planweb_counts_build( $why = '' ) {
 	$check = get_option( 'planweb_import_done' ) || get_option( 'planweb_import_result' ) ? planweb_verify() : array();
 	$c     = planweb_count_entries( planweb_entries( '', '', array( 'posts_per_page' => -1 ) ), wp_date( 'Y-m-d' ), $check );
 
-	$c['site'] = planweb_site_counts( wp_date( 'Y-m-d' ) ); // The site's own schedule (site-schedule.php).
+	if ( planweb_site_on() ) {
+		$c['site'] = planweb_site_counts( wp_date( 'Y-m-d' ) ); // The site's own schedule (site-schedule.php); no tile when off.
+	}
 
 	$c['at'] = time();
 	set_transient( PLANWEB_COUNTS, $c, 3 * HOUR_IN_SECONDS );

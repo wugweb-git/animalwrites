@@ -16,7 +16,7 @@
  *   GET  services                  manage_options        the services the plan names, with their state
  *   POST settings/feed             manage_options        the calendar feed's key: action new (make a new key; the old
  *                                                        address stops working) or off (no key: no feed)
- *   POST settings/site             manage_options        which parts of the site's own schedule show (site-schedule.php)
+ *   POST settings/site             manage_options        the site schedule's switch and which parts of it show (site-schedule.php)
  *   GET  calendar.ics?key=…        the feed key          the read-only calendar feed (feed.php); no sign-in
  *
  * Every route checks the capability and, for a signed-in browser, the wp_rest nonce (kits_shell_rest_can()). The core
@@ -109,6 +109,10 @@ add_action(
 				'manage_options',
 				'planweb_rest_site_types',
 				array(
+					'on'    => array(
+						'type'    => 'boolean',
+						'default' => true,
+					),
 					'types' => array(
 						'type'     => 'array',
 						'items'    => array( 'type' => 'string' ),
@@ -762,7 +766,10 @@ function planweb_site_payload(): array {
 			'bulk'  => in_array( $slug, PLANWEB_SITE_SKIP, true ),
 		);
 	}
-	return array( 'sources' => $out );
+	return array(
+		'on'      => planweb_site_on(),
+		'sources' => $out,
+	);
 }
 
 /**
@@ -771,7 +778,8 @@ function planweb_site_payload(): array {
  * @param WP_REST_Request $request Request.
  */
 function planweb_rest_site_types( WP_REST_Request $request ) {
-	$saved = planweb_site_types_save( (array) $request['types'] );
+	$switched = planweb_site_on_save( (bool) $request['on'] );
+	$saved    = planweb_site_types_save( (array) $request['types'] ) || $switched;
 	if ( $saved ) {
 		planweb_counts_request();
 	}

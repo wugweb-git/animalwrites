@@ -1495,6 +1495,7 @@ function FeedGroup( { group, onSaved } ) {
  * @param {Function} props.onSaved New payload.
  */
 function SiteGroup( { group, onSaved } ) {
+	const [ live, setLive ] = useState( !! group.on );
 	const [ on, setOn ] = useState( () =>
 		group.sources.filter( ( s ) => s.on ).map( ( s ) => s.slug )
 	);
@@ -1506,7 +1507,7 @@ function SiteGroup( { group, onSaved } ) {
 		apiFetch( {
 			path: path( 'settings/site' ),
 			method: 'POST',
-			data: { types: on },
+			data: { on: live, types: on },
 		} )
 			.then( ( r ) => {
 				onSaved( r.site );
@@ -1539,7 +1540,26 @@ function SiteGroup( { group, onSaved } ) {
 					{ msg.text }
 				</Notice>
 			) }
-			<fieldset className="kits-shell-field planweb-channels">
+			<Switch
+				label={ __( 'Site schedule in PlanWeb', 'planweb' ) }
+				help={
+					live
+						? __(
+								"On: the site's posts and newsletters show beside the entries.",
+								'planweb'
+							)
+						: __(
+								'Off: PlanWeb shows only its own entries. Also in Kits → Modules → PlanWeb.',
+								'planweb'
+							)
+				}
+				checked={ live }
+				onChange={ setLive }
+			/>
+			<fieldset
+				className="kits-shell-field planweb-channels"
+				disabled={ ! live }
+			>
 				<legend>{ __( 'Show', 'planweb' ) }</legend>
 				{ group.sources.map( ( s ) => (
 					<label
