@@ -104,9 +104,9 @@ add_action(
 				'permission_callback' => 'planweb_feed_can',
 				'callback'            => 'planweb_feed_serve',
 				'args'                => array(
-					'key'    => array(
-						'type'     => 'string',
-						'required' => true,
+					'key'    => array( // not "required": a missing key must get the same 404 as a wrong one (planweb_feed_can), not a 400 that shows the route exists
+						'type'    => 'string',
+						'default' => '',
 					),
 					'type'   => array(
 						'type'    => 'string',

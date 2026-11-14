@@ -705,6 +705,15 @@ add_filter(
 	},
 	25
 );
+// WordPress puts "auto" back in front of a lazy picture's sizes when the template's tags are filtered, which undid the fix
+// above. These sizes are only ever set there, so the tag filter takes "auto" off them again.
+add_filter(
+	'wp_content_img_tag',
+	function ( $img ) {
+		return str_replace( ' sizes="auto, (max-width: 767px) 280px, 320px"', ' sizes="(max-width: 767px) 280px, 320px"', (string) $img );
+	},
+	20
+);
 
 /*
  * Press cards on campaign pages show the source line and the title only (owner, 13 Nov 2026). A press item has no
