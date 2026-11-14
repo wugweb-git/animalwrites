@@ -260,6 +260,16 @@ function aw_ingest( WP_REST_Request $req ) {
 	}
 	update_post_meta( $post_id, 'aw_source_name', sanitize_text_field( (string) $req->get_param( 'source_name' ) ) );
 	$source_date = aw_sanitize_meta( (string) $req->get_param( 'source_date' ), 'aw_source_date' );
+	// A document dated in its own title ("Circular dated 05.06.2024") keeps that date when the source gave none or only
+	// the day it was fetched (14 Nov 2026: 19 AWBI circulars showed "5 minutes ago" in the Library).
+	if ( ( '' === $source_date || wp_date( 'Y-m-d' ) === $source_date )
+		&& preg_match( '/\b(\d{1,2})[.\/-](\d{1,2})[.\/-](20\d\d)\b/', $title, $m )
+		&& checkdate( (int) $m[2], (int) $m[1], (int) $m[3] ) ) {
+		$titled = sprintf( '%04d-%02d-%02d', (int) $m[3], (int) $m[2], (int) $m[1] );
+		if ( $titled <= wp_date( 'Y-m-d' ) ) {
+			$source_date = $titled;
+		}
+	}
 	if ( '' === $source_date && 'aw_news' === $type ) {
 		// Every News item carries a sort date (audit item 2, owner 25 Oct 2026): no date from the source = the day it came in.
 		$source_date = wp_date( 'Y-m-d' );
