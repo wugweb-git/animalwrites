@@ -242,14 +242,27 @@ function aw_seo_content_advice( WP_Post $post ) {
 	// linked types, longest first); without it, the pages' primary focus keyphrases (aw_seo_advice_focus_index()).
 	$index = function_exists( 'aw_link_index' ) ? aw_link_index() : array();
 	if ( $index ) {
-		$words = ' ' . AW_Linker::normalize( $body['text'] ) . ' ';
-		uksort( $index, fn( $a, $b ) => mb_strlen( (string) $b ) <=> mb_strlen( (string) $a ) );
-		$focus_index = array();
-		foreach ( $index as $kw => $cands ) {
-			if ( false === mb_strpos( $words, ' ' . $kw . ' ' ) ) {
-				continue; // whole words only, as the auto-linker
+		// The phrases of the text that are keywords: every run of up to as many words as the longest keyword, looked up
+		// in the index (no scan of every keyword), longest first, as the auto-linker.
+		$words   = explode( ' ', AW_Linker::normalize( $body['text'] ) );
+		$longest = 1;
+		foreach ( array_keys( $index ) as $kw ) {
+			$longest = max( $longest, substr_count( (string) $kw, ' ' ) + 1 );
+		}
+		$found = array();
+		for ( $i = 0, $n = count( $words ); $i < $n; $i++ ) {
+			$phrase = '';
+			for ( $k = 0; $k < $longest && $i + $k < $n; $k++ ) {
+				$phrase .= ( $k ? ' ' : '' ) . $words[ $i + $k ];
+				if ( isset( $index[ $phrase ] ) ) {
+					$found[ $phrase ] = true;
+				}
 			}
-			foreach ( $cands as $c ) {
+		}
+		uksort( $found, fn( $a, $b ) => mb_strlen( (string) $b ) <=> mb_strlen( (string) $a ) );
+		$focus_index = array();
+		foreach ( array_keys( $found ) as $kw ) {
+			foreach ( $index[ $kw ] as $c ) {
 				if ( (int) $c[0] !== $id ) {
 					$focus_index[ (string) $kw ] = array( (int) $c[0], (string) get_permalink( (int) $c[0] ) );
 					break;

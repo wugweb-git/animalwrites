@@ -11,7 +11,7 @@
  *   whole index daily and after a Settings save.
  * - On the_content of a singular view of the main query, for an item of a linked type, AW_Linker (class-aw-linker.php)
  *   adds links. The output is cached per item (transient aw_seo_link_<id>), keyed by the item's modified time, the
- *   index version (option aw_link_index_version, raised on every index change), the settings and the input HTML.
+ *   pages' version (option aw_link_page_version, raised by an address change, a rebuild or a deletion), the settings and the input HTML.
  *   The index is read once into a transient (aw_seo_link_index), so a page view never queries per keyword.
  * - Every link of an item, added or hand-made, is recorded in {prefix}aw_links (source_id, target_id, url, anchor,
  *   anchor_type, origin auto|manual, rel) when its linked output is built.
@@ -30,7 +30,8 @@ require_once __DIR__ . '/class-aw-linker.php';
 
 const AW_LINK_DB_VERSION = '1';
 const AW_LINK_DB_OPTION  = 'aw_link_db';
-const AW_LINK_VERSION    = 'aw_link_index_version';
+const AW_LINK_VERSION    = 'aw_link_index_version'; // raised on every index change (the index transient)
+const AW_LINK_PAGE_VER   = 'aw_link_page_version'; // raised when pages must be linked again (address changes, rebuild)
 const AW_LINK_META       = '_aw_link_keywords';
 const AW_LINK_JOB        = 'aw_link_index_build';
 const AW_LINK_MAX_WORDS  = 100; // characters per keyword
@@ -245,9 +246,19 @@ function aw_link_insert_rows( array $rows ): void {
 	}
 }
 
-/** Raise the index version: every item's cached linked output is rebuilt on its next view. */
-function aw_link_bump(): void {
+/**
+ * Raise the index version (the keyword index is read again). With $pages, also the pages' version: every item's cached
+ * linked output is built again on its next view. One item's keyword change raises only the index version, so a single
+ * edit does not throw away every cached page; the new keyword reaches other pages at the next rebuild (daily, or after
+ * a Settings save). An address change or a target gone raises both.
+ *
+ * @param bool $pages Also build the cached pages again.
+ */
+function aw_link_bump( bool $pages = false ): void {
 	update_option( AW_LINK_VERSION, (int) get_option( AW_LINK_VERSION, 0 ) + 1, true );
+	if ( $pages ) {
+		update_option( AW_LINK_PAGE_VER, (int) get_option( AW_LINK_PAGE_VER, 0 ) + 1, true );
+	}
 	delete_transient( 'aw_seo_link_index' );
 }
 
@@ -291,8 +302,10 @@ function aw_link_index_build(): void {
 			if ( isset( $skip[ (int) $r->ID ] ) ) {
 				continue;
 			}
-			$kws  = (int) $r->saved ? aw_link_keywords_clean( maybe_unserialize( (string) $r->kws ) ) : aw_link_keywords_clean( explode( ',', (string) $r->focus ) );
-			$rows = array_merge( $rows, aw_link_rows( (int) $r->ID, $kws ) );
+			$kws = (int) $r->saved ? aw_link_keywords_clean( maybe_unserialize( (string) $r->kws ) ) : aw_link_keywords_clean( explode( ',', (string) $r->focus ) );
+			foreach ( aw_link_rows( (int) $r->ID, $kws ) as $row ) {
+				$rows[] = $row; // appended one by one: array_merge() in a loop copies the whole array each time
+			}
 		}
 	}
 	$sum  = md5( (string) wp_json_encode( $rows ) );
@@ -301,7 +314,7 @@ function aw_link_index_build(): void {
 	if ( ( $last['sum'] ?? '' ) !== $sum || count( $rows ) !== $have ) {
 		$wpdb->query( $wpdb->prepare( 'DELETE FROM %i', aw_link_table( 'keywords' ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- RankWeb's own table, rebuilt whole.
 		aw_link_insert_rows( $rows );
-		aw_link_bump(); // only when the index changed, so the cached pages stay otherwise
+		aw_link_bump( true ); // only when the index changed, so the cached pages stay otherwise; the rebuild is when other pages learn a new keyword
 	}
 	update_option(
 		'aw_link_index_built',
@@ -316,7 +329,7 @@ function aw_link_index_build(): void {
 add_action( AW_LINK_JOB, 'aw_link_index_build' );
 
 /**
- * The index as the linker reads it: keyword_norm => list of array( target_id, priority, keyword ), best first
+ * The index as the linker reads it: keyword_norm => list of array( target_id, priority ), best five first
  * (highest priority, then the lowest ID). One read per index version, kept in a transient.
  */
 function aw_link_index(): array {
@@ -330,9 +343,11 @@ function aw_link_index(): array {
 		global $wpdb;
 		$map = array();
 		if ( get_option( AW_LINK_DB_OPTION ) === AW_LINK_DB_VERSION ) {
-			$rows = (array) $wpdb->get_results( $wpdb->prepare( 'SELECT keyword_norm, target_id, priority, keyword FROM %i ORDER BY keyword_norm, priority DESC, target_id', aw_link_table( 'keywords' ) ), ARRAY_N ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- read once per index version, cached below.
+			$rows = (array) $wpdb->get_results( $wpdb->prepare( 'SELECT keyword_norm, target_id, priority FROM %i ORDER BY keyword_norm, priority DESC, target_id', aw_link_table( 'keywords' ) ), ARRAY_N ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- read once per index version, cached below.
 			foreach ( $rows as $r ) {
-				$map[ (string) $r[0] ][] = array( (int) $r[1], (int) $r[2], (string) $r[3] );
+				if ( count( $map[ (string) $r[0] ] ?? array() ) < 5 ) { // the best five targets of a keyword are plenty (rows come best first)
+					$map[ (string) $r[0] ][] = array( (int) $r[1], (int) $r[2] );
+				}
 			}
 		}
 		$hit = array(
@@ -345,6 +360,19 @@ function aw_link_index(): array {
 	return $hit['map'];
 }
 
+/**
+ * Remove the links recorded for an item as the page they are in (when it is no longer published, or is deleted).
+ *
+ * @param int $id Item ID.
+ */
+function aw_link_forget_source( int $id ): void {
+	global $wpdb;
+	if ( get_option( AW_LINK_DB_OPTION ) !== AW_LINK_DB_VERSION ) {
+		return;
+	}
+	$wpdb->delete( aw_link_table( 'links' ), array( 'source_id' => $id ), array( '%d' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- RankWeb's own table.
+}
+
 // An item saved (after the editor saved its meta and terms), trashed or unpublished: its own rows.
 add_action(
 	'wp_after_insert_post',
@@ -353,9 +381,13 @@ add_action(
 			return;
 		}
 		aw_link_index_item( (int) $post_id );
+		// An item that is not published (draft, trashed, private) is no source of links: its recorded links go.
+		if ( 'publish' !== $post->post_status ) {
+			aw_link_forget_source( (int) $post_id );
+		}
 		// A linked item's address changed (slug, parent or status): pages that link to it are built again.
 		if ( $post_before instanceof WP_Post && in_array( $post->post_type, aw_link_types(), true ) && ( $post_before->post_name !== $post->post_name || $post_before->post_parent !== $post->post_parent || $post_before->post_status !== $post->post_status ) ) {
-			aw_link_bump();
+			aw_link_bump( true );
 		}
 	},
 	20,
@@ -391,9 +423,9 @@ add_action(
 			return;
 		}
 		$gone = (int) $wpdb->delete( aw_link_table( 'keywords' ), array( 'target_id' => (int) $post_id ), array( '%d' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- RankWeb's own table.
-		$wpdb->delete( aw_link_table( 'links' ), array( 'source_id' => (int) $post_id ), array( '%d' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- RankWeb's own table.
+		aw_link_forget_source( (int) $post_id );
 		if ( $gone ) {
-			aw_link_bump();
+			aw_link_bump( true ); // pages that linked to it
 		}
 	}
 );
@@ -455,7 +487,7 @@ function aw_link_filter_content( $html ) {
 	}
 	// One cache entry per input: a page can run the_content more than once on different HTML (the theme's content
 	// block, a plugin building a description), so the item keeps up to three entries, all of the same item state.
-	$state = md5( $post->post_modified_gmt . '|' . (int) get_option( AW_LINK_VERSION, 0 ) . '|' . aw_link_settings_key() );
+	$state = md5( $post->post_modified_gmt . '|' . (int) get_option( AW_LINK_PAGE_VER, 0 ) . '|' . aw_link_settings_key() );
 	$input = md5( $html );
 	$name  = 'aw_seo_link_' . $id;
 	$hit   = get_transient( $name );
@@ -464,7 +496,7 @@ function aw_link_filter_content( $html ) {
 		'h' => array(),
 	);
 	if ( isset( $hit['h'][ $input ] ) ) {
-		return (string) $hit['h'][ $input ];
+		return 0 === $hit['h'][ $input ] ? $html : (string) $hit['h'][ $input ]; // 0: nothing was linked, the input stands
 	}
 	$result             = AW_Linker::link(
 		$html,
@@ -485,7 +517,7 @@ function aw_link_filter_content( $html ) {
 		)
 	);
 	$hit['h']           = array_slice( $hit['h'], -2, 2, true );
-	$hit['h'][ $input ] = $result['html'];
+	$hit['h'][ $input ] = $result['links'] ? $result['html'] : 0; // the HTML is kept only when a link was added
 	set_transient( $name, $hit, WEEK_IN_SECONDS );
 	// The links table, once the page is out, from the longest HTML this request linked (the whole content).
 	static $best = array();
@@ -536,23 +568,36 @@ function aw_link_store( int $source, array $result ): void {
 		$rows[] = array( (int) url_to_postid( $abs ), $clip( $abs, 255 ), $clip( $anchor, 255 ), 'manual', $clip( (string) $l['rel'], 64 ) );
 	}
 	$table = aw_link_table( 'links' );
-	$wpdb->delete( $table, array( 'source_id' => $source ), array( '%d' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- RankWeb's own table.
-	foreach ( $rows as $r ) {
-		$wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- RankWeb's own table.
-			$table,
-			array(
-				'source_id'   => $source,
-				'target_id'   => $r[0],
-				'url'         => $r[1],
-				'anchor'      => $r[2],
-				'anchor_type' => '',
-				'origin'      => $r[3],
-				'rel'         => $r[4],
-				'updated'     => $now,
-			),
-			array( '%d', '%d', '%s', '%s', '%s', '%s', '%s', '%s' )
-		);
+	// One writer per item: two views building the same page at once would each delete and then insert, leaving every
+	// row twice. The named lock is the database's own (freed when the connection ends); a second writer just skips,
+	// as the first is writing the same rows.
+	$lock = 'aw_link_store_' . $wpdb->prefix . $source;
+	if ( 1 !== (int) $wpdb->get_var( $wpdb->prepare( 'SELECT GET_LOCK( %s, 0 )', $lock ) ) ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- a named lock.
+		return;
 	}
+	// Nothing written when the rows are the ones already there (the usual rebuild after a version bump).
+	$have = (array) $wpdb->get_results( $wpdb->prepare( 'SELECT target_id, url, anchor, origin, rel FROM %i WHERE source_id = %d ORDER BY id', $table, $source ), ARRAY_N ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- RankWeb's own table.
+	$have = array_map( fn( $r ) => array( (int) $r[0], (string) $r[1], (string) $r[2], (string) $r[3], (string) $r[4] ), $have );
+	if ( $have !== $rows ) {
+		$wpdb->delete( $table, array( 'source_id' => $source ), array( '%d' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- RankWeb's own table.
+		foreach ( $rows as $r ) {
+			$wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- RankWeb's own table.
+				$table,
+				array(
+					'source_id'   => $source,
+					'target_id'   => $r[0],
+					'url'         => $r[1],
+					'anchor'      => $r[2],
+					'anchor_type' => '',
+					'origin'      => $r[3],
+					'rel'         => $r[4],
+					'updated'     => $now,
+				),
+				array( '%d', '%d', '%s', '%s', '%s', '%s', '%s', '%s' )
+			);
+		}
+	}
+	$wpdb->get_var( $wpdb->prepare( 'SELECT RELEASE_LOCK( %s )', $lock ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- a named lock.
 }
 
 /* ---------- The classic editor: a "Link keywords" box ---------- */

@@ -213,6 +213,21 @@ final class LinkerTest extends PHPUnit\Framework\TestCase {
 		$this->assertSame( $html, $this->run_linker( $html, array( 'unknown' => 99 ) )['html'] );
 	}
 
+	public function test_item_the_parser_would_change_is_left_alone(): void {
+		$svg = '<svg viewBox="0 0 1 1"><path d="M0 0"/></svg><p>Help stray dogs.</p>';
+		$r   = $this->run_linker( $svg, array( 'stray dogs' => 2 ) );
+		$this->assertSame( $svg, $r['html'] );
+		$this->assertSame( array(), $r['links'] );
+		$nest = '<p>Help stray dogs <div>here</div></p>';
+		$this->assertSame( $nest, $this->run_linker( $nest, array( 'stray dogs' => 2 ) )['html'] );
+	}
+
+	public function test_figure_and_void_tags_still_link(): void {
+		$html = '<figure><img src="a.jpg" alt="x"/><figcaption>Cap</figcaption></figure><p>Stray dogs<br/>sleep.</p><ul><li>One</li></ul>';
+		$r    = $this->run_linker( $html, array( 'stray dogs' => 2 ) );
+		$this->assertCount( 1, $r['links'] );
+	}
+
 	public function test_normalize(): void {
 		$this->assertSame( 'stray dogs', AW_Linker::normalize( '  Stray   DOGS ' ) );
 		$this->assertSame( 'prevention of cruelty to animals act 1960', AW_Linker::normalize( 'Prevention of Cruelty to Animals Act, 1960' ) );

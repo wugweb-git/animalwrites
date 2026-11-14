@@ -77,7 +77,7 @@ final class AW_Linker {
 	 * @param callable $url_for  fn( int $target_id ): string, the target's address ('' = do not link to it).
 	 * @param array    $opt      max_links (5), max_per_target (1), first_only (true), self_id (0), no_self (true),
 	 *                           skip_linked (true), exclude (target ids never linked), home (site address).
-	 * @return array html (unchanged, byte for byte, when no link was added), links (each: target_id, url, anchor,
+	 * @return array html (unchanged, byte for byte, when no link was added or the parsed page would not match the input), links (each: target_id, url, anchor,
 	 *               keyword, origin 'auto'), manual (each: url, anchor, rel: the links that were already there).
 	 */
 	public static function link( string $html, array $index, callable $url_for, array $opt = array() ): array {
@@ -132,6 +132,16 @@ final class AW_Linker {
 
 		$max_links = max( 0, (int) $opt['max_links'] );
 		if ( ! $index || 0 === $max_links ) {
+			return $out;
+		}
+		// The page is written back from the parsed tree only when that tree is the same page: libxml reads HTML 4, so
+		// markup it does not understand (camelCase SVG attributes, a div inside a p) comes out changed. Such an item
+		// is left as it is; the tags and the attribute names of the tree, untouched, must equal those of the input.
+		$base = '';
+		foreach ( $root->childNodes as $child ) {
+			$base .= $doc->saveHTML( $child );
+		}
+		if ( self::signature( $html ) !== self::signature( $base ) ) {
 			return $out;
 		}
 		$longest = 1;
@@ -263,6 +273,30 @@ final class AW_Linker {
 			$out['html'] = $html;
 		}
 		return $out;
+	}
+
+	/**
+	 * The tags (lower case) and attribute names (as written) of some HTML, sorted, and its end tags in order: the same
+	 * page parsed and written back has the same signature.
+	 *
+	 * @param string $html HTML.
+	 */
+	private static function signature( string $html ): string {
+		$tags  = array();
+		$attrs = array();
+		if ( preg_match_all( '/<([a-zA-Z][a-zA-Z0-9:-]*)((?:[^>"\']|"[^"]*"|\'[^\']*\')*)>/', $html, $m, PREG_SET_ORDER ) ) {
+			foreach ( $m as $t ) {
+				$tags[] = strtolower( $t[1] );
+				if ( preg_match_all( '/\s([^\s"\'<>\/=]+)(?=[\s=\/>]|$)/', $t[2], $am ) ) {
+					array_push( $attrs, ...$am[1] );
+				}
+			}
+		}
+		sort( $tags );
+		sort( $attrs );
+		// The end tags in order: a div inside a p moves the </p>; an item that leaves end tags out is left alone too.
+		$ends = preg_match_all( '/<\/([a-zA-Z][a-zA-Z0-9:-]*)\s*>/', $html, $em ) ? array_map( 'strtolower', $em[1] ) : array();
+		return implode( ',', $tags ) . '|' . implode( ',', $attrs ) . '|' . implode( ',', $ends );
 	}
 
 	/**

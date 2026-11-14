@@ -11,7 +11,7 @@
  *   aw_faq_off_types, aw_seo_keep_listings, aw_default_share_image, aw_seo_delete_data,
  *   aw_seo_endpoints_last, aw_seo_cache_gen, aw_seo_press_kw_1103, aw_seed_redirects_version, aw_sitemap_filtered,
  *   aw_html_sitemap_page (the option only; the page itself stays), aw_faq_experiment,
- *   rankweb_health_log, rankweb_health_schema, aw_link_db, aw_link_index_version, aw_link_index_built
+ *   rankweb_health_log, rankweb_health_schema, aw_link_db, aw_link_index_version, aw_link_page_version, aw_link_index_built
  * Transients (and their timeouts):
  *   rankweb_health, aw_faq_counts, aw_faq_index, aw_html_sitemap, aw_seed_redirects_wait, aw_sitemap_dir_pairs,
  *   and every transient named aw_seo_… (aw_seo_dir_data, aw_seo_category_counts, aw_seo_endpoints_mailed,
@@ -41,7 +41,7 @@ if ( ! get_option( 'aw_seo_delete_data', 0 ) ) {
 	return; // The default: keep everything.
 }
 
-$aw_seo_options = array( 'aw_faq_off_types', 'aw_seo_keep_listings', 'aw_default_share_image', 'aw_seo_endpoints_last', 'aw_seo_cache_gen', 'aw_seo_press_kw_1103', 'aw_seed_redirects_version', 'aw_sitemap_filtered', 'aw_html_sitemap_page', 'aw_faq_experiment', 'rankweb_health_log', 'rankweb_health_schema', 'aw_link_db', 'aw_link_index_version', 'aw_link_index_built', 'aw_seo_delete_data' );
+$aw_seo_options = array( 'aw_faq_off_types', 'aw_seo_keep_listings', 'aw_default_share_image', 'aw_seo_endpoints_last', 'aw_seo_cache_gen', 'aw_seo_press_kw_1103', 'aw_seed_redirects_version', 'aw_sitemap_filtered', 'aw_html_sitemap_page', 'aw_faq_experiment', 'rankweb_health_log', 'rankweb_health_schema', 'aw_link_db', 'aw_link_index_version', 'aw_link_page_version', 'aw_link_index_built', 'aw_seo_delete_data' );
 
 require_once __DIR__ . '/includes/uninstall-backup.php';
 if ( ! aw_seo_uninstall_backup( 'aw-seo-extras', __DIR__ . '/aw-seo-extras.php', array_merge( array( 'aw_seo_settings' ), $aw_seo_options ), array(), array( $GLOBALS['wpdb']->prefix . 'aw_link_keywords', $GLOBALS['wpdb']->prefix . 'aw_links' ) ) ) {
