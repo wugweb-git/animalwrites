@@ -275,6 +275,20 @@
 /* Directory search on phones: the close button at the top of the Filters sheet closes it without applying (the sheet
    itself, focus and Esc are kit.js's). */
 (function () {
+	/* Reset in the open phone sheet clears its choices and leaves it open for Apply filters; elsewhere it stays the link. */
+	document.querySelectorAll('[data-aw-sheet-reset]').forEach(function (a) {
+		a.addEventListener('click', function (e) {
+			var d = a.closest('details.is-sheet');
+			if (!d || !d.open) return;
+			e.preventDefault();
+			d.querySelectorAll('select').forEach(function (s) { s.value = ''; });
+			d.querySelectorAll('input[type=checkbox]').forEach(function (c) { c.checked = false; });
+			var st = d.querySelector('[name=state]');
+			if (st) st.dispatchEvent(new Event('change')); // District goes back to "Choose a state first"
+			var status = d.querySelector('[data-aw-sheet-status]');
+			if (status) status.textContent = 'Filters cleared.';
+		});
+	});
 	document.querySelectorAll('[data-aw-sheet-close]').forEach(function (b) {
 		b.addEventListener('click', function () {
 			var d = b.closest('details');

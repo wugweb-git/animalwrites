@@ -272,10 +272,14 @@
 			out.textContent = 'Your browser cannot share your location. Enter a PIN code instead.';
 			return;
 		}
+		var btn = this;
+		btn.setAttribute( 'aria-busy', 'true' ); // loading state (aw-directory.css); the words go to the live region
 		out.textContent = 'Detecting location…';
 		navigator.geolocation.getCurrentPosition( function ( pos ) {
+			btn.removeAttribute( 'aria-busy' );
 			ask( { lat: pos.coords.latitude.toFixed( 4 ), lng: pos.coords.longitude.toFixed( 4 ) } );
 		}, function () {
+			btn.removeAttribute( 'aria-busy' );
 			out.textContent = 'Location not shared. Enter a PIN code instead.';
 			pin.focus();
 		}, { enableHighAccuracy: false, timeout: 10000, maximumAge: 600000 } );

@@ -641,13 +641,13 @@ function aw_directory_filter( $type = '' ) {
 		. '<div class="aw-dir-submit"><button type="submit" class="kit-btn kit-btn--ico-search">Search</button></div></div>'
 		. '<div class="aw-dir-actions"><details class="kit-filter-sheet aw-dir-sheet" open><summary class="aw-dir-sheet-open"><span class="kit-ico kit-ico--sliders" aria-hidden="true"></span>Filters' . ( $n_active ? ' (' . (int) $n_active . ')' : '' ) . '</summary>'
 		. '<div class="kit-filters aw-dir-filters" role="group" aria-labelledby="aw-dir-sheet-h">'
-		. '<div class="aw-dir-sheet-head"><p class="aw-dir-sheet-title" id="aw-dir-sheet-h">Filters</p><button type="button" class="aw-dir-sheet-x" data-aw-sheet-close aria-label="Close filters"><span class="kit-ico kit-ico--x" aria-hidden="true"></span></button></div>'
+		. '<div class="aw-dir-sheet-head"><p class="aw-dir-sheet-title" id="aw-dir-sheet-h">Filters</p><button type="button" class="aw-dir-sheet-x" data-aw-sheet-close aria-label="Close filters"><span class="kit-ico kit-ico--x" aria-hidden="true"></span></button><p class="screen-reader-text" role="status" data-aw-sheet-status></p></div>'
 		. '<div class="aw-dir-selects">' . $shared['state']
 		. $field( 'aw-dir-district', 'District', '<select id="aw-dir-district" name="district"' . ( $state ? '' : ' disabled' ) . '>' . $d_opts . '</select>', 'district' )
 		. $field( 'aw-dir-type', 'Type', '<select id="aw-dir-type" name="tag[]">' . $t_opts . '</select>', 'type' )
 		. $service . '</div>'
 		. ( $checks ? '<fieldset class="aw-dir-checks"><legend class="screen-reader-text">Show only</legend>' . $checks . '</fieldset>' : '' )
-		. '<div class="kit-filter-sheet-actions"><a class="kit-btn kit-btn--secondary kit-btn--label" href="' . esc_url( aw_hub_url( 'aw_listing' ) ) . '">Reset</a><button type="submit" class="kit-btn">Apply filters</button></div>'
+		. '<div class="kit-filter-sheet-actions"><a class="kit-btn kit-btn--secondary kit-btn--label" href="' . esc_url( aw_hub_url( 'aw_listing' ) ) . '" data-aw-sheet-reset>Reset</a><button type="submit" class="kit-btn">Apply filters</button></div>'
 		. '</div></details><button type="button" class="kit-btn kit-btn--secondary kit-btn--ico-map-pin aw-near-proxy" aria-controls="aw-near" hidden>Near me</button></div>' . ( function_exists( 'kits_fold_now' ) ? kits_fold_now( 'sheet' ) : '' ) // a sheet before the first paint on phones (no layout shift)
 		. '<input type="hidden" name="aw_filter" value="1">'
 		. '</form>';

@@ -127,3 +127,5 @@
 	body:has(.aw-near-proxy:not([hidden])) .aw-dir-tools .aw-near-open { display: none; }
 	.aw-dir-tools .kit-segment :is(button, a) { min-height: var(--kit-size-control); }
 }
+
+.aw-near-locate[aria-busy=true] { cursor: progress; opacity: var(--opacity-60); }
