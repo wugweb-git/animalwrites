@@ -158,7 +158,7 @@ function planweb_site_items( string $from, string $to ): array {
 				'order'                  => 'ASC',
 				'no_found_rows'          => true,
 				'ignore_sticky_posts'    => true,
-				'suppress_filters'       => true, // The schedule as stored: no front-end re-sorting (aw_news).
+				'suppress_filters'       => true, // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.SuppressFilters_suppress_filters -- the schedule as stored: no front-end re-sorting (aw_news).
 				'update_post_meta_cache' => false,
 				'update_post_term_cache' => false,
 			)
