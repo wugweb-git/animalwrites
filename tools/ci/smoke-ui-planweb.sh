@@ -107,6 +107,14 @@ want 200 "GET /$PW/month with the site schedule" -b /tmp/cj-ci -H "X-WP-Nonce: $
 if python3 -c 'import json,sys; d=json.load(open("/tmp/rw.out")); sys.exit(0 if any(i["title"]=="Scheduled resource" and i["status"]=="scheduled" and i["source"]=="post" for i in d["site"]) else 1)'; then echo "ok   month: the scheduled post beside the entries"; else echo "FAIL month: scheduled post missing"; FAIL=1; fi
 want 200 "GET /$PW/dashboard site schedule" -b /tmp/cj-ci -H "X-WP-Nonce: $NA" "$P/dashboard"
 grep -q '"Scheduled resource"' /tmp/rw.out && echo "ok   dashboard: site schedule lists the scheduled post" || { echo "FAIL dashboard site schedule"; FAIL=1; }
+# The module's own switch: off, nothing from the site shows (and no Site schedule tile); back on, it is there again.
+want 200 "POST /$PW/settings/site off" -X POST "${AJ[@]}" -d '{"on":false,"types":["post","page"]}' "$P/settings/site"
+want 200 "GET /$PW/month site schedule off" -b /tmp/cj-ci -H "X-WP-Nonce: $NA" "$P/month&m=$SPM"
+python3 -c 'import json,sys; d=json.load(open("/tmp/rw.out")); sys.exit(0 if d["site"]==[] else 1)' && echo "ok   site schedule off: nothing from the site in the month" || { echo "FAIL site schedule still shows when off"; FAIL=1; }
+[ "$(wp option get planweb_site_on)" = "" ] && echo "ok   switch stored off" || { echo "FAIL switch not stored"; FAIL=1; }
+want 200 "POST /$PW/settings/site on" -X POST "${AJ[@]}" -d '{"on":true,"types":["post","page"]}' "$P/settings/site"
+want 200 "GET /$PW/month site schedule on again" -b /tmp/cj-ci -H "X-WP-Nonce: $NA" "$P/month&m=$SPM"
+grep -q '"Scheduled resource"' /tmp/rw.out && echo "ok   site schedule on again" || { echo "FAIL site schedule not back on"; FAIL=1; }
 wp eval "global \$wpdb; \$wpdb->update( \$wpdb->posts, array( 'post_date' => '$(date -d '-2 days' '+%Y-%m-%d') 09:00:00', 'post_date_gmt' => '$(date -u -d '-2 days' '+%Y-%m-%d') 03:30:00' ), array( 'ID' => $SP ) ); clean_post_cache( $SP );"
 MS=$(wp eval 'echo planweb_site_counts( wp_date( "Y-m-d" ) )["missed"];')
 [ "${MS:-0}" -ge 1 ] && echo "ok   a future post past its time counts as missed ($MS)" || { echo "FAIL missed schedule not counted"; FAIL=1; }

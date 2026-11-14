@@ -11,7 +11,8 @@
  *   Newsletters FluentCRM's campaigns table (fc_campaigns, type campaign) by scheduled_at: Scheduled, Sending, Paused,
  *               Sent. Titles only; never recipients.
  *
- * Which sources show is the option planweb_site_types (post type slugs, and "fluentcrm"); by default every public post
+ * The whole module has its own switch (option planweb_site_on, on unless switched off): Kits → Modules → PlanWeb
+ * and PlanWeb → Settings → Site schedule. Which sources show is the option planweb_site_types (post type slugs, and "fluentcrm"); by default every public post
  * type except the bulk imports (News, Directory) and attachments, plus FluentCRM when it is there.
  *
  * @package planweb
@@ -20,6 +21,9 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+/** Option: the site schedule's own switch ('1' on, '' off). Not set: on. Kits → Modules → PlanWeb, and Settings. */
+const PLANWEB_SITE_ON = 'planweb_site_on';
 
 /** Option: the sources that show (post type slugs and "fluentcrm"). Not set: the defaults. */
 const PLANWEB_SITE_TYPES = 'planweb_site_types';
@@ -42,6 +46,25 @@ const PLANWEB_SITE_STATUSES = array(
 
 /** Most site items read for one range (a month grid, the feed: about 100 posts a month with News and Directory off). */
 const PLANWEB_SITE_MAX = 1000;
+
+/** Whether the site schedule shows at all. Off: PlanWeb shows only its own entries, as before. */
+function planweb_site_on(): bool {
+	return '1' === (string) get_option( PLANWEB_SITE_ON, '1' );
+}
+
+/**
+ * Switch the site schedule on or off. Nothing is written when it is already so.
+ *
+ * @param bool $on On.
+ * @return bool Whether the option was written.
+ */
+function planweb_site_on_save( bool $on ): bool {
+	if ( planweb_site_on() === $on && null !== get_option( PLANWEB_SITE_ON, null ) ) {
+		return false;
+	}
+	update_option( PLANWEB_SITE_ON, $on ? '1' : '', false );
+	return true;
+}
 
 /** The FluentCRM campaigns table, or '' when FluentCRM is not there. */
 function planweb_site_fluent_table(): string {
@@ -110,6 +133,9 @@ function planweb_site_types_save( array $types ): bool {
  * @return array[]
  */
 function planweb_site_items( string $from, string $to ): array {
+	if ( ! planweb_site_on() ) {
+		return array(); // Switched off: nothing from the site anywhere (Dashboard, calendar, WP box, feed).
+	}
 	$types = planweb_site_types();
 	$posts = array_values( array_diff( $types, array( PLANWEB_SITE_FLUENT ) ) );
 	$items = array();

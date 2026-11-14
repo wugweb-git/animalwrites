@@ -60,6 +60,16 @@ add_action(
 				'show_in_rest'      => false,
 			)
 		);
+		register_setting(
+			'aw_modules',
+			'planweb_site_on',
+			array(
+				'type'              => 'string',
+				'default'           => '1',
+				'sanitize_callback' => 'planweb_on_clean',
+				'show_in_rest'      => false,
+			)
+		);
 		if ( ! function_exists( 'aw_modules_screen' ) ) {
 			return;
 		}
@@ -84,6 +94,20 @@ add_action(
 			'aw-modules',
 			'planweb_module',
 			array( 'label_for' => 'planweb_on' )
+		);
+		add_settings_field(
+			'planweb_site_on',
+			__( 'Site schedule in PlanWeb', 'planweb' ),
+			function () {
+				printf(
+					'<input type="checkbox" id="planweb_site_on" name="planweb_site_on" value="1"%1$s> <span class="description">%2$s</span>',
+					checked( planweb_site_on(), true, false ),
+					esc_html__( 'On: published, scheduled and missed posts and FluentCRM newsletters show beside the entries (read only; nothing is copied). Off: PlanWeb shows only its own entries.', 'planweb' )
+				);
+			},
+			'aw-modules',
+			'planweb_module',
+			array( 'label_for' => 'planweb_site_on' )
 		);
 		add_settings_field(
 			'planweb_delete_data_on_uninstall',
