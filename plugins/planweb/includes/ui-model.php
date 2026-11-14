@@ -246,6 +246,25 @@ function planweb_dashboard_tiles( array $c, int $range, callable $url, callable 
 			'tone'  => '',
 		),
 	);
+	$site  = $c['site'] ?? null;
+	if ( is_array( $site ) ) {
+		$snext   = $site['next'] ?? null;
+		$tiles[] = array(
+			'key'   => 'site',
+			/* translators: %d: number of days. */
+			'label' => sprintf( __( 'Site schedule, %d days', 'planweb' ), $range ),
+			'value' => $num( $site['ahead'][ $range ] ?? 0 ),
+			'sub'   => ! empty( $site['missed'] )
+				/* translators: %s: number of posts. */
+				? sprintf( _n( '%s missed its publish time', '%s missed their publish time', (int) $site['missed'], 'planweb' ), $num( $site['missed'] ) )
+				: ( $snext
+					/* translators: 1: date, 2: title. */
+					? sprintf( __( 'Next: %1$s, %2$s', 'planweb' ), $label( (string) $snext['date'] ), (string) $snext['title'] )
+					: __( 'Nothing scheduled on the site', 'planweb' ) ),
+			'href'  => '#site-schedule',
+			'tone'  => ! empty( $site['missed'] ) ? 'warn' : '',
+		);
+	}
 	$check = (array) ( $c['check'] ?? array() );
 	if ( $check ) {
 		$bad     = (int) $check['differs'] + (int) $check['missing'] + (int) $check['extra'];

@@ -18,14 +18,20 @@ const PLANWEB_FEED_TZ = 'Asia/Kolkata';
 /** Minutes a timed entry lasts in a calendar app (entries have a start time only). */
 const PLANWEB_FEED_MINUTES = 30;
 
-/** Named groups a feed address may use for type: marketing = social, email, campaign, content (no reminders). */
+/** Feed types besides PlanWeb's own: the site's posts (site-schedule.php; newsletters are type email). */
+const PLANWEB_FEED_EXTRA_TYPES = array( 'site' => 'Site post' );
+
+/**
+ * Named groups a feed address may use for type: marketing = social, email, campaign, content and the site's own posts
+ * (no reminders). The site's newsletters are type email.
+ */
 const PLANWEB_FEED_TYPE_GROUPS = array(
-	'marketing' => array( 'social', 'email', 'campaign', 'content' ),
+	'marketing' => array( 'social', 'email', 'campaign', 'content', 'site' ),
 );
 
-/** Named groups a feed address may use for status: open = not sent and not done. */
+/** Named groups a feed address may use for status: open = still to happen (not sent, done or published). */
 const PLANWEB_FEED_STATUS_GROUPS = array(
-	'open' => array( 'idea', 'draft', 'approved', 'due' ),
+	'open' => array( 'idea', 'draft', 'approved', 'due', 'scheduled', 'missed', 'sending', 'paused' ),
 );
 
 /**
@@ -121,21 +127,21 @@ function planweb_ics_event( array $e, array $ctx ): array {
 	if ( '' !== planweb_personal_data_problem( $title ) ) {
 		$title = 'Entry ' . (int) $e['id'] . ' (title not shown: check it in PlanWeb)';
 	}
-	$type     = (string) ( $ctx['types'][ $e['type'] ?? '' ] ?? '' );
+	$type     = (string) ( $e['typeText'] ?? $ctx['types'][ $e['type'] ?? '' ] ?? '' ); // Site items carry their own labels.
 	$channels = array();
 	foreach ( (array) ( $e['channels'] ?? array() ) as $slug ) {
 		if ( isset( $ctx['channels'][ $slug ] ) ) {
 			$channels[] = (string) $ctx['channels'][ $slug ];
 		}
 	}
-	$status = (string) ( $ctx['statuses'][ $e['status'] ?? '' ] ?? '' );
+	$status = (string) ( $e['statusText'] ?? $ctx['statuses'][ $e['status'] ?? '' ] ?? '' );
 	$link   = (string) ( $e['link'] ?? '' );
 	if ( '' !== $link && '' !== planweb_link_problem( $link, (string) $ctx['host'] ) ) {
 		$link = '';
 	}
 	$lines   = array(
 		'BEGIN:VEVENT',
-		'UID:planweb-' . (int) $e['id'] . '@' . $ctx['host'],
+		'UID:' . ( isset( $e['uid'] ) ? (string) $e['uid'] : 'planweb-' . (int) $e['id'] ) . '@' . $ctx['host'],
 		'DTSTAMP:' . $ctx['stamp'],
 	);
 	$changed = (string) ( $e['modified'] ?? '' );

@@ -16,6 +16,7 @@
  *   GET  services                  manage_options        the services the plan names, with their state
  *   POST settings/feed             manage_options        the calendar feed's key: action new (make a new key; the old
  *                                                        address stops working) or off (no key: no feed)
+ *   POST settings/site             manage_options        which parts of the site's own schedule show (site-schedule.php)
  *   GET  calendar.ics?key=…        the feed key          the read-only calendar feed (feed.php); no sign-in
  *
  * Every route checks the capability and, for a signed-in browser, the wp_rest nonce (kits_shell_rest_can()). The core
@@ -103,6 +104,18 @@ add_action(
 			),
 			'/import'                    => array( 'POST', 'manage_options', 'planweb_rest_import', array() ),
 			'/services'                  => array( 'GET', 'manage_options', fn() => rest_ensure_response( array( 'services' => planweb_services() ) ), array() ),
+			'/settings/site'             => array(
+				'POST',
+				'manage_options',
+				'planweb_rest_site_types',
+				array(
+					'types' => array(
+						'type'     => 'array',
+						'items'    => array( 'type' => 'string' ),
+						'required' => true,
+					),
+				),
+			),
 			'/settings/feed'             => array(
 				'POST',
 				'manage_options',
@@ -219,6 +232,17 @@ function planweb_rest_dashboard() {
 		'tiles'    => array(),
 		'byType'   => array(),
 		'byStatus' => array(),
+		// The site's own schedule: missed in the last 30 days, and the next 30 days (read live; nothing is written).
+		'site'     => array_slice(
+			array_values(
+				array_filter(
+					planweb_site_items( planweb_add_days( $today, -30 ), planweb_add_days( $today, 29 ) ),
+					fn( $i ) => 'missed' === $i['status'] || ( $i['date'] >= $today && 'published' !== $i['status'] && 'sent' !== $i['status'] )
+				)
+			),
+			0,
+			30
+		),
 	);
 	foreach ( PLANWEB_RANGES as $r ) {
 		$out['tiles'][ $r ]  = planweb_dashboard_tiles( $c, $r, $url, 'planweb_date_label' );
@@ -302,6 +326,7 @@ function planweb_rest_month( WP_REST_Request $request ) {
 			'month'   => $month,
 			'today'   => $today,
 			'entries' => $rows,
+			'site'    => planweb_site_items( $month . '-01', sprintf( '%s-%02d', $month, $last ) ), // The site's own schedule.
 		)
 	);
 }
@@ -593,6 +618,7 @@ function planweb_settings_payload(): array {
 		'lists'  => $lists,
 		'import' => planweb_import_payload(),
 		'feed'   => planweb_feed_payload(),
+		'site'   => planweb_site_payload(),
 	);
 }
 
@@ -663,7 +689,7 @@ function planweb_services(): array {
 			'name'    => 'FluentCRM',
 			'status'  => $fluent ? __( 'Active', 'planweb' ) : __( 'Not active', 'planweb' ),
 			'tone'    => $fluent ? '' : 'warn',
-			'summary' => $fluent ? $later : __( 'Scheduled newsletter sends show here once FluentCRM is active.', 'planweb' ),
+			'summary' => $fluent ? __( 'Scheduled, sending and sent newsletters show in the schedule (read only; titles only).', 'planweb' ) : __( 'Scheduled newsletter sends show here once FluentCRM is active.', 'planweb' ),
 		),
 		array(
 			'slug'    => 'social-posts',
@@ -720,6 +746,40 @@ function planweb_rest_feed_key( WP_REST_Request $request ) {
 		array(
 			'feed'    => planweb_feed_payload(),
 			'message' => $message,
+		)
+	);
+}
+
+/** The Site schedule group: every source with whether it shows. */
+function planweb_site_payload(): array {
+	$on  = planweb_site_types();
+	$out = array();
+	foreach ( planweb_site_choices() as $slug => $label ) {
+		$out[] = array(
+			'slug'  => $slug,
+			'label' => $label,
+			'on'    => in_array( $slug, $on, true ),
+			'bulk'  => in_array( $slug, PLANWEB_SITE_SKIP, true ),
+		);
+	}
+	return array( 'sources' => $out );
+}
+
+/**
+ * POST settings/site: which sources of the site's schedule show.
+ *
+ * @param WP_REST_Request $request Request.
+ */
+function planweb_rest_site_types( WP_REST_Request $request ) {
+	$saved = planweb_site_types_save( (array) $request['types'] );
+	if ( $saved ) {
+		planweb_counts_request();
+	}
+	return rest_ensure_response(
+		array(
+			'site'    => planweb_site_payload(),
+			'saved'   => $saved,
+			'message' => $saved ? __( 'Saved. The Dashboard counts again in the background.', 'planweb' ) : __( 'Nothing changed.', 'planweb' ),
 		)
 	);
 }

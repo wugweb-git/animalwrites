@@ -273,6 +273,24 @@ check( '1 social, 1 content' === $tiles[0]['sub'] || '1 content, 1 social' === $
 check( 'warn' === $tiles[1]['tone'] && 'Oldest from L2026-11-07' === $tiles[1]['sub'], 'overdue tile warns with the oldest date' );
 check( 'L2026-11-11' === $tiles[4]['value'] && 'Today' === $tiles[4]['sub'], 'next date tile' );
 check( 'Matches' === $tiles[7]['value'] && '' === $tiles[7]['tone'], 'import check tile' );
+$ts = planweb_dashboard_tiles(
+	$c + array(
+		'site' => array(
+			'ahead'  => array(
+				7  => 2,
+				30 => 5,
+				90 => 9,
+			),
+			'missed' => 1,
+			'next'   => null,
+		),
+	),
+	30,
+	fn( $a ) => 'u?' . http_build_query( $a ),
+	fn( $d ) => 'L' . $d
+);
+check( array( 'ahead', 'overdue', 'waiting', 'ready', 'next', 'today', 'total', 'site', 'check' ) === array_column( $ts, 'key' ), 'site schedule tile before the import check' );
+check( '5' === $ts[7]['value'] && 'warn' === $ts[7]['tone'] && str_contains( $ts[7]['sub'], '1 missed' ), 'site tile: scheduled in range, missed warns' );
 $t90 = planweb_dashboard_tiles( $empty, 99, fn() => '', fn( $d ) => $d );
 check( 'Coming up in 30 days' === $t90[0]['label'] && 7 === count( $t90 ) && '' === $t90[1]['tone'], 'unknown range is 30; no check tile without an import' );
 
@@ -384,7 +402,7 @@ check( isset( PLANWEB_CHANNELS['threads'], PLANWEB_CHANNELS['bluesky'], PLANWEB_
 check( '' === planweb_link_problem( 'https://bsky.app/profile/x', 'animalwrites.in' ), 'Bluesky link allowed' );
 
 // The calendar feed.
-check( array( 'social', 'email', 'campaign', 'content' ) === planweb_feed_list( 'marketing', PLANWEB_TYPES, PLANWEB_FEED_TYPE_GROUPS ), 'feed: marketing types' );
+check( array( 'social', 'email', 'campaign', 'content', 'site' ) === planweb_feed_list( 'marketing', PLANWEB_TYPES, PLANWEB_FEED_TYPE_GROUPS ), 'feed: marketing types' );
 check( array( 'approved', 'due' ) === planweb_feed_list( 'approved,due', PLANWEB_STATUSES, PLANWEB_FEED_STATUS_GROUPS ), 'feed: statuses' );
 check( array() === planweb_feed_list( '', PLANWEB_TYPES, PLANWEB_FEED_TYPE_GROUPS ), 'feed: no filter' );
 check( null === planweb_feed_list( 'social,spam', PLANWEB_TYPES, PLANWEB_FEED_TYPE_GROUPS ), 'feed: unknown value refused' );
@@ -453,6 +471,34 @@ check( false === strpos( $ics_un, '98765' ) && str_contains( $ics_un, 'SUMMARY:E
 check( false === strpos( $ics_un, 'evil.example' ), 'ics: a link to another site is left out' );
 check( str_contains( $ics_un, 'UID:planweb-1@animalwrites.in' ) && str_contains( $ics_un, 'DTSTAMP:20261114T120000Z' ), 'ics: UID and DTSTAMP' );
 check( str_contains( $ics_un, 'Status: Done' ), 'ics: Done status' );
+$site_ics = planweb_ics(
+	array(
+		array(
+			'uid'        => 'planweb-site-post-77',
+			'id'         => 77,
+			'date'       => '2026-12-02',
+			'time'       => '10:00',
+			'title'      => 'Rabies guide',
+			'type'       => 'site',
+			'typeText'   => 'Resource',
+			'channels'   => array( 'site' ),
+			'status'     => 'scheduled',
+			'statusText' => 'Scheduled',
+			'link'       => '',
+		),
+	),
+	array(
+		'name'     => 'N',
+		'version'  => '0.2.0',
+		'host'     => 'animalwrites.in',
+		'stamp'    => '20261114T120000Z',
+		'types'    => PLANWEB_TYPES,
+		'channels' => PLANWEB_CHANNELS,
+		'statuses' => PLANWEB_STATUSES,
+	)
+);
+check( str_contains( $site_ics, 'UID:planweb-site-post-77@animalwrites.in' ) && str_contains( $site_ics, 'Type: Resource' ) && str_contains( $site_ics, 'Status: Scheduled' ), 'ics: a site post with its own kind and status' );
+check( array( 'site' ) === planweb_feed_list( 'site', PLANWEB_TYPES + PLANWEB_FEED_EXTRA_TYPES, PLANWEB_FEED_TYPE_GROUPS ) && in_array( 'site', PLANWEB_FEED_TYPE_GROUPS['marketing'], true ), 'feed: site type, in marketing' );
 check( str_contains( $ics_un, 'LAST-MODIFIED:20261114T063000Z' ) && 1 === substr_count( $ics_un, 'LAST-MODIFIED' ), 'ics: LAST-MODIFIED when the entry has one' );
 
 echo $fails ? "$fails of $count checks failed.\n" : "All $count checks passed.\n";
