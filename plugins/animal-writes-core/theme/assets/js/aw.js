@@ -252,6 +252,26 @@
 		.catch(function () {});
 })();
 
+/* Directory on phones (owner's spec, 14 Nov 2026): Near me sits beside Filters under the search and opens the toolbar's
+   Near me; Sort is a menu beside List / Map. Both show only with JavaScript; without it the toolbar keeps its own. */
+(function () {
+	var real = document.querySelector('.aw-near-open');
+	document.querySelectorAll('.aw-near-proxy').forEach(function (b) {
+		if (!real) return;
+		b.hidden = false;
+		b.addEventListener('click', function () {
+			real.click();
+			var panel = document.getElementById('aw-near');
+			(panel && !panel.hidden ? panel : real).scrollIntoView({ block: 'start', behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+		});
+	});
+	document.querySelectorAll('.aw-sort-pick').forEach(function (p) {
+		p.hidden = false;
+		var sel = p.querySelector('select');
+		if (sel) sel.addEventListener('change', function () { location.href = sel.value; });
+	});
+})();
+
 /* Directory search on phones: the close button at the top of the Filters sheet closes it without applying (the sheet
    itself, focus and Esc are kit.js's). */
 (function () {

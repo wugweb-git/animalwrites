@@ -551,7 +551,7 @@ function aw_dir_search_controls( $args ) {
 			'cls'         => 'aw-dir-',
 			'show_labels' => true,
 			'q_label'     => 'Name or PIN code',
-			'placeholder' => 'Blue Cross',
+			'placeholder' => 'Search by name or PIN code',
 			'state_label' => 'State',
 			'q'           => '',
 			'state'       => '',
@@ -633,20 +633,22 @@ function aw_directory_filter( $type = '' ) {
 		. ( function_exists( 'aw_gov_verified_count' ) && aw_gov_verified_count() ? '<label class="kit-checkbox aw-dir-check"><input type="checkbox" name="gov" value="1"' . checked( $gov, true, false ) . '> Verified only</label>' : '' );
 	aw_use_component_style( 'aw-directory' ); // the search form (tag pages, the List filters block, the shortcode)
 	// Row 1: search and Search. Then the filters: inline rows from 768, a "Filters" bottom sheet on phones (the Kits
-	// sheet, kit.js), applied only with "Show results". Without JavaScript the filters stay inline at every width.
+	// sheet, kit.js), applied only with "Apply filters". On phones Filters and Near me share one row under the search
+	// (owner's Directory mobile spec, 14 Nov 2026); Near me there opens the toolbar's Near me (aw.js), and shows only
+	// where that toolbar is on the page. Without JavaScript the filters stay inline at every width.
 	return '<form class="aw-dir-search kit-section-search" role="search" method="get" action="' . esc_url( aw_hub_url( 'aw_listing' ) ) . '">'
 		. '<div class="aw-dir-row">' . $shared['q']
 		. '<div class="aw-dir-submit"><button type="submit" class="kit-btn kit-btn--ico-search">Search</button></div></div>'
-		. '<details class="kit-filter-sheet aw-dir-sheet" open><summary class="aw-dir-sheet-open"><span class="kit-ico kit-ico--sliders" aria-hidden="true"></span>Filters' . ( $n_active ? ' (' . (int) $n_active . ')' : '' ) . '</summary>'
+		. '<div class="aw-dir-actions"><details class="kit-filter-sheet aw-dir-sheet" open><summary class="aw-dir-sheet-open"><span class="kit-ico kit-ico--sliders" aria-hidden="true"></span>Filters' . ( $n_active ? ' (' . (int) $n_active . ')' : '' ) . '</summary>'
 		. '<div class="kit-filters aw-dir-filters" role="group" aria-labelledby="aw-dir-sheet-h">'
-		. '<div class="aw-dir-sheet-head"><p class="aw-dir-sheet-title" id="aw-dir-sheet-h">Filter organisations</p><button type="button" class="aw-dir-sheet-x" data-aw-sheet-close aria-label="Close filters"><span class="kit-ico kit-ico--x" aria-hidden="true"></span></button></div>'
+		. '<div class="aw-dir-sheet-head"><p class="aw-dir-sheet-title" id="aw-dir-sheet-h">Filters</p><button type="button" class="aw-dir-sheet-x" data-aw-sheet-close aria-label="Close filters"><span class="kit-ico kit-ico--x" aria-hidden="true"></span></button></div>'
 		. '<div class="aw-dir-selects">' . $shared['state']
 		. $field( 'aw-dir-district', 'District', '<select id="aw-dir-district" name="district"' . ( $state ? '' : ' disabled' ) . '>' . $d_opts . '</select>', 'district' )
 		. $field( 'aw-dir-type', 'Type', '<select id="aw-dir-type" name="tag[]">' . $t_opts . '</select>', 'type' )
 		. $service . '</div>'
 		. ( $checks ? '<fieldset class="aw-dir-checks"><legend class="screen-reader-text">Show only</legend>' . $checks . '</fieldset>' : '' )
-		. '<div class="kit-filter-sheet-actions"><a class="kit-btn kit-btn--secondary kit-btn--label" href="' . esc_url( aw_hub_url( 'aw_listing' ) ) . '">Reset</a><button type="submit" class="kit-btn kit-btn--ico-search">Show results</button></div>'
-		. '</div></details>' . ( function_exists( 'kits_fold_now' ) ? kits_fold_now( 'sheet' ) : '' ) // a sheet before the first paint on phones (no layout shift)
+		. '<div class="kit-filter-sheet-actions"><a class="kit-btn kit-btn--secondary kit-btn--label" href="' . esc_url( aw_hub_url( 'aw_listing' ) ) . '">Reset</a><button type="submit" class="kit-btn">Apply filters</button></div>'
+		. '</div></details><button type="button" class="kit-btn kit-btn--secondary kit-btn--ico-map-pin aw-near-proxy" aria-controls="aw-near" hidden>Near me</button></div>' . ( function_exists( 'kits_fold_now' ) ? kits_fold_now( 'sheet' ) : '' ) // a sheet before the first paint on phones (no layout shift)
 		. '<input type="hidden" name="aw_filter" value="1">'
 		. '</form>';
 }

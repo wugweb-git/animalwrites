@@ -624,6 +624,22 @@
 				if (first) first.focus();
 			}
 		});
+		// The page behind stays still while the sheet is open; a tap on the dimmed page or a swipe down closes it.
+		sheet.addEventListener('toggle', function () {
+			var on = sheet.classList.contains('is-sheet') && sheet.open;
+			document.documentElement.classList.toggle('kit-sheet-open', on);
+		});
+		sheet.addEventListener('click', function (e) {
+			if (sheet.classList.contains('is-sheet') && sheet.open && e.target === sheet) { sheet.open = false; summary.focus(); }
+		});
+		var panel = sheet.querySelector('.kit-filters'), y0 = null;
+		if (panel) {
+			panel.addEventListener('touchstart', function (e) { y0 = panel.scrollTop <= 0 ? e.touches[0].clientY : null; }, { passive: true });
+			panel.addEventListener('touchend', function (e) {
+				if (y0 !== null && e.changedTouches[0].clientY - y0 > 80 && sheet.open) { sheet.open = false; summary.focus(); }
+				y0 = null;
+			}, { passive: true });
+		}
 		sheet.addEventListener('keydown', function (e) {
 			if (!sheet.classList.contains('is-sheet') || !sheet.open) return;
 			if (e.key === 'Escape') { sheet.open = false; summary.focus(); return; }

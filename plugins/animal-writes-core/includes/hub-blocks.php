@@ -414,9 +414,12 @@ function aw_block_result_head() {
 	$line  = $where ? sprintf( /* translators: 1: number of results, 2: what was searched for. */ _n( '%1$s result for %2$s', '%1$s results for %2$s', $n, 'animal-writes-core' ), number_format_i18n( $n ), implode( ', ', $where ) ) : sprintf( /* translators: %s: number of organisations. */ _n( '%s organisation', '%s organisations', $n, 'animal-writes-core' ), number_format_i18n( $n ) );
 	$sort  = 'details' === sanitize_key( wp_unslash( $_GET['sort'] ?? '' ) ) ? 'details' : ''; // phpcs:ignore WordPress.Security.NonceVerification
 	$here  = add_query_arg( map_deep( array_diff_key( wp_unslash( $_GET ), array( 'sort' => 1, 'paged' => 1, 'query-106-page' => 1 ) ), 'rawurlencode' ), strtok( aw_hub_base_url(), '?' ) ); // phpcs:ignore WordPress.Security.NonceVerification
+	// Phones: Sort is a menu beside List / Map (owner's Directory mobile spec, 14 Nov 2026). aw.js shows it and hides the
+	// two links; without JavaScript the links stay.
+	$pick    = '<span class="aw-sort-pick" hidden><label class="screen-reader-text" for="aw-sort-sel">Sort</label><select id="aw-sort-sel" class="aw-sort-select"><option value="' . esc_url( $here ) . '"' . selected( $sort, '', false ) . '>A–Z</option><option value="' . esc_url( add_query_arg( 'sort', 'details', $here ) ) . '"' . selected( $sort, 'details', false ) . '>Most details first</option></select></span>';
 	$sortnav = '<nav class="kit-segment" aria-label="Sort"><a href="' . esc_url( $here ) . '"' . ( $sort ? '' : ' aria-current="true"' ) . '>A–Z</a><a href="' . esc_url( add_query_arg( 'sort', 'details', $here ) ) . '"' . ( $sort ? ' aria-current="true"' : '' ) . '>Most details first</a></nav>';
 	return ( function_exists( 'aw_district_helplines_row' ) ? aw_district_helplines_row() : '' ) // a district's helplines row, above the toolbar (district-helplines.php)
-		. aw_toolbar( $line, $sortnav . ( function_exists( 'aw_dir_tools_html' ) ? aw_dir_tools_html() : '' ) ) // List / Map and Near me (directory-map.php)
+		. aw_toolbar( $line, $sortnav . ( function_exists( 'aw_dir_tools_html' ) ? aw_dir_tools_html() : '' ) . $pick ) // List / Map and Near me (directory-map.php)
 		. ( function_exists( 'aw_dir_panels_html' ) ? aw_dir_panels_html() : '' );
 }
 

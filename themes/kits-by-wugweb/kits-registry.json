@@ -542,13 +542,14 @@
     "kit-filterbar",
     "kit-filters",
     "kit-dd",
-    "kit-removable"
+    "kit-removable",
+    "kit-sheet-open"
    ],
    "states": [
     "closed",
     "open",
     "chosen (count)",
-    "sheet on phones",
+    "sheet on phones (slides up; closes on Esc, a tap on the dimmed page or a swipe down; html.kit-sheet-open keeps the page behind still)",
     "no JavaScript (Apply button)"
    ],
    "tokens": [],

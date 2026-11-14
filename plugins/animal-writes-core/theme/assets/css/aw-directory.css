@@ -107,3 +107,23 @@
 .aw-dir-sheet-x:hover { background: var(--kit-chip-hover); }
 .aw-dir-sheet-x:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
 .aw-dir-sheet.is-sheet[open] .kit-filter-sheet-actions .kit-btn { justify-content: center; }
+/* Phones (owner's Directory mobile spec, 14 Nov 2026): search › Filters and Near me in one row › count › List / Map and
+   Sort in one row › results. Spacing: description › search 16, search › row 12, row › count 16, count › view row 12,
+   view row › first result 16. Controls 48px (--kit-size-control). Wider screens keep their layout. */
+.aw-dir-actions { display: contents; }
+.aw-sort-pick { display: none; }
+@media (max-width: 767px) {
+	.kit-section-band .aw-dir-search { margin-top: var(--kit-space-4); padding: 0; border: 0; background: none; box-shadow: none; }
+	.aw-dir-search:has(.aw-dir-sheet.is-sheet) .aw-dir-q > label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+	.aw-dir-search:has(.aw-dir-sheet.is-sheet) .aw-dir-submit { display: none; }
+	.aw-dir-search:has(.aw-dir-sheet.is-sheet) { display: grid; gap: var(--kit-space-3); }
+	.aw-dir-actions { display: flex; gap: var(--kit-space-3); }
+	.aw-dir-actions > * { flex: 1 1 0; min-width: 0; }
+	.kit-filter-sheet.aw-dir-sheet.is-sheet > summary.aw-dir-sheet-open, .aw-near-proxy { min-height: var(--kit-size-control); justify-content: center; }
+	.aw-toolbar:has(.aw-sort-pick:not([hidden])) { row-gap: var(--kit-space-3); margin-top: var(--kit-space-4); margin-bottom: var(--kit-space-4); }
+	.aw-toolbar:has(.aw-sort-pick:not([hidden])) > nav.kit-segment[aria-label="Sort"] { display: none; }
+	.aw-toolbar .aw-sort-pick:not([hidden]) { display: block; flex: 1 1 0; min-width: 0; }
+	.aw-sort-select { width: 100%; min-height: var(--kit-size-control); }
+	body:has(.aw-near-proxy:not([hidden])) .aw-dir-tools .aw-near-open { display: none; }
+	.aw-dir-tools .kit-segment :is(button, a) { min-height: var(--kit-size-control); }
+}

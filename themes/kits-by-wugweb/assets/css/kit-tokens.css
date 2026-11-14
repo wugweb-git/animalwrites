@@ -71,7 +71,7 @@
   --kit-space-9: 6rem;
   --kit-space-head: var(--s-4);
   --kit-space-head-meta: var(--s-3);
-  --kit-space-head-sub: var(--kit-space-head-meta);
+  --kit-space-head-sub: var(--s-2);
   --kit-space-collection: var(--s-4);
   --kit-space-section-base: 48px; /* the section steps: 48 / 70 / 96 */
   --kit-space-section: var(--kit-space-section-base); /* section top (and both sides where a part has one value); Styles > Group > Section > Padding top */

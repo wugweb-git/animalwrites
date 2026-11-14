@@ -107,6 +107,10 @@ a.kit-tag { cursor: pointer; }
 	background: var(--kit-color-raised); border-radius: var(--radius-lg) var(--radius-lg) 0 0;
 	box-shadow: var(--kit-elevation-3);
 }
+html.kit-sheet-open { overflow: hidden; } /* the page behind the sheet does not scroll */
+.kit-filter-sheet.is-sheet[open] > .kit-filters { animation: kit-sheet-up var(--kit-motion-slow) var(--kit-motion-ease) both; }
+@keyframes kit-sheet-up { from { transform: translateY(100%); } to { transform: none; } }
+@media (prefers-reduced-motion: reduce) { .kit-filter-sheet.is-sheet[open] > .kit-filters { animation: none; } }
 .kit-filter-sheet.is-sheet[open]::before { content: ""; position: fixed; inset: 0; z-index: calc(var(--kit-z-overlay) - 1); background: color-mix(in srgb, var(--kit-color-ink) 45%, transparent); }
 .kit-filter-sheet.is-sheet[open] .kit-filter-sheet-actions { display: flex; gap: var(--s-2); position: sticky; bottom: calc(-1 * var(--s-4)); padding: var(--s-3) 0; background: var(--kit-color-raised); }
 .kit-filter-sheet.is-sheet[open] .kit-filter-sheet-actions .kit-btn { flex: 1; }

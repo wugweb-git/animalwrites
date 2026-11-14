@@ -714,6 +714,15 @@ add_filter(
 	},
 	20
 );
+// Optimization Detective adds "auto" again to lazy pictures when it rewrites the finished page (it keeps the old value in
+// data-od-replaced-sizes), so the page it hands back gets the same fix, after it and after Kits (20).
+add_filter(
+	'od_template_output_buffer',
+	function ( $html ) {
+		return str_replace( ' sizes="auto, (max-width: 767px) 280px, 320px"', ' sizes="(max-width: 767px) 280px, 320px"', (string) $html );
+	},
+	30
+);
 
 /*
  * Press cards on campaign pages show the source line and the title only (owner, 13 Nov 2026). A press item has no

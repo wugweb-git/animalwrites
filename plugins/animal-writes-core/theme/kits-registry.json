@@ -286,6 +286,8 @@
     "aw-dir-check",
     "aw-toolbar",
     "aw-toolbar-count",
+    "aw-sort-pick",
+    "aw-sort-select",
     "aw-closed-mark",
     "aw-sort-seg",
     "aw-dd-sort",

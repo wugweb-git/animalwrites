@@ -127,7 +127,7 @@ Body measure: `--aw-measure` 68ch. Headings use `leading-heading`; display and s
 | `--aw-space-gutter` | 1rem | 1.5rem | 2rem |
 | `--aw-space-grid` | 1rem | 1.5rem | 1.75rem |
 
-**Heading › subtitle, locked (owner, 14 Nov 2026):** every heading, H1 to H6, and the line under it (section description, lead, campaign lede, share line) are `--kit-space-head-sub` apart, 12px, the same space as title › meta (`--kit-space-head-meta`). One rule in kit.css sets it for every page; in cards, title and summary share the card's gap (8px, 4px in small stacked cards), as meta and title do.
+**Heading › subtitle, locked (owner, 14 Nov 2026):** every heading, H1 to H6, and the line under it (section description, lead, campaign lede, share line) are `--kit-space-head-sub` apart, 8px, the same space as meta › title in cards (the Directory mobile spec, 14 Nov 2026: "Title → description: 8px"). One rule in kit.css sets it for every page; in cards, title and summary share the card's gap (8px, 4px in small stacked cards), as meta and title do.
 
 | Token | sm (0) | md (768) | lg (1200) |
 |---|---|---|---|
@@ -339,6 +339,9 @@ The home page's sections and their order live in the theme template `plugins/ani
 The front page (post 57) keeps its content, but it is not shown. Its FAQ box (meta `aw_faq`) still feeds the FAQ section; with too few questions the section prints nothing. Item picks for Query Loops 43 and 44 are in `animal-writes-core/includes/home.php`.
 
 Every home section head is the Kits section head (`kit-sec-head`): an H2, one supporting line and a ghost button.
+
+### Directory on phones (owner's mobile spec, 14 Nov 2026)
+Below 768: H1 › description 8 › search (full width, label for screen readers only, "Search by name or PIN code") 16 › Filters and Near me in one row 12 › count 16 › List / Map and a Sort menu in one row 12 › first result 16. Filters open the bottom sheet (State, District, Type, Service, Claimed only, Verified only; Reset and Apply filters), up to 85% of the screen, sliding up (none with reduced motion), focus inside, closed by Esc, the close button, a tap on the dimmed page or a swipe down; the page behind does not scroll. Controls 48px. Without JavaScript the filters stay inline and the toolbar keeps its Sort links and Near me.
 
 ### Directory states panel
 The directory home's header visual: the nine states with the most organisations, set as type (count in Tiro, name below), each linking to its state page. Real counts from the taxonomy; no map. Busiest state in ink, the rest raised; hover lifts, reduced motion respected.
