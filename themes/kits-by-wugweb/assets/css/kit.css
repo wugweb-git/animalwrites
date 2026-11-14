@@ -231,7 +231,14 @@ main > .kit-section-band:first-child, main > p:first-child + .kit-section-band {
 .kit-section-band:not(:has(.kit-section-filters)) + .wp-block-post-content > :first-child { margin-block-start: 0; } /* the gap once, not the first block's own margin as well */
 .kit-section-band:not(:has(.kit-section-filters)) .kit-section-visual { overflow: hidden; } /* the pictures stay inside the head, off the filters below */
 .kit-section-inner { max-width: var(--kit-width-wide); margin-inline: auto; }
-/* Page head: nav › breadcrumb › H1 › description › lead, 16 apart (--kit-space-head) */
+/* Heading › subtitle: one locked space for every heading, H1 to H6, on every page (owner, 14 Nov 2026: "lock space between
+   Title and subtitle the same way we locked space between meta and title", "all h1 h2 h3 h4 etc"). The subtitle is the
+   line that sits under a heading (section description, lead, campaign lede); --kit-space-head-sub is --kit-space-head-meta
+   (12px), the title-to-meta space. The heading gives up its own bottom margin there, and :is(…, #kits-head-weight) adds an
+   id's weight so page and block-gap rules do not stack on top. In cards, title and summary share the card's gap. */
+:is(h1, h2, h3, h4, h5, h6):is(h1, h2, h3, h4, h5, h6, #kits-head-weight):has(+ :is(.kit-section-desc, .kit-ed-desc, .kit-lead, .has-large-font-size, .aw-hero-lead, .kit-error-lead, .aw-camp-lede, .aw-findhelp-lede, .aw-letter-share-lede, .aw-letter-share-desc, .kit-step-intro, .kit-dateline-desc, .aw-listing-desc)) { margin-bottom: 0; }
+:is(h1, h2, h3, h4, h5, h6):is(h1, h2, h3, h4, h5, h6, #kits-head-weight) + :is(.kit-section-desc, .kit-ed-desc, .kit-lead, .has-large-font-size, .aw-hero-lead, .kit-error-lead, .aw-camp-lede, .aw-findhelp-lede, .aw-letter-share-lede, .aw-letter-share-desc, .kit-step-intro, .kit-dateline-desc, .aw-listing-desc) { margin-top: var(--kit-space-head-sub); }
+/* Page head: nav › breadcrumb › H1 › description › lead, 16 apart (--kit-space-head), except H1 › description: 12 (--kit-space-head-sub, above) */
 .kit-section-inner > .kit-crumbs { margin: 0 0 var(--kit-space-head); }
 .kit-section-filters { margin-top: var(--kit-space-head); }
 .kit-section-band .kit-section-filters { margin-top: var(--kit-space-head); margin-bottom: calc(var(--kit-space-6) - var(--kit-space-head)); } /* filters inside the band: 16 above (beats the band's no-gap rule); its bottom padding (a setting) plus this keeps the old --kit-space-6 under them */
@@ -262,7 +269,7 @@ main > .kit-section-band:first-child, main > p:first-child + .kit-section-band {
 html { overflow-x: clip; }
 .kit-section-head { display: grid; gap: var(--kit-space-5); align-items: end; max-width: var(--kit-width-wide); margin-inline: auto; }
 .kit-section-head :is(.wp-block-query-title, .wp-block-post-title) { margin: 0; } /* the band's H1, archive or Page */
-.kit-section-desc { font-size: var(--kit-section-desc-size); color: var(--kit-color-muted); margin: var(--kit-space-head) 0 0; }
+.kit-section-desc { font-size: var(--kit-section-desc-size); color: var(--kit-color-muted); margin: var(--kit-space-head-sub) 0 0; }
 .kit-section-count { font-weight: var(--kit-weight-strong); color: var(--kit-color-ink); font-size: var(--kit-type-sm); margin: var(--kit-space-2) 0 0; } /* ink: accent-ink on kraft is only 4.3:1 */
 .kit-section-visual { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--kit-space-2); min-width: 0; }
 .kit-section-visual > * { min-width: 0; }

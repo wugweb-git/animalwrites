@@ -255,6 +255,11 @@
       "md": "var(--s-3)",
       "lg": "var(--s-3)"
     },
+    "space-head-sub": {
+      "sm": "var(--kit-space-head-meta)",
+      "md": "var(--kit-space-head-meta)",
+      "lg": "var(--kit-space-head-meta)"
+    },
     "space-collection": {
       "sm": "var(--s-4)",
       "md": "var(--s-4)",

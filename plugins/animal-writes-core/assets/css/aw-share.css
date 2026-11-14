@@ -41,7 +41,7 @@
 #share:is(.aw-share-sec, .aw-camp-section) :is(h2, p) { color: var(--kit-color-on-ink); }
 #share:is(.aw-share-sec, .aw-camp-section) h2 { display: block; margin-block: 0 !important; font-size: var(--kit-type-h2) !important; line-height: var(--kit-leading-heading); }
 #share:is(.aw-share-sec, .aw-camp-section) h2::before { content: none; }
-#share:is(.aw-share-sec, .aw-camp-section) :is(.aw-share-line, .aw-camp-lede) { max-width: 60ch; margin-block: var(--kit-space-4) 0; margin-inline: max(0px, (100% - var(--aw-share-col, 1120px)) / 2) auto !important; font-size: var(--kit-type-lead); } /* at most 60ch, its left edge on the heading's (!important: core's constrained layout centres children with auto !important) */
+#share:is(.aw-share-sec, .aw-camp-section) :is(.aw-share-line, .aw-camp-lede) { max-width: 60ch; margin-block: var(--kit-space-head-sub) 0; margin-inline: max(0px, (100% - var(--aw-share-col, 1120px)) / 2) auto !important; font-size: var(--kit-type-lead); } /* at most 60ch, its left edge on the heading's (!important: core's constrained layout centres children with auto !important) */
 #share:is(.aw-share-sec, .aw-camp-section) .aw-camp-note { display: none; }
 /* older Diwali content: the text column across the band, the picture column out (the picture is under the band) */
 #share.aw-camp-section .aw-camp-split > .wp-block-column:has(> .aw-camp-art) { display: none; }

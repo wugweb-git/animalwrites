@@ -127,6 +127,8 @@ Body measure: `--aw-measure` 68ch. Headings use `leading-heading`; display and s
 | `--aw-space-gutter` | 1rem | 1.5rem | 2rem |
 | `--aw-space-grid` | 1rem | 1.5rem | 1.75rem |
 
+**Heading › subtitle, locked (owner, 14 Nov 2026):** every heading, H1 to H6, and the line under it (section description, lead, campaign lede, share line) are `--kit-space-head-sub` apart, 12px, the same space as title › meta (`--kit-space-head-meta`). One rule in kit.css sets it for every page; in cards, title and summary share the card's gap (8px, 4px in small stacked cards), as meta and title do.
+
 | Token | sm (0) | md (768) | lg (1200) |
 |---|---|---|---|
 | `--aw-width-content` | 720px | = | = |
