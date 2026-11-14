@@ -33,6 +33,7 @@ import {
 	Tile,
 	TileGrid,
 } from '@kits/shell'; // eslint-disable-line import/no-unresolved -- Kits Core's shell script (window.kits.shell), mapped in webpack.config.js
+import { ModuleCards } from './modules';
 
 const app = window.rankwebApp || {};
 const path = ( p ) => `/${ app.rest }/${ p }`;
@@ -300,6 +301,7 @@ function Dashboard() {
 					] ) }
 				/>
 			</SectionCard>
+			<ModuleCards />
 			{ ( app.modules || [] ).length > 0 && (
 				<SectionCard
 					id="modules"

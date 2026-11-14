@@ -91,17 +91,19 @@ add_action(
 				'object'      => 'rankwebApp',
 				'text_domain' => 'aw-seo-extras',
 				'data'        => array(
-					'screen'  => $screen,
-					'name'    => 'RankWeb',
-					'version' => (string) $head['Version'],
-					'icon'    => plugins_url( 'assets/icon.svg', AW_SEO_EXTRAS_DIR . 'aw-seo-extras.php' ),
-					'tabs'    => $tabs,
-					'rest'    => RANKWEB_REST,
-					'faqUrl'  => add_query_arg( 'page', 'aw-faq', admin_url( 'admin.php' ) ),
+					'screen'    => $screen,
+					'name'      => 'RankWeb',
+					'version'   => (string) $head['Version'],
+					'icon'      => plugins_url( 'assets/icon.svg', AW_SEO_EXTRAS_DIR . 'aw-seo-extras.php' ),
+					'tabs'      => $tabs,
+					'rest'      => RANKWEB_REST,
+					'faqUrl'    => add_query_arg( 'page', 'aw-faq', admin_url( 'admin.php' ) ),
+					// The Dashboard's module switches save through settings/modules (manage_options).
+					'canSwitch' => current_user_can( 'manage_options' ),
 					// The FAQ screen's own output as parts, after its load hook ran (Kits Core's page parts).
-					'parts'   => 'faq' === $screen ? rankweb_faq_parts() : array(),
+					'parts'     => 'faq' === $screen ? rankweb_faq_parts() : array(),
 					// The Dashboard's Modules table and the rest of the Overview, from its own output (Kits' page parts).
-					'modules' => 'dashboard' === $screen ? rankweb_overview_parts() : array(),
+					'modules'   => 'dashboard' === $screen ? rankweb_overview_parts() : array(),
 				),
 			)
 		);

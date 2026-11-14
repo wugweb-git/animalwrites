@@ -47,7 +47,7 @@ add_action(
 		}
 		require_once AW_SEO_EXTRAS_DIR . 'includes/settings.php'; // first: the modules, their settings and switches
 		$off = aw_seo_files_off();
-		foreach ( array( 'helpers', 'overview', 'faq', 'programmatic', 'titles', 'canonical', 'filtered-views', 'robots', 'schema', 'rank-math-schema', 'opengraph', 'sitemap', 'redirects', 'breadcrumbs', 'focus-keywords', 'health', 'llms', 'markdown', 'analysis', 'content-advice', 'internal-links', 'rankweb-dashboard', 'rankweb-rest', 'rankweb-ui', 'help-tab' ) as $file ) {
+		foreach ( array( 'helpers', 'overview', 'faq', 'programmatic', 'titles', 'canonical', 'filtered-views', 'robots', 'schema', 'rank-math-schema', 'opengraph', 'sitemap', 'redirects', 'breadcrumbs', 'focus-keywords', 'health', 'llms', 'markdown', 'analysis', 'content-advice', 'internal-links', 'rankweb-dashboard', 'rankweb-rest', 'rankweb-ui', 'rankweb-modules', 'help-tab' ) as $file ) {
 			if ( ! in_array( $file, $off, true ) ) { // a module switched off in RankWeb → Settings is not loaded
 				require_once AW_SEO_EXTRAS_DIR . 'includes/' . $file . '.php';
 			}
@@ -56,8 +56,8 @@ add_action(
 		// A switched-off module's scheduled job is taken off (its file, which runs and reschedules it, is not loaded).
 		// Checked in admin and cron requests only, so a page view never writes.
 		$jobs = array(
-			'health'  => 'aw_seo_endpoints_watchdog',
-			'sitemap' => 'aw_seo_sitemap_daily',
+			'health'         => 'aw_seo_endpoints_watchdog',
+			'sitemap'        => 'aw_seo_sitemap_daily',
 			'internal-links' => 'aw_link_index_build',
 		);
 		$idle = array_intersect_key( $jobs, array_flip( $off ) );
