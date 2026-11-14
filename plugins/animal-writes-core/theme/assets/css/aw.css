@@ -355,3 +355,16 @@ a.aw-social-name { min-height: var(--kit-size-target); text-decoration: none; }
    No fluid sizes, so the size changes only at a breakpoint. */
 .kit-card :is(h3, h4).kit-card-title.kit-card-title, .kit-card :is(h3, h4).kit-card-title.kit-card-title a { font-size: var(--kit-type-card-title) !important; line-height: var(--kit-h3-leading) !important; }
 .kit-card .kit-card-metarow.kit-card-metarow, .kit-card .kit-card-metarow.kit-card-metarow * { font-size: var(--kit-meta-size) !important; }
+
+/* News article polish: moved here from the live Additional CSS block of the same name (14 Nov 2026). Scoped to .single-aw_news. */
+.single-aw_news .aw-item-content { max-width: 680px; }
+.single-aw_news .aw-item-content .wp-block-post-excerpt, .single-aw_news .aw-item-content .wp-block-post-excerpt p { color: #2b2b2b !important; font-size: 18px !important; line-height: 1.55 !important; }
+.single-aw_news .aw-item-content .wp-block-post-excerpt p { margin: 0 0 16px; }
+@media (min-width: 768px) {
+	.single-aw_news .aw-item-content .wp-block-post-excerpt, .single-aw_news .aw-item-content .wp-block-post-excerpt p { font-size: 20px !important; line-height: 1.5 !important; }
+}
+.single-aw_news .aw-item-meta { align-items: center; gap: 8px 12px; }
+.single-aw_news .aw-item-meta .kit-chip:nth-of-type(n+2) { display: none; }
+.single-aw_news .aw-item-meta .kit-chip, .single-aw_news .kit-crumbs a { display: inline-flex; align-items: center; min-height: 44px; }
+.single-aw_news .aw-sources-links a { display: inline-flex; align-items: center; min-height: 44px; }
+.single-aw_news .aw-sources-note, .single-aw_news .aw-sources-credit { font-size: 14px; }

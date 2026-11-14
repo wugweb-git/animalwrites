@@ -62,6 +62,7 @@ require_once AW_CORE_DIR . 'includes/scf.php';
 require_once AW_CORE_DIR . 'includes/places.php';
 require_once AW_CORE_DIR . 'includes/issuers.php';
 require_once AW_CORE_DIR . 'includes/summary-display.php'; // an item's own page shows its whole summary (the rules are SourceWeb's)
+require_once AW_CORE_DIR . 'includes/news-article.php'; // News article: read-more fold and the ad-slot hook
 require_once AW_CORE_DIR . 'includes/places-admin.php';
 require_once AW_CORE_DIR . 'includes/directory.php';
 require_once AW_CORE_DIR . 'includes/data-sources.php';

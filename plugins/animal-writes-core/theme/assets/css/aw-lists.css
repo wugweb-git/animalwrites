@@ -67,10 +67,16 @@
 .is-first-page .aw-news-list > li:nth-child(n+2):nth-child(-n+4) { grid-column: 1 / -1; }
 .is-first-page .aw-news-list > li:nth-child(n+2):nth-child(-n+4) .aw-src { margin-top: 0; }
 @media (max-width: 1199px) {
+	/* One fixed 16px gap between cards (14 Nov 2026; cards 2 and 3 nearly touched on a phone): no rule lines, no pulled-up margins. */
+	.aw-news-list { row-gap: var(--kit-space-4); }
 	.is-first-page .aw-news-list > li:first-child { border-bottom: 0 !important; padding-bottom: 0 !important; }
-	.is-first-page .aw-news-list > li:nth-child(3), .is-first-page .aw-news-list > li:nth-child(4) { border-top: var(--kit-border-width) solid var(--kit-color-line) !important; padding-top: var(--kit-space-4) !important; margin-top: calc(var(--kit-space-4) - var(--kit-space-7)) !important; }
-	.is-first-page .aw-news-list > li:nth-child(4) { border-bottom: var(--kit-border-width) solid var(--kit-color-line) !important; padding-bottom: var(--kit-space-7) !important; }
+	.is-first-page .aw-news-list > li:nth-child(n+2):nth-child(-n+4) { border: 0 !important; margin: 0 !important; padding: 0 !important; }
 }
+
+/* The source chip shows logo and short name whole, never cut ("5 Dariya Ne..."); it wraps inside the card instead. */
+.aw-news-list .kit-tag--source { max-width: 100%; height: auto; }
+.aw-news-list .kit-tag--source .kit-tag-text { overflow: visible; text-overflow: clip; white-space: normal; }
+.aw-news-list .kit-card-chips { flex-wrap: wrap; }
 @media (min-width: 1200px) {
 	.is-first-page .aw-news-list { grid-template-columns: repeat(12, minmax(0, 1fr)); grid-template-rows: auto auto auto 1fr; row-gap: 0; }
 	.is-first-page .aw-news-list::before { content: ""; grid-row: 5; grid-column: 1 / -1; border-top: var(--kit-border-width) solid var(--kit-color-line); margin: var(--kit-space-7) 0; }

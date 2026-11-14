@@ -2263,7 +2263,13 @@
    "classes": [
     "kit-with-sidebar",
     "kit-main",
-    "kit-sidebar"
+    "kit-sidebar",
+    "aw-fold",
+    "aw-fold-body",
+    "aw-fold-btn",
+    "aw-ad-slot",
+    "aw-ad-label",
+    "aw-ad-box"
    ],
    "states": [
     "sidebar empty or only an empty/waiting/unfilled ad: one column, text centred at the reading width",
