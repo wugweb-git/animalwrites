@@ -15,6 +15,10 @@ if ( ! defined( 'ABSPATH' ) && 'cli' !== PHP_SAPI ) {
 	exit;
 }
 
+if ( ! defined( 'ABSPATH' ) ) {
+	define( 'ABSPATH', __DIR__ . '/' ); // the linker is pure PHP; the constant only satisfies its direct-access guard
+}
+
 require_once dirname( __DIR__ ) . '/includes/class-aw-linker.php';
 
 /** The linker. */
