@@ -996,7 +996,7 @@ function aw_block_current_campaign( $a = array(), $id = 0 ) {
 function aw_side_default_card() {
 	aw_use_component_style( 'aw-single' );
 	wp_enqueue_style( 'aw-camp-tokens', plugins_url( 'assets/css/aw-camp-tokens.css', AW_CORE_DIR . 'animal-writes-core.php' ), array(), (string) filemtime( AW_CORE_DIR . 'assets/css/aw-camp-tokens.css' ) );
-	$img = wp_get_attachment_image( 23313, 'medium_large', false, array( 'alt' => '', 'loading' => 'lazy' ) );
+	$img = wp_get_attachment_image( 8747, 'medium_large', false, array( 'alt' => '', 'loading' => 'lazy' ) );
 	$url = home_url( '/help/' );
 	return '<section class="kit-card aw-side-camp aw-camp aw-side-camp--default" aria-labelledby="aw-side-camp-default">'
 		. ( $img ? '<div class="aw-side-camp-media">' . $img . '</div>' : '' )
