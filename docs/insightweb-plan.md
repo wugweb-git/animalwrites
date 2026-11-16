@@ -234,6 +234,38 @@ types, the Kits admin shell, mixed prefixes) is all removable, none of it a rewr
 public install authenticates to Google (see **Credentials crux** below); until that is chosen it is a no-go on that
 axis, not on the features.
 
+### Decided plan (owner, 17 Nov 2026 — blockers 2, 3, 6, 7)
+
+These are **locked** for the public/extracted edition. They apply **only to the public codebase**, never to the live
+`plugins/insightweb` plugin.
+
+- **#7 Credentials — LOCKED to model (A): companion to Site Kit.** The public plugin declares
+  `Requires Plugins: google-site-kit`, reads Google (Search Console + GA4) **only through Site Kit**, and stores **no
+  Google OAuth client or tokens of its own**. PageSpeed, Microsoft Clarity and Bing (own keys, no OAuth) are treated as
+  standalone value that works with or without Site Kit. Move to model (B) own-OAuth **only** if Site Kit's
+  publicly-supported surface proves insufficient — and **flag that to the coordinator before doing so**. **(runtime)**
+  Today the Google reads use Site Kit's *internal* classes (`\Google\Site_Kit\Context`, `...\Core\Modules\Modules`,
+  module `get_data()`, `googlesitekit_*_settings`); confirm a publicly-supported path per Site Kit version — the
+  internal-API dependency is a per-version runtime risk to re-check.
+- **#2 One prefix.** `insightweb_` (functions/options/hooks/meta/REST namespace/text domain), `InsightWeb_` classes,
+  `INSIGHTWEB_` constants. Remove the mixed `aw_si_` / `aw_` / `aw_kw_` / `aw_seo_` / `kits_` in the public codebase.
+  No `aw`-based name anywhere newly written.
+- **#3 No `Update URI`.** Remove the `Update URI` header and the self-hosted-update hooks (`plugin-info.php` →
+  `update_plugins_wugweb.com`, `plugins_api`) from the public codebase. The **live** plugin keeps them for self-hosted
+  updates.
+- **#6 Drop the Animal Writes coupling.** Remove the hardcoded `https://animalwrites.in/` (`links-seed.php:21-22`,
+  the crawl user-agent + alert-email body in `crawlcheck.php:48,325`, the repo link in `server.php:217`), the shipped
+  AW seed links (`search-insights/data/links-2026-11-02.php`), and the AW post types (`aw_listing` / `aw_news` /
+  `aw_legal` / `aw_campaign` / `aw_opportunity`, `AW_SEO_ITEM_TYPES`) — the public plugin operates on admin-chosen
+  public post types only.
+
+**Build status (17 Nov 2026):** the extracted build (`plugins/insightweb-org/`) does not exist yet, and the code for
+#2/#6 is the I1–I3 port. Unlike MailWeb (already single-prefixed and standalone), a *loadable* InsightWeb extraction
+also needs (a) its **own keyword table** to replace Kits Core's `aw_kw_*`, and (b) the bundled **`insightweb-shell`**
+UI package, which the RankWeb session is still extracting. So the re-prefix (#2) and the woven-in decouple (#6) cannot
+land green standalone until those land; #3 and #7 are header-level and land with the skeleton (I1). Sequence the build
+I1 → I3 so each phase stays PHPCS/tests-green.
+
 ### What ports vs what is dropped
 
 **Ports (generic search-analytics features):** keyword records (roles, owning pages, GSC figures by day, priority,
