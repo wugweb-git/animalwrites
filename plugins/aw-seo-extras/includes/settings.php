@@ -317,6 +317,24 @@ function aw_seo_modules(): array {
 				'AW_MD_VARY_HTML' => array( 'type' => 'int', 'label' => 'Vary: Accept on the HTML (1 on, 0 off)', 'help' => 'Set 0 if the CDN stops storing Home and single pages (x-hcdn-cache-status never HIT).', 'default' => 1 ),
 			),
 		),
+		'bulk' => array(
+			'label'  => 'Bulk edit',
+			'switch' => true,
+			'files'  => array( 'bulk-edit', 'bulk-csv' ),
+			'desc'   => 'SEO columns, filters, Quick Edit and Bulk Edit on the post-list screens, and a CSV export and import of the SEO fields (RankWeb → SEO CSV).',
+			'fields' => array(
+				'AW_BULK_TYPES' => array( 'type' => 'list', 'label' => 'Post types with the list-screen SEO tools', 'help' => 'One per line. Empty: none.', 'default' => array( 'aw_listing', 'aw_news', 'post', 'aw_legal', 'aw_opportunity', 'aw_campaign', 'page' ) ),
+			),
+		),
+		'media' => array(
+			'label'  => 'Images',
+			'switch' => true,
+			'files'  => array( 'media-seo' ),
+			'desc'   => 'Find and replace across image alt text, title and caption, and fill missing captions (RankWeb → Images).',
+			'fields' => array(
+				'AW_MEDIA_CAPTION' => array( 'type' => 'text', 'label' => 'Caption pattern for missing captions', 'help' => 'Placeholders: {title}, {filename}, {sitename}.', 'default' => '{title}' ),
+			),
+		),
 		'analysis' => array(
 			'label'  => 'Content analysis',
 			'switch' => true,
@@ -403,6 +421,8 @@ function aw_seo_field_text( string $type, $value ): string {
 	switch ( $type ) {
 		case 'int':
 			return (string) (int) $value;
+		case 'text':
+			return (string) $value;
 		case 'list':
 			return implode( "\n", array_map( fn( $v ) => '' === (string) $v ? '/' : (string) $v, (array) $value ) );
 		case 'map':
@@ -419,6 +439,8 @@ function aw_seo_field_value( string $type, string $text ) {
 	switch ( $type ) {
 		case 'int':
 			return max( 0, (int) $text );
+		case 'text':
+			return sanitize_text_field( $text );
 		case 'list':
 			return array_map( fn( $l ) => '/' === $l ? '' : sanitize_text_field( $l ), $lines );
 		case 'map':
@@ -624,7 +646,7 @@ const AW_SEO_DELETE_DATA = 'aw_seo_delete_data'; // 1: uninstall.php deletes Ran
  * One stored setting value, cleaned by its field type. Values the screen stored come back unchanged (the same clean-up
  * as aw_seo_field_value()), so a save that changes nothing still writes nothing.
  *
- * @param string $type int, list, map, maplist, or '' (a key no field knows: kept, its texts cleaned).
+ * @param string $type int, text, list, map, maplist, or '' (a key no field knows: kept, its texts cleaned).
  * @param mixed  $v    Value.
  * @return mixed
  */
@@ -632,6 +654,8 @@ function aw_seo_setting_clean( string $type, $v ) {
 	switch ( $type ) {
 		case 'int':
 			return max( 0, (int) $v );
+		case 'text':
+			return sanitize_text_field( (string) $v );
 		case 'list':
 			return array_values( array_map( fn( $x ) => sanitize_text_field( (string) $x ), (array) $v ) );
 		case 'map':

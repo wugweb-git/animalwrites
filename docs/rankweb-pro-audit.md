@@ -147,7 +147,13 @@ every output escaped, every string in the aw-seo-extras text domain.
   link. The nodes join Rank Math's graph; Speakable, about and mentions go on the WebPage node. Tests: `AW_Schema` parse,
   extract, @id, speakable and things. No scheduled job.
 - **E. Bulk work.** Quick and Bulk Edit SEO fields, SEO data and focus keyword CSV export/import, media find and replace,
-  automatic captions, list filters.
+  automatic captions, list filters. **Built 17 Nov 2026** on branch `claude/rankweb-bulk` (stacked on D), not live yet.
+  Two modules: "Bulk edit" (a SEO column, filters for missing title/description/focus/noindex/orphan, Quick Edit for
+  title/description/focus, Bulk Edit for focus keyword, link keyword and the index rule, and a RankWeb → SEO CSV screen
+  with export and a dry-run import) and "Images" (find and replace across alt/title/caption with a dry run, and fill
+  missing captions from a pattern). A new scalar "text" settings type was added for the caption pattern. Pure `AW_Bulk`
+  (CSV read/write, find-and-replace) with tests. Note: Quick Edit and Bulk Edit use the standard inline hooks and need a
+  wp-admin check (not run on WordPress here).
 - **F. Redirections.** CSV import, 404 log export, categories, .htaccess sync (off by default).
 - **G. InsightWeb additions.** Index status (URL Inspection API), winners and losers, per-item performance badge and
   view, content SEO overview, PageSpeed on demand, country filter, monthly email digest.
