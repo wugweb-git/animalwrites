@@ -307,6 +307,32 @@ not push or ship; the branch + hashes go to the coordinator, and only the live-p
 `b3cd3a0d`, the readme `0d723960`/`b8e5857d`) are production-bound. The `plugins/insightweb-org/` build is a separate
 public codebase and must **not** be deployed to the live site.
 
+### Feature coverage — the owner's InsightWeb feature list (checked against live `plugins/insightweb`, 17 Nov 2026)
+
+Features the owner assigned to InsightWeb (they all need Google data, so they belong here, not RankWeb). "Built" is
+the state of the **live** plugin; the public edition carries the generic ones as the engine ports.
+
+| # | Feature | Built (live)? | Note |
+|---|---|---|---|
+| 1 | GA4 integration | **Yes** | `ga4.php`, read-only via Site Kit (organic / AI / referral sessions, key events). |
+| 8 | AI search traffic tracker (ChatGPT, Perplexity… from GA4) | **Yes** | `ga4.php` `aw_si_ai_sources` (chatgpt.com, chat.openai.com, perplexity.ai, gemini.google.com, copilot.microsoft.com) + `referrer-icons.php`; shown on Overview/Pages. |
+| 9 | Google index status (URL Inspection API) | **Yes** | `gsc-types.php` — URL Inspection + index status (queue; the free API is partial, as noted). |
+| 11, 12, 29 | Email reports, white-label reports, report frequency | **No** | The only `wp_mail` is the crawler-access alert (`crawlcheck.php`); no scheduled/white-label analytics report and no frequency setting. |
+| 27, 28 | Fetch frequency; days of data kept | **Partial** | Retention = `AW_SI_KEEP_DAYS` (Settings; daily→monthly rollup) — yes. Fetch frequency is fixed by cron (daily/weekly), not a setting — no. |
+| 31–34 | Top 5 winning / losing keywords and posts | **Partial** | Movers (`AW_SI_MOVERS`, pos_prev vs pos28) and Rising/drops exist; no packaged "top-5 winners/losers" card for keywords *and* posts. |
+| 35, 36, 37 | Content SEO overview; ranking keywords per post; position history | **Partial** | Pages tab (`pages.php`): per-page overview + owned keywords + GA4/Clarity/PageSpeed/Rank-Math score — yes. Daily positions are stored (`obs`, rollup, `openseo-positions.php`); a per-item position-history view is thin — partial. |
+| 52 | AdSense earnings history | **No** | Not read (no `adsense` anywhere). Site Kit surfaces AdSense; InsightWeb does not. |
+| 53 | Search Console / GA data for one country | **No** | `gsc.php`/`ga4.php` don't filter by country. (`visitors.php` has a DB-IP country for the Server tab — different thing.) |
+| 66, 69 | Post performance badges; SEO performance per post | **Partial** | Per-post Rank Math SEO score + PageSpeed + flags on the Pages tab — yes; a visual "badge" is thin — partial. |
+| 68 | PageSpeed per post (needs a PSI key) | **Yes** | `psi.php` — per-page mobile score, flags under a threshold. |
+| 77, 78, 79 | GA tracking settings (anonymize IP, self-hosted GA script, exclude logged-in users) | **No / out of scope** | InsightWeb *reads* via Site Kit; it does not inject or configure the GA snippet — that is Site Kit / GTM's job. |
+| 15 | Google Trends (no public API → link out) | **Partial** | `rising.php` takes Trends via the worker/GDELT and shows a notice when Trends refuses; it is a rising source, not a pure link-out. |
+
+Takeaway for the public edition: the **read + analyse** features (1, 8, 9, 68, and the Pages-tab per-post SEO) are
+built and port cleanly under model A; the **reporting** features (11/12/29, white-label) and **AdSense** (52) and
+**country filters** (53) are genuinely not built; the **GA tracking settings** (77–79) are out of scope (Site Kit owns
+the snippet). None of this changes the go/no-go — it is a backlog map.
+
 ### External-services registry (shared component, owner 17 Nov 2026)
 
 A single declared registry of every outbound integration, **shared** with SourceWeb (and the rest of the suite) — one
