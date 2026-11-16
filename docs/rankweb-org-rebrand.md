@@ -83,11 +83,41 @@ The detail below is kept for reference.
 
 - New folder/slug/main-file all identical (`<slug>/<slug>.php`), text domain = slug, one prefix.
 - `Requires Plugins: seo-by-rank-math` (the whole premise: a free Rank Math add-on). No Kits Core, no InsightWeb.
-- Standalone admin: its own top-level menu and Settings screen built on the Settings API + `WP_List_Table` (RankWeb's
-  Kits-shell React UI does not come along). The module on/off framework ports; the tabs are rebuilt for the generic set.
 - Operates on admin-chosen public post types only (a setting), never on hardcoded types.
 - Reuses the nine pure classes (shared package or fork) and the test suite verbatim.
 - Same security posture already verified in RankWeb (nonces, caps, prepared SQL, escaping, `wp_safe_remote_*`).
+
+### Admin UI: a bundled shared-shell package (decided 17 Nov 2026)
+
+The suite's admin shell lives in Kits Core today: Kits Core registers the `kits-shell` script/style handle and every suite
+plugin's admin app lists `kits-shell` as a dependency (externalised `@kits/shell` in each `webpack.config.js`;
+`build/index.asset.php` carries the handle). A public plugin cannot depend on that — the handle only exists when Kits
+Core is active, and `.org` forbids a shared runtime handed out by a separate, unpublished plugin.
+
+**Solution (the Fluent model — how Fluent Forms / FluentCRM share one framework):** extract the shell into a single
+**shared UI package** that is **bundled into each plugin**, never required at runtime. One codebase, several consumers,
+each injecting its own config.
+
+**Reuse the current shell as-is and keep it the same (owner, 17 Nov).** Do NOT redesign or rebuild the UI. Lift the
+existing Kits shell code unchanged into the package; keep its look, components and behaviour identical, so the suite,
+the theme and the public plugins all run the same shell. The only changes are the minimum needed to make it portable:
+
+- Bundle it in each plugin; GPL (source shipped, not minified-only). Nothing is removed from the shell — the
+  Kits-specific pieces (branding, the `kits/v1` endpoints, cross-plugin navigation) are turned into **config injected
+  via `wp_localize_script`** rather than hardcoded, so the same code renders Kits chrome in the suite and the plugin's
+  own chrome on `.org`. No visual or behavioural divergence.
+- Each plugin bundles it under its **own namespaced handle** (`rankweb-shell`, `planweb-shell`, …), never a global
+  `kits-shell` — otherwise two active suite plugins would collide on one handle and WordPress would keep whichever
+  loaded first (version clash). Same code, different handle.
+- So two shared packages back the public plugins: **`rankweb-core`** (the nine pure PHP classes) and the **shell UI
+  package**. RankWeb's build session extracts the shell package from the Kits shell as the template; the other plugins
+  reuse it.
+
+**Sequencing (important):** build the shell package greenfield for the public plugins first and prove it there. Do **not**
+refactor the live Kits Core / theme Theme-Options UI onto it in the same step. Migrating Kits Core (and therefore the
+theme's Theme Options admin) to consume the same package is a deliberate **later follow-up**, tested on its own, so the
+running site's admin is never disturbed mid-flight. End state: one shell package used by both the private suite/theme
+(via Kits Core, Kits-branded) and the public plugins (bundled, de-branded).
 
 ## 5. WordPress.org compliance checklist (from the wp-org-submission skill)
 
