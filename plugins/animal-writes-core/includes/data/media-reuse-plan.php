@@ -58,4 +58,5 @@ return array(
 	array( 8849, 13390, 'low', true ), // aw_news
 	array( 12784, 7509, 'low', false ), // aw_news
 	array( 15563, 9775, 'low', false ), // aw_news
+	array( 28971, 28644, 'high', false ), // aw_legal — distinct film-camera cover for the CGI-instead-of-live-animals advisory (shared its category photo before)
 );

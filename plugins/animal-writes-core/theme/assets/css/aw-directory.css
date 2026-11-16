@@ -26,7 +26,7 @@
 }
 .aw-orgs { border-top: var(--kit-border-width) solid var(--kit-color-line); }
 .aw-org { position: relative; display: grid; grid-template-columns: var(--kit-thumb-sm) 1fr auto; gap: var(--kit-space-4); align-items: center; padding: var(--kit-space-5) 0; border-bottom: var(--kit-border-width) solid var(--kit-color-line); }
-.aw-org-mark { width: var(--kit-thumb-sm); height: var(--kit-thumb-sm); border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; background: var(--kit-color-surface); border: var(--kit-border-width) solid var(--kit-color-line); font-weight: var(--kit-weight-bold); color: var(--kit-color-ink); }
+.aw-org-mark { width: var(--kit-thumb-sm); height: var(--kit-thumb-sm); border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; background: var(--kit-color-bg); border: var(--kit-border-width) solid var(--kit-color-line); font-weight: var(--kit-weight-bold); color: var(--kit-color-ink); }
 .aw-org-mark img { width: 100%; height: 100%; object-fit: contain; background: var(--kit-color-raised); padding: var(--kit-space-1); }
 .aw-org:hover .aw-org-name a { text-decoration: underline; text-underline-offset: var(--kit-underline-offset-sm); }
 .aw-org-meta { display: flex; align-items: center; gap: var(--kit-space-1); margin: var(--kit-space-1) 0; font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
@@ -52,7 +52,7 @@
 	.aw-org-gallery { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 .aw-org-gallery figure { margin: 0; }
-.aw-org-photo { aspect-ratio: var(--kit-card-media-ratio); overflow: hidden; border-radius: var(--kit-radius-media); background: var(--kit-color-surface); }
+.aw-org-photo { aspect-ratio: var(--kit-card-media-ratio); overflow: hidden; border-radius: var(--kit-radius-media); background: var(--kit-color-bg); }
 .aw-org-gallery figcaption { margin-top: var(--kit-space-1); font-size: var(--kit-type-xs); color: var(--kit-color-muted); line-height: 1.4; }
 .aw-org-gallery img { display: block; width: 100%; height: 100% !important; object-fit: cover; }
 .aw-org-host { position: relative; }
