@@ -368,3 +368,7 @@ a.aw-social-name { min-height: var(--kit-size-target); text-decoration: none; }
 .single-aw_news .aw-item-meta .kit-chip, .single-aw_news .kit-crumbs a { display: inline-flex; align-items: center; min-height: 44px; }
 .single-aw_news .aw-sources-links a { display: inline-flex; align-items: center; min-height: 44px; }
 .single-aw_news .aw-sources-note, .single-aw_news .aw-sources-credit { font-size: 14px; }
+
+/* Hub page heads (News index and its siblings): the breadcrumb Home icon and the source link in the head are 44px targets (owner, 16 Nov 2026) */
+.page-template-page-hub .kit-section-band .kit-crumbs-home a { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; margin-left: -10px; }
+.page-template-page-hub .kit-section-band a.kit-link-ext { display: inline-flex; align-items: center; min-height: 44px; }
