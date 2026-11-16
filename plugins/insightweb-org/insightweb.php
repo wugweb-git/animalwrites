@@ -38,4 +38,5 @@ define( 'INSIGHTWEB_VERSION', '0.1.0' ); // Equal to the header's Version.
 define( 'INSIGHTWEB_FILE', __FILE__ );
 define( 'INSIGHTWEB_DIR', plugin_dir_path( __FILE__ ) );
 
+require_once INSIGHTWEB_DIR . 'includes/keyword-table.php';
 require_once INSIGHTWEB_DIR . 'includes/admin.php';
