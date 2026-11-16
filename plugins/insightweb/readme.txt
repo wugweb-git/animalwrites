@@ -8,7 +8,7 @@ Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Search Console, GA4, Clarity, PageSpeed, Bing, keywords and rising terms for Kits sites.
+Search Console, GA4, Clarity, PageSpeed and Bing insights: keyword records, rising terms, quick wins and page checks.
 
 == Description ==
 
@@ -31,6 +31,17 @@ InsightWeb measures how a Kits site does in search. It reads data and makes sugg
 = Keys =
 
 Clarity, Bing Webmaster, PageSpeed and Google Alerts keys are set under Animal Writes → Keys, or as `wp-config.php` constants, which win. Their values are never shown.
+
+== External services ==
+
+InsightWeb reads measurement data from a few services. It only reads; it never sends your content or personal data to them, and each one is used only when you have set its key or connection.
+
+* **Google Search Console and Google Analytics 4** — InsightWeb does not connect to Google itself and stores no Google credentials. It reads Search Console and GA4 data that the separate *Site Kit by Google* plugin has already fetched, using the Google account you connect inside Site Kit. To authenticate, install Site Kit by Google and connect Search Console and Analytics there; InsightWeb then reads that data (your site's own clicks, impressions, positions, sessions and index status) read-only. Governed by Google's terms (https://policies.google.com/terms) and privacy policy (https://policies.google.com/privacy).
+* **Google PageSpeed Insights API** (`https://www.googleapis.com/pagespeedonline/v5/runPagespeed`) — when PageSpeed is enabled, InsightWeb sends the URL of each page it checks to measure its mobile score. An optional free API key may be set to raise the rate limit. Google terms and privacy as above.
+* **Microsoft Clarity** (`https://www.clarity.ms/`) — only when a Clarity API token is set. InsightWeb reads your own Clarity project's summary metrics. Microsoft Services Agreement (https://www.microsoft.com/servicesagreement) and privacy statement (https://privacy.microsoft.com/privacystatement).
+* **Bing Webmaster Tools** (`https://ssl.bing.com/`) — only when a Bing Webmaster API key is set. InsightWeb sends your site URL to read its crawl statistics and keyword figures. Microsoft terms and privacy as above.
+* **DB-IP IP-to-Country Lite** (`https://download.db-ip.com/`) — once a month InsightWeb downloads a free country-lookup file (CC BY 4.0) used to show the country of visitors locally. No data is sent to DB-IP. See https://db-ip.com/ and https://db-ip.com/db/lite.php.
+* **Crawler-access checks** — InsightWeb requests your own site's pages and `robots.txt` from outside to confirm search and AI crawlers can reach them. No third-party data is involved.
 
 == Installation ==
 
