@@ -307,6 +307,8 @@ function rankweb_dashboard_payload(): array {
 			'raw'    => $la['at'] ? (int) ( $by['orphan'] ?? 0 ) : null,
 			/* translators: %s: number of items. */
 			'sub'    => $la['at'] ? sprintf( __( 'orphans; %s items have a finding', 'aw-seo-extras' ), $num( $la['flagged'] ) ) : __( 'The first audit runs within a day', 'aw-seo-extras' ),
+			/* translators: %s: number of items. */
+			'detail' => $la['at'] ? array( sprintf( __( '%s items with an anchor mix over a limit', 'aw-seo-extras' ), $num( $la['anchor_warn'] ) ) ) : array(),
 			'href'   => add_query_arg( 'page', 'aw-links', admin_url( 'admin.php' ) ),
 			'tone'   => $la['flagged'] ? 'warn' : '',
 		);

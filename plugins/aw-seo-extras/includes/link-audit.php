@@ -393,15 +393,20 @@ function aw_link_audit_analyse( array $ids, int $started ): void {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders -- RankWeb's own table; the placeholders are built above.
 		$wpdb->query( $wpdb->prepare( 'INSERT INTO %i (post_id, links_in, links_out, depth, flags, detail, checked) VALUES ' . implode( ',', $sql ), $args ) );
 	}
-	$sum = AW_Link_Audit::summary( $result );
+	$sum    = AW_Link_Audit::summary( $result );
+	$anchor = function_exists( 'aw_anchor_rebuild' ) ? aw_anchor_rebuild() : array(
+		'targets' => 0,
+		'warn'    => 0,
+	);
 	update_option(
 		AW_LINK_AUDIT_SUMMARY,
 		array(
-			'at'      => time(),
-			'took'    => max( 0, time() - $started ),
-			'items'   => $sum['items'],
-			'flagged' => $sum['flagged'],
-			'by'      => $sum['by'],
+			'at'          => time(),
+			'anchor_warn' => $anchor['warn'],
+			'took'        => max( 0, time() - $started ),
+			'items'       => $sum['items'],
+			'flagged'     => $sum['flagged'],
+			'by'          => $sum['by'],
 		),
 		false
 	);
@@ -498,12 +503,13 @@ add_action(
 function aw_link_audit_summary(): array {
 	$s = (array) get_option( AW_LINK_AUDIT_SUMMARY, array() );
 	return array(
-		'at'       => (int) ( $s['at'] ?? 0 ),
-		'took'     => (int) ( $s['took'] ?? 0 ),
-		'items'    => (int) ( $s['items'] ?? 0 ),
-		'flagged'  => (int) ( $s['flagged'] ?? 0 ),
-		'by'       => (object) ( $s['by'] ?? array() ),
-		'progress' => aw_link_audit_progress(),
+		'at'          => (int) ( $s['at'] ?? 0 ),
+		'took'        => (int) ( $s['took'] ?? 0 ),
+		'items'       => (int) ( $s['items'] ?? 0 ),
+		'flagged'     => (int) ( $s['flagged'] ?? 0 ),
+		'anchor_warn' => (int) ( $s['anchor_warn'] ?? 0 ),
+		'by'          => (object) ( $s['by'] ?? array() ),
+		'progress'    => aw_link_audit_progress(),
 	);
 }
 
@@ -583,7 +589,18 @@ function aw_link_audit_page_html(): void {
 	$prog   = $sum['progress'];
 	$base   = admin_url( 'admin.php?page=aw-links' );
 
+	$view = 'anchors' === sanitize_key( wp_unslash( $_GET['view'] ?? '' ) ) && function_exists( 'aw_anchor_screen' ) ? 'anchors' : 'audit'; // phpcs:ignore WordPress.Security.NonceVerification -- a tab on a read-only screen.
 	echo '<div class="wrap"><h1>' . esc_html__( 'Internal links', 'aw-seo-extras' ) . '</h1>';
+	echo '<nav class="nav-tab-wrapper"><a href="' . esc_url( $base ) . '" class="nav-tab' . ( 'audit' === $view ? ' nav-tab-active' : '' ) . '">' . esc_html__( 'Audit', 'aw-seo-extras' ) . '</a>';
+	if ( function_exists( 'aw_anchor_screen' ) ) {
+		echo '<a href="' . esc_url( add_query_arg( 'view', 'anchors', $base ) ) . '" class="nav-tab' . ( 'anchors' === $view ? ' nav-tab-active' : '' ) . '">' . esc_html__( 'Anchor mix', 'aw-seo-extras' ) . '</a>';
+	}
+	echo '</nav>';
+	if ( 'anchors' === $view ) {
+		aw_anchor_screen();
+		echo '</div>';
+		return;
+	}
 	if ( isset( $_GET['started'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- only a notice.
 		wp_admin_notice( esc_html__( 'The audit starts in a few seconds and runs in the background.', 'aw-seo-extras' ), array( 'type' => 'info' ) );
 	}

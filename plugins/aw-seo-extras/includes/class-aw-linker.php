@@ -76,7 +76,9 @@ final class AW_Linker {
 	 *                           target first (internal-links.php sorts it). Each keyword must already be normalised.
 	 * @param callable $url_for  fn( int $target_id ): string, the target's address ('' = do not link to it).
 	 * @param array    $opt      max_links (5), max_per_target (1), first_only (true), self_id (0), no_self (true),
-	 *                           skip_linked (true), exclude (target ids never linked), home (site address).
+	 *                           skip_linked (true), exclude (target ids never linked), home (site address), anchor_ok (null, or
+	 *                           fn( int $target_id, string $keyword ): bool: false refuses a link with this keyword as
+	 *                           its anchor, and the target is linked by another keyword, or not at all, in this item).
 	 * @return array html (unchanged, byte for byte, when no link was added or the parsed page would not match the input), links (each: target_id, url, anchor,
 	 *               keyword, origin 'auto'), manual (each: url, anchor, rel: the links that were already there).
 	 */
@@ -90,6 +92,7 @@ final class AW_Linker {
 			'skip_linked'    => true,
 			'exclude'        => array(),
 			'home'           => '',
+			'anchor_ok'      => null,
 		);
 		$out  = array(
 			'html'   => $html,
@@ -172,6 +175,9 @@ final class AW_Linker {
 				}
 				if ( ( $per_t[ $tid ] ?? 0 ) >= max( 1, (int) $opt['max_per_target'] ) ) {
 					continue;
+				}
+				if ( is_callable( $opt['anchor_ok'] ) && ! $opt['anchor_ok']( $tid, $kw ) ) {
+					continue; // this anchor would put the target's anchor mix over a limit
 				}
 				$url = $resolve( $tid );
 				if ( '' !== $url ) {

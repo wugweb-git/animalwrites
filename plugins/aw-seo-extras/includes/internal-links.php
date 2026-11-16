@@ -110,7 +110,7 @@ function aw_link_excluded(): array {
 
 /** The settings that change an item's linked output, as one string (part of its cache key). */
 function aw_link_settings_key(): string {
-	return md5( (string) wp_json_encode( array( aw_link_types(), aw_link_excluded(), (int) AW_LINK_MAX, (int) AW_LINK_MAX_PER_TARGET, (int) AW_LINK_FIRST_ONLY, (int) AW_LINK_NO_SELF, (int) AW_LINK_SKIP_LINKED ) ) );
+	return md5( (string) wp_json_encode( array( aw_link_types(), aw_link_excluded(), (int) AW_LINK_MAX, (int) AW_LINK_MAX_PER_TARGET, (int) AW_LINK_FIRST_ONLY, (int) AW_LINK_NO_SELF, (int) AW_LINK_SKIP_LINKED, (int) AW_LINK_ANCHOR_EXACT_MAX, (int) AW_LINK_ANCHOR_TYPE_MAX, (int) AW_LINK_ANCHOR_MIN, aw_anchor_settings_key() ) ) );
 }
 
 /* ---------- Link keywords of an item ---------- */
@@ -499,6 +499,7 @@ function aw_link_run( string $html, int $id ): array {
 			'skip_linked'    => (bool) AW_LINK_SKIP_LINKED,
 			'exclude'        => aw_link_excluded(),
 			'home'           => home_url(),
+			'anchor_ok'      => 'aw_anchor_ok',
 		)
 	);
 }
@@ -571,7 +572,7 @@ function aw_link_store( int $source, array $result ): void {
 	$rows = array();
 	$clip = fn( string $s, int $n ) => mb_substr( $s, 0, $n );
 	foreach ( $result['links'] as $l ) {
-		$rows[] = array( (int) $l['target_id'], $clip( (string) $l['url'], 255 ), $clip( (string) $l['anchor'], 255 ), 'auto', '' );
+		$rows[] = array( (int) $l['target_id'], $clip( (string) $l['url'], 255 ), $clip( (string) $l['anchor'], 255 ), 'auto', '', aw_anchor_type( (string) $l['anchor'], (int) $l['target_id'] ) );
 	}
 	foreach ( $result['manual'] as $l ) {
 		$key = AW_Linker::url_key( (string) $l['url'], home_url() );
@@ -580,7 +581,8 @@ function aw_link_store( int $source, array $result ): void {
 		}
 		$abs    = 0 === strpos( (string) $l['url'], '/' ) ? home_url( (string) $l['url'] ) : (string) $l['url'];
 		$anchor = '' !== (string) $l['anchor'] ? (string) $l['anchor'] : (string) $l['alt'];
-		$rows[] = array( (int) url_to_postid( $abs ), $clip( $abs, 255 ), $clip( $anchor, 255 ), 'manual', $clip( (string) $l['rel'], 64 ) );
+		$tid    = (int) url_to_postid( $abs );
+		$rows[] = array( $tid, $clip( $abs, 255 ), $clip( $anchor, 255 ), 'manual', $clip( (string) $l['rel'], 64 ), aw_anchor_type( $anchor, $tid, '' === (string) $l['anchor'] && '' !== (string) $l['alt'] ) );
 	}
 	$table = aw_link_table( 'links' );
 	// One writer per item: two views building the same page at once would each delete and then insert, leaving every
@@ -591,8 +593,8 @@ function aw_link_store( int $source, array $result ): void {
 		return;
 	}
 	// Nothing written when the rows are the ones already there (the usual rebuild after a version bump).
-	$have = (array) $wpdb->get_results( $wpdb->prepare( 'SELECT target_id, url, anchor, origin, rel FROM %i WHERE source_id = %d ORDER BY id', $table, $source ), ARRAY_N ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- RankWeb's own table.
-	$have = array_map( fn( $r ) => array( (int) $r[0], (string) $r[1], (string) $r[2], (string) $r[3], (string) $r[4] ), $have );
+	$have = (array) $wpdb->get_results( $wpdb->prepare( 'SELECT target_id, url, anchor, origin, rel, anchor_type FROM %i WHERE source_id = %d ORDER BY id', $table, $source ), ARRAY_N ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- RankWeb's own table.
+	$have = array_map( fn( $r ) => array( (int) $r[0], (string) $r[1], (string) $r[2], (string) $r[3], (string) $r[4], (string) $r[5] ), $have );
 	if ( $have !== $rows ) {
 		$wpdb->delete( $table, array( 'source_id' => $source ), array( '%d' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- RankWeb's own table.
 		foreach ( $rows as $r ) {
@@ -603,7 +605,7 @@ function aw_link_store( int $source, array $result ): void {
 					'target_id'   => $r[0],
 					'url'         => $r[1],
 					'anchor'      => $r[2],
-					'anchor_type' => '',
+					'anchor_type' => $r[5],
 					'origin'      => $r[3],
 					'rel'         => $r[4],
 					'updated'     => $now,

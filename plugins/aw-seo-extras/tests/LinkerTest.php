@@ -64,6 +64,25 @@ final class LinkerTest extends PHPUnit\Framework\TestCase {
 		$this->assertSame( 'stray dogs', $r['links'][0]['anchor'] );
 	}
 
+	public function test_a_refused_anchor_rotates_to_the_targets_other_keyword(): void {
+		$r = $this->run_linker(
+			'<p>Help stray dogs and street dog care.</p>',
+			array(
+				'stray dogs'      => 2,
+				'street dog care' => 2,
+			),
+			array( 'anchor_ok' => fn( int $id, string $kw ): bool => 'stray dogs' !== $kw )
+		);
+		$this->assertSame( '<p>Help stray dogs and ' . $this->a( 2, 'street dog care' ) . '.</p>', $r['html'] );
+		$this->assertSame( 'street dog care', $r['links'][0]['anchor'] );
+	}
+
+	public function test_anchor_ok_refusing_every_keyword_adds_no_link(): void {
+		$r = $this->run_linker( '<p>Help stray dogs.</p>', array( 'stray dogs' => 2 ), array( 'anchor_ok' => fn( int $id, string $kw ): bool => false ) );
+		$this->assertSame( '<p>Help stray dogs.</p>', $r['html'] );
+		$this->assertCount( 0, $r['links'] );
+	}
+
 	public function test_case_insensitive_keeps_the_text_as_written(): void {
 		$r = $this->run_linker( '<p>STRAY Dogs need food.</p>', array( 'stray dogs' => 2 ) );
 		$this->assertSame( '<p>' . $this->a( 2, 'STRAY Dogs' ) . ' need food.</p>', $r['html'] );

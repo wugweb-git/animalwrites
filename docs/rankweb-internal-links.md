@@ -8,7 +8,7 @@ Four phases, each usable on its own:
 
 1. **Auto-linker** (done on branch `claude/rankweb-internal-links`, 14 Nov 2026).
 2. **Link audit** (built 16 Nov 2026 on branch `claude/rankweb-link-audit`): links in and out, click depth, orphans, broken links, redirects, nofollow, canonicals elsewhere.
-3. Anchor mix: anchor types per target, warnings, keyword rotation.
+3. **Anchor mix** (built 17 Nov 2026 on branch `claude/rankweb-anchor-mix`, on top of the audit branch): anchor types per target, warnings, keyword rotation.
 4. Silos: hub and supporting items, virtual and circle modes.
 
 ## Phase 1: auto-linker
@@ -67,3 +67,34 @@ addresses not to link to (thank-you, thanks, download). Screen: RankWeb → Inte
 finding). Dashboard tile "Internal links" (orphans, items with a finding). REST: `GET rankweb/v1/links`
 (flag, page, per_page), `GET links/summary`, `POST links/audit` (administrators). Table `{prefix}aw_link_audit` has its
 own version option `aw_link_audit_db`; uninstall removes it, with the audit's options.
+
+## Phase 3: anchor mix
+
+Every link in `{prefix}aw_links` gets an `anchor_type`, written with the row. The sorter is `AW_Anchor`
+(`class-aw-anchor.php`, pure PHP). First match wins:
+
+| Type | Rule |
+|---|---|
+| image | the link holds an image and no text (the ALT text is the anchor) |
+| naked | the anchor is an address (`https://…`, `www.…`, `example.org/page`) |
+| generic | one of the editable list (click here, read more, this page…), compared as normalised words |
+| exact | equals the target's **main** keyword (its first link keyword) |
+| branded | contains a brand name (setting), as whole words |
+| long_tail | more words than the limit (setting, 6) |
+| partial | contains a word of 3 letters or more of any of the target's keywords (so another keyword of the target is partial, not exact) |
+| other | anything else |
+
+For each target the audit counts the types (links to items only) into the transient `aw_seo_anchor_mix`. RankWeb → Internal
+links → Anchor mix lists targets with their shares and warns when exact match is over 20% or any other type is over 60%.
+A target with fewer than 5 links in gets no warning (a share of two links says nothing); the minimum is a setting. The
+guides disagree on the right exact share (1 to 5%, 20%, 60%), so all three limits are settings.
+
+Rotation: before it links a keyword the auto-linker asks `aw_anchor_ok()` (one transient read, no query per keyword). A
+keyword that would put its target over a limit is skipped, so the target is linked by another of its keywords, or not
+at all in that item. The snapshot is the last audit's, so it changes once a day; a page already cached keeps its links
+until it is built again (the thresholds and the brand, generic and long-tail settings are part of the cache key).
+
+Settings (Internal links): most exact match (20), most of any other type (60), fewest links before a warning (5), brand
+names (Animal Writes), generic anchors, words in a long-tail anchor (6). REST: `GET rankweb/v1/links/anchors` (warn,
+page, per_page). The Dashboard tile "Internal links" shows the items over a limit as a detail line. Existing rows get
+their type at the next audit.
