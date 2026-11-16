@@ -164,10 +164,33 @@ function aw_core_map_sibling( string $main ): void {
 		wp_register_plugin_realpath( $link );
 	}
 }
-aw_core_map_sibling( 'aw-sourcing/aw-sourcing.php' );
-aw_core_map_sibling( 'insightweb/insightweb.php' );
-aw_core_map_sibling( 'planweb/planweb.php' );
-aw_core_map_sibling( 'directoryweb/directoryweb.php' );
+
+/**
+ * Create the plugins-directory link for a sibling that Core loads from the deploy folder, when it is missing, so its
+ * own assets resolve and it lists on the Plugins screen. The deploy clones the repo into aw_deploy and the links in
+ * wp-content/plugins were made by hand, so a new split (e.g. DirectoryWeb) would otherwise have no link and its assets
+ * would 404. WordPress owns wp-content/plugins (plugin uploads write there), so a symlink from PHP works; if the host
+ * blocks symlink() or the directory is not writable, nothing changes and Core still loads the plugin from the deploy
+ * folder. Creating the link does not activate the plugin; Core keeps loading it with require_once.
+ *
+ * @param string $main The plugin's main file, relative to the plugins directory (e.g. 'directoryweb/directoryweb.php').
+ */
+function aw_core_ensure_sibling_link( string $main ): void {
+	if ( ! defined( 'WP_PLUGIN_DIR' ) || ! function_exists( 'symlink' ) ) {
+		return;
+	}
+	$slug = dirname( $main );
+	$link = WP_PLUGIN_DIR . '/' . $slug;
+	$real = dirname( AW_CORE_DIR ) . '/' . $slug;
+	if ( file_exists( $link ) || ! is_dir( $real ) || ! is_writable( WP_PLUGIN_DIR ) ) {
+		return;
+	}
+	@symlink( $real, $link ); // phpcs:ignore WordPress.PHP.NoSilencedErrors -- a host that blocks symlink() must not warn; Core still loads the plugin from the deploy folder.
+}
+foreach ( array( 'aw-sourcing/aw-sourcing.php', 'insightweb/insightweb.php', 'planweb/planweb.php', 'directoryweb/directoryweb.php' ) as $aw_sibling ) {
+	aw_core_ensure_sibling_link( $aw_sibling );
+	aw_core_map_sibling( $aw_sibling );
+}
 
 // AW Sourcing (feeds, keywords, publishers, worker endpoints, AI keys, enrichment, review). Loaded from the sibling
 // plugin folder when it is not active on its own; after Core's includes, which it uses.
