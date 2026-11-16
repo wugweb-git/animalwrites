@@ -20,23 +20,17 @@ function directoryweb_register_listing_type(): void {
 	register_post_type( 'aw_listing', aw_content_type_args( 'aw_listing' ) );
 	register_taxonomy_for_object_type( 'category', 'aw_listing' );
 }
-/**
- * The listing field groups' keys, for the plugins that read them (SourceWeb's rules).
- *
- * @return string[]
- */
-function directoryweb_scf_groups(): array {
-	return DIRECTORYWEB_SCF_GROUPS;
-}
-
-/**
- * The listing field group files, for the plugins that read them (SourceWeb's rules and tests).
- *
- * @return string[] Absolute paths.
- */
-function directoryweb_field_files(): array {
-	return (array) glob( DIRECTORYWEB_DIR . 'acf-json/group_aw_listing*.json' );
-}
+/** One flush of the rewrite rules after the first deploy of a version (the Directory addresses come from this plugin now). */
+add_action(
+	'init',
+	function () {
+		if ( DIRECTORYWEB_VERSION !== get_option( 'directoryweb_rewrite_ver' ) ) {
+			flush_rewrite_rules();
+			update_option( 'directoryweb_rewrite_ver', DIRECTORYWEB_VERSION, false );
+		}
+	},
+	99
+);
 
 /** Activation: rewrite rules for the Directory addresses, the capability, one flush. */
 function directoryweb_activate(): void {
