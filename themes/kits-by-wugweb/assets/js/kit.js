@@ -2,16 +2,7 @@
  * Each behaviour answers to .kit-* and to the older .aw-* names. */
 (function () {
 	'use strict';
-	var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 	var doc = document.documentElement;
-
-	/* 1. One orchestrated moment: homepage hero animates on the first view of a session only. */
-	try {
-		if (!reduce && document.body.classList.contains('home') && !sessionStorage.getItem('aw_seen')) {
-			doc.classList.add('aw-motion', 'kit-motion');
-			sessionStorage.setItem('aw_seen', '1');
-		}
-	} catch (e) {}
 
 	/* Smooth in-page scrolling (kit.css html.kit-smooth) from the first pointer or key press on, never for the jump to
 	   a #fragment while the page loads: an animated load-time jump lands short when content above it settles. */
@@ -89,7 +80,7 @@
 
 	/* Copy link (share bar). */
 	document.addEventListener('click', function (e) {
-		var b = e.target.closest('.kit-share-copy, .aw-share-copy');
+		var b = e.target.closest('.kit-share-copy');
 		if (!b || !b.dataset.url) return;
 		copyLink(b.dataset.url, b).then(function (ok) { if (ok) copied(b); });
 	});
@@ -973,7 +964,7 @@
    drew a "+" (the Details block, claim and card folds) stays open and its summary no longer closes it. Folds marked with
    a chevron (footer menus, filters) keep working. */
 (function () {
-	var SEL = 'details.wp-block-details, .kit-claim details, details.aw-camp-card-fold';
+	var SEL = 'details.wp-block-details, .kit-claim details';
 	document.querySelectorAll(SEL).forEach(function (d) { d.open = true; });
 	document.addEventListener('click', function (e) {
 		var s = e.target.closest && e.target.closest('summary');

@@ -1,4 +1,18 @@
 /* Animal Writes interactions specific to Animal Writes. Generic behaviours live in Kits (kit.js). */
+
+/* One orchestrated moment: the homepage hero animates on the first view of a session only (owner, 2 Nov 2026). Moved
+   out of the generic theme (kit.js): .aw-motion drives the .aw-hero rise in aw.css, so it is Animal Writes-specific. */
+(function () {
+	'use strict';
+	try {
+		var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		if (!reduce && document.body.classList.contains('home') && !sessionStorage.getItem('aw_seen')) {
+			document.documentElement.classList.add('aw-motion', 'kit-motion');
+			sessionStorage.setItem('aw_seen', '1');
+		}
+	} catch (e) {}
+})();
+
 (function () {
 	'use strict';
 	/* Directory search: District stays off until a State is chosen, then lists that state's districts; it resets
