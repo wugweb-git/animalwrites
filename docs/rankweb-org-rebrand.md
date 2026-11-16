@@ -46,7 +46,20 @@ WordPress.org compliance.
 Rule of thumb: a generic feature **about Rank Math's own data** ports; anything **about Animal Writes content** is
 dropped. The public plugin operates only on the public post types the admin chooses, never on built-in site types.
 
-## 3. Decisions needed before any build (owner)
+## 3. Decisions (locked by the owner, 17 Nov 2026)
+
+- **Name: RankWeb.** Kept as-is for the public plugin (owner's decision; not to be re-raised). Slug `rankweb`, text
+  domain `rankweb`. Verify `https://wordpress.org/plugins/rankweb/` is free before submitting; the slug is permanent.
+- **One prefix: `rankweb_`** (functions/options/hooks/meta), `RankWeb_` classes, `RANKWEB_` constants. Replaces the
+  mixed `aw_` / `rankweb_` / `kits_` — `aw_` especially must be gone everywhere.
+- **Shared-core: a package.** The nine pure classes live in one small Composer package that both RankWeb (site) and the
+  public plugin require. No fork, no drift.
+- **v1 feature set: full.** Port all seven generic areas (internal links, video, schema, bulk, media, redirects,
+  agent), since we already have a functional full-featured plugin. Not a focused first release.
+
+The detail below is kept for reference.
+
+## 3a. Decision detail (reference)
 
 1. **Name and slug.** Must not start with a generic word, and a third-party trademark may appear only at the end after
    "for"/"with". "RankWeb" is too close to "Rank Math" — do not reuse it. Options (owner picks):
@@ -119,6 +132,7 @@ and screenshots. The real cost is the one-time **re-prefix + standalone Settings
 
 ## 8. Recommendation
 
-Start with a **focused v1** — "internal linking for Rank Math" (auto-linker + audit + anchor mix + silos), the
-strongest, most self-contained story — as a **shared-core** package, rather than porting all seven feature areas at
-once. It is the cleanest first review and proves the pipeline; the other modules follow as later releases.
+The owner chose the **full feature set** for v1 (17 Nov) — all seven areas, as a **shared-core** package — since the
+plugin is already functional and complete. A focused internal-linking-only first release was the alternative, not taken.
+Sequence the build so a reviewer can still follow it: port the shared core first, then one module area per phase (R3),
+each tested and PHPCS-clean, even though all ship in v1.
