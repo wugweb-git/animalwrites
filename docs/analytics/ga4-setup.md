@@ -78,7 +78,7 @@ Do **not** mark it while the three older events are marked: GA4's "Key events" t
 same tap would count twice. Migration when wanted: mark `generate_lead`, unmark `call_click`, `whatsapp_click`,
 `email_click` the same day, and annotate the date (older reports keep the old names).
 
-## Campaign 2.0 events (16 Oct 2026)
+## Campaign events (16 Oct 2026)
 
 The container has GA4 event tags for the campaign tools (`plugins/animal-writes-core/assets/js/campaign.js`):
 `campaign_view`, `letter_open`, `ground_toggle` (ground, on), `objection_sent` (route: gmail, outlook, mailto, copy),

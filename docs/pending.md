@@ -531,7 +531,7 @@ Status checked on 24 Oct against the live site, WP-CLI (read only) and git; the 
 - The Emergency help photo: kept as it is.
 - Restoring the Fluent Forms demo forms 1 and 2 (backup stays in `~/backups/fluentforms-2026-10-16.sql.gz`).
 - The carried-over Backend items: the "About: sender" column label (Mailweb list), staging on the deleted `ux-audit` branch, an UptimeRobot monitor, the double redirect, and sends lost before fab4e94 (8 Oct).
-- The carried-over Content items (fact-checking the 7 crisis guides, per-state guides, legal review of Privacy and Terms, the 1.0 invitation to 88 volunteers, AWBI items 142, 144, 145).
+- The carried-over Content items (fact-checking the 7 crisis guides, per-state guides, legal review of Privacy and Terms, the earlier invitation to 88 volunteers, AWBI items 142, 144, 145).
 
 ## Decided: never (owner, 22 Oct 2026)
 - Rewriting the 11 Wildlife SOS job summaries, or dropping their JobPosting markup.

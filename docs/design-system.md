@@ -1,6 +1,6 @@
 # Animal Writes design system
 
-How the 2.0 site looks and behaves. No component hardcodes a colour, size, radius or duration.
+How the site looks and behaves. No component hardcodes a colour, size, radius or duration.
 
 **Current and history (24 Oct 2026).** The colour rule and the breakpoints below are current. The Product systems, Scales, States vocabulary and Components sections are the first version (5 to 7 Oct 2026: `--aw-*` tokens, `aw-*` classes, the old section names Legal Watch, Knowledge Centre, Research Library and Campaign Hub), kept as history; several values have changed since. Current components: [component-map.md](component-map.md) (generated), [buttons.md](buttons.md), [card-sizes.md](card-sizes.md), [item-template.md](item-template.md), [listing-template.md](listing-template.md) and the states sheet (/kits-demo/).
 
@@ -30,7 +30,7 @@ One generic archive template is replaced by four systems, each built for what pe
 | Help | Directory, Knowledge Centre, Resources | Scannable organisation rows (mark, area, verification state, type, Call, View); guides as tasks (photo, icon, updated date, reading time); resources by format and language |
 | Intelligence | Legal Watch, News, Research Library | Case register (large date, issuer badge by court or body, topic, summary, source, document flag, issuer filters); news with a lead story, side stories and grid, topic filters; document library (kind, year, issuer, Read / PDF) |
 | Action | Opportunities, Get involved | Opportunity cards with type, place, organisation, checked date, Apply and Details; type filters |
-| Archive | Campaign Hub | The 1.0 documentary, other campaigns, an invitation to bring a campaign |
+| Archive | Campaign Hub | The earlier documentary, other campaigns, an invitation to bring a campaign |
 | Trust | Every news, legal, research, opportunity and listing page | The item's Sources block and meta row (item-head.php): issuer, source link, published and added dates; for listings, verification state and AWBI recognition. (The old `[aw_trust]` panel was in no page and was removed on 25 Oct 2026.) |
 
 Directory order: verified, then A–Z. No featured listings (owner, 24 Oct 2026): no organisation is ranked above others for any other reason.

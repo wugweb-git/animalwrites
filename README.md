@@ -1,4 +1,4 @@
-# Animal Writes 2.0 — WordPress
+# Animal Writes — WordPress
 
 Live at **https://animalwrites.in** — a platform for animal welfare in India: daily **news**, a **library** of government rules, advisories and judgments, a **directory** of NGOs, gaushalas and government vets by state and district, and **campaigns**.
 

@@ -1,4 +1,4 @@
-# Working rules for Animal Writes 2.0 (owner rules; read before changing anything)
+# Working rules for Animal Writes (owner rules; read before changing anything)
 
 1. **Old branches are never merged blind.** Before merging, rebasing or cherry-picking any branch that is more than a day behind `origin/wordpress-dev`:
    - list what it changes against what live changed since: `mb=$(git merge-base BRANCH origin/wordpress); git diff --stat $mb BRANCH; git diff --stat $mb origin/wordpress`;
@@ -11,5 +11,5 @@
    - Either way the Deploy check gates `wordpress`. Ship with `git fetch origin && git checkout --detach origin/wordpress-dev && bash tools/aw-ship.sh` (from any checkout of this repo; `~/Documents/GitHub/aw-ship.sh` only calls it): it refuses unless the commit's `check` is success, and the cache is purged after every deploy (`animal-writes-core/includes/deploy-purge.php`). No direct pushes to `wordpress`. One session deploys at a time.
 4. **Every session works in its own git worktree**; stage explicit paths (never `git add -A`); commit trailer `Co-Authored-By: Wugweb <admin@wugweb.com>`.
 5. **Never delete user data, listings or posts without asking.** Unpublish to draft instead.
-6. **The Animal Writes 1.0 repo (`main`, old.animalwrites.in) is read-only.**
+6. **The previous Animal Writes repo (`main`, old.animalwrites.in) is read-only.**
 7. **Open work lives in `docs/pending.md`.** Update it when something is done, decided or added.

@@ -1,4 +1,4 @@
-# Keyword map — Animal Writes 2.0
+# Keyword map — Animal Writes
 
 15 October 2026 (SEO Phase 3). Written using the AEO/GEO, keyword research and SEO/AEO skills.
 
@@ -9,7 +9,7 @@
   - reading the pages and their own copy;
   - the 10 Oct 2026 keyword audit (not kept in this repo);
   - how the queries are phrased.
-- Re-check against Search Console queries once there are 3 months of 2.0 data.
+- Re-check against Search Console queries once there are 3 months of data on the current site.
 - **Demand column (added 15 Oct 2026).** The data and method are in `docs/seo/keyword-demand-2026-10-15.md` (removed 25 Oct 2026; in git history).
   - **T** is the Google Trends index, India, past 12 months, with "animal welfare" = 100. It shows relative interest, not search counts.
   - **AC** is Google autocomplete (India): **Y** exact phrase suggested, **ext** only longer forms suggested, **–** not suggested.
@@ -172,7 +172,7 @@ Read from the live database with `wp db query` on 22 Oct. The rule stays: one pr
 | world animal day | guide #13797 /resources/world-animal-day-4-october/; Library #142 (AWBI notice, 2026); 2 news items (#81, #7484) | the guide (evergreen) | Library #142 → "world animal day 2026 notice" (or "awbi world animal day circular"); news → "bollywood world animal day". Google ranks the Library notice today (1,548 impressions, position 8–8.4), not the guide; add a link from the notice to the guide. |
 | animal birth control | guide /resources/animal-birth-control-abc-explained/; Library /library/animal-birth-control-rules-2023/ (aw_legal); 2 news items | the guide | Library item → "abc rules 2023" (it is the rules text), which also matches the "abc rules 2023 pdf" searches. The ABC Rules guide #9032 then needs "abc rules 2023 explained" so the two do not collide. |
 | animal welfare board of india | guide #13800 /resources/animal-welfare-board-of-india-awbi-explained/; 2 Library notices | the guide | Library notices → their own subject ("awbi public notice misuse of name", "awbi illegal transport letter"). |
-| letter petition campaign | the /media/ hub (now /press-coverage/); 5 press items | the hub or /campaigns/animal-writes-1-0/ (Google ranks the 1.0 campaign page #1) | Press items → their headline phrase. Decide whether the hub keeps "letter petition campaign" now that /media/ redirects to /press-coverage/. |
+| letter petition campaign | the /media/ hub (now /press-coverage/); 5 press items | the hub or /campaigns/animal-writes-1-0/ (Google ranks that campaign page #1) | Press items → their headline phrase. Decide whether the hub keeps "letter petition campaign" now that /media/ redirects to /press-coverage/. |
 | community dogs | Library /library/supreme-court-judgment-of-22-august-2025-on-community-dogs-2025-insc-1018/; 1 research item; 1 press item | the Community Dogs topic (secondary) | Library → "supreme court community dogs judgment 2025". |
 | dog bite / dog bites | guide #17307 ("dog bite"); 9 research items ("dog bites") | the guide | Research items → "dog bites {place}" (most already name a place; 9 use the bare phrase). |
 | rabies vaccine | 9 research items | the dog-bite guide #17307 as a secondary | Research items → "rabies vaccine completion {place}" and similar. |

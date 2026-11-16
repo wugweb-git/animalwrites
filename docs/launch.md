@@ -1,4 +1,4 @@
-# Launch prep: animalwrites.in → 2.0 (applied; kept as a record — today GTM-TB3FCFQB carries GA4, see analytics/ga4-setup.md)
+# Launch prep: animalwrites.in (applied; kept as a record — today GTM-TB3FCFQB carries GA4, see analytics/ga4-setup.md)
 
 **History (snapshot of 5 Oct 2026); current state: docs/pending.md and docs/plugin-map.md.**
 
@@ -6,9 +6,9 @@
 1.0 was a single page: every section was a `#anchor` on `/`, so anchors need no redirects
 (browsers never send them to the server). The only real 1.0 URL was `/`.
 
-| From (1.0) | To (2.0) | Code |
+| From (old site) | To (new site) | Code |
 |---|---|---|
-| `animalwrites.in/` | 2.0 homepage `/` | none needed once DNS points at Hostinger |
+| `animalwrites.in/` | the new homepage `/` | none needed once DNS points at Hostinger |
 | `animalwrites.in/campaign` | `/campaigns/animal-writes-1-0/` (1.0 case study, once published) | 301 |
 | `www.animalwrites.in/*` | `https://animalwrites.in/*` | 301 |
 
@@ -23,17 +23,17 @@ RewriteRule ^(.*)$ https://animalwrites.in/$1 [R=301,L]
 RewriteRule ^campaign/?$ /campaigns/animal-writes-1-0/ [R=301,L]
 ```
 
-Check the case-study slug after publishing (WP Admin → Campaign Hub → Animal Writes 1.0 → URL);
+Check the case-study slug after publishing (WP Admin → Campaign Hub → the Animal Writes case study → URL);
 it defaults to `animal-writes-1-0`.
 
 ## 2. Analytics continuity
-- 1.0 loaded Google Tag Manager container **GTM-W9D28GKV**. 2.0 loads the same container from
+- The old site loaded Google Tag Manager container **GTM-W9D28GKV**. The current site loads the same container from
   Animal Writes Core (`includes/analytics.php`), **only on animalwrites.in** (never on the
   temporary domain), so GA4 history continues. Nothing to switch on at launch.
 - Site Kit (optional, for GA reports inside WP Admin): connect it with the Google account that
   owns the GA4 property and **leave Site Kit's Tag Manager snippet off** (or, if you turn it on,
   Animal Writes Core automatically stops printing its own copy).
-- `GA_PROPERTY_ID` (the numeric GA4 property ID) was only stored as a secret on the 1.0 Supabase
+- `GA_PROPERTY_ID` (the numeric GA4 property ID) was only stored as a secret on the old Supabase
   edge function, which has been deleted. It is not in the code. Find it in Google Analytics →
   Admin → Property settings (only needed for the GA4 Data API, not for tracking).
 
