@@ -264,7 +264,11 @@ These are **locked** for the public/extracted edition. They apply **only to the 
 also needs (a) its **own keyword table** to replace Kits Core's `aw_kw_*`, and (b) the bundled **`insightweb-shell`**
 UI package, which the RankWeb session is still extracting. So the re-prefix (#2) and the woven-in decouple (#6) cannot
 land green standalone until those land; #3 and #7 are header-level and land with the skeleton (I1). Sequence the build
-I1 → I3 so each phase stays PHPCS/tests-green.
+I1 → I3 so each phase stays PHPCS/tests-green. **I1 done (`f0c8c935`):** `plugins/insightweb-org/` scaffolded —
+standalone, activates next to Site Kit with an empty tab set, #3 (no Update URI) and #7 (`Requires Plugins:
+google-site-kit`, model A) resolved, one `insightweb_` prefix; `php -l` + PHPCS (WordPress + security ruleset) + a
+no-WP smoke test all green. Next: own keyword table + non-UI engine re-prefix/#6 decouple (can land green), then the
+shell-backed tabs behind the shared `insightweb-shell` package.
 
 ### External-services registry (shared component, owner 17 Nov 2026)
 
