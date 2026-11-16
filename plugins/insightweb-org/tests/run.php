@@ -170,4 +170,24 @@ iw_check(
 	'set_figures writes the daily figures'
 );
 
+// Decision engine (compute.php).
+iw_check( 'P3' === insightweb_priority( null, 999, 2.0, true ), 'position in the top 3 is always P3' );
+iw_check( 'P1' === insightweb_priority( null, 80, 6.0, false ), 'high demand, ranking 4-20 → P1' );
+iw_check( 'P1' === insightweb_priority( null, 80, null, true ), 'high demand with an owning page → P1' );
+iw_check( 'P2' === insightweb_priority( null, 80, null, false ), 'high demand, no page, not ranking → P2 (gap)' );
+iw_check( 'P3' === insightweb_priority( 5, 10, null, false ), 'low demand → P3' );
+iw_check( insightweb_is_question( 'how to report animal cruelty' ) && insightweb_is_question( 'what is rabies?' ), 'question phrases detected' );
+iw_check( ! insightweb_is_question( 'animal ambulance mumbai' ), 'a plain phrase is not a question' );
+iw_check( insightweb_is_news( 'high court verdict' ) && insightweb_is_news( 'dog attack incident 2024' ), 'news phrases detected' );
+iw_check( ! insightweb_is_news( 'animal birth control rules 2023' ), 'a law of a year is not news' );
+iw_check( insightweb_quick_win( 12.0, 20 ) && ! insightweb_quick_win( 5.0, 999 ) && ! insightweb_quick_win( 12.0, 3 ), 'quick win: position 8-20 with enough impressions' );
+iw_check( 'faq-answer' === insightweb_gap_action( 'how do I adopt' ) && 'news-explainer' === insightweb_gap_action( 'court case 2024' ) && 'new-guide' === insightweb_gap_action( 'animal shelter delhi' ), 'gap action picks the fitting page type' );
+
+$d = insightweb_decide( null, 80, 6.0, null, array( '/a/', '/b/' ), true, array( '/a/', 60 ), array( 'main' => array( '/a/', '/b/' ) ) );
+iw_check( 'conflict' === $d['status'] && 'fix-conflict' === $d['action'] && true === $d['conflict'], 'two owning pages → conflict' );
+$d = insightweb_decide( null, 80, null, null, array(), false, array( '', 0 ), array( 'label' => 'how to report cruelty' ) );
+iw_check( 'gap' === $d['status'] && 'faq-answer' === $d['action'], 'high-demand question with no page → gap + FAQ answer' );
+$d = insightweb_decide( null, 40, 12.0, null, array( '/guide/' ), true, array( '/guide/', 40 ), array() );
+iw_check( 'has-page' === $d['status'] && 'guide-update' === $d['action'], 'a quick win with an owning page → update the page' );
+
 exit( $GLOBALS['iw_fail'] );
