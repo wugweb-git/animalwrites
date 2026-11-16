@@ -212,9 +212,9 @@
 		"aw_org_people": {
 			"title": "Volunteers",
 			"source": "Animal Writes core",
-			"plugin": "Animal Writes core",
+			"plugin": "DirectoryWeb",
 			"purpose": "People",
-			"file": "core/org-people.php (aw_org_people_box)",
+			"file": "directoryweb/org-people.php (aw_org_people_box)",
 			"screen": "post",
 			"types": [
 				"aw_listing"
@@ -237,9 +237,9 @@
 		"aw_claim_review": {
 			"title": "Review",
 			"source": "Animal Writes core",
-			"plugin": "Animal Writes core",
+			"plugin": "DirectoryWeb",
 			"purpose": "Review",
-			"file": "core/claims.php (aw_claim_review_box)",
+			"file": "directoryweb/claims.php (aw_claim_review_box)",
 			"screen": "post",
 			"types": [
 				"aw_claim"
@@ -263,9 +263,9 @@
 		"aw-listing-details": {
 			"title": "Organisation details (fallback)",
 			"source": "Animal Writes core",
-			"plugin": "Animal Writes core",
+			"plugin": "DirectoryWeb",
 			"purpose": "Details",
-			"file": "core/listing-profile.php (aw_listing_details_box)",
+			"file": "directoryweb/listing-profile.php (aw_listing_details_box)",
 			"screen": "post",
 			"types": [
 				"aw_listing"
@@ -440,9 +440,9 @@
 		"acf-group_aw_listing": {
 			"title": "Contact",
 			"source": "Secure Custom Fields",
-			"plugin": "Animal Writes core",
+			"plugin": "DirectoryWeb",
 			"purpose": "Details",
-			"file": "acf-json/group_aw_listing.json",
+			"file": "directoryweb/acf-json/group_aw_listing.json",
 			"screen": "post",
 			"types": [
 				"aw_listing"
@@ -452,22 +452,22 @@
 		"acf-group_aw_listing_address": {
 			"title": "Address and place",
 			"source": "Secure Custom Fields",
-			"plugin": "Animal Writes core",
+			"plugin": "DirectoryWeb",
 			"purpose": "Place",
-			"file": "acf-json/group_aw_listing_address.json; core/places-admin.php (aw_place_box)",
+			"file": "directoryweb/acf-json/group_aw_listing_address.json; directoryweb/places-admin.php (aw_place_box)",
 			"screen": "post",
 			"types": [
 				"aw_listing"
 			],
 			"runtime": "scf",
-			"notes": "PIN code, State, District and Town are drawn at the top by a message field (acf/render_field); their own nonce and save (core/places-admin.php)."
+			"notes": "PIN code, State, District and Town are drawn at the top by a message field (acf/render_field); their own nonce and save (directoryweb/places-admin.php)."
 		},
 		"acf-group_aw_listing_hours": {
 			"title": "Opening hours",
 			"source": "Secure Custom Fields",
-			"plugin": "Animal Writes core",
+			"plugin": "DirectoryWeb",
 			"purpose": "Details",
-			"file": "acf-json/group_aw_listing_hours.json",
+			"file": "directoryweb/acf-json/group_aw_listing_hours.json",
 			"screen": "post",
 			"types": [
 				"aw_listing"
@@ -477,9 +477,9 @@
 		"acf-group_aw_listing_registrations": {
 			"title": "Registrations",
 			"source": "Secure Custom Fields",
-			"plugin": "Animal Writes core",
+			"plugin": "DirectoryWeb",
 			"purpose": "Details",
-			"file": "acf-json/group_aw_listing_registrations.json",
+			"file": "directoryweb/acf-json/group_aw_listing_registrations.json",
 			"screen": "post",
 			"types": [
 				"aw_listing"
@@ -489,9 +489,9 @@
 		"acf-group_aw_listing_about": {
 			"title": "About and services",
 			"source": "Secure Custom Fields",
-			"plugin": "Animal Writes core",
+			"plugin": "DirectoryWeb",
 			"purpose": "Details",
-			"file": "acf-json/group_aw_listing_about.json",
+			"file": "directoryweb/acf-json/group_aw_listing_about.json",
 			"screen": "post",
 			"types": [
 				"aw_listing"
@@ -501,9 +501,9 @@
 		"acf-group_aw_listing_online": {
 			"title": "Online",
 			"source": "Secure Custom Fields",
-			"plugin": "Animal Writes core",
+			"plugin": "DirectoryWeb",
 			"purpose": "Details",
-			"file": "acf-json/group_aw_listing_online.json",
+			"file": "directoryweb/acf-json/group_aw_listing_online.json",
 			"screen": "post",
 			"types": [
 				"aw_listing"
@@ -513,9 +513,9 @@
 		"acf-group_aw_listing_photos": {
 			"title": "Photos and support",
 			"source": "Secure Custom Fields",
-			"plugin": "Animal Writes core",
+			"plugin": "DirectoryWeb",
 			"purpose": "Details",
-			"file": "acf-json/group_aw_listing_photos.json",
+			"file": "directoryweb/acf-json/group_aw_listing_photos.json",
 			"screen": "post",
 			"types": [
 				"aw_listing"
@@ -526,9 +526,9 @@
 		"acf-group_aw_listing_claimed": {
 			"title": "Claimed and sources",
 			"source": "Secure Custom Fields",
-			"plugin": "Animal Writes core",
+			"plugin": "DirectoryWeb",
 			"purpose": "Sources",
-			"file": "acf-json/group_aw_listing_claimed.json; src/enrichment-admin.php (aw_enrich_prov_box); core/gov-verified.php (aw_gov_state_lines)",
+			"file": "directoryweb/acf-json/group_aw_listing_claimed.json; src/enrichment-admin.php (aw_enrich_prov_box); directoryweb/gov-verified.php (aw_gov_state_lines)",
 			"screen": "post",
 			"types": [
 				"aw_listing"
@@ -2714,9 +2714,9 @@
 		"ap-core-claims-list": {
 			"title": "Claims",
 			"source": "Animal Writes core",
-			"plugin": "Animal Writes core",
+			"plugin": "DirectoryWeb",
 			"purpose": "Claim review",
-			"file": "core/claims-review.php:343 (aw_claims_screen)",
+			"file": "directoryweb/claims-review.php:343 (aw_claims_screen)",
 			"screen": "admin",
 			"page": "Directory: Claims",
 			"types": [
@@ -2735,9 +2735,9 @@
 		"ap-core-claims-review": {
 			"title": "Changes (one claim)",
 			"source": "Animal Writes core",
-			"plugin": "Animal Writes core",
+			"plugin": "DirectoryWeb",
 			"purpose": "Claim review",
-			"file": "core/claims-review.php:377 (aw_claim_review_screen)",
+			"file": "directoryweb/claims-review.php:377 (aw_claim_review_screen)",
 			"screen": "admin",
 			"page": "Directory: Claims",
 			"types": [

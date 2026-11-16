@@ -32,6 +32,40 @@ function aw_post_types() {
 }
 
 /**
+ * The arguments of one pillar post type (never 'post': WordPress's own). One function builds them, so a type registered
+ * by a plugin (DirectoryWeb registers aw_listing) gets exactly what the loop below would give it.
+ *
+ * @param string $type A key of aw_post_types().
+ * @return array
+ */
+function aw_content_type_args( string $type ): array {
+	$def = aw_post_types()[ $type ];
+	list( $singular, $plural, $slug, $supports ) = $def;
+
+	$rewrite = array( 'slug' => $slug, 'with_front' => false );
+	if ( 'aw_listing' === $type ) {
+		// Singles live under /directory/org/ so /directory/{city}/{type}/ stays free.
+		$rewrite['slug'] = 'directory/org';
+	}
+
+	return array(
+		'labels'       => array(
+			'name'          => $plural,
+			'singular_name' => $singular,
+			'menu_name'     => $plural,
+			'add_new_item'  => sprintf( 'Add %s', $singular ),
+			'edit_item'     => sprintf( 'Edit %s', $singular ),
+		),
+		'public'       => true,
+		'show_in_rest' => true,
+		'has_archive'  => $slug,
+		'rewrite'      => $rewrite,
+		'supports'     => $supports,
+		'menu_icon'    => array( 'aw_listing' => 'dashicons-location', 'aw_news' => 'dashicons-media-text', 'post' => 'dashicons-book', 'aw_legal' => 'dashicons-bank', 'aw_opportunity' => 'dashicons-businessperson', 'aw_campaign' => 'dashicons-flag' )[ $type ] ?? 'dashicons-pets', // one icon each
+	);
+}
+
+/**
  * Register post types and taxonomies.
  */
 function aw_register_content_types() {
@@ -39,38 +73,19 @@ function aw_register_content_types() {
 		if ( 'post' === $type ) {
 			continue; // built in; relabelled by aw_resources_post_args()
 		}
-		list( $singular, $plural, $slug, $supports ) = $def;
-
-		$rewrite = array( 'slug' => $slug, 'with_front' => false );
-		if ( 'aw_listing' === $type ) {
-			// Singles live under /directory/org/ so /directory/{city}/{type}/ stays free.
-			$rewrite['slug'] = 'directory/org';
+		if ( 'aw_listing' === $type && defined( 'DIRECTORYWEB_LOADED' ) ) {
+			continue; // DirectoryWeb registers the listing type itself (directoryweb.php), with these same arguments
 		}
-
-		register_post_type(
-			$type,
-			array(
-				'labels'       => array(
-					'name'          => $plural,
-					'singular_name' => $singular,
-					'menu_name'     => $plural,
-					'add_new_item'  => sprintf( 'Add %s', $singular ),
-					'edit_item'     => sprintf( 'Edit %s', $singular ),
-				),
-				'public'       => true,
-				'show_in_rest' => true,
-				'has_archive'  => $slug,
-				'rewrite'      => $rewrite,
-				'supports'     => $supports,
-				'menu_icon'    => array( 'aw_listing' => 'dashicons-location', 'aw_news' => 'dashicons-media-text', 'post' => 'dashicons-book', 'aw_legal' => 'dashicons-bank', 'aw_opportunity' => 'dashicons-businessperson', 'aw_campaign' => 'dashicons-flag' )[ $type ] ?? 'dashicons-pets', // one icon each
-			)
-		);
+		register_post_type( $type, aw_content_type_args( $type ) );
 	}
 
 	$all = array_keys( aw_post_types() );
 
 	// Categories are WordPress's own (owner, 15 Oct 2026): the core category, on every section, at /category/{slug}/.
 	foreach ( $all as $type ) {
+		if ( 'aw_listing' === $type && defined( 'DIRECTORYWEB_LOADED' ) ) {
+			continue; // attached by DirectoryWeb right after it registers the type
+		}
 		register_taxonomy_for_object_type( 'category', $type );
 	}
 

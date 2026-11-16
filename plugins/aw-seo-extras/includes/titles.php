@@ -366,6 +366,9 @@ function aw_seo_place_has_helpline( $place ) {
 	return 'district' === $place->kind && function_exists( 'aw_district_official_numbers' ) && array() !== aw_district_official_numbers( $place->code );
 }
 
+/** DirectoryWeb asks whether a place can be called "Animal Helpline Numbers in …" (filter directoryweb_place_has_helpline). */
+add_filter( 'directoryweb_place_has_helpline', fn( $has, $place ) => is_object( $place ) ? aw_seo_place_has_helpline( $place ) : $has, 10, 2 );
+
 /**
  * A listing type as a state page's title names it, plural and short: "NGOs", "Gaushalas", "ABC Centres". Every
  * veterinary type (hospital, dispensary, clinic, government office, 1962 unit, bird hospital) is counted together and

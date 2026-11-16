@@ -1,4 +1,4 @@
-"""State and district matching for directory imports, against the LGD file (plugins/animal-writes-core/data/lgd.json).
+"""State and district matching for directory imports, against the LGD file (plugins/directoryweb/data/lgd.json).
 
 Places are dicts: code (LGD code), name, slug, state (the state's code; 0 for a state). Rows carry codes in
 "state" and "district"; the importers store them with aw_set_item_places() (places.php), which refuses unknown codes.
@@ -33,7 +33,7 @@ def norm(s):
     return re.sub(r"\s+", " ", re.sub(r"[^a-z ]", " ", (s or "").lower().replace("&", "and"))).strip()
 
 
-LGD_FILE = os.path.join(_HERE, "..", "..", "plugins", "animal-writes-core", "data", "lgd.json")
+LGD_FILE = os.path.join(_HERE, "..", "..", "plugins", "directoryweb", "data", "lgd.json")
 
 
 class Places:

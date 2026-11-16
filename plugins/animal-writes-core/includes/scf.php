@@ -60,8 +60,8 @@ add_action(
 	}
 );
 
-/** Our field groups (keys of the files in acf-json/). */
-const AW_SCF_GROUPS = array( 'group_aw_listing', 'group_aw_listing_address', 'group_aw_listing_hours', 'group_aw_listing_registrations', 'group_aw_listing_about', 'group_aw_listing_online', 'group_aw_listing_photos', 'group_aw_listing_claimed', 'group_aw_opportunity', 'group_aw_news', 'group_aw_legal', 'group_aw_legal_document', 'group_aw_campaign', 'group_aw_campaign_dates', 'group_aw_campaign_document', 'group_aw_campaign_orgs', 'group_aw_campaign_outcome', 'group_aw_campaign_share', 'group_aw_resource', 'group_aw_social', 'group_aw_campaign_social' );
+/** Our field groups (keys of the files in acf-json/). The Directory's eight listing groups are DirectoryWeb's (its own acf-json/); it adds them through aw_scf_group_keys(). */
+const AW_SCF_GROUPS = array( 'group_aw_opportunity', 'group_aw_news', 'group_aw_legal', 'group_aw_legal_document', 'group_aw_campaign', 'group_aw_campaign_dates', 'group_aw_campaign_document', 'group_aw_campaign_orgs', 'group_aw_campaign_outcome', 'group_aw_campaign_share', 'group_aw_resource', 'group_aw_social', 'group_aw_campaign_social' );
 
 add_filter(
 	'acf/settings/load_json',
@@ -74,6 +74,15 @@ foreach ( AW_SCF_GROUPS as $aw_scf_group ) {
 	add_filter( 'acf/settings/save_json/key=' . $aw_scf_group, fn() => AW_CORE_DIR . 'acf-json' );
 }
 unset( $aw_scf_group );
+
+/**
+ * Every field group of ours, Core's and the plugins' (DirectoryWeb adds its listing groups through the aw_scf_groups filter).
+ *
+ * @return string[]
+ */
+function aw_scf_group_keys(): array {
+	return array_values( array_unique( array_merge( AW_SCF_GROUPS, (array) apply_filters( 'aw_scf_groups', array() ) ) ) );
+}
 
 /** Is this one of our fields (top level or inside one of our repeaters)? */
 function aw_scf_ours( $field ) {
@@ -211,7 +220,7 @@ add_filter(
 		static $map = null;
 		if ( null === $map ) {
 			$map = array();
-			foreach ( AW_SCF_GROUPS as $gk ) {
+			foreach ( aw_scf_group_keys() as $gk ) {
 				$group = acf_get_field_group( $gk );
 				if ( ! $group ) {
 					continue;

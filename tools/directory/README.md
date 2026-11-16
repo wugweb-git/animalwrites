@@ -3,7 +3,7 @@
 Every import is idempotent and never deletes. New listings are published **unverified**, with their source and the list's date on the listing (card label and trust panel). Addresses that may be private are stored in `aw_import_address` and not shown.
 
 Common steps (on your Mac, then on the server):
-1. Places come from the LGD file in the plugin (`plugins/animal-writes-core/data/lgd.json`, read by `places.py`); rows carry LGD state and district codes.
+1. Places come from the LGD file in the plugin (`plugins/directoryweb/data/lgd.json`, read by `places.py`); rows carry LGD state and district codes.
 2. Build the rows with the source's builder (below).
 3. Upload the JSON, then on the server: `wp eval-file aw_deploy/tools/directory/import_listings.php rows.json 0 500` (repeat with offset 500, 1000 … if needed), then `wp term recount post_tag` and `wp litespeed-purge all` (place counts update by themselves).
 

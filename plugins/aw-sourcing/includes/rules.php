@@ -189,7 +189,7 @@ function aw_enrich_listing_acf_fields() {
 		}
 	}
 	$groups = array();
-	$dir    = ( defined( 'AW_CORE_DIR' ) ? AW_CORE_DIR : WP_PLUGIN_DIR . '/animal-writes-core/' ) . 'acf-json/';
+	$dir    = ( defined( 'DIRECTORYWEB_DIR' ) ? DIRECTORYWEB_DIR : dirname( __DIR__, 2 ) . '/directoryweb/' ) . 'acf-json/'; // the listing field groups are DirectoryWeb's
 	foreach ( (array) glob( $dir . AW_ENRICH_LISTING_GROUP . '*.json' ) as $file ) {
 		$json = is_readable( $file ) ? json_decode( (string) file_get_contents( $file ), true ) : null; // phpcs:ignore WordPress.WP.AlternativeFunctions -- a local file
 		if ( is_array( $json ) ) {

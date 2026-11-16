@@ -341,6 +341,9 @@ function aw_seo_dir_h1() {
 	return aw_seo_title_case( aw_seo_view_type_words( $v, 1 ) ) . ( 1 === $ph ? ' Contact Number' : ' Contact Numbers' ) . ' in ' . $v['place']->name;
 }
 
+/** DirectoryWeb asks for the H1 of a place × type page (filter directoryweb_place_h1). */
+add_filter( 'directoryweb_place_h1', fn( $h1 ) => aw_seo_dir_h1() ?: $h1 );
+
 /**
  * The places worth naming as "most are in": up to $max with at least two listings and more than the next place down
  * (no list of ties such as "A (1), B (1) and C (1)").

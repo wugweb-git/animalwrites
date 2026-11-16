@@ -132,11 +132,11 @@ function aw_related_pick( $id, $type, $n, $first = array(), $extra = array(), $p
 /** Within this distance (km) of a listing's district, another district counts as nearby for the state fill. */
 const AW_RELATED_NEAR_KM = 150;
 
-/** District centres [lat, lng] by LGD district code (data/district-centroids.json, OpenStreetMap Nominatim, 20 Oct 2026). */
+/** District centres [lat, lng] by LGD district code (DirectoryWeb's data/district-centroids.json, OpenStreetMap Nominatim, 20 Oct 2026). */
 function aw_district_centroid( $code ) {
 	static $c = null;
 	if ( null === $c ) {
-		$f = dirname( __DIR__ ) . '/data/district-centroids.json';
+		$f = ( defined( 'DIRECTORYWEB_DIR' ) ? DIRECTORYWEB_DIR : dirname( __DIR__, 2 ) . '/directoryweb/' ) . 'data/district-centroids.json'; // DirectoryWeb's data file
 		$c = is_readable( $f ) ? (array) json_decode( (string) file_get_contents( $f ), true ) : array(); // phpcs:ignore WordPress.WP.AlternativeFunctions
 	}
 	return $c[ (string) (int) $code ] ?? null;

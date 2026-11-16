@@ -9,8 +9,8 @@ Site Editor they are listed as "Listing: …" (category Widgets). Fields: SCF gr
 | # | Row | Block | What fills it |
 |---|-----|-------|---------------|
 | 1 | Breadcrumb | `animal-writes/breadcrumb` | Home › Directory › State › District (each a link); the BreadcrumbList is the same trail. |
-| 2 | H1 | `core/post-title` | The organisation's name. No tick (the meta row says Verified). |
-| 3 | Meta row | `animal-writes/item-meta` | Up to 3 type chips (primary first) · place chip · status: "Verified on {date}" (aw_verified, aw_verified_on), or "Needs re-check" (aw_needs_reverify), "Blacklisted on NGO Darpan". No other date. |
+| 2 | H1 | `core/post-title` | The organisation's name. No tick (the meta row says Claimed). |
+| 3 | Meta row | `animal-writes/item-meta` | Up to 3 type chips (primary first) · place chip · status: "Claimed on {date}" (aw_verified, aw_verified_on), or "Needs re-check" (aw_needs_reverify), "Blacklisted on NGO Darpan"; then, for registrations from government documents, "Verified on {date}" (aw_gov_verified_on). No other date. |
 | 7 | Contact | `animal-writes/listing-contact` | Labelled buttons: Call {first number} · WhatsApp (first number marked WhatsApp) · Email · Website ↗ · Directions (aw_maps_url; greyed out without it). Then the other numbers, one per line: "{label}: {number}" (+ WhatsApp link). Contact data appears only here. |
 | 7b | Online profiles | `animal-writes/listing-profiles` | Right after Contact (owner, 20 Oct 2026): small icon links, only those present. |
 | 8 | Location | `animal-writes/listing-location` | Address (aw_address, else aw_area with district, state, PIN) · District (place chip) · Opening hours (one line per day; split days on one line; "Closed"; days with no row not shown). |
@@ -19,7 +19,7 @@ Site Editor they are listed as "Listing: …" (category Widgets). Fields: SCF gr
 | 9 | Services | `animal-writes/listing-services` | Services (service tags, else aw_services; "Stated by …" aw_services_source, aw_services_on; nothing stated: the services its type(s) imply, combined, marked "Based on type" — AW_TYPE_SERVICES, Notion "Page templates: items and listings" §3) · Animals helped · Areas served · Languages. |
 | 10 | Organisation | `animal-writes/listing-organisation` | Established · Incorporated (aw_reg_date, the registration date as NGO Darpan lists it) · Head of the organisation. |
 | 11 | Ad 1 | `advads/gblock` "place_profile" | The "Directory profile" Advanced Ads placement. Prints nothing while Advanced Ads is off (as on live). |
-| 13 | Support | `animal-writes/listing-support` | Donate · Volunteer · Adopt buttons; "UPI: {aw_upi}" with a copy button. |
+| 13 | Support | `animal-writes/listing-support` | Adopt and Volunteer buttons (Donate and UPI were dropped on 31 Oct 2026). |
 | 14 | Photos | `animal-writes/listing-photos` | aw_gallery, the organisation's own photos only (up to 6, caption under each). Stock and CC images (CC0 worker's `aw_cc0_source` / Openverse, or Unsplash, rawpixel, Wikimedia, Pexels, Pixabay, Flickr URLs) are never shown (`aw_is_stock_image()`). |
 | 14b | Activity | `animal-writes/listing-activity` | Stored figures only, never fetched on page load: Google (★ rating, reviews, as on, link aw_g_profile) and Instagram (followers, posts, last post, as on, link aw_instagram); each box only with data. "As on": a dated detail source for that site, else the last enrichment check (aw_enrich_checked), else the source date. |
 | 15 | Sources | `animal-writes/item-sources` | The listing's data sources with their marks and "as on" dates, linked · "Last updated: {date}" = the latest of aw_verified_on, aw_source_date, aw_detail_sources[].checked and the newest applied enrichment row (aw_enrich_last_applied(); 25 Oct 2026) (never the post's own date) · Editorial policy · Report a mistake. |
