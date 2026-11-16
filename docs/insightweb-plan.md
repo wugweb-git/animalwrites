@@ -273,19 +273,24 @@ shell-backed tabs behind the shared `insightweb-shell` package.
 ### External-services registry (shared component, owner 17 Nov 2026)
 
 A single declared registry of every outbound integration, **shared** with SourceWeb (and the rest of the suite) — one
-implementation in a shared package, both plugins consume it. **Not an InsightWeb-only copy.** Shape to be agreed with
-the SourceWeb session so there is exactly one registry; the proposal below is the InsightWeb side of that agreement.
+implementation in a shared package, both plugins consume it. **Not an InsightWeb-only copy.** **Converged with the
+SourceWeb session (17 Nov 2026); the contract below is agreed.** Working reference / template:
+`plugins/sourceweb/includes/external-services.php` + `external-services-admin.php` (SourceWeb commit `a23dadd3`).
 
-- **Declaration.** Each service registers `{ id, hosts[], purpose, data_sent, terms_url, privacy_url, enabled }`.
-  Admin-added endpoints (e.g. an extra API the admin configures) register the same fields at runtime, so disclosure and
-  gating cover them too.
-- **Gating.** All outbound HTTP goes through a registry-aware wrapper (on top of `wp_safe_remote_*`). A call to a host
-  not registered-and-enabled for its `id` is refused (`WP_Error`), so an integration cannot phone home undisclosed.
-- **Generation (single source of truth).** The readme `== External services ==` section **and** an admin disclosure
-  screen are both generated from the registry — no hand-maintained second copy.
+- **Declaration.** `register( id, { hosts[], purpose, data_sent, terms_url, privacy_url, enabled } )` on a
+  `register_services` action. `hosts[]` is one or more hosts; `id` is optional and derived from the first host. Code
+  services are **enabled-by-default**; admin-added endpoints are **opt-in (disabled until enabled)**. The admin UI
+  accepts a comma/space list for `hosts[]`, and legacy `data`/`terms`/`privacy` keys as aliases (migration convenience).
+- **Gating.** `remote_request( url, args, method )` is the **sole gate** over `wp_safe_remote_*` — a `WP_Error` unless
+  the URL's host is registered **and** enabled. `external_service_for_host( url|host )` matches membership in `hosts[]`,
+  normalising scheme / path / `www` / case. So an integration cannot phone home undisclosed.
+- **Generation (single source of truth).** `external_services_readme()` builds the readme `== External services ==`
+  section **and** the admin disclosure screen is generated from the same registry — no hand-maintained second copy.
 - **Shared package, neutral naming.** Lives alongside the shared core (not in either plugin), with its **own neutral
-  package namespace** — not `aw_`, not `insightweb_`, not `kits_` (e.g. a `Wugweb\ServiceRegistry` namespace / a short
-  neutral prefix). Each plugin wraps it under its own prefix. Final name/shape agreed with SourceWeb.
+  package namespace** — never `aw_` / `insightweb_` / `sourceweb_` / `kits_` (a `Wugweb\ServiceRegistry`-style namespace
+  or a short neutral prefix). Each plugin wraps it under its own prefix. The **RankWeb build session owns the shared
+  package path/namespace** (coordinator routing); when it lands, each plugin `require`s it and deletes its own copy
+  (same option shape, no data migration).
 - **InsightWeb's registered surface:**
   - **Google (Search Console + GA4)** — disclosed as **"accessed through the Site Kit by Google plugin"**: under model
     (A) Site Kit makes the actual Google calls, so InsightWeb registers this as a *via-Site-Kit* entry (no direct
@@ -296,9 +301,11 @@ the SourceWeb session so there is exactly one registry; the proposal below is th
   - **DB-IP** — `download.db-ip.com`; monthly country-lite file download, nothing sent; DB-IP T/P.
   - **Crawl checks** — the site's own URLs/robots from outside; no third-party data.
   - **Admin-added** — any endpoint the admin registers, same five fields.
-- **Status:** spec only. The code lands in the shared package once (a) the extracted build is scaffolded and (b) the
-  registry shape is agreed with SourceWeb — building it twice is the thing to avoid. It supersedes the hand-written
-  `== External services ==` added in-place to the live `readme.txt` (which stays as-is on the live plugin).
+- **Status:** contract agreed; SourceWeb has the working reference. InsightWeb consumes the shared package once the
+  RankWeb build session publishes its path/namespace — then InsightWeb registers the surface above through it
+  (`register_services`) and its readme section is generated, not hand-written. Until then the I1 skeleton makes no
+  outbound calls, so there is nothing to gate yet. (The hand-written `== External services ==` on the live
+  `plugins/insightweb` readme stays as-is.)
 
 ### What ports vs what is dropped
 
