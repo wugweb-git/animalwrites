@@ -91,10 +91,10 @@ jobs:
         run: php plugins/mailweb/tests/run.php
       - name: Sourcing tests without WordPress (shared keyword matcher, Sources model; plugins/aw-sourcing/tests)
         run: php plugins/aw-sourcing/tests/run.php
-      - name: Claimant link to the listing's people (plugins/animal-writes-core/tests/org-people-tests.php)
-        run: php plugins/animal-writes-core/tests/org-people-tests.php
-      - name: DirectoryWeb screens, pure parts (plugins/animal-writes-core/tests/directoryweb-tests.php)
-        run: php plugins/animal-writes-core/tests/directoryweb-tests.php
+      - name: Claimant link to the listing's people (plugins/directoryweb/tests/org-people-tests.php)
+        run: php plugins/directoryweb/tests/org-people-tests.php
+      - name: DirectoryWeb screens, pure parts (plugins/directoryweb/tests/directoryweb-tests.php)
+        run: php plugins/directoryweb/tests/directoryweb-tests.php
       - name: Daily PHP error count by kind (plugins/animal-writes-core/tests/error-count-tests.php)
         run: php plugins/animal-writes-core/tests/error-count-tests.php
       - name: PlanWeb tests without WordPress (field checks, Dates import mapping; plugins/planweb/tests)
@@ -134,7 +134,7 @@ jobs:
         run: |
           # Plugin Check on each of our plugins that changed (all of them when the base cannot be read: a new branch).
           PLUGIN_CHECK=""
-          for p in animal-writes-core kits-core aw-seo-extras mailweb aw-sourcing insightweb planweb; do
+          for p in animal-writes-core directoryweb kits-core aw-seo-extras mailweb aw-sourcing insightweb planweb; do
             if ! git cat-file -e "$BASE" 2>/dev/null || ! git diff --quiet "$BASE" "$HEAD" -- "plugins/$p"; then
               PLUGIN_CHECK="$PLUGIN_CHECK $p"
             fi

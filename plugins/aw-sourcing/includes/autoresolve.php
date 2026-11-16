@@ -440,8 +440,11 @@ add_action(
 				'callback'            => function ( WP_REST_Request $q ) {
 					$res = aw_rules_field_reset( sanitize_key( (string) $q['field'] ) );
 					$txt = array(
+						/* translators: %s: field name. */
 						'field_reset' => __( 'Field rule %s is the built-in rule again.', 'aw-sourcing' ),
+						/* translators: %s: field name. */
 						'none'        => __( 'Nothing to put back for %s: it already uses the built-in rule.', 'aw-sourcing' ),
+						/* translators: %s: field name. */
 						'nosuch'      => __( 'No such field: %s.', 'aw-sourcing' ),
 					);
 					return aw_ar_answer( array( 'nosuch' === $res[0] ? 'error' : $res[0], sprintf( $txt[ $res[0] ], $res[1] ) ) );

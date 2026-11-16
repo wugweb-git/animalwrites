@@ -1,4 +1,4 @@
-"""Build plugins/animal-writes-core/data/lgd.json, the read-only place reference, from an LGD export.
+"""Build plugins/directoryweb/data/lgd.json, the read-only place reference, from an LGD export.
 
     python3 tools/lgd/build_lgd.py tools/lgd/source/states.DDMonYYYY.csv tools/lgd/source/districts.DDMonYYYY.csv
 
@@ -13,7 +13,7 @@ After building, run tools/lgd/check.php on the site: it lists items whose codes 
 import csv, json, os, re, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-OUT = os.path.join(HERE, "..", "..", "plugins", "animal-writes-core", "data", "lgd.json")
+OUT = os.path.join(HERE, "..", "..", "plugins", "directoryweb", "data", "lgd.json")
 WP = os.path.join(HERE, "source", "wp-locations-2026-10-08.json")
 
 

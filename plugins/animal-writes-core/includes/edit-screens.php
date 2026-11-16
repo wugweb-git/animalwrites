@@ -816,7 +816,7 @@ function aw_edit_screen_map_only_note(): string {
  * AW SEO Plus and Mailweb are treated like third-party plugins there (owner, 1 Nov 2026).
  */
 function aw_edit_screen_own_plugins(): array {
-	return array( 'Animal Writes core', 'Kits Core' );
+	return array( 'Animal Writes core', 'Kits Core', 'DirectoryWeb' );
 }
 
 /**

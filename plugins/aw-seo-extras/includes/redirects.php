@@ -62,6 +62,9 @@ function aw_rank_math_redirect( $pattern, $to, $comparison = 'exact' ) {
 	return (int) $r->save();
 }
 
+/** DirectoryWeb's `wp aw redirects-import` adds its old-address 301s through this filter. */
+add_filter( 'directoryweb_redirect_add', fn( $done, $path, $to ) => (bool) aw_rank_math_redirect( (string) $path, (string) $to ) || (bool) $done, 10, 3 );
+
 /**
  * Seed redirects, added once per version to Rank Math's list (they can be edited or removed there afterwards; an exact
  * path already in the list is left alone). 12 Nov 2026: common city spellings that are not the Directory's district

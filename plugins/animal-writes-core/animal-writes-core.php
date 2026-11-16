@@ -45,7 +45,6 @@ require_once AW_CORE_DIR . 'includes/kits-config.php';
 require_once AW_CORE_DIR . 'includes/admin-table.php';
 require_once AW_CORE_DIR . 'includes/admin-home.php';
 require_once AW_CORE_DIR . 'includes/help-tab.php';
-require_once AW_CORE_DIR . 'includes/directoryweb-help-tab.php';
 require_once AW_CORE_DIR . 'includes/keys.php'; // Kits → Keys: service keys in WP admin (owner, 31 Oct 2026)
 require_once AW_CORE_DIR . 'includes/edit-screens.php'; // Kits → Edit screens: every edit-screen box, its fields and where they are used (owner, 1 Nov 2026)
 require_once AW_CORE_DIR . 'includes/admin-tidy.php';
@@ -59,14 +58,27 @@ require_once AW_CORE_DIR . 'includes/tags.php';
 require_once AW_CORE_DIR . 'includes/campaign-links.php';
 require_once AW_CORE_DIR . 'includes/meta.php';
 require_once AW_CORE_DIR . 'includes/scf.php';
-require_once AW_CORE_DIR . 'includes/places.php';
+// DirectoryWeb (the Directory: listings, places, claims, map, Find help, and its admin). Loaded from the sibling plugin
+// folder when it is not active on its own, here, where the Directory files were loaded before (the Directory is used by
+// the files below). If the folder is missing, one notice says so; the Directory pieces that follow need it.
+if ( ! defined( 'DIRECTORYWEB_LOADED' ) ) {
+	if ( file_exists( dirname( AW_CORE_DIR ) . '/directoryweb/directoryweb.php' ) ) {
+		require_once dirname( AW_CORE_DIR ) . '/directoryweb/directoryweb.php';
+	} else {
+		add_action(
+			'admin_notices',
+			function () {
+				if ( current_user_can( 'activate_plugins' ) ) {
+					echo '<div class="notice notice-error"><p>' . esc_html__( 'DirectoryWeb is missing: Animal Writes Core needs the directoryweb plugin folder next to it.', 'animal-writes-core' ) . '</p></div>';
+				}
+			}
+		);
+	}
+}
 require_once AW_CORE_DIR . 'includes/issuers.php';
 require_once AW_CORE_DIR . 'includes/summary-display.php'; // an item's own page shows its whole summary (the rules are SourceWeb's)
 require_once AW_CORE_DIR . 'includes/news-article.php'; // News article: read-more fold and the ad-slot hook
-require_once AW_CORE_DIR . 'includes/places-admin.php';
-require_once AW_CORE_DIR . 'includes/directory.php';
 require_once AW_CORE_DIR . 'includes/data-sources.php';
-require_once AW_CORE_DIR . 'includes/gov-verified.php';
 require_once AW_CORE_DIR . 'includes/bindings.php';
 require_once AW_CORE_DIR . 'includes/also-reported.php';
 require_once AW_CORE_DIR . 'includes/category-images.php';
@@ -95,32 +107,17 @@ require_once AW_CORE_DIR . 'includes/sponsored-blocks.php';
 require_once AW_CORE_DIR . 'includes/form-blocks.php';
 require_once AW_CORE_DIR . 'includes/site-check.php';
 require_once AW_CORE_DIR . 'includes/mailweb-aw.php';
-require_once AW_CORE_DIR . 'includes/geocode.php';
-require_once AW_CORE_DIR . 'includes/directory-map.php';
 require_once AW_CORE_DIR . 'includes/backups.php';
 require_once AW_CORE_DIR . 'includes/staging.php';
-require_once AW_CORE_DIR . 'includes/claims.php';
-require_once AW_CORE_DIR . 'includes/claims-review.php';
-require_once AW_CORE_DIR . 'includes/directoryweb-shape.php'; // DirectoryWeb's new screens: pure parts.
-require_once AW_CORE_DIR . 'includes/directoryweb-dashboard.php'; // the Dashboard's background counts.
-require_once AW_CORE_DIR . 'includes/directoryweb-rest.php'; // directoryweb/v1.
-require_once AW_CORE_DIR . 'includes/directoryweb-listings.php'; // the Listings tab and its route (read only).
-require_once AW_CORE_DIR . 'includes/directoryweb-caps.php'; // DirectoryWeb's own capability, manage_directoryweb (granted from edit_aw_volunteers).
-require_once AW_CORE_DIR . 'includes/directoryweb-ui.php'; // Dashboard, Claims and Settings on the Kits admin shell.
-require_once AW_CORE_DIR . 'includes/place-intros.php'; // DirectoryWeb → Place intros: a short paragraph on a state or district page.
-require_once AW_CORE_DIR . 'includes/unverified.php';
 require_once AW_CORE_DIR . 'includes/systems.php';
 require_once AW_CORE_DIR . 'includes/reports.php';
 require_once AW_CORE_DIR . 'includes/retention.php';
 require_once AW_CORE_DIR . 'includes/newsletter.php';
 require_once AW_CORE_DIR . 'includes/model.php';
-require_once AW_CORE_DIR . 'includes/featured.php';
-require_once AW_CORE_DIR . 'includes/org-people.php';
 require_once AW_CORE_DIR . 'includes/helpers-public.php'; // [aw_helpers] on the Volunteer page: approved helpers (owner, 13 Nov 2026)
 require_once AW_CORE_DIR . 'includes/breadcrumbs.php';
 require_once AW_CORE_DIR . 'includes/item-head.php';
 require_once AW_CORE_DIR . 'includes/research-citation.php';
-require_once AW_CORE_DIR . 'includes/listing-template.php';
 require_once AW_CORE_DIR . 'includes/pages.php';
 require_once AW_CORE_DIR . 'includes/not-found.php';
 require_once AW_CORE_DIR . 'includes/press.php';
@@ -128,13 +125,8 @@ require_once AW_CORE_DIR . 'includes/social-posts.php'; // Social posts (aw_soci
 require_once AW_CORE_DIR . 'includes/site-options.php'; // Kits → Modules → Forms and sample listings (12 Nov 2026)
 require_once AW_CORE_DIR . 'includes/edit-fields.php'; // edit fields for values that were WP-CLI only (12 Nov 2026)
 require_once AW_CORE_DIR . 'includes/block-states.php';
-require_once AW_CORE_DIR . 'includes/listing-profile.php';
-require_once AW_CORE_DIR . 'includes/map-picker.php';
-require_once AW_CORE_DIR . 'includes/local-cards.php';
-require_once AW_CORE_DIR . 'includes/district-helplines.php';
 require_once AW_CORE_DIR . 'includes/related.php';
 require_once AW_CORE_DIR . 'includes/law-links.php';
-require_once AW_CORE_DIR . 'includes/find-help.php';
 require_once AW_CORE_DIR . 'includes/home.php'; // Home: sections in the theme template, hero, FAQ section
 require_once AW_CORE_DIR . 'includes/near-opps.php';
 require_once AW_CORE_DIR . 'includes/entity-links.php';
@@ -175,6 +167,7 @@ function aw_core_map_sibling( string $main ): void {
 aw_core_map_sibling( 'aw-sourcing/aw-sourcing.php' );
 aw_core_map_sibling( 'insightweb/insightweb.php' );
 aw_core_map_sibling( 'planweb/planweb.php' );
+aw_core_map_sibling( 'directoryweb/directoryweb.php' );
 
 // AW Sourcing (feeds, keywords, publishers, worker endpoints, AI keys, enrichment, review). Loaded from the sibling
 // plugin folder when it is not active on its own; after Core's includes, which it uses.
@@ -206,8 +199,16 @@ register_activation_hook(
 	__FILE__,
 	function () {
 		aw_register_content_types();
-		aw_directory_rewrites();
+		if ( function_exists( 'directoryweb_register_listing_type' ) ) {
+			directoryweb_register_listing_type();
+		}
+		if ( function_exists( 'aw_directory_rewrites' ) ) {
+			aw_directory_rewrites();
+		}
 		aw_register_meta();
+		if ( function_exists( 'directoryweb_caps_grant' ) ) {
+			directoryweb_caps_grant();
+		}
 		flush_rewrite_rules();
 		aw_cron_schedule();
 	}
