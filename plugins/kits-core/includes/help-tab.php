@@ -1,6 +1,6 @@
 <?php
 /**
- * Kits Core: an "About Kits Core" Help tab and a sidebar on Kits Core's own screens (WP_Screen::add_help_tab), on every screen.
+ * Kits Core: an "About Kits Core" Help tab and a sidebar on Kits Core's own screens (WP_Screen::add_help_tab).
  * Screens that have their own help keep it; this tab sits beside it.
  *
  * @package kits-core
@@ -45,7 +45,7 @@ function kits_help_tab( $screen ) {
 			'id'       => 'kits-about',
 			/* translators: %s: plugin name. */
 			'title'    => sprintf( __( 'About %s', 'kits-core' ), 'Kits Core' ),
-			'content'  => '<p>' . esc_html__( 'The features every Kits site shares (forms and their spam guard, the share bar, Google Tag Manager with consent mode, the visit counter) and the Kits admin screens that the other Kits plugins are built on.', 'kits-core' ) . '</p><ul>' . $list . '</ul>',
+			'content'  => '<p>' . esc_html__( 'The features every Kits site shares (forms and their spam guard, the share bar, Google Tag Manager with consent mode) and the Kits admin screens that the other Kits plugins are built on.', 'kits-core' ) . '</p><ul>' . $list . '</ul>',
 			'priority' => 5,
 		)
 	);

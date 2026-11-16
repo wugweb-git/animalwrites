@@ -5,25 +5,35 @@ Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 8.0
 Stable tag: 1.0.0
-License: GPLv2 or later
+License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-The features every Kits site shares: the form engine with its spam guard, the share bar, Google Tag Manager with consent mode, a visit counter, source attribution and the Kits admin screens.
+The shared layer for Kits by Wugweb sites: form engine with spam guard, share bar, consent-mode analytics, attribution and the Kits admin screens.
 
 == Description ==
 
 Kits Core is the shared layer of Kits by Wugweb sites. The site configures it through `kits_*` filters.
 
 * Form engine: one field dictionary, server-side checks, per-field errors that work without JavaScript, and ALTCHA, a proof-of-work spam guard with no third-party service and no cookies.
-* Share bar: plain links and copy-link, with no third-party scripts or tracking.
+* Share bar: a native share sheet where the browser offers one, plus plain links and copy-link, with no third-party scripts or tracking.
 * Google Tag Manager and Microsoft Clarity with consent mode v2, denied by default where the law asks for it.
-* A visit counter, preview-only items, news attribution and the publisher records used by SourceWeb.
+* Preview-only items, news attribution and the publisher records used by SourceWeb.
 * The Kits admin shell: the screens of every Kits plugin built on WordPress components and DataViews, with lists, settings, empty and error states that look and work the same everywhere.
 * The Kits menu: Home, Theme Options, Settings, Tools and Help, with the design system and the registry of every component.
 
 == Uninstall ==
 
-Deleting the plugin deletes no data: theme options, form settings, saved keys, publisher records, keyword tables and visit counts stay, so reinstalling finds everything as it was.
+By default, deleting the plugin deletes nothing — theme options, form settings, saved keys, publisher records and keyword tables all stay, so reinstalling finds everything as it was. Only when you tick Kits &rarr; Settings &rarr; Uninstall &rarr; "Delete this plugin's data when it is deleted" does it remove Kits Core's own options and transients, after first writing a backup to wp-content/uploads/wugweb-backups/ (nothing is deleted if the backup fails). Shared data and anything belonging to another plugin are never touched.
+
+== External services ==
+
+Each of these loads only when you turn it on; none runs by default.
+
+* Google Tag Manager / Google Analytics — loaded only when a GTM or GA container is configured (through Site Kit or the site's own settings), under consent mode (denied by default where the law requires it). What is collected is whatever your container is set up to send. Terms: https://marketingplatform.google.com/about/analytics/terms/ — Privacy: https://policies.google.com/privacy
+* Microsoft Clarity — loaded only when a Clarity project is configured, under the same consent gate. Terms: https://www.microsoft.com/en-us/legal/terms-of-use — Privacy: https://privacy.microsoft.com/privacystatement
+* Update check — only when the site sets an update URL (off by default): the plugin fetches an update manifest from that URL to offer in-dashboard updates.
+
+The ALTCHA spam guard runs locally (proof of work) and contacts no third-party service.
 
 == Changelog ==
 

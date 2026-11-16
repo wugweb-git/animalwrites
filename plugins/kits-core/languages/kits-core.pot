@@ -3,13 +3,13 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Kits Core 1.0.0\n"
-"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/kits-core\n"
+"Report-Msgid-Bugs-To: https://wugweb.com/plugins/kits-core/\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-13T05:42:03+00:00\n"
+"POT-Creation-Date: 2026-11-16T21:32:46+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: kits-core\n"
@@ -21,7 +21,7 @@ msgstr ""
 
 #. Description of the plugin
 #: kits-core.php
-msgid "Kits by Wugweb, the site features every Kits site shares: form engine with spam guard (ALTCHA) and per-field errors, share bar, Google Tag Manager with consent mode, an honest visit counter, preview-only items, source attribution and the publisher records the sourcing plugin uses; plus the design system index of the Kits theme and its child. Own menu: Kits (Overview, Design system, Preview). Configured by the site through filters (kits_*)."
+msgid "Shared layer for Kits by Wugweb sites: form engine with spam guard (ALTCHA), share bar, consent-mode analytics, attribution and the Kits admin."
 msgstr ""
 
 #. Author of the plugin
@@ -34,68 +34,132 @@ msgstr ""
 msgid "https://wugweb.com"
 msgstr ""
 
-#: includes/admin-app-cards.php:61
+#: includes/admin-app-cards.php:62
+msgid "4:3 (standard)"
+msgstr ""
+
+#: includes/admin-app-cards.php:66
+msgid "3:4 (portrait)"
+msgstr ""
+
+#: includes/admin-app-cards.php:70
+msgid "3:2 (featured)"
+msgstr ""
+
+#: includes/admin-app-cards.php:74
+msgid "1:1 (square)"
+msgstr ""
+
+#: includes/admin-app-cards.php:79
 msgid "Card padding"
 msgstr ""
 
-#: includes/admin-app-cards.php:62
+#: includes/admin-app-cards.php:80
 msgid "Space inside every card, around its text (and around a stacked card’s picture)."
 msgstr ""
 
-#: includes/admin-app-cards.php:67
+#: includes/admin-app-cards.php:85
 msgid "Card gap"
 msgstr ""
 
-#: includes/admin-app-cards.php:68
+#: includes/admin-app-cards.php:86
 msgid "Space between the cards of a list."
 msgstr ""
 
 #. translators: %s: token name.
-#: includes/admin-app-cards.php:70
+#: includes/admin-app-cards.php:88
 #, php-format
 msgid "%s, which grows with the screen width"
 msgstr ""
 
-#: includes/admin-app-cards.php:74
+#: includes/admin-app-cards.php:92
 msgid "Stacked large card: padding"
 msgstr ""
 
-#: includes/admin-app-cards.php:75
+#: includes/admin-app-cards.php:93
 msgid "The wide card with the picture on the left (kit-card--stacked-lg)."
 msgstr ""
 
-#: includes/admin-app-cards.php:76
+#: includes/admin-app-cards.php:94
 msgid "the Card padding"
 msgstr ""
 
-#: includes/admin-app-cards.php:80
+#: includes/admin-app-cards.php:98
 msgid "Stacked large card: gap"
 msgstr ""
 
-#: includes/admin-app-cards.php:81
+#: includes/admin-app-cards.php:99
 msgid "Space between the picture and the text."
 msgstr ""
 
 #. translators: %s: token name.
-#: includes/admin-app-cards.php:83
+#: includes/admin-app-cards.php:101
 #, php-format
 msgid "%s, which grows with the screen width on some sites"
 msgstr ""
 
-#: includes/admin-app-cards.php:98
+#: includes/admin-app-cards.php:105
+msgid "Picture ratio: standard cards"
+msgstr ""
+
+#: includes/admin-app-cards.php:106
+msgid "Cards with the picture above the text: archives, search, category pages, story cards, three-across rows."
+msgstr ""
+
+#: includes/admin-app-cards.php:107
+msgid "4:3"
+msgstr ""
+
+#: includes/admin-app-cards.php:111
+msgid "Picture ratio: stacked cards"
+msgstr ""
+
+#: includes/admin-app-cards.php:112
+msgid "Cards with the picture beside the text: the News, Library and Resources lists and the Home news rows."
+msgstr ""
+
+#: includes/admin-app-cards.php:113
+msgid "3:4"
+msgstr ""
+
+#: includes/admin-app-cards.php:117
+msgid "Picture ratio: featured cards"
+msgstr ""
+
+#: includes/admin-app-cards.php:118
+msgid "Lead and featured stories."
+msgstr ""
+
+#: includes/admin-app-cards.php:119
+msgid "3:2"
+msgstr ""
+
+#: includes/admin-app-cards.php:123
+msgid "Picture ratio: square thumbnails"
+msgstr ""
+
+#: includes/admin-app-cards.php:124
+msgid "Compact thumbnails."
+msgstr ""
+
+#: includes/admin-app-cards.php:125
+msgid "1:1"
+msgstr ""
+
+#: includes/admin-app-cards.php:140
 msgid "Side-by-side cards"
 msgstr ""
 
-#: includes/admin-app-cards.php:98
+#: includes/admin-app-cards.php:140
 msgid "Set by the theme’s CSS; not changed here."
 msgstr ""
 
-#: includes/admin-app-cards.php:99
+#: includes/admin-app-cards.php:141
 msgid "Meta row"
 msgstr ""
 
-#: includes/admin-app-cards.php:99
-msgid "The date comes first; the row wraps to a second line when it is full (theme CSS)."
+#: includes/admin-app-cards.php:141
+msgid "The date comes first; the row is always one line (theme CSS)."
 msgstr ""
 
 #: includes/admin-app.php:58
@@ -122,24 +186,52 @@ msgstr ""
 msgid "phones up to 767 px, tablets 768 to 1199 px, wide screens from 1200 px (fixed in the theme)"
 msgstr ""
 
-#: includes/admin-app.php:258
-#: includes/admin-app.php:264
+#: includes/admin-app.php:261
 #: includes/admin-app.php:267
+#: includes/admin-app.php:270
 #: includes/help-tab.php:34
 msgid "Theme Options"
 msgstr ""
 
-#: includes/admin-app.php:259
+#: includes/admin-app.php:262
 msgid "Kits Core needs its build (build/theme-options/ and build/shell/) to show this screen."
 msgstr ""
 
-#: includes/admin-app.php:267
+#: includes/admin-app.php:270
 #: includes/admin-shell.php:127
 msgid "This screen needs JavaScript."
 msgstr ""
 
-#: includes/admin-app.php:267
+#: includes/admin-app.php:270
 msgid "Export the settings"
+msgstr ""
+
+#: includes/admin-app.php:303
+msgid "Kits Theme Options"
+msgstr ""
+
+#: includes/admin-app.php:306
+msgid "The header’s switches (announcement bar, header stays at the top) are in"
+msgstr ""
+
+#: includes/admin-app.php:307
+msgid "Kits → Theme Options → Header"
+msgstr ""
+
+#: includes/admin-app.php:311
+msgid "The phone bar at the foot of phone screens is set in"
+msgstr ""
+
+#: includes/admin-app.php:312
+msgid "Kits → Theme Options → Footer"
+msgstr ""
+
+#: includes/admin-app.php:316
+msgid "Sidebar, title and breadcrumbs for each kind of page, and the share bar, are set in"
+msgstr ""
+
+#: includes/admin-app.php:317
+msgid "Kits → Theme Options → Content types"
 msgstr ""
 
 #: includes/admin-kits-frame.php:44
@@ -147,12 +239,12 @@ msgid "Kits Core needs its build (build/shell/) to show this screen."
 msgstr ""
 
 #: includes/admin-kits-frame.php:90
-#: src/theme-options/index.js:450
+#: src/theme-options/index.js:457
 msgid "Kits"
 msgstr ""
 
 #: includes/admin-kits-frame.php:130
-#: src/shell/index.js:114
+#: src/shell/index.js:122
 msgid "Screens"
 msgstr ""
 
@@ -222,7 +314,7 @@ msgid "About %s"
 msgstr ""
 
 #: includes/help-tab.php:48
-msgid "The features every Kits site shares (forms and their spam guard, the share bar, Google Tag Manager with consent mode, the visit counter) and the Kits admin screens that the other Kits plugins are built on."
+msgid "The features every Kits site shares (forms and their spam guard, the share bar, Google Tag Manager with consent mode) and the Kits admin screens that the other Kits plugins are built on."
 msgstr ""
 
 #: includes/help-tab.php:55
@@ -289,36 +381,57 @@ msgstr ""
 msgid "The column beside an item page's text (below it on phones and tablets)."
 msgstr ""
 
-#: includes/share.php:115
-#: includes/share.php:118
+#: includes/primitives.php:162
+msgid "Completed"
+msgstr ""
+
+#: includes/primitives.php:163
+msgid "Current"
+msgstr ""
+
+#: includes/primitives.php:164
+msgid "Ongoing"
+msgstr ""
+
+#: includes/primitives.php:165
+msgid "Upcoming"
+msgstr ""
+
+#: includes/primitives.php:166
+msgid "Date not set"
+msgstr ""
+
+#: includes/share.php:156
+#: includes/share.php:162
 msgid "Share"
 msgstr ""
 
+#: includes/share.php:163
+#: includes/share.php:170
+msgid "Link copied"
+msgstr ""
+
 #. translators: %s: network name.
-#: includes/share.php:122
+#: includes/share.php:166
 msgid "Share by email"
 msgstr ""
 
 #. translators: %s: network name.
-#: includes/share.php:122
+#: includes/share.php:166
 #, php-format
 msgid "Share on %s"
 msgstr ""
 
-#: includes/share.php:125
+#: includes/share.php:169
 msgid "Copy link"
 msgstr ""
 
-#: includes/share.php:126
-msgid "Link copied"
-msgstr ""
-
-#: includes/share.php:142
+#: includes/share.php:186
 msgid "Follow us"
 msgstr ""
 
 #. translators: %s: network name.
-#: includes/share.php:147
+#: includes/share.php:191
 #, php-format
 msgid "Follow us on %s"
 msgstr ""
@@ -339,8 +452,18 @@ msgstr ""
 msgid "Nothing this month."
 msgstr ""
 
+#: src/shell/crumbs.js:90
+msgid "Breadcrumb"
+msgstr ""
+
+#. translators: %s: where the setting is changed ("Site Editor → Header").
+#: src/shell/crumbs.js:131
+#, js-format
+msgid "Change in %s"
+msgstr ""
+
 #: src/shell/detail.js:39
-#: src/shell/index.js:536
+#: src/shell/index.js:587
 msgid "Close"
 msgstr ""
 
@@ -452,7 +575,7 @@ msgid "Tiles to show"
 msgstr ""
 
 #: src/shell/extras.js:286
-#: src/theme-options/index.js:470
+#: src/theme-options/index.js:477
 msgid "Save"
 msgstr ""
 
@@ -461,33 +584,33 @@ msgstr ""
 msgid "Cancel"
 msgstr ""
 
-#: src/shell/index.js:235
+#: src/shell/index.js:249
 msgid "Needs attention"
 msgstr ""
 
-#: src/shell/index.js:236
+#: src/shell/index.js:250
 msgid "Not working"
 msgstr ""
 
 #. translators: %s: plugin name.
-#: src/shell/index.js:275
+#: src/shell/index.js:289
 #, js-format
 msgid "%s not active"
 msgstr ""
 
-#: src/shell/index.js:286
+#: src/shell/index.js:300
 msgid "Counting…"
 msgstr ""
 
-#: src/shell/index.js:412
+#: src/shell/index.js:453
 msgid "Changed from the default."
 msgstr ""
 
-#: src/shell/index.js:423
+#: src/shell/index.js:464
 msgid "Reset to default"
 msgstr ""
 
-#: src/shell/index.js:537
+#: src/shell/index.js:588
 msgid "Edit"
 msgstr ""
 
@@ -657,11 +780,11 @@ msgid "Header"
 msgstr ""
 
 #: src/theme-options/index.js:67
-msgid "Edit what the header holds (logo, menu, buttons)"
+msgid "Edit the header in the Site Editor (logo, menu, buttons, announcement text)"
 msgstr ""
 
 #: src/theme-options/index.js:73
-#: src/theme-options/index.js:89
+#: src/theme-options/index.js:92
 msgid "Edit menus"
 msgstr ""
 
@@ -670,54 +793,58 @@ msgid "Footer"
 msgstr ""
 
 #: src/theme-options/index.js:86
-msgid "Edit what the footer holds"
+msgid "Edit the footer in the Site Editor (links, profile icons)"
 msgstr ""
 
-#: src/theme-options/index.js:94
+#: src/theme-options/index.js:97
 msgid "Layout and spacing"
 msgstr ""
 
-#: src/theme-options/index.js:103
+#: src/theme-options/index.js:106
 msgid "Widths and spacing in Styles"
 msgstr ""
 
-#: src/theme-options/index.js:185
+#: src/theme-options/index.js:110
+msgid "Each kind of page’s layout in Templates"
+msgstr ""
+
+#: src/theme-options/index.js:192
 msgid "These fields save with their own button below."
 msgstr ""
 
-#: src/theme-options/index.js:269
+#: src/theme-options/index.js:276
 msgid "Theme"
 msgstr ""
 
-#: src/theme-options/index.js:279
+#: src/theme-options/index.js:286
 msgid "the theme’s own"
 msgstr ""
 
-#: src/theme-options/index.js:390
+#: src/theme-options/index.js:397
 msgid "Saved."
 msgstr ""
 
-#: src/theme-options/index.js:396
+#: src/theme-options/index.js:403
 msgid "Not saved. Try again."
 msgstr ""
 
 #. translators: %s: error message.
-#: src/theme-options/index.js:405
+#: src/theme-options/index.js:412
 #, js-format
 msgid "Partly saved. The rest was not saved: %s"
 msgstr ""
 
-#: src/theme-options/index.js:461
+#: src/theme-options/index.js:468
 msgid "Changes not saved"
 msgstr ""
 
 #. translators: 1: site name, 2: theme name and version, 3: Kits Core version.
-#: src/theme-options/index.js:480
+#: src/theme-options/index.js:487
 #, js-format
 msgid "%1$s · %2$s · Kits Core %3$s"
 msgstr ""
 
-#: src/theme-options/index.js:487
+#: src/theme-options/index.js:494
 msgid "Sections"
 msgstr ""
 

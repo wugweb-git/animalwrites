@@ -1,13 +1,14 @@
 <?php
 /**
  * Plugin Name: Kits Core
- * Description: Kits by Wugweb, the site features every Kits site shares: form engine with spam guard (ALTCHA) and per-field errors, share bar, Google Tag Manager with consent mode, an honest visit counter, preview-only items, source attribution and the publisher records the sourcing plugin uses; plus the design system index of the Kits theme and its child. Own menu: Kits (Overview, Design system, Preview). Configured by the site through filters (kits_*).
+ * Description: Shared layer for Kits by Wugweb sites: form engine with spam guard (ALTCHA), share bar, consent-mode analytics, attribution and Kits admin.
  * Version: 1.0.0
  * Requires at least: 6.5
  * Requires PHP: 8.0
  * Author: Wugweb
  * Author URI: https://wugweb.com
  * License: GPL-2.0-or-later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Update URI: https://wugweb.com/plugins/kits-core/
  * Text Domain: kits-core
  * Domain Path: /languages

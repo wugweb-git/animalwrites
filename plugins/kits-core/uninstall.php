@@ -1,7 +1,7 @@
 <?php
 /**
- * Uninstall Kits Core. By default it deletes nothing: theme options, form settings, saved keys, publisher records and
- * visit counts stay, so reinstalling finds everything as it was.
+ * Uninstall Kits Core. By default it deletes nothing: theme options, form settings, saved keys and publisher records
+ * stay, so reinstalling finds everything as it was.
  *
  * Only when Kits → Settings → Uninstall → "Delete this plugin's data when it is deleted" is ticked
  * (kits_delete_data_on_uninstall is true) does it delete Kits Core's own data, exactly this:
@@ -25,7 +25,8 @@
  * - Anything belonging to another plugin or to WordPress itself.
  *
  * Before deleting, writes a backup to wp-content/uploads/wugweb-backups/kits-core-uninstall-<YYYYmmdd-His>.jsonl.gz
- * (includes/uninstall-backup.php): a header line, then every option below with its value as stored, then every row of
+ * (includes/uninstall-backup.php): a header line, then every option below (except kits_altcha_key, a regenerated
+ * secret that is deleted but never written to the backup file) with its value as stored, then every row of
  * every table below (transients are caches and are not kept). If the backup cannot be written, nothing is deleted.
  *
  * Runs for the current site only.
@@ -54,8 +55,12 @@ $kits_options = array(
 	'kits_spot_map',
 );
 
+// The ALTCHA signing key is deleted but kept OUT of the backup file: it is a secret (regenerated on demand), and the
+// backup lives under uploads/, which is URL-reachable on servers that ignore .htaccess (for example nginx).
+$kits_backup_options = array_values( array_diff( $kits_options, array( 'kits_altcha_key' ) ) );
+
 require_once __DIR__ . '/includes/uninstall-backup.php';
-if ( ! kits_uninstall_backup( 'kits-core', __DIR__ . '/kits-core.php', array_merge( $kits_options, array( 'kits_delete_data_on_uninstall' ) ), array(), array() ) ) {
+if ( ! kits_uninstall_backup( 'kits-core', __DIR__ . '/kits-core.php', array_merge( $kits_backup_options, array( 'kits_delete_data_on_uninstall' ) ), array(), array() ) ) {
 	return; // No backup, no delete (the reason is in the error log).
 }
 
