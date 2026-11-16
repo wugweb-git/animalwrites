@@ -1,14 +1,10 @@
 <?php
 /**
- * News article page: the read-more fold and the ad-slot hook.
- *
- * Fold: a News body with more than 5 paragraphs shows paragraphs 1 to 3, then a 64px faded peek of the rest and a
- * "Read full summary" button (aria-expanded, aria-controls; aw.js opens it). The full text is in the page, so search and
- * a visitor without JavaScript get all of it (the <noscript> rule shows it and hides the button).
+ * News article page: the ad-slot hook (the read-more fold was dropped, owner 14 Nov 2026).
  *
  * Ads: nothing is built. aw_news_ad_slot( '', 'after-p3' | 'after-sources' ) is the hook; a slot prints, with its
  * reserved height and an "Advertisement" label, only when a filter gives it content. Not above the headline, no fixed bottom banner,
- * no popup. The two positions are at least 600px apart once the fold is open; with it shut a plugin should print one only.
+ * no popup. The two positions are at least 600px apart.
  *
  * @package animal-writes-core
  */
@@ -49,14 +45,7 @@ add_filter(
 		$head = substr( $html, 0, $ends[2] );
 		$rest = substr( $html, $ends[2] );
 		$ad   = aw_news_ad_slot( 'after-p3' );
-		if ( count( $ends ) <= 5 ) {
-			return $head . $ad . $rest;
-		}
-		$rest = preg_replace( '/<p(?=[\s>])/i', '<p tabindex="-1"', $rest, 1 ); // the first new paragraph takes focus when the fold opens
-		return $head . $ad
-			. '<div class="aw-fold" data-aw-fold><div class="aw-fold-body" id="aw-fold-body">' . $rest . '</div>'
-			. '<button type="button" class="aw-fold-btn" aria-expanded="false" aria-controls="aw-fold-body" data-open="' . esc_attr__( 'Show less', 'animal-writes-core' ) . '" data-shut="' . esc_attr__( 'Read full summary', 'animal-writes-core' ) . '">' . esc_html__( 'Read full summary', 'animal-writes-core' ) . '</button>'
-			. '<noscript><style>.aw-fold-body{max-height:none!important;-webkit-mask-image:none!important;mask-image:none!important}.aw-fold-btn{display:none!important}</style></noscript></div>';
+		return $head . $ad . $rest;
 	}
 );
 

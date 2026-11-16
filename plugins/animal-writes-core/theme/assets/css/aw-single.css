@@ -142,17 +142,6 @@
 		linear-gradient(180deg, var(--aw-tp-top), var(--aw-tp-base)); }
 }
 
-/* News read-more fold: the text after paragraph 3 is clipped to a 64px fade, "Read full summary" opens it (aw.js). The clip is
-   on by default, so the page does not move when the script starts; a visitor without JavaScript gets the <noscript> rule
-   printed with the fold: full text, no button. */
-.single-aw_news .aw-fold-body { position: relative; overflow: hidden; }
-.single-aw_news .aw-fold:not(.is-open) .aw-fold-body { max-height: 64px; -webkit-mask-image: linear-gradient(#000, transparent); mask-image: linear-gradient(#000, transparent); }
-.single-aw_news .aw-fold-body > :first-child { margin-top: 0; }
-.single-aw_news .aw-fold-btn { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; margin-top: var(--kit-space-3); padding: 0 24px; border: 1px solid #141414; border-radius: 24px; background: #fff; color: #141414; font: inherit; font-weight: 700; cursor: pointer; }
-.single-aw_news .aw-fold-btn:hover { background: #141414; color: #fff; }
-.single-aw_news .aw-fold-btn:focus-visible, .single-aw_news .aw-fold-body > p:focus-visible { outline: 3px solid #141414; outline-offset: 3px; }
-@media (prefers-reduced-motion: reduce) { .single-aw_news .aw-fold-btn { transition: none; } }
-
 /* News ad slot hook (nothing is built yet: the slot prints only when aw_news_ad_slot gives it something). Positions: after
    paragraph 3 and after Sources. The height is reserved so the page does not move: 250px on a phone, a 280x600 sticky box in the desktop rail. */
 .aw-ad-slot { box-sizing: border-box; margin: var(--kit-space-5) 0; }
