@@ -1,4 +1,4 @@
-# Accessibility audit: Animal Writes 2.0
+# Accessibility audit: Animal Writes
 
 **History (snapshot of 5 Oct 2026); current state: docs/pending.md and docs/plugin-map.md.**
 
@@ -6,7 +6,7 @@
 **Method:** axe-core 4.10 run in the browser on every page type at 1280px and 375px, plus scripted checks for horizontal overflow and target size, plus manual keyboard, focus and form checks.
 
 ## Pages covered (each at 1280px and 375px)
-Home · Directory · Directory state page (Maharashtra, empty state) · Listing (Barkville Foundation, with claim form) · Legal Watch · Legal item · News · News item · Knowledge Centre · Guide · Research Library · Research item (PDF viewer) · Opportunities · Opportunity · Campaigns · Campaign (Animal Writes 1.0, receipt upload) · Resources · Resource · Helplines · Get involved (volunteer form) · About · Search results · 404.
+Home · Directory · Directory state page (Maharashtra, empty state) · Listing (Barkville Foundation, with claim form) · Legal Watch · Legal item · News · News item · Knowledge Centre · Guide · Research Library · Research item (PDF viewer) · Opportunities · Opportunity · Campaigns · Campaign (the Animal Writes case study, receipt upload) · Resources · Resource · Helplines · Get involved (volunteer form) · About · Search results · 404.
 
 ## Result
 **Before:** 7 distinct issues across all pages, 3 of them serious. **After:** 0 axe violations on all 23 page types at both widths. No horizontal overflow.

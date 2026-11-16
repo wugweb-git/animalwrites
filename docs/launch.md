@@ -8,7 +8,7 @@
 
 | From (1.0) | To (2.0) | Code |
 |---|---|---|
-| `animalwrites.in/` | 2.0 homepage `/` | none needed once DNS points at Hostinger |
+| `animalwrites.in/` | the new homepage `/` | none needed once DNS points at Hostinger |
 | `animalwrites.in/campaign` | `/campaigns/animal-writes-1-0/` (1.0 case study, once published) | 301 |
 | `www.animalwrites.in/*` | `https://animalwrites.in/*` | 301 |
 
@@ -33,7 +33,7 @@ it defaults to `animal-writes-1-0`.
 - Site Kit (optional, for GA reports inside WP Admin): connect it with the Google account that
   owns the GA4 property and **leave Site Kit's Tag Manager snippet off** (or, if you turn it on,
   Animal Writes Core automatically stops printing its own copy).
-- `GA_PROPERTY_ID` (the numeric GA4 property ID) was only stored as a secret on the 1.0 Supabase
+- `GA_PROPERTY_ID` (the numeric GA4 property ID) was only stored as a secret on the old Supabase
   edge function, which has been deleted. It is not in the code. Find it in Google Analytics →
   Admin → Property settings (only needed for the GA4 Data API, not for tracking).
 

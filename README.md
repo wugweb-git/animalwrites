@@ -1,4 +1,4 @@
-# Animal Writes 2.0 — WordPress
+# Animal Writes — WordPress
 
 Live at https://animalwrites.in. How changes are made, reviewed and shipped: [CLAUDE.md](CLAUDE.md).
 

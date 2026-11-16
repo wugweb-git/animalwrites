@@ -1,4 +1,4 @@
-# Animal Writes 2.0: status
+# Animal Writes: status
 
 **This file is a snapshot of 7 Oct 2026, kept as history.** Current state: [pending.md](pending.md) (open and done work) and [plugin-map.md](plugin-map.md) (what each file does). What changed since, in short (31 Oct 2026):
 - Plugins: Animal Writes Core, AW Sourcing, AW SEO extras (with Rank Math, the SEO system; sitemap `/sitemap_index.xml`), Kits Core (reusable parts only), Mailweb 3.2, Fluent Forms + FluentCRM, Advanced Ads (switched off on live), LiteSpeed Cache, Site Kit.
@@ -9,7 +9,7 @@
 - Breakpoints 768 / 1200 (640 retired).
 
 **Site and stack**
-- **Live:** https://animalwrites.in · **Admin:** /wp-admin · **1.0 archive:** old.animalwrites.in (cancelled; the 1.0 site will be deleted).
+- **Live:** https://animalwrites.in · **Admin:** /wp-admin · **old archive:** old.animalwrites.in (cancelled; the old site will be deleted).
 - **Stack:** WordPress 7.1.3 + PHP/MySQL on Hostinger.
   - **Themes:** Kits by Wugweb (master), Animal Writes (child).
   - **Plugins:** Animal Writes Core (also loads Kits Core), LiteSpeed Cache, Site Kit.
@@ -133,8 +133,8 @@
 | Data | Where | Status |
 |---|---|---|
 | Live site | Hostinger MySQL | live |
-| Volunteers | FluentCRM, tag Volunteer (`aw_volunteers` kept read-only as the backup: view and export only) | **88** 1.0 volunteers recovered (from the session log and campaign screenshots); the 2.0 form writes to FluentCRM only (24 Oct 2026) |
-| 1.0 Supabase export (18,222 rows: volunteers + receipts) | — | **lost.** Exported and checksum-verified on 5 Oct, then the project was deleted and every local copy was gone by 7 Oct. Two whole-disk scans found nothing; Supabase can't restore it |
+| Volunteers | FluentCRM, tag Volunteer (`aw_volunteers` kept read-only as the backup: view and export only) | **88** 1.0 volunteers recovered (from the session log and campaign screenshots); the form writes to FluentCRM only (24 Oct 2026) |
+| old Supabase export (18,222 rows: volunteers + receipts) | — | **lost.** Exported and checksum-verified on 5 Oct, then the project was deleted and every local copy was gone by 7 Oct. Two whole-disk scans found nothing; Supabase can't restore it |
 | Consent | volunteer and newsletter forms | consent tick box on both (DPDP). 1.0 volunteers must opt in before any newsletter: the invitation in WP Admin → Newsletter carries a confirm link |
 | Newsletter subscribers | `aw_subscribers` (WP Admin → Newsletter: counts, CSV export, send) | sign-up on Get involved with email confirmation; 0 so far |
 
@@ -148,11 +148,11 @@
 - **Docs:** `docs/design-system.md` (scales, states, component specs) and `docs/accessibility-audit.md`.
 - **Accessibility:** 0 WCAG 2.1 AA automated failures (20 pages × desktop and phone, 7 Oct). Visual QA found no sideways scrolling, no broken images and no text overflow.
 
-## 9. 1.0 → 2.0
+## 9. Old site → new site
 
-| 1.0 | 2.0 |
+| Old site | New site |
 |---|---|
-| Story sections, impact stats, FAQ, press, gallery | 1.0 case study in the Campaign Hub |
+| Story sections, impact stats, FAQ, press, gallery | the Animal Writes case study in the Campaign Hub |
 | Letter templates | Resources (6) |
 | Supporters | Directory (13) |
 | Logo, colours, font | theme |
@@ -179,7 +179,7 @@
 **Copy needed:** the new pages carry "Copy needed" markers that only logged-in editors see.
 
 ## 10. Notion
-- **🐾 Animal Writes 2.0:** build status and a **Pending** section (merged from the ⏳ Pending page, which now points there), updated 7 Oct.
+- **🐾 Animal Writes:** build status and a **Pending** section (merged from the ⏳ Pending page, which now points there), updated 7 Oct.
 - **Topic write-ups and photos** table: the owner fills it in; it is copied to WP Admin → Topics.
 
 ## 11. Pending
