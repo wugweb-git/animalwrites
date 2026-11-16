@@ -104,7 +104,14 @@ function planweb_site_choices(): array {
 function planweb_site_types(): array {
 	$choices = planweb_site_choices();
 	$stored  = get_option( PLANWEB_SITE_TYPES, null );
-	$picked  = is_array( $stored ) ? array_map( 'strval', $stored ) : array_diff( array_keys( $choices ), PLANWEB_SITE_SKIP );
+	/**
+	 * Post types left out of the site schedule by default (before the admin picks any).
+	 * Default: PLANWEB_SITE_SKIP. A generic site can tune this without the Animal Writes bulk types.
+	 *
+	 * @param string[] $skip Post-type slugs to skip.
+	 */
+	$skip   = array_map( 'strval', (array) apply_filters( 'planweb_site_skip_types', PLANWEB_SITE_SKIP ) );
+	$picked = is_array( $stored ) ? array_map( 'strval', $stored ) : array_diff( array_keys( $choices ), $skip );
 	return array_values( array_intersect( array_keys( $choices ), $picked ) );
 }
 
