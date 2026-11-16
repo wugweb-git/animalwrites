@@ -1,0 +1,567 @@
+# Copyright (C) 2026 Wugweb
+# This file is distributed under the GNU General Public License v2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Kits by Wugweb 2.2.0\n"
+"Report-Msgid-Bugs-To: https://wugweb.com/kits/\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-11-16T21:16:53+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: kits-by-wugweb\n"
+
+#. Theme Name of the theme
+#: style.css
+msgid "Kits by Wugweb"
+msgstr ""
+
+#. Theme URI of the theme
+#: style.css
+msgid "https://kits.wugweb.studio"
+msgstr ""
+
+#. Description of the theme
+#: style.css
+msgid "Kits by Wugweb is a multipurpose block theme. Colours, type, spacing and layout are set in Appearance > Editor > Styles, and each site keeps its own look as a style variation."
+msgstr ""
+
+#. Author of the theme
+#: style.css
+msgid "Wugweb"
+msgstr ""
+
+#. Author URI of the theme
+#: style.css
+msgid "https://wugweb.com"
+msgstr ""
+
+#: functions.php:137
+msgid "Kits: Components"
+msgstr ""
+
+#: functions.php:138
+msgid "Kits: Lists"
+msgstr ""
+
+#: functions.php:151
+msgid "Secondary"
+msgstr ""
+
+#: functions.php:152
+msgid "Ghost"
+msgstr ""
+
+#: functions.php:153
+msgid "Brand"
+msgstr ""
+
+#: functions.php:158
+msgid "Card"
+msgstr ""
+
+#: functions.php:159
+msgid "Surface"
+msgstr ""
+
+#: functions.php:160
+msgid "Section"
+msgstr ""
+
+#: functions.php:161
+msgid "Head band"
+msgstr ""
+
+#: functions.php:164
+msgid "Hairline"
+msgstr ""
+
+#: functions.php:167
+msgid "Label"
+msgstr ""
+
+#: functions.php:168
+msgid "Note"
+msgstr ""
+
+#: functions.php:171
+msgid "Sources"
+msgstr ""
+
+#: functions.php:175
+#: functions.php:251
+msgid "Beta"
+msgstr ""
+
+#: functions.php:267
+msgid "Primary"
+msgstr ""
+
+#. translators: %s: card state
+#: functions.php:1130
+#, php-format
+msgid "Card: %s"
+msgstr ""
+
+#: patterns/banner.php
+msgctxt "Pattern title"
+msgid "Banner"
+msgstr ""
+
+#: patterns/banner.php
+msgctxt "Pattern description"
+msgid "A wide image with optional text on it: 16:5 on wide screens, 4:3 on phones. Shows nothing until an image is chosen. Source images up to 5 MB; WebP or AVIF."
+msgstr ""
+
+#: patterns/card-grid.php
+msgctxt "Pattern title"
+msgid "Card grid — latest"
+msgstr ""
+
+#: patterns/category-hub.php
+msgctxt "Pattern title"
+msgid "Category hub — category list"
+msgstr ""
+
+#: patterns/cta.php
+msgctxt "Pattern title"
+msgid "Call to action"
+msgstr ""
+
+#: patterns/empty-state.php
+msgctxt "Pattern title"
+msgid "Empty state"
+msgstr ""
+
+#: patterns/empty-state.php:12
+msgid "Nothing here yet"
+msgstr ""
+
+#: patterns/empty-state.php:16
+msgid "Try another search or browse the latest updates."
+msgstr ""
+
+#: patterns/faq.php
+msgctxt "Pattern title"
+msgid "FAQ"
+msgstr ""
+
+#: patterns/hero-split.php
+msgctxt "Pattern title"
+msgid "Hero — split"
+msgstr ""
+
+#: patterns/hero.php
+msgctxt "Pattern title"
+msgid "Hero"
+msgstr ""
+
+#: patterns/hero.php
+msgctxt "Pattern description"
+msgid "Page hero (Kits Hero block): label, H1, one line and two actions. Its height, colours and padding are set in Styles > Blocks > Hero."
+msgstr ""
+
+#: patterns/lead-list.php
+msgctxt "Pattern title"
+msgid "Lead + list"
+msgstr ""
+
+#: patterns/lead-list.php
+msgctxt "Pattern description"
+msgid "Section head (kit-sec-head: H2 and a ghost \"See all\" button, the same head as every Home section) with a link, one lead post (large image and headline) and the next four as a ruled list."
+msgstr ""
+
+#: patterns/newsletter.php
+msgctxt "Pattern title"
+msgid "Newsletter signup"
+msgstr ""
+
+#: patterns/section.php
+msgctxt "Pattern title"
+msgid "Section"
+msgstr ""
+
+#: patterns/section.php
+msgctxt "Pattern description"
+msgid "A full-width section (Group style Section): its padding, background and gap are set in Styles > Blocks > Group > Section."
+msgstr ""
+
+#: patterns/sponsored-label.php
+msgctxt "Pattern title"
+msgid "Sponsored label"
+msgstr ""
+
+#: patterns/three-big-actions.php
+msgctxt "Pattern title"
+msgid "Three big actions"
+msgstr ""
+
+#: patterns/three-big-actions.php
+msgctxt "Pattern description"
+msgid "A dark band with a section head (kit-sec-head, as on every section) and three large, linked actions; the first is filled with the accent colour."
+msgstr ""
+
+#: assets/js/button-options.js:46
+msgid "Size and content"
+msgstr ""
+
+#: assets/js/button-options.js:48
+msgid "Size"
+msgstr ""
+
+#: assets/js/button-options.js:50
+msgid "Default"
+msgstr ""
+
+#: assets/js/button-options.js:50
+msgid "Small"
+msgstr ""
+
+#: assets/js/button-options.js:55
+msgid "Content"
+msgstr ""
+
+#: assets/js/button-options.js:58
+msgid "Icon and label"
+msgstr ""
+
+#: assets/js/button-options.js:59
+msgid "Label only (no icon)"
+msgstr ""
+
+#: assets/js/button-options.js:60
+msgid "Icon only (the text stays as its name)"
+msgstr ""
+
+#: assets/js/button-options.js:62
+msgid "The button text is read out by screen readers and hidden on screen. Choose an icon below."
+msgstr ""
+
+#: assets/js/button-options.js:62
+msgid "No arrow and no icon."
+msgstr ""
+
+#: assets/js/button-options.js:62
+msgid "The icon is → inside the site, ↗ when the link leaves it, or the icon chosen below."
+msgstr ""
+
+#: assets/js/button-options.js:67
+msgid "Icon"
+msgstr ""
+
+#: assets/js/button-options.js:69
+msgid "Automatic"
+msgstr ""
+
+#: theme.json
+msgctxt "Color name"
+msgid "Accent"
+msgstr ""
+
+#: theme.json
+msgctxt "Color name"
+msgid "Accent ink"
+msgstr ""
+
+#: theme.json
+msgctxt "Color name"
+msgid "Ink"
+msgstr ""
+
+#: theme.json
+msgctxt "Color name"
+msgid "Text"
+msgstr ""
+
+#: theme.json
+msgctxt "Color name"
+msgid "Muted"
+msgstr ""
+
+#: theme.json
+msgctxt "Color name"
+msgid "Line"
+msgstr ""
+
+#: theme.json
+msgctxt "Color name"
+msgid "Page"
+msgstr ""
+
+#: theme.json
+msgctxt "Color name"
+msgid "Surface"
+msgstr ""
+
+#: theme.json
+msgctxt "Color name"
+msgid "Raised"
+msgstr ""
+
+#: theme.json
+msgctxt "Color name"
+msgid "On ink"
+msgstr ""
+
+#: theme.json
+msgctxt "Color name"
+msgid "Focus"
+msgstr ""
+
+#: theme.json
+msgctxt "Color name"
+msgid "Danger"
+msgstr ""
+
+#: theme.json
+msgctxt "Color name"
+msgid "Success"
+msgstr ""
+
+#: theme.json
+msgctxt "Color name"
+msgid "Warning"
+msgstr ""
+
+#: theme.json
+msgctxt "Color name"
+msgid "Danger tint"
+msgstr ""
+
+#: theme.json
+msgctxt "Color name"
+msgid "Success tint"
+msgstr ""
+
+#: theme.json
+msgctxt "Color name"
+msgid "Warning tint"
+msgstr ""
+
+#: theme.json
+msgctxt "Color name"
+msgid "Info tint"
+msgstr ""
+
+#: theme.json
+msgctxt "Color name"
+msgid "WhatsApp"
+msgstr ""
+
+#: theme.json
+msgctxt "Font family name"
+msgid "Inter"
+msgstr ""
+
+#: theme.json
+msgctxt "Font family name"
+msgid "Inter (headings)"
+msgstr ""
+
+#: theme.json
+msgctxt "Font size name"
+msgid "Caption"
+msgstr ""
+
+#: theme.json
+msgctxt "Font size name"
+msgid "XS"
+msgstr ""
+
+#: theme.json
+msgctxt "Font size name"
+msgid "Meta"
+msgstr ""
+
+#: theme.json
+msgctxt "Font size name"
+msgid "Small"
+msgstr ""
+
+#: theme.json
+msgctxt "Font size name"
+msgid "Base"
+msgstr ""
+
+#: theme.json
+msgctxt "Font size name"
+msgid "Lead"
+msgstr ""
+
+#: theme.json
+msgctxt "Font size name"
+msgid "Placard"
+msgstr ""
+
+#: theme.json
+msgctxt "Font size name"
+msgid "H4"
+msgstr ""
+
+#: theme.json
+msgctxt "Font size name"
+msgid "H3"
+msgstr ""
+
+#: theme.json
+msgctxt "Font size name"
+msgid "H2"
+msgstr ""
+
+#: theme.json
+msgctxt "Font size name"
+msgid "H1"
+msgstr ""
+
+#: theme.json
+msgctxt "Font size name"
+msgid "Display"
+msgstr ""
+
+#: theme.json
+msgctxt "Space size name"
+msgid "None"
+msgstr ""
+
+#: theme.json
+msgctxt "Space size name"
+msgid "1 (4px)"
+msgstr ""
+
+#: theme.json
+msgctxt "Space size name"
+msgid "2 (8px)"
+msgstr ""
+
+#: theme.json
+msgctxt "Space size name"
+msgid "3 (12px)"
+msgstr ""
+
+#: theme.json
+msgctxt "Space size name"
+msgid "4 (16px)"
+msgstr ""
+
+#: theme.json
+msgctxt "Space size name"
+msgid "5 (24px)"
+msgstr ""
+
+#: theme.json
+msgctxt "Space size name"
+msgid "6 (32px)"
+msgstr ""
+
+#: theme.json
+msgctxt "Space size name"
+msgid "7 (40px)"
+msgstr ""
+
+#: theme.json
+msgctxt "Space size name"
+msgid "8 (48px)"
+msgstr ""
+
+#: theme.json
+msgctxt "Space size name"
+msgid "Section (48 / 70 / 96)"
+msgstr ""
+
+#: theme.json
+msgctxt "Border radius size name"
+msgid "Control"
+msgstr ""
+
+#: theme.json
+msgctxt "Border radius size name"
+msgid "Card"
+msgstr ""
+
+#: theme.json
+msgctxt "Border radius size name"
+msgid "Media"
+msgstr ""
+
+#: theme.json
+msgctxt "Border radius size name"
+msgid "Pill"
+msgstr ""
+
+#: theme.json
+msgctxt "Aspect ratio name"
+msgid "Standard 4:3"
+msgstr ""
+
+#: theme.json
+msgctxt "Aspect ratio name"
+msgid "Portrait 3:4"
+msgstr ""
+
+#: theme.json
+msgctxt "Aspect ratio name"
+msgid "Featured 3:2"
+msgstr ""
+
+#: theme.json
+msgctxt "Aspect ratio name"
+msgid "Square 1:1"
+msgstr ""
+
+#: theme.json
+msgctxt "Aspect ratio name"
+msgid "Wide 16:9"
+msgstr ""
+
+#: theme.json
+msgctxt "Shadow name"
+msgid "Elevation 1"
+msgstr ""
+
+#: theme.json
+msgctxt "Shadow name"
+msgid "Elevation 2"
+msgstr ""
+
+#: theme.json
+msgctxt "Shadow name"
+msgid "Elevation 3"
+msgstr ""
+
+#: theme.json
+msgctxt "Shadow name"
+msgid "Brand offset"
+msgstr ""
+
+#: theme.json
+msgctxt "Template part name"
+msgid "Header"
+msgstr ""
+
+#: theme.json
+msgctxt "Template part name"
+msgid "Footer"
+msgstr ""
+
+#: theme.json
+msgctxt "Template part name"
+msgid "Sidebar"
+msgstr ""
+
+#: theme.json
+msgctxt "Template part name"
+msgid "Above the footer (newsletter)"
+msgstr ""
+
+#: theme.json
+msgctxt "Custom template name"
+msgid "Page — Wide"
+msgstr ""
+
+#: styles/colours/ink.json
+msgctxt "Style variation name"
+msgid "Colours: Ink"
+msgstr ""

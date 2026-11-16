@@ -300,6 +300,7 @@ add_action( 'enqueue_block_assets', 'kits_button_own_host_css' );
 function kits_button_editor_options() {
 	$f = get_template_directory() . '/assets/js/button-options.js';
 	wp_enqueue_script( 'kits-button-options', get_template_directory_uri() . '/assets/js/button-options.js', array( 'wp-hooks', 'wp-compose', 'wp-element', 'wp-block-editor', 'wp-components', 'wp-i18n' ), (string) filemtime( $f ), true );
+	wp_set_script_translations( 'kits-button-options', 'kits-by-wugweb', get_template_directory() . '/languages' ); // so the editor control's strings load from a locale's JSON.
 }
 add_action( 'enqueue_block_editor_assets', 'kits_button_editor_options' );
 
