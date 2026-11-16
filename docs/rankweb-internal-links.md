@@ -7,7 +7,7 @@ or click depth. RankWeb reads it, never writes it.
 Four phases, each usable on its own:
 
 1. **Auto-linker** (done on branch `claude/rankweb-internal-links`, 14 Nov 2026).
-2. Link audit: links in and out, click depth, orphans, broken links, redirects, nofollow, canonicals elsewhere.
+2. **Link audit** (built 16 Nov 2026 on branch `claude/rankweb-link-audit`): links in and out, click depth, orphans, broken links, redirects, nofollow, canonicals elsewhere.
 3. Anchor mix: anchor types per target, warnings, keyword rotation.
 4. Silos: hub and supporting items, virtual and circle modes.
 
@@ -39,3 +39,31 @@ An item the HTML parser would change (camelCase SVG attributes, a div inside a p
 | Never link an item to itself | 1 (on) |
 | Skip a page the item already links to by hand | 1 (on) |
 | Items left out (never linked from or to) | none |
+
+## Phase 2: link audit
+
+Scheduled job `aw_link_audit` (daily, or "Run the audit now" on RankWeb → Internal links). It works in slices of about 20
+seconds and carries on in a one-off event (`more`) until done, so no browser tab must stay open. WP-Cron only: Action
+Scheduler is not used. Three steps:
+
+1. **Collect.** Each published item of the linked post types is rendered (`the_content`), linked as a visitor would see it
+   (same index and settings as the auto-linker, `aw_link_run()`) and its links are recorded in `{prefix}aw_links`.
+2. **Check.** Addresses on this site that no item owns are asked for once (HEAD, no redirect followed, answer kept six
+   days): 404 and 410 are broken, 3xx is a redirect. An error or a refusal is never counted as broken.
+3. **Analyse.** `AW_Link_Audit` (pure PHP, `class-aw-link-audit.php`) works out each item's links in and out, clicks from the
+   home page (breadth first from the items the home page and the menus link to), and the findings. The result is one row
+   per item in `{prefix}aw_link_audit`.
+
+Findings: orphan (nothing links in; a link from the home page or a menu counts), too many clicks from the home page (or no
+way to reach it), too many links in the item, broken link, link through a redirect (also a link written with an old
+address of an item), internal nofollow, link to an item whose canonical points elsewhere, link to an address on the
+do-not-link list.
+
+The first click is the front page (when it is a page), menus, and block navigation and template parts saved in the
+database. Template files that only live in the theme are not read. Rank Math's link counter is not used.
+
+Settings (RankWeb → Settings → Internal links): most clicks from the home page (3), most links in one item (100),
+addresses not to link to (thank-you, thanks, download). Screen: RankWeb → Internal links (core list table, filter by
+finding). Dashboard tile "Internal links" (orphans, items with a finding). REST: `GET rankweb/v1/links`
+(flag, page, per_page), `GET links/summary`, `POST links/audit` (administrators). Table `{prefix}aw_link_audit` has its
+own version option `aw_link_audit_db`; uninstall removes it, with the audit's options.

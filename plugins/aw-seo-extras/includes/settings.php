@@ -312,7 +312,7 @@ function aw_seo_modules(): array {
 		'internal-links' => array(
 			'label'  => 'Internal links',
 			'switch' => true,
-			'files'  => array( 'internal-links' ),
+			'files'  => array( 'internal-links', 'link-audit' ),
 			'desc'   => 'Links items to each other from their link keywords, and records every link in each item. Adds no link until a post type is listed.',
 			'fields' => array(
 				'AW_LINK_TYPES' => array( 'type' => 'list', 'label' => 'Post types linked', 'help' => 'Items of these types get links and can be linked to. One post type per line. Empty: no links are added.', 'default' => array() ),
@@ -322,6 +322,9 @@ function aw_seo_modules(): array {
 				'AW_LINK_NO_SELF' => array( 'type' => 'int', 'label' => 'Never link an item to itself (1 on, 0 off)', 'help' => '', 'default' => 1 ),
 				'AW_LINK_SKIP_LINKED' => array( 'type' => 'int', 'label' => 'Skip a page the item already links to by hand (1 on, 0 off)', 'help' => '', 'default' => 1 ),
 				'AW_LINK_EXCLUDE' => array( 'type' => 'list', 'label' => 'Items left out', 'help' => 'Never linked from or to. One item ID per line.', 'default' => array() ),
+				'AW_LINK_AUDIT_DEPTH' => array( 'type' => 'int', 'label' => 'Audit: most clicks from the home page', 'help' => 'An item further away than this is listed as too deep.', 'default' => 3 ),
+				'AW_LINK_AUDIT_MAX' => array( 'type' => 'int', 'label' => 'Audit: most links in one item', 'help' => 'An item with more links than this is listed as having too many.', 'default' => 100 ),
+				'AW_LINK_AUDIT_AVOID' => array( 'type' => 'list', 'label' => 'Audit: addresses not to link to', 'help' => 'A link whose address contains one of these words is listed (thank-you and download pages). One per line.', 'default' => array( 'thank-you', 'thanks', 'download' ) ),
 			),
 		),
 	);

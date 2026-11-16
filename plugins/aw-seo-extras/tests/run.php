@@ -132,7 +132,7 @@ foreach ( aw_seo_modules() as $key => $mod ) {
 		rw_check( $back === $f['default'], "default round trip {$key}.{$const}" );
 	}
 }
-rw_check( 38 === $fields, "38 fields found ({$fields})" ); // 31, and 7 for Internal links (14 Nov 2026)
+rw_check( 41 === $fields, "41 fields found ({$fields})" ); // 31, 7 for Internal links (14 Nov 2026) and 3 for its audit (16 Nov 2026)
 
 $tabs = array_keys( array_filter( aw_seo_setting_tabs(), fn( $t ) => empty( $t['hidden'] ) ) );
 rw_check( 8 === count( $tabs ), 'eight groups (Internal links added 14 Nov 2026): ' . implode( ', ', $tabs ) );

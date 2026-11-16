@@ -42,11 +42,15 @@ const AW_LINK_MAX_KWS    = 20; // keywords per item
 /**
  * A table name with the site prefix.
  *
- * @param string $name 'keywords' or 'links'.
+ * @param string $name 'keywords', 'links' or 'audit'.
  */
 function aw_link_table( string $name ): string {
 	global $wpdb;
-	return $wpdb->prefix . ( 'keywords' === $name ? 'aw_link_keywords' : 'aw_links' );
+	$names = array(
+		'keywords' => 'aw_link_keywords',
+		'audit'    => 'aw_link_audit',
+	);
+	return $wpdb->prefix . ( $names[ $name ] ?? 'aw_links' );
 }
 
 /** Create or update the two tables when their version changes (one option read when nothing changed). */
@@ -472,6 +476,34 @@ function aw_link_wanted(): bool {
 }
 
 /**
+ * Link one item's HTML with the index and the settings (the front end and the audit both run this).
+ *
+ * @param string $html Content HTML.
+ * @param int    $id   The item's ID.
+ * @return array AW_Linker::link() result.
+ */
+function aw_link_run( string $html, int $id ): array {
+	return AW_Linker::link(
+		$html,
+		aw_link_index(),
+		function ( int $tid ): string {
+			$t = get_post( $tid );
+			return $t instanceof WP_Post && aw_link_is_target( $t ) ? (string) get_permalink( $t ) : '';
+		},
+		array(
+			'max_links'      => (int) AW_LINK_MAX,
+			'max_per_target' => (int) AW_LINK_MAX_PER_TARGET,
+			'first_only'     => (bool) AW_LINK_FIRST_ONLY,
+			'self_id'        => $id,
+			'no_self'        => (bool) AW_LINK_NO_SELF,
+			'skip_linked'    => (bool) AW_LINK_SKIP_LINKED,
+			'exclude'        => aw_link_excluded(),
+			'home'           => home_url(),
+		)
+	);
+}
+
+/**
  * The_content: the item's HTML with its links, from the cache when nothing changed.
  *
  * @param string $html Content HTML.
@@ -498,24 +530,7 @@ function aw_link_filter_content( $html ) {
 	if ( isset( $hit['h'][ $input ] ) ) {
 		return 0 === $hit['h'][ $input ] ? $html : (string) $hit['h'][ $input ]; // 0: nothing was linked, the input stands
 	}
-	$result             = AW_Linker::link(
-		$html,
-		aw_link_index(),
-		function ( int $tid ): string {
-			$t = get_post( $tid );
-			return $t instanceof WP_Post && aw_link_is_target( $t ) ? (string) get_permalink( $t ) : '';
-		},
-		array(
-			'max_links'      => (int) AW_LINK_MAX,
-			'max_per_target' => (int) AW_LINK_MAX_PER_TARGET,
-			'first_only'     => (bool) AW_LINK_FIRST_ONLY,
-			'self_id'        => $id,
-			'no_self'        => (bool) AW_LINK_NO_SELF,
-			'skip_linked'    => (bool) AW_LINK_SKIP_LINKED,
-			'exclude'        => aw_link_excluded(),
-			'home'           => home_url(),
-		)
-	);
+	$result             = aw_link_run( $html, $id );
 	$hit['h']           = array_slice( $hit['h'], -2, 2, true );
 	$hit['h'][ $input ] = $result['links'] ? $result['html'] : 0; // the HTML is kept only when a link was added
 	set_transient( $name, $hit, WEEK_IN_SECONDS );
