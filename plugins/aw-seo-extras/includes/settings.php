@@ -344,6 +344,15 @@ function aw_seo_modules(): array {
 				'AW_MEDIA_CAPTION' => array( 'type' => 'text', 'label' => 'Caption pattern for missing captions', 'help' => 'Placeholders: {title}, {filename}, {sitename}.', 'default' => '{title}' ),
 			),
 		),
+		'agent' => array(
+			'label'  => 'Agent tools',
+			'switch' => true,
+			'files'  => array( 'agent-tools' ),
+			'desc'   => 'RankWeb\'s work as WordPress abilities (the Abilities API, 6.9+), exposed to AI agents by the MCP adapter. Reads only, unless writes are allowed below.',
+			'fields' => array(
+				'AW_AGENT_WRITES' => array( 'type' => 'int', 'label' => 'Allow write abilities (1 on, 0 off)', 'help' => 'Off by default. The reads are always registered; the writes (set SEO, add redirect, set schema) are registered only when this is on, and each still checks the capability.', 'default' => 0 ),
+			),
+		),
 		'analysis' => array(
 			'label'  => 'Content analysis',
 			'switch' => true,

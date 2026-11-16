@@ -166,6 +166,11 @@ every output escaped, every string in the aw-seo-extras text domain.
 - **G. InsightWeb additions.** Index status (URL Inspection API), winners and losers, per-item performance badge and
   view, content SEO overview, PageSpeed on demand, country filter, monthly email digest.
 - **H. Agent tools.** RankWeb abilities through the WordPress Abilities API and MCP adapter, read first, then writes
-  that need edit_post.
+  that need edit_post. **Built 17 Nov 2026** on branch `claude/rankweb-agent` (stacked on F), not live yet. Module
+  "Agent tools": registers RankWeb abilities on `wp_abilities_api_init` (WordPress 6.9+; guarded by function_exists, so
+  nothing breaks without it). Reads (get-seo, audit-summary, list-orphans) register when the module is on; the writes
+  (set-seo, add-redirect, set-schema) only when "Allow writes" is on, and each checks its capability (edit_post or
+  manage_options). The MCP adapter plugin, where installed, exposes the public abilities. Pure `AW_Agent` (manifest,
+  name validation, input tidy) with tests. Needs the Abilities API and a live check (not run on WordPress here).
 
 When all phases are done: version 2.1.0, changelog, readme.
