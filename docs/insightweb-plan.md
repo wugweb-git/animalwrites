@@ -389,6 +389,27 @@ Kits-specific bits (branding, `kits/v1`, cross-plugin nav) injected as config vi
 session is extracting the shared shell as the template (see `docs/rankweb-org-rebrand.md` §4). This supersedes the
 "InsightWeb app on the Kits Core plugin shell" named in "Later, separate plan" below.
 
+**Shell package contract (from the RankWeb build session, 17 Nov; structurally final):**
+
+- It is a **source** package each plugin builds its *own* bundle from — **not** one runtime build shared across plugins
+  (WP.org plugins can't share a runtime dep cleanly). RankWeb's is `@rankweb/shell` (`packages/rankweb-shell`), built
+  with `@wordpress/scripts` to handle `rankweb-shell`, global `window.rankweb.shell`.
+- **For InsightWeb:** copy the shell src, change the one global line at the end of `index.js` to
+  `window.insightweb.shell`, and in `webpack.config.js` map the `@kits/shell` import to `requestToExternal`
+  `['insightweb','shell']` / `requestToHandle` `insightweb-shell`. Everything else stays byte-identical — **including
+  the `kits-` CSS class names (keep them)**. Distinct handle + global + PHP prefix per plugin = no collision when both
+  are active; no re-namespacing of the shell internals is needed.
+- **Config contract** (`wp_localize_script` into `window.<yourApp>`): `{ screen, name, version, icon, tabs:[{slug,
+  label, url, current}], rest:'insightweb/v1', canSwitch, … }`. The shell's `AppHeader` reads name/version/icon/tabs;
+  screens read rest+screen. Branding, cross-plugin nav and the REST namespace are all injected here — nothing
+  hardcoded in the shell.
+- **Tabs/screens:** pass the `insightweb_tabs` set as the `tabs` array (the shell renders the header); each screen body
+  is InsightWeb's own React component built against the shell's exports (`import { AppShell, AppHeader, SettingsGroup }
+  from '@kits/shell'`), routed by `app.screen`.
+- **Open (owner):** the canonical **shared source location** for the shell (so the plugins don't keep divergent copies)
+  is a suite-wide decision with the owner. Until then, build from the RankWeb copy as above. The staged shell-backed
+  tabs wait on this.
+
 ### Listing blockers (wp.org checklist)
 
 - **Slug** `insightweb` free (404 on wordpress.org/plugins/, verified 17 Nov); name has no third-party mark; main file =
