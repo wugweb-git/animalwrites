@@ -266,6 +266,36 @@ UI package, which the RankWeb session is still extracting. So the re-prefix (#2)
 land green standalone until those land; #3 and #7 are header-level and land with the skeleton (I1). Sequence the build
 I1 → I3 so each phase stays PHPCS/tests-green.
 
+### External-services registry (shared component, owner 17 Nov 2026)
+
+A single declared registry of every outbound integration, **shared** with SourceWeb (and the rest of the suite) — one
+implementation in a shared package, both plugins consume it. **Not an InsightWeb-only copy.** Shape to be agreed with
+the SourceWeb session so there is exactly one registry; the proposal below is the InsightWeb side of that agreement.
+
+- **Declaration.** Each service registers `{ id, hosts[], purpose, data_sent, terms_url, privacy_url, enabled }`.
+  Admin-added endpoints (e.g. an extra API the admin configures) register the same fields at runtime, so disclosure and
+  gating cover them too.
+- **Gating.** All outbound HTTP goes through a registry-aware wrapper (on top of `wp_safe_remote_*`). A call to a host
+  not registered-and-enabled for its `id` is refused (`WP_Error`), so an integration cannot phone home undisclosed.
+- **Generation (single source of truth).** The readme `== External services ==` section **and** an admin disclosure
+  screen are both generated from the registry — no hand-maintained second copy.
+- **Shared package, neutral naming.** Lives alongside the shared core (not in either plugin), with its **own neutral
+  package namespace** — not `aw_`, not `insightweb_`, not `kits_` (e.g. a `Wugweb\ServiceRegistry` namespace / a short
+  neutral prefix). Each plugin wraps it under its own prefix. Final name/shape agreed with SourceWeb.
+- **InsightWeb's registered surface:**
+  - **Google (Search Console + GA4)** — disclosed as **"accessed through the Site Kit by Google plugin"**: under model
+    (A) Site Kit makes the actual Google calls, so InsightWeb registers this as a *via-Site-Kit* entry (no direct
+    Google host of its own), with Google Terms/Privacy URLs.
+  - **PageSpeed Insights** — `www.googleapis.com` (`/pagespeedonline/v5/runPagespeed`); page URL sent; Google T/P.
+  - **Microsoft Clarity** — `www.clarity.ms`; own token; Microsoft T/P.
+  - **Bing Webmaster** — `ssl.bing.com`; site URL + own key; Microsoft T/P.
+  - **DB-IP** — `download.db-ip.com`; monthly country-lite file download, nothing sent; DB-IP T/P.
+  - **Crawl checks** — the site's own URLs/robots from outside; no third-party data.
+  - **Admin-added** — any endpoint the admin registers, same five fields.
+- **Status:** spec only. The code lands in the shared package once (a) the extracted build is scaffolded and (b) the
+  registry shape is agreed with SourceWeb — building it twice is the thing to avoid. It supersedes the hand-written
+  `== External services ==` added in-place to the live `readme.txt` (which stays as-is on the live plugin).
+
 ### What ports vs what is dropped
 
 **Ports (generic search-analytics features):** keyword records (roles, owning pages, GSC figures by day, priority,
