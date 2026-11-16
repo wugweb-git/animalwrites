@@ -12,7 +12,7 @@ Search Console, GA4, Clarity, PageSpeed and Bing insights: keyword records, risi
 
 == Description ==
 
-InsightWeb measures how a Kits site does in search. It reads data and makes suggestions; it never changes SEO settings, keyphrases or content. The SEO work itself (titles, schema, FAQ, canonicals, sitemaps) is RankWeb's.
+InsightWeb reads your Search Console and GA4 data (through Site Kit) and turns it into one record per keyword — its roles, the pages that own it, a priority and a suggested next action. Rising terms, quick wins and conflicts sit alongside. It only reads and suggests; it never changes SEO settings, keyphrases or content — the SEO work itself (titles, schema, FAQ, canonicals, sitemaps) is RankWeb's.
 
 = Search Insights =
 
