@@ -15,12 +15,12 @@ if ( ! defined( 'ABSPATH' ) ) {
  * theme rules allow one option, named after the theme.
  *
  * @param string $key     Entry.
- * @param mixed  $default What to return when the entry is not set.
+ * @param mixed  $fallback What to return when the entry is not set.
  * @return mixed
  */
-function kits_theme_store( string $key, $default = null ) {
+function kits_theme_store( string $key, $fallback = null ) {
 	$all = get_option( 'kits_by_wugweb', array() );
-	return is_array( $all ) && array_key_exists( $key, $all ) ? $all[ $key ] : $default;
+	return is_array( $all ) && array_key_exists( $key, $all ) ? $all[ $key ] : $fallback;
 }
 
 /**
@@ -62,7 +62,7 @@ function kits_setup() {
 	add_editor_style( 'assets/css/kits-v42.css' );
 	add_editor_style( 'assets/css/kit-tokens.css' );
 	add_editor_style( 'assets/css/kits.css' );
-	add_editor_style( 'assets/css/kit.css' ); // components and primitives: the editor shows content as the site does
+	add_editor_style( 'assets/css/kit.css' ); // components and primitives: the editor shows content as the site does.
 	add_editor_style( 'assets/css/kit-primitives.css' );
 }
 add_action( 'after_setup_theme', 'kits_setup' );
@@ -102,7 +102,7 @@ function kits_enqueue_styles() {
 		'kits',
 		get_template_directory_uri() . '/assets/css/kits.css',
 		array(),
-		(string) filemtime( get_template_directory() . '/assets/css/kits.css' ) // a new version on every change, so browsers never keep an old copy
+		(string) filemtime( get_template_directory() . '/assets/css/kits.css' ) // a new version on every change, so browsers never keep an old copy.
 	);
 }
 add_action( 'wp_enqueue_scripts', 'kits_enqueue_styles' );
@@ -117,7 +117,16 @@ function kits_enqueue_components() {
 	wp_enqueue_style( 'kit-components', $uri . '/' . $css, array( 'kit-tokens', 'kits' ), (string) filemtime( $dir . '/' . $css ) );
 	$css = kits_css_file( 'kit-primitives' );
 	wp_enqueue_style( 'kit-primitives', $uri . '/' . $css, array( 'kit-components' ), (string) filemtime( $dir . '/' . $css ) );
-	wp_enqueue_script( 'kit-interactions', $uri . '/assets/js/kit.js', array(), (string) filemtime( $dir . '/assets/js/kit.js' ), array( 'in_footer' => true, 'strategy' => 'defer' ) ); // scroll-in motion: the browser's own (element.animate), no GSAP (owner, 2 Nov 2026)
+	wp_enqueue_script(
+		'kit-interactions',
+		$uri . '/assets/js/kit.js',
+		array(),
+		(string) filemtime( $dir . '/assets/js/kit.js' ),
+		array(
+			'in_footer' => true,
+			'strategy'  => 'defer',
+		)
+	); // scroll-in motion: the browser's own (element.animate), no GSAP (owner, 2 Nov 2026).
 }
 add_action( 'wp_enqueue_scripts', 'kits_enqueue_components', 15 );
 
@@ -138,27 +147,27 @@ function kits_block_styles() {
 	$styles = array(
 		// Default (core "fill", shown as Primary) + these three. Size and content are extra CSS classes (docs/buttons.md).
 		// Retired names still render: kits-primary (= Brand), kits-small (= small Primary), core outline (= Secondary).
-		'core/button'    => array(
+		'core/button'          => array(
 			'kits-secondary' => __( 'Secondary', 'kits-by-wugweb' ),
 			'kits-ghost'     => __( 'Ghost', 'kits-by-wugweb' ),
 			'kits-brand'     => __( 'Brand', 'kits-by-wugweb' ),
 		),
 		// Section and Head band: their padding, background and gap are settings (theme.json styles.blocks.core/group.variations;
 		// Appearance > Editor > Styles > Blocks > Group), not CSS. docs/kits-control-map.md.
-		'core/group'     => array(
+		'core/group'           => array(
 			'kits-card'      => __( 'Card', 'kits-by-wugweb' ),
 			'kits-surface'   => __( 'Surface', 'kits-by-wugweb' ),
 			'kits-section'   => __( 'Section', 'kits-by-wugweb' ),
 			'kits-head-band' => __( 'Head band', 'kits-by-wugweb' ),
 		),
-		'core/separator' => array(
+		'core/separator'       => array(
 			'kits-hairline' => __( 'Hairline', 'kits-by-wugweb' ),
 		),
-		'core/paragraph' => array(
+		'core/paragraph'       => array(
 			'kits-label' => __( 'Label', 'kits-by-wugweb' ),
 			'kits-note'  => __( 'Note', 'kits-by-wugweb' ),
 		),
-		'core/list'      => array(
+		'core/list'            => array(
 			'kits-sources' => __( 'Sources', 'kits-by-wugweb' ),
 		),
 		// A menu link with a "Beta" badge after its label (kits_nav_badge below; kit-primitives.css section 6).
@@ -206,7 +215,7 @@ add_filter(
 		}
 		return $block;
 	},
-	5 // before core's block style variation support (10), which prints the style's CSS
+	5 // before core's block style variation support (10), which prints the style's CSS.
 );
 
 /**
@@ -927,7 +936,7 @@ function kits_bundle_component_css() {
 		}
 	}
 	$members = array_values( array_filter( array_keys( $registry ), fn( $h ) => in_array( $h, $members, true ) ) );
-	$deps = array();
+	$deps    = array();
 	foreach ( $members as $h ) {
 		foreach ( (array) $styles->registered[ $h ]->deps as $d ) {
 			if ( ! in_array( $d, $members, true ) && ! in_array( $d, $deps, true ) ) {

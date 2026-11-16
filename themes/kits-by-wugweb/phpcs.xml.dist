@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<ruleset name="Kits by Wugweb">
+	<description>WordPress Coding Standards for the Kits by Wugweb theme (WP.org / marketplace submission).</description>
+
+	<!-- Scan the theme's PHP only. Block-theme markup (templates/parts *.html), JSON and CSS/JS are out of PHPCS scope. -->
+	<file>functions.php</file>
+	<file>patterns</file>
+	<file>tools</file>
+
+	<exclude-pattern>*/node_modules/*</exclude-pattern>
+	<exclude-pattern>*/vendor/*</exclude-pattern>
+	<exclude-pattern>*.min.css</exclude-pattern>
+	<exclude-pattern>*.min.js</exclude-pattern>
+
+	<arg name="extensions" value="php"/>
+	<arg value="ps"/>
+	<arg name="colors"/>
+
+	<!-- WordPress-Extra (superset of Core) + Docs: the bar WP.org theme review checks by hand. -->
+	<rule ref="WordPress-Extra"/>
+	<rule ref="WordPress-Docs"/>
+
+	<!-- i18n: every translatable string must use the theme's own text domain. -->
+	<rule ref="WordPress.WP.I18n">
+		<properties>
+			<property name="text_domain" type="array">
+				<element value="kits-by-wugweb"/>
+			</property>
+		</properties>
+	</rule>
+
+	<!-- Themes must prefix their globals (functions, hooks, classes, constants). -->
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+		<properties>
+			<property name="prefixes" type="array">
+				<element value="kits"/>
+				<element value="Kits"/>
+			</property>
+		</properties>
+	</rule>
+
+	<!-- Block-pattern files use the WordPress pattern header (Title:/Slug:/Categories:), not a @package docblock. -->
+	<rule ref="Squiz.Commenting.FileComment.MissingPackageTag">
+		<exclude-pattern>patterns/*</exclude-pattern>
+	</rule>
+	<rule ref="Squiz.Commenting.FileComment.SpacingAfterComment">
+		<exclude-pattern>patterns/*</exclude-pattern>
+	</rule>
+</ruleset>
