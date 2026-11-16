@@ -119,6 +119,9 @@ function aw_meta_schema() {
 		'aw_requires_email'  => array( 'boolean', array( 'aw_legal' ), 'Gate download behind newsletter signup' ),
 		'aw_legal_number'    => array( 'string', array( 'aw_legal' ), 'Official number of the text (e.g. G.S.R. 864(E))' ),
 		'aw_legal_force'     => array( 'string', array( 'aw_legal' ), 'In force: InForce, NotInForce or PartiallyInForce' ),
+
+		// An explicit cover the owner chose for an item, used ahead of the document preview, the ingested photo and the category photo (attachment ID).
+		'aw_cover_image_id'  => array( 'string', array( 'aw_news', 'aw_legal', 'post' ), 'Cover picture override (attachment ID): shown ahead of the document preview and category photo' ),
 	);
 }
 
@@ -151,6 +154,9 @@ function aw_sanitize_meta( $value, $key ) {
 	}
 	if ( 'aw_g_reviews' === $key ) {
 		return ctype_digit( trim( (string) $value ) ) ? trim( (string) $value ) : '';
+	}
+	if ( 'aw_cover_image_id' === $key ) { // an attachment ID, or empty to clear
+		return (int) $value ? (string) (int) $value : '';
 	}
 	if ( 'aw_founded' === $key ) {
 		return preg_match( '/^(18|19|20)\d{2}$/', trim( (string) $value ) ) ? trim( (string) $value ) : '';

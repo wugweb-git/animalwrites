@@ -54,6 +54,11 @@ function aw_item_image_id( $post_id ) {
 	if ( ! in_array( $type, array( 'aw_news', 'aw_legal', 'post' ), true ) ) { // guides: their category's photo
 		return 0;
 	}
+	// A cover the owner chose by hand wins over every automatic source (meta.php).
+	$cover = (int) get_post_meta( $post_id, 'aw_cover_image_id', true );
+	if ( $cover ) {
+		return $cover;
+	}
 	$fid = (int) get_post_meta( $post_id, 'aw_file_id', true );
 	if ( 'aw_legal' === $type && $fid ) {
 		return $fid;
