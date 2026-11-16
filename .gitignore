@@ -1,2 +1,5 @@
 node_modules/
 .DS_Store
+
+# Marketplace build artifacts (tools/build-dist.py)
+dist/
