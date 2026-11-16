@@ -270,9 +270,13 @@ google-site-kit`, model A) resolved, one `insightweb_` prefix; `php -l` + PHPCS 
 no-WP smoke test all green. **Own keyword table done (`0e87dc6c`):** `includes/keyword-table.php` — `insightweb_kw_*`
 (install/ready/table/norm/schema + id_by_norm/get/create/set_figures), the search-insights subset of Kits Core's
 `aw_kw_*` with the sourcing/news columns and the taxonomy map table dropped (#6 at the data layer); 17 green checks.
-Next: port the non-UI engine modules (compute, keywords, rising) onto this table with the `insightweb_` prefix and the
-#6 decouple (drop the AW post types, hardcoded `animalwrites.in`, seed links), each green; then the shell-backed tabs
-behind the shared `insightweb-shell` package, and the shared external-services registry once its package lands.
+**Decision engine done (`ae211a59`):** `includes/compute.php` — the generalised "decide" logic (`insightweb_priority`,
+`insightweb_is_question`/`is_news`, `insightweb_gap_action`, `insightweb_quick_win`, `insightweb_decide`,
+`insightweb_actions`), the differentiator that turns metrics into a suggested action; the Directory/Library/News-item
+branches dropped (#6), thresholds as overridable constants; 31 green checks. Next: the observation tables (`obs` and
+friends) + the daily recompute (the DB aggregation in `aw_si_compute`) and the Site-Kit GSC/GA4 read, then `keywords`
+and `rising`, each green; then the shell-backed tabs behind the shared `insightweb-shell` package, and the shared
+external-services registry once its package lands.
 
 ### External-services registry (shared component, owner 17 Nov 2026)
 
