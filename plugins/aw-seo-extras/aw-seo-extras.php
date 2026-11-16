@@ -3,7 +3,7 @@
  * Plugin Name:       RankWeb
  * Plugin URI:        https://animalwrites.in/
  * Description:       Everything Rank Math doesn't do or keeps for Premium, for Kits sites.
- * Version:           2.0.0
+ * Version:           2.1.0
  * Requires at least: 6.4
  * Requires PHP:      8.0
  * Author:            Wugweb

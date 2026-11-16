@@ -294,7 +294,7 @@ add_action(
 	};
 } )();
 JS;
-		wp_register_script( 'aw-bulk-inline', '', array( 'inline-edit-post', 'jquery' ), '2.0.0', true );
+		wp_register_script( 'aw-bulk-inline', '', array( 'inline-edit-post', 'jquery' ), '2.1.0', true );
 		wp_enqueue_script( 'aw-bulk-inline' );
 		wp_add_inline_script( 'aw-bulk-inline', $js );
 	}
