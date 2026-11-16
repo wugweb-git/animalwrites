@@ -9,7 +9,7 @@ Four phases, each usable on its own:
 1. **Auto-linker** (done on branch `claude/rankweb-internal-links`, 14 Nov 2026).
 2. **Link audit** (built 16 Nov 2026 on branch `claude/rankweb-link-audit`): links in and out, click depth, orphans, broken links, redirects, nofollow, canonicals elsewhere.
 3. **Anchor mix** (built 17 Nov 2026 on branch `claude/rankweb-anchor-mix`, on top of the audit branch): anchor types per target, warnings, keyword rotation.
-4. Silos: hub and supporting items, virtual and circle modes.
+4. **Silos** (built 17 Nov 2026 on branch `claude/rankweb-silos`, on top of the anchor-mix branch): hub and supporting items, virtual and circle modes.
 
 ## Phase 1: auto-linker
 
@@ -98,3 +98,31 @@ Settings (Internal links): most exact match (20), most of any other type (60), f
 names (Animal Writes), generic anchors, words in a long-tail anchor (6). REST: `GET rankweb/v1/links/anchors` (warn,
 page, per_page). The Dashboard tile "Internal links" shows the items over a limit as a detail line. Existing rows get
 their type at the next audit.
+
+## Phase 4: silos
+
+A silo has a name, one hub item, its supporting items in order, and a mode. **Storage: two custom tables, not a private
+taxonomy.** `{prefix}aw_silos` (name, hub, mode; the hub is unique) and `{prefix}aw_silo_items` (the item ID is the primary
+key, so the database itself keeps an item in one silo only; `position` is the circle's order). A taxonomy would show in the
+editor, the REST API and the sitemaps, allow one item in several silos, and keep no order. Own version option
+`aw_silo_db`; uninstall removes the tables (written to the backup first).
+
+| Mode | Links |
+|---|---|
+| virtual | a supporting item links to the hub and to the other supporting items (the ones after it first, so links spread round the silo, at most "Silos: most links an item shows", 10); the hub links to its supporting items |
+| circle | each item links to the next one and back to the hub; the last one only to the hub; the hub links to the first |
+
+- **On the page:** the end of the content of a silo member gets a `<nav class="aw-silo-links">` list (`the_content`, after
+  the auto-linker; singular main view only). No CSS is added: it is a plain list under a heading.
+- **Between silos:** an item in one silo links to another silo's hub only. The auto-linker skips such a target and tries
+  the next candidate of the keyword, and tries the item's own silo's targets first. Items in no silo are not restricted.
+- **Audit:** the silo links count as links (they are not saved in the content), so they give in-links, depth and
+  orphan results. A new finding "Link into another silo's supporting item" flags any link (the auto-linker's or a hand-made
+  one) from an item in one silo to another silo's supporting item. This is wider than the plan's wording (supporting item
+  to supporting item): a hub is held to the same rule as the auto-linker.
+- **Checks on the Silos tab:** fewer than 5 items (hub counted), and addresses deeper than 3 folders
+  (`/library/guides/page/` is 3). Both limits are settings.
+- **Screen:** RankWeb → Internal links → Silos: a list, and a form (name, hub item ID, mode, supporting item IDs one per
+  line). The form needs an administrator; it refuses an item already in another silo, naming it, and an item that is not
+  published with its own page. Deleting a silo removes its settings only. Silo links are not in the anchor mix (their
+  anchor is the item's title and they are not in `aw_links`). REST: `GET rankweb/v1/links/silos`.

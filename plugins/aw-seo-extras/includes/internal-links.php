@@ -500,6 +500,8 @@ function aw_link_run( string $html, int $id ): array {
 			'exclude'        => aw_link_excluded(),
 			'home'           => home_url(),
 			'anchor_ok'      => 'aw_anchor_ok',
+			'target_ok'      => function_exists( 'aw_silo_target_rule' ) ? aw_silo_target_rule( $id ) : null,
+			'prefer'         => function_exists( 'aw_silo_prefer_rule' ) ? aw_silo_prefer_rule( $id ) : null,
 		)
 	);
 }

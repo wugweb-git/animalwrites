@@ -75,6 +75,7 @@ function aw_link_audit_labels(): array {
 		'nofollow'  => __( 'Internal link set to nofollow', 'aw-seo-extras' ),
 		'canonical' => __( 'Link to an item whose canonical is elsewhere', 'aw-seo-extras' ),
 		'avoided'   => __( 'Link to a page on the do-not-link list', 'aw-seo-extras' ),
+		'silo'      => __( 'Link into another silo\'s supporting item', 'aw-seo-extras' ),
 	);
 }
 
@@ -108,6 +109,9 @@ function aw_link_audit_job( $why = '' ): void { // phpcs:ignore Generic.CodeAnal
 	set_transient( 'aw_link_audit_lock', 1, 2 * MINUTE_IN_SECONDS );
 	aw_link_install();
 	aw_link_audit_install();
+	if ( function_exists( 'aw_silo_install' ) ) {
+		aw_silo_install();
+	}
 	$state = get_option( AW_LINK_AUDIT_STATE );
 	if ( ! is_array( $state ) || empty( $state['phase'] ) ) {
 		$state = array(
@@ -370,6 +374,27 @@ function aw_link_audit_analyse( array $ids, int $started ): void {
 			'status' => $status,
 		);
 	}
+	// Silo links are shown on the page, not saved in the content: they count as links here.
+	$silos = function_exists( 'aw_silo_data' ) ? aw_silo_data() : array(
+		'silos' => array(),
+		'map'   => array(),
+	);
+	foreach ( $silos['silos'] as $s ) {
+		foreach ( array_merge( array( $s['hub'] ), $s['items'] ) as $member ) {
+			if ( ! isset( $items[ $member ] ) ) {
+				continue;
+			}
+			foreach ( AW_Silo::links( $s['mode'], $s['hub'], $s['items'], (int) $member, max( 1, (int) AW_SILO_MAX ) ) as $tid ) {
+				$edges[] = array(
+					'source' => (int) $member,
+					'target' => (int) $tid,
+					'url'    => (string) get_permalink( $tid ),
+					'rel'    => '',
+					'status' => '',
+				);
+			}
+		}
+	}
 	$result = AW_Link_Audit::analyze(
 		$items,
 		$edges,
@@ -378,6 +403,7 @@ function aw_link_audit_analyse( array $ids, int $started ): void {
 			'max_depth' => max( 1, (int) AW_LINK_AUDIT_DEPTH ),
 			'max_links' => max( 1, (int) AW_LINK_AUDIT_MAX ),
 			'avoid'     => (array) AW_LINK_AUDIT_AVOID,
+			'silo'      => $silos['map'],
 		)
 	);
 	$table  = aw_link_table( 'audit' );
@@ -589,15 +615,23 @@ function aw_link_audit_page_html(): void {
 	$prog   = $sum['progress'];
 	$base   = admin_url( 'admin.php?page=aw-links' );
 
-	$view = 'anchors' === sanitize_key( wp_unslash( $_GET['view'] ?? '' ) ) && function_exists( 'aw_anchor_screen' ) ? 'anchors' : 'audit'; // phpcs:ignore WordPress.Security.NonceVerification -- a tab on a read-only screen.
+	$view = sanitize_key( wp_unslash( $_GET['view'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification -- a tab on a read-only screen.
+	$view = 'anchors' === $view && function_exists( 'aw_anchor_screen' ) ? 'anchors' : ( 'silos' === $view && function_exists( 'aw_silo_screen' ) ? 'silos' : 'audit' );
 	echo '<div class="wrap"><h1>' . esc_html__( 'Internal links', 'aw-seo-extras' ) . '</h1>';
 	echo '<nav class="nav-tab-wrapper"><a href="' . esc_url( $base ) . '" class="nav-tab' . ( 'audit' === $view ? ' nav-tab-active' : '' ) . '">' . esc_html__( 'Audit', 'aw-seo-extras' ) . '</a>';
 	if ( function_exists( 'aw_anchor_screen' ) ) {
 		echo '<a href="' . esc_url( add_query_arg( 'view', 'anchors', $base ) ) . '" class="nav-tab' . ( 'anchors' === $view ? ' nav-tab-active' : '' ) . '">' . esc_html__( 'Anchor mix', 'aw-seo-extras' ) . '</a>';
 	}
+	if ( function_exists( 'aw_silo_screen' ) ) {
+		echo '<a href="' . esc_url( add_query_arg( 'view', 'silos', $base ) ) . '" class="nav-tab' . ( 'silos' === $view ? ' nav-tab-active' : '' ) . '">' . esc_html__( 'Silos', 'aw-seo-extras' ) . '</a>';
+	}
 	echo '</nav>';
-	if ( 'anchors' === $view ) {
-		aw_anchor_screen();
+	if ( 'anchors' === $view || 'silos' === $view ) {
+		if ( 'anchors' === $view ) {
+			aw_anchor_screen();
+		} else {
+			aw_silo_screen();
+		}
 		echo '</div>';
 		return;
 	}

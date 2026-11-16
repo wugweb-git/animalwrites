@@ -312,7 +312,7 @@ function aw_seo_modules(): array {
 		'internal-links' => array(
 			'label'  => 'Internal links',
 			'switch' => true,
-			'files'  => array( 'internal-links', 'link-audit', 'link-anchors' ),
+			'files'  => array( 'internal-links', 'link-audit', 'link-anchors', 'silos' ),
 			'desc'   => 'Links items to each other from their link keywords, and records every link in each item. Adds no link until a post type is listed.',
 			'fields' => array(
 				'AW_LINK_TYPES' => array( 'type' => 'list', 'label' => 'Post types linked', 'help' => 'Items of these types get links and can be linked to. One post type per line. Empty: no links are added.', 'default' => array() ),
@@ -330,6 +330,9 @@ function aw_seo_modules(): array {
 				'AW_LINK_BRAND' => array( 'type' => 'list', 'label' => 'Anchors: brand names', 'help' => 'An anchor with one of these words is branded. One per line.', 'default' => array( 'Animal Writes' ) ),
 				'AW_LINK_GENERIC' => array( 'type' => 'list', 'label' => 'Anchors: generic anchors', 'help' => 'These anchors are generic. One per line.', 'default' => array( 'click here', 'here', 'read more', 'learn more', 'more', 'this page', 'this article', 'this link', 'link' ) ),
 				'AW_LINK_LONG_WORDS' => array( 'type' => 'int', 'label' => 'Anchors: words in a long-tail anchor', 'help' => 'An anchor with more words than this is long-tail.', 'default' => 6 ),
+				'AW_SILO_MAX' => array( 'type' => 'int', 'label' => 'Silos: most links an item shows', 'help' => 'The silo links at the end of an item. In virtual mode the others are listed from the next one round, so every item gets links.', 'default' => 10 ),
+				'AW_SILO_MIN' => array( 'type' => 'int', 'label' => 'Silos: fewest items', 'help' => 'A silo with fewer items (the hub counts) is flagged.', 'default' => 5 ),
+				'AW_SILO_DEPTH' => array( 'type' => 'int', 'label' => 'Silos: most folders deep', 'help' => 'An item whose address is deeper (/library/guides/page/ is 3) is flagged.', 'default' => 3 ),
 				'AW_LINK_AUDIT_AVOID' => array( 'type' => 'list', 'label' => 'Audit: addresses not to link to', 'help' => 'A link whose address contains one of these words is listed (thank-you and download pages). One per line.', 'default' => array( 'thank-you', 'thanks', 'download' ) ),
 			),
 		),

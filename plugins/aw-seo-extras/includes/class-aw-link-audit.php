@@ -10,7 +10,8 @@
  *   (one click) and follows the links between items;
  * - orphan (nothing links in), too deep (more clicks than the limit, or no way to reach it), too many links out;
  * - links out that are broken, go through a redirect, are nofollow, point to an item whose canonical points elsewhere,
- *   or point to an address on the "do not link" list (thank-you and download pages).
+ *   point to an address on the "do not link" list (thank-you and download pages), or leave a silo for another silo's
+ *   supporting item.
  *
  * @package aw-seo-extras
  */
@@ -19,11 +20,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+require_once __DIR__ . '/class-aw-silo.php';
+
 /** Link audit. */
 final class AW_Link_Audit {
 
 	/** The findings, in the order they are listed. */
-	const FLAGS = array( 'orphan', 'deep', 'too_many', 'broken', 'redirect', 'nofollow', 'canonical', 'avoided' );
+	const FLAGS = array( 'orphan', 'deep', 'too_many', 'broken', 'redirect', 'nofollow', 'canonical', 'avoided', 'silo' );
 
 	/** Most addresses kept as the detail of one finding. */
 	const DETAIL_MAX = 5;
@@ -37,7 +40,8 @@ final class AW_Link_Audit {
 	 *                     no item, url: the address as written, rel: its rel attribute, status: '' (not checked),
 	 *                     'ok', 'broken' or 'redirect' ).
 	 * @param array $roots Item IDs the home page and the menus link to (one click from the home page).
-	 * @param array $opt   max_depth (3), max_links (100), avoid (address fragments, lower case).
+	 * @param array $opt   max_depth (3), max_links (100), avoid (address fragments, lower case), silo (item ID => array( silo,
+	 *                     hub ) for the items in a silo: a link into another silo's supporting item is flagged).
 	 * @return array Item ID => array( in, out, depth (int, or null when no click path reaches it), flags (list), detail
 	 *               (flag => list of addresses) ).
 	 */
@@ -46,6 +50,7 @@ final class AW_Link_Audit {
 			'max_depth' => 3,
 			'max_links' => 100,
 			'avoid'     => array(),
+			'silo'      => array(),
 		);
 		$avoid = array_values( array_filter( array_map( 'strtolower', array_map( 'strval', (array) $opt['avoid'] ) ), 'strlen' ) );
 
@@ -87,6 +92,9 @@ final class AW_Link_Audit {
 			}
 			if ( $tgt > 0 && '' !== (string) ( $items[ $tgt ]['canonical'] ?? '' ) ) {
 				self::note( $res, $detail, $src, 'canonical', $url );
+			}
+			if ( $tgt > 0 && $opt['silo'] && ! AW_Silo::may_link( (array) $opt['silo'], $src, $tgt ) ) {
+				self::note( $res, $detail, $src, 'silo', $url );
 			}
 			$low = strtolower( $url );
 			foreach ( $avoid as $bit ) {

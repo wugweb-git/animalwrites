@@ -77,6 +77,16 @@ final class LinkerTest extends PHPUnit\Framework\TestCase {
 		$this->assertSame( 'street dog care', $r['links'][0]['anchor'] );
 	}
 
+	public function test_a_preferred_target_is_tried_before_the_others_of_the_same_keyword(): void {
+		$r = $this->run_linker( '<p>Help dogs.</p>', array( 'dogs' => array( 3, 2 ) ), array( 'prefer' => fn( int $id ): bool => 2 === $id ) );
+		$this->assertSame( '<p>Help ' . $this->a( 2, 'dogs' ) . '.</p>', $r['html'] );
+	}
+
+	public function test_a_target_the_item_may_not_link_to_is_skipped_for_the_next_candidate(): void {
+		$r = $this->run_linker( '<p>Help dogs.</p>', array( 'dogs' => array( 3, 2 ) ), array( 'target_ok' => fn( int $id ): bool => 3 !== $id ) );
+		$this->assertSame( '<p>Help ' . $this->a( 2, 'dogs' ) . '.</p>', $r['html'] );
+	}
+
 	public function test_anchor_ok_refusing_every_keyword_adds_no_link(): void {
 		$r = $this->run_linker( '<p>Help stray dogs.</p>', array( 'stray dogs' => 2 ), array( 'anchor_ok' => fn( int $id, string $kw ): bool => false ) );
 		$this->assertSame( '<p>Help stray dogs.</p>', $r['html'] );
