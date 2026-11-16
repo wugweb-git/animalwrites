@@ -223,7 +223,7 @@ function aw_link_audit_check( array $state, float $end ): array {
 		if ( isset( $checks[ $url ] ) && $now - (int) $checks[ $url ]['at'] < AW_LINK_AUDIT_KEEP ) {
 			continue;
 		}
-		$res = wp_remote_head(
+		$res = wp_safe_remote_head(
 			$url,
 			array(
 				'timeout'     => 5,
@@ -231,7 +231,7 @@ function aw_link_audit_check( array $state, float $end ): array {
 			)
 		);
 		if ( ! is_wp_error( $res ) && 405 === (int) wp_remote_retrieve_response_code( $res ) ) {
-			$res = wp_remote_get(
+			$res = wp_safe_remote_get(
 				$url,
 				array(
 					'timeout'     => 5,

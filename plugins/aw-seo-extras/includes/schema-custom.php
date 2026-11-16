@@ -170,11 +170,13 @@ add_action(
 		if ( '' === $url ) {
 			$msg = __( 'Enter a URL to import from.', 'aw-seo-extras' );
 		} else {
-			$res = wp_remote_get(
+			$res = wp_safe_remote_get(
 				$url,
 				array(
-					'timeout'     => 8,
-					'redirection' => 3,
+					'timeout'             => 8,
+					'redirection'         => 3,
+					'limit_response_size' => 2 * MB_IN_BYTES, // cap the body; the page need only hold its JSON-LD
+
 				)
 			);
 			if ( is_wp_error( $res ) || 200 !== (int) wp_remote_retrieve_response_code( $res ) ) {

@@ -152,7 +152,8 @@ final class AW_Redirects {
 				continue; // regex rules stay in Rank Math (its matching is not Apache's)
 			}
 			if ( in_array( $code, self::GONE, true ) ) {
-				$lines[] = 'RedirectMatch ' . $code . ' ^' . self::escape( $source ) . '/?$';
+				// Apache's own Redirect form for a status with no destination; no regex, so a source with ( or [ cannot break .htaccess.
+				$lines[] = 'Redirect ' . $code . ' ' . self::escape( $source );
 				continue;
 			}
 			$target = (string) ( $r['target'] ?? '' );

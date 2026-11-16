@@ -167,7 +167,7 @@ add_action(
 		$fh     = fopen( 'php://temp', 'r+' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- an in-memory stream
 		fputcsv( $fh, array( 'uri', 'hits', 'last_seen', 'referer', 'user_agent' ), ',', '"', '' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- in-memory
 		foreach ( $rows as $r ) {
-			fputcsv( $fh, array( (string) $r['uri'], (string) (int) $r['times_accessed'], (string) $r['accessed'], (string) $r['referer'], (string) $r['user_agent'] ), ',', '"', '' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- in-memory
+			fputcsv( $fh, array( aw_redirect_csv_safe( (string) $r['uri'] ), (string) (int) $r['times_accessed'], (string) $r['accessed'], aw_redirect_csv_safe( (string) $r['referer'] ), aw_redirect_csv_safe( (string) $r['user_agent'] ) ), ',', '"', '' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- in-memory
 		}
 		rewind( $fh );
 		$csv = (string) stream_get_contents( $fh );
@@ -277,7 +277,10 @@ function aw_redirect_htaccess_apply( bool $remove ): array {
 				'ok'    => '',
 			);
 		}
-		$wp_filesystem->put_contents( $path . '.rankweb-bak', (string) $wp_filesystem->get_contents( $path ), FS_CHMOD_FILE ); // a backup before any change
+		$current = $wp_filesystem->get_contents( $path );
+		if ( false === $current || ! $wp_filesystem->put_contents( $path . '.rankweb-bak', (string) $current, FS_CHMOD_FILE ) ) {
+			return array( 'error' => __( 'A backup of .htaccess could not be written, so nothing was changed.', 'aw-seo-extras' ), 'ok' => '' );
+		}
 	} elseif ( $remove ) {
 		return array(
 			'error' => '',
@@ -293,9 +296,20 @@ function aw_redirect_htaccess_apply( bool $remove ): array {
 	}
 	return array(
 		'error' => '',
-		/* translators: %d: number of rules. */
+		/* translators: %d: number of redirects. */
 		'ok'    => $remove ? __( 'RankWeb\'s .htaccess block was removed (a backup is at .htaccess.rankweb-bak).', 'aw-seo-extras' ) : sprintf( __( '%d redirects written to .htaccess (a backup is at .htaccess.rankweb-bak).', 'aw-seo-extras' ), count( $lines ) ),
 	);
+}
+
+/**
+ * Neutralise a spreadsheet formula in a CSV cell (the 404 log's referer and user agent are attacker-set headers): a
+ * value that begins with =, +, -, @ or a control character is prefixed with a single quote so a spreadsheet treats it
+ * as text, not a formula.
+ *
+ * @param string $value A cell value.
+ */
+function aw_redirect_csv_safe( string $value ): string {
+	return '' !== $value && 1 === preg_match( '/^[=+\-@\t\r]/', $value ) ? "'" . $value : $value;
 }
 
 /* ---------- The screen ---------- */
@@ -336,7 +350,7 @@ function aw_redirect_tools_screen(): void {
 
 	echo '<h2 style="margin-top:2em">' . esc_html__( 'Apache .htaccess', 'aw-seo-extras' ) . '</h2>';
 	$count = count( aw_redirect_htaccess_lines() );
-	/* translators: %d: number of rules. */
+	/* translators: %d: number of redirects. */
 	echo '<p>' . esc_html( sprintf( __( '%d exact redirects can go in .htaccess (regex rules stay in Rank Math).', 'aw-seo-extras' ), $count ) ) . '</p>';
 	echo '<form method="post" action="' . esc_url( $post ) . '" style="display:inline-block;margin-right:1em"><input type="hidden" name="action" value="aw_redirect_htaccess_download">';
 	wp_nonce_field( 'aw_redirect_htaccess' );

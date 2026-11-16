@@ -150,7 +150,8 @@ function aw_bulk_csv_apply( array $rows, array $header, bool $dry, array $report
 		}
 		$changed = array();
 		foreach ( $cols as $col ) {
-			$new = trim( (string) $row[ $col ] );
+			$raw = trim( (string) $row[ $col ] );
+			$new = 'canonical' === $col ? esc_url_raw( $raw ) : ( 'description' === $col ? sanitize_textarea_field( $raw ) : sanitize_text_field( $raw ) );
 			$old = (string) get_post_meta( $id, $meta[ $col ], true );
 			if ( $new !== $old ) {
 				$changed[] = $col;

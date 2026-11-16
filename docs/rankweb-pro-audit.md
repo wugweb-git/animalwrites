@@ -95,7 +95,7 @@ built in InsightWeb · **Free** = Rank Math Free already does it · **Not needed
 | Advanced redirections module (categories, schedule) | Groups and scheduled redirects | Build | Read and write Rank Math's `wp_rank_math_redirections`; categories as a column (phase F) |
 | Import redirections via CSV | Bulk add | Build | CSV upload, preview, then add through `aw_redirect_add()` (phase F) |
 | Export 404 log | CSV of `wp_rank_math_404_logs` | Build | Download on the Tools tab (phase F) |
-| Sync redirections to .htaccess | Server-level redirects | Build, off | The server is LiteSpeed (reads .htaccess); a block between `# BEGIN RankWeb` markers, plain path rules only, written only when switched on, with a backup of the old file (phase F) |
+| Sync redirections to .htaccess | Server-level redirects | Build, off | The server is LiteSpeed (reads .htaccess); a block between `# BEGIN RankWeb Redirects` markers, plain path rules only, written only when switched on, with a backup of the old file (phase F) |
 
 ### Content, images, bulk work
 

@@ -493,19 +493,19 @@ function aw_seo_setting_tabs(): array {
 		),
 		'titles'          => array(
 			'label'   => 'Titles and descriptions',
-			'modules' => array( 'general', 'titles', 'breadcrumbs' ),
+			'modules' => array( 'general', 'titles', 'breadcrumbs', 'bulk' ),
 		),
 		'indexing'        => array(
 			'label'   => 'Indexing',
-			'modules' => array( 'canonical', 'robots', 'filtered', 'sitemap', 'redirects', 'health' ),
+			'modules' => array( 'canonical', 'robots', 'filtered', 'sitemap', 'redirects', 'redirect-tools', 'health', 'video' ),
 		),
 		'schema'          => array(
 			'label'   => 'Schema and FAQ',
-			'modules' => array( 'schema', 'faq', 'rank-math-schema' ),
+			'modules' => array( 'schema', 'schema-plus', 'faq', 'rank-math-schema' ),
 		),
 		'share'           => array(
 			'label'   => 'Share images and Open Graph',
-			'modules' => array( 'opengraph' ),
+			'modules' => array( 'opengraph', 'media' ),
 		),
 		'analysis'        => array(
 			'label'   => 'Focus keywords and content analysis',
@@ -513,7 +513,7 @@ function aw_seo_setting_tabs(): array {
 		),
 		'ai'              => array(
 			'label'   => 'AI agents',
-			'modules' => array( 'llms', 'markdown' ),
+			'modules' => array( 'llms', 'markdown', 'agent' ),
 		),
 		'links'           => array(
 			'label'   => 'Internal links',

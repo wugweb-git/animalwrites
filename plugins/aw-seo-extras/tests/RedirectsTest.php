@@ -136,7 +136,7 @@ final class RedirectsTest extends PHPUnit\Framework\TestCase {
 		$this->assertSame( 'Redirect 302 /temp https://example.org/t/', $lines[1] );
 	}
 
-	public function testHtaccessUsesRedirectMatchForGoneAndSkipsRegex(): void {
+	public function testHtaccessUsesPlainRedirectForGoneAndSkipsRegex(): void {
 		$lines = AW_Redirects::htaccess_lines(
 			array(
 				array(
@@ -154,7 +154,7 @@ final class RedirectsTest extends PHPUnit\Framework\TestCase {
 			)
 		);
 		$this->assertCount( 1, $lines, 'the regex rule is left out' );
-		$this->assertSame( 'RedirectMatch 410 ^/gone/?$', $lines[0] );
+		$this->assertSame( 'Redirect 410 /gone', $lines[0], 'a gone rule is a plain Redirect, never a regex' );
 	}
 
 	public function testHtaccessEscapesSpacesAndStripsNewlines(): void {

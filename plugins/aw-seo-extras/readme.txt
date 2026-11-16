@@ -28,7 +28,7 @@ RankWeb works next to Rank Math (free) and does nothing unless Rank Math is acti
 * Agent tools: RankWeb's work as WordPress abilities (the Abilities API) for AI agents through the MCP adapter; reads by default, writes opt-in.
 * A password-protected item is kept out of search.
 * llms.txt, Open Graph details, share images and a watchdog for the sitemap.
-* Settings for every rule, grouped by module, with their defaults. Each module has an on/off switch on the dashboard.
+* Settings for every rule, grouped by module, with their defaults. Every switchable module has an on/off switch on the dashboard.
 
 == Uninstall ==
 

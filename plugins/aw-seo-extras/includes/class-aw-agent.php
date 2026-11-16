@@ -40,7 +40,7 @@ final class AW_Agent {
 			array(
 				'name'    => 'rankweb/get-seo',
 				'writes'  => false,
-				'cap'     => 'read',
+				'cap'     => 'edit_post',
 				'summary' => 'Read an item\'s SEO title, description, focus keyword, link keywords and canonical.',
 			),
 			array(
