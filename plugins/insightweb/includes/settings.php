@@ -89,19 +89,17 @@ function aw_si_settings_save( array $posted, bool $reset = false ): bool {
 	$had  = (array) ( $all['search-insights'] ?? array() );
 	$mine = $had;
 	foreach ( aw_si_setting_fields() as $const => $f ) {
-		if ( ! $reset && ! array_key_exists( $const, $posted ) ) {
-			continue;
-		}
-		$value = max( 0, (int) ( $posted[ $const ] ?? 0 ) );
-		$now   = array_key_exists( $const, $had ) ? (int) $had[ $const ] : $f['default'];
-		if ( ! $reset && $value === $now ) {
-			continue; // Unchanged: kept exactly as stored.
-		}
-		unset( $mine[ $const ] );
 		if ( $reset ) {
+			unset( $mine[ $const ] ); // Back to the default.
 			continue;
 		}
-		if ( $value !== $f['default'] ) {
+		if ( ! array_key_exists( $const, $posted ) ) {
+			continue; // Field not sent: its stored value stays.
+		}
+		$value = max( 0, (int) $posted[ $const ] );
+		if ( $value === $f['default'] ) {
+			unset( $mine[ $const ] ); // Equal to the default: never stored, so a later default change is followed, even if a stale value equal to the default was stored before.
+		} else {
 			$mine[ $const ] = $value;
 		}
 	}
@@ -158,11 +156,11 @@ function aw_si_settings_part_clean( $part ): array {
 	foreach ( (array) $part as $name => $v ) {
 		$name = (string) $name;
 		if ( 'on' === $name ) {
-			$out['on'] = in_array( $v, array( true, false, 0, 1 ), true ) ? $v : (bool) $v; // stored as it was (an older save left 1)
+			$out['on'] = in_array( $v, array( true, false, 0, 1 ), true ) ? $v : (bool) $v; // Stored as it was (an older save left 1).
 		} elseif ( 0 === strpos( $name, 'AW_SI_' ) ) {
 			$out[ $name ] = max( 0, (int) $v );
 		} else {
-			$out[ $name ] = is_string( $v ) ? sanitize_text_field( $v ) : $v; // a key no field knows: kept
+			$out[ $name ] = is_string( $v ) ? sanitize_text_field( $v ) : $v; // A key no field knows: kept.
 		}
 	}
 	return $out;
