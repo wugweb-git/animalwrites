@@ -276,10 +276,14 @@ no-WP smoke test all green. **Own keyword table done (`0e87dc6c`):** `includes/k
 branches dropped (#6), thresholds as overridable constants; 31 green checks. **Observation tables done (`23822062`):** `includes/schema.php` —
 the plugin's own four tables (`kw_pages`, `obs`, `rising`, `links`) with pure per-table schema builders,
 `insightweb_install` (admin_init, after the keyword table) and `insightweb_ready`; the AW links seed not carried (#6);
-37 green checks. Next: the daily recompute (the DB aggregation in `aw_si_compute`, reading `obs` and writing the
-engine's decisions onto the keyword records) and the Site-Kit GSC/GA4 read (model A — the per-version internal-API
-risk), then `keywords` and `rising`, each green; then the shell-backed tabs behind the shared `insightweb-shell`
-package, and the shared external-services registry once its package lands.
+37 green checks. **Daily recompute done (`f3acd37a`):** `includes/recompute.php` —
+`insightweb_compute` (reads `obs`, runs `insightweb_decide`, writes decisions onto the records via
+`insightweb_kw_set_figures`), split into a pure, unit-tested `insightweb_compute_row` + float-tolerant
+`insightweb_compute_changed`; redirect resolution and the News/tag/category "minor path" dropped (#6); 42 green checks
+(the DB orchestrator is runtime-verified only). Next: the **Site-Kit GSC/GA4 read** (model A — the per-version
+internal-API risk; keep it bounded behind a clear adapter), which fills `obs`; then `keywords`/`rising` list builders;
+then the shell-backed tabs behind the shared `insightweb-shell` package, and the shared external-services registry once
+its package lands.
 
 ### External-services registry (shared component, owner 17 Nov 2026)
 
