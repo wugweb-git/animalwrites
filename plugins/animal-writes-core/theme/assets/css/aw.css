@@ -372,3 +372,14 @@ a.aw-social-name { min-height: var(--kit-size-target); text-decoration: none; }
 /* Hub page heads (News index and its siblings): the breadcrumb Home icon and the source link in the head are 44px targets (owner, 16 Nov 2026) */
 .page-template-page-hub .kit-section-band .kit-crumbs-home a { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; margin-left: -10px; }
 .page-template-page-hub .kit-section-band a.kit-link-ext { display: inline-flex; align-items: center; min-height: 44px; }
+
+/* Moved out of the generic Kits theme (kit.css) so the theme carries no Animal Writes-specific rules.
+   These load after kit.css and reproduce the exact previous behaviour on Animal Writes pages. */
+body.single-aw_research .kit-lead-media { display: none; }
+.type-aw_research .wp-block-post-featured-image img ,.single-aw_research .wp-block-post-featured-image img { object-position: top; background: var(--kit-color-bg); }
+:is(h1, h2, h3, h4, h5, h6):is(h1, h2, h3, h4, h5, h6, #kits-head-weight):has(+ :is(.aw-hero-lead, .aw-camp-lede, .aw-findhelp-lede, .aw-letter-share-lede, .aw-letter-share-desc, .aw-listing-desc)) { margin-bottom: 0; }
+:is(h1, h2, h3, h4, h5, h6):is(h1, h2, h3, h4, h5, h6, #kits-head-weight) + :is(.aw-hero-lead, .aw-camp-lede, .aw-findhelp-lede, .aw-letter-share-lede, .aw-letter-share-desc, .aw-listing-desc) { margin-top: var(--kit-space-head-sub); }
+details.aw-camp-card-fold > summary { cursor: default; }
+details.aw-camp-card-fold > summary::after { content: none !important; }
+.wp-block-details.aw-more > summary { display: none; }
+.kit-card-body > .aw-opp-actions { position: relative; z-index: 1; margin-top: auto !important; padding-top: var(--kit-space-2); }
