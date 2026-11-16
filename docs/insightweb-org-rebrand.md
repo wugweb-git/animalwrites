@@ -32,6 +32,7 @@ the credentials model is chosen**; until then it is a no-go on that one axis, no
 | Links view (who links to us) + Bing monthly | none (drop the Animal Writes seed data) |
 | Site Health test, WordPress Dashboard box, `wp` CLI | light (rename the command namespace) |
 | The settings model (seven numbers, store-only-if-differs-from-default) | none — already correct after the 17 Nov fix |
+| Admin UI — the Kits shell, kept identical | reused as a bundled shared GPL package (no runtime Kits Core); see §4 |
 | The no-WordPress PHPUnit-style runner (`tests/run.php`) | none |
 
 **Dropped (Animal Writes / Kits specific — not in the public plugin):**
@@ -40,9 +41,9 @@ the credentials model is chosen**; until then it is a no-go on that one axis, no
   the public plugin operates only on **admin-chosen public post types** (a setting), never hardcoded ones.
 - Hardcoded `animalwrites.in` (`links-seed.php`, `crawlcheck.php` UA + alert email, `server.php` repo link) and the
   shipped seed data (`search-insights/data/links-2026-11-02.php`).
-- The **Kits Core admin shell** (its whole React UI) and the Kits Core dependency; the **RankWeb bridge** and the
-  shared `aw_seo_settings` option; the `aw/v1` worker routes; the `aw_worker` capability; the Keys page (replace with
-  the plugin's own settings fields).
+- The **Kits Core runtime dependency**, the **RankWeb bridge** and the shared `aw_seo_settings` option, the `aw/v1`
+  worker routes, the `aw_worker` capability, and the Keys page (replaced by the plugin's own settings fields). The
+  admin **UI is kept, not dropped** — the Kits shell is reused as a bundled package rather than rebuilt (see §4).
 - The **hard Rank Math requirement** — make Rank Math an *optional* enhancement (it supplies SEO scores and a GSC
   backup), not a gate. The generic plugin should run with just WordPress (+ Site Kit for Google data).
 - Visitors/country via the DB-IP download and the server-log tab if they prove too site-specific (reassess in R3).
@@ -63,7 +64,8 @@ shell** is dropped.
   shorter plugin-specific prefix only.
 - **Shared core vs fork.** The generic engine (keyword model, rising, compute, the source adapters, the settings model,
   the test runner) could live in a small Composer package shared by InsightWeb (site) and the public plugin, as decided
-  for RankWeb — *recommended* to avoid drift. Fork is simpler but drifts.
+  for RankWeb — *recommended* to avoid drift. Fork is simpler but drifts. A **second shared package holds the admin
+  shell UI** (the bundled `insightweb-shell`, see §4), extracted by RankWeb's build session as the template.
 - **Credentials model (§5).** The gating decision; lock before R2.
 - **Distribution of InsightWeb itself.** Unchanged: stays the self-hosted Animal Writes plugin, keeps its `Update URI`
   and in-code dependency checks. The public plugin does not replace it.
@@ -74,9 +76,13 @@ shell** is dropped.
 - Header: **no `Update URI`** (that header is for self-hosted plugins); `Requires Plugins: google-site-kit` if it keeps
   the Site Kit dependency (§5A), and `seo-by-rank-math` only if Rank Math stays required (preferably it does not).
   `@wordpress-plugin` + `@package/@author/@copyright/@license` + `License URI` (the live header already has these).
-- Standalone admin: its own top-level menu and Settings screen on the **Settings API + `WP_List_Table`** (the Kits-shell
-  React UI does not come along; treat the shell-UI coupling as mechanical, not a blocker). The tab framework ports;
-  tabs rebuilt for the generic set.
+- Admin UI: **reuse the current Kits shell as-is, kept identical** — same code, same look, different handle. It is
+  extracted into a **shared GPL UI package bundled into the plugin** (no runtime dependency on Kits Core) and enqueued
+  under a namespaced handle **`insightweb-shell`** (never the global `kits-shell`). The Kits-specific bits — branding,
+  the `kits/v1` routes, cross-plugin navigation — are **injected as config via `wp_localize_script`**, not hardcoded,
+  so the same shell serves a standalone install. This is a **dependency on the shared shell UI package** that RankWeb's
+  build session is extracting as the template (detail: `docs/rankweb-org-rebrand.md` §4). The generic tab set is
+  configured through it; the tabs themselves port. (Do not propose a rebuilt or native Settings-API UI.)
 - Operates on admin-chosen public post types only.
 - Reuse the generic engine (shared package or re-prefixed copy) and `tests/run.php` verbatim.
 - Same security posture already in InsightWeb (nonces, caps, prepared `%i` SQL, escaping, real `permission_callback`s).
