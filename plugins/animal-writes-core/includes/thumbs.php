@@ -45,8 +45,8 @@ function aw_thumb_rebuild() {
 	}
 	$map = array();
 	foreach ( $ids as $id ) {
-		if ( get_post_meta( $id, 'aw_file_id', true ) || get_post_meta( $id, 'aw_doc_preview', true ) || get_post_thumbnail_id( $id ) ) {
-			continue; // its own document page, or its own featured image (e.g. a CC0 photo, cc0-images.php)
+		if ( get_post_meta( $id, 'aw_file_id', true ) || get_post_meta( $id, 'aw_doc_preview', true ) || get_post_meta( $id, 'aw_cover_image_id', true ) || get_post_thumbnail_id( $id ) ) {
+			continue; // its own document page, a cover the owner chose (meta.php), or its own featured image (e.g. a CC0 photo, cc0-images.php)
 		}
 		if ( function_exists( 'aw_is_ingested' ) && aw_is_ingested( $id ) && function_exists( 'aw_publisher_image' ) && aw_publisher_image( $id ) ) {
 			continue; // shows the publisher's image
@@ -93,6 +93,27 @@ add_action(
 	3
 );
 add_action( 'set_object_terms', fn( $id, $terms, $tt, $tax ) => 'category' === $tax && in_array( get_post_type( $id ), AW_THUMB_TYPES, true ) ? aw_thumb_schedule() : null, 10, 4 );
+
+/**
+ * A hand-picked cover (meta.php: aw_cover_image_id) means the item has its own picture, so it leaves the shared
+ * category-photo pool at once: rebuild the map and drop the cached count now, without waiting for WP-Cron (which a
+ * quiet site may not run for a while). Fires on add, change and clear of the meta.
+ *
+ * @param int|array $mid     Meta ID(s) (unused).
+ * @param int       $post_id Post ID (unused; the rebuild scans every item).
+ * @param string    $key     Meta key.
+ * @return void
+ */
+function aw_thumb_cover_changed( $mid, $post_id, $key ) {
+	if ( 'aw_cover_image_id' !== $key ) {
+		return;
+	}
+	aw_thumb_rebuild();
+	delete_transient( 'aw_thumb_dupes_n' );
+}
+add_action( 'added_post_meta', 'aw_thumb_cover_changed', 10, 3 );
+add_action( 'updated_post_meta', 'aw_thumb_cover_changed', 10, 3 );
+add_action( 'deleted_post_meta', 'aw_thumb_cover_changed', 10, 3 );
 
 /** Number of pictures used by more than one published item (cards and featured images). */
 function aw_thumb_duplicates() {
