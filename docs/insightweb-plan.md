@@ -259,8 +259,8 @@ These are **locked** for the public/extracted edition. They apply **only to the 
   `aw_legal` / `aw_campaign` / `aw_opportunity`, `AW_SEO_ITEM_TYPES`) — the public plugin operates on admin-chosen
   public post types only.
 
-**Build status (17 Nov 2026):** the extracted build (`plugins/insightweb-org/`) does not exist yet, and the code for
-#2/#6 is the I1–I3 port. Unlike MailWeb (already single-prefixed and standalone), a *loadable* InsightWeb extraction
+**Build status (17 Nov 2026; see the progress table below for the current state):** when this was written the extracted
+build did not exist, and the code for #2/#6 was planned as the I1–I3 port. Unlike MailWeb (already single-prefixed and standalone), a *loadable* InsightWeb extraction
 also needs (a) its **own keyword table** to replace Kits Core's `aw_kw_*`, and (b) the bundled **`insightweb-shell`**
 UI package, which the RankWeb session is still extracting. So the re-prefix (#2) and the woven-in decouple (#6) cannot
 land green standalone until those land; #3 and #7 are header-level and land with the skeleton (I1). Sequence the build
@@ -284,6 +284,28 @@ the plugin's own four tables (`kw_pages`, `obs`, `rising`, `links`) with pure pe
 internal-API risk; keep it bounded behind a clear adapter), which fills `obs`; then `keywords`/`rising` list builders;
 then the shell-backed tabs behind the shared `insightweb-shell` package, and the shared external-services registry once
 its package lands.
+
+### Extracted build progress (public edition, as of 17 Nov 2026)
+
+`plugins/insightweb-org/` exists and is a separate, standalone codebase — the live `plugins/insightweb` is untouched.
+Each piece landed green (`php -l` + PHPCS WordPress + `tools/ci/phpcs-security.xml` + the no-WP smoke test, now 42
+checks); `vendor/` is never committed. Branch `claude/insightweb-org-assess-dc97b9`, **not** on `wordpress-dev` or
+`wordpress` — side session, nothing pushed or shipped.
+
+| Piece | File | Commit | State |
+|---|---|---|---|
+| I1 skeleton (#3, #7, prefix, empty tab set) | `insightweb.php`, `includes/admin.php` | `f0c8c935` | done, green |
+| Own keyword table | `includes/keyword-table.php` | `0e87dc6c` | done, green |
+| Decision engine | `includes/compute.php` | `ae211a59` | done, green |
+| Observation tables | `includes/schema.php` | `23822062` | done, green |
+| Daily recompute | `includes/recompute.php` | `f3acd37a` | done, green (DB orchestrator runtime-verified only) |
+
+**Not built yet:** the Site Kit GSC/GA4 read (model A — the internal-API/runtime-risk adapter that fills `obs`); the
+`keywords`/`rising` list builders; the shell-backed admin tabs (staged behind the shared `insightweb-shell` package);
+the shared external-services registry (consumed when its package lands). **Shipping:** this is a side session — it does
+not push or ship; the branch + hashes go to the coordinator, and only the live-plugin changes (the settings bug fix
+`b3cd3a0d`, the readme `0d723960`/`b8e5857d`) are production-bound. The `plugins/insightweb-org/` build is a separate
+public codebase and must **not** be deployed to the live site.
 
 ### External-services registry (shared component, owner 17 Nov 2026)
 
