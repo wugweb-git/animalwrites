@@ -212,6 +212,15 @@ function aw_seo_modules(): array {
 				'AW_SITE_ALT_NAMES' => array( 'type' => 'list', 'label' => 'Other names of the site', 'help' => 'The WebSite node\'s alternateName. One per line.', 'default' => array( 'AnimalWrites', 'Animal Writes India', 'animalwrites.in' ) ), // "Animal Writes India": 12 Nov 2026, people search the brand under several names
 			),
 		),
+		'schema-plus' => array(
+			'label'  => 'Custom schema',
+			'switch' => true,
+			'files'  => array( 'schema-custom' ),
+			'desc'   => 'A per-item JSON-LD box (several nodes), Speakable, about and mentions, import schema from a URL, and a Rich Results Test link.',
+			'fields' => array(
+				'AW_SCHEMA_TYPES' => array( 'type' => 'list', 'label' => 'Post types with the custom-schema box', 'help' => 'Items of these types get the Custom schema box. One per line. Empty: none.', 'default' => array( 'post', 'page', 'aw_news', 'aw_legal', 'aw_campaign', 'aw_listing', 'aw_opportunity' ) ),
+			),
+		),
 		'faq' => array(
 			'label'  => 'FAQ',
 			'switch' => true,

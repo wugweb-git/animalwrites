@@ -33,6 +33,13 @@ if ( ! class_exists( TestCase::class ) ) {
 			}
 		}
 
+		public function assertNotSame( $expected, $actual, string $msg = '' ): void {
+			++self::$assertions;
+			if ( $expected === $actual ) {
+				self::fail_with( ( $msg ? $msg . "\n" : '' ) . 'did not expect: ' . var_export( $expected, true ) );
+			}
+		}
+
 		public function assertCount( int $n, $list, string $msg = '' ): void {
 			$this->assertSame( $n, count( $list ), $msg ?: 'count' );
 		}

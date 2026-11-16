@@ -140,7 +140,12 @@ every output escaped, every string in the aw-seo-extras text domain.
   search" robots setting (on by default). Tests: `AW_Video` detection, node and duration. Daily backfill job
   `aw_video_sync`.
 - **D. Schema.** Custom JSON-LD box (several per item), import from a URL, Rich Results Test links, speakable, about and
-  mentions, Dataset where it applies.
+  mentions, Dataset where it applies. **Built 17 Nov 2026** on branch `claude/rankweb-schema-custom` (stacked on C), not
+  live yet. Module "Custom schema": a JSON-LD box (one object, a list, or a @graph; checked on save by `AW_Schema` and
+  given a stable @id), Speakable CSS selectors, About and Mentions (names or URLs as Thing references), import JSON-LD
+  from a URL (the page's application/ld+json read into the box), a Dataset starter template, and a Rich Results Test
+  link. The nodes join Rank Math's graph; Speakable, about and mentions go on the WebPage node. Tests: `AW_Schema` parse,
+  extract, @id, speakable and things. No scheduled job.
 - **E. Bulk work.** Quick and Bulk Edit SEO fields, SEO data and focus keyword CSV export/import, media find and replace,
   automatic captions, list filters.
 - **F. Redirections.** CSV import, 404 log export, categories, .htaccess sync (off by default).
