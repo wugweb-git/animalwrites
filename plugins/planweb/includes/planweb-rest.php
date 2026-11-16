@@ -3,7 +3,7 @@
  * PlanWeb's routes for its new screens (docs/calendar-plugin-plan.md §4), under planweb/v1:
  *
  *   GET  dashboard                 edit_planweb_entries  the tiles, from the stored counts (planweb-dashboard.php)
- *   POST dashboard/count           edit_planweb_entries  ask for a count now (one background event)
+ *   POST dashboard/count           edit_planweb_entries  count now, in this request (the person pressed Count now; a page view never counts)
  *   GET  entries                   edit_planweb_entries  one page of the list: search, filters, sort, paging
  *   POST entries                   edit_planweb_entries  add an entry (planweb_save_entry(), as the Calendar's form)
  *   POST entries/<id>              edit_post             change an entry (the same)
@@ -30,6 +30,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 const PLANWEB_REST = 'planweb/v1';
+
+/**
+ * "Count now": the person pressed the button, so count in this request (71 entries: a moment) instead of waiting for
+ * WP-Cron, which only runs when the site is visited. Falls back to one background event if the count cannot run.
+ */
+function planweb_rest_count_now() {
+	$c = planweb_counts_build( 'now' );
+	return rest_ensure_response( array( 'waiting' => empty( $c ) ? planweb_counts_request() : false ) );
+}
 
 /**
  * The permission check: Kits Core's when it is there, else the same steps here.
@@ -84,7 +93,7 @@ add_action(
 		);
 		$routes = array(
 			'/dashboard'                 => array( 'GET', 'edit_planweb_entries', 'planweb_rest_dashboard', array() ),
-			'/dashboard/count'           => array( 'POST', 'edit_planweb_entries', fn() => rest_ensure_response( array( 'waiting' => planweb_counts_request() ) ), array() ),
+			'/dashboard/count'           => array( 'POST', 'edit_planweb_entries', 'planweb_rest_count_now', array() ),
 			'/entries'                   => array( 'GET', 'edit_planweb_entries', 'planweb_rest_entries', planweb_rest_list_params() ),
 			'/entries/(?P<id>\d+)'       => array( 'POST', 'edit_planweb_entries', 'planweb_rest_save', $fields ),
 			'/entries/(?P<id>\d+)/trash' => array( 'POST', 'edit_planweb_entries', 'planweb_rest_trash', array() ),

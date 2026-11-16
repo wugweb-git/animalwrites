@@ -88,16 +88,21 @@ function Dashboard() {
 	const countNow = () => {
 		setBusy( true );
 		apiFetch( { path: path( 'dashboard/count' ), method: 'POST' } )
-			.then( () => {
+			.then( ( r ) => {
 				setTries( 0 );
-				setAsked( true );
-				setNote(
-					__(
-						'A count is running in the background. The numbers change when it is done.',
-						'planweb'
-					)
-				);
-				setTimeout( load, 20000 );
+				if ( r && r.waiting ) {
+					setAsked( true );
+					setNote(
+						__(
+							'A count is running in the background. The numbers change when it is done.',
+							'planweb'
+						)
+					);
+					setTimeout( load, 20000 );
+				} else {
+					setNote( '' );
+					load();
+				}
 			} )
 			.catch( ( e ) => setNote( errText( e ) ) )
 			.finally( () => setBusy( false ) );
