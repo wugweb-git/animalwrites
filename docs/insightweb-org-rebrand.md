@@ -124,6 +124,16 @@ an OAuth layer.
 - [ ] WordPress.org Contributors username (owner to provide).
 - [ ] Plugin Check clean on a clean WP install; PHPCS (security + WordPress-Extra) clean.
 
+## 6a. Listing copy (draft, for R4/R5)
+
+Lead the directory listing with the differentiator (the keyword-record model), not the source list. Facts preserved:
+it **reads** Google data through Site Kit and never changes SEO settings/keyphrases/content.
+
+- **Short description (≤150):** "Per-keyword insights from Search Console and GA4: roles, owning pages, priority and a next action, plus rising terms and quick wins."
+- **Description opening:** "InsightWeb reads your Search Console and GA4 data (through Site Kit) and turns it into one record per keyword — its roles, the pages that own it, a priority and a suggested next action. Rising terms, quick wins and conflicts sit alongside. It only reads and suggests; it never changes your SEO settings, keyphrases or content."
+- **Tags (≤5):** `search console`, `analytics`, `google analytics`, `pagespeed`, `seo`. **Category:** SEO / analytics.
+- **Assets (deferred to R5):** `icon-128/256` + `icon.svg` + banner exist; **screenshots are new work** (need a live install with Site Kit connected — cannot be produced without local/staging WordPress). Spec: Overview, a keyword record with its suggested action, Rising/quick-wins, the Site Health test. Banner copy can reuse the differentiator line above.
+
 ## 7. Phased plan (each phase stops and reports)
 
 - **I0 — decisions (owner).** Name/slug, prefix, shared-core vs fork, **credentials model (§5)**, Rank Math
