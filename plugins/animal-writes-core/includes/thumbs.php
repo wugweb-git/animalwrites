@@ -115,16 +115,20 @@ add_action( 'added_post_meta', 'aw_thumb_cover_changed', 10, 3 );
 add_action( 'updated_post_meta', 'aw_thumb_cover_changed', 10, 3 );
 add_action( 'deleted_post_meta', 'aw_thumb_cover_changed', 10, 3 );
 
-/** Number of pictures used by more than one published item (cards and featured images). */
+/**
+ * Number of pictures used by more than one published item (cards and featured images). An item with a hand-picked
+ * cover (meta.php: aw_cover_image_id) shows that cover, not its map photo or featured image, so its fallbacks are
+ * left out of the count: two document items whose page-1 scans happen to match do not clash once one carries a cover.
+ */
 function aw_thumb_duplicates() {
 	$seen = array();
 	foreach ( (array) get_option( 'aw_thumb_map', array() ) as $id => $att ) {
-		if ( 'publish' === get_post_status( $id ) ) {
+		if ( 'publish' === get_post_status( $id ) && ! get_post_meta( (int) $id, 'aw_cover_image_id', true ) ) {
 			$seen[ aw_thumb_hash( $att ) ][] = (int) $id;
 		}
 	}
 	global $wpdb;
-	foreach ( $wpdb->get_results( "SELECT pm.post_id, pm.meta_value FROM {$wpdb->postmeta} pm JOIN {$wpdb->posts} p ON p.ID = pm.post_id WHERE pm.meta_key = '_thumbnail_id' AND p.post_status = 'publish'" ) as $r ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	foreach ( $wpdb->get_results( "SELECT pm.post_id, pm.meta_value FROM {$wpdb->postmeta} pm JOIN {$wpdb->posts} p ON p.ID = pm.post_id WHERE pm.meta_key = '_thumbnail_id' AND p.post_status = 'publish' AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} c WHERE c.post_id = p.ID AND c.meta_key = 'aw_cover_image_id' AND c.meta_value <> '')" ) as $r ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		$seen[ aw_thumb_hash( (int) $r->meta_value ) ][] = (int) $r->post_id;
 	}
 	return array_filter( array_map( 'array_unique', $seen ), fn( $ids ) => count( $ids ) > 1 );
