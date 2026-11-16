@@ -39,22 +39,27 @@ present).
 
 ## 2. Dependency map — CRITICAL vs NON-CRITICAL
 
+Reference for a public listing: CRITICAL deps are what a public codebase must declare via `Requires Plugins` (if kept)
+or design out; NON-CRITICAL deps are already safe to ship because every call is guarded. "WP.org slug" is the
+directory slug for `Requires Plugins`, or "—" when the dependency is a suite/site plugin not on the directory (it must
+be removed or replaced for the public plugin, never required).
+
 **CRITICAL** — hard-gated in `includes/bootstrap.php`; without these InsightWeb shows one admin notice and does nothing:
 
-| Dependency | Guard (file:line) | Effect if absent |
-|---|---|---|
-| **Kits Core** | `! defined( 'KITS_CORE_LOADED' )` — `bootstrap.php:30`; and `! function_exists( 'aw_kw_install' )` (the keyword table, now Kits Core's) — `bootstrap.php:52` | Bootstrap returns early; admin notice; nothing loads. |
-| **Rank Math SEO** | `defined( 'RANK_MATH_VERSION' ) && class_exists( '\RankMath\Helper' )` — `bootstrap.php:31` | Same early return + notice. |
+| Dependency | WP.org slug | Exact guard (file:line) | Effect if absent | Public-codebase handling |
+|---|---|---|---|---|
+| **Kits Core** | — (suite plugin, not on the directory) | `! defined( 'KITS_CORE_LOADED' )` — `bootstrap.php:30`; **and** `! function_exists( 'aw_kw_install' )` (the keyword table, now Kits Core's) — `bootstrap.php:52` | Bootstrap returns early → one `admin_notices` warning, nothing else loads. | **Design out**: the public plugin ships its own keyword table + helpers (one prefix), so there is no Kits Core dependency to require. |
+| **Rank Math SEO** | `seo-by-rank-math` | `defined( 'RANK_MATH_VERSION' ) && class_exists( '\RankMath\Helper' )` — `bootstrap.php:31` | Same early return + notice. | **Make optional** (it supplies SEO scores + a GSC backup, not core); if kept required, `Requires Plugins: seo-by-rank-math`. |
 
-**NON-CRITICAL** — guarded with `function_exists` / `class_exists`; the plugin boots and the feature degrades:
+**NON-CRITICAL** — guarded with `function_exists` / `class_exists`; the plugin boots and the feature degrades. None blocks a listing:
 
-| Dependency | Guard | Degradation |
-|---|---|---|
-| **Site Kit by Google** | `class_exists( '\Google\Site_Kit\Context' )` (`sitekit.php:17`), `\Google\Site_Kit\Plugin` (`sitekit.php:20`, `insightweb-rest.php:533`), `\Google\Site_Kit\Core\Modules\Modules` (`sitekit.php:46`) | Returns `WP_Error` "Site Kit is not active"; Search Console + GA4 unavailable. **Functionally core, technically optional.** |
-| **Animal Writes Core** | none inside InsightWeb — it is only the **live loader** (InsightWeb boots itself on `plugins_loaded` priority 5 in `insightweb.php`) | Not a runtime gate; standalone activation works without it. The keyword table it once owned is now Kits Core's. |
-| **Kits Core admin shell** | `function_exists( 'kits_shell_html_parts' / 'kits_shell_app' / 'kits_shell_mount' / 'kits_shell_rest_can' )` (`insightweb-tabs.php:46,56`, `insightweb-ui.php:36,75,143`, `insightweb-rest.php:29`), `kits_admin_tabs` (`kits-hub.php:17`), `kits_dash_cards`/`kits_dash_bars` (`dashboard.php:141,175`), `kits_status_cell` (`kits-hub.php:46`) | Empty/fallback output; the screens do not render. (Not a listing blocker: the public plugin reuses this shell as a bundled shared GPL package — handle `insightweb-shell`, Kits specifics injected via `wp_localize_script`, no runtime Kits Core — per `docs/insightweb-org-rebrand.md` §4.) |
-| **SourceWeb** | `function_exists( 'aw_sourcing_kw_on' )` | Sourcing-keywords tab hidden. |
-| **Keys** (`aw_key()`, Kits Core) + PSI/Clarity/Bing/Alerts keys | `function_exists( 'aw_key' )` (`runs.php:46`, `admin.php:1076`); each source checks its own key (`bing.php:35`, `clarity.php:36`, `psi.php:158`) | That source simply does not run. |
+| Dependency | WP.org slug | Exact guard (file:line) | Degrade behaviour |
+|---|---|---|---|
+| **Site Kit by Google** | `google-site-kit` | `class_exists( '\Google\Site_Kit\Context' )` (`sitekit.php:17`), `\Google\Site_Kit\Plugin` (`sitekit.php:20`, `insightweb-rest.php:533`), `\Google\Site_Kit\Core\Modules\Modules` (`sitekit.php:46`) | Each Google read returns `WP_Error` "Site Kit is not active"; Search Console + GA4 panels are unavailable, the rest of the plugin runs. **Functionally core, technically optional** — the §6 credentials decision turns on whether to `Requires Plugins: google-site-kit` or ship own OAuth. |
+| **Animal Writes Core** | — (site plugin) | none inside InsightWeb — it is only the **live loader** (InsightWeb boots itself on `plugins_loaded` priority 5 in `insightweb.php`) | Not a runtime gate; standalone activation works without it. The keyword table it once owned is now Kits Core's. |
+| **Kits Core admin shell** | — (bundled, not required) | `function_exists( 'kits_shell_html_parts' / 'kits_shell_app' / 'kits_shell_mount' / 'kits_shell_rest_can' )` (`insightweb-tabs.php:46,56`, `insightweb-ui.php:36,75,143`, `insightweb-rest.php:29`), `kits_admin_tabs` (`kits-hub.php:17`), `kits_dash_cards`/`kits_dash_bars` (`dashboard.php:141,175`), `kits_status_cell` (`kits-hub.php:46`) | Empty/fallback output; screens do not render. The public plugin **bundles** this shell as a shared GPL package (handle `insightweb-shell`, Kits specifics via `wp_localize_script`, no runtime Kits Core) — per `docs/insightweb-org-rebrand.md` §4; never a `Requires Plugins`. |
+| **SourceWeb** | — (suite plugin) | `function_exists( 'aw_sourcing_kw_on' )` | Sourcing-keywords tab hidden; everything else runs. (Dropped from the public plugin.) |
+| **Keys** (`aw_key()`, Kits Core) + the per-source keys | — (own settings in the public plugin) | `function_exists( 'aw_key' )` (`runs.php:46`, `admin.php:1076`); each source also checks its own key — `bing.php:35` (`AW_BING_WEBMASTER_KEY`), `clarity.php:36` (`AW_CLARITY_TOKEN`), `psi.php:158` (`AW_PSI_KEY`) | A source whose key is unset simply does not run; no error. In the public plugin these become the plugin's own settings fields (one prefix). |
 
 ## 3. Security posture (good)
 
