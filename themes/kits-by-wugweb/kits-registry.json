@@ -1011,12 +1011,12 @@
     "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
     "target": "44px",
     "motion": "none",
-    "sr": "logo link \"Animal Writes home\""
+    "sr": "logo link \"Home\""
    },
    "seo": {
     "heading": "none (the page H1 is in the content)",
     "link": "section names",
-    "alt": "logo alt \"Animal Writes\"",
+    "alt": "logo alt (site name)",
     "schema": "WebSite (site-wide, SearchAction)"
    }
   },
@@ -1094,7 +1094,7 @@
    ],
    "tokens": [],
    "a11y": {
-    "element": "<footer> with one <nav> per list, each with its own aria-label (Explore, Animal Writes, Legal and trust, Helplines, Policies)",
+    "element": "<footer> with one <nav> per list, each with its own aria-label (Explore, About, Legal and trust, Helplines, Policies)",
     "aria": "each phone fold is a <details>",
     "keyboard": "Tab; Enter",
     "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
@@ -1855,7 +1855,7 @@
     "kit-type-h2",
     "kit-type-xs"
    ],
-   "source": "plugins/kits-core/includes/primitives.php kits_timeline(); plugins/animal-writes-core/includes/campaign-tools.php; themes/kits-by-wugweb/assets/css/kit-primitives.css",
+   "source": "plugins/kits-core/includes/primitives.php kits_timeline(); themes/kits-by-wugweb/assets/css/kit-primitives.css",
    "rules": {
     "font": "Inter (the site font), lining tabular figures",
     "use": "a date that is the point of a block (timelines, deadlines, event days); dates in sentences and meta rows stay kit-date",
@@ -2508,7 +2508,7 @@
    "name": "Footer navigation",
    "slug": "footer-nav",
    "status": "live",
-   "where": "footer: Helplines, Explore, Animal Writes, Categories, Policies",
+   "where": "footer: Helplines, Explore, About, Categories, Policies",
    "a11y": "one <nav> per list, each with its own aria-label"
   },
   {

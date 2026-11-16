@@ -50,7 +50,7 @@ a.kit-tag { cursor: pointer; }
 .kit-tag:is(.kit-tag--success, .kit-tag--warning, .kit-tag--danger, .kit-tag--closed, .kit-tag--featured) .kit-date { color: inherit; }
 .kit-tags { display: flex; flex-wrap: wrap; gap: var(--s-1); align-items: center; }
 .kit-chip::after, .wp-block-post-terms a::after { content: ""; position: absolute; inset: calc((var(--s-8) - var(--kit-size-target)) / 2) 0; }
-.kit-chip::after { inset: calc((100% - var(--kit-size-target)) / 2) 0; } /* a 44px hit area (--kit-size-target) from the chip's own height, the chip's look unchanged; it reaches 8px above and below, so chips in a row with an 8px gap (.aw-item-meta) meet in the gap and never cover each other */
+.kit-chip::after { inset: calc((100% - var(--kit-size-target)) / 2) 0; } /* a 44px hit area (--kit-size-target) from the chip's own height, the chip's look unchanged; it reaches 8px above and below, so chips in a row with an 8px gap (e.g. a meta row) meet in the gap and never cover each other */
 .kit-tags:has(> .kit-chip, > li > .kit-chip) { row-gap: var(--kit-space-4); } /* wrapped chip rows 16px apart (44 - 28), so the hit areas of one row never reach the chips of the next */
 :is(.kit-chip, .wp-block-post-terms a, a.kit-tag):visited { color: var(--kit-chip-fg); }
 :is(.kit-chip, .wp-block-post-terms a, a.kit-tag):focus-visible { background: var(--kit-chip-hover); border-color: var(--kit-chip-border-strong); outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
@@ -551,8 +551,7 @@ form, .kit-form, .fluentform { --kit-btn-height: var(--kit-size-control); --kit-
 
 /* Timeline calendar (owner, 13 Nov 2026: "rebuild the timeline calendar system": one calendar, one geometry, four
    states, campaign colours, four connectors, three layouts). Markup: kits_datecard(), kits_datecard_word(),
-   kits_timeline() (kits-core primitives.php); the campaign and Home timelines come from the server (aw_camp_dates_timeline,
-   aw_steps_dateline, home.php). For dates that are the point of a block; dates in sentences and meta rows stay .kit-date.
+   kits_timeline() (kits-core primitives.php); the campaign and Home timelines may be built by the site on the server (site-specific). For dates that are the point of a block; dates in sentences and meta rows stay .kit-date.
 
    The page: a sheet torn from a desk calendar. Two binder rings above, the month on a strip with a perforation under
    it, the day large, the year small, the next sheet showing under it. Inter (owner, 13 Nov), lining tabular figures.
@@ -560,7 +559,7 @@ form, .kit-form, .fluentform { --kit-btn-height: var(--kit-size-control); --kit-
    existing 4:5, so 64 x 80; strip 30% of the height, year 25%, the day the rest; type in proportion to the width, so
    1 to 9 and 10 to 31 sit in the same box. Badges 24px (--kit-space-5) in every state. Nothing in a state changes a size.
    Colours come from the campaign (--camp-mark strip, --camp-on-mark on it, --camp-dark rings and day); off campaign
-   pages the Animal Writes yellow (--kit-color-accent) with ink. A new campaign only sets its tokens.
+   pages the brand accent (--kit-color-accent) with ink. A new campaign only sets its tokens.
 
    States (data-state on the card or on its step; the words a screen reader hears are in the card):
    - past: the strip in the mark, a quiet page, the day muted, a round tick badge;
@@ -626,7 +625,7 @@ form, .kit-form, .fluentform { --kit-btn-height: var(--kit-size-control); --kit-
    - 768 to 1199: two steps a row, each page above its words; the line joins the two steps of a row only.
    - From 1200: one row, the pages aligned, the line across their middles, the words under them.
    The step's word when it has no date ("Now", "No date set") is printed above its words (.kit-dateline-word).
-   Markup: ol or div.kit-dateline > a step (data-state) > its page holder first (kit-dateline-when, aw-ed-story-when),
+   Markup: ol or div.kit-dateline > a step (data-state) > its page holder first (kit-dateline-when),
    then its words. */
 .kit-dateline { --dl-w: var(--kit-space-8); --dl-h: calc(var(--dl-w) * 1.25); --dl-gap: var(--kit-space-4); --dl-row: var(--kit-space-6); --dl-mark: var(--camp-mark, var(--kit-color-accent)); --dl-rest: color-mix(in srgb, currentColor 34%, transparent); display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; padding: 0; list-style: none; }
 .kit-dateline > * { --dl-t: calc(var(--kit-border-width) * 2); --dl-style: dashed; --dl-c: var(--dl-rest); --dl-band: transparent; position: relative; display: grid; grid-template-columns: var(--dl-w) minmax(0, 1fr); column-gap: var(--kit-space-4); align-content: start; margin: 0; padding: 0 0 var(--dl-row); border: 0; list-style: none; }

@@ -23,7 +23,7 @@ tokens/tokens.json is the source. tools/build-tokens.py (and, for a child theme,
 * Section and Head band are Group styles; their padding, background and gap are set in Styles > Blocks > Group.
 * Kits Hero block: height, colours, padding, border and shadow are block supports, set in Styles > Blocks > Hero.
 * Styles values for the hero height and section padding also reach parts that are not blocks yet.
-* Animal Writes style variation (styles/animal-writes.json), with the Inter font.
+* Style variations under styles/, selectable in Appearance > Editor > Styles, with the Inter font.
 * Inter is the theme font, declared once in theme.json and served from the theme (no Google Fonts request).
 * Needs WordPress 6.6 or later (Group styles in theme.json).
 * Updates can come from wugweb.com (Update URI, checked by Kits Core) once the update file is published there: Appearance > Themes then shows new versions with their details, and auto-updates can be turned on. Until then the check is off.

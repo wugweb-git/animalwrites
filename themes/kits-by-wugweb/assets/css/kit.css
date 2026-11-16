@@ -1,6 +1,6 @@
 /*
- * Kits by Wugweb — components (generated from the Animal Writes promotion, 2026-10-07).
- * One name per component (kit-*); Animal Writes-only components live in the child theme (aw.css).
+ * Kits by Wugweb — components.
+ * One name per component (kit-*); site-specific components live in the site's own stylesheet, not shipped with the theme.
  * Values come from tokens (--kit-*), so a child theme restyles everything by overriding tokens only.
  * Sections: base, typography, layout, components (button, card, media, field, chip, section, icons,
  * section header, tile), chrome (header, footer, sticky bar), page components (nav dropdowns, carousel,
@@ -832,7 +832,7 @@ html.has-modal-open .kit-sticky-help { display: none !important; }
 }
 
 /* ---------- Footer (1 Nov 2026) ----------
-   The newsletter is its own band just above (kit-nl-band). The dark block: Brand · Explore · Animal Writes ·
+   The newsletter is its own band just above (kit-nl-band). The dark block: Brand · Explore · About ·
    Legal & Trust (brand wider, the three link columns one width; 2×2 from 768; stacked on phones with the lists as
    folds); the helplines sit in the brand column (tap-to-call numbers in the accent colour); then © · policies · Powered by, smaller
    and dimmer. Column labels white, links light grey. Height = content (no screen-height cap;
@@ -897,7 +897,7 @@ html.has-modal-open .kit-sticky-help { display: none !important; }
 @media (max-width: 767px) { .kit-powered { margin-left: 0; } }
 .kit-footer :is(a, summary):focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
 
-/* Footer on phones. Explore, Animal Writes and Legal & Trust are folds (details.kit-footer-fold, data-kit-fold="767"):
+/* Footer on phones. Explore, About and Legal & Trust are folds (details.kit-footer-fold, data-kit-fold="767"):
    open from 768 and without JavaScript, with the summary hidden and the column label shown; under 768 the summary is
    the label (a 44px row with a chevron), the folds are stacked under the Brand block and start closed, and an open fold
    shows its links in two columns. Brand compact: logo, the line, then address and social
@@ -1182,7 +1182,7 @@ body { background: var(--kit-surface-page); }
 .kit-error-search .kit-error-field input { width: 100%; padding-left: calc(var(--kit-space-4) + var(--kit-icon-md) + var(--kit-space-2)); border-color: var(--kit-color-muted); } /* the field's edge at 3:1 or more (WCAG 1.4.11) */
 .kit-error-links a { gap: var(--kit-space-2); }
 .kit-error-links a .kit-ico { --kit-ico-size: var(--kit-icon-md); }
-/* The photo (aw_error_picture): on phones after the lead, the column's width, no frame. From 768px it fills the section
+/* The error-page photo (set per site): on phones after the lead, the column's width, no frame. From 768px it fills the section
    behind the text at the page hero's height (--kit-hero-min, so the section stays within 720px): the page colour fades
    in from the left over the photo, so the text keeps its contrast whatever the picture (stops: docs/design-system.md,
    Error pages) */
