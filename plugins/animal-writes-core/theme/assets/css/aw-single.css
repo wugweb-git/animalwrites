@@ -142,6 +142,11 @@
 		linear-gradient(180deg, var(--aw-tp-top), var(--aw-tp-base)); }
 }
 
+/* News key facts: a white card with a 1px line, three one-line rows (label bold), above the summary. Prints only when filled (news-article.php). */
+.single-aw_news .aw-keyfacts { box-sizing: border-box; margin: 0 0 var(--kit-space-5); padding: var(--kit-space-5); border: 1px solid var(--kit-color-line); border-radius: var(--kit-radius-card); background: #fff; color: #141414; }
+.single-aw_news .aw-keyfacts ul { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--kit-space-3); }
+.single-aw_news .aw-keyfacts li { margin: 0; font-size: 16px; line-height: 1.5; }
+
 /* News ad slot hook (nothing is built yet: the slot prints only when aw_news_ad_slot gives it something). Positions: after
    paragraph 3 and after Sources. The height is reserved so the page does not move: 250px on a phone, a 280x600 sticky box in the desktop rail. */
 .aw-ad-slot { box-sizing: border-box; margin: var(--kit-space-5) 0; }

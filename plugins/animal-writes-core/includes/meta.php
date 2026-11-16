@@ -24,6 +24,11 @@ function aw_meta_schema() {
 		'aw_source_name'     => array( 'string', $cards, 'Original source name' ),
 		'aw_source_date'     => array( 'string', $cards, 'Source publication date (Y-m-d)' ),
 
+		// News key facts: the card above the summary prints when at least one is filled (news-article.php).
+		'aw_news_happened'   => array( 'string', array( 'aw_news' ), 'Key facts: what happened (one sentence)' ),
+		'aw_news_matters'    => array( 'string', array( 'aw_news' ), 'Key facts: why it matters (one sentence)' ),
+		'aw_news_next'       => array( 'string', array( 'aw_news' ), 'Key facts: what is next (one sentence)' ),
+
 		// Monetisation guardrails.
 		'aw_sponsored'       => array( 'boolean', $all, 'Sponsored content' ),
 		'aw_sponsor_name'    => array( 'string', $all, 'Sponsor name' ),
