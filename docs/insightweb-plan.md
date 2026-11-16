@@ -273,10 +273,13 @@ no-WP smoke test all green. **Own keyword table done (`0e87dc6c`):** `includes/k
 **Decision engine done (`ae211a59`):** `includes/compute.php` — the generalised "decide" logic (`insightweb_priority`,
 `insightweb_is_question`/`is_news`, `insightweb_gap_action`, `insightweb_quick_win`, `insightweb_decide`,
 `insightweb_actions`), the differentiator that turns metrics into a suggested action; the Directory/Library/News-item
-branches dropped (#6), thresholds as overridable constants; 31 green checks. Next: the observation tables (`obs` and
-friends) + the daily recompute (the DB aggregation in `aw_si_compute`) and the Site-Kit GSC/GA4 read, then `keywords`
-and `rising`, each green; then the shell-backed tabs behind the shared `insightweb-shell` package, and the shared
-external-services registry once its package lands.
+branches dropped (#6), thresholds as overridable constants; 31 green checks. **Observation tables done (`23822062`):** `includes/schema.php` —
+the plugin's own four tables (`kw_pages`, `obs`, `rising`, `links`) with pure per-table schema builders,
+`insightweb_install` (admin_init, after the keyword table) and `insightweb_ready`; the AW links seed not carried (#6);
+37 green checks. Next: the daily recompute (the DB aggregation in `aw_si_compute`, reading `obs` and writing the
+engine's decisions onto the keyword records) and the Site-Kit GSC/GA4 read (model A — the per-version internal-API
+risk), then `keywords` and `rising`, each green; then the shell-backed tabs behind the shared `insightweb-shell`
+package, and the shared external-services registry once its package lands.
 
 ### External-services registry (shared component, owner 17 Nov 2026)
 
