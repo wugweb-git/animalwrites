@@ -267,8 +267,12 @@ land green standalone until those land; #3 and #7 are header-level and land with
 I1 → I3 so each phase stays PHPCS/tests-green. **I1 done (`f0c8c935`):** `plugins/insightweb-org/` scaffolded —
 standalone, activates next to Site Kit with an empty tab set, #3 (no Update URI) and #7 (`Requires Plugins:
 google-site-kit`, model A) resolved, one `insightweb_` prefix; `php -l` + PHPCS (WordPress + security ruleset) + a
-no-WP smoke test all green. Next: own keyword table + non-UI engine re-prefix/#6 decouple (can land green), then the
-shell-backed tabs behind the shared `insightweb-shell` package.
+no-WP smoke test all green. **Own keyword table done (`0e87dc6c`):** `includes/keyword-table.php` — `insightweb_kw_*`
+(install/ready/table/norm/schema + id_by_norm/get/create/set_figures), the search-insights subset of Kits Core's
+`aw_kw_*` with the sourcing/news columns and the taxonomy map table dropped (#6 at the data layer); 17 green checks.
+Next: port the non-UI engine modules (compute, keywords, rising) onto this table with the `insightweb_` prefix and the
+#6 decouple (drop the AW post types, hardcoded `animalwrites.in`, seed links), each green; then the shell-backed tabs
+behind the shared `insightweb-shell` package, and the shared external-services registry once its package lands.
 
 ### External-services registry (shared component, owner 17 Nov 2026)
 
