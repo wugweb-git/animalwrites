@@ -203,6 +203,15 @@ function aw_seo_modules(): array {
 				'AW_VIDEO_TYPES' => array( 'type' => 'list', 'label' => 'Post types scanned for videos', 'help' => 'Items of these types are scanned for YouTube and Vimeo videos. One per line. Empty: nothing runs.', 'default' => array( 'post', 'aw_news', 'aw_legal', 'aw_campaign' ) ),
 			),
 		),
+		'redirect-tools' => array(
+			'label'  => 'Redirect tools',
+			'switch' => true,
+			'files'  => array( 'redirect-tools' ),
+			'desc'   => 'Export and import redirects as CSV, export Rank Math\'s 404 log, and an Apache .htaccess block. Redirects stay in Rank Math\'s one list.',
+			'fields' => array(
+				'AW_REDIRECT_HTACCESS' => array( 'type' => 'int', 'label' => 'Allow writing redirects to .htaccess (1 on, 0 off)', 'help' => 'Off by default. Apache or LiteSpeed only; a backup is written first. The download works whether this is on or off.', 'default' => 0 ),
+			),
+		),
 		'schema' => array(
 			'label'  => 'Schema',
 			'switch' => false,

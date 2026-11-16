@@ -154,7 +154,15 @@ every output escaped, every string in the aw-seo-extras text domain.
   missing captions from a pattern). A new scalar "text" settings type was added for the caption pattern. Pure `AW_Bulk`
   (CSV read/write, find-and-replace) with tests. Note: Quick Edit and Bulk Edit use the standard inline hooks and need a
   wp-admin check (not run on WordPress here).
-- **F. Redirections.** CSV import, 404 log export, categories, .htaccess sync (off by default).
+- **F. Redirections.** CSV import, 404 log export, categories, .htaccess sync (off by default). **Built 17 Nov 2026**
+  on branch `claude/rankweb-redirects` (stacked on E), not live yet. Module "Redirect tools": export and import the
+  redirects as CSV (source, target, code 301/302/307/308/410/451, comparison; import has a dry run and writes through
+  `aw_rank_math_redirect()` into Rank Math's one list), export Rank Math's 404 log as CSV, and an Apache/LiteSpeed
+  .htaccess block (download always; a live write only when the setting is on, a backup first, via
+  `insert_with_markers()`). `aw_rank_math_redirect()` now takes a status code. Pure `AW_Redirects` (CSV, validation,
+  .htaccess lines) with tests. **Categories were not built**: Rank Math's list has no category field and the owner's
+  rule keeps every redirect in that one list, so a parallel category map keyed by Rank Math id would be fragile — left
+  for the owner to decide. The live .htaccess write needs a wp-admin check (not run on WordPress here).
 - **G. InsightWeb additions.** Index status (URL Inspection API), winners and losers, per-item performance badge and
   view, content SEO overview, PageSpeed on demand, country filter, monthly email digest.
 - **H. Agent tools.** RankWeb abilities through the WordPress Abilities API and MCP adapter, read first, then writes

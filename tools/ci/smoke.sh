@@ -352,8 +352,8 @@ for g in groups:
         out = subprocess.run(['curl', '-s', '-o', '/dev/null', '-w', '%{http_code}', '-X', 'POST', '-b', '/tmp/cj-ci', '-H', 'X-WP-Nonce: ' + nonce, '-H', 'Content-Type: application/json', '-d', json.dumps(data), r + '/' + route], capture_output=True, text=True).stdout
         print(('ok  ' if out == '200' else 'FAIL') + ' ' + out + ' unchanged Save ' + route)
         bad += out != '200'
-print(('ok  ' if len(groups) == 12 else 'FAIL') + ' %d settings groups' % len(groups))  # 8, plus Video, Custom schema, Bulk edit and Images (RankWeb PRO phases C–E, 17 Nov 2026)
-sys.exit(1 if bad or len(groups) != 12 else 0)
+print(('ok  ' if len(groups) == 13 else 'FAIL') + ' %d settings groups' % len(groups))  # 8, plus Video, Custom schema, Bulk edit, Images and Redirect tools (RankWeb PRO phases C–F, 17 Nov 2026)
+sys.exit(1 if bad or len(groups) != 13 else 0)
 PY
 AFTER=$(snap)
 if [ "$BEFORE" = "$AFTER" ]; then echo "ok   no setting changed by unchanged Saves: $AFTER"; else echo "FAIL settings changed: $BEFORE -> $AFTER"; FAIL=1; fi

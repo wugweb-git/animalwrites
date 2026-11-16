@@ -35,10 +35,13 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @param string $pattern    Path without slashes at the ends, or a regex.
  * @param string $to         Destination URL (absolute, or a path on this site).
  * @param string $comparison exact | regex.
+ * @param int    $code       The status code (301, 302, 307, 308, 410, 451). A 410 or 451 needs no destination.
  * @return int
  */
-function aw_rank_math_redirect( $pattern, $to, $comparison = 'exact' ) {
-	if ( '' === $pattern || '' === $to || ! class_exists( '\RankMath\Redirections\Redirection' ) || ! \RankMath\Helper::is_module_active( 'redirections' ) ) {
+function aw_rank_math_redirect( $pattern, $to, $comparison = 'exact', $code = 301 ) {
+	$code = in_array( (int) $code, array( 301, 302, 307, 308, 410, 451 ), true ) ? (int) $code : 301;
+	$gone = in_array( $code, array( 410, 451 ), true );
+	if ( '' === $pattern || ( '' === $to && ! $gone ) || ! class_exists( '\RankMath\Redirections\Redirection' ) || ! \RankMath\Helper::is_module_active( 'redirections' ) ) {
 		return 0;
 	}
 	if ( 'exact' === $comparison && class_exists( '\RankMath\Redirections\DB' ) ) {
@@ -55,7 +58,7 @@ function aw_rank_math_redirect( $pattern, $to, $comparison = 'exact' ) {
 		array(
 			'sources'     => array( array( 'pattern' => $pattern, 'comparison' => $comparison ) ),
 			'url_to'      => $to,
-			'header_code' => 301,
+			'header_code' => $code,
 			'status'      => 'active',
 		)
 	);
