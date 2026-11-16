@@ -64,7 +64,22 @@ Move every AW-specific rule out of the generic component CSS into the tenant lay
 ## Gates (per CLAUDE.md "bigger technical work")
 Each PR: `code-review` skill · `wp-plugin-audit` (when Kits Core changes) · PHPCS on changed files · Deploy check green · Codex comments answered. **Live parity proven before any merge.** Owner merges; ship via `tools/aw-ship.sh`. Update the Notion theme page + `docs/pending.md` as items land. Commit trailer `Co-Authored-By: Wugweb <admin@wugweb.com>`.
 
-## Open decisions for the owner
-1. **Display face:** keep self-hosted **Inter** as the marketplace default, or also bundle **Inter Tight** woff2 for the exact display look? (Inter Tight isn't in the repo; bundling needs the OFL files.)
-2. **Theme name/slug for distribution:** keep "Kits by Wugweb", or a marketplace-specific name? (slug is permanent on wp.org.)
-3. **Demo style variations:** which 1–2 neutral looks ship as the marketplace demo.
+## Decisions (owner)
+1. **Font: keep self-hosted Inter** (already bundled, local `fontFace`). Google's Inter files may be used as a *source* but must be bundled, never hotlinked. Both tracks chosen.
+2. **Name/slug: keep "Kits by Wugweb"** (`kits-by-wugweb`).
+
+## Still open
+- Which 1–2 neutral style variations ship as the marketplace demo (Phase 2).
+
+## Progress (branch `claude/theme-marketplace-prep`, local — not pushed)
+Status against `origin`: live == dev, already clean on headers/fonts (no `Update URI`, PHP 8.0, Inter self-hosted, no Google/CDN call).
+
+- **Phase 1 — decouple tenant from the generic theme: DONE.**
+  - `7d4b9409` — 8 Animal-Writes CSS rules moved `kit.css` → tenant `aw.css`.
+  - `6b3ecadd` — "Animal Writes" name scrubbed from the generic theme (comments, `kits-registry.json`, `readme.txt`); `styles/animal-writes.json` relocated to the plugin.
+  - `4ec3199f` — safe AW JS decoupled: dead aliases dropped, hero-motion gate moved to `aw.js`, dead `reduce` var removed. `code-review` (medium): 0 correctness bugs.
+  - Verified: `theme_rules_check`, `theme_copies`, `registry_check`, `css_min`, `node --check` all pass; **no "Animal Writes" literal left in the generic theme**.
+- **Phase 0/3 — WPCS on the theme PHP: DONE.**
+  - `c949a91f` — added `themes/kits-by-wugweb/phpcs.xml.dist` (WordPress-Extra + WordPress-Docs + i18n + PrefixAllGlobals); fixed all violations → **`vendor/bin/phpcs` clean, 0 errors / 0 warnings** (WPCS 3.4.1 / PHPCS 3.13.6, installed in the scratchpad, not the repo).
+- **Deferred to the Dec `aw_`-prefix rename (not theme-only safe):** the kits-core form-engine protocol names `X-AW-Fetch` / `_aw_nonce`, the shared `aw-form-done-title` hook, and the tenant analytics hooks in `kit.js` (harmless no-ops on a plugin-less site).
+- **Remaining:** live render-compare parity (staging) · Phase 2 i18n `.pot` + demo variations · Phase 4 Kits Core `wp-plugin-audit` + PHPCS · Phase 5/6 two builds + submission · owner runs Theme Check on staging.
