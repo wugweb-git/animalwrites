@@ -215,6 +215,18 @@ Bigger technical work, so branch → PR into `wordpress-dev` → review gate (co
 | **1. Move the code** | `insightweb/` with the loader, the 37 files it loads (7 of them pull in the 7 list tables) and `data/`; bootstrap with guard; the bridge in RankWeb; RankWeb's loader, module list, deactivation, Overview row, Kits row and header edited (1.1); `aw_si_api_allowed()`, the 7 fields printed by InsightWeb, guard on `aw_seo_kp_replay()`; smoke test and load-order test; release files (3.1: PHPDoc header, version constant, `readme.txt`, `composer.json`, translation template; RankWeb 2.0.0); `docs/plugin-map.md` rows moved. About 14,000 lines moved, about 300 changed. | M (mostly moves) | Medium: load order and cron gaps (3.2); a missed RankWeb helper would show as a fatal in the smoke test, not on live |
 | **1b. Activate, then remove the bridge** | Owner activates InsightWeb; after one clean daily run, the bridge goes | S | Low |
 
+## Status (17 Nov 2026)
+
+Phase 1 shipped and live (`b354050c`). **The bridge (step 1b/5) has not been removed yet:**
+`aw_seo_extras_insightweb_bridge()` is still in `plugins/aw-seo-extras/aw-seo-extras.php`, dormant because InsightWeb
+is active (it returns as soon as `INSIGHTWEB_FILE` is defined). Removing it is a small RankWeb commit — **out of scope
+for InsightWeb-only work**, left to the RankWeb session; noted, not forced. The Settings default-value bug (a stored
+value equal to the default was kept, so it did not follow a later default change) is **fixed** in
+`aw_si_settings_save()` (`b3cd3a0d`; test updated `eadd5e5c`). The public WordPress.org listing is now assessed and
+planned — `docs/insightweb-org-assessment.md` and `docs/insightweb-org-rebrand.md`; the "InsightWeb app on the Kits
+Core plugin shell" named below is superseded there by **reusing the Kits shell as a bundled shared package** (no
+rebuilt UI).
+
 ## Later, separate plan
 
 Named only; none of this is part of phase 1, and each would need its own plan and the owner's yes: an InsightWeb app on the Kits Core plugin shell (Dashboard with tiles and chips, Keywords as the working list, Settings with connected services); the keys moving from Kits → Keys into that Settings; InsightWeb's own menu with redirects from the old tabs; an "Apply focus keyword" action through `aw/v1/seo-focus`; Sourcing keywords moving into SourceWeb; daily counts of quick wins and conflicts; the shell parts the pilot would ask Kits Core for; clearing the `aw_si_srv_speed` events on deactivation (1.4); the text domain and `aw_si_` rename. Any new route a later plan adds uses InsightWeb's own namespace, `insightweb/v1/…` (each Kits plugin has its own; `kits/v1` is Kits Core's); phase 1 keeps every `aw/v1/` route as it is.
