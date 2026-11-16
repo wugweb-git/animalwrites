@@ -190,4 +190,17 @@ iw_check( 'gap' === $d['status'] && 'faq-answer' === $d['action'], 'high-demand 
 $d = insightweb_decide( null, 40, 12.0, null, array( '/guide/' ), true, array( '/guide/', 40 ), array() );
 iw_check( 'has-page' === $d['status'] && 'guide-update' === $d['action'], 'a quick win with an owning page → update the page' );
 
+// Observation tables (schema.php).
+$pages = insightweb_pages_schema_sql( 'wp_insightweb_kw_pages', '' );
+$obs   = insightweb_obs_schema_sql( 'wp_insightweb_obs', '' );
+$ris   = insightweb_rising_schema_sql( 'wp_insightweb_rising', '' );
+$lnk   = insightweb_links_schema_sql( 'wp_insightweb_links', '' );
+iw_check( false !== strpos( $pages, 'CREATE TABLE wp_insightweb_kw_pages' ) && false !== strpos( $pages, 'UNIQUE KEY kw_page_role' ), 'kw_pages schema' );
+iw_check( false !== strpos( $obs, 'CREATE TABLE wp_insightweb_obs' ) && false !== strpos( $obs, 'UNIQUE KEY obs' ) && false !== strpos( $obs, 'clicks' ) && false !== strpos( $obs, 'impr' ) && false !== strpos( $obs, 'pos ' ), 'obs schema with the GSC metric columns' );
+iw_check( false !== strpos( $ris, 'CREATE TABLE wp_insightweb_rising' ) && false !== strpos( $ris, 'growth' ), 'rising schema' );
+iw_check( false !== strpos( $lnk, 'CREATE TABLE wp_insightweb_links' ) && false !== strpos( $lnk, 'UNIQUE KEY link_key' ), 'links schema' );
+iw_check( false === insightweb_ready(), 'observation tables not ready before install' );
+$GLOBALS['iw_opts'][ INSIGHTWEB_DB_OPTION ] = INSIGHTWEB_DB_VERSION;
+iw_check( true === insightweb_ready(), 'observation tables ready once the version option is set' );
+
 exit( $GLOBALS['iw_fail'] );
