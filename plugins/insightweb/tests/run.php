@@ -124,14 +124,18 @@ iw_check( false === aw_si_settings_save( iw_texts() ) && $GLOBALS['iw_writes'] =
 $GLOBALS['iw_options']['aw_seo_settings'] = array(
 	'titles'          => array( 'AW_SEO_X' => 3 ),
 	'search-insights' => array(
-		'on'              => 1,
-		'AW_SI_MOVERS'    => 30,
-		'AW_SI_HIGH_IMPR' => 50, // Stored though equal to the default: kept as it is.
+		'on'           => 1,
+		'AW_SI_MOVERS' => 30, // A real (non-default) value; only these are stored.
 	),
 );
 $before                                   = serialize( $GLOBALS['iw_options']['aw_seo_settings'] );
 $w                                        = $GLOBALS['iw_writes'];
 iw_check( false === aw_si_settings_save( iw_texts() ) && serialize( $GLOBALS['iw_options']['aw_seo_settings'] ) === $before && $GLOBALS['iw_writes'] === $w, 'unchanged Save with values stored writes nothing (byte for byte)' );
+// A value stored though equal to its default (a stale key) is taken out on the next Save, so a later default change is
+// followed (docs/pending.md, fixed b3cd3a0d). The Save writes once; the other stored key is kept.
+$GLOBALS['iw_options']['aw_seo_settings']['search-insights']['AW_SI_HIGH_IMPR'] = 50; // Equal to the default.
+$w                                                                              = $GLOBALS['iw_writes'];
+iw_check( true === aw_si_settings_save( iw_texts() ) && ! isset( $GLOBALS['iw_options']['aw_seo_settings']['search-insights']['AW_SI_HIGH_IMPR'] ) && 30 === $GLOBALS['iw_options']['aw_seo_settings']['search-insights']['AW_SI_MOVERS'] && $GLOBALS['iw_writes'] === $w + 1, 'a stored value equal to the default is taken out on the next Save (follows a later default change)' );
 iw_check( false === aw_si_settings_save( array() ), 'a Save sending nothing writes nothing' );
 iw_check( aw_si_settings_save( array( 'AW_SI_QUICK_MIN' => '15' ) ) && 15 === $GLOBALS['iw_options']['aw_seo_settings']['search-insights']['AW_SI_QUICK_MIN'] && 30 === $GLOBALS['iw_options']['aw_seo_settings']['search-insights']['AW_SI_MOVERS'], 'a changed number is stored; one not sent keeps its value' );
 iw_check( aw_si_settings_save( array( 'AW_SI_MOVERS' => '20' ) ) && ! isset( $GLOBALS['iw_options']['aw_seo_settings']['search-insights']['AW_SI_MOVERS'] ), 'a number set back to its default is taken out' );
