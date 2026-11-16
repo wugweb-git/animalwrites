@@ -203,4 +203,14 @@ iw_check( false === insightweb_ready(), 'observation tables not ready before ins
 $GLOBALS['iw_opts'][ INSIGHTWEB_DB_OPTION ] = INSIGHTWEB_DB_VERSION;
 iw_check( true === insightweb_ready(), 'observation tables ready once the version option is set' );
 
+// Daily recompute (recompute.php).
+iw_check( ! insightweb_compute_changed( null, null ) && insightweb_compute_changed( null, 5 ) && insightweb_compute_changed( 5, null ), 'change detection: null vs value' );
+iw_check( ! insightweb_compute_changed( '6.4', 6.43 ) && insightweb_compute_changed( '6.4', 7.0 ), 'change detection: floats within 0.05 are equal' );
+iw_check( insightweb_compute_changed( 'P1', 'P2' ) && ! insightweb_compute_changed( 'P1', 'P1' ), 'change detection: strings' );
+
+$set = insightweb_compute_row( 80, 0, null, null, null, null, array(), false, array( '', 0 ), array( 'label' => 'how to report cruelty' ) );
+iw_check( 'gap' === $set['status'] && 'faq-answer' === $set['action'] && 80 === $set['impr28'] && 0 === $set['quick_win'] && '' === $set['page'], 'row shaper: a high-demand question gap' );
+$set = insightweb_compute_row( 40, 3, 12.0, 13.0, null, null, array( '/guide/' ), true, array( '/guide/', 40 ), array( 'label' => 'dog adoption guide' ) );
+iw_check( 'has-page' === $set['status'] && 'guide-update' === $set['action'] && 1 === $set['quick_win'] && '/guide/' === $set['page'] && 12.0 === $set['pos28'], 'row shaper: a quick win with an owning page' );
+
 exit( $GLOBALS['iw_fail'] );
