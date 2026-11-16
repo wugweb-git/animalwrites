@@ -217,15 +217,37 @@ Bigger technical work, so branch → PR into `wordpress-dev` → review gate (co
 
 ## Status (17 Nov 2026)
 
-Phase 1 shipped and live (`b354050c`). **The bridge (step 1b/5) has not been removed yet:**
-`aw_seo_extras_insightweb_bridge()` is still in `plugins/aw-seo-extras/aw-seo-extras.php`, dormant because InsightWeb
-is active (it returns as soon as `INSIGHTWEB_FILE` is defined). Removing it is a small RankWeb commit — **out of scope
-for InsightWeb-only work**, left to the RankWeb session; noted, not forced. The Settings default-value bug (a stored
-value equal to the default was kept, so it did not follow a later default change) is **fixed** in
-`aw_si_settings_save()` (`b3cd3a0d`; test updated `eadd5e5c`). The public WordPress.org listing is now assessed and
-planned — `docs/insightweb-org-assessment.md` and `docs/insightweb-org-rebrand.md`; the "InsightWeb app on the Kits
-Core plugin shell" named below is superseded there by **reusing the Kits shell as a bundled shared package** (no
-rebuilt UI).
+Phase 1 shipped and live (`b354050c`). Full detail: `docs/insightweb-org-assessment.md` (consolidation, dependency
+map, WordPress.org landscape) and `docs/insightweb-org-rebrand.md` (extraction plan, go/no-go).
+
+- **Public WordPress.org verdict:** **no-go as-is; extractable with real cost at one layer — Google credentials.**
+  InsightWeb has the suite's clearest generic story ("Search Console + GA4 insights"), but today it is a Rank Math /
+  Kits add-on. The gating decision for a public plugin is how it authenticates to Google: (A) companion to Site Kit via
+  a *supported* surface, or (B) its own Google OAuth (Netpeak model). Everything else (one prefix `insightweb_`, drop
+  the site coupling) is mechanical.
+- **Admin-UI decision:** the listable edition does **not** rebuild a native UI. It **reuses the current Kits shell
+  as-is, kept identical**, extracted into a shared GPL UI package bundled into the plugin (no runtime Kits Core),
+  enqueued under a namespaced handle `insightweb-shell` (never the global `kits-shell`), with the Kits-specific bits
+  (branding, `kits/v1`, cross-plugin nav) injected as config via `wp_localize_script`. RankWeb's build session is
+  extracting the shared shell as the template. This supersedes the "InsightWeb app on the Kits Core plugin shell" named
+  in "Later, separate plan" below.
+- **Dependency map (summary; full table in the assessment doc §2):**
+  - *CRITICAL* (hard-gated in `bootstrap.php`; plugin shows a notice and does nothing): **Kits Core**
+    (`! defined('KITS_CORE_LOADED')` :30, `! function_exists('aw_kw_install')` :52) and **Rank Math**
+    (`RANK_MATH_VERSION` + `\RankMath\Helper` :31).
+  - *NON-CRITICAL* (guarded; degrades): **Site Kit by Google** (`class_exists('\Google\Site_Kit\…')` → GSC/GA4
+    unavailable), **Animal Writes Core** (live loader only, not a runtime gate), the **Kits admin shell**
+    (`function_exists('kits_shell_*')` → fallback), **SourceWeb** (`aw_sourcing_kw_on`) and the **keys** (`aw_key()` +
+    per-source keys) — all optional.
+- **The bridge (step 1b/5) has not been removed yet:** `aw_seo_extras_insightweb_bridge()` is still in
+  `plugins/aw-seo-extras/aw-seo-extras.php`, dormant because InsightWeb is active (it returns as soon as
+  `INSIGHTWEB_FILE` is defined). Removing it is a small RankWeb commit — **out of scope for InsightWeb-only work**, left
+  to the RankWeb session; noted, not forced.
+- **Settings default-value bug fixed:** a stored value equal to the default was kept, so it did not follow a later
+  default change — fixed in `aw_si_settings_save()` (`b3cd3a0d`; test updated `eadd5e5c`).
+- **Safe in-place readme hygiene (live plugin):** `readme.txt` gained `== External services ==` and a brand-neutral,
+  differentiator-led description; `Requires Plugins` / `Update URI` removal were **not** applied to the live plugin
+  (owner's 11 Nov in-code-check decision + live-activation risk) and belong to the public codebase.
 
 ## Later, separate plan
 
