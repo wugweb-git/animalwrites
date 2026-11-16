@@ -215,39 +215,159 @@ Bigger technical work, so branch → PR into `wordpress-dev` → review gate (co
 | **1. Move the code** | `insightweb/` with the loader, the 37 files it loads (7 of them pull in the 7 list tables) and `data/`; bootstrap with guard; the bridge in RankWeb; RankWeb's loader, module list, deactivation, Overview row, Kits row and header edited (1.1); `aw_si_api_allowed()`, the 7 fields printed by InsightWeb, guard on `aw_seo_kp_replay()`; smoke test and load-order test; release files (3.1: PHPDoc header, version constant, `readme.txt`, `composer.json`, translation template; RankWeb 2.0.0); `docs/plugin-map.md` rows moved. About 14,000 lines moved, about 300 changed. | M (mostly moves) | Medium: load order and cron gaps (3.2); a missed RankWeb helper would show as a fatal in the smoke test, not on live |
 | **1b. Activate, then remove the bridge** | Owner activates InsightWeb; after one clean daily run, the bridge goes | S | Low |
 
-## Status (17 Nov 2026)
+## WordPress.org edition (17 Nov 2026)
 
-Phase 1 shipped and live (`b354050c`). Full detail: `docs/insightweb-org-assessment.md` (consolidation, dependency
-map, WordPress.org landscape) and `docs/insightweb-org-rebrand.md` (extraction plan, go/no-go).
+Phase 1 shipped and live (`b354050c`). This section folds in the former `docs/insightweb-org-assessment.md` and
+`docs/insightweb-org-rebrand.md` (now deleted — `docs/insightweb-plan.md` is the single living doc). Read-only
+assessment + extraction plan for listing `plugins/insightweb` on the public WordPress.org directory; no local
+WordPress (owner rule), so runtime-only items are marked **(runtime)**. Side session; nothing shipped. InsightWeb
+itself stays the self-hosted Animal Writes plugin (keeps its `Update URI` and in-code dependency checks); the public
+plugin is a **separate codebase** that reuses the generic parts.
 
-- **Public WordPress.org verdict:** **no-go as-is; extractable with real cost at one layer — Google credentials.**
-  InsightWeb has the suite's clearest generic story ("Search Console + GA4 insights"), but today it is a Rank Math /
-  Kits add-on. The gating decision for a public plugin is how it authenticates to Google: (A) companion to Site Kit via
-  a *supported* surface, or (B) its own Google OAuth (Netpeak model). Everything else (one prefix `insightweb_`, drop
-  the site coupling) is mechanical.
-- **Admin-UI decision:** the listable edition does **not** rebuild a native UI. It **reuses the current Kits shell
-  as-is, kept identical**, extracted into a shared GPL UI package bundled into the plugin (no runtime Kits Core),
-  enqueued under a namespaced handle `insightweb-shell` (never the global `kits-shell`), with the Kits-specific bits
-  (branding, `kits/v1`, cross-plugin nav) injected as config via `wp_localize_script`. RankWeb's build session is
-  extracting the shared shell as the template. This supersedes the "InsightWeb app on the Kits Core plugin shell" named
-  in "Later, separate plan" below.
-- **Dependency map (summary; full table in the assessment doc §2):**
-  - *CRITICAL* (hard-gated in `bootstrap.php`; plugin shows a notice and does nothing): **Kits Core**
-    (`! defined('KITS_CORE_LOADED')` :30, `! function_exists('aw_kw_install')` :52) and **Rank Math**
-    (`RANK_MATH_VERSION` + `\RankMath\Helper` :31).
-  - *NON-CRITICAL* (guarded; degrades): **Site Kit by Google** (`class_exists('\Google\Site_Kit\…')` → GSC/GA4
-    unavailable), **Animal Writes Core** (live loader only, not a runtime gate), the **Kits admin shell**
-    (`function_exists('kits_shell_*')` → fallback), **SourceWeb** (`aw_sourcing_kw_on`) and the **keys** (`aw_key()` +
-    per-source keys) — all optional.
-- **The bridge (step 1b/5) has not been removed yet:** `aw_seo_extras_insightweb_bridge()` is still in
-  `plugins/aw-seo-extras/aw-seo-extras.php`, dormant because InsightWeb is active (it returns as soon as
-  `INSIGHTWEB_FILE` is defined). Removing it is a small RankWeb commit — **out of scope for InsightWeb-only work**, left
-  to the RankWeb session; noted, not forced.
+### Verdict / go-no-go
+
+**No-go as it stands; a conditional GO to extract a separate listable plugin — with real cost at one layer: Google
+credentials.** Of the suite InsightWeb has the clearest generic story ("Search Console + GA4 insights"), and the
+analysis engine (keyword records, rising terms, quick wins, Discover/News/URL-Inspection, PageSpeed, Site Health,
+WP-CLI) is genuinely generic and already works. The coupling (Kits Core, Rank Math requirement, Animal Writes post
+types, the Kits admin shell, mixed prefixes) is all removable, none of it a rewrite. The one gating decision is how a
+public install authenticates to Google (see **Credentials crux** below); until that is chosen it is a no-go on that
+axis, not on the features.
+
+### What ports vs what is dropped
+
+**Ports (generic search-analytics features):** keyword records (roles, owning pages, GSC figures by day, priority,
+suggested action); rising terms / quick wins / conflicts; PageSpeed, Clarity, Bing (own keys); URL Inspection /
+Discover / Google News (via Site Kit); the Links view (drop the AW seed data); Site Health test, Dashboard box, WP-CLI
+(rename the command namespace); the settings model (store-only-if-differs-from-default, correct after the 17 Nov fix);
+the admin UI (the Kits shell, reused as a bundled package — see **Admin UI**); the no-WordPress runner `tests/run.php`.
+
+**Dropped (Animal Writes / Kits specific):** the site post types `aw_listing` / `aw_news` / `aw_legal` /
+`aw_campaign` / `aw_opportunity` and `AW_SEO_ITEM_TYPES` (the public plugin operates on admin-chosen public post types,
+never hardcoded); hardcoded `animalwrites.in` (`links-seed.php`, `crawlcheck.php` UA + alert email, `server.php` repo
+link) and the shipped seed data (`search-insights/data/links-2026-11-02.php`); the Kits Core **runtime** dependency, the
+RankWeb bridge and the shared `aw_seo_settings` option, the `aw/v1` worker routes, the `aw_worker` capability, the Keys
+page (→ own settings fields); the **hard Rank Math requirement** (make it optional); reassess the DB-IP visitors/country
+and server-log tabs. Rule of thumb: a feature about search/analytics data ports; anything about Animal Writes content or
+the Kits shell is dropped.
+
+### Dependency map — CRITICAL vs NON-CRITICAL
+
+"WP.org slug" is the directory slug for `Requires Plugins`, or "—" for a suite/site plugin not on the directory (must
+be removed/replaced for the public plugin, never required).
+
+**CRITICAL** — hard-gated in `includes/bootstrap.php`; without these InsightWeb shows one admin notice and does nothing:
+
+| Dependency | WP.org slug | Exact guard (file:line) | Effect if absent | Public-codebase handling |
+|---|---|---|---|---|
+| **Kits Core** | — | `! defined( 'KITS_CORE_LOADED' )` — `bootstrap.php:30`; **and** `! function_exists( 'aw_kw_install' )` (the keyword table, now Kits Core's) — `bootstrap.php:52` | Bootstrap returns early → one `admin_notices` warning, nothing else loads. | **Design out**: ship own keyword table + helpers (one prefix); no Kits Core dependency to require. |
+| **Rank Math SEO** | `seo-by-rank-math` | `defined( 'RANK_MATH_VERSION' ) && class_exists( '\RankMath\Helper' )` — `bootstrap.php:31` | Same early return + notice. | **Make optional** (SEO scores + GSC backup, not core); if kept, `Requires Plugins: seo-by-rank-math`. |
+
+**NON-CRITICAL** — guarded with `function_exists` / `class_exists`; the plugin boots and the feature degrades. None blocks a listing:
+
+| Dependency | WP.org slug | Exact guard (file:line) | Degrade behaviour |
+|---|---|---|---|
+| **Site Kit by Google** | `google-site-kit` | `class_exists( '\Google\Site_Kit\Context' )` (`sitekit.php:17`), `\Google\Site_Kit\Plugin` (`sitekit.php:20`, `insightweb-rest.php:533`), `\Google\Site_Kit\Core\Modules\Modules` (`sitekit.php:46`) | Each Google read returns `WP_Error` "Site Kit is not active"; GSC + GA4 unavailable, the rest runs. **Functionally core, technically optional** — see the credentials crux. |
+| **Animal Writes Core** | — | none inside InsightWeb — only the **live loader** (InsightWeb boots itself on `plugins_loaded` priority 5 in `insightweb.php`) | Not a runtime gate; standalone activation works without it. The keyword table it once owned is now Kits Core's. |
+| **Kits Core admin shell** | — (bundled) | `function_exists( 'kits_shell_html_parts' / 'kits_shell_app' / 'kits_shell_mount' / 'kits_shell_rest_can' )` (`insightweb-tabs.php:46,56`, `insightweb-ui.php:36,75,143`, `insightweb-rest.php:29`), `kits_admin_tabs` (`kits-hub.php:17`), `kits_dash_cards`/`kits_dash_bars` (`dashboard.php:141,175`), `kits_status_cell` (`kits-hub.php:46`) | Empty/fallback output; screens do not render. The public plugin **bundles** this shell as a shared GPL package (handle `insightweb-shell`, Kits specifics via `wp_localize_script`, no runtime Kits Core); never a `Requires Plugins`. |
+| **SourceWeb** | — | `function_exists( 'aw_sourcing_kw_on' )` | Sourcing-keywords tab hidden; everything else runs. (Dropped.) |
+| **Keys** (`aw_key()`) + per-source keys | — | `function_exists( 'aw_key' )` (`runs.php:46`, `admin.php:1076`); each source checks its own key — `bing.php:35`, `clarity.php:36`, `psi.php:158` | A source whose key is unset simply does not run; no error. Become the plugin's own settings fields. |
+
+### Security posture (good)
+
+REST routes all have a real `permission_callback` (`kits_shell_rest_can()` nonce+cap, or `aw_si_api_allowed` =
+admin/`aw_worker`); no `__return_true`. SQL via `$wpdb->prepare()` with `%i` for identifiers (167 uses). 17
+`check_admin_referer` + 1 `check_ajax_referer`; 35 `current_user_can`. Raw `file_get_contents` only on the local readme
+and uploaded import files. PHPCS `WordPress` + `tools/ci/phpcs-security.xml` clean on the files changed this session.
+
+### The credentials crux (the gating decision)
+
+InsightWeb holds **no Google OAuth client and no tokens of its own**. For GSC/GA4 it calls Site Kit's **internals**
+(`\Google\Site_Kit\Context`, `...\Core\Modules\Modules`, module `get_data()`, `googlesitekit_*_settings`) — a private,
+unsupported surface that can break on any Site Kit release **(runtime to confirm per version)**. Two models:
+
+- **(A) Companion to Site Kit** — `Requires Plugins: google-site-kit`; the user connects Google in Site Kit; the plugin
+  reads it. No credential handling, smallest build, honest story — but needs a *supported* way in (today's internal
+  calls are a listing + maintenance risk).
+- **(B) Own Google OAuth** (the Netpeak model) — the user's own Google Cloud credentials, tokens stored encrypted; or a
+  vendor-run OAuth proxy (an external service to disclose and operate). Independent, but a real OAuth layer to build and
+  support.
+
+Recommendation: start with **(A)** scoped to what Site Kit supports publicly; treat PageSpeed/Clarity/Bing (own keys,
+no OAuth) as value that works with or without Site Kit; move to (B) only if the Site Kit surface proves insufficient.
+
+### Admin UI decision
+
+The listable edition does **not** rebuild a native UI. It **reuses the current Kits shell as-is, kept identical** —
+same code, same look, different handle — extracted into a shared GPL UI package **bundled** into the plugin (no runtime
+Kits Core), enqueued under the namespaced handle **`insightweb-shell`** (never the global `kits-shell`), with the
+Kits-specific bits (branding, `kits/v1`, cross-plugin nav) injected as config via `wp_localize_script`. RankWeb's build
+session is extracting the shared shell as the template (see `docs/rankweb-org-rebrand.md` §4). This supersedes the
+"InsightWeb app on the Kits Core plugin shell" named in "Later, separate plan" below.
+
+### Listing blockers (wp.org checklist)
+
+- **Slug** `insightweb` free (404 on wordpress.org/plugins/, verified 17 Nov); name has no third-party mark; main file =
+  slug. Permanent once taken — re-check before submitting.
+- **One 4+ char prefix** `insightweb_` (`InsightWeb_` classes, `INSIGHTWEB_` constants) — blocker today (mixed
+  `aw_si_`/`aw_`/`aw_kw_`/`aw_seo_`/`kits_`); public codebase only, do not mass-rename the live plugin.
+- **`Requires Plugins`** for any hard dep the public plugin keeps — public codebase only, **not** the live plugin
+  (owner's 11 Nov in-code-check decision; adding it risks blocking live activation because Kits Core is not a standalone
+  active plugin on live).
+- **`Update URI`** must go in the public codebase (live plugin keeps it for self-hosted updates via `plugin-info.php`).
+- **`== External services ==`** done in place in `readme.txt` (Google via Site Kit, PSI, Clarity, Bing, DB-IP, crawl
+  checks, with Terms/Privacy URLs). Installation/FAQ/Changelog present; short description brand-neutral and ≤150.
+- GPL-2.0-or-later, `src/` present, React built locally, no CDN/minified-only. **No trialware/nags/undisclosed
+  tracking.** Assets: icon + banner exist; **screenshots are new work**. Contributors: owner to supply a real wp.org
+  account.
+
+### WordPress.org landscape
+
+- **Competitors:** *Site Kit by Google* (the dependency; a public InsightWeb is a companion/analysis layer, not a
+  replacement); *ExactMetrics* / *MonsterInsights* (GA dashboards); *SiteStats Analytics* (combines GA/GSC/Bing);
+  *Netpeak Analytics Kit* (GSC+GA4 with the user's own OAuth — the model for option B).
+- **Differentiator:** not another metrics dashboard — the **keyword-record model** (roles, owning pages, priority, a
+  suggested action), rising terms / quick wins / conflicts, Discover/News/URL-Inspection coverage, crawler-access
+  checks. Lead the listing with this.
+- **Category:** SEO / analytics. **Tags (≤5):** `search console`, `analytics`, `google analytics`, `pagespeed`, `seo`.
+
+### Listing copy (draft, for the public edition)
+
+- **Short description (≤150):** "Per-keyword insights from Search Console and GA4: roles, owning pages, priority and a next action, plus rising terms and quick wins."
+- **Description opening:** "InsightWeb reads your Search Console and GA4 data (through Site Kit) and turns it into one record per keyword — its roles, the pages that own it, a priority and a suggested next action. Rising terms, quick wins and conflicts sit alongside. It only reads and suggests; it never changes your SEO settings, keyphrases or content."
+- **Long description:** "InsightWeb turns the search data you already have into decisions. Instead of one more metrics dashboard, it builds a record for every keyword your site ranks for — the roles it plays, the pages that own it, a priority, and a suggested next action — so you know what to do, not just what happened. It reads Search Console and Google Analytics 4 through Site Kit by Google (read-only; InsightWeb stores no Google credentials of its own and never changes your site or your SEO). On top of that it surfaces rising terms, quick wins (pages ranking just below the first page) and conflicts (two pages competing for one term), checks each page's PageSpeed, and confirms search and AI crawlers can reach your content. PageSpeed, Microsoft Clarity and Bing Webmaster add their figures when you set their keys. A Site Health test, a WordPress dashboard widget and WP-CLI commands keep it out of your way. It reads and suggests; what you change is always your call."
+
+### Phase plan (each phase stops and reports)
+
+- **I0 — decisions (owner):** name/slug, prefix, shared-core vs fork, **credentials model**, Rank Math optional-vs-required.
+- **I1 — skeleton:** new folder, header (no `Update URI`, `Requires Plugins` per the credentials choice), one prefix,
+  text domain, the tab framework + the bundled shell, empty generic tab set; activates on a clean WP; settings model +
+  `tests/run.php` green.
+- **I2 — Google data:** implement the chosen credentials model; GSC + GA4 read on a clean install; graceful
+  "connect Google" state. **(The real cost; size depends on the credentials choice.)**
+- **I3 — the engine:** keyword records, rising/quick-wins/conflicts, compute, Pages — wired to the generic post-type
+  setting, each PHPCS-clean and tested.
+- **I4 — independent sources:** PageSpeed, Clarity, Bing, Links (own keys, no OAuth); reassess visitors/server tabs.
+- **I5 — readme, assets, screenshots:** re-branded; generate screenshots.
+- **I6 — compliance + submit:** `wp-org-submission` + Plugin Check + PHPCS; clean zip (`.distignore`); slug check;
+  submit; answer the reviewer; on approval set up SVN deploy.
+
+### Runtime-only items (no local WordPress)
+
+Compatibility of the Site Kit internal calls against the installed Site Kit version; cron registration, REST routes, DB
+table creation on activation, Plugin Check on a clean WP next to Site Kit + Rank Math; the official readme validator
+before submission.
+
+### In-place work done this session (live plugin; safe)
+
+- **The bridge (step 1b/5) is not removed:** `aw_seo_extras_insightweb_bridge()` is still in
+  `plugins/aw-seo-extras/aw-seo-extras.php`, dormant because InsightWeb is active (returns as soon as `INSIGHTWEB_FILE`
+  is defined). Removing it is a small RankWeb commit — **out of scope for InsightWeb-only work**, left to the RankWeb
+  session; noted, not forced.
 - **Settings default-value bug fixed:** a stored value equal to the default was kept, so it did not follow a later
   default change — fixed in `aw_si_settings_save()` (`b3cd3a0d`; test updated `eadd5e5c`).
-- **Safe in-place readme hygiene (live plugin):** `readme.txt` gained `== External services ==` and a brand-neutral,
-  differentiator-led description; `Requires Plugins` / `Update URI` removal were **not** applied to the live plugin
-  (owner's 11 Nov in-code-check decision + live-activation risk) and belong to the public codebase.
+- **readme hygiene:** `== External services ==` + brand-neutral differentiator-led description added; `Requires Plugins`
+  / `Update URI` **not** touched on the live plugin (reasons above).
 
 ## Later, separate plan
 
