@@ -67,7 +67,7 @@ global $wpdb;
 // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- no API deletes transients by prefix.
 $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s", $wpdb->esc_like( '_transient_aw_seo_' ) . '%', $wpdb->esc_like( '_transient_timeout_aw_seo_' ) . '%' ) );
 
-foreach ( array( 'aw_seo_fill_daily', 'aw_seo_endpoints_watchdog', 'aw_seo_sitemap_daily', 'aw_faq_index_build', 'rankweb_health_build', 'aw_link_index_build', 'aw_link_audit' ) as $aw_seo_hook ) {
+foreach ( array( 'aw_seo_fill_daily', 'aw_seo_endpoints_watchdog', 'aw_seo_sitemap_daily', 'aw_faq_index_build', 'rankweb_health_build', 'aw_link_index_build', 'aw_link_audit', 'aw_video_sync' ) as $aw_seo_hook ) {
 	wp_clear_scheduled_hook( $aw_seo_hook );
 }
 wp_clear_scheduled_hook( 'rankweb_health_build', array( 'now' ) );

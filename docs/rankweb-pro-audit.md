@@ -130,8 +130,15 @@ every output escaped, every string in the aw-seo-extras text domain.
   settings (JSON). Rank Math's own tools stay on Rank Math → Status & Tools.
 - **B. Internal links phases 2 to 4.** Link audit (report, orphans, broken, redirects, nofollow, canonical elsewhere,
   click depth), anchor mix, silos (as planned in `docs/rankweb-internal-links.md`), plus the external broken-link check.
+  **Built 16–17 Nov 2026** on branches `claude/rankweb-link-audit`, `claude/rankweb-anchor-mix`, `claude/rankweb-silos`
+  (stacked, in that order), not live yet.
 - **C. Sitemaps and video.** Google News sitemap, video detection and VideoObject, video sitemap, noindex on protected
-  items.
+  items. **Built 17 Nov 2026** on branch `claude/rankweb-video-noindex` (stacked on B), not live yet. The News sitemap
+  was already live (12 Nov). New: module "Video" (YouTube and Vimeo detection from content, oEmbed for title, thumbnail
+  and — Vimeo — duration and date; no paid API, so a YouTube video has no duration or date), a VideoObject in Rank
+  Math's graph, a `video-sitemap.xml` served and listed like the News one, and a "Keep password-protected items out of
+  search" robots setting (on by default). Tests: `AW_Video` detection, node and duration. Daily backfill job
+  `aw_video_sync`.
 - **D. Schema.** Custom JSON-LD box (several per item), import from a URL, Rich Results Test links, speakable, about and
   mentions, Dataset where it applies.
 - **E. Bulk work.** Quick and Bulk Edit SEO fields, SEO data and focus keyword CSV export/import, media find and replace,

@@ -155,6 +155,7 @@ function aw_seo_modules(): array {
 			'files'  => array( 'robots' ),
 			'desc'   => 'Noindex rules that depend on an item\'s state or a list\'s size.',
 			'fields' => array(
+				'AW_SEO_NOINDEX_PROTECTED' => array( 'type' => 'int', 'label' => 'Keep password-protected items out of search (1 on, 0 off)', 'help' => 'A password-protected item hides its content, so it is set to noindex.', 'default' => 1 ),
 				'AW_THIN_DISTRICT_TYPE' => array( 'type' => 'int', 'label' => 'Fewest listings for an indexed Directory page', 'help' => 'A district × type page with fewer listings than this is noindex and left out of the Directory sitemap, unless it is on the "Thin pages kept indexed" list. At 1, the default, only a page with no listings is noindex.', 'default' => 1 ),
 				'AW_DIRECTORY_KEEP_INDEXED' => array( 'type' => 'list', 'label' => 'Thin pages kept indexed', 'help' => 'Paths under /directory/ that stay indexed anyway. One per line.', 'default' => array(
 						'haryana/jhajjar/animal-welfare-organisation',
@@ -191,6 +192,15 @@ function aw_seo_modules(): array {
 						'aw_campaign'    => array( '%s Campaigns', 'Campaigns on %s' ),
 					) ),
 				'AW_FILTERED_STATE_NOINDEX' => array( 'type' => 'list', 'label' => 'Hubs whose state views are noindex', 'help' => 'One post type per line.', 'default' => array( 'aw_news', 'aw_legal', 'aw_opportunity' ) ),
+			),
+		),
+		'video' => array(
+			'label'  => 'Video',
+			'switch' => true,
+			'files'  => array( 'video' ),
+			'desc'   => 'Finds YouTube and Vimeo videos in content, adds a VideoObject to the schema, and lists them in a video sitemap. No paid API: a YouTube video gets its title and thumbnail, not its duration or date.',
+			'fields' => array(
+				'AW_VIDEO_TYPES' => array( 'type' => 'list', 'label' => 'Post types scanned for videos', 'help' => 'Items of these types are scanned for YouTube and Vimeo videos. One per line. Empty: nothing runs.', 'default' => array( 'post', 'aw_news', 'aw_legal', 'aw_campaign' ) ),
 			),
 		),
 		'schema' => array(

@@ -47,7 +47,7 @@ add_action(
 		}
 		require_once AW_SEO_EXTRAS_DIR . 'includes/settings.php'; // first: the modules, their settings and switches
 		$off = aw_seo_files_off();
-		foreach ( array( 'helpers', 'overview', 'faq', 'programmatic', 'titles', 'canonical', 'filtered-views', 'robots', 'schema', 'rank-math-schema', 'opengraph', 'sitemap', 'redirects', 'breadcrumbs', 'focus-keywords', 'health', 'llms', 'markdown', 'analysis', 'content-advice', 'internal-links', 'link-audit', 'link-anchors', 'silos', 'rankweb-dashboard', 'rankweb-rest', 'rankweb-ui', 'rankweb-modules', 'help-tab' ) as $file ) {
+		foreach ( array( 'helpers', 'overview', 'faq', 'programmatic', 'titles', 'canonical', 'filtered-views', 'robots', 'schema', 'rank-math-schema', 'opengraph', 'sitemap', 'redirects', 'breadcrumbs', 'focus-keywords', 'health', 'llms', 'markdown', 'analysis', 'content-advice', 'internal-links', 'link-audit', 'link-anchors', 'silos', 'video', 'rankweb-dashboard', 'rankweb-rest', 'rankweb-ui', 'rankweb-modules', 'help-tab' ) as $file ) {
 			if ( ! in_array( $file, $off, true ) ) { // a module switched off in RankWeb → Settings is not loaded
 				require_once AW_SEO_EXTRAS_DIR . 'includes/' . $file . '.php';
 			}
@@ -59,6 +59,7 @@ add_action(
 			'health'         => 'aw_seo_endpoints_watchdog',
 			'sitemap'        => 'aw_seo_sitemap_daily',
 			'internal-links' => array( 'aw_link_index_build', 'aw_link_audit' ),
+			'video'          => 'aw_video_sync',
 		);
 		$idle = array_intersect_key( $jobs, array_flip( $off ) );
 		if ( $idle ) {
@@ -104,7 +105,7 @@ register_deactivation_hook(
 	__FILE__,
 	function () {
 		// The SEO jobs: titles.php, health.php, sitemap.php; the Dashboard counts: rankweb-dashboard.php.
-		foreach ( array( 'aw_seo_fill_daily', 'aw_seo_endpoints_watchdog', 'aw_seo_sitemap_daily', 'rankweb_health_build', 'aw_link_index_build', 'aw_link_audit' ) as $hook ) {
+		foreach ( array( 'aw_seo_fill_daily', 'aw_seo_endpoints_watchdog', 'aw_seo_sitemap_daily', 'rankweb_health_build', 'aw_link_index_build', 'aw_link_audit', 'aw_video_sync' ) as $hook ) {
 			wp_clear_scheduled_hook( $hook ); // repeating (no-argument) events only, as Core
 		}
 		wp_clear_scheduled_hook( 'rankweb_health_build', array( 'now' ) ); // A Count now that has not run yet.

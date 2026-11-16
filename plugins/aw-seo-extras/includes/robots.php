@@ -114,6 +114,12 @@ add_action( 'aw_seo_fill_daily', 'aw_seo_fill_contact_scores', 40 ); // the dail
 
 /** Whether the current view is an item or list kept out of search engines by a rule of its state. */
 function aw_seo_noindex_rule() {
+	if ( AW_SEO_NOINDEX_PROTECTED && is_singular() ) {
+		$qid = get_queried_object_id();
+		if ( $qid && '' !== (string) get_post_field( 'post_password', $qid ) ) {
+			return true; // a password-protected item: its content is hidden, so keep it out of the index
+		}
+	}
 	if ( is_singular( 'aw_opportunity' ) && function_exists( 'aw_retention_state' ) && aw_retention_state( get_queried_object() ) ) {
 		return true; // closed opportunity
 	}
