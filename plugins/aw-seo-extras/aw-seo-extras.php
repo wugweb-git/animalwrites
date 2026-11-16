@@ -1,19 +1,27 @@
 <?php
 /**
+ * RankWeb
+ *
+ * @package           aw-seo-extras
+ * @author            Wugweb
+ * @copyright         2026 Wugweb
+ * @license           GPL-2.0-or-later
+ *
+ * @wordpress-plugin
  * Plugin Name:       RankWeb
  * Plugin URI:        https://animalwrites.in/
- * Description:       Everything Rank Math doesn't do or keeps for Premium, for Kits sites.
+ * Description:       SEO extras that run alongside Rank Math: FAQs, canonicals, breadcrumbs, internal links, schema, video and bulk tools.
  * Version:           2.1.0
  * Requires at least: 6.4
  * Requires PHP:      8.0
+ * Requires Plugins:  seo-by-rank-math
  * Author:            Wugweb
  * Author URI:        https://wugweb.com/
- * License:           GPL-2.0-or-later
+ * License:           GPLv2 or later
+ * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Update URI:        https://wugweb.com/plugins/aw-seo-extras/
  * Text Domain:       aw-seo-extras
  * Domain Path:       /languages
- *
- * @package aw-seo-extras
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
