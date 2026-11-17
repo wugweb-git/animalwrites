@@ -26,7 +26,7 @@ tokens/tokens.json is the source. tools/build-tokens.py (and, for a child theme,
 * Style variations under styles/, selectable in Appearance > Editor > Styles, with the Inter font.
 * Inter is the theme font, declared once in theme.json and served from the theme (no Google Fonts request).
 * Needs WordPress 6.6 or later (Group styles in theme.json).
-* Updates can come from wugweb.com (Update URI, checked by Kits Core) once the update file is published there: Appearance > Themes then shows new versions with their details, and auto-updates can be turned on. Until then the check is off.
+* Self-hosted edition only (not the wordpress.org build): updates can come from wugweb.com via the Update URI header, checked by Kits Core, once the update file is published there; Appearance > Themes then shows new versions with their details and auto-updates can be turned on. The wordpress.org edition updates through the directory.
 * Colour sets: block styles for Group and Post content (styles/colours/), first one Colours: Ink; a page picks one in Page Options.
 * With Kits Core: Page Options per page (header, footer, sidebar, title, breadcrumbs, colour set), Theme Options on Kits > Theme Options (phone bar, announcement bar, share networks; font preload under Utility > Performance), the speed and older-parts switches on Kits > Core Settings, and one settings file to export and import them with the Styles.
 

@@ -1507,3 +1507,17 @@ header.wp-block-template-part.kit-header-hidden { transform: translateY(calc(-10
 .kit-toc ol { margin: 0; padding: 0 var(--kit-space-5) var(--kit-space-5) var(--kit-space-7); font-size: var(--kit-type-sm); }
 .kit-toc li { margin: var(--kit-space-1) 0; }
 .kit-toc li.is-sub { margin-left: var(--kit-space-4); list-style-type: lower-alpha; }
+
+/* Comments (single.html core wp:comments block): styled to match the theme. Renders only where comments are open or exist. */
+.wp-block-comments { margin-top: var(--kit-space-7); }
+.wp-block-comments .wp-block-comment-template { margin: var(--kit-space-5) 0; padding: 0; list-style: none; }
+.wp-block-comments .wp-block-comment-template > li { padding: var(--kit-space-5) 0; border-top: var(--kit-border-width) solid var(--kit-color-line); }
+.wp-block-comments .wp-block-comment-author-name { font-weight: var(--kit-weight-medium); }
+.wp-block-comments .wp-block-comment-date, .wp-block-comments .wp-block-comment-edit-link { font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
+.wp-block-comments .wp-block-comment-reply-link { font-size: var(--kit-type-sm); }
+.wp-block-comments .wp-block-comments-pagination { margin-top: var(--kit-space-5); }
+
+/* Password-protected posts (core post-password-form, shown by the Post Content block). */
+.post-password-form { display: flex; flex-wrap: wrap; gap: var(--kit-space-3); align-items: flex-end; margin: var(--kit-space-5) 0; }
+.post-password-form label { display: flex; flex-direction: column; gap: var(--kit-space-1); font-size: var(--kit-type-sm); }
+.post-password-form input[type="password"] { min-height: var(--kit-size-control); padding: 0 var(--kit-space-3); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); }
