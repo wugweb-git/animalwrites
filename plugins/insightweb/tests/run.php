@@ -134,7 +134,7 @@ iw_check( false === aw_si_settings_save( iw_texts() ) && serialize( $GLOBALS['iw
 // A value stored though equal to its default (a stale key) is taken out on the next Save, so a later default change is
 // followed (docs/pending.md, fixed b3cd3a0d). The Save writes once; the other stored key is kept.
 $GLOBALS['iw_options']['aw_seo_settings']['search-insights']['AW_SI_HIGH_IMPR'] = 50; // Equal to the default.
-$w                                                                              = $GLOBALS['iw_writes'];
+$w = $GLOBALS['iw_writes'];
 iw_check( true === aw_si_settings_save( iw_texts() ) && ! isset( $GLOBALS['iw_options']['aw_seo_settings']['search-insights']['AW_SI_HIGH_IMPR'] ) && 30 === $GLOBALS['iw_options']['aw_seo_settings']['search-insights']['AW_SI_MOVERS'] && $GLOBALS['iw_writes'] === $w + 1, 'a stored value equal to the default is taken out on the next Save (follows a later default change)' );
 iw_check( false === aw_si_settings_save( array() ), 'a Save sending nothing writes nothing' );
 iw_check( aw_si_settings_save( array( 'AW_SI_QUICK_MIN' => '15' ) ) && 15 === $GLOBALS['iw_options']['aw_seo_settings']['search-insights']['AW_SI_QUICK_MIN'] && 30 === $GLOBALS['iw_options']['aw_seo_settings']['search-insights']['AW_SI_MOVERS'], 'a changed number is stored; one not sent keeps its value' );
@@ -229,7 +229,7 @@ if ( ! function_exists( 'esc_url_raw' ) ) {
 }
 require dirname( __DIR__, 2 ) . '/kits-core/includes/admin-shell-parts.php'; // the page parts the boxes use
 require dirname( __DIR__ ) . '/includes/insightweb-boxes.php';
-$b = insightweb_html_blocks(
+$b     = insightweb_html_blocks(
 	'<p>Hello <strong>there</strong></p><p class="description">A note</p><ul><li><a href="https://x.test/k">P1</a>: 3</li><li><a href="javascript:alert(1)">bad</a></li></ul>'
 	. '<table class="widefat striped"><thead><tr><th scope="col">Keyword</th><th scope="col">Page</th></tr></thead><tbody><tr><td>dog</td><td><a href="/news/x/" target="_blank">/news/x/</a></td></tr></tbody></table>'
 	. '<div class="notice notice-warning inline"><p>Careful</p></div><form><input name="x"></form><script>alert(1)</script><details><summary>More</summary><p>Inside</p></details>'
@@ -282,11 +282,38 @@ iw_check( false !== strpos( $qe['warnings'][0], 'could not be reached' ) && fals
 $ql = aw_si_inspect_queue_lines( $qi );
 iw_check( 2 === count( $ql ) && $qi['warnings'][0] === $ql[0] && false !== strpos( $ql[1], 'by about 13 Nov 2026' ) && array() === aw_si_inspect_queue_lines( array( 'left' => 0 ) ), 'queue lines: the not-reached reason, then the estimate; none for a finished old run' );
 iw_check( false !== strpos( $qi['warnings'][0], '15 s of calls per step, a step every 5 min' ) && false !== strpos( $qi['warnings'][0], '2,000-a-day' ), 'not reached: the budget, gap and cap come from the constants' );
-iw_check( array() === aw_si_inspect_info( array( 'todo' => array(), 'done' => 4 ) )['warnings'], 'a finished queue has no not-reached line' );
+iw_check(
+	array() === aw_si_inspect_info(
+		array(
+			'todo' => array(),
+			'done' => 4,
+		)
+	)['warnings'],
+	'a finished queue has no not-reached line'
+);
 iw_check( false !== strpos( aw_si_inspect_eta( 1500, 1000, '2026-11-11' ), 'by about 13 Nov 2026' ), 'estimate: 1,500 pages at 1,000 a day end two days on' );
 iw_check( 0 === strpos( aw_si_inspect_eta( 0, 1000, '2026-11-11' ), 'every page has been inspected' ) && '' === aw_si_inspect_eta( 10, 0, '2026-11-11' ), 'estimate: done, or nothing without a rate' );
-iw_check( array( 4390, 4803, '2026-11-12', false ) === aw_si_coverage_totals( array( 'indexed' => 4390, 'not_indexed' => 4803, 'discovered' => 10, 'day' => '2026-11-12' ) ), 'Search Console totals: the typed Not indexed total wins' );
-iw_check( array( 10, 7, '', true ) === aw_si_coverage_totals( array( 'indexed' => 10, 'discovered' => 3, 'crawled' => 4 ) ) && null === aw_si_coverage_totals( array( 'crawled' => 4 ) ), 'Search Console totals: reasons added up when no total; none without Indexed' );
+iw_check(
+	array( 4390, 4803, '2026-11-12', false ) === aw_si_coverage_totals(
+		array(
+			'indexed'     => 4390,
+			'not_indexed' => 4803,
+			'discovered'  => 10,
+			'day'         => '2026-11-12',
+		)
+	),
+	'Search Console totals: the typed Not indexed total wins'
+);
+iw_check(
+	array( 10, 7, '', true ) === aw_si_coverage_totals(
+		array(
+			'indexed'    => 10,
+			'discovered' => 3,
+			'crawled'    => 4,
+		)
+	) && null === aw_si_coverage_totals( array( 'crawled' => 4 ) ),
+	'Search Console totals: reasons added up when no total; none without Indexed'
+);
 
 // 7. Rising (12 Nov 2026): what a run dropped and why.
 /** Stub. */
@@ -298,14 +325,42 @@ function sanitize_key( $s ) {
 	return preg_replace( '/[^a-z0-9_\-]/', '', strtolower( (string) $s ) );
 }
 require dirname( __DIR__ ) . '/includes/search-insights/rising-drops.php';
-$wd = aw_si_rising_worker_dropped( array( array( 'term' => 'Tiger Shroff film', 'filter' => 'exclude' ), array( 'term' => '' ), 'x', array( 'term' => 'ok' ) ) );
+$wd = aw_si_rising_worker_dropped(
+	array(
+		array(
+			'term'   => 'Tiger Shroff film',
+			'filter' => 'exclude',
+		),
+		array( 'term' => '' ),
+		'x',
+		array( 'term' => 'ok' ),
+	)
+);
 iw_check( array( array( 'Tiger Shroff film', 'worker:exclude' ) ) === $wd, 'worker drops: only rows with a term and a filter' );
-iw_check( 101 > count( aw_si_rising_worker_dropped( array_fill( 0, 500, array( 'term' => 't', 'filter' => 'old' ) ) ) ), 'worker drops: capped' );
+iw_check(
+	101 > count(
+		aw_si_rising_worker_dropped(
+			array_fill(
+				0,
+				500,
+				array(
+					'term'   => 't',
+					'filter' => 'old',
+				)
+			)
+		)
+	),
+	'worker drops: capped'
+);
 iw_check( array() === aw_si_rising_worker_dropped( 'nonsense' ), 'worker drops: anything but a list is ignored' );
 $dc = aw_si_rising_drop_counts(
 	array(
 		'rising'  => 2,
-		'worker'  => array( 'trending' => '20', 'kept' => '3', 'excluded' => '1' ),
+		'worker'  => array(
+			'trending' => '20',
+			'kept'     => '3',
+			'excluded' => '1',
+		),
 		'dropped' => array( array( 'चाय', 'not-english' ), array( 'x', 'worker:vocabulary' ) ),
 	)
 );
@@ -371,7 +426,17 @@ $ub_t( "\n" === substr( $ub_l, -1 ) && 1 === substr_count( $ub_l, "\n" ), 'backu
 $ub_t( 'option' === $ub_o['type'] && 'a:1:{s:1:"k";s:3:"é/";}' === $ub_o['value'] && 'yes' === $ub_o['autoload'] && ! isset( $ub_o['b64'] ), 'backup: option value kept exactly as stored' );
 $ub_o = json_decode( insightweb_backup_option_line( 'bin', "\xff\x00\xfe", 'no' ), true );
 $ub_t( array( 'value' ) === $ub_o['b64'] && "\xff\x00\xfe" === base64_decode( $ub_o['value'] ), 'backup: a value that is not UTF-8 is kept base64-encoded' ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode -- the test reads the value back
-$ub_r = json_decode( insightweb_backup_row_line( 'wp_x', array( 'id' => '7', 'note' => null, 'blob' => "\x80" ) ), true );
+$ub_r = json_decode(
+	insightweb_backup_row_line(
+		'wp_x',
+		array(
+			'id'   => '7',
+			'note' => null,
+			'blob' => "\x80",
+		)
+	),
+	true
+);
 $ub_t( 'row' === $ub_r['type'] && 'wp_x' === $ub_r['table'] && '7' === $ub_r['row']['id'] && null === $ub_r['row']['note'] && array( 'blob' ) === $ub_r['b64'], 'backup: row line keeps every column, null and binary' );
 $ub_t( '{}' === substr( trim( insightweb_backup_row_line( 'wp_x', array() ) ), -3, 2 ), 'backup: an empty row is an object' );
 $ub_t( 500 === INSIGHTWEB_BACKUP_BATCH, 'backup: tables are read 500 rows at a time' );
@@ -419,5 +484,129 @@ $ub_dir = sys_get_temp_dir() . '/insightweb-ub-ro-' . getmypid();
 @mkdir( $ub_dir, 0555 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions -- a read-only folder for the test
 $ub_t( 0 === getmyuid() || ! @insightweb_backup_protect( $ub_dir ), 'backup: a folder that cannot be written is refused' ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- the warning is the expected failure
 rmdir( $ub_dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- the test's own folder
+
+// Keyword scoring, recommendations, focus-keyphrase reconciliation and the canonical-owner ladder (score.php).
+require dirname( __DIR__ ) . '/includes/search-insights/compute.php'; // aw_si_is_news() for intent
+require dirname( __DIR__ ) . '/includes/search-insights/score.php';
+
+iw_check( 0 === aw_si_score_demand( 0, 0 ) && 100 === aw_si_score_demand( 5000, 0 ) && 46 === aw_si_score_demand( 50, 0 ), 'demand sub-score: 0 / full at the cap / log-scaled between' );
+iw_check( 0 === aw_si_score_opportunity( null ) && 20 === aw_si_score_opportunity( 2.0 ) && 100 === aw_si_score_opportunity( 12.0 ) && 65 === aw_si_score_opportunity( 35.0 ) && 12 === aw_si_score_opportunity( 80.0 ), 'opportunity sub-score: 0 unranked, 20 top-3, 100 in 5-20, tapering past 20' );
+iw_check( 0 === aw_si_score_engagement( 0, 0 ) && 100 === aw_si_score_engagement( 5, 50 ) && 20 === aw_si_score_engagement( 1, 50 ), 'engagement sub-score: CTR, 10% = full' );
+iw_check( 100 === aw_si_score_momentum( 5.0, null ) && 50 === aw_si_score_momentum( 2.5, null ) && 50 === aw_si_score_momentum( null, 50 ) && 0 === aw_si_score_momentum( null, null ), 'momentum sub-score: growth first, then trends' );
+$sc = aw_si_score(
+	array(
+		'impr'   => 5000,
+		'clicks' => 500,
+		'pos'    => 12.0,
+		'growth' => 5.0,
+	)
+);
+iw_check( 100 === $sc['score'] && 100 === $sc['demand'] && 100 === $sc['opportunity'], 'score: all signals at full = 100' );
+$sc = aw_si_score(
+	array(
+		'impr'   => 50,
+		'clicks' => 1,
+		'pos'    => 80.0,
+	)
+);
+iw_check( 23 === $sc['score'], 'score: weak keyword scores low (weighted blend)' );
+
+iw_check(
+	array( 'exclude' ) === aw_si_recommended_use(
+		array(
+			'roles' => 128,
+			'score' => 90,
+		)
+	),
+	'recommended-use: the Exclude role wins outright'
+);
+iw_check(
+	array( 'focus-page' ) === aw_si_recommended_use(
+		array(
+			'score'    => 70,
+			'pos'      => 12.0,
+			'has_page' => true,
+			'impr'     => 100,
+		)
+	),
+	'recommended-use: owning page at a winnable position → focus keyphrase'
+);
+iw_check(
+	array( 'write-page' ) === aw_si_recommended_use(
+		array(
+			'score'    => 70,
+			'pos'      => null,
+			'has_page' => false,
+			'impr'     => 100,
+		)
+	),
+	'recommended-use: demand, no page → write a new page'
+);
+iw_check(
+	array( 'secondary' ) === aw_si_recommended_use(
+		array(
+			'score'    => 60,
+			'pos'      => 2.0,
+			'has_page' => true,
+		)
+	),
+	'recommended-use: already top-3 → secondary keyphrase'
+);
+iw_check(
+	array( 'focus-page', 'sourcing:library' ) === aw_si_recommended_use(
+		array(
+			'score'    => 70,
+			'pos'      => 12.0,
+			'has_page' => true,
+			'impr'     => 100,
+			'topic'    => 'Rabies',
+		),
+		array( 'rabies' => 'library' )
+	),
+	'recommended-use: a sourcing topic adds a sourcing candidate of that type'
+);
+
+iw_check( 'poor-rank' === aw_si_focus_health( true, false ) && 'should-be' === aw_si_focus_health( false, true ) && '' === aw_si_focus_health( true, true ) && '' === aw_si_focus_health( false, false ), 'focus health: in-A-not-B / in-B-not-A / agree' );
+iw_check( aw_si_is_focus_candidate( 60, 12.0, true ) && ! aw_si_is_focus_candidate( 40, 12.0, true ) && ! aw_si_is_focus_candidate( 60, 2.0, true ) && ! aw_si_is_focus_candidate( 60, 12.0, false ), 'focus candidate: strong score + winnable position + a page' );
+
+iw_check( 'evergreen' === aw_si_query_intent( 'rabies symptoms' ) && 'dated' === aw_si_query_intent( 'dog attack 2024' ) && 'local' === aw_si_query_intent( 'animal shelter near me' ) && 'campaign' === aw_si_query_intent( 'donate to animals' ), 'query intent: evergreen / dated / local / campaign' );
+iw_check( 'library' === aw_si_page_class( '/x/', 'aw_legal' ) && 'resource' === aw_si_page_class( '/resources/y/', 'page' ) && 'news' === aw_si_page_class( '/news/z/', '' ) && 'directory' === aw_si_page_class( '/d/', 'aw_listing' ), 'page class from post type and path' );
+
+$own = aw_si_canonical_owner(
+	array(
+		array(
+			'path'      => '/news/x',
+			'post_type' => 'aw_news',
+			'pos'       => 3.0,
+			'impr'      => 100,
+		),
+		array(
+			'path'      => '/resources/y',
+			'post_type' => 'page',
+			'pos'       => 8.0,
+			'impr'      => 60,
+		),
+	),
+	'evergreen'
+);
+iw_check( '/resources/y' === $own['owner']['path'] && 'news-should-be-evergreen' === $own['flag'], 'canonical owner: evergreen query a news page holds → owner is the resource, flagged' );
+$own = aw_si_canonical_owner(
+	array(
+		array(
+			'path'      => '/a/',
+			'post_type' => 'post',
+			'pos'       => 6.0,
+			'impr'      => 50,
+		),
+		array(
+			'path'      => '/b/',
+			'post_type' => 'post',
+			'pos'       => 7.0,
+			'impr'      => 50,
+		),
+	),
+	'evergreen'
+);
+iw_check( 'no-owner' === $own['flag'], 'canonical owner: two pages split the query with no majority → no canonical owner' );
 
 exit( $GLOBALS['iw_fail'] );
