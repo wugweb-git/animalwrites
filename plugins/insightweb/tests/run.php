@@ -660,4 +660,30 @@ $row = aw_si_score_row(
 iw_check( false !== strpos( $row['recommended'], 'sourcing:library' ), 'score row: a sourcing topic adds sourcing:library' );
 iw_check( is_array( aw_si_sourcing_types() ), 'sourcing types: a map (empty until SourceWeb fills the filter)' );
 
+// The SourceWeb emit side (sourcing-push.php): threshold + the per-candidate context.
+require dirname( __DIR__ ) . '/includes/search-insights/sourcing-push.php';
+iw_check( 70 === aw_si_sourcing_push_min(), 'sourcing push: default threshold 70' );
+$ctx = aw_si_push_context(
+	array(
+		'score'       => 80,
+		'recommended' => 'write-page,sourcing:news',
+		'impr'        => 500,
+		'clicks'      => 20,
+		'pos'         => 6.0,
+		'topic'       => 'Rabies',
+		'roles'       => 2,
+	)
+);
+iw_check( 'insightweb' === $ctx['source'] && 80 === $ctx['score'] && 'news' === $ctx['recommended_type'] && 6.0 === $ctx['position'] && 6.0 === $ctx['rank'] && true === $ctx['focus_keyphrase'] && 'Rabies' === $ctx['topic'], 'sourcing push: the context carries score, type, rank and the focus-keyphrase flag' );
+$ctx = aw_si_push_context(
+	array(
+		'score'       => 60,
+		'recommended' => 'secondary',
+		'impr'        => 100,
+		'pos'         => 12.0,
+		'roles'       => 0,
+	)
+);
+iw_check( 'news' === $ctx['recommended_type'] && false === $ctx['focus_keyphrase'], 'sourcing push: no sourcing: recommendation → type defaults to news, not a focus keyphrase' );
+
 exit( $GLOBALS['iw_fail'] );
