@@ -256,7 +256,7 @@ aw_t( false !== strpos( $ui, "kits_shell_mount( 'sourceweb-app', \$title );" ) &
 aw_t( false !== strpos( $pages, 'aw_sourcing_kw_add(' ) && false !== strpos( $pages, 'aw_sourcing_kw_apply(' ) && false !== strpos( $pages, 'aw_sourcing_kw_bulk(' ) && false !== strpos( $pages, 'aw_relevance_verdict(' ) && false !== strpos( $pages, 'aw_relevance_switches_sanitize(' ) && false !== strpos( $pages, 'aw_sources_sanitize(' ) && false !== strpos( $pages, 'aw_sourcing_suggestions()' ) && false !== strpos( $pages, 'aw_sourcing_suggest_apply(' ), 'keywords routes: add, edit, list actions, test, switches, Press settings and suggestions through the shared functions' );
 $kwa = file_get_contents( dirname( __DIR__ ) . '/includes/keywords-admin.php' );
 aw_t( false !== strpos( $kwa, 'function aw_sourcing_kw_bulk(' ) && false === strpos( $kwa, "'admin_post_aw_sourcing_kw'" ) && ! file_exists( dirname( __DIR__ ) . '/includes/class-aw-sourcing-keywords-table.php' ), 'keywords: the shared list actions stay; the classic list and its handler are gone' );
-aw_t( 7 === substr_count( $pages, '$ready = sourceweb_keywords_ready();' ), 'keywords routes: every save and list refuses before the keyword table (409)' );
+aw_t( 8 === substr_count( $pages, '$ready = sourceweb_keywords_ready();' ), 'keywords routes: every save and list refuses before the keyword table (409)' );
 
 // ---- AI models: its own routes, no key goes out, the shared saves ----
 $air = file_get_contents( dirname( __DIR__ ) . '/includes/sourceweb-rest-ai.php' );
