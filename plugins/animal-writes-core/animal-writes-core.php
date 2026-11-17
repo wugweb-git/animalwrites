@@ -182,7 +182,7 @@ function aw_core_ensure_sibling_link( string $main ): void {
 	$slug = dirname( $main );
 	$link = WP_PLUGIN_DIR . '/' . $slug;
 	$real = dirname( AW_CORE_DIR ) . '/' . $slug;
-	if ( file_exists( $link ) || ! is_dir( $real ) || ! is_writable( WP_PLUGIN_DIR ) ) {
+	if ( file_exists( $link ) || ! is_dir( $real ) || ! is_writable( WP_PLUGIN_DIR ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_is_writable -- pre-flight capability check before an optional symlink; WP_Filesystem is not loaded this early and nothing is written here.
 		return;
 	}
 	@symlink( $real, $link ); // phpcs:ignore WordPress.PHP.NoSilencedErrors -- a host that blocks symlink() must not warn; Core still loads the plugin from the deploy folder.
