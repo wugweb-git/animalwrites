@@ -249,7 +249,7 @@ class INSIGHTWEB_Keywords_Table extends WP_List_Table {
 				'hinglish' => __( 'Hinglish', 'insightweb' ),
 			)
 		);
-		if ( aw_si_ready() ) {
+		if ( insightweb_ready() ) {
 			$this->dropdown(
 				'focus_health',
 				__( 'All focus-keyphrase health', 'insightweb' ),
@@ -322,8 +322,8 @@ class INSIGHTWEB_Keywords_Table extends WP_List_Table {
 		// The score store (InsightWeb's own table, schema version 3): join it for the Score column, sorting and the
 		// focus-keyphrase-health filter. Every score column is spelled with the s. alias; the keyword columns are
 		// unique to the keyword table, so the WHERE and ORDER built below stay unqualified.
-		$sc    = aw_si_table( 'scores' );
-		$store = aw_si_ready();
+		$sc    = insightweb_kw_table( 'scores' );
+		$store = insightweb_ready();
 		if ( $store ) {
 			$fh = $this->arg( 'focus_health' );
 			if ( in_array( $fh, array( 'poor-rank', 'should-be' ), true ) ) {
@@ -591,13 +591,13 @@ class INSIGHTWEB_Keywords_Table extends WP_List_Table {
 		if ( ! empty( $item->aggregate ) ) {
 			return '';
 		}
-		$labels = aw_si_use_labels();
+		$labels = insightweb_use_labels();
 		$out    = array();
 		foreach ( array_filter( explode( ',', (string) ( $item->iw_recommended ?? '' ) ) ) as $key ) {
 			$out[] = esc_html( $labels[ $key ] ?? $key );
 		}
 		$html  = $out ? implode( '<br>', $out ) : '–';
-		$flags = aw_si_flag_labels();
+		$flags = insightweb_flag_labels();
 		$fh    = (string) ( $item->iw_focus_health ?? '' );
 		if ( '' !== $fh ) {
 			$html .= '<br><span class="post-state">' . esc_html( $flags[ $fh ] ?? $fh ) . '</span>';

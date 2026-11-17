@@ -16,16 +16,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Score weights (sum to 100). Demand leads, then Opportunity, then Momentum, then Engagement.
-const AW_SI_SCORE_W_DEMAND      = 35;
-const AW_SI_SCORE_W_OPPORTUNITY = 30;
-const AW_SI_SCORE_W_MOMENTUM    = 20;
-const AW_SI_SCORE_W_ENGAGEMENT  = 15;
+const INSIGHTWEB_SCORE_W_DEMAND      = 35;
+const INSIGHTWEB_SCORE_W_OPPORTUNITY = 30;
+const INSIGHTWEB_SCORE_W_MOMENTUM    = 20;
+const INSIGHTWEB_SCORE_W_ENGAGEMENT  = 15;
 
 // Caps that turn raw signals into 0–100 sub-scores.
-const AW_SI_SCORE_DEMAND_CAP = 5000; // impressions(28d) + volume that reaches a full demand sub-score (log scale).
-const AW_SI_SCORE_CTR_FULL   = 0.10; // a 10% click-through rate is a full engagement sub-score.
-const AW_SI_SCORE_GROWTH_CAP = 5.0;  // a rising growth of ×5 is a full momentum sub-score.
-const AW_SI_SCORE_TRENDS_CAP = 100;  // a Trends index of 100 is a full momentum sub-score (used when there is no growth).
+const INSIGHTWEB_SCORE_DEMAND_CAP = 5000; // impressions(28d) + volume that reaches a full demand sub-score (log scale).
+const INSIGHTWEB_SCORE_CTR_FULL   = 0.10; // a 10% click-through rate is a full engagement sub-score.
+const INSIGHTWEB_SCORE_GROWTH_CAP = 5.0;  // a rising growth of ×5 is a full momentum sub-score.
+const INSIGHTWEB_SCORE_TRENDS_CAP = 100;  // a Trends index of 100 is a full momentum sub-score (used when there is no growth).
 
 /**
  * The demand sub-score (0–100): how much a keyword is searched, from 28-day impressions plus any imported volume. Log
@@ -35,12 +35,12 @@ const AW_SI_SCORE_TRENDS_CAP = 100;  // a Trends index of 100 is a full momentum
  * @param int $volume Imported monthly volume (Keyword Planner etc.), or 0.
  * @return int
  */
-function aw_si_score_demand( int $impr, int $volume ): int {
+function insightweb_score_demand( int $impr, int $volume ): int {
 	$total = max( 0, $impr ) + max( 0, $volume );
 	if ( $total <= 0 ) {
 		return 0;
 	}
-	$score = log10( 1 + $total ) / log10( 1 + AW_SI_SCORE_DEMAND_CAP ) * 100;
+	$score = log10( 1 + $total ) / log10( 1 + INSIGHTWEB_SCORE_DEMAND_CAP ) * 100;
 	return (int) max( 0, min( 100, round( $score ) ) );
 }
 
@@ -51,7 +51,7 @@ function aw_si_score_demand( int $impr, int $volume ): int {
  * @param float|null $pos Latest position, or null when we do not rank.
  * @return int
  */
-function aw_si_score_opportunity( ?float $pos ): int {
+function insightweb_score_opportunity( ?float $pos ): int {
 	if ( null === $pos || $pos <= 0 ) {
 		return 0; // Not ranking: demand/momentum carry the keyword, not opportunity.
 	}
@@ -77,12 +77,12 @@ function aw_si_score_opportunity( ?float $pos ): int {
  * @param int $impr   Impressions, 28 days.
  * @return int
  */
-function aw_si_score_engagement( int $clicks, int $impr ): int {
+function insightweb_score_engagement( int $clicks, int $impr ): int {
 	if ( $impr <= 0 ) {
 		return 0;
 	}
 	$ctr = max( 0, $clicks ) / $impr;
-	return (int) max( 0, min( 100, round( $ctr / AW_SI_SCORE_CTR_FULL * 100 ) ) );
+	return (int) max( 0, min( 100, round( $ctr / INSIGHTWEB_SCORE_CTR_FULL * 100 ) ) );
 }
 
 /**
@@ -93,12 +93,12 @@ function aw_si_score_engagement( int $clicks, int $impr ): int {
  * @param int|null   $trends Trends index, or null.
  * @return int
  */
-function aw_si_score_momentum( ?float $growth, ?int $trends ): int {
+function insightweb_score_momentum( ?float $growth, ?int $trends ): int {
 	if ( null !== $growth && $growth > 0 ) {
-		return (int) max( 0, min( 100, round( $growth / AW_SI_SCORE_GROWTH_CAP * 100 ) ) );
+		return (int) max( 0, min( 100, round( $growth / INSIGHTWEB_SCORE_GROWTH_CAP * 100 ) ) );
 	}
 	if ( null !== $trends && $trends > 0 ) {
-		return (int) max( 0, min( 100, round( $trends / AW_SI_SCORE_TRENDS_CAP * 100 ) ) );
+		return (int) max( 0, min( 100, round( $trends / INSIGHTWEB_SCORE_TRENDS_CAP * 100 ) ) );
 	}
 	return 0;
 }
@@ -109,18 +109,18 @@ function aw_si_score_momentum( ?float $growth, ?int $trends ): int {
  * @param array{impr?: int, volume?: int, clicks?: int, pos?: float|null, growth?: float|null, trends?: int|null} $s Signals.
  * @return array{score: int, demand: int, opportunity: int, engagement: int, momentum: int}
  */
-function aw_si_score( array $s ): array {
-	$demand      = aw_si_score_demand( (int) ( $s['impr'] ?? 0 ), (int) ( $s['volume'] ?? 0 ) );
-	$opportunity = aw_si_score_opportunity( isset( $s['pos'] ) ? ( null === $s['pos'] ? null : (float) $s['pos'] ) : null );
-	$engagement  = aw_si_score_engagement( (int) ( $s['clicks'] ?? 0 ), (int) ( $s['impr'] ?? 0 ) );
-	$momentum    = aw_si_score_momentum(
+function insightweb_score( array $s ): array {
+	$demand      = insightweb_score_demand( (int) ( $s['impr'] ?? 0 ), (int) ( $s['volume'] ?? 0 ) );
+	$opportunity = insightweb_score_opportunity( isset( $s['pos'] ) ? ( null === $s['pos'] ? null : (float) $s['pos'] ) : null );
+	$engagement  = insightweb_score_engagement( (int) ( $s['clicks'] ?? 0 ), (int) ( $s['impr'] ?? 0 ) );
+	$momentum    = insightweb_score_momentum(
 		isset( $s['growth'] ) && null !== $s['growth'] ? (float) $s['growth'] : null,
 		isset( $s['trends'] ) && null !== $s['trends'] ? (int) $s['trends'] : null
 	);
-	$score       = ( $demand * AW_SI_SCORE_W_DEMAND
-		+ $opportunity * AW_SI_SCORE_W_OPPORTUNITY
-		+ $momentum * AW_SI_SCORE_W_MOMENTUM
-		+ $engagement * AW_SI_SCORE_W_ENGAGEMENT ) / 100;
+	$score       = ( $demand * INSIGHTWEB_SCORE_W_DEMAND
+		+ $opportunity * INSIGHTWEB_SCORE_W_OPPORTUNITY
+		+ $momentum * INSIGHTWEB_SCORE_W_MOMENTUM
+		+ $engagement * INSIGHTWEB_SCORE_W_ENGAGEMENT ) / 100;
 	return array(
 		'score'       => (int) max( 0, min( 100, round( $score ) ) ),
 		'demand'      => $demand,
@@ -136,13 +136,13 @@ function aw_si_score( array $s ): array {
  *
  * @return int
  */
-function aw_si_score_floor(): int {
-	return defined( 'AW_SI_SCORE_FLOOR' ) ? (int) AW_SI_SCORE_FLOOR : 55;
+function insightweb_score_floor(): int {
+	return defined( 'INSIGHTWEB_SCORE_FLOOR' ) ? (int) INSIGHTWEB_SCORE_FLOOR : 55;
 }
 
 /**
  * The recommended-use labels for a keyword — one or more, spanning SEO and sourcing. Keys are stored; labels are shown
- * by aw_si_use_labels(). Suggestions only.
+ * by insightweb_use_labels(). Suggestions only.
  *
  * Rules:
  * - focus-page   — has an owning page and ranks in the winnable band (positions 4–20): make it that page's focus keyphrase.
@@ -155,14 +155,14 @@ function aw_si_score_floor(): int {
  * @param array<string, string>                                                                                           $sourcing_types topic (lower-case) => 'news'|'library'|'campaign', read from SourceWeb (empty when SourceWeb is absent).
  * @return string[] Recommended-use keys, in display order.
  */
-function aw_si_recommended_use( array $kw, array $sourcing_types = array() ): array {
+function insightweb_recommended_use( array $kw, array $sourcing_types = array() ): array {
 	$score    = (int) ( $kw['score'] ?? 0 );
 	$pos      = isset( $kw['pos'] ) && null !== $kw['pos'] ? (float) $kw['pos'] : null;
 	$has_page = ! empty( $kw['has_page'] );
 	$impr     = (int) ( $kw['impr'] ?? 0 );
 	$roles    = (int) ( $kw['roles'] ?? 0 );
-	$exclude  = defined( 'AW_KW_ROLE_EXCLUDE' ) ? (int) AW_KW_ROLE_EXCLUDE : 128;
-	$floor    = aw_si_score_floor();
+	$exclude  = defined( 'INSIGHTWEB_KW_ROLE_EXCLUDE' ) ? (int) INSIGHTWEB_KW_ROLE_EXCLUDE : 128;
+	$floor    = insightweb_score_floor();
 	$out      = array();
 
 	if ( $roles & $exclude ) {
@@ -180,7 +180,7 @@ function aw_si_recommended_use( array $kw, array $sourcing_types = array() ): ar
 		$out[] = 'secondary';
 	}
 
-	$type = aw_si_sourcing_type( (string) ( $kw['topic'] ?? '' ), $sourcing_types );
+	$type = insightweb_sourcing_type( (string) ( $kw['topic'] ?? '' ), $sourcing_types );
 	if ( '' !== $type && $impr > 0 ) {
 		$out[] = 'sourcing:' . $type;
 	}
@@ -199,7 +199,7 @@ function aw_si_recommended_use( array $kw, array $sourcing_types = array() ): ar
  * @param array<string, string> $sourcing_types topic (lower-case) => type.
  * @return string '' | 'news' | 'library' | 'campaign'.
  */
-function aw_si_sourcing_type( string $topic, array $sourcing_types ): string {
+function insightweb_sourcing_type( string $topic, array $sourcing_types ): string {
 	$key = strtolower( trim( $topic ) );
 	if ( '' === $key || ! isset( $sourcing_types[ $key ] ) ) {
 		return '';
@@ -217,18 +217,18 @@ function aw_si_sourcing_type( string $topic, array $sourcing_types ): string {
  * @param bool       $has_page An owning page.
  * @return bool
  */
-function aw_si_is_focus_candidate( int $score, ?float $pos, bool $has_page ): bool {
-	return $has_page && null !== $pos && $pos > 3 && $pos <= 20 && $score >= aw_si_score_floor();
+function insightweb_is_focus_candidate( int $score, ?float $pos, bool $has_page ): bool {
+	return $has_page && null !== $pos && $pos > 3 && $pos <= 20 && $score >= insightweb_score_floor();
 }
 
 /**
  * Focus-keyphrase health (Part 3): compare the role Rank Math set (set A) with what InsightWeb recommends (set B).
  *
  * @param bool $in_a Carries the Focus keyphrase role (set in Rank Math).
- * @param bool $in_b Recommended as a focus keyphrase (aw_si_is_focus_candidate()).
+ * @param bool $in_b Recommended as a focus keyphrase (insightweb_is_focus_candidate()).
  * @return string '' (agree) | 'poor-rank' (focus keyphrase on a weak word, candidate to drop) | 'should-be' (strong word not set).
  */
-function aw_si_focus_health( bool $in_a, bool $in_b ): string {
+function insightweb_focus_health( bool $in_a, bool $in_b ): string {
 	if ( $in_a && ! $in_b ) {
 		return 'poor-rank';
 	}
@@ -246,7 +246,7 @@ function aw_si_focus_health( bool $in_a, bool $in_b ): string {
  * @param string $post_type Post type (aw_legal, aw_campaign, aw_news, aw_listing, page, post…).
  * @return string
  */
-function aw_si_page_class( string $path, string $post_type ): string {
+function insightweb_page_class( string $path, string $post_type ): string {
 	$map = array(
 		'aw_legal'    => 'library',
 		'aw_campaign' => 'campaign',
@@ -282,12 +282,12 @@ function aw_si_page_class( string $path, string $post_type ): string {
  * @param string $label Search phrase.
  * @return string 'evergreen' | 'dated' | 'local' | 'campaign'.
  */
-function aw_si_query_intent( string $label ): string {
+function insightweb_query_intent( string $label ): string {
 	$l = ' ' . strtolower( trim( $label ) ) . ' ';
 	if ( preg_match( '/\bnear me\b/', $l ) || preg_match( '/\b(in|near|around)\s+[a-z]+\s*(city|district)?\s*$/', trim( strtolower( $label ) ) ) ) {
 		return 'local';
 	}
-	if ( aw_si_is_news( trim( $label ) ) ) {
+	if ( insightweb_is_news( trim( $label ) ) ) {
 		return 'dated';
 	}
 	if ( preg_match( '/\b(donate|volunteer|petition|sign|pledge|join|campaign|support the)\b/', $l ) ) {
@@ -300,10 +300,10 @@ function aw_si_query_intent( string $label ): string {
  * The content-class priority ladder for an intent: higher wins. Evergreen favours a resource or library page; dated a
  * news page; local the directory; campaign the campaign page.
  *
- * @param string $intent aw_si_query_intent().
+ * @param string $intent insightweb_query_intent().
  * @return array<string, int>
  */
-function aw_si_owner_ladder( string $intent ): array {
+function insightweb_owner_ladder( string $intent ): array {
 	switch ( $intent ) {
 		case 'dated':
 			return array(
@@ -350,10 +350,10 @@ function aw_si_owner_ladder( string $intent ): array {
  * tie-broken by position then CTR. Suggestions only — a human sets the focus keyphrase on the chosen page.
  *
  * @param array<int, array{path: string, post_type?: string, pos?: float|null, impr?: int, clicks?: int}> $candidates One per ranking URL.
- * @param string                                                                                          $intent aw_si_query_intent().
+ * @param string                                                                                          $intent insightweb_query_intent().
  * @return array{owner: array<string, mixed>|null, flag: string} flag '' | 'news-should-be-evergreen' | 'no-owner'.
  */
-function aw_si_canonical_owner( array $candidates, string $intent ): array {
+function insightweb_canonical_owner( array $candidates, string $intent ): array {
 	$candidates = array_values( $candidates );
 	if ( ! $candidates ) {
 		return array(
@@ -362,9 +362,9 @@ function aw_si_canonical_owner( array $candidates, string $intent ): array {
 		);
 	}
 
-	$ladder = aw_si_owner_ladder( $intent );
+	$ladder = insightweb_owner_ladder( $intent );
 	$rank   = static function ( array $c ) use ( $ladder ) {
-		return (int) ( $ladder[ aw_si_page_class( (string) ( $c['path'] ?? '' ), (string) ( $c['post_type'] ?? '' ) ) ] ?? 1 );
+		return (int) ( $ladder[ insightweb_page_class( (string) ( $c['path'] ?? '' ), (string) ( $c['post_type'] ?? '' ) ) ] ?? 1 );
 	};
 	$ctr    = static function ( array $c ) {
 		$i = (int) ( $c['impr'] ?? 0 );
@@ -413,8 +413,8 @@ function aw_si_canonical_owner( array $candidates, string $intent ): array {
 				$best_ranked = $c;
 			}
 		}
-		$owner_class = aw_si_page_class( (string) ( $owner['path'] ?? '' ), (string) ( $owner['post_type'] ?? '' ) );
-		$top_class   = aw_si_page_class( (string) ( $best_ranked['path'] ?? '' ), (string) ( $best_ranked['post_type'] ?? '' ) );
+		$owner_class = insightweb_page_class( (string) ( $owner['path'] ?? '' ), (string) ( $owner['post_type'] ?? '' ) );
+		$top_class   = insightweb_page_class( (string) ( $best_ranked['path'] ?? '' ), (string) ( $best_ranked['post_type'] ?? '' ) );
 		if ( 'news' === $top_class && in_array( $owner_class, array( 'resource', 'library' ), true ) ) {
 			$flag = 'news-should-be-evergreen';
 		}
@@ -428,19 +428,19 @@ function aw_si_canonical_owner( array $candidates, string $intent ): array {
 
 /**
  * The topic → sourcing content-type map. InsightWeb never hardcodes SourceWeb's categories: SourceWeb (or any sourcing
- * plugin) fills this through the `aw_si_sourcing_types` filter, so the map is empty and no sourcing recommendation
+ * plugin) fills this through the `insightweb_sourcing_types` filter, so the map is empty and no sourcing recommendation
  * fires when SourceWeb is absent. Keys are lower-cased topics; values are 'news' | 'library' | 'campaign'.
  *
  * @return array<string, string>
  */
-function aw_si_sourcing_types(): array {
+function insightweb_sourcing_types(): array {
 	/**
 	 * Filter the topic → sourcing content-type map (SourceWeb supplies it from its own category list).
 	 *
 	 * @param array<string, string> $map topic => 'news' | 'library' | 'campaign'.
 	 */
 	$map = array();
-	foreach ( (array) apply_filters( 'aw_si_sourcing_types', array() ) as $topic => $type ) {
+	foreach ( (array) apply_filters( 'insightweb_sourcing_types', array() ) as $topic => $type ) {
 		$t = strtolower( trim( (string) $topic ) );
 		if ( '' !== $t && in_array( $type, array( 'news', 'library', 'campaign' ), true ) ) {
 			$map[ $t ] = (string) $type;
@@ -455,12 +455,12 @@ function aw_si_sourcing_types(): array {
  * test checks it. The canonical-owner columns are written by a later pass; they are not computed here.
  *
  * @param array{impr?: int, volume?: int, clicks?: int, pos?: float|null, growth?: float|null, trends?: int|null, has_page?: bool, roles?: int, topic?: string, is_minor?: bool} $kw Keyword signals and facts.
- * @param array<string, string>                                                                                                                                                  $sourcing_types aw_si_sourcing_types().
+ * @param array<string, string>                                                                                                                                                  $sourcing_types insightweb_sourcing_types().
  * @return array{score: int, s_demand: int, s_opportunity: int, s_engagement: int, s_momentum: int, recommended: string, focus_health: string}
  */
-function aw_si_score_row( array $kw, array $sourcing_types = array() ): array {
+function insightweb_score_row( array $kw, array $sourcing_types = array() ): array {
 	$pos      = isset( $kw['pos'] ) && null !== $kw['pos'] ? (float) $kw['pos'] : null;
-	$s        = aw_si_score(
+	$s        = insightweb_score(
 		array(
 			'impr'   => (int) ( $kw['impr'] ?? 0 ),
 			'volume' => (int) ( $kw['volume'] ?? 0 ),
@@ -472,7 +472,7 @@ function aw_si_score_row( array $kw, array $sourcing_types = array() ): array {
 	);
 	$has_page = ! empty( $kw['has_page'] );
 	$roles    = (int) ( $kw['roles'] ?? 0 );
-	$rec      = aw_si_recommended_use(
+	$rec      = insightweb_recommended_use(
 		array(
 			'score'    => $s['score'],
 			'pos'      => $pos,
@@ -484,9 +484,9 @@ function aw_si_score_row( array $kw, array $sourcing_types = array() ): array {
 		),
 		$sourcing_types
 	);
-	$focus    = defined( 'AW_SI_ROLE_FOCUS' ) ? (int) AW_SI_ROLE_FOCUS : 2;
+	$focus    = defined( 'INSIGHTWEB_KW_ROLE_FOCUS' ) ? (int) INSIGHTWEB_KW_ROLE_FOCUS : 2;
 	$in_a     = (bool) ( $roles & $focus );
-	$in_b     = aw_si_is_focus_candidate( $s['score'], $pos, $has_page );
+	$in_b     = insightweb_is_focus_candidate( $s['score'], $pos, $has_page );
 	return array(
 		'score'         => $s['score'],
 		's_demand'      => $s['demand'],
@@ -494,7 +494,7 @@ function aw_si_score_row( array $kw, array $sourcing_types = array() ): array {
 		's_engagement'  => $s['engagement'],
 		's_momentum'    => $s['momentum'],
 		'recommended'   => implode( ',', $rec ),
-		'focus_health'  => aw_si_focus_health( $in_a, $in_b ),
+		'focus_health'  => insightweb_focus_health( $in_a, $in_b ),
 	);
 }
 
@@ -503,7 +503,7 @@ function aw_si_score_row( array $kw, array $sourcing_types = array() ): array {
  *
  * @return array<string, string>
  */
-function aw_si_use_labels(): array {
+function insightweb_use_labels(): array {
 	return array(
 		'focus-page'        => __( 'Focus keyphrase → page', 'insightweb' ),
 		'write-page'        => __( 'Write a new page', 'insightweb' ),
@@ -520,7 +520,7 @@ function aw_si_use_labels(): array {
  *
  * @return array<string, string>
  */
-function aw_si_flag_labels(): array {
+function insightweb_flag_labels(): array {
 	return array(
 		'poor-rank'                => __( 'Focus keyphrase, poor rank', 'insightweb' ),
 		'should-be'                => __( 'Should be a focus keyphrase', 'insightweb' ),

@@ -355,17 +355,17 @@ function insightweb_ctx( $r, array $quality ): array {
 
 /**
  * Write (insert or replace) one keyword's score-store row, keyed by keyword id. The store is InsightWeb's own table
- * (wp_aw_si_scores); Kits Core's keyword table is not touched.
+ * (wp_insightweb_scores); Kits Core's keyword table is not touched.
  *
  * @param int                  $id  Keyword id.
- * @param array<string, mixed> $row aw_si_score_row() columns (score, the four parts, recommended, focus_health).
+ * @param array<string, mixed> $row insightweb_score_row() columns (score, the four parts, recommended, focus_health).
  * @return void
  */
-function aw_si_score_set( int $id, array $row ): void {
+function insightweb_score_set( int $id, array $row ): void {
 	global $wpdb;
 	$row['kw_id']   = $id;
-	$row['updated'] = aw_si_now();
-	$wpdb->replace( aw_si_table( 'scores' ), $row ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$row['updated'] = insightweb_kw_now();
+	$wpdb->replace( insightweb_kw_table( 'scores' ), $row ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 }
 
 /**
@@ -422,7 +422,7 @@ function insightweb_compute(): array {
 		arsort( $pages );
 		$top_page[ $kw ] = array( (string) key( $pages ), (int) current( $pages ) );
 	}
-	// Candidate pages per keyword as flat rows for aw_si_canonical_owner() (position = weighted average; type by path).
+	// Candidate pages per keyword as flat rows for insightweb_canonical_owner() (position = weighted average; type by path).
 	$cands = array();
 	foreach ( $cand as $kw => $pages ) {
 		foreach ( $pages as $path => $m ) {
@@ -499,7 +499,7 @@ function insightweb_compute(): array {
 			$set['quick_win'] = insightweb_quick_win( $d['pos'], $impr ) ? 1 : 0;
 		}
 		if ( $store ) {
-			$srow = aw_si_score_row(
+			$srow = insightweb_score_row(
 				array(
 					'impr'     => $impr,
 					'volume'   => $vol[ $id ] ?? 0,
@@ -515,12 +515,12 @@ function insightweb_compute(): array {
 				$styp
 			);
 			// Canonical owner (Part 6): the page that should own the keyword across the pages it ranks for, plus a flag.
-			$own                = aw_si_canonical_owner( $cands[ $id ] ?? array(), aw_si_query_intent( (string) $r->label ) );
+			$own                = insightweb_canonical_owner( $cands[ $id ] ?? array(), insightweb_query_intent( (string) $r->label ) );
 			$owner_path         = $own['owner'] ? (string) ( $own['owner']['path'] ?? '' ) : '';
 			$srow['owner_path'] = mb_substr( $owner_path, 0, 255 );
-			$srow['owner_type'] = '' !== $owner_path ? aw_si_page_class( $owner_path, '' ) : '';
+			$srow['owner_type'] = '' !== $owner_path ? insightweb_page_class( $owner_path, '' ) : '';
 			$srow['owner_flag'] = (string) $own['flag'];
-			aw_si_score_set( $id, $srow );
+			insightweb_score_set( $id, $srow );
 		}
 		$changed = false;
 		foreach ( $set as $col => $val ) {
@@ -548,7 +548,7 @@ function insightweb_compute(): array {
 		$count[ $status ? $status : 'none' ] = ( $count[ $status ? $status : 'none' ] ?? 0 ) + 1;
 	}
 	if ( $store ) {
-		aw_si_push_sourcing_candidates(); // Offer the current sourcing candidates to SourceWeb (opt-in; idle if absent).
+		insightweb_push_sourcing_candidates(); // Offer the current sourcing candidates to SourceWeb (opt-in; idle if absent).
 	}
 	return $count;
 }

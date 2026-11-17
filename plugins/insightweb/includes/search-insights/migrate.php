@@ -24,7 +24,7 @@ function insightweb_migrate_names(): void {
 	global $wpdb;
 
 	// 1) InsightWeb's own tables: {prefix}aw_si_<n> -> {prefix}insightweb_<n>.
-	foreach ( array( 'kw_pages', 'obs', 'rising', 'links', 'visits' ) as $n ) {
+	foreach ( array( 'kw_pages', 'obs', 'rising', 'links', 'visits', 'scores' ) as $n ) {
 		$old = $wpdb->prefix . 'aw_si_' . $n;
 		$new = $wpdb->prefix . 'insightweb_' . $n;
 		if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $old ) ) === $old // phpcs:ignore WordPress.DB.DirectDatabaseQuery
