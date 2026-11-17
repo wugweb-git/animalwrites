@@ -354,7 +354,22 @@ function aw_si_ctx( $r, array $quality ): array {
 }
 
 /**
- * Recalculate every keyword record.
+ * Write (insert or replace) one keyword's score-store row, keyed by keyword id. The store is InsightWeb's own table
+ * (wp_aw_si_scores); Kits Core's keyword table is not touched.
+ *
+ * @param int                  $id  Keyword id.
+ * @param array<string, mixed> $row aw_si_score_row() columns (score, the four parts, recommended, focus_health).
+ * @return void
+ */
+function aw_si_score_set( int $id, array $row ): void {
+	global $wpdb;
+	$row['kw_id']   = $id;
+	$row['updated'] = aw_si_now();
+	$wpdb->replace( aw_si_table( 'scores' ), $row ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+}
+
+/**
+ * Recalculate every keyword record, and write each keyword's score store.
  *
  * @return array Counts by priority and status.
  */
@@ -379,7 +394,16 @@ function aw_si_compute(): array {
 	$trend = $wpdb->get_results( $wpdb->prepare( "SELECT o.kw_id, o.value FROM %i o JOIN (SELECT kw_id, MAX(d) d FROM %i WHERE src = 'trends' AND metric = 'index' GROUP BY kw_id) l ON l.kw_id = o.kw_id AND l.d = o.d WHERE o.src = 'trends' AND o.metric = 'index'", $o, $o ), OBJECT_K );
 	$links = $wpdb->get_results( $wpdb->prepare( 'SELECT kw_id, obj_type, path, role, src FROM %i', $p ) );
 	$qw    = function_exists( 'aw_kw_ready' ) && aw_kw_ready(); // the quick_win column (keyword table version 3)
-	$rows  = $wpdb->get_results( $wpdb->prepare( 'SELECT id, label, lang, roles, priority, priority_override, status, action, page, impr28, clicks28, pos28, pos_prev, live_pos, live_txt, live_date, trends' . ( $qw ? ', quick_win' : '' ) . ' FROM %i', $k ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- a fixed column name, no input
+	$rows  = $wpdb->get_results( $wpdb->prepare( 'SELECT id, label, lang, topic, roles, priority, priority_override, status, action, page, impr28, clicks28, pos28, pos_prev, live_pos, live_txt, live_date, trends' . ( $qw ? ', quick_win' : '' ) . ' FROM %i', $k ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- a fixed column name, no input
+	// Score inputs: the latest imported monthly volume per keyword, and the rising growth, for the score store.
+	$vol = array();
+	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT kw_id, value FROM %i WHERE src = 'kp' AND metric = 'volume' ORDER BY d", $o ) ) as $v ) {
+		$vol[ (int) $v->kw_id ] = (int) $v->value; // Ordered by date: the latest wins.
+	}
+	$growth = array();
+	foreach ( (array) $wpdb->get_results( $wpdb->prepare( 'SELECT kw_id, MAX(growth) g FROM %i WHERE kw_id > 0 GROUP BY kw_id', aw_si_table( 'rising' ) ) ) as $g ) {
+		$growth[ (int) $g->kw_id ] = null === $g->g ? null : (float) $g->g;
+	}
 	// phpcs:enable
 
 	// An old address counts as the page it redirects to (plan §12, phase 2), so a redirected URL is no conflict.
@@ -416,6 +440,8 @@ function aw_si_compute(): array {
 	}
 
 	$quality = aw_si_quality_pages();
+	$styp    = aw_si_sourcing_types(); // topic => sourcing type, from SourceWeb (empty when absent).
+	$store   = aw_si_ready();          // the score store exists (schema version 3).
 	$count   = array();
 	foreach ( (array) $rows as $r ) {
 		$id       = (int) $r->id;
@@ -454,7 +480,27 @@ function aw_si_compute(): array {
 		if ( $qw ) {
 			$set['quick_win'] = aw_si_quick_win( $d['pos'], $impr ) ? 1 : 0;
 		}
-		$changed  = false;
+		if ( $store ) {
+			aw_si_score_set(
+				$id,
+				aw_si_score_row(
+					array(
+						'impr'     => $impr,
+						'volume'   => $vol[ $id ] ?? 0,
+						'clicks'   => $clicks,
+						'pos'      => $d['pos'],
+						'growth'   => $growth[ $id ] ?? null,
+						'trends'   => $trends,
+						'has_page' => ! empty( $fits[ $id ] ),
+						'roles'    => (int) $r->roles,
+						'topic'    => (string) $r->topic,
+						'is_minor' => ! empty( $ctx['shown_minor'] ),
+					),
+					$styp
+				)
+			);
+		}
+		$changed = false;
 		foreach ( $set as $col => $val ) {
 			$old = $r->$col;
 			if ( null === $val ? null !== $old : ( null === $old || (string) $old !== (string) $val ) ) {
