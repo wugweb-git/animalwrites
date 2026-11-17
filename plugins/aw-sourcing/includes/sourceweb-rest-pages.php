@@ -251,10 +251,22 @@ add_action(
 				array(
 					'op' => array(
 						'type'     => 'string',
-						'enum'     => array( 'include', 'exclude', 'search', 'dismiss', 'restore' ),
+						'enum'     => array( 'include', 'exclude', 'search', 'route', 'dismiss', 'restore' ),
 						'required' => true,
 					),
 					'qs' => $hosts,
+				),
+			),
+			'/keywords/suggestions/autoapprove'       => array(
+				'POST',
+				AW_SRC_CAP,
+				'sourceweb_rest_suggestions_autoapprove',
+				array(
+					'on_score'    => array( 'type' => 'boolean', 'default' => false ),
+					'min_score'   => array( 'type' => 'integer', 'default' => 80 ),
+					'types'       => array( 'type' => 'array', 'items' => array( 'type' => 'string' ), 'default' => array() ),
+					'on_proven'   => array( 'type' => 'boolean', 'default' => false ),
+					'proven_rank' => array( 'type' => 'integer', 'default' => 10 ),
 				),
 			),
 			'/rules/sections'                         => array( 'GET', AW_SRC_CAP, 'sourceweb_rest_rules_sections', array() ),
@@ -1419,9 +1431,20 @@ function sourceweb_rest_suggestions( WP_REST_Request $request ) {
 			'pos'       => round( (float) $t['pos'], 1 ),
 			'rising'    => (bool) $t['rising'],
 			'dismissed' => (bool) $t['dismissed'],
+			'pushed'    => ! empty( $t['pushed'] ),
+			'score'     => (int) ( $t['score'] ?? 0 ),
+			'type'      => (string) ( $t['recommended_type'] ?? '' ),
+			'topic'     => (string) ( $t['topic'] ?? '' ),
+			'proven'    => ! empty( $t['focus_keyphrase'] ),
+			'rank'      => (int) ( $t['rank'] ?? 0 ),
+			'source'    => (string) ( $t['source'] ?? '' ),
 		);
 	}
-	usort( $rows, fn( $a, $b ) => ( $b['impr'] <=> $a['impr'] ) ?: strcmp( $a['id'], $b['id'] ) );
+	// Default order: proven focus keyphrases first, then by InsightWeb Score, then impressions (owner, 17 Nov 2026).
+	usort(
+		$rows,
+		fn( $a, $b ) => ( (int) $b['proven'] <=> (int) $a['proven'] ) ?: ( $b['score'] <=> $a['score'] ) ?: ( $b['impr'] <=> $a['impr'] ) ?: strcmp( $a['id'], $b['id'] )
+	);
 	$out         = sourceweb_list(
 		$rows,
 		$request->get_params(),
@@ -1430,17 +1453,19 @@ function sourceweb_rest_suggestions( WP_REST_Request $request ) {
 				''          => array( __( 'Suggested', 'aw-sourcing' ), fn( $r ) => ! $r['dismissed'] ),
 				'dismissed' => array( __( 'Dismissed', 'aw-sourcing' ), fn( $r ) => $r['dismissed'] ),
 			),
-			'text'  => fn( $r ) => $r['id'],
+			'text'  => fn( $r ) => $r['id'] . ' ' . $r['topic'],
 			'sort'  => array(
 				'title'  => fn( $r ) => $r['id'],
 				'impr'   => fn( $r ) => $r['impr'],
 				'clicks' => fn( $r ) => $r['clicks'],
 				'pos'    => fn( $r ) => $r['pos'],
+				'score'  => fn( $r ) => $r['score'],
 			),
 			'per'   => 50,
 		)
 	);
-	$out['none'] = false;
+	$out['none']        = false;
+	$out['autoapprove'] = function_exists( 'aw_sourcing_push_autoapprove' ) ? aw_sourcing_push_autoapprove() : null;
 	return rest_ensure_response( $out );
 }
 
@@ -1460,6 +1485,36 @@ function sourceweb_rest_suggestions_decide( WP_REST_Request $request ) {
 			'changed' => $n,
 			/* translators: %d: number of searches. */
 			'message' => $n ? sprintf( _n( '%d search changed.', '%d searches changed.', $n, 'aw-sourcing' ), $n ) : __( 'Nothing changed.', 'aw-sourcing' ),
+		)
+	);
+}
+
+/**
+ * POST keywords/suggestions/autoapprove: save the two auto-approve rules for pushed keywords (both off by default).
+ *
+ * @param WP_REST_Request $request Request.
+ */
+function sourceweb_rest_suggestions_autoapprove( WP_REST_Request $request ) {
+	$ready = sourceweb_keywords_ready();
+	if ( is_wp_error( $ready ) ) {
+		return $ready;
+	}
+	if ( ! function_exists( 'aw_sourcing_push_autoapprove_save' ) ) {
+		return new WP_Error( 'aw_push_not_ready', __( 'Pushed keywords are not set up yet.', 'aw-sourcing' ), array( 'status' => 409 ) );
+	}
+	$saved = aw_sourcing_push_autoapprove_save(
+		array(
+			'on_score'    => (bool) $request['on_score'],
+			'min_score'   => (int) $request['min_score'],
+			'types'       => array_map( 'sanitize_key', (array) $request['types'] ),
+			'on_proven'   => (bool) $request['on_proven'],
+			'proven_rank' => (int) $request['proven_rank'],
+		)
+	);
+	return rest_ensure_response(
+		array(
+			'autoapprove' => $saved,
+			'message'     => __( 'Auto-approve rules saved.', 'aw-sourcing' ),
 		)
 	);
 }

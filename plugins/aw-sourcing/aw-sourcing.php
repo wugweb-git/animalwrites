@@ -88,6 +88,8 @@ require_once AW_SOURCING_DIR . 'includes/workers.php';
 require_once AW_SOURCING_DIR . 'includes/workers-tick.php'; // WP-CLI: wp aw workers-tick (hPanel cron every 15 minutes)
 require_once AW_SOURCING_DIR . 'includes/sourcing-terms-admin.php';
 require_once AW_SOURCING_DIR . 'includes/keywords-admin.php'; // phase 2: Keywords on the keyword table
+require_once AW_SOURCING_DIR . 'includes/keyword-push.php'; // receive keyword candidates pushed by InsightWeb (sourceweb_push_keywords)
+require_once AW_SOURCING_DIR . 'includes/keyword-routing.php'; // route a pushed candidate on approval; owner auto-approve rules
 // Workers you can organise and AI keys attached to workers (owner, 24 Oct 2026).
 require_once AW_SOURCING_DIR . 'includes/workers-meta.php';
 require_once AW_SOURCING_DIR . 'includes/workers-admin.php';
