@@ -65,6 +65,7 @@ if ( ! function_exists( 'insightweb_caps_grant' ) ) { // Loaded by insightweb.ph
 	require_once INSIGHTWEB_DIR . 'includes/insightweb-caps.php';
 }
 require_once INSIGHTWEB_DIR . 'includes/settings.php'; // the seven numbers (constants) and the API rule, first
+require_once INSIGHTWEB_DIR . 'includes/search-insights/migrate.php'; // one-time aw_si_ -> insightweb_ live-data migration (init pri 1; owner deploys, never run here)
 
 foreach ( array( 'schema', 'runs', 'sitekit', 'keywords', 'gsc', 'compute', 'score', 'sourcing-push', 'rollup', 'cron', 'health', 'searches', 'dryrun', 'admin-table', 'rising', 'admin', 'cli' ) as $insightweb_file ) {
 	require_once __DIR__ . '/search-insights/' . $insightweb_file . '.php';

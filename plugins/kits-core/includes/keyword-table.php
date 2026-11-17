@@ -25,17 +25,55 @@ if ( ! defined( 'ABSPATH' ) ) {
 require_once __DIR__ . '/keyword-model.php';
 
 const INSIGHTWEB_KW_DB_VERSION = '3';
-const INSIGHTWEB_KW_DB_OPTION  = 'aw_kw_db';
+const INSIGHTWEB_KW_DB_OPTION  = 'insightweb_kw_db';
 
 /**
  * Full name of a Search Insights / keyword table.
  *
- * @param string $name keywords, kw_map, kw_pages, obs or rising.
+ * Dual-resolved through the rename: the new {prefix}insightweb_<name> once the migration has renamed it, otherwise
+ * the legacy {prefix}aw_si_<name>. Each table is resolved independently and cached per request, so reads and writes
+ * never break no matter when insightweb_kw_migrate() (or InsightWeb's table migration) runs on a request.
+ *
+ * @param string $name keywords, kw_map, kw_pages, obs, rising or links.
  */
 function insightweb_kw_table( string $name ): string {
 	global $wpdb;
-	return $wpdb->prefix . 'aw_si_' . $name;
+	static $resolved = array();
+	if ( ! isset( $resolved[ $name ] ) ) {
+		$new               = $wpdb->prefix . 'insightweb_' . $name;
+		$resolved[ $name ] = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $new ) ) === $new // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			? $new
+			: $wpdb->prefix . 'aw_si_' . $name;
+	}
+	return $resolved[ $name ];
 }
+
+/**
+ * One-time, idempotent rename of Kits Core's two keyword tables and their version option from the legacy aw_si_/aw_kw_
+ * names to insightweb_. Runs on 'init' before the installers; guarded so it does nothing once done, and each RENAME
+ * only fires when the old table exists and the new one does not. Writes no data and drops nothing. The owner deploys
+ * this; it is never run here. Mirrors InsightWeb's own table migration (its five tables).
+ */
+function insightweb_kw_migrate(): void {
+	if ( get_option( 'insightweb_kw_migrated' ) ) {
+		return;
+	}
+	global $wpdb;
+	foreach ( array( 'keywords', 'kw_map' ) as $n ) {
+		$old = $wpdb->prefix . 'aw_si_' . $n;
+		$new = $wpdb->prefix . 'insightweb_' . $n;
+		if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $old ) ) === $old // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			&& $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $new ) ) !== $new ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			$wpdb->query( "RENAME TABLE `{$old}` TO `{$new}`" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared -- table names are built from $wpdb->prefix and fixed strings, no user input
+		}
+	}
+	if ( false === get_option( 'insightweb_kw_db', false ) && false !== get_option( 'aw_kw_db', false ) ) {
+		update_option( 'insightweb_kw_db', get_option( 'aw_kw_db' ), true );
+		delete_option( 'aw_kw_db' );
+	}
+	update_option( 'insightweb_kw_migrated', 1, true );
+}
+add_action( 'init', 'insightweb_kw_migrate', 1 );
 
 /** Current time in MySQL format, site time zone (IST). */
 function insightweb_kw_now(): string {

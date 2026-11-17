@@ -24,10 +24,17 @@ const INSIGHTWEB_VIS_DB      = '1'; // Table version.
 const INSIGHTWEB_VIS_IP_DAYS = 30;
 const INSIGHTWEB_GEO_CRON    = 'insightweb_geo_refresh';
 
-/** The table name. */
+/** The table name, dual-resolved through the rename ({prefix}insightweb_visits once migrated, else {prefix}aw_si_visits). */
 function insightweb_vis_table(): string {
 	global $wpdb;
-	return $wpdb->prefix . 'insightweb_visits';
+	static $t = null;
+	if ( null === $t ) {
+		$new = $wpdb->prefix . 'insightweb_visits';
+		$t   = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $new ) ) === $new // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			? $new
+			: $wpdb->prefix . 'aw_si_visits';
+	}
+	return $t;
 }
 
 /** Create or update the table (admin and the daily run only). */
