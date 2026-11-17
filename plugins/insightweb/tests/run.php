@@ -56,6 +56,10 @@ function wp_json_encode_stub( $v ) {
 function add_action() {}
 /** Stub. */
 function add_filter() {}
+/** Stub: default passthrough (no filters registered in the test). */
+function apply_filters( $hook, $value = null ) {
+	return $value;
+}
 /** Stub. */
 function __( $s ) {
 	return $s;
@@ -608,5 +612,52 @@ $own = aw_si_canonical_owner(
 	'evergreen'
 );
 iw_check( 'no-owner' === $own['flag'], 'canonical owner: two pages split the query with no majority → no canonical owner' );
+
+// The stored score row the recompute writes (aw_si_score_row) and the sourcing-types filter.
+$row = aw_si_score_row(
+	array(
+		'impr'     => 5000,
+		'clicks'   => 500,
+		'pos'      => 12.0,
+		'growth'   => 5.0,
+		'has_page' => true,
+		'roles'    => 2,
+		'topic'    => '',
+	)
+);
+iw_check( 100 === $row['score'] && 'focus-page' === $row['recommended'] && '' === $row['focus_health'], 'score row: strong owned keyword → full score, focus-page, agrees with Rank Math' );
+$row = aw_si_score_row(
+	array(
+		'impr'     => 5000,
+		'clicks'   => 300,
+		'pos'      => null,
+		'growth'   => 5.0,
+		'has_page' => false,
+		'roles'    => 0,
+	)
+);
+iw_check( $row['score'] >= 55 && 'write-page' === $row['recommended'], 'score row: demand, no page, not ranking → write a new page' );
+$row = aw_si_score_row(
+	array(
+		'impr'     => 100,
+		'clicks'   => 5,
+		'pos'      => 2.0,
+		'has_page' => true,
+		'roles'    => 2,
+	)
+);
+iw_check( 'poor-rank' === $row['focus_health'] && 'secondary' === $row['recommended'], 'score row: a focus keyphrase already top-3 → poor-rank + secondary' );
+$row = aw_si_score_row(
+	array(
+		'impr'     => 100,
+		'clicks'   => 5,
+		'pos'      => 12.0,
+		'has_page' => true,
+		'topic'    => 'rabies',
+	),
+	array( 'rabies' => 'library' )
+);
+iw_check( false !== strpos( $row['recommended'], 'sourcing:library' ), 'score row: a sourcing topic adds sourcing:library' );
+iw_check( is_array( aw_si_sourcing_types() ), 'sourcing types: a map (empty until SourceWeb fills the filter)' );
 
 exit( $GLOBALS['iw_fail'] );
