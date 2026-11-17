@@ -135,7 +135,8 @@ function mailweb_box_id( $key ) {
  */
 function mailweb_api( $path ) {
 	// Routed through the active provider (providers.php); 200-only, returns the response's `data` (or the decoded body).
-	list( $code, $data ) = mailweb_provider()->request( 'GET', (string) $path );
+	// 15s keeps this read's original timeout (the inbox's richer calls use the adapter's 20s default).
+	list( $code, $data ) = mailweb_provider()->request( 'GET', (string) $path, null, false, 15 );
 	if ( 200 !== (int) $code ) {
 		return null;
 	}

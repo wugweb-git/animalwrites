@@ -34,9 +34,10 @@ interface Mailweb_Provider {
 	 * @param string     $path   Path after the backend's base URL.
 	 * @param array|null $body   Optional JSON body.
 	 * @param bool       $raw    Return the raw body (attachments) instead of decoded JSON.
+	 * @param int        $timeout Request timeout in seconds; 0 uses the adapter's default.
 	 * @return array{0:int,1:mixed,2:array} [status code, data (decoded JSON or raw body), headers].
 	 */
-	public function request( string $method, string $path, $body = null, bool $raw = false ): array;
+	public function request( string $method, string $path, $body = null, bool $raw = false, int $timeout = 0 ): array;
 }
 
 /**
@@ -49,14 +50,14 @@ final class Mailweb_Hostinger_Provider implements Mailweb_Provider {
 	/**
 	 * {@inheritDoc}
 	 */
-	public function request( string $method, string $path, $body = null, bool $raw = false ): array {
+	public function request( string $method, string $path, $body = null, bool $raw = false, int $timeout = 0 ): array {
 		$token = function_exists( 'mailweb_setting' ) ? mailweb_setting( 'api_token' ) : '';
 		if ( '' === $token ) {
 			return array( 0, null, array() );
 		}
 		$args = array(
 			'method'  => $method,
-			'timeout' => $raw ? 60 : 20,
+			'timeout' => $timeout > 0 ? $timeout : ( $raw ? 60 : 20 ),
 			'headers' => array(
 				'Authorization' => 'Bearer ' . $token,
 				'Accept'        => $raw ? '*/*' : 'application/json',
@@ -111,7 +112,7 @@ final class Mailweb_Imap_Provider implements Mailweb_Provider {
 	/**
 	 * {@inheritDoc} Fail-safe until implemented: a transport-failure triple, plus a one-time admin notice.
 	 */
-	public function request( string $method, string $path, $body = null, bool $raw = false ): array {
+	public function request( string $method, string $path, $body = null, bool $raw = false, int $timeout = 0 ): array {
 		if ( is_admin() && ! get_transient( 'mailweb_imap_notice_shown' ) ) {
 			set_transient( 'mailweb_imap_notice_shown', 1, HOUR_IN_SECONDS );
 			add_action(
