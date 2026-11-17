@@ -23,17 +23,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const INSIGHTWEB_CRAWL_CRON  = 'insightweb_crawl';
-const INSIGHTWEB_CRAWL_IN    = 'insightweb_crawl_inside'; // Option: the last inside run.
-const INSIGHTWEB_CRAWL_OUT   = 'insightweb_crawl_outside'; // Option: the last outside run.
-const INSIGHTWEB_CRAWL_WEEKS = 12;
-const INSIGHTWEB_CRAWL_TIME  = 240; // Seconds the inside run may take before it stops.
-const INSIGHTWEB_CRAWL_STALE = 15 * DAY_IN_SECONDS; // An outside run older than this no longer counts (the job stopped?).
+const AW_SI_CRAWL_CRON  = 'aw_si_crawl';
+const AW_SI_CRAWL_IN    = 'aw_si_crawl_inside'; // Option: the last inside run.
+const AW_SI_CRAWL_OUT   = 'aw_si_crawl_outside'; // Option: the last outside run.
+const AW_SI_CRAWL_WEEKS = 12;
+const AW_SI_CRAWL_TIME  = 240; // Seconds the inside run may take before it stops.
+const AW_SI_CRAWL_STALE = 15 * DAY_IN_SECONDS; // An outside run older than this no longer counts (the job stopped?).
 
 /** User agents: the same as the workers job (aw_workers/crawl_check.py AGENTS). */
-function insightweb_crawl_agents(): array {
+function aw_si_crawl_agents(): array {
 	return (array) apply_filters(
-		'insightweb_crawl_agents',
+		'aw_si_crawl_agents',
 		array(
 			'Browser'         => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36',
 			'Googlebot'       => 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
@@ -55,7 +55,7 @@ function insightweb_crawl_agents(): array {
  *
  * @return array{pages: array<int, array{kind: string, url: string}>, burst: string[]}
  */
-function insightweb_crawl_pages(): array {
+function aw_si_crawl_pages(): array {
 	$pages = array(
 		array(
 			'kind' => 'home',
@@ -116,7 +116,7 @@ function insightweb_crawl_pages(): array {
  * @param int    $code HTTP status (0: no answer).
  * @param string $body Response body.
  */
-function insightweb_crawl_verdict( int $code, string $body ): string {
+function aw_si_crawl_verdict( int $code, string $body ): string {
 	if ( 200 !== $code ) {
 		return 'refused';
 	}
@@ -131,20 +131,20 @@ function insightweb_crawl_verdict( int $code, string $body ): string {
  * @param bool $dry Check only.
  * @return array{at: int, runner: string, checks: array, cut: bool}
  */
-function insightweb_crawl_run( bool $dry = false ): array {
+function aw_si_crawl_run( bool $dry = false ): array {
 	if ( ! $dry ) {
-		insightweb_run_start( 'crawl-in' );
+		aw_si_run_start( 'crawl-in' );
 	}
 	if ( function_exists( 'set_time_limit' ) ) {
-		set_time_limit( INSIGHTWEB_CRAWL_TIME + 60 ); // phpcs:ignore Squiz.PHP.DiscouragedFunctions -- the run stops itself at INSIGHTWEB_CRAWL_TIME.
+		set_time_limit( AW_SI_CRAWL_TIME + 60 ); // phpcs:ignore Squiz.PHP.DiscouragedFunctions -- the run stops itself at AW_SI_CRAWL_TIME.
 	}
-	$plan   = insightweb_crawl_pages();
+	$plan   = aw_si_crawl_pages();
 	$start  = time();
 	$checks = array();
 	$cut    = false;
-	foreach ( insightweb_crawl_agents() as $agent => $ua ) {
+	foreach ( aw_si_crawl_agents() as $agent => $ua ) {
 		foreach ( $plan['pages'] as $p ) {
-			if ( time() - $start > INSIGHTWEB_CRAWL_TIME ) {
+			if ( time() - $start > AW_SI_CRAWL_TIME ) {
 				$cut = true;
 				break 2;
 			}
@@ -165,7 +165,7 @@ function insightweb_crawl_run( bool $dry = false ): array {
 				'url'    => $p['url'],
 				'code'   => $code,
 				'ms'     => (int) round( ( microtime( true ) - $t ) * 1000 ),
-				'result' => is_wp_error( $resp ) ? 'refused' : insightweb_crawl_verdict( $code, (string) wp_remote_retrieve_body( $resp ) ),
+				'result' => is_wp_error( $resp ) ? 'refused' : aw_si_crawl_verdict( $code, (string) wp_remote_retrieve_body( $resp ) ),
 				'error'  => is_wp_error( $resp ) ? $resp->get_error_message() : '',
 			);
 		}
@@ -178,30 +178,30 @@ function insightweb_crawl_run( bool $dry = false ): array {
 		'cut'    => $cut,
 	);
 	if ( ! $dry ) {
-		insightweb_crawl_store( 'inside', $run );
+		aw_si_crawl_store( 'inside', $run );
 		if ( $cut ) {
 			/* translators: %d: seconds. */
-			insightweb_run_fail( 'crawl-in', sprintf( __( 'The check stopped after %d seconds; some agents were not asked.', 'insightweb' ), INSIGHTWEB_CRAWL_TIME ) );
+			aw_si_run_fail( 'crawl-in', sprintf( __( 'The check stopped after %d seconds; some agents were not asked.', 'insightweb' ), AW_SI_CRAWL_TIME ) );
 		}
 	}
 	return $run;
 }
 
 /**
- * A stored run, or [] when there is none, or (outside only) it is older than INSIGHTWEB_CRAWL_STALE.
+ * A stored run, or [] when there is none, or (outside only) it is older than AW_SI_CRAWL_STALE.
  *
- * @param string $opt INSIGHTWEB_CRAWL_IN or INSIGHTWEB_CRAWL_OUT.
+ * @param string $opt AW_SI_CRAWL_IN or AW_SI_CRAWL_OUT.
  */
-function insightweb_crawl_last( string $opt ): array {
+function aw_si_crawl_last( string $opt ): array {
 	$run = (array) get_option( $opt, array() );
-	if ( empty( $run['at'] ) || ( INSIGHTWEB_CRAWL_OUT === $opt && time() - (int) $run['at'] > INSIGHTWEB_CRAWL_STALE ) ) {
+	if ( empty( $run['at'] ) || ( AW_SI_CRAWL_OUT === $opt && time() - (int) $run['at'] > AW_SI_CRAWL_STALE ) ) {
 		return array();
 	}
 	return $run;
 }
 
 /** Named search and AI crawlers that CDNs check by address: from outside, a refusal of their name is a refused fake. */
-function insightweb_crawl_verified_bots(): array {
+function aw_si_crawl_verified_bots(): array {
 	return array( 'Googlebot', 'Bingbot', 'GPTBot', 'OAI-SearchBot', 'ChatGPT-User', 'PerplexityBot', 'ClaudeBot', 'Google-Extended', 'Applebot' );
 }
 
@@ -211,9 +211,9 @@ function insightweb_crawl_verified_bots(): array {
  * @param array $run The run.
  * @param array $c   One check.
  */
-function insightweb_crawl_expected( array $run, array $c ): bool {
+function aw_si_crawl_expected( array $run, array $c ): bool {
 	return 'server' !== ( $run['runner'] ?? 'server' ) && 'refused' === ( $c['result'] ?? '' )
-		&& in_array( (string) ( $c['agent'] ?? '' ), insightweb_crawl_verified_bots(), true ) && in_array( (int) ( $c['code'] ?? 0 ), array( 0, 403, 429 ), true );
+		&& in_array( (string) ( $c['agent'] ?? '' ), aw_si_crawl_verified_bots(), true ) && in_array( (int) ( $c['code'] ?? 0 ), array( 0, 403, 429 ), true );
 }
 
 /**
@@ -222,10 +222,10 @@ function insightweb_crawl_expected( array $run, array $c ): bool {
  * @param array $run A stored run.
  * @return string[]
  */
-function insightweb_crawl_refused_fakes( array $run ): array {
+function aw_si_crawl_refused_fakes( array $run ): array {
 	$out = array();
 	foreach ( (array) ( $run['checks'] ?? array() ) as $c ) {
-		if ( 'ok' !== ( $c['result'] ?? '' ) && insightweb_crawl_expected( $run, $c ) ) {
+		if ( 'ok' !== ( $c['result'] ?? '' ) && aw_si_crawl_expected( $run, $c ) ) {
 			$out[] = sprintf( '%s, %s: %s', $c['agent'], $c['kind'], $c['code'] ? 'HTTP ' . $c['code'] : __( 'no answer', 'insightweb' ) );
 		}
 	}
@@ -238,10 +238,10 @@ function insightweb_crawl_refused_fakes( array $run ): array {
  * @param array $run A stored run.
  * @return string[]
  */
-function insightweb_crawl_problems( array $run ): array {
+function aw_si_crawl_problems( array $run ): array {
 	$out = array();
 	foreach ( (array) ( $run['checks'] ?? array() ) as $c ) {
-		if ( 'ok' !== ( $c['result'] ?? '' ) && ! insightweb_crawl_expected( $run, $c ) ) {
+		if ( 'ok' !== ( $c['result'] ?? '' ) && ! aw_si_crawl_expected( $run, $c ) ) {
 			$what  = 'challenge' === $c['result'] ? __( 'challenge page', 'insightweb' ) : ( $c['code'] ? 'HTTP ' . $c['code'] : __( 'no answer', 'insightweb' ) );
 			$out[] = sprintf( '%s, %s: %s', $c['agent'], $c['kind'], $what );
 		}
@@ -264,67 +264,67 @@ function insightweb_crawl_problems( array $run ): array {
  * @param string $side inside or outside.
  * @param array  $run  The run.
  */
-function insightweb_crawl_store( string $side, array $run ): void {
+function aw_si_crawl_store( string $side, array $run ): void {
 	global $wpdb;
-	update_option( 'inside' === $side ? INSIGHTWEB_CRAWL_IN : INSIGHTWEB_CRAWL_OUT, $run, false );
+	update_option( 'inside' === $side ? AW_SI_CRAWL_IN : AW_SI_CRAWL_OUT, $run, false );
 	$day = wp_date( 'Y-m-d', (int) $run['at'] );
 	$per = array();
 	foreach ( (array) $run['checks'] as $c ) {
-		$per[ $c['agent'] ] = ( $per[ $c['agent'] ] ?? 0 ) + ( 'ok' === $c['result'] || insightweb_crawl_expected( $run, $c ) ? 0 : 1 );
+		$per[ $c['agent'] ] = ( $per[ $c['agent'] ] ?? 0 ) + ( 'ok' === $c['result'] || aw_si_crawl_expected( $run, $c ) ? 0 : 1 );
 	}
-	$o = insightweb_kw_table( 'obs' );
+	$o = aw_si_table( 'obs' );
 	foreach ( $per as $agent => $n ) {
 		$wpdb->replace( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 			$o,
 			array(
 				'kw_id'    => 0,
 				'page'     => '',
-				'page_key' => md5( 'agent:' . $agent ), // One row per agent and day (insightweb_obs_put keys rows by page).
+				'page_key' => md5( 'agent:' . $agent ), // One row per agent and day (aw_si_obs_put keys rows by page).
 				'src'      => 'crawl',
 				'metric'   => $side,
 				'period'   => 'day',
 				'd'        => $day,
 				'value'    => (float) $n,
 				'txt'      => mb_substr( (string) $agent, 0, 255 ),
-				'fetched'  => insightweb_kw_now(),
+				'fetched'  => aw_si_now(),
 			)
 		);
 	}
-	$keep = ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( '-' . INSIGHTWEB_CRAWL_WEEKS . ' weeks' )->format( 'Y-m-d' );
+	$keep = ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( '-' . AW_SI_CRAWL_WEEKS . ' weeks' )->format( 'Y-m-d' );
 	$wpdb->query( $wpdb->prepare( "DELETE FROM %i WHERE src = 'crawl' AND d < %s", $o, $keep ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-	$problems = insightweb_crawl_problems( $run );
-	insightweb_run_ok(
+	$problems = aw_si_crawl_problems( $run );
+	aw_si_run_ok(
 		'inside' === $side ? 'crawl-in' : 'crawl-out',
 		array(
 			'checks'   => count( (array) $run['checks'] ),
 			'problems' => count( $problems ),
 		)
 	);
-	insightweb_crawl_alert();
+	aw_si_crawl_alert();
 }
 
 /** Email the owner once per new set of problems (inside and outside together). */
-function insightweb_crawl_alert(): void {
+function aw_si_crawl_alert(): void {
 	$all = array();
 	foreach ( array(
-		__( 'From the server', 'insightweb' )  => INSIGHTWEB_CRAWL_IN,
-		__( 'From outside', 'insightweb' )     => INSIGHTWEB_CRAWL_OUT,
+		__( 'From the server', 'insightweb' )  => AW_SI_CRAWL_IN,
+		__( 'From outside', 'insightweb' )     => AW_SI_CRAWL_OUT,
 	) as $label => $opt ) {
-		foreach ( insightweb_crawl_problems( insightweb_crawl_last( $opt ) ) as $p ) {
+		foreach ( aw_si_crawl_problems( aw_si_crawl_last( $opt ) ) as $p ) {
 			$all[] = $label . ': ' . $p;
 		}
 	}
 	if ( ! $all ) {
-		delete_option( 'insightweb_crawl_mailed' );
+		delete_option( 'aw_si_crawl_mailed' );
 		return;
 	}
 	$key = md5( implode( "\n", $all ) );
-	if ( get_option( 'insightweb_crawl_mailed' ) === $key ) {
+	if ( get_option( 'aw_si_crawl_mailed' ) === $key ) {
 		return; // The same problems were already emailed.
 	}
-	$body = "Some search or AI crawlers could not read animalwrites.in pages:\n\n- " . implode( "\n- ", $all ) . "\n\nSite Health: " . admin_url( 'site-health.php' ) . "\nSearch Insights: " . insightweb_url() . "\n";
+	$body = "Some search or AI crawlers could not read animalwrites.in pages:\n\n- " . implode( "\n- ", $all ) . "\n\nSite Health: " . admin_url( 'site-health.php' ) . "\nSearch Insights: " . aw_si_url() . "\n";
 	if ( wp_mail( get_option( 'admin_email' ), 'Animal Writes: crawler access problem — ' . $all[0], $body ) ) {
-		update_option( 'insightweb_crawl_mailed', $key, false );
+		update_option( 'aw_si_crawl_mailed', $key, false );
 	}
 }
 
@@ -334,7 +334,7 @@ function insightweb_crawl_alert(): void {
  * @param array $body JSON body: runner, started, checks [{agent, kind, url, code, ms, bytes, result, error}], burst.
  * @return array|WP_Error What was stored.
  */
-function insightweb_crawl_receive( array $body ) {
+function aw_si_crawl_receive( array $body ) {
 	$checks = array();
 	foreach ( array_slice( (array) ( $body['checks'] ?? array() ), 0, 500 ) as $c ) {
 		if ( ! is_array( $c ) || empty( $c['agent'] ) ) {
@@ -351,7 +351,7 @@ function insightweb_crawl_receive( array $body ) {
 		);
 	}
 	if ( ! $checks ) {
-		return new WP_Error( 'insightweb_crawl', __( 'No checks in the request.', 'insightweb' ), array( 'status' => 400 ) );
+		return new WP_Error( 'aw_si_crawl', __( 'No checks in the request.', 'insightweb' ), array( 'status' => 400 ) );
 	}
 	$burst = array();
 	foreach ( array_slice( (array) ( $body['burst'] ?? array() ), 0, 20 ) as $b ) {
@@ -372,10 +372,10 @@ function insightweb_crawl_receive( array $body ) {
 		'burst'  => $burst,
 		'cut'    => ! empty( $body['cut'] ), // The workers job stopped at its deadline.
 	);
-	insightweb_crawl_store( 'outside', $run );
+	aw_si_crawl_store( 'outside', $run );
 	return array(
 		'checks'   => count( $checks ),
-		'problems' => count( insightweb_crawl_problems( $run ) ),
+		'problems' => count( aw_si_crawl_problems( $run ) ),
 	);
 }
 
@@ -389,14 +389,14 @@ add_action(
 				array(
 					'methods'             => 'GET',
 					'permission_callback' => 'aw_si_api_allowed',
-					'callback'            => fn() => rest_ensure_response( insightweb_crawl_pages() + array( 'agents' => insightweb_crawl_agents() ) ),
+					'callback'            => fn() => rest_ensure_response( aw_si_crawl_pages() + array( 'agents' => aw_si_crawl_agents() ) ),
 				),
 				array(
 					'methods'             => 'POST',
 					'permission_callback' => 'aw_si_api_allowed',
 					'callback'            => function ( WP_REST_Request $req ) {
 						$body = $req->get_json_params();
-						$out  = insightweb_crawl_receive( is_array( $body ) ? $body : array() );
+						$out  = aw_si_crawl_receive( is_array( $body ) ? $body : array() );
 						return is_wp_error( $out ) ? $out : rest_ensure_response( $out );
 					},
 				),
@@ -405,33 +405,33 @@ add_action(
 	}
 );
 
-add_action( INSIGHTWEB_CRAWL_CRON, fn() => get_option( 'insightweb_off' ) ? null : insightweb_crawl_run() );
+add_action( AW_SI_CRAWL_CRON, fn() => get_option( 'aw_si_off' ) ? null : aw_si_crawl_run() );
 
 add_action(
 	'init',
 	function () {
-		if ( ! get_option( 'insightweb_off' ) && ! wp_next_scheduled( INSIGHTWEB_CRAWL_CRON ) ) {
-			wp_schedule_event( ( new DateTimeImmutable( 'next monday 08:45', wp_timezone() ) )->getTimestamp(), 'weekly', INSIGHTWEB_CRAWL_CRON );
+		if ( ! get_option( 'aw_si_off' ) && ! wp_next_scheduled( AW_SI_CRAWL_CRON ) ) {
+			wp_schedule_event( ( new DateTimeImmutable( 'next monday 08:45', wp_timezone() ) )->getTimestamp(), 'weekly', AW_SI_CRAWL_CRON );
 		}
 	}
 );
 
 add_filter(
-	'insightweb_cron_hooks',
+	'aw_si_cron_hooks',
 	function ( $hooks ) {
-		$hooks[] = INSIGHTWEB_CRAWL_CRON;
+		$hooks[] = AW_SI_CRAWL_CRON;
 		return $hooks;
 	}
 );
 
 add_filter(
-	'insightweb_sources',
+	'aw_si_sources',
 	function ( $s ) {
 		$s['crawl-in'] = array(
 			'label' => __( 'Crawler access, from the server', 'insightweb' ),
 			'every' => WEEK_IN_SECONDS,
 		);
-		if ( get_option( INSIGHTWEB_CRAWL_OUT ) ) { // Listed once the workers job has reported, so it never shows as late before.
+		if ( get_option( AW_SI_CRAWL_OUT ) ) { // Listed once the workers job has reported, so it never shows as late before.
 			$s['crawl-out'] = array(
 				'label' => __( 'Crawler access, from outside (workers)', 'insightweb' ),
 				'every' => WEEK_IN_SECONDS,
@@ -442,22 +442,22 @@ add_filter(
 );
 
 /** Site Health test: the last inside and outside runs. */
-function insightweb_crawl_health_test(): array {
+function aw_si_crawl_health_test(): array {
 	$items = '';
 	$any   = false;
 	$bad   = 0;
-	$out   = (bool) insightweb_crawl_last( INSIGHTWEB_CRAWL_OUT );
+	$out   = (bool) aw_si_crawl_last( AW_SI_CRAWL_OUT );
 	foreach ( array(
-		__( 'From the server (user-agent rules only)', 'insightweb' ) => INSIGHTWEB_CRAWL_IN,
-		__( 'From outside (GitHub runner, weekly)', 'insightweb' )    => INSIGHTWEB_CRAWL_OUT,
+		__( 'From the server (user-agent rules only)', 'insightweb' ) => AW_SI_CRAWL_IN,
+		__( 'From outside (GitHub runner, weekly)', 'insightweb' )    => AW_SI_CRAWL_OUT,
 	) as $label => $opt ) {
-		$run = insightweb_crawl_last( $opt );
+		$run = aw_si_crawl_last( $opt );
 		if ( empty( $run['at'] ) ) {
 			$items .= '<li>' . esc_html( $label . ': ' . __( 'no result from the last 15 days.', 'insightweb' ) ) . '</li>';
 			continue;
 		}
 		$any      = true;
-		$problems = insightweb_crawl_problems( $run );
+		$problems = aw_si_crawl_problems( $run );
 		$bad     += count( $problems );
 		/* translators: 1: date, 2: checks, 3: problems. */
 		$line   = sprintf( __( '%1$s: %2$d checks, %3$d problems', 'insightweb' ), wp_date( 'j M, H:i', (int) $run['at'] ), count( (array) $run['checks'] ), count( $problems ) );
@@ -473,7 +473,7 @@ function insightweb_crawl_health_test(): array {
 			'color' => $bad ? 'red' : 'blue',
 		),
 		'description' => '<p>' . esc_html__( 'Each week the home page and five sample pages are asked with the user agents of a browser, Googlebot, Bingbot, GPTBot, OAI-SearchBot, ChatGPT-User, PerplexityBot, ClaudeBot, Google-Extended, Applebot and a generic SEO crawler: from this server, and from outside by the workers. A page that is not a 200, or a challenge page, is a problem. From outside, a refused request with a named crawler\'s name is a refused fake (expected: the CDN lets the real crawlers in by their own addresses), so it is not counted.', 'insightweb' ) . '</p><ul>' . $items . '</ul>',
-		'actions'     => '<p><a href="' . esc_url( insightweb_url() ) . '">' . esc_html__( 'Open Search Insights', 'insightweb' ) . '</a></p>',
+		'actions'     => '<p><a href="' . esc_url( aw_si_url() ) . '">' . esc_html__( 'Open Search Insights', 'insightweb' ) . '</a></p>',
 		'test'        => 'aw_search_insights_crawl',
 	);
 }
@@ -483,25 +483,25 @@ add_filter(
 	function ( $tests ) {
 		$tests['direct']['aw_search_insights_crawl'] = array(
 			'label' => __( 'Search and AI crawlers can read the site', 'insightweb' ),
-			'test'  => 'insightweb_crawl_health_test',
+			'test'  => 'aw_si_crawl_health_test',
 		);
 		return $tests;
 	}
 );
 
 /** Overview box: the last inside and outside runs, problems first. */
-function insightweb_box_crawl(): void {
+function aw_si_box_crawl(): void {
 	foreach ( array(
-		__( 'From the server', 'insightweb' )         => INSIGHTWEB_CRAWL_IN,
-		__( 'From outside (workers)', 'insightweb' ) => INSIGHTWEB_CRAWL_OUT,
+		__( 'From the server', 'insightweb' )         => AW_SI_CRAWL_IN,
+		__( 'From outside (workers)', 'insightweb' ) => AW_SI_CRAWL_OUT,
 	) as $label => $opt ) {
-		$run = insightweb_crawl_last( $opt );
+		$run = aw_si_crawl_last( $opt );
 		if ( empty( $run['at'] ) ) {
 			echo '<p><strong>' . esc_html( $label ) . ':</strong> ' . esc_html__( 'no result from the last 15 days (weekly, Monday morning).', 'insightweb' ) . '</p>';
 			continue;
 		}
-		$problems = insightweb_crawl_problems( $run );
-		$fakes    = insightweb_crawl_refused_fakes( $run );
+		$problems = aw_si_crawl_problems( $run );
+		$fakes    = aw_si_crawl_refused_fakes( $run );
 		/* translators: 1: date, 2: checks. */
 		$line = sprintf( __( '%1$s, %2$d checks', 'insightweb' ), wp_date( 'j M, H:i', (int) $run['at'] ), count( (array) $run['checks'] ) );
 		echo '<p><strong>' . esc_html( $label ) . ':</strong> ' . esc_html( $line ) . ' — ' . ( $problems ? '<span class="dashicons dashicons-warning" aria-hidden="true"></span> ' . esc_html( implode( '; ', array_slice( $problems, 0, 8 ) ) ) : '<span class="dashicons dashicons-yes" aria-hidden="true"></span> ' . esc_html__( 'every agent got every page.', 'insightweb' ) ) . '</p>';
@@ -529,9 +529,9 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	WP_CLI::add_command(
 		'aw-si-crawl',
 		function ( $args, $assoc ) {
-			$run = insightweb_crawl_run( isset( $assoc['dry-run'] ) );
+			$run = aw_si_crawl_run( isset( $assoc['dry-run'] ) );
 			WP_CLI\Utils\format_items( 'table', $run['checks'], array( 'agent', 'kind', 'code', 'ms', 'result' ) );
-			$problems = insightweb_crawl_problems( $run );
+			$problems = aw_si_crawl_problems( $run );
 			WP_CLI::log( $problems ? 'Problems: ' . implode( '; ', $problems ) : 'Every agent got every page.' );
 		}
 	);

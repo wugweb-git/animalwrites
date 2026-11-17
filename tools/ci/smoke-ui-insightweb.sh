@@ -6,7 +6,7 @@ screen aw-search-insights insightweb-app insightweb-admin
 screen "aw-search-insights&tab=settings" insightweb-app insightweb-admin
 # Settings → Runs and data: the Settings tab's own rows (Run now, imports, Delete data) as parts, with their forms.
 want 200 "admin.php?page=aw-search-insights&tab=settings (Runs and data)" -b /tmp/cj-ci "$H/wp-admin/admin.php?page=aw-search-insights&tab=settings"
-if grep -o '"more":\[.*' /tmp/rw.out | grep -q 'insightweb_run' && grep -o '"more":\[.*' /tmp/rw.out | grep -q 'insightweb_delete'; then echo "ok   Settings: Run now and Delete data forms on the new screen"; else echo "FAIL Settings: Run now or Delete data missing from Runs and data"; FAIL=1; fi
+if grep -o '"more":\[.*' /tmp/rw.out | grep -q 'aw_si_run' && grep -o '"more":\[.*' /tmp/rw.out | grep -q 'aw_si_delete'; then echo "ok   Settings: Run now and Delete data forms on the new screen"; else echo "FAIL Settings: Run now or Delete data missing from Runs and data"; FAIL=1; fi
 if grep -o '"more":\[.*' /tmp/rw.out | grep -q '"Numbers"'; then echo "FAIL Settings: the Numbers row is drawn twice"; FAIL=1; else echo "ok   Settings: Numbers only in its own group"; fi
 # Keywords and the other tabs on the new screen, each from its own output (insightweb-tabs.php): the screen is the tab's,
 # and its parts carry no markup or script.
@@ -22,7 +22,7 @@ done
 # The Overview boxes on the Dashboard: every box answers 200 as plain parts (no markup); an unknown box is 404; the
 # options stay the same.
 want 404 "GET /insightweb/v1/dashboard/box unknown key" -b /tmp/cj-ci -H "X-WP-Nonce: $NA" "$H/?rest_route=/insightweb/v1/dashboard/box&key=nosuchbox"
-BOXES_BEFORE=$(optmd5 aw_seo_settings insightweb_runs insightweb_off)
+BOXES_BEFORE=$(optmd5 aw_seo_settings aw_si_runs aw_si_off)
 wp eval 'echo implode( " ", array_column( insightweb_box_list(), "key" ) );' > /tmp/iw-boxes.txt
 python3 - "$H/?rest_route=/insightweb/v1/dashboard/box" "$NA" <<'PY' || FAIL=1
 import json, re, subprocess, sys
@@ -42,13 +42,13 @@ for k in keys:
     bad += not ok
 sys.exit(1 if bad else 0)
 PY
-same "InsightWeb boxes" "$BOXES_BEFORE" "$(optmd5 aw_seo_settings insightweb_runs insightweb_off)"
+same "InsightWeb boxes" "$BOXES_BEFORE" "$(optmd5 aw_seo_settings aw_si_runs aw_si_off)"
 post insightweb/v1/dashboard/count '{}'
 post insightweb/v1/settings/numbers '{"fields":{}}'
 post insightweb/v1/settings/rising '{}'
 want 200 "POST /insightweb/v1/dashboard/count administrator" -X POST -b /tmp/cj-ci -H "X-WP-Nonce: $NA" "$H/?rest_route=/insightweb/v1/dashboard/count"
 # No setting lost: Save each group exactly as the screen shows it; nothing is written and the options stay the same.
-BEFORE=$(optmd5 aw_seo_settings insightweb_gdelt_on insightweb_tool_seeds)
+BEFORE=$(optmd5 aw_seo_settings aw_si_gdelt_on aw_si_tool_seeds)
 curl -s -b /tmp/cj-ci -H "X-WP-Nonce: $NA" "$H/?rest_route=/insightweb/v1/settings" > /tmp/iw-settings.json
 python3 - "$H/?rest_route=/insightweb/v1" "$NA" <<'PY' || FAIL=1
 import json, subprocess, sys
@@ -74,5 +74,5 @@ slugs = [g['slug'] for g in groups]
 print(('ok  ' if slugs == ['numbers', 'rising'] else 'FAIL') + ' settings groups: ' + ', '.join(slugs))
 sys.exit(1 if bad or slugs != ['numbers', 'rising'] else 0)
 PY
-same "InsightWeb Settings" "$BEFORE" "$(optmd5 aw_seo_settings insightweb_gdelt_on insightweb_tool_seeds)"
-if wp eval 'exit( count( array_intersect( array( "aw_seo_settings", "insightweb_gdelt_on", "insightweb_tool_seeds" ), kits_settings_transfer_options() ) ) === 3 ? 0 : 1 );'; then echo "ok   InsightWeb's settings are in the Kits export"; else echo "FAIL InsightWeb's settings missing from the Kits export"; FAIL=1; fi
+same "InsightWeb Settings" "$BEFORE" "$(optmd5 aw_seo_settings aw_si_gdelt_on aw_si_tool_seeds)"
+if wp eval 'exit( count( array_intersect( array( "aw_seo_settings", "aw_si_gdelt_on", "aw_si_tool_seeds" ), kits_settings_transfer_options() ) ) === 3 ? 0 : 1 );'; then echo "ok   InsightWeb's settings are in the Kits export"; else echo "FAIL InsightWeb's settings missing from the Kits export"; FAIL=1; fi

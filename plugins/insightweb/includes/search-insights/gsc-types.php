@@ -5,7 +5,7 @@
  * - Discover and Google News, daily at 07:15 IST: clicks and impressions per page for the last 3 days Search Console
  *   has (each day replaced). Rows in obs: src gsc-types (not gsc: the daily Search Console run
  *   replaces every gsc row of the days it reads), metric discover or gnews, period day, page = path.
- * - URL Inspection, daily from 07:40 IST: up to INSIGHTWEB_INSPECT_CAP pages a day (Google allows 2,000 a day per site),
+ * - URL Inspection, daily from 07:40 IST: up to AW_SI_INSPECT_CAP pages a day (Google allows 2,000 a day per site),
  *   never-checked pages first, then pages not indexed, then the oldest checks. A few calls per cron step, the next
  *   step five minutes later. A refused call (HTTP 403 or 429) stops it for the day. Rows in obs: src inspect, metric
  *   index, period state, d 2000-01-01 (one row per page, replaced at each check), value 1 indexed / 0 not, txt = Google's
@@ -18,17 +18,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const INSIGHTWEB_GSC_TYPES_CRON = 'insightweb_gsc_types';
-const INSIGHTWEB_INSPECT_CRON   = 'insightweb_inspect';
-const INSIGHTWEB_INSPECT_MORE   = 'insightweb_inspect_more';
-const INSIGHTWEB_INSPECT_QUEUE  = 'insightweb_inspect_queue';
-const INSIGHTWEB_INSPECT_CAP    = 2000; // Google's daily URL Inspection limit per site. Filter insightweb_inspect_cap lowers it.
-const INSIGHTWEB_INSPECT_BUDGET = 15;   // Seconds per cron step (12 Nov 2026: 25 left too little room under the host's 30-second PHP limit; the 11 Nov run died mid-step).
-const INSIGHTWEB_INSPECT_GAP    = 300;  // Seconds between cron steps (WP-Cron runs them only when the site has visits).
-const INSIGHTWEB_INSPECT_D      = '2000-01-01'; // The one fixed date of the index-state rows.
+const AW_SI_GSC_TYPES_CRON = 'aw_si_gsc_types';
+const AW_SI_INSPECT_CRON   = 'aw_si_inspect';
+const AW_SI_INSPECT_MORE   = 'aw_si_inspect_more';
+const AW_SI_INSPECT_QUEUE  = 'aw_si_inspect_queue';
+const AW_SI_INSPECT_CAP    = 2000; // Google's daily URL Inspection limit per site. Filter aw_si_inspect_cap lowers it.
+const AW_SI_INSPECT_BUDGET = 15;   // Seconds per cron step (12 Nov 2026: 25 left too little room under the host's 30-second PHP limit; the 11 Nov run died mid-step).
+const AW_SI_INSPECT_GAP    = 300;  // Seconds between cron steps (WP-Cron runs them only when the site has visits).
+const AW_SI_INSPECT_D      = '2000-01-01'; // The one fixed date of the index-state rows.
 
 add_filter(
-	'insightweb_sources',
+	'aw_si_sources',
 	function ( $s ) {
 		$s['gsc_types'] = array(
 			'label' => __( 'Search Console: Discover and Google News', 'insightweb' ),
@@ -41,20 +41,20 @@ add_filter(
 		return $s;
 	}
 );
-add_filter( 'insightweb_cron_hooks', fn( $h ) => array_merge( (array) $h, array( INSIGHTWEB_GSC_TYPES_CRON, INSIGHTWEB_INSPECT_CRON, INSIGHTWEB_INSPECT_MORE ) ) );
+add_filter( 'aw_si_cron_hooks', fn( $h ) => array_merge( (array) $h, array( AW_SI_GSC_TYPES_CRON, AW_SI_INSPECT_CRON, AW_SI_INSPECT_MORE ) ) );
 
 add_action(
 	'init',
 	function () {
-		if ( get_option( 'insightweb_off' ) ) {
+		if ( get_option( 'aw_si_off' ) ) {
 			return;
 		}
 		$tz = wp_timezone();
-		if ( ! wp_next_scheduled( INSIGHTWEB_GSC_TYPES_CRON ) ) {
-			wp_schedule_event( ( new DateTimeImmutable( 'tomorrow 07:15', $tz ) )->getTimestamp(), 'daily', INSIGHTWEB_GSC_TYPES_CRON );
+		if ( ! wp_next_scheduled( AW_SI_GSC_TYPES_CRON ) ) {
+			wp_schedule_event( ( new DateTimeImmutable( 'tomorrow 07:15', $tz ) )->getTimestamp(), 'daily', AW_SI_GSC_TYPES_CRON );
 		}
-		if ( ! wp_next_scheduled( INSIGHTWEB_INSPECT_CRON ) ) {
-			wp_schedule_event( ( new DateTimeImmutable( 'tomorrow 07:40', $tz ) )->getTimestamp(), 'daily', INSIGHTWEB_INSPECT_CRON );
+		if ( ! wp_next_scheduled( AW_SI_INSPECT_CRON ) ) {
+			wp_schedule_event( ( new DateTimeImmutable( 'tomorrow 07:40', $tz ) )->getTimestamp(), 'daily', AW_SI_INSPECT_CRON );
 		}
 	}
 );
@@ -65,15 +65,15 @@ add_action(
  * @param object $module Site Kit's Search Console module.
  * @return array{0: object, 1: string}|WP_Error [service, property].
  */
-function insightweb_gsc_service( $module ) {
+function aw_si_gsc_service( $module ) {
 	$cls = '\Google\Site_Kit_Dependencies\Google\Service\SearchConsole';
 	if ( ! class_exists( $cls ) || ! method_exists( $module, 'get_client' ) ) {
-		return new WP_Error( 'insightweb_gsc', __( 'This Site Kit version has no Search Console client to call.', 'insightweb' ) );
+		return new WP_Error( 'aw_si_gsc', __( 'This Site Kit version has no Search Console client to call.', 'insightweb' ) );
 	}
 	$settings = (array) get_option( 'googlesitekit_search-console_settings', array() );
 	$property = (string) ( $settings['propertyID'] ?? '' );
 	if ( '' === $property ) {
-		return new WP_Error( 'insightweb_gsc', __( 'Search Console is not connected in Site Kit.', 'insightweb' ) );
+		return new WP_Error( 'aw_si_gsc', __( 'Search Console is not connected in Site Kit.', 'insightweb' ) );
 	}
 	return array( new $cls( $module->get_client() ), $property );
 }
@@ -83,7 +83,7 @@ function insightweb_gsc_service( $module ) {
  *
  * @param Throwable $e The exception.
  */
-function insightweb_gsc_http_code( Throwable $e ): int {
+function aw_si_gsc_http_code( Throwable $e ): int {
 	$code = (int) $e->getCode();
 	return $code >= 100 && $code < 600 ? $code : 0;
 }
@@ -94,22 +94,22 @@ function insightweb_gsc_http_code( Throwable $e ): int {
  * @param bool $dry Read, do not write.
  * @return array What was read.
  */
-function insightweb_gsc_types_run( bool $dry = false ): array {
-	if ( get_option( 'insightweb_off' ) || ! insightweb_ready() ) {
+function aw_si_gsc_types_run( bool $dry = false ): array {
+	if ( get_option( 'aw_si_off' ) || ! aw_si_ready() ) {
 		return array( 'off' => true );
 	}
 	if ( ! $dry ) {
-		insightweb_run_start( 'gsc_types' );
+		aw_si_run_start( 'gsc_types' );
 	}
 	$tz   = wp_timezone();
 	$days = array();
 	for ( $i = 4; $i >= 2; $i-- ) { // Search Console's figures arrive about two days late.
 		$days[] = ( new DateTimeImmutable( 'today', $tz ) )->modify( "-{$i} days" )->format( 'Y-m-d' );
 	}
-	$out = insightweb_with_module(
+	$out = aw_si_with_module(
 		'search-console',
 		function ( $module ) use ( $days, $dry ) {
-			$svc = insightweb_gsc_service( $module );
+			$svc = aw_si_gsc_service( $module );
 			if ( is_wp_error( $svc ) ) {
 				return $svc;
 			}
@@ -134,11 +134,11 @@ function insightweb_gsc_types_run( bool $dry = false ): array {
 						$resp = $service->searchanalytics->query( $property, $req );
 					} catch ( Throwable $e ) {
 						/* translators: 1: Discover or Google News, 2: the problem. */
-						return new WP_Error( 'insightweb_gsc', sprintf( __( '%1$s could not be read: %2$s', 'insightweb' ), $type, wp_strip_all_tags( $e->getMessage() ) ) );
+						return new WP_Error( 'aw_si_gsc', sprintf( __( '%1$s could not be read: %2$s', 'insightweb' ), $type, wp_strip_all_tags( $e->getMessage() ) ) );
 					}
 					$rows = array();
 					foreach ( (array) $resp->getRows() as $row ) {
-						$path = insightweb_path( (string) ( $row->getKeys()[0] ?? '' ) );
+						$path = aw_si_path( (string) ( $row->getKeys()[0] ?? '' ) );
 						if ( '' !== $path ) {
 							$rows[ $path ] = array( (int) ( $rows[ $path ][0] ?? 0 ) + (int) $row->getClicks(), (int) ( $rows[ $path ][1] ?? 0 ) + (int) $row->getImpressions() ); // two addresses of one page add up
 						}
@@ -148,7 +148,7 @@ function insightweb_gsc_types_run( bool $dry = false ): array {
 					if ( $rows ) {
 						$rep['up_to'] = max( $rep['up_to'], $day );
 					}
-					$n = $dry ? 0 : insightweb_gsc_types_store( $metric, $day, $rows );
+					$n = $dry ? 0 : aw_si_gsc_types_store( $metric, $day, $rows );
 					if ( is_wp_error( $n ) ) {
 						return $n;
 					}
@@ -161,16 +161,16 @@ function insightweb_gsc_types_run( bool $dry = false ): array {
 		return is_wp_error( $out ) ? array( 'error' => $out->get_error_message() ) : $out;
 	}
 	if ( is_wp_error( $out ) ) {
-		insightweb_run_fail( 'gsc_types', $out->get_error_message() );
+		aw_si_run_fail( 'gsc_types', $out->get_error_message() );
 		return array( 'error' => $out->get_error_message() );
 	}
 	if ( '' === $out['up_to'] ) {
 		unset( $out['up_to'] ); // No Discover or News figures in those days: the run still counts as done.
 	}
-	insightweb_run_ok( 'gsc_types', $out );
+	aw_si_run_ok( 'gsc_types', $out );
 	return $out;
 }
-add_action( INSIGHTWEB_GSC_TYPES_CRON, fn() => insightweb_gsc_types_run() );
+add_action( AW_SI_GSC_TYPES_CRON, fn() => aw_si_gsc_types_run() );
 
 /**
  * One day of one search type: that day's rows are replaced.
@@ -180,12 +180,12 @@ add_action( INSIGHTWEB_GSC_TYPES_CRON, fn() => insightweb_gsc_types_run() );
  * @param array  $rows   path => [clicks, impressions].
  * @return int|WP_Error Rows written.
  */
-function insightweb_gsc_types_store( string $metric, string $day, array $rows ) {
+function aw_si_gsc_types_store( string $metric, string $day, array $rows ) {
 	$list = array();
 	foreach ( $rows as $path => $r ) {
 		$list[] = array( 0, (string) $path, '' === (string) $path ? '' : md5( (string) $path ), $metric, (int) $r[0], (int) $r[1], null );
 	}
-	return insightweb_obs_replace_day( 'gsc-types', $day, $list, 'day', array( $metric ), 'gsc' );
+	return aw_si_obs_replace_day( 'gsc-types', $day, $list, 'day', array( $metric ), 'gsc' );
 }
 
 /**
@@ -195,20 +195,20 @@ function insightweb_gsc_types_store( string $metric, string $day, array $rows ) 
  * @param int $days  Days.
  * @param int $limit Pages.
  */
-function insightweb_gsc_types_pages( int $days = 28, int $limit = 10 ): array {
+function aw_si_gsc_types_pages( int $days = 28, int $limit = 10 ): array {
 	global $wpdb;
-	if ( ! insightweb_ready() ) {
+	if ( ! aw_si_ready() ) {
 		return array();
 	}
-	$o     = insightweb_kw_table( 'obs' );
+	$o     = aw_si_table( 'obs' );
 	$since = ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( "-{$days} days" )->format( 'Y-m-d' );
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	return (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, SUM(IF(metric = 'discover', clicks, 0)) dc, SUM(IF(metric = 'discover', impr, 0)) di, SUM(IF(metric = 'gnews', clicks, 0)) nc, SUM(IF(metric = 'gnews', impr, 0)) ni FROM %i WHERE src = 'gsc-types' AND metric IN ('discover', 'gnews') AND period = 'day' AND d >= %s GROUP BY page ORDER BY SUM(impr) DESC LIMIT %d", $o, $since, $limit ) );
 }
 
 /** Overview box: Discover and Google News. */
-function insightweb_box_gsc_types(): void {
-	$rows = insightweb_gsc_types_pages();
+function aw_si_box_gsc_types(): void {
+	$rows = aw_si_gsc_types_pages();
 	if ( ! $rows ) {
 		echo '<p>' . esc_html__( 'No Discover or Google News figures yet (Search Console, daily at 07:15 IST). Google shows these only once a page has appeared there.', 'insightweb' ) . '</p>';
 		return;
@@ -223,8 +223,8 @@ function insightweb_box_gsc_types(): void {
 }
 
 /** The daily cap of URL Inspection calls. */
-function insightweb_inspect_cap(): int {
-	return max( 0, min( INSIGHTWEB_INSPECT_CAP, (int) apply_filters( 'insightweb_inspect_cap', INSIGHTWEB_INSPECT_CAP ) ) );
+function aw_si_inspect_cap(): int {
+	return max( 0, min( AW_SI_INSPECT_CAP, (int) apply_filters( 'aw_si_inspect_cap', AW_SI_INSPECT_CAP ) ) );
 }
 
 /**
@@ -234,7 +234,7 @@ function insightweb_inspect_cap(): int {
  * @param int|null $never Set to the number of published pages never inspected (all of them, not only today's).
  * @return string[] Paths.
  */
-function insightweb_inspect_todo( int $cap, ?int &$never = null ): array {
+function aw_si_inspect_todo( int $cap, ?int &$never = null ): array {
 	global $wpdb;
 	$types = array_values( array_diff( get_post_types( array( 'public' => true ) ), array( 'attachment' ) ) );
 	$ids   = get_posts(
@@ -250,14 +250,14 @@ function insightweb_inspect_todo( int $cap, ?int &$never = null ): array {
 	);
 	$paths = array( '/' => true );
 	foreach ( $ids as $id ) {
-		$p = insightweb_object_path( 'post', (int) $id );
+		$p = aw_si_object_path( 'post', (int) $id );
 		if ( '' !== $p ) {
 			$paths[ $p ] = true;
 		}
 	}
-	$o = insightweb_kw_table( 'obs' );
+	$o = aw_si_table( 'obs' );
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
-	$seen  = (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, value, fetched FROM %i WHERE src = 'inspect' AND metric = 'index' AND period = 'state' AND d = %s ORDER BY value ASC, fetched ASC", $o, INSIGHTWEB_INSPECT_D ) );
+	$seen  = (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, value, fetched FROM %i WHERE src = 'inspect' AND metric = 'index' AND period = 'state' AND d = %s ORDER BY value ASC, fetched ASC", $o, AW_SI_INSPECT_D ) );
 	$known = array();
 	foreach ( $seen as $r ) {
 		$known[ $r->page ] = $r;
@@ -274,24 +274,24 @@ function insightweb_inspect_todo( int $cap, ?int &$never = null ): array {
 }
 
 /** Start today's URL Inspection queue. */
-function insightweb_inspect_start(): void {
-	if ( get_option( 'insightweb_off' ) || ! insightweb_ready() ) {
+function aw_si_inspect_start(): void {
+	if ( get_option( 'aw_si_off' ) || ! aw_si_ready() ) {
 		return;
 	}
-	$q = get_option( INSIGHTWEB_INSPECT_QUEUE );
+	$q = get_option( AW_SI_INSPECT_QUEUE );
 	if ( is_array( $q ) && ( $q['d'] ?? '' ) === wp_date( 'Y-m-d' ) ) {
-		insightweb_inspect_step(); // Today's queue already started.
+		aw_si_inspect_step(); // Today's queue already started.
 		return;
 	}
 	if ( is_array( $q ) && ! empty( $q['todo'] ) && ! empty( $q['done'] ) && '' === ( $q['refused'] ?? '' ) ) {
 		// Yesterday's queue did not get through every page: log what it did, so the run is not left open for good.
 		// The pages left are still first in line (never checked, then not indexed).
-		insightweb_run_ok( 'inspect', insightweb_inspect_info( $q ) );
+		aw_si_run_ok( 'inspect', aw_si_inspect_info( $q ) );
 	}
 	$never = 0;
-	$todo  = insightweb_inspect_todo( insightweb_inspect_cap(), $never );
+	$todo  = aw_si_inspect_todo( aw_si_inspect_cap(), $never );
 	update_option(
-		INSIGHTWEB_INSPECT_QUEUE,
+		AW_SI_INSPECT_QUEUE,
 		array(
 			'd'       => wp_date( 'Y-m-d' ),
 			'todo'    => $todo,
@@ -303,35 +303,35 @@ function insightweb_inspect_start(): void {
 		),
 		false
 	);
-	insightweb_run_start( 'inspect' );
-	insightweb_inspect_step();
+	aw_si_run_start( 'inspect' );
+	aw_si_inspect_step();
 }
-add_action( INSIGHTWEB_INSPECT_CRON, 'insightweb_inspect_start' );
+add_action( AW_SI_INSPECT_CRON, 'aw_si_inspect_start' );
 
 /**
- * Work through today's queue for up to INSIGHTWEB_INSPECT_BUDGET seconds; book the next step while pages are left.
+ * Work through today's queue for up to AW_SI_INSPECT_BUDGET seconds; book the next step while pages are left.
  *
  * @return array The queue.
  */
-function insightweb_inspect_step(): array {
-	$q = get_option( INSIGHTWEB_INSPECT_QUEUE );
-	if ( ! is_array( $q ) || empty( $q['todo'] ) || '' !== ( $q['refused'] ?? '' ) || get_option( 'insightweb_off' ) || ! insightweb_ready() ) {
+function aw_si_inspect_step(): array {
+	$q = get_option( AW_SI_INSPECT_QUEUE );
+	if ( ! is_array( $q ) || empty( $q['todo'] ) || '' !== ( $q['refused'] ?? '' ) || get_option( 'aw_si_off' ) || ! aw_si_ready() ) {
 		return is_array( $q ) ? $q : array();
 	}
-	if ( ! wp_next_scheduled( INSIGHTWEB_INSPECT_MORE ) ) {
-		wp_schedule_single_event( time() + INSIGHTWEB_INSPECT_GAP, INSIGHTWEB_INSPECT_MORE ); // Booked first, as in psi.php.
+	if ( ! wp_next_scheduled( AW_SI_INSPECT_MORE ) ) {
+		wp_schedule_single_event( time() + AW_SI_INSPECT_GAP, AW_SI_INSPECT_MORE ); // Booked first, as in psi.php.
 	}
-	$res = insightweb_with_module(
+	$res = aw_si_with_module(
 		'search-console',
 		function ( $module ) use ( &$q ) {
-			$svc = insightweb_gsc_service( $module );
+			$svc = aw_si_gsc_service( $module );
 			if ( is_wp_error( $svc ) ) {
 				return $svc;
 			}
 			list( $service, $property ) = $svc;
 			$req_cls = '\Google\Site_Kit_Dependencies\Google\Service\SearchConsole\InspectUrlIndexRequest';
 			$start   = microtime( true );
-			while ( $q['todo'] && microtime( true ) - $start < INSIGHTWEB_INSPECT_BUDGET ) {
+			while ( $q['todo'] && microtime( true ) - $start < AW_SI_INSPECT_BUDGET ) {
 				$path = (string) $q['todo'][0];
 				$req  = new $req_cls();
 				$req->setInspectionUrl( home_url( $path ) );
@@ -339,17 +339,17 @@ function insightweb_inspect_step(): array {
 				try {
 					$resp = $service->urlInspection_index->inspect( $req ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- Google's client property.
 				} catch ( Throwable $e ) {
-					$code = insightweb_gsc_http_code( $e );
+					$code = aw_si_gsc_http_code( $e );
 					if ( in_array( $code, array( 403, 429 ), true ) ) {
 						/* translators: %d: HTTP status. */
 						$q['refused'] = sprintf( __( 'Google refused URL Inspection (HTTP %d), so it stops for today.', 'insightweb' ), $code );
-						$q['quota']   = true; // only these two codes are Google's quota; other errors say so differently (insightweb_inspect_info())
+						$q['quota']   = true; // only these two codes are Google's quota; other errors say so differently (aw_si_inspect_info())
 						break;
 					}
 					array_shift( $q['todo'] );
 					$q['errors'][] = $path . ': ' . wp_html_excerpt( wp_strip_all_tags( $e->getMessage() ), 160, '…' );
 					$q['errors']   = array_slice( (array) $q['errors'], -20 );
-					update_option( INSIGHTWEB_INSPECT_QUEUE, $q, false ); // Saved after every page, so a step cut short loses nothing.
+					update_option( AW_SI_INSPECT_QUEUE, $q, false ); // Saved after every page, so a step cut short loses nothing.
 					continue;
 				}
 				array_shift( $q['todo'] );
@@ -357,13 +357,13 @@ function insightweb_inspect_step(): array {
 				$verdict = $st ? (string) $st->getVerdict() : '';
 				$state   = $st ? (string) $st->getCoverageState() : '';
 				$indexed = 'PASS' === $verdict;
-				insightweb_obs_put(
+				aw_si_obs_put(
 					0,
 					$path,
 					'inspect',
 					'index',
 					'state',
-					INSIGHTWEB_INSPECT_D,
+					AW_SI_INSPECT_D,
 					array(
 						'value' => $indexed ? 1.0 : 0.0,
 						'txt'   => '' !== $state ? $state : $verdict,
@@ -371,8 +371,8 @@ function insightweb_inspect_step(): array {
 				);
 				++$q['done'];
 				$q['indexed'] += $indexed ? 1 : 0;
-				update_option( INSIGHTWEB_INSPECT_QUEUE, $q, false ); // Saved after every page, so a step cut short loses nothing.
-				insightweb_run_beat( 'inspect' );
+				update_option( AW_SI_INSPECT_QUEUE, $q, false ); // Saved after every page, so a step cut short loses nothing.
+				aw_si_run_beat( 'inspect' );
 			}
 			return true;
 		}
@@ -381,31 +381,31 @@ function insightweb_inspect_step(): array {
 		$q['refused'] = $res->get_error_message();
 	}
 	$q['errors'] = array_slice( (array) $q['errors'], -20 );
-	update_option( INSIGHTWEB_INSPECT_QUEUE, $q, false );
+	update_option( AW_SI_INSPECT_QUEUE, $q, false );
 	if ( $q['todo'] && '' === $q['refused'] ) {
-		insightweb_run_beat( 'inspect' );
+		aw_si_run_beat( 'inspect' );
 		return $q;
 	}
-	wp_clear_scheduled_hook( INSIGHTWEB_INSPECT_MORE );
+	wp_clear_scheduled_hook( AW_SI_INSPECT_MORE );
 	if ( $q['done'] ) {
-		insightweb_run_ok( 'inspect', insightweb_inspect_info( $q ) );
+		aw_si_run_ok( 'inspect', aw_si_inspect_info( $q ) );
 	} else {
 		/* translators: %s: the problem. */
-		insightweb_run_fail( 'inspect', sprintf( __( 'No URL Inspection call worked: %s', 'insightweb' ), '' !== $q['refused'] ? $q['refused'] : (string) ( $q['errors'][0] ?? '' ) ) );
+		aw_si_run_fail( 'inspect', sprintf( __( 'No URL Inspection call worked: %s', 'insightweb' ), '' !== $q['refused'] ? $q['refused'] : (string) ( $q['errors'][0] ?? '' ) ) );
 	}
 	return $q;
 }
-add_action( INSIGHTWEB_INSPECT_MORE, 'insightweb_inspect_step' );
+add_action( AW_SI_INSPECT_MORE, 'aw_si_inspect_step' );
 
 /**
  * A day's URL Inspection queue as the run log's info: pages done and indexed and, when pages were left, why they were
  * not reached (Google's refusal or quota, else the time budget of the day's steps) and how many pages were never
- * inspected, for the estimate of when every page has been (insightweb_inspect_eta()). 12 Nov 2026: the bare "N pages were
+ * inspected, for the estimate of when every page has been (aw_si_inspect_eta()). 12 Nov 2026: the bare "N pages were
  * not reached" line gave no reason and no end date.
  *
- * @param array $q The queue (INSIGHTWEB_INSPECT_QUEUE).
+ * @param array $q The queue (AW_SI_INSPECT_QUEUE).
  */
-function insightweb_inspect_info( array $q ): array {
+function aw_si_inspect_info( array $q ): array {
 	$done    = (int) ( $q['done'] ?? 0 );
 	$left    = count( (array) ( $q['todo'] ?? array() ) );
 	$refused = (string) ( $q['refused'] ?? '' );
@@ -421,7 +421,7 @@ function insightweb_inspect_info( array $q ): array {
 			$why = sprintf( __( '%s not reached that day: Search Console could not be reached (the reason follows), so the queue stopped.', 'insightweb' ), $pages );
 		} else {
 			/* translators: 1: "3 pages", 2: seconds of calls per step, 3: minutes between steps, 4: Google's daily limit. */
-			$why = sprintf( __( '%1$s not reached that day: the time budget ran out (%2$s s of calls per step, a step every %3$s min when the site has visits), not Google\'s %4$s-a-day quota.', 'insightweb' ), $pages, number_format_i18n( INSIGHTWEB_INSPECT_BUDGET ), number_format_i18n( INSIGHTWEB_INSPECT_GAP / MINUTE_IN_SECONDS ), number_format_i18n( INSIGHTWEB_INSPECT_CAP ) );
+			$why = sprintf( __( '%1$s not reached that day: the time budget ran out (%2$s s of calls per step, a step every %3$s min when the site has visits), not Google\'s %4$s-a-day quota.', 'insightweb' ), $pages, number_format_i18n( AW_SI_INSPECT_BUDGET ), number_format_i18n( AW_SI_INSPECT_GAP / MINUTE_IN_SECONDS ), number_format_i18n( AW_SI_INSPECT_CAP ) );
 		}
 		array_unshift( $warn, $why );
 	}
@@ -446,7 +446,7 @@ function insightweb_inspect_info( array $q ): array {
  * @param string $day        That day (Y-m-d).
  * @return string A short phrase, or '' when there is nothing to estimate.
  */
-function insightweb_inspect_eta( int $never_left, int $per_day, string $day ): string {
+function aw_si_inspect_eta( int $never_left, int $per_day, string $day ): string {
 	if ( $never_left <= 0 ) {
 		return __( 'every page has been inspected at least once; the queue now checks not-indexed pages first, then the oldest checks', 'insightweb' );
 	}
@@ -464,8 +464,8 @@ function insightweb_inspect_eta( int $never_left, int $per_day, string $day ): s
  * indexed, latest check (Y-m-d H:i:s or '')]. The Overview's "pages we inspected" line and the Pages tab's Not indexed
  * view use this one rule (12 Nov 2026).
  */
-function insightweb_inspect_summary(): array {
-	$states = insightweb_index_states();
+function aw_si_inspect_summary(): array {
+	$states = aw_si_index_states();
 	$yes    = count( array_filter( $states, fn( $s ) => $s[0] ) );
 	$latest = $states ? (string) max( array_map( fn( $s ) => (string) $s[2], $states ) ) : '';
 	return array( count( $states ), $yes, count( $states ) - $yes, $latest );
@@ -475,9 +475,9 @@ function insightweb_inspect_summary(): array {
  * Search Console's Page indexing totals as last entered: [indexed, not indexed, report day, whether "not indexed" is
  * the sum of the reasons entered (no total typed)], or null when no indexed total is entered.
  *
- * @param array $c insightweb_coverage().
+ * @param array $c aw_si_coverage().
  */
-function insightweb_coverage_totals( array $c ): ?array {
+function aw_si_coverage_totals( array $c ): ?array {
 	if ( ! isset( $c['indexed'] ) ) {
 		return null;
 	}
@@ -485,7 +485,7 @@ function insightweb_coverage_totals( array $c ): ?array {
 		return array( (int) $c['indexed'], (int) $c['not_indexed'], (string) ( $c['day'] ?? '' ), false );
 	}
 	$sum = 0;
-	foreach ( array_keys( insightweb_coverage_fields() ) as $k ) {
+	foreach ( array_keys( aw_si_coverage_fields() ) as $k ) {
 		$sum += in_array( $k, array( 'indexed', 'not_indexed' ), true ) ? 0 : (int) ( $c[ $k ] ?? 0 );
 	}
 	return array( (int) $c['indexed'], $sum, (string) ( $c['day'] ?? '' ), true );
@@ -496,19 +496,19 @@ function insightweb_coverage_totals( array $c ): ?array {
  *
  * @return array<string, array{0: bool, 1: string, 2: string}>
  */
-function insightweb_index_states(): array {
+function aw_si_index_states(): array {
 	static $cache = null;
 	if ( null !== $cache ) {
 		return $cache;
 	}
 	global $wpdb;
 	$cache = array();
-	if ( ! insightweb_ready() ) {
+	if ( ! aw_si_ready() ) {
 		return $cache;
 	}
-	$o = insightweb_kw_table( 'obs' );
+	$o = aw_si_table( 'obs' );
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
-	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, value, txt, fetched FROM %i WHERE src = 'inspect' AND metric = 'index' AND period = 'state' AND d = %s", $o, INSIGHTWEB_INSPECT_D ) ) as $r ) {
+	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, value, txt, fetched FROM %i WHERE src = 'inspect' AND metric = 'index' AND period = 'state' AND d = %s", $o, AW_SI_INSPECT_D ) ) as $r ) {
 		$cache[ $r->page ] = array( (float) $r->value > 0, (string) $r->txt, (string) $r->fetched );
 	}
 	return $cache;
@@ -516,10 +516,10 @@ function insightweb_index_states(): array {
 
 /* ---------- Search Console coverage totals (entered by hand) and the Request indexing list (owner, 12 Nov 2026) ---------- */
 
-const INSIGHTWEB_COVERAGE_OPTION = 'insightweb_gsc_coverage';
+const AW_SI_COVERAGE_OPTION = 'aw_si_gsc_coverage';
 
 /** The coverage rows Search Console's Page indexing report shows: key => label. */
-function insightweb_coverage_fields(): array {
+function aw_si_coverage_fields(): array {
 	return array(
 		'indexed'     => __( 'Indexed', 'insightweb' ),
 		'not_indexed' => __( 'Not indexed (the total at the top of the report)', 'insightweb' ),
@@ -531,18 +531,18 @@ function insightweb_coverage_fields(): array {
 }
 
 /** The totals last entered: field => count, plus 'day' (Y-m-d, the report's date). */
-function insightweb_coverage(): array {
-	return (array) get_option( INSIGHTWEB_COVERAGE_OPTION, array() );
+function aw_si_coverage(): array {
+	return (array) get_option( AW_SI_COVERAGE_OPTION, array() );
 }
 
 add_action(
-	'admin_post_insightweb_coverage',
+	'admin_post_aw_si_coverage',
 	function () {
-		if ( ! current_user_can( insightweb_cap() ) || ! check_admin_referer( 'insightweb_coverage' ) ) {
+		if ( ! current_user_can( aw_si_cap() ) || ! check_admin_referer( 'aw_si_coverage' ) ) {
 			wp_die( esc_html__( 'Not allowed.', 'insightweb' ), 403 );
 		}
 		$out = array();
-		foreach ( array_keys( insightweb_coverage_fields() ) as $k ) {
+		foreach ( array_keys( aw_si_coverage_fields() ) as $k ) {
 			$v = isset( $_POST[ $k ] ) ? str_replace( array( ',', ' ' ), '', sanitize_text_field( wp_unslash( $_POST[ $k ] ) ) ) : '';
 			if ( '' !== $v && ctype_digit( $v ) ) {
 				$out[ $k ] = (int) $v;
@@ -550,20 +550,20 @@ add_action(
 		}
 		$day        = isset( $_POST['day'] ) ? sanitize_text_field( wp_unslash( $_POST['day'] ) ) : '';
 		$out['day'] = preg_match( '/^\d{4}-\d{2}-\d{2}$/', $day ) ? $day : wp_date( 'Y-m-d' );
-		update_option( INSIGHTWEB_COVERAGE_OPTION, $out, false );
-		wp_safe_redirect( wp_get_referer() ? wp_get_referer() : insightweb_url( '' ) );
+		update_option( AW_SI_COVERAGE_OPTION, $out, false );
+		wp_safe_redirect( wp_get_referer() ? wp_get_referer() : aw_si_url( '' ) );
 		exit;
 	}
 );
 
 /** The coverage totals as a table, with the form to enter them. */
-function insightweb_coverage_html(): string {
-	$c   = insightweb_coverage();
+function aw_si_coverage_html(): string {
+	$c   = aw_si_coverage();
 	$out = '<h3>' . esc_html__( 'Search Console Page indexing (the whole site, entered by hand)', 'insightweb' ) . '</h3>';
 	$out .= '<p class="description">' . ( ! empty( $c['day'] ) ? esc_html( sprintf( /* translators: %s: date. */ __( 'From Search Console → Pages, %s.', 'insightweb' ), wp_date( 'j M Y', strtotime( $c['day'] . ' 12:00' ) ) ) ) : esc_html__( 'Not entered yet: copy the figures from Search Console → Pages.', 'insightweb' ) ) . '</p>';
-	$out .= '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="insightweb_coverage">' . wp_nonce_field( 'insightweb_coverage', '_wpnonce', true, false );
+	$out .= '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_si_coverage">' . wp_nonce_field( 'aw_si_coverage', '_wpnonce', true, false );
 	$out .= '<table class="widefat striped"><tbody>';
-	foreach ( insightweb_coverage_fields() as $k => $label ) {
+	foreach ( aw_si_coverage_fields() as $k => $label ) {
 		$out .= '<tr><th scope="row"><label for="aw-si-cov-' . esc_attr( $k ) . '">' . esc_html( $label ) . '</label></th><td><input type="text" inputmode="numeric" class="small-text" id="aw-si-cov-' . esc_attr( $k ) . '" name="' . esc_attr( $k ) . '" value="' . esc_attr( isset( $c[ $k ] ) ? (string) $c[ $k ] : '' ) . '"></td></tr>';
 	}
 	$out .= '<tr><th scope="row"><label for="aw-si-cov-day">' . esc_html__( 'Report date', 'insightweb' ) . '</label></th><td><input type="date" id="aw-si-cov-day" name="day" value="' . esc_attr( (string) ( $c['day'] ?? '' ) ) . '"></td></tr>';
@@ -573,15 +573,15 @@ function insightweb_coverage_html(): string {
 
 // The same form on the Settings tab (12 Nov 2026), where the shell keeps forms; the Dashboard's boxes show text only.
 add_action(
-	'insightweb_settings_rows',
+	'aw_si_settings_rows',
 	function () {
-		echo '<tr><th scope="row">' . esc_html__( 'Search Console Page indexing', 'insightweb' ) . '</th><td>' . insightweb_coverage_html() . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in insightweb_coverage_html().
+		echo '<tr><th scope="row">' . esc_html__( 'Search Console Page indexing', 'insightweb' ) . '</th><td>' . aw_si_coverage_html() . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in aw_si_coverage_html().
 	},
 	5
 );
 
 /** Type order for the Request indexing list: guides, Library, campaigns, then the rest, listings last. */
-function insightweb_request_type_rank( int $id ): int {
+function aw_si_request_type_rank( int $id ): int {
 	$rank = array( 'post' => 0, 'aw_legal' => 1, 'aw_campaign' => 2, 'page' => 3, 'aw_news' => 4, 'aw_opportunity' => 5, 'aw_listing' => 9 );
 	return $id ? ( $rank[ (string) get_post_type( $id ) ] ?? 6 ) : 7;
 }
@@ -589,32 +589,32 @@ function insightweb_request_type_rank( int $id ): int {
 /**
  * The highest-value pages URL Inspection found not indexed, for asking Google by hand (Search Console → URL
  * Inspection → Request indexing): no internal link in first (Rank Math's link counter, links in the text of other
- * items), then the most Search Console impressions in 28 days, then the type (insightweb_request_type_rank()). Read only.
+ * items), then the most Search Console impressions in 28 days, then the type (aw_si_request_type_rank()). Read only.
  *
  * @param int $n How many.
  * @return array<int, array{path: string, id: int, links_in: int|null, impr: int, reason: string}>
  */
-function insightweb_request_list( int $n = 10 ): array {
-	$key    = 'insightweb_request_' . $n . '_' . gmdate( 'Ymd' ); // one list a day: each row looks up its page (url_to_postid)
+function aw_si_request_list( int $n = 10 ): array {
+	$key    = 'aw_si_request_' . $n . '_' . gmdate( 'Ymd' ); // one list a day: each row looks up its page (url_to_postid)
 	$cached = get_transient( $key );
 	if ( is_array( $cached ) ) {
 		return $cached;
 	}
-	$list = insightweb_request_build( $n );
+	$list = aw_si_request_build( $n );
 	set_transient( $key, $list, DAY_IN_SECONDS );
 	return $list;
 }
 
 /**
- * Works out the Request indexing list (insightweb_request_list(), which keeps it for the day).
+ * Works out the Request indexing list (aw_si_request_list(), which keeps it for the day).
  *
  * @param int $n How many.
  * @return array[]
  */
-function insightweb_request_build( int $n ): array {
+function aw_si_request_build( int $n ): array {
 	global $wpdb;
 	$rows = array();
-	foreach ( insightweb_index_states() as $path => $st ) {
+	foreach ( aw_si_index_states() as $path => $st ) {
 		if ( ! $st[0] && '/' === substr( (string) $path, 0, 1 ) ) {
 			$rows[ $path ] = array( 'path' => (string) $path, 'id' => (int) url_to_postid( home_url( $path ) ), 'links_in' => null, 'impr' => 0, 'reason' => (string) $st[1] );
 		}
@@ -635,7 +635,7 @@ function insightweb_request_build( int $n ): array {
 			$rows[ $p ]['links_in'] = $r['id'] ? ( $by[ $r['id'] ] ?? 0 ) : null;
 		}
 	}
-	foreach ( insightweb_page_metrics( array(), 28 ) as $page => $m ) {
+	foreach ( aw_si_page_metrics( array(), 28 ) as $page => $m ) {
 		if ( isset( $rows[ $page ] ) ) {
 			$rows[ $page ]['impr'] = (int) ( $m['impr'] ?? 0 );
 		}
@@ -643,14 +643,14 @@ function insightweb_request_build( int $n ): array {
 	$rows = array_values( $rows );
 	usort(
 		$rows,
-		fn( $a, $b ) => array( 0 === $a['links_in'] ? 0 : 1, -$a['impr'], insightweb_request_type_rank( $a['id'] ), $a['path'] ) <=> array( 0 === $b['links_in'] ? 0 : 1, -$b['impr'], insightweb_request_type_rank( $b['id'] ), $b['path'] )
+		fn( $a, $b ) => array( 0 === $a['links_in'] ? 0 : 1, -$a['impr'], aw_si_request_type_rank( $a['id'] ), $a['path'] ) <=> array( 0 === $b['links_in'] ? 0 : 1, -$b['impr'], aw_si_request_type_rank( $b['id'] ), $b['path'] )
 	);
 	return array_slice( $rows, 0, $n );
 }
 
 /** Overview box: today's Request indexing list. */
-function insightweb_box_request(): void {
-	$rows = insightweb_request_list( 10 );
+function aw_si_box_request(): void {
+	$rows = aw_si_request_list( 10 );
 	if ( ! $rows ) {
 		echo '<p>' . esc_html__( 'Nothing to ask for: URL Inspection has found no page that is not indexed.', 'insightweb' ) . '</p>';
 		return;
@@ -670,26 +670,26 @@ function insightweb_box_request(): void {
  * @param array $info The inspect run's info.
  * @return string[]
  */
-function insightweb_inspect_queue_lines( array $info ): array {
+function aw_si_inspect_queue_lines( array $info ): array {
 	$out = array();
 	if ( ! empty( $info['left'] ) ) {
-		$out[] = (string) ( (array) ( $info['warnings'] ?? array() ) )[0]; // insightweb_inspect_info() puts the not-reached line first
+		$out[] = (string) ( (array) ( $info['warnings'] ?? array() ) )[0]; // aw_si_inspect_info() puts the not-reached line first
 	}
-	$out[] = insightweb_inspect_info_eta( $info );
+	$out[] = aw_si_inspect_info_eta( $info );
 	return array_values( array_filter( $out ) );
 }
 
 /**
- * The estimate of insightweb_inspect_eta() from an inspect run's info, or '' when the run kept no count of pages never
+ * The estimate of aw_si_inspect_eta() from an inspect run's info, or '' when the run kept no count of pages never
  * inspected (runs before 12 Nov 2026).
  *
- * @param array $info The inspect run's info (insightweb_inspect_info()).
+ * @param array $info The inspect run's info (aw_si_inspect_info()).
  */
-function insightweb_inspect_info_eta( array $info ): string {
+function aw_si_inspect_info_eta( array $info ): string {
 	if ( ! isset( $info['never_left'] ) ) {
 		return '';
 	}
-	return insightweb_inspect_eta( (int) $info['never_left'], (int) ( $info['rows'] ?? 0 ), (string) ( $info['up_to'] ?? '' ) );
+	return aw_si_inspect_eta( (int) $info['never_left'], (int) ( $info['rows'] ?? 0 ), (string) ( $info['up_to'] ?? '' ) );
 }
 
 /**
@@ -697,8 +697,8 @@ function insightweb_inspect_info_eta( array $info ): string {
  * totals with the day they were read; then URL Inspection's figures, labelled as the pages we inspected, each by its
  * latest result (the Pages tab's Not indexed view counts the same pages); the queue's state; Google's reasons.
  */
-function insightweb_box_index(): void {
-	$tot = insightweb_coverage_totals( insightweb_coverage() );
+function aw_si_box_index(): void {
+	$tot = aw_si_coverage_totals( aw_si_coverage() );
 	if ( $tot ) {
 		$day = '' !== $tot[2] ? wp_date( 'j M Y', (int) strtotime( $tot[2] . ' 12:00:00' ) ) : __( 'date not entered', 'insightweb' );
 		$msg = $tot[3]
@@ -711,19 +711,19 @@ function insightweb_box_index(): void {
 	} else {
 		echo '<p><strong>' . esc_html__( 'Search Console Page indexing totals are not entered yet, so there is no whole-site figure: copy them from Search Console → Pages (Settings tab, or the form below). The figures here are only the pages we inspected.', 'insightweb' ) . '</strong></p>';
 	}
-	$states = insightweb_index_states();
+	$states = aw_si_index_states();
 	if ( ! $states ) {
 		echo '<p>' . esc_html__( 'No pages inspected yet (URL Inspection, daily from 07:40 IST, up to 2,000 pages a day).', 'insightweb' ) . '</p>';
-		echo insightweb_coverage_html(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in insightweb_coverage_html().
+		echo aw_si_coverage_html(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in aw_si_coverage_html().
 		return;
 	}
-	list( $all, $yes, $not, $latest ) = insightweb_inspect_summary();
+	list( $all, $yes, $not, $latest ) = aw_si_inspect_summary();
 	echo '<h3>' . esc_html__( 'URL Inspection: pages we inspected, latest result', 'insightweb' ) . '</h3>';
 	/* translators: 1: pages inspected, 2: indexed, 3: not indexed, 4: date of the latest check. */
 	echo '<p>' . esc_html( sprintf( __( 'Pages we inspected, latest result: %1$s pages, %2$s indexed, %3$s not indexed (latest check %4$s).', 'insightweb' ), number_format_i18n( $all ), number_format_i18n( $yes ), number_format_i18n( $not ), '' !== $latest ? mysql2date( 'j M Y', $latest ) : '–' ) ) . '</p>';
 	/* translators: %s: pages inspected a day at most. */
-	echo '<p class="description">' . esc_html( sprintf( __( 'Each page counts once, by its latest check (up to %s a day, never-checked and not-indexed pages first), so these figures lean to pages that are not indexed and are not the whole site.', 'insightweb' ), number_format_i18n( INSIGHTWEB_INSPECT_CAP ) ) ) . '</p>';
-	$queue = insightweb_inspect_queue_lines( (array) ( insightweb_runs()['inspect']['info'] ?? array() ) );
+	echo '<p class="description">' . esc_html( sprintf( __( 'Each page counts once, by its latest check (up to %s a day, never-checked and not-indexed pages first), so these figures lean to pages that are not indexed and are not the whole site.', 'insightweb' ), number_format_i18n( AW_SI_INSPECT_CAP ) ) ) . '</p>';
+	$queue = aw_si_inspect_queue_lines( (array) ( aw_si_runs()['inspect']['info'] ?? array() ) );
 	if ( $queue ) {
 		echo '<p class="description">' . esc_html( implode( ' ', array_map( fn( $l ) => rtrim( ucfirst( $l ), '.' ) . '.', $queue ) ) ) . '</p>';
 	}
@@ -742,8 +742,8 @@ function insightweb_box_index(): void {
 		}
 		echo '</tbody></table>';
 	}
-	if ( isset( insightweb_extra_tabs()['pages'] ) ) {
+	if ( isset( aw_si_extra_tabs()['pages'] ) ) {
 		echo '<p class="description">' . esc_html__( 'Each page\'s state is on the Pages tab (Google index column); its "Not indexed (URL Inspection)" view counts the same pages as the not-indexed figure above.', 'insightweb' ) . '</p>';
 	}
-	echo insightweb_coverage_html(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in insightweb_coverage_html().
+	echo aw_si_coverage_html(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in aw_si_coverage_html().
 }

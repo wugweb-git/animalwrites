@@ -12,14 +12,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const INSIGHTWEB_ALERTS_CRON = 'insightweb_alerts';
-const INSIGHTWEB_ALERTS_KEYS = array( 'AW_GOOGLE_ALERTS_FEED_1', 'AW_GOOGLE_ALERTS_FEED_2' );
+const AW_SI_ALERTS_CRON = 'aw_si_alerts';
+const AW_SI_ALERTS_KEYS = array( 'AW_GOOGLE_ALERTS_FEED_1', 'AW_GOOGLE_ALERTS_FEED_2' );
 
 add_filter(
 	'aw_keys',
 	function ( $keys ) {
 		$by = __( 'Search Insights', 'insightweb' );
-		foreach ( INSIGHTWEB_ALERTS_KEYS as $i => $name ) {
+		foreach ( AW_SI_ALERTS_KEYS as $i => $name ) {
 			/* translators: %d: 1 or 2. */
 			$keys[ $name ] = array( sprintf( __( 'Google Alerts feed %d (RSS address)', 'insightweb' ), $i + 1 ), __( 'google.com/alerts → create an alert → Show options → Deliver to: RSS feed → copy the feed address (https://www.google.com/alerts/feeds/…).', 'insightweb' ), $by );
 		}
@@ -28,10 +28,10 @@ add_filter(
 );
 
 /** The feed addresses that are set and look like Google Alerts feeds. */
-function insightweb_alerts_feeds(): array {
+function aw_si_alerts_feeds(): array {
 	$out = array();
-	foreach ( INSIGHTWEB_ALERTS_KEYS as $name ) {
-		$url = trim( insightweb_key( $name ) );
+	foreach ( AW_SI_ALERTS_KEYS as $name ) {
+		$url = trim( aw_si_key( $name ) );
 		if ( preg_match( '#^https://www\.google\.[a-z.]+/alerts/feeds/#', $url ) ) {
 			$out[] = $url;
 		}
@@ -40,9 +40,9 @@ function insightweb_alerts_feeds(): array {
 }
 
 add_filter(
-	'insightweb_sources',
+	'aw_si_sources',
 	function ( $s ) {
-		if ( insightweb_alerts_feeds() ) {
+		if ( aw_si_alerts_feeds() ) {
 			$s['alerts'] = array(
 				'label' => __( 'Google Alerts (mentions)', 'insightweb' ),
 				'every' => DAY_IN_SECONDS,
@@ -51,17 +51,17 @@ add_filter(
 		return $s;
 	}
 );
-add_filter( 'insightweb_cron_hooks', fn( $h ) => array_merge( (array) $h, array( INSIGHTWEB_ALERTS_CRON ) ) );
+add_filter( 'aw_si_cron_hooks', fn( $h ) => array_merge( (array) $h, array( AW_SI_ALERTS_CRON ) ) );
 add_filter(
-	'insightweb_link_types',
+	'aw_si_link_types',
 	fn( $t ) => (array) $t + array( 'mention' => __( 'Mention', 'insightweb' ) )
 );
 
 add_action(
 	'init',
 	function () {
-		if ( ! get_option( 'insightweb_off' ) && ! wp_next_scheduled( INSIGHTWEB_ALERTS_CRON ) ) {
-			wp_schedule_event( ( new DateTimeImmutable( 'tomorrow 08:10', wp_timezone() ) )->getTimestamp(), 'daily', INSIGHTWEB_ALERTS_CRON );
+		if ( ! get_option( 'aw_si_off' ) && ! wp_next_scheduled( AW_SI_ALERTS_CRON ) ) {
+			wp_schedule_event( ( new DateTimeImmutable( 'tomorrow 08:10', wp_timezone() ) )->getTimestamp(), 'daily', AW_SI_ALERTS_CRON );
 		}
 	}
 );
@@ -71,7 +71,7 @@ add_action(
  *
  * @param string $link Link from the feed.
  */
-function insightweb_alerts_target( string $link ): string {
+function aw_si_alerts_target( string $link ): string {
 	$q = array();
 	wp_parse_str( (string) wp_parse_url( $link, PHP_URL_QUERY ), $q );
 	return ! empty( $q['url'] ) && false !== strpos( (string) wp_parse_url( $link, PHP_URL_HOST ), 'google.' ) ? (string) $q['url'] : $link;
@@ -82,13 +82,13 @@ function insightweb_alerts_target( string $link ): string {
  *
  * @param bool $dry Read, do not write.
  */
-function insightweb_alerts_run( bool $dry = false ): array {
-	$feeds = insightweb_alerts_feeds();
-	if ( ! $feeds || get_option( 'insightweb_off' ) || ! insightweb_ready() ) {
+function aw_si_alerts_run( bool $dry = false ): array {
+	$feeds = aw_si_alerts_feeds();
+	if ( ! $feeds || get_option( 'aw_si_off' ) || ! aw_si_ready() ) {
 		return array( 'off' => true );
 	}
 	if ( ! $dry ) {
-		insightweb_run_start( 'alerts' );
+		aw_si_run_start( 'alerts' );
 	}
 	require_once ABSPATH . WPINC . '/feed.php';
 	$rep  = array(
@@ -105,7 +105,7 @@ function insightweb_alerts_run( bool $dry = false ): array {
 			continue;
 		}
 		foreach ( (array) $feed->get_items( 0, 50 ) as $item ) {
-			$from = insightweb_alerts_target( (string) $item->get_permalink() );
+			$from = aw_si_alerts_target( (string) $item->get_permalink() );
 			if ( '' === $from || wp_parse_url( $from, PHP_URL_HOST ) === $home ) {
 				continue; // Our own pages are not mentions.
 			}
@@ -114,7 +114,7 @@ function insightweb_alerts_run( bool $dry = false ): array {
 				continue;
 			}
 			$seen = $item->get_date( 'Y-m-d' );
-			$n    = insightweb_link_put(
+			$n    = aw_si_link_put(
 				array(
 					'from_url'   => $from,
 					'linked_url' => home_url( '/' ),
@@ -132,10 +132,10 @@ function insightweb_alerts_run( bool $dry = false ): array {
 		return $rep;
 	}
 	if ( ! $rep['rows'] && count( $rep['warnings'] ) === count( $feeds ) ) {
-		insightweb_run_fail( 'alerts', (string) $rep['warnings'][0] );
+		aw_si_run_fail( 'alerts', (string) $rep['warnings'][0] );
 	} else {
-		insightweb_run_ok( 'alerts', $rep );
+		aw_si_run_ok( 'alerts', $rep );
 	}
 	return $rep;
 }
-add_action( INSIGHTWEB_ALERTS_CRON, fn() => insightweb_alerts_run() );
+add_action( AW_SI_ALERTS_CRON, fn() => aw_si_alerts_run() );

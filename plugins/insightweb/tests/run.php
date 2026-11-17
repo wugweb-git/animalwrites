@@ -89,15 +89,15 @@ require dirname( __DIR__ ) . '/includes/settings.php';
 require dirname( __DIR__ ) . '/includes/insightweb-rest.php';
 
 /** Stubs for the moved Search Insights functions the saves use (same bodies). */
-function insightweb_gdelt_on(): bool {
-	return (bool) get_option( 'insightweb_gdelt_on', 0 );
+function aw_si_gdelt_on(): bool {
+	return (bool) get_option( 'aw_si_gdelt_on', 0 );
 }
 /** Same as rising.php. */
-function insightweb_gdelt_save( bool $on ): bool {
-	if ( insightweb_gdelt_on() === $on ) {
+function aw_si_gdelt_save( bool $on ): bool {
+	if ( aw_si_gdelt_on() === $on ) {
 		return false;
 	}
-	update_option( 'insightweb_gdelt_on', $on ? 1 : 0, false );
+	update_option( 'aw_si_gdelt_on', $on ? 1 : 0, false );
 	return true;
 }
 
@@ -114,7 +114,7 @@ function iw_check( bool $ok, string $what ): void {
 /** The numbers as the screen shows them (text per field). */
 function iw_texts(): array {
 	$out = array();
-	foreach ( insightweb_numbers_group( insightweb_settings_saved() )['blocks'] as $b ) {
+	foreach ( insightweb_numbers_group( aw_si_settings_saved() )['blocks'] as $b ) {
 		foreach ( $b['fields'] as $f ) {
 			$out[ $f['const'] ] = $f['text'];
 		}
@@ -124,34 +124,34 @@ function iw_texts(): array {
 
 // 1. Numbers.
 $w = $GLOBALS['iw_writes'];
-iw_check( false === insightweb_settings_save( iw_texts() ) && $GLOBALS['iw_writes'] === $w && ! array_key_exists( 'aw_seo_settings', $GLOBALS['iw_options'] ), 'unchanged Save with nothing stored writes nothing' );
+iw_check( false === aw_si_settings_save( iw_texts() ) && $GLOBALS['iw_writes'] === $w && ! array_key_exists( 'aw_seo_settings', $GLOBALS['iw_options'] ), 'unchanged Save with nothing stored writes nothing' );
 $GLOBALS['iw_options']['aw_seo_settings'] = array(
 	'titles'          => array( 'AW_SEO_X' => 3 ),
 	'search-insights' => array(
 		'on'           => 1,
-		'INSIGHTWEB_MOVERS' => 30, // A real (non-default) value; only these are stored.
+		'AW_SI_MOVERS' => 30, // A real (non-default) value; only these are stored.
 	),
 );
 $before                                   = serialize( $GLOBALS['iw_options']['aw_seo_settings'] );
 $w                                        = $GLOBALS['iw_writes'];
-iw_check( false === insightweb_settings_save( iw_texts() ) && serialize( $GLOBALS['iw_options']['aw_seo_settings'] ) === $before && $GLOBALS['iw_writes'] === $w, 'unchanged Save with values stored writes nothing (byte for byte)' );
+iw_check( false === aw_si_settings_save( iw_texts() ) && serialize( $GLOBALS['iw_options']['aw_seo_settings'] ) === $before && $GLOBALS['iw_writes'] === $w, 'unchanged Save with values stored writes nothing (byte for byte)' );
 // A value stored though equal to its default (a stale key) is taken out on the next Save, so a later default change is
 // followed (docs/pending.md, fixed b3cd3a0d). The Save writes once; the other stored key is kept.
-$GLOBALS['iw_options']['aw_seo_settings']['search-insights']['INSIGHTWEB_HIGH_IMPR'] = 50; // Equal to the default.
+$GLOBALS['iw_options']['aw_seo_settings']['search-insights']['AW_SI_HIGH_IMPR'] = 50; // Equal to the default.
 $w = $GLOBALS['iw_writes'];
-iw_check( true === insightweb_settings_save( iw_texts() ) && ! isset( $GLOBALS['iw_options']['aw_seo_settings']['search-insights']['INSIGHTWEB_HIGH_IMPR'] ) && 30 === $GLOBALS['iw_options']['aw_seo_settings']['search-insights']['INSIGHTWEB_MOVERS'] && $GLOBALS['iw_writes'] === $w + 1, 'a stored value equal to the default is taken out on the next Save (follows a later default change)' );
-iw_check( false === insightweb_settings_save( array() ), 'a Save sending nothing writes nothing' );
-iw_check( insightweb_settings_save( array( 'INSIGHTWEB_QUICK_MIN' => '15' ) ) && 15 === $GLOBALS['iw_options']['aw_seo_settings']['search-insights']['INSIGHTWEB_QUICK_MIN'] && 30 === $GLOBALS['iw_options']['aw_seo_settings']['search-insights']['INSIGHTWEB_MOVERS'], 'a changed number is stored; one not sent keeps its value' );
-iw_check( insightweb_settings_save( array( 'INSIGHTWEB_MOVERS' => '20' ) ) && ! isset( $GLOBALS['iw_options']['aw_seo_settings']['search-insights']['INSIGHTWEB_MOVERS'] ), 'a number set back to its default is taken out' );
+iw_check( true === aw_si_settings_save( iw_texts() ) && ! isset( $GLOBALS['iw_options']['aw_seo_settings']['search-insights']['AW_SI_HIGH_IMPR'] ) && 30 === $GLOBALS['iw_options']['aw_seo_settings']['search-insights']['AW_SI_MOVERS'] && $GLOBALS['iw_writes'] === $w + 1, 'a stored value equal to the default is taken out on the next Save (follows a later default change)' );
+iw_check( false === aw_si_settings_save( array() ), 'a Save sending nothing writes nothing' );
+iw_check( aw_si_settings_save( array( 'AW_SI_QUICK_MIN' => '15' ) ) && 15 === $GLOBALS['iw_options']['aw_seo_settings']['search-insights']['AW_SI_QUICK_MIN'] && 30 === $GLOBALS['iw_options']['aw_seo_settings']['search-insights']['AW_SI_MOVERS'], 'a changed number is stored; one not sent keeps its value' );
+iw_check( aw_si_settings_save( array( 'AW_SI_MOVERS' => '20' ) ) && ! isset( $GLOBALS['iw_options']['aw_seo_settings']['search-insights']['AW_SI_MOVERS'] ), 'a number set back to its default is taken out' );
 iw_check( 3 === $GLOBALS['iw_options']['aw_seo_settings']['titles']['AW_SEO_X'], "RankWeb's own keys are untouched" );
-insightweb_settings_save( array(), true );
+aw_si_settings_save( array(), true );
 iw_check( array( 'on' => 1 ) === $GLOBALS['iw_options']['aw_seo_settings']['search-insights'], "Restore defaults keeps only RankWeb's old switch" );
-iw_check( '90' === iw_texts()['INSIGHTWEB_KEEP_DAYS'], 'the screen shows the default as text' );
+iw_check( '90' === iw_texts()['AW_SI_KEEP_DAYS'], 'the screen shows the default as text' );
 
 // 2. GDELT.
 $w = $GLOBALS['iw_writes'];
-iw_check( false === insightweb_gdelt_save( false ) && $GLOBALS['iw_writes'] === $w, 'GDELT: unchanged Save writes nothing' );
-iw_check( insightweb_gdelt_save( true ) && false === insightweb_gdelt_save( true ), 'GDELT: a change is written once' );
+iw_check( false === aw_si_gdelt_save( false ) && $GLOBALS['iw_writes'] === $w, 'GDELT: unchanged Save writes nothing' );
+iw_check( aw_si_gdelt_save( true ) && false === aw_si_gdelt_save( true ), 'GDELT: a change is written once' );
 
 // 3. Dashboard shaper.
 $range = array(
@@ -249,7 +249,7 @@ iw_check( array() === insightweb_html_blocks( '   ' ), 'an empty box has no part
 
 // 6. Index status (12 Nov 2026): the URL Inspection queue's info, the estimate, and the Search Console totals.
 require dirname( __DIR__ ) . '/includes/search-insights/gsc-types.php';
-$qi = insightweb_inspect_info(
+$qi = aw_si_inspect_info(
 	array(
 		'd'       => '2026-11-11',
 		'todo'    => array( '/a/', '/b/', '/c/' ),
@@ -262,7 +262,7 @@ $qi = insightweb_inspect_info(
 );
 iw_check( 3 === $qi['left'] && 1500 === $qi['never_left'] && 1000 === $qi['rows'] && 300 === $qi['indexed'], 'inspect info: pages left, never-inspected left, done' );
 iw_check( 0 === strpos( $qi['warnings'][0], '3 pages not reached that day: the time budget' ), 'not reached: says the time budget when Google did not refuse' );
-$qr = insightweb_inspect_info(
+$qr = aw_si_inspect_info(
 	array(
 		'd'       => '2026-11-11',
 		'todo'    => array( '/a/' ),
@@ -274,8 +274,8 @@ $qr = insightweb_inspect_info(
 	)
 );
 iw_check( false !== strpos( $qr['warnings'][0], 'its quota' ) && 2 === count( $qr['warnings'] ) && ! isset( $qr['never_left'] ), 'not reached: says the quota when Google refused; no estimate without the never count' );
-iw_check( '' === insightweb_inspect_info_eta( $qr ) && false !== strpos( insightweb_inspect_info_eta( $qi ), 'by about 13 Nov 2026' ), 'estimate from a run: none without the never count' );
-$qe = insightweb_inspect_info(
+iw_check( '' === aw_si_inspect_info_eta( $qr ) && false !== strpos( aw_si_inspect_info_eta( $qi ), 'by about 13 Nov 2026' ), 'estimate from a run: none without the never count' );
+$qe = aw_si_inspect_info(
 	array(
 		'todo'    => array( '/a/' ),
 		'done'    => 2,
@@ -283,11 +283,11 @@ $qe = insightweb_inspect_info(
 	)
 );
 iw_check( false !== strpos( $qe['warnings'][0], 'could not be reached' ) && false === strpos( $qe['warnings'][0], 'quota' ), 'not reached: another error is not called the quota' );
-$ql = insightweb_inspect_queue_lines( $qi );
-iw_check( 2 === count( $ql ) && $qi['warnings'][0] === $ql[0] && false !== strpos( $ql[1], 'by about 13 Nov 2026' ) && array() === insightweb_inspect_queue_lines( array( 'left' => 0 ) ), 'queue lines: the not-reached reason, then the estimate; none for a finished old run' );
+$ql = aw_si_inspect_queue_lines( $qi );
+iw_check( 2 === count( $ql ) && $qi['warnings'][0] === $ql[0] && false !== strpos( $ql[1], 'by about 13 Nov 2026' ) && array() === aw_si_inspect_queue_lines( array( 'left' => 0 ) ), 'queue lines: the not-reached reason, then the estimate; none for a finished old run' );
 iw_check( false !== strpos( $qi['warnings'][0], '15 s of calls per step, a step every 5 min' ) && false !== strpos( $qi['warnings'][0], '2,000-a-day' ), 'not reached: the budget, gap and cap come from the constants' );
 iw_check(
-	array() === insightweb_inspect_info(
+	array() === aw_si_inspect_info(
 		array(
 			'todo' => array(),
 			'done' => 4,
@@ -295,10 +295,10 @@ iw_check(
 	)['warnings'],
 	'a finished queue has no not-reached line'
 );
-iw_check( false !== strpos( insightweb_inspect_eta( 1500, 1000, '2026-11-11' ), 'by about 13 Nov 2026' ), 'estimate: 1,500 pages at 1,000 a day end two days on' );
-iw_check( 0 === strpos( insightweb_inspect_eta( 0, 1000, '2026-11-11' ), 'every page has been inspected' ) && '' === insightweb_inspect_eta( 10, 0, '2026-11-11' ), 'estimate: done, or nothing without a rate' );
+iw_check( false !== strpos( aw_si_inspect_eta( 1500, 1000, '2026-11-11' ), 'by about 13 Nov 2026' ), 'estimate: 1,500 pages at 1,000 a day end two days on' );
+iw_check( 0 === strpos( aw_si_inspect_eta( 0, 1000, '2026-11-11' ), 'every page has been inspected' ) && '' === aw_si_inspect_eta( 10, 0, '2026-11-11' ), 'estimate: done, or nothing without a rate' );
 iw_check(
-	array( 4390, 4803, '2026-11-12', false ) === insightweb_coverage_totals(
+	array( 4390, 4803, '2026-11-12', false ) === aw_si_coverage_totals(
 		array(
 			'indexed'     => 4390,
 			'not_indexed' => 4803,
@@ -309,13 +309,13 @@ iw_check(
 	'Search Console totals: the typed Not indexed total wins'
 );
 iw_check(
-	array( 10, 7, '', true ) === insightweb_coverage_totals(
+	array( 10, 7, '', true ) === aw_si_coverage_totals(
 		array(
 			'indexed'    => 10,
 			'discovered' => 3,
 			'crawled'    => 4,
 		)
-	) && null === insightweb_coverage_totals( array( 'crawled' => 4 ) ),
+	) && null === aw_si_coverage_totals( array( 'crawled' => 4 ) ),
 	'Search Console totals: reasons added up when no total; none without Indexed'
 );
 
@@ -329,7 +329,7 @@ function sanitize_key( $s ) {
 	return preg_replace( '/[^a-z0-9_\-]/', '', strtolower( (string) $s ) );
 }
 require dirname( __DIR__ ) . '/includes/search-insights/rising-drops.php';
-$wd = insightweb_rising_worker_dropped(
+$wd = aw_si_rising_worker_dropped(
 	array(
 		array(
 			'term'   => 'Tiger Shroff film',
@@ -343,7 +343,7 @@ $wd = insightweb_rising_worker_dropped(
 iw_check( array( array( 'Tiger Shroff film', 'worker:exclude' ) ) === $wd, 'worker drops: only rows with a term and a filter' );
 iw_check(
 	101 > count(
-		insightweb_rising_worker_dropped(
+		aw_si_rising_worker_dropped(
 			array_fill(
 				0,
 				500,
@@ -356,8 +356,8 @@ iw_check(
 	),
 	'worker drops: capped'
 );
-iw_check( array() === insightweb_rising_worker_dropped( 'nonsense' ), 'worker drops: anything but a list is ignored' );
-$dc = insightweb_rising_drop_counts(
+iw_check( array() === aw_si_rising_worker_dropped( 'nonsense' ), 'worker drops: anything but a list is ignored' );
+$dc = aw_si_rising_drop_counts(
 	array(
 		'rising'  => 2,
 		'worker'  => array(
@@ -369,8 +369,8 @@ $dc = insightweb_rising_drop_counts(
 	)
 );
 iw_check( 20 === $dc['seen'] && 17 === $dc['worker_dropped'] && 1 === $dc['excluded'] && 2 === $dc['sent'] && 1 === $dc['stored'] && 2 === count( $dc['terms'] ), 'drop counts: seen, dropped by the worker, excluded, sent and stored' );
-iw_check( null === insightweb_rising_drop_counts( array( 'rising' => 0 ) )['seen'] && null === insightweb_rising_drop_counts( array() )['worker_dropped'], 'drop counts: unknown without the worker counts' );
-iw_check( false !== strpos( insightweb_rising_drop_label( 'not-english' ), 'not English' ) && 'worker filter: odd' === insightweb_rising_drop_label( 'worker:odd' ), 'drop labels in plain words' );
+iw_check( null === aw_si_rising_drop_counts( array( 'rising' => 0 ) )['seen'] && null === aw_si_rising_drop_counts( array() )['worker_dropped'], 'drop counts: unknown without the worker counts' );
+iw_check( false !== strpos( aw_si_rising_drop_label( 'not-english' ), 'not English' ) && 'worker filter: odd' === aw_si_rising_drop_label( 'worker:odd' ), 'drop labels in plain words' );
 
 // 8. Links import (12 Nov 2026): Search Console's Links exports and a pasted list with DR.
 /** Stub. */
@@ -381,26 +381,26 @@ require dirname( __DIR__ ) . '/includes/search-insights/imports.php';
 require dirname( __DIR__ ) . '/includes/search-insights/links-import.php';
 $home = 'https://animalwrites.in/';
 $src  = 'Search Console Links, read 12 Nov 2026';
-$ls   = insightweb_links_import_parse( "\xEF\xBB\xBFSite,Linking pages,Target pages\nexample.org,\"1,204\",3\nwww.News.example.in,2,1\nnot a domain,1,1\nanimalwrites.in,9,9\n", $home, $src, '2026-11-12', '2026-11-12' );
+$ls   = aw_si_links_import_parse( "\xEF\xBB\xBFSite,Linking pages,Target pages\nexample.org,\"1,204\",3\nwww.News.example.in,2,1\nnot a domain,1,1\nanimalwrites.in,9,9\n", $home, $src, '2026-11-12', '2026-11-12' );
 iw_check( 'sites' === $ls['kind'] && 2 === count( $ls['rows'] ) && 2 === $ls['skipped'], 'top linking sites: two sites kept; a bad name and our own site skipped' );
 iw_check( 'example.org' === $ls['rows'][0]['domain'] && 1204 === $ls['rows'][0]['links'] && $home === $ls['rows'][0]['linked_url'] && false !== strpos( $ls['rows'][0]['note'], '3 of our pages' ) && 'news.example.in' === $ls['rows'][1]['domain'], 'top linking sites: domain without www, links, home page with a note' );
 iw_check( '2026-11-12' === $ls['rows'][0]['last_seen'] && $src === $ls['rows'][0]['source'], 'top linking sites: the day read and the source' );
-$lp = insightweb_links_import_parse( "Target page,Incoming links,Linking sites\nhttps://animalwrites.in/campaigns/x/,40,7\nhttps://other.example/,5,1\n", $home, $src, '2026-11-12', '2026-11-12' );
+$lp = aw_si_links_import_parse( "Target page,Incoming links,Linking sites\nhttps://animalwrites.in/campaigns/x/,40,7\nhttps://other.example/,5,1\n", $home, $src, '2026-11-12', '2026-11-12' );
 iw_check( 'pages' === $lp['kind'] && array() === $lp['rows'] && array( array( 'https://animalwrites.in/campaigns/x/', 40, 7 ) ) === $lp['pages'] && 1 === $lp['skipped'], 'top linked pages: a summary of our pages, no link rows' );
-$ll = insightweb_links_import_parse( "Linking page,Last crawled\nhttps://blog.example.com/post/,2026-11-02\nhttps://blog.example.com/b/,2027-01-01\n", $home, $src, '2026-11-12', '2026-11-12' );
+$ll = aw_si_links_import_parse( "Linking page,Last crawled\nhttps://blog.example.com/post/,2026-11-02\nhttps://blog.example.com/b/,2027-01-01\n", $home, $src, '2026-11-12', '2026-11-12' );
 iw_check( 'latest' === $ll['kind'] && '2026-11-02' === $ll['rows'][0]['last_seen'] && '2026-11-12' === $ll['rows'][1]['last_seen'] && 'https://blog.example.com/post/' === $ll['rows'][0]['from_url'], 'latest links: last crawled as last seen; a date in the future falls back to the day read' );
-$lx = insightweb_links_import_parse( "Linking page\tLinked page\tAnchor\tDR\nhttps://a.example.org/x\thttps://animalwrites.in/about/\tAnimal Writes\t54\nhttps://b.example.org/\thttps://evil.example/\tx\t20\nhttps://c.example.org/\t\t\t140\n", $home, 'Pasted list, read 12 Nov 2026', '2026-11-12', '2026-11-12' );
+$lx = aw_si_links_import_parse( "Linking page\tLinked page\tAnchor\tDR\nhttps://a.example.org/x\thttps://animalwrites.in/about/\tAnimal Writes\t54\nhttps://b.example.org/\thttps://evil.example/\tx\t20\nhttps://c.example.org/\t\t\t140\n", $home, 'Pasted list, read 12 Nov 2026', '2026-11-12', '2026-11-12' );
 iw_check( 'list' === $lx['kind'] && 2 === count( $lx['rows'] ) && 1 === $lx['skipped'] && 'https://animalwrites.in/about/' === $lx['rows'][0]['linked_url'] && 'Animal Writes' === $lx['rows'][0]['anchor'], 'list: tab separated; a linked page not ours is skipped' );
 iw_check( array( 'a.example.org' => 54 ) === $lx['dr'], 'list: DR kept per domain, only 0–100' );
-iw_check( '' !== insightweb_links_import_parse( "Keyword,Volume\ndog,10\n", $home, $src, '2026-11-12', '2026-11-12' )['error'] && '' !== insightweb_links_import_parse( 'just text', $home, $src, '2026-11-12', '2026-11-12' )['error'], 'unknown columns or no header: an error, nothing stored' );
-iw_check( 'Search Console Links' === insightweb_link_source_key( 'Search Console Links, read 2 Nov 2026' ) && 'Bing Webmaster' === insightweb_link_source_key( 'Bing Webmaster' ), 'reads group by source without the read date' );
-$l1 = insightweb_links_import_parse( "Site\nexample.org\nwww.xn--p1ai.xn--p1ai\nanimalwrites.in\n", $home, $src, '2026-11-12', '2026-11-12' );
+iw_check( '' !== aw_si_links_import_parse( "Keyword,Volume\ndog,10\n", $home, $src, '2026-11-12', '2026-11-12' )['error'] && '' !== aw_si_links_import_parse( 'just text', $home, $src, '2026-11-12', '2026-11-12' )['error'], 'unknown columns or no header: an error, nothing stored' );
+iw_check( 'Search Console Links' === aw_si_link_source_key( 'Search Console Links, read 2 Nov 2026' ) && 'Bing Webmaster' === aw_si_link_source_key( 'Bing Webmaster' ), 'reads group by source without the read date' );
+$l1 = aw_si_links_import_parse( "Site\nexample.org\nwww.xn--p1ai.xn--p1ai\nanimalwrites.in\n", $home, $src, '2026-11-12', '2026-11-12' );
 iw_check( 'list' === $l1['kind'] && 2 === count( $l1['rows'] ) && 'xn--p1ai.xn--p1ai' === $l1['rows'][1]['domain'] && 1 === $l1['skipped'], 'one-column list; an IDN (punycode) domain is a domain' );
-$lr = insightweb_links_import_parse( "\"Linking page\",\"Last crawled\"\r\n\"https://blog.example.com/post/\",\"Nov 2, 2026\"\r\n\"https://blog.example.com/post/\",\"Nov 2, 2026\"\r\n\"https://www.animalwrites.in/x/\",\"Nov 3, 2026\"\r\n", $home, $src, '2026-11-12', '2026-11-12' );
-iw_check( 'latest' === $lr['kind'] && 2 === count( $lr['rows'] ) && '2026-11-02' === $lr['rows'][0]['last_seen'] && 1 === $lr['skipped'], 'a real Latest links export: quoted, CRLF, US dates; our own site with www skipped; a repeated row stays one link (same key in insightweb_link_put)' );
-iw_check( '2026-11-02' === insightweb_links_import_date( '2 Nov 2026', '2026-11-12' ) && '' === insightweb_links_import_date( '1999-12-31', '2026-11-12' ) && '' === insightweb_links_import_date( 'soon', '2026-11-12' ), 'import dates: read, too old, not a date' );
-iw_check( 'example.org' === insightweb_link_domain( 'https://WWW.Example.org/x' ) && '' === insightweb_links_import_host( 'not a domain' ), 'one domain rule for links and the import' );
-$GLOBALS['iw_options']['insightweb_link_dr'] = array( 'a.example.org' => array( 60, '2026-11-20' ) );
+$lr = aw_si_links_import_parse( "\"Linking page\",\"Last crawled\"\r\n\"https://blog.example.com/post/\",\"Nov 2, 2026\"\r\n\"https://blog.example.com/post/\",\"Nov 2, 2026\"\r\n\"https://www.animalwrites.in/x/\",\"Nov 3, 2026\"\r\n", $home, $src, '2026-11-12', '2026-11-12' );
+iw_check( 'latest' === $lr['kind'] && 2 === count( $lr['rows'] ) && '2026-11-02' === $lr['rows'][0]['last_seen'] && 1 === $lr['skipped'], 'a real Latest links export: quoted, CRLF, US dates; our own site with www skipped; a repeated row stays one link (same key in aw_si_link_put)' );
+iw_check( '2026-11-02' === aw_si_links_import_date( '2 Nov 2026', '2026-11-12' ) && '' === aw_si_links_import_date( '1999-12-31', '2026-11-12' ) && '' === aw_si_links_import_date( 'soon', '2026-11-12' ), 'import dates: read, too old, not a date' );
+iw_check( 'example.org' === aw_si_link_domain( 'https://WWW.Example.org/x' ) && '' === aw_si_links_import_host( 'not a domain' ), 'one domain rule for links and the import' );
+$GLOBALS['iw_options']['aw_si_link_dr'] = array( 'a.example.org' => array( 60, '2026-11-20' ) );
 $dr_in                                  = array(
 	'rows'    => array(),
 	'dr'      => array(
@@ -412,8 +412,8 @@ $dr_in                                  = array(
 	'kind'    => 'list',
 	'error'   => '',
 );
-insightweb_links_import_store( $dr_in, 'Pasted list', '2026-11-12' );
-iw_check( array( 60, '2026-11-20' ) === $GLOBALS['iw_options']['insightweb_link_dr']['a.example.org'] && array( 10, '2026-11-12' ) === $GLOBALS['iw_options']['insightweb_link_dr']['b.example.org'], 'DR: an older read never replaces a newer one' );
+aw_si_links_import_store( $dr_in, 'Pasted list', '2026-11-12' );
+iw_check( array( 60, '2026-11-20' ) === $GLOBALS['iw_options']['aw_si_link_dr']['a.example.org'] && array( 10, '2026-11-12' ) === $GLOBALS['iw_options']['aw_si_link_dr']['b.example.org'], 'DR: an older read never replaces a newer one' );
 
 
 // Backup before uninstall deletes (includes/uninstall-backup.php): the lines, the 500-row batches, the folder guard.
@@ -490,14 +490,14 @@ $ub_t( 0 === getmyuid() || ! @insightweb_backup_protect( $ub_dir ), 'backup: a f
 rmdir( $ub_dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- the test's own folder
 
 // Keyword scoring, recommendations, focus-keyphrase reconciliation and the canonical-owner ladder (score.php).
-require dirname( __DIR__ ) . '/includes/search-insights/compute.php'; // insightweb_is_news() for intent
+require dirname( __DIR__ ) . '/includes/search-insights/compute.php'; // aw_si_is_news() for intent
 require dirname( __DIR__ ) . '/includes/search-insights/score.php';
 
-iw_check( 0 === insightweb_score_demand( 0, 0 ) && 100 === insightweb_score_demand( 5000, 0 ) && 46 === insightweb_score_demand( 50, 0 ), 'demand sub-score: 0 / full at the cap / log-scaled between' );
-iw_check( 0 === insightweb_score_opportunity( null ) && 20 === insightweb_score_opportunity( 2.0 ) && 100 === insightweb_score_opportunity( 12.0 ) && 65 === insightweb_score_opportunity( 35.0 ) && 12 === insightweb_score_opportunity( 80.0 ), 'opportunity sub-score: 0 unranked, 20 top-3, 100 in 5-20, tapering past 20' );
-iw_check( 0 === insightweb_score_engagement( 0, 0 ) && 100 === insightweb_score_engagement( 5, 50 ) && 20 === insightweb_score_engagement( 1, 50 ), 'engagement sub-score: CTR, 10% = full' );
-iw_check( 100 === insightweb_score_momentum( 5.0, null ) && 50 === insightweb_score_momentum( 2.5, null ) && 50 === insightweb_score_momentum( null, 50 ) && 0 === insightweb_score_momentum( null, null ), 'momentum sub-score: growth first, then trends' );
-$sc = insightweb_score(
+iw_check( 0 === aw_si_score_demand( 0, 0 ) && 100 === aw_si_score_demand( 5000, 0 ) && 46 === aw_si_score_demand( 50, 0 ), 'demand sub-score: 0 / full at the cap / log-scaled between' );
+iw_check( 0 === aw_si_score_opportunity( null ) && 20 === aw_si_score_opportunity( 2.0 ) && 100 === aw_si_score_opportunity( 12.0 ) && 65 === aw_si_score_opportunity( 35.0 ) && 12 === aw_si_score_opportunity( 80.0 ), 'opportunity sub-score: 0 unranked, 20 top-3, 100 in 5-20, tapering past 20' );
+iw_check( 0 === aw_si_score_engagement( 0, 0 ) && 100 === aw_si_score_engagement( 5, 50 ) && 20 === aw_si_score_engagement( 1, 50 ), 'engagement sub-score: CTR, 10% = full' );
+iw_check( 100 === aw_si_score_momentum( 5.0, null ) && 50 === aw_si_score_momentum( 2.5, null ) && 50 === aw_si_score_momentum( null, 50 ) && 0 === aw_si_score_momentum( null, null ), 'momentum sub-score: growth first, then trends' );
+$sc = aw_si_score(
 	array(
 		'impr'   => 5000,
 		'clicks' => 500,
@@ -506,7 +506,7 @@ $sc = insightweb_score(
 	)
 );
 iw_check( 100 === $sc['score'] && 100 === $sc['demand'] && 100 === $sc['opportunity'], 'score: all signals at full = 100' );
-$sc = insightweb_score(
+$sc = aw_si_score(
 	array(
 		'impr'   => 50,
 		'clicks' => 1,
@@ -516,7 +516,7 @@ $sc = insightweb_score(
 iw_check( 23 === $sc['score'], 'score: weak keyword scores low (weighted blend)' );
 
 iw_check(
-	array( 'exclude' ) === insightweb_recommended_use(
+	array( 'exclude' ) === aw_si_recommended_use(
 		array(
 			'roles' => 128,
 			'score' => 90,
@@ -525,7 +525,7 @@ iw_check(
 	'recommended-use: the Exclude role wins outright'
 );
 iw_check(
-	array( 'focus-page' ) === insightweb_recommended_use(
+	array( 'focus-page' ) === aw_si_recommended_use(
 		array(
 			'score'    => 70,
 			'pos'      => 12.0,
@@ -536,7 +536,7 @@ iw_check(
 	'recommended-use: owning page at a winnable position → focus keyphrase'
 );
 iw_check(
-	array( 'write-page' ) === insightweb_recommended_use(
+	array( 'write-page' ) === aw_si_recommended_use(
 		array(
 			'score'    => 70,
 			'pos'      => null,
@@ -547,7 +547,7 @@ iw_check(
 	'recommended-use: demand, no page → write a new page'
 );
 iw_check(
-	array( 'secondary' ) === insightweb_recommended_use(
+	array( 'secondary' ) === aw_si_recommended_use(
 		array(
 			'score'    => 60,
 			'pos'      => 2.0,
@@ -557,7 +557,7 @@ iw_check(
 	'recommended-use: already top-3 → secondary keyphrase'
 );
 iw_check(
-	array( 'focus-page', 'sourcing:library' ) === insightweb_recommended_use(
+	array( 'focus-page', 'sourcing:library' ) === aw_si_recommended_use(
 		array(
 			'score'    => 70,
 			'pos'      => 12.0,
@@ -570,13 +570,13 @@ iw_check(
 	'recommended-use: a sourcing topic adds a sourcing candidate of that type'
 );
 
-iw_check( 'poor-rank' === insightweb_focus_health( true, false ) && 'should-be' === insightweb_focus_health( false, true ) && '' === insightweb_focus_health( true, true ) && '' === insightweb_focus_health( false, false ), 'focus health: in-A-not-B / in-B-not-A / agree' );
-iw_check( insightweb_is_focus_candidate( 60, 12.0, true ) && ! insightweb_is_focus_candidate( 40, 12.0, true ) && ! insightweb_is_focus_candidate( 60, 2.0, true ) && ! insightweb_is_focus_candidate( 60, 12.0, false ), 'focus candidate: strong score + winnable position + a page' );
+iw_check( 'poor-rank' === aw_si_focus_health( true, false ) && 'should-be' === aw_si_focus_health( false, true ) && '' === aw_si_focus_health( true, true ) && '' === aw_si_focus_health( false, false ), 'focus health: in-A-not-B / in-B-not-A / agree' );
+iw_check( aw_si_is_focus_candidate( 60, 12.0, true ) && ! aw_si_is_focus_candidate( 40, 12.0, true ) && ! aw_si_is_focus_candidate( 60, 2.0, true ) && ! aw_si_is_focus_candidate( 60, 12.0, false ), 'focus candidate: strong score + winnable position + a page' );
 
-iw_check( 'evergreen' === insightweb_query_intent( 'rabies symptoms' ) && 'dated' === insightweb_query_intent( 'dog attack 2024' ) && 'local' === insightweb_query_intent( 'animal shelter near me' ) && 'campaign' === insightweb_query_intent( 'donate to animals' ), 'query intent: evergreen / dated / local / campaign' );
-iw_check( 'library' === insightweb_page_class( '/x/', 'aw_legal' ) && 'resource' === insightweb_page_class( '/resources/y/', 'page' ) && 'news' === insightweb_page_class( '/news/z/', '' ) && 'directory' === insightweb_page_class( '/d/', 'aw_listing' ), 'page class from post type and path' );
+iw_check( 'evergreen' === aw_si_query_intent( 'rabies symptoms' ) && 'dated' === aw_si_query_intent( 'dog attack 2024' ) && 'local' === aw_si_query_intent( 'animal shelter near me' ) && 'campaign' === aw_si_query_intent( 'donate to animals' ), 'query intent: evergreen / dated / local / campaign' );
+iw_check( 'library' === aw_si_page_class( '/x/', 'aw_legal' ) && 'resource' === aw_si_page_class( '/resources/y/', 'page' ) && 'news' === aw_si_page_class( '/news/z/', '' ) && 'directory' === aw_si_page_class( '/d/', 'aw_listing' ), 'page class from post type and path' );
 
-$own = insightweb_canonical_owner(
+$own = aw_si_canonical_owner(
 	array(
 		array(
 			'path'      => '/news/x',
@@ -594,7 +594,7 @@ $own = insightweb_canonical_owner(
 	'evergreen'
 );
 iw_check( '/resources/y' === $own['owner']['path'] && 'news-should-be-evergreen' === $own['flag'], 'canonical owner: evergreen query a news page holds → owner is the resource, flagged' );
-$own = insightweb_canonical_owner(
+$own = aw_si_canonical_owner(
 	array(
 		array(
 			'path'      => '/a/',
@@ -613,8 +613,8 @@ $own = insightweb_canonical_owner(
 );
 iw_check( 'no-owner' === $own['flag'], 'canonical owner: two pages split the query with no majority → no canonical owner' );
 
-// The stored score row the recompute writes (insightweb_score_row) and the sourcing-types filter.
-$row = insightweb_score_row(
+// The stored score row the recompute writes (aw_si_score_row) and the sourcing-types filter.
+$row = aw_si_score_row(
 	array(
 		'impr'     => 5000,
 		'clicks'   => 500,
@@ -626,7 +626,7 @@ $row = insightweb_score_row(
 	)
 );
 iw_check( 100 === $row['score'] && 'focus-page' === $row['recommended'] && '' === $row['focus_health'], 'score row: strong owned keyword → full score, focus-page, agrees with Rank Math' );
-$row = insightweb_score_row(
+$row = aw_si_score_row(
 	array(
 		'impr'     => 5000,
 		'clicks'   => 300,
@@ -637,7 +637,7 @@ $row = insightweb_score_row(
 	)
 );
 iw_check( $row['score'] >= 55 && 'write-page' === $row['recommended'], 'score row: demand, no page, not ranking → write a new page' );
-$row = insightweb_score_row(
+$row = aw_si_score_row(
 	array(
 		'impr'     => 100,
 		'clicks'   => 5,
@@ -647,7 +647,7 @@ $row = insightweb_score_row(
 	)
 );
 iw_check( 'poor-rank' === $row['focus_health'] && 'secondary' === $row['recommended'], 'score row: a focus keyphrase already top-3 → poor-rank + secondary' );
-$row = insightweb_score_row(
+$row = aw_si_score_row(
 	array(
 		'impr'     => 100,
 		'clicks'   => 5,
@@ -658,12 +658,12 @@ $row = insightweb_score_row(
 	array( 'rabies' => 'library' )
 );
 iw_check( false !== strpos( $row['recommended'], 'sourcing:library' ), 'score row: a sourcing topic adds sourcing:library' );
-iw_check( is_array( insightweb_sourcing_types() ), 'sourcing types: a map (empty until SourceWeb fills the filter)' );
+iw_check( is_array( aw_si_sourcing_types() ), 'sourcing types: a map (empty until SourceWeb fills the filter)' );
 
 // The SourceWeb emit side (sourcing-push.php): threshold + the per-candidate context.
 require dirname( __DIR__ ) . '/includes/search-insights/sourcing-push.php';
-iw_check( 70 === insightweb_sourcing_push_min(), 'sourcing push: default threshold 70' );
-$ctx = insightweb_push_context(
+iw_check( 70 === aw_si_sourcing_push_min(), 'sourcing push: default threshold 70' );
+$ctx = aw_si_push_context(
 	array(
 		'score'       => 80,
 		'recommended' => 'write-page,sourcing:news',
@@ -675,7 +675,7 @@ $ctx = insightweb_push_context(
 	)
 );
 iw_check( 'insightweb' === $ctx['source'] && 80 === $ctx['score'] && 'news' === $ctx['recommended_type'] && 6.0 === $ctx['position'] && 6.0 === $ctx['rank'] && true === $ctx['focus_keyphrase'] && 'Rabies' === $ctx['topic'], 'sourcing push: the context carries score, type, rank and the focus-keyphrase flag' );
-$ctx = insightweb_push_context(
+$ctx = aw_si_push_context(
 	array(
 		'score'       => 60,
 		'recommended' => 'secondary',

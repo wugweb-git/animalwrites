@@ -2,14 +2,14 @@
 /**
  * InsightWeb's routes for its shell screens, under insightweb/v1:
  *
- *   GET  dashboard           insightweb_cap()       the tiles and lists, from the stored counts (insightweb-dashboard.php)
- *   POST dashboard/count     insightweb_cap()       ask for a count now (one background event)
- *   GET  settings            insightweb_cap()       the groups with today's values
- *   POST settings/numbers    manage_options    the seven numbers (insightweb_settings_save(), the same as the form) and
+ *   GET  dashboard           aw_si_cap()       the tiles and lists, from the stored counts (insightweb-dashboard.php)
+ *   POST dashboard/count     aw_si_cap()       ask for a count now (one background event)
+ *   GET  settings            aw_si_cap()       the groups with today's values
+ *   POST settings/numbers    manage_options    the seven numbers (aw_si_settings_save(), the same as the form) and
  *                                              delete_data; reset: true puts the group back to its registered defaults
- *   POST settings/rising     insightweb_cap()       News (GDELT) and Seeds for keyword tools (the same saves as the forms);
+ *   POST settings/rising     aw_si_cap()       News (GDELT) and Seeds for keyword tools (the same saves as the forms);
  *                                              reset: true switches GDELT back to its default (off)
- *   GET  services            insightweb_cap()       the connected services and their last runs
+ *   GET  services            aw_si_cap()       the connected services and their last runs
  *
  * Every route checks the capability and, for a signed-in browser, the wp_rest nonce (kits_shell_rest_can()). The
  * aw/v1 routes the workers use are not touched.
@@ -29,7 +29,7 @@ add_action(
 		if ( ! function_exists( 'kits_shell_rest_can' ) ) {
 			return;
 		}
-		$cap = insightweb_cap();
+		$cap = aw_si_cap();
 		register_rest_route(
 			INSIGHTWEB_REST,
 			'/dashboard',
@@ -316,7 +316,7 @@ function insightweb_health_shape( array $sources, array $gsc, string $state, arr
 
 /** The Dashboard: every range from the stored counts, the health tiles and the sources. */
 function insightweb_dashboard_payload(): array {
-	$off = (bool) get_option( 'insightweb_off' );
+	$off = (bool) get_option( 'aw_si_off' );
 	if ( $off ) { // After Delete data: no stored figures are shown and no count is booked.
 		delete_transient( INSIGHTWEB_DASH );
 	}
@@ -327,28 +327,28 @@ function insightweb_dashboard_payload(): array {
 		$c = array();
 	}
 	$links  = array(
-		'overview' => insightweb_url( 'overview' ),
-		'keywords' => insightweb_url( 'keywords' ),
-		'pages'    => isset( insightweb_extra_tabs()['pages'] ) ? insightweb_url( 'pages' ) : insightweb_url( 'keywords' ),
+		'overview' => aw_si_url( 'overview' ),
+		'keywords' => aw_si_url( 'keywords' ),
+		'pages'    => isset( aw_si_extra_tabs()['pages'] ) ? aw_si_url( 'pages' ) : aw_si_url( 'keywords' ),
 		'settings' => insightweb_ui_url( 'settings' ),
 	);
 	$ranges = array();
 	foreach ( (array) ( $c['ranges'] ?? array() ) as $n => $r ) {
 		$ranges[ (string) $n ] = insightweb_dash_shape( (array) $r, $links );
 	}
-	$runs  = insightweb_runs();
+	$runs  = aw_si_runs();
 	$end   = (string) ( $c['end'] ?? '' );
 	$state = 'ok';
-	if ( '' !== insightweb_run_problem( 'gsc' ) ) {
+	if ( '' !== aw_si_run_problem( 'gsc' ) ) {
 		$state = 'failed';
 	} elseif ( empty( $runs['gsc']['ok'] ) ) {
 		$state = 'notrun';
-	} elseif ( insightweb_stale( 'gsc' ) ) {
+	} elseif ( aw_si_stale( 'gsc' ) ) {
 		$state = 'late';
 	}
 	return array(
 		'counting' => $counting,
-		'off'      => (bool) get_option( 'insightweb_off' ),
+		'off'      => (bool) get_option( 'aw_si_off' ),
 		'at'       => (int) ( $c['at'] ?? 0 ),
 		'atText'   => ! empty( $c['at'] ) ? wp_date( 'j M Y, H:i', (int) $c['at'] ) : '',
 		'endText'  => '' !== $end ? wp_date( 'j M Y', strtotime( $end . ' 12:00:00' ) ) : '',
@@ -363,14 +363,14 @@ function insightweb_dashboard_payload(): array {
 /**
  * The numbers as the screen shows them, in three blocks.
  *
- * @param array $saved Stored numbers (insightweb_settings_saved()).
+ * @param array $saved Stored numbers (aw_si_settings_saved()).
  */
 function insightweb_numbers_group( array $saved ): array {
-	$fields = insightweb_setting_fields();
+	$fields = aw_si_setting_fields();
 	$blocks = array(
-		'priorities' => array( __( 'Priorities', 'insightweb' ), __( 'When a search counts as high demand or a quick win, and how listing names are shown.', 'insightweb' ), array( 'INSIGHTWEB_HIGH_TRENDS', 'INSIGHTWEB_HIGH_IMPR', 'INSIGHTWEB_QUICK_MIN', 'INSIGHTWEB_MOVERS' ) ),
-		'flags'      => array( __( 'Page flags', 'insightweb' ), __( 'Scores under these mark a page on the Pages tab.', 'insightweb' ), array( 'INSIGHTWEB_PSI_FLAG', 'INSIGHTWEB_RM_LOW' ) ),
-		'keep'       => array( __( 'Keeping data', 'insightweb' ), '', array( 'INSIGHTWEB_KEEP_DAYS' ) ),
+		'priorities' => array( __( 'Priorities', 'insightweb' ), __( 'When a search counts as high demand or a quick win, and how listing names are shown.', 'insightweb' ), array( 'AW_SI_HIGH_TRENDS', 'AW_SI_HIGH_IMPR', 'AW_SI_QUICK_MIN', 'AW_SI_MOVERS' ) ),
+		'flags'      => array( __( 'Page flags', 'insightweb' ), __( 'Scores under these mark a page on the Pages tab.', 'insightweb' ), array( 'AW_SI_PSI_FLAG', 'AW_SI_RM_LOW' ) ),
+		'keep'       => array( __( 'Keeping data', 'insightweb' ), '', array( 'AW_SI_KEEP_DAYS' ) ),
 	);
 	$out    = array();
 	foreach ( $blocks as $key => $b ) {
@@ -411,11 +411,11 @@ function insightweb_rising_group(): array {
 		'label'  => __( 'Rising', 'insightweb' ),
 		'blocks' => array(),
 		'gdelt'  => array(
-			'on'   => insightweb_gdelt_on(),
+			'on'   => aw_si_gdelt_on(),
 			'help' => __( 'Off by default: GDELT refuses requests from the workers\' and the site\'s addresses. While it is off its results are not stored, and it is not shown as late or failing.', 'insightweb' ),
 		),
 		'seeds'  => array(
-			'text' => implode( "\n", insightweb_tool_seeds() ),
+			'text' => implode( "\n", aw_si_tool_seeds() ),
 			'help' => __( 'One search per line. The Ubersuggest, vidIQ and OpenSEO reports start from these, in turn.', 'insightweb' ),
 		),
 	);
@@ -429,7 +429,7 @@ function insightweb_rising_group(): array {
 function insightweb_settings_payload( bool $admin ): array {
 	$groups = array();
 	if ( $admin ) {
-		$groups[] = insightweb_numbers_group( insightweb_settings_saved() );
+		$groups[] = insightweb_numbers_group( aw_si_settings_saved() );
 	}
 	$groups[] = insightweb_rising_group();
 	return array(
@@ -444,14 +444,14 @@ function insightweb_settings_payload( bool $admin ): array {
  */
 function insightweb_rest_save_numbers( WP_REST_Request $request ) {
 	$reset = (bool) $request['reset'];
-	$known = array_intersect_key( (array) $request['fields'], insightweb_setting_fields() );
+	$known = array_intersect_key( (array) $request['fields'], aw_si_setting_fields() );
 	foreach ( $known as $const => $v ) {
 		if ( ! is_numeric( $v ) ) {
 			/* translators: %s: field name. */
-			return new WP_Error( 'rest_invalid_param', sprintf( __( '%s must be a whole number.', 'insightweb' ), insightweb_setting_fields()[ $const ]['label'] ), array( 'status' => 400 ) );
+			return new WP_Error( 'rest_invalid_param', sprintf( __( '%s must be a whole number.', 'insightweb' ), aw_si_setting_fields()[ $const ]['label'] ), array( 'status' => 400 ) );
 		}
 	}
-	$saved = insightweb_settings_save( $known, $reset );
+	$saved = aw_si_settings_save( $known, $reset );
 	if ( $reset ) {
 		$saved = insightweb_delete_data_save( (bool) insightweb_registered_settings()[ INSIGHTWEB_DELETE_DATA ]['default'] ) || $saved; // "Reset this section"
 	} elseif ( null !== $request['delete_data'] ) {
@@ -459,7 +459,7 @@ function insightweb_rest_save_numbers( WP_REST_Request $request ) {
 	}
 	return rest_ensure_response(
 		array(
-			'group'   => insightweb_numbers_group( insightweb_settings_saved() ),
+			'group'   => insightweb_numbers_group( aw_si_settings_saved() ),
 			'saved'   => $saved,
 			'message' => $reset ? __( 'Defaults restored.', 'insightweb' ) : ( $saved ? __( 'Saved. The new numbers are used from the next daily run.', 'insightweb' ) : __( 'Nothing changed.', 'insightweb' ) ),
 		)
@@ -475,7 +475,7 @@ function insightweb_rest_save_rising( WP_REST_Request $request ) {
 	$saved = false;
 	if ( $request['reset'] ) {
 		// "Reset this section": GDELT back to its registered default (off). The seeds are a hand-made list, not a setting with a default: they stay.
-		$saved = insightweb_gdelt_save( (bool) insightweb_registered_settings()['insightweb_gdelt_on']['default'] );
+		$saved = aw_si_gdelt_save( (bool) insightweb_registered_settings()['aw_si_gdelt_on']['default'] );
 		return rest_ensure_response(
 			array(
 				'group'   => insightweb_rising_group(),
@@ -485,10 +485,10 @@ function insightweb_rest_save_rising( WP_REST_Request $request ) {
 		);
 	}
 	if ( null !== $request['gdelt'] ) {
-		$saved = insightweb_gdelt_save( (bool) $request['gdelt'] ) || $saved;
+		$saved = aw_si_gdelt_save( (bool) $request['gdelt'] ) || $saved;
 	}
 	if ( null !== $request['seeds'] ) {
-		$saved = insightweb_tool_seeds_save( sanitize_textarea_field( (string) $request['seeds'] ) ) || $saved;
+		$saved = aw_si_tool_seeds_save( sanitize_textarea_field( (string) $request['seeds'] ) ) || $saved;
 	}
 	return rest_ensure_response(
 		array(
@@ -508,21 +508,21 @@ function insightweb_rest_save_rising( WP_REST_Request $request ) {
  * @return array [ status, tone, lines ].
  */
 function insightweb_run_state( string $src ): array {
-	$r    = insightweb_runs()[ $src ] ?? array();
+	$r    = aw_si_runs()[ $src ] ?? array();
 	$ok   = (int) ( $r['ok'] ?? 0 );
-	$err  = insightweb_run_problem( $src );
+	$err  = aw_si_run_problem( $src );
 	$line = array(
 		/* translators: %s: date and time. */
 		$ok ? sprintf( __( 'Last good run: %s', 'insightweb' ), wp_date( 'j M Y, H:i', $ok ) ) : __( 'Not run yet', 'insightweb' ),
 	);
-	if ( function_exists( 'insightweb_run_detail' ) ) {
-		$line = array_merge( $line, insightweb_run_detail( $src, (array) ( $r['info'] ?? array() ) ) );
+	if ( function_exists( 'aw_si_run_detail' ) ) {
+		$line = array_merge( $line, aw_si_run_detail( $src, (array) ( $r['info'] ?? array() ) ) );
 	}
 	if ( $err ) {
 		$line[] = $err;
 		return array( __( 'Last run failed', 'insightweb' ), 'error', $line );
 	}
-	if ( $ok && insightweb_stale( $src ) ) {
+	if ( $ok && aw_si_stale( $src ) ) {
 		return array( __( 'Late', 'insightweb' ), 'warn', $line );
 	}
 	return array( $ok ? __( 'Working', 'insightweb' ) : __( 'Not run yet', 'insightweb' ), '', $line );
@@ -533,7 +533,7 @@ function insightweb_services(): array {
 	$sitekit = class_exists( '\Google\Site_Kit\Plugin' );
 	$sk_url  = add_query_arg( 'page', 'googlesitekit-settings', admin_url( 'admin.php' ) );
 	$keys    = current_user_can( 'manage_options' ) ? admin_url( 'admin.php?page=aw-keys' ) : '';
-	$run     = insightweb_url( 'settings' );
+	$run     = aw_si_url( 'settings' );
 	$out     = array();
 	$module  = function ( string $slug, string $src, string $name, string $prop ) use ( $sitekit, $sk_url, $run ) {
 		$s                             = get_option( 'googlesitekit_' . $slug . '_settings' );
@@ -572,14 +572,14 @@ function insightweb_services(): array {
 	$out[]   = $module( 'search-console', 'gsc', __( 'Search Console', 'insightweb' ), 'propertyID' );
 	$out[]   = $module( 'analytics-4', 'ga4', __( 'Google Analytics 4', 'insightweb' ), 'propertyID' );
 	$psi     = $module( 'pagespeed-insights', 'psi', __( 'PageSpeed Insights', 'insightweb' ), '' );
-	if ( '' !== insightweb_key( 'AW_PSI_KEY' ) ) {
+	if ( '' !== aw_si_key( 'AW_PSI_KEY' ) ) {
 		$psi['summary'] = __( 'Through Site Kit by Google, with its own key as a fallback. Weekly.', 'insightweb' );
 	}
 	$out[] = $psi;
 	$keyed = array(
-		array( 'clarity', __( 'Microsoft Clarity', 'insightweb' ), function_exists( 'insightweb_clarity_on' ) && insightweb_clarity_on(), __( 'Daily, 2 of its 10 free calls.', 'insightweb' ) ),
-		array( 'bing', __( 'Bing Webmaster', 'insightweb' ), function_exists( 'insightweb_bing_on' ) && insightweb_bing_on(), __( 'Monthly: links to us, and clicks and impressions by search and by page.', 'insightweb' ) ),
-		array( 'alerts', __( 'Google Alerts', 'insightweb' ), function_exists( 'insightweb_alerts_feeds' ) && (bool) insightweb_alerts_feeds(), __( 'Daily: up to two alert feeds, as mentions on the Links tab.', 'insightweb' ) ),
+		array( 'clarity', __( 'Microsoft Clarity', 'insightweb' ), function_exists( 'aw_si_clarity_on' ) && aw_si_clarity_on(), __( 'Daily, 2 of its 10 free calls.', 'insightweb' ) ),
+		array( 'bing', __( 'Bing Webmaster', 'insightweb' ), function_exists( 'aw_si_bing_on' ) && aw_si_bing_on(), __( 'Monthly: links to us, and clicks and impressions by search and by page.', 'insightweb' ) ),
+		array( 'alerts', __( 'Google Alerts', 'insightweb' ), function_exists( 'aw_si_alerts_feeds' ) && (bool) aw_si_alerts_feeds(), __( 'Daily: up to two alert feeds, as mentions on the Links tab.', 'insightweb' ) ),
 	);
 	foreach ( $keyed as $k ) {
 		list( $status, $tone, $lines ) = insightweb_run_state( $k[0] );

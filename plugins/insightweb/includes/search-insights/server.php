@@ -13,8 +13,8 @@
  *     error-count.php), with the most frequent messages.
  * - Visitors by country and shortened IP address: visitors.php.
  * - No full IP address, full user agent or query string is stored; a crawler is kept only as its name.
- * - Counts are kept in one option per day (insightweb_srv_YYYYMMDD, site time zone, not autoloaded); a request is written
- *   only when it is a listed crawler or a 4xx/5xx answer. The daily run (insightweb_daily) adds yesterday's PHP errors.
+ * - Counts are kept in one option per day (aw_si_srv_YYYYMMDD, site time zone, not autoloaded); a request is written
+ *   only when it is a listed crawler or a 4xx/5xx answer. The daily run (aw_si_daily) adds yesterday's PHP errors.
  *   Every day is kept (owner, 3 Nov 2026: nothing is dropped).
  * - Speed and AI visibility are checked automatically every morning: selfcheck.php.
  *
@@ -25,7 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const INSIGHTWEB_SRV_URLS = 100; // distinct addresses kept per day and kind; more are counted as "(other)".
+const AW_SI_SRV_URLS = 100; // distinct addresses kept per day and kind; more are counted as "(other)".
 
 /**
  * The crawler watch list (owner, 3 Nov 2026), as name => user-agent token, matched case-insensitively; the first match
@@ -35,9 +35,9 @@ const INSIGHTWEB_SRV_URLS = 100; // distinct addresses kept per day and kind; mo
  *
  * @return array<string,string>
  */
-function insightweb_srv_bots(): array {
+function aw_si_srv_bots(): array {
 	return (array) apply_filters(
-		'insightweb_srv_bots',
+		'aw_si_srv_bots',
 		array(
 			'OAI-SearchBot'         => 'OAI-SearchBot',
 			'ChatGPT-User'          => 'ChatGPT-User',
@@ -76,11 +76,11 @@ function insightweb_srv_bots(): array {
  *
  * @param string $ua User agent.
  */
-function insightweb_srv_bot( string $ua ): string {
+function aw_si_srv_bot( string $ua ): string {
 	if ( '' === $ua ) {
 		return '';
 	}
-	foreach ( insightweb_srv_bots() as $name => $token ) {
+	foreach ( aw_si_srv_bots() as $name => $token ) {
 		if ( '' !== (string) $token && false !== stripos( $ua, (string) $token ) ) {
 			return (string) $name;
 		}
@@ -93,37 +93,37 @@ function insightweb_srv_bot( string $ua ): string {
  *
  * @param string $ymd Day as Ymd (site time zone).
  */
-function insightweb_srv_key( string $ymd ): string {
-	return 'insightweb_srv_' . preg_replace( '/\D/', '', $ymd );
+function aw_si_srv_key( string $ymd ): string {
+	return 'aw_si_srv_' . preg_replace( '/\D/', '', $ymd );
 }
 
 /**
- * Add one to a counted address, keeping at most INSIGHTWEB_SRV_URLS per kind.
+ * Add one to a counted address, keeping at most AW_SI_SRV_URLS per kind.
  *
  * @param array  $urls Address => count (changed in place).
  * @param string $path Path.
  */
-function insightweb_srv_tally( array &$urls, string $path ): void {
-	if ( ! isset( $urls[ $path ] ) && count( $urls ) >= INSIGHTWEB_SRV_URLS ) {
+function aw_si_srv_tally( array &$urls, string $path ): void {
+	if ( ! isset( $urls[ $path ] ) && count( $urls ) >= AW_SI_SRV_URLS ) {
 		$path = '(other)';
 	}
 	$urls[ $path ] = (int) ( $urls[ $path ] ?? 0 ) + 1;
 }
 
 /** At the end of a front-end request: count a listed crawler, and a 4xx or 5xx answer. */
-function insightweb_srv_count(): void {
+function aw_si_srv_count(): void {
 	if ( is_admin() || wp_doing_cron() || wp_doing_ajax() || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
 		return;
 	}
 	$ua   = isset( $_SERVER['HTTP_USER_AGENT'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) : '';
-	$bot  = insightweb_srv_bot( $ua );
+	$bot  = aw_si_srv_bot( $ua );
 	$code = (int) http_response_code();
 	$rest = defined( 'REST_REQUEST' ) && REST_REQUEST;
 	$bad  = ! $rest && $code >= 400 && $code < 600;
 	if ( '' === $bot && ! $bad ) {
 		return; // most requests: nothing written.
 	}
-	$key = insightweb_srv_key( wp_date( 'Ymd' ) );
+	$key = aw_si_srv_key( wp_date( 'Ymd' ) );
 	$day = get_option( $key, array() );
 	$day = is_array( $day ) ? $day : array();
 	if ( '' !== $bot ) {
@@ -136,11 +136,11 @@ function insightweb_srv_count(): void {
 		$path                  = (string) wp_parse_url( $uri, PHP_URL_PATH );
 		$path                  = '' !== $path ? mb_substr( $path, 0, 200 ) : '/';
 		$day['urls'][ $kind ]  = (array) ( $day['urls'][ $kind ] ?? array() );
-		insightweb_srv_tally( $day['urls'][ $kind ], ( '4xx' === $kind && 404 !== $code ? $code . ' ' : '' ) . $path );
+		aw_si_srv_tally( $day['urls'][ $kind ], ( '4xx' === $kind && 404 !== $code ? $code . ' ' : '' ) . $path );
 	}
 	update_option( $key, $day, false );
 }
-add_action( 'shutdown', 'insightweb_srv_count', 0 );
+add_action( 'shutdown', 'aw_si_srv_count', 0 );
 
 /**
  * PHP errors on one day (site time zone) by kind, with the most frequent messages, from this domain's PHP error logs.
@@ -148,7 +148,7 @@ add_action( 'shutdown', 'insightweb_srv_count', 0 );
  * @param string $ymd Day as Ymd.
  * @return array{status:string,kinds:array<string,int>,top:array<string,int>}
  */
-function insightweb_srv_php_errors( string $ymd ): array {
+function aw_si_srv_php_errors( string $ymd ): array {
 	$out = array(
 		'status' => 'not_found',
 		'kinds'  => array(),
@@ -208,40 +208,40 @@ function insightweb_srv_php_errors( string $ymd ): array {
  *
  * @param string $msg Message (paths relative to the site root).
  */
-function insightweb_srv_msg_html( string $msg ): string {
+function aw_si_srv_msg_html( string $msg ): string {
 	if ( ! preg_match( '#(wp-content/(plugins|themes)/([^/\s]+)/\S+?\.php)(?: on line |:)(\d+)#', $msg, $m ) ) {
 		return esc_html( $msg );
 	}
-	$own  = (array) apply_filters( 'insightweb_srv_repo_dirs', array( 'animal-writes-core', 'aw-seo-extras', 'aw-sourcing', 'kits-core', 'mailweb', 'animal-writes', 'kits-by-wugweb' ) );
+	$own  = (array) apply_filters( 'aw_si_srv_repo_dirs', array( 'animal-writes-core', 'aw-seo-extras', 'aw-sourcing', 'kits-core', 'mailweb', 'animal-writes', 'kits-by-wugweb' ) );
 	$file = $m[1] . ':' . $m[4];
 	$link = in_array( $m[3], $own, true ) ? 'https://github.com/wugweb-git/animalwrites/blob/wordpress/' . substr( $m[1], strlen( 'wp-content/' ) ) . '#L' . $m[4] : '';
 	return esc_html( $msg ) . ' (' . ( '' !== $link ? '<a href="' . esc_url( $link ) . '" target="_blank" rel="noopener">' . esc_html( $file ) . '</a>' : esc_html( $file ) ) . ')';
 }
 
 /** The daily step: yesterday's PHP errors into its day. Every day is kept. */
-function insightweb_srv_daily(): void {
+function aw_si_srv_daily(): void {
 	$ymd        = wp_date( 'Ymd', time() - DAY_IN_SECONDS );
-	$key        = insightweb_srv_key( $ymd );
+	$key        = aw_si_srv_key( $ymd );
 	$day        = get_option( $key, array() );
 	$day        = is_array( $day ) ? $day : array();
-	$day['php'] = insightweb_srv_php_errors( $ymd );
+	$day['php'] = aw_si_srv_php_errors( $ymd );
 	update_option( $key, $day, false );
 }
-add_action( INSIGHTWEB_CRON_DAILY, 'insightweb_srv_daily', 20 );
+add_action( AW_SI_CRON_DAILY, 'aw_si_srv_daily', 20 );
 
 /**
  * The stored days, newest first.
  *
  * @return array<string,array> Ymd => day.
  */
-function insightweb_srv_days(): array {
+function aw_si_srv_days(): array {
 	global $wpdb;
-	$rows = $wpdb->get_results( $wpdb->prepare( "SELECT option_name, option_value FROM {$wpdb->options} WHERE option_name LIKE %s ORDER BY option_name DESC", $wpdb->esc_like( 'insightweb_srv_' ) . '%' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- a prefix scan of our own options
+	$rows = $wpdb->get_results( $wpdb->prepare( "SELECT option_name, option_value FROM {$wpdb->options} WHERE option_name LIKE %s ORDER BY option_name DESC", $wpdb->esc_like( 'aw_si_srv_' ) . '%' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- a prefix scan of our own options
 	$out  = array();
 	foreach ( (array) $rows as $r ) {
 		$v   = maybe_unserialize( $r->option_value );
-		$ymd = substr( (string) $r->option_name, strlen( 'insightweb_srv_' ) );
-		if ( is_array( $v ) && preg_match( '/^\d{8}$/', $ymd ) ) { // day options only, not insightweb_srv_checks
+		$ymd = substr( (string) $r->option_name, strlen( 'aw_si_srv_' ) );
+		if ( is_array( $v ) && preg_match( '/^\d{8}$/', $ymd ) ) { // day options only, not aw_si_srv_checks
 			$out[ $ymd ] = $v;
 		}
 	}
@@ -254,7 +254,7 @@ function insightweb_srv_days(): array {
  * @param array $map   Name => count.
  * @param int   $limit How many.
  */
-function insightweb_srv_list( array $map, int $limit = 5 ): string {
+function aw_si_srv_list( array $map, int $limit = 5 ): string {
 	arsort( $map );
 	$parts = array();
 	foreach ( array_slice( $map, 0, $limit, true ) as $k => $n ) {
@@ -266,9 +266,9 @@ function insightweb_srv_list( array $map, int $limit = 5 ): string {
 /**
  * Crawler requests by week (Monday to Sunday), the last 12 weeks: all crawlers, the five busiest by name, the rest.
  *
- * @param array $days What insightweb_srv_days() returned.
+ * @param array $days What aw_si_srv_days() returned.
  */
-function insightweb_srv_weeks_table( array $days ): void {
+function aw_si_srv_weeks_table( array $days ): void {
 	$monday = new DateTimeImmutable( 'monday this week', wp_timezone() );
 	$weeks  = array();
 	for ( $i = 0; $i < 12; $i++ ) {
@@ -322,7 +322,7 @@ function insightweb_srv_weeks_table( array $days ): void {
 		$row['_sort']['others'] = $rest;
 		$cells[]                = $row;
 	}
-	insightweb_simple_table(
+	aw_si_simple_table(
 		'crawler-weeks',
 		$cols,
 		$cells,
@@ -337,7 +337,7 @@ function insightweb_srv_weeks_table( array $days ): void {
 /* ---------- The tab ---------- */
 
 add_filter(
-	'insightweb_tabs',
+	'aw_si_tabs',
 	function ( $tabs ) {
 		$tabs           = (array) $tabs;
 		$tabs['server'] = __( 'Server', 'insightweb' );
@@ -347,19 +347,19 @@ add_filter(
 );
 
 add_action(
-	'insightweb_load_tab_server',
+	'aw_si_load_tab_server',
 	function () {
 		require_once __DIR__ . '/class-aw-si-server-table.php';
 	}
 );
 
 add_action(
-	'insightweb_tab_server',
+	'aw_si_tab_server',
 	function () {
-		if ( ! current_user_can( insightweb_cap() ) || ! class_exists( 'INSIGHTWEB_Server_Table' ) ) {
+		if ( ! current_user_can( aw_si_cap() ) || ! class_exists( 'AW_SI_Server_Table' ) ) {
 			return;
 		}
-		$days = insightweb_srv_days();
+		$days = aw_si_srv_days();
 		echo '<p>' . esc_html__( 'What the server sees, per day, kept for good. Everything here is counted when a request reaches WordPress: a page the CDN or the server\'s page cache (LiteSpeed) answers from a stored copy is not counted, unless that cache lets the request through (docs/cdn.md, step C). Bandwidth is only in hPanel. No full IP address or user agent is stored.', 'insightweb' ) . '</p>';
 
 		// Every crawler on the watch list, with 0 when it made no requests.
@@ -387,7 +387,7 @@ add_action(
 			$cols[ $pk ] = esc_html( $per[0] );
 		}
 		$cols['note'] = esc_html__( 'Note', 'insightweb' );
-		$names        = array_keys( insightweb_srv_bots() );
+		$names        = array_keys( aw_si_srv_bots() );
 		foreach ( array_keys( $sums ) as $b ) {
 			if ( ! in_array( $b, $names, true ) ) {
 				$names[] = $b; // a crawler counted under a name since taken off the list.
@@ -395,7 +395,7 @@ add_action(
 		}
 		$cells = array();
 		foreach ( $names as $b ) {
-			$only = '' === (string) ( insightweb_srv_bots()[ $b ] ?? 'x' );
+			$only = '' === (string) ( aw_si_srv_bots()[ $b ] ?? 'x' );
 			$row  = array(
 				'crawler' => esc_html( $b ),
 				'_sort'   => array(),
@@ -407,7 +407,7 @@ add_action(
 			$row['note'] = $only ? esc_html__( 'robots.txt name only, never visits', 'insightweb' ) : '';
 			$cells[]     = $row;
 		}
-		insightweb_simple_table(
+		aw_si_simple_table(
 			'crawlers',
 			$cols,
 			$cells,
@@ -416,19 +416,19 @@ add_action(
 		// 12 Nov 2026: Googlebot showed 2,099 requests in 30 days because cached hits never reach PHP. There is no access
 		// log on this host to read instead (only PHP error logs), so the table says what it leaves out.
 		echo '<p class="description">' . esc_html__( 'These are lower bounds. Most crawler hits are answered from a stored copy by the server\'s page cache (LiteSpeed) or the Hostinger CDN; those requests never reach PHP, so they are not counted here. hPanel shows the full traffic. Letting crawlers past the caches is step C of docs/cdn.md:', 'insightweb' ) . ' <a href="' . esc_url( 'https://github.com/wugweb-git/animalwrites/blob/wordpress/docs/cdn.md#c-let-ai-agents-and-crawlers-past-the-caches-3-nov-2026' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'docs/cdn.md, C. Let AI agents and crawlers past the caches', 'insightweb' ) . '</a>.</p>';
-		insightweb_srv_weeks_table( $days );
+		aw_si_srv_weeks_table( $days );
 
-		if ( function_exists( 'insightweb_vis_section' ) ) {
-			insightweb_vis_section();
+		if ( function_exists( 'aw_si_vis_section' ) ) {
+			aw_si_vis_section();
 		}
 
 		echo '<h2>' . esc_html__( 'Per day', 'insightweb' ) . '</h2>';
-		$table = new INSIGHTWEB_Server_Table( $days );
+		$table = new AW_SI_Server_Table( $days );
 		$table->prepare_items();
 		$table->display();
 
-		if ( function_exists( 'insightweb_chk_section' ) ) {
-			insightweb_chk_section();
+		if ( function_exists( 'aw_si_chk_section' ) ) {
+			aw_si_chk_section();
 		}
 	}
 );

@@ -6,13 +6,13 @@
  * - Top linking sites (Site, Linking pages, Target pages): one row per site; the export names no linked page, so the
  *   home page is used and the note says so.
  * - Top linked pages (Target page, Incoming links, Linking sites): no linking site, so not link rows; kept as a
- *   summary (option insightweb_links_gsc_pages) shown above the list.
+ *   summary (option aw_si_links_gsc_pages) shown above the list.
  * - Latest links or More sample links (Linking page, Last crawled): one row per linking page, last seen = last crawled.
  * - A list: linking page or site, and optional linked page, anchor, links, DR.
  *
  * Any of them may carry a DR column: Ahrefs' Domain Rating typed by hand from its free checker (no Ahrefs API or
- * export is used), kept per domain with the day read (option insightweb_link_dr) and shown in the list's DR column.
- * Rows go through insightweb_link_put(), so a link read again only moves its dates. Loaded by links.php.
+ * export is used), kept per domain with the day read (option aw_si_link_dr) and shown in the list's DR column.
+ * Rows go through aw_si_link_put(), so a link read again only moves its dates. Loaded by links.php.
  *
  * @package insightweb
  */
@@ -21,14 +21,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const INSIGHTWEB_LINK_DR_OPTION    = 'insightweb_link_dr';         // domain => [DR 0–100, Y-m-d read]
-const INSIGHTWEB_LINK_PAGES_OPTION = 'insightweb_links_gsc_pages'; // [ day, rows: [ [url, links, sites], … ] ]
-const INSIGHTWEB_LINK_READS_OPTION = 'insightweb_links_imports';   // source => [ time of the import, rows, day read ]
-const INSIGHTWEB_LINK_MAX_ROWS     = 2000;                    // per import
-const INSIGHTWEB_LINK_MAX_BYTES    = 2097152;                 // 2 MB per file or paste
+const AW_SI_LINK_DR_OPTION    = 'aw_si_link_dr';         // domain => [DR 0–100, Y-m-d read]
+const AW_SI_LINK_PAGES_OPTION = 'aw_si_links_gsc_pages'; // [ day, rows: [ [url, links, sites], … ] ]
+const AW_SI_LINK_READS_OPTION = 'aw_si_links_imports';   // source => [ time of the import, rows, day read ]
+const AW_SI_LINK_MAX_ROWS     = 2000;                    // per import
+const AW_SI_LINK_MAX_BYTES    = 2097152;                 // 2 MB per file or paste
 
 /** The import's sources: form value => the source name stored on each row (with ", read <date>"). */
-function insightweb_links_import_sources(): array {
+function aw_si_links_import_sources(): array {
 	return array(
 		'gsc'   => __( 'Search Console Links', 'insightweb' ),
 		'other' => __( 'Pasted list', 'insightweb' ),
@@ -37,11 +37,11 @@ function insightweb_links_import_sources(): array {
 
 /**
  * A source without its read date, so reads of one source group together ("Search Console Links, read 2 Nov 2026" and
- * "Search Console Links (read 1 Dec 2026)" are one source). The same rule as the link key in insightweb_link_put().
+ * "Search Console Links (read 1 Dec 2026)" are one source). The same rule as the link key in aw_si_link_put().
  *
  * @param string $source Source as stored.
  */
-function insightweb_link_source_key( string $source ): string {
+function aw_si_link_source_key( string $source ): string {
 	return trim( (string) preg_replace( '/[\s,]*\(?read\b[^)]*\)?\s*$/i', '', $source ) );
 }
 
@@ -50,7 +50,7 @@ function insightweb_link_source_key( string $source ): string {
  *
  * @param string $url URL or domain.
  */
-function insightweb_link_domain( string $url ): string {
+function aw_si_link_domain( string $url ): string {
 	$host = wp_parse_url( false === strpos( $url, '//' ) ? 'https://' . $url : $url, PHP_URL_HOST );
 	return strtolower( preg_replace( '/^www\./i', '', (string) $host ) );
 }
@@ -60,8 +60,8 @@ function insightweb_link_domain( string $url ): string {
  *
  * @param string $v URL or domain.
  */
-function insightweb_links_import_host( string $v ): string {
-	$host = insightweb_link_domain( trim( $v ) );
+function aw_si_links_import_host( string $v ): string {
+	$host = aw_si_link_domain( trim( $v ) );
 	// Labels of letters, digits and hyphens; the last one letters, or an IDN in punycode (xn--…).
 	return preg_match( '/^(?=.{3,191}$)([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+(?:[a-z]{2,63}|xn--[a-z0-9-]{1,59})$/', $host ) ? $host : '';
 }
@@ -72,7 +72,7 @@ function insightweb_links_import_host( string $v ): string {
  * @param string $v     Cell.
  * @param string $today Today (Y-m-d).
  */
-function insightweb_links_import_date( string $v, string $today ): string {
+function aw_si_links_import_date( string $v, string $today ): string {
 	$v = trim( $v );
 	if ( '' === $v ) {
 		return '';
@@ -86,16 +86,16 @@ function insightweb_links_import_date( string $v, string $today ): string {
 }
 
 /**
- * Parse an import into link rows (insightweb_link_put() fields), DR per domain and the linked-pages summary.
+ * Parse an import into link rows (aw_si_link_put() fields), DR per domain and the linked-pages summary.
  *
- * @param string $raw    CSV or TSV text (insightweb_parse_table()).
+ * @param string $raw    CSV or TSV text (aw_si_parse_table()).
  * @param string $home   The site's home address (rows with no linked page use it; a linked page must be on it).
  * @param string $source Source name with its read date.
  * @param string $day    Day read (Y-m-d), the first and last seen of rows without a date of their own.
  * @param string $today  Today (Y-m-d).
  * @return array{kind: string, rows: array, dr: array<string, int>, pages: array, skipped: int, error: string}
  */
-function insightweb_links_import_parse( string $raw, string $home, string $source, string $day, string $today ): array {
+function aw_si_links_import_parse( string $raw, string $home, string $source, string $day, string $today ): array {
 	$out = array(
 		'kind'    => '',
 		'rows'    => array(),
@@ -104,7 +104,7 @@ function insightweb_links_import_parse( string $raw, string $home, string $sourc
 		'skipped' => 0,
 		'error'   => '',
 	);
-	list( $head, $rows ) = insightweb_parse_table( $raw );
+	list( $head, $rows ) = aw_si_parse_table( $raw );
 	if ( ! $head ) {
 		// A one-column list (the shared table reader wants two columns): Site, Linking page, Domain or URL, one per line.
 		$lines = array_values( array_filter( array_map( 'trim', (array) preg_split( '/\r\n|\r|\n/', (string) preg_replace( '/^\xEF\xBB\xBF/', '', $raw ) ) ), 'strlen' ) );
@@ -138,7 +138,7 @@ function insightweb_links_import_parse( string $raw, string $home, string $sourc
 	$first   = $col( array( 'first seen' ) );
 	$anch    = $col( array( 'anchor', 'anchor text' ) );
 	$dr      = $col( array( 'dr', 'domain rating' ) );
-	$hhost   = insightweb_links_import_host( $home );
+	$hhost   = aw_si_links_import_host( $home );
 	if ( '' !== $to && '' !== $in && '' === $site && '' === $from ) {
 		$out['kind'] = 'pages';
 	} elseif ( '' !== $site && '' === $from && '' !== $targets ) {
@@ -153,10 +153,10 @@ function insightweb_links_import_parse( string $raw, string $home, string $sourc
 		$v = str_replace( array( ',', ' ' ), '', $v );
 		return ctype_digit( $v ) ? (int) $v : -1;
 	};
-	foreach ( array_slice( $rows, 0, INSIGHTWEB_LINK_MAX_ROWS ) as $r ) {
+	foreach ( array_slice( $rows, 0, AW_SI_LINK_MAX_ROWS ) as $r ) {
 		if ( 'pages' === $out['kind'] ) {
 			$url = esc_url_raw( (string) $r[ $to ], array( 'http', 'https' ) );
-			if ( '' === $url || insightweb_links_import_host( $url ) !== $hhost ) {
+			if ( '' === $url || aw_si_links_import_host( $url ) !== $hhost ) {
 				++$out['skipped'];
 				continue;
 			}
@@ -164,18 +164,18 @@ function insightweb_links_import_parse( string $raw, string $home, string $sourc
 			continue;
 		}
 		$page   = '' !== $from ? esc_url_raw( (string) $r[ $from ], array( 'http', 'https' ) ) : '';
-		$domain = insightweb_links_import_host( '' !== $page ? $page : ( '' !== $site ? (string) $r[ $site ] : '' ) );
+		$domain = aw_si_links_import_host( '' !== $page ? $page : ( '' !== $site ? (string) $r[ $site ] : '' ) );
 		if ( '' === $domain || $domain === $hhost ) {
 			++$out['skipped']; // not a site name or link address, or our own site
 			continue;
 		}
 		$target = '' !== $to && '' !== trim( (string) $r[ $to ] ) ? esc_url_raw( (string) $r[ $to ], array( 'http', 'https' ) ) : '';
-		if ( '' !== $to && '' !== trim( (string) $r[ $to ] ) && ( '' === $target || insightweb_links_import_host( $target ) !== $hhost ) ) {
+		if ( '' !== $to && '' !== trim( (string) $r[ $to ] ) && ( '' === $target || aw_si_links_import_host( $target ) !== $hhost ) ) {
 			++$out['skipped']; // the linked page is not one of ours
 			continue;
 		}
-		$seen  = '' !== $when ? insightweb_links_import_date( (string) $r[ $when ], $today ) : '';
-		$since = '' !== $first ? insightweb_links_import_date( (string) $r[ $first ], $today ) : '';
+		$seen  = '' !== $when ? aw_si_links_import_date( (string) $r[ $when ], $today ) : '';
+		$since = '' !== $first ? aw_si_links_import_date( (string) $r[ $first ], $today ) : '';
 		$links = '' !== $n ? $num( (string) $r[ $n ] ) : 1;
 		$note  = '' === $target ? __( 'Linked page not named in the export; home page used.', 'insightweb' ) : '';
 		if ( '' !== $targets && $num( (string) $r[ $targets ] ) > 0 ) {
@@ -200,7 +200,7 @@ function insightweb_links_import_parse( string $raw, string $home, string $sourc
 			}
 		}
 	}
-	$out['skipped'] += max( 0, count( $rows ) - INSIGHTWEB_LINK_MAX_ROWS );
+	$out['skipped'] += max( 0, count( $rows ) - AW_SI_LINK_MAX_ROWS );
 	return $out;
 }
 
@@ -209,10 +209,10 @@ function insightweb_links_import_parse( string $raw, string $home, string $sourc
  *
  * @param string $domain Domain without www.
  */
-function insightweb_link_dr( string $domain ): ?array {
+function aw_si_link_dr( string $domain ): ?array {
 	static $all = null;
 	if ( null === $all ) {
-		$all = (array) get_option( INSIGHTWEB_LINK_DR_OPTION, array() );
+		$all = (array) get_option( AW_SI_LINK_DR_OPTION, array() );
 	}
 	return isset( $all[ $domain ] ) && is_array( $all[ $domain ] ) ? $all[ $domain ] : null;
 }
@@ -220,12 +220,12 @@ function insightweb_link_dr( string $domain ): ?array {
 /**
  * Store an import: link rows, DR per domain, the linked-pages summary and the read in the log of reads.
  *
- * @param array  $parsed insightweb_links_import_parse().
+ * @param array  $parsed aw_si_links_import_parse().
  * @param string $source Source name without the read date.
  * @param string $day    Day read (Y-m-d).
  * @return array{added: int, updated: int, failed: int, skipped: int, dr: int, pages: int, kind: string, error: string}
  */
-function insightweb_links_import_store( array $parsed, string $source, string $day ): array {
+function aw_si_links_import_store( array $parsed, string $source, string $day ): array {
 	$res = array(
 		'added'   => 0,
 		'updated' => 0,
@@ -240,8 +240,8 @@ function insightweb_links_import_store( array $parsed, string $source, string $d
 		return $res;
 	}
 	foreach ( $parsed['rows'] as $row ) {
-		$row['type'] = insightweb_link_auto_type( (string) $row['anchor'] );
-		$n           = insightweb_link_put( $row );
+		$row['type'] = aw_si_link_auto_type( (string) $row['anchor'] );
+		$n           = aw_si_link_put( $row );
 		if ( 1 === $n ) {
 			++$res['added'];
 		} elseif ( $n >= 0 ) {
@@ -251,18 +251,18 @@ function insightweb_links_import_store( array $parsed, string $source, string $d
 		}
 	}
 	if ( $parsed['dr'] ) {
-		$all = (array) get_option( INSIGHTWEB_LINK_DR_OPTION, array() );
+		$all = (array) get_option( AW_SI_LINK_DR_OPTION, array() );
 		foreach ( $parsed['dr'] as $domain => $v ) {
 			if ( (string) ( $all[ $domain ][1] ?? '' ) <= $day ) { // an older read never replaces a newer one
 				$all[ $domain ] = array( (int) $v, $day );
 			}
 		}
-		update_option( INSIGHTWEB_LINK_DR_OPTION, $all, false );
+		update_option( AW_SI_LINK_DR_OPTION, $all, false );
 	}
 	if ( $parsed['pages'] ) {
 		usort( $parsed['pages'], fn( $a, $b ) => $b[1] <=> $a[1] );
 		update_option(
-			INSIGHTWEB_LINK_PAGES_OPTION,
+			AW_SI_LINK_PAGES_OPTION,
 			array(
 				'day'  => $day,
 				'rows' => array_slice( $parsed['pages'], 0, 200 ),
@@ -270,22 +270,22 @@ function insightweb_links_import_store( array $parsed, string $source, string $d
 			false
 		);
 	}
-	$reads            = (array) get_option( INSIGHTWEB_LINK_READS_OPTION, array() );
+	$reads            = (array) get_option( AW_SI_LINK_READS_OPTION, array() );
 	$reads[ $source ] = array( time(), $res['added'] + $res['updated'] + $res['pages'], $day );
-	update_option( INSIGHTWEB_LINK_READS_OPTION, $reads, false );
+	update_option( AW_SI_LINK_READS_OPTION, $reads, false );
 	return $res;
 }
 
 /** The import form on the Links tab: source, day read, a file or a paste. */
-function insightweb_links_import_form(): void {
+function aw_si_links_import_form(): void {
 	$today = wp_date( 'Y-m-d' );
 	echo '<h2>' . esc_html__( 'Import links', 'insightweb' ) . '</h2>';
 	echo '<p>' . esc_html__( 'Search Console has no links API: export a table from Search Console → Links (Top linking sites, Top linked pages, or Export external links → Latest links) and upload the CSV or paste it here. A list of your own works too: a header row with Linking page or Site, and Linked page, Anchor, Links or DR when you have them. DR is Ahrefs\' Domain Rating typed by hand from its free checker; no Ahrefs data is fetched.', 'insightweb' ) . '</p>';
-	echo '<form method="post" enctype="multipart/form-data" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="insightweb_links_import">';
-	wp_nonce_field( 'insightweb_links_import' );
+	echo '<form method="post" enctype="multipart/form-data" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_si_links_import">';
+	wp_nonce_field( 'aw_si_links_import' );
 	echo '<table class="form-table" role="presentation"><tbody>';
 	echo '<tr><th scope="row"><label for="aw-si-li-source">' . esc_html__( 'Source', 'insightweb' ) . '</label></th><td><select id="aw-si-li-source" name="source">';
-	foreach ( insightweb_links_import_sources() as $k => $label ) {
+	foreach ( aw_si_links_import_sources() as $k => $label ) {
 		echo '<option value="' . esc_attr( $k ) . '">' . esc_html( $label ) . '</option>';
 	}
 	echo '</select></td></tr>';
@@ -298,31 +298,31 @@ function insightweb_links_import_form(): void {
 }
 
 add_action(
-	'admin_post_insightweb_links_import',
+	'admin_post_aw_si_links_import',
 	function () {
-		if ( ! current_user_can( insightweb_cap() ) || ! check_admin_referer( 'insightweb_links_import' ) ) {
+		if ( ! current_user_can( aw_si_cap() ) || ! check_admin_referer( 'aw_si_links_import' ) ) {
 			wp_die( esc_html__( 'Not allowed.', 'insightweb' ), 403 );
 		}
-		$back = insightweb_return_url( 'links' );
+		$back = aw_si_return_url( 'links' );
 		$fail = function ( string $msg ) use ( $back ) {
-			set_transient( 'insightweb_links_import_' . get_current_user_id(), array( 'error' => $msg ), 5 * MINUTE_IN_SECONDS );
+			set_transient( 'aw_si_links_import_' . get_current_user_id(), array( 'error' => $msg ), 5 * MINUTE_IN_SECONDS );
 			wp_safe_redirect( add_query_arg( 'links_imported', 1, $back ) );
 			exit;
 		};
-		if ( get_option( 'insightweb_off' ) || ! insightweb_ready() ) {
+		if ( get_option( 'aw_si_off' ) || ! aw_si_ready() ) {
 			$fail( __( 'Search Insights is off (its data was deleted), so nothing was stored. Settings → Run the daily update starts it again.', 'insightweb' ) );
 		}
-		$sources = insightweb_links_import_sources();
+		$sources = aw_si_links_import_sources();
 		$src     = isset( $_POST['source'] ) ? sanitize_key( wp_unslash( $_POST['source'] ) ) : 'gsc';
 		$src     = isset( $sources[ $src ] ) ? $src : 'gsc';
 		$today   = wp_date( 'Y-m-d' );
 		$day     = isset( $_POST['day'] ) ? sanitize_text_field( wp_unslash( $_POST['day'] ) ) : '';
 		$day     = preg_match( '/^\d{4}-\d{2}-\d{2}$/', $day ) && checkdate( (int) substr( $day, 5, 2 ), (int) substr( $day, 8, 2 ), (int) substr( $day, 0, 4 ) ) && $day <= $today ? $day : $today;
-		$raw     = isset( $_POST['paste'] ) ? (string) wp_unslash( $_POST['paste'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- parsed as CSV; every value is validated and sanitised in insightweb_links_import_parse().
+		$raw     = isset( $_POST['paste'] ) ? (string) wp_unslash( $_POST['paste'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- parsed as CSV; every value is validated and sanitised in aw_si_links_import_parse().
 		if ( ! empty( $_FILES['file']['name'] ) ) {
 			require_once ABSPATH . 'wp-admin/includes/file.php';
 			$size = isset( $_FILES['file']['size'] ) ? absint( $_FILES['file']['size'] ) : 0;
-			if ( $size > INSIGHTWEB_LINK_MAX_BYTES ) {
+			if ( $size > AW_SI_LINK_MAX_BYTES ) {
 				$fail( __( 'The file is larger than 2 MB.', 'insightweb' ) );
 			}
 			$up = wp_handle_upload(
@@ -344,28 +344,28 @@ add_action(
 		if ( '' === trim( $raw ) ) {
 			$fail( __( 'Nothing to import: choose a file or paste the rows.', 'insightweb' ) );
 		}
-		if ( strlen( $raw ) > INSIGHTWEB_LINK_MAX_BYTES ) {
+		if ( strlen( $raw ) > AW_SI_LINK_MAX_BYTES ) {
 			$fail( __( 'The paste is larger than 2 MB.', 'insightweb' ) );
 		}
 		/* translators: 1: source, 2: date read. */
 		$source = sprintf( __( '%1$s, read %2$s', 'insightweb' ), $sources[ $src ], wp_date( 'j M Y', (int) strtotime( $day . ' 12:00:00' ) ) );
-		$res    = insightweb_links_import_store( insightweb_links_import_parse( $raw, home_url( '/' ), $source, $day, $today ), $sources[ $src ], $day );
-		set_transient( 'insightweb_links_import_' . get_current_user_id(), $res, 5 * MINUTE_IN_SECONDS );
+		$res    = aw_si_links_import_store( aw_si_links_import_parse( $raw, home_url( '/' ), $source, $day, $today ), $sources[ $src ], $day );
+		set_transient( 'aw_si_links_import_' . get_current_user_id(), $res, 5 * MINUTE_IN_SECONDS );
 		wp_safe_redirect( add_query_arg( 'links_imported', 1, $back ) );
 		exit;
 	}
 );
 
 /** The import's result notice on the Links tab. */
-function insightweb_links_import_notice(): void {
+function aw_si_links_import_notice(): void {
 	if ( ! isset( $_GET['links_imported'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- message only.
 		return;
 	}
-	$r = get_transient( 'insightweb_links_import_' . get_current_user_id() );
+	$r = get_transient( 'aw_si_links_import_' . get_current_user_id() );
 	if ( ! is_array( $r ) ) {
 		return;
 	}
-	delete_transient( 'insightweb_links_import_' . get_current_user_id() );
+	delete_transient( 'aw_si_links_import_' . get_current_user_id() );
 	if ( '' !== (string) ( $r['error'] ?? '' ) ) {
 		wp_admin_notice( esc_html( (string) $r['error'] ), array( 'type' => 'error', 'additional_classes' => array( 'inline' ) ) );
 		return;
@@ -382,13 +382,13 @@ function insightweb_links_import_notice(): void {
 }
 
 /** The last read of each source: Search Console imports and reads, Bing Webmaster's run, Google Alerts, DR. */
-function insightweb_links_reads_section(): void {
+function aw_si_links_reads_section(): void {
 	global $wpdb;
 	$by = array();
-	if ( insightweb_ready() ) {
-		$t = insightweb_kw_table( 'links' );
+	if ( aw_si_ready() ) {
+		$t = aw_si_table( 'links' );
 		foreach ( (array) $wpdb->get_results( $wpdb->prepare( 'SELECT source, COUNT(*) n, MAX(last_seen) d FROM %i GROUP BY source', $t ) ) as $r ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-			$k        = insightweb_link_source_key( (string) $r->source );
+			$k        = aw_si_link_source_key( (string) $r->source );
 			$k        = '' !== $k ? $k : __( 'No source', 'insightweb' );
 			$by[ $k ] = array(
 				( $by[ $k ][0] ?? 0 ) + (int) $r->n,
@@ -396,14 +396,14 @@ function insightweb_links_reads_section(): void {
 			);
 		}
 	}
-	$runs  = insightweb_runs();
-	$reads = (array) get_option( INSIGHTWEB_LINK_READS_OPTION, array() );
+	$runs  = aw_si_runs();
+	$reads = (array) get_option( AW_SI_LINK_READS_OPTION, array() );
 	$rows  = array();
 	foreach ( $by as $k => $v ) {
 		// The day of the read itself when one was logged: rows keep their own (older) last seen from the export.
 		$day  = max( $v[1], is_array( $reads[ $k ] ?? null ) ? (string) ( $reads[ $k ][2] ?? '' ) : '' );
 		$read = '' !== $day ? mysql2date( 'j M Y', $day ) : '–';
-		if ( defined( 'INSIGHTWEB_BING_SOURCE' ) && INSIGHTWEB_BING_SOURCE === $k && ! empty( $runs['bing']['ok'] ) ) {
+		if ( defined( 'AW_SI_BING_SOURCE' ) && AW_SI_BING_SOURCE === $k && ! empty( $runs['bing']['ok'] ) ) {
 			$read = wp_date( 'j M Y', (int) $runs['bing']['ok'] ); // the monthly run itself, even when it found nothing new
 		}
 		$rows[] = array( $k, number_format_i18n( $v[0] ), $read, $v[0], $day );
@@ -413,11 +413,11 @@ function insightweb_links_reads_section(): void {
 			$rows[] = array( (string) $src, '–', mysql2date( 'j M Y', (string) ( $r[2] ?? '' ) ), -1, (string) ( $r[2] ?? '' ) ); // a read with no link rows (Top linked pages only)
 		}
 	}
-	$pages = (array) get_option( INSIGHTWEB_LINK_PAGES_OPTION, array() );
+	$pages = (array) get_option( AW_SI_LINK_PAGES_OPTION, array() );
 	if ( ! empty( $pages['day'] ) ) {
 		$rows[] = array( __( 'Search Console Links: top linked pages', 'insightweb' ), number_format_i18n( count( (array) ( $pages['rows'] ?? array() ) ) ), mysql2date( 'j M Y', (string) $pages['day'] ), count( (array) ( $pages['rows'] ?? array() ) ), (string) $pages['day'] );
 	}
-	$dr = (array) get_option( INSIGHTWEB_LINK_DR_OPTION, array() );
+	$dr = (array) get_option( AW_SI_LINK_DR_OPTION, array() );
 	if ( $dr ) {
 		$dr_day = (string) max( array_map( fn( $x ) => (string) ( $x[1] ?? '' ), $dr ) );
 		$rows[] = array( __( 'DR (Ahrefs, typed by hand)', 'insightweb' ), number_format_i18n( count( $dr ) ), mysql2date( 'j M Y', $dr_day ), count( $dr ), $dr_day );
@@ -439,7 +439,7 @@ function insightweb_links_reads_section(): void {
 			),
 		);
 	}
-	insightweb_simple_table(
+	aw_si_simple_table(
 		'link-reads',
 		array(
 			'source' => esc_html__( 'Source', 'insightweb' ),
@@ -460,7 +460,7 @@ function insightweb_links_reads_section(): void {
 		echo '<h2>' . esc_html( sprintf( __( 'Top linked pages (Search Console, read %s)', 'insightweb' ), mysql2date( 'j M Y', (string) $pages['day'] ) ) ) . '</h2>';
 		$cells = array();
 		foreach ( array_slice( (array) $pages['rows'], 0, 10 ) as $p ) {
-			$path    = insightweb_path( (string) $p[0] );
+			$path    = aw_si_path( (string) $p[0] );
 			$cells[] = array(
 				'page'  => '<a href="' . esc_url( (string) $p[0] ) . '" target="_blank" rel="noopener">' . esc_html( '' !== $path ? $path : (string) $p[0] ) . '</a>',
 				'links' => esc_html( number_format_i18n( (int) $p[1] ) ),
@@ -471,7 +471,7 @@ function insightweb_links_reads_section(): void {
 				),
 			);
 		}
-		insightweb_simple_table(
+		aw_si_simple_table(
 			'linked-pages',
 			array(
 				'page'  => esc_html__( 'Our page', 'insightweb' ),

@@ -18,7 +18,7 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
 /**
  * The Rising tab list table.
  */
-class INSIGHTWEB_Rising_Table extends WP_List_Table {
+class AW_SI_Rising_Table extends WP_List_Table {
 
 	/** Set up the list: one row per rising term. */
 	public function __construct() {
@@ -97,13 +97,13 @@ class INSIGHTWEB_Rising_Table extends WP_List_Table {
 	/** Views by status, with counts. */
 	protected function get_views() {
 		global $wpdb;
-		$t      = insightweb_kw_table( 'rising' );
-		$counts = insightweb_ready() ? array_column( (array) $wpdb->get_results( $wpdb->prepare( 'SELECT status, COUNT(*) n FROM %i GROUP BY status', $t ), ARRAY_A ), 'n', 'status' ) : array(); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$t      = aw_si_table( 'rising' );
+		$counts = aw_si_ready() ? array_column( (array) $wpdb->get_results( $wpdb->prepare( 'SELECT status, COUNT(*) n FROM %i GROUP BY status', $t ), ARRAY_A ), 'n', 'status' ) : array(); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		$out    = array();
 		$cur    = $this->view();
 		foreach ( array_merge( $this->statuses(), array( 'all' => __( 'All', 'insightweb' ) ) ) as $key => $label ) {
 			$n           = 'all' === $key ? array_sum( array_map( 'intval', $counts ) ) : (int) ( $counts[ $key ] ?? 0 );
-			$out[ $key ] = '<a href="' . esc_url( add_query_arg( 'view', $key, insightweb_url( 'rising' ) ) ) . '"' . ( $key === $cur ? ' class="current" aria-current="page"' : '' ) . '>' . esc_html( $label ) . ' <span class="count">(' . esc_html( number_format_i18n( $n ) ) . ')</span></a>';
+			$out[ $key ] = '<a href="' . esc_url( add_query_arg( 'view', $key, aw_si_url( 'rising' ) ) ) . '"' . ( $key === $cur ? ' class="current" aria-current="page"' : '' ) . '>' . esc_html( $label ) . ' <span class="count">(' . esc_html( number_format_i18n( $n ) ) . ')</span></a>';
 		}
 		return $out;
 	}
@@ -120,7 +120,7 @@ class INSIGHTWEB_Rising_Table extends WP_List_Table {
 		$cur = $this->arg( 'source' );
 		echo '<div class="alignleft actions"><label class="screen-reader-text" for="aw-si-rising-source">' . esc_html__( 'Filter by source', 'insightweb' ) . '</label>';
 		echo '<select name="source" id="aw-si-rising-source"><option value="">' . esc_html__( 'All sources', 'insightweb' ) . '</option>';
-		foreach ( insightweb_rising_sources() as $key => $s ) {
+		foreach ( aw_si_rising_sources() as $key => $s ) {
 			echo '<option value="' . esc_attr( $key ) . '"' . selected( $cur, $key, false ) . '>' . esc_html( $s['label'] ) . '</option>';
 		}
 		echo '</select>';
@@ -132,11 +132,11 @@ class INSIGHTWEB_Rising_Table extends WP_List_Table {
 	public function prepare_items() {
 		global $wpdb;
 		$this->_column_headers = array( $this->get_columns(), array(), $this->get_sortable_columns(), $this->get_primary_column_name() );
-		if ( ! insightweb_ready() ) {
+		if ( ! aw_si_ready() ) {
 			$this->items = array();
 			return;
 		}
-		$t     = insightweb_kw_table( 'rising' );
+		$t     = aw_si_table( 'rising' );
 		$where = array( '1=1' );
 		$args  = array();
 		$view  = $this->view();
@@ -145,7 +145,7 @@ class INSIGHTWEB_Rising_Table extends WP_List_Table {
 			$args[]  = $view;
 		}
 		$source = $this->arg( 'source' );
-		if ( isset( insightweb_rising_sources()[ $source ] ) ) {
+		if ( isset( aw_si_rising_sources()[ $source ] ) ) {
 			$where[] = 'FIND_IN_SET(%s, sources)';
 			$args[]  = $source;
 		}
@@ -174,7 +174,7 @@ class INSIGHTWEB_Rising_Table extends WP_List_Table {
 			$by[]  = $orderby;
 		}
 		$sql      = implode( ' AND ', $where );
-		$per_page = $this->get_items_per_page( 'insightweb_rising_per_page', 50 );
+		$per_page = $this->get_items_per_page( 'aw_si_rising_per_page', 50 );
 		$paged    = $this->get_pagenum();
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber,PluginCheck.Security.DirectDB.UnescapedDBParameter -- conditions and order built above from fixed parts; the table and sort column are %i, values are placeholders.
 		$total       = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE {$sql}", array_merge( array( $t ), $args ) ) );
@@ -213,10 +213,10 @@ class INSIGHTWEB_Rising_Table extends WP_List_Table {
 		return wp_nonce_url(
 			add_query_arg(
 				array(
-					'insightweb_rising' => $action,
+					'aw_si_rising' => $action,
 					'rising_id[]'  => $id,
 				),
-				insightweb_url( 'rising' )
+				aw_si_url( 'rising' )
 			),
 			'bulk-rising'
 		);
@@ -252,7 +252,7 @@ class INSIGHTWEB_Rising_Table extends WP_List_Table {
 	 * @param object $item Row.
 	 */
 	protected function column_sources( $item ) {
-		$all = insightweb_rising_sources();
+		$all = aw_si_rising_sources();
 		$out = array();
 		foreach ( array_filter( explode( ',', (string) $item->sources ) ) as $s ) {
 			$out[] = esc_html( $all[ $s ]['label'] ?? $s );
@@ -303,7 +303,7 @@ class INSIGHTWEB_Rising_Table extends WP_List_Table {
 	 * @param object $item Row.
 	 */
 	protected function column_action( $item ) {
-		return esc_html( insightweb_actions()[ (string) $item->action ] ?? '–' );
+		return esc_html( aw_si_actions()[ (string) $item->action ] ?? '–' );
 	}
 
 	/**

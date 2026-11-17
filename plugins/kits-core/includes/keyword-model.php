@@ -18,34 +18,34 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 // Roles (a bit field on each record). 1-16 are Search Insights' (1 was "Sourcing": the Include list); 32 and up
 // arrived with phase 2. Include keeps bit 1, so Search Insights' "Sourcing" filter still finds the Include words.
-const INSIGHTWEB_KW_ROLE_SOURCING = 1;    // Include: keeps an item on its own; an English one is also a Google News search.
-const INSIGHTWEB_KW_ROLE_FOCUS    = 2;    // A Rank Math focus keyphrase (primary or secondary) on a post or term.
-const INSIGHTWEB_KW_ROLE_TRACKED  = 4;    // Keyword map target, demand gap or the monthly check list.
-const INSIGHTWEB_KW_ROLE_BRAND    = 8;    // Matches INSIGHTWEB_KW_BRAND.
-const INSIGHTWEB_KW_ROLE_SEARCHED = 16;   // Seen in Search Console.
-const INSIGHTWEB_KW_ROLE_INCLUDE  = 1;    // The same bit as INSIGHTWEB_KW_ROLE_SOURCING.
-const INSIGHTWEB_KW_ROLE_ANIMAL   = 32;   // An animal word: keeps an item together with a context word.
-const INSIGHTWEB_KW_ROLE_CONTEXT  = 64;   // A context word: keeps an item together with an animal word.
-const INSIGHTWEB_KW_ROLE_EXCLUDE  = 128;  // Drops an item, whatever else it has (always, on the site as in the workers).
-const INSIGHTWEB_KW_ROLE_SEARCH   = 256;  // Its own Google News search, besides (or instead of) Include.
-const INSIGHTWEB_KW_ROLE_PRESS    = 512;  // A press-discovery query (coverage of Animal Writes).
-const INSIGHTWEB_KW_ROLE_CATEGORY = 1024; // Files items into the categories it is mapped to.
+const AW_SI_ROLE_SOURCING = 1;    // Include: keeps an item on its own; an English one is also a Google News search.
+const AW_SI_ROLE_FOCUS    = 2;    // A Rank Math focus keyphrase (primary or secondary) on a post or term.
+const AW_SI_ROLE_TRACKED  = 4;    // Keyword map target, demand gap or the monthly check list.
+const AW_SI_ROLE_BRAND    = 8;    // Matches AW_SI_BRAND.
+const AW_SI_ROLE_SEARCHED = 16;   // Seen in Search Console.
+const AW_KW_ROLE_INCLUDE  = 1;    // The same bit as AW_SI_ROLE_SOURCING.
+const AW_KW_ROLE_ANIMAL   = 32;   // An animal word: keeps an item together with a context word.
+const AW_KW_ROLE_CONTEXT  = 64;   // A context word: keeps an item together with an animal word.
+const AW_KW_ROLE_EXCLUDE  = 128;  // Drops an item, whatever else it has (always, on the site as in the workers).
+const AW_KW_ROLE_SEARCH   = 256;  // Its own Google News search, besides (or instead of) Include.
+const AW_KW_ROLE_PRESS    = 512;  // A press-discovery query (coverage of Animal Writes).
+const AW_KW_ROLE_CATEGORY = 1024; // Files items into the categories it is mapped to.
 
 /** The Sourcing roles (the ones the workers read, English only). */
-const INSIGHTWEB_KW_SOURCING_ROLES = INSIGHTWEB_KW_ROLE_INCLUDE | INSIGHTWEB_KW_ROLE_ANIMAL | INSIGHTWEB_KW_ROLE_CONTEXT | INSIGHTWEB_KW_ROLE_EXCLUDE | INSIGHTWEB_KW_ROLE_SEARCH | INSIGHTWEB_KW_ROLE_CATEGORY;
+const AW_KW_SOURCING_ROLES = AW_KW_ROLE_INCLUDE | AW_KW_ROLE_ANIMAL | AW_KW_ROLE_CONTEXT | AW_KW_ROLE_EXCLUDE | AW_KW_ROLE_SEARCH | AW_KW_ROLE_CATEGORY;
 
 /** Sourcing and Press: the roles the workers receive (lang = en only). */
-const INSIGHTWEB_KW_WORKER_ROLES = INSIGHTWEB_KW_SOURCING_ROLES | INSIGHTWEB_KW_ROLE_PRESS;
+const AW_KW_WORKER_ROLES = AW_KW_SOURCING_ROLES | AW_KW_ROLE_PRESS;
 
 /** Roles the owner sets by hand: kept when Search Insights' data is deleted, never rebuilt by its daily sync. */
-const INSIGHTWEB_KW_OWNER_ROLES = INSIGHTWEB_KW_WORKER_ROLES | INSIGHTWEB_KW_ROLE_TRACKED;
+const AW_KW_OWNER_ROLES = AW_KW_WORKER_ROLES | AW_SI_ROLE_TRACKED;
 
 /**
  * Search Insights' own columns, as a new record has them: "Delete Search Insights data" puts these back on the records
  * it keeps (Codex, PR #75). group_id goes back to the record itself. Never the owner's: label, norm, lang, roles (only
  * Search Insights' bits are cleared), variants, query, feed_id, search_on, dismissed, src_note, and the maps.
  */
-const INSIGHTWEB_KW_RESET_COLUMNS = array(
+const AW_SI_RESET_COLUMNS = array(
 	'topic'             => '',
 	'page_type'         => '',
 	'intent'            => '',
@@ -69,13 +69,13 @@ const INSIGHTWEB_KW_RESET_COLUMNS = array(
 /**
  * The SET part of the reset (Search Insights' columns, its role bits off, group_id back to the record).
  *
- * @param int $keep Role bits kept (INSIGHTWEB_KW_OWNER_ROLES).
+ * @param int $keep Role bits kept (AW_KW_OWNER_ROLES).
  * @return string
  */
-function insightweb_kw_reset_sql( $keep ) {
+function aw_si_reset_sql( $keep ) {
 	$out = array( 'roles = roles & ' . (int) $keep, 'group_id = id' );
-	$cols = INSIGHTWEB_KW_RESET_COLUMNS;
-	if ( function_exists( 'insightweb_kw_ready' ) && insightweb_kw_ready() ) {
+	$cols = AW_SI_RESET_COLUMNS;
+	if ( function_exists( 'aw_kw_ready' ) && aw_kw_ready() ) {
 		$cols['quick_win'] = 0; // Keyword table version 3: the stored quick-win flag goes too.
 	}
 	foreach ( $cols as $col => $v ) {
@@ -85,37 +85,37 @@ function insightweb_kw_reset_sql( $keep ) {
 }
 
 // Brand searches: Animal Writes in any spelling, and the old animalrights.in name.
-const INSIGHTWEB_KW_BRAND = '/animal\s*-?\s*writ|animalwrit|animal\s*-?\s*rights?\s*\.\s*in|animalrights?\.in|india\s*writes/i';
+const AW_SI_BRAND = '/animal\s*-?\s*writ|animalwrit|animal\s*-?\s*rights?\s*\.\s*in|animalrights?\.in|india\s*writes/i';
 
 // Words ending in s that are not plurals: never folded ("news" must not become "new").
-const INSIGHTWEB_KW_NOT_PLURAL = array( 'news', 'rabies', 'species', 'series', 'scabies', 'diabetes', 'herpes', 'mumps', 'measles', 'always', 'perhaps', 'whereas', 'christmas' );
+const AW_SI_NOT_PLURAL = array( 'news', 'rabies', 'species', 'series', 'scabies', 'diabetes', 'herpes', 'mumps', 'measles', 'always', 'perhaps', 'whereas', 'christmas' );
 
 /**
  * The worker roles by bit: bit => slug the workers read (sourcing policy keywords_v2[].roles).
  *
  * @return array<int, string>
  */
-function insightweb_kw_role_slugs() {
+function aw_kw_role_slugs() {
 	return array(
-		INSIGHTWEB_KW_ROLE_INCLUDE  => 'include',
-		INSIGHTWEB_KW_ROLE_ANIMAL   => 'animal',
-		INSIGHTWEB_KW_ROLE_CONTEXT  => 'context',
-		INSIGHTWEB_KW_ROLE_EXCLUDE  => 'exclude',
-		INSIGHTWEB_KW_ROLE_SEARCH   => 'search',
-		INSIGHTWEB_KW_ROLE_PRESS    => 'press',
-		INSIGHTWEB_KW_ROLE_CATEGORY => 'category',
+		AW_KW_ROLE_INCLUDE  => 'include',
+		AW_KW_ROLE_ANIMAL   => 'animal',
+		AW_KW_ROLE_CONTEXT  => 'context',
+		AW_KW_ROLE_EXCLUDE  => 'exclude',
+		AW_KW_ROLE_SEARCH   => 'search',
+		AW_KW_ROLE_PRESS    => 'press',
+		AW_KW_ROLE_CATEGORY => 'category',
 	);
 }
 
 /**
- * The worker role slugs a bit field holds, in the order of insightweb_kw_role_slugs().
+ * The worker role slugs a bit field holds, in the order of aw_kw_role_slugs().
  *
  * @param int $roles Bit field.
  * @return string[]
  */
-function insightweb_kw_roles_to_slugs( $roles ) {
+function aw_kw_roles_to_slugs( $roles ) {
 	$out = array();
-	foreach ( insightweb_kw_role_slugs() as $bit => $slug ) {
+	foreach ( aw_kw_role_slugs() as $bit => $slug ) {
 		if ( (int) $roles & $bit ) {
 			$out[] = $slug;
 		}
@@ -124,12 +124,12 @@ function insightweb_kw_roles_to_slugs( $roles ) {
 }
 
 /**
- * Whether a phrase is a brand search (INSIGHTWEB_KW_BRAND).
+ * Whether a phrase is a brand search (AW_SI_BRAND).
  *
  * @param string $s Phrase.
  */
-function insightweb_kw_is_brand( string $s ): bool {
-	return (bool) preg_match( INSIGHTWEB_KW_BRAND, $s );
+function aw_si_is_brand( string $s ): bool {
+	return (bool) preg_match( AW_SI_BRAND, $s );
 }
 
 /**
@@ -139,13 +139,13 @@ function insightweb_kw_is_brand( string $s ): bool {
  *
  * @param string $s Phrase as written.
  */
-function insightweb_kw_norm( string $s ): string {
+function aw_si_norm( string $s ): string {
 	$s = mb_strtolower( wp_strip_all_tags( $s ) );
 	$s = str_replace( array( '.', "'", '’' ), '', $s );
 	$s = (string) preg_replace( '/[^\p{L}\p{M}\p{N}{}]+/u', ' ', $s );
 	$w = preg_split( '/\s+/u', trim( $s ) );
 	foreach ( (array) $w as $i => $word ) {
-		if ( preg_match( '/^[a-z]{4,}s$/', $word ) && ! preg_match( '/(ss|us|is|ous)$/', $word ) && ! in_array( $word, INSIGHTWEB_KW_NOT_PLURAL, true ) ) {
+		if ( preg_match( '/^[a-z]{4,}s$/', $word ) && ! preg_match( '/(ss|us|is|ous)$/', $word ) && ! in_array( $word, AW_SI_NOT_PLURAL, true ) ) {
 			$w[ $i ] = substr( $word, 0, -1 );
 		}
 	}
@@ -158,7 +158,7 @@ function insightweb_kw_norm( string $s ): string {
  *
  * @param string $s Phrase as written.
  */
-function insightweb_kw_lang( string $s ): string {
+function aw_si_lang( string $s ): string {
 	if ( preg_match( '/\p{Devanagari}/u', $s ) ) {
 		return 'hi';
 	}
@@ -189,14 +189,14 @@ function insightweb_kw_lang( string $s ): string {
  * @param string $lang   The record's language (en, hi, hinglish).
  * @return array{0: int, 1: string} The new roles (unchanged when refused), and why it was refused ('' when allowed).
  */
-function insightweb_kw_roles_check( $roles, $add, $remove, $lang ) {
+function aw_kw_roles_check( $roles, $add, $remove, $lang ) {
 	$roles = (int) $roles;
 	$new   = ( $roles | (int) $add ) & ~(int) $remove;
 	$gain  = $new & ~$roles;
-	if ( 'en' !== (string) $lang && ( $gain & INSIGHTWEB_KW_WORKER_ROLES ) ) {
+	if ( 'en' !== (string) $lang && ( $gain & AW_KW_WORKER_ROLES ) ) {
 		return array( $roles, 'Sourcing and Press roles are for English keywords only (this one is ' . ( 'hi' === $lang ? 'Hindi' : ( 'hinglish' === $lang ? 'Hinglish' : (string) $lang ) ) . ').' );
 	}
-	if ( ( $new & INSIGHTWEB_KW_ROLE_INCLUDE ) && ( $new & INSIGHTWEB_KW_ROLE_EXCLUDE ) ) {
+	if ( ( $new & AW_KW_ROLE_INCLUDE ) && ( $new & AW_KW_ROLE_EXCLUDE ) ) {
 		return array( $roles, 'A keyword cannot be both Include and Exclude.' );
 	}
 	return array( $new, '' );
@@ -208,7 +208,7 @@ function insightweb_kw_roles_check( $roles, $add, $remove, $lang ) {
  * @param string|array $text Lines, or a list.
  * @return string[]
  */
-function insightweb_kw_variants_list( $text ) {
+function aw_kw_variants_list( $text ) {
 	$list = is_array( $text ) ? $text : preg_split( '/\r\n|\r|\n/', (string) $text );
 	$out  = array();
 	$seen = array();
@@ -230,6 +230,6 @@ function insightweb_kw_variants_list( $text ) {
  * @param array $row Record: label, variants (list or lines).
  * @return string[]
  */
-function insightweb_kw_spellings( array $row ) {
-	return insightweb_kw_variants_list( array_merge( array( (string) ( $row['label'] ?? '' ) ), insightweb_kw_variants_list( $row['variants'] ?? array() ) ) );
+function aw_kw_spellings( array $row ) {
+	return aw_kw_variants_list( array_merge( array( (string) ( $row['label'] ?? '' ) ), aw_kw_variants_list( $row['variants'] ?? array() ) ) );
 }

@@ -13,7 +13,7 @@
  *   5. The home page's JSON-LD decodes and has one Organization node with the site's @id, name and URL.
  *   6. llms.txt answers with text.
  *   The home page is asked with a query string, so the CDN's cached copy is not the one checked.
- * - Stored in option insightweb_srv_checks (Ymd => speed, ai), every day kept.
+ * - Stored in option aw_si_srv_checks (Ymd => speed, ai), every day kept.
  *
  * @package insightweb
  */
@@ -22,8 +22,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const INSIGHTWEB_CHK_SPEED = 'insightweb_srv_speed';
-const INSIGHTWEB_CHK_AI    = 'insightweb_srv_ai';
+const AW_SI_CHK_SPEED = 'aw_si_srv_speed';
+const AW_SI_CHK_AI    = 'aw_si_srv_ai';
 
 /**
  * Store one day's result.
@@ -31,43 +31,43 @@ const INSIGHTWEB_CHK_AI    = 'insightweb_srv_ai';
  * @param string $part  speed or ai.
  * @param array  $value What to keep.
  */
-function insightweb_chk_put( string $part, array $value ): void {
-	$all = get_option( 'insightweb_srv_checks', array() );
+function aw_si_chk_put( string $part, array $value ): void {
+	$all = get_option( 'aw_si_srv_checks', array() );
 	$all = is_array( $all ) ? $all : array();
 	$ymd = wp_date( 'Ymd' );
 
 	$all[ $ymd ]          = (array) ( $all[ $ymd ] ?? array() );
 	$all[ $ymd ][ $part ] = 'speed' === $part ? array_merge( (array) ( $all[ $ymd ]['speed'] ?? array() ), $value ) : $value;
 	krsort( $all );
-	update_option( 'insightweb_srv_checks', $all, false );
+	update_option( 'aw_si_srv_checks', $all, false );
 }
 
 /** The daily step: the checks, each in its own run a few minutes apart. */
-function insightweb_chk_daily(): void {
-	if ( ! wp_next_scheduled( INSIGHTWEB_CHK_AI ) ) {
-		wp_schedule_single_event( time() + 60, INSIGHTWEB_CHK_AI );
+function aw_si_chk_daily(): void {
+	if ( ! wp_next_scheduled( AW_SI_CHK_AI ) ) {
+		wp_schedule_single_event( time() + 60, AW_SI_CHK_AI );
 	}
 	foreach ( array(
 		'mobile'  => 180,
 		'desktop' => 480,
 	) as $strategy => $in ) {
-		if ( ! wp_next_scheduled( INSIGHTWEB_CHK_SPEED, array( $strategy ) ) ) {
-			wp_schedule_single_event( time() + $in, INSIGHTWEB_CHK_SPEED, array( $strategy ) );
+		if ( ! wp_next_scheduled( AW_SI_CHK_SPEED, array( $strategy ) ) ) {
+			wp_schedule_single_event( time() + $in, AW_SI_CHK_SPEED, array( $strategy ) );
 		}
 	}
 }
-add_action( INSIGHTWEB_CRON_DAILY, 'insightweb_chk_daily', 22 );
-add_filter( 'insightweb_cron_hooks', fn( $h ) => array_merge( (array) $h, array( INSIGHTWEB_CHK_SPEED, INSIGHTWEB_CHK_AI ) ) );
+add_action( AW_SI_CRON_DAILY, 'aw_si_chk_daily', 22 );
+add_filter( 'aw_si_cron_hooks', fn( $h ) => array_merge( (array) $h, array( AW_SI_CHK_SPEED, AW_SI_CHK_AI ) ) );
 
 add_action(
-	INSIGHTWEB_CHK_SPEED,
+	AW_SI_CHK_SPEED,
 	function ( $strategy ) {
 		$strategy = 'desktop' === $strategy ? 'desktop' : 'mobile';
-		if ( ! function_exists( 'insightweb_psi_call' ) ) {
+		if ( ! function_exists( 'aw_si_psi_call' ) ) {
 			return;
 		}
-		$fig = insightweb_psi_call( '/', $strategy );
-		insightweb_chk_put( 'speed', array( $strategy => is_wp_error( $fig ) ? null : (int) $fig['score'] ) );
+		$fig = aw_si_psi_call( '/', $strategy );
+		aw_si_chk_put( 'speed', array( $strategy => is_wp_error( $fig ) ? null : (int) $fig['score'] ) );
 	}
 );
 
@@ -79,7 +79,7 @@ add_action(
  * @param bool   $fresh  Add a query string.
  * @return array{code:int,type:string,body:string}
  */
-function insightweb_chk_fetch( string $path, array $headers = array(), bool $fresh = false ): array {
+function aw_si_chk_fetch( string $path, array $headers = array(), bool $fresh = false ): array {
 	$url = home_url( $path );
 	$url = $fresh ? add_query_arg( 'aw_check', time(), $url ) : $url;
 	$r   = wp_remote_get(
@@ -102,7 +102,7 @@ function insightweb_chk_fetch( string $path, array $headers = array(), bool $fre
  * @param string $txt robots.txt.
  * @param string $bot Crawler name.
  */
-function insightweb_chk_robots_blocks( string $txt, string $bot ): bool {
+function aw_si_chk_robots_blocks( string $txt, string $bot ): bool {
 	$groups = array();
 	$agents = array();
 	$rules  = false;
@@ -135,16 +135,16 @@ function insightweb_chk_robots_blocks( string $txt, string $bot ): bool {
 }
 
 add_action(
-	INSIGHTWEB_CHK_AI,
+	AW_SI_CHK_AI,
 	function () {
-		$robots = insightweb_chk_fetch( '/robots.txt' );
-		$home   = insightweb_chk_fetch( '/', array(), true );
-		$md     = insightweb_chk_fetch( '/', array( 'Accept' => 'text/markdown' ), true );
-		$llms   = insightweb_chk_fetch( '/llms.txt' );
+		$robots = aw_si_chk_fetch( '/robots.txt' );
+		$home   = aw_si_chk_fetch( '/', array(), true );
+		$md     = aw_si_chk_fetch( '/', array( 'Accept' => 'text/markdown' ), true );
+		$llms   = aw_si_chk_fetch( '/llms.txt' );
 
 		$blocked = array();
 		foreach ( array( 'GPTBot', 'OAI-SearchBot', 'ChatGPT-User', 'ClaudeBot', 'Claude-SearchBot', 'Claude-User', 'PerplexityBot', 'Perplexity-User', 'Google-Extended', 'Applebot-Extended' ) as $bot ) {
-			if ( 200 !== $robots['code'] || insightweb_chk_robots_blocks( $robots['body'], $bot ) ) {
+			if ( 200 !== $robots['code'] || aw_si_chk_robots_blocks( $robots['body'], $bot ) ) {
 				$blocked[] = $bot;
 			}
 		}
@@ -184,7 +184,7 @@ add_action(
 			'organization'   => $org,
 			'llms'           => 200 === $llms['code'] && '' !== trim( $llms['body'] ) && 0 === stripos( $llms['type'], 'text/' ),
 		);
-		insightweb_chk_put(
+		aw_si_chk_put(
 			'ai',
 			array(
 				'items'   => $items,
@@ -196,7 +196,7 @@ add_action(
 );
 
 /** Item labels. */
-function insightweb_chk_labels(): array {
+function aw_si_chk_labels(): array {
 	return array(
 		'content_signal' => __( 'robots.txt has a Content-Signal line', 'insightweb' ),
 		'ai_allowed'     => __( 'robots.txt lets the AI crawlers in', 'insightweb' ),
@@ -208,8 +208,8 @@ function insightweb_chk_labels(): array {
 }
 
 /** The checks section of the Server tab: the last 7 days, and the newest AI check item by item. */
-function insightweb_chk_section(): void {
-	$all = get_option( 'insightweb_srv_checks', array() );
+function aw_si_chk_section(): void {
+	$all = get_option( 'aw_si_srv_checks', array() );
 	$all = is_array( $all ) ? $all : array();
 	krsort( $all );
 	echo '<h2>' . esc_html__( 'Speed and AI visibility', 'insightweb' ) . '</h2>';
@@ -236,7 +236,7 @@ function insightweb_chk_section(): void {
 			),
 		);
 	}
-	insightweb_simple_table(
+	aw_si_simple_table(
 		'speed-checks',
 		array(
 			'day'     => esc_html__( 'Day', 'insightweb' ),
@@ -263,7 +263,7 @@ function insightweb_chk_section(): void {
 	}
 	if ( $last ) {
 		echo '<ul>';
-		foreach ( insightweb_chk_labels() as $k => $label ) {
+		foreach ( aw_si_chk_labels() as $k => $label ) {
 			$pass = ! empty( $last['items'][ $k ] );
 			$more = 'ai_allowed' === $k && ! empty( $last['blocked'] ) ? ' (' . implode( ', ', (array) $last['blocked'] ) . ')' : '';
 			echo '<li>' . esc_html( ( $pass ? __( 'Pass', 'insightweb' ) : __( 'Fail', 'insightweb' ) ) . ': ' . $label . $more ) . '</li>';

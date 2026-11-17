@@ -1,7 +1,7 @@
 <?php
 /**
- * The Overview boxes on the Dashboard: GET insightweb/v1/dashboard/box (insightweb_cap()) runs the box's
- * own function (insightweb_overview_boxes()) and hands its output over as plain parts
+ * The Overview boxes on the Dashboard: GET insightweb/v1/dashboard/box (aw_si_cap()) runs the box's
+ * own function (aw_si_overview_boxes()) and hands its output over as plain parts
  * the shell draws: paragraphs, notes, lists, tables and notices. Text and links only: no markup goes out, and a link
  * is kept only when it is http(s) or a relative address.
  *
@@ -23,7 +23,7 @@ add_action(
 			'/dashboard/box',
 			array(
 				'methods'             => 'GET',
-				'permission_callback' => kits_shell_rest_can( insightweb_cap() ),
+				'permission_callback' => kits_shell_rest_can( aw_si_cap() ),
 				'callback'            => 'insightweb_rest_box',
 				'args'                => array(
 					'key' => array(
@@ -39,7 +39,7 @@ add_action(
 /** The boxes the Dashboard shows below its tiles: [ { key, title } ]. */
 function insightweb_box_list(): array {
 	$out = array();
-	foreach ( insightweb_overview_boxes() as $key => $box ) {
+	foreach ( aw_si_overview_boxes() as $key => $box ) {
 		$out[] = array(
 			'key'   => $key,
 			'title' => $box[0],
@@ -55,11 +55,11 @@ function insightweb_box_list(): array {
  */
 function insightweb_rest_box( WP_REST_Request $request ) {
 	$key   = sanitize_key( (string) $request['key'] );
-	$boxes = insightweb_overview_boxes();
+	$boxes = aw_si_overview_boxes();
 	if ( ! isset( $boxes[ $key ] ) || ! is_callable( $boxes[ $key ][1] ) ) {
 		return new WP_Error( 'insightweb_no_box', __( 'No such box.', 'insightweb' ), array( 'status' => 404 ) );
 	}
-	if ( get_option( 'insightweb_off' ) ) {
+	if ( get_option( 'aw_si_off' ) ) {
 		return rest_ensure_response(
 			array(
 				'key'    => $key,

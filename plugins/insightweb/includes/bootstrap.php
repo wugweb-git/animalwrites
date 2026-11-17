@@ -24,7 +24,7 @@ if ( ! defined( 'INSIGHTWEB_DIR' ) ) {
 
 // Kits Core (loaded by Animal Writes Core on live) and Rank Math are needed, as for RankWeb's Search Insights module
 // (owner, 11 Nov 2026: checked here, not with a Requires Plugins header).
-$insightweb_missing = array_keys(
+$aw_si_missing = array_keys(
 	array_filter(
 		array(
 			'Kits Core' => ! defined( 'KITS_CORE_LOADED' ),
@@ -32,24 +32,24 @@ $insightweb_missing = array_keys(
 		)
 	)
 );
-if ( $insightweb_missing ) {
+if ( $aw_si_missing ) {
 	add_action(
 		'admin_notices',
-		function () use ( $insightweb_missing ) {
+		function () use ( $aw_si_missing ) {
 			if ( current_user_can( 'activate_plugins' ) ) {
 				/* translators: %s: plugin names. */
-				wp_admin_notice( esc_html( sprintf( __( 'InsightWeb does nothing until %s is active.', 'insightweb' ), implode( ' and ', $insightweb_missing ) ) ), array( 'type' => 'warning' ) );
+				wp_admin_notice( esc_html( sprintf( __( 'InsightWeb does nothing until %s is active.', 'insightweb' ), implode( ' and ', $aw_si_missing ) ) ), array( 'type' => 'warning' ) );
 			}
 		}
 	);
-	unset( $insightweb_missing );
+	unset( $aw_si_missing );
 	return;
 }
-unset( $insightweb_missing );
+unset( $aw_si_missing );
 
 // The keyword table and its helpers are Kits Core's (Animal Writes Core's from 25 Oct, Kits Core's from 12 Nov 2026):
 // without them, Search Insights stays off.
-if ( ! function_exists( 'insightweb_kw_install' ) ) {
+if ( ! function_exists( 'aw_kw_install' ) ) {
 	add_action(
 		'admin_notices',
 		function () {
@@ -65,10 +65,9 @@ if ( ! function_exists( 'insightweb_caps_grant' ) ) { // Loaded by insightweb.ph
 	require_once INSIGHTWEB_DIR . 'includes/insightweb-caps.php';
 }
 require_once INSIGHTWEB_DIR . 'includes/settings.php'; // the seven numbers (constants) and the API rule, first
-require_once INSIGHTWEB_DIR . 'includes/search-insights/migrate.php'; // one-time aw_si_ -> insightweb_ live-data migration (init pri 1; owner deploys, never run here)
 
-foreach ( array( 'schema', 'runs', 'sitekit', 'keywords', 'gsc', 'compute', 'score', 'sourcing-push', 'rollup', 'cron', 'health', 'searches', 'dryrun', 'admin-table', 'rising', 'admin', 'cli' ) as $insightweb_file ) {
-	require_once __DIR__ . '/search-insights/' . $insightweb_file . '.php';
+foreach ( array( 'schema', 'runs', 'sitekit', 'keywords', 'gsc', 'compute', 'score', 'sourcing-push', 'rollup', 'cron', 'health', 'searches', 'dryrun', 'admin-table', 'rising', 'admin', 'cli' ) as $aw_si_file ) {
+	require_once __DIR__ . '/search-insights/' . $aw_si_file . '.php';
 }
 // Phase 2: GA4, PageSpeed, Clarity, searches on the site, the Pages tab, redirects counted as their target.
 // Phase 4: the Check list tab with the bookmarklet live check, and the imports on the Settings tab.
@@ -81,10 +80,10 @@ foreach ( array( 'schema', 'runs', 'sitekit', 'keywords', 'gsc', 'compute', 'sco
 // Search Console types (3 Nov 2026): Discover and Google News per page, and URL Inspection index status.
 // Bing crawl (3 Nov 2026): Bing's crawl statistics weekly and keyword volumes monthly.
 // Google Alerts (3 Nov 2026): up to two alert feeds from Animal Writes → Keys, as Mention rows on the Links tab.
-foreach ( array( 'sitesearch', 'ga4', 'psi', 'clarity', 'bing', 'sources', 'pages', 'checklist', 'imports', 'snapshot', 'rankmath', 'links', 'links-seed', 'crawlcheck', 'server', 'visitors', 'selfcheck', 'dashboard', 'referrer-icons', 'gsc-types', 'bing-crawl', 'alerts', 'tool-imports', 'openseo-positions' ) as $insightweb_file ) {
-	require_once __DIR__ . '/search-insights/' . $insightweb_file . '.php';
+foreach ( array( 'sitesearch', 'ga4', 'psi', 'clarity', 'bing', 'sources', 'pages', 'checklist', 'imports', 'snapshot', 'rankmath', 'links', 'links-seed', 'crawlcheck', 'server', 'visitors', 'selfcheck', 'dashboard', 'referrer-icons', 'gsc-types', 'bing-crawl', 'alerts', 'tool-imports', 'openseo-positions' ) as $aw_si_file ) {
+	require_once __DIR__ . '/search-insights/' . $aw_si_file . '.php';
 }
-unset( $insightweb_file );
+unset( $aw_si_file );
 
 // The screens on the Kits admin shell: Dashboard, the tabs and Settings.
 require_once INSIGHTWEB_DIR . 'includes/insightweb-dashboard.php';
@@ -93,5 +92,3 @@ require_once INSIGHTWEB_DIR . 'includes/help-tab.php';
 require_once INSIGHTWEB_DIR . 'includes/insightweb-boxes.php'; // the Overview boxes on the Dashboard
 require_once INSIGHTWEB_DIR . 'includes/insightweb-tabs.php'; // the other tabs on the shell
 require_once INSIGHTWEB_DIR . 'includes/insightweb-ui.php';
-
-require_once INSIGHTWEB_DIR . 'includes/compat-aw-si.php'; // aw_si_ -> insightweb_ back-compat shims for SourceWeb/DirectoryWeb/RankWeb through the transition

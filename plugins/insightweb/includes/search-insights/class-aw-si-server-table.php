@@ -1,6 +1,6 @@
 <?php
 /**
- * Server tab list table: one row per stored day (insightweb_srv_days() in server.php), newest first, paged. Read only.
+ * Server tab list table: one row per stored day (aw_si_srv_days() in server.php), newest first, paged. Read only.
  *
  * @package insightweb
  */
@@ -16,7 +16,7 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
 /**
  * The Server tab list table.
  */
-class INSIGHTWEB_Server_Table extends WP_List_Table {
+class AW_SI_Server_Table extends WP_List_Table {
 
 	/**
 	 * Stored days, Ymd => day.
@@ -90,13 +90,13 @@ class INSIGHTWEB_Server_Table extends WP_List_Table {
 				return esc_html( $t ? wp_date( 'j M Y', $t ) : (string) $item['ymd'] );
 			case 'bots':
 				$bots = (array) ( $item['bots'] ?? array() );
-				return $bots ? esc_html( number_format_i18n( array_sum( $bots ) ) . ': ' . insightweb_srv_list( $bots, 6 ) ) : '0';
+				return $bots ? esc_html( number_format_i18n( array_sum( $bots ) ) . ': ' . aw_si_srv_list( $bots, 6 ) ) : '0';
 			case 'c4':
 			case 'c5':
 				return esc_html( number_format_i18n( (int) ( $item['codes'][ 'c4' === $column ? '4xx' : '5xx' ] ?? 0 ) ) );
 			case 'u4':
 			case 'u5':
-				return esc_html( insightweb_srv_list( (array) ( $item['urls'][ 'u4' === $column ? '4xx' : '5xx' ] ?? array() ), 5 ) );
+				return esc_html( aw_si_srv_list( (array) ( $item['urls'][ 'u4' === $column ? '4xx' : '5xx' ] ?? array() ), 5 ) );
 			case 'php':
 				$php = (array) ( $item['php'] ?? array() );
 				if ( ! $php ) {
@@ -106,9 +106,9 @@ class INSIGHTWEB_Server_Table extends WP_List_Table {
 					return esc_html__( 'Log not found', 'insightweb' );
 				}
 				$kinds = (array) ( $php['kinds'] ?? array() );
-				$out   = esc_html( $kinds ? number_format_i18n( array_sum( $kinds ) ) . ': ' . insightweb_srv_list( $kinds, 6 ) : '0' );
+				$out   = esc_html( $kinds ? number_format_i18n( array_sum( $kinds ) ) . ': ' . aw_si_srv_list( $kinds, 6 ) : '0' );
 				foreach ( array_slice( (array) ( $php['top'] ?? array() ), 0, 3, true ) as $msg => $n ) {
-					$out .= '<br><span class="description">' . esc_html( number_format_i18n( (int) $n ) . ' × ' ) . insightweb_srv_msg_html( (string) $msg ) . '</span>'; // escaped inside.
+					$out .= '<br><span class="description">' . esc_html( number_format_i18n( (int) $n ) . ' × ' ) . aw_si_srv_msg_html( (string) $msg ) . '</span>'; // escaped inside.
 				}
 				return $out;
 		}

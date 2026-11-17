@@ -28,8 +28,8 @@ function kits_admin_bar_product_list(): array {
 	if ( defined( 'AW_SEO_MENU' ) ) {
 		$list[] = array( 'rankweb', 'RankWeb', AW_SEO_MENU, defined( 'RANKWEB_CAP' ) ? RANKWEB_CAP : 'manage_categories' );
 	}
-	if ( defined( 'INSIGHTWEB_SLUG' ) ) {
-		$list[] = array( 'insightweb', 'InsightWeb', INSIGHTWEB_SLUG, function_exists( 'insightweb_cap' ) ? insightweb_cap() : 'manage_options' );
+	if ( defined( 'AW_SI_SLUG' ) ) {
+		$list[] = array( 'insightweb', 'InsightWeb', AW_SI_SLUG, function_exists( 'aw_si_cap' ) ? aw_si_cap() : 'manage_options' );
 	}
 	if ( defined( 'MAILWEB_CAP' ) ) {
 		$list[] = array( 'mailweb', 'MailWeb', 'mailweb', MAILWEB_CAP );

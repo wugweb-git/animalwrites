@@ -16,17 +16,17 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @return object[] Keyword records, ordered by priority then label.
  */
-function insightweb_snapshot_keywords(): array {
+function aw_si_snapshot_keywords(): array {
 	global $wpdb;
-	if ( ! insightweb_ready() ) {
+	if ( ! aw_si_ready() ) {
 		return array();
 	}
-	$k   = insightweb_kw_table( 'keywords' );
-	$ids = function_exists( 'insightweb_checklist' ) ? insightweb_checklist() : array();
+	$k   = aw_si_table( 'keywords' );
+	$ids = function_exists( 'aw_si_checklist' ) ? aw_si_checklist() : array();
 	$in  = $ids ? ' OR id IN (' . implode( ',', array_map( 'intval', $ids ) ) . ')' : '';
-	$eff = insightweb_eff_sql();
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- $eff is the fixed SQL expression of insightweb_eff_sql() and $in integers; the table is %i.
-	return (array) $wpdb->get_results( $wpdb->prepare( "SELECT *, {$eff} eff FROM %i WHERE entity = 0 AND label NOT LIKE %s AND ((roles & %d AND {$eff} IN ('P1', 'P2')){$in}) ORDER BY {$eff} = '', {$eff}, label", $k, '%' . $wpdb->esc_like( '{' ) . '%', INSIGHTWEB_KW_ROLE_TRACKED ) );
+	$eff = aw_si_eff_sql();
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- $eff is the fixed SQL expression of aw_si_eff_sql() and $in integers; the table is %i.
+	return (array) $wpdb->get_results( $wpdb->prepare( "SELECT *, {$eff} eff FROM %i WHERE entity = 0 AND label NOT LIKE %s AND ((roles & %d AND {$eff} IN ('P1', 'P2')){$in}) ORDER BY {$eff} = '', {$eff}, label", $k, '%' . $wpdb->esc_like( '{' ) . '%', AW_SI_ROLE_TRACKED ) );
 }
 
 /**
@@ -37,12 +37,12 @@ function insightweb_snapshot_keywords(): array {
  * @param string[] $metrics Metrics.
  * @return array<int, array<string, object>> kw_id => metric => row (value, txt, d).
  */
-function insightweb_snapshot_latest( array $ids, string $src, array $metrics ): array {
+function aw_si_snapshot_latest( array $ids, string $src, array $metrics ): array {
 	global $wpdb;
 	if ( ! $ids ) {
 		return array();
 	}
-	$o    = insightweb_kw_table( 'obs' );
+	$o    = aw_si_table( 'obs' );
 	$in   = implode( ',', array_map( 'intval', $ids ) );
 	$list = implode( ',', array_fill( 0, count( $metrics ), '%s' ) );
 	$out  = array();
@@ -58,11 +58,11 @@ function insightweb_snapshot_latest( array $ids, string $src, array $metrics ): 
  *
  * @return array<int, array<string, string>>
  */
-function insightweb_snapshot_rows(): array {
-	$rows = insightweb_snapshot_keywords();
+function aw_si_snapshot_rows(): array {
+	$rows = aw_si_snapshot_keywords();
 	$ids  = array_map( fn( $r ) => (int) $r->id, $rows );
-	$live = insightweb_snapshot_latest( $ids, 'live', array( 'position', 'top3', 'paa', 'url' ) );
-	$kp   = insightweb_snapshot_latest( $ids, 'kp', array( 'volume' ) );
+	$live = aw_si_snapshot_latest( $ids, 'live', array( 'position', 'top3', 'paa', 'url' ) );
+	$kp   = aw_si_snapshot_latest( $ids, 'kp', array( 'volume' ) );
 	$out  = array();
 	$date = wp_date( 'Y-m-d' );
 	foreach ( $rows as $r ) {
@@ -79,7 +79,7 @@ function insightweb_snapshot_rows(): array {
 		if ( (int) $r->impr28 ) {
 			$demand[] = 'GSC ' . (int) $r->impr28 . ' impr';
 		}
-		$group = ( (int) $r->roles & INSIGHTWEB_KW_ROLE_BRAND ) ? 'brand' : ( '' !== $r->topic ? $r->topic : ( '' !== $r->page_type ? $r->page_type : 'demand' ) );
+		$group = ( (int) $r->roles & AW_SI_ROLE_BRAND ) ? 'brand' : ( '' !== $r->topic ? $r->topic : ( '' !== $r->page_type ? $r->page_type : 'demand' ) );
 		$out[] = array(
 			'date'                 => $date,
 			'query'                => (string) $r->label,
@@ -98,15 +98,15 @@ function insightweb_snapshot_rows(): array {
 			'demand'               => implode( '; ', $demand ),
 			'priority'             => (string) $r->eff,
 			'status'               => (string) $r->status,
-			'action'               => (string) ( insightweb_actions()[ $r->action ] ?? '' ),
+			'action'               => (string) ( aw_si_actions()[ $r->action ] ?? '' ),
 		);
 	}
 	return $out;
 }
 
 /** The snapshot as CSV text. */
-function insightweb_snapshot_csv(): string {
-	$rows = insightweb_snapshot_rows();
+function aw_si_snapshot_csv(): string {
+	$rows = aw_si_snapshot_rows();
 	$cols = array( 'date', 'query', 'group', 'source', 'position', 'url', 'top3', 'ai_overview', 'ai_overview_names_aw', 'paa', 'related', 'gsc_impr_28d', 'gsc_clicks_28d', 'gsc_pos_28d', 'demand', 'priority', 'status', 'action' );
 	// A column that is empty in every row (e.g. the live-check columns in a month without a live check) is left out.
 	$keep = array( 'date', 'query', 'priority', 'status', 'action' );
@@ -127,25 +127,25 @@ function insightweb_snapshot_csv(): string {
  *
  * @param string $s Cell text.
  */
-function insightweb_md_cell( string $s ): string {
+function aw_si_md_cell( string $s ): string {
 	return str_replace( array( '|', "\r", "\n" ), array( '\|', ' ', ' ' ), trim( $s ) );
 }
 
 /** The keyword map (keyword-map.md) rebuilt from the keyword table: one table per section, keywords per page. */
-function insightweb_keyword_map_md(): string {
+function aw_si_keyword_map_md(): string {
 	global $wpdb;
-	if ( ! insightweb_ready() ) {
+	if ( ! aw_si_ready() ) {
 		return '';
 	}
-	$k   = insightweb_kw_table( 'keywords' );
-	$p   = insightweb_kw_table( 'kw_pages' );
-	$eff = insightweb_eff_sql( 'k.' );
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- $eff is the fixed SQL expression of insightweb_eff_sql(); the tables are %i.
-	$links = (array) $wpdb->get_results( $wpdb->prepare( "SELECT k.id, k.label, k.page_type, k.intent, k.trends, k.impr28, k.pos28, k.live_txt, k.status, k.action, {$eff} eff, l.path, l.obj_type, l.obj_id, l.role FROM %i l JOIN %i k ON k.id = l.kw_id WHERE l.src = 'seed' AND l.role IN ('owner', 'secondary') AND k.roles & %d ORDER BY l.role = 'secondary', k.label", $p, $k, INSIGHTWEB_KW_ROLE_TRACKED ) );
+	$k   = aw_si_table( 'keywords' );
+	$p   = aw_si_table( 'kw_pages' );
+	$eff = aw_si_eff_sql( 'k.' );
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- $eff is the fixed SQL expression of aw_si_eff_sql(); the tables are %i.
+	$links = (array) $wpdb->get_results( $wpdb->prepare( "SELECT k.id, k.label, k.page_type, k.intent, k.trends, k.impr28, k.pos28, k.live_txt, k.status, k.action, {$eff} eff, l.path, l.obj_type, l.obj_id, l.role FROM %i l JOIN %i k ON k.id = l.kw_id WHERE l.src = 'seed' AND l.role IN ('owner', 'secondary') AND k.roles & %d ORDER BY l.role = 'secondary', k.label", $p, $k, AW_SI_ROLE_TRACKED ) );
 	$pages = array(); // section => page => [primary rows, secondary labels].
 	foreach ( $links as $l ) {
 		$section = '' !== $l->page_type ? $l->page_type : 'other';
-		$page    = 'post' === $l->obj_type && $l->obj_id ? insightweb_object_path( 'post', (int) $l->obj_id ) : (string) $l->path;
+		$page    = 'post' === $l->obj_type && $l->obj_id ? aw_si_object_path( 'post', (int) $l->obj_id ) : (string) $l->path;
 		$page    = '' !== $page ? $page : (string) $l->path;
 		if ( 'owner' === $l->role ) {
 			$pages[ $section ][ $page ]['primary'][] = $l;
@@ -183,7 +183,7 @@ function insightweb_keyword_map_md(): string {
 				$md      .= '| ' . implode(
 					' | ',
 					array_map(
-						'insightweb_md_cell',
+						'aw_si_md_cell',
 						array(
 							$page,
 							$r->label,
@@ -192,7 +192,7 @@ function insightweb_keyword_map_md(): string {
 							implode( '; ', $demand ),
 							$rank,
 							(string) $r->eff,
-							(string) ( insightweb_actions()[ $r->action ] ?? '' ),
+							(string) ( aw_si_actions()[ $r->action ] ?? '' ),
 						)
 					)
 				) . " |\n";
@@ -204,18 +204,18 @@ function insightweb_keyword_map_md(): string {
 }
 
 add_action(
-	'admin_post_insightweb_download',
+	'admin_post_aw_si_download',
 	function () {
-		if ( ! current_user_can( insightweb_cap() ) || ! check_admin_referer( 'insightweb_download' ) ) {
+		if ( ! current_user_can( aw_si_cap() ) || ! check_admin_referer( 'aw_si_download' ) ) {
 			wp_die( esc_html__( 'Not allowed.', 'insightweb' ), 403 );
 		}
 		$what = isset( $_GET['what'] ) ? sanitize_key( wp_unslash( $_GET['what'] ) ) : '';
 		if ( 'map' === $what ) {
-			$body = insightweb_keyword_map_md();
+			$body = aw_si_keyword_map_md();
 			$name = 'keyword-map.md';
 			$type = 'text/markdown';
 		} else {
-			$body = insightweb_snapshot_csv();
+			$body = aw_si_snapshot_csv();
 			$name = 'search-insights-' . wp_date( 'Y-m' ) . '.csv';
 			$type = 'text/csv';
 		}
@@ -228,16 +228,16 @@ add_action(
 );
 
 /** Settings tab row: the two downloads. */
-function insightweb_snapshot_row(): void {
+function aw_si_snapshot_row(): void {
 	$url = fn( $what ) => wp_nonce_url(
 		add_query_arg(
 			array(
-				'action' => 'insightweb_download',
+				'action' => 'aw_si_download',
 				'what'   => $what,
 			),
 			admin_url( 'admin-post.php' )
 		),
-		'insightweb_download'
+		'aw_si_download'
 	);
 	echo '<tr><th scope="row">' . esc_html__( 'Monthly snapshot', 'insightweb' ) . '</th><td><p>';
 	/* translators: %s: month such as 2026-10. */
@@ -245,4 +245,4 @@ function insightweb_snapshot_row(): void {
 	echo '<a class="button" href="' . esc_url( $url( 'map' ) ) . '">' . esc_html__( 'Download keyword-map.md', 'insightweb' ) . '</a></p>';
 	echo '<p class="description">' . esc_html__( 'The check list and every tracked P1/P2 keyword, in the columns of the 21 Oct rankings CSV plus demand, priority, status and action; and the keyword map rebuilt from the table. Once a month a session commits both to docs/seo/ (also: wp aw-si snapshot csv|map).', 'insightweb' ) . '</p></td></tr>';
 }
-add_action( 'insightweb_settings_rows', 'insightweb_snapshot_row', 5 );
+add_action( 'aw_si_settings_rows', 'aw_si_snapshot_row', 5 );

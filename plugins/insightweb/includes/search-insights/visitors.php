@@ -8,10 +8,10 @@
  * - Shortened IP: IPv4 with the last number zeroed (203.0.113.0), IPv6 cut to its first 48 bits (2001:db8:1::).
  *   No full address is stored. Shortened addresses are kept 30 days (the daily run deletes older ones); country
  *   counts are kept for good.
- * - Country: a country header from the CDN when one is sent (filter insightweb_vis_country_headers), else the free DB-IP
+ * - Country: a country header from the CDN when one is sent (filter aw_si_vis_country_headers), else the free DB-IP
  *   Lite country file (CC BY 4.0, db-ip.com), downloaded once a month into uploads/aw-geo/ as two small lookup files.
  *   No paid service and no lookup per request leaves the server.
- * - Storage: table {prefix}insightweb_visits (day, kind c = country / i = shortened IP, key, count); one write per request.
+ * - Storage: table {prefix}aw_si_visits (day, kind c = country / i = shortened IP, key, count); one write per request.
  *
  * @package insightweb
  */
@@ -20,36 +20,25 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const INSIGHTWEB_VIS_DB      = '1'; // Table version.
-const INSIGHTWEB_VIS_IP_DAYS = 30;
-const INSIGHTWEB_GEO_CRON    = 'insightweb_geo_refresh';
+const AW_SI_VIS_DB      = '1'; // Table version.
+const AW_SI_VIS_IP_DAYS = 30;
+const AW_SI_GEO_CRON    = 'aw_si_geo_refresh';
 
-/** The table name, dual-resolved through the rename ({prefix}insightweb_visits once migrated, else {prefix}aw_si_visits). */
-function insightweb_vis_table(): string {
+/** The table name. */
+function aw_si_vis_table(): string {
 	global $wpdb;
-	static $t = null;
-	if ( null === $t ) {
-		$new = $wpdb->prefix . 'insightweb_visits';
-		$old = $wpdb->prefix . 'aw_si_visits';
-		// Prefer the new name; fall back to the legacy table only when it (and not the new one) exists, so a fresh
-		// install creates and uses wp_insightweb_visits instead of the old name.
-		$t = ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $new ) ) !== $new // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-			&& $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $old ) ) === $old ) // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-			? $old
-			: $new;
-	}
-	return $t;
+	return $wpdb->prefix . 'aw_si_visits';
 }
 
 /** Create or update the table (admin and the daily run only). */
-function insightweb_vis_install(): void {
-	if ( INSIGHTWEB_VIS_DB === get_option( 'insightweb_vis_db' ) ) {
+function aw_si_vis_install(): void {
+	if ( AW_SI_VIS_DB === get_option( 'aw_si_vis_db' ) ) {
 		return;
 	}
 	global $wpdb;
 	require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 	dbDelta(
-		'CREATE TABLE ' . insightweb_vis_table() . ' (
+		'CREATE TABLE ' . aw_si_vis_table() . ' (
 			day date NOT NULL,
 			kind char(1) NOT NULL,
 			k varchar(45) NOT NULL,
@@ -57,16 +46,16 @@ function insightweb_vis_install(): void {
 			PRIMARY KEY  (day,kind,k)
 		) ' . $wpdb->get_charset_collate() . ';'
 	);
-	update_option( 'insightweb_vis_db', INSIGHTWEB_VIS_DB, true );
+	update_option( 'aw_si_vis_db', AW_SI_VIS_DB, true );
 }
-add_action( 'admin_init', 'insightweb_vis_install' );
+add_action( 'admin_init', 'aw_si_vis_install' );
 
 /**
  * An IP address shortened: IPv4 /24, IPv6 /48. '' when not an address.
  *
  * @param string $ip Address.
  */
-function insightweb_vis_short_ip( string $ip ): string {
+function aw_si_vis_short_ip( string $ip ): string {
 	$bin = filter_var( $ip, FILTER_VALIDATE_IP ) ? inet_pton( $ip ) : false;
 	if ( false === $bin ) {
 		return '';
@@ -76,7 +65,7 @@ function insightweb_vis_short_ip( string $ip ): string {
 }
 
 /** Where the country lookup files live. */
-function insightweb_geo_dir(): string {
+function aw_si_geo_dir(): string {
 	return trailingslashit( wp_upload_dir( null, false )['basedir'] ) . 'aw-geo/';
 }
 
@@ -86,13 +75,13 @@ function insightweb_geo_dir(): string {
  *
  * @param string $ip Full address (used for the lookup only, never stored).
  */
-function insightweb_geo_country( string $ip ): string {
+function aw_si_geo_country( string $ip ): string {
 	$bin = filter_var( $ip, FILTER_VALIDATE_IP ) ? inet_pton( $ip ) : false;
 	if ( false === $bin ) {
 		return '';
 	}
 	$w    = strlen( $bin );
-	$file = insightweb_geo_dir() . ( 4 === $w ? 'v4.bin' : 'v6.bin' );
+	$file = aw_si_geo_dir() . ( 4 === $w ? 'v4.bin' : 'v6.bin' );
 	$size = is_readable( $file ) ? (int) filesize( $file ) : 0;
 	$rec  = 2 * $w + 2;
 	if ( $size < $rec ) {
@@ -123,56 +112,56 @@ function insightweb_geo_country( string $ip ): string {
 }
 
 /** The visitor's country: the CDN's header when sent, else the lookup files; '--' when unknown. */
-function insightweb_vis_country(): string {
-	foreach ( (array) apply_filters( 'insightweb_vis_country_headers', array( 'HTTP_CF_IPCOUNTRY', 'HTTP_X_COUNTRY_CODE', 'HTTP_X_GEO_COUNTRY', 'HTTP_X_HCDN_COUNTRY', 'GEOIP_COUNTRY_CODE' ) ) as $h ) {
+function aw_si_vis_country(): string {
+	foreach ( (array) apply_filters( 'aw_si_vis_country_headers', array( 'HTTP_CF_IPCOUNTRY', 'HTTP_X_COUNTRY_CODE', 'HTTP_X_GEO_COUNTRY', 'HTTP_X_HCDN_COUNTRY', 'GEOIP_COUNTRY_CODE' ) ) as $h ) {
 		$v = isset( $_SERVER[ $h ] ) ? strtoupper( sanitize_key( wp_unslash( $_SERVER[ $h ] ) ) ) : '';
 		if ( preg_match( '/^[A-Z]{2}$/', $v ) && 'XX' !== $v ) {
 			return $v;
 		}
 	}
 	$ip = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : ''; // LiteSpeed puts the visitor's address here (kits-core preview.php).
-	$cc = insightweb_geo_country( $ip );
+	$cc = aw_si_geo_country( $ip );
 	return '' !== $cc ? $cc : '--';
 }
 
 /** At the end of a front-end request: one more for its country and its shortened address (one query). */
-function insightweb_vis_count(): void {
-	if ( INSIGHTWEB_VIS_DB !== get_option( 'insightweb_vis_db' ) || is_admin() || wp_doing_cron() || wp_doing_ajax() || ( defined( 'WP_CLI' ) && WP_CLI ) || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) || is_user_logged_in() ) {
+function aw_si_vis_count(): void {
+	if ( AW_SI_VIS_DB !== get_option( 'aw_si_vis_db' ) || is_admin() || wp_doing_cron() || wp_doing_ajax() || ( defined( 'WP_CLI' ) && WP_CLI ) || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) || is_user_logged_in() ) {
 		return;
 	}
 	$ip  = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
-	$sip = insightweb_vis_short_ip( $ip );
+	$sip = aw_si_vis_short_ip( $ip );
 	$day = wp_date( 'Y-m-d' );
 	global $wpdb;
-	$t = insightweb_vis_table();
+	$t = aw_si_vis_table();
 	if ( '' !== $sip ) {
-		$wpdb->query( $wpdb->prepare( "INSERT INTO %i (day, kind, k, n) VALUES (%s, 'c', %s, 1), (%s, 'i', %s, 1) ON DUPLICATE KEY UPDATE n = n + 1", $t, $day, insightweb_vis_country(), $day, $sip ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- our own counter table
+		$wpdb->query( $wpdb->prepare( "INSERT INTO %i (day, kind, k, n) VALUES (%s, 'c', %s, 1), (%s, 'i', %s, 1) ON DUPLICATE KEY UPDATE n = n + 1", $t, $day, aw_si_vis_country(), $day, $sip ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- our own counter table
 	} else {
-		$wpdb->query( $wpdb->prepare( "INSERT INTO %i (day, kind, k, n) VALUES (%s, 'c', %s, 1) ON DUPLICATE KEY UPDATE n = n + 1", $t, $day, insightweb_vis_country() ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- our own counter table
+		$wpdb->query( $wpdb->prepare( "INSERT INTO %i (day, kind, k, n) VALUES (%s, 'c', %s, 1) ON DUPLICATE KEY UPDATE n = n + 1", $t, $day, aw_si_vis_country() ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- our own counter table
 	}
 }
-add_action( 'shutdown', 'insightweb_vis_count', 0 );
+add_action( 'shutdown', 'aw_si_vis_count', 0 );
 
 /** The daily step: the table in place, shortened addresses older than 30 days deleted, the lookup files refreshed when a month old. */
-function insightweb_vis_daily(): void {
-	insightweb_vis_install();
+function aw_si_vis_daily(): void {
+	aw_si_vis_install();
 	global $wpdb;
-	$t = insightweb_vis_table();
-	$wpdb->query( $wpdb->prepare( "DELETE FROM %i WHERE kind = 'i' AND day < %s", $t, wp_date( 'Y-m-d', time() - INSIGHTWEB_VIS_IP_DAYS * DAY_IN_SECONDS ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- shortened addresses older than 30 days
-	$v4 = insightweb_geo_dir() . 'v4.bin';
-	if ( ( ! is_readable( $v4 ) || filemtime( $v4 ) < time() - 30 * DAY_IN_SECONDS ) && ! wp_next_scheduled( INSIGHTWEB_GEO_CRON ) ) {
-		wp_schedule_single_event( time() + 120, INSIGHTWEB_GEO_CRON ); // its own run: the download and conversion take a while.
+	$t = aw_si_vis_table();
+	$wpdb->query( $wpdb->prepare( "DELETE FROM %i WHERE kind = 'i' AND day < %s", $t, wp_date( 'Y-m-d', time() - AW_SI_VIS_IP_DAYS * DAY_IN_SECONDS ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- shortened addresses older than 30 days
+	$v4 = aw_si_geo_dir() . 'v4.bin';
+	if ( ( ! is_readable( $v4 ) || filemtime( $v4 ) < time() - 30 * DAY_IN_SECONDS ) && ! wp_next_scheduled( AW_SI_GEO_CRON ) ) {
+		wp_schedule_single_event( time() + 120, AW_SI_GEO_CRON ); // its own run: the download and conversion take a while.
 	}
 }
-add_action( INSIGHTWEB_CRON_DAILY, 'insightweb_vis_daily', 21 );
+add_action( AW_SI_CRON_DAILY, 'aw_si_vis_daily', 21 );
 
 /**
  * Download this month's DB-IP Lite country file (last month's when this month's is not out yet) and write the two
  * lookup files. The old files stay until the new ones are complete.
  */
-function insightweb_geo_refresh(): void {
+function aw_si_geo_refresh(): void {
 	require_once ABSPATH . 'wp-admin/includes/file.php';
-	$dir = insightweb_geo_dir();
+	$dir = aw_si_geo_dir();
 	if ( ! wp_mkdir_p( $dir ) ) {
 		return;
 	}
@@ -219,14 +208,14 @@ function insightweb_geo_refresh(): void {
 	if ( $n > 100000 ) { // a whole file (about 600,000 ranges): swap in.
 		rename( $dir . 'v4.bin.new', $dir . 'v4.bin' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.rename_rename
 		rename( $dir . 'v6.bin.new', $dir . 'v6.bin' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.rename_rename
-		update_option( 'insightweb_geo_updated', wp_date( 'Y-m-d' ), false );
+		update_option( 'aw_si_geo_updated', wp_date( 'Y-m-d' ), false );
 	} else {
 		wp_delete_file( $dir . 'v4.bin.new' );
 		wp_delete_file( $dir . 'v6.bin.new' );
 	}
 }
-add_action( INSIGHTWEB_GEO_CRON, 'insightweb_geo_refresh' );
-add_filter( 'insightweb_cron_hooks', fn( $h ) => array_merge( (array) $h, array( INSIGHTWEB_GEO_CRON ) ) );
+add_action( AW_SI_GEO_CRON, 'aw_si_geo_refresh' );
+add_filter( 'aw_si_cron_hooks', fn( $h ) => array_merge( (array) $h, array( AW_SI_GEO_CRON ) ) );
 
 /**
  * Rows for the tab.
@@ -236,9 +225,9 @@ add_filter( 'insightweb_cron_hooks', fn( $h ) => array_merge( (array) $h, array(
  * @param int    $limit Rows.
  * @return array<string,int> Key => count over the days.
  */
-function insightweb_vis_top( string $kind, int $days, int $limit ): array {
+function aw_si_vis_top( string $kind, int $days, int $limit ): array {
 	global $wpdb;
-	$t    = insightweb_vis_table();
+	$t    = aw_si_vis_table();
 	$rows = $wpdb->get_results( $wpdb->prepare( "SELECT k, SUM(n) AS n FROM %i WHERE kind = %s AND day >= %s GROUP BY k ORDER BY n DESC LIMIT %d", $t, $kind, $days > 0 ? wp_date( 'Y-m-d', time() - ( $days - 1 ) * DAY_IN_SECONDS ) : '1970-01-01', $limit ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- our own counter table
 	$out  = array();
 	foreach ( (array) $rows as $r ) {
@@ -248,19 +237,19 @@ function insightweb_vis_top( string $kind, int $days, int $limit ): array {
 }
 
 /** The visitors section of the Server tab. */
-function insightweb_vis_section(): void {
+function aw_si_vis_section(): void {
 	echo '<h2>' . esc_html__( 'Visitors', 'insightweb' ) . '</h2>';
-	if ( INSIGHTWEB_VIS_DB !== get_option( 'insightweb_vis_db' ) ) {
+	if ( AW_SI_VIS_DB !== get_option( 'aw_si_vis_db' ) ) {
 		echo '<p>' . esc_html__( 'Counting starts once this page has been opened after the update.', 'insightweb' ) . '</p>';
 		return;
 	}
-	$geo = (string) get_option( 'insightweb_geo_updated' );
+	$geo = (string) get_option( 'aw_si_geo_updated' );
 	echo '<p class="description">' . esc_html__( 'Front-end requests the server answered (not logged-in users, wp-admin, the REST API or cron; not pages the CDN or the server\'s page cache answered from a stored copy), by country and by shortened address (IPv4 with the last number zeroed, IPv6 to 48 bits). Shortened addresses are kept 30 days, countries for good.', 'insightweb' ) . ' ';
 	/* translators: %s: date the country file was downloaded, or "not yet". */
 	echo esc_html( sprintf( __( 'Countries: the CDN\'s country header when sent, else IP Geolocation by DB-IP (db-ip.com, CC BY 4.0), file of %s.', 'insightweb' ), '' !== $geo ? $geo : __( 'not yet', 'insightweb' ) ) ) . '</p>';
 
 	global $wpdb;
-	$t     = insightweb_vis_table();
+	$t     = aw_si_vis_table();
 	$cells = array();
 	for ( $i = 0; $i < 7; $i++ ) {
 		$day = wp_date( 'Y-m-d', time() - $i * DAY_IN_SECONDS );
@@ -277,15 +266,15 @@ function insightweb_vis_section(): void {
 		$cells[] = array(
 			'day'       => esc_html( wp_date( 'j M Y', strtotime( $day . ' 12:00:00' ) ) ),
 			'requests'  => esc_html( number_format_i18n( array_sum( $cm ) ) ),
-			'countries' => esc_html( insightweb_srv_list( $cm, 5 ) ),
-			'addresses' => esc_html( insightweb_srv_list( $im, 5 ) ),
+			'countries' => esc_html( aw_si_srv_list( $cm, 5 ) ),
+			'addresses' => esc_html( aw_si_srv_list( $im, 5 ) ),
 			'_sort'     => array(
 				'day'      => $day,
 				'requests' => array_sum( $cm ),
 			),
 		);
 	}
-	insightweb_simple_table(
+	aw_si_simple_table(
 		'visitor-days',
 		array(
 			'day'       => esc_html__( 'Day', 'insightweb' ),
@@ -304,8 +293,8 @@ function insightweb_vis_section(): void {
 
 	foreach (
 		array(
-			'visitor-countries' => array( __( 'Top countries, all days', 'insightweb' ), __( 'Country', 'insightweb' ), insightweb_vis_top( 'c', 0, 10 ) ),
-			'visitor-addresses' => array( __( 'Top shortened addresses, 30 days', 'insightweb' ), __( 'Shortened address', 'insightweb' ), insightweb_vis_top( 'i', INSIGHTWEB_VIS_IP_DAYS, 10 ) ),
+			'visitor-countries' => array( __( 'Top countries, all days', 'insightweb' ), __( 'Country', 'insightweb' ), aw_si_vis_top( 'c', 0, 10 ) ),
+			'visitor-addresses' => array( __( 'Top shortened addresses, 30 days', 'insightweb' ), __( 'Shortened address', 'insightweb' ), aw_si_vis_top( 'i', AW_SI_VIS_IP_DAYS, 10 ) ),
 		) as $name => $sec
 	) {
 		echo '<h3>' . esc_html( $sec[0] ) . '</h3>';
@@ -324,7 +313,7 @@ function insightweb_vis_section(): void {
 				),
 			);
 		}
-		insightweb_simple_table(
+		aw_si_simple_table(
 			$name,
 			array(
 				'key'      => esc_html( $sec[1] ),

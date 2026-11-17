@@ -557,8 +557,8 @@ add_action(
 			wp_set_option_autoload( AW_SEO_SETTINGS, true );
 		}
 		// An old link to Search Insights' module tab: its numbers are on Search Insights → Settings (InsightWeb).
-		if ( 'aw-seo-settings' === sanitize_key( wp_unslash( $_GET['page'] ?? '' ) ) && 'search-insights' === sanitize_key( wp_unslash( $_GET['tab'] ?? '' ) ) && function_exists( 'insightweb_url' ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- navigation only
-			wp_safe_redirect( insightweb_url( 'settings' ) );
+		if ( 'aw-seo-settings' === sanitize_key( wp_unslash( $_GET['page'] ?? '' ) ) && 'search-insights' === sanitize_key( wp_unslash( $_GET['tab'] ?? '' ) ) && function_exists( 'aw_si_url' ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- navigation only
+			wp_safe_redirect( aw_si_url( 'settings' ) );
 			exit;
 		}
 	}

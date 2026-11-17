@@ -3,7 +3,7 @@
  * Rising: what each source's latest run kept and dropped, and why (12 Nov 2026: Rising showed New (0) for days with no
  * way to see what the sources had seen). The workers send counts for their own filters (trending, kept, excluded) and
  * may send dropped: [ { term, filter } ]; terms the site itself refuses (not English, empty, no valid date) are
- * always recorded. Kept in the run log (insightweb_runs), at most INSIGHTWEB_RISING_MAX_DROPPED terms per run. Loaded by
+ * always recorded. Kept in the run log (aw_si_runs), at most AW_SI_RISING_MAX_DROPPED terms per run. Loaded by
  * rising.php.
  *
  * @package insightweb
@@ -13,16 +13,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const INSIGHTWEB_RISING_MAX_DROPPED = 100; // Per run: dropped terms kept in the run log, with the filter that dropped each.
+const AW_SI_RISING_MAX_DROPPED = 100; // Per run: dropped terms kept in the run log, with the filter that dropped each.
 
 /**
- * The terms a worker says its own filters dropped: [ [term, filter], … ], at most INSIGHTWEB_RISING_MAX_DROPPED. The worker
+ * The terms a worker says its own filters dropped: [ [term, filter], … ], at most AW_SI_RISING_MAX_DROPPED. The worker
  * may send dropped: [ { term, filter } ]; anything else is ignored.
  *
  * @param mixed $list The body's dropped field.
  * @return array<int, array{0: string, 1: string}>
  */
-function insightweb_rising_worker_dropped( $list ): array {
+function aw_si_rising_worker_dropped( $list ): array {
 	$out = array();
 	foreach ( is_array( $list ) ? $list : array() as $r ) {
 		if ( ! is_array( $r ) || ! is_scalar( $r['term'] ?? null ) || ! is_scalar( $r['filter'] ?? null ) ) {
@@ -32,7 +32,7 @@ function insightweb_rising_worker_dropped( $list ): array {
 		if ( '' !== $term ) {
 			$out[] = array( $term, 'worker:' . mb_substr( sanitize_key( (string) $r['filter'] ), 0, 40 ) );
 		}
-		if ( count( $out ) >= INSIGHTWEB_RISING_MAX_DROPPED ) {
+		if ( count( $out ) >= AW_SI_RISING_MAX_DROPPED ) {
 			break;
 		}
 	}
@@ -44,7 +44,7 @@ function insightweb_rising_worker_dropped( $list ): array {
  *
  * @param string $why bad-row, not-english, empty, db-error, or worker:<filter>.
  */
-function insightweb_rising_drop_label( string $why ): string {
+function aw_si_rising_drop_label( string $why ): string {
 	$words = array(
 		'bad-row'            => __( 'no date within the last 400 days, or not text (site)', 'insightweb' ),
 		'not-english'        => __( 'not English: Hindi and Hinglish wait for a later phase (site)', 'insightweb' ),
@@ -67,7 +67,7 @@ function insightweb_rising_drop_label( string $why ): string {
  * @param array $info The run's info.
  * @return array{seen: int|null, sent: int, worker_dropped: int|null, excluded: int, stored: int, terms: array}
  */
-function insightweb_rising_drop_counts( array $info ): array {
+function aw_si_rising_drop_counts( array $info ): array {
 	$w        = (array) ( $info['worker'] ?? array() );
 	$sent     = (int) ( $info['rising'] ?? 0 );
 	$excluded = (int) ( $w['excluded'] ?? 0 );
@@ -85,15 +85,15 @@ function insightweb_rising_drop_counts( array $info ): array {
 }
 
 /** Rising tab section: each worker source's latest run, what it saw, kept and dropped, and why. */
-function insightweb_rising_drops_section(): void {
-	$runs = insightweb_runs();
+function aw_si_rising_drops_section(): void {
+	$runs = aw_si_runs();
 	$rows = array();
-	foreach ( insightweb_rising_sources() as $key => $s ) {
+	foreach ( aw_si_rising_sources() as $key => $s ) {
 		$r = $runs[ 'rising_' . $key ] ?? array();
-		if ( empty( $s['worker'] ) || empty( $r['ok'] ) || ( 'gdelt' === $key && ! insightweb_gdelt_on() ) ) {
+		if ( empty( $s['worker'] ) || empty( $r['ok'] ) || ( 'gdelt' === $key && ! aw_si_gdelt_on() ) ) {
 			continue;
 		}
-		$rows[ $key ] = array( $s['label'], (int) $r['ok'], insightweb_rising_drop_counts( (array) ( $r['info'] ?? array() ) ) );
+		$rows[ $key ] = array( $s['label'], (int) $r['ok'], aw_si_rising_drop_counts( (array) ( $r['info'] ?? array() ) ) );
 	}
 	echo '<h2>' . esc_html__( 'Latest run per source: kept and dropped', 'insightweb' ) . '</h2>';
 	if ( ! $rows ) {
@@ -127,10 +127,10 @@ function insightweb_rising_drops_section(): void {
 			),
 		);
 		foreach ( $c['terms'] as $t ) {
-			$terms[] = array( $label, (string) ( $t[0] ?? '' ), insightweb_rising_drop_label( (string) ( $t[1] ?? '' ) ) );
+			$terms[] = array( $label, (string) ( $t[0] ?? '' ), aw_si_rising_drop_label( (string) ( $t[1] ?? '' ) ) );
 		}
 	}
-	insightweb_simple_table(
+	aw_si_simple_table(
 		'rising-runs',
 		array(
 			'source'  => esc_html__( 'Source', 'insightweb' ),
@@ -158,7 +158,7 @@ function insightweb_rising_drops_section(): void {
 				'filter' => esc_html( $t[2] ),
 			);
 		}
-		insightweb_simple_table(
+		aw_si_simple_table(
 			'rising-dropped',
 			array(
 				'source' => esc_html__( 'Source', 'insightweb' ),

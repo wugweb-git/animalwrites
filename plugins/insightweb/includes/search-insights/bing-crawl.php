@@ -6,7 +6,7 @@
  *   4xx and 5xx answers, blocked by robots.txt) into obs src bing, period day, metrics crawl-pages, crawl-errors,
  *   in-index, code-4xx, code-5xx, robots-blocked; GetCrawlIssues counted in the run log.
  * - Keyword stats, monthly on the 1st at 07:00 IST: GetKeywordStats (Bing's weekly searches across all sites, India,
- *   English) for the P1 and quick-win keywords, at most INSIGHTWEB_BING_KW a run, into obs src bing, period week, metric
+ *   English) for the P1 and quick-win keywords, at most AW_SI_BING_KW a run, into obs src bing, period week, metric
  *   kw-volume (value = Impressions, txt = broad impressions), kw_id set. Only the last 12 weeks are kept.
  *
  * @package insightweb
@@ -16,10 +16,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const INSIGHTWEB_BING_CRAWL_CRON = 'insightweb_bing_crawl';
-const INSIGHTWEB_BING_KW_CRON    = 'insightweb_bing_kw';
-const INSIGHTWEB_BING_KW         = 60;
-const INSIGHTWEB_BING_CRAWL_MAP  = array(
+const AW_SI_BING_CRAWL_CRON = 'aw_si_bing_crawl';
+const AW_SI_BING_KW_CRON    = 'aw_si_bing_kw';
+const AW_SI_BING_KW         = 60;
+const AW_SI_BING_CRAWL_MAP  = array(
 	'CrawledPages'       => 'crawl-pages',
 	'CrawlErrors'        => 'crawl-errors',
 	'InIndex'            => 'in-index',
@@ -29,9 +29,9 @@ const INSIGHTWEB_BING_CRAWL_MAP  = array(
 );
 
 add_filter(
-	'insightweb_sources',
+	'aw_si_sources',
 	function ( $s ) {
-		if ( function_exists( 'insightweb_bing_on' ) && insightweb_bing_on() ) {
+		if ( function_exists( 'aw_si_bing_on' ) && aw_si_bing_on() ) {
 			$s['bing_crawl'] = array(
 				'label' => __( 'Bing crawl (weekly)', 'insightweb' ),
 				'every' => WEEK_IN_SECONDS,
@@ -44,20 +44,20 @@ add_filter(
 		return $s;
 	}
 );
-add_filter( 'insightweb_cron_hooks', fn( $h ) => array_merge( (array) $h, array( INSIGHTWEB_BING_CRAWL_CRON, INSIGHTWEB_BING_KW_CRON ) ) );
+add_filter( 'aw_si_cron_hooks', fn( $h ) => array_merge( (array) $h, array( AW_SI_BING_CRAWL_CRON, AW_SI_BING_KW_CRON ) ) );
 
 add_action(
 	'init',
 	function () {
-		if ( get_option( 'insightweb_off' ) ) {
+		if ( get_option( 'aw_si_off' ) ) {
 			return;
 		}
 		$tz = wp_timezone();
-		if ( ! wp_next_scheduled( INSIGHTWEB_BING_CRAWL_CRON ) ) {
-			wp_schedule_event( ( new DateTimeImmutable( 'next monday 06:45', $tz ) )->getTimestamp(), 'weekly', INSIGHTWEB_BING_CRAWL_CRON );
+		if ( ! wp_next_scheduled( AW_SI_BING_CRAWL_CRON ) ) {
+			wp_schedule_event( ( new DateTimeImmutable( 'next monday 06:45', $tz ) )->getTimestamp(), 'weekly', AW_SI_BING_CRAWL_CRON );
 		}
-		if ( ! wp_next_scheduled( INSIGHTWEB_BING_KW_CRON ) ) {
-			wp_schedule_single_event( ( new DateTimeImmutable( 'first day of next month 07:00', $tz ) )->getTimestamp(), INSIGHTWEB_BING_KW_CRON ); // Booked again after each run: WordPress has no monthly recurrence.
+		if ( ! wp_next_scheduled( AW_SI_BING_KW_CRON ) ) {
+			wp_schedule_single_event( ( new DateTimeImmutable( 'first day of next month 07:00', $tz ) )->getTimestamp(), AW_SI_BING_KW_CRON ); // Booked again after each run: WordPress has no monthly recurrence.
 		}
 	}
 );
@@ -67,32 +67,32 @@ add_action(
  *
  * @param bool $dry Read, do not write.
  */
-function insightweb_bing_crawl_run( bool $dry = false ): array {
-	if ( get_option( 'insightweb_off' ) || ! insightweb_ready() || ! function_exists( 'insightweb_bing_on' ) || ! insightweb_bing_on() ) {
+function aw_si_bing_crawl_run( bool $dry = false ): array {
+	if ( get_option( 'aw_si_off' ) || ! aw_si_ready() || ! function_exists( 'aw_si_bing_on' ) || ! aw_si_bing_on() ) {
 		return array( 'off' => true );
 	}
 	if ( ! $dry ) {
-		insightweb_run_start( 'bing_crawl' );
+		aw_si_run_start( 'bing_crawl' );
 	}
-	$stats = insightweb_bing_call( 'GetCrawlStats' );
+	$stats = aw_si_bing_call( 'GetCrawlStats' );
 	if ( is_wp_error( $stats ) ) {
 		if ( ! $dry ) {
-			insightweb_run_fail( 'bing_crawl', $stats->get_error_message() );
+			aw_si_run_fail( 'bing_crawl', $stats->get_error_message() );
 		}
 		return array( 'error' => $stats->get_error_message() );
 	}
-	$issues = insightweb_bing_call( 'GetCrawlIssues' );
+	$issues = aw_si_bing_call( 'GetCrawlIssues' );
 	$rows   = 0;
 	$up_to  = '';
-	$keep   = ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( '-' . ( insightweb_bing_days() ) . ' days' )->format( 'Y-m-d' );
+	$keep   = ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( '-' . ( aw_si_bing_days() ) . ' days' )->format( 'Y-m-d' );
 	foreach ( (array) $stats as $r ) {
-		$d = insightweb_bing_date( (string) ( $r['Date'] ?? '' ) );
+		$d = aw_si_bing_date( (string) ( $r['Date'] ?? '' ) );
 		if ( '' === $d || $d < $keep ) {
 			continue; // Days the rollup already folded into months are not stored again.
 		}
-		foreach ( INSIGHTWEB_BING_CRAWL_MAP as $field => $metric ) {
+		foreach ( AW_SI_BING_CRAWL_MAP as $field => $metric ) {
 			if ( isset( $r[ $field ] ) && ! $dry ) {
-				insightweb_obs_put( 0, '', 'bing', $metric, 'day', $d, array( 'value' => (float) $r[ $field ] ) );
+				aw_si_obs_put( 0, '', 'bing', $metric, 'day', $d, array( 'value' => (float) $r[ $field ] ) );
 			}
 		}
 		++$rows;
@@ -109,39 +109,39 @@ function insightweb_bing_crawl_run( bool $dry = false ): array {
 		$info['warnings'] = array( $issues->get_error_message() );
 	}
 	if ( ! $dry ) {
-		insightweb_run_ok( 'bing_crawl', $info );
+		aw_si_run_ok( 'bing_crawl', $info );
 	}
 	return $info;
 }
-add_action( INSIGHTWEB_BING_CRAWL_CRON, fn() => insightweb_bing_crawl_run() );
+add_action( AW_SI_BING_CRAWL_CRON, fn() => aw_si_bing_crawl_run() );
 
 /**
  * The monthly keyword-volume run for the P1 and quick-win keywords (English only).
  *
  * @param bool $dry Read, do not write.
  */
-function insightweb_bing_kw_run( bool $dry = false ): array {
+function aw_si_bing_kw_run( bool $dry = false ): array {
 	if ( ! $dry ) {
-		wp_clear_scheduled_hook( INSIGHTWEB_BING_KW_CRON ); // The init hook books next month's run.
+		wp_clear_scheduled_hook( AW_SI_BING_KW_CRON ); // The init hook books next month's run.
 	}
-	if ( get_option( 'insightweb_off' ) || ! insightweb_ready() || ! function_exists( 'insightweb_bing_on' ) || ! insightweb_bing_on() ) {
+	if ( get_option( 'aw_si_off' ) || ! aw_si_ready() || ! function_exists( 'aw_si_bing_on' ) || ! aw_si_bing_on() ) {
 		return array( 'off' => true );
 	}
 	global $wpdb;
 	if ( ! $dry ) {
-		insightweb_run_start( 'bing_kw' );
+		aw_si_run_start( 'bing_kw' );
 	}
-	$k     = insightweb_kw_table( 'keywords' );
-	$o     = insightweb_kw_table( 'obs' );
-	$quick = insightweb_view_sql( 'quick' );
-	$p1    = insightweb_view_sql( 'p1' );
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- $p1 and $quick are the fixed view conditions of insightweb_view_sql(); the table is %i.
-	$kws  = (array) $wpdb->get_results( $wpdb->prepare( "SELECT id, label FROM %i WHERE ( {$p1} OR {$quick} ) AND COALESCE(lang, 'en') = 'en' AND label NOT LIKE %s ORDER BY impr28 DESC LIMIT %d", $k, '%' . $wpdb->esc_like( '{' ) . '%', INSIGHTWEB_BING_KW ) );
+	$k     = aw_si_table( 'keywords' );
+	$o     = aw_si_table( 'obs' );
+	$quick = aw_si_view_sql( 'quick' );
+	$p1    = aw_si_view_sql( 'p1' );
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- $p1 and $quick are the fixed view conditions of aw_si_view_sql(); the table is %i.
+	$kws  = (array) $wpdb->get_results( $wpdb->prepare( "SELECT id, label FROM %i WHERE ( {$p1} OR {$quick} ) AND COALESCE(lang, 'en') = 'en' AND label NOT LIKE %s ORDER BY impr28 DESC LIMIT %d", $k, '%' . $wpdb->esc_like( '{' ) . '%', AW_SI_BING_KW ) );
 	$rows = 0;
 	$fail = array();
 	$cut  = ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( '-84 days' )->format( 'Y-m-d' );
 	foreach ( $kws as $kw ) {
-		$r = insightweb_bing_call(
+		$r = aw_si_bing_call(
 			'GetKeywordStats',
 			array(
 				'q'        => (string) $kw->label,
@@ -157,12 +157,12 @@ function insightweb_bing_kw_run( bool $dry = false ): array {
 			continue;
 		}
 		foreach ( (array) $r as $w ) {
-			$d = insightweb_bing_date( (string) ( $w['Date'] ?? '' ) );
+			$d = aw_si_bing_date( (string) ( $w['Date'] ?? '' ) );
 			if ( '' === $d || $d < $cut ) {
 				continue;
 			}
 			if ( ! $dry ) {
-				insightweb_obs_put(
+				aw_si_obs_put(
 					(int) $kw->id,
 					'',
 					'bing',
@@ -188,9 +188,9 @@ function insightweb_bing_kw_run( bool $dry = false ): array {
 	// Only the last 12 weeks of volumes are kept.
 	$wpdb->query( $wpdb->prepare( "DELETE FROM %i WHERE src = 'bing' AND metric = 'kw-volume' AND period = 'week' AND d < %s", $o, $cut ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	if ( ! $rows && $fail ) {
-		insightweb_run_fail( 'bing_kw', (string) $fail[0] );
+		aw_si_run_fail( 'bing_kw', (string) $fail[0] );
 	} else {
-		insightweb_run_ok(
+		aw_si_run_ok(
 			'bing_kw',
 			array(
 				'rows'     => $rows,
@@ -201,16 +201,16 @@ function insightweb_bing_kw_run( bool $dry = false ): array {
 	}
 	return array( 'rows' => $rows );
 }
-add_action( INSIGHTWEB_BING_KW_CRON, fn() => insightweb_bing_kw_run() );
+add_action( AW_SI_BING_KW_CRON, fn() => aw_si_bing_kw_run() );
 
 /** Overview box: Bing's crawl over the last 28 days and the last 12 weeks. */
-function insightweb_box_bing_crawl(): void {
+function aw_si_box_bing_crawl(): void {
 	global $wpdb;
-	if ( ! insightweb_ready() ) {
+	if ( ! aw_si_ready() ) {
 		echo '<p>' . esc_html__( 'Nothing yet.', 'insightweb' ) . '</p>';
 		return;
 	}
-	$o    = insightweb_kw_table( 'obs' );
+	$o    = aw_si_table( 'obs' );
 	$from = ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( '-84 days' )->format( 'Y-m-d' );
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT YEARWEEK(d, 3) wk, MIN(d) since, MAX(d) last, SUM(IF(metric = 'crawl-pages', value, 0)) pages, SUM(IF(metric = 'crawl-errors', value, 0)) errors, SUM(IF(metric = 'code-4xx', value, 0)) c4, SUM(IF(metric = 'code-5xx', value, 0)) c5, SUM(IF(metric = 'robots-blocked', value, 0)) robots, MAX(IF(metric = 'in-index', value, 0)) idx FROM %i WHERE src = 'bing' AND period = 'day' AND metric IN ('crawl-pages', 'crawl-errors', 'code-4xx', 'code-5xx', 'robots-blocked', 'in-index') AND d >= %s GROUP BY wk ORDER BY wk DESC LIMIT 12", $o, $from ) );

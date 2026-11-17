@@ -16,8 +16,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 require_once __DIR__ . '/links-import.php'; // the Search Console Links import, DR and the last read per source (12 Nov 2026)
 
-/** Link types and their labels; '' is unsorted. Filter insightweb_link_types adds more. */
-function insightweb_link_types(): array {
+/** Link types and their labels; '' is unsorted. Filter aw_si_link_types adds more. */
+function aw_si_link_types(): array {
 	$types = array(
 		'press'        => __( 'Press', 'insightweb' ),
 		'organisation' => __( 'Organisation', 'insightweb' ),
@@ -26,7 +26,7 @@ function insightweb_link_types(): array {
 		'copy'         => __( 'Copy', 'insightweb' ),
 		'spam'         => __( 'Spam', 'insightweb' ),
 	);
-	return (array) apply_filters( 'insightweb_link_types', $types ); // alerts.php adds Mention.
+	return (array) apply_filters( 'aw_si_link_types', $types ); // alerts.php adds Mention.
 }
 
 /**
@@ -34,7 +34,7 @@ function insightweb_link_types(): array {
  *
  * @param string $anchor Anchor text.
  */
-function insightweb_link_auto_type( string $anchor ): string {
+function aw_si_link_auto_type( string $anchor ): string {
 	return preg_match( '/buy backlinks|seo services|casino|poker|betting/i', $anchor ) ? 'spam' : '';
 }
 
@@ -46,10 +46,10 @@ function insightweb_link_auto_type( string $anchor ): string {
  *                 today), source, type, note.
  * @return int 1 added, 2 updated, 0 unchanged, -1 failed or not valid.
  */
-function insightweb_link_put( array $l ): int {
+function aw_si_link_put( array $l ): int {
 	global $wpdb;
 	$from   = esc_url_raw( trim( (string) ( $l['from_url'] ?? '' ) ) );
-	$domain = insightweb_link_domain( '' !== trim( (string) ( $l['domain'] ?? '' ) ) ? (string) $l['domain'] : $from );
+	$domain = aw_si_link_domain( '' !== trim( (string) ( $l['domain'] ?? '' ) ) ? (string) $l['domain'] : $from );
 	$to     = esc_url_raw( trim( (string) ( $l['linked_url'] ?? '' ) ) );
 	if ( '' === $domain || '' === $to ) {
 		return -1;
@@ -60,12 +60,12 @@ function insightweb_link_put( array $l ): int {
 	$anchor = mb_substr( trim( wp_strip_all_tags( (string) ( $l['anchor'] ?? '' ) ) ), 0, 255 );
 	$source = mb_substr( trim( (string) ( $l['source'] ?? '' ) ), 0, 100 );
 	$type   = (string) ( $l['type'] ?? '' );
-	$type   = isset( insightweb_link_types()[ $type ] ) ? $type : '';
+	$type   = isset( aw_si_link_types()[ $type ] ) ? $type : '';
 	// The key ignores a read date in the source ("…, read 26 Oct 2026", "… (read 1 Dec 2026)"): the same link from the
 	// next monthly read updates its dates instead of adding a row (Codex, PR #91). The date is last_seen.
-	$src_key = insightweb_link_source_key( $source );
+	$src_key = aw_si_link_source_key( $source );
 	$key     = md5( strtolower( '' !== $from ? $from : $domain ) . '|' . $to . '|' . $anchor . '|' . strtolower( $src_key ) );
-	$t      = insightweb_kw_table( 'links' );
+	$t      = aw_si_table( 'links' );
 	$n      = $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		$wpdb->prepare(
 			"INSERT INTO %i (link_key, domain, from_url, linked_url, anchor, links, first_seen, last_seen, source, type, hidden, note) VALUES (%s, %s, %s, %s, %s, %d, %s, %s, %s, %s, %d, %s) ON DUPLICATE KEY UPDATE first_seen = LEAST(COALESCE(first_seen, VALUES(first_seen)), VALUES(first_seen)), last_seen = GREATEST(COALESCE(last_seen, VALUES(last_seen)), VALUES(last_seen)), links = GREATEST(links, VALUES(links))",
@@ -91,7 +91,7 @@ function insightweb_link_put( array $l ): int {
  * The Links tab.
  */
 
-add_filter( 'insightweb_tabs', fn( $tabs ) => (array) $tabs + array( 'links' => __( 'Links', 'insightweb' ) ) );
+add_filter( 'aw_si_tabs', fn( $tabs ) => (array) $tabs + array( 'links' => __( 'Links', 'insightweb' ) ) );
 
 add_filter( 'removable_query_args', fn( $args ) => array_merge( (array) $args, array( 'linked', 'links_imported' ) ) );
 
@@ -105,12 +105,12 @@ add_filter(
 );
 
 /** The bulk and row actions: hide, unhide, and set a type. */
-function insightweb_link_actions(): array {
+function aw_si_link_actions(): array {
 	$out = array(
 		'link_hide'   => __( 'Hide', 'insightweb' ),
 		'link_unhide' => __( 'Unhide', 'insightweb' ),
 	);
-	foreach ( insightweb_link_types() as $key => $label ) {
+	foreach ( aw_si_link_types() as $key => $label ) {
 		/* translators: %s: link type. */
 		$out[ 'link_type_' . $key ] = sprintf( __( 'Set type: %s', 'insightweb' ), $label );
 	}
@@ -119,22 +119,22 @@ function insightweb_link_actions(): array {
 }
 
 /** Before output: screen options, and Hide / Unhide / Set type (then redirect). */
-function insightweb_links_load(): void {
-	if ( insightweb_ready() && function_exists( 'insightweb_links_seed' ) ) {
-		insightweb_links_seed(); // One option read once seeded.
+function aw_si_links_load(): void {
+	if ( aw_si_ready() && function_exists( 'aw_si_links_seed' ) ) {
+		aw_si_links_seed(); // One option read once seeded.
 	}
 	add_screen_option(
 		'per_page',
 		array(
 			'label'   => __( 'Links per page', 'insightweb' ),
 			'default' => 50,
-			'option'  => 'insightweb_links_per_page',
+			'option'  => 'aw_si_links_per_page',
 		)
 	);
 	$action = '';
-	foreach ( array( 'insightweb_link', 'action', 'action2' ) as $field ) {
+	foreach ( array( 'aw_si_link', 'action', 'action2' ) as $field ) {
 		$v = isset( $_REQUEST[ $field ] ) ? sanitize_key( wp_unslash( $_REQUEST[ $field ] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- checked below before any change.
-		if ( isset( insightweb_link_actions()[ $v ] ) ) {
+		if ( isset( aw_si_link_actions()[ $v ] ) ) {
 			$action = $v;
 			break;
 		}
@@ -143,13 +143,13 @@ function insightweb_links_load(): void {
 		return;
 	}
 	check_admin_referer( 'bulk-links' );
-	if ( ! current_user_can( insightweb_cap() ) ) {
+	if ( ! current_user_can( aw_si_cap() ) ) {
 		wp_die( esc_html__( 'Not allowed.', 'insightweb' ), 403 );
 	}
 	$ids = array_filter( array_map( 'intval', (array) wp_unslash( $_REQUEST['link_id'] ?? array() ) ) );
 	if ( $ids ) {
 		global $wpdb;
-		$t  = insightweb_kw_table( 'links' );
+		$t  = aw_si_table( 'links' );
 		$in = implode( ',', $ids );
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name and integers.
 		if ( 'link_hide' === $action || 'link_unhide' === $action ) {
@@ -162,29 +162,29 @@ function insightweb_links_load(): void {
 		}
 		// phpcs:enable
 	}
-	$back = remove_query_arg( array( 'insightweb_link', 'link_id', '_wpnonce', '_wp_http_referer', 'action', 'action2', 'linked' ), wp_get_referer() ? wp_get_referer() : insightweb_url( 'links' ) );
+	$back = remove_query_arg( array( 'aw_si_link', 'link_id', '_wpnonce', '_wp_http_referer', 'action', 'action2', 'linked' ), wp_get_referer() ? wp_get_referer() : aw_si_url( 'links' ) );
 	wp_safe_redirect( add_query_arg( 'linked', $ids ? count( $ids ) : 0, $back ) );
 	exit;
 }
-add_action( 'insightweb_load_tab_links', 'insightweb_links_load' );
+add_action( 'aw_si_load_tab_links', 'aw_si_links_load' );
 
 /** The Links tab: the Bing key notice, what it shows, then the list. */
-function insightweb_links_tab(): void {
+function aw_si_links_tab(): void {
 	require_once __DIR__ . '/class-aw-si-links-table.php';
-	if ( ! function_exists( 'insightweb_bing_on' ) || ! insightweb_bing_on() ) {
+	if ( ! function_exists( 'aw_si_bing_on' ) || ! aw_si_bing_on() ) {
 		wp_admin_notice( esc_html__( 'No Bing Webmaster API key yet: add it under Animal Writes → Keys.', 'insightweb' ), array( 'type' => 'info', 'additional_classes' => array( 'inline' ) ) );
 	}
 	if ( isset( $_GET['linked'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- message only.
 		$n = absint( wp_unslash( $_GET['linked'] ) ); // phpcs:ignore WordPress.Security.NonceVerification -- message only.
 		wp_admin_notice( esc_html( $n ? __( 'Saved.', 'insightweb' ) : __( 'No link was selected, so nothing changed.', 'insightweb' ) ), array( 'type' => $n ? 'success' : 'warning', 'additional_classes' => array( 'inline' ) ) );
 	}
-	insightweb_links_import_notice();
+	aw_si_links_import_notice();
 	echo '<p>' . esc_html__( 'Sites that link to us: from Bing Webmaster (monthly, on the 2nd), the Search Console Links exports imported below, Google Alerts, and the 25–26 Oct lists. Spam is hidden and shows only in the Spam view; nothing here is deleted. Set a type with the bulk actions.', 'insightweb' ) . '</p>';
-	insightweb_links_reads_section();
-	$table = new INSIGHTWEB_Links_Table();
+	aw_si_links_reads_section();
+	$table = new AW_SI_Links_Table();
 	$table->prepare_items();
 	$table->views();
-	echo '<form method="get"><input type="hidden" name="page" value="' . esc_attr( INSIGHTWEB_SLUG ) . '"><input type="hidden" name="tab" value="links">';
+	echo '<form method="get"><input type="hidden" name="page" value="' . esc_attr( AW_SI_SLUG ) . '"><input type="hidden" name="tab" value="links">';
 	$view = isset( $_GET['view'] ) ? sanitize_key( wp_unslash( $_GET['view'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- navigation only.
 	if ( $view ) {
 		echo '<input type="hidden" name="view" value="' . esc_attr( $view ) . '">';
@@ -192,6 +192,6 @@ function insightweb_links_tab(): void {
 	$table->search_box( __( 'Search links', 'insightweb' ), 'aw-si-links' );
 	$table->display();
 	echo '</form>';
-	insightweb_links_import_form();
+	aw_si_links_import_form();
 }
-add_action( 'insightweb_tab_links', 'insightweb_links_tab' );
+add_action( 'aw_si_tab_links', 'aw_si_links_tab' );

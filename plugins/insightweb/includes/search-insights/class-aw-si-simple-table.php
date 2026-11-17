@@ -5,7 +5,7 @@
  * once (per_page), or one page the screen already fetched (per_page and total). Optional sorting of the rows it holds
  * (sortable). It prints no nonce and no bulk actions, so it may sit inside the screen's own form.
  * The same pattern as the other Wugweb plugins' *_simple_table() helpers, each plugin with its own copy and prefix.
- * Loaded by insightweb_simple_table() (admin-table.php) only when a screen renders one.
+ * Loaded by aw_si_simple_table() (admin-table.php) only when a screen renders one.
  *
  * @package insightweb
  */
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Plain rows in a core list table. */
-class INSIGHTWEB_Simple_Table extends WP_List_Table {
+class AW_SI_Simple_Table extends WP_List_Table {
 
 	/** @var array column => label */
 	private $cols;

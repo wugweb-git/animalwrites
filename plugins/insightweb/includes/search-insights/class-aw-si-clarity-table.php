@@ -1,6 +1,6 @@
 <?php
 /**
- * Clarity tab list table: one row per page over 28 days (insightweb_clarity_pages() in clarity.php), with views, search,
+ * Clarity tab list table: one row per page over 28 days (aw_si_clarity_pages() in clarity.php), with views, search,
  * sorting and pagination. Read only.
  *
  * @package insightweb
@@ -17,7 +17,7 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
 /**
  * The Clarity tab list table.
  */
-class INSIGHTWEB_Clarity_Table extends WP_List_Table {
+class AW_SI_Clarity_Table extends WP_List_Table {
 
 	/**
 	 * All rows, read once.
@@ -41,8 +41,8 @@ class INSIGHTWEB_Clarity_Table extends WP_List_Table {
 	private function all(): array {
 		if ( null === $this->all ) {
 			$this->all = array();
-			if ( function_exists( 'insightweb_clarity_pages' ) && function_exists( 'insightweb_clarity_on' ) && insightweb_clarity_on() ) {
-				foreach ( (array) insightweb_clarity_pages( 28 ) as $r ) {
+			if ( function_exists( 'aw_si_clarity_pages' ) && function_exists( 'aw_si_clarity_on' ) && aw_si_clarity_on() ) {
+				foreach ( (array) aw_si_clarity_pages( 28 ) as $r ) {
 					$r = (array) $r;
 					if ( isset( $r['page'] ) && '' !== (string) $r['page'] ) {
 						$r['page']      = (string) $r['page'];
@@ -122,7 +122,7 @@ class INSIGHTWEB_Clarity_Table extends WP_List_Table {
 		$out     = array();
 		foreach ( $this->view_tests() as $key => $test ) {
 			$n           = count( array_filter( $this->all(), $test ) );
-			$out[ $key ] = '<a href="' . esc_url( add_query_arg( 'view', $key, insightweb_url( 'clarity' ) ) ) . '"' . ( $key === $current ? ' class="current" aria-current="page"' : '' ) . '>' . esc_html( $labels[ $key ] ) . ' <span class="count">(' . esc_html( number_format_i18n( $n ) ) . ')</span></a>';
+			$out[ $key ] = '<a href="' . esc_url( add_query_arg( 'view', $key, aw_si_url( 'clarity' ) ) ) . '"' . ( $key === $current ? ' class="current" aria-current="page"' : '' ) . '>' . esc_html( $labels[ $key ] ) . ' <span class="count">(' . esc_html( number_format_i18n( $n ) ) . ')</span></a>';
 		}
 		return $out;
 	}
@@ -152,7 +152,7 @@ class INSIGHTWEB_Clarity_Table extends WP_List_Table {
 				return $asc ? $c : -$c;
 			}
 		);
-		$per                   = $this->get_items_per_page( 'insightweb_clarity_per_page', 50 );
+		$per                   = $this->get_items_per_page( 'aw_si_clarity_per_page', 50 );
 		$paged                 = max( 1, $this->get_pagenum() );
 		$this->items           = array_slice( $rows, ( $paged - 1 ) * $per, $per );
 		$this->_column_headers = array( $this->get_columns(), array(), $this->get_sortable_columns(), 'page' );
@@ -166,7 +166,7 @@ class INSIGHTWEB_Clarity_Table extends WP_List_Table {
 
 	/** Message for an empty list: no token, or no data yet. */
 	public function no_items() {
-		echo esc_html( insightweb_clarity_empty_line() );
+		echo esc_html( aw_si_clarity_empty_line() );
 	}
 
 	/**
@@ -184,7 +184,7 @@ class INSIGHTWEB_Clarity_Table extends WP_List_Table {
 	 * @param array $item Row.
 	 */
 	protected function column_devices( $item ) {
-		return esc_html( insightweb_clarity_devices_txt( $item['devices'] ?? array() ) );
+		return esc_html( aw_si_clarity_devices_txt( $item['devices'] ?? array() ) );
 	}
 
 	/**
@@ -217,11 +217,11 @@ class INSIGHTWEB_Clarity_Table extends WP_List_Table {
 			return esc_html( is_numeric( $v ) ? number_format_i18n( (int) $v ) : '–' );
 		}
 		if ( 'pps' === $col ) {
-			return esc_html( insightweb_clarity_num( $v ) );
+			return esc_html( aw_si_clarity_num( $v ) );
 		}
 		if ( 'active' === $col ) {
-			return esc_html( insightweb_clarity_secs( $v ) );
+			return esc_html( aw_si_clarity_secs( $v ) );
 		}
-		return esc_html( insightweb_clarity_pct( $v ) );
+		return esc_html( aw_si_clarity_pct( $v ) );
 	}
 }

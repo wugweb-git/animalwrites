@@ -26,8 +26,8 @@ add_action(
 add_filter(
 	'plugin_action_links_' . plugin_basename( INSIGHTWEB_FILE ),
 	function ( $links ) {
-		if ( function_exists( 'insightweb_url' ) && current_user_can( insightweb_cap() ) ) {
-			array_unshift( $links, '<a href="' . esc_url( insightweb_url() ) . '">' . esc_html__( 'Search Insights', 'insightweb' ) . '</a>' );
+		if ( function_exists( 'aw_si_url' ) && current_user_can( aw_si_cap() ) ) {
+			array_unshift( $links, '<a href="' . esc_url( aw_si_url() ) . '">' . esc_html__( 'Search Insights', 'insightweb' ) . '</a>' );
 		}
 		return $links;
 	}
@@ -41,11 +41,11 @@ add_filter(
 function insightweb_kits_status_row( $rows ) {
 	/* translators: %s: plugin version. */
 	$text = sprintf( __( 'Active, %s', 'insightweb' ), INSIGHTWEB_VERSION );
-	if ( ! function_exists( 'insightweb_url' ) ) {
+	if ( ! function_exists( 'aw_si_url' ) ) {
 		$fix    = __( 'Does nothing until Kits Core, Animal Writes Core and Rank Math SEO are active.', 'insightweb' );
 		$rows[] = array( __( 'InsightWeb', 'insightweb' ), function_exists( 'kits_status_cell' ) ? kits_status_cell( $text, $fix ) : esc_html( $text . '. ' . $fix ) );
 		return $rows;
 	}
-	$rows[] = array( __( 'InsightWeb', 'insightweb' ), esc_html( $text ) . ' <a href="' . esc_url( insightweb_url() ) . '">' . esc_html__( 'Search Insights', 'insightweb' ) . '</a>' );
+	$rows[] = array( __( 'InsightWeb', 'insightweb' ), esc_html( $text ) . ' <a href="' . esc_url( aw_si_url() ) . '">' . esc_html__( 'Search Insights', 'insightweb' ) . '</a>' );
 	return $rows;
 }

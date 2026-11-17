@@ -23,13 +23,13 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			 */
 			public function status() {
 				global $wpdb;
-				foreach ( insightweb_sources() as $src => $s ) {
-					$r = insightweb_runs()[ $src ] ?? array();
+				foreach ( aw_si_sources() as $src => $s ) {
+					$r = aw_si_runs()[ $src ] ?? array();
 					WP_CLI::log( sprintf( '%-40s ok %s%s', $s['label'], ! empty( $r['ok'] ) ? wp_date( 'Y-m-d H:i', (int) $r['ok'] ) : 'never', ! empty( $r['error'] ) ? ' | error: ' . $r['error']['message'] : '' ) );
 				}
-				if ( insightweb_ready() ) {
+				if ( aw_si_ready() ) {
 					foreach ( array( 'keywords', 'kw_pages', 'obs', 'rising', 'links' ) as $t ) {
-						WP_CLI::log( sprintf( '%-10s %s rows', $t, number_format( (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM %i', insightweb_kw_table( $t ) ) ) ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+						WP_CLI::log( sprintf( '%-10s %s rows', $t, number_format( (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM %i', aw_si_table( $t ) ) ) ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 					}
 				} else {
 					WP_CLI::log( 'Tables not created yet.' );
@@ -49,7 +49,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			 */
 			public function dry_run( $args, $assoc ) {
 				$day = (string) ( $assoc['day'] ?? ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( '-3 days' )->format( 'Y-m-d' ) );
-				$rep = insightweb_dry_report( $day );
+				$rep = aw_si_dry_report( $day );
 				if ( ! empty( $rep['error'] ) ) {
 					WP_CLI::warning( 'Search Console: ' . $rep['error'] );
 				}
@@ -65,7 +65,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			 * The daily run now: tables, seed (once), Search Console, roles, priorities.
 			 */
 			public function run() {
-				$out = insightweb_daily( true );
+				$out = aw_si_daily( true );
 				WP_CLI::log( wp_json_encode( array_diff_key( $out, array( 'gsc' => 1 ) ) ) );
 				WP_CLI::log( 'gsc: ' . wp_json_encode( array_intersect_key( (array) $out['gsc'], array_flip( array( 'rows', 'truncated', 'split', 'error' ) ) ) ) . ' days ' . implode( ', ', array_keys( (array) ( $out['gsc']['days'] ?? array() ) ) ) );
 				$this->status();
@@ -93,7 +93,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 				$dry = ! empty( $assoc['dry'] );
 				$src = (string) ( $args[0] ?? '' );
 				if ( 'ga4' === $src ) {
-					$out = insightweb_ga4_run(
+					$out = aw_si_ga4_run(
 						array_filter(
 							array(
 								'dry'  => $dry,
@@ -102,40 +102,40 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 						)
 					);
 				} elseif ( 'psi' === $src ) {
-					$path = insightweb_psi_pages()[0] ?? '/';
+					$path = aw_si_psi_pages()[0] ?? '/';
 					if ( $dry ) {
 						$out = array(
-							'pages'            => insightweb_psi_pages(),
-							$path . ' mobile'  => insightweb_psi_call( $path, 'mobile' ),
-							$path . ' desktop' => insightweb_psi_call( $path, 'desktop' ),
+							'pages'            => aw_si_psi_pages(),
+							$path . ' mobile'  => aw_si_psi_call( $path, 'mobile' ),
+							$path . ' desktop' => aw_si_psi_call( $path, 'desktop' ),
 						);
 					} else {
-						insightweb_psi_start(); // The first calls now; WP-cron runs the rest every five minutes.
-						$out = get_option( INSIGHTWEB_PSI_QUEUE );
+						aw_si_psi_start(); // The first calls now; WP-cron runs the rest every five minutes.
+						$out = get_option( AW_SI_PSI_QUEUE );
 					}
 				} elseif ( 'clarity' === $src ) {
-					$out = insightweb_clarity_run( array( 'dry' => $dry ) );
+					$out = aw_si_clarity_run( array( 'dry' => $dry ) );
 				} elseif ( 'bing' === $src ) {
-					if ( ! insightweb_bing_on() ) {
+					if ( ! aw_si_bing_on() ) {
 						WP_CLI::error( 'Bing Webmaster is not set up: add its API key under Animal Writes → Keys.' );
 					}
-					$out = insightweb_bing_run( array( 'dry' => $dry ) );
+					$out = aw_si_bing_run( array( 'dry' => $dry ) );
 				} elseif ( 'gsc-types' === $src ) {
-					$out = insightweb_gsc_types_run( $dry );
+					$out = aw_si_gsc_types_run( $dry );
 				} elseif ( 'inspect' === $src ) {
 					if ( $dry ) {
-						$out = array( 'next' => insightweb_inspect_todo( 20 ) );
+						$out = array( 'next' => aw_si_inspect_todo( 20 ) );
 					} else {
-						insightweb_inspect_start(); // The first pages now; WP-cron runs the rest every five minutes.
-						$out = get_option( INSIGHTWEB_INSPECT_QUEUE );
+						aw_si_inspect_start(); // The first pages now; WP-cron runs the rest every five minutes.
+						$out = get_option( AW_SI_INSPECT_QUEUE );
 						unset( $out['todo'] );
 					}
 				} elseif ( 'bing-crawl' === $src ) {
-					$out = insightweb_bing_crawl_run( $dry );
+					$out = aw_si_bing_crawl_run( $dry );
 				} elseif ( 'bing-kw' === $src ) {
-					$out = insightweb_bing_kw_run( $dry );
+					$out = aw_si_bing_kw_run( $dry );
 				} elseif ( 'alerts' === $src ) {
-					$out = insightweb_alerts_run( $dry );
+					$out = aw_si_alerts_run( $dry );
 				} else {
 					WP_CLI::error( 'Source must be ga4, psi, clarity, bing, gsc-types, inspect, bing-crawl, bing-kw or alerts.' );
 				}
@@ -197,10 +197,10 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			 * @param array $assoc Named arguments.
 			 */
 			public function links( $args, $assoc ) {
-				insightweb_install();
+				aw_si_install();
 				$what = (string) ( $args[0] ?? '' );
 				if ( 'seed' === $what ) {
-					$out = insightweb_links_seed( ! empty( $assoc['force'] ) );
+					$out = aw_si_links_seed( ! empty( $assoc['force'] ) );
 					WP_CLI::log( $out ? (string) wp_json_encode( $out ) : 'Already seeded (add --force to run again).' );
 					return;
 				}
@@ -215,15 +215,15 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 					WP_CLI::error( 'Give --to and --from (or --domain).' );
 				}
 				$type = (string) ( $assoc['type'] ?? '' );
-				if ( '' !== $type && ! isset( insightweb_link_types()[ $type ] ) ) {
-					WP_CLI::error( 'Type must be one of: ' . implode( ', ', array_keys( insightweb_link_types() ) ) . '.' );
+				if ( '' !== $type && ! isset( aw_si_link_types()[ $type ] ) ) {
+					WP_CLI::error( 'Type must be one of: ' . implode( ', ', array_keys( aw_si_link_types() ) ) . '.' );
 				}
 				$anchor = (string) ( $assoc['anchor'] ?? '' );
 				$seen   = (string) ( $assoc['seen'] ?? wp_date( 'Y-m-d' ) );
 				if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $seen ) ) {
 					WP_CLI::error( '--seen must be Y-m-d.' );
 				}
-				$n = insightweb_link_put(
+				$n = aw_si_link_put(
 					array(
 						'from_url'   => (string) ( $assoc['from'] ?? '' ),
 						'domain'     => (string) ( $assoc['domain'] ?? '' ),
@@ -233,7 +233,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 						'first_seen' => $seen,
 						'last_seen'  => $seen,
 						'source'     => (string) ( $assoc['source'] ?? 'Search Console Links' ), // The read date is --seen (last_seen).
-						'type'       => '' !== $type ? $type : insightweb_link_auto_type( $anchor ),
+						'type'       => '' !== $type ? $type : aw_si_link_auto_type( $anchor ),
 						'note'       => (string) ( $assoc['note'] ?? '' ),
 					)
 				);
@@ -253,7 +253,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			 * @param array $assoc Named arguments.
 			 */
 			public function rising( $args, $assoc ) {
-				WP_CLI\Utils\format_items( 'table', insightweb_rising_top( (int) ( $assoc['limit'] ?? 10 ) ), array( 'term', 'sources', 'growth', 'first_seen', 'page', 'action', 'status' ) );
+				WP_CLI\Utils\format_items( 'table', aw_si_rising_top( (int) ( $assoc['limit'] ?? 10 ) ), array( 'term', 'sources', 'growth', 'first_seen', 'page', 'action', 'status' ) );
 			}
 
 			/**
@@ -266,9 +266,9 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			 * @param array $assoc Named arguments.
 			 */
 			public function crawl( $args, $assoc ) {
-				$run = insightweb_crawl_run( isset( $assoc['dry-run'] ) );
+				$run = aw_si_crawl_run( isset( $assoc['dry-run'] ) );
 				WP_CLI\Utils\format_items( 'table', $run['checks'], array( 'agent', 'kind', 'code', 'ms', 'result' ) );
-				$problems = insightweb_crawl_problems( $run );
+				$problems = aw_si_crawl_problems( $run );
 				WP_CLI::log( $problems ? 'Problems: ' . implode( '; ', $problems ) : 'Every agent got every page.' );
 			}
 
@@ -290,7 +290,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 				if ( ! in_array( $what, array( 'csv', 'map' ), true ) ) {
 					WP_CLI::error( 'Say csv or map.' );
 				}
-				echo 'csv' === $what ? insightweb_snapshot_csv() : insightweb_keyword_map_md(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- command-line output.
+				echo 'csv' === $what ? aw_si_snapshot_csv() : aw_si_keyword_map_md(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- command-line output.
 			}
 
 			/**
@@ -303,7 +303,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			 * @param array $assoc Named arguments.
 			 */
 			public function rollup( $args, $assoc ) {
-				WP_CLI::log( wp_json_encode( insightweb_rollup( ! empty( $assoc['dry'] ) ) ) );
+				WP_CLI::log( wp_json_encode( aw_si_rollup( ! empty( $assoc['dry'] ) ) ) );
 			}
 
 			/**
@@ -321,11 +321,11 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			 */
 			public function keyphrase_guard( $args, $assoc ) {
 				global $wpdb;
-				if ( ! insightweb_ready() || ! function_exists( 'aw_seo_kp_replay' ) ) {
+				if ( ! aw_si_ready() || ! function_exists( 'aw_seo_kp_replay' ) ) {
 					WP_CLI::error( 'Search Insights tables or the focus-keyword module are not loaded.' );
 				}
-				$k    = insightweb_kw_table( 'keywords' );
-				$pg   = insightweb_kw_table( 'kw_pages' );
+				$k    = aw_si_table( 'keywords' );
+				$pg   = aw_si_table( 'kw_pages' );
 				$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT k.id, k.label, k.impr28, l.obj_type, l.obj_id, p.post_type, p.post_date FROM %i k JOIN %i l ON l.kw_id = k.id AND l.role = 'owner' AND l.obj_type IN ('post', 'term') AND l.obj_id > 0 LEFT JOIN {$wpdb->posts} p ON l.obj_type = 'post' AND p.ID = l.obj_id WHERE k.status = 'conflict' ORDER BY k.impr28 DESC, k.id", $k, $pg ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table names only.
 				$by   = array();
 				foreach ( $rows as $r ) {
@@ -372,7 +372,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 				if ( empty( $assoc['yes'] ) ) {
 					WP_CLI::error( 'Add --yes to delete the Search Insights data.' );
 				}
-				insightweb_drop_all();
+				aw_si_drop_all();
 				WP_CLI::success( 'Search Insights data deleted.' );
 			}
 		}
