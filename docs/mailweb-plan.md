@@ -6,7 +6,7 @@ Status: plan only, for the owner's yes (owner, 11 Nov 2026). No code until it is
 
 - **Data stays as it is.** Every option, the queue table, the webhook routes, hooks, filters, cron hooks, menu slugs and the `mailweb_` prefix keep their names. The one slug change is the owner's menu decision (§10): `mailweb` opens the Dashboard and the Inbox moves to `mailweb-inbox`, with redirects (§5). New REST routes go under MailWeb's own namespace, `mailweb/v1/…`, beside `mailweb/v1/mail-in` (as DirectoryWeb uses `directoryweb/v1`), never under `kits/v1`. MailWeb is 3.2.1 and is already the model for release files (`readme.txt`, `languages/`, `MAILWEB_VERSION`).
 - **Mail rules.** support@ sends outgoing mail and replies; noreply@ sends bulk and automatic mail only; the partnership mailbox is for partnerships only; the public address is contact@. Nothing is sent without the owner's yes. No test sends, so no proof in this plan sends an email. Forms send no email (`aw_ff_mail_off()`, `animal-writes-core/includes/forms-fluentforms.php:34`), and nothing here changes that.
-- **No ship during a FluentCRM send.** `tools/aw-ship.sh` and the Deploy check already refuse (`tools/ci/mail_sending_check.py` reads `aw/v1/deploy-status`). Every phase ships on the owner's yes, one deploy at a time.
+- **No ship during a FluentCRM send.** `tools/kits-ship.sh` and the Deploy check already refuse (`tools/ci/mail_sending_check.py` reads `aw/v1/deploy-status`). Every phase ships on the owner's yes, one deploy at a time.
 - **The admin is the shared Kits Core shell.** MailWeb only registers parts into it.
 
 ## Where the brief and the docs differ
@@ -415,7 +415,7 @@ Each phase is its own branch and PR into `wordpress-dev`, with the review gate b
 - the Deploy check green;
 - Codex comments answered.
 
-The owner merges, then the phase ships with `tools/aw-ship.sh` on the owner's yes, never while a FluentCRM campaign is sending (the gate refuses). **Before any MailWeb deploy:** the AW Mail Guard zip should be installed (Owner, pending since 3 Nov). Without it, the few seconds while MailWeb's folder is replaced send through PHP `mail()`.
+The owner merges, then the phase ships with `tools/kits-ship.sh` on the owner's yes, never while a FluentCRM campaign is sending (the gate refuses). **Before any MailWeb deploy:** the AW Mail Guard zip should be installed (Owner, pending since 3 Nov). Without it, the few seconds while MailWeb's folder is replaced send through PHP `mail()`.
 
 | Phase | What | Size | Risk | Proof (read-only on live; no email sent) |
 |---|---|---|---|---|

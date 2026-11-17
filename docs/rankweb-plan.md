@@ -340,7 +340,7 @@ The PNGs are for places outside wp-admin (listings); the plugin's screens use th
 
 ## 8. Phases
 
-Each phase is its own branch from `origin/wordpress-dev` with the review gate (§6), ships on the owner's yes with `tools/aw-ship.sh` (the Deploy check refuses while a FluentCRM campaign is sending), one deploy at a time.
+Each phase is its own branch from `origin/wordpress-dev` with the review gate (§6), ships on the owner's yes with `tools/kits-ship.sh` (the Deploy check refuses while a FluentCRM campaign is sending), one deploy at a time.
 
 | Phase | What | Size | Risk | Proof |
 |---|---|---|---|---|

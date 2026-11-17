@@ -7,7 +7,7 @@ fails (33 emails on 3 Nov). Reads https://animalwrites.in/wp-json/aw/v1/deploy-s
 Exit 0: not sending, or the endpoint is not on the live site yet (first deploy of it; warns).
 Exit 1: sending, or no clear answer from the site after 3 tries (fails closed). Override in an emergency: run the
 Deploy check from GitHub Actions with "skip_mail_check" ticked.
-Used by .github/workflows/deploy-check.yml and tools/aw-ship.sh.
+Used by .github/workflows/deploy-check.yml and tools/kits-ship.sh.
 """
 import json
 import sys

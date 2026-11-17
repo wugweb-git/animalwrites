@@ -208,7 +208,7 @@ The page slug `aw-search-insights` and every address `admin.php?page=aw-search-i
 
 ## 4. Phase 1 and its ship
 
-Bigger technical work, so branch → PR into `wordpress-dev` → review gate (code-review, wp-plugin-audit, PHPCS on changed files, Deploy check green) → the owner merges → ship with `tools/aw-ship.sh`, on the owner's yes, never during a FluentCRM send (the Deploy check's `mail_sending_check.py` already refuses one).
+Bigger technical work, so branch → PR into `wordpress-dev` → review gate (code-review, wp-plugin-audit, PHPCS on changed files, Deploy check green) → the owner merges → ship with `tools/kits-ship.sh`, on the owner's yes, never during a FluentCRM send (the Deploy check's `mail_sending_check.py` already refuses one).
 
 | Step | What | Size | Risk |
 |---|---|---|---|

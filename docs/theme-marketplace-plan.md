@@ -62,7 +62,7 @@ Move every AW-specific rule out of the generic component CSS into the tenant lay
 ---
 
 ## Gates (per CLAUDE.md "bigger technical work")
-Each PR: `code-review` skill · `wp-plugin-audit` (when Kits Core changes) · PHPCS on changed files · Deploy check green · Codex comments answered. **Live parity proven before any merge.** Owner merges; ship via `tools/aw-ship.sh`. Update the Notion theme page + `docs/pending.md` as items land. Commit trailer `Co-Authored-By: Wugweb <admin@wugweb.com>`.
+Each PR: `code-review` skill · `wp-plugin-audit` (when Kits Core changes) · PHPCS on changed files · Deploy check green · Codex comments answered. **Live parity proven before any merge.** Owner merges; ship via `tools/kits-ship.sh`. Update the Notion theme page + `docs/pending.md` as items land. Commit trailer `Co-Authored-By: Wugweb <admin@wugweb.com>`.
 
 ## Decisions (owner)
 1. **Font: keep self-hosted Inter** (already bundled, local `fontFace`). Google's Inter files may be used as a *source* but must be bundled, never hotlinked. Both tracks chosen.

@@ -104,7 +104,7 @@ Where they appear: the volunteer banner is the theme pattern `plugins/animal-wri
 - **Show a form on another page:** put its shortcode in the page, or call `aw_ff_form( <key> )` in code.
 - **A form was rebuilt and has a new ID:** `wp aw ff-form <key> <new ID>`.
 
-Every change goes through GitHub (see CLAUDE.md): a new form or function, or a restructured one, as a pull request into `wordpress-dev`; a small fix straight onto `wordpress-dev`. The Deploy check gates `wordpress`, then `aw-ship.sh` ships it.
+Every change goes through GitHub (see CLAUDE.md): a new form or function, or a restructured one, as a pull request into `wordpress-dev`; a small fix straight onto `wordpress-dev`. The Deploy check gates `wordpress`, then `kits-ship.sh` ships it.
 
 ## Campaign form (#10) and the raw copy (21 Oct 2026)
 

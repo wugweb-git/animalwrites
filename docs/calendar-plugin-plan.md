@@ -413,7 +413,7 @@ loads them, and each view has its own address (`&view=month&m=2026-11`).
 
 Each phase is complete before the next. Each is a branch → PR into `wordpress-dev` → review gate (code-review,
 wp-plugin-audit, PHPCS, Deploy check green, Codex comments answered) → the owner merges → it ships on the owner's yes.
-**A phase never ships while a FluentCRM campaign is sending.** `aw-ship.sh` is run only after checking that FluentCRM
+**A phase never ships while a FluentCRM campaign is sending.** `kits-ship.sh` is run only after checking that FluentCRM
 has no campaign in "working" and that MailWeb's queue holds no campaign emails.
 
 **Order relative to the shell.** The Kits Core shell ships first, with InsightWeb as the pilot, then RankWeb,

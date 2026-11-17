@@ -151,7 +151,7 @@ jobs:
           retention-days: 14
       # Each deploy replaces the deployed folder, so mailweb is missing for a few seconds and a campaign batch that
       # starts then fails (3 Nov 2026). A push to wordpress-dev deploys through this job, so the check lives here too,
-      # not only in tools/aw-ship.sh. It fails closed; the manual run's "skip_mail_check" overrides it.
+      # not only in tools/kits-ship.sh. It fails closed; the manual run's "skip_mail_check" overrides it.
       - name: No deploy while a FluentCRM campaign is sending
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/wordpress-dev' && inputs.skip_mail_check != true
         run: python3 tools/ci/mail_sending_check.py

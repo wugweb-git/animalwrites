@@ -1,6 +1,6 @@
 #!/bin/bash
 # Ship: push HEAD to wordpress-dev, wait for the deploy gate, wait for Hostinger to pull it, purge LiteSpeed.
-# In the repo since 25 Oct 2026 (was ~/Documents/GitHub/aw-ship.sh, which now only calls this file). Ships the HEAD of the
+# In the repo since 25 Oct 2026 (was ~/Documents/GitHub/kits-ship.sh, which now only calls this file). Ships the HEAD of the
 # checkout it is run from: fetch and check out the commit first (git checkout --detach origin/wordpress-dev), and ship
 # when wordpress-dev is quiet: a newer push cancels this commit's Deploy check and the script refuses.
 set -e

@@ -2,7 +2,7 @@
 
 **This file is a snapshot of 7 Oct 2026, kept as history.** Current state: [pending.md](pending.md) (open and done work) and [plugin-map.md](plugin-map.md) (what each file does). What changed since, in short (31 Oct 2026):
 - Plugins: Animal Writes Core, AW Sourcing, AW SEO extras (with Rank Math, the SEO system; sitemap `/sitemap_index.xml`), Kits Core (reusable parts only), Mailweb 3.2, Fluent Forms + FluentCRM, Advanced Ads (switched off on live), LiteSpeed Cache, Site Kit.
-- Deploys: bigger work (a new plugin or function, restructuring) goes as a pull request into `wordpress-dev`, merged by the owner; small changes (data, docs, small fixes) go straight onto `wordpress-dev`. Then the Deploy check moves `wordpress` → Hostinger pulls (`aw-ship.sh`); the cache is purged after every deploy.
+- Deploys: bigger work (a new plugin or function, restructuring) goes as a pull request into `wordpress-dev`, merged by the owner; small changes (data, docs, small fixes) go straight onto `wordpress-dev`. Then the Deploy check moves `wordpress` → Hostinger pulls (`kits-ship.sh`); the cache is purged after every deploy.
 - Mail: replies from support@ (Mailweb); site forms send no email; Report a mistake and Remove my data are reasons on the Contact form; the newsletter is the FluentCRM list "Newsletter".
 - Sourcing has its own menu (since 25 Oct 2026; it was Settings → Sourcing): Overview, To review, Enrichment review, the settings screens, the reports and jobs, Settings; 18 workflows on Sourcing → Workers.
 - Indexing: directory profiles with no contact are noindex and out of the sitemap unless they have Search Console impressions; `?state=` lists and claim forms are noindex; the Directory map and Near me are built.

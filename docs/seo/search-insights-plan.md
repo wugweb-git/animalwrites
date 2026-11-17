@@ -395,7 +395,7 @@ Everything sits at Tools → Search Insights, with tabs (`nav-tab-wrapper`, `?ta
 - Each phase gets its own branch: WordPress parts from `origin/wordpress-dev`, workers parts from `origin/main` in animal-writes-workers.
 - Each phase gets its own PR: what changed, the dry-run results, screenshots.
 - No direct pushes and no auto-merge. Merge only after the owner approves.
-- Shipping is a separate, manual `aw-ship.sh` step after the merge.
+- Shipping is a separate, manual `kits-ship.sh` step after the merge.
 
 ## 13. Risks and overrides
 
