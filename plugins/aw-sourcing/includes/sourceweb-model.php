@@ -283,11 +283,15 @@ function sourceweb_enrich_sources_next( array $on, array $sent ): ?array {
  */
 function sourceweb_dashboard_numbers( array $c ): array {
 	$n = array(
-		'review'   => (int) ( $c['review']['total'] ?? 0 ),
-		'enrich'   => (int) ( $c['enrich']['pending'] ?? 0 ),
-		'applied'  => (int) ( $c['enrich']['applied7'] ?? 0 ),
-		'rejected' => (int) ( $c['intake']['rejected_today'] ?? 0 ),
-		'sources'  => (int) ( $c['sources']['allow'] ?? 0 ),
+		'review'    => (int) ( $c['review']['total'] ?? 0 ),
+		'enrich'    => (int) ( $c['enrich']['pending'] ?? 0 ),
+		'applied'   => (int) ( $c['enrich']['applied7'] ?? 0 ),
+		'rejected'  => (int) ( $c['intake']['rejected_today'] ?? 0 ),
+		'sources'   => (int) ( $c['sources']['allow'] ?? 0 ),
+		// Daily totals for the dashboard charts (summable over a window): items fetched, published and folded as duplicates.
+		'new'       => (int) ( $c['today']['new'] ?? 0 ),
+		'published' => (int) ( $c['today']['published'] ?? 0 ),
+		'dupes'     => (int) ( $c['today']['dupes'] ?? 0 ),
 	);
 	if ( isset( $c['workers']['total'] ) ) {
 		$n['workers'] = (int) ( $c['workers']['total'] ?? 0 ) - count( (array) ( $c['workers']['problems'] ?? array() ) );
@@ -307,6 +311,89 @@ function sourceweb_log_add( array $log, string $date, array $row, int $days ): a
 	$log[ $date ] = $row;
 	ksort( $log );
 	return array_slice( $log, -$days, null, true );
+}
+
+/**
+ * The last $days dates ending today, oldest first (pure: no WordPress). For the dashboard charts.
+ *
+ * @param int    $days  How many days.
+ * @param string $today Today (Y-m-d).
+ * @return string[] Y-m-d, oldest first.
+ */
+function sourceweb_dashboard_date_range( int $days, string $today ): array {
+	$days = max( 1, $days );
+	$out  = array();
+	$t    = date_create_immutable( $today ) ?: date_create_immutable();
+	for ( $i = $days - 1; $i >= 0; $i-- ) {
+		$out[] = $t->modify( "-$i day" )->format( 'Y-m-d' );
+	}
+	return $out;
+}
+
+/**
+ * One metric as MiniChart points over the last $days days (a day with no row is 0), oldest first. For a snapshot
+ * metric (the review-queue size) this reads the value recorded that day; for a daily count (new items, duplicates) it
+ * reads the day's total. Pure: no WordPress.
+ *
+ * @param array  $log    Date => numbers (the dashboard log).
+ * @param string $metric Metric key.
+ * @param int    $days   How many days.
+ * @param string $today  Today (Y-m-d).
+ * @return array<int, array{value:int, label:string}>
+ */
+function sourceweb_dashboard_series( array $log, string $metric, int $days, string $today ): array {
+	$out = array();
+	foreach ( sourceweb_dashboard_date_range( $days, $today ) as $date ) {
+		$row     = is_array( $log[ $date ] ?? null ) ? $log[ $date ] : array();
+		$out[]   = array(
+			'value' => (int) ( $row[ $metric ] ?? 0 ),
+			'label' => ( date_create_immutable( $date ) ?: date_create_immutable() )->format( 'j M' ),
+		);
+	}
+	return $out;
+}
+
+/**
+ * The pipeline funnel over the last $days days, as three MiniChart bars: Ingested (new items fetched) → Reviewed
+ * (the ones that entered the queue: ingested minus those auto-rejected by the relevance gate) → Approved (published).
+ * Each bar is the window total. Pure: no WordPress.
+ *
+ * @param array  $log   Date => numbers (needs new, rejected, published).
+ * @param int    $days  How many days.
+ * @param string $today Today (Y-m-d).
+ * @return array<int, array{value:int, label:string}>
+ */
+function sourceweb_dashboard_funnel( array $log, int $days, string $today ): array {
+	$sum = array( 'new' => 0, 'rejected' => 0, 'published' => 0 );
+	foreach ( sourceweb_dashboard_date_range( $days, $today ) as $date ) {
+		$row = is_array( $log[ $date ] ?? null ) ? $log[ $date ] : array();
+		foreach ( $sum as $k => $v ) {
+			$sum[ $k ] += (int) ( $row[ $k ] ?? 0 );
+		}
+	}
+	$reviewed = max( 0, $sum['new'] - $sum['rejected'] );
+	return array(
+		array( 'value' => (int) $sum['new'], 'label' => 'Ingested' ),
+		array( 'value' => (int) $reviewed, 'label' => 'Reviewed' ),
+		array( 'value' => (int) $sum['published'], 'label' => 'Approved' ),
+	);
+}
+
+/**
+ * The Dashboard's four charts from the daily log: the 28-day pipeline funnel, and 14-day daily series for feed
+ * throughput (items fetched), near-duplicates folded, and the review-queue size. Pure: no WordPress.
+ *
+ * @param array  $log   The dashboard log (date => numbers).
+ * @param string $today Today (Y-m-d).
+ * @return array{funnel:array, throughput:array, dupes:array, queue:array}
+ */
+function sourceweb_dashboard_charts( array $log, string $today ): array {
+	return array(
+		'funnel'     => sourceweb_dashboard_funnel( $log, 28, $today ),
+		'throughput' => sourceweb_dashboard_series( $log, 'new', 14, $today ),
+		'dupes'      => sourceweb_dashboard_series( $log, 'dupes', 14, $today ),
+		'queue'      => sourceweb_dashboard_series( $log, 'review', 14, $today ),
+	);
 }
 
 /**
