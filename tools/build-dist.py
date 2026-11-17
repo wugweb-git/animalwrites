@@ -2,8 +2,10 @@
 """Build distributable zips of the Kits by Wugweb theme and the Kits Core plugin.
 
 Two tracks:
-  * wporg      — directory-ready: no `Update URI` in the theme, dev files stripped.
-  * commercial — adds an `Update URI` to the theme header for self-hosted updates.
+  * wporg      — directory-ready: no `Update URI` in the theme, dev files stripped. Keeps the
+                 admin-app src/, because wp.org requires the source of any compiled file in the zip.
+  * commercial — adds an `Update URI` to the theme header for self-hosted updates; drops src/ (not
+                 reviewed by wp.org, so the zip stays lean).
 
 The plugin already carries its own `Update URI`; the track only changes the theme header.
 Dev-only files (phpcs config, build tooling, node_modules, VCS, OS cruft) are excluded; the
@@ -50,7 +52,6 @@ EXCLUDE = [
     "node_modules", "node_modules/*",
     "vendor", "vendor/*",
     "tests", "tests/*",
-    "src", "src/*",            # JS sources for the admin app; build/ carries the compiled output
     "*.map",
     "phpcs.xml.dist", ".phpcs.xml.dist", "phpcs.xml",
     "package.json", "package-lock.json",
@@ -58,9 +59,14 @@ EXCLUDE = [
     "tokens/*",                # token sources; theme.json + kit-tokens.css are the shipped output
 ]
 
+# The admin-app JS sources (src/, compiled into build/). wp.org requires the source of every
+# compiled/minified file in the zip (or a public source repo linked in readme.txt), so src/ ships
+# on the wporg track; only the self-hosted commercial track strips it to keep the zip lean.
+SRC_EXCLUDE = ["src", "src/*"]
 
-def excluded(rel: str) -> bool:
-    return any(fnmatch.fnmatch(rel, pat) or fnmatch.fnmatch(rel, pat.rstrip("/*")) for pat in EXCLUDE)
+
+def excluded(rel: str, patterns: list) -> bool:
+    return any(fnmatch.fnmatch(rel, pat) or fnmatch.fnmatch(rel, pat.rstrip("/*")) for pat in patterns)
 
 
 def set_theme_update_uri(style_css: pathlib.Path, uri: str | None) -> None:
@@ -84,10 +90,13 @@ def build(target: str, track: str, out_dir: pathlib.Path) -> pathlib.Path:
         shutil.rmtree(stage)
     stage.mkdir(parents=True)
 
+    # wp.org needs the source of the compiled build/; the commercial track is not reviewed, so it drops src/.
+    patterns = EXCLUDE if track == "wporg" else EXCLUDE + SRC_EXCLUDE
+
     count = 0
     for path in sorted(src.rglob("*")):
         rel = path.relative_to(src).as_posix()
-        if excluded(rel):
+        if excluded(rel, patterns):
             continue
         dest = stage / rel
         if path.is_dir():
