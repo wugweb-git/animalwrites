@@ -21,6 +21,7 @@ import {
 	Field,
 	LoadingState,
 	MediaField,
+	MiniChart,
 	Notice,
 	PageParts,
 	RefTable,
@@ -72,6 +73,94 @@ function rowBefore( log, today, days ) {
 	const d = dates[ dates.length - 1 ];
 	return d ? [ d, log[ d ] ] : null;
 }
+
+/**
+ * The daily log as MiniChart points for one metric: the days within the range, oldest first, one bar each.
+ *
+ * @param {Object} log    { 'Y-m-d': { metric: n } }.
+ * @param {string} today  Site date today (Y-m-d).
+ * @param {string} metric Key to read from each day.
+ * @param {number} days   How far back to include.
+ * @return {Array} [ { label: 'MM-DD', value } ].
+ */
+function logPoints( log, today, metric, days ) {
+	const at = new Date( `${ today }T12:00:00Z` );
+	at.setUTCDate( at.getUTCDate() - days );
+	const from = at.toISOString().slice( 0, 10 );
+	return Object.keys( log || {} )
+		.filter( ( d ) => d >= from && undefined !== log[ d ]?.[ metric ] )
+		.sort()
+		.map( ( d ) => ( {
+			label: d.slice( 5 ), // MM-DD
+			value: Number( log[ d ][ metric ] ) || 0,
+		} ) );
+}
+
+// The headline tiles, grouped into themed cards so each group is a real <h2> with its own sub-grid (greyscale, shell
+// tokens; no colour carries meaning). Keys not listed here fall into "System".
+const TILE_GROUPS = [
+	{
+		id: 'content',
+		keys: [ 'titles', 'descs', 'focus', 'schema' ],
+		title: __( 'Content & metadata', 'aw-seo-extras' ),
+		description: __(
+			'Search titles, descriptions, focus keywords and Rank Math schema across the item types RankWeb manages.',
+			'aw-seo-extras'
+		),
+	},
+	{
+		id: 'faq-index',
+		keys: [ 'faq', 'noindex' ],
+		title: __( 'FAQ & indexing', 'aw-seo-extras' ),
+		description: __(
+			'Pages carrying an FAQ, and the pages RankWeb’s own rules keep out of search.',
+			'aw-seo-extras'
+		),
+	},
+	{
+		id: 'system',
+		keys: [ 'endpoints', 'rankmath' ],
+		title: __( 'System', 'aw-seo-extras' ),
+		description: __(
+			'The hourly sitemap and llms.txt check, and Rank Math itself.',
+			'aw-seo-extras'
+		),
+	},
+];
+
+// Metrics with a daily history worth a trend chart (unit shown in the screen-reader table).
+const TREND_METRICS = [
+	{
+		metric: 'titles',
+		label: __( 'Search titles missing', 'aw-seo-extras' ),
+		unit: __( 'items', 'aw-seo-extras' ),
+	},
+	{
+		metric: 'descs',
+		label: __( 'Descriptions missing', 'aw-seo-extras' ),
+		unit: __( 'items', 'aw-seo-extras' ),
+	},
+	{
+		metric: 'focus',
+		label: __( 'Focus keywords missing', 'aw-seo-extras' ),
+		unit: __( 'items', 'aw-seo-extras' ),
+	},
+	{
+		metric: 'schema',
+		label: __( 'Schema entries to write', 'aw-seo-extras' ),
+		unit: __( 'items', 'aw-seo-extras' ),
+	},
+	{
+		metric: 'faq',
+		label: __( 'Pages with an FAQ', 'aw-seo-extras' ),
+		unit: __( 'pages', 'aw-seo-extras' ),
+	},
+	{
+		metric: 'noindex',
+		label: __( 'Kept out of search', 'aw-seo-extras' ),
+		unit: __( 'pages', 'aw-seo-extras' ),
+	},
+];
 
 function Dashboard() {
 	const [ data, setData ] = useState( null );
@@ -184,6 +273,29 @@ function Dashboard() {
 	}
 	const noindex = data.tiles.find( ( t ) => 'noindex' === t.key );
 
+	const byKey = Object.fromEntries( data.tiles.map( ( t ) => [ t.key, t ] ) );
+	const known = new Set( TILE_GROUPS.flatMap( ( g ) => g.keys ) );
+	const extra = data.tiles.filter( ( t ) => ! known.has( t.key ) );
+	const renderTile = ( t ) => (
+		<Tile
+			key={ t.key }
+			label={ t.label }
+			value={ t.value }
+			delta={ delta( t ) }
+			sub={ t.sub }
+			href={ t.href }
+			tone={ t.tone }
+			loading={ ( data.counting && t.metric ) || t.counting }
+		/>
+	);
+	const trendCharts = TREND_METRICS.map( ( m ) => ( {
+		...m,
+		points: logPoints( data.log, data.today, m.metric, days ),
+	} ) ).filter( ( m ) => m.points.length >= 2 );
+	const dists = [ 'titles', 'descs', 'focus' ]
+		.map( ( k ) => byKey[ k ] )
+		.filter( ( t ) => t && Array.isArray( t.dist ) && t.dist.length > 0 );
+
 	return (
 		<>
 			<ChipRow
@@ -227,20 +339,70 @@ function Dashboard() {
 					</ul>
 				</Notice>
 			) }
-			<TileGrid label={ __( 'RankWeb at a glance', 'aw-seo-extras' ) }>
-				{ data.tiles.map( ( t ) => (
-					<Tile
-						key={ t.key }
-						label={ t.label }
-						value={ t.value }
-						delta={ delta( t ) }
-						sub={ t.sub }
-						href={ t.href }
-						tone={ t.tone }
-						loading={ ( data.counting && t.metric ) || t.counting }
-					/>
-				) ) }
-			</TileGrid>
+			{ TILE_GROUPS.map( ( g, gi ) => {
+				const tiles = g.keys
+					.map( ( k ) => byKey[ k ] )
+					.filter( Boolean )
+					// Any tile the groups don't name joins the last group, so nothing is dropped.
+					.concat( gi === TILE_GROUPS.length - 1 ? extra : [] );
+				if ( ! tiles.length ) {
+					return null;
+				}
+				return (
+					<SectionCard
+						key={ g.id }
+						id={ `rankweb-${ g.id }` }
+						title={ g.title }
+						description={ g.description }
+					>
+						<TileGrid label={ g.title }>
+							{ tiles.map( renderTile ) }
+						</TileGrid>
+					</SectionCard>
+				);
+			} ) }
+			{ trendCharts.length > 0 && (
+				<SectionCard
+					id="rankweb-trends"
+					title={ __( 'Over time', 'aw-seo-extras' ) }
+					description={ __(
+						'One bar per recorded day within the compare range; the latest day is the darkest. The full numbers are in each chart’s table.',
+						'aw-seo-extras'
+					) }
+				>
+					<div className="rankweb-dash-grid">
+						{ trendCharts.map( ( m ) => (
+							<MiniChart
+								key={ m.metric }
+								label={ m.label }
+								points={ m.points }
+								unit={ m.unit }
+							/>
+						) ) }
+					</div>
+				</SectionCard>
+			) }
+			{ ! data.counting && dists.length > 0 && (
+				<SectionCard
+					id="rankweb-gaps"
+					title={ __( 'Where the gaps are', 'aw-seo-extras' ) }
+					description={ __(
+						'The item types with the most missing fields right now (up to six types per chart). The full numbers are in each chart’s table.',
+						'aw-seo-extras'
+					) }
+				>
+					<div className="rankweb-dash-grid">
+						{ dists.map( ( t ) => (
+							<MiniChart
+								key={ t.key }
+								label={ t.label }
+								points={ t.dist }
+								unit={ __( 'items', 'aw-seo-extras' ) }
+							/>
+						) ) }
+					</div>
+				</SectionCard>
+			) }
 			{ noindex && ! data.counting && (
 				<SectionCard
 					id="kept-out"

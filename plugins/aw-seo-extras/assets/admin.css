@@ -1,0 +1,27 @@
+/**
+ * RankWeb admin layout overrides — loaded after the Kits shell (handle `rankweb-admin-css`, depends on `kits-shell`)
+ * on RankWeb's own shell screens only. Layout only: it changes no colour, type or chrome of the shell theme. It lets
+ * RankWeb's wide data tables (the FAQ list table, the Overview modules table) use the full width of the shell content
+ * area instead of the shell's 1280px reading cap, and gives the dashboard chart grids the shell's own spacing.
+ * Everything is scoped to `body.rankweb-shell-screen`, so no other Kits plugin's shell (Kits Core, MailWeb, …) is
+ * touched. The shared shell package is not changed.
+ */
+
+/* The content column: RankWeb's screens carry wide list tables, so let them use the full admin width instead of the
+   shell's default 1280px reading cap. The prose paragraphs keep their own 72ch measure. */
+body.rankweb-shell-screen .kits-shell__body {
+	max-width: none;
+}
+
+/* WordPress list tables (FAQ, the Overview modules table) fill the content area. */
+body.rankweb-shell-screen .kits-shell-prose .wp-list-table {
+	width: 100%;
+}
+
+/* Dashboard chart grids (trends and distributions): the shell's own spacing token, auto-fitting to the full width. */
+body.rankweb-shell-screen .rankweb-dash-grid {
+	display: grid;
+	gap: var( --ks-s4, 16px );
+	grid-template-columns: repeat( auto-fit, minmax( 260px, 1fr ) );
+	margin-top: var( --ks-s4, 16px );
+}

@@ -108,8 +108,28 @@ add_action(
 			)
 		);
 		rankweb_ui_ready( $ok );
+		if ( $ok ) {
+			// Layout-only overrides on RankWeb's own shell screens (full-width data tables, dashboard chart grids).
+			// Scoped to the body class below, so no other Kits plugin's shell is affected; the shell package is untouched.
+			wp_enqueue_style(
+				'rankweb-admin-css',
+				plugins_url( 'assets/admin.css', AW_SEO_EXTRAS_DIR . 'aw-seo-extras.php' ),
+				array( 'kits-shell' ),
+				(string) $head['Version']
+			);
+			add_filter( 'admin_body_class', 'rankweb_ui_body_class' );
+		}
 	}
 );
+
+/**
+ * The body class that scopes RankWeb's layout overrides (assets/admin.css) to its own shell screens.
+ *
+ * @param string $classes Admin body classes.
+ */
+function rankweb_ui_body_class( $classes ) {
+	return trim( (string) $classes . ' rankweb-shell-screen' );
+}
 
 /**
  * Draw a screen: the shell when its script is enqueued, else a notice that it needs Kits Core. The page callbacks

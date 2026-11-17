@@ -186,6 +186,23 @@ function rankweb_type_label( string $type ): string {
 }
 
 /**
+ * A "missing by type" breakdown as MiniChart points: the plural type name and its count, most first, at most six bars.
+ *
+ * @param array $by type => count (already sorted most first by the count job).
+ * @return array[] [ { label, value } ].
+ */
+function rankweb_dist( array $by ): array {
+	$out = array();
+	foreach ( array_slice( $by, 0, 6, true ) as $type => $n ) {
+		$out[] = array(
+			'label' => rankweb_type_label( (string) $type ),
+			'value' => (int) $n,
+		);
+	}
+	return $out;
+}
+
+/**
  * The Dashboard: tiles from the stored counts (formatting only, nothing is counted here), the day log for the time
  * range, the attention list and "Where things are".
  */
@@ -215,6 +232,7 @@ function rankweb_dashboard_payload(): array {
 		'href'   => $list( (array) ( $t['by'] ?? array() ) ),
 		'tone'   => ! empty( $t['total'] ) ? 'warn' : '',
 		'metric' => 'titles',
+		'dist'   => rankweb_dist( (array) ( $t['by'] ?? array() ) ),
 	);
 	$d       = (array) ( $c['descs'] ?? array() );
 	$tiles[] = array(
@@ -227,6 +245,7 @@ function rankweb_dashboard_payload(): array {
 		'href'   => $list( (array) ( $d['by'] ?? array() ) ),
 		'tone'   => ! empty( $d['total'] ) ? 'warn' : '',
 		'metric' => 'descs',
+		'dist'   => rankweb_dist( (array) ( $d['by'] ?? array() ) ),
 	);
 	$s       = (array) ( $c['schema'] ?? array() );
 	if ( isset( $s['on'] ) && ! $s['on'] ) {
@@ -262,6 +281,7 @@ function rankweb_dashboard_payload(): array {
 		'href'   => $list( (array) ( $f['by'] ?? array() ) ),
 		'tone'   => '',
 		'metric' => 'focus',
+		'dist'   => rankweb_dist( (array) ( $f['by'] ?? array() ) ),
 	);
 	$q       = (array) ( $c['faq'] ?? array() );
 	$faq_url = add_query_arg( 'page', 'aw-faq', admin_url( 'admin.php' ) );
