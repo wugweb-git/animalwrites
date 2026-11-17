@@ -226,3 +226,72 @@ Named only; none of this is part of phase 1, and each would need its own plan an
 3. **RankWeb's text, exactly as written: yes.** Plugins screen description: "Everything Rank Math doesn't do or keeps for Premium, for Kits sites." Kits → Plugins row: "What Rank Math doesn't do or keeps for Premium." Overview row: "Search Insights is now its own plugin, InsightWeb." (same link). RankWeb's scope is everything Rank Math doesn't do or keeps for Premium; only Search Insights moves out.
 
 The text domain stays `aw-seo-extras` (owner, 11 Nov).
+
+---
+
+## Keyword scoring & cross-purpose use (live InsightWeb — Parts 2/3/5/6, 17 Nov 2026)
+
+Owner directive: give the one keyword table a numeric **Score**, a **Recommended use** that spans SEO and sourcing, a
+**focus-keyphrase reconciliation**, a **canonical-owner** across the pages a keyword ranks for, and an **opt-in feed to
+SourceWeb**. Suggestions only — InsightWeb never writes to Rank Math or SourceWeb. The scored results are stored in
+**InsightWeb's own table** (keyed by `kw_id`, written by the daily recompute), never as a column on Kits Core's shared
+`wp_aw_si_keywords`. The pure logic (tested, no WordPress) lives in `plugins/insightweb/includes/search-insights/score.php`.
+
+### Score (0–100) — weights and formula
+
+`score = round(0.35·Demand + 0.30·Opportunity + 0.20·Momentum + 0.15·Engagement)`, each part a 0–100 sub-score:
+
+| Part | Weight | Signal | Rule |
+|---|---|---|---|
+| Demand | 35 | impressions(28d) + imported volume | log scale: `log10(1+total) / log10(1+5000) · 100`, capped at 100 |
+| Opportunity | 30 | latest position | 0 unranked · 20 at pos ≤3 (won) · 70 at 4–5 · 100 at 5–20 (sweet spot) · 100→30 across 20–50 · 30→0 across 50–100 |
+| Momentum | 20 | rising growth, else Trends | `growth/5 · 100` when there is a growth multiple, else `trends/100 · 100` |
+| Engagement | 15 | CTR = clicks/impr | `ctr/0.10 · 100` (a 10% CTR = full) |
+
+Weights and caps are constants at the top of `score.php` (`AW_SI_SCORE_W_*`, `AW_SI_SCORE_*_CAP`). The **score floor**
+for "worth acting on" is `AW_SI_SCORE_FLOOR` (default 55; the Settings threshold overrides it).
+
+### Recommended use — rules (one or more labels per keyword)
+
+- **Focus keyphrase → page** — has an owning page and ranks in the winnable band (positions 4–20).
+- **Write a new page** — score ≥ floor, no page, not ranking (positions >20 or none) — the Tracked-not-ranking set.
+- **Secondary keyphrase** — has a page but already ranks top-3, or is a minor variant.
+- **Sourcing candidate: news / library / campaign** — the keyword's topic maps to a sourcing content type in **SourceWeb's
+  own category list** (read via a function, never hardcoded; empty when SourceWeb is absent), and it has impressions.
+- **Exclude** — carries the Exclude role, or has no demand and a sub-floor score.
+
+### Focus-keyphrase reconciliation (Part 3)
+
+- **Set A** = keywords carrying the Focus-keyphrase role (set in Rank Math).
+- **Set B** = keywords InsightWeb recommends as focus (`aw_si_is_focus_candidate`: score ≥ floor, position 4–20, has a page).
+- Flags: **"Focus keyphrase, poor rank"** = in A, not B (candidate to drop — the not-ranking focus words); **"Should be a
+  focus keyphrase"** = in B, not A (candidate to add). Both live beside Conflicts in one **Focus-keyphrase health** filter.
+
+### Canonical owner (Part 6) — intent-first, then content-type ladder
+
+Query **intent** from the phrase: `local` ("near me"/place) → `dated` (news words / a bare year) → `campaign` (donate/
+volunteer/petition…) → else `evergreen`. Content **class** of a page from its post type / path: resource, library,
+campaign, news, directory, other. The owner is the candidate with the best ladder rank for the intent, tie-broken by
+position then CTR:
+
+- **evergreen:** resource ≈ library (5) > campaign (4) > news (3) > directory (2) > other (1)
+- **dated:** news (5) first · **local:** directory (5) first · **campaign:** campaign (5) first
+
+Flags: **"Owned by News, should be Resource/Library"** (evergreen query where a news page ranks best but an evergreen
+page should own the focus keyphrase; news keeps it as secondary); **"No canonical owner"** (≥2 candidate pages and none
+holds a majority of impressions — a consolidation candidate).
+
+### Feed into SourceWeb (Part 5 — InsightWeb emit side only)
+
+Keywords scoring above the threshold **and** carrying a Sourcing-candidate recommendation are pushed as *candidates* via
+`do_action('sourceweb_push_keywords', $terms, $context)` where `$context = {source:'insightweb', score, recommended_type,
+impressions, clicks, position, topic, focus_keyphrase, rank}`. A well-ranking focus keyphrase is a proven term, flagged
+`focus_keyphrase:true` with its rank. Candidacy only — the terms land in SourceWeb's **approval queue**, never auto-insert;
+no shared table and no hard dependency (the hook sits idle if SourceWeb is absent). The SourceWeb receive side is a
+separate session.
+
+**Build status (17 Nov):** the pure scoring/recommendation/reconciliation/owner logic + 17 no-WP tests are **done, green**
+(`score.php`). Still to wire on the branch: the InsightWeb score store (new table, `AW_SI_DB_VERSION` 2→3) + the recompute
+writer; the Keywords-tab Score and Recommended-use columns + the Focus-keyphrase-health filter + the candidate-pages /
+canonical-owner view; the `sourceweb_push_keywords` emit + the threshold setting. Branch only; Part 4 (the Sourcing-keywords
+tab) is SourceWeb's session.
