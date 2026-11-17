@@ -68,25 +68,27 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 	/** Columns. */
 	public function get_columns() {
 		return array(
-			'cb'       => '<input type="checkbox">',
-			'label'    => __( 'Keyword', 'insightweb' ),
-			'priority' => __( 'Priority', 'insightweb' ),
-			'status'   => __( 'Status', 'insightweb' ),
-			'topic'    => __( 'Topic', 'insightweb' ),
-			'page'     => __( 'Page', 'insightweb' ),
-			'impr28'   => __( 'Impressions (28 days)', 'insightweb' ),
-			'clicks28' => __( 'Clicks', 'insightweb' ),
-			'pos28'    => __( 'Position', 'insightweb' ),
-			'change'   => __( 'Change', 'insightweb' ),
-			'bing'     => __( 'Bing impressions (90 days)', 'insightweb' ),
-			'live'     => __( 'Live check', 'insightweb' ),
-			'trends'   => __( 'Trends', 'insightweb' ),
-			'volume'   => __( 'Volume (imports)', 'insightweb' ),
+			'cb'          => '<input type="checkbox">',
+			'label'       => __( 'Keyword', 'insightweb' ),
+			'score'       => __( 'Score', 'insightweb' ),
+			'recommended' => __( 'Recommended use', 'insightweb' ),
+			'priority'    => __( 'Priority', 'insightweb' ),
+			'status'      => __( 'Status', 'insightweb' ),
+			'topic'       => __( 'Topic', 'insightweb' ),
+			'page'        => __( 'Page', 'insightweb' ),
+			'impr28'      => __( 'Impressions (28 days)', 'insightweb' ),
+			'clicks28'    => __( 'Clicks', 'insightweb' ),
+			'pos28'       => __( 'Position', 'insightweb' ),
+			'change'      => __( 'Change', 'insightweb' ),
+			'bing'        => __( 'Bing impressions (90 days)', 'insightweb' ),
+			'live'        => __( 'Live check', 'insightweb' ),
+			'trends'      => __( 'Trends', 'insightweb' ),
+			'volume'      => __( 'Volume (imports)', 'insightweb' ),
 			'ubersuggest' => __( 'Ubersuggest', 'insightweb' ),
 			'vidiq'       => __( 'vidIQ (YouTube)', 'insightweb' ),
 			'openseo'     => __( 'OpenSEO', 'insightweb' ),
 			'openseo_pos' => __( 'OpenSEO position', 'insightweb' ),
-			'action'   => __( 'Suggested action', 'insightweb' ),
+			'action'      => __( 'Suggested action', 'insightweb' ),
 		);
 	}
 
@@ -94,6 +96,7 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 	protected function get_sortable_columns() {
 		return array(
 			'label'    => array( 'label', false ),
+			'score'    => array( 'score', true ),
 			'priority' => array( 'priority', false ),
 			'topic'    => array( 'topic', false ),
 			'impr28'   => array( 'impr28', true ),
@@ -166,7 +169,7 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 		global $wpdb;
 		$t = aw_si_table( 'keywords' );
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
-		$a = $wpdb->get_row( $wpdb->prepare( "SELECT COUNT(*) n, SUM(impr28) i, SUM(clicks28) c, SUM(pos28 * impr28) / NULLIF(SUM(IF(pos28 IS NULL, 0, impr28)), 0) p, SUM(IF(pos_prev IS NULL OR pos28 IS NULL, 0, (pos_prev - pos28) * impr28)) / NULLIF(SUM(IF(pos_prev IS NULL OR pos28 IS NULL, 0, impr28)), 0) d FROM %i WHERE entity = 1", $t ) );
+		$a = $wpdb->get_row( $wpdb->prepare( 'SELECT COUNT(*) n, SUM(impr28) i, SUM(clicks28) c, SUM(pos28 * impr28) / NULLIF(SUM(IF(pos28 IS NULL, 0, impr28)), 0) p, SUM(IF(pos_prev IS NULL OR pos28 IS NULL, 0, (pos_prev - pos28) * impr28)) / NULLIF(SUM(IF(pos_prev IS NULL OR pos28 IS NULL, 0, impr28)), 0) d FROM %i WHERE entity = 1', $t ) );
 		if ( ! $a || ! (int) $a->n ) {
 			return null;
 		}
@@ -246,6 +249,16 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 				'hinglish' => __( 'Hinglish', 'insightweb' ),
 			)
 		);
+		if ( aw_si_ready() ) {
+			$this->dropdown(
+				'focus_health',
+				__( 'All focus-keyphrase health', 'insightweb' ),
+				array(
+					'poor-rank' => __( 'Focus keyphrase, poor rank', 'insightweb' ),
+					'should-be' => __( 'Should be a focus keyphrase', 'insightweb' ),
+				)
+			);
+		}
 		submit_button( __( 'Filter', 'insightweb' ), '', 'filter_action', false );
 		echo '</div>';
 	}
@@ -298,6 +311,18 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 			$where[] = 'label LIKE %s';
 			$args[]  = '%' . $wpdb->esc_like( $search ) . '%';
 		}
+		// The score store (InsightWeb's own table, schema version 3): join it for the Score column, sorting and the
+		// focus-keyphrase-health filter. Every score column is spelled with the s. alias; the keyword columns are
+		// unique to the keyword table, so the WHERE and ORDER built below stay unqualified.
+		$sc    = aw_si_table( 'scores' );
+		$store = aw_si_ready();
+		if ( $store ) {
+			$fh = $this->arg( 'focus_health' );
+			if ( in_array( $fh, array( 'poor-rank', 'should-be' ), true ) ) {
+				$where[] = 's.focus_health = %s';
+				$args[]  = $fh;
+			}
+		}
 		$orderby = $this->arg( 'orderby' );
 		$cols    = array(
 			'label'    => 'label',
@@ -309,25 +334,34 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 			'change'   => '(pos_prev - pos28)',
 			'trends'   => 'trends',
 		);
-		$order   = 'asc' === $this->arg( 'order' ) ? 'ASC' : 'DESC';
+		if ( $store ) {
+			$cols['score'] = 's.score';
+		}
+		$order = 'asc' === $this->arg( 'order' ) ? 'ASC' : 'DESC';
 		if ( ! isset( $cols[ $orderby ] ) ) {
 			$orderby = 'impr28';
 		}
 		$by = $cols[ $orderby ];
 		if ( 'pos28' === $orderby ) {
 			$by = 'pos28 IS NULL, pos28 ' . $order;
+		} elseif ( 'score' === $orderby ) {
+			$by = 's.score IS NULL, s.score ' . $order; // Unscored keywords last.
 		} else {
 			$by .= ' ' . $order;
 		}
-		$per   = $this->get_items_per_page( 'aw_si_keywords_per_page', 50 );
-		$paged = max( 1, $this->get_pagenum() );
-		$sql   = implode( ' AND ', $where );
-		$agg   = $this->plain_all() ? $this->entity_row() : null; // Counts as the first row of page 1.
-		$shift = $agg ? 1 : 0;
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber,PluginCheck.Security.DirectDB.UnescapedDBParameter -- conditions and order built from fixed parts with placeholders.
-		$total       = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE {$sql}", array_merge( array( $t ), $args ) ) );
-		$query       = "SELECT * FROM %i WHERE {$sql} ORDER BY {$by}, label ASC LIMIT %d OFFSET %d";
-		$this->items = $wpdb->get_results( $wpdb->prepare( $query, array_merge( array( $t ), $args, array( 1 === $paged ? $per - $shift : $per, max( 0, ( $paged - 1 ) * $per - $shift ) ) ) ) );
+		$per    = $this->get_items_per_page( 'aw_si_keywords_per_page', 50 );
+		$paged  = max( 1, $this->get_pagenum() );
+		$sql    = implode( ' AND ', $where );
+		$agg    = $this->plain_all() ? $this->entity_row() : null; // Counts as the first row of page 1.
+		$shift  = $agg ? 1 : 0;
+		$from   = $store ? '%i k LEFT JOIN %i s ON s.kw_id = k.id' : '%i';
+		$select = $store ? 'k.*, s.score iw_score, s.recommended iw_recommended, s.focus_health iw_focus_health' : '*';
+		$lbl    = $store ? 'k.label' : 'label';
+		$pre    = $store ? array( $t, $sc ) : array( $t );
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber,PluginCheck.Security.DirectDB.UnescapedDBParameter -- conditions and order built from fixed parts with placeholders; table names via %i.
+		$total       = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$from} WHERE {$sql}", array_merge( $pre, $args ) ) );
+		$query       = "SELECT {$select} FROM {$from} WHERE {$sql} ORDER BY {$by}, {$lbl} ASC LIMIT %d OFFSET %d";
+		$this->items = $wpdb->get_results( $wpdb->prepare( $query, array_merge( $pre, $args, array( 1 === $paged ? $per - $shift : $per, max( 0, ( $paged - 1 ) * $per - $shift ) ) ) ) );
 		// phpcs:enable
 		// Monthly search volume from the latest Keyword Planner import, for the keywords on this page.
 		$page_ids = array_filter( array_map( 'intval', wp_list_pluck( (array) $this->items, 'id' ) ) );
@@ -344,7 +378,7 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 			// volume for the top keywords (bing-crawl.php, the last 12 weeks), kept apart from Search Console's figures.
 			$since = ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( '-90 days' )->format( 'Y-m-d' );
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers.
-			$bing = (array) $wpdb->get_results( $wpdb->prepare( "SELECT kw_id, SUM(IF(metric = 'q', impr, 0)) i, AVG(IF(metric = 'kw-volume', value, NULL)) v FROM %i WHERE src = 'bing' AND metric IN ('q', 'kw-volume') AND kw_id IN ({$in}) AND d >= %s GROUP BY kw_id", $o, $since ), OBJECT_K );
+			$bing  = (array) $wpdb->get_results( $wpdb->prepare( "SELECT kw_id, SUM(IF(metric = 'q', impr, 0)) i, AVG(IF(metric = 'kw-volume', value, NULL)) v FROM %i WHERE src = 'bing' AND metric IN ('q', 'kw-volume') AND kw_id IN ({$in}) AND d >= %s GROUP BY kw_id", $o, $since ), OBJECT_K );
 			$tools = function_exists( 'aw_si_tool_figures' ) ? aw_si_tool_figures( $page_ids ) : array();
 			$oseo  = function_exists( 'aw_si_openseo_positions' ) ? aw_si_openseo_positions( $page_ids ) : array(); // Kept apart from the Live check.
 			foreach ( $this->items as $item ) {
@@ -521,6 +555,41 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 	 */
 	protected function column_action( $item ) {
 		return esc_html( aw_si_actions()[ $item->action ] ?? '' );
+	}
+
+	/**
+	 * The keyword score (0–100) from the score store, or an en dash when it has not been scored yet.
+	 *
+	 * @param object $item Keyword record (joined with the score store).
+	 */
+	protected function column_score( $item ) {
+		if ( ! empty( $item->aggregate ) || ! isset( $item->iw_score ) || null === $item->iw_score ) {
+			return '–';
+		}
+		return esc_html( number_format_i18n( (int) $item->iw_score ) );
+	}
+
+	/**
+	 * The recommended-use labels (one or more), and the focus-keyphrase-health flag when there is one.
+	 *
+	 * @param object $item Keyword record (joined with the score store).
+	 */
+	protected function column_recommended( $item ) {
+		if ( ! empty( $item->aggregate ) ) {
+			return '';
+		}
+		$labels = aw_si_use_labels();
+		$out    = array();
+		foreach ( array_filter( explode( ',', (string) ( $item->iw_recommended ?? '' ) ) ) as $key ) {
+			$out[] = esc_html( $labels[ $key ] ?? $key );
+		}
+		$html = $out ? implode( '<br>', $out ) : '–';
+		$fh   = (string) ( $item->iw_focus_health ?? '' );
+		if ( '' !== $fh ) {
+			$flags = aw_si_flag_labels();
+			$html .= '<br><span class="post-state">' . esc_html( $flags[ $fh ] ?? $fh ) . '</span>';
+		}
+		return $html;
 	}
 
 	/**
