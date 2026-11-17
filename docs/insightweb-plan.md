@@ -285,6 +285,34 @@ internal-API risk; keep it bounded behind a clear adapter), which fills `obs`; t
 then the shell-backed tabs behind the shared `insightweb-shell` package, and the shared external-services registry once
 its package lands.
 
+### Safety audit (standalone .org edition, 17 Nov 2026) — SAFE
+
+Verified the public edition is safe to activate/uninstall with Animal Writes Core, Kits Core and the other suite
+plugins present or absent, and alongside the live plugin, with no fatal, no redeclare and no live-data corruption:
+
+- **Own prefix on everything.** Tables `{prefix}insightweb_{keywords,kw_pages,obs,rising,links}`; options `insightweb_db`,
+  `insightweb_kw_db`; per-user screen meta `insightweb_*_per_page`; REST namespace `insightweb/v1`; menu slug `insightweb`;
+  classes `InsightWeb_*` (+ the shared, guarded `Wugweb_External_Services`); 76 `insightweb_*` functions; constants
+  `INSIGHTWEB_*`. No `aw_` / `kits_` names, no Core/Kits shared names, no enqueued script/style handles, no CPT/taxonomy.
+- **No reads/writes of Core's shared data.** Grep confirms zero references to `wp_aw_si_keywords`, `aw_kw_db`, `aw_si_*`,
+  `aw_kw_*` or any `aw_`/`kits_` option or function. The keyword table has its OWN db-version option `insightweb_kw_db`
+  (not `aw_kw_db`) and its own table `{prefix}insightweb_keywords` (never `{prefix}aw_si_keywords`).
+- **Activation idempotent, Core-independent.** No `register_activation_hook`; tables are created lazily on `admin_init`
+  (keyword table priority 1, observation tables priority 2) guarded by an autoloaded version option and built with
+  `dbDelta` — cheap and safe to re-run. The plugin boots standalone (no `KITS_CORE_LOADED` gate); Site Kit is reached
+  only through `class_exists( '\Google\Site_Kit\Plugin' )`, so its absence shows a prompt, never a fatal. No cron and
+  no transients, so nothing is orphaned on deactivation.
+- **No fatal if co-installed with the live plugin.** The live plugin and the public edition are one plugin identity
+  (slug `insightweb`), so a site runs one or the other — but even side by side there is **zero** overlap of global
+  `insightweb_*` functions (live 44, public 76, intersection empty) and classes are disjoint (`AW_SI_*` vs
+  `InsightWeb_*`), so no redeclare; tables and options are disjoint (`aw_si_*`/`aw_kw_*` vs `insightweb_*`), so no data
+  clash. The only shared symbols are the identity constants `INSIGHTWEB_VERSION/DIR/FILE` — expected for one identity,
+  and non-fatal (a second `define()` warns and is ignored).
+- **Uninstall removes only its own data, opt-in.** `uninstall.php` runs only under `WP_UNINSTALL_PLUGIN` and only when
+  `insightweb_delete_data` is on (off by default), then drops only the `{prefix}insightweb_*` tables and deletes only
+  the `insightweb_*` options and per-user meta — never Core's or any `aw_*` data. (The toggle UI lands with the Settings
+  tab; until then nothing is deleted on uninstall, which is the safe default.) Current-blog scope (standard WP limit).
+
 ### Extracted build progress (public edition, as of 17 Nov 2026)
 
 `plugins/insightweb-org/` exists and is a separate, standalone codebase — the live `plugins/insightweb` is untouched.
