@@ -129,7 +129,9 @@ add_action(
 		// Full-width list screens (owner, 17 Nov 2026): a plugin stylesheet, after the shell CSS (its dependency), lifts
 		// the shell's content max-width on any InsightWeb screen that shows a list table, so dense tables use the full
 		// admin width. Dashboard and Settings (no list table) keep the comfortable reading width.
-		wp_enqueue_style( 'insightweb-admin', plugins_url( 'assets/admin.css', $main ), array( 'kits-shell' ), (string) $head['Version'] );
+		// The cache-bust rev is bumped by hand whenever assets/admin.css changes, because the plugin Version is static
+		// (a stale admin.css?ver=1.0.0 is otherwise served from the browser cache). Bump on every admin.css edit.
+		wp_enqueue_style( 'insightweb-admin', plugins_url( 'assets/admin.css', $main ), array( 'kits-shell' ), (string) $head['Version'] . '-css2' );
 	}
 );
 
