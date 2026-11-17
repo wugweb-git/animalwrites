@@ -149,7 +149,7 @@ risk; no persisted state.
 ### 1-J. REST namespaces / routes
 | Namespace | Count | Decision |
 |---|---|---|
-| `sourceweb/v1` (`SOURCEWEB_REST`) | 6 routes | already renamed — keep |
+| `sourceweb/v1` (`SOURCEWEB_REST`) | 6 routes (`/rules/autoresolve*`, `/enrichment/*`) | already renamed — keep. **Namespace shared with the `.org` fork — see Part 2-A for co-install constraints** |
 | `aw/v1` | 5 routes | **worker endpoints — SHARED, KEEP** (external workers post to these; renaming breaks the fetch pipeline) |
 
 ### 1-K. Nonce actions
@@ -180,6 +180,26 @@ co-active plugins.
   there is no in-repo clash between the live plugin and the fork.
 - The only existing `sourceweb_*` names are the partial migration **inside** aw-sourcing itself
   (not a collision — those are the already-done half).
+
+### 2-A. `sourceweb/v1` REST namespace is SHARED with the `.org` fork (cross-repo, co-install)
+Flagged by the standalone-SourceWeb session. The namespace `sourceweb/v1` is used by **both**
+plugins, partitioned by path, so they coexist even if co-installed:
+- **Live `aw-sourcing` registers:** `sourceweb/v1/rules/autoresolve`, `/rules/autoresolve/delete`,
+  `/rules/autoresolve/move`, `/rules/autoresolve/reset`, `/enrichment/edit`, `/enrichment/delete`
+  (autoresolve.php). Permission callback: **`sourceweb_rest_can`** (defined sourceweb-rest.php:35,
+  used across sourceweb-rest-ai/logs/pages).
+- **`.org` fork registers:** `sourceweb/v1/stats` (not in this repo). Its permission callback was
+  renamed to **`sourceweb_stats_rest_can`** (fork fix 26ba900d) specifically to avoid a
+  function-name redeclare with the live side's `sourceweb_rest_can`.
+
+Constraints for Part 4 (no clash in this repo today — the fork isn't here — but to stay
+co-install-safe):
+1. **Do NOT add a `sourceweb/v1/stats` route on the live side** — the fork owns that path.
+2. **Do NOT rename any live function to `sourceweb_stats_rest_can`** — the fork owns that name.
+3. Live's existing `sourceweb_rest_can` is fine to keep (the fork already renamed away from it);
+   do not rename any *other* live callback *into* `sourceweb_rest_can` either.
+4. Leave the `aw/v1` worker routes and the `aw_si_tabs` / `aw_si_page_metrics` / `aw_si_table` /
+   `wp_aw_si_keywords` contracts untouched (already in brief).
 
 ---
 
