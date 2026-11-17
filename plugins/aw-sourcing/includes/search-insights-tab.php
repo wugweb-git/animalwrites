@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // The tab sits between Search Insights' Searches and Settings tabs.
-add_filter( 'aw_si_tabs', fn( $tabs ) => (array) $tabs + array( 'sourcing' => 'Sourcing keywords' ) );
+add_filter( 'aw_si_tabs', fn( $tabs ) => (array) $tabs + array( 'sourcing' => 'SourceWeb keywords' ) );
 
 add_action(
 	'aw_si_tab_sourcing',
