@@ -203,6 +203,17 @@ $rl = insightweb_rising_list( insightweb_list_filters( 'rising' ) + array( 'per'
 $ll = insightweb_links_list( insightweb_list_filters( 'links' ) + array( 'per' => 50 ) );
 iw_check( array() === $rl['items'] && 0 === $rl['total'] && array() === $ll['items'] && 0 === $ll['total'], 'rising/links lists are empty until a source fills the tables' );
 
+// Shared external-services registry (external-services.php + services.php).
+iw_check( defined( 'WUGWEB_EXTSVC_VERSION' ) && class_exists( 'Wugweb_External_Services' ), 'external-services registry loads (version constant + class)' );
+iw_check( array() === Wugweb_External_Services::all(), 'registry is empty before anything registers' );
+insightweb_register_services();
+$svc = Wugweb_External_Services::all();
+iw_check( isset( $svc['google-site-kit'] ) && false !== strpos( (string) $svc['google-site-kit']['name'], 'Site Kit' ), 'InsightWeb registers the Site Kit data flow' );
+$readme = Wugweb_External_Services::readme_section();
+iw_check( false !== strpos( $readme, '== External services ==' ) && false !== strpos( $readme, 'Site Kit' ) && false !== strpos( $readme, 'policies.google.com/privacy' ), 'registry renders the readme External services block' );
+Wugweb_External_Services::register( '', array() );
+iw_check( count( Wugweb_External_Services::all() ) === count( $svc ), 'registry ignores an empty registration' );
+
 // Keyword table.
 iw_check( 'dog bite' === insightweb_kw_norm( '  Dog BITE! ' ), 'norm lower-cases, strips punctuation, collapses space' );
 $sql = insightweb_kw_schema_sql( 'wp_insightweb_keywords', '' );

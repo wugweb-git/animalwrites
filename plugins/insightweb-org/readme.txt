@@ -38,7 +38,7 @@ Yes, for Search Console and GA4 data: InsightWeb reads them through Site Kit by 
 
 == External services ==
 
-InsightWeb reads measurement data; it only reads, and each service is used only when its key or connection is set. This 0.1.0 skeleton makes no direct external calls yet; as the insights modules land, every outbound integration is declared in InsightWeb's external-services registry, which generates this section and an in-admin disclosure screen. The services it will use:
+InsightWeb reads measurement data; it only reads, and each service is used only when its key or connection is set. Every outbound integration is declared in InsightWeb's external-services registry (a shared, suite-wide component), which generates this section and the in-admin "Data sources" list on the Overview. Today the registry declares the Google data flow below; this 0.1.0 skeleton makes no direct external call of its own, and PageSpeed, Clarity, Bing and DB-IP each register as their module lands. The services:
 
 * **Google Search Console and Google Analytics 4** — accessed through the Site Kit by Google plugin, which holds the Google connection; InsightWeb stores no Google credentials. Google terms (https://policies.google.com/terms) and privacy policy (https://policies.google.com/privacy).
 * **Google PageSpeed Insights** (`https://www.googleapis.com/`) — the URL of each checked page is sent to measure its score. Same Google terms and privacy.

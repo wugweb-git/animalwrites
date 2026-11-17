@@ -288,7 +288,7 @@ its package lands.
 ### Extracted build progress (public edition, as of 17 Nov 2026)
 
 `plugins/insightweb-org/` exists and is a separate, standalone codebase — the live `plugins/insightweb` is untouched.
-Each piece landed green (`php -l` + PHPCS WordPress + `tools/ci/phpcs-security.xml` + the no-WP smoke test, now 51
+Each piece landed green (`php -l` + PHPCS WordPress + `tools/ci/phpcs-security.xml` + the no-WP smoke test, now 56
 checks); `vendor/` and `composer.lock` are never committed. Branch `claude/insightweb-org-assess-dc97b9`, **not** on
 `wordpress-dev` or `wordpress` — side session, nothing pushed or shipped.
 
@@ -306,6 +306,7 @@ checks); `vendor/` and `composer.lock` are never committed. Branch `claude/insig
 | REST `insightweb/v1/overview` (feeds the shell chart component) | `includes/rest.php` | Admin UI commit | done, green |
 | Rising list table (status views, search, sort, noted/dismissed/new row + bulk actions) | `includes/class-insightweb-rising-table.php` | Rising/Links commit | done, green |
 | Links list table (read-only: type filter, search, sort, pagination) | `includes/class-insightweb-links-table.php` | Rising/Links commit | done, green |
+| Shared external-services registry (suite-neutral, collision-guarded, version-gated) + InsightWeb's Site Kit disclosure + Overview "Data sources" card | `includes/class-wugweb-external-services.php`, `includes/services.php` | Registry commit | done, green — **proposed suite reference, pending coordinator adoption** |
 
 **Admin UI phase (§7 charts + §8 tables), decisions applied:**
 - **Substrate.** The live plugin renders the Kits React shell as *chrome* and embeds each tab's server HTML as a shell
@@ -343,8 +344,15 @@ and bulk actions; Links: read-only, type filter, search, sort). Both show empty 
 **Not built yet:** the Site Kit GSC/GA4 read (model A — the internal-API/runtime-risk adapter that fills `obs` and the
 `rising`/`links` source rows, the one piece that makes the lists and charts show real data); the bundled
 `insightweb-shell` React package + mount (the server-rendered parts and the MiniChart contract are ready for it;
-RankWeb's build recipe applies); the shared external-services registry (one implementation for the suite, coordinated
-with SourceWeb — not built solo here). **Shipping:** this is a side session — it does not push or ship; the branch + hashes
+RankWeb's build recipe applies).
+
+**Shared external-services registry (built here as the proposed suite reference).** `class-wugweb-external-services.php`
+is suite-neutral, load-once and collision-guarded (class + `WUGWEB_EXTSVC_VERSION` guarded; later versions raise the
+constant and every plugin ships the identical file). InsightWeb registers its one real integration — the Google
+Search Console / GA4 data flow through Site Kit — in `services.php`; PageSpeed / Clarity / Bing / DB-IP register from
+their modules as they land. `readme_section()` renders the readme "== External services ==" block and the Overview
+"Data sources" card reads the same list. **This is the first implementation in the suite; the coordinator must bless it
+and have SourceWeb / RankWeb bundle the identical copy** (the file was built to be adopted verbatim, not forked). **Shipping:** this is a side session — it does not push or ship; the branch + hashes
 go to the coordinator, and only the live-plugin changes (the settings bug fix `b3cd3a0d`, the readme
 `0d723960`/`b8e5857d`) are production-bound. The `plugins/insightweb-org/` build is a separate public codebase and must
 **not** be deployed to the live site.

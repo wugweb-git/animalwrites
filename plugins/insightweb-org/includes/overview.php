@@ -33,7 +33,39 @@ function insightweb_overview_html(): string {
 	$html .= insightweb_overview_trends( $o['trend'] );
 	$html .= insightweb_overview_breakdowns( $o );
 	$html .= insightweb_overview_top( $o['top'] );
+	$html .= insightweb_overview_sources();
 	return $html;
+}
+
+/**
+ * The data-sources disclosure: the external services InsightWeb has declared with the shared registry
+ * (external-services.php), so the admin shows the same list the readme declares.
+ *
+ * @return string
+ */
+function insightweb_overview_sources(): string {
+	if ( ! class_exists( 'Wugweb_External_Services' ) ) {
+		return '';
+	}
+	$services = Wugweb_External_Services::all();
+	if ( ! $services ) {
+		return '';
+	}
+	$out  = '<h2>' . esc_html__( 'Data sources', 'insightweb' ) . '</h2>';
+	$out .= '<p class="description">' . esc_html__( 'The outside services InsightWeb uses. It reads only and changes nothing on them.', 'insightweb' ) . '</p>';
+	$out .= '<ul class="ul-disc">';
+	foreach ( $services as $service ) {
+		$line = '<strong>' . esc_html( (string) $service['name'] ) . '</strong>';
+		if ( '' !== (string) $service['summary'] ) {
+			$line .= ' — ' . esc_html( (string) $service['summary'] );
+		}
+		if ( ! empty( $service['optional'] ) ) {
+			$line .= ' ' . esc_html__( '(only when its key or connection is set)', 'insightweb' );
+		}
+		$out .= '<li>' . $line . '</li>';
+	}
+	$out .= '</ul>';
+	return $out;
 }
 
 /**
