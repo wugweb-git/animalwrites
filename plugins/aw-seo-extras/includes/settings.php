@@ -155,6 +155,7 @@ function aw_seo_modules(): array {
 			'files'  => array( 'robots' ),
 			'desc'   => 'Noindex rules that depend on an item\'s state or a list\'s size.',
 			'fields' => array(
+				'AW_SEO_NOINDEX_PROTECTED' => array( 'type' => 'int', 'label' => 'Keep password-protected items out of search (1 on, 0 off)', 'help' => 'A password-protected item hides its content, so it is set to noindex.', 'default' => 1 ),
 				'AW_THIN_DISTRICT_TYPE' => array( 'type' => 'int', 'label' => 'Fewest listings for an indexed Directory page', 'help' => 'A district × type page with fewer listings than this is noindex and left out of the Directory sitemap, unless it is on the "Thin pages kept indexed" list. At 1, the default, only a page with no listings is noindex.', 'default' => 1 ),
 				'AW_DIRECTORY_KEEP_INDEXED' => array( 'type' => 'list', 'label' => 'Thin pages kept indexed', 'help' => 'Paths under /directory/ that stay indexed anyway. One per line.', 'default' => array(
 						'haryana/jhajjar/animal-welfare-organisation',
@@ -193,6 +194,24 @@ function aw_seo_modules(): array {
 				'AW_FILTERED_STATE_NOINDEX' => array( 'type' => 'list', 'label' => 'Hubs whose state views are noindex', 'help' => 'One post type per line.', 'default' => array( 'aw_news', 'aw_legal', 'aw_opportunity' ) ),
 			),
 		),
+		'video' => array(
+			'label'  => 'Video',
+			'switch' => true,
+			'files'  => array( 'video' ),
+			'desc'   => 'Finds YouTube and Vimeo videos in content, adds a VideoObject to the schema, and lists them in a video sitemap. No paid API: a YouTube video gets its title and thumbnail, not its duration or date.',
+			'fields' => array(
+				'AW_VIDEO_TYPES' => array( 'type' => 'list', 'label' => 'Post types scanned for videos', 'help' => 'Items of these types are scanned for YouTube and Vimeo videos. One per line. Empty: nothing runs.', 'default' => array( 'post', 'aw_news', 'aw_legal', 'aw_campaign' ) ),
+			),
+		),
+		'redirect-tools' => array(
+			'label'  => 'Redirect tools',
+			'switch' => true,
+			'files'  => array( 'redirect-tools' ),
+			'desc'   => 'Export and import redirects as CSV, export Rank Math\'s 404 log, and an Apache .htaccess block. Redirects stay in Rank Math\'s one list.',
+			'fields' => array(
+				'AW_REDIRECT_HTACCESS' => array( 'type' => 'int', 'label' => 'Allow writing redirects to .htaccess (1 on, 0 off)', 'help' => 'Off by default. Apache or LiteSpeed only; a backup is written first. The download works whether this is on or off.', 'default' => 0 ),
+			),
+		),
 		'schema' => array(
 			'label'  => 'Schema',
 			'switch' => false,
@@ -200,6 +219,15 @@ function aw_seo_modules(): array {
 			'desc'   => 'The site\'s own JSON-LD nodes in Rank Math\'s graph (organisations, Library documents, campaigns, opportunities, lists).',
 			'fields' => array(
 				'AW_SITE_ALT_NAMES' => array( 'type' => 'list', 'label' => 'Other names of the site', 'help' => 'The WebSite node\'s alternateName. One per line.', 'default' => array( 'AnimalWrites', 'Animal Writes India', 'animalwrites.in' ) ), // "Animal Writes India": 12 Nov 2026, people search the brand under several names
+			),
+		),
+		'schema-plus' => array(
+			'label'  => 'Custom schema',
+			'switch' => true,
+			'files'  => array( 'schema-custom' ),
+			'desc'   => 'A per-item JSON-LD box (several nodes), Speakable, about and mentions, import schema from a URL, and a Rich Results Test link.',
+			'fields' => array(
+				'AW_SCHEMA_TYPES' => array( 'type' => 'list', 'label' => 'Post types with the custom-schema box', 'help' => 'Items of these types get the Custom schema box. One per line. Empty: none.', 'default' => array( 'post', 'page', 'aw_news', 'aw_legal', 'aw_campaign', 'aw_listing', 'aw_opportunity' ) ),
 			),
 		),
 		'faq' => array(
@@ -298,6 +326,33 @@ function aw_seo_modules(): array {
 				'AW_MD_VARY_HTML' => array( 'type' => 'int', 'label' => 'Vary: Accept on the HTML (1 on, 0 off)', 'help' => 'Set 0 if the CDN stops storing Home and single pages (x-hcdn-cache-status never HIT).', 'default' => 1 ),
 			),
 		),
+		'bulk' => array(
+			'label'  => 'Bulk edit',
+			'switch' => true,
+			'files'  => array( 'bulk-edit', 'bulk-csv' ),
+			'desc'   => 'SEO columns, filters, Quick Edit and Bulk Edit on the post-list screens, and a CSV export and import of the SEO fields (RankWeb → SEO CSV).',
+			'fields' => array(
+				'AW_BULK_TYPES' => array( 'type' => 'list', 'label' => 'Post types with the list-screen SEO tools', 'help' => 'One per line. Empty: none.', 'default' => array( 'aw_listing', 'aw_news', 'post', 'aw_legal', 'aw_opportunity', 'aw_campaign', 'page' ) ),
+			),
+		),
+		'media' => array(
+			'label'  => 'Images',
+			'switch' => true,
+			'files'  => array( 'media-seo' ),
+			'desc'   => 'Find and replace across image alt text, title and caption, and fill missing captions (RankWeb → Images).',
+			'fields' => array(
+				'AW_MEDIA_CAPTION' => array( 'type' => 'text', 'label' => 'Caption pattern for missing captions', 'help' => 'Placeholders: {title}, {filename}, {sitename}.', 'default' => '{title}' ),
+			),
+		),
+		'agent' => array(
+			'label'  => 'Agent tools',
+			'switch' => true,
+			'files'  => array( 'agent-tools' ),
+			'desc'   => 'RankWeb\'s work as WordPress abilities (the Abilities API, 6.9+), exposed to AI agents by the MCP adapter. Reads only, unless writes are allowed below.',
+			'fields' => array(
+				'AW_AGENT_WRITES' => array( 'type' => 'int', 'label' => 'Allow write abilities (1 on, 0 off)', 'help' => 'Off by default. The reads are always registered; the writes (set SEO, add redirect, set schema) are registered only when this is on, and each still checks the capability.', 'default' => 0 ),
+			),
+		),
 		'analysis' => array(
 			'label'  => 'Content analysis',
 			'switch' => true,
@@ -312,7 +367,7 @@ function aw_seo_modules(): array {
 		'internal-links' => array(
 			'label'  => 'Internal links',
 			'switch' => true,
-			'files'  => array( 'internal-links' ),
+			'files'  => array( 'internal-links', 'link-audit', 'link-anchors', 'silos' ),
 			'desc'   => 'Links items to each other from their link keywords, and records every link in each item. Adds no link until a post type is listed.',
 			'fields' => array(
 				'AW_LINK_TYPES' => array( 'type' => 'list', 'label' => 'Post types linked', 'help' => 'Items of these types get links and can be linked to. One post type per line. Empty: no links are added.', 'default' => array() ),
@@ -322,6 +377,18 @@ function aw_seo_modules(): array {
 				'AW_LINK_NO_SELF' => array( 'type' => 'int', 'label' => 'Never link an item to itself (1 on, 0 off)', 'help' => '', 'default' => 1 ),
 				'AW_LINK_SKIP_LINKED' => array( 'type' => 'int', 'label' => 'Skip a page the item already links to by hand (1 on, 0 off)', 'help' => '', 'default' => 1 ),
 				'AW_LINK_EXCLUDE' => array( 'type' => 'list', 'label' => 'Items left out', 'help' => 'Never linked from or to. One item ID per line.', 'default' => array() ),
+				'AW_LINK_AUDIT_DEPTH' => array( 'type' => 'int', 'label' => 'Audit: most clicks from the home page', 'help' => 'An item further away than this is listed as too deep.', 'default' => 3 ),
+				'AW_LINK_AUDIT_MAX' => array( 'type' => 'int', 'label' => 'Audit: most links in one item', 'help' => 'An item with more links than this is listed as having too many.', 'default' => 100 ),
+				'AW_LINK_ANCHOR_EXACT_MAX' => array( 'type' => 'int', 'label' => 'Anchors: most exact match, in percent', 'help' => 'An item whose links in have more exact-match anchors than this share is warned about, and the auto-linker uses another keyword.', 'default' => 20 ),
+				'AW_LINK_ANCHOR_TYPE_MAX' => array( 'type' => 'int', 'label' => 'Anchors: most of any other type, in percent', 'help' => 'The same for every other anchor type.', 'default' => 60 ),
+				'AW_LINK_ANCHOR_MIN' => array( 'type' => 'int', 'label' => 'Anchors: fewest links before a warning', 'help' => 'An item with fewer links in gets no warning.', 'default' => 5 ),
+				'AW_LINK_BRAND' => array( 'type' => 'list', 'label' => 'Anchors: brand names', 'help' => 'An anchor with one of these words is branded. One per line.', 'default' => array( 'Animal Writes' ) ),
+				'AW_LINK_GENERIC' => array( 'type' => 'list', 'label' => 'Anchors: generic anchors', 'help' => 'These anchors are generic. One per line.', 'default' => array( 'click here', 'here', 'read more', 'learn more', 'more', 'this page', 'this article', 'this link', 'link' ) ),
+				'AW_LINK_LONG_WORDS' => array( 'type' => 'int', 'label' => 'Anchors: words in a long-tail anchor', 'help' => 'An anchor with more words than this is long-tail.', 'default' => 6 ),
+				'AW_SILO_MAX' => array( 'type' => 'int', 'label' => 'Silos: most links an item shows', 'help' => 'The silo links at the end of an item. In virtual mode the others are listed from the next one round, so every item gets links.', 'default' => 10 ),
+				'AW_SILO_MIN' => array( 'type' => 'int', 'label' => 'Silos: fewest items', 'help' => 'A silo with fewer items (the hub counts) is flagged.', 'default' => 5 ),
+				'AW_SILO_DEPTH' => array( 'type' => 'int', 'label' => 'Silos: most folders deep', 'help' => 'An item whose address is deeper (/library/guides/page/ is 3) is flagged.', 'default' => 3 ),
+				'AW_LINK_AUDIT_AVOID' => array( 'type' => 'list', 'label' => 'Audit: addresses not to link to', 'help' => 'A link whose address contains one of these words is listed (thank-you and download pages). One per line.', 'default' => array( 'thank-you', 'thanks', 'download' ) ),
 			),
 		),
 	);
@@ -372,6 +439,8 @@ function aw_seo_field_text( string $type, $value ): string {
 	switch ( $type ) {
 		case 'int':
 			return (string) (int) $value;
+		case 'text':
+			return (string) $value;
 		case 'list':
 			return implode( "\n", array_map( fn( $v ) => '' === (string) $v ? '/' : (string) $v, (array) $value ) );
 		case 'map':
@@ -388,6 +457,8 @@ function aw_seo_field_value( string $type, string $text ) {
 	switch ( $type ) {
 		case 'int':
 			return max( 0, (int) $text );
+		case 'text':
+			return sanitize_text_field( $text );
 		case 'list':
 			return array_map( fn( $l ) => '/' === $l ? '' : sanitize_text_field( $l ), $lines );
 		case 'map':
@@ -422,19 +493,19 @@ function aw_seo_setting_tabs(): array {
 		),
 		'titles'          => array(
 			'label'   => 'Titles and descriptions',
-			'modules' => array( 'general', 'titles', 'breadcrumbs' ),
+			'modules' => array( 'general', 'titles', 'breadcrumbs', 'bulk' ),
 		),
 		'indexing'        => array(
 			'label'   => 'Indexing',
-			'modules' => array( 'canonical', 'robots', 'filtered', 'sitemap', 'redirects', 'health' ),
+			'modules' => array( 'canonical', 'robots', 'filtered', 'sitemap', 'redirects', 'redirect-tools', 'health', 'video' ),
 		),
 		'schema'          => array(
 			'label'   => 'Schema and FAQ',
-			'modules' => array( 'schema', 'faq', 'rank-math-schema' ),
+			'modules' => array( 'schema', 'schema-plus', 'faq', 'rank-math-schema' ),
 		),
 		'share'           => array(
 			'label'   => 'Share images and Open Graph',
-			'modules' => array( 'opengraph' ),
+			'modules' => array( 'opengraph', 'media' ),
 		),
 		'analysis'        => array(
 			'label'   => 'Focus keywords and content analysis',
@@ -442,7 +513,7 @@ function aw_seo_setting_tabs(): array {
 		),
 		'ai'              => array(
 			'label'   => 'AI agents',
-			'modules' => array( 'llms', 'markdown' ),
+			'modules' => array( 'llms', 'markdown', 'agent' ),
 		),
 		'links'           => array(
 			'label'   => 'Internal links',
@@ -593,7 +664,7 @@ const AW_SEO_DELETE_DATA = 'aw_seo_delete_data'; // 1: uninstall.php deletes Ran
  * One stored setting value, cleaned by its field type. Values the screen stored come back unchanged (the same clean-up
  * as aw_seo_field_value()), so a save that changes nothing still writes nothing.
  *
- * @param string $type int, list, map, maplist, or '' (a key no field knows: kept, its texts cleaned).
+ * @param string $type int, text, list, map, maplist, or '' (a key no field knows: kept, its texts cleaned).
  * @param mixed  $v    Value.
  * @return mixed
  */
@@ -601,6 +672,8 @@ function aw_seo_setting_clean( string $type, $v ) {
 	switch ( $type ) {
 		case 'int':
 			return max( 0, (int) $v );
+		case 'text':
+			return sanitize_text_field( (string) $v );
 		case 'list':
 			return array_values( array_map( fn( $x ) => sanitize_text_field( (string) $x ), (array) $v ) );
 		case 'map':

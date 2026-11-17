@@ -95,7 +95,7 @@ built in InsightWeb · **Free** = Rank Math Free already does it · **Not needed
 | Advanced redirections module (categories, schedule) | Groups and scheduled redirects | Build | Read and write Rank Math's `wp_rank_math_redirections`; categories as a column (phase F) |
 | Import redirections via CSV | Bulk add | Build | CSV upload, preview, then add through `aw_redirect_add()` (phase F) |
 | Export 404 log | CSV of `wp_rank_math_404_logs` | Build | Download on the Tools tab (phase F) |
-| Sync redirections to .htaccess | Server-level redirects | Build, off | The server is LiteSpeed (reads .htaccess); a block between `# BEGIN RankWeb` markers, plain path rules only, written only when switched on, with a backup of the old file (phase F) |
+| Sync redirections to .htaccess | Server-level redirects | Build, off | The server is LiteSpeed (reads .htaccess); a block between `# BEGIN RankWeb Redirects` markers, plain path rules only, written only when switched on, with a backup of the old file (phase F) |
 
 ### Content, images, bulk work
 
@@ -130,16 +130,47 @@ every output escaped, every string in the aw-seo-extras text domain.
   settings (JSON). Rank Math's own tools stay on Rank Math → Status & Tools.
 - **B. Internal links phases 2 to 4.** Link audit (report, orphans, broken, redirects, nofollow, canonical elsewhere,
   click depth), anchor mix, silos (as planned in `docs/rankweb-internal-links.md`), plus the external broken-link check.
+  **Built 16–17 Nov 2026** on branches `claude/rankweb-link-audit`, `claude/rankweb-anchor-mix`, `claude/rankweb-silos`
+  (stacked, in that order), not live yet.
 - **C. Sitemaps and video.** Google News sitemap, video detection and VideoObject, video sitemap, noindex on protected
-  items.
+  items. **Built 17 Nov 2026** on branch `claude/rankweb-video-noindex` (stacked on B), not live yet. The News sitemap
+  was already live (12 Nov). New: module "Video" (YouTube and Vimeo detection from content, oEmbed for title, thumbnail
+  and — Vimeo — duration and date; no paid API, so a YouTube video has no duration or date), a VideoObject in Rank
+  Math's graph, a `video-sitemap.xml` served and listed like the News one, and a "Keep password-protected items out of
+  search" robots setting (on by default). Tests: `AW_Video` detection, node and duration. Daily backfill job
+  `aw_video_sync`.
 - **D. Schema.** Custom JSON-LD box (several per item), import from a URL, Rich Results Test links, speakable, about and
-  mentions, Dataset where it applies.
+  mentions, Dataset where it applies. **Built 17 Nov 2026** on branch `claude/rankweb-schema-custom` (stacked on C), not
+  live yet. Module "Custom schema": a JSON-LD box (one object, a list, or a @graph; checked on save by `AW_Schema` and
+  given a stable @id), Speakable CSS selectors, About and Mentions (names or URLs as Thing references), import JSON-LD
+  from a URL (the page's application/ld+json read into the box), a Dataset starter template, and a Rich Results Test
+  link. The nodes join Rank Math's graph; Speakable, about and mentions go on the WebPage node. Tests: `AW_Schema` parse,
+  extract, @id, speakable and things. No scheduled job.
 - **E. Bulk work.** Quick and Bulk Edit SEO fields, SEO data and focus keyword CSV export/import, media find and replace,
-  automatic captions, list filters.
-- **F. Redirections.** CSV import, 404 log export, categories, .htaccess sync (off by default).
+  automatic captions, list filters. **Built 17 Nov 2026** on branch `claude/rankweb-bulk` (stacked on D), not live yet.
+  Two modules: "Bulk edit" (a SEO column, filters for missing title/description/focus/noindex/orphan, Quick Edit for
+  title/description/focus, Bulk Edit for focus keyword, link keyword and the index rule, and a RankWeb → SEO CSV screen
+  with export and a dry-run import) and "Images" (find and replace across alt/title/caption with a dry run, and fill
+  missing captions from a pattern). A new scalar "text" settings type was added for the caption pattern. Pure `AW_Bulk`
+  (CSV read/write, find-and-replace) with tests. Note: Quick Edit and Bulk Edit use the standard inline hooks and need a
+  wp-admin check (not run on WordPress here).
+- **F. Redirections.** CSV import, 404 log export, categories, .htaccess sync (off by default). **Built 17 Nov 2026**
+  on branch `claude/rankweb-redirects` (stacked on E), not live yet. Module "Redirect tools": export and import the
+  redirects as CSV (source, target, code 301/302/307/308/410/451, comparison; import has a dry run and writes through
+  `aw_rank_math_redirect()` into Rank Math's one list), export Rank Math's 404 log as CSV, and an Apache/LiteSpeed
+  .htaccess block (download always; a live write only when the setting is on, a backup first, via
+  `insert_with_markers()`). `aw_rank_math_redirect()` now takes a status code. Pure `AW_Redirects` (CSV, validation,
+  .htaccess lines) with tests. **Categories were not built**: Rank Math's list has no category field and the owner's
+  rule keeps every redirect in that one list, so a parallel category map keyed by Rank Math id would be fragile — left
+  for the owner to decide. The live .htaccess write needs a wp-admin check (not run on WordPress here).
 - **G. InsightWeb additions.** Index status (URL Inspection API), winners and losers, per-item performance badge and
   view, content SEO overview, PageSpeed on demand, country filter, monthly email digest.
 - **H. Agent tools.** RankWeb abilities through the WordPress Abilities API and MCP adapter, read first, then writes
-  that need edit_post.
+  that need edit_post. **Built 17 Nov 2026** on branch `claude/rankweb-agent` (stacked on F), not live yet. Module
+  "Agent tools": registers RankWeb abilities on `wp_abilities_api_init` (WordPress 6.9+; guarded by function_exists, so
+  nothing breaks without it). Reads (get-seo, audit-summary, list-orphans) register when the module is on; the writes
+  (set-seo, add-redirect, set-schema) only when "Allow writes" is on, and each checks its capability (edit_post or
+  manage_options). The MCP adapter plugin, where installed, exposes the public abilities. Pure `AW_Agent` (manifest,
+  name validation, input tidy) with tests. Needs the Abilities API and a live check (not run on WordPress here).
 
 When all phases are done: version 2.1.0, changelog, readme.

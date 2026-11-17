@@ -316,6 +316,23 @@ function rankweb_dashboard_payload(): array {
 			sprintf( __( '%s category lists below the minimum', 'aw-seo-extras' ), $num( $n['filtered'] ?? 0 ) ),
 		),
 	);
+	// Internal links: the last audit's stored result (link-audit.php), read, not counted.
+	if ( function_exists( 'aw_link_audit_summary' ) ) {
+		$la      = aw_link_audit_summary();
+		$by      = (array) $la['by'];
+		$tiles[] = array(
+			'key'    => 'links',
+			'label'  => __( 'Internal links', 'aw-seo-extras' ),
+			'value'  => $la['at'] ? $num( $by['orphan'] ?? 0 ) : __( 'Not run', 'aw-seo-extras' ),
+			'raw'    => $la['at'] ? (int) ( $by['orphan'] ?? 0 ) : null,
+			/* translators: %s: number of items. */
+			'sub'    => $la['at'] ? sprintf( __( 'orphans; %s items have a finding', 'aw-seo-extras' ), $num( $la['flagged'] ) ) : __( 'The first audit runs within a day', 'aw-seo-extras' ),
+			/* translators: %s: number of items. */
+			'detail' => $la['at'] ? array( sprintf( __( '%s items with an anchor mix over a limit', 'aw-seo-extras' ), $num( $la['anchor_warn'] ) ) ) : array(),
+			'href'   => add_query_arg( 'page', 'aw-links', admin_url( 'admin.php' ) ),
+			'tone'   => $la['flagged'] ? 'warn' : '',
+		);
+	}
 	// The last two are stored results already (the hourly check and the plugin state): read, not counted.
 	$last = (array) get_option( 'aw_seo_endpoints_last', array() );
 	if ( ! aw_seo_module_on( 'health' ) ) {

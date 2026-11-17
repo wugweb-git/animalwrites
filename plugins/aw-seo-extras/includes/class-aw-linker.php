@@ -76,7 +76,12 @@ final class AW_Linker {
 	 *                           target first (internal-links.php sorts it). Each keyword must already be normalised.
 	 * @param callable $url_for  fn( int $target_id ): string, the target's address ('' = do not link to it).
 	 * @param array    $opt      max_links (5), max_per_target (1), first_only (true), self_id (0), no_self (true),
-	 *                           skip_linked (true), exclude (target ids never linked), home (site address).
+	 *                           skip_linked (true), exclude (target ids never linked), home (site address), anchor_ok (null, or
+	 *                           fn( int $target_id, string $keyword ): bool: false refuses a link with this keyword as
+	 *                           its anchor, and the target is linked by another keyword, or not at all, in this item),
+	 *                           target_ok (null, or fn( int $target_id ): bool: false never links to this target from this item),
+	 *                           prefer (null, or fn( int $target_id ): bool: a target it is true for is tried before the others
+	 *                           of the same keyword).
 	 * @return array html (unchanged, byte for byte, when no link was added or the parsed page would not match the input), links (each: target_id, url, anchor,
 	 *               keyword, origin 'auto'), manual (each: url, anchor, rel: the links that were already there).
 	 */
@@ -90,6 +95,9 @@ final class AW_Linker {
 			'skip_linked'    => true,
 			'exclude'        => array(),
 			'home'           => '',
+			'anchor_ok'      => null,
+			'target_ok'      => null,
+			'prefer'         => null,
 		);
 		$out  = array(
 			'html'   => $html,
@@ -165,13 +173,25 @@ final class AW_Linker {
 			return $urls[ $tid ];
 		};
 		$choose  = function ( string $kw ) use ( $index, $opt, $exclude, &$per_t, $resolve ) {
-			foreach ( $index[ $kw ] as $cand ) {
+			$cands = $index[ $kw ];
+			if ( is_callable( $opt['prefer'] ) ) { // preferred targets first, each group keeping its order
+				$first = array_values( array_filter( $cands, fn( $c ) => $opt['prefer']( (int) $c[0] ) ) );
+				$rest  = array_values( array_filter( $cands, fn( $c ) => ! $opt['prefer']( (int) $c[0] ) ) );
+				$cands = array_merge( $first, $rest );
+			}
+			foreach ( $cands as $cand ) {
 				$tid = (int) $cand[0];
 				if ( isset( $exclude[ $tid ] ) || ( $opt['no_self'] && $tid === (int) $opt['self_id'] ) ) {
 					continue;
 				}
 				if ( ( $per_t[ $tid ] ?? 0 ) >= max( 1, (int) $opt['max_per_target'] ) ) {
 					continue;
+				}
+				if ( is_callable( $opt['target_ok'] ) && ! $opt['target_ok']( $tid ) ) {
+					continue;
+				}
+				if ( is_callable( $opt['anchor_ok'] ) && ! $opt['anchor_ok']( $tid, $kw ) ) {
+					continue; // this anchor would put the target's anchor mix over a limit
 				}
 				$url = $resolve( $tid );
 				if ( '' !== $url ) {

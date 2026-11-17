@@ -1,19 +1,27 @@
 <?php
 /**
+ * RankWeb
+ *
+ * @package           aw-seo-extras
+ * @author            Wugweb
+ * @copyright         2026 Wugweb
+ * @license           GPL-2.0-or-later
+ *
+ * @wordpress-plugin
  * Plugin Name:       RankWeb
  * Plugin URI:        https://animalwrites.in/
- * Description:       Everything Rank Math doesn't do or keeps for Premium, for Kits sites.
- * Version:           2.0.0
+ * Description:       SEO extras that run alongside Rank Math: FAQs, canonicals, breadcrumbs, internal links, schema, video and bulk tools.
+ * Version:           2.1.0
  * Requires at least: 6.4
  * Requires PHP:      8.0
+ * Requires Plugins:  seo-by-rank-math
  * Author:            Wugweb
  * Author URI:        https://wugweb.com/
- * License:           GPL-2.0-or-later
+ * License:           GPLv2 or later
+ * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Update URI:        https://wugweb.com/plugins/aw-seo-extras/
  * Text Domain:       aw-seo-extras
  * Domain Path:       /languages
- *
- * @package aw-seo-extras
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -47,7 +55,7 @@ add_action(
 		}
 		require_once AW_SEO_EXTRAS_DIR . 'includes/settings.php'; // first: the modules, their settings and switches
 		$off = aw_seo_files_off();
-		foreach ( array( 'helpers', 'overview', 'faq', 'programmatic', 'titles', 'canonical', 'filtered-views', 'robots', 'schema', 'rank-math-schema', 'opengraph', 'sitemap', 'redirects', 'breadcrumbs', 'focus-keywords', 'health', 'llms', 'markdown', 'analysis', 'content-advice', 'internal-links', 'rankweb-dashboard', 'rankweb-rest', 'rankweb-ui', 'rankweb-modules', 'help-tab' ) as $file ) {
+		foreach ( array( 'helpers', 'overview', 'faq', 'programmatic', 'titles', 'canonical', 'filtered-views', 'robots', 'schema', 'rank-math-schema', 'opengraph', 'sitemap', 'redirects', 'breadcrumbs', 'focus-keywords', 'health', 'llms', 'markdown', 'analysis', 'content-advice', 'internal-links', 'link-audit', 'link-anchors', 'silos', 'video', 'schema-custom', 'bulk-edit', 'bulk-csv', 'media-seo', 'redirect-tools', 'agent-tools', 'rankweb-dashboard', 'rankweb-rest', 'rankweb-ui', 'rankweb-modules', 'help-tab' ) as $file ) {
 			if ( ! in_array( $file, $off, true ) ) { // a module switched off in RankWeb → Settings is not loaded
 				require_once AW_SEO_EXTRAS_DIR . 'includes/' . $file . '.php';
 			}
@@ -58,7 +66,8 @@ add_action(
 		$jobs = array(
 			'health'         => 'aw_seo_endpoints_watchdog',
 			'sitemap'        => 'aw_seo_sitemap_daily',
-			'internal-links' => 'aw_link_index_build',
+			'internal-links' => array( 'aw_link_index_build', 'aw_link_audit' ),
+			'video'          => 'aw_video_sync',
 		);
 		$idle = array_intersect_key( $jobs, array_flip( $off ) );
 		if ( $idle ) {
@@ -68,9 +77,11 @@ add_action(
 					if ( ! is_admin() && ! wp_doing_cron() ) {
 						return;
 					}
-					foreach ( $idle as $hook ) {
-						if ( wp_next_scheduled( $hook ) ) {
-							wp_clear_scheduled_hook( $hook );
+					foreach ( $idle as $hooks ) {
+						foreach ( (array) $hooks as $hook ) {
+							if ( wp_next_scheduled( $hook ) ) {
+								wp_clear_scheduled_hook( $hook );
+							}
 						}
 					}
 				}
@@ -102,10 +113,12 @@ register_deactivation_hook(
 	__FILE__,
 	function () {
 		// The SEO jobs: titles.php, health.php, sitemap.php; the Dashboard counts: rankweb-dashboard.php.
-		foreach ( array( 'aw_seo_fill_daily', 'aw_seo_endpoints_watchdog', 'aw_seo_sitemap_daily', 'rankweb_health_build', 'aw_link_index_build' ) as $hook ) {
+		foreach ( array( 'aw_seo_fill_daily', 'aw_seo_endpoints_watchdog', 'aw_seo_sitemap_daily', 'rankweb_health_build', 'aw_link_index_build', 'aw_link_audit', 'aw_video_sync' ) as $hook ) {
 			wp_clear_scheduled_hook( $hook ); // repeating (no-argument) events only, as Core
 		}
 		wp_clear_scheduled_hook( 'rankweb_health_build', array( 'now' ) ); // A Count now that has not run yet.
 		wp_clear_scheduled_hook( 'aw_link_index_build', array( 'now' ) ); // A rebuild after a Settings save.
+		wp_clear_scheduled_hook( 'aw_link_audit', array( 'now' ) ); // An audit asked for and not yet run.
+		wp_clear_scheduled_hook( 'aw_link_audit', array( 'more' ) ); // The next slice of a running audit.
 	}
 );

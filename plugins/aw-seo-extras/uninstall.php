@@ -11,7 +11,7 @@
  *   aw_faq_off_types, aw_seo_keep_listings, aw_default_share_image, aw_seo_delete_data,
  *   aw_seo_endpoints_last, aw_seo_cache_gen, aw_seo_press_kw_1103, aw_seed_redirects_version, aw_sitemap_filtered,
  *   aw_html_sitemap_page (the option only; the page itself stays), aw_faq_experiment,
- *   rankweb_health_log, rankweb_health_schema, aw_link_db, aw_link_index_version, aw_link_page_version, aw_link_index_built
+ *   rankweb_health_log, rankweb_health_schema, aw_link_db, aw_link_index_version, aw_link_page_version, aw_link_index_built, aw_link_audit_state, aw_link_audit_summary, aw_link_audit_checks
  * Transients (and their timeouts):
  *   rankweb_health, aw_faq_counts, aw_faq_index, aw_html_sitemap, aw_seed_redirects_wait, aw_sitemap_dir_pairs,
  *   and every transient named aw_seo_… (aw_seo_dir_data, aw_seo_category_counts, aw_seo_endpoints_mailed,
@@ -20,7 +20,7 @@
  * Scheduled events:
  *   aw_seo_fill_daily, aw_seo_endpoints_watchdog, aw_seo_sitemap_daily, aw_faq_index_build, rankweb_health_build and
  *   aw_link_index_build (both with and without their 'now' argument)
- * Custom tables: {prefix}aw_link_keywords and {prefix}aw_links (Internal links), dropped. Rank Math's tables are Rank Math's.
+ * Custom tables: {prefix}aw_link_keywords, {prefix}aw_links, {prefix}aw_link_audit, {prefix}aw_silos and {prefix}aw_silo_items (Internal links), dropped. Rank Math's tables are Rank Math's.
  *
  * Before deleting, writes a backup to wp-content/uploads/wugweb-backups/aw-seo-extras-uninstall-<YYYYmmdd-His>.jsonl.gz
  * (includes/uninstall-backup.php): a header line, then every option below with its value as stored, then every row of
@@ -41,10 +41,10 @@ if ( ! get_option( 'aw_seo_delete_data', 0 ) ) {
 	return; // The default: keep everything.
 }
 
-$aw_seo_options = array( 'aw_faq_off_types', 'aw_seo_keep_listings', 'aw_default_share_image', 'aw_seo_endpoints_last', 'aw_seo_cache_gen', 'aw_seo_press_kw_1103', 'aw_seed_redirects_version', 'aw_sitemap_filtered', 'aw_html_sitemap_page', 'aw_faq_experiment', 'rankweb_health_log', 'rankweb_health_schema', 'aw_link_db', 'aw_link_index_version', 'aw_link_page_version', 'aw_link_index_built', 'aw_seo_delete_data' );
+$aw_seo_options = array( 'aw_faq_off_types', 'aw_seo_keep_listings', 'aw_default_share_image', 'aw_seo_endpoints_last', 'aw_seo_cache_gen', 'aw_seo_press_kw_1103', 'aw_seed_redirects_version', 'aw_sitemap_filtered', 'aw_html_sitemap_page', 'aw_faq_experiment', 'rankweb_health_log', 'rankweb_health_schema', 'aw_link_db', 'aw_link_index_version', 'aw_link_page_version', 'aw_link_index_built', 'aw_link_audit_db', 'aw_silo_db', 'aw_link_audit_state', 'aw_link_audit_summary', 'aw_link_audit_checks', 'aw_seo_delete_data' );
 
 require_once __DIR__ . '/includes/uninstall-backup.php';
-if ( ! aw_seo_uninstall_backup( 'aw-seo-extras', __DIR__ . '/aw-seo-extras.php', array_merge( array( 'aw_seo_settings' ), $aw_seo_options ), array(), array( $GLOBALS['wpdb']->prefix . 'aw_link_keywords', $GLOBALS['wpdb']->prefix . 'aw_links' ) ) ) {
+if ( ! aw_seo_uninstall_backup( 'aw-seo-extras', __DIR__ . '/aw-seo-extras.php', array_merge( array( 'aw_seo_settings' ), $aw_seo_options ), array(), array( $GLOBALS['wpdb']->prefix . 'aw_link_keywords', $GLOBALS['wpdb']->prefix . 'aw_links', $GLOBALS['wpdb']->prefix . 'aw_link_audit', $GLOBALS['wpdb']->prefix . 'aw_silos', $GLOBALS['wpdb']->prefix . 'aw_silo_items' ) ) ) {
 	return; // No backup, no delete (the reason is in the error log).
 }
 
@@ -67,13 +67,15 @@ global $wpdb;
 // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- no API deletes transients by prefix.
 $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s", $wpdb->esc_like( '_transient_aw_seo_' ) . '%', $wpdb->esc_like( '_transient_timeout_aw_seo_' ) . '%' ) );
 
-foreach ( array( 'aw_seo_fill_daily', 'aw_seo_endpoints_watchdog', 'aw_seo_sitemap_daily', 'aw_faq_index_build', 'rankweb_health_build', 'aw_link_index_build' ) as $aw_seo_hook ) {
+foreach ( array( 'aw_seo_fill_daily', 'aw_seo_endpoints_watchdog', 'aw_seo_sitemap_daily', 'aw_faq_index_build', 'rankweb_health_build', 'aw_link_index_build', 'aw_link_audit', 'aw_video_sync' ) as $aw_seo_hook ) {
 	wp_clear_scheduled_hook( $aw_seo_hook );
 }
 wp_clear_scheduled_hook( 'rankweb_health_build', array( 'now' ) );
 wp_clear_scheduled_hook( 'aw_link_index_build', array( 'now' ) );
+wp_clear_scheduled_hook( 'aw_link_audit', array( 'now' ) );
+wp_clear_scheduled_hook( 'aw_link_audit', array( 'more' ) );
 
 // Internal links' tables (written to the backup above).
-foreach ( array( 'aw_link_keywords', 'aw_links' ) as $aw_seo_table ) {
+foreach ( array( 'aw_link_keywords', 'aw_links', 'aw_link_audit', 'aw_silos', 'aw_silo_items' ) as $aw_seo_table ) {
 	$wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', $wpdb->prefix . $aw_seo_table ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.DirectDatabaseQuery.SchemaChange -- RankWeb's own tables, on uninstall.
 }
