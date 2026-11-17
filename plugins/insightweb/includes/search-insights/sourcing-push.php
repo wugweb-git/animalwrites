@@ -17,17 +17,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * The score at or above which a keyword may be pushed to SourceWeb as a sourcing candidate. Option, filterable.
+ * The score at or above which a keyword may be pushed to SourceWeb as a sourcing candidate. Set on the Settings tab
+ * (the AW_SI_SOURCING_PUSH_MIN number); filterable.
  *
  * @return int
  */
 function aw_si_sourcing_push_min(): int {
+	$min = defined( 'AW_SI_SOURCING_PUSH_MIN' ) ? (int) AW_SI_SOURCING_PUSH_MIN : 70;
 	/**
 	 * Filter the minimum score to push a keyword to SourceWeb.
 	 *
 	 * @param int $min The threshold (0-100).
 	 */
-	return (int) apply_filters( 'aw_si_sourcing_push_min', (int) get_option( 'aw_si_sourcing_push_min', 70 ) );
+	return (int) apply_filters( 'aw_si_sourcing_push_min', $min );
 }
 
 /**

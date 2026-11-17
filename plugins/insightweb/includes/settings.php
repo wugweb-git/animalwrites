@@ -13,43 +13,48 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/** The seven numbers: constant => [label, help, default]. As RankWeb's module list had them. */
+/** The settings numbers: constant => [label, help, default]. As RankWeb's module list had them. */
 function aw_si_setting_fields(): array {
 	return array(
-		'AW_SI_HIGH_TRENDS' => array(
+		'AW_SI_HIGH_TRENDS'       => array(
 			'label'   => 'High demand: Trends at least',
 			'help'    => '',
 			'default' => 20,
 		),
-		'AW_SI_HIGH_IMPR'   => array(
+		'AW_SI_HIGH_IMPR'         => array(
 			'label'   => 'High demand: impressions in 28 days at least',
 			'help'    => '',
 			'default' => 50,
 		),
-		'AW_SI_QUICK_MIN'   => array(
+		'AW_SI_QUICK_MIN'         => array(
 			'label'   => 'Quick win: impressions at least',
 			'help'    => 'At position 8 to 20.',
 			'default' => 10,
 		),
-		'AW_SI_MOVERS'      => array(
+		'AW_SI_MOVERS'            => array(
 			'label'   => 'Listing names shown one by one',
 			'help'    => 'The rest are one "entity" row.',
 			'default' => 20,
 		),
-		'AW_SI_PSI_FLAG'    => array(
+		'AW_SI_PSI_FLAG'          => array(
 			'label'   => 'PageSpeed mobile score that flags a page (under)',
 			'help'    => '',
 			'default' => 50,
 		),
-		'AW_SI_RM_LOW'      => array(
+		'AW_SI_RM_LOW'            => array(
 			'label'   => 'Rank Math SEO score that is "low" (under)',
 			'help'    => '',
 			'default' => 50,
 		),
-		'AW_SI_KEEP_DAYS'   => array(
+		'AW_SI_KEEP_DAYS'         => array(
 			'label'   => 'Daily figures kept (days)',
 			'help'    => 'Older days become monthly totals.',
 			'default' => 90,
+		),
+		'AW_SI_SOURCING_PUSH_MIN' => array(
+			'label'   => 'Score to offer a keyword to SourceWeb (at least)',
+			'help'    => 'A sourcing candidate scoring this high is offered to SourceWeb as a suggestion.',
+			'default' => 70,
 		),
 	);
 }
