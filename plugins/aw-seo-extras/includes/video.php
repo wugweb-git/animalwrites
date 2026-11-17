@@ -145,7 +145,7 @@ function aw_video_backfill_ids(): array {
 			'orderby'          => 'modified',
 			'order'            => 'ASC',
 			'fields'           => 'ids',
-			'suppress_filters' => true,
+			'suppress_filters' => true, // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.SuppressFilters_suppress_filters -- admin/background query over post IDs; filters suppressed so other plugins do not alter this internal set (capped or cached, never a front-end query).
 			'meta_query'       => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- the daily backfill, capped to AW_VIDEO_BATCH
 				array(
 					'key'     => AW_VIDEO_META,
@@ -227,7 +227,7 @@ function aw_video_sitemap_items(): array {
 			'order'            => 'DESC',
 			'fields'           => 'ids',
 			'has_password'     => false,
-			'suppress_filters' => true,
+			'suppress_filters' => true, // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.SuppressFilters_suppress_filters -- admin/background query over post IDs; filters suppressed so other plugins do not alter this internal set (capped or cached, never a front-end query).
 			'meta_query'       => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- the video sitemap, built on request and cached by the server
 				array(
 					'key'     => AW_VIDEO_META,

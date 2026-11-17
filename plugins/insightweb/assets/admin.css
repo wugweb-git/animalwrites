@@ -3,9 +3,10 @@
 /*
  * Full-width list screens (owner, 17 Nov 2026). The Kits shell caps content width for comfortable reading, but
  * InsightWeb's dense data tables (Keywords, Pages, Rising, Links, Clarity, Sourcing keywords) read better across the
- * full admin width. Lift the cap only on a shell body that actually holds a WP list table, so the Dashboard (Overview
- * boxes + status notices) and Settings keep the narrower reading width.
+ * full admin width. The shell renders each list as a DataViews component (table.dataviews-view-table inside
+ * .dataviews-wrapper), not a classic wp-list-table, so key off .dataviews-wrapper. Lift the cap only on a shell body
+ * that actually holds one, so the Dashboard (Overview boxes) and Settings keep the narrower reading width.
  */
-.kits-shell__body:has( table.wp-list-table ) {
+.kits-shell__body:has( .dataviews-wrapper ) {
 	max-width: none;
 }

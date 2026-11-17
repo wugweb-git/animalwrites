@@ -65,7 +65,7 @@ add_action(
 				'orderby'          => 'ID',
 				'order'            => 'ASC',
 				'fields'           => 'ids',
-				'suppress_filters' => true,
+				'suppress_filters' => true, // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.SuppressFilters_suppress_filters -- admin/background query over post IDs; filters suppressed so other plugins do not alter this internal set (capped or cached, never a front-end query).
 			)
 		) : array();
 		$rows  = array();
