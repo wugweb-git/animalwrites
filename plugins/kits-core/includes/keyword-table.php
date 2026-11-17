@@ -68,7 +68,7 @@ function insightweb_kw_migrate(): void {
 		$new = $wpdb->prefix . 'insightweb_' . $n;
 		if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $old ) ) === $old // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 			&& $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $new ) ) !== $new ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-			$wpdb->query( "RENAME TABLE `{$old}` TO `{$new}`" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared -- table names are built from $wpdb->prefix and fixed strings, no user input
+			$wpdb->query( "RENAME TABLE `{$old}` TO `{$new}`" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table names are built from $wpdb->prefix and fixed strings, no user input
 		}
 	}
 	if ( false === get_option( 'insightweb_kw_db', false ) && false !== get_option( 'aw_kw_db', false ) ) {

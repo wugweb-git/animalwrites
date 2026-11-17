@@ -29,7 +29,7 @@ function insightweb_migrate_names(): void {
 		$new = $wpdb->prefix . 'insightweb_' . $n;
 		if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $old ) ) === $old // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 			&& $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $new ) ) !== $new ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-			$wpdb->query( "RENAME TABLE `{$old}` TO `{$new}`" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared -- names built from $wpdb->prefix and a fixed list, no user input
+			$wpdb->query( "RENAME TABLE `{$old}` TO `{$new}`" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- names built from $wpdb->prefix and a fixed list, no user input
 		}
 	}
 
