@@ -218,6 +218,8 @@ administrator kits-help 200 kits kits-help
 administrator aw-keys 200 kits -
 administrator aw-modules 200 kits -
 administrator aw-seo-plus 200 aw-seo-plus aw-seo-plus
+administrator aw-seo-insights 200 aw-seo-plus aw-seo-insights
+administrator aw-seo-modules 200 aw-seo-plus aw-seo-modules
 administrator aw-faq 200 aw-seo-plus aw-faq
 administrator aw-seo-settings 200 aw-seo-plus aw-seo-settings
 administrator aw-search-insights 200 aw-search-insights -
@@ -231,6 +233,8 @@ administrator mailweb-overview 200 mailweb -
 administrator mailweb-settings 200 mailweb -
 administrator planweb 200 planweb -
 editor aw-seo-plus 200 aw-seo-plus aw-seo-plus
+editor aw-seo-insights 200 aw-seo-plus aw-seo-insights
+editor aw-seo-modules 200 aw-seo-plus aw-seo-modules
 editor aw-faq 200 aw-seo-plus aw-faq
 editor aw-sourcing-menu 200 aw-sourcing-menu -
 editor aw-review 200 aw-sourcing-menu -

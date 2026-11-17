@@ -37,6 +37,9 @@ add_action(
 			$GLOBALS['menu']['58.05'] = array( '', 'read', 'separator-wugweb', '', 'wp-menu-separator', 'separator-wugweb' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- one separator above the block, as core adds its own.
 		}
 		add_submenu_page( AW_SEO_MENU, 'RankWeb', 'Overview', RANKWEB_CAP, AW_SEO_MENU, 'aw_seo_overview_page' );
+		// The Dashboard's other two pages (trends and gaps; module switches and reference tables), so no page is long.
+		add_submenu_page( AW_SEO_MENU, 'RankWeb insights', 'Insights', RANKWEB_CAP, 'aw-seo-insights', 'aw_seo_insights_page' );
+		add_submenu_page( AW_SEO_MENU, 'RankWeb modules', 'Modules', RANKWEB_CAP, 'aw-seo-modules', 'aw_seo_modules_page' );
 	},
 	9 // Before FAQ (10), so Overview is the first item.
 );
@@ -103,6 +106,16 @@ function aw_seo_overview_faq_status(): string {
 /** RankWeb → Dashboard (rankweb-ui.php). */
 function aw_seo_overview_page() {
 	rankweb_ui_page( 'dashboard' );
+}
+
+/** RankWeb → Insights: the trends, where the gaps are, what is kept out of search. */
+function aw_seo_insights_page() {
+	rankweb_ui_page( 'insights' );
+}
+
+/** RankWeb → Modules: the module switches, the modules table, where things are. */
+function aw_seo_modules_page() {
+	rankweb_ui_page( 'modules' );
 }
 
 /**

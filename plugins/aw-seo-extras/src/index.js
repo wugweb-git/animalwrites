@@ -162,7 +162,14 @@ const TREND_METRICS = [
 	},
 ];
 
-function Dashboard() {
+/**
+ * The Dashboard's three views of one set of counts: 'dashboard' (tiles and the tools), 'insights' (trends and gaps) and
+ * 'modules' (switches, the modules table, where things are). Each is its own page and tab, so none is long.
+ *
+ * @param {Object} props
+ * @param {string} props.view 'dashboard', 'insights' or 'modules'.
+ */
+function Dashboard( { view } ) {
 	const [ data, setData ] = useState( null );
 	const [ error, setError ] = useState( '' );
 	const [ days, setDays ] = useState( 28 );
@@ -298,34 +305,39 @@ function Dashboard() {
 
 	return (
 		<>
-			<ChipRow
-				label={ __( 'Compare with', 'aw-seo-extras' ) }
-				value={ days }
-				onChange={ setDays }
-				chips={ RANGES.map( ( n ) => ( {
-					value: n,
-					/* translators: %d: number of days. */
-					label: sprintf( __( 'Last %d days', 'aw-seo-extras' ), n ),
-				} ) ) }
-				after={
-					<>
-						{ after }{ ' ' }
-						<Button
-							variant="link"
-							busy={ busy }
-							onClick={ countNow }
-						>
-							{ __( 'Count now', 'aw-seo-extras' ) }
-						</Button>
-					</>
-				}
-			/>
+			{ 'modules' !== view && (
+				<ChipRow
+					label={ __( 'Compare with', 'aw-seo-extras' ) }
+					value={ days }
+					onChange={ setDays }
+					chips={ RANGES.map( ( n ) => ( {
+						value: n,
+						label: sprintf(
+							/* translators: %d: number of days. */
+							__( 'Last %d days', 'aw-seo-extras' ),
+							n
+						),
+					} ) ) }
+					after={
+						<>
+							{ after }{ ' ' }
+							<Button
+								variant="link"
+								busy={ busy }
+								onClick={ countNow }
+							>
+								{ __( 'Count now', 'aw-seo-extras' ) }
+							</Button>
+						</>
+					}
+				/>
+			) }
 			{ note && (
 				<Notice tone="info" onDismiss={ () => setNote( '' ) }>
 					{ note }
 				</Notice>
 			) }
-			{ attention.length > 0 && (
+			{ 'dashboard' === view && attention.length > 0 && (
 				<Notice tone="warning">
 					<strong>
 						{ __( 'Needs attention', 'aw-seo-extras' ) }
@@ -339,29 +351,54 @@ function Dashboard() {
 					</ul>
 				</Notice>
 			) }
-			{ TILE_GROUPS.map( ( g, gi ) => {
-				const tiles = g.keys
-					.map( ( k ) => byKey[ k ] )
-					.filter( Boolean )
-					// Any tile the groups don't name joins the last group, so nothing is dropped.
-					.concat( gi === TILE_GROUPS.length - 1 ? extra : [] );
-				if ( ! tiles.length ) {
-					return null;
-				}
-				return (
-					<SectionCard
-						key={ g.id }
-						id={ `rankweb-${ g.id }` }
-						title={ g.title }
-						description={ g.description }
-					>
-						<TileGrid label={ g.title }>
-							{ tiles.map( renderTile ) }
-						</TileGrid>
-					</SectionCard>
-				);
-			} ) }
-			{ trendCharts.length > 0 && (
+			{ 'dashboard' === view && ( app.tools || [] ).length > 0 && (
+				<SectionCard
+					id="rankweb-tools"
+					title={ __( 'Tools', 'aw-seo-extras' ) }
+					description={ __(
+						'RankWeb’s working screens, also under RankWeb in the menu.',
+						'aw-seo-extras'
+					) }
+				>
+					<RefTable
+						caption={ __( 'Tools', 'aw-seo-extras' ) }
+						head={ [
+							__( 'Tool', 'aw-seo-extras' ),
+							__( 'What it does', 'aw-seo-extras' ),
+						] }
+						rows={ app.tools.map( ( t ) => [
+							<a key="a" href={ t.url }>
+								{ t.label }
+							</a>,
+							t.desc,
+						] ) }
+					/>
+				</SectionCard>
+			) }
+			{ 'dashboard' === view &&
+				TILE_GROUPS.map( ( g, gi ) => {
+					const tiles = g.keys
+						.map( ( k ) => byKey[ k ] )
+						.filter( Boolean )
+						// Any tile the groups don't name joins the last group, so nothing is dropped.
+						.concat( gi === TILE_GROUPS.length - 1 ? extra : [] );
+					if ( ! tiles.length ) {
+						return null;
+					}
+					return (
+						<SectionCard
+							key={ g.id }
+							id={ `rankweb-${ g.id }` }
+							title={ g.title }
+							description={ g.description }
+						>
+							<TileGrid label={ g.title }>
+								{ tiles.map( renderTile ) }
+							</TileGrid>
+						</SectionCard>
+					);
+				} ) }
+			{ 'insights' === view && trendCharts.length > 0 && (
 				<SectionCard
 					id="rankweb-trends"
 					title={ __( 'Over time', 'aw-seo-extras' ) }
@@ -382,7 +419,7 @@ function Dashboard() {
 					</div>
 				</SectionCard>
 			) }
-			{ ! data.counting && dists.length > 0 && (
+			{ 'insights' === view && ! data.counting && dists.length > 0 && (
 				<SectionCard
 					id="rankweb-gaps"
 					title={ __( 'Where the gaps are', 'aw-seo-extras' ) }
@@ -403,7 +440,7 @@ function Dashboard() {
 					</div>
 				</SectionCard>
 			) }
-			{ noindex && ! data.counting && (
+			{ 'insights' === view && noindex && ! data.counting && (
 				<SectionCard
 					id="kept-out"
 					title={ __( 'Kept out of search', 'aw-seo-extras' ) }
@@ -419,52 +456,8 @@ function Dashboard() {
 					</ul>
 				</SectionCard>
 			) }
-			<SectionCard
-				id="where"
-				title={ __( 'Where things are', 'aw-seo-extras' ) }
-				description={ __(
-					'Everything Rank Math doesn’t do or keeps for Premium, for this site. Rank Math holds everything else; where a setting lives in Rank Math, the link goes there.',
-					'aw-seo-extras'
-				) }
-			>
-				<RefTable
-					caption={ __( 'On edit screens', 'aw-seo-extras' ) }
-					head={ [
-						__( 'On edit screens', 'aw-seo-extras' ),
-						__( 'What you edit there', 'aw-seo-extras' ),
-					] }
-					rows={ data.where.boxes }
-				/>
-				<RefTable
-					caption={ __( 'Commands', 'aw-seo-extras' ) }
-					head={ [
-						__(
-							'Commands (WP-CLI on the server)',
-							'aw-seo-extras'
-						),
-						__( 'What it does', 'aw-seo-extras' ),
-					] }
-					rows={ data.where.commands.map( ( c ) => [
-						<code key="c">{ c[ 0 ] }</code>,
-						c[ 1 ],
-					] ) }
-				/>
-				<RefTable
-					caption={ __( 'In Rank Math', 'aw-seo-extras' ) }
-					head={ [
-						__( 'In Rank Math', 'aw-seo-extras' ),
-						__( 'What is set there', 'aw-seo-extras' ),
-					] }
-					rows={ data.where.rankMath.map( ( r ) => [
-						<a key="a" href={ r.url }>
-							{ r.label }
-						</a>,
-						r.what,
-					] ) }
-				/>
-			</SectionCard>
-			<ModuleCards />
-			{ ( app.modules || [] ).length > 0 && (
+			{ 'modules' === view && <ModuleCards /> }
+			{ 'modules' === view && ( app.modules || [] ).length > 0 && (
 				<SectionCard
 					id="modules"
 					title={ __( 'Modules', 'aw-seo-extras' ) }
@@ -476,6 +469,52 @@ function Dashboard() {
 					<PageParts
 						parts={ app.modules }
 						title={ __( 'Modules', 'aw-seo-extras' ) }
+					/>
+				</SectionCard>
+			) }
+			{ 'modules' === view && (
+				<SectionCard
+					id="where"
+					title={ __( 'Where things are', 'aw-seo-extras' ) }
+					description={ __(
+						'Everything Rank Math doesn’t do or keeps for Premium, for this site. Rank Math holds everything else; where a setting lives in Rank Math, the link goes there.',
+						'aw-seo-extras'
+					) }
+				>
+					<RefTable
+						caption={ __( 'On edit screens', 'aw-seo-extras' ) }
+						head={ [
+							__( 'On edit screens', 'aw-seo-extras' ),
+							__( 'What you edit there', 'aw-seo-extras' ),
+						] }
+						rows={ data.where.boxes }
+					/>
+					<RefTable
+						caption={ __( 'Commands', 'aw-seo-extras' ) }
+						head={ [
+							__(
+								'Commands (WP-CLI on the server)',
+								'aw-seo-extras'
+							),
+							__( 'What it does', 'aw-seo-extras' ),
+						] }
+						rows={ data.where.commands.map( ( c ) => [
+							<code key="c">{ c[ 0 ] }</code>,
+							c[ 1 ],
+						] ) }
+					/>
+					<RefTable
+						caption={ __( 'In Rank Math', 'aw-seo-extras' ) }
+						head={ [
+							__( 'In Rank Math', 'aw-seo-extras' ),
+							__( 'What is set there', 'aw-seo-extras' ),
+						] }
+						rows={ data.where.rankMath.map( ( r ) => [
+							<a key="a" href={ r.url }>
+								{ r.label }
+							</a>,
+							r.what,
+						] ) }
 					/>
 				</SectionCard>
 			) }
@@ -1170,7 +1209,9 @@ function App() {
 		<AppShell header={ <Header /> }>
 			{ 'settings' === app.screen && <Settings /> }
 			{ 'faq' === app.screen && <Faq /> }
-			{ 'dashboard' === app.screen && <Dashboard /> }
+			{ [ 'dashboard', 'insights', 'modules' ].includes( app.screen ) && (
+				<Dashboard view={ app.screen } />
+			) }
 		</AppShell>
 	);
 }

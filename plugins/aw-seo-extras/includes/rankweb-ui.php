@@ -1,7 +1,8 @@
 <?php
 /**
- * RankWeb's screens on the Kits admin shell: admin.php?page=aw-seo-plus (Dashboard), admin.php?page=aw-faq (FAQ, from
- * its own output through Kits Core's page parts) and admin.php?page=aw-seo-settings (Settings). The screens are one
+ * RankWeb's screens on the Kits admin shell: admin.php?page=aw-seo-plus (Dashboard: the counts and the tools),
+ * aw-seo-insights (Insights: trends and gaps), aw-seo-modules (Modules: switches, the modules table, where things
+ * are), aw-faq (FAQ, from its own output through Kits Core's page parts) and aw-seo-settings (Settings). The screens are one
  * script (build/index.js, from src/), drawn with Kits Core's shell parts (kits-core/includes/admin-shell.php) and fed
  * by the rankweb/v1 routes (rankweb-rest.php).
  *
@@ -16,12 +17,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Which screen this request asks for: 'dashboard', 'faq', 'settings' or ''.
+ * Which screen this request asks for: 'dashboard', 'insights', 'modules', 'faq', 'settings' or ''.
  */
 function rankweb_ui_wanted(): string {
 	$page = sanitize_key( wp_unslash( $_GET['page'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- which screen to show; nothing is saved here
 	return array(
 		AW_SEO_MENU       => 'dashboard',
+		'aw-seo-insights' => 'insights',
+		'aw-seo-modules'  => 'modules',
 		'aw-faq'          => 'faq',
 		'aw-seo-settings' => 'settings',
 	)[ $page ] ?? '';
@@ -43,10 +46,45 @@ function rankweb_ui_ready( ?bool $set = null ): bool {
 /**
  * The address of a screen.
  *
- * @param string $screen 'dashboard' or 'settings'.
+ * @param string $screen 'dashboard', 'insights', 'modules' or 'settings'.
  */
 function rankweb_ui_url( string $screen ): string {
-	return add_query_arg( 'page', 'settings' === $screen ? 'aw-seo-settings' : AW_SEO_MENU, admin_url( 'admin.php' ) );
+	$page = array(
+		'settings' => 'aw-seo-settings',
+		'insights' => 'aw-seo-insights',
+		'modules'  => 'aw-seo-modules',
+	)[ $screen ] ?? AW_SEO_MENU;
+	return add_query_arg( 'page', $page, admin_url( 'admin.php' ) );
+}
+
+/**
+ * RankWeb's working screens (the classic pages under the RankWeb menu) the current user can open, for the Dashboard's
+ * Tools card. Read from the menu itself, so a screen of a module switched off is not listed.
+ *
+ * @return array[] [ { label, desc, url } ].
+ */
+function rankweb_ui_tools(): array {
+	$about = array(
+		'aw-links'     => __( 'The internal-link audit, anchor mix and silos.', 'aw-seo-extras' ),
+		'aw-images'    => __( 'Find and replace alt text, titles and captions across the media library.', 'aw-seo-extras' ),
+		'aw-seo-csv'   => __( 'Export and import SEO fields as a CSV file.', 'aw-seo-extras' ),
+		'aw-redirects' => __( 'Redirect imports, exports and the 404 log.', 'aw-seo-extras' ),
+	);
+	$items = (array) ( $GLOBALS['submenu'][ AW_SEO_MENU ] ?? array() );
+	$tools = array();
+	foreach ( $about as $slug => $desc ) {
+		foreach ( $items as $item ) {
+			if ( ( $item[2] ?? '' ) === $slug && current_user_can( (string) $item[1] ) ) {
+				$tools[] = array(
+					'label' => wp_strip_all_tags( (string) $item[0] ),
+					'desc'  => $desc,
+					'url'   => add_query_arg( 'page', $slug, admin_url( 'admin.php' ) ),
+				);
+				break;
+			}
+		}
+	}
+	return $tools;
 }
 
 add_action(
@@ -63,6 +101,18 @@ add_action(
 				'label'   => __( 'Dashboard', 'aw-seo-extras' ),
 				'url'     => rankweb_ui_url( 'dashboard' ),
 				'current' => 'dashboard' === $screen,
+			),
+			array(
+				'slug'    => 'insights',
+				'label'   => __( 'Insights', 'aw-seo-extras' ),
+				'url'     => rankweb_ui_url( 'insights' ),
+				'current' => 'insights' === $screen,
+			),
+			array(
+				'slug'    => 'modules',
+				'label'   => __( 'Modules', 'aw-seo-extras' ),
+				'url'     => rankweb_ui_url( 'modules' ),
+				'current' => 'modules' === $screen,
 			),
 			array(
 				'slug'    => 'faq',
@@ -103,7 +153,9 @@ add_action(
 					// The FAQ screen's own output as parts, after its load hook ran (Kits Core's page parts).
 					'parts'     => 'faq' === $screen ? rankweb_faq_parts() : array(),
 					// The Dashboard's Modules table and the rest of the Overview, from its own output (Kits' page parts).
-					'modules'   => 'dashboard' === $screen ? rankweb_overview_parts() : array(),
+					'modules'   => 'modules' === $screen ? rankweb_overview_parts() : array(),
+					// The Dashboard's Tools card.
+					'tools'     => 'dashboard' === $screen ? rankweb_ui_tools() : array(),
 				),
 			)
 		);
@@ -135,12 +187,14 @@ function rankweb_ui_body_class( $classes ) {
  * Draw a screen: the shell when its script is enqueued, else a notice that it needs Kits Core. The page callbacks
  * call this.
  *
- * @param string $screen 'dashboard', 'faq' or 'settings'.
+ * @param string $screen 'dashboard', 'insights', 'modules', 'faq' or 'settings'.
  */
 function rankweb_ui_page( string $screen ): void {
 	$title = array(
 		'settings' => __( 'RankWeb settings', 'aw-seo-extras' ),
 		'faq'      => __( 'FAQ', 'aw-seo-extras' ),
+		'insights' => __( 'RankWeb insights', 'aw-seo-extras' ),
+		'modules'  => __( 'RankWeb modules', 'aw-seo-extras' ),
 	)[ $screen ] ?? __( 'RankWeb', 'aw-seo-extras' );
 	if ( rankweb_ui_ready() && function_exists( 'kits_shell_mount' ) ) {
 		kits_shell_mount( 'rankweb-app', $title );
