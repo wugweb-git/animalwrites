@@ -24,7 +24,8 @@ function aw_share_html( $post_id ) {
 	if ( array() === $nets ) {
 		return ''; // No networks for this kind of item: no bar.
 	}
-	$camp = 'aw_campaign' === $type ? (string) get_post_field( 'post_name', $post_id ) : $type;
+	$ct   = kits_campaign_post_type();
+	$camp = ( '' !== $ct && $ct === $type ) ? (string) get_post_field( 'post_name', $post_id ) : $type;
 	return kits_share_html( (string) get_permalink( $post_id ), html_entity_decode( get_the_title( $post_id ), ENT_QUOTES ), $nets, $camp, array( 'post_id' => (int) $post_id ) );
 }
 

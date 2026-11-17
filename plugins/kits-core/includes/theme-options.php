@@ -98,11 +98,20 @@ function kits_theme_options_saved(): array {
 	return (array) get_option( 'kits_theme_options', array() );
 }
 
+/**
+ * The tenant's "campaign" post type, if any. A campaign page carries its own share bar and no sticky bar.
+ * Standalone Kits Core has none; a tenant names one with the kits_campaign_post_type filter.
+ */
+function kits_campaign_post_type(): string {
+	return (string) apply_filters( 'kits_campaign_post_type', '' );
+}
+
 /** Post types the share bar can be set for: public, with a page of their own. */
 function kits_theme_share_types(): array {
-	$types = array();
+	$campaign = kits_campaign_post_type();
+	$types    = array();
 	foreach ( get_post_types( array( 'public' => true ), 'objects' ) as $type ) {
-		if ( ( ( 'attachment' !== $type->name && $type->publicly_queryable ) || 'page' === $type->name ) && 'aw_campaign' !== $type->name ) { // Campaigns keep their own share bar.
+		if ( ( ( 'attachment' !== $type->name && $type->publicly_queryable ) || 'page' === $type->name ) && $type->name !== $campaign ) { // Campaigns keep their own share bar.
 			$types[ $type->name ] = $type->labels->name;
 		}
 	}
