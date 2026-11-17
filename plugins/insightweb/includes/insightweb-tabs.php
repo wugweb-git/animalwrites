@@ -26,7 +26,8 @@ function insightweb_tab_labels(): array {
 }
 
 /**
- * The tab's output as parts: the notices above every tab, then the tab itself.
+ * The tab's own output as parts. The status notices (source states and "Last updated") are NOT printed here any more:
+ * they stacked above every tab (owner, 17 Nov 2026). They now show once, on the Overview — see insightweb_overview_parts().
  *
  * @param string $tab A key of insightweb_tab_keys().
  * @return array[]
@@ -36,7 +37,6 @@ function insightweb_tab_parts( string $tab ): array {
 		return array();
 	}
 	ob_start();
-	aw_si_screen_notices();
 	if ( 'keywords' === $tab ) {
 		aw_si_keywords_tab();
 	} else {
@@ -44,6 +44,21 @@ function insightweb_tab_parts( string $tab ): array {
 	}
 	$html = (string) ob_get_clean();
 	return function_exists( 'kits_shell_html_parts' ) ? kits_shell_html_parts( $html ) : array();
+}
+
+/**
+ * The status notices (each source's state, then "Last updated") as parts for the Overview, so they show once at the top
+ * of the Dashboard instead of stacking above every tab (owner, 17 Nov 2026).
+ *
+ * @return array[]
+ */
+function insightweb_overview_parts(): array {
+	if ( ! function_exists( 'kits_shell_html_parts' ) ) {
+		return array();
+	}
+	ob_start();
+	aw_si_screen_notices();
+	return kits_shell_html_parts( (string) ob_get_clean() );
 }
 
 /**

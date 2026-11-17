@@ -117,14 +117,19 @@ add_action(
 					'admin'   => current_user_can( 'manage_options' ),
 					'boxes'   => 'dashboard' === $screen ? insightweb_box_list() : array(), // the Overview boxes (insightweb-boxes.php)
 					'title'   => insightweb_tab_labels()[ $screen ] ?? '',
-					// The tab's own output as parts, drawn after its load hook has run (insightweb-tabs.php).
-					'parts'   => insightweb_tab_parts( $screen ),
+					// The tab's own output as parts (insightweb-tabs.php). On the Dashboard, the status notices
+					// (source states + "Last updated") instead of a tab body, so they show once on the Overview.
+					'parts'   => 'dashboard' === $screen ? insightweb_overview_parts() : insightweb_tab_parts( $screen ),
 					// Settings: schedule, keys, seed, Run now, snapshots, imports and Delete data, from the Settings tab's own output.
 					'more'    => 'settings' === $screen ? insightweb_settings_more_parts() : array(),
 				),
 			)
 		);
 		insightweb_ui_ready( $ok );
+		// Full-width list screens (owner, 17 Nov 2026): a plugin stylesheet, after the shell CSS (its dependency), lifts
+		// the shell's content max-width on any InsightWeb screen that shows a list table, so dense tables use the full
+		// admin width. Dashboard and Settings (no list table) keep the comfortable reading width.
+		wp_enqueue_style( 'insightweb-admin', plugins_url( 'assets/admin.css', $main ), array( 'kits-shell' ), (string) $head['Version'] );
 	}
 );
 
