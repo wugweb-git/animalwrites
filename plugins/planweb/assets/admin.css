@@ -62,3 +62,17 @@
    PlanWeb's own list screen (the class is set on the mount in src/index.js) — the shell theme itself is unchanged. */
 .planweb-screen--entries .kits-shell__body { max-width: none; }
 #planweb-app .kits-shell-datalist .dataviews-view-table { width: 100%; }
+
+/* The WHAT column's note. The shell's help text is white-space:nowrap (right for the Date column's short sub-label),
+   but an entry note can be long, so on the list it must wrap inside its own cell and not run across the next columns.
+   Kept to a two-line preview — the full note stays on the entry's edit form. Scoped to PlanWeb's list. */
+#planweb-app .kits-shell-datalist .planweb-note {
+	white-space: normal;
+	overflow-wrap: anywhere;
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 2;
+	line-clamp: 2;
+	overflow: hidden;
+	max-width: 100%;
+}

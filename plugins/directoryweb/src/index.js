@@ -12,7 +12,6 @@ import {
 	Button,
 	ChipRow,
 	DataList,
-	DetailPanel,
 	EmptyState,
 	ErrorState,
 	Field,
@@ -1031,82 +1030,263 @@ function firstListingView() {
 	return LISTING_VIEWS.includes( v ) ? v : 'all';
 }
 
-/**
- * One listing's reading panel, opened in its row.
- *
- * @param {Object} props
- * @param {Object} props.r The row.
- */
-function ListingDetail( { r } ) {
-	const yes = __( 'Yes', 'directoryweb' );
+// A labelled card of value rows (used in the profile's sections). Renders nothing when it has no rows.
+function ProfileFacts( { title, rows } ) {
+	const kept = ( rows || [] ).filter( ( f ) => f && f.value );
+	if ( ! kept.length ) {
+		return null;
+	}
 	return (
-		<DetailPanel
-			title={ r.title }
-			subtitle={ [ r.status, r.types ].filter( Boolean ).join( ' · ' ) }
-			items={ [
-				{
-					label: __( 'Picture', 'directoryweb' ),
-					value: r.thumb && (
-						<MediaThumbs
-							urls={ [ r.thumb ] }
-							label={ __( 'Logo', 'directoryweb' ) }
-						/>
-					),
-				},
-				{ label: __( 'Place', 'directoryweb' ), value: r.place },
-				{ label: __( 'Area', 'directoryweb' ), value: r.area },
-				{ label: __( 'Services', 'directoryweb' ), value: r.services },
-				{
-					label: __( 'Website', 'directoryweb' ),
-					value: r.website && (
-						<a
-							href={ r.website }
-							target="_blank"
-							rel="noopener noreferrer nofollow"
-						>
-							{ r.website }
-						</a>
-					),
-				},
-				{
-					label: __( 'Claimed', 'directoryweb' ),
-					value: r.claimed ? yes : '',
-				},
-				{
-					label: __( 'Verified (government record)', 'directoryweb' ),
-					value: r.verified,
-				},
-				{
-					label: __( 'Needs a re-check', 'directoryweb' ),
-					value: r.recheck ? yes : '',
-				},
-				{ label: __( 'Added', 'directoryweb' ), value: r.created },
-				{
-					label: __( 'Last changed', 'directoryweb' ),
-					value: r.modified,
-				},
-			] }
-			actions={
-				<>
-					{ r.editUrl && (
+		<section className="directoryweb-lp__card">
+			<h3 className="directoryweb-lp__card-h">{ title }</h3>
+			<dl className="directoryweb-lp__facts">
+				{ kept.map( ( f ) => (
+					<div key={ f.label } className="directoryweb-lp__fact">
+						<dt>{ f.label }</dt>
+						<dd>{ f.value }</dd>
+					</div>
+				) ) }
+			</dl>
+		</section>
+	);
+}
+
+/**
+ * One listing's full profile — a read-only CRM-style page (identity header, a facts sidebar and detail cards),
+ * fetched on open from listings/<id>. Opens in place of the list, with a way back. No phone or e-mail is shown.
+ *
+ * @param {Object}   props
+ * @param {number}   props.id     The listing ID.
+ * @param {Function} props.onBack Return to the list.
+ */
+function ListingProfile( { id, onBack } ) {
+	const [ d, setD ] = useState( null );
+	const [ error, setError ] = useState( '' );
+	const load = () => {
+		setError( '' );
+		apiFetch( { path: path( `listings/${ id }` ) } )
+			.then( setD )
+			.catch( ( e ) => setError( errText( e ) ) );
+	};
+	useEffect( load, [ id ] );
+
+	const back = (
+		<Button variant="link" onClick={ onBack }>
+			{ __( '← All listings', 'directoryweb' ) }
+		</Button>
+	);
+	if ( error ) {
+		return (
+			<>
+				{ back }
+				<ErrorState message={ error } onRetry={ load } />
+			</>
+		);
+	}
+	if ( ! d ) {
+		return (
+			<>
+				{ back }
+				<LoadingState
+					label={ __( 'Loading the listing…', 'directoryweb' ) }
+				/>
+			</>
+		);
+	}
+
+	const badges = (
+		<>
+			{ d.claimed && (
+				<span className="directoryweb-lp__badge">
+					{ __( 'Claimed', 'directoryweb' ) }
+				</span>
+			) }
+			{ d.verified && (
+				<span className="directoryweb-lp__badge directoryweb-lp__badge--gov">
+					{ __( 'Verified', 'directoryweb' ) }
+				</span>
+			) }
+			{ d.recheck && (
+				<span className="directoryweb-lp__badge directoryweb-lp__badge--warn">
+					{ __( 'Needs re-check', 'directoryweb' ) }
+				</span>
+			) }
+		</>
+	);
+
+	return (
+		<div className="directoryweb-lp">
+			{ back }
+			<header className="directoryweb-lp__head">
+				<div className="directoryweb-lp__logo">
+					{ d.thumb ? (
+						<img src={ d.thumb } alt="" />
+					) : (
+						<span className="directoryweb-lp__logo-ph dashicons dashicons-location" />
+					) }
+				</div>
+				<div className="directoryweb-lp__id">
+					<h2 className="directoryweb-lp__name">{ d.title }</h2>
+					<div className="directoryweb-lp__sub">
+						{ [ d.status, d.types ]
+							.filter( Boolean )
+							.join( ' · ' ) }
+					</div>
+					<div className="directoryweb-lp__badges">{ badges }</div>
+				</div>
+				<div className="directoryweb-lp__actions">
+					{ d.editUrl && (
 						<a
 							className="kits-shell-button is-primary"
-							href={ r.editUrl }
+							href={ d.editUrl }
 						>
 							{ __( 'Edit listing', 'directoryweb' ) }
 						</a>
 					) }
-					{ r.viewUrl && (
+					{ d.viewUrl && (
 						<a
 							className="kits-shell-button is-secondary"
-							href={ r.viewUrl }
+							href={ d.viewUrl }
+							target="_blank"
+							rel="noopener noreferrer"
 						>
 							{ __( 'View on the site', 'directoryweb' ) }
 						</a>
 					) }
-				</>
-			}
-		/>
+				</div>
+			</header>
+
+			<div className="directoryweb-lp__grid">
+				<aside className="directoryweb-lp__aside">
+					{ typeof d.completeness === 'number' && (
+						<section className="directoryweb-lp__card directoryweb-lp__meter">
+							<h3 className="directoryweb-lp__card-h">
+								{ __( 'Profile completeness', 'directoryweb' ) }
+							</h3>
+							<div
+								className="directoryweb-lp__bar"
+								role="img"
+								aria-label={ sprintf(
+									/* translators: %d: percent complete. */
+									__( '%d%% complete', 'directoryweb' ),
+									d.completeness
+								) }
+							>
+								<span
+									style={ { width: `${ d.completeness }%` } }
+								/>
+							</div>
+							<strong>{ d.completeness }%</strong>
+						</section>
+					) }
+					<ProfileFacts
+						title={ __( 'Key facts', 'directoryweb' ) }
+						rows={ [
+							{
+								label: __( 'Place', 'directoryweb' ),
+								value: d.place,
+							},
+							{
+								label: __( 'Area', 'directoryweb' ),
+								value: d.area,
+							},
+							{
+								label: __( 'Services', 'directoryweb' ),
+								value: d.services,
+							},
+							{
+								label: __(
+									'Verified (government record)',
+									'directoryweb'
+								),
+								value: d.verified,
+							},
+							{
+								label: __( 'Added', 'directoryweb' ),
+								value: d.created,
+							},
+							{
+								label: __( 'Last changed', 'directoryweb' ),
+								value: d.modified,
+							},
+						] }
+					/>
+				</aside>
+
+				<div className="directoryweb-lp__main">
+					{ d.excerpt && (
+						<section className="directoryweb-lp__card">
+							<h3 className="directoryweb-lp__card-h">
+								{ __( 'About', 'directoryweb' ) }
+							</h3>
+							<p className="directoryweb-lp__bio">
+								{ d.excerpt }
+							</p>
+						</section>
+					) }
+					{ d.socials && d.socials.length > 0 && (
+						<section className="directoryweb-lp__card">
+							<h3 className="directoryweb-lp__card-h">
+								{ __( 'Online & social', 'directoryweb' ) }
+							</h3>
+							<ul className="directoryweb-lp__links">
+								{ d.socials.map( ( s ) => (
+									<li key={ s.url }>
+										<a
+											href={ s.url }
+											target="_blank"
+											rel="noopener noreferrer nofollow"
+										>
+											{ s.label }
+										</a>
+									</li>
+								) ) }
+							</ul>
+						</section>
+					) }
+					<ProfileFacts
+						title={ __( 'About & registration', 'directoryweb' ) }
+						rows={ [
+							...( d.about || [] ),
+							...( d.registration || [] ),
+						] }
+					/>
+					<ProfileFacts
+						title={ __( 'Google', 'directoryweb' ) }
+						rows={ d.google || [] }
+					/>
+					{ d.hours && d.hours.length > 0 && (
+						<section className="directoryweb-lp__card">
+							<h3 className="directoryweb-lp__card-h">
+								{ __( 'Opening hours', 'directoryweb' ) }
+							</h3>
+							<dl className="directoryweb-lp__facts">
+								{ d.hours.map( ( h ) => (
+									<div
+										key={ h.day }
+										className="directoryweb-lp__fact"
+									>
+										<dt>{ h.day }</dt>
+										<dd>{ h.time }</dd>
+									</div>
+								) ) }
+							</dl>
+						</section>
+					) }
+					{ d.photos && d.photos.length > 0 && (
+						<section className="directoryweb-lp__card">
+							<h3 className="directoryweb-lp__card-h">
+								{ __( 'Photos', 'directoryweb' ) }
+							</h3>
+							<MediaThumbs
+								urls={ d.photos }
+								label={ __( 'Listing photos', 'directoryweb' ) }
+							/>
+						</section>
+					) }
+				</div>
+			</div>
+		</div>
 	);
 }
 
@@ -1125,6 +1305,7 @@ function Listings() {
 	const [ error, setError ] = useState( '' );
 	const [ tick, setTick ] = useState( 0 );
 	const [ msg, setMsg ] = useState( null );
+	const [ profileId, setProfileId ] = useState( null );
 	useEffect( () => {
 		setLoading( true );
 		setError( '' );
@@ -1225,6 +1406,14 @@ function Listings() {
 					.join( ' · ' ),
 		},
 	];
+	if ( profileId ) {
+		return (
+			<ListingProfile
+				id={ profileId }
+				onBack={ () => setProfileId( null ) }
+			/>
+		);
+	}
 	return (
 		<SectionCard
 			id="directoryweb-listings"
@@ -1290,16 +1479,17 @@ function Listings() {
 					setQ( ( o ) => ( { ...o, sort: key, dir, page: 1 } ) )
 				}
 				rowActions={ ( r ) =>
-					r.editUrl
-						? [
-								{
-									label: __( 'Edit', 'directoryweb' ),
-									href: r.editUrl,
-								},
-							]
-						: []
+					[
+						{
+							label: __( 'View profile', 'directoryweb' ),
+							onClick: () => setProfileId( r.id ),
+						},
+						r.editUrl && {
+							label: __( 'Edit', 'directoryweb' ),
+							href: r.editUrl,
+						},
+					].filter( Boolean )
 				}
-				rowView={ ( r ) => <ListingDetail r={ r } /> }
 				loading={ loading }
 				error={ error }
 				onRetry={ () => setTick( ( t ) => t + 1 ) }

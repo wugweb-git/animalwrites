@@ -946,7 +946,7 @@ function Entries() {
 					{ r.note && (
 						<>
 							<br />
-							<span className="kits-shell-field__help">
+							<span className="kits-shell-field__help planweb-note">
 								{ r.note }
 							</span>
 						</>

@@ -185,10 +185,11 @@ check( array( 'b' => 9, 'c' => 5 ) === $t['top'] && 3 === $t['others'], 'top two
 check( 3 === directoryweb_age_days( '2026-11-08 11:00:00', $now ), 'age in whole days' );
 check( 0 === directoryweb_age_days( 'not a date', $now ), 'bad date' );
 
-// Listings tab: a GET list route and a POST bulk route; the bulk route writes status/re-check but never deletes or
-// trashes, and changes only a listing the user may edit (publish also needs the cap); no phone or e-mail read.
+// Listings tab: a GET list route, a GET single-profile route and a POST bulk route; the bulk route writes
+// status/re-check but never deletes or trashes, and changes only a listing the user may edit (publish also needs
+// the cap); no phone or e-mail read anywhere (the profile is read-only and public-only).
 $lst = (string) file_get_contents( dirname( __DIR__ ) . '/includes/directoryweb-listings.php' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- a local file read by the test
-check( 2 === substr_count( $lst, 'register_rest_route(' ) && false !== strpos( $lst, "'methods'             => 'GET'" ) && false !== strpos( $lst, "'methods'             => 'POST'" ), 'Listings: a GET list route and a POST bulk route' );
+check( 3 === substr_count( $lst, 'register_rest_route(' ) && 2 === substr_count( $lst, "'methods'             => 'GET'" ) && false !== strpos( $lst, "'methods'             => 'POST'" ), 'Listings: GET list, GET profile and POST bulk routes' );
 check( ! preg_match( '/\b(wp_delete_post|wp_trash_post|wp_insert_post)\s*\(/', $lst ) && false !== strpos( $lst, "current_user_can( 'publish_posts' )" ), 'Listings: bulk never deletes, trashes or inserts; publish needs the cap' );
 check( ! preg_match( "/'aw_(phone|whatsapp|emergency|email)'/", $lst ), 'Listings: no phone or e-mail is read' );
 check( false !== strpos( $lst, "current_user_can( 'edit_post', \$id )" ), 'Listings: Edit link only for who may edit the listing' );

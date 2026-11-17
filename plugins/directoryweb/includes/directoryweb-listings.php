@@ -1,11 +1,12 @@
 <?php
 /**
  * DirectoryWeb's Listings tab (12 Nov 2026): the Directory's listings as a read-only list on the Kits shell, with
- * views (status and badges), search, state and type filters, sort and pages; each row opens a reading panel with an
- * Edit link to the listing's own edit screen. Nothing is changed here: listings are edited on their edit screen, and
- * claims stay on Directory → Claims.
+ * views (status and badges), search, state and type filters, sort and pages; opening a listing shows its full
+ * profile (read-only), with an Edit link to the listing's own edit screen. Nothing is changed here except the bulk
+ * status/re-check actions: listings are edited on their edit screen, and claims stay on Directory → Claims.
  *
  *   GET  directoryweb/v1/listings        edit_posts   the list
+ *   GET  directoryweb/v1/listings/<id>   edit_posts   one listing's full public profile (read-only; no phone or e-mail)
  *   POST directoryweb/v1/listings/bulk   edit_posts   publish / move to draft / re-check the ticked listings
  *
  * Bulk actions never delete or trash a listing (they move it to draft instead); each listing is changed only
@@ -78,6 +79,21 @@ add_action(
 					),
 				),
 				'callback'            => 'directoryweb_rest_listings',
+			)
+		);
+		register_rest_route(
+			DIRECTORYWEB_REST,
+			'/listings/(?P<id>\d+)',
+			array(
+				'methods'             => 'GET',
+				'permission_callback' => directoryweb_rest_can( DIRECTORYWEB_LISTINGS_CAP ),
+				'args'                => array(
+					'id' => array(
+						'type'     => 'integer',
+						'required' => true,
+					),
+				),
+				'callback'            => 'directoryweb_rest_listing_detail',
 			)
 		);
 		register_rest_route(
@@ -299,6 +315,102 @@ function directoryweb_rest_listings_bulk( WP_REST_Request $r ) {
 			'message' => $message,
 		)
 	);
+}
+
+/**
+ * GET listings/<id>: one listing's full public profile for the read-only profile view (modelled on a CRM contact
+ * profile). The same public fields the listing's own page shows, grouped, plus status, dates and a completeness
+ * score — never a phone number, e-mail address or claim detail. Read only; nothing is written.
+ *
+ * @param WP_REST_Request $r Request.
+ * @return WP_REST_Response|WP_Error
+ */
+function directoryweb_rest_listing_detail( WP_REST_Request $r ) {
+	$id = absint( $r['id'] );
+	$p  = get_post( $id );
+	if ( ! $p || 'aw_listing' !== $p->post_type || 'trash' === $p->post_status ) {
+		return new WP_Error( 'directoryweb_no_listing', __( 'No such listing.', 'directoryweb' ), array( 'status' => 404 ) );
+	}
+	$meta = fn( string $k ) => trim( (string) get_post_meta( $id, $k, true ) );
+	$link = static function ( string $label, string $url ) {
+		$url = esc_url_raw( $url );
+		return preg_match( '#^https?://#', (string) $url ) ? array(
+			'label' => $label,
+			'url'   => $url,
+		) : null;
+	};
+	$socials = array_values(
+		array_filter(
+			array(
+				$link( __( 'Website', 'directoryweb' ), $meta( 'aw_website' ) ),
+				$link( __( 'Google Maps', 'directoryweb' ), $meta( 'aw_maps_url' ) ),
+				$link( __( 'Google Business Profile', 'directoryweb' ), $meta( 'aw_g_profile' ) ),
+				$link( __( 'Instagram', 'directoryweb' ), $meta( 'aw_instagram' ) ),
+				$link( __( 'Facebook', 'directoryweb' ), $meta( 'aw_facebook' ) ),
+				$link( __( 'X (Twitter)', 'directoryweb' ), $meta( 'aw_x' ) ),
+				$link( __( 'YouTube', 'directoryweb' ), $meta( 'aw_youtube' ) ),
+				$link( __( 'LinkedIn', 'directoryweb' ), $meta( 'aw_linkedin' ) ),
+			)
+		)
+	);
+	$named = fn( array $pairs ) => array_values(
+		array_filter(
+			array_map(
+				fn( $pair ) => '' !== $pair[1] ? array(
+					'label' => $pair[0],
+					'value' => $pair[1],
+				) : null,
+				$pairs
+			)
+		)
+	);
+	$registration = $named(
+		array(
+			array( __( 'Registration', 'directoryweb' ), $meta( 'aw_registration' ) ),
+			array( __( '12A', 'directoryweb' ), $meta( 'aw_reg_12a' ) ),
+			array( __( '80G', 'directoryweb' ), $meta( 'aw_reg_80g' ) ),
+			array( __( 'NGO Darpan ID', 'directoryweb' ), $meta( 'aw_darpan_id' ) ),
+		)
+	);
+	$about = $named(
+		array(
+			array( __( 'Year established', 'directoryweb' ), $meta( 'aw_founded' ) ),
+			array( __( 'Head of the organisation', 'directoryweb' ), $meta( 'aw_head' ) ),
+			array( __( 'Animals helped', 'directoryweb' ), $meta( 'aw_animals' ) ),
+			array( __( 'Languages', 'directoryweb' ), $meta( 'aw_languages' ) ),
+		)
+	);
+	$google = $named(
+		array(
+			array( __( 'Google rating', 'directoryweb' ), $meta( 'aw_g_rating' ) ),
+			array( __( 'Google reviews', 'directoryweb' ), $meta( 'aw_g_reviews' ) ),
+			array( __( 'Google category', 'directoryweb' ), $meta( 'aw_g_category' ) ),
+		)
+	);
+	$hours  = array();
+	foreach ( function_exists( 'aw_listing_hours' ) ? aw_listing_hours( $id ) : array() as $h ) {
+		$hours[] = array(
+			'day'  => (string) ( $h['day'] ?? '' ),
+			'time' => ! empty( $h['closed'] ) ? __( 'Closed', 'directoryweb' ) : trim( (string) ( $h['open'] ?? '' ) . '–' . (string) ( $h['close'] ?? '' ), '–' ),
+		);
+	}
+	$photos = array();
+	foreach ( array_filter( array_map( 'absint', explode( ',', $meta( 'aw_gallery' ) ) ) ) as $att ) {
+		$url = wp_get_attachment_image_url( $att, 'medium' );
+		if ( $url ) {
+			$photos[] = $url;
+		}
+	}
+	$detail                 = directoryweb_listing_row( $p );
+	$detail['excerpt']      = html_entity_decode( wp_strip_all_tags( (string) $p->post_excerpt ), ENT_QUOTES, 'UTF-8' );
+	$detail['socials']      = $socials;
+	$detail['about']        = $about;
+	$detail['registration'] = $registration;
+	$detail['google']       = $google;
+	$detail['hours']        = $hours;
+	$detail['photos']       = $photos;
+	$detail['completeness'] = function_exists( 'directoryweb_listing_completeness' ) ? directoryweb_listing_completeness( $id ) : null;
+	return rest_ensure_response( $detail );
 }
 
 /**
