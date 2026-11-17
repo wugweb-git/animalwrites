@@ -194,7 +194,7 @@
 **Waiting, no action needed:** AdSense review, and ads.txt switching to "Authorized".
 
 **Later (after the architecture work):**
-- Kits by Wugweb as a reusable, store-ready master theme (WordPress.org and marketplaces): configurable header and footer parts, one archive template instead of six, main shortcodes as blocks or master patterns, Animal Writes styles moved out of `kit.css`, `theme.json`-driven styles, translatable and escaped strings, GPL-only assets, screenshot, readme and demo content.
+- Kits by Wugweb reusable, store-ready master theme (WordPress.org + marketplaces) — **DONE on `wordpress-dev` (not shipped), 17 Nov 2026:** tenant CSS/JS/name decoupled, `theme.json`-driven style variations (Slate/Forest), translatable + escaped, GPL-only assets with licences, `tools/build-dist.py` zips (neutral default accent in the zip only), comment support, working Theme URI; audited clean (wp.org Required checklist, block-theme conformance, Theme Unit Test coverage). Owner-side only: a real front-page screenshot, Theme Check on staging, the logged-in directory upload. Detail: `docs/theme-marketplace-plan.md` and the `docs/pending.md` entry.
 - Accessibility re-audit of phases 6–10 (footer, volunteer block, tags row, search).
 - Directory audit: 32 likely-duplicate groups and 75 name-based retype suggestions.
 - Kerala import script: keep cut-off names from coming back.
