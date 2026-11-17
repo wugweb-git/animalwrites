@@ -29,6 +29,7 @@ function wp_strip_all_tags( $s ) {
 	return trim( strip_tags( (string) preg_replace( '@<(script|style)[^>]*?>.*?</\\1>@si', '', (string) $s ) ) );
 }
 require dirname( __DIR__, 2 ) . '/kits-core/includes/keyword-model.php';
+require dirname( __DIR__, 2 ) . '/kits-core/includes/compat-insightweb-kw.php'; // aw_kw_/aw_si_ -> insightweb_kw_ shims (kits-core's bootstrap loads these in production)
 require dirname( __DIR__ ) . '/includes/sources-model.php';
 require dirname( __DIR__ ) . '/includes/keywords-model.php';
 require dirname( __DIR__ ) . '/includes/rules-model.php';

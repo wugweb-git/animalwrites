@@ -63,6 +63,7 @@ require_once KITS_CORE_DIR . 'includes/preview.php';
 require_once KITS_CORE_DIR . 'includes/sourcing.php';
 require_once KITS_CORE_DIR . 'includes/sources-config.php'; // the sourcing lists (option aw_sources)
 require_once KITS_CORE_DIR . 'includes/keyword-table.php'; // the keyword table SourceWeb, InsightWeb and RankWeb share (with keyword-model.php)
+require_once KITS_CORE_DIR . 'includes/compat-insightweb-kw.php'; // aw_kw_/aw_si_ -> insightweb_kw_ back-compat shims for the plugins that still call the old names
 require_once KITS_CORE_DIR . 'includes/attribution.php';
 require_once KITS_CORE_DIR . 'includes/theme-updates.php';
 require_once KITS_CORE_DIR . 'includes/page-options.php';
