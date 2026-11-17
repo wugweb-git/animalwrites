@@ -83,7 +83,7 @@ add_action(
 		}
 		wp_add_dashboard_widget(
 			'aw_sourcing_dashboard',
-			'Sourcing',
+			'SourceWeb',
 			function () {
 				$rows    = aw_sourcing_dash_workers();
 				$need    = count( array_filter( $rows, fn( $r ) => $r['problem'] ) );
