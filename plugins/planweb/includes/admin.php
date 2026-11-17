@@ -150,10 +150,22 @@ function planweb_screen() {
 		'import' => __( 'Import run.', 'planweb' ),
 	);
 	if ( isset( $messages[ $done ] ) ) {
-		wp_admin_notice( esc_html( $messages[ $done ] ), array( 'type' => 'success', 'dismissible' => true ) );
+		wp_admin_notice(
+			esc_html( $messages[ $done ] ),
+			array(
+				'type'        => 'success',
+				'dismissible' => true,
+			)
+		);
 	}
 	if ( '' !== $error ) {
-		wp_admin_notice( esc_html( $error ), array( 'type' => 'error', 'dismissible' => true ) );
+		wp_admin_notice(
+			esc_html( $error ),
+			array(
+				'type'        => 'error',
+				'dismissible' => true,
+			)
+		);
 	}
 	echo '<p class="description">' . esc_html__( 'Nothing on this calendar is posted or sent: it is the team\'s plan. Approved and Sent are set by an administrator.', 'planweb' ) . '</p>';
 
@@ -391,18 +403,36 @@ function planweb_import_panel() {
 		/* translators: 1: date and time, 2: elements in Dates, 3: entries made, 4: already there. */
 		echo '<p>' . esc_html( sprintf( __( 'Last run %1$s: %2$d dates in Dates, %3$d entries made, %4$d already there.', 'planweb' ), wp_date( 'j M Y, g:i a', (int) $r['time'] ), (int) $r['stored'], (int) $r['created'], (int) $r['skipped'] ) ) . '</p>';
 		foreach ( (array) ( $r['failed'] ?? array() ) as $f ) {
-			/* translators: 1: position in the Dates list, 2: error. */
-			wp_admin_notice( esc_html( sprintf( __( 'Date %1$d was not imported: %2$s', 'planweb' ), (int) $f['index'] + 1, (string) $f['error'] ) ), array( 'type' => 'error', 'additional_classes' => array( 'inline' ) ) );
+			wp_admin_notice(
+				/* translators: 1: position in the Dates list, 2: error. */
+				esc_html( sprintf( __( 'Date %1$d was not imported: %2$s', 'planweb' ), (int) $f['index'] + 1, (string) $f['error'] ) ),
+				array(
+					'type'               => 'error',
+					'additional_classes' => array( 'inline' ),
+				)
+			);
 		}
 		if ( ! empty( $r['personal'] ) ) {
-			/* translators: %s: entry IDs. */
-			wp_admin_notice( esc_html( sprintf( __( 'These imported entries look as if they hold an email address or a phone number; check them: %s', 'planweb' ), implode( ', ', array_map( 'intval', (array) $r['personal'] ) ) ) ), array( 'type' => 'warning', 'additional_classes' => array( 'inline' ) ) );
+			wp_admin_notice(
+				/* translators: %s: entry IDs. */
+				esc_html( sprintf( __( 'These imported entries look as if they hold an email address or a phone number; check them: %s', 'planweb' ), implode( ', ', array_map( 'intval', (array) $r['personal'] ) ) ) ),
+				array(
+					'type'               => 'warning',
+					'additional_classes' => array( 'inline' ),
+				)
+			);
 		}
 	}
 	$ok = 0 === $v['differs'] + $v['missing'] + $v['extra'];
 	/* translators: 1: same, 2: differs, 3: missing, 4: extra. */
 	$line = sprintf( __( 'Check now: %1$d the same, %2$d different, %3$d missing, %4$d extra.', 'planweb' ), $v['same'], $v['differs'], $v['missing'], $v['extra'] );
-	wp_admin_notice( esc_html( $line ) . ' ' . esc_html__( 'An entry changed or moved to the Trash since the import shows as different or missing.', 'planweb' ), array( 'type' => ( $ok ? 'success' : 'warning' ), 'additional_classes' => array( 'inline' ) ) );
+	wp_admin_notice(
+		esc_html( $line ) . ' ' . esc_html__( 'An entry changed or moved to the Trash since the import shows as different or missing.', 'planweb' ),
+		array(
+			'type'               => ( $ok ? 'success' : 'warning' ),
+			'additional_classes' => array( 'inline' ),
+		)
+	);
 	foreach ( $v['invalid'] as $bad ) {
 		/* translators: 1: position in the Dates list, 2: the stored value. */
 		echo '<p>' . esc_html( sprintf( __( 'Dates element %1$d is not a date and was not imported: %2$s', 'planweb' ), (int) $bad['index'] + 1, (string) $bad['value'] ) ) . '</p>';

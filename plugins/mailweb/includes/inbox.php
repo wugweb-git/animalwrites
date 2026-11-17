@@ -64,25 +64,9 @@ function mailweb_forms() {
  * @return array
  */
 function mailweb_call( $method, $path, $body = null, $raw = false ) {
-	$token = function_exists( 'mailweb_setting' ) ? mailweb_setting( 'api_token' ) : '';
-	if ( '' === $token ) {
-		return array( 0, null, array() );
-	}
-	$args = array(
-		'method'  => $method,
-		'timeout' => $raw ? 60 : 20,
-		'headers' => array( 'Authorization' => 'Bearer ' . $token, 'Accept' => $raw ? '*/*' : 'application/json' ),
-	);
-	if ( null !== $body ) {
-		$args['headers']['Content-Type'] = 'application/json';
-		$args['body']                    = wp_json_encode( $body );
-	}
-	$r = wp_remote_request( 'https://api.mail.hostinger.com' . $path, $args );
-	if ( is_wp_error( $r ) ) {
-		return array( 0, null, array() );
-	}
-	$b = wp_remote_retrieve_body( $r );
-	return array( (int) wp_remote_retrieve_response_code( $r ), $raw ? $b : json_decode( $b, true ), wp_remote_retrieve_headers( $r ) );
+	// Delegates to the active provider (providers.php). The default Hostinger adapter makes the same request this
+	// function used to make directly; a future IMAP adapter is swapped in with the `mailweb_provider` filter.
+	return mailweb_provider()->request( (string) $method, (string) $path, $body, (bool) $raw );
 }
 
 /** The API path of a mailbox's folder. */

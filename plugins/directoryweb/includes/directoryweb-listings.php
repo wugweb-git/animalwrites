@@ -5,7 +5,11 @@
  * Edit link to the listing's own edit screen. Nothing is changed here: listings are edited on their edit screen, and
  * claims stay on Directory → Claims.
  *
- *   GET directoryweb/v1/listings   edit_posts   the list
+ *   GET  directoryweb/v1/listings        edit_posts   the list
+ *   POST directoryweb/v1/listings/bulk   edit_posts   publish / move to draft / re-check the ticked listings
+ *
+ * Bulk actions never delete or trash a listing (they move it to draft instead); each listing is changed only
+ * if the current user can edit it (and, to publish, can publish). Claims stay read-only on their own screen.
  *
  * @package directoryweb
  */
@@ -76,8 +80,39 @@ add_action(
 				'callback'            => 'directoryweb_rest_listings',
 			)
 		);
+		register_rest_route(
+			DIRECTORYWEB_REST,
+			'/listings/bulk',
+			array(
+				'methods'             => 'POST',
+				'permission_callback' => directoryweb_rest_can( DIRECTORYWEB_LISTINGS_CAP ),
+				'args'                => array(
+					'action' => array(
+						'type'     => 'string',
+						'enum'     => array_keys( directoryweb_listing_bulk_actions() ),
+						'required' => true,
+					),
+					'ids'    => array(
+						'type'     => 'array',
+						'items'    => array( 'type' => 'integer' ),
+						'required' => true,
+					),
+				),
+				'callback'            => 'directoryweb_rest_listings_bulk',
+			)
+		);
 	}
 );
+
+/** The bulk actions the Listings screen offers: value => label. None deletes or trashes a listing. */
+function directoryweb_listing_bulk_actions(): array {
+	return array(
+		'publish'       => __( 'Publish', 'directoryweb' ),
+		'draft'         => __( 'Move to draft', 'directoryweb' ),
+		'recheck'       => __( 'Mark for re-check', 'directoryweb' ),
+		'clear-recheck' => __( 'Clear re-check', 'directoryweb' ),
+	);
+}
 
 /**
  * GET listings.
@@ -195,6 +230,73 @@ function directoryweb_rest_listings( WP_REST_Request $r ) {
 				'type'  => $types,
 			),
 			'newUrl'  => current_user_can( 'edit_posts' ) ? admin_url( 'post-new.php?post_type=aw_listing' ) : '',
+		)
+	);
+}
+
+/**
+ * POST listings/bulk: apply one action to the ticked listings. Each listing is changed only if the current user can
+ * edit it (publish also needs publish_posts); listings already in the target state, trashed, or not a directory
+ * listing are skipped. Never deletes or trashes.
+ *
+ * @param WP_REST_Request $r Request.
+ * @return WP_REST_Response|WP_Error
+ */
+function directoryweb_rest_listings_bulk( WP_REST_Request $r ) {
+	$action  = (string) $r['action'];
+	$ids     = array_values( array_unique( array_filter( array_map( 'absint', (array) $r['ids'] ) ) ) );
+	$changed = 0;
+	$skipped = 0;
+	if ( ( 'publish' === $action ) && ! current_user_can( 'publish_posts' ) ) {
+		return new WP_Error( 'directoryweb_cannot_publish', __( 'You are not allowed to publish listings.', 'directoryweb' ), array( 'status' => 403 ) );
+	}
+	foreach ( $ids as $id ) {
+		$post = get_post( $id );
+		if ( ! $post || 'aw_listing' !== $post->post_type || 'trash' === $post->post_status || ! current_user_can( 'edit_post', $id ) ) {
+			++$skipped;
+			continue;
+		}
+		$ok = false;
+		if ( 'publish' === $action || 'draft' === $action ) {
+			if ( $post->post_status === $action ) {
+				++$skipped;
+				continue;
+			}
+			$done = wp_update_post(
+				array(
+					'ID'          => $id,
+					'post_status' => $action,
+				),
+				true
+			);
+			$ok = ! is_wp_error( $done );
+		} elseif ( 'recheck' === $action ) {
+			$ok = '1' === (string) get_post_meta( $id, 'aw_needs_reverify', true ) ? null : (bool) update_post_meta( $id, 'aw_needs_reverify', '1' );
+		} elseif ( 'clear-recheck' === $action ) {
+			$ok = '' === (string) get_post_meta( $id, 'aw_needs_reverify', true ) ? null : (bool) delete_post_meta( $id, 'aw_needs_reverify' );
+		}
+		if ( true === $ok ) {
+			++$changed;
+		} else {
+			++$skipped;
+		}
+	}
+	if ( $changed > 0 ) {
+		delete_transient( DIRECTORYWEB_STATS ); // the Dashboard's counts (and badge totals) recount on the next view
+	}
+	$labels  = directoryweb_listing_bulk_actions();
+	$message = sprintf(
+		/* translators: 1: action label, 2: number changed, 3: number skipped. */
+		__( '%1$s — %2$d changed, %3$d skipped.', 'directoryweb' ),
+		$labels[ $action ] ?? $action,
+		$changed,
+		$skipped
+	);
+	return rest_ensure_response(
+		array(
+			'changed' => $changed,
+			'skipped' => $skipped,
+			'message' => $message,
 		)
 	);
 }

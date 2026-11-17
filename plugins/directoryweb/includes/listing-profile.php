@@ -2,7 +2,8 @@
 /**
  * Organisation profile (directory listings): the details box in wp-admin and the block that shows them.
  *
- * Admin: "Organisation details" on every listing, grouped as Contact, Online, About, Photos and Support. Every field is
+ * Admin: "Organisation profile" on every listing — a one-pager (identity header, then the field groups as cards in a
+ * responsive grid) grouped as Contact, Online, About, Support, Links and Photos. Every field is
  * optional; empty fields print nothing, except phone, email, website, address, opening hours and services, which say
  * they are not available yet (with a link to suggest an update), and Directions, which shows greyed out. The short bio is the listing's excerpt (WordPress's own field).
  * Front end: block animal-writes/org-details — links (map, social, donate, volunteer), up to four photos, and the facts.
@@ -65,37 +66,139 @@ add_action(
 		if ( function_exists( 'aw_scf_active' ) && aw_scf_active() ) {
 			return;
 		}
-		add_meta_box( 'aw-listing-details', 'Organisation details', 'aw_listing_details_box', 'aw_listing', 'normal', 'high' );
+		add_meta_box( 'aw-listing-details', __( 'Organisation profile', 'directoryweb' ), 'aw_listing_details_box', 'aw_listing', 'normal', 'high' );
 	}
 );
+
+/** The card the one-pager lays each field group into: group key => [ title, hint ]. Order sets the layout. */
+function directoryweb_listing_cards() {
+	return array(
+		'Contact' => array( __( 'Contact', 'directoryweb' ), __( 'How people reach the organisation.', 'directoryweb' ) ),
+		'Online'  => array( __( 'Online & social', 'directoryweb' ), __( 'Website, map and social profiles.', 'directoryweb' ) ),
+		'About'   => array( __( 'About & registration', 'directoryweb' ), __( 'Who they are and how they are registered.', 'directoryweb' ) ),
+		'Support' => array( __( 'Support', 'directoryweb' ), __( 'Ways people can help.', 'directoryweb' ) ),
+		'Links'   => array( __( 'Link visibility', 'directoryweb' ), '' ),
+	);
+}
+
+/**
+ * One field's control (label, input, hint) for the one-pager.
+ *
+ * @param string $key Meta key.
+ * @param array  $f   [ label, input type, hint ] from aw_listing_fields().
+ * @param string $val Current value.
+ * @return string
+ */
+function directoryweb_listing_control( $key, $f, $val ) {
+	if ( 'checkbox' === $f[1] ) {
+		return '<label class="directoryweb-profile__check" for="' . esc_attr( $key ) . '"><input type="checkbox" id="' . esc_attr( $key ) . '" name="' . esc_attr( $key ) . '" value="1"' . checked( $val, '1', false ) . '> ' . esc_html( $f[0] ) . '</label>'
+			. ( $f[2] ? '<p class="description">' . esc_html( $f[2] ) . '</p>' : '' );
+	}
+	$input = 'textarea' === $f[1]
+		? '<textarea class="widefat" rows="3" id="' . esc_attr( $key ) . '" name="' . esc_attr( $key ) . '">' . esc_textarea( $val ) . '</textarea>'
+		: '<input class="widefat" type="' . esc_attr( $f[1] ) . '" id="' . esc_attr( $key ) . '" name="' . esc_attr( $key ) . '" value="' . esc_attr( $val ) . '">';
+	return '<label class="directoryweb-profile__label" for="' . esc_attr( $key ) . '">' . esc_html( $f[0] ) . '</label>' . $input
+		. ( $f[2] ? '<p class="description">' . esc_html( $f[2] ) . '</p>' : '' );
+}
+
+/** The one-pager's inline CSS (printed once): identity header, card grid and field spacing. Greyscale, WP admin palette. */
+function directoryweb_listing_profile_css() {
+	static $done = false;
+	if ( $done ) {
+		return;
+	}
+	$done = true;
+	?>
+<style>
+.directoryweb-profile__head{display:flex;align-items:center;gap:14px;padding:4px 0 14px;border-bottom:1px solid #dcdcde;margin-bottom:14px}
+.directoryweb-profile__logo-img{border-radius:8px;object-fit:cover;display:block}
+.directoryweb-profile__logo-ph{width:72px;height:72px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:#f0f0f1;color:#8c8f94;font-size:34px}
+.directoryweb-profile__logo-ph:before{line-height:72px}
+.directoryweb-profile__name{font-size:18px;line-height:1.3}
+.directoryweb-profile__meta{display:flex;align-items:center;gap:8px;margin-top:5px;flex-wrap:wrap}
+.directoryweb-profile__status{color:#50575e;font-size:12px;text-transform:uppercase;letter-spacing:.03em}
+.directoryweb-profile__badge{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600;background:#f0f6fc;color:#0a4b78;border:1px solid #c5d9ed}
+.directoryweb-profile__badge--gov{background:#edfaef;color:#135e2b;border-color:#b8e0c2}
+.directoryweb-profile__note{margin:0 0 14px}
+.directoryweb-profile__grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;align-items:start}
+.directoryweb-card{border:1px solid #dcdcde;border-radius:8px;background:#fff;padding:16px}
+.directoryweb-card__h{margin:0;font-size:14px}
+.directoryweb-card__sub{margin:3px 0 12px;color:#646970;font-size:12px}
+.directoryweb-card__body{display:flex;flex-direction:column;gap:12px}
+.directoryweb-profile__label{display:block;font-weight:600;margin-bottom:4px;font-size:13px}
+.directoryweb-field .description{margin-top:3px}
+.directoryweb-profile__check{display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:13px}
+.directoryweb-profile__gallery{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.directoryweb-profile__gallery img{border-radius:6px;object-fit:cover}
+</style>
+	<?php
+}
 
 function aw_listing_details_box( $post ) {
 	wp_nonce_field( 'aw_listing_details', 'aw_listing_details_nonce' );
 	wp_enqueue_media();
-	echo '<p>Every field is optional; empty fields are not shown. The short bio is the Excerpt.</p>';
-	foreach ( aw_listing_fields() as $group => $fields ) {
-		echo '<h3 style="margin:1.25em 0 .5em">' . esc_html( $group ) . '</h3><table class="form-table" role="presentation"><tbody>';
-		foreach ( $fields as $key => $f ) {
-			$val     = (string) get_post_meta( $post->ID, $key, true );
-			$control = 'checkbox' === $f[1] ? '<input type="checkbox" id="' . esc_attr( $key ) . '" name="' . esc_attr( $key ) . '" value="1"' . checked( $val, '1', false ) . '>' : ( 'textarea' === $f[1] ? '<textarea class="large-text" rows="3" id="' . esc_attr( $key ) . '" name="' . esc_attr( $key ) . '">' . esc_textarea( $val ) . '</textarea>' : '<input class="regular-text" type="' . esc_attr( $f[1] ) . '" id="' . esc_attr( $key ) . '" name="' . esc_attr( $key ) . '" value="' . esc_attr( $val ) . '">' );
-			echo '<tr><th scope="row"><label for="' . esc_attr( $key ) . '">' . esc_html( $f[0] ) . '</label></th><td>' . $control // phpcs:ignore WordPress.Security.EscapeOutput
-				. ( $f[2] ? '<p class="description">' . esc_html( $f[2] ) . '</p>' : '' ) . '</td></tr>';
-		}
-		echo '</tbody></table>';
+	$fields   = aw_listing_fields();
+	$cards    = directoryweb_listing_cards();
+	$logo     = get_the_post_thumbnail( $post, array( 72, 72 ), array( 'class' => 'directoryweb-profile__logo-img' ) );
+	$title    = get_the_title( $post );
+	$statuses = get_post_statuses();
+	$status   = $statuses[ get_post_status( $post ) ] ?? ucfirst( (string) get_post_status( $post ) );
+	$badges   = '';
+	if ( get_post_meta( $post->ID, 'aw_verified', true ) ) {
+		$badges .= '<span class="directoryweb-profile__badge">' . esc_html__( 'Claimed', 'directoryweb' ) . '</span>';
 	}
-	// The two lists (SCF repeaters) as plain lines, for when SCF is off.
-	$ph = implode( "\n", array_map( fn( $r ) => $r['number'] . ' | ' . $r['label'] . ' | ' . ( $r['whatsapp'] ? 'whatsapp' : '' ), aw_listing_phones( $post->ID ) ) );
-	$hr = implode( "\n", array_map( fn( $r ) => $r['day'] . ' ' . ( $r['closed'] ? 'closed' : $r['open'] . '-' . $r['close'] ), aw_listing_hours( $post->ID ) ) );
-	echo '<h3 style="margin:1.25em 0 .5em">Phone numbers and opening hours</h3><table class="form-table" role="presentation"><tbody>'
-		. '<tr><th scope="row"><label for="aw_phones_lines">Phone numbers</label></th><td><textarea class="large-text" rows="3" id="aw_phones_lines" name="aw_phones_lines">' . esc_textarea( $ph ) . '</textarea><p class="description">One per line: number | label | whatsapp (the last two optional), e.g. 98765 43210 | Helpline | whatsapp</p></td></tr>'
-		. '<tr><th scope="row"><label for="aw_hours_lines">Opening hours by day</label></th><td><textarea class="large-text" rows="4" id="aw_hours_lines" name="aw_hours_lines">' . esc_textarea( $hr ) . '</textarea><p class="description">One day per line: Monday 09:00-18:00, or Sunday closed. Open all day: 00:00-23:59.</p></td></tr>'
-		. '</tbody></table>';
+	if ( get_post_meta( $post->ID, 'aw_gov_verified_on', true ) ) {
+		$badges .= '<span class="directoryweb-profile__badge directoryweb-profile__badge--gov">' . esc_html__( 'Verified', 'directoryweb' ) . '</span>';
+	}
+
+	directoryweb_listing_profile_css();
+	echo '<div class="directoryweb-profile">';
+
+	// Identity header.
+	echo '<div class="directoryweb-profile__head">'
+		. '<div class="directoryweb-profile__logo">' . ( $logo ? $logo : '<span class="directoryweb-profile__logo-ph dashicons dashicons-location"></span>' ) // phpcs:ignore WordPress.Security.EscapeOutput -- get_the_post_thumbnail is safe; dashicon markup is static.
+		. '</div><div class="directoryweb-profile__id">'
+		. '<strong class="directoryweb-profile__name">' . ( '' !== $title ? esc_html( $title ) : esc_html__( '(no name yet)', 'directoryweb' ) ) . '</strong>'
+		. '<div class="directoryweb-profile__meta"><span class="directoryweb-profile__status">' . esc_html( $status ) . '</span>' . $badges // phpcs:ignore WordPress.Security.EscapeOutput -- badge markup escaped above.
+		. '</div></div></div>';
+	echo '<p class="description directoryweb-profile__note">' . esc_html__( 'Every field is optional; empty fields are not shown on the listing. The short bio is the Excerpt.', 'directoryweb' ) . '</p>';
+
+	echo '<div class="directoryweb-profile__grid">';
+	foreach ( $cards as $group => $card ) {
+		if ( empty( $fields[ $group ] ) ) {
+			continue;
+		}
+		echo '<section class="directoryweb-card"><h3 class="directoryweb-card__h">' . esc_html( $card[0] ) . '</h3>'
+			. ( $card[1] ? '<p class="directoryweb-card__sub">' . esc_html( $card[1] ) . '</p>' : '' )
+			. '<div class="directoryweb-card__body">';
+		foreach ( $fields[ $group ] as $key => $f ) {
+			echo '<div class="directoryweb-field directoryweb-field--' . esc_attr( $f[1] ) . '">' . directoryweb_listing_control( $key, $f, (string) get_post_meta( $post->ID, $key, true ) ) . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput -- control built with escaping above.
+		}
+		if ( 'Contact' === $group ) {
+			$ph = implode( "\n", array_map( fn( $r ) => $r['number'] . ' | ' . $r['label'] . ' | ' . ( $r['whatsapp'] ? 'whatsapp' : '' ), aw_listing_phones( $post->ID ) ) );
+			$hr = implode( "\n", array_map( fn( $r ) => $r['day'] . ' ' . ( $r['closed'] ? 'closed' : $r['open'] . '-' . $r['close'] ), aw_listing_hours( $post->ID ) ) );
+			echo '<div class="directoryweb-field"><label class="directoryweb-profile__label" for="aw_phones_lines">' . esc_html__( 'Phone numbers', 'directoryweb' ) . '</label>'
+				. '<textarea class="widefat" rows="3" autocomplete="off" id="aw_phones_lines" name="aw_phones_lines">' . esc_textarea( $ph ) . '</textarea>'
+				. '<p class="description">' . esc_html__( 'One per line: number | label | whatsapp (the last two optional), e.g. 98765 43210 | Helpline | whatsapp', 'directoryweb' ) . '</p></div>';
+			echo '<div class="directoryweb-field"><label class="directoryweb-profile__label" for="aw_hours_lines">' . esc_html__( 'Opening hours by day', 'directoryweb' ) . '</label>'
+				. '<textarea class="widefat" rows="4" autocomplete="off" id="aw_hours_lines" name="aw_hours_lines">' . esc_textarea( $hr ) . '</textarea>'
+				. '<p class="description">' . esc_html__( 'One day per line: Monday 09:00-18:00, or Sunday closed. Open all day: 00:00-23:59.', 'directoryweb' ) . '</p></div>';
+		}
+		echo '</div></section>';
+	}
+
+	// Photos card.
 	$ids = (string) get_post_meta( $post->ID, 'aw_gallery', true );
-	echo '<h3 style="margin:1.25em 0 .5em">Photos (up to 6)</h3><input type="hidden" id="aw_gallery" name="aw_gallery" value="' . esc_attr( $ids ) . '"><div id="aw-gallery-prev" style="display:flex;gap:8px;margin-bottom:8px">';
+	echo '<section class="directoryweb-card"><h3 class="directoryweb-card__h">' . esc_html__( 'Photos', 'directoryweb' ) . '</h3>'
+		. '<p class="directoryweb-card__sub">' . esc_html__( 'Up to six photos of the organisation.', 'directoryweb' ) . '</p>'
+		. '<div class="directoryweb-card__body"><input type="hidden" id="aw_gallery" name="aw_gallery" value="' . esc_attr( $ids ) . '">'
+		. '<div id="aw-gallery-prev" class="directoryweb-profile__gallery">';
 	foreach ( array_filter( array_map( 'absint', explode( ',', $ids ) ) ) as $id ) {
 		echo wp_get_attachment_image( $id, array( 80, 80 ) ); // phpcs:ignore WordPress.Security.EscapeOutput
 	}
-	echo '</div><button type="button" class="button" id="aw-gallery-pick">Choose photos</button> <button type="button" class="button-link" id="aw-gallery-clear">Remove all</button>';
+	echo '</div><p><button type="button" class="button" id="aw-gallery-pick">' . esc_html__( 'Choose photos', 'directoryweb' ) . '</button> <button type="button" class="button-link" id="aw-gallery-clear">' . esc_html__( 'Remove all', 'directoryweb' ) . '</button></p></div></section>';
+
+	echo '</div></div>'; // .directoryweb-profile__grid, .directoryweb-profile
 	echo "<script>(function(){var f,inp=document.getElementById('aw_gallery'),prev=document.getElementById('aw-gallery-prev');"
 		. "document.getElementById('aw-gallery-pick').addEventListener('click',function(){f=f||wp.media({title:'Photos (up to 6)',multiple:true,library:{type:'image'}});"
 		. "f.off('select').on('select',function(){var s=f.state().get('selection').toArray().slice(0,6);inp.value=s.map(function(a){return a.id}).join(',');prev.innerHTML='';s.forEach(function(a){var i=document.createElement('img');i.src=(a.attributes.sizes&&a.attributes.sizes.thumbnail?a.attributes.sizes.thumbnail.url:a.attributes.url);i.width=80;i.height=80;i.style.objectFit='cover';prev.appendChild(i);});});f.open();});"

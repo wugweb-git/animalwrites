@@ -340,7 +340,17 @@ $ub_t( "\n" === substr( $ub_l, -1 ) && 1 === substr_count( $ub_l, "\n" ), 'backu
 $ub_t( 'option' === $ub_o['type'] && 'a:1:{s:1:"k";s:3:"é/";}' === $ub_o['value'] && 'yes' === $ub_o['autoload'] && ! isset( $ub_o['b64'] ), 'backup: option value kept exactly as stored' );
 $ub_o = json_decode( planweb_backup_option_line( 'bin', "\xff\x00\xfe", 'no' ), true );
 $ub_t( array( 'value' ) === $ub_o['b64'] && "\xff\x00\xfe" === base64_decode( $ub_o['value'] ), 'backup: a value that is not UTF-8 is kept base64-encoded' ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode -- the test reads the value back
-$ub_r = json_decode( planweb_backup_row_line( 'wp_x', array( 'id' => '7', 'note' => null, 'blob' => "\x80" ) ), true );
+$ub_r = json_decode(
+	planweb_backup_row_line(
+		'wp_x',
+		array(
+			'id'   => '7',
+			'note' => null,
+			'blob' => "\x80",
+		)
+	),
+	true
+);
 $ub_t( 'row' === $ub_r['type'] && 'wp_x' === $ub_r['table'] && '7' === $ub_r['row']['id'] && null === $ub_r['row']['note'] && array( 'blob' ) === $ub_r['b64'], 'backup: row line keeps every column, null and binary' );
 $ub_t( '{}' === substr( trim( planweb_backup_row_line( 'wp_x', array() ) ), -3, 2 ), 'backup: an empty row is an object' );
 $ub_t( 500 === PLANWEB_BACKUP_BATCH, 'backup: tables are read 500 rows at a time' );
@@ -350,7 +360,8 @@ $ub_fetch = static function ( int $offset, int $limit ) use ( &$ub_calls ) {
 	$ub_calls[] = array( $offset, $limit );
 	return array_fill( 0, max( 0, min( $limit, 1203 - $offset ) ), array( 'id' => '1' ) );
 };
-$ub_n     = planweb_backup_rows(
+// phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter -- the test callbacks mirror the planweb_backup_rows() signature; not every case uses each argument.
+$ub_n = planweb_backup_rows(
 	$ub_fetch,
 	static function ( array $row ) use ( &$ub_seen ): bool {
 		++$ub_seen;
@@ -369,6 +380,7 @@ $ub_n = planweb_backup_rows(
 		return ++$ub_w < 3;
 	}
 );
+// phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter
 $ub_t( false === $ub_n && 3 === $ub_w, 'backup: a write error stops the backup at once' );
 $ub_t( 1 === preg_match( '/^planweb-uninstall-\d{8}-\d{6}\.jsonl\.gz$/', planweb_backup_name( 'planweb', 1763000000 ) ) && 'planweb-uninstall-20251113-021320.jsonl.gz' === planweb_backup_name( 'planweb', 1763000000 ), 'backup: file name' );
 $ub_dir = sys_get_temp_dir() . '/planweb-ub-' . getmypid();

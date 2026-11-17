@@ -92,6 +92,15 @@ function planweb_count_entries( array $entries, string $today, array $check = ar
 			'end'   => planweb_add_days( $today, $r - 1 ),
 		);
 	}
+	// Throughput: entries per calendar month (by their date), the last six months through this one, oldest first. The
+	// label is added where it is shown (planweb-rest.php), so this stays free of WordPress date formatting.
+	$months = array();
+	$mbase  = DateTimeImmutable::createFromFormat( '!Y-m-d', substr( $today, 0, 7 ) . '-01', new DateTimeZone( 'UTC' ) );
+	if ( $mbase ) {
+		for ( $i = 5; $i >= 0; $i-- ) {
+			$months[ $mbase->modify( '-' . $i . ' months' )->format( 'Y-m' ) ] = 0;
+		}
+	}
 	foreach ( $entries as $e ) {
 		$date   = (string) ( $e['date'] ?? '' );
 		$type   = isset( PLANWEB_TYPES[ $e['type'] ?? '' ] ) ? (string) $e['type'] : 'reminder';
@@ -99,6 +108,10 @@ function planweb_count_entries( array $entries, string $today, array $check = ar
 		++$c['total'];
 		++$c['types'][ $type ];
 		++$c['statuses'][ $status ];
+		$ym = substr( $date, 0, 7 );
+		if ( '' !== $date && isset( $months[ $ym ] ) ) {
+			++$months[ $ym ];
+		}
 		if ( 'draft' === $status ) {
 			++$c['waiting'];
 		}
@@ -145,6 +158,13 @@ function planweb_count_entries( array $entries, string $today, array $check = ar
 	}
 	if ( null !== $c['next'] ) {
 		unset( $c['next']['key'] );
+	}
+	$c['months'] = array();
+	foreach ( $months as $ym => $n ) {
+		$c['months'][] = array(
+			'ym'    => $ym,
+			'value' => $n,
+		);
 	}
 	return $c;
 }

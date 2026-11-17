@@ -19,6 +19,7 @@ import {
 	LinkedSetting,
 	LoadingState,
 	MediaThumbs,
+	MiniChart,
 	Notice,
 	RefTable,
 	SectionCard,
@@ -52,6 +53,24 @@ function Header() {
 }
 
 /* ---------- Dashboard ---------- */
+
+// One overview chart on the Dashboard: a shell MiniChart with the same figures listed beside it (the chart also carries
+// its own screen-reader table of the same numbers).
+function OverviewChart( { title, points, unit } ) {
+	return (
+		<div className="directoryweb-overview__chart">
+			<MiniChart label={ title } points={ points } unit={ unit } />
+			<ul className="directoryweb-overview__figures">
+				{ points.map( ( p ) => (
+					<li key={ p.label }>
+						{ p.label }:{ ' ' }
+						<strong>{ Number( p.value ).toLocaleString() }</strong>
+					</li>
+				) ) }
+			</ul>
+		</div>
+	);
+}
 
 function Dashboard() {
 	const [ data, setData ] = useState( null );
@@ -209,6 +228,66 @@ function Dashboard() {
 						</ul>
 					</SectionCard>
 				) }
+			{ ! data.counting && data.overview && (
+				<SectionCard
+					id="directoryweb-overview"
+					title={ __( 'In numbers', 'directoryweb' ) }
+					description={ __(
+						'The Directory at a glance. Each chart has the same figures as a table for screen readers.',
+						'directoryweb'
+					) }
+				>
+					<div className="directoryweb-overview">
+						{ ( 'all' === section || 'listings' === section ) && (
+							<OverviewChart
+								title={ __(
+									'Listings by status',
+									'directoryweb'
+								) }
+								points={ data.overview.status }
+								unit={ __( 'listings', 'directoryweb' ) }
+							/>
+						) }
+						{ ( 'all' === section || 'listings' === section ) &&
+							data.overview.types.length > 0 && (
+								<OverviewChart
+									title={ __(
+										'Published listings by type',
+										'directoryweb'
+									) }
+									points={ data.overview.types }
+									unit={ __( 'listings', 'directoryweb' ) }
+								/>
+							) }
+						{ ( 'all' === section || 'listings' === section ) &&
+							data.overview.completeness.total > 0 && (
+								<OverviewChart
+									title={ sprintf(
+										/* translators: %d: average completeness percentage. */
+										__(
+											'Listing completeness — average %d%%',
+											'directoryweb'
+										),
+										data.overview.completeness.average
+									) }
+									points={ data.overview.completeness.bands }
+									unit={ __( 'listings', 'directoryweb' ) }
+								/>
+							) }
+						{ ( 'all' === section || 'claims' === section ) &&
+							data.overview.hasClaims && (
+								<OverviewChart
+									title={ __(
+										'Claims by status',
+										'directoryweb'
+									) }
+									points={ data.overview.claims }
+									unit={ __( 'claims', 'directoryweb' ) }
+								/>
+							) }
+					</div>
+				</SectionCard>
+			) }
 		</>
 	);
 }
@@ -1045,6 +1124,7 @@ function Listings() {
 	const [ loading, setLoading ] = useState( true );
 	const [ error, setError ] = useState( '' );
 	const [ tick, setTick ] = useState( 0 );
+	const [ msg, setMsg ] = useState( null );
 	useEffect( () => {
 		setLoading( true );
 		setError( '' );
@@ -1058,6 +1138,33 @@ function Listings() {
 	}, [ q, tick ] );
 	const set = ( k, v ) =>
 		setQ( ( o ) => ( { ...o, [ k ]: v, page: 'page' === k ? v : 1 } ) );
+	// Bulk actions (publish, move to draft, re-check). They change the ticked listings; nothing is deleted. Each
+	// listing is changed only if the user can edit it. The route reports how many changed and how many were skipped.
+	const bulkActions = [
+		{ value: 'publish', label: __( 'Publish', 'directoryweb' ) },
+		{ value: 'draft', label: __( 'Move to draft', 'directoryweb' ) },
+		{ value: 'recheck', label: __( 'Mark for re-check', 'directoryweb' ) },
+		{
+			value: 'clear-recheck',
+			label: __( 'Clear re-check', 'directoryweb' ),
+		},
+	];
+	const onBulk = ( action, ids ) => {
+		setMsg( null );
+		return apiFetch( {
+			path: path( 'listings/bulk' ),
+			method: 'POST',
+			data: { action, ids: ids.map( Number ) },
+		} )
+			.then( ( r ) => {
+				setMsg( {
+					tone: r.changed ? 'success' : 'info',
+					text: r.message,
+				} );
+				setTick( ( t ) => t + 1 );
+			} )
+			.catch( ( e ) => setMsg( { tone: 'error', text: errText( e ) } ) );
+	};
 	const columns = [
 		{
 			key: 'title',
@@ -1137,6 +1244,11 @@ function Listings() {
 				)
 			}
 		>
+			{ msg && (
+				<Notice tone={ msg.tone } onDismiss={ () => setMsg( null ) }>
+					{ msg.text }
+				</Notice>
+			) }
 			<DataList
 				label={ __( 'Listings', 'directoryweb' ) }
 				columns={ columns }
@@ -1145,6 +1257,8 @@ function Listings() {
 				page={ data?.page || 1 }
 				pages={ data?.pages || 1 }
 				onPage={ ( p ) => set( 'page', p ) }
+				bulkActions={ bulkActions }
+				onBulk={ onBulk }
 				search={ q.search }
 				onSearch={ ( v ) => set( 'search', v ) }
 				searchLabel={ __( 'Search listings', 'directoryweb' ) }

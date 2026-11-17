@@ -163,6 +163,15 @@ add_action(
 				),
 			)
 		);
+		if ( $ok ) {
+			// The plugin's own screen layout (full-width tables, Dashboard overview grid), on top of the shell's styles.
+			wp_enqueue_style(
+				'directoryweb-admin',
+				plugins_url( 'assets/css/directoryweb-admin.css', DIRECTORYWEB_FILE ),
+				array( 'kits-shell' ),
+				DIRECTORYWEB_VERSION
+			);
+		}
 		directoryweb_ui_ready( $ok );
 	}
 );

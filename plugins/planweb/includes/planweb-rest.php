@@ -287,6 +287,25 @@ function planweb_rest_dashboard() {
 			),
 		);
 	}
+	// Raw numbers behind the "overdue vs coming up" chart (the tiles format the same figures as text).
+	$ahead = array();
+	foreach ( PLANWEB_RANGES as $r ) {
+		$ahead[ $r ] = (int) ( $c['ahead'][ $r ]['total'] ?? 0 );
+	}
+	$out['overview'] = array(
+		'overdue' => (int) ( $c['overdue']['total'] ?? 0 ),
+		'waiting' => (int) ( $c['waiting'] ?? 0 ),
+		'ready'   => (int) ( $c['ready'] ?? 0 ),
+		'ahead'   => $ahead,
+	);
+	// Throughput: entries per month by their date, the last six months through this one (oldest first), labelled here.
+	$out['throughput'] = array_map(
+		fn( $m ) => array(
+			'label' => wp_date( 'M', (int) strtotime( ( $m['ym'] ?? '1970-01' ) . '-01 12:00:00' ) ),
+			'value' => (int) ( $m['value'] ?? 0 ),
+		),
+		(array) ( $c['months'] ?? array() )
+	);
 	return rest_ensure_response( $out );
 }
 

@@ -31,10 +31,10 @@ function planweb_help_tab( $screen ) {
 	}
 	$screens = array(
 		__( 'Calendar', 'planweb' ) => __( 'the month grid', 'planweb' ),
-		__( 'Entries', 'planweb' ) => __( 'add or edit an entry; only administrators set Approved or Sent', 'planweb' ),
+		__( 'Entries', 'planweb' )  => __( 'add or edit an entry; only administrators set Approved or Sent', 'planweb' ),
 		__( 'Settings', 'planweb' ) => __( 'PlanWeb on or off and its defaults', 'planweb' ),
 	);
-	$list = '';
+	$list    = '';
 	foreach ( $screens as $label => $what ) {
 		$list .= '<li><strong>' . esc_html( $label ) . '</strong>: ' . esc_html( $what ) . '</li>';
 	}

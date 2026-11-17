@@ -296,10 +296,87 @@ function directoryweb_dashboard_payload(): array {
 	}
 	$tiles[] = $tile;
 
+	// Overview charts (shell MiniChart): one bar per category, each with the figure beside it. Built only from counts
+	// already stored. The last bar is the shell's "attention" bar; no colour carries meaning (the figure list names
+	// every bar). Charts with no data are left out by the screen.
+	$cl       = (array) ( $c['claims'] ?? array() );
+	$cm       = (array) ( $c['completeness'] ?? array() );
+	$overview = array(
+		'status'       => array(
+			array(
+				'label' => __( 'Published', 'directoryweb' ),
+				'value' => $pub,
+			),
+			array(
+				'label' => __( 'Draft', 'directoryweb' ),
+				'value' => (int) ( $st['draft'] ?? 0 ),
+			),
+			array(
+				'label' => __( 'Pending', 'directoryweb' ),
+				'value' => (int) ( $st['pending'] ?? 0 ),
+			),
+			array(
+				'label' => __( 'Private', 'directoryweb' ),
+				'value' => (int) ( $st['private'] ?? 0 ),
+			),
+		),
+		'types'        => array(),
+		'claims'       => array(
+			array(
+				'label' => __( 'Waiting', 'directoryweb' ),
+				'value' => (int) ( $cl['pending'] ?? 0 ),
+			),
+			array(
+				'label' => __( 'Approved', 'directoryweb' ),
+				'value' => (int) ( $cl['approved'] ?? 0 ),
+			),
+			array(
+				'label' => __( 'Rejected', 'directoryweb' ),
+				'value' => (int) ( $cl['rejected'] ?? 0 ),
+			),
+		),
+		'hasClaims'    => is_array( $c['claims'] ?? null ),
+		'completeness' => array(
+			'average' => (int) ( $cm['average'] ?? 0 ),
+			'total'   => (int) ( $cm['total'] ?? 0 ),
+			'bands'   => array(
+				array(
+					'label' => '0–25%',
+					'value' => (int) ( $cm['bands'][0] ?? 0 ),
+				),
+				array(
+					'label' => '25–50%',
+					'value' => (int) ( $cm['bands'][1] ?? 0 ),
+				),
+				array(
+					'label' => '50–75%',
+					'value' => (int) ( $cm['bands'][2] ?? 0 ),
+				),
+				array(
+					'label' => '75–100%',
+					'value' => (int) ( $cm['bands'][3] ?? 0 ),
+				),
+			),
+		),
+	);
+	foreach ( $top['top'] as $slug => $nn ) {
+		$overview['types'][] = array(
+			'label' => $name( $slug ),
+			'value' => (int) $nn,
+		);
+	}
+	if ( $top['others'] ) {
+		$overview['types'][] = array(
+			'label' => __( 'Other', 'directoryweb' ),
+			'value' => (int) $top['others'],
+		);
+	}
+
 	return array(
 		'counting' => $counting,
 		'at'       => (int) ( $c['at'] ?? 0 ),
 		'atText'   => ! empty( $c['at'] ) ? wp_date( 'j M Y, g:i a', (int) $c['at'] ) : '',
+		'overview' => $overview,
 		'sections' => array(
 			array(
 				'value' => 'all',

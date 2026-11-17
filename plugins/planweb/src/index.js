@@ -11,7 +11,7 @@ import {
 	useState,
 } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
-import { __, sprintf } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import {
 	CalendarGrid,
 	AppShell,
@@ -23,6 +23,7 @@ import {
 	ErrorState,
 	Field,
 	LoadingState,
+	MiniChart,
 	Notice,
 	RefTable,
 	SectionCard,
@@ -118,6 +119,25 @@ function Dashboard() {
 	}
 	const tiles = data.tiles[ range ] || [];
 	const byType = data.byType[ range ] || [];
+	// The overview charts (the shell's MiniChart: one greyscale bar per point, the last bar inked). Each has the same
+	// numbers in its own screen-reader table; the tables below keep the per-row links.
+	const overview = data.overview || {};
+	const statusPts = ( data.byStatus || [] ).map( ( r ) => ( {
+		label: r.label,
+		value: r.count,
+	} ) );
+	const typePts = byType.map( ( r ) => ( {
+		label: r.label,
+		value: r.count,
+	} ) );
+	const pipelinePts = [
+		{ label: __( 'Overdue', 'planweb' ), value: overview.overdue || 0 },
+		{
+			label: __( 'Coming up', 'planweb' ),
+			value: ( overview.ahead || {} )[ range ] || 0,
+		},
+	];
+	const throughput = data.throughput || [];
 	let after = data.atText
 		? sprintf(
 				/* translators: %s: date and time. */
@@ -183,53 +203,93 @@ function Dashboard() {
 			{ ! data.counting && (
 				<>
 					<SectionCard
-						id="by-type"
-						title={ sprintf(
-							/* translators: %d: number of days. */
-							__( 'By type, next %d days', 'planweb' ),
-							range
-						) }
+						id="overview"
+						title={ __( 'Overview', 'planweb' ) }
 						description={ __(
-							'Entries from today on, by type. Each number opens the list.',
+							'The plan at a glance. Each bar chart has the same numbers in a table for screen readers; the tables below open the matching list.',
 							'planweb'
 						) }
 					>
-						<RefTable
-							caption={ __( 'By type', 'planweb' ) }
-							head={ [
-								__( 'Type', 'planweb' ),
-								__( 'Entries', 'planweb' ),
-							] }
-							rows={ byType.map( ( r ) => [
-								r.label,
-								<a key="a" href={ r.href }>
-									{ r.count.toLocaleString() }
-								</a>,
-							] ) }
-						/>
+						<div className="planweb-charts">
+							<MiniChart
+								label={ __(
+									'Overdue vs coming up',
+									'planweb'
+								) }
+								points={ pipelinePts }
+								unit={ __( 'entries', 'planweb' ) }
+							/>
+							<MiniChart
+								label={ __( 'Entries by month', 'planweb' ) }
+								points={ throughput }
+								unit={ __( 'entries', 'planweb' ) }
+							/>
+							<MiniChart
+								label={ sprintf(
+									/* translators: %d: number of days. */
+									__( 'By type, next %d days', 'planweb' ),
+									range
+								) }
+								points={ typePts }
+								unit={ __( 'entries', 'planweb' ) }
+							/>
+							<MiniChart
+								label={ __( 'By status', 'planweb' ) }
+								points={ statusPts }
+								unit={ __( 'entries', 'planweb' ) }
+							/>
+						</div>
 					</SectionCard>
-					<SectionCard
-						id="by-status"
-						title={ __( 'By status', 'planweb' ) }
-						description={ __(
-							'Every entry, past and future. Approved and Sent are set by an administrator.',
-							'planweb'
-						) }
-					>
-						<RefTable
-							caption={ __( 'By status', 'planweb' ) }
-							head={ [
-								__( 'Status', 'planweb' ),
-								__( 'Entries', 'planweb' ),
-							] }
-							rows={ data.byStatus.map( ( r ) => [
-								r.label,
-								<a key="a" href={ r.href }>
-									{ r.count.toLocaleString() }
-								</a>,
-							] ) }
-						/>
-					</SectionCard>
+					<div className="planweb-grid">
+						<SectionCard
+							id="by-type"
+							title={ sprintf(
+								/* translators: %d: number of days. */
+								__( 'By type, next %d days', 'planweb' ),
+								range
+							) }
+							description={ __(
+								'Entries from today on, by type. Each number opens the list.',
+								'planweb'
+							) }
+						>
+							<RefTable
+								caption={ __( 'By type', 'planweb' ) }
+								head={ [
+									__( 'Type', 'planweb' ),
+									__( 'Entries', 'planweb' ),
+								] }
+								rows={ byType.map( ( r ) => [
+									r.label,
+									<a key="a" href={ r.href }>
+										{ r.count.toLocaleString() }
+									</a>,
+								] ) }
+							/>
+						</SectionCard>
+						<SectionCard
+							id="by-status"
+							title={ __( 'By status', 'planweb' ) }
+							description={ __(
+								'Every entry, past and future. Approved and Sent are set by an administrator.',
+								'planweb'
+							) }
+						>
+							<RefTable
+								caption={ __( 'By status', 'planweb' ) }
+								head={ [
+									__( 'Status', 'planweb' ),
+									__( 'Entries', 'planweb' ),
+								] }
+								rows={ data.byStatus.map( ( r ) => [
+									r.label,
+									<a key="a" href={ r.href }>
+										{ r.count.toLocaleString() }
+									</a>,
+								] ) }
+							/>
+						</SectionCard>
+					</div>
 				</>
 			) }
 		</>
@@ -787,6 +847,67 @@ function Entries() {
 			} )
 			.catch( ( e ) => setMsg( { tone: 'error', text: errText( e ) } ) );
 	};
+	// Bulk Trash the ticked rows. There is no bulk REST route, so each id goes to the per-entry trash route (a few at a
+	// time); the server still checks delete_post on each, so one the user may not trash is reported, not forced.
+	const bulkTrash = ( value, ids ) => {
+		if ( 'trash' !== value || ! ids.length ) {
+			return;
+		}
+		if (
+			// eslint-disable-next-line no-alert -- a plain browser confirm before the Trash, as core's lists do
+			! window.confirm(
+				sprintf(
+					/* translators: %d: number of entries. */
+					_n(
+						'Move %d entry to the Trash?',
+						'Move %d entries to the Trash?',
+						ids.length,
+						'planweb'
+					),
+					ids.length
+				)
+			)
+		) {
+			return;
+		}
+		Promise.allSettled(
+			ids.map( ( id ) =>
+				apiFetch( {
+					path: path( `entries/${ id }/trash` ),
+					method: 'POST',
+				} )
+			)
+		).then( ( results ) => {
+			const ok = results.filter(
+				( r ) => 'fulfilled' === r.status
+			).length;
+			const failed = results.length - ok;
+			setMsg( {
+				tone: failed ? 'warning' : 'success',
+				text: failed
+					? sprintf(
+							/* translators: 1: number moved, 2: number that could not be. */
+							__(
+								'%1$d moved to the Trash; %2$d could not be.',
+								'planweb'
+							),
+							ok,
+							failed
+						)
+					: sprintf(
+							/* translators: %d: number of entries. */
+							_n(
+								'%d entry moved to the Trash.',
+								'%d entries moved to the Trash.',
+								ok,
+								'planweb'
+							),
+							ok
+						),
+			} );
+			load();
+		} );
+	};
 	const a = data ? data.args : {};
 	const opts = ( list, all ) => [
 		{ value: '', label: all },
@@ -980,6 +1101,13 @@ function Entries() {
 							page: '',
 						} ) )
 					}
+					bulkActions={ [
+						{
+							value: 'trash',
+							label: __( 'Move to Trash', 'planweb' ),
+						},
+					] }
+					onBulk={ bulkTrash }
 					rowActions={ ( r ) =>
 						[
 							r.canEdit && {
@@ -1676,5 +1804,11 @@ function App() {
 
 const root = document.getElementById( 'planweb-app' );
 if ( root ) {
+	// A per-screen class on the mount lets the plugin's own admin.css widen the list screen (full-width tables) without
+	// touching the shell. The screen is fixed for the request (the tabs reload the page).
+	const screenSlug = [ 'entries', 'settings' ].includes( app.screen )
+		? app.screen
+		: 'dashboard';
+	root.classList.add( 'planweb-screen', `planweb-screen--${ screenSlug }` );
 	createRoot( root ).render( <App /> );
 }

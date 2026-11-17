@@ -504,6 +504,9 @@ if [ "$got" = "$want" ]; then echo "ok   $got animal-writes/ patterns registered
 # (RankWeb is never switched off: it is tied to the theme and Rank Math).
 echo "-- insightweb"
 iw() { wp eval-file "$REPO/tools/ci/insightweb_load_check.php" "$1" --user=ci || FAIL=1; }
+# The Plugin Check loop above activates each changed plugin and never deactivates them, so InsightWeb can still be
+# active here. The bridge case needs it inactive (RankWeb's bridge loads Search Insights), so deactivate it first.
+wp plugin deactivate insightweb --quiet 2>/dev/null || true
 iw bridge
 wp plugin activate insightweb --quiet
 iw both

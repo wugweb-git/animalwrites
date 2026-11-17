@@ -141,6 +141,7 @@ function planweb_backup_rows( callable $fetch, callable $write, int $batch = PLA
 		if ( ! is_array( $rows ) ) {
 			return false;
 		}
+		$got = count( $rows );
 		foreach ( $rows as $row ) {
 			if ( true !== $write( (array) $row ) ) {
 				return false;
@@ -148,7 +149,7 @@ function planweb_backup_rows( callable $fetch, callable $write, int $batch = PLA
 			++$done;
 		}
 		$offset += $batch;
-	} while ( count( $rows ) === $batch );
+	} while ( $batch === $got );
 	return $done;
 }
 
@@ -214,7 +215,7 @@ function planweb_uninstall_backup( string $plugin, string $main, array $names, a
 	$opts = array();
 	foreach ( array_chunk( array_values( array_unique( array_map( 'strval', $names ) ) ), 100 ) as $chunk ) {
 		$in   = implode( ', ', array_fill( 0, count( $chunk ), '%s' ) );
-		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT option_name, option_value, autoload FROM {$wpdb->options} WHERE option_name IN ($in)", $chunk ), ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- uninstall backup: the raw stored values; $in is placeholders only
+		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT option_name, option_value, autoload FROM {$wpdb->options} WHERE option_name IN ($in)", $chunk ), ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- uninstall backup: the raw stored values; $in is the %s placeholders only
 		if ( '' !== $wpdb->last_error || ! is_array( $rows ) ) {
 			return $fail( 'options could not be read' );
 		}
@@ -254,7 +255,7 @@ function planweb_uninstall_backup( string $plugin, string $main, array $names, a
 	if ( ! $gz ) {
 		return $fail( 'gzopen failed: ' . $part );
 	}
-	$put = static function ( string $line ) use ( $gz ): bool {
+	$put   = static function ( string $line ) use ( $gz ): bool {
 		return '' !== $line && strlen( $line ) === gzwrite( $gz, $line );
 	};
 	$abort = static function ( string $why ) use ( $gz, $part, $fail ): bool {

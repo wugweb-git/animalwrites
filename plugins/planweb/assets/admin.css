@@ -44,3 +44,21 @@
 .planweb-status--missed { border-color: #d63638; color: #8a2424; background: #fcf0f1; }
 .planweb-status--scheduled, .planweb-status--sending, .planweb-status--paused { border-color: #2271b1; }
 .planweb-status--published { background: #fff; color: #50575e; }
+
+/* Overview charts: the shell's MiniChart figures in a responsive grid (one column on phones, two from 600px).
+   Only the grid container is styled here; the figure itself keeps the shell's own look. */
+.planweb-charts { display: grid; grid-template-columns: 1fr; gap: 16px; }
+.planweb-charts .kits-shell-chart { margin: 0; min-width: 0; }
+@media (min-width: 600px) { .planweb-charts { grid-template-columns: 1fr 1fr; } }
+
+/* Richer Dashboard: the two breakdowns (by type / by status) sit side by side on wider screens, like the charts,
+   so the lower Dashboard reads as a set of blocks rather than a tall stack. One column on phones. */
+.planweb-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+.planweb-grid > * { min-width: 0; }
+@media (min-width: 782px) { .planweb-grid { grid-template-columns: 1fr 1fr; } }
+
+/* Full-width list views: the Entries (list) screen uses the full admin content width so its DataViews table spans it.
+   The shell caps general content at 1280px for readability; a dense data table benefits from the full width. Scoped to
+   PlanWeb's own list screen (the class is set on the mount in src/index.js) — the shell theme itself is unchanged. */
+.planweb-screen--entries .kits-shell__body { max-width: none; }
+#planweb-app .kits-shell-datalist .dataviews-view-table { width: 100%; }

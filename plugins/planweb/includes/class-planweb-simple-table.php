@@ -38,10 +38,26 @@ class PlanWeb_Simple_Table extends WP_List_Table {
 	 * @param array  $opts   Options (see $opts).
 	 */
 	public function __construct( $plural, array $cols, array $rows, array $opts = array() ) {
-		parent::__construct( array( 'singular' => $plural, 'plural' => $plural, 'ajax' => false, 'screen' => get_current_screen() ) );
+		parent::__construct(
+			array(
+				'singular' => $plural,
+				'plural'   => $plural,
+				'ajax'     => false,
+				'screen'   => get_current_screen(),
+			)
+		);
 		$this->cols = $cols;
 		$this->rows = $rows;
-		$this->opts = $opts + array( 'per_page' => 0, 'total' => null, 'primary' => (string) array_key_first( $cols ), 'fixed' => false, 'empty' => null, 'foot' => true, 'sortable' => array(), 'caption' => '' );
+		$this->opts = $opts + array(
+			'per_page' => 0,
+			'total'    => null,
+			'primary'  => (string) array_key_first( $cols ),
+			'fixed'    => false,
+			'empty'    => null,
+			'foot'     => true,
+			'sortable' => array(),
+			'caption'  => '',
+		);
 	}
 
 	/**
@@ -139,7 +155,12 @@ class PlanWeb_Simple_Table extends WP_List_Table {
 		}
 		if ( $per ) {
 			$total = null === $this->opts['total'] ? count( $rows ) : (int) $this->opts['total'];
-			$this->set_pagination_args( array( 'total_items' => $total, 'per_page' => $per ) );
+			$this->set_pagination_args(
+				array(
+					'total_items' => $total,
+					'per_page'    => $per,
+				)
+			);
 			if ( null === $this->opts['total'] ) {
 				$rows = array_slice( $rows, ( $this->get_pagenum() - 1 ) * $per, $per );
 			}

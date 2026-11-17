@@ -1,0 +1,27 @@
+/*
+ * MailWeb admin layout — loaded only on MailWeb's own shell screens (includes/mailweb-ui.php),
+ * so no other plugin's Kits admin shell screens are touched. This is LAYOUT ONLY: the live Kits
+ * Core shell (handle "kits-shell") keeps its own tokens, greyscale, type and components. It
+ * overrides nothing in the shell stylesheet; it only adjusts how MailWeb's own screens use the
+ * space.
+ *
+ * 1) Full-width data: MailWeb's screens use the full content width instead of the shell's default
+ *    reading cap (.kits-shell__body max-width 1280px), so the Inbox reads like an email app and
+ *    the data tables (Inbox list, Queue, Sent and failed) span the content area rather than
+ *    sitting narrow.
+ * 2) Dashboard tiles fill the wider space as a flexible grid (a comfortable minimum each) rather
+ *    than four stretched boxes, keeping a consistent rhythm at every width. The shell's own
+ *    narrower-viewport rules still apply below 1200px.
+ *
+ * Scoped under body.kits-shell-screen (the shell's body class, kits_shell_body_class()) so the
+ * rules beat the shell's own defaults by specificity, and loaded on MailWeb screens only so
+ * nothing else is affected.
+ */
+
+body.kits-shell-screen .kits-shell__body {
+	max-width: none;
+}
+
+body.kits-shell-screen .kits-shell-tiles {
+	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}

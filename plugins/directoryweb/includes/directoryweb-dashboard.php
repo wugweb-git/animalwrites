@@ -52,13 +52,14 @@ function directoryweb_stats_request(): bool {
 function directoryweb_stats_build( $why = '' ) {
 	unset( $why );
 	$c = array(
-		'at'         => time(),
-		'listings'   => directoryweb_count_listings(),
-		'places'     => directoryweb_count_places(),
-		'indexing'   => directoryweb_count_indexing(),
-		'claims'     => directoryweb_count_claims(),
-		'badges'     => directoryweb_count_badges(),
-		'enrichment' => directoryweb_count_enrichment(),
+		'at'           => time(),
+		'listings'     => directoryweb_count_listings(),
+		'places'       => directoryweb_count_places(),
+		'indexing'     => directoryweb_count_indexing(),
+		'claims'       => directoryweb_count_claims(),
+		'badges'       => directoryweb_count_badges(),
+		'enrichment'   => directoryweb_count_enrichment(),
+		'completeness' => directoryweb_count_completeness(),
 	);
 	set_transient( DIRECTORYWEB_STATS, $c, 3 * HOUR_IN_SECONDS );
 	return $c;
@@ -94,6 +95,65 @@ function directoryweb_count_listings(): array {
 		}
 	}
 	return $out;
+}
+
+/**
+ * How complete one published listing is: the share (0–100) of the fields people look for that are filled in. The same
+ * eight signals the public profile shows — website, e-mail, a contact area, a phone number, opening hours, a logo, a
+ * map point, and at least one social profile. Used for the Dashboard's completeness chart.
+ *
+ * @param int $id Listing ID.
+ * @return int 0–100.
+ */
+function directoryweb_listing_completeness( int $id ): int {
+	$signals = array(
+		(bool) get_post_meta( $id, 'aw_website', true ),
+		(bool) get_post_meta( $id, 'aw_email', true ),
+		( '' !== (string) get_post_meta( $id, 'aw_area', true ) || '' !== (string) get_post_meta( $id, 'aw_address', true ) ),
+		(int) get_post_meta( $id, 'aw_phones', true ) > 0,
+		(int) get_post_meta( $id, 'aw_opening_hours', true ) > 0,
+		has_post_thumbnail( $id ),
+		( '' !== (string) get_post_meta( $id, 'aw_lat', true ) && '' !== (string) get_post_meta( $id, 'aw_lng', true ) ),
+		( '' !== (string) get_post_meta( $id, 'aw_instagram', true ) || '' !== (string) get_post_meta( $id, 'aw_facebook', true ) || '' !== (string) get_post_meta( $id, 'aw_x', true ) || '' !== (string) get_post_meta( $id, 'aw_youtube', true ) ),
+	);
+	$have    = count( array_filter( $signals ) );
+	return (int) round( 100 * $have / count( $signals ) );
+}
+
+/**
+ * Published listings by how complete they are: the average share and a four-band spread (0–25, 25–50, 50–75,
+ * 75–100 %). Meta is primed in one query, so the per-listing read is from cache.
+ *
+ * @return array [ 'total', 'average', 'bands' => [ n, n, n, n ] ].
+ */
+function directoryweb_count_completeness(): array {
+	$ids   = get_posts(
+		array(
+			'post_type'        => 'aw_listing',
+			'post_status'      => 'publish',
+			'posts_per_page'   => -1,
+			'fields'           => 'ids',
+			'no_found_rows'    => true,
+			'suppress_filters' => false,
+		)
+	);
+	$bands = array( 0, 0, 0, 0 );
+	$sum   = 0;
+	if ( $ids ) {
+		update_meta_cache( 'post', $ids );
+		foreach ( $ids as $id ) {
+			$pct             = directoryweb_listing_completeness( (int) $id );
+			$sum            += $pct;
+			$band            = 100 === $pct ? 3 : (int) ( $pct / 25 ); // Band 0 is up to a quarter filled; band 3 is three-quarters or more.
+			$bands[ $band ] += 1;
+		}
+	}
+	$total = count( $ids );
+	return array(
+		'total'   => $total,
+		'average' => $total ? (int) round( $sum / $total ) : 0,
+		'bands'   => $bands,
+	);
 }
 
 /**

@@ -134,26 +134,12 @@ function mailweb_box_id( $key ) {
  * @return mixed
  */
 function mailweb_api( $path ) {
-	$token = mailweb_setting( 'api_token' );
-	if ( '' === $token ) {
+	// Routed through the active provider (providers.php); 200-only, returns the response's `data` (or the decoded body).
+	list( $code, $data ) = mailweb_provider()->request( 'GET', (string) $path );
+	if ( 200 !== (int) $code ) {
 		return null;
 	}
-	$r = wp_remote_get(
-		MAILWEB_API_HOST . $path,
-		array(
-			'timeout' => 15,
-			'headers' => array(
-				'Authorization' => 'Bearer ' . $token,
-				'Accept'        => 'application/json',
-			),
-		)
-	);
-	if ( is_wp_error( $r ) || 200 !== (int) wp_remote_retrieve_response_code( $r ) ) {
-		return null;
-	}
-	$body = wp_remote_retrieve_body( $r );
-	$json = json_decode( $body, true );
-	return is_array( $json ) ? ( $json['data'] ?? $json ) : $body;
+	return is_array( $data ) ? ( $data['data'] ?? $data ) : $data;
 }
 
 /* ---------- Webhook ---------- */

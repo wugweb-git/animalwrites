@@ -131,6 +131,11 @@ add_action(
 			$asset = include MAILWEB_DIR . 'build/index.asset.php';
 			wp_enqueue_style( 'mailweb-admin', plugins_url( 'build/index.css', MAILWEB_FILE ), array( 'kits-shell' ), $asset['version'] ?? MAILWEB_VERSION );
 		}
+		// Layout only, on every MailWeb shell screen: the data screens use the full content width (the shell's 1280px
+		// reading cap is lifted) and the Dashboard tiles fill it as a flexible grid. The shell theme is unchanged.
+		if ( $ok && file_exists( MAILWEB_DIR . 'assets/admin.css' ) ) {
+			wp_enqueue_style( 'mailweb-admin-layout', plugins_url( 'assets/admin.css', MAILWEB_FILE ), array( 'kits-shell' ), MAILWEB_VERSION );
+		}
 		mailweb_ui_ready( $ok );
 	}
 );
