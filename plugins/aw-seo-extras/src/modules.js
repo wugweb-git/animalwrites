@@ -78,52 +78,43 @@ export function ModuleCards() {
 				/>
 			) : (
 				<RefTable
-					caption={ __( 'Modules on and off', 'aw-seo-extras' ) }
+					caption={ __( 'Modules', 'aw-seo-extras' ) }
 					head={ [
 						__( 'Module', 'aw-seo-extras' ),
+						__( 'Where it is set up', 'aw-seo-extras' ),
+						__( 'Status', 'aw-seo-extras' ),
 						__( 'On or off', 'aw-seo-extras' ),
 					] }
 					rows={ cards.map( ( c ) => [
 						<>
 							<strong>{ c.label }</strong>
 							{ c.desc && <p>{ c.desc }</p> }
+						</>,
+						<>
 							{ c.settingsUrl && (
 								<p>
 									<a href={ c.settingsUrl }>
-										{ sprintf(
-											/* translators: %s: module name. */
-											__(
-												'%s settings',
-												'aw-seo-extras'
-											),
-											c.label
+										{ __(
+											'RankWeb Settings',
+											'aw-seo-extras'
 										) }
 									</a>
 								</p>
 							) }
+							{ ( c.where || [] ).map( ( w ) => (
+								<p key={ w.label || w.text }>
+									{ w.url ? (
+										<a href={ w.url }>{ w.label }</a>
+									) : (
+										w.text
+									) }
+								</p>
+							) ) }
 						</>,
 						<>
-							{ c.switch ? (
-								<Switch
-									label={ sprintf(
-										/* translators: %s: module name. */
-										__( '%s on', 'aw-seo-extras' ),
-										c.label
-									) }
-									checked={ c.on }
-									disabled={ ! admin || !! busy }
-									help={
-										admin
-											? ''
-											: __(
-													'Only administrators can switch modules.',
-													'aw-seo-extras'
-												)
-									}
-									onChange={ ( v ) => flip( c.key, v ) }
-								/>
-							) : (
-								<p>{ __( 'Always on.', 'aw-seo-extras' ) }</p>
+							{ ! c.on && __( 'Off', 'aw-seo-extras' ) }
+							{ c.on && c.status && c.status.text && (
+								<p>{ c.status.text }</p>
 							) }
 							{ c.on && c.next > 0 && (
 								<p>
@@ -137,6 +128,28 @@ export function ModuleCards() {
 								</p>
 							) }
 						</>,
+						c.switch ? (
+							<Switch
+								label={ sprintf(
+									/* translators: %s: module name. */
+									__( '%s on', 'aw-seo-extras' ),
+									c.label
+								) }
+								checked={ c.on }
+								disabled={ ! admin || !! busy }
+								help={
+									admin
+										? ''
+										: __(
+												'Only administrators can switch modules.',
+												'aw-seo-extras'
+											)
+								}
+								onChange={ ( v ) => flip( c.key, v ) }
+							/>
+						) : (
+							<p>{ __( 'Always on.', 'aw-seo-extras' ) }</p>
+						),
 					] ) }
 				/>
 			) }

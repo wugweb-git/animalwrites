@@ -152,8 +152,6 @@ add_action(
 					'canSwitch' => current_user_can( 'manage_options' ),
 					// The FAQ screen's own output as parts, after its load hook ran (Kits Core's page parts).
 					'parts'     => 'faq' === $screen ? rankweb_faq_parts() : array(),
-					// The Dashboard's Modules table and the rest of the Overview, from its own output (Kits' page parts).
-					'modules'   => 'modules' === $screen ? rankweb_overview_parts() : array(),
 					// The Dashboard's Tools card.
 					'tools'     => 'dashboard' === $screen ? rankweb_ui_tools() : array(),
 				),
@@ -212,15 +210,5 @@ function rankweb_faq_parts(): array {
 	}
 	ob_start();
 	aw_faq_admin_body();
-	return kits_shell_html_parts( (string) ob_get_clean() );
-}
-
-/** The Overview's body (aw_seo_overview_body(): Modules, On edit screens, Commands) as page parts for the Dashboard. */
-function rankweb_overview_parts(): array {
-	if ( ! function_exists( 'aw_seo_overview_body' ) || ! function_exists( 'kits_shell_html_parts' ) ) {
-		return array();
-	}
-	ob_start();
-	aw_seo_overview_body();
 	return kits_shell_html_parts( (string) ob_get_clean() );
 }

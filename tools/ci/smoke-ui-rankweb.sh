@@ -8,7 +8,8 @@ if grep -q '"screen":"faq"' /tmp/rw.out && grep -o '"parts":\[.*' /tmp/rw.out | 
 if grep -o '"parts":\[.*' /tmp/rw.out | head -c 400000 | grep -qiE '<(script|form|input|a )|javascript:'; then echo "FAIL aw-faq: markup in its parts"; FAIL=1; else echo "ok   aw-faq: parts are text and links only"; fi
 want 200 "admin.php?page=aw-faq (editor)" -b /tmp/cj-rw-ed "$H/wp-admin/admin.php?page=aw-faq"
 if grep -q 'id="rankweb-app"' /tmp/rw.out; then echo "ok   aw-faq: the new screen for an editor"; else echo "FAIL aw-faq: no new screen for an editor"; FAIL=1; fi
-# The Modules page: the Overview's own Modules table (where each is set up, Off state) as parts.
+# The Modules page: one table from GET rankweb/v1/modules (each module: switch, where it is set up, status), so the
+# Overview's own HTML table is no longer sent as parts.
 want 200 "admin.php?page=aw-seo-modules (Modules)" -b /tmp/cj-ci "$H/wp-admin/admin.php?page=aw-seo-modules"
-if grep -o '"modules":\[.*' /tmp/rw.out | grep -q '"type":"listtable"' && grep -o '"modules":\[.*' /tmp/rw.out | grep -q 'Content analysis'; then echo "ok   Modules page: the Modules table"; else echo "FAIL Modules page: no Modules table"; FAIL=1; fi
-if grep -o '"modules":\[.*' /tmp/rw.out | head -c 400000 | grep -qiE '<(script|form|input|a )|javascript:'; then echo "FAIL Modules page: markup in the Modules parts"; FAIL=1; else echo "ok   Modules page: Modules parts are text and links only"; fi
+want 200 "GET /rankweb/v1/modules administrator" -b /tmp/cj-ci -H "X-WP-Nonce: $NA" "$H/?rest_route=/rankweb/v1/modules"
+if grep -q '"key":"internal-links"' /tmp/rw.out && grep -q '"key":"analysis"' /tmp/rw.out && grep -q '"where":\[' /tmp/rw.out && grep -q '"status":{' /tmp/rw.out; then echo "ok   Modules page: every module with where and status"; else echo "FAIL Modules page: modules route lacks a module, where or status"; FAIL=1; fi

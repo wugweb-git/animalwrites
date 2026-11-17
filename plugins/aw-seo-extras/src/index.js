@@ -457,21 +457,6 @@ function Dashboard( { view } ) {
 				</SectionCard>
 			) }
 			{ 'modules' === view && <ModuleCards /> }
-			{ 'modules' === view && ( app.modules || [] ).length > 0 && (
-				<SectionCard
-					id="modules"
-					title={ __( 'Modules', 'aw-seo-extras' ) }
-					description={ __(
-						'What each module adds, where it is set up, and whether it is on.',
-						'aw-seo-extras'
-					) }
-				>
-					<PageParts
-						parts={ app.modules }
-						title={ __( 'Modules', 'aw-seo-extras' ) }
-					/>
-				</SectionCard>
-			) }
 			{ 'modules' === view && (
 				<SectionCard
 					id="where"
