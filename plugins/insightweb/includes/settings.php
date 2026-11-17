@@ -125,7 +125,7 @@ function insightweb_settings_save( array $posted, bool $reset = false ): bool {
 }
 
 add_action(
-	'admin_post_aw_si_settings',
+	'admin_post_insightweb_settings',
 	function () {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_die( 'Not allowed.', 403 );

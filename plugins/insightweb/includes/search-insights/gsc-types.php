@@ -536,7 +536,7 @@ function insightweb_coverage(): array {
 }
 
 add_action(
-	'admin_post_aw_si_coverage',
+	'admin_post_insightweb_coverage',
 	function () {
 		if ( ! current_user_can( insightweb_cap() ) || ! check_admin_referer( 'insightweb_coverage' ) ) {
 			wp_die( esc_html__( 'Not allowed.', 'insightweb' ), 403 );

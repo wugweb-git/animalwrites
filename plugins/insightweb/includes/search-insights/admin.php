@@ -1116,7 +1116,7 @@ function insightweb_settings_tab(): void {
 }
 
 add_action(
-	'admin_post_aw_si_run',
+	'admin_post_insightweb_run',
 	function () {
 		if ( ! current_user_can( insightweb_cap() ) || ! check_admin_referer( 'insightweb_run' ) ) {
 			wp_die( esc_html__( 'Not allowed.', 'insightweb' ), 403 );
@@ -1143,7 +1143,7 @@ add_action(
 );
 
 add_action(
-	'admin_post_aw_si_delete',
+	'admin_post_insightweb_delete',
 	function () {
 		if ( ! current_user_can( insightweb_cap() ) || ! check_admin_referer( 'insightweb_delete' ) ) {
 			wp_die( esc_html__( 'Not allowed.', 'insightweb' ), 403 );

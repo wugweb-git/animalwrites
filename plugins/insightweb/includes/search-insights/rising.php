@@ -618,7 +618,7 @@ function insightweb_rising_add( string $term, string $where, string $label, stri
 }
 
 add_action(
-	'admin_post_aw_si_rising_add',
+	'admin_post_insightweb_rising_add',
 	function () {
 		if ( ! current_user_can( insightweb_cap() ) || ! check_admin_referer( 'insightweb_rising_add' ) ) {
 			wp_die( esc_html__( 'Not allowed.', 'insightweb' ), 403 );
@@ -872,7 +872,7 @@ function insightweb_rising_paste_lines( string $text ): array {
 }
 
 add_action(
-	'admin_post_aw_si_rising_paste',
+	'admin_post_insightweb_rising_paste',
 	function () {
 		if ( ! current_user_can( insightweb_cap() ) || ! check_admin_referer( 'insightweb_rising_paste' ) ) {
 			wp_die( esc_html__( 'Not allowed.', 'insightweb' ), 403 );
@@ -1058,7 +1058,7 @@ add_action(
 );
 
 add_action(
-	'admin_post_aw_si_gdelt',
+	'admin_post_insightweb_gdelt',
 	function () {
 		if ( ! current_user_can( insightweb_cap() ) || ! check_admin_referer( 'insightweb_gdelt' ) ) {
 			wp_die( esc_html__( 'Not allowed.', 'insightweb' ), 403 );

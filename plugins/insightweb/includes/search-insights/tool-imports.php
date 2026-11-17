@@ -268,7 +268,7 @@ add_action(
 );
 
 add_action(
-	'admin_post_aw_si_tool_seeds',
+	'admin_post_insightweb_tool_seeds',
 	function () {
 		if ( ! current_user_can( insightweb_cap() ) || ! check_admin_referer( 'insightweb_tool_seeds' ) ) {
 			wp_die( esc_html__( 'Not allowed.', 'insightweb' ), 403 );

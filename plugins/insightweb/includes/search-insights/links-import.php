@@ -298,7 +298,7 @@ function insightweb_links_import_form(): void {
 }
 
 add_action(
-	'admin_post_aw_si_links_import',
+	'admin_post_insightweb_links_import',
 	function () {
 		if ( ! current_user_can( insightweb_cap() ) || ! check_admin_referer( 'insightweb_links_import' ) ) {
 			wp_die( esc_html__( 'Not allowed.', 'insightweb' ), 403 );

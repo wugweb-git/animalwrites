@@ -204,7 +204,7 @@ function insightweb_keyword_map_md(): string {
 }
 
 add_action(
-	'admin_post_aw_si_download',
+	'admin_post_insightweb_download',
 	function () {
 		if ( ! current_user_can( insightweb_cap() ) || ! check_admin_referer( 'insightweb_download' ) ) {
 			wp_die( esc_html__( 'Not allowed.', 'insightweb' ), 403 );

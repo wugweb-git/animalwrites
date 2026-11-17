@@ -256,7 +256,7 @@ function insightweb_can_import(): bool {
 }
 
 add_action(
-	'admin_post_aw_si_import',
+	'admin_post_insightweb_import',
 	function () {
 		if ( ! insightweb_can_import() || ! check_admin_referer( 'insightweb_import' ) ) {
 			wp_die( esc_html__( 'Not allowed.', 'insightweb' ), 403 );

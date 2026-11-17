@@ -508,7 +508,7 @@ function insightweb_clarity_note_save( string $path, string $note ): bool {
 }
 
 add_action(
-	'admin_post_aw_si_note',
+	'admin_post_insightweb_note',
 	function () {
 		if ( ! current_user_can( insightweb_cap() ) || ! check_admin_referer( 'insightweb_note' ) ) {
 			wp_die( esc_html__( 'Not allowed.', 'insightweb' ), 403 );

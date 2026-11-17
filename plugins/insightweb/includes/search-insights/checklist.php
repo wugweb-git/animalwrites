@@ -223,7 +223,7 @@ function insightweb_live_save(): void {
 	);
 	wp_send_json_success( array( 'pending' => count( insightweb_live_pending() ) ) );
 }
-add_action( 'wp_ajax_aw_si_live_save', 'insightweb_live_save' );
+add_action( 'wp_ajax_insightweb_live_save', 'insightweb_live_save' );
 
 add_action(
 	'insightweb_load_tab_checklist',

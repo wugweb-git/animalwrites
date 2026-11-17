@@ -459,7 +459,7 @@ add_action(
 );
 
 add_action(
-	'admin_post_aw_si_bing_kw',
+	'admin_post_insightweb_bing_kw',
 	function () {
 		if ( ! current_user_can( insightweb_cap() ) || ! check_admin_referer( 'insightweb_bing_kw' ) ) {
 			wp_die( esc_html__( 'Not allowed.', 'insightweb' ), 403 );
