@@ -288,9 +288,9 @@ its package lands.
 ### Extracted build progress (public edition, as of 17 Nov 2026)
 
 `plugins/insightweb-org/` exists and is a separate, standalone codebase — the live `plugins/insightweb` is untouched.
-Each piece landed green (`php -l` + PHPCS WordPress + `tools/ci/phpcs-security.xml` + the no-WP smoke test, now 42
-checks); `vendor/` is never committed. Branch `claude/insightweb-org-assess-dc97b9`, **not** on `wordpress-dev` or
-`wordpress` — side session, nothing pushed or shipped.
+Each piece landed green (`php -l` + PHPCS WordPress + `tools/ci/phpcs-security.xml` + the no-WP smoke test, now 46
+checks); `vendor/` and `composer.lock` are never committed. Branch `claude/insightweb-org-assess-dc97b9`, **not** on
+`wordpress-dev` or `wordpress` — side session, nothing pushed or shipped.
 
 | Piece | File | Commit | State |
 |---|---|---|---|
@@ -299,13 +299,37 @@ checks); `vendor/` is never committed. Branch `claude/insightweb-org-assess-dc97
 | Decision engine | `includes/compute.php` | `ae211a59` | done, green |
 | Observation tables | `includes/schema.php` | `23822062` | done, green |
 | Daily recompute | `includes/recompute.php` | `f3acd37a` | done, green (DB orchestrator runtime-verified only) |
+| Admin data layer (list/views/overview reads, override) | `includes/query.php` | Admin UI commit | done, green |
+| Keywords list table (WP_List_Table: views, filters, search, sort, bulk/row override, screen options) | `includes/class-insightweb-keywords-table.php` | Admin UI commit | done, green |
+| Overview dashboard (scorecards; MiniChart trends + gap-action/priority/status; top queries) | `includes/overview.php` | Admin UI commit | done, green |
+| Admin screen (tabbed: Overview + Keywords; Site Kit prompt; shell-embeddable render) | `includes/admin.php` | Admin UI commit | done, green |
+| REST `insightweb/v1/overview` (feeds the shell chart component) | `includes/rest.php` | Admin UI commit | done, green |
 
-**Not built yet:** the Site Kit GSC/GA4 read (model A — the internal-API/runtime-risk adapter that fills `obs`); the
-`keywords`/`rising` list builders; the shell-backed admin tabs (staged behind the shared `insightweb-shell` package);
-the shared external-services registry (consumed when its package lands). **Shipping:** this is a side session — it does
-not push or ship; the branch + hashes go to the coordinator, and only the live-plugin changes (the settings bug fix
-`b3cd3a0d`, the readme `0d723960`/`b8e5857d`) are production-bound. The `plugins/insightweb-org/` build is a separate
-public codebase and must **not** be deployed to the live site.
+**Admin UI phase (§7 charts + §8 tables), decisions applied:**
+- **Substrate.** The live plugin renders the Kits React shell as *chrome* and embeds each tab's server HTML as a shell
+  "part" (`insightweb_tab_parts` → `data.parts`), with a classic `<div class="wrap">` fallback when the shell/Kits Core
+  is absent. The public edition mirrors this: every tab renderer **returns** HTML, so the same markup serves the classic
+  screen today and the shell as a part once the bundled `insightweb-shell` package lands. The shell look is unchanged —
+  the WP_List_Table and the Overview inherit the shell's CSS; no restyle, no new theme (owner constraint).
+- **Charts = MiniChart contract (NOT Chart.js).** The suite standard is the shell's `MiniChart({label, points:[{value,
+  label}], unit})`: inline-SVG bars normalised to max, **last bar inked for attention, the rest greyscale**, a
+  `<figcaption>` (label + first→last range) and a hidden screen-reader data table (unit appended). `insightweb_minichart()`
+  server-renders that exact contract, so it is identical before and after the shell app mounts and needs no chart
+  library. Colours come from `--insightweb-ink` / `--insightweb-bar` (shell-overridable; greyscale default). Built for
+  the clicks / impressions / CTR / position 28-day trends (bars over time) and the gap-action, priority and status
+  breakdowns (one bar per category). Design pass: dataviz (read first — one axis each, direct labels, table-equivalent,
+  no dual-axis), then frontend-design / ui-ux-pro-max / accessibility-review on the screens.
+- **Overrides** are the only write, and only to InsightWeb's own keyword record (row + bulk, nonce + capability,
+  post/redirect/get).
+
+**Not built yet:** the Site Kit GSC/GA4 read (model A — the internal-API/runtime-risk adapter that fills `obs`, the one
+piece that makes the lists and charts show real data); the `rising`/`links` list tables (their source adapters are not
+ported yet, so they would be empty); the bundled `insightweb-shell` React package + mount (the server-rendered parts
+and the MiniChart contract are ready for it; RankWeb's build recipe applies); the shared external-services registry
+(consumed when its package lands). **Shipping:** this is a side session — it does not push or ship; the branch + hashes
+go to the coordinator, and only the live-plugin changes (the settings bug fix `b3cd3a0d`, the readme
+`0d723960`/`b8e5857d`) are production-bound. The `plugins/insightweb-org/` build is a separate public codebase and must
+**not** be deployed to the live site.
 
 ### Feature coverage — the owner's InsightWeb feature list (checked against live `plugins/insightweb`, 17 Nov 2026)
 

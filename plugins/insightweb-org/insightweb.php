@@ -37,9 +37,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 define( 'INSIGHTWEB_VERSION', '0.1.0' ); // Equal to the header's Version.
 define( 'INSIGHTWEB_FILE', __FILE__ );
 define( 'INSIGHTWEB_DIR', plugin_dir_path( __FILE__ ) );
+define( 'INSIGHTWEB_REST', 'insightweb/v1' ); // REST namespace for the admin Overview chart component.
 
 require_once INSIGHTWEB_DIR . 'includes/keyword-table.php';
 require_once INSIGHTWEB_DIR . 'includes/schema.php';
 require_once INSIGHTWEB_DIR . 'includes/compute.php';
 require_once INSIGHTWEB_DIR . 'includes/recompute.php';
+require_once INSIGHTWEB_DIR . 'includes/query.php';
+require_once INSIGHTWEB_DIR . 'includes/overview.php';
 require_once INSIGHTWEB_DIR . 'includes/admin.php';
+require_once INSIGHTWEB_DIR . 'includes/rest.php';
+
+// The Keywords list table pulls in WordPress's WP_List_Table; load it only in the admin.
+if ( is_admin() ) {
+	require_once INSIGHTWEB_DIR . 'includes/class-insightweb-keywords-table.php';
+}

@@ -61,6 +61,36 @@ function update_option( $name, $value ) {
 function current_time( $type ) {
 	return '2026-11-17 10:00:00';
 }
+/** Stub. */
+function add_filter() {}
+/** Stub: front-end context, so the WP_List_Table file is not loaded in the test. */
+function is_admin() {
+	return false;
+}
+/** Stub. */
+function esc_attr( $s ) {
+	return $s;
+}
+/** Stub. */
+function esc_attr__( $s ) {
+	return $s;
+}
+/** Stub. */
+function esc_url( $s ) {
+	return $s;
+}
+/** Stub: append the args as a query string so URLs are inspectable. */
+function add_query_arg( $args, $url = '' ) {
+	return $url . ( false === strpos( (string) $url, '?' ) ? '?' : '&' ) . http_build_query( (array) $args );
+}
+/** Stub. */
+function admin_url( $path = '' ) {
+	return 'http://example.test/wp-admin/' . $path;
+}
+/** Stub. */
+function number_format_i18n( $n, $decimals = 0 ) {
+	return number_format( (float) $n, (int) $decimals );
+}
 
 /** Minimal in-memory $wpdb for the keyword-table round-trip (ignores SQL text, dispatches on the known shapes). */
 class IW_WPDB {
@@ -134,7 +164,8 @@ function iw_check( bool $ok, string $what ): void {
 iw_check( defined( 'INSIGHTWEB_VERSION' ) && '0.1.0' === INSIGHTWEB_VERSION, 'version constant is 0.1.0' );
 iw_check( defined( 'INSIGHTWEB_FILE' ) && defined( 'INSIGHTWEB_DIR' ), 'file and dir constants defined' );
 iw_check( 'manage_options' === insightweb_cap(), 'capability maps to manage_options' );
-iw_check( array() === insightweb_tabs(), 'tab set is empty in the skeleton' );
+$tabs = insightweb_tabs();
+iw_check( isset( $tabs['overview'], $tabs['keywords'] ), 'tab set has Overview and Keywords' );
 iw_check( is_bool( insightweb_site_kit_active() ) && false === insightweb_site_kit_active(), 'Site Kit absent in the test → false' );
 
 insightweb_admin_menu();
@@ -143,8 +174,16 @@ iw_check( 'insightweb' === ( $GLOBALS['iw_menu']['slug'] ?? '' ) && 'insightweb_
 ob_start();
 insightweb_render_screen();
 $html = (string) ob_get_clean();
-iw_check( false !== strpos( $html, 'No insights modules are active yet.' ), 'empty-module screen renders' );
+iw_check( false !== strpos( $html, 'nav-tab' ) && false !== strpos( $html, 'Overview' ) && false !== strpos( $html, 'Keywords' ), 'tabbed screen renders the Overview and Keywords tabs' );
 iw_check( false !== strpos( $html, 'Site Kit by Google' ), 'Site Kit connection prompt shown when absent' );
+iw_check( false !== strpos( $html, 'Setting up' ), 'Overview shows the setting-up state before the tables exist' );
+
+// Admin data layer (query.php): views, roles, intents, effective-priority SQL.
+$views = insightweb_view_sql();
+iw_check( isset( $views['p1'], $views['gap'], $views['quick'], $views['notranked'] ) && ! isset( $views['entity'] ), 'view SQL has the public views and drops the entity view' );
+iw_check( false !== strpos( insightweb_eff_sql(), 'priority_override' ), 'effective-priority SQL prefers the override' );
+iw_check( count( insightweb_roles() ) === 4 && count( insightweb_intents() ) === 4, 'four roles and four intents' );
+iw_check( false !== strpos( insightweb_url( 'keywords' ), 'page=insightweb' ) && false !== strpos( insightweb_url( 'keywords' ), 'tab=keywords' ), 'tab URL carries page and tab' );
 
 // Keyword table.
 iw_check( 'dog bite' === insightweb_kw_norm( '  Dog BITE! ' ), 'norm lower-cases, strips punctuation, collapses space' );
