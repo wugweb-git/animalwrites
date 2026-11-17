@@ -322,6 +322,18 @@ checks); `vendor/` and `composer.lock` are never committed. Branch `claude/insig
 - **Overrides** are the only write, and only to InsightWeb's own keyword record (row + bulk, nonce + capability,
   post/redirect/get).
 
+**Governing dev standard — the WordPress Plugin Developer Handbook** (developer.wordpress.org/plugins/): header
+requirements, Best Practices, Security (sanitize input / escape output / nonces / capability checks), Hooks, the
+Settings & Options API, Internationalization, Privacy and the directory guidelines. Enforced on the whole
+`plugins/insightweb-org/` codebase with **wp-coding-standards** (PHPCS `WordPress,WordPress-Docs`), **wp-plugin-audit**
+and **wp-org-submission**; the official **Plugin Check** runs on a clean WP at submission (no local WP here — owner
+rule). As of the Admin UI commit all 11 PHP files pass `php -l`, PHPCS `WordPress,WordPress-Docs` and
+`tools/ci/phpcs-security.xml` with zero findings, and the new Admin UI code is verified against each Handbook dimension:
+input sanitised (`sanitize_key`/`sanitize_text_field` + `wp_unslash`), output escaped (`esc_*`, late-escape only where
+built from escaped parts), nonces (`check_admin_referer` on both override paths) + capability checks (screen, handler,
+REST `permission_callback`), i18n (`insightweb` text domain + translator comments on every placeholder string), hooks +
+the screen-options API, and no new external calls (Privacy). This standard applies to everything still to build.
+
 **Not built yet:** the Site Kit GSC/GA4 read (model A — the internal-API/runtime-risk adapter that fills `obs`, the one
 piece that makes the lists and charts show real data); the `rising`/`links` list tables (their source adapters are not
 ported yet, so they would be empty); the bundled `insightweb-shell` React package + mount (the server-rendered parts
