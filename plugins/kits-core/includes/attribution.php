@@ -16,15 +16,29 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * A source meta value, dual-read through the rename: the new kits_source_* key, falling back to the legacy
+ * aw_source_* key that the sourcing ingest (workers repo, out of scope) still writes. Drop the fallback once the
+ * workers write the new key.
+ *
+ * @param int    $id    Post ID.
+ * @param string $field url|name|date.
+ * @return string
+ */
+function kits_source_meta( $id, $field ) {
+	$v = (string) get_post_meta( $id, 'kits_source_' . $field, true );
+	return '' !== $v ? $v : (string) get_post_meta( $id, 'aw_source_' . $field, true );
+}
+
+/**
  * Publisher name and host for an item.
  *
  * @param int $id Post ID.
  * @return array{0: string, 1: string} name, host.
  */
-function aw_publisher_of( $id ) {
-	$url  = (string) get_post_meta( $id, 'aw_source_url', true );
-	$host = function_exists( 'aw_host' ) ? aw_host( $url ) : '';
-	$name = (string) get_post_meta( $id, 'aw_source_name', true );
+function kits_publisher_of( $id ) {
+	$url  = (string) kits_source_meta( $id, 'url' );
+	$host = function_exists( 'kits_host' ) ? kits_host( $url ) : '';
+	$name = (string) kits_source_meta( $id, 'name' );
 	$name = preg_replace( '/\s+[–-]\s+(Energy & Environment|Circulars|Notifications)$/u', '', $name ); // feed labels are not the publisher
 	return array( $name ? $name : $host, $host );
 }
@@ -35,8 +49,8 @@ function aw_publisher_of( $id ) {
  * @param string $host Host.
  * @return string
  */
-function aw_favicon_url( $host ) {
-	$p  = function_exists( 'aw_publishers' ) ? aw_publishers() : array();
+function kits_favicon_url( $host ) {
+	$p  = function_exists( 'kits_publishers' ) ? kits_publishers() : array();
 	$id = (int) ( $p[ $host ]['icon'] ?? 0 );
 	return $id ? (string) wp_get_attachment_image_url( $id, 'thumbnail' ) : '';
 }
@@ -48,16 +62,16 @@ function aw_favicon_url( $host ) {
  * @param bool $link Link to the original.
  * @return string
  */
-function aw_source_row_html( $id, $link = false ) {
-	list( $name, $host ) = aw_publisher_of( $id );
+function kits_source_row_html( $id, $link = false ) {
+	list( $name, $host ) = kits_publisher_of( $id );
 	if ( '' === $name ) {
 		return '';
 	}
-	$icon = $host ? aw_favicon_url( $host ) : '';
+	$icon = $host ? kits_favicon_url( $host ) : '';
 	$mark = $icon
 		? '<img class="kit-src-icon aw-src-icon" src="' . esc_url( $icon ) . '" alt="" width="16" height="16" loading="lazy" decoding="async">' // the name is printed beside it (kit-src-name), so the icon is decorative
 		: '<span class="kit-src-icon kit-src-icon--letter aw-src-icon aw-src-icon--letter" aria-hidden="true">' . esc_html( mb_strtoupper( mb_substr( $name, 0, 1 ) ) ) . '</span>';
-	$url  = (string) get_post_meta( $id, 'aw_source_url', true );
+	$url  = (string) kits_source_meta( $id, 'url' );
 	$text = '<span class="kit-src-name aw-src-name">' . esc_html( $name ) . '</span>';
 	if ( $link && $url ) {
 		return '<p class="kit-src kit-src--link aw-src aw-src--link"><a href="' . esc_url( $url ) . '" target="_blank" rel="noopener nofollow">' . $mark . $text . '</a></p>';
@@ -69,7 +83,7 @@ add_shortcode(
 	'aw_source_row',
 	function ( $atts ) {
 		$a = shortcode_atts( array( 'link' => '0' ), $atts );
-		return aw_source_row_html( (int) get_the_ID(), '1' === (string) $a['link'] );
+		return kits_source_row_html( (int) get_the_ID(), '1' === (string) $a['link'] );
 	}
 );
 
@@ -79,8 +93,8 @@ add_shortcode(
  * @param int $id Post ID.
  * @return int
  */
-function aw_published_ts( $id ) {
-	$src  = (string) get_post_meta( $id, 'aw_source_date', true );
+function kits_published_ts( $id ) {
+	$src  = (string) kits_source_meta( $id, 'date' );
 	$post = (int) get_post_time( 'U', true, $id );
 	if ( ! $src ) {
 		return $post;
@@ -95,8 +109,8 @@ function aw_published_ts( $id ) {
  * @param int $id Post ID.
  * @return string <time> element.
  */
-function aw_rel_time_html( $id ) {
-	$ts   = aw_published_ts( $id );
+function kits_rel_time_html( $id ) {
+	$ts   = kits_published_ts( $id );
 	$diff = time() - $ts;
 	if ( $diff < 7 * DAY_IN_SECONDS && $diff >= 0 && ! is_front_page() ) { // the home page shows the date, like its Library cards (owner, 18 Oct 2026)
 		/* translators: %s: human time difference, e.g. 3 hours. */
@@ -104,7 +118,7 @@ function aw_rel_time_html( $id ) {
 	} else {
 		$label = wp_date( (string) get_option( 'date_format' ), $ts ); // the site's one date format, with the year
 	}
-	$src   = (string) get_post_meta( $id, 'aw_source_date', true );
+	$src   = (string) kits_source_meta( $id, 'date' );
 	$exact = ! $src || wp_date( 'Y-m-d', (int) get_post_time( 'U', true, $id ) ) === $src; // only the date is known otherwise
 	return '<time class="aw-rel-time" datetime="' . esc_attr( $exact ? gmdate( 'c', $ts ) : $src ) . '" title="' . esc_attr( wp_date( $exact ? get_option( 'date_format' ) . ', ' . get_option( 'time_format' ) : (string) get_option( 'date_format' ), $ts ) ) . '">' . esc_html( $label ) . '</time>';
 }
@@ -117,7 +131,7 @@ add_filter(
 		if ( ! $id || kits_sourcing_menu_type() !== get_post_type( $id ) || ( is_singular() && get_queried_object_id() === $id ) ) {
 			return $html;
 		}
-		return '<div class="wp-block-post-date kit-meta-item kit-meta-item--time aw-card-time">' . aw_rel_time_html( $id ) . '</div>';
+		return '<div class="wp-block-post-date kit-meta-item kit-meta-item--time aw-card-time">' . kits_rel_time_html( $id ) . '</div>';
 	},
 	20,
 	3
@@ -134,16 +148,18 @@ add_action(
 	}
 );
 
-add_action(
-	'aw_fetch_favicons',
-	function () {
-		if ( ! function_exists( 'aw_publishers' ) ) {
+add_action( 'aw_fetch_favicons', 'kits_fetch_favicons_run' );   // the hourly favicon run; a cross-plugin hook (InsightWeb's referrer-icons listens on it) and already booked on live, so it keeps the aw_ name
+add_action( 'kits_fetch_favicons', 'kits_fetch_favicons_run' ); // also answer the neutral name if anything schedules it
+
+/** Fetch up to 10 publisher favicons into the media library (hourly cron). */
+function kits_fetch_favicons_run() {
+		if ( ! function_exists( 'kits_publishers' ) ) {
 			return;
 		}
 		require_once ABSPATH . 'wp-admin/includes/file.php';
 		require_once ABSPATH . 'wp-admin/includes/image.php';
 		require_once ABSPATH . 'wp-admin/includes/media.php';
-		$pubs = aw_publishers();
+		$pubs = kits_publishers();
 		$done = 0;
 		foreach ( $pubs as $host => $p ) {
 			if ( array_key_exists( 'icon', $p ) || ! (int) ( $p['count'] ?? 0 ) || $done >= 10 ) {
@@ -172,10 +188,9 @@ add_action(
 			$pubs[ $host ]['icon'] = $att; // 0 = tried, use the letter fallback
 		}
 		if ( $done ) {
-			update_option( AW_PUB_OPTION, $pubs, false );
+			update_option( KITS_PUB_OPTION, $pubs, false );
 		}
-	}
-);
+}
 
 /* ---------- Slugs without the publisher ---------- */
 
@@ -186,15 +201,15 @@ add_action(
  * @param int    $id   Post ID.
  * @return string
  */
-function aw_clean_news_slug( $slug, $id ) {
-	list( $name, $host ) = aw_publisher_of( $id );
+function kits_clean_news_slug( $slug, $id ) {
+	list( $name, $host ) = kits_publisher_of( $id );
 	$cands = array_filter(
 		array_unique(
 			array(
 				sanitize_title( str_replace( '.', '-', $host ) ),
 				sanitize_title( preg_replace( '/\.[a-z.]+$/', '', $host ) ),
 				sanitize_title( $name ),
-				sanitize_title( str_replace( '.', '-', (string) get_post_meta( $id, 'aw_source_name', true ) ) ),
+				sanitize_title( str_replace( '.', '-', (string) kits_source_meta( $id, 'name' ) ) ),
 			)
 		)
 	);
@@ -219,7 +234,7 @@ add_filter(
 		if ( ! in_array( $data['post_type'], kits_sourced_types(), true ) || empty( $postarr['ID'] ) || empty( $data['post_name'] ) ) {
 			return $data;
 		}
-		$clean = aw_clean_news_slug( $data['post_name'], (int) $postarr['ID'] );
+		$clean = kits_clean_news_slug( $data['post_name'], (int) $postarr['ID'] );
 		if ( $clean !== $data['post_name'] ) {
 			$data['post_name'] = wp_unique_post_slug( $clean, (int) $postarr['ID'], $data['post_status'], $data['post_type'], (int) $data['post_parent'] );
 		}

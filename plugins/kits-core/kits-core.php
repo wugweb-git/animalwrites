@@ -64,6 +64,7 @@ require_once KITS_CORE_DIR . 'includes/sourcing.php';
 require_once KITS_CORE_DIR . 'includes/sources-config.php'; // the sourcing lists (option aw_sources)
 require_once KITS_CORE_DIR . 'includes/keyword-table.php'; // the keyword table SourceWeb, InsightWeb and RankWeb share (with keyword-model.php)
 require_once KITS_CORE_DIR . 'includes/attribution.php';
+require_once KITS_CORE_DIR . 'includes/compat-sourcing.php'; // aw_ -> kits_ back-compat shims for the sourcing/attribution helpers the tenant and siblings still call
 require_once KITS_CORE_DIR . 'includes/theme-updates.php';
 require_once KITS_CORE_DIR . 'includes/page-options.php';
 require_once KITS_CORE_DIR . 'includes/settings-transfer.php';

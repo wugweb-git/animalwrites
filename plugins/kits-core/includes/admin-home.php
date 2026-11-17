@@ -87,7 +87,7 @@ function kits_overview_tables() {
 
 	// Plugin features and their state.
 	$gtm     = function_exists( 'kits_gtm_container' ) ? kits_gtm_container() : '';
-	$clarity = function_exists( 'aw_clarity_id' ) ? (string) aw_clarity_id() : '';
+	$clarity = function_exists( 'kits_clarity_id' ) ? (string) kits_clarity_id() : '';
 	$ips     = function_exists( 'kits_preview_ips' ) ? count( kits_preview_ips() ) : count( array_filter( preg_split( '/[\r\n,]+/', (string) get_option( 'kits_preview_ips', '' ) ) ) );
 	$devices = function_exists( 'kits_preview_devices' ) ? count( kits_preview_devices() ) : 0;
 

@@ -306,7 +306,7 @@ function kits_settings_analytics(): void {
 	// What visitors get: kits_gtm_container() is '' on admin screens and for signed-in staff, so read the settings.
 	$on        = (bool) get_option( 'kits_ga4_via_gtm' );
 	$sitekit   = (array) get_option( 'googlesitekit_tagmanager_settings', array() );
-	$own       = function_exists( 'aw_gtm_id' ) ? (string) aw_gtm_id() : '';
+	$own       = function_exists( 'kits_gtm_id' ) ? (string) kits_gtm_id() : '';
 	$container = ! empty( $sitekit['useSnippet'] ) && ! empty( $sitekit['containerID'] ) ? (string) $sitekit['containerID'] . ' (from Site Kit)' : ( '' !== $own ? $own . ' (the site\'s own)' : '' );
 	$rows      = array(
 		array( 'GA4 through Tag Manager only', $on ? 'On: Site Kit\'s own GA4 tag is held back while a container is placed.' : 'Off: Site Kit places its own GA4 tag.' ),

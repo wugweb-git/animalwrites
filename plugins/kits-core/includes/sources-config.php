@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** The lists (seeded once from data/sources-seed.json). */
-function aw_sources_config() {
+function kits_sources_config() {
 	$c = get_option( 'aw_sources' );
 	if ( ! is_array( $c ) ) {
 		$c         = json_decode( (string) file_get_contents( KITS_CORE_DIR . 'data/sources-seed.json' ), true ); // phpcs:ignore WordPress.WP.AlternativeFunctions

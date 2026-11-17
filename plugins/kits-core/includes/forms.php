@@ -21,11 +21,11 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @param string $form Form key.
  * @return array{errors: array<string,string>, values: array<string,mixed>, notice: string}
  */
-function aw_form_state( $form ) {
+function kits_form_state( $form ) {
 	static $cache = null;
 	if ( null === $cache ) {
 		$token = isset( $_GET['aw_err'] ) ? preg_replace( '/[^A-Za-z0-9]/', '', (string) wp_unslash( $_GET['aw_err'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- preg_replace() keeps letters and digits only
-		$cache = $token ? get_transient( 'aw_form_' . $token ) : false;
+		$cache = $token ? get_transient( 'kits_form_' . $token ) : false;
 	}
 	if ( is_array( $cache ) && ( $cache['form'] ?? '' ) === $form ) {
 		return $cache;
@@ -43,24 +43,24 @@ function aw_form_state( $form ) {
  * @param string $anchor Fragment of the form.
  * @param string $notice Optional form-level message.
  */
-function aw_form_fail( $form, $errors, $values, $back, $anchor, $notice = '' ) {
-	if ( aw_form_is_fetch() ) { // submitted with fetch(): answer in JSON, the page keeps what was typed
+function kits_form_fail( $form, $errors, $values, $back, $anchor, $notice = '' ) {
+	if ( kits_form_is_fetch() ) { // submitted with fetch(): answer in JSON, the page keeps what was typed
 		wp_send_json( array( 'ok' => false, 'errors' => (object) $errors, 'notice' => $notice ) );
 	}
 	$token = wp_generate_password( 16, false );
-	set_transient( 'aw_form_' . $token, array( 'form' => $form, 'errors' => $errors, 'values' => $values, 'notice' => $notice ), 10 * MINUTE_IN_SECONDS );
+	set_transient( 'kits_form_' . $token, array( 'form' => $form, 'errors' => $errors, 'values' => $values, 'notice' => $notice ), 10 * MINUTE_IN_SECONDS );
 	wp_safe_redirect( add_query_arg( 'aw_err', $token, $back ) . '#' . $anchor );
 	exit;
 }
 
 /** The form-level message when sending fails (a form can set its own with the kits_form_generic_error filter). */
-function aw_form_generic_error( $form ) {
+function kits_form_generic_error( $form ) {
 	return (string) apply_filters( 'kits_form_generic_error', 'Couldn\'t send. Your details are still here — try again.', $form );
 }
 
-/** Was this submitted by kit.js with fetch() (X-AW-Fetch header)? */
-function aw_form_is_fetch() {
-	return ! empty( $_SERVER['HTTP_X_AW_FETCH'] );
+/** Was this submitted by kit.js with fetch() (X-Kits-Fetch header; the legacy X-AW-Fetch is still accepted). */
+function kits_form_is_fetch() {
+	return ! empty( $_SERVER['HTTP_X_KITS_FETCH'] ) || ! empty( $_SERVER['HTTP_X_AW_FETCH'] );
 }
 
 /**
@@ -71,8 +71,8 @@ function aw_form_is_fetch() {
  * @param string $text  Line under it.
  * @param array  $more  Extra fields for the page script (e.g. a "Send another" label).
  */
-function aw_form_success( $url, $title, $text = '', $more = array() ) {
-	if ( aw_form_is_fetch() ) {
+function kits_form_success( $url, $title, $text = '', $more = array() ) {
+	if ( kits_form_is_fetch() ) {
 		// A thank-you page URL: kit.js goes there; otherwise the form is replaced by the message in place.
 		$go = kits_is_thanks_url( $url ) ? array( 'redirect' => $url ) : array();
 		wp_send_json( array_merge( array( 'ok' => true, 'title' => $title, 'text' => $text ), $more, $go ) );
@@ -144,7 +144,7 @@ function kits_thanks_from() {
 }
 
 /** Email cleaned as the server checks it: trimmed, domain in lower case. */
-function aw_clean_email( $email ) {
+function kits_clean_email( $email ) {
 	$email = trim( (string) $email );
 	$at    = strrpos( $email, '@' );
 	return false === $at ? $email : substr( $email, 0, $at + 1 ) . strtolower( substr( $email, $at + 1 ) );
@@ -156,7 +156,7 @@ function aw_clean_email( $email ) {
  * @param string $fallback Path if there is no referer.
  * @return string
  */
-function aw_form_back( $fallback ) {
+function kits_form_back( $fallback ) {
 	$ref = wp_get_referer();
 	return $ref ? remove_query_arg( array( 'aw_err', 'aw_done', 'joined', 'vol_error', 'sent', 'r_error' ), $ref ) : home_url( $fallback );
 }
@@ -168,17 +168,17 @@ function aw_form_back( $fallback ) {
  * @param array  $attrs Extra attributes for <form>.
  * @return string
  */
-function aw_form_open( $form, $attrs = array() ) {
-	$GLOBALS['aw_form_copies'][ $form ] = ( $GLOBALS['aw_form_copies'][ $form ] ?? 0 ) + 1; // the same form twice on a page (a page's own and the footer's)
-	$state  = aw_form_state( $form );
+function kits_form_open( $form, $attrs = array() ) {
+	$GLOBALS['kits_form_copies'][ $form ] = ( $GLOBALS['kits_form_copies'][ $form ] ?? 0 ) + 1; // the same form twice on a page (a page's own and the footer's)
+	$state  = kits_form_state( $form );
 	$altcha = (string) ( $attrs['data-altcha'] ?? '' ); // "invisible": the check runs on send, no check box
 	$attrs = array_merge(
 		array(
 			'class'  => 'kit-form',
 			'method' => 'post',
 			'action' => admin_url( 'admin-post.php' ),
-			'id'     => 'aw-form-' . $form . aw_form_copy_suffix( $form ),
-			'data-generic-error' => aw_form_generic_error( $form ),
+			'id'     => 'aw-form-' . $form . kits_form_copy_suffix( $form ),
+			'data-generic-error' => kits_form_generic_error( $form ),
 		),
 		$attrs
 	);
@@ -198,14 +198,14 @@ function aw_form_open( $form, $attrs = array() ) {
 			$n     = count( $state['errors'] );
 			$html .= '<strong>' . esc_html( 1 === $n ? 'Please fix this before sending:' : "Please fix these {$n} before sending:" ) . '</strong><ul>';
 			foreach ( $state['errors'] as $name => $msg ) {
-				$html .= '<li><a href="#' . esc_attr( aw_field_id( $form, $name ) ) . '">' . esc_html( $msg ) . '</a></li>';
+				$html .= '<li><a href="#' . esc_attr( kits_field_id( $form, $name ) ) . '">' . esc_html( $msg ) . '</a></li>';
 			}
 			$html .= '</ul>';
 		}
 		$html .= '</div>';
 	}
 	$html .= '<input type="hidden" name="action" value="' . esc_attr( $form ) . '">'
-		. str_replace( ' id="_aw_nonce"', '', wp_nonce_field( $form, '_aw_nonce', true, false ) ) // several forms on a page: no repeated id
+		. str_replace( ' id="_kits_nonce"', '', wp_nonce_field( $form, '_kits_nonce', true, false ) ) // several forms on a page: no repeated id
 		. '<input type="hidden" name="aw_t" value="' . esc_attr( (string) time() ) . '">'
 		. '<input type="hidden" name="aw_source" value="' . esc_attr( (string) ( $attrs['data-source'] ?? kits_form_source() ) ) . '">'
 		. '<p class="kit-hp" aria-hidden="true"><label>Leave this empty <input type="text" name="kits_hp" tabindex="-1" autocomplete="off"></label></p>'
@@ -219,8 +219,8 @@ function aw_form_open( $form, $attrs = array() ) {
  * @param string $form Form key.
  * @return string
  */
-function aw_form_copy_suffix( $form ) {
-	$n = (int) ( $GLOBALS['aw_form_copies'][ $form ] ?? 1 );
+function kits_form_copy_suffix( $form ) {
+	$n = (int) ( $GLOBALS['kits_form_copies'][ $form ] ?? 1 );
 	return $n > 1 ? '-' . $n : '';
 }
 
@@ -231,8 +231,8 @@ function aw_form_copy_suffix( $form ) {
  * @param string $name Field name.
  * @return string
  */
-function aw_field_id( $form, $name ) {
-	return sanitize_html_class( str_replace( '_', '-', $form ) . '-' . rtrim( $name, '[]' ) . aw_form_copy_suffix( $form ) );
+function kits_field_id( $form, $name ) {
+	return sanitize_html_class( str_replace( '_', '-', $form ) . '-' . rtrim( $name, '[]' ) . kits_form_copy_suffix( $form ) );
 }
 
 /**
@@ -243,11 +243,11 @@ function aw_field_id( $form, $name ) {
  *                     required, hint, options (value => label), attrs (extra attributes), value.
  * @return string
  */
-function aw_field( $form, $f ) {
+function kits_field( $form, $f ) {
 	$f     = array_merge( array( 'type' => 'text', 'required' => false, 'hint' => '', 'options' => array(), 'attrs' => array(), 'value' => '', 'icon' => '', 'messages' => array() ), $f );
-	$state = aw_form_state( $form );
+	$state = kits_form_state( $form );
 	$key   = rtrim( $f['name'], '[]' );
-	$id    = aw_field_id( $form, $f['name'] );
+	$id    = kits_field_id( $form, $f['name'] );
 	$err   = $state['errors'][ $key ] ?? '';
 	$val   = array_key_exists( $key, $state['values'] ) ? $state['values'][ $key ] : $f['value'];
 	$by    = array();
@@ -316,24 +316,25 @@ function aw_field( $form, $f ) {
  * @param string $anchor  Fragment of the form.
  * @param string $done    URL to send bots to (looks like success).
  * @param int    $per_hour Submissions allowed per connection per hour.
- * @return string Rate-limit key; call aw_form_count() after a successful save.
+ * @return string Rate-limit key; call kits_form_count() after a successful save.
  */
-function aw_form_guard( $form, $back, $anchor, $done, $per_hour = 5 ) {
-	if ( ! isset( $_POST['_aw_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_aw_nonce'] ) ), $form ) ) {
-		if ( aw_form_is_fetch() ) {
+function kits_form_guard( $form, $back, $anchor, $done, $per_hour = 5 ) {
+	$nonce = isset( $_POST['_kits_nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['_kits_nonce'] ) ) : ( isset( $_POST['_aw_nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['_aw_nonce'] ) ) : '' ); // _aw_nonce: legacy field name still accepted
+	if ( '' === $nonce || ! wp_verify_nonce( $nonce, $form ) ) {
+		if ( kits_form_is_fetch() ) {
 			wp_send_json( array( 'ok' => false, 'code' => 'expired', 'errors' => (object) array(), 'notice' => 'This page has been open a while. Reload it and send again.' ) ); // kit.js gets a fresh key and sends once more
 		}
-		aw_form_fail( $form, array(), aw_form_kept_values(), $back, $anchor, 'This page has been open a while. Reload it and send again.' );
+		kits_form_fail( $form, array(), kits_form_kept_values(), $back, $anchor, 'This page has been open a while. Reload it and send again.' );
 	}
 	if ( ! empty( $_POST['kits_hp'] ) || ( time() - absint( $_POST['aw_t'] ?? 0 ) ) < 3 ) {
-		aw_form_success( $done, '' ); // bots see a success
+		kits_form_success( $done, '' ); // bots see a success
 	}
 	if ( ! kits_altcha_verify( wp_unslash( $_POST['altcha'] ?? '' ) ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-		aw_form_fail( $form, array(), aw_form_kept_values(), $back, $anchor, 'Couldn\'t verify you\'re not a bot. Try again.' );
+		kits_form_fail( $form, array(), kits_form_kept_values(), $back, $anchor, 'Couldn\'t verify you\'re not a bot. Try again.' );
 	}
-	$key = 'aw_rl_' . $form . '_' . md5( sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ?? '' ) ) );
+	$key = 'kits_rl_' . $form . '_' . md5( sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ?? '' ) ) );
 	if ( (int) get_transient( $key ) >= $per_hour ) {
-		aw_form_fail( $form, array(), aw_form_kept_values(), $back, $anchor, 'Too many tries. Wait a minute, then try again.' );
+		kits_form_fail( $form, array(), kits_form_kept_values(), $back, $anchor, 'Too many tries. Wait a minute, then try again.' );
 	}
 	return $key;
 }
@@ -343,8 +344,8 @@ function aw_form_guard( $form, $back, $anchor, $done, $per_hour = 5 ) {
  *
  * @return array<string,mixed>
  */
-function aw_form_kept_values() {
-	$skip = array( 'action', '_aw_nonce', '_wp_http_referer', 'aw_t', 'altcha', 'aw_source', 'kits_hp' );
+function kits_form_kept_values() {
+	$skip = array( 'action', '_kits_nonce', '_aw_nonce', '_wp_http_referer', 'aw_t', 'altcha', 'aw_source', 'kits_hp' );
 	$out  = array();
 	foreach ( wp_unslash( $_POST ) as $k => $v ) { // phpcs:ignore WordPress.Security.NonceVerification
 		if ( ! in_array( $k, $skip, true ) ) {
@@ -357,9 +358,9 @@ function aw_form_kept_values() {
 /**
  * Count one successful submission against the rate limit.
  *
- * @param string $key Key from aw_form_guard().
+ * @param string $key Key from kits_form_guard().
  */
-function aw_form_count( $key ) {
+function kits_form_count( $key ) {
 	set_transient( $key, (int) get_transient( $key ) + 1, HOUR_IN_SECONDS );
 }
 
@@ -371,7 +372,7 @@ function aw_form_count( $key ) {
  * @param array $labels field => label, for messages.
  * @return array<string,string>
  */
-function aw_form_validate( $rules, $values, $labels, $messages = array() ) {
+function kits_form_validate( $rules, $values, $labels, $messages = array() ) {
 	$errors = array();
 	foreach ( $rules as $field => $list ) {
 		$v     = $values[ $field ] ?? '';

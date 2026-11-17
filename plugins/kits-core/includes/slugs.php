@@ -21,8 +21,8 @@ add_action(
 		}
 		$base = sanitize_title( $post->post_title );
 		$base = '' !== $base ? $base : $post->post_type . '-' . $post->ID;
-		if ( function_exists( 'aw_clean_news_slug' ) && function_exists( 'kits_sourced_types' ) && in_array( $post->post_type, kits_sourced_types(), true ) ) {
-			$base = aw_clean_news_slug( $base, $post->ID );
+		if ( function_exists( 'kits_clean_news_slug' ) && function_exists( 'kits_sourced_types' ) && in_array( $post->post_type, kits_sourced_types(), true ) ) {
+			$base = kits_clean_news_slug( $base, $post->ID );
 		}
 		$slug = wp_unique_post_slug( $base, $post->ID, 'publish', $post->post_type, (int) $post->post_parent );
 		global $wpdb;

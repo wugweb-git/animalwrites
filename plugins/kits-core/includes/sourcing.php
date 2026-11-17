@@ -23,27 +23,33 @@ function kits_sourcing_menu_type() {
 	return (string) reset( $t );
 }
 
-// SourceWeb defines the same names (aw-sourcing/includes/sourcing-basics.php); whichever loads first wins.
+// Kits Core's own names for the sourcing option keys and capability. The option VALUES ('aw_publishers',
+// 'aw_relevance') are stored data: they keep their names until the owner-gated migration, so the constants hold the
+// old values for now.
+defined( 'KITS_PUB_OPTION' ) || define( 'KITS_PUB_OPTION', 'aw_publishers' );
+defined( 'KITS_REL_OPTION' ) || define( 'KITS_REL_OPTION', 'aw_relevance' );
+defined( 'KITS_SRC_CAP' ) || define( 'KITS_SRC_CAP', 'manage_options' );
+// Back-compat: SourceWeb (aw-sourcing) still defines and uses the AW_ names; keep them defined too (whichever loads first wins).
 defined( 'AW_PUB_OPTION' ) || define( 'AW_PUB_OPTION', 'aw_publishers' );
 defined( 'AW_REL_OPTION' ) || define( 'AW_REL_OPTION', 'aw_relevance' );
 defined( 'AW_SRC_CAP' ) || define( 'AW_SRC_CAP', 'manage_options' );
 
-if ( ! function_exists( 'aw_host' ) ) {
+if ( ! function_exists( 'kits_host' ) ) {
 	/**
 	 * Normalised host of a URL (lowercase, no www.).
 	 *
 	 * @param string $url URL.
 	 */
-	function aw_host( $url ) {
+	function kits_host( $url ) {
 		$h = strtolower( (string) wp_parse_url( (string) $url, PHP_URL_HOST ) );
 		return preg_replace( '/^www\./', '', $h );
 	}
 }
 
-if ( ! function_exists( 'aw_publishers' ) ) {
+if ( ! function_exists( 'kits_publishers' ) ) {
 	/** Publisher records: host => [status, name, count, first, last]. */
-	function aw_publishers() {
-		$p = get_option( AW_PUB_OPTION );
+	function kits_publishers() {
+		$p = get_option( KITS_PUB_OPTION );
 		return is_array( $p ) ? $p : array();
 	}
 }

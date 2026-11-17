@@ -15,6 +15,7 @@ add_filter( 'kits_gtm_id', fn() => '' );
 add_filter( 'kits_analytics_hosts', fn() => 'animalwrites.in,www.animalwrites.in' );
 add_filter( 'kits_clarity_id', fn() => 'yy09ekj2dp' ); // Microsoft Clarity (owner, 15 Oct 2026)
 
+add_filter( 'kits_campaign_post_type', fn() => 'aw_campaign' ); // Campaign pages keep their own share bar and no sticky bar.
 add_filter( 'kits_share_post_types', fn() => array() ); // sharing: the Scriptless Social Sharing plugin (owner, 8 Oct 2026)
 add_filter( 'kits_sourced_post_types', fn() => array( 'aw_news', 'aw_legal' ) ); // first one holds the Sourcing menu
 /*

@@ -339,7 +339,7 @@
 			if (!window.fetch || !window.FormData || form.enctype === 'multipart/form-data' && form.querySelector('input[type=file]')) { busy(btn, true); return; } // normal POST
 			e.preventDefault();
 			busy(btn, true);
-			fetch(form.getAttribute('action'), { method: 'POST', body: new FormData(form), headers: { 'X-AW-Fetch': '1' }, credentials: 'same-origin' })
+			fetch(form.getAttribute('action'), { method: 'POST', body: new FormData(form), headers: { 'X-Kits-Fetch': '1' }, credentials: 'same-origin' })
 				.then(function (r) { return r.json(); })
 				.then(function (data) {
 					busy(btn, false);
@@ -349,7 +349,7 @@
 						var act = form.querySelector('input[name=action]');
 						return fetch(form.getAttribute('action').replace('admin-post.php', 'admin-ajax.php') + '?action=kits_form_nonce&form=' + encodeURIComponent(act ? act.value : ''), { credentials: 'same-origin' })
 							.then(function (r) { return r.json(); })
-							.then(function (k) { var n = form.querySelector('input[name=_aw_nonce]'); if (n && k.nonce) { n.value = k.nonce; form.requestSubmit(); } else status(form, data.notice); });
+							.then(function (k) { var n = form.querySelector('input[name=_kits_nonce]'); if (n && k.nonce) { n.value = k.nonce; form.requestSubmit(); } else status(form, data.notice); });
 					}
 					if (data.ok && data.redirect) { try { sessionStorage.removeItem(KEY); } catch (x) {} busy(btn, true); location.assign(data.redirect); return; } // the thank-you page
 					if (data.ok) { try { sessionStorage.removeItem(KEY); } catch (x) {} done(form, data); return; }

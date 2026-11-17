@@ -60,7 +60,7 @@ function aw_volunteer_values( $in ) {
 	$roles = $in['roles'] ?? array();
 	return array(
 		'name'     => trim( sanitize_text_field( (string) ( $in['name'] ?? '' ) ) ),
-		'email'    => aw_clean_email( sanitize_text_field( (string) ( $in['email'] ?? '' ) ) ),
+		'email'    => kits_clean_email( sanitize_text_field( (string) ( $in['email'] ?? '' ) ) ),
 		'phone'    => trim( sanitize_text_field( (string) ( $in['phone'] ?? '' ) ) ),
 		'pincode'  => preg_replace( '/\D/', '', (string) ( $in['pincode'] ?? '' ) ),
 		'state'    => sanitize_title( (string) ( $in['state'] ?? '' ) ),
@@ -75,7 +75,7 @@ function aw_volunteer_values( $in ) {
 function aw_volunteer_errors( $v ) {
 	list( $rules, $msgs ) = kits_dict_rules( array( 'name' => 'name', 'email' => 'email', 'phone' => 'phone', 'pincode' => 'pincode', 'state' => 'state', 'consent' => 'consent' ), array( 'name', 'email', 'state', 'consent' ) );
 	$msgs['consent']['required'] = 'Tick the box to agree';
-	$errors = aw_form_validate( $rules, $v, array( 'name' => 'Your name', 'email' => 'Email', 'phone' => 'Phone', 'pincode' => 'PIN code', 'state' => 'State', 'consent' => 'Agreement' ), $msgs );
+	$errors = kits_form_validate( $rules, $v, array( 'name' => 'Your name', 'email' => 'Email', 'phone' => 'Phone', 'pincode' => 'PIN code', 'state' => 'State', 'consent' => 'Agreement' ), $msgs );
 	$term = $v['state'] ? aw_place_by_slug( $v['state'] ) : null;
 	$term = $term && 'state' === $term->kind ? $term : null;
 	if ( $v['state'] && ! $term ) {

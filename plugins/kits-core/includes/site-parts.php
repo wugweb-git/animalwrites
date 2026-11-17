@@ -19,7 +19,8 @@ add_action(
 		if ( ! function_exists( 'kits_option' ) || is_admin() || is_feed() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) ) {
 			return;
 		}
-		if ( is_singular( 'aw_campaign' ) || 'on' !== kits_option( 'sticky_bar' ) ) {
+		$campaign = kits_campaign_post_type();
+		if ( ( '' !== $campaign && is_singular( $campaign ) ) || 'on' !== kits_option( 'sticky_bar' ) ) {
 			return;
 		}
 		$href  = trim( (string) kits_option( 'sticky_href' ) );
