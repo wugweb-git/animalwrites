@@ -341,7 +341,7 @@ add_shortcode(
 <form class="aw-letter" data-letter="<?php echo esc_attr( wp_json_encode( $data ) ); ?>" novalidate>
 <?php if ( aw_camp_is_lab_page( $id ) ) : // the Lab rules page keeps its letter tool on one page, as on the morning of 2 Nov 2026 (owner) ?>
 	<?php
-	// Fields in the theme's form markup (kits-core forms.php aw_field()): kit-field, label, kit-field-control with the
+	// Fields in the theme's form markup (kits-core forms.php kits_field()): kit-field, label, kit-field-control with the
 	// field icon and the error line {id}-error. Each placeholder repeats its label in plain words (owner, 2 Nov 2026).
 	?>
 	<div class="aw-letter-inputs">
