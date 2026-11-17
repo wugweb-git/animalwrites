@@ -651,12 +651,12 @@ add_action(
 			array(
 				array(
 					'methods'             => 'GET',
-					'permission_callback' => 'insightweb_api_allowed',
+					'permission_callback' => 'aw_si_api_allowed',
 					'callback'            => fn() => rest_ensure_response( insightweb_rising_lists() ),
 				),
 				array(
 					'methods'             => 'POST',
-					'permission_callback' => 'insightweb_api_allowed',
+					'permission_callback' => 'aw_si_api_allowed',
 					'callback'            => function ( WP_REST_Request $req ) {
 						$body = $req->get_json_params();
 						$out  = insightweb_rising_receive( is_array( $body ) ? $body : array() );

@@ -40,3 +40,13 @@ if ( ! function_exists( 'aw_si_path' ) && function_exists( 'insightweb_path' ) )
 if ( ! function_exists( 'aw_si_runs' ) && function_exists( 'insightweb_runs' ) ) {
 	function aw_si_runs( ...$a ) { return insightweb_runs( ...$a ); }
 }
+if ( ! function_exists( 'aw_si_api_allowed' ) && function_exists( 'insightweb_api_allowed' ) ) {
+	function aw_si_api_allowed( ...$a ) { return insightweb_api_allowed( ...$a ); }
+}
+
+// The seven Search Insights setting constants (defined in settings.php as INSIGHTWEB_*): keep the legacy AW_SI_* names
+// defined for RankWeb's bridge and any code reading them through the transition. Same values (RankWeb's defaults).
+foreach ( array( 'HIGH_TRENDS', 'HIGH_IMPR', 'QUICK_MIN', 'MOVERS', 'PSI_FLAG', 'RM_LOW', 'KEEP_DAYS' ) as $insightweb_num ) {
+	defined( "AW_SI_{$insightweb_num}" ) || ( defined( "INSIGHTWEB_{$insightweb_num}" ) && define( "AW_SI_{$insightweb_num}", constant( "INSIGHTWEB_{$insightweb_num}" ) ) );
+}
+unset( $insightweb_num );
