@@ -407,7 +407,7 @@ function aw_block_item_share( $a, $id ) {
 		return aw_item_editor_preview( 'Share: X, Facebook, LinkedIn, WhatsApp, Email, Copy link' );
 	}
 	aw_use_component_style( 'aw-single' ); // aw-item-share
-	$bar = function_exists( 'aw_share_html' ) ? aw_share_html( $id ) : '';
+	$bar = function_exists( 'kits_post_share_html' ) ? kits_post_share_html( $id ) : '';
 	return '' !== $bar ? '<div class="kit-share-inline aw-item-share">' . $bar . '</div>' : '';
 }
 

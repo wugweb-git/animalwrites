@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @param int $post_id Post ID.
  * @return string
  */
-function aw_share_html( $post_id ) {
+function kits_post_share_html( $post_id ) {
 	$saved = kits_share_saved();
 	$type  = (string) get_post_type( $post_id );
 	$nets  = isset( $saved[ $type ] ) ? kits_share_list( $saved[ $type ] ) : null; // Networks chosen in Theme Options; else every network.
@@ -209,7 +209,7 @@ add_filter(
 			return $content;
 		}
 		$done = true;
-		return substr( $content, 0, $pos ) . '<div class="kit-share-wrap">' . aw_share_html( get_queried_object_id() ) . '</div>' . substr( $content, $pos );
+		return substr( $content, 0, $pos ) . '<div class="kit-share-wrap">' . kits_post_share_html( get_queried_object_id() ) . '</div>' . substr( $content, $pos );
 	},
 	10,
 	2

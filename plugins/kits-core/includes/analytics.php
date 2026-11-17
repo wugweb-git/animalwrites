@@ -50,12 +50,12 @@ add_action(
 );
 
 /** GTM container ID for this site ('' = off). */
-function aw_gtm_id() {
+function kits_gtm_id() {
 	return (string) apply_filters( 'kits_gtm_id', defined( 'KITS_GTM_ID' ) ? KITS_GTM_ID : '' );
 }
 
 /** Comma-separated production hosts on which analytics may run. */
-function aw_analytics_hosts() {
+function kits_analytics_hosts() {
 	return (string) apply_filters( 'kits_analytics_hosts', defined( 'KITS_ANALYTICS_HOSTS' ) ? KITS_ANALYTICS_HOSTS : '' );
 }
 
@@ -64,12 +64,12 @@ function aw_analytics_hosts() {
  *
  * @return bool
  */
-function aw_gtm_enabled() {
-	if ( ! aw_gtm_id() || is_admin() || wp_doing_ajax() || aw_analytics_skip_user() ) {
+function kits_gtm_enabled() {
+	if ( ! kits_gtm_id() || is_admin() || wp_doing_ajax() || kits_analytics_skip_user() ) {
 		return false;
 	}
 	$host  = wp_parse_url( home_url(), PHP_URL_HOST );
-	$hosts = array_map( 'trim', explode( ',', aw_analytics_hosts() ) );
+	$hosts = array_map( 'trim', explode( ',', kits_analytics_hosts() ) );
 	if ( ! in_array( $host, $hosts, true ) ) {
 		return false;
 	}
@@ -89,17 +89,17 @@ function aw_gtm_enabled() {
  */
 function kits_sitekit_gtm_id() {
 	$s = get_option( 'googlesitekit_tagmanager_settings' );
-	// Logged-in staff get no container either (aw_analytics_skip_user(), as for the site's own GTM and Clarity).
-	if ( is_admin() || aw_analytics_skip_user() || 'production' !== wp_get_environment_type() || ! is_array( $s ) || empty( $s['useSnippet'] ) || ! preg_match( '/^GTM-[A-Z0-9]+$/', (string) ( $s['containerID'] ?? '' ) ) ) {
+	// Logged-in staff get no container either (kits_analytics_skip_user(), as for the site's own GTM and Clarity).
+	if ( is_admin() || kits_analytics_skip_user() || 'production' !== wp_get_environment_type() || ! is_array( $s ) || empty( $s['useSnippet'] ) || ! preg_match( '/^GTM-[A-Z0-9]+$/', (string) ( $s['containerID'] ?? '' ) ) ) {
 		return '';
 	}
 	return (string) $s['containerID'];
 }
 add_filter( 'googlesitekit_tagmanager_tag_blocked', fn( $b ) => '' !== kits_sitekit_gtm_id() ? true : $b );
 
-/** The container to place on this request: the site's own (aw_gtm_enabled) or Site Kit's; '' for none. */
+/** The container to place on this request: the site's own (kits_gtm_enabled) or Site Kit's; '' for none. */
 function kits_gtm_container() {
-	return aw_gtm_enabled() ? aw_gtm_id() : kits_sitekit_gtm_id();
+	return kits_gtm_enabled() ? kits_gtm_id() : kits_sitekit_gtm_id();
 }
 
 add_action(
@@ -128,7 +128,7 @@ add_action(
 );
 
 /** Microsoft Clarity project ID for this site ('' = off). */
-function aw_clarity_id() {
+function kits_clarity_id() {
 	return (string) apply_filters( 'kits_clarity_id', '' );
 }
 
@@ -142,14 +142,14 @@ function aw_clarity_id() {
 add_action(
 	'wp_head',
 	function () {
-		if ( ! aw_clarity_id() || is_admin() || wp_doing_ajax() || aw_analytics_skip_user() ) {
+		if ( ! kits_clarity_id() || is_admin() || wp_doing_ajax() || kits_analytics_skip_user() ) {
 			return;
 		}
 		$host = wp_parse_url( home_url(), PHP_URL_HOST );
-		if ( ! in_array( $host, array_map( 'trim', explode( ',', aw_analytics_hosts() ) ), true ) ) {
+		if ( ! in_array( $host, array_map( 'trim', explode( ',', kits_analytics_hosts() ) ), true ) ) {
 			return;
 		}
-		$id = esc_js( aw_clarity_id() );
+		$id = esc_js( kits_clarity_id() );
 		$tz = wp_json_encode( kits_consent_timezones() );
 		echo "<script>(function(w,d,id,zones){var on=false;function load(g){if(!on){on=true;(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};function go(){t=l.createElement(r);t.async=1;t.src=\"https://www.clarity.ms/tag/\"+i+\"?ref=bwt\";y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);}function idle(){(\"requestIdleCallback\" in c)?requestIdleCallback(go,{timeout:2000}):setTimeout(go,1000);}var ev=[\"pointerdown\",\"keydown\",\"scroll\",\"touchstart\"],st=false;function start(){if(st)return;st=true;ev.forEach(function(e){c.removeEventListener(e,start,true);});idle();}ev.forEach(function(e){c.addEventListener(e,start,{capture:true,passive:true});});})(w,d,\"clarity\",\"script\",id);}if(g){w.clarity(\"consentv2\",{ad_Storage:g.ad_storage===\"granted\"?\"granted\":\"denied\",analytics_Storage:\"granted\"});}}var tz=\"\";try{tz=Intl.DateTimeFormat().resolvedOptions().timeZone||\"\";}catch(e){}if(zones.indexOf(tz)<0){load();return;}function seen(a){if(a&&a[0]===\"consent\"&&a[1]===\"update\"&&a[2]&&a[2].analytics_storage===\"granted\"){load(a[2]);}}var dl=w.dataLayer=w.dataLayer||[];for(var i=0;i<dl.length;i++){seen(dl[i]);}var push=dl.push;dl.push=function(){for(var j=0;j<arguments.length;j++){seen(arguments[j]);}return push.apply(dl,arguments);};var n=0,t=setInterval(function(){if(typeof w.__tcfapi===\"function\"){clearInterval(t);w.__tcfapi(\"addEventListener\",2,function(tc,ok){if(ok&&tc&&(tc.eventStatus===\"tcloaded\"||tc.eventStatus===\"useractioncomplete\")&&tc.gdprApplies&&tc.purpose&&tc.purpose.consents&&tc.purpose.consents[1]){load({ad_storage:\"granted\"});}});}else if(++n>40){clearInterval(t);}},250);})(window,document,\"{$id}\",{$tz});</script>\n"; // phpcs:ignore WordPress.Security.EscapeOutput
 	},
@@ -190,11 +190,11 @@ add_action(
  * Logged-in staff (anyone who can edit content) are never counted (owner, 14 Oct 2026): no GTM container for them,
  * whether Site Kit places it or this file does. Visitors are unaffected.
  */
-function aw_analytics_skip_user() {
+function kits_analytics_skip_user() {
 	return is_user_logged_in() && current_user_can( 'edit_posts' );
 }
-add_filter( 'googlesitekit_tagmanager_tag_blocked', fn( $blocked ) => $blocked || aw_analytics_skip_user() );
-add_filter( 'googlesitekit_analytics-4_tag_blocked', fn( $blocked ) => $blocked || aw_analytics_skip_user() || kits_ga4_in_gtm() );
+add_filter( 'googlesitekit_tagmanager_tag_blocked', fn( $blocked ) => $blocked || kits_analytics_skip_user() );
+add_filter( 'googlesitekit_analytics-4_tag_blocked', fn( $blocked ) => $blocked || kits_analytics_skip_user() || kits_ga4_in_gtm() );
 
 /**
  * One GA4 tag (owner, 25 Oct 2026). Site Kit places its own Google tag for GA4 (GT-…) while the GTM container's Google

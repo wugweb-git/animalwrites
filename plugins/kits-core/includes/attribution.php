@@ -186,7 +186,7 @@ add_action(
  * @param int    $id   Post ID.
  * @return string
  */
-function aw_clean_news_slug( $slug, $id ) {
+function kits_clean_news_slug( $slug, $id ) {
 	list( $name, $host ) = aw_publisher_of( $id );
 	$cands = array_filter(
 		array_unique(
@@ -219,7 +219,7 @@ add_filter(
 		if ( ! in_array( $data['post_type'], kits_sourced_types(), true ) || empty( $postarr['ID'] ) || empty( $data['post_name'] ) ) {
 			return $data;
 		}
-		$clean = aw_clean_news_slug( $data['post_name'], (int) $postarr['ID'] );
+		$clean = kits_clean_news_slug( $data['post_name'], (int) $postarr['ID'] );
 		if ( $clean !== $data['post_name'] ) {
 			$data['post_name'] = wp_unique_post_slug( $clean, (int) $postarr['ID'], $data['post_status'], $data['post_type'], (int) $data['post_parent'] );
 		}

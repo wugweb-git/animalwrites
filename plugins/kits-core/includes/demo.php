@@ -190,8 +190,8 @@ function kits_demo_more() {
 			. '<a class="kit-share-whatsapp" href="#">' . $ico( 'whatsapp' ) . 'WhatsApp</a><a class="kit-share-facebook" href="#">' . $ico( 'facebook' ) . 'Facebook</a><a class="kit-share-x kit-share-icon" href="#" aria-label="X">' . $ico( 'x-brand' ) . '</a>'
 			. '<button type="button" class="kit-share-copy">' . $ico( $copied ? 'check' : 'link' ) . ( $copied ? 'Link copied' : 'Copy link' ) . '</button></div>';
 	};
-	if ( function_exists( 'aw_share_html' ) && $pic ) { // the real share row, then the copy button in its done state
-		$real  = aw_share_html( $pic[0] );
+	if ( function_exists( 'kits_post_share_html' ) && $pic ) { // the real share row, then the copy button in its done state
+		$real  = kits_post_share_html( $pic[0] );
 		$share = fn( $copied ) => $copied ? (string) preg_replace( '#(<button[^>]*kit-share-copy[^>]*>)(.*?)(</button>)#s', '$1' . $ico( 'check' ) . 'Link copied$3', $real ) : $real;
 	}
 	$o .= $h( 'Share' ) . $st( 'Default' ) . $share( false ) . $st( 'Copied (after Copy link)' ) . $share( true );
