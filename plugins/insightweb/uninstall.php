@@ -46,7 +46,7 @@ if ( ! get_option( 'insightweb_delete_data', 0 ) ) {
 
 global $wpdb;
 
-$insightweb_tables = array_map( fn( $t ) => $wpdb->prefix . 'insightweb_' . $t, array( 'kw_pages', 'obs', 'rising', 'links', 'visits' ) );
+$insightweb_tables = array_map( fn( $t ) => $wpdb->prefix . 'insightweb_' . $t, array( 'kw_pages', 'obs', 'rising', 'links', 'visits', 'scores' ) );
 
 require_once __DIR__ . '/includes/uninstall-backup.php';
 if ( ! insightweb_uninstall_backup( 'insightweb', __DIR__ . '/insightweb.php', array( 'aw_seo_settings' ), array( 'insightweb_', 'insightweb_' ), $insightweb_tables ) ) {
