@@ -100,6 +100,39 @@ add_action(
 	}
 );
 
+// One top-level menu for the plugin (WordPress Plugin Handbook): the listing type sits under DirectoryWeb instead of a
+// second top-level "Directory" item beside it. Only the menu placement changes — the listings, their data, the Fluent
+// Forms claims and the theme are untouched; the native All listings / Add listing screens still open at their URLs
+// (DirectoryWeb → Listings, and the editor), and Claims stays where it is (Fluent Forms → Claims when active).
+// NOTE: the site's admin IA groups content types at the top (animal-writes-core/includes/admin-ia.php, owner 12 Nov
+// 2026), so this moves "Directory" out of that top group into the DirectoryWeb product menu. Owner to review and
+// verify on staging before shipping. Prepared on a branch; nothing deploys from here.
+add_filter(
+	'register_post_type_args',
+	function ( $args, $type ) {
+		if ( 'aw_listing' === $type ) {
+			$args['show_in_menu'] = false;
+		}
+		return $args;
+	},
+	20, // After Animal Writes Core's own register_post_type_args filter (priority 10).
+	2
+);
+add_filter(
+	'parent_file',
+	function ( $parent_file ) {
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		return $screen && 'aw_listing' === $screen->post_type ? DIRECTORYWEB_PAGE : $parent_file;
+	}
+);
+add_filter(
+	'submenu_file',
+	function ( $submenu ) {
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		return $screen && 'aw_listing' === $screen->post_type ? DIRECTORYWEB_LISTINGS_PAGE : $submenu;
+	}
+);
+
 add_action(
 	'admin_enqueue_scripts',
 	function () {
