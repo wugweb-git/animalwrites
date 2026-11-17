@@ -1,0 +1,30 @@
+{
+	"$schema": "https://schemas.wp.org/wp/6.9/theme.json",
+	"version": 3,
+	"title": "Forest",
+	"settings": {
+		"color": {
+			"palette": [
+				{ "slug": "primary", "name": "Accent", "color": "#A8D5B5" },
+				{ "slug": "primary-dark", "name": "Accent ink", "color": "#1E6B43" },
+				{ "slug": "secondary", "name": "Ink", "color": "#191919" },
+				{ "slug": "foreground", "name": "Text", "color": "#2E2E2E" },
+				{ "slug": "text-muted", "name": "Muted", "color": "#636363" },
+				{ "slug": "border", "name": "Line", "color": "#DFDFDF" },
+				{ "slug": "canvas", "name": "Page", "color": "#F4F4F4" },
+				{ "slug": "surface", "name": "Surface", "color": "#F4F4F4" },
+				{ "slug": "background", "name": "Raised", "color": "#FFFFFF" },
+				{ "slug": "on-ink", "name": "On ink", "color": "#FFFFFF" },
+				{ "slug": "focus", "name": "Focus", "color": "#1E6B43" },
+				{ "slug": "error", "name": "Danger", "color": "#c8102e" },
+				{ "slug": "success", "name": "Success", "color": "#15803d" },
+				{ "slug": "warning", "name": "Warning", "color": "#8a5a00" },
+				{ "slug": "error-soft", "name": "Danger tint", "color": "#fef2f2" },
+				{ "slug": "success-soft", "name": "Success tint", "color": "#f0fdf4" },
+				{ "slug": "warning-soft", "name": "Warning tint", "color": "#fff6e0" },
+				{ "slug": "info-soft", "name": "Info tint", "color": "#eaf1fc" },
+				{ "slug": "whatsapp", "name": "WhatsApp", "color": "#15803d" }
+			]
+		}
+	}
+}
