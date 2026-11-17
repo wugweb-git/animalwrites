@@ -10,8 +10,8 @@ import {
 	ErrorState,
 	LoadingState,
 	Notice,
+	RefTable,
 	SectionCard,
-	SettingsBlock,
 	Switch,
 } from '@kits/shell'; // eslint-disable-line import/no-unresolved -- Kits Core's shell script (window.kits.shell), mapped in webpack.config.js
 
@@ -77,58 +77,68 @@ export function ModuleCards() {
 					label={ __( 'Loading the modules…', 'aw-seo-extras' ) }
 				/>
 			) : (
-				cards.map( ( c ) => (
-					<SettingsBlock
-						key={ c.key }
-						title={ c.label }
-						description={ c.desc }
-						note={
-							c.on && c.next
-								? sprintf(
+				<RefTable
+					caption={ __( 'Modules on and off', 'aw-seo-extras' ) }
+					head={ [
+						__( 'Module', 'aw-seo-extras' ),
+						__( 'On or off', 'aw-seo-extras' ),
+					] }
+					rows={ cards.map( ( c ) => [
+						<>
+							<strong>{ c.label }</strong>
+							{ c.desc && <p>{ c.desc }</p> }
+							{ c.settingsUrl && (
+								<p>
+									<a href={ c.settingsUrl }>
+										{ sprintf(
+											/* translators: %s: module name. */
+											__(
+												'%s settings',
+												'aw-seo-extras'
+											),
+											c.label
+										) }
+									</a>
+								</p>
+							) }
+						</>,
+						<>
+							{ c.switch ? (
+								<Switch
+									label={ sprintf(
+										/* translators: %s: module name. */
+										__( '%s on', 'aw-seo-extras' ),
+										c.label
+									) }
+									checked={ c.on }
+									disabled={ ! admin || !! busy }
+									help={
+										admin
+											? ''
+											: __(
+													'Only administrators can switch modules.',
+													'aw-seo-extras'
+												)
+									}
+									onChange={ ( v ) => flip( c.key, v ) }
+								/>
+							) : (
+								<p>{ __( 'Always on.', 'aw-seo-extras' ) }</p>
+							) }
+							{ c.on && c.next > 0 && (
+								<p>
+									{ sprintf(
 										/* translators: %s: date and time. */
 										__( 'Next run: %s', 'aw-seo-extras' ),
 										new Date(
 											c.next * 1000
 										).toLocaleString()
-									)
-								: ''
-						}
-					>
-						{ c.switch ? (
-							<Switch
-								label={ sprintf(
-									/* translators: %s: module name. */
-									__( '%s on', 'aw-seo-extras' ),
-									c.label
-								) }
-								checked={ c.on }
-								disabled={ ! admin || !! busy }
-								help={
-									admin
-										? ''
-										: __(
-												'Only administrators can switch modules.',
-												'aw-seo-extras'
-											)
-								}
-								onChange={ ( v ) => flip( c.key, v ) }
-							/>
-						) : (
-							<p>{ __( 'Always on.', 'aw-seo-extras' ) }</p>
-						) }
-						{ c.settingsUrl && (
-							<p>
-								<a href={ c.settingsUrl }>
-									{ sprintf(
-										/* translators: %s: module name. */
-										__( '%s settings', 'aw-seo-extras' ),
-										c.label
 									) }
-								</a>
-							</p>
-						) }
-					</SettingsBlock>
-				) )
+								</p>
+							) }
+						</>,
+					] ) }
+				/>
 			) }
 		</SectionCard>
 	);
