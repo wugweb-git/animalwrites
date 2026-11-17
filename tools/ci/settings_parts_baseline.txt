@@ -44,8 +44,8 @@ plugins/aw-sourcing/includes/admin-menu.php | admin page | add_submenu_page( AW_
 plugins/aw-sourcing/includes/enrichment-admin.php | admin page | add_submenu_page( AW_SRC_MENU, 'Enrichment review', 'Enrichment review' . ( $n && function_exists( 'aw_menu_count' ) ? aw_menu_count( $n ) : '' ), AW_ENRICH_CAP
 plugins/aw-sourcing/includes/enrichment-admin.php | admin style | <style> block
 plugins/aw-sourcing/includes/review-queue.php | admin page | add_submenu_page( AW_SRC_MENU, 'To review', 'To review' . ( function_exists( 'aw_menu_count' ) ? aw_menu_count( aw_review_count() ) : '' ), AW_REVIEW_CAP, 'aw-r
-plugins/insightweb/includes/search-insights/admin.php | admin page | add_menu_page( __( 'Search Insights', 'insightweb' ), 'InsightWeb', aw_si_cap(), AW_SI_SLUG, 'aw_si_screen', $icon, '58.5' );
-plugins/insightweb/includes/search-insights/admin.php | admin page | add_submenu_page( AW_SI_SLUG, __( 'Search Insights', 'insightweb' ), __( 'Search Insights', 'insightweb' ), aw_si_cap(), AW_SI_SLUG, 'aw_si_screen' );
+plugins/insightweb/includes/search-insights/admin.php | admin page | add_menu_page( __( 'Search Insights', 'insightweb' ), 'InsightWeb', insightweb_cap(), INSIGHTWEB_SLUG, 'insightweb_screen', $icon, '58.5' );
+plugins/insightweb/includes/search-insights/admin.php | admin page | add_submenu_page( INSIGHTWEB_SLUG, __( 'Search Insights', 'insightweb' ), __( 'Search Insights', 'insightweb' ), insightweb_cap(), INSIGHTWEB_SLUG, 'insightweb_screen' );
 plugins/kits-core/includes/admin-app.php | admin style | wp_enqueue_style( 'wp-components'
 plugins/kits-core/includes/admin-home.php | admin page | add_menu_page( 'Kits', 'Kits', KITS_CAP, KITS_MENU, 'kits_home_page', $icon, '58.1' );
 plugins/kits-core/includes/admin-home.php | admin page | add_submenu_page( KITS_MENU, 'Home', 'Home', KITS_CAP, KITS_MENU, 'kits_home_page' );
