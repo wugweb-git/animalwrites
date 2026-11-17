@@ -64,9 +64,35 @@ EXCLUDE = [
 # on the wporg track; only the self-hosted commercial track strips it to keep the zip lean.
 SRC_EXCLUDE = ["src", "src/*"]
 
+# The distributed theme must not default to the Animal Writes brand yellow (#FFBE1A) — that is a
+# tenant colour, wrong for a generic marketplace theme. The repo and the live Animal Writes site
+# keep #FFBE1A; only the built zip ships this neutral default. --kit-color-accent reads the `primary`
+# preset, so rewriting theme.json's primary (plus the CSS fallback literals) neutralises the whole
+# accent system. Owner: change this one value to pick a different shipped default; it must stay light
+# enough for dark #191919 on-accent text (the demo variations slate.json/forest.json are checked).
+AW_ACCENT = "#FFBE1A"
+NEUTRAL_ACCENT = "#C6D2E0"  # grey-blue, same as the Slate variation; WCAG: ash #191919 on it = 11.5:1
+
 
 def excluded(rel: str, patterns: list) -> bool:
     return any(fnmatch.fnmatch(rel, pat) or fnmatch.fnmatch(rel, pat.rstrip("/*")) for pat in patterns)
+
+
+def neutralise_theme_accent(stage: pathlib.Path) -> int:
+    """Swap the AW brand yellow for a neutral default across the STAGED theme (zip only, not the repo).
+
+    Covers theme.json's `primary` preset and every `#FFBE1A` fallback literal in the shipped CSS, so a
+    reviewer sees no tenant colour. Returns the number of files changed."""
+    changed = 0
+    for path in sorted(stage.rglob("*")):
+        if path.suffix.lower() not in (".json", ".css"):
+            continue
+        text = path.read_text(encoding="utf-8")
+        new = re.sub(re.escape(AW_ACCENT), NEUTRAL_ACCENT, text, flags=re.IGNORECASE)
+        if new != text:
+            path.write_text(new, encoding="utf-8")
+            changed += 1
+    return changed
 
 
 def set_theme_update_uri(style_css: pathlib.Path, uri: str | None) -> None:
@@ -108,6 +134,8 @@ def build(target: str, track: str, out_dir: pathlib.Path) -> pathlib.Path:
 
     if target == "theme":
         set_theme_update_uri(stage / "style.css", spec["update_uri"] if track == "commercial" else None)
+        n = neutralise_theme_accent(stage)
+        print(f"  accent: {AW_ACCENT} -> {NEUTRAL_ACCENT} in {n} file(s) (repo keeps {AW_ACCENT})")
 
     zip_name = f"{slug}-{track}.zip" if target == "theme" else f"{slug}.zip"
     zip_path = out_dir / zip_name
