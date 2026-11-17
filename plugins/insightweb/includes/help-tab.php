@@ -10,14 +10,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-add_action( 'current_screen', 'aw_si_help_tab' );
+add_action( 'current_screen', 'insightweb_help_tab' );
 
 /**
  * Add the tab when the open admin page is one of InsightWeb's.
  *
  * @param WP_Screen $screen The screen.
  */
-function aw_si_help_tab( $screen ) {
+function insightweb_help_tab( $screen ) {
 	$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- which screen is open; nothing is saved.
 	if ( '' === $page || ! is_object( $screen ) ) {
 		return;

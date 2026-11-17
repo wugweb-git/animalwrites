@@ -12,15 +12,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-add_filter( 'update_plugins_wugweb.com', 'aw_si_plugin_update_row', 10, 3 );
-add_filter( 'plugins_api', 'aw_si_plugin_details', 10, 3 );
+add_filter( 'update_plugins_wugweb.com', 'insightweb_plugin_update_row', 10, 3 );
+add_filter( 'plugins_api', 'insightweb_plugin_details', 10, 3 );
 
 /**
  * InsightWeb's icon and banner addresses.
  *
  * @return array{icons: array<string, string>, banners: array<string, string>}
  */
-function aw_si_plugin_art(): array {
+function insightweb_plugin_art(): array {
 	$base = plugins_url( 'assets/', INSIGHTWEB_DIR . 'insightweb.php' );
 	return array(
 		'icons'   => array(
@@ -43,7 +43,7 @@ function aw_si_plugin_art(): array {
  * @param string      $plugin_file The plugin's file, relative to the plugins folder.
  * @return array|false
  */
-function aw_si_plugin_update_row( $update, $plugin_data, $plugin_file ) {
+function insightweb_plugin_update_row( $update, $plugin_data, $plugin_file ) {
 	if ( plugin_basename( INSIGHTWEB_DIR . 'insightweb.php' ) !== $plugin_file ) {
 		return $update;
 	}
@@ -56,7 +56,7 @@ function aw_si_plugin_update_row( $update, $plugin_data, $plugin_file ) {
 			'package'      => '',
 			'requires_php' => (string) ( $plugin_data['RequiresPHP'] ?? '' ),
 		),
-		aw_si_plugin_art()
+		insightweb_plugin_art()
 	);
 }
 
@@ -68,7 +68,7 @@ function aw_si_plugin_update_row( $update, $plugin_data, $plugin_file ) {
  * @param object             $args   Its arguments (slug).
  * @return false|object|array
  */
-function aw_si_plugin_details( $result, $action, $args ) {
+function insightweb_plugin_details( $result, $action, $args ) {
 	if ( 'plugin_information' !== $action || 'insightweb' !== ( $args->slug ?? '' ) ) {
 		return $result;
 	}
@@ -82,11 +82,11 @@ function aw_si_plugin_details( $result, $action, $args ) {
 		if ( $i % 2 ) {
 			$name = strtolower( trim( $chunk ) );
 		} elseif ( isset( $name ) ) {
-			$parts[ $name ] = aw_si_plugin_readme_html( $chunk );
+			$parts[ $name ] = insightweb_plugin_readme_html( $chunk );
 		}
 	}
 	$tested = preg_match( '/^Tested up to:\s*(\S+)/mi', $readme, $m ) ? $m[1] : '';
-	$art    = aw_si_plugin_art();
+	$art    = insightweb_plugin_art();
 	return (object) array(
 		'name'          => 'InsightWeb',
 		'slug'          => 'insightweb',
@@ -113,7 +113,7 @@ function aw_si_plugin_details( $result, $action, $args ) {
  *
  * @param string $text The section's text.
  */
-function aw_si_plugin_readme_html( string $text ): string {
+function insightweb_plugin_readme_html( string $text ): string {
 	$html = '';
 	$list = false;
 	foreach ( preg_split( '/\R/', trim( $text ) ) as $line ) {

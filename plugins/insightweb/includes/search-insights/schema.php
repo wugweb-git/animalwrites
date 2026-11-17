@@ -11,26 +11,26 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_SI_DB_VERSION = '3'; // 2: links table (31 Oct 2026). 3: scores table (17 Nov 2026).
-const AW_SI_DB_OPTION  = 'aw_si_db';
+const INSIGHTWEB_DB_VERSION = '3'; // 2: links table (31 Oct 2026). 3: scores table (17 Nov 2026).
+const INSIGHTWEB_DB_OPTION  = 'insightweb_db';
 
-// aw_si_table() and aw_si_now() moved to Animal Writes Core (includes/keyword-table.php) with the keyword table.
+// insightweb_kw_table() and insightweb_kw_now() moved to Animal Writes Core (includes/keyword-table.php) with the keyword table.
 
 /** Create or update the tables when the version changes. Cheap when nothing changed (one option read). */
-function aw_si_install(): void {
-	if ( get_option( AW_SI_DB_OPTION ) === AW_SI_DB_VERSION ) {
+function insightweb_install(): void {
+	if ( get_option( INSIGHTWEB_DB_OPTION ) === INSIGHTWEB_DB_VERSION ) {
 		return;
 	}
 	global $wpdb;
 	require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 	$c  = $wpdb->get_charset_collate();
-	$p  = aw_si_table( 'kw_pages' );
-	$o  = aw_si_table( 'obs' );
-	$r  = aw_si_table( 'rising' );
-	$l  = aw_si_table( 'links' );
-	$sc = aw_si_table( 'scores' );
-	// The keyword table itself is Animal Writes Core's (aw_kw_install(), owner's decision 3, 25 Oct 2026).
-	aw_kw_install();
+	$p  = insightweb_kw_table( 'kw_pages' );
+	$o  = insightweb_kw_table( 'obs' );
+	$r  = insightweb_kw_table( 'rising' );
+	$l  = insightweb_kw_table( 'links' );
+	$sc = insightweb_kw_table( 'scores' );
+	// The keyword table itself is Animal Writes Core's (insightweb_kw_install(), owner's decision 3, 25 Oct 2026).
+	insightweb_kw_install();
 	// Which page owns which keyword. path_key = md5 of the object or path, so one page holds one row per keyword and role.
 	dbDelta(
 		"CREATE TABLE {$p} (
@@ -141,17 +141,17 @@ function aw_si_install(): void {
 		KEY owner_flag (owner_flag)
 		) {$c};"
 	);
-	update_option( AW_SI_DB_OPTION, AW_SI_DB_VERSION, true ); // Autoloaded: checked on every admin request.
-	add_option( 'aw_si_installed', time(), '', false );
-	if ( function_exists( 'aw_si_links_seed' ) ) {
-		aw_si_links_seed(); // Once (option aw_si_links_seeded); a repeat only moves dates.
+	update_option( INSIGHTWEB_DB_OPTION, INSIGHTWEB_DB_VERSION, true ); // Autoloaded: checked on every admin request.
+	add_option( 'insightweb_installed', time(), '', false );
+	if ( function_exists( 'insightweb_links_seed' ) ) {
+		insightweb_links_seed(); // Once (option insightweb_links_seeded); a repeat only moves dates.
 	}
 }
-add_action( 'admin_init', 'aw_si_install', 1 ); // Also called by the cron and WP-CLI; there are no REST routes yet.
+add_action( 'admin_init', 'insightweb_install', 1 ); // Also called by the cron and WP-CLI; there are no REST routes yet.
 
 /** Whether the tables exist (the install may not have run yet, e.g. on a fresh install before any admin visit). */
-function aw_si_ready(): bool {
-	return get_option( AW_SI_DB_OPTION ) === AW_SI_DB_VERSION;
+function insightweb_ready(): bool {
+	return get_option( INSIGHTWEB_DB_OPTION ) === INSIGHTWEB_DB_VERSION;
 }
 
 /**
@@ -161,35 +161,35 @@ function aw_si_ready(): bool {
  * Only from the owner's typed confirmation (admin.php) or `wp aw-si delete-data --yes`. "Run the daily update" (or
  * `wp aw-si run`) switches it on again.
  */
-function aw_si_drop_all(): void {
+function insightweb_drop_all(): void {
 	global $wpdb;
 	foreach ( array( 'kw_pages', 'obs', 'rising', 'links', 'scores' ) as $t ) {
-		$wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', aw_si_table( $t ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.DirectDatabaseQuery.SchemaChange -- fixed table names.
+		$wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', insightweb_kw_table( $t ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.DirectDatabaseQuery.SchemaChange -- fixed table names.
 	}
 	// The keyword table is Animal Writes Core's and holds the owner's Sourcing, Press and Tracked roles (sourcing phase 2):
 	// records with one of those (or a dismissed suggestion, or a migrated spelling) stay, with Search Insights' own roles and figures cleared; the others are deleted.
-	$k = aw_si_table( 'keywords' );
-	$m = aw_si_table( 'kw_map' );
-	if ( aw_kw_ready() ) { // A dismissed suggestion or a migrated spelling is the owner's too.
-		$wpdb->query( $wpdb->prepare( "DELETE FROM %i WHERE roles & %d = 0 AND dismissed = 0 AND (src_note IS NULL OR src_note = '')", $k, AW_KW_OWNER_ROLES ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$k = insightweb_kw_table( 'keywords' );
+	$m = insightweb_kw_table( 'kw_map' );
+	if ( insightweb_kw_ready() ) { // A dismissed suggestion or a migrated spelling is the owner's too.
+		$wpdb->query( $wpdb->prepare( "DELETE FROM %i WHERE roles & %d = 0 AND dismissed = 0 AND (src_note IS NULL OR src_note = '')", $k, INSIGHTWEB_KW_OWNER_ROLES ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	} else {
-		$wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE roles & %d = 0', $k, AW_KW_OWNER_ROLES ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE roles & %d = 0', $k, INSIGHTWEB_KW_OWNER_ROLES ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	}
-	$set = aw_si_reset_sql( AW_KW_OWNER_ROLES ); // Every Search Insights column back to a new record's (Codex, PR #75).
-	$wpdb->query( $wpdb->prepare( "UPDATE %i SET {$set}", $k ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- $set is the fixed column list of aw_si_reset_sql() (constants and integers, no %); the table is %i.
-	if ( aw_kw_ready() ) {
+	$set = insightweb_kw_reset_sql( INSIGHTWEB_KW_OWNER_ROLES ); // Every Search Insights column back to a new record's (Codex, PR #75).
+	$wpdb->query( $wpdb->prepare( "UPDATE %i SET {$set}", $k ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- $set is the fixed column list of insightweb_kw_reset_sql() (constants and integers, no %); the table is %i.
+	if ( insightweb_kw_ready() ) {
 		$wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE kw_id NOT IN (SELECT id FROM %i)', $m, $k ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	}
-	foreach ( array( AW_SI_DB_OPTION, 'aw_si_runs', 'aw_si_seeded', 'aw_si_backfill', 'aw_si_installed', 'aw_si_psi_queue', 'aw_si_clarity_calls', 'aw_si_crawl_inside', 'aw_si_crawl_outside', 'aw_si_crawl_mailed', 'aw_si_clarity_retried', 'aw_si_bing_cursor', 'aw_si_links_seeded', 'aw_si_links_seeded_20261102', 'aw_si_checklist', 'aw_si_live_token', 'aw_si_live_seed_run', 'aw_si_gdelt_on', 'aw_si_rising_since', 'aw_si_ref_icons', 'aw_si_inspect_queue', 'aw_si_link_dr', 'aw_si_links_gsc_pages', 'aw_si_links_imports' ) as $opt ) {
+	foreach ( array( INSIGHTWEB_DB_OPTION, 'insightweb_runs', 'insightweb_seeded', 'insightweb_backfill', 'insightweb_installed', 'insightweb_psi_queue', 'insightweb_clarity_calls', 'insightweb_crawl_inside', 'insightweb_crawl_outside', 'insightweb_crawl_mailed', 'insightweb_clarity_retried', 'insightweb_bing_cursor', 'insightweb_links_seeded', 'insightweb_links_seeded_20261102', 'insightweb_checklist', 'insightweb_live_token', 'insightweb_live_seed_run', 'insightweb_gdelt_on', 'insightweb_rising_since', 'insightweb_ref_icons', 'insightweb_inspect_queue', 'insightweb_link_dr', 'insightweb_links_gsc_pages', 'insightweb_links_imports' ) as $opt ) {
 		delete_option( $opt );
 	}
-	foreach ( array( 'aw_si_redirects', 'aw_si_redirects_rx', 'aw_si_rm_scores' ) as $tr ) {
+	foreach ( array( 'insightweb_redirects', 'insightweb_redirects_rx', 'insightweb_rm_scores' ) as $tr ) {
 		delete_transient( $tr );
 	}
-	// Per-key caches (Bing keyword volumes, live-check and import results): every transient named aw_si_….
+	// Per-key caches (Bing keyword volumes, live-check and import results): every transient named insightweb_….
 	$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s", $wpdb->esc_like( '_transient_aw_si_' ) . '%', $wpdb->esc_like( '_transient_timeout_aw_si_' ) . '%' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- no API deletes transients by prefix.
-	update_option( 'aw_si_off', time(), false );
-	foreach ( aw_si_cron_hooks() as $hook ) {
+	update_option( 'insightweb_off', time(), false );
+	foreach ( insightweb_cron_hooks() as $hook ) {
 		wp_clear_scheduled_hook( $hook );
 	}
 }

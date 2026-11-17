@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @param string $term Raw term.
  */
-function aw_si_term_ok( string $term ): string {
+function insightweb_term_ok( string $term ): string {
 	$term = trim( preg_replace( '/\s+/', ' ', mb_strtolower( wp_strip_all_tags( $term ) ) ) );
 	if ( mb_strlen( $term ) < 2 || mb_strlen( $term ) > 80 ) {
 		return '';
@@ -38,7 +38,7 @@ function aw_si_term_ok( string $term ): string {
 }
 
 /** Whether this request should not be counted: bots, logged-in editors, previews and feeds. */
-function aw_si_search_skip(): bool {
+function insightweb_search_skip(): bool {
 	$ua = isset( $_SERVER['HTTP_USER_AGENT'] ) ? (string) $_SERVER['HTTP_USER_AGENT'] : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- only matched, never stored.
 	return '' === $ua || (bool) preg_match( '/bot|crawl|spider|slurp|fetch|preview|monitor|curl|wget|python|headless/i', $ua ) || current_user_can( 'edit_posts' ) || is_feed() || is_preview();
 }
@@ -49,35 +49,35 @@ function aw_si_search_skip(): bool {
  * @param string $metric wp, dir-q, dir-pin or dir-near.
  * @param string $term   Search term (cleaned here).
  */
-function aw_si_count_search( string $metric, string $term ): void {
-	if ( get_option( 'aw_si_off' ) || ! aw_si_ready() ) {
+function insightweb_count_search( string $metric, string $term ): void {
+	if ( get_option( 'insightweb_off' ) || ! insightweb_ready() ) {
 		return;
 	}
-	$term = 'dir-near' === $metric ? trim( $term ) : aw_si_term_ok( $term );
+	$term = 'dir-near' === $metric ? trim( $term ) : insightweb_term_ok( $term );
 	if ( '' === $term ) {
 		return;
 	}
 	global $wpdb;
-	$o = aw_si_table( 'obs' );
+	$o = insightweb_kw_table( 'obs' );
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
-	$wpdb->query( $wpdb->prepare( "INSERT INTO %i (kw_id, page, page_key, src, metric, period, d, value, txt, fetched) VALUES (0, '', %s, 'site-search', %s, 'day', %s, 1, %s, %s) ON DUPLICATE KEY UPDATE value = value + 1, fetched = VALUES(fetched)", $o, md5( 'term:' . $term ), $metric, wp_date( 'Y-m-d' ), mb_substr( $term, 0, 255 ), aw_si_now() ) );
+	$wpdb->query( $wpdb->prepare( "INSERT INTO %i (kw_id, page, page_key, src, metric, period, d, value, txt, fetched) VALUES (0, '', %s, 'site-search', %s, 'day', %s, 1, %s, %s) ON DUPLICATE KEY UPDATE value = value + 1, fetched = VALUES(fetched)", $o, md5( 'term:' . $term ), $metric, wp_date( 'Y-m-d' ), mb_substr( $term, 0, 255 ), insightweb_kw_now() ) );
 }
 
 // WordPress search and the Directory search box: first results page only.
 add_action(
 	'template_redirect',
 	function () {
-		if ( is_admin() || is_paged() || aw_si_search_skip() ) {
+		if ( is_admin() || is_paged() || insightweb_search_skip() ) {
 			return;
 		}
 		if ( is_search() ) {
-			aw_si_count_search( 'wp', (string) get_search_query( false ) );
+			insightweb_count_search( 'wp', (string) get_search_query( false ) );
 			return;
 		}
 		$q = isset( $_GET['q'] ) ? sanitize_text_field( wp_unslash( $_GET['q'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- a public search, counted only.
 		if ( '' !== $q && function_exists( 'aw_is_directory_view' ) && aw_is_directory_view() ) {
 			$pin = preg_replace( '/\s/', '', $q );
-			aw_si_count_search( preg_match( '/^[1-9][0-9]{5}$/', $pin ) ? 'dir-pin' : 'dir-q', preg_match( '/^[1-9][0-9]{5}$/', $pin ) ? $pin : $q );
+			insightweb_count_search( preg_match( '/^[1-9][0-9]{5}$/', $pin ) ? 'dir-pin' : 'dir-q', preg_match( '/^[1-9][0-9]{5}$/', $pin ) ? $pin : $q );
 		}
 	}
 );
@@ -86,15 +86,15 @@ add_action(
 add_filter(
 	'rest_post_dispatch',
 	function ( $result, $server, $request ) {
-		if ( ! $request instanceof WP_REST_Request || '/aw/v1/dir-near' !== $request->get_route() || ! $result instanceof WP_REST_Response || 200 !== $result->get_status() || aw_si_search_skip() ) {
+		if ( ! $request instanceof WP_REST_Request || '/aw/v1/dir-near' !== $request->get_route() || ! $result instanceof WP_REST_Response || 200 !== $result->get_status() || insightweb_search_skip() ) {
 			return $result;
 		}
 		$data = (array) $result->get_data();
 		$pin  = preg_replace( '/\D/', '', (string) $request->get_param( 'pin' ) );
 		if ( '' !== $pin ) {
-			aw_si_count_search( 'dir-pin', $pin );
+			insightweb_count_search( 'dir-pin', $pin );
 		} elseif ( ! empty( $data['district']['name'] ) ) {
-			aw_si_count_search( 'dir-near', (string) $data['district']['name'] );
+			insightweb_count_search( 'dir-near', (string) $data['district']['name'] );
 		}
 		return $result;
 	},
@@ -111,14 +111,14 @@ add_filter(
  * @param int $limit Terms.
  * @return array<int, object{txt: string, metric: string, n: float}>
  */
-function aw_si_site_searches( int $days = 28, int $limit = 15 ): array {
+function insightweb_site_searches( int $days = 28, int $limit = 15 ): array {
 	global $wpdb;
-	if ( ! aw_si_ready() ) {
+	if ( ! insightweb_ready() ) {
 		return array();
 	}
-	$o     = aw_si_table( 'obs' );
+	$o     = insightweb_kw_table( 'obs' );
 	$since = ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( '-' . max( 1, $days ) . ' days' )->format( 'Y-m-d' );
-	$skip  = aw_si_ga4_skip_sql();
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- $skip is the fixed date list of aw_si_ga4_skip_sql() (constants, esc_sql); the table is %i.
+	$skip  = insightweb_ga4_skip_sql();
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- $skip is the fixed date list of insightweb_ga4_skip_sql() (constants, esc_sql); the table is %i.
 	return (array) $wpdb->get_results( $wpdb->prepare( "SELECT txt, IF(metric = 'search', 'wp', metric) metric, GREATEST(SUM(IF(src = 'ga4', 0, value)), SUM(IF(src = 'ga4', value, 0))) n FROM %i WHERE ((src = 'site-search') OR (src = 'ga4' AND metric = 'search'{$skip})) AND period = 'day' AND d >= %s GROUP BY txt, IF(metric = 'search', 'wp', metric) ORDER BY n DESC LIMIT %d", $o, $since, $limit ) );
 }

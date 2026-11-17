@@ -2,7 +2,7 @@
 /**
  * Pages tab (plan §8): one row per page over the last 28 days. Search Console clicks, impressions and position, the
  * keywords it owns and their conflicts, GA4 organic sessions and AI referrals, Clarity totals and the page-quality
- * flag, the latest PageSpeed scores and the owner's Clarity note. Added through the aw_si_tabs filter.
+ * flag, the latest PageSpeed scores and the owner's Clarity note. Added through the insightweb_tabs filter.
  *
  * @package insightweb
  */
@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 add_filter(
-	'aw_si_tabs',
+	'insightweb_tabs',
 	function ( $tabs ) {
 		return array( 'pages' => __( 'Pages', 'insightweb' ) ) + (array) $tabs;
 	},
@@ -29,14 +29,14 @@ add_filter(
 );
 
 add_action(
-	'aw_si_load_tab_pages',
+	'insightweb_load_tab_pages',
 	function () {
 		add_screen_option(
 			'per_page',
 			array(
 				'label'   => __( 'Pages per page', 'insightweb' ),
 				'default' => 50,
-				'option'  => 'aw_si_pages_per_page',
+				'option'  => 'insightweb_pages_per_page',
 			)
 		);
 		require_once __DIR__ . '/class-aw-si-pages-table.php';
@@ -48,13 +48,13 @@ add_action(
  *
  * @return array<string, array<string, mixed>> path => figures.
  */
-function aw_si_pages_data(): array {
+function insightweb_pages_data(): array {
 	global $wpdb;
-	if ( ! aw_si_ready() ) {
+	if ( ! insightweb_ready() ) {
 		return array();
 	}
-	$o    = aw_si_table( 'obs' );
-	$k    = aw_si_table( 'keywords' );
+	$o    = insightweb_kw_table( 'obs' );
+	$k    = insightweb_kw_table( 'keywords' );
 	$end  = ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( '-1 day' );
 	$from = $end->modify( '-27 days' )->format( 'Y-m-d' );
 	$to   = $end->format( 'Y-m-d' );
@@ -65,21 +65,21 @@ function aw_si_pages_data(): array {
 		}
 		$out[ $path ][ $field ] = $value;
 	};
-	// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- $skip only (aw_si_ga4_skip_sql(), esc_sql'd constant dates).
-	foreach ( aw_si_page_metrics( array(), 28 ) as $page => $m ) { // the same figures as the Overview's pages
+	// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- $skip only (insightweb_ga4_skip_sql(), esc_sql'd constant dates).
+	foreach ( insightweb_page_metrics( array(), 28 ) as $page => $m ) { // the same figures as the Overview's pages
 		foreach ( $m as $field => $v ) {
 			$set( (string) $page, $field, $v );
 		}
 	}
 	// Keywords the page owns (keyword map or Rank Math focus), and how many of them are in conflict.
-	$p = aw_si_table( 'kw_pages' );
+	$p = insightweb_kw_table( 'kw_pages' );
 	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT l.path page, COUNT(DISTINCT l.kw_id) n, COUNT(DISTINCT IF(k.status = 'conflict', k.id, NULL)) c FROM %i l JOIN %i k ON k.id = l.kw_id WHERE l.role = 'owner' AND l.path LIKE %s GROUP BY l.path", $p, $k, '/%' ) ) as $r ) {
 		$set( $r->page, 'keywords', (int) $r->n );
 		$set( $r->page, 'conflicts', (int) $r->c );
 	}
-	$skip = aw_si_ga4_skip_sql(); // Without the GA4 test-event days.
+	$skip = insightweb_ga4_skip_sql(); // Without the GA4 test-event days.
 	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, metric, txt, SUM(value) v FROM %i WHERE src = 'ga4' AND metric IN ('organic', 'ai') AND period = 'day' AND d BETWEEN %s AND %s{$skip} GROUP BY page, metric, txt", $o, $from, $to ) ) as $r ) {
-		$r->page = aw_si_ga4_page( (string) $r->page );
+		$r->page = insightweb_ga4_page( (string) $r->page );
 		if ( 'organic' === $r->metric ) {
 			$set( $r->page, 'organic', (int) ( $out[ $r->page ]['organic'] ?? 0 ) + (int) $r->v );
 			continue;
@@ -89,12 +89,12 @@ function aw_si_pages_data(): array {
 	}
 	// Referral and social sessions (owner, 31 Oct 2026).
 	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, txt, SUM(value) v FROM %i WHERE src = 'ga4' AND metric = 'ref' AND period = 'day' AND d BETWEEN %s AND %s{$skip} GROUP BY page, txt", $o, $from, $to ) ) as $r ) {
-		$r->page = aw_si_ga4_page( (string) $r->page );
+		$r->page = insightweb_ga4_page( (string) $r->page );
 		$set( $r->page, 'ref', (int) ( $out[ $r->page ]['ref'] ?? 0 ) + (int) $r->v );
 		$out[ $r->page ]['ref_by'][ (string) $r->txt ] = (int) ( $out[ $r->page ]['ref_by'][ (string) $r->txt ] ?? 0 ) + (int) $r->v;
 	}
-	// A Clarity flag counts only on enough flagged days (filter aw_si_quality_min_days, as in aw_si_quality_pages()).
-	$c_min = max( 1, (int) apply_filters( 'aw_si_quality_min_days', 3 ) );
+	// A Clarity flag counts only on enough flagged days (filter insightweb_quality_min_days, as in insightweb_quality_pages()).
+	$c_min = max( 1, (int) apply_filters( 'insightweb_quality_min_days', 3 ) );
 	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, metric, SUM(value) s, AVG(value) a, SUM(value > 0) n FROM %i WHERE src = 'clarity' AND page <> '' AND period = 'day' AND d BETWEEN %s AND %s GROUP BY page, metric", $o, $from, $to ) ) as $r ) {
 		$set( $r->page, 'c_' . $r->metric, 'sessions' === $r->metric ? (int) $r->s : ( 'flag' === $r->metric ? (int) ( (int) $r->n >= $c_min ) : round( (float) $r->a, 1 ) ) );
 	}
@@ -118,8 +118,8 @@ function aw_si_pages_data(): array {
 	// is listed even without other figures, so the Not indexed view counts the same pages as the Overview's "pages we
 	// inspected" figure (12 Nov 2026: it counted only pages that had figures, 579 of 3,653). Before the Rank Math
 	// scores, so those pages get theirs too.
-	if ( function_exists( 'aw_si_index_states' ) ) {
-		foreach ( aw_si_index_states() as $path => $st ) {
+	if ( function_exists( 'insightweb_index_states' ) ) {
+		foreach ( insightweb_index_states() as $path => $st ) {
 			if ( isset( $out[ $path ] ) || ( ! $st[0] && '' !== (string) $path ) ) {
 				$out[ $path ]['index']   = $st[0] ? 1 : 0;
 				$out[ $path ]['index_t'] = $st[1];
@@ -128,7 +128,7 @@ function aw_si_pages_data(): array {
 		}
 	}
 	// Rank Math SEO score of the item at that address (rankmath.php).
-	foreach ( aw_si_rankmath_scores() as $path => $score ) {
+	foreach ( insightweb_rankmath_scores() as $path => $score ) {
 		if ( isset( $out[ $path ] ) ) {
 			$out[ $path ]['rm_score'] = $score;
 		}
@@ -141,7 +141,7 @@ function aw_si_pages_data(): array {
 }
 
 add_action(
-	'aw_si_tab_pages',
+	'insightweb_tab_pages',
 	function () {
 		if ( isset( $_GET['noted'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- message only.
 			wp_admin_notice( esc_html__( 'Clarity note saved.', 'insightweb' ), array( 'type' => 'success', 'additional_classes' => array( 'inline' ) ) );
@@ -149,28 +149,28 @@ add_action(
 		if ( isset( $_GET['not_noted'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- message only.
 			wp_admin_notice( esc_html__( 'The note was empty or the page unknown, so nothing was saved.', 'insightweb' ), array( 'type' => 'warning', 'additional_classes' => array( 'inline' ) ) );
 		}
-		if ( ! aw_si_clarity_on() ) {
+		if ( ! insightweb_clarity_on() ) {
 			wp_admin_notice( esc_html__( 'Clarity figures start once the Clarity token is added under Animal Writes → Keys as AW_CLARITY_TOKEN (Clarity → Settings → Data Export → Generate new API token).', 'insightweb' ), array( 'type' => 'info', 'additional_classes' => array( 'inline' ) ) );
 		}
-		$note = isset( $_GET['note'] ) ? aw_si_path( home_url( sanitize_text_field( wp_unslash( $_GET['note'] ) ) ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- opens a form only.
+		$note = isset( $_GET['note'] ) ? insightweb_path( home_url( sanitize_text_field( wp_unslash( $_GET['note'] ) ) ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- opens a form only.
 		if ( '' !== $note ) {
-			echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_si_note"><input type="hidden" name="path" value="' . esc_attr( $note ) . '">';
-			wp_nonce_field( 'aw_si_note' );
+			echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="insightweb_note"><input type="hidden" name="path" value="' . esc_attr( $note ) . '">';
+			wp_nonce_field( 'insightweb_note' );
 			echo '<table class="form-table" role="presentation"><tbody><tr><th scope="row"><label for="aw-si-note">';
 			/* translators: %s: page path. */
 			echo esc_html( sprintf( __( 'Clarity note for %s', 'insightweb' ), $note ) );
 			echo '</label></th><td><textarea id="aw-si-note" name="note" rows="3" class="large-text" maxlength="255"></textarea>';
 			echo '<p class="description">' . esc_html__( 'A short summary of what the recordings show (Clarity Copilot or your own), dated today. Never paste personal data.', 'insightweb' ) . '</p>';
 			submit_button( __( 'Save note', 'insightweb' ), 'primary', 'submit', false );
-			echo ' <a class="button" href="' . esc_url( aw_si_url( 'pages' ) ) . '">' . esc_html__( 'Cancel', 'insightweb' ) . '</a></td></tr></tbody></table></form>';
+			echo ' <a class="button" href="' . esc_url( insightweb_url( 'pages' ) ) . '">' . esc_html__( 'Cancel', 'insightweb' ) . '</a></td></tr></tbody></table></form>';
 		}
-		$table = new AW_SI_Pages_Table();
+		$table = new INSIGHTWEB_Pages_Table();
 		$table->prepare_items();
 		$table->views();
 		if ( 'unindexed' === ( isset( $_GET['view'] ) ? sanitize_key( wp_unslash( $_GET['view'] ) ) : '' ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- navigation only.
 			echo '<p class="description">' . esc_html__( 'Pages whose latest URL Inspection result is not indexed: the same rule, and the same count, as the Overview\'s "pages we inspected, latest result" figure. Pages with no search figures in 28 days are listed too. Search Console\'s own Page indexing total counts the whole site, so it differs.', 'insightweb' ) . '</p>';
 		}
-		echo '<form method="get"><input type="hidden" name="page" value="' . esc_attr( AW_SI_SLUG ) . '"><input type="hidden" name="tab" value="pages">';
+		echo '<form method="get"><input type="hidden" name="page" value="' . esc_attr( INSIGHTWEB_SLUG ) . '"><input type="hidden" name="tab" value="pages">';
 		$table->search_box( __( 'Search pages', 'insightweb' ), 'aw-si-pages' );
 		$table->display();
 		echo '</form>';
@@ -184,7 +184,7 @@ add_action(
  *
  * @param string $path Stored GA4 landing path.
  */
-function aw_si_ga4_page( string $path ): string {
+function insightweb_ga4_page( string $path ): string {
 	if ( '' === $path || '/' === substr( $path, -1 ) || preg_match( '/\.[a-z0-9]{2,5}$/i', $path ) ) {
 		return $path;
 	}

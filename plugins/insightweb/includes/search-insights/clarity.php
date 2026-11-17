@@ -25,24 +25,24 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_SI_CLARITY_CRON  = 'aw_si_clarity';
-const AW_SI_CLARITY_API   = 'https://www.clarity.ms/export-data/api/v1/project-live-insights';
-const AW_SI_CLARITY_MAX   = 8; // Calls a day this job allows itself (Clarity's limit is 10).
-const AW_SI_CLARITY_RETRY = 'aw_si_clarity_retry'; // One later try on a day whose run failed (owner, 31 Oct 2026).
-const AW_SI_CLARITY_KEEP  = 35; // Daily clarity and clarity-dev rows are kept at least this many days (rollup.php).
+const INSIGHTWEB_CLARITY_CRON  = 'insightweb_clarity';
+const INSIGHTWEB_CLARITY_API   = 'https://www.clarity.ms/export-data/api/v1/project-live-insights';
+const INSIGHTWEB_CLARITY_MAX   = 8; // Calls a day this job allows itself (Clarity's limit is 10).
+const INSIGHTWEB_CLARITY_RETRY = 'insightweb_clarity_retry'; // One later try on a day whose run failed (owner, 31 Oct 2026).
+const INSIGHTWEB_CLARITY_KEEP  = 35; // Daily clarity and clarity-dev rows are kept at least this many days (rollup.php).
 
 /** Whether the Clarity token is set in wp-config.php. */
-function aw_si_clarity_on(): bool {
-	return '' !== aw_si_key( 'AW_CLARITY_TOKEN' );
+function insightweb_clarity_on(): bool {
+	return '' !== insightweb_key( 'AW_CLARITY_TOKEN' );
 }
 
 /**
  * Page-quality thresholds (provisional until a month of data; plan §5.2). A page is flagged when it had at least
- * `sessions` sessions and any share is at or over its limit. Filter aw_si_clarity_thresholds changes them.
+ * `sessions` sessions and any share is at or over its limit. Filter insightweb_clarity_thresholds changes them.
  */
-function aw_si_clarity_thresholds(): array {
+function insightweb_clarity_thresholds(): array {
 	return (array) apply_filters(
-		'aw_si_clarity_thresholds',
+		'insightweb_clarity_thresholds',
 		array(
 			'sessions'  => 20,
 			'rage'      => 5.0,
@@ -55,7 +55,7 @@ function aw_si_clarity_thresholds(): array {
 /**
  * Where each stored metric comes from: Clarity block => metric => field in the block's rows.
  */
-function aw_si_clarity_fields(): array {
+function insightweb_clarity_fields(): array {
 	$share = 'sessionsWithMetricPercentage';
 	return array(
 		'traffic'          => array(
@@ -79,7 +79,7 @@ function aw_si_clarity_fields(): array {
 }
 
 /** Metrics that are added up when rows are combined; all others are averages weighted by sessions. */
-const AW_SI_CLARITY_COUNTS = array( 'sessions', 'users', 'bots' );
+const INSIGHTWEB_CLARITY_COUNTS = array( 'sessions', 'users', 'bots' );
 
 /**
  * A dimension's value in one response row, whatever its case (the API sends "Url" for dimension URL).
@@ -87,7 +87,7 @@ const AW_SI_CLARITY_COUNTS = array( 'sessions', 'users', 'bots' );
  * @param array  $info One row of a block's information list.
  * @param string $name Dimension name: URL or Device.
  */
-function aw_si_clarity_dim( array $info, string $name ): string {
+function insightweb_clarity_dim( array $info, string $name ): string {
 	foreach ( $info as $k => $v ) {
 		if ( 0 === strcasecmp( (string) $k, $name ) ) {
 			return trim( (string) $v );
@@ -102,15 +102,15 @@ function aw_si_clarity_dim( array $info, string $name ): string {
  * @param string[] $dimensions Up to three of URL, Device, …, in order.
  * @return array|WP_Error The decoded response: a list of {metricName, information[]}.
  */
-function aw_si_clarity_call( array $dimensions ) {
+function insightweb_clarity_call( array $dimensions ) {
 	$day   = wp_date( 'Y-m-d' );
-	$calls = get_option( 'aw_si_clarity_calls', array() );
+	$calls = get_option( 'insightweb_clarity_calls', array() );
 	$used  = (int) ( is_array( $calls ) && ( $calls['d'] ?? '' ) === $day ? $calls['n'] : 0 );
-	if ( $used >= AW_SI_CLARITY_MAX ) {
-		return new WP_Error( 'aw_si_clarity', __( 'Clarity: the calls allowed today are used up; the next run tries again.', 'insightweb' ) );
+	if ( $used >= INSIGHTWEB_CLARITY_MAX ) {
+		return new WP_Error( 'insightweb_clarity', __( 'Clarity: the calls allowed today are used up; the next run tries again.', 'insightweb' ) );
 	}
 	update_option(
-		'aw_si_clarity_calls',
+		'insightweb_clarity_calls',
 		array(
 			'd' => $day,
 			'n' => $used + 1,
@@ -122,11 +122,11 @@ function aw_si_clarity_call( array $dimensions ) {
 		$query[ 'dimension' . ( $i + 1 ) ] = $dim;
 	}
 	$http = wp_remote_get(
-		add_query_arg( $query, AW_SI_CLARITY_API ),
+		add_query_arg( $query, INSIGHTWEB_CLARITY_API ),
 		array(
 			'timeout' => 60, // Clarity's export can take over 30 s; the 30 s limit failed every run 27–31 Oct 2026.
 			'headers' => array(
-				'Authorization' => 'Bearer ' . aw_si_key( 'AW_CLARITY_TOKEN' ),
+				'Authorization' => 'Bearer ' . insightweb_key( 'AW_CLARITY_TOKEN' ),
 				'Content-Type'  => 'application/json',
 			),
 		)
@@ -142,10 +142,10 @@ function aw_si_clarity_call( array $dimensions ) {
 			429 => __( 'the daily limit of 10 calls is used up', 'insightweb' ),
 		);
 		/* translators: 1: HTTP status, 2: reason. */
-		return new WP_Error( 'aw_si_clarity', sprintf( __( 'Clarity answered %1$d: %2$s.', 'insightweb' ), $code, $why[ $code ] ?? __( 'unexpected answer', 'insightweb' ) ) );
+		return new WP_Error( 'insightweb_clarity', sprintf( __( 'Clarity answered %1$d: %2$s.', 'insightweb' ), $code, $why[ $code ] ?? __( 'unexpected answer', 'insightweb' ) ) );
 	}
 	$data = json_decode( (string) wp_remote_retrieve_body( $http ), true );
-	return is_array( $data ) ? $data : new WP_Error( 'aw_si_clarity', __( 'Clarity returned no data.', 'insightweb' ) );
+	return is_array( $data ) ? $data : new WP_Error( 'insightweb_clarity', __( 'Clarity returned no data.', 'insightweb' ) );
 }
 
 /**
@@ -157,10 +157,10 @@ function aw_si_clarity_call( array $dimensions ) {
  * @param callable $keyof  Row => group key.
  * @return array<string, array<string, float>> group => metric => value (every group has sessions).
  */
-function aw_si_clarity_totals( array $resp, array $dims, callable $keyof ): array {
-	$fields = aw_si_clarity_fields();
+function insightweb_clarity_totals( array $resp, array $dims, callable $keyof ): array {
+	$fields = insightweb_clarity_fields();
 	$rowid  = function ( array $info ) use ( $dims ): string {
-		return implode( "\n", array_map( fn( $d ) => aw_si_clarity_dim( $info, $d ), $dims ) );
+		return implode( "\n", array_map( fn( $d ) => insightweb_clarity_dim( $info, $d ), $dims ) );
 	};
 	// Sessions of each response row, the weight of its other figures.
 	$weight = array();
@@ -200,7 +200,7 @@ function aw_si_clarity_totals( array $resp, array $dims, callable $keyof ): arra
 	foreach ( $sum as $k => $metrics ) {
 		$out[ $k ]['sessions'] = 0.0;
 		foreach ( $metrics as $m => $s ) {
-			if ( in_array( $m, AW_SI_CLARITY_COUNTS, true ) ) {
+			if ( in_array( $m, INSIGHTWEB_CLARITY_COUNTS, true ) ) {
 				$out[ $k ][ $m ] = $s[2];
 			} else {
 				// Rows without sessions (bots only) get a plain mean.
@@ -216,8 +216,8 @@ function aw_si_clarity_totals( array $resp, array $dims, callable $keyof ): arra
  *
  * @param array $m Metric => value for one page.
  */
-function aw_si_clarity_flagged( array $m ): bool {
-	$t = aw_si_clarity_thresholds();
+function insightweb_clarity_flagged( array $m ): bool {
+	$t = insightweb_clarity_thresholds();
 	if ( (float) ( $m['sessions'] ?? 0 ) < (float) $t['sessions'] ) {
 		return false;
 	}
@@ -235,13 +235,13 @@ function aw_si_clarity_flagged( array $m ): bool {
  * @param array $args dry (fetch only).
  * @return array Report: pages, devices, flagged, rows, error.
  */
-function aw_si_clarity_run( array $args = array() ): array {
+function insightweb_clarity_run( array $args = array() ): array {
 	$dry = ! empty( $args['dry'] );
-	if ( ! aw_si_clarity_on() ) {
+	if ( ! insightweb_clarity_on() ) {
 		return array( 'error' => __( 'No Clarity token: add it under Animal Writes → Keys.', 'insightweb' ) );
 	}
 	if ( ! $dry ) {
-		aw_si_run_start( 'clarity' );
+		insightweb_run_start( 'clarity' );
 	}
 	$day    = ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( '-1 day' )->format( 'Y-m-d' );
 	$rep    = array(
@@ -255,25 +255,25 @@ function aw_si_clarity_run( array $args = array() ): array {
 		'clarity'     => array(),
 		'clarity-dev' => array(),
 	);
-	$device = fn( array $info ): string => mb_substr( aw_si_clarity_dim( $info, 'Device' ), 0, 60 );
+	$device = fn( array $info ): string => mb_substr( insightweb_clarity_dim( $info, 'Device' ), 0, 60 );
 	$path   = function ( array $info ): string {
-		$url = aw_si_clarity_dim( $info, 'URL' );
-		return '' === $url ? '' : aw_si_path( $url );
+		$url = insightweb_clarity_dim( $info, 'URL' );
+		return '' === $url ? '' : insightweb_path( $url );
 	};
 
 	// Call 1: by URL and device, for the page rows and the page-and-device rows.
-	$resp = aw_si_clarity_call( array( 'URL', 'Device' ) );
+	$resp = insightweb_clarity_call( array( 'URL', 'Device' ) );
 	if ( is_wp_error( $resp ) ) {
 		$rep['error'] = $resp->get_error_message();
 	} else {
 		$dims = array( 'URL', 'Device' );
-		foreach ( aw_si_clarity_totals( $resp, $dims, $path ) as $page => $metrics ) {
+		foreach ( insightweb_clarity_totals( $resp, $dims, $path ) as $page => $metrics ) {
 			$pk = md5( $page );
 			foreach ( $metrics as $m => $v ) {
 				$rows['clarity'][] = array( 0, $page, $pk, $m, $v, '' );
 			}
 			++$rep['pages'];
-			if ( aw_si_clarity_flagged( $metrics ) ) {
+			if ( insightweb_clarity_flagged( $metrics ) ) {
 				$rows['clarity'][] = array( 0, $page, $pk, 'flag', 1.0, '' );
 				++$rep['flagged'];
 			}
@@ -284,7 +284,7 @@ function aw_si_clarity_run( array $args = array() ): array {
 			return '' === $p || '' === $d ? '' : $p . "\n" . $d;
 		};
 		$keep = array( 'sessions', 'dead', 'rage', 'quickback', 'scroll' );
-		foreach ( aw_si_clarity_totals( $resp, $dims, $pair ) as $key => $metrics ) {
+		foreach ( insightweb_clarity_totals( $resp, $dims, $pair ) as $key => $metrics ) {
 			list( $page, $dev ) = explode( "\n", $key, 2 );
 			$pk                 = md5( $page . '|' . $dev );
 			foreach ( array_intersect_key( $metrics, array_flip( $keep ) ) as $m => $v ) {
@@ -295,11 +295,11 @@ function aw_si_clarity_run( array $args = array() ): array {
 
 	// Call 2: by device, for the site's totals per device.
 	if ( '' === $rep['error'] ) {
-		$resp = aw_si_clarity_call( array( 'Device' ) );
+		$resp = insightweb_clarity_call( array( 'Device' ) );
 		if ( is_wp_error( $resp ) ) {
 			$rep['error'] = $resp->get_error_message();
 		} else {
-			foreach ( aw_si_clarity_totals( $resp, array( 'Device' ), $device ) as $dev => $metrics ) {
+			foreach ( insightweb_clarity_totals( $resp, array( 'Device' ), $device ) as $dev => $metrics ) {
 				$pk = md5( 'device:' . $dev );
 				foreach ( $metrics as $m => $v ) {
 					$rows['clarity'][] = array( 0, '', $pk, $m, $v, $dev );
@@ -312,7 +312,7 @@ function aw_si_clarity_run( array $args = array() ): array {
 	// Both calls answered: replace the day's rows of each source.
 	if ( '' === $rep['error'] ) {
 		foreach ( $rows as $src => $list ) {
-			$n = $dry ? count( $list ) : aw_si_obs_replace_day( $src, $day, $list );
+			$n = $dry ? count( $list ) : insightweb_obs_replace_day( $src, $day, $list );
 			if ( is_wp_error( $n ) ) {
 				$rep['error'] = $n->get_error_message();
 				break;
@@ -325,24 +325,24 @@ function aw_si_clarity_run( array $args = array() ): array {
 		return $rep;
 	}
 	if ( '' !== $rep['error'] ) {
-		aw_si_run_fail( 'clarity', $rep['error'] );
+		insightweb_run_fail( 'clarity', $rep['error'] );
 		// One more try 3 hours later, once a day (calls stay well inside Clarity's 10 a day).
 		$today = wp_date( 'Y-m-d' );
-		if ( get_option( 'aw_si_clarity_retried' ) !== $today && ! wp_next_scheduled( AW_SI_CLARITY_RETRY ) ) {
-			update_option( 'aw_si_clarity_retried', $today, false );
-			wp_schedule_single_event( time() + 3 * HOUR_IN_SECONDS, AW_SI_CLARITY_RETRY );
+		if ( get_option( 'insightweb_clarity_retried' ) !== $today && ! wp_next_scheduled( INSIGHTWEB_CLARITY_RETRY ) ) {
+			update_option( 'insightweb_clarity_retried', $today, false );
+			wp_schedule_single_event( time() + 3 * HOUR_IN_SECONDS, INSIGHTWEB_CLARITY_RETRY );
 		}
 	} else {
-		aw_si_run_ok( 'clarity', $rep + array( 'up_to' => $day ) );
+		insightweb_run_ok( 'clarity', $rep + array( 'up_to' => $day ) );
 	}
 	return $rep;
 }
-add_action( AW_SI_CLARITY_CRON, fn() => get_option( 'aw_si_off' ) || ! aw_si_clarity_on() ? null : aw_si_clarity_run() );
-add_action( AW_SI_CLARITY_RETRY, fn() => get_option( 'aw_si_off' ) || ! aw_si_clarity_on() ? null : aw_si_clarity_run() );
+add_action( INSIGHTWEB_CLARITY_CRON, fn() => get_option( 'insightweb_off' ) || ! insightweb_clarity_on() ? null : insightweb_clarity_run() );
+add_action( INSIGHTWEB_CLARITY_RETRY, fn() => get_option( 'insightweb_off' ) || ! insightweb_clarity_on() ? null : insightweb_clarity_run() );
 
 // Monthly rows keep the last value of averages and shares (a sum of them would mean nothing); counts are summed.
 add_filter(
-	'aw_si_last_value_metrics',
+	'insightweb_last_value_metrics',
 	function ( $last ) {
 		foreach ( array( 'pps', 'active', 'total', 'xscroll', 'errclick' ) as $m ) {
 			$last[] = 'clarity:' . $m;
@@ -355,13 +355,13 @@ add_filter(
 );
 
 /** First day (Y-m-d) of a window of the last $days days, which ends yesterday. */
-function aw_si_clarity_since( int $days ): string {
+function insightweb_clarity_since( int $days ): string {
 	return ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( '-' . max( 1, $days ) . ' days' )->format( 'Y-m-d' );
 }
 
-/** Days a Clarity page must be flagged on to count (filter aw_si_quality_min_days, as in aw_si_quality_pages()). */
-function aw_si_clarity_min_days(): int {
-	return max( 1, (int) apply_filters( 'aw_si_quality_min_days', 3 ) );
+/** Days a Clarity page must be flagged on to count (filter insightweb_quality_min_days, as in insightweb_quality_pages()). */
+function insightweb_clarity_min_days(): int {
+	return max( 1, (int) apply_filters( 'insightweb_quality_min_days', 3 ) );
 }
 
 /**
@@ -372,10 +372,10 @@ function aw_si_clarity_min_days(): int {
  *               jserror, errclick (floats weighted by sessions), flagged (pages flagged on enough days), devices
  *               (device => sessions).
  */
-function aw_si_clarity_summary( int $days = 28 ): array {
+function insightweb_clarity_summary( int $days = 28 ): array {
 	global $wpdb;
-	$o     = aw_si_table( 'obs' );
-	$since = aw_si_clarity_since( $days );
+	$o     = insightweb_kw_table( 'obs' );
+	$since = insightweb_clarity_since( $days );
 	$avg   = array( 'pps', 'active', 'scroll', 'dead', 'rage', 'quickback', 'xscroll', 'jserror', 'errclick' );
 	$out   = array(
 		'days'     => 0,
@@ -391,7 +391,7 @@ function aw_si_clarity_summary( int $days = 28 ): array {
 	$out['devices'] = array();
 	// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
 	$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT d, page_key, txt, metric, value FROM %i WHERE src = 'clarity' AND period = 'day' AND kw_id = 0 AND page = '' AND d >= %s", $o, $since ) );
-	$out['flagged'] = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM (SELECT page FROM %i WHERE src = 'clarity' AND metric = 'flag' AND period = 'day' AND value > 0 AND d >= %s AND page <> '' GROUP BY page HAVING COUNT(DISTINCT d) >= %d) f", $o, $since, aw_si_clarity_min_days() ) );
+	$out['flagged'] = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM (SELECT page FROM %i WHERE src = 'clarity' AND metric = 'flag' AND period = 'day' AND value > 0 AND d >= %s AND page <> '' GROUP BY page HAVING COUNT(DISTINCT d) >= %d) f", $o, $since, insightweb_clarity_min_days() ) );
 	// phpcs:enable
 	// One device on one day => metric => value.
 	$cells = array();
@@ -440,10 +440,10 @@ function aw_si_clarity_summary( int $days = 28 ): array {
  *                 quickback, xscroll, jserror (floats weighted by sessions), flag_days (int), flagged (bool),
  *                 devices (device => sessions).
  */
-function aw_si_clarity_pages( int $days = 28 ): array {
+function insightweb_clarity_pages( int $days = 28 ): array {
 	global $wpdb;
-	$o     = aw_si_table( 'obs' );
-	$since = aw_si_clarity_since( $days );
+	$o     = insightweb_kw_table( 'obs' );
+	$since = insightweb_clarity_since( $days );
 	$avg   = array( 'pps', 'active', 'scroll', 'dead', 'rage', 'quickback', 'xscroll', 'jserror' );
 	// Each metric row is weighted by its own day's sessions (same day and page_key; the unique key finds it).
 	// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
@@ -460,7 +460,7 @@ function aw_si_clarity_pages( int $days = 28 ): array {
 	);
 	$devs = (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, txt, SUM(value) v FROM %i WHERE src = 'clarity-dev' AND metric = 'sessions' AND period = 'day' AND kw_id = 0 AND d >= %s GROUP BY page, txt", $o, $since ) );
 	// phpcs:enable
-	$min = aw_si_clarity_min_days();
+	$min = insightweb_clarity_min_days();
 	$out = array();
 	foreach ( $rows as $r ) {
 		$p = (string) $r->page;
@@ -503,20 +503,20 @@ function aw_si_clarity_pages( int $days = 28 ): array {
  * @param string $path Site path.
  * @param string $note Note text (up to 255 characters).
  */
-function aw_si_clarity_note_save( string $path, string $note ): bool {
-	return aw_si_obs_put( 0, $path, 'clarity-note', 'note', 'day', wp_date( 'Y-m-d' ), array( 'txt' => $note ) );
+function insightweb_clarity_note_save( string $path, string $note ): bool {
+	return insightweb_obs_put( 0, $path, 'clarity-note', 'note', 'day', wp_date( 'Y-m-d' ), array( 'txt' => $note ) );
 }
 
 add_action(
 	'admin_post_aw_si_note',
 	function () {
-		if ( ! current_user_can( aw_si_cap() ) || ! check_admin_referer( 'aw_si_note' ) ) {
+		if ( ! current_user_can( insightweb_cap() ) || ! check_admin_referer( 'insightweb_note' ) ) {
 			wp_die( esc_html__( 'Not allowed.', 'insightweb' ), 403 );
 		}
-		$path = isset( $_POST['path'] ) ? aw_si_path( home_url( sanitize_text_field( wp_unslash( $_POST['path'] ) ) ) ) : '';
+		$path = isset( $_POST['path'] ) ? insightweb_path( home_url( sanitize_text_field( wp_unslash( $_POST['path'] ) ) ) ) : '';
 		$note = isset( $_POST['note'] ) ? sanitize_textarea_field( wp_unslash( $_POST['note'] ) ) : '';
-		$ok   = '' !== $path && '' !== trim( $note ) && aw_si_clarity_note_save( $path, mb_substr( trim( $note ), 0, 255 ) );
-		wp_safe_redirect( add_query_arg( $ok ? 'noted' : 'not_noted', 1, aw_si_return_url( 'pages' ) ) );
+		$ok   = '' !== $path && '' !== trim( $note ) && insightweb_clarity_note_save( $path, mb_substr( trim( $note ), 0, 255 ) );
+		wp_safe_redirect( add_query_arg( $ok ? 'noted' : 'not_noted', 1, insightweb_return_url( 'pages' ) ) );
 		exit;
 	}
 );

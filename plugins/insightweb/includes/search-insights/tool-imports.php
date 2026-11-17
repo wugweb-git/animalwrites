@@ -9,7 +9,7 @@
  *   OpenSEO's 12-month trend one row per month). Importing the same month again replaces it.
  * - A term that is not a keyword yet goes to Rising (source = the tool), never into the keyword table, with the figure
  *   as its note. English only, as for the other Rising sources.
- * - Seeds for the tools: a list on Settings (option aw_si_tool_seeds), also given to the workers' GET as tool_seeds.
+ * - Seeds for the tools: a list on Settings (option insightweb_tool_seeds), also given to the workers' GET as tool_seeds.
  * - Each import is a run in the run log (Rising source rising_<tool>), listed once the tool has sent something.
  * - No email, nothing fetched from the tools here, no keys stored.
  *
@@ -20,14 +20,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_SI_TOOL_SEEDS = 'aw_si_tool_seeds';
+const INSIGHTWEB_TOOL_SEEDS = 'insightweb_tool_seeds';
 
 /**
  * The tools: label, metric stored, what the figure is, how often the routine sends it.
  *
  * @return array<string, array{label: string, metric: string, what: string, every: int}>
  */
-function aw_si_tools(): array {
+function insightweb_tools(): array {
 	return array(
 		'ubersuggest' => array(
 			'label'  => __( 'Ubersuggest', 'insightweb' ),
@@ -51,7 +51,7 @@ function aw_si_tools(): array {
 }
 
 add_filter(
-	'aw_si_import_kinds',
+	'insightweb_import_kinds',
 	function ( $kinds ) {
 		$kinds['ubersuggest'] = __( 'Ubersuggest (paste or CSV: keyword, volume; optional: SD, CPC)', 'insightweb' );
 		$kinds['vidiq']       = __( 'vidIQ (paste or CSV: keyword, volume; optional: competition, score)', 'insightweb' );
@@ -61,9 +61,9 @@ add_filter(
 );
 
 add_filter(
-	'aw_si_import_run',
+	'insightweb_import_run',
 	function ( $out, string $kind, string $raw ) {
-		return isset( aw_si_tools()[ $kind ] ) ? aw_si_tool_import( $kind, $raw ) : $out;
+		return isset( insightweb_tools()[ $kind ] ) ? insightweb_tool_import( $kind, $raw ) : $out;
 	},
 	10,
 	3
@@ -74,7 +74,7 @@ add_filter(
  *
  * @param array<string, float> $by_month Y-m-01 => volume.
  */
-function aw_si_tool_growth( array $by_month ): ?float {
+function insightweb_tool_growth( array $by_month ): ?float {
 	ksort( $by_month );
 	$v = array_values( $by_month );
 	if ( count( $v ) < 6 ) {
@@ -93,17 +93,17 @@ function aw_si_tool_growth( array $by_month ): ?float {
  * @param string $raw  File or pasted text (a header row, then one row per keyword or keyword and month).
  * @return array{rows: int, skipped: int, error: string, rising: int}
  */
-function aw_si_tool_import( string $tool, string $raw ): array {
-	$t   = aw_si_tools()[ $tool ];
+function insightweb_tool_import( string $tool, string $raw ): array {
+	$t   = insightweb_tools()[ $tool ];
 	$out = array(
 		'rows'    => 0,
 		'skipped' => 0,
 		'rising'  => 0,
 		'error'   => '',
 	);
-	list( $head, $rows ) = aw_si_parse_table( $raw, 'keyword' );
-	$kcol                = $head ? aw_si_import_col( $head, array( 'keyword', 'query', 'term' ) ) : '';
-	$vcol                = $head ? aw_si_import_col( $head, array( 'search volume', 'monthly searches', 'volume', 'searches' ) ) : '';
+	list( $head, $rows ) = insightweb_parse_table( $raw, 'keyword' );
+	$kcol                = $head ? insightweb_import_col( $head, array( 'keyword', 'query', 'term' ) ) : '';
+	$vcol                = $head ? insightweb_import_col( $head, array( 'search volume', 'monthly searches', 'volume', 'searches' ) ) : '';
 	if ( '' === $kcol || '' === $vcol ) {
 		$out['error'] = __( 'The rows need a header with a keyword column and a volume column.', 'insightweb' );
 		return $out;
@@ -111,20 +111,20 @@ function aw_si_tool_import( string $tool, string $raw ): array {
 	$mcol  = (string) current( array_intersect( $head, array( 'month', 'date' ) ) ); // exact: "monthly searches" is the volume
 	$extra = array_filter(
 		array(
-			'SD'          => aw_si_import_col( $head, array( 'seo difficulty' ) ) ? aw_si_import_col( $head, array( 'seo difficulty' ) ) : (string) current( array_intersect( $head, array( 'sd' ) ) ), // "sd" exactly: "cpc (usd)" contains it
-			'CPC'         => aw_si_import_col( $head, array( 'cpc' ) ),
-			'competition' => aw_si_import_col( $head, array( 'competition' ) ),
-			'score'       => aw_si_import_col( $head, array( 'overall', 'score' ) ),
+			'SD'          => insightweb_import_col( $head, array( 'seo difficulty' ) ) ? insightweb_import_col( $head, array( 'seo difficulty' ) ) : (string) current( array_intersect( $head, array( 'sd' ) ) ), // "sd" exactly: "cpc (usd)" contains it
+			'CPC'         => insightweb_import_col( $head, array( 'cpc' ) ),
+			'competition' => insightweb_import_col( $head, array( 'competition' ) ),
+			'score'       => insightweb_import_col( $head, array( 'overall', 'score' ) ),
 		)
 	);
-	aw_si_run_start( 'rising_' . $tool );
+	insightweb_run_start( 'rising_' . $tool );
 	$month = wp_date( 'Y-m-01' );
-	$map   = aw_si_kw_map(); // Existing keywords only: a tool's idea never becomes a keyword record by itself.
+	$map   = insightweb_kw_map(); // Existing keywords only: a tool's idea never becomes a keyword record by itself.
 	$terms = array(); // norm => [term, months => volume, txt].
 	foreach ( $rows as $r ) {
 		$term = sanitize_text_field( (string) ( $r[ $kcol ] ?? '' ) );
-		$vol  = aw_si_import_number( (string) ( $r[ $vcol ] ?? '' ) );
-		$norm = aw_si_norm( $term );
+		$vol  = insightweb_import_number( (string) ( $r[ $vcol ] ?? '' ) );
+		$norm = insightweb_kw_norm( $term );
 		if ( '' === $norm || null === $vol ) {
 			++$out['skipped'];
 			continue;
@@ -155,7 +155,7 @@ function aw_si_tool_import( string $tool, string $raw ): array {
 		$id     = (int) ( $map[ $norm ] ?? 0 );
 		if ( $id ) {
 			foreach ( $x['months'] as $d => $vol ) {
-				aw_si_obs_put(
+				insightweb_obs_put(
 					$id,
 					'',
 					$tool,
@@ -172,11 +172,11 @@ function aw_si_tool_import( string $tool, string $raw ): array {
 		}
 		/* translators: 1: tool, 2: searches a month, 3: what the figure is, 4: extra figures. */
 		$note = sprintf( __( '%1$s: %2$s (%3$s)%4$s', 'insightweb' ), $t['label'], number_format_i18n( $latest ), $t['what'], '' !== $x['txt'] ? ', ' . $x['txt'] : '' );
-		$res  = aw_si_rising_put( (string) $x['term'], $tool, aw_si_tool_growth( $x['months'] ), $today, $note );
+		$res  = insightweb_rising_put( (string) $x['term'], $tool, insightweb_tool_growth( $x['months'] ), $today, $note );
 		in_array( $res, array( 'created', 'updated' ), true ) ? ++$out['rising'] : ++$out['skipped'];
 	}
 	$out['rows'] += $out['rising'];
-	aw_si_run_ok(
+	insightweb_run_ok(
 		'rising_' . $tool,
 		array(
 			'rows'    => $out['rows'],
@@ -194,15 +194,15 @@ function aw_si_tool_import( string $tool, string $raw ): array {
  * @param int[] $ids Keyword IDs.
  * @return array<int, array<string, object>> id => tool => row (value, txt, d).
  */
-function aw_si_tool_figures( array $ids ): array {
+function insightweb_tool_figures( array $ids ): array {
 	global $wpdb;
 	$ids = array_filter( array_map( 'intval', $ids ) );
-	if ( ! $ids || ! aw_si_ready() ) {
+	if ( ! $ids || ! insightweb_ready() ) {
 		return array();
 	}
-	$o    = aw_si_table( 'obs' );
+	$o    = insightweb_kw_table( 'obs' );
 	$in   = implode( ',', $ids );
-	$tools = array_keys( aw_si_tools() );
+	$tools = array_keys( insightweb_tools() );
 	$srcs  = implode( ', ', array_fill( 0, count( $tools ), '%s' ) );
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers and placeholders built above.
 	$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT kw_id, src, value, txt, d FROM %i WHERE src IN ({$srcs}) AND period = 'month' AND kw_id IN ({$in}) ORDER BY d", array_merge( array( $o ), $tools ) ) );
@@ -214,8 +214,8 @@ function aw_si_tool_figures( array $ids ): array {
 }
 
 /** The seeds the routine uses with the tools, one per line. */
-function aw_si_tool_seeds(): array {
-	$raw = (string) get_option( AW_SI_TOOL_SEEDS, '' );
+function insightweb_tool_seeds(): array {
+	$raw = (string) get_option( INSIGHTWEB_TOOL_SEEDS, '' );
 	return array_values( array_unique( array_filter( array_map( 'trim', (array) preg_split( '/\r\n|\r|\n/', $raw ) ), 'strlen' ) ) );
 }
 
@@ -224,7 +224,7 @@ function aw_si_tool_seeds(): array {
  *
  * @param string $raw Text as typed (already passed through sanitize_textarea_field()).
  */
-function aw_si_tool_seeds_clean( string $raw ): string {
+function insightweb_tool_seeds_clean( string $raw ): string {
 	$lines = array_slice( array_values( array_unique( array_filter( array_map( 'trim', (array) preg_split( '/\r\n|\r|\n/', $raw ) ), 'strlen' ) ) ), 0, 200 );
 	return implode( "\n", array_map( fn( $l ) => mb_substr( $l, 0, 100 ), $lines ) );
 }
@@ -236,30 +236,30 @@ function aw_si_tool_seeds_clean( string $raw ): string {
  * @param string $raw Text as typed (already passed through sanitize_textarea_field()).
  * @return bool Whether the option was written.
  */
-function aw_si_tool_seeds_save( string $raw ): bool {
-	$clean = aw_si_tool_seeds_clean( $raw );
-	if ( (string) get_option( AW_SI_TOOL_SEEDS, '' ) === $clean ) {
+function insightweb_tool_seeds_save( string $raw ): bool {
+	$clean = insightweb_tool_seeds_clean( $raw );
+	if ( (string) get_option( INSIGHTWEB_TOOL_SEEDS, '' ) === $clean ) {
 		return false;
 	}
-	update_option( AW_SI_TOOL_SEEDS, $clean, false );
+	update_option( INSIGHTWEB_TOOL_SEEDS, $clean, false );
 	return true;
 }
 
 add_filter(
-	'aw_si_rising_lists',
+	'insightweb_rising_lists',
 	function ( $lists ) {
-		$lists['tool_seeds'] = aw_si_tool_seeds();
+		$lists['tool_seeds'] = insightweb_tool_seeds();
 		return $lists;
 	}
 );
 
 add_action(
-	'aw_si_settings_rows',
+	'insightweb_settings_rows',
 	function () {
 		echo '<tr><th scope="row"><label for="aw-si-tool-seeds">' . esc_html__( 'Seeds for keyword tools', 'insightweb' ) . '</label></th><td>';
-		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_si_tool_seeds">';
-		wp_nonce_field( 'aw_si_tool_seeds' );
-		echo '<textarea id="aw-si-tool-seeds" name="seeds" rows="6" class="large-text">' . esc_textarea( implode( "\n", aw_si_tool_seeds() ) ) . '</textarea>';
+		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="insightweb_tool_seeds">';
+		wp_nonce_field( 'insightweb_tool_seeds' );
+		echo '<textarea id="aw-si-tool-seeds" name="seeds" rows="6" class="large-text">' . esc_textarea( implode( "\n", insightweb_tool_seeds() ) ) . '</textarea>';
 		submit_button( __( 'Save seeds', 'insightweb' ), 'secondary', 'submit', false );
 		echo '<p class="description">' . esc_html__( 'One search per line. The Ubersuggest, vidIQ and OpenSEO reports start from these (in turn); their results come back through Imports above: figures for our keywords go to the Keywords tab, new terms to Rising.', 'insightweb' ) . '</p>';
 		echo '</form></td></tr>';
@@ -270,23 +270,23 @@ add_action(
 add_action(
 	'admin_post_aw_si_tool_seeds',
 	function () {
-		if ( ! current_user_can( aw_si_cap() ) || ! check_admin_referer( 'aw_si_tool_seeds' ) ) {
+		if ( ! current_user_can( insightweb_cap() ) || ! check_admin_referer( 'insightweb_tool_seeds' ) ) {
 			wp_die( esc_html__( 'Not allowed.', 'insightweb' ), 403 );
 		}
-		$changed = aw_si_tool_seeds_save( isset( $_POST['seeds'] ) ? sanitize_textarea_field( wp_unslash( $_POST['seeds'] ) ) : '' );
-		wp_safe_redirect( add_query_arg( 'seeds', $changed ? 'saved' : 'same', aw_si_return_url( 'settings' ) ) );
+		$changed = insightweb_tool_seeds_save( isset( $_POST['seeds'] ) ? sanitize_textarea_field( wp_unslash( $_POST['seeds'] ) ) : '' );
+		wp_safe_redirect( add_query_arg( 'seeds', $changed ? 'saved' : 'same', insightweb_return_url( 'settings' ) ) );
 		exit;
 	}
 );
 
 // The result of Save seeds, on Settings (12 Nov 2026: the save had no notice).
 add_action(
-	'aw_si_settings_notices',
+	'insightweb_settings_notices',
 	function () {
 		$r = isset( $_GET['seeds'] ) ? sanitize_key( wp_unslash( $_GET['seeds'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- message only.
 		if ( 'saved' === $r ) {
 			/* translators: %s: number of seeds. */
-			wp_admin_notice( esc_html( sprintf( _n( 'Seeds saved: %s search.', 'Seeds saved: %s searches.', count( aw_si_tool_seeds() ), 'insightweb' ), number_format_i18n( count( aw_si_tool_seeds() ) ) ) ), array( 'type' => 'success', 'additional_classes' => array( 'inline' ) ) );
+			wp_admin_notice( esc_html( sprintf( _n( 'Seeds saved: %s search.', 'Seeds saved: %s searches.', count( insightweb_tool_seeds() ), 'insightweb' ), number_format_i18n( count( insightweb_tool_seeds() ) ) ) ), array( 'type' => 'success', 'additional_classes' => array( 'inline' ) ) );
 		} elseif ( 'same' === $r ) {
 			wp_admin_notice( esc_html__( 'Seeds unchanged: nothing to save.', 'insightweb' ), array( 'type' => 'success', 'additional_classes' => array( 'inline' ) ) );
 		}

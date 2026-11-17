@@ -17,23 +17,23 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_SI_PSI_CRON   = 'aw_si_psi';
-const AW_SI_PSI_MORE   = 'aw_si_psi_more';
-const AW_SI_PSI_QUEUE  = 'aw_si_psi_queue';
-const AW_SI_PSI_BUDGET = 25; // Seconds: no new call starts after this, so a run stays inside host time limits.
-// AW_SI_PSI_FLAG: RankWeb → Settings (settings.php).
+const INSIGHTWEB_PSI_CRON   = 'insightweb_psi';
+const INSIGHTWEB_PSI_MORE   = 'insightweb_psi_more';
+const INSIGHTWEB_PSI_QUEUE  = 'insightweb_psi_queue';
+const INSIGHTWEB_PSI_BUDGET = 25; // Seconds: no new call starts after this, so a run stays inside host time limits.
+// INSIGHTWEB_PSI_FLAG: RankWeb → Settings (settings.php).
 
 /**
  * The key pages of the 20 Oct PageSpeed audit: the hubs, a state and a district page, the newest item of each type,
- * and every published campaign page (2 Nov 2026). Filter aw_si_psi_pages changes the list.
+ * and every published campaign page (2 Nov 2026). Filter insightweb_psi_pages changes the list.
  *
  * @return string[] Site paths.
  */
-function aw_si_psi_pages(): array {
+function insightweb_psi_pages(): array {
 	$paths = array( '/', '/news/', '/directory/', '/library/', '/resources/', '/opportunities/', '/campaigns/', '/about/' );
 	if ( function_exists( 'aw_directory_url' ) ) {
 		foreach ( array( 'kerala', 'pune' ) as $slug ) {
-			$paths[] = aw_si_path( (string) aw_directory_url( $slug ) );
+			$paths[] = insightweb_path( (string) aw_directory_url( $slug ) );
 		}
 	}
 	// Every published campaign (a handful), so each campaign page gets LCP and TBT figures.
@@ -48,7 +48,7 @@ function aw_si_psi_pages(): array {
 		)
 	);
 	foreach ( $camps as $id ) {
-		$paths[] = aw_si_object_path( 'post', (int) $id );
+		$paths[] = insightweb_object_path( 'post', (int) $id );
 	}
 	foreach ( array( 'aw_news', 'aw_legal', 'post', 'aw_opportunity', 'aw_listing' ) as $type ) {
 		$ids = get_posts(
@@ -62,10 +62,10 @@ function aw_si_psi_pages(): array {
 			)
 		);
 		if ( $ids ) {
-			$paths[] = aw_si_object_path( 'post', (int) $ids[0] );
+			$paths[] = insightweb_object_path( 'post', (int) $ids[0] );
 		}
 	}
-	return array_values( array_unique( array_filter( (array) apply_filters( 'aw_si_psi_pages', $paths ) ) ) );
+	return array_values( array_unique( array_filter( (array) apply_filters( 'insightweb_psi_pages', $paths ) ) ) );
 }
 
 /**
@@ -74,7 +74,7 @@ function aw_si_psi_pages(): array {
  * @param mixed $resp Site Kit's response object, or the decoded JSON of the PSI API.
  * @return array{score: float|null, lcp: float|null, tbt: float|null, cls: float|null}
  */
-function aw_si_psi_figures( $resp ): array {
+function insightweb_psi_figures( $resp ): array {
 	if ( is_object( $resp ) && method_exists( $resp, 'toSimpleObject' ) ) {
 		$resp = json_decode( (string) wp_json_encode( $resp->toSimpleObject() ), true );
 	} elseif ( is_object( $resp ) ) {
@@ -90,8 +90,8 @@ function aw_si_psi_figures( $resp ): array {
 			'tbt'   => $audit( 'total-blocking-time' ),
 			'cls'   => $audit( 'cumulative-layout-shift' ),
 		),
-		aw_si_psi_field( (array) ( $resp['loadingExperience'] ?? array() ), 'field' ),
-		aw_si_psi_field( (array) ( $resp['originLoadingExperience'] ?? array() ), 'site' )
+		insightweb_psi_field( (array) ( $resp['loadingExperience'] ?? array() ), 'field' ),
+		insightweb_psi_field( (array) ( $resp['originLoadingExperience'] ?? array() ), 'site' )
 	);
 }
 
@@ -104,7 +104,7 @@ function aw_si_psi_figures( $resp ): array {
  * @param string $prefix field (this page) or site (the whole site).
  * @return array<string, float> e.g. field-lcp => 2100.
  */
-function aw_si_psi_field( array $exp, string $prefix ): array {
+function insightweb_psi_field( array $exp, string $prefix ): array {
 	if ( ! $exp || ( 'field' === $prefix && ! empty( $exp['origin_fallback'] ) ) ) {
 		return array();
 	}
@@ -129,11 +129,11 @@ function aw_si_psi_field( array $exp, string $prefix ): array {
  *
  * @param string $path     Site path.
  * @param string $strategy mobile or desktop.
- * @return array|WP_Error What aw_si_psi_figures() returns.
+ * @return array|WP_Error What insightweb_psi_figures() returns.
  */
-function aw_si_psi_call( string $path, string $strategy ) {
+function insightweb_psi_call( string $path, string $strategy ) {
 	$url  = home_url( $path );
-	$resp = aw_si_with_module(
+	$resp = insightweb_with_module(
 		'pagespeed-insights',
 		function ( $module ) use ( $url, $strategy ) {
 			try {
@@ -145,7 +145,7 @@ function aw_si_psi_call( string $path, string $strategy ) {
 					)
 				);
 			} catch ( Throwable $e ) {
-				return new WP_Error( 'aw_si_psi', $e->getMessage() );
+				return new WP_Error( 'insightweb_psi', $e->getMessage() );
 			}
 		}
 	);
@@ -155,8 +155,8 @@ function aw_si_psi_call( string $path, string $strategy ) {
 			'strategy' => $strategy,
 			'category' => 'performance',
 		);
-		if ( '' !== aw_si_key( 'AW_PSI_KEY' ) ) {
-			$query['key'] = aw_si_key( 'AW_PSI_KEY' );
+		if ( '' !== insightweb_key( 'AW_PSI_KEY' ) ) {
+			$query['key'] = insightweb_key( 'AW_PSI_KEY' );
 		}
 		$http = wp_remote_get(
 			add_query_arg(
@@ -170,34 +170,34 @@ function aw_si_psi_call( string $path, string $strategy ) {
 		}
 		if ( 200 !== (int) wp_remote_retrieve_response_code( $http ) ) {
 			/* translators: 1: Site Kit's problem, 2: HTTP status. */
-			return new WP_Error( 'aw_si_psi', sprintf( __( '%1$s The PageSpeed API answered %2$d.', 'insightweb' ), $resp->get_error_message(), (int) wp_remote_retrieve_response_code( $http ) ) );
+			return new WP_Error( 'insightweb_psi', sprintf( __( '%1$s The PageSpeed API answered %2$d.', 'insightweb' ), $resp->get_error_message(), (int) wp_remote_retrieve_response_code( $http ) ) );
 		}
 		$resp = json_decode( (string) wp_remote_retrieve_body( $http ), true );
 	}
 	if ( is_wp_error( $resp ) ) {
 		return $resp;
 	}
-	$fig = aw_si_psi_figures( $resp );
-	return null === $fig['score'] ? new WP_Error( 'aw_si_psi', __( 'PageSpeed returned no performance score.', 'insightweb' ) ) : $fig;
+	$fig = insightweb_psi_figures( $resp );
+	return null === $fig['score'] ? new WP_Error( 'insightweb_psi', __( 'PageSpeed returned no performance score.', 'insightweb' ) ) : $fig;
 }
 
 /** Start this week's queue: every key page, mobile and desktop. */
-function aw_si_psi_start(): void {
-	if ( get_option( 'aw_si_off' ) || ! aw_si_ready() ) {
+function insightweb_psi_start(): void {
+	if ( get_option( 'insightweb_off' ) || ! insightweb_ready() ) {
 		return;
 	}
-	$q = get_option( AW_SI_PSI_QUEUE );
+	$q = get_option( INSIGHTWEB_PSI_QUEUE );
 	if ( is_array( $q ) && ! empty( $q['todo'] ) && ( $q['d'] ?? '' ) >= wp_date( 'Y-m-d', time() - DAY_IN_SECONDS ) ) {
-		aw_si_psi_step(); // A run is still in progress: carry on with it instead of starting over.
+		insightweb_psi_step(); // A run is still in progress: carry on with it instead of starting over.
 		return;
 	}
 	$todo = array();
-	foreach ( aw_si_psi_pages() as $path ) {
+	foreach ( insightweb_psi_pages() as $path ) {
 		$todo[] = array( $path, 'mobile' );
 		$todo[] = array( $path, 'desktop' );
 	}
 	update_option(
-		AW_SI_PSI_QUEUE,
+		INSIGHTWEB_PSI_QUEUE,
 		array(
 			'd'      => wp_date( 'Y-m-d' ),
 			'todo'   => $todo,
@@ -206,53 +206,53 @@ function aw_si_psi_start(): void {
 		),
 		false
 	);
-	aw_si_run_start( 'psi' );
-	aw_si_psi_step();
+	insightweb_run_start( 'psi' );
+	insightweb_psi_step();
 }
 
 /**
- * Work through the queue for up to AW_SI_PSI_BUDGET seconds; schedule the next step when calls are left.
+ * Work through the queue for up to INSIGHTWEB_PSI_BUDGET seconds; schedule the next step when calls are left.
  *
  * @return array The queue as it stands.
  */
-function aw_si_psi_step(): array {
-	$q = get_option( AW_SI_PSI_QUEUE );
-	if ( ! is_array( $q ) || empty( $q['todo'] ) || get_option( 'aw_si_off' ) || ! aw_si_ready() ) {
+function insightweb_psi_step(): array {
+	$q = get_option( INSIGHTWEB_PSI_QUEUE );
+	if ( ! is_array( $q ) || empty( $q['todo'] ) || get_option( 'insightweb_off' ) || ! insightweb_ready() ) {
 		return is_array( $q ) ? $q : array();
 	}
 	// The next step is booked before any call (25 Oct 2026): a step the host's time limit cuts off mid-call never reached
 	// the booking after the loop, so the queue stopped until someone pressed Start PageSpeed again. The call it was making
 	// is still in the saved queue and is tried again.
-	if ( ! wp_next_scheduled( AW_SI_PSI_MORE ) ) {
-		wp_schedule_single_event( time() + 5 * MINUTE_IN_SECONDS, AW_SI_PSI_MORE );
+	if ( ! wp_next_scheduled( INSIGHTWEB_PSI_MORE ) ) {
+		wp_schedule_single_event( time() + 5 * MINUTE_IN_SECONDS, INSIGHTWEB_PSI_MORE );
 	}
 	$start = microtime( true );
-	while ( $q['todo'] && microtime( true ) - $start < AW_SI_PSI_BUDGET ) {
+	while ( $q['todo'] && microtime( true ) - $start < INSIGHTWEB_PSI_BUDGET ) {
 		list( $path, $strategy ) = array_shift( $q['todo'] );
-		$fig                     = aw_si_psi_call( $path, $strategy );
+		$fig                     = insightweb_psi_call( $path, $strategy );
 		if ( is_wp_error( $fig ) ) {
 			$q['errors'][] = $path . ' (' . $strategy . '): ' . $fig->get_error_message();
 		} else {
 			foreach ( $fig as $metric => $value ) {
 				if ( null !== $value && ( '/' === $path || 0 !== strpos( $metric, 'site-' ) ) ) { // The site's figures once, on the home page row.
-					aw_si_obs_put( 0, $path, 'psi', $metric . '-' . $strategy, 'day', $q['d'], array( 'value' => (float) $value ) );
+					insightweb_obs_put( 0, $path, 'psi', $metric . '-' . $strategy, 'day', $q['d'], array( 'value' => (float) $value ) );
 				}
 			}
 			if ( 'mobile' === $strategy ) {
-				aw_si_obs_put( 0, $path, 'psi', 'flag', 'day', $q['d'], array( 'value' => $fig['score'] < AW_SI_PSI_FLAG ? 1.0 : 0.0 ) );
+				insightweb_obs_put( 0, $path, 'psi', 'flag', 'day', $q['d'], array( 'value' => $fig['score'] < INSIGHTWEB_PSI_FLAG ? 1.0 : 0.0 ) );
 			}
 			++$q['done'];
 		}
-		update_option( AW_SI_PSI_QUEUE, $q, false ); // Saved after each call, so a run cut short loses nothing.
+		update_option( INSIGHTWEB_PSI_QUEUE, $q, false ); // Saved after each call, so a run cut short loses nothing.
 	}
 	if ( $q['todo'] ) {
-		aw_si_run_beat( 'psi' );
+		insightweb_run_beat( 'psi' );
 		return $q; // The next step is already booked (above).
 	}
-	wp_clear_scheduled_hook( AW_SI_PSI_MORE ); // Done: no further step.
+	wp_clear_scheduled_hook( INSIGHTWEB_PSI_MORE ); // Done: no further step.
 	// Finished: good when at least one call worked; every error is listed either way.
 	if ( $q['done'] ) {
-		aw_si_run_ok(
+		insightweb_run_ok(
 			'psi',
 			array(
 				'rows'   => $q['done'],
@@ -262,9 +262,9 @@ function aw_si_psi_step(): array {
 		);
 	} else {
 		/* translators: %s: first error. */
-		aw_si_run_fail( 'psi', sprintf( __( 'No PageSpeed call worked: %s', 'insightweb' ), (string) ( $q['errors'][0] ?? '' ) ) );
+		insightweb_run_fail( 'psi', sprintf( __( 'No PageSpeed call worked: %s', 'insightweb' ), (string) ( $q['errors'][0] ?? '' ) ) );
 	}
 	return $q;
 }
-add_action( AW_SI_PSI_CRON, 'aw_si_psi_start' );
-add_action( AW_SI_PSI_MORE, 'aw_si_psi_step' );
+add_action( INSIGHTWEB_PSI_CRON, 'insightweb_psi_start' );
+add_action( INSIGHTWEB_PSI_MORE, 'insightweb_psi_step' );

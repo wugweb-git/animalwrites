@@ -1,6 +1,6 @@
 <?php
 /**
- * aw_si_simple_table(): the plugin's plain admin tables as a core list table (admin UI is
+ * insightweb_simple_table(): the plugin's plain admin tables as a core list table (admin UI is
  * core WordPress only). The class loads only when a screen draws one.
  *
  * @package insightweb
@@ -18,12 +18,12 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @param array  $rows   Rows of escaped HTML cells, column => HTML (_sort: column => raw value; _after: a row printed under it).
  * @param array  $opts   per_page, total (rows are already that page), primary, fixed, empty, foot, sortable, caption.
  */
-function aw_si_simple_table( $plural, array $cols, array $rows, array $opts = array() ) {
+function insightweb_simple_table( $plural, array $cols, array $rows, array $opts = array() ) {
 	if ( ! class_exists( 'WP_List_Table' ) ) {
 		require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
 	}
 	require_once __DIR__ . '/class-aw-si-simple-table.php';
-	$t = new AW_SI_Simple_Table( $plural, $cols, $rows, $opts );
+	$t = new INSIGHTWEB_Simple_Table( $plural, $cols, $rows, $opts );
 	$t->prepare_items();
 	$t->display();
 }

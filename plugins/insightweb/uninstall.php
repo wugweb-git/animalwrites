@@ -7,21 +7,21 @@
  * option insightweb_delete_data = 1) it deletes InsightWeb's own data, and exactly this:
  *
  * Custom tables:
- *   {prefix}aw_si_kw_pages, {prefix}aw_si_obs, {prefix}aw_si_rising, {prefix}aw_si_links, {prefix}aw_si_visits
+ *   {prefix}insightweb_kw_pages, {prefix}insightweb_obs, {prefix}insightweb_rising, {prefix}insightweb_links, {prefix}insightweb_visits
  * Options:
- *   every option named aw_si_… (aw_si_db, aw_si_runs, aw_si_off, aw_si_gdelt_on, aw_si_tool_seeds, aw_si_checklist,
- *   aw_si_psi_queue, aw_si_inspect_queue, aw_si_ref_icons, aw_si_link_dr, aw_si_links_gsc_pages, aw_si_links_imports,
- *   aw_si_gsc_coverage, aw_si_bing_cursor, aw_si_crawl_inside, aw_si_crawl_outside, aw_si_live_token, aw_si_vis_db,
- *   the daily server counts aw_si_srv_…, and the other run markers), every option named insightweb_… (with
+ *   every option named insightweb_… (insightweb_db, insightweb_runs, insightweb_off, insightweb_gdelt_on, insightweb_tool_seeds, insightweb_checklist,
+ *   insightweb_psi_queue, insightweb_inspect_queue, insightweb_ref_icons, insightweb_link_dr, insightweb_links_gsc_pages, insightweb_links_imports,
+ *   insightweb_gsc_coverage, insightweb_bing_cursor, insightweb_crawl_inside, insightweb_crawl_outside, insightweb_live_token, insightweb_vis_db,
+ *   the daily server counts insightweb_srv_…, and the other run markers), every option named insightweb_… (with
  *   insightweb_delete_data), and the key 'search-insights' (the seven numbers) inside RankWeb's aw_seo_settings —
  *   the rest of that option is RankWeb's and stays
  * Transients (and their timeouts):
- *   every transient named aw_si_… or insightweb_… (insightweb_dash, aw_si_redirects, aw_si_rm_scores, per-user import
+ *   every transient named insightweb_… or insightweb_… (insightweb_dash, insightweb_redirects, insightweb_rm_scores, per-user import
  *   results, Bing keyword volumes, …)
  * Scheduled events:
- *   aw_si_daily, aw_si_rollup, aw_si_alerts, aw_si_ga4, aw_si_psi, aw_si_psi_more, aw_si_clarity, aw_si_clarity_retry,
- *   aw_si_bing, aw_si_bing_kw, aw_si_bing_crawl, aw_si_gsc_types, aw_si_inspect, aw_si_inspect_more, aw_si_crawl,
- *   aw_si_geo_refresh, aw_si_rising_spikes, aw_si_srv_ai, aw_si_srv_speed, insightweb_dash_build — every event of
+ *   insightweb_daily, insightweb_rollup, insightweb_alerts, insightweb_ga4, insightweb_psi, insightweb_psi_more, insightweb_clarity, insightweb_clarity_retry,
+ *   insightweb_bing, insightweb_bing_kw, insightweb_bing_crawl, insightweb_gsc_types, insightweb_inspect, insightweb_inspect_more, insightweb_crawl,
+ *   insightweb_geo_refresh, insightweb_rising_spikes, insightweb_srv_ai, insightweb_srv_speed, insightweb_dash_build — every event of
  *   these hooks, whatever its arguments
  *
  * Before deleting, writes a backup to wp-content/uploads/wugweb-backups/insightweb-uninstall-<YYYYmmdd-His>.jsonl.gz
@@ -29,7 +29,7 @@
  * every table below (transients are caches and are not kept).
  * RankWeb's aw_seo_settings is kept whole in the backup. If the backup cannot be written, nothing is deleted.
  *
- * Never deleted: the keyword tables {prefix}aw_si_keywords and {prefix}aw_si_kw_map (Kits Core's, they hold the
+ * Never deleted: the keyword tables {prefix}insightweb_keywords and {prefix}insightweb_kw_map (Kits Core's, they hold the
  * owner's Sourcing, Press and Tracked keywords), posts, users, Site Kit's and Rank Math's data, and any other plugin's
  * options.
  *
@@ -46,10 +46,10 @@ if ( ! get_option( 'insightweb_delete_data', 0 ) ) {
 
 global $wpdb;
 
-$insightweb_tables = array_map( fn( $t ) => $wpdb->prefix . 'aw_si_' . $t, array( 'kw_pages', 'obs', 'rising', 'links', 'visits' ) );
+$insightweb_tables = array_map( fn( $t ) => $wpdb->prefix . 'insightweb_' . $t, array( 'kw_pages', 'obs', 'rising', 'links', 'visits' ) );
 
 require_once __DIR__ . '/includes/uninstall-backup.php';
-if ( ! insightweb_uninstall_backup( 'insightweb', __DIR__ . '/insightweb.php', array( 'aw_seo_settings' ), array( 'aw_si_', 'insightweb_' ), $insightweb_tables ) ) {
+if ( ! insightweb_uninstall_backup( 'insightweb', __DIR__ . '/insightweb.php', array( 'aw_seo_settings' ), array( 'insightweb_', 'insightweb_' ), $insightweb_tables ) ) {
 	return; // No backup, no delete (the reason is in the error log).
 }
 
@@ -70,18 +70,18 @@ if ( is_array( $insightweb_seo ) && array_key_exists( 'search-insights', $insigh
 unset( $insightweb_seo );
 
 // Scheduled events first: wp_clear_scheduled_hook() needs the arguments, so each event is taken off as it is listed.
-$insightweb_hooks = array( 'aw_si_daily', 'aw_si_rollup', 'aw_si_alerts', 'aw_si_ga4', 'aw_si_psi', 'aw_si_psi_more', 'aw_si_clarity', 'aw_si_clarity_retry', 'aw_si_bing', 'aw_si_bing_kw', 'aw_si_bing_crawl', 'aw_si_gsc_types', 'aw_si_inspect', 'aw_si_inspect_more', 'aw_si_crawl', 'aw_si_geo_refresh', 'aw_si_rising_spikes', 'aw_si_srv_ai', 'aw_si_srv_speed', 'insightweb_dash_build' );
+$insightweb_hooks = array( 'insightweb_daily', 'insightweb_rollup', 'insightweb_alerts', 'insightweb_ga4', 'insightweb_psi', 'insightweb_psi_more', 'insightweb_clarity', 'insightweb_clarity_retry', 'insightweb_bing', 'insightweb_bing_kw', 'insightweb_bing_crawl', 'insightweb_gsc_types', 'insightweb_inspect', 'insightweb_inspect_more', 'insightweb_crawl', 'insightweb_geo_refresh', 'insightweb_rising_spikes', 'insightweb_srv_ai', 'insightweb_srv_speed', 'insightweb_dash_build' );
 foreach ( $insightweb_hooks as $insightweb_hook ) {
 	wp_unschedule_hook( $insightweb_hook );
 }
 unset( $insightweb_hooks, $insightweb_hook, $insightweb_table );
 
-// Options and transients by name: aw_si_… and insightweb_… are InsightWeb's only.
+// Options and transients by name: insightweb_… and insightweb_… are InsightWeb's only.
 // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- no API deletes options by prefix.
 $wpdb->query(
 	$wpdb->prepare(
 		"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s",
-		$wpdb->esc_like( 'aw_si_' ) . '%',
+		$wpdb->esc_like( 'insightweb_' ) . '%',
 		$wpdb->esc_like( 'insightweb_' ) . '%',
 		$wpdb->esc_like( '_transient_aw_si_' ) . '%',
 		$wpdb->esc_like( '_transient_timeout_aw_si_' ) . '%',

@@ -14,15 +14,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-// AW_SI_RM_LOW: RankWeb → Settings (settings.php).
+// INSIGHTWEB_RM_LOW: RankWeb → Settings (settings.php).
 
 /**
  * Rank Math SEO score per site path, for published items that have one. Cached for 12 hours.
  *
  * @return array<string, int> path => score (0–100).
  */
-function aw_si_rankmath_scores(): array {
-	$cached = get_transient( 'aw_si_rm_scores' );
+function insightweb_rankmath_scores(): array {
+	$cached = get_transient( 'insightweb_rm_scores' );
 	if ( is_array( $cached ) ) {
 		return $cached;
 	}
@@ -32,39 +32,39 @@ function aw_si_rankmath_scores(): array {
 	_prime_post_caches( array_map( 'intval', wp_list_pluck( $rows, 'post_id' ) ), false, false );
 	$out = array();
 	foreach ( $rows as $r ) {
-		$path = aw_si_object_path( 'post', (int) $r->post_id );
+		$path = insightweb_object_path( 'post', (int) $r->post_id );
 		if ( '' !== $path && is_numeric( $r->meta_value ) ) {
 			$out[ $path ] = max( 0, min( 100, (int) $r->meta_value ) );
 		}
 	}
-	set_transient( 'aw_si_rm_scores', $out, 12 * HOUR_IN_SECONDS );
+	set_transient( 'insightweb_rm_scores', $out, 12 * HOUR_IN_SECONDS );
 	return $out;
 }
 
 /** Whether Rank Math Analytics has its Search Console table. */
-function aw_si_rankmath_gsc_table(): string {
+function insightweb_rankmath_gsc_table(): string {
 	global $wpdb;
 	$t = $wpdb->prefix . 'rank_math_analytics_gsc';
 	return $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $t ) ) === $t ? $t : ''; // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 }
 
 /**
- * One day of Search Console from Rank Math Analytics, in the shape aw_si_gsc_fetch_day() returns.
+ * One day of Search Console from Rank Math Analytics, in the shape insightweb_gsc_fetch_day() returns.
  *
  * @param string $day Date (Y-m-d).
  * @return array|WP_Error array{total: array, q: array, qp: array, p: array, truncated: array}
  */
-function aw_si_rankmath_gsc_day( string $day ) {
+function insightweb_rankmath_gsc_day( string $day ) {
 	global $wpdb;
-	$t = aw_si_rankmath_gsc_table();
+	$t = insightweb_rankmath_gsc_table();
 	if ( '' === $t ) {
-		return new WP_Error( 'aw_si_rm', __( 'Rank Math Analytics is not connected (no rank_math_analytics_gsc table).', 'insightweb' ) );
+		return new WP_Error( 'insightweb_rm', __( 'Rank Math Analytics is not connected (no rank_math_analytics_gsc table).', 'insightweb' ) );
 	}
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	$rows = (array) $wpdb->get_results( $wpdb->prepare( 'SELECT query, page, SUM(clicks) c, SUM(impressions) i, SUM(position * impressions) / NULLIF(SUM(impressions), 0) p FROM %i WHERE created >= %s AND created < %s GROUP BY query, page', $t, $day . ' 00:00:00', gmdate( 'Y-m-d', strtotime( $day . ' +1 day' ) ) . ' 00:00:00' ) );
 	if ( ! $rows ) {
 		/* translators: %s: date. */
-		return new WP_Error( 'aw_si_rm', sprintf( __( 'Rank Math Analytics has no Search Console rows for %s.', 'insightweb' ), $day ) );
+		return new WP_Error( 'insightweb_rm', sprintf( __( 'Rank Math Analytics has no Search Console rows for %s.', 'insightweb' ), $day ) );
 	}
 	$out = array(
 		'total'     => array(),
@@ -112,8 +112,8 @@ function aw_si_rankmath_gsc_day( string $day ) {
  * @param string   $sitekit Why Site Kit could not be used.
  * @return array|null The run report, or null when Rank Math has none of the days (the caller then logs the failure).
  */
-function aw_si_rankmath_gsc_run( array $days, bool $dry, string $sitekit ): ?array {
-	if ( '' === aw_si_rankmath_gsc_table() ) {
+function insightweb_rankmath_gsc_run( array $days, bool $dry, string $sitekit ): ?array {
+	if ( '' === insightweb_rankmath_gsc_table() ) {
 		return null;
 	}
 	$rep = array(
@@ -124,11 +124,11 @@ function aw_si_rankmath_gsc_run( array $days, bool $dry, string $sitekit ): ?arr
 		'sitekit' => $sitekit,
 	);
 	foreach ( $days as $day ) {
-		$data = aw_si_rankmath_gsc_day( $day );
+		$data = insightweb_rankmath_gsc_day( $day );
 		if ( is_wp_error( $data ) ) {
 			continue; // Rank Math may not have every day; the others are still stored.
 		}
-		$n = $dry ? count( $data['qp'] ) : aw_si_gsc_store_day( $day, $data );
+		$n = $dry ? count( $data['qp'] ) : insightweb_gsc_store_day( $day, $data );
 		if ( is_wp_error( $n ) ) {
 			$rep['error'] = $n->get_error_message();
 			break;
@@ -146,9 +146,9 @@ function aw_si_rankmath_gsc_run( array $days, bool $dry, string $sitekit ): ?arr
 	}
 	if ( ! $dry ) {
 		if ( '' !== $rep['error'] ) {
-			aw_si_run_fail( 'gsc', $rep['error'] );
+			insightweb_run_fail( 'gsc', $rep['error'] );
 		} else {
-			aw_si_run_ok(
+			insightweb_run_ok(
 				'gsc',
 				array(
 					'days'  => count( $rep['days'] ),

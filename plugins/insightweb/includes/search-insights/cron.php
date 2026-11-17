@@ -10,8 +10,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_SI_CRON_DAILY  = 'aw_si_daily';
-const AW_SI_CRON_ROLLUP = 'aw_si_rollup';
+const INSIGHTWEB_CRON_DAILY  = 'insightweb_daily';
+const INSIGHTWEB_CRON_ROLLUP = 'insightweb_rollup';
 
 /**
  * The daily run: tables, the one-time seed, Search Console, roles, then the calculation. Skipped while the owner has
@@ -19,39 +19,39 @@ const AW_SI_CRON_ROLLUP = 'aw_si_rollup';
  *
  * @param bool $by_hand Started from Settings or WP-CLI: switches Search Insights on again.
  */
-function aw_si_daily( bool $by_hand = false ): array {
-	if ( get_option( 'aw_si_off' ) ) {
+function insightweb_daily( bool $by_hand = false ): array {
+	if ( get_option( 'insightweb_off' ) ) {
 		if ( ! $by_hand ) {
 			return array( 'off' => true );
 		}
-		delete_option( 'aw_si_off' );
+		delete_option( 'insightweb_off' );
 	}
-	aw_si_install();
-	aw_si_run_start( 'gsc' );
-	$out        = array( 'seed' => aw_si_seed() );
-	$gsc        = aw_si_gsc_run();
+	insightweb_install();
+	insightweb_run_start( 'gsc' );
+	$out        = array( 'seed' => insightweb_seed() );
+	$gsc        = insightweb_gsc_run();
 	$out['gsc'] = $gsc;
 	// Roles, the calculation and topics are one entry in the run log ("Keyword roles"): its Detail shows the seed's
 	// problem, the role counts, the priorities worked out and any write that failed.
-	aw_si_run_start( 'roles' );
+	insightweb_run_start( 'roles' );
 	$errors = array();
 	if ( ! empty( $out['seed']['error'] ) ) {
 		$errors[] = __( 'The keyword map seed file is missing, so the map was not loaded.', 'insightweb' );
 	}
 	$failed = '';
 	try {
-		$out['roles'] = aw_si_sync_roles();
+		$out['roles'] = insightweb_sync_roles();
 	} catch ( Throwable $e ) {
 		$failed       = $e->getMessage();
 		$out['roles'] = array();
 	}
 	try {
-		$out['compute'] = aw_si_compute();
+		$out['compute'] = insightweb_compute();
 	} catch ( Throwable $e ) {
 		$errors[] = __( 'Priorities could not be worked out: ', 'insightweb' ) . $e->getMessage();
 	}
 	try {
-		$out['topics'] = aw_si_sync_topics(); // After the calculation: it reads the page Google shows most.
+		$out['topics'] = insightweb_sync_topics(); // After the calculation: it reads the page Google shows most.
 	} catch ( Throwable $e ) {
 		$errors[] = __( 'Topics could not be updated: ', 'insightweb' ) . $e->getMessage();
 	}
@@ -61,45 +61,45 @@ function aw_si_daily( bool $by_hand = false ): array {
 		$info['prio'][ $p ] = (int) ( $out['compute'][ $p ] ?? 0 );
 	}
 	if ( '' !== $failed ) {
-		aw_si_run_fail( 'roles', $failed ); // the priorities above still ran, on yesterday's roles
+		insightweb_run_fail( 'roles', $failed ); // the priorities above still ran, on yesterday's roles
 	} else {
-		aw_si_run_ok( 'roles', $info );
+		insightweb_run_ok( 'roles', $info );
 	}
 	return $out;
 }
-add_action( AW_SI_CRON_DAILY, fn() => aw_si_daily() );
+add_action( INSIGHTWEB_CRON_DAILY, fn() => insightweb_daily() );
 
 /** The nightly rollup, with its result in the run log. */
-function aw_si_rollup_cron(): void {
-	if ( ! aw_si_ready() ) {
+function insightweb_rollup_cron(): void {
+	if ( ! insightweb_ready() ) {
 		return;
 	}
-	aw_si_run_start( 'rollup' );
+	insightweb_run_start( 'rollup' );
 	try {
-		$result = aw_si_rollup();
+		$result = insightweb_rollup();
 		if ( ! empty( $result['error'] ) ) {
-			aw_si_run_fail( 'rollup', $result['error'] );
+			insightweb_run_fail( 'rollup', $result['error'] );
 		} else {
-			aw_si_run_ok( 'rollup', $result );
+			insightweb_run_ok( 'rollup', $result );
 		}
 	} catch ( Throwable $e ) {
-		aw_si_run_fail( 'rollup', $e->getMessage() );
+		insightweb_run_fail( 'rollup', $e->getMessage() );
 	}
 }
-add_action( AW_SI_CRON_ROLLUP, 'aw_si_rollup_cron' );
+add_action( INSIGHTWEB_CRON_ROLLUP, 'insightweb_rollup_cron' );
 
 add_action(
 	'init',
 	function () {
-		if ( get_option( 'aw_si_off' ) ) {
+		if ( get_option( 'insightweb_off' ) ) {
 			return; // Switched off by Delete data.
 		}
 		$tz = wp_timezone();
-		if ( ! wp_next_scheduled( AW_SI_CRON_DAILY ) ) {
-			wp_schedule_event( ( new DateTimeImmutable( 'tomorrow 07:10', $tz ) )->getTimestamp(), 'daily', AW_SI_CRON_DAILY );
+		if ( ! wp_next_scheduled( INSIGHTWEB_CRON_DAILY ) ) {
+			wp_schedule_event( ( new DateTimeImmutable( 'tomorrow 07:10', $tz ) )->getTimestamp(), 'daily', INSIGHTWEB_CRON_DAILY );
 		}
-		if ( ! wp_next_scheduled( AW_SI_CRON_ROLLUP ) ) {
-			wp_schedule_event( ( new DateTimeImmutable( 'today 23:30', $tz ) )->getTimestamp(), 'daily', AW_SI_CRON_ROLLUP );
+		if ( ! wp_next_scheduled( INSIGHTWEB_CRON_ROLLUP ) ) {
+			wp_schedule_event( ( new DateTimeImmutable( 'today 23:30', $tz ) )->getTimestamp(), 'daily', INSIGHTWEB_CRON_ROLLUP );
 		}
 	}
 );

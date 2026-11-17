@@ -11,24 +11,24 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** The test result in Site Health's format. */
-function aw_si_health_test(): array {
+function insightweb_health_test(): array {
 	$late  = array();
 	$fails = array();
-	foreach ( aw_si_sources() as $src => $s ) {
-		if ( aw_si_rising_blocked( $src ) ) {
+	foreach ( insightweb_sources() as $src => $s ) {
+		if ( insightweb_rising_blocked( $src ) ) {
 			continue; // refused by the service (HTTP 429/403): a known limit, said on the panel, not a failure
 		}
 		if ( in_array( $src, array( 'crawl-in', 'crawl-out' ), true ) ) {
 			continue; // judged once, by the crawler-access test (crawlcheck.php), which also says when a run is missing
 		}
-		$err = aw_si_run_problem( $src );
-		$dry = aw_si_rows_dry_days( $src );
+		$err = insightweb_run_problem( $src );
+		$dry = insightweb_rows_dry_days( $src );
 		if ( $err ) {
 			$fails[] = $s['label'] . ': ' . $err;
 		} elseif ( $dry ) {
 			/* translators: %d: days. */
 			$fails[] = $s['label'] . ': ' . sprintf( __( 'source failed: its runs have stored no rows for %d days.', 'insightweb' ), $dry );
-		} elseif ( aw_si_stale( $src ) ) {
+		} elseif ( insightweb_stale( $src ) ) {
 			$late[] = $s['label'];
 		}
 	}
@@ -41,7 +41,7 @@ function aw_si_health_test(): array {
 			'color' => $ok ? 'blue' : 'orange',
 		),
 		'description' => '<p>' . esc_html__( 'Each Search Insights source keeps its last good data when a run fails, and shows when it was last updated.', 'insightweb' ) . '</p>',
-		'actions'     => '<p><a href="' . esc_url( aw_si_url() ) . '">' . esc_html__( 'Open Search Insights', 'insightweb' ) . '</a></p>',
+		'actions'     => '<p><a href="' . esc_url( insightweb_url() ) . '">' . esc_html__( 'Open Search Insights', 'insightweb' ) . '</a></p>',
 		'test'        => 'aw_search_insights_fresh',
 	);
 	if ( ! $ok ) {
@@ -63,7 +63,7 @@ add_filter(
 	function ( $tests ) {
 		$tests['direct']['aw_search_insights_fresh'] = array(
 			'label' => __( 'Search Insights sources fresh', 'insightweb' ),
-			'test'  => 'aw_si_health_test',
+			'test'  => 'insightweb_health_test',
 		);
 		return $tests;
 	}

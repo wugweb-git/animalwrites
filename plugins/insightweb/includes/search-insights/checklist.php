@@ -3,7 +3,7 @@
  * Check list tab and the monthly live Google check (plan §5.4). Nothing here searches Google from the server: the
  * owner runs the check in their own browser with a bookmarklet on google.com.
  *
- * - The list (option aw_si_checklist, keyword record IDs) starts from the keyword map's P1/P2, brand terms, the
+ * - The list (option insightweb_checklist, keyword record IDs) starts from the keyword map's P1/P2, brand terms, the
  *   current quick wins and the 130 queries of the 21 Oct rankings; the owner adds and removes keywords.
  * - "Start live check" makes a one-time token (2 hours) and shows the bookmarklet. On google.com the bookmarklet opens
  *   a small Search Insights window (this site, logged in), which hands it the keywords not yet checked this month. The
@@ -21,11 +21,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_SI_LIVE_TOKEN = 'aw_si_live_token';
-const AW_SI_LIVE_TTL   = 2 * HOUR_IN_SECONDS;
+const INSIGHTWEB_LIVE_TOKEN = 'insightweb_live_token';
+const INSIGHTWEB_LIVE_TTL   = 2 * HOUR_IN_SECONDS;
 
 add_filter(
-	'aw_si_tabs',
+	'insightweb_tabs',
 	function ( $tabs ) {
 		$tabs['checklist'] = __( 'Check list', 'insightweb' );
 		return $tabs;
@@ -34,7 +34,7 @@ add_filter(
 );
 
 /** First day of the current month (Y-m-d): a keyword with a live result from this date on is checked this month. */
-function aw_si_live_month(): string {
+function insightweb_live_month(): string {
 	return wp_date( 'Y-m-01' );
 }
 
@@ -43,12 +43,12 @@ function aw_si_live_month(): string {
  *
  * @return int[]
  */
-function aw_si_checklist(): array {
-	$ids = get_option( 'aw_si_checklist', null );
+function insightweb_checklist(): array {
+	$ids = get_option( 'insightweb_checklist', null );
 	if ( ! is_array( $ids ) ) {
-		$ids = aw_si_checklist_defaults();
+		$ids = insightweb_checklist_defaults();
 		if ( $ids ) { // Not stored while the keyword table is still empty, so the list fills once it is seeded.
-			update_option( 'aw_si_checklist', $ids, false );
+			update_option( 'insightweb_checklist', $ids, false );
 		}
 	}
 	return array_values( array_unique( array_map( 'intval', $ids ) ) );
@@ -60,18 +60,18 @@ function aw_si_checklist(): array {
  *
  * @return int[]
  */
-function aw_si_checklist_defaults(): array {
+function insightweb_checklist_defaults(): array {
 	global $wpdb;
-	if ( ! aw_si_ready() ) {
+	if ( ! insightweb_ready() ) {
 		return array();
 	}
-	$k   = aw_si_table( 'keywords' );
-	$o   = aw_si_table( 'obs' );
-	// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- constants and aw_si_view_sql() (fixed SQL from a map, no %).
+	$k   = insightweb_kw_table( 'keywords' );
+	$o   = insightweb_kw_table( 'obs' );
+	// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- constants and insightweb_view_sql() (fixed SQL from a map, no %).
 	$ids = array_merge(
-		(array) $wpdb->get_col( $wpdb->prepare( 'SELECT id FROM %i WHERE roles & %d AND ( ' . aw_si_view_sql( 'p1' ) . ' OR ' . aw_si_view_sql( 'p2' ) . ' ) AND entity = 0', $k, AW_SI_ROLE_TRACKED ) ),
-		(array) $wpdb->get_col( $wpdb->prepare( 'SELECT id FROM %i WHERE roles & %d', $k, AW_SI_ROLE_BRAND ) ),
-		(array) $wpdb->get_col( $wpdb->prepare( 'SELECT id FROM %i WHERE ' . aw_si_view_sql( 'quick' ) . ' AND entity = 0 ORDER BY impr28 DESC LIMIT 100', $k ) ),
+		(array) $wpdb->get_col( $wpdb->prepare( 'SELECT id FROM %i WHERE roles & %d AND ( ' . insightweb_view_sql( 'p1' ) . ' OR ' . insightweb_view_sql( 'p2' ) . ' ) AND entity = 0', $k, INSIGHTWEB_KW_ROLE_TRACKED ) ),
+		(array) $wpdb->get_col( $wpdb->prepare( 'SELECT id FROM %i WHERE roles & %d', $k, INSIGHTWEB_KW_ROLE_BRAND ) ),
+		(array) $wpdb->get_col( $wpdb->prepare( 'SELECT id FROM %i WHERE ' . insightweb_view_sql( 'quick' ) . ' AND entity = 0 ORDER BY impr28 DESC LIMIT 100', $k ) ),
 		(array) $wpdb->get_col( $wpdb->prepare( "SELECT DISTINCT kw_id FROM %i WHERE src = 'live' AND metric = 'position' AND kw_id > 0", $o ) )
 	);
 	// phpcs:enable
@@ -83,16 +83,16 @@ function aw_si_checklist_defaults(): array {
  *
  * @return array<int, array{id: int, q: string}>
  */
-function aw_si_live_pending(): array {
+function insightweb_live_pending(): array {
 	global $wpdb;
-	$ids = aw_si_checklist();
-	if ( ! $ids || ! aw_si_ready() ) {
+	$ids = insightweb_checklist();
+	if ( ! $ids || ! insightweb_ready() ) {
 		return array();
 	}
-	$k    = aw_si_table( 'keywords' );
-	$o    = aw_si_table( 'obs' );
+	$k    = insightweb_kw_table( 'keywords' );
+	$o    = insightweb_kw_table( 'obs' );
 	$in   = implode( ',', array_map( 'intval', $ids ) );
-	$done = array_flip( array_map( 'intval', (array) $wpdb->get_col( $wpdb->prepare( "SELECT kw_id FROM %i WHERE src = 'live' AND metric = 'position' AND period = 'month' AND d >= %s AND kw_id IN ({$in})", $o, aw_si_live_month() ) ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers.
+	$done = array_flip( array_map( 'intval', (array) $wpdb->get_col( $wpdb->prepare( "SELECT kw_id FROM %i WHERE src = 'live' AND metric = 'position' AND period = 'month' AND d >= %s AND kw_id IN ({$in})", $o, insightweb_live_month() ) ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers.
 	$out  = array();
 	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT id, label FROM %i WHERE id IN ({$in}) ORDER BY id", $k ) ) as $r ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers.
 		if ( ! isset( $done[ (int) $r->id ] ) && false === strpos( $r->label, '{' ) ) { // Directory patterns such as {district} are not searchable.
@@ -106,13 +106,13 @@ function aw_si_live_pending(): array {
 }
 
 /** Make a new live-check token (valid 2 hours) and return it. Only its hash is stored. */
-function aw_si_live_token_new(): string {
+function insightweb_live_token_new(): string {
 	$token = wp_generate_password( 32, false );
 	update_option(
-		AW_SI_LIVE_TOKEN,
+		INSIGHTWEB_LIVE_TOKEN,
 		array(
 			'hash'    => hash_hmac( 'sha256', $token, wp_salt( 'auth' ) ),
-			'expires' => time() + AW_SI_LIVE_TTL,
+			'expires' => time() + INSIGHTWEB_LIVE_TTL,
 			'user'    => get_current_user_id(),
 		),
 		false
@@ -125,8 +125,8 @@ function aw_si_live_token_new(): string {
  *
  * @param string $token Token from the request.
  */
-function aw_si_live_token_ok( string $token ): bool {
-	$t = get_option( AW_SI_LIVE_TOKEN );
+function insightweb_live_token_ok( string $token ): bool {
+	$t = get_option( INSIGHTWEB_LIVE_TOKEN );
 	return is_array( $t ) && '' !== $token && time() < (int) $t['expires'] && get_current_user_id() === (int) $t['user']
 		&& hash_equals( (string) $t['hash'], hash_hmac( 'sha256', $token, wp_salt( 'auth' ) ) );
 }
@@ -136,10 +136,10 @@ function aw_si_live_token_ok( string $token ): bool {
  *
  * @param string $token Live-check token.
  */
-function aw_si_bookmarklet( string $token ): string {
+function insightweb_bookmarklet( string $token ): string {
 	$win  = add_query_arg(
 		array(
-			'page'  => AW_SI_SLUG,
+			'page'  => INSIGHTWEB_SLUG,
 			'tab'   => 'checklist',
 			'live'  => 1,
 			'token' => $token,
@@ -177,13 +177,13 @@ function aw_si_bookmarklet( string $token ): string {
 /**
  * Save one live result (from the window the bookmarklet opened). Logged-in owner + nonce + live token.
  */
-function aw_si_live_save(): void {
-	check_ajax_referer( 'aw_si_live', 'nonce' );
-	if ( ! current_user_can( aw_si_cap() ) || ! aw_si_live_token_ok( isset( $_POST['token'] ) ? sanitize_text_field( wp_unslash( $_POST['token'] ) ) : '' ) ) {
+function insightweb_live_save(): void {
+	check_ajax_referer( 'insightweb_live', 'nonce' );
+	if ( ! current_user_can( insightweb_cap() ) || ! insightweb_live_token_ok( isset( $_POST['token'] ) ? sanitize_text_field( wp_unslash( $_POST['token'] ) ) : '' ) ) {
 		wp_send_json_error( array( 'message' => __( 'The live-check token has expired. Start a new live check.', 'insightweb' ) ), 403 );
 	}
 	$id = isset( $_POST['id'] ) ? absint( $_POST['id'] ) : 0;
-	if ( ! $id || ! in_array( $id, aw_si_checklist(), true ) ) {
+	if ( ! $id || ! in_array( $id, insightweb_checklist(), true ) ) {
 		wp_send_json_error( array( 'message' => __( 'Not on the check list.', 'insightweb' ) ), 400 );
 	}
 	$pos   = isset( $_POST['pos'] ) && '' !== $_POST['pos'] ? absint( $_POST['pos'] ) : 0;
@@ -191,9 +191,9 @@ function aw_si_live_save(): void {
 	$ours  = isset( $_POST['ours'] ) ? min( 20, absint( $_POST['ours'] ) ) : 0;
 	$top3  = isset( $_POST['top3'] ) ? array_slice( array_map( 'sanitize_text_field', (array) wp_unslash( $_POST['top3'] ) ), 0, 3 ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitised per item.
 	$paa   = isset( $_POST['paa'] ) ? array_slice( array_map( 'sanitize_text_field', (array) wp_unslash( $_POST['paa'] ) ), 0, 6 ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitised per item.
-	$url   = isset( $_POST['url'] ) ? aw_si_path( esc_url_raw( wp_unslash( $_POST['url'] ) ) ) : '';
+	$url   = isset( $_POST['url'] ) ? insightweb_path( esc_url_raw( wp_unslash( $_POST['url'] ) ) ) : '';
 	$month = wp_date( 'Y-m-d' ); // The day of the check, so it is newer than any earlier check (the seed's is 22 Oct).
-	$ok    = aw_si_obs_put(
+	$ok    = insightweb_obs_put(
 		$id,
 		'',
 		'live',
@@ -205,39 +205,39 @@ function aw_si_live_save(): void {
 			'txt'   => $pos ? '#' . $pos : '>20',
 		)
 	);
-	$ok    = $ok && aw_si_obs_put( $id, '', 'live', 'ours', 'month', $month, array( 'value' => (float) $ours ) );
-	$ok    = $ok && aw_si_obs_put( $id, '', 'live', 'top3', 'month', $month, array( 'txt' => implode( ', ', $top3 ) ) );
-	$ok    = $ok && aw_si_obs_put( $id, '', 'live', 'paa', 'month', $month, array( 'txt' => implode( ' | ', $paa ) ) );
+	$ok    = $ok && insightweb_obs_put( $id, '', 'live', 'ours', 'month', $month, array( 'value' => (float) $ours ) );
+	$ok    = $ok && insightweb_obs_put( $id, '', 'live', 'top3', 'month', $month, array( 'txt' => implode( ', ', $top3 ) ) );
+	$ok    = $ok && insightweb_obs_put( $id, '', 'live', 'paa', 'month', $month, array( 'txt' => implode( ' | ', $paa ) ) );
 	if ( '' !== $url ) {
-		$ok = $ok && aw_si_obs_put( $id, '', 'live', 'url', 'month', $month, array( 'txt' => $url ) );
+		$ok = $ok && insightweb_obs_put( $id, '', 'live', 'url', 'month', $month, array( 'txt' => $url ) );
 	}
 	if ( ! $ok ) {
 		wp_send_json_error( array( 'message' => __( 'The result could not be saved.', 'insightweb' ) ), 500 );
 	}
-	aw_si_run_ok(
+	insightweb_run_ok(
 		'live',
 		array(
-			'rows'  => count( aw_si_checklist() ) - count( aw_si_live_pending() ),
+			'rows'  => count( insightweb_checklist() ) - count( insightweb_live_pending() ),
 			'up_to' => wp_date( 'Y-m-d' ),
 		)
 	);
-	wp_send_json_success( array( 'pending' => count( aw_si_live_pending() ) ) );
+	wp_send_json_success( array( 'pending' => count( insightweb_live_pending() ) ) );
 }
-add_action( 'wp_ajax_aw_si_live_save', 'aw_si_live_save' );
+add_action( 'wp_ajax_aw_si_live_save', 'insightweb_live_save' );
 
 add_action(
-	'aw_si_load_tab_checklist',
+	'insightweb_load_tab_checklist',
 	function () {
 		add_screen_option(
 			'per_page',
 			array(
 				'label'   => __( 'Keywords per page', 'insightweb' ),
 				'default' => 50,
-				'option'  => 'aw_si_checklist_per_page',
+				'option'  => 'insightweb_checklist_per_page',
 			)
 		);
 		require_once __DIR__ . '/class-aw-si-checklist-table.php';
-		aw_si_checklist_handle();
+		insightweb_checklist_handle();
 	}
 );
 
@@ -251,9 +251,9 @@ add_filter(
 );
 
 /** Changes from the Check list tab: add keywords, remove (row or bulk), rebuild from the rules, start a live check. */
-function aw_si_checklist_handle(): void {
+function insightweb_checklist_handle(): void {
 	$action = '';
-	foreach ( array( 'aw_si_cl', 'action', 'action2' ) as $field ) {
+	foreach ( array( 'insightweb_cl', 'action', 'action2' ) as $field ) {
 		$v = isset( $_REQUEST[ $field ] ) ? sanitize_key( wp_unslash( $_REQUEST[ $field ] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- checked below before any change.
 		if ( in_array( $v, array( 'remove', 'add', 'rebuild', 'start' ), true ) ) {
 			$action = $v;
@@ -264,10 +264,10 @@ function aw_si_checklist_handle(): void {
 		return;
 	}
 	check_admin_referer( 'bulk-checklist' );
-	if ( ! current_user_can( aw_si_cap() ) ) {
+	if ( ! current_user_can( insightweb_cap() ) ) {
 		wp_die( esc_html__( 'Not allowed.', 'insightweb' ), 403 );
 	}
-	$list = aw_si_checklist();
+	$list = insightweb_checklist();
 	$msg  = '';
 	if ( 'remove' === $action ) {
 		$ids  = array_map( 'intval', (array) wp_unslash( $_REQUEST['kw'] ?? array() ) );
@@ -275,29 +275,29 @@ function aw_si_checklist_handle(): void {
 		$msg  = 'removed';
 	} elseif ( 'add' === $action ) {
 		$lines = preg_split( '/[\r\n]+/', isset( $_POST['keywords'] ) ? sanitize_textarea_field( wp_unslash( $_POST['keywords'] ) ) : '' );
-		$ids   = aw_si_kw_ids( array_filter( array_map( 'trim', (array) $lines ) ), AW_SI_ROLE_TRACKED );
+		$ids   = insightweb_kw_ids( array_filter( array_map( 'trim', (array) $lines ) ), INSIGHTWEB_KW_ROLE_TRACKED );
 		$list  = array_values( array_unique( array_merge( $list, array_map( 'intval', $ids ) ) ) );
 		$msg   = 'added';
 	} elseif ( 'rebuild' === $action ) {
-		$list = aw_si_checklist_defaults();
+		$list = insightweb_checklist_defaults();
 		$msg  = 'rebuilt';
 	} elseif ( 'start' === $action ) {
-		set_transient( 'aw_si_live_new_' . get_current_user_id(), aw_si_live_token_new(), AW_SI_LIVE_TTL );
+		set_transient( 'insightweb_live_new_' . get_current_user_id(), insightweb_live_token_new(), INSIGHTWEB_LIVE_TTL );
 		$msg = 'started';
 	}
-	update_option( 'aw_si_checklist', array_slice( $list, 0, 500 ), false );
-	wp_safe_redirect( add_query_arg( 'cl', $msg, aw_si_return_url( 'checklist' ) ) );
+	update_option( 'insightweb_checklist', array_slice( $list, 0, 500 ), false );
+	wp_safe_redirect( add_query_arg( 'cl', $msg, insightweb_return_url( 'checklist' ) ) );
 	exit;
 }
 
 /** The small window the bookmarklet opens: hands over the keywords to check, saves each result, shows progress. */
-function aw_si_live_window(): void {
+function insightweb_live_window(): void {
 	$token = isset( $_GET['token'] ) ? sanitize_text_field( wp_unslash( $_GET['token'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- the live token is checked here.
-	if ( ! aw_si_live_token_ok( $token ) ) {
+	if ( ! insightweb_live_token_ok( $token ) ) {
 		wp_admin_notice( esc_html__( 'This live-check link has expired or is not yours. Start a new live check on the Check list tab.', 'insightweb' ), array( 'type' => 'error', 'additional_classes' => array( 'inline' ) ) );
 		return;
 	}
-	$pending = aw_si_live_pending();
+	$pending = insightweb_live_pending();
 	echo '<h2>' . esc_html__( 'Live Google check', 'insightweb' ) . '</h2>';
 	/* translators: %d: keywords left to check this month. */
 	echo '<p id="aw-si-live-status">' . esc_html( sprintf( __( '%d keywords to check this month. Keep this window and the Google tab open.', 'insightweb' ), count( $pending ) ) ) . '</p>';
@@ -305,10 +305,10 @@ function aw_si_live_window(): void {
 	echo '<ol id="aw-si-live-log"></ol>';
 	$cfg = array(
 		'ajax'    => admin_url( 'admin-ajax.php' ),
-		'nonce'   => wp_create_nonce( 'aw_si_live' ),
+		'nonce'   => wp_create_nonce( 'insightweb_live' ),
 		'token'   => $token,
 		'queries' => $pending,
-		'google'  => (array) apply_filters( 'aw_si_live_origins', array( 'https://www.google.com', 'https://www.google.co.in' ) ),
+		'google'  => (array) apply_filters( 'insightweb_live_origins', array( 'https://www.google.com', 'https://www.google.co.in' ) ),
 		'text'    => array(
 			/* translators: %d: keywords left. */
 			'left'    => __( '%d left.', 'insightweb' ),
@@ -333,7 +333,7 @@ function aw_si_live_window(): void {
 		. 'if(d.type==="aw-si-done"){say(c.text.done);return;}'
 		. 'if(d.type!=="aw-si-result"||!names[d.id])return;var r=d.r||{};'
 		. 'if(r.error){line(names[d.id]+": "+c.text.noread);return;}'
-		. 'var b=new URLSearchParams();b.append("action","aw_si_live_save");b.append("nonce",c.nonce);b.append("token",c.token);b.append("id",d.id);'
+		. 'var b=new URLSearchParams();b.append("action","insightweb_live_save");b.append("nonce",c.nonce);b.append("token",c.token);b.append("id",d.id);'
 		. 'b.append("pos",r.pos||"");b.append("ours",r.ours||0);b.append("url",r.url||"");'
 		. '(r.top3||[]).forEach(function(x){b.append("top3[]",x);});(r.paa||[]).forEach(function(x){b.append("paa[]",x);});'
 		. 'fetch(c.ajax,{method:"POST",credentials:"same-origin",body:b}).then(function(x){return x.json();}).then(function(j){'
@@ -344,10 +344,10 @@ function aw_si_live_window(): void {
 }
 
 add_action(
-	'aw_si_tab_checklist',
+	'insightweb_tab_checklist',
 	function () {
-		if ( isset( $_GET['live'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- the live token is checked in aw_si_live_window().
-			aw_si_live_window();
+		if ( isset( $_GET['live'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- the live token is checked in insightweb_live_window().
+			insightweb_live_window();
 			return;
 		}
 		$msgs = array(
@@ -360,9 +360,9 @@ add_action(
 			wp_admin_notice( esc_html( $msgs[ $cl ] ), array( 'type' => 'success', 'additional_classes' => array( 'inline' ) ) );
 		}
 		global $wpdb;
-		$pending  = count( aw_si_live_pending() );
-		$ids      = aw_si_checklist();
-		$patterns = $ids && aw_si_ready() ? (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM %i WHERE label LIKE %s AND id IN (' . implode( ',', array_map( 'intval', $ids ) ) . ')', aw_si_table( 'keywords' ), '%{%' ) ) : 0; // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.NotPrepared -- integers.
+		$pending  = count( insightweb_live_pending() );
+		$ids      = insightweb_checklist();
+		$patterns = $ids && insightweb_ready() ? (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM %i WHERE label LIKE %s AND id IN (' . implode( ',', array_map( 'intval', $ids ) ) . ')', insightweb_kw_table( 'keywords' ), '%{%' ) ) : 0; // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.NotPrepared -- integers.
 		$total    = count( $ids ) - $patterns;
 		echo '<h2>' . esc_html__( 'Monthly live check', 'insightweb' ) . '</h2>';
 		/* translators: 1: keywords checked this month, 2: searchable keywords on the list. */
@@ -372,23 +372,23 @@ add_action(
 			$line .= ' ' . sprintf( _n( '%d Directory pattern ({district}) is on the list but is not searched.', '%d Directory patterns ({district}) are on the list but are not searched.', $patterns, 'insightweb' ), $patterns );
 		}
 		echo '<p>' . esc_html( $line ) . '</p>';
-		$token = get_transient( 'aw_si_live_new_' . get_current_user_id() );
-		if ( $token && aw_si_live_token_ok( (string) $token ) ) {
+		$token = get_transient( 'insightweb_live_new_' . get_current_user_id() );
+		if ( $token && insightweb_live_token_ok( (string) $token ) ) {
 			echo '<div class="notice notice-info inline"><p>' . esc_html__( 'Drag this button to your bookmarks bar (it works for 2 hours), open google.com in this browser and click it. A small window opens here and the check runs in the Google tab, 8–15 seconds per keyword. Nothing is sent to GA4.', 'insightweb' ) . '</p>';
 			// The javascript: link is the bookmarklet itself; esc_url() would strip it, so it is built from rawurlencode() only.
-			echo '<p><a class="button button-primary" href="' . esc_attr( aw_si_bookmarklet( (string) $token ) ) . '">' . esc_html__( 'AW live check', 'insightweb' ) . '</a></p></div>';
+			echo '<p><a class="button button-primary" href="' . esc_attr( insightweb_bookmarklet( (string) $token ) ) . '">' . esc_html__( 'AW live check', 'insightweb' ) . '</a></p></div>';
 		}
 		echo '<form method="post">';
 		wp_nonce_field( 'bulk-checklist' );
-		echo '<p><button type="submit" name="aw_si_cl" value="start" class="button button-primary">' . esc_html__( 'Start live check', 'insightweb' ) . '</button> ';
-		echo '<button type="submit" name="aw_si_cl" value="rebuild" class="button">' . esc_html__( 'Rebuild the list from the rules', 'insightweb' ) . '</button></p>';
+		echo '<p><button type="submit" name="insightweb_cl" value="start" class="button button-primary">' . esc_html__( 'Start live check', 'insightweb' ) . '</button> ';
+		echo '<button type="submit" name="insightweb_cl" value="rebuild" class="button">' . esc_html__( 'Rebuild the list from the rules', 'insightweb' ) . '</button></p>';
 		echo '<table class="form-table" role="presentation"><tbody><tr><th scope="row"><label for="aw-si-add">' . esc_html__( 'Add keywords', 'insightweb' ) . '</label></th><td>';
 		echo '<textarea id="aw-si-add" name="keywords" rows="3" class="large-text" placeholder="' . esc_attr__( 'One keyword per line', 'insightweb' ) . '"></textarea>';
-		echo '<p><button type="submit" name="aw_si_cl" value="add" class="button">' . esc_html__( 'Add to the list', 'insightweb' ) . '</button></p></td></tr></tbody></table>';
+		echo '<p><button type="submit" name="insightweb_cl" value="add" class="button">' . esc_html__( 'Add to the list', 'insightweb' ) . '</button></p></td></tr></tbody></table>';
 		echo '</form>';
-		$table = new AW_SI_Checklist_Table();
+		$table = new INSIGHTWEB_Checklist_Table();
 		$table->prepare_items();
-		echo '<form method="post"><input type="hidden" name="page" value="' . esc_attr( AW_SI_SLUG ) . '"><input type="hidden" name="tab" value="checklist">';
+		echo '<form method="post"><input type="hidden" name="page" value="' . esc_attr( INSIGHTWEB_SLUG ) . '"><input type="hidden" name="tab" value="checklist">';
 		$table->search_box( __( 'Search the list', 'insightweb' ), 'aw-si-cl' );
 		$table->display();
 		echo '</form>';

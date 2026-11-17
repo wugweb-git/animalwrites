@@ -1,7 +1,7 @@
 <?php
 /**
  * InsightWeb Dashboard counts: built by the job insightweb_dash_build, never while a screen loads. It sums the
- * Search Console rows Search Insights already stores (table aw_si_obs, src gsc, daily rows) for 7, 28 and 90 days and
+ * Search Console rows Search Insights already stores (table insightweb_obs, src gsc, daily rows) for 7, 28 and 90 days and
  * the same length before, and keeps the result in the transient insightweb_dash. No remote call is made.
  *
  * The job runs twice a day, once more right after the daily Search Console import, and once when the Dashboard finds
@@ -25,17 +25,17 @@ add_action( INSIGHTWEB_DASH_JOB, 'insightweb_dash_build' );
 add_action(
 	'admin_init',
 	function () {
-		if ( ! get_option( 'aw_si_off' ) && ! wp_next_scheduled( INSIGHTWEB_DASH_JOB ) ) {
+		if ( ! get_option( 'insightweb_off' ) && ! wp_next_scheduled( INSIGHTWEB_DASH_JOB ) ) {
 			wp_schedule_event( time() + MINUTE_IN_SECONDS, 'twicedaily', INSIGHTWEB_DASH_JOB );
 		}
 	}
 );
 
-// Right after the daily import (aw_si_daily runs at priority 10): count again in a separate request.
-add_action( 'aw_si_daily', 'insightweb_dash_request', 20 );
+// Right after the daily import (insightweb_daily runs at priority 10): count again in a separate request.
+add_action( 'insightweb_daily', 'insightweb_dash_request', 20 );
 
 // Delete data clears this job with the others.
-add_filter( 'aw_si_cron_hooks', fn( $h ) => array_merge( (array) $h, array( INSIGHTWEB_DASH_JOB ) ) );
+add_filter( 'insightweb_cron_hooks', fn( $h ) => array_merge( (array) $h, array( INSIGHTWEB_DASH_JOB ) ) );
 
 /**
  * Ask for a count now (the Dashboard's first view, Count now, or after the daily import): one single event, never a
@@ -58,7 +58,7 @@ function insightweb_dash_request(): bool {
  */
 function insightweb_dash_build( $why = '' ) {
 	unset( $why );
-	if ( get_option( 'aw_si_off' ) ) { // After Delete data: keep no figures.
+	if ( get_option( 'insightweb_off' ) ) { // After Delete data: keep no figures.
 		delete_transient( INSIGHTWEB_DASH );
 		return array();
 	}
@@ -67,7 +67,7 @@ function insightweb_dash_build( $why = '' ) {
 		'end'    => '',
 		'ranges' => array(),
 	);
-	if ( function_exists( 'aw_si_ready' ) && aw_si_ready() ) {
+	if ( function_exists( 'insightweb_ready' ) && insightweb_ready() ) {
 		$c = insightweb_dash_count( $c );
 	}
 	set_transient( INSIGHTWEB_DASH, $c, 2 * DAY_IN_SECONDS );
@@ -82,7 +82,7 @@ function insightweb_dash_build( $why = '' ) {
  */
 function insightweb_dash_count( array $c ): array {
 	global $wpdb;
-	$o   = aw_si_table( 'obs' );
+	$o   = insightweb_kw_table( 'obs' );
 	$end = (string) $wpdb->get_var( $wpdb->prepare( "SELECT MAX(d) FROM %i WHERE src = 'gsc' AND metric = 'total' AND period = 'day'", $o ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- background count.
 	if ( '' === $end ) {
 		return $c;
@@ -97,7 +97,7 @@ function insightweb_dash_count( array $c ): array {
 	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT d, SUM(clicks) c, SUM(impr) i, SUM(pos * impr) pw FROM %i WHERE src = 'gsc' AND metric = 'total' AND period = 'day' AND d BETWEEN %s AND %s GROUP BY d ORDER BY d", $o, $first, $end ) ) as $r ) {
 		$days[ (string) $r->d ] = array( (int) $r->c, (int) $r->i, (float) $r->pw );
 	}
-	$k = aw_si_table( 'keywords' );
+	$k = insightweb_kw_table( 'keywords' );
 	foreach ( INSIGHTWEB_DASH_RANGES as $n ) {
 		$from  = $e->modify( '-' . ( $n - 1 ) . ' days' )->format( 'Y-m-d' );
 		$pfrom = $e->modify( '-' . ( 2 * $n - 1 ) . ' days' )->format( 'Y-m-d' );

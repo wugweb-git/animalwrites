@@ -81,10 +81,10 @@ function aw_seo_overview_endpoints_status(): string {
 
 /** Status of Search Insights from its Site Health test. */
 function aw_seo_overview_si_status(): string {
-	if ( ! function_exists( 'aw_si_health_test' ) ) {
+	if ( ! function_exists( 'insightweb_health_test' ) ) {
 		return '';
 	}
-	$t = aw_si_health_test();
+	$t = insightweb_health_test();
 	return '<span class="dashicons dashicons-' . ( 'good' === $t['status'] ? 'yes' : 'warning' ) . '" aria-hidden="true"></span> ' . esc_html( $t['label'] );
 }
 
@@ -124,7 +124,7 @@ function aw_seo_modules_page() {
  */
 function aw_seo_overview_body() {
 	$faq = add_query_arg( 'page', 'aw-faq', admin_url( 'admin.php' ) );
-	$si  = function_exists( 'aw_si_url' ) && current_user_can( aw_si_cap() );
+	$si  = function_exists( 'insightweb_url' ) && current_user_can( insightweb_cap() );
 	$rm  = array(
 		'titles'   => aw_seo_overview_link( 'Rank Math → Titles & Meta', aw_seo_rank_math_url( 'rank-math-options-titles' ) ),
 		'sitemap'  => aw_seo_overview_link( 'Rank Math → Sitemap Settings', aw_seo_rank_math_url( 'rank-math-options-sitemap' ) ),
@@ -144,7 +144,7 @@ function aw_seo_overview_body() {
 	);
 	// Search Insights is InsightWeb's since 11 Nov 2026: one row, the same link, no RankWeb setting.
 	$rows[] = array(
-		'module' => '<strong>' . ( $si ? aw_seo_overview_link( 'Search Insights', aw_si_url() ) : 'Search Insights' ) . '</strong>',
+		'module' => '<strong>' . ( $si ? aw_seo_overview_link( 'Search Insights', insightweb_url() ) : 'Search Insights' ) . '</strong>',
 		'what'   => 'Search Insights is now its own plugin, InsightWeb.',
 		'where'  => '',
 		'status' => $si ? aw_seo_overview_si_status() : '',

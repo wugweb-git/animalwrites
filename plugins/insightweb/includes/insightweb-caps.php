@@ -1,7 +1,7 @@
 <?php
 /**
  * InsightWeb's own capability, manage_insightweb. It opens InsightWeb's screens and routes;
- * aw_si_cap() returns it. Settings saves keep manage_options.
+ * insightweb_cap() returns it. Settings saves keep manage_options.
  *
  * Nobody loses access:
  * - Granted to administrator and to every role that holds manage_options (or AW_SRC_CAP, when a site defines it), on

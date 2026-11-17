@@ -173,7 +173,7 @@ function aw_seo_content_advice( WP_Post $post ) {
 		'shape'     => aw_seo_advice_shape( $body['html'] ),
 		'typical'   => aw_seo_advice_type_median( $post->post_type ),
 		'questions' => array(),
-		'insights'  => function_exists( 'aw_si_ready' ) && aw_si_ready(),
+		'insights'  => function_exists( 'insightweb_ready' ) && insightweb_ready(),
 		'link_kws'  => function_exists( 'aw_link_panel_data' ) ? aw_link_panel_data( $post ) : null, // internal-links.php
 	);
 
@@ -203,12 +203,12 @@ function aw_seo_content_advice( WP_Post $post ) {
 	}
 
 	// 2. Search queries this page was shown for (Search Console, 28 days).
-	if ( $out['insights'] && function_exists( 'aw_si_object_path' ) ) {
-		$path = aw_si_object_path( 'post', $id );
+	if ( $out['insights'] && function_exists( 'insightweb_object_path' ) ) {
+		$path = insightweb_object_path( 'post', $id );
 		if ( '' !== $path ) {
 			global $wpdb;
-			$o    = aw_si_table( 'obs' );
-			$k    = aw_si_table( 'keywords' );
+			$o    = insightweb_kw_table( 'obs' );
+			$k    = insightweb_kw_table( 'keywords' );
 			$rows = (array) $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- Search Insights' own tables; editor only.
 				$wpdb->prepare(
 					"SELECT k.label, SUM( o.clicks ) AS clicks, SUM( o.impr ) AS impr, SUM( o.pos * o.impr ) / NULLIF( SUM( o.impr ), 0 ) AS pos FROM %i o JOIN %i k ON k.id = o.kw_id WHERE o.src = 'gsc' AND o.metric = 'qp' AND o.page_key = %s AND o.d >= %s GROUP BY o.kw_id ORDER BY impr DESC LIMIT 15",

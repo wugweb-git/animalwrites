@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Site Kit's plugin context, or null. */
-function aw_si_sitekit_context() {
+function insightweb_sitekit_context() {
 	if ( defined( 'GOOGLESITEKIT_PLUGIN_MAIN_FILE' ) && class_exists( '\Google\Site_Kit\Context' ) ) {
 		return new \Google\Site_Kit\Context( GOOGLESITEKIT_PLUGIN_MAIN_FILE );
 	}
@@ -32,19 +32,19 @@ function aw_si_sitekit_context() {
  * Run $callback( $module ) as the owner of the Site Kit module $slug (search-console, analytics-4, pagespeed-insights).
  * The current user is restored afterwards, also when $callback throws.
  *
- * Tests and dry runs can supply their own module with the aw_si_sitekit_module filter (return an object with get_data()).
+ * Tests and dry runs can supply their own module with the insightweb_sitekit_module filter (return an object with get_data()).
  *
  * @param string   $slug     Site Kit module slug.
  * @param callable $callback Receives the module.
  * @return mixed|WP_Error What $callback returned, or a WP_Error saying in plain words why the module cannot be used.
  */
-function aw_si_with_module( string $slug, callable $callback ) {
-	$fake = apply_filters( 'aw_si_sitekit_module', null, $slug );
+function insightweb_with_module( string $slug, callable $callback ) {
+	$fake = apply_filters( 'insightweb_sitekit_module', null, $slug );
 	if ( $fake ) {
 		return $callback( $fake );
 	}
 	if ( ! class_exists( '\Google\Site_Kit\Core\Modules\Modules' ) ) {
-		return new WP_Error( 'aw_si_sitekit', __( 'Site Kit by Google is not active.', 'insightweb' ) );
+		return new WP_Error( 'insightweb_sitekit', __( 'Site Kit by Google is not active.', 'insightweb' ) );
 	}
 	$settings = get_option( 'googlesitekit_' . $slug . '_settings' );
 	$owner    = is_array( $settings ) ? (int) ( $settings['ownerID'] ?? 0 ) : 0;
@@ -61,27 +61,27 @@ function aw_si_with_module( string $slug, callable $callback ) {
 	}
 	if ( ! $owner || ! get_userdata( $owner ) ) {
 		/* translators: %s: Site Kit module slug, e.g. search-console. */
-		return new WP_Error( 'aw_si_sitekit', sprintf( __( 'Site Kit module %s has no owner. Connect it under Site Kit → Settings.', 'insightweb' ), $slug ) );
+		return new WP_Error( 'insightweb_sitekit', sprintf( __( 'Site Kit module %s has no owner. Connect it under Site Kit → Settings.', 'insightweb' ), $slug ) );
 	}
 	if ( 'search-console' === $slug && empty( $settings['propertyID'] ) ) {
-		return new WP_Error( 'aw_si_sitekit', __( 'Search Console is not connected in Site Kit. Connect it under Site Kit → Settings.', 'insightweb' ) );
+		return new WP_Error( 'insightweb_sitekit', __( 'Search Console is not connected in Site Kit. Connect it under Site Kit → Settings.', 'insightweb' ) );
 	}
 	$was = get_current_user_id();
 	wp_set_current_user( $owner ); // Site Kit binds the Google client to the current user when the module is built.
 	try {
-		$ctx = aw_si_sitekit_context();
+		$ctx = insightweb_sitekit_context();
 		if ( ! $ctx ) {
-			return new WP_Error( 'aw_si_sitekit', __( 'Site Kit by Google is not active.', 'insightweb' ) );
+			return new WP_Error( 'insightweb_sitekit', __( 'Site Kit by Google is not active.', 'insightweb' ) );
 		}
 		$module = ( new \Google\Site_Kit\Core\Modules\Modules( $ctx ) )->get_module( $slug );
 		if ( method_exists( $module, 'is_connected' ) && ! $module->is_connected() ) {
 			/* translators: %s: Site Kit module slug. */
-			return new WP_Error( 'aw_si_sitekit', sprintf( __( 'Site Kit module %s is not connected.', 'insightweb' ), $slug ) );
+			return new WP_Error( 'insightweb_sitekit', sprintf( __( 'Site Kit module %s is not connected.', 'insightweb' ), $slug ) );
 		}
 		return $callback( $module );
 	} catch ( Throwable $e ) {
 		/* translators: 1: Site Kit module slug, 2: error message. */
-		return new WP_Error( 'aw_si_sitekit', sprintf( __( 'Site Kit module %1$s could not be used: %2$s', 'insightweb' ), $slug, wp_strip_all_tags( $e->getMessage() ) ) );
+		return new WP_Error( 'insightweb_sitekit', sprintf( __( 'Site Kit module %1$s could not be used: %2$s', 'insightweb' ), $slug, wp_strip_all_tags( $e->getMessage() ) ) );
 	} finally {
 		wp_set_current_user( $was );
 	}

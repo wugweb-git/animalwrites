@@ -20,10 +20,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function aw_seo_dash_gsc(): ?array {
 	global $wpdb;
-	if ( ! aw_si_ready() ) {
+	if ( ! insightweb_ready() ) {
 		return null;
 	}
-	$o   = aw_si_table( 'obs' );
+	$o   = insightweb_kw_table( 'obs' );
 	$end = (string) $wpdb->get_var( $wpdb->prepare( "SELECT MAX(d) FROM %i WHERE src = 'gsc' AND metric = 'total' AND period = 'day'", $o ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	if ( '' === $end ) {
 		return null;
@@ -62,21 +62,21 @@ function aw_seo_dash_gsc(): ?array {
 
 /**
  * The paths in the stored 28-day 404 rows (GA4 404_view, as in the Overview's Not found box) that no redirect or old
- * slug leads away from now: the Overview's "Still 404" (aw_si_final_path()). Most views first.
+ * slug leads away from now: the Overview's "Still 404" (insightweb_final_path()). Most views first.
  *
  * @return array[] path, views.
  */
 function aw_seo_dash_nf_open(): array {
 	global $wpdb;
-	if ( ! aw_si_ready() ) {
+	if ( ! insightweb_ready() ) {
 		return array();
 	}
-	$o    = aw_si_table( 'obs' );
+	$o    = insightweb_kw_table( 'obs' );
 	$open = array();
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT txt, value FROM %i WHERE src = 'ga4' AND metric = 'nf' AND period = '28d' ORDER BY value DESC, txt", $o ) ) as $r ) {
 		$path = (string) $r->txt;
-		if ( ! aw_si_nf_is_test( $path ) && untrailingslashit( aw_si_final_path( $path ) ) === untrailingslashit( $path ) ) {
+		if ( ! insightweb_nf_is_test( $path ) && untrailingslashit( insightweb_final_path( $path ) ) === untrailingslashit( $path ) ) {
 			$open[] = array(
 				'path'  => $path,
 				'views' => (int) $r->value,
@@ -87,25 +87,25 @@ function aw_seo_dash_nf_open(): array {
 }
 
 /**
- * One row per source (aw_si_sources()), problems first. The same states as the Overview's Sources box and notices:
- * Failed (aw_si_run_problem()), Late (ran before, now aw_si_stale()), Refused (a rising source the service refuses,
- * aw_si_rising_blocked(): a known limit, not a problem), Not run, OK.
+ * One row per source (insightweb_sources()), problems first. The same states as the Overview's Sources box and notices:
+ * Failed (insightweb_run_problem()), Late (ran before, now insightweb_stale()), Refused (a rising source the service refuses,
+ * insightweb_rising_blocked(): a known limit, not a problem), Not run, OK.
  *
  * @return array[] name, last (Unix or 0), status (failed, late, ok, refused, notrun), problem (bool).
  */
 function aw_seo_dash_sources(): array {
-	$runs = aw_si_runs();
+	$runs = insightweb_runs();
 	$rows = array();
-	foreach ( aw_si_sources() as $src => $s ) {
+	foreach ( insightweb_sources() as $src => $s ) {
 		$ok  = (int) ( $runs[ $src ]['ok'] ?? 0 );
-		$err = aw_si_run_problem( $src );
-		if ( $err && aw_si_rising_blocked( $src ) ) {
+		$err = insightweb_run_problem( $src );
+		if ( $err && insightweb_rising_blocked( $src ) ) {
 			$status = 'refused';
 		} elseif ( $err ) {
 			$status = 'failed';
 		} elseif ( ! $ok ) {
 			$status = 'notrun';
-		} elseif ( aw_si_stale( $src ) ) {
+		} elseif ( insightweb_stale( $src ) ) {
 			$status = 'late';
 		} else {
 			$status = 'ok';
@@ -119,14 +119,14 @@ function aw_seo_dash_sources(): array {
 		);
 	}
 	$order = array_flip( array( 'failed', 'late', 'refused', 'notrun', 'ok' ) );
-	usort( $rows, fn( $a, $b ) => $order[ $a['status'] ] <=> $order[ $b['status'] ] ); // stable: aw_si_sources() order within a status
+	usort( $rows, fn( $a, $b ) => $order[ $a['status'] ] <=> $order[ $b['status'] ] ); // stable: insightweb_sources() order within a status
 	return $rows;
 }
 
 add_action(
 	'wp_dashboard_setup',
 	function () {
-		if ( ! current_user_can( aw_si_cap() ) ) {
+		if ( ! current_user_can( insightweb_cap() ) ) {
 			return; // Search Insights' own capability
 		}
 		wp_add_dashboard_widget(
@@ -200,7 +200,7 @@ add_action(
 						'status' => '<span class="dashicons dashicons-' . esc_attr( $s[0] ) . '" style="color:' . esc_attr( $s[1] ) . '" aria-hidden="true"></span> ' . esc_html( $s[2] ),
 					);
 				}
-				aw_si_simple_table(
+				insightweb_simple_table(
 					'seo-sources',
 					array(
 						'source' => esc_html__( 'Source', 'insightweb' ),
@@ -222,7 +222,7 @@ add_action(
 							'views' => esc_html( number_format_i18n( $r['views'] ) ),
 						);
 					}
-					aw_si_simple_table(
+					insightweb_simple_table(
 						'seo-404s',
 						array(
 							'path'  => esc_html__( 'Path', 'insightweb' ),
@@ -236,7 +236,7 @@ add_action(
 				}
 				echo '</details>';
 
-				echo '<p><a href="' . esc_url( aw_si_url() ) . '">' . esc_html__( 'Search Insights', 'insightweb' ) . '</a></p>';
+				echo '<p><a href="' . esc_url( insightweb_url() ) . '">' . esc_html__( 'Search Insights', 'insightweb' ) . '</a></p>';
 			}
 		);
 	},

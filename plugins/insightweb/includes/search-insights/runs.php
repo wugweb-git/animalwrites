@@ -1,6 +1,6 @@
 <?php
 /**
- * Run log per source (option aw_si_runs): last good run, last error, rows written. Feeds the "last updated" notices on
+ * Run log per source (option insightweb_runs): last good run, last error, rows written. Feeds the "last updated" notices on
  * every tab and the Site Health test. A failed run never clears the last good data (plan §5, failure rule).
  *
  * @package insightweb
@@ -10,14 +10,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_SI_RUNS = 'aw_si_runs';
+const INSIGHTWEB_RUNS = 'insightweb_runs';
 
 /**
- * Sources and how often each should run. Later phases add theirs through the aw_si_sources filter.
+ * Sources and how often each should run. Later phases add theirs through the insightweb_sources filter.
  *
  * @return array<string, array{label: string, every: int}>
  */
-function aw_si_sources(): array {
+function insightweb_sources(): array {
 	$s = array(
 		'gsc'    => array(
 			'label' => __( 'Search Console (Site Kit)', 'insightweb' ),
@@ -29,11 +29,11 @@ function aw_si_sources(): array {
 		),
 		'rollup' => array(
 			/* translators: %d: days. */
-			'label' => sprintf( __( 'Retention (%d-day rollup)', 'insightweb' ), aw_si_keep_days() ),
+			'label' => sprintf( __( 'Retention (%d-day rollup)', 'insightweb' ), insightweb_keep_days() ),
 			'every' => DAY_IN_SECONDS,
 		),
 	);
-	return (array) apply_filters( 'aw_si_sources', $s );
+	return (array) apply_filters( 'insightweb_sources', $s );
 }
 
 /**
@@ -42,7 +42,7 @@ function aw_si_sources(): array {
  *
  * @param string $name Constant name, e.g. AW_CLARITY_TOKEN.
  */
-function aw_si_key( string $name ): string {
+function insightweb_key( string $name ): string {
 	if ( function_exists( 'aw_key' ) ) {
 		return aw_key( $name );
 	}
@@ -62,8 +62,8 @@ add_filter(
 );
 
 /** The run log: source => ok, error, info. */
-function aw_si_runs(): array {
-	$r = get_option( AW_SI_RUNS, array() );
+function insightweb_runs(): array {
+	$r = get_option( INSIGHTWEB_RUNS, array() );
 	return is_array( $r ) ? $r : array();
 }
 
@@ -72,11 +72,11 @@ function aw_si_runs(): array {
  *
  * @param string $src Source key.
  */
-function aw_si_run_start( string $src ): void {
-	$r                    = aw_si_runs();
+function insightweb_run_start( string $src ): void {
+	$r                    = insightweb_runs();
 	$r[ $src ]            = $r[ $src ] ?? array( 'ok' => 0 );
 	$r[ $src ]['started'] = time();
-	update_option( AW_SI_RUNS, $r, false );
+	update_option( INSIGHTWEB_RUNS, $r, false );
 }
 
 /**
@@ -84,13 +84,13 @@ function aw_si_run_start( string $src ): void {
  *
  * @param string $src Source key.
  */
-function aw_si_run_beat( string $src ): void {
-	$r = aw_si_runs();
+function insightweb_run_beat( string $src ): void {
+	$r = insightweb_runs();
 	if ( empty( $r[ $src ]['started'] ) ) {
 		return;
 	}
 	$r[ $src ]['beat'] = time();
-	update_option( AW_SI_RUNS, $r, false );
+	update_option( INSIGHTWEB_RUNS, $r, false );
 }
 
 /**
@@ -98,8 +98,8 @@ function aw_si_run_beat( string $src ): void {
  *
  * @param string $src Source key.
  */
-function aw_si_run_problem( string $src ): string {
-	$r   = aw_si_runs()[ $src ] ?? array();
+function insightweb_run_problem( string $src ): string {
+	$r   = insightweb_runs()[ $src ] ?? array();
 	$err = $r['error'] ?? null;
 	$end = max( (int) ( $r['ok'] ?? 0 ), (int) ( $err['time'] ?? 0 ) );
 	$last = max( (int) ( $r['started'] ?? 0 ), (int) ( $r['beat'] ?? 0 ) ); // A run in steps (URL Inspection, PageSpeed) beats at each step.
@@ -116,8 +116,8 @@ function aw_si_run_problem( string $src ): string {
  * @param string $src  Source key.
  * @param array  $info Kept as is: rows written, days fetched, warnings.
  */
-function aw_si_run_ok( string $src, array $info = array() ): void {
-	$r         = aw_si_runs();
+function insightweb_run_ok( string $src, array $info = array() ): void {
+	$r         = insightweb_runs();
 	$had       = (int) ( $r[ $src ]['rows_at'] ?? 0 );
 	$r[ $src ] = array(
 		'ok'      => time(),
@@ -127,7 +127,7 @@ function aw_si_run_ok( string $src, array $info = array() ): void {
 		// When this source last stored rows (1 Nov 2026): a run that keeps "succeeding" with 0 rows is a failing source.
 		'rows_at' => ! array_key_exists( 'rows', $info ) || (int) $info['rows'] > 0 ? time() : ( $had ? $had : time() ),
 	);
-	update_option( AW_SI_RUNS, $r, false );
+	update_option( INSIGHTWEB_RUNS, $r, false );
 }
 
 /**
@@ -136,14 +136,14 @@ function aw_si_run_ok( string $src, array $info = array() ): void {
  * @param string $src     Source key.
  * @param string $message What went wrong, in plain words.
  */
-function aw_si_run_fail( string $src, string $message ): void {
-	$r                  = aw_si_runs();
+function insightweb_run_fail( string $src, string $message ): void {
+	$r                  = insightweb_runs();
 	$r[ $src ]          = $r[ $src ] ?? array( 'ok' => 0 );
 	$r[ $src ]['error'] = array(
 		'time'    => time(),
 		'message' => $message,
 	);
-	update_option( AW_SI_RUNS, $r, false );
+	update_option( INSIGHTWEB_RUNS, $r, false );
 }
 
 /**
@@ -152,21 +152,21 @@ function aw_si_run_fail( string $src, string $message ): void {
  *
  * @param string $src Source key.
  */
-function aw_si_stale( string $src ): bool {
-	$every = (int) ( aw_si_sources()[ $src ]['every'] ?? DAY_IN_SECONDS );
-	$r     = aw_si_runs()[ $src ] ?? array();
+function insightweb_stale( string $src ): bool {
+	$every = (int) ( insightweb_sources()[ $src ]['every'] ?? DAY_IN_SECONDS );
+	$r     = insightweb_runs()[ $src ] ?? array();
 	$ok    = (int) ( $r['ok'] ?? 0 );
 	if ( (int) ( $r['started'] ?? 0 ) > $ok && time() - (int) ( $r['beat'] ?? 0 ) <= HOUR_IN_SECONDS ) {
 		return false; // A run in steps is working now (a step in the last hour): not late.
 	}
-	$since = $ok ? $ok : (int) get_option( 'aw_si_installed', time() );
+	$since = $ok ? $ok : (int) get_option( 'insightweb_installed', time() );
 	return ( time() - $since ) > $every + DAY_IN_SECONDS; // late once a day past its schedule (12 Nov 2026; was twice the schedule)
 }
 
 /** When a source's next run is due (its last good run plus its schedule), or 0 when it has never run. */
-function aw_si_next_due( string $src ): int {
-	$ok = (int) ( aw_si_runs()[ $src ]['ok'] ?? 0 );
-	return $ok ? $ok + (int) ( aw_si_sources()[ $src ]['every'] ?? DAY_IN_SECONDS ) : 0;
+function insightweb_next_due( string $src ): int {
+	$ok = (int) ( insightweb_runs()[ $src ]['ok'] ?? 0 );
+	return $ok ? $ok + (int) ( insightweb_sources()[ $src ]['every'] ?? DAY_IN_SECONDS ) : 0;
 }
 
 /**
@@ -175,8 +175,8 @@ function aw_si_next_due( string $src ): int {
  *
  * @param string $src Source key.
  */
-function aw_si_rows_dry_days( string $src ): int {
-	$r = aw_si_runs()[ $src ] ?? array();
+function insightweb_rows_dry_days( string $src ): int {
+	$r = insightweb_runs()[ $src ] ?? array();
 	if ( empty( $r['ok'] ) || ! array_key_exists( 'rows', (array) ( $r['info'] ?? array() ) ) || (int) $r['info']['rows'] > 0 || empty( $r['rows_at'] ) ) {
 		return 0;
 	}

@@ -17,7 +17,7 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
 /**
  * The Pages tab list table.
  */
-class AW_SI_Pages_Table extends WP_List_Table {
+class INSIGHTWEB_Pages_Table extends WP_List_Table {
 
 	/**
 	 * All rows (path => figures), read once.
@@ -40,7 +40,7 @@ class AW_SI_Pages_Table extends WP_List_Table {
 	/** Every row, cached for the screen. */
 	private function all(): array {
 		if ( null === $this->all ) {
-			$this->all = aw_si_pages_data();
+			$this->all = insightweb_pages_data();
 		}
 		return $this->all;
 	}
@@ -107,7 +107,7 @@ class AW_SI_Pages_Table extends WP_List_Table {
 			'ref'       => fn( $r ) => ! empty( $r['ref'] ),
 			'conflicts' => fn( $r ) => ! empty( $r['conflicts'] ),
 			'noted'     => fn( $r ) => ! empty( $r['note'] ),
-			'lowseo'    => fn( $r ) => isset( $r['rm_score'] ) && $r['rm_score'] < AW_SI_RM_LOW,
+			'lowseo'    => fn( $r ) => isset( $r['rm_score'] ) && $r['rm_score'] < INSIGHTWEB_RM_LOW,
 			'unindexed' => fn( $r ) => isset( $r['index'] ) && 0 === $r['index'],
 		);
 	}
@@ -122,14 +122,14 @@ class AW_SI_Pages_Table extends WP_List_Table {
 			'conflicts' => __( 'With conflicts', 'insightweb' ),
 			'noted'     => __( 'With Clarity notes', 'insightweb' ),
 			/* translators: %d: score limit, e.g. 50. */
-			'lowseo'    => sprintf( __( 'Rank Math score under %d', 'insightweb' ), AW_SI_RM_LOW ),
+			'lowseo'    => sprintf( __( 'Rank Math score under %d', 'insightweb' ), INSIGHTWEB_RM_LOW ),
 			'unindexed' => __( 'Not indexed (URL Inspection)', 'insightweb' ),
 		);
 		$current = $this->arg( 'view' ) ? $this->arg( 'view' ) : 'all';
 		$out     = array();
 		foreach ( $this->view_tests() as $key => $test ) {
 			$n           = count( array_filter( $this->all(), $test ) );
-			$out[ $key ] = '<a href="' . esc_url( add_query_arg( 'view', $key, aw_si_url( 'pages' ) ) ) . '"' . ( $key === $current ? ' class="current" aria-current="page"' : '' ) . '>' . esc_html( $labels[ $key ] ) . ' <span class="count">(' . esc_html( number_format_i18n( $n ) ) . ')</span></a>';
+			$out[ $key ] = '<a href="' . esc_url( add_query_arg( 'view', $key, insightweb_url( 'pages' ) ) ) . '"' . ( $key === $current ? ' class="current" aria-current="page"' : '' ) . '>' . esc_html( $labels[ $key ] ) . ' <span class="count">(' . esc_html( number_format_i18n( $n ) ) . ')</span></a>';
 		}
 		return $out;
 	}
@@ -159,7 +159,7 @@ class AW_SI_Pages_Table extends WP_List_Table {
 				return $asc ? $c : -$c;
 			}
 		);
-		$per                   = $this->get_items_per_page( 'aw_si_pages_per_page', 50 );
+		$per                   = $this->get_items_per_page( 'insightweb_pages_per_page', 50 );
 		$paged                 = max( 1, $this->get_pagenum() );
 		$this->items           = array_slice( $rows, ( $paged - 1 ) * $per, $per );
 		$this->_column_headers = array( $this->get_columns(), array(), $this->get_sortable_columns(), 'path' );
@@ -195,7 +195,7 @@ class AW_SI_Pages_Table extends WP_List_Table {
 			$out .= ' — <span class="post-state"><span class="dashicons dashicons-flag" aria-hidden="true"></span> ' . esc_html( sprintf( __( 'Page quality (%s)', 'insightweb' ), implode( ', ', $why ) ) ) . '</span>';
 		}
 		$actions = array(
-			'note' => '<a href="' . esc_url( add_query_arg( 'note', rawurlencode( $item['path'] ), aw_si_url( 'pages' ) ) ) . '">' . esc_html__( 'Add Clarity note', 'insightweb' ) . '</a>',
+			'note' => '<a href="' . esc_url( add_query_arg( 'note', rawurlencode( $item['path'] ), insightweb_url( 'pages' ) ) ) . '">' . esc_html__( 'Add Clarity note', 'insightweb' ) . '</a>',
 		);
 		return $out . $this->row_actions( $actions );
 	}
@@ -226,7 +226,7 @@ class AW_SI_Pages_Table extends WP_List_Table {
 		if ( empty( $item['ai'] ) ) {
 			return '–';
 		}
-		return esc_html( number_format_i18n( (int) $item['ai'] ) ) . '<br><span class="description">' . aw_si_ref_top( (array) ( $item['ai_by'] ?? array() ) ) . '</span>';
+		return esc_html( number_format_i18n( (int) $item['ai'] ) ) . '<br><span class="description">' . insightweb_ref_top( (array) ( $item['ai_by'] ?? array() ) ) . '</span>';
 	}
 
 	/**
@@ -238,7 +238,7 @@ class AW_SI_Pages_Table extends WP_List_Table {
 		if ( empty( $item['ref'] ) ) {
 			return '–';
 		}
-		return esc_html( number_format_i18n( (int) $item['ref'] ) ) . '<br><span class="description">' . aw_si_ref_top( (array) ( $item['ref_by'] ?? array() ) ) . '</span>';
+		return esc_html( number_format_i18n( (int) $item['ref'] ) ) . '<br><span class="description">' . insightweb_ref_top( (array) ( $item['ref_by'] ?? array() ) ) . '</span>';
 	}
 
 	/**

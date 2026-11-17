@@ -3,7 +3,7 @@
  * Names and site icons of the referring sources (Top referrers, AI referrals, the Pages columns).
  *
  * The icon comes from the publishers' icons (aw_favicon_url() in Kits Core) when the host is a known publisher, else
- * from option aw_si_ref_icons (host => attachment ID, 0 = tried and none found). That option fills on Kits Core's hourly
+ * from option insightweb_ref_icons (host => attachment ID, 0 = tried and none found). That option fills on Kits Core's hourly
  * aw_fetch_favicons event, five hosts a run: Google's favicon service, then the host's /favicon.ico, saved once into
  * the Media Library as "Favicon: host". Nothing is fetched while a page is drawn; until then a core dashicon shows.
  *
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_SI_REF_ICONS = 'aw_si_ref_icons';
+const INSIGHTWEB_REF_ICONS = 'insightweb_ref_icons';
 
 /**
  * The site a GA4 source stands for: "ig" and l.instagram.com are Instagram, t.co is X, and so on. '' when the source is
@@ -22,7 +22,7 @@ const AW_SI_REF_ICONS = 'aw_si_ref_icons';
  *
  * @param string $src GA4 session source.
  */
-function aw_si_ref_host( string $src ): string {
+function insightweb_ref_host( string $src ): string {
 	$src   = strtolower( trim( $src ) );
 	$alias = array(
 		'ig'               => 'instagram.com',
@@ -58,11 +58,11 @@ function aw_si_ref_host( string $src ): string {
  *
  * @param string $src GA4 session source.
  */
-function aw_si_ref_icon( string $src ): string {
-	$host = aw_si_ref_host( $src );
+function insightweb_ref_icon( string $src ): string {
+	$host = insightweb_ref_host( $src );
 	$url  = '' !== $host && function_exists( 'aw_favicon_url' ) ? aw_favicon_url( $host ) : '';
 	if ( '' === $url && '' !== $host ) {
-		$id  = (int) ( ( (array) get_option( AW_SI_REF_ICONS, array() ) )[ $host ] ?? 0 );
+		$id  = (int) ( ( (array) get_option( INSIGHTWEB_REF_ICONS, array() ) )[ $host ] ?? 0 );
 		$url = $id ? (string) wp_get_attachment_image_url( $id, 'thumbnail' ) : '';
 	}
 	if ( '' === $url ) {
@@ -77,8 +77,8 @@ function aw_si_ref_icon( string $src ): string {
  *
  * @param string $src GA4 session source.
  */
-function aw_si_referrer_label( string $src ): string {
-	$host  = aw_si_ref_host( $src );
+function insightweb_referrer_label( string $src ): string {
+	$host  = insightweb_ref_host( $src );
 	$names = array(
 		'instagram.com'         => 'Instagram',
 		'facebook.com'          => 'Facebook',
@@ -100,7 +100,7 @@ function aw_si_referrer_label( string $src ): string {
 		'bing.com'              => 'Bing',
 		'duckduckgo.com'        => 'DuckDuckGo',
 	);
-	$names = (array) apply_filters( 'aw_si_referrer_names', $names );
+	$names = (array) apply_filters( 'insightweb_referrer_names', $names );
 	if ( '' === $host ) {
 		return trim( $src );
 	}
@@ -108,17 +108,17 @@ function aw_si_referrer_label( string $src ): string {
 }
 
 /**
- * Rows of one source each, merged into one row per name (aw_si_referrer_label()): the number fields are added up, the
+ * Rows of one source each, merged into one row per name (insightweb_referrer_label()): the number fields are added up, the
  * earliest "since" is kept. Order: as the first row of each name came.
  *
  * @param object[] $rows   Rows with a txt field.
  * @param string[] $fields Number fields to add up.
  * @return object[] Rows with txt = the source of the biggest row and label = the name.
  */
-function aw_si_ref_merge( array $rows, array $fields ): array {
+function insightweb_ref_merge( array $rows, array $fields ): array {
 	$out = array();
 	foreach ( $rows as $r ) {
-		$label = aw_si_referrer_label( (string) $r->txt );
+		$label = insightweb_referrer_label( (string) $r->txt );
 		$key   = strtolower( $label );
 		if ( ! isset( $out[ $key ] ) ) {
 			$out[ $key ]        = clone $r;
@@ -140,18 +140,18 @@ function aw_si_ref_merge( array $rows, array $fields ): array {
  *
  * @param array $by Source => sessions.
  */
-function aw_si_ref_top( array $by ): string {
+function insightweb_ref_top( array $by ): string {
 	$n   = array();
 	$src = array();
 	foreach ( $by as $s => $v ) {
-		$label         = aw_si_referrer_label( (string) $s );
+		$label         = insightweb_referrer_label( (string) $s );
 		$n[ $label ]   = ( $n[ $label ] ?? 0 ) + (int) $v;
 		$src[ $label ] = $src[ $label ] ?? (string) $s;
 	}
 	arsort( $n );
 	$out = array();
 	foreach ( array_slice( array_keys( $n ), 0, 2 ) as $label ) {
-		$out[] = aw_si_ref_icon( $src[ $label ] ) . ' ' . esc_html( (string) $label );
+		$out[] = insightweb_ref_icon( $src[ $label ] ) . ' ' . esc_html( (string) $label );
 	}
 	return implode( ', ', $out );
 }
@@ -161,24 +161,24 @@ function aw_si_ref_top( array $by ): string {
  *
  * @param string $src GA4 session source.
  */
-function aw_si_ref_html( string $src ): string {
-	return aw_si_ref_icon( $src ) . ' ' . esc_html( aw_si_referrer_label( $src ) );
+function insightweb_ref_html( string $src ): string {
+	return insightweb_ref_icon( $src ) . ' ' . esc_html( insightweb_referrer_label( $src ) );
 }
 
 /** The hosts the Overview shows (the 90 days of referral and AI rows) that have no icon yet and were not tried. */
-function aw_si_ref_icons_wanted(): array {
+function insightweb_ref_icons_wanted(): array {
 	global $wpdb;
-	if ( ! function_exists( 'aw_si_ready' ) || ! aw_si_ready() ) {
+	if ( ! function_exists( 'insightweb_ready' ) || ! insightweb_ready() ) {
 		return array();
 	}
-	$o     = aw_si_table( 'obs' );
+	$o     = insightweb_kw_table( 'obs' );
 	$since = ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( '-90 days' )->format( 'Y-m-d' );
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	$srcs = (array) $wpdb->get_col( $wpdb->prepare( "SELECT txt FROM %i WHERE src = 'ga4' AND metric IN ('ref', 'ai') AND period = 'day' AND d >= %s GROUP BY txt ORDER BY SUM(value) DESC LIMIT 60", $o, $since ) );
-	$have = (array) get_option( AW_SI_REF_ICONS, array() );
+	$have = (array) get_option( INSIGHTWEB_REF_ICONS, array() );
 	$want = array();
 	foreach ( $srcs as $src ) {
-		$host = aw_si_ref_host( (string) $src );
+		$host = insightweb_ref_host( (string) $src );
 		if ( '' !== $host && ! array_key_exists( $host, $have ) && ( ! function_exists( 'aw_favicon_url' ) || '' === aw_favicon_url( $host ) ) ) {
 			$want[ $host ] = true;
 		}
@@ -190,14 +190,14 @@ function aw_si_ref_icons_wanted(): array {
 add_action(
 	'aw_fetch_favicons',
 	function () {
-		$want = array_slice( aw_si_ref_icons_wanted(), 0, 5 );
+		$want = array_slice( insightweb_ref_icons_wanted(), 0, 5 );
 		if ( ! $want ) {
 			return;
 		}
 		require_once ABSPATH . 'wp-admin/includes/file.php';
 		require_once ABSPATH . 'wp-admin/includes/image.php';
 		require_once ABSPATH . 'wp-admin/includes/media.php';
-		$have  = (array) get_option( AW_SI_REF_ICONS, array() );
+		$have  = (array) get_option( INSIGHTWEB_REF_ICONS, array() );
 		$types = array(
 			'image/png'                => 'png',
 			'image/x-icon'             => 'ico',
@@ -236,7 +236,7 @@ add_action(
 			}
 			$have[ $host ] = $att;
 		}
-		update_option( AW_SI_REF_ICONS, $have, false );
+		update_option( INSIGHTWEB_REF_ICONS, $have, false );
 	},
 	30
 );

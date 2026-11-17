@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 add_filter(
-	'aw_si_sources',
+	'insightweb_sources',
 	function ( $s ) {
 		$s['ga4'] = array(
 			'label' => __( 'GA4 (Site Kit)', 'insightweb' ),
@@ -21,7 +21,7 @@ add_filter(
 			'label' => __( 'PageSpeed (Site Kit)', 'insightweb' ),
 			'every' => WEEK_IN_SECONDS,
 		);
-		if ( aw_si_clarity_on() ) { // Listed only once the owner has added the token, so it never shows as late before.
+		if ( insightweb_clarity_on() ) { // Listed only once the owner has added the token, so it never shows as late before.
 			$s['clarity'] = array(
 				'label' => __( 'Clarity', 'insightweb' ),
 				'every' => DAY_IN_SECONDS,
@@ -33,7 +33,7 @@ add_filter(
 
 // Monthly rows keep the last value of rates, scores and notes (sums would mean nothing); counts are summed.
 add_filter(
-	'aw_si_last_value_metrics',
+	'insightweb_last_value_metrics',
 	function ( $last ) {
 		foreach ( array( 'score', 'lcp', 'tbt', 'cls' ) as $m ) {
 			$last[] = 'psi:' . $m . '-mobile';
@@ -48,31 +48,31 @@ add_filter(
 	}
 );
 
-/** Days the daily figures are kept before they become monthly totals (RankWeb → Settings, AW_SI_KEEP_DAYS). */
-function aw_si_keep_days(): int {
-	return max( 1, defined( 'AW_SI_KEEP_DAYS' ) ? (int) AW_SI_KEEP_DAYS : 90 );
+/** Days the daily figures are kept before they become monthly totals (RankWeb → Settings, INSIGHTWEB_KEEP_DAYS). */
+function insightweb_keep_days(): int {
+	return max( 1, defined( 'INSIGHTWEB_KEEP_DAYS' ) ? (int) INSIGHTWEB_KEEP_DAYS : 90 );
 }
 
 /** Cron hooks of every Search Insights job, for scheduling, Delete data and deactivation. */
-function aw_si_cron_hooks(): array {
-	return (array) apply_filters( 'aw_si_cron_hooks', array( 'aw_si_daily', 'aw_si_rollup', AW_SI_GA4_CRON, AW_SI_PSI_CRON, AW_SI_PSI_MORE, AW_SI_CLARITY_CRON, AW_SI_CLARITY_RETRY, AW_SI_BING_CRON ) );
+function insightweb_cron_hooks(): array {
+	return (array) apply_filters( 'insightweb_cron_hooks', array( 'insightweb_daily', 'insightweb_rollup', INSIGHTWEB_GA4_CRON, INSIGHTWEB_PSI_CRON, INSIGHTWEB_PSI_MORE, INSIGHTWEB_CLARITY_CRON, INSIGHTWEB_CLARITY_RETRY, INSIGHTWEB_BING_CRON ) );
 }
 
 add_action(
 	'init',
 	function () {
-		if ( get_option( 'aw_si_off' ) ) {
+		if ( get_option( 'insightweb_off' ) ) {
 			return;
 		}
 		$tz = wp_timezone();
-		if ( ! wp_next_scheduled( AW_SI_GA4_CRON ) ) {
-			wp_schedule_event( ( new DateTimeImmutable( 'tomorrow 07:20', $tz ) )->getTimestamp(), 'daily', AW_SI_GA4_CRON );
+		if ( ! wp_next_scheduled( INSIGHTWEB_GA4_CRON ) ) {
+			wp_schedule_event( ( new DateTimeImmutable( 'tomorrow 07:20', $tz ) )->getTimestamp(), 'daily', INSIGHTWEB_GA4_CRON );
 		}
-		if ( ! wp_next_scheduled( AW_SI_PSI_CRON ) ) {
-			wp_schedule_event( ( new DateTimeImmutable( 'next sunday 06:00', $tz ) )->getTimestamp(), 'weekly', AW_SI_PSI_CRON );
+		if ( ! wp_next_scheduled( INSIGHTWEB_PSI_CRON ) ) {
+			wp_schedule_event( ( new DateTimeImmutable( 'next sunday 06:00', $tz ) )->getTimestamp(), 'weekly', INSIGHTWEB_PSI_CRON );
 		}
-		if ( aw_si_clarity_on() && ! wp_next_scheduled( AW_SI_CLARITY_CRON ) ) {
-			wp_schedule_event( ( new DateTimeImmutable( 'tomorrow 06:30', $tz ) )->getTimestamp(), 'daily', AW_SI_CLARITY_CRON );
+		if ( insightweb_clarity_on() && ! wp_next_scheduled( INSIGHTWEB_CLARITY_CRON ) ) {
+			wp_schedule_event( ( new DateTimeImmutable( 'tomorrow 06:30', $tz ) )->getTimestamp(), 'daily', INSIGHTWEB_CLARITY_CRON );
 		}
 	}
 );
@@ -83,8 +83,8 @@ add_action(
  *
  * @return array<string, string> old path => new path.
  */
-function aw_si_redirect_map(): array {
-	$map = get_transient( 'aw_si_redirects' );
+function insightweb_redirect_map(): array {
+	$map = get_transient( 'insightweb_redirects' );
 	if ( is_array( $map ) ) {
 		return $map;
 	}
@@ -93,7 +93,7 @@ function aw_si_redirect_map(): array {
 	$table = $wpdb->prefix . 'rank_math_redirections';
 	if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) === $table ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT sources, url_to FROM %i WHERE status = 'active' AND header_code IN (301, 302, 307, 308)", $table ) ) as $r ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-			$to = aw_si_path( (string) $r->url_to );
+			$to = insightweb_path( (string) $r->url_to );
 			foreach ( (array) maybe_unserialize( $r->sources ) as $s ) {
 				if ( 'exact' === ( $s['comparison'] ?? '' ) && '' !== (string) ( $s['pattern'] ?? '' ) && '' !== $to ) {
 					$map[ '/' . trim( (string) $s['pattern'], '/' ) ] = $to;
@@ -104,13 +104,13 @@ function aw_si_redirect_map(): array {
 	// Old slugs WordPress itself redirects (wp_old_slug_redirect): the same path with the old slug.
 	$old = $wpdb->get_results( "SELECT m.post_id, m.meta_value FROM {$wpdb->postmeta} m JOIN {$wpdb->posts} p ON p.ID = m.post_id AND p.post_status = 'publish' WHERE m.meta_key = '_wp_old_slug' LIMIT 5000" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	foreach ( (array) $old as $r ) {
-		$now  = aw_si_object_path( 'post', (int) $r->post_id );
+		$now  = insightweb_object_path( 'post', (int) $r->post_id );
 		$slug = basename( untrailingslashit( $now ) );
 		if ( '' !== $now && '' !== $slug && (string) $r->meta_value !== $slug ) {
 			$map[ substr( untrailingslashit( $now ), 0, -strlen( $slug ) ) . $r->meta_value ] = $now;
 		}
 	}
-	set_transient( 'aw_si_redirects', $map, 12 * HOUR_IN_SECONDS );
+	set_transient( 'insightweb_redirects', $map, 12 * HOUR_IN_SECONDS );
 	return $map;
 }
 
@@ -119,8 +119,8 @@ function aw_si_redirect_map(): array {
  *
  * @return array<int, array{0: string, 1: string}> [PHP pattern, target path with $1 …].
  */
-function aw_si_redirect_rules(): array {
-	$rules = get_transient( 'aw_si_redirects_rx' );
+function insightweb_redirect_rules(): array {
+	$rules = get_transient( 'insightweb_redirects_rx' );
 	if ( is_array( $rules ) ) {
 		return $rules;
 	}
@@ -129,7 +129,7 @@ function aw_si_redirect_rules(): array {
 	$table = $wpdb->prefix . 'rank_math_redirections';
 	if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) === $table ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT sources, url_to FROM %i WHERE status = 'active' AND header_code IN (301, 302, 307, 308) AND sources LIKE %s ORDER BY id", $table, '%' . $wpdb->esc_like( 'regex' ) . '%' ) ) as $r ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-			$to = aw_si_path( (string) $r->url_to );
+			$to = insightweb_path( (string) $r->url_to );
 			foreach ( (array) maybe_unserialize( $r->sources ) as $s ) {
 				$pattern = (string) ( $s['pattern'] ?? '' );
 				// Rank Math matches the path without its leading slash; "ignore case" is the source's own option.
@@ -141,7 +141,7 @@ function aw_si_redirect_rules(): array {
 			}
 		}
 	}
-	set_transient( 'aw_si_redirects_rx', $rules, 12 * HOUR_IN_SECONDS );
+	set_transient( 'insightweb_redirects_rx', $rules, 12 * HOUR_IN_SECONDS );
 	return $rules;
 }
 
@@ -151,12 +151,12 @@ function aw_si_redirect_rules(): array {
  *
  * @param string $path Site path.
  */
-function aw_si_final_path( string $path ): string {
+function insightweb_final_path( string $path ): string {
 	static $map   = null;
 	static $rules = null;
 	if ( null === $map ) {
-		$map   = aw_si_redirect_map();
-		$rules = aw_si_redirect_rules();
+		$map   = insightweb_redirect_map();
+		$rules = insightweb_redirect_rules();
 	}
 	$seen = array();
 	$key  = untrailingslashit( $path );

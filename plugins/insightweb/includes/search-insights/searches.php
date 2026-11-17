@@ -15,27 +15,27 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @return array<int, array{0: string, 1: string}>
  */
-function aw_si_searches_gaps(): array {
+function insightweb_searches_gaps(): array {
 	global $wpdb;
-	if ( ! aw_si_ready() ) {
+	if ( ! insightweb_ready() ) {
 		return array();
 	}
-	$k = aw_si_table( 'keywords' );
+	$k = insightweb_kw_table( 'keywords' );
 	// A keyword-map gap note stays on the record; the gap is shown only while no page carries the search and none of
 	// our pages ranks in the top 20 for it.
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- read-only list.
 	$rows   = $wpdb->get_results( $wpdb->prepare( "SELECT label, note, status, action, impr28, pos28 FROM %i WHERE status = 'gap' OR ( note LIKE %s AND COALESCE(status, '') NOT IN ('has-page', 'conflict') AND NOT ( COALESCE(page, '') <> '' AND pos28 IS NOT NULL AND pos28 <= 20 ) ) ORDER BY impr28 DESC, label", $k, $wpdb->esc_like( 'Gap' ) . '%' ) );
 	$groups = array();
 	foreach ( (array) $rows as $r ) {
-		if ( aw_si_gap_variant_covered( (string) $r->label ) ) {
+		if ( insightweb_gap_variant_covered( (string) $r->label ) ) {
 			continue; // "order/judgement": one of the phrases has a page already.
 		}
 		$title = 0 === strpos( (string) $r->note, 'Gap' ) ? trim( (string) preg_replace( '/^Gap \([^)]*\):\s*/', '', (string) $r->note ) ) : __( 'High demand, no page yet (P2)', 'insightweb' );
 		/* translators: 1: search phrase, 2: impressions in 28 days, 3: average position. */
 		$line = null === $r->pos28 ? sprintf( __( '"%1$s": %2$s impressions (28 days)', 'insightweb' ), $r->label, number_format_i18n( (int) $r->impr28 ) ) : sprintf( __( '"%1$s": %2$s impressions (28 days), position %3$s', 'insightweb' ), $r->label, number_format_i18n( (int) $r->impr28 ), number_format_i18n( (float) $r->pos28, 1 ) );
-		if ( 'gap' === $r->status && isset( aw_si_actions()[ $r->action ] ) ) {
+		if ( 'gap' === $r->status && isset( insightweb_actions()[ $r->action ] ) ) {
 			/* translators: 1: gap line, 2: suggested page type such as "New page: guide". */
-			$line = sprintf( __( '%1$s (suggested: %2$s)', 'insightweb' ), $line, aw_si_actions()[ $r->action ] );
+			$line = sprintf( __( '%1$s (suggested: %2$s)', 'insightweb' ), $line, insightweb_actions()[ $r->action ] );
 		}
 		$groups[ $title ][] = $line;
 	}
@@ -52,19 +52,19 @@ function aw_si_searches_gaps(): array {
  *
  * @param string $label Keyword label.
  */
-function aw_si_gap_variant_covered( string $label ): bool {
+function insightweb_gap_variant_covered( string $label ): bool {
 	global $wpdb;
 	if ( ! preg_match( '#(\p{L}+)/(\p{L}+)#u', $label, $m ) ) {
 		return false;
 	}
 	static $has = null; // Every has-page phrase, read once for all the gap rows.
 	if ( null === $has ) {
-		$k = aw_si_table( 'keywords' );
+		$k = insightweb_kw_table( 'keywords' );
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- read once per request.
 		$has = array_flip( (array) $wpdb->get_col( $wpdb->prepare( "SELECT norm FROM %i WHERE status = 'has-page'", $k ) ) );
 	}
 	foreach ( array( $m[1], $m[2] ) as $alt ) {
-		if ( isset( $has[ aw_si_norm( str_replace( $m[0], $alt, $label ) ) ] ) ) {
+		if ( isset( $has[ insightweb_kw_norm( str_replace( $m[0], $alt, $label ) ) ] ) ) {
 			return true;
 		}
 	}

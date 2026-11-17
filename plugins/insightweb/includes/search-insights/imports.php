@@ -19,13 +19,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** The import kinds and their labels. */
-function aw_si_import_kinds(): array {
+function insightweb_import_kinds(): array {
 	$kinds = array(
 		'kp'     => __( 'Keyword Planner (CSV export: Keyword, Avg. monthly searches)', 'insightweb' ),
 		'trends' => __( 'Google Trends averages (paste: keyword, value; "animal welfare" = 100)', 'insightweb' ),
 		'gov'    => __( 'data.gov.in / IDSP figures (paste: state, measure, value, as of, source URL)', 'insightweb' ),
 	);
-	return (array) apply_filters( 'aw_si_import_kinds', $kinds ); // tool-imports.php adds Ubersuggest, vidIQ, OpenSEO.
+	return (array) apply_filters( 'insightweb_import_kinds', $kinds ); // tool-imports.php adds Ubersuggest, vidIQ, OpenSEO.
 }
 
 /**
@@ -36,7 +36,7 @@ function aw_si_import_kinds(): array {
  * @param string $must_have A word the header row contains (e.g. keyword).
  * @return array{0: string[], 1: array<int, array<string, string>>}
  */
-function aw_si_parse_table( string $raw, string $must_have = '' ): array {
+function insightweb_parse_table( string $raw, string $must_have = '' ): array {
 	if ( 0 === strpos( $raw, "\xFF\xFE" ) || 0 === strpos( $raw, "\xFE\xFF" ) || 20 < substr_count( substr( $raw, 0, 200 ), "\0" ) ) {
 		$from = str_starts_with( $raw, "\xFE\xFF" ) ? 'UTF-16BE' : 'UTF-16LE';
 		$raw  = (string) mb_convert_encoding( $raw, 'UTF-8', $from );
@@ -76,7 +76,7 @@ function aw_si_parse_table( string $raw, string $must_have = '' ): array {
  * @param string[] $head  Header.
  * @param string[] $words Words to look for, in order.
  */
-function aw_si_import_col( array $head, array $words ): string {
+function insightweb_import_col( array $head, array $words ): string {
 	foreach ( $words as $w ) {
 		foreach ( $head as $h ) {
 			if ( false !== strpos( $h, $w ) ) {
@@ -92,7 +92,7 @@ function aw_si_import_col( array $head, array $words ): string {
  *
  * @param string $v Cell text.
  */
-function aw_si_import_number( string $v ): ?float {
+function insightweb_import_number( string $v ): ?float {
 	if ( ! preg_match( '/([0-9][0-9,.]*)\s*([kKmM]?)/', $v, $m ) ) {
 		return null;
 	}
@@ -107,10 +107,10 @@ function aw_si_import_number( string $v ): ?float {
  * @param string $raw  File or pasted text.
  * @return array{rows: int, skipped: int, error: string}
  */
-function aw_si_import( string $kind, string $raw ): array {
+function insightweb_import( string $kind, string $raw ): array {
 	global $wpdb;
-	$o     = aw_si_table( 'obs' );
-	$other = apply_filters( 'aw_si_import_run', null, $kind, $raw ); // An import kind added by another file.
+	$o     = insightweb_kw_table( 'obs' );
+	$other = apply_filters( 'insightweb_import_run', null, $kind, $raw ); // An import kind added by another file.
 	if ( is_array( $other ) ) {
 		return $other;
 	}
@@ -133,12 +133,12 @@ function aw_si_import( string $kind, string $raw ): array {
 					++$out['skipped'];
 					continue;
 				}
-				$id = (int) current( aw_si_kw_ids( array( sanitize_text_field( $cells[0] ) ), 0 ) );
+				$id = (int) current( insightweb_kw_ids( array( sanitize_text_field( $cells[0] ) ), 0 ) );
 				if ( $id ) { // A new paste replaces the keyword's earlier pasted figure (the workers' rows stay).
 					$wpdb->query( $wpdb->prepare( "DELETE FROM %i WHERE src = 'trends' AND metric = 'index' AND period = '12m' AND kw_id = %d AND txt = 'import'", $o, $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 				}
 				$put(
-					$id && aw_si_obs_put(
+					$id && insightweb_obs_put(
 						$id,
 						'',
 						'trends',
@@ -153,7 +153,7 @@ function aw_si_import( string $kind, string $raw ): array {
 				);
 				continue;
 			}
-			$v = isset( $cells[2] ) ? aw_si_import_number( $cells[2] ) : null;
+			$v = isset( $cells[2] ) ? insightweb_import_number( $cells[2] ) : null;
 			if ( count( $cells ) < 3 || null === $v || '' === $cells[0] || '' === $cells[1] ) {
 				++$out['skipped'];
 				continue;
@@ -161,7 +161,7 @@ function aw_si_import( string $kind, string $raw ): array {
 			$key = sanitize_text_field( $cells[0] ) . '|' . sanitize_text_field( $cells[1] );
 			$txt = implode( ' | ', array( sanitize_text_field( $cells[0] ), sanitize_text_field( $cells[1] ), esc_url_raw( $cells[4] ?? '' ), sanitize_text_field( $cells[3] ?? '' ) ) );
 			$put(
-				aw_si_obs_put(
+				insightweb_obs_put(
 					0,
 					$key,
 					'gov',
@@ -177,28 +177,28 @@ function aw_si_import( string $kind, string $raw ): array {
 		}
 		return $out;
 	}
-	list( $head, $rows ) = aw_si_parse_table( $raw, 'keyword' );
+	list( $head, $rows ) = insightweb_parse_table( $raw, 'keyword' );
 	if ( ! $head ) {
 		$out['error'] = __( 'No header row was found. Check that the file is the right export.', 'insightweb' );
 		return $out;
 	}
-	$kcol = aw_si_import_col( $head, array( 'keyword' ) );
-	$vcol = aw_si_import_col( $head, array( 'avg. monthly searches', 'monthly searches', 'volume' ) );
+	$kcol = insightweb_import_col( $head, array( 'keyword' ) );
+	$vcol = insightweb_import_col( $head, array( 'avg. monthly searches', 'monthly searches', 'volume' ) );
 	if ( '' === $kcol || '' === $vcol ) {
 		$out['error'] = __( 'The file needs a keyword column and a volume column.', 'insightweb' );
 		return $out;
 	}
 	$labels = array_filter( array_map( fn( $r ) => sanitize_text_field( (string) $r[ $kcol ] ), $rows ) );
-	$ids    = aw_si_kw_ids( $labels, 0 );
+	$ids    = insightweb_kw_ids( $labels, 0 );
 	foreach ( $rows as $r ) {
-		$id  = (int) ( $ids[ aw_si_norm( sanitize_text_field( (string) $r[ $kcol ] ) ) ] ?? 0 );
-		$vol = aw_si_import_number( (string) $r[ $vcol ] );
+		$id  = (int) ( $ids[ insightweb_kw_norm( sanitize_text_field( (string) $r[ $kcol ] ) ) ] ?? 0 );
+		$vol = insightweb_import_number( (string) $r[ $vcol ] );
 		if ( ! $id || null === $vol ) {
 			++$out['skipped'];
 			continue;
 		}
 		$put(
-			aw_si_obs_put(
+			insightweb_obs_put(
 				$id,
 				'',
 				$kind,
@@ -215,13 +215,13 @@ function aw_si_import( string $kind, string $raw ): array {
 	return $out;
 }
 
-/** Settings tab rows: imports and paste forms (added to the form-table through aw_si_settings_rows). */
-function aw_si_import_rows(): void {
+/** Settings tab rows: imports and paste forms (added to the form-table through insightweb_settings_rows). */
+function insightweb_import_rows(): void {
 	echo '<tr><th scope="row"><label for="aw-si-import-kind">' . esc_html__( 'Imports', 'insightweb' ) . '</label></th><td>';
-	echo '<form method="post" enctype="multipart/form-data" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_si_import">';
-	wp_nonce_field( 'aw_si_import' );
+	echo '<form method="post" enctype="multipart/form-data" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="insightweb_import">';
+	wp_nonce_field( 'insightweb_import' );
 	echo '<p><select id="aw-si-import-kind" name="kind">';
-	foreach ( aw_si_import_kinds() as $k => $label ) {
+	foreach ( insightweb_import_kinds() as $k => $label ) {
 		echo '<option value="' . esc_attr( $k ) . '">' . esc_html( $label ) . '</option>';
 	}
 	echo '</select></p>';
@@ -231,8 +231,8 @@ function aw_si_import_rows(): void {
 	echo '<p class="description">' . esc_html__( 'Files are read once and deleted. Volumes and positions are stored for this month; a second import in the same month replaces the first.', 'insightweb' ) . '</p>';
 	echo '</form>';
 	global $wpdb;
-	if ( aw_si_ready() ) {
-		$o    = aw_si_table( 'obs' );
+	if ( insightweb_ready() ) {
+		$o    = insightweb_kw_table( 'obs' );
 		$last = (array) $wpdb->get_results( $wpdb->prepare( "SELECT src, MAX(fetched) f, COUNT(*) n FROM %i WHERE src IN ('kp', 'gov', 'openseo_serp') OR (src = 'trends' AND txt = 'import') GROUP BY src", $o ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		if ( $last ) {
 			echo '<ul>';
@@ -245,24 +245,24 @@ function aw_si_import_rows(): void {
 	}
 	echo '</td></tr>';
 }
-add_action( 'aw_si_settings_rows', 'aw_si_import_rows' );
+add_action( 'insightweb_settings_rows', 'insightweb_import_rows' );
 
 /**
  * Who may send an import: the Search Insights managers, or a separate sender account that has only the capability
- * aw_si_import (the owner creates that user; it can import and nothing else in Search Insights).
+ * insightweb_import (the owner creates that user; it can import and nothing else in Search Insights).
  */
-function aw_si_can_import(): bool {
-	return current_user_can( aw_si_cap() ) || current_user_can( 'aw_si_import' );
+function insightweb_can_import(): bool {
+	return current_user_can( insightweb_cap() ) || current_user_can( 'insightweb_import' );
 }
 
 add_action(
 	'admin_post_aw_si_import',
 	function () {
-		if ( ! aw_si_can_import() || ! check_admin_referer( 'aw_si_import' ) ) {
+		if ( ! insightweb_can_import() || ! check_admin_referer( 'insightweb_import' ) ) {
 			wp_die( esc_html__( 'Not allowed.', 'insightweb' ), 403 );
 		}
 		$kind = isset( $_POST['kind'] ) ? sanitize_key( wp_unslash( $_POST['kind'] ) ) : '';
-		if ( ! isset( aw_si_import_kinds()[ $kind ] ) ) {
+		if ( ! isset( insightweb_import_kinds()[ $kind ] ) ) {
 			wp_die( esc_html__( 'Unknown import.', 'insightweb' ), 400 );
 		}
 		$raw = isset( $_POST['paste'] ) ? (string) wp_unslash( $_POST['paste'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- parsed as CSV; each value is sanitised where it is stored.
@@ -291,20 +291,20 @@ add_action(
 			'rows'    => 0,
 			'skipped' => 0,
 			'error'   => __( 'Nothing to import: choose a file or paste the rows.', 'insightweb' ),
-		) : aw_si_import( $kind, $raw );
-		set_transient( 'aw_si_import_result_' . get_current_user_id(), $res + array( 'kind' => $kind ), 5 * MINUTE_IN_SECONDS );
-		wp_safe_redirect( add_query_arg( 'imported', 1, aw_si_return_url( 'settings' ) ) );
+		) : insightweb_import( $kind, $raw );
+		set_transient( 'insightweb_import_result_' . get_current_user_id(), $res + array( 'kind' => $kind ), 5 * MINUTE_IN_SECONDS );
+		wp_safe_redirect( add_query_arg( 'imported', 1, insightweb_return_url( 'settings' ) ) );
 		exit;
 	}
 );
 
 add_action(
-	'aw_si_settings_notices',
+	'insightweb_settings_notices',
 	function () {
 		if ( ! isset( $_GET['imported'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- message only.
 			return;
 		}
-		$r = get_transient( 'aw_si_import_result_' . get_current_user_id() );
+		$r = get_transient( 'insightweb_import_result_' . get_current_user_id() );
 		if ( ! is_array( $r ) ) {
 			return;
 		}
@@ -313,7 +313,7 @@ add_action(
 			return;
 		}
 		/* translators: 1: import kind, 2: rows stored, 3: rows skipped. */
-		$msg = sprintf( __( '%1$s: %2$s rows stored, %3$s skipped.', 'insightweb' ), aw_si_import_kinds()[ $r['kind'] ] ?? $r['kind'], number_format_i18n( (int) $r['rows'] ), number_format_i18n( (int) $r['skipped'] ) );
+		$msg = sprintf( __( '%1$s: %2$s rows stored, %3$s skipped.', 'insightweb' ), insightweb_import_kinds()[ $r['kind'] ] ?? $r['kind'], number_format_i18n( (int) $r['rows'] ), number_format_i18n( (int) $r['skipped'] ) );
 		if ( ! empty( $r['other'] ) ) {
 			/* translators: %s: rows. */
 			$msg .= ' ' . sprintf( __( '%s rows from another source (such as the browser checks) were left out.', 'insightweb' ), number_format_i18n( (int) $r['other'] ) );
@@ -327,7 +327,7 @@ add_action(
 );
 
 add_filter(
-	'aw_si_sources',
+	'insightweb_sources',
 	function ( $s ) {
 		$s['live'] = array(
 			'label' => __( 'Live Google check (bookmarklet)', 'insightweb' ),
@@ -340,19 +340,19 @@ add_filter(
 /**
  * The 21 Oct rankings seed stored live results (src live, 22 Oct 2026) without a run in the log, so the Live Google check
  * read "not run yet" beside its own figures. Once, the newest stored live result counts as the source's last run, marked
- * as the seed; the bookmarklet's own runs replace it (1 Nov 2026, flag aw_si_live_seed_run).
+ * as the seed; the bookmarklet's own runs replace it (1 Nov 2026, flag insightweb_live_seed_run).
  */
 add_action(
 	'admin_init',
 	function () {
-		if ( get_option( 'aw_si_live_seed_run' ) || ! aw_si_ready() || ! empty( aw_si_runs()['live']['ok'] ) ) {
+		if ( get_option( 'insightweb_live_seed_run' ) || ! insightweb_ready() || ! empty( insightweb_runs()['live']['ok'] ) ) {
 			return;
 		}
 		global $wpdb;
-		$o   = aw_si_table( 'obs' );
+		$o   = insightweb_kw_table( 'obs' );
 		$row = $wpdb->get_row( $wpdb->prepare( "SELECT MAX(d) d, COUNT(*) n FROM %i WHERE src = 'live' AND metric = 'position'", $o ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		if ( $row && $row->d && (int) $row->n > 0 ) {
-			$r         = aw_si_runs();
+			$r         = insightweb_runs();
 			$r['live'] = array(
 				'ok'      => (int) strtotime( $row->d . ' 12:00:00' ),
 				'error'   => null,
@@ -364,8 +364,8 @@ add_action(
 				),
 				'started' => 0,
 			);
-			update_option( AW_SI_RUNS, $r, false );
+			update_option( INSIGHTWEB_RUNS, $r, false );
 		}
-		update_option( 'aw_si_live_seed_run', time(), false );
+		update_option( 'insightweb_live_seed_run', time(), false );
 	}
 );
