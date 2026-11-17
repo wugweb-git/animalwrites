@@ -1,6 +1,11 @@
 <?php
 /**
- * Tools → Search Insights → Sourcing keywords: a core list table, sortable and read-only (owner, 24 Oct 2026).
+ * Tools → Search Insights → SourceWeb keywords: the keyword results report, a core list table, sortable and read-only
+ * (owner, 24 Oct 2026; rebuilt as a report on the live keyword list, 17 Nov 2026).
+ *
+ * One row per keyword RECORD from the live keyword table (aw_sourcing_kw_report): its real roles, whether its Google
+ * News search is on, the keyword's own Search Console impressions, the items each brought in over 30 days (News and
+ * Library apart) and those published items' pages' Search Console figures. Deduped by record, with no invented roles.
  * Loaded only when the tab is shown.
  *
  * @package aw-sourcing
@@ -10,24 +15,28 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/** Per Google News search: items fetched and published (News, Library) and their pages' Search Console figures. */
+/** The keyword results report: per keyword, its roles, search on/off, items fetched and published, and Search Console. */
 class AW_Sourcing_SI_Keywords_Table extends WP_List_Table {
 
-	/** @var array From aw_sourcing_keyword_stats(). */
-	private $stats;
+	/** @var array From aw_sourcing_kw_report(): {records: bool, rows: array[]}. */
+	private $report;
 
 	/** @var array path => figures over 28 days, from Search Insights (empty when it has none yet). */
 	private $pages = array();
 
-	/** @var array path => figures over 3 months: 90 days, as long as Search Insights keeps daily rows (rollup.php) (owner, 24 Oct 2026). */
+	/** @var array path => figures over 3 months (90 days). */
 	private $pages3 = array();
 
+	/** @var bool The rows carry real roles (phase 2 migrated); the roles column is shown. */
+	private $has_roles = false;
+
 	/**
-	 * @param array $stats aw_sourcing_keyword_stats() result.
+	 * @param array $report aw_sourcing_kw_report() result.
 	 */
-	public function __construct( array $stats ) {
-		parent::__construct( array( 'singular' => 'keyword', 'plural' => 'keywords', 'ajax' => false ) ); // the current screen (Search Insights moved to RankWeb, 25 Oct 2026)
-		$this->stats = $stats;
+	public function __construct( array $report ) {
+		parent::__construct( array( 'singular' => 'keyword', 'plural' => 'keywords', 'ajax' => false ) );
+		$this->report    = $report;
+		$this->has_roles = ! empty( $report['records'] );
 	}
 
 	/** @var bool Search Insights has stored a Search Console run (page rows exist), so a missing page means 0. */
@@ -48,23 +57,31 @@ class AW_Sourcing_SI_Keywords_Table extends WP_List_Table {
 
 	/** Columns. */
 	public function get_columns() {
-		return array(
-			'term'    => 'Keyword',
+		$cols = array( 'term' => 'Keyword' );
+		if ( $this->has_roles ) {
+			$cols['roles']  = 'Roles';
+			$cols['search'] = 'Search';
+		}
+		return $cols + array(
 			'news_f'  => 'Fetched: News',
 			'legal_f' => 'Fetched: Library',
 			'news_p'  => 'Published: News',
 			'legal_p' => 'Published: Library',
-			'impr'    => 'Impressions (28 days)',
-			'clicks'  => 'Clicks (28 days)',
-			'impr3'   => 'Impressions (3 months)',
-			'clicks3' => 'Clicks (3 months)',
+			'kw_impr' => 'Keyword impressions (28 days)',
+			'impr'    => 'Page impressions (28 days)',
+			'clicks'  => 'Page clicks (28 days)',
+			'impr3'   => 'Page impressions (3 months)',
+			'clicks3' => 'Page clicks (3 months)',
 		);
 	}
 
-	/** Every column sorts; numbers start high. */
+	/** Numeric columns sort (not the roles/search labels); numbers start high. */
 	protected function get_sortable_columns() {
 		$out = array();
 		foreach ( array_keys( $this->get_columns() ) as $c ) {
+			if ( in_array( $c, array( 'roles', 'search' ), true ) ) {
+				continue;
+			}
 			$out[ $c ] = array( $c, 'term' !== $c );
 		}
 		return $out;
@@ -87,10 +104,10 @@ class AW_Sourcing_SI_Keywords_Table extends WP_List_Table {
 
 	/** Rows with their figures, sorted. */
 	public function prepare_items() {
-		$rows = (array) ( $this->stats['rows'] ?? array() );
+		$rows = (array) ( $this->report['rows'] ?? array() );
 		$ids  = array();
 		foreach ( $rows as $r ) {
-			$ids = array_merge( $ids, $r['news']['published'], $r['legal']['published'] ); // only published items have a page (a draft's link is ?p=, which would read as the home page)
+			$ids = array_merge( $ids, (array) ( $r['pub_ids'] ?? array() ) ); // only published items have a page
 		}
 		$ids   = array_values( array_unique( array_map( 'intval', $ids ) ) );
 		$paths = array();
@@ -113,7 +130,7 @@ class AW_Sourcing_SI_Keywords_Table extends WP_List_Table {
 			$i  = 0;
 			$c3 = 0;
 			$i3 = 0;
-			foreach ( array_unique( array_merge( $r['news']['published'], $r['legal']['published'] ) ) as $id ) {
+			foreach ( (array) ( $r['pub_ids'] ?? array() ) as $id ) {
 				$key = $paths[ (int) $id ] ?? '';
 				$m   = $this->pages[ $key ] ?? null;
 				$m3  = $this->pages3[ $key ] ?? null;
@@ -123,14 +140,18 @@ class AW_Sourcing_SI_Keywords_Table extends WP_List_Table {
 				$i3 += $m3 ? (int) $m3['impr'] : 0;
 			}
 			$items[] = array(
-				'term'      => $r['term'],
-				'fixed'     => ! empty( $r['fixed'] ),
-				'listed'    => ! empty( $r['listed'] ),
+				'term'      => (string) $r['label'],
+				'roles'     => (int) ( $r['roles'] ?? 0 ),
+				'lang'      => (string) ( $r['lang'] ?? 'en' ),
+				'is_search' => ! empty( $r['is_search'] ),
+				'search_on' => ! empty( $r['search_on'] ),
+				'dismissed' => ! empty( $r['dismissed'] ),
 				'estimated' => ! empty( $r['estimated'] ),
-				'news_f'    => count( $r['news']['fetched'] ),
-				'legal_f'   => count( $r['legal']['fetched'] ),
-				'news_p'    => count( $r['news']['published'] ),
-				'legal_p'   => count( $r['legal']['published'] ),
+				'news_f'    => (int) $r['news_f'],
+				'legal_f'   => (int) $r['legal_f'],
+				'news_p'    => (int) $r['news_p'],
+				'legal_p'   => (int) $r['legal_p'],
+				'kw_impr'   => null === ( $r['kw_impr'] ?? null ) ? null : (int) $r['kw_impr'],
 				'impr'      => $this->has_data ? $i : null,
 				'clicks'    => $this->has_data ? $c : null,
 				'impr3'     => $this->has_data ? $i3 : null,
@@ -138,7 +159,7 @@ class AW_Sourcing_SI_Keywords_Table extends WP_List_Table {
 			);
 		}
 		$by  = sanitize_key( wp_unslash( $_GET['orderby'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification -- sorting a read-only list
-		$by  = isset( $this->get_columns()[ $by ] ) ? $by : 'news_f';
+		$by  = isset( $this->get_sortable_columns()[ $by ] ) ? $by : 'news_f';
 		$asc = 'asc' === sanitize_key( wp_unslash( $_GET['order'] ?? ( 'term' === $by ? 'asc' : 'desc' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification -- sorting a read-only list
 		usort(
 			$items,
@@ -159,10 +180,11 @@ class AW_Sourcing_SI_Keywords_Table extends WP_List_Table {
 	 */
 	protected function column_term( $item ) {
 		$notes = array();
-		if ( $item['fixed'] ) {
-			$notes[] = 'Fixed search in the workers';
-		} elseif ( ! $item['listed'] ) {
-			$notes[] = 'No longer in the Include list';
+		if ( 'en' !== $item['lang'] ) {
+			$notes[] = 'Not searched (not English)';
+		}
+		if ( $item['dismissed'] ) {
+			$notes[] = 'Suggestion dismissed';
 		}
 		if ( $item['estimated'] ) {
 			$notes[] = 'Estimated';
@@ -171,18 +193,50 @@ class AW_Sourcing_SI_Keywords_Table extends WP_List_Table {
 	}
 
 	/**
-	 * Numbers; a dash when Search Insights has no page figures yet.
+	 * The keyword's roles, as the Keywords screen names them.
+	 *
+	 * @param array $item Row.
+	 */
+	protected function column_roles( $item ) {
+		if ( ! function_exists( 'aw_sourcing_kw_roles' ) ) {
+			return '—';
+		}
+		$names = array();
+		foreach ( aw_sourcing_kw_roles() as $bit => $label ) {
+			if ( (int) $item['roles'] & $bit ) {
+				$names[] = $label;
+			}
+		}
+		return $names ? esc_html( implode( ', ', $names ) ) : '—';
+	}
+
+	/**
+	 * Whether the keyword's Google News search runs (only Include and Search keywords, English, are searches).
+	 *
+	 * @param array $item Row.
+	 */
+	protected function column_search( $item ) {
+		if ( ! $item['is_search'] ) {
+			return '—';
+		}
+		return $item['search_on']
+			? '<span class="post-state" style="color:#007017">On</span>'
+			: '<span class="post-state" style="color:#b32d2e">Off</span>';
+	}
+
+	/**
+	 * Numbers; a dash when Search Insights has no page figures yet, or the keyword has no impressions figure.
 	 *
 	 * @param array  $item Row.
 	 * @param string $col  Column.
 	 */
 	protected function column_default( $item, $col ) {
-		return null === $item[ $col ] ? '—' : esc_html( number_format_i18n( (int) $item[ $col ] ) );
+		return null === ( $item[ $col ] ?? null ) ? '—' : esc_html( number_format_i18n( (int) $item[ $col ] ) );
 	}
 
 	/** Empty list. */
 	public function no_items() {
-		echo 'No searches yet.';
+		echo 'No keywords yet.';
 	}
 
 	/**

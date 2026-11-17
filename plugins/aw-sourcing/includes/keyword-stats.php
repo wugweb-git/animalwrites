@@ -146,3 +146,86 @@ function aw_sourcing_keyword_stats( $days = 30 ) {
 
 // For aw-seo-extras (Tools → Search Insights): null there means SourceWeb is off.
 add_filter( 'aw_sourcing_keyword_items', fn( $v, $days = 30 ) => aw_sourcing_keyword_stats( $days ), 10, 2 );
+
+/**
+ * The keyword results report (owner, 17 Nov 2026): one row per keyword RECORD (not per feed), from the LIVE keyword
+ * table once phase 2 is migrated — its real roles, whether its Google News search is on, and the keyword's own Search
+ * Console impressions — with the items each brought in over $days days. Deduped by the record (so "animal welfare" and
+ * "AWBI"/"awbi" are one row each), with no invented roles. Before phase 2 it falls back to one row per Google News
+ * search from aw_sourcing_keyword_stats(), with no roles.
+ *
+ * @param int $days Days back for the item counts.
+ * @return array{records: bool, rows: array<int, array{label:string, roles:int, lang:string, is_search:bool, search_on:bool, dismissed:bool, estimated:bool, news_f:int, legal_f:int, news_p:int, legal_p:int, kw_impr:?int, pub_ids:int[]}>}
+ */
+function aw_sourcing_kw_report( $days = 30 ) {
+	$stats = (array) ( aw_sourcing_keyword_stats( $days )['rows'] ?? array() );
+	$feed  = array(); // feed id => split counts and the published item ids
+	foreach ( $stats as $id => $st ) {
+		$feed[ $id ] = array(
+			'news_f'  => (array) $st['news']['fetched'],
+			'legal_f' => (array) $st['legal']['fetched'],
+			'news_p'  => (array) $st['news']['published'],
+			'legal_p' => (array) $st['legal']['published'],
+			'est'     => (int) $st['estimated'] > 0,
+		);
+	}
+	$rows = array();
+	if ( function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() && function_exists( 'aw_sourcing_kw_records' ) ) {
+		$en_roles = defined( 'AW_KW_ROLE_INCLUDE' ) ? ( AW_KW_ROLE_INCLUDE | AW_KW_ROLE_SEARCH ) : 0;
+		foreach ( aw_sourcing_kw_records() as $r ) {
+			$roles = (int) $r['roles'];
+			$lang  = (string) ( $r['lang'] ?? 'en' );
+			$nf    = array();
+			$lf    = array();
+			$np    = array();
+			$lp    = array();
+			$est   = false;
+			foreach ( (array) ( $r['searches'] ?? array() ) as $x ) {
+				$f = $feed[ (string) ( $x['feed'] ?? '' ) ] ?? null;
+				if ( ! $f ) {
+					continue;
+				}
+				$nf  = array_merge( $nf, $f['news_f'] );
+				$lf  = array_merge( $lf, $f['legal_f'] );
+				$np  = array_merge( $np, $f['news_p'] );
+				$lp  = array_merge( $lp, $f['legal_p'] );
+				$est = $est || $f['est'];
+			}
+			$rows[] = array(
+				'label'     => (string) $r['label'],
+				'roles'     => $roles,
+				'lang'      => $lang,
+				'is_search' => 'en' === $lang && (bool) ( $roles & $en_roles ),
+				'search_on' => 'en' === $lang && (bool) ( $roles & $en_roles ) && ! empty( $r['search_on'] ),
+				'dismissed' => ! empty( $r['dismissed'] ),
+				'estimated' => $est,
+				'news_f'    => count( array_unique( array_map( 'intval', $nf ) ) ),
+				'legal_f'   => count( array_unique( array_map( 'intval', $lf ) ) ),
+				'news_p'    => count( array_unique( array_map( 'intval', $np ) ) ),
+				'legal_p'   => count( array_unique( array_map( 'intval', $lp ) ) ),
+				'kw_impr'   => isset( $r['impr28'] ) ? (int) $r['impr28'] : null,
+				'pub_ids'   => array_values( array_unique( array_map( 'intval', array_merge( $np, $lp ) ) ) ),
+			);
+		}
+		return array( 'records' => true, 'rows' => $rows );
+	}
+	// Before phase 2: one row per Google News search, no roles (the keyword table is not the lists' home yet).
+	foreach ( $stats as $st ) {
+		$rows[] = array(
+			'label'     => (string) $st['term'],
+			'roles'     => 0,
+			'lang'      => 'en',
+			'is_search' => true,
+			'search_on' => true,
+			'dismissed' => false,
+			'estimated' => (int) $st['estimated'] > 0,
+			'news_f'    => count( $st['news']['fetched'] ),
+			'legal_f'   => count( $st['legal']['fetched'] ),
+			'news_p'    => count( $st['news']['published'] ),
+			'legal_p'   => count( $st['legal']['published'] ),
+			'kw_impr'   => null,
+			'pub_ids'   => array_values( array_unique( array_map( 'intval', array_merge( (array) $st['news']['published'], (array) $st['legal']['published'] ) ) ) ),
+		);
+	}
+	return array( 'records' => false, 'rows' => $rows );
+}
