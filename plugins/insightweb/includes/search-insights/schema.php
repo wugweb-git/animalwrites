@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_SI_DB_VERSION = '2'; // 2: links table (31 Oct 2026).
+const AW_SI_DB_VERSION = '3'; // 2: links table (31 Oct 2026). 3: scores table (17 Nov 2026).
 const AW_SI_DB_OPTION  = 'aw_si_db';
 
 // aw_si_table() and aw_si_now() moved to Animal Writes Core (includes/keyword-table.php) with the keyword table.
@@ -23,11 +23,12 @@ function aw_si_install(): void {
 	}
 	global $wpdb;
 	require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-	$c = $wpdb->get_charset_collate();
-	$p = aw_si_table( 'kw_pages' );
-	$o = aw_si_table( 'obs' );
-	$r = aw_si_table( 'rising' );
-	$l = aw_si_table( 'links' );
+	$c  = $wpdb->get_charset_collate();
+	$p  = aw_si_table( 'kw_pages' );
+	$o  = aw_si_table( 'obs' );
+	$r  = aw_si_table( 'rising' );
+	$l  = aw_si_table( 'links' );
+	$sc = aw_si_table( 'scores' );
 	// The keyword table itself is Animal Writes Core's (aw_kw_install(), owner's decision 3, 25 Oct 2026).
 	aw_kw_install();
 	// Which page owns which keyword. path_key = md5 of the object or path, so one page holds one row per keyword and role.
@@ -117,6 +118,29 @@ function aw_si_install(): void {
 		KEY last_seen (last_seen)
 		) {$c};"
 	);
+	// InsightWeb's own keyword score store (plan §7b): the daily recompute writes a score (0-100) and its parts, the
+	// recommended-use keys, the focus-keyphrase health and the canonical owner, keyed by keyword id. The Keywords tab
+	// joins it for sorting and filtering. Kept in InsightWeb's own table so Kits Core's shared keyword table is unchanged.
+	dbDelta(
+		"CREATE TABLE {$sc} (
+		kw_id bigint(20) unsigned NOT NULL,
+		score tinyint(3) unsigned NOT NULL DEFAULT 0,
+		s_demand tinyint(3) unsigned NOT NULL DEFAULT 0,
+		s_opportunity tinyint(3) unsigned NOT NULL DEFAULT 0,
+		s_engagement tinyint(3) unsigned NOT NULL DEFAULT 0,
+		s_momentum tinyint(3) unsigned NOT NULL DEFAULT 0,
+		recommended varchar(191) NOT NULL DEFAULT '',
+		focus_health varchar(24) NOT NULL DEFAULT '',
+		owner_path varchar(255) NOT NULL DEFAULT '',
+		owner_type varchar(32) NOT NULL DEFAULT '',
+		owner_flag varchar(32) NOT NULL DEFAULT '',
+		updated datetime NOT NULL,
+		PRIMARY KEY  (kw_id),
+		KEY score (score),
+		KEY focus_health (focus_health),
+		KEY owner_flag (owner_flag)
+		) {$c};"
+	);
 	update_option( AW_SI_DB_OPTION, AW_SI_DB_VERSION, true ); // Autoloaded: checked on every admin request.
 	add_option( 'aw_si_installed', time(), '', false );
 	if ( function_exists( 'aw_si_links_seed' ) ) {
@@ -139,19 +163,19 @@ function aw_si_ready(): bool {
  */
 function aw_si_drop_all(): void {
 	global $wpdb;
-	foreach ( array( 'kw_pages', 'obs', 'rising', 'links' ) as $t ) {
+	foreach ( array( 'kw_pages', 'obs', 'rising', 'links', 'scores' ) as $t ) {
 		$wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', aw_si_table( $t ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.DirectDatabaseQuery.SchemaChange -- fixed table names.
 	}
 	// The keyword table is Animal Writes Core's and holds the owner's Sourcing, Press and Tracked roles (sourcing phase 2):
 	// records with one of those (or a dismissed suggestion, or a migrated spelling) stay, with Search Insights' own roles and figures cleared; the others are deleted.
 	$k = aw_si_table( 'keywords' );
 	$m = aw_si_table( 'kw_map' );
-	if ( aw_kw_ready() ) { // a dismissed suggestion or a migrated spelling is the owner's too
+	if ( aw_kw_ready() ) { // A dismissed suggestion or a migrated spelling is the owner's too.
 		$wpdb->query( $wpdb->prepare( "DELETE FROM %i WHERE roles & %d = 0 AND dismissed = 0 AND (src_note IS NULL OR src_note = '')", $k, AW_KW_OWNER_ROLES ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	} else {
 		$wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE roles & %d = 0', $k, AW_KW_OWNER_ROLES ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	}
-	$set = aw_si_reset_sql( AW_KW_OWNER_ROLES ); // every Search Insights column back to a new record's (Codex, PR #75)
+	$set = aw_si_reset_sql( AW_KW_OWNER_ROLES ); // Every Search Insights column back to a new record's (Codex, PR #75).
 	$wpdb->query( $wpdb->prepare( "UPDATE %i SET {$set}", $k ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- $set is the fixed column list of aw_si_reset_sql() (constants and integers, no %); the table is %i.
 	if ( aw_kw_ready() ) {
 		$wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE kw_id NOT IN (SELECT id FROM %i)', $m, $k ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
@@ -169,4 +193,3 @@ function aw_si_drop_all(): void {
 		wp_clear_scheduled_hook( $hook );
 	}
 }
-

@@ -427,6 +427,78 @@ function aw_si_canonical_owner( array $candidates, string $intent ): array {
 }
 
 /**
+ * The topic → sourcing content-type map. InsightWeb never hardcodes SourceWeb's categories: SourceWeb (or any sourcing
+ * plugin) fills this through the `aw_si_sourcing_types` filter, so the map is empty and no sourcing recommendation
+ * fires when SourceWeb is absent. Keys are lower-cased topics; values are 'news' | 'library' | 'campaign'.
+ *
+ * @return array<string, string>
+ */
+function aw_si_sourcing_types(): array {
+	/**
+	 * Filter the topic → sourcing content-type map (SourceWeb supplies it from its own category list).
+	 *
+	 * @param array<string, string> $map topic => 'news' | 'library' | 'campaign'.
+	 */
+	$map = array();
+	foreach ( (array) apply_filters( 'aw_si_sourcing_types', array() ) as $topic => $type ) {
+		$t = strtolower( trim( (string) $topic ) );
+		if ( '' !== $t && in_array( $type, array( 'news', 'library', 'campaign' ), true ) ) {
+			$map[ $t ] = (string) $type;
+		}
+	}
+	return $map;
+}
+
+/**
+ * The stored score row for one keyword: the score and its parts, the recommended-use keys (CSV) and the focus-keyphrase
+ * health. Pure — the daily recompute passes the keyword's signals and this returns the columns to store, and the no-WP
+ * test checks it. The canonical-owner columns are written by a later pass; they are not computed here.
+ *
+ * @param array{impr?: int, volume?: int, clicks?: int, pos?: float|null, growth?: float|null, trends?: int|null, has_page?: bool, roles?: int, topic?: string, is_minor?: bool} $kw Keyword signals and facts.
+ * @param array<string, string>                                                                                                                                                  $sourcing_types aw_si_sourcing_types().
+ * @return array{score: int, s_demand: int, s_opportunity: int, s_engagement: int, s_momentum: int, recommended: string, focus_health: string}
+ */
+function aw_si_score_row( array $kw, array $sourcing_types = array() ): array {
+	$pos      = isset( $kw['pos'] ) && null !== $kw['pos'] ? (float) $kw['pos'] : null;
+	$s        = aw_si_score(
+		array(
+			'impr'   => (int) ( $kw['impr'] ?? 0 ),
+			'volume' => (int) ( $kw['volume'] ?? 0 ),
+			'clicks' => (int) ( $kw['clicks'] ?? 0 ),
+			'pos'    => $pos,
+			'growth' => isset( $kw['growth'] ) && null !== $kw['growth'] ? (float) $kw['growth'] : null,
+			'trends' => isset( $kw['trends'] ) && null !== $kw['trends'] ? (int) $kw['trends'] : null,
+		)
+	);
+	$has_page = ! empty( $kw['has_page'] );
+	$roles    = (int) ( $kw['roles'] ?? 0 );
+	$rec      = aw_si_recommended_use(
+		array(
+			'score'    => $s['score'],
+			'pos'      => $pos,
+			'has_page' => $has_page,
+			'impr'     => (int) ( $kw['impr'] ?? 0 ),
+			'roles'    => $roles,
+			'topic'    => (string) ( $kw['topic'] ?? '' ),
+			'is_minor' => ! empty( $kw['is_minor'] ),
+		),
+		$sourcing_types
+	);
+	$focus    = defined( 'AW_SI_ROLE_FOCUS' ) ? (int) AW_SI_ROLE_FOCUS : 2;
+	$in_a     = (bool) ( $roles & $focus );
+	$in_b     = aw_si_is_focus_candidate( $s['score'], $pos, $has_page );
+	return array(
+		'score'         => $s['score'],
+		's_demand'      => $s['demand'],
+		's_opportunity' => $s['opportunity'],
+		's_engagement'  => $s['engagement'],
+		's_momentum'    => $s['momentum'],
+		'recommended'   => implode( ',', $rec ),
+		'focus_health'  => aw_si_focus_health( $in_a, $in_b ),
+	);
+}
+
+/**
  * Labels for the recommended-use keys (shown in the Keywords tab).
  *
  * @return array<string, string>
