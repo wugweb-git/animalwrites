@@ -676,14 +676,34 @@ holds a majority of impressions — a consolidation candidate).
 ### Feed into SourceWeb (Part 5 — InsightWeb emit side only)
 
 Keywords scoring above the threshold **and** carrying a Sourcing-candidate recommendation are pushed as *candidates* via
-`do_action('sourceweb_push_keywords', $terms, $context)` where `$context = {source:'insightweb', score, recommended_type,
-impressions, clicks, position, topic, focus_keyphrase, rank}`. A well-ranking focus keyphrase is a proven term, flagged
-`focus_keyphrase:true` with its rank. Candidacy only — the terms land in SourceWeb's **approval queue**, never auto-insert;
-no shared table and no hard dependency (the hook sits idle if SourceWeb is absent). The SourceWeb receive side is a
-separate session.
+`do_action('sourceweb_push_keywords', $terms, $context)` — one call per candidate, `$terms` an array of the one keyword
+label. A well-ranking focus keyphrase is a proven term, flagged `focus_keyphrase:true` with its rank. Candidacy only —
+the terms land in SourceWeb's **approval queue**, never auto-insert; no shared table and no hard dependency (the hook
+sits idle if SourceWeb is absent). The SourceWeb receive side is a separate session.
 
-**Build status (17 Nov):** the pure scoring/recommendation/reconciliation/owner logic + 17 no-WP tests are **done, green**
-(`score.php`). Still to wire on the branch: the InsightWeb score store (new table, `AW_SI_DB_VERSION` 2→3) + the recompute
-writer; the Keywords-tab Score and Recommended-use columns + the Focus-keyphrase-health filter + the candidate-pages /
-canonical-owner view; the `sourceweb_push_keywords` emit + the threshold setting. Branch only; Part 4 (the Sourcing-keywords
+**`$context` shape — LOCKED (field names are the contract; the live aw-sourcing receiver matches these exactly, held by
+the coordinator):**
+
+| Field | Type | Meaning |
+|---|---|---|
+| `source` | string | always `'insightweb'` |
+| `score` | int 0–100 | the keyword score |
+| `recommended_type` | string | `'news'` \| `'library'` \| `'campaign'` (from the `sourcing:TYPE` recommendation; `'news'` default) |
+| `impressions` | int | Search Console impressions, 28 days |
+| `clicks` | int | Search Console clicks, 28 days |
+| `position` | float\|null | latest position (Search Console, else live check) |
+| `topic` | string | the keyword's topic |
+| `focus_keyphrase` | bool | carries the Rank Math Focus keyphrase role |
+| `rank` | float\|null | the focus keyphrase's rank (= `position`) |
+
+Emitted by `aw_si_push_context()` (`search-insights/sourcing-push.php`); the threshold is the option
+`aw_si_sourcing_push_min` (default 70, filter `aw_si_sourcing_push_min`). InsightWeb reads the topic→type map from the
+`aw_si_sourcing_types` filter that SourceWeb fills (empty ⇒ no sourcing recommendation).
+
+**Build status (17 Nov):** Stage 1 (pure core `score.php`) and Stage 2 are **done, green on the branch** — the score store
+`wp_aw_si_scores` (`AW_SI_DB_VERSION` 2→3) + the recompute writer (`aw_si_compute` → `aw_si_score_set`); the Keywords-tab
+Score (sortable) + Recommended-use columns and the Focus-keyphrase-health filter; and the `sourceweb_push_keywords` emit +
+threshold. Commits: `cef3d252`, `3fc5a1c3`, `2f5afb70`, `9297ed6a`, `8d889cdf`; 103 no-WP tests green. **Stage 3 (still to
+build):** the multi-page candidate list + canonical-owner ladder (Part 6; the `owner_path`/`owner_type`/`owner_flag` store
+columns are reserved) and a threshold Settings-UI field. Branch only; Part 4 (the Sourcing-keywords
 tab) is SourceWeb's session.
