@@ -525,5 +525,8 @@ function aw_si_compute(): array {
 		$count[ $eff ]                       = ( $count[ $eff ] ?? 0 ) + 1;
 		$count[ $status ? $status : 'none' ] = ( $count[ $status ? $status : 'none' ] ?? 0 ) + 1;
 	}
+	if ( $store ) {
+		aw_si_push_sourcing_candidates(); // Offer the current sourcing candidates to SourceWeb (opt-in; idle if absent).
+	}
 	return $count;
 }
