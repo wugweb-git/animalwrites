@@ -36,11 +36,13 @@ function insightweb_migrate_names(): void {
 	// 2) Options: every aw_si_* -> insightweb_* (keep the stored value and its autoload flag).
 	$rows = $wpdb->get_results( "SELECT option_name, autoload FROM {$wpdb->options} WHERE option_name LIKE 'aw\\_si\\_%'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared -- fixed LIKE pattern, no user input
 	foreach ( (array) $rows as $row ) {
-		$old = $row->option_name;
-		$new = 'insightweb_' . substr( $old, 6 ); // strip the "aw_si_" prefix
-		if ( add_option( $new, get_option( $old ), '', $row->autoload ) ) {
-			delete_option( $old );
+		$old      = $row->option_name;
+		$new      = 'insightweb_' . substr( $old, 6 ); // strip the "aw_si_" prefix
+		$autoload = in_array( (string) $row->autoload, array( 'yes', 'on', 'auto' ), true ) ? 'yes' : 'no'; // normalise (WP 6.6+ stores on/off/auto)
+		if ( '__insightweb_absent__' === get_option( $new, '__insightweb_absent__' ) ) {
+			add_option( $new, get_option( $old ), '', $autoload );
 		}
+		delete_option( $old ); // always remove the old key once the new one holds the value, so a half-run leaves no orphan
 	}
 
 	// 3) Cron: clear the legacy aw_si_ events; cron.php schedules the new insightweb_ hooks going forward.

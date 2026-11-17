@@ -67,8 +67,10 @@ function insightweb_kw_action_url( string $action, int $id ): string {
  * on the action insightweb_tab_{key}; the action insightweb_load_tab_{key} runs before output (screen options, redirects).
  */
 function insightweb_extra_tabs(): array {
-	$out = array();
-	foreach ( (array) apply_filters( 'insightweb_tabs', array() ) as $key => $label ) {
+	$out  = array();
+	$tabs = apply_filters( 'insightweb_tabs', array() );
+	$tabs = apply_filters( 'aw_si_tabs', $tabs ); // back-compat: SourceWeb (aw-sourcing) still adds its tab on the old filter name
+	foreach ( (array) $tabs as $key => $label ) {
 		$key = sanitize_key( (string) $key );
 		if ( '' !== $key && ! in_array( $key, array( 'overview', 'keywords', 'settings' ), true ) ) {
 			$out[ $key ] = (string) $label;

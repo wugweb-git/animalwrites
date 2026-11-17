@@ -40,10 +40,14 @@ function insightweb_kw_table( string $name ): string {
 	global $wpdb;
 	static $resolved = array();
 	if ( ! isset( $resolved[ $name ] ) ) {
-		$new               = $wpdb->prefix . 'insightweb_' . $name;
-		$resolved[ $name ] = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $new ) ) === $new // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-			? $new
-			: $wpdb->prefix . 'aw_si_' . $name;
+		$new = $wpdb->prefix . 'insightweb_' . $name;
+		$old = $wpdb->prefix . 'aw_si_' . $name;
+		// Prefer the new name; fall back to the legacy table only when it (and not the new one) actually exists, so a
+		// fresh install where neither exists creates and uses the new insightweb_ name instead of the old one.
+		$resolved[ $name ] = ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $new ) ) !== $new // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			&& $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $old ) ) === $old ) // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			? $old
+			: $new;
 	}
 	return $resolved[ $name ];
 }

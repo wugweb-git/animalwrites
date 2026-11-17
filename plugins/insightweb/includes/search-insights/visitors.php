@@ -30,9 +30,13 @@ function insightweb_vis_table(): string {
 	static $t = null;
 	if ( null === $t ) {
 		$new = $wpdb->prefix . 'insightweb_visits';
-		$t   = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $new ) ) === $new // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-			? $new
-			: $wpdb->prefix . 'aw_si_visits';
+		$old = $wpdb->prefix . 'aw_si_visits';
+		// Prefer the new name; fall back to the legacy table only when it (and not the new one) exists, so a fresh
+		// install creates and uses wp_insightweb_visits instead of the old name.
+		$t = ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $new ) ) !== $new // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			&& $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $old ) ) === $old ) // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			? $old
+			: $new;
 	}
 	return $t;
 }
