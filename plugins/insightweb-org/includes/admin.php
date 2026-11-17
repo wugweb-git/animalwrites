@@ -149,7 +149,8 @@ function insightweb_render_screen(): void {
 	$tabs = insightweb_tabs();
 	$cur  = insightweb_current_tab();
 
-	echo '<div class="wrap">';
+	echo '<div class="wrap insightweb-screen">';
+	insightweb_admin_style();
 	echo '<h1>' . esc_html__( 'InsightWeb', 'insightweb' ) . '</h1>';
 
 	// Site Kit connection prompt (model A: Google data arrives only through Site Kit by Google).
@@ -168,6 +169,41 @@ function insightweb_render_screen(): void {
 	echo insightweb_tab_html( $cur ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from escaped parts in the tab renderers.
 
 	echo '</div>';
+}
+
+/**
+ * Scoped admin styling for the InsightWeb screen (printed once): the tile/grid layout the Overview uses and the
+ * full-width data tables. Greyscale only — it reuses WordPress admin's own greys and sets no brand colours, and every
+ * value is a CSS custom property the shared admin shell can override, so the shell's look is unchanged. This is layout,
+ * not a theme: no custom CSS reaches any screen but InsightWeb's own (`.insightweb-screen`).
+ *
+ * @return void
+ */
+function insightweb_admin_style(): void {
+	static $done = false;
+	if ( $done ) {
+		return;
+	}
+	$done = true;
+	$css  = '.insightweb-screen{--iw-gap:16px;--iw-ink:#1d2327;--iw-muted:#50575e;--iw-line:#dcdcde;--iw-surface:#fff;--iw-bar:#c3c4c7;}'
+		. '.insightweb-screen .wp-list-table{width:100%;}'
+		. '.insightweb-screen form{max-width:none;}'
+		. '.insightweb-section{margin:24px 0 8px;}'
+		. '.insightweb-section:first-of-type{margin-top:12px;}'
+		. '.insightweb-section h2{margin:0 0 2px;font-size:14px;line-height:1.4;}'
+		. '.insightweb-section .description{margin:0 0 8px;}'
+		. '.insightweb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--iw-min,180px),1fr));gap:var(--iw-gap);margin:0 0 8px;}'
+		. '.insightweb-grid--charts{--iw-min:300px;}'
+		. '.insightweb-grid--wide{--iw-min:340px;}'
+		. '.insightweb-tile{background:var(--iw-surface);border:1px solid var(--iw-line);border-radius:8px;padding:16px;margin:0;box-sizing:border-box;}'
+		. '.insightweb-tile--stat{display:flex;flex-direction:column;gap:4px;}'
+		. '.insightweb-tile__label{margin:0;color:var(--iw-muted);font-size:13px;}'
+		. '.insightweb-tile__value{margin:0;font-size:1.9em;font-weight:600;line-height:1.1;color:var(--iw-ink);}'
+		. '.insightweb-tile h3{margin:0 0 8px;font-size:13px;color:var(--iw-muted);font-weight:600;}'
+		. '.insightweb-tile figure{margin:0;}'
+		. '.insightweb-tile figcaption{margin-top:6px;color:var(--iw-muted);font-size:12px;}'
+		. '.insightweb-tile .wp-list-table{border:0;}';
+	echo '<style id="insightweb-admin-style">' . $css . '</style>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- a static, literal stylesheet (no dynamic data).
 }
 
 /**

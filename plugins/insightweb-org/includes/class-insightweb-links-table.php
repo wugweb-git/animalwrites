@@ -73,6 +73,15 @@ class InsightWeb_Links_Table extends WP_List_Table {
 	}
 
 	/**
+	 * Table classes without 'fixed', so the columns size to their content and the table fills the content width.
+	 *
+	 * @return string[]
+	 */
+	protected function get_table_classes() {
+		return array_values( array_diff( parent::get_table_classes(), array( 'fixed' ) ) );
+	}
+
+	/**
 	 * The type filter above the list.
 	 *
 	 * @param string $which top or bottom.

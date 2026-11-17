@@ -51,9 +51,9 @@ function insightweb_overview_sources(): string {
 	if ( ! $services ) {
 		return '';
 	}
-	$out  = '<h2>' . esc_html__( 'Data sources', 'insightweb' ) . '</h2>';
+	$out  = '<div class="insightweb-section"><h2>' . esc_html__( 'Data sources', 'insightweb' ) . '</h2>';
 	$out .= '<p class="description">' . esc_html__( 'The outside services InsightWeb uses. It reads only and changes nothing on them.', 'insightweb' ) . '</p>';
-	$out .= '<ul class="ul-disc">';
+	$out .= '<div class="insightweb-tile"><ul class="ul-disc" style="margin:0;">';
 	foreach ( $services as $service ) {
 		$line = '<strong>' . esc_html( (string) $service['name'] ) . '</strong>';
 		if ( '' !== (string) $service['summary'] ) {
@@ -64,7 +64,7 @@ function insightweb_overview_sources(): string {
 		}
 		$out .= '<li>' . $line . '</li>';
 	}
-	$out .= '</ul>';
+	$out .= '</ul></div></div>';
 	return $out;
 }
 
@@ -83,14 +83,14 @@ function insightweb_overview_scorecards( array $t ): string {
 		array( __( 'Average position', 'insightweb' ), null === $t['pos'] ? '–' : number_format_i18n( (float) $t['pos'], 1 ) ),
 		array( __( 'Quick wins', 'insightweb' ), number_format_i18n( (int) $t['quick'] ) ),
 	);
-	$out   = '<div class="insightweb-scorecards" style="display:flex;flex-wrap:wrap;gap:1em;margin:1em 0;">';
+	$out   = '<div class="insightweb-section"><div class="insightweb-grid">';
 	foreach ( $cards as $c ) {
-		$out .= '<div class="card" style="flex:1 1 150px;margin:0;padding:1em;">'
-			. '<p class="description" style="margin:0 0 .25em;">' . esc_html( $c[0] ) . '</p>'
-			. '<p style="font-size:1.6em;font-weight:600;margin:0;">' . esc_html( $c[1] ) . '</p>'
+		$out .= '<div class="insightweb-tile insightweb-tile--stat">'
+			. '<p class="insightweb-tile__label">' . esc_html( $c[0] ) . '</p>'
+			. '<p class="insightweb-tile__value">' . esc_html( $c[1] ) . '</p>'
 			. '</div>';
 	}
-	$out .= '</div>';
+	$out .= '</div></div>';
 	return $out;
 }
 
@@ -102,9 +102,9 @@ function insightweb_overview_scorecards( array $t ): string {
  * @return string
  */
 function insightweb_overview_trends( array $trend ): string {
-	$out = '<h2>' . esc_html__( 'Last 28 days', 'insightweb' ) . '</h2>';
+	$head = '<div class="insightweb-section"><h2>' . esc_html__( 'Last 28 days', 'insightweb' ) . '</h2>';
 	if ( count( $trend ) < 2 ) {
-		return $out . '<p>' . esc_html__( 'No daily figures yet — the trends appear once Search Console data has been read.', 'insightweb' ) . '</p>';
+		return $head . '<p>' . esc_html__( 'No daily figures yet — the trends appear once Search Console data has been read.', 'insightweb' ) . '</p></div>';
 	}
 	$series = array(
 		array( __( 'Clicks', 'insightweb' ), 'clicks', '' ),
@@ -112,7 +112,7 @@ function insightweb_overview_trends( array $trend ): string {
 		array( __( 'CTR', 'insightweb' ), 'ctr', '%' ),
 		array( __( 'Average position', 'insightweb' ), 'pos', '' ),
 	);
-	$out   .= '<div style="display:flex;flex-wrap:wrap;gap:1em;">';
+	$out    = $head . '<div class="insightweb-grid insightweb-grid--charts">';
 	foreach ( $series as $s ) {
 		$points = array();
 		foreach ( $trend as $r ) {
@@ -121,9 +121,9 @@ function insightweb_overview_trends( array $trend ): string {
 				'label' => mysql2date( 'j M', (string) $r['d'] ),
 			);
 		}
-		$out .= '<div style="flex:1 1 280px;">' . insightweb_minichart( $s[0], $points, $s[2] ) . '</div>';
+		$out .= '<div class="insightweb-tile"><h3>' . esc_html( $s[0] ) . '</h3>' . insightweb_minichart( $s[0], $points, $s[2] ) . '</div>';
 	}
-	$out .= '</div>';
+	$out .= '</div></div>';
 	return $out;
 }
 
@@ -134,8 +134,9 @@ function insightweb_overview_trends( array $trend ): string {
  * @return string
  */
 function insightweb_overview_breakdowns( array $o ): string {
-	$out  = '<h2>' . esc_html__( 'Where to spend effort', 'insightweb' ) . '</h2>';
-	$out .= '<div style="display:flex;flex-wrap:wrap;gap:1em;">';
+	$unit = __( 'keywords', 'insightweb' );
+	$out  = '<div class="insightweb-section"><h2>' . esc_html__( 'Where to spend effort', 'insightweb' ) . '</h2>';
+	$out .= '<div class="insightweb-grid insightweb-grid--charts">';
 
 	// Suggested next actions (the differentiator) — biggest category last, so the attention bar is the top action.
 	$labels  = insightweb_actions();
@@ -149,7 +150,7 @@ function insightweb_overview_breakdowns( array $o ): string {
 		);
 	}
 	if ( $points ) {
-		$out .= '<div style="flex:1 1 280px;">' . insightweb_minichart( __( 'Suggested next actions', 'insightweb' ), $points, __( 'keywords', 'insightweb' ) ) . '</div>';
+		$out .= '<div class="insightweb-tile">' . insightweb_minichart( __( 'Suggested next actions', 'insightweb' ), $points, $unit ) . '</div>';
 	}
 
 	// Priority split.
@@ -165,7 +166,7 @@ function insightweb_overview_breakdowns( array $o ): string {
 			'label' => $label,
 		);
 	}
-	$out .= '<div style="flex:1 1 280px;">' . insightweb_minichart( __( 'By priority', 'insightweb' ), $ppoints, __( 'keywords', 'insightweb' ) ) . '</div>';
+	$out .= '<div class="insightweb-tile">' . insightweb_minichart( __( 'By priority', 'insightweb' ), $ppoints, $unit ) . '</div>';
 
 	// Status split.
 	$slabels = array(
@@ -181,9 +182,9 @@ function insightweb_overview_breakdowns( array $o ): string {
 			'label' => $label,
 		);
 	}
-	$out .= '<div style="flex:1 1 280px;">' . insightweb_minichart( __( 'By status', 'insightweb' ), $spoints, __( 'keywords', 'insightweb' ) ) . '</div>';
+	$out .= '<div class="insightweb-tile">' . insightweb_minichart( __( 'By status', 'insightweb' ), $spoints, $unit ) . '</div>';
 
-	$out .= '</div>';
+	$out .= '</div></div>';
 	return $out;
 }
 
@@ -254,9 +255,9 @@ function insightweb_minichart( string $label, array $points, string $unit = '' )
  * @return string
  */
 function insightweb_overview_top( array $rows ): string {
-	$out = '<h2>' . esc_html__( 'Top queries (28 days)', 'insightweb' ) . '</h2>';
+	$out = '<div class="insightweb-section"><h2>' . esc_html__( 'Top queries (28 days)', 'insightweb' ) . '</h2>';
 	if ( ! $rows ) {
-		return $out . '<p>' . esc_html__( 'No impressions yet.', 'insightweb' ) . '</p>';
+		return $out . '<p>' . esc_html__( 'No impressions yet.', 'insightweb' ) . '</p></div>';
 	}
 	$out .= '<table class="wp-list-table widefat striped"><thead><tr>'
 		. '<th scope="col">' . esc_html__( 'Keyword', 'insightweb' ) . '</th>'
@@ -270,6 +271,6 @@ function insightweb_overview_top( array $rows ): string {
 			. '<td style="text-align:right;">' . esc_html( number_format_i18n( (int) $r->clicks28 ) ) . '</td>'
 			. '<td style="text-align:right;">' . esc_html( null === $r->pos28 ? '–' : number_format_i18n( (float) $r->pos28, 1 ) ) . '</td></tr>';
 	}
-	$out .= '</tbody></table>';
+	$out .= '</tbody></table></div>';
 	return $out;
 }

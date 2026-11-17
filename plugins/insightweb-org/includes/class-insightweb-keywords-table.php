@@ -99,6 +99,16 @@ class InsightWeb_Keywords_Table extends WP_List_Table {
 	}
 
 	/**
+	 * Table classes without 'fixed', so the many columns size to their content and the table fills the content width
+	 * instead of being squeezed into equal columns.
+	 *
+	 * @return string[]
+	 */
+	protected function get_table_classes() {
+		return array_values( array_diff( parent::get_table_classes(), array( 'fixed' ) ) );
+	}
+
+	/**
 	 * Priority overrides: the only change this list makes, to its own table.
 	 *
 	 * @return array<string, string>
