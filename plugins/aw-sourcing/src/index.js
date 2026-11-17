@@ -4309,6 +4309,7 @@ function Suggestions( { onBack } ) {
 			.finally( load );
 	};
 	const ops = {
+		route: __( 'Approve (auto-route)', 'aw-sourcing' ),
 		include: __( 'Add as Include', 'aw-sourcing' ),
 		exclude: __( 'Add as Exclude', 'aw-sourcing' ),
 		search: __( 'Add as Search', 'aw-sourcing' ),
@@ -4319,12 +4320,57 @@ function Suggestions( { onBack } ) {
 	const bulk = Object.keys( ops )
 		.filter( ( k ) => ( dismissed ? 'dismiss' !== k : 'restore' !== k ) )
 		.map( ( k ) => ( { value: k, label: ops[ k ] } ) );
+	const typeLabel = ( t ) =>
+		( {
+			news: __( 'News', 'aw-sourcing' ),
+			library: __( 'Library', 'aw-sourcing' ),
+			campaign: __( 'Campaign', 'aw-sourcing' ),
+		}[ t ] || '—' );
+	// The two auto-approve rules (both off by default); the owner toggles them.
+	const [ aa, setAa ] = useState( null );
+	const [ savingAa, setSavingAa ] = useState( false );
+	useEffect( () => {
+		if ( data?.autoapprove && ! aa ) {
+			setAa( data.autoapprove );
+		}
+	}, [ data, aa ] );
+	const saveAa = () => {
+		if ( ! aa ) {
+			return;
+		}
+		setSavingAa( true );
+		setMsg( null );
+		apiFetch( {
+			path: path( 'keywords/suggestions/autoapprove' ),
+			method: 'POST',
+			data: aa,
+		} )
+			.then( ( r ) => {
+				setAa( r.autoapprove );
+				setMsg( { tone: 'success', text: r.message } );
+			} )
+			.catch( ( e ) => setMsg( { tone: 'error', text: errText( e ) } ) )
+			.finally( () => {
+				setSavingAa( false );
+				load();
+			} );
+	};
+	const toggleType = ( t ) =>
+		setAa( ( o ) => {
+			const has = ( o.types || [] ).includes( t );
+			return {
+				...o,
+				types: has
+					? o.types.filter( ( x ) => x !== t )
+					: [ ...( o.types || [] ), t ],
+			};
+		} );
 	return (
 		<SectionCard
 			id="suggestions"
 			title={ __( 'Suggestions from Search Insights', 'aw-sourcing' ) }
 			description={ __(
-				'Searches people made (20 impressions or more in 28 days) that no keyword covers yet. Add one as a keyword, or dismiss it.',
+				'Searches people made (20 impressions or more in 28 days) that no keyword covers yet, plus keyword candidates Search Insights scored and pushed here. Approve one (routed to its section, role and category) or dismiss it. Nothing is added by itself.',
 				'aw-sourcing'
 			) }
 			actions={
@@ -4346,6 +4392,123 @@ function Suggestions( { onBack } ) {
 					) }
 				</Notice>
 			) }
+			{ aa && (
+				<SettingsGroup
+					title={ __( 'Auto-approve rules', 'aw-sourcing' ) }
+					description={ __(
+						'Off by default: every candidate waits for you here. Turn one on to route matching pushed candidates automatically.',
+						'aw-sourcing'
+					) }
+				>
+					<Switch
+						label={ __(
+							'Auto-approve by score',
+							'aw-sourcing'
+						) }
+						help={ __(
+							'Approve pushed candidates whose Score is at least the number below.',
+							'aw-sourcing'
+						) }
+						checked={ !! aa.on_score }
+						onChange={ ( on ) =>
+							setAa( ( o ) => ( { ...o, on_score: on } ) )
+						}
+					/>
+					<Field
+						label={ __( 'Minimum score', 'aw-sourcing' ) }
+						render={ ( id ) => (
+							<input
+								id={ id }
+								type="number"
+								min="0"
+								step="1"
+								value={ aa.min_score }
+								disabled={ ! aa.on_score }
+								onChange={ ( e ) =>
+									setAa( ( o ) => ( {
+										...o,
+										min_score:
+											parseInt( e.target.value, 10 ) || 0,
+									} ) )
+								}
+							/>
+						) }
+					/>
+					<Field
+						label={ __(
+							'Only these recommended types',
+							'aw-sourcing'
+						) }
+						help={ __(
+							'Leave all off to allow any type.',
+							'aw-sourcing'
+						) }
+						render={ () =>
+							[ 'news', 'library', 'campaign' ].map( ( t ) => (
+								<label
+									key={ t }
+									style={ {
+										marginRight: '12px',
+										opacity: aa.on_score ? 1 : 0.5,
+									} }
+								>
+									<input
+										type="checkbox"
+										checked={ ( aa.types || [] ).includes(
+											t
+										) }
+										disabled={ ! aa.on_score }
+										onChange={ () => toggleType( t ) }
+									/>{ ' ' }
+									{ typeLabel( t ) }
+								</label>
+							) )
+						}
+					/>
+					<Switch
+						label={ __(
+							'Auto-approve proven focus keyphrases',
+							'aw-sourcing'
+						) }
+						help={ __(
+							'Approve candidates the site already ranks for, up to the rank below.',
+							'aw-sourcing'
+						) }
+						checked={ !! aa.on_proven }
+						onChange={ ( on ) =>
+							setAa( ( o ) => ( { ...o, on_proven: on } ) )
+						}
+					/>
+					<Field
+						label={ __( 'Up to rank', 'aw-sourcing' ) }
+						render={ ( id ) => (
+							<input
+								id={ id }
+								type="number"
+								min="1"
+								step="1"
+								value={ aa.proven_rank }
+								disabled={ ! aa.on_proven }
+								onChange={ ( e ) =>
+									setAa( ( o ) => ( {
+										...o,
+										proven_rank:
+											parseInt( e.target.value, 10 ) || 1,
+									} ) )
+								}
+							/>
+						) }
+					/>
+					<Button
+						variant="primary"
+						onClick={ saveAa }
+						isBusy={ savingAa }
+						disabled={ savingAa }
+					>
+						{ __( 'Save auto-approve rules', 'aw-sourcing' ) }
+					</Button>
+				</SettingsGroup>
+			) }
 			<DataList
 				label={ __( 'Suggestions', 'aw-sourcing' ) }
 				columns={ [
@@ -4357,7 +4520,28 @@ function Suggestions( { onBack } ) {
 						render: ( r ) => (
 							<>
 								<strong>{ r.title }</strong>
-								{ r.rising && (
+								{ r.proven && (
+									<span
+										className="kits-shell-field__help"
+										style={ { color: '#007017' } }
+									>
+										{ ' ' }
+										{ r.rank
+											? sprintf(
+													/* translators: %d: search rank. */
+													__(
+														'Proven (focus keyphrase, ranks #%d)',
+														'aw-sourcing'
+													),
+													r.rank
+											  )
+											: __(
+													'Proven (focus keyphrase)',
+													'aw-sourcing'
+											  ) }
+									</span>
+								) }
+								{ ! r.proven && r.rising && (
 									<span className="kits-shell-field__help">
 										{ ' ' }
 										{ __( 'Rising', 'aw-sourcing' ) }
@@ -4365,6 +4549,22 @@ function Suggestions( { onBack } ) {
 								) }
 							</>
 						),
+					},
+					{
+						key: 'score',
+						label: __( 'Score', 'aw-sourcing' ),
+						sortable: true,
+						render: ( r ) => ( r.pushed ? r.score : '—' ),
+					},
+					{
+						key: 'type',
+						label: __( 'Recommended type', 'aw-sourcing' ),
+						render: ( r ) => ( r.pushed ? typeLabel( r.type ) : '—' ),
+					},
+					{
+						key: 'topic',
+						label: __( 'Topic', 'aw-sourcing' ),
+						render: ( r ) => r.topic || '—',
 					},
 					{
 						key: 'impr',
@@ -4398,10 +4598,12 @@ function Suggestions( { onBack } ) {
 				bulkActions={ bulk }
 				onBulk={ decide }
 				rowActions={ ( r ) =>
-					bulk.map( ( b ) => ( {
-						label: b.label,
-						onClick: () => decide( b.value, [ r.id ] ),
-					} ) )
+					bulk
+						.filter( ( b ) => 'route' !== b.value || r.pushed )
+						.map( ( b ) => ( {
+							label: b.label,
+							onClick: () => decide( b.value, [ r.id ] ),
+						} ) )
 				}
 				loading={ loading }
 				error={ error }
