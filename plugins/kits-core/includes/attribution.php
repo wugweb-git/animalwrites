@@ -142,14 +142,14 @@ add_filter(
 add_action(
 	'init',
 	function () {
-		if ( ! wp_next_scheduled( 'kits_fetch_favicons' ) ) {
-			wp_schedule_event( time() + 60, 'hourly', 'kits_fetch_favicons' );
+		if ( ! wp_next_scheduled( 'aw_fetch_favicons' ) ) {
+			wp_schedule_event( time() + 60, 'hourly', 'aw_fetch_favicons' );
 		}
 	}
 );
 
-add_action( 'kits_fetch_favicons', 'kits_fetch_favicons_run' );
-add_action( 'aw_fetch_favicons', 'kits_fetch_favicons_run' ); // back-compat: the old scheduled event (cleared by the DB migration) still runs the handler meanwhile
+add_action( 'aw_fetch_favicons', 'kits_fetch_favicons_run' );   // the hourly favicon run; a cross-plugin hook (InsightWeb's referrer-icons listens on it) and already booked on live, so it keeps the aw_ name
+add_action( 'kits_fetch_favicons', 'kits_fetch_favicons_run' ); // also answer the neutral name if anything schedules it
 
 /** Fetch up to 10 publisher favicons into the media library (hourly cron). */
 function kits_fetch_favicons_run() {
