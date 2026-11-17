@@ -388,8 +388,9 @@ function aw_si_compute(): array {
 	// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table names only.
 	$now28 = $wpdb->get_results( $wpdb->prepare( "SELECT kw_id, SUM(clicks) c, SUM(impr) i, SUM(pos * impr) / NULLIF(SUM(impr), 0) p FROM %i WHERE src = 'gsc' AND metric = 'q' AND period = 'day' AND d BETWEEN %s AND %s GROUP BY kw_id", $o, $s28, $e28 ), OBJECT_K );
 	$prev  = $wpdb->get_results( $wpdb->prepare( "SELECT kw_id, SUM(impr) i, SUM(pos * impr) / NULLIF(SUM(impr), 0) p FROM %i WHERE src = 'gsc' AND metric = 'q' AND period = 'day' AND d BETWEEN %s AND %s GROUP BY kw_id", $o, $s56, $e56 ), OBJECT_K );
-	// The page Google showed most for each query over 28 days.
-	$top   = $wpdb->get_results( $wpdb->prepare( "SELECT kw_id, page, SUM(impr) i FROM %i WHERE src = 'gsc' AND metric = 'qp' AND period = 'day' AND d BETWEEN %s AND %s GROUP BY kw_id, page ORDER BY kw_id, i DESC", $o, $s28, $e28 ) );
+	// Every page Google showed for each query over 28 days (the page shown most, and all candidate pages for the
+	// canonical-owner pass), with clicks and the impression-weighted position.
+	$top   = $wpdb->get_results( $wpdb->prepare( "SELECT kw_id, page, SUM(impr) i, SUM(clicks) c, SUM(pos * impr) / NULLIF(SUM(impr), 0) p FROM %i WHERE src = 'gsc' AND metric = 'qp' AND period = 'day' AND d BETWEEN %s AND %s GROUP BY kw_id, page ORDER BY kw_id, i DESC", $o, $s28, $e28 ) );
 	$live  = $wpdb->get_results( $wpdb->prepare( "SELECT o.kw_id, o.value, o.txt, o.d FROM %i o JOIN (SELECT kw_id, MAX(d) d FROM %i WHERE src = 'live' AND metric = 'position' GROUP BY kw_id) l ON l.kw_id = o.kw_id AND l.d = o.d WHERE o.src = 'live' AND o.metric = 'position'", $o, $o ), OBJECT_K );
 	$trend = $wpdb->get_results( $wpdb->prepare( "SELECT o.kw_id, o.value FROM %i o JOIN (SELECT kw_id, MAX(d) d FROM %i WHERE src = 'trends' AND metric = 'index' GROUP BY kw_id) l ON l.kw_id = o.kw_id AND l.d = o.d WHERE o.src = 'trends' AND o.metric = 'index'", $o, $o ), OBJECT_K );
 	$links = $wpdb->get_results( $wpdb->prepare( 'SELECT kw_id, obj_type, path, role, src FROM %i', $p ) );
@@ -408,14 +409,31 @@ function aw_si_compute(): array {
 
 	// An old address counts as the page it redirects to (plan §12, phase 2), so a redirected URL is no conflict.
 	$by_page = array(); // kw_id => final path => impressions.
+	$cand    = array(); // kw_id => final path => [impr, clicks, pos*impr] for the canonical-owner pass (Part 6).
 	foreach ( (array) $top as $t ) {
-		$final                          = aw_si_final_path( (string) $t->page );
-		$by_page[ $t->kw_id ][ $final ] = ( $by_page[ $t->kw_id ][ $final ] ?? 0 ) + (int) $t->i;
+		$final                      = aw_si_final_path( (string) $t->page );
+		$kwid                       = (int) $t->kw_id;
+		$by_page[ $kwid ][ $final ] = ( $by_page[ $kwid ][ $final ] ?? 0 ) + (int) $t->i;
+		$c                          = $cand[ $kwid ][ $final ] ?? array( 0, 0, 0.0 );
+		$cand[ $kwid ][ $final ]    = array( $c[0] + (int) $t->i, $c[1] + (int) $t->c, $c[2] + ( null === $t->p ? 0.0 : (float) $t->p * (int) $t->i ) );
 	}
 	$top_page = array();
 	foreach ( $by_page as $kw => $pages ) {
 		arsort( $pages );
 		$top_page[ $kw ] = array( (string) key( $pages ), (int) current( $pages ) );
+	}
+	// Candidate pages per keyword as flat rows for aw_si_canonical_owner() (position = weighted average; type by path).
+	$cands = array();
+	foreach ( $cand as $kw => $pages ) {
+		foreach ( $pages as $path => $m ) {
+			$cands[ $kw ][] = array(
+				'path'      => (string) $path,
+				'impr'      => (int) $m[0],
+				'clicks'    => (int) $m[1],
+				'pos'       => $m[0] > 0 ? round( $m[2] / $m[0], 1 ) : null,
+				'post_type' => '',
+			);
+		}
 	}
 	$owners   = array(); // kw_id => owning paths (focus primaries and keyword-map pages).
 	$main     = array(); // kw_id => owning paths that are not News items or archives.
@@ -481,24 +499,28 @@ function aw_si_compute(): array {
 			$set['quick_win'] = aw_si_quick_win( $d['pos'], $impr ) ? 1 : 0;
 		}
 		if ( $store ) {
-			aw_si_score_set(
-				$id,
-				aw_si_score_row(
-					array(
-						'impr'     => $impr,
-						'volume'   => $vol[ $id ] ?? 0,
-						'clicks'   => $clicks,
-						'pos'      => $d['pos'],
-						'growth'   => $growth[ $id ] ?? null,
-						'trends'   => $trends,
-						'has_page' => ! empty( $fits[ $id ] ),
-						'roles'    => (int) $r->roles,
-						'topic'    => (string) $r->topic,
-						'is_minor' => ! empty( $ctx['shown_minor'] ),
-					),
-					$styp
-				)
+			$srow = aw_si_score_row(
+				array(
+					'impr'     => $impr,
+					'volume'   => $vol[ $id ] ?? 0,
+					'clicks'   => $clicks,
+					'pos'      => $d['pos'],
+					'growth'   => $growth[ $id ] ?? null,
+					'trends'   => $trends,
+					'has_page' => ! empty( $fits[ $id ] ),
+					'roles'    => (int) $r->roles,
+					'topic'    => (string) $r->topic,
+					'is_minor' => ! empty( $ctx['shown_minor'] ),
+				),
+				$styp
 			);
+			// Canonical owner (Part 6): the page that should own the keyword across the pages it ranks for, plus a flag.
+			$own                = aw_si_canonical_owner( $cands[ $id ] ?? array(), aw_si_query_intent( (string) $r->label ) );
+			$owner_path         = $own['owner'] ? (string) ( $own['owner']['path'] ?? '' ) : '';
+			$srow['owner_path'] = mb_substr( $owner_path, 0, 255 );
+			$srow['owner_type'] = '' !== $owner_path ? aw_si_page_class( $owner_path, '' ) : '';
+			$srow['owner_flag'] = (string) $own['flag'];
+			aw_si_score_set( $id, $srow );
 		}
 		$changed = false;
 		foreach ( $set as $col => $val ) {

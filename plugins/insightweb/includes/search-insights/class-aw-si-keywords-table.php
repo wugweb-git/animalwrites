@@ -258,6 +258,14 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 					'should-be' => __( 'Should be a focus keyphrase', 'insightweb' ),
 				)
 			);
+			$this->dropdown(
+				'owner_flag',
+				__( 'All page ownership', 'insightweb' ),
+				array(
+					'news-should-be-evergreen' => __( 'Owned by News, should be Resource/Library', 'insightweb' ),
+					'no-owner'                 => __( 'No canonical owner', 'insightweb' ),
+				)
+			);
 		}
 		submit_button( __( 'Filter', 'insightweb' ), '', 'filter_action', false );
 		echo '</div>';
@@ -322,6 +330,11 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 				$where[] = 's.focus_health = %s';
 				$args[]  = $fh;
 			}
+			$of = $this->arg( 'owner_flag' );
+			if ( in_array( $of, array( 'news-should-be-evergreen', 'no-owner' ), true ) ) {
+				$where[] = 's.owner_flag = %s';
+				$args[]  = $of;
+			}
 		}
 		$orderby = $this->arg( 'orderby' );
 		$cols    = array(
@@ -355,7 +368,7 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 		$agg    = $this->plain_all() ? $this->entity_row() : null; // Counts as the first row of page 1.
 		$shift  = $agg ? 1 : 0;
 		$from   = $store ? '%i k LEFT JOIN %i s ON s.kw_id = k.id' : '%i';
-		$select = $store ? 'k.*, s.score iw_score, s.recommended iw_recommended, s.focus_health iw_focus_health' : '*';
+		$select = $store ? 'k.*, s.score iw_score, s.recommended iw_recommended, s.focus_health iw_focus_health, s.owner_path iw_owner_path, s.owner_type iw_owner_type, s.owner_flag iw_owner_flag' : '*';
 		$lbl    = $store ? 'k.label' : 'label';
 		$pre    = $store ? array( $t, $sc ) : array( $t );
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber,PluginCheck.Security.DirectDB.UnescapedDBParameter -- conditions and order built from fixed parts with placeholders; table names via %i.
@@ -583,11 +596,20 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 		foreach ( array_filter( explode( ',', (string) ( $item->iw_recommended ?? '' ) ) ) as $key ) {
 			$out[] = esc_html( $labels[ $key ] ?? $key );
 		}
-		$html = $out ? implode( '<br>', $out ) : '–';
-		$fh   = (string) ( $item->iw_focus_health ?? '' );
+		$html  = $out ? implode( '<br>', $out ) : '–';
+		$flags = aw_si_flag_labels();
+		$fh    = (string) ( $item->iw_focus_health ?? '' );
 		if ( '' !== $fh ) {
-			$flags = aw_si_flag_labels();
 			$html .= '<br><span class="post-state">' . esc_html( $flags[ $fh ] ?? $fh ) . '</span>';
+		}
+		$of = (string) ( $item->iw_owner_flag ?? '' );
+		if ( '' !== $of ) {
+			$html .= '<br><span class="post-state">' . esc_html( $flags[ $of ] ?? $of ) . '</span>';
+			$owner = (string) ( $item->iw_owner_path ?? '' );
+			if ( '' !== $owner ) {
+				/* translators: %s: the page path that should own the keyword. */
+				$html .= '<br><span class="description">' . esc_html( sprintf( __( 'Owner: %s', 'insightweb' ), $owner ) ) . '</span>';
+			}
 		}
 		return $html;
 	}
