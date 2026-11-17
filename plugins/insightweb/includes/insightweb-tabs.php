@@ -57,7 +57,7 @@ function insightweb_overview_parts(): array {
 		return array();
 	}
 	ob_start();
-	aw_si_screen_notices();
+	insightweb_screen_notices();
 	return kits_shell_html_parts( (string) ob_get_clean() );
 }
 
