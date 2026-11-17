@@ -316,7 +316,7 @@ plugins present or absent, and alongside the live plugin, with no fatal, no rede
 ### Extracted build progress (public edition, as of 17 Nov 2026)
 
 `plugins/insightweb-org/` exists and is a separate, standalone codebase — the live `plugins/insightweb` is untouched.
-Each piece landed green (`php -l` + PHPCS WordPress + `tools/ci/phpcs-security.xml` + the no-WP smoke test, now 56
+Each piece landed green (`php -l` + PHPCS WordPress + `tools/ci/phpcs-security.xml` + the no-WP smoke test, now 61
 checks); `vendor/` and `composer.lock` are never committed. Branch `claude/insightweb-org-assess-dc97b9`, **not** on
 `wordpress-dev` or `wordpress` — side session, nothing pushed or shipped.
 
@@ -335,6 +335,9 @@ checks); `vendor/` and `composer.lock` are never committed. Branch `claude/insig
 | Rising list table (status views, search, sort, noted/dismissed/new row + bulk actions) | `includes/class-insightweb-rising-table.php` | Rising/Links commit | done, green |
 | Links list table (read-only: type filter, search, sort, pagination) | `includes/class-insightweb-links-table.php` | Rising/Links commit | done, green |
 | Shared external-services registry (suite-neutral, collision-guarded, version-gated) + InsightWeb's Site Kit disclosure + Overview "Data sources" card | `includes/class-wugweb-external-services.php`, `includes/services.php` | Registry commit | done, green — **proposed suite reference, pending coordinator adoption** |
+| Settings tab (Settings API: decision thresholds + delete-data opt-in; thresholds drive the engine) | `includes/settings.php` | Settings commit | done, green |
+
+**Admin screen inventory (public edition):** Overview (scorecards + MiniChart trends/breakdowns + top queries + Data sources), Keywords, Rising, Links (all core `WP_List_Table`), and Settings — five tabs, each returning HTML (classic screen today; a shell "part" once `insightweb-shell` lands). Pages / Clarity / Check list / Server / Sourcing keywords from the live edition are intentionally **not** in the public scope (no ported data source), not gaps.
 
 **Admin UI phase (§7 charts + §8 tables), decisions applied:**
 - **Substrate.** The live plugin renders the Kits React shell as *chrome* and embeds each tab's server HTML as a shell

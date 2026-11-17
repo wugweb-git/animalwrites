@@ -214,6 +214,20 @@ iw_check( false !== strpos( $readme, '== External services ==' ) && false !== st
 Wugweb_External_Services::register( '', array() );
 iw_check( count( Wugweb_External_Services::all() ) === count( $svc ), 'registry ignores an empty registration' );
 
+// Settings (settings.php).
+iw_check( isset( $tabs['settings'] ), 'tab set has Settings' );
+$sd = insightweb_settings_defaults();
+iw_check( 20 === $sd['high_trends'] && 50 === $sd['high_impr'] && 10 === $sd['quick_min'], 'threshold defaults are 20 / 50 / 10' );
+iw_check( defined( 'INSIGHTWEB_HIGH_IMPR' ) && 50 === INSIGHTWEB_HIGH_IMPR && defined( 'INSIGHTWEB_HIGH_TRENDS' ) && 20 === INSIGHTWEB_HIGH_TRENDS, 'settings define the engine threshold constants' );
+$san = insightweb_settings_sanitize(
+	array(
+		'high_impr' => '99',
+		'bogus'     => 'x',
+	)
+);
+iw_check( 99 === $san['high_impr'] && 20 === $san['high_trends'] && ! isset( $san['bogus'] ), 'threshold sanitiser keeps known keys as non-negative ints' );
+iw_check( 1 === insightweb_settings_sanitize_bool( '1' ) && 0 === insightweb_settings_sanitize_bool( '' ), 'delete-data flag sanitises to 0/1' );
+
 // Keyword table.
 iw_check( 'dog bite' === insightweb_kw_norm( '  Dog BITE! ' ), 'norm lower-cases, strips punctuation, collapses space' );
 $sql = insightweb_kw_schema_sql( 'wp_insightweb_keywords', '' );

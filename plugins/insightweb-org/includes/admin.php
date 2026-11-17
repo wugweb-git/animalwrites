@@ -43,6 +43,7 @@ function insightweb_tabs(): array {
 		'keywords' => __( 'Keywords', 'insightweb' ),
 		'rising'   => __( 'Rising', 'insightweb' ),
 		'links'    => __( 'Links', 'insightweb' ),
+		'settings' => __( 'Settings', 'insightweb' ),
 	);
 	/**
 	 * Filter the InsightWeb admin tabs (id => title).
@@ -184,6 +185,9 @@ function insightweb_tab_html( string $tab ): string {
 	}
 	if ( 'links' === $tab ) {
 		return insightweb_links_html();
+	}
+	if ( 'settings' === $tab ) {
+		return insightweb_settings_html();
 	}
 	if ( 'overview' === $tab ) {
 		return insightweb_overview_html();

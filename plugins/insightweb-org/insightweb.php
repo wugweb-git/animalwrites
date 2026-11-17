@@ -40,6 +40,7 @@ define( 'INSIGHTWEB_REST', 'insightweb/v1' ); // REST namespace for the admin Ov
 
 require_once INSIGHTWEB_DIR . 'includes/class-wugweb-external-services.php'; // Shared suite registry (identical copy per plugin).
 require_once INSIGHTWEB_DIR . 'includes/services.php';
+require_once INSIGHTWEB_DIR . 'includes/settings.php'; // Defines the threshold constants before the engine's defaults.
 require_once INSIGHTWEB_DIR . 'includes/keyword-table.php';
 require_once INSIGHTWEB_DIR . 'includes/schema.php';
 require_once INSIGHTWEB_DIR . 'includes/compute.php';
