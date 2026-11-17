@@ -253,6 +253,201 @@ function insightweb_kw_set_override( int $id, string $to ): bool {
 }
 
 /**
+ * The rising-term statuses (also the Rising views), key => label.
+ *
+ * @return array<string, string>
+ */
+function insightweb_rising_statuses(): array {
+	return array(
+		'new'       => __( 'New', 'insightweb' ),
+		'noted'     => __( 'Noted', 'insightweb' ),
+		'dismissed' => __( 'Dismissed', 'insightweb' ),
+	);
+}
+
+/**
+ * One page of rising terms for the given filters, plus the total.
+ *
+ * @param array<string, mixed> $f view (a status or 'all'), search, orderby, order, paged, per.
+ * @return array{items: object[], total: int}
+ */
+function insightweb_rising_list( array $f ): array {
+	global $wpdb;
+	if ( ! insightweb_ready() ) {
+		return array(
+			'items' => array(),
+			'total' => 0,
+		);
+	}
+	$t     = insightweb_kw_table( 'rising' );
+	$where = array( '1=1' );
+	$args  = array();
+	if ( isset( insightweb_rising_statuses()[ $f['view'] ] ) ) {
+		$where[] = 'status = %s';
+		$args[]  = $f['view'];
+	}
+	if ( '' !== (string) $f['search'] ) {
+		$like    = '%' . $wpdb->esc_like( (string) $f['search'] ) . '%';
+		$where[] = '(term LIKE %s OR note LIKE %s)';
+		$args[]  = $like;
+		$args[]  = $like;
+	}
+	$cols    = array(
+		'term'       => 'term',
+		'growth'     => 'growth IS NULL, growth',
+		'first_seen' => 'first_seen',
+		'last_seen'  => 'last_seen',
+	);
+	$orderby = isset( $cols[ $f['orderby'] ] ) ? $f['orderby'] : 'last_seen';
+	$order   = 'ASC' === $f['order'] ? 'ASC' : 'DESC';
+	$by      = $cols[ $orderby ] . ' ' . $order . ', id DESC';
+	$per     = max( 1, (int) $f['per'] );
+	$paged   = max( 1, (int) $f['paged'] );
+	$sql     = implode( ' AND ', $where );
+	// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, PluginCheck.Security.DirectDB.UnescapedDBParameter -- conditions and order are fixed fragments with placeholders; values are bound.
+	$total = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE {$sql}", array_merge( array( $t ), $args ) ) );
+	$items = (array) $wpdb->get_results( $wpdb->prepare( "SELECT * FROM %i WHERE {$sql} ORDER BY {$by} LIMIT %d OFFSET %d", array_merge( array( $t ), $args, array( $per, ( $paged - 1 ) * $per ) ) ) );
+	// phpcs:enable
+	return array(
+		'items' => $items,
+		'total' => $total,
+	);
+}
+
+/**
+ * The rising-term count of each status, for the Rising views.
+ *
+ * @return array<string, int>
+ */
+function insightweb_rising_counts(): array {
+	global $wpdb;
+	$out = array(
+		'new'       => 0,
+		'noted'     => 0,
+		'dismissed' => 0,
+		'all'       => 0,
+	);
+	if ( ! insightweb_ready() ) {
+		return $out;
+	}
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	foreach ( (array) $wpdb->get_results( $wpdb->prepare( 'SELECT status, COUNT(*) n FROM %i GROUP BY status', insightweb_kw_table( 'rising' ) ) ) as $r ) {
+		if ( isset( $out[ (string) $r->status ] ) ) {
+			$out[ (string) $r->status ] = (int) $r->n;
+		}
+		$out['all'] += (int) $r->n;
+	}
+	return $out;
+}
+
+/**
+ * Set a rising term's owner status (noted / dismissed / new). The only write the Rising list makes.
+ *
+ * @param int    $id Rising-row id.
+ * @param string $to A key of insightweb_rising_statuses().
+ * @return bool
+ */
+function insightweb_rising_set_status( int $id, string $to ): bool {
+	global $wpdb;
+	if ( ! isset( insightweb_rising_statuses()[ $to ] ) ) {
+		return false;
+	}
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	return false !== $wpdb->update( insightweb_kw_table( 'rising' ), array( 'status' => $to ), array( 'id' => $id ) );
+}
+
+/**
+ * One page of inbound links for the given filters, plus the total. Hidden rows are left out.
+ *
+ * @param array<string, mixed> $f type, search, orderby, order, paged, per.
+ * @return array{items: object[], total: int}
+ */
+function insightweb_links_list( array $f ): array {
+	global $wpdb;
+	if ( ! insightweb_ready() ) {
+		return array(
+			'items' => array(),
+			'total' => 0,
+		);
+	}
+	$t     = insightweb_kw_table( 'links' );
+	$where = array( 'hidden = 0' );
+	$args  = array();
+	if ( '' !== (string) $f['type'] ) {
+		$where[] = 'type = %s';
+		$args[]  = (string) $f['type'];
+	}
+	if ( '' !== (string) $f['search'] ) {
+		$like    = '%' . $wpdb->esc_like( (string) $f['search'] ) . '%';
+		$where[] = '(domain LIKE %s OR anchor LIKE %s OR from_url LIKE %s)';
+		$args[]  = $like;
+		$args[]  = $like;
+		$args[]  = $like;
+	}
+	$cols    = array(
+		'domain'    => 'domain',
+		'links'     => 'links',
+		'last_seen' => 'last_seen',
+	);
+	$orderby = isset( $cols[ $f['orderby'] ] ) ? $f['orderby'] : 'last_seen';
+	$order   = 'ASC' === $f['order'] ? 'ASC' : 'DESC';
+	$by      = $cols[ $orderby ] . ' ' . $order . ', id DESC';
+	$per     = max( 1, (int) $f['per'] );
+	$paged   = max( 1, (int) $f['paged'] );
+	$sql     = implode( ' AND ', $where );
+	// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, PluginCheck.Security.DirectDB.UnescapedDBParameter -- conditions and order are fixed fragments with placeholders; values are bound.
+	$total = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE {$sql}", array_merge( array( $t ), $args ) ) );
+	$items = (array) $wpdb->get_results( $wpdb->prepare( "SELECT * FROM %i WHERE {$sql} ORDER BY {$by} LIMIT %d OFFSET %d", array_merge( array( $t ), $args, array( $per, ( $paged - 1 ) * $per ) ) ) );
+	// phpcs:enable
+	return array(
+		'items' => $items,
+		'total' => $total,
+	);
+}
+
+/**
+ * The distinct link types present (for the Links type filter).
+ *
+ * @return string[]
+ */
+function insightweb_link_types(): array {
+	global $wpdb;
+	if ( ! insightweb_ready() ) {
+		return array();
+	}
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	return array_values( array_filter( array_map( 'strval', (array) $wpdb->get_col( $wpdb->prepare( "SELECT DISTINCT type FROM %i WHERE type <> '' AND hidden = 0 ORDER BY type", insightweb_kw_table( 'links' ) ) ) ) ) );
+}
+
+/**
+ * Read list filters for the Rising or Links tab (read-only request values).
+ *
+ * @param string $kind 'rising' or 'links'.
+ * @return array<string, mixed>
+ */
+function insightweb_list_filters( string $kind ): array {
+	// phpcs:disable WordPress.Security.NonceVerification.Recommended -- read-only filters on a GET list screen.
+	$req = wp_unslash( $_REQUEST );
+	// phpcs:enable WordPress.Security.NonceVerification.Recommended
+	$key = static function ( $k ) use ( $req ) {
+		return isset( $req[ $k ] ) ? sanitize_key( (string) $req[ $k ] ) : '';
+	};
+	$f   = array(
+		'search'  => isset( $req['s'] ) ? trim( sanitize_text_field( (string) $req['s'] ) ) : '',
+		'orderby' => $key( 'orderby' ) ? $key( 'orderby' ) : 'last_seen',
+		'order'   => 'asc' === $key( 'order' ) ? 'ASC' : 'DESC',
+		'paged'   => max( 1, (int) $key( 'paged' ) ),
+		'per'     => 50,
+	);
+	if ( 'rising' === $kind ) {
+		$f['view'] = $key( 'view' ) ? $key( 'view' ) : 'new';
+	} else {
+		$f['type'] = $key( 'type' );
+	}
+	return $f;
+}
+
+/**
  * The Overview aggregates the dashboard charts and the scorecards read. All read-only.
  *
  * @return array{

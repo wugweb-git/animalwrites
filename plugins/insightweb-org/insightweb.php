@@ -47,7 +47,9 @@ require_once INSIGHTWEB_DIR . 'includes/overview.php';
 require_once INSIGHTWEB_DIR . 'includes/admin.php';
 require_once INSIGHTWEB_DIR . 'includes/rest.php';
 
-// The Keywords list table pulls in WordPress's WP_List_Table; load it only in the admin.
+// The list tables pull in WordPress's WP_List_Table; load them only in the admin.
 if ( is_admin() ) {
 	require_once INSIGHTWEB_DIR . 'includes/class-insightweb-keywords-table.php';
+	require_once INSIGHTWEB_DIR . 'includes/class-insightweb-rising-table.php';
+	require_once INSIGHTWEB_DIR . 'includes/class-insightweb-links-table.php';
 }

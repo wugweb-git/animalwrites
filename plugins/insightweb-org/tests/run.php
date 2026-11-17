@@ -91,6 +91,18 @@ function admin_url( $path = '' ) {
 function number_format_i18n( $n, $decimals = 0 ) {
 	return number_format( (float) $n, (int) $decimals );
 }
+/** Stub: passthrough (no magic quotes in the test). */
+function wp_unslash( $v ) {
+	return $v;
+}
+/** Stub. */
+function sanitize_key( $v ) {
+	return strtolower( preg_replace( '/[^a-z0-9_\-]/i', '', (string) $v ) );
+}
+/** Stub. */
+function sanitize_text_field( $v ) {
+	return trim( (string) $v );
+}
 
 /** Minimal in-memory $wpdb for the keyword-table round-trip (ignores SQL text, dispatches on the known shapes). */
 class IW_WPDB {
@@ -184,6 +196,12 @@ iw_check( isset( $views['p1'], $views['gap'], $views['quick'], $views['notranked
 iw_check( false !== strpos( insightweb_eff_sql(), 'priority_override' ), 'effective-priority SQL prefers the override' );
 iw_check( count( insightweb_roles() ) === 4 && count( insightweb_intents() ) === 4, 'four roles and four intents' );
 iw_check( false !== strpos( insightweb_url( 'keywords' ), 'page=insightweb' ) && false !== strpos( insightweb_url( 'keywords' ), 'tab=keywords' ), 'tab URL carries page and tab' );
+iw_check( isset( $tabs['rising'], $tabs['links'] ), 'tab set has Rising and Links' );
+iw_check( count( insightweb_rising_statuses() ) === 3 && isset( insightweb_rising_statuses()['dismissed'] ), 'three rising statuses' );
+iw_check( 'new' === insightweb_list_filters( 'rising' )['view'] && array_key_exists( 'type', insightweb_list_filters( 'links' ) ), 'rising defaults to the New view; links filters by type' );
+$rl = insightweb_rising_list( insightweb_list_filters( 'rising' ) + array( 'per' => 50 ) );
+$ll = insightweb_links_list( insightweb_list_filters( 'links' ) + array( 'per' => 50 ) );
+iw_check( array() === $rl['items'] && 0 === $rl['total'] && array() === $ll['items'] && 0 === $ll['total'], 'rising/links lists are empty until a source fills the tables' );
 
 // Keyword table.
 iw_check( 'dog bite' === insightweb_kw_norm( '  Dog BITE! ' ), 'norm lower-cases, strips punctuation, collapses space' );

@@ -288,7 +288,7 @@ its package lands.
 ### Extracted build progress (public edition, as of 17 Nov 2026)
 
 `plugins/insightweb-org/` exists and is a separate, standalone codebase — the live `plugins/insightweb` is untouched.
-Each piece landed green (`php -l` + PHPCS WordPress + `tools/ci/phpcs-security.xml` + the no-WP smoke test, now 46
+Each piece landed green (`php -l` + PHPCS WordPress + `tools/ci/phpcs-security.xml` + the no-WP smoke test, now 51
 checks); `vendor/` and `composer.lock` are never committed. Branch `claude/insightweb-org-assess-dc97b9`, **not** on
 `wordpress-dev` or `wordpress` — side session, nothing pushed or shipped.
 
@@ -304,6 +304,8 @@ checks); `vendor/` and `composer.lock` are never committed. Branch `claude/insig
 | Overview dashboard (scorecards; MiniChart trends + gap-action/priority/status; top queries) | `includes/overview.php` | Admin UI commit | done, green |
 | Admin screen (tabbed: Overview + Keywords; Site Kit prompt; shell-embeddable render) | `includes/admin.php` | Admin UI commit | done, green |
 | REST `insightweb/v1/overview` (feeds the shell chart component) | `includes/rest.php` | Admin UI commit | done, green |
+| Rising list table (status views, search, sort, noted/dismissed/new row + bulk actions) | `includes/class-insightweb-rising-table.php` | Rising/Links commit | done, green |
+| Links list table (read-only: type filter, search, sort, pagination) | `includes/class-insightweb-links-table.php` | Rising/Links commit | done, green |
 
 **Admin UI phase (§7 charts + §8 tables), decisions applied:**
 - **Substrate.** The live plugin renders the Kits React shell as *chrome* and embeds each tab's server HTML as a shell
@@ -334,11 +336,15 @@ built from escaped parts), nonces (`check_admin_referer` on both override paths)
 REST `permission_callback`), i18n (`insightweb` text domain + translator comments on every placeholder string), hooks +
 the screen-options API, and no new external calls (Privacy). This standard applies to everything still to build.
 
-**Not built yet:** the Site Kit GSC/GA4 read (model A — the internal-API/runtime-risk adapter that fills `obs`, the one
-piece that makes the lists and charts show real data); the `rising`/`links` list tables (their source adapters are not
-ported yet, so they would be empty); the bundled `insightweb-shell` React package + mount (the server-rendered parts
-and the MiniChart contract are ready for it; RankWeb's build recipe applies); the shared external-services registry
-(consumed when its package lands). **Shipping:** this is a side session — it does not push or ship; the branch + hashes
+The Rising and Links tabs now have their own list tables (Rising: status views, search, sort, noted/dismissed/new row
+and bulk actions; Links: read-only, type filter, search, sort). Both show empty states until a source fills the
+`rising` / `links` tables.
+
+**Not built yet:** the Site Kit GSC/GA4 read (model A — the internal-API/runtime-risk adapter that fills `obs` and the
+`rising`/`links` source rows, the one piece that makes the lists and charts show real data); the bundled
+`insightweb-shell` React package + mount (the server-rendered parts and the MiniChart contract are ready for it;
+RankWeb's build recipe applies); the shared external-services registry (one implementation for the suite, coordinated
+with SourceWeb — not built solo here). **Shipping:** this is a side session — it does not push or ship; the branch + hashes
 go to the coordinator, and only the live-plugin changes (the settings bug fix `b3cd3a0d`, the readme
 `0d723960`/`b8e5857d`) are production-bound. The `plugins/insightweb-org/` build is a separate public codebase and must
 **not** be deployed to the live site.
