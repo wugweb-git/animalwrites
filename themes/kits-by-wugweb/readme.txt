@@ -17,6 +17,28 @@ Kits by Wugweb is a full-site-editing block theme. Design tokens (colour, type, 
 
 tokens/tokens.json is the source. tools/build-tokens.py (and, for a child theme, the site's tools/build-tokens.py) writes the presets listed under "$wp" into theme.json (colour palette, font sizes, spacing, border radius, shadows) and makes the CSS variables point at them (--kit-color-ink: var(--wp--preset--color--secondary)). Core blocks are styled in theme.json (styles.elements, styles.blocks and the block style variations Primary, Secondary, Ghost, Small, Card, Surface, Hairline); kit.css only adds what theme.json cannot express (heights, hover, motion, layout). So a change in Appearance > Editor > Styles reaches core blocks and Kits components alike. Font families are written by hand in theme.json, as they carry font files. Do not edit kit-tokens.css or the generated presets by hand; edit tokens.json and rebuild.
 
+== Frequently Asked Questions ==
+
+= Does the theme need a plugin? =
+
+No. Kits by Wugweb works on its own. The companion plugin Kits Core adds optional site features (a form engine, a share bar, consent-mode analytics and the Kits admin screens), but the theme renders fully without it.
+
+= How do I change the colours, fonts and spacing? =
+
+Go to Appearance > Editor > Styles. The palette, type and layout all come from theme.json, so a change there reaches core blocks and Kits components alike. Start from one of the bundled style variations (the default, Slate or Forest).
+
+= Does it load Google Fonts from a remote server? =
+
+No. Inter is bundled in the theme (assets/fonts) and declared in theme.json, so no font request leaves the site. You can still switch fonts in the editor.
+
+= Is the theme translation-ready? =
+
+Yes. Every string uses the kits-by-wugweb text domain and a .pot file ships in /languages.
+
+= Where do site features like forms and analytics live? =
+
+In plugins, not the theme. Install Kits Core (or your own plugin) for those; the theme stays focused on design and presentation.
+
 == Changelog ==
 
 = 2.2.0 =
