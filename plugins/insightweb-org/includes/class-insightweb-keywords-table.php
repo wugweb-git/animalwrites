@@ -6,9 +6,8 @@
  *
  * No hand-built markup and no custom CSS: the table is core WP_List_Table, so it inherits WordPress admin styling and
  * accessibility and, when the shared admin shell (insightweb-shell) is present, renders unchanged as one of the shell's
- * "parts" (admin.php). Columns are the public, Site-Kit-fed subset — the Animal Writes edition's Bing, Ubersuggest,
- * vidIQ, OpenSEO, Keyword-Planner-volume and entity/movers columns are dropped (#6). The override flow functions live
- * in admin.php. One prefix: insightweb_.
+ * "parts" (admin.php). The columns are the Search-Console / GA4 figures read through Site Kit. The override flow
+ * functions live in admin.php.
  *
  * @package InsightWeb
  */

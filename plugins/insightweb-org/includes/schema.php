@@ -8,8 +8,7 @@
  * - rising: rising terms.
  * - links: who links to the site (the Links view).
  *
- * The schemas are generic; the Animal Writes links seed is not carried (#6). Deactivating or deleting the plugin keeps
- * the tables; only the owner's opt-in "delete data" removes them. One prefix: insightweb_ / INSIGHTWEB_.
+ * Deactivating or deleting the plugin keeps the tables; only the site owner's opt-in "delete data" removes them.
  *
  * @package InsightWeb
  */

@@ -1,12 +1,8 @@
 <?php
 /**
- * InsightWeb's own keyword table — the public edition's replacement for Kits Core's shared `aw_kw_*` table. One record
- * per normalised keyword with its Search Console figures (copied in by the daily calculation so the Keywords list
- * sorts and filters without aggregating on every view), a priority, a status and a suggested action.
- *
- * This is the search-insights subset only: the sourcing/news columns (variants, query, feed_id, search_on, dismissed,
- * src_note) and the category/section map table from the shared Animal Writes table are intentionally dropped — that is
- * part of the #6 decouple. One prefix: insightweb_ / INSIGHTWEB_. No `aw_` / `kits_`.
+ * InsightWeb's keyword table. One record per normalised keyword with its Search Console figures (copied in by the
+ * daily calculation so the Keywords list sorts and filters without aggregating on every view), a priority, a status
+ * and a suggested action.
  *
  * @package InsightWeb
  */

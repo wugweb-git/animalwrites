@@ -4,11 +4,11 @@
  * function that RETURNS its HTML, so the same markup serves two ways:
  *   - today, the classic path — insightweb_render_screen() echoes it inside a core `<div class="wrap">`;
  *   - once the shared admin shell package (insightweb-shell) is bundled, the shell draws the same HTML as a "part",
- *     keeping the current Kits shell look exactly (components, palette, typography, chrome) with no redesign.
+ *     keeping the admin shell look (components, palette, typography, chrome) with no redesign.
  *
  * No custom CSS of its own beyond layout; colours and chrome come from WordPress admin / the shell. The Keywords grid
- * is a core WP_List_Table (list-table.php); the Overview is core scorecards and widefat tables (overview.php), and the
- * same figures feed the shell's chart component over REST (insightweb-rest.php). One prefix: insightweb_.
+ * is a core WP_List_Table (class-insightweb-keywords-table.php); the Overview is core scorecards and widefat tables
+ * (overview.php), and the same figures feed the shell's chart component over REST (rest.php).
  *
  * @package InsightWeb
  */

@@ -2,13 +2,12 @@
 /**
  * InsightWeb
  *
- * The public WordPress.org edition of InsightWeb: a separate, standalone codebase extracted from the Animal Writes
- * site plugin (plugins/insightweb), which is untouched. This is the I1 skeleton — it activates on its own next to
- * Site Kit by Google with an empty tab set; the insights engine ports in later phases (docs/insightweb-plan.md,
- * "WordPress.org edition"). One prefix: insightweb_ / InsightWeb_ / INSIGHTWEB_. No `aw_`/`kits_`.
+ * Per-keyword insights from Google Search Console and GA4: each keyword's roles and owning pages, a priority, a status,
+ * one suggested next action, rising terms and quick wins. It makes suggestions only and never changes the site's SEO
+ * settings, content or keyphrases.
  *
- * Credentials: model (A), companion to Site Kit — InsightWeb reads Search Console and GA4 only through the Site Kit
- * by Google plugin and stores no Google OAuth client or tokens of its own.
+ * InsightWeb is a companion to Site Kit by Google: it reads Search Console and GA4 through the Site Kit plugin and
+ * stores no Google OAuth client or tokens of its own.
  *
  * @package           InsightWeb
  * @author            Wugweb

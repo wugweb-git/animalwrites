@@ -3,10 +3,7 @@
  * The daily recompute: read the 28-day Search Console figures from the obs table, the previous period, the page shown
  * most, the latest live check and the trends index, work each keyword through the decision engine (compute.php) and
  * copy the result onto the keyword record, so the lists sort and filter without aggregating on every view. Suggestions
- * only — nothing on the site is changed.
- *
- * Generalised from the Animal Writes edition: the redirect-resolution (`final_path`) and the News/tag/category "minor
- * path" handling are dropped (#6) — a path is used as-is and every owner counts. One prefix: insightweb_.
+ * only — nothing on the site is changed. A page path is used as-is and every owning page counts.
  *
  * @package InsightWeb
  */

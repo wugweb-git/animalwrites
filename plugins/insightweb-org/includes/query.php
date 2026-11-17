@@ -5,9 +5,6 @@
  * render. Read-only except insightweb_kw_set_override(), the one change the admin makes — a priority override on
  * InsightWeb's own keyword record, never on the site.
  *
- * Generalised from the Animal Writes edition: the entity/movers views, the Directory "same subject" rule and the
- * sourcing branch are dropped (#6). One prefix: insightweb_ / INSIGHTWEB_.
- *
  * @package InsightWeb
  */
 

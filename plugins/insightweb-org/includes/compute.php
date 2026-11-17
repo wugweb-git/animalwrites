@@ -2,11 +2,8 @@
 /**
  * The decision engine: from a keyword's Search Console figures (28-day impressions, position, the previous period and
  * the latest live check) and its owning pages, work out a priority, a status and one suggested next action. Pure,
- * read-only logic — this is what turns metrics into decisions; nothing on the site is changed.
- *
- * Ported from the Animal Writes edition's search-insights/compute.php, generalised: the Directory/Library "same
- * subject", the district/place gap and the News-item "sourcing" branches are dropped (#6 decouple) — this engine makes
- * no assumption about a site's post types or URL shapes. One prefix: insightweb_ / INSIGHTWEB_.
+ * read-only logic — this is what turns metrics into decisions; nothing on the site is changed. The engine makes no
+ * assumption about a site's post types or URL shapes.
  *
  * @package InsightWeb
  */
