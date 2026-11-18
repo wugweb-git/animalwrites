@@ -60,9 +60,11 @@ URLS=(/ "/?rest_route=/aw/v1/mail-in" /news/ /library/ /resources/ /opportunitie
   /directory/kerala/ /directory/kerala/ernakulam/ /category/community-dogs/ /tag/ci-tag/ "/news/?category_name=community-dogs"
   "$(single aw_news)" "$(single aw_legal)" "$(single post)" "$(single aw_opportunity)" "$(single aw_campaign)" "$(single aw_listing)")
 FAIL=0
+# A PHP error as PHP prints it ("Fatal error: …", "<b>Fatal error</b>: …") or WordPress's critical-error page; page text
+# that only mentions errors (a command described as counting "fatal errors") is not one.
 for u in "${URLS[@]}"; do
   code=$(curl -s -o /tmp/page.html -w '%{http_code}' "http://127.0.0.1:8080$u")
-  if [ "$code" != "200" ] || grep -qiE 'critical error|Fatal error|Parse error' /tmp/page.html; then
+  if [ "$code" != "200" ] || grep -qiE 'critical error on this website|(Fatal|Parse) error(</b>)?: ' /tmp/page.html; then
     echo "FAIL $code $u"; FAIL=1
   else
     echo "ok   $code $u"
@@ -115,7 +117,7 @@ adm "" >/dev/null # the first admin request runs the site's hourly checks (e.g. 
 opts >/tmp/opts-before.txt
 admok() { # NAME PATH: 200, no PHP error, not refused
   code=$(adm "$2")
-  if [ "$code" = "200" ] && ! grep -qiE 'critical error|Fatal error|Parse error|Sorry, you are not allowed' /tmp/admin.html; then echo "ok   $code $1"; else echo "FAIL $code $1"; FAIL=1; fi
+  if [ "$code" = "200" ] && ! grep -qiE 'critical error on this website|(Fatal|Parse) error(</b>)?: |Sorry, you are not allowed' /tmp/admin.html; then echo "ok   $code $1"; else echo "FAIL $code $1"; FAIL=1; fi
 }
 for s in kits kits-options kits-settings kits-tools kits-help; do admok "Kits → $s" "admin.php?page=$s"; done
 adm "admin.php?page=kits" >/dev/null # the five tabs are checked with the frame below
@@ -205,7 +207,7 @@ while read -r role page want mid item; do
     if [ "$code" = "$want" ]; then echo "ok   $code $role $page (not theirs, as before)"; else echo "FAIL $code $role $page (want $want)"; FAIL=1; fi
     continue
   fi
-  if [ "$code" != "200" ] || grep -qiE 'critical error|Fatal error|Parse error|Sorry, you are not allowed' /tmp/admin.html; then echo "FAIL $code $role $page"; FAIL=1; continue; fi
+  if [ "$code" != "200" ] || grep -qiE 'critical error on this website|(Fatal|Parse) error(</b>)?: |Sorry, you are not allowed' /tmp/admin.html; then echo "FAIL $code $role $page"; FAIL=1; continue; fi
   m=$(menu_read "toplevel_page_$mid")
   if echo "$m" | grep -qx "open yes" && { [ "$item" = "-" ] || echo "$m" | grep -qx "current $item"; }; then echo "ok   200 $role $page: $mid open${item:+, $item lit}"; else echo "FAIL $role $page: want $mid open with $item lit, got: $(echo "$m" | head -2 | tr '\n' ' ')"; FAIL=1; fi
   for under in menu-appearance menu-plugins; do
@@ -404,7 +406,7 @@ while read -r page section; do
   if grep -q 'class="kits-shell-header"' /tmp/rw.out && grep -q "kits-shell-css" /tmp/rw.out && grep -q "id=\"$section\"" /tmp/rw.out; then echo "ok   $page&ui=next draws the frame with $section"; else echo "FAIL $page&ui=next: frame or $section missing"; FAIL=1; fi
   n=$(grep -o 'class="kits-shell-tab' /tmp/rw.out | wc -l | tr -d ' ')
   if [ "$n" = "5" ]; then echo "ok   $page&ui=next: five tabs"; else echo "FAIL $page&ui=next: $n tabs"; FAIL=1; fi
-  if grep -qiE 'critical error|Fatal error|Parse error' /tmp/rw.out; then echo "FAIL $page&ui=next: PHP error"; FAIL=1; fi
+  if grep -qiE 'critical error on this website|(Fatal|Parse) error(</b>)?: ' /tmp/rw.out; then echo "FAIL $page&ui=next: PHP error"; FAIL=1; fi
   want 200 "admin.php?page=$page (default)" -b /tmp/cj-ci "$H/wp-admin/admin.php?page=$page"
   if grep -q 'class="kits-shell-header"' /tmp/rw.out; then echo "ok   $page: the new look is the default"; else echo "FAIL $page: the new look is not the default"; FAIL=1; fi
   want 403 "admin.php?page=$page&ui=next (subscriber)" -b /tmp/cj-rw-sub "$H/wp-admin/admin.php?page=$page&ui=next"
@@ -448,7 +450,7 @@ curl -s -o /dev/null http://127.0.0.1:8080/ || true
 aw_links() { grep -oE "<link[^>]*rel=['\"]stylesheet['\"][^>]*>" "$1" | grep -cE "/kits-by-wugweb/assets/site/css/|/kits-cache/parts/" || true; }
 for u in "${URLS[@]}"; do
   code=$(curl -s -o /tmp/page.html -w '%{http_code}' "http://127.0.0.1:8080$u")
-  if [ "$code" != "200" ] || grep -qiE 'critical error|Fatal error|Parse error' /tmp/page.html; then
+  if [ "$code" != "200" ] || grep -qiE 'critical error on this website|(Fatal|Parse) error(</b>)?: ' /tmp/page.html; then
     echo "FAIL $code $u"; FAIL=1
   else
     echo "ok   $code $u"

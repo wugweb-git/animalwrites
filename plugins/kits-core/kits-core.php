@@ -86,6 +86,16 @@ require_once KITS_CORE_DIR . 'includes/admin-kits-frame.php'; // Kits → Home, 
 require_once KITS_CORE_DIR . 'includes/admin-app-global-styles.php';
 require_once KITS_CORE_DIR . 'includes/button-hover.php';
 require_once KITS_CORE_DIR . 'includes/admin-app-cards.php';
+// The admin layer (moved from Animal Writes Core, 18 Nov 2026): menu arrangement and tidy, the site's rows on the Kits
+// screens, the edit-screens map, edit fields and the Modules settings. The site's own values come through filters.
+require_once KITS_CORE_DIR . 'includes/admin-layer/arrange.php';
+require_once KITS_CORE_DIR . 'includes/admin-layer/tidy.php';
+require_once KITS_CORE_DIR . 'includes/admin-layer/site-screens.php';
+require_once KITS_CORE_DIR . 'includes/admin-layer/cli-commands.php';
+require_once KITS_CORE_DIR . 'includes/admin-layer/edit-screens.php';
+require_once KITS_CORE_DIR . 'includes/admin-layer/edit-fields.php';
+require_once KITS_CORE_DIR . 'includes/admin-layer/site-options.php';
+require_once KITS_CORE_DIR . 'includes/admin-layer/compat.php'; // the older aw_ names, after the files that define what they wrap
 require_once KITS_CORE_DIR . 'includes/site-parts.php';
 require_once KITS_CORE_DIR . 'includes/fonts.php';
 require_once KITS_CORE_DIR . 'includes/backups.php'; // the daily database and code backup into ~/backups, its REST download and the UpdraftPlus alert (moved from Animal Writes Core, 18 Nov 2026)

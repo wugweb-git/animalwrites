@@ -11,7 +11,7 @@
  *   kits_ga4_via_gtm, kits_preview_devices, kits_preview_ips, kits_preview_links, kits_spot_map, kits_presets_enabled,
  *   kits_presets_rewrite, kits_presets_consent,
  *   kits_daily_backup (the daily backup's switch) and aw_backup_last (its last run, backups.php), aw_error_pages (the error pages' state, error-pages.php),
- *   kits_delete_data_on_uninstall.
+ *   kits_cli_commands (the Help commands list, cli-commands.php), kits_delete_data_on_uninstall.
  * Transients (they expire anyway): kits_preview_link_*, kits_thanks_*, kits_transfer_result_*, kits_altcha_*, and the
  *   site transient kits_update_release, aw_error_pages_checked.
  * Scheduled events: kits_spot_map_daily, aw_daily_backup.
@@ -62,6 +62,7 @@ $kits_options = array(
 	'aw_error_pages',
 	'kits_presets_rewrite',
 	'kits_presets_consent',
+	'kits_cli_commands',
 );
 
 // The ALTCHA signing key is deleted but kept OUT of the backup file: it is a secret (regenerated on demand), and the
