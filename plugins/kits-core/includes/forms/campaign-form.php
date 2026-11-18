@@ -98,7 +98,7 @@ function kits_raw_mark( $id, $status, $entry_id = 0 ) {
 $GLOBALS['aw_raw_id'] = 0;
 foreach ( array( 'wp_ajax_nopriv_fluentform_submit', 'wp_ajax_fluentform_submit' ) as $kits_cf_hook ) {
 	add_action(
-		$aw_hook,
+		$kits_cf_hook,
 		function () {
 			$data = array();
 			parse_str( (string) wp_unslash( $_POST['data'] ?? '' ), $data ); // phpcs:ignore WordPress.Security.NonceVerification,WordPress.Security.ValidatedSanitizedInput -- copied as sent, read only by admins
