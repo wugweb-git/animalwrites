@@ -308,8 +308,7 @@ if ( ! defined( 'KITS_CAP' ) ) {
 	define( 'KITS_CAP', 'edit_posts' );
 }
 require dirname( __DIR__ ) . '/includes/admin-kits-frame.php';
-$frame_before = kits_frame_screens();
-kits_t( array( 'kits', 'kits-settings', 'kits-tools', 'kits-help' ) === array_keys( $frame_before ), 'frame: the four Kits screens, before any joins' );
+// The joins are read once per request, so they are all registered before the first read.
 $joined = array(
 	'includes/media-webp.php'          => array( 'aw-media-webp', 'manage_options', 'kits-tools' ),
 	'includes/tools/media-merge.php'   => array( 'aw-media-duplicates', 'manage_options', 'kits-tools' ),
@@ -339,6 +338,7 @@ add_filter(
 	}
 );
 $frame_after = kits_frame_screens();
+kits_t( array( 'kits', 'kits-settings', 'kits-tools', 'kits-help' ) === array_slice( array_keys( $frame_after ), 0, 4 ), 'frame: the four Kits screens come first' );
 kits_t( 'manage_options' === $frame_after['kits-tools'] && 'manage_options' === $frame_after['aw-media-webp'] && 'edit_posts' === $frame_after['aw-letter-report'], 'frame: joined screens keep their capability; the Kits four cannot be replaced' );
 kits_t( 'kits-tools' === kits_frame_extra_tab( 'aw-media-reuse' ) && '' === kits_frame_extra_tab( 'aw-modules' ) && '' === kits_frame_extra_tab( 'nope' ), 'frame: the media screens sit under the Tools tab' );
 
