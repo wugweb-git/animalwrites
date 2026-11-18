@@ -37,7 +37,7 @@ function kits_post_fields() {
 		return $fields;
 	}
 	$built = (array) apply_filters( 'kits_post_fields', array() );
-	if ( did_action( 'init' ) ) { // keys are registered by init; before that, do not keep a partial list
+	if ( did_action( 'init' ) ) { // Keys are registered by init; before that, do not keep a partial list.
 		$fields = $built;
 	}
 	return $built;
@@ -51,14 +51,14 @@ function kits_post_fields() {
  * @return string
  */
 function kits_post_field_value( $key, $post_id ) {
-	static $seen = array(); // one page asks for the same value twice: the binding, then the empty-block rule
-	$fields = kits_post_fields();
+	static $seen = array(); // One page asks for the same value twice: the binding, then the empty-block rule.
+	$fields      = kits_post_fields();
 	if ( ! isset( $fields[ $key ]['callback'] ) || ! is_callable( $fields[ $key ]['callback'] ) ) {
 		return '';
 	}
 	$id = (int) $post_id . '|' . $key;
 	if ( ! array_key_exists( $id, $seen ) ) {
-		if ( count( $seen ) > 2000 ) { // long CLI or cron runs: keep memory flat
+		if ( count( $seen ) > 2000 ) { // Long CLI or cron runs: keep memory flat.
 			$seen = array();
 		}
 		$seen[ $id ] = (string) call_user_func( $fields[ $key ]['callback'], (int) $post_id, (string) $key );
