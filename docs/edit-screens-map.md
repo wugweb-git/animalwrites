@@ -71,7 +71,7 @@ Legend: **src** = where the box comes from. **cond** = when it shows. SCF box id
 | 1 | Publish (sidebar panel) | submitdiv | core | side/core | back-compat → panel |
 | 2 | Categories | categorydiv | core | side/core | panel |
 | 3 | Tags | tagsdiv-post_tag | core | side/core | panel |
-| 4 | Linked campaigns | tagsdiv-aw_campaign_link | core box for our taxonomy `aw_campaign_link` | side/core | panel |
+| 4 | Linked campaigns | tagsdiv-kits_campaign_link | core box for our taxonomy `kits_campaign_link` | side/core | panel |
 | 5 | Resource attributes (template) | pageparentdiv | core | side/core | panel; shows because the theme has templates for posts |
 | 6 | LiteSpeed | litespeed_meta_boxes | LiteSpeed `litespeed-cache/src/metabox.cls.php:76` | side/core | public types only |
 | 8 | Featured image | postimagediv | core | side/low | panel |
@@ -116,7 +116,7 @@ No SCF group, no Related box. The admin account's saved order still lists a `kit
 | 1 | Publish | submitdiv | core | side/core | |
 | 2 | Categories | categorydiv | core | side/core | |
 | 3 | Tags | tagsdiv-post_tag | core | side/core | |
-| 4 | Linked campaigns | tagsdiv-aw_campaign_link | core | side/core | |
+| 4 | Linked campaigns | tagsdiv-kits_campaign_link | core | side/core | |
 | 5 | Post Attributes (template) | pageparentdiv | core | side/core | |
 | 6 | LiteSpeed | litespeed_meta_boxes | LiteSpeed | side/core | |
 | 7 | Content AI | rank_math_metabox_content_ai | Rank Math `modules/content-ai/class-admin.php:110` | side/high | classic editor only. Not captured (see above) |
@@ -137,7 +137,7 @@ Places stored on News are kept and still read (`AW_PLACE_TYPES`, `core/places.ph
 | # | Title | id | src | context / prio | cond |
 |---|---|---|---|---|---|
 | 1 | Publish | submitdiv | core | side/core | panel |
-| 2 | Categories / Tags / Linked campaigns | categorydiv, tagsdiv-post_tag, tagsdiv-aw_campaign_link | core | side/core | panels |
+| 2 | Categories / Tags / Linked campaigns | categorydiv, tagsdiv-post_tag, tagsdiv-kits_campaign_link | core | side/core | panels |
 | 3 | Post Attributes | pageparentdiv | core | side/core | panel |
 | 4 | LiteSpeed | litespeed_meta_boxes | LiteSpeed | side/core | |
 | 5 | Revisions | revisionsdiv | core | normal/core | panel; 2+ revisions |
@@ -189,7 +189,7 @@ The five campaign groups (7–11) hold one message field each; the fields inside
 
 | # | Title | id | src | context / prio | cond |
 |---|---|---|---|---|---|
-| 1 | Publish / Categories / Tags / Post Attributes | core | core | side/core | panels (no aw_campaign_link on listings) |
+| 1 | Publish / Categories / Tags / Post Attributes | core | core | side/core | panels (no kits_campaign_link on listings) |
 | 2 | LiteSpeed | litespeed_meta_boxes | LiteSpeed | side/core | |
 | 3 | Featured image (= logo) | postimagediv | core | side/low | panel |
 | 4 | Excerpt (= short bio) / Custom Fields / Slug | core | core | normal/core | |
@@ -215,7 +215,7 @@ No Related box on listings (no relation starts at aw_listing).
 | # | Title | id | src | context / prio |
 |---|---|---|---|---|
 | 1 | Publish | submitdiv | core | side/core |
-| 2 | Tags / Linked campaigns | tagsdiv-post_tag, tagsdiv-aw_campaign_link | core | side/core |
+| 2 | Tags / Linked campaigns | tagsdiv-post_tag, tagsdiv-kits_campaign_link | core | side/core |
 | 3 | Featured image (= thumbnail) | postimagediv | core | side/low |
 | 4 | Coverage | aw_press_box | ours `core/press.php:135` (closure :138) | normal/high |
 | 5 | Slug | slugdiv | core | normal/core (hidden by the admin account) |
@@ -237,7 +237,7 @@ Publish, Slug only (plus the editor), both in the General row. No plugin box.
 
 ### attachment (media edit screen)
 
-Save `submitdiv`, Media groups `tagsdiv-aw_media_group` (our taxonomy), Attachment Attributes `pageparentdiv`, LiteSpeed, Slug, Author (hidden by the admin account). Field via `attachment_fields_to_edit` (not a box): **Image context** `kits_image_context`, `kits/image-context.php:13–30`.
+Save `submitdiv`, Media groups `tagsdiv-kits_media_group` (our taxonomy), Attachment Attributes `pageparentdiv`, LiteSpeed, Slug, Author (hidden by the admin account). Field via `attachment_fields_to_edit` (not a box): **Image context** `kits_image_context`, `kits/image-context.php:13–30`.
 
 ### aw_volunteer
 
@@ -639,7 +639,7 @@ None. Every key has one box per type: the Place, Issued by, Library item, proven
 
 ## 5. Term screens
 
-Taxonomies with UI: category, post_tag (public), aw_campaign_link (`show_ui`, not public), aw_media_group (attachment, not public), link_category, wp_pattern_category. Our FAQ term box is hooked on `admin_init` (`seo/faq.php:851–860`) and Rank Math's term box and description editor when its Screen is loaded on term.php, so none of these appears in a command-line run; listed from the map. On a live term screen the map joins Rank Math's hooks by file, hook and priority (`term-rank-math`: `{taxonomy}_edit_form` 11; `term-rank-math-description`: `{taxonomy}_edit_form_fields` 1).
+Taxonomies with UI: category, post_tag (public), kits_campaign_link (`show_ui`, not public), kits_media_group (attachment, not public), link_category, wp_pattern_category. Our FAQ term box is hooked on `admin_init` (`seo/faq.php:851–860`) and Rank Math's term box and description editor when its Screen is loaded on term.php, so none of these appears in a command-line run; listed from the map. On a live term screen the map joins Rank Math's hooks by file, hook and priority (`term-rank-math`: `{taxonomy}_edit_form` 11; `term-rank-math-description`: `{taxonomy}_edit_form_fields` 1).
 
 ### category
 
@@ -667,9 +667,9 @@ Category term meta with **no field** on the screen: `aw_category_card` (18, read
 | FAQ (edit) | `aw_faq` | ours | tag FAQ; 19 rows |
 | Rank Math SEO (edit) | `rank_math_title/description/focus_keyword/robots/canonical_url/breadcrumb_title/facebook_image/twitter_use_facebook/seo_score` | Rank Math (`tax_post_tag_add_meta_box` on) | `aw_seo_sync_tags` `seo/programmatic.php:933–960` writes title/description/robots |
 
-### aw_campaign_link, aw_media_group, link_category, wp_pattern_category
+### kits_campaign_link, kits_media_group, link_category, wp_pattern_category
 
-Core fields only (name, slug, description). `aw_campaign_link` terms carry `aw_campaign_page` (2) and the short name with **no field** on the screen: term meta `aw_short_name` (0) is read first, then the older `aw_campaign_short` (2); read by campaign cards `core/hub-blocks.php:622–628` and `core/faq-data.php:1009`.
+Core fields only (name, slug, description). `kits_campaign_link` terms carry `aw_campaign_page` (2) and the short name with **no field** on the screen: term meta `aw_short_name` (0) is read first, then the older `aw_campaign_short` (2); read by campaign cards `core/hub-blocks.php:622–628` and `core/faq-data.php:1009`.
 
 ---
 
@@ -803,7 +803,7 @@ The panels, boxes and tables on the admin pages of SourceWeb, RankWeb (with Sear
 | id | widget | kind | reads | limits | file |
 |---|---|---|---|---|---|
 | ap-src-rules-sections | Section rules (AW_Sourcing_Sections_Table) | list-table | `option:aw_sources (sections)`, `category`, `post_tag` | One row per section; up to 8 tag names before "…" | `src/class-aw-sourcing-sections-table.php:16 (AW_Sourcing_Sections_Table), shown at src/rules-admin.php:123` |
-| ap-src-rules-tags | Tag rules (Add New Rule and list) | table | `option:aw_sources (topic_tags)`, `post_tag`, `aw_campaign_link` | One row per tag rule | `src/rules-admin.php:125 (aw_rules_tab), list src/rules-admin.php:187 (aw_rules_tag_table)` |
+| ap-src-rules-tags | Tag rules (Add New Rule and list) | table | `option:aw_sources (topic_tags)`, `post_tag`, `kits_campaign_link` | One row per tag rule | `src/rules-admin.php:125 (aw_rules_tab), list src/rules-admin.php:187 (aw_rules_tag_table)` |
 | ap-src-rules-summary | Summary rules | form | `option:aw_summary_rules` | One rule set, with a rule per section | `src/summary-rules-admin.php:237 (aw_summary_rules_tab)` |
 | ap-src-rules-enrich-settings | Directory enrichment (sources, Google key, monthly cap) | form | `option:aw_enrich_sources`, `option:aw_enrich_google_key`, `option:aw_enrich_live_cap` | Live Google block cap default 20 a month | `src/enrichment-admin.php:449 (aw_enrich_settings_tab)` |
 | ap-src-rules-trust-order | Trust order | form | `option:aw_enrich_field_rules (priority)`, `option:aw_enrich_sources` | Positions 1–99; empty ranks last | `src/rules-admin.php:399 (aw_rules_priority_form)` |

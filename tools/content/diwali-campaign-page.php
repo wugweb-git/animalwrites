@@ -123,7 +123,7 @@ function dwsplit( $text, $img_id, $pos = 'center' ) {
 		. '</div>' . "\n" . '<!-- /wp:columns -->' . "\n\n";
 }
 function dwq( $markup, $term_id ) {
-	return str_replace( '%TQ%', '"taxQuery":{"aw_campaign_link":[' . (int) $term_id . ']}', $markup );
+	return str_replace( '%TQ%', '"taxQuery":{"kits_campaign_link":[' . (int) $term_id . ']}', $markup );
 }
 /** A query row of cards (the lab campaign's card markup). */
 function dwrow( $query_id, $type, $per, $term_id, $cls = 'aw-camp-row-q' ) {
@@ -142,7 +142,7 @@ function dwrow( $query_id, $type, $per, $term_id, $cls = 'aw-camp-row-q' ) {
 	return dwq( $m, $term_id ) . "\n";
 }
 
-$term_id = getenv( 'AW_RENDER' ) ? (int) getenv( 'AW_TERM_ID' ) : (int) ( get_term_by( 'slug', DW_TERM, 'aw_campaign_link' )->term_id ?? 0 );
+$term_id = getenv( 'AW_RENDER' ) ? (int) getenv( 'AW_TERM_ID' ) : (int) ( get_term_by( 'slug', DW_TERM, 'kits_campaign_link' )->term_id ?? 0 );
 if ( ! $term_id ) {
 	$msg = 'Campaign link ' . DW_TERM . ' not found; create it first';
 	if ( defined( 'WP_CLI' ) ) {
@@ -468,7 +468,7 @@ if ( getenv( 'AW_RENDER' ) ) { // the REST payload: the post, then Rank Math's m
 				'content'        => $content,
 				'template'       => 'campaign-page',
 				'featured_media' => DW_HERO,
-				'aw_campaign_link' => array( $term_id ),
+				'kits_campaign_link' => array( $term_id ),
 				'meta'           => $meta,
 			),
 			'seo'  => $seo,
@@ -497,7 +497,7 @@ $id = wp_insert_post( wp_slash( $post ), true );
 if ( is_wp_error( $id ) ) {
 	WP_CLI::error( $id->get_error_message() );
 }
-wp_set_object_terms( $id, array( $term_id ), 'aw_campaign_link', true );
+wp_set_object_terms( $id, array( $term_id ), 'kits_campaign_link', true );
 wp_set_object_terms( $id, array( 'campaigns-civic-action', 'pets-breeding', 'community-dogs' ), 'category', false );
 set_post_thumbnail( $id, DW_HERO );
 update_term_meta( $term_id, 'aw_campaign_page', $id );

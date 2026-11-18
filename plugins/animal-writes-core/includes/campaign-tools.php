@@ -1042,7 +1042,7 @@ add_filter(
 		}
 		$tax = array();
 		foreach ( (array) ( $a['query']['taxQuery'] ?? array() ) as $taxonomy => $terms ) {
-			$tax[] = array( 'taxonomy' => $taxonomy, 'terms' => array_map( 'intval', (array) $terms ) );
+			$tax[] = array( 'taxonomy' => kits_taxonomy_current( $taxonomy ), 'terms' => array_map( 'intval', (array) $terms ) ); // saved blocks may name aw_campaign_link (taxonomy-rename.php)
 		}
 		$posts = get_posts(
 			array(
@@ -1094,7 +1094,7 @@ add_filter(
 		}
 		$linked = false;
 		foreach ( (array) $q['tax_query'] as $t ) {
-			$linked = $linked || ( is_array( $t ) && AW_CAMPAIGN_LINK === ( $t['taxonomy'] ?? '' ) );
+			$linked = $linked || ( is_array( $t ) && KITS_CAMPAIGN_LINK === ( $t['taxonomy'] ?? '' ) );
 		}
 		if ( ! $linked ) {
 			return $q;

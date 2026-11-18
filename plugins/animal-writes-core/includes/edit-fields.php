@@ -67,7 +67,7 @@ add_action(
 /* ---------- Linked campaigns: short name ---------- */
 
 add_action(
-	'aw_campaign_link_edit_form_fields',
+	'kits_campaign_link_edit_form_fields',
 	function ( $term ) {
 		wp_nonce_field( 'aw_edit_fields_camp', 'aw_edit_fields_camp_nonce' );
 		printf(
@@ -91,7 +91,7 @@ function aw_edit_fields_term_short( $term_id ): string {
 }
 
 add_action(
-	'edited_aw_campaign_link',
+	'edited_kits_campaign_link',
 	function ( $term_id ) {
 		if ( ! isset( $_POST['aw_edit_fields_camp_nonce'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['aw_edit_fields_camp_nonce'] ) ), 'aw_edit_fields_camp' ) || ! current_user_can( 'manage_categories' ) ) {
 			return;

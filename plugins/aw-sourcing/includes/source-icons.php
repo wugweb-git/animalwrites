@@ -135,8 +135,8 @@ function aw_src_icon_fetch( $url, $host ) {
 	if ( is_wp_error( $id ) ) {
 		return mb_substr( 'error: ' . $id->get_error_message(), 0, 120 );
 	}
-	if ( taxonomy_exists( 'aw_media_group' ) ) {
-		wp_set_object_terms( (int) $id, 'Source icon', 'aw_media_group' );
+	if ( taxonomy_exists( 'kits_media_group' ) ) {
+		wp_set_object_terms( (int) $id, 'Source icon', 'kits_media_group' );
 	}
 	return (int) $id;
 }

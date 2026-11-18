@@ -7,8 +7,9 @@
  * Each term's meta aw_campaign_page holds its campaign's post ID; the old tag addresses (/tag/campaign-...) 301 to it.
  *
  * Used by: the Media & PR Campaign filter (systems.php), related items (related.php), the campaign record schema
- * (aw-seo-extras schema.php), campaign pages' query lists ("taxQuery":{"aw_campaign_link":[id]}, systems.php restores
- * them), and the stock-photo rule (cc0-images.php).
+ * (aw-seo-extras schema.php), campaign pages' query lists ("taxQuery":{"kits_campaign_link":[id]}; blocks saved
+ * before 18 Nov 2026 name aw_campaign_link, mapped by taxonomy-rename.php; systems.php restores them), and the
+ * stock-photo rule (cc0-images.php). Renamed from aw_campaign_link on 18 Nov 2026 (taxonomy-rename.php).
  *
  * @package animal-writes-core
  */
@@ -17,15 +18,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_CAMPAIGN_LINK       = 'aw_campaign_link';
-const AW_CAMPAIGN_LINK_TYPES = array( 'aw_news', 'aw_legal', 'post', 'aw_press', 'aw_opportunity', 'aw_campaign' );
+const KITS_CAMPAIGN_LINK       = 'kits_campaign_link';
+const KITS_CAMPAIGN_LINK_TYPES = array( 'aw_news', 'aw_legal', 'post', 'aw_press', 'aw_opportunity', 'aw_campaign' );
 
 add_action(
 	'init',
 	function () {
 		register_taxonomy(
-			AW_CAMPAIGN_LINK,
-			AW_CAMPAIGN_LINK_TYPES,
+			KITS_CAMPAIGN_LINK,
+			KITS_CAMPAIGN_LINK_TYPES,
 			array(
 				'labels'             => array(
 					'name'          => 'Linked campaigns', // owner, 25 Oct 2026: not "Campaigns", which is the Campaigns menu
@@ -62,7 +63,7 @@ add_action(
  * @return WP_Term[]
  */
 function aw_campaign_links( $id ) {
-	$t = get_the_terms( $id, AW_CAMPAIGN_LINK );
+	$t = get_the_terms( $id, KITS_CAMPAIGN_LINK );
 	return $t && ! is_wp_error( $t ) ? $t : array();
 }
 
@@ -80,13 +81,13 @@ function aw_set_campaign_links( $id, $slugs ) {
 		if ( 0 !== strpos( $s, 'campaign-' ) ) {
 			continue;
 		}
-		$t = get_term_by( 'slug', $s, AW_CAMPAIGN_LINK );
+		$t = get_term_by( 'slug', $s, KITS_CAMPAIGN_LINK );
 		if ( $t ) {
 			$ids[] = (int) $t->term_id;
 		}
 	}
 	if ( $ids ) {
-		wp_set_object_terms( $id, $ids, AW_CAMPAIGN_LINK, true );
+		wp_set_object_terms( $id, $ids, KITS_CAMPAIGN_LINK, true );
 	}
 	return $ids;
 }
@@ -142,7 +143,7 @@ add_action(
 	function () {
 		foreach ( array( 'aw_news_line', 'aw_news_line_link' ) as $key ) {
 			register_term_meta(
-				AW_CAMPAIGN_LINK,
+				KITS_CAMPAIGN_LINK,
 				$key,
 				array(
 					'type'              => 'string',
@@ -158,7 +159,7 @@ add_action(
 		}
 		// The campaign page a link points to (post ID); editable through wp-admin REST like the two fields above.
 		register_term_meta(
-			AW_CAMPAIGN_LINK,
+			KITS_CAMPAIGN_LINK,
 			'aw_campaign_page',
 			array(
 				'type'              => 'integer',
@@ -193,7 +194,7 @@ function aw_campaign_news_line( $t ) {
 
 // The two fields on Linked campaigns → Edit (core form table, no custom CSS).
 add_action(
-	AW_CAMPAIGN_LINK . '_edit_form_fields',
+	KITS_CAMPAIGN_LINK . '_edit_form_fields',
 	function ( $term ) {
 		wp_nonce_field( 'aw_news_line', 'aw_news_line_nonce' );
 		$rows = array(
@@ -212,7 +213,7 @@ add_action(
 	}
 );
 add_action(
-	'edited_' . AW_CAMPAIGN_LINK,
+	'edited_' . KITS_CAMPAIGN_LINK,
 	function ( $term_id ) {
 		if ( ! isset( $_POST['aw_news_line_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['aw_news_line_nonce'] ) ), 'aw_news_line' ) || ! current_user_can( 'manage_categories' ) ) {
 			return;

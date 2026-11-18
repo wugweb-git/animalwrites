@@ -16,7 +16,7 @@
  *
  * Fields (one box, SCF group_aw_social): link (unique, duplicates refused), platform, person, handle, post date, summary,
  * format, numbers at import (views, reposts, likes, replies, date seen), poster image, related News / Library / listing
- * items. Campaigns: the same aw_campaign_link terms campaign items use (campaign-links.php). Each campaign: its hashtags
+ * items. Campaigns: the same kits_campaign_link terms campaign items use (campaign-links.php). Each campaign: its hashtags
  * and search strings (aw_social_terms, SCF group_aw_campaign_social), read by the weekly collection and the workers.
  *
  * Routes (the workers' user, as aw/v1/search-insights): POST aw/v1/social/intake, GET aw/v1/social/campaigns.
@@ -155,8 +155,8 @@ add_action(
 				'supports'            => array( 'title' ),
 			)
 		);
-		if ( defined( 'AW_CAMPAIGN_LINK' ) ) {
-			register_taxonomy_for_object_type( AW_CAMPAIGN_LINK, AW_SOCIAL_TYPE ); // the same campaign links campaign items use
+		if ( defined( 'KITS_CAMPAIGN_LINK' ) ) {
+			register_taxonomy_for_object_type( KITS_CAMPAIGN_LINK, AW_SOCIAL_TYPE ); // the same campaign links campaign items use
 		}
 	},
 	11 // after the campaign link taxonomy (5) and the content types (10)
@@ -285,10 +285,10 @@ function aw_social_campaign_terms( int $id ): array {
  * @return WP_Term[] Its own term first.
  */
 function aw_social_campaign_link_terms( int $id ): array {
-	if ( ! defined( 'AW_CAMPAIGN_LINK' ) ) {
+	if ( ! defined( 'KITS_CAMPAIGN_LINK' ) ) {
 		return array();
 	}
-	$own  = get_terms( array( 'taxonomy' => AW_CAMPAIGN_LINK, 'hide_empty' => false, 'meta_key' => 'aw_campaign_page', 'meta_value' => (string) $id ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
+	$own  = get_terms( array( 'taxonomy' => KITS_CAMPAIGN_LINK, 'hide_empty' => false, 'meta_key' => 'aw_campaign_page', 'meta_value' => (string) $id ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
 	$out  = array();
 	foreach ( array_merge( is_array( $own ) ? $own : array(), function_exists( 'aw_campaign_links' ) ? aw_campaign_links( $id ) : array() ) as $t ) {
 		$out[ $t->term_id ] = $t;
@@ -671,7 +671,7 @@ add_action(
 		} elseif ( 'invalid' === $done ) {
 			wp_admin_notice( esc_html( 'Nothing added: paste the full link to the post (https://…).' ), array( 'type' => 'error', 'dismissible' => true ) );
 		}
-		$terms = defined( 'AW_CAMPAIGN_LINK' ) ? get_terms( array( 'taxonomy' => AW_CAMPAIGN_LINK, 'hide_empty' => false ) ) : array();
+		$terms = defined( 'KITS_CAMPAIGN_LINK' ) ? get_terms( array( 'taxonomy' => KITS_CAMPAIGN_LINK, 'hide_empty' => false ) ) : array();
 		echo '<h2>' . esc_html( 'Add a social post from its link' ) . '</h2>';
 		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
 		wp_nonce_field( 'aw_social_add' );
@@ -726,7 +726,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	 * : The CSV file.
 	 *
 	 * [--campaign=<slug>]
-	 * : Link every record to this campaign (an aw_campaign_link slug, e.g. campaign-lab-animals-2026).
+	 * : Link every record to this campaign (an kits_campaign_link slug, e.g. campaign-lab-animals-2026).
 	 *
 	 * [--dry-run]
 	 * : Count what would be created; write nothing.
@@ -746,8 +746,8 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 				WP_CLI::error( 'CSV file not found: ' . $file );
 			}
 			$camp = sanitize_title( (string) ( $assoc['campaign'] ?? '' ) );
-			if ( '' !== $camp && ( 0 !== strpos( $camp, 'campaign-' ) || ! term_exists( $camp, AW_CAMPAIGN_LINK ) ) ) {
-				WP_CLI::error( 'No linked campaign with the slug ' . $camp . ' (wp term list aw_campaign_link).' );
+			if ( '' !== $camp && ( 0 !== strpos( $camp, 'campaign-' ) || ! term_exists( $camp, KITS_CAMPAIGN_LINK ) ) ) {
+				WP_CLI::error( 'No linked campaign with the slug ' . $camp . ' (wp term list kits_campaign_link).' );
 			}
 			$dry = ! empty( $assoc['dry-run'] );
 			$fh  = fopen( $file, 'r' ); // phpcs:ignore WordPress.WP.AlternativeFunctions
@@ -887,7 +887,7 @@ function aw_social_rest_intake( WP_REST_Request $req ) {
 
 /**
  * GET aw/v1/social/campaigns: [{slug, title, terms}] for each published campaign with hashtags or search strings.
- * slug is the campaign's own aw_campaign_link term (to send back as "campaign"); '' when it has none.
+ * slug is the campaign's own kits_campaign_link term (to send back as "campaign"); '' when it has none.
  *
  * @return WP_REST_Response|WP_Error
  */
@@ -945,7 +945,7 @@ function aw_social_for_item( int $id ): array {
 		if ( ! $terms ) {
 			return array();
 		}
-		$args['tax_query'] = array( array( 'taxonomy' => AW_CAMPAIGN_LINK, 'terms' => array_map( 'intval', $terms ) ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
+		$args['tax_query'] = array( array( 'taxonomy' => KITS_CAMPAIGN_LINK, 'terms' => array_map( 'intval', $terms ) ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
 	} elseif ( in_array( $type, array( 'aw_news', 'aw_legal', 'aw_listing' ), true ) ) {
 		$args['meta_query'] = array( array( 'key' => 'aw_social_related', 'value' => '(^|,)' . (int) $id . '(,|$)', 'compare' => 'REGEXP' ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
 	} else {
