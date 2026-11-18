@@ -155,14 +155,21 @@ if ( PHP_VERSION_ID >= 80000 && ! defined( 'PLANWEB_VERSION' ) && file_exists( d
 register_activation_hook(
 	__FILE__,
 	function () {
-		aw_register_content_types();
+		// The content types, their meta and the daily schedule moved out of this plugin (the theme's site layer and Kits Core,
+		// 19 Nov 2026). Each is called only when it is loaded: on a first activation the site layer may not be (it loads once
+		// Kits Core is), and a missing function must not stop the activation.
+		if ( function_exists( 'aw_register_content_types' ) ) {
+			aw_register_content_types();
+		}
 		if ( function_exists( 'directoryweb_register_listing_type' ) ) {
 			directoryweb_register_listing_type();
 		}
 		if ( function_exists( 'aw_directory_rewrites' ) ) {
 			aw_directory_rewrites();
 		}
-		aw_register_meta();
+		if ( function_exists( 'aw_register_meta' ) ) {
+			aw_register_meta();
+		}
 		if ( function_exists( 'directoryweb_caps_grant' ) ) {
 			directoryweb_caps_grant();
 		}
