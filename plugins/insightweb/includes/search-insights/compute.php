@@ -355,7 +355,7 @@ function aw_si_ctx( $r, array $quality ): array {
 
 /**
  * Write (insert or replace) one keyword's score-store row, keyed by keyword id. The store is InsightWeb's own table
- * (wp_aw_si_scores); Kits Core's keyword table is not touched.
+ * (wp_aw_si_scores); the shared keyword table is not touched.
  *
  * @param int                  $id  Keyword id.
  * @param array<string, mixed> $row aw_si_score_row() columns (score, the four parts, recommended, focus_health).
