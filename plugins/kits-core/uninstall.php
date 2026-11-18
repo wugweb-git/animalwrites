@@ -18,7 +18,7 @@
  *   aw_media_merge_log, aw_media_merge_data_*, aw_media_reuse_log, aw_media_webp_log; kits_delete_data_on_uninstall.
  * Transients (they expire anyway): kits_preview_link_*, kits_thanks_*, kits_transfer_result_*, kits_altcha_*,
  *   aw_media_reuse_notice_*, aw_thumb_dupes_n, aw_error_count_mailed, aw_error_pages_checked, and the site transient kits_update_release.
- * Scheduled events: kits_spot_map_daily, aw_daily_backup, aw_thumb_rebuild, aw_daily, aw_error_count_daily,
+ * Scheduled events: kits_spot_map_daily, aw_daily_backup, aw_thumb_rebuild, aw_error_count_daily,
  *   aw_site_check_deploy.
  * Tables: none of its own.
  *
@@ -109,7 +109,6 @@ delete_site_transient( 'kits_update_release' );
 
 wp_unschedule_hook( 'kits_spot_map_daily' );
 wp_unschedule_hook( 'aw_thumb_rebuild' ); // the thumbnail map rebuild (thumbs.php)
-wp_unschedule_hook( 'aw_daily' ); // the daily event (includes/ops/daily.php)
 wp_unschedule_hook( 'aw_error_count_daily' ); // includes/ops/error-count.php
 wp_unschedule_hook( 'aw_site_check_deploy' ); // includes/ops/site-check.php
 wp_unschedule_hook( 'aw_daily_backup' ); // the daily backup (backups.php); the backup files in ~/backups stay

@@ -25,6 +25,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return array<string,string>
  */
 function kits_site_check_urls() {
+	$own = apply_filters( 'kits_site_check_urls', null ); // a site that names its own list skips the generic queries below
+	if ( is_array( $own ) ) {
+		return $own;
+	}
 	$urls = array(
 		'Home'    => '/',
 		'Search'  => '/search/?q=a',
@@ -43,7 +47,7 @@ function kits_site_check_urls() {
 	if ( $t && ! is_wp_error( $t ) ) {
 		$urls['A category'] = wp_parse_url( function_exists( 'kits_term_url' ) ? kits_term_url( $t[0] ) : get_term_link( $t[0] ), PHP_URL_PATH );
 	}
-	return (array) apply_filters( 'kits_site_check_urls', $urls );
+	return $urls;
 }
 
 add_action(
@@ -135,15 +139,6 @@ add_action(
 /** Where the check's results are: Kits → Home → Page check. */
 function kits_site_check_url(): string {
 	return admin_url( 'admin.php?page=' . KITS_MENU ) . '#page-check';
-}
-
-/** Check site without Kits: the results, then the other checks (backup, CDN, email, …) through aw_site_check_after. */
-function kits_site_check_page() {
-	echo '<div class="wrap"><h1>Check site</h1>';
-	kits_site_screen_nav( 'aw-site-check' );
-	kits_site_check_results();
-	do_action( 'aw_site_check_after' ); // e.g. the daily backup line
-	echo '</div>';
 }
 
 /** Kits → Home → Page check: the Run button, the last check's time and commit, and each page's status. */

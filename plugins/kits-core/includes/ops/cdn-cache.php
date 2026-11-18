@@ -28,10 +28,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /** Pages that carry a form, a nonce or personal data: never in the shared cache. */
 function kits_cdn_excluded_slugs() {
-	return (array) apply_filters(
-		'kits_cdn_excluded_slugs',
+	$slugs = (array) apply_filters(
+		'aw_cdn_excluded_slugs', // the older name of this filter, still applied
 		array( 'contact', 'volunteer', 'claim', 'remove-my-data', 'report', 'thank-you', 'corrections', 'helplines', 'search', 'login', 'register', 'my-account' )
 	);
+	return (array) apply_filters( 'kits_cdn_excluded_slugs', $slugs );
 }
 
 /** The lifetime to send for this request, 0 for none. */

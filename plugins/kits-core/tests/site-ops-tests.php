@@ -193,5 +193,12 @@ check( 'old names: aw_retention_state and aw_keep_modified forward', 'closed' ==
 check( 'old names: aw_cron_span forwards', '5 min' === aw_cron_span( 300 ) );
 check( 'old name: aw_dispatch_workflow exists for the server\'s cron line', function_exists( 'aw_dispatch_workflow' ) && function_exists( 'aw_cron_last' ) && function_exists( 'aw_core_simple_table' ) );
 
+foreach ( array( $git . '/refs/heads/main', $git . '/refs/heads/packed', $git . '/HEAD', $git . '/packed-refs' ) as $f ) {
+	@unlink( $f );
+}
+foreach ( array( $git . '/refs/heads', $git . '/refs', $git, $tmp . '/repo/plugins/kits-core', $tmp . '/repo/plugins', $tmp . '/repo', $tmp ) as $d ) {
+	@rmdir( $d );
+}
+
 echo "\n" . $n . ' checks, ' . $fails . " failed\n";
 exit( $fails ? 1 : 0 );

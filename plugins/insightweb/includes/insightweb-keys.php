@@ -218,7 +218,9 @@ add_action(
 			return;
 		}
 		insightweb_keys_copy( true );
-		update_option( 'insightweb_keys_copied', '1', false );
+		if ( ! in_array( 'copied', insightweb_keys_copy( false ), true ) ) { // nothing left to copy: it worked (or there was nothing). Otherwise try again next time.
+			update_option( 'insightweb_keys_copied', '1', false );
+		}
 	}
 );
 

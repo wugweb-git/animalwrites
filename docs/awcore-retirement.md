@@ -160,7 +160,7 @@ slug; every stored name stays. Branch `awcore-ops`.
 | `error-count.php` | Kits Core `ops/error-count.php`: `kits_error_count_*`; test `kits-core/tests/error-count-tests.php` | InsightWeb server report (`aw_error_count_*` now `kits_error_count_*`, still behind `function_exists`), Deploy check | Event `aw_error_count_daily`, option `aw_error_count`, filter `aw_error_count_php_paths`, `wp aw error-count` unchanged. Mail subject uses the site name. Not redesigned (owner: 404 and error count are out of scope for the ops work in #147, but they still block deleting aw-core). |
 | `not-found.php` | Kits Core `ops/not-found.php`: `kits_not_found_*`, `[kits_not_found]` and `[aw_not_found]`; the photos to `kits-core/assets/site/error/` (site-only folder) | the theme's 404 template (shortcode) | The site's sections, 410 types, lead texts, section markup, links and list styles come through `kits_not_found_*` filters in the theme site layer `ops.php`; output is the same. Not redesigned. |
 | `site-check.php` | Kits Core `ops/site-check.php`: `kits_site_check_*` | Kits Core site-screens (Page check, Joined files, summary), `deploy-purge.php` | Option `aw_site_check_last`, event `aw_site_check_deploy`, admin-post `aw_site_check`, action `aw_site_check_after` (MailWeb, backups) unchanged. The page list is the filter `kits_site_check_urls`; the site's list is in `ops.php`. The standalone "Check site" screen (only used without Kits) is gone. |
-| `cdn-cache.php` | Kits Core `ops/cdn-cache.php`: `kits_cdn_*` | RankWeb faq.php (comment only), Kits Core volunteers.php (`kits_cdn_excluded_slugs`), site-screens, site-options | Options `aw_cdn_ttl`, `aw_cdn_ttl_long`, settings group `aw_cdn` unchanged. Never-cached ids (the crisis guides) and the longer-lived types come from `ops.php` filters `kits_cdn_excluded_ids`, `kits_cdn_long_lived_types`. |
+| `cdn-cache.php` | Kits Core `ops/cdn-cache.php`: `kits_cdn_*` | RankWeb faq.php (comment only), Kits Core volunteers.php (`aw_cdn_excluded_slugs`), site-screens, site-options | Options `aw_cdn_ttl`, `aw_cdn_ttl_long`, settings group `aw_cdn` and the filter `aw_cdn_excluded_slugs` unchanged (`kits_cdn_excluded_slugs` runs after it). Never-cached ids (the crisis guides) and the longer-lived types come from `ops.php` filters `kits_cdn_excluded_ids`, `kits_cdn_long_lived_types`. |
 | `deploy-purge.php` | Kits Core `ops/deploy-purge.php`: `kits_deployed_head()`, `kits_deploy_purge_if_new()` | Kits Core site-screens (option), `tools/kits-ship.sh` and the Deploy check (the `?aw_deploy_nudge=` request) | Purges LiteSpeed once per new commit, as before. Tested without WordPress (`site-ops-tests.php`): new commit purges once, same commit does not, unreadable head does nothing. |
 | `deploy-status.php` | Kits Core `ops/deploy-status.php`: `kits_mail_sending()`, route `aw/v1/deploy-status` | `tools/ci/mail_sending_check.py`, `tools/kits-ship.sh` | Route and answer unchanged. |
 | `keep-modified.php` | Kits Core `ops/keep-modified.php`: `kits_keep_modified()` | RankWeb faq.php (sets `$GLOBALS['aw_keep_modified']`, unchanged), SourceWeb news-titles.php | `?aw_keep_modified=1` and `X-AW-Keep-Modified` unchanged. |
@@ -208,6 +208,15 @@ there. AI keys are out of scope and untouched.
    `wp insightweb keys status` shows both live keys as `set yes (insightweb)` and the next Clarity run (daily 06:30 IST)
    and Bing run (2nd of the month, 07:40 IST) are OK. Then InsightWeb drops its `aw_keys` fallback, and the option is
    deleted after a database export to a file (size checked).
+
+### Depends on the site layer
+
+The site's values (Check site pages, 404 sections and 410 types, the workers repository, never-cached ids, staging's
+noindex, login wall and no-mail rules, the Activity box, analytics and admin config) now come from
+`themes/kits-by-wugweb/assets/site/`, which loads only when `kits_site_on()` is true (Kits theme active, no child theme).
+Live has that today. Anywhere it is off (a child theme, `wp --skip-themes`), those values are absent: a staging copy
+would not be noindex or mail-blocked, and Run now says no repository is set. `tools/staging/*.sh` use `--skip-themes`
+only for config and table-prefix commands, not for anything that sends.
 
 ### Not verified
 

@@ -17,10 +17,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * The pages Check site loads: one of each kind this site has (label => path), from what exists now.
  *
- * @param array $urls Kits Core's generic list (ignored: the site names its own).
  */
-function kits_site_check_pages( $urls ) {
-	unset( $urls );
+function kits_site_check_pages() {
 	$urls = array(
 		'Home'                => '/',
 		'News'                => '/news/',
