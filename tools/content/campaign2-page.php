@@ -107,7 +107,7 @@ function c2faq( $qa ) {
 function c2html( $h ) {
 	return "<!-- wp:html -->\n$h\n<!-- /wp:html -->\n\n";
 }
-/** Theme icon (aw.css 4.7), same markup as aw_i(). */
+/** Theme icon (aw.css 4.7), same markup as kits_icon(). */
 /** A query list as the card patterns write it (Kits cards, 20 Oct 2026); %TQ% is the campaign's taxQuery. */
 function c2q( $markup, $tq ) {
 	return str_replace( '%TQ%', $tq, $markup );
@@ -128,7 +128,7 @@ function c2guides( array $slugs ) {
 			continue;
 		}
 		$img    = get_the_post_thumbnail( $g, 'medium', array( 'class' => 'kit-card-img', 'alt' => '', 'loading' => 'lazy', 'decoding' => 'async' ) ); // the title says what it is
-		$date   = function_exists( 'aw_date' ) ? aw_date( get_post_field( 'post_date', $g ) ) : '';
+		$date   = function_exists( 'kits_date' ) ? kits_date( get_post_field( 'post_date', $g ) ) : '';
 		$items .= '<li><article class="kit-card kit-card--stacked-md">'
 			. ( $img ? '<figure class="kit-card-media">' . $img . '</figure>' : '' )
 			. '<div class="kit-card-body">'

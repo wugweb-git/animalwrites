@@ -145,7 +145,7 @@ function aw_block_item_meta( $a, $id ) {
 	if ( 'listing' !== $kind ) {
 		$ts = aw_item_date_ts( $id );
 		if ( $ts ) {
-			$row .= '<span class="aw-item-date">' . aw_date( $ts ) . '</span>';
+			$row .= '<span class="aw-item-date">' . kits_date( $ts ) . '</span>';
 		}
 		// A Library item whose own date differs from its publication date (the Gazette's) keeps the publication date
 		// first and adds "Dated {date}" (owner, 24 Oct 2026: the draft lab animal rules, dated 30 Sep, published 6 Oct).
@@ -314,7 +314,7 @@ function aw_block_item_sources( $a, $id ) {
 		$last = function_exists( 'aw_listing_last_updated' ) ? aw_listing_last_updated( $id ) : '';
 		return '<section class="aw-sources" aria-labelledby="' . esc_attr( $hid ) . '"><h2 class="aw-sources-head has-x-large-font-size" id="' . esc_attr( $hid ) . '">' . esc_html__( 'Sources', 'animal-writes-core' ) . '</h2>'
 			. ( '' !== $list ? '<div class="aw-sources-list">' . $list . '</div>' : '' )
-			. ( '' !== $last ? '<p class="aw-sources-updated">' . esc_html__( 'Last updated:', 'animal-writes-core' ) . ' ' . aw_date( $last ) . '</p>' : '' )
+			. ( '' !== $last ? '<p class="aw-sources-updated">' . esc_html__( 'Last updated:', 'animal-writes-core' ) . ' ' . kits_date( $last ) . '</p>' : '' )
 			. $links . '</section>';
 	}
 	$url    = (string) get_post_meta( $id, 'aw_source_url', true );
@@ -504,13 +504,13 @@ function aw_item_more_card( $pid ) {
 		$mark  = $logo ? $logo : '<span class="kit-minicard-initials aw-more-initials" aria-hidden="true">' . esc_html( mb_strtoupper( mb_substr( $words[0] ?? '', 0, 1 ) . mb_substr( $words[1] ?? '', 0, 1 ) ) ) . '</span>';
 		$place = function_exists( 'aw_item_place' ) ? aw_item_place( $pid ) : null;
 		$line  = wp_trim_words( wp_strip_all_tags( (string) get_the_excerpt( $pid ) ), 30, '…' );
-		return '<li><article class="kit-card kit-minicard aw-more-card aw-more-card--org"><div class="kit-minicard-media kit-minicard-logo aw-more-media aw-more-logo">' . $mark . '</div><div class="kit-minicard-body aw-more-body"><p class="kit-minicard-meta aw-more-meta kit-meta-row">' . ( '' !== $name ? '<span class="aw-more-type">' . esc_html( $name ) . '</span>' : '' ) . ( $place ? '<span class="kit-meta-item">' . aw_i( 'map-pin' ) . esc_html( $place->name ) . '</span>' : '' ) . '</p>'
+		return '<li><article class="kit-card kit-minicard aw-more-card aw-more-card--org"><div class="kit-minicard-media kit-minicard-logo aw-more-media aw-more-logo">' . $mark . '</div><div class="kit-minicard-body aw-more-body"><p class="kit-minicard-meta aw-more-meta kit-meta-row">' . ( '' !== $name ? '<span class="aw-more-type">' . esc_html( $name ) . '</span>' : '' ) . ( $place ? '<span class="kit-meta-item">' . kits_icon( 'map-pin' ) . esc_html( $place->name ) . '</span>' : '' ) . '</p>'
 			. '<h3 class="kit-minicard-title aw-more-title"><a href="' . esc_url( get_permalink( $pid ) ) . '">' . esc_html( get_the_title( $pid ) ) . '</a></h3>'
 			. ( '' !== $line ? '<p class="kit-minicard-line aw-more-line">' . esc_html( $line ) . '</p>' : '' ) . '</div></article></li>';
 	}
 	$ts   = aw_item_date_ts( $pid );
 	$line = wp_trim_words( wp_strip_all_tags( (string) get_the_excerpt( $pid ) ), 30, '…' );
-	return '<li><article class="kit-card kit-minicard aw-more-card">' . aw_item_card_media( $pid ) . '<div class="kit-minicard-body aw-more-body"><p class="kit-minicard-meta aw-more-meta kit-meta-row">' . ( $ts ? aw_date( $ts ) : '' ) . ( '' !== $name ? '<span class="aw-more-type">' . esc_html( $name ) . '</span>' : '' ) . '</p>' // the date always first in a meta row (owner)
+	return '<li><article class="kit-card kit-minicard aw-more-card">' . aw_item_card_media( $pid ) . '<div class="kit-minicard-body aw-more-body"><p class="kit-minicard-meta aw-more-meta kit-meta-row">' . ( $ts ? kits_date( $ts ) : '' ) . ( '' !== $name ? '<span class="aw-more-type">' . esc_html( $name ) . '</span>' : '' ) . '</p>' // the date always first in a meta row (owner)
 		. '<h3 class="kit-minicard-title aw-more-title"><a href="' . esc_url( get_permalink( $pid ) ) . '">' . esc_html( get_the_title( $pid ) ) . '</a></h3>'
 		. ( '' !== $line ? '<p class="kit-minicard-line aw-more-line">' . esc_html( $line ) . '</p>' : '' ) . '</div></article></li>';
 }

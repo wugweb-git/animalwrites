@@ -1,6 +1,8 @@
 <?php
 /**
- * Block Bindings source "animal-writes/field" so templates can show meta with core blocks.
+ * Block Bindings keys for Animal Writes: the values (aw_binding_value) and their rules. The source itself, the key
+ * registry and the "leave out an empty bound block" rule are Kits Core's (kits-core/includes/bindings.php, source
+ * "kits/post-field"); "animal-writes/field" stays registered as the same source under its saved name.
  *
  * Usage in a template:
  * <!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"animal-writes/field","args":{"key":"verified_label"}}}}} -->
@@ -160,69 +162,112 @@ function aw_binding_value( $key, $post_id ) {
 	return '';
 }
 
-/**
- * Register the bindings source.
+/*
+ * The keys above, registered on Kits Core's binding registry (kits-core/includes/bindings.php), so templates can bind
+ * them with the Kits source "kits/post-field". Same values and escaping as before: URLs esc_url, the deadline (the
+ * date component) wp_kses_post, the rest esc_html.
  */
-function aw_register_bindings() {
-	if ( ! function_exists( 'register_block_bindings_source' ) ) {
-		return;
-	}
-	register_block_bindings_source(
-		'animal-writes/field',
-		array(
-			'label'              => __( 'Animal Writes field', 'animal-writes-core' ),
-			'uses_context'       => array( 'postId' ),
-			'get_value_callback' => function ( $args, $block ) {
-				$post_id = $block->context['postId'] ?? get_the_ID();
-				$value   = aw_binding_value( $args['key'] ?? '', (int) $post_id );
-				if ( in_array( $args['key'] ?? '', array( 'deadline' ), true ) ) {
-					return wp_kses_post( $value ); // markup keys: the date component
-				}
-				return in_array( $args['key'] ?? '', array( 'source_url', 'phone_url', 'whatsapp_url', 'email_url', 'website', 'apply_url', 'file_url' ), true ) ? esc_url( $value ) : esc_html( $value );
-			},
-		)
-	);
-}
-add_action( 'init', 'aw_register_bindings' );
-
-/**
- * Drop blocks whose Animal Writes binding resolves to an empty value.
- *
- * @param string        $content  Rendered block.
- * @param array         $block    Parsed block.
- * @param WP_Block|null $instance Block instance.
- * @return string
- */
-function aw_hide_empty_bound_blocks( $content, $block, $instance = null ) {
-	$bindings = $block['attrs']['metadata']['bindings'] ?? array();
-	if ( ! $bindings ) {
-		return $content;
-	}
-	$post_id = ( $instance && isset( $instance->context['postId'] ) ) ? (int) $instance->context['postId'] : (int) get_the_ID();
-	foreach ( $bindings as $binding ) {
-		$key = $binding['args']['key'] ?? '';
-		if ( ( $binding['source'] ?? '' ) === 'animal-writes/field' && '' === aw_binding_value( $key, $post_id ) ) {
-			// Organisation contact buttons stay in place, greyed out and not a link, so every profile has the same row (owner, 15 Oct 2026).
-			$act = array( 'phone_url' => 'phone', 'whatsapp_url' => 'whatsapp', 'email_url' => 'email', 'website' => 'website' )[ $key ] ?? '';
-			if ( $act && 'core/button' === ( $block['blockName'] ?? '' ) && 'aw_listing' === get_post_type( $post_id ) ) {
-				$name = array( 'phone' => 'Call', 'whatsapp' => 'WhatsApp', 'email' => 'Email', 'website' => 'Website' )[ $act ];
-				return preg_replace( array( '#<a\b[^>]*>#', '#</a>#' ), array( '<span class="wp-block-button__link wp-element-button" role="link" aria-disabled="true" aria-label="' . esc_attr( $name . ': not available yet' ) . '" title="Not available yet" data-act="' . $act . '">', '</span>' ), $content, 1 );
-			}
-			return '';
+add_filter(
+	'kits_post_fields',
+	function ( $fields ) {
+		$types = array(
+			'source_url'        => 'url',
+			'source_link_label' => 'text',
+			'source_meta'       => 'text',
+			'sponsored_label'   => 'text',
+			'verified_label'    => 'text',
+			'blacklisted_label' => 'text',
+			'area'              => 'text',
+			'services'          => 'text',
+			'phone'             => 'text',
+			'phone_url'         => 'url',
+			'whatsapp_url'      => 'url',
+			'email_url'         => 'url',
+			'website'           => 'url',
+			'org_name'          => 'text',
+			'apply_url'         => 'url',
+			'deadline_label'    => 'text',
+			'deadline'          => 'html',
+			'file_url'          => 'url',
+		);
+		$cb = fn( $post_id, $k ) => aw_binding_value( $k, $post_id );
+		foreach ( $types as $key => $type ) {
+			$fields[ $key ] = array(
+				'callback' => $cb,
+				'type'     => $type,
+			);
 		}
+		return $fields;
 	}
-	// Filled contact buttons name their action too (data-act), for the Directory analytics (aw-analytics.js).
-	if ( 'core/button' === ( $block['blockName'] ?? '' ) && 'aw_listing' === get_post_type( $post_id ) ) {
+);
+
+/*
+ * "animal-writes/field", the source name saved in templates and patterns since Oct 2026: kept for good, reading the
+ * same keys through Kits Core, and sharing Kits Core's rule that a block bound to an empty value is left out.
+ */
+add_filter( 'kits_post_field_sources', fn( $sources ) => array_merge( (array) $sources, array( 'animal-writes/field' ) ) );
+add_action(
+	'init',
+	function () {
+		if ( ! function_exists( 'register_block_bindings_source' ) ) {
+			return;
+		}
+		register_block_bindings_source(
+			'animal-writes/field',
+			array(
+				'label'              => __( 'Animal Writes field', 'animal-writes-core' ),
+				'uses_context'       => array( 'postId' ),
+				'get_value_callback' => fn( $args, $block ) => kits_post_field_output( (string) ( $args['key'] ?? '' ), kits_post_field_post_id( $block ) ),
+			)
+		);
+	}
+);
+
+/** Organisation contact buttons: binding key => the action they name (data-act), and the action => its button word. */
+const ANIMAL_WRITES_CONTACT_ACTS  = array( 'phone_url' => 'phone', 'whatsapp_url' => 'whatsapp', 'email_url' => 'email', 'website' => 'website' );
+const ANIMAL_WRITES_CONTACT_NAMES = array( 'phone' => 'Call', 'whatsapp' => 'WhatsApp', 'email' => 'Email', 'website' => 'Website' );
+
+/*
+ * Organisation contact buttons with no value stay in place, greyed out and not a link, so every profile has the same
+ * row (owner, 15 Oct 2026). Kits Core asks what an empty bound block shows (kits_post_field_empty).
+ */
+add_filter(
+	'kits_post_field_empty',
+	function ( $out, $content, $block, $key, $post_id ) {
+		$act = ANIMAL_WRITES_CONTACT_ACTS[ $key ] ?? '';
+		if ( $act && 'core/button' === ( $block['blockName'] ?? '' ) && 'aw_listing' === get_post_type( $post_id ) ) {
+			$name = ANIMAL_WRITES_CONTACT_NAMES[ $act ];
+			return preg_replace( array( '#<a\b[^>]*>#', '#</a>#' ), array( '<span class="wp-block-button__link wp-element-button" role="link" aria-disabled="true" aria-label="' . esc_attr( $name . ': not available yet' ) . '" title="Not available yet" data-act="' . $act . '">', '</span>' ), $content, 1 );
+		}
+		return $out;
+	},
+	10,
+	5
+);
+
+/*
+ * Filled contact buttons name their action too (data-act), for the Directory analytics (aw-analytics.js). Runs after
+ * Kits Core's empty rule (priority 10); a greyed button has no <a> left, so it is not touched twice.
+ */
+add_filter(
+	'render_block',
+	function ( $content, $block, $instance = null ) {
+		$bindings = $block['attrs']['metadata']['bindings'] ?? array();
+		if ( ! $bindings || 'core/button' !== ( $block['blockName'] ?? '' ) || 'aw_listing' !== get_post_type( kits_post_field_post_id( $instance ) ) ) {
+			return $content;
+		}
+		$sources = kits_post_field_sources(); // the same sources as the greyed rule, so both behave alike
 		foreach ( $bindings as $binding ) {
-			$act = array( 'phone_url' => 'phone', 'whatsapp_url' => 'whatsapp', 'email_url' => 'email', 'website' => 'website' )[ $binding['args']['key'] ?? '' ] ?? '';
-			if ( $act && ( $binding['source'] ?? '' ) === 'animal-writes/field' ) {
+			$act = ANIMAL_WRITES_CONTACT_ACTS[ $binding['args']['key'] ?? '' ] ?? '';
+			if ( $act && in_array( $binding['source'] ?? '', $sources, true ) ) {
 				return preg_replace( '#<a\b#', '<a data-act="' . $act . '"', $content, 1 );
 			}
 		}
-	}
-	return $content;
-}
-add_filter( 'render_block', 'aw_hide_empty_bound_blocks', 10, 3 );
+		return $content;
+	},
+	11,
+	3
+);
 
 /**
  * Organisation contact row (Call, WhatsApp, Email, Website): when any is missing, the greyed buttons are followed by a
@@ -236,8 +281,7 @@ function aw_profile_actions_note( $content ) {
 	if ( false === strpos( $content, 'aw-profile-actions' ) || ! is_singular( 'aw_listing' ) || ! preg_match_all( '#aria-disabled="true"[^>]*data-act="([a-z]+)"#', $content, $m ) ) {
 		return $content;
 	}
-	$names = array( 'phone' => 'Call', 'whatsapp' => 'WhatsApp', 'email' => 'Email', 'website' => 'Website' );
-	$list  = implode( ', ', array_map( fn( $a ) => $names[ $a ] ?? $a, $m[1] ) );
+	$list  = implode( ', ', array_map( fn( $a ) => ANIMAL_WRITES_CONTACT_NAMES[ $a ] ?? $a, $m[1] ) );
 	$id    = (int) get_queried_object_id();
 	$field = 1 === count( $m[1] ) ? ( array( 'phone' => 'phone', 'email' => 'email' )[ $m[1][0] ] ?? '' ) : ''; // one missing: the form names it
 	return $content . '<p class="aw-profile-actions-na"><span>' . esc_html( 'Not available yet: ' . $list ) . '</span>'
