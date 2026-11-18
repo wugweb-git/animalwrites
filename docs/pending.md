@@ -34,14 +34,11 @@ Two read-only audits of origin/wordpress-dev (theme plus plugin dependencies, Ki
   - DirectoryWeb (`directoryweb.php:38`) and SourceWeb (`aw-sourcing.php:33`) stop themselves without `AW_CORE_*`. Point them at Kits Core and DirectoryWeb, and declare `Requires Plugins`.
   - Unguarded calls into aw-core, DirectoryWeb and Kits Core: RankWeb about 22, SourceWeb about 28, InsightWeb about 6. Guard each one or move it.
   - Sourcing and keyword code in Kits Core moves to SourceWeb/InsightWeb: `wp_aw_si_*` tables, `aw_kw_*`, `aw_sources`, `[aw_source_row]`, `aw_fetch_favicons`.
-- **Bigger moves (theme ↔ plugin boundary):**
-  - `kit.js` analytics, forms, share and ALTCHA → Kits Core.
-  - The theme's joined-CSS/caching code (`functions.php` about 750 lines) → Kits Core Performance.
-  - `dropdown.js` → Kits Core.
-  - `patterns/hero.php` (`kits/hero`) → Kits Core, or rebuild from core blocks.
-  - Rename the `kit-*` handles (prefix of 4+ letters).
-  - The 6 PHP card patterns → pattern files.
-  - Theme PHP into `inc/`; Kits Core files by purpose (content, display, forms, seo, frontend, admin, ops).
+- **Bigger moves (theme ↔ plugin boundary): built 18 Nov 2026 as three stacked PRs into `wordpress-dev`, not merged or live. Merge in order #150, #155, #156.**
+  - #150 (`claude/site-layer-theme`, Track H): Animal Writes Core's `theme/` folder moves to the Kits theme's site folder `themes/kits-by-wugweb/assets/site/`, which the dist zip leaves out. Served by the theme's `inc/site-layer.php` (generic) and `assets/site/site.php` (site only). `theme-switch.php` is retired; Core keeps 3 thin `aw_*` wrappers. After the ship, compare against the 11-page before-snapshot (shared notes folder, `site-layer-before/`).
+  - #155 (`claude/kits-core-frontend-js`): `kit.js` share, forms (ALTCHA) and analytics → Kits Core `assets/js/`; `dropdown.js` → Kits Core; the joined-CSS code → Kits Core `includes/joined-css.php` (state in option `kits_core_joined`).
+  - #156 (`claude/theme-inc-patterns`): the 6 card patterns as files; the Hero pattern → Kits Core (`kits-core/hero`); handles become `kits-tokens`, `kits-components`, `kits-primitives`, `kits-interactions`; the theme's PHP is in `inc/`.
+  - Still open: Kits Core files by purpose (content, display, forms, seo, frontend, admin, ops). DirectoryWeb (about 14 calls) and RankWeb still call Core's `aw_use_component_style()`; switch them to `kits_use_component_style()` before Core is deleted.
 - **Kits Core, still open:**
   - SCF field groups (Local JSON) for the 7 content types.
   - Rename the second "Content types" (Theme Options → "Display per type").
