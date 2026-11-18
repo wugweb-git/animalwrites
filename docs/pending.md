@@ -11,6 +11,13 @@ Theme and WordPress items are tracked by Animal Writes WordPress. Code requests 
 
 ## Open
 
+### Kits Core screens on the Kits shell frame (build, 19 Nov 2026; PR open, owner merges)
+- **Moved into the Kits frame** (`kits_frame_screen()`, `admin-kits-frame.php`; app header, five tabs, body as one card; same address, capability, nonces, option and field names): Make WebP, Duplicate files and Reuse pictures (Media submenus, under the Tools tab), Letter report (`edit_posts`), Modules (`aw-modules`), Taxonomy rename. Each joins with the `kits_frame_extra_screens` filter, so a file moved into the theme site layer keeps working. Without the shell build the screen falls back to a plain wrap and heading, never blank.
+- **Classic header removed** from `kits_admin_head()` (only reachable as a section of Help).
+- **Tables:** core list tables and `widefat` tables inside a Kits card take the shell list look (`src/shell/more.css`, build committed). The `WP_List_Table` class stays: it gives sort, paging and row actions.
+- **Left as they are on purpose:** Backup and CDN settings (already cards in Kits → Settings); Settings API stays the saving mechanism. Dashboard widgets and meta boxes. Not checked visually (no local WordPress): lint, suites, PHPCS and the Deploy check only.
+- **Not done:** moving the three Media screens into Kits → Tools as sections (kept their Media addresses; Tools already links to them).
+
 ### Admin button piles: one "action list" part for the Kits shell (owner, 19 Nov 2026; idea only, nothing built)
 - **Seen:** SourceWeb → Enrichment review showed one "Reject <field> for good" pill per applied value in a heap under the table. **Fixed and live** (8b70064a): "Reject for good" now sits on its row beside Undo (`FieldReview` got an optional `onRejectForGood`). The same heap is on InsightWeb → Settings → Runs and data → Run now: seven identical pills (daily update, 90-day rollup, GA4, PageSpeed, Bing Webmaster, Bing keyword volumes, Clarity), with the names repeated as plain text above them, and a Schedule paragraph that describes the same jobs.
 - **Root cause:** the Kits shell has no part for "a set of named actions", so each screen puts bare `.button`s in a row.

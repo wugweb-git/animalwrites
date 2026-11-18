@@ -18,14 +18,59 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/** The screens drawn in the frame: slug => capability (the menu's). */
+/**
+ * The screens drawn in the frame: slug => capability (the menu's).
+ *
+ * Screens that sit under other menus (Media, Campaigns, Tools) join through the kits_frame_extra_screens filter, see
+ * kits_frame_screen(). The five Kits screens come first and cannot be replaced.
+ */
 function kits_frame_screens(): array {
-	return array(
+	$caps = array(
 		KITS_MENU       => KITS_CAP,
 		'kits-settings' => 'manage_options',
 		'kits-tools'    => 'manage_options',
 		'kits-help'     => KITS_CAP,
 	);
+	foreach ( (array) apply_filters( 'kits_frame_extra_screens', array() ) as $slug => $def ) {
+		if ( is_string( $slug ) && ! isset( $caps[ $slug ] ) && is_array( $def ) && isset( $def[0] ) ) {
+			$caps[ $slug ] = (string) $def[0];
+		}
+	}
+	return $caps;
+}
+
+/**
+ * The Kits tab a joined screen sits under (its second value in kits_frame_extra_screens), or '' for none.
+ *
+ * @param string $slug The screen's page= value.
+ */
+function kits_frame_extra_tab( string $slug ): string {
+	$extra = (array) apply_filters( 'kits_frame_extra_screens', array() );
+	return isset( $extra[ $slug ][1] ) ? (string) $extra[ $slug ][1] : '';
+}
+
+/**
+ * A classic screen printed in the Kits frame: the app header and tabs, then the screen's body as one card. Same
+ * address, capability, forms and nonces as before; only the presentation moves. Without the shell's build the body is
+ * printed in a plain wrap with its heading, so the screen never goes blank.
+ *
+ * The slug must be registered with the kits_frame_extra_screens filter (slug => [ capability, tab ]) so the frame's
+ * stylesheet loads.
+ *
+ * @param string   $slug  The screen's page= value.
+ * @param string   $title The screen's name (card heading).
+ * @param callable $body  Prints the body (no wrap, no h1).
+ */
+function kits_frame_screen( string $slug, string $title, callable $body ): void {
+	if ( ! kits_frame_ready() ) {
+		echo '<div class="wrap"><h1>' . esc_html( $title ) . '</h1>';
+		call_user_func( $body );
+		echo '</div>';
+		return;
+	}
+	kits_frame_open( kits_frame_extra_tab( $slug ), $title );
+	kits_frame_card( $slug, $title, $body );
+	kits_frame_close();
 }
 
 /** This request asks for a Kits screen in the frame. */

@@ -382,15 +382,27 @@ add_action(
 	}
 );
 
-/** The Media -> Reuse pictures screen. */
+add_filter(
+	'kits_frame_extra_screens',
+	function ( $screens ) {
+		$screens['aw-media-reuse'] = array( 'manage_options', 'kits-tools' );
+		return $screens;
+	}
+);
+
+/** The Media -> Reuse pictures screen, in the Kits frame (admin-kits-frame.php). */
 function kits_media_reuse_screen() {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		return;
 	}
-	kits_media_reuse_recover();
+	kits_media_reuse_recover(); // Before the page prints: it may redirect or set the notice.
+	kits_frame_screen( 'aw-media-reuse', 'Reuse pictures', 'kits_media_reuse_body' );
+}
+
+/** What the Reuse pictures screen prints inside the frame. */
+function kits_media_reuse_body(): void {
 	$plan = kits_media_reuse_plan();
 	$log  = kits_media_reuse_log();
-	echo '<div class="wrap"><h1>Reuse pictures</h1>';
 	$key    = 'aw_media_reuse_notice_' . get_current_user_id();
 	$notice = get_transient( $key );
 	if ( is_array( $notice ) ) {
@@ -445,5 +457,5 @@ function kits_media_reuse_screen() {
 		$rows,
 		array( 'primary' => 'picture' )
 	);
-	echo '</form></div>';
+	echo '</form>';
 }

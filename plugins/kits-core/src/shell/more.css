@@ -665,6 +665,48 @@ body.kits-shell-screen {
 }
 
 /*
+ * Core's list tables and striped tables inside a card (kits_simple_table(), the status tables) take the shell list's
+ * look: no outer shadow, grey rules between rows, small grey headings. Same tokens as .kits-shell-list above.
+ */
+.kits-shell .kits-shell-prose table.wp-list-table,
+.kits-shell .kits-shell-prose table.widefat {
+	width: 100%;
+	border: 1px solid var(--ks-g2);
+	border-radius: var(--ks-r-control);
+	box-shadow: none;
+	border-collapse: separate;
+	border-spacing: 0;
+	background: var(--ks-white);
+}
+
+.kits-shell .kits-shell-prose table.wp-list-table th,
+.kits-shell .kits-shell-prose table.wp-list-table td,
+.kits-shell .kits-shell-prose table.widefat th,
+.kits-shell .kits-shell-prose table.widefat td {
+	padding: var(--ks-s3) var(--ks-s4);
+	border-bottom: 1px solid var(--ks-g2);
+	vertical-align: top;
+}
+
+.kits-shell .kits-shell-prose table.wp-list-table thead th,
+.kits-shell .kits-shell-prose table.widefat thead th {
+	color: var(--ks-g6);
+	font-size: 12px;
+	font-weight: 600;
+}
+
+.kits-shell .kits-shell-prose table.wp-list-table tr:last-child > td,
+.kits-shell .kits-shell-prose table.widefat tr:last-child > td,
+.kits-shell .kits-shell-prose table.widefat tr:last-child > th {
+	border-bottom: 0;
+}
+
+.kits-shell .kits-shell-prose table.wp-list-table.striped > tbody > :nth-child(odd),
+.kits-shell .kits-shell-prose table.widefat.striped > tbody > :nth-child(odd) {
+	background: var(--ks-g1);
+}
+
+/*
  * WordPress's own controls inside the shell (today's forms in the Kits cards, Theme Options' fields): black and greys
  * like the shell's parts, not the admin colour scheme's blue. --ks-ink #141414 (--neutral-9), --ks-g7 #4a4a4a
  * (--neutral-7) for hover, --ks-g3 #bababa (--neutral-3) for borders. WordPress components read --wp-admin-theme-color.

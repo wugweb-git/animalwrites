@@ -244,15 +244,27 @@ add_action(
 	}
 );
 
-/** The screen: the counts first, then one button (Rename now, or Undo once renamed). */
+add_filter(
+	'kits_frame_extra_screens',
+	function ( $screens ) {
+		$screens['kits-taxonomy-rename'] = array( 'manage_options', 'kits-tools' );
+		return $screens;
+	}
+);
+
+/** The screen, in the Kits frame (admin-kits-frame.php). */
 function kits_taxonomy_rename_screen() {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		wp_die( esc_html( 'Sorry, you are not allowed to do this.' ) );
 	}
+	kits_frame_screen( 'kits-taxonomy-rename', 'Taxonomy rename', 'kits_taxonomy_rename_body' );
+}
+
+/** What the screen prints inside the frame: the counts first, then one button (Rename now, or Undo once renamed). */
+function kits_taxonomy_rename_body(): void {
 	$counts  = kits_taxonomy_rename_counts();
 	$renamed = kits_taxonomy_renamed();
 	$did     = isset( $_GET['kits-done'] ) ? sanitize_key( wp_unslash( $_GET['kits-done'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- a notice after the redirect; nothing changes here
-	echo '<div class="wrap"><h1>Taxonomy rename</h1>';
 	if ( 'run' === $did || 'undo' === $did ) {
 		printf( '<div class="notice notice-success"><p>%s</p></div>', esc_html( 'run' === $did ? 'Renamed. The counts below are after the change.' : 'Undone. The counts below are after the change.' ) );
 	}
@@ -275,7 +287,7 @@ function kits_taxonomy_rename_screen() {
 	wp_nonce_field( 'kits_taxonomy_rename' );
 	printf( '<input type="hidden" name="action" value="kits_taxonomy_rename"><input type="hidden" name="do" value="%s">', esc_attr( $renamed ? 'undo' : 'run' ) );
 	submit_button( $renamed ? 'Undo the rename' : 'Rename now', $renamed ? 'secondary' : 'primary' );
-	echo '</form></div>';
+	echo '</form>';
 }
 
 add_action(

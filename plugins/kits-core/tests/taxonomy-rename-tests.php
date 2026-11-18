@@ -25,6 +25,10 @@ function update_option( $k, $v ) {
 	$GLOBALS['opts'][ $k ] = $v;
 	return true;
 }
+/** Filters (the screen joins the Kits frame with one). */
+function add_filter( $hook, $cb ) {
+	$GLOBALS['filters'][ $hook ][] = $cb;
+}
 /** Hooks. */
 function add_action( $hook, $cb ) {
 	$GLOBALS['actions'][ $hook ][] = $cb;

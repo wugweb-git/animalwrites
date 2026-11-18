@@ -434,14 +434,26 @@ add_action(
 	}
 );
 
-/** The Media → Duplicate files screen. */
+add_filter(
+	'kits_frame_extra_screens',
+	function ( $screens ) {
+		$screens['aw-media-duplicates'] = array( 'manage_options', 'kits-tools' );
+		return $screens;
+	}
+);
+
+/** The Media → Duplicate files screen, in the Kits frame (admin-kits-frame.php). */
 function kits_media_merge_screen() {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		return;
 	}
+	kits_frame_screen( 'aw-media-duplicates', 'Duplicate files', 'kits_media_merge_body' );
+}
+
+/** What the Duplicate files screen prints inside the frame. */
+function kits_media_merge_body(): void {
 	$groups = kits_media_merge_groups();
 	$log    = kits_media_merge_log();
-	echo '<div class="wrap"><h1>Duplicate files</h1>';
 	if ( isset( $_GET['aw_mm'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		wp_admin_notice( 'Checked ' . (int) $_GET['aw_mm'] . ' group(s). Merged groups show the date; blocked ones show why.', array( 'type' => 'success', 'dismissible' => true ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	}
@@ -507,5 +519,5 @@ function kits_media_merge_screen() {
 		$rows,
 		array( 'primary' => 'keep' )
 	);
-	echo '</form></div>';
+	echo '</form>';
 }

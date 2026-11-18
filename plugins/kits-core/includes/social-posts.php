@@ -105,13 +105,24 @@ function aw_social_settings_field( $args ) {
 	);
 }
 
-/** The Modules screen (Settings API, core markup). */
+add_filter(
+	'kits_frame_extra_screens',
+	function ( $screens ) {
+		$screens['aw-modules'] = array( 'manage_options', '' );
+		return $screens;
+	}
+);
+
+/** The Modules screen, in the Kits frame (admin-kits-frame.php). */
 function aw_modules_screen() {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		wp_die( esc_html__( 'Sorry, you are not allowed to access this page.', 'kits-core' ), 403 );
 	}
-	echo '<div class="wrap"><h1>' . esc_html( 'Modules' ) . '</h1>';
-	aw_core_screen_nav( 'aw-modules' );
+	kits_frame_screen( 'aw-modules', 'Modules', 'aw_modules_body' );
+}
+
+/** What the Modules screen prints inside the frame (Settings API, core markup). */
+function aw_modules_body(): void {
 	settings_errors( 'general' ); // options.php's "Settings saved." (core prints it only under the Settings menu)
 	echo '<form method="post" action="' . esc_url( admin_url( 'options.php' ) ) . '">';
 	settings_fields( 'aw_modules' );
@@ -119,7 +130,6 @@ function aw_modules_screen() {
 	submit_button();
 	echo '</form>';
 	aw_modules_reset_forms();
-	echo '</div>';
 }
 
 /* ---------- Type, campaign links, meta ---------- */
