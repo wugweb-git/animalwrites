@@ -162,9 +162,9 @@ function aw_block_listing_contact( $a, $id ) {
 		return function_exists( 'aw_item_editor_preview' ) ? aw_item_editor_preview( 'Contact: Call, WhatsApp, Email, Website, Directions, other numbers' ) : '';
 	}
 	$rel    = aw_listing_rel( $id );
-	$phones = function_exists( 'aw_listing_phones' ) ? aw_listing_phones( $id ) : array();
+	$phones = function_exists( 'directoryweb_listing_phones' ) ? directoryweb_listing_phones( $id ) : array();
 	$first  = $phones ? $phones[0]['number'] : '';
-	$wa     = function_exists( 'aw_listing_first_phone' ) ? aw_listing_first_phone( $id, true ) : '';
+	$wa     = function_exists( 'directoryweb_listing_first_phone' ) ? directoryweb_listing_first_phone( $id, true ) : '';
 	$btns   = '';
 	if ( '' !== $first && '' !== aw_tel_url( $first ) ) {
 		/* translators: %s: phone number. */
@@ -220,7 +220,7 @@ function aw_block_listing_location( $a, $id ) {
 		$st     = 'district' === $p->kind && function_exists( 'aw_place_state' ) ? aw_place_state( $p->state ) : null;
 		$place .= '<a class="aw-item-place" href="' . esc_url( aw_directory_url( $p->slug ) ) . '"><span class="kit-ico kit-ico--map-pin" aria-hidden="true"></span>' . esc_html( $st ? $p->name . ', ' . $st->name : $p->name ) . '</a>';
 	}
-	$hours = function_exists( 'aw_org_hours_html' ) && function_exists( 'aw_listing_hours' ) ? aw_org_hours_html( aw_listing_hours( $id ) ) : '';
+	$hours = function_exists( 'aw_org_hours_html' ) && function_exists( 'directoryweb_listing_hours' ) ? aw_org_hours_html( directoryweb_listing_hours( $id ) ) : '';
 	$rows  = array(
 		array( __( 'Address', 'directoryweb' ), '' !== $addr ? esc_html( $addr ) : aw_listing_na( $id, 'address' ), 'map-pin' ),
 		array( __( 'District', 'directoryweb' ), $place, 'directory' ),

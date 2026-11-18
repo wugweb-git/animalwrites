@@ -3,13 +3,13 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Kits Core 1.0.0\n"
-"Report-Msgid-Bugs-To: https://wugweb.com/plugins/kits-core/\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/kits-core\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-16T21:32:46+00:00\n"
+"POT-Creation-Date: 2026-11-18T12:09:46+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: kits-core\n"
@@ -21,7 +21,7 @@ msgstr ""
 
 #. Description of the plugin
 #: kits-core.php
-msgid "Shared layer for Kits by Wugweb sites: form engine with spam guard (ALTCHA), share bar, consent-mode analytics, attribution and the Kits admin."
+msgid "Shared layer for Kits by Wugweb sites: form engine with spam guard (ALTCHA), share bar, consent-mode analytics, attribution and Kits admin."
 msgstr ""
 
 #. Author of the plugin
@@ -261,14 +261,18 @@ msgid "You are not allowed to do this."
 msgstr ""
 
 #. translators: %s: human time difference, e.g. 3 hours.
-#: includes/attribution.php:103
+#: includes/attribution.php:117
 msgid "Just now"
 msgstr ""
 
 #. translators: %s: human time difference, e.g. 3 hours.
-#: includes/attribution.php:103
+#: includes/attribution.php:117
 #, php-format
 msgid "%s ago"
+msgstr ""
+
+#: includes/bindings.php:113
+msgid "Kits post field"
 msgstr ""
 
 #: includes/help-tab.php:33
@@ -381,57 +385,432 @@ msgstr ""
 msgid "The column beside an item page's text (below it on phones and tablets)."
 msgstr ""
 
-#: includes/primitives.php:162
-msgid "Completed"
+#. translators: 1: post type slug, 2: address such as /events
+#: includes/presets.php:692
+#, php-format
+msgid "Type %1$s, address %2$s."
 msgstr ""
 
-#: includes/primitives.php:163
-msgid "Current"
+#. translators: %s: post type slug
+#: includes/presets.php:694
+#, php-format
+msgid "Type %s, with no pages of its own: shown inside other pages."
+msgstr ""
+
+#. translators: 1: address such as /events/, 2: page title
+#: includes/presets.php:699
+#, php-format
+msgid "The page \"%2$s\" already has %1$s: it keeps that address, and this type gets no list page there."
+msgstr ""
+
+#: includes/presets/card.php:15
+#: includes/presets/card.php:19
+#: src/theme-options/sections/cards.js:100
+msgid "Cards"
+msgstr ""
+
+#: includes/presets/card.php:16
+msgid "Small reusable cards, such as tips and facts: a picture, one line and a link, shown inside other pages (no list page, not in search engines)."
+msgstr ""
+
+#: includes/presets/card.php:20
+msgid "Card"
+msgstr ""
+
+#: includes/presets/card.php:21
+msgid "Add card"
+msgstr ""
+
+#: includes/presets/card.php:22
+msgid "Edit card"
+msgstr ""
+
+#: includes/presets/card.php:23
+msgid "View card"
+msgstr ""
+
+#: includes/presets/card.php:24
+msgid "Search cards"
+msgstr ""
+
+#: includes/presets/card.php:25
+msgid "No cards found."
+msgstr ""
+
+#: includes/presets/card.php:26
+msgid "All cards"
+msgstr ""
+
+#: includes/presets/card.php:42
+#: includes/presets/infographic.php:36
+#: src/shell/detail.js:102
+msgid "Picture"
+msgstr ""
+
+#: includes/presets/card.php:46
+msgid "Line"
+msgstr ""
+
+#: includes/presets/card.php:50
+#: includes/presets/portfolio.php:47
+msgid "Link"
+msgstr ""
+
+#: includes/presets/case-study.php:14
+#: includes/presets/case-study.php:18
+msgid "Case studies"
+msgstr ""
+
+#: includes/presets/case-study.php:15
+msgid "Case studies: the problem, the approach, the outcome and the figures."
+msgstr ""
+
+#: includes/presets/case-study.php:19
+msgid "Case study"
+msgstr ""
+
+#: includes/presets/case-study.php:20
+msgid "Add case study"
+msgstr ""
+
+#: includes/presets/case-study.php:21
+msgid "Edit case study"
+msgstr ""
+
+#: includes/presets/case-study.php:22
+msgid "View case study"
+msgstr ""
+
+#: includes/presets/case-study.php:23
+msgid "Search case studies"
+msgstr ""
+
+#: includes/presets/case-study.php:24
+msgid "No case studies found."
+msgstr ""
+
+#: includes/presets/case-study.php:25
+msgid "All case studies"
+msgstr ""
+
+#: includes/presets/case-study.php:35
+msgid "Problem"
+msgstr ""
+
+#: includes/presets/case-study.php:39
+msgid "Approach"
+msgstr ""
+
+#: includes/presets/case-study.php:43
+msgid "Outcome"
+msgstr ""
+
+#: includes/presets/case-study.php:47
+msgid "Figures"
+msgstr ""
+
+#: includes/presets/event.php:15
+#: includes/presets/event.php:19
+msgid "Events"
+msgstr ""
+
+#: includes/presets/event.php:16
+msgid "Events: start, end, place and an online address."
+msgstr ""
+
+#: includes/presets/event.php:20
+msgid "Event"
+msgstr ""
+
+#: includes/presets/event.php:21
+msgid "Add event"
+msgstr ""
+
+#: includes/presets/event.php:22
+msgid "Edit event"
+msgstr ""
+
+#: includes/presets/event.php:23
+msgid "View event"
+msgstr ""
+
+#: includes/presets/event.php:24
+msgid "Search events"
+msgstr ""
+
+#: includes/presets/event.php:25
+msgid "No events found."
+msgstr ""
+
+#: includes/presets/event.php:26
+msgid "All events"
+msgstr ""
+
+#: includes/presets/event.php:36
+msgid "Start (YYYY-MM-DD, optional HH:MM)"
+msgstr ""
+
+#: includes/presets/event.php:40
+msgid "End (YYYY-MM-DD, optional HH:MM)"
+msgstr ""
+
+#: includes/presets/event.php:44
+msgid "Place"
+msgstr ""
+
+#: includes/presets/event.php:48
+msgid "Online address"
+msgstr ""
+
+#: includes/presets/infographic.php:15
+#: includes/presets/infographic.php:19
+msgid "Infographics"
+msgstr ""
+
+#: includes/presets/infographic.php:16
+msgid "Infographics, each with a long text description for people who cannot see the picture, its source and a link to the data."
+msgstr ""
+
+#: includes/presets/infographic.php:20
+msgid "Infographic"
+msgstr ""
+
+#: includes/presets/infographic.php:21
+msgid "Add infographic"
+msgstr ""
+
+#: includes/presets/infographic.php:22
+msgid "Edit infographic"
+msgstr ""
+
+#: includes/presets/infographic.php:23
+msgid "View infographic"
+msgstr ""
+
+#: includes/presets/infographic.php:24
+msgid "Search infographics"
+msgstr ""
+
+#: includes/presets/infographic.php:25
+msgid "No infographics found."
+msgstr ""
+
+#: includes/presets/infographic.php:26
+msgid "All infographics"
+msgstr ""
+
+#: includes/presets/infographic.php:40
+msgid "Long description (text alternative)"
+msgstr ""
+
+#: includes/presets/infographic.php:44
+msgid "Source"
+msgstr ""
+
+#: includes/presets/infographic.php:48
+msgid "Data link"
+msgstr ""
+
+#: includes/presets/person.php:15
+#: includes/presets/person.php:19
+msgid "People"
+msgstr ""
+
+#: includes/presets/person.php:16
+msgid "Team members and contributors: role, photo and public profile links. No private details."
+msgstr ""
+
+#: includes/presets/person.php:20
+msgid "Person"
+msgstr ""
+
+#: includes/presets/person.php:21
+msgid "Add person"
+msgstr ""
+
+#: includes/presets/person.php:22
+msgid "Edit person"
+msgstr ""
+
+#: includes/presets/person.php:23
+msgid "View person"
+msgstr ""
+
+#: includes/presets/person.php:24
+msgid "Search people"
+msgstr ""
+
+#: includes/presets/person.php:25
+msgid "No people found."
+msgstr ""
+
+#: includes/presets/person.php:26
+msgid "All people"
+msgstr ""
+
+#: includes/presets/person.php:36
+#: includes/presets/portfolio.php:43
+#: includes/presets/testimonial.php:48
+msgid "Role"
+msgstr ""
+
+#: includes/presets/person.php:40
+msgid "Photo"
+msgstr ""
+
+#: includes/presets/person.php:44
+msgid "Public profile links (one per line)"
+msgstr ""
+
+#: includes/presets/portfolio.php:14
+#: includes/presets/portfolio.php:18
+msgid "Portfolio"
+msgstr ""
+
+#: includes/presets/portfolio.php:15
+msgid "Work the site shows: client, year, role and a link."
+msgstr ""
+
+#: includes/presets/portfolio.php:19
+msgid "Portfolio item"
+msgstr ""
+
+#: includes/presets/portfolio.php:20
+msgid "Add portfolio item"
+msgstr ""
+
+#: includes/presets/portfolio.php:21
+msgid "Edit portfolio item"
+msgstr ""
+
+#: includes/presets/portfolio.php:22
+msgid "View portfolio item"
+msgstr ""
+
+#: includes/presets/portfolio.php:23
+msgid "Search portfolio"
+msgstr ""
+
+#: includes/presets/portfolio.php:24
+msgid "No portfolio items found."
+msgstr ""
+
+#: includes/presets/portfolio.php:25
+msgid "All portfolio items"
+msgstr ""
+
+#: includes/presets/portfolio.php:35
+msgid "Client"
+msgstr ""
+
+#: includes/presets/portfolio.php:39
+msgid "Year"
+msgstr ""
+
+#: includes/presets/testimonial.php:16
+#: includes/presets/testimonial.php:20
+msgid "Testimonials"
+msgstr ""
+
+#: includes/presets/testimonial.php:17
+msgid "Quotes from people, each shown only after the date of their consent is filled in."
+msgstr ""
+
+#: includes/presets/testimonial.php:21
+msgid "Testimonial"
+msgstr ""
+
+#: includes/presets/testimonial.php:22
+msgid "Add testimonial"
+msgstr ""
+
+#: includes/presets/testimonial.php:23
+msgid "Edit testimonial"
+msgstr ""
+
+#: includes/presets/testimonial.php:24
+msgid "View testimonial"
+msgstr ""
+
+#: includes/presets/testimonial.php:25
+msgid "Search testimonials"
+msgstr ""
+
+#: includes/presets/testimonial.php:26
+msgid "No testimonials found."
+msgstr ""
+
+#: includes/presets/testimonial.php:27
+msgid "All testimonials"
+msgstr ""
+
+#: includes/presets/testimonial.php:40
+msgid "Quote"
+msgstr ""
+
+#: includes/presets/testimonial.php:44
+msgid "Name"
+msgstr ""
+
+#: includes/presets/testimonial.php:52
+msgid "What it is about (product, service or event; for search engines)"
+msgstr ""
+
+#: includes/presets/testimonial.php:56
+msgid "Consent date (YYYY-MM-DD)"
 msgstr ""
 
 #: includes/primitives.php:164
-msgid "Ongoing"
+msgid "Completed"
 msgstr ""
 
 #: includes/primitives.php:165
-msgid "Upcoming"
+msgid "Current"
 msgstr ""
 
 #: includes/primitives.php:166
+msgid "Ongoing"
+msgstr ""
+
+#: includes/primitives.php:167
+msgid "Upcoming"
+msgstr ""
+
+#: includes/primitives.php:168
 msgid "Date not set"
 msgstr ""
 
-#: includes/share.php:156
-#: includes/share.php:162
+#: includes/share.php:157
+#: includes/share.php:163
 msgid "Share"
 msgstr ""
 
-#: includes/share.php:163
-#: includes/share.php:170
+#: includes/share.php:164
+#: includes/share.php:171
 msgid "Link copied"
 msgstr ""
 
 #. translators: %s: network name.
-#: includes/share.php:166
+#: includes/share.php:167
 msgid "Share by email"
 msgstr ""
 
 #. translators: %s: network name.
-#: includes/share.php:166
+#: includes/share.php:167
 #, php-format
 msgid "Share on %s"
 msgstr ""
 
-#: includes/share.php:169
+#: includes/share.php:170
 msgid "Copy link"
 msgstr ""
 
-#: includes/share.php:186
+#: includes/share.php:187
 msgid "Follow us"
 msgstr ""
 
 #. translators: %s: network name.
-#: includes/share.php:191
+#: includes/share.php:192
 #, php-format
 msgid "Follow us on %s"
 msgstr ""
@@ -471,10 +850,6 @@ msgstr ""
 #: src/shell/detail.js:101
 #, js-format
 msgid "%1$s, picture %2$d"
-msgstr ""
-
-#: src/shell/detail.js:102
-msgid "Picture"
 msgstr ""
 
 #. translators: %d: pictures not shown.
@@ -866,10 +1241,6 @@ msgstr ""
 msgid "See the tokens"
 msgstr ""
 
-#: src/theme-options/sections/cards.js:100
-msgid "Cards"
-msgstr ""
-
 #: src/theme-options/theme-note.js:11
 msgid "Theme value"
 msgstr ""
@@ -922,8 +1293,4 @@ msgstr ""
 #: blocks/hero/block.json
 msgctxt "block keyword"
 msgid "kits"
-msgstr ""
-
-#: includes/bindings.php:97
-msgid "Kits post field"
 msgstr ""

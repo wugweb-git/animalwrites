@@ -95,6 +95,8 @@ jobs:
         run: php plugins/directoryweb/tests/org-people-tests.php
       - name: DirectoryWeb screens, pure parts (plugins/directoryweb/tests/directoryweb-tests.php)
         run: php plugins/directoryweb/tests/directoryweb-tests.php
+      - name: DirectoryWeb listing data model and Core's wrappers (plugins/directoryweb/tests/listing-meta-tests.php)
+        run: php plugins/directoryweb/tests/listing-meta-tests.php
       - name: Daily PHP error count by kind (plugins/animal-writes-core/tests/error-count-tests.php)
         run: php plugins/animal-writes-core/tests/error-count-tests.php
       - name: PlanWeb tests without WordPress (field checks, Dates import mapping; plugins/planweb/tests)
@@ -105,6 +107,8 @@ jobs:
         run: php plugins/kits-core/tests/admin-menu-tests.php
       - name: Kits page parts, a classic screen's output as shell parts (plugins/kits-core/tests/shell-parts-tests.php)
         run: php plugins/kits-core/tests/shell-parts-tests.php
+      - name: Kits content-type presets, off by default, native registration only (plugins/kits-core/tests/presets-tests.php)
+        run: php plugins/kits-core/tests/presets-tests.php
       - name: RankWeb settings tests without WordPress (defaults round trip, unchanged saves write nothing; plugins/aw-seo-extras/tests)
         run: php plugins/aw-seo-extras/tests/run.php
       - name: RankWeb auto-linker tests (sample HTML in, expected HTML out; PHPUnit classes run without PHPUnit, plugins/aw-seo-extras/tests)

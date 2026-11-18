@@ -30,7 +30,7 @@ InsightWeb measures how a Kits site does in search. It reads data and makes sugg
 
 = Keys =
 
-Clarity, Bing Webmaster, PageSpeed and Google Alerts keys are set under Animal Writes → Keys, or as `wp-config.php` constants, which win. Their values are never shown.
+Clarity, Bing Webmaster, PageSpeed and Google Alerts keys are set on InsightWeb → Settings → Keys, or as `wp-config.php` constants, which win. Their values are never shown. Keys saved earlier under Kits → Keys keep working until they are copied over.
 
 == Installation ==
 

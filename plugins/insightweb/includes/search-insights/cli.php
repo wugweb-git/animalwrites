@@ -117,7 +117,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 					$out = aw_si_clarity_run( array( 'dry' => $dry ) );
 				} elseif ( 'bing' === $src ) {
 					if ( ! aw_si_bing_on() ) {
-						WP_CLI::error( 'Bing Webmaster is not set up: add its API key under Animal Writes → Keys.' );
+						WP_CLI::error( 'Bing Webmaster is not set up: add its API key under InsightWeb → Settings → Keys.' );
 					}
 					$out = aw_si_bing_run( array( 'dry' => $dry ) );
 				} elseif ( 'gsc-types' === $src ) {

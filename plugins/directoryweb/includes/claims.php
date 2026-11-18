@@ -78,7 +78,7 @@ add_action(
 /** What a listing shows now for a claim field: phones from the Phone numbers list, the rest from its meta. */
 function aw_claim_current( $lid, $key ) {
 	if ( 'aw_phone' === $key || 'aw_whatsapp' === $key ) {
-		return aw_listing_first_phone( $lid, 'aw_whatsapp' === $key );
+		return directoryweb_listing_first_phone( $lid, 'aw_whatsapp' === $key );
 	}
 	return (string) get_post_meta( $lid, $key, true );
 }
@@ -210,9 +210,9 @@ add_action(
 					if ( 'aw_services' === $key ) {
 						aw_set_item_tags( $lid, explode( ',', (string) $val ), aw_service_slugs() ); // the services only; the listing's types stay
 					} elseif ( 'aw_phone' === $key ) {
-						aw_listing_put_phone( $lid, (string) $val, '' ); // into the Phone numbers list
+						directoryweb_listing_put_phone( $lid, (string) $val, '' ); // into the Phone numbers list
 					} elseif ( 'aw_whatsapp' === $key ) {
-						aw_listing_put_phone( $lid, '', (string) $val );
+						directoryweb_listing_put_phone( $lid, '', (string) $val );
 					} else {
 						update_post_meta( $lid, $key, $val );
 					}

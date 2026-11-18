@@ -2,7 +2,7 @@
 /**
  * PageSpeed (plan §5.1): mobile and desktop for the key pages and every campaign page, weekly on Sunday 06:00 IST, through Site Kit's
  * pagespeed-insights module as its owner; when the module can't be used (no owner, not connected), the public PageSpeed
- * API directly, with the free AW_PSI_KEY (Animal Writes → Keys or wp-config.php) when set (keyless calls have a small shared quota). One PageSpeed call can take 10–40 seconds, so the 32 calls run as a queue: a few per cron run, the next run
+ * API directly, with the free AW_PSI_KEY (InsightWeb → Settings → Keys or wp-config.php) when set (keyless calls have a small shared quota). One PageSpeed call can take 10–40 seconds, so the 32 calls run as a queue: a few per cron run, the next run
  * five minutes later, until the queue is empty.
  *
  * Rows in obs: src psi, period day (the week's run date), page = path; metrics score-mobile, lcp-mobile, tbt-mobile,

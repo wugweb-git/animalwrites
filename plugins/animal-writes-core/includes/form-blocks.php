@@ -142,7 +142,7 @@ function aw_claim_finder() {
  */
 function aw_claim_head_band() {
 	$listing = aw_form_page_listing();
-	$crumbs  = function_exists( 'aw_breadcrumbs_claim' ) ? aw_breadcrumbs_claim() : '';
+	$crumbs  = function_exists( 'rankweb_breadcrumbs_claim' ) ? rankweb_breadcrumbs_claim() : '';
 	if ( ! $listing ) {
 		return aw_head_band( array( 'crumbs' => $crumbs, 'title' => 'Claim a listing', 'title_class' => 'wp-block-post-title' ) );
 	}

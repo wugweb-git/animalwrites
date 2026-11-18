@@ -1,8 +1,8 @@
 <?php
 /**
  * Breadcrumbs: Rank Math's trail is the one source. Rank Math does not know the site's places and hubs, so its items
- * are replaced here (rank_math/frontend/breadcrumb/items) by the trail below; the site's breadcrumb block
- * (animal-writes-core breadcrumbs.php) shows Rank Math's items, and Rank Math prints them as the page's one
+ * are replaced here (rank_math/frontend/breadcrumb/items) by the trail below; the visible trail
+ * (breadcrumbs-render.php) shows Rank Math's items, and Rank Math prints them as the page's one
  * BreadcrumbList.
  *
  * Organisation:      Home › Directory › State › District (its place; the name is the H1)

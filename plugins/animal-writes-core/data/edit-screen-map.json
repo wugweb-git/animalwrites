@@ -2345,6 +2345,7 @@
 			"reads": [
 				"option:aw_si_seeded",
 				"option:aw_si_off",
+				"option:insightweb_keys",
 				"option:aw_keys"
 			],
 			"limits": "Key values are never shown.",
@@ -4211,7 +4212,7 @@
 				{
 					"kind": "display",
 					"where": "listing Sources block",
-					"file": "core/data-sources.php:61"
+					"file": "directoryweb/includes/data-sources.php:61"
 				},
 				{
 					"kind": "schema",
@@ -5242,7 +5243,7 @@
 				{
 					"kind": "display",
 					"where": "Contact (aw_listing_phones)",
-					"file": "core/meta.php:237"
+					"file": "directoryweb/includes/listing-meta.php:221"
 				},
 				{
 					"kind": "schema",
@@ -5433,7 +5434,7 @@
 				{
 					"kind": "display",
 					"where": "Contact hours (aw_listing_hours)",
-					"file": "core/meta.php:260"
+					"file": "directoryweb/includes/listing-meta.php:245"
 				},
 				{
 					"kind": "schema",
@@ -5776,7 +5777,7 @@
 				{
 					"kind": "admin",
 					"where": "re-verify job",
-					"file": "core/cron.php:76"
+					"file": "directoryweb/includes/listing-meta.php:454"
 				}
 			]
 		},
@@ -6196,7 +6197,7 @@
 				{
 					"kind": "display",
 					"where": "Sources",
-					"file": "core/data-sources.php:99"
+					"file": "directoryweb/includes/data-sources.php:99"
 				},
 				{
 					"kind": "schema",
@@ -6564,7 +6565,7 @@
 				{
 					"kind": "admin",
 					"where": "set by the re-verify job",
-					"file": "core/cron.php:65"
+					"file": "directoryweb/includes/listing-meta.php:443"
 				}
 			]
 		},
@@ -6689,7 +6690,7 @@
 				{
 					"kind": "display",
 					"where": "AWBI source date (\"Details from\")",
-					"file": "core/data-sources.php:92"
+					"file": "directoryweb/includes/data-sources.php:92"
 				},
 				{
 					"kind": "filter",

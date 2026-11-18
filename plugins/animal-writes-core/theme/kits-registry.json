@@ -942,7 +942,7 @@
     "alt": "see note",
     "schema": "BreadcrumbList"
    },
-   "block": "animal-writes/breadcrumb"
+   "block": "rankweb/breadcrumbs"
   },
   {
    "name": "Hub count",

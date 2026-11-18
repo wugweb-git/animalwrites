@@ -313,6 +313,7 @@ Contract (proposed, for the RankWeb track to accept or change):
 - `kits_schema_map( array $map ): array` — post type => `array( 'type' => 'Article', 'fields' => array( schema
   property => binding key ) )`. RankWeb builds the node from the binding values (`kits_post_field_value()`), so
   schema text is the visible text.
+- An entry may carry `requires` (properties without which no node is built) and `value_callback( $key, $post_id )`: when set, RankWeb reads values through it instead. Presets set it to `kits_preset_schema_value()`, the visible value except dates in ISO 8601 and pictures as their address (built in stage 4).
 - `kits_schema_node( array $node, int $post_id, string $post_type )` — last-mile change by the site.
 - Term and hub pages: `CollectionPage` + `ItemList`, as RankWeb does today.
 
@@ -349,7 +350,7 @@ schema template — RankWeb's existing rule (its node replaces Rank Math's defau
 
 | With code (filters) | Hook |
 |---|---|
-| Enable / disable presets | `kits_presets` (planned) |
+| Enable / disable presets | `kits_presets_enabled` (the ids that are on; Kits → Settings → Content types saves them); `kits_presets` (the definitions) |
 | Field keys and values | `kits_post_fields` (this PR) |
 | Empty-field markup | `kits_post_field_empty` (this PR) |
 | Schema | `kits_schema_map`, `kits_schema_node` (section 13) |
@@ -524,7 +525,7 @@ Not moved, renamed or deleted here. Final: Kits Core, kept dormant; when the mon
 |---|---|---|
 | 2 (this PR) | icon/date, `kits/post-field`, **SCF bridge** (`kits_scf_active`, `kits_scf_json_folder`, `kits_scf_groups`); callers switched to the `kits_*` names | none |
 | 3 | The files open PRs touch (faq-data.php, tags.php, DirectoryWeb listing files) switch to `kits_*`; then the `aw_i` / `aw_date` / `aw_scf_*` wrappers are deleted. DirectoryWeb uses `kits_scf_json_folder()` and puts its listing keys on `kits_post_fields` | none |
-| 4 | Preset loader + all seven new presets, each switched on or off in Kits Core (off by default) | new types only, when switched on |
+| 4 | Preset loader + all seven new presets, each switched on or off in Kits Core (off by default). Built: `plugins/kits-core/includes/presets.php` + `includes/presets/`, switches in Kits → Settings → Content types (option `kits_presets_enabled`), `wp kits preset list`, tests in `plugins/kits-core/tests/presets-tests.php`. Templates and patterns per preset follow with the layouts (stage 5) | new types only, when switched on |
 | 5 | Layout block styles + rail; `kits/share` with aliases | yes, on the owner's yes |
 | 6 | Schema contract read by RankWeb | `<head>` only |
 | 7 | This site's existing types onto their `kits-*` presets (byte-identical registration) | none intended |
@@ -533,7 +534,8 @@ Owner questions (added):
 5. Which new presets first: `kits-portfolio`, `kits-card`, `kits-infographic`; and are `kits-case-study`, `kits-event`, `kits-person`, `kits-testimonial` wanted?
 6. Tabs: answered 18 Nov, **yes**, allowed (see section 16).
 7. Card minimum width: answered 18 Nov, **17rem** (the Kits token). The aw-core override is removed in this PR.
-8. `aw_campaign_link` and `aw_media_group`: confirm both stay as the two non-tag relations.
+8. `aw_campaign_link` and `aw_media_group`: answered 18 Nov, **rename to `kits_campaign_link` and `kits_media_group`**. They stay
+   taxonomies (the right native tool for both); the rename is a data migration in its own PR (see the owner answers).
 9. Masonry: wanted? (Reading order and screen readers make it the riskiest layout.)
 10. Sponsored blocks: confirm they stay dormant until the monetisation plan (section 21).
 11. Card minimum width: answered, 17rem (see 7).
@@ -584,8 +586,8 @@ Native column names the core part each row relies on.
 | Private records `aw_report`, `aw_volunteer` | Kits Core private-record presets | `register_post_type()` (`public` false) |
 | Private record `aw_message` | MailWeb | — |
 | Meta keys (`meta.php`) | **Native**, declared by each preset | `register_post_meta()` with `show_in_rest`, `sanitize_callback`, `auth_callback` |
-| Taxonomy `aw_campaign_link` | Kits Core (`kits-campaign`) | `register_taxonomy()` |
-| Taxonomy `aw_media_group` | Kits Core | `register_taxonomy()` on attachments, Media Library |
+| Taxonomy `aw_campaign_link` → `kits_campaign_link` (owner, 18 Nov) | Kits Core (`kits-campaign`) | `register_taxonomy()` |
+| Taxonomy `aw_media_group` → `kits_media_group` (owner, 18 Nov) | Kits Core | `register_taxonomy()` on attachments, Media Library |
 | Hub list filters (`AW_LIST_FILTERS`, `systems.php`) | Kits Core `kits/collection-filter`; values in Site settings | core `category` / `post_tag`, `query_loop_block_query_vars` |
 | Hub pages (`hubs.php`) | **Native** Query Loop in page content + Kits Core filter | core Query Loop block |
 | `aw_i()` / `aw_date()` | Kits Core (`kits_icon`, `kits_date`), done here | `date_i18n()` / `get_option( 'date_format' )` |
@@ -725,3 +727,18 @@ they are supporters' own records, always kept, and their ownership goes to Kits 
 
 Until every row above has moved, the box stays unticked. When animal-writes-core is deleted, its `uninstall.php` goes
 with it, so no option is deleted.
+
+**Taxonomy rename (owner, 18 Nov 2026): "rename aw to kits".** `aw_campaign_link` becomes `kits_campaign_link`, and
+`aw_media_group` becomes `kits_media_group`. Both stay taxonomies. The post-meta and tag alternatives are dropped: a
+taxonomy is what WordPress gives for "many items share one label". It brings counts, admin filters and a REST route,
+and it is queried with `tax_query`. A tag would mix campaigns with topic tags and give them public tag pages; post meta
+would need a slow meta query on every campaign page. This is a stored-name change (section 6), so it gets its own PR:
+- **Built in PR #145.** The code registers only the new names. The first web or cron load after the deploy renames
+  the `term_taxonomy` rows once (one UPDATE per taxonomy), after saving the renamed IDs in
+  `kits_taxonomy_rename_backup`. Term IDs, slugs, term meta and assignments do not change.
+- **Saved blocks.** Query Loops saved with `"taxQuery":{"aw_campaign_link":…}` are mapped to the new name by
+  `kits_taxonomy_current()`, so post content is not rewritten.
+- **WP-CLI.** `wp kits taxonomy-rename status | run [--dry-run] | undo`. `undo` goes together with rolling the code
+  back.
+- **Callers.** 42 mentions of `aw_campaign_link` in 14 files and 15 of `aw_media_group` in 4 files, all switched in
+  the same PR. The media `rest_base` stays `media-groups`.

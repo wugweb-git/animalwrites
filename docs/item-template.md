@@ -16,7 +16,7 @@ A row prints nothing when it has nothing.
 
 | # | Row | Block | What fills it | Used on |
 |---|-----|-------|---------------|---------|
-| 1 | Breadcrumb | `animal-writes/breadcrumb` | Rank Math's trail (aw-seo-extras `breadcrumbs.php`): Home › Section › primary category (the Rank Math primary category, else the first). The last step is a link. The BreadcrumbList schema is the same trail. Listings: Home › Directory › State › District. | all items, listings |
+| 1 | Breadcrumb | `rankweb/breadcrumbs` (RankWeb; the earlier `animal-writes/breadcrumb` renders the same) | Rank Math's trail (aw-seo-extras `breadcrumbs.php`): Home › Section › primary category (the Rank Math primary category, else the first). The last step is a link. The BreadcrumbList schema is the same trail. Listings: Home › Directory › State › District. | all items, listings |
 | 2 | Title | `core/post-title` (H1) | The title. | all |
 | 3 | Meta row | `animal-writes/item-meta` | In this order, only what applies: one date (News, Library, research: the original's publication date; Opportunities: the day posted; guides: the day published; never "Updated") · "Sponsored by …" · type chips (Library type, Research, Guide, Job …) · place chips (Opportunities, listings) · deadline (Opportunities) · status (listings: Blacklisted, Verified + date, Needs re-check) · category chips. No publisher, source or author. Spacing is the CSS gap only. | all, listings |
 | 4 | Image | `core/post-featured-image` | The lead picture. Listings: `animal-writes/org-mark`, the logo only (nothing when there is none). | all, listings |

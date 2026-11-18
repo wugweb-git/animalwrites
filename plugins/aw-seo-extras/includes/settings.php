@@ -233,7 +233,7 @@ function aw_seo_modules(): array {
 		'faq' => array(
 			'label'  => 'FAQ',
 			'switch' => true,
-			'files'  => array( 'faq' ),
+			'files'  => array( 'faq', 'faq-data' ),
 			'desc'   => 'The FAQ box on the edit screen of every public post type and taxonomy (which ones: Plugins → RankWeb → FAQ), and the questions and answers with FAQPage schema on the page. Automatic questions from a page\'s own fields fill the box where the site provides them.',
 			'fields' => array(
 				'AW_FAQ_MIN' => array( 'type' => 'int', 'label' => 'Fewest questions (pages and every other type)', 'help' => 'Fewer than this: no FAQ and no schema.', 'default' => 3 ),

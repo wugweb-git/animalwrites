@@ -23,7 +23,7 @@ Everything else becomes a native WordPress feature (section 3). PlanWeb, Insight
 **Rules that hold for every phase**
 - Kits Core and the Kits theme get no Animal Writes names. Only new code gets `kits` names; the `aw` to `kits` rename of existing code stays deferred. Where a new Kits block needs site data (a campaign's close date, a campaign's metrics), it asks through a `kits_*` filter and Animal Writes Core answers.
 - Old shortcodes and old blocks keep rendering until their content is moved. Each old block stays registered, hidden from the inserter (`supports.inserter: false`), so saved content never shows "This block is not supported".
-- No build step, like `kits/hero`: plain `index.js` on the `wp` globals for the editor, and a plain ES module `view.js` with a hand-written `view.asset.php` (dependency `@wordpress/interactivity`) where a block needs behaviour.
+- Built with each plugin's own `@wordpress/scripts` setup (owner, 18 Nov 2026: no hand-written asset files): the editor script in the plugin's `src/`, built to `build/` with its `.asset.php` (dependencies and a content hash), and `block.json` points at the built file (`kits/hero`: `kits-core/src/hero/` → `build/hero/`; `rankweb/breadcrumbs`: `aw-seo-extras/src/blocks/breadcrumbs.js` → `build/blocks/`). A block that needs behaviour gets a `view` entry the same way (`@wordpress/interactivity`). `build/` is committed, because the deploy does not run npm.
 - Sizes and colours come only from `docs/design-system.md`, `docs/card-sizes.md`, the component map and the registry tokens. No new values.
 - Classes and `data-*` attributes that `aw-analytics.js` listens to are kept, or the listener is moved in the same change (list in section 4, Risks). No GA4 or GTM change without the owner's word.
 
@@ -80,10 +80,11 @@ All are dynamic (a PHP render callback), except `kits/hero`, which saves its mar
 
 | Block | Defined at | Attributes | Live use | Row that covers it |
 |---|---|---|---|---|
-| `kits/hero` | `kits-core/blocks/hero/block.json`, `kits-core/includes/blocks.php:32` | `align` (`full`) + block supports | Kits theme pattern `hero.php` | `kits/hero`: no change |
+| `kits/hero` | `kits-core/blocks/hero/block.json` (editor script `src/hero/` → `build/hero/`), `kits-core/includes/blocks.php:32` | `align` (`full`) + block supports | Kits theme pattern `hero.php` | `kits/hero`: no change |
 | `animal-writes/sponsored-item` | `animal-writes-core/includes/sponsored-blocks.php:73` | `postId` | None | `kits/sponsored` |
 | `animal-writes/sponsored-banner` | `sponsored-blocks.php:82` | `mediaId`, `mediaAlt`, `heading`, `text`, `url`, `linkText`, `sponsor` | None | `kits/sponsored` |
-| `animal-writes/breadcrumb` | `hub-blocks.php:24` | none | Hub pages 8811, 8935, 8937, 8939, 8941, 8943, 8945; theme files `single.html`, `single-aw_listing.html` | Rank Math Breadcrumbs block (3.18) |
+| `rankweb/breadcrumbs` | `aw-seo-extras/blocks/breadcrumbs/block.json`, registered in `aw-seo-extras/includes/breadcrumbs-render.php` (18 Nov 2026); editor script `src/blocks/breadcrumbs.js`, built by wp-scripts to `build/blocks/breadcrumbs.js` | none | Theme files `single.html`, `single-aw_listing.html` | The trail, once per page (`rankweb_breadcrumbs_block()`); `animal-writes/breadcrumb` below renders the same, for saved pages (RankWeb's alias) |
+| `animal-writes/breadcrumb` | `aw-seo-extras/includes/breadcrumbs-render.php` (alias, since 18 Nov 2026; Animal Writes Core registered it before) | none | Hub pages 8811, 8935, 8937, 8939, 8941, 8943, 8945 (post content) | Same output as `rankweb/breadcrumbs`; hidden from the inserter. Registered by RankWeb only when no other plugin registered the name. Swapping the 7 pages to `rankweb/breadcrumbs` is optional (content edit, owner's yes) |
 | `animal-writes/section-head` | `hub-blocks.php:25` | `postType` | Theme files `archive`, `category`, `page`, `page-volunteer`, `tag` | Section heads → a pattern (see note 1) |
 | `animal-writes/hub-count` | `hub-blocks.php:26` | `postType` | Hub pages 8935, 8937, 8939, 8941, 8943 (prints nothing since 20 Oct) | Hub toolbar → `kits/collection-filter` |
 | `animal-writes/hub-visual` | `hub-blocks.php:27` | `postType` | Hub pages 8811, 8935, 8937, 8939, 8941, 8943, 8945 | Kits Banner pattern, or core Cover / Image (3.18) |

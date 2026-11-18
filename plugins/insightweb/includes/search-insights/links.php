@@ -172,7 +172,7 @@ add_action( 'aw_si_load_tab_links', 'aw_si_links_load' );
 function aw_si_links_tab(): void {
 	require_once __DIR__ . '/class-aw-si-links-table.php';
 	if ( ! function_exists( 'aw_si_bing_on' ) || ! aw_si_bing_on() ) {
-		wp_admin_notice( esc_html__( 'No Bing Webmaster API key yet: add it under Animal Writes → Keys.', 'insightweb' ), array( 'type' => 'info', 'additional_classes' => array( 'inline' ) ) );
+		wp_admin_notice( esc_html__( 'No Bing Webmaster API key yet: add it under Settings → Keys.', 'insightweb' ), array( 'type' => 'info', 'additional_classes' => array( 'inline' ) ) );
 	}
 	if ( isset( $_GET['linked'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- message only.
 		$n = absint( wp_unslash( $_GET['linked'] ) ); // phpcs:ignore WordPress.Security.NonceVerification -- message only.
