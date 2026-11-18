@@ -33,8 +33,9 @@
  *       'noindex'     => false,               // Optional: its own pages say noindex and leave the sitemaps.
  *   )
  * Field formats: text, textarea, url, urls (one per line), date (stored Y-m-d), datetime (stored Y-m-d H:i, site
- * time), html, attachment (a Media Library ID). Dates are accepted as Y-m-d, Ymd (the SCF date picker), d/m/Y (also
- * d-m-Y and d.m.Y), each with an optional time H:i or H:i:s (the SCF date-time picker), and stored in the form above.
+ * time), html, attachment (a Media Library ID). Dates are accepted as Y-m-d, Ymd (the SCF date picker), d-m-y or d-m-Y
+ * (also with / . or : between), each with an optional time H:i or H:i:s (the SCF date-time picker), and stored in the
+ * form above. They are shown as d-m-y H:i (filter kits_preset_date_format).
  * A field with 'private' => true is not in the REST API and has no binding key.
  *
  * Shared keys: when two switched-on presets use the same field key, a post reads it from the preset of its own post
@@ -287,7 +288,8 @@ function kits_preset_field_clean( string $format, $value ) {
 
 /**
  * A date in any accepted form, as array( 'Y-m-d', 'H:i' or '' ), or null when it is not a real day and time.
- * Accepted: Y-m-d, Ymd (SCF date picker), d/m/Y, d-m-Y or d.m.Y, each optionally followed by a space or T and H:i or
+ * Accepted: Y-m-d, Ymd (SCF date picker), d-m-y or d-m-Y with - / . or : between (a two-digit year is 20yy), each
+ * optionally followed by a space, T or ": " and H:i or
  * H:i:s (SCF date-time picker stores Y-m-d H:i:s); and ISO 8601 with a zone (2026-12-01T13:00:00.000Z), turned into
  * site time. Seconds are dropped.
  *
@@ -305,11 +307,12 @@ function kits_preset_date_parse( string $value ): ?array {
 		$at = $at->setTimezone( wp_timezone() );
 		return array( $at->format( 'Y-m-d' ), $at->format( 'H:i' ) );
 	}
-	$time = '(?:[T ](\d{1,2}):(\d{2})(?::(\d{2}))?)?';
+	$time = '(?:(?:[T ]|: ?)(\d{1,2}):(\d{2})(?::(\d{2}))?)?';
 	if ( 1 === preg_match( '/^(\d{4})-(\d{1,2})-(\d{1,2})' . $time . '$/', $value, $m ) || 1 === preg_match( '/^(\d{4})(\d{2})(\d{2})' . $time . '$/', $value, $m ) ) {
 		list( $y, $mo, $d ) = array( (int) $m[1], (int) $m[2], (int) $m[3] );
-	} elseif ( 1 === preg_match( '#^(\d{1,2})[/.\-](\d{1,2})[/.\-](\d{4})' . $time . '$#', $value, $m ) ) {
-		list( $d, $mo, $y ) = array( (int) $m[1], (int) $m[2], (int) $m[3] );
+	} elseif ( 1 === preg_match( '#^(\d{1,2})([/.:\-])(\d{1,2})\2(\d{4}|\d{2})' . $time . '$#', $value, $m ) ) {
+		list( $d, $mo, $y ) = array( (int) $m[1], (int) $m[3], strlen( $m[4] ) > 2 ? (int) $m[4] : 2000 + (int) $m[4] );
+		array_splice( $m, 1, 1 ); // Drop the separator group, so the time is in 4 to 6 as in the other forms.
 	} else {
 		return null;
 	}
@@ -444,9 +447,15 @@ function kits_preset_field_display( array $preset, string $key, int $post_id ): 
 			if ( ! $when ) {
 				return '';
 			}
-			$fmt = (string) get_option( 'date_format' );
+			/**
+			 * Filters how preset dates are shown (PHP date format). Default d-m-y (owner, 18 Nov 2026); a stored time adds
+			 * " H:i".
+			 *
+			 * @param string $format Date format.
+			 */
+			$fmt = (string) apply_filters( 'kits_preset_date_format', 'd-m-y' );
 			if ( 'datetime' === $preset['fields'][ $key ]['format'] && $when[1] ) {
-				$fmt .= ' ' . (string) get_option( 'time_format' );
+				$fmt .= ' H:i';
 			}
 			return (string) wp_date( $fmt, $when[0]->getTimestamp() );
 		case 'urls':

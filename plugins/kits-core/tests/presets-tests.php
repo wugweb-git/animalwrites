@@ -305,6 +305,8 @@ t_check( '2026-12-01 18:30' === $m['sanitize_callback']( '2026-12-01 18:30:00' )
 $date = $GLOBALS['t_postmeta']['kits_testimonial']['kits_testimonial_consent']['sanitize_callback'];
 t_check( '2026-11-01' === $date( '20261101' ) && '2026-11-01' === $date( '01/11/2026' ) && '2026-11-01' === $date( '1.11.2026' ) && '2026-11-01' === $date( '01-11-2026' ) && '2026-11-01' === $date( ' 2026-11-01 ' ) && '2026-11-01' === $date( '2026-11-01 10:00:00' ), 'fix 3: date: Ymd (SCF), d/m/Y, d.m.Y, d-m-Y and Y-m-d kept as Y-m-d' );
 t_check( '2026-12-01 18:30' === $m['sanitize_callback']( '2026-12-01T18:30:00.000Z' ) && '2026-12-01 13:00' === $m['sanitize_callback']( '2026-12-01T18:30:00+05:30' ) && '' === $m['sanitize_callback']( '2026-02-30T10:00:00Z' ), 'review: ISO 8601 with a zone kept, in site time' );
+t_check( '2026-12-01 18:30' === $m['sanitize_callback']( '01-12-26 18:30' ) && '2026-12-01 18:30' === $m['sanitize_callback']( '01-12-26: 18:30' ) && '2026-12-01 18:30' === $m['sanitize_callback']( '01:12:26 18:30' ) && '2026-12-01' === $date( '01/12/26' ), 'owner format: d-m-y H:i (and dd:mm:yy) accepted' );
+t_check( '' === $date( '01-12/26' ) && '' === $date( '29-02-27' ), 'owner format: mixed separators or a day that does not exist = empty' );
 t_check( '' === $date( '31/02/2026' ) && '' === $date( '2026-13-01' ) && '' === $date( 'soon' ) && '' === $date( '2026111' ), 'fix 3: date: not a real day = empty' );
 t_check( false === $m['auth_callback']( true, 'kits_event_start', 5 ), 'auth: needs edit_post' );
 $url = $GLOBALS['t_postmeta']['kits_event']['kits_event_online_url']['sanitize_callback'];
@@ -322,10 +324,10 @@ $GLOBALS['t_meta'][20]  = array(
 	'kits_event_end'   => '2026-12-02',
 	'kits_event_place' => 'Pune',
 );
-t_check( '1 Dec 2026 18:30' === kits_post_field_value( 'kits_event_start', 20 ) && '2 Dec 2026' === kits_post_field_value( 'kits_event_end', 20 ), 'dates shown in the site format (time only when stored)' );
+t_check( '01-12-26 18:30' === kits_post_field_value( 'kits_event_start', 20 ) && '02-12-26' === kits_post_field_value( 'kits_event_end', 20 ), 'dates shown as d-m-y H:i (time only when stored)' );
 $GLOBALS['t_types'][22] = 'kits_event';
 $GLOBALS['t_meta'][22]  = array( 'kits_event_start' => '20261203' );
-t_check( '3 Dec 2026' === kits_post_field_value( 'kits_event_start', 22 ) && '2026-12-03' === kits_preset_schema_value( 'kits_event_start', 22 ), 'fix 3: a date stored in an SCF form is still shown and given to schema' );
+t_check( '03-12-26' === kits_post_field_value( 'kits_event_start', 22 ) && '2026-12-03' === kits_preset_schema_value( 'kits_event_start', 22 ), 'fix 3: a date stored in an SCF form is still shown and given to schema' );
 t_check( 'Pune' === kits_post_field_output( 'kits_event_place', 20 ) && '' === kits_post_field_value( 'kits_event_online_url', 20 ), 'text shown; empty stays empty' );
 $GLOBALS['t_types'][21] = 'post';
 $GLOBALS['t_meta'][21]  = array( 'kits_event_place' => 'Leak' );
@@ -501,7 +503,7 @@ $GLOBALS['t_options']['kits_presets_enabled'] = array( 'kits-event', 'site-meetu
 $GLOBALS['t_types'][60] = 'site_meetup';
 $GLOBALS['t_meta'][60]  = array( 'kits_event_start' => '2026-12-05 10:00' );
 t_check( '2026-12-05T10:00:00+00:00' === kits_preset_schema_value( 'kits_event_start', 60 ) && '2026-12-01T18:30:00+00:00' === kits_preset_schema_value( 'kits_event_start', 20 ), 'fix 7: shared key: schema value from each post\'s own type, either order' );
-t_check( '5 Dec 2026 10:00' === kits_post_field_value( 'kits_event_start', 60 ), 'fix 7: shared key: the binding shows the second type\'s value' );
+t_check( '05-12-26 10:00' === kits_post_field_value( 'kits_event_start', 60 ), 'fix 7: shared key: the binding shows the second type\'s value' );
 $GLOBALS['t_options']['kits_presets_enabled'] = array( 'kits-event', 'site-event-two' );
 $map = apply_filters( 'kits_schema_map', array() );
 t_check( 'SocialEvent' === $map['kits_event']['type'] && '' === kits_preset_schema_value( 'kits_event_place', 20 ), 'fix 7: two presets of one type: the later one wins (schema and fields)' );

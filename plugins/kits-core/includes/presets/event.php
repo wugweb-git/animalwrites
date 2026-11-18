@@ -1,6 +1,6 @@
 <?php
 /**
- * Preset kits-event: start, end, place and an online address. Dates are shown with the site's date format; templates
+ * Preset kits-event: start, end, place and an online address. Dates are shown as d-m-y H:i (kits_preset_date_format); templates
  * print them with kits_date() / kits_datecard(). Schema: Event.
  *
  * @package kits-core
@@ -51,11 +51,11 @@ return array(
 	),
 	'fields'      => array(
 		'kits_event_start'      => array(
-			'label'  => __( 'Start (YYYY-MM-DD, optional HH:MM)', 'kits-core' ),
+			'label'  => __( 'Start (DD-MM-YY, optional HH:MM)', 'kits-core' ),
 			'format' => 'datetime',
 		),
 		'kits_event_end'        => array(
-			'label'  => __( 'End (YYYY-MM-DD, optional HH:MM)', 'kits-core' ),
+			'label'  => __( 'End (DD-MM-YY, optional HH:MM)', 'kits-core' ),
 			'format' => 'datetime',
 		),
 		'kits_event_place'      => array(
