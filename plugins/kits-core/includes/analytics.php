@@ -44,7 +44,7 @@ add_action(
 			return;
 		}
 		$region = wp_json_encode( kits_consent_regions() );
-		echo "<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',analytics_storage:'denied',wait_for_update:500,region:{$region}});gtag('consent','default',{ad_storage:'granted',ad_user_data:'granted',ad_personalization:'granted',analytics_storage:'granted'});gtag('set','ads_data_redaction',true);gtag('set','url_passthrough',true);</script>\n"; // phpcs:ignore WordPress.Security.EscapeOutput
+		wp_print_inline_script_tag( "window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',analytics_storage:'denied',wait_for_update:500,region:{$region}});gtag('consent','default',{ad_storage:'granted',ad_user_data:'granted',ad_personalization:'granted',analytics_storage:'granted'});gtag('set','ads_data_redaction',true);gtag('set','url_passthrough',true);" );
 	},
 	-100
 );
@@ -112,7 +112,9 @@ add_action(
 		// Page speed: the container starts once the page has loaded, or at the visitor's first tap, key or scroll if that
 		// comes first, so it never holds back the first paint. gtm.start is stamped now; everything pushed to the dataLayer
 		// before the container starts (consent defaults, page_context, events) is kept and read by it.
-		echo "<!-- Google Tag Manager -->\n<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var done=false,ev=['pointerdown','keydown','scroll'];function go(){if(done)return;done=true;ev.forEach(function(e){w.removeEventListener(e,go,true);});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);}ev.forEach(function(e){w.addEventListener(e,go,{capture:true,passive:true});});if(d.readyState==='complete'){go();}else{w.addEventListener('load',go,{once:true});}})(window,document,'script','dataLayer','{$id}');</script>\n<!-- End Google Tag Manager -->\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- the container id is esc_js() above; the rest is fixed text
+		echo "<!-- Google Tag Manager -->\n";
+		wp_print_inline_script_tag( "(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var done=false,ev=['pointerdown','keydown','scroll'];function go(){if(done)return;done=true;ev.forEach(function(e){w.removeEventListener(e,go,true);});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);}ev.forEach(function(e){w.addEventListener(e,go,{capture:true,passive:true});});if(d.readyState==='complete'){go();}else{w.addEventListener('load',go,{once:true});}})(window,document,'script','dataLayer','{$id}');" ); // The container id is esc_js() above; the rest is fixed text.
+		echo "<!-- End Google Tag Manager -->\n";
 	},
 	1
 );
@@ -151,7 +153,7 @@ add_action(
 		}
 		$id = esc_js( kits_clarity_id() );
 		$tz = wp_json_encode( kits_consent_timezones() );
-		echo "<script>(function(w,d,id,zones){var on=false;function load(g){if(!on){on=true;(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};function go(){t=l.createElement(r);t.async=1;t.src=\"https://www.clarity.ms/tag/\"+i+\"?ref=bwt\";y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);}function idle(){(\"requestIdleCallback\" in c)?requestIdleCallback(go,{timeout:2000}):setTimeout(go,1000);}var ev=[\"pointerdown\",\"keydown\",\"scroll\",\"touchstart\"],st=false;function start(){if(st)return;st=true;ev.forEach(function(e){c.removeEventListener(e,start,true);});idle();}ev.forEach(function(e){c.addEventListener(e,start,{capture:true,passive:true});});})(w,d,\"clarity\",\"script\",id);}if(g){w.clarity(\"consentv2\",{ad_Storage:g.ad_storage===\"granted\"?\"granted\":\"denied\",analytics_Storage:\"granted\"});}}var tz=\"\";try{tz=Intl.DateTimeFormat().resolvedOptions().timeZone||\"\";}catch(e){}if(zones.indexOf(tz)<0){load();return;}function seen(a){if(a&&a[0]===\"consent\"&&a[1]===\"update\"&&a[2]&&a[2].analytics_storage===\"granted\"){load(a[2]);}}var dl=w.dataLayer=w.dataLayer||[];for(var i=0;i<dl.length;i++){seen(dl[i]);}var push=dl.push;dl.push=function(){for(var j=0;j<arguments.length;j++){seen(arguments[j]);}return push.apply(dl,arguments);};var n=0,t=setInterval(function(){if(typeof w.__tcfapi===\"function\"){clearInterval(t);w.__tcfapi(\"addEventListener\",2,function(tc,ok){if(ok&&tc&&(tc.eventStatus===\"tcloaded\"||tc.eventStatus===\"useractioncomplete\")&&tc.gdprApplies&&tc.purpose&&tc.purpose.consents&&tc.purpose.consents[1]){load({ad_storage:\"granted\"});}});}else if(++n>40){clearInterval(t);}},250);})(window,document,\"{$id}\",{$tz});</script>\n"; // phpcs:ignore WordPress.Security.EscapeOutput
+		wp_print_inline_script_tag( "(function(w,d,id,zones){var on=false;function load(g){if(!on){on=true;(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};function go(){t=l.createElement(r);t.async=1;t.src=\"https://www.clarity.ms/tag/\"+i+\"?ref=bwt\";y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);}function idle(){(\"requestIdleCallback\" in c)?requestIdleCallback(go,{timeout:2000}):setTimeout(go,1000);}var ev=[\"pointerdown\",\"keydown\",\"scroll\",\"touchstart\"],st=false;function start(){if(st)return;st=true;ev.forEach(function(e){c.removeEventListener(e,start,true);});idle();}ev.forEach(function(e){c.addEventListener(e,start,{capture:true,passive:true});});})(w,d,\"clarity\",\"script\",id);}if(g){w.clarity(\"consentv2\",{ad_Storage:g.ad_storage===\"granted\"?\"granted\":\"denied\",analytics_Storage:\"granted\"});}}var tz=\"\";try{tz=Intl.DateTimeFormat().resolvedOptions().timeZone||\"\";}catch(e){}if(zones.indexOf(tz)<0){load();return;}function seen(a){if(a&&a[0]===\"consent\"&&a[1]===\"update\"&&a[2]&&a[2].analytics_storage===\"granted\"){load(a[2]);}}var dl=w.dataLayer=w.dataLayer||[];for(var i=0;i<dl.length;i++){seen(dl[i]);}var push=dl.push;dl.push=function(){for(var j=0;j<arguments.length;j++){seen(arguments[j]);}return push.apply(dl,arguments);};var n=0,t=setInterval(function(){if(typeof w.__tcfapi===\"function\"){clearInterval(t);w.__tcfapi(\"addEventListener\",2,function(tc,ok){if(ok&&tc&&(tc.eventStatus===\"tcloaded\"||tc.eventStatus===\"useractioncomplete\")&&tc.gdprApplies&&tc.purpose&&tc.purpose.consents&&tc.purpose.consents[1]){load({ad_storage:\"granted\"});}});}else if(++n>40){clearInterval(t);}},250);})(window,document,\"{$id}\",{$tz});" );
 	},
 	2
 );
@@ -181,7 +183,7 @@ add_action(
 		);
 		$ctx         = array_map( 'strval', (array) apply_filters( 'kits_page_context', $ctx ) );
 		$ctx['gtag'] = ! empty( $ga['useSnippet'] ) && ! get_option( 'kits_ga4_via_gtm' );
-		echo '<script>window.kitsPage=' . wp_json_encode( $ctx ) . ';(window.dataLayer=window.dataLayer||[]).push(Object.assign({event:"page_context"},window.kitsPage));</script>' . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput
+		wp_print_inline_script_tag( 'window.kitsPage=' . wp_json_encode( $ctx ) . ';(window.dataLayer=window.dataLayer||[]).push(Object.assign({event:"page_context"},window.kitsPage));' );
 	},
 	0
 );

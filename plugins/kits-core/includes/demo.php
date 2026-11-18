@@ -180,7 +180,7 @@ function kits_demo_more() {
 	if ( $pic ) {
 		$img = (string) get_the_post_thumbnail_url( $pic[0], 'large' );
 	}
-	$o  = '<style>.kit-demo-static .kit-sticky-help{position:static!important;display:flex!important;transform:none!important}.kit-demo-state{margin:var(--s-3) 0 var(--s-1);font-size:var(--kit-meta-size);color:var(--kit-color-muted)}.kit-demo-grid>span{display:grid;place-items:center;min-height:2.5rem;background:var(--kit-color-surface);border-radius:var(--kit-radius-control);font-size:var(--kit-meta-size)}.kit-demo-surfaces{display:grid;gap:var(--s-3);grid-template-columns:repeat(auto-fill,minmax(10rem,1fr))}.kit-demo-surfaces>div{padding:var(--s-4);border-radius:var(--kit-radius-card);border:1px solid var(--kit-color-line);min-height:5rem}</style>';
+	$o  = '';
 	$o .= $h( 'Sticky action bar' ) . $st( 'Default (phones only; fixed to the bottom of the screen, hidden while scrolling down)' )
 		. '<div class="kit-demo-static"><div class="kit-sticky-help"><a class="kit-sh-primary" href="#">' . $ico( 'helpline' ) . 'Call us now</a><a class="kit-sh-secondary" href="#">Find us near you</a></div></div>';
 	$o .= $h( 'Banner' ) . $st( 'Default (a section page banner; nothing is printed until it has a picture)' )
@@ -218,6 +218,26 @@ function kits_demo_more() {
 	return $o;
 }
 
+/**
+ * A style of the states sheet's own, printed with the page's styles (no file: the rules only).
+ *
+ * @param string $handle Style handle.
+ * @param string $css    The rules.
+ */
+function kits_demo_inline_style( string $handle, string $css ): void {
+	if ( wp_style_is( $handle, 'registered' ) ) {
+		return;
+	}
+	wp_register_style( $handle, false, array(), KITS_CORE_LOADED );
+	wp_enqueue_style( $handle );
+	wp_add_inline_style( $handle, $css );
+}
+
+/** The states sheet's layout and the extra components' rules ([kits_demo], kits_demo_more()). */
+function kits_demo_styles(): void {
+	kits_demo_inline_style( 'kits-demo', '.kit-demo{display:grid;gap:var(--s-8)}@media(min-width:1200px){.kit-demo{grid-template-columns:repeat(2,minmax(0,1fr))}}.kit-demo>section{padding:var(--s-6);border:1px solid var(--kit-color-line);border-radius:var(--kit-radius-card);background:var(--kit-color-bg);color:var(--kit-color-text)}.kit-demo-h{font-size:var(--fluid-body-md);margin:var(--s-6) 0 var(--s-2)}.kit-demo-ink{background:var(--kit-color-ink);padding:var(--s-3);border-radius:var(--kit-radius-control);margin-top:var(--s-2)}.kit-demo-fields{display:grid;gap:0 var(--s-4);grid-template-columns:repeat(auto-fill,minmax(14rem,1fr))}.kit-demo-btns{padding:var(--s-4);border-radius:var(--kit-radius-control);margin-top:var(--s-3);background:var(--kit-color-bg)}.kit-demo-btns.kit-dark,.kit-demo-btns-dark{background:var(--kit-color-ink);color:var(--kit-color-on-ink)}.kit-demo-btns-dark{padding:var(--s-3);border-radius:var(--kit-radius-control)}.kit-demo-btns-h{margin:0 0 var(--s-2);font-weight:var(--kit-weight-bold)}.kit-demo-btns-row{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s-2);margin:0 0 var(--s-3)}.kit-demo-btns-row .wp-block-buttons{display:flex;flex-wrap:wrap;gap:var(--s-2);margin:0}.kit-demo-btns-label{flex:0 0 100%;font-size:var(--fluid-caption);text-transform:uppercase;letter-spacing:.06em;opacity:.75}.kit-btn.is-demo-hover{background:var(--_bg-h);border-color:var(--_line-h);color:var(--_fg-h)}.kit-btn.is-demo-active{transform:translateY(var(--kit-btn-press))}.is-demo-focus{outline:var(--kit-focus-width) solid var(--kit-color-focus)!important;outline-offset:var(--kit-focus-offset)}.kit-chip.is-demo-hover,.kit-filter-pill.is-demo-hover{border-color:var(--kit-color-ink)}.kit-chip.is-demo-active{background:var(--kit-color-surface)}.kit-demo-dd .kit-dd-panel{position:static;margin-top:var(--s-1)}.kit-demo-icons{list-style:none;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(8rem,1fr));gap:var(--s-2)}.kit-demo-icons li{display:flex;align-items:center;gap:var(--s-2);font-size:var(--fluid-label)}.kit-demo-blocks{grid-column:1/-1}' . '.kit-demo-static .kit-sticky-help{position:static!important;display:flex!important;transform:none!important}.kit-demo-state{margin:var(--s-3) 0 var(--s-1);font-size:var(--kit-meta-size);color:var(--kit-color-muted)}.kit-demo-grid>span{display:grid;place-items:center;min-height:2.5rem;background:var(--kit-color-surface);border-radius:var(--kit-radius-control);font-size:var(--kit-meta-size)}.kit-demo-surfaces{display:grid;gap:var(--s-3);grid-template-columns:repeat(auto-fill,minmax(10rem,1fr))}.kit-demo-surfaces>div{padding:var(--s-4);border-radius:var(--kit-radius-card);border:1px solid var(--kit-color-line);min-height:5rem}' );
+}
+
 add_shortcode(
 	'kits_demo',
 	function () {
@@ -228,9 +248,8 @@ add_shortcode(
 		if ( '' !== $pattern && WP_Block_Patterns_Registry::get_instance()->is_registered( $pattern ) ) { // one pattern drawn on its own (Design system > Components)
 			return do_blocks( '<!-- wp:pattern {"slug":"' . esc_attr( $pattern ) . '"} /-->' );
 		}
-		return '<style>.kit-demo{display:grid;gap:var(--s-8)}@media(min-width:1200px){.kit-demo{grid-template-columns:repeat(2,minmax(0,1fr))}}.kit-demo>section{padding:var(--s-6);border:1px solid var(--kit-color-line);border-radius:var(--kit-radius-card);background:var(--kit-color-bg);color:var(--kit-color-text)}.kit-demo-h{font-size:var(--fluid-body-md);margin:var(--s-6) 0 var(--s-2)}.kit-demo-ink{background:var(--kit-color-ink);padding:var(--s-3);border-radius:var(--kit-radius-control);margin-top:var(--s-2)}.kit-demo-fields{display:grid;gap:0 var(--s-4);grid-template-columns:repeat(auto-fill,minmax(14rem,1fr))}'
-			. '.kit-demo-btns{padding:var(--s-4);border-radius:var(--kit-radius-control);margin-top:var(--s-3);background:var(--kit-color-bg)}.kit-demo-btns.kit-dark,.kit-demo-btns-dark{background:var(--kit-color-ink);color:var(--kit-color-on-ink)}.kit-demo-btns-dark{padding:var(--s-3);border-radius:var(--kit-radius-control)}.kit-demo-btns-h{margin:0 0 var(--s-2);font-weight:var(--kit-weight-bold)}.kit-demo-btns-row{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s-2);margin:0 0 var(--s-3)}.kit-demo-btns-row .wp-block-buttons{display:flex;flex-wrap:wrap;gap:var(--s-2);margin:0}.kit-demo-btns-label{flex:0 0 100%;font-size:var(--fluid-caption);text-transform:uppercase;letter-spacing:.06em;opacity:.75}.kit-btn.is-demo-hover{background:var(--_bg-h);border-color:var(--_line-h);color:var(--_fg-h)}.kit-btn.is-demo-active{transform:translateY(var(--kit-btn-press))}.is-demo-focus{outline:var(--kit-focus-width) solid var(--kit-color-focus)!important;outline-offset:var(--kit-focus-offset)}.kit-chip.is-demo-hover,.kit-filter-pill.is-demo-hover{border-color:var(--kit-color-ink)}.kit-chip.is-demo-active{background:var(--kit-color-surface)}.kit-demo-dd .kit-dd-panel{position:static;margin-top:var(--s-1)}.kit-demo-icons{list-style:none;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(8rem,1fr));gap:var(--s-2)}.kit-demo-icons li{display:flex;align-items:center;gap:var(--s-2);font-size:var(--fluid-label)}.kit-demo-blocks{grid-column:1/-1}</style>'
-			. '<div class="kit-demo"><section style="' . esc_attr( kits_demo_master_vars() ) . '"><h2>Kits (master palette)</h2>' . kits_demo_panel( '-master' ) . '</section>'
+		kits_demo_styles();
+		return '<div class="kit-demo"><section style="' . esc_attr( kits_demo_master_vars() ) . '"><h2>Kits (master palette)</h2>' . kits_demo_panel( '-master' ) . '</section>'
 			. '<section><h2>' . esc_html( get_bloginfo( 'name' ) ) . ' palette</h2>' . kits_demo_panel( '-site' ) . '</section>'
 			. '<section class="kit-demo-blocks"><h2>More Kits components</h2>' . kits_demo_more() . '</section>'
 			. ( ( $extra = (string) apply_filters( 'kits_demo_sections', '' ) ) ? '<section class="kit-demo-blocks">' . $extra . '</section>' : '' ) . '</div>'; // a site's own blocks, in their states
@@ -249,10 +268,16 @@ add_action(
 	}
 );
 add_action(
-	'wp_head',
+	'wp_enqueue_scripts',
 	function () {
-		if ( is_page( 'kits-demo' ) && isset( $_GET['kits_embed'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-			echo '<style>html{margin-top:0!important}#wpadminbar,.wp-site-blocks>header,.wp-site-blocks>footer,.wp-site-blocks>.wp-block-template-part,header.wp-block-template-part,footer.wp-block-template-part{display:none!important}</style>';
+		if ( is_page( 'kits-demo' ) ) {
+			kits_demo_styles();
+			if ( isset( $_GET['kits_embed'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+				kits_demo_inline_style( 'kits-demo-embed', 'html{margin-top:0!important}#wpadminbar,.wp-site-blocks>header,.wp-site-blocks>footer,.wp-site-blocks>.wp-block-template-part,header.wp-block-template-part,footer.wp-block-template-part{display:none!important}' );
+			}
+		}
+		if ( isset( $_GET['kits_spot'] ) && current_user_can( 'manage_options' ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+			kits_demo_inline_style( 'kits-demo-spot', 'html{margin-top:0!important}#wpadminbar{display:none!important}.kits-spot{outline:3px solid #2271b1!important;outline-offset:4px}' );
 		}
 	}
 );
@@ -272,17 +297,16 @@ add_action(
 			return;
 		}
 		if ( is_page( 'kits-demo' ) && ( isset( $_GET['kits_only_classes'] ) || isset( $_GET['kits_only_block'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-			echo '<script>(function(){var q=new URLSearchParams(location.search),cls=(q.get("kits_only_classes")||"").split(",").filter(Boolean),blk=q.get("kits_only_block")||"",nm=q.get("kits_only_name")||"";'
+			wp_print_inline_script_tag( '(function(){var q=new URLSearchParams(location.search),cls=(q.get("kits_only_classes")||"").split(",").filter(Boolean),blk=q.get("kits_only_block")||"",nm=q.get("kits_only_name")||"";'
 				. 'var sel=cls.map(function(c){return "[class~=\""+c+"\"],[class*=\" "+c+"-\"],[class^=\""+c+"-\"]";}).join(",");'
 				. 'var root=document.querySelector(".kit-demo");if(!root)return;var first=root.querySelector(":scope>section");if(first&&first.nextElementSibling)first.hidden=true;'
 				. 'root.querySelectorAll("h2").forEach(function(h){h.hidden=true;if(h.nextElementSibling&&h.nextElementSibling.tagName==="P")h.nextElementSibling.hidden=true;});var keep=0;'
 				. 'root.querySelectorAll("h3.kit-demo-h").forEach(function(h){if(h.closest("[hidden]"))return;var g=[h],n=h.nextElementSibling;while(n&&!n.matches("h3.kit-demo-h,h2,section")){g.push(n);n=n.nextElementSibling;}'
 				. 'var hit=(nm&&h.textContent.trim().replace(/^[0-9]+[a-z]?\s+/,"").indexOf(nm)===0)||(blk&&h.textContent.indexOf(blk)>-1)||(sel&&g.some(function(x){return x!==h&&(x.matches(sel)||x.querySelector(sel));}));g.forEach(function(x){x.hidden=!hit;});if(hit)keep++;});'
-				. 'if(!keep){var u=q.get("kits_spot_url")||"none";if(u==="none"){root.insertAdjacentHTML("afterbegin","<p style=\\"padding:1em;background:#fcf0f1;font:14px sans-serif\\">Not drawn on the states sheet and not found on the sample pages: it may appear only in a state, a form step or wp-admin.</p>");}else{var tgt;try{tgt=new URL(u,location.origin);}catch(ex){tgt=null;}if(tgt&&tgt.origin===location.origin&&/^https?:$/.test(tgt.protocol)){tgt.searchParams.set("kits_spot",sel||(".wp-block-"+blk.replace("/","-")));location.replace(tgt.href);}}}})();</script>';
+				. 'if(!keep){var u=q.get("kits_spot_url")||"none";if(u==="none"){root.insertAdjacentHTML("afterbegin","<p style=\\"padding:1em;background:#fcf0f1;font:14px sans-serif\\">Not drawn on the states sheet and not found on the sample pages: it may appear only in a state, a form step or wp-admin.</p>");}else{var tgt;try{tgt=new URL(u,location.origin);}catch(ex){tgt=null;}if(tgt&&tgt.origin===location.origin&&/^https?:$/.test(tgt.protocol)){tgt.searchParams.set("kits_spot",sel||(".wp-block-"+blk.replace("/","-")));location.replace(tgt.href);}}}})();' );
 		}
 		if ( isset( $_GET['kits_spot'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-			echo '<style>html{margin-top:0!important}#wpadminbar{display:none!important}.kits-spot{outline:3px solid #2271b1!important;outline-offset:4px}</style>'
-				. '<script>(function(){var s=new URLSearchParams(location.search).get("kits_spot"),e;try{e=document.querySelector(s);}catch(x){}if(e){e.classList.add("kits-spot");e.scrollIntoView({block:"center"});}document.body.insertAdjacentHTML("afterbegin","<p class=\\"kits-spot-note\\" style=\\"padding:.5em 1em;background:#f0f6fc;font:13px sans-serif\\">"+(e?"Shown where it is used: ":"Not found on ")+location.pathname+"</p>");})();</script>';
+			wp_print_inline_script_tag( '(function(){var s=new URLSearchParams(location.search).get("kits_spot"),e;try{e=document.querySelector(s);}catch(x){}if(e){e.classList.add("kits-spot");e.scrollIntoView({block:"center"});}document.body.insertAdjacentHTML("afterbegin","<p class=\\"kits-spot-note\\" style=\\"padding:.5em 1em;background:#f0f6fc;font:13px sans-serif\\">"+(e?"Shown where it is used: ":"Not found on ")+location.pathname+"</p>");})();' );
 		}
 	}
 );
