@@ -11,6 +11,14 @@ Theme and WordPress items are tracked by Animal Writes WordPress. Code requests 
 
 ## Open
 
+### Admin button piles: one "action list" part for the Kits shell (owner, 19 Nov 2026; idea only, nothing built)
+- **Seen:** SourceWeb → Enrichment review showed one "Reject <field> for good" pill per applied value in a heap under the table. **Fixed and live** (8b70064a): "Reject for good" now sits on its row beside Undo (`FieldReview` got an optional `onRejectForGood`). The same heap is on InsightWeb → Settings → Runs and data → Run now: seven identical pills (daily update, 90-day rollup, GA4, PageSpeed, Bing Webmaster, Bing keyword volumes, Clarity), with the names repeated as plain text above them, and a Schedule paragraph that describes the same jobs.
+- **Root cause:** the Kits shell has no part for "a set of named actions", so each screen puts bare `.button`s in a row.
+- **Idea:** one shell part, an action list (`plugins/kits-core/src/shell/parts.js`). Each row: job name, what it does or when it runs, its last result, one button on the right.
+  - InsightWeb: Run now and the Schedule prose become one "Jobs" table. The data is already in `plugins/insightweb/includes/search-insights/admin.php` (the Run now block, about line 1076) and `aw_si_runs()`; the buttons are captured from classic HTML by `kits_shell_html_parts()` (`insightweb-tabs.php:70`), so the block is rewritten to emit rows.
+  - SourceWeb: already solved by putting the button on its row.
+- **Route:** small change (commit onto `wordpress-dev`, ship). Not started; owner's word to build.
+
 ### Theme and Kits Core audit after the aw-core merges (owner, 18 Nov 2026)
 Two read-only audits of origin/wordpress-dev (theme plus plugin dependencies, Kits Core functions plus content types), against the WP Theme Review "Required" page and developer.wordpress.org.
 - **Automatic FAQs were off sitewide from 18 Nov until the fix shipped.** The RankWeb FAQ data guard checked a function its own file defines; PHP binds those first, so the file always returned. Guard removed (c23fec23); live 18 Nov. Checked with a cache-buster: Library 'draft-laboratory-animals-rules-2026' and three Directory listings show #faq and FAQPage.
