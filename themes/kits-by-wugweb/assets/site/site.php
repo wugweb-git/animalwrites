@@ -255,3 +255,14 @@ function kits_site_part_block_theme( $block ) {
 }
 add_filter( 'render_block_data', 'kits_site_part_block_theme', 1 );
 
+
+/**
+ * One date format sitewide, Indian day-month-year (owner, 16 Oct 2026): "8 Oct 2026". WordPress's own date format
+ * (core Post Date blocks, kits_date() with no format, date_i18n( get_option( 'date_format' ) )) follows it too, whatever
+ * Settings → General says. It was a filter in Animal Writes Core (systems.php); it is the site's, so it lives here and
+ * is never in a distributed theme. The constant keeps its name until Animal Writes Core's own callers are gone.
+ */
+if ( ! defined( 'AW_DATE_FORMAT' ) ) {
+	define( 'AW_DATE_FORMAT', 'j M Y' );
+}
+add_filter( 'pre_option_date_format', fn() => AW_DATE_FORMAT );

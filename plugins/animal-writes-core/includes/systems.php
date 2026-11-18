@@ -35,12 +35,12 @@ function aw_i( $name, $class = '' ) {
  */
 /*
  * One date format sitewide, Indian day-month-year (owner, 16 Oct 2026): "8 Oct 2026". WordPress's own date format
- * (core Post Date blocks, date_i18n( get_option( 'date_format' ) )) follows it too, whatever Settings → General says.
+ * (core Post Date blocks, date_i18n( get_option( 'date_format' ) )) follows it too (the filter is in the theme's site layer now).
  */
 if ( ! defined( 'AW_DATE_FORMAT' ) ) {
 	define( 'AW_DATE_FORMAT', 'j M Y' );
 }
-add_filter( 'pre_option_date_format', fn() => AW_DATE_FORMAT );
+// The pre_option_date_format filter that forces this format moved to the theme's site layer (assets/site/site.php, 19 Nov 2026).
 
 function aw_date( $when, $fmt = AW_DATE_FORMAT ) {
 	return kits_date( $when, $fmt, 'aw-date' ); // Remove with aw_i(): last callers as above. The aw-date class is used by the site's CSS (aw.css, aw-meta.css).

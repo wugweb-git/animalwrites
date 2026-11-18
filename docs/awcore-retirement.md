@@ -95,9 +95,10 @@ These no longer crash without aw-core, but stop working:
    queries) are aw-core's. Without them there is no `aw_listing` post type, so the Directory is empty, and RankWeb's
    hub canonical, schema and sitemap parts fall back to Rank Math. They move with the content types
    (`docs/content-blocks-feasibility.md` §22).
-2. **The sitewide date format.** aw-core forces `date_format` to `j M Y` (`systems.php`, `pre_option_date_format`).
-   The switched callers pass `null` to `kits_date()`, which follows that setting. Move the filter to Kits Core or the
-   theme first, or dates follow Settings → General.
+2. **The sitewide date format.** Done 19 Nov 2026: the `pre_option_date_format` filter (Indian day-month-year,
+   `j M Y`, "19 Nov 2026") moved from aw-core's `systems.php` to the theme's site layer
+   (`themes/kits-by-wugweb/assets/site/site.php`), so it stays on this site and never ships in a distributed theme.
+   The `AW_DATE_FORMAT` constant is still defined there and in aw-core, for aw-core's own callers.
 3. **Claims:** the Fluent Forms claim form and review (`forms-fluentforms.php`), the private upload folder
    (`aw_private_dir`, `campaigns.php`) and the FluentCRM tag (`fluentcrm.php`).
 4. **Issuers** (`issuers.php`): the Library issuer label written by SourceWeb's ingest and read by auto-review.
