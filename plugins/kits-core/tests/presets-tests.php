@@ -128,6 +128,17 @@ function delete_post_meta( $id, $k ) {
 function get_post( $id ) {
 	return isset( $GLOBALS['t_posts'][ $id ] ) ? $GLOBALS['t_posts'][ $id ] : null;
 }
+// get_posts(): published or scheduled items of a type without the meta key the consent sweep asks about.
+function get_posts( $args ) {
+	$key = $args['meta_query'][0]['key'];
+	$ids = array();
+	foreach ( $GLOBALS['t_posts'] ?? array() as $id => $p ) {
+		if ( $p->post_type === $args['post_type'] && in_array( $p->post_status, $args['post_status'], true ) && '' === (string) ( $GLOBALS['t_meta'][ $id ][ $key ] ?? '' ) ) {
+			$ids[] = $id;
+		}
+	}
+	return array_slice( $ids, 0, $args['posts_per_page'] );
+}
 function get_post_type_object( $type ) {
 	return (object) array( 'cap' => (object) array( 'publish_posts' => 'publish_' . $type ) );
 }
@@ -293,6 +304,7 @@ t_check( '2026-12-01 18:30' === $m['sanitize_callback']( '2026-12-01T18:30' ) &&
 t_check( '2026-12-01 18:30' === $m['sanitize_callback']( '2026-12-01 18:30:00' ) && '2026-12-01' === $m['sanitize_callback']( '20261201' ) && '2026-12-01 18:30' === $m['sanitize_callback']( '01/12/2026 18:30' ) && '' === $m['sanitize_callback']( '2026-12-01 18:60' ), 'fix 3: datetime: SCF date-time and d/m/Y forms kept, normalised' );
 $date = $GLOBALS['t_postmeta']['kits_testimonial']['kits_testimonial_consent']['sanitize_callback'];
 t_check( '2026-11-01' === $date( '20261101' ) && '2026-11-01' === $date( '01/11/2026' ) && '2026-11-01' === $date( '1.11.2026' ) && '2026-11-01' === $date( '01-11-2026' ) && '2026-11-01' === $date( ' 2026-11-01 ' ) && '2026-11-01' === $date( '2026-11-01 10:00:00' ), 'fix 3: date: Ymd (SCF), d/m/Y, d.m.Y, d-m-Y and Y-m-d kept as Y-m-d' );
+t_check( '2026-12-01 18:30' === $m['sanitize_callback']( '2026-12-01T18:30:00.000Z' ) && '2026-12-01 13:00' === $m['sanitize_callback']( '2026-12-01T18:30:00+05:30' ) && '' === $m['sanitize_callback']( '2026-02-30T10:00:00Z' ), 'review: ISO 8601 with a zone kept, in site time' );
 t_check( '' === $date( '31/02/2026' ) && '' === $date( '2026-13-01' ) && '' === $date( 'soon' ) && '' === $date( '2026111' ), 'fix 3: date: not a real day = empty' );
 t_check( false === $m['auth_callback']( true, 'kits_event_start', 5 ), 'auth: needs edit_post' );
 $url = $GLOBALS['t_postmeta']['kits_event']['kits_event_online_url']['sanitize_callback'];
@@ -347,7 +359,7 @@ t_check( '' === kits_preset_schema_value( 'kits_testimonial_quote', 30 ) && 'Gre
 // query, REST list or X-WP-Total, sitemap (WordPress's or Rank Math's) or get_posts() caller can show it.
 $ins = function ( $status, $id = 0, $meta = array() ) {
 	$data = apply_filters( 'wp_insert_post_data', array( 'post_type' => 'kits_testimonial', 'post_status' => $status ), array( 'ID' => $id, 'meta_input' => $meta ) );
-	kits_presets_held_now( '' );
+	kits_presets_held_take( $id );
 	return $data['post_status'];
 };
 t_check( 'pending' === $ins( 'publish', 30 ) && 'pending' === $ins( 'future', 30 ) && 'pending' === $ins( 'publish' ), 'fix 1: publish and schedule held as pending without consent' );
@@ -366,6 +378,13 @@ apply_filters( 'wp_insert_post_data', array( 'post_type' => 'kits_testimonial', 
 $p32->post_status = 'pending';
 t_act( 'save_post', 32, $p32 );
 t_check( 'publish' === get_post_meta( 32, '_kits_preset_held_status' ) && 'pending' === $p32->post_status, 'fix 1: the publish asked for is remembered on the pending item' );
+apply_filters( 'wp_insert_post_data', array( 'post_type' => 'kits_testimonial', 'post_status' => 'publish' ), array( 'ID' => 0 ) ); // Held for a new post whose insert then fails.
+$p37                    = new WP_Post( 37, 'kits_testimonial' );
+$p37->post_status       = 'pending';
+$GLOBALS['t_types'][37] = 'kits_testimonial';
+t_act( 'save_post', 37, $p37, true );
+t_check( '' === get_post_meta( 37, '_kits_preset_held_status' ), 'review: a hold for another (new) post is not given to an updated one' );
+kits_presets_held_take( 0 );
 $GLOBALS['t_meta'][32]['kits_testimonial_consent'] = '2026-11-01';
 t_act( 'save_post', 32, $p32 );
 t_check( 'pending' === $p32->post_status, 'fix 1: consent saved by someone who may not publish: it stays pending' );
@@ -381,8 +400,12 @@ t_check( '' === get_post_meta( 33, '_kits_preset_held_status' ), 'fix 1: saving 
 $p34                    = new WP_Post( 34, 'kits_testimonial' );
 $GLOBALS['t_posts'][34] = $p34;
 $GLOBALS['t_types'][34] = 'kits_testimonial';
+$p34->post_status = 'future';
+t_act( 'publish_future_post', 34 );
+t_check( 'pending' === $p34->post_status, 'review: a schedule reaching its time without consent goes to pending before it is published' );
+$p34->post_status = 'publish';
 t_act( 'transition_post_status', 'publish', 'future', $p34 );
-t_check( 'pending' === $p34->post_status, 'fix 1: a schedule reaching its time without consent goes to pending' );
+t_check( 'pending' === $p34->post_status, 'fix 1: published by other code without consent: back to pending' );
 $p35                    = new WP_Post( 35, 'kits_testimonial' );
 $GLOBALS['t_posts'][35] = $p35;
 $GLOBALS['t_types'][35] = 'kits_testimonial';
@@ -398,6 +421,23 @@ t_act( 'before_delete_post', 36 );
 t_act( 'deleted_post_meta', array( 1 ), 36, 'kits_testimonial_consent' );
 t_check( 'publish' === $p36->post_status, 'fix 1: a post being deleted is not unpublished on the way' );
 $GLOBALS['t_caps'] = array();
+
+// Review: items published before the rule held for them are swept to pending once, when the consent fields change.
+$p38                    = new WP_Post( 38, 'kits_testimonial' );
+$p39                    = new WP_Post( 39, 'kits_testimonial' );
+$GLOBALS['t_posts']     = array( 38 => $p38, 39 => $p39 );
+$GLOBALS['t_types'][38] = 'kits_testimonial';
+$GLOBALS['t_types'][39] = 'kits_testimonial';
+$GLOBALS['t_meta'][38]  = array( 'kits_testimonial_quote' => 'Old' );
+$GLOBALS['t_meta'][39]  = array( 'kits_testimonial_consent' => '2026-10-01' );
+t_check( '' !== ( $GLOBALS['t_options']['kits_presets_consent'] ?? '' ), 'review: consent fields recorded when testimonials were switched on' );
+unset( $GLOBALS['t_options']['kits_presets_consent'] ); // Kits Core deactivated and back on (kits-core.php forgets it).
+do_action( 'wp_loaded' );
+t_check( 'pending' === $p38->post_status && 'publish' === $p39->post_status && '' !== $GLOBALS['t_options']['kits_presets_consent'], 'review: sweep sends the unconsented published item to pending, keeps the consented one' );
+$p38->post_status = 'publish';
+do_action( 'wp_loaded' );
+t_check( 'publish' === $p38->post_status, 'review: no sweep while the consent fields are unchanged' );
+$p38->post_status = 'pending';
 
 // Display formats: a picture as its address, profile links as links.
 $GLOBALS['t_options']['kits_presets_enabled'] = array( 'kits-card', 'kits-person' );

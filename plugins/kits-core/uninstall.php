@@ -9,7 +9,7 @@
  * Options:
  *   kits_theme_options, kits_page_defaults, kits_settings_backup, kits_settings_backup_defaults, kits_altcha_key,
  *   kits_ga4_via_gtm, kits_preview_devices, kits_preview_ips, kits_preview_links, kits_spot_map, kits_presets_enabled,
- *   kits_presets_rewrite, kits_delete_data_on_uninstall.
+ *   kits_presets_rewrite, kits_presets_consent, kits_delete_data_on_uninstall.
  * Transients (they expire anyway): kits_preview_link_*, kits_thanks_*, kits_transfer_result_*, kits_altcha_*, and the
  *   site transient kits_update_release.
  * Scheduled events: kits_spot_map_daily.
@@ -55,6 +55,7 @@ $kits_options = array(
 	'kits_spot_map',
 	'kits_presets_enabled',
 	'kits_presets_rewrite',
+	'kits_presets_consent',
 );
 
 // The ALTCHA signing key is deleted but kept OUT of the backup file: it is a secret (regenerated on demand), and the

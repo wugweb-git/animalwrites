@@ -90,5 +90,9 @@ register_deactivation_hook(
 	function () {
 		wp_unschedule_hook( 'aw_fetch_favicons' );
 		wp_unschedule_hook( 'kits_spot_map_daily' );
+		// While it is off the rules may be rebuilt without the preset types and consent items may be published:
+		// rebuild the rules and recheck consent when it is back on (includes/presets.php).
+		delete_option( 'kits_presets_rewrite' );
+		delete_option( 'kits_presets_consent' );
 	}
 );

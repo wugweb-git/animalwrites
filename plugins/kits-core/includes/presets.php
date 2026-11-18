@@ -288,14 +288,24 @@ function kits_preset_field_clean( string $format, $value ) {
 /**
  * A date in any accepted form, as array( 'Y-m-d', 'H:i' or '' ), or null when it is not a real day and time.
  * Accepted: Y-m-d, Ymd (SCF date picker), d/m/Y, d-m-Y or d.m.Y, each optionally followed by a space or T and H:i or
- * H:i:s (SCF date-time picker stores Y-m-d H:i:s). Seconds are dropped.
+ * H:i:s (SCF date-time picker stores Y-m-d H:i:s); and ISO 8601 with a zone (2026-12-01T13:00:00.000Z), turned into
+ * site time. Seconds are dropped.
  *
  * @param string $value Date as submitted or stored.
  * @return array{0: string, 1: string}|null
  */
 function kits_preset_date_parse( string $value ): ?array {
 	$value = trim( $value );
-	$time  = '(?:[T ](\d{1,2}):(\d{2})(?::(\d{2}))?)?';
+	// ISO 8601 with a zone (Z or an offset) and maybe fractions, as JavaScript and REST clients send it: site time.
+	if ( 1 === preg_match( '/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2})(?:\.\d+)?)?(?:Z|[+-]\d{2}:?\d{2})$/i', $value, $m ) ) {
+		$at = checkdate( (int) $m[2], (int) $m[3], (int) $m[1] ) && (int) $m[4] <= 23 && (int) $m[5] <= 59 && (int) ( $m[6] ?? 0 ) <= 59 ? date_create_immutable( $value ) : false;
+		if ( ! $at ) {
+			return null;
+		}
+		$at = $at->setTimezone( wp_timezone() );
+		return array( $at->format( 'Y-m-d' ), $at->format( 'H:i' ) );
+	}
+	$time = '(?:[T ](\d{1,2}):(\d{2})(?::(\d{2}))?)?';
 	if ( 1 === preg_match( '/^(\d{4})-(\d{1,2})-(\d{1,2})' . $time . '$/', $value, $m ) || 1 === preg_match( '/^(\d{4})(\d{2})(\d{2})' . $time . '$/', $value, $m ) ) {
 		list( $y, $mo, $d ) = array( (int) $m[1], (int) $m[2], (int) $m[3] );
 	} elseif ( 1 === preg_match( '#^(\d{1,2})[/.\-](\d{1,2})[/.\-](\d{4})' . $time . '$#', $value, $m ) ) {
@@ -508,7 +518,8 @@ function kits_presets_rewrite_shape( ?array $set = null ): array {
  * (kits_presets_enabled, kits_presets), or a page taking or leaving a type's address (the clash is checked live on
  * every init, from the database, not from a saved answer). When the shape differs from the one the rewrite rules were
  * last built for, they are rebuilt once, on this request, after every type is registered. With every preset off (the
- * default) nothing is written.
+ * default) nothing is written. Deactivating Kits Core forgets the shape (kits-core.php), as the rules may be rebuilt
+ * without these types while it is off.
  */
 const KITS_PRESETS_REWRITE_OPTION = 'kits_presets_rewrite';
 
@@ -610,8 +621,10 @@ add_filter(
  * (KITS_PRESETS_HELD_META), and done as soon as a save records the consent, by someone who may publish this type.
  * Saving it as a draft, private or to the Trash forgets that publish.
  *
- * The rule also holds where WordPress publishes without wp_insert_post_data (a scheduled item reaching its time:
- * wp_publish_post) and when the consent date of a published item is removed: the item goes back to pending.
+ * The rule also holds where WordPress publishes without wp_insert_post_data (a scheduled item reaching its time is
+ * sent to pending before wp_publish_post; any other wp_publish_post call is undone at once), when the consent date of
+ * a published item is removed (back to pending), and for items published before the rule held for them (the sweep
+ * below).
  */
 const KITS_PRESETS_HELD_META = '_kits_preset_held_status';
 
@@ -650,29 +663,48 @@ function kits_presets_hold_unconsented( $data, $postarr ) {
 		return $data;
 	}
 	$data['post_status'] = 'pending';
-	kits_presets_held_now( $status );
+	kits_presets_held_remember( $id, $status );
 	return $data;
 }
 
 /**
- * The publish held on this request, until the post's save_post takes it (a new post has no ID yet in
- * wp_insert_post_data).
+ * The publishes held on this request, by post ID (0 = a post being created, which has no ID yet), until the post's
+ * save_post takes them.
  *
- * @param string|null $status 'publish' or 'future' to remember, '' to take and forget, null to read.
- * @return string
+ * @return array<int, string>
  */
-function kits_presets_held_now( ?string $status = null ): string {
-	static $held = '';
-	$was         = $held;
-	if ( null !== $status ) {
-		$held = $status;
-	}
+function &kits_presets_held_list(): array {
+	static $held = array();
+	return $held;
+}
+
+/**
+ * Remember a held publish for a post's save_post.
+ *
+ * @param int    $post_id Post ID (0 for a post being created).
+ * @param string $status  'publish' or 'future'.
+ */
+function kits_presets_held_remember( int $post_id, string $status ): void {
+	$held             = &kits_presets_held_list();
+	$held[ $post_id ] = $status;
+}
+
+/**
+ * Take (and forget) the held publish of a post.
+ *
+ * @param int $post_id Post ID (0 for a post being created).
+ * @return string 'publish', 'future' or ''.
+ */
+function kits_presets_held_take( int $post_id ): string {
+	$held = &kits_presets_held_list();
+	$was  = (string) ( $held[ $post_id ] ?? '' );
+	unset( $held[ $post_id ] );
 	return $was;
 }
 
 // First on save_post: the item keeps the publish that was asked for. Last on save_post: once consent is recorded
 // (SCF saves on save_post 10), that publish is done.
-add_action( 'save_post', 'kits_presets_note_held', 1, 2 );
+add_action( 'save_post', 'kits_presets_note_held', 1, 3 );
 add_action( 'save_post', 'kits_presets_release_held', 999, 2 );
 
 /**
@@ -680,12 +712,13 @@ add_action( 'save_post', 'kits_presets_release_held', 999, 2 );
  *
  * @param int           $post_id Post ID.
  * @param WP_Post|mixed $post    Post.
+ * @param bool          $update  Whether an existing post was updated (false: just created).
  */
-function kits_presets_note_held( $post_id, $post ): void {
+function kits_presets_note_held( $post_id, $post, $update = true ): void {
 	if ( ! ( $post instanceof WP_Post ) || ! kits_preset_consent_type( $post->post_type ) ) {
 		return;
 	}
-	$held = kits_presets_held_now( '' );
+	$held = kits_presets_held_take( $update ? (int) $post_id : 0 );
 	if ( '' !== $held && 'pending' === $post->post_status ) {
 		update_post_meta( (int) $post_id, KITS_PRESETS_HELD_META, $held );
 	}
@@ -749,7 +782,11 @@ function kits_presets_unpublish_unconsented( int $post_id ): void {
 	);
 }
 
-// Published without wp_insert_post_data (wp_publish_post: a scheduled item reaching its time).
+// A scheduled item reaching its time without consent is sent to pending before WordPress publishes it
+// (check_and_publish_future_post() runs on 10 and publishes only an item that is still scheduled).
+add_action( 'publish_future_post', fn( $post_id ) => kits_presets_unpublish_unconsented( (int) $post_id ), 5 );
+
+// Any other publish without wp_insert_post_data (wp_publish_post() called by code): back to pending at once.
 add_action(
 	'transition_post_status',
 	function ( $new_status, $old_status, $post ) {
@@ -786,9 +823,80 @@ add_action(
  * @param string $meta_key Meta key.
  */
 function kits_presets_consent_meta_changed( int $post_id, string $meta_key ): void {
+	if ( ! isset( kits_presets_consent_fields()[ $meta_key ] ) ) {
+		return; // Most meta writes: not a consent field of any switched-on preset.
+	}
 	$preset = kits_preset_consent_type( (string) get_post_type( $post_id ) );
 	if ( $preset && $preset['consent_field'] === $meta_key ) {
 		kits_presets_unpublish_unconsented( $post_id );
+	}
+}
+
+/**
+ * The consent fields of the switched-on presets, by the preset that owns each type.
+ *
+ * @return array<string, string> Field key => post type.
+ */
+function kits_presets_consent_fields(): array {
+	$out = array();
+	foreach ( kits_presets_active() as $preset ) {
+		$owner = kits_preset_consent_type( $preset['post_type'] );
+		if ( $owner ) {
+			$out[ $owner['consent_field'] ] = $owner['post_type'];
+		}
+	}
+	return $out;
+}
+
+/*
+ * Items published before the rule held for them (a site preset that gains a consent field, a preset switched back on,
+ * Kits Core reactivated, items written straight to the database): whenever the set of consent fields changes, every
+ * published or scheduled item of those types without its consent date is sent to pending, once. With every preset
+ * off (the default) nothing is written.
+ */
+const KITS_PRESETS_CONSENT_OPTION = 'kits_presets_consent';
+
+add_action( 'wp_loaded', 'kits_presets_consent_sweep' );
+
+/** Send to pending the published items of consent presets that have no consent, when the consent fields changed. */
+function kits_presets_consent_sweep(): void {
+	$fields = kits_presets_consent_fields();
+	$sig    = md5( (string) wp_json_encode( $fields ) );
+	if ( (string) get_option( KITS_PRESETS_CONSENT_OPTION, md5( (string) wp_json_encode( array() ) ) ) === $sig ) {
+		return;
+	}
+	update_option( KITS_PRESETS_CONSENT_OPTION, $sig );
+	foreach ( $fields as $field => $type ) {
+		for ( $round = 0; $round < 100; $round++ ) { // 100 x 100 items at most on one request; the rest on the next change.
+			$ids = get_posts(
+				array(
+					'post_type'        => $type,
+					'post_status'      => array( 'publish', 'future' ),
+					'fields'           => 'ids',
+					'posts_per_page'   => 100,
+					'no_found_rows'    => true,
+					'suppress_filters' => true,
+					// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- once, when the consent fields change.
+					'meta_query'       => array(
+						'relation' => 'OR',
+						array(
+							'key'     => $field,
+							'compare' => 'NOT EXISTS',
+						),
+						array(
+							'key'   => $field,
+							'value' => '',
+						),
+					),
+				)
+			);
+			if ( ! $ids ) {
+				break;
+			}
+			foreach ( $ids as $id ) {
+				kits_presets_unpublish_unconsented( (int) $id );
+			}
+		}
 	}
 }
 
