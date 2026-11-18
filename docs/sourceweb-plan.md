@@ -60,8 +60,8 @@ Menu today: SourceWeb (`dashicons-rss`, position 26) → Overview · To review �
 
 | Item | Now | Code (stays in Core) | Lands |
 |---|---|---|---|
-| Thumbnails | Animal Writes → Check site, "Thumbnails" | `core/thumbs.php:135-141`: pictures used by more than one item, `aw_thumb_duplicates()`, option `aw_thumb_map`; public `GET aw/v1/thumb-dupes` (`:112-133`) for the deploy gate | **D** tile "Thumbnails", through a filter Core fills (§2.1) |
-| Pictures (CC0) | Check site, "Pictures on News, Library and research items" | `core/cc0-images.php:953-981`: 8 counts (`aw_cc0_counts()`), Openverse requests today of 300 (`AW_CC0_DAILY_REQUESTS`, option `aw_ov_quota`), next `aw_cc0_run`, last 15 lines of `aw_cc0_log` | **D** tile "Picture pipeline" and its section, through the same filter |
+| Thumbnails | Animal Writes → Check site, "Thumbnails" | `kits-core/includes/thumbs.php:135-141`: pictures used by more than one item, `kits_thumb_duplicates()`, option `aw_thumb_map`; public `GET aw/v1/thumb-dupes` (`:112-133`) for the deploy gate | **D** tile "Thumbnails", through a filter Core fills (§2.1) |
+| Pictures (CC0) | Check site, "Pictures on News, Library and research items" | `aw-sourcing/includes/cc0-images.php:953-981`: 8 counts (`sourceweb_cc0_counts()`), Openverse requests today of 300 (`SOURCEWEB_CC0_DAILY_REQUESTS`, option `aw_ov_quota`), next `aw_cc0_run`, last 15 lines of `aw_cc0_log` | **D** tile "Picture pipeline" and its section, through the same filter |
 | Modules (Social posts) | Kits → Modules (`aw-modules`) | `core/social-posts.php:66-79` (settings group `aw_modules`), `core/admin-home.php:39` | **S → Social posts** (two switches, same options) |
 
 The Check site rows are drawn today by the `aw_site_check_after` action. They keep working there until Kits Home exists; then Check site redirects (`docs/admin-ui-spec.md` §E1) and these two rows are on SourceWeb's Dashboard only.
@@ -162,7 +162,7 @@ In phase C each action gets a `sourceweb/v1/…` route with the same capability 
 | `aw_sources_sync_dispatch` | single, 2 min after a Sources save | `sw/sourcing-lists.php:153-154` | keep |
 | `aw_research_citation` | single, 60 s after a research item arrives | `sw/ingest.php:389` | keep |
 | `wp aw workers-tick` | hPanel cron, every 15 min | `sw/workers-tick.php:139` | keep |
-| From Core: `aw_cc0_run` (every 15 min), `aw_daily` → `aw_thumb_rebuild` | | `core/cc0-images.php:47-52`, `core/thumbs.php:84` | keep (Core); D shows next run |
+| From Core: `aw_cc0_run` (every 15 min), `aw_daily` → `aw_thumb_rebuild` | | `aw-sourcing/includes/cc0-images.php:47-52`, `kits-core/includes/thumbs.php:84` | keep (Core); D shows next run |
 
 No hook name changes, so no event is lost on deploy.
 
@@ -222,8 +222,8 @@ Each tile: a number, a sub-line, the source it names, and a cached REST route wi
 | Listing details | proposals waiting in `aw_enrich`; applied in the last 7 days, auto-applied share | SourceWeb enrichment (`aw_enrich`) | `stats/enrichment` |
 | Workers | healthy of 19; late or failed workflows by name, next due | SourceWeb workers (run reports from `POST aw/v1/worker-run`, `aw_workers_problems()`) | `stats/workers` |
 | Today's intake | items that arrived today (published / held) and refused today; last report time, "Sourcing ran on time" or the problem | workers' reports (`aw_ingest_heartbeat`, `aw_relevance_rejected`, Site Health test §1.9) | `stats/intake` |
-| Picture pipeline | items with their own picture of the published total; CC0 assigned, still placard, no match after the tries; Openverse requests today of 300 and next run | Animal Writes Core (`aw_cc0_counts()`, `aw_ov_quota`, `aw_cc0_run`), through the filter `aw_sourcing_dashboard_tiles`; hidden without it | `stats/pictures` |
-| Thumbnails | pictures used by more than one item (0 is green) | Animal Writes Core (`aw_thumb_duplicates()`, same filter) | `stats/thumbnails` |
+| Picture pipeline | items with their own picture of the published total; CC0 assigned, still placard, no match after the tries; Openverse requests today of 300 and next run | Animal Writes Core (`sourceweb_cc0_counts()`, `aw_ov_quota`, `aw_cc0_run`), through the filter `aw_sourcing_dashboard_tiles`; hidden without it | `stats/pictures` |
+| Thumbnails | pictures used by more than one item (0 is green) | Animal Writes Core (`kits_thumb_duplicates()`, same filter) | `stats/thumbnails` |
 | AI models | free models that work of those listed; refused today | SourceWeb AI models: status column only (`aw_sourcing_overview_ai()`, `sw/dashboard.php:18`). No key, no key fragment | `stats/ai` |
 | Google Maps spend | this month's live and check spend against the monthly cap | SourceWeb (`aw_enrich_ledger`, `aw_enrich_live_cap`) | `stats/enrichment` |
 
@@ -376,6 +376,6 @@ Not part of any phase: DirectoryWeb's switch to `directoryweb_fields()` and `dir
 - The aw→kits rename of options, routes, hooks and the folder (deferred by the owner).
 - AI keys and `ai-keys.php`: never touched (owner only).
 - The workers repo, including the GDELT replacement suggestion (`docs/pending.md`).
-- Moving `core/social-posts.php`, `core/cc0-images.php` or `core/thumbs.php` into SourceWeb (§0.4; they stay Core's).
+- Moving `core/social-posts.php`, `aw-sourcing/includes/cc0-images.php` or `kits-core/includes/thumbs.php` into SourceWeb (§0.4; they stay Core's).
 - PHPUnit and Plugin Check in CI (§4).
 - Correcting `docs/directory-plugin-plan.md` §1.5 on `aw_cdn_purge_post()` (§1.11.3).

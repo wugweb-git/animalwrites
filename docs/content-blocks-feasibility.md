@@ -718,7 +718,7 @@ moves to the reader; the option names stay the same.
 | `aw_district_helplines`, `aw_place_intros`, `aw_gov_verified_live` | DirectoryWeb | DirectoryWeb |
 | `aw_place_counts` | DirectoryWeb, RankWeb | DirectoryWeb |
 | `aw_social_on`, `aw_social_show` | SourceWeb, PlanWeb | Kits Core (social preset settings) |
-| `aw_category_images` (and term meta `aw_category_image`) | RankWeb through `aw_category_image_id()` | Kits Core term image |
+| `aw_category_images` (and term meta `aw_category_image`) | RankWeb through `kits_category_image_id()` | Kits Core term image |
 | `aw_issuer_short`, `aw_press_logos`, `aw_internal_org`, `aw_elsewhere`, `aw_follow_reddit`, `aw_follow_discord`, `aw_sample_listing_ids`, `aw_cdn_ttl*` | aw-core only today | Kits Core preset or share settings (`aw_sample_listing_ids` → DirectoryWeb; `aw_cdn_ttl*` → Kits Core deploy purge) |
 
 The same uninstall also deletes the DirectoryWeb transient `directoryweb_stats` and unschedules its

@@ -499,7 +499,7 @@ function aw_enrich_source_page( $sources ) {
 /**
  * Download a picture as a browser opening it from the page it is on would (owner, 25 Oct 2026): a normal browser
  * User-Agent and that page as the Referer, because some sites (smptindia.org, swordodisha, vardodisha) refuse other
- * requests with 403. Nothing else is changed: the same download as before (aw_source_download: wp_safe_remote_get,
+ * requests with 403. Nothing else is changed: the same download as before (sourceweb_source_download: wp_safe_remote_get,
  * redirects, 20 s, 15 MB), then the type and size checks in aw_enrich_sideload. Returns a temporary file or WP_Error.
  *
  * @param string $url     Picture address.
@@ -511,10 +511,7 @@ function aw_enrich_download( $url, $referer = '' ) {
 	if ( '' !== $referer ) {
 		$headers['Referer'] = $referer;
 	}
-	if ( ! function_exists( 'aw_source_download' ) ) { // cc0-images.php (Core)
-		return new WP_Error( 'sourceweb_no_download', 'Picture downloads need Animal Writes Core.' );
-	}
-	return aw_source_download( $url, 20, 15 * MB_IN_BYTES, $headers, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36' ); // cc0-images.php
+	return sourceweb_source_download( $url, 20, 15 * MB_IN_BYTES, $headers, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36' ); // cc0-images.php
 }
 
 /**

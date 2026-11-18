@@ -44,7 +44,7 @@ function aw_tag_main_page_button( $slug ) {
  * @return string
  */
 function aw_section_tile( $p ) {
-	$img = function_exists( 'aw_item_image' ) ? aw_item_image( $p->ID, 'medium_large' ) : '';
+	$img = function_exists( 'kits_item_image' ) ? kits_item_image( $p->ID, 'medium_large' ) : '';
 	if ( ! $img && ( $fid = (int) get_post_meta( $p->ID, 'aw_file_id', true ) ) ) {
 		$img = (string) wp_get_attachment_image_url( $fid, 'large' );
 	}
@@ -55,7 +55,7 @@ function aw_section_tile( $p ) {
 		$fit = 'aw_listing' === $p->post_type ? ' class="aw-tile-logo"' : ''; // an organisation's logo stays whole (aw.css)
 		return '<img src="' . esc_url( $img ) . '" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer"' . $fit . '>';
 	}
-	return function_exists( 'aw_placard_html' ) ? aw_placard_html( $p->ID ) : '';
+	return function_exists( 'kits_placard_html' ) ? kits_placard_html( $p->ID ) : '';
 }
 
 /**
@@ -136,7 +136,7 @@ function aw_section_head_archive() {
 			$seen  = array();
 			$with  = array();
 			foreach ( $pool as $p ) {
-				$key = aw_item_image( $p->ID ) ?: ( get_post_meta( $p->ID, 'aw_file_id', true ) ? 'doc' . $p->ID : ( has_post_thumbnail( $p ) ? get_the_post_thumbnail_url( $p ) : '' ) );
+				$key = kits_item_image( $p->ID ) ?: ( get_post_meta( $p->ID, 'aw_file_id', true ) ? 'doc' . $p->ID : ( has_post_thumbnail( $p ) ? get_the_post_thumbnail_url( $p ) : '' ) );
 				if ( $key && ! isset( $seen[ $key ] ) ) {
 					$seen[ $key ] = true;
 					$with[]       = $p;
@@ -144,14 +144,14 @@ function aw_section_head_archive() {
 			}
 			// Category and tag pages: no placards (owner, 21 Oct 2026: the same source placard repeated three times on tag
 			// pages); the term's own photo, then items' distinct pictures, else no visual.
-			$rest  = $term_page ? array() : array_filter( $pool, fn( $p ) => ! in_array( $p, $with, true ) && ! aw_item_image( $p->ID ) );
+			$rest  = $term_page ? array() : array_filter( $pool, fn( $p ) => ! in_array( $p, $with, true ) && ! kits_item_image( $p->ID ) );
 			$posts = array_slice( array_merge( $with, $rest ), 0, 3 );
 			foreach ( $posts as $p ) {
 				$tiles .= aw_section_tile( $p );
 			}
 		}
 		// A category page leads with its own photo (set on the category screen in WP Admin).
-		$cat_img = ( $term_page && function_exists( 'aw_category_image_id' ) ) ? aw_category_image_id( get_queried_object() ) : 0;
+		$cat_img = ( $term_page && function_exists( 'kits_category_image_id' ) ) ? kits_category_image_id( get_queried_object() ) : 0;
 		if ( $cat_img ) {
 			$tiles = '<img src="' . esc_url( (string) wp_get_attachment_image_url( $cat_img, 'medium_large' ) ) . '" alt="" loading="lazy">' . implode( '', array_slice( preg_split( '/(?=<img|<div class="kit-placard)/', $tiles, -1, PREG_SPLIT_NO_EMPTY ), 0, 2 ) );
 		}

@@ -3,8 +3,8 @@
  * The site's rows on the Kits screens (moved from Animal Writes Core's admin-home.php, 18 Nov 2026; owner, 25 Oct,
  * 10 Nov and 11 Nov 2026; docs/admin-ui-spec.md §B, §C, §E3). There is no site tab or menu item: the site's parts join
  * the Kits screens through Kits' own filters.
- * - Home: Page check, Deployed commit, Joined files, Email sending, Thumbnails and Pictures (each only when the part
- *   that prints it is loaded); Dates is linked from Home and keeps its address (aw-dates) until PlanWeb has it.
+ * - Home: Page check, Deployed commit, Joined files, Email sending (each only when the part that prints it is loaded;
+ *   Thumbnails and Pictures are added by Kits Core's thumbs.php and SourceWeb's cc0-images.php themselves); Dates is linked from Home and keeps its address (aw-dates) until PlanWeb has it.
  * - Settings: CDN cache times (Performance), and where keys and the optional parts are set.
  * - Theme Options → Socials: Contact links. Help: the site's Overview (Docs, from the kits_site_overview filter),
  *   Edit screens and Theme parts (Developer).
@@ -167,8 +167,8 @@ function kits_site_section_if( array $sections, string $id, string $title, strin
 }
 
 /**
- * Kits → Home: the site's checks (docs/admin-ui-spec.md §B1, §D6). Email, thumbnails and pictures stay here until the
- * MailWeb and SourceWeb dashboards have them (owner, 11 Nov 2026). Nothing WordPress or another plugin already shows
+ * Kits → Home: the site's checks (docs/admin-ui-spec.md §B1, §D6). Email stays here until the MailWeb dashboard has it
+ * (owner, 11 Nov 2026); Thumbnails and Pictures are added by thumbs.php (Kits Core) and cc0-images.php (SourceWeb). Nothing WordPress or another plugin already shows
  * (owner, 11 Nov 2026): backups are UpdraftPlus's, the theme is Appearance → Themes, dates are PlanWeb's.
  *
  * @param array $sections Kits' sections.
@@ -184,9 +184,7 @@ function kits_site_home_sections( $sections ) {
 		40
 	);
 	$sections           = kits_site_section_if( $sections, 'joined-files', 'Joined files', 'aw_site_check_joined', 50 );
-	$sections           = kits_site_section_if( $sections, 'email', 'Email sending', 'aw_mail_site_check', 70 );
-	$sections           = kits_site_section_if( $sections, 'thumbnails', 'Thumbnails', 'aw_thumbs_site_check', 71 );
-	return kits_site_section_if( $sections, 'pictures', 'Pictures', 'aw_cc0_site_check', 72 );
+	return kits_site_section_if( $sections, 'email', 'Email sending', 'aw_mail_site_check', 70 );
 }
 
 /**

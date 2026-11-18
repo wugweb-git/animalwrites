@@ -356,9 +356,9 @@ function aw_ingest( WP_REST_Request $req ) {
 		update_post_meta( $post_id, 'aw_verified', false ); // Imports are never verified.
 	}
 
-	if ( 'aw_legal' === $type && function_exists( 'aw_mirror_gov_pdf' ) ) {
+	if ( 'aw_legal' === $type && function_exists( 'sourceweb_mirror_gov_pdf' ) ) {
 		$doc_url = esc_url_raw( (string) $req->get_param( 'document_url' ) ); // the PDF, when the source page is not the PDF itself
-		aw_mirror_gov_pdf( $post_id, $doc_url ? $doc_url : $source_url );
+		sourceweb_mirror_gov_pdf( $post_id, $doc_url ? $doc_url : $source_url );
 	}
 
 	// Routine items go live when every check passes; the rest wait with the reason (auto-review.php).

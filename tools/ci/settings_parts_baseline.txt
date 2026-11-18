@@ -20,9 +20,9 @@ plugins/directoryweb/includes/directoryweb-ui.php | admin page | add_submenu_pag
 plugins/directoryweb/includes/directoryweb-ui.php | admin page | add_submenu_page( DIRECTORYWEB_PAGE, __( 'DirectoryWeb', 'directoryweb' ), __( 'Dashboard', 'directoryweb' ), DIRECTORYWEB_CAP, DIRECTORYWEB_PAGE, 'directoryweb
 plugins/animal-writes-core/includes/keys.php | admin page | add_submenu_page( aw_core_menu_parent(), 'Keys', 'Keys', aw_core_screen_cap( 'aw-keys' ), 'aw-keys', 'aw_keys_screen' ); // Kits → Keys
 plugins/directoryweb/includes/map-picker.php | admin style | wp_enqueue_style( 'aw-leaflet'
-plugins/animal-writes-core/includes/media-merge.php | admin page | add_submenu_page( 'upload.php', 'Duplicate files', 'Duplicate files', 'manage_options', 'aw-media-duplicates', 'aw_media_merge_screen' );
-plugins/animal-writes-core/includes/media-reuse.php | admin page | add_submenu_page( 'upload.php', 'Reuse pictures', 'Reuse pictures', 'manage_options', 'aw-media-reuse', 'aw_media_reuse_screen' );
-plugins/animal-writes-core/includes/media-webp.php | admin page | add_submenu_page( 'upload.php', 'Make WebP', 'Make WebP', 'manage_options', 'aw-media-webp', 'aw_media_webp_screen' );
+plugins/kits-core/includes/tools/media-merge.php | admin page | add_submenu_page( 'upload.php', 'Duplicate files', 'Duplicate files', 'manage_options', 'aw-media-duplicates', 'kits_media_merge_screen' );
+plugins/kits-core/includes/tools/media-reuse.php | admin page | add_submenu_page( 'upload.php', 'Reuse pictures', 'Reuse pictures', 'manage_options', 'aw-media-reuse', 'kits_media_reuse_screen' );
+plugins/kits-core/includes/media-webp.php | admin page | add_submenu_page( 'upload.php', 'Make WebP', 'Make WebP', 'manage_options', 'aw-media-webp', 'kits_media_webp_screen' );
 plugins/animal-writes-core/includes/pages.php | admin page | add_submenu_page( AW_CORE_MENU, 'Contact links', 'Contact links', aw_core_screen_cap( 'aw-elsewhere' ), 'aw-elsewhere', 'aw_elsewhere_screen' );
 plugins/animal-writes-core/includes/pages.php | admin style | <style> block
 plugins/directoryweb/includes/place-intros.php | admin page | add_submenu_page( DIRECTORYWEB_PAGE, __( 'Place intros', 'directoryweb' ), __( 'Place intros', 'directoryweb' ), 'manage_options', AW_PLACE_INTROS_PAGE, 'aw_pla

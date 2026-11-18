@@ -67,6 +67,14 @@ require_once KITS_CORE_DIR . 'includes/sections.php';
 require_once KITS_CORE_DIR . 'includes/share.php';
 require_once KITS_CORE_DIR . 'includes/frontend-scripts.php'; // share, forms (ALTCHA) and analytics scripts, before the theme's kit.js
 require_once KITS_CORE_DIR . 'includes/image-context.php';
+require_once KITS_CORE_DIR . 'includes/media-groups.php'; // Media group label for every attachment: core taxonomy, column, REST (moved from Animal Writes Core, 18 Nov 2026)
+require_once KITS_CORE_DIR . 'includes/category-images.php'; // category and tag photos (term meta aw_category_image) and the category banner
+require_once KITS_CORE_DIR . 'includes/thumbs.php'; // card pictures never repeat: option aw_thumb_map, GET /aw/v1/thumb-dupes (the deploy gate)
+require_once KITS_CORE_DIR . 'includes/card-images.php'; // card images: the item's own picture, the category photo, the placard fallback
+require_once KITS_CORE_DIR . 'includes/library-documents.php'; // Library documents on the item's page: PDF viewer, preview, print button (moved from Core, 18 Nov 2026)
+require_once KITS_CORE_DIR . 'includes/media-webp.php'; // resized copies of JPEG and PNG uploads as WebP; Media → Make WebP with Undo
+require_once KITS_CORE_DIR . 'includes/tools/media-merge.php'; // Kits → Tools: Media → Duplicate files (one-off clean-up, Undo, never deletes)
+require_once KITS_CORE_DIR . 'includes/tools/media-reuse.php'; // Kits → Tools: Media → Reuse pictures (recycle, never delete)
 require_once KITS_CORE_DIR . 'includes/slugs.php';
 require_once KITS_CORE_DIR . 'includes/analytics.php';
 require_once KITS_CORE_DIR . 'includes/performance.php';
@@ -108,6 +116,7 @@ register_deactivation_hook(
 	__FILE__,
 	function () {
 		wp_unschedule_hook( 'kits_spot_map_daily' ); // aw_fetch_favicons is SourceWeb's since 18 Nov 2026
+		wp_unschedule_hook( 'aw_thumb_rebuild' ); // a queued thumbnail map rebuild (thumbs.php)
 		// While it is off the rules may be rebuilt without the preset types and consent items may be published:
 		// rebuild the rules and recheck consent when it is back on (includes/presets.php).
 		delete_option( 'kits_presets_rewrite' );

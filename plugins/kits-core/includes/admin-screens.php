@@ -344,8 +344,23 @@ function kits_transfer_parts(): array {
 		if ( is_array( $backup ) && ! empty( $backup['file'] ) ) {
 			$parts['undo'] = array( 'Put the last copy back', 'kits_transfer_undo_part' );
 		}
+		if ( function_exists( 'kits_media_merge_screen' ) || function_exists( 'kits_media_reuse_screen' ) ) {
+			$parts['media'] = array( 'Media clean-up', 'kits_tools_media_part' );
+		}
 	}
 	return $parts;
+}
+
+/** Tools → Media clean-up: the one-off Media Library tools (includes/tools/). Both keep every file and have Undo. */
+function kits_tools_media_part(): void {
+	echo '<p>' . esc_html( 'One-off tools for the Media Library. Nothing is deleted: merged copies keep their files, and every change has Undo.' ) . '</p><ul>';
+	if ( function_exists( 'kits_media_merge_screen' ) ) {
+		echo '<li><a href="' . esc_url( admin_url( 'upload.php?page=aw-media-duplicates' ) ) . '">' . esc_html( 'Duplicate files' ) . '</a>: ' . esc_html( 'merge copies of the same file into one, one group at a time.' ) . '</li>';
+	}
+	if ( function_exists( 'kits_media_reuse_screen' ) ) {
+		echo '<li><a href="' . esc_url( admin_url( 'upload.php?page=aw-media-reuse' ) ) . '">' . esc_html( 'Reuse pictures' ) . '</a>: ' . esc_html( 'recycle pictures already in the Media Library as covers of pages that have none.' ) . '</li>';
+	}
+	echo '</ul>';
 }
 
 /** What the last import, check, restore or put-back did (once, for the user who did it). */

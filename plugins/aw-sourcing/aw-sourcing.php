@@ -79,6 +79,8 @@ require_once AW_SOURCING_DIR . 'includes/retire-model.php'; // phase 4: what sto
 require_once AW_SOURCING_DIR . 'includes/sourcing-policy.php';
 require_once AW_SOURCING_DIR . 'includes/source-sites.php';
 require_once AW_SOURCING_DIR . 'includes/source-icons.php';
+require_once AW_SOURCING_DIR . 'includes/cc0-images.php'; // publisher images (check, og:image, keep a copy) and the CC0 photo fetch from Openverse (moved from Core, 18 Nov 2026)
+require_once AW_SOURCING_DIR . 'includes/library-pdfs.php'; // which government PDFs we may host and the mirror that copies them (moved from Core, 18 Nov 2026)
 require_once AW_SOURCING_DIR . 'includes/sourcing-lists.php';
 require_once AW_SOURCING_DIR . 'includes/summary-rules-admin.php';
 require_once AW_SOURCING_DIR . 'includes/relevance.php';

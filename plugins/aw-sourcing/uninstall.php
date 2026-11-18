@@ -15,14 +15,15 @@
  *   aw_source_icons, aw_sourcing_migrating, aw_sourcing_phase, aw_sourcing_phase1_record … aw_sourcing_phase4_record,
  *   aw_sourcing_seed_hc, aw_sourcing_seed_s35, aw_sourcing_v1_archive, kits_sourcing_log (the retired v1 log),
  *   aw_worker_dispatch_log, aw_workers_meta, aw_workers_tick, aw_workers_tick_lock, aw_workers_watchdog_at,
- *   sourceweb_dashboard_log, aw_worker_runs_*, the migration backups aw_backup_1_* … aw_backup_4_* and
+ *   sourceweb_dashboard_log, the picture pipeline's aw_cc0_log, aw_ov_last and aw_ov_quota (cc0-images.php, from Animal
+ *   Writes Core on 18 Nov 2026), aw_worker_runs_*, the migration backups aw_backup_1_* … aw_backup_4_* and
  *   aw_backup_latest_1 … aw_backup_latest_4, aw_src_delete_data_on_uninstall.
  * Transients (caches; they expire anyway): aw_ingest_alert_mailed, aw_relevance_alert_sent, aw_review_count,
- *   aw_sourcing_host_stats, aw_summary_below, aw_workers_alert_mailed, sourceweb_dashboard, and those starting
- *   aw_newsm_, aw_glive_, aw_sourcing_kw_stats_, aw_relay_rl_.
+ *   aw_sourcing_host_stats, aw_summary_below, aw_workers_alert_mailed, sourceweb_dashboard, aw_cc0_lock, and those
+ *   starting aw_newsm_, aw_glive_, aw_sourcing_kw_stats_, aw_relay_rl_, aw_ov_ (Openverse pages and aw_ov_pause).
  * Scheduled events (all of each hook, whatever its arguments): aw_sourcing_site_meta, aw_ai_check_all,
  *   aw_ai_check_all_now, aw_ai_check_new, aw_ingest_watchdog, aw_workers_watchdog, sourceweb_dashboard_build,
- *   aw_sources_sync_dispatch.
+ *   aw_sources_sync_dispatch, aw_cc0_run.
  * Tables: {prefix}aw_enrich (the enrichment proposals and their sources; the values applied to listings are post meta
  *   and stay).
  *
@@ -93,6 +94,9 @@ $aw_src_options = array(
 	'aw_workers_tick_lock',
 	'aw_workers_watchdog_at',
 	'sourceweb_dashboard_log',
+	'aw_cc0_log',
+	'aw_ov_last',
+	'aw_ov_quota',
 	'aw_backup_latest_1',
 	'aw_backup_latest_2',
 	'aw_backup_latest_3',
@@ -119,15 +123,15 @@ foreach ( array( 1, 2, 3, 4 ) as $aw_src_phase ) {
 	$aw_src_like( 'aw_backup_' . $aw_src_phase . '_' );
 }
 
-foreach ( array( 'aw_ingest_alert_mailed', 'aw_relevance_alert_sent', 'aw_review_count', 'aw_sourcing_host_stats', 'aw_summary_below', 'aw_workers_alert_mailed', 'sourceweb_dashboard' ) as $aw_src_transient ) {
+foreach ( array( 'aw_ingest_alert_mailed', 'aw_relevance_alert_sent', 'aw_review_count', 'aw_sourcing_host_stats', 'aw_summary_below', 'aw_workers_alert_mailed', 'sourceweb_dashboard', 'aw_cc0_lock' ) as $aw_src_transient ) {
 	delete_transient( $aw_src_transient );
 }
-foreach ( array( 'aw_newsm_', 'aw_glive_', 'aw_sourcing_kw_stats_', 'aw_relay_rl_' ) as $aw_src_prefix ) {
+foreach ( array( 'aw_newsm_', 'aw_glive_', 'aw_sourcing_kw_stats_', 'aw_relay_rl_', 'aw_ov_' ) as $aw_src_prefix ) {
 	$aw_src_like( '_transient_' . $aw_src_prefix );
 	$aw_src_like( '_transient_timeout_' . $aw_src_prefix );
 }
 
-foreach ( array( 'aw_sourcing_site_meta', 'aw_ai_check_all', 'aw_ai_check_all_now', 'aw_ai_check_new', 'aw_ingest_watchdog', 'aw_workers_watchdog', 'sourceweb_dashboard_build', 'aw_sources_sync_dispatch' ) as $aw_src_hook ) {
+foreach ( array( 'aw_sourcing_site_meta', 'aw_ai_check_all', 'aw_ai_check_all_now', 'aw_ai_check_new', 'aw_ingest_watchdog', 'aw_workers_watchdog', 'sourceweb_dashboard_build', 'aw_sources_sync_dispatch', 'aw_cc0_run' ) as $aw_src_hook ) {
 	wp_unschedule_hook( $aw_src_hook );
 }
 

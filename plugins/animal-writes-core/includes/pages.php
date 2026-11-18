@@ -44,7 +44,7 @@ add_shortcode(
 		aw_use_component_style( 'aw-hubs' ); // aw-categories-index
 		$html = '<ul class="aw-categories-index">';
 		foreach ( $terms as $t ) {
-			$img  = function_exists( 'aw_category_image_id' ) ? aw_category_image_id( $t ) : 0;
+			$img  = function_exists( 'kits_category_image_id' ) ? kits_category_image_id( $t ) : 0;
 			$html .= '<li><a href="' . esc_url( kits_term_url( $t ) ) . '">'
 				. ( $img ? wp_get_attachment_image( $img, 'medium', false, array( 'alt' => '', 'loading' => 'lazy' ) ) : '' )
 				. '<span class="aw-categories-name">' . esc_html( $t->name ) . '</span>'

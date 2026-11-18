@@ -10,8 +10,10 @@
  *   photo, the site icon, and the source a favicon or logo belongs to. Sorting still goes through the core parent order.
  * - Optimisation: size, format and what is missing (no resized copies, over 300 KB, under 64 px).
  * Core list-table columns only: no custom CSS, no scripts. Read only; nothing is saved by this file.
+ * Moved from Animal Writes Core on 18 Nov 2026; loaded with or without Rank Math. Column keys (aw_file, aw_slug …) are
+ * unchanged, so each user's hidden columns stay as they were.
  *
- * @package animal-writes-core
+ * @package aw-seo-extras
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -19,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Post meta keys that hold an attachment ID, with the words shown for each. */
-function aw_media_post_meta_uses() {
+function rankweb_media_post_meta_uses() {
 	return array(
 		'_thumbnail_id'               => 'Featured image',
 		'aw_source_image_att'         => 'Source image',
@@ -36,7 +38,7 @@ function aw_media_post_meta_uses() {
 }
 
 /** Term meta keys that hold an attachment ID, with the words shown for each. */
-function aw_media_term_meta_uses() {
+function rankweb_media_term_meta_uses() {
 	return array(
 		'aw_category_card'            => 'Category card',
 		'aw_category_image'           => 'Category photo',
@@ -52,7 +54,7 @@ function aw_media_term_meta_uses() {
  * @param int[] $ids Attachment IDs.
  * @return array[] Per attachment ID: array( 'uses' => lines (already escaped), 'pages' => post IDs, 'kw' => focus keyword ).
  */
-function aw_media_usage( $ids ) {
+function rankweb_media_usage( $ids ) {
 	global $wpdb;
 	static $cache = array();
 	$ids = array_values( array_unique( array_filter( array_map( 'intval', (array) $ids ) ) ) );
@@ -68,7 +70,7 @@ function aw_media_usage( $ids ) {
 				'kw'    => '',
 			);
 		}
-		$labels = aw_media_post_meta_uses();
+		$labels = rankweb_media_post_meta_uses();
 		$keys   = array_keys( $labels );
 		$kin    = implode( ',', array_fill( 0, count( $keys ), '%s' ) );
 		// phpcs:disable WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- the IN lists are only %d / %s placeholders built with array_fill
@@ -77,7 +79,7 @@ function aw_media_usage( $ids ) {
 			$found[ (int) $r->att ]['uses'][ 'p' . $r->pid . $r->k ] = esc_html( $labels[ $r->k ] ) . ': <a href="' . esc_url( get_edit_post_link( (int) $r->pid ) ) . '">' . esc_html( wp_html_excerpt( html_entity_decode( $r->title, ENT_QUOTES, 'UTF-8' ), 40, '…' ) ) . '</a>';
 			$found[ (int) $r->att ]['pages'][]                       = (int) $r->pid;
 		}
-		$tlabels = aw_media_term_meta_uses();
+		$tlabels = rankweb_media_term_meta_uses();
 		$tkeys   = array_keys( $tlabels );
 		$tin     = implode( ',', array_fill( 0, count( $tkeys ), '%s' ) );
 		$trows   = $wpdb->get_results( $wpdb->prepare( "SELECT m.meta_value AS att, m.meta_key AS k, t.term_id AS tid, t.name AS name, x.taxonomy AS tax FROM {$wpdb->termmeta} m JOIN {$wpdb->terms} t ON t.term_id = m.term_id JOIN {$wpdb->term_taxonomy} x ON x.term_id = t.term_id WHERE m.meta_key IN ($tin) AND m.meta_value IN ($in) LIMIT 500", array_merge( $tkeys, $new ) ) );
@@ -136,7 +138,7 @@ add_filter(
 			'aw_parent'    => 'Uploaded to',
 			'aw_opt'       => 'Optimisation',
 		);
-		$order  = array( 'cb', 'aw_file', 'rank_math_image_title', 'taxonomy-' . KITS_MEDIA_GROUP, 'aw_slug', 'aw_caption', 'aw_desc', 'aw_keyphrase', 'rank_math_image_alt', 'aw_context', 'aw_parent', 'aw_opt', 'date' );
+		$order  = array( 'cb', 'aw_file', 'rank_math_image_title', 'taxonomy-' . ( function_exists( 'kits_media_group_taxonomy' ) ? kits_media_group_taxonomy() : ( defined( 'KITS_MEDIA_GROUP' ) ? KITS_MEDIA_GROUP : 'kits_media_group' ) ), 'aw_slug', 'aw_caption', 'aw_desc', 'aw_keyphrase', 'rank_math_image_alt', 'aw_context', 'aw_parent', 'aw_opt', 'date' );
 		$remove = array( 'title', 'author', 'imgoptm', 'parent' );
 		$out    = array();
 		foreach ( $order as $key ) {
@@ -222,7 +224,7 @@ add_action(
 			return;
 		}
 		$page_ids = ! empty( $GLOBALS['wp_query']->posts ) ? wp_list_pluck( $GLOBALS['wp_query']->posts, 'ID' ) : array( $post_id );
-		$use      = aw_media_usage( $page_ids )[ (int) $post_id ] ?? array(
+		$use      = rankweb_media_usage( $page_ids )[ (int) $post_id ] ?? array(
 			'uses'  => array(),
 			'pages' => array(),
 			'kw'    => '',

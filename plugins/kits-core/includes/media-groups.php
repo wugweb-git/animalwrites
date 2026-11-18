@@ -6,18 +6,28 @@
  *   (/wp/v2/media-groups).
  * - The taxonomy is never public: no rewrite, no query var, not in menus.
  * - A new upload gets a group from its title, file name, type and parent, once; an existing assignment is never changed.
+ * Moved from Animal Writes Core on 18 Nov 2026. The taxonomy name is KITS_MEDIA_GROUP when the site defines it (Tools →
+ * Taxonomy rename), else aw_media_group, the name it has on the live site.
  *
- * @package animal-writes-core
+ * @package kits-core
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/** Name of the Media group taxonomy: KITS_MEDIA_GROUP when defined, else the active name (kits_media_group since the rename ran on live, 18 Nov 2026). */
+function kits_media_group_taxonomy() {
+	if ( defined( 'KITS_MEDIA_GROUP' ) ) {
+		return (string) KITS_MEDIA_GROUP;
+	}
+	return function_exists( 'kits_taxonomy_current' ) ? (string) kits_taxonomy_current( 'kits_media_group' ) : 'kits_media_group';
+}
+
 /** Register the Media group taxonomy for attachments. */
-function aw_media_group_register() {
+function kits_media_group_register() {
 	register_taxonomy(
-		KITS_MEDIA_GROUP,
+		kits_media_group_taxonomy(),
 		'attachment',
 		array(
 			'labels'               => array(
@@ -38,7 +48,7 @@ function aw_media_group_register() {
 		)
 	);
 }
-add_action( 'init', 'aw_media_group_register' );
+add_action( 'init', 'kits_media_group_register' );
 
 /**
  * Name of the group for a file, by the first matching rule. Pure: no WordPress calls.
@@ -49,7 +59,7 @@ add_action( 'init', 'aw_media_group_register' );
  * @param string $parent_type Post type of the parent, or an empty string.
  * @return string
  */
-function aw_media_group_for( $title, $file, $mime, $parent_type ) {
+function kits_media_group_for( $title, $file, $mime, $parent_type ) {
 	$title = trim( (string) $title );
 	$base  = pathinfo( basename( (string) $file ), PATHINFO_FILENAME );
 
@@ -94,14 +104,14 @@ function aw_media_group_for( $title, $file, $mime, $parent_type ) {
  *
  * @param int $attachment_id Attachment ID.
  */
-function aw_media_group_assign( $attachment_id ) {
-	if ( wp_get_object_terms( $attachment_id, KITS_MEDIA_GROUP, array( 'fields' => 'ids' ) ) ) {
+function kits_media_group_assign( $attachment_id ) {
+	if ( wp_get_object_terms( $attachment_id, kits_media_group_taxonomy(), array( 'fields' => 'ids' ) ) ) {
 		return;
 	}
 	$post   = get_post( $attachment_id );
 	$file   = (string) get_attached_file( $attachment_id );
 	$parent = ( $post && $post->post_parent ) ? (string) get_post_type( $post->post_parent ) : '';
-	$name   = aw_media_group_for( $post ? $post->post_title : '', basename( $file ), $post ? $post->post_mime_type : '', $parent );
-	wp_set_object_terms( $attachment_id, $name, KITS_MEDIA_GROUP );
+	$name   = kits_media_group_for( $post ? $post->post_title : '', basename( $file ), $post ? $post->post_mime_type : '', $parent );
+	wp_set_object_terms( $attachment_id, $name, kits_media_group_taxonomy() );
 }
-add_action( 'add_attachment', 'aw_media_group_assign', 20 );
+add_action( 'add_attachment', 'kits_media_group_assign', 20 );

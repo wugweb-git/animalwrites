@@ -3,10 +3,11 @@
  * Category and tag photos, set in WP Admin on the Categories and Tags screens: add or edit
  * a category's name, slug, write-up (Description) and photo (pick or upload from the media library).
  * Category photos are also used on news and Library items in that category.
- * News and Library items show their category's photo (see aw_item_image() in media.php). Stored as term meta
+ * News and Library items show their category's photo (see kits_item_image() in card-images.php). Stored as term meta
  * `aw_category_image` (attachment ID). The general photos for items without a category stay in the option aw_category_images['default'].
+ * Moved from Animal Writes Core on 18 Nov 2026; term meta, option and field names unchanged.
  *
- * @package animal-writes-core
+ * @package kits-core
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -14,10 +15,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Category screens that get the photo field. */
-const AW_PHOTO_TAXONOMIES = array( 'category', 'post_tag' );
+const KITS_PHOTO_TAXONOMIES = array( 'category', 'post_tag' );
 
 /** Attachment ID of a category's photo (term meta; for Categories, the older option mapping as fallback). */
-function aw_category_image_id( $term ) {
+function kits_category_image_id( $term ) {
 	$term = is_object( $term ) ? $term : get_term( $term );
 	if ( ! $term || is_wp_error( $term ) ) {
 		return 0;
@@ -31,7 +32,7 @@ function aw_category_image_id( $term ) {
 }
 
 /** The picker: a hidden ID field, a preview and two buttons (wp.media). */
-function aw_category_image_field( $id ) {
+function kits_category_image_field( $id ) {
 	$src = $id ? wp_get_attachment_image_url( $id, 'medium' ) : '';
 	echo '<div class="aw-category-image">';
 	echo '<input type="hidden" name="aw_category_image" value="' . esc_attr( (string) $id ) . '">';
@@ -42,31 +43,32 @@ function aw_category_image_field( $id ) {
 	echo '</div>';
 }
 
-foreach ( AW_PHOTO_TAXONOMIES as $aw_tx ) {
+foreach ( KITS_PHOTO_TAXONOMIES as $kits_photo_tax ) {
 	add_action(
-		"{$aw_tx}_add_form_fields",
+		"{$kits_photo_tax}_add_form_fields",
 		function () {
 			echo '<div class="form-field"><label>Photo</label>';
-			aw_category_image_field( 0 );
+			kits_category_image_field( 0 );
 			echo '</div>';
 		}
 	);
 	add_action(
-		"{$aw_tx}_edit_form_fields",
+		"{$kits_photo_tax}_edit_form_fields",
 		function ( $term ) {
 			echo '<tr class="form-field"><th scope="row"><label>Photo</label></th><td>';
-			aw_category_image_field( aw_category_image_id( $term ) );
+			kits_category_image_field( kits_category_image_id( $term ) );
 			echo '</td></tr>';
 		}
 	);
-	add_action( "created_{$aw_tx}", 'aw_category_image_save' );
-	add_action( "edited_{$aw_tx}", 'aw_category_image_save' );
-	add_filter( "manage_edit-{$aw_tx}_columns", fn( $c ) => array_slice( $c, 0, 1, true ) + array( 'aw_category_image' => 'Photo' ) + array_slice( $c, 1, null, true ) );
-	add_filter( "manage_{$aw_tx}_custom_column", 'aw_category_image_column', 10, 3 );
+	add_action( "created_{$kits_photo_tax}", 'kits_category_image_save' );
+	add_action( "edited_{$kits_photo_tax}", 'kits_category_image_save' );
+	add_filter( "manage_edit-{$kits_photo_tax}_columns", fn( $c ) => array_slice( $c, 0, 1, true ) + array( 'aw_category_image' => 'Photo' ) + array_slice( $c, 1, null, true ) );
+	add_filter( "manage_{$kits_photo_tax}_custom_column", 'kits_category_image_column', 10, 3 );
 }
+unset( $kits_photo_tax );
 
 /** Save the field (term edit screens only; WordPress checks the term nonce before these hooks run). */
-function aw_category_image_save( $term_id ) {
+function kits_category_image_save( $term_id ) {
 	if ( ! isset( $_POST['aw_category_image'] ) || ! current_user_can( 'manage_categories' ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		return;
 	}
@@ -88,7 +90,7 @@ function aw_category_image_save( $term_id ) {
 add_action(
 	'admin_enqueue_scripts',
 	function ( $hook ) {
-		if ( ! in_array( $hook, array( 'edit-tags.php', 'term.php' ), true ) || ! in_array( $_GET['taxonomy'] ?? '', AW_PHOTO_TAXONOMIES, true ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+		if ( ! in_array( $hook, array( 'edit-tags.php', 'term.php' ), true ) || ! in_array( $_GET['taxonomy'] ?? '', KITS_PHOTO_TAXONOMIES, true ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 			return;
 		}
 		wp_enqueue_media();
@@ -110,11 +112,11 @@ add_action(
 );
 
 /** Thumbnail column on the category lists. */
-function aw_category_image_column( $out, $col, $term_id ) {
+function kits_category_image_column( $out, $col, $term_id ) {
 	if ( 'aw_category_image' !== $col ) {
 		return $out;
 	}
-	$id = aw_category_image_id( $term_id );
+	$id = kits_category_image_id( $term_id );
 	return $id ? wp_get_attachment_image( $id, array( 60, 34 ) ) : '—';
 }
 
@@ -141,7 +143,7 @@ add_action(
 );
 
 /** The category page's banner (same markup and rules as the Banner pattern), or ''. */
-function aw_category_banner_html() {
+function kits_category_banner_html() {
 	if ( ! is_category() ) {
 		return '';
 	}
@@ -152,4 +154,4 @@ function aw_category_banner_html() {
 	return '<div class="wp-block-cover alignwide kit-banner"><span aria-hidden="true" class="wp-block-cover__background has-secondary-background-color has-background-dim-30 has-background-dim"></span>'
 		. wp_get_attachment_image( $id, 'full', false, array( 'class' => 'wp-block-cover__image-background', 'alt' => '', 'fetchpriority' => 'high', 'loading' => 'eager', 'data-object-fit' => 'cover' ) ) . '</div>';
 }
-add_filter( 'do_shortcode_tag', fn( $html, $tag ) => 'aw_section_head' === $tag ? aw_category_banner_html() . $html : $html, 6, 2 );
+add_filter( 'do_shortcode_tag', fn( $html, $tag ) => 'aw_section_head' === $tag ? kits_category_banner_html() . $html : $html, 6, 2 );

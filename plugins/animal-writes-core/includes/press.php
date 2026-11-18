@@ -76,7 +76,7 @@ function aw_press_sideload( $image, $id ) {
 	$url  = (string) get_post_meta( $id, 'aw_press_url', true );
 	$name = preg_match( '#instagram\.com/(?:[^/]+/)?(?:reel|p|tv)/([A-Za-z0-9_-]+)#', $url, $m ) ? 'instagram-' . $m[1]
 		: ( preg_match( '#facebook\.com/.*?(\d{8,})/?$#', $url, $m ) ? 'facebook-' . $m[1] : 'press-' . $id );
-	$tmp  = aw_source_download( $image ); // cc0-images.php; core download_url() fails fatally on a doubled content-type
+	$tmp  = sourceweb_source_download( $image ); // cc0-images.php; core download_url() fails fatally on a doubled content-type
 	if ( is_wp_error( $tmp ) ) {
 		return 0;
 	}
@@ -312,13 +312,13 @@ function aw_press_site_logo( $url ) {
 	require_once ABSPATH . 'wp-admin/includes/media.php';
 	require_once ABSPATH . 'wp-admin/includes/file.php';
 	require_once ABSPATH . 'wp-admin/includes/image.php';
-	$tmp = aw_source_download( $icon, 15 );
+	$tmp = sourceweb_source_download( $icon, 15 );
 	if ( is_wp_error( $tmp ) || ! wp_get_image_mime( $tmp ) || filesize( $tmp ) < 100 ) { // the site refused: Google's favicon service, as on News
 		if ( ! is_wp_error( $tmp ) ) {
 			wp_delete_file( $tmp );
 		}
 		$icon = 'https://www.google.com/s2/favicons?sz=64&domain=' . rawurlencode( $host ) . '&.png';
-		$tmp  = aw_source_download( $icon, 15 );
+		$tmp  = sourceweb_source_download( $icon, 15 );
 	}
 	$id  = 0;
 	if ( ! is_wp_error( $tmp ) ) {

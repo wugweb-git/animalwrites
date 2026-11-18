@@ -3,7 +3,7 @@
  * Library records for "India Writes for Its Community Dogs" (17 Oct 2026, owner's brief): the three Supreme Court
  * documents of In Re: "City Hounded by Strays, Kids Pay Price", Suo Motu Writ Petition (Civil) No. 5 of 2025, that
  * were not yet in the Library. Each PDF is the court's own (api.sci.gov.in), stored here like every other judgment
- * (aw_mirror_gov_pdf). Summaries follow the Library summary rules, written from the PDF; the operative paragraphs
+ * (sourceweb_mirror_gov_pdf). Summaries follow the Library summary rules, written from the PDF; the operative paragraphs
  * are quoted word for word. Re-running updates the same items (by slug). The two LiveLaw News items on the same
  * orders link to their record (aw_rel_legal).
  *
@@ -117,8 +117,8 @@ foreach ( $docs as $d ) {
 	) as $k => $v ) {
 		update_post_meta( $id, $k, wp_slash( $v ) );
 	}
-	if ( function_exists( 'aw_mirror_gov_pdf' ) && ! get_post_meta( $id, 'aw_file_id', true ) ) {
-		aw_mirror_gov_pdf( $id, $d['src'] ); // the court's own PDF, stored here (media.php)
+	if ( function_exists( 'sourceweb_mirror_gov_pdf' ) && ! get_post_meta( $id, 'aw_file_id', true ) ) {
+		sourceweb_mirror_gov_pdf( $id, $d['src'] ); // the court's own PDF, stored here (SourceWeb, library-pdfs.php)
 	}
 	if ( function_exists( 'aw_summary_store_entities' ) ) {
 		aw_summary_store_entities( $id );

@@ -105,7 +105,7 @@ Core and older code.
 | `aw_service_slugs()` | 3 | `includes/programmatic.php` (3) |
 | `aw_tag_section()` | 3 | `includes/breadcrumbs.php` (1), `includes/programmatic.php` (2) |
 | `aw_camp_state()` | 2 | `includes/schema.php` (2) |
-| `aw_category_image_id()` | 2 | `includes/helpers.php` (1), `includes/programmatic.php` (1) |
+| `kits_category_image_id()` | 2 | `includes/helpers.php` (1), `includes/programmatic.php` (1) |
 | `aw_form_page_listing()` | 2 | `includes/breadcrumbs.php` (2) |
 | `aw_heading_dates()` | 2 | `includes/titles.php` (2) |
 | `aw_item_issuer()` | 2 | `includes/schema.php` (2) |
@@ -133,7 +133,7 @@ Core and older code.
 | `aw_open_opportunities_meta_query()` | 1 | `includes/helpers.php` (1) |
 | `aw_press_list()` | 1 | `includes/schema.php` (1) |
 | `aw_primary_category()` | 1 | `includes/breadcrumbs.php` (1) |
-| `aw_publisher_image()` | 1 | `includes/helpers.php` (1) |
+| `sourceweb_publisher_image()` | 1 | `includes/helpers.php` (1) |
 | `aw_term_section()` | 1 | `includes/programmatic.php` (1) |
 
 ## `plugins/aw-sourcing`
@@ -165,14 +165,13 @@ Core and older code.
 | `aw_keep_modified()` | 1 | `includes/news-titles.php` (1) |
 | `aw_listing_put_phone()` | 1 | `includes/ingest.php` (1) |
 | `aw_listing_types()` | 1 | `includes/enrichment.php` (1) |
-| `aw_mirror_gov_pdf()` | 1 | `includes/ingest.php` (1) |
 | `aw_phone_never_publish()` | 1 | `includes/enrichment.php` (1) |
 | `aw_press_ingest()` | 1 | `includes/ingest.php` (1) |
 | `aw_research_doi()` | 1 | `includes/ingest.php` (1) |
 | `aw_research_save_citation()` | 1 | `includes/ingest.php` (1) |
 | `aw_research_save_study_title()` | 1 | `includes/ingest.php` (1) |
 | `aw_set_campaign_links()` | 1 | `includes/ingest.php` (1) |
-| `aw_source_download()` | 1 | `includes/enrichment.php` (1) |
+| `sourceweb_source_download()` | 1 | `includes/enrichment.php` (1) |
 
 ## `tools/ci`
 
@@ -213,7 +212,6 @@ Core and older code.
 | `aw_hub_item()` | 2 | `aw1-post-page.php` (2) |
 | `aw_date()` | 1 | `campaign2-page.php` (1) |
 | `aw_i()` | 1 | `campaign2-page.php` (1) |
-| `aw_mirror_gov_pdf()` | 1 | `aw1-library.php` (1) |
 | `aw_press_ingest()` | 1 | `aw1-post-site.php` (1) |
 
 ## `plugins/planweb`

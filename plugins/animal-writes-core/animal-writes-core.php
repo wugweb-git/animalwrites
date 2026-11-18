@@ -79,16 +79,9 @@ require_once AW_CORE_DIR . 'includes/summary-display.php'; // an item's own page
 require_once AW_CORE_DIR . 'includes/news-article.php'; // News article: read-more fold and the ad-slot hook
 require_once AW_CORE_DIR . 'includes/bindings.php';
 require_once AW_CORE_DIR . 'includes/also-reported.php';
-require_once AW_CORE_DIR . 'includes/category-images.php';
 require_once AW_CORE_DIR . 'includes/cron.php';
 require_once AW_CORE_DIR . 'includes/display.php';
-require_once AW_CORE_DIR . 'includes/media.php';
-require_once AW_CORE_DIR . 'includes/media-autofill.php'; // New image uploads: fill empty name, alt, caption, description and image context
-require_once AW_CORE_DIR . 'includes/media-columns.php'; // Media Library columns: slug, also used in, SEO score, optimisation; no Author (owner, 31 Oct 2026)
-require_once AW_CORE_DIR . 'includes/media-groups.php'; // Media group label for every attachment: core taxonomy, column, REST
-require_once AW_CORE_DIR . 'includes/media-webp.php'; // Resized copies of JPEG and PNG uploads as WebP; Media → Make WebP converts existing images in batches with Undo
-require_once AW_CORE_DIR . 'includes/media-merge.php'; // Media → Duplicate files: merge duplicate copies with Undo
-require_once AW_CORE_DIR . 'includes/media-reuse.php'; // Media → Reuse pictures: recycle Media Library pictures as page covers, one at a time, with Undo
+require_once AW_CORE_DIR . 'includes/media-compat.php'; // old aw_ names of the media functions that moved to Kits Core, RankWeb and SourceWeb (18 Nov 2026)
 require_once AW_CORE_DIR . 'includes/campaigns.php';
 require_once AW_CORE_DIR . 'includes/campaign-tools.php';
 require_once AW_CORE_DIR . 'includes/campaign-short.php'; // /lab, /diwali...: a campaign's short link, 301 to its page
@@ -120,8 +113,6 @@ require_once AW_CORE_DIR . 'includes/law-links.php';
 require_once AW_CORE_DIR . 'includes/home.php'; // Home: sections in the theme template, hero, FAQ section
 require_once AW_CORE_DIR . 'includes/near-opps.php';
 require_once AW_CORE_DIR . 'includes/entity-links.php';
-require_once AW_CORE_DIR . 'includes/thumbs.php';
-require_once AW_CORE_DIR . 'includes/cc0-images.php';
 require_once AW_CORE_DIR . 'includes/team-dates.php';
 require_once AW_CORE_DIR . 'includes/dashboard-activity.php';
 require_once AW_CORE_DIR . 'includes/cron-health.php';

@@ -4,7 +4,7 @@
  * by at most one post). Each entry: keep ID => extra IDs. Live data decides: the tool re-checks every group (same file,
  * same type, every reference known) before it changes anything.
  *
- * @package animal-writes-core
+ * @package kits-core
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
