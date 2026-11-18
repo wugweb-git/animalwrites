@@ -488,6 +488,28 @@ Native first; SCF, Rank Math and form adapters are layers on top.
 | WP-CLI | `wp aw …`, `wp kits …` | — | presets get `wp kits preset list` (read-only) | S / low | [admin] |
 | Editor panels | ServerSideRender previews | — | core components (`InspectorControls`, `PanelBody`) only | S / low | [admin] |
 
+## 21. Added to scope: nine more tenant files, and the sponsored blocks
+
+| File | Lines | What it does | Side | Verdict |
+|---|---|---|---|---|
+| `model.php` | 334 | Content model: Library sub-type, court, category → listing types for "Find help", two-sided relations between items | [admin] (relation boxes) + data | Tenant config (AW's model). A preset (section 12) can later declare relations; the relation storage stays as is |
+| `reports.php` | 204 | "Report a mistake": `/report/?item=`, `[aw_report_box]`, private type `aw_report` | [front-end] form + [admin] records | Form → Fluent Forms block (blocks-spec 3.7); the `aw_report` records stay tenant. No move now |
+| `near-opps.php` | 82 | Home "Opportunities near you": server draws the newest, `GET aw/v1/opps-near?state=` swaps in local rows | [front-end] | Tenant (AW Opportunities and places). Generic later as a Query Loop variation with a "near the visitor" filter; REST route stays custom (core has none) |
+| `team-dates.php` | 351 | The team's calendar, Kits → Dates (option `aw_team_dates`); PlanWeb takes over when on | [admin] | Not content. Stays until PlanWeb replaces it (PlanWeb's track); no Kits Core move |
+| `category-moves.php` | 78 | 301s from the old `/topic/{slug}/` addresses to `/category/{slug}/` | [front-end] (redirects) | Tenant: AW's own URL history. Keep for good (old links); never generic |
+| `law-links.php` | 204 | Acts and Rules: crawlable links to every Act and Rule (`render_block_core/query`) | [front-end] | Tenant (Library). An SEO internal-link feature that fits RankWeb's internal-links track; plan only |
+| `issuers.php` | 106 | Issuer label on Library items (meta `aw_issuer`) | [front-end] label + [admin] field | Tenant config; its label can become a `kits_post_fields` key (`issuer`) so templates bind it |
+| `research-citation.php` | 141 | Research credit line in Sources and the ScholarlyArticle in schema | [front-end] | Tenant. The credit line → a binding key; the schema part goes through the RankWeb contract (section 13) |
+| `entity-links.php` | 112 | Names in a summary linked to their pages (`render_block_core/post-excerpt`, meta `aw_entities`) | [front-end] | Tenant (SourceWeb data). Generic in shape; plan only, with SourceWeb/RankWeb |
+
+None of the nine moves in this PR: each one either holds AW data rules or changes what visitors see.
+
+**`sponsored-blocks.php` — KEEP (owner, 18 Nov 2026).** `animal-writes/sponsored-item` and
+`animal-writes/sponsored-banner` (104 lines; [front-end] blocks, inserter group "Sponsored") are **dormant until the
+monetisation plan; the hide-monetary rule applies** (no money items shown on the site until the owner says so).
+Not moved, renamed or deleted here. When the monetisation plan (including ads) starts, they are the base for
+`kits/sponsored` (blocks-spec 2.7), and the Advanced Ads rule (a page with a sponsored block carries no ads) stays.
+
 ## 20. Updated staged plan and owner questions
 
 | Stage | Work | Visible change |
@@ -505,3 +527,4 @@ Owner questions (added):
 7. Card minimum width: `docs/card-sizes.md` says 18rem, the token is 17rem — which is right?
 8. `aw_campaign_link` and `aw_media_group`: confirm both stay as the two non-tag relations.
 9. Masonry: wanted? (Reading order and screen readers make it the riskiest layout.)
+10. Sponsored blocks: confirm they stay dormant until the monetisation plan (section 21).
