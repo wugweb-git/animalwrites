@@ -83,7 +83,7 @@ function kits_thumb_schedule() {
 	}
 }
 add_action( 'aw_thumb_rebuild', 'kits_thumb_rebuild' );
-add_action( 'aw_daily', 'kits_thumb_rebuild' );
+add_action( 'wp_scheduled_delete', 'kits_thumb_rebuild' ); // daily, with WordPress's own daily clean-up (was the site's aw_daily event)
 add_action(
 	'transition_post_status',
 	function ( $new, $old, $post ) {

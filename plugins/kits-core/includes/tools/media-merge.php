@@ -27,6 +27,11 @@ function kits_media_merge_meta_keys() {
 	return array( 'aw_source_image_att', 'rank_math_facebook_image_id', 'rank_math_twitter_image_id', 'kits_og_image', 'aw_campaign_share_image', 'aw_campaign_share_story', 'aw_campaign_share_post' );
 }
 
+/** Post meta keys known to hold an attachment ID (the Media columns' list, kept here so the check needs no other plugin). */
+function kits_media_merge_known_keys() {
+	return array( '_thumbnail_id', 'aw_source_image_att', 'aw_doc_preview', 'aw_file_id', 'aw_press_logo', 'aw_org_logo', 'aw_c_logo', 'aw_claim_logo', 'aw_banner_image', 'rank_math_facebook_image_id', 'kits_og_image' );
+}
+
 /** Post meta keys that hold the address of the picture next to an ID key above (repointed with it). */
 function kits_media_merge_url_keys() {
 	return array( 'rank_math_facebook_image', 'rank_math_twitter_image' );
@@ -143,7 +148,7 @@ function kits_media_merge_check( $keep, array $extras ) {
 	$ids     = array_map( 'strval', $extras ); // Exact text match, so '14468abc' or '14468.5' never counts as an ID.
 	$in      = implode( ',', array_fill( 0, count( $ids ), '%s' ) );
 	$allowed = kits_media_merge_meta_keys();
-	$known   = array_values( array_unique( array_merge( function_exists( 'rankweb_media_post_meta_uses' ) ? array_keys( rankweb_media_post_meta_uses() ) : array(), $allowed ) ) );
+	$known   = array_values( array_unique( array_merge( kits_media_merge_known_keys(), function_exists( 'rankweb_media_post_meta_uses' ) ? array_keys( rankweb_media_post_meta_uses() ) : array(), $allowed ) ) );
 
 	// phpcs:disable WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- the lists are only %s placeholders joined with implode or array_fill; every value is bound through prepare()
 	$rows = $wpdb->get_results( $wpdb->prepare( "SELECT meta_id, post_id, meta_key, meta_value FROM {$wpdb->postmeta} WHERE meta_value IN (" . implode( ',', array_fill( 0, count( $ids ), '%s' ) ) . ") AND ( meta_key REGEXP 'image|img|logo|thumb|icon|photo|file|preview|_att|banner|picture|attachment|hero|cover|poster|avatar|_id$|_og' OR meta_key IN (" . ( $known ? implode( ',', array_fill( 0, count( $known ), '%s' ) ) : "''" ) . ') )', array_merge( $ids, $known ) ) );
@@ -459,7 +464,7 @@ function kits_media_merge_screen() {
 	foreach ( $groups as $keep => $extras ) {
 		$ids = array_merge( $ids, array( $keep ), $extras );
 	}
-	$use  = rankweb_media_usage( $ids );
+	$use  = function_exists( 'rankweb_media_usage' ) ? rankweb_media_usage( $ids ) : array(); // RankWeb's Media columns; without it the Used in cells stay empty
 	$rows = array();
 	foreach ( $groups as $keep => $extras ) {
 		$e      = $log[ $keep ] ?? array();

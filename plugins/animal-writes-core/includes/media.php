@@ -1,6 +1,8 @@
 <?php
 /**
- * Card images: the article's own preview image (linked, not copied) or a placard-style fallback.
+ * Library documents: the hosted PDF viewer, the blurred preview of a document we may not host, which government
+ * PDFs we may host and the mirror that copies them, the letter print button, the egazette certificate and court
+ * links in a new tab. The card image rules moved to Kits Core (includes/card-images.php) on 18 Nov 2026.
  *
  * @package animal-writes-core
  */

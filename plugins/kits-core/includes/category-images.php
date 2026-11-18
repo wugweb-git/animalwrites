@@ -43,9 +43,9 @@ function kits_category_image_field( $id ) {
 	echo '</div>';
 }
 
-foreach ( KITS_PHOTO_TAXONOMIES as $aw_tx ) {
+foreach ( KITS_PHOTO_TAXONOMIES as $kits_photo_tax ) {
 	add_action(
-		"{$aw_tx}_add_form_fields",
+		"{$kits_photo_tax}_add_form_fields",
 		function () {
 			echo '<div class="form-field"><label>Photo</label>';
 			kits_category_image_field( 0 );
@@ -53,18 +53,19 @@ foreach ( KITS_PHOTO_TAXONOMIES as $aw_tx ) {
 		}
 	);
 	add_action(
-		"{$aw_tx}_edit_form_fields",
+		"{$kits_photo_tax}_edit_form_fields",
 		function ( $term ) {
 			echo '<tr class="form-field"><th scope="row"><label>Photo</label></th><td>';
 			kits_category_image_field( kits_category_image_id( $term ) );
 			echo '</td></tr>';
 		}
 	);
-	add_action( "created_{$aw_tx}", 'kits_category_image_save' );
-	add_action( "edited_{$aw_tx}", 'kits_category_image_save' );
-	add_filter( "manage_edit-{$aw_tx}_columns", fn( $c ) => array_slice( $c, 0, 1, true ) + array( 'aw_category_image' => 'Photo' ) + array_slice( $c, 1, null, true ) );
-	add_filter( "manage_{$aw_tx}_custom_column", 'kits_category_image_column', 10, 3 );
+	add_action( "created_{$kits_photo_tax}", 'kits_category_image_save' );
+	add_action( "edited_{$kits_photo_tax}", 'kits_category_image_save' );
+	add_filter( "manage_edit-{$kits_photo_tax}_columns", fn( $c ) => array_slice( $c, 0, 1, true ) + array( 'aw_category_image' => 'Photo' ) + array_slice( $c, 1, null, true ) );
+	add_filter( "manage_{$kits_photo_tax}_custom_column", 'kits_category_image_column', 10, 3 );
 }
+unset( $kits_photo_tax );
 
 /** Save the field (term edit screens only; WordPress checks the term nonce before these hooks run). */
 function kits_category_image_save( $term_id ) {
