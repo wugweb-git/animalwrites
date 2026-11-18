@@ -304,7 +304,7 @@ add_action(
 		if ( ! $parts ) {
 			return;
 		}
-		$shown = array_merge( array_keys( $forms ), array_map( 'kits_ff_id', array_keys( MAILWEB_WF_KEYS ) ) );
+		$shown = array_merge( array_keys( $forms ), ( function_exists( 'kits_ff_id' ) ? array_map( 'kits_ff_id', array_keys( MAILWEB_WF_KEYS ) ) : array() ) );
 		$other = array_diff_key( $counts, array_flip( $shown ) );
 		if ( $other && current_user_can( 'manage_options' ) ) {
 			global $wpdb;
