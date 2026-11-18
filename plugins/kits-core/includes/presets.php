@@ -879,14 +879,13 @@ function kits_presets_consent_sweep(): void {
 		for ( $round = 0; $round < 100; $round++ ) { // 100 x 100 items at most on one request; the rest on the next change.
 			$ids = get_posts(
 				array(
-					'post_type'        => $type,
-					'post_status'      => array( 'publish', 'future' ),
-					'fields'           => 'ids',
-					'posts_per_page'   => 100,
-					'no_found_rows'    => true,
-					'suppress_filters' => true,
+					'post_type'      => $type,
+					'post_status'    => array( 'publish', 'future' ),
+					'fields'         => 'ids',
+					'posts_per_page' => 100,
+					'no_found_rows'  => true,
 					// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- once, when the consent fields change.
-					'meta_query'       => array(
+					'meta_query'     => array(
 						'relation' => 'OR',
 						array(
 							'key'     => $field,
