@@ -2,9 +2,11 @@
 /**
  * Tests that need no WordPress (owner rule: no local WordPress or MySQL): the ops pieces moved from Animal Writes Core
  * on 18 Nov 2026. The error pages (includes/error-pages.php) install a missing drop-in, update ours, leave a current
- * one and never replace a file without the marker; the shipped drop-ins carry the marker. The daily backup
- * (includes/backups.php) keeps its cron hook, option and REST route names, and the UpdraftPlus alert reads the newest
- * remote backup. The old aw_ names still answer.
+ * one and never replace a file without the marker; the site's drop-ins carry the marker and sit in the site folder
+ * (assets/site/dropins/, left out of Kits builds), and nothing installs without them. The daily backup
+ * (includes/backups.php) is off unless switched on, is switched on once by itself where it already ran, keeps its cron
+ * hook, option and REST route names, and the UpdraftPlus alert reads the newest remote backup. The old aw_ names still
+ * answer.
  *
  * Usage: php plugins/kits-core/tests/ops-tests.php
  *
@@ -25,12 +27,51 @@ define( 'DAY_IN_SECONDS', 86400 );
 $GLOBALS['t_hooks']   = array();
 $GLOBALS['t_options'] = array();
 
+$GLOBALS['t_filters'] = array();
+$GLOBALS['t_cron']    = array();
+
 function add_action( $hook, $cb, $prio = 10, $args = 1 ) {
 	$GLOBALS['t_hooks'][ $hook ][] = $cb;
 	return true;
 }
+function add_filter( $hook, $cb, $prio = 10, $args = 1 ) {
+	return add_action( $hook, $cb, $prio, $args );
+}
+function apply_filters( $hook, $value, ...$rest ) {
+	return array_key_exists( $hook, $GLOBALS['t_filters'] ) ? $GLOBALS['t_filters'][ $hook ] : $value;
+}
 function get_option( $name, $default = false ) {
 	return array_key_exists( $name, $GLOBALS['t_options'] ) ? $GLOBALS['t_options'][ $name ] : $default;
+}
+function add_option( $name, $value = '', $deprecated = '', $autoload = null ) {
+	if ( array_key_exists( $name, $GLOBALS['t_options'] ) ) {
+		return false;
+	}
+	$GLOBALS['t_options'][ $name ] = $value;
+	return true;
+}
+function wp_next_scheduled( $hook ) {
+	return $GLOBALS['t_cron'][ $hook ] ?? false;
+}
+function wp_schedule_event( $at, $recurrence, $hook ) {
+	$GLOBALS['t_cron'][ $hook ] = $at;
+	return true;
+}
+function wp_clear_scheduled_hook( $hook ) {
+	unset( $GLOBALS['t_cron'][ $hook ] );
+	return 1;
+}
+function register_setting( ...$args ) {
+	return true;
+}
+function rest_sanitize_boolean( $v ) {
+	return in_array( $v, array( true, 1, '1', 'true', 'on' ), true );
+}
+/** Run every init callback (the scheduler and the setting), as WordPress does on each request. */
+function t_init(): void {
+	foreach ( $GLOBALS['t_hooks']['init'] ?? array() as $cb ) {
+		$cb();
+	}
 }
 function update_option( $name, $value, $autoload = null ) {
 	$GLOBALS['t_options'][ $name ] = $value;
@@ -62,12 +103,16 @@ function check( $label, $ok ) {
 require KITS_CORE_DIR . 'includes/error-pages.php';
 require KITS_CORE_DIR . 'includes/backups.php';
 
-// The shipped drop-ins carry the marker (or the sync would report no-source and never install them).
+// The site's drop-ins carry the marker (or the sync would report no-source and never install them).
+check( 'the error pages live in the site folder Kits builds leave out', 'assets/site/dropins/' === substr( KITS_ERROR_PAGE_DIR, strlen( KITS_CORE_DIR ) ) && ! is_dir( KITS_CORE_DIR . 'dropins' ) );
+check( 'this site has its error pages', kits_error_pages_here() );
 foreach ( KITS_ERROR_PAGE_FILES as $name ) {
-	$src = (string) file_get_contents( KITS_CORE_DIR . 'dropins/' . $name );
-	check( "dropins/$name carries the marker", false !== strpos( $src, KITS_ERROR_PAGE_MARKER ) );
-	check( "dropins/$name looks for its pictures in kits-core", false !== strpos( $src, "'/plugins/kits-core/assets/error/'" ) && false === strpos( $src, '/plugins/animal-writes-core/assets' ) );
+	$src = (string) file_get_contents( KITS_ERROR_PAGE_DIR . $name );
+	check( "assets/site/dropins/$name carries the marker", false !== strpos( $src, KITS_ERROR_PAGE_MARKER ) );
+	check( "assets/site/dropins/$name looks for its pictures in the site folder", false !== strpos( $src, "'/plugins/kits-core/assets/site/dropins/'" ) && false === strpos( $src, '/plugins/animal-writes-core/assets' ) && false === strpos( $src, "'/plugins/kits-core/assets/error/'" ) );
 }
+$pages_src = (string) file_get_contents( KITS_CORE_DIR . 'includes/error-pages.php' );
+check( 'without the site folder: no copy, no option, no hourly check, no notice', false !== strpos( $pages_src, "if ( ! kits_error_pages_here() ) {\n\t\treturn array();" ) && false !== strpos( $pages_src, "wp_doing_ajax() || ! kits_error_pages_here()" ) && false !== strpos( $pages_src, "current_user_can( 'manage_options' ) || ! kits_error_pages_here()" ) );
 check( 'the marker is unchanged, so the drop-ins already installed stay ours', 'Animal Writes error page' === KITS_ERROR_PAGE_MARKER );
 
 // One drop-in through every state.
@@ -88,6 +133,27 @@ check( 'no temporary files are left behind', array() === glob( $dir . '/.*.tmp' 
 check( 'old name aw_error_page_sync_one() still answers', 'no-source' === aw_error_page_sync_one( $src, $dst ) );
 array_map( 'unlink', glob( $dir . '/*' ) );
 @rmdir( $dir );
+
+// The switch: off by default, on once by itself where the backup already ran (live keeps it with no manual step).
+check( 'a new site: off, stored once as off', false === kits_daily_backup_on() && '0' === get_option( 'kits_daily_backup' ) );
+t_init();
+check( 'off: nothing is booked', false === wp_next_scheduled( 'aw_daily_backup' ) );
+check( 'off: a booked run writes nothing', array( 'error' => 'off' ) === kits_daily_backup_run() );
+$GLOBALS['t_options'] = array( 'aw_backup_last' => array( 'at' => '2026-11-18 03:30:18' ) );
+check( 'where the backup already ran (aw_backup_last): switched on once', true === kits_daily_backup_on() && '1' === get_option( 'kits_daily_backup' ) );
+t_init();
+check( 'on: the daily run is booked', false !== wp_next_scheduled( 'aw_daily_backup' ) );
+$GLOBALS['t_options'] = array();
+check( 'where a run is booked but none ran yet: switched on once', true === kits_daily_backup_on() && '1' === get_option( 'kits_daily_backup' ) );
+$GLOBALS['t_options'] = array( 'kits_daily_backup' => '0', 'aw_backup_last' => array( 'at' => 'x' ) );
+check( 'a stored off wins over the old evidence (asked once only)', false === kits_daily_backup_on() );
+t_init();
+check( 'switched off: the booked run is taken off', false === wp_next_scheduled( 'aw_daily_backup' ) );
+$GLOBALS['t_filters']['kits_daily_backup'] = true;
+check( 'the filter kits_daily_backup can force it on', true === kits_daily_backup_on() );
+unset( $GLOBALS['t_filters']['kits_daily_backup'] );
+$GLOBALS['t_options'] = array();
+$GLOBALS['t_cron']    = array();
 
 // Names the server, the workers repository and the dashboards rely on.
 check( 'cron hook aw_daily_backup runs the backup', in_array( 'kits_daily_backup_run', $GLOBALS['t_hooks']['aw_daily_backup'] ?? array(), true ) );

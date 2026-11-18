@@ -3,7 +3,7 @@
  * Branded server error pages: the PHP fatal error page (500) and the update maintenance page (503).
  *
  * WordPress only reads these as drop-ins in wp-content (php-error.php and maintenance.php), which is outside what a
- * deploy updates, so the sources live in this plugin's dropins/ folder and are copied there. A copy is made when the
+ * deploy updates, so the sources live in this plugin's site folder assets/site/dropins/ and are copied there. A copy is made when the
  * file is missing or differs from the plugin's version, on the first web request after a deploy (when the deployed
  * commit changes, see deploy-purge.php) and on admin screens. A file at that path without the marker
  * "Animal Writes error page" belongs to something else and is never replaced. Nothing here can stop a request: if
@@ -12,6 +12,10 @@
  * Moved from Animal Writes Core (18 Nov 2026) with the dropins/ folder: the marker, the option aw_error_pages and the
  * transient aw_error_pages_checked keep their names, so the pages already in wp-content stay recognised as ours and
  * are updated in place. The old aw_ functions stay at the end of this file as thin wrappers until nothing calls them.
+ *
+ * Site-only (owner, 18 Nov 2026): the Animal Writes pages and pictures are in assets/site/, which tools/build-dist.py
+ * leaves out of every Kits zip. Where that folder is not there, nothing is copied, no option is written and no notice
+ * shows: other sites keep WordPress's own error pages.
  *
  * @package kits-core
  */
@@ -23,8 +27,25 @@ if ( ! defined( 'ABSPATH' ) ) {
 /** Marker that every page in dropins/ carries; only files with it are replaced. */
 const KITS_ERROR_PAGE_MARKER = 'Animal Writes error page';
 
-/** Drop-in file names (the same in dropins/ and wp-content/). */
+/** Drop-in file names (the same in assets/site/dropins/ and wp-content/). */
 const KITS_ERROR_PAGE_FILES = array( 'php-error.php', 'maintenance.php' );
+
+/** The site folder that holds this site's error pages (left out of Kits builds). */
+const KITS_ERROR_PAGE_DIR = KITS_CORE_DIR . 'assets/site/dropins/';
+
+/**
+ * Whether this site has its own error pages (the site folder with at least one of the drop-ins).
+ *
+ * @return bool
+ */
+function kits_error_pages_here(): bool {
+	foreach ( KITS_ERROR_PAGE_FILES as $name ) {
+		if ( is_readable( KITS_ERROR_PAGE_DIR . $name ) ) {
+			return true;
+		}
+	}
+	return false;
+}
 
 /**
  * Copy each drop-in into wp-content when it is missing or out of date.
@@ -32,9 +53,12 @@ const KITS_ERROR_PAGE_FILES = array( 'php-error.php', 'maintenance.php' );
  * @return array<string,string> File name => 'current', 'installed', 'updated', 'foreign', 'unwritable' or 'no-source'.
  */
 function kits_error_pages_sync() {
+	if ( ! kits_error_pages_here() ) {
+		return array(); // not this site's: nothing to install
+	}
 	$status = array();
 	foreach ( KITS_ERROR_PAGE_FILES as $name ) {
-		$status[ $name ] = kits_error_page_sync_one( KITS_CORE_DIR . 'dropins/' . $name, WP_CONTENT_DIR . '/' . $name );
+		$status[ $name ] = kits_error_page_sync_one( KITS_ERROR_PAGE_DIR . $name, WP_CONTENT_DIR . '/' . $name );
 	}
 	if ( get_option( 'aw_error_pages' ) !== $status ) {
 		update_option( 'aw_error_pages', $status, false );
@@ -93,7 +117,7 @@ add_action( 'update_option_aw_deployed_head', 'kits_error_pages_sync' );
 add_action(
 	'admin_init',
 	function () {
-		if ( wp_doing_ajax() || get_transient( 'aw_error_pages_checked' ) ) {
+		if ( wp_doing_ajax() || ! kits_error_pages_here() || get_transient( 'aw_error_pages_checked' ) ) {
 			return;
 		}
 		set_transient( 'aw_error_pages_checked', 1, HOUR_IN_SECONDS );
@@ -106,7 +130,7 @@ add_action(
 	'admin_notices',
 	function () {
 		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
-		if ( ! $screen || 'dashboard' !== $screen->id || ! current_user_can( 'manage_options' ) ) {
+		if ( ! $screen || 'dashboard' !== $screen->id || ! current_user_can( 'manage_options' ) || ! kits_error_pages_here() ) {
 			return;
 		}
 		$bad = array_keys( array_filter( (array) get_option( 'aw_error_pages', array() ), fn( $s ) => in_array( $s, array( 'unwritable', 'foreign', 'no-source' ), true ) ) );

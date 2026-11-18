@@ -3,7 +3,8 @@
  * Animal Writes error page (wp-content/php-error.php): shown instead of WordPress's default page when PHP stops
  * with a fatal error.
  *
- * Copied into wp-content by includes/error-pages.php, which only replaces a file that carries the marker
+ * Copied into wp-content by Kits Core's includes/error-pages.php (the source lives in the site folder assets/site/dropins/, which
+ * Kits builds leave out), which only replaces a file that carries the marker
  * "Animal Writes error page". WordPress may be half-loaded when this runs, so the page is self-contained: no
  * WordPress functions, no scripts and no tracking; only the site's own font file and, when present, its picture (both static files).
  *
@@ -47,10 +48,10 @@ if ( ! headers_sent() ) {
 }
 ?>
 <?php
-// The picture: the owner's own files in kits-core/assets/error/ (500-wide.webp, 500-phone.webp; the 404 page's own
-// pictures stay in animal-writes-core/assets/error/ until not-found.php moves) when they are there, otherwise the Media Library photo 23313 (a street dog resting on a promenade
+// The picture: the owner's own files next to this page's source, kits-core/assets/site/dropins/ (500-wide.webp,
+// 500-phone.webp; the 404 page's own pictures stay in animal-writes-core/assets/error/ until not-found.php moves) when they are there, otherwise the Media Library photo 23313 (a street dog resting on a promenade
 // at dusk). Both are static files the web server sends without WordPress. Without either, the slot shows the surface tint.
-$aw_pic_dir = ( defined( 'WP_CONTENT_DIR' ) ? WP_CONTENT_DIR : dirname( __FILE__ ) ) . '/plugins/kits-core/assets/error/';
+$aw_pic_dir = ( defined( 'WP_CONTENT_DIR' ) ? WP_CONTENT_DIR : dirname( __FILE__ ) ) . '/plugins/kits-core/assets/site/dropins/';
 $aw_wide    = is_readable( $aw_pic_dir . '500-wide.webp' );
 $aw_phone   = is_readable( $aw_pic_dir . '500-phone.webp' );
 $aw_own     = $aw_wide || $aw_phone;
@@ -122,7 +123,7 @@ a:focus-visible{outline:var(--kit-focus-width) solid var(--kit-color-focus);outl
 </ul>
 <p class="note">If it keeps happening, write to us at <a href="mailto:contact@animalwrites.in">contact@animalwrites.in</a>.</p>
 </div>
-<figure class="media"><?php if ( $aw_own ) : ?><picture><?php if ( $aw_wide && $aw_phone ) : ?><source media="(min-width: 768px)" srcset="/wp-content/plugins/kits-core/assets/error/500-wide.webp" width="2400" height="1350"><?php endif; ?><img src="/wp-content/plugins/kits-core/assets/error/500-<?php echo $aw_phone ? 'phone' : 'wide'; ?>.webp" width="1200" height="900" alt="" decoding="async"></picture><?php else : ?><img src="<?php echo $aw_photo; ?>-1024x576.avif" srcset="<?php echo $aw_photo; ?>-768x432.avif 768w, <?php echo $aw_photo; ?>-1024x576.avif 1024w, <?php echo $aw_photo; ?>-1536x864.avif 1536w, <?php echo $aw_photo; ?>.avif 1600w" sizes="(min-width: 1200px) 560px, (min-width: 768px) 47vw, 100vw" width="1600" height="900" alt="" decoding="async"><?php endif; ?></figure><?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $aw_photo is the fixed upload path set at the top of this file. ?> <?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $aw_photo is the fixed upload path set at the top of this file. ?>
+<figure class="media"><?php if ( $aw_own ) : ?><picture><?php if ( $aw_wide && $aw_phone ) : ?><source media="(min-width: 768px)" srcset="/wp-content/plugins/kits-core/assets/site/dropins/500-wide.webp" width="2400" height="1350"><?php endif; ?><img src="/wp-content/plugins/kits-core/assets/site/dropins/500-<?php echo $aw_phone ? 'phone' : 'wide'; ?>.webp" width="1200" height="900" alt="" decoding="async"></picture><?php else : ?><img src="<?php echo $aw_photo; ?>-1024x576.avif" srcset="<?php echo $aw_photo; ?>-768x432.avif 768w, <?php echo $aw_photo; ?>-1024x576.avif 1024w, <?php echo $aw_photo; ?>-1536x864.avif 1536w, <?php echo $aw_photo; ?>.avif 1600w" sizes="(min-width: 1200px) 560px, (min-width: 768px) 47vw, 100vw" width="1600" height="900" alt="" decoding="async"><?php endif; ?></figure><?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $aw_photo is the fixed upload path set at the top of this file. ?> <?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $aw_photo is the fixed upload path set at the top of this file. ?>
 </div>
 </main>
 </body>

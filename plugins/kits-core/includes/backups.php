@@ -9,6 +9,13 @@
  * REST route aw/v1/backup/(db|code) keep their names (the workers repository's off-server copy calls the route). The
  * old aw_ functions stay at the end of this file as thin wrappers until nothing calls them.
  *
+ * Off unless the site turns it on (owner, 18 Nov 2026): Kits → Settings → Backup (option kits_daily_backup) or the
+ * filter kits_daily_backup. A site where this backup already ran (option aw_backup_last, or the event aw_daily_backup
+ * booked) is switched on once, by itself, the first time this file loads there, so Animal Writes keeps its backup with
+ * no manual step. When off: nothing is booked or written, the download route is not registered, and an event booked
+ * earlier is taken off. Backup files already in ~/backups are never touched by switching it off.
+ * The UpdraftPlus alert at the end of this file only reads UpdraftPlus's own options and is not part of the switch.
+ *
  * @package kits-core
  */
 
@@ -23,10 +30,36 @@ function kits_daily_backup_dir() {
 	return dirname( untrailingslashit( ABSPATH ), 3 ) . '/backups';
 }
 
+/** The switch: '1' on, '0' off; missing until the one-time choice below has run. */
+const KITS_DAILY_BACKUP_OPTION = 'kits_daily_backup';
+
+/**
+ * Whether the daily backup runs on this site. Off by default. The first time it is asked on a site that has no
+ * choice stored yet, it stores one: on where this backup already ran (aw_backup_last) or is booked (aw_daily_backup),
+ * off everywhere else. A site can force it with the filter kits_daily_backup.
+ *
+ * @return bool
+ */
+function kits_daily_backup_on(): bool {
+	$stored = get_option( KITS_DAILY_BACKUP_OPTION, null );
+	if ( null === $stored ) {
+		$stored = ( get_option( 'aw_backup_last' ) || wp_next_scheduled( 'aw_daily_backup' ) ) ? '1' : '0';
+		add_option( KITS_DAILY_BACKUP_OPTION, $stored ); // autoloaded: read on every request, so no extra query.
+	}
+	return (bool) apply_filters( 'kits_daily_backup', '1' === (string) $stored );
+}
+
 add_action(
 	'init',
 	function () {
-		if ( ! wp_next_scheduled( 'aw_daily_backup' ) ) {
+		$booked = wp_next_scheduled( 'aw_daily_backup' );
+		if ( ! kits_daily_backup_on() ) {
+			if ( $booked ) {
+				wp_clear_scheduled_hook( 'aw_daily_backup' );
+			}
+			return;
+		}
+		if ( ! $booked ) {
 			$at = strtotime( 'tomorrow 03:30 Asia/Kolkata' ); // a quiet hour
 			wp_schedule_event( $at ? $at : time() + HOUR_IN_SECONDS, 'daily', 'aw_daily_backup' );
 		}
@@ -34,12 +67,77 @@ add_action(
 );
 add_action( 'aw_daily_backup', 'kits_daily_backup_run' );
 
+// Kits → Settings → Backup: the switch (core Settings API, its own form like Uninstall).
+add_action(
+	'init',
+	function () {
+		register_setting(
+			'kits_daily_backup',
+			KITS_DAILY_BACKUP_OPTION,
+			array(
+				'type'              => 'string',
+				'sanitize_callback' => static fn( $v ): string => rest_sanitize_boolean( $v ) ? '1' : '0',
+				'show_in_rest'      => false,
+			)
+		);
+	}
+);
+add_action(
+	'admin_init',
+	function () {
+		add_settings_section( 'kits_daily_backup', '', '__return_null', 'kits-backup' );
+		add_settings_field( KITS_DAILY_BACKUP_OPTION, 'Daily backup', 'kits_daily_backup_field', 'kits-backup', 'kits_daily_backup', array( 'label_for' => KITS_DAILY_BACKUP_OPTION ) );
+	}
+);
+add_filter(
+	'kits_settings_sections',
+	function ( $sections ) {
+		$sections           = (array) $sections;
+		$sections['backup'] = array(
+			'title'  => 'Backup',
+			'render' => 'kits_daily_backup_form',
+			'cap'    => 'manage_options',
+			'order'  => 85,
+		);
+		return $sections;
+	}
+);
+
+/** The Backup box. */
+function kits_daily_backup_field(): void {
+	$stored = '1' === (string) get_option( KITS_DAILY_BACKUP_OPTION, '0' );
+	$forced = kits_daily_backup_on() !== $stored ? ' This site sets it in code (filter kits_daily_backup), so the box does not decide.' : '';
+	printf(
+		'<input type="checkbox" id="%1$s" name="%1$s" value="1"%2$s> <p class="description">%3$s</p>',
+		esc_attr( KITS_DAILY_BACKUP_OPTION ),
+		checked( $stored, true, false ),
+		esc_html( 'Every day at 03:30 (India time), a copy of the database and of the deployed code goes to the backups folder in the hosting account, outside the website, kept ' . KITS_BACKUP_KEEP_DAYS . ' days. Off: nothing is written; backups already there stay.' . $forced )
+	);
+	if ( function_exists( 'kits_daily_backup_site_check' ) ) {
+		kits_daily_backup_site_check();
+	}
+}
+
+/** Kits → Settings → Backup: its own form, coming back to its section after the save. */
+function kits_daily_backup_form(): void {
+	echo '<form method="post" action="options.php">';
+	echo '<input type="hidden" name="option_page" value="kits_daily_backup"><input type="hidden" name="action" value="update">';
+	wp_nonce_field( 'kits_daily_backup-options', '_wpnonce', false );
+	echo '<input type="hidden" name="_wp_http_referer" value="' . esc_attr( wp_make_link_relative( admin_url( 'admin.php?page=kits-settings&kits_section=backup' ) ) ) . '">';
+	do_settings_sections( 'kits-backup' );
+	submit_button( 'Save backup setting' );
+	echo '</form>';
+}
+
 /**
  * Write today's database and code backups and remove automatic ones older than 14 days.
  *
  * @return array What was written.
  */
 function kits_daily_backup_run() {
+	if ( ! kits_daily_backup_on() ) {
+		return array( 'error' => 'off' ); // switched off after the event was booked
+	}
 	if ( function_exists( 'set_time_limit' ) ) {
 		set_time_limit( 600 );
 	}
@@ -112,6 +210,10 @@ function kits_daily_backup_site_check() {
 	$b = get_option( 'aw_backup_last' );
 	$n = wp_next_scheduled( 'aw_daily_backup' );
 	echo '<h2>Daily backup</h2><p>';
+	if ( ! kits_daily_backup_on() ) {
+		echo 'Off (Kits → Settings → Backup).</p>';
+		return;
+	}
 	if ( is_array( $b ) ) {
 		echo 'Last: ' . esc_html( $b['at'] ) . ( isset( $b['db'] ) ? ' · database ' . esc_html( size_format( $b['db'][1] ) ) : ' · database: not written' ) . ( isset( $b['code'] ) ? ' · code ' . esc_html( size_format( $b['code'][1] ) ) : ' · code: not written' ) . '.';
 	} else {
@@ -129,6 +231,9 @@ add_action( 'aw_site_check_after', 'kits_daily_backup_site_check' );
 add_action(
 	'rest_api_init',
 	function () {
+		if ( ! kits_daily_backup_on() ) {
+			return;
+		}
 		register_rest_route(
 			'aw/v1',
 			'/backup/(?P<kind>db|code)',

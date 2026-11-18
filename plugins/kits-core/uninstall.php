@@ -9,7 +9,7 @@
  * Options:
  *   kits_theme_options, kits_page_defaults, kits_settings_backup, kits_settings_backup_defaults, kits_altcha_key,
  *   kits_ga4_via_gtm, kits_preview_devices, kits_preview_ips, kits_preview_links, kits_spot_map, kits_presets_enabled,
- *   aw_backup_last (the last daily backup, backups.php), aw_error_pages (the error pages' state, error-pages.php),
+ *   kits_daily_backup (the daily backup's switch) and aw_backup_last (its last run, backups.php), aw_error_pages (the error pages' state, error-pages.php),
  *   kits_delete_data_on_uninstall.
  * Transients (they expire anyway): kits_preview_link_*, kits_thanks_*, kits_transfer_result_*, kits_altcha_*, and the
  *   site transient kits_update_release, aw_error_pages_checked.
@@ -56,6 +56,7 @@ $kits_options = array(
 	'kits_preview_links',
 	'kits_spot_map',
 	'kits_presets_enabled',
+	'kits_daily_backup',
 	'aw_backup_last',
 	'aw_error_pages',
 );
