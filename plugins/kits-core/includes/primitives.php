@@ -23,6 +23,8 @@ if ( ! function_exists( 'kits_term_url' ) ) { // aw-seo-extras carries a copy fo
  *  kits_badge()          state: verified, unconfirmed, featured, sponsored, ad, closed, new
  *  kits_eyebrow()        small label that carries information                   span.kit-eyebrow
  *  kits_count()          number beside a label                                  span.kit-count
+ *  kits_icon()           a decorative icon from the theme's set                  span.kit-ico
+ *  kits_date()           the date component: calendar icon + <time>              span.kit-date
  *  kits_datecard()       a highlighted date as a calendar page (timelines, deadlines) time.kit-datecard
  *  kits_datecard_word()  a timeline step with no date yet, on the same calendar page   span.kit-datecard--undated
  *  kits_timeline()       milestones as a timeline: calendar pages, states, connectors   ol.kit-dateline
@@ -279,6 +281,38 @@ function kits_timeline( array $items, array $args = array() ) {
 
 function kits_count( $n ) {
 	return '<span class="kit-count">' . esc_html( number_format_i18n( (int) $n ) ) . '</span>';
+}
+
+/**
+ * An icon: an empty span the theme draws from its icon set (kit-ico--{name}; kit-primitives.css). Decorative, so
+ * hidden from screen readers; the words next to it carry the meaning.
+ *
+ * @param string $name  Icon name (calendar, arrow-up-right, play...).
+ * @param string $class Optional extra classes.
+ * @return string
+ */
+function kits_icon( $name, $class = '' ) {
+	return '<span class="kit-ico kit-ico--' . esc_attr( $name ) . ( '' !== $class ? ' ' . esc_attr( $class ) : '' ) . '" aria-hidden="true"></span>';
+}
+
+/**
+ * The date component: the calendar icon directly before the date, nothing between them, in a <time>. Every visible
+ * date goes through here, so all dates look and read the same.
+ *
+ * @param string|int $when  Any date strtotime() reads (Y-m-d, a full timestamp string), Ymd (the SCF date picker's
+ *                          stored value) or a Unix time.
+ * @param string     $fmt   Display format ('' = the site's date format).
+ * @param string     $class Optional extra classes on the wrapper.
+ * @return string '' when the date cannot be read.
+ */
+function kits_date( $when, $fmt = '', $class = '' ) {
+	$when = preg_match( '/^\d{8}$/', (string) $when ) ? substr( $when, 0, 4 ) . '-' . substr( $when, 4, 2 ) . '-' . substr( $when, 6, 2 ) : $when;
+	$ts   = is_numeric( $when ) ? (int) $when : strtotime( (string) $when );
+	if ( ! $ts ) {
+		return '';
+	}
+	$fmt = '' !== (string) $fmt ? (string) $fmt : (string) get_option( 'date_format' );
+	return '<span class="kit-date' . ( '' !== $class ? ' ' . esc_attr( $class ) : '' ) . '">' . kits_icon( 'calendar' ) . '<time datetime="' . esc_attr( wp_date( 'Y-m-d', $ts ) ) . '">' . esc_html( wp_date( $fmt, $ts ) ) . '</time></span>';
 }
 
 /**

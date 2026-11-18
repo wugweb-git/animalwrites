@@ -923,3 +923,7 @@ msgstr ""
 msgctxt "block keyword"
 msgid "kits"
 msgstr ""
+
+#: includes/bindings.php:97
+msgid "Kits post field"
+msgstr ""

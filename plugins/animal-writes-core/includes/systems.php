@@ -15,14 +15,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 /* ---------- Shared helpers ---------- */
 
 /**
- * Icon span.
+ * Icon span: Kits Core's kits_icon().
  *
  * @param string $name  Icon name (see aw.css 4.7), or type-{slug} for a listing or Library type (aw-type-icons.css).
  * @param string $class Optional extra classes, e.g. 'kit-ico--type' (aw_type_icon()).
  * @return string
  */
 function aw_i( $name, $class = '' ) {
-	return '<span class="kit-ico kit-ico--' . esc_attr( $name ) . ( '' !== $class ? ' ' . esc_attr( $class ) : '' ) . '" aria-hidden="true"></span>';
+	return kits_icon( $name, $class ); // the component lives in Kits Core (primitives.php); this name stays for its callers
 }
 
 /**
@@ -43,12 +43,7 @@ if ( ! defined( 'AW_DATE_FORMAT' ) ) {
 add_filter( 'pre_option_date_format', fn() => AW_DATE_FORMAT );
 
 function aw_date( $when, $fmt = AW_DATE_FORMAT ) {
-	$when = preg_match( '/^\d{8}$/', (string) $when ) ? substr( $when, 0, 4 ) . '-' . substr( $when, 4, 2 ) . '-' . substr( $when, 6, 2 ) : $when; // the date picker stores Ymd, which is not a Unix time
-	$ts   = is_numeric( $when ) ? (int) $when : strtotime( (string) $when );
-	if ( ! $ts ) {
-		return '';
-	}
-	return '<span class="kit-date aw-date">' . aw_i( 'calendar' ) . '<time datetime="' . esc_attr( wp_date( 'Y-m-d', $ts ) ) . '">' . esc_html( wp_date( $fmt, $ts ) ) . '</time></span>';
+	return kits_date( $when, $fmt, 'aw-date' ); // Kits Core's date component; aw-date stays for the site's CSS (aw.css, aw-meta.css)
 }
 
 /**
