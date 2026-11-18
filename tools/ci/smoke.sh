@@ -154,7 +154,8 @@ has "Theme Options: the app is the default" /tmp/admin.html 'kits-admin-theme-op
 for l in content-types socials share; do has "Theme Options: $l shows today's fields" /tmp/admin.html "data-kits-legacy=\"$l\""; done
 has "Theme Options → Socials: Contact links" /tmp/admin.html 'name="aw_elsewhere[0][label]"'
 # aw-keys redirects since the shared Keys screen was retired (19 Nov 2026): each plugin keeps its own keys.
-for s in aw-modules aw-dates; do admok "$s keeps its address" "admin.php?page=$s"; done
+# aw-dates is PlanWeb's own screen (Dates, or the Calendar when PlanWeb is on); PlanWeb is off here, so it is not a screen of the site (animal-writes-core used to load PlanWeb regardless, retired 19 Nov 2026).
+for s in aw-modules; do admok "$s keeps its address" "admin.php?page=$s"; done
 # Kits → Modules: the fields that were WP-CLI only (12 Nov 2026), one Settings API form.
 adm "admin.php?page=aw-modules" >/dev/null
 for f in aw_ff_send_email aw_nl_ff_form_full aw_sample_listing_ids aw_district_helplines aw_issuer_short; do has "Modules: field $f" /tmp/admin.html "name=\"$f\""; done
