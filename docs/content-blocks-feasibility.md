@@ -732,10 +732,12 @@ with it, so no option is deleted.
 taxonomy is what WordPress gives for "many items share one label". It brings counts, admin filters and a REST route,
 and it is queried with `tax_query`. A tag would mix campaigns with topic tags and give them public tag pages; post meta
 would need a slow meta query on every campaign page. This is a stored-name change (section 6), so it gets its own PR:
-- **Data:** one `UPDATE {prefix}term_taxonomy SET taxonomy = 'kits_…' WHERE taxonomy = 'aw_…'` per taxonomy, run by a
-  WP-CLI command with a dry run, a count before and after, a backup of the rows, and an undo (the reverse update).
-  Term IDs, slugs and assignments do not change.
-- **Code:** every caller switches in the same PR: 42 mentions of `aw_campaign_link` in 14 files (aw-core, RankWeb,
-  SourceWeb, tools), and 15 of `aw_media_group` in 4 files (aw-core, SourceWeb). `rest_base` stays `media-groups`.
-- **Order:** deploy the code that registers both names for one release, then run the migration, then drop the old name.
-  That way no request ever sees a missing taxonomy.
+- **Built in PR #145.** The code registers only the new names. The first web or cron load after the deploy renames
+  the `term_taxonomy` rows once (one UPDATE per taxonomy), after saving the renamed IDs in
+  `kits_taxonomy_rename_backup`. Term IDs, slugs, term meta and assignments do not change.
+- **Saved blocks.** Query Loops saved with `"taxQuery":{"aw_campaign_link":…}` are mapped to the new name by
+  `kits_taxonomy_current()`, so post content is not rewritten.
+- **WP-CLI.** `wp kits taxonomy-rename status | run [--dry-run] | undo`. `undo` goes together with rolling the code
+  back.
+- **Callers.** 42 mentions of `aw_campaign_link` in 14 files and 15 of `aw_media_group` in 4 files, all switched in
+  the same PR. The media `rest_base` stays `media-groups`.
