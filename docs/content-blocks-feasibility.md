@@ -530,5 +530,5 @@ Owner questions (added):
 7. Card minimum width: `docs/card-sizes.md` says 18rem, the token is 17rem — which is right?
 8. `aw_campaign_link` and `aw_media_group`: confirm both stay as the two non-tag relations.
 9. Masonry: wanted? (Reading order and screen readers make it the riskiest layout.)
-11. Card minimum width (see 7) is left unchanged in both places until the owner decides.
 10. Sponsored blocks: confirm they stay dormant until the monetisation plan (section 21).
+11. Card minimum width (see 7) is left unchanged in both places until the owner decides.
