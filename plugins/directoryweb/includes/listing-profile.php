@@ -58,12 +58,22 @@ function aw_listing_fields() {
 	);
 }
 
+/**
+ * Whether SCF (or ACF) is active, without Animal Writes Core: Kits Core's check when it has one, else SCF's own
+ * function. Same answer as Core's aw_scf_active() on this site.
+ *
+ * @return bool
+ */
+function directoryweb_scf_active(): bool {
+	return function_exists( 'kits_scf_active' ) ? (bool) kits_scf_active() : function_exists( 'acf_add_local_field_group' );
+}
+
 // With SCF active the listing field groups (acf-json/group_aw_listing*.json: Contact and seven more) edit these same keys; this box
 // is the fallback when SCF is off.
 add_action(
 	'add_meta_boxes_aw_listing',
 	function () {
-		if ( function_exists( 'aw_scf_active' ) && aw_scf_active() ) {
+		if ( directoryweb_scf_active() ) {
 			return;
 		}
 		add_meta_box( 'aw-listing-details', __( 'Organisation profile', 'directoryweb' ), 'aw_listing_details_box', 'aw_listing', 'normal', 'high' );
