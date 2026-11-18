@@ -164,7 +164,7 @@ function sourceweb_cc0_run() {
 		AND NOT EXISTS (SELECT 1 FROM {$wpdb->term_relationships} tr JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = tr.term_taxonomy_id AND tt.taxonomy = %s JOIN {$wpdb->terms} te ON te.term_id = tt.term_id AND te.slug LIKE 'campaign-%%' WHERE tr.object_id = p.ID)
 		AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} a WHERE a.post_id = p.ID AND a.meta_key = 'aw_cc0_attempts' AND a.meta_value >= %d)
 		AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} tr2 WHERE tr2.post_id = p.ID AND tr2.meta_key = 'aw_cc0_tried' AND tr2.meta_value > %s)
-		ORDER BY p.post_date DESC LIMIT 5", ( defined( 'KITS_CAMPAIGN_LINK' ) ? KITS_CAMPAIGN_LINK : 'aw_campaign_link' ), SOURCEWEB_CC0_MAX_ATTEMPTS, $week ) ); // phpcs:ignore WordPress.DB
+		ORDER BY p.post_date DESC LIMIT 5", ( defined( 'KITS_CAMPAIGN_LINK' ) ? KITS_CAMPAIGN_LINK : ( function_exists( 'kits_taxonomy_current' ) ? kits_taxonomy_current( 'kits_campaign_link' ) : 'kits_campaign_link' ) ), SOURCEWEB_CC0_MAX_ATTEMPTS, $week ) ); // phpcs:ignore WordPress.DB
 	// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery
 	foreach ( $own as $id ) {
 		if ( time() - $start > SOURCEWEB_CC0_BUDGET || get_transient( 'aw_ov_pause' ) || ! sourceweb_ov_quota_left() ) {

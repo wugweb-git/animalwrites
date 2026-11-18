@@ -16,9 +16,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/** Name of the Media group taxonomy: KITS_MEDIA_GROUP when defined, else the name it was registered under. */
+/** Name of the Media group taxonomy: KITS_MEDIA_GROUP when defined, else the active name (kits_media_group since the rename ran on live, 18 Nov 2026). */
 function kits_media_group_taxonomy() {
-	return defined( 'KITS_MEDIA_GROUP' ) ? (string) KITS_MEDIA_GROUP : 'aw_media_group';
+	if ( defined( 'KITS_MEDIA_GROUP' ) ) {
+		return (string) KITS_MEDIA_GROUP;
+	}
+	return function_exists( 'kits_taxonomy_current' ) ? (string) kits_taxonomy_current( 'kits_media_group' ) : 'kits_media_group';
 }
 
 /** Register the Media group taxonomy for attachments. */
