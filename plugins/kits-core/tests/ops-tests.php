@@ -66,7 +66,7 @@ require KITS_CORE_DIR . 'includes/backups.php';
 foreach ( KITS_ERROR_PAGE_FILES as $name ) {
 	$src = (string) file_get_contents( KITS_CORE_DIR . 'dropins/' . $name );
 	check( "dropins/$name carries the marker", false !== strpos( $src, KITS_ERROR_PAGE_MARKER ) );
-	check( "dropins/$name looks for its pictures in kits-core", false === strpos( $src, 'animal-writes-core/assets' ) );
+	check( "dropins/$name looks for its pictures in kits-core", false !== strpos( $src, "'/plugins/kits-core/assets/error/'" ) && false === strpos( $src, '/plugins/animal-writes-core/assets' ) );
 }
 check( 'the marker is unchanged, so the drop-ins already installed stay ours', 'Animal Writes error page' === KITS_ERROR_PAGE_MARKER );
 
