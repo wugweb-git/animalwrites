@@ -198,6 +198,7 @@ add_action(
 		}
 		wp_nonce_field( 'aw_bulk_quick', 'aw_bulk_quick_nonce' );
 		echo '<fieldset class="inline-edit-col-right"><div class="inline-edit-col"><div class="inline-edit-group wp-clearfix">';
+		echo '<input type="hidden" name="aw_seo_loaded" value="0">'; // the script sets 1 once it has filled the fields from the row
 		echo '<label class="inline-edit-group"><span class="title">' . esc_html__( 'SEO title', 'aw-seo-extras' ) . '</span><input type="text" name="aw_seo_title" class="aw-seo-field" value=""></label>';
 		echo '<label class="inline-edit-group"><span class="title">' . esc_html__( 'Description', 'aw-seo-extras' ) . '</span><textarea name="aw_seo_desc" class="aw-seo-field" rows="1"></textarea></label>';
 		echo '<label class="inline-edit-group"><span class="title">' . esc_html__( 'Focus keyword', 'aw-seo-extras' ) . '</span><input type="text" name="aw_seo_focus" class="aw-seo-field" value=""></label>';
@@ -238,6 +239,11 @@ add_action(
 		$bulk = isset( $_REQUEST['bulk_edit'] );
 		// Quick Edit: the three text fields, always written (an empty value clears).
 		if ( ! $bulk ) {
+			// Only when the script filled the fields from the row: with the SEO column hidden (Screen Options) they are
+			// empty, and saving would clear the title, description and focus keyword.
+			if ( '1' !== ( isset( $_REQUEST['aw_seo_loaded'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['aw_seo_loaded'] ) ) : '' ) ) {
+				return;
+			}
 			if ( isset( $_REQUEST['aw_seo_title'] ) ) {
 				update_post_meta( $post_id, 'rank_math_title', sanitize_text_field( wp_unslash( $_REQUEST['aw_seo_title'] ) ) );
 			}
@@ -291,6 +297,7 @@ add_action(
 		ed.find( 'input[name="aw_seo_title"]' ).val( row.find( '.aw-seo-title' ).text() );
 		ed.find( 'textarea[name="aw_seo_desc"]' ).val( row.find( '.aw-seo-desc' ).text() );
 		ed.find( 'input[name="aw_seo_focus"]' ).val( row.find( '.aw-seo-focus' ).text() );
+		ed.find( 'input[name="aw_seo_loaded"]' ).val( row.find( '.aw-seo-title' ).length ? '1' : '0' );
 	};
 } )();
 JS;

@@ -224,6 +224,9 @@ function aw_agent_set_seo( array $input ) {
 			update_post_meta( $id, $meta[ $key ], $clean );
 		}
 	}
+	if ( function_exists( 'aw_link_index_item' ) ) {
+		aw_link_index_item( $id ); // a cleared focus keyword or a changed link keyword is not caught by the meta hooks
+	}
 	return aw_agent_get_seo( $id );
 }
 

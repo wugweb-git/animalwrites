@@ -170,6 +170,12 @@ function aw_silo_filter_content( $html ) {
 	if ( $id < 1 || get_queried_object_id() !== $id || post_password_required( $id ) || ! isset( aw_silo_data()['map'][ $id ] ) ) {
 		return $html;
 	}
+	// The_content can run more than once for the main item (a Query Loop, a summary, an SEO analysis): one list per page.
+	static $printed = array();
+	if ( ! in_the_loop() || isset( $printed[ $id ] ) ) {
+		return $html;
+	}
+	$printed[ $id ] = true;
 	$d       = aw_silo_data();
 	$silo    = $d['silos'][ $d['map'][ $id ]['silo'] ];
 	$targets = aw_silo_targets( $id );
