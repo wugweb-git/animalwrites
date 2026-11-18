@@ -3,7 +3,7 @@
  * Plugin Name: Kits Core
  * Description: Shared layer for Kits by Wugweb sites: form engine with spam guard (ALTCHA), share bar, consent-mode analytics, attribution and Kits admin.
  * Version: 1.0.0
- * Requires at least: 6.5
+ * Requires at least: 6.6
  * Requires PHP: 8.0
  * Author: Wugweb
  * Author URI: https://wugweb.com
@@ -43,7 +43,6 @@ require_once KITS_CORE_DIR . 'includes/kits-caps.php'; // Kits' own capability, 
 require_once KITS_CORE_DIR . 'includes/admin-table.php';
 require_once KITS_CORE_DIR . 'includes/dashboard-cards.php';
 require_once KITS_CORE_DIR . 'includes/admin-home.php';
-require_once KITS_CORE_DIR . 'includes/help-tab.php';
 require_once KITS_CORE_DIR . 'includes/plugin-info.php';
 require_once KITS_CORE_DIR . 'includes/altcha.php';
 require_once KITS_CORE_DIR . 'includes/forms.php';
@@ -84,3 +83,12 @@ require_once KITS_CORE_DIR . 'includes/button-hover.php';
 require_once KITS_CORE_DIR . 'includes/admin-app-cards.php';
 require_once KITS_CORE_DIR . 'includes/site-parts.php';
 require_once KITS_CORE_DIR . 'includes/fonts.php';
+
+// Switched off: its scheduled jobs come off too (they are booked again on the next request after it is switched back on).
+register_deactivation_hook(
+	__FILE__,
+	function () {
+		wp_unschedule_hook( 'aw_fetch_favicons' );
+		wp_unschedule_hook( 'kits_spot_map_daily' );
+	}
+);

@@ -224,8 +224,10 @@ function aw_is_directory_view() {
 }
 
 /**
- * H1 of the Directory view: "Directory", "Animal Helpline Numbers in Kerala" where the place's title says so (a listing
- * with a phone or an official number: filter directoryweb_place_has_helpline, answered by RankWeb; owner, 5 Nov 2026), else "Help in Kerala";
+ * H1 of the Directory view: "Directory"; "Animal NGOs and Helpline Numbers in Ernakulam" or "Animal Welfare NGOs and Helpline
+ * Numbers in Kerala" where the place's title says so (a listing with a phone or an official number: filter
+ * directoryweb_place_has_helpline, answered by RankWeb; 18 Nov 2026, option B), with the title's fallback "Animal Helpline
+ * Numbers in …" where that form passes 60 characters; else "Animal NGOs in Ernakulam" or "Animal Welfare NGOs in Kerala";
  * "Animal Shelter Contact Numbers in Gandhinagar" where its listings have a number (filter directoryweb_place_h1, answered by RankWeb; owner, 5 Nov 2026),
  * else "Gaushala in Ernakulam" or the type.
  */
@@ -243,9 +245,11 @@ function aw_directory_h1() {
 		return $city ? $tname . ' in ' . $city->name : $tname;
 	}
 	if ( apply_filters( 'directoryweb_place_has_helpline', false, $city ) ) { // RankWeb answers
-		return 'Animal Helpline Numbers in ' . $city->name;
+		// Same fallback as the page-1 title (aw_seo_fit, 60): "Animal Helpline Numbers in …" where the NGO form is too long.
+		$ngo = $city->parent ? 'Animal NGOs and Helpline Numbers in ' : 'Animal Welfare NGOs and Helpline Numbers in ';
+		return ( mb_strlen( $ngo . $city->name ) <= 60 ? $ngo : 'Animal Helpline Numbers in ' ) . $city->name;
 	}
-	return 'Help in ' . $city->name;
+	return ( $city->parent ? 'Animal NGOs in ' : 'Animal Welfare NGOs in ' ) . $city->name;
 }
 
 // The Directory Page's H1 and intro follow the place and type.
@@ -703,8 +707,8 @@ function aw_state_count( $state ) {
 
 
 /**
- * The Directory's intro line for the current view (also its meta and share description):
- * hub, "… in {State}." or "… in {District}, {State}." (owner-approved copy, 8 Oct 2026).
+ * The Directory's intro line for the current view: hub, "… in {State}." or "… in {District}, {State}." (copy of 8 Oct 2026).
+ * On place pages the meta and share description come from aw_seo_dir_description() (RankWeb), not from this line.
  */
 function aw_directory_intro() {
 	$city = aw_current_place();
@@ -713,9 +717,9 @@ function aw_directory_intro() {
 	}
 	if ( $city->parent ) {
 		$state = aw_place_parent_state( $city );
-		return sprintf( 'Animal welfare organisations, Gaushalas and government vets in %1$s, %2$s.', $city->name, $state->name );
+		return sprintf( 'Animal NGOs, shelters, Gaushalas and government vets in %1$s, %2$s, with phone numbers where they have one.', $city->name, $state->name );
 	}
-	return sprintf( 'Animal welfare organisations, Gaushalas and government vets in %s.', $city->name );
+	return sprintf( 'Animal NGOs, shelters, Gaushalas and government vets in %s, with phone numbers where they have one.', $city->name );
 }
 
 // A–Z with names that start with a digit last (owner, 12 Oct 2026: the 1962 units were filling the top of the Directory).

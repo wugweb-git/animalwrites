@@ -10,10 +10,10 @@
 ?>
 <!-- wp:group {"tagName":"section","align":"full","className":"is-style-kits-section","layout":{"type":"constrained"}} -->
 <section class="wp-block-group alignfull is-style-kits-section"><!-- wp:heading -->
-<h2 class="wp-block-heading">Section heading</h2>
+<h2 class="wp-block-heading"><?php esc_html_e( 'Section heading', 'kits-by-wugweb' ); ?></h2>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
-<p>Section text.</p>
+<p><?php esc_html_e( 'Section text.', 'kits-by-wugweb' ); ?></p>
 <!-- /wp:paragraph --></section>
 <!-- /wp:group -->
