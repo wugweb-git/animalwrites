@@ -2,7 +2,7 @@
  * MailWeb Inbox as an email app (src/inbox.js).
  * Colours, spaces and radii are the shell's tokens (--ks-*).
  * Sizes from the design docs: the list pane's minimum is
- * --kit-card-min (18rem, docs/design-system.md); the message
+ * --kit-card-min (17rem, docs/card-sizes.md); the message
  * frame keeps today's message screen height (65vh,
  * includes/inbox.php); targets at least 44px; breakpoints
  * 768 and 1200. Text sizes are the shell's (13px small, 18px
@@ -379,7 +379,7 @@
 @media (min-width: 768px) {
 
 	.mailweb-mail[data-pane="list"] {
-		grid-template-columns: max-content minmax(var(--kit-card-min, 18rem), 1fr);
+		grid-template-columns: max-content minmax(var(--kit-card-min, 17rem), 1fr);
 	}
 
 	.mailweb-mail__views {
@@ -397,7 +397,7 @@
 	.mailweb-mail,
 	.mailweb-mail[data-pane="list"],
 	.mailweb-mail[data-pane="read"] {
-		grid-template-columns: max-content minmax(var(--kit-card-min, 18rem), 2fr) minmax(0, 3fr);
+		grid-template-columns: max-content minmax(var(--kit-card-min, 17rem), 2fr) minmax(0, 3fr);
 	}
 
 	.mailweb-mail[data-pane] .mailweb-mail__folders,
