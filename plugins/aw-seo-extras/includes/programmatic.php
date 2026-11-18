@@ -729,7 +729,7 @@ function aw_seo_sync_categories() {
 	$out = array();
 	foreach ( get_terms( array( 'taxonomy' => aw_seo_category_tax(), 'hide_empty' => false ) ) as $term ) {
 		$auto  = (array) json_decode( (string) get_term_meta( $term->term_id, '_aw_seo_auto', true ), true );
-		$att   = function_exists( 'aw_category_image_id' ) ? (int) aw_category_image_id( $term ) : 0;
+		$att   = function_exists( 'kits_category_image_id' ) ? (int) kits_category_image_id( $term ) : 0;
 		$url   = $att ? (string) wp_get_attachment_url( $att ) : '';
 		$want  = array(
 			'title'                => aw_seo_term_title( $term ),

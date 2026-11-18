@@ -10,12 +10,12 @@
  * publisher image) of another page, that no other page's cover is the same file, and that the page still exists
  * and shows a cover. It then saves the old values in option aw_media_reuse_log and sets the cover. A news item,
  * Library item or post that shows the publisher's image (cc0-images.php) also gets the flag aw_source_image_off = 1,
- * which aw_publisher_image() honours and the weekly re-check skips, so the cover leads and the re-check cannot
+ * which sourceweb_publisher_image() honours and the weekly re-check skips, so the cover leads and the re-check cannot
  * switch the publisher image back on. Undo puts the old cover back and removes the flag, but only while the page
  * still has the values Apply set.
  * Admin screen: core list table and core notices only (no CSS, no scripts).
  *
- * @package animal-writes-core
+ * @package kits-core
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -23,12 +23,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Page types the screen may change. */
-function aw_media_reuse_types() {
+function kits_media_reuse_types() {
 	return array( 'aw_news', 'aw_legal', 'aw_listing', 'post' );
 }
 
 /** Types whose page may show the publisher's image ahead of the cover (media.php). */
-function aw_media_reuse_source_types() {
+function kits_media_reuse_source_types() {
 	return array( 'aw_news', 'aw_legal', 'post' );
 }
 
@@ -37,7 +37,7 @@ function aw_media_reuse_source_types() {
  *
  * @return array[] Each: picture, target, confidence, undo_only.
  */
-function aw_media_reuse_plan() {
+function kits_media_reuse_plan() {
 	static $plan = null;
 	if ( null === $plan ) {
 		$plan = array();
@@ -54,7 +54,7 @@ function aw_media_reuse_plan() {
 }
 
 /** What happened to each picture: picture ID => array( status applied|undone, time, target, old cover, old flag, new flag ). */
-function aw_media_reuse_log() {
+function kits_media_reuse_log() {
 	return (array) get_option( 'aw_media_reuse_log', array() );
 }
 
@@ -64,7 +64,7 @@ function aw_media_reuse_log() {
  * @param array $log Whole log.
  * @return bool Whether the stored value is now the log.
  */
-function aw_media_reuse_save_log( array $log ) {
+function kits_media_reuse_save_log( array $log ) {
 	return update_option( 'aw_media_reuse_log', $log, false ) || get_option( 'aw_media_reuse_log' ) === $log;
 }
 
@@ -75,33 +75,33 @@ function aw_media_reuse_save_log( array $log ) {
  * @param array|null $entry   New entry, or null to remove it.
  * @return bool
  */
-function aw_media_reuse_set_entry( $picture, $entry ) {
-	$log = aw_media_reuse_log();
+function kits_media_reuse_set_entry( $picture, $entry ) {
+	$log = kits_media_reuse_log();
 	if ( null === $entry ) {
 		unset( $log[ $picture ] );
 	} else {
 		$log[ $picture ] = $entry;
 	}
-	return aw_media_reuse_save_log( $log );
+	return kits_media_reuse_save_log( $log );
 }
 
 /**
  * Entries left 'pending' for over a minute (the request stopped after the log was saved) are put back to the old
  * values, as long as the page still has the old cover or the new one; otherwise the entry is just closed.
  */
-function aw_media_reuse_recover() {
-	foreach ( aw_media_reuse_log() as $picture => $e ) {
+function kits_media_reuse_recover() {
+	foreach ( kits_media_reuse_log() as $picture => $e ) {
 		if ( 'pending' !== ( $e['status'] ?? '' ) || time() - (int) ( $e['time'] ?? 0 ) < MINUTE_IN_SECONDS ) {
 			continue;
 		}
 		$cover = (int) get_post_meta( (int) $e['target'], '_thumbnail_id', true );
 		if ( get_post( (int) $e['target'] ) && in_array( $cover, array( (int) $picture, (int) $e['old_cover'] ), true ) ) {
-			aw_media_reuse_restore( $e, (int) $picture, true );
-			aw_media_reuse_refresh( (int) $e['target'] );
+			kits_media_reuse_restore( $e, (int) $picture, true );
+			kits_media_reuse_refresh( (int) $e['target'] );
 		}
 		$e['status'] = 'undone';
 		$e['time']   = time();
-		aw_media_reuse_set_entry( (int) $picture, $e );
+		kits_media_reuse_set_entry( (int) $picture, $e );
 	}
 }
 
@@ -111,7 +111,7 @@ function aw_media_reuse_recover() {
  * @param int $id Page ID.
  * @return bool
  */
-function aw_media_reuse_is_document( $id ) {
+function kits_media_reuse_is_document( $id ) {
 	return (int) get_post_meta( $id, 'aw_file_id', true ) > 0 || (int) get_post_meta( $id, 'aw_doc_preview', true ) > 0;
 }
 
@@ -121,10 +121,10 @@ function aw_media_reuse_is_document( $id ) {
  * @param int $id Page ID.
  * @return array kind (publisher|cover|none), cover (attachment ID), text (for the list).
  */
-function aw_media_reuse_current( $id ) {
+function kits_media_reuse_current( $id ) {
 	$cover  = (int) get_post_meta( $id, '_thumbnail_id', true );
-	$source = in_array( get_post_type( $id ), aw_media_reuse_source_types(), true ) && function_exists( 'aw_publisher_image' ) && function_exists( 'aw_is_ingested' ) && aw_is_ingested( $id ) && '' !== aw_publisher_image( $id );
-	if ( aw_media_reuse_is_document( $id ) ) {
+	$source = in_array( get_post_type( $id ), kits_media_reuse_source_types(), true ) && function_exists( 'sourceweb_publisher_image' ) && function_exists( 'kits_is_ingested' ) && kits_is_ingested( $id ) && '' !== sourceweb_publisher_image( $id );
+	if ( kits_media_reuse_is_document( $id ) ) {
 		return array( 'kind' => 'document', 'cover' => $cover, 'text' => 'Its own document page' );
 	}
 	if ( $source ) {
@@ -143,7 +143,7 @@ function aw_media_reuse_current( $id ) {
  * @param int $target  Page that is about to get it.
  * @return string Why not, or '' when it is free.
  */
-function aw_media_reuse_taken( $picture, $target ) {
+function kits_media_reuse_taken( $picture, $target ) {
 	global $wpdb;
 	$other = $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		$wpdb->prepare(
@@ -166,8 +166,8 @@ function aw_media_reuse_taken( $picture, $target ) {
 	if ( in_array( $picture, $cat, true ) || $wpdb->get_var( $wpdb->prepare( "SELECT term_id FROM {$wpdb->termmeta} WHERE meta_key = 'aw_category_image' AND meta_value = %s LIMIT 1", (string) $picture ) ) ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		return 'the picture is a category photo';
 	}
-	if ( function_exists( 'aw_thumb_hash' ) ) { // the site rule: the same file is not a cover twice (thumbs.php)
-		$hash = aw_thumb_hash( $picture );
+	if ( function_exists( 'kits_thumb_hash' ) ) { // the site rule: the same file is not a cover twice (thumbs.php)
+		$hash = kits_thumb_hash( $picture );
 		$rows = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 			$wpdb->prepare(
 				"SELECT pm.post_id, pm.meta_value FROM {$wpdb->postmeta} pm JOIN {$wpdb->posts} p ON p.ID = pm.post_id WHERE pm.meta_key = '_thumbnail_id' AND p.post_status = 'publish' AND pm.post_id <> %d",
@@ -175,12 +175,12 @@ function aw_media_reuse_taken( $picture, $target ) {
 			)
 		);
 		foreach ( (array) get_option( 'aw_thumb_map', array() ) as $post_id => $att ) {
-			if ( (int) $post_id !== $target && (int) $att !== $picture && (int) $att > 0 && aw_thumb_hash( (int) $att ) === $hash ) {
+			if ( (int) $post_id !== $target && (int) $att !== $picture && (int) $att > 0 && kits_thumb_hash( (int) $att ) === $hash ) {
 				return 'the same file is the category photo shown on page ' . (int) $post_id;
 			}
 		}
 		foreach ( (array) $rows as $r ) {
-			if ( (int) $r->meta_value !== $picture && (int) $r->meta_value > 0 && aw_thumb_hash( (int) $r->meta_value ) === $hash ) {
+			if ( (int) $r->meta_value !== $picture && (int) $r->meta_value > 0 && kits_thumb_hash( (int) $r->meta_value ) === $hash ) {
 				return 'the same file is already the cover of page ' . (int) $r->post_id;
 			}
 		}
@@ -194,7 +194,7 @@ function aw_media_reuse_taken( $picture, $target ) {
  * @param array $row Plan row.
  * @return string Why not, or '' when it can.
  */
-function aw_media_reuse_why_not( array $row ) {
+function kits_media_reuse_why_not( array $row ) {
 	$picture = get_post( $row['picture'] );
 	if ( ! $picture || 'attachment' !== $picture->post_type ) {
 		return 'picture ' . $row['picture'] . ' is missing';
@@ -206,20 +206,20 @@ function aw_media_reuse_why_not( array $row ) {
 		return 'picture ' . $row['picture'] . ' is not an image';
 	}
 	$target = get_post( $row['target'] );
-	if ( ! $target || ! in_array( $target->post_type, aw_media_reuse_types(), true ) || in_array( $target->post_status, array( 'trash', 'auto-draft' ), true ) ) {
+	if ( ! $target || ! in_array( $target->post_type, kits_media_reuse_types(), true ) || in_array( $target->post_status, array( 'trash', 'auto-draft' ), true ) ) {
 		return 'page ' . $row['target'] . ' is missing';
 	}
-	$log = aw_media_reuse_log();
+	$log = kits_media_reuse_log();
 	if ( isset( $log[ $row['picture'] ] ) && 'applied' === $log[ $row['picture'] ]['status'] ) {
 		return 'already applied';
 	}
-	if ( aw_media_reuse_is_document( $row['target'] ) ) {
+	if ( kits_media_reuse_is_document( $row['target'] ) ) {
 		return 'page ' . $row['target'] . ' shows its own document page, not a cover';
 	}
 	if ( (int) get_post_meta( $row['target'], '_thumbnail_id', true ) === $row['picture'] ) {
 		return 'the picture is already the cover of page ' . $row['target'];
 	}
-	return aw_media_reuse_taken( $row['picture'], $row['target'] );
+	return kits_media_reuse_taken( $row['picture'], $row['target'] );
 }
 
 /**
@@ -228,19 +228,19 @@ function aw_media_reuse_why_not( array $row ) {
  * @param int $picture Attachment ID of a plan row.
  * @return string Why it was not applied, or '' when it was.
  */
-function aw_media_reuse_apply( $picture ) {
-	$plan = aw_media_reuse_plan();
+function kits_media_reuse_apply( $picture ) {
+	$plan = kits_media_reuse_plan();
 	if ( empty( $plan[ $picture ] ) ) {
 		return 'picture ' . (int) $picture . ' is not in the list';
 	}
 	$row = $plan[ $picture ];
-	$why = aw_media_reuse_why_not( $row );
+	$why = kits_media_reuse_why_not( $row );
 	if ( '' !== $why ) {
 		return ucfirst( $why );
 	}
 	$target   = $row['target'];
 	$old_off  = metadata_exists( 'post', $target, 'aw_source_image_off' ) ? (string) get_post_meta( $target, 'aw_source_image_off', true ) : null;
-	$set_off  = in_array( get_post_type( $target ), array( 'aw_news', 'aw_legal', 'post' ), true ) || 'publisher' === aw_media_reuse_current( $target )['kind']; // pages that can take a publisher image always get the flag, so no later fetch can bring one back over the cover
+	$set_off  = in_array( get_post_type( $target ), array( 'aw_news', 'aw_legal', 'post' ), true ) || 'publisher' === kits_media_reuse_current( $target )['kind']; // pages that can take a publisher image always get the flag, so no later fetch can bring one back over the cover
 	$entry    = array(
 		'status'    => 'pending',
 		'time'      => time(),
@@ -249,7 +249,7 @@ function aw_media_reuse_apply( $picture ) {
 		'old_off'   => $old_off,
 		'set_off'   => $set_off,
 	);
-	if ( ! aw_media_reuse_set_entry( $picture, $entry ) ) {
+	if ( ! kits_media_reuse_set_entry( $picture, $entry ) ) {
 		return 'The old values could not be saved, so nothing was changed.';
 	}
 	update_post_meta( $target, '_thumbnail_id', $picture );
@@ -259,13 +259,13 @@ function aw_media_reuse_apply( $picture ) {
 	}
 	$ok = (int) get_post_meta( $target, '_thumbnail_id', true ) === $picture && ( ! $set_off || '1' === (string) get_post_meta( $target, 'aw_source_image_off', true ) );
 	if ( ! $ok ) {
-		aw_media_reuse_restore( $entry, $picture, true );
-		aw_media_reuse_set_entry( $picture, null );
+		kits_media_reuse_restore( $entry, $picture, true );
+		kits_media_reuse_set_entry( $picture, null );
 		return 'The change did not stick, so the old values were put back.';
 	}
 	$entry['status'] = 'applied';
-	aw_media_reuse_set_entry( $picture, $entry );
-	aw_media_reuse_refresh( $target );
+	kits_media_reuse_set_entry( $picture, $entry );
+	kits_media_reuse_refresh( $target );
 	return '';
 }
 
@@ -277,7 +277,7 @@ function aw_media_reuse_apply( $picture ) {
  * @param bool  $force   Restore without checking the current values (used when Apply itself failed).
  * @return string Why not, or '' when restored.
  */
-function aw_media_reuse_restore( array $e, $picture, $force = false ) {
+function kits_media_reuse_restore( array $e, $picture, $force = false ) {
 	$target = (int) $e['target'];
 	if ( ! $force ) {
 		if ( ! get_post( $target ) ) {
@@ -291,7 +291,7 @@ function aw_media_reuse_restore( array $e, $picture, $force = false ) {
 		}
 	}
 	if ( ! $force && (int) $e['old_cover'] > 0 ) {
-		$taken = aw_media_reuse_taken( (int) $e['old_cover'], $target );
+		$taken = kits_media_reuse_taken( (int) $e['old_cover'], $target );
 		if ( '' !== $taken ) {
 			return 'the old cover ' . (int) $e['old_cover'] . ' cannot go back: ' . $taken;
 		}
@@ -318,31 +318,31 @@ function aw_media_reuse_restore( array $e, $picture, $force = false ) {
  * @param int $picture Attachment ID.
  * @return string Why not, or '' when undone.
  */
-function aw_media_reuse_undo( $picture ) {
-	$log = aw_media_reuse_log();
+function kits_media_reuse_undo( $picture ) {
+	$log = kits_media_reuse_log();
 	if ( empty( $log[ $picture ] ) || ! in_array( $log[ $picture ]['status'], array( 'applied', 'pending' ), true ) ) {
 		return 'Picture ' . (int) $picture . ' was not applied.';
 	}
-	$why = aw_media_reuse_restore( $log[ $picture ], $picture );
+	$why = kits_media_reuse_restore( $log[ $picture ], $picture );
 	if ( '' !== $why ) {
 		return ucfirst( $why ) . '.';
 	}
 	$entry           = $log[ $picture ];
 	$entry['status'] = 'undone';
 	$entry['time']   = time();
-	aw_media_reuse_set_entry( $picture, $entry );
-	aw_media_reuse_refresh( (int) $entry['target'] );
+	kits_media_reuse_set_entry( $picture, $entry );
+	kits_media_reuse_refresh( (int) $entry['target'] );
 	return '';
 }
 
 /** The public duplicate count is kept for 5 minutes and the category photos are assigned by a rebuild: refresh both. */
-function aw_media_reuse_refresh( $target = 0 ) {
+function kits_media_reuse_refresh( $target = 0 ) {
 	if ( $target ) {
 		clean_post_cache( $target );
 		do_action( 'litespeed_purge_post', $target ); // this page only
 	}
-	if ( function_exists( 'aw_thumb_rebuild' ) ) {
-		aw_thumb_rebuild(); // now, so thumb-dupes never counts a stale map
+	if ( function_exists( 'kits_thumb_rebuild' ) ) {
+		kits_thumb_rebuild(); // now, so thumb-dupes never counts a stale map
 	}
 	delete_transient( 'aw_thumb_dupes_n' );
 }
@@ -350,7 +350,7 @@ function aw_media_reuse_refresh( $target = 0 ) {
 add_action(
 	'admin_menu',
 	function () {
-		add_submenu_page( 'upload.php', 'Reuse pictures', 'Reuse pictures', 'manage_options', 'aw-media-reuse', 'aw_media_reuse_screen' );
+		add_submenu_page( 'upload.php', 'Reuse pictures', 'Reuse pictures', 'manage_options', 'aw-media-reuse', 'kits_media_reuse_screen' );
 	}
 );
 
@@ -364,15 +364,15 @@ add_action(
 		$do = sanitize_text_field( wp_unslash( $_POST['do'] ?? '' ) );
 		if ( preg_match( '/^(apply|undo|check):(\d+)$/', $do, $m ) ) {
 			$picture = (int) $m[2];
-			$plan    = aw_media_reuse_plan();
+			$plan    = kits_media_reuse_plan();
 			if ( 'apply' === $m[1] ) {
-				$why = aw_media_reuse_apply( $picture );
+				$why = kits_media_reuse_apply( $picture );
 				$msg = '' === $why ? array( 'success', 'Picture ' . $picture . ' is now the cover of page ' . $plan[ $picture ]['target'] . '.' ) : array( 'error', $why );
 			} elseif ( 'undo' === $m[1] ) {
-				$why = aw_media_reuse_undo( $picture );
+				$why = kits_media_reuse_undo( $picture );
 				$msg = '' === $why ? array( 'success', 'Picture ' . $picture . ' taken off page ' . ( $plan[ $picture ]['target'] ?? '' ) . '; the old values are back.' ) : array( 'error', $why );
 			} else {
-				$why = isset( $plan[ $picture ] ) ? aw_media_reuse_why_not( $plan[ $picture ] ) : 'picture ' . $picture . ' is not in the list';
+				$why = isset( $plan[ $picture ] ) ? kits_media_reuse_why_not( $plan[ $picture ] ) : 'picture ' . $picture . ' is not in the list';
 				$msg = '' === $why ? array( 'success', 'Picture ' . $picture . ' can be applied.' ) : array( 'warning', 'Picture ' . $picture . ': ' . $why . '.' );
 			}
 			set_transient( 'aw_media_reuse_notice_' . get_current_user_id(), $msg, 120 );
@@ -383,13 +383,13 @@ add_action(
 );
 
 /** The Media -> Reuse pictures screen. */
-function aw_media_reuse_screen() {
+function kits_media_reuse_screen() {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		return;
 	}
-	aw_media_reuse_recover();
-	$plan = aw_media_reuse_plan();
-	$log  = aw_media_reuse_log();
+	kits_media_reuse_recover();
+	$plan = kits_media_reuse_plan();
+	$log  = kits_media_reuse_log();
 	echo '<div class="wrap"><h1>Reuse pictures</h1>';
 	$key    = 'aw_media_reuse_notice_' . get_current_user_id();
 	$notice = get_transient( $key );
@@ -412,7 +412,7 @@ function aw_media_reuse_screen() {
 		$e       = $log[ $picture ] ?? array();
 		$status  = $e['status'] ?? '';
 		$target  = get_post( $row['target'] );
-		$current = $target ? aw_media_reuse_current( $row['target'] ) : array( 'text' => 'Page missing' );
+		$current = $target ? kits_media_reuse_current( $row['target'] ) : array( 'text' => 'Page missing' );
 		$image   = wp_get_attachment_image( $picture, array( 60, 60 ) );
 		if ( in_array( $status, array( 'applied', 'pending' ), true ) ) {
 			$state  = ( 'applied' === $status ? 'Applied ' : 'Stopped half way ' ) . wp_date( 'j M Y', (int) $e['time'] );
@@ -431,7 +431,7 @@ function aw_media_reuse_screen() {
 			'action'     => $action,
 		);
 	}
-	aw_core_simple_table(
+	kits_simple_table(
 		'aw-media-reuse',
 		array(
 			'picture'    => 'Picture',

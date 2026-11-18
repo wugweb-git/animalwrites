@@ -27,7 +27,7 @@ function aw_cron_unschedule() {
 	$hooks = array(
 		'aw_daily',
 		'aw_daily_backup',     // backups.php
-		'aw_cc0_run',          // cc0-images.php
+		'aw_cc0_run',          // aw-sourcing cc0-images.php
 		'aw_raw_prune',        // campaign-form.php
 		'aw_fetch_favicons',   // kits-core attribution.php
 		'kits_spot_map_daily', // kits-core system-screen.php

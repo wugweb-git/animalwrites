@@ -223,8 +223,8 @@ function aw_core_home_sections( $sections ) {
 	);
 	$sections['joined-files'] = aw_core_section( 'Joined files', 'aw_site_check_joined', 50 );
 	$sections['email']        = aw_core_section( 'Email sending', 'aw_mail_site_check', 70 );
-	$sections['thumbnails']   = aw_core_section( 'Thumbnails', 'aw_thumbs_site_check', 71 );
-	$sections['pictures']     = aw_core_section( 'Pictures', 'aw_cc0_site_check', 72 );
+	$sections['thumbnails']   = aw_core_section( 'Thumbnails', 'kits_thumbs_site_check', 71 );
+	$sections['pictures']     = aw_core_section( 'Pictures', 'sourceweb_cc0_site_check', 72 );
 	return $sections;
 }
 

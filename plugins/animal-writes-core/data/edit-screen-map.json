@@ -56,7 +56,7 @@
 			"source": "WordPress",
 			"plugin": "WordPress",
 			"purpose": "General",
-			"file": "wp-admin/includes/meta-boxes.php (post_tags_meta_box); taxonomy from core/media-groups.php",
+			"file": "wp-admin/includes/meta-boxes.php (post_tags_meta_box); taxonomy from kits-core/includes/media-groups.php",
 			"screen": "post",
 			"types": [
 				"attachment"
@@ -1047,7 +1047,7 @@
 			"source": "Animal Writes core",
 			"plugin": "Animal Writes core",
 			"purpose": "Image",
-			"file": "core/category-images.php",
+			"file": "kits-core/includes/category-images.php",
 			"screen": "term",
 			"types": [
 				"category",
@@ -1055,7 +1055,7 @@
 			],
 			"runtime": "live",
 			"match": {
-				"file": "includes/category-images.php",
+				"file": "kits-core/includes/category-images.php",
 				"hooks": [
 					"add_form_fields",
 					"edit_form_fields"
@@ -1068,14 +1068,14 @@
 			"source": "Animal Writes core",
 			"plugin": "Animal Writes core",
 			"purpose": "Image",
-			"file": "core/category-images.php",
+			"file": "kits-core/includes/category-images.php",
 			"screen": "term",
 			"types": [
 				"category"
 			],
 			"runtime": "live",
 			"match": {
-				"file": "includes/category-images.php",
+				"file": "kits-core/includes/category-images.php",
 				"hooks": [
 					"edit_form_fields"
 				],
@@ -2782,7 +2782,7 @@
 			"source": "Animal Writes core",
 			"plugin": "Animal Writes core",
 			"purpose": "Media merge",
-			"file": "core/media-merge.php:437 (aw_media_merge_screen)",
+			"file": "kits-core/includes/tools/media-merge.php:437 (kits_media_merge_screen)",
 			"screen": "admin",
 			"page": "Media: Duplicate files",
 			"types": [
@@ -2805,7 +2805,7 @@
 			"source": "Animal Writes core",
 			"plugin": "Animal Writes core",
 			"purpose": "Media WebP",
-			"file": "core/media-webp.php:410 (aw_media_webp_screen)",
+			"file": "kits-core/includes/media-webp.php:410 (kits_media_webp_screen)",
 			"screen": "admin",
 			"page": "Media: Make WebP",
 			"types": [
@@ -3043,7 +3043,7 @@
 			"source": "Animal Writes core",
 			"plugin": "Animal Writes core",
 			"purpose": "Media reuse",
-			"file": "core/media-reuse.php:353 (aw_media_reuse_screen)",
+			"file": "kits-core/includes/tools/media-reuse.php:353 (kits_media_reuse_screen)",
 			"screen": "admin",
 			"page": "Media: Reuse pictures",
 			"types": [
@@ -3052,7 +3052,7 @@
 			"runtime": "map-only",
 			"kind": "table",
 			"reads": [
-				"data/media-reuse-plan.php",
+				"kits-core/includes/tools/data/media-reuse-plan.php",
 				"option:aw_media_reuse_log",
 				"option:aw_thumb_map",
 				"option:aw_category_images",
@@ -3375,7 +3375,7 @@
 				{
 					"kind": "admin",
 					"where": "Media Library column and filter",
-					"file": "core/media-groups.php"
+					"file": "kits-core/includes/media-groups.php"
 				}
 			]
 		},
@@ -5062,7 +5062,7 @@
 				{
 					"kind": "admin",
 					"where": "kept by media merge",
-					"file": "core/media-merge.php:27"
+					"file": "kits-core/includes/tools/media-merge.php:27"
 				}
 			]
 		},
@@ -5085,7 +5085,7 @@
 				{
 					"kind": "admin",
 					"where": "kept by media merge",
-					"file": "core/media-merge.php:27"
+					"file": "kits-core/includes/tools/media-merge.php:27"
 				}
 			]
 		},
@@ -7400,12 +7400,12 @@
 				{
 					"kind": "admin",
 					"where": "Media list column",
-					"file": "core/media-columns.php:214"
+					"file": "aw-seo-extras/includes/media-columns.php:214"
 				},
 				{
 					"kind": "admin",
 					"where": "filled on upload",
-					"file": "core/media-autofill.php:174"
+					"file": "aw-seo-extras/includes/media-autofill.php:174"
 				}
 			],
 			"notes": [
@@ -7426,12 +7426,12 @@
 				{
 					"kind": "admin",
 					"where": "Media list column",
-					"file": "core/media-columns.php"
+					"file": "aw-seo-extras/includes/media-columns.php"
 				},
 				{
 					"kind": "admin",
 					"where": "filled on upload",
-					"file": "core/media-autofill.php"
+					"file": "aw-seo-extras/includes/media-autofill.php"
 				}
 			]
 		},
@@ -7450,7 +7450,7 @@
 				{
 					"kind": "display",
 					"where": "category page head; item fallback image",
-					"file": "core/category-images.php:20"
+					"file": "kits-core/includes/category-images.php:20"
 				},
 				{
 					"kind": "display",
@@ -7473,7 +7473,7 @@
 				{
 					"kind": "display",
 					"where": "category banner",
-					"file": "core/category-images.php:144"
+					"file": "kits-core/includes/category-images.php:144"
 				}
 			],
 			"notes": [

@@ -18,21 +18,26 @@
  *     The photo is resized to 1600 px wide, added to the Media Library and set as the item's featured image.
  *     No match: tried again after 7 days, at most 3 times (aw_cc0_status, aw_cc0_attempts).
  *
- * Openverse: no key, a descriptive User-Agent, one request per 2 s, at most AW_CC0_DAILY_REQUESTS a day; result
+ * Openverse: no key, a descriptive User-Agent, one request per 2 s, at most SOURCEWEB_CC0_DAILY_REQUESTS a day; result
  * pages are cached for a week. Counts and the log: Kits → Home → Pictures.
  *
- * @package animal-writes-core
+ * Moved from Animal Writes Core on 18 Nov 2026: options, meta keys, the aw_cc0_run event and the aw_15min schedule are
+ * unchanged.
+ *
+ * @package aw-sourcing
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_CC0_UA             = 'AnimalWrites/1.0 (+https://animalwrites.in; admin@wugweb.com) image finder';
-const AW_CC0_BATCH          = 30;
-const AW_CC0_BUDGET         = 150; // seconds per run
-const AW_CC0_DAILY_REQUESTS = 300;
-const AW_CC0_MAX_ATTEMPTS   = 3;
+const SOURCEWEB_CC0_UA             = 'AnimalWrites/1.0 (+https://animalwrites.in; admin@wugweb.com) image finder';
+const SOURCEWEB_CC0_BATCH          = 30;
+const SOURCEWEB_CC0_BUDGET         = 150; // seconds per run
+const SOURCEWEB_CC0_DAILY_REQUESTS = 300;
+const SOURCEWEB_CC0_MAX_ATTEMPTS   = 3;
+// A browser's User-Agent for publishers that refuse bot-style ones (the same string as the press logos fetch).
+const SOURCEWEB_BROWSER_UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36';
 
 add_filter(
 	'cron_schedules',
@@ -49,17 +54,17 @@ add_action(
 		}
 	}
 );
-add_action( 'aw_cc0_run', 'aw_cc0_run' );
+add_action( 'aw_cc0_run', 'sourceweb_cc0_run' );
 
 /** Append a line to the log (last 200 lines). */
-function aw_cc0_log( $msg ) {
+function sourceweb_cc0_log( $msg ) {
 	$log   = (array) get_option( 'aw_cc0_log', array() );
 	$log[] = wp_date( 'Y-m-d H:i' ) . ' ' . $msg;
 	update_option( 'aw_cc0_log', array_slice( $log, -200 ), false );
 }
 
 /** The publisher image to show, or '' when there is none or it was found unusable. */
-function aw_publisher_image( $post_id ) {
+function sourceweb_publisher_image( $post_id ) {
 	$url = (string) get_post_meta( $post_id, 'aw_source_image', true );
 	if ( '' === $url || ! preg_match( '#^https://[^/]+/#i', $url ) ) {
 		return '';
@@ -71,7 +76,7 @@ function aw_publisher_image( $post_id ) {
 }
 
 /** SQL fragment: published ingested items without their own document page. */
-function aw_cc0_items_sql() {
+function sourceweb_cc0_items_sql() {
 	global $wpdb;
 	return "FROM {$wpdb->posts} p
 		JOIN {$wpdb->postmeta} su ON su.post_id = p.ID AND su.meta_key = 'aw_source_url' AND su.meta_value <> ''
@@ -82,32 +87,32 @@ function aw_cc0_items_sql() {
 }
 
 /** One batch: check publisher images, then find photos. */
-function aw_cc0_run() {
+function sourceweb_cc0_run() {
 	if ( get_transient( 'aw_cc0_lock' ) ) {
 		return;
 	}
 	set_transient( 'aw_cc0_lock', 1, 10 * MINUTE_IN_SECONDS );
 	if ( function_exists( 'set_time_limit' ) ) {
-		@set_time_limit( AW_CC0_BUDGET + 120 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+		@set_time_limit( SOURCEWEB_CC0_BUDGET + 120 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
 	}
 	$start = time();
 	global $wpdb;
 
 	// 0. Publisher images read from the source page when ingest stored none (or a broken one).
-	$fetched = aw_source_og_run( 40 );
+	$fetched = sourceweb_source_og_run( 40 );
 
 	// 0b. Linked publisher images stored in the Media Library (no hotlinking).
-	$local = aw_source_localise_run( 25, 60 );
+	$local = sourceweb_source_localise_run( 25, 60 );
 	// 0c. Documents whose source is a PDF: the first page as their picture.
 	foreach ( $wpdb->get_col( "SELECT p.ID FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} su ON su.post_id = p.ID AND su.meta_key = 'aw_source_url' AND su.meta_value LIKE '%.pdf%' WHERE p.post_status = 'publish' AND p.post_type IN ('aw_legal','post','aw_news') AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} d WHERE d.post_id = p.ID AND d.meta_key IN ('aw_doc_preview','aw_file_id','aw_pdf_cover_tried','aw_cover_reused')) ORDER BY p.post_date DESC LIMIT 5" ) as $pid ) { // phpcs:ignore WordPress.DB
 		update_post_meta( $pid, 'aw_pdf_cover_tried', current_time( 'mysql', true ) );
-		aw_source_pdf_cover( (int) $pid );
+		sourceweb_source_pdf_cover( (int) $pid );
 	}
 
 	// 1. Publisher images: unchecked first, then failures older than a week.
 	$week = gmdate( 'Y-m-d H:i:s', time() - WEEK_IN_SECONDS );
-	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter -- fixed SQL and the plugin's own clauses (aw_cc0_items_sql() is a constant fragment); values go in as placeholders
-	$ids  = $wpdb->get_col( $wpdb->prepare( "SELECT p.ID " . aw_cc0_items_sql() . " AND EXISTS (SELECT 1 FROM {$wpdb->postmeta} si WHERE si.post_id = p.ID AND si.meta_key = 'aw_source_image' AND si.meta_value <> '')
+	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter -- fixed SQL and the plugin's own clauses (sourceweb_cc0_items_sql() is a constant fragment); values go in as placeholders
+	$ids  = $wpdb->get_col( $wpdb->prepare( "SELECT p.ID " . sourceweb_cc0_items_sql() . " AND EXISTS (SELECT 1 FROM {$wpdb->postmeta} si WHERE si.post_id = p.ID AND si.meta_key = 'aw_source_image' AND si.meta_value <> '')
 		AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} sf WHERE sf.post_id = p.ID AND sf.meta_key = 'aw_source_image_off' AND sf.meta_value = '1')
 		AND ( NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} c WHERE c.post_id = p.ID AND c.meta_key = 'aw_source_image_checked')
 		   OR EXISTS (SELECT 1 FROM {$wpdb->postmeta} o JOIN {$wpdb->postmeta} c2 ON c2.post_id = o.post_id AND c2.meta_key = 'aw_source_image_checked'
@@ -119,7 +124,7 @@ function aw_cc0_run() {
 		if ( time() - $start > 60 ) {
 			break;
 		}
-		$why = aw_cc0_check_source( (int) $id );
+		$why = sourceweb_cc0_check_source( (int) $id );
 		update_post_meta( $id, 'aw_source_image_ok', '' === $why ? 1 : 0 );
 		update_post_meta( $id, 'aw_source_image_checked', current_time( 'mysql', true ) );
 		update_post_meta( $id, 'aw_source_image_why', $why );
@@ -127,22 +132,22 @@ function aw_cc0_run() {
 	}
 
 	// 2. Items with no usable picture of their own.
-	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter -- fixed SQL and the plugin's own clauses (aw_cc0_items_sql() is a constant fragment); values go in as placeholders
-	$ids  = $wpdb->get_col( $wpdb->prepare( "SELECT p.ID " . aw_cc0_items_sql() . "
+	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter -- fixed SQL and the plugin's own clauses (sourceweb_cc0_items_sql() is a constant fragment); values go in as placeholders
+	$ids  = $wpdb->get_col( $wpdb->prepare( "SELECT p.ID " . sourceweb_cc0_items_sql() . "
 		AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} t WHERE t.post_id = p.ID AND t.meta_key = '_thumbnail_id' AND t.meta_value <> '' AND t.meta_value <> '0')
 		AND ( NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} si WHERE si.post_id = p.ID AND si.meta_key = 'aw_source_image' AND si.meta_value LIKE 'https://%%')
 		   OR EXISTS (SELECT 1 FROM {$wpdb->postmeta} o WHERE o.post_id = p.ID AND o.meta_key = 'aw_source_image_ok' AND o.meta_value = '0') )
 		AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} a WHERE a.post_id = p.ID AND a.meta_key = 'aw_cc0_attempts' AND a.meta_value >= %d)
 		AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} tr WHERE tr.post_id = p.ID AND tr.meta_key = 'aw_cc0_tried' AND tr.meta_value > %s)
-		ORDER BY p.post_date DESC LIMIT %d", AW_CC0_MAX_ATTEMPTS, $week, AW_CC0_BATCH ) ); // phpcs:ignore WordPress.DB
+		ORDER BY p.post_date DESC LIMIT %d", SOURCEWEB_CC0_MAX_ATTEMPTS, $week, SOURCEWEB_CC0_BATCH ) ); // phpcs:ignore WordPress.DB
 	// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter
 	$done = 0;
 	$none = 0;
 	foreach ( $ids as $id ) {
-		if ( time() - $start > AW_CC0_BUDGET || get_transient( 'aw_ov_pause' ) || ! aw_ov_quota_left() ) {
+		if ( time() - $start > SOURCEWEB_CC0_BUDGET || get_transient( 'aw_ov_pause' ) || ! sourceweb_ov_quota_left() ) {
 			break;
 		}
-		$r = aw_cc0_assign( (int) $id );
+		$r = sourceweb_cc0_assign( (int) $id );
 		if ( $r ) {
 			++$done;
 		} elseif ( null !== $r ) {
@@ -159,13 +164,13 @@ function aw_cc0_run() {
 		AND NOT EXISTS (SELECT 1 FROM {$wpdb->term_relationships} tr JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = tr.term_taxonomy_id AND tt.taxonomy = %s JOIN {$wpdb->terms} te ON te.term_id = tt.term_id AND te.slug LIKE 'campaign-%%' WHERE tr.object_id = p.ID)
 		AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} a WHERE a.post_id = p.ID AND a.meta_key = 'aw_cc0_attempts' AND a.meta_value >= %d)
 		AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} tr2 WHERE tr2.post_id = p.ID AND tr2.meta_key = 'aw_cc0_tried' AND tr2.meta_value > %s)
-		ORDER BY p.post_date DESC LIMIT 5", KITS_CAMPAIGN_LINK, AW_CC0_MAX_ATTEMPTS, $week ) ); // phpcs:ignore WordPress.DB
+		ORDER BY p.post_date DESC LIMIT 5", ( defined( 'KITS_CAMPAIGN_LINK' ) ? KITS_CAMPAIGN_LINK : 'aw_campaign_link' ), SOURCEWEB_CC0_MAX_ATTEMPTS, $week ) ); // phpcs:ignore WordPress.DB
 	// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery
 	foreach ( $own as $id ) {
-		if ( time() - $start > AW_CC0_BUDGET || get_transient( 'aw_ov_pause' ) || ! aw_ov_quota_left() ) {
+		if ( time() - $start > SOURCEWEB_CC0_BUDGET || get_transient( 'aw_ov_pause' ) || ! sourceweb_ov_quota_left() ) {
 			break;
 		}
-		$r = aw_cc0_assign( (int) $id );
+		$r = sourceweb_cc0_assign( (int) $id );
 		if ( $r ) {
 			++$done;
 		} elseif ( null !== $r ) {
@@ -174,10 +179,10 @@ function aw_cc0_run() {
 	}
 
 	if ( $fetched || $local || $checked || $done || $none ) {
-		aw_cc0_log( sprintf( 'run: %d publisher images read from source pages, %d stored locally, %d checked, %d photos added, %d without a match (%ds)', $fetched, $local, $checked, $done, $none, time() - $start ) );
+		sourceweb_cc0_log( sprintf( 'run: %d publisher images read from source pages, %d stored locally, %d checked, %d photos added, %d without a match (%ds)', $fetched, $local, $checked, $done, $none, time() - $start ) );
 	}
-	if ( $done && function_exists( 'aw_thumb_schedule' ) ) {
-		aw_thumb_schedule();
+	if ( $done && function_exists( 'kits_thumb_schedule' ) ) {
+		kits_thumb_schedule();
 	}
 	delete_transient( 'aw_cc0_lock' );
 }
@@ -188,7 +193,7 @@ function aw_cc0_run() {
  * @param int $post_id Post ID.
  * @return string
  */
-function aw_cc0_check_source( $post_id ) {
+function sourceweb_cc0_check_source( $post_id ) {
 	$url = (string) get_post_meta( $post_id, 'aw_source_image', true );
 	if ( ! preg_match( '#^https://[^/]+\.[^/]+/#i', $url ) ) {
 		return 'bad address';
@@ -233,7 +238,7 @@ function aw_cc0_check_source( $post_id ) {
  * @param string $page Source page URL.
  * @return string
  */
-function aw_source_og_image( $page ) {
+function sourceweb_source_og_image( $page ) {
 	if ( ! preg_match( '#^https?://#i', $page ) ) {
 		return '';
 	}
@@ -243,13 +248,13 @@ function aw_source_og_image( $page ) {
 	}
 	// PIB: every release declares the same site picture; the release's own first photo is the item's (owner, 18 Oct 2026).
 	if ( preg_match( '#^https?://(www\.)?pib\.gov\.in/#i', $page ) ) {
-		$r = wp_remote_get( $page, array( 'timeout' => 15, 'user-agent' => AW_PRESS_UA ) ); // a browser's agent: PIB refuses bot-style ones
+		$r = wp_remote_get( $page, array( 'timeout' => 15, 'user-agent' => SOURCEWEB_BROWSER_UA ) ); // a browser's agent: PIB refuses bot-style ones
 		$h = is_wp_error( $r ) ? '' : (string) wp_remote_retrieve_body( $r );
 		return preg_match( '#<img[^>]+src=["\'](https://static\.pib\.gov\.in/WriteReadData/userfiles/image/[^"\']+)#i', $h, $m ) ? esc_url_raw( $m[1] ) : '';
 	}
 	// Link-preview crawlers first (social sites and many publishers give them the real picture), then a browser.
-	foreach ( array( 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)', 'Twitterbot/1.0', AW_PRESS_UA ) as $ua ) { // then a browser (owner, 17 Oct 2026)
-		$url = aw_source_og_image_as( $page, $ua );
+	foreach ( array( 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)', 'Twitterbot/1.0', SOURCEWEB_BROWSER_UA ) as $ua ) { // then a browser (owner, 17 Oct 2026)
+		$url = sourceweb_source_og_image_as( $page, $ua );
 		if ( '' !== $url && ! ( function_exists( 'aw_press_is_platform_image' ) && aw_press_is_platform_image( $url ) ) ) {
 			return $url;
 		}
@@ -258,7 +263,7 @@ function aw_source_og_image( $page ) {
 }
 
 /** og:image (else twitter:image, image_src) of a page read with one User-Agent, or ''. */
-function aw_source_og_image_as( $page, $ua ) {
+function sourceweb_source_og_image_as( $page, $ua ) {
 	$r = wp_remote_get(
 		$page,
 		array(
@@ -306,7 +311,7 @@ function aw_source_og_image_as( $page, $ua ) {
  * @param int $limit Pages to read in this run.
  * @return int
  */
-function aw_source_og_run( $limit = 40 ) {
+function sourceweb_source_og_run( $limit = 40 ) {
 	global $wpdb;
 	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery -- fixed SQL and the plugin's own clauses; values go in as placeholders
 	$ids = $wpdb->get_col( // phpcs:ignore WordPress.DB
@@ -330,8 +335,8 @@ function aw_source_og_run( $limit = 40 ) {
 		if ( time() - $start > 90 ) {
 			break;
 		}
-		$found = aw_source_og_image( (string) get_post_meta( $id, 'aw_source_url', true ) );
-		$found = '' !== $found ? $found : aw_source_also_image( (int) $id ); // another report of the same story
+		$found = sourceweb_source_og_image( (string) get_post_meta( $id, 'aw_source_url', true ) );
+		$found = '' !== $found ? $found : sourceweb_source_also_image( (int) $id ); // another report of the same story
 		$have  = (string) get_post_meta( $id, 'aw_source_image', true );
 		update_post_meta( $id, 'aw_source_og_tried', current_time( 'mysql', true ) );
 		update_post_meta( $id, 'aw_source_og_result', '' === $found ? 'none' : ( $found === $have ? 'same as the broken one' : $found ) );
@@ -340,7 +345,7 @@ function aw_source_og_run( $limit = 40 ) {
 				update_post_meta( $id, 'aw_source_image_prev', $have );
 			}
 			update_post_meta( $id, 'aw_source_image', $found );
-			$why = aw_cc0_check_source( (int) $id );
+			$why = sourceweb_cc0_check_source( (int) $id );
 			update_post_meta( $id, 'aw_source_image_ok', '' === $why ? 1 : 0 );
 			update_post_meta( $id, 'aw_source_image_checked', current_time( 'mysql', true ) );
 			update_post_meta( $id, 'aw_source_image_why', $why );
@@ -355,10 +360,10 @@ function aw_source_og_run( $limit = 40 ) {
  * The picture of a story reported by several publishers: the first other report whose page has one (owner, 18 Oct
  * 2026: a story from more than one source takes its picture from another when its own has none).
  */
-function aw_source_also_image( $post_id ) {
+function sourceweb_source_also_image( $post_id ) {
 	foreach ( array_filter( (array) get_post_meta( $post_id, 'aw_also_reported', true ) ) as $a ) {
 		$url = is_array( $a ) ? (string) ( $a['url'] ?? '' ) : (string) $a;
-		$img = '' !== $url ? aw_source_og_image( $url ) : '';
+		$img = '' !== $url ? sourceweb_source_og_image( $url ) : '';
 		if ( '' !== $img ) {
 			return $img;
 		}
@@ -372,7 +377,7 @@ function aw_source_also_image( $post_id ) {
  *
  * @return int Attachment ID, or 0.
  */
-function aw_source_pdf_cover( $post_id ) {
+function sourceweb_source_pdf_cover( $post_id ) {
 	$src = (string) get_post_meta( $post_id, 'aw_source_url', true );
 	if ( ! in_array( get_post_type( $post_id ), array( 'aw_legal', 'post', 'aw_news' ), true ) ) {
 		return 0; // documents only: a Directory listing's source PDF (the AWBI list) is not its picture
@@ -380,7 +385,7 @@ function aw_source_pdf_cover( $post_id ) {
 	if ( ! preg_match( '~^https?://[^?#]+\.pdf(\?|$)~i', $src ) || get_post_meta( $post_id, 'aw_file_id', true ) || get_post_meta( $post_id, 'aw_doc_preview', true ) || get_post_meta( $post_id, 'aw_cover_reused', true ) || ! class_exists( 'Imagick' ) ) {
 		return 0;
 	}
-	$pdf = aw_source_download( $src );
+	$pdf = sourceweb_source_download( $src );
 	if ( is_wp_error( $pdf ) || '%PDF' !== (string) file_get_contents( $pdf, false, null, 0, 4 ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions
 		is_string( $pdf ) && wp_delete_file( $pdf );
 		return 0;
@@ -434,7 +439,7 @@ function aw_source_pdf_cover( $post_id ) {
  * @param string $user_agent User-Agent ('' = the site's own).
  * @return string|WP_Error Temporary file path.
  */
-function aw_source_download( $url, $timeout = 30, $max = 15 * MB_IN_BYTES, $headers = array(), $user_agent = '' ) {
+function sourceweb_source_download( $url, $timeout = 30, $max = 15 * MB_IN_BYTES, $headers = array(), $user_agent = '' ) {
 	$r = wp_safe_remote_get( $url, array( 'timeout' => (int) $timeout, 'redirection' => 5, 'user-agent' => '' !== $user_agent ? $user_agent : 'Mozilla/5.0 (compatible; AnimalWritesImageCheck/1.0; +https://animalwrites.in)', 'headers' => (array) $headers, 'limit_response_size' => (int) $max ) );
 	if ( is_wp_error( $r ) ) {
 		return $r;
@@ -463,7 +468,7 @@ function aw_source_download( $url, $timeout = 30, $max = 15 * MB_IN_BYTES, $head
  * @param int $post_id Item.
  * @return int Attachment ID, or 0.
  */
-function aw_source_localise( $post_id ) {
+function sourceweb_source_localise( $post_id ) {
 	$url  = (string) get_post_meta( $post_id, 'aw_source_image', true );
 	$host = (string) wp_parse_url( home_url(), PHP_URL_HOST );
 	if ( '' === $url || false !== strpos( (string) wp_parse_url( $url, PHP_URL_HOST ), $host ) || '0' === (string) get_post_meta( $post_id, 'aw_source_image_ok', true ) ) {
@@ -472,7 +477,7 @@ function aw_source_localise( $post_id ) {
 	require_once ABSPATH . 'wp-admin/includes/media.php';
 	require_once ABSPATH . 'wp-admin/includes/file.php';
 	require_once ABSPATH . 'wp-admin/includes/image.php';
-	$tmp = aw_source_download( $url );
+	$tmp = sourceweb_source_download( $url );
 	if ( is_wp_error( $tmp ) ) {
 		update_post_meta( $post_id, 'aw_source_localise', 'download failed: ' . $tmp->get_error_message() );
 		return 0;
@@ -507,7 +512,7 @@ function aw_source_localise( $post_id ) {
 }
 
 /** Store linked publisher images locally, newest first; each item is tried once a day. Returns how many were stored. */
-function aw_source_localise_run( $limit = 25, $budget = 60 ) {
+function sourceweb_source_localise_run( $limit = 25, $budget = 60 ) {
 	global $wpdb;
 	$host = (string) wp_parse_url( home_url(), PHP_URL_HOST );
 	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery -- fixed SQL and the plugin's own clauses; values go in as placeholders
@@ -533,7 +538,7 @@ function aw_source_localise_run( $limit = 25, $budget = 60 ) {
 			break;
 		}
 		update_post_meta( $id, 'aw_source_localise_tried', current_time( 'mysql', true ) );
-		$stored += aw_source_localise( (int) $id ) ? 1 : 0;
+		$stored += sourceweb_source_localise( (int) $id ) ? 1 : 0;
 	}
 	return $stored;
 }
@@ -541,9 +546,9 @@ function aw_source_localise_run( $limit = 25, $budget = 60 ) {
 /* ---------- Openverse ---------- */
 
 /** True while today's request allowance lasts. */
-function aw_ov_quota_left() {
+function sourceweb_ov_quota_left() {
 	$q = (array) get_option( 'aw_ov_quota', array() );
-	return ( $q['d'] ?? '' ) !== gmdate( 'Y-m-d' ) || (int) ( $q['n'] ?? 0 ) < AW_CC0_DAILY_REQUESTS;
+	return ( $q['d'] ?? '' ) !== gmdate( 'Y-m-d' ) || (int) ( $q['n'] ?? 0 ) < SOURCEWEB_CC0_DAILY_REQUESTS;
 }
 
 /**
@@ -554,13 +559,13 @@ function aw_ov_quota_left() {
  * @param int    $page   Page.
  * @return array|null
  */
-function aw_ov_search( $q, $source, $page ) {
+function sourceweb_ov_search( $q, $source, $page ) {
 	$key    = 'aw_ov_' . md5( $q . '|' . $source . '|' . $page );
 	$cached = get_transient( $key );
 	if ( is_array( $cached ) ) {
 		return $cached;
 	}
-	if ( get_transient( 'aw_ov_pause' ) || ! aw_ov_quota_left() ) {
+	if ( get_transient( 'aw_ov_pause' ) || ! sourceweb_ov_quota_left() ) {
 		return null;
 	}
 	$last = (float) get_option( 'aw_ov_last', 0 );
@@ -579,7 +584,7 @@ function aw_ov_search( $q, $source, $page ) {
 		),
 		'https://api.openverse.org/v1/images/'
 	);
-	$r = wp_remote_get( $url, array( 'timeout' => 20, 'user-agent' => AW_CC0_UA ) );
+	$r = wp_remote_get( $url, array( 'timeout' => 20, 'user-agent' => SOURCEWEB_CC0_UA ) );
 	update_option( 'aw_ov_last', microtime( true ), false );
 	$qd = (array) get_option( 'aw_ov_quota', array() );
 	$qd = ( $qd['d'] ?? '' ) === gmdate( 'Y-m-d' ) ? $qd : array( 'd' => gmdate( 'Y-m-d' ), 'n' => 0 );
@@ -588,7 +593,7 @@ function aw_ov_search( $q, $source, $page ) {
 	$code = is_wp_error( $r ) ? 0 : (int) wp_remote_retrieve_response_code( $r );
 	if ( 429 === $code ) {
 		set_transient( 'aw_ov_pause', 1, HOUR_IN_SECONDS );
-		aw_cc0_log( 'Openverse: rate limited (429), pausing for an hour' );
+		sourceweb_cc0_log( 'Openverse: rate limited (429), pausing for an hour' );
 		return null;
 	}
 	if ( 200 !== $code ) {
@@ -596,7 +601,7 @@ function aw_ov_search( $q, $source, $page ) {
 			set_transient( $key, array(), WEEK_IN_SECONDS );
 			return array();
 		}
-		aw_cc0_log( 'Openverse: ' . ( is_wp_error( $r ) ? $r->get_error_message() : 'HTTP ' . $code ) . ' for "' . $q . '"' );
+		sourceweb_cc0_log( 'Openverse: ' . ( is_wp_error( $r ) ? $r->get_error_message() : 'HTTP ' . $code ) . ' for "' . $q . '"' );
 		return null;
 	}
 	$d    = json_decode( (string) wp_remote_retrieve_body( $r ), true );
@@ -621,7 +626,7 @@ function aw_ov_search( $q, $source, $page ) {
 }
 
 /** Animals named in titles: regex => query noun. Order matters (first match in the title wins by position). */
-function aw_cc0_nouns() {
+function sourceweb_cc0_nouns() {
 	return array(
 		'(?:stray|street|community|pet)?\s*(?:dogs?|pupp(?:y|ies)|canines?|strays)' => 'dog',
 		'(?:cats?|kittens?)'                                => 'cat',
@@ -677,7 +682,7 @@ function aw_cc0_nouns() {
 }
 
 /** Category => query, when the title names no animal. */
-function aw_cc0_category_query( $slug ) {
+function sourceweb_cc0_category_query( $slug ) {
 	$m = array(
 		'community-dogs'             => 'dog',
 		'animal-birth-control'       => 'dog',
@@ -702,12 +707,12 @@ function aw_cc0_category_query( $slug ) {
  * @param int $post_id Post ID.
  * @return array
  */
-function aw_cc0_queries( $post_id ) {
+function sourceweb_cc0_queries( $post_id ) {
 	$title  = wp_strip_all_tags( html_entity_decode( get_the_title( $post_id ), ENT_QUOTES ) );
 	$best   = null;
 	$at     = PHP_INT_MAX;
 	$stray  = false;
-	foreach ( aw_cc0_nouns() as $re => $noun ) {
+	foreach ( sourceweb_cc0_nouns() as $re => $noun ) {
 		if ( preg_match( '/\b(?:' . $re . ')\b/i', $title, $m, PREG_OFFSET_CAPTURE ) && $m[0][1] < $at ) {
 			$at   = $m[0][1];
 			$best = $noun;
@@ -725,7 +730,7 @@ function aw_cc0_queries( $post_id ) {
 	}
 	if ( ! $best ) {
 		foreach ( $cats as $s ) {
-			$best = aw_cc0_category_query( $s );
+			$best = sourceweb_cc0_category_query( $s );
 			if ( $best ) {
 				break;
 			}
@@ -777,7 +782,7 @@ function aw_cc0_queries( $post_id ) {
  * @param bool   $injury Whether injury pictures are allowed (veterinary care).
  * @return int
  */
-function aw_cc0_score( $x, $word, $injury ) {
+function sourceweb_cc0_score( $x, $word, $injury ) {
 	$text = strtolower( $x['title'] . ' | ' . $x['tags'] );
 	if ( '' === $x['id'] || ! preg_match( '#^https://#', $x['url'] ) || ! in_array( $x['license'], array( 'cc0', 'pdm' ), true ) ) {
 		return -1;
@@ -810,7 +815,7 @@ function aw_cc0_score( $x, $word, $injury ) {
 }
 
 /** Openverse ids and file hashes already in the Media Library. */
-function aw_cc0_used() {
+function sourceweb_cc0_used() {
 	global $wpdb;
 	return array(
 		'ids' => array_flip( $wpdb->get_col( "SELECT meta_value FROM {$wpdb->postmeta} WHERE meta_key = 'aw_openverse_id'" ) ), // phpcs:ignore WordPress.DB
@@ -825,14 +830,14 @@ function aw_cc0_used() {
  * @param int $post_id Post ID.
  * @return bool|null
  */
-function aw_cc0_assign( $post_id ) {
-	$used   = aw_cc0_used();
+function sourceweb_cc0_assign( $post_id ) {
+	$used   = sourceweb_cc0_used();
 	$injury = has_term( 'veterinary-care', 'category', $post_id );
 	$tried  = array();
-	foreach ( aw_cc0_queries( $post_id ) as $qq ) {
+	foreach ( sourceweb_cc0_queries( $post_id ) as $qq ) {
 		list( $q, $source, $word ) = $qq;
 		for ( $page = 1; $page <= 12; $page++ ) {
-			$rows = aw_ov_search( $q, $source, $page );
+			$rows = sourceweb_ov_search( $q, $source, $page );
 			if ( null === $rows ) {
 				return null;
 			}
@@ -843,7 +848,7 @@ function aw_cc0_assign( $post_id ) {
 				if ( isset( $used['ids'][ $x['id'] ] ) || isset( $tried[ $x['id'] ] ) ) {
 					continue;
 				}
-				$s = aw_cc0_score( $x, $word, $injury );
+				$s = sourceweb_cc0_score( $x, $word, $injury );
 				if ( $s >= 0 ) {
 					$cands[] = array( $s, $x );
 				}
@@ -851,12 +856,12 @@ function aw_cc0_assign( $post_id ) {
 			usort( $cands, fn( $a, $b ) => $b[0] <=> $a[0] );
 			foreach ( array_slice( $cands, 0, 3 ) as $c ) {
 				$tried[ $c[1]['id'] ] = 1;
-				$att                  = aw_cc0_sideload( $post_id, $c[1], $q, $used );
+				$att                  = sourceweb_cc0_sideload( $post_id, $c[1], $q, $used );
 				if ( $att ) {
 					set_post_thumbnail( $post_id, $att );
 					update_post_meta( $post_id, 'aw_cc0_status', 'done' );
 					update_post_meta( $post_id, 'aw_cc0_tried', current_time( 'mysql', true ) );
-					aw_cc0_log( '#' . $post_id . ' ← "' . $c[1]['title'] . '" (' . $c[1]['source'] . ', ' . $c[1]['license'] . ', q: ' . $q . ')' );
+					sourceweb_cc0_log( '#' . $post_id . ' ← "' . $c[1]['title'] . '" (' . $c[1]['source'] . ', ' . $c[1]['license'] . ', q: ' . $q . ')' );
 					return true;
 				}
 			}
@@ -868,7 +873,7 @@ function aw_cc0_assign( $post_id ) {
 	update_post_meta( $post_id, 'aw_cc0_status', 'none' );
 	update_post_meta( $post_id, 'aw_cc0_attempts', (int) get_post_meta( $post_id, 'aw_cc0_attempts', true ) + 1 );
 	update_post_meta( $post_id, 'aw_cc0_tried', current_time( 'mysql', true ) );
-	aw_cc0_log( '#' . $post_id . ' no suitable photo (' . implode( '; ', array_map( fn( $x ) => $x[0] . '@' . $x[1], aw_cc0_queries( $post_id ) ) ) . ')' );
+	sourceweb_cc0_log( '#' . $post_id . ' no suitable photo (' . implode( '; ', array_map( fn( $x ) => $x[0] . '@' . $x[1], sourceweb_cc0_queries( $post_id ) ) ) . ')' );
 	return false;
 }
 
@@ -881,13 +886,13 @@ function aw_cc0_assign( $post_id ) {
  * @param array  $used    Used ids / hashes (updated).
  * @return int
  */
-function aw_cc0_sideload( $post_id, $x, $q, &$used ) {
+function sourceweb_cc0_sideload( $post_id, $x, $q, &$used ) {
 	require_once ABSPATH . 'wp-admin/includes/media.php';
 	require_once ABSPATH . 'wp-admin/includes/file.php';
 	require_once ABSPATH . 'wp-admin/includes/image.php';
-	$tmp = aw_source_download( $x['url'], 40, 26 * MB_IN_BYTES ); // over 25 MB is refused below
+	$tmp = sourceweb_source_download( $x['url'], 40, 26 * MB_IN_BYTES ); // over 25 MB is refused below
 	if ( is_wp_error( $tmp ) ) {
-		aw_cc0_log( '#' . $post_id . ' download failed: ' . $x['url'] . ' (' . $tmp->get_error_message() . ')' );
+		sourceweb_cc0_log( '#' . $post_id . ' download failed: ' . $x['url'] . ' (' . $tmp->get_error_message() . ')' );
 		return 0;
 	}
 	$size = @getimagesize( $tmp ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
@@ -913,7 +918,7 @@ function aw_cc0_sideload( $post_id, $x, $q, &$used ) {
 	$att   = media_handle_sideload( array( 'name' => $name, 'tmp_name' => $saved['path'] ), $post_id, $title, array( 'post_excerpt' => '', 'post_content' => '' ) );
 	if ( is_wp_error( $att ) ) {
 		wp_delete_file( $saved['path'] );
-		aw_cc0_log( '#' . $post_id . ' could not be added to the Media Library: ' . $att->get_error_message() );
+		sourceweb_cc0_log( '#' . $post_id . ' could not be added to the Media Library: ' . $att->get_error_message() );
 		return 0;
 	}
 	update_post_meta( $att, '_wp_attachment_image_alt', function_exists( 'aw_seo_plain' ) ? aw_seo_plain( $title ) : $title );
@@ -925,16 +930,16 @@ function aw_cc0_sideload( $post_id, $x, $q, &$used ) {
 	update_post_meta( $att, 'aw_openverse_title', $x['title'] );
 	$used['ids'][ $x['id'] ] = 1;
 	$used['md5'][ $md5 ]     = 1;
-	if ( function_exists( 'aw_thumb_hash' ) ) {
-		$used['md5'][ aw_thumb_hash( $att ) ] = 1;
+	if ( function_exists( 'kits_thumb_hash' ) ) {
+		$used['md5'][ kits_thumb_hash( $att ) ] = 1;
 	}
 	return (int) $att;
 }
 
 /** Counts for Kits → Home → Pictures. */
-function aw_cc0_counts() {
+function sourceweb_cc0_counts() {
 	global $wpdb;
-	$from = aw_cc0_items_sql();
+	$from = sourceweb_cc0_items_sql();
 	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery -- fixed SQL and the plugin's own clauses; values go in as placeholders
 	$row  = $wpdb->get_row( // phpcs:ignore WordPress.DB
 		"SELECT COUNT(*) total,
@@ -944,7 +949,7 @@ function aw_cc0_counts() {
 			SUM( si.meta_value IS NULL OR si.meta_value = '' ) pub_none,
 			SUM( cc.meta_value IS NOT NULL ) cc0,
 			SUM( th.meta_value IS NULL AND ( si.meta_value IS NULL OR si.meta_value NOT LIKE 'https://%' OR ok.meta_value = '0' ) ) placard,
-			SUM( th.meta_value IS NULL AND st.meta_value = 'none' AND at.meta_value >= " . (int) AW_CC0_MAX_ATTEMPTS . " ) gave_up
+			SUM( th.meta_value IS NULL AND st.meta_value = 'none' AND at.meta_value >= " . (int) SOURCEWEB_CC0_MAX_ATTEMPTS . " ) gave_up
 		" . str_replace(
 			'WHERE',
 			"LEFT JOIN {$wpdb->postmeta} si ON si.post_id = p.ID AND si.meta_key = 'aw_source_image'
@@ -963,8 +968,8 @@ function aw_cc0_counts() {
 }
 
 /** Kits → Home → Pictures (until the SourceWeb dashboard has it): publisher images and CC0 photos. */
-function aw_cc0_site_check() {
-	$c = aw_cc0_counts();
+function sourceweb_cc0_site_check() {
+	$c = sourceweb_cc0_counts();
 	echo '<h2>Pictures on News, Library and research items</h2><table class="form-table" role="presentation"><tbody>';
 	foreach (
 		array(
@@ -975,22 +980,22 @@ function aw_cc0_site_check() {
 			'No publisher image'                                  => $c['pub_none'] ?? 0,
 			'CC0 photo assigned (Openverse)'                      => $c['cc0'] ?? 0,
 			'Still no photo of its own (category photo or placard)'  => $c['placard'] ?? 0,
-			'No suitable CC0 photo after ' . AW_CC0_MAX_ATTEMPTS . ' tries' => $c['gave_up'] ?? 0,
+			'No suitable CC0 photo after ' . SOURCEWEB_CC0_MAX_ATTEMPTS . ' tries' => $c['gave_up'] ?? 0,
 		) as $k => $v
 	) {
 		echo '<tr><th scope="row">' . esc_html( $k ) . '</th><td>' . (int) $v . '</td></tr>';
 	}
 	$q = (array) get_option( 'aw_ov_quota', array() );
-	echo '</tbody></table><p>Openverse requests today: ' . (int) ( ( $q['d'] ?? '' ) === gmdate( 'Y-m-d' ) ? $q['n'] : 0 ) . ' of ' . (int) AW_CC0_DAILY_REQUESTS . '. Next run: ' . esc_html( wp_next_scheduled( 'aw_cc0_run' ) ? wp_date( 'j M H:i', wp_next_scheduled( 'aw_cc0_run' ) ) : 'not scheduled' ) . '.</p>';
+	echo '</tbody></table><p>Openverse requests today: ' . (int) ( ( $q['d'] ?? '' ) === gmdate( 'Y-m-d' ) ? $q['n'] : 0 ) . ' of ' . (int) SOURCEWEB_CC0_DAILY_REQUESTS . '. Next run: ' . esc_html( wp_next_scheduled( 'aw_cc0_run' ) ? wp_date( 'j M H:i', wp_next_scheduled( 'aw_cc0_run' ) ) : 'not scheduled' ) . '.</p>';
 	$log = array_slice( (array) get_option( 'aw_cc0_log', array() ), -15 );
 	if ( $log ) {
 		echo '<details><summary>Last log lines</summary><pre style="white-space:pre-wrap;max-width:900px">' . esc_html( implode( "\n", array_reverse( $log ) ) ) . '</pre></details>';
 	}
 }
-add_action( 'aw_site_check_after', 'aw_cc0_site_check' );
+add_action( 'aw_site_check_after', 'sourceweb_cc0_site_check' );
 
 /*
- * The per-item switch for the publisher's image (aw_publisher_image() above), editable over the REST API so an editor
+ * The per-item switch for the publisher's image (sourceweb_publisher_image() above), editable over the REST API so an editor
  * can let an item's own cover lead from wp-admin: '1' = the cover leads, '' = the publisher's image again. Editors of
  * the item only; no change until a value is set.
  */

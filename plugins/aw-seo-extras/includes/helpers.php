@@ -895,8 +895,8 @@ function aw_seo_item_image( $id ) {
 		return $img;
 	}
 	$type = get_post_type( $id );
-	if ( in_array( $type, AW_SEO_SOURCE_IMAGE_TYPES, true ) && function_exists( 'aw_publisher_image' ) ) {
-		$url = aw_publisher_image( $id );
+	if ( in_array( $type, AW_SEO_SOURCE_IMAGE_TYPES, true ) && function_exists( 'sourceweb_publisher_image' ) ) {
+		$url = sourceweb_publisher_image( $id );
 		if ( '' !== $url ) {
 			return array( 'id' => 0, 'url' => $url, 'width' => (int) get_post_meta( $id, 'aw_source_image_w', true ), 'height' => (int) get_post_meta( $id, 'aw_source_image_h', true ) );
 		}
@@ -920,11 +920,11 @@ function aw_seo_item_image( $id ) {
 
 /** The share image of a category page: its category photo (term meta aw_category_image), or null. */
 function aw_seo_term_image() {
-	if ( ! aw_seo_is_category_page() || ! function_exists( 'aw_category_image_id' ) ) {
+	if ( ! aw_seo_is_category_page() || ! function_exists( 'kits_category_image_id' ) ) {
 		return null;
 	}
 	$att = (int) get_term_meta( get_queried_object_id(), 'rank_math_facebook_image_id', true );
-	return aw_seo_attachment( $att ? $att : (int) aw_category_image_id( get_queried_object() ) );
+	return aw_seo_attachment( $att ? $att : (int) kits_category_image_id( get_queried_object() ) );
 }
 
 /**

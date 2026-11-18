@@ -462,7 +462,7 @@ R = reads, W = writes. "Display" = front-end block/output. Only box-edited (or b
 
 | key | display | JSON-LD | FAQ | lists / filters / place pages | writers besides the box | analytics / admin |
 |---|---|---|---|---|---|---|
-| `aw_source_url` | "Read at {source}" binding `core/bindings.php:81–85`; item sources `core/item-head.php:318`; source attribution `kits/attribution.php:25,60` | Article `isBasedOn`/citation `seo/schema.php:426`; PDF `aw_schema_pdf` :366; court doc url :564 | `core/faq-data.php:333–443, 554` (download/read/study answers) | dedupe `src/same-story.php:42`; `core/cc0-images.php` image source; `core/media.php:277,303,463` source image | ingest `src/ingest.php:215` | review table `src/class-aw-sourcing-review-table.php:126`, source sites, keyword stats |
+| `aw_source_url` | "Read at {source}" binding `core/bindings.php:81–85`; item sources `core/item-head.php:318`; source attribution `kits/attribution.php:25,60` | Article `isBasedOn`/citation `seo/schema.php:426`; PDF `aw_schema_pdf` :366; court doc url :564 | `core/faq-data.php:333–443, 554` (download/read/study answers) | dedupe `src/same-story.php:42`; `aw-sourcing/includes/cc0-images.php` image source; `core/media.php:277,303,463` source image | ingest `src/ingest.php:215` | review table `src/class-aw-sourcing-review-table.php:126`, source sites, keyword stats |
 | `aw_source_name` | binding `source_meta`/`source_link_label` `core/bindings.php:83,87`; item head by-line `core/item-head.php:341,359`; card source `core/hub-blocks.php:603` | Article publisher name `seo/schema.php:427`, Periodical name :546 | study journal `core/faq-data.php:574, 758` | title cleanup `seo/titles.php:80` | ingest `src/ingest.php:241` | relevance, summary rewrite |
 | `aw_source_date` | shown date: Post Date block filter `core/display.php:38–58`, meta row `core/item-head.php:124`; card ts `core/hub-blocks.php:253` | `datePublished` of the original `seo/schema.php:428`; Legislation `legislationDate` :481 | `core/faq-data.php:370,575` | News sort key `core/display.php:60–219` (filled from post date when missing, :155–158) | ingest `src/ingest.php:247` | review queue, gov-verified watch list `core/gov-verified.php:48,72` |
 | `aw_issuer` | Library meta/issuer line `core/item-head.php:329`; card source `core/hub-blocks.php:604`; placard `core/media.php:308` | `GovernmentOrganization` (`aw_schema_issuer` `seo/schema.php:373–376`; court types :502) | issuer/read questions `core/faq-data.php:43–44, 342–411, 768, 1031` | — | `aw_set_issuer()` (imports) | dataLayer `issuer` `core/kits-config.php:67–68`; relevance/auto-review |
@@ -505,7 +505,7 @@ R = reads, W = writes. "Display" = front-end block/output. Only box-edited (or b
 | `aw_campaign_outcome`, `_asof` | `[aw_campaign_outcome]` etc. `core/campaign-tools.php:98–100`, `core/campaign-record.php:127` | — | asof auto-set at close :148–149 |
 | `aw_campaign_state_override`, `_override_note` | state override `core/campaign-tools.php:60–61` | — | — |
 | `aw_campaign_metric_min`, `_metric_stale` | when the letter count shows / gets an as-of date `core/campaign-tools.php:170, 403, 410` | — | — |
-| `aw_campaign_share_text`, `_share_story`, `_share_post` | Share button data `window.awCampShare` `core/campaign-tools.php:566, 579` | — | media merge keeps the IDs `core/media-merge.php:27` |
+| `aw_campaign_share_text`, `_share_story`, `_share_post` | Share button data `window.awCampShare` `core/campaign-tools.php:566, 579` | — | media merge keeps the IDs `kits-core/includes/tools/media-merge.php:27` |
 | `aw_campaign_sent` (+`_sent_at`) | count `[aw_campaign_count]` `core/campaign-tools.php:171, 386–410` | — | written by the "sent" endpoint |
 | `aw_campaign_impact_state`, `_evidence` | Real-world impact module `core/campaign-record.php:116–120` | `aw_campaign_record_schema` `seo/schema.php:672ff` | — |
 | `aw_campaign_metrics` | metric records `core/campaign-record.php:73` | record schema | no box |
@@ -601,7 +601,7 @@ Live listing page = theme template `single-aw_listing.html` (blocks listing-abou
 
 ### 3.8 attachment
 
-`kits_image_context` — Media list column `core/media-columns.php:214`; media auto-fill reads/writes `core/media-autofill.php:174–204`; removed from REST for viewers who cannot edit (`kits/image-context.php:55–63`). No front-end display.
+`kits_image_context` — Media list column `aw-seo-extras/includes/media-columns.php:214`; media auto-fill reads/writes `aw-seo-extras/includes/media-autofill.php:174–204`; removed from REST for viewers who cannot edit (`kits/image-context.php:55–63`). No front-end display.
 
 ---
 
@@ -647,9 +647,9 @@ Taxonomies with UI: category, post_tag (public), kits_campaign_link (`show_ui`, 
 |---|---|---|---|---|---|
 | Name, Slug, Parent, Description | term fields | core | core | WordPress | everywhere |
 | Description (Rank Math editor, edit) | core term description | HTML | Rank Math `category_description_editor` replaces the core field | Rank Math | category page description |
-| Photo (add + edit) | term meta `aw_category_image` (attachment ID); fallback option `aw_category_images` kept in step | int | `absint`, must be an image; `manage_categories`; `created_/edited_category` (`core/category-images.php:47–85`) | ours | category page head and News/Library items in the category (`aw_category_image_id` :20–31; `core/media.php:118`; card fallback `core/hub-blocks.php:685`); 18 rows |
+| Photo (add + edit) | term meta `aw_category_image` (attachment ID); fallback option `aw_category_images` kept in step | int | `absint`, must be an image; `manage_categories`; `created_/edited_category` (`kits-core/includes/category-images.php:47–85`) | ours | category page head and News/Library items in the category (`aw_category_image_id` :20–31; `core/media.php:118`; card fallback `core/hub-blocks.php:685`); 18 rows |
 | Find help: listing types (add + edit) | term meta `aw_help_types` (array of post_tag IDs) | array | `absint`, `term_exists`; `manage_categories` (`core/model.php:277–315`) | ours | "Find help" on the category page (`aw_category_help_types` :318); 9 rows |
-| Banner image (edit, prio 20) | term meta `aw_banner_image` | attachment ID | `absint`, image check (`core/category-images.php:122–141`) | ours | category banner `aw_category_banner_html` :144ff; 0 rows on live |
+| Banner image (edit, prio 20) | term meta `aw_banner_image` | attachment ID | `absint`, image check (`kits-core/includes/category-images.php:122–141`) | ours | category banner `aw_category_banner_html` :144ff; 0 rows on live |
 | FAQ (edit) | term meta `aw_faq` (JSON) | JSON | as post FAQ (`seo/faq.php:834–860`) | ours | FAQ block + FAQPage on the category page; 19 rows |
 | Rank Math SEO (edit) | term meta `rank_math_title`, `_description`, `_focus_keyword`, `_robots`, `_breadcrumb_title`, `_facebook_image(_id)`, `_twitter_use_facebook`, `_seo_score` | | Rank Math `save_term_meta` (edit_term) | Rank Math (`tax_category_add_meta_box` on) | `rank_math_breadcrumb_title` read by our breadcrumbs `seo/breadcrumbs.php:30`; title/description filled by `aw_seo_sync_categories` `seo/programmatic.php:661–691` (`_aw_seo_auto` bookkeeping) |
 | (save hook, no field) | `_aw_seo_auto` | JSON | `edited_/created_category` prio 30 | ours | auto-fill bookkeeping |
@@ -662,7 +662,7 @@ Category term meta with **no field** on the screen: `aw_category_card` (18, read
 |---|---|---|---|
 | Name, Slug, Description | term fields | WordPress | |
 | Description (Rank Math editor, edit) | core term description | Rank Math | tag page description |
-| Photo (add + edit) | `aw_category_image` | ours `core/category-images.php:47–64` | tag page head; 0 tag rows on live |
+| Photo (add + edit) | `aw_category_image` | ours `kits-core/includes/category-images.php:47–64` | tag page head; 0 tag rows on live |
 | Guides linking here (edit, prio 20, listing-type tags only) | read-only (posts with `aw_rel_listing_type`) | ours `core/model.php:320–332` | — |
 | FAQ (edit) | `aw_faq` | ours | tag FAQ; 19 rows |
 | Rank Math SEO (edit) | `rank_math_title/description/focus_keyword/robots/canonical_url/breadcrumb_title/facebook_image/twitter_use_facebook/seo_score` | Rank Math (`tax_post_tag_add_meta_box` on) | `aw_seo_sync_tags` `seo/programmatic.php:933–960` writes title/description/robots |
@@ -989,19 +989,19 @@ The panels, boxes and tables on the admin pages of SourceWeb, RankWeb (with Sear
 
 | id | widget | kind | reads | limits | file |
 |---|---|---|---|---|---|
-| ap-core-media-duplicates | Duplicate files | table | `data/media-duplicate-groups.php`, `option:aw_media_merge_log`, `option:aw_media_merge_data_{id}`, `aw_gallery` | Merges the next 10 groups per click; Undo per group. | `core/media-merge.php:437 (aw_media_merge_screen)` |
+| ap-core-media-duplicates | Duplicate files | table | `data/media-duplicate-groups.php`, `option:aw_media_merge_log`, `option:aw_media_merge_data_{id}`, `aw_gallery` | Merges the next 10 groups per click; Undo per group. | `kits-core/includes/tools/media-merge.php:437 (aw_media_merge_screen)` |
 
 **Media: Make WebP** (`aw-media-webp`)
 
 | id | widget | kind | reads | limits | file |
 |---|---|---|---|---|---|
-| ap-core-media-webp | Make WebP | table | `option:aw_media_webp_log`, `_wp_attached_file`, `_wp_attachment_metadata` | Batches; Undo per image. | `core/media-webp.php:410 (aw_media_webp_screen)` |
+| ap-core-media-webp | Make WebP | table | `option:aw_media_webp_log`, `_wp_attached_file`, `_wp_attachment_metadata` | Batches; Undo per image. | `kits-core/includes/media-webp.php:410 (aw_media_webp_screen)` |
 
 **Media: Reuse pictures** (`aw-media-reuse`)
 
 | id | widget | kind | reads | limits | file |
 |---|---|---|---|---|---|
-| ap-core-media-reuse | Reuse pictures | table | `data/media-reuse-plan.php`, `option:aw_media_reuse_log`, `option:aw_thumb_map`, `option:aw_category_images`, `transient:aw_media_reuse_notice_{user}`, `_thumbnail_id`, `aw_cover_reused`, `aw_source_image_off` | One row per offered picture (the plan file); Apply, Undo and Check again one picture at a time; news, Library items, listings and posts only. | `core/media-reuse.php:353 (aw_media_reuse_screen)` |
+| ap-core-media-reuse | Reuse pictures | table | `data/media-reuse-plan.php`, `option:aw_media_reuse_log`, `option:aw_thumb_map`, `option:aw_category_images`, `transient:aw_media_reuse_notice_{user}`, `_thumbnail_id`, `aw_cover_reused`, `aw_source_image_off` | One row per offered picture (the plan file); Apply, Undo and Check again one picture at a time; news, Library items, listings and posts only. | `kits-core/includes/tools/media-reuse.php:353 (aw_media_reuse_screen)` |
 
 ### MailWeb
 
@@ -1094,4 +1094,4 @@ Tabs in this order on every Kits screen (`kits_admin_tabs`); Fonts is core's Fon
 | ap-kits-preview | Preview addresses | form | `option:kits_preview_ips` | One address per line. | `kits/preview.php:236` |
 **Keys set from an admin page, not from an edit-screen box**
 
-- `_thumbnail_id` (the cover), `aw_cover_reused`, `aw_source_image_off`: set by Apply on Media → Reuse pictures (`core/media-reuse.php:255–258`) and put back by Undo. `aw_cover_reused` keeps the PDF cover job (`core/cc0-images.php`) from replacing the chosen cover; `aw_source_image_off` switches the publisher image off so the cover shows. Featured image on the edit screen still edits the cover.
+- `_thumbnail_id` (the cover), `aw_cover_reused`, `aw_source_image_off`: set by Apply on Media → Reuse pictures (`kits-core/includes/tools/media-reuse.php:255–258`) and put back by Undo. `aw_cover_reused` keeps the PDF cover job (`aw-sourcing/includes/cc0-images.php`) from replacing the chosen cover; `aw_source_image_off` switches the publisher image off so the cover shows. Featured image on the edit screen still edits the cover.

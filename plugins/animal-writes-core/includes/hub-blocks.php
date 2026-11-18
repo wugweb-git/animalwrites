@@ -178,7 +178,7 @@ function aw_block_hub_visual( $a ) {
 	if ( 'aw_listing' === $type ) { // Directory: the photos of three categories it serves
 		foreach ( array( 'veterinary-care', 'community-dogs', 'cattle-gaushalas' ) as $slug ) {
 			$t   = get_term_by( 'slug', $slug, 'category' );
-			$tid = $t && function_exists( 'aw_category_image_id' ) ? (int) aw_category_image_id( $t ) : 0;
+			$tid = $t && function_exists( 'kits_category_image_id' ) ? (int) kits_category_image_id( $t ) : 0;
 			$tiles .= $tid ? (string) wp_get_attachment_image( $tid, 'medium_large', false, array( 'alt' => '', 'loading' => 'lazy' ) ) : '';
 		}
 	} elseif ( 'aw_press' === $type ) { // Media & PR: the latest coverage pictures
@@ -194,13 +194,13 @@ function aw_block_hub_visual( $a ) {
 		$seen = array();
 		$with = array();
 		foreach ( $pool as $p ) {
-			$key = aw_item_image( $p->ID ) ?: ( get_post_meta( $p->ID, 'aw_file_id', true ) ? 'doc' . $p->ID : ( has_post_thumbnail( $p ) ? get_the_post_thumbnail_url( $p ) : '' ) );
+			$key = kits_item_image( $p->ID ) ?: ( get_post_meta( $p->ID, 'aw_file_id', true ) ? 'doc' . $p->ID : ( has_post_thumbnail( $p ) ? get_the_post_thumbnail_url( $p ) : '' ) );
 			if ( $key && ! isset( $seen[ $key ] ) ) {
 				$seen[ $key ] = true;
 				$with[]       = $p;
 			}
 		}
-		$rest = array_filter( $pool, fn( $p ) => ! in_array( $p, $with, true ) && ! aw_item_image( $p->ID ) );
+		$rest = array_filter( $pool, fn( $p ) => ! in_array( $p, $with, true ) && ! kits_item_image( $p->ID ) );
 		foreach ( array_slice( array_merge( $with, $rest ), 0, 3 ) as $p ) {
 			$tiles .= aw_section_tile( $p );
 		}
@@ -527,7 +527,7 @@ function aw_card_ts( $id ) {
 		$d = (string) get_post_meta( $id, 'aw_press_date', true );
 		return $d ? (int) strtotime( $d . ' 12:00:00 Asia/Kolkata' ) : (int) get_post_time( 'U', true, $id );
 	}
-	if ( 'post' === $type && ! aw_is_ingested( $id ) ) {
+	if ( 'post' === $type && ! kits_is_ingested( $id ) ) {
 		return (int) get_post_modified_time( 'U', true, $id ); // our own guides: when they were last updated
 	}
 	return function_exists( 'aw_published_ts' ) ? (int) aw_published_ts( $id ) : (int) get_post_time( 'U', true, $id );
@@ -690,7 +690,7 @@ function aw_card_chips( $id, $state = 'block-md' ) {
  * blurred document preview). URL, or ''.
  */
 function aw_card_fallback_image( $id ) {
-	$att = function_exists( 'aw_category_card_id' ) ? (int) aw_category_card_id( $id ) : 0;
+	$att = function_exists( 'kits_category_card_id' ) ? (int) kits_category_card_id( $id ) : 0;
 	if ( ! $att ) {
 		$def = (array) ( get_option( 'aw_category_images', array() )['default'] ?? array() );
 		$att = (int) ( $def ? $def[ $id % count( $def ) ] : 0 );

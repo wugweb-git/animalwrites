@@ -99,7 +99,7 @@ deleted (see `docs/content-blocks-feasibility.md`, section 22). The 7 SourceWeb 
 | `aw_service_slugs()` | 3 | `includes/programmatic.php` (3) |
 | `aw_tag_section()` | 3 | `includes/breadcrumbs.php` (1), `includes/programmatic.php` (2) |
 | `aw_camp_state()` | 2 | `includes/schema.php` (2) |
-| `aw_category_image_id()` | 2 | `includes/helpers.php` (1), `includes/programmatic.php` (1) |
+| `kits_category_image_id()` | 2 | `includes/helpers.php` (1), `includes/programmatic.php` (1) |
 | `aw_form_page_listing()` | 2 | `includes/breadcrumbs.php` (2) |
 | `aw_heading_dates()` | 2 | `includes/titles.php` (2) |
 | `aw_item_issuer()` | 2 | `includes/schema.php` (2) |
@@ -127,7 +127,7 @@ deleted (see `docs/content-blocks-feasibility.md`, section 22). The 7 SourceWeb 
 | `aw_open_opportunities_meta_query()` | 1 | `includes/helpers.php` (1) |
 | `aw_press_list()` | 1 | `includes/schema.php` (1) |
 | `aw_primary_category()` | 1 | `includes/breadcrumbs.php` (1) |
-| `aw_publisher_image()` | 1 | `includes/helpers.php` (1) |
+| `sourceweb_publisher_image()` | 1 | `includes/helpers.php` (1) |
 | `aw_term_section()` | 1 | `includes/programmatic.php` (1) |
 
 ## `plugins/aw-sourcing`
@@ -166,7 +166,7 @@ deleted (see `docs/content-blocks-feasibility.md`, section 22). The 7 SourceWeb 
 | `aw_research_save_citation()` | 1 | `includes/ingest.php` (1) |
 | `aw_research_save_study_title()` | 1 | `includes/ingest.php` (1) |
 | `aw_set_campaign_links()` | 1 | `includes/ingest.php` (1) |
-| `aw_source_download()` | 1 | `includes/enrichment.php` (1) |
+| `sourceweb_source_download()` | 1 | `includes/enrichment.php` (1) |
 
 ## `tools/ci`
 

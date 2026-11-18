@@ -8,11 +8,12 @@
  *
  * Options:
  *   kits_theme_options, kits_page_defaults, kits_settings_backup, kits_settings_backup_defaults, kits_altcha_key,
- *   kits_ga4_via_gtm, kits_preview_devices, kits_preview_ips, kits_preview_links, kits_spot_map, kits_presets_enabled,
- *   kits_delete_data_on_uninstall.
- * Transients (they expire anyway): kits_preview_link_*, kits_thanks_*, kits_transfer_result_*, kits_altcha_*, and the
- *   site transient kits_update_release.
- * Scheduled events: kits_spot_map_daily.
+ *   kits_ga4_via_gtm, kits_preview_devices, kits_preview_ips, kits_preview_links, kits_spot_map, kits_presets_enabled;
+ *   the media records that came from Animal Writes Core on 18 Nov 2026: aw_category_images, aw_thumb_map,
+ *   aw_media_merge_log, aw_media_merge_data_*, aw_media_reuse_log, aw_media_webp_log; kits_delete_data_on_uninstall.
+ * Transients (they expire anyway): kits_preview_link_*, kits_thanks_*, kits_transfer_result_*, kits_altcha_*,
+ *   aw_media_reuse_notice_*, aw_thumb_dupes_n, and the site transient kits_update_release.
+ * Scheduled events: kits_spot_map_daily, aw_thumb_rebuild.
  * Tables: none of its own.
  *
  * Never deleted, even when ticked:
@@ -54,6 +55,11 @@ $kits_options = array(
 	'kits_preview_links',
 	'kits_spot_map',
 	'kits_presets_enabled',
+	'aw_category_images',
+	'aw_thumb_map',
+	'aw_media_merge_log',
+	'aw_media_reuse_log',
+	'aw_media_webp_log',
 );
 
 // The ALTCHA signing key is deleted but kept OUT of the backup file: it is a secret (regenerated on demand), and the
@@ -61,7 +67,7 @@ $kits_options = array(
 $kits_backup_options = array_values( array_diff( $kits_options, array( 'kits_altcha_key' ) ) );
 
 require_once __DIR__ . '/includes/uninstall-backup.php';
-if ( ! kits_uninstall_backup( 'kits-core', __DIR__ . '/kits-core.php', array_merge( $kits_backup_options, array( 'kits_delete_data_on_uninstall' ) ), array(), array() ) ) {
+if ( ! kits_uninstall_backup( 'kits-core', __DIR__ . '/kits-core.php', array_merge( $kits_backup_options, array( 'kits_delete_data_on_uninstall' ) ), array( 'aw_media_merge_data_' ), array() ) ) {
 	return; // No backup, no delete (the reason is in the error log).
 }
 
@@ -70,7 +76,9 @@ foreach ( $kits_options as $kits_option ) {
 }
 
 global $wpdb;
-foreach ( array( 'kits_preview_link_', 'kits_thanks_', 'kits_transfer_result_', 'kits_altcha_' ) as $kits_prefix ) {
+$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s", $wpdb->esc_like( 'aw_media_merge_data_' ) . '%' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- uninstall: the merge tool's per-group records, once.
+delete_transient( 'aw_thumb_dupes_n' );
+foreach ( array( 'kits_preview_link_', 'kits_thanks_', 'kits_transfer_result_', 'kits_altcha_', 'aw_media_reuse_notice_' ) as $kits_prefix ) {
 	foreach ( array( '_transient_', '_transient_timeout_' ) as $kits_kind ) {
 		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s", $wpdb->esc_like( $kits_kind . $kits_prefix ) . '%' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- uninstall: transients by prefix, once.
 	}
@@ -78,6 +86,7 @@ foreach ( array( 'kits_preview_link_', 'kits_thanks_', 'kits_transfer_result_', 
 delete_site_transient( 'kits_update_release' );
 
 wp_unschedule_hook( 'kits_spot_map_daily' );
+wp_unschedule_hook( 'aw_thumb_rebuild' ); // the thumbnail map rebuild (thumbs.php)
 wp_unschedule_hook( 'aw_fetch_favicons' ); // the hourly favicon run (attribution.php)
 
 delete_option( 'kits_delete_data_on_uninstall' ); // Last, so a run that stops half-way can be repeated.

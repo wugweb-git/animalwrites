@@ -11,7 +11,7 @@
  * file being read or written is one of them.
  *
  * Only the resized copies change. Core also asks the format filter about the full-size file and would repoint the
- * attachment to a WebP full-size image, so a late wp_generate_attachment_metadata filter (aw_media_webp_keep_full())
+ * attachment to a WebP full-size image, so a late wp_generate_attachment_metadata filter (kits_media_webp_keep_full())
  * puts the attachment's file back to the JPEG/PNG that sits beside it on disk and drops a WebP "full" size entry. A
  * converted full-size file left on disk is never deleted.
  *
@@ -19,7 +19,7 @@
  * core), the old copies stay on disk, and the old list of sizes is kept in option aw_media_webp_log so Undo can put it
  * back. Admin screen: core list table and core notices only (no CSS, no scripts).
  *
- * @package animal-writes-core
+ * @package kits-core
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -27,7 +27,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** True for a share file name ({name}-og.jpg, {name}-share-1080.jpg or .png), which must keep its format. */
-function aw_media_webp_is_share_file( $file ) {
+function kits_media_webp_is_share_file( $file ) {
 	return (bool) preg_match( '/(-og\.jpe?g|-share-1080\.(jpe?g|png))$/i', (string) $file );
 }
 
@@ -40,9 +40,9 @@ function aw_media_webp_is_share_file( $file ) {
  * @param bool   $supported Whether the server can write WebP (passed in so the mapping can be tested).
  * @return array
  */
-function aw_media_webp_map_formats( $formats, $filename, $mime_type, $supported ) {
+function kits_media_webp_map_formats( $formats, $filename, $mime_type, $supported ) {
 	$formats = is_array( $formats ) ? $formats : array();
-	if ( ! $supported || aw_media_webp_is_share_file( $filename ) ) {
+	if ( ! $supported || kits_media_webp_is_share_file( $filename ) ) {
 		return $formats;
 	}
 	$formats['image/jpeg'] = 'image/webp';
@@ -53,7 +53,7 @@ function aw_media_webp_map_formats( $formats, $filename, $mime_type, $supported 
 add_filter(
 	'image_editor_output_format',
 	function ( $formats, $filename = '', $mime_type = '' ) {
-		return aw_media_webp_map_formats( $formats, $filename, $mime_type, wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) ) );
+		return kits_media_webp_map_formats( $formats, $filename, $mime_type, wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) ) );
 	},
 	99,
 	3
@@ -66,7 +66,7 @@ add_filter(
  * @param string $dir Uploads base directory.
  * @return string Relative JPEG/PNG file, '' when there is none.
  */
-function aw_media_webp_original_rel( $rel, $dir ) {
+function kits_media_webp_original_rel( $rel, $dir ) {
 	if ( ! preg_match( '/\.webp$/i', (string) $rel ) ) {
 		return '';
 	}
@@ -92,13 +92,13 @@ function aw_media_webp_original_rel( $rel, $dir ) {
  * @param string $err  Set to the reason when the recorded original is missing on disk (the metadata is then unchanged).
  * @return array Metadata (changed only when it was repointed).
  */
-function aw_media_webp_keep_full( $meta, $id, &$err = '' ) {
+function kits_media_webp_keep_full( $meta, $id, &$err = '' ) {
 	$err = '';
 	if ( ! is_array( $meta ) || empty( $meta['file'] ) || ! preg_match( '/\.webp$/i', (string) $meta['file'] ) ) {
 		return $meta;
 	}
 	$up   = wp_get_upload_dir();
-	$orig = aw_media_webp_original_rel( (string) $meta['file'], (string) $up['basedir'] );
+	$orig = kits_media_webp_original_rel( (string) $meta['file'], (string) $up['basedir'] );
 	if ( '' === $orig && preg_match( '/-scaled\.webp$/i', (string) $meta['file'] ) && ! empty( $meta['original_image'] ) ) {
 		$dir  = dirname( (string) $meta['file'] );
 		$orig = ( '.' === $dir ? '' : $dir . '/' ) . basename( (string) $meta['original_image'] );
@@ -108,7 +108,7 @@ function aw_media_webp_keep_full( $meta, $id, &$err = '' ) {
 		}
 		$drop_original = true;
 	}
-	if ( '' === $orig || aw_media_webp_is_share_file( $orig ) ) {
+	if ( '' === $orig || kits_media_webp_is_share_file( $orig ) ) {
 		return $meta;
 	}
 	// The attachment is the unscaled/JPEG-PNG file again: width, height and size describe that file.
@@ -135,7 +135,7 @@ function aw_media_webp_keep_full( $meta, $id, &$err = '' ) {
 add_filter(
 	'wp_generate_attachment_metadata',
 	function ( $meta, $id ) {
-		return aw_media_webp_keep_full( $meta, (int) $id );
+		return kits_media_webp_keep_full( $meta, (int) $id );
 	},
 	50,
 	2
@@ -151,7 +151,7 @@ add_filter(
  * @param callable      $is_webp Takes a path, true when the file really is WebP.
  * @return string '' when fine, else the reason.
  */
-function aw_media_webp_check_sizes( array $old, array $new, $dir, $allowed, $is_webp ) {
+function kits_media_webp_check_sizes( array $old, array $new, $dir, $allowed, $is_webp ) {
 	foreach ( array_keys( $old ) as $key ) {
 		if ( is_array( $allowed ) && ! in_array( $key, $allowed, true ) ) {
 			continue;
@@ -172,7 +172,7 @@ function aw_media_webp_check_sizes( array $old, array $new, $dir, $allowed, $is_
 }
 
 /** True when the file really is WebP (checked by content, not by its name). */
-function aw_media_webp_file_is_webp( $path ) {
+function kits_media_webp_file_is_webp( $path ) {
 	$mime = function_exists( 'wp_get_image_mime' ) ? wp_get_image_mime( $path ) : false;
 	return 'image/webp' === $mime;
 }
@@ -185,7 +185,7 @@ function aw_media_webp_file_is_webp( $path ) {
  * @param int   $limit 0 = all.
  * @return int[] Each ID once.
  */
-function aw_media_webp_pick( array $ids, array $log, $limit = 0 ) {
+function kits_media_webp_pick( array $ids, array $log, $limit = 0 ) {
 	$fresh  = array();
 	$failed = array();
 	foreach ( array_unique( $ids ) as $id ) {
@@ -210,7 +210,7 @@ function aw_media_webp_pick( array $ids, array $log, $limit = 0 ) {
  * @param string|null $old  Old 'original_image' value (null when there was none).
  * @return array
  */
-function aw_media_webp_set_original( $meta, $old ) {
+function kits_media_webp_set_original( $meta, $old ) {
 	if ( null !== $old && '' !== $old ) {
 		$meta['original_image'] = $old;
 	}
@@ -218,13 +218,13 @@ function aw_media_webp_set_original( $meta, $old ) {
 }
 
 /** The conversion log: attachment ID => array( sizes (the old list), time, status converted|failed|undone, why ). */
-function aw_media_webp_log() {
+function kits_media_webp_log() {
 	$log = get_option( 'aw_media_webp_log', array() );
 	return is_array( $log ) ? $log : array();
 }
 
 /** Save the log; false when it could not be written. */
-function aw_media_webp_log_save( array $log ) {
+function kits_media_webp_log_save( array $log ) {
 	if ( update_option( 'aw_media_webp_log', $log, false ) ) {
 		return true;
 	}
@@ -232,9 +232,9 @@ function aw_media_webp_log_save( array $log ) {
 }
 
 /** True when a size entry still points at a JPEG or PNG file that is not a share file. */
-function aw_media_webp_old_size( $size ) {
+function kits_media_webp_old_size( $size ) {
 	$file = is_array( $size ) ? (string) ( $size['file'] ?? '' ) : '';
-	return '' !== $file && preg_match( '/\.(jpe?g|png)$/i', $file ) && ! aw_media_webp_is_share_file( $file );
+	return '' !== $file && preg_match( '/\.(jpe?g|png)$/i', $file ) && ! kits_media_webp_is_share_file( $file );
 }
 
 /**
@@ -244,9 +244,9 @@ function aw_media_webp_old_size( $size ) {
  * @param int $limit Return at most this many (0 = all, for the counter).
  * @return int[]
  */
-function aw_media_webp_pending( $limit = 0 ) {
+function kits_media_webp_pending( $limit = 0 ) {
 	global $wpdb;
-	$log = aw_media_webp_log();
+	$log = kits_media_webp_log();
 	$ids = $wpdb->get_col( "SELECT ID FROM {$wpdb->posts} WHERE post_type = 'attachment' AND post_mime_type IN ('image/jpeg','image/png') ORDER BY ID ASC" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	$out    = array();
 	$weight = array();
@@ -257,12 +257,12 @@ function aw_media_webp_pending( $limit = 0 ) {
 				continue;
 			}
 			$file = (string) get_post_meta( $id, '_wp_attached_file', true );
-			if ( '' === $file || aw_media_webp_is_share_file( $file ) ) {
+			if ( '' === $file || kits_media_webp_is_share_file( $file ) ) {
 				continue;
 			}
 			$meta = wp_get_attachment_metadata( $id );
 			foreach ( (array) ( is_array( $meta ) ? ( $meta['sizes'] ?? array() ) : array() ) as $size ) {
-				if ( aw_media_webp_old_size( $size ) ) {
+				if ( kits_media_webp_old_size( $size ) ) {
 					$out[]         = $id;
 					$weight[ $id ] = (int) ( $meta['filesize'] ?? 0 );
 					break;
@@ -277,7 +277,7 @@ function aw_media_webp_pending( $limit = 0 ) {
 			return ( $weight[ $b ] <=> $weight[ $a ] ) ?: ( $a <=> $b );
 		}
 	);
-	return aw_media_webp_pick( $out, $log, $limit );
+	return kits_media_webp_pick( $out, $log, $limit );
 }
 
 /**
@@ -286,11 +286,11 @@ function aw_media_webp_pending( $limit = 0 ) {
  * @param int $id Attachment ID.
  * @return bool
  */
-function aw_media_webp_convert( $id ) {
+function kits_media_webp_convert( $id ) {
 	$id   = (int) $id;
 	$meta = wp_get_attachment_metadata( $id );
 	$file = get_attached_file( $id );
-	$log  = aw_media_webp_log();
+	$log  = kits_media_webp_log();
 	if ( ! is_array( $meta ) || empty( $meta['sizes'] ) || ! $file || ! file_exists( $file ) ) {
 		return false;
 	}
@@ -299,7 +299,7 @@ function aw_media_webp_convert( $id ) {
 	if ( null !== $old_orig ) {
 		$log[ $id ]['original_image'] = $old_orig; // kept with the old sizes so Undo restores both
 	}
-	if ( ! aw_media_webp_log_save( $log ) ) {
+	if ( ! kits_media_webp_log_save( $log ) ) {
 		return false; // nothing is changed without the old list saved
 	}
 	require_once ABSPATH . 'wp-admin/includes/image.php';
@@ -313,16 +313,16 @@ function aw_media_webp_convert( $id ) {
 		if ( is_wp_error( $new ) ) {
 			$why = $new->get_error_message();
 		} else {
-			$new = aw_media_webp_keep_full( $new, $id, $why );
-			$new = aw_media_webp_set_original( $new, $old_orig ); // core records the scaled copy's name; keep the upload's
+			$new = kits_media_webp_keep_full( $new, $id, $why );
+			$new = kits_media_webp_set_original( $new, $old_orig ); // core records the scaled copy's name; keep the upload's
 			wp_update_attachment_metadata( $id, $new );
 			// Core leaves out a size it could not make, and may pick an image library that cannot write WebP.
-			$why = '' !== $why ? $why : aw_media_webp_check_sizes(
+			$why = '' !== $why ? $why : kits_media_webp_check_sizes(
 				(array) $meta['sizes'],
 				(array) ( $new['sizes'] ?? array() ),
 				dirname( $file ),
 				array_keys( wp_get_registered_image_subsizes() ),
-				'aw_media_webp_file_is_webp'
+				'kits_media_webp_file_is_webp'
 			);
 		}
 	} catch ( Throwable $e ) {
@@ -332,24 +332,24 @@ function aw_media_webp_convert( $id ) {
 		wp_update_attachment_metadata( $id, $meta ); // put the old metadata back
 		update_attached_file( $id, $file );
 		$log[ $id ]['why'] = $why;
-		aw_media_webp_log_save( $log );
+		kits_media_webp_log_save( $log );
 		return false;
 	}
 	$log[ $id ]['status'] = 'converted';
 	$log[ $id ]['why']    = '';
-	return aw_media_webp_log_save( $log );
+	return kits_media_webp_log_save( $log );
 }
 
 /** Put the saved list of sizes back (the old files are still on disk). */
-function aw_media_webp_undo( $id ) {
+function kits_media_webp_undo( $id ) {
 	$id   = (int) $id;
-	$log  = aw_media_webp_log();
+	$log  = kits_media_webp_log();
 	$meta = wp_get_attachment_metadata( $id );
 	if ( empty( $log[ $id ]['sizes'] ) || 'converted' !== ( $log[ $id ]['status'] ?? '' ) || ! is_array( $meta ) ) {
 		return false;
 	}
 	$meta['sizes'] = $log[ $id ]['sizes'];
-	$meta          = aw_media_webp_set_original( $meta, $log[ $id ]['original_image'] ?? null );
+	$meta          = kits_media_webp_set_original( $meta, $log[ $id ]['original_image'] ?? null );
 	wp_update_attachment_metadata( $id, $meta );
 	$back = wp_get_attachment_metadata( $id );
 	if ( ! is_array( $back ) || ( $back['sizes'] ?? null ) !== $log[ $id ]['sizes'] ) {
@@ -357,13 +357,13 @@ function aw_media_webp_undo( $id ) {
 	}
 	$log[ $id ]['status'] = 'undone';
 	$log[ $id ]['time']   = time();
-	return aw_media_webp_log_save( $log );
+	return kits_media_webp_log_save( $log );
 }
 
 add_action(
 	'admin_menu',
 	function () {
-		add_submenu_page( 'upload.php', 'Make WebP', 'Make WebP', 'manage_options', 'aw-media-webp', 'aw_media_webp_screen' );
+		add_submenu_page( 'upload.php', 'Make WebP', 'Make WebP', 'manage_options', 'aw-media-webp', 'kits_media_webp_screen' );
 	}
 );
 
@@ -386,11 +386,11 @@ add_action(
 				}
 				$ok   = 0;
 				$fail = 0;
-				foreach ( aw_media_webp_pending( 20 ) as $id ) {
+				foreach ( kits_media_webp_pending( 20 ) as $id ) {
 					if ( microtime( true ) > $stop ) {
 						break;
 					}
-					if ( aw_media_webp_convert( $id ) ) {
+					if ( kits_media_webp_convert( $id ) ) {
 						++$ok;
 					} else {
 						++$fail;
@@ -400,7 +400,7 @@ add_action(
 				$args['aw_mw_fail'] = $fail;
 			}
 		} elseif ( preg_match( '/^undo:(\d+)$/', $do, $m ) ) {
-			$args[ aw_media_webp_undo( (int) $m[1] ) ? 'aw_mw_undo' : 'aw_mw_undo_fail' ] = (int) $m[1];
+			$args[ kits_media_webp_undo( (int) $m[1] ) ? 'aw_mw_undo' : 'aw_mw_undo_fail' ] = (int) $m[1];
 		}
 		wp_safe_redirect( add_query_arg( $args, admin_url( 'upload.php' ) ) );
 		exit;
@@ -408,7 +408,7 @@ add_action(
 );
 
 /** The Media → Make WebP screen. */
-function aw_media_webp_screen() {
+function kits_media_webp_screen() {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		return;
 	}
@@ -428,8 +428,8 @@ function aw_media_webp_screen() {
 	}
 	// phpcs:enable WordPress.Security.NonceVerification.Recommended
 	$supported = wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) );
-	$pending   = count( aw_media_webp_pending() );
-	$log       = aw_media_webp_log();
+	$pending   = count( kits_media_webp_pending() );
+	$log       = kits_media_webp_log();
 	echo '<p>New JPEG and PNG uploads get WebP resized copies. The uploaded file is never changed and no file is deleted: converting an existing image makes its resized copies again as WebP and keeps the old ones on disk. Undo puts the old list of sizes back.</p>';
 	$failed = 0;
 	foreach ( $log as $e ) {
@@ -460,7 +460,7 @@ function aw_media_webp_screen() {
 			'action' => $action,
 		);
 	}
-	aw_core_simple_table(
+	kits_simple_table(
 		'aw-media-webp',
 		array( 'image' => 'Image', 'sizes' => 'Old sizes kept', 'state' => 'Status', 'action' => 'Action' ),
 		$rows,
