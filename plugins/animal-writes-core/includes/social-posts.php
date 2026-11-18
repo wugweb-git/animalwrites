@@ -628,7 +628,7 @@ add_action(
 
 add_filter(
 	'manage_aw_social_posts_columns',
-	fn( $c ) => array( 'cb' => $c['cb'], 'title' => 'Post', 'aw_platform' => 'Platform', 'aw_date' => 'Post date', 'aw_summary' => 'Summary', 'aw_link' => 'Link' ) + array_diff_key( $c, array( 'cb' => 1, 'title' => 1, 'date' => 1 ) ) + array( 'date' => $c['date'] ?? 'Date' )
+	fn( $c ) => array( 'cb' => $c['cb'], 'title' => 'Post', 'aw_platform' => 'Platform', 'kits_date' => 'Post date', 'aw_summary' => 'Summary', 'aw_link' => 'Link' ) + array_diff_key( $c, array( 'cb' => 1, 'title' => 1, 'date' => 1 ) ) + array( 'date' => $c['date'] ?? 'Date' )
 );
 add_action(
 	'manage_aw_social_posts_custom_column',
@@ -637,7 +637,7 @@ add_action(
 			case 'aw_platform':
 				echo esc_html( AW_SOCIAL_PLATFORMS[ (string) get_post_meta( $id, 'aw_social_platform', true ) ] ?? '—' );
 				break;
-			case 'aw_date':
+			case 'kits_date':
 				echo esc_html( (string) get_post_meta( $id, 'aw_social_date', true ) );
 				break;
 			case 'aw_summary':
@@ -1050,7 +1050,7 @@ function aw_social_card_html( array $d ): string {
 	$insta    = '' !== $pic && in_array( $on, array( 'instagram', 'facebook' ), true );
 	$reel     = 'video' === $format;
 	$logos    = array( 'x' => 'x-brand', 'instagram' => 'instagram', 'facebook' => 'facebook', 'linkedin' => 'linkedin', 'youtube' => 'youtube', 'bluesky' => 'bluesky', 'mastodon' => 'mastodon' );
-	$logo     = isset( $logos[ $on ] ) ? aw_i( $logos[ $on ], 'aw-social-logo' ) : '';
+	$logo     = isset( $logos[ $on ] ) ? kits_icon( $logos[ $on ], 'aw-social-logo' ) : '';
 	$initial  = function_exists( 'mb_substr' ) ? mb_substr( ltrim( $name, '@' ), 0, 1 ) : substr( ltrim( $name, '@' ), 0, 1 );
 	$avatar   = '<span class="aw-social-avatar" aria-hidden="true">' . esc_html( strtoupper( $initial ) ) . '</span>';
 	$media    = '';
@@ -1063,15 +1063,15 @@ function aw_social_card_html( array $d ): string {
 	// The one link: the name with the external arrow (as hub-blocks.php's press titles), a new tab, a 44px target.
 	$who_link = function ( string $text ) use ( $href ) {
 		$t = '<span class="aw-social-name-text">' . esc_html( $text ) . '</span>';
-		return '' !== $href ? '<a class="aw-social-name" href="' . esc_url( $href ) . '" target="_blank" rel="nofollow ugc noopener">' . $t . aw_i( 'arrow-up-right' ) . '<span class="screen-reader-text">' . esc_html( ' (opens in a new tab)' ) . '</span></a>' : '<span class="aw-social-name">' . $t . '</span>';
+		return '' !== $href ? '<a class="aw-social-name" href="' . esc_url( $href ) . '" target="_blank" rel="nofollow ugc noopener">' . $t . kits_icon( 'arrow-up-right' ) . '<span class="screen-reader-text">' . esc_html( ' (opens in a new tab)' ) . '</span></a>' : '<span class="aw-social-name">' . $t . '</span>';
 	};
-	$when = '<p class="kit-meta-row aw-social-date">' . ( $date && function_exists( 'aw_date' ) ? aw_date( $date . ' 12:00:00' ) : '' ) // the date always first in a meta row (owner)
+	$when = '<p class="kit-meta-row aw-social-date">' . ( $date && function_exists( 'kits_date' ) ? kits_date( $date . ' 12:00:00' ) : '' ) // the date always first in a meta row (owner)
 		. '<span class="kit-meta-item">' . esc_html( 'on ' . ( AW_SOCIAL_PLATFORMS[ $on ] ?? 'Other' ) ) . '</span></p>';
 	if ( $insta ) {
 		$tag  = '' !== $handle ? $handle : $name;
 		$img  = $reel && '' !== $href ? '<a class="aw-social-pic-link" href="' . esc_url( $href ) . '" target="_blank" rel="nofollow ugc noopener" tabindex="-1" aria-hidden="true">' . $pic . '</a>' : $pic;
 		$body = '<div class="aw-social-head">' . $avatar . '<p class="aw-social-who">' . $who_link( $tag ) . '</p>' . $logo . '</div>'
-			. '<figure class="aw-social-pic' . ( $reel ? ' aw-social-pic--reel' : '' ) . '">' . $img . ( $reel ? aw_i( 'play', 'aw-social-play' ) : '' ) . '</figure>'
+			. '<figure class="aw-social-pic' . ( $reel ? ' aw-social-pic--reel' : '' ) . '">' . $img . ( $reel ? kits_icon( 'play', 'aw-social-play' ) : '' ) . '</figure>'
 			. ( '' !== $summary ? '<p class="aw-social-text"><strong>' . esc_html( $tag ) . '</strong> ' . esc_html( $summary ) . '</p>' : '' );
 	} else {
 		$body = '<div class="aw-social-head">' . $avatar . '<p class="aw-social-who">' . $who_link( $name )

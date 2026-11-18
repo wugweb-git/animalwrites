@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/** True when SCF (or ACF) is active and loads our field groups (Kits Core's kits_scf_active(); this name stays for its callers). */
+/** True when SCF (or ACF) is active. Use kits_scf_active(); this one goes once DirectoryWeb (listing-profile.php) has switched. */
 function aw_scf_active() {
 	return kits_scf_active();
 }

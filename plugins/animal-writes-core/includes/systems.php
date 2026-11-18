@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return string
  */
 function aw_i( $name, $class = '' ) {
-	return kits_icon( $name, $class ); // the component lives in Kits Core (primitives.php); this name stays for its callers
+	return kits_icon( $name, $class ); // Remove with aw_date(): the last callers (faq-data.php, DirectoryWeb listing files) switch to kits_icon() once their open PRs merge.
 }
 
 /**
@@ -43,7 +43,7 @@ if ( ! defined( 'AW_DATE_FORMAT' ) ) {
 add_filter( 'pre_option_date_format', fn() => AW_DATE_FORMAT );
 
 function aw_date( $when, $fmt = AW_DATE_FORMAT ) {
-	return kits_date( $when, $fmt, 'aw-date' ); // Kits Core's date component; aw-date stays for the site's CSS (aw.css, aw-meta.css)
+	return kits_date( $when, $fmt, 'aw-date' ); // Remove with aw_i(): last callers as above. The aw-date class is used by the site's CSS (aw.css, aw-meta.css).
 }
 
 /**

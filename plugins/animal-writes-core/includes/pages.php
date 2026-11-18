@@ -324,7 +324,7 @@ add_filter(
 add_action(
 	'add_meta_boxes_post',
 	function () {
-		if ( function_exists( 'aw_scf_active' ) && aw_scf_active() ) {
+		if ( function_exists( 'kits_scf_active' ) && kits_scf_active() ) {
 			return;
 		}
 		add_meta_box( 'aw-sponsored', 'Sponsored', 'aw_sponsored_box', 'post', 'side', 'default' );
@@ -385,7 +385,7 @@ add_shortcode(
 		$html = '<section class="aw-elsewhere"><h2>Elsewhere</h2><ul>';
 		foreach ( $links as $l ) {
 			$icon  = aw_social_icon( $l['url'] );
-			$html .= '<li><a class="kit-link-ext" href="' . esc_url( $l['url'] ) . '" target="_blank" rel="noopener noreferrer">' . ( $icon ? aw_i( $icon ) : '' ) . esc_html( $l['label'] ) . '<span class="screen-reader-text"> (opens in a new tab)</span></a></li>';
+			$html .= '<li><a class="kit-link-ext" href="' . esc_url( $l['url'] ) . '" target="_blank" rel="noopener noreferrer">' . ( $icon ? kits_icon( $icon ) : '' ) . esc_html( $l['label'] ) . '<span class="screen-reader-text"> (opens in a new tab)</span></a></li>';
 		}
 		return $html . '</ul></section>';
 	}
@@ -542,7 +542,7 @@ function aw_inline_dates( $html ) {
 				$ts0  = '' !== $from && $ts ? strtotime( $from . ' ' . $m['mon'] . ' ' . $m['yr'] ) : 0;
 				$iso  = $ts ? wp_date( '' !== $day ? 'Y-m-d' : 'Y-m', $ts0 ? $ts0 : $ts ) : '';
 				$txt  = $ts ? ( $ts0 ? (int) $from . '–' : '' ) . wp_date( '' !== $day ? AW_DATE_FORMAT : 'M Y', $ts ) : $m[0]; // one format sitewide: "2 Oct 2026", "Nov 2025", a range "20–27 Jan 2025"
-				return '<span class="kit-date aw-date">' . aw_i( 'calendar' ) . '<time' . ( $iso ? ' datetime="' . esc_attr( $iso ) . '"' : '' ) . '>' . esc_html( $txt ) . '</time></span>';
+				return '<span class="kit-date aw-date">' . kits_icon( 'calendar' ) . '<time' . ( $iso ? ' datetime="' . esc_attr( $iso ) . '"' : '' ) . '>' . esc_html( $txt ) . '</time></span>';
 			},
 			$part
 		);

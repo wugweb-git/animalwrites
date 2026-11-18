@@ -337,7 +337,7 @@ function aw_findhelp_html( $id, $places, $head, $all_of = true ) {
 	if ( ! $places ) {
 		return '<p class="aw-findhelp-line"><strong>' . esc_html__( 'Find help near you', 'directoryweb' ) . '</strong>'
 			. '<a href="' . esc_url( home_url( '/directory/' ) ) . '">' . esc_html__( 'All states and districts', 'directoryweb' ) . '</a>'
-			. '<a href="' . esc_url( home_url( '/directory/#near-me' ) ) . '">' . aw_i( 'map-pin' ) . esc_html__( 'Near me', 'directoryweb' ) . '</a></p>';
+			. '<a href="' . esc_url( home_url( '/directory/#near-me' ) ) . '">' . kits_icon( 'map-pin' ) . esc_html__( 'Near me', 'directoryweb' ) . '</a></p>';
 	}
 	$items = '';
 	foreach ( $places as list( $p, $n ) ) {
