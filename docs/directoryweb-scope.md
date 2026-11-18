@@ -321,11 +321,17 @@ Admin [A]: one Settings API section per adapter (event → tags/lists), plus fil
   off. On this site it stays the fallback, not forced visible (owner, 17 Nov).
 - **The gap that was there:** the gate called Core's `aw_scf_active()` (`core/scf.php:24-26`) under `function_exists`.
   With Core gone it would fail open, and both the one-pager and the SCF boxes would show. **Fixed on this branch:**
-  `directoryweb_scf_active()` (`dw/listing-profile.php:67`) = `kits_scf_active()` when Kits Core has it, else
-  `function_exists( 'acf_add_local_field_group' )`. That gives the same answer as today on live. The name matches the
-  .org edition (`directoryweb-org/includes/listing-profile.php:66`).
-- **Next (session D, Kits Core track):** the generic SCF bridge moves to Kits Core as `kits_scf_*`: the active check,
-  the group registry filter, the JSON load/save paths and the edit-screen group ordering. Core keeps `aw_scf_*` wrappers.
+  `directoryweb_scf_active()` (`dw/listing-profile.php`) is a fallback chain: `kits_scf_active()` when Kits Core has it
+  (session D, PR #139), else Core's `aw_scf_active()`, else `function_exists( 'acf_add_local_field_group' )`. It gives
+  the same answer as today on live whichever PR merges first. The name matches the .org edition
+  (`directoryweb-org/includes/listing-profile.php:66`).
+- **Next (session D, Kits Core track):** the generic SCF bridge moves to Kits Core as `kits_scf_*` (PR #139 adds
+  `kits_scf_active()`, `kits_scf_json_folder( $dir, $keys )` and `kits_scf_groups()`): the active check, the group
+  registry filter, the JSON load/save paths and the edit-screen group ordering. Core keeps `aw_scf_*` wrappers.
+- **Follow-up step, after #139 is merged (not on this PR):** DirectoryWeb's acf-json registration
+  (`directoryweb.php:96-115`: `load_json`, `save_json/key=`, `aw_scf_groups`) switches to
+  `kits_scf_json_folder( DIRECTORYWEB_DIR . 'acf-json', DIRECTORYWEB_SCF_GROUPS )`, guarded by `function_exists`, with
+  today's filters kept as the fallback. Then the gate's `aw_scf_active()` step can go when Core goes.
 - **Nothing in stage 2 assumes SCF is active.** The only `acf_*` touch in DirectoryWeb is the filter registration
   (harmless without SCF) and the gate above.
 - **.org edition:** ships the acf-json groups, supports SCF fully, works with SCF absent.
@@ -474,7 +480,8 @@ This PR's changes by side:
 
 1. **Scope** (this document). ✔
 2. **This PR: the safe engine split.** The listing data model in `dw/listing-meta.php`, `data-sources.php` moved, the
-   re-verification job, the self-contained SCF gate, the config seam. The `aw` preset is implicit: today's values, in code.
+   re-verification job, the SCF gate fallback chain, the config seam. Follow-up once PR #139 is merged: acf-json
+   registration through `kits_scf_json_folder()` (§6). The `aw` preset is implicit: today's values, in code.
 3. **Preset and contracts.**
    - The preset array (`aw` generated from today's code);
    - own post type arguments (with session D);
