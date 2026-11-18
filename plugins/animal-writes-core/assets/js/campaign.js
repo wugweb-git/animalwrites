@@ -1,4 +1,4 @@
-/* Campaign tools (campaign-tools.php): rule chips, letter tool, phone bar, home band. Events go through kitsTrack (kit.js).
+/* Campaign tools (campaign-tools.php): rule chips, letter tool, phone bar, home band. Events go through kitsTrack (Kits Core analytics.js).
    Standard campaign events (owner, 17 Oct 2026): every action here is also campaign_action (action = the older event's
    name, with campaign_slug and campaign_title), through awCampaignTrack (aw-analytics.js). The older events keep firing
    (objection_sent and objection_confirmed are key events). campaign_view: aw-analytics.js, on every campaign page. */
@@ -53,7 +53,7 @@
 		});
 	});
 
-	/* Share row: the copy-link button (links marked data-kit-share are counted by kit.js); newsletter sign-ups made on a
+	/* Share row: the copy-link button (links marked data-kit-share are counted by analytics.js); newsletter sign-ups made on a
 	   campaign page, once the form plugin reports success. Source: the share row's data-source (e.g. campaign2). */
 	var shareRow = document.querySelector('.aw-camp-share');
 	var source = shareRow && shareRow.dataset.source || 'campaign';
@@ -130,7 +130,7 @@
 			link('Facebook', 'facebook', 'facebook', 'https://www.facebook.com/sharer/sharer.php?u=' + u('facebook'));
 			link('LinkedIn', 'linkedin', 'linkedin', 'https://www.linkedin.com/sharing/share-offsite/?url=' + u('linkedin'));
 			var c = btn('Copy link', 'link', 'copy_link', function () {
-				/* kit.js's one copy (clipboard, else the browser's copy command, else the link shown selected); never silent */
+				/* share.js's one copy (clipboard, else the browser's copy command, else the link shown selected); never silent */
 				var done = function () { c.lastChild.nodeValue = 'Link copied'; };
 				if (window.kitShareCopy) window.kitShareCopy(tagged('copy'), c).then(function (ok) { if (ok) done(); });
 				else if (navigator.clipboard) navigator.clipboard.writeText(tagged('copy')).then(done, function () {});
@@ -270,7 +270,7 @@
 		var ok = !miss.length;
 		errorEl.textContent = ok ? '' : 'Add ' + miss.map(function (f) { return f[1]; }).join(miss.length > 2 ? ', ' : ' and ').replace(/, ([^,]*)$/, ' and $1') + ' to send your objection.';
 		errorEl.hidden = ok;
-		if (!ok) { // the field is in step 2: go back to it first (the theme's steps, kit.js)
+		if (!ok) { // the field is in step 2: go back to it first (the theme's steps, forms.js)
 			var first = form.elements[miss[0][0]], step = first.closest('.kit-step');
 			var back = step && step.hidden && form.querySelector('.kit-step:not([hidden]) [data-step-back]');
 			if (back) back.click();
@@ -283,7 +283,7 @@
 		if (el) el.addEventListener('input', function () {
 			if (el.getAttribute('aria-invalid') !== 'true' || !(n === 'email' ? emailOk() : val(n))) return;
 			el.setAttribute('aria-invalid', 'false');
-			var msg = document.getElementById(el.id + '-error'); // the step's error line (kit.js) clears with the mark
+			var msg = document.getElementById(el.id + '-error'); // the step's error line (forms.js) clears with the mark
 			if (msg) msg.textContent = '';
 		});
 	});

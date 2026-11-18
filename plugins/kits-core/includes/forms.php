@@ -322,7 +322,7 @@ function kits_form_guard( $form, $back, $anchor, $done, $per_hour = 5 ) {
 	$nonce = isset( $_POST['_kits_nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['_kits_nonce'] ) ) : ( isset( $_POST['_aw_nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['_aw_nonce'] ) ) : '' ); // _aw_nonce: legacy field name still accepted
 	if ( '' === $nonce || ! wp_verify_nonce( $nonce, $form ) ) {
 		if ( kits_form_is_fetch() ) {
-			wp_send_json( array( 'ok' => false, 'code' => 'expired', 'errors' => (object) array(), 'notice' => 'This page has been open a while. Reload it and send again.' ) ); // kit.js gets a fresh key and sends once more
+			wp_send_json( array( 'ok' => false, 'code' => 'expired', 'errors' => (object) array(), 'notice' => 'This page has been open a while. Reload it and send again.' ) ); // forms.js gets a fresh key and sends once more
 		}
 		kits_form_fail( $form, array(), kits_form_kept_values(), $back, $anchor, 'This page has been open a while. Reload it and send again.' );
 	}

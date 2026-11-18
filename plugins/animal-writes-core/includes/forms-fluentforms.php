@@ -15,7 +15,7 @@
  *   becomes a contact (transactional, tag contact-form) with the message as a note; a claimant becomes a contact
  *   (transactional, tag claimant); every contact gets the newsletter box as 1/0 ("Newsletter box (last form)"); a
  *   volunteer's State, District and PIN code from the LGD picker go into their Volunteer fields.
- * - The site's look on Fluent Forms fields (icons, tick-box styles, the browser rules kit.js checks with).
+ * - The site's look on Fluent Forms fields (icons, tick-box styles, the browser rules forms.js checks with).
  * - aw_ff_form() shows each form. Fluent Forms is the only form since 25 Oct 2026 (owner): the site's own forms and
  *   their submit handlers were removed, so a missing form shows nothing to visitors and a short note to administrators.
  * - Emails: none since 21 Oct 2026 (owner): nothing is sent when a Fluent Forms form is submitted (aw_ff_mail_off).
@@ -433,7 +433,7 @@ const AW_FF_ICONS = array(
 );
 
 foreach ( array( 'input_text', 'input_email', 'input_url', 'textarea', 'select', 'input_checkbox', 'input_radio', 'input_hidden' ) as $aw_ff_el ) {
-	// The step check (kit.js) uses the browser's rules with the site's words.
+	// The step check (forms.js) uses the browser's rules with the site's words.
 	add_filter(
 		'fluentform/rendering_field_data_' . $aw_ff_el,
 		function ( $data, $form ) {
