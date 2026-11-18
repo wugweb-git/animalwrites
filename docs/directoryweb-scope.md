@@ -160,6 +160,29 @@ terms, URLs, SCF groups and schema rules (`rw/schema.php:54-90`: NGO, Veterinary
 type tag). The settings are generated from what is in the code now, so nothing changes on live. Another site (for
 example a music or a services directory) runs the same preset with its own settings.
 
+### 3.2a Listing types and their schema change per site
+
+Entry types, their fields and their schema.org mapping are **site settings, not engine code**. The same engine renders,
+validates and marks up whatever types a site declares. The table shows how; the second and third rows are illustrations
+only, not plans.
+
+| Site | Entry types (core tags in the "type" role) | Type-specific fields (examples) | schema.org mapping |
+|---|---|---|---|
+| This site (today, `rw/schema.php:57-81`) | vet hospital/clinic/dispensary, shelter, gaushala, sanctuary, ABC centre, rescue group, helpline… | registrations (AWBI, Darpan, 12A/80G), animals served, areas served | `VeterinaryCare`, `AnimalShelter`, `GovernmentOffice`, else `NGO`; several types give a `@type` list |
+| A music directory (illustration) | artist, band, venue, label, studio, teacher | genres, instruments, capacity, booking contact | `MusicGroup`, `Person`, `MusicVenue`, `Organization`, `LocalBusiness` |
+| A services directory (illustration) | plumber, electrician, tutor, clinic | service area, licence number, price range | `LocalBusiness` subtypes (`Plumber`, `Electrician`, `ProfessionalService`, `MedicalClinic`) |
+
+What changes per site, and how:
+- **Types** [A]: add, rename or retire tags on the core Tags screen and list them in the site's `taxonomy_roles`. No code,
+  no new taxonomy.
+- **Fields** [A]: field groups in the site settings (and the matching SCF groups when SCF is used). New fields are
+  registered natively with their rules; nothing renames stored keys.
+- **Schema** [F]: `schema_map` maps each type tag to a schema.org type, and each field to a property. RankWeb (or the
+  engine's own output when RankWeb is off) reads the map instead of today's hardcoded list. This site's map is generated
+  from `rw/schema.php` so its markup stays identical.
+- **Rules that need code** (today: a government vet from a government list becomes `GovernmentOffice`, and legal aid
+  from NALSA is not an `NGO`, `rw/schema.php:69-79`) stay as small site rules on a filter (`directoryweb_schema_types`).
+
 ### 3.3 Integrations read the preset
 
 | Integration | Reads from the config (preset + site settings) | Side |
