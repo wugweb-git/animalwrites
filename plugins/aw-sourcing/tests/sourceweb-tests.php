@@ -163,6 +163,11 @@ $n = sourceweb_dashboard_numbers(
 		),
 		'intake'  => array( 'rejected_today' => 2 ),
 		'sources' => array( 'allow' => 40 ),
+		'today'   => array(
+			'new'       => 7,
+			'published' => 4,
+			'dupes'     => 1,
+		),
 		'workers' => array(
 			'total'    => 19,
 			'problems' => array( 'a', 'b' ),
@@ -171,14 +176,17 @@ $n = sourceweb_dashboard_numbers(
 );
 aw_t(
 	array(
-		'review'   => 5,
-		'enrich'   => 9,
-		'applied'  => 3,
-		'rejected' => 2,
-		'sources'  => 40,
-		'workers'  => 17,
+		'review'    => 5,
+		'enrich'    => 9,
+		'applied'   => 3,
+		'rejected'  => 2,
+		'sources'   => 40,
+		'new'       => 7,
+		'published' => 4,
+		'dupes'     => 1,
+		'workers'   => 17,
 	) === $n,
-	'log: the numbers a day keeps'
+	'log: the numbers a day keeps (daily totals included)'
 );
 aw_t( ! isset( sourceweb_dashboard_numbers( array() )['workers'] ), 'log: no workers number without the workers' );
 $log = array();
@@ -187,6 +195,22 @@ for ( $d = 1; $d <= 5; $d++ ) {
 }
 $log = sourceweb_log_add( $log, '2026-11-05', array( 'review' => 50 ), 3 );
 aw_t( array( '2026-11-03', '2026-11-04', '2026-11-05' ) === array_keys( $log ) && 50 === $log['2026-11-05']['review'], 'log: one row a day, the last run wins, the oldest go' );
+
+// ---- Dashboard charts (funnel + daily series), pure ----
+$clog = array(
+	'2026-11-15' => array( 'new' => 10, 'rejected' => 3, 'published' => 4, 'dupes' => 2, 'review' => 20 ),
+	'2026-11-16' => array( 'new' => 8, 'rejected' => 1, 'published' => 5, 'dupes' => 0, 'review' => 18 ),
+	'2026-11-17' => array( 'new' => 12, 'rejected' => 2, 'published' => 6, 'dupes' => 3, 'review' => 15 ),
+);
+aw_t( array( '2026-11-15', '2026-11-16', '2026-11-17' ) === sourceweb_dashboard_date_range( 3, '2026-11-17' ), 'charts: the date range is the last N days, oldest first' );
+$f = sourceweb_dashboard_funnel( $clog, 28, '2026-11-17' );
+aw_t( 3 === count( $f ) && 30 === $f[0]['value'] && 24 === $f[1]['value'] && 15 === $f[2]['value'] && 'Ingested' === $f[0]['label'] && 'Reviewed' === $f[1]['label'] && 'Approved' === $f[2]['label'], 'charts: the funnel sums ingested, reviewed (ingested minus auto-rejected) and approved' );
+$ser = sourceweb_dashboard_series( $clog, 'dupes', 14, '2026-11-17' );
+aw_t( 14 === count( $ser ) && 0 === $ser[0]['value'] && 2 === $ser[11]['value'] && 0 === $ser[12]['value'] && 3 === $ser[13]['value'], 'charts: a daily series fills missing days with 0 and keeps each day\'s total' );
+$q = sourceweb_dashboard_series( $clog, 'review', 14, '2026-11-17' );
+aw_t( 20 === $q[11]['value'] && 18 === $q[12]['value'] && 15 === $q[13]['value'], 'charts: the queue-size series reads the day\'s snapshot' );
+$all = sourceweb_dashboard_charts( $clog, '2026-11-17' );
+aw_t( isset( $all['funnel'], $all['throughput'], $all['dupes'], $all['queue'] ) && 14 === count( $all['throughput'] ) && 3 === count( $all['funnel'] ), 'charts: the payload has the funnel and the three daily series' );
 
 // ---- the routes: a capability on every one, none open ----
 $rest = file_get_contents( dirname( __DIR__ ) . '/includes/sourceweb-rest.php' );
