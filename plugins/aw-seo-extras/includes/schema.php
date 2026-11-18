@@ -570,8 +570,8 @@ function aw_article_nodes( $id ) {
 			$article['isBasedOn'] = array_filter(
 				array(
 					'@type'      => $research || $doi ? 'ScholarlyArticle' : 'CreativeWork',
-					'name'       => $research && function_exists( 'aw_research_study_title' ) && '' !== aw_research_study_title( $id ) ? aw_research_study_title( $id ) : $title, // the paper's own title (owner, 20 Oct 2026); else the item's
-					'headline'   => $research && function_exists( 'aw_research_study_title' ) && '' !== aw_research_study_title( $id ) ? aw_research_study_title( $id ) : $title,
+					'name'       => $research && function_exists( 'sourceweb_research_study_title' ) && '' !== sourceweb_research_study_title( $id ) ? sourceweb_research_study_title( $id ) : $title, // the paper's own title (owner, 20 Oct 2026); else the item's
+					'headline'   => $research && function_exists( 'sourceweb_research_study_title' ) && '' !== sourceweb_research_study_title( $id ) ? sourceweb_research_study_title( $id ) : $title,
 					'url'        => $src_url,
 					'sameAs'     => $doi ? 'https://doi.org/' . $doi : null,
 					'identifier' => $doi ? array( '@type' => 'PropertyValue', 'propertyID' => 'DOI', 'value' => $doi ) : null,
@@ -808,7 +808,7 @@ function aw_job_schema( $id ) {
 		$org_site = (string) get_post_meta( $org_id, 'aw_website', true );
 	}
 	$deadline = (string) get_post_meta( $id, 'aw_deadline', true );
-	if ( ( preg_match( '/^\d{4}-\d{2}-\d{2}$/', $deadline ) && $deadline < wp_date( 'Y-m-d' ) ) || ( function_exists( 'aw_retention_state' ) && aw_retention_state( $id ) ) ) {
+	if ( ( preg_match( '/^\d{4}-\d{2}-\d{2}$/', $deadline ) && $deadline < wp_date( 'Y-m-d' ) ) || ( function_exists( 'kits_retention_state' ) && kits_retention_state( $id ) ) ) {
 		return array(); // closed (past its deadline or review date): no JobPosting
 	}
 	$kinds = wp_get_object_terms( $id, 'post_tag', array( 'fields' => 'slugs' ) );
@@ -960,7 +960,7 @@ function aw_opportunity_org_address( $id, $org_id ) {
  * A closed opportunity (past its deadline or review date) has none.
  */
 function aw_opportunity_schema( $id ) {
-	if ( function_exists( 'aw_retention_state' ) && aw_retention_state( $id ) ) {
+	if ( function_exists( 'kits_retention_state' ) && kits_retention_state( $id ) ) {
 		return array();
 	}
 	$kind = aw_opportunity_kind( $id );

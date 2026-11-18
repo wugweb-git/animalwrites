@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Animal Writes Core
- * Description: The Animal Writes site: content types and fields, the Directory with its map and places, campaigns and letters, forms and people (Fluent Forms, FluentCRM), card pictures, and the jobs that keep it running (site check, scheduled tasks, deploy purge, CDN cache). Its screens are in the Kits menu (Home, Settings, Theme Options, Help). Theme-independent.
+ * Description: The Animal Writes site: content types and fields, the Directory with its map and places, campaigns and letters, forms and people (Fluent Forms, FluentCRM), card pictures, (its operations, admin settings, keys and theme parts moved to Kits Core, InsightWeb and the Kits theme's site layer on 19 Nov 2026). Its screens are in the Kits menu (Home, Settings, Theme Options, Help). Theme-independent.
  * Version: 1.0.0
  * Requires at least: 6.5
  * Requires PHP: 8.0
@@ -40,16 +40,6 @@ if ( ! defined( 'AW_REVERIFY_DAYS' ) ) {
 if ( ! defined( 'KITS_CORE_LOADED' ) && file_exists( dirname( AW_CORE_DIR ) . '/kits-core/kits-core.php' ) ) {
 	require_once dirname( AW_CORE_DIR ) . '/kits-core/kits-core.php';
 }
-require_once AW_CORE_DIR . 'includes/plugin-info.php'; // icon, banner and View details on the Plugins screen
-require_once AW_CORE_DIR . 'includes/kits-config.php';
-require_once AW_CORE_DIR . 'includes/admin-config.php'; // the site's values for Kits Core's admin layer (menus, labels, Overview)
-require_once AW_CORE_DIR . 'includes/admin-table.php';
-require_once AW_CORE_DIR . 'includes/help-tab.php';
-require_once AW_CORE_DIR . 'includes/keys.php'; // Kits → Keys: service keys in WP admin (owner, 31 Oct 2026)
-require_once AW_CORE_DIR . 'includes/cdn-cache.php';
-require_once AW_CORE_DIR . 'includes/deploy-purge.php';
-require_once AW_CORE_DIR . 'includes/deploy-status.php'; // /aw/v1/deploy-status: the deploy gate waits while a campaign is sending (3 Nov 2026)
-require_once AW_CORE_DIR . 'includes/keep-modified.php'; // technical saves keep the modified date (1 Nov 2026)
 // The content types, hubs, blocks, tags, meta, SCF, bindings, related and the rest of the content layer load from the theme's site
 // layer (themes/kits-by-wugweb/assets/site/content/, loaded by assets/site/site.php); the taxonomy rename is Kits Core's.
 // DirectoryWeb (the Directory: listings, places, claims, map, Find help, and its admin). Loaded from the sibling plugin
@@ -69,18 +59,7 @@ if ( ! defined( 'DIRECTORYWEB_LOADED' ) ) {
 		);
 	}
 }
-require_once AW_CORE_DIR . 'includes/cron.php';
-require_once AW_CORE_DIR . 'includes/media-compat.php'; // old aw_ names of the media functions that moved to Kits Core, RankWeb and SourceWeb (18 Nov 2026)
-require_once AW_CORE_DIR . 'includes/site-check.php';
-require_once AW_CORE_DIR . 'includes/staging.php';
 require_once AW_CORE_DIR . 'includes/systems.php';
-require_once AW_CORE_DIR . 'includes/retention.php';
-require_once AW_CORE_DIR . 'includes/research-citation.php';
-require_once AW_CORE_DIR . 'includes/not-found.php';
-require_once AW_CORE_DIR . 'includes/uninstall-setting.php'; // Kits → Modules → Animal Writes Core data (the rest of Modules is Kits Core's)
-require_once AW_CORE_DIR . 'includes/dashboard-activity.php';
-require_once AW_CORE_DIR . 'includes/cron-health.php';
-require_once AW_CORE_DIR . 'includes/error-count.php';
 // Forms, FluentCRM and the newsletter moved out (18 Nov 2026): the form engine, form pages, Report a mistake, volunteers,
 // the Campaign form and the Dashboard box to Kits Core (includes/forms/); the claim page to DirectoryWeb (claim-page.php);
 // FluentCRM, the newsletter and Mail → Website forms to MailWeb. When MailWeb is not active, its three site files are
@@ -100,8 +79,6 @@ add_action(
 	},
 	0
 );
-require_once AW_CORE_DIR . 'includes/theme-parts.php'; // theme files, templates and patterns when Kits runs with no child theme
-require_once AW_CORE_DIR . 'includes/theme-parts-screen.php'; // Kits → Theme parts: the child theme's parts, where they live now, where to change them.
 
 /**
  * A sibling plugin Core loads (SourceWeb, InsightWeb, PlanWeb) is loaded from its real folder, so WordPress does not
@@ -197,18 +174,12 @@ register_activation_hook(
 			directoryweb_caps_grant();
 		}
 		flush_rewrite_rules();
-		if ( function_exists( 'aw_cron_schedule' ) ) {
-			aw_cron_schedule();
-		}
 	}
 );
 
 register_deactivation_hook(
 	__FILE__,
 	function () {
-		if ( function_exists( 'aw_cron_unschedule' ) ) {
-			aw_cron_unschedule();
-		}
 		flush_rewrite_rules();
 	}
 );

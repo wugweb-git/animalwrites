@@ -37,7 +37,6 @@ function kits_site_screens( bool $all = false ): array {
 		'aw-dates'        => array( 'Dates', defined( 'AW_DATES_CAP' ) ? AW_DATES_CAP : 'edit_others_posts' ),
 		'aw-site-check'   => array( 'Check site', 'manage_options' ),
 		'aw-elsewhere'    => array( 'Contact links', 'edit_pages' ),
-		'aw-keys'         => array( 'Keys', 'manage_options' ),
 		'aw-modules'      => array( 'Modules', 'manage_options' ),
 		'aw-edit-screens' => array( 'Edit screens', 'manage_options' ),
 	);
@@ -73,7 +72,7 @@ function kits_site_screen_cap( string $slug ): string {
 }
 
 /**
- * Under a screen's heading: the Kits tabs (Dates lights Home; Keys and Modules light Settings).
+ * Under a screen's heading: the Kits tabs (Dates lights Home; Modules lights Settings).
  *
  * @param string $current The screen's slug.
  */
@@ -91,7 +90,7 @@ add_filter(
 	}
 );
 
-// Old addresses (docs/admin-ui-spec.md §E1). Dates, Keys and Modules keep theirs.
+// Old addresses (docs/admin-ui-spec.md §E1). Dates and Modules keep theirs; Keys redirects to InsightWeb's own Keys.
 add_filter(
 	'kits_admin_redirects',
 	fn( $map ) => array_merge(
@@ -101,6 +100,7 @@ add_filter(
 			'aw-site-check'   => KITS_MENU . '#page-check',
 			'aw-elsewhere'    => 'kits-options#socials',
 			'aw-edit-screens' => 'kits-help#developer/edit-screens',
+			'aw-keys'         => defined( 'INSIGHTWEB_LOADED' ) ? 'aw-search-insights#keys' : 'kits-settings', // the shared Keys screen is retired (19 Nov 2026): each plugin keeps its own keys on its own Settings
 			'aw-theme-parts'  => 'kits-help#developer/theme-parts',
 			'aw-core'         => KITS_MENU, // 12 Nov 2026: these two answered 403
 			'aw-cron-health'  => 'index.php', // the Scheduled tasks box is on the Dashboard
@@ -114,7 +114,6 @@ add_filter(
 		(array) $tabs,
 		array(
 			'aw-dates'   => KITS_MENU,
-			'aw-keys'    => 'kits-settings',
 			'aw-modules' => 'kits-settings',
 		)
 	)
@@ -174,7 +173,7 @@ function kits_site_section_if( array $sections, string $id, string $title, strin
  * @param array $sections Kits' sections.
  */
 function kits_site_home_sections( $sections ) {
-	$sections           = kits_site_section_if( (array) $sections, 'page-check', 'Page check', 'aw_site_check_results', 20 );
+	$sections           = kits_site_section_if( (array) $sections, 'page-check', 'Page check', 'kits_site_check_results', 20 );
 	$sections['deploy'] = kits_site_section(
 		'Deployed commit',
 		function () {
@@ -183,7 +182,7 @@ function kits_site_home_sections( $sections ) {
 		},
 		40
 	);
-	$sections           = kits_site_section_if( $sections, 'joined-files', 'Joined files', 'aw_site_check_joined', 50 );
+	$sections           = kits_site_section_if( $sections, 'joined-files', 'Joined files', 'kits_site_check_joined', 50 );
 	return kits_site_section_if( $sections, 'email', 'Email sending', 'aw_mail_site_check', 70 );
 }
 
@@ -194,12 +193,12 @@ function kits_site_home_sections( $sections ) {
  * @param array $sections Kits' sections.
  */
 function kits_site_settings_sections( $sections ) {
-	$sections                       = kits_site_section_if( (array) $sections, 'cdn', 'CDN cache times', 'aw_cdn_settings_box', 15 );
+	$sections                       = kits_site_section_if( (array) $sections, 'cdn', 'CDN cache times', 'kits_cdn_settings_box', 15 );
 	$sections['connected-services'] = kits_site_section(
 		'Connected services and modules',
 		function () {
 			echo '<ul>';
-			echo '<li>' . kits_site_link( 'Keys', 'admin.php?page=aw-keys' ) . ': ' . esc_html( 'the service keys the plugins use (Clarity, Bing Webmaster, PageSpeed).' ) . '</li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- kits_site_link() escapes.
+			echo '<li>' . kits_site_link( 'InsightWeb → Settings → Keys', 'admin.php?page=aw-search-insights&tab=settings' ) . ': ' . esc_html( 'the service keys Search Insights uses (Clarity, Bing Webmaster, PageSpeed, Google Alerts). Each plugin keeps its own keys.' ) . '</li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- kits_site_link() escapes.
 			echo '<li>' . kits_site_link( 'Modules', 'admin.php?page=aw-modules' ) . ': ' . esc_html( 'optional parts of the site (Social posts, the PlanWeb calendar), emails from forms, sample listings, district helplines and issuer short names.' ) . '</li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- kits_site_link() escapes.
 			echo '<li>' . kits_site_link( 'RankWeb → Settings', 'admin.php?page=aw-seo-settings' ) . ': ' . esc_html( 'connected services for search.' ) . '</li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- kits_site_link() escapes.
 			echo '<li>' . kits_site_link( 'SourceWeb → Settings', 'admin.php?page=aw-sourcing&tab=settings' ) . ': ' . esc_html( 'Social posts, sourcing lists and Directory enrichment.' ) . '</li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- kits_site_link() escapes.
@@ -222,8 +221,8 @@ function kits_site_help_sections( $sections ) {
 		$sections[ 'docs/' . $overview['slug'] ] = kits_site_section( 'Docs: ' . $overview['title'], fn() => kits_admin_embed( 'kits_site_overview_page' ), 15 );
 	}
 	$sections['developer/edit-screens'] = kits_site_section( 'Developer: edit screens', fn() => kits_admin_embed( 'kits_edit_screens_page' ), 30 );
-	if ( function_exists( 'aw_theme_parts_screen' ) ) {
-		$sections['developer/theme-parts'] = kits_site_section( 'Developer: theme parts', fn() => kits_admin_embed( 'aw_theme_parts_screen' ), 31 );
+	if ( function_exists( 'kits_site_theme_parts_screen' ) ) {
+		$sections['developer/theme-parts'] = kits_site_section( 'Developer: theme parts', fn() => kits_admin_embed( 'kits_site_theme_parts_screen' ), 31 );
 	}
 	return $sections;
 }
@@ -274,23 +273,23 @@ function kits_site_status( bool $full = true ): array {
 	$s['backup'] = is_array( $b ) && ! empty( $b['at'] )
 		? kits_site_status_cell( isset( $b['db'], $b['code'] ) && strtotime( (string) $b['at'] ) > time() - 2 * DAY_IN_SECONDS, 'Last backup ' . $b['at'] . '.' )
 		: kits_site_status_cell( false, 'No backup recorded yet.' );
-	$c           = function_exists( 'aw_site_check_summary' ) ? aw_site_check_summary() : array(
+	$c           = function_exists( 'kits_site_check_summary' ) ? kits_site_check_summary() : array(
 		'ok'   => false,
 		'text' => 'Not run yet.',
 	); // Result, time and commit of the last check (site-check.php).
 	$s['check']  = 'Not run yet.' === $c['text'] ? esc_html( $c['text'] ) : kits_site_status_cell( (bool) $c['ok'], (string) $c['text'] );
-	$last        = function_exists( 'aw_cron_last' ) ? (int) aw_cron_last() : 0;
+	$last        = function_exists( 'kits_cron_last' ) ? (int) kits_cron_last() : 0;
 	$s['cron']   = $last ? kits_site_status_cell( $last > time() - HOUR_IN_SECONDS, 'Last run ' . wp_date( 'j M Y, g:i a', $last ) . '.' ) : esc_html( 'No run recorded.' );
 	$head        = (string) get_option( 'aw_deployed_head', '' );
 	$s['deploy'] = $head ? esc_html( 'Deployed commit ' . substr( $head, 0, 7 ) . '; cache purged once for it.' ) : esc_html( 'No deploy recorded.' );
 	if ( ! $full ) {
 		return $s;
 	}
-	$ttl        = (int) get_option( 'aw_cdn_ttl', 0 ); // aw_cdn_ttl() is 0 in wp-admin (no header there), so the option itself
+	$ttl        = (int) get_option( 'aw_cdn_ttl', 0 ); // kits_cdn_ttl() is 0 in wp-admin (no header there), so the option itself
 	$ttl        = $ttl > 0 ? max( 60, min( 3600, $ttl ) ) : 0;
 	$long       = (int) get_option( 'aw_cdn_ttl_long', 3600 );
 	$s['cdn']   = esc_html( $ttl ? 'CDN keeps public pages ' . $ttl . ' s' . ( $long > $ttl ? '; listings, Library items and Resources ' . min( 3600, $long ) . ' s.' : '.' ) : 'CDN caching off.' );
-	$s['stage'] = esc_html( function_exists( 'aw_is_staging' ) && aw_is_staging() ? 'This is the staging site.' : 'Live site.' );
+	$s['stage'] = esc_html( function_exists( 'kits_site_is_staging' ) && kits_site_is_staging() ? 'This is the staging site.' : 'Live site.' );
 	$next       = '';
 	if ( function_exists( 'aw_team_dates_moved' ) && aw_team_dates_moved() && function_exists( 'planweb_next' ) ) {
 		$next = planweb_next();

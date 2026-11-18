@@ -6,8 +6,9 @@
  * A key's value, first found wins:
  *   1. a wp-config.php constant of the same name (not empty);
  *   2. InsightWeb's own option insightweb_keys (name => value, not autoloaded), set on Settings → Keys;
- *   3. the old shared option aw_keys (Kits → Keys), read directly, so the live keys keep working until each one is
- *      copied over (the copy step in docs/keys-per-plugin.md, stage 3) and the vault is retired.
+ *   3. the old shared option aw_keys (the Kits → Keys vault, whose screen and code left Animal Writes Core on 19 Nov
+ *      2026), read directly, so the live keys keep working until the copy has run (insightweb_keys_copy(), by itself
+ *      or `wp insightweb keys copy`) and the owner deletes the option.
  * A value is never printed, logged, exported or sent over REST: the screen only says whether a key is set and where.
  * Administrators only (manage_options), as on Kits → Keys.
  *
@@ -174,27 +175,84 @@ add_action(
 	}
 );
 
-// Kits → Keys keeps listing InsightWeb's keys during the move (its values are the fallback above).
-add_filter(
-	'aw_keys',
-	function ( $keys ) {
-		$by = __( 'Search Insights', 'insightweb' );
-		foreach ( insightweb_key_fields() as $name => $f ) {
-			$keys[ $name ] = array( $f[0], $f[1], $by );
+/**
+ * The copy step of the move (docs/keys-per-plugin.md, stage 3): each InsightWeb key that is saved in the old shared
+ * vault (option aw_keys) and not yet in InsightWeb's own option is copied over. Guarded: it copies only keys InsightWeb
+ * owns, only into an empty place, and never when a wp-config.php constant sets the key. Idempotent: running it again
+ * copies nothing. Reversible: it never deletes or changes aw_keys, so removing a key from Settings → Keys (or deleting
+ * insightweb_keys) puts things back as they were. It never prints, logs or returns a value: only the names.
+ *
+ * @param bool $write False for a rehearsal (nothing is written).
+ * @return array<string,string> Key name => 'copied' | 'already set' | 'set in wp-config.php' | 'not in the old place'.
+ */
+function insightweb_keys_copy( bool $write = true ): array {
+	$own    = get_option( INSIGHTWEB_KEYS_OPTION, array() );
+	$own    = is_array( $own ) ? $own : array();
+	$result = array();
+	$new    = array();
+	foreach ( array_keys( insightweb_key_fields() ) as $name ) {
+		if ( '' !== insightweb_key_constant( $name ) ) {
+			$result[ $name ] = 'set in wp-config.php';
+		} elseif ( isset( $own[ $name ] ) && '' !== (string) $own[ $name ] ) {
+			$result[ $name ] = 'already set';
+		} elseif ( '' === insightweb_key_saved( INSIGHTWEB_KEYS_OLD_OPTION, $name ) ) {
+			$result[ $name ] = 'not in the old place';
+		} else {
+			$new[ $name ]    = insightweb_key_saved( INSIGHTWEB_KEYS_OLD_OPTION, $name );
+			$result[ $name ] = 'copied';
 		}
-		return $keys;
+	}
+	if ( $write && $new ) {
+		update_option( INSIGHTWEB_KEYS_OPTION, array_merge( $own, $new ), false ); // through insightweb_keys_sanitize(); not autoloaded
+	}
+	return $result;
+}
+
+// The copy runs by itself, once, on the first administrator request after this version is deployed (nothing is copied
+// when the old vault has none of InsightWeb's keys). The flag only saves reading the old option on every admin request;
+// delete the option insightweb_keys_copied to run it again.
+add_action(
+	'admin_init',
+	function () {
+		if ( '1' === (string) get_option( 'insightweb_keys_copied', '' ) || ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+		insightweb_keys_copy( true );
+		if ( ! in_array( 'copied', insightweb_keys_copy( false ), true ) ) { // nothing left to copy: it worked (or there was nothing). Otherwise try again next time.
+			update_option( 'insightweb_keys_copied', '1', false );
+		}
 	}
 );
 
-// The old reader aw_key() (Animal Writes Core) answers with InsightWeb's value for InsightWeb's keys.
-add_filter(
-	'kits_service_key',
-	function ( $value, $name ) {
-		return in_array( (string) $name, INSIGHTWEB_KEY_NAMES, true ) ? insightweb_key( (string) $name ) : $value;
-	},
-	10,
-	2
-);
+if ( defined( 'WP_CLI' ) && WP_CLI ) {
+	WP_CLI::add_command(
+		'insightweb keys',
+		/**
+		 * Where InsightWeb's service keys are set, and the copy from the old Kits → Keys vault. Never prints a value.
+		 *
+		 * ## OPTIONS
+		 *
+		 * <action>
+		 * : status (where each key is set), or copy (copy keys from the old vault into InsightWeb's own option).
+		 *
+		 * [--dry-run]
+		 * : With copy: say what would be copied and write nothing.
+		 */
+		function ( $args, $assoc ) {
+			$action = (string) ( $args[0] ?? 'status' );
+			if ( 'copy' === $action ) {
+				foreach ( insightweb_keys_copy( empty( $assoc['dry-run'] ) ) as $name => $what ) {
+					WP_CLI::log( $name . ': ' . $what );
+				}
+				return;
+			}
+			foreach ( array_keys( insightweb_key_fields() ) as $name ) {
+				$where = insightweb_key_where( $name );
+				WP_CLI::log( $name . ': set ' . ( '' === $where ? 'no' : 'yes (' . $where . ')' ) );
+			}
+		}
+	);
+}
 
 /**
  * The Keys section's data: per key its label, help and where it is set. Never a value.

@@ -296,7 +296,7 @@ add_action(
 );
 
 // A tag's subject changed (box or REST meta): its page shows the new heading at once (LiteSpeed; the edge keeps it up
-// to aw_cdn_ttl). The REST API saves meta alone without edited_term, so the purge follows the meta, not the term.
+// to kits_cdn_ttl). The REST API saves meta alone without edited_term, so the purge follows the meta, not the term.
 foreach ( array( 'added_term_meta', 'updated_term_meta', 'deleted_term_meta' ) as $aw_faq_hook ) {
 	add_action(
 		$aw_faq_hook,
@@ -787,8 +787,8 @@ add_filter(
 		if ( '' === $faq ) {
 			return $html;
 		}
-		if ( function_exists( 'aw_use_component_style' ) ) {
-			aw_use_component_style( 'aw-hubs' ); // aw-hub-faq
+		if ( function_exists( 'kits_use_component_style' ) ) {
+			kits_use_component_style( 'aw-hubs' ); // aw-hub-faq
 		}
 		$class = 'hub' === $ctx['kind'] ? 'aw-hub-faq alignwide' : ( 'constrained' === ( $block['attrs']['layout']['type'] ?? '' ) ? 'aw-hub-faq' : 'aw-hub-faq has-global-padding is-layout-constrained' );
 		// A campaign page with a next-steps section: the FAQ goes right after it, before the next section (Campaign

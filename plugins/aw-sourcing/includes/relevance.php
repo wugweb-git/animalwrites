@@ -484,7 +484,7 @@ function aw_ingest_problems( $now = null ) {
 		$out['no_run'] = $last ? sprintf( 'No worker run has reported for %d hours (last: %s). The GitHub Actions schedule may have stopped, or runs are failing before the end.', floor( ( $now - $last ) / HOUR_IN_SECONDS ), wp_date( 'j M Y, g:i a', $last ) ) : 'No worker run has reported yet.';
 	}
 	// Scheduled tasks (cron-health.php): no trigger has called wp-cron.php for 30 minutes.
-	$cron = function_exists( 'aw_cron_last' ) ? aw_cron_last() : 0;
+	$cron = function_exists( 'kits_cron_last' ) ? kits_cron_last() : 0;
 	if ( $cron && $now - $cron >= SOURCEWEB_CRON_STALE ) {
 		$out['cron'] = sprintf( 'Scheduled tasks have not run for %d minutes (last: %s). Hostinger\'s server cron, the GitHub "WordPress cron" job and the outside monitor have all stopped.', floor( ( $now - $cron ) / MINUTE_IN_SECONDS ), wp_date( 'j M Y, g:i a', $cron ) );
 	}
@@ -523,7 +523,7 @@ add_action(
 	'shutdown',
 	function () {
 		$age   = time() - (int) get_option( 'aw_ingest_watchdog_at', 0 );
-		$cron  = function_exists( 'aw_cron_last' ) ? aw_cron_last() : 0;
+		$cron  = function_exists( 'kits_cron_last' ) ? kits_cron_last() : 0;
 		$stale = $cron && time() - $cron >= SOURCEWEB_CRON_STALE;
 		if ( ( $age >= HOUR_IN_SECONDS || ( $stale && $age >= 10 * MINUTE_IN_SECONDS ) ) && ! wp_installing() ) {
 			aw_ingest_watchdog();

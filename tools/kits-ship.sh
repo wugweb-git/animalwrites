@@ -51,10 +51,10 @@ fi
 [ "$live" = "$sha" ] || { echo "NOT deployed: server is at ${live:0:7}, wanted $short"; exit 1; }
 echo "deployed $short"
 # Purge through the site, not WP-CLI: "wp litespeed-purge all" cannot notify the web server on this host (24 Oct 2026).
-# A one-off home URL is a cache miss, so deploy-purge.php (animal-writes-core) runs and purges once for the new commit.
+# A one-off home URL is a cache miss, so deploy-purge.php (Kits Core, includes/ops) runs and purges once for the new commit.
 code=$(curl -s -o /dev/null -m 30 -w "%{http_code}" "https://animalwrites.in/?aw_deploy_nudge=ship-$short-$(date +%s)" || true)
 echo "purge request: HTTP $code"
 [ "$code" = "200" ] || echo "WARNING: purge request did not return 200; purge by hand (WP Admin, LiteSpeed Cache, Purge All)"
-# The same request schedules Check site for the new commit (site-check.php): its result shows on Kits → Check site and
+# The same request schedules Check site for the new commit (Kits Core includes/ops/site-check.php): its result shows on Kits → Check site and
 # Kits → Welcome a few minutes from now, with the commit it ran on.
 if [ "$code" = "200" ]; then echo "Check site runs for $short in about 2-7 minutes (Kits → Check site)"; fi

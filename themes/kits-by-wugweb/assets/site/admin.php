@@ -5,7 +5,9 @@
  * menus, labels, retired types and shortcodes, the edit-screen map and the Overview. Its final home is the site's
  * settings (docs/content-blocks-feasibility.md §22), together with kits-config.php.
  *
- * @package animal-writes-core
+ * Moved from Animal Writes Core's admin-config.php (19 Nov 2026) into the theme's site layer; loaded by site.php.
+ *
+ * @package kits-by-wugweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -55,7 +57,7 @@ add_filter(
 
 /* ---------- Edit screens and edit fields ---------- */
 
-add_filter( 'kits_edit_screen_map_file', fn() => AW_CORE_DIR . 'data/edit-screen-map.json' );
+add_filter( 'kits_edit_screen_map_file', fn() => kits_site_path( 'data/edit-screen-map.json' ) );
 add_filter( 'kits_library_post_type', fn() => 'aw_legal' );
 
 /* ---------- The Overview: Kits → Help → Docs: Animal Writes (was admin-home.php) ---------- */
@@ -105,7 +107,7 @@ add_filter(
 					: array( 'Dates', 'The team\'s calendar (observance days, deadlines) and the Dates dashboard widget.', $link( 'Dates', 'admin.php?page=aw-dates' ), $st['dates'] ),
 				array( 'Check site', 'Loads one page of every kind and reports any that do not open cleanly; also in the admin bar.', $admin ? $link( 'Appearance → Kits → Home → Page check', $url( 'aw-site-check' ) ) : 'Administrators', $st['check'] ),
 				array( 'Contact links', 'The "Elsewhere" links on the Contact page.', $link( 'Contact links', $url( 'aw-elsewhere' ) ), $auto ),
-				array( 'Keys', 'Service keys the plugins use (Clarity, Bing Webmaster, PageSpeed): paste once, never shown again; a wp-config.php constant wins.', $admin ? $link( 'Keys', 'admin.php?page=aw-keys' ) : 'Administrators', $auto ),
+				array( 'Keys', 'Each plugin keeps its own service keys on its own Settings (InsightWeb: Clarity, Bing Webmaster, PageSpeed, Google Alerts): paste once, never shown again; a wp-config.php constant wins.', $admin ? $link( 'InsightWeb → Settings → Keys', 'admin.php?page=aw-search-insights&tab=settings' ) : 'Administrators', $auto ),
 				array( 'Edit screens', 'Every box on each edit screen (WordPress, plugins and ours), the keys it stores and where each key is used.', $admin ? $link( 'Edit screens', $url( 'aw-edit-screens' ) ) : 'Administrators', $auto ),
 				array( 'To review', 'Items waiting for a person (from SourceWeb).', $link( 'Plugins → SourceWeb → To review', 'admin.php?page=aw-review' ), $st['review'] ),
 				array( 'Scheduled tasks', 'Who triggers WP-Cron (Hostinger, GitHub, UptimeRobot) and the longest gap; dashboard widget.', $link( 'Dashboard', 'index.php' ), $st['cron'] ),
@@ -140,9 +142,3 @@ add_filter(
 
 // Kits → Help → Docs → Commands: this site's commands are named aw and aw-… too (read from WP-CLI, cli-commands.php).
 add_filter( 'kits_cli_command_prefixes', fn( $p ) => array_merge( (array) $p, array( 'aw' ) ) );
-
-// Plugins screen: Overview under the plugin's name (Kits → Help → Docs: Animal Writes).
-add_filter(
-	'plugin_action_links_' . plugin_basename( AW_CORE_DIR . 'animal-writes-core.php' ),
-	fn( $links ) => array_merge( array( '<a href="' . esc_url( admin_url( 'admin.php?page=kits-help#docs/animal-writes' ) ) . '">Overview</a>' ), (array) $links )
-);

@@ -827,7 +827,7 @@
 			"source": "Animal Writes core",
 			"plugin": "Animal Writes core",
 			"purpose": "Scheduled tasks",
-			"file": "core/cron-health.php:105",
+			"file": "kits-core/includes/ops/cron-health.php (kits_cron_*)",
 			"screen": "admin",
 			"page": "Dashboard (widgets)",
 			"types": [
@@ -2455,7 +2455,7 @@
 			"source": "Animal Writes core",
 			"plugin": "Animal Writes core",
 			"purpose": "Service keys",
-			"file": "core/keys.php:58 (aw_keys_screen)",
+			"file": "retired 19 Nov 2026: each plugin keeps its own keys (insightweb/includes/insightweb-keys.php); the Kits → Keys screen is gone",
 			"screen": "admin",
 			"page": "Animal Writes: Keys",
 			"types": [
@@ -2676,7 +2676,7 @@
 			"source": "Animal Writes core",
 			"plugin": "Animal Writes core",
 			"purpose": "Site check",
-			"file": "core/site-check.php:85 (aw_site_check_page)",
+			"file": "kits-core/includes/ops/site-check.php (kits_site_check_page)",
 			"screen": "admin",
 			"page": "Animal Writes: Check site",
 			"types": [
@@ -3217,7 +3217,7 @@
 			"source": "Animal Writes core",
 			"plugin": "Animal Writes core",
 			"purpose": "Child theme parts",
-			"file": "core/theme-parts-screen.php:176 (aw_theme_parts_screen)",
+			"file": "themes/kits-by-wugweb/assets/site/theme-parts-screen.php (kits_site_theme_parts_screen)",
 			"screen": "admin",
 			"page": "Kits: Theme parts",
 			"types": [

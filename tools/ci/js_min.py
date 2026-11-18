@@ -17,7 +17,7 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 TERSER = "terser@5.31.6"
 FILES = [
-    ROOT / "plugins/animal-writes-core/assets/js/aw-analytics.js",
+    ROOT / "themes/kits-by-wugweb/assets/site/js/aw-analytics.js",
 ]
 
 

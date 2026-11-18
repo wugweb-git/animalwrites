@@ -222,14 +222,14 @@ function kits_ff_kit_wrap( $shortcode ) {
 }
 
 /**
- * A form part's stylesheet from the site's component sheets (the theme layer's aw_use_component_style(), when it is
+ * A form part's stylesheet from the site's component sheets (the theme layer's kits_use_component_style(), when it is
  * loaded; without it nothing is added).
  *
  * @param string $handle Component sheet handle.
  */
 function kits_ff_style( $handle ) {
-	if ( function_exists( 'aw_use_component_style' ) ) {
-		aw_use_component_style( $handle );
+	if ( function_exists( 'kits_use_component_style' ) ) {
+		kits_use_component_style( $handle );
 	}
 }
 

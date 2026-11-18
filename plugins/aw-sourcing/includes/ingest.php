@@ -392,10 +392,10 @@ function aw_ingest( WP_REST_Request $req ) {
 		update_post_meta( $post_id, 'aw_summary_short', current_time( 'Y-m-d' ) );
 	}
 	// A research paper's credit (research-citation.php): authors and journal from the worker, else from doi.org later.
-	if ( 'research' === $req->get_param( 'type' ) && function_exists( 'aw_research_save_citation' ) ) {
-		aw_research_save_citation( $post_id, (array) $req->get_param( 'authors' ), (string) ( $req->get_param( 'journal' ) ?: $req->get_param( 'source_name' ) ) );
-		aw_research_save_study_title( $post_id, (string) $req->get_param( 'study_title' ) ); // the paper's own title; the post title is the headline
-		if ( ! get_post_meta( $post_id, 'aw_authors', true ) || '' === aw_research_study_title( $post_id ) ) {
+	if ( 'research' === $req->get_param( 'type' ) && function_exists( 'sourceweb_research_save_citation' ) ) {
+		sourceweb_research_save_citation( $post_id, (array) $req->get_param( 'authors' ), (string) ( $req->get_param( 'journal' ) ?: $req->get_param( 'source_name' ) ) );
+		sourceweb_research_save_study_title( $post_id, (string) $req->get_param( 'study_title' ) ); // the paper's own title; the post title is the headline
+		if ( ! get_post_meta( $post_id, 'aw_authors', true ) || '' === sourceweb_research_study_title( $post_id ) ) {
 			wp_schedule_single_event( time() + 60, 'aw_research_citation', array( $post_id ) );
 		}
 		// The headline's SEO title and focus keyphrase (research_titles.py), stored as written so Rank Math shows them.
@@ -493,7 +493,7 @@ function aw_exists_norm_doi( $doi ) {
 	return rtrim( preg_replace( '~^(https?://(dx\.)?doi\.org/|doi:)~', '', $d ), '/' );
 }
 
-/** The DOI of a doi.org link, normalised ('' when the URL is not one); the same pattern as aw_research_doi(). */
+/** The DOI of a doi.org link, normalised ('' when the URL is not one); the same pattern as sourceweb_research_doi(). */
 function aw_exists_doi_of( $url ) {
 	return preg_match( '~^https?://(?:dx\.)?doi\.org/(10\.[^\s?#]+)~i', (string) $url, $m ) ? aw_exists_norm_doi( $m[1] ) : '';
 }
@@ -548,7 +548,7 @@ function aw_exists( WP_REST_Request $req ) {
 		foreach ( $rows as $r ) {
 			$id      = (int) $r->ID;
 			$authors = array_values( (array) get_post_meta( $id, 'aw_authors', true ) );
-			$study   = function_exists( 'aw_research_study_title' ) ? aw_research_study_title( $id ) : '';
+			$study   = function_exists( 'sourceweb_research_study_title' ) ? sourceweb_research_study_title( $id ) : '';
 			$out['studies'][] = array(
 				'id'           => $id,
 				'title'        => '' !== $study ? $study : get_the_title( $id ),

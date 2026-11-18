@@ -7,7 +7,7 @@
  * read GET /wp-json/aw/v1/deploy-status (tools/ci/mail_sending_check.py) and do not deploy while it says sending.
  * Public, like /aw/v1/thumb-dupes: it returns only a yes or no, never campaign names, ids or counts.
  *
- * @package animal-writes-core
+ * @package kits-core
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** True while a FluentCRM campaign is running or scheduled and still has emails waiting to go out. */
-function aw_campaign_sending() {
+function kits_mail_sending() {
 	global $wpdb;
 	$c = $wpdb->prefix . 'fc_campaigns';
 	$e = $wpdb->prefix . 'fc_campaign_emails';
@@ -36,7 +36,7 @@ add_action(
 				'methods'             => 'GET',
 				'permission_callback' => '__return_true', // the deploy gate reads it without logging in
 				'callback'            => function () {
-					$r = new WP_REST_Response( array( 'sending' => aw_campaign_sending() ), 200 );
+					$r = new WP_REST_Response( array( 'sending' => kits_mail_sending() ), 200 );
 					$r->header( 'Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0' );
 					$r->header( 'X-LiteSpeed-Cache-Control', 'no-cache' );
 					return $r;

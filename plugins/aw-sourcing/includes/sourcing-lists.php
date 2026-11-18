@@ -108,7 +108,7 @@ function aw_sources_live_save( $on ) {
 /*
  * Sources sync when the lists are saved (owner, 25 Oct 2026), instead of every hour: a save of the source lists or the
  * keywords starts sources-sync.yml once, 2 minutes later, so a run of edits is one copy. Its daily run stays as the
- * fallback. Only while "Workers use these lists" is on, and only with AW_GITHUB_DISPATCH_TOKEN (aw_dispatch_workflow
+ * fallback. Only while "Workers use these lists" is on, and only with AW_GITHUB_DISPATCH_TOKEN (kits_dispatch_workflow
  * logs the missing token); without it the daily run copies the lists.
  */
 foreach ( array( 'aw_sources', 'aw_relevance' ) as $aw_sync_option ) {
@@ -127,8 +127,8 @@ function aw_sources_sync_soon() {
 add_action(
 	'aw_sources_sync_dispatch',
 	function () {
-		if ( ! empty( aw_sources_config()['live'] ) && function_exists( 'aw_dispatch_workflow' ) ) {
-			aw_dispatch_workflow( 'sources-sync.yml' );
+		if ( ! empty( aw_sources_config()['live'] ) && function_exists( 'kits_dispatch_workflow' ) ) {
+			kits_dispatch_workflow( 'sources-sync.yml' );
 		}
 	}
 );

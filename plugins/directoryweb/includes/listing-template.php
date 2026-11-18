@@ -503,8 +503,8 @@ function aw_block_listing_opportunities( $a, $id ) {
 		return function_exists( 'aw_item_editor_preview' ) ? aw_item_editor_preview( 'Opportunities at the organisation (open only)' ) : '';
 	}
 	$q = array( 'post_type' => 'aw_opportunity', 'post_status' => 'publish', 'numberposts' => 3, 'fields' => 'ids', 'orderby' => 'date', 'order' => 'DESC', 'meta_query' => array( array( 'key' => 'aw_organisation', 'value' => (string) $id ) ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
-	if ( function_exists( 'aw_open_opportunities_meta_query' ) ) {
-		$q['meta_query'][] = aw_open_opportunities_meta_query();
+	if ( function_exists( 'kits_open_opportunities_meta_query' ) ) {
+		$q['meta_query'][] = kits_open_opportunities_meta_query();
 		$q['meta_query']['relation'] = 'AND';
 	}
 	$ids = get_posts( $q );

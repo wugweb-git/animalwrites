@@ -119,6 +119,14 @@ foreach ( array( 'campaign-links', 'campaign-short', 'campaign-letters', 'press'
 	require_once KITS_CORE_DIR . 'includes/' . $kits_engine_file . '.php';
 }
 unset( $kits_engine_file );
+// Site operations (moved from Animal Writes Core, 19 Nov 2026): scheduled-task health and Run now, the daily event, deploy purge
+// and status, technical saves keeping the modified date, CDN cache times, Check site, the PHP error count, the 404 page and
+// retention. The site's own values (page lists, sections, repository) come through filters from the theme's site layer.
+require_once KITS_CORE_DIR . 'includes/dashboard-activity.php'; // the Dashboard Activity box, off unless the site switches it on (moved from Animal Writes Core, 19 Nov 2026)
+foreach ( array( 'cron-health', 'daily', 'deploy-purge', 'deploy-status', 'keep-modified', 'cdn-cache', 'site-check', 'error-count', 'not-found', 'retention', 'compat' ) as $kits_ops_file ) {
+	require_once KITS_CORE_DIR . 'includes/ops/' . $kits_ops_file . '.php';
+}
+unset( $kits_ops_file );
 
 // Switched off: its scheduled jobs come off too (they are booked again on the next request after it is switched back on).
 register_deactivation_hook(

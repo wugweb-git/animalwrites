@@ -1,0 +1,168 @@
+<?php
+/**
+ * The page for a missing address (owner, 26 Oct 2026; moved from Animal Writes Core, 19 Nov 2026).
+ *
+ * - A trashed item of a section that asks for it answers 410 Gone, not 404, so search engines drop the address sooner.
+ *   It says so ("This item was removed") and lists the newest items of that section. A draft, a private item or an
+ *   address that never existed stays 404. Nothing redirects: a missing address is never sent to a guessed item.
+ * - Every 404 fills the search field with the words of the missing address (/news/stray-dog-protest/ → "stray dog
+ *   protest") and, under a section's address, lists that section's three newest items.
+ *
+ * The site names its sections with the filter kits_not_found_sections (Animal Writes: the theme's site layer,
+ * assets/site/ops.php). [kits_not_found] (also [aw_not_found], the name pages and templates carry) prints the page.
+ *
+ * @package kits-core
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
+ * Sections whose missing items get the newest-items list: post type => array( 'label' => 'News', 'slug' => 'news'
+ * (the section's first address part), 'gone' => true when a trashed item answers 410 ).
+ *
+ * @return array<string,array{label:string,slug:string,gone?:bool}>
+ */
+function kits_not_found_sections(): array {
+	return (array) apply_filters( 'kits_not_found_sections', array() );
+}
+
+/** The section (post type => label) a missing address is under, e.g. array( 'aw_news', 'News' ), or null. */
+function kits_not_found_section() {
+	$parts = kits_not_found_parts();
+	if ( count( $parts ) < 2 ) {
+		return null;
+	}
+	foreach ( kits_not_found_sections() as $type => $s ) {
+		if ( (string) $s['slug'] === $parts[0] ) {
+			return array( $type, (string) $s['label'] );
+		}
+	}
+	return null;
+}
+
+/** The missing address as its parts, e.g. array( 'news', 'some-story' ). */
+function kits_not_found_parts() {
+	$path = (string) wp_parse_url( (string) wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ), PHP_URL_PATH ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+	return array_values( array_filter( explode( '/', rawurldecode( $path ) ), 'strlen' ) );
+}
+
+/**
+ * The trashed News or Library item at the missing address, or null. WordPress keeps the slug a trashed item had in
+ * _wp_desired_post_slug (its own slug becomes {slug}__trashed).
+ *
+ * @return WP_Post|null
+ */
+function kits_removed_item() {
+	static $item = false;
+	if ( false !== $item ) {
+		return $item;
+	}
+	$item    = null;
+	$parts   = kits_not_found_parts();
+	$section = kits_not_found_section();
+	if ( ! is_404() || 2 !== count( $parts ) || ! $section || empty( kits_not_found_sections()[ $section[0] ]['gone'] ) ) {
+		return $item;
+	}
+	$type = $section[0];
+	global $wpdb;
+	$slug = sanitize_title( $parts[1] );
+	$id   = (int) $wpdb->get_var( $wpdb->prepare( "SELECT p.ID FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = '_wp_desired_post_slug' WHERE p.post_status = 'trash' AND p.post_type = %s AND m.meta_value = %s LIMIT 1", $type, $slug ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	if ( $id ) {
+		$item = get_post( $id );
+	}
+	return $item;
+}
+
+// 410 for a trashed item. Late, so a redirect in Rank Math's list for the same address still wins.
+add_action(
+	'template_redirect',
+	function () {
+		if ( kits_removed_item() ) {
+			status_header( 410 );
+		}
+	},
+	99
+);
+
+/**
+ * Words for the search field from the missing address: its last part, with hyphens as spaces. '' for files, WordPress
+ * and dot paths (/wp-…, /_…, /.well-known/…) and script leftovers such as /null or /undefined.
+ */
+function kits_not_found_query() {
+	$parts = kits_not_found_parts();
+	$last  = (string) end( $parts );
+	if ( '' === $last || false !== strpos( $last, '.' ) || in_array( strtolower( $last ), array( 'null', 'undefined', 'false' ), true ) || preg_match( '#^(wp-|_|\.)#', (string) ( $parts[0] ?? '' ) ) ) {
+		return '';
+	}
+	$words = preg_split( '/[-_\s]+/u', preg_replace( '/__trashed$/', '', $last ) );
+	$words = array_filter( $words, fn( $w ) => '' !== $w && ! is_numeric( $w ) );
+	return sanitize_text_field( implode( ' ', array_slice( $words, 0, 8 ) ) );
+}
+
+/** The page's HTML: the [kits_not_found] and [aw_not_found] shortcodes. */
+function kits_not_found_html(): string {
+	$gone    = kits_removed_item();
+	$section = kits_not_found_section();
+	$q       = kits_not_found_query();
+	$media   = kits_error_picture( '404' );
+	$site    = wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES );
+
+	$html = '<p class="kit-error-code">' . ( $gone ? '410' : '404' ) . '</p>';
+	if ( $gone ) {
+		$label = $section ? $section[1] : '';
+		/* translators: 1: site name, 2: section name. */
+		$lead  = (string) apply_filters( 'kits_not_found_gone_lead', sprintf( 'We took this item off %1$s. Here’s the latest from %2$s instead.', $site, $label ), $gone->post_type, $site );
+		$html .= '<h1 class="wp-block-heading">This item was removed</h1><p class="kit-error-lead">' . esc_html( $lead ) . '</p>';
+	} else {
+		$html .= '<h1 class="wp-block-heading">Page not found</h1><p class="kit-error-lead">This page doesn’t exist or has moved. Search the site, or go to a section.</p>';
+	}
+	$html .= $media; // after the lead on phones and tablets; from 1200px the photo fills the section behind the text
+	$html .= '<form class="kit-error-search" action="' . esc_url( home_url( '/search/' ) ) . '" method="get" role="search"><label class="screen-reader-text" for="kit-404-q">Search</label><span class="kit-error-field"><span class="kit-ico kit-ico--search" aria-hidden="true"></span><input id="kit-404-q" type="search" name="q" value="' . esc_attr( $q ) . '" placeholder="Search" autocomplete="off"></span><button type="submit" class="kit-btn kit-btn--brand kit-btn--label">Search</button></form>';
+
+	if ( $section ) {
+		$posts = get_posts( array( 'post_type' => $section[0], 'post_status' => 'publish', 'numberposts' => 3, 'orderby' => 'date', 'order' => 'DESC' ) );
+		if ( $posts ) {
+			do_action( 'kits_not_found_section_styles', $section[0] ); // the site loads its list styles
+			$m     = (array) apply_filters( 'kits_not_found_markup', array( 'section' => 'kit-not-found-group', 'list' => '' ), $section[0] );
+			$html .= '<section class="' . esc_attr( (string) $m['section'] ) . '"><h2>Latest from ' . esc_html( $section[1] ) . '</h2><ul' . ( '' !== (string) $m['list'] ? ' class="' . esc_attr( (string) $m['list'] ) . '"' : '' ) . '>';
+			foreach ( $posts as $p ) {
+				$html .= '<li>' . (string) apply_filters( 'kits_not_found_item_before', '', $p ) . '<a href="' . esc_url( get_permalink( $p ) ) . '">' . esc_html( get_the_title( $p ) ) . '</a></li>';
+			}
+			$html .= '</ul><p><a href="' . esc_url( home_url( '/' . (string) kits_not_found_sections()[ $section[0] ]['slug'] . '/' ) ) . '">All ' . esc_html( strtolower( $section[1] ) ) . '</a></p></section>';
+		}
+	}
+
+	$links = (array) apply_filters( 'kits_not_found_links', array( '/' => array( 'Home', 'home' ) ) );
+	$html .= '<nav class="kit-error-links" aria-label="Sections"><ul>';
+	foreach ( $links as $href => $l ) {
+		$html .= '<li><a href="' . esc_url( $href ) . '"><span class="kit-ico kit-ico--' . esc_attr( $l[1] ) . '" aria-hidden="true"></span>' . esc_html( $l[0] ) . '</a></li>';
+	}
+	return $html . '</ul></nav>';
+}
+add_shortcode( 'kits_not_found', 'kits_not_found_html' );
+add_shortcode( 'aw_not_found', 'kits_not_found_html' ); // the name the 404 template and stored pages carry
+
+/**
+ * An error page's photo (owner, 2 Nov 2026: the animals blended into the page, reference 7). Files in assets/site/error/:
+ * {name}-wide.webp (16:9, 2400 × 1350: from 768px it fills the section behind the text, so its left half is a plain
+ * wall and the animals sit bottom right) and {name}-phone.webp (4:3, 1200 × 900: on phones, after the lead, animals
+ * in the middle). Either file alone is used at every width. '' with neither: the page keeps its one text column.
+ * Decorative (empty alt): the words say everything.
+ *
+ * @param string $name 404, 500 or 503.
+ * @return string
+ */
+function kits_error_picture( $name ) {
+	$dir   = KITS_CORE_DIR . 'assets/site/error/'; // the site's photos (left out of Kits builds, like the other assets/site/ files)
+	$url   = plugins_url( 'assets/site/error/', KITS_CORE_DIR . 'kits-core.php' );
+	$wide  = is_readable( $dir . $name . '-wide.webp' ) ? $url . $name . '-wide.webp' : '';
+	$phone = is_readable( $dir . $name . '-phone.webp' ) ? $url . $name . '-phone.webp' : '';
+	if ( '' === $wide && '' === $phone ) {
+		return '';
+	}
+	$src    = $phone ? $phone : $wide;
+	$source = $wide && $phone ? '<source media="(min-width: 768px)" srcset="' . esc_url( $wide ) . '" width="2400" height="1350">' : '';
+	return '<figure class="kit-error-media"><picture>' . $source . '<img src="' . esc_url( $src ) . '" width="1200" height="900" alt="" decoding="async" fetchpriority="high"></picture></figure>';
+}

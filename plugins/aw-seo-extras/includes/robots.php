@@ -120,7 +120,7 @@ function aw_seo_noindex_rule() {
 			return true; // a password-protected item: its content is hidden, so keep it out of the index
 		}
 	}
-	if ( is_singular( 'aw_opportunity' ) && function_exists( 'aw_retention_state' ) && aw_retention_state( get_queried_object() ) ) {
+	if ( is_singular( 'aw_opportunity' ) && function_exists( 'kits_retention_state' ) && kits_retention_state( get_queried_object() ) ) {
 		return true; // closed opportunity
 	}
 	if ( is_post_type_archive( 'web-story' ) && ! (int) ( wp_count_posts( 'web-story' )->publish ?? 0 ) ) {
@@ -233,7 +233,7 @@ add_filter(
 		if ( ! $obj instanceof WP_Post ) {
 			return $url;
 		}
-		$closed      = 'aw_opportunity' === $obj->post_type && function_exists( 'aw_retention_state' ) && aw_retention_state( $obj );
+		$closed      = 'aw_opportunity' === $obj->post_type && function_exists( 'kits_retention_state' ) && kits_retention_state( $obj );
 		$merged      = (int) get_post_meta( $obj->ID, 'aw_merged_into', true ) > 0; // a same-story duplicate (normally private already)
 		$unreachable = 'aw_listing' === $obj->post_type && isset( aw_sitemap_unreachable_listings()[ (int) $obj->ID ] ); // noindex (above)
 		if ( '' === (string) $obj->post_name || $closed || $merged || $unreachable || in_array( (int) $obj->ID, aw_seo_preview_ids(), true ) ) {
@@ -253,7 +253,7 @@ add_filter(
 add_filter(
 	'rank_math/sitemap/exclude_post_type',
 	function ( $exclude, $type ) {
-		if ( $exclude || 'aw_opportunity' !== $type || ! function_exists( 'aw_retention_state' ) || ! function_exists( 'aw_seo_cached' ) ) {
+		if ( $exclude || 'aw_opportunity' !== $type || ! function_exists( 'kits_retention_state' ) || ! function_exists( 'aw_seo_cached' ) ) {
 			return $exclude;
 		}
 		$open = aw_seo_cached(
@@ -261,7 +261,7 @@ add_filter(
 			function () {
 				$ids = get_posts( array( 'post_type' => 'aw_opportunity', 'post_status' => 'publish', 'numberposts' => -1, 'fields' => 'ids', 'no_found_rows' => true ) );
 				foreach ( $ids as $id ) {
-					if ( ! aw_retention_state( $id ) ) {
+					if ( ! kits_retention_state( $id ) ) {
 						return 1;
 					}
 				}

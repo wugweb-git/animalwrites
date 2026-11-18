@@ -10,7 +10,11 @@
  *   without authors gets them from doi.org (CSL-JSON) in the background (aw_research_citation).
  * - The one-off fill of older research posts (aw_research_citation_backfill) ran and was removed (25 Oct 2026).
  *
- * @package animal-writes-core
+ * Moved from Animal Writes Core (19 Nov 2026): SourceWeb's ingest writes these fields and reads them back, RankWeb's
+ * schema reads the study title. The sourceweb_ names are the real ones; the aw_research_* wrappers at the end are for
+ * Animal Writes Core's item-head.php until that file moves.
+ *
+ * @package aw-sourcing
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -18,13 +22,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** The DOI in a research post's source URL ('' when it is not a doi.org link). */
-function aw_research_doi( $id ) {
+function sourceweb_research_doi( $id ) {
 	$url = (string) get_post_meta( $id, 'aw_source_url', true );
 	return preg_match( '~^https?://(?:dx\.)?doi\.org/(10\.[^\s?#]+)~i', $url, $m ) ? rawurldecode( $m[1] ) : '';
 }
 
 /** The paper's own title ('' when not stored). */
-function aw_research_study_title( $id ) {
+function sourceweb_research_study_title( $id ) {
 	return (string) get_post_meta( $id, 'aw_study_title', true );
 }
 
@@ -34,9 +38,9 @@ function aw_research_study_title( $id ) {
  * @param int    $id    Post ID.
  * @param string $title The paper's title.
  */
-function aw_research_save_study_title( $id, $title ) {
+function sourceweb_research_save_study_title( $id, $title ) {
 	$title = trim( preg_replace( '/\s+/u', ' ', html_entity_decode( wp_strip_all_tags( (string) $title ), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ) );
-	if ( '' !== $title && '' === aw_research_study_title( $id ) ) {
+	if ( '' !== $title && '' === sourceweb_research_study_title( $id ) ) {
 		update_post_meta( $id, 'aw_study_title', wp_slash( $title ) );
 	}
 }
@@ -51,7 +55,7 @@ add_filter( 'is_protected_meta', fn( $protected, $key ) => 'aw_study_title' === 
  * @param array  $authors Names.
  * @param string $journal Journal title.
  */
-function aw_research_save_citation( $id, $authors, $journal ) {
+function sourceweb_research_save_citation( $id, $authors, $journal ) {
 	$names = array_values( array_unique( array_filter( array_map( fn( $a ) => trim( sanitize_text_field( (string) $a ) ), (array) $authors ) ) ) );
 	if ( $names ) {
 		update_post_meta( $id, 'aw_authors', array_slice( $names, 0, 100 ) );
@@ -68,8 +72,8 @@ function aw_research_save_citation( $id, $authors, $journal ) {
  * @param int $id Post ID.
  * @return bool
  */
-function aw_research_citation_fetch( $id ) {
-	$doi = aw_research_doi( $id );
+function sourceweb_research_citation_fetch( $id ) {
+	$doi = sourceweb_research_doi( $id );
 	update_post_meta( $id, 'aw_citation_tried', current_time( 'mysql' ) );
 	if ( '' === $doi ) {
 		return false;
@@ -97,15 +101,15 @@ function aw_research_citation_fetch( $id ) {
 	}
 	$journal = $d['container-title'] ?? '';
 	$journal = is_array( $journal ) ? (string) ( $journal[0] ?? '' ) : (string) $journal;
-	aw_research_save_citation( $id, $names, html_entity_decode( $journal, ENT_QUOTES ) );
+	sourceweb_research_save_citation( $id, $names, html_entity_decode( $journal, ENT_QUOTES ) );
 	$title = $d['title'] ?? '';
-	aw_research_save_study_title( $id, is_array( $title ) ? (string) ( $title[0] ?? '' ) : (string) $title );
+	sourceweb_research_save_study_title( $id, is_array( $title ) ? (string) ( $title[0] ?? '' ) : (string) $title );
 	return (bool) $names || '' !== $journal;
 }
-add_action( 'aw_research_citation', 'aw_research_citation_fetch' );
+add_action( 'aw_research_citation', 'sourceweb_research_citation_fetch' );
 
 /** The credit line's names: up to three, then "et al.". */
-function aw_research_authors_text( $id ) {
+function sourceweb_research_authors_text( $id ) {
 	$a = array_values( (array) get_post_meta( $id, 'aw_authors', true ) );
 	if ( ! $a ) {
 		return '';
@@ -121,7 +125,7 @@ function aw_research_authors_text( $id ) {
  * @param WP_Query $q      The query.
  * @return string
  */
-function aw_research_search_study_title( $search, $q ) {
+function sourceweb_research_search_study_title( $search, $q ) {
 	global $wpdb;
 	$terms = (array) $q->get( 'search_terms' );
 	if ( '' === $search || ! $terms ) {
@@ -138,4 +142,36 @@ function aw_research_search_study_title( $search, $q ) {
 	}
 	return $search;
 }
-add_filter( 'posts_search', 'aw_research_search_study_title', 10, 2 );
+add_filter( 'posts_search', 'sourceweb_research_search_study_title', 10, 2 );
+
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals -- the older names, kept for Animal Writes Core's item-head.php.
+if ( ! function_exists( 'aw_research_doi' ) ) {
+	/**
+	 * Older name of sourceweb_research_doi().
+	 *
+	 * @param int $id Post ID.
+	 */
+	function aw_research_doi( $id ) {
+		return sourceweb_research_doi( $id );
+	}
+}
+if ( ! function_exists( 'aw_research_study_title' ) ) {
+	/**
+	 * Older name of sourceweb_research_study_title().
+	 *
+	 * @param int $id Post ID.
+	 */
+	function aw_research_study_title( $id ) {
+		return sourceweb_research_study_title( $id );
+	}
+}
+if ( ! function_exists( 'aw_research_authors_text' ) ) {
+	/**
+	 * Older name of sourceweb_research_authors_text().
+	 *
+	 * @param int $id Post ID.
+	 */
+	function aw_research_authors_text( $id ) {
+		return sourceweb_research_authors_text( $id );
+	}
+}
