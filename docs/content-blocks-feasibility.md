@@ -521,9 +521,9 @@ Not moved, renamed or deleted here. When the monetisation plan (including ads) s
 
 | Stage | Work | Visible change |
 |---|---|---|
-| 2 (this PR) | icon/date, `kits/post-field`, **SCF bridge** (`kits_scf_active`, `kits_scf_json_folder`, `kits_scf_groups`; `aw_scf_*` kept) | none |
-| 3 | DirectoryWeb / SourceWeb on `kits_*` names; DirectoryWeb uses `kits_scf_json_folder()` and its listing keys on `kits_post_fields` | none |
-| 4 | Preset loader + new presets (Portfolio, Card, Infographic) on a site that wants them | new types only |
+| 2 (this PR) | icon/date, `kits/post-field`, **SCF bridge** (`kits_scf_active`, `kits_scf_json_folder`, `kits_scf_groups`); callers switched to the `kits_*` names | none |
+| 3 | The files open PRs touch (faq-data.php, tags.php, DirectoryWeb listing files) switch to `kits_*`; then the `aw_i` / `aw_date` / `aw_scf_*` wrappers are deleted. DirectoryWeb uses `kits_scf_json_folder()` and puts its listing keys on `kits_post_fields` | none |
+| 4 | Preset loader + all seven new presets, each switched on or off in Kits Core (off by default) | new types only, when switched on |
 | 5 | Layout block styles + rail; `kits/share` with aliases | yes, on the owner's yes |
 | 6 | Schema contract read by RankWeb | `<head>` only |
 | 7 | This site's existing types onto their `kits-*` presets (byte-identical registration) | none intended |
@@ -536,3 +536,20 @@ Owner questions (added):
 9. Masonry: wanted? (Reading order and screen readers make it the riskiest layout.)
 10. Sponsored blocks: confirm they stay dormant until the monetisation plan (section 21).
 11. Card minimum width (see 7) is left unchanged in both places until the owner decides.
+
+Owner answers (18 Nov 2026):
+- **Old names (question 4):** replace aw with kits, no compat file. Callers in this PR now use `kits_icon()`,
+  `kits_date()`, `kits_scf_active()`, `kits_scf_groups()` and `kits/post-field`. The old functions stay only for the
+  files open PRs touch (faq-data.php, tags.php, DirectoryWeb listing files) and are deleted once those switch (stage 3).
+  The `animal-writes/field` source name stays registered while any saved post or synced pattern in the database still
+  binds to it; a search of the live posts decides when it can go.
+- **Presets (question 5):** all seven in one go (`kits-portfolio`, `kits-card`, `kits-infographic`, `kits-case-study`,
+  `kits-event`, `kits-person`, `kits-testimonial`). Each preset has an on/off switch in Kits Core (admin, core Settings
+  API), off by default, so the admin menu only shows the types a site uses.
+- **Relations (question 8):** the owner asked why. `aw_campaign_link` ties an item (News, Library, guide, press) to a
+  campaign: it has no public archive, campaign pages and SourceWeb query it, and it must not mix with topic tags.
+  `aw_media_group` groups pictures in the Media Library for admin only. Both could become post meta or a tag instead;
+  that stays the owner's call, and nothing changes until then.
+- **Masonry (question 9):** wanted, as one layout option of the layout block (section 16), with DOM order = reading order.
+- **Sponsored blocks (question 10):** yes, dormant until the monetisation plan.
+- **Social card rename (question 2):** yes, `aw-social-*` → `kit-social-*`, in its own PR (both aw.css copies, markup).
