@@ -103,7 +103,6 @@ require_once AW_CORE_DIR . 'includes/term-page.php';
 require_once AW_CORE_DIR . 'includes/faq-data.php'; // the Library item fields (the FAQ questions are RankWeb's faq-data.php since 18 Nov 2026)
 require_once AW_CORE_DIR . 'includes/sponsored-blocks.php';
 require_once AW_CORE_DIR . 'includes/site-check.php';
-require_once AW_CORE_DIR . 'includes/mailweb-aw.php';
 require_once AW_CORE_DIR . 'includes/staging.php';
 require_once AW_CORE_DIR . 'includes/systems.php';
 require_once AW_CORE_DIR . 'includes/retention.php';
