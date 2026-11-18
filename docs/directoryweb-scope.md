@@ -49,23 +49,29 @@ listing groups, the LGD place files, the map, the admin and the REST routes. Cor
 | — (cron) | Re-verification job | `core/cron.php:46-83` | `directoryweb_flag_reverify()` on `aw_daily` |
 | A | One-pager SCF gate | `dw/listing-profile.php:66` called Core's `aw_scf_active()` | `directoryweb_scf_active()` (Kits Core's check, else SCF's function), §6 |
 
-### 1.2 Stays in Core for now
+### 1.2 Still in Core today, and the final home of each piece
 
-| Side | Piece | Where | Why it stays |
+**Owner rule:** `animal-writes-core` will be **deleted**. "Stays in Core" is never an end state, and no code stays in
+it. Each piece below has a final home: DirectoryWeb (code), Kits Core (generic code), RankWeb, SourceWeb, or site
+**data** (options, settings, SCF groups saved to the owning plugin, global styles).
+
+| Side | Piece | Where today | Final home |
 |---|---|---|---|
-| A+F | Listing post type arguments | `core/content-types.php:30`, `:46-48`, `:76-87` | One builder for seven types (session D's file); DirectoryWeb registers `aw_listing` with it (`dw/bootstrap.php:16-22`) |
-| — | Attribution fields on listings | `core/meta.php:18-25` | Shared by four types; SourceWeb writes them |
-| — | `aw_website` on Opportunities | `core/meta.php:37` (branch) | Shared key; DirectoryWeb registers the listing side |
-| — | `AW_WEEKDAYS` | `core/meta.php` (branch) | Also read by `core/faq-data.php` (session B) and `sw/enrichment.php` |
-| A+F | Tags: types and services | `core/tags.php:25-33` (`AW_TAG_ICONS`), `:41`, `:106-153`; `core/model.php:25` | The shared tag pool of every section (§3) |
-| — | Relations to listings | `core/model.php:36-39`, `:88-115`, `:277-284` | The campaigns/Opportunities/News content model |
-| F | Block bindings | `core/bindings.php:104-236` (source `animal-writes/field` `:170`) | One source for all types; listing keys move in stage 4 |
-| F | Listing blocks registration | `core/hub-blocks.php:41`, `:50-63` (`animal-writes/listing-*`, `claim-cta`) | Session D's file; callbacks are DirectoryWeb's (`dw/listing-template.php:116-566`) |
-| F+A | Forms engine | `core/forms-fluentforms.php`, `core/fluentcrm.php` | Shared with contact, volunteer, report and campaign forms (§5) |
-| A | SCF bridge | `core/scf.php:24-26` (`aw_scf_active`), `:63-90` (`aw_scf_group_keys`, filter `aw_scf_groups` `:84`), `:196-200`; `core/edit-screens.php:236+` | Moves to Kits Core as `kits_scf_*` (session D), §6 |
-| F | Templates | `plugins/animal-writes-core/theme/templates/single-aw_listing.html`, `archive.html`, `page-hub.html` via `core/theme-parts-templates.php:114-194` | Core's theme layer (§7) |
-| F | Search, Home, analytics context | `core/pages.php:196-259`, `core/home.php:203-212`, `core/kits-config.php:26-97` | Site pages that read the Directory through guards |
-| — | FAQ feeders, breadcrumbs | `core/faq-data.php`, `core/breadcrumbs.php` | Session B |
+| A+F | Listing post type arguments | `core/content-types.php:30`, `:46-48`, `:76-87` (DirectoryWeb calls it at `dw/bootstrap.php:16-22`) | **DirectoryWeb**: own `register_post_type` from its config (stage 3; Q1). The builder for the other six types goes to **Kits Core** (session D) |
+| — | Attribution fields on listings | `core/meta.php:18-25` | **SourceWeb** registers them (it writes them); DirectoryWeb reads them |
+| — | `aw_website` on Opportunities | `core/meta.php:37` (branch) | **Kits Core** content model (session D) registers the Opportunity side; DirectoryWeb keeps the listing side |
+| — | `AW_WEEKDAYS` | `core/meta.php` (branch) | **DirectoryWeb** `DIRECTORYWEB_WEEKDAYS` (exists); `faq-data.php` (→ RankWeb) and SourceWeb switch to it |
+| A+F | Tags: types and services, icons | `core/tags.php:25-33` (`AW_TAG_ICONS`), `:41`, `:106-153`; `core/model.php:25` (`AW_SERVICES`) | Roles and helpers: **DirectoryWeb** (§4, §1.4). Generic tag helpers: **Kits Core**. Slug lists, service labels and icons: site **data** (DirectoryWeb settings) |
+| — | Relations to listings | `core/model.php:36-39`, `:88-115`, `:277-284` | **Kits Core** content model (session D); DirectoryWeb reads through a `directoryweb_related_items` filter |
+| F | Block bindings | `core/bindings.php:104-236` (source `animal-writes/field` `:170`) | **Kits Core** generic bindings source; **DirectoryWeb** registers `directoryweb/field` for listing keys |
+| F | Listing blocks registration | `core/hub-blocks.php:41`, `:50-63` | **DirectoryWeb** (block.json per block; callbacks are already in `dw/listing-template.php:116-566`) |
+| F+A | Forms engine | `core/forms-fluentforms.php`, `core/fluentcrm.php` | **Kits Core** generic Fluent Forms / FluentCRM bridges; **DirectoryWeb** adapters for claim and report (§5); form IDs and tags: site **data** (options) |
+| A | SCF bridge | `core/scf.php:24-26`, `:63-90` (filter `aw_scf_groups` `:84`), `:196-200`; `core/edit-screens.php:236+` | **Kits Core** `kits_scf_*` (session D, PR #139); the 8 groups are **data** saved in DirectoryWeb's `acf-json` (§6) |
+| F | Templates | `plugins/animal-writes-core/theme/templates/single-aw_listing.html`, `archive.html`, `page-hub.html` via `core/theme-parts-templates.php:114-194` | **DirectoryWeb** plugin block templates (stage 4); theme overrides in the Kits theme; styling in **global styles** (data) |
+| F | Search, Home, analytics context | `core/pages.php:196-259`, `core/home.php:203-212`, `core/kits-config.php:26-97` | **Kits Core** (search, Home, analytics context), calling `directoryweb_*` guarded |
+| — | FAQ feeders, breadcrumbs | `core/faq-data.php`, `core/breadcrumbs.php` | **RankWeb** (session B) |
+| — | Wrappers this PR leaves in Core (`aw_listing_phones` …) | `core/meta.php`, `core/cron.php` (branch) | **Deleted with Core.** Every caller switches to the `directoryweb_*` names first (stage 6) |
+| — | Daily event `aw_daily` | `core/cron.php` | **DirectoryWeb** own `directoryweb_daily` event (stage 6) |
 
 ### 1.3 Already in DirectoryWeb
 
@@ -81,6 +87,104 @@ listing groups, the LGD place files, the map, the admin and the REST routes. Cor
 
 **Thin type pages** are RankWeb's: `rw/robots.php:9`, `:34` (`AW_THIN_DISTRICT_TYPE`, a RankWeb setting, default 1;
 only empty pages get noindex).
+
+### 1.4 DirectoryWeb's calls into Core, to switch before Core goes
+
+Every DirectoryWeb call into a function defined only in `animal-writes-core` (found by listing Core's functions and
+searching `plugins/directoryweb` for calls, tests excluded). Each must switch to a `kits_*` or `directoryweb_*` name
+**before Core is deleted**, and each call is guarded (`function_exists`, or a DirectoryWeb fallback) so a missing Core
+or Kits Core never fatals. Today DirectoryWeb stops itself when Core is missing (`directoryweb.php:35-46`, checks
+`AW_CORE_VERSION` at `:38`), which is why the unguarded calls are safe now. That check goes last.
+
+| Final home | Group | Core function (defined at) | DirectoryWeb call sites (`*` = not guarded at the call) | Guarded | New name |
+|---|---|---|---|---|---|
+| Kits Core | Item page parts (session D) | `aw_item_editor_preview` (`core/item-head.php:73`) | `listing-template.php:118`, `listing-template.php:141`, `listing-template.php:162`, `listing-template.php:214`, `listing-template.php:236` +8 | 13/13 | `kits_item_*` |
+| Kits Core | Item page parts (session D) | `aw_item_here` (`core/item-head.php:67`) | `listing-template.php:39`, `find-help.php:358*` | 1/2 | `kits_item_*` |
+| Kits Core | Item page parts (session D) | `aw_item_kind` (`core/item-head.php:83`) | `find-help.php:116*`, `find-help.php:242*`, `find-help.php:436*` | 0/3 | `kits_item_*` |
+| Kits Core | Item page parts (session D) | `aw_item_more_card` (`core/item-head.php:497`) | `listing-template.php:558` | 1/1 | `kits_item_*` |
+| Kits Core | Item page parts (session D) | `aw_item_date_ts` (`core/item-head.php:120`) | `listing-template.php:478` | 1/1 | `kits_item_*` |
+| Kits Core | Item page parts (session D) | `aw_item_card_media` (`core/item-head.php:487`) | `listing-template.php:480` | 1/1 | `kits_item_*` |
+| Kits Core | Icons, dates | `aw_i` (`core/systems.php:24`) | `listing-profile.php:259*`, `listing-profile.php:261*`, `listing-profile.php:288*`, `listing-profile.php:293*`, `listing-profile.php:301*` +17 | 0/22 | `kits_icon`, `kits_date` |
+| Kits Core | Icons, dates | `aw_date` (`core/systems.php:45`) | `listing-profile.php:297*`, `data-sources.php:134*`, `listing-template.php:94*`, `listing-template.php:95*`, `listing-template.php:147*` +7 | 0/12 | `kits_icon`, `kits_date` |
+| Kits Core | Assets and theme files | `aw_use_component_style` (`core/theme-parts-assets.php:161`) | `listing-profile.php:311*`, `listing-profile.php:313*`, `local-cards.php:19*`, `listing-template.php:370*`, `listing-template.php:474*` +9 | 0/14 | `kits_use_component_style`, `kits_theme_file_uri`; DirectoryWeb's own CSS by `DIRECTORYWEB_URL` |
+| Kits Core | Assets and theme files | `aw_theme_file_uri` (`core/theme-parts.php:36`) | `data-sources.php:121*`, `listing-template.php:321*` | 0/2 | `kits_use_component_style`, `kits_theme_file_uri`; DirectoryWeb's own CSS by `DIRECTORYWEB_URL` |
+| Kits Core | Phone link | `aw_tel_url` (`core/bindings.php:59`) | `listing-profile.php:357*`, `listing-template.php:169*`, `listing-template.php:171*`, `listing-template.php:192*` | 0/4 | `kits_tel_url` |
+| Kits Core | Admin table | `aw_core_simple_table` (`core/admin-table.php:21`) | `claims-review.php:457*`, `claims.php:165*`, `place-intros.php:236*` | 0/3 | `kits_simple_table` (exists) |
+| Kits Core | Private upload folder | `aw_private_dir` (`core/campaigns.php:17`) | `claims-review.php:515*`, `claims.php:106*`, `claims.php:187*`, `claims.php:226*` | 0/4 | `kits_private_dir` |
+| Kits Core | Section pages (hubs) | `aw_hub_url` (`core/hubs.php:35`) | `directory.php:398*`, `directory.php:639*`, `directory.php:650*` | 0/3 | `kits_hub_*` |
+| Kits Core | Section pages (hubs) | `aw_hub_page` (`core/hubs.php:126`) | `district-helplines.php:108*`, `place-intros.php:129*` | 0/2 | `kits_hub_*` |
+| Kits Core | Section pages (hubs) | `aw_hub_type` (`core/hubs.php:40`) | `directory.php:223` | 1/1 | `kits_hub_*` |
+| Kits Core | Section pages (hubs) | `aw_hub_of_query` (`core/hubs.php:68`) | `district-helplines.php:181*` | 0/1 | `kits_hub_*` |
+| Kits Core | Generic tag helpers | `aw_item_tags` (`core/tags.php:133`) | `district-helplines.php:82*` | 0/1 | `kits_item_tags`, `kits_set_item_tags` |
+| Kits Core | Generic tag helpers | `aw_set_item_tags` (`core/tags.php:158`) | `claims-review.php:603*`, `claims.php:211*` | 0/2 | `kits_item_tags`, `kits_set_item_tags` |
+| Kits Core | Block result head | `aw_block_result_head` (`core/hub-blocks.php:404`) | `directory-map.php:281*` | 0/1 | `kits_block_result_head` |
+| Kits Core | Bindings value | `aw_binding_value` (`core/bindings.php:74`) | `gov-verified.php:213` | 1/1 | `kits_binding_value`; DirectoryWeb registers `directoryweb/field` |
+| Kits Core | SCF check | `aw_scf_active` (`core/scf.php:24`) | `listing-profile.php:68` | 1/1 | `kits_scf_active` (PR #139; gate already chains) |
+| Kits Core | Fluent Forms bridge (generic) | `aw_ff_id` (`core/forms-fluentforms.php:176`) | `claims-review.php:66` | 1/1 | `kits_ff_*`; claim/report mapping in DirectoryWeb's Fluent Forms adapter |
+| Kits Core | Fluent Forms bridge (generic) | `aw_ff_form` (`core/forms-fluentforms.php:237`) | `claims.php:88*` | 0/1 | `kits_ff_*`; claim/report mapping in DirectoryWeb's Fluent Forms adapter |
+| Kits Core | Fluent Forms bridge (generic) | `aw_ff_ref` (`core/forms-fluentforms.php:552`) | `claims-review.php:247`, `directoryweb-dashboard.php:382*` | 1/2 | `kits_ff_*`; claim/report mapping in DirectoryWeb's Fluent Forms adapter |
+| Kits Core | Fluent Forms bridge (generic) | `aw_ff_ticked` (`core/forms-fluentforms.php:531`) | `claims-review.php:222` | 1/1 | `kits_ff_*`; claim/report mapping in DirectoryWeb's Fluent Forms adapter |
+| Kits Core | Fluent Forms bridge (generic) | `aw_ff_phone10` (`core/forms-fluentforms.php:85`) | `claims-review.php:149*` | 0/1 | `kits_ff_*`; claim/report mapping in DirectoryWeb's Fluent Forms adapter |
+| Kits Core | Fluent Forms bridge (generic) | `aw_ff_phone_store` (`core/forms-fluentforms.php:96`) | `claims-review.php:110*`, `claims-review.php:219*`, `claims-review.php:226*` | 0/3 | `kits_ff_*`; claim/report mapping in DirectoryWeb's Fluent Forms adapter |
+| Kits Core | Fluent Forms bridge (generic) | `aw_ff_social_user` (`core/forms-fluentforms.php:111`) | `claims-review.php:160*`, `claims-review.php:161*`, `claims-review.php:279*`, `claims-review.php:280*`, `claims-review.php:281*` +1 | 0/6 | `kits_ff_*`; claim/report mapping in DirectoryWeb's Fluent Forms adapter |
+| Kits Core | FluentCRM bridge (generic) | `aw_crm_on` (`core/fluentcrm.php:98`) | `org-people.php:43`, `org-people.php:120` | 2/2 | `kits_crm_*`, reached through `directoryweb_*` CRM events (§5.3) |
+| Kits Core | FluentCRM bridge (generic) | `aw_crm_tag_ids` (`core/fluentcrm.php:136`) | `org-people.php:140*` | 0/1 | `kits_crm_*`, reached through `directoryweb_*` CRM events (§5.3) |
+| Kits Core | Content model: campaigns, Opportunities (session D) | `aw_campaign_organiser` (`core/model.php:147`) | `listing-template.php:526*` | 0/1 | Kits Core content model; DirectoryWeb reads related items through a `directoryweb_related_items` filter |
+| Kits Core | Content model: campaigns, Opportunities (session D) | `aw_campaign_partner_ids` (`core/model.php:156`) | `listing-template.php:532*` | 0/1 | Kits Core content model; DirectoryWeb reads related items through a `directoryweb_related_items` filter |
+| Kits Core | Content model: campaigns, Opportunities (session D) | `aw_open_opportunities_meta_query` (`core/retention.php:85`) | `listing-template.php:507` | 1/1 | Kits Core content model; DirectoryWeb reads related items through a `directoryweb_related_items` filter |
+| DirectoryWeb | Type and service roles | `aw_listing_type_slugs` (`core/tags.php:112`) | `directoryweb-rest.php:443`, `directoryweb-rest.php:897`, `directory-map.php:43*`, `directory-map.php:128*`, `directory-map.php:294*` +7 | 3/12 | `directoryweb_type_slugs`, `directoryweb_entry_types`, `directoryweb_service_names`, `directoryweb_service_slugs`, `directoryweb_type_icon` (slug lists and icons = site data) |
+| DirectoryWeb | Type and service roles | `aw_listing_types` (`core/tags.php:148`) | `listing-template.php:286`, `district-helplines.php:78*`, `district-helplines.php:84*`, `directoryweb-listings.php:436` | 2/4 | `directoryweb_type_slugs`, `directoryweb_entry_types`, `directoryweb_service_names`, `directoryweb_service_slugs`, `directoryweb_type_icon` (slug lists and icons = site data) |
+| DirectoryWeb | Type and service roles | `aw_listing_service_names` (`core/tags.php:153`) | `listing-profile.php:271*`, `listing-template.php:238`, `directoryweb-listings.php:437` | 2/3 | `directoryweb_type_slugs`, `directoryweb_entry_types`, `directoryweb_service_names`, `directoryweb_service_slugs`, `directoryweb_type_icon` (slug lists and icons = site data) |
+| DirectoryWeb | Type and service roles | `aw_service_slugs` (`core/tags.php:107`) | `claims-review.php:603*`, `district-helplines.php:82*`, `directory.php:59*`, `directory.php:522*`, `claims.php:211*` | 0/5 | `directoryweb_type_slugs`, `directoryweb_entry_types`, `directoryweb_service_names`, `directoryweb_service_slugs`, `directoryweb_type_icon` (slug lists and icons = site data) |
+| DirectoryWeb | Type and service roles | `aw_type_icon` (`core/hub-blocks.php:360`) | `directory-map.php:295*` | 0/1 | `directoryweb_type_slugs`, `directoryweb_entry_types`, `directoryweb_service_names`, `directoryweb_service_slugs`, `directoryweb_type_icon` (slug lists and icons = site data) |
+| DirectoryWeb | Verified mark | `aw_verified_mark` (`core/hub-blocks.php:502`) | `listing-template.php:418` | 1/1 | `directoryweb_verified_mark` |
+| DirectoryWeb | Form links of a listing | `aw_report_url` (`core/form-blocks.php:93`) | `listing-profile.php:284`, `listing-template.php:83` | 2/2 | `directoryweb_report_url`, `directoryweb_form_listing` |
+| DirectoryWeb | Form links of a listing | `aw_form_page_listing` (`core/form-blocks.php:101`) | `claims-review.php:131` | 1/1 | `directoryweb_report_url`, `directoryweb_form_listing` |
+| DirectoryWeb | Place distances (India module) | `aw_district_centroid` (`core/related.php:136`) | `directory-map.php:199*`, `directory-map.php:215*`, `geocode.php:155` | 1/3 | `directoryweb_place_centroid`, `directoryweb_place_km` |
+| DirectoryWeb | Place distances (India module) | `aw_district_km` (`core/related.php:146`) | `find-help.php:299*` | 0/1 | `directoryweb_place_centroid`, `directoryweb_place_km` |
+| DirectoryWeb | Post type, meta | `aw_content_type_args` (`core/content-types.php:41`) | `bootstrap.php:20` | 1/1 | own `register_post_type`; drop the Core calls (DirectoryWeb registers and sanitises its keys, this PR) |
+| DirectoryWeb | Post type, meta | `aw_register_meta` (`core/meta.php:136`) | `bootstrap.php:44` | 1/1 | own `register_post_type`; drop the Core calls (DirectoryWeb registers and sanitises its keys, this PR) |
+| DirectoryWeb | Post type, meta | `aw_sanitize_meta` (`core/meta.php:104`) | `listing-profile.php:229*` | 0/1 | own `register_post_type`; drop the Core calls (DirectoryWeb registers and sanitises its keys, this PR) |
+| SourceWeb | Source logo | `aw_press_site_logo` (`core/press.php:293`) | `data-sources.php:181` | 1/1 | `sourceweb_site_logo` |
+
+
+Constants and hooks from Core:
+
+| Final home | Name | DirectoryWeb uses at | New name |
+|---|---|---|---|
+| DirectoryWeb | `AW_CORE_VERSION` | `directoryweb.php:38` (the Core check) | removed with the check |
+| DirectoryWeb setting (data) | `AW_REVERIFY_DAYS` (default 180) | `listing-meta.php:419`, `directoryweb-rest.php:935` | `directoryweb_reverify_days` option |
+| Site data (DirectoryWeb settings) | `AW_SERVICES` (`core/model.php:26`) | `claims-review.php:80`, `:202`, `:232`; `listing-template.php:289`; `claims.php:37` | service roles in config (§4) |
+| DirectoryWeb Fluent Forms adapter | `AW_FF_OPTION`, `AW_FF_SOCIAL`, `AW_FF_DATES` | `directoryweb-ui.php:281`, `directoryweb-rest.php:1000`; `claims-review.php:160`, `:162`, `:279`, `:498-500` | `DIRECTORYWEB_FF_*` (option names unchanged) |
+| DirectoryWeb | hook `aw_daily` | `listing-meta.php:466` | `directoryweb_daily` |
+
+### 1.5 Options DirectoryWeb reads that Core's uninstall would delete
+
+`plugins/animal-writes-core/uninstall.php` deletes these when "Delete this plugin's data" is ticked
+(`aw_delete_data_on_uninstall`, `:57`). DirectoryWeb reads them, so **ownership moves to DirectoryWeb**: the option
+names stay the same (data), DirectoryWeb's own `uninstall.php` (and its backup) takes them over, and **Core's uninstall
+list must drop them**. That change ships before or with Core's deletion, never after.
+
+| Option or transient | Deleted by Core at | DirectoryWeb uses at |
+|---|---|---|
+| `aw_district_helplines` | `uninstall.php:69` | `district-helplines.php:36` |
+| `aw_place_intros` | `:75` | `place-intros.php:22` |
+| `aw_ff_forms` (form IDs) | `:74` | `directoryweb-ui.php:281`, `directoryweb-rest.php:1000` (shared with the other forms: owner = the Kits Core forms bridge, DirectoryWeb reads its two keys) |
+| `aw_ff_send_email` | `:66` | `directoryweb-rest.php:937` (shared like `aw_ff_forms`) |
+| `aw_press_logos` | `:79` | `data-sources.php:165` (owner = SourceWeb, with the source logo) |
+| `aw_geo_last_request` | `:93` | `geocode.php:50-57`, `directoryweb-rest.php:767` |
+| `aw_gov_verified_live` | `:94` | `gov-verified.php:118`, `:240`, `:250`; `directoryweb-rest.php:947` |
+| `aw_place_counts` | `:108` | `places.php:279`, `:289`, `:307`; `directoryweb-dashboard.php:165` |
+| `aw_places_rewrite` | `:109` | `places.php:369-371` |
+| transient `aw_dir_points` | `:141` | `directory-map.php:35`, `:67`, `:71`; `gov-verified.php:101` |
+| transients `aw_featured_names`, `_aliases`, `_links`, `_shared` | `:146-149` | `featured.php:37-306` |
+| transient `aw_gov_verified_count` | `:151` | `directory.php:633`; `gov-verified.php:100-141` |
+| transient `aw_verified_count` | `:155` | `directory.php:503-506`; `claims-review.php:651` |
+| transient prefixes `aw_pin_`, `aw_place_error_`, `aw_orgq_rl_`, `aw_geo_` | `:160` | `directory-map.php:45`, `:198`; `places.php:467-474`; `places-admin.php:108-120`; `org-people.php:304`; `geocode.php:44` |
+| cron hooks `aw_featured_rescan`, `aw_geocode_one`, `directoryweb_stats_build`; transient `directoryweb_stats` | `:166-176`, `:140` | `featured.php:322-335`; `geocode.php:204-205`; DirectoryWeb's own uninstall already clears the `directoryweb_*` two |
+
+Not DirectoryWeb's: `aw_social_on` and `aw_social_show` are read by SourceWeb (`sw/kits-hub.php:33`,
+`sw/sourceweb-rest.php:877-1071`), so SourceWeb takes those over in the same way.
 
 ---
 
@@ -115,7 +219,7 @@ only empty pages get noindex).
 | WP-CLI | `aw redirects-import`, `aw gov-verify`, `aw geocode`, `aw-places`, featured, org people, place intros | `dw/places.php:408`, `dw/gov-verified.php:236`, `dw/geocode.php:279`, `dw/find-help.php:419`, `:507`, `dw/featured.php:472`, `dw/org-people.php:249`, `dw/place-intros.php:337` | A |
 | Theme templates | listing blocks, bindings | `theme/templates/single-aw_listing.html`, `theme/patterns/find-help.php` | F |
 
-After the move every caller keeps working: the `aw_*` names stay as wrappers in Core (§12).
+After the move every caller keeps working through the `aw_*` wrappers in Core (§12). The wrappers are temporary: Core will be deleted, so every caller switches to `directoryweb_*` first (§1.2, §1.4).
 
 ---
 
@@ -281,7 +385,7 @@ DirectoryWeb Claims screen stays **read-only** [A].
 
 The visitor form is [F] (Kits form rules). The **field-mapping settings** are [A]: one Settings API section per active
 adapter (form field → preset field, select boxes), plus a filter `directoryweb_forms_map` for code. **This PR writes no
-adapter code**; today's Fluent Forms code stays where it is.
+adapter code**; today's Fluent Forms code is untouched here. Its final home is the Kits Core forms bridge plus DirectoryWeb's claim/report adapter (§1.2).
 
 ### 5.2 Enrichment write contract (SourceWeb stays the engine)
 
@@ -295,7 +399,7 @@ adapter code**; today's Fluent Forms code stays where it is.
 | F | Profile extras (live Google block, news mentions) | `sw/enrichment-front.php:62-219` |
 | — | Places, merge/unmerge | `sw/enrichment-cleanup.php:31-340` |
 | — | DirectoryWeb's uses of it (guarded) | `dw/claims-review.php:545-550`, `:655-656`; `dw/claims.php:207` (`aw_claim_before_apply`); `dw/gov-verified.php:34-37`; `dw/listing-profile.php:296`; `dw/directoryweb-dashboard.php:264-275`; `dw/directoryweb-rest.php:281-286`, `:576-586` |
-| — | Core | none ("→ SourceWeb, later" does not apply) |
+| — | Core | none: no enrichment code is in Core, so nothing moves from it |
 
 **Contract (stage 3, documented here, not built on this PR):**
 ```
@@ -352,7 +456,7 @@ Admin [A]: one Settings API section per adapter (event → tags/lists), plus fil
   (`directoryweb-org/includes/listing-profile.php:66`).
 - **Next (session D, Kits Core track):** the generic SCF bridge moves to Kits Core as `kits_scf_*` (PR #139 adds
   `kits_scf_active()`, `kits_scf_json_folder( $dir, $keys )` and `kits_scf_groups()`): the active check, the group
-  registry filter, the JSON load/save paths and the edit-screen group ordering. Core keeps `aw_scf_*` wrappers.
+  registry filter, the JSON load/save paths and the edit-screen group ordering. Core's `aw_scf_*` go when Core is deleted.
 - **Follow-up step, after #139 is merged (not on this PR):** DirectoryWeb's acf-json registration
   (`directoryweb.php:96-115`: `load_json`, `save_json/key=`, `aw_scf_groups`) switches to
   `kits_scf_json_folder( DIRECTORYWEB_DIR . 'acf-json', DIRECTORYWEB_SCF_GROUPS )`, guarded by `function_exists`, with
@@ -527,8 +631,13 @@ This PR's changes by side:
    Render-compare live pages before and after.
 5. **Other sites [A+F].** Site settings in the Settings screen, the prefix/slug filters, the default preset for the .org
    edition, the other form/CRM adapters, the privacy exporter/eraser, the Abilities API.
-6. **Core out.** Drop Core's wrappers once SourceWeb, RankWeb, the import tools and the theme call `directoryweb_*`;
-   own daily event; DirectoryWeb runs without Core.
+6. **Core deleted.** Before deletion:
+   - every DirectoryWeb call in §1.4 is switched and guarded;
+   - SourceWeb, RankWeb, the import tools and the theme call `directoryweb_*`;
+   - DirectoryWeb has its own `directoryweb_daily` event;
+   - the §1.5 options move to DirectoryWeb's uninstall and leave Core's;
+   - the Core check in `directoryweb.php:35-46` is removed.
+   Then `animal-writes-core` is deleted, with no code left in it.
 
 ## 14. Risks
 
@@ -537,7 +646,9 @@ This PR's changes by side:
 | — | A key registered twice or not at all | `aw_register_meta` skips exactly DirectoryWeb's (key, type) pairs; parity test |
 | — | Sanitising changes for a key | rules copied unchanged; parity run over every key |
 | — | Load order (Core includes `meta.php` before DirectoryWeb) | wrappers resolve at call time; nothing calls them at include time |
-| — | DirectoryWeb missing | reads empty, writes `_doing_it_wrong`; Core's existing notice |
+| — | DirectoryWeb missing | reads empty, writes `_doing_it_wrong` (until Core is deleted) |
+| — | Core deleted before a §1.4 call is switched | every call guarded; the Core check in `directoryweb.php:35-46` is removed only after the last switch |
+| A | "Delete this plugin's data" on Core removes Directory options | §1.5: Core's uninstall list drops them first; DirectoryWeb's uninstall and backup own them |
 | A | One-pager and SCF boxes both show after Core goes | gate is self-contained now (§6) |
 | A | Takedown hash added in the old place | `meta.php` says where the list lives; docs and pending updated |
 | A+F | Plugin Check pulls all of Core in | inline `phpcs:ignore` only where the Deploy check reports pre-existing ERROR rows |
