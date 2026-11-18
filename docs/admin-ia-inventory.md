@@ -14,7 +14,7 @@ the same with or without Kits Core), then third-party plugins as their vendors s
 | Directory › Directory, Add Listing | Core (CPT `aw_listing`) | keep |
 | Directory › Claims | Core `claims-review.php:296` | **done 12 Nov**: the item is Fluent Forms › Claims, after Entries (owner: "With form entries"); same screen, address and review; DirectoryWeb › Claims stays read-only |
 | News › News, Add News item | Core (CPT `aw_news`) | keep |
-| News › Linked campaigns | taxonomy `aw_campaign_link` | **done 12 Nov**: one entry under Classification |
+| News › Linked campaigns | taxonomy `kits_campaign_link` | **done 12 Nov**: one entry under Classification |
 | News › Social posts | Core `social-posts.php:146` (CPT `aw_social`) | keep under News (no Animal Writes menu: Animal Writes is the site layer and goes with the child theme (plan 4.3), so its screens stay in Kits (owner, 12 Nov)) |
 | Resources › All Resources, Add New Resource | core `post` | keep |
 | Resources › Linked campaigns | taxonomy | **done** (as above) |
@@ -25,7 +25,7 @@ the same with or without Kits Core), then third-party plugins as their vendors s
 | Press coverage › All coverage, Add coverage, Linked campaigns | Core (CPT `aw_press`; menu set twice: `press.php:108`, `admin-ia.php:95`) | **done 12 Nov**: menu defined once (`press.php`); Linked campaigns under Classification |
 | Pages | core | keep |
 | Media › Library, Add Media File | core | keep |
-| Media › Media groups | Core (taxonomy `aw_media_group`) | keep |
+| Media › Media groups | Core (taxonomy `kits_media_group`) | keep |
 | Media › Make WebP, Duplicate files, Reuse pictures | Core `media-webp.php`, `media-merge.php`, `media-reuse.php` | keep (core convention: media tools under Media) |
 | Classification › Categories, Tags, Linked campaigns | Core `admin-ia.php:135` | keep (Linked campaigns added 12 Nov) |
 | Appearance › Themes, Editor, Fonts | core | keep |

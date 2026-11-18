@@ -55,6 +55,7 @@ require_once AW_CORE_DIR . 'includes/keep-modified.php'; // technical saves keep
 require_once AW_CORE_DIR . 'includes/content-types.php';
 require_once AW_CORE_DIR . 'includes/category-moves.php';
 require_once AW_CORE_DIR . 'includes/tags.php';
+require_once AW_CORE_DIR . 'includes/taxonomy-rename.php'; // aw_campaign_link / aw_media_group → kits_ names, renamed only by a click on Tools → Taxonomy rename (owner, 18 Nov 2026)
 require_once AW_CORE_DIR . 'includes/campaign-links.php';
 require_once AW_CORE_DIR . 'includes/meta.php';
 require_once AW_CORE_DIR . 'includes/scf.php';
