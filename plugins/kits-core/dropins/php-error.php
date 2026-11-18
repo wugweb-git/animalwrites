@@ -47,8 +47,8 @@ if ( ! headers_sent() ) {
 }
 ?>
 <?php
-// The picture: the owner's own files in kits-core/assets/error/ (500-wide.webp, 500-phone.webp; aw_error_picture()
-// in not-found.php) when they are there, otherwise the Media Library photo 23313 (a street dog resting on a promenade
+// The picture: the owner's own files in kits-core/assets/error/ (500-wide.webp, 500-phone.webp; the 404 page's own
+// pictures stay in animal-writes-core/assets/error/ until not-found.php moves) when they are there, otherwise the Media Library photo 23313 (a street dog resting on a promenade
 // at dusk). Both are static files the web server sends without WordPress. Without either, the slot shows the surface tint.
 $aw_pic_dir = ( defined( 'WP_CONTENT_DIR' ) ? WP_CONTENT_DIR : dirname( __FILE__ ) ) . '/plugins/kits-core/assets/error/';
 $aw_wide    = is_readable( $aw_pic_dir . '500-wide.webp' );
