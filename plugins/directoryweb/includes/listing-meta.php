@@ -278,6 +278,7 @@ function directoryweb_listing_hours( $id ) {
  */
 function directoryweb_set_listing_list( $id, $key, array $rows ) {
 	if ( ! isset( DIRECTORYWEB_LIST_FIELDS[ $key ] ) ) {
+		_doing_it_wrong( __FUNCTION__, esc_html( 'Not a listing list: ' . $key . '. Nothing was written.' ), '1.0.0' );
 		return;
 	}
 	$subs   = DIRECTORYWEB_LIST_FIELDS[ $key ];

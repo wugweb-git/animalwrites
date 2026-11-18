@@ -199,6 +199,8 @@ if ( ! function_exists( 'aw_set_listing_list' ) ) {
 	function aw_set_listing_list( $id, $key, array $rows ) {
 		if ( function_exists( 'directoryweb_set_listing_list' ) ) {
 			directoryweb_set_listing_list( $id, $key, $rows );
+		} else {
+			_doing_it_wrong( __FUNCTION__, 'DirectoryWeb is not loaded: the list was not written.', '1.0.0' );
 		}
 	}
 }
@@ -208,6 +210,8 @@ if ( ! function_exists( 'aw_listing_put_phone' ) ) {
 	function aw_listing_put_phone( $id, $phone = '', $whatsapp = '' ) {
 		if ( function_exists( 'directoryweb_listing_put_phone' ) ) {
 			directoryweb_listing_put_phone( $id, $phone, $whatsapp );
+		} else {
+			_doing_it_wrong( __FUNCTION__, 'DirectoryWeb is not loaded: the phone was not written.', '1.0.0' );
 		}
 	}
 }

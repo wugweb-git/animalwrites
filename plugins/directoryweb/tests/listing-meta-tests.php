@@ -17,8 +17,12 @@ if ( ! defined( 'ABSPATH' ) && 'cli' !== PHP_SAPI ) { // web requests stop here;
 define( 'ABSPATH', __DIR__ . '/' );
 $meta = array();
 $reg  = array();
+$wrong   = array();
+$takedown = array();
 function add_action( ...$a ) {}
-function apply_filters( $h, $v ) { return $v; }
+function apply_filters( $h, $v ) { global $takedown; return 'directoryweb_never_publish_phones' === $h ? array_merge( (array) $v, $takedown ) : $v; }
+function _doing_it_wrong( $f ) { global $wrong; $wrong[] = $f; }
+function esc_html( $v ) { return (string) $v; }
 function esc_url_raw( $v ) { return 'url:' . $v; }
 function sanitize_email( $v ) { return 'email:' . $v; }
 function sanitize_text_field( $v ) { return trim( strip_tags( (string) $v ) ); }
@@ -84,11 +88,18 @@ check( 2 === count( $spec ) && '00:00' === $spec[1]['opens'], 'closed day as 00:
 aw_set_listing_list( 7, 'aw_phones', array() );
 check( 0 === get_post_meta( 7, 'aw_phones' ) && '' === get_post_meta( 7, 'aw_phones_0_number' ), 'rows past the count are removed' );
 directoryweb_set_listing_list( 7, 'aw_unknown', array( array( 'x' => 1 ) ) );
-check( '' === get_post_meta( 7, 'aw_unknown' ), 'unknown list is ignored' );
+check( '' === get_post_meta( 7, 'aw_unknown' ) && in_array( 'directoryweb_set_listing_list', $wrong, true ), 'unknown list is not written, and says so' );
 
 // Never-publish: the takedown hash kept, and a listed number is never stored or shown.
 check( 1 === count( DIRECTORYWEB_NEVER_PUBLISH_PHONES ), 'takedown hash kept' );
 check( ! aw_phone_never_publish( '98765 43210' ), 'an ordinary number is shown' );
+$takedown[] = hash( 'sha256', '919876543210' ); // a number taken down through the filter
+check( aw_phone_never_publish( '+91 98765-43210' ), 'a listed number is caught in any format' );
+aw_set_listing_list( 8, 'aw_phones', array( array( 'number' => '98765 43210' ), array( 'number' => '011 2222 3333' ) ) );
+check( 1 === get_post_meta( 8, 'aw_phones' ) && '011 2222 3333' === get_post_meta( 8, 'aw_phones_0_number' ), 'a listed number is never stored' );
+update_post_meta( 8, 'aw_phones', 2 );
+update_post_meta( 8, 'aw_phones_1_number', '9876543210' ); // written past the check (an old row)
+check( 1 === count( aw_listing_phones( 8 ) ), 'a listed number is never shown' );
 check( AW_WEEKDAYS === DIRECTORYWEB_WEEKDAYS, 'weekdays the same' );
 
 echo $count . ' checks, ' . $fails . " failed\n";
