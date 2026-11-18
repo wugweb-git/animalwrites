@@ -24,7 +24,7 @@ Before this change (`wordpress-dev` 19494848):
 |---|---|
 | Vault: option, reader, screen, save handler | `plugins/animal-writes-core/includes/keys.php:17` (`AW_KEYS_OPTION`), `:20` (`aw_keys_list()`), `:29` (`aw_key()`), `:42` (`aw_key_where()`), `:52` (menu), `:58` (`aw_keys_screen()`), `:96` (`admin_post_aw_keys`) |
 | Vault option deleted on Core uninstall | `plugins/animal-writes-core/uninstall.php:73` |
-| Registered: `AW_CLARITY_TOKEN`, `AW_BING_WEBMASTER_KEY`, `AW_PSI_KEY` | `plugins/insightweb/includes/search-insights/runs.php:54` (`aw_keys` filter) |
+| Registered: `AW_CLARITY_TOKEN`, `AW_BING_WEBMASTER_KEY`, `AW_PSI_KEY` | `plugins/insightweb/includes/search-insights/runs.php:54` (`aw_keys` filter; the three entries at `:57`, `:58`, `:59`) |
 | Registered: `AW_GOOGLE_ALERTS_FEED_1`, `AW_GOOGLE_ALERTS_FEED_2` | `plugins/insightweb/includes/search-insights/alerts.php:19` (`aw_keys` filter) |
 | InsightWeb's reader `aw_si_key()` (called `aw_key()`, else the constant alone) | `plugins/insightweb/includes/search-insights/runs.php:45` |
 | Links to `aw-keys` | InsightWeb `search-insights/admin.php:377`, `:1077`; `insightweb-rest.php:535`; Kits Core tests `kits-core/tests/admin-menu-tests.php:90,111,122,147,152`; Core `admin-home.php:44,160,244,383`, `help-tab.php:25`, `data/edit-screen-map.json` |
@@ -45,6 +45,18 @@ or an admin screen, never a public page).
 Live, 18 Nov 2026: `aw_keys` holds 2 names (`AW_BING_WEBMASTER_KEY`, `AW_CLARITY_TOKEN`), autoload `off`. None of the
 five constants is defined in `wp-config.php` (`docs/pending.md` still says the Clarity token is in wp-config.php; live
 shows it in the option). `insightweb_keys` does not exist yet.
+
+### What counts as a key (and what does not)
+
+| Type | Examples | Where it lives |
+|---|---|---|
+| Secret (API key or token) | Bing Webmaster key, Clarity Data Export token, PageSpeed key, Google Alerts feed addresses | The owning plugin's own setting; a wp-config.php constant of the same name wins. Never shown. |
+| Public ID | Clarity project ID (`kits_clarity_id`, Kits Core `analytics.php:132`, set in Animal Writes Core `kits-config.php:16`), GTM container (`kits_gtm_id` / `KITS_GTM_ID`, `analytics.php:54`) | Config filters or constants, as now. Not secrets, not on a keys screen. |
+| OAuth access | Search Console, GA4, Site Kit's PageSpeed | Site Kit by Google; no key is stored by a Kits plugin. |
+| AI provider keys | — | Out of scope: owner-only wp-config.php, never an admin screen. |
+
+No shared vault stays anywhere in the suite: each plugin works standalone, and `includes/keys.php` is retired after
+copy → check → delete. It is never moved to Kits Core.
 
 ### Other plugins' secrets (already in their own place, not part of the vault)
 
