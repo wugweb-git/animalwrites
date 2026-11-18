@@ -23,6 +23,9 @@ const INSIGHTWEB_KEYS_OPTION = 'insightweb_keys';
 /** The old shared vault's option (Animal Writes Core's includes/keys.php), read only, until it is retired. */
 const INSIGHTWEB_KEYS_OLD_OPTION = 'aw_keys';
 
+/** InsightWeb's key names (the wp-config.php constants), as insightweb_key_fields() lists them. */
+const INSIGHTWEB_KEY_NAMES = array( 'AW_CLARITY_TOKEN', 'AW_BING_WEBMASTER_KEY', 'AW_PSI_KEY', 'AW_GOOGLE_ALERTS_FEED_1', 'AW_GOOGLE_ALERTS_FEED_2' );
+
 /**
  * InsightWeb's keys: constant name => [label, where to find it]. The names are the wp-config.php constants already in
  * use, so a constant set today keeps working.
@@ -63,35 +66,43 @@ function insightweb_key_saved( string $option, string $name ): string {
 }
 
 /**
+ * Where a key is set and its value: ['config' | 'insightweb' | 'old' | '', value], first found wins.
+ *
+ * @param string $name Constant name, e.g. AW_CLARITY_TOKEN.
+ * @return array{0: string, 1: string}
+ */
+function insightweb_key_found( string $name ): array {
+	$sources = array(
+		'config'     => fn() => insightweb_key_constant( $name ),
+		'insightweb' => fn() => insightweb_key_saved( INSIGHTWEB_KEYS_OPTION, $name ),
+		'old'        => fn() => insightweb_key_saved( INSIGHTWEB_KEYS_OLD_OPTION, $name ),
+	);
+	foreach ( $sources as $where => $read ) {
+		$v = $read();
+		if ( '' !== $v ) {
+			return array( $where, $v );
+		}
+	}
+	return array( '', '' );
+}
+
+/**
  * Where a key is set: 'config' (wp-config.php), 'insightweb' (Settings → Keys), 'old' (the old Kits → Keys) or ''.
  *
  * @param string $name Constant name, e.g. AW_CLARITY_TOKEN.
  */
 function insightweb_key_where( string $name ): string {
-	if ( '' !== insightweb_key_constant( $name ) ) {
-		return 'config';
-	}
-	if ( '' !== insightweb_key_saved( INSIGHTWEB_KEYS_OPTION, $name ) ) {
-		return 'insightweb';
-	}
-	return '' !== insightweb_key_saved( INSIGHTWEB_KEYS_OLD_OPTION, $name ) ? 'old' : '';
+	return insightweb_key_found( $name )[0];
 }
 
 /**
- * A key's value: the wp-config.php constant, else InsightWeb's own, else the old Kits → Keys one, else ''.
+ * A key's value: the wp-config.php constant, else InsightWeb's own, else the old Kits → Keys one, else ''. The old
+ * place is read directly, also when Animal Writes Core is off, so a key saved there keeps working until it is copied.
  *
  * @param string $name Constant name, e.g. AW_CLARITY_TOKEN.
  */
 function insightweb_key( string $name ): string {
-	switch ( insightweb_key_where( $name ) ) {
-		case 'config':
-			return insightweb_key_constant( $name );
-		case 'insightweb':
-			return insightweb_key_saved( INSIGHTWEB_KEYS_OPTION, $name );
-		case 'old':
-			return insightweb_key_saved( INSIGHTWEB_KEYS_OLD_OPTION, $name );
-	}
-	return '';
+	return insightweb_key_found( $name )[1];
 }
 
 /**
@@ -124,7 +135,8 @@ function insightweb_keys_sanitize( $value ): array {
 		if ( in_array( $name, $clear, true ) ) {
 			continue;
 		}
-		$v = mb_substr( (string) preg_replace( '/\s+/', '', sanitize_text_field( (string) ( $value[ $name ] ?? '' ) ) ), 0, 512 );
+		$in = $value[ $name ] ?? '';
+		$v  = is_scalar( $in ) ? mb_substr( (string) preg_replace( '/\s+/', '', sanitize_text_field( (string) $in ) ), 0, 512 ) : '';
 		if ( '' !== $v ) {
 			$out[ $name ] = $v;
 		} elseif ( isset( $saved[ $name ] ) && '' !== (string) $saved[ $name ] ) {
@@ -178,7 +190,7 @@ add_filter(
 add_filter(
 	'kits_service_key',
 	function ( $value, $name ) {
-		return isset( insightweb_key_fields()[ (string) $name ] ) ? insightweb_key( (string) $name ) : $value;
+		return in_array( (string) $name, INSIGHTWEB_KEY_NAMES, true ) ? insightweb_key( (string) $name ) : $value;
 	},
 	10,
 	2

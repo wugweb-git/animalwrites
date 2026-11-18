@@ -51,18 +51,26 @@ global $wpdb;
 $insightweb_tables = array_map( fn( $t ) => $wpdb->prefix . 'aw_si_' . $t, array( 'kw_pages', 'obs', 'rising', 'links', 'visits' ) );
 
 // The service keys go out of the database before the backup reads the insightweb_… options, so no key value reaches
-// the file; they are put back as they were if the backup fails (nothing is deleted then).
+// the file. They are put back as they were if the backup fails (nothing is deleted then), also when the backup dies
+// on a fatal error or a time limit (the shutdown function below, cleared once the backup is written).
 $insightweb_keys = get_option( 'insightweb_keys', null );
+if ( null !== $insightweb_keys ) {
+	$GLOBALS['insightweb_keys_restore'] = $insightweb_keys;
+	register_shutdown_function(
+		function () {
+			if ( isset( $GLOBALS['insightweb_keys_restore'] ) && false === get_option( 'insightweb_keys' ) ) {
+				add_option( 'insightweb_keys', $GLOBALS['insightweb_keys_restore'], '', false );
+			}
+		}
+	);
+}
 delete_option( 'insightweb_keys' );
 
 require_once __DIR__ . '/includes/uninstall-backup.php';
 if ( ! insightweb_uninstall_backup( 'insightweb', __DIR__ . '/insightweb.php', array( 'aw_seo_settings' ), array( 'aw_si_', 'insightweb_' ), $insightweb_tables ) ) {
-	if ( null !== $insightweb_keys ) {
-		add_option( 'insightweb_keys', $insightweb_keys, '', false );
-	}
-	return; // No backup, no delete (the reason is in the error log).
+	return; // No backup, no delete (the reason is in the error log); the shutdown function puts the keys back.
 }
-unset( $insightweb_keys );
+unset( $insightweb_keys, $GLOBALS['insightweb_keys_restore'] ); // Backup written: the keys stay deleted.
 
 foreach ( $insightweb_tables as $insightweb_table ) {
 	$wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', $insightweb_table ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.DirectDatabaseQuery.SchemaChange -- fixed table names.

@@ -27,16 +27,6 @@ function aw_keys_list(): array {
 }
 
 /**
- * A key's value saved under Kits → Keys, else ''.
- *
- * @param string $name Constant name.
- */
-function aw_key_saved( string $name ): string {
-	$saved = get_option( AW_KEYS_OPTION, array() );
-	return is_array( $saved ) ? (string) ( $saved[ $name ] ?? '' ) : '';
-}
-
-/**
  * A key's value: the wp-config.php constant if set, else what the plugin that owns it answers (kits_service_key: its
  * own setting, then the value saved here), else the one saved under Kits → Keys, else ''.
  *
@@ -47,7 +37,11 @@ function aw_key( string $name ): string {
 		return (string) constant( $name );
 	}
 	$owned = apply_filters( 'kits_service_key', null, $name );
-	return is_string( $owned ) ? $owned : aw_key_saved( $name );
+	if ( is_string( $owned ) ) {
+		return $owned;
+	}
+	$saved = get_option( AW_KEYS_OPTION, array() );
+	return is_array( $saved ) ? (string) ( $saved[ $name ] ?? '' ) : '';
 }
 
 /**
@@ -59,8 +53,10 @@ function aw_key_where( string $name ): string {
 	if ( defined( $name ) && '' !== (string) constant( $name ) ) {
 		return 'config';
 	}
-	$used = aw_key( $name );
-	if ( '' !== $used && aw_key_saved( $name ) !== $used ) {
+	$used  = aw_key( $name );
+	$saved = get_option( AW_KEYS_OPTION, array() );
+	$here  = is_array( $saved ) ? (string) ( $saved[ $name ] ?? '' ) : '';
+	if ( '' !== $used && $here !== $used ) {
 		return 'plugin';
 	}
 	return '' !== $used ? 'admin' : '';
