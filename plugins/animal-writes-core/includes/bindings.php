@@ -190,9 +190,10 @@ add_filter(
 			'deadline'          => 'html',
 			'file_url'          => 'url',
 		);
+		$cb = fn( $post_id, $k ) => aw_binding_value( $k, $post_id );
 		foreach ( $types as $key => $type ) {
 			$fields[ $key ] = array(
-				'callback' => fn( $post_id, $k ) => aw_binding_value( $k, $post_id ),
+				'callback' => $cb,
 				'type'     => $type,
 			);
 		}
@@ -222,6 +223,10 @@ add_action(
 	}
 );
 
+/** Organisation contact buttons: binding key => the action they name (data-act), and the action => its button word. */
+const ANIMAL_WRITES_CONTACT_ACTS  = array( 'phone_url' => 'phone', 'whatsapp_url' => 'whatsapp', 'email_url' => 'email', 'website' => 'website' );
+const ANIMAL_WRITES_CONTACT_NAMES = array( 'phone' => 'Call', 'whatsapp' => 'WhatsApp', 'email' => 'Email', 'website' => 'Website' );
+
 /*
  * Organisation contact buttons with no value stay in place, greyed out and not a link, so every profile has the same
  * row (owner, 15 Oct 2026). Kits Core asks what an empty bound block shows (kits_post_field_empty).
@@ -229,9 +234,9 @@ add_action(
 add_filter(
 	'kits_post_field_empty',
 	function ( $out, $content, $block, $key, $post_id ) {
-		$act = array( 'phone_url' => 'phone', 'whatsapp_url' => 'whatsapp', 'email_url' => 'email', 'website' => 'website' )[ $key ] ?? '';
+		$act = ANIMAL_WRITES_CONTACT_ACTS[ $key ] ?? '';
 		if ( $act && 'core/button' === ( $block['blockName'] ?? '' ) && 'aw_listing' === get_post_type( $post_id ) ) {
-			$name = array( 'phone' => 'Call', 'whatsapp' => 'WhatsApp', 'email' => 'Email', 'website' => 'Website' )[ $act ];
+			$name = ANIMAL_WRITES_CONTACT_NAMES[ $act ];
 			return preg_replace( array( '#<a\b[^>]*>#', '#</a>#' ), array( '<span class="wp-block-button__link wp-element-button" role="link" aria-disabled="true" aria-label="' . esc_attr( $name . ': not available yet' ) . '" title="Not available yet" data-act="' . $act . '">', '</span>' ), $content, 1 );
 		}
 		return $out;
@@ -251,9 +256,10 @@ add_filter(
 		if ( ! $bindings || 'core/button' !== ( $block['blockName'] ?? '' ) || 'aw_listing' !== get_post_type( kits_post_field_post_id( $instance ) ) ) {
 			return $content;
 		}
+		$sources = kits_post_field_sources(); // the same sources as the greyed rule, so both behave alike
 		foreach ( $bindings as $binding ) {
-			$act = array( 'phone_url' => 'phone', 'whatsapp_url' => 'whatsapp', 'email_url' => 'email', 'website' => 'website' )[ $binding['args']['key'] ?? '' ] ?? '';
-			if ( $act && ( $binding['source'] ?? '' ) === 'animal-writes/field' ) {
+			$act = ANIMAL_WRITES_CONTACT_ACTS[ $binding['args']['key'] ?? '' ] ?? '';
+			if ( $act && in_array( $binding['source'] ?? '', $sources, true ) ) {
 				return preg_replace( '#<a\b#', '<a data-act="' . $act . '"', $content, 1 );
 			}
 		}
@@ -275,8 +281,7 @@ function aw_profile_actions_note( $content ) {
 	if ( false === strpos( $content, 'aw-profile-actions' ) || ! is_singular( 'aw_listing' ) || ! preg_match_all( '#aria-disabled="true"[^>]*data-act="([a-z]+)"#', $content, $m ) ) {
 		return $content;
 	}
-	$names = array( 'phone' => 'Call', 'whatsapp' => 'WhatsApp', 'email' => 'Email', 'website' => 'Website' );
-	$list  = implode( ', ', array_map( fn( $a ) => $names[ $a ] ?? $a, $m[1] ) );
+	$list  = implode( ', ', array_map( fn( $a ) => ANIMAL_WRITES_CONTACT_NAMES[ $a ] ?? $a, $m[1] ) );
 	$id    = (int) get_queried_object_id();
 	$field = 1 === count( $m[1] ) ? ( array( 'phone' => 'phone', 'email' => 'email' )[ $m[1][0] ] ?? '' ) : ''; // one missing: the form names it
 	return $content . '<p class="aw-profile-actions-na"><span>' . esc_html( 'Not available yet: ' . $list ) . '</span>'

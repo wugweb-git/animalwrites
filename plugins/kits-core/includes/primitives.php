@@ -301,17 +301,17 @@ function kits_icon( $name, $class = '' ) {
  *
  * @param string|int $when  Any date strtotime() reads (Y-m-d, a full timestamp string), Ymd (the SCF date picker's
  *                          stored value) or a Unix time.
- * @param string     $fmt   Display format ('' = the site's date format).
+ * @param string|null $fmt  Display format (null = the site's date format).
  * @param string     $class Optional extra classes on the wrapper.
  * @return string '' when the date cannot be read.
  */
-function kits_date( $when, $fmt = '', $class = '' ) {
+function kits_date( $when, $fmt = null, $class = '' ) {
 	$when = preg_match( '/^\d{8}$/', (string) $when ) ? substr( $when, 0, 4 ) . '-' . substr( $when, 4, 2 ) . '-' . substr( $when, 6, 2 ) : $when;
 	$ts   = is_numeric( $when ) ? (int) $when : strtotime( (string) $when );
 	if ( ! $ts ) {
 		return '';
 	}
-	$fmt = '' !== (string) $fmt ? (string) $fmt : (string) get_option( 'date_format' );
+	$fmt = null === $fmt ? (string) get_option( 'date_format' ) : (string) $fmt;
 	return '<span class="kit-date' . ( '' !== $class ? ' ' . esc_attr( $class ) : '' ) . '">' . kits_icon( 'calendar' ) . '<time datetime="' . esc_attr( wp_date( 'Y-m-d', $ts ) ) . '">' . esc_html( wp_date( $fmt, $ts ) ) . '</time></span>';
 }
 

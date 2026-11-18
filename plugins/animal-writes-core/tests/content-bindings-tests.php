@@ -41,7 +41,11 @@ function apply_filters( $hook, $value, ...$rest ) {
 	return $value;
 }
 function do_action( $hook ) {
+	$GLOBALS['t_did'][ $hook ] = 1;
 	apply_filters( $hook, null );
+}
+function did_action( $hook ) {
+	return $GLOBALS['t_did'][ $hook ] ?? 0;
 }
 function esc_attr( $s ) {
 	return htmlspecialchars( (string) $s, ENT_QUOTES, 'UTF-8' );
@@ -175,5 +179,18 @@ t_check(
 	'listing: filled Email button gets data-act'
 );
 t_check( '' === $render( $btn, $bound( 'animal-writes/field', 'website', 'core/button' ), $block ), 'not a listing: empty button left out' );
+t_check(
+	'<div class="wp-block-button"><span class="wp-block-button__link wp-element-button" role="link" aria-disabled="true" aria-label="Website: not available yet" title="Not available yet" data-act="website">Website</span></div>' === $render( $btn, $bound( 'kits/post-field', 'website', 'core/button' ), $lb )
+		&& '<div class="wp-block-button"><a data-act="email" class="wp-block-button__link wp-element-button" href="#">Website</a></div>' === $render( $btn, $bound( 'kits/post-field', 'email_url', 'core/button' ), $lb ),
+	'listing through kits/post-field: greyed when empty, data-act when filled'
+);
+
+// The html key (the deadline's date component) keeps its markup and loses scripts.
+function aw_retention_state() {
+	return 'open';
+}
+$GLOBALS['t_meta'][9] = array( 'aw_deadline' => '2026-12-01' );
+$dl                   = $GLOBALS['t_sources']['kits/post-field']['get_value_callback']( array( 'key' => 'deadline' ), new WP_Block( array( 'postId' => 9 ) ) );
+t_check( 'Apply by <span class="kit-date aw-date"><span class="kit-ico kit-ico--calendar" aria-hidden="true"></span><time datetime="2026-12-01">1 Dec 2026</time></span>' === $dl, 'deadline: html key keeps the date component' );
 
 exit( $GLOBALS['t_fail'] );
