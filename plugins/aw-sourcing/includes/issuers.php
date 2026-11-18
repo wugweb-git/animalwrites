@@ -12,6 +12,9 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+if ( function_exists( 'aw_issuers' ) ) { // loaded before the dependency check, so aw-sourcing.php may reach this twice (from Core, and as an active plugin, by another path)
+	return;
+}
 
 /** Issuer names: slug => name (the former list's values). An editor can add one from the item's Issuer box. */
 function aw_issuers() {

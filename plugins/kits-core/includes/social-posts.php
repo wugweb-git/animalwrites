@@ -74,9 +74,15 @@ add_action(
 );
 
 add_action(
-	'admin_menu',
-	fn() => add_submenu_page( aw_core_menu_parent(), 'Modules', 'Modules', aw_core_screen_cap( 'aw-modules' ), 'aw-modules', 'aw_modules_screen' ),
-	aw_core_menu_priority( 'aw-modules' ) // order: aw_core_screens() (admin-home.php)
+	'plugins_loaded', // the menu position reads the site's screens (kits_site_screens), which Animal Writes Core registers after Kits Core has loaded this file
+	function () {
+		add_action(
+			'admin_menu',
+			fn() => add_submenu_page( aw_core_menu_parent(), 'Modules', 'Modules', aw_core_screen_cap( 'aw-modules' ), 'aw-modules', 'aw_modules_screen' ),
+			aw_core_menu_priority( 'aw-modules' ) // order: aw_core_screens() (admin-home.php)
+		);
+	},
+	20
 );
 
 /** Section text. */
