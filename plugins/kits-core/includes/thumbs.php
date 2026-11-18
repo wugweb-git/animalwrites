@@ -16,6 +16,9 @@
  * aw_thumb_rebuild event and the REST route are unchanged.
  *
  * @package kits-core
+ *
+ * SITE MODULE (Animal Writes only): not part of the generic Kits Core product. It stays in this plugin for now because card-images.php, tools/media-reuse.php and category-images.php call it and it hooks the Home sections at plugin load;
+ * moving it to the theme's site layer (assets/site/) would break that load order. Listed in docs/awcore-retirement.md §6.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

@@ -2,7 +2,7 @@
 /**
  * Admin layer tests that need no WordPress (owner rule: no local WordPress or MySQL). The admin layer moved from
  * Animal Writes Core to Kits Core on 18 Nov 2026 (includes/admin-layer/); these check that, with Animal Writes' values
- * (animal-writes-core/includes/admin-config.php), what it gives is what Animal Writes Core gave: the menu order, the
+ * (the site layer's assets/site/admin.php), what it gives is what Animal Writes Core gave: the menu order, the
  * site's screens and their menu positions, the hidden upsell links, comments off, and the value parsers (campaign
  * metrics, district helplines, issuer short names). The Deploy check also loads every screen in a real WordPress
  * (tools/ci/smoke.sh).
@@ -142,7 +142,6 @@ require $dir . 'site-screens.php';
 require $dir . 'cli-commands.php';
 require $dir . 'edit-fields.php';
 require $dir . 'site-options.php';
-require $dir . 'compat.php';
 
 $fails = 0;
 $count = 0;
@@ -234,8 +233,8 @@ $screens = kits_site_screens( true );
 kits_t( array( 'animal-writes', 'aw-dates', 'aw-site-check', 'aw-elsewhere', 'aw-modules', 'aw-edit-screens' ) === array_keys( $screens ), 'site screens in the same order, without the retired Keys' );
 kits_t( array( 20, 21, 22, 23, 24, 25, 29 ) === array_map( 'kits_site_menu_priority', array( 'animal-writes', 'aw-dates', 'aw-site-check', 'aw-elsewhere', 'aw-modules', 'aw-edit-screens', 'unknown' ) ), 'menu positions 20 to 25, unknown 29' );
 kits_t( 'manage_options' === kits_site_screen_cap( 'aw-modules' ) && 'edit_pages' === kits_site_screen_cap( 'aw-elsewhere' ) && 'edit_others_posts' === kits_site_screen_cap( 'aw-dates' ), 'capabilities as before' );
-kits_t( 'kits' === aw_core_menu_parent() && 'animal-writes' === AW_CORE_MENU, 'older names: the menu parent is Kits' );
-kits_t( aw_core_screens( true ) === $screens && 24 === aw_core_menu_priority( 'aw-modules' ), 'older names: the same screens and positions' );
+kits_t( 'kits' === kits_site_menu_parent(), 'the menu parent is Kits' );
+kits_t( 24 === kits_site_menu_priority( 'aw-modules' ), 'the Modules screen position' );
 
 /* ---------- Tidy: labels and the hidden links ---------- */
 
@@ -243,7 +242,7 @@ kits_t( 'To review' === kits_admin_label( 'To review <span class="awaiting-mod c
 kits_t( kits_admin_label_in( 'Unlock PRO now', array( 'Unlock PRO' ) ) && ! kits_admin_label_in( 'Dashboard', array( 'Unlock PRO' ) ), 'label starts with a hidden one' );
 kits_t( array( 'Available Tools', 'Server-Timing', 'Scheduled Actions' ) === apply_filters( 'kits_admin_hide', KITS_ADMIN_HIDE )['Tools'], 'Tools: the same three links hidden' );
 kits_t( array( 'SCF' ) === KITS_ADMIN_HIDE_TOP && array( 'Rank Math SEO', 'UpdraftPlus' ) === KITS_ADMIN_BAR_HIDE, 'SCF menu and two admin-bar shortcuts hidden' );
-kits_t( ' <span class="awaiting-mod count-2"><span class="pending-count">2</span></span>' === aw_menu_count( 2 ) && '' === kits_menu_count( 0 ), 'menu count bubble' );
+kits_t( ' <span class="awaiting-mod count-2"><span class="pending-count">2</span></span>' === kits_menu_count( 2 ) && '' === kits_menu_count( 0 ), 'menu count bubble' );
 
 /* ---------- Edit fields: campaign metrics ---------- */
 
@@ -267,7 +266,7 @@ kits_t( kits_site_options_helplines_clean( "123 | | 0100\n" ) === $h && 1 === co
 kits_t( kits_site_options_helplines_clean( '' ) === $h, 'helplines: an empty box keeps the saved list' );
 kits_t( array( 'awbi' => 'AWBI' ) === kits_site_options_short_clean( "awbi = AWBI\nbad line\n = x" ), 'issuer short names: slug = short' );
 kits_t( array( 3, 12 ) === kits_site_options_ids( '3, 12, 3, x' ), 'sample listing IDs' );
-kits_t( isset( KITS_FOLLOW_EXTRA['aw_follow_reddit'] ) && AW_FOLLOW_EXTRA === KITS_FOLLOW_EXTRA, 'Follow us accounts, older constant too' );
+kits_t( isset( KITS_FOLLOW_EXTRA['aw_follow_reddit'] ), 'Follow us accounts' );
 kits_t( array( 'aw_cdn', 'aw_modules_social', 'aw_modules_forms' ) === array_keys( kits_site_reset_sections() ), 'Reset this section: the Kits sections' );
 
 /* ---------- Help → Docs → Commands, read from WP-CLI's registry ---------- */

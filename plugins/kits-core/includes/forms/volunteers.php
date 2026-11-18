@@ -17,6 +17,9 @@
  * slugs are unchanged, and the old function names still work (back-compat wrappers).
  *
  * @package kits-core
+ *
+ * SITE MODULE (Animal Writes only): not part of the generic Kits Core product. It stays in this plugin for now because the form pages, Fluent Forms field code and compat.php in Kits Core call it straight at plugin load;
+ * moving it to the theme's site layer (assets/site/) would break that load order. Listed in docs/awcore-retirement.md §6.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

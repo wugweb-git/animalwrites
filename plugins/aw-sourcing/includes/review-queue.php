@@ -101,7 +101,7 @@ unset( $aw_review_hook );
 add_action(
 	'admin_menu',
 	function () {
-		add_submenu_page( AW_SRC_MENU, 'To review', 'To review' . ( function_exists( 'aw_menu_count' ) ? aw_menu_count( aw_review_count() ) : '' ), AW_REVIEW_CAP, 'aw-review', 'aw_review_page' );
+		add_submenu_page( AW_SRC_MENU, 'To review', 'To review' . ( function_exists( 'kits_menu_count' ) ? kits_menu_count( aw_review_count() ) : '' ), AW_REVIEW_CAP, 'aw-review', 'aw_review_page' );
 	},
 	10 // after the menu and its Overview (admin-menu.php, 9)
 );

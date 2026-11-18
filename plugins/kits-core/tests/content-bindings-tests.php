@@ -7,7 +7,7 @@
  *
  * Usage: php plugins/kits-core/tests/content-bindings-tests.php
  *
- * @package animal-writes-core
+ * @package kits-core
  */
 
 if ( 'cli' !== PHP_SAPI ) {

@@ -15,9 +15,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // This site's campaign pages, Home sections and item heads (moved from Animal Writes Core, 19 Nov 2026; function, block,
-// shortcode, post-type and option names unchanged). The campaign engines (links, short links, letters, press, social
-// posts) are Kits Core's; the campaign stylesheets and scripts are in campaign/.
+// shortcode, post-type and option names unchanged). The campaign link engine and the letter statistics are Kits Core's; the campaign stylesheets and scripts are in campaign/.
 if ( defined( 'KITS_CORE_LOADED' ) ) { // these files call Kits Core's functions at load: without Kits Core (deactivated, or not yet active) the site loads without them, and does not fatal
+	// Site modules moved here from Kits Core (19 Nov 2026), in the order Kits Core loaded them: the short links (/lab,
+	// /diwali), press coverage, social posts, the sponsored blocks (dormant) and the Library document viewer.
+	foreach ( array( 'campaign-short', 'press', 'social-posts', 'sponsored-blocks', 'library-documents' ) as $kits_site_module ) {
+		require_once __DIR__ . '/includes/' . $kits_site_module . '.php';
+	}
+	unset( $kits_site_module );
 	foreach ( array( 'campaigns', 'campaign-tools', 'campaign-record', 'item-head', 'home' ) as $kits_site_file ) {
 		require_once __DIR__ . '/includes/' . $kits_site_file . '.php';
 	}

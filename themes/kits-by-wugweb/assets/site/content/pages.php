@@ -394,15 +394,15 @@ add_shortcode(
 add_action(
 	'admin_menu',
 	function () {
-		if ( AW_CORE_MENU === aw_core_menu_parent() ) {
-			add_submenu_page( AW_CORE_MENU, 'Contact links', 'Contact links', aw_core_screen_cap( 'aw-elsewhere' ), 'aw-elsewhere', 'aw_elsewhere_screen' );
+		if ( 'animal-writes' === kits_site_menu_parent() ) {
+			add_submenu_page( 'animal-writes', 'Contact links', 'Contact links', kits_site_screen_cap( 'aw-elsewhere' ), 'aw-elsewhere', 'aw_elsewhere_screen' );
 		}
 	},
-	aw_core_menu_priority( 'aw-elsewhere' ) // order: aw_core_screens() (admin-home.php)
+	kits_site_menu_priority( 'aw-elsewhere' ) // order: kits_site_screens() (admin-home.php)
 );
 /** Contact links: Kits → Theme Options → Socials (its own screen without Kits). The form posts to the screen it is on. */
 function aw_elsewhere_screen() {
-	if ( ! current_user_can( aw_core_screen_cap( 'aw-elsewhere' ) ) ) {
+	if ( ! current_user_can( kits_site_screen_cap( 'aw-elsewhere' ) ) ) {
 		return;
 	}
 	if ( isset( $_POST['aw_elsewhere'] ) && check_admin_referer( 'aw_elsewhere' ) ) {
@@ -418,8 +418,8 @@ function aw_elsewhere_screen() {
 	}
 	$rows = array_merge( aw_elsewhere_links(), array_fill( 0, 4, array() ) );
 	echo '<div class="wrap"><h1>Contact links</h1>';
-	aw_core_screen_nav( 'aw-elsewhere' );
-	echo '<p>Shown under "Elsewhere" on the <a href="' . esc_url( home_url( '/contact/' ) ) . '" target="_blank">Contact</a> page; the section stays hidden while this list is empty. Use the platform name as the label (for example Instagram).</p><form method="post" action="' . esc_url( admin_url( AW_CORE_MENU === aw_core_menu_parent() ? 'admin.php?page=aw-elsewhere' : 'admin.php?page=kits-options&kits_section=socials' ) ) . '">'; // Back to the same place after saving (Kits → Theme Options → Socials).
+	kits_site_screen_nav( 'aw-elsewhere' );
+	echo '<p>Shown under "Elsewhere" on the <a href="' . esc_url( home_url( '/contact/' ) ) . '" target="_blank">Contact</a> page; the section stays hidden while this list is empty. Use the platform name as the label (for example Instagram).</p><form method="post" action="' . esc_url( admin_url( 'animal-writes' === kits_site_menu_parent() ? 'admin.php?page=aw-elsewhere' : 'admin.php?page=kits-options&kits_section=socials' ) ) . '">'; // Back to the same place after saving (Kits → Theme Options → Socials).
 	wp_nonce_field( 'aw_elsewhere' );
 	$cells = array();
 	foreach ( $rows as $i => $r ) {

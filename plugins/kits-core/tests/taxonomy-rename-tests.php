@@ -6,7 +6,7 @@
  *
  * Run: php plugins/kits-core/tests/taxonomy-rename-tests.php
  *
- * @package animal-writes-core
+ * @package kits-core
  */
 
 define( 'ABSPATH', __DIR__ . '/' );

@@ -73,7 +73,6 @@ require_once KITS_CORE_DIR . 'includes/media-groups.php'; // Media group label f
 require_once KITS_CORE_DIR . 'includes/category-images.php'; // category and tag photos (term meta aw_category_image) and the category banner
 require_once KITS_CORE_DIR . 'includes/thumbs.php'; // card pictures never repeat: option aw_thumb_map, GET /aw/v1/thumb-dupes (the deploy gate)
 require_once KITS_CORE_DIR . 'includes/card-images.php'; // card images: the item's own picture, the category photo, the placard fallback
-require_once KITS_CORE_DIR . 'includes/library-documents.php'; // Library documents on the item's page: PDF viewer, preview, print button (moved from Core, 18 Nov 2026)
 require_once KITS_CORE_DIR . 'includes/media-webp.php'; // resized copies of JPEG and PNG uploads as WebP; Media → Make WebP with Undo
 require_once KITS_CORE_DIR . 'includes/tools/media-merge.php'; // Kits → Tools: Media → Duplicate files (one-off clean-up, Undo, never deletes)
 require_once KITS_CORE_DIR . 'includes/tools/media-reuse.php'; // Kits → Tools: Media → Reuse pictures (recycle, never delete)
@@ -107,15 +106,15 @@ require_once KITS_CORE_DIR . 'includes/admin-layer/cli-commands.php';
 require_once KITS_CORE_DIR . 'includes/admin-layer/edit-screens.php';
 require_once KITS_CORE_DIR . 'includes/admin-layer/edit-fields.php';
 require_once KITS_CORE_DIR . 'includes/admin-layer/site-options.php';
-require_once KITS_CORE_DIR . 'includes/admin-layer/compat.php'; // the older aw_ names, after the files that define what they wrap
 require_once KITS_CORE_DIR . 'includes/site-parts.php';
 require_once KITS_CORE_DIR . 'includes/fonts.php';
 require_once KITS_CORE_DIR . 'includes/backups.php'; // the daily database and code backup into ~/backups, its REST download and the UpdraftPlus alert (moved from Animal Writes Core, 18 Nov 2026)
 require_once KITS_CORE_DIR . 'includes/error-pages.php'; // the branded 500 and 503 drop-ins copied from dropins/ into wp-content (moved from Animal Writes Core, 18 Nov 2026)
-// Campaign, press and social engines (moved from Animal Writes Core, 19 Nov 2026; names and data unchanged): the campaign
-// link taxonomy, the short links (/lab, /diwali), the letter tool's statistics, press coverage, social posts and the
-// sponsored blocks. The campaign pages and Home themselves are the theme's site layer (assets/site/includes/).
-foreach ( array( 'campaign-links', 'campaign-short', 'campaign-letters', 'press', 'social-posts', 'sponsored-blocks' ) as $kits_engine_file ) {
+// Campaign engines (moved from Animal Writes Core, 19 Nov 2026; names and data unchanged): the campaign link taxonomy and
+// the letter tool's statistics (campaign-letters.php is a site module, see its header). The short links, press coverage,
+// social posts, sponsored blocks and the Library document viewer are the theme's site layer (assets/site/includes/), as
+// are the campaign pages and Home.
+foreach ( array( 'campaign-links', 'campaign-letters' ) as $kits_engine_file ) {
 	require_once KITS_CORE_DIR . 'includes/' . $kits_engine_file . '.php';
 }
 unset( $kits_engine_file );
