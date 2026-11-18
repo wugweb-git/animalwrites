@@ -19,7 +19,7 @@
  *   - Home and About: fixed titles. Everything else: "{Title} – Animal Writes".
  *   - Description: the excerpt, else the first real paragraph; listings without one get a line of their facts.
  *
- *   - Directory places (18 Nov 2026, option B): "Animal NGOs and Helpline Numbers in {District} {State} – Animal Writes"
+ *   - Directory places (18 Nov 2026, option B): "Animal NGOs and Helpline Numbers in {District}, {State} – Animal Writes"
  *     (then without the site name, then without the state) where the district has a listing with a phone or an official
  *     number; "Animal Welfare NGOs and Helpline Numbers in {State}" where any listing in the state has a phone; where the
  *     name is too long for these, "Animal Helpline Numbers in …" (the earlier titles) is the last fallback. The earlier
@@ -305,8 +305,8 @@ function aw_seo_list_title() {
 			return aw_seo_fit( array( AW_HUB_TITLES['aw_listing'], 'Animal Welfare NGO Directory of India' ), 60 - mb_strlen( aw_seo_page_suffix() ) );
 		}
 		if ( $place->parent ) { // within 60 characters: the longest of these that fits
-			$where = $place->name . ' ' . aw_place_parent_state( $place )->name;
-			// "Animal NGOs and Helpline Numbers in {District} {State} – Animal Writes" where the district has a number of its own
+			$where = $place->name . ', ' . aw_place_parent_state( $place )->name;
+			// "Animal NGOs and Helpline Numbers in {District}, {State} – Animal Writes" where the district has a number of its own
 			// (18 Nov 2026: option B); searched as "animal helpline number {city}" and "animal ngo in {district}".
 			// "Animal Helpline Numbers in …" (1 Nov 2026: option A) stays as the last fallback for long names.
 			$help  = aw_seo_place_has_helpline( $place ) ? array( aw_seo_branded( 'Animal NGOs and Helpline Numbers in ' . $where ), 'Animal NGOs and Helpline Numbers in ' . $where, aw_seo_branded( 'Animal NGOs and Helpline Numbers in ' . $place->name ), 'Animal NGOs and Helpline Numbers in ' . $place->name, aw_seo_branded( 'Animal Helpline Numbers in ' . $where ), 'Animal Helpline Numbers in ' . $where, aw_seo_branded( 'Animal Helpline Numbers in ' . $place->name ), 'Animal Helpline Numbers in ' . $place->name ) : array();
