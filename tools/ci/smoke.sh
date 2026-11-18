@@ -30,6 +30,9 @@ wp plugin install seo-by-rank-math --version=1.0.280 --activate --quiet
 wp plugin activate aw-seo-extras --quiet
 # Mailweb: all site mail (inbox, webhook /wp-json/mailweb/v1/mail-in, SMTP sending, daily limit, signatures).
 wp plugin activate mailweb --quiet
+# InsightWeb and SourceWeb: active on the live site; animal-writes-core used to load them from their folders (retired 19 Nov 2026).
+wp plugin activate insightweb --quiet
+wp plugin activate aw-sourcing --quiet
 # One item of each kind.
 wp post create --post_type=page --post_title="Contact us" --post_name=contact --post_status=publish --quiet
 wp post create --post_type=page --post_title="Home" --post_name=home --post_status=publish --quiet
