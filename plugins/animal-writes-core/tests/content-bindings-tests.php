@@ -113,6 +113,7 @@ class WP_Block {
 $root = dirname( __DIR__, 2 );
 require $root . '/kits-core/includes/primitives.php';
 require $root . '/kits-core/includes/bindings.php';
+require $root . '/animal-writes-core/includes/taxonomy-rename.php'; // KITS_CAMPAIGN_LINK / KITS_MEDIA_GROUP, which systems.php reads (loaded first in animal-writes-core.php too)
 require $root . '/animal-writes-core/includes/systems.php';
 require $root . '/animal-writes-core/includes/bindings.php';
 define( 'AW_CORE_DIR', $root . '/animal-writes-core/' );

@@ -1,7 +1,7 @@
 === Kits Core ===
 Contributors: wugweb
 Tags: forms, spam protection, share, analytics, admin
-Requires at least: 6.5
+Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 8.0
 Stable tag: 1.0.0

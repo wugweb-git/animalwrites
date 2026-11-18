@@ -19,9 +19,10 @@
  *   - Home and About: fixed titles. Everything else: "{Title} – Animal Writes".
  *   - Description: the excerpt, else the first real paragraph; listings without one get a line of their facts.
  *
- *   - Directory places (owner, 1 Nov 2026, option A): "Animal Helpline Numbers in {District} {State} – Animal Writes" (then
- *     without the site name, then without the state) where the district has a listing with a phone or an official number;
- *     "Animal Helpline Numbers in {State} – Animal Writes" where any listing in the state has a phone; the earlier
+ *   - Directory places (18 Nov 2026, option B): "Animal NGOs and Helpline Numbers in {District}, {State} – Animal Writes"
+ *     (then without the site name, then without the state) where the district has a listing with a phone or an official
+ *     number; "Animal Welfare NGOs and Helpline Numbers in {State}" where any listing in the state has a phone; where the
+ *     name is too long for these, "Animal Helpline Numbers in …" (the earlier titles) is the last fallback. The earlier
  *     "Contact Numbers" and "Animal Welfare …" titles stay for places without a number. District × type pages are unchanged.
  * Lists (section hub Pages, Directory places and type pages, filtered lists, archives) change with their contents and
  * page number, which Rank Math's templates cannot express: they are built here at run time, through Rank Math's
@@ -304,10 +305,11 @@ function aw_seo_list_title() {
 			return aw_seo_fit( array( AW_HUB_TITLES['aw_listing'], 'Animal Welfare NGO Directory of India' ), 60 - mb_strlen( aw_seo_page_suffix() ) );
 		}
 		if ( $place->parent ) { // within 60 characters: the longest of these that fits
-			$where = $place->name . ' ' . aw_place_parent_state( $place )->name;
-			// "Animal Helpline Numbers in {District} {State} – Animal Writes" where the district has a number of its own
-			// (owner, 1 Nov 2026: option A); searched as "animal helpline number {city}" (449 queries, 28 days to 31 Oct).
-			$help  = aw_seo_place_has_helpline( $place ) ? array( aw_seo_branded( 'Animal Helpline Numbers in ' . $where ), 'Animal Helpline Numbers in ' . $where, aw_seo_branded( 'Animal Helpline Numbers in ' . $place->name ), 'Animal Helpline Numbers in ' . $place->name ) : array();
+			$where = $place->name . ', ' . aw_place_parent_state( $place )->name;
+			// "Animal NGOs and Helpline Numbers in {District}, {State} – Animal Writes" where the district has a number of its own
+			// (18 Nov 2026: option B); searched as "animal helpline number {city}" and "animal ngo in {district}".
+			// "Animal Helpline Numbers in …" (1 Nov 2026: option A) stays as the last fallback for long names.
+			$help  = aw_seo_place_has_helpline( $place ) ? array( aw_seo_branded( 'Animal NGOs and Helpline Numbers in ' . $where ), 'Animal NGOs and Helpline Numbers in ' . $where, aw_seo_branded( 'Animal NGOs and Helpline Numbers in ' . $place->name ), 'Animal NGOs and Helpline Numbers in ' . $place->name, aw_seo_branded( 'Animal Helpline Numbers in ' . $where ), 'Animal Helpline Numbers in ' . $where, aw_seo_branded( 'Animal Helpline Numbers in ' . $place->name ), 'Animal Helpline Numbers in ' . $place->name ) : array();
 			$phone = aw_seo_has_numbers( $place ) ? array( 'Animal Rescue and NGO Contact Numbers in ' . $where, 'Animal Rescue and NGO Contact Numbers in ' . $place->name ) : array(); // searched as "animal rescue {district} contact number"
 			return aw_seo_fit(
 				array_merge(
@@ -330,8 +332,10 @@ function aw_seo_list_title() {
 		$in    = ' in ' . $place->name;
 		$more  = count( $types ) > 2 ? ' and More' : '';
 		$try   = array();
-		if ( aw_seo_place_has_helpline( $place ) ) { // owner, 1 Nov 2026 (option A): a state with any listing that has a phone
-			$try[] = aw_seo_branded( 'Animal Helpline Numbers' . $in );
+		if ( aw_seo_place_has_helpline( $place ) ) { // 18 Nov 2026 (option B): a state with any listing that has a phone
+			$try[] = aw_seo_branded( 'Animal Welfare NGOs and Helpline Numbers' . $in );
+			$try[] = 'Animal Welfare NGOs and Helpline Numbers' . $in;
+			$try[] = aw_seo_branded( 'Animal Helpline Numbers' . $in ); // the earlier title, kept for long names (Arunachal Pradesh, Jammu and Kashmir)
 		}
 		if ( count( $types ) > 1 ) {
 			$try[] = 'Animal Welfare ' . $first . ' and ' . $types[1] . $in;
@@ -352,7 +356,7 @@ function aw_seo_list_title() {
 }
 
 /**
- * Whether a place's page can be titled "Animal Helpline Numbers in …": at least one of its listings has a phone number
+ * Whether a place's page can be titled "Animal NGOs and Helpline Numbers in …" (or "Animal Helpline Numbers in …"): at least one of its listings has a phone number
  * (stored counts, programmatic.php), or, for a district, an official number is kept for it (district-helplines.php).
  * Title only; the district helpline block has its own test.
  *
@@ -366,7 +370,7 @@ function aw_seo_place_has_helpline( $place ) {
 	return 'district' === $place->kind && function_exists( 'aw_district_official_numbers' ) && array() !== aw_district_official_numbers( $place->code );
 }
 
-/** DirectoryWeb asks whether a place can be called "Animal Helpline Numbers in …" (filter directoryweb_place_has_helpline). */
+/** DirectoryWeb asks whether a place can be called "Animal NGOs and Helpline Numbers in …" (filter directoryweb_place_has_helpline). */
 add_filter( 'directoryweb_place_has_helpline', fn( $has, $place ) => is_object( $place ) ? aw_seo_place_has_helpline( $place ) : $has, 10, 2 );
 
 /**

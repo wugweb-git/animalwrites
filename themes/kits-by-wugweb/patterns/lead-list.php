@@ -12,13 +12,13 @@
 <div class="wp-block-group alignfull kit-ed-news"><!-- wp:group {"className":"kit-sec-head","layout":{"type":"default"}} -->
 <div class="wp-block-group kit-sec-head"><!-- wp:group {"layout":{"type":"default"}} -->
 <div class="wp-block-group"><!-- wp:heading -->
-<h2 class="wp-block-heading">[Section heading]</h2>
+<h2 class="wp-block-heading"><?php esc_html_e( '[Section heading]', 'kits-by-wugweb' ); ?></h2>
 <!-- /wp:heading --></div>
 <!-- /wp:group -->
 
 <!-- wp:buttons -->
 <div class="wp-block-buttons"><!-- wp:button {"className":"is-style-kits-ghost kit-btn--sm"} -->
-<div class="wp-block-button is-style-kits-ghost kit-btn--sm"><a class="wp-block-button__link wp-element-button" href="#">[See all]</a></div>
+<div class="wp-block-button is-style-kits-ghost kit-btn--sm"><a class="wp-block-button__link wp-element-button" href="#"><?php esc_html_e( '[See all]', 'kits-by-wugweb' ); ?></a></div>
 <!-- /wp:button --></div>
 <!-- /wp:buttons --></div>
 <!-- /wp:group -->

@@ -57,6 +57,8 @@ EXCLUDE = [
     "package.json", "package-lock.json",
     "*.DS_Store", ".DS_Store",
     "tokens/*",                # token sources; theme.json + kit-tokens.css are the shipped output
+    "tools", "tools/*",        # dev scripts (the theme's build-tokens.py); not part of the product
+    "styles/animal-writes.json",  # the Animal Writes site's own style variation, a client brand: never in a Kits zip
     "assets/site", "assets/site/*",  # the site's own CSS (kits_site_component_style); never in a distributed zip
 ]
 
@@ -94,6 +96,18 @@ def neutralise_theme_accent(stage: pathlib.Path) -> int:
             path.write_text(new, encoding="utf-8")
             changed += 1
     return changed
+
+
+def neutral_sidebar_part(stage: pathlib.Path) -> bool:
+    """The STAGED theme's Sidebar part as an empty group (zip only, not the repo).
+
+    The repo's part holds the site's dormant Advanced Ads slot (advads/gblock); a theme on wp.org may not depend on a
+    plugin's block. Returns True when the part was changed."""
+    part = stage / "parts" / "sidebar.html"
+    if not part.is_file() or "wp:advads/" not in part.read_text(encoding="utf-8"):
+        return False
+    part.write_text('<!-- wp:group {"layout":{"type":"constrained"}} -->\n<div class="wp-block-group"></div>\n<!-- /wp:group -->\n', encoding="utf-8")
+    return True
 
 
 def set_theme_update_uri(style_css: pathlib.Path, uri: str | None) -> None:
@@ -137,6 +151,8 @@ def build(target: str, track: str, out_dir: pathlib.Path) -> pathlib.Path:
         set_theme_update_uri(stage / "style.css", spec["update_uri"] if track == "commercial" else None)
         n = neutralise_theme_accent(stage)
         print(f"  accent: {AW_ACCENT} -> {NEUTRAL_ACCENT} in {n} file(s) (repo keeps {AW_ACCENT})")
+        if neutral_sidebar_part(stage):
+            print("  parts/sidebar.html: the Advanced Ads block -> an empty group (repo keeps the dormant ad slot)")
 
     zip_name = f"{slug}-{track}.zip" if target == "theme" else f"{slug}.zip"
     zip_path = out_dir / zip_name

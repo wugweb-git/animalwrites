@@ -288,33 +288,30 @@ function kits_status_rows(): array {
 	return (array) apply_filters( 'kits_status_rows', $rows );
 }
 
-/** Kits → Home → Setup checklist: where to change things. */
-function kits_home_start(): void {
-	echo '<ul>';
-	foreach ( array(
-		array( 'Theme Options', 'admin.php?page=kits-options', 'identity, header, footer, layout, each kind of page, share bar' ),
-		array( 'Styles', 'site-editor.php?path=/wp_global_styles', 'colours, fonts, sizes, buttons' ),
-		array( 'Header & footer', 'site-editor.php?postType=wp_template_part', 'what they hold' ),
-		array( 'Templates', 'site-editor.php?postType=wp_template', 'the layout of each kind of page' ),
-		array( 'Navigation', 'site-editor.php?path=/navigation', 'menus' ),
-		array( 'Patterns', 'site-editor.php?path=/patterns', 'ready-made sections' ),
-		array( 'Fonts', 'font-library.php', 'install or remove fonts' ),
-	) as $l ) {
-		echo '<li><a href="' . esc_url( admin_url( $l[1] ) ) . '"><strong>' . esc_html( $l[0] ) . '</strong></a>: ' . esc_html( $l[2] ) . '</li>';
+/**
+ * Tools → Site Health → Info: a "Kits" section with the status rows (kits_status_rows: versions, limits and each Kits
+ * plugin's row). Core's own place for this (the debug_information filter), so it is also in Site Health's "Copy site
+ * info to clipboard". Values are plain text there; a row's fix sits after its value.
+ *
+ * @param array $info Site Health sections.
+ * @return array
+ */
+function kits_site_health_info( $info ) {
+	$fields = array();
+	foreach ( kits_status_rows() as $i => $r ) {
+		$value = trim( (string) preg_replace( '/\s+/', ' ', wp_strip_all_tags( str_replace( '<br>', ' — ', (string) $r[1] ) ) ) );
+		$fields[ 'kits_row_' . $i ] = array(
+			'label' => (string) $r[0],
+			'value' => '' === $value ? '—' : $value,
+		);
 	}
-	echo '</ul>';
+	$info['kits'] = array(
+		'label'  => __( 'Kits', 'kits-core' ),
+		'fields' => $fields,
+	);
+	return $info;
 }
-
-/** Kits → Home → Versions and limits: the System Status table (kits_status_rows). */
-function kits_home_status(): void {
-	echo '<p>' . esc_html( 'Anything shown in red needs a change on the server or in wp-config.php.' ) . '</p>';
-	echo '<table class="widefat striped"><caption class="screen-reader-text">' . esc_html( 'System status' ) . '</caption><tbody>';
-	foreach ( kits_status_rows() as $r ) {
-		$label = (string) $r[0];
-		echo '<tr><th scope="row">' . kits_product_icon_img( 'Theme version' === $label ? 'Kits' : $label ) . esc_html( $label ) . '</th><td>' . wp_kses_post( $r[1] ) . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- kits_product_icon_img() escapes its image address.
-	}
-	echo '</tbody></table>';
-}
+add_filter( 'debug_information', 'kits_site_health_info' );
 
 /* ---------- Import / Export ---------- */
 

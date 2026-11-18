@@ -1,7 +1,7 @@
 <?php
 /**
  * Place intros: a short paragraph on a Directory state or district page, under the page's fixed intro line
- * (aw_directory_intro(), which stays as it is and is still the meta and share description).
+ * (aw_directory_intro()). On place pages the meta and share description come from aw_seo_dir_description() (RankWeb).
  *
  * Kept in the option aw_place_intros, one entry per place, keyed by kind and LGD code, because states and districts
  * have separate code lists ("state:27", "district:519"; Delhi is a state page):

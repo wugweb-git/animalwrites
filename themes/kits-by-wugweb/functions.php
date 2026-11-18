@@ -57,12 +57,9 @@ function kits_theme_store_delete( string $key ): void {
 }
 
 /**
- * Theme supports. Block themes get most supports automatically; these are the extras.
+ * Editor styles. A block theme gets editor-styles, responsive-embeds and post-thumbnails from core on its own.
  */
 function kits_setup() {
-	add_theme_support( 'editor-styles' );
-	add_theme_support( 'responsive-embeds' );
-	add_theme_support( 'post-thumbnails' );
 	add_editor_style( 'assets/css/kits-v42.css' );
 	add_editor_style( 'assets/css/kit-tokens.css' );
 	add_editor_style( 'assets/css/kits.css' );
@@ -1084,14 +1081,24 @@ function kits_parts_bundle_status(): array {
 		$hit = 0;
 	}
 	$warn = $on && ( $fail > 0 || $hit > 0 || $count >= (int) ceil( $cap * 0.8 ) );
-	$text = $on ? sprintf( '%1$d page kinds · %2$d of %3$d other sets', $kinds, $count, $cap ) : 'Joined stylesheet is off: every component file loads on its own';
+	$text = $on ? sprintf(
+		/* translators: 1: page kinds with a joined file, 2: other joined sets, 3: the cap on other sets. */
+		__( '%1$d page kinds · %2$d of %3$d other sets', 'kits-by-wugweb' ),
+		$kinds,
+		$count,
+		$cap
+	) : __( 'Joined stylesheet is off: every component file loads on its own', 'kits-by-wugweb' );
 	$fix  = '';
 	if ( $warn && $fail ) {
-		$fix = 'uploads/kits-cache/parts/ could not be written on ' . wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $fail ) . ': pages load separate files. Make the folder writable; the next try is an hour after the failure. ';
+		/* translators: %s: date and time of the failed write. */
+		$fix = sprintf( __( 'uploads/kits-cache/parts/ could not be written on %s: pages load separate files. Make the folder writable; the next try is an hour after the failure.', 'kits-by-wugweb' ), wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $fail ) ) . ' ';
 	}
 	if ( $warn && ( $hit || $count >= (int) ceil( $cap * 0.8 ) ) ) {
-		$fix .= $hit ? 'The cap was reached on ' . wp_date( get_option( 'date_format' ), $hit ) . ': a page outside the page kinds with a new set of components loads separate files. ' : 'Near the cap: once it is reached, a page outside the page kinds with a new set of components loads separate files. ';
-		$fix .= 'Raise the cap in Appearance → Kits → Settings → Performance (Joined files cap), or empty uploads/kits-cache/parts/ (the files are made again as pages are visited).';
+		$fix .= ( $hit
+			/* translators: %s: date the cap was reached. */
+			? sprintf( __( 'The cap was reached on %s: a page outside the page kinds with a new set of components loads separate files.', 'kits-by-wugweb' ), wp_date( get_option( 'date_format' ), $hit ) )
+			: __( 'Near the cap: once it is reached, a page outside the page kinds with a new set of components loads separate files.', 'kits-by-wugweb' ) ) . ' ';
+		$fix .= __( 'Raise the cap in Kits → Settings → Performance (Joined files cap), or empty uploads/kits-cache/parts/ (the files are made again as pages are visited).', 'kits-by-wugweb' );
 	}
 	return compact( 'on', 'kinds', 'count', 'cap', 'warn', 'hit', 'fail', 'text', 'fix' );
 }
@@ -1104,7 +1111,7 @@ add_filter(
 			return $rows;
 		}
 		$s      = kits_parts_bundle_status();
-		$rows[] = array( 'Joined component files', function_exists( 'kits_status_cell' ) ? kits_status_cell( $s['text'], $s['fix'] ) : esc_html( trim( $s['text'] . ' ' . $s['fix'] ) ) );
+		$rows[] = array( __( 'Joined component files', 'kits-by-wugweb' ), function_exists( 'kits_status_cell' ) ? kits_status_cell( $s['text'], $s['fix'] ) : esc_html( trim( $s['text'] . ' ' . $s['fix'] ) ) );
 		return $rows;
 	}
 );

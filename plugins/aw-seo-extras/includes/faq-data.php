@@ -24,10 +24,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( function_exists( 'aw_faq_legal_question' ) ) {
-	return; // an older Animal Writes Core still has this half: it runs, and this copy stays out of its way.
-}
-
 /**
  * Whether the functions a group of questions reads exist (Animal Writes Core, DirectoryWeb, Kits Core).
  *
