@@ -1046,40 +1046,40 @@ function aw_social_card_html( array $d ): string {
 	$on       = isset( AW_SOCIAL_PLATFORMS[ $platform ] ) && 'other' !== $platform ? $platform : $link['platform']; // the saved platform, else the one the link shows
 	$label    = AW_SOCIAL_PLATFORMS[ $on ] ?? '';
 	$name     = '' !== $person ? $person : ( '' !== $handle ? $handle : $label );
-	$pic      = $poster ? wp_get_attachment_image( $poster, 'medium_large', false, array( 'class' => 'aw-social-img', 'loading' => 'lazy', 'decoding' => 'async' ) ) : '';
+	$pic      = $poster ? wp_get_attachment_image( $poster, 'medium_large', false, array( 'class' => 'kit-social-img', 'loading' => 'lazy', 'decoding' => 'async' ) ) : '';
 	$insta    = '' !== $pic && in_array( $on, array( 'instagram', 'facebook' ), true );
 	$reel     = 'video' === $format;
 	$logos    = array( 'x' => 'x-brand', 'instagram' => 'instagram', 'facebook' => 'facebook', 'linkedin' => 'linkedin', 'youtube' => 'youtube', 'bluesky' => 'bluesky', 'mastodon' => 'mastodon' );
-	$logo     = isset( $logos[ $on ] ) ? aw_i( $logos[ $on ], 'aw-social-logo' ) : '';
+	$logo     = isset( $logos[ $on ] ) ? aw_i( $logos[ $on ], 'kit-social-logo' ) : '';
 	$initial  = function_exists( 'mb_substr' ) ? mb_substr( ltrim( $name, '@' ), 0, 1 ) : substr( ltrim( $name, '@' ), 0, 1 );
-	$avatar   = '<span class="aw-social-avatar" aria-hidden="true">' . esc_html( strtoupper( $initial ) ) . '</span>';
+	$avatar   = '<span class="kit-social-avatar" aria-hidden="true">' . esc_html( strtoupper( $initial ) ) . '</span>';
 	$media    = '';
 	if ( 'youtube' === $link['platform'] && '' !== $link['video'] ) {
 		$box   = 'aw-social-embed-' . (int) $d['id'];
-		$media = '<div id="' . esc_attr( $box ) . '" class="aw-social-media" data-aw-social-embed="youtube" data-id="' . esc_attr( $link['video'] ) . '" data-title="' . esc_attr( $name ) . '"></div>';
+		$media = '<div id="' . esc_attr( $box ) . '" class="kit-social-media" data-aw-social-embed="youtube" data-id="' . esc_attr( $link['video'] ) . '" data-title="' . esc_attr( $name ) . '"></div>';
 		aw_social_embed_script();
 	}
 	$href = '' !== $link['url'] ? $link['url'] : $url;
 	// The one link: the name with the external arrow (as hub-blocks.php's press titles), a new tab, a 44px target.
 	$who_link = function ( string $text ) use ( $href ) {
-		$t = '<span class="aw-social-name-text">' . esc_html( $text ) . '</span>';
-		return '' !== $href ? '<a class="aw-social-name" href="' . esc_url( $href ) . '" target="_blank" rel="nofollow ugc noopener">' . $t . aw_i( 'arrow-up-right' ) . '<span class="screen-reader-text">' . esc_html( ' (opens in a new tab)' ) . '</span></a>' : '<span class="aw-social-name">' . $t . '</span>';
+		$t = '<span class="kit-social-name-text">' . esc_html( $text ) . '</span>';
+		return '' !== $href ? '<a class="kit-social-name" href="' . esc_url( $href ) . '" target="_blank" rel="nofollow ugc noopener">' . $t . aw_i( 'arrow-up-right' ) . '<span class="screen-reader-text">' . esc_html( ' (opens in a new tab)' ) . '</span></a>' : '<span class="kit-social-name">' . $t . '</span>';
 	};
-	$when = '<p class="kit-meta-row aw-social-date">' . ( $date && function_exists( 'aw_date' ) ? aw_date( $date . ' 12:00:00' ) : '' ) // the date always first in a meta row (owner)
+	$when = '<p class="kit-meta-row kit-social-date">' . ( $date && function_exists( 'aw_date' ) ? aw_date( $date . ' 12:00:00' ) : '' ) // the date always first in a meta row (owner)
 		. '<span class="kit-meta-item">' . esc_html( 'on ' . ( AW_SOCIAL_PLATFORMS[ $on ] ?? 'Other' ) ) . '</span></p>';
 	if ( $insta ) {
 		$tag  = '' !== $handle ? $handle : $name;
-		$img  = $reel && '' !== $href ? '<a class="aw-social-pic-link" href="' . esc_url( $href ) . '" target="_blank" rel="nofollow ugc noopener" tabindex="-1" aria-hidden="true">' . $pic . '</a>' : $pic;
-		$body = '<div class="aw-social-head">' . $avatar . '<p class="aw-social-who">' . $who_link( $tag ) . '</p>' . $logo . '</div>'
-			. '<figure class="aw-social-pic' . ( $reel ? ' aw-social-pic--reel' : '' ) . '">' . $img . ( $reel ? aw_i( 'play', 'aw-social-play' ) : '' ) . '</figure>'
-			. ( '' !== $summary ? '<p class="aw-social-text"><strong>' . esc_html( $tag ) . '</strong> ' . esc_html( $summary ) . '</p>' : '' );
+		$img  = $reel && '' !== $href ? '<a class="kit-social-pic-link" href="' . esc_url( $href ) . '" target="_blank" rel="nofollow ugc noopener" tabindex="-1" aria-hidden="true">' . $pic . '</a>' : $pic;
+		$body = '<div class="kit-social-head">' . $avatar . '<p class="kit-social-who">' . $who_link( $tag ) . '</p>' . $logo . '</div>'
+			. '<figure class="kit-social-pic' . ( $reel ? ' kit-social-pic--reel' : '' ) . '">' . $img . ( $reel ? aw_i( 'play', 'kit-social-play' ) : '' ) . '</figure>'
+			. ( '' !== $summary ? '<p class="kit-social-text"><strong>' . esc_html( $tag ) . '</strong> ' . esc_html( $summary ) . '</p>' : '' );
 	} else {
-		$body = '<div class="aw-social-head">' . $avatar . '<p class="aw-social-who">' . $who_link( $name )
-			. ( '' !== $handle && $handle !== $name ? '<span class="aw-social-handle" title="' . esc_attr( $handle ) . '">' . esc_html( $handle ) . '</span>' : '' ) . '</p>' . $logo . '</div>'
-			. ( '' !== $summary ? '<p class="aw-social-text">' . esc_html( $summary ) . '</p>' : '' )
-			. ( '' !== $pic ? '<figure class="aw-social-pic">' . $pic . '</figure>' : '' );
+		$body = '<div class="kit-social-head">' . $avatar . '<p class="kit-social-who">' . $who_link( $name )
+			. ( '' !== $handle && $handle !== $name ? '<span class="kit-social-handle" title="' . esc_attr( $handle ) . '">' . esc_html( $handle ) . '</span>' : '' ) . '</p>' . $logo . '</div>'
+			. ( '' !== $summary ? '<p class="kit-social-text">' . esc_html( $summary ) . '</p>' : '' )
+			. ( '' !== $pic ? '<figure class="kit-social-pic">' . $pic . '</figure>' : '' );
 	}
-	return '<li><article class="aw-social-card aw-social-card--' . ( $insta ? 'insta' : 'text' ) . '">' . $body . $media . $when . '</article></li>';
+	return '<li><article class="kit-social-card kit-social-card--' . ( $insta ? 'insta' : 'text' ) . '">' . $body . $media . $when . '</article></li>';
 }
 
 /**
