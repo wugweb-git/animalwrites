@@ -22,7 +22,8 @@
  *   aw_si_daily, aw_si_rollup, aw_si_alerts, aw_si_ga4, aw_si_psi, aw_si_psi_more, aw_si_clarity, aw_si_clarity_retry,
  *   aw_si_bing, aw_si_bing_kw, aw_si_bing_crawl, aw_si_gsc_types, aw_si_inspect, aw_si_inspect_more, aw_si_crawl,
  *   aw_si_geo_refresh, aw_si_rising_spikes, aw_si_srv_ai, aw_si_srv_speed, insightweb_dash_build — every event of
- *   these hooks, whatever its arguments
+ *   these hooks, whatever its arguments. Not aw_fetch_favicons: the hourly icon run is shared with SourceWeb and is
+ *   left booked (an icon run with nothing to do costs nothing)
  *
  * Before deleting, writes a backup to wp-content/uploads/wugweb-backups/insightweb-uninstall-<YYYYmmdd-His>.jsonl.gz
  * (includes/uninstall-backup.php): a header line, then every option below with its value as stored, then every row of

@@ -14,7 +14,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 const AW_SI_DB_VERSION = '3'; // 2: links table (31 Oct 2026). 3: scores table (17 Nov 2026).
 const AW_SI_DB_OPTION  = 'aw_si_db';
 
-// aw_si_table() and aw_si_now() moved to Animal Writes Core (includes/keyword-table.php) with the keyword table.
+// aw_si_table() and aw_si_now() live with the keyword table in InsightWeb's includes/keyword-table.php (Animal Writes
+// Core's from 25 Oct, Kits Core's from 12 Nov, InsightWeb's from 18 Nov 2026).
 
 /** Create or update the tables when the version changes. Cheap when nothing changed (one option read). */
 function aw_si_install(): void {
