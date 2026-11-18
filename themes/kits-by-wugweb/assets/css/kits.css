@@ -89,7 +89,7 @@ a.kit-social-name { min-height: var(--kit-size-target); text-decoration: none; }
 .kit-social-pic--reel::before { content: ""; position: absolute; top: var(--kit-space-3); right: var(--kit-space-3); width: var(--kit-size-target); height: var(--kit-size-target); border-radius: 50%; background: color-mix(in srgb, var(--kit-color-ink) 65%, transparent); pointer-events: none; } /* the reel mark's backdrop: white on any picture */
 .kit-social-play { position: absolute; top: calc(var(--kit-space-3) + (var(--kit-size-target) - var(--kit-icon-lg)) / 2); right: calc(var(--kit-space-3) + (var(--kit-size-target) - var(--kit-icon-lg)) / 2); --kit-ico-size: var(--kit-icon-lg); color: var(--kit-color-on-ink); pointer-events: none; }
 .kit-social-media :is(figure, .wp-block-embed) { margin: 0; overflow: hidden; border-radius: var(--kit-radius-media); }
-.kit-social-date { flex-wrap: nowrap; gap: var(--kit-space-2); white-space: nowrap; min-width: 0; font-size: var(--kit-meta-size); color: var(--kit-color-muted); }
+.kit-meta-row.kit-social-date { flex-wrap: nowrap; gap: var(--kit-space-2); white-space: nowrap; min-width: 0; font-size: var(--kit-meta-size); color: var(--kit-color-muted); }
 
 /* Card type in steps (owner, 13 Nov 2026: "h3 one size per breakpoint", "metarow - one font size per breakpoint"): every card's
    H3 title is --kit-type-card-title (20px, 22px from 1200; an H4 card title takes the same size, owner 14 Nov 2026: "use correct h3"; owner, 13 Nov 2026: "20-22px desktop, 18-20px mobile") with the H3
