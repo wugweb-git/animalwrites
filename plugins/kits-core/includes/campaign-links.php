@@ -193,7 +193,11 @@ function aw_campaign_news_line( $t ) {
 	return AW_CAMPAIGN_NEWS_LINES[ $t->slug ] ?? null;
 }
 
-// The two fields on Linked campaigns → Edit (core form table, no custom CSS).
+// The two fields on Linked campaigns → Edit (core form table, no custom CSS). Hooked once plugins have loaded: the taxonomy's
+// name (KITS_CAMPAIGN_LINK) is defined by Animal Writes Core's taxonomy-rename.php, which loads after Kits Core.
+add_action(
+	'plugins_loaded',
+	function () {
 add_action(
 	KITS_CAMPAIGN_LINK . '_edit_form_fields',
 	function ( $term ) {
@@ -228,6 +232,9 @@ add_action(
 			}
 		}
 	}
+);
+	},
+	20
 );
 
 // The News item's own summary (not a card's): its campaign line after it.
