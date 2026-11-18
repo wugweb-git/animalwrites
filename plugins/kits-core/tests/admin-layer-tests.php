@@ -140,6 +140,7 @@ $dir = dirname( __DIR__ ) . '/includes/admin-layer/';
 require $dir . 'arrange.php';
 require $dir . 'tidy.php';
 require $dir . 'site-screens.php';
+require $dir . 'cli-commands.php';
 require $dir . 'edit-fields.php';
 require $dir . 'site-options.php';
 require $dir . 'compat.php';
@@ -265,6 +266,38 @@ kits_t( array( 'awbi' => 'AWBI' ) === kits_site_options_short_clean( "awbi = AWB
 kits_t( array( 3, 12 ) === kits_site_options_ids( '3, 12, 3, x' ), 'sample listing IDs' );
 kits_t( isset( KITS_FOLLOW_EXTRA['aw_follow_reddit'] ) && AW_FOLLOW_EXTRA === KITS_FOLLOW_EXTRA, 'Follow us accounts, older constant too' );
 kits_t( array( 'aw_cdn', 'aw_modules_social', 'aw_modules_forms' ) === array_keys( kits_site_reset_sections() ), 'Reset this section: the Kits sections' );
+
+/* ---------- Help → Docs → Commands, read from WP-CLI's registry ---------- */
+
+$tree = array(
+	'post'          => array( 'what' => 'Core.' ),
+	'aw'            => array(
+		'what' => 'Group.',
+		'subs' => array(
+			'sort-dates' => array( 'what' => 'News and Library sort dates.' ),
+			'crm-setup'  => array( 'what' => 'FluentCRM sender.' ),
+		),
+	),
+	'aw-edit-screens' => array( 'what' => 'Edit-screen boxes.' ),
+	'awful'           => array( 'what' => 'Not ours: aw is a whole word.' ),
+	'kits'            => array(
+		'subs' => array(
+			'preset' => array(
+				'subs' => array( 'list' => array( 'what' => 'List the presets.' ) ),
+			),
+			'export' => array( 'what' => ' Export. ' ),
+		),
+	),
+);
+$names = array_column( kits_cli_command_rows( $tree, array( 'kits', 'aw' ) ), 'name' );
+kits_t( array( 'aw crm-setup', 'aw sort-dates', 'aw-edit-screens', 'kits export', 'kits preset list' ) === $names, 'commands: the site\'s, every runnable one, sorted; core and look-alikes left out' );
+kits_t( 'Export.' === kits_cli_command_rows( $tree, array( 'kits' ) )[0]['what'], 'commands: one-line description trimmed' );
+kits_t( array() === kits_cli_command_rows( $tree, array() ), 'commands: no prefixes, nothing listed' );
+kits_t( in_array( 'kits', kits_cli_command_prefixes(), true ) && in_array( 'aw', kits_cli_command_prefixes(), true ), 'commands: the Kits prefixes, and aw from admin-config.php' );
+$GLOBALS['kits_test_options']['kits_cli_commands'] = array( array( 'name' => 'kits export', 'what' => 'x' ) );
+kits_t( 1 === count( kits_cli_commands() ), 'commands: the list kept at the last wp run' );
+$GLOBALS['kits_test_options']['kits_cli_commands'] = 'broken';
+kits_t( array() === kits_cli_commands(), 'commands: a broken option lists nothing' );
 
 echo "$count checks, $fails failed\n";
 exit( $fails ? 1 : 0 );

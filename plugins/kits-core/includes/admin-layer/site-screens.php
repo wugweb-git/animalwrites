@@ -324,7 +324,8 @@ function kits_site_status( bool $full = true ): array {
 function kits_site_overview(): array {
 	/**
 	 * Filters the site's Overview: slug, title, intro, groups (title => rows [feature, what, where HTML, status HTML]),
-	 * widgets (rows widget, what) and commands (rows cmd HTML, what).
+	 * widgets (rows widget, what) and commands (rows cmd HTML, what; WP-CLI's own commands are added from
+	 * kits_cli_commands(), so a site lists here only what WP-CLI cannot report).
 	 *
 	 * @param array $overview Empty: no Overview.
 	 */
@@ -389,6 +390,16 @@ function kits_site_overview_page() {
 		echo '</details>';
 	}
 
+	// Read from WP-CLI's registry at the last wp run (cli-commands.php); a site's own rows (commands) first.
+	foreach ( kits_cli_commands() as $c ) {
+		$o['commands'][] = array(
+			'cmd'  => '<code>' . esc_html( 'wp ' . (string) ( $c['name'] ?? '' ) ) . '</code>',
+			'what' => esc_html( (string) ( $c['what'] ?? '' ) ),
+		);
+	}
+	if ( ! $o['commands'] ) {
+		echo '<p>' . esc_html( 'Commands (WP-CLI on the server): listed after the next wp command runs there (any command, for example wp help).' ) . '</p>';
+	}
 	if ( $o['commands'] ) {
 		echo '<details><summary><strong>Commands (WP-CLI on the server)</strong> (' . count( $o['commands'] ) . ')</summary>';
 		kits_simple_table(

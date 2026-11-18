@@ -134,47 +134,12 @@ add_filter(
 					'what'   => 'Letters sent per campaign.',
 				),
 			),
-			'commands' => array(
-				array(
-					'cmd'  => '<code>wp aw crm-setup</code>',
-					'what' => 'FluentCRM sender, list, tags and custom fields',
-				),
-				array(
-					'cmd'  => '<code>wp aw ff-form</code>',
-					'what' => 'Which Fluent Forms form shows as each site form',
-				),
-				array(
-					'cmd'  => '<code>wp aw geocode</code>',
-					'what' => 'Listing coordinates for the map',
-				),
-				array(
-					'cmd'  => '<code>wp aw sort-dates</code>',
-					'what' => 'News and Library sort dates',
-				),
-				array(
-					'cmd'  => '<code>wp aw redirects-import</code>',
-					'what' => 'Old addresses into Rank Math Redirections',
-				),
-				array(
-					'cmd'  => '<code>wp aw raw-export</code>',
-					'what' => 'Campaign form sign-ups as CSV',
-				),
-				array(
-					'cmd'  => '<code>wp aw-edit-screens</code>',
-					'what' => 'Edit-screen boxes, their fields and where they are used (read-only)',
-				),
-				array(
-					'cmd'  => '<code>wp aw-featured scan</code>',
-					'what' => '"Featured in" links between organisations and items',
-				),
-				array(
-					'cmd'  => '<code>wp aw-places detect</code>, <code>mark-auto</code>',
-					'what' => 'Places found in items',
-				),
-			),
 		);
 	}
 );
+
+// Kits → Help → Docs → Commands: this site's commands are named aw and aw-… too (read from WP-CLI, cli-commands.php).
+add_filter( 'kits_cli_command_prefixes', fn( $p ) => array_merge( (array) $p, array( 'aw' ) ) );
 
 // Plugins screen: Overview under the plugin's name (Kits → Help → Docs: Animal Writes).
 add_filter(

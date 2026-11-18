@@ -86,6 +86,7 @@ require_once KITS_CORE_DIR . 'includes/admin-app-cards.php';
 require_once KITS_CORE_DIR . 'includes/admin-layer/arrange.php';
 require_once KITS_CORE_DIR . 'includes/admin-layer/tidy.php';
 require_once KITS_CORE_DIR . 'includes/admin-layer/site-screens.php';
+require_once KITS_CORE_DIR . 'includes/admin-layer/cli-commands.php';
 require_once KITS_CORE_DIR . 'includes/admin-layer/edit-screens.php';
 require_once KITS_CORE_DIR . 'includes/admin-layer/edit-fields.php';
 require_once KITS_CORE_DIR . 'includes/admin-layer/site-options.php';
