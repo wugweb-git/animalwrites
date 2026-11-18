@@ -6,7 +6,11 @@
  * - animal-writes/sponsored-banner: picture, heading, text and link set by the editor.
  * The editor also gets the "System" pattern category (content repeated across pages: synced patterns).
  *
- * @package kits-core
+ * @package kits-by-wugweb
+ *
+ * Site module: moved from Kits Core to the theme's site layer (19 Nov 2026) and loaded by assets/site/site.php while Kits
+ * Core is active. The distributed theme and zips leave it out. Names, options, meta keys, hooks, shortcodes and routes
+ * are unchanged.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

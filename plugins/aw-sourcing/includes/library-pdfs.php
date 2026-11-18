@@ -3,7 +3,7 @@
  * Library PDFs: which government documents we may host, the mirror that copies a gov.in / nic.in PDF (or one from the
  * open judgment datasets) into the Media Library, the refetch when the owner allows hosting (aw_doc_host_ok), and
  * egazette.gov.in's missing certificates. Moved here from Animal Writes Core (includes/media.php) on 18 Nov 2026: it is
- * sourcing. The viewer and preview on the item's page are Kits Core's (kits-core/includes/library-documents.php).
+ * sourcing. The viewer and preview on the item's page are the site layer's (assets/site/includes/library-documents.php).
  * Meta keys (aw_file_id, aw_file_archived, aw_doc_host_ok, aw_source_url) are unchanged.
  *
  * @package aw-sourcing

@@ -205,9 +205,9 @@ add_action(
 		if ( aw_team_dates_moved() ) {
 			return; // PlanWeb opens admin.php?page=aw-dates as its Calendar.
 		}
-		add_submenu_page( aw_core_menu_parent(), 'Dates', 'Dates', aw_core_screen_cap( 'aw-dates' ), 'aw-dates', 'aw_team_dates_screen' ); // Kits → Dates
+		add_submenu_page( kits_site_menu_parent(), 'Dates', 'Dates', kits_site_screen_cap( 'aw-dates' ), 'aw-dates', 'aw_team_dates_screen' ); // Kits → Dates
 	},
-	aw_core_menu_priority( 'aw-dates' ) // order: aw_core_screens() (admin-home.php)
+	kits_site_menu_priority( 'aw-dates' ) // order: kits_site_screens() (admin-home.php)
 );
 
 /** Kits → Dates. */
@@ -230,7 +230,7 @@ function aw_team_dates_screen() {
 	$days  = (int) wp_date( 't', $first );
 	$today = wp_date( 'Y-m-d' );
 	echo '<div class="wrap"><h1>Dates</h1>';
-	aw_core_screen_nav( 'aw-dates' );
+	kits_site_screen_nav( 'aw-dates' );
 	echo '<p><a class="button" href="' . esc_url( add_query_arg( 'm', $prev, $base ) ) . '">‹ ' . esc_html( wp_date( 'F', strtotime( $prev . '-01 12:00:00' ) ) ) . '</a> <strong>' . esc_html( wp_date( 'F Y', $first ) ) . '</strong> <a class="button" href="' . esc_url( add_query_arg( 'm', $next, $base ) ) . '">' . esc_html( wp_date( 'F', strtotime( $next . '-01 12:00:00' ) ) ) . ' ›</a> <a class="button" href="' . esc_url( $base ) . '">Today</a></p>';
 	echo '<table class="widefat fixed"><thead><tr>';
 	foreach ( array( 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun' ) as $h ) {

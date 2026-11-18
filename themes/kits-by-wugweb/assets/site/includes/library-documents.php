@@ -6,7 +6,11 @@
  * may be hosted and the mirror that copies them are SourceWeb's (aw-sourcing/includes/library-pdfs.php). Meta keys
  * (aw_file_id, aw_doc_preview, aw_source_url, aw_legal_number) are unchanged.
  *
- * @package kits-core
+ * @package kits-by-wugweb
+ *
+ * Site module: moved from Kits Core to the theme's site layer (19 Nov 2026) and loaded by assets/site/site.php while Kits
+ * Core is active. The distributed theme and zips leave it out. Names, options, meta keys, hooks, shortcodes and routes
+ * are unchanged.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

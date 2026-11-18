@@ -84,7 +84,7 @@ wp option update aw_team_dates "$DATES" --format=json --quiet
 wp option update aw_team_dates_links_note_1111 1 --quiet
 BEFORE=$(wp option get aw_team_dates --format=json)
 # Off first, as on live today: Kits → Dates is in the menu and the calendar's post type does not exist.
-if [ "$(wp eval 'echo isset( aw_core_screens()["aw-dates"] ) ? "yes" : "no";')" = "yes" ]; then echo "ok   planweb off: Kits → Dates in the menu"; else echo "FAIL planweb off: Kits → Dates missing"; FAIL=1; fi
+if [ "$(wp eval 'echo isset( kits_site_screens()["aw-dates"] ) ? "yes" : "no";')" = "yes" ]; then echo "ok   planweb off: Kits → Dates in the menu"; else echo "FAIL planweb off: Kits → Dates missing"; FAIL=1; fi
 if [ "$(wp eval 'echo post_type_exists( "planweb_entry" ) ? "yes" : "no";')" = "no" ]; then echo "ok   planweb off: no entry type"; else echo "FAIL planweb off: entry type registered"; FAIL=1; fi
 wp plugin activate planweb --quiet # Core already loads it; activating also switches it on, as ticking Kits → Modules does.
 if [ "$(wp option get planweb_on)" = "1" ]; then echo "ok   planweb on after activation"; else echo "FAIL planweb not on after activation"; FAIL=1; fi
@@ -93,7 +93,7 @@ if out=$(wp planweb verify 2>&1) && echo "$out" | grep -q "4 the same, 0 differe
 if out=$(wp planweb import 2>&1) && echo "$out" | grep -q "0 entries made, 4 already there"; then echo "ok   planweb import again adds nothing"; else echo "FAIL planweb import again: $out"; FAIL=1; fi
 if out=$(wp planweb verify 2>&1); then echo "ok   planweb verify again"; else echo "FAIL planweb verify again: $out"; FAIL=1; fi
 if [ "$(wp option get aw_team_dates --format=json)" = "$BEFORE" ]; then echo "ok   aw_team_dates unchanged"; else echo "FAIL aw_team_dates changed by the import"; FAIL=1; fi
-if [ "$(wp eval 'echo isset( aw_core_screens()["aw-dates"] ) ? "yes" : "no";')" = "no" ]; then echo "ok   Kits → Dates left the menu"; else echo "FAIL Kits → Dates still in the menu"; FAIL=1; fi
+if [ "$(wp eval 'echo isset( kits_site_screens()["aw-dates"] ) ? "yes" : "no";')" = "no" ]; then echo "ok   Kits → Dates left the menu"; else echo "FAIL Kits → Dates still in the menu"; FAIL=1; fi
 for r in /wp/v2/planweb-entries /wp/v2/planweb_type; do
   code=$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:8080/?rest_route=$r")
   if [ "$code" != "401" ]; then echo "FAIL $code $r (want 401)"; FAIL=1; else echo "ok   $code $r"; fi
@@ -103,7 +103,7 @@ if [ "$(wp eval 'echo planweb_check_fields( array( "link" => "https://wa.me/9199
 # roles, and the entries are kept.
 wp plugin deactivate planweb --quiet
 if [ "$(wp option get planweb_on 2>/dev/null)" = "" ]; then echo "ok   planweb off after deactivation"; else echo "FAIL planweb still on after deactivation"; FAIL=1; fi
-if [ "$(wp eval 'echo isset( aw_core_screens()["aw-dates"] ) ? "yes" : "no";')" = "yes" ]; then echo "ok   planweb off: Kits → Dates back"; else echo "FAIL planweb off: Kits → Dates not back"; FAIL=1; fi
+if [ "$(wp eval 'echo isset( kits_site_screens()["aw-dates"] ) ? "yes" : "no";')" = "yes" ]; then echo "ok   planweb off: Kits → Dates back"; else echo "FAIL planweb off: Kits → Dates not back"; FAIL=1; fi
 if [ "$(wp eval 'echo get_role( "administrator" )->has_cap( "edit_planweb_entries" ) ? "yes" : "no";')" = "no" ]; then echo "ok   planweb off: capabilities removed"; else echo "FAIL planweb off: capabilities left on"; FAIL=1; fi
 if [ "$(wp eval 'global $wpdb; echo (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = \"planweb_entry\"" );')" = "4" ]; then echo "ok   planweb off: entries kept"; else echo "FAIL planweb off: entries not kept"; FAIL=1; fi
 # Kits menu (docs/admin-ui-spec.md §B, §E1; owner, 11 Nov 2026): as an administrator, the menu is exactly the six items,

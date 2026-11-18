@@ -8,6 +8,9 @@
  * Moved from Animal Writes Core on 18 Nov 2026; term meta, option and field names unchanged.
  *
  * @package kits-core
+ *
+ * SITE MODULE (Animal Writes only): not part of the generic Kits Core product. It stays in this plugin for now because card-images.php and thumbs.php read it at plugin load, and it is called from the Kits Core card code;
+ * moving it to the theme's site layer (assets/site/) would break that load order. Listed in docs/awcore-retirement.md §7.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

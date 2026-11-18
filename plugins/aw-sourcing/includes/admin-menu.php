@@ -59,7 +59,7 @@ add_action(
 		// count; the other screens are its tabs (the shell header). Without Kits Core, a menu of its own as before.
 		// WordPress names the screens under a menu after its hook prefix, which stays "sourcing" (AW_SRC_SCREEN,
 		// sourcing_page_…): saved screen options and columns stay.
-		$count = current_user_can( AW_REVIEW_CAP ) && function_exists( 'aw_review_count' ) && function_exists( 'aw_menu_count' ) ? aw_menu_count( aw_review_count() ) : '';
+		$count = current_user_can( AW_REVIEW_CAP ) && function_exists( 'aw_review_count' ) && function_exists( 'kits_menu_count' ) ? kits_menu_count( aw_review_count() ) : '';
 		// The Wugweb block (owner, 12 Nov 2026): Kits, DirectoryWeb, SourceWeb, RankWeb, InsightWeb, MailWeb, PlanWeb at 58.1-58.7,
 		// after one separator (58.05), before WordPress's second separator (59); the same with or without Kits Core.
 		// The icon is the plugin's one-colour SVG as a data URI, which WordPress paints in the admin colour scheme.

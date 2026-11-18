@@ -1365,7 +1365,7 @@ function aw_follow_accounts() {
 		array( 'Facebook', 'https://www.facebook.com/profile.php?id=61596537146561', 'facebook' ),
 		array( 'LinkedIn', 'https://www.linkedin.com/company/animalwrites/', 'linkedin' ),
 	);
-	foreach ( defined( 'AW_FOLLOW_EXTRA' ) ? AW_FOLLOW_EXTRA : array() as $opt => $row ) {
+	foreach ( defined( 'KITS_FOLLOW_EXTRA' ) ? KITS_FOLLOW_EXTRA : array() as $opt => $row ) {
 		$url = (string) get_option( $opt, '' );
 		if ( '' !== $url ) {
 			$rows[] = array( $row[0], $url, $row[1] );

@@ -49,7 +49,7 @@ if ( ! headers_sent() ) {
 ?>
 <?php
 // The picture: the owner's own files next to this page's source, kits-core/assets/site/dropins/ (500-wide.webp,
-// 500-phone.webp; the 404 page's own pictures stay in animal-writes-core/assets/error/ until not-found.php moves) when they are there, otherwise the Media Library photo 23313 (a street dog resting on a promenade
+// 500-phone.webp) when they are there, otherwise the Media Library photo 23313 (a street dog resting on a promenade
 // at dusk). Both are static files the web server sends without WordPress. Without either, the slot shows the surface tint.
 $aw_pic_dir = ( defined( 'WP_CONTENT_DIR' ) ? WP_CONTENT_DIR : dirname( __FILE__ ) ) . '/plugins/kits-core/assets/site/dropins/';
 $aw_wide    = is_readable( $aw_pic_dir . '500-wide.webp' );

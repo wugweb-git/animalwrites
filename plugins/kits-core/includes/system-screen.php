@@ -325,12 +325,7 @@ function kits_class_usage() {
 		return $cached;
 	}
 	$used  = array();
-	$roots = array_unique( array_merge( kits_system_dirs(), array( WP_PLUGIN_DIR . '/kits-core', WP_PLUGIN_DIR . '/animal-writes-core' ) ) );
-	// animal-writes-core/theme/ holds copies of the child theme's files, read only while it stands in for the child (one
-	// of the design system folders); otherwise its files would be counted next to the child's.
-	$copies = WP_PLUGIN_DIR . '/animal-writes-core/theme';
-	$real   = realpath( $copies );
-	$skip   = false !== $real && ! in_array( $real, array_filter( array_map( 'realpath', kits_system_dirs() ) ), true ) ? $real . DIRECTORY_SEPARATOR : '';
+	$roots = array_unique( array_merge( kits_system_dirs(), array( WP_PLUGIN_DIR . '/kits-core' ) ) );
 	foreach ( $roots as $root ) {
 		if ( ! is_dir( $root ) ) {
 			continue;
@@ -338,7 +333,7 @@ function kits_class_usage() {
 		$it = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $root, FilesystemIterator::SKIP_DOTS ) );
 		foreach ( $it as $file ) {
 			$ext = strtolower( $file->getExtension() );
-			if ( ! in_array( $ext, array( 'php', 'html', 'css', 'js' ), true ) || false !== strpos( $file->getPathname(), '/node_modules/' ) || str_ends_with( $file->getFilename(), '.min.css' ) || ( '' !== $skip && 0 === strpos( (string) realpath( $file->getPathname() ), $skip ) ) ) {
+			if ( ! in_array( $ext, array( 'php', 'html', 'css', 'js' ), true ) || false !== strpos( $file->getPathname(), '/node_modules/' ) || str_ends_with( $file->getFilename(), '.min.css' ) ) {
 				continue;
 			}
 			$s     = (string) file_get_contents( $file->getPathname() ); // phpcs:ignore WordPress.WP.AlternativeFunctions

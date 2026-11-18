@@ -253,11 +253,11 @@ Text domains in the moved files are now the new home's (`kits-core`, `kits-by-wu
 | `home.php` | Home hero, Lab/SC/content blocks, guide and library picks | none outside the file (hooked on `aw_hub_blocks` and `query_loop_block_query_vars`) | theme site layer `assets/site/includes/home.php` |
 | `item-head.php` | the item page's meta row, sources, tags, share, more-groups, card media; `aw_primary_category` | DirectoryWeb listing template and Find help (all behind `function_exists`), RankWeb (guarded; `aw_item_date_ts` in `faq-data.php` is not, front end only), aw-core `hub-blocks.php`, `law-links.php` | theme site layer `assets/site/includes/item-head.php`. `aw_whole_sentences()` (a text rule SourceWeb's ingest and rewrite use) left it for SourceWeb: `sourceweb_whole_sentences()` in `content-helpers.php`; both callers switched, no alias |
 | `campaign-links.php` | taxonomy `aw_campaign_link` behind `KITS_CAMPAIGN_LINK`, `aw_campaign_links()`, `aw_set_campaign_links()`, news lines | RankWeb schema/faq-data (guarded), SourceWeb ingest, aw-core `hub-blocks.php`, `related.php` | Kits Core `includes/campaign-links.php` |
-| `campaign-short.php` | short links (/lab, /diwali) 301 to the campaign page; `aw_campaign_short` meta rules | aw-core `meta.php` (`aw_camp_short_clean`) | Kits Core `includes/campaign-short.php` |
-| `campaign-letters.php` | the letter tool's statistics table, report page, dashboard widget, CSV | Kits Core campaign form (`aw_cl_*`) | Kits Core `includes/campaign-letters.php` |
-| `press.php` | CPT `aw_press`, coverage fetch/sideload, `aw_press_list()`, `aw_press_ingest()` | SourceWeb ingest, RankWeb schema, DirectoryWeb (`aw_press_site_logo`), aw-core `hub-blocks.php`, `systems.php`, `tools/content` | Kits Core `includes/press.php` |
-| `social-posts.php` | CPT `aw_social`, module switch `aw_social_on`/`aw_social_show`, REST intake, cards, block | PlanWeb, SourceWeb settings (`aw_social_on`), aw-core `uninstall.php`, `tools/` | Kits Core `includes/social-posts.php` |
-| `sponsored-blocks.php` (+ `assets/js/sponsored-blocks.js`) | `animal-writes/sponsored-item` and `-banner` blocks | aw-core `block-states.php` (render callbacks by name) | Kits Core `includes/sponsored-blocks.php`, `assets/js/sponsored-blocks.js` |
+| `campaign-short.php` | short links (/lab, /diwali) 301 to the campaign page; `aw_campaign_short` meta rules | aw-core `meta.php` (`aw_camp_short_clean`) | theme site layer `assets/site/includes/campaign-short.php` (moved from Kits Core, 19 Nov 2026) |
+| `campaign-letters.php` | the letter tool's statistics table, report page, dashboard widget, CSV | Kits Core campaign form (`aw_cl_*`) | Kits Core `includes/campaign-letters.php`, labelled a site module (§7): the Campaign form handler calls `aw_cl_*` straight |
+| `press.php` | CPT `aw_press`, coverage fetch/sideload, `aw_press_list()`, `aw_press_ingest()` | SourceWeb ingest, RankWeb schema, DirectoryWeb (`aw_press_site_logo`), aw-core `hub-blocks.php`, `systems.php`, `tools/content` | theme site layer `assets/site/includes/press.php` (moved from Kits Core, 19 Nov 2026) |
+| `social-posts.php` | CPT `aw_social`, module switch `aw_social_on`/`aw_social_show`, REST intake, cards, block | PlanWeb, SourceWeb settings (`aw_social_on`), aw-core `uninstall.php`, `tools/` | theme site layer `assets/site/includes/social-posts.php` (moved from Kits Core, 19 Nov 2026) |
+| `sponsored-blocks.php` (+ `assets/js/sponsored-blocks.js`) | `animal-writes/sponsored-item` and `-banner` blocks | aw-core `block-states.php` (render callbacks by name) | theme site layer `assets/site/includes/sponsored-blocks.php` (moved from Kits Core, 19 Nov 2026); the editor script `assets/js/sponsored-blocks.js` stays in Kits Core and is found by `plugins_url()` |
 | `issuers.php` | issuer names, `aw_item_issuer()`, `aw_set_issuer()`, `aw_issuer_short()`, editor box | SourceWeb ingest and auto-review (guarded), RankWeb schema, Kits Core cards, aw-core `faq-data.php`, `hub-blocks.php` | SourceWeb `includes/issuers.php` |
 | `team-dates.php` | the team calendar fallback: option `aw_team_dates`, Kits → Dates | PlanWeb (11), Kits Core (`aw_team_dates_moved`, `aw_team_date_label`), aw-core `admin-config.php`, `uninstall.php`, `tools/` | PlanWeb `includes/team-dates.php` |
 | `assets/css/` campaign files, `assets/js/campaign*.js` | `campaign.css`, `campaign-lab.css`, `aw-camp-*.css`, `aw-share.css`, `campaign-record*.css`, `campaign.js`, `campaign-lab.js` | the moved enqueue code; aw-core `block-states.php` (Kits demo page, switched); `tools/ci/contrast_check.py` (path switched) | theme site layer `assets/site/campaign/css`, `.../js` (not `css/aw*.css`, so no `.min` pairs); CI baselines re-keyed to the new paths |
@@ -356,6 +356,44 @@ No local WordPress (repo rule), so the moved screens and hooks were not run in a
 Deploy check, a scan of the `require` targets, PHPCS on the changed files and the new tests are the evidence. After
 the deploy, read-only on live: Kits → Home → Page check and Settings (CDN box), the Dashboard "Scheduled tasks" and
 "Activity" boxes, a 404 page, `aw/v1/deploy-status`, and `wp insightweb keys status`.
+
+## 7. Site modules in Kits Core: moved or labelled (19 Nov 2026, branch `claude/awcore-theme-db086f`)
+
+The audit of 19 Nov found Animal Writes-only modules in the generic Kits Core. Names, options, meta keys, post types,
+hooks, shortcodes, REST routes and WP-CLI names are unchanged; no aliases added.
+
+**Moved to the theme's site layer** (`themes/kits-by-wugweb/assets/site/includes/`, loaded first by `assets/site/site.php`
+inside the `KITS_CORE_LOADED` guard; the distributed theme and zips leave the folder out). Every caller outside the files
+was already behind `function_exists` (SourceWeb, PlanWeb, RankWeb schema, DirectoryWeb, `tools/content`) or sits in the
+site layer itself: `campaign-short.php`, `press.php`, `social-posts.php`, `sponsored-blocks.php`, `library-documents.php`.
+One code change: the Modules menu in `social-posts.php` was added on `plugins_loaded`, which has already fired when the
+theme loads, so it now hooks `after_setup_theme` (priority 20, still before `admin_menu`).
+
+**Labelled as site modules** (header says so; they stay in Kits Core because code in Kits Core calls them straight at plugin
+load, so moving them would break the load order or the Campaign/volunteer/report forms):
+
+| File | Why it stays |
+|---|---|
+| `includes/campaign-letters.php` | the Campaign form handler (`forms/campaign-form.php`) calls `aw_cl_*` and `AW_CL_*` unguarded |
+| `includes/thumbs.php` | `card-images.php`, `tools/media-reuse.php` and `category-images.php` call it; hooks the Home sections |
+| `includes/category-images.php` | `card-images.php` and `thumbs.php` read it |
+| `includes/forms/volunteers.php` | form pages, Fluent Forms field code and `forms/compat.php` call it |
+| `includes/forms/reports.php` | form pages and `forms/compat.php` call it |
+
+Moving them needs the Campaign, volunteer and report forms (and the card-picture code) to move with them, or each call
+guarded; left for one change of its own.
+
+**Kept on purpose.**
+- `includes/taxonomy-rename.php`: the one-off rename has **not run** (`docs/pending.md`: "Rename not clicked, owner's word
+  needed"), and its test is in the Deploy check. It goes after the owner's yes and a live check.
+- The `aw_report` registration in `forms/reports.php`: the list columns, status action, edit box, the edit-screen map and
+  the form pages still read those entries.
+
+**Cleaned.** `animal-writes-core` is no longer named in `includes/system-screen.php` (class-usage scan), `admin-layer/edit-screens.php`
+(plugin list), the 500/503 drop-ins or the test headers. `admin-layer/compat.php` is deleted: every caller (SourceWeb's menu
+count, PlanWeb's Dates screen, the site layer's Contact links, Modules and campaign files, `tools/ci/smoke.sh`) now uses the
+`kits_site_*`, `kits_modules_*`, `kits_menu_count`, `kits_edit_fields_metrics_box` and `KITS_FOLLOW_EXTRA` names. The filter
+`aw_core_reset_sections` (a hook name) is still read.
 
 ## How it was checked
 

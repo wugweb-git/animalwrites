@@ -22,7 +22,11 @@
  * Routes (the workers' user, as aw/v1/search-insights): POST aw/v1/social/intake, GET aw/v1/social/campaigns.
  * Contract: docs/plugin-map.md ("Social posts routes").
  *
- * @package kits-core
+ * @package kits-by-wugweb
+ *
+ * Site module: moved from Kits Core to the theme's site layer (19 Nov 2026) and loaded by assets/site/site.php while Kits
+ * Core is active. The distributed theme and zips leave it out. Names, options, meta keys, hooks, shortcodes and routes
+ * are unchanged.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -74,12 +78,12 @@ add_action(
 );
 
 add_action(
-	'plugins_loaded', // the menu position reads the site's screens (kits_site_screens), which Animal Writes Core registers after Kits Core has loaded this file
+	'after_setup_theme', // the menu position reads the site's screens (kits_site_screens), registered by assets/site/admin.php, which loads after this file; this file loads at theme load, after plugins_loaded has fired
 	function () {
 		add_action(
 			'admin_menu',
-			fn() => add_submenu_page( aw_core_menu_parent(), 'Modules', 'Modules', aw_core_screen_cap( 'aw-modules' ), 'aw-modules', 'aw_modules_screen' ),
-			aw_core_menu_priority( 'aw-modules' ) // order: aw_core_screens() (admin-home.php)
+			fn() => add_submenu_page( kits_site_menu_parent(), 'Modules', 'Modules', kits_site_screen_cap( 'aw-modules' ), 'aw-modules', 'aw_modules_screen' ),
+			kits_site_menu_priority( 'aw-modules' ) // order: kits_site_screens() (admin-home.php)
 		);
 	},
 	20
@@ -108,7 +112,7 @@ function aw_social_settings_field( $args ) {
 add_filter(
 	'kits_frame_extra_screens',
 	function ( $screens ) {
-		$screens['aw-modules'] = array( 'manage_options', '' );
+		$screens['aw-modules'] = array( 'manage_options', 'kits-settings' );
 		return $screens;
 	}
 );
@@ -123,13 +127,12 @@ function aw_modules_screen() {
 
 /** What the Modules screen prints inside the frame (Settings API, core markup). */
 function aw_modules_body(): void {
-	settings_errors( 'general' ); // options.php's "Settings saved." (core prints it only under the Settings menu)
 	echo '<form method="post" action="' . esc_url( admin_url( 'options.php' ) ) . '">';
 	settings_fields( 'aw_modules' );
-	aw_modules_sections(); // do_settings_sections( 'aw-modules' ), with "Reset this section" (site-options.php)
+	kits_modules_sections(); // do_settings_sections( 'aw-modules' ), with "Reset this section" (site-options.php)
 	submit_button();
 	echo '</form>';
-	aw_modules_reset_forms();
+	kits_modules_reset_forms();
 }
 
 /* ---------- Type, campaign links, meta ---------- */

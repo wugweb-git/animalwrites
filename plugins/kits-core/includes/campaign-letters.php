@@ -19,6 +19,9 @@
  *   of the anonymous rows.
  *
  * @package kits-core
+ *
+ * SITE MODULE (Animal Writes only): not part of the generic Kits Core product. It stays in this plugin for now because the Campaign form handler (forms/campaign-form.php) calls aw_cl_* and AW_CL_* straight, so the two move together;
+ * moving it to the theme's site layer (assets/site/) would break that load order. Listed in docs/awcore-retirement.md §7.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

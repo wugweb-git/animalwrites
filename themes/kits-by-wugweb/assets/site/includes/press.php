@@ -10,7 +10,11 @@
  * the publisher's logo (apple-touch-icon or favicon, fetched once per site) is used. Owner input is never overwritten.
  * Cards: one external link each, newest first, undated last. No article text is copied.
  *
- * @package kits-core
+ * @package kits-by-wugweb
+ *
+ * Site module: moved from Kits Core to the theme's site layer (19 Nov 2026) and loaded by assets/site/site.php while Kits
+ * Core is active. The distributed theme and zips leave it out. Names, options, meta keys, hooks, shortcodes and routes
+ * are unchanged.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

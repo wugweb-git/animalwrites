@@ -20,7 +20,7 @@ const AW_REVIEW_TYPES = array(
 	'aw_legal'       => 'Library',
 	'aw_opportunity' => 'Opportunity',
 	'aw_press'       => 'Press',
-	'aw_social'      => 'Social post', // Social posts (core social-posts.php), only while that module is on
+	'aw_social'      => 'Social post', // Social posts (the site layer's social-posts.php), only while that module is on
 	'post'           => 'Research', // research papers only (Resources tagged research): a held one shows why (24 Oct 2026)
 );
 
@@ -101,7 +101,7 @@ unset( $aw_review_hook );
 add_action(
 	'admin_menu',
 	function () {
-		add_submenu_page( AW_SRC_MENU, 'To review', 'To review' . ( function_exists( 'aw_menu_count' ) ? aw_menu_count( aw_review_count() ) : '' ), AW_REVIEW_CAP, 'aw-review', 'aw_review_page' );
+		add_submenu_page( AW_SRC_MENU, 'To review', 'To review' . ( function_exists( 'kits_menu_count' ) ? kits_menu_count( aw_review_count() ) : '' ), AW_REVIEW_CAP, 'aw-review', 'aw_review_page' );
 	},
 	10 // after the menu and its Overview (admin-menu.php, 9)
 );
