@@ -2345,6 +2345,7 @@
 			"reads": [
 				"option:aw_si_seeded",
 				"option:aw_si_off",
+				"option:insightweb_keys",
 				"option:aw_keys"
 			],
 			"limits": "Key values are never shown.",
