@@ -4,7 +4,7 @@
  * load, Rename moves terms, menu items and Rank Math keys after saving a backup, Undo puts them back, and the counts.
  * An in-memory term_taxonomy and postmeta stand in for the database.
  *
- * Run: php plugins/animal-writes-core/tests/taxonomy-rename-tests.php
+ * Run: php plugins/kits-core/tests/taxonomy-rename-tests.php
  *
  * @package animal-writes-core
  */

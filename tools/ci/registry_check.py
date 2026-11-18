@@ -49,8 +49,8 @@ def covered(c):
 
 
 missing = sorted(c for c in used if not covered(c))
-# Registered blocks: the names in aw_hub_blocks() (animal-writes-core) and the theme's patterns.
-hb = open(os.path.join(ROOT, "plugins/animal-writes-core/includes/hub-blocks.php")).read()
+# Registered blocks: the names in aw_hub_blocks() (the theme site layer) and the theme's patterns.
+hb = open(os.path.join(ROOT, "themes/kits-by-wugweb/assets/site/content/hub-blocks.php")).read()
 fn = hb[hb.index("function aw_hub_blocks"):hb.index("add_action", hb.index("function aw_hub_blocks"))]
 site_blocks = {"animal-writes/" + n for n in re.findall(r"^\s*'([a-z-]+)'\s*=>\s*array\(", fn, re.M)}
 site_blocks |= {"animal-writes/" + f[:-4] for f in os.listdir(theme_file("patterns")) if f.endswith(".php")}

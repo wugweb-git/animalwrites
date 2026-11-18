@@ -180,6 +180,9 @@ add_action(
 		if ( ! is_page( 'kits-demo' ) ) {
 			return;
 		}
+		if ( ! defined( 'AW_CORE_DIR' ) ) {
+			return; // the campaign sheets are Animal Writes Core's assets/css/ until the campaigns move
+		}
 		foreach ( array( 'aw-camp-tokens' => 'aw-camp-tokens.css', 'aw-campaign' => 'campaign.css', 'aw-campaign-record' => 'campaign-record.css' ) as $handle => $file ) {
 			wp_enqueue_style( $handle, plugins_url( 'assets/css/' . $file, AW_CORE_DIR . 'animal-writes-core.php' ), array(), (string) filemtime( AW_CORE_DIR . 'assets/css/' . $file ) );
 		}

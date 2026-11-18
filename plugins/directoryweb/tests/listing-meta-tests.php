@@ -1,6 +1,6 @@
 <?php
 /**
- * The listing data model (includes/listing-meta.php) and Core's wrappers (animal-writes-core/includes/meta.php),
+ * The listing data model (includes/listing-meta.php) and Core's wrappers (the site layer's content/meta.php),
  * without WordPress: every key registered once, the rules, the phone and hours lists. Run by the Deploy check.
  *
  * Usage: php plugins/directoryweb/tests/listing-meta-tests.php
@@ -38,7 +38,7 @@ function register_post_meta( $t, $k, $a ) { global $reg; $reg[] = $t . '|' . $k 
 
 require dirname( __DIR__ ) . '/includes/listing-meta.php';
 require dirname( __DIR__ ) . '/includes/listing-terms.php'; // directoryweb_normalise_phone()
-require dirname( __DIR__, 2 ) . '/animal-writes-core/includes/meta.php';
+require dirname( __DIR__, 3 ) . '/themes/kits-by-wugweb/assets/site/content/meta.php';
 
 $fails = 0;
 $count = 0;

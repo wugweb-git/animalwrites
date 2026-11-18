@@ -5,7 +5,7 @@
  * through aw_i(), aw_date() and "animal-writes/field": same markup, same escaping, empty bound blocks left out, the
  * Directory's greyed contact buttons and data-act kept.
  *
- * Usage: php plugins/animal-writes-core/tests/content-bindings-tests.php
+ * Usage: php plugins/kits-core/tests/content-bindings-tests.php
  *
  * @package animal-writes-core
  */
@@ -116,12 +116,16 @@ class WP_Block {
 $root = dirname( __DIR__, 2 );
 require $root . '/kits-core/includes/primitives.php';
 require $root . '/kits-core/includes/bindings.php';
-require $root . '/animal-writes-core/includes/taxonomy-rename.php'; // KITS_CAMPAIGN_LINK / KITS_MEDIA_GROUP, which systems.php reads (loaded first in animal-writes-core.php too)
+require $root . '/kits-core/includes/taxonomy-rename.php'; // KITS_CAMPAIGN_LINK / KITS_MEDIA_GROUP, which systems.php reads (Kits Core loads it first)
 require $root . '/animal-writes-core/includes/systems.php';
-require $root . '/animal-writes-core/includes/bindings.php';
+$site = dirname( $root ) . '/themes/kits-by-wugweb/assets/site/'; // the site layer: the content files moved here from animal-writes-core on 19 Nov 2026
+function kits_site_path( $f ) {
+	return dirname( __DIR__, 2 ) . '/themes/kits-by-wugweb/assets/site/' . ltrim( $f, '/' );
+}
+require $site . 'content/bindings.php';
 define( 'AW_CORE_DIR', $root . '/animal-writes-core/' );
 require $root . '/kits-core/includes/scf.php';
-require $root . '/animal-writes-core/includes/scf.php';
+require $site . 'content/scf.php';
 do_action( 'init' );
 
 $GLOBALS['t_fail'] = 0;
@@ -206,8 +210,8 @@ t_check( 'Apply by <span class="kit-date aw-date"><span class="kit-ico kit-ico--
 // SCF bridge (admin): the same folder, save paths and group order as before the move (scf.php at 73bbc87c).
 add_filter( 'aw_scf_groups', fn( $g ) => array_merge( (array) $g, array( 'group_aw_listing' ) ) ); // as DirectoryWeb does
 add_filter( 'kits_scf_groups', fn( $g ) => array_merge( (array) $g, array( 'group_other', 'group_aw_news' ) ) );
-t_check( in_array( AW_CORE_DIR . 'acf-json', apply_filters( 'acf/settings/load_json', array() ), true ), 'SCF: our acf-json folder is loaded' );
-t_check( AW_CORE_DIR . 'acf-json' === apply_filters( 'acf/settings/save_json/key=group_aw_news', '' ), 'SCF: our groups save back to it' );
+t_check( in_array( kits_site_path( 'acf-json' ), apply_filters( 'acf/settings/load_json', array() ), true ), 'SCF: our acf-json folder is loaded' );
+t_check( kits_site_path( 'acf-json' ) === apply_filters( 'acf/settings/save_json/key=group_aw_news', '' ), 'SCF: our groups save back to it' );
 t_check( '' === apply_filters( 'acf/settings/save_json/key=group_aw_listing', '' ), 'SCF: other plugins\' groups are not saved here' );
 t_check( array_merge( AW_SCF_GROUPS, array( 'group_aw_listing', 'group_other' ) ) === aw_scf_group_keys(), 'SCF: group keys in the same order, plugins after ours, no duplicates' );
 t_check( false === aw_scf_active() && false === kits_scf_active(), 'SCF: not active without SCF' );

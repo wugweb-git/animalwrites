@@ -136,7 +136,7 @@ const AW_RELATED_NEAR_KM = 150;
 function aw_district_centroid( $code ) {
 	static $c = null;
 	if ( null === $c ) {
-		$f = ( defined( 'DIRECTORYWEB_DIR' ) ? DIRECTORYWEB_DIR : dirname( __DIR__, 2 ) . '/directoryweb/' ) . 'data/district-centroids.json'; // DirectoryWeb's data file
+		$f = ( defined( 'DIRECTORYWEB_DIR' ) ? DIRECTORYWEB_DIR : WP_PLUGIN_DIR . '/directoryweb/' ) . 'data/district-centroids.json'; // DirectoryWeb's data file
 		$c = is_readable( $f ) ? (array) json_decode( (string) file_get_contents( $f ), true ) : array(); // phpcs:ignore WordPress.WP.AlternativeFunctions
 	}
 	return $c[ (string) (int) $code ] ?? null;

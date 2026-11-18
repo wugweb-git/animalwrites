@@ -23,8 +23,8 @@ plugins/directoryweb/includes/map-picker.php | admin style | wp_enqueue_style( '
 plugins/kits-core/includes/tools/media-merge.php | admin page | add_submenu_page( 'upload.php', 'Duplicate files', 'Duplicate files', 'manage_options', 'aw-media-duplicates', 'kits_media_merge_screen' );
 plugins/kits-core/includes/tools/media-reuse.php | admin page | add_submenu_page( 'upload.php', 'Reuse pictures', 'Reuse pictures', 'manage_options', 'aw-media-reuse', 'kits_media_reuse_screen' );
 plugins/kits-core/includes/media-webp.php | admin page | add_submenu_page( 'upload.php', 'Make WebP', 'Make WebP', 'manage_options', 'aw-media-webp', 'kits_media_webp_screen' );
-plugins/animal-writes-core/includes/pages.php | admin page | add_submenu_page( AW_CORE_MENU, 'Contact links', 'Contact links', aw_core_screen_cap( 'aw-elsewhere' ), 'aw-elsewhere', 'aw_elsewhere_screen' );
-plugins/animal-writes-core/includes/pages.php | admin style | <style> block
+themes/kits-by-wugweb/assets/site/content/pages.php | admin page | add_submenu_page( AW_CORE_MENU, 'Contact links', 'Contact links', aw_core_screen_cap( 'aw-elsewhere' ), 'aw-elsewhere', 'aw_elsewhere_screen' );
+themes/kits-by-wugweb/assets/site/content/pages.php | admin style | <style> block
 plugins/directoryweb/includes/place-intros.php | admin page | add_submenu_page( DIRECTORYWEB_PAGE, __( 'Place intros', 'directoryweb' ), __( 'Place intros', 'directoryweb' ), 'manage_options', AW_PLACE_INTROS_PAGE, 'aw_pla
 plugins/animal-writes-core/includes/site-check.php | admin page | add_submenu_page( AW_CORE_MENU, 'Check site', 'Check site', aw_core_screen_cap( 'aw-site-check' ), 'aw-site-check', 'aw_site_check_page' );
 plugins/animal-writes-core/includes/social-posts.php | admin page | add_submenu_page( aw_core_menu_parent(), 'Modules', 'Modules', aw_core_screen_cap( 'aw-modules' ), 'aw-modules', 'aw_modules_screen' ),
