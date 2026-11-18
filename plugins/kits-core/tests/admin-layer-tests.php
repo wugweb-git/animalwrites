@@ -302,5 +302,45 @@ kits_t( 1 === count( kits_cli_commands() ), 'commands: the list kept at the last
 $GLOBALS['kits_test_options']['kits_cli_commands'] = 'broken';
 kits_t( array() === kits_cli_commands(), 'commands: a broken option lists nothing' );
 
+/* ---------- Classic screens in the Kits frame (includes/admin-kits-frame.php) ---------- */
+
+if ( ! defined( 'KITS_CAP' ) ) {
+	define( 'KITS_CAP', 'edit_posts' );
+}
+require dirname( __DIR__ ) . '/includes/admin-kits-frame.php';
+$frame_before = kits_frame_screens();
+kits_t( array( 'kits', 'kits-settings', 'kits-tools', 'kits-help' ) === array_keys( $frame_before ), 'frame: the four Kits screens, before any joins' );
+$joined = array(
+	'includes/media-webp.php'          => array( 'aw-media-webp', 'manage_options', 'kits-tools' ),
+	'includes/tools/media-merge.php'   => array( 'aw-media-duplicates', 'manage_options', 'kits-tools' ),
+	'includes/tools/media-reuse.php'   => array( 'aw-media-reuse', 'manage_options', 'kits-tools' ),
+	'includes/campaign-letters.php'    => array( 'aw-letter-report', 'edit_posts', '' ),
+	'includes/social-posts.php'        => array( 'aw-modules', 'manage_options', '' ),
+	'includes/taxonomy-rename.php'     => array( 'kits-taxonomy-rename', 'manage_options', 'kits-tools' ),
+);
+foreach ( $joined as $file => $def ) {
+	$src = (string) file_get_contents( dirname( __DIR__ ) . '/' . $file );
+	kits_t( false !== strpos( $src, "'kits_frame_extra_screens'" ) && false !== strpos( $src, "\$screens['{$def[0]}'] = array( '{$def[1]}', '{$def[2]}' )" ), "frame: {$def[0]} joins with its own capability ({$def[1]})" );
+	kits_t( false === strpos( $src, '<div class="wrap"><h1>' ), "frame: {$file} prints no classic wrap and heading" );
+	kits_t( false !== strpos( $src, "kits_frame_screen( '{$def[0]}'" ), "frame: {$def[0]} prints through kits_frame_screen()" );
+	add_filter(
+		'kits_frame_extra_screens',
+		function ( $screens ) use ( $def ) {
+			$screens[ $def[0] ] = array( $def[1], $def[2] );
+			return $screens;
+		}
+	);
+}
+add_filter(
+	'kits_frame_extra_screens',
+	function ( $screens ) {
+		$screens['kits-tools'] = array( 'read', '' ); // A join cannot replace a Kits screen.
+		return $screens;
+	}
+);
+$frame_after = kits_frame_screens();
+kits_t( 'manage_options' === $frame_after['kits-tools'] && 'manage_options' === $frame_after['aw-media-webp'] && 'edit_posts' === $frame_after['aw-letter-report'], 'frame: joined screens keep their capability; the Kits four cannot be replaced' );
+kits_t( 'kits-tools' === kits_frame_extra_tab( 'aw-media-reuse' ) && '' === kits_frame_extra_tab( 'aw-modules' ) && '' === kits_frame_extra_tab( 'nope' ), 'frame: the media screens sit under the Tools tab' );
+
 echo "$count checks, $fails failed\n";
 exit( $fails ? 1 : 0 );
