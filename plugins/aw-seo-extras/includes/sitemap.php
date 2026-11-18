@@ -23,6 +23,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /** District × listing-type pairs with enough listings to be indexed (no state × type pages exist). Stored counts, places.php. */
 function aw_sitemap_directory_pairs() {
+	if ( ! function_exists( 'aw_place_counts' ) ) { // DirectoryWeb is off
+		return array();
+	}
 	$pairs = get_transient( 'aw_sitemap_dir_pairs' );
 	if ( false !== $pairs ) {
 		return $pairs;
@@ -42,6 +45,9 @@ function aw_sitemap_directory_pairs() {
 /** Directory place pages (states and districts with listings), then district × type pages. */
 function aw_sitemap_directory_urls() {
 	$urls = array();
+	if ( ! function_exists( 'aw_place_states' ) ) { // DirectoryWeb is off
+		return $urls;
+	}
 	foreach ( aw_place_states() as $st ) {
 		if ( aw_place_count( $st ) ) {
 			$urls[] = array( 'loc' => aw_directory_url( $st->slug ) );
@@ -207,7 +213,7 @@ function aw_news_sitemap_items() {
 		if ( ! $ts || $ts < $cut || $ts > time() + HOUR_IN_SECONDS ) {
 			continue;
 		}
-		$out[] = array( 'loc' => get_permalink( $id ), 'title' => aw_seo_plain( get_the_title( $id ) ), 'date' => (string) $date, 'ts' => $ts );
+		$out[] = array( 'loc' => get_permalink( $id ), 'title' => rankweb_plain_text( get_the_title( $id ) ), 'date' => (string) $date, 'ts' => $ts );
 	}
 	usort( $out, fn( $a, $b ) => $b['ts'] <=> $a['ts'] );
 	return $out;

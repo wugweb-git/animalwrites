@@ -82,7 +82,7 @@ function directoryweb_count_listings(): array {
 		),
 		'types'  => array(),
 	);
-	$slugs = function_exists( 'aw_listing_type_slugs' ) ? array_values( array_filter( array_map( 'strval', aw_listing_type_slugs() ) ) ) : array();
+	$slugs = array_values( array_filter( array_map( 'strval', directoryweb_listing_type_slugs() ) ) );
 	if ( $slugs ) {
 		$rows = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- hourly count in the background
 			$wpdb->prepare(

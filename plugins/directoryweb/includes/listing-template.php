@@ -51,7 +51,7 @@ function aw_listing_dl( $rows, $class = '' ) {
 	$out = '';
 	foreach ( $rows as $r ) {
 		if ( '' !== trim( (string) $r[1] ) ) {
-			$ico  = empty( $r[2] ) ? '' : ( 0 === strpos( $r[2], '<' ) ? '<span class="aw-facts-ico">' . $r[2] . '</span>' : aw_i( $r[2] ) );
+			$ico  = empty( $r[2] ) ? '' : ( 0 === strpos( $r[2], '<' ) ? '<span class="aw-facts-ico">' . $r[2] . '</span>' : kits_icon( $r[2] ) );
 			$out .= '<div class="aw-facts-row"><dt>' . $ico . esc_html( $r[0] ) . '</dt><dd>' . $r[1] . '</dd></div>';
 		}
 	}
@@ -91,8 +91,8 @@ function aw_listing_validity( $date ) {
 	}
 	$day = wp_date( 'Y-m-d', strtotime( $date . ' 12:00:00' ) );
 	return $day < wp_date( 'Y-m-d' )
-		? '<span class="kit-tag kit-tag--warning aw-facts-expired">' . esc_html__( 'Expired', 'directoryweb' ) . ' ' . aw_date( $day ) . '</span>'
-		: esc_html__( 'valid until', 'directoryweb' ) . ' ' . aw_date( $day );
+		? '<span class="kit-tag kit-tag--warning aw-facts-expired">' . esc_html__( 'Expired', 'directoryweb' ) . ' ' . kits_date( $day, null, 'aw-date' ) . '</span>'
+		: esc_html__( 'valid until', 'directoryweb' ) . ' ' . kits_date( $day, null, 'aw-date' );
 }
 
 /* ---------- 4–5 Logo and description ---------- */
@@ -144,7 +144,7 @@ function aw_block_listing_registrations( $a, $id ) {
 	$drop = aw_lf( $id, 'aw_awbi_dropped' );
 	$type = aw_lf( $id, 'aw_reg_type' );
 	$rows = array(
-		array( __( 'AWBI number', 'directoryweb' ), $awbi ? aw_listing_parts( array( esc_html( $awbi ), aw_listing_validity( aw_lf( $id, 'aw_awbi_valid' ) ), $drop ? '<span class="kit-tag kit-tag--warning aw-facts-expired">' . esc_html__( 'Not on the current AWBI list', 'directoryweb' ) . ' ' . aw_date( $drop ) . '</span>' : '' ) ) : aw_listing_na( $id ) , aw_listing_issuer_icon( 'awbi', $id, 'legal' ) ),
+		array( __( 'AWBI number', 'directoryweb' ), $awbi ? aw_listing_parts( array( esc_html( $awbi ), aw_listing_validity( aw_lf( $id, 'aw_awbi_valid' ) ), $drop ? '<span class="kit-tag kit-tag--warning aw-facts-expired">' . esc_html__( 'Not on the current AWBI list', 'directoryweb' ) . ' ' . kits_date( $drop, null, 'aw-date' ) . '</span>' : '' ) ) : aw_listing_na( $id ) , aw_listing_issuer_icon( 'awbi', $id, 'legal' ) ),
 		/* translators: %s: registration type, e.g. Trust. */
 		array( $type ? sprintf( __( 'Registration (%s)', 'directoryweb' ), $type ) : __( 'Registration', 'directoryweb' ), aw_lf( $id, 'aw_registration' ) ? esc_html( aw_lf( $id, 'aw_registration' ) ) : aw_listing_na( $id ), 'file' ),
 		array( '12A', esc_html( aw_lf( $id, 'aw_reg_12a' ) ), aw_listing_issuer_icon( 'incometax', $id, 'legal' ) ),
@@ -166,22 +166,22 @@ function aw_block_listing_contact( $a, $id ) {
 	$first  = $phones ? $phones[0]['number'] : '';
 	$wa     = function_exists( 'directoryweb_listing_first_phone' ) ? directoryweb_listing_first_phone( $id, true ) : '';
 	$btns   = '';
-	if ( '' !== $first && '' !== aw_tel_url( $first ) ) {
+	if ( '' !== $first && '' !== directoryweb_tel_url( $first ) ) {
 		/* translators: %s: phone number. */
-		$btns .= '<a class="kit-btn kit-btn--secondary" href="' . esc_url( aw_tel_url( $first ) ) . '" data-act="phone">' . aw_i( 'phone' ) . esc_html( sprintf( __( 'Call %s', 'directoryweb' ), $first ) ) . ( function_exists( 'aw_unverified_mark' ) ? aw_unverified_mark( $id, $first ) : '' ) . '</a>';
+		$btns .= '<a class="kit-btn kit-btn--secondary" href="' . esc_url( directoryweb_tel_url( $first ) ) . '" data-act="phone">' . kits_icon( 'phone' ) . esc_html( sprintf( __( 'Call %s', 'directoryweb' ), $first ) ) . ( function_exists( 'aw_unverified_mark' ) ? aw_unverified_mark( $id, $first ) : '' ) . '</a>';
 	}
-	if ( '' !== $wa && strlen( aw_normalise_phone( $wa ) ) > 5 ) {
-		$btns .= '<a class="kit-btn" href="' . esc_url( 'https://wa.me/' . aw_normalise_phone( $wa ) ) . '" rel="noopener" data-act="whatsapp">' . aw_i( 'brand-whatsapp' ) . esc_html__( 'WhatsApp', 'directoryweb' ) . '</a>';
+	if ( '' !== $wa && strlen( directoryweb_normalise_phone( $wa ) ) > 5 ) {
+		$btns .= '<a class="kit-btn" href="' . esc_url( 'https://wa.me/' . directoryweb_normalise_phone( $wa ) ) . '" rel="noopener" data-act="whatsapp">' . kits_icon( 'brand-whatsapp' ) . esc_html__( 'WhatsApp', 'directoryweb' ) . '</a>';
 	}
 	if ( aw_lf( $id, 'aw_email' ) ) {
-		$btns .= '<a class="kit-btn kit-btn--secondary" href="' . esc_url( 'mailto:' . aw_lf( $id, 'aw_email' ) ) . '" data-act="email">' . aw_i( 'mail' ) . esc_html__( 'Email', 'directoryweb' ) . ( function_exists( 'aw_unverified_mark' ) ? aw_unverified_mark( $id, aw_lf( $id, 'aw_email' ) ) : '' ) . '</a>';
+		$btns .= '<a class="kit-btn kit-btn--secondary" href="' . esc_url( 'mailto:' . aw_lf( $id, 'aw_email' ) ) . '" data-act="email">' . kits_icon( 'mail' ) . esc_html__( 'Email', 'directoryweb' ) . ( function_exists( 'aw_unverified_mark' ) ? aw_unverified_mark( $id, aw_lf( $id, 'aw_email' ) ) : '' ) . '</a>';
 	}
 	if ( aw_lf( $id, 'aw_website' ) ) {
-		$btns .= '<a class="kit-btn kit-btn--secondary" href="' . esc_url( aw_lf( $id, 'aw_website' ) ) . '" rel="' . esc_attr( $rel ) . '" target="_blank" data-act="website">' . aw_i( 'world' ) . esc_html__( 'Website', 'directoryweb' ) . ' <span aria-hidden="true">↗</span><span class="screen-reader-text"> ' . esc_html__( '(opens in a new tab)', 'directoryweb' ) . '</span>' . ( function_exists( 'aw_unverified_mark' ) ? aw_unverified_mark( $id, aw_lf( $id, 'aw_website' ) ) : '' ) . '</a>';
+		$btns .= '<a class="kit-btn kit-btn--secondary" href="' . esc_url( aw_lf( $id, 'aw_website' ) ) . '" rel="' . esc_attr( $rel ) . '" target="_blank" data-act="website">' . kits_icon( 'world' ) . esc_html__( 'Website', 'directoryweb' ) . ' <span aria-hidden="true">↗</span><span class="screen-reader-text"> ' . esc_html__( '(opens in a new tab)', 'directoryweb' ) . '</span>' . ( function_exists( 'aw_unverified_mark' ) ? aw_unverified_mark( $id, aw_lf( $id, 'aw_website' ) ) : '' ) . '</a>';
 	}
 	$btns .= aw_lf( $id, 'aw_maps_url' )
-		? '<a class="kit-btn kit-btn--secondary" href="' . esc_url( aw_lf( $id, 'aw_maps_url' ) ) . '" rel="' . esc_attr( $rel ) . '" target="_blank" data-act="maps_url">' . aw_i( 'map-pin' ) . esc_html__( 'Directions', 'directoryweb' ) . '</a>'
-		: '<span class="kit-btn kit-btn--secondary" role="link" aria-disabled="true" data-act="maps_url">' . aw_i( 'map-pin' ) . esc_html__( 'Directions', 'directoryweb' ) . '</span>'; // no map link yet: greyed out (field note)
+		? '<a class="kit-btn kit-btn--secondary" href="' . esc_url( aw_lf( $id, 'aw_maps_url' ) ) . '" rel="' . esc_attr( $rel ) . '" target="_blank" data-act="maps_url">' . kits_icon( 'map-pin' ) . esc_html__( 'Directions', 'directoryweb' ) . '</a>'
+		: '<span class="kit-btn kit-btn--secondary" role="link" aria-disabled="true" data-act="maps_url">' . kits_icon( 'map-pin' ) . esc_html__( 'Directions', 'directoryweb' ) . '</span>'; // no map link yet: greyed out (field note)
 	$more = array();
 	foreach ( array( array( '' === $first, __( 'Phone', 'directoryweb' ), 'phone', 'phone' ), array( ! aw_lf( $id, 'aw_email' ), __( 'Email', 'directoryweb' ), 'mail', 'email' ), array( ! aw_lf( $id, 'aw_website' ), __( 'Website', 'directoryweb' ), 'world', '' ) ) as $na ) {
 		if ( $na[0] ) { // a missing way to reach them is said, never hidden
@@ -189,12 +189,12 @@ function aw_block_listing_contact( $a, $id ) {
 		}
 	}
 	foreach ( array_slice( $phones, 1 ) as $p ) {
-		$tel = aw_tel_url( $p['number'] );
+		$tel = directoryweb_tel_url( $p['number'] );
 		if ( '' === $tel ) {
 			continue;
 		}
 		$num    = '<a href="' . esc_url( $tel ) . '" data-act="phone">' . esc_html( $p['number'] ) . '</a>' . ( function_exists( 'aw_unverified_mark' ) ? aw_unverified_mark( $id, $p['number'] ) : '' );
-		$waa    = $p['whatsapp'] && strlen( aw_normalise_phone( $p['number'] ) ) > 5 ? ' <a class="aw-listing-wa" href="' . esc_url( 'https://wa.me/' . aw_normalise_phone( $p['number'] ) ) . '" rel="noopener" data-act="whatsapp" aria-label="' . esc_attr( 'WhatsApp ' . $p['number'] ) . '">' . aw_i( 'brand-whatsapp' ) . '</a>' : '';
+		$waa    = $p['whatsapp'] && strlen( directoryweb_normalise_phone( $p['number'] ) ) > 5 ? ' <a class="aw-listing-wa" href="' . esc_url( 'https://wa.me/' . directoryweb_normalise_phone( $p['number'] ) ) . '" rel="noopener" data-act="whatsapp" aria-label="' . esc_attr( 'WhatsApp ' . $p['number'] ) . '">' . kits_icon( 'brand-whatsapp' ) . '</a>' : '';
 		$more[] = array( '' !== $p['label'] ? $p['label'] : __( 'Phone', 'directoryweb' ), $num . $waa, $p['whatsapp'] ? 'brand-whatsapp' : 'phone' );
 	}
 	// A second email or website found by the enrichment worker is kept beside the first, both marked unverified.
@@ -235,7 +235,7 @@ function aw_block_listing_services( $a, $id ) {
 	if ( ! aw_listing_here( $id ) ) {
 		return function_exists( 'aw_item_editor_preview' ) ? aw_item_editor_preview( 'Services: services, animals helped, areas served, languages' ) : '';
 	}
-	$names = function_exists( 'aw_listing_service_names' ) ? aw_listing_service_names( $id ) : array();
+	$names = directoryweb_listing_service_names( $id );
 	$svc   = $names ? esc_html( implode( ', ', $names ) ) : esc_html( aw_lf( $id, 'aw_services' ) );
 	$by    = aw_lf( $id, 'aw_services_source' );
 	if ( '' === $svc && aw_listing_type_services( $id ) ) { // nothing stated: the services its type implies, said so
@@ -244,7 +244,7 @@ function aw_block_listing_services( $a, $id ) {
 	}
 	if ( '' !== $svc && '' !== $by ) { // who said so, and when
 		/* translators: %s: who stated the services. */
-		$svc .= '<span class="aw-facts-note">' . esc_html( sprintf( __( 'Stated by %s', 'directoryweb' ), 'organisation' === $by ? __( 'the organisation', 'directoryweb' ) : $by ) ) . ( aw_lf( $id, 'aw_services_on' ) ? ' ' . aw_date( aw_lf( $id, 'aw_services_on' ) ) : '' ) . '</span>';
+		$svc .= '<span class="aw-facts-note">' . esc_html( sprintf( __( 'Stated by %s', 'directoryweb' ), 'organisation' === $by ? __( 'the organisation', 'directoryweb' ) : $by ) ) . ( aw_lf( $id, 'aw_services_on' ) ? ' ' . kits_date( aw_lf( $id, 'aw_services_on' ), null, 'aw-date' ) : '' ) . '</span>';
 	}
 	$rows = array(
 		array( __( 'Services', 'directoryweb' ), '' !== $svc ? $svc : aw_listing_na( $id ), 'check' ),
@@ -283,10 +283,10 @@ const AW_TYPE_SERVICES = array(
 /** The service names a listing's types imply, combined and without repeats, in the tags' current names. */
 function aw_listing_type_services( $id ) {
 	$out = array();
-	foreach ( function_exists( 'aw_listing_types' ) ? aw_listing_types( $id ) : array() as $t ) {
+	foreach ( directoryweb_listing_types( $id ) as $t ) {
 		foreach ( AW_TYPE_SERVICES[ $t->slug ] ?? array() as $svc ) {
 			$term         = get_term_by( 'slug', $svc, 'post_tag' );
-			$out[ $svc ] = $term ? $term->name : ( AW_SERVICES[ $svc ] ?? $svc );
+			$out[ $svc ] = $term ? $term->name : ( DIRECTORYWEB_SERVICES[ $svc ] ?? $svc );
 		}
 	}
 	return array_values( $out );
@@ -300,7 +300,7 @@ function aw_block_listing_organisation( $a, $id ) {
 	}
 	$rows = array(
 		array( __( 'Established', 'directoryweb' ), esc_html( aw_lf( $id, 'aw_founded' ) ), 'calendar' ),
-		array( __( 'Incorporated', 'directoryweb' ), aw_lf( $id, 'aw_reg_date' ) && strtotime( aw_lf( $id, 'aw_reg_date' ) ) ? aw_date( aw_lf( $id, 'aw_reg_date' ) ) : '', 'legal' ), // the registration date as NGO Darpan lists it (owner, 20 Oct 2026)
+		array( __( 'Incorporated', 'directoryweb' ), aw_lf( $id, 'aw_reg_date' ) && strtotime( aw_lf( $id, 'aw_reg_date' ) ) ? kits_date( aw_lf( $id, 'aw_reg_date' ), null, 'aw-date' ) : '', 'legal' ), // the registration date as NGO Darpan lists it (owner, 20 Oct 2026)
 		array( __( 'Head of the organisation', 'directoryweb' ), esc_html( aw_lf( $id, 'aw_head' ) ), 'user' ),
 	);
 	return aw_listing_group( 'organisation', __( 'Organisation', 'directoryweb' ), aw_listing_dl( $rows ) );
@@ -318,7 +318,7 @@ function aw_block_listing_profiles( $a, $id ) {
 		if ( aw_lf( $id, $k ) ) {
 			/* translators: 1: organisation, 2: network. */
 			$label  = sprintf( __( '%1$s on %2$s', 'directoryweb' ), get_the_title( $id ), $l[1] );
-			$mark   = 'aw_g_profile' === $k ? '<img class="aw-listing-profile-img" src="' . esc_url( aw_theme_file_uri( 'assets/img/google-maps.png' ) ) . '" alt="" width="20" height="20">' : '<span class="kit-ico kit-ico--' . esc_attr( $l[0] ) . '" aria-hidden="true"></span>'; // Google: its own Maps mark
+			$mark   = 'aw_g_profile' === $k ? '<img class="aw-listing-profile-img" src="' . esc_url( function_exists( 'aw_theme_file_uri' ) ? aw_theme_file_uri( 'assets/img/google-maps.png' ) : DIRECTORYWEB_URL . 'assets/img/google-maps.png' ) . '" alt="" width="20" height="20">' : '<span class="kit-ico kit-ico--' . esc_attr( $l[0] ) . '" aria-hidden="true"></span>'; // Google: its own Maps mark
 			$links .= '<a class="aw-listing-profile" href="' . esc_url( aw_lf( $id, $k ) ) . '" rel="' . esc_attr( $rel ) . '" target="_blank" data-act="' . esc_attr( substr( $k, 3 ) ) . '" aria-label="' . esc_attr( $label ) . '" title="' . esc_attr( $l[1] ) . '">' . $mark . '</a>';
 		}
 	}
@@ -336,7 +336,7 @@ function aw_block_listing_support( $a, $id ) {
 	// No money anywhere (owner, 31 Oct 2026): no Donate link and no UPI ID on listings; the stored values stay, unused.
 	foreach ( array( 'aw_volunteer_url' => array( 'name', __( 'Volunteer', 'directoryweb' ) ), 'aw_adopt_url' => array( 'home', __( 'Adopt', 'directoryweb' ) ) ) as $k => $l ) {
 		if ( aw_lf( $id, $k ) ) {
-			$btns .= '<a class="kit-btn kit-btn--secondary" href="' . esc_url( aw_lf( $id, $k ) ) . '" rel="' . esc_attr( $rel ) . '" target="_blank" data-act="' . esc_attr( substr( $k, 3 ) ) . '">' . aw_i( $l[0] ) . esc_html( $l[1] ) . '</a>';
+			$btns .= '<a class="kit-btn kit-btn--secondary" href="' . esc_url( aw_lf( $id, $k ) ) . '" rel="' . esc_attr( $rel ) . '" target="_blank" data-act="' . esc_attr( substr( $k, 3 ) ) . '">' . kits_icon( $l[0] ) . esc_html( $l[1] ) . '</a>';
 		}
 	}
 	$body = '' !== $btns ? '<div class="aw-listing-actions">' . $btns . '</div>' : '';
@@ -367,7 +367,7 @@ function aw_block_listing_photos( $a, $id ) {
 		$out .= '<figure><div class="aw-org-photo">' . wp_get_attachment_image( $pid, 'medium_large', false, array( 'loading' => 'lazy' ) ) . '</div>' . ( $cap ? '<figcaption>' . esc_html( $cap ) . '</figcaption>' : '' ) . '</figure>';
 	}
 	if ( '' !== $out ) {
-		aw_use_component_style( 'aw-directory' ); // aw-org-gallery, aw-org-photo
+		directoryweb_use_style( 'aw-directory' ); // aw-org-gallery, aw-org-photo
 	}
 	return aw_listing_group( 'photos', __( 'Photos', 'directoryweb' ), '' !== $out ? '<div class="aw-org-gallery">' . $out . '</div>' : '' );
 }
@@ -447,8 +447,8 @@ function aw_block_listing_activity( $a, $id ) {
 	if ( aw_lf( $id, 'aw_g_rating' ) ) {
 		$on     = aw_listing_figures_on( $id, 'google' );
 		$parts  = aw_listing_parts( array( '<span aria-hidden="true">★</span> ' . esc_html( aw_lf( $id, 'aw_g_rating' ) ) . '<span class="screen-reader-text"> ' . esc_html__( 'out of 5', 'directoryweb' ) . '</span>', aw_lf( $id, 'aw_g_reviews' ) ? esc_html( sprintf( /* translators: %s: number. */ _n( '%s review', '%s reviews', (int) aw_lf( $id, 'aw_g_reviews' ), 'directoryweb' ), number_format_i18n( (int) aw_lf( $id, 'aw_g_reviews' ) ) ) ) : '' ) );
-		$boxes .= '<div class="aw-activity-box"><p class="aw-activity-name">' . aw_i( 'map-pin' ) . esc_html__( 'Google', 'directoryweb' ) . '</p><p class="aw-activity-figures">' . $parts . '</p>'
-			. ( $on ? '<p class="aw-activity-on">' . esc_html__( 'as on', 'directoryweb' ) . ' ' . aw_date( $on ) . '</p>' : '' )
+		$boxes .= '<div class="aw-activity-box"><p class="aw-activity-name">' . kits_icon( 'map-pin' ) . esc_html__( 'Google', 'directoryweb' ) . '</p><p class="aw-activity-figures">' . $parts . '</p>'
+			. ( $on ? '<p class="aw-activity-on">' . esc_html__( 'as on', 'directoryweb' ) . ' ' . kits_date( $on, null, 'aw-date' ) . '</p>' : '' )
 			. ( aw_lf( $id, 'aw_g_profile' ) ? '<a class="aw-activity-link" href="' . esc_url( aw_lf( $id, 'aw_g_profile' ) ) . '" rel="' . esc_attr( $rel ) . '" target="_blank">' . esc_html__( 'View on Google', 'directoryweb' ) . ' <span aria-hidden="true">↗</span></a>' : '' ) . '</div>';
 	}
 	if ( aw_lf( $id, 'aw_ig_followers' ) || aw_lf( $id, 'aw_ig_posts' ) || aw_lf( $id, 'aw_last_post' ) ) {
@@ -457,11 +457,11 @@ function aw_block_listing_activity( $a, $id ) {
 			array(
 				aw_lf( $id, 'aw_ig_followers' ) ? esc_html( sprintf( /* translators: %s: number. */ __( '%s followers', 'directoryweb' ), number_format_i18n( (int) aw_lf( $id, 'aw_ig_followers' ) ) ) ) : '',
 				aw_lf( $id, 'aw_ig_posts' ) ? esc_html( sprintf( /* translators: %s: number. */ __( '%s posts', 'directoryweb' ), number_format_i18n( (int) aw_lf( $id, 'aw_ig_posts' ) ) ) ) : '',
-				aw_lf( $id, 'aw_last_post' ) ? esc_html__( 'last post', 'directoryweb' ) . ' ' . aw_date( aw_lf( $id, 'aw_last_post' ) ) : '',
+				aw_lf( $id, 'aw_last_post' ) ? esc_html__( 'last post', 'directoryweb' ) . ' ' . kits_date( aw_lf( $id, 'aw_last_post' ), null, 'aw-date' ) : '',
 			)
 		);
-		$boxes .= '<div class="aw-activity-box"><p class="aw-activity-name">' . aw_i( 'instagram' ) . esc_html__( 'Instagram', 'directoryweb' ) . '</p><p class="aw-activity-figures">' . $parts . '</p>'
-			. ( $on ? '<p class="aw-activity-on">' . esc_html__( 'as on', 'directoryweb' ) . ' ' . aw_date( $on ) . '</p>' : '' )
+		$boxes .= '<div class="aw-activity-box"><p class="aw-activity-name">' . kits_icon( 'instagram' ) . esc_html__( 'Instagram', 'directoryweb' ) . '</p><p class="aw-activity-figures">' . $parts . '</p>'
+			. ( $on ? '<p class="aw-activity-on">' . esc_html__( 'as on', 'directoryweb' ) . ' ' . kits_date( $on, null, 'aw-date' ) . '</p>' : '' )
 			. ( aw_lf( $id, 'aw_instagram' ) ? '<a class="aw-activity-link" href="' . esc_url( aw_lf( $id, 'aw_instagram' ) ) . '" rel="' . esc_attr( $rel ) . '" target="_blank">' . esc_html__( 'View on Instagram', 'directoryweb' ) . ' <span aria-hidden="true">↗</span></a>' : '' ) . '</div>';
 	}
 	return aw_listing_group( 'activity', __( 'Activity', 'directoryweb' ), '' !== $boxes ? '<div class="aw-activity">' . $boxes . '</div>' : '' );
@@ -471,18 +471,18 @@ function aw_block_listing_activity( $a, $id ) {
 
 /** A small card for "In the press": 4:3 picture, type and date, title (press coverage links to the article itself). */
 function aw_listing_press_card( $pid ) {
-	aw_use_component_style( 'aw-single' ); // aw-more-card, aw-more-head, aw-more-list
+	directoryweb_use_style( 'aw-single' ); // aw-more-card, aw-more-head, aw-more-list
 	$type = get_post_type( $pid );
 	$url  = function_exists( 'aw_featured_url' ) ? aw_featured_url( $pid ) : get_permalink( $pid );
 	$ext  = 'aw_press' === $type;
 	$ts   = function_exists( 'aw_item_date_ts' ) ? aw_item_date_ts( $pid ) : (int) get_post_time( 'U', true, $pid );
 	$name = defined( 'AW_FEATURED_TYPES' ) ? ( AW_FEATURED_TYPES[ $type ] ?? '' ) : '';
-	return '<li><article class="kit-card kit-minicard aw-more-card">' . ( function_exists( 'aw_item_card_media' ) ? aw_item_card_media( $pid ) : '' ) . '<div class="kit-minicard-body aw-more-body"><p class="kit-minicard-meta aw-more-meta kit-meta-row">' . ( $ts ? aw_date( $ts ) : '' ) . ( '' !== $name ? '<span class="aw-more-type">' . esc_html( $name ) . '</span>' : '' ) . '</p>' // the date always first in a meta row (owner)
+	return '<li><article class="kit-card kit-minicard aw-more-card">' . ( function_exists( 'aw_item_card_media' ) ? aw_item_card_media( $pid ) : '' ) . '<div class="kit-minicard-body aw-more-body"><p class="kit-minicard-meta aw-more-meta kit-meta-row">' . ( $ts ? kits_date( $ts, null, 'aw-date' ) : '' ) . ( '' !== $name ? '<span class="aw-more-type">' . esc_html( $name ) . '</span>' : '' ) . '</p>' // the date always first in a meta row (owner)
 		. '<h3 class="kit-minicard-title aw-more-title"><a href="' . esc_url( $url ) . '"' . ( $ext ? ' rel="noopener nofollow" target="_blank"' : '' ) . '>' . esc_html( html_entity_decode( get_the_title( $pid ), ENT_QUOTES ) ) . '</a></h3></div></article></li>';
 }
 
 function aw_block_listing_press( $a, $id ) {
-	aw_use_component_style( 'aw-single' ); // aw-more-card, aw-more-head, aw-more-list
+	directoryweb_use_style( 'aw-single' ); // aw-more-card, aw-more-head, aw-more-list
 	if ( ! aw_listing_here( $id ) || ! function_exists( 'aw_featured_items' ) ) {
 		return function_exists( 'aw_item_editor_preview' ) ? aw_item_editor_preview( 'In the press: items on the site that name this organisation' ) : '';
 	}
@@ -511,7 +511,7 @@ function aw_block_listing_opportunities( $a, $id ) {
 	if ( ! $ids || ! function_exists( 'aw_item_more_card' ) ) {
 		return '';
 	}
-	aw_use_component_style( 'aw-single' ); // aw-more-card, aw-more-head, aw-more-list
+	directoryweb_use_style( 'aw-single' ); // aw-more-card, aw-more-head, aw-more-list
 	/* translators: %s: organisation. */
 	return '<section class="aw-more-group aw-listing-opps" aria-labelledby="aw-opps-h"><h2 class="aw-more-head has-x-large-font-size" id="aw-opps-h">' . esc_html( sprintf( __( 'Opportunities at %s', 'directoryweb' ), get_the_title( $id ) ) ) . '</h2><ul class="kit-minicard-list aw-more-list">' . implode( '', array_map( 'aw_item_more_card', $ids ) ) . '</ul></section>';
 }
@@ -520,6 +520,9 @@ function aw_block_listing_opportunities( $a, $id ) {
 
 /** Campaigns linked to a listing, newest first: [ campaign ID => role ]. Organiser = aw_organisation, else the older aw_organiser; Partner = aw_campaign_partners plus older aw_participant rows; Supporter = aw_campaign_supporters (owner, 20 Oct 2026). */
 function aw_listing_campaigns( $id, $max = 3 ) {
+	if ( ! function_exists( 'aw_campaign_organiser' ) || ! function_exists( 'aw_campaign_partner_ids' ) ) {
+		return array(); // the campaign relations are Animal Writes Core's
+	}
 	$base  = array( 'post_type' => 'aw_campaign', 'post_status' => 'publish', 'numberposts' => 30, 'fields' => 'ids', 'orderby' => 'date', 'order' => 'DESC' );
 	$roles = array();
 	foreach ( get_posts( $base + array( 'meta_query' => array( 'relation' => 'OR', array( 'key' => 'aw_organisation', 'value' => (string) $id ), array( 'key' => 'aw_organiser', 'value' => (string) $id ) ) ) ) as $c ) { // phpcs:ignore WordPress.DB.SlowDBQuery
@@ -544,7 +547,7 @@ function aw_listing_campaigns( $id, $max = 3 ) {
 }
 
 function aw_block_listing_campaigns( $a, $id ) {
-	aw_use_component_style( 'aw-single' ); // aw-more-card, aw-more-head, aw-more-list
+	directoryweb_use_style( 'aw-single' ); // aw-more-card, aw-more-head, aw-more-list
 	if ( ! aw_listing_here( $id ) ) {
 		return function_exists( 'aw_item_editor_preview' ) ? aw_item_editor_preview( 'Campaigns with the organisation (Organiser / Partner / Supporter, up to 3)' ) : '';
 	}

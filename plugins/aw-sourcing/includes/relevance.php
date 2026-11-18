@@ -123,8 +123,8 @@ function aw_relevance_sections() {
 		}
 		return (object) $o;
 	};
-	foreach ( array_keys( aw_post_types() ) as $type ) {
-		$out[ $type ] = array( 'categories' => $names( 'category', aw_section_categories( $type ) ), 'tags' => $names( 'post_tag', aw_section_tags( $type ) ) );
+	foreach ( sourceweb_post_types() as $type ) {
+		$out[ $type ] = array( 'categories' => $names( 'category', sourceweb_section_categories( $type ) ), 'tags' => $names( 'post_tag', sourceweb_section_tags( $type ) ) );
 	}
 	return $out;
 }
@@ -148,7 +148,7 @@ function aw_relevance_row( WP_Post $p ) {
 	$text    = $p->post_excerpt ? $p->post_excerpt : wp_trim_words( wp_strip_all_tags( strip_shortcodes( $p->post_content ) ), 150 );
 	$issuer  = function_exists( 'aw_item_issuer' ) ? aw_item_issuer( $id ) : null;
 	$verdict = (string) get_post_meta( $id, 'aw_relevance', true );
-	$rtypes  = 'post' === $p->post_type ? wp_list_pluck( aw_item_tags( $id, aw_section_tags( 'post' ) ), 'slug' ) : array();
+	$rtypes  = 'post' === $p->post_type ? wp_list_pluck( sourceweb_item_tags( $id, sourceweb_section_tags( 'post' ) ), 'slug' ) : array();
 	$row     = array(
 		'id'          => $id,
 		'type'        => $p->post_type,
@@ -159,7 +159,7 @@ function aw_relevance_row( WP_Post $p ) {
 		'source_name' => (string) get_post_meta( $id, $press ? 'aw_press_publisher' : 'aw_source_name', true ),
 		'issuer'      => $issuer ? $issuer->name : '',
 		'resource_types' => $rtypes, // the Resource type tags (research, guide ...)
-		'tags'           => 'aw_press' === $p->post_type ? array() : wp_list_pluck( aw_item_tags( $id ), 'slug' ),
+		'tags'           => 'aw_press' === $p->post_type ? array() : wp_list_pluck( sourceweb_item_tags( $id ), 'slug' ),
 		'categories'     => 'aw_press' === $p->post_type ? array() : wp_get_post_terms( $id, 'category', array( 'fields' => 'slugs' ) ),
 		'verdict'     => $verdict ? json_decode( $verdict, true ) : null,
 	);
@@ -485,7 +485,7 @@ function aw_ingest_problems( $now = null ) {
 	}
 	// Scheduled tasks (cron-health.php): no trigger has called wp-cron.php for 30 minutes.
 	$cron = function_exists( 'aw_cron_last' ) ? aw_cron_last() : 0;
-	if ( $cron && $now - $cron >= AW_CRON_STALE ) {
+	if ( $cron && $now - $cron >= SOURCEWEB_CRON_STALE ) {
 		$out['cron'] = sprintf( 'Scheduled tasks have not run for %d minutes (last: %s). Hostinger\'s server cron, the GitHub "WordPress cron" job and the outside monitor have all stopped.', floor( ( $now - $cron ) / MINUTE_IN_SECONDS ), wp_date( 'j M Y, g:i a', $cron ) );
 	}
 	$n    = (int) ( $hb['sources'] ?? 0 );
@@ -524,7 +524,7 @@ add_action(
 	function () {
 		$age   = time() - (int) get_option( 'aw_ingest_watchdog_at', 0 );
 		$cron  = function_exists( 'aw_cron_last' ) ? aw_cron_last() : 0;
-		$stale = $cron && time() - $cron >= AW_CRON_STALE;
+		$stale = $cron && time() - $cron >= SOURCEWEB_CRON_STALE;
 		if ( ( $age >= HOUR_IN_SECONDS || ( $stale && $age >= 10 * MINUTE_IN_SECONDS ) ) && ! wp_installing() ) {
 			aw_ingest_watchdog();
 		}
