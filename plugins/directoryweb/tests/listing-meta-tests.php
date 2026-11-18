@@ -37,6 +37,7 @@ function delete_post_meta( $id, $k ) { global $meta; unset( $meta[ $id ][ $k ] )
 function register_post_meta( $t, $k, $a ) { global $reg; $reg[] = $t . '|' . $k . '|' . $a['type']; }
 
 require dirname( __DIR__ ) . '/includes/listing-meta.php';
+require dirname( __DIR__ ) . '/includes/listing-terms.php'; // directoryweb_normalise_phone()
 require dirname( __DIR__, 2 ) . '/animal-writes-core/includes/meta.php';
 
 $fails = 0;

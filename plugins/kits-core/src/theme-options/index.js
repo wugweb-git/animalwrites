@@ -41,7 +41,7 @@ const pdFields = data.pageDefaults?.fields || {};
 
 /**
  * The sections, in order: Header, Footer, Layout, Cards, then the sections
- * that still show today's fields (Content types, Socials, Share bar; a built section replaces its fallback), then the
+ * that still show today's fields (Display per type, Socials, Share bar; a built section replaces its fallback), then the
  * groups of any Theme Options fields not placed in them. Fields shown on Kits → Settings (speed, older content, font preload) are left out.
  *
  * @return {Array} [ { slug, label, items, links, info, legacy } ].

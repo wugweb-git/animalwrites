@@ -379,7 +379,7 @@ function aw_seo_cut_title( $text, $max = 60 ) {
  * that fits, the headline alone when only it fits, else the headline cut at a whole phrase (aw_seo_cut_title).
  */
 function aw_seo_headline_title( $title ) {
-	$t = aw_seo_headline_case( aw_seo_plain( $title ) ); // Title Case like every other title on the site
+	$t = aw_seo_headline_case( rankweb_plain_text( $title ) ); // Title Case like every other title on the site
 	return mb_strlen( aw_seo_branded( $t ) ) <= 60 ? aw_seo_branded( $t ) : $t; // over 60: no site name; a headline is never cut (owner, 15 Oct 2026)
 }
 
@@ -420,7 +420,7 @@ function aw_seo_headline_case( $text ) {
  * @return string
  */
 function aw_seo_resource_title( $post ) {
-	$t = aw_seo_plain( $post->post_title );
+	$t = rankweb_plain_text( $post->post_title );
 	$t = preg_replace( '/[\s,(–—-]*(?:dated\b)?[\s:–—-]*\d{1,2}\.\d{1,2}\.\d{4}\)?\.?$/u', '', $t ); // "… dated - 11.08.2026"
 	$t = preg_replace( '/[\s,;:.–—-]*\bdated$/u', '', $t );
 	$t = trim( preg_replace( '/^[“"]\s*(.*?)\s*[”"]$/u', '$1', trim( $t ) ), " \t.,;:" );
@@ -482,7 +482,7 @@ function aw_seo_fit( array $titles, $max = 60 ) {
 
 /** "{Name} in {District}" or "{Name} in {State}" (no comma as a separator; the place is not repeated when the name has it). */
 function aw_seo_listing_name( $id ) {
-	$name = preg_replace( '/[\s,;:\x{2013}\x{2014}-]+$/u', '', aw_seo_plain( get_post_field( 'post_title', $id ) ) ); // organisation names keep their hyphens (owner, 18 Oct 2026)
+	$name = preg_replace( '/[\s,;:\x{2013}\x{2014}-]+$/u', '', rankweb_plain_text( get_post_field( 'post_title', $id ) ) ); // organisation names keep their hyphens (owner, 18 Oct 2026)
 	list( $state, $district ) = function_exists( 'aw_item_place_names' ) ? aw_item_place_names( $id ) : array( '', '' );
 	$where = $district ? $district : $state;
 	return ( '' !== $where && false === mb_stripos( $name, $where ) ) ? $name . ' in ' . $where : $name;
@@ -561,7 +561,7 @@ function aw_seo_top_categories( $type ) {
  */
 function aw_seo_hub_intro_description( $type ) {
 	$page  = get_queried_object();
-	$intro = aw_seo_plain( ( $page instanceof WP_Post && '' !== trim( $page->post_excerpt ) ) ? $page->post_excerpt : aw_hub_intro( $type ) );
+	$intro = rankweb_plain_text( ( $page instanceof WP_Post && '' !== trim( $page->post_excerpt ) ) ? $page->post_excerpt : ( function_exists( 'aw_hub_intro' ) ? aw_hub_intro( $type ) : '' ) );
 	$count = 'post' === $type ? aw_seo_resources_count_label() : ''; // guides and research summaries counted apart
 	$count = '' !== $count ? $count : ( function_exists( 'aw_hub_count_label' ) ? aw_hub_count_label( $type ) : '' );
 	if ( '' === $count ) {
@@ -587,21 +587,21 @@ function aw_seo_awbi_description( $id, $desc ) {
 	if ( '' === $code || get_post_meta( $id, 'aw_awbi_dropped', true ) || has_excerpt( $id ) || ( '' !== trim( (string) $desc ) && ! preg_match( '/^Recognised by the Animal Welfare Board of India/i', trim( wp_strip_all_tags( (string) $desc ) ) ) ) ) {
 		return '';
 	}
-	$types = function_exists( 'aw_listing_types' ) ? aw_listing_types( $id ) : array();
+	$types = function_exists( 'directoryweb_listing_types' ) ? directoryweb_listing_types( $id ) : array();
 	if ( $types && count( $types ) > 1 ) { // the specific type (gaushala) before the general one
 		usort( $types, fn( $a, $b ) => (int) ( 'animal-welfare-organisation' === $a->slug ) - (int) ( 'animal-welfare-organisation' === $b->slug ) );
 	}
 	$type  = $types ? implode( ' ', array_map( fn( $w ) => preg_match( '/^[A-Z]{2,}$/', $w ) || 0 === stripos( $w, 'gaushala' ) ? ucfirst( $w ) : mb_strtolower( $w ), explode( ' ', trim( preg_replace( '/\s*\(.*?\)/', '', $types[0]->name ) ) ) ) ) : 'organisation';
 	list( $state, $district ) = aw_seo_item_place_names( $id );
 	$where = implode( ', ', array_unique( array_filter( array( $district, $state ) ) ) ); // Chandigarh, Delhi: the district and state share a name
-	$name  = preg_replace( '/[\s,;:]+$/u', '', aw_seo_plain( get_post_field( 'post_title', $id ) ) );
+	$name  = preg_replace( '/[\s,;:]+$/u', '', rankweb_plain_text( get_post_field( 'post_title', $id ) ) );
 	$line  = sprintf( '%1$s is an AWBI-recognised %2$s%3$s (AWBI code %4$s).', $name, $type, $where ? ' in ' . $where : '', $code );
 	return mb_strlen( $line ) <= 120 ? $line . ' Address, contact and how to help.' : $line; // whole sentences only
 }
 
 /** "{Listing type} in {District}, {State}. {Services}. Contact details, location and how to help." ('' without type or place). */
 function aw_listing_fact_description( $id ) {
-	$types = function_exists( 'aw_listing_types' ) ? aw_listing_types( $id ) : array();
+	$types = function_exists( 'directoryweb_listing_types' ) ? directoryweb_listing_types( $id ) : array();
 	$type  = $types ? $types[0]->name : '';
 	list( $state, $district ) = function_exists( 'aw_item_place_names' ) ? aw_item_place_names( $id ) : array( '', '' );
 	$where = implode( ', ', array_unique( array_filter( array( $district, $state ) ) ) ); // Chandigarh, Delhi: the district and state share a name
@@ -609,7 +609,7 @@ function aw_listing_fact_description( $id ) {
 		return '';
 	}
 	$lead = $type ? $type . ( $where ? ' in ' . $where : '' ) : 'In ' . $where;
-	$svc  = function_exists( 'aw_listing_service_names' ) ? aw_listing_service_names( $id ) : array();
+	$svc  = function_exists( 'directoryweb_listing_service_names' ) ? directoryweb_listing_service_names( $id ) : array();
 	$svc  = $svc ? implode( ', ', array_slice( $svc, 0, 4 ) ) : '';
 	return $lead . '. ' . ( $svc ? ucfirst( $svc ) . '. ' : '' ) . 'Contact details, location and how to help.';
 }

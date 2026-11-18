@@ -32,7 +32,7 @@ plugins/animal-writes-core/includes/site-check.php | admin page | add_submenu_pa
 plugins/animal-writes-core/includes/social-posts.php | admin page | add_submenu_page( aw_core_menu_parent(), 'Modules', 'Modules', aw_core_screen_cap( 'aw-modules' ), 'aw-modules', 'aw_modules_screen' ),
 plugins/animal-writes-core/includes/team-dates.php | admin page | add_submenu_page( aw_core_menu_parent(), 'Dates', 'Dates', aw_core_screen_cap( 'aw-dates' ), 'aw-dates', 'aw_team_dates_screen' ); // Kits → Dates
 plugins/animal-writes-core/includes/team-dates.php | admin style | <style> block
-plugins/animal-writes-core/theme/assets/css/aw-camp-band-aw.css | css Hero | section.aw-camp-band.aw-ed-hero--campaign | min-height: var(--kit-hero-h)
+themes/kits-by-wugweb/assets/site/css/aw-camp-band-aw.css | css Hero | section.aw-camp-band.aw-ed-hero--campaign | min-height: var(--kit-hero-h)
 plugins/aw-seo-extras/includes/faq-overview.php | admin page | add_submenu_page( AW_SEO_MENU, 'FAQ', 'FAQ', RANKWEB_CAP, 'aw-faq', 'aw_faq_admin_page' ); // RankWeb → FAQ (overview.php has the menu)
 plugins/aw-seo-extras/includes/overview.php | admin page | add_menu_page( 'RankWeb', 'RankWeb', RANKWEB_CAP, AW_SEO_MENU, 'aw_seo_overview_page', $icon, '58.4' );
 plugins/aw-seo-extras/includes/overview.php | admin page | add_submenu_page( AW_SEO_MENU, 'RankWeb', 'Overview', RANKWEB_CAP, AW_SEO_MENU, 'aw_seo_overview_page' );
@@ -47,16 +47,18 @@ plugins/aw-sourcing/includes/review-queue.php | admin page | add_submenu_page( A
 plugins/insightweb/includes/search-insights/admin.php | admin page | add_menu_page( __( 'Search Insights', 'insightweb' ), 'InsightWeb', aw_si_cap(), AW_SI_SLUG, 'aw_si_screen', $icon, '58.5' );
 plugins/insightweb/includes/search-insights/admin.php | admin page | add_submenu_page( AW_SI_SLUG, __( 'Search Insights', 'insightweb' ), __( 'Search Insights', 'insightweb' ), aw_si_cap(), AW_SI_SLUG, 'aw_si_screen' );
 plugins/kits-core/includes/admin-app.php | admin style | wp_enqueue_style( 'wp-components'
-plugins/kits-core/includes/admin-home.php | admin page | add_menu_page( 'Kits', 'Kits', KITS_CAP, KITS_MENU, 'kits_home_page', $icon, '58.1' );
-plugins/kits-core/includes/admin-home.php | admin page | add_submenu_page( KITS_MENU, 'Home', 'Home', KITS_CAP, KITS_MENU, 'kits_home_page' );
+plugins/kits-core/includes/admin-home.php | admin page | add_menu_page( __( 'Kits', 'kits-core' ), __( 'Kits', 'kits-core' ), KITS_CAP, KITS_MENU, 'kits_home_page', $icon, '58.1' );
+plugins/kits-core/includes/admin-home.php | admin page | add_submenu_page( KITS_MENU, __( 'Home', 'kits-core' ), __( 'Home', 'kits-core' ), KITS_CAP, KITS_MENU, 'kits_home_page' );
 plugins/kits-core/includes/admin-kits-frame.php | admin style | wp_enqueue_style( 'kits-shell'
 plugins/kits-core/includes/admin-menu.php | admin page | add_submenu_page( '', (string) ( $item[3] ?? $item[0] ), '', (string) $item[1], $slug, fn() => do_action( $hook ) ); // phpcs:ignore WordPress.NamingConventions
-plugins/kits-core/includes/admin-menu.php | admin page | add_submenu_page( KITS_MENU, 'Help', 'Help', KITS_CAP, 'kits-help', 'kits_help_page' );
-plugins/kits-core/includes/admin-menu.php | admin page | add_submenu_page( KITS_MENU, 'Settings', 'Settings', 'manage_options', 'kits-settings', 'kits_settings_page' );
-plugins/kits-core/includes/admin-menu.php | admin page | add_submenu_page( KITS_MENU, 'Theme Options', 'Theme Options', 'manage_options', 'kits-options', 'kits_options_page' );
-plugins/kits-core/includes/admin-menu.php | admin page | add_submenu_page( KITS_MENU, 'Tools', 'Tools', 'edit_theme_options', 'kits-tools', 'kits_transfer_page' );
+plugins/kits-core/includes/admin-menu.php | admin page | add_submenu_page( KITS_MENU, __( 'Help', 'kits-core' ), __( 'Help', 'kits-core' ), KITS_CAP, 'kits-help', 'kits_help_page' );
+plugins/kits-core/includes/admin-menu.php | admin page | add_submenu_page( KITS_MENU, __( 'Settings', 'kits-core' ), __( 'Settings', 'kits-core' ), 'manage_options', 'kits-settings', 'kits_settings_page' );
+plugins/kits-core/includes/admin-menu.php | admin page | add_submenu_page( KITS_MENU, __( 'Theme Options', 'kits-core' ), __( 'Theme Options', 'kits-core' ), 'manage_options', 'kits-options', 'kits_options_page' );
+plugins/kits-core/includes/admin-menu.php | admin page | add_submenu_page( KITS_MENU, __( 'Tools', 'kits-core' ), __( 'Tools', 'kits-core' ), 'manage_options', 'kits-tools', 'kits_transfer_page' );
 plugins/kits-core/includes/admin-shell.php | admin style | wp_enqueue_style( 'kits-shell'
 plugins/kits-core/includes/admin-shell.php | admin style | wp_register_style( 'kits-shell'
+plugins/kits-core/includes/dashboard-cards.php | admin style | wp_enqueue_style( 'kits-dash-cards'
+plugins/kits-core/includes/dashboard-cards.php | admin style | wp_register_style( 'kits-dash-cards'
 plugins/mailweb/includes/mailweb-ui.php | admin style | wp_enqueue_style( 'mailweb-admin'
 plugins/mailweb/includes/overview.php | admin page | add_menu_page( __( 'MailWeb', 'mailweb' ), __( 'MailWeb', 'mailweb' ) . $badge, MAILWEB_CAP, 'mailweb', 'mailweb_inbox_page', $icon, '58.6' ); // the inbox (inb
 plugins/mailweb/includes/overview.php | admin page | add_submenu_page( 'mailweb', __( 'MailWeb overview', 'mailweb' ), __( 'Overview', 'mailweb' ), MAILWEB_CAP, 'mailweb-overview', 'mailweb_home_page' ); // home.p

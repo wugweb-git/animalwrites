@@ -124,7 +124,7 @@ function aw_rm_page_schema_extra( $id ) {
 		return array(
 			'potentialAction' => array(
 				'@type'  => 'JoinAction',
-				'name'   => aw_seo_plain( get_the_title( $id ) ),
+				'name'   => rankweb_plain_text( get_the_title( $id ) ),
 				'target' => get_permalink( $id ),
 				'object' => array( '@id' => home_url( '/#organization' ) ),
 			),

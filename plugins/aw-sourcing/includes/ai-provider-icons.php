@@ -1,7 +1,7 @@
 <?php
 /**
  * Each AI provider's own site icon, kept in option aw_ai_provider_icons (host => attachment ID, 0 = tried and none
- * found). It fills the way Kits Core fills the publishers' icons: on its hourly aw_fetch_favicons event, a few hosts a
+ * found). It fills the way SourceWeb fills the publishers' icons (attribution.php): on the hourly aw_fetch_favicons event, a few hosts a
  * run, Google's favicon service then the host's /favicon.ico, saved once into the media library.
  *
  * @package aw-sourcing
@@ -36,7 +36,7 @@ const AW_AI_HOSTS = array(
 	'tinyfish'    => 'tinyfish.ai',
 );
 
-// Kits Core's hourly favicon run: also fetch the icons of the providers that have a saved key (five a run at most).
+// The hourly favicon run (attribution.php): also fetch the icons of the providers that have a saved key (five a run at most).
 add_action(
 	'aw_fetch_favicons',
 	function () {

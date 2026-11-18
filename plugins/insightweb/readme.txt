@@ -25,7 +25,7 @@ InsightWeb measures how a Kits site does in search. It reads data and makes sugg
 
 = What it needs =
 
-* Kits Core, Animal Writes Core (the keyword table) and Rank Math SEO. Without them InsightWeb shows one notice and does nothing else.
+* Kits Core and Rank Math SEO. Without them InsightWeb shows one notice and does nothing else. The keyword table (wp_aw_si_keywords, wp_aw_si_kw_map) is InsightWeb's own and loads without them, because SourceWeb uses it too.
 * Site Kit by Google for Search Console and GA4.
 
 = Keys =

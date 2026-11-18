@@ -1,12 +1,8 @@
 <?php
 /**
- * Animal Writes theme parts (once the animal-writes child theme's), brought by this plugin so the site runs Kits by
- * Wugweb with no child theme (as Uncode sites run Uncode with Uncode Core). The plugin's theme/ folder is their one
- * source; the child theme was retired (its folder left the repository on 14 Nov 2026).
- *
- * With Kits as the active theme, theme-parts-assets.php (styles, scripts, files, fonts) and theme-parts-templates.php
- * (templates, template parts, patterns) serve them. Were an animal-writes child theme active again, nothing here would
- * run and it would serve its own files.
+ * The Animal Writes theme parts moved to the Kits theme's site folder (themes/kits-by-wugweb/assets/site/, served by
+ * the theme's inc/site-layer.php) on 18 Nov 2026; they were this plugin's theme/ folder. These are the old names, kept
+ * for the callers that still use them; each one hands over to the theme.
  *
  * @package animal-writes-core
  */
@@ -15,29 +11,29 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/** Folder of the files this plugin carries for the theme (fonts, images, CSS, JS). */
-define( 'AW_THEME_PARTS_DIR', AW_CORE_DIR . 'theme/' );
-
-/**
- * Whether this plugin serves the Animal Writes theme parts: true when Kits by Wugweb itself is the active theme
- * (no animal-writes child). Filter aw_core_theme_parts_on to force it either way.
- */
+/** Whether the theme serves the Animal Writes site layer (Kits by Wugweb with its assets/site/ folder). */
 function aw_core_theme_parts_on(): bool {
-	$on = 'animal-writes' !== get_stylesheet() && 'kits-by-wugweb' === get_template();
-	return (bool) apply_filters( 'aw_core_theme_parts_on', $on );
+	return function_exists( 'kits_site_on' ) && kits_site_on();
 }
 
 /**
- * Address of a theme file (path relative to the theme root, e.g. 'assets/img/google-maps.png'): the child theme's copy
- * while it is active, else this plugin's copy.
+ * Address of a site file, given by its old path below the theme root (e.g. 'assets/img/google-maps.png', now
+ * assets/site/img/google-maps.png in the Kits theme).
  *
- * @param string $file Path relative to the theme root.
+ * @param string $file Old path relative to the theme root.
  */
 function aw_theme_file_uri( string $file ): string {
-	$file = ltrim( $file, '/' );
-	return aw_core_theme_parts_on() ? plugins_url( 'theme/' . $file, AW_CORE_DIR . 'animal-writes-core.php' ) : get_theme_file_uri( $file );
+	$file = (string) preg_replace( '#^assets/#', '', ltrim( $file, '/' ) );
+	return function_exists( 'kits_site_uri' ) ? kits_site_uri( $file ) : '';
 }
 
-require_once AW_CORE_DIR . 'includes/theme-parts-assets.php';
-require_once AW_CORE_DIR . 'includes/theme-parts-templates.php';
-require_once AW_CORE_DIR . 'includes/theme-switch.php';
+/**
+ * Called by the PHP that prints a component: this page loads that component's stylesheet.
+ *
+ * @param string $handle Handle from the site's component list (kits_site_component_files()).
+ */
+function aw_use_component_style( string $handle ): void {
+	if ( function_exists( 'kits_use_component_style' ) ) {
+		kits_use_component_style( $handle );
+	}
+}

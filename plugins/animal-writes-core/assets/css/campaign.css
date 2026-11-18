@@ -150,11 +150,11 @@
 	min-height: var(--kit-hero-h); /* only text zoomed to 200% makes it taller (WCAG 1.4.4) */
 	background:
 		linear-gradient(to bottom, var(--camp-cream) 0%, rgb(251 238 231 / .92) 40%, rgb(251 238 231 / 0) 70%),
-		url("/wp-content/plugins/animal-writes-core/theme/assets/img/campaigns/supreme-court-stray-dog-phone.webp") center bottom / cover no-repeat,
+		url("/wp-content/themes/kits-by-wugweb/assets/site/img/campaigns/supreme-court-stray-dog-phone.webp") center bottom / cover no-repeat,
 		var(--camp-cream);
 }
 @media (min-width: 1200px) {
-	.aw-camp.aw-camp--sc-stray-dogs .aw-camp-hero.aw-camp-section.alignfull { background: var(--camp-cream) url("/wp-content/plugins/animal-writes-core/theme/assets/img/campaigns/supreme-court-stray-dog-hero.webp") no-repeat right bottom / auto 100%; }
+	.aw-camp.aw-camp--sc-stray-dogs .aw-camp-hero.aw-camp-section.alignfull { background: var(--camp-cream) url("/wp-content/themes/kits-by-wugweb/assets/site/img/campaigns/supreme-court-stray-dog-hero.webp") no-repeat right bottom / auto 100%; }
 	.aw-camp--sc-stray-dogs .aw-camp-hero-cols > .wp-block-column { align-self: flex-start; }
 	.aw-camp--sc-stray-dogs .aw-camp-hero .aw-camp-poster { max-width: 26rem; }
 }
@@ -235,12 +235,12 @@
 .aw-camp.aw-camp--sc-stray-dogs #act .aw-camp-grid > .aw-camp-card:is(:nth-child(2), :nth-child(4)) :is(h3, p, a:not(.wp-element-button), .aw-camp-card-ico) { color: var(--camp-primary); }
 .aw-camp.aw-camp--sc-stray-dogs #act .aw-camp-grid > .aw-camp-card:is(:nth-child(2), :nth-child(4)) .aw-camp-card-ico { background: rgb(58 23 48 / 0.1); }
 .aw-camp.aw-camp--sc-stray-dogs #act .aw-camp-grid > .aw-camp-card:nth-child(3) { background: repeating-linear-gradient(180deg, transparent 0 calc(var(--kit-space-6) - 1px), rgb(58 23 48 / 0.08) calc(var(--kit-space-6) - 1px) var(--kit-space-6)), var(--kit-color-surface-soft); }
-.aw-camp.aw-camp--sc-stray-dogs #act .aw-camp-grid > .aw-camp-card:nth-child(5) { background: linear-gradient(90deg, rgb(32 13 26 / 0.94) 0%, rgb(32 13 26 / 0.88) 55%, rgb(32 13 26 / 0.7) 100%), url("/wp-content/plugins/animal-writes-core/theme/assets/img/campaigns/supreme-court-stray-dog-share.jpg") 42% 30% / 260% auto no-repeat, rgb(32 13 26); }
+.aw-camp.aw-camp--sc-stray-dogs #act .aw-camp-grid > .aw-camp-card:nth-child(5) { background: linear-gradient(90deg, rgb(32 13 26 / 0.94) 0%, rgb(32 13 26 / 0.88) 55%, rgb(32 13 26 / 0.7) 100%), url("/wp-content/themes/kits-by-wugweb/assets/site/img/campaigns/supreme-court-stray-dog-share.jpg") 42% 30% / 260% auto no-repeat, rgb(32 13 26); }
 @media (min-width: 768px) { .aw-camp.aw-camp--sc-stray-dogs #act .aw-camp-grid > .aw-camp-card:nth-child(5) { background-position: 0 0, 45% 40%; background-size: auto, 200% auto; } }
 /* Lead: the text on the picture (owner, 13 Nov 2026: picture tiles put their text on the picture, never a picture band
    with the text below). The dog and court picture covers the whole tile under a plum overlay of 0.76 to 0.9: white text
    on it is at least 6:1 over the picture's lightest pixels (WCAG AA 4.5:1). */
-.aw-camp.aw-camp--sc-stray-dogs #act .aw-camp-grid > .aw-camp-card:nth-child(1) { background: linear-gradient(180deg, rgb(58 23 48 / 0.76) 0%, rgb(58 23 48 / 0.9) 100%), url("/wp-content/plugins/animal-writes-core/theme/assets/img/campaigns/supreme-court-stray-dog-share.jpg") 50% 40% / cover no-repeat, var(--camp-mark); }
+.aw-camp.aw-camp--sc-stray-dogs #act .aw-camp-grid > .aw-camp-card:nth-child(1) { background: linear-gradient(180deg, rgb(58 23 48 / 0.76) 0%, rgb(58 23 48 / 0.9) 100%), url("/wp-content/themes/kits-by-wugweb/assets/site/img/campaigns/supreme-court-stray-dog-share.jpg") 50% 40% / cover no-repeat, var(--camp-mark); }
 /* The share bar under the share message */
 .aw-camp--sc-stray-dogs .aw-camp-share-kit { margin: var(--kit-space-4) 0; }
 

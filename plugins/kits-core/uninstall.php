@@ -8,21 +8,24 @@
  *
  * Options:
  *   kits_theme_options, kits_page_defaults, kits_settings_backup, kits_settings_backup_defaults, kits_altcha_key,
- *   kits_ga4_via_gtm, kits_preview_devices, kits_preview_ips, kits_preview_links, kits_spot_map, kits_presets_enabled;
+ *   kits_ga4_via_gtm, kits_preview_devices, kits_preview_ips, kits_preview_links, kits_spot_map, kits_presets_enabled,
+ *   kits_presets_rewrite, kits_presets_consent,
+ *   kits_daily_backup (the daily backup's switch) and aw_backup_last (its last run, backups.php), aw_error_pages (the error pages' state, error-pages.php),
  *   the media records that came from Animal Writes Core on 18 Nov 2026: aw_category_images, aw_thumb_map,
  *   aw_media_merge_log, aw_media_merge_data_*, aw_media_reuse_log, aw_media_webp_log; kits_delete_data_on_uninstall.
  * Transients (they expire anyway): kits_preview_link_*, kits_thanks_*, kits_transfer_result_*, kits_altcha_*,
- *   aw_media_reuse_notice_*, aw_thumb_dupes_n, and the site transient kits_update_release.
- * Scheduled events: kits_spot_map_daily, aw_thumb_rebuild.
+ *   aw_media_reuse_notice_*, aw_thumb_dupes_n, aw_error_pages_checked, and the site transient kits_update_release.
+ * Scheduled events: kits_spot_map_daily, aw_daily_backup, aw_thumb_rebuild.
  * Tables: none of its own.
  *
  * Never deleted, even when ticked:
  * - Posts, pages, synced patterns, Styles (wp_global_styles), terms, users, attachments and any post meta (the
  *   _kits_* Page Options of each page stay).
- * - Shared data Kits Core keeps for the other plugins: the keyword tables ({prefix}aw_si_keywords and
- *   {prefix}aw_si_kw_map) and their version option aw_kw_db, the sourcing lists aw_sources, aw_publishers and
- *   aw_relevance, the aw_fetch_favicons event, and the aw_form_* / aw_rl_* form transients (shared with Animal Writes
- *   Core; they expire within the hour).
+ * - The aw_form_* / aw_rl_* form transients (shared with Animal Writes Core; they expire within the hour).
+ * - The keyword tables ({prefix}aw_si_keywords, {prefix}aw_si_kw_map) and aw_kw_db, the sourcing lists aw_sources,
+ *   aw_publishers and aw_relevance, and the aw_fetch_favicons event: InsightWeb's and SourceWeb's since 18 Nov 2026
+ *   (Kits Core no longer installs, reads or books them).
+ * - Files: the daily backups in ~/backups and the error pages (drop-ins) in wp-content.
  * - Anything belonging to another plugin or to WordPress itself.
  *
  * Before deleting, writes a backup to wp-content/uploads/wugweb-backups/kits-core-uninstall-<YYYYmmdd-His>.jsonl.gz
@@ -55,6 +58,11 @@ $kits_options = array(
 	'kits_preview_links',
 	'kits_spot_map',
 	'kits_presets_enabled',
+	'kits_daily_backup',
+	'aw_backup_last',
+	'aw_error_pages',
+	'kits_presets_rewrite',
+	'kits_presets_consent',
 	'aw_category_images',
 	'aw_thumb_map',
 	'aw_media_merge_log',
@@ -87,6 +95,7 @@ delete_site_transient( 'kits_update_release' );
 
 wp_unschedule_hook( 'kits_spot_map_daily' );
 wp_unschedule_hook( 'aw_thumb_rebuild' ); // the thumbnail map rebuild (thumbs.php)
-wp_unschedule_hook( 'aw_fetch_favicons' ); // the hourly favicon run (attribution.php)
+wp_unschedule_hook( 'aw_daily_backup' ); // the daily backup (backups.php); the backup files in ~/backups stay
+delete_transient( 'aw_error_pages_checked' ); // error-pages.php; the drop-ins in wp-content stay
 
 delete_option( 'kits_delete_data_on_uninstall' ); // Last, so a run that stops half-way can be repeated.

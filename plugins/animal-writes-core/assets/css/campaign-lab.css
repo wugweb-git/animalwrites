@@ -82,12 +82,12 @@
 .aw-camp.aw-camp--sc-stray-dogs .aw-camp-hero.aw-camp-section.alignfull {
 	background:
 		linear-gradient(to bottom, var(--camp-cream) calc(100% - 125vw), rgb(251 238 231 / 0) calc(100% - 100vw)),
-		url("/wp-content/plugins/animal-writes-core/theme/assets/img/campaigns/supreme-court-stray-dog-phone.webp") center bottom / 100% auto no-repeat,
+		url("/wp-content/themes/kits-by-wugweb/assets/site/img/campaigns/supreme-court-stray-dog-phone.webp") center bottom / 100% auto no-repeat,
 		var(--camp-cream);
 	padding-bottom: 80vw !important;
 }
 /* Tablets: the wide photo along the bottom, under the card */
-@media (min-width: 768px) { .aw-camp.aw-camp--sc-stray-dogs .aw-camp-hero.aw-camp-section.alignfull { background: var(--camp-cream) url("/wp-content/plugins/animal-writes-core/theme/assets/img/campaigns/supreme-court-stray-dog-hero.webp") no-repeat right bottom / auto 72%; padding-bottom: clamp(180px, 16vw, 260px) !important; } }
+@media (min-width: 768px) { .aw-camp.aw-camp--sc-stray-dogs .aw-camp-hero.aw-camp-section.alignfull { background: var(--camp-cream) url("/wp-content/themes/kits-by-wugweb/assets/site/img/campaigns/supreme-court-stray-dog-hero.webp") no-repeat right bottom / auto 72%; padding-bottom: clamp(180px, 16vw, 260px) !important; } }
 /* Desktops: the photo at full height on the right; text and card at the top, so the dog lies clear below the card */
 @media (min-width: 1200px) {
 	.aw-camp.aw-camp--sc-stray-dogs .aw-camp-hero.aw-camp-section.alignfull { background-size: auto 100%; min-height: var(--kit-hero-min); padding-bottom: var(--kit-space-6) !important; }
@@ -885,16 +885,16 @@
 /* Ash black tiles: strays, and a lab without walls */
 .aw-camp.aw-camp--lab-rules #why-it-matters .aw-camp-grid > .aw-camp-card:is(:nth-child(3), :nth-child(5)) { background: var(--camp-dark); }
 /* Lead: the scales (flask against papers) under maroon to near black */
-.aw-camp.aw-camp--lab-rules #why-it-matters .aw-camp-grid > .aw-camp-card:nth-child(1) { aspect-ratio: 4 / 5; background: linear-gradient(180deg, rgb(29 20 24 / 0.2) 0%, rgb(107 15 34 / 0.55) 32%, rgb(29 20 24 / 0.9) 55%, var(--camp-dark) 72%), url("/wp-content/plugins/animal-writes-core/theme/assets/img/campaigns/lab-rules-scales-flask-papers.webp") 50% 0 / cover no-repeat, var(--camp-dark); }
+.aw-camp.aw-camp--lab-rules #why-it-matters .aw-camp-grid > .aw-camp-card:nth-child(1) { aspect-ratio: 4 / 5; background: linear-gradient(180deg, rgb(29 20 24 / 0.2) 0%, rgb(107 15 34 / 0.55) 32%, rgb(29 20 24 / 0.9) 55%, var(--camp-dark) 72%), url("/wp-content/themes/kits-by-wugweb/assets/site/img/campaigns/lab-rules-scales-flask-papers.webp") 50% 0 / cover no-repeat, var(--camp-dark); }
 /* Training: the tied red book beside the text, near black over it */
-.aw-camp.aw-camp--lab-rules #why-it-matters .aw-camp-grid > .aw-camp-card:nth-child(6) { padding-top: clamp(11rem, 48vw, 16rem); background: linear-gradient(180deg, rgb(29 20 24 / 0.1) 0%, rgb(29 20 24 / 0.75) 45%, var(--camp-dark) 62%), url("/wp-content/plugins/animal-writes-core/theme/assets/img/campaigns/lab-rules-red-book-papers-pencil.webp") 50% 0 / 100% auto no-repeat, var(--camp-dark); }
+.aw-camp.aw-camp--lab-rules #why-it-matters .aw-camp-grid > .aw-camp-card:nth-child(6) { padding-top: clamp(11rem, 48vw, 16rem); background: linear-gradient(180deg, rgb(29 20 24 / 0.1) 0%, rgb(29 20 24 / 0.75) 45%, var(--camp-dark) 62%), url("/wp-content/themes/kits-by-wugweb/assets/site/img/campaigns/lab-rules-red-book-papers-pencil.webp") 50% 0 / 100% auto no-repeat, var(--camp-dark); }
 @media (min-width: 768px) {
-	.aw-camp.aw-camp--lab-rules #why-it-matters .aw-camp-grid > .aw-camp-card:nth-child(1) { aspect-ratio: auto; padding-right: 42%; background: linear-gradient(90deg, var(--camp-dark) 0%, var(--camp-dark) 50%, rgb(107 15 34 / 0.55) 72%, rgb(29 20 24 / 0.2) 100%), url("/wp-content/plugins/animal-writes-core/theme/assets/img/campaigns/lab-rules-scales-flask-papers.webp") 100% 30% / 50% auto no-repeat, var(--camp-dark); }
-	.aw-camp.aw-camp--lab-rules #why-it-matters .aw-camp-grid > .aw-camp-card:nth-child(6) { padding-top: var(--kit-space-5); padding-right: 42%; background: linear-gradient(90deg, var(--camp-dark) 0%, var(--camp-dark) 52%, rgb(29 20 24 / 0.55) 72%, rgb(29 20 24 / 0.2) 100%), url("/wp-content/plugins/animal-writes-core/theme/assets/img/campaigns/lab-rules-red-book-papers-pencil.webp") 100% 50% / 48% auto no-repeat, var(--camp-dark); }
+	.aw-camp.aw-camp--lab-rules #why-it-matters .aw-camp-grid > .aw-camp-card:nth-child(1) { aspect-ratio: auto; padding-right: 42%; background: linear-gradient(90deg, var(--camp-dark) 0%, var(--camp-dark) 50%, rgb(107 15 34 / 0.55) 72%, rgb(29 20 24 / 0.2) 100%), url("/wp-content/themes/kits-by-wugweb/assets/site/img/campaigns/lab-rules-scales-flask-papers.webp") 100% 30% / 50% auto no-repeat, var(--camp-dark); }
+	.aw-camp.aw-camp--lab-rules #why-it-matters .aw-camp-grid > .aw-camp-card:nth-child(6) { padding-top: var(--kit-space-5); padding-right: 42%; background: linear-gradient(90deg, var(--camp-dark) 0%, var(--camp-dark) 52%, rgb(29 20 24 / 0.55) 72%, rgb(29 20 24 / 0.2) 100%), url("/wp-content/themes/kits-by-wugweb/assets/site/img/campaigns/lab-rules-red-book-papers-pencil.webp") 100% 50% / 48% auto no-repeat, var(--camp-dark); }
 }
 @media (min-width: 1200px) {
-	.aw-camp.aw-camp--lab-rules #why-it-matters .aw-camp-grid > .aw-camp-card:nth-child(1) { padding-right: 34%; background: linear-gradient(90deg, var(--camp-dark) 0%, var(--camp-dark) 62%, rgb(107 15 34 / 0.5) 80%, rgb(29 20 24 / 0.15) 100%), url("/wp-content/plugins/animal-writes-core/theme/assets/img/campaigns/lab-rules-scales-flask-papers.webp") 100% 30% / 38% auto no-repeat, var(--camp-dark); }
-	.aw-camp.aw-camp--lab-rules #why-it-matters .aw-camp-grid > .aw-camp-card:nth-child(6) { padding-right: 34%; background: linear-gradient(90deg, var(--camp-dark) 0%, var(--camp-dark) 64%, rgb(29 20 24 / 0.5) 80%, rgb(29 20 24 / 0.15) 100%), url("/wp-content/plugins/animal-writes-core/theme/assets/img/campaigns/lab-rules-red-book-papers-pencil.webp") 100% 50% / 36% auto no-repeat, var(--camp-dark); }
+	.aw-camp.aw-camp--lab-rules #why-it-matters .aw-camp-grid > .aw-camp-card:nth-child(1) { padding-right: 34%; background: linear-gradient(90deg, var(--camp-dark) 0%, var(--camp-dark) 62%, rgb(107 15 34 / 0.5) 80%, rgb(29 20 24 / 0.15) 100%), url("/wp-content/themes/kits-by-wugweb/assets/site/img/campaigns/lab-rules-scales-flask-papers.webp") 100% 30% / 38% auto no-repeat, var(--camp-dark); }
+	.aw-camp.aw-camp--lab-rules #why-it-matters .aw-camp-grid > .aw-camp-card:nth-child(6) { padding-right: 34%; background: linear-gradient(90deg, var(--camp-dark) 0%, var(--camp-dark) 64%, rgb(29 20 24 / 0.5) 80%, rgb(29 20 24 / 0.15) 100%), url("/wp-content/themes/kits-by-wugweb/assets/site/img/campaigns/lab-rules-red-book-papers-pencil.webp") 100% 50% / 36% auto no-repeat, var(--camp-dark); }
 }
 
 /* What people are saying (#people): the social posts kept as Media & PR items are drawn as social post cards

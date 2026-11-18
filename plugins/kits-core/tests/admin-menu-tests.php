@@ -20,6 +20,16 @@ if ( 'cli' !== PHP_SAPI ) {
 	exit;
 }
 define( 'ABSPATH', __DIR__ . '/' );
+
+/**
+ * Stand-in for __().
+ *
+ * @param string $s Text.
+ */
+function __( $s ) {
+	return $s;
+}
+
 require dirname( __DIR__ ) . '/includes/admin-menu-model.php';
 require dirname( __DIR__ ) . '/includes/admin-fold-model.php';
 
@@ -45,7 +55,7 @@ function kits_t( bool $ok, string $name ) {
 $six = kits_menu_six( 'kits' );
 kits_t( array( 'kits', 'kits-options', 'kits-settings', 'kits-tools', 'kits-help' ) === array_keys( $six ), 'five items in the spec order (Plugins is WordPress\'s own)' );
 kits_t( array( 'Home', 'Theme Options', 'Settings', 'Tools', 'Help' ) === array_column( $six, 0 ), 'five labels' );
-kits_t( 'edit_theme_options' === $six['kits-tools'][2], 'Tools: edit_theme_options' );
+kits_t( 'manage_options' === $six['kits-tools'][2], 'Tools: manage_options (its import, reset and undo write manage_options options)' );
 kits_t( 'manage_kits' === $six['kits'][2] && 'manage_kits' === $six['kits-help'][2], 'Home and Help: manage_kits (kits-caps.php)' );
 kits_t( 'manage_options' === $six['kits-options'][2] && 'manage_options' === $six['kits-settings'][2], 'Theme Options and Settings: manage_options' );
 foreach ( $six as $slug => $t ) {
@@ -114,7 +124,7 @@ $items = array(
 	array( 'Modules', 'manage_options', 'aw-modules', 'Modules' ),
 	array( 'Settings', 'manage_options', 'kits-settings', 'Settings' ),
 	array( 'Dates', 'edit_others_posts', 'aw-dates', 'Dates' ),
-	array( 'Tools', 'edit_theme_options', 'kits-tools', 'Tools' ),
+	array( 'Tools', 'manage_options', 'kits-tools', 'Tools' ),
 	array( 'Home again', 'manage_options', 'kits', 'Home again' ),
 );
 list( $kept, $hidden ) = kits_menu_split( $items, $six );

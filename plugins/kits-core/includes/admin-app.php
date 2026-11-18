@@ -8,7 +8,7 @@
  * (kits_page_defaults._site), and saves them through /wp/v2/settings, which runs the same clean-up as options.php
  * (kits_theme_options_clean). Without the build, the screen shows one notice.
  *
- * Sections not built in the app yet (Colours, Typography, Buttons, Cards, Content types, Socials, Share bar) show
+ * Sections not built in the app yet (Colours, Typography, Buttons, Cards, Display per type, Socials, Share bar) show
  * today's fields under their names: kits_admin_app_legacy() prints them on the page, the app moves each into its
  * section, and each saves with its own button through options.php as before. So no field is out of reach. A site adds
  * to a section through the kits_options_legacy_section action (Animal Writes: Contact links under Socials).
@@ -55,7 +55,7 @@ function kits_admin_app_legacy(): array {
 	};
 	$list = array(
 		// Colours, Typography, Buttons and Cards are built in the app (src/theme-options/sections/).
-		'content-types' => array( __( 'Content types', 'kits-core' ), $types ),
+		'content-types' => array( __( 'Display per type', 'kits-core' ), $types ), // "Display per type": Kits → Settings → Content types switches the types on.
 		'socials'       => array(
 			__( 'Socials', 'kits-core' ),
 			function () use ( $form ) {
@@ -314,7 +314,7 @@ add_action(
 					),
 					'templates' => array(
 						'text'  => __( 'Sidebar, title and breadcrumbs for each kind of page, and the share bar, are set in', 'kits-core' ),
-						'label' => __( 'Kits → Theme Options → Content types', 'kits-core' ),
+						'label' => __( 'Kits → Theme Options → Display per type', 'kits-core' ),
 						'url'   => $to( 'content-types' ),
 					),
 				),

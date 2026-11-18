@@ -21,6 +21,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /** Canonical URL of a hub page: its path without filters, with /page/N/. */
 function aw_hub_canonical() {
+	if ( ! function_exists( 'aw_hub_base_url' ) || ! function_exists( 'aw_hub_page' ) ) { // the hubs (Animal Writes Core) are not loaded
+		return aw_list_canonical();
+	}
 	return strtok( aw_hub_base_url(), '?' ) . ( aw_hub_page() > 1 ? 'page/' . aw_hub_page() . '/' : '' );
 }
 

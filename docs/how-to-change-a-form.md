@@ -40,7 +40,7 @@ A tick box Fluent Forms saves as `1` when ticked and nothing when not (empty is 
 
 **Analytics:** GTM (`docs/gtm`) listens for Fluent Forms' success event: GA4 `form_submit` (form, ref) and Clarity's `form_ref`, with analytics consent only.
 
-**Custom code** (`plugins/animal-writes-core/includes/forms-fluentforms.php` unless named): ALTCHA, PIN code → State → District (LGD), the private upload (claim logo and proof), the FluentCRM steps a link cannot do (notes, transactional contacts, the 1/0 box), the campaign letter tool (`campaign-letters.php`, `campaign.js`), the listing's Volunteers from FluentCRM (`org-people.php`) and the hidden-field script (`aw-analytics.js`).
+**Custom code** (`plugins/kits-core/includes/forms/fluentforms.php` unless named; the FluentCRM steps are MailWeb's `plugins/mailweb/includes/fluentcrm.php`; moved from Animal Writes Core 18 Nov 2026, old `aw_` names still work): ALTCHA, PIN code → State → District (LGD), the private upload (claim logo and proof), the FluentCRM steps a link cannot do (notes, transactional contacts, the 1/0 box), the campaign letter tool (`campaign-letters.php`, `campaign.js`), the listing's Volunteers from FluentCRM (`org-people.php`) and the hidden-field script (`aw-analytics.js`).
 
 **Claim form, 13 Nov 2026 (owner):** the map field reads "Map link" (Google, Bing or OpenStreetMap link, any web address passes the check) and the last step has a required tick `details_ok` ("The details and documents I have sent are correct.") above `consent`. **Volunteer form, 13 Nov 2026 (owner: B4 and B5, helper profile):** two ticks before the consent tick: `helper_public` ("Show me as a helper on Animal Writes", help: only first name, district and what you can do show, after we check, never phone or email) and `verify_ok` ("OK to contact me to verify my details"; shown and required only when `helper_public` is ticked). The submission handler (`forms-fluentforms.php`) saves both as 1/0 in `vol_helper_public` and `vol_verify_ok`, the form-B answers in `vol_vehicle`, `vol_can_do`, `vol_animals_ok`, and tags a person who ticked both `helper-pending`. The owner swaps it for `helper-approved` in FluentCRM; `[aw_helpers]` on /volunteer/ (`helpers-public.php`) then shows first name, district, state and the kinds of help. A send with a box unticked sets it to 0 and takes the person off. The privacy table has a "Helper profile" row.
 
@@ -73,17 +73,17 @@ Only Newsletter #3 sends people to /thank-you/ (Fluent Forms confirmation "redir
 | Too many sends | "Too many tries. Wait a minute, then try again." |
 | The send itself fails (no connection, server error) | "Your message didn't send. Check your connection and try again." (aw.js) |
 
-**Which form shows where:** each page calls `aw_ff_form( <key> )` (`forms-fluentforms.php`) with the form's ID from `wp aw ff-form <key> <ID>` (keys in `AW_FF_FORMS`: contact, volunteer, claim, and report for the inactive form #7, still printed by the old `[aw_report_box]` shortcode; the newsletter forms use the options `aw_nl_ff_form` and `aw_nl_ff_form_full`). If Fluent Forms is off or an ID is missing, visitors see nothing in its place and administrators see a short note saying what to set. There is no fallback form.
+**Which form shows where:** each page calls `kits_ff_form( <key> )` (Kits Core `forms/fluentforms.php`; `aw_ff_form()` still works) with the form's ID from `wp aw ff-form <key> <ID>` (keys in `KITS_FF_FORMS`: contact, volunteer, claim, and report for the inactive form #7, still printed by the old `[aw_report_box]` shortcode; the newsletter forms use the options `aw_nl_ff_form` and `aw_nl_ff_form_full`). If Fluent Forms is off or an ID is missing, visitors see nothing in its place and administrators see a short note saying what to set. There is no fallback form.
 
 ## Where each form is shown
 
 | Form | Shortcode or block (page) | Code |
 |---|---|---|
-| Newsletter (#3) | `[aw_newsletter]` (footer reusable block, campaign pages) | `newsletter-fluentforms.php`, `aw_newsletter_ff_form()` |
-| Newsletter (full, #9) | `[aw_thank_you]` after a footer sign-up (`/thank-you/?form=newsletter`) | `form-blocks.php` |
+| Newsletter (#3) | `[aw_newsletter]` (footer reusable block, campaign pages) | MailWeb `newsletter.php`, `mailweb_nl_ff_form()` |
+| Newsletter (full, #9) | `[aw_thank_you]` after a footer sign-up (`/thank-you/?form=newsletter`) | Kits Core `forms/form-pages.php` |
 | Contact (#4) | `[aw_contact_form]` (`/contact/`); `?about=listing` and so on choose the reason | `pages.php`, `aw_contact_form()`; reasons and message examples `AW_CONTACT_ABOUT`, `AW_CONTACT_PLACEHOLDER` (the placeholder follows the reason, `aw.js`) |
-| Volunteer sign-up (#5) | block `animal-writes/volunteer` (the Volunteer banner pattern, `/volunteer/`); `[aw_volunteer_update]` on `/update/` | `volunteers.php`, `form-blocks.php` |
-| Claim this listing (#6) | `[aw_claim_page]` (`/claim/?listing=<ID>`, with the listing's own head band; without a listing, the organisation finder) | `form-blocks.php`, `claims.php`, `claims-review.php` |
+| Volunteer sign-up (#5) | block `animal-writes/volunteer` (the Volunteer banner pattern, `/volunteer/`); `[aw_volunteer_update]` on `/update/` | Kits Core `forms/volunteers.php`, `forms/form-pages.php` |
+| Claim this listing (#6) | `[aw_claim_page]` (`/claim/?listing=<ID>`, with the listing's own head band; without a listing, the organisation finder) | DirectoryWeb `claim-page.php`, `claims.php`, `claims-review.php` |
 | Report a mistake, Remove my data | Contact (#4), `?about=general&item=<ID>` (hidden `report_item`, `report_path`; since 12 Nov 2026 not a reason), `?about=remove`. `/report/` and `/remove-my-data/` are Rank Math 301s to them (the query string is kept, so `?item=` and `?listing=` still name the item); the pages are in the trash and forms #7 and #8 inactive (entries kept and exported on 31 Oct). | `pages.php`, `reports.php`, `form-blocks.php` |
 
 Where they appear: the volunteer banner is the theme pattern `plugins/animal-writes-core/theme/patterns/volunteer-banner.php` (block `animal-writes/volunteer`); the listing card is the block `animal-writes/listing-help` in `plugins/animal-writes-core/theme/templates/single-aw_listing.html`; the newsletter strip is in the footer (reusable block 12752, `[aw_newsletter]`).
