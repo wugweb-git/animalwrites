@@ -24,3 +24,76 @@
 	outline-offset: 2px;
 }
 
+/* Site-wide rules that came from Animal Writes Core's aw.css (18 Nov 2026), in their aw.css order: the finder,
+   claim box, document cover, share and segment targets, the h4/h5 and heading-link levels, the form field and
+   Fluent Forms button size, and the card title and meta row sizes. Rules only Animal Writes uses are in the
+   Animal Writes style variation (styles/animal-writes.json, styles.css). */
+.kit-hero-title { margin: 0 0 var(--kit-space-4); }
+.kit-finder { display: flex; flex-wrap: wrap; gap: var(--kit-space-3); align-items: center; margin: var(--kit-space-5) 0 var(--kit-space-4); padding: var(--kit-space-3); background: var(--kit-color-raised); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); box-shadow: var(--kit-elevation-2); }
+.kit-finder label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.kit-finder select { flex: 1 1 16rem; min-width: 0; font-size: var(--kit-type-lead); }
+.kit-claim { margin-block: var(--kit-space-7); padding: var(--kit-space-5); border-radius: var(--kit-radius-card); background: var(--kit-color-surface-soft); border: var(--kit-border-width) solid var(--kit-color-line); }
+.kit-claim summary { cursor: pointer; font-weight: var(--kit-weight-strong); min-height: var(--kit-size-target); display: flex; align-items: center; }
+.kit-claim details[open] > summary { margin-bottom: var(--kit-space-4); }
+.kit-share-copy { cursor: pointer; }
+.kit-segment :is(a, button) { min-height: var(--kit-size-target); }
+@media (prefers-reduced-motion: reduce) {
+	.kit-ed-more .kit-ico { transition: none; }
+}
+.kit-doc-cover { width: var(--kit-thumb-md); aspect-ratio: 3/4; border-radius: var(--kit-radius-xs); overflow: hidden; background: var(--kit-color-raised); box-shadow: var(--kit-elevation-1); display: flex; align-items: center; justify-content: center; color: var(--kit-color-muted); }
+.kit-doc-cover img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
+@media (max-width: 767px) {
+	.kit-doc-cover { width: var(--kit-thumb-sm); }
+}
+.wp-block-search .wp-block-search__button { min-height: var(--kit-size-target); }
+:is(.kit-ed-list .wp-block-post-title, main .entry-content h4, main h4.wp-block-heading, main .wp-block-post-template h4) { font-size: var(--kit-type-h4) !important; font-weight: var(--kit-weight-strong) !important; line-height: 1.3 !important; }
+:is(main .entry-content h5, main h5) { font-size: var(--kit-h5-size) !important; font-weight: var(--kit-h5-weight) !important; line-height: var(--kit-h5-leading) !important; }
+:is(main h2, main h3, main h4, main h5) a { color: var(--kit-color-ink) !important; text-decoration: none; }
+:is(main h2, main h3, main h4, main h5) a:is(:hover, :focus-visible) { text-decoration: underline; text-underline-offset: var(--kit-underline-offset); }
+@media (min-width: 1200px) {
+	.kit-ed-list .wp-block-post-template > li:nth-child(n+4) { display: none !important; }
+}
+.fluentform .ff-btn.kit-btn { font-size: var(--kit-btn-font-size); }
+:is(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="submit"]), select, textarea) { font-size: var(--kit-field-text-size) !important; }
+.home main.kit-static > * { margin-block: 0; }
+
+/* Social post card (kit-social-*; markup from social-posts.php, one sitewide component), drawn like a post on its
+   platform, our own markup only. Text post (X, Bluesky, Mastodon, LinkedIn, YouTube, and Instagram or Facebook with no
+   poster): a white card, 1px line, card radius; a head row (the initial in a grey circle at the 44px target size, the
+   bold name and the grey handle, the platform logo at the right); the summary at body size; a picture under it with
+   the media radius; the date and platform in grey on one line. Instagram style (Instagram, Facebook with a poster):
+   the same head with a ringed circle, the picture across the card at 4:5 (a reel 9:16, with a play mark), the caption
+   led by the handle in bold. No counts. The one link is the name with the external arrow, at least the 44px target
+   tall; the logo is decorative (aria-hidden), the platform's name is in the date row.
+   Padding --kit-space-5 (every block at least 24px), gaps --kit-space-3, sizes from kit tokens. */
+.kit-social-card { display: flex; flex-direction: column; gap: var(--kit-space-3); box-sizing: border-box; min-width: 0; margin: 0; padding: var(--kit-space-5); border: var(--kit-border-width, 1px) solid var(--kit-color-line); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); color: var(--kit-color-text); overflow: hidden; }
+.kit-social-card > * { margin: 0; }
+.kit-social-head { display: flex; align-items: center; gap: var(--kit-space-3); min-width: 0; }
+.kit-social-avatar { display: grid; place-items: center; flex: none; width: var(--kit-size-target); height: var(--kit-size-target); border-radius: 50%; background: color-mix(in srgb, var(--kit-color-ink) 10%, var(--kit-color-raised)); color: var(--kit-color-ink); font-size: var(--kit-type-base); font-weight: var(--kit-weight-bold); line-height: 1; }
+.kit-social-card--insta .kit-social-avatar { box-shadow: 0 0 0 2px var(--kit-color-raised), 0 0 0 3px var(--kit-color-ink); }
+.kit-social-who { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: var(--kit-space-2); flex: 1 1 auto; min-width: 0; margin: 0; line-height: var(--kit-leading-heading, 1.25); }
+.kit-social-name { display: inline-flex; align-items: center; gap: var(--kit-space-1); max-width: 100%; min-width: 0; font-size: var(--kit-type-base); font-weight: var(--kit-weight-bold); color: var(--kit-color-text); }
+a.kit-social-name { min-height: var(--kit-size-target); text-decoration: none; }
+.kit-social-name-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kit-social-name > .kit-ico { flex: none; --kit-ico-size: var(--kit-icon-sm); }
+.kit-social-pic-link { display: block; height: 100%; }
+.kit-social-handle { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
+.kit-social-logo { flex: none; align-self: center; --kit-ico-size: var(--kit-icon-md); color: var(--kit-color-ink); }
+.kit-social-text { max-width: none; font-size: var(--kit-type-base); line-height: var(--kit-leading-body); overflow-wrap: anywhere; }
+.kit-social-text > strong { font-weight: var(--kit-weight-bold); }
+.kit-social-pic { position: relative; overflow: hidden; border-radius: var(--kit-radius-media); background: var(--kit-color-surface-soft); }
+.kit-social-pic .kit-social-img { display: block; width: 100%; height: auto; }
+.kit-social-card--insta .kit-social-pic { margin-inline: calc(-1 * var(--kit-space-5)); border-radius: 0; aspect-ratio: 4 / 5; }
+.kit-social-card--insta .kit-social-pic--reel { aspect-ratio: 9 / 16; }
+.kit-social-card--insta .kit-social-pic .kit-social-img { height: 100%; object-fit: cover; }
+.kit-social-pic--reel::before { content: ""; position: absolute; top: var(--kit-space-3); right: var(--kit-space-3); width: var(--kit-size-target); height: var(--kit-size-target); border-radius: 50%; background: color-mix(in srgb, var(--kit-color-ink) 65%, transparent); pointer-events: none; } /* the reel mark's backdrop: white on any picture */
+.kit-social-play { position: absolute; top: calc(var(--kit-space-3) + (var(--kit-size-target) - var(--kit-icon-lg)) / 2); right: calc(var(--kit-space-3) + (var(--kit-size-target) - var(--kit-icon-lg)) / 2); --kit-ico-size: var(--kit-icon-lg); color: var(--kit-color-on-ink); pointer-events: none; }
+.kit-social-media :is(figure, .wp-block-embed) { margin: 0; overflow: hidden; border-radius: var(--kit-radius-media); }
+.kit-meta-row.kit-social-date { flex-wrap: nowrap; gap: var(--kit-space-2); white-space: nowrap; min-width: 0; font-size: var(--kit-meta-size); color: var(--kit-color-muted); }
+
+/* Card type in steps (owner, 13 Nov 2026: "h3 one size per breakpoint", "metarow - one font size per breakpoint"): every card's
+   H3 title is --kit-type-card-title (20px, 22px from 1200; an H4 card title takes the same size, owner 14 Nov 2026: "use correct h3"; owner, 13 Nov 2026: "20-22px desktop, 18-20px mobile") with the H3
+   line height, and everything in the meta row (date, read time, chips) is --kit-meta-size (12px, 13px from 768).
+   No fluid sizes, so the size changes only at a breakpoint. */
+.kit-card :is(h3, h4).kit-card-title.kit-card-title, .kit-card :is(h3, h4).kit-card-title.kit-card-title a { font-size: var(--kit-type-card-title) !important; line-height: var(--kit-h3-leading) !important; }
+.kit-card .kit-card-metarow.kit-card-metarow, .kit-card .kit-card-metarow.kit-card-metarow * { font-size: var(--kit-meta-size) !important; }

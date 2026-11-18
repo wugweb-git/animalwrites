@@ -17,6 +17,42 @@ const SOURCEWEB_DASH_LOG      = 'sourceweb_dashboard_log';
 const SOURCEWEB_DASH_JOB      = 'sourceweb_dashboard_build';
 const SOURCEWEB_DASH_LOG_DAYS = 120;
 
+/** A running count of items retired as duplicates of the same story, one total a day (for the dashboard charts). */
+const SOURCEWEB_DUPES = 'sourceweb_dupes_daily';
+
+/**
+ * Count one more "same story" duplicate against today (same-story.php calls this when it retires a duplicate). Kept at
+ * most SOURCEWEB_DASH_LOG_DAYS + a few days, so the dashboard's daily rows always have the day's total to log.
+ *
+ * @return void
+ */
+function sourceweb_dupe_bump() {
+	$log           = array_filter( (array) get_option( SOURCEWEB_DUPES, array() ), 'is_numeric' );
+	$today         = wp_date( 'Y-m-d' );
+	$log[ $today ] = (int) ( $log[ $today ] ?? 0 ) + 1;
+	ksort( $log );
+	update_option( SOURCEWEB_DUPES, array_slice( $log, -( SOURCEWEB_DASH_LOG_DAYS + 7 ), null, true ), false );
+}
+
+/**
+ * Today's totals for the dashboard charts: items fetched today (aw_ingested_at), review-type items published today, and
+ * duplicates folded today. Daily totals, so summing them over a window is correct (unlike the last-run heartbeat).
+ *
+ * @return array{new:int, published:int, dupes:int}
+ */
+function sourceweb_count_today(): array {
+	global $wpdb;
+	$start_gmt   = (int) strtotime( get_gmt_from_date( wp_date( 'Y-m-d' ) . ' 00:00:00' ) . ' +0000' );
+	$start_local = wp_date( 'Y-m-d' ) . ' 00:00:00';
+	$new         = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE meta_key = 'aw_ingested_at' AND CAST( meta_value AS UNSIGNED ) >= %d", $start_gmt ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- hourly background count
+	$types       = defined( 'AW_REVIEW_TYPES' ) ? array_keys( AW_REVIEW_TYPES ) : array( 'aw_news', 'aw_legal' );
+	$place       = implode( ',', array_fill( 0, count( $types ), '%s' ) );
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- placeholders only; hourly background count
+	$published   = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_status = 'publish' AND post_date >= %s AND post_type IN ( $place )", array_merge( array( $start_local ), $types ) ) );
+	$dupes       = (int) ( ( (array) get_option( SOURCEWEB_DUPES, array() ) )[ wp_date( 'Y-m-d' ) ] ?? 0 );
+	return array( 'new' => $new, 'published' => $published, 'dupes' => $dupes );
+}
+
 add_action( SOURCEWEB_DASH_JOB, 'sourceweb_dashboard_build' );
 
 // Hourly, scheduled from an admin request (as the plugin's other jobs), so a front-end view never writes.
@@ -54,6 +90,7 @@ function sourceweb_dashboard_build( $why = '' ) {
 		'review'  => sourceweb_count_review(),
 		'enrich'  => sourceweb_count_enrich(),
 		'intake'  => sourceweb_count_intake(),
+		'today'   => sourceweb_count_today(),
 		'sources' => sourceweb_count_sources(),
 		'workers' => sourceweb_count_workers(),
 		'ai'      => function_exists( 'aw_sourcing_ai_counts' ) ? aw_sourcing_ai_counts() : array(),

@@ -386,6 +386,7 @@ function sourceweb_dashboard_payload(): array {
 		'tiles'    => $tiles,
 		'log'      => (object) get_option( SOURCEWEB_DASH_LOG, array() ),
 		'today'    => wp_date( 'Y-m-d' ),
+		'charts'   => sourceweb_dashboard_charts( (array) get_option( SOURCEWEB_DASH_LOG, array() ), wp_date( 'Y-m-d' ) ),
 		'runs'     => $runs,
 		'reports'  => $reports,
 		'commands' => array(

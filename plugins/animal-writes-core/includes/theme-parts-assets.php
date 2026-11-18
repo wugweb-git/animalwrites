@@ -36,7 +36,7 @@ add_filter( 'wp_theme_json_data_theme', 'aw_core_theme_json_data' );
 /**
  * Path or address of a file this plugin carries for the theme (theme/assets/...).
  *
- * @param string $file Path relative to the theme root, e.g. 'assets/css/aw.css'.
+ * @param string $file Path relative to the theme root, e.g. 'assets/css/tokens.css'.
  */
 function aw_theme_parts_path( string $file ): string {
 	return AW_THEME_PARTS_DIR . ltrim( $file, '/' );
@@ -44,12 +44,12 @@ function aw_theme_parts_path( string $file ): string {
 
 /**
  * Component stylesheets (theme/assets/css/aw-*.css): each loads only on the pages that print its component, joined
- * with aw.css into one file per page by Kits (kits_component_styles, Kits functions.php). handle => [
+ * into one file per page by Kits (kits_component_styles, Kits functions.php). handle => [
  *   'file'   => path relative to the theme root; the .min.css next to it is served when it exists,
  *   'when'   => optional callable, no arguments: a template condition, e.g. 'is_front_page',
  *   'blocks' => optional [ block name => class prefix or list of prefixes ]: stored content no PHP prints, e.g. [ 'core/group' => 'aw-about-' ],
  * ]. With no 'when', the file loads on pages whose PHP called aw_use_component_style( $handle ) while printing.
- * The order here is the order in the joined file, after aw.css. Editors load every file (below). For example:
+ * The order here is the order in the joined file. Editors load every file (below). For example:
  *
  *     'aw-home'     => array( 'file' => 'assets/css/aw-home.css', 'when' => 'is_front_page' ),
  *     'aw-type-icons' => array( 'file' => 'assets/css/aw-type-icons.css' ),
@@ -60,7 +60,9 @@ function aw_theme_parts_path( string $file ): string {
  * which most list pages print, are in every page's joined file ('when' => '__return_true'). Keyed by what each page
  * printed, they made 37 joined files in one day; the larger page-type files (aw-home, aw-type-icons, aw-single, aw-lists,
  * aw-directory, aw-listing, aw-forms) still decide which file a page gets. All their rules are scoped to their own
- * component classes, and they were all in aw.css on every page before phase 2.
+ * component classes, and they were all in aw.css on every page before phase 2. aw.css itself was retired on
+ * 18 Nov 2026: its site-wide rules are in the Kits theme's kits.css, the rules only Animal Writes uses are in the
+ * theme's site file (assets/site/site.css), which the theme joins first, before these files.
  *
  * One file per kind of page (11 Nov 2026): Kits keys the joined file on the kind of page (front, page, page-{template},
  * single-{type}, term-{taxonomy}, search, 404...), not on the exact list, and the Directory views are their own kind
@@ -193,12 +195,13 @@ function aw_theme_parts_uri( string $file ): string {
 }
 
 /**
- * Stylesheets the editors show: tokens, aw.css, then every component file (sources, not minified). Under the child
- * theme only the component files: the child's add_editor_style() gives tokens and aw.css.
+ * Stylesheets the editors show: tokens, then every component file (sources, not minified). Under the child theme
+ * only the component files: the child's add_editor_style() gives tokens. The editors get kits.css and the site file
+ * (assets/site/site.css) from the Kits theme.
  */
 function aw_editor_style_files(): array {
 	$parts = array_column( aw_component_style_files(), 'file' );
-	return aw_child_theme_on() ? $parts : array_merge( array( 'assets/css/tokens.css', 'assets/css/aw.css' ), $parts );
+	return aw_child_theme_on() ? $parts : array_merge( array( 'assets/css/tokens.css' ), $parts );
 }
 
 /** The editors load this plugin's files: while it serves the theme parts, and the component files under the child. */
@@ -217,8 +220,9 @@ function aw_parts_page_kind( $kind ) {
 add_filter( 'kits_parts_page_kind', 'aw_parts_page_kind' );
 
 /*
- * aw.css first (every page), then the component files, through the Kits registry. Under the child theme the child
- * registers aw-components (its own aw.css) and the component files come from this plugin, after it.
+ * The component files, through the Kits registry, after the tokens and the Kits components (where aw.css, retired on
+ * 18 Nov 2026, used to print). Under the child theme the child registers aw-components (its own aw.css) and the
+ * component files come from this plugin, after it.
  */
 add_filter(
 	'kits_component_styles',
@@ -226,13 +230,6 @@ add_filter(
 		$child = aw_child_theme_on();
 		if ( ( ! $child && ! aw_core_theme_parts_on() ) || ! is_array( $styles ) ) {
 			return $styles;
-		}
-		if ( ! $child ) {
-			// Registered and enqueued below (wp_enqueue_scripts 20). 'file' lets Kits join it when its address cannot be mapped.
-			$styles['aw-components'] = array(
-				'file' => aw_theme_parts_path( aw_theme_css_served( 'assets/css/aw.css' ) ),
-				'when' => '__return_true',
-			);
 		}
 		foreach ( aw_component_style_files() as $handle => $c ) {
 			if ( empty( $c['file'] ) ) {
@@ -242,7 +239,7 @@ add_filter(
 			$styles[ $handle ] = array(
 				'src'    => aw_theme_parts_uri( $file ),
 				'file'   => aw_theme_parts_path( $file ),
-				'deps'   => array( 'aw-components' ),
+				'deps'   => $child ? array( 'aw-components' ) : array( 'aw-tokens', 'kit-components' ),
 				'when'   => $c['when'] ?? null,
 				'blocks' => $c['blocks'] ?? array(),
 			);
@@ -260,7 +257,7 @@ add_filter(
 add_action(
 	'setup_theme',
 	function () {
-		// Design tokens, component styles and interactions, over the Kits ones.
+		// Design tokens and interactions, over the Kits ones (the component files come through the Kits registry, above).
 		add_action(
 			'wp_enqueue_scripts',
 			function () {
@@ -269,8 +266,6 @@ add_action(
 				}
 				$v   = fn( $f ) => (string) filemtime( aw_theme_parts_path( $f ) );
 				wp_enqueue_style( 'aw-tokens', aw_theme_file_uri( 'assets/css/tokens.css' ), array( 'kit-tokens' ), $v( 'assets/css/tokens.css' ) ); // Brand values over the Kits defaults.
-				$css = is_readable( aw_theme_parts_path( 'assets/css/aw.min.css' ) ) ? 'assets/css/aw.min.css' : 'assets/css/aw.css'; // aw.min.css: aw.css minified (tools/ci/css_min.py).
-				wp_enqueue_style( 'aw-components', aw_theme_file_uri( $css ), array( 'aw-tokens', 'kit-components' ), $v( $css ) );
 				wp_enqueue_script(
 					'aw-interactions',
 					aw_theme_file_uri( 'assets/js/aw.js' ),
