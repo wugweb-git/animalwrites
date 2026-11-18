@@ -21,4 +21,19 @@
 			return null;
 		}
 	} );
+	// The earlier name (animal-writes/breadcrumb), registered by RankWeb only when Animal Writes Core is not active
+	// (breadcrumbs-render.php), so pages that hold it still open in the editor. Hidden from the inserter.
+	if ( window.rankwebBreadcrumbAlias && ! wp.blocks.getBlockType( 'animal-writes/breadcrumb' ) ) {
+		wp.blocks.registerBlockType( 'animal-writes/breadcrumb', {
+			title: 'Breadcrumb (earlier name)',
+			category: 'theme',
+			supports: { html: false, inserter: false },
+			edit: function () {
+				return el( 'div', wp.blockEditor.useBlockProps(), el( wp.serverSideRender, { block: 'animal-writes/breadcrumb' } ) );
+			},
+			save: function () {
+				return null;
+			}
+		} );
+	}
 } )( window.wp );

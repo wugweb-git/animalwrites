@@ -145,6 +145,35 @@ add_action(
 	}
 );
 
+// The earlier block name, animal-writes/breadcrumb, is stored in the content of 7 hub pages (8811, 8935, 8937, 8939,
+// 8941, 8943, 8945) and in any template saved in the Site Editor. Animal Writes Core registers it while it is active;
+// without Core, RankWeb registers it here as an alias with the same output, so those pages need no edit. Hidden from
+// the inserter: new pages use rankweb/breadcrumbs.
+add_action(
+	'init',
+	function () {
+		if ( WP_Block_Type_Registry::get_instance()->is_registered( 'animal-writes/breadcrumb' ) ) {
+			return; // Animal Writes Core registered it (init priority 10).
+		}
+		register_block_type(
+			'animal-writes/breadcrumb',
+			array(
+				'api_version'     => 3,
+				'title'           => 'Breadcrumb (earlier name)',
+				'category'        => 'theme',
+				'render_callback' => 'rankweb_breadcrumbs_block',
+				'supports'        => array(
+					'html'     => false,
+					'inserter' => false,
+				),
+			)
+		);
+		$handle = generate_block_asset_handle( 'rankweb/breadcrumbs', 'editorScript' );
+		wp_add_inline_script( $handle, 'window.rankwebBreadcrumbAlias = true;', 'before' ); // index.js registers the alias in the editor too.
+	},
+	20
+);
+
 /* ---------- The earlier names (Animal Writes Core's bands call aw_breadcrumbs_claim) ---------- */
 
 if ( ! function_exists( 'aw_breadcrumbs' ) ) {
