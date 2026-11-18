@@ -348,7 +348,7 @@ schema template — RankWeb's existing rule (its node replaces Rank Math's defau
 
 | With code (filters) | Hook |
 |---|---|
-| Enable / disable presets | `kits_presets` (planned) |
+| Enable / disable presets | `kits_presets_enabled` (the ids that are on; Kits → Settings → Content types saves them); `kits_presets` (the definitions) |
 | Field keys and values | `kits_post_fields` (this PR) |
 | Empty-field markup | `kits_post_field_empty` (this PR) |
 | Schema | `kits_schema_map`, `kits_schema_node` (section 13) |
@@ -523,7 +523,7 @@ Not moved, renamed or deleted here. When the monetisation plan (including ads) s
 |---|---|---|
 | 2 (this PR) | icon/date, `kits/post-field`, **SCF bridge** (`kits_scf_active`, `kits_scf_json_folder`, `kits_scf_groups`); callers switched to the `kits_*` names | none |
 | 3 | The files open PRs touch (faq-data.php, tags.php, DirectoryWeb listing files) switch to `kits_*`; then the `aw_i` / `aw_date` / `aw_scf_*` wrappers are deleted. DirectoryWeb uses `kits_scf_json_folder()` and puts its listing keys on `kits_post_fields` | none |
-| 4 | Preset loader + all seven new presets, each switched on or off in Kits Core (off by default) | new types only, when switched on |
+| 4 | Preset loader + all seven new presets, each switched on or off in Kits Core (off by default). Built: `plugins/kits-core/includes/presets.php` + `includes/presets/`, switches in Kits → Settings → Content types (option `kits_presets_enabled`), `wp kits preset list`, tests in `plugins/kits-core/tests/presets-tests.php`. Templates and patterns per preset follow with the layouts (stage 5) | new types only, when switched on |
 | 5 | Layout block styles + rail; `kits/share` with aliases | yes, on the owner's yes |
 | 6 | Schema contract read by RankWeb | `<head>` only |
 | 7 | This site's existing types onto their `kits-*` presets (byte-identical registration) | none intended |
