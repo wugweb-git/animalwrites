@@ -1528,7 +1528,7 @@ function aw_faq_tag_list( $term_id ) {
 }
 
 // Not in the registry until the campaigns it names are open again (owner, 1 Nov 2026).
-/** The campaign most of the tag's Library documents are linked to (aw_campaign_link; its term meta aw_campaign_page). */
+/** The campaign most of the tag's Library documents are linked to (kits_campaign_link; its term meta aw_campaign_page). */
 function aw_faq_tag_campaign( $term_id, $name ) {
 	$ids    = aw_faq_tag_items( $term_id )['aw_legal'] ?? array();
 	$counts = array();

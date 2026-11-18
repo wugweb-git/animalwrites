@@ -41,7 +41,7 @@
 			"types": [],
 			"runtime": "live"
 		},
-		"tagsdiv-aw_campaign_link": {
+		"tagsdiv-kits_campaign_link": {
 			"title": "Linked campaigns",
 			"source": "WordPress",
 			"plugin": "WordPress",
@@ -51,7 +51,7 @@
 			"types": [],
 			"runtime": "live"
 		},
-		"tagsdiv-aw_media_group": {
+		"tagsdiv-kits_media_group": {
 			"title": "Media groups",
 			"source": "WordPress",
 			"plugin": "WordPress",
@@ -1090,13 +1090,13 @@
 			"file": "core/campaign-links.php",
 			"screen": "term",
 			"types": [
-				"aw_campaign_link"
+				"kits_campaign_link"
 			],
 			"runtime": "live",
 			"match": {
 				"file": "includes/campaign-links.php",
 				"taxonomies": [
-					"aw_campaign_link"
+					"kits_campaign_link"
 				],
 				"hooks": [
 					"edit_form_fields"
@@ -1597,7 +1597,7 @@
 			"reads": [
 				"option:aw_sources (topic_tags)",
 				"post_tag",
-				"aw_campaign_link"
+				"kits_campaign_link"
 			],
 			"limits": "One row per tag rule",
 			"decision": "",
@@ -3342,12 +3342,12 @@
 				}
 			]
 		},
-		"aw_campaign_link": {
+		"kits_campaign_link": {
 			"store": "taxonomy",
 			"label": "Linked campaigns",
 			"type": "taxonomy",
 			"boxes": [
-				"tagsdiv-aw_campaign_link"
+				"tagsdiv-kits_campaign_link"
 			],
 			"types": [],
 			"uses": [
@@ -3361,12 +3361,12 @@
 				"Campaign items use this taxonomy, not tags."
 			]
 		},
-		"aw_media_group": {
+		"kits_media_group": {
 			"store": "taxonomy",
 			"label": "Media group",
 			"type": "taxonomy",
 			"boxes": [
-				"tagsdiv-aw_media_group"
+				"tagsdiv-kits_media_group"
 			],
 			"types": [
 				"attachment"
@@ -4105,7 +4105,7 @@
 				}
 			],
 			"notes": [
-				"Also term meta on aw_campaign_link terms (the campaign label's short name, core/hub-blocks.php:625), read first, then the older term meta aw_campaign_short (2 rows on live). No term field."
+				"Also term meta on kits_campaign_link terms (the campaign label's short name, core/hub-blocks.php:625), read first, then the older term meta aw_campaign_short (2 rows on live). No term field."
 			]
 		},
 		"aw_legal_act": {
@@ -8009,7 +8009,7 @@
 				"term-campaign-news-line"
 			],
 			"types": [
-				"aw_campaign_link"
+				"kits_campaign_link"
 			],
 			"uses": [
 				{
@@ -8027,7 +8027,7 @@
 				"term-campaign-news-line"
 			],
 			"types": [
-				"aw_campaign_link"
+				"kits_campaign_link"
 			],
 			"uses": [
 				{

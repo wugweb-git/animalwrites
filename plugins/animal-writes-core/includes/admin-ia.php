@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_SHARED_TAXONOMIES = array( 'category', 'post_tag', 'aw_campaign_link' ); // Categories, Tags and Linked campaigns: on every section, listed once under Classification (12 Nov 2026) // places are not a list any more (LGD file, places.php)
+const AW_SHARED_TAXONOMIES = array( 'category', 'post_tag', KITS_CAMPAIGN_LINK ); // Categories, Tags and Linked campaigns: on every section, listed once under Classification (12 Nov 2026) // places are not a list any more (LGD file, places.php)
 
 /* ---------- Comments off ---------- */
 
