@@ -120,6 +120,9 @@ function aw_same_story_retire( $dup, $keep ) {
 	}
 	update_post_meta( $dup, 'aw_merged_into', $keep );
 	update_post_meta( $dup, 'aw_review', 'merged into #' . $keep . ' (same event) ' . wp_date( 'Y-m-d H:i' ) );
+	if ( function_exists( 'sourceweb_dupe_bump' ) ) {
+		sourceweb_dupe_bump(); // one more "same story" duplicate today, for the dashboard near-duplicates chart
+	}
 	if ( function_exists( 'aw_redirect_add' ) && $path && '/' !== $path ) {
 		aw_redirect_add( $path, $keep );
 	}

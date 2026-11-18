@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""aw*.css → aw*.min.css (aw.css and the component files aw-*.css in plugins/animal-writes-core/theme/assets/css), and
+"""aw*.css → aw*.min.css (the component files aw-*.css in plugins/animal-writes-core/theme/assets/css), and
 the Kits kit.css, kit-primitives.css, kit-tokens.css → .min.css: comments and whitespace out, nothing else.
 
 The site serves the .min.css files; the sources stay the readable files in git (the editors load the sources).
