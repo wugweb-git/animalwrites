@@ -9,10 +9,11 @@
  * Options:
  *   kits_theme_options, kits_page_defaults, kits_settings_backup, kits_settings_backup_defaults, kits_altcha_key,
  *   kits_ga4_via_gtm, kits_preview_devices, kits_preview_ips, kits_preview_links, kits_spot_map, kits_presets_enabled,
+ *   aw_backup_last (the last daily backup, backups.php), aw_error_pages (the error pages' state, error-pages.php),
  *   kits_delete_data_on_uninstall.
  * Transients (they expire anyway): kits_preview_link_*, kits_thanks_*, kits_transfer_result_*, kits_altcha_*, and the
- *   site transient kits_update_release.
- * Scheduled events: kits_spot_map_daily.
+ *   site transient kits_update_release, aw_error_pages_checked.
+ * Scheduled events: kits_spot_map_daily, aw_daily_backup.
  * Tables: none of its own.
  *
  * Never deleted, even when ticked:
@@ -22,6 +23,7 @@
  *   {prefix}aw_si_kw_map) and their version option aw_kw_db, the sourcing lists aw_sources, aw_publishers and
  *   aw_relevance, the aw_fetch_favicons event, and the aw_form_* / aw_rl_* form transients (shared with Animal Writes
  *   Core; they expire within the hour).
+ * - Files: the daily backups in ~/backups and the error pages (drop-ins) in wp-content.
  * - Anything belonging to another plugin or to WordPress itself.
  *
  * Before deleting, writes a backup to wp-content/uploads/wugweb-backups/kits-core-uninstall-<YYYYmmdd-His>.jsonl.gz
@@ -54,6 +56,8 @@ $kits_options = array(
 	'kits_preview_links',
 	'kits_spot_map',
 	'kits_presets_enabled',
+	'aw_backup_last',
+	'aw_error_pages',
 );
 
 // The ALTCHA signing key is deleted but kept OUT of the backup file: it is a secret (regenerated on demand), and the
@@ -79,5 +83,7 @@ delete_site_transient( 'kits_update_release' );
 
 wp_unschedule_hook( 'kits_spot_map_daily' );
 wp_unschedule_hook( 'aw_fetch_favicons' ); // the hourly favicon run (attribution.php)
+wp_unschedule_hook( 'aw_daily_backup' ); // the daily backup (backups.php); the backup files in ~/backups stay
+delete_transient( 'aw_error_pages_checked' ); // error-pages.php; the drop-ins in wp-content stay
 
 delete_option( 'kits_delete_data_on_uninstall' ); // Last, so a run that stops half-way can be repeated.

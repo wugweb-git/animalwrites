@@ -9,7 +9,11 @@
  * "Animal Writes error page" belongs to something else and is never replaced. Nothing here can stop a request: if
  * wp-content is not writable the copy is skipped and the result is kept in the option aw_error_pages.
  *
- * @package animal-writes-core
+ * Moved from Animal Writes Core (18 Nov 2026) with the dropins/ folder: the marker, the option aw_error_pages and the
+ * transient aw_error_pages_checked keep their names, so the pages already in wp-content stay recognised as ours and
+ * are updated in place. The old aw_ functions stay at the end of this file as thin wrappers until nothing calls them.
+ *
+ * @package kits-core
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -17,20 +21,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Marker that every page in dropins/ carries; only files with it are replaced. */
-const AW_ERROR_PAGE_MARKER = 'Animal Writes error page';
+const KITS_ERROR_PAGE_MARKER = 'Animal Writes error page';
 
 /** Drop-in file names (the same in dropins/ and wp-content/). */
-const AW_ERROR_PAGE_FILES = array( 'php-error.php', 'maintenance.php' );
+const KITS_ERROR_PAGE_FILES = array( 'php-error.php', 'maintenance.php' );
 
 /**
  * Copy each drop-in into wp-content when it is missing or out of date.
  *
  * @return array<string,string> File name => 'current', 'installed', 'updated', 'foreign', 'unwritable' or 'no-source'.
  */
-function aw_error_pages_sync() {
+function kits_error_pages_sync() {
 	$status = array();
-	foreach ( AW_ERROR_PAGE_FILES as $name ) {
-		$status[ $name ] = aw_error_page_sync_one( AW_CORE_DIR . 'dropins/' . $name, WP_CONTENT_DIR . '/' . $name );
+	foreach ( KITS_ERROR_PAGE_FILES as $name ) {
+		$status[ $name ] = kits_error_page_sync_one( KITS_CORE_DIR . 'dropins/' . $name, WP_CONTENT_DIR . '/' . $name );
 	}
 	if ( get_option( 'aw_error_pages' ) !== $status ) {
 		update_option( 'aw_error_pages', $status, false );
@@ -43,11 +47,11 @@ function aw_error_pages_sync() {
  *
  * @param string $src Source file in the plugin.
  * @param string $dst Drop-in path in wp-content.
- * @return string Result, see aw_error_pages_sync().
+ * @return string Result, see kits_error_pages_sync().
  */
-function aw_error_page_sync_one( $src, $dst ) {
+function kits_error_page_sync_one( $src, $dst ) {
 	$new = is_readable( $src ) ? (string) file_get_contents( $src ) : ''; // phpcs:ignore WordPress.WP.AlternativeFunctions
-	if ( '' === $new || false === strpos( $new, AW_ERROR_PAGE_MARKER ) ) {
+	if ( '' === $new || false === strpos( $new, KITS_ERROR_PAGE_MARKER ) ) {
 		return 'no-source';
 	}
 	$exists = file_exists( $dst );
@@ -56,7 +60,7 @@ function aw_error_page_sync_one( $src, $dst ) {
 		if ( $old === $new ) {
 			return 'current';
 		}
-		if ( false === strpos( $old, AW_ERROR_PAGE_MARKER ) ) {
+		if ( false === strpos( $old, KITS_ERROR_PAGE_MARKER ) ) {
 			return 'foreign'; // another plugin's or a person's drop-in: leave it alone.
 		}
 	}
@@ -82,8 +86,8 @@ function aw_error_page_sync_one( $src, $dst ) {
 }
 
 // After a deploy: deploy-purge.php stores the new commit on the first web request that sees it.
-add_action( 'add_option_aw_deployed_head', 'aw_error_pages_sync' );
-add_action( 'update_option_aw_deployed_head', 'aw_error_pages_sync' );
+add_action( 'add_option_aw_deployed_head', 'kits_error_pages_sync' );
+add_action( 'update_option_aw_deployed_head', 'kits_error_pages_sync' );
 
 // On admin screens (not Ajax or the heartbeat), at most once an hour: puts the pages back if one was deleted, and covers a first install.
 add_action(
@@ -93,7 +97,7 @@ add_action(
 			return;
 		}
 		set_transient( 'aw_error_pages_checked', 1, HOUR_IN_SECONDS );
-		aw_error_pages_sync();
+		kits_error_pages_sync();
 	}
 );
 
@@ -111,3 +115,29 @@ add_action(
 		}
 	}
 );
+
+/*
+ * The old names (Animal Writes Core), kept as thin wrappers until nothing calls them.
+ */
+if ( ! function_exists( 'aw_error_pages_sync' ) ) {
+	/**
+	 * Old name of kits_error_pages_sync().
+	 *
+	 * @return array<string,string>
+	 */
+	function aw_error_pages_sync() {
+		return kits_error_pages_sync();
+	}
+}
+if ( ! function_exists( 'aw_error_page_sync_one' ) ) {
+	/**
+	 * Old name of kits_error_page_sync_one().
+	 *
+	 * @param string $src Source file in the plugin.
+	 * @param string $dst Drop-in path in wp-content.
+	 * @return string
+	 */
+	function aw_error_page_sync_one( $src, $dst ) {
+		return kits_error_page_sync_one( $src, $dst );
+	}
+}

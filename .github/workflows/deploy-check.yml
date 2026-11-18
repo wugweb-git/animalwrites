@@ -111,6 +111,8 @@ jobs:
         run: php plugins/kits-core/tests/shell-parts-tests.php
       - name: Kits content-type presets, off by default, native registration only (plugins/kits-core/tests/presets-tests.php)
         run: php plugins/kits-core/tests/presets-tests.php
+      - name: Kits ops, error pages and daily backup moved from Core (plugins/kits-core/tests/ops-tests.php)
+        run: php plugins/kits-core/tests/ops-tests.php
       - name: RankWeb settings tests without WordPress (defaults round trip, unchanged saves write nothing; plugins/aw-seo-extras/tests)
         run: php plugins/aw-seo-extras/tests/run.php
       - name: RankWeb auto-linker tests (sample HTML in, expected HTML out; PHPUnit classes run without PHPUnit, plugins/aw-seo-extras/tests)

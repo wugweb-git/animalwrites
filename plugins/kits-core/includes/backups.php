@@ -5,17 +5,21 @@
  * auto-code-YYYY-MM-DD.tar.gz; only files with the auto- prefix are ever removed by the rotation.
  * Last run and size show on Kits → Home → Backup. Restoring: docs/rollback.md.
  *
- * @package animal-writes-core
+ * Moved whole from Animal Writes Core (18 Nov 2026): the option aw_backup_last, the cron hook aw_daily_backup and the
+ * REST route aw/v1/backup/(db|code) keep their names (the workers repository's off-server copy calls the route). The
+ * old aw_ functions stay at the end of this file as thin wrappers until nothing calls them.
+ *
+ * @package kits-core
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_BACKUP_KEEP_DAYS = 14;
+const KITS_BACKUP_KEEP_DAYS = 14;
 
 /** ~/backups (the account's home, three levels above the web root). */
-function aw_backup_dir() {
+function kits_daily_backup_dir() {
 	return dirname( untrailingslashit( ABSPATH ), 3 ) . '/backups';
 }
 
@@ -28,18 +32,18 @@ add_action(
 		}
 	}
 );
-add_action( 'aw_daily_backup', 'aw_run_backup' );
+add_action( 'aw_daily_backup', 'kits_daily_backup_run' );
 
 /**
  * Write today's database and code backups and remove automatic ones older than 14 days.
  *
  * @return array What was written.
  */
-function aw_run_backup() {
+function kits_daily_backup_run() {
 	if ( function_exists( 'set_time_limit' ) ) {
 		set_time_limit( 600 );
 	}
-	$dir = aw_backup_dir();
+	$dir = kits_daily_backup_dir();
 	if ( ! is_dir( $dir ) && ! wp_mkdir_p( $dir ) ) {
 		return array( 'error' => 'no backup folder' );
 	}
@@ -92,7 +96,7 @@ function aw_run_backup() {
 	$removed = array();
 	$old_files = glob( $dir . '/auto-*' );
 	foreach ( is_array( $old_files ) ? $old_files : array() as $f ) { // glob() gives false on failure
-		if ( filemtime( $f ) < time() - AW_BACKUP_KEEP_DAYS * DAY_IN_SECONDS ) {
+		if ( filemtime( $f ) < time() - KITS_BACKUP_KEEP_DAYS * DAY_IN_SECONDS ) {
 			wp_delete_file( $f );
 			$removed[] = basename( $f );
 		}
@@ -104,7 +108,7 @@ function aw_run_backup() {
 
 // Shown on Kits → Home → Backup.
 /** Kits → Home → Backup (and Check site without Kits): the last daily backup and the next run. */
-function aw_backup_site_check() {
+function kits_daily_backup_site_check() {
 	$b = get_option( 'aw_backup_last' );
 	$n = wp_next_scheduled( 'aw_daily_backup' );
 	echo '<h2>Daily backup</h2><p>';
@@ -113,9 +117,9 @@ function aw_backup_site_check() {
 	} else {
 		echo 'Not run yet.';
 	}
-	echo ' Next: ' . esc_html( $n ? wp_date( 'j M Y, g:i a', $n ) : 'not scheduled' ) . '. Kept ' . (int) AW_BACKUP_KEEP_DAYS . ' days in ~/backups on the server.</p>';
+	echo ' Next: ' . esc_html( $n ? wp_date( 'j M Y, g:i a', $n ) : 'not scheduled' ) . '. Kept ' . (int) KITS_BACKUP_KEEP_DAYS . ' days in ~/backups on the server.</p>';
 }
-add_action( 'aw_site_check_after', 'aw_backup_site_check' );
+add_action( 'aw_site_check_after', 'kits_daily_backup_site_check' );
 
 /*
  * Off-server copy (owner's choice, 8 Oct 2026: GitHub). The workers repository (private) downloads the latest
@@ -132,7 +136,7 @@ add_action(
 				'methods'             => 'GET',
 				'permission_callback' => fn() => current_user_can( 'edit_others_posts' ) && did_action( 'application_password_did_authenticate' ),
 				'callback'            => function ( WP_REST_Request $req ) {
-					$files = (array) glob( aw_backup_dir() . '/auto-' . $req['kind'] . '-*.gz' );
+					$files = (array) glob( kits_daily_backup_dir() . '/auto-' . $req['kind'] . '-*.gz' );
 					rsort( $files ); // newest date first
 					$f = $files[0] ?? '';
 					if ( ! $f || ! is_readable( $f ) ) {
@@ -153,17 +157,17 @@ add_action(
 /*
  * Remote backup alert (owner, 25 Oct 2026): backups are UpdraftPlus's job (database daily, files weekly, to Google
  * Drive). Its newest backup sent to a remote store older than 36 hours, or its last run ending with errors, is a
- * Workers problem (aw_workers_problems, aw-sourcing workers.php): shown on Sourcing → Workers, in the dashboard box and
+ * Workers problem (aw_workers_problems, SourceWeb workers.php): shown on Sourcing → Workers, in the dashboard box and
  * Site Health, and emailed once per new set of problems. Read from UpdraftPlus's own options; nothing is written.
  */
-const AW_BACKUP_REMOTE_STALE = 36 * HOUR_IN_SECONDS;
+const KITS_BACKUP_REMOTE_STALE = 36 * HOUR_IN_SECONDS;
 
 /**
  * Unix time of UpdraftPlus's newest backup that went to a remote store (not 'none'), or 0.
  *
  * @return int
  */
-function aw_backup_remote_last() {
+function kits_backup_remote_last() {
 	$last = 0;
 	foreach ( (array) get_option( 'updraft_backup_history', array() ) as $at => $b ) {
 		$services = array_diff( (array) ( $b['service'] ?? array() ), array( '', 'none' ) );
@@ -180,16 +184,16 @@ function aw_backup_remote_last() {
  * @param int|null $now Unix time (tests).
  * @return string
  */
-function aw_backup_problem( $now = null ) {
+function kits_backup_problem( $now = null ) {
 	if ( ! class_exists( 'UpdraftPlus' ) ) {
 		return '';
 	}
 	$now  = $now ? $now : time();
-	$last = aw_backup_remote_last();
+	$last = kits_backup_remote_last();
 	if ( ! $last ) {
 		return 'UpdraftPlus has no backup in a remote store (Google Drive) yet.';
 	}
-	if ( $now - $last > AW_BACKUP_REMOTE_STALE ) {
+	if ( $now - $last > KITS_BACKUP_REMOTE_STALE ) {
 		return sprintf( 'The newest UpdraftPlus backup in Google Drive is %d hours old (%s); one is expected daily.', floor( ( $now - $last ) / HOUR_IN_SECONDS ), wp_date( 'j M, g:i a', $last ) );
 	}
 	$run = (array) get_option( 'updraft_last_backup', array() );
@@ -197,4 +201,51 @@ function aw_backup_problem( $now = null ) {
 		return sprintf( 'The last UpdraftPlus backup run (%s) ended with errors%s', wp_date( 'j M, g:i a', (int) ( $run['backup_time'] ?? 0 ) ), ! empty( $run['errors'] ) && is_array( $run['errors'] ) ? ': ' . mb_substr( wp_strip_all_tags( (string) reset( $run['errors'] ) ), 0, 160 ) : '.' );
 	}
 	return '';
+}
+
+/*
+ * The old names (Animal Writes Core), kept as thin wrappers until nothing calls them.
+ */
+if ( ! function_exists( 'aw_backup_dir' ) ) {
+	/** Old name of kits_daily_backup_dir(). */
+	function aw_backup_dir() {
+		return kits_daily_backup_dir();
+	}
+}
+if ( ! function_exists( 'aw_run_backup' ) ) {
+	/**
+	 * Old name of kits_daily_backup_run().
+	 *
+	 * @return array What was written.
+	 */
+	function aw_run_backup() {
+		return kits_daily_backup_run();
+	}
+}
+if ( ! function_exists( 'aw_backup_site_check' ) ) {
+	/** Old name of kits_daily_backup_site_check(). */
+	function aw_backup_site_check() {
+		kits_daily_backup_site_check();
+	}
+}
+if ( ! function_exists( 'aw_backup_remote_last' ) ) {
+	/**
+	 * Old name of kits_backup_remote_last().
+	 *
+	 * @return int
+	 */
+	function aw_backup_remote_last() {
+		return kits_backup_remote_last();
+	}
+}
+if ( ! function_exists( 'aw_backup_problem' ) ) {
+	/**
+	 * Old name of kits_backup_problem().
+	 *
+	 * @param int|null $now Unix time (tests).
+	 * @return string
+	 */
+	function aw_backup_problem( $now = null ) {
+		return kits_backup_problem( $now );
+	}
 }

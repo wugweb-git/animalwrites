@@ -83,6 +83,8 @@ require_once KITS_CORE_DIR . 'includes/button-hover.php';
 require_once KITS_CORE_DIR . 'includes/admin-app-cards.php';
 require_once KITS_CORE_DIR . 'includes/site-parts.php';
 require_once KITS_CORE_DIR . 'includes/fonts.php';
+require_once KITS_CORE_DIR . 'includes/backups.php'; // the daily database and code backup into ~/backups, its REST download and the UpdraftPlus alert (moved from Animal Writes Core, 18 Nov 2026)
+require_once KITS_CORE_DIR . 'includes/error-pages.php'; // the branded 500 and 503 drop-ins copied from dropins/ into wp-content (moved from Animal Writes Core, 18 Nov 2026)
 
 // Switched off: its scheduled jobs come off too (they are booked again on the next request after it is switched back on).
 register_deactivation_hook(

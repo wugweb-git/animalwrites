@@ -155,7 +155,7 @@ deleted (see `docs/content-blocks-feasibility.md`, section 22). The 7 SourceWeb 
 | `aw_set_item_tags()` | 2 | `includes/enrichment.php` (2) |
 | `aw_tel_url()` | 2 | `includes/enrichment-front.php` (2) |
 | `aw_whole_sentences()` | 2 | `includes/ingest.php` (1), `includes/summary-rewrite.php` (1) |
-| `aw_backup_problem()` | 1 | `includes/workers.php` (1) |
+| `aw_backup_problem()` | 1 | `includes/workers.php` (1): switched to `kits_backup_problem()` (Kits Core, 18 Nov 2026) |
 | `aw_keep_modified()` | 1 | `includes/news-titles.php` (1) |
 | `aw_listing_put_phone()` | 1 | `includes/ingest.php` (1) |
 | `aw_listing_types()` | 1 | `includes/enrichment.php` (1) |
