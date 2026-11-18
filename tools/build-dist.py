@@ -110,6 +110,44 @@ def neutral_sidebar_part(stage: pathlib.Path) -> bool:
     return True
 
 
+def neutral_registry(stage: pathlib.Path) -> bool:
+    """The STAGED theme's kits-registry.json without the site's own names (zip only, not the repo).
+
+    Drops the dormant Advertisement component (it names the Advanced Ads block), the `aw-` class names in the class
+    lists, and the `aw_` function names inside the notes. Returns True when the file was changed."""
+    import json
+
+    reg = stage / "kits-registry.json"
+    if not reg.is_file():
+        return False
+    before = reg.read_text(encoding="utf-8")
+    note = re.compile(r"\s*\((?:aw_[a-z_]+|[a-z_]+\.php)\)|\s*\(aw_[a-z_]+\)")
+
+    def walk(node):
+        if isinstance(node, dict):
+            return {k: walk(v) for k, v in node.items()}
+        if isinstance(node, list):
+            keep = []
+            for item in node:
+                if isinstance(item, dict) and str(item.get("block", "")).startswith("advads/"):
+                    continue
+                if isinstance(item, str) and item.startswith("aw-"):
+                    continue
+                keep.append(walk(item))
+            return keep
+        if isinstance(node, str):
+            out = re.sub(r"\s*\((?:aw_[a-z_]+|\.aw-[^)]*)\)", "", node)
+            return re.sub(r"ol\.aw-[a-z-]+\s*", "", out)
+        return node
+
+    data = walk(json.loads(before))
+    after = json.dumps(data, indent=1, ensure_ascii=False) + "\n"
+    if re.search(r"advads|\baw[-_]", after):
+        sys.exit("kits-registry.json still names the site after neutralising: " + ", ".join(sorted(set(re.findall(r"[^\"]*(?:advads|\baw[-_])[^\"]*", after)))[:5]))
+    reg.write_text(after, encoding="utf-8")
+    return after != before
+
+
 def set_theme_update_uri(style_css: pathlib.Path, uri: str | None) -> None:
     """Add, or strip, the `Update URI:` header line in a theme style.css for the chosen track."""
     text = style_css.read_text(encoding="utf-8")
@@ -153,6 +191,8 @@ def build(target: str, track: str, out_dir: pathlib.Path) -> pathlib.Path:
         print(f"  accent: {AW_ACCENT} -> {NEUTRAL_ACCENT} in {n} file(s) (repo keeps {AW_ACCENT})")
         if neutral_sidebar_part(stage):
             print("  parts/sidebar.html: the Advanced Ads block -> an empty group (repo keeps the dormant ad slot)")
+        if neutral_registry(stage):
+            print("  kits-registry.json: the site's own names (Advanced Ads component, aw- classes, aw_ functions) left out (repo keeps them)")
 
     zip_name = f"{slug}-{track}.zip" if target == "theme" else f"{slug}.zip"
     zip_path = out_dir / zip_name
