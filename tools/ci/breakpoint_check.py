@@ -10,7 +10,7 @@ import pathlib
 import re
 import sys
 
-from theme_copies import is_copy
+from theme_copies import is_copy, variation_css
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 ALLOWED = {("min", "768"), ("max", "767"), ("min", "1200"), ("max", "1199")}
@@ -30,6 +30,12 @@ def main():
                     for kind, num, unit in WIDTH.findall(q):
                         if unit != "px" or (kind, num) not in ALLOWED:
                             bad.append(f"{f.relative_to(ROOT)}:{n}: {kind}-width {num}{unit}")
+    for f, css in variation_css():  # a style variation's styles.css (the site's own CSS)
+        for n, line in enumerate(css.splitlines(), 1):
+            for q in QUERY.findall(line):
+                for kind, num, unit in WIDTH.findall(q):
+                    if unit != "px" or (kind, num) not in ALLOWED:
+                        bad.append(f"{f.relative_to(ROOT)} styles.css:{n}: {kind}-width {num}{unit}")
     if bad:
         print("Width queries outside 767/768 and 1199/1200 (use a container query instead):")
         print("\n".join("  " + b for b in bad))

@@ -10,7 +10,12 @@ is missing, or when a font folder appears there: Kits by Wugweb declares Inter i
 The other checks import is_copy() and theme_file() from here:
 - is_copy() is true for the generated .min.css files (tools/ci/css_min.py writes aw*.min.css in the plugin's folder and
   kit-tokens/kit/kit-primitives.min.css in Kits; MIN_FILES), so the checks read their sources instead;
-- theme_file(rel) is the plugin's file.
+- theme_file(rel) is the plugin's file;
+- variation_css() gives the CSS of each Kits style variation (themes/*/styles/*.json, styles.css): the site CSS that
+  only Animal Writes uses lives there (aw.css was retired on 18 Nov 2026), so the CSS checks read it too.
+
+The plugin's styles/animal-writes.json must equal the Kits theme's (the same variation; the plugin copy goes with
+animal-writes-core).
 
     python3 tools/ci/theme_copies.py        # exit 1 when a required file is missing or a font folder is there
 """
@@ -21,7 +26,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 COPY = ROOT / "plugins/animal-writes-core/theme"
 # Each of these must be in the plugin's theme/ folder (the plugin serves them; a missing one would be missing on the site).
 REQUIRED = (
-    "assets/css/aw.css",
+    "styles/animal-writes.json",
     "assets/css/tokens.css",
     "assets/js/aw.js",
     "templates",
@@ -46,6 +51,15 @@ def is_copy(path):
     return pathlib.Path(path).resolve() in MIN_FILES
 
 
+def variation_css():
+    """(path, css) for each Kits style variation with a styles.css: themes/*/styles/*.json."""
+    import json
+    for f in sorted((ROOT / "themes").glob("*/styles/*.json")):
+        css = (json.loads(f.read_text()).get("styles") or {}).get("css") or ""
+        if css.strip():
+            yield f, css
+
+
 def theme_file(rel):
     """The Animal Writes theme file (path relative to the theme root) in the plugin's theme/ folder."""
     return COPY / rel
@@ -62,6 +76,9 @@ def main():
     folder = COPY / "assets/fonts"
     if folder.is_dir() and any(f.is_file() and f.name != ".DS_Store" for f in folder.rglob("*")):
         bad.append(f"FONT {folder.relative_to(ROOT)} has font files; Inter is declared once, in Kits")
+    variation = "styles/animal-writes.json"
+    if (COPY / variation).is_file() and (COPY / variation).read_bytes() != (ROOT / "themes/kits-by-wugweb" / variation).read_bytes():
+        bad.append(f"DIFFERENT plugins/animal-writes-core/theme/{variation} and themes/kits-by-wugweb/{variation} (keep them identical)")
     if bad:
         print("Animal Writes theme files in animal-writes-core:")
         print("\n".join("  " + b for b in bad))

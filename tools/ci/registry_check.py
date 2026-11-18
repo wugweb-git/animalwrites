@@ -9,7 +9,7 @@ import os
 import re
 import sys
 
-from theme_copies import is_copy, theme_file
+from theme_copies import is_copy, theme_file, variation_css
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 REGS = ["themes/kits-by-wugweb/kits-registry.json", theme_file("kits-registry.json")]  # Kits master, then Animal Writes (animal-writes-core/theme)
@@ -42,6 +42,9 @@ for top in ("themes", "plugins"):
                     found |= {c for c in m.group(1).split() if re.fullmatch(r"(aw|kit)-[a-z0-9-]+", c)}
             for c in found:
                 used.setdefault(c.split("--")[0].rstrip("-"), set()).add(os.path.relpath(p, ROOT))
+for f, css in variation_css():  # a style variation's styles.css (the site's own CSS)
+    for c in set(re.findall(r"\.((?:aw|kit)-[a-z0-9-]+)", css)):
+        used.setdefault(c.split("--")[0].rstrip("-"), set()).add(os.path.relpath(str(f), ROOT))
 
 
 def covered(c):
