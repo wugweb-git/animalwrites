@@ -47,6 +47,13 @@ require_once KITS_CORE_DIR . 'includes/plugin-info.php';
 require_once KITS_CORE_DIR . 'includes/altcha.php';
 require_once KITS_CORE_DIR . 'includes/forms.php';
 require_once KITS_CORE_DIR . 'includes/form-kit.php';
+// The site's forms on Fluent Forms: the custom fields, checks and look, the form and thank-you pages, Report a mistake,
+// the volunteer form, the Campaign form with the raw copy of every send, and the Dashboard box (moved from Animal Writes
+// Core, 18 Nov 2026). compat.php keeps the old function names working.
+foreach ( array( 'fluentforms', 'form-pages', 'reports', 'volunteers', 'campaign-form', 'dashboard-forms', 'compat' ) as $kits_forms_file ) {
+	require_once KITS_CORE_DIR . 'includes/forms/' . $kits_forms_file . '.php';
+}
+unset( $kits_forms_file );
 require_once KITS_CORE_DIR . 'includes/primitives.php';
 require_once KITS_CORE_DIR . 'includes/scf.php'; // SCF/ACF bridge (admin): Local JSON folders and the field group registry
 require_once KITS_CORE_DIR . 'includes/bindings.php'; // Block Bindings source kits/post-field; sites register keys on kits_post_fields

@@ -75,6 +75,7 @@ $directoryweb_includes = array(
 	'geocode',
 	'directory-map',
 	'claims',
+	'claim-page',
 	'claims-review',
 	'directoryweb-shape',
 	'directoryweb-dashboard',

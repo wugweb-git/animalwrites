@@ -9,7 +9,10 @@
  * action, notes = what was done). Nothing on the item changes automatically. The site's own form and its handler were
  * removed (owner, 25 Oct 2026); reports sent before are private aw_report posts, still listed below.
  *
- * @package animal-writes-core
+ * Moved from Animal Writes Core `includes/reports.php` (18 Nov 2026); options, meta keys, tags, hooks and
+ * slugs are unchanged, and the old function names still work (back-compat wrappers).
+ *
+ * @package kits-core
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -17,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** What can be wrong: key => label. "Details missing" is what the "Data not yet available" links choose. */
-function aw_report_reasons() {
+function kits_report_reasons() {
 	return array(
 		'wrong'     => 'Wrong information',
 		'outdated'  => 'Out of date',
@@ -31,13 +34,13 @@ function aw_report_reasons() {
 }
 
 /** Reasons from before 21 Oct 2026, for reports made then. */
-const AW_REPORT_OLD_REASONS = array( 'contact' => 'Phone, email or website is wrong', 'location' => 'Location is wrong' );
+const KITS_REPORT_OLD_REASONS = array( 'contact' => 'Phone, email or website is wrong', 'location' => 'Location is wrong' );
 
 /** Item types a report can be about: post type => Type column. */
-const AW_REPORT_TYPES = array( 'aw_listing' => 'Listing', 'aw_news' => 'News', 'aw_legal' => 'Library', 'post' => 'Resource' );
+const KITS_REPORT_TYPES = array( 'aw_listing' => 'Listing', 'aw_news' => 'News', 'aw_legal' => 'Library', 'post' => 'Resource' );
 
 /** Statuses: New → Fixed / No change ("resolved" from before 21 Oct 2026 shows as Fixed). */
-const AW_REPORT_STATUSES = array( 'new' => 'New', 'fixed' => 'Fixed', 'no_change' => 'No change' );
+const KITS_REPORT_STATUSES = array( 'new' => 'New', 'fixed' => 'Fixed', 'no_change' => 'No change' );
 
 add_action(
 	'init',
@@ -60,19 +63,19 @@ add_action(
 );
 
 /** A published item a report can be about, or null. */
-function aw_report_item( $id ) {
+function kits_report_item( $id ) {
 	$p = $id ? get_post( (int) $id ) : null;
-	return $p && isset( AW_REPORT_TYPES[ $p->post_type ] ) && 'publish' === $p->post_status ? $p : null;
+	return $p && isset( KITS_REPORT_TYPES[ $p->post_type ] ) && 'publish' === $p->post_status ? $p : null;
 }
 
 /** The item a Report a mistake or Suggest an update link names (/contact/?item=<ID>, or the older ?listing=), or null. */
-function aw_report_get_item() {
-	return aw_report_item( absint( wp_unslash( $_GET['item'] ?? ( $_GET['listing'] ?? 0 ) ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
+function kits_report_get_item() {
+	return kits_report_item( absint( wp_unslash( $_GET['item'] ?? ( $_GET['listing'] ?? 0 ) ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
 }
 
 /**
  * The Contact form's fields filled from a Report a mistake or Suggest an update link (/contact/?about=general&item=<ID>
- * [&field=<x>], aw_report_url(); owner, 12 Nov 2026: no Report a mistake reason in the menu, the item's ID and path are
+ * [&field=<x>], kits_report_url(); owner, 12 Nov 2026: no Report a mistake reason in the menu, the item's ID and path are
  * captured instead). Only a published listing, News, Library or Resource item; otherwise empty.
  * - {aw.correction_message}: the Message box, "Page: {title}", "Field: {field}" (only when given), the page's link and an
  *   empty line. Fluent Forms has no smartcode for another page's title.
@@ -86,7 +89,7 @@ add_filter(
 		if ( ! in_array( $key, array( 'correction_message', 'report_item', 'report_path' ), true ) ) {
 			return $value;
 		}
-		$item = aw_report_get_item();
+		$item = kits_report_get_item();
 		if ( ! $item ) {
 			return '';
 		}
@@ -105,20 +108,20 @@ add_filter(
 );
 
 /** The report form (S7.3), the Fluent Forms form. $item: the item it is about, or null (then it asks for the page link). */
-function aw_report_form( $item, $reason = '' ) {
-	$reason = isset( aw_report_reasons()[ $reason ] ) ? $reason : '';
-	return aw_ff_form( 'report', array( 'item' => $item, 'listing' => $item && 'aw_listing' === $item->post_type ? $item : null, 'reason' => $reason ) );
+function kits_report_form( $item, $reason = '' ) {
+	$reason = isset( kits_report_reasons()[ $reason ] ) ? $reason : '';
+	return kits_ff_form( 'report', array( 'item' => $item, 'listing' => $item && 'aw_listing' === $item->post_type ? $item : null, 'reason' => $reason ) );
 }
 
 /** Back-compat: [aw_report_box] prints the report form of the current item. */
-add_shortcode( 'aw_report_box', fn() => get_post() ? aw_report_form( aw_report_item( get_the_ID() ) ) : '' );
+add_shortcode( 'aw_report_box', fn() => get_post() ? kits_report_form( kits_report_item( get_the_ID() ) ) : '' );
 
 /* ---------- Admin review ---------- */
 
 /** A report's status ("resolved" from before is Fixed). */
-function aw_report_status( $id ) {
+function kits_report_status( $id ) {
 	$st = (string) get_post_meta( $id, 'aw_r_status', true );
-	return 'resolved' === $st ? 'fixed' : ( isset( AW_REPORT_STATUSES[ $st ] ) ? $st : 'new' );
+	return 'resolved' === $st ? 'fixed' : ( isset( KITS_REPORT_STATUSES[ $st ] ) ? $st : 'new' );
 }
 
 add_filter( 'manage_aw_report_posts_columns', fn( $c ) => array( 'cb' => $c['cb'], 'title' => 'Item', 'aw_type' => 'Type', 'aw_reason' => 'Reason', 'aw_details' => 'Details', 'aw_status' => 'Status', 'date' => 'Received' ) );
@@ -132,14 +135,14 @@ add_action(
 			echo esc_html( '' !== $type ? $type : ( $item ? 'Listing' : '' ) );
 		} elseif ( 'aw_reason' === $col ) {
 			$r = (string) get_post_meta( $id, 'aw_r_reason', true );
-			echo esc_html( aw_report_reasons()[ $r ] ?? ( AW_REPORT_OLD_REASONS[ $r ] ?? $r ) );
+			echo esc_html( kits_report_reasons()[ $r ] ?? ( KITS_REPORT_OLD_REASONS[ $r ] ?? $r ) );
 		} elseif ( 'aw_details' === $col ) {
 			echo esc_html( wp_trim_words( (string) get_post_meta( $id, 'aw_r_details', true ), 30 ) );
 			$email = (string) get_post_meta( $id, 'aw_r_email', true );
 			echo '' !== $email ? '<br><a href="mailto:' . esc_attr( $email ) . '">' . esc_html( $email ) . '</a>' : '';
 		} elseif ( 'aw_status' === $col ) {
-			$st = aw_report_status( $id );
-			echo esc_html( AW_REPORT_STATUSES[ $st ] );
+			$st = kits_report_status( $id );
+			echo esc_html( KITS_REPORT_STATUSES[ $st ] );
 			if ( 'new' === $st ) {
 				foreach ( array( 'fixed' => 'Mark fixed', 'no_change' => 'No change' ) as $to => $label ) {
 					$url = wp_nonce_url( add_query_arg( array( 'action' => 'aw_report_status', 'report' => $id, 'to' => $to ), admin_url( 'admin-post.php' ) ), 'aw_report_status_' . $id );
@@ -163,7 +166,7 @@ add_action(
 	function () {
 		$id = absint( $_GET['report'] ?? 0 );
 		$to = sanitize_key( wp_unslash( $_GET['to'] ?? '' ) );
-		if ( ! current_user_can( 'edit_aw_volunteers' ) || ! check_admin_referer( 'aw_report_status_' . $id ) || 'aw_report' !== get_post_type( $id ) || ! isset( AW_REPORT_STATUSES[ $to ] ) ) {
+		if ( ! current_user_can( 'edit_aw_volunteers' ) || ! check_admin_referer( 'aw_report_status_' . $id ) || 'aw_report' !== get_post_type( $id ) || ! isset( KITS_REPORT_STATUSES[ $to ] ) ) {
 			wp_die( 'Not allowed.', 403 );
 		}
 		update_post_meta( $id, 'aw_r_status', $to );
@@ -184,10 +187,10 @@ add_action(
 				$rows = array(
 					'Type'          => (string) get_post_meta( $post->ID, 'aw_r_type', true ),
 					'Page'          => (string) get_post_meta( $post->ID, 'aw_r_page', true ),
-					'What\'s wrong' => aw_report_reasons()[ $r ] ?? ( AW_REPORT_OLD_REASONS[ $r ] ?? $r ),
+					'What\'s wrong' => kits_report_reasons()[ $r ] ?? ( KITS_REPORT_OLD_REASONS[ $r ] ?? $r ),
 					'Details'       => (string) get_post_meta( $post->ID, 'aw_r_details', true ),
 					'Email'         => (string) get_post_meta( $post->ID, 'aw_r_email', true ),
-					'Status'        => AW_REPORT_STATUSES[ aw_report_status( $post->ID ) ],
+					'Status'        => KITS_REPORT_STATUSES[ kits_report_status( $post->ID ) ],
 					'Reference'     => (string) get_post_meta( $post->ID, 'aw_r_ref', true ),
 				);
 				echo '<table class="form-table" role="presentation"><tbody>';

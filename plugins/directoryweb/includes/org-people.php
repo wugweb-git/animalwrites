@@ -40,7 +40,7 @@ function aw_org_people_crm( $lid, $tag = 'org-approved' ) {
 		return $cache[ $tag ][ $lid ];
 	}
 	$out = array();
-	$t   = function_exists( 'aw_crm_on' ) && aw_crm_on() ? FluentCrmApi( 'tags' )->getInstance()->where( 'slug', $tag )->first() : null;
+	$t   = function_exists( 'mailweb_fcrm_on' ) && mailweb_fcrm_on() ? FluentCrmApi( 'tags' )->getInstance()->where( 'slug', $tag )->first() : null;
 	if ( $t ) {
 		$title = aw_org_people_norm( get_the_title( $lid ) );
 		foreach ( \FluentCrm\App\Models\Subscriber::filterByTags( array( (int) $t->id ) )->limit( 2000 )->get() as $c ) {
@@ -117,7 +117,7 @@ function aw_org_people_schema( $lid ) {
  * @return string crm-off | no-email | no-contact | no-listing | elsewhere | already | updated | linked
  */
 function aw_org_people_link( $lid, $email, $role, $show, $apply = true ) {
-	if ( ! function_exists( 'aw_crm_on' ) || ! aw_crm_on() ) {
+	if ( ! function_exists( 'mailweb_fcrm_on' ) || ! mailweb_fcrm_on() ) {
 		return 'crm-off';
 	}
 	$email = strtolower( trim( (string) $email ) );
@@ -136,8 +136,8 @@ function aw_org_people_link( $lid, $email, $role, $show, $apply = true ) {
 	$has_tag = $tag && \FluentCrm\App\Models\Subscriber::filterByTags( array( (int) $tag->id ) )->where( 'id', (int) $contact->id )->first();
 	$plan    = aw_org_people_link_plan( (array) $contact->custom_fields(), (bool) $has_tag, $lid, (bool) $show, html_entity_decode( get_the_title( $lid ), ENT_QUOTES ), (string) $role );
 	if ( $apply ) {
-		if ( $plan['tag'] && function_exists( 'aw_crm_tag_ids' ) ) { // without Animal Writes Core's tag helper the tag is not added
-			$contact->attachTags( aw_crm_tag_ids( array( 'org-approved' ) ) );
+		if ( $plan['tag'] && function_exists( 'mailweb_fcrm_tag_ids' ) ) { // without MailWeb the tag is not added
+			$contact->attachTags( mailweb_fcrm_tag_ids( array( 'org-approved' ) ) );
 		}
 		if ( $plan['sync'] ) {
 			$contact->syncCustomFieldValues( $plan['sync'], false );
@@ -327,4 +327,3 @@ function aw_org_listing_ok( $id ) {
 	$id = absint( $id );
 	return $id && 'aw_listing' === get_post_type( $id ) && 'publish' === get_post_status( $id ) ? $id : 0;
 }
-

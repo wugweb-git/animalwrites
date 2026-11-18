@@ -91,8 +91,6 @@ require_once AW_CORE_DIR . 'includes/media-groups.php'; // Media group label for
 require_once AW_CORE_DIR . 'includes/media-webp.php'; // Resized copies of JPEG and PNG uploads as WebP; Media → Make WebP converts existing images in batches with Undo
 require_once AW_CORE_DIR . 'includes/media-merge.php'; // Media → Duplicate files: merge duplicate copies with Undo
 require_once AW_CORE_DIR . 'includes/media-reuse.php'; // Media → Reuse pictures: recycle Media Library pictures as page covers, one at a time, with Undo
-require_once AW_CORE_DIR . 'includes/volunteers-db.php';
-require_once AW_CORE_DIR . 'includes/volunteers.php';
 require_once AW_CORE_DIR . 'includes/campaigns.php';
 require_once AW_CORE_DIR . 'includes/campaign-tools.php';
 require_once AW_CORE_DIR . 'includes/campaign-short.php'; // /lab, /diwali...: a campaign's short link, 301 to its page
@@ -104,14 +102,11 @@ require_once AW_CORE_DIR . 'includes/hub-blocks.php';
 require_once AW_CORE_DIR . 'includes/term-page.php';
 require_once AW_CORE_DIR . 'includes/faq-data.php'; // the Library item fields (the FAQ questions are RankWeb's faq-data.php since 18 Nov 2026)
 require_once AW_CORE_DIR . 'includes/sponsored-blocks.php';
-require_once AW_CORE_DIR . 'includes/form-blocks.php';
 require_once AW_CORE_DIR . 'includes/site-check.php';
 require_once AW_CORE_DIR . 'includes/mailweb-aw.php';
 require_once AW_CORE_DIR . 'includes/staging.php';
 require_once AW_CORE_DIR . 'includes/systems.php';
-require_once AW_CORE_DIR . 'includes/reports.php';
 require_once AW_CORE_DIR . 'includes/retention.php';
-require_once AW_CORE_DIR . 'includes/newsletter.php';
 require_once AW_CORE_DIR . 'includes/model.php';
 require_once AW_CORE_DIR . 'includes/helpers-public.php'; // [aw_helpers] on the Volunteer page: approved helpers (owner, 13 Nov 2026)
 require_once AW_CORE_DIR . 'includes/breadcrumbs.php'; // fallback: RankWeb's breadcrumb renderer when RankWeb is not active
@@ -131,16 +126,30 @@ require_once AW_CORE_DIR . 'includes/near-opps.php';
 require_once AW_CORE_DIR . 'includes/entity-links.php';
 require_once AW_CORE_DIR . 'includes/thumbs.php';
 require_once AW_CORE_DIR . 'includes/cc0-images.php';
-require_once AW_CORE_DIR . 'includes/newsletter-fluentforms.php';
-require_once AW_CORE_DIR . 'includes/forms-fluentforms.php';
-require_once AW_CORE_DIR . 'includes/campaign-form.php'; // "Sign it" as the Fluent Forms Campaign form; the raw copy of every form send
-require_once AW_CORE_DIR . 'includes/fluentcrm.php';
 require_once AW_CORE_DIR . 'includes/admin-ia.php';
 require_once AW_CORE_DIR . 'includes/team-dates.php';
-require_once AW_CORE_DIR . 'includes/dashboard-forms.php';
 require_once AW_CORE_DIR . 'includes/dashboard-activity.php';
 require_once AW_CORE_DIR . 'includes/cron-health.php';
 require_once AW_CORE_DIR . 'includes/error-count.php';
+// Forms, FluentCRM and the newsletter moved out (18 Nov 2026): the form engine, form pages, Report a mistake, volunteers,
+// the Campaign form and the Dashboard box to Kits Core (includes/forms/); the claim page to DirectoryWeb (claim-page.php);
+// FluentCRM, the newsletter and Mail → Website forms to MailWeb. When MailWeb is not active, its three site files are
+// loaded from the sibling folder, so the forms keep their FluentCRM steps as before.
+add_action(
+	'plugins_loaded',
+	function () {
+		if ( defined( 'MAILWEB_VERSION' ) ) {
+			return;
+		}
+		foreach ( array( 'website-forms', 'fluentcrm', 'newsletter', 'fluentcrm-compat' ) as $f ) {
+			$file = dirname( AW_CORE_DIR ) . '/mailweb/includes/' . $f . '.php';
+			if ( file_exists( $file ) ) {
+				require_once $file;
+			}
+		}
+	},
+	0
+);
 require_once AW_CORE_DIR . 'includes/theme-parts.php'; // theme files, templates and patterns when Kits runs with no child theme
 require_once AW_CORE_DIR . 'includes/theme-parts-screen.php'; // Kits → Theme parts: the child theme's parts, where they live now, where to change them.
 
