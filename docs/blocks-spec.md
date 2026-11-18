@@ -2,7 +2,7 @@
 
 The front-end plan for the owner's custom-blocks decision of 11 Nov 2026. It goes with the Kits admin rebuild of the same day (Home, Theme Options, Settings, Plugins, Tools, Help; Theme Options → Socials is the one source for social links).
 
-This is a spec only. Nothing here is built. The owner reviews it first; each phase below is built on its own branch and pull request, and each content change on live waits for its own yes.
+**Approved by the owner, 18 Nov 2026.** Each phase below is built on its own branch and pull request, and each content change on live waits for its own yes.
 
 ## The decision
 

@@ -187,7 +187,7 @@ Code moves; data stays. In this PR and every later step:
 | C. DirectoryWeb and SourceWeb call `kits_icon()` / `kits_date()`, and DirectoryWeb registers its listing keys (`phone`, `area`, `services`…) on `kits_post_fields` | S | Low | Their own tracks; this is what lets them drop the tenant |
 | D. Kits loader for server-rendered blocks (same `animal-writes/*` names, generic ServerSideRender editor script) | M | Medium (editor script handle and `window.awHubBlocks` global move) | Phase B |
 | E. Social post card → `kits_social_card_html()` with `kit-social-*` classes | M | Medium: CSS rename in both `aw.css` copies, visible if missed | Phase B; needs a before/after check at 375/768/1280 |
-| F. Query Loop variations `kits/related`, `kits/item-more`, `kits/term-related` (blocks-spec 3.3, 3.18) | M | Medium (query cost; `aw_news` re-sort) | Owner review of blocks-spec first |
+| F. Query Loop variations `kits/related`, `kits/item-more`, `kits/term-related` (blocks-spec 3.3, 3.18) | M | Medium (query cost; `aw_news` re-sort) | Blocks spec approved (18 Nov); own PR |
 | G. Item meta row from bound core blocks (`kits/post-field`) in `single.html` | M | Medium (template change, many `render_block_*` filters) | After B; template edit = visible layout, owner's yes |
 | H. Kits blocks of blocks-spec (`kits/share`, `kits/countdown`, `kits/sponsored`, then the rest) | L | Medium | Waiting on the owner's review of blocks-spec |
 | I. Editor: register `kits/post-field` keys in JS too (labels in the Attributes panel) | S | Low | After B |
@@ -202,7 +202,7 @@ Code moves; data stays. In this PR and every later step:
 | 2 (this PR) | A + B: icon/date helpers and the binding source move to Kits Core; tenant keeps thin wrappers and its keys | Review gate, then the owner merges | **none** (markup identical) |
 | 3 | C: DirectoryWeb and SourceWeb switch to `kits_*` names | Their tracks | none |
 | 4 | D + E: block loader and social card | Owner (CSS rename) | none intended; checked at 375/768/1280 |
-| 5 | F + G + H: blocks-spec phases 1–3 | Owner review of blocks-spec | yes, per page on the owner's yes |
+| 5 | F + G + H: blocks-spec phases 1–3 (spec approved 18 Nov) | Owner, per page | yes, per page on the owner's yes |
 | 6 | animal-writes-core is deleted: every part has a final home (section 22); words, slugs and settings are site data | Owner | none |
 
 ---
@@ -225,7 +225,7 @@ Code moves; data stays. In this PR and every later step:
 
 ## 10. Open questions for the owner
 
-1. **Blocks spec review.** The bigger content moves (F, G, H) wait on `docs/blocks-spec.md`. Is it approved as written?
+1. **Blocks spec review.** Answered 18 Nov: `docs/blocks-spec.md` is **approved**. The moves F, G, H can be built, each phase on its own PR; each content change on live still waits for its own yes.
 2. **Social card class rename (E).** `aw-social-*` → `kit-social-*` in both `aw.css` copies and the card markup. OK to
    do as its own PR with a before/after check?
 3. **Where the CPT rows end up (stage 6).** Answered 18 Nov: animal-writes-core is deleted, no site plugin. The rows
@@ -395,7 +395,7 @@ Any post type can use them, `aw_listing` included. No new query block.
 | Bento | `is-style-kits-bento`: three shades per bento, campaign light + campaign dark + white, plus pictures/texture (owner, 13 Nov) | |
 | Featured + list | first item lg, the rest stacked (CSS `:first-child`) | |
 | Masonry | CSS columns (no JS); reading order stays top-to-bottom per column, checked with a screen reader | low priority |
-| Tabs | **not built** — hides content behind interaction; owner's "no folds sitewide" rule. Open question | |
+| Tabs | **allowed (owner, 18 Nov 2026)**, as a layout option where the owner picks it. Not a fold: every panel's content is in the page markup, real `tablist`/`tab`/`tabpanel` roles, arrow keys between tabs, no-JS shows all panels in order. Not built yet | |
 | Accordions / "Show more" | **never** (owner, 13 Nov) | |
 
 **Carousel / rail rules** [front-end]:
@@ -531,7 +531,7 @@ Not moved, renamed or deleted here. Final: Kits Core, kept dormant; when the mon
 
 Owner questions (added):
 5. Which new presets first: `kits-portfolio`, `kits-card`, `kits-infographic`; and are `kits-case-study`, `kits-event`, `kits-person`, `kits-testimonial` wanted?
-6. Tabs: allowed anywhere, given "no folds sitewide"? (Not built until answered.)
+6. Tabs: answered 18 Nov, **yes**, allowed (see section 16).
 7. Card minimum width: answered 18 Nov, **17rem** (the Kits token). The aw-core override is removed in this PR.
 8. `aw_campaign_link` and `aw_media_group`: confirm both stay as the two non-tag relations.
 9. Masonry: wanted? (Reading order and screen readers make it the riskiest layout.)
