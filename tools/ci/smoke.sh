@@ -463,9 +463,11 @@ curl -s -o /tmp/listing.html "http://127.0.0.1:8080$(single aw_listing)"
 # joined FILE: the joined component file a page links to (kits-parts-css), fetched to /tmp/joined-NAME.css.
 joined() { href=$(grep -oE "<link[^>]*id=['\"]kits-parts-css['\"][^>]*>" "$1" | grep -oE "href=['\"][^'\"]+" | head -1 | cut -c7-); [ -n "$href" ] && curl -s -o "/tmp/joined-$2.css" "$href"; }
 if joined /tmp/home.html home; then
-  has "joined file on / starts with aw.css" /tmp/joined-home.css '/* aw-components */'
-  # aw.css's wordmark url() is rewritten to the folder it came from: the plugin's copy, not a theme folder.
-  has "joined aw.css is the plugin copy" /tmp/joined-home.css '/wp-content/plugins/animal-writes-core/theme/assets/'
+  # aw.css was retired (18 Nov 2026): the joined file holds the component files only.
+  if grep -qF '/* aw-components */' /tmp/joined-home.css; then echo "FAIL joined file on / still has aw.css"; FAIL=1; else echo "ok   joined file on / has no aw.css"; fi
+  # The theme's site file (assets/site/site.css) joins first; its wordmark url() is rewritten to the theme's site folder.
+  has "joined file on / has the site CSS" /tmp/joined-home.css '/* kits-site */'
+  has "joined site CSS points at the theme's site folder" /tmp/joined-home.css '/wp-content/themes/kits-by-wugweb/assets/site/'
 else
   echo "FAIL no joined component file on /"; FAIL=1
 fi
@@ -479,12 +481,8 @@ wp eval '$o = (array) get_option( "kits_theme_options", array() ); $o["css_bundl
 curl -s -o /tmp/home.html http://127.0.0.1:8080/
 curl -s -o /tmp/state.html http://127.0.0.1:8080/directory/kerala/
 curl -s -o /tmp/listing.html "http://127.0.0.1:8080$(single aw_listing)"
-# The component stylesheet comes from the plugin's copy (aw.min.css, or aw.css when the min file is missing), not a theme folder.
-if grep -oE "<link[^>]*id=['\"]aw-components-css['\"][^>]*>" /tmp/home.html | grep -qE '/wp-content/plugins/animal-writes-core/theme/assets/css/aw(\.min)?\.css'; then
-  echo "ok   aw-components-css from the plugin (joined off)"
-else
-  echo "FAIL aw-components-css from the plugin (joined off)"; FAIL=1
-fi
+# aw.css was retired (18 Nov 2026): no aw-components stylesheet with the joined file off either.
+if grep -qE "id=['\"]aw-components-css['\"]" /tmp/home.html; then echo "FAIL aw-components-css still loads (joined off)"; FAIL=1; else echo "ok   no aw-components-css (joined off)"; fi
 if grep -qF 'kits-cache/parts/' /tmp/home.html; then echo "FAIL joined component file on / with the switch off"; FAIL=1; else echo "ok   no joined component file with the switch off"; fi
 if [ -f "$REPO/plugins/animal-writes-core/theme/assets/css/aw-home.css" ]; then
   has "aw-home-css on / (joined off)" /tmp/home.html "id='aw-home-css'"

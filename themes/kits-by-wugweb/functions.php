@@ -61,6 +61,9 @@ function kits_setup() {
 	add_editor_style( 'assets/css/kits.css' );
 	add_editor_style( 'assets/css/kit.css' ); // components and primitives: the editor shows content as the site does.
 	add_editor_style( 'assets/css/kit-primitives.css' );
+	if ( is_readable( get_template_directory() . '/assets/site/site.css' ) ) {
+		add_editor_style( 'assets/site/site.css' ); // the site's own CSS (kits_site_component_style).
+	}
 }
 add_action( 'after_setup_theme', 'kits_setup' );
 
@@ -389,6 +392,30 @@ function kits_component_styles(): array {
 	}
 	return $list;
 }
+
+/**
+ * The site's own CSS (assets/site/site.css), when the site has one: rules only this site uses. It joins every page's
+ * component file first, before the component files a plugin adds (priority 5), and the editors load it too
+ * (kits_setup). The distributed theme has no assets/site/ folder (tools/build-dist.py), so nothing loads there.
+ *
+ * @param array $styles kits_component_styles entries.
+ * @return array
+ */
+function kits_site_component_style( $styles ) {
+	$file = get_template_directory() . '/assets/site/site.css';
+	if ( ! is_array( $styles ) || ! is_readable( $file ) ) {
+		return $styles;
+	}
+	return array(
+		'kits-site' => array(
+			'src'  => get_template_directory_uri() . '/assets/site/site.css',
+			'file' => $file,
+			'deps' => array( 'kit-components' ),
+			'when' => '__return_true',
+		),
+	) + $styles;
+}
+add_filter( 'kits_component_styles', 'kits_site_component_style', 5 );
 
 /** Whether init has finished, so every kits_component_styles filter is in place. */
 function kits_component_styles_ready(): bool {

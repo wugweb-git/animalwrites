@@ -1,15 +1,18 @@
+/* The site's own CSS: rules only this site uses (classes, ids, post types and templates of its own), loaded by the
+   Kits theme (functions.php, kits_site_component_style) on every page, in the joined component file before the
+   component files, and in the editors. Edit it here; Site Editor > Styles > Additional CSS still overrides it.
+   It is not in the distributed theme zip (tools/build-dist.py leaves assets/site/ out).
+   Animal Writes: the rules from Animal Writes Core's aw.css (retired 18 Nov 2026), in their aw.css order. */
 /*
  * Animal Writes — what is specific to Animal Writes. Generic components live in Kits (kits-by-wugweb/assets/css/kit.css)
  * and load first; this file adds the domain components and brand-specific layouts.
  */
 .aw-hero { padding-block: var(--kit-space-6) var(--kit-space-6) !important; background: linear-gradient(180deg, var(--kit-color-bg) 0%, var(--kit-color-canvas) 100%); }
-.kit-hero-title { margin: 0 0 var(--kit-space-4); }
-@media (max-width: 1199px) {  .aw-hero { padding-top: var(--kit-space-5) !important; } }
-.kit-finder { display: flex; flex-wrap: wrap; gap: var(--kit-space-3); align-items: center; margin: var(--kit-space-5) 0 var(--kit-space-4); padding: var(--kit-space-3); background: var(--kit-color-raised); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); box-shadow: var(--kit-elevation-2); }
+@media (max-width: 1199px) {
+	.aw-hero { padding-top: var(--kit-space-5) !important; }
+}
 .aw-finder-band { padding-block: var(--kit-space-section) var(--kit-space-section-end) !important; }
 .aw-finder-band h2 { margin-bottom: var(--kit-space-2); }
-.kit-finder label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
-.kit-finder select { flex: 1 1 16rem; min-width: 0; font-size: var(--kit-type-lead); }
 .aw-band .wp-block-heading { color: var(--kit-color-on-ink); }
 .aw-band p { color: color-mix(in srgb, var(--neutral-0) 85%, transparent); }
 .aw-mosaic img { aspect-ratio: 3/4; object-fit: cover; border-radius: var(--kit-radius-media); transition: transform var(--kit-motion-slow) var(--kit-motion-ease); }
@@ -22,33 +25,30 @@
 .aw-testimonial blockquote { margin: 0 0 var(--kit-space-4); font-family: var(--kit-font-display); font-weight: var(--kit-weight-medium); font-size: var(--kit-type-h4); line-height: 1.4; border: 0; padding: 0; }
 .aw-testimonial figcaption { display: flex; flex-direction: column; font-size: var(--kit-type-sm); }
 .aw-testimonial figcaption span { color: var(--kit-color-muted); }
-.kit-claim { margin-block: var(--kit-space-7); padding: var(--kit-space-5); border-radius: var(--kit-radius-card); background: var(--kit-color-surface-soft); border: var(--kit-border-width) solid var(--kit-color-line); }
-.kit-claim summary { cursor: pointer; font-weight: var(--kit-weight-strong); min-height: var(--kit-size-target); display: flex; align-items: center; }
-.kit-claim details[open] > summary { margin-bottom: var(--kit-space-4); }
 .aw-motion .aw-hero :is(.kit-hero-title, .aw-hero-lead, .aw-hero-actions, .aw-quick, .aw-hero-media) { animation: kit-rise var(--kit-motion-slow) var(--kit-motion-ease) both; }
 @media (max-width: 767px) {
 	.aw-listing-card { display: grid; grid-template-columns: var(--kit-thumb-md) 1fr; column-gap: var(--kit-space-4); align-items: center; }
 	.aw-listing-card > * { grid-column: 2; }
 	.aw-listing-card > .kit-logo { grid-column: 1; grid-row: 1 / span 4; max-width: var(--kit-thumb-md); margin: 0; }
 }
-.kit-share-copy { cursor: pointer; }
-.kit-segment :is(a, button) { min-height: var(--kit-size-target); }
-@media (prefers-reduced-motion: reduce) {  .kit-ed-more .kit-ico { transition: none; } }
 .aw-story-title { font-size: var(--kit-type-h3) !important; line-height: 1.3 !important; margin: 0 0 var(--kit-space-2); }
 .aw-story-title a { color: var(--kit-color-ink); text-decoration: none; }
 .aw-story-title a::after { content: ""; position: absolute; inset: 0; }
 .aw-docs { border-top: var(--kit-border-width) solid var(--kit-color-line); }
-.kit-doc-cover { width: var(--kit-thumb-md); aspect-ratio: 3/4; border-radius: var(--kit-radius-xs); overflow: hidden; background: var(--kit-color-raised); box-shadow: var(--kit-elevation-1); display: flex; align-items: center; justify-content: center; color: var(--kit-color-muted); }
-.kit-doc-cover img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
-@media (max-width: 767px) {  .kit-doc-cover { width: var(--kit-thumb-sm); }  }
 .aw-res { display: grid; gap: var(--kit-space-grid); grid-template-columns: minmax(0, 1fr); }
-@media (min-width: 768px) { .aw-res { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (min-width: 1200px) { .aw-res { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 768px) {
+	.aw-res { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (min-width: 1200px) {
+	.aw-res { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
 .aw-org-name { font-size: var(--kit-type-h3) !important; line-height: 1.3 !important; margin: 0; }
 .aw-org-name a { color: var(--kit-color-ink); text-decoration: none; }
 .aw-org-name a::after { content: ""; position: absolute; inset: 0; }
 .aw-opps { display: grid; gap: var(--kit-space-grid); grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--kit-card-min)), 1fr)); }
-@media (min-width: 768px) { .aw-opps { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 768px) {
+	.aw-opps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
 .aw-opp-actions { display: flex; flex-wrap: wrap; gap: var(--kit-space-2); margin-top: auto; padding-top: var(--kit-space-3); }
 .aw-src--also { flex-wrap: wrap; }
 .aw-src-also { display: inline-flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-1); margin: 0; padding: 0; list-style: none; }
@@ -59,7 +59,9 @@
 .aw-item-place { display: inline-flex; align-items: center; gap: var(--kit-meta-icon-gap, var(--kit-space-1)); color: inherit; text-decoration: none; }
 .aw-item-place .kit-ico { --kit-ico-size: var(--kit-meta-icon, 1em); }
 .aw-item-place::after { content: none !important; }
-@media (hover: hover) { .aw-item-place:hover { text-decoration: underline; text-underline-offset: 2px; } }
+@media (hover: hover) {
+	.aw-item-place:hover { text-decoration: underline; text-underline-offset: 2px; }
+}
 .aw-item-place:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); border-radius: var(--kit-radius-hair); }
 .aw-listing-upi { margin-right: var(--kit-space-2); font-family: var(--kit-font-mono, monospace); }
 .aw-listing-support .aw-facts { margin-top: var(--kit-space-3); }
@@ -83,10 +85,11 @@
 .aw-search-results li > .kit-tags, .aw-hub-group li > .kit-tags { margin: 0 0 var(--kit-space-1); }
 .aw-banner { position: relative; margin-block: 0 var(--kit-space-5, 1.25rem); }
 .aw-banner picture, .aw-banner img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 5; object-fit: cover; border-radius: var(--kit-radius-card); }
-@media (max-width: 767px) { .aw-banner picture, .aw-banner img { aspect-ratio: 4 / 3; } }
+@media (max-width: 767px) {
+	.aw-banner picture, .aw-banner img { aspect-ratio: 4 / 3; }
+}
 .kit-card[class*="kit-card--"] > .kit-card-media:has(.aw-story-logo) { background: var(--kit-color-raised); }
 .kit-card[class*="kit-card--"] > .kit-card-media .aw-story-logo { object-fit: contain; padding: var(--kit-space-4); box-sizing: border-box; transform: none !important; }
-.wp-block-search .wp-block-search__button { min-height: var(--kit-size-target); }
 :is(.aw-org-name, .aw-story-title) a { display: inline-block; min-height: var(--kit-space-5); }
 .kit-section-band .aw-tag-main-page { margin-top: var(--kit-space-head); }
 .aw-closed-mark, .aw-blacklisted-mark { vertical-align: middle; font-size: var(--fluid-label); font-weight: 600; white-space: nowrap; }
@@ -102,13 +105,10 @@
 /* the tick boxes ("On WhatsApp"): the label is the target, a 44px row, the box --kit-size-check */
 .aw-newsletter-form .ff-el-form-check-label { display: flex; align-items: center; gap: var(--kit-space-2); min-height: var(--kit-size-target); margin: 0; cursor: pointer; }
 .aw-newsletter-form .ff-el-form-check-input { flex: none; width: var(--kit-size-check); height: var(--kit-size-check); margin: 0; }
-.aw-newsletter-form .ff-el-form-control {
-	width: 100%; box-sizing: border-box; height: var(--kit-field-height); min-height: var(--kit-field-height); padding: 0 var(--s-3);
-	font: inherit; font-size: max(1rem, var(--kit-type-base)); color: var(--neutral-10); background-color: var(--neutral-0);
-	border: var(--kit-border-control) solid var(--kit-field-border); border-radius: var(--r-2);
-	transition: border-color var(--kit-motion-fast) var(--kit-motion-ease), box-shadow var(--kit-motion-fast) var(--kit-motion-ease);
+.aw-newsletter-form .ff-el-form-control { width: 100%; box-sizing: border-box; height: var(--kit-field-height); min-height: var(--kit-field-height); padding: 0 var(--s-3); font: inherit; font-size: max(1rem, var(--kit-type-base)); color: var(--neutral-10); background-color: var(--neutral-0); border: var(--kit-border-control) solid var(--kit-field-border); border-radius: var(--r-2); transition: border-color var(--kit-motion-fast) var(--kit-motion-ease), box-shadow var(--kit-motion-fast) var(--kit-motion-ease); }
+@media (hover: hover) {
+	.aw-newsletter-form .ff-el-form-control:hover { border-color: var(--neutral-5); box-shadow: none; }
 }
-@media (hover: hover) { .aw-newsletter-form .ff-el-form-control:hover { border-color: var(--neutral-5); box-shadow: none; } }
 .aw-newsletter-form .ff-el-form-control:focus, .aw-newsletter-form .ff-el-form-control:focus-visible { outline: none; border-color: var(--color-blue); box-shadow: 0 0 0 var(--kit-focus-outline) var(--color-blue); }
 .aw-newsletter-form .ff-el-is-error .ff-el-form-control { border-color: var(--kit-color-danger); background: var(--kit-color-danger-soft); }
 .aw-newsletter-form .ff-el-is-error .text-danger { display: block; margin-top: var(--kit-space-1); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-strong); color: var(--kit-color-accent); }
@@ -134,15 +134,17 @@
 .aw-nl-band .aw-newsletter-form .ff-message-success { border-left-color: var(--kit-color-success); }
 .aw-nl-band .aw-newsletter-form .ff-el-form-control { height: var(--kit-btn-height); min-height: var(--kit-btn-height); background-color: var(--kit-color-raised); transition-duration: var(--kit-motion-base); }
 .aw-nl-band .aw-newsletter-form .ff-el-form-control:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
-.aw-nl-band .aw-newsletter-form .ff-btn-submit.kit-btn {
-	--kit-btn-primary-bg: var(--nl-mark); --kit-btn-primary-bg-hover: var(--nl-mark-deep); --kit-btn-primary-fg: var(--nl-on-mark); --kit-btn-primary-fg-hover: var(--nl-on-mark);
-	min-height: var(--kit-btn-height); font-weight: var(--kit-weight-strong);
-	transition: background-color var(--kit-motion-base) var(--kit-motion-ease), transform var(--kit-motion-base) var(--kit-motion-ease), box-shadow var(--kit-motion-base) var(--kit-motion-ease);
+.aw-nl-band .aw-newsletter-form .ff-btn-submit.kit-btn { --kit-btn-primary-bg: var(--nl-mark); --kit-btn-primary-bg-hover: var(--nl-mark-deep); --kit-btn-primary-fg: var(--nl-on-mark); --kit-btn-primary-fg-hover: var(--nl-on-mark); min-height: var(--kit-btn-height); font-weight: var(--kit-weight-strong); transition: background-color var(--kit-motion-base) var(--kit-motion-ease), transform var(--kit-motion-base) var(--kit-motion-ease), box-shadow var(--kit-motion-base) var(--kit-motion-ease); }
+@media (hover: hover) {
+	.aw-nl-band .aw-newsletter-form .ff-btn-submit.kit-btn:hover:not([disabled], .is-loading, [aria-busy=true]) { box-shadow: var(--kit-elevation-2); }
 }
-@media (hover: hover) { .aw-nl-band .aw-newsletter-form .ff-btn-submit.kit-btn:hover:not([disabled], .is-loading, [aria-busy=true]) { box-shadow: var(--kit-elevation-2); } }
 .aw-nl-band .aw-newsletter-form .ff-btn-submit.kit-btn:active:not([disabled]) { background: var(--nl-mark-deep); box-shadow: none; }
-@media (hover: hover) and (prefers-reduced-motion: no-preference) { .aw-nl-band .aw-newsletter-form .ff-btn-submit.kit-btn:hover:not([disabled], .is-loading, [aria-busy=true]) { transform: translateY(var(--kit-motion-lift)); } }
-@media (prefers-reduced-motion: no-preference) { .aw-nl-band .aw-newsletter-form .ff-btn-submit.kit-btn:active:not([disabled]) { transform: translateY(var(--kit-btn-press)); } }
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+	.aw-nl-band .aw-newsletter-form .ff-btn-submit.kit-btn:hover:not([disabled], .is-loading, [aria-busy=true]) { transform: translateY(var(--kit-motion-lift)); }
+}
+@media (prefers-reduced-motion: no-preference) {
+	.aw-nl-band .aw-newsletter-form .ff-btn-submit.kit-btn:active:not([disabled]) { transform: translateY(var(--kit-btn-press)); }
+}
 @media (prefers-reduced-motion: reduce) {
 	.aw-nl-band .aw-newsletter-form :is(.ff-btn-submit.kit-btn, .ff-el-form-control) { transition: none; }
 	.aw-nl-band .aw-newsletter-form .ff-btn-submit.kit-btn:active:not([disabled]) { transform: none; }
@@ -166,35 +168,21 @@
 .aw-org-none { border-top: var(--kit-border-width) solid var(--kit-color-line); font-style: italic; }
 #report > summary, .aw-report-link, .aw-report-form [type=submit] { --kit-btn-ico: var(--kit-ico-alert); }
 #claim > summary::before, #report > summary::before, #volunteer > summary::before, .aw-claim-link::before, .aw-report-link::before { content: ""; flex: none; width: 1.125em; height: 1.125em; background: currentColor; -webkit-mask: var(--kit-btn-ico) center / contain no-repeat; mask: var(--kit-btn-ico) center / contain no-repeat; }
-.aw-profile-badge, .taxonomy-aw_place a {
-	display: inline-flex; align-items: center; gap: var(--kit-space-1); min-height: 1.75rem; padding: 0 var(--kit-space-2); border: 0; border-radius: var(--radius-sm);
-	font-family: inherit; font-size: var(--fluid-label) !important; font-weight: var(--kit-weight-regular) !important; font-style: normal; letter-spacing: 0; line-height: 1.2; white-space: nowrap; text-decoration: none !important;
-}
+.aw-profile-badge, .taxonomy-aw_place a { display: inline-flex; align-items: center; gap: var(--kit-space-1); min-height: 1.75rem; padding: 0 var(--kit-space-2); border: 0; border-radius: var(--radius-sm); font-family: inherit; font-size: var(--fluid-label) !important; font-weight: var(--kit-weight-regular) !important; font-style: normal; letter-spacing: 0; line-height: 1.2; white-space: nowrap; text-decoration: none !important; }
 .taxonomy-aw_place a { border: 1px solid var(--kit-chip-border); background: var(--kit-chip-bg); color: var(--kit-chip-fg); }
-@media (hover: hover) { .taxonomy-aw_place a:hover { background: var(--kit-chip-hover); border-color: var(--kit-chip-border-strong); } }
+@media (hover: hover) {
+	.taxonomy-aw_place a:hover { background: var(--kit-chip-hover); border-color: var(--kit-chip-border-strong); }
+}
 .taxonomy-aw_place a::before { content: ""; width: 1em; height: 1em; background: currentColor; -webkit-mask: var(--kit-ico-pin) center / contain no-repeat; mask: var(--kit-ico-pin) center / contain no-repeat; }
-.kit-site-header .wp-block-navigation__responsive-container.is-menu-open::before { content: ""; position: fixed; top: calc(var(--kit-toggle-top, 28px) + 22px - 24px); left: var(--kit-space-gutter); width: 150px; height: var(--kit-size-control); background: url("../wordmark-light.svg") left center / contain no-repeat; }
+.kit-site-header .wp-block-navigation__responsive-container.is-menu-open::before { content: ""; position: fixed; top: calc(var(--kit-toggle-top, 28px) + 22px - 24px); left: var(--kit-space-gutter); width: 150px; height: var(--kit-size-control); background: url("wordmark-light.svg") left center / contain no-repeat; }
 .aw-card-meta > .aw-src { margin: 0 !important; min-width: 0; }
 .aw-card-meta > .aw-card-time { margin: 0 !important; padding: 0 !important; min-height: 0 !important; }
 :is(.wp-block-post-date, .kit-meta, .aw-law-date, .aw-posted-by) { gap: var(--kit-meta-icon-gap) !important; font-size: var(--kit-meta-size) !important; font-weight: var(--kit-meta-weight) !important; color: var(--kit-color-muted) !important; line-height: 1.3; }
 .aw-src.aw-src { display: inline-flex; align-items: center; gap: var(--s-1); width: fit-content; max-width: 100%; box-sizing: border-box; min-height: 1.75rem; padding: 0 var(--s-2); border: 1px solid var(--kit-chip-border); border-radius: var(--radius-sm); background: var(--kit-chip-bg); color: var(--kit-chip-fg) !important; font-size: var(--fluid-label) !important; font-weight: var(--kit-weight-regular) !important; line-height: 1.2; }
 .aw-card-time .aw-rel-time { font: inherit; color: inherit; }
-:is(main h2, .aw-hub-group > h2, .aw-also h2, .kit-ed-head h2, .aw-vol-banner-title):not(.aw-story-title, .aw-case-title, .kit-eyebrow, .screen-reader-text, .wp-block-post-title, .aw-local-card-head, .aw-camp-band-title, .aw-take-part-card h2, .kit-action-card h2) {
-	font-size: var(--kit-type-h2) !important; font-weight: var(--kit-weight-bold) !important; line-height: 1.2 !important; letter-spacing: var(--kit-tracking-heading, -0.01em);
-}
-:is(.aw-story-title, .aw-org-name, .kit-ed-lead .wp-block-post-title, main .entry-content h3:not(:where(.aw-system .aw-hub-list:not(.aw-hub-library) .kit-card-title)), main h3.wp-block-heading, .aw-local-card-head, .aw-contact-row h3) {
-	font-size: var(--kit-type-h3) !important; font-weight: var(--kit-weight-strong) !important; line-height: 1.25 !important;
-}
-:is(.kit-ed-list .wp-block-post-title, main .entry-content h4, main h4.wp-block-heading, main .wp-block-post-template h4) {
-	font-size: var(--kit-type-h4) !important; font-weight: var(--kit-weight-strong) !important; line-height: 1.3 !important;
-}
-:is(main .entry-content h5, main h5) { font-size: var(--kit-h5-size) !important; font-weight: var(--kit-h5-weight) !important; line-height: var(--kit-h5-leading) !important; }
-:is(main h2, main h3, main h4, main h5) a { color: var(--kit-color-ink) !important; text-decoration: none; }
-:is(main h2, main h3, main h4, main h5) a:is(:hover, :focus-visible) { text-decoration: underline; text-underline-offset: var(--kit-underline-offset); }
+:is(main h2, .aw-hub-group > h2, .aw-also h2, .kit-ed-head h2, .aw-vol-banner-title):not(.aw-story-title, .aw-case-title, .kit-eyebrow, .screen-reader-text, .wp-block-post-title, .aw-local-card-head, .aw-camp-band-title, .aw-take-part-card h2, .kit-action-card h2) { font-size: var(--kit-type-h2) !important; font-weight: var(--kit-weight-bold) !important; line-height: 1.2 !important; letter-spacing: var(--kit-tracking-heading, -0.01em); }
+:is(.aw-story-title, .aw-org-name, .kit-ed-lead .wp-block-post-title, main .entry-content h3:not(:where(.aw-system .aw-hub-list:not(.aw-hub-library) .kit-card-title)), main h3.wp-block-heading, .aw-local-card-head, .aw-contact-row h3) { font-size: var(--kit-type-h3) !important; font-weight: var(--kit-weight-strong) !important; line-height: 1.25 !important; }
 :is(.aw-story-title, .aw-org-name, .wp-block-post-template .wp-block-post-title) { text-wrap: pretty; }
-@media (min-width: 1200px) {
-	.kit-ed-list .wp-block-post-template > li:nth-child(n+4) { display: none !important; }
-}
 .aw-gov-mark { display: inline-flex; align-items: center; justify-content: center; width: 1.1em; height: 1.1em; margin-left: .2em; border-radius: 50%; background: var(--kit-color-success); color: var(--kit-color-on-ink, #fff); vertical-align: -0.12em; }
 .aw-gov-mark .kit-ico { width: .7em; height: .7em; }
 .aw-date > .kit-ico { margin-right: var(--kit-icon-gap); flex: none; }
@@ -221,7 +209,9 @@
 .aw-about-who .wp-block-column > p.has-large-font-size { margin-block-start: var(--kit-space-6); font-weight: var(--kit-weight-strong); }
 .aw-about-who .wp-block-image { margin: 0; }
 .aw-about-who .wp-block-image img { width: 100%; height: auto; border-radius: var(--kit-radius-media); }
-@media (min-width: 768px) and (max-width: 1199px) { .aw-about-who .wp-block-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--kit-space-grid); align-items: center; } }
+@media (min-width: 768px) and (max-width: 1199px) {
+	.aw-about-who .wp-block-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--kit-space-grid); align-items: center; }
+}
 .aw-about-how { max-width: min(62ch, var(--kit-width-content)); }
 .aw-about-how > * { margin-block: 0; }
 .aw-about-how > * + * { margin-block-start: var(--kit-space-2); }
@@ -235,12 +225,20 @@
 .aw-about-act .wp-block-button__link::before { content: ""; position: absolute; inset: 0; border-radius: inherit; }
 .aw-about-act:hover { border-color: var(--kit-color-ink); }
 .aw-about-act:has(.wp-block-button__link:focus-visible) { outline: 2px solid var(--kit-color-focus); outline-offset: 2px; }
-@media (prefers-reduced-motion: reduce) { .aw-about-what .is-style-kits-card, .aw-about-act { transition: none; } }
+@media (prefers-reduced-motion: reduce) {
+	.aw-about-what .is-style-kits-card, .aw-about-act { transition: none; }
+}
 .wp-block-post-content > .aw-about-band:first-child { margin-top: 0 !important; padding-top: var(--kit-space-2); }
 :is(.aw-about-why, .aw-about-help) .aw-about-inner > .wp-block-group { grid-template-columns: minmax(0, 1fr) !important; }
-@media (min-width: 768px) { .aw-about-why .aw-about-inner > .wp-block-group { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; } }
-@media (min-width: 768px) { .aw-about-help .aw-about-inner > .wp-block-group { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: var(--kit-space-4); } }
-@media (min-width: 768px) and (max-width: 1199px) { .aw-about-act .wp-block-button__link { padding-inline: var(--kit-space-3); font-size: var(--kit-type-sm); } }
+@media (min-width: 768px) {
+	.aw-about-why .aw-about-inner > .wp-block-group { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+}
+@media (min-width: 768px) {
+	.aw-about-help .aw-about-inner > .wp-block-group { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: var(--kit-space-4); }
+}
+@media (min-width: 768px) and (max-width: 1199px) {
+	.aw-about-act .wp-block-button__link { padding-inline: var(--kit-space-3); font-size: var(--kit-type-sm); }
+}
 @media (min-width: 768px) {
 	.aw-about-help .aw-about-act { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto auto 1fr; column-gap: var(--kit-space-3); align-items: center; }
 	.aw-about-help .aw-about-act > .aw-about-act-ico { margin-bottom: 0; }
@@ -254,7 +252,9 @@
 .aw-about-act > .aw-about-act-ico { display: grid; place-items: center; width: 3rem; height: 3rem; margin-bottom: var(--kit-space-2); border-radius: var(--kit-radius-pill); background: color-mix(in srgb, var(--kit-color-ink) 7%, var(--kit-color-raised)); color: var(--kit-color-ink); }
 .aw-about-act > .aw-about-act-ico .kit-ico { --kit-ico-size: 1.5rem; }
 .aw-about-what .aw-about-inner > .wp-block-group:not(.aw-about-how) { grid-template-columns: minmax(0, 1fr) !important; gap: var(--kit-space-4); }
-@media (min-width: 1200px) { .aw-about-what .aw-about-inner > .wp-block-group:not(.aw-about-how) { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } }
+@media (min-width: 1200px) {
+	.aw-about-what .aw-about-inner > .wp-block-group:not(.aw-about-how) { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+}
 .aw-about-what .is-style-kits-card { position: relative; display: flex; flex-direction: column; gap: var(--kit-space-2); height: 100%; margin: 0 !important; padding: var(--wp--custom--kits--card--padding, var(--kit-space-4)) !important; background: var(--kit-color-canvas) !important; border: 0 !important; border-radius: var(--kit-radius-card) !important; transition: background-color var(--kit-motion-base) var(--kit-motion-ease); }
 .aw-about-what .is-style-kits-card > * { margin: 0 !important; }
 .aw-about-what .is-style-kits-card > h3 + p { font-size: var(--kit-type-lead); }
@@ -284,48 +284,14 @@
 .aw-glive-hours { list-style: none; margin: 0; padding: 0; font-size: var(--kit-type-sm); }
 .aw-glive-attr { font-size: var(--kit-type-xs); color: var(--kit-color-muted); margin: var(--kit-space-2) 0 0; }
 .aw-org-news { margin: 0; padding-inline-start: 1.1em; }
-.fluentform .ff-btn.kit-btn { font-size: var(--kit-btn-font-size); }
-:is(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="submit"]), select, textarea) { font-size: var(--kit-field-text-size) !important; }
-.home main.kit-static > * { margin-block: 0; }
 .aw-content { position: relative; isolation: isolate; display: flex; flex-direction: column; justify-content: flex-end; box-sizing: border-box; overflow: hidden; padding: var(--kit-space-5); border-radius: var(--kit-radius-card); background: var(--kit-color-ink); color: var(--kit-color-on-ink); --kit-color-focus: var(--kit-color-on-ink); }
 .aw-content::before { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, color-mix(in srgb, var(--kit-color-ink) 25%, transparent) 0%, color-mix(in srgb, var(--kit-color-ink) 80%, transparent) 38%, color-mix(in srgb, var(--kit-color-ink) 94%, transparent) 60%); }
-.aw-social-card .aw-date { display: inline-flex; align-items: center; gap: var(--kit-meta-icon-gap); }
-/* Social post cards (social-posts.php aw_social_card), drawn like a post on its platform (owner, 14 Nov 2026: "it should
-   look like x and insta"), our own markup only. Text post (X, Bluesky, Mastodon, LinkedIn, YouTube, and Instagram or
-   Facebook with no poster): a white card, 1px line, card radius; a head row (the initial in a grey circle at the 44px
-   target size, the bold name and the grey handle, the platform logo at the right); the summary at body size; a picture
-   under it with the media radius; the date and platform in grey on one line. Instagram style
-   (Instagram, Facebook with a poster): the same head with a ringed circle, the picture across the card at 4:5 (a reel
-   9:16, with a play mark; ratios as the owner gave them, 14 Nov 2026), the caption led by the handle in bold. No counts.
-   The one link is the name with the external arrow (as News titles; owner, 14 Nov 2026: "an arrow will do"), at least
-   the 44px target tall; the logo is decorative (aria-hidden), the platform's name is in the date row.
-   Padding --kit-space-5 (every block at least 24px), gaps --kit-space-3, sizes from kit tokens. */
-.aw-more-list:has(> li > .aw-social-card) { align-items: start; }
-.aw-social-card { display: flex; flex-direction: column; gap: var(--kit-space-3); box-sizing: border-box; min-width: 0; margin: 0; padding: var(--kit-space-5); border: var(--kit-border-width, 1px) solid var(--kit-color-line); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); color: var(--kit-color-text); overflow: hidden; }
-.aw-social-card > * { margin: 0; }
-.aw-social-head { display: flex; align-items: center; gap: var(--kit-space-3); min-width: 0; }
-.aw-social-avatar { display: grid; place-items: center; flex: none; width: var(--kit-size-target); height: var(--kit-size-target); border-radius: 50%; background: color-mix(in srgb, var(--kit-color-ink) 10%, var(--kit-color-raised)); color: var(--kit-color-ink); font-size: var(--kit-type-base); font-weight: var(--kit-weight-bold); line-height: 1; }
-.aw-social-card--insta .aw-social-avatar { box-shadow: 0 0 0 2px var(--kit-color-raised), 0 0 0 3px var(--kit-color-ink); }
-.aw-social-who { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: var(--kit-space-2); flex: 1 1 auto; min-width: 0; margin: 0; line-height: var(--kit-leading-heading, 1.25); }
-.aw-social-name { display: inline-flex; align-items: center; gap: var(--kit-space-1); max-width: 100%; min-width: 0; font-size: var(--kit-type-base); font-weight: var(--kit-weight-bold); color: var(--kit-color-text); }
-a.aw-social-name { min-height: var(--kit-size-target); text-decoration: none; }
-.aw-social-name-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.aw-social-name > .kit-ico { flex: none; --kit-ico-size: var(--kit-icon-sm); }
-.aw-social-pic-link { display: block; height: 100%; }
-.aw-social-handle { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
-.aw-social-logo { flex: none; align-self: center; --kit-ico-size: var(--kit-icon-md); color: var(--kit-color-ink); }
-.aw-social-text { max-width: none; font-size: var(--kit-type-base); line-height: var(--kit-leading-body); overflow-wrap: anywhere; }
-.aw-social-text > strong { font-weight: var(--kit-weight-bold); }
-.aw-social-pic { position: relative; overflow: hidden; border-radius: var(--kit-radius-media); background: var(--kit-color-surface-soft); }
-.aw-social-pic .aw-social-img { display: block; width: 100%; height: auto; }
-.aw-social-card--insta .aw-social-pic { margin-inline: calc(-1 * var(--kit-space-5)); border-radius: 0; aspect-ratio: 4 / 5; }
-.aw-social-card--insta .aw-social-pic--reel { aspect-ratio: 9 / 16; }
-.aw-social-card--insta .aw-social-pic .aw-social-img { height: 100%; object-fit: cover; }
-.aw-social-pic--reel::before { content: ""; position: absolute; top: var(--kit-space-3); right: var(--kit-space-3); width: var(--kit-size-target); height: var(--kit-size-target); border-radius: 50%; background: color-mix(in srgb, var(--kit-color-ink) 65%, transparent); pointer-events: none; } /* the reel mark's backdrop: white on any picture */
-.aw-social-play { position: absolute; top: calc(var(--kit-space-3) + (var(--kit-size-target) - var(--kit-icon-lg)) / 2); right: calc(var(--kit-space-3) + (var(--kit-size-target) - var(--kit-icon-lg)) / 2); --kit-ico-size: var(--kit-icon-lg); color: var(--kit-color-on-ink); pointer-events: none; }
-.aw-social-media :is(figure, .wp-block-embed) { margin: 0; overflow: hidden; border-radius: var(--kit-radius-media); }
-.aw-social-date { flex-wrap: nowrap; gap: var(--kit-space-2); white-space: nowrap; min-width: 0; font-size: var(--kit-meta-size); color: var(--kit-color-muted); }
-.aw-social-date > .aw-date + .kit-meta-item::before { content: "·" / ""; margin-inline-end: var(--kit-space-2); } /* "14 Nov 2026 · on Instagram" */
+/* Social post card (kit.css "Social post card"): the parts that meet Animal Writes markup, the date (.aw-date) and
+   the item list (.aw-more-list). */
+.aw-more-list:has(> li > .kit-social-card) { align-items: start; }
+.kit-social-card .aw-date { display: inline-flex; align-items: center; gap: var(--kit-meta-icon-gap); }
+.kit-social-date > .aw-date + .kit-meta-item::before { content: "·" / ""; margin-inline-end: var(--kit-space-2); }
+/* "14 Nov 2026 · on Instagram" */
 /* Help an animal now (/help/): on phones a call bar stays at the foot of the screen, in thumb reach, above the gesture area; hidden from 768 (the call tiles sit in view). */
 .aw-help-bar { display: none; }
 @media (max-width: 767px) {
@@ -337,25 +303,20 @@ a.aw-social-name { min-height: var(--kit-size-target); text-decoration: none; }
 	.aw-help-bar a:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-on-ink); outline-offset: var(--kit-focus-offset); }
 	.aw-help-bar .kit-ico { --kit-ico-size: var(--kit-icon-sm); }
 }
-@media (prefers-reduced-motion: reduce) { .aw-help-bar a { transition: none; } .aw-help-bar a:active { transform: none; } }
-
+@media (prefers-reduced-motion: reduce) {
+	.aw-help-bar a { transition: none; }
+	.aw-help-bar a:active { transform: none; }
+}
 /* News, Library and Resources lists: stacked cards (owner, 13 Nov 2026). hubs.php makes every card in those lists
    kit-card--stacked-md and gives the list aw-stack-list (hubs, Home sections, campaign sections, archives).
    Columns (owner, 13 Nov 2026: "keep the news feed single-column at tablet widths", "never 3 column, max 2"): one column
    below 1200, two from 1200 (docs/design-system.md, line 8: lg 1200). Cards --kit-card-stacked-min to --kit-card-stacked-max
    wide, gap --kit-space-4 (docs/card-sizes.md, Stacked list). One surface. */
-.wp-block-post-template.aw-stack-list.aw-stack-list { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; grid-template-rows: none !important; gap: var(--kit-space-4) !important; }
-@media (min-width: 1200px) { .wp-block-post-template.aw-stack-list.aw-stack-list { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } }
+.wp-block-post-template.aw-stack-list.aw-stack-list.aw-stack-list { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; grid-template-rows: none !important; gap: var(--kit-space-4) !important; }
+@media (min-width: 1200px) {
+	.wp-block-post-template.aw-stack-list.aw-stack-list.aw-stack-list { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+}
 .aw-stack-list.aw-stack-list > li { grid-column: auto !important; grid-row: auto !important; min-width: 0; max-width: var(--kit-card-stacked-max) !important; }
-/* The stacked card's own rules (no card padding, the picture flush and at full height, the words padded) are in the
-   Kits theme, kit.css, for every stacked card (owner, 14 Nov 2026: one card across theme and product). */
-/* Card type in steps (owner, 13 Nov 2026: "h3 one size per breakpoint", "metarow - one font size per breakpoint"): every card's
-   H3 title is --kit-type-card-title (20px, 22px from 1200; an H4 card title takes the same size, owner 14 Nov 2026: "use correct h3"; owner, 13 Nov 2026: "20-22px desktop, 18-20px mobile") with the H3
-   line height, and everything in the meta row (date, read time, chips) is --kit-meta-size (12px, 13px from 768).
-   No fluid sizes, so the size changes only at a breakpoint. */
-.kit-card :is(h3, h4).kit-card-title.kit-card-title, .kit-card :is(h3, h4).kit-card-title.kit-card-title a { font-size: var(--kit-type-card-title) !important; line-height: var(--kit-h3-leading) !important; }
-.kit-card .kit-card-metarow.kit-card-metarow, .kit-card .kit-card-metarow.kit-card-metarow * { font-size: var(--kit-meta-size) !important; }
-
 /* News article polish: moved here from the live Additional CSS block of the same name (14 Nov 2026). Scoped to .single-aw_news. */
 .single-aw_news .aw-item-content { max-width: 680px; }
 .single-aw_news .aw-item-content .wp-block-post-excerpt, .single-aw_news .aw-item-content .wp-block-post-excerpt p { color: #2b2b2b !important; font-size: 18px !important; line-height: 1.55 !important; }
@@ -368,11 +329,9 @@ a.aw-social-name { min-height: var(--kit-size-target); text-decoration: none; }
 .single-aw_news .aw-item-meta .kit-chip, .single-aw_news .kit-crumbs a { display: inline-flex; align-items: center; min-height: 44px; }
 .single-aw_news .aw-sources-links a { display: inline-flex; align-items: center; min-height: 44px; }
 .single-aw_news .aw-sources-note, .single-aw_news .aw-sources-credit { font-size: 14px; }
-
 /* Hub page heads (News index and its siblings): the breadcrumb Home icon and the source link in the head are 44px targets (owner, 16 Nov 2026) */
 .page-template-page-hub .kit-section-band .kit-crumbs-home a { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; margin-left: -10px; }
 .page-template-page-hub .kit-section-band a.kit-link-ext { display: inline-flex; align-items: center; min-height: 44px; }
-
 /* Moved out of the generic Kits theme (kit.css) so the theme carries no Animal Writes-specific rules.
    These load after kit.css and reproduce the exact previous behaviour on Animal Writes pages. */
 body.single-aw_research .kit-lead-media { display: none; }
@@ -381,5 +340,5 @@ body.single-aw_research .kit-lead-media { display: none; }
 :is(h1, h2, h3, h4, h5, h6):is(h1, h2, h3, h4, h5, h6, #kits-head-weight) + :is(.aw-hero-lead, .aw-camp-lede, .aw-findhelp-lede, .aw-letter-share-lede, .aw-letter-share-desc, .aw-listing-desc) { margin-top: var(--kit-space-head-sub); }
 details.aw-camp-card-fold > summary { cursor: default; }
 details.aw-camp-card-fold > summary::after { content: none !important; }
-.wp-block-details.aw-more > summary { display: none; }
+.wp-block-details.aw-more.aw-more > summary { display: none; }
 .kit-card-body > .aw-opp-actions { position: relative; z-index: 1; margin-top: auto !important; padding-top: var(--kit-space-2); }

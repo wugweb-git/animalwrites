@@ -12,6 +12,9 @@ The other checks import is_copy() and theme_file() from here:
   kit-tokens/kit/kit-primitives.min.css in Kits; MIN_FILES), so the checks read their sources instead;
 - theme_file(rel) is the plugin's file.
 
+The plugin's styles/animal-writes.json must equal the Kits theme's (the same variation; the plugin copy goes with
+animal-writes-core).
+
     python3 tools/ci/theme_copies.py        # exit 1 when a required file is missing or a font folder is there
 """
 import pathlib
@@ -21,7 +24,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 COPY = ROOT / "plugins/animal-writes-core/theme"
 # Each of these must be in the plugin's theme/ folder (the plugin serves them; a missing one would be missing on the site).
 REQUIRED = (
-    "assets/css/aw.css",
+    "styles/animal-writes.json",
     "assets/css/tokens.css",
     "assets/js/aw.js",
     "templates",
@@ -62,6 +65,9 @@ def main():
     folder = COPY / "assets/fonts"
     if folder.is_dir() and any(f.is_file() and f.name != ".DS_Store" for f in folder.rglob("*")):
         bad.append(f"FONT {folder.relative_to(ROOT)} has font files; Inter is declared once, in Kits")
+    variation = "styles/animal-writes.json"
+    if (COPY / variation).is_file() and (COPY / variation).read_bytes() != (ROOT / "themes/kits-by-wugweb" / variation).read_bytes():
+        bad.append(f"DIFFERENT plugins/animal-writes-core/theme/{variation} and themes/kits-by-wugweb/{variation} (keep them identical)")
     if bad:
         print("Animal Writes theme files in animal-writes-core:")
         print("\n".join("  " + b for b in bad))

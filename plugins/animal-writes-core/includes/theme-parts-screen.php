@@ -50,8 +50,8 @@ function aw_theme_parts_function_rows(): array {
 	$perf  = aw_theme_parts_link( 'Appearance → Kits → Settings → Performance', 'admin.php?page=kits-settings#performance' );
 	$core  = aw_theme_parts_link( 'Appearance → Kits → Settings', 'admin.php?page=kits-settings' );
 	$items = array(
-		array( 'Site styles and script', 'Loads tokens.css, aw.css (as aw.min.css, its minified copy) and aw.js over the Kits styles on every page.', $here, 'includes/theme-parts-assets.php', $repo, $parts ),
-		array( 'Editor uses the site styles', 'The block editor and the classic editor show content with tokens.css and aw.css.', $here, 'includes/theme-parts-assets.php', 'Automatic', $parts ),
+		array( 'Site styles and script', 'Loads tokens.css and aw.js over the Kits styles on every page. The site-wide rules are in the Kits theme (kits.css); the rules only Animal Writes uses are in the Animal Writes style variation, saved in the global styles.', $here, 'includes/theme-parts-assets.php', $repo, $parts ),
+		array( 'Editor uses the site styles', 'The block editor and the classic editor show content with tokens.css and the component files.', $here, 'includes/theme-parts-assets.php', 'Automatic', $parts ),
 		array( 'Animal Writes pattern category', 'The "Animal Writes" group in the block inserter.', $here, 'includes/theme-parts-assets.php', aw_theme_parts_link( 'Appearance → Editor → Patterns', 'site-editor.php?path=/patterns' ), $parts ),
 		array( 'Home hero photo preload', 'The home page starts loading its hero photograph at once (not when a campaign hero shows).', $here, 'includes/theme-parts-assets.php', 'Automatic', $parts ),
 		array( 'tokens.css inline', 'The five brand values are printed in the page instead of a separate file.', $here, 'includes/theme-parts-assets.php', 'Automatic', $parts ),
