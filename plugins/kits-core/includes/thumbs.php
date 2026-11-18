@@ -18,7 +18,7 @@
  * @package kits-core
  *
  * SITE MODULE (Animal Writes only): not part of the generic Kits Core product. It stays in this plugin for now because card-images.php, tools/media-reuse.php and category-images.php call it and it hooks the Home sections at plugin load;
- * moving it to the theme's site layer (assets/site/) would break that load order. Listed in docs/awcore-retirement.md §6.
+ * moving it to the theme's site layer (assets/site/) would break that load order. Listed in docs/awcore-retirement.md §7.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

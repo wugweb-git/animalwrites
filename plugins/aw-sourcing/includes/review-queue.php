@@ -20,7 +20,7 @@ const AW_REVIEW_TYPES = array(
 	'aw_legal'       => 'Library',
 	'aw_opportunity' => 'Opportunity',
 	'aw_press'       => 'Press',
-	'aw_social'      => 'Social post', // Social posts (core social-posts.php), only while that module is on
+	'aw_social'      => 'Social post', // Social posts (the site layer's social-posts.php), only while that module is on
 	'post'           => 'Research', // research papers only (Resources tagged research): a held one shows why (24 Oct 2026)
 );
 
