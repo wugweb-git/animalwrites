@@ -28,12 +28,18 @@
  *       'fields'      => array(
  *           'kits_event_start' => array( 'label' => 'Start', 'format' => 'datetime' ),
  *       ),
- *       'consent_field' => '',                // Optional: a field that must be set before any field is shown.
+ *       'consent_field' => '',                // Optional: a field that must be set before an item can be published.
  *       'schema'      => array( 'type' => 'Event', 'fields' => array( 'startDate' => 'kits_event_start' ) ),
- *       'noindex'     => false,               // Optional: its own pages say noindex and leave the sitemap.
+ *       'noindex'     => false,               // Optional: its own pages say noindex and leave the sitemaps.
  *   )
- * Field formats: text, textarea, url, urls (one per line), date (Y-m-d), datetime (Y-m-d H:i, site time), html,
- * attachment (a Media Library ID). A field with 'private' => true is not in the REST API and has no binding key.
+ * Field formats: text, textarea, url, urls (one per line), date (stored Y-m-d), datetime (stored Y-m-d H:i, site
+ * time), html, attachment (a Media Library ID). Dates are accepted as Y-m-d, Ymd (the SCF date picker), d/m/Y (also
+ * d-m-Y and d.m.Y), each with an optional time H:i or H:i:s (the SCF date-time picker), and stored in the form above.
+ * A field with 'private' => true is not in the REST API and has no binding key.
+ *
+ * Shared keys: when two switched-on presets use the same field key, a post reads it from the preset of its own post
+ * type. When two switched-on presets register the same post type, the later one in kits_presets wins (fields, schema
+ * and consent), as register_post_type() does.
  *
  * @package kits-core
  */
@@ -266,14 +272,12 @@ function kits_preset_field_clean( string $format, $value ) {
 			$lines = array_filter( array_map( fn( $l ) => esc_url_raw( trim( $l ) ), preg_split( '/\R/', $value ) ) );
 			return implode( "\n", $lines );
 		case 'date':
-			$value = trim( $value );
-			return 1 === preg_match( '/^\d{4}-\d{2}-\d{2}$/', $value ) && kits_preset_date_valid( $value ) ? $value : '';
 		case 'datetime':
-			$value = str_replace( 'T', ' ', trim( $value ) );
-			if ( 1 === preg_match( '/^(\d{4}-\d{2}-\d{2})(?: (\d{2}):(\d{2}))?$/', $value, $m ) && kits_preset_date_valid( $m[1] ) ) {
-				return isset( $m[2] ) && ( (int) $m[2] > 23 || (int) $m[3] > 59 ) ? '' : $value;
+			$when = kits_preset_date_parse( $value );
+			if ( ! $when ) {
+				return ''; // Not a real day or time in any accepted form.
 			}
-			return '';
+			return 'datetime' === $format && '' !== $when[1] ? $when[0] . ' ' . $when[1] : $when[0];
 		case 'html':
 			return wp_kses_post( $value );
 		default:
@@ -282,13 +286,49 @@ function kits_preset_field_clean( string $format, $value ) {
 }
 
 /**
- * Whether a Y-m-d date is a real day.
+ * A date in any accepted form, as array( 'Y-m-d', 'H:i' or '' ), or null when it is not a real day and time.
+ * Accepted: Y-m-d, Ymd (SCF date picker), d/m/Y, d-m-Y or d.m.Y, each optionally followed by a space or T and H:i or
+ * H:i:s (SCF date-time picker stores Y-m-d H:i:s). Seconds are dropped.
  *
- * @param string $ymd Date.
+ * @param string $value Date as submitted or stored.
+ * @return array{0: string, 1: string}|null
  */
-function kits_preset_date_valid( string $ymd ): bool {
-	$p = array_map( 'intval', explode( '-', $ymd ) );
-	return 3 === count( $p ) && checkdate( $p[1], $p[2], $p[0] );
+function kits_preset_date_parse( string $value ): ?array {
+	$value = trim( $value );
+	$time  = '(?:[T ](\d{1,2}):(\d{2})(?::(\d{2}))?)?';
+	if ( 1 === preg_match( '/^(\d{4})-(\d{1,2})-(\d{1,2})' . $time . '$/', $value, $m ) || 1 === preg_match( '/^(\d{4})(\d{2})(\d{2})' . $time . '$/', $value, $m ) ) {
+		list( $y, $mo, $d ) = array( (int) $m[1], (int) $m[2], (int) $m[3] );
+	} elseif ( 1 === preg_match( '#^(\d{1,2})[/.\-](\d{1,2})[/.\-](\d{4})' . $time . '$#', $value, $m ) ) {
+		list( $d, $mo, $y ) = array( (int) $m[1], (int) $m[2], (int) $m[3] );
+	} else {
+		return null;
+	}
+	if ( ! checkdate( $mo, $d, $y ) ) {
+		return null;
+	}
+	$hm = '';
+	if ( isset( $m[4] ) && '' !== $m[4] ) {
+		if ( (int) $m[4] > 23 || (int) $m[5] > 59 || (int) ( $m[6] ?? 0 ) > 59 ) {
+			return null;
+		}
+		$hm = sprintf( '%02d:%02d', (int) $m[4], (int) $m[5] );
+	}
+	return array( sprintf( '%04d-%02d-%02d', $y, $mo, $d ), $hm );
+}
+
+/**
+ * A stored date as a time in the site's time zone, or null.
+ *
+ * @param string $raw Stored value.
+ * @return array{0: DateTimeImmutable, 1: bool}|null The time, and whether a time of day was stored.
+ */
+function kits_preset_date_time( string $raw ): ?array {
+	$when = '' !== $raw ? kits_preset_date_parse( $raw ) : null;
+	if ( ! $when ) {
+		return null;
+	}
+	$at = date_create_immutable( trim( $when[0] . ' ' . $when[1] ), wp_timezone() );
+	return $at ? array( $at, '' !== $when[1] ) : null;
 }
 
 /**
@@ -309,28 +349,64 @@ function kits_preset_consented( array $preset, int $post_id ): bool {
  * @param int    $post_id Post ID.
  */
 function kits_preset_schema_value( string $key, int $post_id ): string {
-	foreach ( kits_presets_active() as $preset ) {
-		if ( ! isset( $preset['fields'][ $key ] ) ) {
-			continue;
-		}
-		if ( $preset['fields'][ $key ]['private'] || get_post_type( $post_id ) !== $preset['post_type'] || ! kits_preset_consented( $preset, $post_id ) ) {
+	$preset = kits_preset_for_post( $key, $post_id );
+	if ( ! $preset || $preset['fields'][ $key ]['private'] || ! kits_preset_consented( $preset, $post_id ) ) {
+		return '';
+	}
+	$raw    = get_post_meta( $post_id, $key, true );
+	$format = $preset['fields'][ $key ]['format'];
+	if ( 'attachment' === $format ) {
+		return kits_preset_field_display( $preset, $key, $post_id );
+	}
+	if ( 'date' === $format || 'datetime' === $format ) {
+		$when = kits_preset_date_time( is_scalar( $raw ) ? (string) $raw : '' );
+		if ( ! $when ) {
 			return '';
 		}
-		$raw    = get_post_meta( $post_id, $key, true );
-		$format = $preset['fields'][ $key ]['format'];
-		if ( 'attachment' === $format || 'urls' === $format ) {
-			return 'attachment' === $format ? kits_preset_field_display( $preset, $key, $post_id ) : (string) $raw;
-		}
-		if ( ( 'date' === $format || 'datetime' === $format ) && '' !== (string) $raw ) {
-			$when = date_create_immutable( (string) $raw, wp_timezone() );
-			if ( ! $when ) {
-				return '';
-			}
-			return strlen( (string) $raw ) > 10 ? $when->format( 'c' ) : $when->format( 'Y-m-d' );
-		}
-		return is_scalar( $raw ) ? (string) $raw : '';
+		return $when[1] ? $when[0]->format( 'c' ) : $when[0]->format( 'Y-m-d' );
 	}
-	return '';
+	return is_scalar( $raw ) ? (string) $raw : '';
+}
+
+/**
+ * The switched-on preset of a post type. When two presets register the same type, the later one wins, as with
+ * register_post_type().
+ *
+ * @param string $type Post type.
+ * @return array|null Normalised preset.
+ */
+function kits_preset_of_type( string $type ): ?array {
+	$found = null;
+	foreach ( kits_presets_active() as $preset ) {
+		if ( $preset['post_type'] === $type ) {
+			$found = $preset;
+		}
+	}
+	return $found;
+}
+
+/**
+ * The preset a field key is read from for a post: the preset of the post's own type, when it has this key. So a key
+ * two presets share gives each post its own type's value, whatever the presets' order.
+ *
+ * @param string $key     Field key.
+ * @param int    $post_id Post ID.
+ * @return array|null Normalised preset.
+ */
+function kits_preset_for_post( string $key, int $post_id ): ?array {
+	$preset = kits_preset_of_type( (string) get_post_type( $post_id ) );
+	return $preset && isset( $preset['fields'][ $key ] ) ? $preset : null;
+}
+
+/**
+ * A binding's value: the field as its post's own preset shows it ('' for a private field or another type).
+ *
+ * @param string $key     Field key.
+ * @param int    $post_id Post ID.
+ */
+function kits_preset_binding_value( string $key, int $post_id ): string {
+	$preset = kits_preset_for_post( $key, $post_id );
+	return $preset && ! $preset['fields'][ $key ]['private'] ? kits_preset_field_display( $preset, $key, $post_id ) : '';
 }
 
 /**
@@ -354,19 +430,15 @@ function kits_preset_field_display( array $preset, string $key, int $post_id ): 
 			return is_string( $url ) ? $url : '';
 		case 'date':
 		case 'datetime':
-			$raw = (string) $raw;
-			if ( '' === $raw ) {
-				return '';
-			}
-			$when = date_create_immutable( $raw, wp_timezone() );
+			$when = kits_preset_date_time( is_scalar( $raw ) ? (string) $raw : '' );
 			if ( ! $when ) {
 				return '';
 			}
 			$fmt = (string) get_option( 'date_format' );
-			if ( 'datetime' === $preset['fields'][ $key ]['format'] && strlen( $raw ) > 10 ) {
+			if ( 'datetime' === $preset['fields'][ $key ]['format'] && $when[1] ) {
 				$fmt .= ' ' . (string) get_option( 'time_format' );
 			}
-			return (string) wp_date( $fmt, $when->getTimestamp() );
+			return (string) wp_date( $fmt, $when[0]->getTimestamp() );
 		case 'urls':
 			$links = array();
 			foreach ( preg_split( '/\R/', (string) $raw ) as $url ) {
@@ -387,12 +459,14 @@ function kits_preset_field_display( array $preset, string $key, int $post_id ): 
 add_action(
 	'init',
 	function () {
+		$shape = array();
 		foreach ( kits_presets_active() as $preset ) {
 			$args = kits_preset_type_args( $preset );
 			if ( ! empty( $args['has_archive'] ) && '' !== kits_preset_slug_taken( kits_preset_slug( $args ) ) ) {
 				$args['has_archive'] = false; // A page already has this address: it keeps it (the settings screen says so).
 			}
 			register_post_type( $preset['post_type'], $args );
+			$shape[ $preset['post_type'] ] = array( $args['rewrite'] ?? true, $args['has_archive'] ?? false, $args['public'] ?? false, $args['publicly_queryable'] ?? null );
 			foreach ( $preset['fields'] as $key => $field ) {
 				$format = $field['format'];
 				register_post_meta(
@@ -410,17 +484,64 @@ add_action(
 				);
 			}
 		}
+		kits_presets_rewrite_shape( $shape );
 	},
 	9 // Before the site's own types and Page Options (20).
 );
 
+/**
+ * The address shape of the types registered on this request (type => rewrite, archive, public): set once on init.
+ *
+ * @param array|null $set The shape to keep, or null to read it.
+ * @return array
+ */
+function kits_presets_rewrite_shape( ?array $set = null ): array {
+	static $shape = array();
+	if ( null !== $set ) {
+		$shape = $set;
+	}
+	return $shape;
+}
+
+/*
+ * Addresses follow the registered types, whatever changed them: a switch on the settings screen, a site's code
+ * (kits_presets_enabled, kits_presets), or a page taking or leaving a type's address (the clash is checked live on
+ * every init, from the database, not from a saved answer). When the shape differs from the one the rewrite rules were
+ * last built for, they are rebuilt once, on this request, after every type is registered. With every preset off (the
+ * default) nothing is written.
+ */
+const KITS_PRESETS_REWRITE_OPTION = 'kits_presets_rewrite';
+
+add_action( 'wp_loaded', 'kits_presets_rewrite_check' );
+
+/** Rebuild the rewrite rules when the presets' address shape changed since they were last built. */
+function kits_presets_rewrite_check(): void {
+	$none = md5( (string) wp_json_encode( array() ) );
+	$sig  = md5( (string) wp_json_encode( kits_presets_rewrite_shape() ) );
+	if ( (string) get_option( KITS_PRESETS_REWRITE_OPTION, $none ) === $sig ) {
+		return;
+	}
+	update_option( KITS_PRESETS_REWRITE_OPTION, $sig );
+	flush_rewrite_rules( false ); // Soft: the rules option only, never .htaccess.
+}
+
 // A preset marked noindex (a type shown inside other pages, such as cards): its own pages say noindex and it is left
-// out of WordPress's sitemap.
+// out of the sitemaps, WordPress's own and Rank Math's (whose filters run only while Rank Math is active).
 add_filter(
 	'wp_robots',
 	function ( $robots ) {
-		if ( is_singular() && in_array( get_post_type(), kits_presets_noindex_types(), true ) ) {
+		if ( kits_presets_noindex_view() ) {
 			$robots['noindex'] = true;
+		}
+		return $robots;
+	}
+);
+add_filter(
+	'rank_math/frontend/robots',
+	function ( $robots ) {
+		if ( kits_presets_noindex_view() ) {
+			$robots          = (array) $robots;
+			$robots['index'] = 'noindex';
 		}
 		return $robots;
 	}
@@ -431,6 +552,19 @@ add_filter(
 		return array_diff_key( (array) $types, array_flip( kits_presets_noindex_types() ) );
 	}
 );
+add_filter(
+	'rank_math/sitemap/exclude_post_type',
+	function ( $exclude, $type ) {
+		return $exclude || in_array( (string) $type, kits_presets_noindex_types(), true );
+	},
+	10,
+	2
+);
+
+/** Whether this request is the own page of an item of a noindex preset. */
+function kits_presets_noindex_view(): bool {
+	return is_singular() && in_array( get_post_type(), kits_presets_noindex_types(), true );
+}
 
 /**
  * The post types of switched-on presets marked noindex.
@@ -452,7 +586,7 @@ add_filter(
 					continue; // A site's own key of the same name wins.
 				}
 				$fields[ $key ] = array(
-					'callback' => fn( int $post_id ) => kits_preset_field_display( $preset, $key, $post_id ),
+					'callback' => fn( int $post_id ) => kits_preset_binding_value( $key, $post_id ), // Each post reads its own type's preset.
 					'type'     => kits_preset_formats()[ $field['format'] ][1],
 					'label'    => $field['label'],
 				);
@@ -462,98 +596,217 @@ add_filter(
 	}
 );
 
-// An item of a consent preset is not served to anyone who may not edit it until its consent is recorded: it leaves every
-// front-end and REST query (lists, its own page, which then is a 404, feeds and search), whatever field or block holds
-// its words. Editors still see it everywhere, so they can finish it.
-add_filter(
-	'the_posts',
-	function ( $posts ) {
-		return is_array( $posts ) ? kits_presets_hide_unconsented( $posts ) : $posts;
-	},
-	10,
-	1
-);
+/* ---------- Consent: an item of a consent preset is published only once its consent is recorded ---------- */
+
+/*
+ * The consent rule is a post status, not an output filter: an item without its consent date cannot be published or
+ * scheduled. Asked to publish, it is kept as "pending" (Pending Review). So it is in no public query, REST list or
+ * X-WP-Total count, sitemap (WordPress's or Rank Math's), feed or search, whatever plugin or code reads it, and its own
+ * address and REST item answer as for any unpublished post. Editors see it in the admin as usual. WP-CLI, cron and the
+ * admin read it as they read any pending post. "Private" stays allowed: only editors can read it.
+ *
+ * SCF and the Custom Fields box save the consent date after the post itself, on the same save (classic editor) or the
+ * request that follows it (block editor meta boxes). So the publish that was asked for is remembered on the item
+ * (KITS_PRESETS_HELD_META), and done as soon as a save records the consent, by someone who may publish this type.
+ * Saving it as a draft, private or to the Trash forgets that publish.
+ *
+ * The rule also holds where WordPress publishes without wp_insert_post_data (a scheduled item reaching its time:
+ * wp_publish_post) and when the consent date of a published item is removed: the item goes back to pending.
+ */
+const KITS_PRESETS_HELD_META = '_kits_preset_held_status';
+
+add_filter( 'wp_insert_post_data', 'kits_presets_hold_unconsented', 99, 2 );
 
 /**
- * The posts without the items of a consent preset that have no consent yet, for people who may not edit them. The
- * admin screens are left as they are.
+ * The post data with a publish or schedule turned into "pending" while a consent preset item has no consent.
  *
- * @param array $posts Posts (WP_Post objects or IDs).
- * @return array
+ * @param array|mixed $data    Slashed post data about to be saved.
+ * @param array|mixed $postarr Data passed to wp_insert_post().
+ * @return array|mixed
  */
-function kits_presets_hide_unconsented( array $posts ): array {
-	if ( is_admin() && ! wp_doing_ajax() ) {
-		return $posts;
+function kits_presets_hold_unconsented( $data, $postarr ) {
+	if ( ! is_array( $data ) ) {
+		return $data;
 	}
-	$guarded = array();
-	foreach ( kits_presets_active() as $preset ) {
-		if ( '' !== $preset['consent_field'] ) {
-			$guarded[ $preset['post_type'] ] = $preset;
+	$preset = kits_preset_of_type( (string) ( $data['post_type'] ?? '' ) );
+	if ( ! $preset || '' === $preset['consent_field'] ) {
+		return $data;
+	}
+	$postarr = is_array( $postarr ) ? $postarr : array();
+	$id      = (int) ( $postarr['ID'] ?? 0 );
+	$status  = (string) ( $data['post_status'] ?? '' );
+	if ( ! in_array( $status, array( 'publish', 'future' ), true ) ) {
+		if ( $id && in_array( $status, array( 'draft', 'private', 'trash' ), true ) ) {
+			delete_post_meta( $id, KITS_PRESETS_HELD_META ); // Saved as something else on purpose: forget the publish.
 		}
+		return $data;
 	}
-	if ( ! $guarded ) {
-		return $posts;
+	$field = $preset['consent_field'];
+	$given = (array) ( $postarr['meta_input'] ?? array() );
+	if ( isset( $given[ $field ] ) && '' !== (string) kits_preset_field_clean( $preset['fields'][ $field ]['format'], $given[ $field ] ) ) {
+		return $data; // Consent recorded on this very save (wp_insert_post meta_input).
 	}
-	$out = array();
-	foreach ( $posts as $post ) {
-		$id   = is_object( $post ) ? (int) $post->ID : (int) $post;
-		$type = is_object( $post ) ? (string) $post->post_type : (string) get_post_type( $id );
-		if ( isset( $guarded[ $type ] ) && ! kits_preset_consented( $guarded[ $type ], $id ) && ! current_user_can( 'edit_post', $id ) ) {
-			continue;
-		}
-		$out[] = $post;
+	if ( $id && kits_preset_consented( $preset, $id ) ) {
+		return $data;
 	}
-	return count( $out ) === count( $posts ) ? $posts : $out;
+	$data['post_status'] = 'pending';
+	kits_presets_held_now( $status );
+	return $data;
 }
 
-// A single item in the REST API is read without a query: its words and fields are blanked there by the same rule.
+/**
+ * The publish held on this request, until the post's save_post takes it (a new post has no ID yet in
+ * wp_insert_post_data).
+ *
+ * @param string|null $status 'publish' or 'future' to remember, '' to take and forget, null to read.
+ * @return string
+ */
+function kits_presets_held_now( ?string $status = null ): string {
+	static $held = '';
+	$was         = $held;
+	if ( null !== $status ) {
+		$held = $status;
+	}
+	return $was;
+}
+
+// First on save_post: the item keeps the publish that was asked for. Last on save_post: once consent is recorded
+// (SCF saves on save_post 10), that publish is done.
+add_action( 'save_post', 'kits_presets_note_held', 1, 2 );
+add_action( 'save_post', 'kits_presets_release_held', 999, 2 );
+
+/**
+ * Keep the publish held on this request on the item.
+ *
+ * @param int           $post_id Post ID.
+ * @param WP_Post|mixed $post    Post.
+ */
+function kits_presets_note_held( $post_id, $post ): void {
+	if ( ! ( $post instanceof WP_Post ) || ! kits_preset_consent_type( $post->post_type ) ) {
+		return;
+	}
+	$held = kits_presets_held_now( '' );
+	if ( '' !== $held && 'pending' === $post->post_status ) {
+		update_post_meta( (int) $post_id, KITS_PRESETS_HELD_META, $held );
+	}
+}
+
+/**
+ * Do the held publish once the item has its consent, when the person saving may publish this type.
+ *
+ * @param int           $post_id Post ID.
+ * @param WP_Post|mixed $post    Post.
+ */
+function kits_presets_release_held( $post_id, $post ): void {
+	if ( ! ( $post instanceof WP_Post ) || 'pending' !== $post->post_status ) {
+		return;
+	}
+	$preset = kits_preset_consent_type( $post->post_type );
+	$held   = (string) get_post_meta( (int) $post_id, KITS_PRESETS_HELD_META, true );
+	if ( ! $preset || ! in_array( $held, array( 'publish', 'future' ), true ) || ! kits_preset_consented( $preset, (int) $post_id ) ) {
+		return;
+	}
+	$type = get_post_type_object( $post->post_type );
+	if ( ! $type || ! current_user_can( $type->cap->publish_posts ) ) {
+		return; // The item waits, pending, for someone who may publish it.
+	}
+	delete_post_meta( (int) $post_id, KITS_PRESETS_HELD_META );
+	wp_update_post(
+		array(
+			'ID'          => (int) $post_id,
+			'post_status' => $held, // A schedule whose time has passed is published by WordPress itself.
+		)
+	);
+}
+
+/**
+ * The switched-on preset of a type when it has a consent field, or null.
+ *
+ * @param string $type Post type.
+ * @return array|null
+ */
+function kits_preset_consent_type( string $type ): ?array {
+	$preset = kits_preset_of_type( $type );
+	return $preset && '' !== $preset['consent_field'] ? $preset : null;
+}
+
+/**
+ * Send an item back to pending when it is published without consent.
+ *
+ * @param int $post_id Post ID.
+ */
+function kits_presets_unpublish_unconsented( int $post_id ): void {
+	$post   = get_post( $post_id );
+	$preset = $post instanceof WP_Post ? kits_preset_consent_type( $post->post_type ) : null;
+	if ( ! $preset || ! in_array( $post->post_status, array( 'publish', 'future' ), true ) || kits_preset_consented( $preset, $post_id ) || kits_presets_deleting( $post_id ) ) {
+		return;
+	}
+	wp_update_post(
+		array(
+			'ID'          => $post_id,
+			'post_status' => 'pending',
+		)
+	);
+}
+
+// Published without wp_insert_post_data (wp_publish_post: a scheduled item reaching its time).
 add_action(
-	'init',
-	function () {
-		foreach ( kits_presets_active() as $preset ) {
-			if ( '' === $preset['consent_field'] ) {
-				continue;
-			}
-			add_filter(
-				'rest_prepare_' . $preset['post_type'],
-				function ( $response, $post ) use ( $preset ) {
-					return kits_preset_rest_consent( $response, $post, $preset );
-				},
-				10,
-				2
-			);
+	'transition_post_status',
+	function ( $new_status, $old_status, $post ) {
+		if ( 'publish' === $new_status && $post instanceof WP_Post ) {
+			kits_presets_unpublish_unconsented( (int) $post->ID );
 		}
 	},
-	11
+	10,
+	3
+);
+
+// The consent date of a published item removed or made empty.
+add_action(
+	'deleted_post_meta',
+	function ( $meta_ids, $post_id, $meta_key ) {
+		kits_presets_consent_meta_changed( (int) $post_id, (string) $meta_key );
+	},
+	10,
+	3
+);
+add_action(
+	'updated_post_meta',
+	function ( $meta_id, $post_id, $meta_key ) {
+		kits_presets_consent_meta_changed( (int) $post_id, (string) $meta_key );
+	},
+	10,
+	3
 );
 
 /**
- * A REST response with no title, content, excerpt or fields while consent is not recorded, for people who may not edit
- * the item.
+ * After a meta change: when it is the consent field of the item's preset, apply the rule.
  *
- * @param WP_REST_Response|mixed $response Response.
- * @param WP_Post|mixed          $post     Post.
- * @param array                  $preset   Normalised preset.
- * @return WP_REST_Response|mixed
+ * @param int    $post_id  Post ID.
+ * @param string $meta_key Meta key.
  */
-function kits_preset_rest_consent( $response, $post, array $preset ) {
-	if ( ! ( $response instanceof WP_REST_Response ) || ! ( $post instanceof WP_Post ) ) {
-		return $response;
+function kits_presets_consent_meta_changed( int $post_id, string $meta_key ): void {
+	$preset = kits_preset_consent_type( (string) get_post_type( $post_id ) );
+	if ( $preset && $preset['consent_field'] === $meta_key ) {
+		kits_presets_unpublish_unconsented( $post_id );
 	}
-	if ( kits_preset_consented( $preset, (int) $post->ID ) || current_user_can( 'edit_post', $post->ID ) ) {
-		return $response;
+}
+
+// A post being deleted loses its meta first: that is not a consent withdrawn.
+add_action( 'before_delete_post', fn( $post_id ) => kits_presets_deleting( (int) $post_id, true ) );
+
+/**
+ * Whether a post is being deleted on this request.
+ *
+ * @param int  $post_id Post ID.
+ * @param bool $mark    True to mark it.
+ */
+function kits_presets_deleting( int $post_id, bool $mark = false ): bool {
+	static $ids = array();
+	if ( $mark ) {
+		$ids[ $post_id ] = true;
 	}
-	$data = $response->get_data();
-	foreach ( array( 'title', 'content', 'excerpt' ) as $part ) {
-		if ( isset( $data[ $part ] ) && is_array( $data[ $part ] ) ) {
-			$data[ $part ] = array_merge( $data[ $part ], array( 'rendered' => '' ), isset( $data[ $part ]['raw'] ) ? array( 'raw' => '' ) : array() );
-		}
-	}
-	if ( isset( $data['meta'] ) && is_array( $data['meta'] ) ) {
-		$data['meta'] = array_diff_key( $data['meta'], $preset['fields'] );
-	}
-	$response->set_data( $data );
-	return $response;
+	return isset( $ids[ $post_id ] );
 }
 
 /*
@@ -566,13 +819,12 @@ function kits_preset_rest_consent( $response, $post, array $preset ) {
 add_filter(
 	'kits_schema_map',
 	function ( $map ) {
-		$map = (array) $map;
+		$ours = array();
 		foreach ( kits_presets_active() as $preset ) {
-			if ( ! empty( $preset['schema']['type'] ) && ! isset( $map[ $preset['post_type'] ] ) ) {
-				$map[ $preset['post_type'] ] = array_merge( $preset['schema'], array( 'value_callback' => 'kits_preset_schema_value' ) );
-			}
+			// Two presets of one type: the later one wins, as its type and fields do (one without schema: no node).
+			$ours[ $preset['post_type'] ] = empty( $preset['schema']['type'] ) ? null : array_merge( $preset['schema'], array( 'value_callback' => 'kits_preset_schema_value' ) );
 		}
-		return $map;
+		return (array) $map + array_filter( $ours ); // A site's own map for a type wins over every preset.
 	}
 );
 
@@ -594,15 +846,7 @@ add_action(
 	}
 );
 
-// A type switched on or off changes the addresses: WordPress rebuilds its rewrite rules on the next request, when the
-// new list of types is registered.
-add_action( 'add_option_' . KITS_PRESETS_OPTION, 'kits_presets_rewrite_later' );
-add_action( 'update_option_' . KITS_PRESETS_OPTION, 'kits_presets_rewrite_later' );
-
-/** Drop the stored rewrite rules, so the next request builds them with the new types. */
-function kits_presets_rewrite_later(): void {
-	delete_option( 'rewrite_rules' );
-}
+// A switch saved here changes the addresses: kits_presets_rewrite_check() rebuilds the rules on the next request.
 
 add_action(
 	'admin_init',
