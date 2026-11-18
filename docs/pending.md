@@ -26,6 +26,10 @@ Two read-only audits of origin/wordpress-dev (theme plus plugin dependencies, Ki
     - joined-files status strings translatable;
     - 3 redundant `add_theme_support` removed;
     - zips drop the Animal Writes variation and `tools/`, and ship the Sidebar part as an empty group. The repo keeps the dormant Advanced Ads slot ("sponsored blocks stay dormant").
+- **Hub pages on the RankWeb breadcrumb block (done 18 Nov, wp-admin REST).** Pages 8811, 8935, 8937, 8939, 8941, 8943 and 8945 now use `rankweb/breadcrumbs`. Only the block name changed; the `animal-writes/breadcrumb` alias stays as a fallback. All 7 return 200 with one BreadcrumbList, as before.
+- **Taxonomy rename status (18 Nov, read only; Rename not clicked, owner's word needed).**
+  - Moves: 4 `aw_campaign_link` terms, 1 Rank Math setting, 13 `aw_media_group` terms; no menu items.
+  - Listed only: 4 posts and patterns name `aw_campaign_link`, and 1 user screen setting names `aw_media_group`.
 - **Before aw-core is deleted (highest risk to live):**
   - DirectoryWeb (`directoryweb.php:38`) and SourceWeb (`aw-sourcing.php:33`) stop themselves without `AW_CORE_*`. Point them at Kits Core and DirectoryWeb, and declare `Requires Plugins`.
   - Unguarded calls into aw-core, DirectoryWeb and Kits Core: RankWeb about 22, SourceWeb about 28, InsightWeb about 6. Guard each one or move it.
